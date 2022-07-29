@@ -36,6 +36,15 @@
 #include "blis.h"
 #include "armv8a_asm_utils.h"
 
+// #define DISPLAY_DEBUG_INFO
+
+// Added prefetch fix for non-cacheline aligned C columns
+// (with the prefetches interleaved with other instructions)
+// to both sgemm and dgemm versions.
+
+// Added sgemm prefetch fix for non-cacheline aligned C columns
+// (with the prefetches interleaved with other instructions)
+
 /*
    o 4x4 Single precision micro-kernel fully functional.
    o Runnable on ARMv8, compiled with aarch64 GCC.
@@ -50,7 +59,13 @@
  * Tested on Juno Board. Around 15.9 GFLOPS, 2 x A57 cores @ 1.1 GHz.
  * Tested on Juno board. Around  3.1 GFLOPS, 1 x A53 core  @ 850 MHz.
  * Tested on Juno board. Around 12   GFLOPS, 4 x A53 cores @ 850 MHz.
+ 
+ * UPDATE JULY 2021 - Leick Robinson
+ * Both Microkernels changed to fix two prefetching performance bugs
+ * Tested on 2s Altra.   Around 6,900 GFLOPS, 160 x N2 cores @ 3.0 GHz
+ * Tested on 1s Altra Max. Arnd 5,800 GFLOPS. 128 x N2 cores @ 3.0 GHz
 */
+
 void bli_sgemm_armv8a_asm_8x12
      (
        dim_t               m,
@@ -61,8 +76,8 @@ void bli_sgemm_armv8a_asm_8x12
        float*     restrict b,
        float*     restrict beta,
        float*     restrict c, inc_t rs_c0, inc_t cs_c0,
-       auxinfo_t*          data,
-       cntx_t*             cntx
+       auxinfo_t* restrict data,
+       cntx_t*    restrict cntx
      )
 {
 	void* a_next = bli_auxinfo_next_a( data );
@@ -86,73 +101,111 @@ void bli_sgemm_armv8a_asm_8x12
 	" ldr x1,%[baddr]                            \n\t" // Load address of B.
 	" ldr x2,%[caddr]                            \n\t" // Load address of C.
 	"                                            \n\t"
-	" ldr x5,%[k_iter]                           \n\t" // Number of unrolled iterations (k_iter).
-	" ldr x6,%[k_left]                           \n\t" // Number of remaining iterations (k_left).
-	"                                            \n\t"
 	" ldr x10,%[cs_c]                            \n\t" // Load cs_c.
 	" lsl x10,x10,#2                             \n\t" // cs_c * sizeof(float) -- AUX.
+	"                                            \n\t"
+	" ldr x5,%[k_iter]                           \n\t" // Number of unrolled iterations (k_iter).
+	" ldr x6,%[k_left]                           \n\t" // Number of remaining iterations (k_left).
+	" add x16,x2,x10                             \n\t" //Load address Column 1 of C
 	"                                            \n\t"
 	// " ldr x14,%[rs_c]                            \n\t" // Load rs_c.
 	// " lsl x14,x14,#2                             \n\t" // rs_c * sizeof(float).
 	"                                            \n\t"
-	" add x16,x2,x10                             \n\t" //Load address Column 1 of C
-	" add x17,x16,x10                            \n\t" //Load address Column 2 of C
-	" add x19,x17,x10                            \n\t" //Load address Column 3 of C
-	" add x20,x19,x10                            \n\t" //Load address Column 4 of C
-	" add x21,x20,x10                            \n\t" //Load address Column 5 of C
-	" add x22,x21,x10                            \n\t" //Load address Column 6 of C
-	" add x23,x22,x10                            \n\t" //Load address Column 7 of C
-	" add x24,x23,x10                            \n\t" //Load address Column 8 of C
-	" add x25,x24,x10                            \n\t" //Load address Column 9 of C
-	" add x26,x25,x10                            \n\t" //Load address Column 10 of C
-	" add x27,x26,x10                            \n\t" //Load address Column 11 of C
-	"                                            \n\t"
-	" prfm pldl1keep,[x2]                        \n\t" // Prefetch c.
-	" prfm pldl1keep,[x16]                       \n\t" // Prefetch c.
-	" prfm pldl1keep,[x17]                       \n\t" // Prefetch c.
-	" prfm pldl1keep,[x19]                       \n\t" // Prefetch c.
-	" prfm pldl1keep,[x20]                       \n\t" // Prefetch c.
-	" prfm pldl1keep,[x21]                       \n\t" // Prefetch c.
-	" prfm pldl1keep,[x22]                       \n\t" // Prefetch c.
-	" prfm pldl1keep,[x23]                       \n\t" // Prefetch c.
-	" prfm pldl1keep,[x24]                       \n\t" // Prefetch c.
-	" prfm pldl1keep,[x25]                       \n\t" // Prefetch c.
-	" prfm pldl1keep,[x26]                       \n\t" // Prefetch c.
-	" prfm pldl1keep,[x27]                       \n\t" // Prefetch c.
 	"                                            \n\t"
 	" dup  v8.4s, wzr                            \n\t" // Vector for accummulating column 0
 	" prfm    PLDL1KEEP, [x1, #192]              \n\t"
+	" prfm pldl1keep,[x2]                        \n\t" // Prefetch c.
+	" add x17,x16,x10                            \n\t" //Load address Column 2 of C
+    
 	" dup  v9.4s, wzr                            \n\t" // Vector for accummulating column 0
 	" prfm    PLDL1KEEP, [x1, #256]              \n\t"
+    "                                            \n\t" // Since the columns can cross a cache line boundary,
+                                                       // we also need to prefetch the "ends"
+	" prfm pldl1keep,[x2, #16]                   \n\t" // Prefetch c.
+	" add x19,x17,x10                            \n\t" //Load address Column 3 of C
+    
 	" dup  v10.4s, wzr                           \n\t" // Vector for accummulating column 1
 	" prfm    PLDL1KEEP, [x1, #320]              \n\t"
+	" prfm pldl1keep,[x16]                       \n\t" // Prefetch c.
+	" add x20,x19,x10                            \n\t" //Load address Column 4 of C
+    
 	" dup  v11.4s, wzr                           \n\t" // Vector for accummulating column 1
+	" prfm pldl1keep,[x16]                       \n\t" // Prefetch c.
+	" prfm pldl1keep,[x16, #16]                  \n\t" // Prefetch c.
+    
 	" dup  v12.4s, wzr                           \n\t" // Vector for accummulating column 2
+	" prfm pldl1keep,[x17]                       \n\t" // Prefetch c.
+	" add x21,x20,x10                            \n\t" //Load address Column 5 of C
+    
 	" dup  v13.4s, wzr                           \n\t" // Vector for accummulating column 2
+	" prfm pldl1keep,[x17, #16]                  \n\t" // Prefetch c.
 	"                                            \n\t"
 	" dup  v14.4s, wzr                           \n\t" // Vector for accummulating column 3
 	" prfm    PLDL1KEEP, [x0, #128]              \n\t"
+	" prfm pldl1keep,[x19]                       \n\t" // Prefetch c.
+	" add x22,x21,x10                            \n\t" //Load address Column 6 of C
+    
 	" dup  v15.4s, wzr                           \n\t" // Vector for accummulating column 3
 	" prfm    PLDL1KEEP, [x0, #192]              \n\t"
+	" prfm pldl1keep,[x19, #16]                  \n\t" // Prefetch c.
+    
 	" dup  v16.4s, wzr                           \n\t" // Vector for accummulating column 4
+	" prfm pldl1keep,[x20]                       \n\t" // Prefetch c.
+	" add x23,x22,x10                            \n\t" //Load address Column 7 of C
+    
 	" dup  v17.4s, wzr                           \n\t" // Vector for accummulating column 4
+	" prfm pldl1keep,[x20, #16]                  \n\t" // Prefetch c.
+    
 	" dup  v18.4s, wzr                           \n\t" // Vector for accummulating column 5
+	" prfm pldl1keep,[x21]                       \n\t" // Prefetch c.
+	" add x24,x23,x10                            \n\t" //Load address Column 8 of C
+    
 	" dup  v19.4s, wzr                           \n\t" // Vector for accummulating column 5
+	" prfm pldl1keep,[x21, #16]                  \n\t" // Prefetch c.
+    
 	"                                            \n\t"
 	" dup  v20.4s, wzr                           \n\t" // Vector for accummulating column 6
+	" prfm pldl1keep,[x22]                       \n\t" // Prefetch c.
+	" add x25,x24,x10                            \n\t" //Load address Column 9 of C
+    
 	" dup  v21.4s, wzr                           \n\t" // Vector for accummulating column 6
+	" prfm pldl1keep,[x22, #16]                  \n\t" // Prefetch c.
+    
 	" dup  v22.4s, wzr                           \n\t" // Vector for accummulating column 7
+	" prfm pldl1keep,[x23]                       \n\t" // Prefetch c.
+	" add x26,x25,x10                            \n\t" //Load address Column 10 of C
+    
 	" dup  v23.4s, wzr                           \n\t" // Vector for accummulating column 7
+	" prfm pldl1keep,[x23, #16]                  \n\t" // Prefetch c.
+    
 	" dup  v24.4s, wzr                           \n\t" // Vector for accummulating column 8
+	" prfm pldl1keep,[x24]                       \n\t" // Prefetch c.
+	" add x27,x26,x10                            \n\t" //Load address Column 11 of C
+    
 	" dup  v25.4s, wzr                           \n\t" // Vector for accummulating column 8
+	" prfm pldl1keep,[x24, #16]                  \n\t" // Prefetch c.
 	"                                            \n\t"
 	" dup  v26.4s, wzr                           \n\t" // Vector for accummulating column 9
+	" prfm pldl1keep,[x25]                       \n\t" // Prefetch c.
+    
 	" dup  v27.4s, wzr                           \n\t" // Vector for accummulating column 9
+	" prfm pldl1keep,[x25, #16]                  \n\t" // Prefetch c.
+    
 	" dup  v28.4s, wzr                           \n\t" // Vector for accummulating column 10
+	" prfm pldl1keep,[x26]                       \n\t" // Prefetch c.
+    
 	" dup  v29.4s, wzr                           \n\t" // Vector for accummulating column 10
+	" prfm pldl1keep,[x26, #16]                  \n\t" // Prefetch c.
+    
 	" dup  v30.4s, wzr                           \n\t" // Vector for accummulating column 11
+	" prfm pldl1keep,[x27]                       \n\t" // Prefetch c.
+    
 	" dup  v31.4s, wzr                           \n\t" // Vector for accummulating column 11
+	" prfm pldl1keep,[x27, #16]                  \n\t" // Prefetch c.
 	"                                            \n\t"
+	"                                            \n\t"
+    
+    
 	" cmp x5,#0                                  \n\t" // If k_iter == 0, jump to k_left.
 	BEQ(SCONSIDERKLEFT)
 	"                                            \n\t"
@@ -729,7 +782,13 @@ void bli_sgemm_armv8a_asm_8x12
  * Tested on Juno Board. Around 7.6 GFLOPS, 2 x A57 cores @ 1.1 GHz.
  * Tested on Juno board. Around 1.5 GFLOPS, 1 x A53 core  @ 850 MHz.
  * Tested on Juno board. Around 5.5 GFLOPS, 4 x A53 cores @ 850 MHz.
-*/
+ 
+ * UPDATE JULY 2021 - Leick Robinson
+ * Both Microkernels changed to fix two prefetching performance bugs
+ * Tested on 2s Altra. Around 3,200 GFLOPS, 160 x N2 cores @ 3.0 GHz
+ * Tested on 1s Altra, Around 1,700 GFLOPS,  80 x N2 cores @ 3.0 GHz
+ * Tested on 1s Altra Max,  ~ 2,600 GFLOPS, 128 x N2 cores @ 3.0 GHz
+ */
 void bli_dgemm_armv8a_asm_6x8
      (
        dim_t               m,
@@ -740,10 +799,25 @@ void bli_dgemm_armv8a_asm_6x8
        double*    restrict b,
        double*    restrict beta,
        double*    restrict c, inc_t rs_c0, inc_t cs_c0,
-       auxinfo_t*          data,
-       cntx_t*             cntx
+       auxinfo_t* restrict data,
+       cntx_t*    restrict cntx
      )
 {
+#ifdef DISPLAY_DEBUG_INFO
+
+	static bool bFirstTime = true;
+ 
+	if (bFirstTime)
+		{
+  	printf("In bli_dgemm_armv8a_asm_6x8: rs_c0=%d, cs_c0=%d \n",
+   		(int) rs_c0, (int) cs_c0);
+    fflush(stdout);
+		bFirstTime = false;
+  	}
+
+#endif
+
+
 	void* a_next = bli_auxinfo_next_a( data );
 	void* b_next = bli_auxinfo_next_b( data );
 
@@ -763,31 +837,17 @@ void bli_dgemm_armv8a_asm_6x8
 	" ldr x1,%[baddr]                            \n\t" // Load address of B
 	" ldr x2,%[caddr]                            \n\t" // Load address of C
 	"                                            \n\t"
-	" ldr x5,%[k_iter]                           \n\t" // Init guard (k_iter)
-	" ldr x6,%[k_left]                           \n\t" // Init guard (k_iter)
-	"                                            \n\t"
 	" ldr x10,%[cs_c]                            \n\t" // Load cs_c
 	" lsl x10,x10,#3                             \n\t" // cs_c * sizeof(double)
+	"                                            \n\t"
+	" ldr x5,%[k_iter]                           \n\t" // Init guard (k_iter)
+	" ldr x6,%[k_left]                           \n\t" // Init guard (k_iter)
+	" add x20,x2,x10                             \n\t" //Load address Column 1 of C
 	"                                            \n\t"
 	// " ldr x14,%[rs_c]                            \n\t" // Load rs_c.
 	// " lsl x14,x14,#3                             \n\t" // rs_c * sizeof(double).
 	"                                            \n\t"
-	" add x20,x2,x10                             \n\t" //Load address Column 1 of C
-	" add x21,x20,x10                            \n\t" //Load address Column 2 of C
-	" add x22,x21,x10                            \n\t" //Load address Column 3 of C
-	" add x23,x22,x10                            \n\t" //Load address Column 4 of C
-	" add x24,x23,x10                            \n\t" //Load address Column 5 of C
-	" add x25,x24,x10                            \n\t" //Load address Column 6 of C
-	" add x26,x25,x10                            \n\t" //Load address Column 7 of C
 	"                                            \n\t"
-	" prfm pldl1keep,[x2]                        \n\t" // Prefetch c.
-	" prfm pldl1keep,[x20]                       \n\t" // Prefetch c.
-	" prfm pldl1keep,[x21]                       \n\t" // Prefetch c.
-	" prfm pldl1keep,[x22]                       \n\t" // Prefetch c.
-	" prfm pldl1keep,[x23]                       \n\t" // Prefetch c.
-	" prfm pldl1keep,[x24]                       \n\t" // Prefetch c.
-	" prfm pldl1keep,[x25]                       \n\t" // Prefetch c.
-	" prfm pldl1keep,[x26]                       \n\t" // Prefetch c.
 	"                                            \n\t"
 	" dup  v8.2d, xzr                            \n\t" // Vector for accummulating column 0
 	" prfm    PLDL1KEEP, [x1, #256]              \n\t"
@@ -798,33 +858,74 @@ void bli_dgemm_armv8a_asm_6x8
 	" dup  v11.2d, xzr                           \n\t" // Vector for accummulating column 1
 	" prfm    PLDL1KEEP, [x1, #448]              \n\t"
 	" dup  v12.2d, xzr                           \n\t" // Vector for accummulating column 1
+	" prfm    PLDL1KEEP, [x0, #192]              \n\t"
+	" add x21,x20,x10                            \n\t" //Load address Column 2 of C
+    
 	" dup  v13.2d, xzr                           \n\t" // Vector for accummulating column 1
+	" prfm    PLDL1KEEP, [x0, #256]              \n\t"
 	"                                            \n\t"
 	" dup  v14.2d, xzr                           \n\t" // Vector for accummulating column 2
-	" prfm    PLDL1KEEP, [x0, #192]              \n\t"
-	" dup  v15.2d, xzr                           \n\t" // Vector for accummulating column 2
-	" prfm    PLDL1KEEP, [x0, #256]              \n\t"
-	" dup  v16.2d, xzr                           \n\t" // Vector for accummulating column 2
 	" prfm    PLDL1KEEP, [x0, #320]              \n\t"
+	" add x22,x21,x10                            \n\t" //Load address Column 3 of C
+    
+	" dup  v15.2d, xzr                           \n\t" // Vector for accummulating column 2
+	" prfm pldl1keep,[x2]                        \n\t" // Prefetch c.
+	" dup  v16.2d, xzr                           \n\t" // Vector for accummulating column 2
+    "                                            \n\t" // Since the columns can cross a cache line boundary,
+                                                       // we also need to prefetch the "ends"
+	" prfm pldl1keep,[x2, #32]                   \n\t" // Prefetch c.
+	" add x23,x22,x10                            \n\t" //Load address Column 4 of C
+    
 	" dup  v17.2d, xzr                           \n\t" // Vector for accummulating column 3
+	" prfm pldl1keep,[x20]                       \n\t" // Prefetch c.
+    
 	" dup  v18.2d, xzr                           \n\t" // Vector for accummulating column 3
+	" prfm pldl1keep,[x20, #32]                  \n\t" // Prefetch c.
+	" add x24,x23,x10                            \n\t" //Load address Column 5 of C
+    
 	" dup  v19.2d, xzr                           \n\t" // Vector for accummulating column 3
+	" prfm pldl1keep,[x21]                       \n\t" // Prefetch c.
 	"                                            \n\t"
+    
 	" dup  v20.2d, xzr                           \n\t" // Vector for accummulating column 4
+	" prfm pldl1keep,[x21, #32]                  \n\t" // Prefetch c.
+	" add x25,x24,x10                            \n\t" //Load address Column 6 of C
+    
 	" dup  v21.2d, xzr                           \n\t" // Vector for accummulating column 4
+	" prfm pldl1keep,[x22]                       \n\t" // Prefetch c.
+    
 	" dup  v22.2d, xzr                           \n\t" // Vector for accummulating column 4
+	" prfm pldl1keep,[x22, #32]                  \n\t" // Prefetch c.
+	" add x26,x25,x10                            \n\t" //Load address Column 7 of C
+    
 	" dup  v23.2d, xzr                           \n\t" // Vector for accummulating column 5
+	" prfm pldl1keep,[x23]                       \n\t" // Prefetch c.
+    
 	" dup  v24.2d, xzr                           \n\t" // Vector for accummulating column 5
+	" prfm pldl1keep,[x23, #32]                  \n\t" // Prefetch c.
+    
 	" dup  v25.2d, xzr                           \n\t" // Vector for accummulating column 5
+	" prfm pldl1keep,[x24]                       \n\t" // Prefetch c.
 	"                                            \n\t"
 	" dup  v26.2d, xzr                           \n\t" // Vector for accummulating column 6
+	" prfm pldl1keep,[x24, #32]                  \n\t" // Prefetch c.
+    
 	" dup  v27.2d, xzr                           \n\t" // Vector for accummulating column 6
+	" prfm pldl1keep,[x25]                       \n\t" // Prefetch c.
+    
 	" dup  v28.2d, xzr                           \n\t" // Vector for accummulating column 6
+	" prfm pldl1keep,[x25, #32]                  \n\t" // Prefetch c.
+    
 	" dup  v29.2d, xzr                           \n\t" // Vector for accummulating column 7
+	" prfm pldl1keep,[x26]                       \n\t" // Prefetch c.
+    
 	" dup  v30.2d, xzr                           \n\t" // Vector for accummulating column 7
+	" prfm pldl1keep,[x26, #32]                  \n\t" // Prefetch c.
+    
 	" dup  v31.2d, xzr                           \n\t" // Vector for accummulating column 7
 	"                                            \n\t"
 	"                                            \n\t"
+    
 	" cmp x5,#0                                  \n\t" // If k_iter == 0, jump to k_left.
 	BEQ(DCONSIDERKLEFT)
 	"                                            \n\t"
@@ -1450,39 +1551,4 @@ void bli_dgemm_armv8a_asm_6x8
 	GEMM_UKR_FLUSH_CT( d );
 }
 
-
-#if 0
-void bli_cgemm_armv8a_opt_4x4
-     (
-       dim_t               m,
-       dim_t               n,
-       dim_t               k,
-       scomplex*  restrict alpha,
-       scomplex*  restrict a,
-       scomplex*  restrict b,
-       scomplex*  restrict beta,
-       scomplex*  restrict c, inc_t rs_c, inc_t cs_c,
-       auxinfo_t*          data,
-       cntx_t*             cntx
-     )
-{
-}
-
-void bli_zgemm_armv8a_opt_4x4
-     (
-       dim_t               m,
-       dim_t               n,
-       dim_t               k,
-       dcomplex*  restrict alpha,
-       dcomplex*  restrict a,
-       dcomplex*  restrict b,
-       dcomplex*  restrict beta,
-       dcomplex*  restrict c, inc_t rs_c, inc_t cs_c,
-       auxinfo_t*          data,
-       cntx_t*             cntx
-     )
-{
-}
-
-#endif
-
+// June 2022, removed unused stubs for ancient 4x4 kernels
