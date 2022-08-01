@@ -6,7 +6,7 @@
 
    Copyright (C) 2014, The University of Texas at Austin
    Copyright (C) 2016, Hewlett Packard Enterprise Development LP
-   Copyright (C) 2018, Advanced Micro Devices, Inc.
+   Copyright (C) 2018-2022, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -39,6 +39,8 @@
 
 gint_t bli_env_get_var( const char* env, gint_t fallback );
 //void  bli_env_set_var( const char* env, dim_t value );
+
+gint_t bli_env_get_var_arch_type( const char* env, gint_t fallback );
 
 #endif
 

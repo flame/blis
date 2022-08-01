@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2018-2021, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2018-2022, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -83,7 +83,7 @@ void bli_arch_set_id( void )
 
 	// Check the environment variable BLIS_ARCH_TYPE to see if the user
 	// requested that we use a specific subconfiguration.
-	dim_t req_id = bli_env_get_var( "BLIS_ARCH_TYPE", -1 );
+	dim_t req_id = bli_env_get_var_arch_type( "BLIS_ARCH_TYPE", -1 );
 
 #ifndef BLIS_CONFIGURETIME_CPUID
 	if ( req_id != -1 )
@@ -230,6 +230,8 @@ void bli_arch_set_id( void )
 // enumeration that is typedef'ed in bli_type_defs.h. That is, the
 // index order of each string should correspond to the implied/assigned
 // enum value given to the corresponding BLIS_ARCH_ value.
+// This must also be kept up-to-date with the bli_env_get_var_arch_type()
+// function in bli_env.c
 static char* config_name[ BLIS_NUM_ARCHS ] =
 {
     "skx",

@@ -990,6 +990,8 @@ typedef enum
 // string array in bli_arch.c. Whenever values are added/inserted
 // OR if values are rearranged, be sure to update the string array
 // in bli_arch.c.
+// This must also be kept up-to-date with the bli_env_get_var_arch_type()
+// function in bli_env.c
 
 typedef enum
 {
