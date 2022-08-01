@@ -49,14 +49,14 @@ void bli_cntx_init_firestorm( cntx_t* cntx )
 	  cntx,
 
 	  // level-3
-	  BLIS_GEMM_UKR, BLIS_FLOAT,  bli_sgemm_armv8a_asm_8x12,
-	  BLIS_GEMM_UKR, BLIS_DOUBLE, bli_dgemm_armv8a_asm_6x8,
+	  BLIS_GEMM_UKR, BLIS_FLOAT,  bli_sgemm_armv8a_asm_12x8r,
+	  BLIS_GEMM_UKR, BLIS_DOUBLE, bli_dgemm_armv8a_asm_8x6r,
 
 	  // packm
-	  BLIS_PACKM_MRXK_KER, BLIS_FLOAT,  bli_spackm_armv8a_int_8xk,
-	  BLIS_PACKM_NRXK_KER, BLIS_FLOAT,  bli_spackm_armv8a_int_12xk,
-	  BLIS_PACKM_MRXK_KER, BLIS_DOUBLE, bli_dpackm_armv8a_int_6xk,
-	  BLIS_PACKM_NRXK_KER, BLIS_DOUBLE, bli_dpackm_armv8a_int_8xk,
+	  BLIS_PACKM_MRXK_KER, BLIS_FLOAT,  bli_spackm_armv8a_int_12xk,
+	  BLIS_PACKM_NRXK_KER, BLIS_FLOAT,  bli_spackm_armv8a_int_8xk,
+	  BLIS_PACKM_MRXK_KER, BLIS_DOUBLE, bli_dpackm_armv8a_int_8xk,
+	  BLIS_PACKM_NRXK_KER, BLIS_DOUBLE, bli_dpackm_armv8a_int_6xk,
 
 	  // gemmsup
 	  BLIS_GEMMSUP_RRR_UKR, BLIS_DOUBLE, bli_dgemmsup_rv_armv8a_asm_6x8m,
@@ -77,8 +77,8 @@ void bli_cntx_init_firestorm( cntx_t* cntx )
 	  cntx,
 
 	  // level-3
-	  BLIS_GEMM_UKR_ROW_PREF, BLIS_FLOAT,  FALSE,
-	  BLIS_GEMM_UKR_ROW_PREF, BLIS_DOUBLE, FALSE,
+	  BLIS_GEMM_UKR_ROW_PREF, BLIS_FLOAT,  TRUE,
+	  BLIS_GEMM_UKR_ROW_PREF, BLIS_DOUBLE, TRUE,
 
 	  // gemmsup
 	  BLIS_GEMMSUP_RRR_UKR_ROW_PREF, BLIS_DOUBLE, TRUE,
@@ -95,11 +95,11 @@ void bli_cntx_init_firestorm( cntx_t* cntx )
 
 	// Initialize level-3 blocksize objects with architecture-specific values.
 	//                                           s      d      c      z
-	bli_blksz_init_easy( &blkszs[ BLIS_MR ],     8,     6,    -1,    -1 );
-	bli_blksz_init_easy( &blkszs[ BLIS_NR ],    12,     8,    -1,    -1 );
-	bli_blksz_init_easy( &blkszs[ BLIS_MC ],   120,   252,    -1,    -1 );
-	bli_blksz_init_easy( &blkszs[ BLIS_KC ],   640,  3072,    -1,    -1 );
-	bli_blksz_init_easy( &blkszs[ BLIS_NC ],  3072,  8192,    -1,    -1 );
+	bli_blksz_init_easy( &blkszs[ BLIS_MR ],    12,     8,    -1,    -1 );
+	bli_blksz_init_easy( &blkszs[ BLIS_NR ],     8,     6,    -1,    -1 );
+	bli_blksz_init_easy( &blkszs[ BLIS_MC ],   480,   256,    -1,    -1 );
+	bli_blksz_init_easy( &blkszs[ BLIS_KC ],  4096,  3072,    -1,    -1 );
+	bli_blksz_init_easy( &blkszs[ BLIS_NC ],  9600,  8184,    -1,    -1 );
 
 	// Initialize sup thresholds with architecture-appropriate values.
 	//                                          s     d     c     z
