@@ -25,6 +25,7 @@ void bli_offloader_init_rntm_from_env ( rntm_t* rntm )
 	// allocate struct
 	rntm->offloader_state = malloc ( sizeof ( offload_t ) );
 	offload_t* config = rntm->offloader_state;
+	config->rocblas = NULL;
 
 	char* s_eng = getenv ( "BLIS_OFFLOAD" );
 	s_eng = ( s_eng == NULL ) ? "never" : s_eng;
@@ -110,11 +111,14 @@ void bli_offloader_finalize ( void )
 
 void bli_offloader_finalize_rntm_from_env ( rntm_t* rntm )
 {
-	// just destroy rocblas handle
-	const rocblas_status stat = rocblas_destroy_handle ( rntm->offloader_state->rocblas );
-	if ( stat != rocblas_status_success )
+	if ( rntm->offloader_state->rocblas != NULL )
 	{
-		fprintf ( stderr, "Couldn't destroy rocBLAS handle w/ error %d\n", stat );
+		// just destroy rocblas handle
+		const rocblas_status stat = rocblas_destroy_handle ( rntm->offloader_state->rocblas );
+		if ( stat != rocblas_status_success )
+		{
+			fprintf ( stderr, "Couldn't destroy rocBLAS handle w/ error %d\n", stat );
+		}
 	}
 
 	// free struct itself
@@ -262,7 +266,7 @@ err_t bli_offload_gemmex_rntm_from_env
 	const inc_t ldc = bli_obj_col_stride ( c );
 	const dim_t m_a = bli_obj_length ( a );
 	const dim_t n_a = bli_obj_width ( a );
-	const dim_t m_b = bli_obj_length ( b );
+	// const dim_t m_b = bli_obj_length ( b );
 	const dim_t n_b = bli_obj_width ( b );
 	const dim_t m_c = bli_obj_length ( c );
 	const dim_t n_c = bli_obj_width ( c );
@@ -284,57 +288,99 @@ err_t bli_offload_gemmex_rntm_from_env
 
 	const size_t buff_size_a = lda * n_a * bli_obj_elem_size ( a );
 	const size_t buff_size_b = ldb * n_b * bli_obj_elem_size ( b );
-	const size_t buff_size_c = ldc * n_c *  bli_obj_elem_size ( c );
+	const size_t buff_size_c = ldc * n_c * bli_obj_elem_size ( c );
 
-	// allocate buffers on device
+	// inspect pointers for memory location of buffers
+	hipPointerAttribute_t attr;
+	const hipError_t err_insp_a = hipPointerGetAttributes(&attr, A);
+        bool copy_a = true;
+	if ( err_insp_a == hipSuccess )
+	{
+		copy_a = ( attr.memoryType != hipMemoryTypeDevice );
+	}
+	const hipError_t err_insp_b = hipPointerGetAttributes(&attr, B);
+	bool copy_b = true;
+	if ( err_insp_b == hipSuccess )
+        {
+                copy_b = ( attr.memoryType != hipMemoryTypeDevice );
+        }
+	const hipError_t err_insp_c = hipPointerGetAttributes(&attr, C);
+        bool copy_c = true;
+        if ( err_insp_c == hipSuccess )
+        {
+                copy_c = ( attr.memoryType != hipMemoryTypeDevice );
+        }
+
+	// if applicable: allocate buffers on device and copy data
+	// note: we cannot assume the CPU buffers to be pinned and hence most likely the copies will be synchronous
 	void* dev_buff_a;
-	const hipError_t err_a = hipMalloc ( &dev_buff_a, buff_size_a );
-	if ( err_a != hipSuccess )
-	{
-		fprintf ( stderr, "Failure to allocate device buffer A of size %ld: %d\n", buff_size_a, err_a );
-		return BLIS_FAILURE;
-	}
-
-	void* dev_buff_b;
-	const hipError_t err_b = hipMalloc ( &dev_buff_b, buff_size_b );
-	if ( err_b != hipSuccess )
-	{
-		fprintf ( stderr, "Failure to allocate device buffer B of size %ld: %d\n", buff_size_b, err_b );
-		return BLIS_FAILURE;
-	}
-
+        void* dev_buff_b;
 	void* dev_buff_c;
-	const hipError_t err_c = hipMalloc ( &dev_buff_c, buff_size_c );
-	if ( err_c != hipSuccess )
-	{
-		fprintf ( stderr, "Failure to allocate device buffer C of size %ld: %d\n", buff_size_c, err_c );
-		return BLIS_FAILURE;
-	}
 
-	// copy buffers to device - note: we cannot assume the CPU buffers to be pinned
-	const hipError_t err_cpa = hipMemcpy ( dev_buff_a, A, buff_size_a, hipMemcpyHostToDevice );
-	if ( err_cpa != hipSuccess )
-	{
-		fprintf ( stderr, "Failure to hipMemcpy A to device: %d\n", err_cpa );
-		return BLIS_FAILURE;
-	}
-	const hipError_t err_cpb = hipMemcpy ( dev_buff_b, B, buff_size_b, hipMemcpyHostToDevice );
-	if ( err_cpb != hipSuccess )
-	{
-		fprintf ( stderr, "Failure to hipMemcpy B to device: %d\n", err_cpb );
-		return BLIS_FAILURE;
-	}
+        hipStream_t stream;
+        rocblas_get_stream( config->rocblas, &stream );
 
-	// is beta zero?
-	const bool is_beta_non_zero = !bli_obj_equals ( beta, &BLIS_ZERO );
-
-	if ( is_beta_non_zero || ldc != m_c ) // only if the result buffer is m*n sized AND beta == 0.0 we can eschew the copy
+	if ( copy_a )
 	{
-		const hipError_t err_cpc = hipMemcpy ( dev_buff_c, C, buff_size_c, hipMemcpyHostToDevice );
-		if ( err_cpc != hipSuccess )
+		const hipError_t err_a = hipMalloc ( &dev_buff_a, buff_size_a );
+		if ( err_a != hipSuccess )
 		{
-			fprintf ( stderr, "Failure to hipMemcpy C to device: %d\n", err_cpc );
+			fprintf ( stderr, "Failure to allocate device buffer A of size %ld: %d\n", buff_size_a, err_a );
 			return BLIS_FAILURE;
+		}
+		const hipError_t err_cpa = hipMemcpyAsync ( dev_buff_a, A, buff_size_a, hipMemcpyHostToDevice, stream );
+        	if ( err_cpa != hipSuccess )
+        	{
+                	fprintf ( stderr, "Failure to hipMemcpy A to device: %d\n", err_cpa );
+                	return BLIS_FAILURE;
+        	}
+	}
+	else
+	{
+		dev_buff_a = A;
+	}
+
+	if ( copy_b )
+	{
+		const hipError_t err_b = hipMalloc ( &dev_buff_b, buff_size_b );
+		if ( err_b != hipSuccess )
+		{
+			fprintf ( stderr, "Failure to allocate device buffer B of size %ld: %d\n", buff_size_b, err_b );
+			return BLIS_FAILURE;
+		}
+		const hipError_t err_cpb = hipMemcpyAsync ( dev_buff_b, B, buff_size_b, hipMemcpyHostToDevice, stream );
+	        if ( err_cpb != hipSuccess )
+        	{
+                	fprintf ( stderr, "Failure to hipMemcpy B to device: %d\n", err_cpb );
+			return BLIS_FAILURE;
+        	}
+
+	}
+	else
+	{
+		dev_buff_b = B;
+	}
+
+	if ( copy_c )
+	{
+		const hipError_t err_c = hipMalloc ( &dev_buff_c, buff_size_c );
+		if ( err_c != hipSuccess )
+		{
+			fprintf ( stderr, "Failure to allocate device buffer C of size %ld: %d\n", buff_size_c, err_c );
+			return BLIS_FAILURE;
+		}
+
+		// is beta zero?
+		const bool is_beta_non_zero = !bli_obj_equals ( beta, &BLIS_ZERO );
+
+		if ( is_beta_non_zero || ldc != m_c ) // only if the result buffer is m*n sized AND beta == 0.0 we can eschew the copy
+		{
+			const hipError_t err_cpc = hipMemcpyAsync ( dev_buff_c, C, buff_size_c, hipMemcpyHostToDevice, stream );
+			if ( err_cpc != hipSuccess )
+			{
+				fprintf ( stderr, "Failure to hipMemcpy C to device: %d\n", err_cpc );
+				return BLIS_FAILURE;
+			}
 		}
 	}
 
@@ -387,33 +433,47 @@ err_t bli_offload_gemmex_rntm_from_env
 		return BLIS_FAILURE;
 	}
 
-
-	// copy result back
-	const hipError_t err_cpr = hipMemcpy ( C, dev_buff_c, buff_size_c, hipMemcpyDeviceToHost );
-	if ( err_cpr != hipSuccess )
+	if ( copy_c )
 	{
-		fprintf ( stderr, "Failure to hipMemcpy C from device: %d\n", err_cpr );
-		return BLIS_FAILURE;
+		// copy result back synchronously
+		const hipError_t err_cpr = hipMemcpy ( C, dev_buff_c, buff_size_c, hipMemcpyDeviceToHost );
+		if ( err_cpr != hipSuccess )
+		{
+			fprintf ( stderr, "Failure to hipMemcpy C from device: %d\n", err_cpr );
+			return BLIS_FAILURE;
+		}
+		// free
+		const hipError_t err_fc = hipFree ( dev_buff_c );
+	        if ( err_fc != hipSuccess )
+        	{
+                	fprintf ( stderr, "Failure to free device buffer C: %d\n", err_fc );
+                	return BLIS_FAILURE;
+        	}
+	}
+	else
+	{
+		// only synchronize on the rocBLAS stream to ensure data correctness
+		hipStreamSynchronize( stream );
 	}
 
-	// free buffers
-	const hipError_t err_fa = hipFree ( dev_buff_a );
-	if ( err_fa != hipSuccess )
+	// if applicable: free intermediate buffers
+	if ( copy_a )
 	{
-		fprintf ( stderr, "Failure to free device buffer A: %d\n", err_fa );
-		return BLIS_FAILURE;
+		const hipError_t err_fa = hipFree ( dev_buff_a );
+		if ( err_fa != hipSuccess )
+		{
+			fprintf ( stderr, "Failure to free device buffer A: %d\n", err_fa );
+			return BLIS_FAILURE;
+		}
 	}
-	const hipError_t err_fb = hipFree ( dev_buff_b );
-	if ( err_fb != hipSuccess )
+	if ( copy_b )
 	{
-		fprintf ( stderr, "Failure to free device buffer B: %d\n", err_fb );
-		return BLIS_FAILURE;
-	}
-	const hipError_t err_fc = hipFree ( dev_buff_c );
-	if ( err_fc != hipSuccess )
-	{
-		fprintf ( stderr, "Failure to free device buffer C: %d\n", err_fc );
-		return BLIS_FAILURE;
+		const hipError_t err_fb = hipFree ( dev_buff_b );
+		if ( err_fb != hipSuccess )
+		{
+			fprintf ( stderr, "Failure to free device buffer B: %d\n", err_fb );
+			return BLIS_FAILURE;
+		}
 	}
 
 	return BLIS_SUCCESS;
