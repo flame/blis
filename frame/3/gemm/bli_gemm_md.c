@@ -439,8 +439,7 @@ mddm_t bli_gemm_md_rcc
 	// the target datatype. (The packm_blk_var1_md() function has "built-in"
 	// support for packing to 1r (and 1e) schemas, whereas the
 	// packm_blk_var1() function relies on packm kernels for packing to 1r.
-	const num_t   dt_complex = bli_obj_dt( a );
-	const cntx_t* cntx_1m    = bli_gks_query_ind_cntx( BLIS_1M, dt_complex );
+	const cntx_t* cntx_1m     = bli_gks_query_ind_cntx( BLIS_1M );
 
 	const func_t* packm_1m_mr = bli_cntx_get_ukrs( BLIS_PACKM_MRXK_KER, cntx_1m );
 	const func_t* packm_1m_nr = bli_cntx_get_ukrs( BLIS_PACKM_NRXK_KER, cntx_1m );

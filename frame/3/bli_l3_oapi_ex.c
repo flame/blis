@@ -120,7 +120,7 @@ void PASTEMAC(gemm,BLIS_OAPI_EX_SUF)
 
 	// If necessary, obtain a valid context from the gks using the induced
 	// method id determined above.
-	if ( cntx == NULL ) cntx = bli_gks_query_ind_cntx( im, dt );
+	if ( cntx == NULL ) cntx = bli_gks_query_ind_cntx( im );
 
 	// Check the operands.
 	if ( bli_error_checking_is_enabled() )
@@ -171,7 +171,7 @@ void PASTEMAC(gemmt,BLIS_OAPI_EX_SUF)
 
 	// If necessary, obtain a valid context from the gks using the induced
 	// method id determined above.
-	if ( cntx == NULL ) cntx = bli_gks_query_ind_cntx( im, dt );
+	if ( cntx == NULL ) cntx = bli_gks_query_ind_cntx( im );
 
 	// Check the operands.
 	if ( bli_error_checking_is_enabled() )
@@ -299,7 +299,7 @@ void PASTEMAC(hemm,BLIS_OAPI_EX_SUF)
 
 	// If necessary, obtain a valid context from the gks using the induced
 	// method id determined above.
-	if ( cntx == NULL ) cntx = bli_gks_query_ind_cntx( im, dt );
+	if ( cntx == NULL ) cntx = bli_gks_query_ind_cntx( im );
 
 	// Check the operands.
 	if ( bli_error_checking_is_enabled() )
@@ -349,7 +349,7 @@ void PASTEMAC(symm,BLIS_OAPI_EX_SUF)
 
 	// If necessary, obtain a valid context from the gks using the induced
 	// method id determined above.
-	if ( cntx == NULL ) cntx = bli_gks_query_ind_cntx( im, dt );
+	if ( cntx == NULL ) cntx = bli_gks_query_ind_cntx( im );
 
 	// Check the operands.
 	if ( bli_error_checking_is_enabled() )
@@ -399,7 +399,7 @@ void PASTEMAC(trmm3,BLIS_OAPI_EX_SUF)
 
 	// If necessary, obtain a valid context from the gks using the induced
 	// method id determined above.
-	if ( cntx == NULL ) cntx = bli_gks_query_ind_cntx( im, dt );
+	if ( cntx == NULL ) cntx = bli_gks_query_ind_cntx( im );
 
 	// Check the operands.
 	if ( bli_error_checking_is_enabled() )
@@ -505,7 +505,7 @@ void PASTEMAC(trmm,BLIS_OAPI_EX_SUF)
 
 	// If necessary, obtain a valid context from the gks using the induced
 	// method id determined above.
-	if ( cntx == NULL ) cntx = bli_gks_query_ind_cntx( im, dt );
+	if ( cntx == NULL ) cntx = bli_gks_query_ind_cntx( im );
 
 	// Check the operands.
 	if ( bli_error_checking_is_enabled() )
@@ -552,7 +552,7 @@ void PASTEMAC(trsm,BLIS_OAPI_EX_SUF)
 
 	// If necessary, obtain a valid context from the gks using the induced
 	// method id determined above.
-	if ( cntx == NULL ) cntx = bli_gks_query_ind_cntx( im, dt );
+	if ( cntx == NULL ) cntx = bli_gks_query_ind_cntx( im );
 
 	// Check the operands.
 	if ( bli_error_checking_is_enabled() )
