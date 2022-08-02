@@ -275,6 +275,9 @@ void PASTEMAC(ch,varname) \
 	/* Save the imaginary stride of B to the auxinfo_t object. */ \
 	bli_auxinfo_set_is_b( istep_b, &aux ); \
 \
+	/* Save the virtual microkernel address. */ \
+	bli_auxinfo_set_ukr( gemm_ukr, &aux ); \
+\
 	/* The 'thread' argument points to the thrinfo_t node for the 2nd (jr)
 	   loop around the microkernel. Here we query the thrinfo_t node for the
 	   1st (ir) loop around the microkernel. */ \

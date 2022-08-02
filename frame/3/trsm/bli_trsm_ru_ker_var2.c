@@ -331,6 +331,9 @@ void PASTEMAC(ch,varname) \
 	   "A" matrix is actually contained within B. */ \
 	bli_auxinfo_set_is_b( istep_a, &aux ); \
 \
+	/* Save the virtual microkernel address. */ \
+	bli_auxinfo_set_ukr( gemm_ukr, &aux ); \
+\
 	b1 = b_cast; \
 	c1 = c_cast; \
 \

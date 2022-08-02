@@ -75,6 +75,8 @@ void PASTEMAC0(opname) \
 	PASTECH2(tname,_ukr,_vft) f = \
 	PASTEMAC(opname,_qfp)( dt ); \
 \
+	bli_auxinfo_set_ukr( f, &data ); \
+\
 	f \
 	( \
 	  m, \
@@ -140,6 +142,8 @@ void PASTEMAC0(opname) \
 		PASTECH2(tname,_ukr,_vft) f = \
 		PASTEMAC(opnamel,_qfp)( dt ); \
 \
+		bli_auxinfo_set_ukr( f, &data ); \
+\
 		f \
 		( \
 		  m, \
@@ -161,6 +165,8 @@ void PASTEMAC0(opname) \
 		   void* for function arguments instead of typed pointers. */ \
 		PASTECH2(tname,_ukr,_vft) f = \
 		PASTEMAC(opnameu,_qfp)( dt ); \
+\
+		bli_auxinfo_set_ukr( f, &data ); \
 \
 		f \
 		( \

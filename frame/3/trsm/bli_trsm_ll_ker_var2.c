@@ -306,6 +306,9 @@ void PASTEMAC(ch,varname) \
 	/* Save the imaginary stride of B to the auxinfo_t object. */ \
 	bli_auxinfo_set_is_b( istep_b, &aux ); \
 \
+	/* Save the virtual microkernel address. */ \
+	bli_auxinfo_set_ukr( gemm_ukr, &aux ); \
+\
 	/* We don't bother querying the thrinfo_t node for the 1st loop because
 	   we can't parallelize that loop in trsm due to the inter-iteration
 	   dependencies that exist. */ \

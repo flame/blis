@@ -275,6 +275,9 @@ void PASTEMAC(ch,varname) \
 	/* Save the imaginary stride of A to the auxinfo_t object. */ \
 	bli_auxinfo_set_is_a( istep_a, &aux ); \
 \
+	/* Save the virtual microkernel address. */ \
+	bli_auxinfo_set_ukr( gemm_ukr, &aux ); \
+\
 	thrinfo_t* caucus = bli_thrinfo_sub_node( thread ); \
 \
 	dim_t jr_nt  = bli_thread_n_way( thread ); \

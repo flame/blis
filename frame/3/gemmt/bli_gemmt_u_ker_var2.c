@@ -275,6 +275,9 @@ void PASTEMAC(ch,varname) \
 	bli_auxinfo_set_is_a( is_a, &aux ); \
 	bli_auxinfo_set_is_b( is_b, &aux ); \
 \
+	/* Save the virtual microkernel address. */ \
+	bli_auxinfo_set_ukr( gemm_ukr, &aux ); \
+\
 	/* Save the desired output datatype (indicating no typecasting). */ \
 	/*bli_auxinfo_set_dt_on_output( dt, &aux );*/ \
 \
