@@ -35,17 +35,21 @@
 #ifndef AOCL_GEMM_U8S8S16OS16_UTILS_H
 #define AOCL_GEMM_U8S8S16OS16_UTILS_H
 
-BLIS_EXPORT_ADDON siz_t aocl_get_reorder_buf_size_u8s8s16os16(
-    const char mat_type,
-    const dim_t k,
-    const dim_t n);
+BLIS_EXPORT_ADDON siz_t aocl_get_reorder_buf_size_u8s8s16os16
+      (
+        const char  mat_type,
+        const dim_t k,
+        const dim_t n
+      );
 
-BLIS_EXPORT_ADDON void aocl_reorder_u8s8s16os16(
-    const char mat_type,
-    const int8_t *input_buf_addr,
-    int8_t *reorder_buf_addr,
-    const dim_t k,
-    const dim_t n,
-    const dim_t ldb);
+BLIS_EXPORT_ADDON void aocl_reorder_u8s8s16os16
+      (
+        const char    mat_type,
+        const int8_t  *input_buf_addr,
+        int8_t        *reorder_buf_addr,
+        const         dim_t k,
+        const         dim_t n,
+        const         dim_t ldb
+      );
 
 #endif // AOCL_GEMM_U8S8S16OS16_UTILS_H

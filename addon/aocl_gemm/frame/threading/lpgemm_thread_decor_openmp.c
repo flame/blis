@@ -36,6 +36,7 @@
 #include "lpgemm_config.h"
 #include "lpgemm_thread_decor_openmp.h"
 #include "lpgemm_types.h"
+#include "lpgemm_u8s8s16.h"
 #include "lpgemm_u8s8s32.h"
 #include "lpgemm_f32f32f32.h"
 
@@ -219,6 +220,59 @@ BLIS_INLINE void lpgemm_adjust_ic_jc_ways
 			( *ic_ways ) = prev_ic;
 			( *jc_ways ) = next_jc;
 		}
+	}
+}
+
+BLIS_INLINE void lpgemm_u8s8s16o16_get_threading
+     (
+       dim_t*  n_threads,
+       dim_t*  ic_ways,
+       dim_t*  jc_ways,
+       dim_t   m,
+       dim_t   n,
+       dim_t   k,
+       rntm_t* rntm_g
+     )
+{
+	*n_threads = bli_rntm_num_threads( rntm_g );
+	*jc_ways = bli_rntm_jc_ways( rntm_g );
+	*ic_ways = bli_rntm_ic_ways( rntm_g );
+
+	if ( ( ( *ic_ways ) > 0 ) || ( ( *jc_ways ) > 0 ) )
+	{
+		// If BLIS_IC_NT or JC_NT are set.
+		// Default cases.
+ 		*ic_ways = ( ( *ic_ways ) > 0 ) ? ( *ic_ways ) : 1;
+		*jc_ways = ( ( *jc_ways ) > 0 ) ? ( *jc_ways ) : 1;
+
+		*n_threads = ( *jc_ways ) * ( *ic_ways );
+	}
+	else if ( ( *n_threads ) > 1 )
+	{
+
+		dim_t NR = 32;
+		//dim_t MR = 6;
+
+		if ( n <= NR )
+		{
+			// If n is less than micro panel dimension, allocating all threads
+			// to ic resulted in gains.
+			( *ic_ways ) = ( *n_threads );
+			( *jc_ways ) = 1;
+		}
+		else
+		{
+			// If BLIS_NUM_THREADS are set, generate jc,ic from the same.
+			bli_thread_partition_2x2( ( *n_threads ), m, n, ic_ways, jc_ways );
+		}
+	}
+	else
+	{
+		// Setting all the values to 1 in case n_threads <= 1. This ensures
+		// the threading parameters are valid.
+		*n_threads = 1;
+		*jc_ways = 1;
+		*ic_ways = 1;
 	}
 }
 
@@ -443,6 +497,7 @@ void lpgemm_ ## LPGEMM_SFX ## _openmp_thread_decorator \
 	} \
 } \
 
+GEN_LPGEMM_OPENMP_DECORATOR(uint8_t,int8_t,int16_t,u8s8s16o16)
 GEN_LPGEMM_OPENMP_DECORATOR(uint8_t,int8_t,int32_t,u8s8s32o32)
 GEN_LPGEMM_OPENMP_DECORATOR(float,float,float,f32f32f32of32)
 
@@ -510,6 +565,7 @@ void lpgemm_ ## LPGEMM_SFX ## _thread_decorator \
 	); \
 } \
 
+GEN_LPGEMM_DECORATOR(uint8_t,int8_t,int32_t,u8s8s16o16)
 GEN_LPGEMM_DECORATOR(uint8_t,int8_t,int32_t,u8s8s32o32)
 GEN_LPGEMM_DECORATOR(float,float,float,f32f32f32of32)
 

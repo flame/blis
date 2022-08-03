@@ -35,13 +35,21 @@
 #ifndef BLIS_GEMM_INT16_PACKB
 #define BLIS_GEMM_INT16_PACKB
 
-void packb_nr32_u8s8s16o16(
-    int8_t *pack_b_buffer_u8s8s16o16,
-    const int8_t *b,
-    const dim_t ldb,
-    const dim_t cols,
-    const dim_t rows,
-    dim_t *rs_b,
-    dim_t *cs_b);
+void get_packb_nr32_u8s8s16o16_strides
+     (
+       dim_t* rs_b,
+       dim_t* cs_b
+     );
+
+void packb_nr32_u8s8s16o16
+      (
+        int8_t        *pack_b_buffer_u8s8s16o16,
+        const int8_t  *b,
+        const dim_t   ldb,
+        const dim_t   cols,
+        const dim_t   rows,
+        dim_t         *rs_b,
+        dim_t         *cs_b
+      );
 
 #endif // BLIS_GEMM_INT16_PACKB

@@ -122,12 +122,12 @@ void lpgemm_rowvar_u8s8s16o16_4x16
 	// Handle k remainder.
 	if (k_partial_pieces > 0)
 	{
-		uint8_t a_element[4];
+		uint8_t a_kfringe;
 
 		b0 = _mm256_loadu_si256((__m256i const *)(b + (32 * k_full_pieces) + (NR * 0)));
 
-		a_element[0] = *(a + (rs_a * 0) + (cs_a * (k_full_pieces * 2)));
-		a_int32_0 = _mm256_set1_epi8(a_element[0]);
+		a_kfringe = *(a + (rs_a * 0) + (cs_a * (k_full_pieces * 2)));
+		a_int32_0 = _mm256_set1_epi8(a_kfringe);
 
 		// Seperate register for intermediate op
 		inter_vec = _mm256_maddubs_epi16(a_int32_0, b0);
@@ -136,8 +136,8 @@ void lpgemm_rowvar_u8s8s16o16_4x16
 		// c[0,0-15] = a[0,kr:kr+2]*b[kr:kr+2,0-31]
 		c_int16_0p0 = _mm256_add_epi16(inter_vec, c_int16_0p0);
 
-		a_element[1] = *(a + (rs_a * 1) + (cs_a * (k_full_pieces * 2)));
-		a_int32_0 = _mm256_set1_epi8(a_element[1]);
+		a_kfringe = *(a + (rs_a * 1) + (cs_a * (k_full_pieces * 2)));
+		a_int32_0 = _mm256_set1_epi8(a_kfringe);
 
 		// Seperate register for intermediate op
 		inter_vec = _mm256_maddubs_epi16(a_int32_0, b0);
@@ -146,8 +146,8 @@ void lpgemm_rowvar_u8s8s16o16_4x16
 		// c[1,0-15] = a[1,kr:kr+2]*b[kr:kr+2,0-31]
 		c_int16_1p0 = _mm256_add_epi16(inter_vec, c_int16_1p0);
 
-		a_element[2] = *(a + (rs_a * 2) + (cs_a * (k_full_pieces * 2)));
-		a_int32_0 = _mm256_set1_epi8(a_element[2]);
+		a_kfringe = *(a + (rs_a * 2) + (cs_a * (k_full_pieces * 2)));
+		a_int32_0 = _mm256_set1_epi8(a_kfringe);
 
 		// Seperate register for intermediate op
 		inter_vec = _mm256_maddubs_epi16(a_int32_0, b0);
@@ -156,8 +156,8 @@ void lpgemm_rowvar_u8s8s16o16_4x16
 		// c[0,0-15] = a[0,kr:kr+2]*b[kr:kr+2,0-31]
 		c_int16_2p0 = _mm256_add_epi16(inter_vec, c_int16_2p0);
 
-		a_element[3] = *(a + (rs_a * 3) + (cs_a * (k_full_pieces * 2)));
-		a_int32_0 = _mm256_set1_epi8(a_element[3]);
+		a_kfringe = *(a + (rs_a * 3) + (cs_a * (k_full_pieces * 2)));
+		a_int32_0 = _mm256_set1_epi8(a_kfringe);
 
 		// Seperate register for intermediate op
 		inter_vec = _mm256_maddubs_epi16(a_int32_0, b0);
@@ -312,12 +312,12 @@ void lpgemm_rowvar_u8s8s16o16_4xlt16
 	// Handle k remainder.
 	if (k_partial_pieces > 0)
 	{
-		uint8_t a_element[4];
+		uint8_t a_kfringe;
 
 		b0 = _mm256_loadu_si256((__m256i const *)(b + (32 * k_full_pieces) + (NR * 0)));
 
-		a_element[0] = *(a + (rs_a * 0) + (cs_a * (k_full_pieces * 2)));
-		a_int32_0 = _mm256_set1_epi8(a_element[0]);
+		a_kfringe = *(a + (rs_a * 0) + (cs_a * (k_full_pieces * 2)));
+		a_int32_0 = _mm256_set1_epi8(a_kfringe);
 
 		// Seperate register for intermediate op
 		inter_vec = _mm256_maddubs_epi16(a_int32_0, b0);
@@ -326,8 +326,8 @@ void lpgemm_rowvar_u8s8s16o16_4xlt16
 		// c[0,0-15] = a[0,kr:kr+2]*b[kr:kr+2,0-31]
 		c_int16_0p0 = _mm256_add_epi16(inter_vec, c_int16_0p0);
 
-		a_element[1] = *(a + (rs_a * 1) + (cs_a * (k_full_pieces * 2)));
-		a_int32_0 = _mm256_set1_epi8(a_element[1]);
+		a_kfringe = *(a + (rs_a * 1) + (cs_a * (k_full_pieces * 2)));
+		a_int32_0 = _mm256_set1_epi8(a_kfringe);
 
 		// Seperate register for intermediate op
 		inter_vec = _mm256_maddubs_epi16(a_int32_0, b0);
@@ -336,8 +336,8 @@ void lpgemm_rowvar_u8s8s16o16_4xlt16
 		// c[1,0-15] = a[1,kr:kr+2]*b[kr:kr+2,0-31]
 		c_int16_1p0 = _mm256_add_epi16(inter_vec, c_int16_1p0);
 
-		a_element[2] = *(a + (rs_a * 2) + (cs_a * (k_full_pieces * 2)));
-		a_int32_0 = _mm256_set1_epi8(a_element[2]);
+		a_kfringe = *(a + (rs_a * 2) + (cs_a * (k_full_pieces * 2)));
+		a_int32_0 = _mm256_set1_epi8(a_kfringe);
 
 		// Seperate register for intermediate op
 		inter_vec = _mm256_maddubs_epi16(a_int32_0, b0);
@@ -346,8 +346,8 @@ void lpgemm_rowvar_u8s8s16o16_4xlt16
 		// c[2,0-15] = a[0,kr:kr+2]*b[kr:kr+2,0-31]
 		c_int16_2p0 = _mm256_add_epi16(inter_vec, c_int16_2p0);
 
-		a_element[3] = *(a + (rs_a * 3) + (cs_a * (k_full_pieces * 2)));
-		a_int32_0 = _mm256_set1_epi8(a_element[3]);
+		a_kfringe = *(a + (rs_a * 3) + (cs_a * (k_full_pieces * 2)));
+		a_int32_0 = _mm256_set1_epi8(a_kfringe);
 
 		// Seperate register for intermediate op
 		inter_vec = _mm256_maddubs_epi16(a_int32_0, b0);
@@ -486,12 +486,12 @@ void lpgemm_rowvar_u8s8s16o16_2x16
 	// Handle k remainder.
 	if (k_partial_pieces > 0)
 	{
-		uint8_t a_element[2];
+		uint8_t a_kfringe;
 
 		b0 = _mm256_loadu_si256((__m256i const *)(b + (32 * k_full_pieces) + (NR * 0)));
 
-		a_element[0] = *(a + (rs_a * 0) + (cs_a * (k_full_pieces * 2)));
-		a_int32_0 = _mm256_set1_epi8(a_element[0]);
+		a_kfringe = *(a + (rs_a * 0) + (cs_a * (k_full_pieces * 2)));
+		a_int32_0 = _mm256_set1_epi8(a_kfringe);
 
 		// Seperate register for intermediate op
 		inter_vec = _mm256_maddubs_epi16(a_int32_0, b0);
@@ -500,8 +500,8 @@ void lpgemm_rowvar_u8s8s16o16_2x16
 		// c[0,0-15] = a[0,kr:kr+2]*b[kr:kr+2,0-31]
 		c_int16_0p0 = _mm256_add_epi16(inter_vec, c_int16_0p0);
 
-		a_element[1] = *(a + (rs_a * 1) + (cs_a * (k_full_pieces * 2)));
-		a_int32_0 = _mm256_set1_epi8(a_element[1]);
+		a_kfringe = *(a + (rs_a * 1) + (cs_a * (k_full_pieces * 2)));
+		a_int32_0 = _mm256_set1_epi8(a_kfringe);
 
 		// Seperate register for intermediate op
 		inter_vec = _mm256_maddubs_epi16(a_int32_0, b0);
@@ -609,12 +609,12 @@ void lpgemm_rowvar_u8s8s16o16_2xlt16
 	// Handle k remainder.
 	if (k_partial_pieces > 0)
 	{
-		uint8_t a_element[4];
+		uint8_t a_kfringe;
 
 		b0 = _mm256_loadu_si256((__m256i const *)(b + (32 * k_full_pieces) + (NR * 0)));
 
-		a_element[0] = *(a + (rs_a * 0) + (cs_a * (k_full_pieces * 2)));
-		a_int32_0 = _mm256_set1_epi8(a_element[0]);
+		a_kfringe = *(a + (rs_a * 0) + (cs_a * (k_full_pieces * 2)));
+		a_int32_0 = _mm256_set1_epi8(a_kfringe);
 
 		// Seperate register for intermediate op
 		inter_vec = _mm256_maddubs_epi16(a_int32_0, b0);
@@ -623,8 +623,8 @@ void lpgemm_rowvar_u8s8s16o16_2xlt16
 		// c[0,0-15] = a[0,kr:kr+2]*b[kr:kr+2,0-31]
 		c_int16_0p0 = _mm256_add_epi16(inter_vec, c_int16_0p0);
 
-		a_element[1] = *(a + (rs_a * 1) + (cs_a * (k_full_pieces * 2)));
-		a_int32_0 = _mm256_set1_epi8(a_element[1]);
+		a_kfringe = *(a + (rs_a * 1) + (cs_a * (k_full_pieces * 2)));
+		a_int32_0 = _mm256_set1_epi8(a_kfringe);
 
 		// Seperate register for intermediate op
 		inter_vec = _mm256_maddubs_epi16(a_int32_0, b0);
@@ -724,12 +724,12 @@ void lpgemm_rowvar_u8s8s16o16_1x16
 	// Handle k remainder.
 	if (k_partial_pieces > 0)
 	{
-		uint8_t a_element[1];
+		uint8_t a_kfringe;
 
 		b0 = _mm256_loadu_si256((__m256i const *)(b + (64 * k_full_pieces) + (NR * 0)));
 
-		a_element[0] = *(a + (rs_a * 0) + (cs_a * (k_full_pieces * 2)));
-		a_int32_0 = _mm256_set1_epi8(a_element[0]);
+		a_kfringe = *(a + (rs_a * 0) + (cs_a * (k_full_pieces * 2)));
+		a_int32_0 = _mm256_set1_epi8(a_kfringe);
 
 		// Seperate register for intermediate op
 		inter_vec = _mm256_maddubs_epi16(a_int32_0, b0);
@@ -814,12 +814,12 @@ void lpgemm_rowvar_u8s8s16o16_1xlt16
 	// Handle k remainder.
 	if (k_partial_pieces > 0)
 	{
-		uint8_t a_element[4];
+		uint8_t a_kfringe;
 
 		b0 = _mm256_loadu_si256((__m256i const *)(b + (32 * k_full_pieces) + (NR * 0)));
 
-		a_element[0] = *(a + (rs_a * 0) + (cs_a * (k_full_pieces * 2)));
-		a_int32_0 = _mm256_set1_epi8(a_element[0]);
+		a_kfringe = *(a + (rs_a * 0) + (cs_a * (k_full_pieces * 2)));
+		a_int32_0 = _mm256_set1_epi8(a_kfringe);
 
 		// Seperate register for intermediate op
 		inter_vec = _mm256_maddubs_epi16(a_int32_0, b0);

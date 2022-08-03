@@ -37,22 +37,28 @@
 
 #include "blis.h"
 #include "lpgemm_types.h"
+#include "lpgemm_post_ops.h"
 
 void lpgemm_rowvar_u8s8s16o16
-  (
-    const dim_t m,
-    const dim_t n,
-    const dim_t k,
-    const uint8_t *a,
-    const dim_t rs_a,
-    const dim_t cs_a,
-    const int8_t *b,
-    const dim_t rs_b,
-    const dim_t cs_b,
-    int16_t *c,
-    const dim_t rs_c,
-    int16_t alpha,
-    int16_t beta
-  );
+	(
+	  const dim_t m,
+	  const dim_t n,
+	  const dim_t k,
+	  const uint8_t *a,
+	  const dim_t rs_a,
+	  const dim_t cs_a,
+	  const AOCL_MEMORY_TAG mtag_a,
+	  const int8_t *b,
+	  const dim_t rs_b,
+	  const dim_t cs_b,
+	  const AOCL_MEMORY_TAG mtag_b,
+	  int16_t *c,
+	  const dim_t rs_c,
+	  int16_t alpha,
+	  int16_t beta,
+	  rntm_t *rntm,
+	  lpgemm_thrinfo_t *thread,
+	  lpgemm_post_op*       post_op_list
+	);
 
 #endif // LPGEMM_U8S8S16_H

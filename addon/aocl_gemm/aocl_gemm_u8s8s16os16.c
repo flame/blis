@@ -38,6 +38,7 @@
 #include "lpgemm_u8s8s16.h"
 #include "lpgemm_config.h"
 #include "lpgemm_utils.h"
+#include "lpgemm_thread_decor_openmp.h"
 
 void aocl_gemm_u8s8s16os16
      (
@@ -61,6 +62,13 @@ void aocl_gemm_u8s8s16os16
 {
 	trans_t blis_transa;
 	trans_t blis_transb;
+
+	// Check if avx ISA is supported, lpgemm u8s8s16os16 matmul only works with it.
+	if ( bli_cpuid_is_avx_supported() == FALSE )
+	{
+		printf(" AVX2 ISA not supported by processor, cannot perform lpgemm.\n");
+		return; // Error.
+	}
 
 	/* Initialize BLIS. */
 	bli_init_auto();
@@ -115,7 +123,7 @@ void aocl_gemm_u8s8s16os16
 	// the mtag_b is set to packed to enable runtime packing.
 	if (mtag_b == UNPACKED)
 	{
-		return; // Error.
+		mtag_b = PACK;
 	}
 
 	// Only unpacked A supported now.
@@ -124,16 +132,37 @@ void aocl_gemm_u8s8s16os16
 		return; // Error.
 	}
 
+	// Convert post op struct to post op linked list format.
+	lpgemm_post_op post_op_list[AOCL_MAX_POST_OPS];
+	lpgemm_translate_to_post_ops_list( post_op_unparsed, post_op_list );
+
 	// Initialize a local runtime with global settings if necessary. Note
 	// that in the case that a runtime is passed in, we make a local copy.
 	rntm_t rntm_g;
 	bli_rntm_init_from_global(&rntm_g);
 	bli_membrk_rntm_set_membrk(&rntm_g);
 
-	lpgemm_rowvar_u8s8s16o16(
-		m, n, k,
-		a, rs_a, cs_a,
-		b, rs_b, cs_b,
-		c, rs_c,
-		alpha, beta);
+#ifdef BLIS_ENABLE_OPENMP
+	lpgemm_u8s8s16o16_openmp_thread_decorator
+	(
+	m, n, k,
+	a, rs_a, cs_a, mtag_a,
+	b, rs_b, cs_b, mtag_b,
+	c, rs_c,
+	alpha, beta,
+	&rntm_g,
+	post_op_list
+	);
+#else
+	lpgemm_u8s8s16o16_thread_decorator
+	(
+	m, n, k,
+	a, rs_a, cs_a, mtag_a,
+	b, rs_b, cs_b, mtag_b,
+	c, rs_c,
+	alpha, beta,
+	&rntm_g,
+	post_op_list
+	);
+#endif
 }

@@ -39,22 +39,20 @@
 #include "lpgemm_mn_fringe_s16.h"
 
 // 6x16 int8o16 kernel
-void lpgemm_rowvar_u8s8s16o16_6x16
-	(
-		const dim_t m0,
-		const dim_t k0,
-		const uint8_t *a,
-		const dim_t rs_a,
-		const dim_t cs_a,
-		const dim_t ps_a,
-		const int8_t *b,
-		const dim_t rs_b,
-		const dim_t cs_b,
-		int16_t *c,
-		const dim_t rs_c,
-		const int16_t alpha,
-		const int16_t beta
-	)
+void lpgemm_rowvar_u8s8s16o16_6x16(
+	const dim_t m0,
+	const dim_t k0,
+	const uint8_t *a,
+	const dim_t rs_a,
+	const dim_t cs_a,
+	const dim_t ps_a,
+	const int8_t *b,
+	const dim_t rs_b,
+	const dim_t cs_b,
+	int16_t *c,
+	const dim_t rs_c,
+	const int16_t alpha,
+	const int16_t beta)
 {
 	dim_t MR = 6;
 	dim_t NR = 16;
@@ -159,12 +157,12 @@ void lpgemm_rowvar_u8s8s16o16_6x16
 		// Handle k remainder.
 		if (k_partial_pieces > 0)
 		{
-			uint8_t a_element[6];
+			uint8_t a_kfringe;
 
 			b0 = _mm256_loadu_si256((__m256i const *)(b + (32 * k_full_pieces) + (NR * 0)));
 
-			a_element[0] = *(a + (rs_a * 0) + (cs_a * (k_full_pieces * 2)));
-			a_int32_0 = _mm256_set1_epi8(a_element[0]);
+			a_kfringe = *(a + (rs_a * 0) + (cs_a * (k_full_pieces * 2)));
+			a_int32_0 = _mm256_set1_epi8(a_kfringe);
 
 			// Seperate register for intermediate op
 			inter_vec = _mm256_maddubs_epi16(a_int32_0, b0);
@@ -173,8 +171,8 @@ void lpgemm_rowvar_u8s8s16o16_6x16
 			// c[0,0-15] = a[0,kr:kr+2]*b[kr:kr+2,0-31]
 			c_int16_0p0 = _mm256_add_epi16(inter_vec, c_int16_0p0);
 
-			a_element[1] = *(a + (rs_a * 1) + (cs_a * (k_full_pieces * 2)));
-			a_int32_0 = _mm256_set1_epi8(a_element[1]);
+			a_kfringe = *(a + (rs_a * 1) + (cs_a * (k_full_pieces * 2)));
+			a_int32_0 = _mm256_set1_epi8(a_kfringe);
 
 			// Seperate register for intermediate op
 			inter_vec = _mm256_maddubs_epi16(a_int32_0, b0);
@@ -183,8 +181,8 @@ void lpgemm_rowvar_u8s8s16o16_6x16
 			// c[1,0-15] = a[1,kr:kr+2]*b[kr:kr+2,0-31]
 			c_int16_1p0 = _mm256_add_epi16(inter_vec, c_int16_1p0);
 
-			a_element[2] = *(a + (rs_a * 2) + (cs_a * (k_full_pieces * 2)));
-			a_int32_0 = _mm256_set1_epi8(a_element[2]);
+			a_kfringe = *(a + (rs_a * 2) + (cs_a * (k_full_pieces * 2)));
+			a_int32_0 = _mm256_set1_epi8(a_kfringe);
 
 			// Seperate register for intermediate op
 			inter_vec = _mm256_maddubs_epi16(a_int32_0, b0);
@@ -193,8 +191,8 @@ void lpgemm_rowvar_u8s8s16o16_6x16
 			// c[2,0-15] = a[2,kr:kr+2]*b[kr:kr+2,0-31]
 			c_int16_2p0 = _mm256_add_epi16(inter_vec, c_int16_2p0);
 
-			a_element[3] = *(a + (rs_a * 3) + (cs_a * (k_full_pieces * 2)));
-			a_int32_0 = _mm256_set1_epi8(a_element[3]);
+			a_kfringe = *(a + (rs_a * 3) + (cs_a * (k_full_pieces * 2)));
+			a_int32_0 = _mm256_set1_epi8(a_kfringe);
 
 			// Seperate register for intermediate op
 			inter_vec = _mm256_maddubs_epi16(a_int32_0, b0);
@@ -203,8 +201,8 @@ void lpgemm_rowvar_u8s8s16o16_6x16
 			// c[3,0-15] = a[3,kr:kr+2]*b[kr:kr+2,0-31]
 			c_int16_3p0 = _mm256_add_epi16(inter_vec, c_int16_3p0);
 
-			a_element[4] = *(a + (rs_a * 4) + (cs_a * (k_full_pieces * 2)));
-			a_int32_0 = _mm256_set1_epi8(a_element[4]);
+			a_kfringe = *(a + (rs_a * 4) + (cs_a * (k_full_pieces * 2)));
+			a_int32_0 = _mm256_set1_epi8(a_kfringe);
 
 			// Seperate register for intermediate op
 			inter_vec = _mm256_maddubs_epi16(a_int32_0, b0);
@@ -213,8 +211,8 @@ void lpgemm_rowvar_u8s8s16o16_6x16
 			// c[4,0-15] = a[4,kr:kr+2]*b[kr:kr+2,0-31]
 			c_int16_4p0 = _mm256_add_epi16(inter_vec, c_int16_4p0);
 
-			a_element[5] = *(a + (rs_a * 5) + (cs_a * (k_full_pieces * 2)));
-			a_int32_0 = _mm256_set1_epi8(a_element[5]);
+			a_kfringe = *(a + (rs_a * 5) + (cs_a * (k_full_pieces * 2)));
+			a_int32_0 = _mm256_set1_epi8(a_kfringe);
 
 			// Seperate register for intermediate op
 			inter_vec = _mm256_maddubs_epi16(a_int32_0, b0);
@@ -346,23 +344,21 @@ void lpgemm_rowvar_u8s8s16o16_6x16
 }
 
 // 6xlt16 int8o16 kernel
-void lpgemm_rowvar_u8s8s16o16_6xlt16
-	(
-		const dim_t m0,
-		const dim_t k0,
-		const uint8_t *a,
-		const dim_t rs_a,
-		const dim_t cs_a,
-		const dim_t ps_a,
-		const int8_t *b,
-		const dim_t rs_b,
-		const dim_t cs_b,
-		int16_t *c,
-		const dim_t rs_c,
-		const int16_t alpha,
-		const int16_t beta,
-		const dim_t n0_rem
-	)
+void lpgemm_rowvar_u8s8s16o16_6xlt16(
+	const dim_t m0,
+	const dim_t k0,
+	const uint8_t *a,
+	const dim_t rs_a,
+	const dim_t cs_a,
+	const dim_t ps_a,
+	const int8_t *b,
+	const dim_t rs_b,
+	const dim_t cs_b,
+	int16_t *c,
+	const dim_t rs_c,
+	const int16_t alpha,
+	const int16_t beta,
+	const dim_t n0_rem)
 {
 	dim_t MR = 6;
 
@@ -473,12 +469,12 @@ void lpgemm_rowvar_u8s8s16o16_6xlt16
 		// Handle k remainder.
 		if (k_partial_pieces > 0)
 		{
-			uint8_t a_element[6];
+			uint8_t a_kfringe;
 
 			b0 = _mm256_loadu_si256((__m256i const *)(b + (32 * k_full_pieces) + (cs_b * 0)));
 
-			a_element[0] = *(a + (rs_a * 0) + (cs_a * (k_full_pieces * 2)));
-			a_int32_0 = _mm256_set1_epi8(a_element[0]);
+			a_kfringe = *(a + (rs_a * 0) + (cs_a * (k_full_pieces * 2)));
+			a_int32_0 = _mm256_set1_epi8(a_kfringe);
 
 			inter_vec = _mm256_maddubs_epi16(a_int32_0, b0);
 
@@ -486,8 +482,8 @@ void lpgemm_rowvar_u8s8s16o16_6xlt16
 			// c[0,0-15] = a[0,kr:kr+2]*b[kr:kr+2,0-31]
 			c_int16_0p0 = _mm256_add_epi16(inter_vec, c_int16_0p0);
 
-			a_element[1] = *(a + (rs_a * 1) + (cs_a * (k_full_pieces * 2)));
-			a_int32_0 = _mm256_set1_epi8(a_element[1]);
+			a_kfringe = *(a + (rs_a * 1) + (cs_a * (k_full_pieces * 2)));
+			a_int32_0 = _mm256_set1_epi8(a_kfringe);
 
 			// Seperate register for intermediate op
 			inter_vec = _mm256_maddubs_epi16(a_int32_0, b0);
@@ -496,8 +492,8 @@ void lpgemm_rowvar_u8s8s16o16_6xlt16
 			// c[1,0-15] = a[1,kr:kr+2]*b[kr:kr+2,0-31]
 			c_int16_1p0 = _mm256_add_epi16(inter_vec, c_int16_1p0);
 
-			a_element[2] = *(a + (rs_a * 2) + (cs_a * (k_full_pieces * 2)));
-			a_int32_0 = _mm256_set1_epi8(a_element[2]);
+			a_kfringe = *(a + (rs_a * 2) + (cs_a * (k_full_pieces * 2)));
+			a_int32_0 = _mm256_set1_epi8(a_kfringe);
 
 			// Seperate register for intermediate op
 			inter_vec = _mm256_maddubs_epi16(a_int32_0, b0);
@@ -506,8 +502,8 @@ void lpgemm_rowvar_u8s8s16o16_6xlt16
 			// c[2,0-15] = a[2,kr:kr+2]*b[kr:kr+2,0-31]
 			c_int16_2p0 = _mm256_add_epi16(inter_vec, c_int16_2p0);
 
-			a_element[3] = *(a + (rs_a * 3) + (cs_a * (k_full_pieces * 2)));
-			a_int32_0 = _mm256_set1_epi8(a_element[3]);
+			a_kfringe = *(a + (rs_a * 3) + (cs_a * (k_full_pieces * 2)));
+			a_int32_0 = _mm256_set1_epi8(a_kfringe);
 
 			// Seperate register for intermediate op
 			inter_vec = _mm256_maddubs_epi16(a_int32_0, b0);
@@ -516,8 +512,8 @@ void lpgemm_rowvar_u8s8s16o16_6xlt16
 			// c[3,0-15] = a[3,kr:kr+2]*b[kr:kr+2,0-31]
 			c_int16_3p0 = _mm256_add_epi16(inter_vec, c_int16_3p0);
 
-			a_element[4] = *(a + (rs_a * 4) + (cs_a * (k_full_pieces * 2)));
-			a_int32_0 = _mm256_set1_epi8(a_element[4]);
+			a_kfringe = *(a + (rs_a * 4) + (cs_a * (k_full_pieces * 2)));
+			a_int32_0 = _mm256_set1_epi8(a_kfringe);
 
 			// Seperate register for intermediate op
 			inter_vec = _mm256_maddubs_epi16(a_int32_0, b0);
@@ -526,8 +522,8 @@ void lpgemm_rowvar_u8s8s16o16_6xlt16
 			// c[4,0-15] = a[4,kr:kr+2]*b[kr:kr+2,0-31]
 			c_int16_4p0 = _mm256_add_epi16(inter_vec, c_int16_4p0);
 
-			a_element[5] = *(a + (rs_a * 5) + (cs_a * (k_full_pieces * 2)));
-			a_int32_0 = _mm256_set1_epi8(a_element[5]);
+			a_kfringe = *(a + (rs_a * 5) + (cs_a * (k_full_pieces * 2)));
+			a_int32_0 = _mm256_set1_epi8(a_kfringe);
 
 			// Seperate register for intermediate op
 			inter_vec = _mm256_maddubs_epi16(a_int32_0, b0);
@@ -594,7 +590,7 @@ void lpgemm_rowvar_u8s8s16o16_6xlt16
 			selector1 = _mm256_mullo_epi16(selector2, selector1);
 			c_int16_5p0 = _mm256_add_epi16(selector1, c_int16_5p0);
 		}
-		
+
 		// Store the results.
 		// c[0,0-15]
 		_mm256_storeu_si256((__m256i_u *)buf0, c_int16_0p0);

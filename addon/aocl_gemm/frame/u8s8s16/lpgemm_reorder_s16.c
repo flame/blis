@@ -43,9 +43,8 @@ void aocl_reorderb_nr32_u8s8s16o16
     lpgemm_obj_t *b_reorder
   )
 {
-  // To Do: Constant declaration's to be moved to config
-  const dim_t NC = 1024;
-  const dim_t KC = 1024;
+  const dim_t NC = lpgemm_get_block_size_NC_global_cntx(U8S8S16OS16);
+  const dim_t KC = lpgemm_get_block_size_KC_global_cntx(U8S8S16OS16);
 
   // Extracting the matrix properties from the lpgemm object
   dim_t rs_b = b->rs;

@@ -37,22 +37,22 @@
 
 // 6x32 int8o16 kernel
 void lpgemm_rowvar_u8s8s16o16_6x32
-  (
-    const dim_t m0,
-    const dim_t n0,
-    const dim_t k0,
-    const uint8_t *a,
-    const dim_t rs_a,
-    const dim_t cs_a,
-    const dim_t ps_a,
-    const int8_t *b,
-    const dim_t rs_b,
-    const dim_t cs_b,
-    int16_t *c,
-    const dim_t rs_c,
-    const dim_t cs_c,
-    const int16_t alpha,
-    const int16_t beta
-  );
+      (
+        const dim_t   m0,
+        const dim_t   n0,
+        const dim_t   k0,
+        const uint8_t *a,
+        const dim_t   rs_a,
+        const dim_t   cs_a,
+        const dim_t   ps_a,
+        const int8_t  *b,
+        const dim_t   rs_b,
+        const dim_t   cs_b,
+        int16_t       *c,
+        const dim_t   rs_c,
+        const dim_t   cs_c,
+        const int16_t alpha,
+        const int16_t beta
+      );
 
 #endif // BLIS_GEMM_INT16_MNROW

@@ -35,6 +35,8 @@
 #ifndef AOCL_GEMM_U8S8S16OS16_H
 #define AOCL_GEMM_U8S8S16OS16_H
 
+#include "aocl_gemm_post_ops.h"
+
 // Only supports matrices in row major format
 // Limitations: Supports mem_format_b = 'Reorder'
 BLIS_EXPORT_ADDON void aocl_gemm_u8s8s16os16

@@ -60,6 +60,7 @@ BLIS_INLINE void lpgemm_set_block_sizes_global_cntx
 void aocl_lpgemm_init_global_cntx()
 {
 	lpgemm_set_block_sizes_global_cntx( U8S8S32OS32, 144, 1024, 2048, 64, 6 );
+  lpgemm_set_block_sizes_global_cntx( U8S8S16OS16, 144, 1024, 1024, 32, 6 );
 }
 
 dim_t lpgemm_get_block_size_MC_global_cntx( AOCL_OPERATION_TYPE op_type )

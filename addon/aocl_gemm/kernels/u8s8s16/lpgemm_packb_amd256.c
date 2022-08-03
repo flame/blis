@@ -37,6 +37,14 @@
 #include "blis.h"
 #include "lpgemm_packb_s16.h"
 
+void get_packb_nr32_u8s8s16o16_strides(
+	dim_t *rs_b,
+	dim_t *cs_b)
+{
+	*rs_b = 32 * 2;
+	*cs_b = 32;
+}
+
 void packb_nrlt16_u8s8s16o16(
 	int8_t *pack_b_buffer_u8s8s16o16,
 	const int8_t *b,
@@ -172,7 +180,7 @@ void packb_nr32_u8s8s16o16(
 	dim_t KC_updated = rows;
 
 	// Making multiple of 2 to suit k in vpmaddubsw
-    KC_updated += (KC_updated & 0x1);
+	KC_updated += (KC_updated & 0x1);
 
 	__m256i b_vec[2], inter_vec[2];
 
@@ -182,10 +190,10 @@ void packb_nr32_u8s8s16o16(
 		{
 			// Read b[0,0], b[0,1], b[0,2]......., b[0,31]
 			b_vec[0] = _mm256_loadu_si256((__m256i const *)(b + (ldb * (kr + 0)) + jc));
-			
+
 			//  Read b[1,0], b[1,1], b[1,2]......., b[1,31]
 			b_vec[1] = _mm256_loadu_si256((__m256i const *)(b + (ldb * (kr + 1)) + jc));
-			
+
 			//  Reorder B matrix inputs to suit vpmaddubsw instructions
 			inter_vec[0] = _mm256_unpacklo_epi8(b_vec[0], b_vec[1]);
 			inter_vec[1] = _mm256_unpackhi_epi8(b_vec[0], b_vec[1]);
@@ -233,7 +241,8 @@ void packb_nr32_u8s8s16o16(
 		if (n0_16 == 1)
 		{
 			packb_nr16_u8s8s16o16(
-				(pack_b_buffer_u8s8s16o16 + (n_full_pieces_loop_limit * KC_updated)),
+				(pack_b_buffer_u8s8s16o16 +
+				 (n_full_pieces_loop_limit * KC_updated)),
 				(b + n_full_pieces_loop_limit), ldb, rows);
 
 			n0_partial_pack = 16;
@@ -242,8 +251,10 @@ void packb_nr32_u8s8s16o16(
 		if (n0_partial_rem > 0)
 		{
 			packb_nrlt16_u8s8s16o16(
-				(pack_b_buffer_u8s8s16o16 + (n_full_pieces_loop_limit * KC_updated) + (n0_partial_pack * KC_updated)),
-				(b + n_full_pieces_loop_limit + n0_partial_pack), ldb, rows, n0_partial_rem);
+				(pack_b_buffer_u8s8s16o16 + (n_full_pieces_loop_limit * KC_updated) +
+				 (n0_partial_pack * KC_updated)),
+				(b + n_full_pieces_loop_limit + n0_partial_pack),
+				ldb, rows, n0_partial_rem);
 		}
 	}
 

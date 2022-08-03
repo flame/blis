@@ -39,13 +39,22 @@
 #include "lpgemm_utils.h"
 #include "lpgemm_reorder_s16.h"
 
-siz_t aocl_get_reorder_buf_size_u8s8s16os16(
-	const char mat_type,
-	const dim_t k,
-	const dim_t n)
+siz_t aocl_get_reorder_buf_size_u8s8s16os16
+	(
+		const char		mat_type,
+		const dim_t 	k,
+		const dim_t 	n
+	)
 {
 	if ((k <= 0) || (n <= 0))
 	{
+		return 0; // Error.
+	}
+
+	// Check if avx ISA is supported, lpgemm u8s8s16os16 matmul only works with it.
+	if ( bli_cpuid_is_avx_supported() == FALSE )
+	{
+		printf(" AVX2 ISA not supported by processor, cannot perform lpgemm.\n");
 		return 0; // Error.
 	}
 
@@ -78,17 +87,26 @@ siz_t aocl_get_reorder_buf_size_u8s8s16os16(
 	return size_req;
 }
 
-void aocl_reorder_u8s8s16os16(
-	const char mat_type,
-	const int8_t *input_buf_addr,
-	int8_t *reorder_buf_addr,
-	const dim_t k,
-	const dim_t n,
-	const dim_t ldb)
+void aocl_reorder_u8s8s16os16
+	(
+		const char 		mat_type,
+		const int8_t 	*input_buf_addr,
+		int8_t 			*reorder_buf_addr,
+		const dim_t 	k,
+		const dim_t 	n,
+		const dim_t 	ldb
+	)
 {
 	if ((input_buf_addr == NULL) || (reorder_buf_addr == NULL) ||
 		(k <= 0) || (n <= 0) || (ldb < n))
 	{
+		return; // Error.
+	}
+
+	// Check if avx ISA is supported, lpgemm u8s8s16os16 matmul only works with it.
+	if ( bli_cpuid_is_avx_supported() == FALSE )
+	{
+		printf(" AVX2 ISA not supported by processor, cannot perform lpgemm.\n");
 		return; // Error.
 	}
 
