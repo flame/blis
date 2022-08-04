@@ -34,8 +34,12 @@ void bli_offloader_init_rntm_from_env ( rntm_t* rntm )
 		fprintf ( stdout, "Never attempting to offload.\n" );
 		config->never_offload_dgemm = true;
 		config->never_offload_sgemm = true;
+		config->never_offload_zgemm = true;
+                config->never_offload_cgemm = true;
 		config->offload_sgemm_thresh = LLONG_MAX;
 		config->offload_dgemm_thresh = LLONG_MAX;
+		config->offload_cgemm_thresh = LLONG_MAX;
+                config->offload_zgemm_thresh = LLONG_MAX;
 		return;
 	}
 	else if ( strcmp ( s_eng, "always" ) == 0 )
@@ -43,8 +47,12 @@ void bli_offloader_init_rntm_from_env ( rntm_t* rntm )
 		fprintf ( stdout, "Always attempting to offload.\n" );
 		config->never_offload_dgemm = false;
 		config->never_offload_sgemm = false;
+		config->never_offload_zgemm = false;
+                config->never_offload_cgemm = false;
 		config->offload_sgemm_thresh = 0;
 		config->offload_dgemm_thresh = 0;
+		config->offload_cgemm_thresh = 0;
+                config->offload_zgemm_thresh = 0;
 		// still initialize rocBLAS handle
 	}
 	else if ( strcmp ( s_eng, "threshold" ) == 0 )
@@ -79,6 +87,36 @@ void bli_offloader_init_rntm_from_env ( rntm_t* rntm )
 			config->never_offload_dgemm = false;
 		}
 
+		const char* s_cgemm = getenv ( "BLIS_OFFLOAD_CGEMM_THRESH" );
+                const int64_t offload_after_c = ( s_sgemm == NULL ) ? LLONG_MAX : atol ( s_cgemm );
+                config->offload_cgemm_thresh = offload_after_c;
+
+                if ( offload_after_c == LLONG_MAX )
+                {
+                        fprintf ( stdout, "Never offloading cgemms.\n" );
+                        config->never_offload_cgemm = true;
+                }
+                else
+                {
+                        fprintf ( stdout, "Offloading all cgemms with at least M*N >= %ld\n", offload_after_c );
+                        config->never_offload_cgemm = false;
+                }
+
+                const char* s_zgemm = getenv ( "BLIS_OFFLOAD_ZGEMM_THRESH" );
+                const int64_t offload_after_z = ( s_dgemm == NULL ) ? LLONG_MAX : atol ( s_zgemm );
+                config->offload_zgemm_thresh = offload_after_z;
+
+                if ( offload_after_z == LLONG_MAX )
+                {
+                        fprintf ( stdout, "Never offloading zgemms.\n" );
+                        config->never_offload_zgemm = true;
+                }
+                else
+                {
+                        fprintf ( stdout, "Offloading all zgemms with at least M*N >= %ld\n", offload_after_z );
+                        config->never_offload_zgemm = false;
+                }
+
 		// still initialize rocBLAS handle
 	}
 	else
@@ -86,8 +124,12 @@ void bli_offloader_init_rntm_from_env ( rntm_t* rntm )
 		fprintf ( stderr, "Unknown BLIS_OFFLOAD selection: %s . Offloading never.\n", s_eng );
 		config->never_offload_dgemm = true;
 		config->never_offload_sgemm = true;
+		config->never_offload_zgemm = true;
+                config->never_offload_cgemm = true;
 		config->offload_sgemm_thresh = LLONG_MAX;
 		config->offload_dgemm_thresh = LLONG_MAX;
+		config->offload_cgemm_thresh = LLONG_MAX;
+                config->offload_zgemm_thresh = LLONG_MAX;
 		return;
 	}
 
@@ -156,15 +198,11 @@ bool bli_do_offload_gemmex_rntm_from_env
 		return false;
 	}
 
-	// figure out if C is integer or complex and reject (for now)
+	// figure out if C is integer and reject (for now)
 	// NOTE: rocBLAS supports f16, f16 cmpl, f32, f32 cmpl, f64, f64 cmpl, i8, u8, i32,
 	//       i32 cmpl, u32 compl, bf16, bf16 cmpl as data type settings
 	//       (not in all combinations)
 	if ( bli_obj_is_int ( a ) ||  bli_obj_is_int ( b ) || bli_obj_is_int ( c ) )
-	{
-		return false;
-	}
-	if ( bli_obj_is_complex ( a ) || bli_obj_is_complex ( b ) || bli_obj_is_complex ( c ) )
 	{
 		return false;
 	}
@@ -180,20 +218,40 @@ bool bli_do_offload_gemmex_rntm_from_env
 
 	// figure out if the result matrix C's M*N is above or below the data type specific cutoff
 	const bool is_float_c = bli_obj_is_float ( c );
-	if ( is_float_c && config->never_offload_sgemm )
+	const bool is_compl_c = bli_obj_is_complex ( c );
+	if ( is_float_c && !is_compl_c && config->never_offload_sgemm )
 	{
 		return false;
 	}
-	else if ( !is_float_c && config->never_offload_dgemm )
+	else if ( !is_float_c && !is_compl_c && config->never_offload_dgemm )
 	{
 		return false;
 	}
+	else if ( is_float_c && is_compl_c && config->never_offload_cgemm )
+        {
+                return false;
+        }
+        else if ( !is_float_c && is_compl_c && config->never_offload_zgemm )
+        {
+                return false;
+        }
 
 	const dim_t m_c = bli_obj_length ( c );
 	const dim_t n_c = bli_obj_width ( c );
 	const size_t mul = m_c * n_c;
 
-	return ( is_float_c ) ? ( mul >= config->offload_sgemm_thresh ) : ( mul >= config->offload_dgemm_thresh );
+	if ( !is_compl_c )
+	{
+		return ( is_float_c ) ? ( mul >= config->offload_sgemm_thresh ) : ( mul >= config->offload_dgemm_thresh );
+	}
+	else
+	{
+		// make sure we're not conjugate AND not transpose
+		if ( bli_obj_has_conj( a ) && !bli_obj_has_trans( a ) ) return false;
+		if ( bli_obj_has_conj( b ) && !bli_obj_has_trans( b ) ) return false;
+
+		return ( bli_obj_is_scomplex( c ) ) ? ( mul >= config->offload_cgemm_thresh ) : ( mul >= config->offload_zgemm_thresh );
+	}
 }
 
 
@@ -229,14 +287,10 @@ err_t bli_offload_gemmex_rntm_from_env
 		return BLIS_FAILURE;
 	}
 
-	// figure out if C is integer or complex and reject
+	// figure out if C is integer and reject
 	if ( bli_obj_is_int ( a ) ||  bli_obj_is_int ( b ) || bli_obj_is_int ( c ) )
 	{
 		return BLIS_EXPECTED_NONINTEGER_DATATYPE;
-	}
-	if ( bli_obj_is_complex ( a ) || bli_obj_is_complex ( b ) || bli_obj_is_complex ( c ) )
-	{
-		return BLIS_EXPECTED_REAL_DATATYPE;
 	}
 
 	const inc_t rs_a = bli_obj_row_stride ( a );
@@ -247,6 +301,11 @@ err_t bli_offload_gemmex_rntm_from_env
 	{
 		return BLIS_INVALID_ROW_STRIDE;
 	}
+
+	// are any of the matrices complex
+        const bool is_compl_a = bli_obj_is_complex ( a );
+        const bool is_compl_b = bli_obj_is_complex ( b );
+	const bool is_compl_c = bli_obj_is_complex ( c );
 
 	// figure out if the result matrix C's M*N is above or below the data type specific cutoff
 	const bool is_float_a = bli_obj_is_float ( a );
@@ -272,11 +331,22 @@ err_t bli_offload_gemmex_rntm_from_env
 	const dim_t n_c = bli_obj_width ( c );
 	const size_t mul = m_c * n_c;
 
-	const bool should_offload = ( is_float_c ) ? ( mul >= config->offload_sgemm_thresh ) : ( mul >= config->offload_dgemm_thresh );
+	bool should_offload;
+	if ( !is_compl_c )
+        {
+                should_offload = ( is_float_c ) ? ( mul >= config->offload_sgemm_thresh ) : ( mul >= config->offload_dgemm_thresh );
+        }
+        else
+        {
+		// make sure we're not conjugate AND not transpose
+                if ( bli_obj_has_conj( a ) && !bli_obj_has_trans( a ) ) should_offload = false;
+		else if ( bli_obj_has_conj( b ) && !bli_obj_has_trans( b ) ) should_offload = false;
+		else should_offload = ( bli_obj_is_scomplex( c ) ) ? ( mul >= config->offload_cgemm_thresh ) : ( mul >= config->offload_zgemm_thresh );
+        }
 	if ( !should_offload )
-	{
-		return BLIS_NONCONFORMAL_DIMENSIONS;
-	}
+        {
+                return BLIS_NONCONFORMAL_DIMENSIONS;
+        }
 
 	// we should offload: gather some dimensions and pointers
 	void *A = bli_obj_buffer_at_off ( a ); // pointer to elements of Matrix A
@@ -328,7 +398,7 @@ err_t bli_offload_gemmex_rntm_from_env
 			fprintf ( stderr, "Failure to allocate device buffer A of size %ld: %d\n", buff_size_a, err_a );
 			return BLIS_FAILURE;
 		}
-		const hipError_t err_cpa = hipMemcpyAsync ( dev_buff_a, A, buff_size_a, hipMemcpyHostToDevice, stream );
+		const hipError_t err_cpa = hipMemcpy ( dev_buff_a, A, buff_size_a, hipMemcpyHostToDevice );
         	if ( err_cpa != hipSuccess )
         	{
                 	fprintf ( stderr, "Failure to hipMemcpy A to device: %d\n", err_cpa );
@@ -348,7 +418,7 @@ err_t bli_offload_gemmex_rntm_from_env
 			fprintf ( stderr, "Failure to allocate device buffer B of size %ld: %d\n", buff_size_b, err_b );
 			return BLIS_FAILURE;
 		}
-		const hipError_t err_cpb = hipMemcpyAsync ( dev_buff_b, B, buff_size_b, hipMemcpyHostToDevice, stream );
+		const hipError_t err_cpb = hipMemcpy ( dev_buff_b, B, buff_size_b, hipMemcpyHostToDevice );
 	        if ( err_cpb != hipSuccess )
         	{
                 	fprintf ( stderr, "Failure to hipMemcpy B to device: %d\n", err_cpb );
@@ -375,7 +445,7 @@ err_t bli_offload_gemmex_rntm_from_env
 
 		if ( is_beta_non_zero || ldc != m_c ) // only if the result buffer is m*n sized AND beta == 0.0 we can eschew the copy
 		{
-			const hipError_t err_cpc = hipMemcpyAsync ( dev_buff_c, C, buff_size_c, hipMemcpyHostToDevice, stream );
+			const hipError_t err_cpc = hipMemcpy ( dev_buff_c, C, buff_size_c, hipMemcpyHostToDevice );
 			if ( err_cpc != hipSuccess )
 			{
 				fprintf ( stderr, "Failure to hipMemcpy C to device: %d\n", err_cpc );
@@ -385,14 +455,34 @@ err_t bli_offload_gemmex_rntm_from_env
 	}
 
 	// call rocblas
-	const rocblas_operation trans_a = is_trans_a ? rocblas_operation_transpose : rocblas_operation_none;
-	const rocblas_operation trans_b = is_trans_b ? rocblas_operation_transpose : rocblas_operation_none;
+	rocblas_operation trans_a = is_trans_a ? rocblas_operation_transpose : rocblas_operation_none;
+	rocblas_operation trans_b = is_trans_b ? rocblas_operation_transpose : rocblas_operation_none;
+        if ( is_compl_a && bli_obj_has_conj( a ) )
+		trans_a = rocblas_operation_conjugate_transpose;
+	if ( is_compl_b && bli_obj_has_conj( b ) )
+                trans_b = rocblas_operation_conjugate_transpose;
 
-	const rocblas_datatype a_type = ( is_float_a ) ? rocblas_datatype_f32_r : rocblas_datatype_f64_r;
-	const rocblas_datatype b_type = ( is_float_b ) ? rocblas_datatype_f32_r : rocblas_datatype_f64_r;
-	const rocblas_datatype c_type = ( is_float_c ) ? rocblas_datatype_f32_r : rocblas_datatype_f64_r;
+	rocblas_datatype a_type;
+	rocblas_datatype b_type;
+	rocblas_datatype c_type;
+	if ( is_compl_a )
+		a_type = ( bli_obj_is_scomplex( a ) ) ? rocblas_datatype_f32_c : rocblas_datatype_f64_c;
+	else
+		a_type = ( is_float_a ) ? rocblas_datatype_f32_r : rocblas_datatype_f64_r;
+	if ( is_compl_b )
+                b_type = ( bli_obj_is_scomplex( b ) ) ? rocblas_datatype_f32_c : rocblas_datatype_f64_c;
+        else
+                b_type = ( is_float_b ) ? rocblas_datatype_f32_r : rocblas_datatype_f64_r;
+	if ( is_compl_c )
+                c_type = ( bli_obj_is_scomplex( c ) ) ? rocblas_datatype_f32_c : rocblas_datatype_f64_c;
+        else
+                c_type = ( is_float_c ) ? rocblas_datatype_f32_r : rocblas_datatype_f64_r;
 
-	const rocblas_datatype compute_type = ( is_float_a && is_float_b && is_float_c ) ? rocblas_datatype_f32_r : rocblas_datatype_f64_r;
+	rocblas_datatype compute_type;
+	if ( !is_compl_a && !is_compl_b && !is_compl_c)
+		compute_type = ( is_float_a && is_float_b && is_float_c ) ? rocblas_datatype_f32_r : rocblas_datatype_f64_r;
+	else
+		compute_type = ( bli_obj_is_scomplex( a ) && bli_obj_is_scomplex( b ) && bli_obj_is_scomplex( c ) ) ? rocblas_datatype_f32_c : rocblas_datatype_f64_c;
 
 	const num_t    dt_exec   = bli_obj_dt ( c );
 	void* restrict alpha_f = bli_obj_buffer_for_1x1 ( dt_exec, alpha );
@@ -433,6 +523,26 @@ err_t bli_offload_gemmex_rntm_from_env
 		return BLIS_FAILURE;
 	}
 
+	// if applicable: free intermediate buffers
+        if ( copy_a )
+        {
+                const hipError_t err_fa = hipFree ( dev_buff_a );
+                if ( err_fa != hipSuccess )
+                {
+                        fprintf ( stderr, "Failure to free device buffer A: %d\n", err_fa );
+                        return BLIS_FAILURE;
+                }
+        }
+        if ( copy_b )
+        {
+                const hipError_t err_fb = hipFree ( dev_buff_b );
+                if ( err_fb != hipSuccess )
+                {
+                        fprintf ( stderr, "Failure to free device buffer B: %d\n", err_fb );
+                        return BLIS_FAILURE;
+                }
+        }
+
 	if ( copy_c )
 	{
 		// copy result back synchronously
@@ -454,26 +564,6 @@ err_t bli_offload_gemmex_rntm_from_env
 	{
 		// only synchronize on the rocBLAS stream to ensure data correctness
 		hipStreamSynchronize( stream );
-	}
-
-	// if applicable: free intermediate buffers
-	if ( copy_a )
-	{
-		const hipError_t err_fa = hipFree ( dev_buff_a );
-		if ( err_fa != hipSuccess )
-		{
-			fprintf ( stderr, "Failure to free device buffer A: %d\n", err_fa );
-			return BLIS_FAILURE;
-		}
-	}
-	if ( copy_b )
-	{
-		const hipError_t err_fb = hipFree ( dev_buff_b );
-		if ( err_fb != hipSuccess )
-		{
-			fprintf ( stderr, "Failure to free device buffer B: %d\n", err_fb );
-			return BLIS_FAILURE;
-		}
 	}
 
 	return BLIS_SUCCESS;
