@@ -112,12 +112,13 @@ int main( int argc, char** argv )
 	else if ( bli_is_scomplex( dt ) ) dt_ch = 'c';
 	else                              dt_ch = 'z';
 
-#if 0
+// Set both zeros to 1 for current Ampere platforms due to column preferred storage micropanel
+#if 1
 	side   = BLIS_LEFT;
 #else
 	side   = BLIS_RIGHT;
 #endif
-#if 0
+#if 1
 	uploa  = BLIS_LOWER;
 #else
 	uploa  = BLIS_UPPER;
@@ -319,6 +320,8 @@ int main( int argc, char** argv )
 		        ( unsigned long )(p - p_begin)/p_inc + 1,
 		        ( unsigned long )m,
 		        ( unsigned long )n, gflops );
+
+		fflush(stdout);
 
 		bli_obj_free( &alpha );
 
