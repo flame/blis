@@ -250,8 +250,7 @@ BLIS_INLINE void lpgemm_u8s8s16o16_get_threading
 	else if ( ( *n_threads ) > 1 )
 	{
 
-		dim_t NR = 32;
-		//dim_t MR = 6;
+		dim_t NR = lpgemm_get_block_size_NR_global_cntx( U8S8S16OS16 );
 
 		if ( n <= NR )
 		{
@@ -565,7 +564,7 @@ void lpgemm_ ## LPGEMM_SFX ## _thread_decorator \
 	); \
 } \
 
-GEN_LPGEMM_DECORATOR(uint8_t,int8_t,int32_t,u8s8s16o16)
+GEN_LPGEMM_DECORATOR(uint8_t,int8_t,int16_t,u8s8s16o16)
 GEN_LPGEMM_DECORATOR(uint8_t,int8_t,int32_t,u8s8s32o32)
 GEN_LPGEMM_DECORATOR(float,float,float,f32f32f32of32)
 

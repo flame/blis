@@ -94,6 +94,9 @@ void lpgemm_rowvar_u8s8s16o16
 	// Making multiple of 2 to suit k in vpmaddubsw
 	dim_t k_updated = make_multiple_of_n( k, 2 );
 
+	// Is required to decide whether to apply post ops or not.
+	bool is_last_k = FALSE;
+
 	// Generate thrinfo objects for jc and ic loops from lpgemm_thrinfo_t.
 	thrinfo_t thread_jc;
 	thrinfo_t thread_ic;
@@ -127,6 +130,8 @@ void lpgemm_rowvar_u8s8s16o16
 		{
 			int16_t beta0 = (pc == 0) ? beta : 1;
 			dim_t kc0 = bli_min((k - pc), KC);
+
+			is_last_k = ( ( pc + KC ) >= k ) ? ( TRUE ) : ( FALSE );
 
 			// kc0 needs to be a multiple of 2 so that it can be
 			// used with vpmaddubsw instruction. Padding is added in
@@ -252,8 +257,9 @@ void lpgemm_rowvar_u8s8s16o16
 						mc0, nr0, kc0,
 						a_use, rs_a_use, cs_a_use, a_block_stride,
 						(b_use + (jr * kc0_updated)), rs_b_use, cs_b_use,
-						(c_use_ic + +jr), rs_c, 1,
-						alpha, beta0
+						(c_use_ic + jr), rs_c, 1,
+						alpha, beta0,
+					  	is_last_k, ic, ( jc + jr ), post_op_list
 					);
 				}
 			}

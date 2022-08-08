@@ -50,10 +50,20 @@ void lpgemm_rowvar_u8s8s16o16_4x16
 		int16_t *c,
 		const dim_t rs_c,
 		const int16_t alpha,
-		const int16_t beta
+		const int16_t beta,
+		bool is_last_k,
+		dim_t post_op_c_i,
+		dim_t post_op_c_j,
+		lpgemm_post_op *post_ops_list
 	)
 {
 	dim_t NR = 16;
+
+	static void *post_ops_labels[] =
+		{
+			&&POST_OPS_4x16_DISABLE,
+			&&POST_OPS_BIAS_4x16,
+			&&POST_OPS_RELU_4x16};
 
 	// The division is done by considering the vpmaddubsw instruction
 	dim_t k_full_pieces = k0 / 2;
@@ -204,6 +214,50 @@ void lpgemm_rowvar_u8s8s16o16_4x16
 		c_int16_3p0 = _mm256_add_epi16(selector1, c_int16_3p0);
 	}
 
+	// Post Ops
+	lpgemm_post_op* post_ops_list_temp = post_ops_list;
+	POST_OP_LABEL_LASTK_SAFE_JUMP
+POST_OPS_BIAS_4x16:
+	{
+		selector1 =
+			_mm256_loadu_si256( (__m256i const *)((int16_t *)post_ops_list_temp->op_args1 +
+							post_op_c_j + ( 0 * 16 )) );
+							
+		// c[0,0-15]
+		c_int16_0p0 = _mm256_add_epi16( selector1, c_int16_0p0 );
+
+		// c[1,0-15]
+		c_int16_1p0 = _mm256_add_epi16( selector1, c_int16_1p0 );
+
+		// c[2,0-15]
+		c_int16_2p0 = _mm256_add_epi16( selector1, c_int16_2p0 );
+
+		// c[3,0-15]
+		c_int16_3p0 = _mm256_add_epi16( selector1, c_int16_3p0 );
+
+		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+	}
+POST_OPS_RELU_4x16:
+	{
+		selector1 = _mm256_setzero_si256 ();
+
+		// c[0,0-15]
+		c_int16_0p0 = _mm256_max_epi16( selector1, c_int16_0p0 );
+
+		// c[1,0-15]
+		c_int16_1p0 = _mm256_max_epi16( selector1, c_int16_1p0 );
+
+		// c[2,0-15]
+		c_int16_2p0 = _mm256_max_epi16( selector1, c_int16_2p0 );
+
+		// c[3,0-15]
+		c_int16_3p0 = _mm256_max_epi16( selector1, c_int16_3p0 );
+
+		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+	}
+POST_OPS_4x16_DISABLE:
+	;
+
 	// Store the results.
 	// c[0,0-15]
 	_mm256_storeu_si256((__m256i *)(c + (rs_c * 0) + (0 * 16)), c_int16_0p0);
@@ -232,10 +286,20 @@ void lpgemm_rowvar_u8s8s16o16_4xlt16
 		const dim_t rs_c,
 		const int16_t alpha,
 		const int16_t beta,
-		dim_t n0_rem
+		dim_t n0_rem,
+		bool is_last_k,
+		dim_t post_op_c_i,
+		dim_t post_op_c_j,
+		lpgemm_post_op *post_ops_list
 	)
 {
 	dim_t NR = 16;
+
+	static void *post_ops_labels[] =
+		{
+			&&POST_OPS_4xlt16_DISABLE,
+			&&POST_OPS_BIAS_4xlt16,
+			&&POST_OPS_RELU_4xlt16};
 
 	// The division is done by considering the vpmaddubsw instruction
 	dim_t k_full_pieces = k0 / 2;
@@ -399,6 +463,54 @@ void lpgemm_rowvar_u8s8s16o16_4xlt16
 		c_int16_3p0 = _mm256_add_epi16(selector1, c_int16_3p0);
 	}
 
+	// Post Ops
+	lpgemm_post_op* post_ops_list_temp = post_ops_list;
+	POST_OP_LABEL_LASTK_SAFE_JUMP
+POST_OPS_BIAS_4xlt16:
+	{
+		int16_t buf4[16];
+
+		memcpy(buf4, (int16_t *)(post_ops_list_temp->op_args1 
+			+ post_op_c_j + ( 0 * 16 )), (n0_rem * sizeof(int16_t)));
+		
+		selector1 =
+			_mm256_loadu_si256( (__m256i const *) buf4 );
+
+		// c[0,0-15]
+		c_int16_0p0 = _mm256_add_epi16( selector1, c_int16_0p0 );
+
+		// c[1,0-15]
+		c_int16_1p0 = _mm256_add_epi16( selector1, c_int16_1p0 );
+
+		// c[2,0-15]
+		c_int16_2p0 = _mm256_add_epi16( selector1, c_int16_2p0 );
+
+		// c[3,0-15]
+		c_int16_3p0 = _mm256_add_epi16( selector1, c_int16_3p0 );
+
+		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+	}
+POST_OPS_RELU_4xlt16:
+	{
+		selector1 = _mm256_setzero_si256 ();
+
+		// c[0,0-15]
+		c_int16_0p0 = _mm256_max_epi16( selector1, c_int16_0p0 );
+
+		// c[1,0-15]
+		c_int16_1p0 = _mm256_max_epi16( selector1, c_int16_1p0 );
+
+		// c[2,0-15]
+		c_int16_2p0 = _mm256_max_epi16( selector1, c_int16_2p0 );
+
+		// c[3,0-15]
+		c_int16_3p0 = _mm256_max_epi16( selector1, c_int16_3p0 );
+
+		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+	}
+POST_OPS_4xlt16_DISABLE:
+	;
+
 	// c[0,0-15]
 	_mm256_storeu_si256((__m256i_u *)buf0, c_int16_0p0);
 
@@ -436,10 +548,20 @@ void lpgemm_rowvar_u8s8s16o16_2x16
 		int16_t *c,
 		const dim_t rs_c,
 		const int16_t alpha,
-		const int16_t beta
+		const int16_t beta,
+		bool is_last_k,
+		dim_t post_op_c_i,
+		dim_t post_op_c_j,
+		lpgemm_post_op *post_ops_list
 	)
 {
 	dim_t NR = 16;
+
+	static void *post_ops_labels[] =
+		{
+			&&POST_OPS_2x16_DISABLE,
+			&&POST_OPS_BIAS_2x16,
+			&&POST_OPS_RELU_2x16};
 
 	// The division is done by considering the vpmaddubsw instruction
 	dim_t k_full_pieces = k0 / 2;
@@ -534,6 +656,38 @@ void lpgemm_rowvar_u8s8s16o16_2x16
 		c_int16_1p0 = _mm256_add_epi16(selector1, c_int16_1p0);
 	}
 
+	// Post Ops
+	lpgemm_post_op* post_ops_list_temp = post_ops_list;
+	POST_OP_LABEL_LASTK_SAFE_JUMP
+POST_OPS_BIAS_2x16:
+	{
+		selector1 =
+			_mm256_loadu_si256( (__m256i const *)((int16_t *)post_ops_list_temp->op_args1 +
+							post_op_c_j + ( 0 * 16 )) );
+		
+		// c[0,0-15]
+		c_int16_0p0 = _mm256_add_epi16( selector1, c_int16_0p0 );
+
+		// c[1,0-15]
+		c_int16_1p0 = _mm256_add_epi16( selector1, c_int16_1p0 );
+
+		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+	}
+POST_OPS_RELU_2x16:
+	{
+		selector1 = _mm256_setzero_si256 ();
+
+		// c[0,0-15]
+		c_int16_0p0 = _mm256_max_epi16( selector1, c_int16_0p0 );
+
+		// c[1,0-15]
+		c_int16_1p0 = _mm256_max_epi16( selector1, c_int16_1p0 );
+
+		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+	}
+POST_OPS_2x16_DISABLE:
+	;
+
 	// Store the results.
 	// c[0,0-15]
 	_mm256_storeu_si256((__m256i *)(c + (rs_c * 0) + (0 * 16)), c_int16_0p0);
@@ -556,10 +710,20 @@ void lpgemm_rowvar_u8s8s16o16_2xlt16
 		const dim_t rs_c,
 		const int16_t alpha,
 		const int16_t beta,
-		dim_t n0_rem
+		dim_t n0_rem,
+		bool is_last_k,
+		dim_t post_op_c_i,
+		dim_t post_op_c_j,
+		lpgemm_post_op *post_ops_list
 	)
 {
 	dim_t NR = 16;
+
+	static void *post_ops_labels[] =
+		{
+			&&POST_OPS_2xlt16_DISABLE,
+			&&POST_OPS_BIAS_2xlt16,
+			&&POST_OPS_RELU_2xlt16};
 
 	// The division is done by considering the vpmaddubsw instruction
 	dim_t k_full_pieces = k0 / 2;
@@ -660,6 +824,42 @@ void lpgemm_rowvar_u8s8s16o16_2xlt16
 		c_int16_1p0 = _mm256_add_epi16(selector1, c_int16_1p0);
 	}
 
+	// Post Ops
+	lpgemm_post_op* post_ops_list_temp = post_ops_list;
+	POST_OP_LABEL_LASTK_SAFE_JUMP
+POST_OPS_BIAS_2xlt16:
+	{
+		int16_t buf4[16];
+
+		memcpy(buf4, (int16_t *)(post_ops_list_temp->op_args1 +
+			post_op_c_j + ( 0 * 16 )), (n0_rem * sizeof(int16_t)));
+
+		selector1 =
+			_mm256_loadu_si256( (__m256i const *) buf4);
+		
+		// c[0,0-15]
+		c_int16_0p0 = _mm256_add_epi16( selector1, c_int16_0p0 );
+
+		// c[1,0-15]
+		c_int16_1p0 = _mm256_add_epi16( selector1, c_int16_1p0 );
+
+		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+	}
+POST_OPS_RELU_2xlt16:
+	{
+		selector1 = _mm256_setzero_si256 ();
+
+		// c[0,0-15]
+		c_int16_0p0 = _mm256_max_epi16( selector1, c_int16_0p0 );
+
+		// c[1,0-15]
+		c_int16_1p0 = _mm256_max_epi16( selector1, c_int16_1p0 );
+
+		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+	}
+POST_OPS_2xlt16_DISABLE:
+	;
+
 	// c[0,0-15]
 	_mm256_storeu_si256((__m256i_u *)buf0, c_int16_0p0);
 
@@ -686,10 +886,20 @@ void lpgemm_rowvar_u8s8s16o16_1x16
 		int16_t *c,
 		const dim_t rs_c,
 		const int16_t alpha,
-		const int16_t beta
+		const int16_t beta,
+		bool is_last_k,
+		dim_t post_op_c_i,
+		dim_t post_op_c_j,
+		lpgemm_post_op *post_ops_list
 	)
 {
 	int NR = 16;
+
+	static void *post_ops_labels[] =
+		{
+			&&POST_OPS_1x16_DISABLE,
+			&&POST_OPS_BIAS_1x16,
+			&&POST_OPS_RELU_1x16};
 
 	// The division is done by considering the vpmaddubsw instruction
 	int k_full_pieces = k0 / 2;
@@ -755,9 +965,35 @@ void lpgemm_rowvar_u8s8s16o16_1x16
 		c_int16_0p0 = _mm256_add_epi16(selector1, c_int16_0p0);
 	}
 
+	// Post Ops
+	lpgemm_post_op* post_ops_list_temp = post_ops_list;
+	POST_OP_LABEL_LASTK_SAFE_JUMP
+POST_OPS_BIAS_1x16:
+	{
+		selector1 =
+			_mm256_loadu_si256( (__m256i const *)((int16_t *)post_ops_list_temp->op_args1 +
+							post_op_c_j + ( 0 * 16 )) );
+
+		// c[0,0-15]
+		c_int16_0p0 = _mm256_add_epi16( selector1, c_int16_0p0 );
+
+		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+	}
+POST_OPS_RELU_1x16:
+	{
+		selector1 = _mm256_setzero_si256 ();
+
+		// c[0,0-15]
+		c_int16_0p0 = _mm256_max_epi16( selector1, c_int16_0p0 );
+
+		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+	}
+POST_OPS_1x16_DISABLE:
+	;
+
 	// Store the results.
 	// c[0,0-15]
-	_mm256_storeu_si256((__m256i *)(c + (rs_c * 0) + (0 * 16)), c_int16_0p0);
+	_mm256_storeu_si256( (__m256i *)(c + ( rs_c *  0 ) + ( 0*16 )), c_int16_0p0 );
 }
 
 // 1xlt16 int8o16 kernel
@@ -774,10 +1010,20 @@ void lpgemm_rowvar_u8s8s16o16_1xlt16
 		const int rs_c,
 		const int16_t alpha,
 		const int16_t beta,
-		dim_t n0_rem
+		dim_t n0_rem,
+		bool is_last_k,
+		dim_t post_op_c_i,
+		dim_t post_op_c_j,
+		lpgemm_post_op *post_ops_list
 	)
 {
 	int NR = 16;
+
+	static void *post_ops_labels[] =
+		{
+			&&POST_OPS_1xlt16_DISABLE,
+			&&POST_OPS_BIAS_1xlt16,
+			&&POST_OPS_RELU_1xlt16};
 
 	// The division is done by considering the vpmaddubsw instruction
 	int k_full_pieces = k0 / 2;
@@ -846,6 +1092,36 @@ void lpgemm_rowvar_u8s8s16o16_1xlt16
 		selector1 = _mm256_mullo_epi16(selector2, selector1);
 		c_int16_0p0 = _mm256_add_epi16(selector1, c_int16_0p0);
 	}
+
+	// Post Ops
+	lpgemm_post_op* post_ops_list_temp = post_ops_list;
+	POST_OP_LABEL_LASTK_SAFE_JUMP
+POST_OPS_BIAS_1xlt16:
+	{
+		int16_t buf4[16];
+
+		memcpy(buf4, (int16_t *)(post_ops_list_temp->op_args1 
+			+ post_op_c_j + ( 0 * 16 )), (n0_rem * sizeof(int16_t)));
+
+		selector1 =
+			_mm256_loadu_si256( (__m256i const *)buf4 );
+
+		// c[0,0-15]
+		c_int16_0p0 = _mm256_add_epi16( selector1, c_int16_0p0 );
+
+		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+	}
+POST_OPS_RELU_1xlt16:
+	{
+		selector1 = _mm256_setzero_si256 ();
+
+		// c[0,0-15]
+		c_int16_0p0 = _mm256_max_epi16( selector1, c_int16_0p0 );
+
+		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+	}
+POST_OPS_1xlt16_DISABLE:
+	;
 
 	// c[0,0-15]
 	_mm256_storeu_si256((__m256i_u *)buf0, c_int16_0p0);

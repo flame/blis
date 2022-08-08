@@ -39,6 +39,7 @@
 #include "lpgemm_config.h"
 #include "lpgemm_utils.h"
 #include "lpgemm_thread_decor_openmp.h"
+#include "lpgemm_post_ops.h"
 
 void aocl_gemm_u8s8s16os16
      (

@@ -40,23 +40,33 @@
 // 6x32 int8o16 kernel
 void lpgemm_rowvar_u8s8s16o16_6x32
 	(
-		const dim_t 	m0,
-		const dim_t 	n0,
-		const dim_t 	k0,
-		const uint8_t 	*a,
-		const dim_t 	rs_a,
-		const dim_t 	cs_a,
-		const dim_t 	ps_a,
-		const int8_t 	*b,
-		const dim_t 	rs_b,
-		const dim_t 	cs_b,
-		int16_t 		*c,
-		const dim_t 	rs_c,
-		const dim_t 	cs_c,
-		const int16_t 	alpha,
-		const int16_t 	beta
+		const dim_t m0,
+		const dim_t n0,
+		const dim_t k0,
+		const uint8_t *a,
+		const dim_t rs_a,
+		const dim_t cs_a,
+		const dim_t ps_a,
+		const int8_t *b,
+		const dim_t rs_b,
+		const dim_t cs_b,
+		int16_t *c,
+		const dim_t rs_c,
+		const dim_t cs_c,
+		const int16_t alpha,
+		const int16_t beta,
+		bool is_last_k,
+		dim_t post_op_c_i,
+		dim_t post_op_c_j,
+		lpgemm_post_op *post_ops_list
 	)
 {
+	static void *post_ops_labels[] =
+		{
+			&&POST_OPS_6x32_DISABLE,
+			&&POST_OPS_BIAS_6x32,
+			&&POST_OPS_RELU_6x32};
+
 	dim_t MR = 6;
 	dim_t NR = 32;
 
@@ -87,7 +97,10 @@ void lpgemm_rowvar_u8s8s16o16_6x32
 				a, rs_a, cs_a, ps_a,
 				b, ((rs_b / 2) * 1), cs_b,
 				c, rs_c,
-				alpha, beta);
+				alpha, beta,
+				is_last_k,
+				post_op_c_i, post_op_c_j,
+				post_ops_list);
 
 			b = b + (16 * k0_updated);
 			c = c + 16;
@@ -100,7 +113,10 @@ void lpgemm_rowvar_u8s8s16o16_6x32
 				a, rs_a, cs_a, ps_a,
 				b, ((rs_b / 2) * 1), cs_b,
 				c, rs_c,
-				alpha, beta, n0_rem);
+				alpha, beta, n0_rem,
+				is_last_k,
+				post_op_c_i, post_op_c_j,
+				post_ops_list);
 		}
 
 		// If fringe cases are encountered, return early
@@ -385,44 +401,140 @@ void lpgemm_rowvar_u8s8s16o16_6x32
 			c_int16_5p1 = _mm256_add_epi16(selector1, c_int16_5p1);
 		}
 
+		// Post Ops
+		lpgemm_post_op* post_ops_list_temp = post_ops_list;
+		POST_OP_LABEL_LASTK_SAFE_JUMP
+POST_OPS_BIAS_6x32:
+		{
+			selector1 =
+				_mm256_loadu_si256( (__m256i const *)((int16_t *)post_ops_list_temp->op_args1 +
+								post_op_c_j + ( 0 * 16 )) );
+			selector2 =
+				_mm256_loadu_si256( (__m256i const *)((int16_t *)post_ops_list_temp->op_args1 +
+								post_op_c_j + ( 1 * 16 )) );
+			
+			// c[0,0-15]
+			c_int16_0p0 = _mm256_add_epi16( selector1, c_int16_0p0 );
+
+			// c[0, 16-31]
+			c_int16_0p1 = _mm256_add_epi16( selector2, c_int16_0p1 );
+
+			// c[1,0-15]
+			c_int16_1p0 = _mm256_add_epi16( selector1, c_int16_1p0 );
+
+			// c[1, 16-31]
+			c_int16_1p1 = _mm256_add_epi16( selector2, c_int16_1p1 );
+
+			// c[2,0-15]
+			c_int16_2p0 = _mm256_add_epi16( selector1, c_int16_2p0 );
+
+			// c[2, 16-31]
+			c_int16_2p1 = _mm256_add_epi16( selector2, c_int16_2p1 );
+
+			// c[3,0-15]
+			c_int16_3p0 = _mm256_add_epi16( selector1, c_int16_3p0 );
+
+			// c[3, 16-31]
+			c_int16_3p1 = _mm256_add_epi16( selector2, c_int16_3p1 );
+
+			// c[4,0-15]
+			c_int16_4p0 = _mm256_add_epi16( selector1, c_int16_4p0 );
+
+			// c[4, 16-31]
+			c_int16_4p1 = _mm256_add_epi16( selector2, c_int16_4p1 );
+
+			// c[5,0-15]
+			c_int16_5p0 = _mm256_add_epi16( selector1, c_int16_5p0 );
+
+			// c[5, 16-31]
+			c_int16_5p1 = _mm256_add_epi16( selector2, c_int16_5p1 );
+
+			POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+		}
+POST_OPS_RELU_6x32:
+		{
+			selector1 = _mm256_setzero_si256 ();
+
+			// c[0,0-15]
+			c_int16_0p0 = _mm256_max_epi16( selector1, c_int16_0p0 );
+
+			// c[0, 16-31]
+			c_int16_0p1 = _mm256_max_epi16( selector1, c_int16_0p1 );
+
+			// c[1,0-15]
+			c_int16_1p0 = _mm256_max_epi16( selector1, c_int16_1p0 );
+
+			// c[1,16-31]
+			c_int16_1p1 = _mm256_max_epi16( selector1, c_int16_1p1 );
+
+			// c[2,0-15]
+			c_int16_2p0 = _mm256_max_epi16( selector1, c_int16_2p0 );
+
+			// c[2,16-31]
+			c_int16_2p1 = _mm256_max_epi16( selector1, c_int16_2p1 );
+
+			// c[3,0-15]
+			c_int16_3p0 = _mm256_max_epi16( selector1, c_int16_3p0 );
+
+			// c[3,16-31]
+			c_int16_3p1 = _mm256_max_epi16( selector1, c_int16_3p1 );
+
+			// c[4,0-15]
+			c_int16_4p0 = _mm256_max_epi16( selector1, c_int16_4p0 );
+
+			// c[4,16-31]
+			c_int16_4p1 = _mm256_max_epi16( selector1, c_int16_4p1 );
+
+			// c[5,0-15]
+			c_int16_5p0 = _mm256_max_epi16( selector1, c_int16_5p0 );
+
+			// c[5,16-31]
+			c_int16_5p1 = _mm256_max_epi16( selector1, c_int16_5p1 );
+
+			POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+		}
+POST_OPS_6x32_DISABLE:
+		;
+
 		// Store the results.
 		// c[0,0-15]
-		_mm256_storeu_si256((__m256i *)(c + (rs_c * (ir + 0)) + (0 * 16)), c_int16_0p0);
+		_mm256_storeu_si256( (__m256i *)(c + ( rs_c * ( ir + 0 ) ) + ( 0*16 )), c_int16_0p0 );
 
 		// c[0, 16-31]
-		_mm256_storeu_si256((__m256i *)(c + (rs_c * (ir + 0)) + (1 * 16)), c_int16_0p1);
+		_mm256_storeu_si256( (__m256i *)(c + ( rs_c * ( ir + 0 ) ) + ( 1*16 )), c_int16_0p1 );
 
 		// c[1,0-15]
-		_mm256_storeu_si256((__m256i *)(c + (rs_c * (ir + 1)) + (0 * 16)), c_int16_1p0);
+		_mm256_storeu_si256( (__m256i *)(c + ( rs_c * ( ir + 1 ) ) + ( 0*16 )), c_int16_1p0 );
 
 		// c[1,16-31]
-		_mm256_storeu_si256((__m256i *)(c + (rs_c * (ir + 1)) + (1 * 16)), c_int16_1p1);
+		_mm256_storeu_si256( (__m256i *)(c + ( rs_c * ( ir + 1 ) ) + ( 1*16 )), c_int16_1p1 );
 
 		// c[2,0-15]
-		_mm256_storeu_si256((__m256i *)(c + (rs_c * (ir + 2)) + (0 * 16)), c_int16_2p0);
+		_mm256_storeu_si256( (__m256i *)(c + ( rs_c * ( ir + 2 ) ) + ( 0*16 )), c_int16_2p0 );
 
 		// c[2,16-31]
-		_mm256_storeu_si256((__m256i *)(c + (rs_c * (ir + 2)) + (1 * 16)), c_int16_2p1);
+		_mm256_storeu_si256( (__m256i *)(c + ( rs_c * ( ir + 2 ) ) + ( 1*16 )), c_int16_2p1 );
 
 		// c[3,0-15]
-		_mm256_storeu_si256((__m256i *)(c + (rs_c * (ir + 3)) + (0 * 16)), c_int16_3p0);
+		_mm256_storeu_si256( (__m256i *)(c + ( rs_c * ( ir + 3 ) ) + ( 0*16 )), c_int16_3p0 );
 
 		// c[3,16-31]
-		_mm256_storeu_si256((__m256i *)(c + (rs_c * (ir + 3)) + (1 * 16)), c_int16_3p1);
+		_mm256_storeu_si256( (__m256i *)(c + ( rs_c * ( ir + 3 ) ) + ( 1*16 )), c_int16_3p1 );
 
 		// c[4,0-15]
-		_mm256_storeu_si256((__m256i *)(c + (rs_c * (ir + 4)) + (0 * 16)), c_int16_4p0);
+		_mm256_storeu_si256( (__m256i *)(c + ( rs_c * ( ir + 4 ) ) + ( 0*16 )), c_int16_4p0 );
 
 		// c[4,16-31]
-		_mm256_storeu_si256((__m256i *)(c + (rs_c * (ir + 4)) + (1 * 16)), c_int16_4p1);
+		_mm256_storeu_si256( (__m256i *)(c + ( rs_c * ( ir + 4 ) ) + ( 1*16 )), c_int16_4p1 );
 
 		// c[5,0-15]
-		_mm256_storeu_si256((__m256i *)(c + (rs_c * (ir + 5)) + (0 * 16)), c_int16_5p0);
+		_mm256_storeu_si256( (__m256i *)(c + ( rs_c * ( ir + 5 ) ) + ( 0*16 )), c_int16_5p0 );
 
 		// c[5,16-31]
-		_mm256_storeu_si256((__m256i *)(c + (rs_c * (ir + 5)) + (1 * 16)), c_int16_5p1);
-
-		a = a + (MR * ps_a);
+		_mm256_storeu_si256( (__m256i *)(c + ( rs_c * ( ir + 5 ) ) + ( 1*16 )), c_int16_5p1 );
+		
+		a = a + ( MR * ps_a );
+		post_op_c_i += MR;
 	}
 
 	if (m_partial_pieces > 0)
@@ -443,7 +555,10 @@ void lpgemm_rowvar_u8s8s16o16_6x32
 				a, rs_a, cs_a,
 				b, rs_b, cs_b,
 				(c + (rs_c * m_full_pieces_loop_limit)), rs_c,
-				alpha, beta);
+				alpha, beta,
+				is_last_k,
+				post_op_c_i, post_op_c_j,
+				post_ops_list);
 
 			// a pointer increment
 			a = a + (4 * ps_a);
@@ -457,7 +572,10 @@ void lpgemm_rowvar_u8s8s16o16_6x32
 				a, rs_a, cs_a,
 				b, rs_b, cs_b,
 				(c + (rs_c * m_full_pieces_loop_limit)), rs_c,
-				alpha, beta);
+				alpha, beta,
+				is_last_k,
+				post_op_c_i, post_op_c_j,
+				post_ops_list);
 
 			// a pointer increment
 			a = a + (2 * ps_a);
@@ -471,7 +589,9 @@ void lpgemm_rowvar_u8s8s16o16_6x32
 				a, rs_a, cs_a,
 				b, rs_b, cs_b,
 				(c + (rs_c * m_full_pieces_loop_limit)), rs_c,
-				alpha, beta);
+				alpha, beta,is_last_k,
+				post_op_c_i, post_op_c_j,
+				post_ops_list);
 		}
 	}
 }

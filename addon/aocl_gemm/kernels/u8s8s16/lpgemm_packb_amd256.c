@@ -36,21 +36,26 @@
 
 #include "blis.h"
 #include "lpgemm_packb_s16.h"
+#include "lpgemm_config.h"
 
-void get_packb_nr32_u8s8s16o16_strides(
-	dim_t *rs_b,
-	dim_t *cs_b)
+void get_packb_nr32_u8s8s16o16_strides
+	(
+		dim_t *rs_b,
+		dim_t *cs_b
+	)
 {
-	*rs_b = 32 * 2;
-	*cs_b = 32;
+	*rs_b = lpgemm_get_block_size_NR_global_cntx( U8S8S16OS16 ) * 2;
+	*cs_b = lpgemm_get_block_size_NR_global_cntx( U8S8S16OS16 );
 }
 
-void packb_nrlt16_u8s8s16o16(
-	int8_t *pack_b_buffer_u8s8s16o16,
-	const int8_t *b,
-	const dim_t ldb,
-	const dim_t rows,
-	dim_t n0_partial_rem)
+void packb_nrlt16_u8s8s16o16
+	(
+		int8_t *pack_b_buffer_u8s8s16o16,
+		const int8_t *b,
+		const dim_t ldb,
+		const dim_t rows,
+		dim_t n0_partial_rem
+	)
 {
 	dim_t k_full_pieces_blks = rows / 2;
 	dim_t k_full_pieces = k_full_pieces_blks * 2;

@@ -35,85 +35,123 @@
 #ifndef BLIS_GEMM_INT16_MNFRINGE
 #define BLIS_GEMM_INT16_MNFRINGE
 
-void lpgemm_rowvar_u8s8s16o16_4x16(
-	const dim_t k0,
-	const uint8_t *a,
-	const dim_t rs_a,
-	const dim_t cs_a,
-	const int8_t *b,
-	const dim_t rs_b,
-	const dim_t cs_b,
-	int16_t *c,
-	const dim_t rs_c,
-	const int16_t alpha,
-	const int16_t beta);
+#include "lpgemm_post_ops.h"
 
-void lpgemm_rowvar_u8s8s16o16_4xlt16(
-	const dim_t k0,
-	const uint8_t *a,
-	const dim_t rs_a,
-	const dim_t cs_a,
-	const int8_t *b,
-	const dim_t rs_b,
-	const dim_t cs_b,
-	int16_t *c,
-	const dim_t rs_c,
-	const int16_t alpha,
-	const int16_t beta,
-	dim_t n0_rem);
+void lpgemm_rowvar_u8s8s16o16_4x16
+     (
+	  const dim_t    k0,
+	  const uint8_t  *a,
+	  const dim_t    rs_a,
+	  const dim_t    cs_a,
+	  const int8_t   *b,
+	  const dim_t    rs_b,
+	  const dim_t    cs_b,
+	  int16_t        *c,
+	  const dim_t    rs_c,
+	  const int16_t  alpha,
+	  const int16_t  beta,
+	  bool           is_last_k,
+	  dim_t          post_op_c_i,
+	  dim_t          post_op_c_j,
+	  lpgemm_post_op *post_ops_list
+	 );
 
-void lpgemm_rowvar_u8s8s16o16_2x16(
-	const dim_t k0,
-	const uint8_t *a,
-	const dim_t rs_a,
-	const dim_t cs_a,
-	const int8_t *b,
-	const dim_t rs_b,
-	const dim_t cs_b,
-	int16_t *c,
-	const dim_t rs_c,
-	const int16_t alpha,
-	const int16_t beta);
+void lpgemm_rowvar_u8s8s16o16_4xlt16
+	 (
+	   const dim_t    k0,
+	   const uint8_t  *a,
+	   const dim_t    rs_a,
+	   const dim_t    cs_a,
+	   const int8_t   *b,
+	   const dim_t    rs_b,
+	   const dim_t    cs_b,
+	   int16_t        *c,
+	   const dim_t    rs_c,
+	   const int16_t  alpha,
+	   const int16_t  beta,
+	   dim_t          n0_rem,	
+	   bool           is_last_k,
+	   dim_t          post_op_c_i,
+	   dim_t          post_op_c_j,
+	   lpgemm_post_op *post_ops_list
+	 );
 
-void lpgemm_rowvar_u8s8s16o16_2xlt16(
-	const dim_t k0,
-	const uint8_t *a,
-	const dim_t rs_a,
-	const dim_t cs_a,
-	const int8_t *b,
-	const dim_t rs_b,
-	const dim_t cs_b,
-	int16_t *c,
-	const dim_t rs_c,
-	const int16_t alpha,
-	const int16_t beta,
-	dim_t n0_rem);
+void lpgemm_rowvar_u8s8s16o16_2x16
+	 (
+	   const dim_t    k0,
+	   const uint8_t  *a,
+	   const dim_t    rs_a,
+	   const dim_t    cs_a,
+	   const int8_t   *b,
+	   const dim_t    rs_b,
+	   const dim_t    cs_b,
+	   int16_t        *c,
+	   const dim_t    rs_c,
+	   const int16_t  alpha,
+	   const int16_t  beta,	
+	   bool           is_last_k,
+	   dim_t          post_op_c_i,
+	   dim_t          post_op_c_j,
+	   lpgemm_post_op *post_ops_list
+	 );
 
-void lpgemm_rowvar_u8s8s16o16_1x16(
-	const dim_t k0,
-	const uint8_t *a,
-	const dim_t rs_a,
-	const dim_t cs_a,
-	const int8_t *b,
-	const dim_t rs_b,
-	const dim_t cs_b,
-	int16_t *c,
-	const dim_t rs_c,
-	const int16_t alpha,
-	const int16_t beta);
+void lpgemm_rowvar_u8s8s16o16_2xlt16
+     (
+	   const dim_t    k0,
+	   const uint8_t  *a,
+	   const dim_t    rs_a,
+	   const dim_t    cs_a,
+	   const int8_t   *b,
+	   const dim_t    rs_b,
+	   const dim_t    cs_b,
+	   int16_t        *c,
+	   const dim_t    rs_c,
+	   const int16_t  alpha,
+	   const int16_t  beta,
+	   dim_t          n0_rem,
+	   bool           is_last_k,
+	   dim_t          post_op_c_i,
+	   dim_t          post_op_c_j,
+	   lpgemm_post_op *post_ops_list
+	 );
 
-void lpgemm_rowvar_u8s8s16o16_1xlt16(
-	const int k0,
-	const uint8_t *a,
-	const int rs_a,
-	const int cs_a,
-	const int8_t *b,
-	const int rs_b,
-	const int cs_b,
-	int16_t *c,
-	const int rs_c,
-	const int16_t alpha,
-	const int16_t beta,
-	dim_t n0_rem);
+void lpgemm_rowvar_u8s8s16o16_1x16
+	 (
+	   const dim_t    k0,
+	   const uint8_t  *a,
+	   const dim_t    rs_a,
+	   const dim_t    cs_a,
+	   const int8_t   *b,
+	   const dim_t    rs_b,
+	   const dim_t    cs_b,
+	   int16_t        *c,
+	   const dim_t    rs_c,
+	   const int16_t  alpha,
+	   const int16_t  beta,
+	   bool           is_last_k,
+	   dim_t          post_op_c_i,
+	   dim_t          post_op_c_j,
+	   lpgemm_post_op *post_ops_list
+	 );
+
+void lpgemm_rowvar_u8s8s16o16_1xlt16
+     (
+	   const int      k0,
+	   const uint8_t  *a,
+	   const int      rs_a,
+	   const int      cs_a,
+	   const int8_t   *b,
+	   const int      rs_b,
+	   const int      cs_b,
+	   int16_t        *c,
+	   const int      rs_c,
+	   const int16_t  alpha,
+	   const int16_t  beta,
+	   dim_t          n0_rem,
+	   bool           is_last_k,
+	   dim_t          post_op_c_i,
+	   dim_t          post_op_c_j,
+	   lpgemm_post_op *post_ops_list
+	 );
 
 #endif // BLIS_GEMM_INT16_MNFRINGE
