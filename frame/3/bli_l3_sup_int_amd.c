@@ -113,22 +113,42 @@ err_t bli_gemmsup_int
 	      bli_l3_sup_thrinfo_update_root( rntm, thread );
 	  }
 
-	  /*Enable packing for B matrix for higher sizes*/
+	  //Enable packing for B matrix for higher sizes
 	  if(bli_is_float(dt) && (n_threads==1)) {
               if((m > 240) &&  (k > 240) && (n > 240))
-	          bli_rntm_set_pack_b( 1, rntm );
+	          bli_rntm_set_pack_b( 1, rntm );//packb
 	  }
 
-	  /*Enable packing of B matrix for complex data type*/
+	  //Enable packing of B matrix for complex data type
 	  if (bli_is_dcomplex(dt) && (n_threads == 1))
 	  {
 		  if ((m > 55) && (k > 55) && (n > 55))
-			  bli_rntm_set_pack_b(1, rntm);
+			  bli_rntm_set_pack_b(1, rntm);//packb
 	  }
 
-	  bli_gemmsup_ref_var2m( BLIS_NO_TRANSPOSE,
-				 alpha, a, b, beta, c,
-				 stor_id, cntx, rntm, thread );
+	  //Enable packing of B matrix for double data type when dims at per 
+	  //thread level are above caches and enable packing of A when transA 
+	  //(RRC or CRC storage ids) to avoid rd kernels
+	  if(bli_is_double(dt))
+	  {
+		  dim_t m_pt = (m/bli_rntm_ways_for( BLIS_MC, rntm ));
+		  dim_t n_pt = (n/bli_rntm_ways_for( BLIS_NC, rntm ));
+
+		  if(k > 120)
+		  {
+			  if(((m_pt > 320) && (n_pt > 120)) || ((m_pt > 120) && (n_pt > 320)))
+			  {
+				  bli_rntm_set_pack_b(1, rntm);//packb
+
+				  if(stor_id==BLIS_RRC || stor_id==BLIS_CRC) 
+					bli_rntm_set_pack_a(1, rntm);//packa
+			  }
+		  }
+	  }
+
+	  bli_gemmsup_ref_var2m(BLIS_NO_TRANSPOSE,
+                            alpha, a, b, beta, c,
+                            stor_id, cntx, rntm, thread );
 	}
 	else
 	{
@@ -156,19 +176,39 @@ err_t bli_gemmsup_int
 	   * becomes pack B inside var2m because this is transpose case*/
 	  if(bli_is_float(dt) && (n_threads==1)) {
               if((m > 240) &&  (k > 240) && (n > 240))
-	          bli_rntm_set_pack_a( 1, rntm );
+	          bli_rntm_set_pack_a( 1, rntm );//packb
 	  }
 
 	  /*Enable packing of A matrix for complex data type*/
 	  if (bli_is_dcomplex(dt) && (n_threads == 1))
 	  {
 		  if ((m > 55) && (k > 55) && (n > 55))
-			  bli_rntm_set_pack_a(1, rntm);
+			  bli_rntm_set_pack_a(1, rntm);//packb
 	  }
 
-	  bli_gemmsup_ref_var2m( BLIS_TRANSPOSE,
-	                         alpha, a, b, beta, c,
-			         stor_id, cntx, rntm, thread );
+	  //Enable packing of B matrix for double data type when dims at per 
+	  //thread level are above caches and enable packing of A when transA 
+	  //(RRC or CRC storage ids) to avoid rd kernels
+	  if(bli_is_double(dt))
+	  {
+		  dim_t m_pt = (m/bli_rntm_ways_for( BLIS_NC, rntm ));
+		  dim_t n_pt = (n/bli_rntm_ways_for( BLIS_MC, rntm ));
+
+		  if(k > 120)
+		  {
+			  if(((m_pt > 320) && (n_pt > 120)) || ((m_pt > 120) && (n_pt > 320))) 
+			  {
+				  bli_rntm_set_pack_a(1, rntm);//packb
+
+				  if(stor_id==BLIS_RRC || stor_id==BLIS_CRC) 
+					bli_rntm_set_pack_b(1, rntm);//packa
+			  }
+		  }
+	  }
+ 
+	  bli_gemmsup_ref_var2m(BLIS_TRANSPOSE,
+                            alpha, a, b, beta, c,
+                            stor_id, cntx, rntm, thread );
 	}
 
 	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_4);
