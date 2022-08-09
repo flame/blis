@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2019 - 22, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2019 - 2022, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -86,6 +86,17 @@ void PASTEF77(ch,blasname) \
 	  ldb, \
 	  ldc  \
 	); \
+\
+	/* Quick return if possible. */ \
+	if ( *m == 0 || *n == 0 || (( PASTEMAC(ch,eq0)( *alpha ) || *k == 0) \
+	   && PASTEMAC(ch,eq1)( *beta ) )) \
+	{ \
+	  AOCL_DTL_LOG_GEMM_STATS(AOCL_DTL_LEVEL_TRACE_1, *m, *n, *k); \
+	  AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1); \
+	  /* Finalize BLIS. */ \
+	  bli_finalize_auto(); \
+	  return; \
+	} \
 \
 	/* Map BLAS chars to their corresponding BLIS enumerated type value. */ \
 	bli_param_map_netlib_to_blis_trans( *transa, &blis_transa ); \
@@ -175,6 +186,17 @@ void PASTEF77(ch,blasname) \
 	  ldb, \
 	  ldc  \
 	); \
+\
+	/* Quick return if possible. */ \
+	if ( *m == 0 || *n == 0 || (( PASTEMAC(ch,eq0)( *alpha ) || *k == 0) \
+	   && PASTEMAC(ch,eq1)( *beta ) )) \
+	{ \
+	  AOCL_DTL_LOG_GEMM_STATS(AOCL_DTL_LEVEL_TRACE_1, *m, *n, *k); \
+	  AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1); \
+	  /* Finalize BLIS. */ \
+	  bli_finalize_auto(); \
+	  return; \
+	} \
 \
 	/* Map BLAS chars to their corresponding BLIS enumerated type value. */ \
 	bli_param_map_netlib_to_blis_trans( *transa, &blis_transa ); \
@@ -343,6 +365,17 @@ void dzgemm_
 	  ldb,
 	  ldc
 	);
+
+	/* Quick return if possible. */
+	if ( *m == 0 || *n == 0 || (( PASTEMAC(ch,eq0)( *alpha ) || *k == 0)
+	   && PASTEMAC(ch,eq1)( *beta ) ))
+	{
+	  AOCL_DTL_LOG_GEMM_STATS(AOCL_DTL_LEVEL_TRACE_1, *m, *n, *k);
+	  AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
+	  /* Finalize BLIS. */
+	  bli_finalize_auto();
+	  return; \
+	}
 
 	/* Map BLAS chars to their corresponding BLIS enumerated type value. */
 	bli_param_map_netlib_to_blis_trans( *transa, &blis_transa );

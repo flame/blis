@@ -86,6 +86,15 @@ void PASTEF77(ch,blasname) \
       ldb  \
     ); \
 \
+    /* Quick return if possible. */ \
+    if ( *m == 0 || *n == 0 ) \
+    { \
+        AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO); \
+        /* Finalize BLIS. */ \
+        bli_finalize_auto(); \
+        return; \
+    } \
+\
     /* Map BLAS chars to their corresponding BLIS enumerated type value. */ \
     bli_param_map_netlib_to_blis_side( *side,  &blis_side ); \
     bli_param_map_netlib_to_blis_uplo( *uploa, &blis_uploa ); \
@@ -169,6 +178,15 @@ void PASTEF77(ch,blasname) \
       lda, \
       ldb  \
     ); \
+\
+    /* Quick return if possible. */ \
+    if ( *m == 0 || *n == 0 ) \
+    { \
+        AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO); \
+        /* Finalize BLIS. */ \
+        bli_finalize_auto(); \
+        return; \
+    } \
 \
     /* Map BLAS chars to their corresponding BLIS enumerated type value. */ \
     bli_param_map_netlib_to_blis_side( *side,  &blis_side ); \
