@@ -97,6 +97,11 @@ void bli_trmm_front
 	// right). So our solution is that in those cases, the subconfigurations
 	// simply #define BLIS_DISABLE_TRMM_RIGHT.
 
+	// On dual-socket architectures, disabling trmm right is needed for a
+	// different reason. Right-side TRMM forces Jc to be 1, so casting it to a
+	// left-side operation allows for dramatically improved performance due to
+	// independent parallelization on the two sockets.
+
 	// NOTE: This case casts right-side trmm in terms of left side. This can
 	// lead to the microkernel being executed on an output matrix with the
 	// microkernel's general stride IO case (unless the microkernel supports
@@ -116,7 +121,70 @@ void bli_trmm_front
 		bli_obj_induce_trans( &c_local );
 	}
 
-#else
+#else /* not BLIS_DISABLE_TRMM_RIGHT */
+#ifdef BLIS_DISABLE_TRMM_LEFT
+	// NOTE: This case casts left-side trmm in terms of right side. This can
+	// lead to the microkernel being executed on an output matrix with the
+	// microkernel's general stride IO case (unless the microkernel supports
+	// both both row and column IO cases as well).
+
+	// NOTE: Casting left-side trmm in terms of right side reduces the number
+	// of macrokernels exercised to two (trmm_rl and trmm_ru).
+
+	// If A is being multiplied from the left, transpose all operands
+	// so that we can perform the computation as if A were being multiplied
+	// from the right.
+	if ( bli_is_left( side ) )
+	{
+		bli_toggle_side( &side );
+		bli_obj_induce_trans( &a_local );
+		bli_obj_induce_trans( &b_local );
+		bli_obj_induce_trans( &c_local );
+	}
+
+#else /* not BLIS_DISABLE_TRMM_LEFT */
+#ifdef BLIS_DISABLE_TRMM_RIGHT_IF_JC_GT_1_ELSE_DISABLE_LEFT_IF_DP
+
+	// This case was added for the Ampere platforms.
+	
+	// As noted above, for dual socket (Jc > 1), disable trmm right
+	// dramatically improves performance by avoiding the forced Jc=1 for
+	// right-side trmm.
+	
+	// On the other hand, for single socket double-precision trmm (where we
+	// already have Jc = 1), performance is significantly improved by
+	// disabling trmm left and forcing a transpose to a right-side operation.
+
+	bool toggle = FALSE;
+	dim_t jc = bli_rntm_jc_ways( rntm );
+	if (jc > 1) {
+		// Presume dual socket, disable trmm right
+		if ( bli_is_right( side ) ) { toggle = TRUE; }
+	} else {
+		// Single socket
+		bool dp = bli_obj_is_double_prec( &a_local ) && bli_obj_is_double_prec( &b_local );
+		if (dp) {
+			// Double precision, disable trmm left
+			if ( bli_is_left( side ) ) { toggle = TRUE; }
+		} else {
+			// As in the default case (below), toggle for preferential storage
+			if ( bli_cntx_l3_vir_ukr_dislikes_storage_of( &c_local, BLIS_GEMM_UKR, cntx ) ) {
+				toggle = TRUE;
+			}
+		}
+	}
+
+	if (toggle) {
+		bli_toggle_side( &side );
+		bli_obj_induce_trans( &a_local );
+		bli_obj_induce_trans( &b_local );
+		bli_obj_induce_trans( &c_local );
+	}
+	
+#else /* not BLIS_DISABLE_TRMM_RIGHT_IF_JC_GT_1_ELSE_DISABLE_LEFT_IF_DP */
+
+	// The default case
+	
 	// NOTE: This case computes right-side trmm natively with trmm_rl and
 	// trmm_ru macrokernels. This code path always gives us the opportunity
 	// to transpose the entire operation so that the effective storage format
@@ -139,14 +207,16 @@ void bli_trmm_front
 		bli_obj_induce_trans( &c_local );
 	}
 
+#endif /* BLIS_DISABLE_TRMM_RIGHT_IF_JC_GT_1_ELSE_DISABLE_LEFT_IF_DP */
+#endif /* BLIS_DISABLE_TRMM_LEFT */
+#endif /* BLIS_DISABLE_TRMM_RIGHT */
+
 	// If A is being multiplied from the right, swap A and B so that
 	// the matrix will actually be on the right.
 	if ( bli_is_right( side ) )
 	{
 		bli_obj_swap( &a_local, &b_local );
 	}
-
-#endif
 
 	// Set each alias as the root object.
 	// NOTE: We MUST wait until we are done potentially swapping the objects

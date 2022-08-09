@@ -10,7 +10,9 @@ delay=0.1
 #sys="lonestar5"
 #sys="ul252"
 #sys="ul264"
-sys="ul2128"
+# sys="ul2128"
+sys="altra"
+# sys="altramax"
 
 # Bind threads to processors.
 #export OMP_PROC_BIND=true
@@ -71,7 +73,7 @@ elif [ ${sys} = "ul264" ]; then
 elif [ ${sys} = "ul2128" ]; then
 
 	export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/home/field/intel/mkl/lib/intel64"
-	export GOMP_CPU_AFFINITY="0-127"
+	export GOMP_CPU_AFFINITY="0-1s"
 
 	numactl="numactl --interleave=all"
 	threads="jc1ic1jr1_2400
@@ -82,23 +84,52 @@ elif [ ${sys} = "ul2128" ]; then
 	#threads="jc1ic1jr1_2400"
 	#threads="jc4ic4jr4_6000"
 	#threads="jc8ic4jr4_8000"
+
+elif [ ${sys} = "altra" ]; then
+
+	# Firmware 1.07-
+	export GOMP_CPU_AFFINITY="0 40 20 60 4 44 24 64 8 48 28 68 12 52 32 72 2 42 22 62 6 46 26 66 10 50 30 70 14 54 34 74 1 41 21 61 5 45 25 65 9 49 29 69 13 53 33 73 3 43 23 63 7 47 27 67 11 51 31 71 15 55 35 75 16 56 36 76 18 58 38 78 17 57 37 77 19 59 39 79 80 120 100 140 84 124 104 144 88 128 108 148 92 132 112 152 82 122 102 142 86 126 106 146 90 130 110 150 94 134 114 154 81 121 101 141 85 125 105 145 89 129 109 149 93 133 113 153 83 123 103 143 87 127 107 147 91 131 111 151 95 135 115 155 96 136 116 156 98 138 118 158 97 137 117 157 99 139 119 159"
+
+	# Firmware 1.08+
+	# export GOMP_CPU_AFFINITY="0-159"
+
+	numactl="numactl --localalloc"
+	# Temporarily reducing run to 12000 & 8000 to save time
+	threads="jc1ic1jr1_2400
+		jc1ic10jr8_8000
+		jc2ic10jr8_12000"
+
+elif [ ${sys} = "altramax" ]; then
+
+	# Firmware 2.04-
+	# export GOMP_CPU_AFFINITY="0 64 32 96 4 68 36 100 1 65 33 97 5 69 37 101 2 66 34 98 6 70 38 102 3 67 35 99 7 71 39 103 8 72 40 104 12 76 44 108 9 73 41 105 13 77 45 109 10 74 42 106 14 78 46 110 11 75 43 107 15 79 47 111 16 80 48 112 20 84 52 116 17 81 49 113 21 85 53 117 18 82 50 114 22 86 54 118 19 83 51 115 23 87 55 119 24 88 56 120 26 90 58 122 25 89 57 121 27 91 59 123 28 92 60 124 30 94 62 126 29 93 61 125 31 95 63 127"
+
+	# Firmware 2.05+
+	export GOMP_CPU_AFFINITY="0 1 64 65 8 9 72 73 2 3 66 67 10 11 74 75 4 5 68 69 12 13 76 77 6 7 70 71 14 15 78 79 16 17 80 81 24 25 88 89 18 19 82 83 26 27 90 91 20 21 84 85 28 29 92 93 22 23 86 87 30 31 94 95 32 33 96 97 40 41 104 105 34 35 98 99 42 43 106 107 36 37 100 101 44 45 108 109 38 39 102 103 46 47 110 111 48 49 112 113 52 53 116 117 50 51 114 115 54 55 118 119 56 57 120 121 60 61 124 125 58 59 122 123 62 63 126 127"
+
+	numactl="numactl --localalloc"
+	# Temporarily reducing run to 12000 to save time
+	threads="jc1ic1jr1_2400
+		jc1ic16jr8_12000
+		jc2ic16jr8_16000"
+
 fi
 
 # Datatypes to test.
 test_dts="d s z c"
-#test_dts="s"
+#test_dts="d"
 
 # Operations to test.
 test_ops="gemm hemm herk trmm trsm"
-#test_ops="herk"
+#test_ops="gemm"
 
 # Implementations to test.
-#impls="blis"
+impls="blis"
 #impls="openblas"
 #impls="vendor"
 #impls="other"
 #impls="eigen"
-impls="all"
+# impls="all"
 
 if [ "${impls}" = "blis" ]; then
 

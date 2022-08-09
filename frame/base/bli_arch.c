@@ -197,9 +197,17 @@ void bli_arch_set_id( void )
 		#ifdef BLIS_FAMILY_A64FX
 		id = BLIS_ARCH_A64FX;
 		#endif
+
+		#ifdef BLIS_FAMILY_ALTRAMAX
+		id = BLIS_ARCH_ALTRAMAX;
+		#endif
+		#ifdef BLIS_FAMILY_ALTRA
+		id = BLIS_ARCH_ALTRA;
+		#endif
 		#ifdef BLIS_FAMILY_FIRESTORM
 		id = BLIS_ARCH_FIRESTORM;
 		#endif
+
 		#ifdef BLIS_FAMILY_THUNDERX2
 		id = BLIS_ARCH_THUNDERX2;
 		#endif
@@ -209,6 +217,7 @@ void bli_arch_set_id( void )
 		#ifdef BLIS_FAMILY_CORTEXA53
 		id = BLIS_ARCH_CORTEXA53;
 		#endif
+
 		#ifdef BLIS_FAMILY_CORTEXA15
 		id = BLIS_ARCH_CORTEXA15;
 		#endif
@@ -268,10 +277,15 @@ static char* config_name[ BLIS_NUM_ARCHS ] =
 
     "armsve",
     "a64fx",
+
+    "altramax",
+    "altra",
     "firestorm",
+
     "thunderx2",
     "cortexa57",
     "cortexa53",
+
     "cortexa15",
     "cortexa9",
 

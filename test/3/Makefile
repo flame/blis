@@ -136,13 +136,15 @@ PS_MAX   := 2400
 PS_INC   := 48
 
 # Single-socket (multithreaded)
-P1_BEGIN := 120
-P1_MAX   := 6000
-P1_INC   := 120
+# Coarse Run:
+P1_BEGIN := 160
+P1_MAX   := 8000
+P1_INC   := 160
 
 # Dual-socket (multithreaded)
+# Coarse Quick Run:
 P2_BEGIN := 160
-P2_MAX   := 8000
+P2_MAX   := 12000
 P2_INC   := 160
 
 

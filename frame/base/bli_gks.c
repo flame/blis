@@ -64,7 +64,8 @@ void bli_gks_init( void )
 		// Register a context for each architecture that was #define'd in
 		// bli_config.h.
 
-		// Intel architectures
+		// -- Intel architectures ----------------------------------------------
+
 #ifdef BLIS_CONFIG_SKX
 		bli_gks_register_cntx( BLIS_ARCH_SKX,         bli_cntx_init_skx,
 		                                              bli_cntx_init_skx_ref,
@@ -96,7 +97,8 @@ void bli_gks_init( void )
 		                                              bli_cntx_init_penryn_ind );
 #endif
 
-		// AMD architectures
+		// -- AMD architectures ------------------------------------------------
+
 #ifdef BLIS_CONFIG_ZEN2
 		bli_gks_register_cntx( BLIS_ARCH_ZEN2,        bli_cntx_init_zen2,
 		                                              bli_cntx_init_zen2_ref,
@@ -128,12 +130,38 @@ void bli_gks_init( void )
 		                                              bli_cntx_init_bulldozer_ind );
 #endif
 
-		// ARM architectures
+		// -- ARM architectures ------------------------------------------------
+
+		// -- ARM-SVE --
+#ifdef BLIS_CONFIG_ARMSVE
+		bli_gks_register_cntx( BLIS_ARCH_ARMSVE,      bli_cntx_init_armsve,
+		                                              bli_cntx_init_armsve_ref,
+		                                              bli_cntx_init_armsve_ind );
+#endif
 #ifdef BLIS_CONFIG_A64FX
-		bli_gks_register_cntx( BLIS_ARCH_A64FX,   bli_cntx_init_a64fx,
+		bli_gks_register_cntx( BLIS_ARCH_A64FX,       bli_cntx_init_a64fx,
 		                                              bli_cntx_init_a64fx_ref,
 		                                              bli_cntx_init_a64fx_ind );
 #endif
+
+		// -- ARM-NEON (4 pipes x 128-bit vectors) --
+#ifdef BLIS_CONFIG_ALTRAMAX
+		bli_gks_register_cntx( BLIS_ARCH_ALTRAMAX,    bli_cntx_init_altramax,
+		                                              bli_cntx_init_altramax_ref,
+		                                              bli_cntx_init_altramax_ind );
+#endif
+#ifdef BLIS_CONFIG_ALTRA
+		bli_gks_register_cntx( BLIS_ARCH_ALTRA,       bli_cntx_init_altra,
+		                                              bli_cntx_init_altra_ref,
+		                                              bli_cntx_init_altra_ind );
+#endif
+#ifdef BLIS_CONFIG_FIRESTORM
+		bli_gks_register_cntx( BLIS_ARCH_FIRESTORM,   bli_cntx_init_firestorm,
+		                                              bli_cntx_init_firestorm_ref,
+		                                              bli_cntx_init_firestorm_ind );
+#endif
+
+		// -- ARM (2 pipes x 128-bit vectors) --
 #ifdef BLIS_CONFIG_THUNDERX2
 		bli_gks_register_cntx( BLIS_ARCH_THUNDERX2,   bli_cntx_init_thunderx2,
 		                                              bli_cntx_init_thunderx2_ref,
@@ -149,21 +177,8 @@ void bli_gks_init( void )
 		                                              bli_cntx_init_cortexa53_ref,
 		                                              bli_cntx_init_cortexa53_ind );
 #endif
-#ifdef BLIS_CONFIG_ARMSVE
-		bli_gks_register_cntx( BLIS_ARCH_ARMSVE,      bli_cntx_init_armsve,
-		                                              bli_cntx_init_armsve_ref,
-		                                              bli_cntx_init_armsve_ind );
-#endif
-#ifdef BLIS_CONFIG_A64FX
-		bli_gks_register_cntx( BLIS_ARCH_A64FX,       bli_cntx_init_a64fx,
-		                                              bli_cntx_init_a64fx_ref,
-		                                              bli_cntx_init_a64fx_ind );
-#endif
-#ifdef BLIS_CONFIG_FIRESTORM
-		bli_gks_register_cntx( BLIS_ARCH_FIRESTORM,   bli_cntx_init_firestorm,
-		                                              bli_cntx_init_firestorm_ref,
-		                                              bli_cntx_init_firestorm_ind );
-#endif
+
+		// -- ARM (older 32-bit microarchitectures) --
 #ifdef BLIS_CONFIG_CORTEXA15
 		bli_gks_register_cntx( BLIS_ARCH_CORTEXA15,   bli_cntx_init_cortexa15,
 		                                              bli_cntx_init_cortexa15_ref,
@@ -175,12 +190,13 @@ void bli_gks_init( void )
 		                                              bli_cntx_init_cortexa9_ind );
 #endif
 
-		// IBM architectures
+		// -- IBM architectures ------------------------------------------------
+
 #ifdef BLIS_CONFIG_POWER10
 		bli_gks_register_cntx( BLIS_ARCH_POWER10,     bli_cntx_init_power10,
 		                                              bli_cntx_init_power10_ref,
 		                                              bli_cntx_init_power10_ind );
-#endif													  
+#endif
 #ifdef BLIS_CONFIG_POWER9
 		bli_gks_register_cntx( BLIS_ARCH_POWER9,      bli_cntx_init_power9,
 		                                              bli_cntx_init_power9_ref,
@@ -197,7 +213,8 @@ void bli_gks_init( void )
 		                                              bli_cntx_init_bgq_ind );
 #endif
 
-		// Generic architectures
+		// -- Generic architectures --------------------------------------------
+
 #ifdef BLIS_CONFIG_GENERIC
 		bli_gks_register_cntx( BLIS_ARCH_GENERIC,     bli_cntx_init_generic,
 		                                              bli_cntx_init_generic_ref,

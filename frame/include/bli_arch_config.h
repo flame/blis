@@ -83,15 +83,24 @@ CNTX_INIT_PROTS( bulldozer )
 
 // -- ARM architectures --
 
+// ARM-SVE
 #ifdef BLIS_CONFIG_ARMSVE
 CNTX_INIT_PROTS( armsve )
 #endif
 #ifdef BLIS_CONFIG_A64FX
 CNTX_INIT_PROTS( a64fx )
 #endif
+// ARM-NEON(4x128)
+#ifdef BLIS_CONFIG_ALTRAMAX
+CNTX_INIT_PROTS( altramax )
+#endif
+#ifdef BLIS_CONFIG_ALTRA
+CNTX_INIT_PROTS( altra )
+#endif
 #ifdef BLIS_CONFIG_FIRESTORM
 CNTX_INIT_PROTS( firestorm )
 #endif
+// ARM-NEON(2x128)
 #ifdef BLIS_CONFIG_THUNDERX2
 CNTX_INIT_PROTS( thunderx2 )
 #endif
@@ -101,6 +110,7 @@ CNTX_INIT_PROTS( cortexa57 )
 #ifdef BLIS_CONFIG_CORTEXA53
 CNTX_INIT_PROTS( cortexa53 )
 #endif
+// ARM 32-bit
 #ifdef BLIS_CONFIG_CORTEXA15
 CNTX_INIT_PROTS( cortexa15 )
 #endif
@@ -200,15 +210,24 @@ CNTX_INIT_PROTS( generic )
 
 // -- ARM architectures --
 
+// ARM-SVE
 #ifdef BLIS_FAMILY_ARMSVE
 #include "bli_family_armsve.h"
 #endif
 #ifdef BLIS_FAMILY_A64FX
 #include "bli_family_a64fx.h"
 #endif
+// ARM-NEON (4x128)
+#ifdef BLIS_FAMILY_ALTRAMAX
+#include "bli_family_altramax.h"
+#endif
+#ifdef BLIS_FAMILY_ALTRA
+#include "bli_family_altra.h"
+#endif
 #ifdef BLIS_FAMILY_FIRESTORM
 #include "bli_family_firestorm.h"
 #endif
+// ARM-NEON (2x128)
 #ifdef BLIS_FAMILY_THUNDERX2
 #include "bli_family_thunderx2.h"
 #endif
@@ -218,6 +237,7 @@ CNTX_INIT_PROTS( generic )
 #ifdef BLIS_FAMILY_CORTEXA53
 #include "bli_family_cortexa53.h"
 #endif
+// ARM 32-bit (vintage)
 #ifdef BLIS_FAMILY_CORTEXA15
 #include "bli_family_cortexa15.h"
 #endif

@@ -48,6 +48,9 @@ output.testsuite.*
 # BLAS test output files
 out.*
 
+# Apple creates these for every file visited (Why?  we don't know.)
+.DS_Store
+
 # GTAGS database
 GPATH
 GRTAGS

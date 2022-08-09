@@ -322,6 +322,8 @@ int main( int argc, char** argv )
 		        ( unsigned long )m,
 		        ( unsigned long )n, gflops );
 
+		fflush(stdout);
+
 		bli_obj_free( &alpha );
 		bli_obj_free( &beta );
 
