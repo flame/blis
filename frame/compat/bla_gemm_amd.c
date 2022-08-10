@@ -556,9 +556,10 @@ void dgemm_
 
 #ifdef BLIS_ENABLE_SMALL_MATRIX
 
-    //if( ((m0 + n0 -k0) < 2000) && ((m0 + k0-n0) < 2000) && ((n0 + k0-m0) < 2000) && (n0 > 2))
-    if( ( ( (m0 + n0 -k0) < 2000) && ((m0 + k0-n0) < 2000) && ((n0 + k0-m0) < 2000) ) ||
-      ((n0 <= 10) && (k0 <=10)) )
+    if(((m0 == n0) && (m0 < 400) && (k0 < 1000)) ||
+	( (m0 != n0) && (( ((m0 + n0 -k0) < 1500) &&
+	((m0 + k0-n0) < 1500) && ((n0 + k0-m0) < 1500) ) ||
+	((n0 <= 100) && (k0 <=100)))))
       {
     err_t status = BLIS_FAILURE;
     if (bli_is_notrans(blis_transa))

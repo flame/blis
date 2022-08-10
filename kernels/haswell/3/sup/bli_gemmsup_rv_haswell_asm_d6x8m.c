@@ -867,8 +867,7 @@ void bli_dgemmsup_rv_haswell_asm_6x8m
 
 
 	label(.DRETURN)
-
-
+	vzeroupper()
 
     end_asm(
 	: // output operands (none)

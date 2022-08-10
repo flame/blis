@@ -1951,12 +1951,12 @@ static err_t bli_sgemm_small
                 tA_packed = D_A_pack;
 
 #ifdef BLIS_ENABLE_PREFETCH
-                _mm_prefetch((char*)(tC + 0), _MM_HINT_T0);
-                _mm_prefetch((char*)(tC + 8), _MM_HINT_T0);
-                _mm_prefetch((char*)(tC + ldc), _MM_HINT_T0);
-                _mm_prefetch((char*)(tC + ldc + 8), _MM_HINT_T0);
-                _mm_prefetch((char*)(tC + 2 * ldc), _MM_HINT_T0);
-                _mm_prefetch((char*)(tC + 2 * ldc + 8), _MM_HINT_T0);
+                _mm_prefetch((char*)(tC + 7), _MM_HINT_T0);
+                _mm_prefetch((char*)(tC + 15), _MM_HINT_T0);
+                _mm_prefetch((char*)(tC + ldc + 7), _MM_HINT_T0);
+                _mm_prefetch((char*)(tC + ldc + 15), _MM_HINT_T0);
+                _mm_prefetch((char*)(tC + 2 * ldc + 7), _MM_HINT_T0);
+                _mm_prefetch((char*)(tC + 2 * ldc + 15), _MM_HINT_T0);
 #endif
                 // clear scratch registers.
                 ymm4 = _mm256_setzero_pd();
@@ -2111,12 +2111,12 @@ static err_t bli_sgemm_small
                 tA = tA_packed + row_idx_packed;
 
 #ifdef BLIS_ENABLE_PREFETCH
-                _mm_prefetch((char*)(tC + 0), _MM_HINT_T0);
-                _mm_prefetch((char*)(tC + 8), _MM_HINT_T0);
-                _mm_prefetch((char*)(tC + ldc), _MM_HINT_T0);
-                _mm_prefetch((char*)(tC + ldc + 8), _MM_HINT_T0);
-                _mm_prefetch((char*)(tC + 2 * ldc), _MM_HINT_T0);
-                _mm_prefetch((char*)(tC + 2 * ldc + 8), _MM_HINT_T0);
+                _mm_prefetch((char*)(tC + 7), _MM_HINT_T0);
+                _mm_prefetch((char*)(tC + 15), _MM_HINT_T0);
+                _mm_prefetch((char*)(tC + ldc + 7), _MM_HINT_T0);
+                _mm_prefetch((char*)(tC + ldc + 15), _MM_HINT_T0);
+                _mm_prefetch((char*)(tC + 2 * ldc + 7), _MM_HINT_T0);
+                _mm_prefetch((char*)(tC + 2 * ldc + 15), _MM_HINT_T0);
 #endif
                 // clear scratch registers.
                 ymm4 = _mm256_setzero_pd();
@@ -4513,12 +4513,12 @@ err_t bli_dgemm_small_At
                 tA = tA_packed + row_idx_packed;
 
 #ifdef BLIS_ENABLE_PREFETCH
-                _mm_prefetch((char*)(tC + 0), _MM_HINT_T0);
-                _mm_prefetch((char*)(tC + 8), _MM_HINT_T0);
-                _mm_prefetch((char*)(tC + ldc), _MM_HINT_T0);
-                _mm_prefetch((char*)(tC + ldc + 8), _MM_HINT_T0);
-                _mm_prefetch((char*)(tC + 2 * ldc), _MM_HINT_T0);
-                _mm_prefetch((char*)(tC + 2 * ldc + 8), _MM_HINT_T0);
+                _mm_prefetch((char*)(tC + 7), _MM_HINT_T0);
+                _mm_prefetch((char*)(tC + 15), _MM_HINT_T0);
+                _mm_prefetch((char*)(tC + ldc + 7), _MM_HINT_T0);
+                _mm_prefetch((char*)(tC + ldc + 15), _MM_HINT_T0);
+                _mm_prefetch((char*)(tC + 2 * ldc + 7), _MM_HINT_T0);
+                _mm_prefetch((char*)(tC + 2 * ldc + 15), _MM_HINT_T0);
 #endif
                 // clear scratch registers.
                 ymm4 = _mm256_setzero_pd();
