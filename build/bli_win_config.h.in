@@ -47,4 +47,8 @@
 
 #cmakedefine BLIS_ENABLE_COMPLEX_RETURN_INTEL
 
+#cmakedefine DISABLE_BLIS_ARCH_TYPE
+
+#cmakedefine __blis_arch_type_name "@rename_blis_arch_type@"
+
 #endif

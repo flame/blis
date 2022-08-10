@@ -81,9 +81,19 @@ void bli_arch_set_id( void )
 	bool do_logging = bli_env_get_var( "BLIS_ARCH_DEBUG", 0 );
 	bli_arch_set_logging( do_logging );
 
-	// Check the environment variable BLIS_ARCH_TYPE to see if the user
-	// requested that we use a specific subconfiguration.
-	dim_t req_id = bli_env_get_var_arch_type( "BLIS_ARCH_TYPE", -1 );
+	// DISABLE_BLIS_ARCH_TYPE and BLIS_CONFIGURETIME_CPUID seem similar but
+	// have different use cases:
+	// * BLIS_CONFIGURETIME_CPUID is used by the "configure auto" option to
+	//   select a single code path, and affects other parts of the code.
+	// * DISABLE_BLIS_ARCH_TYPE disables user selection of code path here in
+	//   builds with multiple code paths.
+
+#ifndef DISABLE_BLIS_ARCH_TYPE
+	// Check the environment variable (that "__blis_arch_type_name" is
+	// defined to be) to see if the user requested that we use a specific
+	// subconfiguration. "__blis_arch_type_name" will be defined by the
+	// configure command in bli_config.h, with the default name of BLIS_ARCH_TYPE
+	dim_t req_id = bli_env_get_var_arch_type( __blis_arch_type_name, -1 );
 
 #ifndef BLIS_CONFIGURETIME_CPUID
 	if ( req_id != -1 )
@@ -118,6 +128,8 @@ void bli_arch_set_id( void )
 		id = req_id;
 	}
 	else
+#endif
+
 #endif
 	{
 		// BLIS_ARCH_TYPE was unset. Proceed with normal subconfiguration
@@ -234,6 +246,10 @@ void bli_arch_set_id( void )
 // function in bli_env.c
 static char* config_name[ BLIS_NUM_ARCHS ] =
 {
+    "error",
+
+    "generic",
+
     "skx",
     "knl",
     "knc",

@@ -107,6 +107,8 @@ option (ENABLE_UPPERCASE_API "export APIs with uppercase" OFF)
 option (ENABLE_COMPLEX_RETURN_INTEL "Enable complex_return_intel" OFF)
 option (ENABLE_TRSM_PREINVERSION "Enable TRSM preinversion" ON)
 option (ENABLE_AOCL_DYNAMIC "Enable Dynamic Multi-threading" OFF)
+option(DISABLE_BLIS_ARCH_TYPE "Disable BLIS_ARCH_TYPE functionality" OFF)
+option(RENAME_BLIS_ARCH_TYPE "Rename BLIS_ARCH_TYPE env var renamed to supplied value" BLIS_ARCH_TYPE)
 
 if (${AOCL_BLIS_FAMILY} STREQUAL "amdzen")
   set(REF_KERNEL_MIRRORING_PY "${CMAKE_SOURCE_DIR}/build/blis_ref_kernel_mirror.py")
@@ -282,6 +284,21 @@ else()
   endif()
 endif()
 
+if(DISABLE_BLIS_ARCH_TYPE)
+    set(BLIS_DISABLE_BLIS_ARCH_TYPE TRUE)
+else()
+    set(BLIS_DISABLE_BLIS_ARCH_TYPE FALSE)
+endif()
+
+if(RENAME_BLIS_ARCH_TYPE)
+    set(__blis_arch_type_name TRUE)
+    set(rename_blis_arch_type "${RENAME_BLIS_ARCH_TYPE}")
+else()
+    set(__blis_arch_type_name TRUE)
+    set(rename_blis_arch_type "BLIS_ARCH_TYPE")
+endif()
+
+
 #print configurations
 message("---cmake configurations---")
 message(CMAKE_C_COMPILER_ID : ${CMAKE_C_COMPILER_ID})
@@ -303,7 +320,8 @@ message(BLIS_ENABLE_MEMKIND : ${BLIS_ENABLE_MEMKIND})
 message(BLIS_ENABLE_PRAGMA_OMP_SIMD : ${BLIS_ENABLE_PRAGMA_OMP_SIMD})
 message(BLIS_ENABLE_SANDBOX : ${BLIS_ENABLE_SANDBOX})
 message(BLIS_ENABLE_SHARED : ${BLIS_ENABLE_SHARED})
-
+message(DISABLE_BLIS_ARCH_TYPE : ${DISABLE_BLIS_ARCH_TYPE})
+message(RENAME_BLIS_ARCH_TYPE : ${RENAME_BLIS_ARCH_TYPE})
 
 SET(ENABLE_SIMD_FLAGS "AVX2" CACHE STRING "Set compiler SIMD flags")
 SET_PROPERTY(CACHE ENABLE_SIMD_FLAGS PROPERTY STRINGS none SSE2 AVX AVX2)

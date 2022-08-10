@@ -998,6 +998,13 @@ typedef enum
 	// NOTE: The C language standard guarantees that the first enum value
 	// starts at 0.
 
+	// Initial value, will be selected for an unrecognized (non-integer)
+	// value of BLIS_ARCH_TYPE
+	BLIS_ARCH_ERROR,
+
+	// Generic architecture/configuration
+	BLIS_ARCH_GENERIC,
+
 	// Intel
 	BLIS_ARCH_SKX,
 	BLIS_ARCH_KNL,
@@ -1029,12 +1036,13 @@ typedef enum
 	BLIS_ARCH_POWER7,
 	BLIS_ARCH_BGQ,
 
-	// Generic architecture/configuration
-	BLIS_ARCH_GENERIC
+	// Dummy value, always the last one.
+	// In config_name in bli_arch.c this is also set to "generic"
+	BLIS_ARCH_GENERIC_LAST
 
 } arch_t;
 
-#define BLIS_NUM_ARCHS (BLIS_ARCH_GENERIC + 1)
+#define BLIS_NUM_ARCHS (BLIS_ARCH_GENERIC_LAST + 1)
 
 
 //

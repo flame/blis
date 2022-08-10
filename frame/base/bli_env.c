@@ -87,14 +87,15 @@ gint_t bli_env_get_var_arch_type( const char* env, gint_t fallback )
 
 		if (r_val == 0)
 		{
-			// Could be deliberately 0 (currently meaning "skx") or
-			// a non-numeric value. We still allow direct specification
-			// of integer value to select code path. Non-zero integer
-			// values bypass this code block and are handled as before.
-			// Here we look for known meaningful names, and return 0
-			// if we cannot find a match.
-			// This code MUST be kept in synch with arch_t enumeration
-			// in bli_type_defs.h and array config_name in bli_arch.c
+			// Could be deliberately 0 (now meaning an ERROR)
+			// or a non-numeric value. We still allow direct
+			// specification of integer value to select code
+			// path. Non-zero integer values bypass this code
+			// block and are handled as before. Here we look
+			// for known meaningful names, and return 0 if
+			// we cannot find a match. This code MUST be kept
+			// in synch with arch_t enumeration in
+			// bli_type_defs.h and array config_name in bli_arch.c
 
 			// convert string to lowercase
 			size = strlen(str);
@@ -141,7 +142,8 @@ gint_t bli_env_get_var_arch_type( const char* env, gint_t fallback )
 			{
 				r_val = BLIS_ARCH_ZEN2;
 			}
-			else if ((strcmp(str, "zen") == 0) || (strcmp(str, "zen1") == 0))
+			else if ((strcmp(str, "zen") == 0) ||
+			         (strcmp(str, "zen1") == 0))
 			{
 				r_val = BLIS_ARCH_ZEN;
 			}
