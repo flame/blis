@@ -35,27 +35,10 @@
 #include <immintrin.h>
 
 #include "blis.h"
-#include "lpgemm_mn_fringe_s16.h"
+#include "lpgemm_kernels.h"
 
 // 4x32 int8o16 kernel
-void lpgemm_rowvar_u8s8s16o16_4x16
-	(
-		const dim_t k0,
-		const uint8_t *a,
-		const dim_t rs_a,
-		const dim_t cs_a,
-		const int8_t *b,
-		const dim_t rs_b,
-		const dim_t cs_b,
-		int16_t *c,
-		const dim_t rs_c,
-		const int16_t alpha,
-		const int16_t beta,
-		bool is_last_k,
-		dim_t post_op_c_i,
-		dim_t post_op_c_j,
-		lpgemm_post_op *post_ops_list
-	)
+LPGEMM_MN_FRINGE_KERN(uint8_t,int8_t,int16_t,u8s8s16o16_4x16)
 {
 	dim_t NR = 16;
 
@@ -273,25 +256,7 @@ POST_OPS_4x16_DISABLE:
 }
 
 // 4x16 int8o16 kernel
-void lpgemm_rowvar_u8s8s16o16_4xlt16
-	(
-		const dim_t k0,
-		const uint8_t *a,
-		const dim_t rs_a,
-		const dim_t cs_a,
-		const int8_t *b,
-		const dim_t rs_b,
-		const dim_t cs_b,
-		int16_t *c,
-		const dim_t rs_c,
-		const int16_t alpha,
-		const int16_t beta,
-		dim_t n0_rem,
-		bool is_last_k,
-		dim_t post_op_c_i,
-		dim_t post_op_c_j,
-		lpgemm_post_op *post_ops_list
-	)
+LPGEMM_MN_LT_NR0_FRINGE_KERN(uint8_t,int8_t,int16_t,u8s8s16o16_4xlt16)
 {
 	dim_t NR = 16;
 
@@ -536,24 +501,7 @@ POST_OPS_4xlt16_DISABLE:
 }
 
 // 2x16 int8o16 kernel
-void lpgemm_rowvar_u8s8s16o16_2x16
-	(
-		const dim_t k0,
-		const uint8_t *a,
-		const dim_t rs_a,
-		const dim_t cs_a,
-		const int8_t *b,
-		const dim_t rs_b,
-		const dim_t cs_b,
-		int16_t *c,
-		const dim_t rs_c,
-		const int16_t alpha,
-		const int16_t beta,
-		bool is_last_k,
-		dim_t post_op_c_i,
-		dim_t post_op_c_j,
-		lpgemm_post_op *post_ops_list
-	)
+LPGEMM_MN_FRINGE_KERN(uint8_t,int8_t,int16_t,u8s8s16o16_2x16)
 {
 	dim_t NR = 16;
 
@@ -697,25 +645,7 @@ POST_OPS_2x16_DISABLE:
 }
 
 // 2xlt16 int8o16 kernel
-void lpgemm_rowvar_u8s8s16o16_2xlt16
-	(
-		const dim_t k0,
-		const uint8_t *a,
-		const dim_t rs_a,
-		const dim_t cs_a,
-		const int8_t *b,
-		const dim_t rs_b,
-		const dim_t cs_b,
-		int16_t *c,
-		const dim_t rs_c,
-		const int16_t alpha,
-		const int16_t beta,
-		dim_t n0_rem,
-		bool is_last_k,
-		dim_t post_op_c_i,
-		dim_t post_op_c_j,
-		lpgemm_post_op *post_ops_list
-	)
+LPGEMM_MN_LT_NR0_FRINGE_KERN(uint8_t,int8_t,int16_t,u8s8s16o16_2xlt16)
 {
 	dim_t NR = 16;
 
@@ -874,24 +804,7 @@ POST_OPS_2xlt16_DISABLE:
 }
 
 // 1x16 int8o16 kernel
-void lpgemm_rowvar_u8s8s16o16_1x16
-	(
-		const dim_t k0,
-		const uint8_t *a,
-		const dim_t rs_a,
-		const dim_t cs_a,
-		const int8_t *b,
-		const dim_t rs_b,
-		const dim_t cs_b,
-		int16_t *c,
-		const dim_t rs_c,
-		const int16_t alpha,
-		const int16_t beta,
-		bool is_last_k,
-		dim_t post_op_c_i,
-		dim_t post_op_c_j,
-		lpgemm_post_op *post_ops_list
-	)
+LPGEMM_MN_FRINGE_KERN(uint8_t,int8_t,int16_t,u8s8s16o16_1x16)
 {
 	int NR = 16;
 
@@ -997,25 +910,7 @@ POST_OPS_1x16_DISABLE:
 }
 
 // 1xlt16 int8o16 kernel
-void lpgemm_rowvar_u8s8s16o16_1xlt16
-	(
-		const int k0,
-		const uint8_t *a,
-		const int rs_a,
-		const int cs_a,
-		const int8_t *b,
-		const int rs_b,
-		const int cs_b,
-		int16_t *c,
-		const int rs_c,
-		const int16_t alpha,
-		const int16_t beta,
-		dim_t n0_rem,
-		bool is_last_k,
-		dim_t post_op_c_i,
-		dim_t post_op_c_j,
-		lpgemm_post_op *post_ops_list
-	)
+LPGEMM_MN_LT_NR0_FRINGE_KERN(uint8_t,int8_t,int16_t,u8s8s16o16_1xlt16)
 {
 	int NR = 16;
 

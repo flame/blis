@@ -33,18 +33,13 @@
 */
 
 #include "blis.h"
-#include "aocl_gemm_u8s8s32os32_utils.h"
+#include "aocl_gemm_interface_apis.h"
 #include "lpgemm_types.h"
 #include "lpgemm_config.h"
 #include "lpgemm_utils.h"
 #include "lpgemm_reorder.h"
 
-siz_t aocl_get_reorder_buf_size_u8s8s32os32
-     (
-       const char  mat_type,
-       const dim_t k,
-       const dim_t n
-     )
+AOCL_GEMM_GET_REORDER_BUF_SIZE(u8s8s32os32)
 {
 	if ( ( k <= 0 ) || ( n <= 0 ) )
 	{
@@ -87,15 +82,7 @@ siz_t aocl_get_reorder_buf_size_u8s8s32os32
 	return size_req;
 }
 
-void aocl_reorder_u8s8s32os32
-     (
-       const char    mat_type,
-       const int8_t* input_buf_addr,
-       int8_t*       reorder_buf_addr,
-       const dim_t   k,
-       const dim_t   n,
-       const dim_t   ldb
-     )
+AOCL_GEMM_REORDER(int8_t,u8s8s32os32)
 {
 	if ( ( input_buf_addr == NULL ) || ( reorder_buf_addr == NULL ) ||
 	     ( k <= 0 ) || ( n <= 0 ) || ( ldb < n ) )

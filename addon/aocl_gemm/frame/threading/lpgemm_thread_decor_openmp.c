@@ -36,9 +36,7 @@
 #include "lpgemm_config.h"
 #include "lpgemm_thread_decor_openmp.h"
 #include "lpgemm_types.h"
-#include "lpgemm_u8s8s16.h"
-#include "lpgemm_u8s8s32.h"
-#include "lpgemm_f32f32f32.h"
+#include "lpgemm_5loop_interface_apis.h"
 
 #ifdef BLIS_ENABLE_OPENMP
 

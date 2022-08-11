@@ -36,27 +36,10 @@
 #include <string.h>
 
 #include "blis.h"
-#include "lpgemm_m_fringe.h"
+#include "lpgemm_kernels.h"
 
 // 5x64 int8o32 kernel
-void lpgemm_rowvar_u8s8s32o32_5x64
-     (
-       const dim_t    k0,
-       const uint8_t* a,
-       const dim_t    rs_a,
-       const dim_t    cs_a,
-       const int8_t*  b,
-       const dim_t    rs_b,
-       const dim_t    cs_b,
-       int32_t*       c,
-       const dim_t    rs_c,
-       const int32_t  alpha,
-       const int32_t  beta,
-       bool           is_last_k,
-       dim_t          post_op_c_i,
-       dim_t          post_op_c_j,
-       lpgemm_post_op*       post_ops_list
-     )
+LPGEMM_M_FRINGE_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_5x64)
 {
 	static void* post_ops_labels[] =
 						{
@@ -607,24 +590,7 @@ POST_OPS_5x64_DISABLE:
 }
 
 // 4x64 int8o32 kernel
-void lpgemm_rowvar_u8s8s32o32_4x64
-     (
-       const dim_t    k0,
-       const uint8_t* a,
-       const dim_t    rs_a,
-       const dim_t    cs_a,
-       const int8_t*  b,
-       const dim_t    rs_b,
-       const dim_t    cs_b,
-       int32_t*       c,
-       const dim_t    rs_c,
-       const int32_t  alpha,
-       const int32_t  beta,
-       bool           is_last_k,
-       dim_t          post_op_c_i,
-       dim_t          post_op_c_j,
-       lpgemm_post_op*       post_ops_list
-     )
+LPGEMM_M_FRINGE_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_4x64)
 {
 	static void* post_ops_labels[] =
 						{
@@ -1081,24 +1047,7 @@ POST_OPS_4x64_DISABLE:
 }
 
 // 3x64 int8o32 kernel
-void lpgemm_rowvar_u8s8s32o32_3x64
-     (
-       const dim_t    k0,
-       const uint8_t* a,
-       const dim_t    rs_a,
-       const dim_t    cs_a,
-       const int8_t*  b,
-       const dim_t    rs_b,
-       const dim_t    cs_b,
-       int32_t*       c,
-       const dim_t    rs_c,
-       const int32_t  alpha,
-       const int32_t  beta,
-       bool           is_last_k,
-       dim_t          post_op_c_i,
-       dim_t          post_op_c_j,
-       lpgemm_post_op*       post_ops_list
-     )
+LPGEMM_M_FRINGE_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_3x64)
 {
 	static void* post_ops_labels[] =
 						{
@@ -1461,24 +1410,7 @@ POST_OPS_3x64_DISABLE:
 }
 
 // 2x64 int8o32 kernel
-void lpgemm_rowvar_u8s8s32o32_2x64
-     (
-       const dim_t    k0,
-       const uint8_t* a,
-       const dim_t    rs_a,
-       const dim_t    cs_a,
-       const int8_t*  b,
-       const dim_t    rs_b,
-       const dim_t    cs_b,
-       int32_t*       c,
-       const dim_t    rs_c,
-       const int32_t  alpha,
-       const int32_t  beta,
-       bool           is_last_k,
-       dim_t          post_op_c_i,
-       dim_t          post_op_c_j,
-       lpgemm_post_op*       post_ops_list
-     )
+LPGEMM_M_FRINGE_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_2x64)
 {
 	static void* post_ops_labels[] =
 						{
@@ -1747,24 +1679,7 @@ POST_OPS_2x64_DISABLE:
 }
 
 // 1x64 int8o32 kernel
-void lpgemm_rowvar_u8s8s32o32_1x64
-     (
-       const dim_t    k0,
-       const uint8_t* a,
-       const dim_t    rs_a,
-       const dim_t    cs_a,
-       const int8_t*  b,
-       const dim_t    rs_b,
-       const dim_t    cs_b,
-       int32_t*       c,
-       const dim_t    rs_c,
-       const int32_t  alpha,
-       const int32_t  beta,
-       bool           is_last_k,
-       dim_t          post_op_c_i,
-       dim_t          post_op_c_j,
-       lpgemm_post_op*       post_ops_list
-     )
+LPGEMM_M_FRINGE_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_1x64)
 {
 	static void* post_ops_labels[] =
 						{

@@ -33,33 +33,10 @@
 */
 #include <immintrin.h>
 #include "blis.h"
-#include "lpgemm_6x32rowmajor.h"
-#include "lpgemm_m_fringe_s16.h"
-#include "lpgemm_n_fringe_s16.h"
+#include "lpgemm_kernels.h"
 
 // 6x32 int8o16 kernel
-void lpgemm_rowvar_u8s8s16o16_6x32
-	(
-		const dim_t m0,
-		const dim_t n0,
-		const dim_t k0,
-		const uint8_t *a,
-		const dim_t rs_a,
-		const dim_t cs_a,
-		const dim_t ps_a,
-		const int8_t *b,
-		const dim_t rs_b,
-		const dim_t cs_b,
-		int16_t *c,
-		const dim_t rs_c,
-		const dim_t cs_c,
-		const int16_t alpha,
-		const int16_t beta,
-		bool is_last_k,
-		dim_t post_op_c_i,
-		dim_t post_op_c_j,
-		lpgemm_post_op *post_ops_list
-	)
+LPGEMM_MAIN_KERN(uint8_t,int8_t,int16_t,u8s8s16o16_6x32)
 {
 	static void *post_ops_labels[] =
 		{

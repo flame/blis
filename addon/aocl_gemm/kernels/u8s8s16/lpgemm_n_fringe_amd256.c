@@ -35,30 +35,10 @@
 #include <immintrin.h>
 
 #include "blis.h"
-#include "lpgemm_n_fringe_s16.h"
-#include "lpgemm_mn_fringe_s16.h"
+#include "lpgemm_kernels.h"
 
 // 6x16 int8o16 kernel
-void lpgemm_rowvar_u8s8s16o16_6x16
-	(
-		const dim_t m0,
-		const dim_t k0,
-		const uint8_t *a,
-		const dim_t rs_a,
-		const dim_t cs_a,
-		const dim_t ps_a,
-		const int8_t *b,
-		const dim_t rs_b,
-		const dim_t cs_b,
-		int16_t *c,
-		const dim_t rs_c,
-		const int16_t alpha,
-		const int16_t beta,
-		bool is_last_k,
-		dim_t post_op_c_i,
-		dim_t post_op_c_j,
-		lpgemm_post_op *post_ops_list
-	)
+LPGEMM_N_FRINGE_KERN(uint8_t,int8_t,int16_t,u8s8s16o16_6x16)
 {
 	dim_t MR = 6;
 	dim_t NR = 16;
@@ -343,22 +323,22 @@ POST_OPS_6x16_DISABLE:
 
 		// Store the results.
 		// c[0,0-15]
-		_mm256_storeu_si256( (__m256i *)(c + ( rs_c *  0 ) + ( 0*16 )), c_int16_0p0 );
+		_mm256_storeu_si256( (__m256i *)(c + ( rs_c *  ( ir + 0 ) ) + ( 0 * 16 ) ), c_int16_0p0 );
 
 		// c[1,0-15]
-		_mm256_storeu_si256( (__m256i *)(c + ( rs_c * 1 ) + ( 0*16 )), c_int16_1p0 );
+		_mm256_storeu_si256( (__m256i *)(c + ( rs_c * ( ir + 1 ) ) + ( 0 * 16 ) ), c_int16_1p0 );
 
 		// c[2,0-15]
-		_mm256_storeu_si256( (__m256i *)(c + ( rs_c * 2  ) + ( 0*16 )), c_int16_2p0 );
+		_mm256_storeu_si256( (__m256i *)(c + ( rs_c * ( ir + 2 ) ) + ( 0 * 16 ) ), c_int16_2p0 );
 
 		// c[3,0-15]
-		_mm256_storeu_si256( (__m256i *)(c + ( rs_c * 3 ) + ( 0*16 )), c_int16_3p0 );
+		_mm256_storeu_si256( (__m256i *)(c + ( rs_c * ( ir + 3 ) ) + ( 0 * 16 ) ), c_int16_3p0 );
 
 		// c[4,0-15]
-		_mm256_storeu_si256( (__m256i *)(c + ( rs_c * 4 ) + ( 0*16 )), c_int16_4p0 );
+		_mm256_storeu_si256( (__m256i *)(c + ( rs_c * ( ir + 4 ) ) + ( 0 * 16 ) ), c_int16_4p0 );
 
 		// c[5,0-15]
-		_mm256_storeu_si256( (__m256i *)(c + ( rs_c * 5 ) + ( 0*16 )), c_int16_5p0 );
+		_mm256_storeu_si256( (__m256i *)(c + ( rs_c * ( ir + 5 ) ) + ( 0 * 16 ) ), c_int16_5p0 );
 		
 		a = a + ( MR * ps_a );
 		post_op_c_i += MR;
@@ -422,27 +402,7 @@ POST_OPS_6x16_DISABLE:
 }
 
 // 6xlt16 int8o16 kernel
-void lpgemm_rowvar_u8s8s16o16_6xlt16
-	(
-		const dim_t m0,
-		const dim_t k0,
-		const uint8_t *a,
-		const dim_t rs_a,
-		const dim_t cs_a,
-		const dim_t ps_a,
-		const int8_t *b,
-		const dim_t rs_b,
-		const dim_t cs_b,
-		int16_t *c,
-		const dim_t rs_c,
-		const int16_t alpha,
-		const int16_t beta,
-		const dim_t n0_rem,
-		bool is_last_k,
-		dim_t post_op_c_i,
-		dim_t post_op_c_j,
-		lpgemm_post_op *post_ops_list
-	)
+LPGEMM_N_LT_NR0_FRINGE_KERN(uint8_t,int8_t,int16_t,u8s8s16o16_6xlt16)
 {
 	dim_t MR = 6;
 

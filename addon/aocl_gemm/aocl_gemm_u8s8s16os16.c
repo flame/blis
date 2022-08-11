@@ -33,33 +33,15 @@
 */
 
 #include "blis.h"
-#include "aocl_gemm_u8s8s16os16.h"
+#include "aocl_gemm_interface_apis.h"
 #include "lpgemm_types.h"
-#include "lpgemm_u8s8s16.h"
+#include "lpgemm_5loop_interface_apis.h"
 #include "lpgemm_config.h"
 #include "lpgemm_utils.h"
 #include "lpgemm_thread_decor_openmp.h"
 #include "lpgemm_post_ops.h"
 
-void aocl_gemm_u8s8s16os16
-     (
-       const char     transa,
-       const char     transb,
-       const dim_t    m,
-       const dim_t    n,
-       const dim_t    k,
-       const int16_t  alpha,
-       const uint8_t* a,
-       const dim_t    lda,
-       const char     mem_format_a,
-       const int8_t*  b,
-       const dim_t    ldb,
-       const char     mem_format_b,
-       const int16_t  beta,
-       int16_t*       c,
-       const dim_t    ldc,
-       aocl_post_op*  post_op_unparsed
-     )
+AOCL_GEMM_MATMUL(uint8_t,int8_t,int16_t,u8s8s16os16)
 {
 	trans_t blis_transa;
 	trans_t blis_transb;
@@ -89,9 +71,14 @@ void aocl_gemm_u8s8s16os16
 
 	/* Perform BLAS parameter checking. */
 	// Transpose not supported.
-	if ((blis_transa != BLIS_NO_TRANSPOSE) || (blis_transb != BLIS_NO_TRANSPOSE))
+	if ( ( blis_transa != BLIS_NO_TRANSPOSE ) ||
+		 ( blis_transb != BLIS_NO_TRANSPOSE ) )
 	{
 		return; // Error.
+	}
+	if ( ( order != 'r' ) && ( order != 'R' ) )
+	{
+		return; // Only row major supported.
 	}
 
 	// Row major input expected with leading dimensions equal to row stride.

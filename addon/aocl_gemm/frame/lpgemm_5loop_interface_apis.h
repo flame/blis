@@ -32,31 +32,36 @@
 
 */
 
-#ifndef AOCL_GEMM_U8S8S32OS32_H
-#define AOCL_GEMM_U8S8S32OS32_H
+#ifndef LPGEMM_5LOOP_INTF_H
+#define LPGEMM_5LOOP_INTF_H
 
-#include "aocl_gemm_post_ops.h"
+#include "lpgemm_types.h"
+#include "lpgemm_post_ops.h"
 
-// Only supports matrices in row major format. Currenlty only mem_format_b
-// is configurable to reorder.
-BLIS_EXPORT_ADDON void aocl_gemm_u8s8s32os32
-     (
-       const char     transa,
-       const char     transb,
-       const dim_t    m,
-       const dim_t    n,
-       const dim_t    k,
-       const int32_t  alpha,
-       const uint8_t* a,
-       const dim_t    lda,
-       const char     mem_format_a,
-       const int8_t*  b,
-       const dim_t    ldb,
-       const char     mem_format_b,
-       const int32_t  beta,
-       int32_t*       c,
-       const dim_t    ldc,
-       aocl_post_op*  post_op_unparsed
-     );
+#define LPGEMM_5LOOP(A_type,B_type,C_type,LP_SFX) \
+void lpgemm_rowvar_ ## LP_SFX \
+     ( \
+       const dim_t           m, \
+       const dim_t           n, \
+       const dim_t           k, \
+       const A_type*         a, \
+       const dim_t           rs_a, \
+       const dim_t           cs_a, \
+       const AOCL_MEMORY_TAG mtag_a, \
+       const B_type*         b, \
+       const dim_t           rs_b, \
+       const dim_t           cs_b, \
+       const AOCL_MEMORY_TAG mtag_b, \
+       C_type*               c, \
+       const dim_t           rs_c, \
+       C_type                alpha, \
+       C_type                beta, \
+       rntm_t*               rntm, \
+       lpgemm_thrinfo_t*     thread, \
+       lpgemm_post_op*       post_op_list \
+     ) \
 
-#endif //AOCL_GEMM_U8S8S32OS32_H
+LPGEMM_5LOOP(uint8_t,int8_t,int32_t,u8s8s32o32);
+LPGEMM_5LOOP(uint8_t,int8_t,int16_t,u8s8s16o16);
+LPGEMM_5LOOP(float,float,float,f32f32f32of32);
+#endif // LPGEMM_5LOOP_INTF_H

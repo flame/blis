@@ -68,6 +68,7 @@ void mat_mul_ ## BLAS_SFX \
        aocl_post_op*  post_op\
      ) \
 { \
+	char storage = 'r'; \
 	char transa = 'n'; \
 	char transb = 'n'; \
 	char reordera = 'n'; \
@@ -86,7 +87,7 @@ void mat_mul_ ## BLAS_SFX \
 		reorderb = 'r'; \
 	} \
  \
-	aocl_gemm_ ## BLAS_SFX( transa, transb, m, n, k, \
+	aocl_gemm_ ## BLAS_SFX( storage, transa, transb, m, n, k, \
 					alpha, \
 					a, lda, reordera, \
 					b, ldb, reorderb, \

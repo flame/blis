@@ -33,32 +33,14 @@
 */
 
 #include "blis.h"
-#include "aocl_gemm_f32f32f32of32.h"
+#include "aocl_gemm_interface_apis.h"
 #include "lpgemm_types.h"
 #include "lpgemm_post_ops.h"
 #include "lpgemm_thread_decor_openmp.h"
 #include "lpgemm_utils.h"
-#include "lpgemm_f32f32f32.h"
+#include "lpgemm_5loop_interface_apis.h"
 
-void aocl_gemm_f32f32f32of32
-     (
-       const char   transa,
-       const char   transb,
-       const dim_t  m,
-       const dim_t  n,
-       const dim_t  k,
-       const float  alpha,
-       const float* a,
-       const dim_t  lda,
-       const char   mem_format_a,
-       const float* b,
-       const dim_t  ldb,
-       const char   mem_format_b,
-       const float  beta,
-       float*       c,
-       const dim_t  ldc,
-       aocl_post_op*  post_op_unparsed
-     )
+AOCL_GEMM_MATMUL(float,float,float,f32f32f32of32)
 {
 	trans_t blis_transa;
 	trans_t blis_transb;
@@ -97,6 +79,10 @@ void aocl_gemm_f32f32f32of32
 		AOCL_DTL_TRACE_EXIT_ERR(AOCL_DTL_LEVEL_TRACE_1, \
 						"Input matrix transpose not supported.");
 		return; // Error.
+	}
+	if ( ( order != 'r' ) && ( order != 'R' ) )
+	{
+		return; // Only row major supported.
 	}
 
 	// Row major input expected with leading dimensions equal to row stride.

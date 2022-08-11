@@ -33,7 +33,7 @@
 */
 
 #include "blis.h"
-#include "lpgemm_f32f32f32.h"
+#include "lpgemm_5loop_interface_apis.h"
 #include "lpgemm_types.h"
 #include "lpgemm_utils.h"
 #include "lpgemm_thrinfo_utils.h"
@@ -51,27 +51,7 @@ void lpgemm_pack_a_f32f32f32of32
        cntx_t*      cntx
      );
 
-void lpgemm_rowvar_f32f32f32of32
-     (
-       const dim_t           m,
-       const dim_t           n,
-       const dim_t           k,
-       const float*          a,
-       const dim_t           rs_a,
-       const dim_t           cs_a,
-       const AOCL_MEMORY_TAG mtag_a,
-       const float*          b,
-       const dim_t           rs_b,
-       const dim_t           cs_b,
-       const AOCL_MEMORY_TAG mtag_b,
-       float*                c,
-       const dim_t           rs_c,
-       float                 alpha,
-       float                 beta,
-       rntm_t*               rntm,
-       lpgemm_thrinfo_t*     thread,
-       lpgemm_post_op*       post_op_list
-     )
+LPGEMM_5LOOP(float,float,float,f32f32f32of32)
 {
 	// Query the global cntx.
 	cntx_t* cntx = bli_gks_query_cntx();

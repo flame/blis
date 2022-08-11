@@ -33,34 +33,15 @@
 */
 
 #include "blis.h"
-#include "lpgemm_u8s8s16.h"
+#include "lpgemm_5loop_interface_apis.h"
 #include "lpgemm_packb_s16.h"
-#include "lpgemm_6x32rowmajor.h"
+#include "lpgemm_kernels.h"
 #include "lpgemm_utils.h"
 #include "lpgemm_config.h"
 #include "lpgemm_thrinfo_utils.h"
 
-void lpgemm_rowvar_u8s8s16o16
-	(
-	  const dim_t m,
-	  const dim_t n,
-	  const dim_t k,
-	  const uint8_t *a,
-	  const dim_t rs_a,
-	  const dim_t cs_a,
-	  const AOCL_MEMORY_TAG mtag_a,
-	  const int8_t *b,
-	  const dim_t rs_b,
-	  const dim_t cs_b,
-	  const AOCL_MEMORY_TAG mtag_b,
-	  int16_t *c,
-	  const dim_t rs_c,
-	  int16_t alpha,
-	  int16_t beta,
-	  rntm_t *rntm,
-	  lpgemm_thrinfo_t *thread,
-	  lpgemm_post_op*       post_op_list
-	)
+// B should always be packed.
+LPGEMM_5LOOP(uint8_t,int8_t,int16_t,u8s8s16o16)
 {
 	const dim_t NC = lpgemm_get_block_size_NC_global_cntx( U8S8S16OS16 );
 	const dim_t KC = lpgemm_get_block_size_KC_global_cntx( U8S8S16OS16 );

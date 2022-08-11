@@ -33,15 +33,10 @@
 */
 
 #include "blis.h"
-#include "aocl_gemm_f32f32f32of32_utils.h"
+#include "aocl_gemm_interface_apis.h"
 #include "lpgemm_utils.h"
 
-siz_t aocl_get_reorder_buf_size_f32f32f32of32
-     (
-       const char  mat_type,
-       const dim_t k,
-       const dim_t n
-     )
+AOCL_GEMM_GET_REORDER_BUF_SIZE(f32f32f32of32)
 {
 	if ( ( k <= 0 ) || ( n <= 0 ) )
 	{
@@ -82,17 +77,9 @@ siz_t aocl_get_reorder_buf_size_f32f32f32of32
 }
 
 // Pack B into row stored column panels.
-void aocl_reorder_f32f32f32of32
-     (
-       const char   mat_type,
-       const float* input_buf_addr_b,
-       float*       reorder_buf_addr_b,
-       const dim_t  k,
-       const dim_t  n,
-       const dim_t  ldb
-     )
+AOCL_GEMM_REORDER(float,f32f32f32of32)
 {
-	if ( ( input_buf_addr_b == NULL ) || ( reorder_buf_addr_b == NULL ) ||
+	if ( ( input_buf_addr == NULL ) || ( reorder_buf_addr == NULL ) ||
 	     ( k <= 0 ) || ( n <= 0 ) || ( ldb < n ) )
 	{
 		return; // Error.
@@ -190,7 +177,7 @@ void aocl_reorder_f32f32f32of32
 				dim_t kc0 = bli_min( ( k - pc ), KC );
 				inc_t ps_p = kc0 * NR;
 
-				const float* b_temp = input_buf_addr_b + ( jc * cs_b ) + ( pc * rs_b );
+				const float* b_temp = input_buf_addr + ( jc * cs_b ) + ( pc * rs_b );
 
 				// The offsets are calculated in such a way that it resembles
 				// the reorder buffer traversal in single threaded reordering.
@@ -227,7 +214,7 @@ void aocl_reorder_f32f32f32of32
 				// st = ( jc_cur_loop * k )    <traverse blocks 1,2,3,4>
 				//    + ( n_sub_updated * pc ) <traverse block 5>
 				//    + ( NC' * kc0_updated)   <traverse block 6>
-				float* p_temp = reorder_buf_addr_b + ( jc_cur_loop * k ) +
+				float* p_temp = reorder_buf_addr + ( jc_cur_loop * k ) +
 								( n_sub_updated * pc ) + ( jc_cur_loop_rem * kc0 );
 
 				dim_t jr, it;
