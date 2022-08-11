@@ -278,14 +278,14 @@ def flatten_header( inputfile, header_dirpaths, cursp ):
 
 				# Mark the beginning of the header being inserted.
 				ostring += "%s%s%c" % ( beginstr, header, '\n' )
-				ostring += "#line %d \"%s\"%c\n" % ( 1, header_path, '\n' )
+				#ostring += "#line %d \"%s\"%c\n" % ( 1, header_path, '\n' )
 
 				# Recurse on the header, accumulating the string.
 				ostring += flatten_header( header_path, header_dirpaths, cursp + "  " )
 
 				# Mark the end of the header being inserted.
 				ostring += "%s%s%c" % ( endstr, header, '\n' )
-				ostring += "#line %d \"%s\"%c\n" % ( lineno+1, inputfile, '\n' )
+				#ostring += "#line %d \"%s\"%c\n" % ( lineno+1, inputfile, '\n' )
 
 				echov2( "%sheader file '%s' fully processed." \
 				        % ( cursp, header_path ) )
