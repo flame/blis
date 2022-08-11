@@ -43,10 +43,10 @@
     /*                                           s      d      c      z */  \
     bli_blksz_init_easy( &blkszs[ BLIS_MR ],    32,    16,     3,     3 );  \
     bli_blksz_init_easy( &blkszs[ BLIS_NR ],    12,    14,     8,     4 );  \
-    bli_blksz_init_easy( &blkszs[ BLIS_MC ],   480,   240,   144,    18 );  \
-    bli_blksz_init     ( &blkszs[ BLIS_KC ],   384,   512,   256,   566,    \
+    bli_blksz_init_easy( &blkszs[ BLIS_MC ],   512,   240,   144,    18 );  \
+    bli_blksz_init     ( &blkszs[ BLIS_KC ],   480,   512,   256,   566,    \
                                                480,   320,   256,   566 );  \
-    bli_blksz_init_easy( &blkszs[ BLIS_NC ],  3072,  4004,  4080,   256 );  \
+    bli_blksz_init_easy( &blkszs[ BLIS_NC ],  6144,  4004,  4080,   256 );  \
                                                                             \
     bli_blksz_init_easy( &blkszs[ BLIS_AF ],     8,     8,    -1,    -1 );  \
     bli_blksz_init_easy( &blkszs[ BLIS_DF ],     8,     8,    -1,    -1 );  \
