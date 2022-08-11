@@ -37,7 +37,6 @@
 #include "blis.h"
 #include "assert.h"
 
-GEMMSUP_KER_PROT( double, d, gemmsup_r_armv8a_ref2 )
 
 // Label locality & misc.
 #include "../armv8a_asm_utils.h"
@@ -534,7 +533,6 @@ consider_edge_cases:
   // Forward address.
   a = a + m_iter * ps_a;
   c = c + m_iter * 6 * rs_c;
-#if 1
   auxinfo_t data_d6x4mn = *data;
   bli_auxinfo_set_ps_b( 4 * cs_b0, &data_d6x4mn );
   bli_dgemmsup_rv_armv8a_int_6x4mn
@@ -543,33 +541,6 @@ consider_edge_cases:
       alpha, a, rs_a0, cs_a0, b, rs_b0, cs_b0,
       beta, c, rs_c0, cs_c0, &data_d6x4mn, cntx
   );
-#else
-  if ( m_left >= 4 )
-  {
-    // Calls 4x8m with only 1 outermost loop.
-    // As only 1 outermost loop is called,
-    //  ps_a needs not being set here.
-    //
-    bli_dgemmsup_rv_armv8a_asm_4x8m
-    (
-      conja, conjb, 4, 8, k0,
-      alpha, a, rs_a0, cs_a0, b, rs_b0, cs_b0,
-      beta, c, rs_c0, cs_c0, data, cntx
-    );
-    m_left -= 4;
-    a = a + 4 * rs_a;
-    c = c + 4 * rs_c;
-  }
-  if ( m_left )
-  {
-    bli_dgemmsup_r_armv8a_ref2
-    (
-      conja, conjb, m_left, 8, k0,
-      alpha, a, rs_a0, cs_a0, b, rs_b0, cs_b0,
-      beta, c, rs_c0, cs_c0, data, cntx
-    );
-  }
-#endif
 
 }
 
