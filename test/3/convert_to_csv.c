@@ -1,4 +1,4 @@
-#define CONVERT_VERSION=1
+#define CONVERT_VERSION 3.0
 //============================================================
 // This Code Presented to you courtesy of Oracle Labs
 // By default, the blis test/3 suite outputs performance
@@ -10,7 +10,7 @@
 //============================================================
 //
 // To build: Currently we use c++ just for the bool type..
-// gcc -O2 ConvertBlisOutputToExcel.c -o convert.x
+// gcc -O2 convert_to_csv.c -o convert.x
 //
 // NEW:  Optional: if first argument ends in .csv, it will use
 //      that name for the summary file.
@@ -126,7 +126,7 @@ int main(int argc, const char* argv[])
   if (argc == 1) // no arguments gets help
   	{
     printf("==================================================\n");
-		printf("Convert V3 Usage: leverage shell to group experiments:\n");
+		printf("Convert Version %.02f Usage: leverage shell to group experiments:\n", CONVERT_VERSION);
 		printf("\te.g.: ./convert.x *_st_*blis.m will create a single chart with those experiments as columns.\n\n");
   	printf("-------------------------------------------------- Optional V3 options must be before file list:\n\n");
     printf("[MyFileName.csv] \t - filename ending in .csv defines the summary filename.\n");
