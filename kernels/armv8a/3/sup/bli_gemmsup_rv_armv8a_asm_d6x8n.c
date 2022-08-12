@@ -143,7 +143,6 @@ void bli_dgemmsup_rv_armv8a_asm_6x8n
        cntx_t*             cntx
      )
 {
-  static int ccc = 1; if (ccc) { fprintf(stderr, "called\n"); ccc = 0; }
   if ( m0 != 6 )
   {
     assert( m0 <= 9 );
