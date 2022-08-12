@@ -5,7 +5,7 @@
 #  libraries.
 #
 #  Copyright (C) 2014, The University of Texas at Austin
-#  Copyright (C) 2020-2021, Advanced Micro Devices, Inc. All rights reserved.
+#  Copyright (C) 2020-2022, Advanced Micro Devices, Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -1084,6 +1084,7 @@ BLIS_H_FLAT     := $(BASE_INC_PATH)/$(BLIS_H)
 # header files.
 CBLAS_H          := cblas.h
 CBLAS_H_SRC_PATH := $(filter %/$(CBLAS_H), $(FRAME_H99_FILES))
+CBLAS_H_DIRPATH  := $(dir $(CBLAS_H_SRC_PATH))
 
 # Construct the path to what will be the intermediate flattened/monolithic
 # cblas.h file.

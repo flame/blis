@@ -565,7 +565,8 @@ message( STATUS "Generating monolithic cblas header file :" ${CMD_OUTPUT})
 # setting the blis version string
 file (STRINGS "version" BLIS_VERSION)
 set(BLIS_VERSION_STRING ${BLIS_VERSION})
-add_definitions(-DBLIS_VERSION_STRING="AOCL BLIS ${BLIS_VERSION_STRING}")
+string(TIMESTAMP BUILD_DATE "%Y%m%d")
+add_definitions(-DBLIS_VERSION_STRING="AOCL-BLIS ${BLIS_VERSION_STRING} Build ${BUILD_DATE}")
 
 if(BUILD_SHARED_LIBS)
     add_library("${PROJECT_NAME}" SHARED ${CMAKE_SOURCE_DIR}/bli_config.h

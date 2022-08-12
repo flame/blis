@@ -1819,67 +1819,13 @@ try_assemble()
 
 set_default_version()
 {
-	local gitdir version_file gd_stderr git_describe_str git_error new_version_str
-
-	gitdir='.git'
-
 	# The path to the version file.
 	version_file=$1
 
 	echo "${script_name}: determining default version string."
 
-	# Check if the .git dir exists; if it does not, we do nothing.
-	if [ -d "${dist_path}/${gitdir}" ]; then
-
-		echo "${script_name}: found '${gitdir}' directory; assuming git clone."
-
-		echo "${script_name}: executing: git describe --tags."
-
-		gd_stderr="git_describe_stderr.txt"
-
-		# Query git for the version string, which is simply the current tag,
-		# followed by a number signifying how many commits have transpired
-		# since the tag, followed by a 'g' and a shortened hash tab. Capture
-		# stderr to a file.
-		git_describe_str=$(git -C ${dist_path} describe --tags 2> ${gd_stderr})
-
-		# Pull in whatever error message was generated, if any, and delete
-		# the file.
-		git_error=$(cat ${gd_stderr})
-
-		# Remove the stderr file.
-		rm -f ${gd_stderr}
-
-		# If git returned an error, don't do anything.
-		if [ -n "${git_error}" ]; then
-
-			echo "${script_name}: git returned an error: '${git_error}'."
-			echo "${script_name}: using string from unmodified version file."
-
-			# Use what's in the version file as-is.
-			version="AOCL BLIS $(cat "${version_file}")"
-		else
-
-			echo "${script_name}: got back ${git_describe_str}."
-
-			# Strip off the commit hash label.
-			new_version_str=$(echo ${git_describe_str} | cut -d- -f2)
-
-			echo "${script_name}: truncating to ${new_version_str}."
-
-			# Write the new version string to the version file.
-			#echo "${new_version_str}" > ${version_file}
-
-			# Set the version variable.
-			version="AOCL BLIS ${new_version_str}"
-		fi
-	else
-
-		echo "${script_name}: could not find '${gitdir}' directory; using unmodified version file."
-
-		# Use what's in the version file as-is.
-		version="AOCL BLIS $(cat "${version_file}")"
-	fi
+	# Use what's in the version file as-is.
+	version="AOCL-BLIS $(cat "${version_file}") Build $(date +%Y%m%d)"
 }
 
 

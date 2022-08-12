@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2018 - 2019, Advanced Micro Devices, Inc.
+   Copyright (C) 2018 - 2022, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -40,7 +40,7 @@
 
 // This string gets defined via -D on the command line when BLIS is compiled.
 // This string is (or rather, should be) only used here.
-static char* bli_version_str       = "3.2.1"; //BLIS_VERSION_STRING;
+static char* bli_version_str       = BLIS_VERSION_STRING;
 static char* bli_int_type_size_str = STRINGIFY_INT( BLIS_INT_TYPE_SIZE );
 
 char* bli_info_get_version_str( void )                { return bli_version_str; }
