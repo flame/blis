@@ -15,15 +15,15 @@ But first, let's make sure your configuration is correct...
 
 Open blis_setenv.bash
 In the Platform Specific: section, around line 50 or so, you will see:
-firmware=107
+firmware=203
 or
-firmware=108
+firmware=204
 
-If your firmware is version 1.08 or greater, make sure this is set to 108, else make sure
-it's set to 107.  Ampere entirely changed the CoreID mappings between these versions.
+If your firmware is version 2.04 or greater, make sure this is set to 204, else make sure
+it's set to 203.  Ampere entirely changed the CoreID mappings between these versions.
 
-The Altra Platform updated their firmware to 1.08 in summer 2021, so if your firmware was
-updated later than that, odds are good that you have 1.08 or later.
+The Altra Platform updated their firmware to 2.04 in April 2022, so if your firmware was
+updated later than that, odds are good that you have 2.04 or later.
 
 Note: the scripts referenced here modify environment variables, so they must be sourced.
 E.g., with
