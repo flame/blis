@@ -110,7 +110,8 @@ void bli_cntx_init_firestorm( cntx_t* cntx )
 	// Initialize level-3 sup blocksize objects with architecture-specific
 	// values.
 	//                                               s      d      c      z
-	bli_blksz_init_easy( &blkszs[ BLIS_MR_SUP ],    -1,     6,    -1,    -1 );
+	bli_blksz_init     ( &blkszs[ BLIS_MR_SUP ],    -1,     6,    -1,    -1,
+	                                                -1,     9,    -1,    -1 );
 	bli_blksz_init_easy( &blkszs[ BLIS_NR_SUP ],    -1,     8,    -1,    -1 );
 	bli_blksz_init_easy( &blkszs[ BLIS_MC_SUP ],    -1,   240,    -1,    -1 );
 	bli_blksz_init_easy( &blkszs[ BLIS_KC_SUP ],    -1,  1024,    -1,    -1 );
