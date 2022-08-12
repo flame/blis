@@ -1,0 +1,26 @@
+========================================================================
+So, you checked the README and found interesting information, but you
+just want to configure, build, and run blis? You've come to the right
+place!
+
+To get the best information for using blis with your current platform, 
+
+. ./QuickStart.bash
+========================================================================
+After you're up and running, BLIS has a wealth of documentation online:
+========================================================================
+BLIS exports a classic BLAS interface compatible with both FORTRAN and C,
+Using "blis.h", applications can take advantage of extended functionality.
+========================================================================
+The main website, https://github.com/flame/blis#introduction has much to see:
+
+# *High level context about blis, followed by features:*
+https://github.com/flame/blis#introduction
+
+# *How to download BLIS*
+https://github.com/flame/blis#how-to-download-blis
+
+# *Getting Started and an overview of the plush Documentation for everything BLIS:*
+https://github.com/flame/blis#getting-started
+
+
