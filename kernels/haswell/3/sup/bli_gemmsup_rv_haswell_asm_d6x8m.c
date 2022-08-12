@@ -1809,7 +1809,7 @@ void bli_dgemmsup_rv_haswell_asm_6x8m_6x8_L
 	jz(.DCOLSTORBZ)                    // jump to column storage case
 
 	label(.DROWSTORBZ)
-	lea(mem(rdi, rcx, 2), rdi)
+	lea(mem(rcx , rdi, 2), rcx)
 
 	vmovlpd(xmm8, mem(rcx, 0*32))
 	add(rdi, rcx)
