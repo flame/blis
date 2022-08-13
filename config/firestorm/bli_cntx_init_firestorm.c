@@ -112,7 +112,8 @@ void bli_cntx_init_firestorm( cntx_t* cntx )
 	//                                               s      d      c      z
 	bli_blksz_init     ( &blkszs[ BLIS_MR_SUP ],    -1,     6,    -1,    -1,
 	                                                -1,     9,    -1,    -1 );
-	bli_blksz_init_easy( &blkszs[ BLIS_NR_SUP ],    -1,     8,    -1,    -1 );
+	bli_blksz_init     ( &blkszs[ BLIS_NR_SUP ],    -1,     8,    -1,    -1,
+	                                                -1,    13,    -1,    -1 );
 	bli_blksz_init_easy( &blkszs[ BLIS_MC_SUP ],    -1,   240,    -1,    -1 );
 	bli_blksz_init_easy( &blkszs[ BLIS_KC_SUP ],    -1,  1024,    -1,    -1 );
 	bli_blksz_init_easy( &blkszs[ BLIS_NC_SUP ],    -1,  3072,    -1,    -1 );

@@ -145,47 +145,70 @@ void bli_dgemmsup_rv_armv8a_asm_6x8m
 {
   if ( n0 != 8 )
   {
-    if ( n0 < 8 )
-    {
-      for ( ; n0 >= 4; n0 -= 4 )
-      {
-	dgemmsup_ker_ft ukr_fp;
-	auxinfo_t data_d8xkm = *data;
-	if ( bli_auxinfo_ps_a( data ) == 6 * rs_a0 )
-	{
-	  // Use 8x4 Asm kernel for the unpacked case.
-	  bli_auxinfo_set_ps_a( 8 * rs_a0, &data_d8xkm );
-	  ukr_fp = bli_dgemmsup_rv_armv8a_asm_8x4m;
-	}
-	else
-	{
-	  // Cannot change dimension for m when A is packed.
-	  ukr_fp = bli_dgemmsup_rv_armv8a_int_6x4mn;
-	}
+    assert( n0 <= 13 );
 
-	ukr_fp
-	(
-	  conja, conjb, m0, 4, k0,
-	  alpha, a, rs_a0, cs_a0, b, rs_b0, cs_b0,
-	  beta, c, rs_c0, cs_c0, &data_d8xkm, cntx
-	);
-	b += 4 * cs_b0;
-	c += 4 * cs_c0;
-      }
-      if ( n0 > 0 )
-      {
-	bli_dgemmsup_rv_armv8a_int_6x4mn
-	(
-	  conja, conjb, m0, n0, k0,
-	  alpha, a, rs_a0, cs_a0, b, rs_b0, cs_b0,
-	  beta, c, rs_c0, cs_c0, data, cntx
-	);
-      }
-    }
-    else
+    // Manual separation.
+    dgemmsup_ker_ft ker_fp1 = NULL;
+    dgemmsup_ker_ft ker_fp2 = NULL;
+    dim_t           nr1, nr2;
+
+    if ( n0 == 13 )
     {
-      assert( FALSE );
+      ker_fp1 = bli_dgemmsup_rv_armv8a_asm_6x7m; nr1 = 7;
+      ker_fp2 = bli_dgemmsup_rv_armv8a_asm_6x6m; nr2 = 6;
     }
+    if ( n0 == 12 )
+    {
+      ker_fp1 = bli_dgemmsup_rv_armv8a_asm_6x6m; nr1 = 6;
+      ker_fp2 = bli_dgemmsup_rv_armv8a_asm_6x6m; nr2 = 6;
+    }
+    if ( n0 == 11 )
+    {
+      ker_fp1 = bli_dgemmsup_rv_armv8a_asm_6x6m; nr1 = 6;
+      ker_fp2 = bli_dgemmsup_rv_armv8a_asm_6x5m; nr2 = 5;
+    }
+    if ( n0 == 10 )
+    {
+      ker_fp1 = bli_dgemmsup_rv_armv8a_asm_6x5m; nr1 = 5;
+      ker_fp2 = bli_dgemmsup_rv_armv8a_asm_6x5m; nr2 = 5;
+    }
+    if ( n0 == 9 )
+    {
+      ker_fp1 = bli_dgemmsup_rv_armv8a_asm_6x5m; nr1 = 5;
+      ker_fp2 = bli_dgemmsup_rv_armv8a_int_6x4mn; nr2 = 4;
+    }
+    if ( n0 == 7 )
+    {
+      ker_fp1 = bli_dgemmsup_rv_armv8a_asm_6x7m; nr1 = 7;
+    }
+    if ( n0 == 6 )
+    {
+      ker_fp1 = bli_dgemmsup_rv_armv8a_asm_6x6m; nr1 = 6;
+    }
+    if ( n0 == 5 )
+    {
+      ker_fp1 = bli_dgemmsup_rv_armv8a_asm_6x5m; nr1 = 5;
+    }
+    if ( n0 <= 4 )
+    {
+      ker_fp1 = bli_dgemmsup_rv_armv8a_int_6x4mn; nr1 = n0;
+    }
+
+    ker_fp1
+    (
+      conja, conjb, m0, nr1, k0,
+      alpha, a, rs_a0, cs_a0, b, rs_b0, cs_b0,
+      beta, c, rs_c0, cs_c0, data, cntx
+    );
+    b += nr1 * cs_b0;
+    c += nr1 * cs_c0;
+    if ( ker_fp2 )
+      ker_fp2
+      (
+	conja, conjb, m0, nr2, k0,
+	alpha, a, rs_a0, cs_a0, b, rs_b0, cs_b0,
+	beta, c, rs_c0, cs_c0, data, cntx
+      );
     return;
   }
 

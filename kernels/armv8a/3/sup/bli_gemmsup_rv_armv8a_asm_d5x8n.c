@@ -411,7 +411,6 @@ BRANCH(PRFM_END_C)
 " prfm  PLDL1STRM, [%[b_next], #16*0] \n\t"
 " prfm  PLDL1STRM, [%[b_next], #16*1] \n\t"
 LABEL(PRFM_END_C)
-" fcmp            d17, #0.0           \n\t" // Not the end. Reset branching reg.
 #endif
 DSTOREC_2PHV_C_FWD(24,4,18,0,x5,0,x7,x8)
 DSTOREC_2PHV_C_FWD(25,5,18,1,x5,0,x7,x8)
