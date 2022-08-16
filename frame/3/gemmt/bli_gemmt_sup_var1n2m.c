@@ -66,249 +66,11 @@ typedef void (*gemmt_ker_ft)
        dim_t               m0,
        dim_t               n0,
        dim_t               k0,
-       void*    restrict alpha,
-       void*    restrict a, inc_t rs_a0, inc_t cs_a0,
-       void*    restrict b, inc_t rs_b0, inc_t cs_b0,
-       void*    restrict beta,
-       void*    restrict c, inc_t rs_c0, inc_t cs_c0,
-       auxinfo_t* restrict data,
-       cntx_t*    restrict cntx
-     );
-
-// Gemmt Upper variant kernel for m_offset=0 and n_offset=0 in 24x24 block
-BLIS_INLINE void bli_dgemmsup_rv_haswell_asm_6x8m_0x0_U
-     (
-       conj_t              conja,
-       conj_t              conjb,
-       dim_t               m0,
-       dim_t               n0,
-       dim_t               k0,
-       void*    restrict alpha,
-       void*    restrict a, inc_t rs_a0, inc_t cs_a0,
-       void*    restrict b, inc_t rs_b0, inc_t cs_b0,
-       void*    restrict beta,
-       void*    restrict c, inc_t rs_c0, inc_t cs_c0,
-       auxinfo_t* restrict data,
-       cntx_t*    restrict cntx
-     );
-
-// Gemmt Upper variant kernel for m_offset=6 and n_offset=8 in 24x24 block
-BLIS_INLINE void bli_dgemmsup_rv_haswell_asm_6x8m_6x8_U
-     (
-       conj_t              conja,
-       conj_t              conjb,
-       dim_t               m0,
-       dim_t               n0,
-       dim_t               k0,
-       void*    restrict alpha,
-       void*    restrict a, inc_t rs_a0, inc_t cs_a0,
-       void*    restrict b, inc_t rs_b0, inc_t cs_b0,
-       void*    restrict beta,
-       void*    restrict c, inc_t rs_c0, inc_t cs_c0,
-       auxinfo_t* restrict data,
-       cntx_t*    restrict cntx
-     );
-
-// Gemmt Upper variant kernel for m_offset=12 and n_offset=16 in 24x24 block
-BLIS_INLINE void bli_dgemmsup_rv_haswell_asm_6x8m_12x16_U
-     (
-       conj_t              conja,
-       conj_t              conjb,
-       dim_t               m0,
-       dim_t               n0,
-       dim_t               k0,
-       void*    restrict alpha,
-       void*    restrict a, inc_t rs_a0, inc_t cs_a0,
-       void*    restrict b, inc_t rs_b0, inc_t cs_b0,
-       void*    restrict beta,
-       void*    restrict c, inc_t rs_c0, inc_t cs_c0,
-       auxinfo_t* restrict data,
-       cntx_t*    restrict cntx
-     );
-
-// Gemmt Upper variant combined kernel for m_offset=12, n_offset=16 and m_offset=18, n_offset=16 in 24x24 block
-BLIS_INLINE void bli_dgemmsup_rv_haswell_asm_6x8m_0x0_combined_U
-     (
-       conj_t              conja,
-       conj_t              conjb,
-       dim_t               m0,
-       dim_t               n0,
-       dim_t               k0,
-       void*    restrict alpha,
-       void*    restrict a, inc_t rs_a0, inc_t cs_a0,
-       void*    restrict b, inc_t rs_b0, inc_t cs_b0,
-       void*    restrict beta,
-       void*    restrict c, inc_t rs_c0, inc_t cs_c0,
-       auxinfo_t* restrict data,
-       cntx_t*    restrict cntx
-     );
-
-// Gemmt Upper variant kernel for m_offset=6 and n_offset=0 in 24x24 block
-BLIS_INLINE void bli_dgemmsup_rv_haswell_asm_6x8m_6x0_U
-     (
-       conj_t              conja,
-       conj_t              conjb,
-       dim_t               m0,
-       dim_t               n0,
-       dim_t               k0,
-       void*    restrict alpha,
-       void*    restrict a, inc_t rs_a0, inc_t cs_a0,
-       void*    restrict b, inc_t rs_b0, inc_t cs_b0,
-       void*    restrict beta,
-       void*    restrict c, inc_t rs_c0, inc_t cs_c0,
-       auxinfo_t* restrict data,
-       cntx_t*    restrict cntx
-     );
-
-// Gemmt Upper variant kernel for m_offset=12 and n_offset=8 in 24x24 block
-BLIS_INLINE void bli_dgemmsup_rv_haswell_asm_6x8m_12x8_U
-     (
-       conj_t              conja,
-       conj_t              conjb,
-       dim_t               m0,
-       dim_t               n0,
-       dim_t               k0,
-       void*    restrict alpha,
-       void*    restrict a, inc_t rs_a0, inc_t cs_a0,
-       void*    restrict b, inc_t rs_b0, inc_t cs_b0,
-       void*    restrict beta,
-       void*    restrict c, inc_t rs_c0, inc_t cs_c0,
-       auxinfo_t* restrict data,
-       cntx_t*    restrict cntx
-     );
-
-// Gemmt Upper variant kernel for m_offset=18 and n_offset=16 in 24x24 block
-BLIS_INLINE void bli_dgemmsup_rv_haswell_asm_6x8m_18x16_U
-     (
-       conj_t              conja,
-       conj_t              conjb,
-       dim_t               m0,
-       dim_t               n0,
-       dim_t               k0,
-       void*    restrict alpha,
-       void*    restrict a, inc_t rs_a0, inc_t cs_a0,
-       void*    restrict b, inc_t rs_b0, inc_t cs_b0,
-       void*    restrict beta,
-       void*    restrict c, inc_t rs_c0, inc_t cs_c0,
-       auxinfo_t* restrict data,
-       cntx_t*    restrict cntx
-     );
-
-// Gemmt Lower variant kernel for m_offset=0 and n_offset=0 in 24x24 block
-BLIS_INLINE void bli_dgemmsup_rv_haswell_asm_6x8m_0x0_L
-     (
-       conj_t              conja,
-       conj_t              conjb,
-       dim_t               m0,
-       dim_t               n0,
-       dim_t               k0,
-       void*    restrict alpha,
-       void*    restrict a, inc_t rs_a0, inc_t cs_a0,
-       void*    restrict b, inc_t rs_b0, inc_t cs_b0,
-       void*    restrict beta,
-       void*    restrict c, inc_t rs_c0, inc_t cs_c0,
-       auxinfo_t* restrict data,
-       cntx_t*    restrict cntx
-     );
-
-// Gemmt Lower variant kernel for m_offset=6 and n_offset=8 in 24x24 block
-BLIS_INLINE void bli_dgemmsup_rv_haswell_asm_6x8m_6x8_L
-     (
-       conj_t              conja,
-       conj_t              conjb,
-       dim_t               m0,
-       dim_t               n0,
-       dim_t               k0,
-       void*    restrict alpha,
-       void*    restrict a, inc_t rs_a0, inc_t cs_a0,
-       void*    restrict b, inc_t rs_b0, inc_t cs_b0,
-       void*    restrict beta,
-       void*    restrict c, inc_t rs_c0, inc_t cs_c0,
-       auxinfo_t* restrict data,
-       cntx_t*    restrict cntx
-     );
-
-// Gemmt Lower variant kernel for m_offset=12 and n_offset=16 in 24x24 block
-BLIS_INLINE void bli_dgemmsup_rv_haswell_asm_6x8m_12x16_L
-     (
-       conj_t              conja,
-       conj_t              conjb,
-       dim_t               m0,
-       dim_t               n0,
-       dim_t               k0,
-       void*    restrict alpha,
-       void*    restrict a, inc_t rs_a0, inc_t cs_a0,
-       void*    restrict b, inc_t rs_b0, inc_t cs_b0,
-       void*    restrict beta,
-       void*    restrict c, inc_t rs_c0, inc_t cs_c0,
-       auxinfo_t* restrict data,
-       cntx_t*    restrict cntx
-     );
-
-// Gemmt Lower variant combined kernel for m_offset=0, n_offset=0 and m_offset=6, n_offset=0 in 24x24 block
-BLIS_INLINE void bli_dgemmsup_rv_haswell_asm_6x8m_16x12_combined_L
-     (
-       conj_t              conja,
-       conj_t              conjb,
-       dim_t               m0,
-       dim_t               n0,
-       dim_t               k0,
-       void*    restrict alpha,
-       void*    restrict a, inc_t rs_a0, inc_t cs_a0,
-       void*    restrict b, inc_t rs_b0, inc_t cs_b0,
-       void*    restrict beta,
-       void*    restrict c, inc_t rs_c0, inc_t cs_c0,
-       auxinfo_t* restrict data,
-       cntx_t*    restrict cntx
-     );
-
-// Gemmt Lower variant kernel for m_offset=6 and n_offset=0 in 24x24 block
-BLIS_INLINE void bli_dgemmsup_rv_haswell_asm_6x8m_6x0_L
-     (
-       conj_t              conja,
-       conj_t              conjb,
-       dim_t               m0,
-       dim_t               n0,
-       dim_t               k0,
-       void*    restrict alpha,
-       void*    restrict a, inc_t rs_a0, inc_t cs_a0,
-       void*    restrict b, inc_t rs_b0, inc_t cs_b0,
-       void*    restrict beta,
-       void*    restrict c, inc_t rs_c0, inc_t cs_c0,
-       auxinfo_t* restrict data,
-       cntx_t*    restrict cntx
-     );
-
-// Gemmt Lower variant kernel for m_offset=12 and n_offset=8 in 24x24 block
-BLIS_INLINE void bli_dgemmsup_rv_haswell_asm_6x8m_12x8_L
-     (
-       conj_t              conja,
-       conj_t              conjb,
-       dim_t               m0,
-       dim_t               n0,
-       dim_t               k0,
-       void*    restrict alpha,
-       void*    restrict a, inc_t rs_a0, inc_t cs_a0,
-       void*    restrict b, inc_t rs_b0, inc_t cs_b0,
-       void*    restrict beta,
-       void*    restrict c, inc_t rs_c0, inc_t cs_c0,
-       auxinfo_t* restrict data,
-       cntx_t*    restrict cntx
-     );
-
-// Gemmt Lower variant kernel for m_offset=18 and n_offset=16 in 24x24 block
-BLIS_INLINE void bli_dgemmsup_rv_haswell_asm_6x8m_18x16_L
-     (
-       conj_t              conja,
-       conj_t              conjb,
-       dim_t               m0,
-       dim_t               n0,
-       dim_t               k0,
-       void*    restrict alpha,
-       void*    restrict a, inc_t rs_a0, inc_t cs_a0,
-       void*    restrict b, inc_t rs_b0, inc_t cs_b0,
-       void*    restrict beta,
-       void*    restrict c, inc_t rs_c0, inc_t cs_c0,
+       double*    restrict alpha,
+       double*    restrict a, inc_t rs_a0, inc_t cs_a0,
+       double*    restrict b, inc_t rs_b0, inc_t cs_b0,
+       double*    restrict beta,
+       double*    restrict c, inc_t rs_c0, inc_t cs_c0,
        auxinfo_t* restrict data,
        cntx_t*    restrict cntx
      );
@@ -2177,11 +1939,11 @@ void PASTEMACT(ch,opname,uplo,varname) \
 							mr_cur, \
 							nr_cur, \
 							kc_cur, \
-							alpha_cast, \
-							a_ir, rs_a_use, cs_a_use, \
-							b_jr,     rs_b_use, cs_b_use, \
-							beta_use, \
-							c_ir,     rs_c,     cs_c, \
+							(double*) alpha_cast, \
+							(double*) a_ir, rs_a_use, cs_a_use, \
+							(double*) b_jr,     rs_b_use, cs_b_use, \
+							(double*) beta_use, \
+							(double*) c_ir,     rs_c,     cs_c, \
 							&aux, \
 							cntx  \
 							); \
@@ -2203,11 +1965,11 @@ void PASTEMACT(ch,opname,uplo,varname) \
 								mr_cur, \
 								nr_cur, \
 								kc_cur, \
-								alpha_cast, \
-								a_ir, rs_a_use, cs_a_use, \
-								b_jr,     rs_b_use, cs_b_use, \
-								beta_use, \
-								c_ir,     rs_c,     cs_c, \
+								(double*) alpha_cast, \
+								(double*) a_ir, rs_a_use, cs_a_use, \
+								(double*) b_jr,     rs_b_use, cs_b_use, \
+								(double*) beta_use, \
+								(double*) c_ir,     rs_c,     cs_c, \
 								&aux, \
 								cntx  \
 								); \
@@ -2849,11 +2611,11 @@ void PASTEMACT(ch,opname,uplo,varname) \
 							mr_cur, \
 							nr_cur, \
 							kc_cur, \
-							alpha_cast, \
-							a_ir, rs_a_use, cs_a_use, \
-							b_jr,     rs_b_use, cs_b_use, \
-							beta_use, \
-							c_ir, rs_c, cs_c,  \
+							(double*) alpha_cast, \
+							(double*) a_ir, rs_a_use, cs_a_use, \
+							(double*) b_jr,     rs_b_use, cs_b_use, \
+							(double*) beta_use, \
+							(double*) c_ir, rs_c, cs_c,  \
 							&aux, \
 							cntx  \
 							); \
@@ -2874,11 +2636,11 @@ void PASTEMACT(ch,opname,uplo,varname) \
 								mr_cur, \
 								nr_cur, \
 								kc_cur, \
-								alpha_cast, \
-								a_ir, rs_a_use, cs_a_use, \
-								b_jr,     rs_b_use, cs_b_use, \
-								beta_use, \
-								c_ir,     rs_c,     cs_c, \
+								(double*) alpha_cast, \
+								(double*) a_ir, rs_a_use, cs_a_use, \
+								(double*) b_jr,     rs_b_use, cs_b_use, \
+								(double*) beta_use, \
+								(double*) c_ir,     rs_c,     cs_c, \
 								&aux, \
 								cntx  \
 								); \
