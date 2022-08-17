@@ -47,7 +47,8 @@ typedef enum
 {
 	U8S8S16OS16 = 0, // uint8_t - A, int8_t - B, int16_t - C
 	U8S8S32OS32 = 1, // uint8_t - A, int8_t - B, int32_t - C
-	F16F16F16OF16 = 2 // float16 - A, float16 - B, float16 - C
+	F16F16F16OF16 = 2, // float16 - A, float16 - B, float16 - C
+	BF16BF16F32OF32 = 3 // bf16 - A, bf16 - B, float - C
 } AOCL_OPERATION_TYPE;
 
 typedef enum

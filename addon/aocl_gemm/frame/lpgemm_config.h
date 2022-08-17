@@ -37,7 +37,8 @@
 
 #include "lpgemm_types.h"
 
-extern lpgemm_cntx_t lpgemm_global_cntx_t_list[3]; // equals to number of ops in enum AOCL_OPERATION_TYPE.
+// equals to number of ops in enum AOCL_OPERATION_TYPE.
+extern lpgemm_cntx_t lpgemm_global_cntx_t_list[4];
 
 void aocl_lpgemm_init_global_cntx();
 

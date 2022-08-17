@@ -36,6 +36,7 @@
 #define AOCL_GEMM_INTERFACE_H
 
 #include "aocl_gemm_post_ops.h"
+#include "aocl_bf16_type.h"
 
 // Returns the size of buffer in bytes required for the reordered matrix.
 #define AOCL_GEMM_GET_REORDER_BUF_SIZE(LP_SFX) \
@@ -49,6 +50,7 @@ BLIS_EXPORT_ADDON siz_t aocl_get_reorder_buf_size_ ## LP_SFX \
 AOCL_GEMM_GET_REORDER_BUF_SIZE(f32f32f32of32);
 AOCL_GEMM_GET_REORDER_BUF_SIZE(u8s8s32os32);
 AOCL_GEMM_GET_REORDER_BUF_SIZE(u8s8s16os16);
+AOCL_GEMM_GET_REORDER_BUF_SIZE(bf16bf16f32of32);
 
 // Performs reordering of input matrix. Reordering is the process of packing
 // the entire matrix upfront, so that the benefits of packed matrix is obtained
@@ -67,6 +69,7 @@ BLIS_EXPORT_ADDON void aocl_reorder_ ## LP_SFX \
 AOCL_GEMM_REORDER(float,f32f32f32of32);
 AOCL_GEMM_REORDER(int8_t,u8s8s32os32);
 AOCL_GEMM_REORDER(int8_t,u8s8s16os16);
+AOCL_GEMM_REORDER(bfloat16,bf16bf16f32of32);
 
 // Only supports matrices in row major format. This api can perform gemm with
 // both normal as well as reordered B matrix as opposesd to sgemm (only
@@ -96,5 +99,6 @@ BLIS_EXPORT_ADDON void aocl_gemm_ ## LP_SFX \
 AOCL_GEMM_MATMUL(float,float,float,f32f32f32of32);
 AOCL_GEMM_MATMUL(uint8_t,int8_t,int32_t,u8s8s32os32);
 AOCL_GEMM_MATMUL(uint8_t,int8_t,int16_t,u8s8s16os16);
+AOCL_GEMM_MATMUL(bfloat16,bfloat16,float,bf16bf16f32of32);
 
 #endif // AOCL_GEMM_INTERFACE_H

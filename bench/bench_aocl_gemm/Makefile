@@ -87,7 +87,7 @@ TEST_OBJS      := $(patsubst $(TEST_SRC_PATH)/%.c, \
 CINCFLAGS      := -I$(INC_PATH) -I$(CBLAS_HEADER_PATH)
 
 # Use the CFLAGS for the configuration family.
-CFLAGS         := $(call get-user-cflags-for,$(CONFIG_NAME))
+CFLAGS         := $(call get-user-cflags-for,$(CONFIG_NAME)) -march=icelake-server -mavx512bf16 
 
 # Add local header paths to CFLAGS
 CFLAGS         += -I$(TEST_SRC_PATH)
