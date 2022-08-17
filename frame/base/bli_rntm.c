@@ -624,13 +624,28 @@ void bli_nthreads_optimum(
 		dim_t n = bli_obj_width(c);
 		dim_t k = bli_obj_width_after_trans(a);
 
-		if((m<=128 || n<=128 || k<=128) && ((m+n+k) <= 400) )
+		if((m<=128 || n<=128 || k<=128) && ((m+n+k) <= 400))
 		{
 			n_threads_ideal = 8;
 		}
-		else if((m<=256 || n<=256 || k<=256) && ((m+n+k) <= 800) )
+		else if((m<=256 || n<=256 || k<=256) && ((m+n+k) <= 800))
 		{
 			n_threads_ideal = 16;
+		}
+		if((m<=48) || (n<=48) || (k<=48))
+		{
+			if((m+n+k) <= 840)
+			{
+				n_threads_ideal = 8;
+			}
+			else if((m+n+k) <= 1240)
+			{
+				n_threads_ideal = 16;
+			}
+			else if((m+n+k) <= 1540)
+			{
+				n_threads_ideal = 32;
+			}
 		}
 	}
 	else if( family == BLIS_SYRK && bli_obj_is_double(c))

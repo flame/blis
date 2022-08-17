@@ -762,7 +762,7 @@ void zgemm_
     - For single thread, the API has no constraints before invoking.
     - For multiple threads, the constraint is that m and n should individually be less than 128.
     */
-    if((k0==1) && ((nt==0) || ((nt==1) && (m0 < 128) && (n0 < 128)))
+    if((k0 == 1) && ((nt == 0) || ((nt == 1) && (m0 < 128) && (n0 < 128)))
         && bli_is_notrans(blis_transa)
         && bli_is_notrans(blis_transb))
     {
@@ -853,9 +853,11 @@ void zgemm_
         }
 #endif
     }
+
 #ifdef BLIS_ENABLE_SMALL_MATRIX
 
-    if (((nt == 0) && (m0 <= 40) && (n0 <= 40) && (k0 <= 512)) ||
+    if (((nt == 0) && (((m0 <= 40) && (n0 <= 40)) || 
+         (m0 <= 128) && (n0 <= 128) && bli_is_notrans(blis_transb)) && (k0 <= 512)) ||
         ((nt == 1) && (((m0 <= 32) || (n0 <= 32) || (k0 <= 32)) && ((m0 + n0 + k0) <= 100))))
     {
         err_t status = BLIS_NOT_YET_IMPLEMENTED;
