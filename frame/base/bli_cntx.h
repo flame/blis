@@ -621,6 +621,30 @@ BLIS_INLINE bool bli_cntx_l3_sup_thresh_is_met( obj_t* a, obj_t* b, obj_t* c, cn
 
 	}
 
+
+	if(dt == BLIS_DOUBLE)
+	{
+		/**
+		 * In case of both matrices having large strides,
+		 * are to be handled in native path, since native
+		 * path does packing of both matrices by default.
+		 * It helps avoiding huge memory jumps while accessing
+		 * matrices during GEMM computation.
+		 */
+		dim_t  k = bli_obj_width( a );
+		inc_t rs_a = bli_obj_row_stride( a );
+		inc_t cs_a = bli_obj_col_stride( a );
+		inc_t rs_b = bli_obj_row_stride( b );
+		inc_t cs_b = bli_obj_col_stride( b );
+		inc_t stride_a = rs_a > cs_a ? rs_a : cs_a;
+		inc_t stride_b = rs_b > cs_b ? rs_b : cs_b;
+		if( (m > 5000 && n > 700 && k > 120) && (stride_a > 5000 && stride_b > 5000) )
+		{
+			return FALSE;
+		}
+	}
+
+
 	if ( m < bli_cntx_get_l3_sup_thresh_dt( dt, BLIS_MT, cntx ) ) return TRUE;
 	if ( n < bli_cntx_get_l3_sup_thresh_dt( dt, BLIS_NT, cntx ) ) return TRUE;
 	if ( k < bli_cntx_get_l3_sup_thresh_dt( dt, BLIS_KT, cntx ) ) return TRUE;
