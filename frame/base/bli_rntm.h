@@ -66,6 +66,11 @@ BLIS_INLINE bool bli_rntm_auto_factor( rntm_t* rntm )
 	return rntm->auto_factor;
 }
 
+BLIS_INLINE bool bli_rntm_blis_mt( rntm_t* rntm )
+{
+	return rntm->blis_mt;
+}
+
 BLIS_INLINE dim_t bli_rntm_num_threads( rntm_t* rntm )
 {
 	return rntm->num_threads;
@@ -152,6 +157,11 @@ BLIS_INLINE dim_t bli_rntm_equals( rntm_t* rntm1, rntm_t* rntm2 )
 BLIS_INLINE void bli_rntm_set_auto_factor_only( bool auto_factor, rntm_t* rntm )
 {
 	rntm->auto_factor = auto_factor;
+}
+
+BLIS_INLINE void bli_rntm_set_blis_mt_only( bool blis_mt, rntm_t* rntm )
+{
+	rntm->blis_mt = blis_mt;
 }
 
 BLIS_INLINE void bli_rntm_set_num_threads_only( dim_t nt, rntm_t* rntm )

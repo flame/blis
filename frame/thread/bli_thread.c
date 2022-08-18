@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2018 - 21, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2018 - 22, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -1614,12 +1614,11 @@ void bli_thread_set_num_threads( dim_t n_threads )
 
 	bli_rntm_set_num_threads_only( n_threads, &global_rntm );
 
-#ifdef BLIS_ENABLE_OPENMP
-	// In the function bli_rntm_init_from_global() we extract n_threads
-	// using the API omp_get_max_threads(). Following step ensures that
-	// omp_get_max_threads returns the same value as set here.
-	omp_set_num_threads( n_threads );
-#endif
+	// BLIS_NUM_THREADS env variable or BLIS API to set the
+	// number of threads is used. Setting the blis_mt flag to TRUE
+	// so that OMP API or OMP env variables will not be of effect
+	// going forward.
+	bli_rntm_set_blis_mt_only(TRUE, &global_rntm);
 
 	// Release the mutex protecting global_rntm.
 	bli_pthread_mutex_unlock( &global_rntm_mutex );
@@ -1642,30 +1641,41 @@ void bli_thread_init_rntm_from_env
 
 #ifdef BLIS_ENABLE_MULTITHREADING
 
-	// Try to read BLIS_NUM_THREADS first.
-	nt = bli_env_get_var( "BLIS_NUM_THREADS", -1 );
-
-
-#ifdef BLIS_ENABLE_OPENMP
-
 	// Scenarios:
-	// 1. If BLIS_NUM_THREADS is set with valid value, set the nt using omp_set_num_threads(nt)
-	// so that this value can be fetched inside BLIS API as well.
-	// 2. If BLIS_NUM_THREADS is not set, then if Application is multithreaded and issued
+	// 1. If BLIS_NUM_THREADS is set with a valid value, same value
+	// will be used in the subsequent parallel regions unless
+	// bli_thread_set_num_threads() API is used by the Application
+	// to modify the desired number of threads during BLIS API execution.
+	//
+	// 2. Once BLIS_NUM_THREADS environment variable or bli_thread_set_num_threads(nt)
+	// API is used by the application, BLIS module would always give precedence to
+	// these values. BLIS API would not consider the values set using OpenMP API
+	// omp_set_num_threads(nt) API or OMP_NUM_THREADS environment variable.
+	//
+	// 3. If Application wants to allocate separate number of threads for BLIS API execution
+	// and application, Application can choose either BLIS_NUM_THREADS environement variable
+	// or bli_thread_set_num_threads(nt) API, to set the desired number of threads
+	// in BLIS API Execution. Application can use OpenMP APIs or environment variables for
+	// itself.
+	//
+	// 4. If BLIS_NUM_THREADS is not set, then if Application is multithreaded and issued
 	// omp_set_num_threads(nt) with desired number of threads,
 	// omp_get_max_threads() API will fetch the number of threads set earlier.
-	// 3. If BLIS_NUM_THREADS is not set, omp_set_num_threads(nt) is not called by the application,
+	//
+	// 5. If BLIS_NUM_THREADS is not set, omp_set_num_threads(nt) is not called by the application,
 	// but only OMP_NUM_THREADS is set,
 	// omp_get_max_threads() API will fetch the value of OMP_NUM_THREADS.
-	// 4. If both environment variables are not set, or if they are set with invalid values, and
+	//
+	// 6. If both environment variables are not set, or if they are set with invalid values, and
 	// omp_set_num_threads(nt) is not issued by application,
 	// omp_get_max_threads() API will return the number of the cores in the current context.
 	//
-	// BLIS will rntm->num_threads will also get initialized with the same value.
+	// BLIS will initialize rntm->num_threads with the same value.
 	// However if omp_set_nested is false - BLIS APIs called from parallel threads will run in sequential.
 	// But if nested parallelism is enabled - Then each application will launch MT BLIS.
 	//
 	// Order of precedence used for number of threads:
+	// 0. valid value set using bli_thread_set_num_threads(nt) by the application
 	// 1. valid value set for BLIS_NUM_THREADS environment variable
 	// 2. omp_set_num_threads(nt) issued by the application
 	// 3. valid value set for OMP_NUM_THREADS environment variable
@@ -1676,16 +1686,27 @@ void bli_thread_init_rntm_from_env
 	//
 	// OMP_NUM_THREADS environment variable is applicable only when OpenMP is enabled.
 
+
+	// Try to read BLIS_NUM_THREADS first.
+	nt = bli_env_get_var( "BLIS_NUM_THREADS", -1 );
+
+	// If BLIS_NUM_THREADS is set with a valid value, set the blis_mt flag in global runtime
+	// structure. Later during API execution, this flag will be checked for TRUE or FALSE.
+	// If the flag is FALSE, only then the value set by the application using OpenMP API,
+	// would be fetched and used subsequently.
 	if(nt > 0)
 	{
-		omp_set_num_threads(nt);
+		bli_rntm_set_blis_mt_only(TRUE, rntm);
 	}
 	else
 	{
+		bli_rntm_set_blis_mt_only(FALSE, rntm);
+
+#ifdef BLIS_ENABLE_OPENMP
 		nt = omp_get_max_threads();
+#endif
 	}
 
-#endif
 	// Read the environment variables for the number of threads (ways
 	// of parallelism) for each individual loop.
 	jc = bli_env_get_var( "BLIS_JC_NT", -1 );

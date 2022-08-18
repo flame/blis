@@ -1478,6 +1478,8 @@ typedef struct rntm_s
 	bool      pack_a; // enable/disable packing of left-hand matrix A.
 	bool      pack_b; // enable/disable packing of right-hand matrix B.
 	bool      l3_sup; // enable/disable small matrix handling in level-3 ops.
+	                  // blis_mt, flag to figure out whether number of
+	bool      blis_mt;// threads is set using BLIS APIS or OpenMP APIs.
 
 	// "Internal" fields: these should not be exposed to the end-user.
 
