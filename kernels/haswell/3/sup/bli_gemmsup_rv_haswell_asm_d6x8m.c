@@ -1048,56 +1048,6 @@ void bli_dgemmsup_rv_haswell_asm_6x8m
 	prefetch(0, mem(rdx, rsi, 1, 5*8)) \
 	prefetch(0, mem(rdx, rsi, 2, 5*8)) \
 
-#define SUBITER4x4(a, b, r1, r2, r3, r4) \
-\
-	vmovupd(mem(b,  0*32), ymm0) \
-	\
-	vbroadcastsd(mem(a        ), ymm2) \
-	vbroadcastsd(mem(a, r8,  1), ymm3) \
-	vfmadd231pd(ymm0, ymm2, r1) \
-	vfmadd231pd(ymm0, ymm3, r2) \
-	\
-	vbroadcastsd(mem(a, r8,  2), ymm2) \
-	vbroadcastsd(mem(a, r13, 1), ymm3) \
-	vfmadd231pd(ymm0, ymm2, r3) \
-	vfmadd231pd(ymm0, ymm3, r4) \
-
-#define SUBITER2x4(a, b, r1, r2) \
-\
-	vmovupd(mem(b,  0*32), ymm0) \
-	\
-	vbroadcastsd(mem(a        ), ymm2) \
-	vbroadcastsd(mem(a, r8,  1), ymm3) \
-	vfmadd231pd(ymm0, ymm2, r1) \
-	vfmadd231pd(ymm0, ymm3, r2) \
-
-#define SUBITER2x2(a, b, r1, r2) \
-\
-	vmovupd(mem(b,  0*32), xmm0) \
-	\
-	vbroadcastsd(mem(a        ), ymm2) \
-	vbroadcastsd(mem(a, r8,  1), ymm3) \
-	vfmadd231pd(xmm0, xmm2, r1) \
-	vfmadd231pd(xmm0, xmm3, r2) \
-
-#define SUBITER6x4(a, b, r1, r2, r3, r4, r5, r6) \
-\
-	vmovupd(mem(b,  0*32), ymm0) \
-	\
-	vbroadcastsd(mem(a        ), ymm2) \
-	vbroadcastsd(mem(a, r8,  1), ymm3) \
-	vfmadd231pd(ymm0, ymm2, r1) \
-	vfmadd231pd(ymm0, ymm3, r2) \
-	\
-	vbroadcastsd(mem(a, r8,  2), ymm2) \
-	vbroadcastsd(mem(a, r13, 1), ymm3) \
-	vfmadd231pd(ymm0, ymm2, r3) \
-	vfmadd231pd(ymm0, ymm3, r4) \
-	\
-	vbroadcastsd(mem(a, r8,  4), ymm2) \
-	vbroadcastsd(mem(a, r15, 1), ymm3) \
-	vfmadd231pd(ymm0, ymm2, r5) \
-	vfmadd231pd(ymm0, ymm3, r6) \
 /*
 
 Following kernel computes the 6x8 block for the Lower vairant(L) of gemmt where
@@ -1224,36 +1174,81 @@ void bli_dgemmsup_rv_haswell_asm_6x8m_0x0_L
 
 	prefetch(0, mem(rdx, 5*8))
 
-	SUBITER6x4(rax, rbx, ymm4, ymm6, ymm8, ymm10, ymm12, ymm14)
-	lea(mem(rax, r8, 4), rbp)
-	lea(mem(rbx, 1*32), rcx)
-	SUBITER2x2(rbp, rcx, xmm13, xmm15)
+	vmovupd(mem(rbx,  0*32), ymm0)
+	vmovupd(mem(rbx,  1*32), ymm1)
 	add(r10, rbx)                      // b += rs_b;
+
+	vbroadcastsd(mem(rax        ), ymm2)
+	vbroadcastsd(mem(rax, r8,  1), ymm3)
+	vfmadd231pd(xmm0, xmm2, xmm4)
+	vfmadd231pd(xmm0, xmm3, xmm6)
+
+	vbroadcastsd(mem(rax, r8,  2), ymm2)
+	vbroadcastsd(mem(rax, r13, 1), ymm3)
+	vfmadd231pd(ymm0, ymm2, ymm8)
+	vfmadd231pd(ymm0, ymm3, ymm10)
+
+	vbroadcastsd(mem(rax, r8,  4), ymm2)
+	vbroadcastsd(mem(rax, r15, 1), ymm3)
 	add(r9, rax)                       // a += cs_a;
+	vfmadd231pd(ymm0, ymm2, ymm12)
+	vfmadd231pd(xmm1, xmm2, xmm13)
+	vfmadd231pd(ymm0, ymm3, ymm14)
+	vfmadd231pd(xmm1, xmm3, xmm15)
 
 
 	// ---------------------------------- iteration 1
 
 	prefetch(0, mem(rdx, r9, 1, 5*8))
 
-	SUBITER6x4(rax, rbx, ymm4, ymm6, ymm8, ymm10, ymm12, ymm14)
-	lea(mem(rax, r8, 4), rbp)
-	lea(mem(rbx, 1*32), rcx)
-	SUBITER2x2(rbp, rcx, xmm13, xmm15)
+	vmovupd(mem(rbx,  0*32), ymm0)
+	vmovupd(mem(rbx,  1*32), ymm1)
 	add(r10, rbx)                      // b += rs_b;
+
+	vbroadcastsd(mem(rax        ), ymm2)
+	vbroadcastsd(mem(rax, r8,  1), ymm3)
+	vfmadd231pd(xmm0, xmm2, xmm4)
+	vfmadd231pd(xmm0, xmm3, xmm6)
+
+	vbroadcastsd(mem(rax, r8,  2), ymm2)
+	vbroadcastsd(mem(rax, r13, 1), ymm3)
+	vfmadd231pd(ymm0, ymm2, ymm8)
+	vfmadd231pd(ymm0, ymm3, ymm10)
+
+	vbroadcastsd(mem(rax, r8,  4), ymm2)
+	vbroadcastsd(mem(rax, r15, 1), ymm3)
 	add(r9, rax)                       // a += cs_a;
+	vfmadd231pd(ymm0, ymm2, ymm12)
+	vfmadd231pd(xmm1, xmm2, xmm13)
+	vfmadd231pd(ymm0, ymm3, ymm14)
+	vfmadd231pd(xmm1, xmm3, xmm15)
 
 
 	// ---------------------------------- iteration 2
 
 	prefetch(0, mem(rdx, r9, 2, 5*8))
 
-	SUBITER6x4(rax, rbx, ymm4, ymm6, ymm8, ymm10, ymm12, ymm14)
-	lea(mem(rax, r8, 4), rbp)
-	lea(mem(rbx, 1*32), rcx)
-	SUBITER2x2(rbp, rcx, xmm13, xmm15)
+	vmovupd(mem(rbx,  0*32), ymm0)
+	vmovupd(mem(rbx,  1*32), ymm1)
 	add(r10, rbx)                      // b += rs_b;
+
+	vbroadcastsd(mem(rax        ), ymm2)
+	vbroadcastsd(mem(rax, r8,  1), ymm3)
+	vfmadd231pd(xmm0, xmm2, xmm4)
+	vfmadd231pd(xmm0, xmm3, xmm6)
+
+	vbroadcastsd(mem(rax, r8,  2), ymm2)
+	vbroadcastsd(mem(rax, r13, 1), ymm3)
+	vfmadd231pd(ymm0, ymm2, ymm8)
+	vfmadd231pd(ymm0, ymm3, ymm10)
+
+	vbroadcastsd(mem(rax, r8,  4), ymm2)
+	vbroadcastsd(mem(rax, r15, 1), ymm3)
 	add(r9, rax)                       // a += cs_a;
+	vfmadd231pd(ymm0, ymm2, ymm12)
+	vfmadd231pd(xmm1, xmm2, xmm13)
+	vfmadd231pd(ymm0, ymm3, ymm14)
+	vfmadd231pd(xmm1, xmm3, xmm15)
 
 
 	// ---------------------------------- iteration 3
@@ -1261,12 +1256,27 @@ void bli_dgemmsup_rv_haswell_asm_6x8m_0x0_L
 	prefetch(0, mem(rdx, rcx, 1, 5*8))
 	lea(mem(rdx, r9,  4), rdx)         // a_prefetch += 4*cs_a;
 
-	SUBITER6x4(rax, rbx, ymm4, ymm6, ymm8, ymm10, ymm12, ymm14)
-	lea(mem(rax, r8, 4), rbp)
-	lea(mem(rbx, 1*32), rcx)
-	SUBITER2x2(rbp, rcx, xmm13, xmm15)
+	vmovupd(mem(rbx, 0*32), ymm0)
+	vmovupd(mem(rbx, 1*32), ymm1)
 	add(r10, rbx)                      // b += rs_b;
+
+	vbroadcastsd(mem(rax        ), ymm2)
+	vbroadcastsd(mem(rax, r8,  1), ymm3)
+	vfmadd231pd(xmm0, xmm2, xmm4)
+	vfmadd231pd(xmm0, xmm3, xmm6)
+
+	vbroadcastsd(mem(rax, r8,  2), ymm2)
+	vbroadcastsd(mem(rax, r13, 1), ymm3)
+	vfmadd231pd(ymm0, ymm2, ymm8)
+	vfmadd231pd(ymm0, ymm3, ymm10)
+
+	vbroadcastsd(mem(rax, r8,  4), ymm2)
+	vbroadcastsd(mem(rax, r15, 1), ymm3)
 	add(r9, rax)                       // a += cs_a;
+	vfmadd231pd(ymm0, ymm2, ymm12)
+	vfmadd231pd(xmm1, xmm2, xmm13)
+	vfmadd231pd(ymm0, ymm3, ymm14)
+	vfmadd231pd(xmm1, xmm3, xmm15)
 
 
 
@@ -1287,13 +1297,27 @@ void bli_dgemmsup_rv_haswell_asm_6x8m_0x0_L
 	prefetch(0, mem(rdx, 5*8))
 	add(r9, rdx)
 
-	SUBITER6x4(rax, rbx, ymm4, ymm6, ymm8, ymm10, ymm12, ymm14)
-	lea(mem(rax, r8, 4), rbp)
-	lea(mem(rbx, 1*32), rcx)
-	SUBITER2x2(rbp, rcx, xmm13, xmm15)
+	vmovupd(mem(rbx,  0*32), ymm0)
+	vmovupd(mem(rbx,  1*32), ymm1)
 	add(r10, rbx)                      // b += rs_b;
-	add(r9, rax)                       // a += cs_a;
 
+	vbroadcastsd(mem(rax        ), ymm2)
+	vbroadcastsd(mem(rax, r8,  1), ymm3)
+	vfmadd231pd(xmm0, xmm2, xmm4)
+	vfmadd231pd(xmm0, xmm3, xmm6)
+
+	vbroadcastsd(mem(rax, r8,  2), ymm2)
+	vbroadcastsd(mem(rax, r13, 1), ymm3)
+	vfmadd231pd(ymm0, ymm2, ymm8)
+	vfmadd231pd(ymm0, ymm3, ymm10)
+
+	vbroadcastsd(mem(rax, r8,  4), ymm2)
+	vbroadcastsd(mem(rax, r15, 1), ymm3)
+	add(r9, rax)                       // a += cs_a;
+	vfmadd231pd(ymm0, ymm2, ymm12)
+	vfmadd231pd(xmm1, xmm2, xmm13)
+	vfmadd231pd(ymm0, ymm3, ymm14)
+	vfmadd231pd(xmm1, xmm3, xmm15)
 
 	dec(rsi)                           // i -= 1;
 	jne(.DLOOPKLEFT)                   // iterate again if i != 0.
@@ -1672,7 +1696,6 @@ void bli_dgemmsup_rv_haswell_asm_6x8m_6x8_L
 	prefetch(0, mem(rdx, 5*8))
 
 	label(.DPOSTPFETCH)
-	lea(mem(rax, r8, 2), rax)
 	mov(var(k_iter), rsi)
 	test(rsi, rsi)
 	je(.DCONSIDKLEFT)
@@ -1680,19 +1703,51 @@ void bli_dgemmsup_rv_haswell_asm_6x8m_6x8_L
 	// computer xmm8, xmm10, ymm12, ymm14 only
 	label(.DLOOPKITER)
 	//0
-	SUBITER4x4(rax, rbx, ymm8, ymm10, ymm12, ymm14)
+	vmovupd(mem(rbx,  0*32), ymm0)
+	vbroadcastsd(mem(rax, r8,  2), ymm1)
+	vbroadcastsd(mem(rax, r13, 1), ymm2)
+	vbroadcastsd(mem(rax, r8,  4), ymm3)
+	vbroadcastsd(mem(rax, r15, 1), ymm4)
+	vfmadd231pd(xmm0, xmm1, xmm8)
+	vfmadd231pd(xmm0, xmm2, xmm10)
+	vfmadd231pd(ymm0, ymm3, ymm12)
+	vfmadd231pd(ymm0, ymm4, ymm14)
 	add(r10, rbx)                      // b += rs_b;
 	add(r9, rax)                       // a += cs_a;
 	//1
-	SUBITER4x4(rax, rbx, ymm8, ymm10, ymm12, ymm14)
+	vmovupd(mem(rbx,  0*32), ymm0)
+	vbroadcastsd(mem(rax, r8,  2), ymm1)
+	vbroadcastsd(mem(rax, r13, 1), ymm2)
+	vbroadcastsd(mem(rax, r8,  4), ymm3)
+	vbroadcastsd(mem(rax, r15, 1), ymm4)
+	vfmadd231pd(xmm0, xmm1, xmm8)
+	vfmadd231pd(xmm0, xmm2, xmm10)
+	vfmadd231pd(ymm0, ymm3, ymm12)
+	vfmadd231pd(ymm0, ymm4, ymm14)
 	add(r10, rbx)                      // b += rs_b;
 	add(r9, rax)                       // a += cs_a;
 	//2
-	SUBITER4x4(rax, rbx, ymm8, ymm10, ymm12, ymm14)
+	vmovupd(mem(rbx,  0*32), ymm0)
+	vbroadcastsd(mem(rax, r8,  2), ymm1)
+	vbroadcastsd(mem(rax, r13, 1), ymm2)
+	vbroadcastsd(mem(rax, r8,  4), ymm3)
+	vbroadcastsd(mem(rax, r15, 1), ymm4)
+	vfmadd231pd(xmm0, xmm1, xmm8)
+	vfmadd231pd(xmm0, xmm2, xmm10)
+	vfmadd231pd(ymm0, ymm3, ymm12)
+	vfmadd231pd(ymm0, ymm4, ymm14)
 	add(r10, rbx)                      // b += rs_b;
 	add(r9, rax)                       // a += cs_a;
 	//3
-	SUBITER4x4(rax, rbx, ymm8, ymm10, ymm12, ymm14)
+	vmovupd(mem(rbx,  0*32), ymm0)
+	vbroadcastsd(mem(rax, r8,  2), ymm1)
+	vbroadcastsd(mem(rax, r13, 1), ymm2)
+	vbroadcastsd(mem(rax, r8,  4), ymm3)
+	vbroadcastsd(mem(rax, r15, 1), ymm4)
+	vfmadd231pd(xmm0, xmm1, xmm8)
+	vfmadd231pd(xmm0, xmm2, xmm10)
+	vfmadd231pd(ymm0, ymm3, ymm12)
+	vfmadd231pd(ymm0, ymm4, ymm14)
 	add(r10, rbx)                      // b += rs_b;
 	add(r9, rax)                       // a += cs_a;
 
@@ -1706,7 +1761,15 @@ void bli_dgemmsup_rv_haswell_asm_6x8m_6x8_L
 	je(.DPOSTACCUM)
 
 	label(.DLOOPKLEFT)
-	SUBITER4x4(rax, rbx, ymm8, ymm10, ymm12, ymm14)
+	vmovupd(mem(rbx,  0*32), ymm0)
+	vbroadcastsd(mem(rax, r8,  2), ymm1)
+	vbroadcastsd(mem(rax, r13, 1), ymm2)
+	vbroadcastsd(mem(rax, r8,  4), ymm3)
+	vbroadcastsd(mem(rax, r15, 1), ymm4)
+	vfmadd231pd(xmm0, xmm1, xmm8)
+	vfmadd231pd(xmm0, xmm2, xmm10)
+	vfmadd231pd(ymm0, ymm3, ymm12)
+	vfmadd231pd(ymm0, ymm4, ymm14)
 	add(r10, rbx)                      // b += rs_b;
 	add(r9, rax)                       // a += cs_a;
 
@@ -1989,19 +2052,35 @@ void bli_dgemmsup_rv_haswell_asm_6x8m_12x16_L
 		//compute xmm12 and xmm 14
 		label(.DMAIN)
 		//0
-		SUBITER2x2(rax, rbx, xmm12, xmm14)
+		vmovupd(mem(rbx,  0*32), xmm0)
+		vbroadcastsd(mem(rax, r8,  4), ymm3)
+		vbroadcastsd(mem(rax, r15, 1), ymm4)
+		vfmadd231pd(xmm0, xmm3, xmm12)
+		vfmadd231pd(xmm0, xmm4, xmm14)
 		add(r10, rbx)
 		add(r9, rax)
 		//1
-		SUBITER2x2(rax, rbx, xmm12, xmm14)
+		vmovupd(mem(rbx,  0*32), xmm0)
+		vbroadcastsd(mem(rax, r8,  4), ymm3)
+		vbroadcastsd(mem(rax, r15, 1), ymm4)
+		vfmadd231pd(xmm0, xmm3, xmm12)
+		vfmadd231pd(xmm0, xmm4, xmm14)
 		add(r10, rbx)
 		add(r9, rax)
 		//2
-		SUBITER2x2(rax, rbx, xmm12, xmm14)
+		vmovupd(mem(rbx,  0*32), xmm0)
+		vbroadcastsd(mem(rax, r8,  4), ymm3)
+		vbroadcastsd(mem(rax, r15, 1), ymm4)
+		vfmadd231pd(xmm0, xmm3, xmm12)
+		vfmadd231pd(xmm0, xmm4, xmm14)
 		add(r10, rbx)
 		add(r9, rax)
 		//3
-		SUBITER2x2(rax, rbx, xmm12, xmm14)
+		vmovupd(mem(rbx,  0*32), xmm0)
+		vbroadcastsd(mem(rax, r8,  4), ymm3)
+		vbroadcastsd(mem(rax, r15, 1), ymm4)
+		vfmadd231pd(xmm0, xmm3, xmm12)
+		vfmadd231pd(xmm0, xmm4, xmm14)
 		add(r10, rbx)
 		add(r9, rax)
 
@@ -2014,7 +2093,11 @@ void bli_dgemmsup_rv_haswell_asm_6x8m_12x16_L
 		je(.DPOSTACC)
 
 		label(.DLEFT)
-		SUBITER2x2(rax, rbx, xmm12, xmm14)
+		vmovupd(mem(rbx,  0*32), xmm0)
+		vbroadcastsd(mem(rax, r8,  4), ymm3)
+		vbroadcastsd(mem(rax, r15, 1), ymm4)
+		vfmadd231pd(xmm0, xmm3, xmm12)
+		vfmadd231pd(xmm0, xmm4, xmm14)
 		add(r10, rbx)
 		add(r9, rax)
 		dec(rsi)
@@ -2886,37 +2969,117 @@ void bli_dgemmsup_rv_haswell_asm_6x8m_6x0_L
 	// ---------------------------------- iteration 0
 
 	prefetch(0, mem(rdx, 5*8))
-	SUBITER6x4(rax, rbx, ymm4, ymm6, ymm8, ymm10, ymm12, ymm14)
-	lea(mem(rbx, 1*32), rbp)
-	SUBITER6x4(rax, rbp, ymm5, ymm7, ymm9, ymm11, ymm13, ymm15)
+	vmovupd(mem(rbx,  0*32), ymm0)
+	vmovupd(mem(rbx,  1*32), ymm1)
 	add(r10, rbx)                      // b += rs_b;
+
+	vbroadcastsd(mem(rax        ), ymm2)
+	vbroadcastsd(mem(rax, r8,  1), ymm3)
+	vfmadd231pd(ymm0, ymm2, ymm4)
+	vfmadd231pd(ymm1, ymm2, ymm5)
+	vfmadd231pd(ymm0, ymm3, ymm6)
+	vfmadd231pd(ymm1, ymm3, ymm7)
+
+	vbroadcastsd(mem(rax, r8,  2), ymm2)
+	vbroadcastsd(mem(rax, r13, 1), ymm3)
+	vfmadd231pd(ymm0, ymm2, ymm8)
+	vfmadd231pd(ymm1, ymm2, ymm9)
+	vfmadd231pd(ymm0, ymm3, ymm10)
+	vfmadd231pd(ymm1, ymm3, ymm11)
+
+	vbroadcastsd(mem(rax, r8,  4), ymm2)
+	vbroadcastsd(mem(rax, r15, 1), ymm3)
 	add(r9, rax)                       // a += cs_a;
+	vfmadd231pd(ymm0, ymm2, ymm12)
+	vfmadd231pd(ymm1, ymm2, ymm13)
+	vfmadd231pd(ymm0, ymm3, ymm14)
+	vfmadd231pd(ymm1, ymm3, ymm15)
 	// ---------------------------------- iteration 1
 
 	prefetch(0, mem(rdx, r9, 1, 5*8))
-	SUBITER6x4(rax, rbx, ymm4, ymm6, ymm8, ymm10, ymm12, ymm14)
-	lea(mem(rbx, 1*32), rbp)
-	SUBITER6x4(rax, rbp, ymm5, ymm7, ymm9, ymm11, ymm13, ymm15)
+	vmovupd(mem(rbx,  0*32), ymm0)
+	vmovupd(mem(rbx,  1*32), ymm1)
 	add(r10, rbx)                      // b += rs_b;
+
+	vbroadcastsd(mem(rax        ), ymm2)
+	vbroadcastsd(mem(rax, r8,  1), ymm3)
+	vfmadd231pd(ymm0, ymm2, ymm4)
+	vfmadd231pd(ymm1, ymm2, ymm5)
+	vfmadd231pd(ymm0, ymm3, ymm6)
+	vfmadd231pd(ymm1, ymm3, ymm7)
+
+	vbroadcastsd(mem(rax, r8,  2), ymm2)
+	vbroadcastsd(mem(rax, r13, 1), ymm3)
+	vfmadd231pd(ymm0, ymm2, ymm8)
+	vfmadd231pd(ymm1, ymm2, ymm9)
+	vfmadd231pd(ymm0, ymm3, ymm10)
+	vfmadd231pd(ymm1, ymm3, ymm11)
+
+	vbroadcastsd(mem(rax, r8,  4), ymm2)
+	vbroadcastsd(mem(rax, r15, 1), ymm3)
 	add(r9, rax)                       // a += cs_a;
+	vfmadd231pd(ymm0, ymm2, ymm12)
+	vfmadd231pd(ymm1, ymm2, ymm13)
+	vfmadd231pd(ymm0, ymm3, ymm14)
+	vfmadd231pd(ymm1, ymm3, ymm15)
 	// ---------------------------------- iteration 2
 
 	prefetch(0, mem(rdx, r9, 2, 5*8))
-	SUBITER6x4(rax, rbx, ymm4, ymm6, ymm8, ymm10, ymm12, ymm14)
-	lea(mem(rbx, 1*32), rbp)
-	SUBITER6x4(rax, rbp, ymm5, ymm7, ymm9, ymm11, ymm13, ymm15)
+	vmovupd(mem(rbx,  0*32), ymm0)
+	vmovupd(mem(rbx,  1*32), ymm1)
 	add(r10, rbx)                      // b += rs_b;
+
+	vbroadcastsd(mem(rax        ), ymm2)
+	vbroadcastsd(mem(rax, r8,  1), ymm3)
+	vfmadd231pd(ymm0, ymm2, ymm4)
+	vfmadd231pd(ymm1, ymm2, ymm5)
+	vfmadd231pd(ymm0, ymm3, ymm6)
+	vfmadd231pd(ymm1, ymm3, ymm7)
+
+	vbroadcastsd(mem(rax, r8,  2), ymm2)
+	vbroadcastsd(mem(rax, r13, 1), ymm3)
+	vfmadd231pd(ymm0, ymm2, ymm8)
+	vfmadd231pd(ymm1, ymm2, ymm9)
+	vfmadd231pd(ymm0, ymm3, ymm10)
+	vfmadd231pd(ymm1, ymm3, ymm11)
+
+	vbroadcastsd(mem(rax, r8,  4), ymm2)
+	vbroadcastsd(mem(rax, r15, 1), ymm3)
 	add(r9, rax)                       // a += cs_a;
+	vfmadd231pd(ymm0, ymm2, ymm12)
+	vfmadd231pd(ymm1, ymm2, ymm13)
+	vfmadd231pd(ymm0, ymm3, ymm14)
+	vfmadd231pd(ymm1, ymm3, ymm15)
 	// ---------------------------------- iteration 3
 
 	prefetch(0, mem(rdx, rcx, 1, 5*8))
 	lea(mem(rdx, r9,  4), rdx)         // a_prefetch += 4*cs_a;
 
-	SUBITER6x4(rax, rbx, ymm4, ymm6, ymm8, ymm10, ymm12, ymm14)
-	lea(mem(rbx, 1*32), rbp)
-	SUBITER6x4(rax, rbp, ymm5, ymm7, ymm9, ymm11, ymm13, ymm15)
+	vmovupd(mem(rbx, 0*32), ymm0)
+	vmovupd(mem(rbx, 1*32), ymm1)
 	add(r10, rbx)                      // b += rs_b;
+
+	vbroadcastsd(mem(rax        ), ymm2)
+	vbroadcastsd(mem(rax, r8,  1), ymm3)
+	vfmadd231pd(ymm0, ymm2, ymm4)
+	vfmadd231pd(ymm1, ymm2, ymm5)
+	vfmadd231pd(ymm0, ymm3, ymm6)
+	vfmadd231pd(ymm1, ymm3, ymm7)
+
+	vbroadcastsd(mem(rax, r8,  2), ymm2)
+	vbroadcastsd(mem(rax, r13, 1), ymm3)
+	vfmadd231pd(ymm0, ymm2, ymm8)
+	vfmadd231pd(ymm1, ymm2, ymm9)
+	vfmadd231pd(ymm0, ymm3, ymm10)
+	vfmadd231pd(ymm1, ymm3, ymm11)
+
+	vbroadcastsd(mem(rax, r8,  4), ymm2)
+	vbroadcastsd(mem(rax, r15, 1), ymm3)
 	add(r9, rax)                       // a += cs_a;
+	vfmadd231pd(ymm0, ymm2, ymm12)
+	vfmadd231pd(ymm1, ymm2, ymm13)
+	vfmadd231pd(ymm0, ymm3, ymm14)
+	vfmadd231pd(ymm1, ymm3, ymm15)
 
 	dec(rsi)                           // i -= 1;
 	jne(.DLOOPKITER)                   // iterate again if i != 0.
@@ -2939,11 +3102,31 @@ void bli_dgemmsup_rv_haswell_asm_6x8m_6x0_L
 	prefetch(0, mem(rdx, 5*8))
 	add(r9, rdx)
 
-	SUBITER6x4(rax, rbx, ymm4, ymm6, ymm8, ymm10, ymm12, ymm14)
-	lea(mem(rbx, 1*32), rbp)
-	SUBITER6x4(rax, rbp, ymm5, ymm7, ymm9, ymm11, ymm13, ymm15)
+	vmovupd(mem(rbx,  0*32), ymm0)
+	vmovupd(mem(rbx,  1*32), ymm1)
 	add(r10, rbx)                      // b += rs_b;
+
+	vbroadcastsd(mem(rax        ), ymm2)
+	vbroadcastsd(mem(rax, r8,  1), ymm3)
+	vfmadd231pd(ymm0, ymm2, ymm4)
+	vfmadd231pd(ymm1, ymm2, ymm5)
+	vfmadd231pd(ymm0, ymm3, ymm6)
+	vfmadd231pd(ymm1, ymm3, ymm7)
+
+	vbroadcastsd(mem(rax, r8,  2), ymm2)
+	vbroadcastsd(mem(rax, r13, 1), ymm3)
+	vfmadd231pd(ymm0, ymm2, ymm8)
+	vfmadd231pd(ymm1, ymm2, ymm9)
+	vfmadd231pd(ymm0, ymm3, ymm10)
+	vfmadd231pd(ymm1, ymm3, ymm11)
+
+	vbroadcastsd(mem(rax, r8,  4), ymm2)
+	vbroadcastsd(mem(rax, r15, 1), ymm3)
 	add(r9, rax)                       // a += cs_a;
+	vfmadd231pd(ymm0, ymm2, ymm12)
+	vfmadd231pd(ymm1, ymm2, ymm13)
+	vfmadd231pd(ymm0, ymm3, ymm14)
+	vfmadd231pd(ymm1, ymm3, ymm15)
 
 
 	dec(rsi)                           // i -= 1;
@@ -3410,39 +3593,120 @@ void bli_dgemmsup_rv_haswell_asm_6x8m_12x8_L
 
 	prefetch(0, mem(rdx, 5*8))
 
-	SUBITER6x4(rax, rbx, ymm4, ymm6, ymm8, ymm10, ymm12, ymm14)
-	lea(mem(rbx, 1*32), rbp)
-	SUBITER6x4(rax, rbp, ymm5, ymm7, ymm9, ymm11, ymm13, ymm15)
+	vmovupd(mem(rbx,  0*32), ymm0)
+	vmovupd(mem(rbx,  1*32), ymm1)
 	add(r10, rbx)                      // b += rs_b;
+
+	vbroadcastsd(mem(rax        ), ymm2)
+	vbroadcastsd(mem(rax, r8,  1), ymm3)
+	vfmadd231pd(ymm0, ymm2, ymm4)
+	vfmadd231pd(ymm1, ymm2, ymm5)
+	vfmadd231pd(ymm0, ymm3, ymm6)
+	vfmadd231pd(ymm1, ymm3, ymm7)
+
+	vbroadcastsd(mem(rax, r8,  2), ymm2)
+	vbroadcastsd(mem(rax, r13, 1), ymm3)
+	vfmadd231pd(ymm0, ymm2, ymm8)
+	vfmadd231pd(ymm1, ymm2, ymm9)
+	vfmadd231pd(ymm0, ymm3, ymm10)
+	vfmadd231pd(ymm1, ymm3, ymm11)
+
+	vbroadcastsd(mem(rax, r8,  4), ymm2)
+	vbroadcastsd(mem(rax, r15, 1), ymm3)
 	add(r9, rax)                       // a += cs_a;
+	vfmadd231pd(ymm0, ymm2, ymm12)
+	vfmadd231pd(ymm1, ymm2, ymm13)
+	vfmadd231pd(ymm0, ymm3, ymm14)
+	vfmadd231pd(ymm1, ymm3, ymm15)
 	// ---------------------------------- iteration 1
 
 	prefetch(0, mem(rdx, r9, 1, 5*8))
 
-	SUBITER6x4(rax, rbx, ymm4, ymm6, ymm8, ymm10, ymm12, ymm14)
-	lea(mem(rbx, 1*32), rbp)
-	SUBITER6x4(rax, rbp, ymm5, ymm7, ymm9, ymm11, ymm13, ymm15)
+	vmovupd(mem(rbx,  0*32), ymm0)
+	vmovupd(mem(rbx,  1*32), ymm1)
 	add(r10, rbx)                      // b += rs_b;
+
+	vbroadcastsd(mem(rax        ), ymm2)
+	vbroadcastsd(mem(rax, r8,  1), ymm3)
+	vfmadd231pd(ymm0, ymm2, ymm4)
+	vfmadd231pd(ymm1, ymm2, ymm5)
+	vfmadd231pd(ymm0, ymm3, ymm6)
+	vfmadd231pd(ymm1, ymm3, ymm7)
+
+	vbroadcastsd(mem(rax, r8,  2), ymm2)
+	vbroadcastsd(mem(rax, r13, 1), ymm3)
+	vfmadd231pd(ymm0, ymm2, ymm8)
+	vfmadd231pd(ymm1, ymm2, ymm9)
+	vfmadd231pd(ymm0, ymm3, ymm10)
+	vfmadd231pd(ymm1, ymm3, ymm11)
+
+	vbroadcastsd(mem(rax, r8,  4), ymm2)
+	vbroadcastsd(mem(rax, r15, 1), ymm3)
 	add(r9, rax)                       // a += cs_a;
+	vfmadd231pd(ymm0, ymm2, ymm12)
+	vfmadd231pd(ymm1, ymm2, ymm13)
+	vfmadd231pd(ymm0, ymm3, ymm14)
+	vfmadd231pd(ymm1, ymm3, ymm15)
 	// ---------------------------------- iteration 2
 
 	prefetch(0, mem(rdx, r9, 2, 5*8))
 
-	SUBITER6x4(rax, rbx, ymm4, ymm6, ymm8, ymm10, ymm12, ymm14)
-	lea(mem(rbx, 1*32), rbp)
-	SUBITER6x4(rax, rbp, ymm5, ymm7, ymm9, ymm11, ymm13, ymm15)
+	vmovupd(mem(rbx,  0*32), ymm0)
+	vmovupd(mem(rbx,  1*32), ymm1)
 	add(r10, rbx)                      // b += rs_b;
+
+	vbroadcastsd(mem(rax        ), ymm2)
+	vbroadcastsd(mem(rax, r8,  1), ymm3)
+	vfmadd231pd(ymm0, ymm2, ymm4)
+	vfmadd231pd(ymm1, ymm2, ymm5)
+	vfmadd231pd(ymm0, ymm3, ymm6)
+	vfmadd231pd(ymm1, ymm3, ymm7)
+
+	vbroadcastsd(mem(rax, r8,  2), ymm2)
+	vbroadcastsd(mem(rax, r13, 1), ymm3)
+	vfmadd231pd(ymm0, ymm2, ymm8)
+	vfmadd231pd(ymm1, ymm2, ymm9)
+	vfmadd231pd(ymm0, ymm3, ymm10)
+	vfmadd231pd(ymm1, ymm3, ymm11)
+
+	vbroadcastsd(mem(rax, r8,  4), ymm2)
+	vbroadcastsd(mem(rax, r15, 1), ymm3)
 	add(r9, rax)                       // a += cs_a;
+	vfmadd231pd(ymm0, ymm2, ymm12)
+	vfmadd231pd(ymm1, ymm2, ymm13)
+	vfmadd231pd(ymm0, ymm3, ymm14)
+	vfmadd231pd(ymm1, ymm3, ymm15)
 	// ---------------------------------- iteration 3
 
 	prefetch(0, mem(rdx, rcx, 1, 5*8))
 	lea(mem(rdx, r9,  4), rdx)         // a_prefetch += 4*cs_a;
 
-	SUBITER6x4(rax, rbx, ymm4, ymm6, ymm8, ymm10, ymm12, ymm14)
-	lea(mem(rbx, 1*32), rbp)
-	SUBITER6x4(rax, rbp, ymm5, ymm7, ymm9, ymm11, ymm13, ymm15)
+	vmovupd(mem(rbx, 0*32), ymm0)
+	vmovupd(mem(rbx, 1*32), ymm1)
 	add(r10, rbx)                      // b += rs_b;
+
+	vbroadcastsd(mem(rax        ), ymm2)
+	vbroadcastsd(mem(rax, r8,  1), ymm3)
+	vfmadd231pd(ymm0, ymm2, ymm4)
+	vfmadd231pd(ymm1, ymm2, ymm5)
+	vfmadd231pd(ymm0, ymm3, ymm6)
+	vfmadd231pd(ymm1, ymm3, ymm7)
+
+	vbroadcastsd(mem(rax, r8,  2), ymm2)
+	vbroadcastsd(mem(rax, r13, 1), ymm3)
+	vfmadd231pd(ymm0, ymm2, ymm8)
+	vfmadd231pd(ymm1, ymm2, ymm9)
+	vfmadd231pd(ymm0, ymm3, ymm10)
+	vfmadd231pd(ymm1, ymm3, ymm11)
+
+	vbroadcastsd(mem(rax, r8,  4), ymm2)
+	vbroadcastsd(mem(rax, r15, 1), ymm3)
 	add(r9, rax)                       // a += cs_a;
+	vfmadd231pd(ymm0, ymm2, ymm12)
+	vfmadd231pd(ymm1, ymm2, ymm13)
+	vfmadd231pd(ymm0, ymm3, ymm14)
+	vfmadd231pd(ymm1, ymm3, ymm15)
+
 	dec(rsi)                           // i -= 1;
 	jne(.DLOOPKITER)                   // iterate again if i != 0.
 
@@ -3464,11 +3728,32 @@ void bli_dgemmsup_rv_haswell_asm_6x8m_12x8_L
 	prefetch(0, mem(rdx, 5*8))
 	add(r9, rdx)
 
-	SUBITER6x4(rax, rbx, ymm4, ymm6, ymm8, ymm10, ymm12, ymm14)
-	lea(mem(rbx, 1*32), rbp)
-	SUBITER6x4(rax, rbp, ymm5, ymm7, ymm9, ymm11, ymm13, ymm15)
+	vmovupd(mem(rbx,  0*32), ymm0)
+	vmovupd(mem(rbx,  1*32), ymm1)
 	add(r10, rbx)                      // b += rs_b;
+
+	vbroadcastsd(mem(rax        ), ymm2)
+	vbroadcastsd(mem(rax, r8,  1), ymm3)
+	vfmadd231pd(ymm0, ymm2, ymm4)
+	vfmadd231pd(ymm1, ymm2, ymm5)
+	vfmadd231pd(ymm0, ymm3, ymm6)
+	vfmadd231pd(ymm1, ymm3, ymm7)
+
+	vbroadcastsd(mem(rax, r8,  2), ymm2)
+	vbroadcastsd(mem(rax, r13, 1), ymm3)
+	vfmadd231pd(ymm0, ymm2, ymm8)
+	vfmadd231pd(ymm1, ymm2, ymm9)
+	vfmadd231pd(ymm0, ymm3, ymm10)
+	vfmadd231pd(ymm1, ymm3, ymm11)
+
+	vbroadcastsd(mem(rax, r8,  4), ymm2)
+	vbroadcastsd(mem(rax, r15, 1), ymm3)
 	add(r9, rax)                       // a += cs_a;
+	vfmadd231pd(ymm0, ymm2, ymm12)
+	vfmadd231pd(ymm1, ymm2, ymm13)
+	vfmadd231pd(ymm0, ymm3, ymm14)
+	vfmadd231pd(ymm1, ymm3, ymm15)
+
 	dec(rsi)                           // i -= 1;
 	jne(.DLOOPKLEFT)                   // iterate again if i != 0.
 
@@ -3935,40 +4220,109 @@ void bli_dgemmsup_rv_haswell_asm_6x8m_18x16_L
 	// ---------------------------------- iteration 0
 
 	prefetch(0, mem(rdx, 5*8))
-	SUBITER6x4(rax, rbx, ymm4, ymm6, ymm8, ymm10, ymm12, ymm14)
-	lea(mem(rbx, 1*32), rbp)
-	lea(mem(rax, r8, 2), rcx)
-	SUBITER4x4(rcx, rbp, ymm9, ymm11, ymm13, ymm15)
+	vmovupd(mem(rbx,  0*32), ymm0)
+	vmovupd(mem(rbx,  1*32), ymm1)
 	add(r10, rbx)                      // b += rs_b;
+
+	vbroadcastsd(mem(rax        ), ymm2)
+	vbroadcastsd(mem(rax, r8,  1), ymm3)
+	vfmadd231pd(ymm0, ymm2, ymm4)
+	vfmadd231pd(ymm0, ymm3, ymm6)
+
+	vbroadcastsd(mem(rax, r8,  2), ymm2)
+	vbroadcastsd(mem(rax, r13, 1), ymm3)
+	vfmadd231pd(ymm0, ymm2, ymm8)
+	vfmadd231pd(ymm1, ymm2, ymm9)
+	vfmadd231pd(ymm0, ymm3, ymm10)
+	vfmadd231pd(ymm1, ymm3, ymm11)
+
+	vbroadcastsd(mem(rax, r8,  4), ymm2)
+	vbroadcastsd(mem(rax, r15, 1), ymm3)
 	add(r9, rax)                       // a += cs_a;
+	vfmadd231pd(ymm0, ymm2, ymm12)
+	vfmadd231pd(ymm1, ymm2, ymm13)
+	vfmadd231pd(ymm0, ymm3, ymm14)
+	vfmadd231pd(ymm1, ymm3, ymm15)
 	// ---------------------------------- iteration 1
 
 	prefetch(0, mem(rdx, r9, 1, 5*8))
-	SUBITER6x4(rax, rbx, ymm4, ymm6, ymm8, ymm10, ymm12, ymm14)
-	lea(mem(rax, r8, 2), rcx)
-	lea(mem(rbx, 1*32), rbp)
-	SUBITER4x4(rcx, rbp, ymm9, ymm11, ymm13, ymm15)
+	vmovupd(mem(rbx,  0*32), ymm0)
+	vmovupd(mem(rbx,  1*32), ymm1)
 	add(r10, rbx)                      // b += rs_b;
+
+	vbroadcastsd(mem(rax        ), ymm2)
+	vbroadcastsd(mem(rax, r8,  1), ymm3)
+	vfmadd231pd(ymm0, ymm2, ymm4)
+	vfmadd231pd(ymm0, ymm3, ymm6)
+
+	vbroadcastsd(mem(rax, r8,  2), ymm2)
+	vbroadcastsd(mem(rax, r13, 1), ymm3)
+	vfmadd231pd(ymm0, ymm2, ymm8)
+	vfmadd231pd(ymm1, ymm2, ymm9)
+	vfmadd231pd(ymm0, ymm3, ymm10)
+	vfmadd231pd(ymm1, ymm3, ymm11)
+
+	vbroadcastsd(mem(rax, r8,  4), ymm2)
+	vbroadcastsd(mem(rax, r15, 1), ymm3)
 	add(r9, rax)                       // a += cs_a;
+	vfmadd231pd(ymm0, ymm2, ymm12)
+	vfmadd231pd(ymm1, ymm2, ymm13)
+	vfmadd231pd(ymm0, ymm3, ymm14)
+	vfmadd231pd(ymm1, ymm3, ymm15)
 	// ---------------------------------- iteration 2
 
 	prefetch(0, mem(rdx, r9, 2, 5*8))
-	SUBITER6x4(rax, rbx, ymm4, ymm6, ymm8, ymm10, ymm12, ymm14)
-	lea(mem(rax, r8, 2), rcx)
-	lea(mem(rbx, 1*32), rbp)
-	SUBITER4x4(rcx, rbp, ymm9, ymm11, ymm13, ymm15)
+	vmovupd(mem(rbx,  0*32), ymm0)
+	vmovupd(mem(rbx,  1*32), ymm1)
 	add(r10, rbx)                      // b += rs_b;
+
+	vbroadcastsd(mem(rax        ), ymm2)
+	vbroadcastsd(mem(rax, r8,  1), ymm3)
+	vfmadd231pd(ymm0, ymm2, ymm4)
+	vfmadd231pd(ymm0, ymm3, ymm6)
+
+	vbroadcastsd(mem(rax, r8,  2), ymm2)
+	vbroadcastsd(mem(rax, r13, 1), ymm3)
+	vfmadd231pd(ymm0, ymm2, ymm8)
+	vfmadd231pd(ymm1, ymm2, ymm9)
+	vfmadd231pd(ymm0, ymm3, ymm10)
+	vfmadd231pd(ymm1, ymm3, ymm11)
+
+	vbroadcastsd(mem(rax, r8,  4), ymm2)
+	vbroadcastsd(mem(rax, r15, 1), ymm3)
 	add(r9, rax)                       // a += cs_a;
+	vfmadd231pd(ymm0, ymm2, ymm12)
+	vfmadd231pd(ymm1, ymm2, ymm13)
+	vfmadd231pd(ymm0, ymm3, ymm14)
+	vfmadd231pd(ymm1, ymm3, ymm15)
 	// ---------------------------------- iteration 3
 
 	prefetch(0, mem(rdx, rcx, 1, 5*8))
 	lea(mem(rdx, r9,  4), rdx)         // a_prefetch += 4*cs_a;
-	SUBITER6x4(rax, rbx, ymm4, ymm6, ymm8, ymm10, ymm12, ymm14)
-	lea(mem(rax, r8, 2), rcx)
-	lea(mem(rbx, 1*32), rbp)
-	SUBITER4x4(rcx, rbp, ymm9, ymm11, ymm13, ymm15)
+
+	vmovupd(mem(rbx, 0*32), ymm0)
+	vmovupd(mem(rbx, 1*32), ymm1)
 	add(r10, rbx)                      // b += rs_b;
+
+	vbroadcastsd(mem(rax        ), ymm2)
+	vbroadcastsd(mem(rax, r8,  1), ymm3)
+	vfmadd231pd(ymm0, ymm2, ymm4)
+	vfmadd231pd(ymm0, ymm3, ymm6)
+
+	vbroadcastsd(mem(rax, r8,  2), ymm2)
+	vbroadcastsd(mem(rax, r13, 1), ymm3)
+	vfmadd231pd(ymm0, ymm2, ymm8)
+	vfmadd231pd(ymm1, ymm2, ymm9)
+	vfmadd231pd(ymm0, ymm3, ymm10)
+	vfmadd231pd(ymm1, ymm3, ymm11)
+
+	vbroadcastsd(mem(rax, r8,  4), ymm2)
+	vbroadcastsd(mem(rax, r15, 1), ymm3)
 	add(r9, rax)                       // a += cs_a;
+	vfmadd231pd(ymm0, ymm2, ymm12)
+	vfmadd231pd(ymm1, ymm2, ymm13)
+	vfmadd231pd(ymm0, ymm3, ymm14)
+	vfmadd231pd(ymm1, ymm3, ymm15)
 
 	dec(rsi)                           // i -= 1;
 	jne(.DLOOPKITER)                   // iterate again if i != 0.
@@ -3989,12 +4343,31 @@ void bli_dgemmsup_rv_haswell_asm_6x8m_18x16_L
 	label(.DLOOPKLEFT)                 // EDGE LOOP
 
 	prefetch(0, mem(rdx, 5*8))
-	SUBITER6x4(rax, rbx, ymm4, ymm6, ymm8, ymm10, ymm12, ymm14)
-	lea(mem(rax, r8, 2), rcx)
-	lea(mem(rbx, 1*32), rbp)
-	SUBITER4x4(rcx, rbp, ymm9, ymm11, ymm13, ymm15)
+	add(r9, rdx)
+
+	vmovupd(mem(rbx,  0*32), ymm0)
+	vmovupd(mem(rbx,  1*32), ymm1)
 	add(r10, rbx)                      // b += rs_b;
+
+	vbroadcastsd(mem(rax        ), ymm2)
+	vbroadcastsd(mem(rax, r8,  1), ymm3)
+	vfmadd231pd(ymm0, ymm2, ymm4)
+	vfmadd231pd(ymm0, ymm3, ymm6)
+
+	vbroadcastsd(mem(rax, r8,  2), ymm2)
+	vbroadcastsd(mem(rax, r13, 1), ymm3)
+	vfmadd231pd(ymm0, ymm2, ymm8)
+	vfmadd231pd(ymm1, ymm2, ymm9)
+	vfmadd231pd(ymm0, ymm3, ymm10)
+	vfmadd231pd(ymm1, ymm3, ymm11)
+
+	vbroadcastsd(mem(rax, r8,  4), ymm2)
+	vbroadcastsd(mem(rax, r15, 1), ymm3)
 	add(r9, rax)                       // a += cs_a;
+	vfmadd231pd(ymm0, ymm2, ymm12)
+	vfmadd231pd(ymm1, ymm2, ymm13)
+	vfmadd231pd(ymm0, ymm3, ymm14)
+	vfmadd231pd(ymm1, ymm3, ymm15)
 
 	dec(rsi)                           // i -= 1;
 	jne(.DLOOPKLEFT)                   // iterate again if i != 0.
@@ -4293,7 +4666,6 @@ void bli_dgemmsup_rv_haswell_asm_6x8m_18x16_L
 	vmovhpd(xmm4, mem(rdx, rax, 1, 1*8))
 
 	label(.DDONE)
-	label(.DRETURN)
 	vzeroupper()
 
     end_asm(
@@ -4432,38 +4804,112 @@ void bli_dgemmsup_rv_haswell_asm_6x8m_0x0_U
 	label(.DLOOPKITER)                 // MAIN LOOP
 	//0
 	prefetch(0, mem(rdx, 5*8))
-	SUBITER4x4(rax, rbx, ymm4, ymm6, ymm8, ymm10)
-	lea(mem(rbx, 1*32), rbp)
-	SUBITER6x4(rax, rbp, ymm5, ymm7, ymm9, ymm11, ymm13, ymm15)
+
+	vmovupd(mem(rbx,  0*32), ymm0)
+	vmovupd(mem(rbx,  1*32), ymm1)
 	add(r10, rbx)                      // b += rs_b;
+
+	vbroadcastsd(mem(rax        ), ymm2)
+	vbroadcastsd(mem(rax, r8,  1), ymm3)
+	vfmadd231pd(ymm0, ymm2, ymm4)
+	vfmadd231pd(ymm1, ymm2, ymm5)
+	vfmadd231pd(ymm0, ymm3, ymm6)
+	vfmadd231pd(ymm1, ymm3, ymm7)
+
+	vbroadcastsd(mem(rax, r8,  2), ymm2)
+	vbroadcastsd(mem(rax, r13, 1), ymm3)
+	vfmadd231pd(ymm0, ymm2, ymm8)
+	vfmadd231pd(ymm1, ymm2, ymm9)
+	vfmadd231pd(ymm0, ymm3, ymm10)
+	vfmadd231pd(ymm1, ymm3, ymm11)
+
+	vbroadcastsd(mem(rax, r8,  4), ymm2)
+	vbroadcastsd(mem(rax, r15, 1), ymm3)
 	add(r9, rax)                       // a += cs_a;
+	vfmadd231pd(ymm1, ymm2, ymm13)
+	vfmadd231pd(ymm1, ymm3, ymm15)
 
 	//1
 	prefetch(0, mem(rdx, r9, 1, 5*8))
 
-	SUBITER4x4(rax, rbx, ymm4, ymm6, ymm8, ymm10)
-	lea(mem(rbx, 1*32), rbp)
-	SUBITER6x4(rax, rbp, ymm5, ymm7, ymm9, ymm11, ymm13, ymm15)
+	vmovupd(mem(rbx,  0*32), ymm0)
+	vmovupd(mem(rbx,  1*32), ymm1)
 	add(r10, rbx)                      // b += rs_b;
+
+	vbroadcastsd(mem(rax        ), ymm2)
+	vbroadcastsd(mem(rax, r8,  1), ymm3)
+	vfmadd231pd(ymm0, ymm2, ymm4)
+	vfmadd231pd(ymm1, ymm2, ymm5)
+	vfmadd231pd(ymm0, ymm3, ymm6)
+	vfmadd231pd(ymm1, ymm3, ymm7)
+
+	vbroadcastsd(mem(rax, r8,  2), ymm2)
+	vbroadcastsd(mem(rax, r13, 1), ymm3)
+	vfmadd231pd(ymm0, ymm2, ymm8)
+	vfmadd231pd(ymm1, ymm2, ymm9)
+	vfmadd231pd(ymm0, ymm3, ymm10)
+	vfmadd231pd(ymm1, ymm3, ymm11)
+
+	vbroadcastsd(mem(rax, r8,  4), ymm2)
+	vbroadcastsd(mem(rax, r15, 1), ymm3)
 	add(r9, rax)                       // a += cs_a;
+	vfmadd231pd(ymm1, ymm2, ymm13)
+	vfmadd231pd(ymm1, ymm3, ymm15)
 	//2
 
 	prefetch(0, mem(rdx, r9, 2, 5*8))
 
-	SUBITER4x4(rax, rbx, ymm4, ymm6, ymm8, ymm10)
-	lea(mem(rbx, 1*32), rbp)
-	SUBITER6x4(rax, rbp, ymm5, ymm7, ymm9, ymm11, ymm13, ymm15)
+	vmovupd(mem(rbx,  0*32), ymm0)
+	vmovupd(mem(rbx,  1*32), ymm1)
 	add(r10, rbx)                      // b += rs_b;
+
+	vbroadcastsd(mem(rax        ), ymm2)
+	vbroadcastsd(mem(rax, r8,  1), ymm3)
+	vfmadd231pd(ymm0, ymm2, ymm4)
+	vfmadd231pd(ymm1, ymm2, ymm5)
+	vfmadd231pd(ymm0, ymm3, ymm6)
+	vfmadd231pd(ymm1, ymm3, ymm7)
+
+	vbroadcastsd(mem(rax, r8,  2), ymm2)
+	vbroadcastsd(mem(rax, r13, 1), ymm3)
+	vfmadd231pd(ymm0, ymm2, ymm8)
+	vfmadd231pd(ymm1, ymm2, ymm9)
+	vfmadd231pd(ymm0, ymm3, ymm10)
+	vfmadd231pd(ymm1, ymm3, ymm11)
+
+	vbroadcastsd(mem(rax, r8,  4), ymm2)
+	vbroadcastsd(mem(rax, r15, 1), ymm3)
 	add(r9, rax)                       // a += cs_a;
+	vfmadd231pd(ymm1, ymm2, ymm13)
+	vfmadd231pd(ymm1, ymm3, ymm15)
 	//3
 	prefetch(0, mem(rdx, rcx, 1, 5*8))
 	lea(mem(rdx, r9,  4), rdx)         // a_prefetch += 4*cs_a;
 
-	SUBITER4x4(rax, rbx, ymm4, ymm6, ymm8, ymm10)
-	lea(mem(rbx, 1*32), rbp)
-	SUBITER6x4(rax, rbp, ymm5, ymm7, ymm9, ymm11, ymm13, ymm15)
+	vmovupd(mem(rbx, 0*32), ymm0)
+	vmovupd(mem(rbx, 1*32), ymm1)
 	add(r10, rbx)                      // b += rs_b;
+
+	vbroadcastsd(mem(rax        ), ymm2)
+	vbroadcastsd(mem(rax, r8,  1), ymm3)
+	vfmadd231pd(ymm0, ymm2, ymm4)
+	vfmadd231pd(ymm1, ymm2, ymm5)
+	vfmadd231pd(ymm0, ymm3, ymm6)
+	vfmadd231pd(ymm1, ymm3, ymm7)
+
+	vbroadcastsd(mem(rax, r8,  2), ymm2)
+	vbroadcastsd(mem(rax, r13, 1), ymm3)
+	vfmadd231pd(ymm0, ymm2, ymm8)
+	vfmadd231pd(ymm1, ymm2, ymm9)
+	vfmadd231pd(ymm0, ymm3, ymm10)
+	vfmadd231pd(ymm1, ymm3, ymm11)
+
+	vbroadcastsd(mem(rax, r8,  4), ymm2)
+	vbroadcastsd(mem(rax, r15, 1), ymm3)
 	add(r9, rax)                       // a += cs_a;
+	vfmadd231pd(ymm1, ymm2, ymm13)
+	vfmadd231pd(ymm1, ymm3, ymm15)
+
 	dec(rsi)
 	jne(.DLOOPKITER)
 
@@ -4478,11 +4924,30 @@ void bli_dgemmsup_rv_haswell_asm_6x8m_0x0_U
 	prefetch(0, mem(rdx, 5*8))
 	add(r9, rdx)
 
-	SUBITER4x4(rax, rbx, ymm4, ymm6, ymm8, ymm10)
-	lea(mem(rbx, 1*32), rbp)
-	SUBITER6x4(rax, rbp, ymm5, ymm7, ymm9, ymm11, ymm13, ymm15)
+	vmovupd(mem(rbx,  0*32), ymm0)
+	vmovupd(mem(rbx,  1*32), ymm1)
 	add(r10, rbx)                      // b += rs_b;
+
+	vbroadcastsd(mem(rax        ), ymm2)
+	vbroadcastsd(mem(rax, r8,  1), ymm3)
+	vfmadd231pd(ymm0, ymm2, ymm4)
+	vfmadd231pd(ymm1, ymm2, ymm5)
+	vfmadd231pd(ymm0, ymm3, ymm6)
+	vfmadd231pd(ymm1, ymm3, ymm7)
+
+	vbroadcastsd(mem(rax, r8,  2), ymm2)
+	vbroadcastsd(mem(rax, r13, 1), ymm3)
+	vfmadd231pd(ymm0, ymm2, ymm8)
+	vfmadd231pd(ymm1, ymm2, ymm9)
+	vfmadd231pd(ymm0, ymm3, ymm10)
+	vfmadd231pd(ymm1, ymm3, ymm11)
+
+	vbroadcastsd(mem(rax, r8,  4), ymm2)
+	vbroadcastsd(mem(rax, r15, 1), ymm3)
 	add(r9, rax)                       // a += cs_a;
+	vfmadd231pd(ymm1, ymm2, ymm13)
+	vfmadd231pd(ymm1, ymm3, ymm15)
+
 	dec(rsi)
 	jne(.DLOOPKLEFT)
 
@@ -4863,37 +5328,120 @@ void bli_dgemmsup_rv_haswell_asm_6x8m_6x8_U
 	//0
 	prefetch(0, mem(rdx, 5*8))
 
-	SUBITER6x4(rax, rbx, ymm4, ymm6, ymm8, ymm10, ymm12, ymm14)
-	lea(mem(rbx, 1*32), rbp)
-	SUBITER6x4(rax, rbp, ymm5, ymm7, ymm9, ymm11, ymm13, ymm15)
+	vmovupd(mem(rbx,  0*32), ymm0)
+	vmovupd(mem(rbx,  1*32), ymm1)
 	add(r10, rbx)                      // b += rs_b;
+
+	vbroadcastsd(mem(rax        ), ymm2)
+	vbroadcastsd(mem(rax, r8,  1), ymm3)
+	vfmadd231pd(ymm0, ymm2, ymm4)
+	vfmadd231pd(ymm1, ymm2, ymm5)
+	vfmadd231pd(ymm0, ymm3, ymm6)
+	vfmadd231pd(ymm1, ymm3, ymm7)
+
+	vbroadcastsd(mem(rax, r8,  2), ymm2)
+	vbroadcastsd(mem(rax, r13, 1), ymm3)
+	vfmadd231pd(ymm0, ymm2, ymm8)
+	vfmadd231pd(ymm1, ymm2, ymm9)
+	vfmadd231pd(ymm0, ymm3, ymm10)
+	vfmadd231pd(ymm1, ymm3, ymm11)
+
+	vbroadcastsd(mem(rax, r8,  4), ymm2)
+	vbroadcastsd(mem(rax, r15, 1), ymm3)
 	add(r9, rax)                       // a += cs_a;
+	vfmadd231pd(ymm0, ymm2, ymm12)
+	vfmadd231pd(ymm1, ymm2, ymm13)
+	vfmadd231pd(ymm0, ymm3, ymm14)
+	vfmadd231pd(ymm1, ymm3, ymm15)
+
 	//1
 	prefetch(0, mem(rdx, r9, 1, 5*8))
 
-	SUBITER6x4(rax, rbx, ymm4, ymm6, ymm8, ymm10, ymm12, ymm14)
-	lea(mem(rbx, 1*32), rbp)
-	SUBITER6x4(rax, rbp, ymm5, ymm7, ymm9, ymm11, ymm13, ymm15)
+	vmovupd(mem(rbx,  0*32), ymm0)
+	vmovupd(mem(rbx,  1*32), ymm1)
 	add(r10, rbx)                      // b += rs_b;
+
+	vbroadcastsd(mem(rax        ), ymm2)
+	vbroadcastsd(mem(rax, r8,  1), ymm3)
+	vfmadd231pd(ymm0, ymm2, ymm4)
+	vfmadd231pd(ymm1, ymm2, ymm5)
+	vfmadd231pd(ymm0, ymm3, ymm6)
+	vfmadd231pd(ymm1, ymm3, ymm7)
+
+	vbroadcastsd(mem(rax, r8,  2), ymm2)
+	vbroadcastsd(mem(rax, r13, 1), ymm3)
+	vfmadd231pd(ymm0, ymm2, ymm8)
+	vfmadd231pd(ymm1, ymm2, ymm9)
+	vfmadd231pd(ymm0, ymm3, ymm10)
+	vfmadd231pd(ymm1, ymm3, ymm11)
+
+	vbroadcastsd(mem(rax, r8,  4), ymm2)
+	vbroadcastsd(mem(rax, r15, 1), ymm3)
 	add(r9, rax)                       // a += cs_a;
+	vfmadd231pd(ymm0, ymm2, ymm12)
+	vfmadd231pd(ymm1, ymm2, ymm13)
+	vfmadd231pd(ymm0, ymm3, ymm14)
+	vfmadd231pd(ymm1, ymm3, ymm15)
+
 	//2
 
 	prefetch(0, mem(rdx, r9, 2, 5*8))
 
-	SUBITER6x4(rax, rbx, ymm4, ymm6, ymm8, ymm10, ymm12, ymm14)
-	lea(mem(rbx, 1*32), rbp)
-	SUBITER6x4(rax, rbp, ymm5, ymm7, ymm9, ymm11, ymm13, ymm15)
+	vmovupd(mem(rbx,  0*32), ymm0)
+	vmovupd(mem(rbx,  1*32), ymm1)
 	add(r10, rbx)                      // b += rs_b;
+
+	vbroadcastsd(mem(rax        ), ymm2)
+	vbroadcastsd(mem(rax, r8,  1), ymm3)
+	vfmadd231pd(ymm0, ymm2, ymm4)
+	vfmadd231pd(ymm1, ymm2, ymm5)
+	vfmadd231pd(ymm0, ymm3, ymm6)
+	vfmadd231pd(ymm1, ymm3, ymm7)
+
+	vbroadcastsd(mem(rax, r8,  2), ymm2)
+	vbroadcastsd(mem(rax, r13, 1), ymm3)
+	vfmadd231pd(ymm0, ymm2, ymm8)
+	vfmadd231pd(ymm1, ymm2, ymm9)
+	vfmadd231pd(ymm0, ymm3, ymm10)
+	vfmadd231pd(ymm1, ymm3, ymm11)
+
+	vbroadcastsd(mem(rax, r8,  4), ymm2)
+	vbroadcastsd(mem(rax, r15, 1), ymm3)
 	add(r9, rax)                       // a += cs_a;
+	vfmadd231pd(ymm0, ymm2, ymm12)
+	vfmadd231pd(ymm1, ymm2, ymm13)
+	vfmadd231pd(ymm0, ymm3, ymm14)
+	vfmadd231pd(ymm1, ymm3, ymm15)
+
 	//3
 	prefetch(0, mem(rdx, rcx, 1, 5*8))
 	lea(mem(rdx, r9,  4), rdx)         // a_prefetch += 4*cs_a;
 
-	SUBITER6x4(rax, rbx, ymm4, ymm6, ymm8, ymm10, ymm12, ymm14)
-	lea(mem(rbx, 1*32), rbp)
-	SUBITER6x4(rax, rbp, ymm5, ymm7, ymm9, ymm11, ymm13, ymm15)
+	vmovupd(mem(rbx, 0*32), ymm0)
+	vmovupd(mem(rbx, 1*32), ymm1)
 	add(r10, rbx)                      // b += rs_b;
+
+	vbroadcastsd(mem(rax        ), ymm2)
+	vbroadcastsd(mem(rax, r8,  1), ymm3)
+	vfmadd231pd(ymm0, ymm2, ymm4)
+	vfmadd231pd(ymm1, ymm2, ymm5)
+	vfmadd231pd(ymm0, ymm3, ymm6)
+	vfmadd231pd(ymm1, ymm3, ymm7)
+
+	vbroadcastsd(mem(rax, r8,  2), ymm2)
+	vbroadcastsd(mem(rax, r13, 1), ymm3)
+	vfmadd231pd(ymm0, ymm2, ymm8)
+	vfmadd231pd(ymm1, ymm2, ymm9)
+	vfmadd231pd(ymm0, ymm3, ymm10)
+	vfmadd231pd(ymm1, ymm3, ymm11)
+
+	vbroadcastsd(mem(rax, r8,  4), ymm2)
+	vbroadcastsd(mem(rax, r15, 1), ymm3)
 	add(r9, rax)                       // a += cs_a;
+	vfmadd231pd(ymm0, ymm2, ymm12)
+	vfmadd231pd(ymm1, ymm2, ymm13)
+	vfmadd231pd(ymm0, ymm3, ymm14)
+	vfmadd231pd(ymm1, ymm3, ymm15)
 
 	dec(rsi)
 	jne(.DLOOPKITER)
@@ -4909,11 +5457,31 @@ void bli_dgemmsup_rv_haswell_asm_6x8m_6x8_U
 	prefetch(0, mem(rdx, 5*8))
 	add(r9, rdx)
 
-	SUBITER6x4(rax, rbx, ymm4, ymm6, ymm8, ymm10, ymm12, ymm14)
-	lea(mem(rbx, 1*32), rbp)
-	SUBITER6x4(rax, rbp, ymm5, ymm7, ymm9, ymm11, ymm13, ymm15)
+	vmovupd(mem(rbx,  0*32), ymm0)
+	vmovupd(mem(rbx,  1*32), ymm1)
 	add(r10, rbx)                      // b += rs_b;
+
+	vbroadcastsd(mem(rax        ), ymm2)
+	vbroadcastsd(mem(rax, r8,  1), ymm3)
+	vfmadd231pd(ymm0, ymm2, ymm4)
+	vfmadd231pd(ymm1, ymm2, ymm5)
+	vfmadd231pd(ymm0, ymm3, ymm6)
+	vfmadd231pd(ymm1, ymm3, ymm7)
+
+	vbroadcastsd(mem(rax, r8,  2), ymm2)
+	vbroadcastsd(mem(rax, r13, 1), ymm3)
+	vfmadd231pd(ymm0, ymm2, ymm8)
+	vfmadd231pd(ymm1, ymm2, ymm9)
+	vfmadd231pd(ymm0, ymm3, ymm10)
+	vfmadd231pd(ymm1, ymm3, ymm11)
+
+	vbroadcastsd(mem(rax, r8,  4), ymm2)
+	vbroadcastsd(mem(rax, r15, 1), ymm3)
 	add(r9, rax)                       // a += cs_a;
+	vfmadd231pd(ymm0, ymm2, ymm12)
+	vfmadd231pd(ymm1, ymm2, ymm13)
+	vfmadd231pd(ymm0, ymm3, ymm14)
+	vfmadd231pd(ymm1, ymm3, ymm15)
 
 	dec(rsi)
 	jne(.DLOOPKLEFT)
@@ -5318,36 +5886,119 @@ void bli_dgemmsup_rv_haswell_asm_6x8m_12x16_U
 	//0
 	prefetch(0, mem(rdx, 5*8))
 
-	SUBITER6x4(rax, rbx, ymm4, ymm6, ymm8, ymm10, ymm12, ymm14)
-	lea(mem(rbx, 1*32), rbp)
-	SUBITER6x4(rax, rbp, ymm5, ymm7, ymm9, ymm11, ymm13, ymm15)
+	vmovupd(mem(rbx,  0*32), ymm0)
+	vmovupd(mem(rbx,  1*32), ymm1)
 	add(r10, rbx)                      // b += rs_b;
-	add(r9, rax)                       // a += cs_a
+
+	vbroadcastsd(mem(rax        ), ymm2)
+	vbroadcastsd(mem(rax, r8,  1), ymm3)
+	vfmadd231pd(ymm0, ymm2, ymm4)
+	vfmadd231pd(ymm1, ymm2, ymm5)
+	vfmadd231pd(ymm0, ymm3, ymm6)
+	vfmadd231pd(ymm1, ymm3, ymm7)
+
+	vbroadcastsd(mem(rax, r8,  2), ymm2)
+	vbroadcastsd(mem(rax, r13, 1), ymm3)
+	vfmadd231pd(ymm0, ymm2, ymm8)
+	vfmadd231pd(ymm1, ymm2, ymm9)
+	vfmadd231pd(ymm0, ymm3, ymm10)
+	vfmadd231pd(ymm1, ymm3, ymm11)
+
+	vbroadcastsd(mem(rax, r8,  4), ymm2)
+	vbroadcastsd(mem(rax, r15, 1), ymm3)
+	add(r9, rax)                       // a += cs_a;
+	vfmadd231pd(ymm0, ymm2, ymm12)
+	vfmadd231pd(ymm1, ymm2, ymm13)
+	vfmadd231pd(ymm0, ymm3, ymm14)
+	vfmadd231pd(ymm1, ymm3, ymm15)
 	//1
 	prefetch(0, mem(rdx, r9, 1, 5*8))
-	SUBITER6x4(rax, rbx, ymm4, ymm6, ymm8, ymm10, ymm12, ymm14)
-	lea(mem(rbx, 1*32), rbp)
-	SUBITER6x4(rax, rbp, ymm5, ymm7, ymm9, ymm11, ymm13, ymm15)
+
+	vmovupd(mem(rbx,  0*32), ymm0)
+	vmovupd(mem(rbx,  1*32), ymm1)
 	add(r10, rbx)                      // b += rs_b;
+
+	vbroadcastsd(mem(rax        ), ymm2)
+	vbroadcastsd(mem(rax, r8,  1), ymm3)
+	vfmadd231pd(ymm0, ymm2, ymm4)
+	vfmadd231pd(ymm1, ymm2, ymm5)
+	vfmadd231pd(ymm0, ymm3, ymm6)
+	vfmadd231pd(ymm1, ymm3, ymm7)
+
+	vbroadcastsd(mem(rax, r8,  2), ymm2)
+	vbroadcastsd(mem(rax, r13, 1), ymm3)
+	vfmadd231pd(ymm0, ymm2, ymm8)
+	vfmadd231pd(ymm1, ymm2, ymm9)
+	vfmadd231pd(ymm0, ymm3, ymm10)
+	vfmadd231pd(ymm1, ymm3, ymm11)
+
+	vbroadcastsd(mem(rax, r8,  4), ymm2)
+	vbroadcastsd(mem(rax, r15, 1), ymm3)
 	add(r9, rax)                       // a += cs_a;
+	vfmadd231pd(ymm0, ymm2, ymm12)
+	vfmadd231pd(ymm1, ymm2, ymm13)
+	vfmadd231pd(ymm0, ymm3, ymm14)
+	vfmadd231pd(ymm1, ymm3, ymm15)
 
 	//2
 
 	prefetch(0, mem(rdx, r9, 2, 5*8))
-	SUBITER6x4(rax, rbx, ymm4, ymm6, ymm8, ymm10, ymm12, ymm14)
-	lea(mem(rbx, 1*32), rbp)
-	SUBITER6x4(rax, rbp, ymm5, ymm7, ymm9, ymm11, ymm13, ymm15)
+
+	vmovupd(mem(rbx,  0*32), ymm0)
+	vmovupd(mem(rbx,  1*32), ymm1)
 	add(r10, rbx)                      // b += rs_b;
+
+	vbroadcastsd(mem(rax        ), ymm2)
+	vbroadcastsd(mem(rax, r8,  1), ymm3)
+	vfmadd231pd(ymm0, ymm2, ymm4)
+	vfmadd231pd(ymm1, ymm2, ymm5)
+	vfmadd231pd(ymm0, ymm3, ymm6)
+	vfmadd231pd(ymm1, ymm3, ymm7)
+
+	vbroadcastsd(mem(rax, r8,  2), ymm2)
+	vbroadcastsd(mem(rax, r13, 1), ymm3)
+	vfmadd231pd(ymm0, ymm2, ymm8)
+	vfmadd231pd(ymm1, ymm2, ymm9)
+	vfmadd231pd(ymm0, ymm3, ymm10)
+	vfmadd231pd(ymm1, ymm3, ymm11)
+
+	vbroadcastsd(mem(rax, r8,  4), ymm2)
+	vbroadcastsd(mem(rax, r15, 1), ymm3)
 	add(r9, rax)                       // a += cs_a;
+	vfmadd231pd(ymm0, ymm2, ymm12)
+	vfmadd231pd(ymm1, ymm2, ymm13)
+	vfmadd231pd(ymm0, ymm3, ymm14)
+	vfmadd231pd(ymm1, ymm3, ymm15)
 	//3
 	prefetch(0, mem(rdx, rcx, 1, 5*8))
 	lea(mem(rdx, r9,  4), rdx)         // a_prefetch += 4*cs_a;
 
-	SUBITER6x4(rax, rbx, ymm4, ymm6, ymm8, ymm10, ymm12, ymm14)
-	lea(mem(rbx, 1*32), rbp)
-	SUBITER6x4(rax, rbp, ymm5, ymm7, ymm9, ymm11, ymm13, ymm15)
+	vmovupd(mem(rbx, 0*32), ymm0)
+	vmovupd(mem(rbx, 1*32), ymm1)
 	add(r10, rbx)                      // b += rs_b;
+
+	vbroadcastsd(mem(rax        ), ymm2)
+	vbroadcastsd(mem(rax, r8,  1), ymm3)
+	vfmadd231pd(ymm0, ymm2, ymm4)
+	vfmadd231pd(ymm1, ymm2, ymm5)
+	vfmadd231pd(ymm0, ymm3, ymm6)
+	vfmadd231pd(ymm1, ymm3, ymm7)
+
+	vbroadcastsd(mem(rax, r8,  2), ymm2)
+	vbroadcastsd(mem(rax, r13, 1), ymm3)
+	vfmadd231pd(ymm0, ymm2, ymm8)
+	vfmadd231pd(ymm1, ymm2, ymm9)
+	vfmadd231pd(ymm0, ymm3, ymm10)
+	vfmadd231pd(ymm1, ymm3, ymm11)
+
+	vbroadcastsd(mem(rax, r8,  4), ymm2)
+	vbroadcastsd(mem(rax, r15, 1), ymm3)
 	add(r9, rax)                       // a += cs_a;
+	vfmadd231pd(ymm0, ymm2, ymm12)
+	vfmadd231pd(ymm1, ymm2, ymm13)
+	vfmadd231pd(ymm0, ymm3, ymm14)
+	vfmadd231pd(ymm1, ymm3, ymm15)
+
 	dec(rsi)
 	jne(.DLOOPKITER)
 
@@ -5361,11 +6012,32 @@ void bli_dgemmsup_rv_haswell_asm_6x8m_12x16_U
 
 	prefetch(0, mem(rdx, 5*8))
 	add(r9, rdx)
-	SUBITER6x4(rax, rbx, ymm4, ymm6, ymm8, ymm10, ymm12, ymm14)
-	lea(mem(rbx, 1*32), rbp)
-	SUBITER6x4(rax, rbp, ymm5, ymm7, ymm9, ymm11, ymm13, ymm15)
+
+	vmovupd(mem(rbx,  0*32), ymm0)
+	vmovupd(mem(rbx,  1*32), ymm1)
 	add(r10, rbx)                      // b += rs_b;
+
+	vbroadcastsd(mem(rax        ), ymm2)
+	vbroadcastsd(mem(rax, r8,  1), ymm3)
+	vfmadd231pd(ymm0, ymm2, ymm4)
+	vfmadd231pd(ymm1, ymm2, ymm5)
+	vfmadd231pd(ymm0, ymm3, ymm6)
+	vfmadd231pd(ymm1, ymm3, ymm7)
+
+	vbroadcastsd(mem(rax, r8,  2), ymm2)
+	vbroadcastsd(mem(rax, r13, 1), ymm3)
+	vfmadd231pd(ymm0, ymm2, ymm8)
+	vfmadd231pd(ymm1, ymm2, ymm9)
+	vfmadd231pd(ymm0, ymm3, ymm10)
+	vfmadd231pd(ymm1, ymm3, ymm11)
+
+	vbroadcastsd(mem(rax, r8,  4), ymm2)
+	vbroadcastsd(mem(rax, r15, 1), ymm3)
 	add(r9, rax)                       // a += cs_a;
+	vfmadd231pd(ymm0, ymm2, ymm12)
+	vfmadd231pd(ymm1, ymm2, ymm13)
+	vfmadd231pd(ymm0, ymm3, ymm14)
+	vfmadd231pd(ymm1, ymm3, ymm15)
 
 	dec(rsi)
 	jne(.DLOOPKLEFT)
@@ -5761,25 +6433,37 @@ void bli_dgemmsup_rv_haswell_asm_6x8m_6x0_U
 		//compute xmm5 and xmm7 only
 		label(.DMAIN)
 		//0
-		lea(mem(rbx, 1*32), rbp)
-		SUBITER2x2(rax, rbp, xmm5, xmm7)
-		add(r9, rax)
+		vmovupd(mem(rbx,  1*32), xmm1)
+		vbroadcastsd(mem(rax        ), ymm2)
+		vbroadcastsd(mem(rax, r8,  1), ymm3)
+		vfmadd231pd(xmm1, xmm2, xmm5)
+		vfmadd231pd(xmm1, xmm3, xmm7)
 		add(r10, rbx)
+		add(r9, rax)
 		//1
-		lea(mem(rbx, 1*32), rbp)
-		SUBITER2x2(rax, rbp, xmm5, xmm7)
-		add(r9, rax)
+		vmovupd(mem(rbx,  1*32), xmm1)
+		vbroadcastsd(mem(rax        ), ymm2)
+		vbroadcastsd(mem(rax, r8,  1), ymm3)
+		vfmadd231pd(xmm1, xmm2, xmm5)
+		vfmadd231pd(xmm1, xmm3, xmm7)
 		add(r10, rbx)
+		add(r9, rax)
 		//2
-		lea(mem(rbx, 1*32), rbp)
-		SUBITER2x2(rax, rbp, xmm5, xmm7)
-		add(r9, rax)
+		vmovupd(mem(rbx,  1*32), xmm1)
+		vbroadcastsd(mem(rax        ), ymm2)
+		vbroadcastsd(mem(rax, r8,  1), ymm3)
+		vfmadd231pd(xmm1, xmm2, xmm5)
+		vfmadd231pd(xmm1, xmm3, xmm7)
 		add(r10, rbx)
+		add(r9, rax)
 		//3
-		lea(mem(rbx, 1*32), rbp)
-		SUBITER2x2(rax, rbp, xmm5, xmm7)
-		add(r9, rax)
+		vmovupd(mem(rbx,  1*32), xmm1)
+		vbroadcastsd(mem(rax        ), ymm2)
+		vbroadcastsd(mem(rax, r8,  1), ymm3)
+		vfmadd231pd(xmm1, xmm2, xmm5)
+		vfmadd231pd(xmm1, xmm3, xmm7)
 		add(r10, rbx)
+		add(r9, rax)
 
 		dec(rsi)
 		jne(.DMAIN)
@@ -5790,10 +6474,13 @@ void bli_dgemmsup_rv_haswell_asm_6x8m_6x0_U
 		je(.DPOSTACC)
 
 		label(.DLEFT)
-		lea(mem(rbx, 1*32), rbp)
-		SUBITER2x2(rax, rbp, xmm5, xmm7)
-		add(r9, rax)
+		vmovupd(mem(rbx,  1*32), xmm1)
+		vbroadcastsd(mem(rax        ), ymm2)
+		vbroadcastsd(mem(rax, r8,  1), ymm3)
+		vfmadd231pd(xmm1, xmm2, xmm5)
+		vfmadd231pd(xmm1, xmm3, xmm7)
 		add(r10, rbx)
+		add(r9, rax)
 		dec(rsi)
 		jne(.DLEFT)
 
@@ -6019,33 +6706,70 @@ void bli_dgemmsup_rv_haswell_asm_6x8m_12x8_U
 	//0
 	prefetch(0, mem(rdx, 5*8))
 
-	lea(mem(rbx, 1*32), rbp)
-	SUBITER4x4(rax, rbp, ymm5, ymm7, ymm9, ymm11)
+	vmovupd(mem(rbx,  1*32), ymm1)
+	add(r10, rbx)                      // b += rs_b;
+
+	vbroadcastsd(mem(rax        ), ymm2)
+	vbroadcastsd(mem(rax, r8,  1), ymm3)
+	vfmadd231pd(ymm1, ymm2, ymm5)
+	vfmadd231pd(ymm1, ymm3, ymm7)
+
+	vbroadcastsd(mem(rax, r8,  2), ymm2)
+	vbroadcastsd(mem(rax, r13, 1), ymm3)
 	add(r9, rax)                       // a += cs_a;
-	add(r10, rbx)
+	vfmadd231pd(ymm1, ymm2, ymm9)
+	vfmadd231pd(ymm1, ymm3, ymm11)
 	//1
 	prefetch(0, mem(rdx, r9, 1, 5*8))
 
-	lea(mem(rbx, 1*32), rbp)
-	SUBITER4x4(rax, rbp, ymm5, ymm7, ymm9, ymm11)
+	vmovupd(mem(rbx,  1*32), ymm1)
+	add(r10, rbx)                      // b += rs_b;
+
+	vbroadcastsd(mem(rax        ), ymm2)
+	vbroadcastsd(mem(rax, r8,  1), ymm3)
+	vfmadd231pd(ymm1, ymm2, ymm5)
+	vfmadd231pd(ymm1, ymm3, ymm7)
+
+	vbroadcastsd(mem(rax, r8,  2), ymm2)
+	vbroadcastsd(mem(rax, r13, 1), ymm3)
 	add(r9, rax)                       // a += cs_a;
-	add(r10, rbx)
+	vfmadd231pd(ymm1, ymm2, ymm9)
+	vfmadd231pd(ymm1, ymm3, ymm11)
 	//2
 
 	prefetch(0, mem(rdx, r9, 2, 5*8))
 
-	lea(mem(rbx, 1*32), rbp)
-	SUBITER4x4(rax, rbp, ymm5, ymm7, ymm9, ymm11)
+	vmovupd(mem(rbx,  1*32), ymm1)
+	add(r10, rbx)                      // b += rs_b;
+
+	vbroadcastsd(mem(rax        ), ymm2)
+	vbroadcastsd(mem(rax, r8,  1), ymm3)
+	vfmadd231pd(ymm1, ymm2, ymm5)
+	vfmadd231pd(ymm1, ymm3, ymm7)
+
+	vbroadcastsd(mem(rax, r8,  2), ymm2)
+	vbroadcastsd(mem(rax, r13, 1), ymm3)
 	add(r9, rax)                       // a += cs_a;
-	add(r10, rbx)
+	vfmadd231pd(ymm1, ymm2, ymm9)
+	vfmadd231pd(ymm1, ymm3, ymm11)
 	//3
 	prefetch(0, mem(rdx, rcx, 1, 5*8))
 	lea(mem(rdx, r9,  4), rdx)         // a_prefetch += 4*cs_a;
 
-	lea(mem(rbx, 1*32), rbp)
-	SUBITER4x4(rax, rbp, ymm5, ymm7, ymm9, ymm11)
+	vmovupd(mem(rbx,  1*32), ymm1)
+	add(r10, rbx)                      // b += rs_b;
+
+	vbroadcastsd(mem(rax        ), ymm2)
+	vbroadcastsd(mem(rax, r8,  1), ymm3)
+	vfmadd231pd(ymm1, ymm2, ymm5)
+	vfmadd231pd(ymm1, ymm3, ymm7)
+
+	vbroadcastsd(mem(rax, r8,  2), ymm2)
+	vbroadcastsd(mem(rax, r13, 1), ymm3)
 	add(r9, rax)                       // a += cs_a;
-	add(r10, rbx)
+	vfmadd231pd(ymm1, ymm2, ymm9)
+	vfmadd231pd(ymm1, ymm3, ymm11)
+
 	dec(rsi)
 	jne(.DLOOPKITER)
 
@@ -6060,10 +6784,20 @@ void bli_dgemmsup_rv_haswell_asm_6x8m_12x8_U
 	prefetch(0, mem(rdx, 5*8))
 	add(r9, rdx)
 
-	lea(mem(rbx, 1*32), rbp)
-	SUBITER4x4(rax, rbp, ymm5, ymm7, ymm9, ymm11)
+	vmovupd(mem(rbx,  1*32), ymm1)
+	add(r10, rbx)                      // b += rs_b;
+
+	vbroadcastsd(mem(rax        ), ymm2)
+	vbroadcastsd(mem(rax, r8,  1), ymm3)
+	vfmadd231pd(ymm1, ymm2, ymm5)
+	vfmadd231pd(ymm1, ymm3, ymm7)
+
+	vbroadcastsd(mem(rax, r8,  2), ymm2)
+	vbroadcastsd(mem(rax, r13, 1), ymm3)
 	add(r9, rax)                       // a += cs_a;
-	add(r10, rbx)
+	vfmadd231pd(ymm1, ymm2, ymm9)
+	vfmadd231pd(ymm1, ymm3, ymm11)
+
 	dec(rsi)
 	jne(.DLOOPKLEFT)
 
@@ -6331,33 +7065,105 @@ void bli_dgemmsup_rv_haswell_asm_6x8m_18x16_U
 	label(.DLOOPKITER)                 // MAIN LOOP
 	//0
 	prefetch(0, mem(rdx, 5*8))
-	SUBITER2x4(rax, rbx, ymm4, ymm6)
-	lea(mem(rbx, 1*32), rbp)
-	SUBITER6x4(rax, rbp, ymm5, ymm7, ymm9, ymm11, ymm13, ymm15)
+
+	vmovupd(mem(rbx,  0*32), ymm0)
+	vmovupd(mem(rbx,  1*32), ymm1)
 	add(r10, rbx)                      // b += rs_b;
+
+	vbroadcastsd(mem(rax        ), ymm2)
+	vbroadcastsd(mem(rax, r8,  1), ymm3)
+	vfmadd231pd(ymm0, ymm2, ymm4)
+	vfmadd231pd(ymm1, ymm2, ymm5)
+	vfmadd231pd(ymm0, ymm3, ymm6)
+	vfmadd231pd(ymm1, ymm3, ymm7)
+
+	vbroadcastsd(mem(rax, r8,  2), ymm2)
+	vbroadcastsd(mem(rax, r13, 1), ymm3)
+	vfmadd231pd(ymm1, ymm2, ymm9)
+	vfmadd231pd(ymm1, ymm3, ymm11)
+
+	vbroadcastsd(mem(rax, r8,  4), ymm2)
+	vbroadcastsd(mem(rax, r15, 1), ymm3)
 	add(r9, rax)                       // a += cs_a;
+	vfmadd231pd(ymm1, ymm2, ymm13)
+	vfmadd231pd(ymm1, ymm3, ymm15)
+
 	//1
 	prefetch(0, mem(rdx, r9, 1, 5*8))
-	SUBITER2x4(rax, rbx, ymm4, ymm6)
-	lea(mem(rbx, 1*32), rbp)
-	SUBITER6x4(rax, rbp, ymm5, ymm7, ymm9, ymm11, ymm13, ymm15)
+
+	vmovupd(mem(rbx,  0*32), ymm0)
+	vmovupd(mem(rbx,  1*32), ymm1)
 	add(r10, rbx)                      // b += rs_b;
+
+	vbroadcastsd(mem(rax        ), ymm2)
+	vbroadcastsd(mem(rax, r8,  1), ymm3)
+	vfmadd231pd(ymm0, ymm2, ymm4)
+	vfmadd231pd(ymm1, ymm2, ymm5)
+	vfmadd231pd(ymm0, ymm3, ymm6)
+	vfmadd231pd(ymm1, ymm3, ymm7)
+
+	vbroadcastsd(mem(rax, r8,  2), ymm2)
+	vbroadcastsd(mem(rax, r13, 1), ymm3)
+	vfmadd231pd(ymm1, ymm2, ymm9)
+	vfmadd231pd(ymm1, ymm3, ymm11)
+
+	vbroadcastsd(mem(rax, r8,  4), ymm2)
+	vbroadcastsd(mem(rax, r15, 1), ymm3)
 	add(r9, rax)                       // a += cs_a;
+	vfmadd231pd(ymm1, ymm2, ymm13)
+	vfmadd231pd(ymm1, ymm3, ymm15)
+
 	//2
 	prefetch(0, mem(rdx, r9, 2, 5*8))
-	SUBITER2x4(rax, rbx, ymm4, ymm6)
-	lea(mem(rbx, 1*32), rbp)
-	SUBITER6x4(rax, rbp, ymm5, ymm7, ymm9, ymm11, ymm13, ymm15)
+
+	vmovupd(mem(rbx,  0*32), ymm0)
+	vmovupd(mem(rbx,  1*32), ymm1)
 	add(r10, rbx)                      // b += rs_b;
+
+	vbroadcastsd(mem(rax        ), ymm2)
+	vbroadcastsd(mem(rax, r8,  1), ymm3)
+	vfmadd231pd(ymm0, ymm2, ymm4)
+	vfmadd231pd(ymm1, ymm2, ymm5)
+	vfmadd231pd(ymm0, ymm3, ymm6)
+	vfmadd231pd(ymm1, ymm3, ymm7)
+
+	vbroadcastsd(mem(rax, r8,  2), ymm2)
+	vbroadcastsd(mem(rax, r13, 1), ymm3)
+	vfmadd231pd(ymm1, ymm2, ymm9)
+	vfmadd231pd(ymm1, ymm3, ymm11)
+
+	vbroadcastsd(mem(rax, r8,  4), ymm2)
+	vbroadcastsd(mem(rax, r15, 1), ymm3)
 	add(r9, rax)                       // a += cs_a;
+	vfmadd231pd(ymm1, ymm2, ymm13)
+	vfmadd231pd(ymm1, ymm3, ymm15)
+
 	//3
 	prefetch(0, mem(rdx, rcx, 1, 5*8))
 	lea(mem(rdx, r9,  4), rdx)         // a_prefetch += 4*cs_a;
-	SUBITER2x4(rax, rbx, ymm4, ymm6)
-	lea(mem(rbx, 1*32), rbp)
-	SUBITER6x4(rax, rbp, ymm5, ymm7, ymm9, ymm11, ymm13, ymm15)
+
+	vmovupd(mem(rbx,  0*32), ymm0)
+	vmovupd(mem(rbx,  1*32), ymm1)
 	add(r10, rbx)                      // b += rs_b;
+
+	vbroadcastsd(mem(rax        ), ymm2)
+	vbroadcastsd(mem(rax, r8,  1), ymm3)
+	vfmadd231pd(ymm0, ymm2, ymm4)
+	vfmadd231pd(ymm1, ymm2, ymm5)
+	vfmadd231pd(ymm0, ymm3, ymm6)
+	vfmadd231pd(ymm1, ymm3, ymm7)
+
+	vbroadcastsd(mem(rax, r8,  2), ymm2)
+	vbroadcastsd(mem(rax, r13, 1), ymm3)
+	vfmadd231pd(ymm1, ymm2, ymm9)
+	vfmadd231pd(ymm1, ymm3, ymm11)
+
+	vbroadcastsd(mem(rax, r8,  4), ymm2)
+	vbroadcastsd(mem(rax, r15, 1), ymm3)
 	add(r9, rax)                       // a += cs_a;
+	vfmadd231pd(ymm1, ymm2, ymm13)
+	vfmadd231pd(ymm1, ymm3, ymm15)
+
 	dec(rsi)
 	jne(.DLOOPKITER)
 
@@ -6371,11 +7177,28 @@ void bli_dgemmsup_rv_haswell_asm_6x8m_18x16_U
 
 	prefetch(0, mem(rdx, 5*8))
 	add(r9, rdx)
-	SUBITER2x4(rax, rbx, ymm4, ymm6)
-	lea(mem(rbx, 1*32), rbp)
-	SUBITER6x4(rax, rbp, ymm5, ymm7, ymm9, ymm11, ymm13, ymm15)
+
+	vmovupd(mem(rbx,  0*32), ymm0)
+	vmovupd(mem(rbx,  1*32), ymm1)
 	add(r10, rbx)                      // b += rs_b;
+
+	vbroadcastsd(mem(rax        ), ymm2)
+	vbroadcastsd(mem(rax, r8,  1), ymm3)
+	vfmadd231pd(ymm0, ymm2, ymm4)
+	vfmadd231pd(ymm1, ymm2, ymm5)
+	vfmadd231pd(ymm0, ymm3, ymm6)
+	vfmadd231pd(ymm1, ymm3, ymm7)
+
+	vbroadcastsd(mem(rax, r8,  2), ymm2)
+	vbroadcastsd(mem(rax, r13, 1), ymm3)
+	vfmadd231pd(ymm1, ymm2, ymm9)
+	vfmadd231pd(ymm1, ymm3, ymm11)
+
+	vbroadcastsd(mem(rax, r8,  4), ymm2)
+	vbroadcastsd(mem(rax, r15, 1), ymm3)
 	add(r9, rax)                       // a += cs_a;
+	vfmadd231pd(ymm1, ymm2, ymm13)
+	vfmadd231pd(ymm1, ymm3, ymm15)
 
 	dec(rsi)
 	jne(.DLOOPKLEFT)
