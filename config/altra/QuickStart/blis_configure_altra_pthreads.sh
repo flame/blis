@@ -12,7 +12,7 @@ if [ "$quiet_confpthreads" = "" ]; then
     echo "##########################################################"
 fi
 
-. ./blis_setenv.bash $quiet_confpthreads
+. ./blis_setenv.sh $quiet_confpthreads
 pushd $BLIS_HOME > /dev/null
 make distclean
 ./configure -t pthreads --disable-pba-pools altra

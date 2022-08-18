@@ -2,7 +2,7 @@
 # Created by Oracle Labs
 clear
 echo "##########################################"
-echo "Running Quickstart.bash..."
+echo "Running Quickstart.sh..."
 echo "##########################################"
 # Get list of config directories...
 if [[ "$1" != "" ]]; then
@@ -67,13 +67,13 @@ echo " (These are all listed in file ./config_registry)"
 echo "... 6 sec"
 echo "##########################################"
 sleep 6
-echo " Browse and choose an architecture as input to QuickStart.bash..."
+echo " Browse and choose an architecture as input to QuickStart.sh..."
 echo " The list is sorted by processor family, e.g. ARM NEON64."
 echo "------------------------------------------"
 echo " For example, for help using BLIS on an Altra, enter:"
-echo " source ./QuickStart.bash altra"
+echo " source ./QuickStart.sh altra"
 echo " If you want help using BLIS on an AltraMax, enter:"
-echo " source ./QuickStart.bash altramax"
+echo " source ./QuickStart.sh altramax"
 echo "------------------------------------------"
 echo " Helpful info and scripts will be copied into this"
 echo " directory named by your platform, e.g."

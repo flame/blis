@@ -5,7 +5,7 @@ place!
 
 To get the best information for using blis with your current platform, 
 
-. ./QuickStart.bash
+. ./QuickStart.sh
 ========================================================================
 After you're up and running, BLIS has a wealth of documentation online:
 ========================================================================

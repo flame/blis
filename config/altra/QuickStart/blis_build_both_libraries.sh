@@ -4,7 +4,7 @@ echo "Creating both OpenMP and pThread BLIS libraries..."
 echo "##########################################################"
 echo "First, Creating pThread library..."
 echo "##########################################################"
-. ./blis_build_altramax_pthreads.bash notest
+. ./blis_build_altra_pthreads.sh notest
 
 echo "##########################################################"
 echo "Saving the pThreads build..."
@@ -40,7 +40,7 @@ echo "##########################################################"
 echo "##########################################################"
 echo "Second, Creating OpenMP library..."
 echo "##########################################################"
-. ./blis_build_altramax.bash notest
+. ./blis_build_altra.sh notest
 
 echo "##########################################################"
 echo "Restoring the pThreads build..."
@@ -51,8 +51,8 @@ mv $BLIS_HOME/.templib/* $BLIS_LIB/
 rmdir $BLIS_HOME/.tempinc
 rmdir $BLIS_HOME/.templib
 
-. ./blis_test.bash quiet
-. ./blis_setenv.bash
+. ./blis_test.sh quiet
+. ./blis_setenv.sh
 echo "##########################################################"
 echo "Done creating BLIS libraries..."
 echo "##########################################################"

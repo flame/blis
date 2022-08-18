@@ -13,7 +13,7 @@
 # directories.
 ##########################################
 # If needed, you may hard code BLIS_HOME in
-# blis_setenv.bash, but be careful!
+# blis_setenv.sh, but be careful!
 ##########################################
 # Try to be clever and find the current
 # directory path regardless of where it's

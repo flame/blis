@@ -13,16 +13,16 @@ Using BLIS requires a few steps:
 Let's briefly touch on these points, and how the scripts provided can help
 But first, let's make sure your configuration is correct...
 
-Open blis_setenv.bash
+Open blis_setenv.sh
 In the Platform Specific: section, around line 50 or so, you will see:
-firmware=203
+firmware=107
 or
-firmware=204
+firmware=108
 
-If your firmware is version 2.04 or greater, make sure this is set to 204, else make sure
-it's set to 203.  Ampere entirely changed the CoreID mappings between these versions.
+If your firmware is version 1.08 or greater, make sure this is set to 108, else make sure
+it's set to 107.  Ampere entirely changed the CoreID mappings between these versions.
 
-The Altra Platform updated their firmware to 2.04 in April 2022, so if your firmware was
+The Altra Platform updated their firmware to 1.08 in May 2021, so if your firmware was
 updated later than that, odds are good that you have 2.04 or later.
 
 Note: the scripts referenced here modify environment variables, so they must be sourced.
@@ -41,22 +41,22 @@ whether you want BLIS to use OpenMP or pthreads for parallelism?  OpenMP is the 
 option, since OpenMP allows thread pinning and thus results in better performance.
 To build with OpenMP use:
 
-. ./blis_build_altra.bash
+. ./blis_build_altra.sh
 
 However, some platforms (like MacOS) cannot use OpenMP at all.  In this case, you want
 to build the pThreads version of BLIS:
 
-. ./blis_build_altra_pthreads.bash
+. ./blis_build_altra_pthreads.sh
 
 In both cases, it will create libblis.a in $BLIS_HOME/lib/$BLIS_ARCH
 
 Try doing that in the root blis directory, depending on your OS.
 
 LINUX:
-. ./blis_build_altra.bash
+. ./blis_build_altra.sh
 
 MacOS Apple Silicon:
-. ./blis_build_altra_pthreads.bash
+. ./blis_build_altra_pthreads.sh
 
 ----------------------------------------------------------------------------
 HOWEVER, there is a tricky case: If you link BLIS with a program that uses pThreads, you
@@ -67,7 +67,7 @@ a single core and essentially freeze your program.
 If this is a possibility, you may want to have both libraries available and switch between
 them for each application.  The script:
 
-. ./blis_build_both_libraries.bash
+. ./blis_build_both_libraries.sh
 
 will build both versions, with the pThreads version being called libblisP.a, and a second
 header blisP.h
@@ -77,7 +77,7 @@ future.
 
 The build will additionally check the library, but if you would like to check a la carte, do
 
-. ./blis_test.bash
+. ./blis_test.sh
 
 You should see near the bottom:
 check-blastest.sh: All BLAS tests passed!
@@ -87,16 +87,16 @@ check-blistest.sh: All BLIS tests passed!
 Finally, here's a script that will be important when you are doing testing.
 This performs the important step of unsetting any parameters effecting blis parallelism.
 
-. ./blis_unset_par.bash
+. ./blis_unset_par.sh
 
 ===================================================
 3) Building and Linking your program with BLIS
 ===================================================
 
 This depends whether you are using the pThreads version of BLIS or the OpenMP version...
-Note this uses the BLIS locations automatically defined when sourcing blis_setenv.bash
+Note this uses the BLIS locations automatically defined when sourcing blis_setenv.sh
 
-. ./blis_setenv.bash
+. ./blis_setenv.sh
 
 (This will display you environment variable settings, your blis libraries and headers (if
 built), and also unset blis parallelism parameters for safety.)
@@ -116,7 +116,7 @@ Let's try building a sample program that we've included to test BLIS:
 TimeDGEMM.c
 
 If this is a new terminal session, make sure to:
-. ./blis_setenv.bash
+. ./blis_setenv.sh
 (there's no harm in running it again.)
 
 Linux:
@@ -135,7 +135,7 @@ The performance of some BLAS libraries are very sensitive to the compiler or the
 BLIS is not sensitive to either of these things, but it IS extremely dependent on pinning
 the right threads to the right cores.  We have scripts to help...
 
-. ./blis_setenv.bash
+. ./blis_setenv.sh
 
 This not only tells you where blis is, but it also creates shell functions to set
 affinity, threading, and NUMA control for each run.  There is a shell function created

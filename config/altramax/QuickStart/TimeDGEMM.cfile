@@ -6,13 +6,14 @@
 #include <float.h>
 #include <limits.h>
 #include "blis.h"
+
 /*###################################################
 // To build with openmp:
 // Note: Don't need the -lomp on Linux
 gcc -fopenmp -O2 -g -I$BLIS_HOME/include/$BLIS_ARCH TimeDGEMM.c $BLIS_HOME/lib/$BLIS_ARCH/libblis.a -lpthread -lm -o time_gemm.x
 
 // To build with pThreads
-source ./enable_blis.bash
+source ./enable_blis.sh
 gcc -O2 -g -I$BLIS_HOME/include/$BLIS_ARCH TimeDGEMM.c $BLIS_HOME/lib/$BLIS_ARCH/libblis.a -lpthread -lm -o time_gemm.x
 
 // To run with QuickStart Macros...
@@ -20,9 +21,9 @@ for N_CORES, S_SOCKETS
 
 blis_set_cores_and_sockets N S; $BLIS_NUMA time_gemm.x
 
-*///###################################################
+###################################################*/
+
 #include <stdarg.h>  // for Linux stdarg
-//#####################################################
 
 //###################################################
 // Handy blis functions
