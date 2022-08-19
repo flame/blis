@@ -163,8 +163,11 @@ void PASTEMAC(ch,varname) \
      ) \
 { \
 	const num_t dt = PASTEMAC(ch,type); \
+	/* ToDo: 
+		Enable intrinsic implementation after verifying
+		with netlib BLAS tests. */ \
 	/* Redirect to intrinsic implementation of HER for dcomplex */ \
-	if ( bli_cpuid_is_avx_supported() == TRUE && bli_is_conj(conjh) && incx == 1 ) \
+	/* if ( bli_cpuid_is_avx_supported() == TRUE && bli_is_conj(conjh) && incx == 1 ) \
 	{ \
 		bli_zher_zen_int_var1 \
 		( \
@@ -181,7 +184,7 @@ void PASTEMAC(ch,varname) \
 		  cntx \
 		); \
 	} \
-	else \
+	else \ */ \
 	{ \
 		ctype*  x0; \
 		ctype*  chi1; \
