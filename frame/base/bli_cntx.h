@@ -601,6 +601,27 @@ BLIS_INLINE bool bli_cntx_l3_vir_ukr_dislikes_storage_of( obj_t* obj, l3ukr_t uk
 	       !bli_cntx_l3_vir_ukr_prefers_storage_of( obj, ukr_id, cntx );
 }
 
+BLIS_INLINE bool bli_cntx_l3_vir_ukr_prefers_storage_of_md( obj_t* obj, num_t dt, l3ukr_t ukr_id, cntx_t* cntx )
+{
+	// we use the computation datatype, which may differ from the
+	// storage datatype of C
+	const bool  ukr_prefers_rows
+	                  = bli_cntx_l3_vir_ukr_prefers_rows_dt( dt, ukr_id, cntx );
+	const bool  ukr_prefers_cols
+	                  = bli_cntx_l3_vir_ukr_prefers_cols_dt( dt, ukr_id, cntx );
+	bool        r_val = FALSE;
+
+	if      ( bli_obj_is_row_stored( obj ) && ukr_prefers_rows ) r_val = TRUE;
+	else if ( bli_obj_is_col_stored( obj ) && ukr_prefers_cols ) r_val = TRUE;
+	return r_val;
+}
+
+BLIS_INLINE bool bli_cntx_l3_vir_ukr_dislikes_storage_of_md( obj_t* obj, num_t dt, l3ukr_t ukr_id, cntx_t* cntx )
+{
+	return ( bool )
+	       !bli_cntx_l3_vir_ukr_prefers_storage_of_md( obj, dt, ukr_id, cntx );
+}
+
 // -----------------------------------------------------------------------------
 BLIS_INLINE bool bli_cntx_l3_sup_thresh_is_met( obj_t* a, obj_t* b, obj_t* c, cntx_t* cntx )
 {

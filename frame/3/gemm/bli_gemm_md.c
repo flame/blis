@@ -172,14 +172,12 @@ mddm_t bli_gemm_md_ccr
 	// that computation datatype to query the corresponding ukernel output
 	// preference.
 	const num_t dt = BLIS_REAL | bli_obj_comp_prec( c );
-	const bool  row_pref
-	      = bli_cntx_l3_nat_ukr_prefers_rows_dt( dt, BLIS_GEMM_UKR, *cntx );
 
 	// We can only perform this case of mixed-domain gemm, C += A*B where
 	// B is real, if the microkernel prefers column output. If it prefers
 	// row output, we must induce a transposition and perform C += A*B
 	// where A (formerly B) is real.
-	if ( row_pref )
+	if ( bli_cntx_l3_vir_ukr_dislikes_storage_of_md( c, dt, BLIS_GEMM_UKR, *cntx ) )
 	{
 		bli_obj_swap( a, b );
 
@@ -273,14 +271,12 @@ mddm_t bli_gemm_md_crc
 	// that computation datatype to query the corresponding ukernel output
 	// preference.
 	const num_t dt = BLIS_REAL | bli_obj_comp_prec( c );
-	const bool  col_pref
-	      = bli_cntx_l3_nat_ukr_prefers_cols_dt( dt, BLIS_GEMM_UKR, *cntx );
 
 	// We can only perform this case of mixed-domain gemm, C += A*B where
 	// A is real, if the microkernel prefers row output. If it prefers
 	// column output, we must induce a transposition and perform C += A*B
 	// where B (formerly A) is real.
-	if ( col_pref )
+	if ( bli_cntx_l3_vir_ukr_dislikes_storage_of_md( c, dt, BLIS_GEMM_UKR, *cntx ) )
 	{
 		bli_obj_swap( a, b );
 
