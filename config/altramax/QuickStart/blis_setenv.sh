@@ -23,9 +23,9 @@ else
 fi
 
 if [[ -n "$BASH_VERSION" ]] ; then
-    file_path_and_name="$( dirname "${BASH_SOURCE[0]}" )/blis_set_home_dir.bash"
+    file_path_and_name="$( dirname "${BASH_SOURCE[0]}" )/blis_set_home_dir.sh"
 else
-    file_path_and_name="$( dirname "$0" )/blis_set_home_dir.bash"
+    file_path_and_name="$( dirname "$0" )/blis_set_home_dir.sh"
 fi
 
 if [ -f "$file_path_and_name" ] ; then
@@ -179,5 +179,5 @@ blis_set_cores_1S() { blis_set_cores_and_sockets $1 1 ; }
 blis_set_cores_2S() { blis_set_cores_and_sockets $1 2 ; }
 
 # For safety:
-. ./blis_unset_par.bash
+. ./blis_unset_par.sh
 
