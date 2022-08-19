@@ -76,19 +76,25 @@ typedef void (*gemmt_ker_ft)
      );
 
 //Look-up table for Gemmt Upper Variant Kernels
-gemmt_ker_ft ker_fpus[7] =
-{
-	bli_dgemmsup_rv_haswell_asm_6x8m_0x0_U,
-	bli_dgemmsup_rv_haswell_asm_6x8m_6x0_U,
-	bli_dgemmsup_rv_haswell_asm_6x8m_6x8_U,
-	bli_dgemmsup_rv_haswell_asm_6x8m_12x8_U,
-	bli_dgemmsup_rv_haswell_asm_6x8m_12x16_U,
-	bli_dgemmsup_rv_haswell_asm_6x8m_18x16_U,
-	bli_dgemmsup_rv_haswell_asm_6x8m_0x0_combined_U
-};
+gemmt_ker_ft ker_fpus[14] =
+	{
+		bli_dgemmsup_rv_haswell_asm_6x8m_0x0_U,
+		bli_dgemmsup_rv_haswell_asm_6x8m_6x0_U,
+		bli_dgemmsup_rv_haswell_asm_6x8m_6x8_U,
+		bli_dgemmsup_rv_haswell_asm_6x8m_12x8_U,
+		bli_dgemmsup_rv_haswell_asm_6x8m_12x16_U,
+		bli_dgemmsup_rv_haswell_asm_6x8m_18x16_U,
+		bli_dgemmsup_rv_haswell_asm_6x8m_0x0_combined_U,
+		bli_dgemmsup_rd_haswell_asm_6x8m_0x0_U,
+		bli_dgemmsup_rd_haswell_asm_6x8m_6x0_U,
+		bli_dgemmsup_rd_haswell_asm_6x8m_6x8_U,
+		bli_dgemmsup_rd_haswell_asm_6x8m_12x8_U,
+		bli_dgemmsup_rd_haswell_asm_6x8m_12x16_U,
+		bli_dgemmsup_rd_haswell_asm_6x8m_18x16_U,
+		bli_dgemmsup_rd_haswell_asm_6x8m_0x0_combined_U};
 
 //Look-up table for Gemmt Lower Variant Kernels
-gemmt_ker_ft ker_fpls[7] =
+gemmt_ker_ft ker_fpls[14] =
 {
 	bli_dgemmsup_rv_haswell_asm_6x8m_0x0_L,
 	bli_dgemmsup_rv_haswell_asm_6x8m_6x0_L,
@@ -96,7 +102,14 @@ gemmt_ker_ft ker_fpls[7] =
 	bli_dgemmsup_rv_haswell_asm_6x8m_12x8_L,
 	bli_dgemmsup_rv_haswell_asm_6x8m_12x16_L,
 	bli_dgemmsup_rv_haswell_asm_6x8m_18x16_L,
-	bli_dgemmsup_rv_haswell_asm_6x8m_16x12_combined_L
+	bli_dgemmsup_rv_haswell_asm_6x8m_16x12_combined_L,
+	bli_dgemmsup_rd_haswell_asm_6x8m_0x0_L,
+	bli_dgemmsup_rd_haswell_asm_6x8m_6x0_L,
+	bli_dgemmsup_rd_haswell_asm_6x8m_6x8_L,
+	bli_dgemmsup_rd_haswell_asm_6x8m_12x8_L,
+	bli_dgemmsup_rd_haswell_asm_6x8m_12x16_L,
+	bli_dgemmsup_rd_haswell_asm_6x8m_18x16_L,
+	bli_dgemmsup_rd_haswell_asm_6x8m_16x12_combined_L
 };
 
 //
@@ -1907,17 +1920,14 @@ void PASTEMACT(ch,opname,uplo,varname) \
 						dim_t m_idx = (dim_t)(m_off_24 / MR); \
 						dim_t n_idx = (dim_t)(n_off_24 / NR); \
 \
-						/* Optimized kernels are not implemented for the case where B is
-						   stored as column major */ \
-						bool storage_supported = (dt == BLIS_DOUBLE) && ( (stor_id == BLIS_RRR) || (stor_id == BLIS_RCR)  || (stor_id == BLIS_CRR) );  \
-\
 						/* Check if m, n indices are multiple of MR and NR respectively
 						   and current block is a complete 6x8 block */ \
 						bool idx_supported = ((m_off_24 % MR) == 0) && ((n_off_24 % NR) == 0) && (mr_cur == MR) && (nr_cur == NR); \
 \
 						/* m_idx and n_idx would be equal only if the current block is
 						   a diagonal block */\
-						if( (storage_supported) && (m_idx == n_idx) && (idx_supported) )  {  \
+						if( (dt == BLIS_DOUBLE) && (m_idx == n_idx) && (idx_supported) )  {  \
+							/* index of kernel in lookup table is 2*m_idx) */ \
 							dim_t ker_idx; \
 							ker_idx = m_idx<<1; \
 \
@@ -1928,9 +1938,14 @@ void PASTEMACT(ch,opname,uplo,varname) \
 							   this, it has to be ensured that at least 12 rows are pending in
 							   C for computation. (m_off + 2 * MR <=m). Usage of this combined
 							   kernel saves the entire time to execute one kernel*/ \
-							if( (n_idx == 2) && (m_off_cblock + MR + MR <= m) )\
+							if( (n_idx == 2) && (m_off_cblock + MR + MR <= m) ) {\
 								ker_idx = 6; /* use combined kernel, index of combined kernel
 								                in lookup table is 6 */\
+							} \
+							/* use rd kernel if B is column major storage */ \
+							if( stor_id == BLIS_RRC ) { \
+								ker_idx += 7; /* index of rd kernel*/ \
+							} \
 							gemmt_ker_ft ker_fp = ker_fpls[ker_idx]; \
 							ker_fp \
 							( \
@@ -1949,15 +1964,17 @@ void PASTEMACT(ch,opname,uplo,varname) \
 							); \
 						} \
 						/* 6x8 block where m_idx == n_idx+1 also has some parts of the diagonal */\
-						else if( (storage_supported) && (m_idx == n_idx+1) && (idx_supported) ) { \
-							dim_t ker_idx = (n_idx << 1) + 1; \
-							gemmt_ker_ft ker_fp = ker_fpls[ker_idx]; \
+						else if( (dt == BLIS_DOUBLE) && (m_idx == n_idx+1) && (idx_supported) ) { \
 							/* If current block was already computed in the combined kernel it
 							   can be skipped combined kernel is only implemented for n_idx=2,
 							   i == m_zero is only true for the first iteration therefore if
 							   i == m_zero then the current 6x8 block was not computed in
 							   combined kernel*/ \
 							if( (n_idx != 2) || (i == m_zero) ) { \
+								dim_t ker_idx = (n_idx << 1) + 1; \
+								/* use rd kernel if B is column major storage */ \
+								if( stor_id == BLIS_RRC ) { ker_idx += 7; } \
+								gemmt_ker_ft ker_fp = ker_fpls[ker_idx]; \
 								ker_fp \
 								( \
 								conja, \
@@ -2581,18 +2598,14 @@ void PASTEMACT(ch,opname,uplo,varname) \
 						dim_t m_idx = (dim_t)(m_off_24 / MR); \
 						dim_t n_idx = (dim_t)(n_off_24 / NR); \
 \
-						/* Optimized kernels are not implemented for the case where B is
-						   stored as column major */ \
-						bool storage_supported = (dt == BLIS_DOUBLE) && ( (stor_id == BLIS_RRR) || (stor_id == BLIS_RCR)  || (stor_id == BLIS_CRR) );  \
-\
 						/* Check if m, n indices are multiple of MR and NR respectively
 						   and current block is a complete 6x8 block */ \
 						bool idx_supported = ((m_off_24 % MR) == 0) && ((n_off_24 % NR) == 0) && (mr_cur==MR) && (nr_cur==NR); \
 \
 						/* m_idx and n_idx would be equal only if the current block is
 						   a diagonal block */\
-						if( (storage_supported) && (m_idx == n_idx) && (idx_supported) )  {  \
-							m_idx = m_idx<<1; \
+						if( (dt == BLIS_DOUBLE) && (m_idx == n_idx) && idx_supported )  {  \
+							dim_t ker_idx = m_idx<<1; \
 							/* If there is another 6x8 diagonal block pending for computation
 							   after the current 6x8 diagonal block, then the two blocks can
 							   be computed together(12x8). This combined kernel is implemented
@@ -2600,10 +2613,15 @@ void PASTEMACT(ch,opname,uplo,varname) \
 							   this, it has to be ensured that at least 12 rows are pending in
 							   C for computation (i+ MR + MR <= mc_cur). Usage of this combined
 							   kernel saves the entire time to execute one kernel*/ \
-							if( (n_idx == 0) && (i+ MR + MR <= mc_cur) ) \
-								m_idx = 6; /* use combined kernel, index of combined kernel
+							if( (n_idx == 0) && (i+ MR + MR <= mc_cur) ) { \
+								ker_idx = 6; /* use combined kernel, index of combined kernel
 								              in lookup table is 6 */\
-				    		gemmt_ker_ft ker_fp = ker_fpus[m_idx]; \
+							} \
+							/* if B is column storage we use rd kernel*/ \
+							if( stor_id == BLIS_RRC ) { \
+								ker_idx += 7; /* index of rd kernel*/\
+							} \
+				    		gemmt_ker_ft ker_fp = ker_fpus[ker_idx]; \
 							ker_fp \
 							( \
 							conja, \
@@ -2621,14 +2639,17 @@ void PASTEMACT(ch,opname,uplo,varname) \
 							); \
 						} \
 						/* 6x8 block where m_idx == n_idx+1 also has some parts of the diagonal */\
-						else if( (storage_supported) && (m_idx == n_idx+1) && (idx_supported) ) { \
-							gemmt_ker_ft ker_fp = ker_fpus[(n_idx << 1) + 1]; \
+						else if( (dt == BLIS_DOUBLE) && (m_idx == n_idx+1) && (idx_supported) ) { \
 							/* If current block was already computed in the combined kernel it
 							   can be skipped combined kernel is only implemented for n_idx=0,
 							   i == m_rect is only true for the first iteration therefore if
 							   i == m_rect then the current 6x8 block was not computed in
 							   combined kernel*/ \
 							if( (n_idx != 0) || (i == m_rect) ) { \
+								dim_t ker_idx = (n_idx << 1) + 1 ; \
+								/* use rd kernel if B is column major storage */ \
+								if( stor_id == BLIS_RRC ) { ker_idx += 7; } \
+								gemmt_ker_ft ker_fp = ker_fpus[ker_idx]; \
 								ker_fp \
 								( \
 								conja, \
