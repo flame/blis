@@ -1291,6 +1291,29 @@ void ztrsm_
                 return;
             }
         }
+#ifdef BLIS_ENABLE_OPENMP
+
+        // bli_trsm_small_mt supports till n_threads equal to 8
+        if( bli_cntx_trsm_small_thresh_is_met_zen(&ao, m0, n0) == true )
+        {
+            err_t status;
+            status = bli_trsm_small_mt(
+                    blis_side,
+                    &alphao,
+                    &ao,
+                    &bo,
+                    NULL,
+                    NULL);
+
+            if ( status == BLIS_SUCCESS )
+            {
+                AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO);
+                /* Finalize BLIS. */
+                bli_finalize_auto();
+                return;
+            }
+        }
+#endif// BLIS_ENABLE_OPENMP
     } // bli_cpuid_is_avx_supported}
 #endif
 

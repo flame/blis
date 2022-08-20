@@ -380,6 +380,17 @@ bool bli_cntx_syrksup_thresh_is_met_zen
        cntx_t* cntx
      );
 
+/*
+ * Check if the TRSM small path should be taken for this
+ * input and threads combination
+ */
+bool bli_cntx_trsm_small_thresh_is_met_zen
+     (
+        obj_t* a,
+        dim_t m,
+        dim_t n
+    );
+
 #ifdef BLIS_ENABLE_FAST_MATH
 void bli_dnorm2fv_unb_var1
      (

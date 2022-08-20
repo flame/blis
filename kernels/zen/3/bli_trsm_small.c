@@ -4201,14 +4201,16 @@ err_t bli_trsm_small
         case BLIS_FLOAT:
         case BLIS_SCOMPLEX:
         {
-            if(m > 1000 || n > 1000) {
+            bool nt = bli_thread_get_is_parallel();
+            if((nt == 0) && (m > 1000 || n > 1000)) {
                return BLIS_NOT_YET_IMPLEMENTED;
             }
             break;
         }
         case BLIS_DCOMPLEX:
         {
-            if(m > 500 || n > 500) {
+            bool nt = bli_thread_get_is_parallel();
+            if((nt == 0) && (m > 500 || n > 500)) {
                 return BLIS_NOT_YET_IMPLEMENTED;
             }
             break;
@@ -4289,6 +4291,11 @@ err_t bli_trsm_small_mt
             d_mr = 8,d_nr = 6;
             break;
         }
+        case BLIS_DCOMPLEX:
+        {
+            d_mr = 4,d_nr = 3;
+            break;
+        }
         default:
         {
             return BLIS_NOT_YET_IMPLEMENTED;
@@ -4303,7 +4310,7 @@ err_t bli_trsm_small_mt
     // If dynamic-threading is enabled, calculate optimum number
     //  of threads.
     //  rntm will be updated with optimum number of threads.
-    if( bli_obj_is_double(b))
+    if( bli_obj_is_double(b) )
     {
         bli_nthreads_optimum(a, b, b, BLIS_TRSM, &rntm);
     }
@@ -46692,6 +46699,30 @@ BLIS_INLINE  err_t bli_ctrsm_small_XAltB_XAuB
 
 
 	return BLIS_SUCCESS;
+}
+
+/*
+ * Check if the TRSM small path should be taken for this
+ * input and threads combination
+ */
+bool bli_cntx_trsm_small_thresh_is_met_zen(obj_t* a,dim_t m, dim_t n)
+{
+    rntm_t rntm;
+    bli_rntm_init_from_global(&rntm);
+    dim_t n_threads = bli_rntm_num_threads(&rntm);
+
+    if(bli_obj_is_dcomplex(a))
+    {
+        if ((n_threads > 1) && (n_threads <= 8) && (m <= 500) && (n <= 500))
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+    return false;
 }
 
 #endif //BLIS_ENABLE_SMALL_MATRIX_TRSM
