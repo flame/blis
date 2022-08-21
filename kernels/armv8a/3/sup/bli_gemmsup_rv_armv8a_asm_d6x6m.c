@@ -406,12 +406,12 @@ DSCALEA6V(22,28,4,23,29,5,12,13,14,15,16,17,31,0)
 LABEL(ZERO_BETA_C_3_4_5_6)
 #ifndef __clang__
 " cmp   x12, #1                       \n\t"
-BRANCH(PRFM_END_R)
+BRANCH(PRFM_END_C)
 " prfm  PLDL1KEEP, [%[a_next], #16*0] \n\t"
 " prfm  PLDL1KEEP, [%[a_next], #16*1] \n\t"
 " prfm  PLDL1STRM, [%[b_next], #16*0] \n\t"
 " prfm  PLDL1STRM, [%[b_next], #16*1] \n\t"
-LABEL(PRFM_END_R)
+LABEL(PRFM_END_C)
 #endif
 DSTOREC_3V_C_FWD(20,26,2,x5,0,x7)
 DSTOREC_3V_C_FWD(21,27,3,x5,0,x7)
