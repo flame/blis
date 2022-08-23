@@ -135,6 +135,7 @@ void get_cpu_name( char *cpu_name );
 int  vpu_count( void );
 bool bli_cpuid_is_avx_supported(void);
 bool bli_cpuid_is_avx512vnni_supported(void);
+bool bli_cpuid_is_avx512_bf16_supported(void);
 
 enum
 {
@@ -144,25 +145,24 @@ enum
 };
 enum
 {
-	FEATURE_SSE3     = 0x0001,
-	FEATURE_SSSE3    = 0x0002,
-	FEATURE_SSE41    = 0x0004,
-	FEATURE_SSE42    = 0x0008,
-	FEATURE_AVX      = 0x0010,
-	FEATURE_AVX2     = 0x0020,
-	FEATURE_FMA3     = 0x0040,
-	FEATURE_FMA4     = 0x0080,
-	FEATURE_AVX512F  = 0x0100,
-	FEATURE_AVX512DQ = 0x0200,
-	FEATURE_AVX512PF = 0x0400,
-	FEATURE_AVX512ER = 0x0800,
-	FEATURE_AVX512CD = 0x1000,
-	FEATURE_AVX512BW = 0x2000,
-	FEATURE_AVX512VL = 0x4000,
-	FEATURE_AVX512VNNI = 0x8000
+  FEATURE_SSE3 = 0x0001,
+  FEATURE_SSSE3 = 0x0002,
+  FEATURE_SSE41 = 0x0004,
+  FEATURE_SSE42 = 0x0008,
+  FEATURE_AVX = 0x0010,
+  FEATURE_AVX2 = 0x0020,
+  FEATURE_FMA3 = 0x0040,
+  FEATURE_FMA4 = 0x0080,
+  FEATURE_AVX512F = 0x0100,
+  FEATURE_AVX512DQ = 0x0200,
+  FEATURE_AVX512PF = 0x0400,
+  FEATURE_AVX512ER = 0x0800,
+  FEATURE_AVX512CD = 0x1000,
+  FEATURE_AVX512BW = 0x2000,
+  FEATURE_AVX512VL = 0x4000,
+  FEATURE_AVX512VNNI = 0x8000,
+  FEATURE_AVX512BF16 = 0x10000
 };
-
-
 
 #elif defined(__aarch64__) || defined(__arm__) || defined(_M_ARM)
 
