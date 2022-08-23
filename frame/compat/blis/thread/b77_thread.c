@@ -55,7 +55,7 @@ void PASTEF770(bli_thread_set_ways)
 	dim_t ir0 = *ir;
 
 	// Initialize BLIS.
-	bli_init_auto();
+	//bli_init_auto();
 
 	// Convert/typecast negative values to zero.
 	//bli_convert_blas_dim1( *jc, jc0 );
@@ -68,7 +68,7 @@ void PASTEF770(bli_thread_set_ways)
 	bli_thread_set_ways( jc0, pc0, ic0, jr0, ir0 );
 
 	// Finalize BLIS.
-	bli_finalize_auto();
+	//bli_finalize_auto();
 }
 
 void PASTEF770(bli_thread_set_num_threads)
@@ -79,7 +79,7 @@ void PASTEF770(bli_thread_set_num_threads)
 	dim_t nt0 = *nt;
 
 	// Initialize BLIS.
-	bli_init_auto();
+	//bli_init_auto();
 
 	// Convert/typecast negative values to zero.
 	//bli_convert_blas_dim1( *nt, nt0 );
@@ -88,6 +88,6 @@ void PASTEF770(bli_thread_set_num_threads)
 	bli_thread_set_num_threads( nt0 );
 
 	// Finalize BLIS.
-	bli_finalize_auto();
+	//bli_finalize_auto();
 }
 

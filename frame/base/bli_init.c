@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2020 - 2022, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2018 - 2022, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -40,10 +40,14 @@
 void bli_init( void )
 {
 	bli_init_once();
+	// Always update thread-local rntm from environment as threading values
+	// may have changed from any previous calls.
+	bli_thread_update_tl();
 }
 
 void bli_finalize( void )
 {
+	bli_thread_finalize_tl();
 	bli_finalize_once();
 }
 
@@ -52,6 +56,9 @@ void bli_finalize( void )
 void bli_init_auto( void )
 {
 	bli_init_once();
+	// Always update thread-local rntm from environment as threading values
+	// may have changed from any previous calls.
+	bli_thread_update_tl();
 }
 
 void bli_finalize_auto( void )
@@ -65,6 +72,7 @@ void bli_finalize_auto( void )
 
 #else
 
+	bli_thread_finalize_tl();
 	bli_finalize_once();
 
 #endif

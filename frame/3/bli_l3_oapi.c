@@ -189,7 +189,7 @@ void PASTEMAC(opname,EX_SUF) \
 	     bli_obj_is_complex( a ) && \
 	     bli_obj_is_complex( b ) ) \
 	{ \
-        /* GEMMT Todo: Currently we support only native implemenation
+        /* GEMMT Todo: Currently we support only native implementation
          for complex datatypes.*/ \
 		PASTEMAC(opname,nat)( alpha, a, b, beta, c, cntx, rntm ); \
 	} \

@@ -37,6 +37,71 @@
 #ifndef BLIS_RNTM_H
 #define BLIS_RNTM_H
 
+// Define this to print information about threading in rntm structures.
+//#define PRINT_THREADING
+
+
+// Function prototypes
+
+BLIS_EXPORT_BLIS void bli_rntm_init_from_global( rntm_t* rntm );
+
+BLIS_EXPORT_BLIS void bli_rntm_set_ways_for_op
+     (
+       opid_t  l3_op,
+       side_t  side,
+       dim_t   m,
+       dim_t   n,
+       dim_t   k,
+       rntm_t* rntm
+     );
+
+void bli_rntm_set_ways_from_rntm
+     (
+       dim_t   m,
+       dim_t   n,
+       dim_t   k,
+       rntm_t* rntm
+     );
+
+void bli_rntm_set_ways_from_rntm_sup
+     (
+       dim_t   m,
+       dim_t   n,
+       dim_t   k,
+       rntm_t* rntm
+     );
+
+void bli_rntm_print
+     (
+       rntm_t* rntm
+     );
+
+dim_t bli_rntm_calc_num_threads_in
+     (
+       bszid_t* restrict bszid_cur,
+       rntm_t*  restrict rntm
+     );
+
+#ifdef AOCL_DYNAMIC
+void bli_nthreads_optimum
+     (
+       obj_t*  a,
+       obj_t*  b,
+       obj_t*  c,
+       opid_t  family,
+       rntm_t* rntm
+     );
+
+err_t bli_smart_threading_sup
+     (
+       obj_t*  a,
+       obj_t*  b,
+       obj_t*  c,
+       opid_t  family,
+       rntm_t* rntm,
+       cntx_t* cntx
+     );
+#endif
 
 // Runtime object type (defined in bli_type_defs.h)
 
@@ -248,6 +313,17 @@ BLIS_INLINE void bli_rntm_set_num_threads( dim_t nt, rntm_t* rntm )
 
 	// Set the individual ways of parallelism to default states.
 	bli_rntm_clear_ways_only( rntm );
+
+	// BLIS_NUM_THREADS env variable or BLIS API to set the
+	// number of threads is used. Setting the blis_mt flag to TRUE
+	// so that OMP API or OMP env variables will not be of effect
+	// going forward.
+	bli_rntm_set_blis_mt_only(TRUE, rntm);
+
+#ifdef PRINT_THREADING
+	printf( "bli_rntm_set_num_threads()\n" );
+	bli_rntm_print( rntm );
+#endif
 }
 
 BLIS_INLINE void bli_rntm_set_ways( dim_t jc, dim_t pc, dim_t ic, dim_t jr, dim_t ir, rntm_t* rntm )
@@ -262,6 +338,17 @@ BLIS_INLINE void bli_rntm_set_ways( dim_t jc, dim_t pc, dim_t ic, dim_t jr, dim_
 
 	// Set the num_threads field to a default state.
 	bli_rntm_clear_num_threads_only( rntm );
+
+	// BLIS_NUM_THREADS env variable or BLIS API to set the
+	// number of threads is used. Setting the blis_mt flag to TRUE
+	// so that OMP API or OMP env variables will not be of effect
+	// going forward.
+	bli_rntm_set_blis_mt_only(TRUE, rntm);
+
+#ifdef PRINT_THREADING
+	printf( "bli_rntm_set_ways()\n" );
+	bli_rntm_print( rntm );
+#endif
 }
 
 BLIS_INLINE void bli_rntm_set_pack_a( bool pack_a, rntm_t* rntm )
@@ -322,6 +409,7 @@ BLIS_INLINE void bli_rntm_clear_l3_sup( rntm_t* rntm )
           .pack_a      = FALSE, \
           .pack_b      = FALSE, \
           .l3_sup      = TRUE, \
+          .blis_mt     = FALSE, \
           .sba_pool    = NULL, \
           .membrk      = NULL, \
         }  \
@@ -335,6 +423,7 @@ BLIS_INLINE void bli_rntm_init( rntm_t* rntm )
 	bli_rntm_clear_pack_a( rntm );
 	bli_rntm_clear_pack_b( rntm );
 	bli_rntm_clear_l3_sup( rntm );
+	bli_rntm_set_blis_mt_only(FALSE, rntm);
 
 	bli_rntm_clear_sba_pool( rntm );
 	bli_rntm_clear_membrk( rntm );
@@ -359,68 +448,6 @@ BLIS_INLINE dim_t bli_rntm_calc_num_threads
 }
 
 // -----------------------------------------------------------------------------
-
-// Function prototypes
-
-BLIS_EXPORT_BLIS void bli_rntm_init_from_global( rntm_t* rntm );
-
-BLIS_EXPORT_BLIS void bli_rntm_set_ways_for_op
-     (
-       opid_t  l3_op,
-       side_t  side,
-       dim_t   m,
-       dim_t   n,
-       dim_t   k,
-       rntm_t* rntm
-     );
-
-void bli_rntm_set_ways_from_rntm
-     (
-       dim_t   m,
-       dim_t   n,
-       dim_t   k,
-       rntm_t* rntm
-     );
-
-void bli_rntm_set_ways_from_rntm_sup
-     (
-       dim_t   m,
-       dim_t   n,
-       dim_t   k,
-       rntm_t* rntm
-     );
-
-void bli_rntm_print
-     (
-       rntm_t* rntm
-     );
-
-dim_t bli_rntm_calc_num_threads_in
-     (
-       bszid_t* restrict bszid_cur,
-       rntm_t*  restrict rntm
-     );
-
-#ifdef AOCL_DYNAMIC
-void bli_nthreads_optimum
-     (
-       obj_t*  a,
-       obj_t*  b,
-       obj_t*  c,
-       opid_t  family,
-       rntm_t* rntm
-     );
-
-err_t bli_smart_threading_sup
-     (
-       obj_t*  a,
-       obj_t*  b,
-       obj_t*  c,
-       opid_t  family,
-       rntm_t* rntm,
-       cntx_t* cntx
-     );
-#endif
 
 #endif
 

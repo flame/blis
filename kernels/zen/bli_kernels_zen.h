@@ -320,7 +320,8 @@ err_t bli_trsm_small
        obj_t*  a,
        obj_t*  b,
        cntx_t* cntx,
-       cntl_t* cntl
+       cntl_t* cntl,
+       bool is_parallel
      );
 
 #ifdef BLIS_ENABLE_OPENMP

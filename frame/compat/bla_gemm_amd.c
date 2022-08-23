@@ -593,13 +593,13 @@ void dgemm_blis_impl
 
     //cntx_t* cntx = bli_gks_query_cntx();
     //dim_t nt = bli_thread_get_num_threads(); // get number of threads
-    bool nt = bli_thread_get_is_parallel(); // Check if parallel dgemm is invoked.
+    bool is_parallel = bli_thread_get_is_parallel(); // Check if parallel dgemm is invoked.
 
 #ifdef AOCL_DYNAMIC
     //For smaller sizes dgemm_small is perfoming better
-    if (nt && (((m0 >32) || (n0>32) || (k0>32)) && ((m0+n0+k0)>150)) )
+    if (is_parallel && (((m0 >32) || (n0>32) || (k0>32)) && ((m0+n0+k0)>150)) )
 #else
-    if (nt)
+    if (is_parallel)
 #endif
     {
     // Will call parallelized dgemm code - sup & native
@@ -809,14 +809,14 @@ void zgemm_blis_impl
     //dim_t single_instance = bli_env_get_var( "BLIS_SINGLE_INSTANCE", -1 );
 
     //dim_t nt = bli_thread_get_num_threads(); // get number of threads
-    bool nt = bli_thread_get_is_parallel(); // Check if parallel zgemm is invoked.
+    bool is_parallel = bli_thread_get_is_parallel(); // Check if parallel zgemm is invoked.
 
     /*
     Invoking the API for input sizes with k=1.
     - For single thread, the API has no constraints before invoking.
     - For multiple threads, the constraint is that m and n should individually be less than 128.
     */
-    if((k0 == 1) && ((nt == 0) || ((nt == 1) && (m0 < 128) && (n0 < 128)))
+    if((k0 == 1) && ((!is_parallel) || ((is_parallel) && (m0 < 128) && (n0 < 128)))
         && bli_is_notrans(blis_transa)
         && bli_is_notrans(blis_transb))
     {
@@ -875,8 +875,8 @@ void zgemm_blis_impl
 
 #ifdef BLIS_ENABLE_SMALL_MATRIX
 
-    if (((nt == 0) && ((m0 <= 512) && (n0 <= 512) && (k0 <= 512))) ||
-        ((nt == 1) && (((m0 <= 32) || (n0 <= 32) || (k0 <= 32)) && ((m0 + n0 + k0) <= 100))))
+    if (((!is_parallel) && ((m0 <= 512) && (n0 <= 512) && (k0 <= 512))) ||
+        ((is_parallel) && (((m0 <= 32) || (n0 <= 32) || (k0 <= 32)) && ((m0 + n0 + k0) <= 100))))
     {
         err_t status = BLIS_NOT_YET_IMPLEMENTED;
         if (bli_is_notrans(blis_transa))
@@ -914,7 +914,7 @@ void zgemm_blis_impl
 #endif
 
     // disabling sup path for single thread in zgemm until further tuning.
-    if (nt == 1)
+    if (is_parallel)
     {
         err_t status = bli_gemmsup(&alphao, &ao, &bo, &betao, &co, NULL, NULL);
         if (status == BLIS_SUCCESS)

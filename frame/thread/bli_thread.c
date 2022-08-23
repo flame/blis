@@ -42,6 +42,10 @@ thrcomm_t BLIS_SINGLE_COMM           = {};
 // The global rntm_t structure. (The definition resides in bli_rntm.c.)
 extern rntm_t global_rntm;
 
+// Make thread settings local to each thread calling BLIS routines.
+// (The definition resides in bli_rntm.c.)
+extern BLIS_THREAD_LOCAL rntm_t tl_rntm;
+
 // A mutex to allow synchronous access to global_rntm. (The definition
 // resides in bli_rntm.c.)
 extern bli_pthread_mutex_t global_rntm_mutex;
@@ -54,12 +58,26 @@ void bli_thread_init( void )
 	bli_packm_thrinfo_init_single( &BLIS_PACKM_SINGLE_THREADED );
 	bli_l3_thrinfo_init_single( &BLIS_GEMM_SINGLE_THREADED );
 
-	// Read the environment variables and use them to initialize the
-	// global runtime object.
+	// Read the BLIS environment variables and (optionally) OpenMP ICVs and
+	// use them to initialize the global runtime object.
+	// The thread local global runtime object will be initialized from this
+	// to ensure all thread local get information from any BLIS environment
+	// variables set, as these are not re-read for performance reasons.
 	bli_thread_init_rntm_from_env( &global_rntm );
 }
 
+void bli_thread_update_tl( void )
+{
+	// Update the thread local global runtime object from any runtime BLIS
+	// or OpenMP calls or nested parallelism.
+	bli_thread_update_rntm_from_env( &tl_rntm );
+}
+
 void bli_thread_finalize( void )
+{
+}
+
+void bli_thread_finalize_tl( void )
 {
 }
 
@@ -1510,77 +1528,94 @@ dim_t bli_ipow( dim_t base, dim_t power )
 
 dim_t bli_thread_get_jc_nt( void )
 {
-	// We must ensure that global_rntm has been initialized.
+	// We must ensure that tl_rntm has been initialized.
 	bli_init_once();
 
-	return bli_rntm_jc_ways( &global_rntm );
+	return bli_rntm_jc_ways( &tl_rntm );
 }
 
 dim_t bli_thread_get_pc_nt( void )
 {
-	// We must ensure that global_rntm has been initialized.
+	// We must ensure that tl_rntm has been initialized.
 	bli_init_once();
 
-	return bli_rntm_pc_ways( &global_rntm );
+	return bli_rntm_pc_ways( &tl_rntm );
 }
 
 dim_t bli_thread_get_ic_nt( void )
 {
-	// We must ensure that global_rntm has been initialized.
+	// We must ensure that tl_rntm has been initialized.
 	bli_init_once();
 
-	return bli_rntm_ic_ways( &global_rntm );
+	return bli_rntm_ic_ways( &tl_rntm );
 }
 
 dim_t bli_thread_get_jr_nt( void )
 {
-	// We must ensure that global_rntm has been initialized.
+	// We must ensure that tl_rntm has been initialized.
 	bli_init_once();
 
-	return bli_rntm_jr_ways( &global_rntm );
+	return bli_rntm_jr_ways( &tl_rntm );
 }
 
 dim_t bli_thread_get_ir_nt( void )
 {
-	// We must ensure that global_rntm has been initialized.
+	// We must ensure that tl_rntm has been initialized.
 	bli_init_once();
 
-	return bli_rntm_ir_ways( &global_rntm );
+	return bli_rntm_ir_ways( &tl_rntm );
 }
 
 dim_t bli_thread_get_num_threads( void )
 {
-	// We must ensure that global_rntm has been initialized.
+	// We must ensure that tl_rntm has been initialized.
 	bli_init_once();
+	// Must also update tl_rntm as value may have been updated
+	// by OpenMP or BLIS runtime calls.
+	bli_thread_update_tl();
 
-	return bli_rntm_num_threads( &global_rntm );
+	return bli_rntm_num_threads( &tl_rntm );
 }
 
 bool bli_thread_get_is_parallel( void ) // VK
 {
-  //  THis function return true if parallelism is enabled
-  // either by OMP_NUM_THREADS or BLIS_NUM_THREADS or BLIS_?C_NT parameters
-  // When parallelism is enabled using BLIS_IC_NT or BLIS_JC_NT
-  // rntm->num_threads = -1, because num_threads is still not derived
-  // at the BLAS interface, as a result we end up running BLIS sequentially.
-  // In dgemm_ we called bli_thread_get_num_threads() which returns num_threads from
-  // global_rntm.
-  // Therefore this function is added to check whether manual thread factorization
-  // is enabled
+	// This function return true if parallelism is enabled
+	// either by OMP_NUM_THREADS or BLIS_NUM_THREADS or BLIS_?C_NT parameters
+	// When parallelism is enabled using BLIS_IC_NT or BLIS_JC_NT
+	// rntm->num_threads = -1, because num_threads is still not derived
+	// at the BLAS interface, as a result we end up running BLIS sequentially.
+	// In dgemm_ we called bli_thread_get_num_threads() which returns num_threads from
+	// tl_rntm.
+	// Therefore this function is added to check whether manual thread factorization
+	// is enabled.
+	//
+	// Note: This function CANNOT be used inside the parallelism within a
+	// BLIS function, as global_norm may not have correct OpenMP parallelism
+	// information, and initializing new TLS tl_rntm on the threads created
+	// by the parallel region will not get the correct OpenMP information
+	// for this region from the inside.
+	// In other words, this function reports whether parallelism will exist
+	// in a new parallel region.
 
-  // We must ensure that global_rntm has been initialized.
+	// We must ensure that tl_rntm has been initialized and is up-to-date.
 	bli_init_once();
+	bli_thread_update_tl();
 
-  dim_t jc = bli_rntm_jc_ways( &global_rntm );
-  dim_t pc = bli_rntm_pc_ways( &global_rntm );
-  dim_t ic = bli_rntm_ic_ways( &global_rntm );
-  dim_t jr = bli_rntm_jr_ways( &global_rntm );
-  dim_t ir = bli_rntm_ir_ways( &global_rntm );
+	dim_t jc = bli_rntm_jc_ways( &tl_rntm );
+	dim_t pc = bli_rntm_pc_ways( &tl_rntm );
+	dim_t ic = bli_rntm_ic_ways( &tl_rntm );
+	dim_t jr = bli_rntm_jr_ways( &tl_rntm );
+	dim_t ir = bli_rntm_ir_ways( &tl_rntm );
 
-  dim_t nt = bli_rntm_num_threads( &global_rntm );
+	dim_t nt = bli_rntm_num_threads( &tl_rntm );
 
-  if ( nt > 1 || (jc * pc * ic * jr * ir) > 1 ) return 1;
-  return 0; // else
+#ifdef PRINT_THREADING
+	printf( "bli_thread_get_is_parallel(): tl_rntm\n" );
+	bli_rntm_print( &tl_rntm );
+#endif
+
+	if ( nt > 1 || (jc * pc * ic * jr * ir) > 1 ) return 1;
+	return 0; // else
 }
 
 // ----------------------------------------------------------------------------
@@ -1590,13 +1625,30 @@ void bli_thread_set_ways( dim_t jc, dim_t pc, dim_t ic, dim_t jr, dim_t ir )
 	// We must ensure that global_rntm has been initialized.
 	bli_init_once();
 
+	// Update global_rntm so any threads spawned after this call
+	// inherit the values set here.
+
 	// Acquire the mutex protecting global_rntm.
 	bli_pthread_mutex_lock( &global_rntm_mutex );
 
 	bli_rntm_set_ways_only( jc, pc, ic, jr, ir, &global_rntm );
 
+	// BLIS_NUM_THREADS env variable or BLIS API to set the
+	// number of threads is used. Setting the blis_mt flag to TRUE
+	// so that OMP API or OMP env variables will not be of effect
+	// going forward.
+	bli_rntm_set_blis_mt_only( TRUE, &global_rntm );
+
+	// Unset num_threads value here?
+	//bli_rntm_set_num_threads_only( -1, &global_rntm );
+
 	// Release the mutex protecting global_rntm.
 	bli_pthread_mutex_unlock( &global_rntm_mutex );
+
+#ifdef PRINT_THREADING
+	printf( "bli_thread_set_ways(): global_rntm\n" );
+	bli_rntm_print( &global_rntm );
+#endif
 }
 
 void bli_thread_set_num_threads( dim_t n_threads )
@@ -1609,6 +1661,9 @@ void bli_thread_set_num_threads( dim_t n_threads )
 		n_threads = 1;
 	}
 
+	// Update global_rntm so any threads spawned after this call
+	// inherit the value set here.
+
 	// Acquire the mutex protecting global_rntm.
 	bli_pthread_mutex_lock( &global_rntm_mutex );
 
@@ -1618,10 +1673,18 @@ void bli_thread_set_num_threads( dim_t n_threads )
 	// number of threads is used. Setting the blis_mt flag to TRUE
 	// so that OMP API or OMP env variables will not be of effect
 	// going forward.
-	bli_rntm_set_blis_mt_only(TRUE, &global_rntm);
+	bli_rntm_set_blis_mt_only( TRUE, &global_rntm );
+
+	// Unset ways values here?
+	//bli_rntm_set_ways_only( -1, -1, -1, -1, -1, &global_rntm );
 
 	// Release the mutex protecting global_rntm.
 	bli_pthread_mutex_unlock( &global_rntm_mutex );
+
+#ifdef PRINT_THREADING
+	printf( "bli_thread_set_num_threads(): global_rntm\n" );
+	bli_rntm_print( &global_rntm );
+#endif
 }
 
 // ----------------------------------------------------------------------------
@@ -1631,12 +1694,13 @@ void bli_thread_init_rntm_from_env
        rntm_t* rntm
      )
 {
+	// Initialize global_rntm from environment.
 	// NOTE: We don't need to acquire the global_rntm_mutex here because this
 	// function is only called from bli_thread_init(), which is only called
 	// by bli_init_once().
 
 	bool  auto_factor = FALSE;
-	dim_t nt;
+	dim_t active_level, max_levels, nt;
 	dim_t jc, pc, ic, jr, ir;
 
 #ifdef BLIS_ENABLE_MULTITHREADING
@@ -1669,6 +1733,11 @@ void bli_thread_init_rntm_from_env
 	// 6. If both environment variables are not set, or if they are set with invalid values, and
 	// omp_set_num_threads(nt) is not issued by application,
 	// omp_get_max_threads() API will return the number of the cores in the current context.
+	//
+	// Note: omp_get_max_threads() alone is not sufficient to determine the number of threads
+	//       that should be used for a new parallel region. We must also consider the number
+	//       of active levels of OpenMP parallelism and which level we are at, using APIs
+	//       omp_get_max_active_levels() and omp_get_active_level().
 	//
 	// BLIS will initialize rntm->num_threads with the same value.
 	// However if omp_set_nested is false - BLIS APIs called from parallel threads will run in sequential.
@@ -1703,7 +1772,16 @@ void bli_thread_init_rntm_from_env
 		bli_rntm_set_blis_mt_only(FALSE, rntm);
 
 #ifdef BLIS_ENABLE_OPENMP
-		nt = omp_get_max_threads();
+		active_level = omp_get_active_level();
+		max_levels = omp_get_max_active_levels();
+		if ( active_level < max_levels )
+		{
+		      nt = omp_get_max_threads();
+		} else {
+		      nt = 1;
+		}
+#else
+		nt = 1;
 #endif
 	}
 
@@ -1729,6 +1807,9 @@ void bli_thread_init_rntm_from_env
 
 		// Unset the value for nt.
 		nt = -1;
+
+		// Ensure blis_mt is set to TRUE.
+		bli_rntm_set_blis_mt_only(TRUE, rntm);
 	}
 
 	// By this time, one of the following conditions holds:
@@ -1738,7 +1819,8 @@ void bli_thread_init_rntm_from_env
 
 	// If nt is set (ie: not -1), then we know we will perform an automatic
 	// thread factorization (later, in bli_rntm.c).
-	if ( nt != -1 ) auto_factor = TRUE;
+	// However, there is no need to run auto_factor if nt=1
+	if ( nt > 1 ) auto_factor = TRUE;
 
 #else
 
@@ -1747,15 +1829,178 @@ void bli_thread_init_rntm_from_env
 	nt = -1;
 	jc = pc = ic = jr = ir = 1;
 
-#endif
+#endif // BLIS_ENABLE_MULTITHREADING
 
 	// Save the results back in the runtime object.
 	bli_rntm_set_auto_factor_only( auto_factor, rntm );
 	bli_rntm_set_num_threads_only( nt, rntm );
 	bli_rntm_set_ways_only( jc, pc, ic, jr, ir, rntm );
 
-#if 0
-	printf( "bli_thread_init_rntm_from_env()\n" );
+#ifdef PRINT_THREADING
+	printf( "bli_thread_init_rntm_from_env(): global_rntm\n" );
+	bli_rntm_print( rntm );
+#endif
+}
+
+void bli_thread_update_rntm_from_env
+     (
+       rntm_t* rntm
+     )
+{	
+	// NOTE: We don't need to acquire the global_rntm_mutex here because this
+	// function is updating the thread local tl_rntm (not global_rntm).
+
+	bool  auto_factor = FALSE;
+	dim_t active_level, max_levels, nt;
+	dim_t jc, pc, ic, jr, ir;
+	bool blis_mt;	
+
+	// Set threading related parts of tl_rntm from global_rntm.
+	// Must do this every time, in case global_rntm has been updated by
+	// blis-specific threading function calls.
+
+	nt = bli_rntm_num_threads( &global_rntm );
+
+	jc = bli_rntm_jc_ways( &global_rntm );
+	pc = bli_rntm_pc_ways( &global_rntm );
+	ic = bli_rntm_ic_ways( &global_rntm );
+	jr = bli_rntm_jr_ways( &global_rntm );
+	ir = bli_rntm_ir_ways( &global_rntm );
+
+	blis_mt = bli_rntm_blis_mt( &global_rntm );
+
+	bli_rntm_set_num_threads_only( nt, rntm );
+	bli_rntm_set_ways_only( jc, pc, ic, jr, ir, rntm );
+	bli_rntm_set_blis_mt_only( blis_mt, rntm );
+
+	// Update tl_rntm from runtime environment for this user thread.
+
+#ifdef BLIS_ENABLE_MULTITHREADING
+
+	// Environment variables BLIS_NUM_THREADS and BLIS_*_NT have been read
+	// by bli_thread_init_rntm_from_env(). Don't incur overhead re-reading
+	// them here.
+
+	// Scenarios:
+	// 1. If BLIS_NUM_THREADS is set with a valid value, same value
+	// will be used in the subsequent parallel regions unless
+	// bli_thread_set_num_threads() API is used by the Application
+	// to modify the desired number of threads during BLIS API execution.
+	//
+	// 2. Once BLIS_NUM_THREADS environment variable or bli_thread_set_num_threads(nt)
+	// API is used by the application, BLIS module would always give precedence to
+	// these values. BLIS API would not consider the values set using OpenMP API
+	// omp_set_num_threads(nt) API or OMP_NUM_THREADS environment variable.
+	//
+	// 3. If Application wants to allocate separate number of threads for BLIS API execution
+	// and application, Application can choose either BLIS_NUM_THREADS environement variable
+	// or bli_thread_set_num_threads(nt) API, to set the desired number of threads
+	// in BLIS API Execution. Application can use OpenMP APIs or environment variables for
+	// itself.
+	//
+	// 4. If BLIS_NUM_THREADS is not set, then if Application is multithreaded and issued
+	// omp_set_num_threads(nt) with desired number of threads,
+	// omp_get_max_threads() API will fetch the number of threads set earlier.
+	//
+	// 5. If BLIS_NUM_THREADS is not set, omp_set_num_threads(nt) is not called by the application,
+	// but only OMP_NUM_THREADS is set,
+	// omp_get_max_threads() API will fetch the value of OMP_NUM_THREADS.
+	//
+	// 6. If both environment variables are not set, or if they are set with invalid values, and
+	// omp_set_num_threads(nt) is not issued by application,
+	// omp_get_max_threads() API will return the number of the cores in the current context.
+	//
+	// Note: omp_get_max_threads() alone is not sufficient to determine the number of threads
+	//       that should be used for a new parallel region. We must also consider the number
+	//       of active levels of OpenMP parallelism and which level we are at, using APIs
+	//       omp_get_max_active_levels() and omp_get_active_level().
+	//
+	// BLIS will initialize rntm->num_threads with the same value.
+	// However if omp_set_nested is false - BLIS APIs called from parallel threads will run in sequential.
+	// But if nested parallelism is enabled - Then each application will launch MT BLIS.
+	//
+	// Order of precedence used for number of threads:
+	// 0. valid value set using bli_thread_set_num_threads(nt) by the application
+	// 1. valid value set for BLIS_NUM_THREADS environment variable
+	// 2. omp_set_num_threads(nt) issued by the application
+	// 3. valid value set for OMP_NUM_THREADS environment variable
+	// 4. Number of cores
+	//
+	// Note: If nt is not a valid value for omp_set_num_threads(nt) API, number of threads would be set to 1.
+	// omp_get_max_threads() API will return 1.
+	//
+	// OMP_NUM_THREADS environment variable is applicable only when OpenMP is enabled.
+
+	// If any BLIS_*_NT environment variable was set, then we ignore the
+	// value of BLIS_NUM_THREADS or OMP_NUM_THREADS and use the
+	// BLIS_*_NT values instead (with unset variables being treated as if
+	// they contained 1).
+	if ( jc != -1 || pc != -1 || ic != -1 || jr != -1 || ir != -1 )
+	{
+		if ( jc == -1 ) jc = 1;
+		if ( pc == -1 ) pc = 1;
+		if ( ic == -1 ) ic = 1;
+		if ( jr == -1 ) jr = 1;
+		if ( ir == -1 ) ir = 1;
+
+		// Unset the value for nt.
+		nt = -1;
+
+		// Ensure blis_mt is set to TRUE.
+		// (It should already be from sync with global_rntm above).
+		bli_rntm_set_blis_mt_only(TRUE, rntm);
+	}
+        else
+        {
+        	// Check if blis_mt is already true, e.g. from prior call to bli_thread_set_num_threads()
+		// or from BLIS_NUM_THREADS being set.
+		if(blis_mt)
+		{
+			nt = bli_rntm_num_threads( rntm );
+		}
+		else
+		{
+#ifdef BLIS_ENABLE_OPENMP
+			active_level = omp_get_active_level();
+			max_levels = omp_get_max_active_levels();
+			if ( active_level < max_levels )
+			{
+			      nt = omp_get_max_threads();
+			} else {
+			      nt = 1;
+			}
+#else
+			nt = 1;
+#endif
+		}
+	}
+
+	// By this time, one of the following conditions holds:
+	// - nt is -1 and the ways for each loop are -1.
+	// - nt is -1 and the ways for each loop are all set.
+	// - nt is set and the ways for each loop are -1.
+
+	// If nt is set (ie: not -1), then we know we will perform an automatic
+	// thread factorization (later, in bli_rntm.c).
+	// However, there is no need to run auto_factor if nt=1
+	if ( nt > 1 ) auto_factor = TRUE;
+
+#else
+
+	// When multithreading is disabled, always set the rntm_t ways
+	// values to 1.
+	nt = -1;
+	jc = pc = ic = jr = ir = 1;
+
+#endif // BLIS_ENABLE_MULTITHREADING
+
+	// Save the results back in the runtime object.
+	bli_rntm_set_auto_factor_only( auto_factor, rntm );
+	bli_rntm_set_num_threads_only( nt, rntm );
+	bli_rntm_set_ways_only( jc, pc, ic, jr, ir, rntm );
+
+#ifdef PRINT_THREADING
+	printf( "bli_thread_update_rntm_from_env(): tl_rntm\n" );
 	bli_rntm_print( rntm );
 #endif
 }

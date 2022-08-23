@@ -658,22 +658,23 @@ void strsm_blis_impl
     {
 	    /* bli_strsm_small is performing better existing native
 	     * implementations for [m,n]<=1000 for single thread.
-	     * In case of multithread when [m,n]<=128 sinlge thread implemenation
+	     * In case of multithread when [m,n]<=128 single thread implementation
 	     * is doing better than native multithread */
-	    bool nt = bli_thread_get_is_parallel();
-	    if((nt==0 && m0<=1000 && n0<=1000) ||
-			    (nt && (m0+n0)<320) )
+	    bool is_parallel = bli_thread_get_is_parallel();
+	    if((!is_parallel && m0<=1000 && n0<=1000) ||
+               (is_parallel && (m0+n0)<320))
 	    {
 		    err_t status;
 		    status = bli_trsm_small
-                (
-                 blis_side,
-			     &alphao,
-			     &ao,
-			     &bo,
-			     NULL,
-			     NULL
-			    );
+                             (
+                               blis_side,
+			       &alphao,
+			       &ao,
+			       &bo,
+			       NULL,
+			       NULL,
+			       is_parallel
+			     );
 		    if (status == BLIS_SUCCESS)
 		    {
 			    AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO);
@@ -945,11 +946,11 @@ void dtrsm_blis_impl
     {
         /* bli_dtrsm_small is performing better existing native
          * implementations for [m,n]<=1000 for single thread.
-         * In case of multithread when [m,n]<=128 sinlge thread implemenation
+         * In case of multithread when [m,n]<=128 single thread implementation
          * is doing better than native multithread */
-        bool nt = bli_thread_get_is_parallel();
-        if ((nt == 0 && m0 <= 1000 && n0 <= 1000) ||
-            (nt && (m0 + n0) < 320))
+        bool is_parallel = bli_thread_get_is_parallel();
+        if ((!is_parallel && m0<=1000 && n0<=1000) ||
+            (is_parallel && (m0+n0)<320))
         {
             err_t status;
             status = bli_trsm_small(
@@ -958,7 +959,8 @@ void dtrsm_blis_impl
                 &ao,
                 &bo,
                 NULL,
-                NULL);
+                NULL,
+                is_parallel);
             if (status == BLIS_SUCCESS)
             {
                 AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO);
@@ -1292,12 +1294,12 @@ void ztrsm_blis_impl
     {
         /* bli_ztrsm_small is performing better existing native
         * implementations for [m,n]<=1000 for single thread.
-        * In case of multithread when [m,n]<=128 sinlge thread implemenation
+        * In case of multithread when [m,n]<=128 single thread implementation
         * is doing better than native multithread */
-        bool nt = bli_thread_get_is_parallel();
+        bool is_parallel = bli_thread_get_is_parallel();
 
-        if(((nt==0) && (m0<=500) && (n0<=500)) ||
-        (nt && ((m0+n0)<128)))
+        if((!is_parallel && m0<=500 && n0<=500) ||
+           (is_parallel && (m0+n0)<128))
         {
             err_t status;
             status = bli_trsm_small
@@ -1307,7 +1309,8 @@ void ztrsm_blis_impl
                         &ao,
                         &bo,
                         NULL,
-                        NULL
+                        NULL,
+                        is_parallel
                     );
             if (status == BLIS_SUCCESS)
             {
@@ -1641,11 +1644,11 @@ void ctrsm_blis_impl
     {
         /* bli_ztrsm_small is performing better existing native
         * implementations for [m,n]<=1000 for single thread.
-        * In case of multithread when [m,n]<=128 sinlge thread implemenation
+        * In case of multithread when [m,n]<=128 single thread implementation
         * is doing better than native multithread */
-        bool nt = bli_thread_get_is_parallel();
-        if((nt==0 && m0<=1000 && n0<=1000) ||
-        (nt && (m0+n0)<320) )
+        bool is_parallel = bli_thread_get_is_parallel();
+        if((!is_parallel && m0<=1000 && n0<=1000) ||
+           (is_parallel && (m0+n0)<320))
         {
             err_t status;
             status = bli_trsm_small
@@ -1655,7 +1658,8 @@ void ctrsm_blis_impl
                         &ao,
                         &bo,
                         NULL,
-                        NULL
+                        NULL,
+                        is_parallel
                     );
             if (status == BLIS_SUCCESS)
             {

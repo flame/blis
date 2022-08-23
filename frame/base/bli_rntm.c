@@ -39,6 +39,9 @@
 // along with a few other key parameters.
 rntm_t global_rntm;
 
+// Make thread settings local to each thread calling BLIS routines
+BLIS_THREAD_LOCAL rntm_t tl_rntm = BLIS_RNTM_INITIALIZER;
+
 // A mutex to allow synchronous access to global_rntm.
 bli_pthread_mutex_t global_rntm_mutex = BLIS_PTHREAD_MUTEX_INITIALIZER;
 
@@ -46,38 +49,40 @@ bli_pthread_mutex_t global_rntm_mutex = BLIS_PTHREAD_MUTEX_INITIALIZER;
 
 void bli_rntm_init_from_global( rntm_t* rntm )
 {
-	// We must ensure that global_rntm has been initialized.
-	bli_init_once();
+	// Initializes supplied rntm from a combination of global and
+	// thread local data (global_rntm and tl_rntm respectively).
 
-	// Fetch the number of threads based on the order of precedence,
-	// or the latest value of number of threads,
-	// if set by the Application using omp_set_num_threads(nt) API.
-#ifdef BLIS_ENABLE_OPENMP
-	dim_t n_threads = omp_get_max_threads();
-#endif
+	dim_t jc, pc, ic, jr, ir;
+
+	// We must ensure that global_rntm and tl_rntm have been initialized.
+	bli_init_once();
 
 	// Acquire the mutex protecting global_rntm.
 	bli_pthread_mutex_lock( &global_rntm_mutex );
 
-	// If BLIS_NUM_THREADS environment variable is not set or
-	// if bli_thread_set_num_threads() API is not used by the
-	// application, blis_mt flag will be false.
-	// Then we derive number of threads using OpenMP API
-	// omp_get_max_threads(), and update into global rntm structure,
-	// before copying into local rntm structure.
-
-	// This updated value will be used in the subsequent parallel regions.
-	if(!(global_rntm.blis_mt))
-	{
-#ifdef BLIS_ENABLE_OPENMP
-	    global_rntm.num_threads = n_threads;
-#endif
-	}
-
+	// Initialize supplied rntm from global_rntm.
 	*rntm = global_rntm;
 
 	// Release the mutex protecting global_rntm.
 	bli_pthread_mutex_unlock( &global_rntm_mutex );
+
+	// Now update threading info in supplied rntm from tl_rntm
+	bli_rntm_set_auto_factor_only( tl_rntm.auto_factor, rntm );
+	bli_rntm_set_num_threads_only( tl_rntm.num_threads, rntm );
+
+	jc = bli_rntm_jc_ways( &tl_rntm );
+	pc = bli_rntm_pc_ways( &tl_rntm );
+	ic = bli_rntm_ic_ways( &tl_rntm );
+	jr = bli_rntm_jr_ways( &tl_rntm );
+	ir = bli_rntm_ir_ways( &tl_rntm );
+	bli_rntm_set_ways_only( jc, pc, ic, jr, ir, rntm );
+
+	bli_rntm_set_blis_mt_only( tl_rntm.blis_mt, rntm );
+
+#if 0
+	printf( "bli_rntm_init_from_global()\n" );
+	bli_rntm_print( rntm );
+#endif
 }
 
 // -----------------------------------------------------------------------------
@@ -96,9 +101,9 @@ void bli_rntm_set_ways_for_op
 	// kind of information is already stored in the rntm_t object.
 	bli_rntm_set_ways_from_rntm( m, n, k, rntm );
 
-#if 0
-printf( "bli_rntm_set_ways_for_op()\n" );
-bli_rntm_print( rntm );
+#ifdef PRINT_THREADING
+	printf( "bli_rntm_set_ways_for_op()\n" );
+	bli_rntm_print( rntm );
 #endif
 
 	// Now modify the number of ways, if necessary, based on the operation.
@@ -211,8 +216,9 @@ void bli_rntm_set_ways_from_rntm
 	// First, we establish whether or not the number of threads is set.
 	if ( nt > 0 ) nt_set = TRUE;
 
-	// Take this opportunity to set the auto_factor field.
-	if ( nt_set ) auto_factor = TRUE;
+	// Take this opportunity to set the auto_factor field (when using
+	// more than one thread).
+	if ( nt_set && nt > 1 ) auto_factor = TRUE;
 
 	// Next, we establish whether or not any of the ways of parallelism
 	// for each loop were set. If any of the ways are set (positive), we
@@ -300,6 +306,11 @@ void bli_rntm_set_ways_from_rntm
 	bli_rntm_set_auto_factor_only( auto_factor, rntm );
 	bli_rntm_set_num_threads_only( nt, rntm );
 	bli_rntm_set_ways_only( jc, pc, ic, jr, ir, rntm );
+
+#ifdef PRINT_THREADING
+	printf( "bli_rntm_set_ways_from_rntm()\n" );
+	bli_rntm_print( rntm );
+#endif
 }
 
 void bli_rntm_set_ways_from_rntm_sup
@@ -337,8 +348,9 @@ void bli_rntm_set_ways_from_rntm_sup
 	// First, we establish whether or not the number of threads is set.
 	if ( nt > 0 ) nt_set = TRUE;
 
-	// Take this opportunity to set the auto_factor field.
-	if ( nt_set ) auto_factor = TRUE;
+	// Take this opportunity to set the auto_factor field (when using
+	// more than one thread).
+	if ( nt_set && nt > 1 ) auto_factor = TRUE;
 
 	// Next, we establish whether or not any of the ways of parallelism
 	// for each loop were set. If any of the ways are set (positive), we
@@ -435,6 +447,11 @@ void bli_rntm_set_ways_from_rntm_sup
 	bli_rntm_set_auto_factor_only( auto_factor, rntm );
 	bli_rntm_set_num_threads_only( nt, rntm );
 	bli_rntm_set_ways_only( jc, pc, ic, jr, ir, rntm );
+
+#ifdef PRINT_THREADING
+	printf( "bli_rntm_set_ways_from_rntm_sup()\n" );
+	bli_rntm_print( rntm );
+#endif
 }
 
 void bli_rntm_print
@@ -446,14 +463,16 @@ void bli_rntm_print
 
 	dim_t nt = bli_rntm_num_threads( rntm );
 
+	bool mt = bli_rntm_blis_mt( rntm );
+
 	dim_t jc = bli_rntm_jc_ways( rntm );
 	dim_t pc = bli_rntm_pc_ways( rntm );
 	dim_t ic = bli_rntm_ic_ways( rntm );
 	dim_t jr = bli_rntm_jr_ways( rntm );
 	dim_t ir = bli_rntm_ir_ways( rntm );
 
-	printf( "rntm contents	nt  jc  pc  ic  jr  ir\n" );
-	printf( "autofac? %1d | %4d%4d%4d%4d%4d%4d\n", (int)af,
+	printf( "rntm contents	       |   nt  jc  pc  ic  jr  ir\n" );
+	printf( "autofac, blis_mt? %1d, %1d | %4d%4d%4d%4d%4d%4d\n", (int)af, (int)mt,
 							   (int)nt, (int)jc, (int)pc,
 							   (int)ic, (int)jr, (int)ir );
 }
@@ -524,10 +543,10 @@ dim_t bli_rntm_calc_num_threads_in
 
 
 #ifdef AOCL_DYNAMIC
-//calculates the optimum number of threads using m, n, k dimensions.
-//This function modifies only the local copy of rntm with optimum threads.
-//Global rntm will remain unchanged. As a result, num_threads set by
-//application is available in global_rntm data structure.
+// Calculates the optimum number of threads using m, n, k dimensions.
+// This function modifies only the local copy of rntm with optimum threads.
+// tl_rntm will remain unchanged. As a result, num_threads set by
+// application is available in tl_rntm data structure.
 
 void bli_nthreads_optimum(
 				   obj_t*  a,
@@ -885,13 +904,18 @@ void bli_nthreads_optimum(
 	// for updating rntm
 	bli_rntm_set_num_threads_only( n_threads_opt, rntm );
 
+#ifdef PRINT_THREADING
+	printf( "bli_nthreads_optimum()\n" );
+	bli_rntm_print( rntm );
+#endif
+
 	return;
 }
 
 // Calculates the optimum number of threads along with the factorization
 // (ic, jc) using m, n, k dimensions. This function modifies only the local
-// copy of rntm with optimum threads. Since global rntm remains unchanged the
-// num_threads set by application is available in global_rntm data structure.
+// copy of rntm with optimum threads. Since tl_rntm remains unchanged the
+// num_threads set by application is available in tl_rntm data structure.
 err_t bli_smart_threading_sup
 				(
 				 obj_t*  a,

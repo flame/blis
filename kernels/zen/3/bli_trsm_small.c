@@ -5244,7 +5244,8 @@ err_t bli_trsm_small
     obj_t*  a,
     obj_t*  b,
     cntx_t* cntx,
-    cntl_t* cntl
+    cntl_t* cntl,
+    bool is_parallel
 )
 {
     err_t err;
@@ -5263,8 +5264,7 @@ err_t bli_trsm_small
    {
         case BLIS_DOUBLE:
         {
-            bool nt = bli_thread_get_is_parallel();
-            if((nt == 0) && (m > 1000 || n > 1000)) {
+            if((!is_parallel) && (m > 1000 || n > 1000)) {
                 return BLIS_NOT_YET_IMPLEMENTED;
             }
             break;
@@ -5272,16 +5272,14 @@ err_t bli_trsm_small
         case BLIS_FLOAT:
         case BLIS_SCOMPLEX:
         {
-            bool nt = bli_thread_get_is_parallel();
-            if((nt == 0) && (m > 1000 || n > 1000)) {
+            if((!is_parallel) && (m > 1000 || n > 1000)) {
                return BLIS_NOT_YET_IMPLEMENTED;
             }
             break;
         }
         case BLIS_DCOMPLEX:
         {
-            bool nt = bli_thread_get_is_parallel();
-            if((nt == 0) && (m > 500 || n > 500)) {
+            if((!is_parallel) && (m > 500 || n > 500)) {
                 return BLIS_NOT_YET_IMPLEMENTED;
             }
             break;
@@ -5392,6 +5390,8 @@ err_t bli_trsm_small_mt
 
     if (n_threads < 0 ) n_threads = 1;
 
+    bool is_parallel = bli_thread_get_is_parallel();
+
     err_t status = BLIS_SUCCESS;
     _Pragma( "omp parallel num_threads(n_threads)" )
     {
@@ -5449,7 +5449,8 @@ err_t bli_trsm_small_mt
                      a,
                      &b_t,
                      NULL,
-                     NULL
+                     NULL,
+                     is_parallel
                    );
 	// To capture the error populated from any of the threads
         _Pragma( "omp critical" )
