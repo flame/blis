@@ -172,11 +172,11 @@ void libblis_test_axpy2v_experiment
 	obj_t        alpha1, alpha2, x, y, z;
 	obj_t        z_save;
 
-	cntx_t*      cntx;
+	cntx_t*      cntx      = NULL;
 
 
 	// Query a context.
-	cntx = ( cntx_t* )bli_gks_query_cntx();
+	bli_gks_query_cntx( ( const cntx_t** )&cntx ); \
 
 	// Use the datatype of the first char in the datatype combination string.
 	bli_param_map_char_to_blis_dt( dc_str[0], &datatype );

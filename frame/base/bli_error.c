@@ -39,9 +39,11 @@
 static const char *bli_error_string[-BLIS_ERROR_CODE_MAX] =
 {
 	[-BLIS_INVALID_ERROR_CHECKING_LEVEL]         = "Invalid error checking level.",
+	[-BLIS_INVALID_ERROR_HANDLING_MODE]          = "Invalid error handling mode.",
 	[-BLIS_UNDEFINED_ERROR_CODE]                 = "Undefined error code.",
 	[-BLIS_NULL_POINTER]                         = "Encountered unexpected null pointer.",
 	[-BLIS_NOT_YET_IMPLEMENTED]                  = "Requested functionality not yet implemented.",
+	[-BLIS_REJECT_EXEC]                          = "Execution path rejected. NOTE: This error message should never be displayed.",
 
 	[-BLIS_INVALID_SIDE]                         = "Invalid side parameter value.",
 	[-BLIS_INVALID_UPLO]                         = "Invalid uplo_t parameter value.",
@@ -83,9 +85,18 @@ static const char *bli_error_string[-BLIS_ERROR_CODE_MAX] =
 
 	[-BLIS_EXPECTED_UPPER_OR_LOWER_OBJECT]       = "Expected upper or lower triangular object.",
 
+	[-BLIS_INVALID_IND]                          = "Invalid ind_t parameter value.",
+
+	[-BLIS_INVALID_DIRECTION]                    = "Invalid dir_t parameter value.",
 	[-BLIS_INVALID_3x1_SUBPART]                  = "Encountered invalid 3x1 (vertical) subpartition label.",
 	[-BLIS_INVALID_1x3_SUBPART]                  = "Encountered invalid 1x3 (horizontal) subpartition label.",
 	[-BLIS_INVALID_3x3_SUBPART]                  = "Encountered invalid 3x3 (diagonal) subpartition label.",
+	[-BLIS_ROW_OFFSET_LESS_THAN_ZERO]            = "Encountered row offset less than zero.",
+	[-BLIS_ROW_OFFSET_EXCEEDS_NUM_ROWS]          = "Encountered row offset that exceeds the number of matrix rows (m dimension).",
+	[-BLIS_COL_OFFSET_LESS_THAN_ZERO]            = "Encountered column offset less than zero.",
+	[-BLIS_COL_OFFSET_EXCEEDS_NUM_COLS]          = "Encountered column offset that exceeds the number of matrix columns (n dimension).",
+	[-BLIS_VECTOR_OFFSET_LESS_THAN_ZERO]         = "Encountered vector offset less than zero.",
+	[-BLIS_VECTOR_OFFSET_EXCEEDS_NUM_ELEM]       = "Encountered vector offset that exceeds the number of vector elements.",
 
 	[-BLIS_UNEXPECTED_NULL_CONTROL_TREE]         = "Encountered unexpected null control tree node.",
 
@@ -100,6 +111,7 @@ static const char *bli_error_string[-BLIS_ERROR_CODE_MAX] =
 	[-BLIS_INSUFFICIENT_STACK_BUF_SIZE]          = "Configured maximum stack buffer size is insufficient for register blocksizes currently in use.",
 	[-BLIS_ALIGNMENT_NOT_POWER_OF_TWO]           = "Encountered memory alignment value that is either zero or not a power of two.",
 	[-BLIS_ALIGNMENT_NOT_MULT_OF_PTR_SIZE]       = "Encountered memory alignment value that is not a multiple of sizeof(void*).",
+	[-BLIS_MEM_POOL_BLOCKS_OUTSTANDING]          = "One or more blocks still checked out at the time a memory pool was finalized.",
 
 	[-BLIS_EXPECTED_OBJECT_ALIAS]                = "Expected object to be alias.",
 
@@ -112,7 +124,151 @@ static const char *bli_error_string[-BLIS_ERROR_CODE_MAX] =
 	[-BLIS_NC_MAX_NONMULTIPLE_OF_NR]             = "Maximum NC is non-multiple of NR for one or more datatypes.",
 	[-BLIS_KC_DEF_NONMULTIPLE_OF_KR]             = "Default KC is non-multiple of KR for one or more datatypes.",
 	[-BLIS_KC_MAX_NONMULTIPLE_OF_KR]             = "Maximum KC is non-multiple of KR for one or more datatypes.",
+
+	[-BLIS_EXPECTED_DIFF_NUM_THREADS]            = "A different number of threads was created than was requested.",
 };
+
+// -----------------------------------------------------------------------------
+
+// A mutex to allow synchronous access to the variable controlling the error
+// checking level.
+static bli_pthread_mutex_t err_level_mutex = BLIS_PTHREAD_MUTEX_INITIALIZER;
+
+// Set the default (initial) error checking level based on how BLIS was
+// configured. Note that we declare the variable as thread-local so that
+// application threads can operate BLIS under different error handling
+// regimes.
+#ifdef BLIS_ENABLE_ERROR_CHECKING
+static BLIS_THREAD_LOCAL errlev_t bli_err_chk_level = BLIS_FULL_ERROR_CHECKING;
+#else
+static BLIS_THREAD_LOCAL errlev_t bli_err_chk_level = BLIS_NO_ERROR_CHECKING;
+#endif
+
+// Primary user APIs.
+
+bool bli_error_checking_is_enabled( void )
+{
+	return bli_error_checking_level() != BLIS_NO_ERROR_CHECKING;
+}
+
+err_t bli_error_checking_enable( void )
+{
+	return bli_error_checking_level_set( BLIS_FULL_ERROR_CHECKING );
+}
+
+err_t bli_error_checking_disable( void )
+{
+	return bli_error_checking_level_set( BLIS_NO_ERROR_CHECKING );
+}
+
+// Lower-level APIs.
+
+errlev_t bli_error_checking_level( void )
+{
+	return bli_err_chk_level;
+}
+
+err_t bli_error_checking_level_set( errlev_t new_level )
+{
+	err_t e_val;
+
+	e_val = bli_check_valid_error_level( new_level );
+	bli_check_return_error_code( e_val );
+
+	// Acquire the mutex protecting bli_err_chk_level.
+	bli_pthread_mutex_lock( &err_level_mutex );
+
+	// BEGIN CRITICAL SECTION
+	{
+		bli_err_chk_level = new_level;
+	}
+	// END CRITICAL SECTION
+
+	// Release the mutex protecting bli_err_chk_level.
+	bli_pthread_mutex_unlock( &err_level_mutex );
+
+	return BLIS_SUCCESS;
+}
+
+// -----------------------------------------------------------------------------
+
+// A mutex to allow synchronous access to the variable controlling the error
+// handling mode.
+static bli_pthread_mutex_t err_mode_mutex = BLIS_PTHREAD_MUTEX_INITIALIZER;
+
+// Set the default (initial) error handling mode based on how BLIS was
+// configured. Note that we declare the variable as thread-local so that
+// application threads can operate BLIS under different error handling
+// regimes.
+#ifdef BLIS_ENABLE_ERROR_RETURN
+static BLIS_THREAD_LOCAL errmode_t bli_err_hand_mode = BLIS_ERROR_RETURN;
+#else // #ifdef BLIS_ENABLE_ERROR_ABORT
+static BLIS_THREAD_LOCAL errmode_t bli_err_hand_mode = BLIS_ERROR_ABORT;
+#endif
+
+// Primary user APIs.
+
+bool bli_error_mode_is_return( void )
+{
+	return bli_error_mode() == BLIS_ERROR_RETURN;
+}
+
+bool bli_error_mode_is_abort( void )
+{
+	return bli_error_mode() == BLIS_ERROR_ABORT;
+}
+
+err_t bli_error_mode_set_return( void )
+{
+	return bli_error_mode_set( BLIS_ERROR_RETURN );
+}
+
+err_t bli_error_mode_set_abort( void )
+{
+	return bli_error_mode_set( BLIS_ERROR_ABORT );
+}
+
+// Lower-level APIs.
+
+errmode_t bli_error_mode( void )
+{
+	return bli_err_hand_mode;
+}
+
+err_t bli_error_mode_set( errmode_t new_mode )
+{
+	err_t e_val;
+
+	e_val = bli_check_valid_error_mode( new_mode );
+	bli_check_return_error_code( e_val );
+
+	// Acquire the mutex protecting bli_err_hand_mode.
+	bli_pthread_mutex_lock( &err_mode_mutex );
+
+	// BEGIN CRITICAL SECTION
+	{
+		bli_err_hand_mode = new_mode;
+	}
+	// END CRITICAL SECTION
+
+	// Release the mutex protecting bli_err_chk_level.
+	bli_pthread_mutex_unlock( &err_mode_mutex );
+
+	return BLIS_SUCCESS;
+}
+
+// -----------------------------------------------------------------------------
+
+const char* bli_error_string_for_code( gint_t code )
+{
+	// If the caller's error code is out of range, use a special error code to
+	// signify this.
+	if ( code <= BLIS_ERROR_CODE_MIN || BLIS_ERROR_CODE_MAX <= code )
+		code = BLIS_UNDEFINED_ERROR_CODE;
+
+	// Return the address of the string corresponding to the chosen error code.
+	return bli_error_string[-code];
+}
 
 // -----------------------------------------------------------------------------
 
@@ -129,35 +285,5 @@ void bli_abort( void )
 	fprintf( stderr, "libblis: Aborting.\n" );
 	//raise( SIGABRT );
 	abort();
-}
-
-// -----------------------------------------------------------------------------
-
-// Current error checking level.
-static BLIS_THREAD_LOCAL errlev_t bli_err_chk_level = BLIS_FULL_ERROR_CHECKING;
-
-errlev_t bli_error_checking_level( void )
-{
-	return bli_err_chk_level;
-}
-
-void bli_error_checking_level_set( errlev_t new_level )
-{
-	err_t e_val;
-
-	e_val = bli_check_valid_error_level( new_level );
-	bli_check_error_code( e_val );
-
-	bli_err_chk_level = new_level;
-}
-
-bool bli_error_checking_is_enabled( void )
-{
-	return bli_error_checking_level() != BLIS_NO_ERROR_CHECKING;
-}
-
-const char* bli_error_string_for_code( gint_t code )
-{
-	return bli_error_string[-code];
 }
 

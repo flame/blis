@@ -53,6 +53,7 @@ cntl_t* bli_unpackm_cntl_create_node
 
 	// Allocate an unpackm_params_t struct.
 	params = bli_malloc_intl( sizeof( unpackm_params_t ), &r_val );
+	//r_val = bli_sba_acquire( rntm, sizeof( packm_params_t ), ( void** )&params );
 
 	// Initialize the unpackm_params_t struct.
 	params->size      = sizeof( unpackm_params_t );

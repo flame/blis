@@ -40,7 +40,7 @@
 #undef  GENTPROT
 #define GENTPROT( opname ) \
 \
-void PASTEMAC(opname,_check) \
+err_t PASTEMAC(opname,_check) \
      ( \
        const obj_t* chi, \
        const obj_t* psi  \
@@ -57,7 +57,7 @@ GENTPROT( subsc )
 #undef  GENTPROT
 #define GENTPROT( opname ) \
 \
-void PASTEMAC(opname,_check) \
+err_t PASTEMAC(opname,_check) \
      ( \
        const obj_t* chi  \
      );
@@ -68,7 +68,7 @@ GENTPROT( invertsc )
 #undef  GENTPROT
 #define GENTPROT( opname ) \
 \
-void PASTEMAC(opname,_check) \
+err_t PASTEMAC(opname,_check) \
      ( \
        const obj_t* chi, \
        const obj_t* absq  \
@@ -81,7 +81,7 @@ GENTPROT( normfsc )
 #undef  GENTPROT
 #define GENTPROT( opname ) \
 \
-void PASTEMAC(opname,_check) \
+err_t PASTEMAC(opname,_check) \
      ( \
        const obj_t*  chi, \
        const double* zeta_r, \
@@ -94,7 +94,7 @@ GENTPROT( getsc )
 #undef  GENTPROT
 #define GENTPROT( opname ) \
 \
-void PASTEMAC(opname,_check) \
+err_t PASTEMAC(opname,_check) \
      ( \
              double zeta_r, \
              double zeta_i, \
@@ -107,7 +107,7 @@ GENTPROT( setsc )
 #undef  GENTPROT
 #define GENTPROT( opname ) \
 \
-void PASTEMAC(opname,_check) \
+err_t PASTEMAC(opname,_check) \
      ( \
        const obj_t* chi, \
        const obj_t* zeta_r, \
@@ -120,7 +120,7 @@ GENTPROT( unzipsc )
 #undef  GENTPROT
 #define GENTPROT( opname ) \
 \
-void PASTEMAC(opname,_check) \
+err_t PASTEMAC(opname,_check) \
      ( \
        const obj_t* zeta_r, \
        const obj_t* zeta_i, \
@@ -131,26 +131,27 @@ GENTPROT( zipsc )
 
 // -----------------------------------------------------------------------------
 
-void bli_l0_xsc_check
+err_t bli_l0_x_check
      (
        const obj_t* chi
      );
 
-void bli_l0_xxsc_check
+err_t bli_l0_xx_check
      (
        const obj_t* chi,
        const obj_t* psi
      );
 
-void bli_l0_xx2sc_check
+err_t bli_l0_xx2_check
      (
        const obj_t* chi,
        const obj_t* norm
      );
 
-void bli_l0_xxbsc_check
+err_t bli_l0_xxbool_check
      (
        const obj_t* chi,
        const obj_t* psi,
        const bool*  is_eq
      );
+

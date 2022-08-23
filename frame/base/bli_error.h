@@ -34,13 +34,29 @@
 */
 
 
-BLIS_EXPORT_BLIS errlev_t bli_error_checking_level( void );
-BLIS_EXPORT_BLIS void     bli_error_checking_level_set( errlev_t new_level );
+BLIS_EXPORT_BLIS bool        bli_error_checking_is_enabled( void );
+BLIS_EXPORT_BLIS err_t       bli_error_checking_enable( void );
+BLIS_EXPORT_BLIS err_t       bli_error_checking_disable( void );
 
-BLIS_EXPORT_BLIS bool     bli_error_checking_is_enabled( void );
+BLIS_EXPORT_BLIS errlev_t    bli_error_checking_level( void );
+BLIS_EXPORT_BLIS err_t       bli_error_checking_level_set( errlev_t new_level );
 
-void                      bli_print_msg( const char* str, const char* file, guint_t line );
-BLIS_EXPORT_BLIS void     bli_abort( void );
+// -----------------------------------------------------------------------------
 
-const char*               bli_error_string_for_code( gint_t code );
+BLIS_EXPORT_BLIS bool        bli_error_mode_is_return( void );
+BLIS_EXPORT_BLIS bool        bli_error_mode_is_abort( void );
+BLIS_EXPORT_BLIS err_t       bli_error_mode_set_return( void );
+BLIS_EXPORT_BLIS err_t       bli_error_mode_set_abort( void );
+
+BLIS_EXPORT_BLIS errmode_t   bli_error_mode( void );
+BLIS_EXPORT_BLIS err_t       bli_error_mode_set( errmode_t new_mode );
+
+// -----------------------------------------------------------------------------
+
+BLIS_EXPORT_BLIS const char* bli_error_string_for_code( gint_t code );
+
+// -----------------------------------------------------------------------------
+
+void                         bli_print_msg( const char* str, const char* file, guint_t line );
+BLIS_EXPORT_BLIS void        bli_abort( void );
 

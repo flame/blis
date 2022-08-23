@@ -81,24 +81,23 @@ BLIS_EXPORT_BLIS gint_t bli_info_get_enable_sandbox( void );
 
 // -- Level-3 kernel definitions --
 
-BLIS_EXPORT_BLIS const char* bli_info_get_gemm_ukr_impl_string( ind_t method, num_t dt );
-BLIS_EXPORT_BLIS const char* bli_info_get_gemmtrsm_l_ukr_impl_string( ind_t method, num_t dt );
-BLIS_EXPORT_BLIS const char* bli_info_get_gemmtrsm_u_ukr_impl_string( ind_t method, num_t dt );
-BLIS_EXPORT_BLIS const char* bli_info_get_trsm_l_ukr_impl_string( ind_t method, num_t dt );
-BLIS_EXPORT_BLIS const char* bli_info_get_trsm_u_ukr_impl_string( ind_t method, num_t dt );
+BLIS_EXPORT_BLIS err_t bli_info_get_gemm_ukr_impl_string( ind_t method, num_t dt, const char** str );
+BLIS_EXPORT_BLIS err_t bli_info_get_gemmtrsm_l_ukr_impl_string( ind_t method, num_t dt, const char** str );
+BLIS_EXPORT_BLIS err_t bli_info_get_gemmtrsm_u_ukr_impl_string( ind_t method, num_t dt, const char** str );
+BLIS_EXPORT_BLIS err_t bli_info_get_trsm_l_ukr_impl_string( ind_t method, num_t dt, const char** str );
+BLIS_EXPORT_BLIS err_t bli_info_get_trsm_u_ukr_impl_string( ind_t method, num_t dt, const char** str );
 
 
 // -- BLIS implementation query (level-3) --------------------------------------
 
-BLIS_EXPORT_BLIS const char* bli_info_get_gemm_impl_string( num_t dt );
-BLIS_EXPORT_BLIS const char* bli_info_get_gemmt_impl_string( num_t dt );
-BLIS_EXPORT_BLIS const char* bli_info_get_hemm_impl_string( num_t dt );
-BLIS_EXPORT_BLIS const char* bli_info_get_herk_impl_string( num_t dt );
-BLIS_EXPORT_BLIS const char* bli_info_get_her2k_impl_string( num_t dt );
-BLIS_EXPORT_BLIS const char* bli_info_get_symm_impl_string( num_t dt );
-BLIS_EXPORT_BLIS const char* bli_info_get_syrk_impl_string( num_t dt );
-BLIS_EXPORT_BLIS const char* bli_info_get_syr2k_impl_string( num_t dt );
-BLIS_EXPORT_BLIS const char* bli_info_get_trmm_impl_string( num_t dt );
-BLIS_EXPORT_BLIS const char* bli_info_get_trmm3_impl_string( num_t dt );
-BLIS_EXPORT_BLIS const char* bli_info_get_trsm_impl_string( num_t dt );
+BLIS_EXPORT_BLIS err_t bli_info_get_gemm_impl_string( num_t dt, const char** str );
+BLIS_EXPORT_BLIS err_t bli_info_get_hemm_impl_string( num_t dt, const char** str );
+BLIS_EXPORT_BLIS err_t bli_info_get_herk_impl_string( num_t dt, const char** str );
+BLIS_EXPORT_BLIS err_t bli_info_get_her2k_impl_string( num_t dt, const char** str );
+BLIS_EXPORT_BLIS err_t bli_info_get_symm_impl_string( num_t dt, const char** str );
+BLIS_EXPORT_BLIS err_t bli_info_get_syrk_impl_string( num_t dt, const char** str );
+BLIS_EXPORT_BLIS err_t bli_info_get_syr2k_impl_string( num_t dt, const char** str );
+BLIS_EXPORT_BLIS err_t bli_info_get_trmm_impl_string( num_t dt, const char** str );
+BLIS_EXPORT_BLIS err_t bli_info_get_trmm3_impl_string( num_t dt, const char** str );
+BLIS_EXPORT_BLIS err_t bli_info_get_trsm_impl_string( num_t dt, const char** str );
 

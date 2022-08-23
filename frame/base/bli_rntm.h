@@ -330,7 +330,9 @@ BLIS_INLINE void bli_rntm_init( rntm_t* rntm )
 	bli_rntm_clear_pba( rntm );
 }
 
+//
 // -- rntm_t total thread calculation ------------------------------------------
+//
 
 BLIS_INLINE dim_t bli_rntm_calc_num_threads
      (
@@ -348,9 +350,9 @@ BLIS_INLINE dim_t bli_rntm_calc_num_threads
 	return n_threads;
 }
 
-// -----------------------------------------------------------------------------
-
-// Function prototypes
+//
+// -- Function prototypes ------------------------------------------------------
+//
 
 BLIS_EXPORT_BLIS void bli_rntm_init_from_global( rntm_t* rntm );
 
@@ -390,6 +392,20 @@ dim_t bli_rntm_calc_num_threads_in
        const bszid_t* bszid_cur,
        const rntm_t*  rntm
      );
+
+//
+// -- rntm_t convenience init wrapper ------------------------------------------
+//
+
+BLIS_INLINE void bli_rntm_init_if_null( rntm_t** rntm, rntm_t* rntm_l )
+{
+	// Initialize a local runtime. If the caller has a NULL rntm_t pointer,
+	// initialize from the global rntm_t. If the caller has a non-NULL rntm_t
+	// pointer, initialize from that rntm_t struct. In either case, the now-
+	// initialized local rntm_t struct is aliased via rntm.
+	if ( *rntm == NULL ) { bli_rntm_init_from_global( rntm_l ); *rntm = rntm_l; }
+	else                 { *rntm_l = **rntm;                    *rntm = rntm_l; }
+}
 
 #endif
 

@@ -39,6 +39,26 @@
 // Statically initialize the mutex within the packing block allocator object.
 static pba_t pba = { .mutex = BLIS_PTHREAD_MUTEX_INITIALIZER };
 
+// A boolean that tracks whether bli_pba_init() has completed successfully.
+static bool pba_is_init = FALSE;
+
+// -----------------------------------------------------------------------------
+
+bool bli_pba_is_init( void )
+{
+	return pba_is_init;
+}
+
+void bli_pba_mark_init( void )
+{
+	pba_is_init = TRUE;
+}
+
+void bli_pba_mark_uninit( void )
+{
+	pba_is_init = FALSE;
+}
+
 // -----------------------------------------------------------------------------
 
 pba_t* bli_pba_query( void )
@@ -46,12 +66,27 @@ pba_t* bli_pba_query( void )
     return &pba;
 }
 
-void bli_pba_init
+void bli_pba_rntm_set_pba
      (
-       const cntx_t* cntx
+       rntm_t* rntm
      )
 {
 	pba_t* pba = bli_pba_query();
+
+	bli_rntm_set_pba( pba, rntm );
+}
+
+// -----------------------------------------------------------------------------
+
+err_t bli_pba_init
+     (
+       void
+     )
+{
+	// Sanity check: Return early if the API is already initialized.
+	if ( bli_pba_is_init() ) return BLIS_SUCCESS;
+
+	pba_t* restrict pba = bli_pba_query();
 
 	const siz_t align_size = BLIS_POOL_ADDR_ALIGN_SIZE_GEN;
 	malloc_ft   malloc_fp  = BLIS_MALLOC_POOL;
@@ -67,20 +102,37 @@ void bli_pba_init
 	// keeps bli_pba_init() simpler and removes the possibility of
 	// something going wrong during mutex initialization.
 
+	// The mutex field of pba is initialized statically above. It's
+	// important to keep the mutex initialization outside of the _init()
+	// function so that in the rare event that BLIS initialization fails
+	// part way through, we don't have to worry about whether or not we
+	// need to destroy the mutex first (before allowing the application
+	// a second chance at initialization).
+
 #ifdef BLIS_ENABLE_PBA_POOLS
-	bli_pba_init_pools( cntx, pba );
+	err_t r_val = bli_pba_init_pools( pba );
+	bli_check_return_if_failure( r_val );
 #endif
+
+	// Mark the API as initialized.
+	bli_pba_mark_init();
+
+	return BLIS_SUCCESS;
 }
 
-void bli_pba_finalize
+err_t bli_pba_finalize
      (
        void
      )
 {
-	pba_t* pba = bli_pba_query();
+	// Sanity check: Return early if the API is uninitialized.
+	if ( !bli_pba_is_init() ) return BLIS_SUCCESS;
+
+	pba_t* restrict pba = bli_pba_query();
 
 #ifdef BLIS_ENABLE_PBA_POOLS
-	bli_pba_finalize_pools( pba );
+	err_t r_val = bli_pba_finalize_pools( pba );
+	bli_check_return_if_failure( r_val );
 #endif
 
 	// The mutex field of pba is initialized statically above, and
@@ -88,9 +140,14 @@ void bli_pba_finalize
 
 	bli_pba_set_malloc_fp( NULL, pba );
 	bli_pba_set_free_fp( NULL, pba );
+
+	// Mark the API as uninitialized.
+	bli_pba_mark_uninit();
+
+	return BLIS_SUCCESS;
 }
 
-void bli_pba_acquire_m
+err_t bli_pba_acquire_m
      (
        rntm_t*   rntm,
        siz_t     req_size,
@@ -98,9 +155,6 @@ void bli_pba_acquire_m
        mem_t*    mem
      )
 {
-	pool_t* pool;
-	pblk_t* pblk;
-	dim_t   pi;
 	err_t   r_val;
 
 	// If the internal memory pools for packing block allocator are disabled,
@@ -127,6 +181,7 @@ void bli_pba_acquire_m
 		// For general-use buffer requests, dynamically allocating memory
 		// is assumed to be sufficient.
 		void* buf = bli_fmalloc_align( malloc_fp, req_size, align_size, &r_val );
+		bli_check_return_if_failure( r_val );
 
 		// Initialize the mem_t object with:
 		// - the address of the memory block,
@@ -148,11 +203,11 @@ void bli_pba_acquire_m
 
 		// Map the requested packed buffer type to a zero-based index, which
 		// we then use to select the corresponding memory pool.
-		pi   = bli_packbuf_index( buf_type );
-		pool = bli_pba_pool( pi, pba );
+		dim_t   pi   = bli_packbuf_index( buf_type );
+		pool_t* pool = bli_pba_pool( pi, pba );
 
 		// Extract the address of the pblk_t struct within the mem_t.
-		pblk = bli_mem_pblk( mem );
+		pblk_t* pblk = bli_mem_pblk( mem );
 
 		// Acquire the mutex associated with the pba object.
 		bli_pba_lock( pba );
@@ -168,13 +223,17 @@ void bli_pba_acquire_m
 			// automatically, as-needed. Note that the addresses are stored
 			// directly into the mem_t struct since pblk is the address of
 			// the struct's pblk_t field.
-			bli_pool_checkout_block( req_size, pblk, pool );
+			r_val = bli_pool_checkout_block( req_size, pblk, pool );
 
 		}
 		// END CRITICAL SECTION
 
 		// Release the mutex associated with the pba object.
 		bli_pba_unlock( pba );
+
+		// Now that we're out of the critical section, we can return if
+		// bli_pool_checkout_block() failed.
+		bli_check_return_if_failure( r_val );
 
 		// Query the block_size from the pblk_t. This will be at least
 		// req_size, perhaps larger.
@@ -192,6 +251,8 @@ void bli_pba_acquire_m
 		bli_mem_set_pool( pool, mem );
 		bli_mem_set_size( block_size, mem );
 	}
+
+	return BLIS_SUCCESS;
 }
 
 
@@ -256,6 +317,8 @@ void bli_pba_release
 	// NOTE: We do not clear the buf_type field since there is no
 	// "uninitialized" value for packbuf_t.
 	bli_mem_clear( mem );
+
+	return; // BLIS_SUCCESS;
 }
 
 
@@ -313,12 +376,20 @@ siz_t bli_pba_pool_size
 
 // -----------------------------------------------------------------------------
 
-void bli_pba_init_pools
+err_t bli_pba_init_pools
      (
-       const cntx_t* cntx,
-             pba_t*  pba
+       pba_t* pba
      )
 {
+	const cntx_t* cntx;
+	err_t         r_val;
+
+	// Query a native context so we have something to pass into
+	// bli_pba_compute_pool_block_sizes().
+	// NOTE: Instead of calling bli_gks_query_cntx(), we call
+	// bli_gks_query_cntx_noinit() to avoid the call to bli_init_once().
+	bli_gks_query_cntx_noinit( &cntx );
+
 	// Map each of the packbuf_t values to an index starting at zero.
 	const dim_t index_a      = bli_packbuf_index( BLIS_BUFFER_FOR_A_BLOCK );
 	const dim_t index_b      = bli_packbuf_index( BLIS_BUFFER_FOR_B_PANEL );
@@ -365,19 +436,31 @@ void bli_pba_init_pools
 	                                  cntx );
 
 	// Initialize the memory pools for A, B, and C.
-	bli_pool_init( num_blocks_a, block_ptrs_len_a, block_size_a, align_size_a,
-	               offset_size_a, malloc_fp, free_fp, pool_a );
-	bli_pool_init( num_blocks_b, block_ptrs_len_b, block_size_b, align_size_b,
-	               offset_size_b, malloc_fp, free_fp, pool_b );
-	bli_pool_init( num_blocks_c, block_ptrs_len_c, block_size_c, align_size_c,
-	               offset_size_c, malloc_fp, free_fp, pool_c );
+	r_val = bli_pool_init( num_blocks_a, block_ptrs_len_a, block_size_a, align_size_a,
+	                       offset_size_a, malloc_fp, free_fp, pool_a );
+
+	bli_check_callthen_return_if_failure( bli_pba_finalize_pools( pba ), r_val );
+
+	r_val = bli_pool_init( num_blocks_b, block_ptrs_len_b, block_size_b, align_size_b,
+	                       offset_size_b, malloc_fp, free_fp, pool_b );
+
+	bli_check_callthen_return_if_failure( bli_pba_finalize_pools( pba ), r_val );
+
+	r_val = bli_pool_init( num_blocks_c, block_ptrs_len_c, block_size_c, align_size_c,
+	                       offset_size_c, malloc_fp, free_fp, pool_c );
+
+	bli_check_callthen_return_if_failure( bli_pba_finalize_pools( pba ), r_val );
+
+	return BLIS_SUCCESS;
 }
 
-void bli_pba_finalize_pools
+err_t bli_pba_finalize_pools
      (
        pba_t* pba
      )
 {
+	err_t r_val;
+
 	// Map each of the packbuf_t values to an index starting at zero.
 	dim_t   index_a = bli_packbuf_index( BLIS_BUFFER_FOR_A_BLOCK );
 	dim_t   index_b = bli_packbuf_index( BLIS_BUFFER_FOR_B_PANEL );
@@ -389,9 +472,11 @@ void bli_pba_finalize_pools
 	pool_t* pool_c  = bli_pba_pool( index_c, pba );
 
 	// Finalize the memory pools for A, B, and C.
-	bli_pool_finalize( pool_a );
-	bli_pool_finalize( pool_b );
-	bli_pool_finalize( pool_c );
+	r_val = bli_pool_finalize( pool_a ); bli_check_return_if_failure( r_val );
+	r_val = bli_pool_finalize( pool_b ); bli_check_return_if_failure( r_val );
+	r_val = bli_pool_finalize( pool_c ); bli_check_return_if_failure( r_val );
+
+	return BLIS_SUCCESS;
 }
 
 // -----------------------------------------------------------------------------

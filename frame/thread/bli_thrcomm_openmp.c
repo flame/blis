@@ -37,17 +37,24 @@
 
 #ifdef BLIS_ENABLE_OPENMP
 
-thrcomm_t* bli_thrcomm_create( rntm_t* rntm, dim_t n_threads )
+err_t bli_thrcomm_create( rntm_t* rntm, dim_t n_threads, thrcomm_t** comm )
 {
 	#ifdef BLIS_ENABLE_MEM_TRACING
 	printf( "bli_thrcomm_create(): " );
 	#endif
 
-	thrcomm_t* comm = bli_sba_acquire( rntm, sizeof(thrcomm_t) );
+	err_t      r_val;
+	thrcomm_t* tc;
 
-	bli_thrcomm_init( n_threads, comm );
+	r_val = bli_sba_acquire( rntm, sizeof( thrcomm_t ), ( void** )&tc );
+	bli_check_return_if_failure( r_val );
 
-	return comm;
+	bli_thrcomm_init( n_threads, tc );
+
+	// Set the thrcomm_t pointer.
+	*comm = tc;
+
+	return BLIS_SUCCESS;
 }
 
 void bli_thrcomm_free( rntm_t* rntm, thrcomm_t* comm )

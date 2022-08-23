@@ -64,7 +64,7 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 	} \
 \
 	/* Obtain a valid context from the gks if necessary. */ \
-	/*if ( cntx == NULL ) cntx = bli_gks_query_cntx();*/ \
+	/*bli_gks_query_cntx_if_null( &cntx );*/ \
 \
 	/* Invoke the helper variant, which loops over the appropriate kernel
 	   to implement the current operation. */ \
@@ -100,7 +100,7 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 	if ( bli_zero_dim2( m, m ) ) return; \
 \
 	/* Obtain a valid context from the gks if necessary. */ \
-	if ( cntx == NULL ) cntx = bli_gks_query_cntx(); \
+	bli_gks_query_cntx_if_null( &cntx ); \
 \
 	/* Invoke the helper variant, which loops over the appropriate kernel
 	   to implement the current operation. */ \
@@ -143,7 +143,7 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 	} \
 \
 	/* Obtain a valid context from the gks if necessary. */ \
-	if ( cntx == NULL ) cntx = bli_gks_query_cntx(); \
+	bli_gks_query_cntx_if_null( &cntx ); \
 \
 	/* Invoke the helper variant, which loops over the appropriate kernel
 	   to implement the current operation. */ \
@@ -190,7 +190,7 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 	} \
 \
 	/* Obtain a valid context from the gks if necessary. */ \
-	if ( cntx == NULL ) cntx = bli_gks_query_cntx(); \
+	bli_gks_query_cntx_if_null( &cntx ); \
 \
 	/* Invoke the helper variant, which loops over the appropriate kernel
 	   to implement the current operation. */ \
@@ -231,7 +231,7 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 	if ( bli_zero_dim1( n ) ) return; \
 \
 	/* Obtain a valid context from the gks if necessary. */ \
-	/*if ( cntx == NULL ) cntx = bli_gks_query_cntx();*/ \
+	/*bli_gks_query_cntx_if_null( &cntx );*/ \
 \
 	ctype_r norm; \
 \
@@ -290,7 +290,7 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 	if ( bli_zero_dim2( m, n ) ) return; \
 \
 	/* Obtain a valid context from the gks if necessary. */ \
-	/*if ( cntx == NULL ) cntx = bli_gks_query_cntx();*/ \
+	/*bli_gks_query_cntx_if_null( &cntx );*/ \
 \
 	ctype_r norm; \
 \
@@ -355,7 +355,7 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 	if ( bli_zero_dim1( n ) ) return; \
 \
 	/* Obtain a valid context from the gks if necessary. */ \
-	/*if ( cntx == NULL ) cntx = bli_gks_query_cntx();*/ \
+	/*bli_gks_query_cntx_if_null( &cntx );*/ \
 \
 	/* Invoke the helper variant, which loops over the appropriate kernel
 	   to implement the current operation. */ \
@@ -419,7 +419,7 @@ void PASTEMAC(ch,opname) \
 	if ( bli_zero_dim1( n ) ) { *is_eq = TRUE; return; } \
 \
 	/* Obtain a valid context from the gks if necessary. */ \
-	/*if ( cntx == NULL ) cntx = bli_gks_query_cntx();*/ \
+	/*bli_gks_query_cntx_if_null( &cntx );*/ \
 \
 	*is_eq = PASTEMAC2(ch,opname,_unb_var1) \
 	( \
@@ -456,7 +456,7 @@ void PASTEMAC(ch,opname) \
 	if ( bli_zero_dim2( m, n ) ) { *is_eq = TRUE; return; } \
 \
 	/* Obtain a valid context from the gks if necessary. */ \
-	/*if ( cntx == NULL ) cntx = bli_gks_query_cntx();*/ \
+	/*bli_gks_query_cntx_if_null( &cntx );*/ \
 \
 	/* Invoke the helper variant. */ \
 	*is_eq = PASTEMAC2(ch,opname,_unb_var1) \

@@ -36,7 +36,7 @@
 
 //#define BLIS_ENABLE_MEM_TRACING
 
-void bli_array_init
+err_t bli_array_init
      (
        siz_t    num_elem,
        siz_t    elem_size,
@@ -44,6 +44,9 @@ void bli_array_init
      )
 {
 	err_t r_val;
+
+	// Start off with a zeroed-out array_t structure.
+	bli_array_clear( array );
 
 	#ifdef BLIS_ENABLE_MEM_TRACING
 	printf( "bli_array_init(): allocating array [%d * %d]: ",
@@ -53,22 +56,29 @@ void bli_array_init
 	// Compute the total size (in bytes) of the array.
 	const size_t array_size = num_elem * elem_size;
 
-	// Allocate the array buffer.
-	void* buf = bli_malloc_intl( array_size, &r_val );
+	// Allocate the array buffer. We use calloc() so that all elements are
+	// initialized to zero, or NULL. This allows us to deallocate only those
+	// blocks that were allocated in the event of a failure.
+	void* buf = bli_calloc_intl( array_size, &r_val );
 
-	// Initialize the array elements to zero. THIS IS IMPORANT because
-	// consumer threads will use the NULL-ness of the array elements to
-	// determine if the corresponding block (data structure) needs to be
-	// created/allocated and initialized.
-	memset( buf, 0, array_size );
+	// If the previous function failed, return the error code immediately.
+	bli_check_return_if_failure( r_val );
 
 	// Initialize the array_t structure.
 	bli_array_set_buf( buf, array );
 	bli_array_set_num_elem( num_elem, array );
 	bli_array_set_elem_size( elem_size, array );
+
+	// Initialize the array elements to zero. THIS IS IMPORANT because
+	// consumer threads will use the NULL-ness of the array elements to
+	// determine if the corresponding block (data structure) needs to be
+	// created/allocated and initialized.
+	//memset( buf, 0, array_size );
+
+	return BLIS_SUCCESS;
 }
 
-void bli_array_resize
+err_t bli_array_resize
      (
        siz_t    num_elem_new,
        array_t* array
@@ -81,7 +91,7 @@ void bli_array_resize
 
 	// If the new requested size (number of elements) is less than or equal to
 	// the current size, no action is needed; return early.
-	if ( num_elem_new <= num_elem_prev ) return;
+	if ( num_elem_new <= num_elem_prev ) return BLIS_SUCCESS;
 
 	// At this point, we know that num_elem_prev < num_elem_new, which means
 	// we need to proceed with the resizing.
@@ -104,6 +114,9 @@ void bli_array_resize
 	// Allocate a new array buffer.
 	char* buf_new = bli_malloc_intl( array_size_new, &r_val );
 
+	// If the previous function failed, return the error code immediately.
+	bli_check_return_if_failure( r_val );
+
 	// Copy the previous array contents to the new array.
 	memcpy( buf_new, buf_prev, array_size_prev );
 
@@ -125,9 +138,11 @@ void bli_array_resize
 	// NOTE: The array elem_size field does not need updating.
 	bli_array_set_buf( buf_new, array );
 	bli_array_set_num_elem( num_elem_new, array );
+
+	return BLIS_SUCCESS;
 }
 
-void bli_array_finalize
+err_t bli_array_finalize
      (
        array_t* array
      )
@@ -142,6 +157,8 @@ void bli_array_finalize
 
 	// Free the buffer.
 	bli_free_intl( buf );
+
+	return BLIS_SUCCESS;
 }
 
 void* bli_array_elem
@@ -151,10 +168,10 @@ void* bli_array_elem
      )
 {
 	// Query the number of elements in the array.
-	const siz_t num_elem = bli_array_num_elem( array );
+	//const siz_t num_elem = bli_array_num_elem( array );
 
 	// Sanity check: disallow access beyond the bounds of the array.
-	if ( num_elem <= index ) bli_abort();
+	//if ( num_elem <= index ) bli_abort();
 
 	// Query the size of each element in the array.
 	const siz_t elem_size = bli_array_elem_size( array );
@@ -183,31 +200,18 @@ void bli_array_set_elem
 	// Query the buffer from the array as a char*.
 	char* buf = bli_array_buf( array );
 
-// memcpy() is the only safe way to copy data of unknown type
-#if 0
-	if ( elem_size == sizeof( void* ) )
-	{
-		#ifdef BLIS_ENABLE_MEM_TRACING
-		printf( "bli_array_set_elem(): elem_size is %d; setting index %d.\n",
-		        ( int )elem_size, ( int )index );
-		fflush( stdout );
-		#endif
+	// Copy the elem_size bytes from elem to buf at the element index specified
+	// by index.
+	memcpy( &buf[ index * elem_size ], elem, ( size_t )elem_size );
+}
 
-		// Special case: Handle elem_size = sizeof( void* ) without calling
-		// memcpy().
-		void** buf_vvp  = ( void** )buf;
-		void** elem_vvp = ( void** )elem;
-
-		buf_vvp[ index ] = *elem_vvp;
-	}
-	else
-	{
-#endif
-		// General case: Copy the elem_size bytes from elem to buf at the
-		// element index specified by index.
-		memcpy( &buf[ index * elem_size ], elem, ( size_t )elem_size );
-#if 0
-	}
-#endif
+void bli_array_clear
+     (
+       array_t* array
+     )
+{
+	bli_array_set_buf( NULL, array );
+	bli_array_set_num_elem( 0, array );
+	bli_array_set_elem_size( 0, array );
 }
 

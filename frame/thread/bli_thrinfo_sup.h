@@ -40,27 +40,29 @@
 // Prototypes for level-3 thrinfo sup functions.
 //
 
-void bli_thrinfo_sup_grow
+err_t bli_thrinfo_sup_grow
      (
              rntm_t*    rntm,
        const bszid_t*   bszid_par,
              thrinfo_t* thread
      );
 
-thrinfo_t* bli_thrinfo_sup_rgrow
+err_t bli_thrinfo_sup_rgrow
      (
-             rntm_t*    rntm,
-       const bszid_t*   bszid_par,
-       const bszid_t*   bszid_cur,
-             thrinfo_t* thread_par
+             rntm_t*     rntm,
+       const bszid_t*    bszid_par,
+       const bszid_t*    bszid_cur,
+             thrinfo_t*  thread_par,
+             thrinfo_t** thread_cur
      );
 
-thrinfo_t* bli_thrinfo_sup_create_for_cntl
+err_t bli_thrinfo_sup_create_for_cntl
      (
-             rntm_t*    rntm,
-       const bszid_t*   bszid_par,
-       const bszid_t*   bszid_chl,
-             thrinfo_t* thread_par
+             rntm_t*     rntm,
+       const bszid_t*    bszid_par,
+       const bszid_t*    bszid_chl,
+             thrinfo_t*  thread_par,
+             thrinfo_t** thread_chl
      );
 
 #endif

@@ -154,11 +154,11 @@ The expert interface contains two additional parameters: a `cntx_t*` and `rntm_t
 
 ## Context type
 
-In general, it is permissible to pass in `NULL` for a `cntx_t*` parameter when calling an expert interface such as `bli_dgemm_ex()`. However, there are cases where `NULL` values are not accepted and may result in a segmentation fault. Specifically, the `cntx_t*` argument appears in the interfaces to the `gemm`, `trsm`, and `gemmtrsm` [level-3 microkernels](KernelsHowTo.md#level-3) along with all [level-1v](KernelsHowTo.md#level-1v) and [level-1f](KernelsHowTo.md#level-1f) kernels. There, as a general rule, a valid pointer must be passed in. Whenever a valid context is needed, the developer may query a default context from the global kernel structure (if a context is not already available in the current scope):
+In general, it is permissible to pass in `NULL` for a `cntx_t*` parameter when calling an expert interface such as `bli_gemm_ex()`. However, there are cases where `NULL` values are not accepted and may result in a segmentation fault. Specifically, the `cntx_t*` argument appears in the interfaces to the `gemm`, `trsm`, and `gemmtrsm` [level-3 microkernels](KernelsHowTo.md#level-3) along with all [level-1v](KernelsHowTo.md#level-1v) and [level-1f](KernelsHowTo.md#level-1f) kernels. There, as a general rule, a valid pointer must be passed in. Whenever a valid context is needed, the developer may query a default context from the global kernel structure (if a context is not already available in the current scope):
 ```c
-cntx_t* bli_gks_query_cntx( void );
+err_t bli_gks_query_cntx( cntx** cntx );
 ```
-When BLIS is configured to target a configuration family (e.g. `intel64`, `x86_64`), `bli_gks_query_cntx()` will use `cpuid` or an equivalent heuristic to select and and return the appropriate context. When BLIS is configured to target a singleton sub-configuration (e.g. `haswell`, `skx`), `bli_gks_query_cntx()` will unconditionally return a pointer to the context appropriate for the targeted configuration.
+When BLIS is configured to target a configuration family (e.g. `intel64`, `x86_64`), `bli_gks_query_cntx()` will use `cpuid` or an equivalent heuristic to provide the appropriate context. When BLIS is configured to target a singleton sub-configuration (e.g. `haswell`, `skx`), `bli_gks_query_cntx()` will unconditionally provide a pointer to the context appropriate for the targeted configuration.
 
 ## Runtime type
 
@@ -1967,15 +1967,15 @@ char* bli_info_get_version_str( void );
 
 ## Specific configuration
 
-The following routine returns a unique ID of type `arch_t` that identifies the current current active configuration:
+The following routine determines a unique ID of type `arch_t` that identifies the current current active configuration:
 ```c
-arch_t bli_arch_query_id( void );
+err_t bli_arch_query_id( arch_t* id );
 ```
 This is most useful when BLIS is configured with multiple configurations. (When linking to multi-configuration builds of BLIS, you don't know for sure which configuration will be used until runtime since the configuration-specific parameters are not loaded until after calling a hueristic to detect the hardware--usually based the `CPUID` instruction.)
 
 Once the configuration's ID is known, it can be used to query a string that contains the name of the configuration:
 ```c
-char* bli_arch_string( arch_t id );
+err_t bli_arch_string( arch_t id, const char** str );
 ```
 
 ## General configuration
@@ -2007,11 +2007,11 @@ gint_t bli_info_get_blas_int_type_size( void );
 The following routines allow the caller to obtain a string that identifies the implementation type of each microkernel that is currently active (ie: part of the current active configuration, as identified bi `bli_arch_query_id()`).
 
 ```c
-char* bli_info_get_gemm_ukr_impl_string( ind_t method, num_t dt )
-char* bli_info_get_gemmtrsm_l_ukr_impl_string( ind_t method, num_t dt )
-char* bli_info_get_gemmtrsm_u_ukr_impl_string( ind_t method, num_t dt )
-char* bli_info_get_trsm_l_ukr_impl_string( ind_t method, num_t dt )
-char* bli_info_get_trsm_u_ukr_impl_string( ind_t method, num_t dt )
+err_t bli_info_get_gemm_ukr_impl_string( ind_t method, num_t dt, char** str )
+err_t bli_info_get_gemmtrsm_l_ukr_impl_string( ind_t method, num_t dt, char** str )
+err_t bli_info_get_gemmtrsm_u_ukr_impl_string( ind_t method, num_t dt, char** str )
+err_t bli_info_get_trsm_l_ukr_impl_string( ind_t method, num_t dt, char** str )
+err_t bli_info_get_trsm_u_ukr_impl_string( ind_t method, num_t dt, char** str )
 ```
 
 Possible implementation (ie: the `ind_t method` argument) types are:
@@ -2029,16 +2029,16 @@ Possible microkernel types (ie: the return values for `bli_info_get_*_ukr_impl_s
 
 The following routines allow the caller to obtain a string that identifies the implementation (`ind_t`) that is currently active (ie: implemented and enabled) for each level-3 operation. Possible implementation types are listed in the section above covering [microkernel implemenation query](BLISTypedAPI.md#microkernel-implementation-type-query).
 ```c
-char* bli_info_get_gemm_impl_string( num_t dt );
-char* bli_info_get_hemm_impl_string( num_t dt );
-char* bli_info_get_herk_impl_string( num_t dt );
-char* bli_info_get_her2k_impl_string( num_t dt );
-char* bli_info_get_symm_impl_string( num_t dt );
-char* bli_info_get_syrk_impl_string( num_t dt );
-char* bli_info_get_syr2k_impl_string( num_t dt );
-char* bli_info_get_trmm_impl_string( num_t dt );
-char* bli_info_get_trmm3_impl_string( num_t dt );
-char* bli_info_get_trsm_impl_string( num_t dt );
+err_t bli_info_get_gemm_impl_string( num_t dt, char** str );
+err_t bli_info_get_hemm_impl_string( num_t dt, char** str );
+err_t bli_info_get_herk_impl_string( num_t dt, char** str );
+err_t bli_info_get_her2k_impl_string( num_t dt, char** str );
+err_t bli_info_get_symm_impl_string( num_t dt, char** str );
+err_t bli_info_get_syrk_impl_string( num_t dt, char** str );
+err_t bli_info_get_syr2k_impl_string( num_t dt, char** str );
+err_t bli_info_get_trmm_impl_string( num_t dt, char** str );
+err_t bli_info_get_trmm3_impl_string( num_t dt, char** str );
+err_t bli_info_get_trsm_impl_string( num_t dt, char** str );
 ```
 
 

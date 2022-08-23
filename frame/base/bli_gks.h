@@ -35,31 +35,63 @@
 #ifndef BLIS_GKS_H
 #define BLIS_GKS_H
 
-void                           bli_gks_init( void );
-void                           bli_gks_finalize( void );
+bool                   bli_gks_is_init( void );
+void                   bli_gks_mark_init( void );
+void                   bli_gks_mark_uninit( void );
 
-void                           bli_gks_init_index( void );
+err_t                  bli_gks_init( void );
+err_t                  bli_gks_finalize( void );
 
-const cntx_t*                  bli_gks_lookup_nat_cntx( arch_t id );
-const cntx_t*                  bli_gks_lookup_ind_cntx( arch_t id, ind_t ind );
-const cntx_t* const *          bli_gks_lookup_id( arch_t id );
-void                           bli_gks_register_cntx( arch_t id, void_fp nat_fp, void_fp ref_fp, void_fp ind_fp );
+void                   bli_gks_init_index( void );
 
-BLIS_EXPORT_BLIS const cntx_t* bli_gks_query_cntx( void );
-BLIS_EXPORT_BLIS const cntx_t* bli_gks_query_nat_cntx( void );
+err_t                  bli_gks_lookup_nat_cntx( arch_t id, const cntx_t** cntx );
+err_t                  bli_gks_lookup_ind_cntx( arch_t id, ind_t ind, const cntx_t** cntx );
+const cntx_t* const *  bli_gks_lookup_id( arch_t id );
+err_t                  bli_gks_register_cntx( arch_t id, void_fp nat_fp, void_fp ref_fp, void_fp ind_fp );
 
-const cntx_t*                  bli_gks_query_cntx_noinit( void );
+BLIS_EXPORT_BLIS err_t bli_gks_query_cntx( const cntx_t** cntx );
+BLIS_EXPORT_BLIS err_t bli_gks_query_nat_cntx( const cntx_t** cntx );
 
-BLIS_EXPORT_BLIS const cntx_t* bli_gks_query_ind_cntx( ind_t ind );
+err_t                  bli_gks_query_cntx_noinit( const cntx_t** cntx );
 
-BLIS_EXPORT_BLIS void          bli_gks_init_ref_cntx( cntx_t* cntx );
+BLIS_EXPORT_BLIS err_t bli_gks_query_ind_cntx( ind_t ind, const cntx_t** cntx );
 
-bool                           bli_gks_cntx_l3_nat_ukr_is_ref( num_t dt, ukr_t ukr_id, const cntx_t* cntx );
+BLIS_EXPORT_BLIS err_t bli_gks_init_ref_cntx( cntx_t* cntx );
 
-BLIS_EXPORT_BLIS const char*   bli_gks_l3_ukr_impl_string( ukr_t ukr, ind_t method, num_t dt );
-BLIS_EXPORT_BLIS kimpl_t       bli_gks_l3_ukr_impl_type( ukr_t ukr, ind_t method, num_t dt );
+err_t                  bli_gks_cntx_l3_nat_ukr_is_ref( num_t dt, ukr_t ukr_id, const cntx_t* cntx, bool* is_ref );
 
-//char*                          bli_gks_l3_ukr_avail_impl_string( ukr_t ukr, num_t dt );
+BLIS_EXPORT_BLIS err_t bli_gks_l3_ukr_impl_string( ukr_t ukr, ind_t method, num_t dt, const char** str );
+BLIS_EXPORT_BLIS err_t bli_gks_l3_ukr_impl_type( ukr_t ukr, ind_t method, num_t dt, kimpl_t* ki );
+
+//
+// -- cntx_t* query convenience wrapper ----------------------------------------
+//
+
+BLIS_INLINE err_t bli_gks_query_cntx_if_null( const cntx_t** cntx )
+{
+	err_t r_val;
+
+	if ( *cntx == NULL )
+	{
+		r_val = bli_gks_query_nat_cntx( cntx );
+		bli_check_return_if_failure( r_val );
+	}
+
+	return BLIS_SUCCESS;
+}
+
+BLIS_INLINE err_t bli_gks_query_ind_cntx_if_null( ind_t im, const cntx_t** cntx )
+{
+	err_t r_val;
+
+	if ( *cntx == NULL )
+	{
+		r_val = bli_gks_query_ind_cntx( im, cntx );
+		bli_check_return_if_failure( r_val );
+	}
+
+	return BLIS_SUCCESS;
+}
 
 #endif
 

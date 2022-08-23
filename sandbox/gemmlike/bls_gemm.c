@@ -75,13 +75,12 @@ void bls_gemm_ex
 	// Initialize a local runtime with global settings if necessary. Note
 	// that in the case that a runtime is passed in, we make a local copy.
 	rntm_t rntm_l;
-	if ( rntm == NULL ) { bli_rntm_init_from_global( &rntm_l ); rntm = &rntm_l; }
-	else                { rntm_l = *rntm;                       rntm = &rntm_l; }
+	bli_rntm_init_if_null( &rntm, &rntm_l );
 
 	// Obtain a valid (native) context from the gks if necessary.
 	// NOTE: This must be done before calling the _check() function, since
 	// that function assumes the context pointer is valid.
-	if ( cntx == NULL ) cntx = bli_gks_query_cntx();
+	bli_gks_query_cntx_if_null( ( const cntx_t** )&cntx ); \
 
 	// Check parameters.
 	if ( bli_error_checking_is_enabled() )

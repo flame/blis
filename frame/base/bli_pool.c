@@ -37,7 +37,7 @@
 
 //#define BLIS_ENABLE_MEM_TRACING
 
-void bli_pool_init
+err_t bli_pool_init
      (
        siz_t     num_blocks,
        siz_t     block_ptrs_len,
@@ -50,6 +50,11 @@ void bli_pool_init
      )
 {
 	err_t r_val;
+
+	// Start off with a zeroed-out pool_t structure.
+	// NOTE: This is especially important because it zeroes out the .block_ptrs
+	// field, which bli_pool_finalize() uses to decide whether to return early.
+	bli_pool_clear( pool );
 
 	// Make sure that block_ptrs_len is at least num_blocks.
 	block_ptrs_len = bli_max( block_ptrs_len, num_blocks );
@@ -64,31 +69,12 @@ void bli_pool_init
 	        ( int )block_ptrs_len );
 	#endif
 
-	// Allocate the block_ptrs array.
-	// FGVZ: Do we want to call malloc_fp() for internal data structures as
-	// well as pool blocks? If so, don't forget to s/bli_free_intl/free_fp/g.
+	// Allocate the block_ptrs array. We use calloc() so that all elements are
+	// initialized to zero, or NULL. This allows us to deallocate only those
+	// blocks that were allocated in the event of a failure.
 	pblk_t* block_ptrs
 	=
-	bli_malloc_intl( block_ptrs_len * sizeof( pblk_t ), &r_val );
-
-	// Allocate and initialize each entry in the block_ptrs array.
-	for ( dim_t i = 0; i < num_blocks; ++i )
-	{
-		#ifdef BLIS_ENABLE_MEM_TRACING
-		printf( "bli_pool_init(): allocating block %d of size %d (align %d, offset %d).\n",
-		        ( int )i, ( int )block_size, ( int )align_size, ( int )offset_size );
-		fflush( stdout );
-		#endif
-
-		bli_pool_alloc_block
-		(
-		  block_size,
-		  align_size,
-		  offset_size,
-		  malloc_fp,
-		  &(block_ptrs[i])
-		);
-	}
+	bli_calloc_intl( block_ptrs_len * sizeof( pblk_t ), &r_val );
 
 	// NOTE: The semantics of top_index approximate a stack, where a "full"
 	// stack (no blocks checked out) is one where top_index == 0 and an empty
@@ -101,7 +87,14 @@ void bli_pool_init
 	// number line in which blocks are checked out from lowest to highest,
 	// and additional blocks are added at the higher end.
 
+	// If the allocation failed, return the error code immediately.
+	bli_check_return_if_failure( r_val );
+
 	// Initialize the pool_t structure.
+	// NOTE: Given that the calloc() succeeded, we must set these fields so
+	// that if any of the below calls to bli_pool_alloc_block() fail, there
+	// will be enough information in the structure to allow bli_pool_finalize()
+	// to de-allocate what was allocated.
 	bli_pool_set_block_ptrs( block_ptrs, pool );
 	bli_pool_set_block_ptrs_len( block_ptrs_len, pool );
 	bli_pool_set_top_index( 0, pool );
@@ -111,9 +104,33 @@ void bli_pool_init
 	bli_pool_set_offset_size( offset_size, pool );
 	bli_pool_set_malloc_fp( malloc_fp, pool );
 	bli_pool_set_free_fp( free_fp, pool );
+
+	// Allocate and initialize each entry in the block_ptrs array.
+	for ( dim_t i = 0; i < num_blocks; ++i )
+	{
+		#ifdef BLIS_ENABLE_MEM_TRACING
+		printf( "bli_pool_init(): allocating block %d of size %d (align %d, offset %d).\n",
+		        ( int )i, ( int )block_size, ( int )align_size, ( int )offset_size );
+		fflush( stdout );
+		#endif
+
+		r_val = bli_pool_alloc_block
+		(
+		  block_size,
+		  align_size,
+		  offset_size,
+		  malloc_fp,
+		  &(block_ptrs[i])
+		);
+
+		// If the allocation failed, finalize the pool and return the error.
+		bli_check_callthen_return_if_failure( bli_pool_finalize( pool ), r_val );
+	}
+
+	return BLIS_SUCCESS;
 }
 
-void bli_pool_finalize
+err_t bli_pool_finalize
      (
        pool_t* pool
      )
@@ -126,6 +143,10 @@ void bli_pool_finalize
 	// Query the block_ptrs array.
 	pblk_t* block_ptrs = bli_pool_block_ptrs( pool );
 
+	// Return early if the block_ptrs array is NULL. This would typically
+	// indicate that the pool structure was was cleared but never initialized.
+	if ( block_ptrs == NULL ) return BLIS_SUCCESS;
+
 	// Query the total number of blocks currently allocated.
 	const siz_t num_blocks = bli_pool_num_blocks( pool );
 
@@ -135,16 +156,17 @@ void bli_pool_finalize
 	// checked out, then we would expect top_index != 0, and therefore this
 	// check is not universally appropriate.
 #if 0
+	err_t r_val;
+
 	// Query the top_index of the pool.
 	const siz_t top_index = bli_pool_top_index( pool );
 
-	// Sanity check: The top_index should be zero.
-	if ( top_index != 0 )
+	// Sanity check: The top_index should be zero. If it's not, then at
+	// least one block is still checked out to a thread.
+	if ( bli_error_checking_is_enabled() )
 	{
-		printf( "bli_pool_finalize(): final top_index == %d (expected 0); block_size: %d.\n",
-		        ( int )top_index, ( int )bli_pool_block_size( pool ) );
-		printf( "bli_pool_finalize(): Implication: not all blocks were checked back in!\n" );
-		bli_abort();
+		r_val = bli_check_outstanding_mem_pool_blocks( top_index );
+		bli_check_return_if_failure( r_val );
 	}
 #endif
 
@@ -180,21 +202,18 @@ void bli_pool_finalize
 	// Free the block_ptrs array.
 	bli_free_intl( block_ptrs );
 
-	// This explicit clearing of the pool_t struct is not strictly
-	// necessary and so it has been commented out.
-#if 0
-	// Clear the contents of the pool_t struct.
-	bli_pool_set_block_ptrs( NULL, pool );
-	bli_pool_set_block_ptrs_len( 0, pool );
-	bli_pool_set_num_blocks( 0, pool );
-	bli_pool_set_top_index( 0, pool );
-	bli_pool_set_block_size( 0, pool );
-	bli_pool_set_align_size( 0, pool );
-	bli_pool_set_offset_size( 0, pool );
-#endif
+	// Clear the pool structure. This step is important because we want to
+	// either leave the pool structure in a fully initialized state (with a
+	// non-NULL block_ptrs field) or we want it to be cleared (with a NULL
+	// block_ptrs field) so that we'll know it is uninitialized. This is
+	// needed so that the caller can tell if a pool needs to be finalized in
+	// the event of an error.
+	bli_pool_clear( pool );
+
+	return BLIS_SUCCESS;
 }
 
-void bli_pool_reinit
+err_t bli_pool_reinit
      (
        siz_t   num_blocks_new,
        siz_t   block_ptrs_len_new,
@@ -204,6 +223,8 @@ void bli_pool_reinit
        pool_t* pool
      )
 {
+	err_t r_val;
+
 	// Preserve the pointers to malloc() and free() provided when the pool
 	// was first initialized.
 	malloc_ft malloc_fp = bli_pool_malloc_fp( pool );
@@ -215,11 +236,14 @@ void bli_pool_reinit
 	// those blocks back into the pool. (This condition can be detected
 	// since the block size is encoded into each pblk, which is copied
 	// upon checkout.)
-	bli_pool_finalize( pool );
+	r_val = bli_pool_finalize( pool );
+
+	// If the previous function failed, return the error code immediately.
+	bli_check_return_if_failure( r_val );
 
 	// Reinitialize the pool with the new parameters, in particular,
 	// the new block size.
-	bli_pool_init
+	r_val = bli_pool_init
 	(
 	  num_blocks_new,
 	  block_ptrs_len_new,
@@ -230,15 +254,22 @@ void bli_pool_reinit
 	  free_fp,
 	  pool
 	);
+
+	// If the previous function failed, return the error code immediately.
+	bli_check_return_if_failure( r_val );
+
+	return BLIS_SUCCESS;
 }
 
-void bli_pool_checkout_block
+err_t bli_pool_checkout_block
      (
        siz_t   req_size,
        pblk_t* block,
        pool_t* pool
      )
 {
+	err_t r_val;
+
 	// If the requested block size is smaller than what the pool was
 	// initialized with, reinitialize the pool to contain blocks of the
 	// requested size.
@@ -256,7 +287,7 @@ void bli_pool_checkout_block
 		fflush( stdout );
 		#endif
 
-		bli_pool_reinit
+		r_val = bli_pool_reinit
 		(
 		  num_blocks_new,
 		  block_ptrs_len_new,
@@ -265,6 +296,9 @@ void bli_pool_checkout_block
 		  offset_size_new,
 		  pool
 		);
+
+		// If the previous function failed, return the error code immediately.
+		bli_check_return_if_failure( r_val );
 	}
 
 	// If the pool is exhausted, add a block.
@@ -276,7 +310,10 @@ void bli_pool_checkout_block
 		fflush( stdout );
 		#endif
 
-		bli_pool_grow( 1, pool );
+		r_val = bli_pool_grow( 1, pool );
+
+		// If the previous function failed, return the error code immediately.
+		bli_check_return_if_failure( r_val );
 	}
 
 	// At this point, at least one block is guaranteed to be available.
@@ -305,9 +342,11 @@ void bli_pool_checkout_block
 
 	// Increment the pool's top_index.
 	bli_pool_set_top_index( top_index + 1, pool );
+
+	return BLIS_SUCCESS;
 }
 
-void bli_pool_checkin_block
+err_t bli_pool_checkin_block
      (
        pblk_t* block,
        pool_t* pool
@@ -326,7 +365,8 @@ void bli_pool_checkin_block
 		free_ft free_fp = bli_pool_free_fp( pool );
 
 		bli_pool_free_block( offset_size, free_fp, block );
-		return;
+
+		return BLIS_SUCCESS;
 	}
 
 	// Query the block_ptrs array.
@@ -349,9 +389,11 @@ void bli_pool_checkin_block
 
 	// Decrement the pool's top_index.
 	bli_pool_set_top_index( top_index - 1, pool );
+
+	return BLIS_SUCCESS;
 }
 
-void bli_pool_grow
+err_t bli_pool_grow
      (
        siz_t   num_blocks_add,
        pool_t* pool
@@ -360,7 +402,7 @@ void bli_pool_grow
 	err_t r_val;
 
 	// If the requested increase is zero, return early.
-	if ( num_blocks_add == 0 ) return;
+	if ( num_blocks_add == 0 ) return BLIS_SUCCESS;
 
 	// Query the allocated length of the block_ptrs array and also the
 	// total number of blocks currently allocated.
@@ -396,12 +438,15 @@ void bli_pool_grow
 		// Query the current block_ptrs array.
 		pblk_t* block_ptrs_cur = bli_pool_block_ptrs( pool );
 
-		// Allocate a new block_ptrs array.
-		// FGVZ: Do we want to call malloc_fp() for internal data structures as
-		// well as pool blocks? If so, don't forget to s/bli_free_intl/free_fp/g.
+		// Allocate the block_ptrs array. We use calloc() so that all elements are
+		// initialized to zero, or NULL. This allows us to deallocate only those
+		// blocks that were allocated in the event of a failure.
 		pblk_t* block_ptrs_new
 		=
-		bli_malloc_intl( block_ptrs_len_new * sizeof( pblk_t ), &r_val );
+		bli_calloc_intl( block_ptrs_len_new * sizeof( pblk_t ), &r_val );
+
+		// If the previous function failed, return the error code immediately.
+		bli_check_return_if_failure( r_val );
 
 		// Query the top_index of the pool.
 		const siz_t top_index = bli_pool_top_index( pool );
@@ -449,10 +494,12 @@ void bli_pool_grow
 	fflush( stdout );
 	#endif
 
+	dim_t i;
+
 	// Allocate the requested additional blocks in the resized array.
-	for ( dim_t i = num_blocks_cur; i < num_blocks_new; ++i )
+	for ( i = num_blocks_cur; i < num_blocks_new; ++i )
 	{
-		bli_pool_alloc_block
+		r_val = bli_pool_alloc_block
 		(
 		  block_size,
 		  align_size,
@@ -460,22 +507,28 @@ void bli_pool_grow
 		  malloc_fp,
 		  &(block_ptrs[i])
 		);
+
+		// If the previous function failed, update the number of blocks in the
+		// pool to reflect the number that were added and then return the error.
+		bli_check_callthen_return_if_failure( bli_pool_set_num_blocks( i, pool ), r_val );
 	}
 
 	// Update the pool_t struct with the new number of allocated blocks.
 	// Notice that top_index remains unchanged, as do the block_size and
 	// align_size fields.
 	bli_pool_set_num_blocks( num_blocks_new, pool );
+
+	return BLIS_SUCCESS;
 }
 
-void bli_pool_shrink
+err_t bli_pool_shrink
      (
        siz_t   num_blocks_sub,
        pool_t* pool
      )
 {
 	// If the requested decrease is zero, return early.
-	if ( num_blocks_sub == 0 ) return;
+	if ( num_blocks_sub == 0 ) return BLIS_SUCCESS;
 
 	// Query the total number of blocks currently allocated.
 	const siz_t num_blocks = bli_pool_num_blocks( pool );
@@ -516,9 +569,11 @@ void bli_pool_shrink
 	// Note that after shrinking the pool, num_blocks < block_ptrs_len.
 	// This means the pool can grow again by num_blocks_sub before
 	// a re-allocation of block_ptrs is triggered.
+
+	return BLIS_SUCCESS;
 }
 
-void bli_pool_alloc_block
+err_t bli_pool_alloc_block
      (
        siz_t     block_size,
        siz_t     align_size,
@@ -540,9 +595,18 @@ void bli_pool_alloc_block
 	// be recovered when it's time to free the block. Note that we have to
 	// add offset_size to the number of bytes requested since we will skip
 	// that many bytes at the beginning of the allocated memory.
+	// NOTE: What is the purpose of the offset_size parameter? It was first
+	// found to be useful by Nicholai Tukanov when optimizing microkernel
+	// performance on the POWER9 microarchitecture. The subconfiguration
+	// ('power9') for use on that hardware uses unconventional offset values
+	// for the pool of packing blocks for A and B. (See bli_pba.c for how
+	// those pools are created.)
 	void* buf
 	=
 	bli_fmalloc_align( malloc_fp, block_size + offset_size, align_size, &r_val );
+
+	// If the previous function failed, return the error code immediately.
+	bli_check_return_if_failure( r_val );
 
 #if 0
 	// NOTE: This code is disabled because it is not needed, since
@@ -573,33 +637,40 @@ void bli_pool_alloc_block
 	// Save the results in the pblk_t structure.
 	bli_pblk_set_buf( buf, block );
 	bli_pblk_set_block_size( block_size, block );
+
+	return BLIS_SUCCESS;
 }
 
-void bli_pool_free_block
+err_t bli_pool_free_block
      (
        siz_t            offset_size,
        free_ft          free_fp,
        pblk_t* block
      )
 {
+	// Extract the pblk_t buffer, which is the aligned address returned from
+	// bli_fmalloc_align() when the block was allocated.
+	void* buf = bli_pblk_buf( block );
+
+	// Return early if the pointer inside of the pblk_t is NULL.
+	if ( buf == NULL ) return BLIS_SUCCESS;
+
+	// Undo the pointer advancement by offset_size bytes performed previously
+	// by bli_pool_alloc_block().
+	buf = ( void* )( ( char* )buf - offset_size );
+
 	#ifdef BLIS_ENABLE_MEM_TRACING
 	printf( "bli_pool_free_block(): calling ffree_align(): size %d.\n",
 	        ( int )bli_pblk_block_size( block ) );
 	fflush( stdout );
 	#endif
 
-	// Extract the pblk_t buffer, which is the aligned address returned from
-	// bli_fmalloc_align() when the block was allocated.
-	void* buf = bli_pblk_buf( block );
-
-	// Undo the pointer advancement by offset_size bytes performed previously
-	// by bli_pool_alloc_block().
-	buf = ( void* )( ( char* )buf - offset_size );
-
 	// Free the block via the bli_ffree_align() wrapper, which recovers the
 	// original pointer that was returned by the pool's malloc() function when
 	// the block was allocated.
 	bli_ffree_align( free_fp, buf );
+
+	return BLIS_SUCCESS;
 }
 
 void bli_pool_print
@@ -640,5 +711,22 @@ void bli_pblk_print
 
 	printf( "pblk struct ---------------\n" );
 	printf( "  block address (aligned): %p\n", buf );
+}
+
+void bli_pool_clear
+     (
+       pool_t* pool
+     )
+{
+	// Clear the contents of the pool_t struct.
+	bli_pool_set_block_ptrs( NULL, pool );
+	bli_pool_set_block_ptrs_len( 0, pool );
+	bli_pool_set_top_index( 0, pool );
+	bli_pool_set_num_blocks( 0, pool );
+	bli_pool_set_block_size( 0, pool );
+	bli_pool_set_align_size( 0, pool );
+	bli_pool_set_offset_size( 0, pool );
+	bli_pool_set_malloc_fp( NULL, pool );
+	bli_pool_set_free_fp( NULL, pool );
 }
 

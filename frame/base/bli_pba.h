@@ -119,18 +119,19 @@ BLIS_INLINE void bli_pba_unlock( pba_t* pba )
 
 // -----------------------------------------------------------------------------
 
-BLIS_EXPORT_BLIS pba_t* bli_pba_query( void );
+bool bli_pba_is_init( void );
+void bli_pba_mark_init( void );
+void bli_pba_mark_uninit( void );
 
-void bli_pba_init
-     (
-       const cntx_t* cntx
-     );
-void bli_pba_finalize
-     (
-       void
-     );
+pba_t* bli_pba_query( void );
+BLIS_EXPORT_BLIS void bli_pba_rntm_set_pba( rntm_t* rntm );
 
-void bli_pba_acquire_m
+// -----------------------------------------------------------------------------
+
+err_t bli_pba_init( void );
+err_t bli_pba_finalize( void );
+
+err_t bli_pba_acquire_m
      (
        rntm_t*   rntm,
        siz_t     req_size,
@@ -144,16 +145,6 @@ void bli_pba_release
        mem_t*  mem
      );
 
-BLIS_INLINE void bli_pba_rntm_set_pba
-     (
-       rntm_t* rntm
-     )
-{
-	pba_t* pba = bli_pba_query();
-
-	bli_rntm_set_pba( pba, rntm );
-}
-
 siz_t bli_pba_pool_size
      (
        const pba_t*    pba,
@@ -162,12 +153,11 @@ siz_t bli_pba_pool_size
 
 // ----------------------------------------------------------------------------
 
-void bli_pba_init_pools
+err_t bli_pba_init_pools
      (
-       const cntx_t* cntx,
-             pba_t*  pba
+       pba_t* pba
      );
-void bli_pba_finalize_pools
+err_t bli_pba_finalize_pools
      (
        pba_t* pba
      );

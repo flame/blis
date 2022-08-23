@@ -215,7 +215,7 @@ BLIS_INLINE void bli_pool_set_top_index( siz_t top_index, pool_t* pool ) \
 
 // -----------------------------------------------------------------------------
 
-void bli_pool_init
+err_t bli_pool_init
      (
        siz_t     num_blocks,
        siz_t     block_ptrs_len,
@@ -226,11 +226,11 @@ void bli_pool_init
        free_ft   free_fp,
        pool_t*   pool
      );
-void bli_pool_finalize
+err_t bli_pool_finalize
      (
        pool_t* pool
      );
-void bli_pool_reinit
+err_t bli_pool_reinit
      (
        siz_t   num_blocks_new,
        siz_t   block_ptrs_len_new,
@@ -240,30 +240,30 @@ void bli_pool_reinit
        pool_t* pool
      );
 
-void bli_pool_checkout_block
+err_t bli_pool_checkout_block
      (
        siz_t   req_size,
        pblk_t* block,
        pool_t* pool
      );
-void bli_pool_checkin_block
+err_t bli_pool_checkin_block
      (
        pblk_t* block,
        pool_t* pool
      );
 
-void bli_pool_grow
+err_t bli_pool_grow
      (
        siz_t   num_blocks_add,
        pool_t* pool
      );
-void bli_pool_shrink
+err_t bli_pool_shrink
      (
        siz_t   num_blocks_sub,
        pool_t* pool
      );
 
-void bli_pool_alloc_block
+err_t bli_pool_alloc_block
      (
        siz_t     block_size,
        siz_t     align_size,
@@ -271,7 +271,7 @@ void bli_pool_alloc_block
        malloc_ft malloc_fp,
        pblk_t*   block
      );
-void bli_pool_free_block
+err_t bli_pool_free_block
      (
        siz_t   offset_size,
        free_ft free_fp,
@@ -287,5 +287,9 @@ void bli_pblk_print
        const pblk_t* pblk
      );
 
+void bli_pool_clear
+     (
+       pool_t* pool
+     );
 #endif
 

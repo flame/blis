@@ -162,29 +162,112 @@ gint_t bli_info_get_enable_sandbox( void )
 
 // -- Level-3 kernel definitions --
 
-const char* bli_info_get_gemm_ukr_impl_string( ind_t method, num_t dt )
-{ bli_init_once(); return bli_gks_l3_ukr_impl_string( BLIS_GEMM_UKR,       method, dt ); }
-const char* bli_info_get_gemmtrsm_l_ukr_impl_string( ind_t method, num_t dt )
-{ bli_init_once(); return bli_gks_l3_ukr_impl_string( BLIS_GEMMTRSM_L_UKR, method, dt ); }
-const char* bli_info_get_gemmtrsm_u_ukr_impl_string( ind_t method, num_t dt )
-{ bli_init_once(); return bli_gks_l3_ukr_impl_string( BLIS_GEMMTRSM_U_UKR, method, dt ); }
-const char* bli_info_get_trsm_l_ukr_impl_string( ind_t method, num_t dt )
-{ bli_init_once(); return bli_gks_l3_ukr_impl_string( BLIS_TRSM_L_UKR,     method, dt ); }
-const char* bli_info_get_trsm_u_ukr_impl_string( ind_t method, num_t dt )
-{ bli_init_once(); return bli_gks_l3_ukr_impl_string( BLIS_TRSM_U_UKR,     method, dt ); }
+err_t bli_info_get_gemm_ukr_impl_string( ind_t method, num_t dt, const char** str )
+{
+	BLIS_INIT_ONCE();
+	err_t r_val = bli_gks_l3_ukr_impl_string( BLIS_GEMM_UKR, method, dt, str );
+	bli_check_return_if_failure( r_val );
+	return BLIS_SUCCESS;
+}
+err_t bli_info_get_gemmtrsm_l_ukr_impl_string( ind_t method, num_t dt, const char** str )
+{
+	BLIS_INIT_ONCE();
+	err_t r_val = bli_gks_l3_ukr_impl_string( BLIS_GEMMTRSM_L_UKR, method, dt, str );
+	bli_check_return_if_failure( r_val );
+	return BLIS_SUCCESS;
+}
+err_t bli_info_get_gemmtrsm_u_ukr_impl_string( ind_t method, num_t dt, const char** str )
+{
+	BLIS_INIT_ONCE();
+	err_t r_val = bli_gks_l3_ukr_impl_string( BLIS_GEMMTRSM_U_UKR, method, dt, str );
+	bli_check_return_if_failure( r_val );
+	return BLIS_SUCCESS;
+}
+err_t bli_info_get_trsm_l_ukr_impl_string( ind_t method, num_t dt, const char** str )
+{
+	BLIS_INIT_ONCE();
+	err_t r_val = bli_gks_l3_ukr_impl_string( BLIS_TRSM_L_UKR, method, dt, str );
+	bli_check_return_if_failure( r_val );
+	return BLIS_SUCCESS;
+}
+err_t bli_info_get_trsm_u_ukr_impl_string( ind_t method, num_t dt, const char** str )
+{
+	BLIS_INIT_ONCE();
+	err_t r_val = bli_gks_l3_ukr_impl_string( BLIS_TRSM_U_UKR, method, dt, str );
+	bli_check_return_if_failure( r_val );
+	return BLIS_SUCCESS;
+}
 
 
 // -- BLIS implementation query (level-3) --------------------------------------
 
-const char* bli_info_get_gemm_impl_string( num_t dt )  { return bli_ind_oper_get_avail_impl_string( BLIS_GEMM,  dt ); }
-const char* bli_info_get_gemmt_impl_string( num_t dt ) { return bli_ind_oper_get_avail_impl_string( BLIS_GEMMT, dt ); }
-const char* bli_info_get_hemm_impl_string( num_t dt )  { return bli_ind_oper_get_avail_impl_string( BLIS_HEMM,  dt ); }
-const char* bli_info_get_herk_impl_string( num_t dt )  { return bli_ind_oper_get_avail_impl_string( BLIS_GEMMT, dt ); }
-const char* bli_info_get_her2k_impl_string( num_t dt ) { return bli_ind_oper_get_avail_impl_string( BLIS_GEMMT, dt ); }
-const char* bli_info_get_symm_impl_string( num_t dt )  { return bli_ind_oper_get_avail_impl_string( BLIS_SYMM,  dt ); }
-const char* bli_info_get_syrk_impl_string( num_t dt )  { return bli_ind_oper_get_avail_impl_string( BLIS_GEMMT, dt ); }
-const char* bli_info_get_syr2k_impl_string( num_t dt ) { return bli_ind_oper_get_avail_impl_string( BLIS_GEMMT, dt ); }
-const char* bli_info_get_trmm_impl_string( num_t dt )  { return bli_ind_oper_get_avail_impl_string( BLIS_TRMM,  dt ); }
-const char* bli_info_get_trmm3_impl_string( num_t dt ) { return bli_ind_oper_get_avail_impl_string( BLIS_TRMM3, dt ); }
-const char* bli_info_get_trsm_impl_string( num_t dt )  { return bli_ind_oper_get_avail_impl_string( BLIS_TRSM,  dt ); }
-
+err_t bli_info_get_gemm_impl_string( num_t dt, const char** str )
+{
+	BLIS_INIT_ONCE();
+	err_t r_val = bli_ind_oper_get_avail_impl_string( BLIS_GEMM, dt, str );
+	bli_check_return_if_failure( r_val );
+	return BLIS_SUCCESS;
+}
+err_t bli_info_get_hemm_impl_string( num_t dt, const char** str )
+{
+	BLIS_INIT_ONCE();
+	err_t r_val = bli_ind_oper_get_avail_impl_string( BLIS_HEMM, dt, str );
+	bli_check_return_if_failure( r_val );
+	return BLIS_SUCCESS;
+}
+err_t bli_info_get_herk_impl_string( num_t dt, const char** str )
+{
+	BLIS_INIT_ONCE();
+	err_t r_val = bli_ind_oper_get_avail_impl_string( BLIS_HERK, dt, str );
+	bli_check_return_if_failure( r_val );
+	return BLIS_SUCCESS;
+}
+err_t bli_info_get_her2k_impl_string( num_t dt, const char** str )
+{
+	BLIS_INIT_ONCE();
+	err_t r_val = bli_ind_oper_get_avail_impl_string( BLIS_HER2K, dt, str );
+	bli_check_return_if_failure( r_val );
+	return BLIS_SUCCESS;
+}
+err_t bli_info_get_symm_impl_string( num_t dt, const char** str )
+{
+	BLIS_INIT_ONCE();
+	err_t r_val = bli_ind_oper_get_avail_impl_string( BLIS_SYMM, dt, str );
+	bli_check_return_if_failure( r_val );
+	return BLIS_SUCCESS;
+}
+err_t bli_info_get_syrk_impl_string( num_t dt, const char** str )
+{
+	BLIS_INIT_ONCE();
+	err_t r_val = bli_ind_oper_get_avail_impl_string( BLIS_SYRK, dt, str );
+	bli_check_return_if_failure( r_val );
+	return BLIS_SUCCESS;
+}
+err_t bli_info_get_syr2k_impl_string( num_t dt, const char** str )
+{
+	BLIS_INIT_ONCE();
+	err_t r_val = bli_ind_oper_get_avail_impl_string( BLIS_SYR2K, dt, str );
+	bli_check_return_if_failure( r_val );
+	return BLIS_SUCCESS;
+}
+err_t bli_info_get_trmm_impl_string( num_t dt, const char** str )
+{
+	BLIS_INIT_ONCE();
+	err_t r_val = bli_ind_oper_get_avail_impl_string( BLIS_TRMM, dt, str );
+	bli_check_return_if_failure( r_val );
+	return BLIS_SUCCESS;
+}
+err_t bli_info_get_trmm3_impl_string( num_t dt, const char** str )
+{
+	BLIS_INIT_ONCE();
+	err_t r_val = bli_ind_oper_get_avail_impl_string( BLIS_TRMM3, dt, str );
+	bli_check_return_if_failure( r_val );
+	return BLIS_SUCCESS;
+}
+err_t bli_info_get_trsm_impl_string( num_t dt, const char** str )
+{
+	BLIS_INIT_ONCE();
+	err_t r_val = bli_ind_oper_get_avail_impl_string( BLIS_TRSM, dt, str );
+	bli_check_return_if_failure( r_val );
+	return BLIS_SUCCESS;
+}

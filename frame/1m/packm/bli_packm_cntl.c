@@ -57,7 +57,7 @@ BLIS_EXPORT_BLIS cntl_t* bli_packm_cntl_create_node
 	#endif
 
 	// Allocate a packm_params_t struct.
-	params = bli_sba_acquire( rntm, sizeof( packm_params_t ) );
+	bli_sba_acquire( rntm, sizeof( packm_params_t ), ( void** )&params );
 
 	// Initialize the packm_params_t struct.
 	params->size              = sizeof( packm_params_t );

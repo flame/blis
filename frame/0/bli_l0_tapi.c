@@ -41,19 +41,21 @@
 #undef  GENTFUNC
 #define GENTFUNC( ctype, ch, opname, kername ) \
 \
-void PASTEMAC(ch,opname) \
+err_t PASTEMAC(ch,opname) \
      ( \
              conj_t conjchi, \
        const ctype* chi, \
              ctype* psi  \
      ) \
 { \
-	bli_init_once(); \
+	BLIS_INIT_ONCE(); \
 \
 	ctype chi_conj; \
 \
 	PASTEMAC(ch,copycjs)( conjchi, *chi, chi_conj ); \
 	PASTEMAC(ch,kername)( chi_conj, *psi ); \
+\
+	return BLIS_SUCCESS; \
 }
 
 INSERT_GENTFUNC_BASIC( addsc, adds )
@@ -64,19 +66,21 @@ INSERT_GENTFUNC_BASIC( subsc, subs )
 #undef  GENTFUNC
 #define GENTFUNC( ctype, ch, opname, kername ) \
 \
-void PASTEMAC(ch,opname) \
+err_t PASTEMAC(ch,opname) \
      ( \
        conj_t conjchi, \
        ctype* chi  \
      ) \
 { \
-	bli_init_once(); \
+	BLIS_INIT_ONCE(); \
 \
 	ctype chi_conj; \
 \
 	PASTEMAC(ch,copycjs)( conjchi, *chi, chi_conj ); \
 	PASTEMAC(ch,kername)( chi_conj ); \
 	PASTEMAC(ch,copys)( chi_conj, *chi ); \
+\
+	return BLIS_SUCCESS; \
 }
 
 INSERT_GENTFUNC_BASIC( invertsc, inverts )
@@ -85,14 +89,14 @@ INSERT_GENTFUNC_BASIC( invertsc, inverts )
 #undef  GENTFUNC
 #define GENTFUNC( ctype, ch, opname, kername ) \
 \
-void PASTEMAC(ch,opname) \
+err_t PASTEMAC(ch,opname) \
      ( \
              conj_t conjchi, \
        const ctype* chi, \
              ctype* psi  \
      ) \
 { \
-	bli_init_once(); \
+	BLIS_INIT_ONCE(); \
 \
 	if ( PASTEMAC(ch,eq0)( *chi ) ) \
 	{ \
@@ -106,6 +110,8 @@ void PASTEMAC(ch,opname) \
 		PASTEMAC(ch,copycjs)( conjchi, *chi, chi_conj ); \
 		PASTEMAC(ch,kername)( chi_conj, *psi ); \
 	} \
+\
+	return BLIS_SUCCESS; \
 }
 
 INSERT_GENTFUNC_BASIC( mulsc, scals )
@@ -114,13 +120,13 @@ INSERT_GENTFUNC_BASIC( mulsc, scals )
 #undef  GENTFUNCR
 #define GENTFUNCR( ctype, ctype_r, ch, chr, opname ) \
 \
-void PASTEMAC(ch,opname) \
+err_t PASTEMAC(ch,opname) \
      ( \
        const ctype*   chi, \
              ctype_r* absq  \
      ) \
 { \
-	bli_init_once(); \
+	BLIS_INIT_ONCE(); \
 \
 	ctype_r chi_r; \
 	ctype_r chi_i; \
@@ -135,6 +141,8 @@ void PASTEMAC(ch,opname) \
 	PASTEMAC(ch,absq2ris)( chi_r, chi_i, *absq, absq_i ); \
 \
 	( void )chi_i; \
+\
+	return BLIS_SUCCESS; \
 }
 
 INSERT_GENTFUNCR_BASIC0( absqsc )
@@ -143,16 +151,18 @@ INSERT_GENTFUNCR_BASIC0( absqsc )
 #undef  GENTFUNCR
 #define GENTFUNCR( ctype, ctype_r, ch, chr, opname ) \
 \
-void PASTEMAC(ch,opname) \
+err_t PASTEMAC(ch,opname) \
      ( \
        const ctype*   chi, \
              ctype_r* norm  \
      ) \
 { \
-	bli_init_once(); \
+	BLIS_INIT_ONCE(); \
 \
 	/* norm = sqrt( chi_r * chi_r + chi_i * chi_i ); */ \
 	PASTEMAC2(ch,chr,abval2s)( *chi, *norm ); \
+\
+	return BLIS_SUCCESS; \
 }
 
 INSERT_GENTFUNCR_BASIC0( normfsc )
@@ -161,16 +171,18 @@ INSERT_GENTFUNCR_BASIC0( normfsc )
 #undef  GENTFUNC
 #define GENTFUNC( ctype, ch, opname ) \
 \
-void PASTEMAC(ch,opname) \
+err_t PASTEMAC(ch,opname) \
      ( \
        const ctype* chi, \
              ctype* psi  \
      ) \
 { \
-	bli_init_once(); \
+	BLIS_INIT_ONCE(); \
 \
 	/* NOTE: sqrtsc/sqrt2s differs from normfsc/abval2s in the complex domain. */ \
 	PASTEMAC(ch,sqrt2s)( *chi, *psi ); \
+\
+	return BLIS_SUCCESS; \
 }
 
 INSERT_GENTFUNC_BASIC0( sqrtsc )
@@ -179,16 +191,18 @@ INSERT_GENTFUNC_BASIC0( sqrtsc )
 #undef  GENTFUNC
 #define GENTFUNC( ctype, ch, opname ) \
 \
-void PASTEMAC(ch,opname) \
+err_t PASTEMAC(ch,opname) \
      ( \
        const ctype*  chi, \
              double* zeta_r, \
              double* zeta_i  \
      ) \
 { \
-	bli_init_once(); \
+	BLIS_INIT_ONCE(); \
 \
 	PASTEMAC2(ch,d,gets)( *chi, *zeta_r, *zeta_i ); \
+\
+	return BLIS_SUCCESS; \
 }
 
 INSERT_GENTFUNC_BASIC0( getsc )
@@ -197,16 +211,18 @@ INSERT_GENTFUNC_BASIC0( getsc )
 #undef  GENTFUNC
 #define GENTFUNC( ctype, ch, opname ) \
 \
-void PASTEMAC(ch,opname) \
+err_t PASTEMAC(ch,opname) \
      ( \
        double zeta_r, \
        double zeta_i, \
        ctype* chi  \
      ) \
 { \
-	bli_init_once(); \
+	BLIS_INIT_ONCE(); \
 \
 	PASTEMAC2(d,ch,sets)( zeta_r, zeta_i, *chi ); \
+\
+	return BLIS_SUCCESS; \
 }
 
 INSERT_GENTFUNC_BASIC0( setsc )
@@ -215,16 +231,18 @@ INSERT_GENTFUNC_BASIC0( setsc )
 #undef  GENTFUNCR
 #define GENTFUNCR( ctype, ctype_r, ch, chr, opname ) \
 \
-void PASTEMAC(ch,opname) \
+err_t PASTEMAC(ch,opname) \
      ( \
        const ctype*   chi, \
              ctype_r* zeta_r, \
              ctype_r* zeta_i  \
      ) \
 { \
-	bli_init_once(); \
+	BLIS_INIT_ONCE(); \
 \
 	PASTEMAC2(ch,chr,gets)( *chi, *zeta_r, *zeta_i ); \
+\
+	return BLIS_SUCCESS; \
 }
 
 INSERT_GENTFUNCR_BASIC0( unzipsc )
@@ -233,43 +251,49 @@ INSERT_GENTFUNCR_BASIC0( unzipsc )
 #undef  GENTFUNCR
 #define GENTFUNCR( ctype, ctype_r, ch, chr, opname ) \
 \
-void PASTEMAC(ch,opname) \
+err_t PASTEMAC(ch,opname) \
      ( \
        const ctype_r* zeta_r, \
        const ctype_r* zeta_i, \
              ctype*   chi  \
      ) \
 { \
-	bli_init_once(); \
+	BLIS_INIT_ONCE(); \
 \
 	PASTEMAC2(chr,ch,sets)( *zeta_r, *zeta_i, *chi ); \
+\
+	return BLIS_SUCCESS; \
 }
 
 INSERT_GENTFUNCR_BASIC0( zipsc )
 
 // -----------------------------------------------------------------------------
 
-void bli_igetsc
+err_t bli_igetsc
      (
        const dim_t*  chi,
              double* zeta_r,
              double* zeta_i
      )
 {
-	bli_init_once();
+	BLIS_INIT_ONCE();
 
 	PASTEMAC2(i,d,gets)( *chi, *zeta_r, *zeta_i );
+
+	return BLIS_SUCCESS;
 }
 
-void bli_isetsc
+err_t bli_isetsc
      (
        double zeta_r,
        double zeta_i,
        dim_t* chi
      )
 {
-	bli_init_once();
+	BLIS_INIT_ONCE();
 
 	PASTEMAC2(d,i,sets)( zeta_r, zeta_i, *chi );
+
+	return BLIS_SUCCESS;
 }
 

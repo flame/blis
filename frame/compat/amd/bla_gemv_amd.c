@@ -144,7 +144,8 @@ void PASTEF77(ch,blasname) \
 	/* Obtain a valid context from the gks. This is needed because these
 	   implementations of ?gemv_() skip calling gemv_ex() and instead
 	   call the unblocked fused variants directly. */ \
-	cntx_t* cntx = bli_gks_query_cntx(); \
+	const cntx_t* cntx; \
+	bli_gks_query_cntx( &cntx ); \
 \
 	/* Invoke the variant chosen above, which loops over a level-1v or
 	   level-1f kernel to implement the current operation. */ \

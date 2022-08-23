@@ -58,8 +58,12 @@
 #include "bli_l3_sup_decor.h"
 
 // Initialization-related prototypes.
-void bli_thread_init( void );
-void bli_thread_finalize( void );
+bool bli_thread_is_init( void );
+void bli_thread_mark_init( void );
+void bli_thread_mark_uninit( void );
+
+err_t bli_thread_init( void );
+err_t bli_thread_finalize( void );
 
 // Thread range-related prototypes.
 
@@ -202,8 +206,8 @@ BLIS_EXPORT_BLIS dim_t bli_thread_get_jr_nt( void );
 BLIS_EXPORT_BLIS dim_t bli_thread_get_ir_nt( void );
 BLIS_EXPORT_BLIS dim_t bli_thread_get_num_threads( void );
 
-BLIS_EXPORT_BLIS void  bli_thread_set_ways( dim_t jc, dim_t pc, dim_t ic, dim_t jr, dim_t ir );
-BLIS_EXPORT_BLIS void  bli_thread_set_num_threads( dim_t value );
+BLIS_EXPORT_BLIS err_t bli_thread_set_ways( dim_t jc, dim_t pc, dim_t ic, dim_t jr, dim_t ir );
+BLIS_EXPORT_BLIS err_t bli_thread_set_num_threads( dim_t value );
 
 void  bli_thread_init_rntm_from_env( rntm_t* rntm );
 

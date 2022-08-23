@@ -85,18 +85,18 @@ BLIS_INLINE void bli_array_set_elem_size( siz_t elem_size, array_t* array ) \
 
 // -----------------------------------------------------------------------------
 
-void bli_array_init
+err_t bli_array_init
      (
        siz_t    num_elem,
        siz_t    elem_size,
        array_t* array
      );
-void bli_array_resize
+err_t bli_array_resize
      (
        siz_t    num_elem_new,
        array_t* array
      );
-void bli_array_finalize
+err_t bli_array_finalize
      (
        array_t* array
      );
@@ -110,6 +110,11 @@ void bli_array_set_elem
      (
        void*    elem,
        siz_t    index,
+       array_t* array
+     );
+
+void bli_array_clear
+     (
        array_t* array
      );
 

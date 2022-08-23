@@ -40,13 +40,45 @@ static const char* bli_ind_impl_str[BLIS_NUM_IND_METHODS] =
 /* nat  */ "native",
 };
 
+// A boolean that tracks whether bli_ind_init() has completed successfully.
+static bool ind_is_init = FALSE;
+
 // -----------------------------------------------------------------------------
 
-void bli_ind_init( void )
+bool bli_ind_is_init( void )
 {
+	return ind_is_init;
+}
+
+void bli_ind_mark_init( void )
+{
+	ind_is_init = TRUE;
+}
+
+void bli_ind_mark_uninit( void )
+{
+	ind_is_init = FALSE;
+}
+
+// -----------------------------------------------------------------------------
+
+err_t bli_ind_init( void )
+{
+	const cntx_t* cntx;
+	err_t         r_val;
+
+	// NOTE: We assume this function is only called by one thread.
+
+	// Sanity check: Return early if the API is already initialized.
+	if ( bli_ind_is_init() ) return BLIS_SUCCESS;
+
 	// NOTE: Instead of calling bli_gks_query_cntx(), we call
 	// bli_gks_query_cntx_noinit() to avoid the call to bli_init_once().
-	const cntx_t* cntx = bli_gks_query_cntx_noinit();
+	r_val = bli_gks_query_cntx_noinit( &cntx );
+	bli_check_return_if_failure( r_val );
+
+	bool s_is_ref, c_is_ref,
+	     d_is_ref, z_is_ref;
 
 	// For each precision, enable the default induced method (1m) if both of
 	// the following conditions are met:
@@ -55,17 +87,38 @@ void bli_ind_init( void )
 	// The second condition means that BLIS will not bother to use an induced
 	// method if both the real and complex domain kernels are reference.
 
-	bool s_is_ref = bli_gks_cntx_l3_nat_ukr_is_ref( BLIS_FLOAT,    BLIS_GEMM_UKR, cntx );
-	bool d_is_ref = bli_gks_cntx_l3_nat_ukr_is_ref( BLIS_DOUBLE,   BLIS_GEMM_UKR, cntx );
-	bool c_is_ref = bli_gks_cntx_l3_nat_ukr_is_ref( BLIS_SCOMPLEX, BLIS_GEMM_UKR, cntx );
-	bool z_is_ref = bli_gks_cntx_l3_nat_ukr_is_ref( BLIS_DCOMPLEX, BLIS_GEMM_UKR, cntx );
+	r_val = bli_gks_cntx_l3_nat_ukr_is_ref( BLIS_FLOAT,    BLIS_GEMM_UKR, cntx, &s_is_ref );
+	bli_check_return_if_failure( r_val );
+
+	r_val = bli_gks_cntx_l3_nat_ukr_is_ref( BLIS_DOUBLE,   BLIS_GEMM_UKR, cntx, &d_is_ref );
+	bli_check_return_if_failure( r_val );
+
+	r_val = bli_gks_cntx_l3_nat_ukr_is_ref( BLIS_SCOMPLEX, BLIS_GEMM_UKR, cntx, &c_is_ref );
+	bli_check_return_if_failure( r_val );
+
+	r_val = bli_gks_cntx_l3_nat_ukr_is_ref( BLIS_DCOMPLEX, BLIS_GEMM_UKR, cntx, &z_is_ref );
+	bli_check_return_if_failure( r_val );
 
 	if ( c_is_ref && !s_is_ref ) bli_ind_enable_dt( BLIS_1M, BLIS_SCOMPLEX );
 	if ( z_is_ref && !d_is_ref ) bli_ind_enable_dt( BLIS_1M, BLIS_DCOMPLEX );
+
+	// Mark the API as initialized.
+	bli_ind_mark_init();
+
+	return BLIS_SUCCESS;
 }
 
-void bli_ind_finalize( void )
+err_t bli_ind_finalize( void )
 {
+	// NOTE: We assume this function is only called by one thread.
+
+	// Sanity check: Return early if the API is uninitialized.
+	if ( !bli_ind_is_init() ) return BLIS_SUCCESS;
+
+	// Mark the API as uninitialized.
+	bli_ind_mark_uninit();
+
+	return BLIS_SUCCESS;
 }
 
 // -----------------------------------------------------------------------------
@@ -176,11 +229,17 @@ ind_t bli_ind_oper_find_avail( opid_t oper, num_t dt )
 	return method;
 }
 
-const char* bli_ind_oper_get_avail_impl_string( opid_t oper, num_t dt )
+// -----------------------------------------------------------------------------
+
+err_t bli_ind_oper_get_avail_impl_string( opid_t oper, num_t dt, const char** str )
 {
+	BLIS_INIT_ONCE();
+
 	ind_t method = bli_ind_oper_find_avail( oper, dt );
 
-	return bli_ind_get_impl_string( method );
+	*str = bli_ind_get_impl_string( method );
+
+	return BLIS_SUCCESS;
 }
 
 // -----------------------------------------------------------------------------
@@ -192,10 +251,9 @@ const char* bli_ind_get_impl_string( ind_t method )
 
 num_t bli_ind_map_cdt_to_index( num_t dt )
 {
-	// A non-complex datatype should never be passed in.
-	if ( !bli_is_complex( dt ) ) bli_abort();
-
-	// Map the complex datatype to a zero-based index.
+	// Map the complex datatype to a zero-based index that matches up with
+	// the expectations of the induced-method-per-operation state array in
+	// bli_l3_ind.c.
 	if         ( bli_is_scomplex( dt ) )    return 0;
 	else /* if ( bli_is_dcomplex( dt ) ) */ return 1;
 }

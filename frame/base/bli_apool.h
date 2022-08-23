@@ -92,19 +92,30 @@ BLIS_INLINE void bli_apool_set_def_array_len( siz_t def_array_len, apool_t* pool
 
 // -----------------------------------------------------------------------------
 
-void bli_apool_init
+err_t bli_apool_init
      (
        apool_t* apool
      );
-void bli_apool_finalize
+err_t bli_apool_finalize
      (
        apool_t* apool
      );
 
-array_t* bli_apool_checkout_array
+err_t bli_apool_alloc_block
      (
-       siz_t    n_threads,
-       apool_t* apool
+       siz_t     num_elem,
+       array_t** array
+     );
+void bli_apool_free_block
+     (
+       array_t* array
+     );
+
+err_t bli_apool_checkout_array
+     (
+             siz_t     n_threads,
+       const array_t** array,
+             apool_t*  apool
      );
 void bli_apool_checkin_array
      (
@@ -112,28 +123,18 @@ void bli_apool_checkin_array
        apool_t* apool
      );
 
-pool_t* bli_apool_array_elem
+err_t bli_apool_array_elem
      (
        siz_t    index,
-       array_t* array
+       array_t* array,
+       pool_t** pool
      );
 
-void bli_apool_grow
+err_t bli_apool_grow
      (
        siz_t    num_blocks_add,
        apool_t* apool
      );
-
-void bli_apool_alloc_block
-     (
-       siz_t     num_elem,
-       array_t** array_p
-     );
-void bli_apool_free_block
-     (
-       array_t* array
-     );
-
 
 #endif
 

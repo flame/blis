@@ -209,9 +209,30 @@ print_usage()
 	echo "                 it no longer needs to call malloc() or free(), even"
 	echo "                 across many separate level-3 operation invocations."
 	echo " "
+	echo "   --enable-error-checking, --disable-error-checking"
+	echo " "
+	echo "                 Disable (enabled by default) runtime error checking. This"
+	echo "                 includes checking for things such as inconsistent object"
+	echo "                 properties, memory allocation errors, and configuration"
+	echo "                 errors. When enabled, BLIS will report an error via the"
+	echo "                 method specified by the --error-handling-mode option."
+	echo "                 When disabled, any function that is set up to return an"
+	echo "                 error code will return \"success\" unconditionally."
+	echo " "
+	echo "   --error-handling-mode=[return|abort]"
+	echo " "
+	echo "                 Specify the way that BLIS reacts to errors. The 'return'"
+	echo "                 mode causes BLIS to return an error code all the way up"
+	echo "                 the function stack to the caller, which may then be used"
+	echo "                 to query a human-readable error string. The 'abort' mode"
+	echo "                 causes BLIS to output the aforementioned error string and"
+	echo "                 then call abort(), which facilitates debugging (e.g. via"
+	echo "                 a debugger's backtrace feature). By default, the 'abort'"
+	echo "                 mode is used."
+	echo " "
 	echo "   --enable-mem-tracing, --disable-mem-tracing"
 	echo " "
-	echo "                 Enable (disable by default) output to stdout that traces"
+	echo "                 Enable (disabled by default) output to stdout that traces"
 	echo "                 the allocation and freeing of memory, including the names"
 	echo "                 of the functions that triggered the allocation/freeing."
 	echo "                 Enabling this option WILL NEGATIVELY IMPACT PERFORMANCE."
@@ -339,8 +360,8 @@ print_usage()
 	echo "                 these division instructions within the microkernel will"
 	echo "                 incur a performance penalty, but numerical robustness will"
 	echo "                 improve for certain cases involving denormal numbers that"
-	echo "                 would otherwise result in overflow in the pre-inverted"
-	echo "                 values."
+	echo "                 would otherwise result in overflow if pre-inversion were"
+	echo "                 employed."
 	echo " "
 	echo "   --force-version=STRING"
 	echo " "
@@ -356,14 +377,14 @@ print_usage()
 	echo "                 a sanity check to make sure these lists are constituted"
 	echo "                 as expected."
 	echo " "
-	echo "   --complex-return=gnu|intel"
+	echo "   --complex-return=[gnu|intel]"
 	echo " "
 	echo "                 Specify the way in which complex numbers are returned"
-	echo "                 from Fortran functions, either \"gnu\" (return in"
-	echo "                 registers) or \"intel\" (return via hidden argument)."
+	echo "                 from Fortran functions, either 'gnu' (return in"
+	echo "                 registers) or 'intel' (return via hidden argument)."
 	echo "                 If not specified and the environment variable FC is set,"
 	echo "                 attempt to determine the return type from the compiler."
-	echo "                 Otherwise, the default is \"gnu\"."
+	echo "                 Otherwise, the default is 'gnu'."
 	echo " "
 	echo "   -q, --quiet   Suppress informational output. By default, configure"
 	echo "                 is verbose. (NOTE: -q is not yet implemented)"
@@ -2451,6 +2472,10 @@ main()
 	quiet_flag=''
 	show_config_list=''
 
+	# Error-related flags.
+	enable_error_checking='yes'
+	error_handling_mode='abort'
+
 	# Additional flags.
 	enable_verbose='no'
 	enable_arg_max_hack='no'
@@ -2601,6 +2626,15 @@ main()
 							;;
 						disable-system)
 							enable_system='no'
+							;;
+						enable-error-checking)
+							enable_error_checking='yes'
+							;;
+						disable-error-checking)
+							enable_error_checking='no'
+							;;
+						error-handling-mode=*)
+							error_handling_mode=${OPTARG#*=}
 							;;
 						enable-threading=*)
 							threading_model=${OPTARG#*=}
@@ -3465,7 +3499,7 @@ main()
 		exit 1
 	fi
 
-	# Convert 'yes' and 'no' flags to booleans.
+	# Check if we are enabling memory pools for large or small blocks.
 	if [ "x${enable_pba_pools}" = "xyes" ]; then
 		echo "${script_name}: internal memory pools for packing blocks are enabled."
 		enable_pba_pools_01=1
@@ -3480,6 +3514,31 @@ main()
 		echo "${script_name}: internal memory pools for small blocks are disabled."
 		enable_sba_pools_01=0
 	fi
+
+	# Check if we are enabling error checking.
+	if [ "x${enable_error_checking}" = "xyes" ]; then
+		echo "${script_name}: error checking is enabled."
+		enable_error_checking_01=1
+	else
+		echo "${script_name}: error checking is disabled."
+		enable_error_checking_01=0
+	fi
+
+	# Check the error handling mode.
+	enable_error_return_01=0
+	enable_error_abort_01=0
+	if [ "x${error_handling_mode}" = "xreturn" ]; then
+		echo "${script_name}: requesting that error codes be returned to caller."
+		enable_error_return_01=1
+	elif [ "x${error_handling_mode}" = "xabort" ]; then
+		echo "${script_name}: requesting that errors trigger a message followed by abort()."
+		enable_error_abort_01=1
+	else
+		echo "${script_name}: *** Unsupported mode of error handling: ${error_handling_mode}."
+		exit 1
+	fi
+
+	# Check if we are enabling memory tracing output.
 	if [ "x${enable_mem_tracing}" = "xyes" ]; then
 		echo "${script_name}: memory tracing output is enabled."
 		enable_mem_tracing_01=1
@@ -3487,6 +3546,8 @@ main()
 		echo "${script_name}: memory tracing output is disabled."
 		enable_mem_tracing_01=0
 	fi
+
+	# Check if we are enabling support for libmemkind.
 	if [ "x${has_memkind}" = "xyes" ]; then
 		if [ "x${enable_memkind}" = "x" ]; then
 			# If no explicit option was given for libmemkind one way or the other,
@@ -3514,6 +3575,8 @@ main()
 		enable_memkind="no"
 		enable_memkind_01=0
 	fi
+
+	# Check if we are enabling #pragma omp simd.
 	if [ "x${pragma_omp_simd}" = "xyes" ]; then
 		echo "${script_name}: compiler appears to support #pragma omp simd."
 		enable_pragma_omp_simd_01=1
@@ -3521,6 +3584,8 @@ main()
 		echo "${script_name}: compiler appears to not support #pragma omp simd."
 		enable_pragma_omp_simd_01=0
 	fi
+
+	# Check if we are enabling the BLAS/CBLAS compatibility layers.
 	if [ "x${enable_blas}" = "xyes" ]; then
 		echo "${script_name}: the BLAS compatibility layer is enabled."
 		enable_blas_01=1
@@ -3537,6 +3602,8 @@ main()
 		echo "${script_name}: the CBLAS compatibility layer is disabled."
 		enable_cblas_01=0
 	fi
+
+	# Check if we are enabling mixed datatype support.
 	if [ "x${enable_mixed_dt}" = "xyes" ]; then
 		echo "${script_name}: mixed datatype support is enabled."
 
@@ -3555,6 +3622,8 @@ main()
 		enable_mixed_dt_extra_mem_01=0
 		enable_mixed_dt_01=0
 	fi
+
+	# Check if we are enabling skinny/unpacked (sup) matrix handling.
 	if [ "x${enable_sup_handling}" = "xyes" ]; then
 		echo "${script_name}: small matrix handling is enabled."
 		enable_sup_handling_01=1
@@ -3562,6 +3631,8 @@ main()
 		echo "${script_name}: small matrix handling is disabled."
 		enable_sup_handling_01=0
 	fi
+
+	# Check if we are enabling pre-inversion of diagonal elements for trsm.
 	if [ "x${enable_trsm_preinversion}" = "xyes" ]; then
 		echo "${script_name}: trsm diagonal element pre-inversion is enabled."
 		enable_trsm_preinversion_01=1
@@ -3713,7 +3784,7 @@ main()
 		exit 1
 	fi
 
-	echo "${script_name}: configuring complex return type as \"${complex_return}\"."
+	echo "${script_name}: configuring complex return type as '${complex_return}'."
 
 	# Variables that may contain forward slashes, such as paths, need extra
 	# escaping when used in sed commands. We insert those extra escape
@@ -3896,6 +3967,9 @@ main()
 		| sed   -e "s/@enable_jrir_rr@/${enable_jrir_rr_01}/g" \
 		| sed   -e "s/@enable_pba_pools@/${enable_pba_pools_01}/g" \
 		| sed   -e "s/@enable_sba_pools@/${enable_sba_pools_01}/g" \
+		| sed   -e "s/@enable_error_checking@/${enable_error_checking_01}/g" \
+		| sed   -e "s/@enable_error_return@/${enable_error_return_01}/g" \
+		| sed   -e "s/@enable_error_abort@/${enable_error_abort_01}/g" \
 		| sed   -e "s/@enable_mem_tracing@/${enable_mem_tracing_01}/g" \
 		| sed   -e "s/@int_type_size@/${int_type_size}/g" \
 		| sed   -e "s/@blas_int_type_size@/${blas_int_type_size}/g" \

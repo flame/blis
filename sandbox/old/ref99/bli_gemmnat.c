@@ -57,13 +57,12 @@ void bli_gemmnat
     bli_init_once();
 
     // Obtain a valid (native) context from the gks if necessary.
-    if ( cntx == NULL ) cntx = bli_gks_query_cntx();
+	bli_gks_query_cntx_if_null( ( const cntx_t** )&cntx ); \
 
 	// Initialize a local runtime with global settings if necessary. Note
     // that in the case that a runtime is passed in, we make a local copy.
 	rntm_t rntm_l;
-	if ( rntm == NULL ) { bli_rntm_init_from_global( &rntm_l ); rntm = &rntm_l; }
-	else                { rntm_l = *rntm;                       rntm = &rntm_l; } 
+	bli_rntm_init_if_null( &rntm, &rntm_l );
 
     // Invoke the operation's front end.
     //blx_gemm_front( alpha, a, b, beta, c, cntx, rntm, NULL );

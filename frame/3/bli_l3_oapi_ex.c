@@ -74,11 +74,11 @@ void PASTEMAC(gemm,BLIS_OAPI_EX_SUF)
 		}
 	}
 
-	// Initialize a local runtime with global settings if necessary. Note
-	// that in the case that a runtime is passed in, we make a local copy.
+	// Initialize a local runtime. Use the global settings if the caller passed
+	// in a rntm_t* that is NULL. Otherwise, copy that rntm_t's contents to the
+	// local rntm_t and use it (instead of the caller's) going forward.
 	rntm_t rntm_l;
-	if ( rntm == NULL ) { bli_rntm_init_from_global( &rntm_l ); rntm = &rntm_l; }
-	else                { rntm_l = *rntm;                       rntm = &rntm_l; }
+	bli_rntm_init_if_null( &rntm, &rntm_l );
 
 	// Default to using native execution.
 	num_t dt = bli_obj_dt( c );
@@ -102,7 +102,7 @@ void PASTEMAC(gemm,BLIS_OAPI_EX_SUF)
 
 	// If necessary, obtain a valid context from the gks using the induced
 	// method id determined above.
-	if ( cntx == NULL ) cntx = bli_gks_query_ind_cntx( im );
+	bli_gks_query_ind_cntx_if_null( im, &cntx );
 
 	// Check the operands.
 	if ( bli_error_checking_is_enabled() )
@@ -128,11 +128,11 @@ void PASTEMAC(gemmt,BLIS_OAPI_EX_SUF)
 {
 	bli_init_once();
 
-	// Initialize a local runtime with global settings if necessary. Note
-	// that in the case that a runtime is passed in, we make a local copy.
+	// Initialize a local runtime. Use the global settings if the caller passed
+	// in a rntm_t* that is NULL. Otherwise, copy that rntm_t's contents to the
+	// local rntm_t and use it (instead of the caller's) going forward.
 	rntm_t rntm_l;
-	if ( rntm == NULL ) { bli_rntm_init_from_global( &rntm_l ); rntm = &rntm_l; }
-	else                { rntm_l = *rntm;                       rntm = &rntm_l; }
+	bli_rntm_init_if_null( &rntm, &rntm_l );
 
 	// Default to using native execution.
 	num_t dt = bli_obj_dt( c );
@@ -153,7 +153,7 @@ void PASTEMAC(gemmt,BLIS_OAPI_EX_SUF)
 
 	// If necessary, obtain a valid context from the gks using the induced
 	// method id determined above.
-	if ( cntx == NULL ) cntx = bli_gks_query_ind_cntx( im );
+	bli_gks_query_ind_cntx_if_null( im, &cntx );
 
 	// Check the operands.
 	if ( bli_error_checking_is_enabled() )
@@ -256,11 +256,11 @@ void PASTEMAC(hemm,BLIS_OAPI_EX_SUF)
 {
 	bli_init_once();
 
-	// Initialize a local runtime with global settings if necessary. Note
-	// that in the case that a runtime is passed in, we make a local copy.
+	// Initialize a local runtime. Use the global settings if the caller passed
+	// in a rntm_t* that is NULL. Otherwise, copy that rntm_t's contents to the
+	// local rntm_t and use it (instead of the caller's) going forward.
 	rntm_t rntm_l;
-	if ( rntm == NULL ) { bli_rntm_init_from_global( &rntm_l ); rntm = &rntm_l; }
-	else                { rntm_l = *rntm;                       rntm = &rntm_l; }
+	bli_rntm_init_if_null( &rntm, &rntm_l );
 
 	// Default to using native execution.
 	num_t dt = bli_obj_dt( c );
@@ -281,7 +281,7 @@ void PASTEMAC(hemm,BLIS_OAPI_EX_SUF)
 
 	// If necessary, obtain a valid context from the gks using the induced
 	// method id determined above.
-	if ( cntx == NULL ) cntx = bli_gks_query_ind_cntx( im );
+	bli_gks_query_ind_cntx_if_null( im, &cntx );
 
 	// Check the operands.
 	if ( bli_error_checking_is_enabled() )
@@ -306,11 +306,11 @@ void PASTEMAC(symm,BLIS_OAPI_EX_SUF)
 {
 	bli_init_once();
 
-	// Initialize a local runtime with global settings if necessary. Note
-	// that in the case that a runtime is passed in, we make a local copy.
+	// Initialize a local runtime. Use the global settings if the caller passed
+	// in a rntm_t* that is NULL. Otherwise, copy that rntm_t's contents to the
+	// local rntm_t and use it (instead of the caller's) going forward.
 	rntm_t rntm_l;
-	if ( rntm == NULL ) { bli_rntm_init_from_global( &rntm_l ); rntm = &rntm_l; }
-	else                { rntm_l = *rntm;                       rntm = &rntm_l; }
+	bli_rntm_init_if_null( &rntm, &rntm_l );
 
 	// Default to using native execution.
 	num_t dt = bli_obj_dt( c );
@@ -331,7 +331,7 @@ void PASTEMAC(symm,BLIS_OAPI_EX_SUF)
 
 	// If necessary, obtain a valid context from the gks using the induced
 	// method id determined above.
-	if ( cntx == NULL ) cntx = bli_gks_query_ind_cntx( im );
+	bli_gks_query_ind_cntx_if_null( im, &cntx );
 
 	// Check the operands.
 	if ( bli_error_checking_is_enabled() )
@@ -356,11 +356,11 @@ void PASTEMAC(trmm3,BLIS_OAPI_EX_SUF)
 {
 	bli_init_once();
 
-	// Initialize a local runtime with global settings if necessary. Note
-	// that in the case that a runtime is passed in, we make a local copy.
+	// Initialize a local runtime. Use the global settings if the caller passed
+	// in a rntm_t* that is NULL. Otherwise, copy that rntm_t's contents to the
+	// local rntm_t and use it (instead of the caller's) going forward.
 	rntm_t rntm_l;
-	if ( rntm == NULL ) { bli_rntm_init_from_global( &rntm_l ); rntm = &rntm_l; }
-	else                { rntm_l = *rntm;                       rntm = &rntm_l; }
+	bli_rntm_init_if_null( &rntm, &rntm_l );
 
 	// Default to using native execution.
 	num_t dt = bli_obj_dt( c );
@@ -381,7 +381,7 @@ void PASTEMAC(trmm3,BLIS_OAPI_EX_SUF)
 
 	// If necessary, obtain a valid context from the gks using the induced
 	// method id determined above.
-	if ( cntx == NULL ) cntx = bli_gks_query_ind_cntx( im );
+	bli_gks_query_ind_cntx_if_null( im, &cntx );
 
 	// Check the operands.
 	if ( bli_error_checking_is_enabled() )
@@ -463,11 +463,11 @@ void PASTEMAC(trmm,BLIS_OAPI_EX_SUF)
 {
 	bli_init_once();
 
-	// Initialize a local runtime with global settings if necessary. Note
-	// that in the case that a runtime is passed in, we make a local copy.
+	// Initialize a local runtime. Use the global settings if the caller passed
+	// in a rntm_t* that is NULL. Otherwise, copy that rntm_t's contents to the
+	// local rntm_t and use it (instead of the caller's) going forward.
 	rntm_t rntm_l;
-	if ( rntm == NULL ) { bli_rntm_init_from_global( &rntm_l ); rntm = &rntm_l; }
-	else                { rntm_l = *rntm;                       rntm = &rntm_l; }
+	bli_rntm_init_if_null( &rntm, &rntm_l );
 
 	// Default to using native execution.
 	num_t dt = bli_obj_dt( b );
@@ -487,7 +487,7 @@ void PASTEMAC(trmm,BLIS_OAPI_EX_SUF)
 
 	// If necessary, obtain a valid context from the gks using the induced
 	// method id determined above.
-	if ( cntx == NULL ) cntx = bli_gks_query_ind_cntx( im );
+	bli_gks_query_ind_cntx_if_null( im, &cntx );
 
 	// Check the operands.
 	if ( bli_error_checking_is_enabled() )
@@ -510,11 +510,11 @@ void PASTEMAC(trsm,BLIS_OAPI_EX_SUF)
 {
 	bli_init_once();
 
-	// Initialize a local runtime with global settings if necessary. Note
-	// that in the case that a runtime is passed in, we make a local copy.
+	// Initialize a local runtime. Use the global settings if the caller passed
+	// in a rntm_t* that is NULL. Otherwise, copy that rntm_t's contents to the
+	// local rntm_t and use it (instead of the caller's) going forward.
 	rntm_t rntm_l;
-	if ( rntm == NULL ) { bli_rntm_init_from_global( &rntm_l ); rntm = &rntm_l; }
-	else                { rntm_l = *rntm;                       rntm = &rntm_l; }
+	bli_rntm_init_if_null( &rntm, &rntm_l );
 
 	// Default to using native execution.
 	num_t dt = bli_obj_dt( b );
@@ -534,7 +534,7 @@ void PASTEMAC(trsm,BLIS_OAPI_EX_SUF)
 
 	// If necessary, obtain a valid context from the gks using the induced
 	// method id determined above.
-	if ( cntx == NULL ) cntx = bli_gks_query_ind_cntx( im );
+	bli_gks_query_ind_cntx_if_null( im, &cntx );
 
 	// Check the operands.
 	if ( bli_error_checking_is_enabled() )

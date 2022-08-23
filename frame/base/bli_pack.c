@@ -42,45 +42,84 @@ extern rntm_t global_rntm;
 // resides in bli_rntm.c.)
 extern bli_pthread_mutex_t global_rntm_mutex;
 
+// A boolean that tracks whether bli_pack_init() has completed successfully.
+static bool pack_is_init = FALSE;
+
 // -----------------------------------------------------------------------------
 
-void bli_pack_init( void )
+bool bli_pack_is_init( void )
 {
+	return pack_is_init;
+}
+
+void bli_pack_mark_init( void )
+{
+	pack_is_init = TRUE;
+}
+
+void bli_pack_mark_uninit( void )
+{
+	pack_is_init = FALSE;
+}
+
+// -----------------------------------------------------------------------------
+
+err_t bli_pack_init( void )
+{
+	// Sanity check: Return early if the API is already initialized.
+	if ( bli_pack_is_init() ) return BLIS_SUCCESS;
+
 	// Read the environment variables and use them to initialize the
 	// global runtime object.
 	bli_pack_init_rntm_from_env( &global_rntm );
+
+	// Mark the API as initialized.
+	bli_pack_mark_init();
+
+	return BLIS_SUCCESS;
 }
 
-void bli_pack_finalize( void )
+err_t bli_pack_finalize( void )
 {
+	// Sanity check: Return early if the API is uninitialized.
+	if ( !bli_pack_is_init() ) return BLIS_SUCCESS;
+
+	// Mark the API as uninitialized.
+	bli_pack_mark_uninit();
+
+	return BLIS_SUCCESS;
 }
 
 // -----------------------------------------------------------------------------
 
-void bli_pack_get_pack_a( bool* pack_a )
+err_t bli_pack_get_pack_a( bool* pack_a )
 {
 	// We must ensure that global_rntm has been initialized.
-	bli_init_once();
+	BLIS_INIT_ONCE();
 
 	*pack_a = bli_rntm_pack_a( &global_rntm );
+
+	return BLIS_SUCCESS;
 }
 
 // -----------------------------------------------------------------------------
 
-void bli_pack_get_pack_b( bool* pack_b )
+err_t bli_pack_get_pack_b( bool* pack_b )
 {
 	// We must ensure that global_rntm has been initialized.
-	bli_init_once();
+	BLIS_INIT_ONCE();
 
 	*pack_b = bli_rntm_pack_b( &global_rntm );
+
+	return BLIS_SUCCESS;
 }
 
 // ----------------------------------------------------------------------------
 
-void bli_pack_set_pack_a( bool pack_a )
+err_t bli_pack_set_pack_a( bool pack_a )
 {
 	// We must ensure that global_rntm has been initialized.
-	bli_init_once();
+	BLIS_INIT_ONCE();
 
 	// Acquire the mutex protecting global_rntm.
 	bli_pthread_mutex_lock( &global_rntm_mutex );
@@ -89,14 +128,16 @@ void bli_pack_set_pack_a( bool pack_a )
 
 	// Release the mutex protecting global_rntm.
 	bli_pthread_mutex_unlock( &global_rntm_mutex );
+
+	return BLIS_SUCCESS;
 }
 
 // ----------------------------------------------------------------------------
 
-void bli_pack_set_pack_b( bool pack_b )
+err_t bli_pack_set_pack_b( bool pack_b )
 {
 	// We must ensure that global_rntm has been initialized.
-	bli_init_once();
+	BLIS_INIT_ONCE();
 
 	// Acquire the mutex protecting global_rntm.
 	bli_pthread_mutex_lock( &global_rntm_mutex );
@@ -105,6 +146,8 @@ void bli_pack_set_pack_b( bool pack_b )
 
 	// Release the mutex protecting global_rntm.
 	bli_pthread_mutex_unlock( &global_rntm_mutex );
+
+	return BLIS_SUCCESS;
 }
 
 // ----------------------------------------------------------------------------
