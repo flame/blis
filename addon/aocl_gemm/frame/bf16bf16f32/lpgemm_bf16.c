@@ -47,10 +47,8 @@ LPGEMM_5LOOP(bfloat16,bfloat16,float,bf16bf16f32of32)
     dim_t KC = lpgemm_get_block_size_KC_global_cntx( BF16BF16F32OF32 );
     dim_t MC = lpgemm_get_block_size_MC_global_cntx( BF16BF16F32OF32 );
     dim_t NR = lpgemm_get_block_size_NR_global_cntx( BF16BF16F32OF32 );
-    dim_t MR = lpgemm_get_block_size_MR_global_cntx( BF16BF16F32OF32 );
 	
     const int16_t* a_use = NULL;
-    dim_t rs_a_use = rs_a;
     dim_t cs_a_use = cs_a;
     dim_t a_block_stride = 0;
 

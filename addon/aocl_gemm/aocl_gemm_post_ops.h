@@ -39,10 +39,8 @@
 
 typedef enum
 {
-	LINEAR = 0,
-	RELU = 1,
-	GELU = 2,
-	CLIP = 3,
+	RELU = 0,
+	PRELU = 1,
 } AOCL_ELT_ALGO_TYPE;
 
 typedef enum

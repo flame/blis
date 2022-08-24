@@ -37,6 +37,7 @@
 
 #include "blis.h"
 #include "lpgemm_kernels.h"
+#include "lpgemm_s32_kern_macros.h"
 
 // 5x64 int8o32 kernel
 LPGEMM_M_FRINGE_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_5x64)
@@ -45,7 +46,8 @@ LPGEMM_M_FRINGE_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_5x64)
 						{
 						  &&POST_OPS_5x64_DISABLE,
 						  &&POST_OPS_BIAS_5x64,
-						  &&POST_OPS_RELU_5x64
+						  &&POST_OPS_RELU_5x64,
+						  &&POST_OPS_RELU_SCALE_5x64
 						};
 	dim_t k_full_pieces = k0 / 4;
 	dim_t k_partial_pieces = k0 % 4;
@@ -524,6 +526,76 @@ POST_OPS_RELU_5x64:
 
 		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 	}
+POST_OPS_RELU_SCALE_5x64:
+	{
+		selector1 = _mm512_setzero_epi32();
+		selector2 =
+			_mm512_set1_epi32( *( ( int32_t* )post_ops_list_temp->op_args2 ) );
+
+		__mmask16 relu_cmp_mask;
+
+		// c[0, 0-15]
+		RELU_SCALE_OP_S32_AVX512(c_int32_0p0)
+
+		// c[0, 16-31]
+		RELU_SCALE_OP_S32_AVX512(c_int32_0p1)
+
+		// c[0, 32-47]
+		RELU_SCALE_OP_S32_AVX512(c_int32_0p2)
+
+		// c[0, 48-63]
+		RELU_SCALE_OP_S32_AVX512(c_int32_0p3)
+
+		// c[1, 0-15]
+		RELU_SCALE_OP_S32_AVX512(c_int32_1p0)
+
+		// c[1, 16-31]
+		RELU_SCALE_OP_S32_AVX512(c_int32_1p1)
+
+		// c[1, 32-47]
+		RELU_SCALE_OP_S32_AVX512(c_int32_1p2)
+
+		// c[1, 48-63]
+		RELU_SCALE_OP_S32_AVX512(c_int32_1p3)
+
+		// c[2, 0-15]
+		RELU_SCALE_OP_S32_AVX512(c_int32_2p0)
+
+		// c[2, 16-31]
+		RELU_SCALE_OP_S32_AVX512(c_int32_2p1)
+
+		// c[2, 32-47]
+		RELU_SCALE_OP_S32_AVX512(c_int32_2p2)
+
+		// c[2, 48-63]
+		RELU_SCALE_OP_S32_AVX512(c_int32_2p3)
+
+		// c[3, 0-15]
+		RELU_SCALE_OP_S32_AVX512(c_int32_3p0)
+
+		// c[3, 16-31]
+		RELU_SCALE_OP_S32_AVX512(c_int32_3p1)
+
+		// c[3, 32-47]
+		RELU_SCALE_OP_S32_AVX512(c_int32_3p2)
+
+		// c[3, 48-63]
+		RELU_SCALE_OP_S32_AVX512(c_int32_3p3)
+
+		// c[4, 0-15]
+		RELU_SCALE_OP_S32_AVX512(c_int32_4p0)
+
+		// c[4, 16-31]
+		RELU_SCALE_OP_S32_AVX512(c_int32_4p1)
+
+		// c[4, 32-47]
+		RELU_SCALE_OP_S32_AVX512(c_int32_4p2)
+
+		// c[4, 48-63]
+		RELU_SCALE_OP_S32_AVX512(c_int32_4p3)
+
+		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+	}
 POST_OPS_5x64_DISABLE:
 	;
 
@@ -596,7 +668,8 @@ LPGEMM_M_FRINGE_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_4x64)
 						{
 						  &&POST_OPS_4x64_DISABLE,
 						  &&POST_OPS_BIAS_4x64,
-						  &&POST_OPS_RELU_4x64
+						  &&POST_OPS_RELU_4x64,
+						  &&POST_OPS_RELU_SCALE_4x64
 						};
 	dim_t k_full_pieces = k0 / 4;
 	dim_t k_partial_pieces = k0 % 4;
@@ -993,6 +1066,64 @@ POST_OPS_RELU_4x64:
 
 		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 	}
+POST_OPS_RELU_SCALE_4x64:
+	{
+		selector1 = _mm512_setzero_epi32();
+		selector2 =
+			_mm512_set1_epi32( *( ( int32_t* )post_ops_list_temp->op_args2 ) );
+
+		__mmask16 relu_cmp_mask;
+
+		// c[0, 0-15]
+		RELU_SCALE_OP_S32_AVX512(c_int32_0p0)
+
+		// c[0, 16-31]
+		RELU_SCALE_OP_S32_AVX512(c_int32_0p1)
+
+		// c[0, 32-47]
+		RELU_SCALE_OP_S32_AVX512(c_int32_0p2)
+
+		// c[0, 48-63]
+		RELU_SCALE_OP_S32_AVX512(c_int32_0p3)
+
+		// c[1, 0-15]
+		RELU_SCALE_OP_S32_AVX512(c_int32_1p0)
+
+		// c[1, 16-31]
+		RELU_SCALE_OP_S32_AVX512(c_int32_1p1)
+
+		// c[1, 32-47]
+		RELU_SCALE_OP_S32_AVX512(c_int32_1p2)
+
+		// c[1, 48-63]
+		RELU_SCALE_OP_S32_AVX512(c_int32_1p3)
+
+		// c[2, 0-15]
+		RELU_SCALE_OP_S32_AVX512(c_int32_2p0)
+
+		// c[2, 16-31]
+		RELU_SCALE_OP_S32_AVX512(c_int32_2p1)
+
+		// c[2, 32-47]
+		RELU_SCALE_OP_S32_AVX512(c_int32_2p2)
+
+		// c[2, 48-63]
+		RELU_SCALE_OP_S32_AVX512(c_int32_2p3)
+
+		// c[3, 0-15]
+		RELU_SCALE_OP_S32_AVX512(c_int32_3p0)
+
+		// c[3, 16-31]
+		RELU_SCALE_OP_S32_AVX512(c_int32_3p1)
+
+		// c[3, 32-47]
+		RELU_SCALE_OP_S32_AVX512(c_int32_3p2)
+
+		// c[3, 48-63]
+		RELU_SCALE_OP_S32_AVX512(c_int32_3p3)
+
+		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+	}
 POST_OPS_4x64_DISABLE:
 	;
 
@@ -1053,7 +1184,8 @@ LPGEMM_M_FRINGE_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_3x64)
 						{
 						  &&POST_OPS_3x64_DISABLE,
 						  &&POST_OPS_BIAS_3x64,
-						  &&POST_OPS_RELU_3x64
+						  &&POST_OPS_RELU_3x64,
+						  &&POST_OPS_RELU_SCALE_3x64
 						};
 	dim_t k_full_pieces = k0 / 4;
 	dim_t k_partial_pieces = k0 % 4;
@@ -1368,6 +1500,52 @@ POST_OPS_RELU_3x64:
 
 		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 	}
+POST_OPS_RELU_SCALE_3x64:
+	{
+		selector1 = _mm512_setzero_epi32();
+		selector2 =
+			_mm512_set1_epi32( *( ( int32_t* )post_ops_list_temp->op_args2 ) );
+
+		__mmask16 relu_cmp_mask;
+
+		// c[0, 0-15]
+		RELU_SCALE_OP_S32_AVX512(c_int32_0p0)
+
+		// c[0, 16-31]
+		RELU_SCALE_OP_S32_AVX512(c_int32_0p1)
+
+		// c[0, 32-47]
+		RELU_SCALE_OP_S32_AVX512(c_int32_0p2)
+
+		// c[0, 48-63]
+		RELU_SCALE_OP_S32_AVX512(c_int32_0p3)
+
+		// c[1, 0-15]
+		RELU_SCALE_OP_S32_AVX512(c_int32_1p0)
+
+		// c[1, 16-31]
+		RELU_SCALE_OP_S32_AVX512(c_int32_1p1)
+
+		// c[1, 32-47]
+		RELU_SCALE_OP_S32_AVX512(c_int32_1p2)
+
+		// c[1, 48-63]
+		RELU_SCALE_OP_S32_AVX512(c_int32_1p3)
+
+		// c[2, 0-15]
+		RELU_SCALE_OP_S32_AVX512(c_int32_2p0)
+
+		// c[2, 16-31]
+		RELU_SCALE_OP_S32_AVX512(c_int32_2p1)
+
+		// c[2, 32-47]
+		RELU_SCALE_OP_S32_AVX512(c_int32_2p2)
+
+		// c[2, 48-63]
+		RELU_SCALE_OP_S32_AVX512(c_int32_2p3)
+
+		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+	}
 POST_OPS_3x64_DISABLE:
 	;
 
@@ -1416,7 +1594,8 @@ LPGEMM_M_FRINGE_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_2x64)
 						{
 						  &&POST_OPS_2x64_DISABLE,
 						  &&POST_OPS_BIAS_2x64,
-						  &&POST_OPS_RELU_2x64
+						  &&POST_OPS_RELU_2x64,
+						  &&POST_OPS_RELU_SCALE_2x64
 						};
 	dim_t k_full_pieces = k0 / 4;
 	dim_t k_partial_pieces = k0 % 4;
@@ -1649,6 +1828,40 @@ POST_OPS_RELU_2x64:
 
 		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 	}
+POST_OPS_RELU_SCALE_2x64:
+	{
+		selector1 = _mm512_setzero_epi32();
+		selector2 =
+			_mm512_set1_epi32( *( ( int32_t* )post_ops_list_temp->op_args2 ) );
+
+		__mmask16 relu_cmp_mask;
+
+		// c[0, 0-15]
+		RELU_SCALE_OP_S32_AVX512(c_int32_0p0)
+
+		// c[0, 16-31]
+		RELU_SCALE_OP_S32_AVX512(c_int32_0p1)
+
+		// c[0, 32-47]
+		RELU_SCALE_OP_S32_AVX512(c_int32_0p2)
+
+		// c[0, 48-63]
+		RELU_SCALE_OP_S32_AVX512(c_int32_0p3)
+
+		// c[1, 0-15]
+		RELU_SCALE_OP_S32_AVX512(c_int32_1p0)
+
+		// c[1, 16-31]
+		RELU_SCALE_OP_S32_AVX512(c_int32_1p1)
+
+		// c[1, 32-47]
+		RELU_SCALE_OP_S32_AVX512(c_int32_1p2)
+
+		// c[1, 48-63]
+		RELU_SCALE_OP_S32_AVX512(c_int32_1p3)
+
+		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+	}
 POST_OPS_2x64_DISABLE:
 	;
 
@@ -1685,7 +1898,8 @@ LPGEMM_M_FRINGE_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_1x64)
 						{
 						  &&POST_OPS_1x64_DISABLE,
 						  &&POST_OPS_BIAS_1x64,
-						  &&POST_OPS_RELU_1x64
+						  &&POST_OPS_RELU_1x64,
+						  &&POST_OPS_RELU_SCALE_1x64
 						};
 	dim_t k_full_pieces = k0 / 4;
 	dim_t k_partial_pieces = k0 % 4;
@@ -1833,6 +2047,28 @@ POST_OPS_RELU_1x64:
 
 		// c[0,48-63]
 		c_int32_0p3 = _mm512_max_epi32( selector1, c_int32_0p3 );
+
+		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+	}
+POST_OPS_RELU_SCALE_1x64:
+	{
+		selector1 = _mm512_setzero_epi32();
+		selector2 =
+			_mm512_set1_epi32( *( ( int32_t* )post_ops_list_temp->op_args2 ) );
+
+		__mmask16 relu_cmp_mask;
+
+		// c[0, 0-15]
+		RELU_SCALE_OP_S32_AVX512(c_int32_0p0)
+
+		// c[0, 16-31]
+		RELU_SCALE_OP_S32_AVX512(c_int32_0p1)
+
+		// c[0, 32-47]
+		RELU_SCALE_OP_S32_AVX512(c_int32_0p2)
+
+		// c[0, 48-63]
+		RELU_SCALE_OP_S32_AVX512(c_int32_0p3)
 
 		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 	}

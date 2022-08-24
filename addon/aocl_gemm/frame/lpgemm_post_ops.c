@@ -103,17 +103,13 @@ void lpgemm_translate_to_post_ops_list
 						// Eltwise algo dispatcher.
 						switch ( post_op_unparsed->eltwise.algo.algo_type )
 						{
-							case LINEAR:
-									tmp_code = POST_OPS_LINEAR;
-									break;
 							case RELU:
 									tmp_code = POST_OPS_RELU;
 									break;
-							case GELU:
-								   tmp_code	= POST_OPS_GELU;
+							case PRELU:
+									tmp_code = POST_OPS_RELU_SCALE;
 									break;
-							case CLIP:
-									tmp_code = POST_OPS_CLIP;
+							default:
 									break;
 						}
 						lpgemm_set_node_params

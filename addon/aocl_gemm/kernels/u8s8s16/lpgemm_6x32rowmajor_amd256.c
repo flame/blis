@@ -34,6 +34,7 @@
 #include <immintrin.h>
 #include "blis.h"
 #include "lpgemm_kernels.h"
+#include "lpgemm_s16_kern_macros.h"
 
 // 6x32 int8o16 kernel
 LPGEMM_MAIN_KERN(uint8_t,int8_t,int16_t,u8s8s16o16_6x32)
@@ -42,7 +43,9 @@ LPGEMM_MAIN_KERN(uint8_t,int8_t,int16_t,u8s8s16o16_6x32)
 		{
 			&&POST_OPS_6x32_DISABLE,
 			&&POST_OPS_BIAS_6x32,
-			&&POST_OPS_RELU_6x32};
+			&&POST_OPS_RELU_6x32,
+			&&POST_OPS_RELU_SCALE_6x32
+		};
 
 	dim_t MR = 6;
 	dim_t NR = 32;
@@ -70,7 +73,7 @@ LPGEMM_MAIN_KERN(uint8_t,int8_t,int16_t,u8s8s16o16_6x32)
 		if (n0_16 == 1)
 		{
 			lpgemm_rowvar_u8s8s16o16_6x16(
-				m0, k0_updated,
+				m0, k0,
 				a, rs_a, cs_a, ps_a,
 				b, ((rs_b / 2) * 1), cs_b,
 				c, rs_c,
@@ -81,12 +84,13 @@ LPGEMM_MAIN_KERN(uint8_t,int8_t,int16_t,u8s8s16o16_6x32)
 
 			b = b + (16 * k0_updated);
 			c = c + 16;
+			post_op_c_j += 16;
 		}
 
 		if (n0_rem > 0)
 		{
 			lpgemm_rowvar_u8s8s16o16_6xlt16(
-				m0, k0_updated,
+				m0, k0,
 				a, rs_a, cs_a, ps_a,
 				b, ((rs_b / 2) * 1), cs_b,
 				c, rs_c,
@@ -467,6 +471,49 @@ POST_OPS_RELU_6x32:
 
 			// c[5,16-31]
 			c_int16_5p1 = _mm256_max_epi16( selector1, c_int16_5p1 );
+
+			POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+		}
+POST_OPS_RELU_SCALE_6x32:
+		{
+			selector2 =
+				_mm256_set1_epi16( *( ( int16_t* )post_ops_list_temp->op_args2 ) );
+
+			// c[0,0-15]
+			RELU_SCALE_OP_S16_AVX2(c_int16_0p0)
+
+			// c[0,16-31]
+			RELU_SCALE_OP_S16_AVX2(c_int16_0p1)
+
+			// c[1,0-15]
+			RELU_SCALE_OP_S16_AVX2(c_int16_1p0)
+
+			// c[1,16-31]
+			RELU_SCALE_OP_S16_AVX2(c_int16_1p1)
+
+			// c[2,0-15]
+			RELU_SCALE_OP_S16_AVX2(c_int16_2p0)
+
+			// c[2,16-31]
+			RELU_SCALE_OP_S16_AVX2(c_int16_2p1)
+
+			// c[3,0-15]
+			RELU_SCALE_OP_S16_AVX2(c_int16_3p0)
+
+			// c[3,16-31]
+			RELU_SCALE_OP_S16_AVX2(c_int16_3p1)
+
+			// c[4,0-15]
+			RELU_SCALE_OP_S16_AVX2(c_int16_4p0)
+
+			// c[4,16-31]
+			RELU_SCALE_OP_S16_AVX2(c_int16_4p1)
+
+			// c[5,0-15]
+			RELU_SCALE_OP_S16_AVX2(c_int16_5p0)
+
+			// c[5,16-31]
+			RELU_SCALE_OP_S16_AVX2(c_int16_5p1)
 
 			POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 		}

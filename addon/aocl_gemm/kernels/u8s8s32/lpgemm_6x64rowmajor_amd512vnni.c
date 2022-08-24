@@ -36,6 +36,7 @@
 
 #include "blis.h"
 #include "lpgemm_kernels.h"
+#include "lpgemm_s32_kern_macros.h"
 
 // 6x64 int8o32 kernel
 LPGEMM_MAIN_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_6x64)
@@ -44,7 +45,8 @@ LPGEMM_MAIN_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_6x64)
 						{
 						  &&POST_OPS_6x64_DISABLE,
 						  &&POST_OPS_BIAS_6x64,
-						  &&POST_OPS_RELU_6x64
+						  &&POST_OPS_RELU_6x64,
+						  &&POST_OPS_RELU_SCALE_6x64
 						};
 
 	dim_t MR = 6;
@@ -715,6 +717,88 @@ POST_OPS_RELU_6x64:
 
 			// c[5,48-63]
 			c_int32_5p3 = _mm512_max_epi32( selector1, c_int32_5p3 );
+
+			POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+		}
+POST_OPS_RELU_SCALE_6x64:
+		{
+			selector1 = _mm512_setzero_epi32();
+			selector2 =
+				_mm512_set1_epi32( *( ( int32_t* )post_ops_list_temp->op_args2 ) );
+
+			__mmask16 relu_cmp_mask;
+
+			// c[0, 0-15]
+			RELU_SCALE_OP_S32_AVX512(c_int32_0p0)
+
+			// c[0, 16-31]
+			RELU_SCALE_OP_S32_AVX512(c_int32_0p1)
+
+			// c[0, 32-47]
+			RELU_SCALE_OP_S32_AVX512(c_int32_0p2)
+
+			// c[0, 48-63]
+			RELU_SCALE_OP_S32_AVX512(c_int32_0p3)
+
+			// c[1, 0-15]
+			RELU_SCALE_OP_S32_AVX512(c_int32_1p0)
+
+			// c[1, 16-31]
+			RELU_SCALE_OP_S32_AVX512(c_int32_1p1)
+
+			// c[1, 32-47]
+			RELU_SCALE_OP_S32_AVX512(c_int32_1p2)
+
+			// c[1, 48-63]
+			RELU_SCALE_OP_S32_AVX512(c_int32_1p3)
+
+			// c[2, 0-15]
+			RELU_SCALE_OP_S32_AVX512(c_int32_2p0)
+
+			// c[2, 16-31]
+			RELU_SCALE_OP_S32_AVX512(c_int32_2p1)
+
+			// c[2, 32-47]
+			RELU_SCALE_OP_S32_AVX512(c_int32_2p2)
+
+			// c[2, 48-63]
+			RELU_SCALE_OP_S32_AVX512(c_int32_2p3)
+
+			// c[3, 0-15]
+			RELU_SCALE_OP_S32_AVX512(c_int32_3p0)
+
+			// c[3, 16-31]
+			RELU_SCALE_OP_S32_AVX512(c_int32_3p1)
+
+			// c[3, 32-47]
+			RELU_SCALE_OP_S32_AVX512(c_int32_3p2)
+
+			// c[3, 48-63]
+			RELU_SCALE_OP_S32_AVX512(c_int32_3p3)
+
+			// c[4, 0-15]
+			RELU_SCALE_OP_S32_AVX512(c_int32_4p0)
+
+			// c[4, 16-31]
+			RELU_SCALE_OP_S32_AVX512(c_int32_4p1)
+
+			// c[4, 32-47]
+			RELU_SCALE_OP_S32_AVX512(c_int32_4p2)
+
+			// c[4, 48-63]
+			RELU_SCALE_OP_S32_AVX512(c_int32_4p3)
+
+			// c[5, 0-15]
+			RELU_SCALE_OP_S32_AVX512(c_int32_5p0)
+
+			// c[5, 16-31]
+			RELU_SCALE_OP_S32_AVX512(c_int32_5p1)
+
+			// c[5, 32-47]
+			RELU_SCALE_OP_S32_AVX512(c_int32_5p2)
+
+			// c[5, 48-63]
+			RELU_SCALE_OP_S32_AVX512(c_int32_5p3)
 
 			POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 		}

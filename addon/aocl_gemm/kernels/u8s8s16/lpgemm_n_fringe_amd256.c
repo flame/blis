@@ -36,6 +36,7 @@
 
 #include "blis.h"
 #include "lpgemm_kernels.h"
+#include "lpgemm_s16_kern_macros.h"
 
 // 6x16 int8o16 kernel
 LPGEMM_N_FRINGE_KERN(uint8_t,int8_t,int16_t,u8s8s16o16_6x16)
@@ -47,7 +48,9 @@ LPGEMM_N_FRINGE_KERN(uint8_t,int8_t,int16_t,u8s8s16o16_6x16)
 		{
 			&&POST_OPS_6x16_DISABLE,
 			&&POST_OPS_BIAS_6x16,
-			&&POST_OPS_RELU_6x16};
+			&&POST_OPS_RELU_6x16,
+			&&POST_OPS_RELU_SCALE_6x16
+		};
 
 	dim_t m_full_pieces = m0 / MR;
 	dim_t m_full_pieces_loop_limit = m_full_pieces * MR;
@@ -318,6 +321,31 @@ POST_OPS_RELU_6x16:
 
 			POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 		}
+POST_OPS_RELU_SCALE_6x16:
+		{
+			selector2 =
+				_mm256_set1_epi16( *( ( int16_t* )post_ops_list_temp->op_args2 ) );
+
+			// c[0,0-15]
+			RELU_SCALE_OP_S16_AVX2(c_int16_0p0)
+
+			// c[1,0-15]
+			RELU_SCALE_OP_S16_AVX2(c_int16_1p0)
+
+			// c[2,0-15]
+			RELU_SCALE_OP_S16_AVX2(c_int16_2p0)
+
+			// c[3,0-15]
+			RELU_SCALE_OP_S16_AVX2(c_int16_3p0)
+
+			// c[4,0-15]
+			RELU_SCALE_OP_S16_AVX2(c_int16_4p0)
+
+			// c[5,0-15]
+			RELU_SCALE_OP_S16_AVX2(c_int16_5p0)
+
+			POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+		}
 POST_OPS_6x16_DISABLE:
 		;
 
@@ -410,7 +438,9 @@ LPGEMM_N_LT_NR0_FRINGE_KERN(uint8_t,int8_t,int16_t,u8s8s16o16_6xlt16)
 		{
 			&&POST_OPS_6xlt16_DISABLE,
 			&&POST_OPS_BIAS_6xlt16,
-			&&POST_OPS_RELU_6xlt16};
+			&&POST_OPS_RELU_6xlt16,
+			&&POST_OPS_RELU_SCALE_6xlt16
+		};
 
 	dim_t m_full_pieces = m0 / MR;
 	dim_t m_full_pieces_loop_limit = m_full_pieces * MR;
@@ -646,13 +676,12 @@ LPGEMM_N_LT_NR0_FRINGE_KERN(uint8_t,int8_t,int16_t,u8s8s16o16_6xlt16)
 		POST_OP_LABEL_LASTK_SAFE_JUMP
 POST_OPS_BIAS_6xlt16:
 		{
-			int16_t buf6[16];
-
-			memcpy(buf0, (int16_t *)(post_ops_list_temp->op_args1 +
-								post_op_c_j + ( 0 * 16 )), (n0_rem * sizeof(int16_t)));
+			memcpy( buf0, ( ( int16_t* )post_ops_list_temp->op_args1 +
+							post_op_c_j + ( 0 * 16 ) ),
+							( n0_rem * sizeof( int16_t ) ) );
 
 			selector1 =
-				_mm256_loadu_si256( (__m256i const *)buf6 );
+				_mm256_loadu_si256( ( __m256i const* )buf0 );
 			
 			// c[0,0-15]
 			c_int16_0p0 = _mm256_add_epi16( selector1, c_int16_0p0 );
@@ -698,21 +727,46 @@ POST_OPS_RELU_6xlt16:
 
 			POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 		}
+POST_OPS_RELU_SCALE_6xlt16:
+		{
+			selector2 =
+				_mm256_set1_epi16( *( ( int16_t* )post_ops_list_temp->op_args2 ) );
+
+			// c[0,0-15]
+			RELU_SCALE_OP_S16_AVX2(c_int16_0p0)
+
+			// c[1,0-15]
+			RELU_SCALE_OP_S16_AVX2(c_int16_1p0)
+
+			// c[2,0-15]
+			RELU_SCALE_OP_S16_AVX2(c_int16_2p0)
+
+			// c[3,0-15]
+			RELU_SCALE_OP_S16_AVX2(c_int16_3p0)
+
+			// c[4,0-15]
+			RELU_SCALE_OP_S16_AVX2(c_int16_4p0)
+
+			// c[5,0-15]
+			RELU_SCALE_OP_S16_AVX2(c_int16_5p0)
+
+			POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+		}
 POST_OPS_6xlt16_DISABLE:
 		;
 
 		// Store the results.
 		// c[0,0-15]
-		_mm256_storeu_si256((__m256i_u *)buf0, c_int16_0p0);
+		_mm256_storeu_si256((__m256i *)buf0, c_int16_0p0);
 
 		// c[1,0-15]
-		_mm256_storeu_si256((__m256i_u *)buf1, c_int16_1p0);
+		_mm256_storeu_si256((__m256i *)buf1, c_int16_1p0);
 
 		// c[2,0-15]
-		_mm256_storeu_si256((__m256i_u *)buf2, c_int16_2p0);
+		_mm256_storeu_si256((__m256i *)buf2, c_int16_2p0);
 
 		// c[3,0-15]
-		_mm256_storeu_si256((__m256i_u *)buf3, c_int16_3p0);
+		_mm256_storeu_si256((__m256i *)buf3, c_int16_3p0);
 
 		// c[4,0-15]
 		_mm256_storeu_si256((__m256i *)buf4, c_int16_4p0);

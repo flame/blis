@@ -40,10 +40,8 @@ typedef enum
 	POST_OPS_DISABLE = 0,
 	POST_OPS_BIAS = 1,
 	POST_OPS_RELU = 2,
-	POST_OPS_SUM = 3,
-	POST_OPS_LINEAR = 4,
-	POST_OPS_GELU = 5,
-	POST_OPS_CLIP = 6,
+	POST_OPS_RELU_SCALE = 3,
+	POST_OPS_SUM = 4,
 } LPGEMM_POST_OP_CODE;
 
 // Used as an internal structure.
