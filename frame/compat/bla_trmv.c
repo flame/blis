@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin.
-   Copyright (C) 2020 - 2021, Advanced Micro Devices, Inc.All Rights Reserved.
+   Copyright (C) 2020 - 2022, Advanced Micro Devices, Inc.All Rights Reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -42,7 +42,7 @@
 #undef  GENTFUNC
 #define GENTFUNC( ftype, ch, blasname, blisname ) \
 \
-void PASTEF77(ch,blasname) \
+void PASTEF77S(ch,blasname) \
      ( \
        const f77_char* uploa, \
        const f77_char* transa, \
@@ -116,6 +116,20 @@ void PASTEF77(ch,blasname) \
 	/* Finalize BLIS. */ \
 	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1) \
 	bli_finalize_auto(); \
+}\
+\
+void PASTEF77(ch,blasname) \
+     ( \
+       const f77_char* uploa, \
+       const f77_char* transa, \
+       const f77_char* diaga, \
+       const f77_int*  m, \
+       const ftype*    a, const f77_int* lda, \
+             ftype*    x, const f77_int* incx  \
+     ) \
+{ \
+    PASTEF77S(ch,blasname) \
+    ( uploa, transa, diaga, m, a, lda, x, incx );\
 }
 
 #ifdef BLIS_ENABLE_BLAS

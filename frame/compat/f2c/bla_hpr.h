@@ -5,7 +5,8 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-
+   Copyright (C) 2020 - 2022, Advanced Micro Devices, Inc. All rights reserved.
+   
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
    met:
@@ -36,5 +37,7 @@
 
 BLIS_EXPORT_BLAS int PASTEF77(c,hpr)(const bla_character *uplo, const bla_integer *n, const bla_real *alpha, const bla_scomplex *x, const bla_integer *incx, bla_scomplex *ap);
 BLIS_EXPORT_BLAS int PASTEF77(z,hpr)(const bla_character *uplo, const bla_integer *n, const bla_double *alpha, const bla_dcomplex *x, const bla_integer *incx, bla_dcomplex *ap);
+BLIS_EXPORT_BLAS int PASTEF77S(c,hpr)(const bla_character *uplo, const bla_integer *n, const bla_real *alpha, const bla_scomplex *x, const bla_integer *incx, bla_scomplex *ap);
+BLIS_EXPORT_BLAS int PASTEF77S(z,hpr)(const bla_character *uplo, const bla_integer *n, const bla_double *alpha, const bla_dcomplex *x, const bla_integer *incx, bla_dcomplex *ap);
 
 #endif

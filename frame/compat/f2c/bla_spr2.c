@@ -5,7 +5,8 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-
+   Copyright (C) 2020 - 2022, Advanced Micro Devices, Inc. All rights reserved.
+   
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
    met:
@@ -41,7 +42,8 @@
 	-lf2c -lm   (in that order)
 */
 
-/* Subroutine */ int PASTEF77(d,spr2)(const bla_character *uplo, const bla_integer *n, const bla_double *alpha, const bla_double *x, const bla_integer *incx, const bla_double *y, const bla_integer *incy, bla_double *ap)
+/* Subroutine */ 
+int PASTEF77S(d,spr2)(const bla_character *uplo, const bla_integer *n, const bla_double *alpha, const bla_double *x, const bla_integer *incx, const bla_double *y, const bla_integer *incy, bla_double *ap)
 {
     /* System generated locals */
     bla_integer i__1, i__2;
@@ -300,7 +302,8 @@
 	-lf2c -lm   (in that order)
 */
 
-/* Subroutine */ int PASTEF77(s,spr2)(const bla_character *uplo, const bla_integer *n, const bla_real *alpha, const bla_real *x, const bla_integer *incx, const bla_real *y, const bla_integer *incy, bla_real *ap)
+/* Subroutine */ 
+int PASTEF77S(s,spr2)(const bla_character *uplo, const bla_integer *n, const bla_real *alpha, const bla_real *x, const bla_integer *incx, const bla_real *y, const bla_integer *incy, bla_real *ap)
 {
     /* System generated locals */
     bla_integer i__1, i__2;
@@ -553,6 +556,16 @@
 /*     End of SSPR2 . */
 
 } /* sspr2_ */
+
+int PASTEF77(d,spr2)(const bla_character *uplo, const bla_integer *n, const bla_double *alpha, const bla_double *x, const bla_integer *incx, const bla_double *y, const bla_integer *incy, bla_double *ap)
+{
+  return PASTEF77S(d,spr2)( uplo, n, alpha, x, incx, y, incy,ap );
+}
+
+int PASTEF77(s,spr2)(const bla_character *uplo, const bla_integer *n, const bla_real *alpha, const bla_real *x, const bla_integer *incx, const bla_real *y, const bla_integer *incy, bla_real *ap)
+{
+  return PASTEF77S(s,spr2)( uplo, n, alpha, x, incx, y, incy,ap );
+}
 
 #endif
 
