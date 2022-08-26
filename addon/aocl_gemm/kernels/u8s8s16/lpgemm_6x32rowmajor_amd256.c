@@ -104,17 +104,11 @@ LPGEMM_MAIN_KERN(uint8_t,int8_t,int16_t,u8s8s16o16_6x32)
 		return;
 	}
 
-	// B matrix storage.
-	__m256i b0, b1;
-
-	// A matrix storage.
-	__m256i a_int32_0, a_int32_1;
-
-	// Intermediate vectors
-	__m256i inter_vec[4];
-
 	for (dim_t ir = 0; ir < m_full_pieces_loop_limit; ir += MR)
 	{
+
+		_mm256_zeroupper();
+
 		// Registers to use for accumulating C.
 		__m256i c_int16_0p0 = _mm256_setzero_si256();
 		__m256i c_int16_0p1 = _mm256_setzero_si256();
@@ -139,246 +133,293 @@ LPGEMM_MAIN_KERN(uint8_t,int8_t,int16_t,u8s8s16o16_6x32)
 			dim_t offset = kr * 2;
 
 			// Broadcast a[0,kr:kr+2].
-			a_int32_0 = _mm256_set1_epi16(*(uint16_t *)(a + (rs_a * 0) + (cs_a * offset)));
+			__m256i a_int32_0 =
+					_mm256_set1_epi16(*(uint16_t *)(a + (rs_a * 0)
+											+ (cs_a * offset)));
 
-			b0 = _mm256_loadu_si256((__m256i const *)(b + (64 * kr) + (NR * 0)));
-			b1 = _mm256_loadu_si256((__m256i const *)(b + (64 * kr) + (NR * 1)));
-
-			// Broadcast a[1,kr:kr+2].
-			a_int32_1 = _mm256_set1_epi16(*(uint16_t *)(a + (rs_a * 1) + (cs_a * offset)));
+			__m256i b0 = 
+					_mm256_loadu_si256((__m256i const *)(b + (64 * kr) + (NR * 0)));
+			__m256i b1 = 
+					_mm256_loadu_si256((__m256i const *)(b + (64 * kr) + (NR * 1)));
 
 			// Seperate register for intermediate op
-			inter_vec[0] = _mm256_maddubs_epi16(a_int32_0, b0);
-			inter_vec[1] = _mm256_maddubs_epi16(a_int32_0, b1);
+			__m256i inter_vec = _mm256_maddubs_epi16(a_int32_0, b0);
 
 			// Perform column direction mat-mul with k = 2.
 			// c[0,0-31] = a[0,kr:kr+2]*b[kr:kr+2,0-31]
-			c_int16_0p0 = _mm256_add_epi16(inter_vec[0], c_int16_0p0);
-			c_int16_0p1 = _mm256_add_epi16(inter_vec[1], c_int16_0p1);
+			c_int16_0p0 = _mm256_add_epi16(inter_vec, c_int16_0p0);
 
-			// Broadcast a[2,kr:kr+2].
-			a_int32_0 = _mm256_set1_epi16(*(uint16_t *)(a + (rs_a * 2) + (cs_a * offset)));
+			inter_vec = _mm256_maddubs_epi16(a_int32_0, b1);
+			c_int16_0p1 = _mm256_add_epi16(inter_vec, c_int16_0p1);
+
+			// Broadcast a[1,kr:kr+2].
+			a_int32_0 =
+				_mm256_set1_epi16(*(uint16_t *)(a + (rs_a * 1) + (cs_a * offset)));
 
 			// Seperate register for intermediate op
-			inter_vec[2] = _mm256_maddubs_epi16(a_int32_1, b0);
-			inter_vec[3] = _mm256_maddubs_epi16(a_int32_1, b1);
+			inter_vec = _mm256_maddubs_epi16(a_int32_0, b0);
 
 			// Perform column direction mat-mul with k = 2.
 			// c[1,0-31] = a[0,kr:kr+2]*b[kr:kr+2,0-31]
-			c_int16_1p0 = _mm256_add_epi16(inter_vec[2], c_int16_1p0);
-			c_int16_1p1 = _mm256_add_epi16(inter_vec[3], c_int16_1p1);
+			c_int16_1p0 = _mm256_add_epi16(inter_vec, c_int16_1p0);
+
+			inter_vec = _mm256_maddubs_epi16(a_int32_0, b1);
+			c_int16_1p1 = _mm256_add_epi16(inter_vec, c_int16_1p1);
+
+			// Broadcast a[2,kr:kr+2].
+			a_int32_0 = 
+				_mm256_set1_epi16(*(uint16_t *)(a + (rs_a * 2) + (cs_a * offset)));
+
+			// Seperate register for intermediate op
+			inter_vec = _mm256_maddubs_epi16(a_int32_0, b0);
+			// Perform column direction mat-mul with k = 2.
+			// c[0,0-31] = a[0,kr:kr+2]*b[kr:kr+2,0-31]
+			c_int16_2p0 = _mm256_add_epi16(inter_vec, c_int16_2p0);
+
+			inter_vec = _mm256_maddubs_epi16(a_int32_0, b1);
+			c_int16_2p1 = _mm256_add_epi16(inter_vec, c_int16_2p1);
 
 			// Broadcast a[3,kr:kr+2].
-			a_int32_1 = _mm256_set1_epi16(*(uint16_t *)(a + (rs_a * 3) + (cs_a * offset)));
+			a_int32_0 = 
+				_mm256_set1_epi16(*(uint16_t *)(a + (rs_a * 3) + (cs_a * offset)));
 
 			// Seperate register for intermediate op
-			inter_vec[0] = _mm256_maddubs_epi16(a_int32_0, b0);
-			inter_vec[1] = _mm256_maddubs_epi16(a_int32_0, b1);
+			inter_vec = _mm256_maddubs_epi16(a_int32_0, b0);
 
 			// Perform column direction mat-mul with k = 2.
 			// c[0,0-31] = a[0,kr:kr+2]*b[kr:kr+2,0-31]
-			c_int16_2p0 = _mm256_add_epi16(inter_vec[0], c_int16_2p0);
-			c_int16_2p1 = _mm256_add_epi16(inter_vec[1], c_int16_2p1);
+			c_int16_3p0 = _mm256_add_epi16(inter_vec, c_int16_3p0);
+
+			inter_vec = _mm256_maddubs_epi16(a_int32_0, b1);
+			c_int16_3p1 = _mm256_add_epi16(inter_vec, c_int16_3p1);
 
 			// Broadcast a[4,kr:kr+2].
-			a_int32_0 = _mm256_set1_epi16(*(uint16_t *)(a + (rs_a * 4) + (cs_a * offset)));
+			a_int32_0 =
+				_mm256_set1_epi16(*(uint16_t *)(a + (rs_a * 4) + (cs_a * offset)));
 
 			// Seperate register for intermediate op
-			inter_vec[2] = _mm256_maddubs_epi16(a_int32_1, b0);
-			inter_vec[3] = _mm256_maddubs_epi16(a_int32_1, b1);
+			inter_vec = _mm256_maddubs_epi16(a_int32_0, b0);
 
 			// Perform column direction mat-mul with k = 2.
-			// c[0,0-31] = a[0,kr:kr+2]*b[kr:kr+2,0-31]
-			c_int16_3p0 = _mm256_add_epi16(inter_vec[2], c_int16_3p0);
-			c_int16_3p1 = _mm256_add_epi16(inter_vec[3], c_int16_3p1);
+			// c[0,0-31] = a[0,kr:kr+2]*b[kr:kr+4,0-31]
+			c_int16_4p0 = _mm256_add_epi16(inter_vec, c_int16_4p0);
+
+			inter_vec = _mm256_maddubs_epi16(a_int32_0, b1);
+
+			c_int16_4p1 = _mm256_add_epi16(inter_vec, c_int16_4p1);
 
 			// Broadcast a[5,kr:kr+2].
-			a_int32_1 = _mm256_set1_epi16(*(uint16_t *)(a + (rs_a * 5) + (cs_a * offset)));
+			a_int32_0 = 
+				_mm256_set1_epi16(*(uint16_t *)(a + (rs_a * 5) + (cs_a * offset)));
 
 			// Seperate register for intermediate op
-			inter_vec[0] = _mm256_maddubs_epi16(a_int32_0, b0);
-			inter_vec[1] = _mm256_maddubs_epi16(a_int32_0, b1);
+			inter_vec = _mm256_maddubs_epi16(a_int32_0, b0);
 
 			// Perform column direction mat-mul with k = 2.
 			// c[0,0-31] = a[0,kr:kr+2]*b[kr:kr+4,0-31]
-			c_int16_4p0 = _mm256_add_epi16(inter_vec[0], c_int16_4p0);
-			c_int16_4p1 = _mm256_add_epi16(inter_vec[1], c_int16_4p1);
+			c_int16_5p0 = _mm256_add_epi16(inter_vec, c_int16_5p0);
 
-			// Seperate register for intermediate op
-			inter_vec[2] = _mm256_maddubs_epi16(a_int32_1, b0);
-			inter_vec[3] = _mm256_maddubs_epi16(a_int32_1, b1);
-
-			// Perform column direction mat-mul with k = 2.
-			// c[0,0-31] = a[0,kr:kr+2]*b[kr:kr+4,0-31]
-			c_int16_5p0 = _mm256_add_epi16(inter_vec[2], c_int16_5p0);
-			c_int16_5p1 = _mm256_add_epi16(inter_vec[3], c_int16_5p1);
+			inter_vec = _mm256_maddubs_epi16(a_int32_0, b1);
+			c_int16_5p1 = _mm256_add_epi16(inter_vec, c_int16_5p1);
 		}
 
 		// Handle k remainder.
 		if (k_partial_pieces > 0)
 		{
-			uint8_t a_kfringe;
 
-			b0 = _mm256_loadu_si256((__m256i const *)(b + (64 * k_full_pieces) + (NR * 0)));
-			b1 = _mm256_loadu_si256((__m256i const *)(b + (64 * k_full_pieces) + (NR * 1)));
+			__m256i b0 = _mm256_loadu_si256((__m256i const *)
+							(b + (64 * k_full_pieces) + (NR * 0)));
+			__m256i b1 = _mm256_loadu_si256((__m256i const *)
+							(b + (64 * k_full_pieces) + (NR * 1)));
 
-			a_kfringe = *(a + (rs_a * 0) + (cs_a * (k_full_pieces * 2)));
-			a_int32_0 = _mm256_set1_epi8(a_kfringe);
+			uint8_t a_kfringe = *(a + (rs_a * 0) + (cs_a * (k_full_pieces * 2)));
+			__m256i a_int32_0 = _mm256_set1_epi8(a_kfringe);
 
 			// Seperate register for intermediate op
-			inter_vec[0] = _mm256_maddubs_epi16(a_int32_0, b0);
-			inter_vec[1] = _mm256_maddubs_epi16(a_int32_0, b1);
+			__m256i inter_vec = _mm256_maddubs_epi16(a_int32_0, b0);
 
 			// Perform column direction mat-mul with k = 2.
 			// c[0,0-31] = a[0,kr:kr+2]*b[kr:kr+2,0-31]
-			c_int16_0p0 = _mm256_add_epi16(inter_vec[0], c_int16_0p0);
-			c_int16_0p1 = _mm256_add_epi16(inter_vec[1], c_int16_0p1);
+			c_int16_0p0 = _mm256_add_epi16(inter_vec, c_int16_0p0);
+
+			inter_vec = _mm256_maddubs_epi16(a_int32_0, b1);
+			c_int16_0p1 = _mm256_add_epi16(inter_vec, c_int16_0p1);
 
 			a_kfringe = *(a + (rs_a * 1) + (cs_a * (k_full_pieces * 2)));
-			a_int32_1 = _mm256_set1_epi8(a_kfringe);
+			a_int32_0 = _mm256_set1_epi8(a_kfringe);
 
 			// Seperate register for intermediate op
-			inter_vec[2] = _mm256_maddubs_epi16(a_int32_1, b0);
-			inter_vec[3] = _mm256_maddubs_epi16(a_int32_1, b1);
+			inter_vec = _mm256_maddubs_epi16(a_int32_0, b0);
 
 			// Perform column direction mat-mul with k = 2.
 			// c[0,0-31] = a[0,kr:kr+2]*b[kr:kr+4,0-31]
-			c_int16_1p0 = _mm256_add_epi16(inter_vec[2], c_int16_1p0);
-			c_int16_1p1 = _mm256_add_epi16(inter_vec[3], c_int16_1p1);
+			c_int16_1p0 = _mm256_add_epi16(inter_vec, c_int16_1p0);
+
+			inter_vec = _mm256_maddubs_epi16(a_int32_0, b1);
+			c_int16_1p1 = _mm256_add_epi16(inter_vec, c_int16_1p1);
 
 			a_kfringe = *(a + (rs_a * 2) + (cs_a * (k_full_pieces * 2)));
 			a_int32_0 = _mm256_set1_epi8(a_kfringe);
 
 			// Seperate register for intermediate op
-			inter_vec[0] = _mm256_maddubs_epi16(a_int32_0, b0);
-			inter_vec[1] = _mm256_maddubs_epi16(a_int32_0, b1);
+			inter_vec = _mm256_maddubs_epi16(a_int32_0, b0);
 
 			// Perform column direction mat-mul with k = 2.
 			// c[0,0-31] = a[0,kr:kr+2]*b[kr:kr+2,0-31]
-			c_int16_2p0 = _mm256_add_epi16(inter_vec[0], c_int16_2p0);
-			c_int16_2p1 = _mm256_add_epi16(inter_vec[1], c_int16_2p1);
+			c_int16_2p0 = _mm256_add_epi16(inter_vec, c_int16_2p0);
+
+			inter_vec = _mm256_maddubs_epi16(a_int32_0, b1);
+
+			c_int16_2p1 = _mm256_add_epi16(inter_vec, c_int16_2p1);
 
 			a_kfringe = *(a + (rs_a * 3) + (cs_a * (k_full_pieces * 2)));
-			a_int32_1 = _mm256_set1_epi8(a_kfringe);
+			a_int32_0 = _mm256_set1_epi8(a_kfringe);
 
 			// Seperate register for intermediate op
-			inter_vec[2] = _mm256_maddubs_epi16(a_int32_1, b0);
-			inter_vec[3] = _mm256_maddubs_epi16(a_int32_1, b1);
+			inter_vec = _mm256_maddubs_epi16(a_int32_0, b0);
 
 			// Perform column direction mat-mul with k = 2.
 			// c[0,0-31] = a[0,kr:kr+2]*b[kr:kr+2,0-31]
-			c_int16_3p0 = _mm256_add_epi16(inter_vec[2], c_int16_3p0);
-			c_int16_3p1 = _mm256_add_epi16(inter_vec[3], c_int16_3p1);
+			c_int16_3p0 = _mm256_add_epi16(inter_vec, c_int16_3p0);
+
+			inter_vec = _mm256_maddubs_epi16(a_int32_0, b1);
+			c_int16_3p1 = _mm256_add_epi16(inter_vec, c_int16_3p1);
 
 			a_kfringe = *(a + (rs_a * 4) + (cs_a * (k_full_pieces * 2)));
 			a_int32_0 = _mm256_set1_epi8(a_kfringe);
 
 			// Seperate register for intermediate op
-			inter_vec[0] = _mm256_maddubs_epi16(a_int32_0, b0);
-			inter_vec[1] = _mm256_maddubs_epi16(a_int32_0, b1);
+			inter_vec = _mm256_maddubs_epi16(a_int32_0, b0);
 
 			// Perform column direction mat-mul with k = 2.
 			// c[0,0-31] = a[0,kr:kr+2]*b[kr:kr+2,0-31]
-			c_int16_4p0 = _mm256_add_epi16(inter_vec[0], c_int16_4p0);
-			c_int16_4p1 = _mm256_add_epi16(inter_vec[1], c_int16_4p1);
+			c_int16_4p0 = _mm256_add_epi16(inter_vec, c_int16_4p0);
+
+			inter_vec = _mm256_maddubs_epi16(a_int32_0, b1);
+			c_int16_4p1 = _mm256_add_epi16(inter_vec, c_int16_4p1);
 
 			a_kfringe = *(a + (rs_a * 5) + (cs_a * (k_full_pieces * 2)));
-			a_int32_1 = _mm256_set1_epi8(a_kfringe);
+			a_int32_0 = _mm256_set1_epi8(a_kfringe);
 
 			// Seperate register for intermediate op
-			inter_vec[2] = _mm256_maddubs_epi16(a_int32_1, b0);
-			inter_vec[3] = _mm256_maddubs_epi16(a_int32_1, b1);
+			inter_vec = _mm256_maddubs_epi16(a_int32_0, b0);
 
 			// Perform column direction mat-mul with k = 2.
 			// c[0,0-31] = a[0,kr:kr+2]*b[kr:kr+2,0-31]
-			c_int16_5p0 = _mm256_add_epi16(inter_vec[2], c_int16_5p0);
-			c_int16_5p1 = _mm256_add_epi16(inter_vec[3], c_int16_5p1);
+			c_int16_5p0 = _mm256_add_epi16(inter_vec, c_int16_5p0);
+
+			inter_vec = _mm256_maddubs_epi16(a_int32_0, b1);
+			c_int16_5p1 = _mm256_add_epi16(inter_vec, c_int16_5p1);
 		}
 
 		// Load alpha and beta
-		__m256i selector1 = _mm256_set1_epi16(alpha);
-		__m256i selector2 = _mm256_set1_epi16(beta);
+		__m256i alphav = _mm256_set1_epi16(alpha);
+		__m256i betav = _mm256_set1_epi16(beta);
 
 		// Scale by alpha
-		c_int16_0p0 = _mm256_mullo_epi16(selector1, c_int16_0p0);
-		c_int16_0p1 = _mm256_mullo_epi16(selector1, c_int16_0p1);
+		c_int16_0p0 = _mm256_mullo_epi16(alphav, c_int16_0p0);
+		c_int16_0p1 = _mm256_mullo_epi16(alphav, c_int16_0p1);
 
-		c_int16_1p0 = _mm256_mullo_epi16(selector1, c_int16_1p0);
-		c_int16_1p1 = _mm256_mullo_epi16(selector1, c_int16_1p1);
+		c_int16_1p0 = _mm256_mullo_epi16(alphav, c_int16_1p0);
+		c_int16_1p1 = _mm256_mullo_epi16(alphav, c_int16_1p1);
 
-		c_int16_2p0 = _mm256_mullo_epi16(selector1, c_int16_2p0);
-		c_int16_2p1 = _mm256_mullo_epi16(selector1, c_int16_2p1);
+		c_int16_2p0 = _mm256_mullo_epi16(alphav, c_int16_2p0);
+		c_int16_2p1 = _mm256_mullo_epi16(alphav, c_int16_2p1);
 
-		c_int16_3p0 = _mm256_mullo_epi16(selector1, c_int16_3p0);
-		c_int16_3p1 = _mm256_mullo_epi16(selector1, c_int16_3p1);
+		c_int16_3p0 = _mm256_mullo_epi16(alphav, c_int16_3p0);
+		c_int16_3p1 = _mm256_mullo_epi16(alphav, c_int16_3p1);
 
-		c_int16_4p0 = _mm256_mullo_epi16(selector1, c_int16_4p0);
-		c_int16_4p1 = _mm256_mullo_epi16(selector1, c_int16_4p1);
+		c_int16_4p0 = _mm256_mullo_epi16(alphav, c_int16_4p0);
+		c_int16_4p1 = _mm256_mullo_epi16(alphav, c_int16_4p1);
 
-		c_int16_5p0 = _mm256_mullo_epi16(selector1, c_int16_5p0);
-		c_int16_5p1 = _mm256_mullo_epi16(selector1, c_int16_5p1);
+		c_int16_5p0 = _mm256_mullo_epi16(alphav, c_int16_5p0);
+		c_int16_5p1 = _mm256_mullo_epi16(alphav, c_int16_5p1);
 
 		// Scale C by beta.
 		if (beta != 0)
 		{
 			// c[0,0-15]
-			selector1 = _mm256_loadu_si256((__m256i const *)(c + (rs_c * (ir + 0)) + (0 * 16)));
-			selector1 = _mm256_mullo_epi16(selector2, selector1);
+			__m256i selector1 =
+				_mm256_loadu_si256((__m256i const *)
+					(c + (rs_c * (ir + 0)) + (0 * 16)));
+			selector1 = _mm256_mullo_epi16(betav, selector1);
 			c_int16_0p0 = _mm256_add_epi16(selector1, c_int16_0p0);
 
 			// c[0, 16-31]
-			selector1 = _mm256_loadu_si256((__m256i const *)(c + (rs_c * (ir + 0)) + (1 * 16)));
-			selector1 = _mm256_mullo_epi16(selector2, selector1);
+			selector1 =
+				_mm256_loadu_si256((__m256i const *)
+					(c + (rs_c * (ir + 0)) + (1 * 16)));
+			selector1 = _mm256_mullo_epi16(betav, selector1);
 			c_int16_0p1 = _mm256_add_epi16(selector1, c_int16_0p1);
 
 			// c[1,0-15]
-			selector1 = _mm256_loadu_si256((__m256i const *)(c + (rs_c * (ir + 1)) + (0 * 16)));
-			selector1 = _mm256_mullo_epi16(selector2, selector1);
+			selector1 =
+				_mm256_loadu_si256((__m256i const *)
+					(c + (rs_c * (ir + 1)) + (0 * 16)));
+			selector1 = _mm256_mullo_epi16(betav, selector1);
 			c_int16_1p0 = _mm256_add_epi16(selector1, c_int16_1p0);
 
 			// c[1,16-31]
-			selector1 = _mm256_loadu_si256((__m256i const *)(c + (rs_c * (ir + 1)) + (1 * 16)));
-			selector1 = _mm256_mullo_epi16(selector2, selector1);
+			selector1 =
+				_mm256_loadu_si256((__m256i const *)
+					(c + (rs_c * (ir + 1)) + (1 * 16)));
+			selector1 = _mm256_mullo_epi16(betav, selector1);
 			c_int16_1p1 = _mm256_add_epi16(selector1, c_int16_1p1);
 
 			// c[2,0-15]
-			selector1 = _mm256_loadu_si256((__m256i const *)(c + (rs_c * (ir + 2)) + (0 * 16)));
-			selector1 = _mm256_mullo_epi16(selector2, selector1);
+			selector1 =
+				_mm256_loadu_si256((__m256i const *)
+					(c + (rs_c * (ir + 2)) + (0 * 16)));
+			selector1 = _mm256_mullo_epi16(betav, selector1);
 			c_int16_2p0 = _mm256_add_epi16(selector1, c_int16_2p0);
 
 			// c[2,16-31]
-			selector1 = _mm256_loadu_si256((__m256i const *)(c + (rs_c * (ir + 2)) + (1 * 16)));
-			selector1 = _mm256_mullo_epi16(selector2, selector1);
+			selector1 =
+				_mm256_loadu_si256((__m256i const *)
+					(c + (rs_c * (ir + 2)) + (1 * 16)));
+			selector1 = _mm256_mullo_epi16(betav, selector1);
 			c_int16_2p1 = _mm256_add_epi16(selector1, c_int16_2p1);
 
 			// c[3,0-15]
-			selector1 = _mm256_loadu_si256((__m256i const *)(c + (rs_c * (ir + 3)) + (0 * 16)));
-			selector1 = _mm256_mullo_epi16(selector2, selector1);
+			selector1 =
+				_mm256_loadu_si256((__m256i const *)
+					(c + (rs_c * (ir + 3)) + (0 * 16)));
+			selector1 = _mm256_mullo_epi16(betav, selector1);
 			c_int16_3p0 = _mm256_add_epi16(selector1, c_int16_3p0);
 
 			// c[3,16-31]
-			selector1 = _mm256_loadu_si256((__m256i const *)(c + (rs_c * (ir + 3)) + (1 * 16)));
-			selector1 = _mm256_mullo_epi16(selector2, selector1);
+			selector1 =
+				_mm256_loadu_si256((__m256i const *)
+					(c + (rs_c * (ir + 3)) + (1 * 16)));
+			selector1 = _mm256_mullo_epi16(betav, selector1);
 			c_int16_3p1 = _mm256_add_epi16(selector1, c_int16_3p1);
 
 			// c[4,0-15]
-			selector1 = _mm256_loadu_si256((__m256i const *)(c + (rs_c * (ir + 4)) + (0 * 16)));
-			selector1 = _mm256_mullo_epi16(selector2, selector1);
+			selector1 =
+				_mm256_loadu_si256((__m256i const *)
+					(c + (rs_c * (ir + 4)) + (0 * 16)));
+			selector1 = _mm256_mullo_epi16(betav, selector1);
 			c_int16_4p0 = _mm256_add_epi16(selector1, c_int16_4p0);
 
 			// c[4,16-31]
-			selector1 = _mm256_loadu_si256((__m256i const *)(c + (rs_c * (ir + 4)) + (1 * 16)));
-			selector1 = _mm256_mullo_epi16(selector2, selector1);
+			selector1 =
+				_mm256_loadu_si256((__m256i const *)
+					(c + (rs_c * (ir + 4)) + (1 * 16)));
+			selector1 = _mm256_mullo_epi16(betav, selector1);
 			c_int16_4p1 = _mm256_add_epi16(selector1, c_int16_4p1);
 
 			// c[5,0-15]
-			selector1 = _mm256_loadu_si256((__m256i const *)(c + (rs_c * (ir + 5)) + (0 * 16)));
-			selector1 = _mm256_mullo_epi16(selector2, selector1);
+			selector1 =
+				_mm256_loadu_si256((__m256i const *)
+					(c + (rs_c * (ir + 5)) + (0 * 16)));
+			selector1 = _mm256_mullo_epi16(betav, selector1);
 			c_int16_5p0 = _mm256_add_epi16(selector1, c_int16_5p0);
 
 			// c[5,16-31]
-			selector1 = _mm256_loadu_si256((__m256i const *)(c + (rs_c * (ir + 5)) + (1 * 16)));
-			selector1 = _mm256_mullo_epi16(selector2, selector1);
+			selector1 =
+				_mm256_loadu_si256((__m256i const *)
+					(c + (rs_c * (ir + 5)) + (1 * 16)));
+			selector1 = _mm256_mullo_epi16(betav, selector1);
 			c_int16_5p1 = _mm256_add_epi16(selector1, c_int16_5p1);
 		}
 
@@ -387,15 +428,17 @@ LPGEMM_MAIN_KERN(uint8_t,int8_t,int16_t,u8s8s16o16_6x32)
 		POST_OP_LABEL_LASTK_SAFE_JUMP
 POST_OPS_BIAS_6x32:
 		{
-			selector1 =
-				_mm256_loadu_si256( (__m256i const *)((int16_t *)post_ops_list_temp->op_args1 +
+			__m256i selector1 =
+				_mm256_loadu_si256( (__m256i const *)(
+					(int16_t *)post_ops_list_temp->op_args1 +
 								post_op_c_j + ( 0 * 16 )) );
-			selector2 =
-				_mm256_loadu_si256( (__m256i const *)((int16_t *)post_ops_list_temp->op_args1 +
+			__m256i selector2 =
+				_mm256_loadu_si256( (__m256i const *)(
+					(int16_t *)post_ops_list_temp->op_args1 +
 								post_op_c_j + ( 1 * 16 )) );
-			
+
 			// c[0,0-15]
-			c_int16_0p0 = _mm256_add_epi16( selector1, c_int16_0p0 );
+			c_int16_0p0 = _mm256_add_epi16(selector1, c_int16_0p0);
 
 			// c[0, 16-31]
 			c_int16_0p1 = _mm256_add_epi16( selector2, c_int16_0p1 );
@@ -434,7 +477,7 @@ POST_OPS_BIAS_6x32:
 		}
 POST_OPS_RELU_6x32:
 		{
-			selector1 = _mm256_setzero_si256 ();
+			__m256i selector1 = _mm256_setzero_si256 ();
 
 			// c[0,0-15]
 			c_int16_0p0 = _mm256_max_epi16( selector1, c_int16_0p0 );
@@ -476,8 +519,10 @@ POST_OPS_RELU_6x32:
 		}
 POST_OPS_RELU_SCALE_6x32:
 		{
-			selector2 =
+			__m256i selector2 =
 				_mm256_set1_epi16( *( ( int16_t* )post_ops_list_temp->op_args2 ) );
+
+			__m256i selector1, b0;
 
 			// c[0,0-15]
 			RELU_SCALE_OP_S16_AVX2(c_int16_0p0)
