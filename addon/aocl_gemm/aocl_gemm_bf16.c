@@ -46,8 +46,8 @@ AOCL_GEMM_MATMUL(bfloat16,bfloat16,float,bf16bf16f32of32)
 	trans_t blis_transa;
 	trans_t blis_transb;
 
-	// Check if avx512_vnni ISA is supported, lpgemm matmul only works with it.
-	if ( bli_cpuid_is_avx512vnni_supported() == FALSE )
+	// Check if avx512_bf16 ISA is supported, lpgemm matmul only works with it.
+	if ( bli_cpuid_is_avx512_bf16_supported() == FALSE )
 	{
 		printf(" AVX512_BF16 ISA not supported by processor, cannot perform lpgemm.\n");
 		return; // Error.
