@@ -399,14 +399,14 @@ void dzgemm_
 	);
 
 	/* Quick return if possible. */
-	if ( *m == 0 || *n == 0 || (( PASTEMAC(ch,eq0)( *alpha ) || *k == 0)
-	   && PASTEMAC(ch,eq1)( *beta ) ))
+	if ( *m == 0 || *n == 0 || (( PASTEMAC(z,eq0)( *alpha ) || *k == 0)
+	   && PASTEMAC(z,eq1)( *beta ) ))
 	{
 	  AOCL_DTL_LOG_GEMM_STATS(AOCL_DTL_LEVEL_TRACE_1, *m, *n, *k);
 	  AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
 	  /* Finalize BLIS. */
 	  bli_finalize_auto();
-	  return; \
+	  return;
 	}
 
 	/* Map BLAS chars to their corresponding BLIS enumerated type value. */
