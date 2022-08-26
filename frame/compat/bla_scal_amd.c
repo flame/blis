@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2020-22, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2020-2022, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -42,7 +42,7 @@
 #undef  GENTFUNCSCAL
 #define GENTFUNCSCAL( ftype_x, ftype_a, chx, cha, blasname, blisname ) \
 \
-void PASTEF772(chx,cha,blasname) \
+void PASTEF772S(chx,cha,blasname) \
      ( \
        const f77_int* n, \
        const ftype_a* alpha, \
@@ -90,11 +90,20 @@ void PASTEF772(chx,cha,blasname) \
   AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1) \
 	/* Finalize BLIS. */ \
 	bli_finalize_auto(); \
+}\
+void PASTEF772(chx,cha,blasname) \
+     ( \
+       const f77_int* n, \
+       const ftype_a* alpha, \
+       ftype_x* x, const f77_int* incx  \
+     ) \
+{ \
+  PASTEF772S(chx,cha,blasname)( n, alpha, x, incx ); \
 }
 
 #ifdef BLIS_ENABLE_BLAS
 
-void sscal_
+void sscal_blis_impl
      (
        const f77_int* n,
        const float* alpha,
@@ -173,8 +182,17 @@ void sscal_
 //    bli_finalize_auto();
     AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1)
 }
+void sscal_
+     (
+       const f77_int* n,
+       const float* alpha,
+       float*   x, const f77_int* incx
+     )
+{
+  sscal_blis_impl( n, alpha, x, incx );
+}
 
-void dscal_
+void dscal_blis_impl
      (
        const f77_int* n,
        const double* alpha,
@@ -253,6 +271,15 @@ void dscal_
     /* Finalize BLIS. */
 //    bli_finalize_auto();
     AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1)
+}
+void dscal_
+     (
+       const f77_int* n,
+       const double* alpha,
+       double*   x, const f77_int* incx
+     )
+{
+  dscal_blis_impl( n, alpha, x, incx );
 }
 
 INSERT_GENTFUNCSCAL_BLAS_CZ( scal, scalv )

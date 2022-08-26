@@ -5,7 +5,8 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-
+   Copyright (C) 2022, Advanced Micro Devices, Inc. All rights reserved.
+   
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
    met:
@@ -40,6 +41,12 @@
 #define GENTPROTR2( ftype_x, ftype_r, chx, chr, blasname ) \
 \
 BLIS_EXPORT_BLAS ftype_r PASTEF772(chr,chx,blasname) \
+     ( \
+       const f77_int* n, \
+       const ftype_x* x, const f77_int* incx  \
+     );\
+\
+BLIS_EXPORT_BLAS ftype_r PASTEF772S(chr,chx,blasname) \
      ( \
        const f77_int* n, \
        const ftype_x* x, const f77_int* incx  \

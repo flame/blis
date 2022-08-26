@@ -5,7 +5,8 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-
+   Copyright (C) 2022, Advanced Micro Devices, Inc. All rights reserved.
+   
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
    met:
@@ -45,6 +46,14 @@ BLIS_EXPORT_BLAS void PASTEF773(ch,blasname,chc,sub) \
        const ftype*   x, const f77_int* incx, \
        const ftype*   y, const f77_int* incy, \
              ftype*   rval  \
+     );\
+\
+BLIS_EXPORT_BLAS void PASTEF773S(ch,blasname,chc,sub) \
+     ( \
+       const f77_int* n, \
+       const ftype*   x, const f77_int* incx, \
+       const ftype*   y, const f77_int* incy, \
+             ftype*   rval  \
      );
 
 #ifdef BLIS_ENABLE_CBLAS
@@ -61,7 +70,15 @@ BLIS_EXPORT_BLAS void PASTEF772(sds,dot,sub)
        const float*   y, const f77_int* incy,
              float*   rval
      );
-
+BLIS_EXPORT_BLAS void PASTEF772S(sds,dot,sub)
+     (
+       const f77_int* n,
+       const float*  sb,
+       const float*   x, const f77_int* incx,
+       const float*   y, const f77_int* incy,
+             float*   rval
+     );
+     
 BLIS_EXPORT_BLAS void PASTEF772(ds,dot,sub)
      (
        const f77_int* n,
@@ -69,4 +86,12 @@ BLIS_EXPORT_BLAS void PASTEF772(ds,dot,sub)
        const float*   y, const f77_int* incy,
              double*  rval
      );
+BLIS_EXPORT_BLAS void PASTEF772S(ds,dot,sub)
+     (
+       const f77_int* n,
+       const float*   x, const f77_int* incx,
+       const float*   y, const f77_int* incy,
+             double*  rval
+     );
+
 #endif

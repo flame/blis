@@ -5,7 +5,8 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-
+   Copyright (C) 2022, Advanced Micro Devices, Inc. All rights reserved.
+   
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
    met:
@@ -42,6 +43,20 @@
 #undef  GENTFUNCR2
 #define GENTFUNCR2( ftype_x, ftype_r, chx, chr, blasname, blisname ) \
 \
+void PASTEF773S(chr,chx,blasname,sub) \
+     ( \
+       const f77_int* n, \
+       const ftype_x* x, const f77_int* incx, \
+             ftype_r* rval  \
+     ) \
+{ \
+	*rval = PASTEF772S(chr,chx,blasname) \
+	( \
+	  n, \
+	  x, incx \
+	); \
+}\
+\
 void PASTEF773(chr,chx,blasname,sub) \
      ( \
        const f77_int* n, \
@@ -49,11 +64,7 @@ void PASTEF773(chr,chx,blasname,sub) \
              ftype_r* rval  \
      ) \
 { \
-	*rval = PASTEF772(chr,chx,blasname) \
-	( \
-	  n, \
-	  x, incx \
-	); \
+	PASTEF773S(chr,chx,blasname,sub) ( n, x, incx, rval ); \
 }
 
 #ifdef BLIS_ENABLE_CBLAS

@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2020 - 22, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2020 - 2022, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -42,7 +42,7 @@
 #undef  GENTFUNC
 #define GENTFUNC( ftype, ch, blasname, blisname ) \
 \
-void PASTEF77(ch,blasname) \
+void PASTEF77S(ch,blasname) \
      ( \
        const f77_int* n, \
        const ftype*   alpha, \
@@ -83,11 +83,23 @@ void PASTEF77(ch,blasname) \
      AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1) \
         /* Finalize BLIS. */ \
      bli_finalize_auto();  \
+}\
+\
+void PASTEF77(ch,blasname) \
+     ( \
+       const f77_int* n, \
+       const ftype*   alpha, \
+       const ftype*   x, const f77_int* incx, \
+             ftype*   y, const f77_int* incy  \
+     ) \
+{ \
+  PASTEF77S(ch,blasname)( n, alpha, x, incx, y, incy ) ; \
 }
+
 
 #ifdef BLIS_ENABLE_BLAS
 
-void saxpy_
+void saxpy_blis_impl
 (
  const f77_int* n,
  const float*   alpha,
@@ -178,8 +190,18 @@ void saxpy_
   //    bli_finalize_auto();
   AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
 }
+void saxpy_
+(
+ const f77_int* n,
+ const float*   alpha,
+ const float*   x, const f77_int* incx,
+ float*   y, const f77_int* incy
+ )
+{
+  saxpy_blis_impl( n, alpha, x, incx, y, incy ) ; 
+}
 
-void daxpy_
+void daxpy_blis_impl
 (
  const f77_int* n,
  const double*   alpha,
@@ -271,8 +293,18 @@ void daxpy_
   /* Finalize BLIS. */
   //    bli_finalize_auto();
 }
+void daxpy_
+(
+ const f77_int* n,
+ const double*   alpha,
+ const double*   x, const f77_int* incx,
+ double*   y, const f77_int* incy
+ )
+{
+  daxpy_blis_impl( n, alpha, x, incx, y, incy ) ; 
+}
 
-void caxpy_
+void caxpy_blis_impl
 (
  const f77_int* n,
  const scomplex*   alpha,
@@ -363,8 +395,17 @@ void caxpy_
   /* Finalize BLIS. */
   //    bli_finalize_auto();
 }
-
-void zaxpy_
+void caxpy_
+(
+ const f77_int* n,
+ const scomplex*   alpha,
+ const scomplex*   x, const f77_int* incx,
+ scomplex*   y, const f77_int* incy
+ )
+{
+  caxpy_blis_impl( n, alpha, x, incx, y, incy ) ; 
+}
+void zaxpy_blis_impl
 (
  const f77_int* n,
  const dcomplex*   alpha,
@@ -456,7 +497,16 @@ void zaxpy_
   /* Finalize BLIS. */
   //    bli_finalize_auto();
 }
-
+void zaxpy_
+(
+ const f77_int* n,
+ const dcomplex*   alpha,
+ const dcomplex*   x, const f77_int* incx,
+ dcomplex*   y, const f77_int* incy
+ )
+{
+  zaxpy_blis_impl( n, alpha, x, incx, y, incy ) ; 
+}
 
 
 #endif
