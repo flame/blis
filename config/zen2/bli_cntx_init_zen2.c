@@ -116,11 +116,11 @@ void bli_cntx_init_zen2( cntx_t* cntx )
 	bli_cntx_set_l1v_kers
 	(
       26,
-#if 1
+
 	  // amaxv
 	  BLIS_AMAXV_KER,  BLIS_FLOAT,  bli_samaxv_zen_int,
 	  BLIS_AMAXV_KER,  BLIS_DOUBLE, bli_damaxv_zen_int,
-#endif
+
       // axpbyv
 	  BLIS_AXPBYV_KER, BLIS_FLOAT, bli_saxpbyv_zen_int10,
 	  BLIS_AXPBYV_KER, BLIS_DOUBLE, bli_daxpbyv_zen_int10,

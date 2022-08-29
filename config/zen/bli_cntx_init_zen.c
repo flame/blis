@@ -104,11 +104,11 @@ void bli_cntx_init_zen( cntx_t* cntx )
     bli_cntx_set_l1v_kers
     (
       26,
-#if 1
+      
       // amaxv
       BLIS_AMAXV_KER,  BLIS_FLOAT,  bli_samaxv_zen_int,
       BLIS_AMAXV_KER,  BLIS_DOUBLE, bli_damaxv_zen_int,
-#endif
+
       // axpbyv
       BLIS_AXPBYV_KER, BLIS_FLOAT, bli_saxpbyv_zen_int10,
       BLIS_AXPBYV_KER, BLIS_DOUBLE, bli_daxpbyv_zen_int10,
@@ -116,16 +116,11 @@ void bli_cntx_init_zen( cntx_t* cntx )
       BLIS_AXPBYV_KER, BLIS_DCOMPLEX, bli_zaxpbyv_zen_int,
 
       // axpyv
-#if 0
-      BLIS_AXPYV_KER,  BLIS_FLOAT,  bli_saxpyv_zen_int,
-      BLIS_AXPYV_KER,  BLIS_DOUBLE, bli_daxpyv_zen_int,
-#else
       BLIS_AXPYV_KER,  BLIS_FLOAT,  bli_saxpyv_zen_int10,
       BLIS_AXPYV_KER,  BLIS_DOUBLE, bli_daxpyv_zen_int10,
       BLIS_AXPYV_KER,  BLIS_SCOMPLEX, bli_caxpyv_zen_int5,
       BLIS_AXPYV_KER,  BLIS_DCOMPLEX, bli_zaxpyv_zen_int5,
 
-#endif
       // dotv
       BLIS_DOTV_KER,   BLIS_FLOAT,  bli_sdotv_zen_int,
       BLIS_DOTV_KER,   BLIS_DOUBLE, bli_ddotv_zen_int,
@@ -138,18 +133,18 @@ void bli_cntx_init_zen( cntx_t* cntx )
       BLIS_DOTXV_KER,  BLIS_DCOMPLEX, bli_zdotxv_zen_int,
       BLIS_DOTXV_KER,  BLIS_SCOMPLEX, bli_cdotxv_zen_int,
       // scalv
-#if 0
-      BLIS_SCALV_KER,  BLIS_FLOAT,  bli_sscalv_zen_int,
-      BLIS_SCALV_KER,  BLIS_DOUBLE, bli_dscalv_zen_int,
-#else
+
       BLIS_SCALV_KER,  BLIS_FLOAT,  bli_sscalv_zen_int10,
       BLIS_SCALV_KER,  BLIS_DOUBLE, bli_dscalv_zen_int10,
-#endif
+
+      // swapv
       BLIS_SWAPV_KER,  BLIS_FLOAT,  bli_sswapv_zen_int8,
       BLIS_SWAPV_KER,  BLIS_DOUBLE, bli_dswapv_zen_int8,
 
+      // copyv
       BLIS_COPYV_KER,  BLIS_FLOAT,  bli_scopyv_zen_int,
       BLIS_COPYV_KER,  BLIS_DOUBLE, bli_dcopyv_zen_int,
+
       //set
       BLIS_SETV_KER,  BLIS_FLOAT,  bli_ssetv_zen_int,
       BLIS_SETV_KER,  BLIS_DOUBLE, bli_dsetv_zen_int,

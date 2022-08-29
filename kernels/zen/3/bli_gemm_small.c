@@ -7274,7 +7274,7 @@ err_t bli_zgemm_small
         }
         m_remainder = M - row_idx;
 
-        if ((m_remainder == 3))
+        if (m_remainder == 3)
         {
             m_remainder -= 3;
             __m128d xmm0;
@@ -8213,7 +8213,7 @@ err_t bli_zgemm_small
                 _mm_storeu_pd((double *)(tC + 2), xmm0);
             }
         }
-        if ((m_remainder == 2))
+        if (m_remainder == 2)
         {
             m_remainder -= 2;
 
@@ -8952,7 +8952,7 @@ err_t bli_zgemm_small
                 _mm256_storeu_pd((double *)tC, ymm8);
             }
         }
-        if ((m_remainder == 1))
+        if (m_remainder == 1)
         {
             m_remainder -= 1;
             __m128d xmm0;
@@ -10842,7 +10842,7 @@ err_t bli_zgemm_small_At
         }
 
         m_remainder = M - row_idx;
-        if ((m_remainder == 3))
+        if (m_remainder == 3)
         {
             m_remainder -= 3;
             __m128d xmm0;
@@ -11832,7 +11832,7 @@ err_t bli_zgemm_small_At
                 _mm_storeu_pd((double *)(tC + 2), xmm0);
             }
         }
-        if ((m_remainder == 2))
+        if (m_remainder == 2)
         {
             m_remainder -= 2;
 
@@ -12615,7 +12615,7 @@ err_t bli_zgemm_small_At
                 _mm256_storeu_pd((double *)tC, ymm8);
             }
         }
-        if ((m_remainder == 1))
+        if (m_remainder == 1)
         {
             m_remainder -= 1;
             __m128d xmm0;

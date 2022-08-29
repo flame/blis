@@ -357,7 +357,6 @@ void PASTEF77(ch,blasname) \
 #ifdef BLIS_ENABLE_BLAS
 INSERT_GENTFUNC_BLAS( gemm,gemm )
 
-#if 1
 void dzgemm_
      (
        const f77_char* transa,
@@ -460,5 +459,5 @@ void dzgemm_
 	/* Finalize BLIS. */
 	bli_finalize_auto();
 }// end of dzgemm_
-#endif
+
 #endif

@@ -35,7 +35,6 @@
 
 #include "blis.h"
 #include "test_libblis.h"
-#define TEST_SQP 0// ENABLE to test sqp path.
 
 // Static variables.
 static char*     op_str                    = "gemm";
@@ -243,18 +242,6 @@ void libblis_test_gemm_experiment
 	                          sc_str[0], m, n, &c_save );
 
 	// Set alpha and beta.
-#if TEST_SQP
-	if ( bli_obj_is_real( &c ) )
-	{
-		bli_setsc(  1.0,  0.0, &alpha );
-		bli_setsc(  1.0,  0.0, &beta );
-	}
-	else
-	{
-		bli_setsc(  1.0,  0.0, &alpha );
-		bli_setsc(  1.0,  0.0, &beta );
-	}
-#else
 	if ( bli_obj_is_real( &c ) )
 	{
 		bli_setsc(  1.2,  0.0, &alpha );
@@ -265,13 +252,6 @@ void libblis_test_gemm_experiment
 		bli_setsc(  1.2,  0.8, &alpha );
 		bli_setsc(  0.9,  1.0, &beta );
 	}
-#endif
-
-	#if 0
-	//bli_setm( &BLIS_ONE, &a );
-	bli_setsc(  1.0,  0.0, &alpha );
-	bli_setsc(  1.0,  0.0, &beta );
-	#endif
 
 	// Randomize A, B, and C, and save C.
 	libblis_test_mobj_randomize( params, TRUE, &a );
@@ -457,31 +437,7 @@ void libblis_test_gemm_impl
 	switch ( iface )
 	{
 		case BLIS_TEST_SEQ_FRONT_END:
-#if 0
-//bli_printm( "alpha", alpha, "%5.2f", "" );
-//bli_printm( "beta", beta, "%5.2f", "" );
-bli_printm( "a", a, "%5.2f", "" );
-bli_printm( "b", b, "%5.2f", "" );
-bli_printm( "c", c, "%5.2f", "" );
-#endif
-//if ( bli_obj_length( b ) == 16 &&
-//     bli_obj_stor3_from_strides( c, a, b ) == BLIS_CRR )
-//bli_printm( "c before", c, "%6.3f", "" );
-
-#if TEST_SQP
-	if(bli_gemm_sqp(alpha,a,b,beta,c,NULL,NULL)!=BLIS_SUCCESS)
-	{
-		bli_gemm( alpha, a, b, beta, c );
-	}
-#else//TEST_SQP
-	bli_gemm( alpha, a, b, beta, c );
-#endif//TEST_SQP
-#if 0
-if ( bli_obj_length( c ) == 12 &&
-     bli_obj_stor3_from_strides( c, a, b ) == BLIS_RRR )
-bli_printm( "c after", c, "%6.3f", "" );
-#endif
-//bli_printm( "c after", c, "%5.2f", "" );
+			bli_gemm( alpha, a, b, beta, c );
 		break;
 
 		default:

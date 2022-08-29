@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2020, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2020-2022, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -278,88 +278,3 @@ void bli_gemmt_front
 }
 
 // -----------------------------------------------------------------------------
-
-#if 0
-	if ( bli_obj_dt( a ) != bli_obj_dt( b ) ||
-	     bli_obj_dt( a ) != bli_obj_dt( c ) ||
-	     bli_obj_comp_prec( c ) != bli_obj_prec( c ) )
-	{
-		const bool a_is_real = bli_obj_is_real( a );
-		const bool a_is_comp = bli_obj_is_complex( a );
-		const bool b_is_real = bli_obj_is_real( b );
-		const bool b_is_comp = bli_obj_is_complex( b );
-		const bool c_is_real = bli_obj_is_real( c );
-		const bool c_is_comp = bli_obj_is_complex( c );
-
-		const bool a_is_single = bli_obj_is_single_prec( a );
-		const bool a_is_double = bli_obj_is_double_prec( a );
-		const bool b_is_single = bli_obj_is_single_prec( b );
-		const bool b_is_double = bli_obj_is_double_prec( b );
-		const bool c_is_single = bli_obj_is_single_prec( c );
-		const bool c_is_double = bli_obj_is_double_prec( c );
-
-		const bool comp_single = bli_obj_comp_prec( c ) == BLIS_SINGLE_PREC;
-		const bool comp_double = bli_obj_comp_prec( c ) == BLIS_DOUBLE_PREC;
-
-		const bool mixeddomain = bli_obj_domain( c ) != bli_obj_domain( a ) ||
-		                           bli_obj_domain( c ) != bli_obj_domain( b );
-
-		( void )a_is_real; ( void )a_is_comp;
-		( void )b_is_real; ( void )b_is_comp;
-		( void )c_is_real; ( void )c_is_comp;
-		( void )a_is_single; ( void )a_is_double;
-		( void )b_is_single; ( void )b_is_double;
-		( void )c_is_single; ( void )c_is_double;
-		( void )comp_single; ( void )comp_double;
-
-		if (
-		     //( c_is_comp && a_is_comp && b_is_real ) ||
-		     //( c_is_comp && a_is_real && b_is_comp ) ||
-		     //( c_is_real && a_is_comp && b_is_comp ) ||
-		     //( c_is_comp && a_is_real && b_is_real ) ||
-		     //( c_is_real && a_is_comp && b_is_real ) ||
-		     //( c_is_real && a_is_real && b_is_comp ) ||
-		     //FALSE
-		     TRUE
-		   )
-		{
-			if (
-			     ( c_is_single && a_is_single && b_is_single && mixeddomain ) ||
-			     ( c_is_single && a_is_single && b_is_single && comp_single ) ||
-			     ( c_is_single && a_is_single && b_is_single && comp_double ) ||
-			     ( c_is_single && a_is_single && b_is_double                ) ||
-			     ( c_is_single && a_is_double && b_is_single                ) ||
-			     ( c_is_double && a_is_single && b_is_single                ) ||
-			     ( c_is_single && a_is_double && b_is_double                ) ||
-			     ( c_is_double && a_is_single && b_is_double                ) ||
-			     ( c_is_double && a_is_double && b_is_single                ) ||
-			     ( c_is_double && a_is_double && b_is_double && comp_single ) ||
-			     ( c_is_double && a_is_double && b_is_double && comp_double ) ||
-			     ( c_is_double && a_is_double && b_is_double && mixeddomain ) ||
-			     FALSE
-			   )
-				bli_gemm_md_front( alpha, a, b, beta, c, cntx, cntl );
-			else
-				bli_gemm_md_zgemm( alpha, a, b, beta, c, cntx, cntl );
-		}
-		else
-			bli_gemm_md_zgemm( alpha, a, b, beta, c, cntx, cntl );
-		return;
-	}
-#else
-#if 0
-	// If any of the storage datatypes differ, or if the execution precision
-	// differs from the storage precision of C, utilize the mixed datatype
-	// code path.
-	// NOTE: We could check the exec dt against the storage dt of C, but for
-	// now we don't support the caller setting the execution domain
-	// explicitly.
-	if ( bli_obj_dt( a ) != bli_obj_dt( b ) ||
-	     bli_obj_dt( a ) != bli_obj_dt( c ) ||
-	     bli_obj_comp_prec( c ) != bli_obj_prec( c ) )
-	{
-		bli_gemm_md_front( alpha, a, b, beta, c, cntx, cntl );
-		return;
-	}
-#endif
-#endif

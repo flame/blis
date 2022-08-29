@@ -853,23 +853,6 @@ void zgemm_blis_impl
 
             return;
         }
-#if 0
-/*** Code is disabled as bli_zgemv_unf_var1 not optimised ***
-     Calling below unoptimised variant causes regression  ***/
-        else
-        {
-            bli_zgemv_unf_var1(
-                blis_transa,
-                bli_extract_conj(blis_transb),
-                k0, m0,
-                (dcomplex *)alpha,
-                (dcomplex *)a, rs_a, cs_a,
-                (dcomplex *)b, bli_is_notrans(blis_transb) ? rs_b : cs_b,
-                (dcomplex *)beta,
-                c, rs_c,
-                ((void *)0));
-        }
-#endif
     }
     else if (m0 == 1)
     {
@@ -888,30 +871,12 @@ void zgemm_blis_impl
             AOCL_DTL_LOG_GEMM_STATS(AOCL_DTL_LEVEL_TRACE_1, *m, *n, *k);
             return;
         }
-#if 0
-/*** Code is disabled as bli_zgemv_unf_var1 not optimised ***
-     Calling below unoptimised variant causes regression  ***/
-
-        else
-        {
-            bli_zgemv_unf_var1(
-                blis_transb,
-                bli_extract_conj(blis_transa),
-                n0, k0,
-                (dcomplex *)alpha,
-                (dcomplex *)b, cs_b, rs_b,
-                (dcomplex *)a, bli_is_notrans(blis_transa) ? cs_a : rs_a,
-                (dcomplex *)beta,
-                c, cs_c,
-                ((void *)0));
-        }
-#endif
     }
 
 #ifdef BLIS_ENABLE_SMALL_MATRIX
 
     if (((nt == 0) && (((m0 <= 40) && (n0 <= 40)) || 
-         (m0 <= 128) && (n0 <= 128) && bli_is_notrans(blis_transb)) && (k0 <= 512)) ||
+         ((m0 <= 128) && (n0 <= 128) && bli_is_notrans(blis_transb))) && (k0 <= 512)) ||
         ((nt == 1) && (((m0 <= 32) || (n0 <= 32) || (k0 <= 32)) && ((m0 + n0 + k0) <= 100))))
     {
         err_t status = BLIS_NOT_YET_IMPLEMENTED;
@@ -988,10 +953,6 @@ void zgemm_
 
 INSERT_GENTFUNC_BLAS_SC( gemm, gemm )
 
-
-// Observed a regression in dgemm with this function addition.
-// Disabling temporarily.
-#if 1
 void dzgemm_
      (
        const f77_char* transa,
@@ -1094,5 +1055,5 @@ void dzgemm_
     /* Finalize BLIS. */
     bli_finalize_auto();
 }// end of dzgemm_
-#endif
+
 #endif
