@@ -6853,7 +6853,7 @@ void bli_sgemmsup_rv_zen_asm_6x2
     
     
     // ---------------------------------- iteration 0
-    vmovups(mem(rbx,  0*32), xmm0)
+    vmovsd(mem(rbx,  0*32), xmm0)
     add(r10, rbx)                      // b += rs_b;
 
     vbroadcastss(mem(rax        ), xmm2)
@@ -6874,7 +6874,7 @@ void bli_sgemmsup_rv_zen_asm_6x2
 
     
     // ---------------------------------- iteration 1
-    vmovups(mem(rbx,  0*32), xmm0)
+    vmovsd(mem(rbx,  0*32), xmm0)
     add(r10, rbx)                      // b += rs_b;
 
     vbroadcastss(mem(rax        ), xmm2)
@@ -6895,7 +6895,7 @@ void bli_sgemmsup_rv_zen_asm_6x2
     
 
     // ---------------------------------- iteration 2
-    vmovups(mem(rbx,  0*32), xmm0)
+    vmovsd(mem(rbx,  0*32), xmm0)
     add(r10, rbx)                      // b += rs_b;
 
     vbroadcastss(mem(rax        ), xmm2)
@@ -6916,7 +6916,7 @@ void bli_sgemmsup_rv_zen_asm_6x2
     
 
     // ---------------------------------- iteration 3
-    vmovups(mem(rbx,  0*32), xmm0)
+    vmovsd(mem(rbx,  0*32), xmm0)
     add(r10, rbx)                      // b += rs_b;
 
     vbroadcastss(mem(rax        ), xmm2)
@@ -6949,7 +6949,7 @@ void bli_sgemmsup_rv_zen_asm_6x2
     
     label(.SLOOPKLEFT)                 // EDGE LOOP
     
-    vmovups(mem(rbx,  0*32), xmm0)
+    vmovsd(mem(rbx,  0*32), xmm0)
     add(r10, rbx)                      // b += rs_b;
 
     vbroadcastss(mem(rax        ), xmm2)
@@ -7237,7 +7237,7 @@ void bli_sgemmsup_rv_zen_asm_5x2
     label(.SLOOPKITER)                 // MAIN LOOP
     
     // ---------------------------------- iteration 0
-    vmovups(mem(rbx,  0*32), xmm0)
+    vmovsd(mem(rbx,  0*32), xmm0)
     add(r10, rbx)                      // b += rs_b;
 
     vbroadcastss(mem(rax        ), xmm2)
@@ -7256,7 +7256,7 @@ void bli_sgemmsup_rv_zen_asm_5x2
 
     
     // ---------------------------------- iteration 1
-    vmovups(mem(rbx,  0*32), xmm0)
+    vmovsd(mem(rbx,  0*32), xmm0)
     add(r10, rbx)                      // b += rs_b;
 
     vbroadcastss(mem(rax        ), xmm2)
@@ -7275,7 +7275,7 @@ void bli_sgemmsup_rv_zen_asm_5x2
 
 
     // ---------------------------------- iteration 2
-    vmovups(mem(rbx,  0*32), xmm0)
+    vmovsd(mem(rbx,  0*32), xmm0)
     add(r10, rbx)                      // b += rs_b;
 
     vbroadcastss(mem(rax        ), xmm2)
@@ -7294,7 +7294,7 @@ void bli_sgemmsup_rv_zen_asm_5x2
 
     
     // ---------------------------------- iteration 3
-    vmovups(mem(rbx,  0*32), xmm0)
+    vmovsd(mem(rbx,  0*32), xmm0)
     add(r10, rbx)                      // b += rs_b;
 
     vbroadcastss(mem(rax        ), xmm2)
@@ -7325,7 +7325,7 @@ void bli_sgemmsup_rv_zen_asm_5x2
     
     label(.SLOOPKLEFT)                 // EDGE LOOP
     
-    vmovups(mem(rbx,  0*32), xmm0)
+    vmovsd(mem(rbx,  0*32), xmm0)
     add(r10, rbx)                      // b += rs_b;
 
     vbroadcastss(mem(rax        ), xmm2)
@@ -7612,7 +7612,7 @@ void bli_sgemmsup_rv_zen_asm_4x2
     label(.SLOOPKITER)                 // MAIN LOOP
     
     // ---------------------------------- iteration 0
-    vmovups(mem(rbx,  0*32), xmm0)
+    vmovsd(mem(rbx,  0*32), xmm0)
     add(r10, rbx)                      // b += rs_b;
 
     vbroadcastss(mem(rax        ), ymm2)
@@ -7627,7 +7627,7 @@ void bli_sgemmsup_rv_zen_asm_4x2
     vfmadd231ps(xmm0, xmm3, xmm10)
 
     // ---------------------------------- iteration 1
-    vmovups(mem(rbx,  0*32), xmm0)
+    vmovsd(mem(rbx,  0*32), xmm0)
     add(r10, rbx)                      // b += rs_b;
 
     vbroadcastss(mem(rax        ), ymm2)
@@ -7642,7 +7642,7 @@ void bli_sgemmsup_rv_zen_asm_4x2
     vfmadd231ps(xmm0, xmm3, xmm10)
     
     // ---------------------------------- iteration 2
-    vmovups(mem(rbx,  0*32), xmm0)
+    vmovsd(mem(rbx,  0*32), xmm0)
     add(r10, rbx)                      // b += rs_b;
 
     vbroadcastss(mem(rax        ), ymm2)
@@ -7657,7 +7657,7 @@ void bli_sgemmsup_rv_zen_asm_4x2
     vfmadd231ps(xmm0, xmm3, xmm10)
     
     // ---------------------------------- iteration 3
-    vmovups(mem(rbx,  0*32), xmm0)
+    vmovsd(mem(rbx,  0*32), xmm0)
     add(r10, rbx)                      // b += rs_b;
 
     vbroadcastss(mem(rax        ), ymm2)
@@ -7685,7 +7685,7 @@ void bli_sgemmsup_rv_zen_asm_4x2
     
     label(.SLOOPKLEFT)                 // EDGE LOOP
     
-    vmovups(mem(rbx,  0*32), xmm0)
+    vmovsd(mem(rbx,  0*32), xmm0)
     add(r10, rbx)                      // b += rs_b;
     
     vbroadcastss(mem(rax        ), ymm2)
@@ -7940,7 +7940,7 @@ void bli_sgemmsup_rv_zen_asm_3x2
     label(.SLOOPKITER)                 // MAIN LOOP
         
     // ---------------------------------- iteration 0
-    vmovups(mem(rbx, 0*32), xmm0)
+    vmovsd(mem(rbx, 0*32), xmm0)
     add(r10, rbx)                      // b += rs_b;
 
     vbroadcastss(mem(rax        ), ymm2)
@@ -7953,7 +7953,7 @@ void bli_sgemmsup_rv_zen_asm_3x2
     vfmadd231ps(xmm0, xmm2, xmm8)    
     
     // ---------------------------------- iteration 1
-    vmovups(mem(rbx, 0*32), xmm0)
+    vmovsd(mem(rbx, 0*32), xmm0)
     add(r10, rbx)                      // b += rs_b;
 
     vbroadcastss(mem(rax        ), ymm2)
@@ -7966,7 +7966,7 @@ void bli_sgemmsup_rv_zen_asm_3x2
     vfmadd231ps(xmm0, xmm2, xmm8)    
 
     // ---------------------------------- iteration 2
-    vmovups(mem(rbx, 0*32), xmm0)
+    vmovsd(mem(rbx, 0*32), xmm0)
     add(r10, rbx)                      // b += rs_b;
 
     vbroadcastss(mem(rax        ), ymm2)
@@ -7979,7 +7979,7 @@ void bli_sgemmsup_rv_zen_asm_3x2
     vfmadd231ps(xmm0, xmm2, xmm8)    
 
     // ---------------------------------- iteration 3
-    vmovups(mem(rbx, 0*32), xmm0)
+    vmovsd(mem(rbx, 0*32), xmm0)
     add(r10, rbx)                      // b += rs_b;
 
     vbroadcastss(mem(rax        ), ymm2)
@@ -8005,7 +8005,7 @@ void bli_sgemmsup_rv_zen_asm_3x2
         
     label(.SLOOPKLEFT)                 // EDGE LOOP
     
-    vmovups(mem(rbx, 0*32), xmm0)
+    vmovsd(mem(rbx, 0*32), xmm0)
     add(r10, rbx)                      // b += rs_b;
 
     vbroadcastss(mem(rax        ), ymm2)
@@ -8245,7 +8245,7 @@ void bli_sgemmsup_rv_zen_asm_2x2
     
     
     // ---------------------------------- iteration 0
-    vmovups(mem(rbx,  0*32), xmm0)
+    vmovsd(mem(rbx,  0*32), xmm0)
     add(r10, rbx)                      // b += rs_b;
     vbroadcastss(mem(rax        ), ymm2)
     vbroadcastss(mem(rax, r8,  1), ymm3)
@@ -8254,7 +8254,7 @@ void bli_sgemmsup_rv_zen_asm_2x2
     vfmadd231ps(xmm0, xmm3, xmm6)
 
     // ---------------------------------- iteration 1
-    vmovups(mem(rbx,  0*32), xmm0)
+    vmovsd(mem(rbx,  0*32), xmm0)
     add(r10, rbx)                      // b += rs_b;
     vbroadcastss(mem(rax        ), ymm2)
     vbroadcastss(mem(rax, r8,  1), ymm3)
@@ -8263,7 +8263,7 @@ void bli_sgemmsup_rv_zen_asm_2x2
     vfmadd231ps(xmm0, xmm3, xmm6)
     
     // ---------------------------------- iteration 2
-    vmovups(mem(rbx,  0*32), xmm0)
+    vmovsd(mem(rbx,  0*32), xmm0)
     add(r10, rbx)                      // b += rs_b;
     
     vbroadcastss(mem(rax        ), ymm2)
@@ -8273,7 +8273,7 @@ void bli_sgemmsup_rv_zen_asm_2x2
     vfmadd231ps(xmm0, xmm3, xmm6)
 
     // ---------------------------------- iteration 3
-    vmovups(mem(rbx,  0*32), xmm0)
+    vmovsd(mem(rbx,  0*32), xmm0)
     add(r10, rbx)                      // b += rs_b;
     
     vbroadcastss(mem(rax        ), ymm2)
@@ -8294,7 +8294,7 @@ void bli_sgemmsup_rv_zen_asm_2x2
     
     label(.SLOOPKLEFT)                 // EDGE LOOP
     
-    vmovups(mem(rbx,  0*32), xmm0)
+    vmovsd(mem(rbx,  0*32), xmm0)
     add(r10, rbx)                      // b += rs_b;
     
     vbroadcastss(mem(rax        ), ymm2)
@@ -8503,7 +8503,7 @@ void bli_sgemmsup_rv_zen_asm_1x2
     label(.SLOOPKITER)                 // MAIN LOOP
     
     // ---------------------------------- iteration 0
-    vmovups(mem(rbx,  0*32), xmm0)
+    vmovsd(mem(rbx,  0*32), xmm0)
     add(r10, rbx)                      // b += rs_b;
 
     vbroadcastss(mem(rax        ), ymm2)
@@ -8511,7 +8511,7 @@ void bli_sgemmsup_rv_zen_asm_1x2
     vfmadd231ps(xmm0, xmm2, xmm4)
     
     // ---------------------------------- iteration 1
-    vmovups(mem(rbx,  0*32), xmm0)
+    vmovsd(mem(rbx,  0*32), xmm0)
     add(r10, rbx)                      // b += rs_b;
 
     vbroadcastss(mem(rax        ), ymm2)
@@ -8520,7 +8520,7 @@ void bli_sgemmsup_rv_zen_asm_1x2
     
     
     // ---------------------------------- iteration 2
-    vmovups(mem(rbx,  0*32), xmm0)
+    vmovsd(mem(rbx,  0*32), xmm0)
     add(r10, rbx)                      // b += rs_b;
 
     vbroadcastss(mem(rax        ), ymm2)
@@ -8528,7 +8528,7 @@ void bli_sgemmsup_rv_zen_asm_1x2
     vfmadd231ps(xmm0, xmm2, xmm4)
 
     // ---------------------------------- iteration 3
-    vmovups(mem(rbx,  0*32), xmm0)
+    vmovsd(mem(rbx,  0*32), xmm0)
     add(r10, rbx)                      // b += rs_b;
 
     vbroadcastss(mem(rax        ), ymm2)
@@ -8548,7 +8548,7 @@ void bli_sgemmsup_rv_zen_asm_1x2
     
     label(.SLOOPKLEFT)                 // EDGE LOOP
     
-    vmovups(mem(rbx,  0*32), xmm0)
+    vmovsd(mem(rbx,  0*32), xmm0)
     add(r10, rbx)                      // b += rs_b;
 
     vbroadcastss(mem(rax        ), xmm2)
