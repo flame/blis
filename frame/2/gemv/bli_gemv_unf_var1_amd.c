@@ -519,6 +519,7 @@ void bli_sgemv_unf_var1
 
     if ( ( nt_max > 1 ) & ( is_omp_mt_enabled == TRUE ) )
     {
+#ifdef BLIS_ENABLE_OPENMP
         b_fuse = 4;
 
         //Setting the thread count to the maximum number of threads provided
@@ -544,6 +545,7 @@ void bli_sgemv_unf_var1
           cntx,
           nt
         );
+#endif// BLIS_ENABLE_OPENMP
     }
     else
     {

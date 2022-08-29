@@ -152,8 +152,7 @@ err_t bli_gemmsup
     // Query the small/unpacked handler from the context and invoke it.
     gemmsup_oft gemmsup_fp = bli_cntx_get_l3_sup_handler( BLIS_GEMM, cntx );
 
-    return
-    gemmsup_fp
+    err_t ret_gemmsup_fp = gemmsup_fp
     (
       alpha,
       a,
@@ -165,6 +164,7 @@ err_t bli_gemmsup
     );
 
     AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_2);
+    return ret_gemmsup_fp;
 }
 
 err_t bli_gemmtsup
@@ -285,8 +285,7 @@ printf( "dims: %d %d %d (threshs: %d %d %d)\n",
     // Query the small/unpacked handler from the context and invoke it.
     gemmtsup_oft gemmtsup_fp = bli_cntx_get_l3_sup_handler( BLIS_GEMMT, cntx );
 
-    return
-    gemmtsup_fp
+    err_t ret_gemmtsup_fp = gemmtsup_fp
     (
       alpha,
       a,
@@ -298,6 +297,7 @@ printf( "dims: %d %d %d (threshs: %d %d %d)\n",
     );
 
     AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_2);
+    return ret_gemmtsup_fp;
 }
 
 err_t bli_syrksup
@@ -414,8 +414,7 @@ printf( "dims: %d %d %d (threshs: %d %d %d)\n",
     // Query the small/unpacked handler from the context and invoke it.
     gemmtsup_oft gemmtsup_fp = bli_cntx_get_l3_sup_handler( BLIS_GEMMT, cntx );
 
-    return
-    gemmtsup_fp
+    err_t ret_gemmtsup_fp = gemmtsup_fp
     (
       alpha,
       a,
@@ -427,4 +426,5 @@ printf( "dims: %d %d %d (threshs: %d %d %d)\n",
     );
 
     AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_2);
+    return ret_gemmtsup_fp;
 }
