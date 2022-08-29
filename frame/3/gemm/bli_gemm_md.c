@@ -156,90 +156,20 @@ mddm_t bli_gemm_md_ccr
        cntx_t** cntx
      )
 {
-	mddm_t doms;
-
-	// We assume that the requested computation domain is complex.
-	//dom_t dom_comp_in = bli_obj_comp_domain( c );
-	//dom_t dom_comp_in = BLIS_COMPLEX;
-
-	// For ccr, the computation (ukernel) will be real, but the execution
-	// will appear complex to other parts of the implementation.
-	doms.comp = BLIS_REAL;
-	doms.exec = BLIS_COMPLEX;
-
-	// Here we construct the computation datatype, which for the ccr case
-	// is equal to the real projection of the execution datatype, and use
-	// that computation datatype to query the corresponding ukernel output
-	// preference.
-	const num_t dt = BLIS_REAL | bli_obj_comp_prec( c );
-
-	// We can only perform this case of mixed-domain gemm, C += A*B where
-	// B is real, if the microkernel prefers column output. If it prefers
-	// row output, we must induce a transposition and perform C += A*B
-	// where A (formerly B) is real.
-	if ( bli_cntx_l3_vir_ukr_dislikes_storage_of_md( c, dt, BLIS_GEMM_UKR, *cntx ) )
-	{
-		bli_obj_swap( a, b );
-
-		bli_obj_induce_trans( a );
-		bli_obj_induce_trans( b );
-		bli_obj_induce_trans( c );
-
-		return bli_gemm_md_crc( a, b, beta, c, cntx_local, cntx );
-	}
-
 	// Create a local copy of the context and then prepare to use this
 	// context instead of the one passed in.
 	*cntx_local = **cntx;
 	*cntx = cntx_local;
 
-	// Copy the real domain blocksizes into the slots of their complex
-	// counterparts.
-	blksz_t* blksz_mr = bli_cntx_get_blksz( BLIS_MR, *cntx );
-	blksz_t* blksz_nr = bli_cntx_get_blksz( BLIS_NR, *cntx );
-	blksz_t* blksz_mc = bli_cntx_get_blksz( BLIS_MC, *cntx );
-	blksz_t* blksz_nc = bli_cntx_get_blksz( BLIS_NC, *cntx );
-	blksz_t* blksz_kc = bli_cntx_get_blksz( BLIS_KC, *cntx );
+	//we must induce a transposition and perform C += A*B
+	// where A (formerly B) is real.
+	bli_obj_swap( a, b );
 
-	bli_blksz_copy_dt( BLIS_FLOAT,  blksz_mr, BLIS_SCOMPLEX, blksz_mr );
-	bli_blksz_copy_dt( BLIS_DOUBLE, blksz_mr, BLIS_DCOMPLEX, blksz_mr );
+	bli_obj_induce_trans( a );
+	bli_obj_induce_trans( b );
+	bli_obj_induce_trans( c );
 
-	bli_blksz_copy_dt( BLIS_FLOAT,  blksz_nr, BLIS_SCOMPLEX, blksz_nr );
-	bli_blksz_copy_dt( BLIS_DOUBLE, blksz_nr, BLIS_DCOMPLEX, blksz_nr );
-
-	bli_blksz_copy_dt( BLIS_FLOAT,  blksz_mc, BLIS_SCOMPLEX, blksz_mc );
-	bli_blksz_copy_dt( BLIS_DOUBLE, blksz_mc, BLIS_DCOMPLEX, blksz_mc );
-
-	bli_blksz_copy_dt( BLIS_FLOAT,  blksz_nc, BLIS_SCOMPLEX, blksz_nc );
-	bli_blksz_copy_dt( BLIS_DOUBLE, blksz_nc, BLIS_DCOMPLEX, blksz_nc );
-
-	bli_blksz_copy_dt( BLIS_FLOAT,  blksz_kc, BLIS_SCOMPLEX, blksz_kc );
-	bli_blksz_copy_dt( BLIS_DOUBLE, blksz_kc, BLIS_DCOMPLEX, blksz_kc );
-
-	// Halve both the real and complex MR's (which are both real MR's).
-	bli_blksz_scale_def_max( 1, 2, BLIS_FLOAT,    blksz_mr );
-	bli_blksz_scale_def_max( 1, 2, BLIS_DOUBLE,   blksz_mr );
-	bli_blksz_scale_def_max( 1, 2, BLIS_SCOMPLEX, blksz_mr );
-	bli_blksz_scale_def_max( 1, 2, BLIS_DCOMPLEX, blksz_mr );
-
-	// Halve both the real and complex MC's (which are both real MC's).
-	bli_blksz_scale_def_max( 1, 2, BLIS_FLOAT,    blksz_mc );
-	bli_blksz_scale_def_max( 1, 2, BLIS_DOUBLE,   blksz_mc );
-	bli_blksz_scale_def_max( 1, 2, BLIS_SCOMPLEX, blksz_mc );
-	bli_blksz_scale_def_max( 1, 2, BLIS_DCOMPLEX, blksz_mc );
-
-	// Use the default pack schemas in the context.
-
-	// static func_t* bli_cntx_get_l3_vir_ukrs( l3ukr_t ukr_id, cntx_t* cntx )
-	func_t* l3_vir_ukrs = bli_cntx_get_l3_vir_ukrs( BLIS_GEMM_UKR, *cntx );
-
-	// Rather than check which complex datatype dt_comp refers to, we set
-	// the mixed-domain virtual microkernel for both types.
-	bli_func_set_dt( bli_cgemm_md_c2r_ref, BLIS_SCOMPLEX, l3_vir_ukrs );
-	bli_func_set_dt( bli_zgemm_md_c2r_ref, BLIS_DCOMPLEX, l3_vir_ukrs );
-
-	// Return the computation and execution domains.
-	return doms;
+	return bli_gemm_md_crc( a, b, beta, c, cntx_local, cntx );
 }
 
 // -----------------------------------------------------------------------------
@@ -265,27 +195,6 @@ mddm_t bli_gemm_md_crc
 	// will appear complex to other parts of the implementation.
 	doms.comp = BLIS_REAL;
 	doms.exec = BLIS_COMPLEX;
-
-	// Here we construct the computation datatype, which for the crc case
-	// is equal to the real projection of the execution datatype, and use
-	// that computation datatype to query the corresponding ukernel output
-	// preference.
-	const num_t dt = BLIS_REAL | bli_obj_comp_prec( c );
-
-	// We can only perform this case of mixed-domain gemm, C += A*B where
-	// A is real, if the microkernel prefers row output. If it prefers
-	// column output, we must induce a transposition and perform C += A*B
-	// where B (formerly A) is real.
-	if ( bli_cntx_l3_vir_ukr_dislikes_storage_of_md( c, dt, BLIS_GEMM_UKR, *cntx ) )
-	{
-		bli_obj_swap( a, b );
-
-		bli_obj_induce_trans( a );
-		bli_obj_induce_trans( b );
-		bli_obj_induce_trans( c );
-
-		return bli_gemm_md_ccr( a, b, beta, c, cntx_local, cntx );
-	}
 
 	// Create a local copy of the context and then prepare to use this
 	// context instead of the one passed in.
