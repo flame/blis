@@ -60,6 +60,7 @@ void bli_zher_zen_int_var1
     double xcR, xcI;
     double xhermcR, xhermcI;
     double alphaR;
+    double interR, interI;
 
     dcomplex* xc;
     dcomplex* xhermc;
@@ -112,8 +113,15 @@ void bli_zher_zen_int_var1
         xc = x + i*incx;
         xcR = xc->real;
         xcI = xc->imag;
+        xhermcR = xc->real;
+        xhermcI = xc->imag;
+
+        xcR = alphaR * xcR;
+        xcI = alphaR * xcI;
+        interR = xcR * xhermcR + xcI * xhermcI;
+
         cc = c + (i)*rs_ct + (i)*cs_ct;
-        cc->real += alphaR * ((xcR * xcR) + (xcI * xcI));
+        cc->real += interR;
         cc->imag = 0;
     }
 
@@ -152,9 +160,14 @@ void bli_zher_zen_int_var1
         xhermcR = xhermc->real;
         xhermcI = -1 * conj_multiplier * xhermc->imag;
 
+        xcR = alphaR * xcR;
+        xcI = alphaR * xcI;
+        interR = xcR * xhermcR - xcI * xhermcI;
+        interI = xcR * xhermcI + xcI * xhermcR;
+
         cc = c + (i + 1)*rs_ct + (i + 0)*cs_ct;
-        cc->real += alphaR * ( (xcR * xhermcR) - (xcI * xhermcI) );
-        cc->imag += alphaR * ( (xcR * xhermcI) + (xcI * xhermcR) );
+        cc->real += interR;
+        cc->imag += interI;
 
         xc = x + (i + 3)*incx;
         xcR = xc->real;
@@ -164,9 +177,14 @@ void bli_zher_zen_int_var1
         xhermcR = xhermc->real;
         xhermcI = -1 * conj_multiplier * xhermc->imag;
 
+        xcR = alphaR * xcR;
+        xcI = alphaR * xcI;
+        interR = xcR * xhermcR - xcI * xhermcI;
+        interI = xcR * xhermcI + xcI * xhermcR;
+
         cc = c + (i + 3)*rs_ct + (i + 2)*cs_ct;
-        cc->real += alphaR * ( (xcR * xhermcR) - (xcI * xhermcI) );
-        cc->imag += alphaR * ( (xcR * xhermcI) + (xcI * xhermcR) );
+        cc->real += interR;
+        cc->imag += interI;
 
         // Solving the 2x2 square tile inside the triangular block
         // using intrinsics
@@ -502,9 +520,14 @@ void bli_zher_zen_int_var1
         xhermcR = xhermc->real;
         xhermcI = -1 * conj_multiplier * xhermc->imag;
 
+        xcR = alphaR * xcR;
+        xcI = alphaR * xcI;
+        interR = xcR * xhermcR - xcI * xhermcI;
+        interI = xcR * xhermcI + xcI * xhermcR;
+
         cc = c + (i + 1)*rs_ct + i*cs_ct;
-        cc->real += alphaR * ( (xcR * xhermcR) - (xcI * xhermcI) );
-        cc->imag += alphaR * ( (xcR * xhermcI) + (xcI * xhermcR) );
+        cc->real += interR;
+        cc->imag += interI;
 
         // Loading elements of x to ymm0 for computing xherm vector
         ymm0 = _mm256_loadu_pd( (double*)( x + i*incx ) );
@@ -571,6 +594,7 @@ void bli_zher_zen_int_var2
     double xcR, xcI;
     double xhermcR, xhermcI;
     double alphaR;
+    double interR, interI;
 
     dcomplex* xc;
     dcomplex* xhermc;
@@ -613,7 +637,13 @@ void bli_zher_zen_int_var2
     if ( bli_is_conj( conjx ) ) alphaRv = _mm256_broadcast_sd( &alphaR );
     else                        alphaRv = _mm256_set_pd( -alphaR, alphaR, -alphaR, alphaR );
 
-    __m256d conj_mulv = _mm256_set_pd( conj_multiplier, -1 * conj_multiplier, conj_multiplier, -1 * conj_multiplier );
+    __m256d conj_mulv = _mm256_set_pd
+                        (
+                          conj_multiplier,
+                          -1 * conj_multiplier,
+                          conj_multiplier,
+                          -1 * conj_multiplier
+                        );
 
     /********* DIAGONAL ELEMENTS *********/
     // Solving for the diagonal elements using a scalar loop
@@ -622,8 +652,15 @@ void bli_zher_zen_int_var2
         xc = x + i*incx;
         xcR = xc->real;
         xcI = xc->imag;
+        xhermcR = xc->real;
+        xhermcI = xc->imag;
+
+        xcR = alphaR * xcR;
+        xcI = alphaR * xcI;
+        interR = xcR * xhermcR + xcI * xhermcI;
+
         cc = c + (i)*rs_ct + (i)*cs_ct;
-        cc->real += alphaR * ((xcR * xcR) + (xcI * xcI));
+        cc->real += interR;
         cc->imag = 0;
     }
 
@@ -664,9 +701,14 @@ void bli_zher_zen_int_var2
         xhermcR = xhermc->real;
         xhermcI = -1 * conj_multiplier * xhermc->imag;
 
+        xcR = alphaR * xcR;
+        xcI = alphaR * xcI;
+        interR = xcR * xhermcR - xcI * xhermcI;
+        interI = xcR * xhermcI + xcI * xhermcR;
+
         cc = c + (i + 1)*rs_ct + (i + 0)*cs_ct;
-        cc->real += alphaR * ( (xcR * xhermcR) - (xcI * xhermcI) );
-        cc->imag += alphaR * ( (xcR * xhermcI) + (xcI * xhermcR) );
+        cc->real += interR;
+        cc->imag += interI;
 
         xc = x + (i + 3)*incx;
         xcR = xc->real;
@@ -676,9 +718,14 @@ void bli_zher_zen_int_var2
         xhermcR = xhermc->real;
         xhermcI = -1 * conj_multiplier * xhermc->imag;
 
+        xcR = alphaR * xcR;
+        xcI = alphaR * xcI;
+        interR = xcR * xhermcR - xcI * xhermcI;
+        interI = xcR * xhermcI + xcI * xhermcR;
+
         cc = c + (i + 3)*rs_ct + (i + 2)*cs_ct;
-        cc->real += alphaR * ( (xcR * xhermcR) - (xcI * xhermcI) );
-        cc->imag += alphaR * ( (xcR * xhermcI) + (xcI * xhermcR) );
+        cc->real += interR;
+        cc->imag += interI;
 
         // Solving the 2x2 square tile inside the triangular block
         // using intrinsics
@@ -949,10 +996,15 @@ void bli_zher_zen_int_var2
             xhermcR = xhermc->real;
             xhermcI = -1 * conj_multiplier * xhermc->imag;
 
+            xcR = alphaR * xcR;
+            xcI = alphaR * xcI;
+            interR = xcR * xhermcR - xcI * xhermcI;
+            interI = xcR * xhermcI + xcI * xhermcR;
+
             // c + ((alpha * x) * xherm)
             cc = c + (j)*rs_ct + (i)*cs_ct;
-            cc->real += (alphaR * ((xcR * xhermcR) - (xcI * xhermcI)));
-            cc->imag += (alphaR * ((xcR * xhermcI) + (xcI * xhermcR)));
+            cc->real += interR;
+            cc->imag += interI;
 
             xc = x + j*incx;
             xcR = xc->real;
@@ -962,10 +1014,15 @@ void bli_zher_zen_int_var2
             xhermcR = xhermc->real;
             xhermcI = -1 * conj_multiplier * xhermc->imag;
 
+            xcR = alphaR * xcR;
+            xcI = alphaR * xcI;
+            interR = xcR * xhermcR - xcI * xhermcI;
+            interI = xcR * xhermcI + xcI * xhermcR;
+
             // c + ((alpha * x) * xherm)
             cc = c + (j)*rs_ct + (i + 1)*cs_ct;
-            cc->real += (alphaR * ((xcR * xhermcR) - (xcI * xhermcI)));
-            cc->imag += (alphaR * ((xcR * xhermcI) + (xcI * xhermcR)));
+            cc->real += interR;
+            cc->imag += interI;
 
             xc = x + j*incx;
             xcR = xc->real;
@@ -975,10 +1032,15 @@ void bli_zher_zen_int_var2
             xhermcR = xhermc->real;
             xhermcI = -1 * conj_multiplier * xhermc->imag;
 
+            xcR = alphaR * xcR;
+            xcI = alphaR * xcI;
+            interR = xcR * xhermcR - xcI * xhermcI;
+            interI = xcR * xhermcI + xcI * xhermcR;
+
             // c + ((alpha * x) * xherm)
             cc = c + (j)*rs_ct + (i + 2)*cs_ct;
-            cc->real += (alphaR * ((xcR * xhermcR) - (xcI * xhermcI)));
-            cc->imag += (alphaR * ((xcR * xhermcI) + (xcI * xhermcR)));
+            cc->real += interR;
+            cc->imag += interI;
 
             xc = x + j*incx;
             xcR = xc->real;
@@ -988,10 +1050,15 @@ void bli_zher_zen_int_var2
             xhermcR = xhermc->real;
             xhermcI = -1 * conj_multiplier * xhermc->imag;
 
+            xcR = alphaR * xcR;
+            xcI = alphaR * xcI;
+            interR = xcR * xhermcR - xcI * xhermcI;
+            interI = xcR * xhermcI + xcI * xhermcR;
+
             // c + ((alpha * x) * xherm)
             cc = c + (j)*rs_ct + (i + 3)*cs_ct;
-            cc->real += (alphaR * ((xcR * xhermcR) - (xcI * xhermcI)));
-            cc->imag += (alphaR * ((xcR * xhermcI) + (xcI * xhermcR)));
+            cc->real += interR;
+            cc->imag += interI;
         }
     }
 
@@ -1008,9 +1075,14 @@ void bli_zher_zen_int_var2
         xhermcR = xhermc->real;
         xhermcI = -1 * conj_multiplier * xhermc->imag;
 
+        xcR = alphaR * xcR;
+        xcI = alphaR * xcI;
+        interR = xcR * xhermcR - xcI * xhermcI;
+        interI = xcR * xhermcI + xcI * xhermcR;
+
         cc = c + (i + 1)*rs_ct + i*cs_ct;
-        cc->real += alphaR * ( (xcR * xhermcR) - (xcI * xhermcI) );
-        cc->imag += alphaR * ( (xcR * xhermcI) + (xcI * xhermcR) );
+        cc->real += interR;
+        cc->imag += interI;
 
         // Solving the remaining elements in square block
         // using scalar code
@@ -1024,10 +1096,15 @@ void bli_zher_zen_int_var2
             xhermcR = xhermc->real;
             xhermcI = -1 * conj_multiplier * xhermc->imag;
 
+            xcR = alphaR * xcR;
+            xcI = alphaR * xcI;
+            interR = xcR * xhermcR - xcI * xhermcI;
+            interI = xcR * xhermcI + xcI * xhermcR;
+
             // c + ((alpha * x) * xherm)
             cc = c + (j)*rs_ct + (i)*cs_ct;
-            cc->real += (alphaR * ((xcR * xhermcR) - (xcI * xhermcI)));
-            cc->imag += (alphaR * ((xcR * xhermcI) + (xcI * xhermcR)));
+            cc->real += interR;
+            cc->imag += interI;
 
             xc = x + j*incx;
             xcR = xc->real;
@@ -1037,10 +1114,15 @@ void bli_zher_zen_int_var2
             xhermcR = xhermc->real;
             xhermcI = -1 * conj_multiplier * xhermc->imag;
 
+            xcR = alphaR * xcR;
+            xcI = alphaR * xcI;
+            interR = xcR * xhermcR - xcI * xhermcI;
+            interI = xcR * xhermcI + xcI * xhermcR;
+
             // c + ((alpha * x) * xherm)
             cc = c + (j)*rs_ct + (i + 1)*cs_ct;
-            cc->real += (alphaR * ((xcR * xhermcR) - (xcI * xhermcI)));
-            cc->imag += (alphaR * ((xcR * xhermcI) + (xcI * xhermcR)));
+            cc->real += interR;
+            cc->imag += interI;
         }
     }
 }
