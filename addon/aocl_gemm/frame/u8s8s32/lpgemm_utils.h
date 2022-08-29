@@ -187,7 +187,7 @@ BLIS_INLINE void get_B_panel_reordered_start_offset_width
        dim_t* panel_start,
        dim_t* panel_offset,
        dim_t* panel_width,
-	   dim_t* panel_width_kdim_trav
+       dim_t* panel_width_kdim_trav
      )
 {
 	// Since n dimension is split across threads in units of NR blocks,

@@ -92,7 +92,7 @@ void lpgemm_ ## LPGEMM_SFX ## _thread_decorator \
        lpgemm_post_op*       post_op_list \
      ); \
 
-GEN_LPGEMM_DECORATOR_FN(uint8_t,int8_t,int32_t,u8s8s16o16)
+GEN_LPGEMM_DECORATOR_FN(uint8_t,int8_t,int16_t,u8s8s16o16)
 GEN_LPGEMM_DECORATOR_FN(uint8_t,int8_t,int32_t,u8s8s32o32)
 GEN_LPGEMM_DECORATOR_FN(bfloat16,bfloat16,float,bf16bf16f32of32)
 GEN_LPGEMM_DECORATOR_FN(float,float,float,f32f32f32of32)

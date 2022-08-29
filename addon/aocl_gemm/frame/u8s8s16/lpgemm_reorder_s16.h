@@ -37,9 +37,9 @@
 #include "lpgemm_types.h"
 
 void aocl_reorderb_nr32_u8s8s16o16
-  (
-    lpgemm_obj_t *b,
-    lpgemm_obj_t *b_reorder
-  );
+     (
+       lpgemm_obj_t *b,
+       lpgemm_obj_t *b_reorder
+     );
 
 #endif // LPGEMM_REORDER_H

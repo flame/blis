@@ -38,56 +38,131 @@
 #include "lpgemm_config.h"
 
 void aocl_reorderb_nr32_u8s8s16o16
-  (
-    lpgemm_obj_t *b,
-    lpgemm_obj_t *b_reorder
-  )
+     (
+       lpgemm_obj_t *b,
+       lpgemm_obj_t *b_reorder
+     )
 {
-  const dim_t NC = lpgemm_get_block_size_NC_global_cntx(U8S8S16OS16);
-  const dim_t KC = lpgemm_get_block_size_KC_global_cntx(U8S8S16OS16);
+	const dim_t NC = lpgemm_get_block_size_NC_global_cntx(U8S8S16OS16);
+	const dim_t KC = lpgemm_get_block_size_KC_global_cntx(U8S8S16OS16);
+	const dim_t NR = lpgemm_get_block_size_NR_global_cntx(U8S8S16OS16);
 
-  // Extracting the matrix properties from the lpgemm object
-  dim_t rs_b = b->rs;
-  dim_t n = b->width;
-  dim_t k = b->length;
+	// Extracting the matrix properties from the lpgemm object
+	dim_t rs_b = b->rs;
+	dim_t n = b->width;
+	dim_t k = b->length;
 
-  dim_t rs_b_reorder;
-  dim_t cs_b_reorder;
+	dim_t rs_b_reorder;
+	dim_t cs_b_reorder;
 
-  dim_t k_updated = k;
+	dim_t k_updated = k;
 
-  // Making multiple of 2 to suit k in vpmaddubsw
-  k_updated += (k_updated & 0x1);
+	// Making multiple of 2 to suit k in vpmaddubsw
+	k_updated += (k_updated & 0x1);
 
-  for (dim_t jc = 0; jc < n; jc += NC)
-  {
-    dim_t nc0 = ((jc + NC) <= n) ? NC : (n % NC);
+	// Initialize a local runtime with global settings if necessary. Note
+	// that in the case that a runtime is passed in, we make a local copy.
+	rntm_t rntm_g;
+	bli_rntm_init_from_global( &rntm_g );
 
-    // nc0 needs to be a multiple of 16 since this gives maximum
-    // vectorization. Packing B always results in buffers with width
-    // which is a multiple of 16. Subsequently the nc0 offsets used
-    // for packed/reordered buffers needs to be updated.
-    dim_t nc0_mod16 = nc0 % 16;
-    dim_t nc0_updated = nc0;
-    if (nc0_mod16 != 0)
-    {
-      nc0_updated += (16 - nc0_mod16);
-    }
+	dim_t n_threads = bli_rntm_num_threads( &rntm_g );
+	n_threads = ( n_threads > 0 ) ? n_threads : 1;
 
-    for (dim_t pc = 0; pc < k; pc += KC)
-    {
-      dim_t kc0 = ((pc + KC) <= k) ? KC : (k % KC);
+#ifdef BLIS_ENABLE_OPENMP
+	_Pragma( "omp parallel num_threads(n_threads)" )
+	{
+		// Initialise a local thrinfo obj for work split across threads.
+		thrinfo_t thread_jc;
+		bli_thrinfo_set_n_way( n_threads, &thread_jc );
+		bli_thrinfo_set_work_id( omp_get_thread_num(), &thread_jc );
+#else
+	{
+		// Initialise a local thrinfo obj for work split across threads.
+		thrinfo_t thread_jc;
+		bli_thrinfo_set_n_way( 1, &thread_jc );
+		bli_thrinfo_set_work_id( 0, &thread_jc );
+#endif
+		// Compute the JC loop thread range for the current thread.
+		dim_t jc_start, jc_end;
+		bli_thread_range_sub( &thread_jc, n, NR, FALSE, &jc_start, &jc_end );
 
-      // B should always be packed.
-      packb_nr32_u8s8s16o16(
-          (((int8_t *)b_reorder->storage.aligned_buffer) + (jc * k_updated) + (nc0_updated * pc)),
-          (((int8_t *)b->storage.aligned_buffer) + (rs_b * pc) + jc),
-          rs_b, nc0, kc0, &rs_b_reorder, &cs_b_reorder);
-    }
-  }
+		for ( dim_t jc = jc_start; jc < jc_end; jc += NC )
+		{
+			dim_t nc0 = bli_min( ( jc_end - jc ), NC );
 
-  // Changing the packed matrix properties in the packed matrix object
-  b_reorder->rs = rs_b_reorder;
-  b_reorder->cs = cs_b_reorder;
-  b_reorder->mtag = REORDERED;
+			dim_t jc_cur_loop = jc;
+			dim_t jc_cur_loop_rem = 0;
+			dim_t n_sub_updated;
+
+			get_B_panel_reordered_start_offset_width
+			(
+			  jc, n, NC, 16,
+			  &jc_cur_loop, &jc_cur_loop_rem,
+			  &nc0, &n_sub_updated
+			);
+
+			for ( dim_t pc = 0; pc < k; pc += KC )
+			{
+				dim_t kc0 = bli_min( ( k - pc ), KC );
+
+				// kc0 needs to be a multiple of 2 so that it can be used with
+				// vmaddubsw instruction. Padding is added in cases this
+				// condition is not satisfied, and therefore the kc0 offsets
+				// used for packed/reordered buffers needs to be updated.
+				dim_t kc0_updated = make_multiple_of_n( kc0, 2 );
+
+				// The offsets are calculated in such a way that it resembles
+				// the reorder buffer traversal in single threaded reordering.
+				// The panel boundaries (KCxNC) remain as it is accessed in
+				// single thread, and as a consequence a thread with jc_start
+				// inside the panel cannot consider NC range for reorder. It
+				// has to work with NC' < NC, and the offset is calulated using
+				// prev NC panels spanning k dim + cur NC panel spaning pc loop
+				// cur iteration + (NC - NC') spanning current kc0 (<= KC).
+				//
+				//Eg: Consider the following reordered buffer diagram:
+				//          t1              t2
+				//          |               |
+				//          |           |..NC..|
+				//          |           |      |
+				//          |.NC. |.NC. |NC'|NC"
+				//     pc=0-+-----+-----+---+--+
+				//        KC|     |     |   |  |
+				//          |  1  |  3  |   5  |
+				//    pc=KC-+-----+-----+---st-+
+				//        KC|     |     |   |  |
+				//          |  2  |  4  | 6 | 7|
+				// pc=k=2KC-+-----+-----+---+--+
+				//          |jc=0 |jc=NC|jc=2NC|
+				//
+				// The numbers 1,2..6,7 denotes the order in which reordered
+				// KCxNC blocks are stored in memory, ie: block 1 followed by 2
+				// followed by 3, etc. Given two threads t1 and t2, and t2 needs
+				// to acces point st in the reorder buffer to write the data:
+				// The offset calulation logic will be:
+				// jc_cur_loop = 2NC, jc_cur_loop_rem = NC', pc = KC,
+				// n_sub_updated = NC, k = 2KC, kc0_updated = KC
+				//
+				// st = ( jc_cur_loop * k )    <traverse blocks 1,2,3,4>
+				//    + ( n_sub_updated * pc ) <traverse block 5>
+				//    + ( NC' * kc0_updated)   <traverse block 6>
+				packb_nr32_u8s8s16o16
+				(
+				  ( ( ( int8_t* )b_reorder->storage.aligned_buffer ) +
+					( jc_cur_loop * k_updated ) + ( n_sub_updated * pc ) +
+					( jc_cur_loop_rem * kc0_updated ) ),
+				  ( ( ( int8_t* )b->storage.aligned_buffer ) +
+					( rs_b * pc ) + jc ),
+				  rs_b, nc0, kc0, &rs_b_reorder, &cs_b_reorder
+				);
+			}
+
+			adjust_B_panel_reordered_jc( &jc, jc_cur_loop );
+		}
+	}
+
+	// Changing the packed matrix properties in the packed matrix object
+	b_reorder->rs = rs_b_reorder;
+	b_reorder->cs = cs_b_reorder;
+	b_reorder->mtag = REORDERED;
 }
