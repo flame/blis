@@ -5,8 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2020 - 2022, Advanced Micro Devices, Inc. All rights reserved.
-   
+
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
    met:
@@ -42,8 +41,7 @@
 	-lf2c -lm   (in that order)
 */
 
-/* Subroutine */ 
-int PASTEF77S(c,tpsv)(const bla_character *uplo, const bla_character *trans, const bla_character *diag, const bla_integer *n, const bla_scomplex *ap, bla_scomplex *x, const bla_integer *incx)
+/* Subroutine */ int PASTEF77(c,tpsv)(const bla_character *uplo, const bla_character *trans, const bla_character *diag, const bla_integer *n, const bla_scomplex *ap, bla_scomplex *x, const bla_integer *incx)
 {
     /* System generated locals */
     bla_integer i__1, i__2, i__3, i__4, i__5;
@@ -536,8 +534,7 @@ int PASTEF77S(c,tpsv)(const bla_character *uplo, const bla_character *trans, con
 	-lf2c -lm   (in that order)
 */
 
-/* Subroutine */ 
-int PASTEF77S(d,tpsv)(const bla_character *uplo, const bla_character *trans, const bla_character *diag, const bla_integer *n, const bla_double *ap, bla_double *x, const bla_integer *incx)
+/* Subroutine */ int PASTEF77(d,tpsv)(const bla_character *uplo, const bla_character *trans, const bla_character *diag, const bla_integer *n, const bla_double *ap, bla_double *x, const bla_integer *incx)
 {
     /* System generated locals */
     bla_integer i__1, i__2;
@@ -888,8 +885,7 @@ int PASTEF77S(d,tpsv)(const bla_character *uplo, const bla_character *trans, con
 	-lf2c -lm   (in that order)
 */
 
-/* Subroutine */ 
-int PASTEF77S(s,tpsv)(const bla_character *uplo, const bla_character *trans, const bla_character *diag, const bla_integer *n, const bla_real *ap, bla_real *x, const bla_integer *incx)
+/* Subroutine */ int PASTEF77(s,tpsv)(const bla_character *uplo, const bla_character *trans, const bla_character *diag, const bla_integer *n, const bla_real *ap, bla_real *x, const bla_integer *incx)
 {
     /* System generated locals */
     bla_integer i__1, i__2;
@@ -1240,8 +1236,7 @@ int PASTEF77S(s,tpsv)(const bla_character *uplo, const bla_character *trans, con
 	-lf2c -lm   (in that order)
 */
 
-/* Subroutine */ 
-int PASTEF77S(z,tpsv)(const bla_character *uplo, const bla_character *trans, const bla_character *diag, const bla_integer *n, const bla_dcomplex *ap, bla_dcomplex *x, const bla_integer *incx)
+/* Subroutine */ int PASTEF77(z,tpsv)(const bla_character *uplo, const bla_character *trans, const bla_character *diag, const bla_integer *n, const bla_dcomplex *ap, bla_dcomplex *x, const bla_integer *incx)
 {
     /* System generated locals */
     bla_integer i__1, i__2, i__3, i__4, i__5;
@@ -1729,26 +1724,6 @@ int PASTEF77S(z,tpsv)(const bla_character *uplo, const bla_character *trans, con
 /*     End of ZTPSV . */
 
 } /* ztpsv_ */
-
-int PASTEF77(s,tpsv)(const bla_character *uplo, const bla_character *trans, const bla_character *diag, const bla_integer *n, const bla_real *ap, bla_real *x, const bla_integer *incx)
-{
-  return PASTEF77S(s,tpsv)( uplo, trans, diag, n, ap, x, incx );
-}
-
-int PASTEF77(d,tpsv)(const bla_character *uplo, const bla_character *trans, const bla_character *diag, const bla_integer *n, const bla_double *ap, bla_double *x, const bla_integer *incx)
-{
-  return PASTEF77S(d,tpsv)( uplo, trans, diag, n, ap, x, incx );
-}
-
-int PASTEF77(c,tpsv)(const bla_character *uplo, const bla_character *trans, const bla_character *diag, const bla_integer *n, const bla_scomplex *ap, bla_scomplex *x, const bla_integer *incx)
-{
-  return PASTEF77S(c,tpsv)( uplo, trans, diag, n, ap, x, incx );
-}
-
-int PASTEF77(z,tpsv)(const bla_character *uplo, const bla_character *trans, const bla_character *diag, const bla_integer *n, const bla_dcomplex *ap, bla_dcomplex *x, const bla_integer *incx)
-{
-  return PASTEF77S(z,tpsv)( uplo, trans, diag, n, ap, x, incx );
-}
 
 #endif
 

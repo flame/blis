@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2020 - 2022, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2020 - 22, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -42,7 +42,7 @@
 #undef  GENTFUNC
 #define GENTFUNC( ftype, ch, blasname, blisname ) \
 \
-void PASTEF77S(ch,blasname) \
+void PASTEF77(ch,blasname) \
      ( \
        const f77_char* transa, \
        const f77_int*  m, \
@@ -143,26 +143,11 @@ void PASTEF77S(ch,blasname) \
     AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1); \
     /* Finalize BLIS. */ \
     bli_finalize_auto(); \
-}\
-void PASTEF77(ch,blasname) \
-     ( \
-       const f77_char* transa, \
-       const f77_int*  m, \
-       const f77_int*  n, \
-       const ftype*    alpha, \
-       const ftype*    a, const f77_int* lda, \
-       const ftype*    x, const f77_int* incx, \
-       const ftype*    beta, \
-             ftype*    y, const f77_int* incy  \
-     ) \
-{ \
-  PASTEF77S(ch,blasname) \
-   ( transa, m, n, alpha, a, lda, x, incx, beta, y, incy ); \
 }
 
 
 #ifdef BLIS_ENABLE_BLAS
-void dgemv_blis_impl
+void dgemv_
      (
        const f77_char* transa,
        const f77_int*  m,
@@ -346,23 +331,8 @@ void dgemv_blis_impl
 
     AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
 }
-void dgemv_
-     (
-       const f77_char* transa,
-       const f77_int*  m,
-       const f77_int*  n,
-       const double*    alpha,
-       const double*    a, const f77_int* lda,
-       const double*    x, const f77_int* incx,
-       const double*    beta,
-             double*    y, const f77_int* incy
-     )
-{
-  dgemv_blis_impl( transa, m, n, alpha, a, lda,
-                        x, incx, beta, y, incy );
-}
 
-void sgemv_blis_impl
+void sgemv_
      (
        const f77_char* transa,
        const f77_int*  m,
@@ -540,23 +510,9 @@ void sgemv_blis_impl
 
     AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
 }
-void sgemv_
-     (
-       const f77_char* transa,
-       const f77_int*  m,
-       const f77_int*  n,
-       const float*    alpha,
-       const float*    a, const f77_int* lda,
-       const float*    x, const f77_int* incx,
-       const float*    beta,
-             float*    y, const f77_int* incy
-     )
-{
-  sgemv_blis_impl( transa, m, n, alpha, a, lda, 
-                        x, incx, beta, y, incy ); 
-}
 
-void cgemv_blis_impl
+
+void cgemv_
      (
        const f77_char* transa,
        const f77_int*  m,
@@ -777,23 +733,9 @@ void cgemv_blis_impl
 
     AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
 }
-void cgemv_
-     (
-       const f77_char* transa,
-       const f77_int*  m,
-       const f77_int*  n,
-       const scomplex* alpha,
-       const scomplex* a, const f77_int* lda,
-       const scomplex* x, const f77_int* incx,
-       const scomplex* beta,
-             scomplex* y, const f77_int* incy
-     )
-{
-  cgemv_blis_impl( transa, m, n, alpha, a, lda, 
-                        x, incx, beta, y, incy ); 
-}
 
-void zgemv_blis_impl
+
+void zgemv_
      (
        const f77_char* transa,
        const f77_int*  m,
@@ -1015,21 +957,7 @@ void zgemv_blis_impl
 
     AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
 }
-void zgemv_
-     (
-       const f77_char* transa,
-       const f77_int*  m,
-       const f77_int*  n,
-       const dcomplex* alpha,
-       const dcomplex* a, const f77_int* lda,
-       const dcomplex* x, const f77_int* incx,
-       const dcomplex* beta,
-             dcomplex* y, const f77_int* incy
-     )
-{
-  zgemv_blis_impl( transa, m, n, alpha, a, lda, 
-                        x, incx, beta, y, incy ); 
-}
+
 
 
 #endif

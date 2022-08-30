@@ -195,17 +195,17 @@ void ZDOTU_(dcomplex* retval,const f77_int *n, const dcomplex *zx, const f77_int
 
 void CGBMV(const char   *trans,const f77_int *m,const f77_int *n,const f77_int *kl,const f77_int *ku,const scomplex  *alpha,const scomplex  *a,const f77_int *lda,const scomplex  *x,const f77_int *incx,const scomplex  *beta,scomplex  *y,const f77_int *incy)
 {
-    cgbmv_blis_impl( trans, m, n, kl, ku, alpha, a, lda, x, incx, beta, y, incy);
+    cgbmv_( trans, m, n, kl, ku, alpha, a, lda, x, incx, beta, y, incy);
 }
 
 void cgbmv(const char   *trans,const f77_int *m,const f77_int *n,const f77_int *kl,const f77_int *ku,const scomplex  *alpha,const scomplex  *a,const f77_int *lda,const scomplex  *x,const f77_int *incx,const scomplex  *beta,scomplex  *y,const f77_int *incy)
 {
-    cgbmv_blis_impl( trans, m, n, kl, ku, alpha, a, lda, x, incx, beta, y, incy);
+    cgbmv_( trans, m, n, kl, ku, alpha, a, lda, x, incx, beta, y, incy);
 }
 
 void CGBMV_(const char   *trans,const f77_int *m,const f77_int *n,const f77_int *kl,const f77_int *ku,const scomplex  *alpha,const scomplex  *a,const f77_int *lda,const scomplex  *x,const f77_int *incx,const scomplex  *beta,scomplex  *y,const f77_int *incy)
 {
-    cgbmv_blis_impl( trans, m, n, kl, ku, alpha, a, lda, x, incx, beta, y, incy);
+    cgbmv_( trans, m, n, kl, ku, alpha, a, lda, x, incx, beta, y, incy);
 }
 
 void CGEMM(const char   *transa,const char   *transb,const f77_int *m,const f77_int *n,const f77_int *k,const scomplex  *alpha,const scomplex  *a,const f77_int *lda,const scomplex  *b,const f77_int *ldb,const scomplex  *beta,scomplex  *c,const f77_int *ldc)
@@ -225,62 +225,62 @@ void CGEMM_(const char   *transa,const char   *transb,const f77_int *m,const f77
 
 void CGEMV(const char   *trans,const f77_int *m,const f77_int *n,const scomplex  *alpha,const scomplex  *a,const f77_int *lda,const scomplex  *x,const f77_int *incx,const scomplex  *beta,scomplex  *y,const f77_int *incy)
 {
-    cgemv_blis_impl( trans, m, n, alpha, a, lda, x, incx, beta, y, incy);
+    cgemv_( trans, m, n, alpha, a, lda, x, incx, beta, y, incy);
 }
 
 void cgemv(const char   *trans,const f77_int *m,const f77_int *n,const scomplex  *alpha,const scomplex  *a,const f77_int *lda,const scomplex  *x,const f77_int *incx,const scomplex  *beta,scomplex  *y,const f77_int *incy)
 {
-    cgemv_blis_impl( trans, m, n, alpha, a, lda, x, incx, beta, y, incy);
+    cgemv_( trans, m, n, alpha, a, lda, x, incx, beta, y, incy);
 }
 
 void CGEMV_(const char   *trans,const f77_int *m,const f77_int *n,const scomplex  *alpha,const scomplex  *a,const f77_int *lda,const scomplex  *x,const f77_int *incx,const scomplex  *beta,scomplex  *y,const f77_int *incy)
 {
-    cgemv_blis_impl( trans, m, n, alpha, a, lda, x, incx, beta, y, incy);
+    cgemv_( trans, m, n, alpha, a, lda, x, incx, beta, y, incy);
 }
 
 void CGERC(const f77_int *m,const f77_int *n,const scomplex  *alpha,const scomplex  *x,const f77_int *incx,const scomplex  *y,const f77_int *incy,scomplex  *a,const f77_int *lda)
 {
-    cgerc_blis_impl( m, n, alpha, x, incx, y, incy, a, lda);
+    cgerc_( m, n, alpha, x, incx, y, incy, a, lda);
 }
 
 void cgerc(const f77_int *m,const f77_int *n,const scomplex  *alpha,const scomplex  *x,const f77_int *incx,const scomplex  *y,const f77_int *incy,scomplex  *a,const f77_int *lda)
 {
-    cgerc_blis_impl( m, n, alpha, x, incx, y, incy, a, lda);
+    cgerc_( m, n, alpha, x, incx, y, incy, a, lda);
 }
 
 void CGERC_(const f77_int *m,const f77_int *n,const scomplex  *alpha,const scomplex  *x,const f77_int *incx,const scomplex  *y,const f77_int *incy,scomplex  *a,const f77_int *lda)
 {
-    cgerc_blis_impl( m, n, alpha, x, incx, y, incy, a, lda);
+    cgerc_( m, n, alpha, x, incx, y, incy, a, lda);
 }
 
 void CGERU(const f77_int *m,const f77_int *n,const scomplex  *alpha,const scomplex  *x,const f77_int *incx,const scomplex  *y,const f77_int *incy,scomplex  *a,const f77_int *lda)
 {
-    cgeru_blis_impl( m, n, alpha, x, incx, y, incy, a, lda);
+    cgeru_( m, n, alpha, x, incx, y, incy, a, lda);
 }
 
 void cgeru(const f77_int *m,const f77_int *n,const scomplex  *alpha,const scomplex  *x,const f77_int *incx,const scomplex  *y,const f77_int *incy,scomplex  *a,const f77_int *lda)
 {
-    cgeru_blis_impl( m, n, alpha, x, incx, y, incy, a, lda);
+    cgeru_( m, n, alpha, x, incx, y, incy, a, lda);
 }
 
 void CGERU_(const f77_int *m,const f77_int *n,const scomplex  *alpha,const scomplex  *x,const f77_int *incx,const scomplex  *y,const f77_int *incy,scomplex  *a,const f77_int *lda)
 {
-    cgeru_blis_impl( m, n, alpha, x, incx, y, incy, a, lda);
+    cgeru_( m, n, alpha, x, incx, y, incy, a, lda);
 }
 
 void CHBMV(const char   *uplo,const f77_int *n,const f77_int *k,const scomplex  *alpha,const scomplex  *a,const f77_int *lda,const scomplex  *x,const f77_int *incx,const scomplex  *beta,scomplex  *y,const f77_int *incy)
 {
-    chbmv_blis_impl( uplo, n, k, alpha, a, lda, x, incx, beta, y, incy);
+    chbmv_( uplo, n, k, alpha, a, lda, x, incx, beta, y, incy);
 }
 
 void chbmv(const char   *uplo,const f77_int *n,const f77_int *k,const scomplex  *alpha,const scomplex  *a,const f77_int *lda,const scomplex  *x,const f77_int *incx,const scomplex  *beta,scomplex  *y,const f77_int *incy)
 {
-    chbmv_blis_impl( uplo, n, k, alpha, a, lda, x, incx, beta, y, incy);
+    chbmv_( uplo, n, k, alpha, a, lda, x, incx, beta, y, incy);
 }
 
 void CHBMV_(const char   *uplo,const f77_int *n,const f77_int *k,const scomplex  *alpha,const scomplex  *a,const f77_int *lda,const scomplex  *x,const f77_int *incx,const scomplex  *beta,scomplex  *y,const f77_int *incy)
 {
-    chbmv_blis_impl( uplo, n, k, alpha, a, lda, x, incx, beta, y, incy);
+    chbmv_( uplo, n, k, alpha, a, lda, x, incx, beta, y, incy);
 }
 
 void CHEMM(const char   *side,const char   *uplo,const f77_int *m,const f77_int *n,const scomplex  *alpha,const scomplex  *a,const f77_int *lda,const scomplex  *b,const f77_int *ldb,const scomplex  *beta,scomplex  *c,const f77_int *ldc)
@@ -300,47 +300,47 @@ void CHEMM_(const char   *side,const char   *uplo,const f77_int *m,const f77_int
 
 void CHEMV(const char   *uplo,const f77_int *n,const scomplex  *alpha,const scomplex  *a,const f77_int *lda,const scomplex  *x,const f77_int *incx,const scomplex  *beta,scomplex  *y,const f77_int *incy)
 {
-    chemv_blis_impl( uplo, n, alpha, a, lda, x, incx, beta, y, incy);
+    chemv_( uplo, n, alpha, a, lda, x, incx, beta, y, incy);
 }
 
 void chemv(const char   *uplo,const f77_int *n,const scomplex  *alpha,const scomplex  *a,const f77_int *lda,const scomplex  *x,const f77_int *incx,const scomplex  *beta,scomplex  *y,const f77_int *incy)
 {
-    chemv_blis_impl( uplo, n, alpha, a, lda, x, incx, beta, y, incy);
+    chemv_( uplo, n, alpha, a, lda, x, incx, beta, y, incy);
 }
 
 void CHEMV_(const char   *uplo,const f77_int *n,const scomplex  *alpha,const scomplex  *a,const f77_int *lda,const scomplex  *x,const f77_int *incx,const scomplex  *beta,scomplex  *y,const f77_int *incy)
 {
-    chemv_blis_impl( uplo, n, alpha, a, lda, x, incx, beta, y, incy);
+    chemv_( uplo, n, alpha, a, lda, x, incx, beta, y, incy);
 }
 
 void CHER(const char   *uplo,const f77_int *n,const float  *alpha,const scomplex  *x,const f77_int *incx,scomplex  *a,const f77_int *lda)
 {
-    cher_blis_impl( uplo, n, alpha, x, incx, a, lda);
+    cher_( uplo, n, alpha, x, incx, a, lda);
 }
 
 void cher(const char   *uplo,const f77_int *n,const float  *alpha,const scomplex  *x,const f77_int *incx,scomplex  *a,const f77_int *lda)
 {
-    cher_blis_impl( uplo, n, alpha, x, incx, a, lda);
+    cher_( uplo, n, alpha, x, incx, a, lda);
 }
 
 void CHER_(const char   *uplo,const f77_int *n,const float  *alpha,const scomplex  *x,const f77_int *incx,scomplex  *a,const f77_int *lda)
 {
-    cher_blis_impl( uplo, n, alpha, x, incx, a, lda);
+    cher_( uplo, n, alpha, x, incx, a, lda);
 }
 
 void CHER2(const char   *uplo,const f77_int *n,const scomplex  *alpha,const scomplex  *x,const f77_int *incx,const scomplex  *y,const f77_int *incy,scomplex  *a,const f77_int *lda)
 {
-    cher2_blis_impl( uplo, n, alpha, x, incx, y, incy, a, lda);
+    cher2_( uplo, n, alpha, x, incx, y, incy, a, lda);
 }
 
 void cher2(const char   *uplo,const f77_int *n,const scomplex  *alpha,const scomplex  *x,const f77_int *incx,const scomplex  *y,const f77_int *incy,scomplex  *a,const f77_int *lda)
 {
-    cher2_blis_impl( uplo, n, alpha, x, incx, y, incy, a, lda);
+    cher2_( uplo, n, alpha, x, incx, y, incy, a, lda);
 }
 
 void CHER2_(const char   *uplo,const f77_int *n,const scomplex  *alpha,const scomplex  *x,const f77_int *incx,const scomplex  *y,const f77_int *incy,scomplex  *a,const f77_int *lda)
 {
-    cher2_blis_impl( uplo, n, alpha, x, incx, y, incy, a, lda);
+    cher2_( uplo, n, alpha, x, incx, y, incy, a, lda);
 }
 
 void CHER2K(const char   *uplo,const char   *trans,const f77_int *n,const f77_int *k,const scomplex  *alpha,const scomplex  *a,const f77_int *lda,const scomplex  *b,const f77_int *ldb,const float  *beta,scomplex  *c,const f77_int *ldc)
@@ -375,47 +375,47 @@ void CHERK_(const char   *uplo,const char   *trans,const f77_int *n,const f77_in
 
 void CHPMV(const char   *uplo,const f77_int *n,const scomplex  *alpha,const scomplex  *ap,const scomplex  *x,const f77_int *incx,const scomplex  *beta,scomplex  *y,const f77_int *incy)
 {
-    chpmv_blis_impl( uplo, n, alpha, ap, x, incx, beta, y, incy);
+    chpmv_( uplo, n, alpha, ap, x, incx, beta, y, incy);
 }
 
 void chpmv(const char   *uplo,const f77_int *n,const scomplex  *alpha,const scomplex  *ap,const scomplex  *x,const f77_int *incx,const scomplex  *beta,scomplex  *y,const f77_int *incy)
 {
-    chpmv_blis_impl( uplo, n, alpha, ap, x, incx, beta, y, incy);
+    chpmv_( uplo, n, alpha, ap, x, incx, beta, y, incy);
 }
 
 void CHPMV_(const char   *uplo,const f77_int *n,const scomplex  *alpha,const scomplex  *ap,const scomplex  *x,const f77_int *incx,const scomplex  *beta,scomplex  *y,const f77_int *incy)
 {
-    chpmv_blis_impl( uplo, n, alpha, ap, x, incx, beta, y, incy);
+    chpmv_( uplo, n, alpha, ap, x, incx, beta, y, incy);
 }
 
 void CHPR(const char   *uplo,const f77_int *n,const float  *alpha,const scomplex  *x,const f77_int *incx,scomplex  *ap)
 {
-    chpr_blis_impl( uplo, n, alpha, x, incx, ap);
+    chpr_( uplo, n, alpha, x, incx, ap);
 }
 
 void chpr(const char   *uplo,const f77_int *n,const float  *alpha,const scomplex  *x,const f77_int *incx,scomplex  *ap)
 {
-    chpr_blis_impl( uplo, n, alpha, x, incx, ap);
+    chpr_( uplo, n, alpha, x, incx, ap);
 }
 
 void CHPR_(const char   *uplo,const f77_int *n,const float  *alpha,const scomplex  *x,const f77_int *incx,scomplex  *ap)
 {
-    chpr_blis_impl( uplo, n, alpha, x, incx, ap);
+    chpr_( uplo, n, alpha, x, incx, ap);
 }
 
 void CHPR2(const char   *uplo,const f77_int *n,const scomplex  *alpha,const scomplex  *x,const f77_int *incx,const scomplex  *y,const f77_int *incy,scomplex  *ap)
 {
-    chpr2_blis_impl( uplo, n, alpha, x, incx, y, incy, ap);
+    chpr2_( uplo, n, alpha, x, incx, y, incy, ap);
 }
 
 void chpr2(const char   *uplo,const f77_int *n,const scomplex  *alpha,const scomplex  *x,const f77_int *incx,const scomplex  *y,const f77_int *incy,scomplex  *ap)
 {
-    chpr2_blis_impl( uplo, n, alpha, x, incx, y, incy, ap);
+    chpr2_( uplo, n, alpha, x, incx, y, incy, ap);
 }
 
 void CHPR2_(const char   *uplo,const f77_int *n,const scomplex  *alpha,const scomplex  *x,const f77_int *incx,const scomplex  *y,const f77_int *incy,scomplex  *ap)
 {
-    chpr2_blis_impl( uplo, n, alpha, x, incx, y, incy, ap);
+    chpr2_( uplo, n, alpha, x, incx, y, incy, ap);
 }
 
 void CROTG(scomplex  *ca, bla_scomplex  *cb, bla_real  *c,scomplex  *s)
@@ -540,62 +540,62 @@ void CSYRK_(const char   *uplo,const char   *trans,const f77_int *n,const f77_in
 
 void CTBMV(const char   *uplo,const char   *trans,const char   *diag,const f77_int *n,const f77_int *k,const scomplex  *a,const f77_int *lda,scomplex  *x,const f77_int *incx)
 {
-    ctbmv_blis_impl( uplo, trans, diag, n, k, a, lda, x, incx);
+    ctbmv_( uplo, trans, diag, n, k, a, lda, x, incx);
 }
 
 void ctbmv(const char   *uplo,const char   *trans,const char   *diag,const f77_int *n,const f77_int *k,const scomplex  *a,const f77_int *lda,scomplex  *x,const f77_int *incx)
 {
-    ctbmv_blis_impl( uplo, trans, diag, n, k, a, lda, x, incx);
+    ctbmv_( uplo, trans, diag, n, k, a, lda, x, incx);
 }
 
 void CTBMV_(const char   *uplo,const char   *trans,const char   *diag,const f77_int *n,const f77_int *k,const scomplex  *a,const f77_int *lda,scomplex  *x,const f77_int *incx)
 {
-    ctbmv_blis_impl( uplo, trans, diag, n, k, a, lda, x, incx);
+    ctbmv_( uplo, trans, diag, n, k, a, lda, x, incx);
 }
 
 void CTBSV(const char   *uplo,const char   *trans,const char   *diag,const f77_int *n,const f77_int *k,const scomplex  *a,const f77_int *lda,scomplex  *x,const f77_int *incx)
 {
-    ctbsv_blis_impl( uplo, trans, diag, n, k, a, lda, x, incx);
+    ctbsv_( uplo, trans, diag, n, k, a, lda, x, incx);
 }
 
 void ctbsv(const char   *uplo,const char   *trans,const char   *diag,const f77_int *n,const f77_int *k,const scomplex  *a,const f77_int *lda,scomplex  *x,const f77_int *incx)
 {
-    ctbsv_blis_impl( uplo, trans, diag, n, k, a, lda, x, incx);
+    ctbsv_( uplo, trans, diag, n, k, a, lda, x, incx);
 }
 
 void CTBSV_(const char   *uplo,const char   *trans,const char   *diag,const f77_int *n,const f77_int *k,const scomplex  *a,const f77_int *lda,scomplex  *x,const f77_int *incx)
 {
-    ctbsv_blis_impl( uplo, trans, diag, n, k, a, lda, x, incx);
+    ctbsv_( uplo, trans, diag, n, k, a, lda, x, incx);
 }
 
 void CTPMV(const char   *uplo,const char   *trans,const char   *diag,const f77_int *n,const scomplex  *ap,scomplex  *x,const f77_int *incx)
 {
-    ctpmv_blis_impl( uplo, trans, diag, n, ap, x, incx);
+    ctpmv_( uplo, trans, diag, n, ap, x, incx);
 }
 
 void ctpmv(const char   *uplo,const char   *trans,const char   *diag,const f77_int *n,const scomplex  *ap,scomplex  *x,const f77_int *incx)
 {
-    ctpmv_blis_impl( uplo, trans, diag, n, ap, x, incx);
+    ctpmv_( uplo, trans, diag, n, ap, x, incx);
 }
 
 void CTPMV_(const char   *uplo,const char   *trans,const char   *diag,const f77_int *n,const scomplex  *ap,scomplex  *x,const f77_int *incx)
 {
-    ctpmv_blis_impl( uplo, trans, diag, n, ap, x, incx);
+    ctpmv_( uplo, trans, diag, n, ap, x, incx);
 }
 
 void CTPSV(const char   *uplo,const char   *trans,const char   *diag,const f77_int *n,const scomplex  *ap,scomplex  *x,const f77_int *incx)
 {
-    ctpsv_blis_impl( uplo, trans, diag, n, ap, x, incx);
+    ctpsv_( uplo, trans, diag, n, ap, x, incx);
 }
 
 void ctpsv(const char   *uplo,const char   *trans,const char   *diag,const f77_int *n,const scomplex  *ap,scomplex  *x,const f77_int *incx)
 {
-    ctpsv_blis_impl( uplo, trans, diag, n, ap, x, incx);
+    ctpsv_( uplo, trans, diag, n, ap, x, incx);
 }
 
 void CTPSV_(const char   *uplo,const char   *trans,const char   *diag,const f77_int *n,const scomplex  *ap,scomplex  *x,const f77_int *incx)
 {
-    ctpsv_blis_impl( uplo, trans, diag, n, ap, x, incx);
+    ctpsv_( uplo, trans, diag, n, ap, x, incx);
 }
 
 void CTRMM(const char   *side,const char   *uplo,const char   *transa,const char   *diag,const f77_int *m,const f77_int *n,const scomplex  *alpha,const scomplex  *a,const f77_int *lda,scomplex  *b,const f77_int *ldb)
@@ -615,17 +615,17 @@ void CTRMM_(const char   *side,const char   *uplo,const char   *transa,const cha
 
 void CTRMV(const char   *uplo,const char   *trans,const char   *diag,const f77_int *n,const scomplex  *a,const f77_int *lda,scomplex  *x,const f77_int *incx)
 {
-    ctrmv_blis_impl( uplo, trans, diag, n, a, lda, x, incx);
+    ctrmv_( uplo, trans, diag, n, a, lda, x, incx);
 }
 
 void ctrmv(const char   *uplo,const char   *trans,const char   *diag,const f77_int *n,const scomplex  *a,const f77_int *lda,scomplex  *x,const f77_int *incx)
 {
-    ctrmv_blis_impl( uplo, trans, diag, n, a, lda, x, incx);
+    ctrmv_( uplo, trans, diag, n, a, lda, x, incx);
 }
 
 void CTRMV_(const char   *uplo,const char   *trans,const char   *diag,const f77_int *n,const scomplex  *a,const f77_int *lda,scomplex  *x,const f77_int *incx)
 {
-    ctrmv_blis_impl( uplo, trans, diag, n, a, lda, x, incx);
+    ctrmv_( uplo, trans, diag, n, a, lda, x, incx);
 }
 
 void CTRSM(const char   *side,const char   *uplo,const char   *transa,const char   *diag,const f77_int *m,const f77_int *n,const scomplex  *alpha,const scomplex  *a,const f77_int *lda,scomplex  *b,const f77_int *ldb)
@@ -645,17 +645,17 @@ void CTRSM_(const char   *side,const char   *uplo,const char   *transa,const cha
 
 void CTRSV(const char   *uplo,const char   *trans,const char   *diag,const f77_int *n,const scomplex  *a,const f77_int *lda,scomplex *x,const f77_int *incx)
 {
-    ctrsv_blis_impl( uplo, trans, diag, n, a, lda, x, incx);
+    ctrsv_( uplo, trans, diag, n, a, lda, x, incx);
 }
 
 void ctrsv(const char   *uplo,const char   *trans,const char   *diag,const f77_int *n,const scomplex *a,const f77_int *lda,scomplex *x,const f77_int *incx)
 {
-    ctrsv_blis_impl( uplo, trans, diag, n, a, lda, x, incx);
+    ctrsv_( uplo, trans, diag, n, a, lda, x, incx);
 }
 
 void CTRSV_(const char   *uplo,const char   *trans,const char   *diag,const f77_int *n,const scomplex *a,const f77_int *lda,scomplex *x,const f77_int *incx)
 {
-    ctrsv_blis_impl( uplo, trans, diag, n, a, lda, x, incx);
+    ctrsv_( uplo, trans, diag, n, a, lda, x, incx);
 }
 
 double DASUM(const f77_int *n,const double *dx,const f77_int *incx)
@@ -735,17 +735,17 @@ double DDOT_(const f77_int *n,const double *dx,const f77_int *incx,const double 
 
 void DGBMV(const char   *trans,const f77_int *m,const f77_int *n,const f77_int *kl,const f77_int *ku,const double *alpha,const double *a,const f77_int *lda,const double *x,const f77_int *incx,const double *beta,double *y,const f77_int *incy)
 {
-    dgbmv_blis_impl( trans, m, n, kl, ku, alpha, a, lda, x, incx, beta, y, incy);
+    dgbmv_( trans, m, n, kl, ku, alpha, a, lda, x, incx, beta, y, incy);
 }
 
 void dgbmv(const char   *trans,const f77_int *m,const f77_int *n,const f77_int *kl,const f77_int *ku,const double *alpha,const double *a,const f77_int *lda,const double *x,const f77_int *incx,const double *beta,double *y,const f77_int *incy)
 {
-    dgbmv_blis_impl( trans, m, n, kl, ku, alpha, a, lda, x, incx, beta, y, incy);
+    dgbmv_( trans, m, n, kl, ku, alpha, a, lda, x, incx, beta, y, incy);
 }
 
 void DGBMV_(const char   *trans,const f77_int *m,const f77_int *n,const f77_int *kl,const f77_int *ku,const double *alpha,const double *a,const f77_int *lda,const double *x,const f77_int *incx,const double *beta,double *y,const f77_int *incy)
 {
-    dgbmv_blis_impl( trans, m, n, kl, ku, alpha, a, lda, x, incx, beta, y, incy);
+    dgbmv_( trans, m, n, kl, ku, alpha, a, lda, x, incx, beta, y, incy);
 }
 
 void DGEMM(const char   *transa,const char   *transb,const f77_int *m,const f77_int *n,const f77_int *k,const double *alpha,const double *a,const f77_int *lda,const double *b,const f77_int *ldb,const double *beta,double *c,const f77_int *ldc)
@@ -765,32 +765,32 @@ void DGEMM_(const char   *transa,const char   *transb,const f77_int *m,const f77
 
 void DGEMV(const char   *trans,const f77_int *m,const f77_int *n,const double *alpha,const double *a,const f77_int *lda,const double *x,const f77_int *incx,const double *beta,double *y,const f77_int *incy)
 {
-    dgemv_blis_impl( trans, m, n, alpha, a, lda, x, incx, beta, y, incy);
+    dgemv_( trans, m, n, alpha, a, lda, x, incx, beta, y, incy);
 }
 
 void dgemv(const char   *trans,const f77_int *m,const f77_int *n,const double *alpha,const double *a,const f77_int *lda,const double *x,const f77_int *incx,const double *beta,double *y,const f77_int *incy)
 {
-    dgemv_blis_impl( trans, m, n, alpha, a, lda, x, incx, beta, y, incy);
+    dgemv_( trans, m, n, alpha, a, lda, x, incx, beta, y, incy);
 }
 
 void DGEMV_(const char   *trans,const f77_int *m,const f77_int *n,const double *alpha,const double *a,const f77_int *lda,const double *x,const f77_int *incx,const double *beta,double *y,const f77_int *incy)
 {
-    dgemv_blis_impl( trans, m, n, alpha, a, lda, x, incx, beta, y, incy);
+    dgemv_( trans, m, n, alpha, a, lda, x, incx, beta, y, incy);
 }
 
 void DGER(const f77_int *m,const f77_int *n,const double *alpha,const double *x,const f77_int *incx,const double *y,const f77_int *incy,double *a,const f77_int *lda)
 {
-    dger_blis_impl( m, n, alpha, x, incx, y, incy, a, lda);
+    dger_( m, n, alpha, x, incx, y, incy, a, lda);
 }
 
 void dger(const f77_int *m,const f77_int *n,const double *alpha,const double *x,const f77_int *incx,const double *y,const f77_int *incy,double *a,const f77_int *lda)
 {
-    dger_blis_impl( m, n, alpha, x, incx, y, incy, a, lda);
+    dger_( m, n, alpha, x, incx, y, incy, a, lda);
 }
 
 void DGER_(const f77_int *m,const f77_int *n,const double *alpha,const double *x,const f77_int *incx,const double *y,const f77_int *incy,double *a,const f77_int *lda)
 {
-    dger_blis_impl( m, n, alpha, x, incx, y, incy, a, lda);
+    dger_( m, n, alpha, x, incx, y, incy, a, lda);
 }
 
 double DNRM2(const f77_int *n,const double *x,const f77_int *incx)
@@ -870,17 +870,17 @@ void DROTMG_(double *dd1,double *dd2,double *dx1,const double *dy1,double *dpara
 
 void DSBMV(const char   *uplo,const f77_int *n,const f77_int *k,const double *alpha,const double *a,const f77_int *lda,const double *x,const f77_int *incx,const double *beta,double *y,const f77_int *incy)
 {
-    dsbmv_blis_impl( uplo, n, k, alpha, a, lda, x, incx, beta, y, incy);
+    dsbmv_( uplo, n, k, alpha, a, lda, x, incx, beta, y, incy);
 }
 
 void dsbmv(const char   *uplo,const f77_int *n,const f77_int *k,const double *alpha,const double *a,const f77_int *lda,const double *x,const f77_int *incx,const double *beta,double *y,const f77_int *incy)
 {
-    dsbmv_blis_impl( uplo, n, k, alpha, a, lda, x, incx, beta, y, incy);
+    dsbmv_( uplo, n, k, alpha, a, lda, x, incx, beta, y, incy);
 }
 
 void DSBMV_(const char   *uplo,const f77_int *n,const f77_int *k,const double *alpha,const double *a,const f77_int *lda,const double *x,const f77_int *incx,const double *beta,double *y,const f77_int *incy)
 {
-    dsbmv_blis_impl( uplo, n, k, alpha, a, lda, x, incx, beta, y, incy);
+    dsbmv_( uplo, n, k, alpha, a, lda, x, incx, beta, y, incy);
 }
 
 void DSCAL(const f77_int *n,const double *da,double *dx,const f77_int *incx)
@@ -915,47 +915,47 @@ double DSDOT_(const f77_int *n,const float  *sx,const f77_int *incx,const float 
 
 void DSPMV(const char   *uplo,const f77_int *n,const double *alpha,const double *ap,const double *x,const f77_int *incx,const double *beta,double *y,const f77_int *incy)
 {
-    dspmv_blis_impl( uplo, n, alpha, ap, x, incx, beta, y, incy);
+    dspmv_( uplo, n, alpha, ap, x, incx, beta, y, incy);
 }
 
 void dspmv(const char   *uplo,const f77_int *n,const double *alpha,const double *ap,const double *x,const f77_int *incx,const double *beta,double *y,const f77_int *incy)
 {
-    dspmv_blis_impl( uplo, n, alpha, ap, x, incx, beta, y, incy);
+    dspmv_( uplo, n, alpha, ap, x, incx, beta, y, incy);
 }
 
 void DSPMV_(const char   *uplo,const f77_int *n,const double *alpha,const double *ap,const double *x,const f77_int *incx,const double *beta,double *y,const f77_int *incy)
 {
-    dspmv_blis_impl( uplo, n, alpha, ap, x, incx, beta, y, incy);
+    dspmv_( uplo, n, alpha, ap, x, incx, beta, y, incy);
 }
 
 void DSPR(const char   *uplo,const f77_int *n,const double *alpha,const double *x,const f77_int *incx,double *ap)
 {
-    dspr_blis_impl( uplo, n, alpha, x, incx, ap);
+    dspr_( uplo, n, alpha, x, incx, ap);
 }
 
 void dspr(const char   *uplo,const f77_int *n,const double *alpha,const double *x,const f77_int *incx,double *ap)
 {
-    dspr_blis_impl( uplo, n, alpha, x, incx, ap);
+    dspr_( uplo, n, alpha, x, incx, ap);
 }
 
 void DSPR_(const char   *uplo,const f77_int *n,const double *alpha,const double *x,const f77_int *incx,double *ap)
 {
-    dspr_blis_impl( uplo, n, alpha, x, incx, ap);
+    dspr_( uplo, n, alpha, x, incx, ap);
 }
 
 void DSPR2(const char   *uplo,const f77_int *n,const double *alpha,const double *x,const f77_int *incx,const double *y,const f77_int *incy,double *ap)
 {
-    dspr2_blis_impl( uplo, n, alpha, x, incx, y, incy, ap);
+    dspr2_( uplo, n, alpha, x, incx, y, incy, ap);
 }
 
 void dspr2(const char   *uplo,const f77_int *n,const double *alpha,const double *x,const f77_int *incx,const double *y,const f77_int *incy,double *ap)
 {
-    dspr2_blis_impl( uplo, n, alpha, x, incx, y, incy, ap);
+    dspr2_( uplo, n, alpha, x, incx, y, incy, ap);
 }
 
 void DSPR2_(const char   *uplo,const f77_int *n,const double *alpha,const double *x,const f77_int *incx,const double *y,const f77_int *incy,double *ap)
 {
-    dspr2_blis_impl( uplo, n, alpha, x, incx, y, incy, ap);
+    dspr2_( uplo, n, alpha, x, incx, y, incy, ap);
 }
 
 void DSWAP(const f77_int *n,double *dx,const f77_int *incx,double *dy,const f77_int *incy)
@@ -990,47 +990,47 @@ void DSYMM_(const char   *side,const char   *uplo,const f77_int *m,const f77_int
 
 void DSYMV(const char   *uplo,const f77_int *n,const double *alpha,const double *a,const f77_int *lda,const double *x,const f77_int *incx,const double *beta,double *y,const f77_int *incy)
 {
-    dsymv_blis_impl( uplo, n, alpha, a, lda, x, incx, beta, y, incy);
+    dsymv_( uplo, n, alpha, a, lda, x, incx, beta, y, incy);
 }
 
 void dsymv(const char   *uplo,const f77_int *n,const double *alpha,const double *a,const f77_int *lda,const double *x,const f77_int *incx,const double *beta,double *y,const f77_int *incy)
 {
-    dsymv_blis_impl( uplo, n, alpha, a, lda, x, incx, beta, y, incy);
+    dsymv_( uplo, n, alpha, a, lda, x, incx, beta, y, incy);
 }
 
 void DSYMV_(const char   *uplo,const f77_int *n,const double *alpha,const double *a,const f77_int *lda,const double *x,const f77_int *incx,const double *beta,double *y,const f77_int *incy)
 {
-    dsymv_blis_impl( uplo, n, alpha, a, lda, x, incx, beta, y, incy);
+    dsymv_( uplo, n, alpha, a, lda, x, incx, beta, y, incy);
 }
 
 void DSYR(const char   *uplo,const f77_int *n,const double *alpha,const double *x,const f77_int *incx,double *a,const f77_int *lda)
 {
-    dsyr_blis_impl( uplo, n, alpha, x, incx, a, lda);
+    dsyr_( uplo, n, alpha, x, incx, a, lda);
 }
 
 void dsyr(const char   *uplo,const f77_int *n,const double *alpha,const double *x,const f77_int *incx,double *a,const f77_int *lda)
 {
-    dsyr_blis_impl( uplo, n, alpha, x, incx, a, lda);
+    dsyr_( uplo, n, alpha, x, incx, a, lda);
 }
 
 void DSYR_(const char   *uplo,const f77_int *n,const double *alpha,const double *x,const f77_int *incx,double *a,const f77_int *lda)
 {
-    dsyr_blis_impl( uplo, n, alpha, x, incx, a, lda);
+    dsyr_( uplo, n, alpha, x, incx, a, lda);
 }
 
 void DSYR2(const char   *uplo,const f77_int *n,const double *alpha,const double *x,const f77_int *incx,const double *y,const f77_int *incy,double *a,const f77_int *lda)
 {
-    dsyr2_blis_impl( uplo, n, alpha, x, incx, y, incy, a, lda);
+    dsyr2_( uplo, n, alpha, x, incx, y, incy, a, lda);
 }
 
 void dsyr2(const char   *uplo,const f77_int *n,const double *alpha,const double *x,const f77_int *incx,const double *y,const f77_int *incy,double *a,const f77_int *lda)
 {
-    dsyr2_blis_impl( uplo, n, alpha, x, incx, y, incy, a, lda);
+    dsyr2_( uplo, n, alpha, x, incx, y, incy, a, lda);
 }
 
 void DSYR2_(const char   *uplo,const f77_int *n,const double *alpha,const double *x,const f77_int *incx,const double *y,const f77_int *incy,double *a,const f77_int *lda)
 {
-    dsyr2_blis_impl( uplo, n, alpha, x, incx, y, incy, a, lda);
+    dsyr2_( uplo, n, alpha, x, incx, y, incy, a, lda);
 }
 
 void DSYR2K(const char   *uplo,const char   *trans,const f77_int *n,const f77_int *k,const double *alpha,const double *a,const f77_int *lda,const double *b,const f77_int *ldb,const double *beta,double *c,const f77_int *ldc)
@@ -1065,62 +1065,62 @@ void DSYRK_(const char   *uplo,const char   *trans,const f77_int *n,const f77_in
 
 void DTBMV(const char   *uplo,const char   *trans,const char   *diag,const f77_int *n,const f77_int *k,const double *a,const f77_int *lda,double *x,const f77_int *incx)
 {
-    dtbmv_blis_impl( uplo, trans, diag, n, k, a, lda, x, incx);
+    dtbmv_( uplo, trans, diag, n, k, a, lda, x, incx);
 }
 
 void dtbmv(const char   *uplo,const char   *trans,const char   *diag,const f77_int *n,const f77_int *k,const double *a,const f77_int *lda,double *x,const f77_int *incx)
 {
-    dtbmv_blis_impl( uplo, trans, diag, n, k, a, lda, x, incx);
+    dtbmv_( uplo, trans, diag, n, k, a, lda, x, incx);
 }
 
 void DTBMV_(const char   *uplo,const char   *trans,const char   *diag,const f77_int *n,const f77_int *k,const double *a,const f77_int *lda,double *x,const f77_int *incx)
 {
-    dtbmv_blis_impl( uplo, trans, diag, n, k, a, lda, x, incx);
+    dtbmv_( uplo, trans, diag, n, k, a, lda, x, incx);
 }
 
 void DTBSV(const char   *uplo,const char   *trans,const char   *diag,const f77_int *n,const f77_int *k,const double *a,const f77_int *lda,double *x,const f77_int *incx)
 {
-    dtbsv_blis_impl( uplo, trans, diag, n, k, a, lda, x, incx);
+    dtbsv_( uplo, trans, diag, n, k, a, lda, x, incx);
 }
 
 void dtbsv(const char   *uplo,const char   *trans,const char   *diag,const f77_int *n,const f77_int *k,const double *a,const f77_int *lda,double *x,const f77_int *incx)
 {
-    dtbsv_blis_impl( uplo, trans, diag, n, k, a, lda, x, incx);
+    dtbsv_( uplo, trans, diag, n, k, a, lda, x, incx);
 }
 
 void DTBSV_(const char   *uplo,const char   *trans,const char   *diag,const f77_int *n,const f77_int *k,const double *a,const f77_int *lda,double *x,const f77_int *incx)
 {
-    dtbsv_blis_impl( uplo, trans, diag, n, k, a, lda, x, incx);
+    dtbsv_( uplo, trans, diag, n, k, a, lda, x, incx);
 }
 
 void DTPMV(const char   *uplo,const char   *trans,const char   *diag,const f77_int *n,const double *ap,double *x,const f77_int *incx)
 {
-    dtpmv_blis_impl( uplo, trans, diag, n, ap, x, incx);
+    dtpmv_( uplo, trans, diag, n, ap, x, incx);
 }
 
 void dtpmv(const char   *uplo,const char   *trans,const char   *diag,const f77_int *n,const double *ap,double *x,const f77_int *incx)
 {
-    dtpmv_blis_impl( uplo, trans, diag, n, ap, x, incx);
+    dtpmv_( uplo, trans, diag, n, ap, x, incx);
 }
 
 void DTPMV_(const char   *uplo,const char   *trans,const char   *diag,const f77_int *n,const double *ap,double *x,const f77_int *incx)
 {
-    dtpmv_blis_impl( uplo, trans, diag, n, ap, x, incx);
+    dtpmv_( uplo, trans, diag, n, ap, x, incx);
 }
 
 void DTPSV(const char   *uplo,const char   *trans,const char   *diag,const f77_int *n,const double *ap,double *x,const f77_int *incx)
 {
-    dtpsv_blis_impl( uplo, trans, diag, n, ap, x, incx);
+    dtpsv_( uplo, trans, diag, n, ap, x, incx);
 }
 
 void dtpsv(const char   *uplo,const char   *trans,const char   *diag,const f77_int *n,const double *ap,double *x,const f77_int *incx)
 {
-    dtpsv_blis_impl( uplo, trans, diag, n, ap, x, incx);
+    dtpsv_( uplo, trans, diag, n, ap, x, incx);
 }
 
 void DTPSV_(const char   *uplo,const char   *trans,const char   *diag,const f77_int *n,const double *ap,double *x,const f77_int *incx)
 {
-    dtpsv_blis_impl( uplo, trans, diag, n, ap, x, incx);
+    dtpsv_( uplo, trans, diag, n, ap, x, incx);
 }
 
 void DTRMM(const char   *side,const char   *uplo,const char   *transa,const char   *diag,const f77_int *m,const f77_int *n,const double *alpha,const double *a,const f77_int *lda,double *b,const f77_int *ldb)
@@ -1140,17 +1140,17 @@ void DTRMM_(const char   *side,const char   *uplo,const char   *transa,const cha
 
 void DTRMV(const char   *uplo,const char   *trans,const char   *diag,const f77_int *n,const double *a,const f77_int *lda,double *x,const f77_int *incx)
 {
-    dtrmv_blis_impl( uplo, trans, diag, n, a, lda, x, incx);
+    dtrmv_( uplo, trans, diag, n, a, lda, x, incx);
 }
 
 void dtrmv(const char   *uplo,const char   *trans,const char   *diag,const f77_int *n,const double *a,const f77_int *lda,double *x,const f77_int *incx)
 {
-    dtrmv_blis_impl( uplo, trans, diag, n, a, lda, x, incx);
+    dtrmv_( uplo, trans, diag, n, a, lda, x, incx);
 }
 
 void DTRMV_(const char   *uplo,const char   *trans,const char   *diag,const f77_int *n,const double *a,const f77_int *lda,double *x,const f77_int *incx)
 {
-    dtrmv_blis_impl( uplo, trans, diag, n, a, lda, x, incx);
+    dtrmv_( uplo, trans, diag, n, a, lda, x, incx);
 }
 
 void DTRSM(const char   *side,const char   *uplo,const char   *transa,const char   *diag,const f77_int *m,const f77_int *n,const double *alpha,const double *a,const f77_int *lda,double *b,const f77_int *ldb)
@@ -1170,17 +1170,17 @@ void DTRSM_(const char   *side,const char   *uplo,const char   *transa,const cha
 
 void DTRSV(const char   *uplo,const char   *trans,const char   *diag,const f77_int *n,const double *a,const f77_int *lda,double *x,const f77_int *incx)
 {
-    dtrsv_blis_impl( uplo, trans, diag, n, a, lda, x, incx);
+    dtrsv_( uplo, trans, diag, n, a, lda, x, incx);
 }
 
 void dtrsv(const char   *uplo,const char   *trans,const char   *diag,const f77_int *n,const double *a,const f77_int *lda,double *x,const f77_int *incx)
 {
-    dtrsv_blis_impl( uplo, trans, diag, n, a, lda, x, incx);
+    dtrsv_( uplo, trans, diag, n, a, lda, x, incx);
 }
 
 void DTRSV_(const char   *uplo,const char   *trans,const char   *diag,const f77_int *n,const double *a,const f77_int *lda,double *x,const f77_int *incx)
 {
-    dtrsv_blis_impl( uplo, trans, diag, n, a, lda, x, incx);
+    dtrsv_( uplo, trans, diag, n, a, lda, x, incx);
 }
 
 double DZASUM(const f77_int *n,const dcomplex *zx,const f77_int *incx)
@@ -1402,17 +1402,17 @@ float SDSDOT_(const f77_int *n,const float  *sb, const float  *sx, const f77_int
 
 void SGBMV(const char   *trans,const f77_int *m,const f77_int *n,const f77_int *kl,const f77_int *ku,const float  *alpha,const float  *a,const f77_int *lda,const float  *x,const f77_int *incx,const float  *beta,float  *y,const f77_int *incy)
 {
-    sgbmv_blis_impl( trans, m, n, kl, ku, alpha, a, lda, x, incx, beta, y, incy);
+    sgbmv_( trans, m, n, kl, ku, alpha, a, lda, x, incx, beta, y, incy);
 }
 
 void sgbmv(const char   *trans,const f77_int *m,const f77_int *n,const f77_int *kl,const f77_int *ku,const float  *alpha,const float  *a,const f77_int *lda,const float  *x,const f77_int *incx,const float  *beta,float  *y,const f77_int *incy)
 {
-    sgbmv_blis_impl( trans, m, n, kl, ku, alpha, a, lda, x, incx, beta, y, incy);
+    sgbmv_( trans, m, n, kl, ku, alpha, a, lda, x, incx, beta, y, incy);
 }
 
 void SGBMV_(const char   *trans,const f77_int *m,const f77_int *n,const f77_int *kl,const f77_int *ku,const float  *alpha,const float  *a,const f77_int *lda,const float  *x,const f77_int *incx,const float  *beta,float  *y,const f77_int *incy)
 {
-    sgbmv_blis_impl( trans, m, n, kl, ku, alpha, a, lda, x, incx, beta, y, incy);
+    sgbmv_( trans, m, n, kl, ku, alpha, a, lda, x, incx, beta, y, incy);
 }
 
 void SGEMM(const char   *transa,const char   *transb,const f77_int *m,const f77_int *n,const f77_int *k,const float  *alpha,const float  *a,const f77_int *lda,const float  *b,const f77_int *ldb,const float  *beta,float  *c,const f77_int *ldc)
@@ -1432,32 +1432,32 @@ void SGEMM_(const char   *transa,const char   *transb,const f77_int *m,const f77
 
 void SGEMV(const char   *trans,const f77_int *m,const f77_int *n,const float  *alpha,const float  *a,const f77_int *lda,const float  *x,const f77_int *incx,const float  *beta,float  *y,const f77_int *incy)
 {
-    sgemv_blis_impl( trans, m, n, alpha, a, lda, x, incx, beta, y, incy);
+    sgemv_( trans, m, n, alpha, a, lda, x, incx, beta, y, incy);
 }
 
 void sgemv(const char   *trans,const f77_int *m,const f77_int *n,const float  *alpha,const float  *a,const f77_int *lda,const float  *x,const f77_int *incx,const float  *beta,float  *y,const f77_int *incy)
 {
-    sgemv_blis_impl( trans, m, n, alpha, a, lda, x, incx, beta, y, incy);
+    sgemv_( trans, m, n, alpha, a, lda, x, incx, beta, y, incy);
 }
 
 void SGEMV_(const char   *trans,const f77_int *m,const f77_int *n,const float  *alpha,const float  *a,const f77_int *lda,const float  *x,const f77_int *incx,const float  *beta,float  *y,const f77_int *incy)
 {
-    sgemv_blis_impl( trans, m, n, alpha, a, lda, x, incx, beta, y, incy);
+    sgemv_( trans, m, n, alpha, a, lda, x, incx, beta, y, incy);
 }
 
 void SGER(const f77_int *m,const f77_int *n,const float  *alpha,const float  *x,const f77_int *incx,const float  *y,const f77_int *incy,float  *a,const f77_int *lda)
 {
-    sger_blis_impl( m, n, alpha, x, incx, y, incy, a, lda);
+    sger_( m, n, alpha, x, incx, y, incy, a, lda);
 }
 
 void sger(const f77_int *m,const f77_int *n,const float  *alpha,const float  *x,const f77_int *incx,const float  *y,const f77_int *incy,float  *a,const f77_int *lda)
 {
-    sger_blis_impl( m, n, alpha, x, incx, y, incy, a, lda);
+    sger_( m, n, alpha, x, incx, y, incy, a, lda);
 }
 
 void SGER_(const f77_int *m,const f77_int *n,const float  *alpha,const float  *x,const f77_int *incx,const float  *y,const f77_int *incy,float  *a,const f77_int *lda)
 {
-    sger_blis_impl( m, n, alpha, x, incx, y, incy, a, lda);
+    sger_( m, n, alpha, x, incx, y, incy, a, lda);
 }
 
 
@@ -1539,17 +1539,17 @@ void SROTMG_(float  *sd1,float  *sd2,float  *sx1,const float  *sy1,float  *spara
 
 void SSBMV(const char   *uplo,const f77_int *n,const f77_int *k,const float  *alpha,const float  *a,const f77_int *lda,const float  *x,const f77_int *incx,const float  *beta,float  *y,const f77_int *incy)
 {
-    ssbmv_blis_impl( uplo, n, k, alpha, a, lda, x, incx, beta, y, incy);
+    ssbmv_( uplo, n, k, alpha, a, lda, x, incx, beta, y, incy);
 }
 
 void ssbmv(const char   *uplo,const f77_int *n,const f77_int *k,const float  *alpha,const float  *a,const f77_int *lda,const float  *x,const f77_int *incx,const float  *beta,float  *y,const f77_int *incy)
 {
-    ssbmv_blis_impl( uplo, n, k, alpha, a, lda, x, incx, beta, y, incy);
+    ssbmv_( uplo, n, k, alpha, a, lda, x, incx, beta, y, incy);
 }
 
 void SSBMV_(const char   *uplo,const f77_int *n,const f77_int *k,const float  *alpha,const float  *a,const f77_int *lda,const float  *x,const f77_int *incx,const float  *beta,float  *y,const f77_int *incy)
 {
-    ssbmv_blis_impl( uplo, n, k, alpha, a, lda, x, incx, beta, y, incy);
+    ssbmv_( uplo, n, k, alpha, a, lda, x, incx, beta, y, incy);
 }
 
 void SSCAL(const f77_int *n,const float  *sa,float  *sx,const f77_int *incx)
@@ -1569,47 +1569,47 @@ void SSCAL_(const f77_int *n,const float  *sa,float  *sx,const f77_int *incx)
 
 void SSPMV(const char   *uplo,const f77_int *n,const float  *alpha,const float  *ap,const float  *x,const f77_int *incx,const float  *beta,float  *y,const f77_int *incy)
 {
-    sspmv_blis_impl( uplo, n, alpha, ap, x, incx, beta, y, incy);
+    sspmv_( uplo, n, alpha, ap, x, incx, beta, y, incy);
 }
 
 void sspmv(const char   *uplo,const f77_int *n,const float  *alpha,const float  *ap,const float  *x,const f77_int *incx,const float  *beta,float  *y,const f77_int *incy)
 {
-    sspmv_blis_impl( uplo, n, alpha, ap, x, incx, beta, y, incy);
+    sspmv_( uplo, n, alpha, ap, x, incx, beta, y, incy);
 }
 
 void SSPMV_(const char   *uplo,const f77_int *n,const float  *alpha,const float  *ap,const float  *x,const f77_int *incx,const float  *beta,float  *y,const f77_int *incy)
 {
-    sspmv_blis_impl( uplo, n, alpha, ap, x, incx, beta, y, incy);
+    sspmv_( uplo, n, alpha, ap, x, incx, beta, y, incy);
 }
 
 void SSPR(const char   *uplo,const f77_int *n,const float  *alpha,const float  *x,const f77_int *incx,float  *ap)
 {
-    sspr_blis_impl( uplo, n, alpha, x, incx, ap);
+    sspr_( uplo, n, alpha, x, incx, ap);
 }
 
 void sspr(const char   *uplo,const f77_int *n,const float  *alpha,const float  *x,const f77_int *incx,float  *ap)
 {
-    sspr_blis_impl( uplo, n, alpha, x, incx, ap);
+    sspr_( uplo, n, alpha, x, incx, ap);
 }
 
 void SSPR_(const char   *uplo,const f77_int *n,const float  *alpha,const float  *x,const f77_int *incx,float  *ap)
 {
-    sspr_blis_impl( uplo, n, alpha, x, incx, ap);
+    sspr_( uplo, n, alpha, x, incx, ap);
 }
 
 void SSPR2(const char   *uplo,const f77_int *n,const float  *alpha,const float  *x,const f77_int *incx,const float  *y,const f77_int *incy,float  *ap)
 {
-    sspr2_blis_impl( uplo, n, alpha, x, incx, y, incy, ap);
+    sspr2_( uplo, n, alpha, x, incx, y, incy, ap);
 }
 
 void sspr2(const char   *uplo,const f77_int *n,const float  *alpha,const float  *x,const f77_int *incx,const float  *y,const f77_int *incy,float  *ap)
 {
-    sspr2_blis_impl( uplo, n, alpha, x, incx, y, incy, ap);
+    sspr2_( uplo, n, alpha, x, incx, y, incy, ap);
 }
 
 void SSPR2_(const char   *uplo,const f77_int *n,const float  *alpha,const float  *x,const f77_int *incx,const float  *y,const f77_int *incy,float  *ap)
 {
-    sspr2_blis_impl( uplo, n, alpha, x, incx, y, incy, ap);
+    sspr2_( uplo, n, alpha, x, incx, y, incy, ap);
 }
 
 void SSWAP(const f77_int *n,float  *sx,const f77_int *incx,float  *sy,const f77_int *incy)
@@ -1644,47 +1644,47 @@ void SSYMM_(const char   *side,const char   *uplo,const f77_int *m,const f77_int
 
 void SSYMV(const char   *uplo,const f77_int *n,const float  *alpha,const float  *a,const f77_int *lda,const float  *x,const f77_int *incx,const float  *beta,float  *y,const f77_int *incy)
 {
-    ssymv_blis_impl( uplo, n, alpha, a, lda, x, incx, beta, y, incy);
+    ssymv_( uplo, n, alpha, a, lda, x, incx, beta, y, incy);
 }
 
 void ssymv(const char   *uplo,const f77_int *n,const float  *alpha,const float  *a,const f77_int *lda,const float  *x,const f77_int *incx,const float  *beta,float  *y,const f77_int *incy)
 {
-    ssymv_blis_impl( uplo, n, alpha, a, lda, x, incx, beta, y, incy);
+    ssymv_( uplo, n, alpha, a, lda, x, incx, beta, y, incy);
 }
 
 void SSYMV_(const char   *uplo,const f77_int *n,const float  *alpha,const float  *a,const f77_int *lda,const float  *x,const f77_int *incx,const float  *beta,float  *y,const f77_int *incy)
 {
-    ssymv_blis_impl( uplo, n, alpha, a, lda, x, incx, beta, y, incy);
+    ssymv_( uplo, n, alpha, a, lda, x, incx, beta, y, incy);
 }
 
 void SSYR(const char   *uplo,const f77_int *n,const float  *alpha,const float  *x,const f77_int *incx,float  *a,const f77_int *lda)
 {
-    ssyr_blis_impl( uplo, n, alpha, x, incx, a, lda);
+    ssyr_( uplo, n, alpha, x, incx, a, lda);
 }
 
 void ssyr(const char   *uplo,const f77_int *n,const float  *alpha,const float  *x,const f77_int *incx,float  *a,const f77_int *lda)
 {
-    ssyr_blis_impl( uplo, n, alpha, x, incx, a, lda);
+    ssyr_( uplo, n, alpha, x, incx, a, lda);
 }
 
 void SSYR_(const char   *uplo,const f77_int *n,const float  *alpha,const float  *x,const f77_int *incx,float  *a,const f77_int *lda)
 {
-    ssyr_blis_impl( uplo, n, alpha, x, incx, a, lda);
+    ssyr_( uplo, n, alpha, x, incx, a, lda);
 }
 
 void SSYR2(const char   *uplo,const f77_int *n,const float  *alpha,const float  *x,const f77_int *incx,const float  *y,const f77_int *incy,float  *a,const f77_int *lda)
 {
-    ssyr2_blis_impl( uplo, n, alpha, x, incx, y, incy, a, lda);
+    ssyr2_( uplo, n, alpha, x, incx, y, incy, a, lda);
 }
 
 void ssyr2(const char   *uplo,const f77_int *n,const float  *alpha,const float  *x,const f77_int *incx,const float  *y,const f77_int *incy,float  *a,const f77_int *lda)
 {
-    ssyr2_blis_impl( uplo, n, alpha, x, incx, y, incy, a, lda);
+    ssyr2_( uplo, n, alpha, x, incx, y, incy, a, lda);
 }
 
 void SSYR2_(const char   *uplo,const f77_int *n,const float  *alpha,const float  *x,const f77_int *incx,const float  *y,const f77_int *incy,float  *a,const f77_int *lda)
 {
-    ssyr2_blis_impl( uplo, n, alpha, x, incx, y, incy, a, lda);
+    ssyr2_( uplo, n, alpha, x, incx, y, incy, a, lda);
 }
 
 void SSYR2K(const char   *uplo,const char   *trans,const f77_int *n,const f77_int *k,const float  *alpha,const float  *a,const f77_int *lda,const float  *b,const f77_int *ldb,const float  *beta,float  *c,const f77_int *ldc)
@@ -1719,62 +1719,62 @@ void SSYRK_(const char   *uplo,const char   *trans,const f77_int *n,const f77_in
 
 void STBMV(const char   *uplo,const char   *trans,const char   *diag,const f77_int *n,const f77_int *k,const float  *a,const f77_int *lda,float  *x,const f77_int *incx)
 {
-    stbmv_blis_impl( uplo, trans, diag, n, k, a, lda, x, incx);
+    stbmv_( uplo, trans, diag, n, k, a, lda, x, incx);
 }
 
 void stbmv(const char   *uplo,const char   *trans,const char   *diag,const f77_int *n,const f77_int *k,const float  *a,const f77_int *lda,float  *x,const f77_int *incx)
 {
-    stbmv_blis_impl( uplo, trans, diag, n, k, a, lda, x, incx);
+    stbmv_( uplo, trans, diag, n, k, a, lda, x, incx);
 }
 
 void STBMV_(const char   *uplo,const char   *trans,const char   *diag,const f77_int *n,const f77_int *k,const float  *a,const f77_int *lda,float  *x,const f77_int *incx)
 {
-    stbmv_blis_impl( uplo, trans, diag, n, k, a, lda, x, incx);
+    stbmv_( uplo, trans, diag, n, k, a, lda, x, incx);
 }
 
 void STBSV(const char   *uplo,const char   *trans,const char   *diag,const f77_int *n,const f77_int *k,const float  *a,const f77_int *lda,float  *x,const f77_int *incx)
 {
-    stbsv_blis_impl( uplo, trans, diag, n, k, a, lda, x, incx);
+    stbsv_( uplo, trans, diag, n, k, a, lda, x, incx);
 }
 
 void stbsv(const char   *uplo,const char   *trans,const char   *diag,const f77_int *n,const f77_int *k,const float  *a,const f77_int *lda,float  *x,const f77_int *incx)
 {
-    stbsv_blis_impl( uplo, trans, diag, n, k, a, lda, x, incx);
+    stbsv_( uplo, trans, diag, n, k, a, lda, x, incx);
 }
 
 void STBSV_(const char   *uplo,const char   *trans,const char   *diag,const f77_int *n,const f77_int *k,const float  *a,const f77_int *lda,float  *x,const f77_int *incx)
 {
-    stbsv_blis_impl( uplo, trans, diag, n, k, a, lda, x, incx);
+    stbsv_( uplo, trans, diag, n, k, a, lda, x, incx);
 }
 
 void STPMV(const char   *uplo,const char   *trans,const char   *diag,const f77_int *n,const float  *ap,float  *x,const f77_int *incx)
 {
-    stpmv_blis_impl( uplo, trans, diag, n, ap, x, incx);
+    stpmv_( uplo, trans, diag, n, ap, x, incx);
 }
 
 void stpmv(const char   *uplo,const char   *trans,const char   *diag,const f77_int *n,const float  *ap,float  *x,const f77_int *incx)
 {
-    stpmv_blis_impl( uplo, trans, diag, n, ap, x, incx);
+    stpmv_( uplo, trans, diag, n, ap, x, incx);
 }
 
 void STPMV_(const char   *uplo,const char   *trans,const char   *diag,const f77_int *n,const float  *ap,float  *x,const f77_int *incx)
 {
-    stpmv_blis_impl( uplo, trans, diag, n, ap, x, incx);
+    stpmv_( uplo, trans, diag, n, ap, x, incx);
 }
 
 void STPSV(const char   *uplo,const char   *trans,const char   *diag,const f77_int *n,const float  *ap,float  *x,const f77_int *incx)
 {
-    stpsv_blis_impl( uplo, trans, diag, n, ap, x, incx);
+    stpsv_( uplo, trans, diag, n, ap, x, incx);
 }
 
 void stpsv(const char   *uplo,const char   *trans,const char   *diag,const f77_int *n,const float  *ap,float  *x,const f77_int *incx)
 {
-    stpsv_blis_impl( uplo, trans, diag, n, ap, x, incx);
+    stpsv_( uplo, trans, diag, n, ap, x, incx);
 }
 
 void STPSV_(const char   *uplo,const char   *trans,const char   *diag,const f77_int *n,const float  *ap,float  *x,const f77_int *incx)
 {
-    stpsv_blis_impl( uplo, trans, diag, n, ap, x, incx);
+    stpsv_( uplo, trans, diag, n, ap, x, incx);
 }
 
 void STRMM(const char   *side,const char   *uplo,const char   *transa,const char   *diag,const f77_int *m,const f77_int *n,const float  *alpha,const float  *a,const f77_int *lda,float  *b,const f77_int *ldb)
@@ -1794,17 +1794,17 @@ void STRMM_(const char   *side,const char   *uplo,const char   *transa,const cha
 
 void STRMV(const char   *uplo,const char   *trans,const char   *diag,const f77_int *n,const float  *a,const f77_int *lda,float  *x,const f77_int *incx)
 {
-    strmv_blis_impl( uplo, trans, diag, n, a, lda, x, incx);
+    strmv_( uplo, trans, diag, n, a, lda, x, incx);
 }
 
 void strmv(const char   *uplo,const char   *trans,const char   *diag,const f77_int *n,const float  *a,const f77_int *lda,float  *x,const f77_int *incx)
 {
-    strmv_blis_impl( uplo, trans, diag, n, a, lda, x, incx);
+    strmv_( uplo, trans, diag, n, a, lda, x, incx);
 }
 
 void STRMV_(const char   *uplo,const char   *trans,const char   *diag,const f77_int *n,const float  *a,const f77_int *lda,float  *x,const f77_int *incx)
 {
-    strmv_blis_impl( uplo, trans, diag, n, a, lda, x, incx);
+    strmv_( uplo, trans, diag, n, a, lda, x, incx);
 }
 
 void STRSM(const char   *side,const char   *uplo,const char   *transa,const char   *diag,const f77_int *m,const f77_int *n,const float  *alpha,const float  *a,const f77_int *lda,float  *b,const f77_int *ldb)
@@ -1824,17 +1824,17 @@ void STRSM_(const char   *side,const char   *uplo,const char   *transa,const cha
 
 void STRSV(const char   *uplo,const char   *trans,const char   *diag,const f77_int *n,const float  *a,const f77_int *lda,float  *x,const f77_int *incx)
 {
-    strsv_blis_impl( uplo, trans, diag, n, a, lda, x, incx);
+    strsv_( uplo, trans, diag, n, a, lda, x, incx);
 }
 
 void strsv(const char   *uplo,const char   *trans,const char   *diag,const f77_int *n,const float  *a,const f77_int *lda,float  *x,const f77_int *incx)
 {
-    strsv_blis_impl( uplo, trans, diag, n, a, lda, x, incx);
+    strsv_( uplo, trans, diag, n, a, lda, x, incx);
 }
 
 void STRSV_(const char   *uplo,const char   *trans,const char   *diag,const f77_int *n,const float  *a,const f77_int *lda,float  *x,const f77_int *incx)
 {
-    strsv_blis_impl( uplo, trans, diag, n, a, lda, x, incx);
+    strsv_( uplo, trans, diag, n, a, lda, x, incx);
 }
 
 int XERBLA(const char   *srname,const f77_int *info, ftnlen n)
@@ -1914,17 +1914,17 @@ void ZDSCAL_(const f77_int *n,const double *da,dcomplex *zx,const f77_int *incx)
 
 void ZGBMV(const char   *trans,const f77_int *m,const f77_int *n,const f77_int *kl,const f77_int *ku,const dcomplex *alpha,const dcomplex *a,const f77_int *lda,const dcomplex *x,const f77_int *incx,const dcomplex *beta,dcomplex *y,const f77_int *incy)
 {
-    zgbmv_blis_impl( trans, m, n, kl, ku, alpha, a, lda, x, incx, beta, y, incy);
+    zgbmv_( trans, m, n, kl, ku, alpha, a, lda, x, incx, beta, y, incy);
 }
 
 void zgbmv(const char   *trans,const f77_int *m,const f77_int *n,const f77_int *kl,const f77_int *ku,const dcomplex *alpha,const dcomplex *a,const f77_int *lda,const dcomplex *x,const f77_int *incx,const dcomplex *beta,dcomplex *y,const f77_int *incy)
 {
-    zgbmv_blis_impl( trans, m, n, kl, ku, alpha, a, lda, x, incx, beta, y, incy);
+    zgbmv_( trans, m, n, kl, ku, alpha, a, lda, x, incx, beta, y, incy);
 }
 
 void ZGBMV_(const char   *trans,const f77_int *m,const f77_int *n,const f77_int *kl,const f77_int *ku,const dcomplex *alpha,const dcomplex *a,const f77_int *lda,const dcomplex *x,const f77_int *incx,const dcomplex *beta,dcomplex *y,const f77_int *incy)
 {
-    zgbmv_blis_impl( trans, m, n, kl, ku, alpha, a, lda, x, incx, beta, y, incy);
+    zgbmv_( trans, m, n, kl, ku, alpha, a, lda, x, incx, beta, y, incy);
 }
 
 void ZGEMM(const char   *transa,const char   *transb,const f77_int *m,const f77_int *n,const f77_int *k,const dcomplex *alpha,const dcomplex *a,const f77_int *lda,const dcomplex *b,const f77_int *ldb,const dcomplex *beta,dcomplex *c,const f77_int *ldc)
@@ -1944,62 +1944,62 @@ void ZGEMM_(const char   *transa,const char   *transb,const f77_int *m,const f77
 
 void ZGEMV(const char   *trans,const f77_int *m,const f77_int *n,const dcomplex *alpha,const dcomplex *a,const f77_int *lda,const dcomplex *x,const f77_int *incx,const dcomplex *beta,dcomplex *y,const f77_int *incy)
 {
-    zgemv_blis_impl( trans, m, n, alpha, a, lda, x, incx, beta, y, incy);
+    zgemv_( trans, m, n, alpha, a, lda, x, incx, beta, y, incy);
 }
 
 void zgemv(const char   *trans,const f77_int *m,const f77_int *n,const dcomplex *alpha,const dcomplex *a,const f77_int *lda,const dcomplex *x,const f77_int *incx,const dcomplex *beta,dcomplex *y,const f77_int *incy)
 {
-    zgemv_blis_impl( trans, m, n, alpha, a, lda, x, incx, beta, y, incy);
+    zgemv_( trans, m, n, alpha, a, lda, x, incx, beta, y, incy);
 }
 
 void ZGEMV_(const char   *trans,const f77_int *m,const f77_int *n,const dcomplex *alpha,const dcomplex *a,const f77_int *lda,const dcomplex *x,const f77_int *incx,const dcomplex *beta,dcomplex *y,const f77_int *incy)
 {
-    zgemv_blis_impl( trans, m, n, alpha, a, lda, x, incx, beta, y, incy);
+    zgemv_( trans, m, n, alpha, a, lda, x, incx, beta, y, incy);
 }
 
 void ZGERC(const f77_int *m,const f77_int *n,const dcomplex *alpha,const dcomplex *x,const f77_int *incx,const dcomplex *y,const f77_int *incy,dcomplex *a,const f77_int *lda)
 {
-    zgerc_blis_impl( m, n, alpha, x, incx, y, incy, a, lda);
+    zgerc_( m, n, alpha, x, incx, y, incy, a, lda);
 }
 
 void zgerc(const f77_int *m,const f77_int *n,const dcomplex *alpha,const dcomplex *x,const f77_int *incx,const dcomplex *y,const f77_int *incy,dcomplex *a,const f77_int *lda)
 {
-    zgerc_blis_impl( m, n, alpha, x, incx, y, incy, a, lda);
+    zgerc_( m, n, alpha, x, incx, y, incy, a, lda);
 }
 
 void ZGERC_(const f77_int *m,const f77_int *n,const dcomplex *alpha,const dcomplex *x,const f77_int *incx,const dcomplex *y,const f77_int *incy,dcomplex *a,const f77_int *lda)
 {
-    zgerc_blis_impl( m, n, alpha, x, incx, y, incy, a, lda);
+    zgerc_( m, n, alpha, x, incx, y, incy, a, lda);
 }
 
 void ZGERU(const f77_int *m,const f77_int *n,const dcomplex *alpha,const dcomplex *x,const f77_int *incx,const dcomplex *y,const f77_int *incy,dcomplex *a,const f77_int *lda)
 {
-    zgeru_blis_impl( m, n, alpha, x, incx, y, incy, a, lda);
+    zgeru_( m, n, alpha, x, incx, y, incy, a, lda);
 }
 
 void zgeru(const f77_int *m,const f77_int *n,const dcomplex *alpha,const dcomplex *x,const f77_int *incx,const dcomplex *y,const f77_int *incy,dcomplex *a,const f77_int *lda)
 {
-    zgeru_blis_impl( m, n, alpha, x, incx, y, incy, a, lda);
+    zgeru_( m, n, alpha, x, incx, y, incy, a, lda);
 }
 
 void ZGERU_(const f77_int *m,const f77_int *n,const dcomplex *alpha,const dcomplex *x,const f77_int *incx,const dcomplex *y,const f77_int *incy,dcomplex *a,const f77_int *lda)
 {
-    zgeru_blis_impl( m, n, alpha, x, incx, y, incy, a, lda);
+    zgeru_( m, n, alpha, x, incx, y, incy, a, lda);
 }
 
 void ZHBMV(const char   *uplo,const f77_int *n,const f77_int *k,const dcomplex *alpha,const dcomplex *a,const f77_int *lda,const dcomplex *x,const f77_int *incx,const dcomplex *beta,dcomplex *y,const f77_int *incy)
 {
-    zhbmv_blis_impl( uplo, n, k, alpha, a, lda, x, incx, beta, y, incy);
+    zhbmv_( uplo, n, k, alpha, a, lda, x, incx, beta, y, incy);
 }
 
 void zhbmv(const char   *uplo,const f77_int *n,const f77_int *k,const dcomplex *alpha,const dcomplex *a,const f77_int *lda,const dcomplex *x,const f77_int *incx,const dcomplex *beta,dcomplex *y,const f77_int *incy)
 {
-    zhbmv_blis_impl( uplo, n, k, alpha, a, lda, x, incx, beta, y, incy);
+    zhbmv_( uplo, n, k, alpha, a, lda, x, incx, beta, y, incy);
 }
 
 void ZHBMV_(const char   *uplo,const f77_int *n,const f77_int *k,const dcomplex *alpha,const dcomplex *a,const f77_int *lda,const dcomplex *x,const f77_int *incx,const dcomplex *beta,dcomplex *y,const f77_int *incy)
 {
-    zhbmv_blis_impl( uplo, n, k, alpha, a, lda, x, incx, beta, y, incy);
+    zhbmv_( uplo, n, k, alpha, a, lda, x, incx, beta, y, incy);
 }
 
 void ZHEMM(const char   *side,const char   *uplo,const f77_int *m,const f77_int *n,const dcomplex *alpha,const dcomplex *a,const f77_int *lda,const dcomplex *b,const f77_int *ldb,const dcomplex *beta,dcomplex *c,const f77_int *ldc)
@@ -2019,47 +2019,47 @@ void ZHEMM_(const char   *side,const char   *uplo,const f77_int *m,const f77_int
 
 void ZHEMV(const char   *uplo,const f77_int *n,const dcomplex *alpha,const dcomplex *a,const f77_int *lda,const dcomplex *x,const f77_int *incx,const dcomplex *beta,dcomplex *y,const f77_int *incy)
 {
-    zhemv_blis_impl( uplo, n, alpha, a, lda, x, incx, beta, y, incy);
+    zhemv_( uplo, n, alpha, a, lda, x, incx, beta, y, incy);
 }
 
 void zhemv(const char   *uplo,const f77_int *n,const dcomplex *alpha,const dcomplex *a,const f77_int *lda,const dcomplex *x,const f77_int *incx,const dcomplex *beta,dcomplex *y,const f77_int *incy)
 {
-    zhemv_blis_impl( uplo, n, alpha, a, lda, x, incx, beta, y, incy);
+    zhemv_( uplo, n, alpha, a, lda, x, incx, beta, y, incy);
 }
 
 void ZHEMV_(const char   *uplo,const f77_int *n,const dcomplex *alpha,const dcomplex *a,const f77_int *lda,const dcomplex *x,const f77_int *incx,const dcomplex *beta,dcomplex *y,const f77_int *incy)
 {
-    zhemv_blis_impl( uplo, n, alpha, a, lda, x, incx, beta, y, incy);
+    zhemv_( uplo, n, alpha, a, lda, x, incx, beta, y, incy);
 }
 
 void ZHER(const char   *uplo,const f77_int *n,const double *alpha,const dcomplex *x,const f77_int *incx,dcomplex *a,const f77_int *lda)
 {
-    zher_blis_impl( uplo, n, alpha, x, incx, a, lda);
+    zher_( uplo, n, alpha, x, incx, a, lda);
 }
 
 void zher(const char   *uplo,const f77_int *n,const double *alpha,const dcomplex *x,const f77_int *incx,dcomplex *a,const f77_int *lda)
 {
-    zher_blis_impl( uplo, n, alpha, x, incx, a, lda);
+    zher_( uplo, n, alpha, x, incx, a, lda);
 }
 
 void ZHER_(const char   *uplo,const f77_int *n,const double *alpha,const dcomplex *x,const f77_int *incx,dcomplex *a,const f77_int *lda)
 {
-    zher_blis_impl( uplo, n, alpha, x, incx, a, lda);
+    zher_( uplo, n, alpha, x, incx, a, lda);
 }
 
 void ZHER2(const char   *uplo,const f77_int *n,const dcomplex *alpha,const dcomplex *x,const f77_int *incx,const dcomplex *y,const f77_int *incy,dcomplex *a,const f77_int *lda)
 {
-    zher2_blis_impl( uplo, n, alpha, x, incx, y, incy, a, lda);
+    zher2_( uplo, n, alpha, x, incx, y, incy, a, lda);
 }
 
 void zher2(const char   *uplo,const f77_int *n,const dcomplex *alpha,const dcomplex *x,const f77_int *incx,const dcomplex *y,const f77_int *incy,dcomplex *a,const f77_int *lda)
 {
-    zher2_blis_impl( uplo, n, alpha, x, incx, y, incy, a, lda);
+    zher2_( uplo, n, alpha, x, incx, y, incy, a, lda);
 }
 
 void ZHER2_(const char   *uplo,const f77_int *n,const dcomplex *alpha,const dcomplex *x,const f77_int *incx,const dcomplex *y,const f77_int *incy,dcomplex *a,const f77_int *lda)
 {
-    zher2_blis_impl( uplo, n, alpha, x, incx, y, incy, a, lda);
+    zher2_( uplo, n, alpha, x, incx, y, incy, a, lda);
 }
 
 void ZHER2K(const char   *uplo,const char   *trans,const f77_int *n,const f77_int *k,const dcomplex *alpha,const dcomplex *a,const f77_int *lda,const dcomplex *b,const f77_int *ldb,const double *beta,dcomplex *c,const f77_int *ldc)
@@ -2094,47 +2094,47 @@ void ZHERK_(const char   *uplo,const char   *trans,const f77_int *n,const f77_in
 
 void ZHPMV(const char   *uplo,const f77_int *n,const dcomplex *alpha,const dcomplex *ap,const dcomplex *x,const f77_int *incx,const dcomplex *beta,dcomplex *y,const f77_int *incy)
 {
-    zhpmv_blis_impl( uplo, n, alpha, ap, x, incx, beta, y, incy);
+    zhpmv_( uplo, n, alpha, ap, x, incx, beta, y, incy);
 }
 
 void zhpmv(const char   *uplo,const f77_int *n,const dcomplex *alpha,const dcomplex *ap,const dcomplex *x,const f77_int *incx,const dcomplex *beta,dcomplex *y,const f77_int *incy)
 {
-    zhpmv_blis_impl( uplo, n, alpha, ap, x, incx, beta, y, incy);
+    zhpmv_( uplo, n, alpha, ap, x, incx, beta, y, incy);
 }
 
 void ZHPMV_(const char   *uplo,const f77_int *n,const dcomplex *alpha,const dcomplex *ap,const dcomplex *x,const f77_int *incx,const dcomplex *beta,dcomplex *y,const f77_int *incy)
 {
-    zhpmv_blis_impl( uplo, n, alpha, ap, x, incx, beta, y, incy);
+    zhpmv_( uplo, n, alpha, ap, x, incx, beta, y, incy);
 }
 
 void ZHPR(const char   *uplo,const f77_int *n,const bla_double *alpha,const dcomplex *x,const f77_int *incx,dcomplex *ap)
 {
-    zhpr_blis_impl( uplo, n, alpha, x, incx, ap);
+    zhpr_( uplo, n, alpha, x, incx, ap);
 }
 
 void zhpr(const char   *uplo,const f77_int *n,const bla_double *alpha,const dcomplex *x,const f77_int *incx,dcomplex *ap)
 {
-    zhpr_blis_impl( uplo, n, alpha, x, incx, ap);
+    zhpr_( uplo, n, alpha, x, incx, ap);
 }
 
 void ZHPR_(const char   *uplo,const f77_int *n,const bla_double *alpha,const dcomplex *x,const f77_int *incx,dcomplex *ap)
 {
-    zhpr_blis_impl( uplo, n, alpha, x, incx, ap);
+    zhpr_( uplo, n, alpha, x, incx, ap);
 }
 
 void ZHPR2(const char   *uplo,const f77_int *n,const dcomplex *alpha,const dcomplex *x,const f77_int *incx,const dcomplex *y,const f77_int *incy,dcomplex *ap)
 {
-    zhpr2_blis_impl( uplo, n, alpha, x, incx, y, incy, ap);
+    zhpr2_( uplo, n, alpha, x, incx, y, incy, ap);
 }
 
 void zhpr2(const char   *uplo,const f77_int *n,const dcomplex *alpha,const dcomplex *x,const f77_int *incx,const dcomplex *y,const f77_int *incy,dcomplex *ap)
 {
-    zhpr2_blis_impl( uplo, n, alpha, x, incx, y, incy, ap);
+    zhpr2_( uplo, n, alpha, x, incx, y, incy, ap);
 }
 
 void ZHPR2_(const char   *uplo,const f77_int *n,const dcomplex *alpha,const dcomplex *x,const f77_int *incx,const dcomplex *y,const f77_int *incy,dcomplex *ap)
 {
-    zhpr2_blis_impl( uplo, n, alpha, x, incx, y, incy, ap);
+    zhpr2_( uplo, n, alpha, x, incx, y, incy, ap);
 }
 
 void ZROTG(dcomplex *ca,bla_dcomplex *cb,bla_double *c,dcomplex *s)
@@ -2229,62 +2229,62 @@ void ZSYRK_(const char   *uplo,const char   *trans,const f77_int *n,const f77_in
 
 void ZTBMV(const char   *uplo,const char   *trans,const char   *diag,const f77_int *n,const f77_int *k,const dcomplex *a,const f77_int *lda,dcomplex *x,const f77_int *incx)
 {
-    ztbmv_blis_impl( uplo, trans, diag, n, k, a, lda, x, incx);
+    ztbmv_( uplo, trans, diag, n, k, a, lda, x, incx);
 }
 
 void ztbmv(const char   *uplo,const char   *trans,const char   *diag,const f77_int *n,const f77_int *k,const dcomplex *a,const f77_int *lda,dcomplex *x,const f77_int *incx)
 {
-    ztbmv_blis_impl( uplo, trans, diag, n, k, a, lda, x, incx);
+    ztbmv_( uplo, trans, diag, n, k, a, lda, x, incx);
 }
 
 void ZTBMV_(const char   *uplo,const char   *trans,const char   *diag,const f77_int *n,const f77_int *k,const dcomplex *a,const f77_int *lda,dcomplex *x,const f77_int *incx)
 {
-    ztbmv_blis_impl( uplo, trans, diag, n, k, a, lda, x, incx);
+    ztbmv_( uplo, trans, diag, n, k, a, lda, x, incx);
 }
 
 void ZTBSV(const char   *uplo,const char   *trans,const char   *diag,const f77_int *n,const f77_int *k,const dcomplex *a,const f77_int *lda,dcomplex *x,const f77_int *incx)
 {
-    ztbsv_blis_impl( uplo, trans, diag, n, k, a, lda, x, incx);
+    ztbsv_( uplo, trans, diag, n, k, a, lda, x, incx);
 }
 
 void ztbsv(const char   *uplo,const char   *trans,const char   *diag,const f77_int *n,const f77_int *k,const dcomplex *a,const f77_int *lda,dcomplex *x,const f77_int *incx)
 {
-    ztbsv_blis_impl( uplo, trans, diag, n, k, a, lda, x, incx);
+    ztbsv_( uplo, trans, diag, n, k, a, lda, x, incx);
 }
 
 void ZTBSV_(const char   *uplo,const char   *trans,const char   *diag,const f77_int *n,const f77_int *k,const dcomplex *a,const f77_int *lda,dcomplex *x,const f77_int *incx)
 {
-    ztbsv_blis_impl( uplo, trans, diag, n, k, a, lda, x, incx);
+    ztbsv_( uplo, trans, diag, n, k, a, lda, x, incx);
 }
 
 void ZTPMV(const char   *uplo,const char   *trans,const char   *diag,const f77_int *n,const dcomplex *ap,dcomplex *x,const f77_int *incx)
 {
-    ztpmv_blis_impl( uplo, trans, diag, n, ap, x, incx);
+    ztpmv_( uplo, trans, diag, n, ap, x, incx);
 }
 
 void ztpmv(const char   *uplo,const char   *trans,const char   *diag,const f77_int *n,const dcomplex *ap,dcomplex *x,const f77_int *incx)
 {
-    ztpmv_blis_impl( uplo, trans, diag, n, ap, x, incx);
+    ztpmv_( uplo, trans, diag, n, ap, x, incx);
 }
 
 void ZTPMV_(const char   *uplo,const char   *trans,const char   *diag,const f77_int *n,const dcomplex *ap,dcomplex *x,const f77_int *incx)
 {
-    ztpmv_blis_impl( uplo, trans, diag, n, ap, x, incx);
+    ztpmv_( uplo, trans, diag, n, ap, x, incx);
 }
 
 void ZTPSV(const char   *uplo,const char   *trans,const char   *diag,const f77_int *n,const dcomplex *ap,dcomplex *x,const f77_int *incx)
 {
-    ztpsv_blis_impl( uplo, trans, diag, n, ap, x, incx);
+    ztpsv_( uplo, trans, diag, n, ap, x, incx);
 }
 
 void ztpsv(const char   *uplo,const char   *trans,const char   *diag,const f77_int *n,const dcomplex *ap,dcomplex *x,const f77_int *incx)
 {
-    ztpsv_blis_impl( uplo, trans, diag, n, ap, x, incx);
+    ztpsv_( uplo, trans, diag, n, ap, x, incx);
 }
 
 void ZTPSV_(const char   *uplo,const char   *trans,const char   *diag,const f77_int *n,const dcomplex *ap,dcomplex *x,const f77_int *incx)
 {
-    ztpsv_blis_impl( uplo, trans, diag, n, ap, x, incx);
+    ztpsv_( uplo, trans, diag, n, ap, x, incx);
 }
 
 void ZTRMM(const char   *side,const char   *uplo,const char   *transa,const char   *diag,const f77_int *m,const f77_int *n,const dcomplex *alpha,const dcomplex *a,const f77_int *lda,dcomplex *b,const f77_int *ldb)
@@ -2304,17 +2304,17 @@ void ZTRMM_(const char   *side,const char   *uplo,const char   *transa,const cha
 
 void ZTRMV(const char   *uplo,const char   *trans,const char   *diag,const f77_int *n,const dcomplex *a,const f77_int *lda,dcomplex *x,const f77_int *incx)
 {
-    ztrmv_blis_impl( uplo, trans, diag, n, a, lda, x, incx);
+    ztrmv_( uplo, trans, diag, n, a, lda, x, incx);
 }
 
 void ztrmv(const char   *uplo,const char   *trans,const char   *diag,const f77_int *n,const dcomplex *a,const f77_int *lda,dcomplex *x,const f77_int *incx)
 {
-    ztrmv_blis_impl( uplo, trans, diag, n, a, lda, x, incx);
+    ztrmv_( uplo, trans, diag, n, a, lda, x, incx);
 }
 
 void ZTRMV_(const char   *uplo,const char   *trans,const char   *diag,const f77_int *n,const dcomplex *a,const f77_int *lda,dcomplex *x,const f77_int *incx)
 {
-    ztrmv_blis_impl( uplo, trans, diag, n, a, lda, x, incx);
+    ztrmv_( uplo, trans, diag, n, a, lda, x, incx);
 }
 
 void ZTRSM(const char   *side,const char   *uplo,const char   *transa,const char   *diag,const f77_int *m,const f77_int *n,const dcomplex *alpha,const dcomplex *a,const f77_int *lda,dcomplex *b,const f77_int *ldb)
@@ -2334,17 +2334,17 @@ void ZTRSM_(const char   *side,const char   *uplo,const char   *transa,const cha
 
 void ZTRSV(const char   *uplo,const char   *trans,const char   *diag,const f77_int *n,const dcomplex *a,const f77_int *lda,dcomplex *x,const f77_int *incx)
 {
-    ztrsv_blis_impl( uplo, trans, diag, n, a, lda, x, incx);
+    ztrsv_( uplo, trans, diag, n, a, lda, x, incx);
 }
 
 void ztrsv(const char   *uplo,const char   *trans,const char   *diag,const f77_int *n,const dcomplex *a,const f77_int *lda,dcomplex *x,const f77_int *incx)
 {
-    ztrsv_blis_impl( uplo, trans, diag, n, a, lda, x, incx);
+    ztrsv_( uplo, trans, diag, n, a, lda, x, incx);
 }
 
 void ZTRSV_(const char   *uplo,const char   *trans,const char   *diag,const f77_int *n,const dcomplex *a,const f77_int *lda,dcomplex *x,const f77_int *incx)
 {
-    ztrsv_blis_impl( uplo, trans, diag, n, a, lda, x, incx);
+    ztrsv_( uplo, trans, diag, n, a, lda, x, incx);
 }
 
 
