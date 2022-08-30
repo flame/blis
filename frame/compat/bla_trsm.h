@@ -5,7 +5,6 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2022, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -41,18 +40,6 @@
 #define GENTPROT( ftype, ch, blasname ) \
 \
 BLIS_EXPORT_BLAS void PASTEF77(ch,blasname) \
-     ( \
-       const f77_char* side, \
-       const f77_char* uploa, \
-       const f77_char* transa, \
-       const f77_char* diaga, \
-       const f77_int*  m, \
-       const f77_int*  n, \
-       const ftype*    alpha, \
-       const ftype*    a, const f77_int* lda, \
-             ftype*    b, const f77_int* ldb  \
-     ); \
-BLIS_EXPORT_BLAS void PASTEF77S(ch,blasname) \
      ( \
        const f77_char* side, \
        const f77_char* uploa, \

@@ -45,7 +45,7 @@
 #undef  GENTFUNC
 #define GENTFUNC( ftype, ch, blasname, blisname ) \
 \
-void PASTEF77S(ch,blasname) \
+void PASTEF77(ch,blasname) \
      ( \
        const f77_char* side, \
        const f77_char* uploa, \
@@ -130,29 +130,14 @@ void PASTEF77S(ch,blasname) \
     AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO) \
     /* Finalize BLIS. */ \
     bli_finalize_auto(); \
-} \
-void PASTEF77(ch,blasname) \
-     ( \
-       const f77_char* side, \
-       const f77_char* uploa, \
-       const f77_char* transa, \
-       const f77_char* diaga, \
-       const f77_int*  m, \
-       const f77_int*  n, \
-       const ftype*    alpha, \
-       const ftype*    a, const f77_int* lda, \
-             ftype*    b, const f77_int* ldb  \
-     ) \
-{ \
-    PASTEF77S(ch,blasname) ( side, uploa, transa, diaga, m, n, alpha, a, lda, b, ldb ); \
- } \
+}
 
 #else
 
 #undef  GENTFUNC
 #define GENTFUNC( ftype, ch, blasname, blisname ) \
 \
-void PASTEF77S(ch,blasname) \
+void PASTEF77(ch,blasname) \
      ( \
        const f77_char* side, \
        const f77_char* uploa, \
@@ -408,28 +393,13 @@ void PASTEF77S(ch,blasname) \
     AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO)  \
     /* Finalize BLIS. */ \
     bli_finalize_auto(); \
-} \
-void PASTEF77(ch,blasname) \
-     ( \
-       const f77_char* side, \
-       const f77_char* uploa, \
-       const f77_char* transa, \
-       const f77_char* diaga, \
-       const f77_int*  m, \
-       const f77_int*  n, \
-       const ftype*    alpha, \
-       const ftype*    a, const f77_int* lda, \
-             ftype*    b, const f77_int* ldb  \
-     ) \
-{ \
-    PASTEF77S(ch,blasname) ( side, uploa, transa, diaga, m, n, alpha, a, lda, b, ldb ); \
-} \
+}
 
 #endif
 
 #ifdef BLIS_ENABLE_BLAS
 
-void strsm_blis_impl
+void strsm_
 (
     const f77_char* side,
     const f77_char* uploa,
@@ -699,23 +669,8 @@ void strsm_blis_impl
     /* Finalize BLIS. */
     bli_finalize_auto();
 }
-void strsm_
-(
-    const f77_char* side,
-    const f77_char* uploa,
-    const f77_char* transa,
-    const f77_char* diaga,
-    const f77_int*  m,
-    const f77_int*  n,
-    const float*    alpha,
-    const float*    a, const f77_int* lda,
-    float*    b, const f77_int* ldb
-)
-{
-    strsm_blis_impl ( side, uploa, transa, diaga, m, n, alpha, a, lda, b, ldb );
-}
 
-void dtrsm_blis_impl
+void dtrsm_
 (
     const f77_char* side,
     const f77_char* uploa,
@@ -937,7 +892,7 @@ void dtrsm_blis_impl
     bli_obj_set_conjtrans( blis_transa, &ao );
 
     bli_obj_set_struc( struca, &ao );
-
+    
 #ifdef BLIS_ENABLE_SMALL_MATRIX_TRSM
     // This function is invoked on all architectures including ‘generic’.
     // Non-AVX platforms will use the kernels derived from the context.
@@ -1018,24 +973,9 @@ void dtrsm_blis_impl
     /* Finalize BLIS. */
     bli_finalize_auto();
 }
-void dtrsm_
-(
-    const f77_char* side,
-    const f77_char* uploa,
-    const f77_char* transa,
-    const f77_char* diaga,
-    const f77_int*  m,
-    const f77_int*  n,
-    const double*    alpha,
-    const double*    a, const f77_int* lda,
-    double*    b, const f77_int* ldb
-)
-{
-    dtrsm_blis_impl ( side, uploa, transa, diaga, m, n, alpha, a, lda, b, ldb );
-}
 
 
-void ztrsm_blis_impl
+void ztrsm_
 (
     const f77_char* side,
     const f77_char* uploa,
@@ -1391,24 +1331,9 @@ void ztrsm_blis_impl
     /* Finalize BLIS. */
     bli_finalize_auto();
 }
-void ztrsm_
-(
-    const f77_char* side,
-    const f77_char* uploa,
-    const f77_char* transa,
-    const f77_char* diaga,
-    const f77_int*  m,
-    const f77_int*  n,
-    const dcomplex*    alpha,
-    const dcomplex*    a, const f77_int* lda,
-    dcomplex*    b, const f77_int* ldb
-)
-{
-    ztrsm_blis_impl ( side, uploa, transa, diaga, m, n, alpha, a, lda, b, ldb );
-}
 
 
-void ctrsm_blis_impl
+void ctrsm_
 (
     const f77_char* side,
     const f77_char* uploa,
@@ -1738,21 +1663,6 @@ void ctrsm_blis_impl
     AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO)
     /* Finalize BLIS. */
     bli_finalize_auto();
-}
-void ctrsm_
-(
-    const f77_char* side,
-    const f77_char* uploa,
-    const f77_char* transa,
-    const f77_char* diaga,
-    const f77_int*  m,
-    const f77_int*  n,
-    const scomplex*    alpha,
-    const scomplex*    a, const f77_int* lda,
-    scomplex*    b, const f77_int* ldb
-)
-{
-    ctrsm_blis_impl ( side, uploa, transa, diaga, m, n, alpha, a, lda, b, ldb );
 }
 
 #endif

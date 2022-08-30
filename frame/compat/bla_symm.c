@@ -45,7 +45,7 @@
 #undef  GENTFUNC
 #define GENTFUNC( ftype, ch, blasname, blisname ) \
 \
-void PASTEF77S(ch,blasname) \
+void PASTEF77(ch,blasname) \
      ( \
        const f77_char* side, \
        const f77_char* uploa, \
@@ -131,29 +131,14 @@ void PASTEF77S(ch,blasname) \
 	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1) \
 	/* Finalize BLIS. */ \
 	bli_finalize_auto(); \
-} \
-void PASTEF77(ch,blasname) \
-     ( \
-       const f77_char* side, \
-       const f77_char* uploa, \
-       const f77_int*  m, \
-       const f77_int*  n, \
-       const ftype*    alpha, \
-       const ftype*    a, const f77_int* lda, \
-       const ftype*    b, const f77_int* ldb, \
-       const ftype*    beta, \
-             ftype*    c, const f77_int* ldc  \
-     ) \
-{ \
-	PASTEF77S(ch,blasname) ( side, uploa, m, n, alpha, a, lda, b, ldb, beta, c, ldc ); \
- } \
+}
 
 #else
 
 #undef  GENTFUNC
 #define GENTFUNC( ftype, ch, blasname, blisname ) \
 \
-void PASTEF77S(ch,blasname) \
+void PASTEF77(ch,blasname) \
      ( \
        const f77_char* side, \
        const f77_char* uploa, \
@@ -261,22 +246,7 @@ void PASTEF77S(ch,blasname) \
 	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1) \
 	/* Finalize BLIS. */ \
 	bli_finalize_auto(); \
-} \
-void PASTEF77(ch,blasname) \
-     ( \
-       const f77_char* side, \
-       const f77_char* uploa, \
-       const f77_int*  m, \
-       const f77_int*  n, \
-       const ftype*    alpha, \
-       const ftype*    a, const f77_int* lda, \
-       const ftype*    b, const f77_int* ldb, \
-       const ftype*    beta, \
-             ftype*    c, const f77_int* ldc  \
-     ) \
-{ \
-	PASTEF77S(ch,blasname) ( side, uploa, m, n, alpha, a, lda, b, ldb, beta, c, ldc ); \
-} \
+}
 
 #endif
 

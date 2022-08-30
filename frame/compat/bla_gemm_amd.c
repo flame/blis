@@ -44,7 +44,7 @@
 #undef  GENTFUNC
 #define GENTFUNC( ftype, ch, blasname, blisname ) \
 \
-void PASTEF77S(ch,blasname) \
+void PASTEF77(ch,blasname) \
      ( \
        const f77_char* transa, \
        const f77_char* transb, \
@@ -136,32 +136,14 @@ void PASTEF77S(ch,blasname) \
     AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1) \
     /* Finalize BLIS. */                 \
     bli_finalize_auto(); \
-} \
-\
-void PASTEF77(ch,blasname) \
-     ( \
-       const f77_char* transa, \
-       const f77_char* transb, \
-       const f77_int*  m, \
-       const f77_int*  n, \
-       const f77_int*  k, \
-       const ftype*    alpha, \
-       const ftype*    a, const f77_int* lda, \
-       const ftype*    b, const f77_int* ldb, \
-       const ftype*    beta, \
-         ftype*    c, const f77_int* ldc  \
-     ) \
-{ \
-\
-    PASTEF77S(ch,blasname) ( transa, transb, m, n, k, alpha, a, lda, b, ldb, beta, c, ldc ); \
-} \
+}
 
 #else
 
 #undef  GENTFUNC
 #define GENTFUNC( ftype, ch, blasname, blisname ) \
 \
-void PASTEF77S(ch,blasname) \
+void PASTEF77(ch,blasname) \
      ( \
        const f77_char* transa, \
        const f77_char* transb, \
@@ -336,30 +318,11 @@ void PASTEF77S(ch,blasname) \
     AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1) \
     /* Finalize BLIS. */                 \
     bli_finalize_auto(); \
-} \
-\
-void PASTEF77(ch,blasname) \
-     ( \
-       const f77_char* transa, \
-       const f77_char* transb, \
-       const f77_int*  m, \
-       const f77_int*  n, \
-       const f77_int*  k, \
-       const ftype*    alpha, \
-       const ftype*    a, const f77_int* lda, \
-       const ftype*    b, const f77_int* ldb, \
-       const ftype*    beta, \
-         ftype*    c, const f77_int* ldc  \
-     ) \
-{ \
-\
-    PASTEF77S(ch,blasname) ( transa, transb, m, n, k, alpha, a, lda, b, ldb, beta, c, ldc ); \
-} \
-
+}
 #endif
 
 #ifdef BLIS_ENABLE_BLAS
-void dgemm_blis_impl
+void dgemm_
 (
     const f77_char* transa,
     const f77_char* transb,
@@ -695,24 +658,7 @@ void dgemm_blis_impl
     bli_finalize_auto();
 } // end of dgemm_
 
-void dgemm_
-(
-    const f77_char* transa,
-    const f77_char* transb,
-    const f77_int* m,
-    const f77_int* n,
-    const f77_int* k,
-    const double* alpha,
-    const double* a, const f77_int* lda,
-    const double* b, const f77_int* ldb,
-    const double* beta,
-    double* c, const f77_int* ldc
-)
-{
-    dgemm_blis_impl(transa, transb, m, n, k, alpha, a, lda, b, ldb, beta, c, ldc);
-}
-
-void zgemm_blis_impl
+void zgemm_
      (
        const f77_char* transa,
        const f77_char* transb,
@@ -934,22 +880,6 @@ void zgemm_blis_impl
     bli_finalize_auto();
 }// end of zgemm_
 
-void zgemm_
-     (
-       const f77_char* transa,
-       const f77_char* transb,
-       const f77_int*  m,
-       const f77_int*  n,
-       const f77_int*  k,
-       const dcomplex*    alpha,
-       const dcomplex*    a, const f77_int* lda,
-       const dcomplex*    b, const f77_int* ldb,
-       const dcomplex*    beta,
-             dcomplex*    c, const f77_int* ldc
-     )
-{
-    zgemm_blis_impl(transa, transb, m, n, k, alpha, a, lda, b, ldb, beta, c, ldc);
-}
 
 INSERT_GENTFUNC_BLAS_SC( gemm, gemm )
 
