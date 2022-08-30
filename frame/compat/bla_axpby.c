@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2020-2022, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2020, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -41,7 +41,7 @@
 #undef  GENTFUNC
 #define GENTFUNC( ftype, ch, blasname, blisname ) \
 \
-void PASTEF77S(ch,blasname) \
+void PASTEF77(ch,blasname) \
      ( \
        const f77_int* n, \
        const ftype*   alpha, \
@@ -85,19 +85,6 @@ void PASTEF77S(ch,blasname) \
     AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1) \
     /* Finalize BLIS. */ \
     bli_finalize_auto(); \
-}\
-\
-void PASTEF77(ch,blasname) \
-     ( \
-       const f77_int* n, \
-       const ftype*   alpha, \
-       const ftype*   x, const f77_int* incx, \
-       const ftype*   beta, \
-             ftype*   y, const f77_int* incy  \
-     ) \
-{ \
-  PASTEF77S(ch,blasname) \
-     ( n, alpha, x, incx, beta, y, incy ); \
 }
 
 #ifdef BLIS_ENABLE_BLAS

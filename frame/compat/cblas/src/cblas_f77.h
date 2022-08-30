@@ -207,52 +207,53 @@
  * Level 1 BLAS
  */
 #define F77_xerbla     xerbla_
-#define F77_srotg      srotg_blis_impl
-#define F77_srotmg     srotmg_blis_impl
-#define F77_srot       srot_blis_impl
-#define F77_srotm      srotm_blis_impl
-#define F77_drotg      drotg_blis_impl
-#define F77_drotmg     drotmg_blis_impl
-#define F77_drot       drot_blis_impl
-#define F77_drotm      drotm_blis_impl
+#define F77_srotg      srotg_
+#define F77_srotmg     srotmg_
+#define F77_srot       srot_
+#define F77_srotm      srotm_
+#define F77_drotg      drotg_
+#define F77_drotmg     drotmg_
+#define F77_drot       drot_
+#define F77_drotm      drotm_
 #define F77_sswap      sswap_
-#define F77_scopy      scopy_blis_impl
-#define F77_saxpy      saxpy_blis_impl
-#define F77_isamax_sub isamaxsub_blis_impl
+#define F77_scopy      scopy_
+#define F77_saxpy      saxpy_
+#define F77_isamax_sub isamaxsub_
 #define F77_dswap      dswap_
-#define F77_dcopy      dcopy_blis_impl
-#define F77_daxpy      daxpy_blis_impl
-#define F77_idamax_sub idamaxsub_blis_impl
+#define F77_dcopy      dcopy_
+#define F77_daxpy      daxpy_
+#define F77_idamax_sub idamaxsub_
 #define F77_cswap      cswap_
-#define F77_ccopy      ccopy_blis_impl
-#define F77_caxpy      caxpy_blis_impl
-#define F77_icamax_sub icamaxsub_blis_impl
+#define F77_ccopy      ccopy_
+#define F77_caxpy      caxpy_
+#define F77_icamax_sub icamaxsub_
 #define F77_zswap      zswap_
-#define F77_zcopy      zcopy_blis_impl
-#define F77_zaxpy      zaxpy_blis_impl
-#define F77_izamax_sub izamaxsub_blis_impl
-#define F77_sdot_sub   sdotsub_blis_impl
-#define F77_ddot_sub   ddotsub_blis_impl
-#define F77_dsdot_sub  dsdotsub_blis_impl
-#define F77_sscal      sscal_blis_impl
-#define F77_dscal      dscal_blis_impl
-#define F77_cscal      cscal_blis_impl
-#define F77_zscal      zscal_blis_impl
-#define F77_csscal     csscal_blis_impl
-#define F77_zdscal     zdscal_blis_impl
-#define F77_cdotu_sub  cdotusub_blis_impl
-#define F77_cdotc_sub  cdotcsub_blis_impl
-#define F77_zdotu_sub  zdotusub_blis_impl
-#define F77_zdotc_sub  zdotcsub_blis_impl
-#define F77_snrm2_sub  snrm2sub_blis_impl
-#define F77_sasum_sub  sasumsub_blis_impl
-#define F77_dnrm2_sub  dnrm2sub_blis_impl
-#define F77_dasum_sub  dasumsub_blis_impl
-#define F77_scnrm2_sub scnrm2sub_blis_impl
-#define F77_scasum_sub scasumsub_blis_impl
-#define F77_dznrm2_sub dznrm2sub_blis_impl
-#define F77_dzasum_sub dzasumsub_blis_impl
-#define F77_sdsdot_sub sdsdotsub_blis_impl
+#define F77_zcopy      zcopy_
+#define F77_zaxpy      zaxpy_
+#define F77_zaxpby     zaxpby_
+#define F77_izamax_sub izamaxsub_
+#define F77_sdot_sub   sdotsub_
+#define F77_ddot_sub   ddotsub_
+#define F77_dsdot_sub  dsdotsub_
+#define F77_sscal      sscal_
+#define F77_dscal      dscal_
+#define F77_cscal      cscal_
+#define F77_zscal      zscal_
+#define F77_csscal     csscal_
+#define F77_zdscal     zdscal_
+#define F77_cdotu_sub  cdotusub_
+#define F77_cdotc_sub  cdotcsub_
+#define F77_zdotu_sub  zdotusub_
+#define F77_zdotc_sub  zdotcsub_
+#define F77_snrm2_sub  snrm2sub_
+#define F77_sasum_sub  sasumsub_
+#define F77_dnrm2_sub  dnrm2sub_
+#define F77_dasum_sub  dasumsub_
+#define F77_scnrm2_sub scnrm2sub_
+#define F77_scasum_sub scasumsub_
+#define F77_dznrm2_sub dznrm2sub_
+#define F77_dzasum_sub dzasumsub_
+#define F77_sdsdot_sub sdsdotsub_
 /*
 * Level 2 BLAS
 */
@@ -370,17 +371,17 @@
  * -- BLAS Extension APIs --
  */
 
-#define F77_saxpby     saxpby_blis_impl
-#define F77_daxpby     daxpby_blis_impl
-#define F77_caxpby     caxpby_blis_impl
-#define F77_zaxpby     zaxpby_blis_impl
+#define F77_saxpby     saxpby_
+#define F77_daxpby     daxpby_
+#define F77_caxpby     caxpby_
+#define F77_zaxpby     zaxpby_
 #define F77_cgemm3m    cgemm3m_blis_impl
 #define F77_zgemm3m    zgemm3m_blis_impl
 
-#define F77_isamin_sub isaminsub_blis_impl
-#define F77_idamin_sub idaminsub_blis_impl
-#define F77_icamin_sub icaminsub_blis_impl
-#define F77_izamin_sub izaminsub_blis_impl
+#define F77_isamin_sub isaminsub_
+#define F77_idamin_sub idaminsub_
+#define F77_icamin_sub icaminsub_
+#define F77_izamin_sub izaminsub_
 
 // -- Batch APIs --
 #define F77_sgemm_batch  sgemm_batch_

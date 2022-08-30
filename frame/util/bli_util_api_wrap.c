@@ -43,32 +43,32 @@
 #ifndef BLIS_ENABLE_UPPERCASE_API
 void CAXPY(const f77_int *n,const scomplex  *ca,const scomplex  *cx,const f77_int *incx,scomplex  *cy,const f77_int *incy)
 {
-    caxpy_blis_impl( n, ca, cx, incx, cy, incy);
+    caxpy_( n, ca, cx, incx, cy, incy);
 }
 
 void caxpy(const f77_int *n,const scomplex  *ca,const scomplex  *cx,const f77_int *incx,scomplex  *cy,const f77_int *incy)
 {
-    caxpy_blis_impl( n, ca, cx, incx, cy, incy);
+    caxpy_( n, ca, cx, incx, cy, incy);
 }
 
 void CAXPY_(const f77_int *n,const scomplex  *ca,const scomplex  *cx,const f77_int *incx,scomplex  *cy,const f77_int *incy)
 {
-    caxpy_blis_impl( n, ca, cx, incx, cy, incy);
+    caxpy_( n, ca, cx, incx, cy, incy);
 }
 
 void CCOPY(const f77_int *n,const scomplex  *cx,const f77_int *incx,scomplex  *cy,const f77_int *incy)
 {
-    ccopy_blis_impl( n, cx, incx, cy, incy);
+    ccopy_( n, cx, incx, cy, incy);
 }
 
 void ccopy(const f77_int *n,const scomplex  *cx,const f77_int *incx,scomplex  *cy,const f77_int *incy)
 {
-    ccopy_blis_impl( n, cx, incx, cy, incy);
+    ccopy_( n, cx, incx, cy, incy);
 }
 
 void CCOPY_(const f77_int *n,const scomplex  *cx,const f77_int *incx,scomplex  *cy,const f77_int *incy)
 {
-    ccopy_blis_impl( n, cx, incx, cy, incy);
+    ccopy_( n, cx, incx, cy, incy);
 }
 
 #ifdef BLIS_DISABLE_COMPLEX_RETURN_INTEL
@@ -435,17 +435,17 @@ void CROTG_(scomplex  *ca, bla_scomplex  *cb, bla_real  *c,scomplex  *s)
 
 void CSCAL(const f77_int *n,const scomplex  *ca,scomplex  *cx,const f77_int *incx)
 {
-    cscal_blis_impl( n, ca, cx, incx);
+    cscal_( n, ca, cx, incx);
 }
 
 void cscal(const f77_int *n,const scomplex  *ca,scomplex  *cx,const f77_int *incx)
 {
-    cscal_blis_impl( n, ca, cx, incx);
+    cscal_( n, ca, cx, incx);
 }
 
 void CSCAL_(const f77_int *n,const scomplex  *ca,scomplex  *cx,const f77_int *incx)
 {
-    cscal_blis_impl( n, ca, cx, incx);
+    cscal_( n, ca, cx, incx);
 }
 
 void CSROT(const f77_int *n,scomplex  *cx,const f77_int *incx,scomplex  *cy,const f77_int *incy,const float  *c,const float  *s)
@@ -465,17 +465,17 @@ void CSROT_(const f77_int *n,scomplex  *cx,const f77_int *incx,scomplex  *cy,con
 
 void CSSCAL(const f77_int *n,const float  *sa,scomplex  *cx,const f77_int *incx)
 {
-    csscal_blis_impl( n, sa, cx, incx);
+    csscal_( n, sa, cx, incx);
 }
 
 void csscal(const f77_int *n,const float  *sa,scomplex  *cx,const f77_int *incx)
 {
-    csscal_blis_impl( n, sa, cx, incx);
+    csscal_( n, sa, cx, incx);
 }
 
 void CSSCAL_(const f77_int *n,const float  *sa,scomplex  *cx,const f77_int *incx)
 {
-    csscal_blis_impl( n, sa, cx, incx);
+    csscal_( n, sa, cx, incx);
 }
 
 void CSWAP(const f77_int *n,scomplex  *cx,const f77_int *incx,scomplex  *cy,const f77_int *incy)
@@ -675,17 +675,17 @@ double DASUM_(const f77_int *n,const double *dx,const f77_int *incx)
 
 void DAXPY(const f77_int *n,const double *da,const double *dx,const f77_int *incx,double *dy,const f77_int *incy)
 {
-    daxpy_blis_impl( n, da, dx, incx, dy, incy);
+    daxpy_( n, da, dx, incx, dy, incy);
 }
 
 void daxpy(const f77_int *n,const double *da,const double *dx,const f77_int *incx,double *dy,const f77_int *incy)
 {
-    daxpy_blis_impl( n, da, dx, incx, dy, incy);
+    daxpy_( n, da, dx, incx, dy, incy);
 }
 
 void DAXPY_(const f77_int *n,const double *da,const double *dx,const f77_int *incx,double *dy,const f77_int *incy)
 {
-    daxpy_blis_impl( n, da, dx, incx, dy, incy);
+    daxpy_( n, da, dx, incx, dy, incy);
 }
 
 double DCABS1(bla_dcomplex *z)
@@ -705,17 +705,17 @@ double DCABS1_(bla_dcomplex *z)
 
 void DCOPY(const f77_int *n,const double *dx,const f77_int *incx,double *dy,const f77_int *incy)
 {
-    dcopy_blis_impl( n, dx, incx, dy, incy);
+    dcopy_( n, dx, incx, dy, incy);
 }
 
 void dcopy(const f77_int *n,const double *dx,const f77_int *incx,double *dy,const f77_int *incy)
 {
-    dcopy_blis_impl( n, dx, incx, dy, incy);
+    dcopy_( n, dx, incx, dy, incy);
 }
 
 void DCOPY_(const f77_int *n,const double *dx,const f77_int *incx,double *dy,const f77_int *incy)
 {
-    dcopy_blis_impl( n, dx, incx, dy, incy);
+    dcopy_( n, dx, incx, dy, incy);
 }
 
 double DDOT(const f77_int *n,const double *dx,const f77_int *incx,const double *dy,const f77_int *incy)
@@ -810,62 +810,62 @@ double DNRM2_(const f77_int *n,const double *x,const f77_int *incx)
 
 void DROT(const f77_int *n,double *dx,const f77_int *incx,double *dy,const f77_int *incy,const double *c,const double *s)
 {
-    drot_blis_impl( n, dx, incx, dy, incy, c, s);
+    drot_( n, dx, incx, dy, incy, c, s);
 }
 
 void drot(const f77_int *n,double *dx,const f77_int *incx,double *dy,const f77_int *incy,const double *c,const double *s)
 {
-    drot_blis_impl( n, dx, incx, dy, incy, c, s);
+    drot_( n, dx, incx, dy, incy, c, s);
 }
 
 void DROT_(const f77_int *n,double *dx,const f77_int *incx,double *dy,const f77_int *incy,const double *c,const double *s)
 {
-    drot_blis_impl( n, dx, incx, dy, incy, c, s);
+    drot_( n, dx, incx, dy, incy, c, s);
 }
 
 void DROTG(double *da,double *db,double *c,double *s)
 {
-    drotg_blis_impl( da, db, c, s);
+    drotg_( da, db, c, s);
 }
 
 void drotg(double *da,double *db,double *c,double *s)
 {
-    drotg_blis_impl( da, db, c, s);
+    drotg_( da, db, c, s);
 }
 
 void DROTG_(double *da,double *db,double *c,double *s)
 {
-    drotg_blis_impl( da, db, c, s);
+    drotg_( da, db, c, s);
 }
 
 void DROTM(const f77_int *n,double *dx,const f77_int *incx,double *dy,const f77_int *incy,const double *dparam)
 {
-    drotm_blis_impl( n, dx, incx, dy, incy, dparam);
+    drotm_( n, dx, incx, dy, incy, dparam);
 }
 
 void drotm(const f77_int *n,double *dx,const f77_int *incx,double *dy,const f77_int *incy,const double *dparam)
 {
-    drotm_blis_impl( n, dx, incx, dy, incy, dparam);
+    drotm_( n, dx, incx, dy, incy, dparam);
 }
 
 void DROTM_(const f77_int *n,double *dx,const f77_int *incx,double *dy,const f77_int *incy,const double *dparam)
 {
-    drotm_blis_impl( n, dx, incx, dy, incy, dparam);
+    drotm_( n, dx, incx, dy, incy, dparam);
 }
 
 void DROTMG(double *dd1,double *dd2,double *dx1,const double *dy1,double *dparam)
 {
-    drotmg_blis_impl( dd1, dd2, dx1, dy1, dparam);
+    drotmg_( dd1, dd2, dx1, dy1, dparam);
 }
 
 void drotmg(double *dd1,double *dd2,double *dx1,const double *dy1,double *dparam)
 {
-    drotmg_blis_impl( dd1, dd2, dx1, dy1, dparam);
+    drotmg_( dd1, dd2, dx1, dy1, dparam);
 }
 
 void DROTMG_(double *dd1,double *dd2,double *dx1,const double *dy1,double *dparam)
 {
-    drotmg_blis_impl( dd1, dd2, dx1, dy1, dparam);
+    drotmg_( dd1, dd2, dx1, dy1, dparam);
 }
 
 void DSBMV(const char   *uplo,const f77_int *n,const f77_int *k,const double *alpha,const double *a,const f77_int *lda,const double *x,const f77_int *incx,const double *beta,double *y,const f77_int *incy)
@@ -885,17 +885,17 @@ void DSBMV_(const char   *uplo,const f77_int *n,const f77_int *k,const double *a
 
 void DSCAL(const f77_int *n,const double *da,double *dx,const f77_int *incx)
 {
-    dscal_blis_impl( n, da, dx, incx);
+    dscal_( n, da, dx, incx);
 }
 
 void dscal(const f77_int *n,const double *da,double *dx,const f77_int *incx)
 {
-    dscal_blis_impl( n, da, dx, incx);
+    dscal_( n, da, dx, incx);
 }
 
 void DSCAL_(const f77_int *n,const double *da,double *dx,const f77_int *incx)
 {
-    dscal_blis_impl( n, da, dx, incx);
+    dscal_( n, da, dx, incx);
 }
 
 double DSDOT(const f77_int *n,const float  *sx,const f77_int *incx,const float  *sy,const f77_int *incy)
@@ -1305,17 +1305,17 @@ float SASUM_(const f77_int *n,const float  *sx, const f77_int *incx)
 
 void SAXPY(const f77_int *n,const float  *sa,const float  *sx,const f77_int *incx,float  *sy,const f77_int *incy)
 {
-    saxpy_blis_impl( n, sa, sx, incx, sy, incy);
+    saxpy_( n, sa, sx, incx, sy, incy);
 }
 
 void saxpy(const f77_int *n,const float  *sa,const float  *sx,const f77_int *incx,float  *sy,const f77_int *incy)
 {
-    saxpy_blis_impl( n, sa, sx, incx, sy, incy);
+    saxpy_( n, sa, sx, incx, sy, incy);
 }
 
 void SAXPY_(const f77_int *n,const float  *sa,const float  *sx,const f77_int *incx,float  *sy,const f77_int *incy)
 {
-    saxpy_blis_impl( n, sa, sx, incx, sy, incy);
+    saxpy_( n, sa, sx, incx, sy, incy);
 }
 
 
@@ -1354,17 +1354,17 @@ float SCNRM2_(const f77_int *n,const scomplex  *x, const f77_int *incx)
 
 void SCOPY(const f77_int *n,const float  *sx,const f77_int *incx,float  *sy,const f77_int *incy)
 {
-    scopy_blis_impl( n, sx, incx, sy, incy);
+    scopy_( n, sx, incx, sy, incy);
 }
 
 void scopy(const f77_int *n,const float  *sx,const f77_int *incx,float  *sy,const f77_int *incy)
 {
-    scopy_blis_impl( n, sx, incx, sy, incy);
+    scopy_( n, sx, incx, sy, incy);
 }
 
 void SCOPY_(const f77_int *n,const float  *sx,const f77_int *incx,float  *sy,const f77_int *incy)
 {
-    scopy_blis_impl( n, sx, incx, sy, incy);
+    scopy_( n, sx, incx, sy, incy);
 }
 
 
@@ -1479,62 +1479,62 @@ float SNRM2_(const f77_int *n,const float  *x, const f77_int *incx)
 
 void SROT(const f77_int *n,float  *sx,const f77_int *incx,float  *sy,const f77_int *incy,const float  *c,const float  *s)
 {
-    srot_blis_impl( n, sx, incx, sy, incy, c, s);
+    srot_( n, sx, incx, sy, incy, c, s);
 }
 
 void srot(const f77_int *n,float  *sx,const f77_int *incx,float  *sy,const f77_int *incy,const float  *c,const float  *s)
 {
-    srot_blis_impl( n, sx, incx, sy, incy, c, s);
+    srot_( n, sx, incx, sy, incy, c, s);
 }
 
-void SROT_blis_impl(const f77_int *n,float  *sx,const f77_int *incx,float  *sy,const f77_int *incy,const float  *c,const float  *s)
+void SROT_(const f77_int *n,float  *sx,const f77_int *incx,float  *sy,const f77_int *incy,const float  *c,const float  *s)
 {
-    srot_blis_impl( n, sx, incx, sy, incy, c, s);
+    srot_( n, sx, incx, sy, incy, c, s);
 }
 
 void SROTG(float  *sa,float  *sb,float  *c,float  *s)
 {
-    srotg_blis_impl( sa, sb, c, s);
+    srotg_( sa, sb, c, s);
 }
 
 void srotg(float  *sa,float  *sb,float  *c,float  *s)
 {
-    srotg_blis_impl( sa, sb, c, s);
+    srotg_( sa, sb, c, s);
 }
 
 void SROTG_(float  *sa,float  *sb,float  *c,float  *s)
 {
-    srotg_blis_impl( sa, sb, c, s);
+    srotg_( sa, sb, c, s);
 }
 
 void SROTM(const f77_int *n,float  *sx,const f77_int *incx,float  *sy,const f77_int *incy,const float  *sparam)
 {
-    srotm_blis_impl( n, sx, incx, sy, incy, sparam);
+    srotm_( n, sx, incx, sy, incy, sparam);
 }
 
 void srotm(const f77_int *n,float  *sx,const f77_int *incx,float  *sy,const f77_int *incy,const float  *sparam)
 {
-    srotm_blis_impl( n, sx, incx, sy, incy, sparam);
+    srotm_( n, sx, incx, sy, incy, sparam);
 }
 
 void SROTM_(const f77_int *n,float  *sx,const f77_int *incx,float  *sy,const f77_int *incy,const float  *sparam)
 {
-    srotm_blis_impl( n, sx, incx, sy, incy, sparam);
+    srotm_( n, sx, incx, sy, incy, sparam);
 }
 
 void SROTMG(float  *sd1,float  *sd2,float  *sx1,const float  *sy1,float  *sparam)
 {
-    srotmg_blis_impl( sd1, sd2, sx1, sy1, sparam);
+    srotmg_( sd1, sd2, sx1, sy1, sparam);
 }
 
 void srotmg(float  *sd1,float  *sd2,float  *sx1,const float  *sy1,float  *sparam)
 {
-    srotmg_blis_impl( sd1, sd2, sx1, sy1, sparam);
+    srotmg_( sd1, sd2, sx1, sy1, sparam);
 }
 
 void SROTMG_(float  *sd1,float  *sd2,float  *sx1,const float  *sy1,float  *sparam)
 {
-    srotmg_blis_impl( sd1, sd2, sx1, sy1, sparam);
+    srotmg_( sd1, sd2, sx1, sy1, sparam);
 }
 
 void SSBMV(const char   *uplo,const f77_int *n,const f77_int *k,const float  *alpha,const float  *a,const f77_int *lda,const float  *x,const f77_int *incx,const float  *beta,float  *y,const f77_int *incy)
@@ -1554,17 +1554,17 @@ void SSBMV_(const char   *uplo,const f77_int *n,const f77_int *k,const float  *a
 
 void SSCAL(const f77_int *n,const float  *sa,float  *sx,const f77_int *incx)
 {
-    sscal_blis_impl( n, sa, sx, incx);
+    sscal_( n, sa, sx, incx);
 }
 
 void sscal(const f77_int *n,const float  *sa,float  *sx,const f77_int *incx)
 {
-    sscal_blis_impl( n, sa, sx, incx);
+    sscal_( n, sa, sx, incx);
 }
 
 void SSCAL_(const f77_int *n,const float  *sa,float  *sx,const f77_int *incx)
 {
-    sscal_blis_impl( n, sa, sx, incx);
+    sscal_( n, sa, sx, incx);
 }
 
 void SSPMV(const char   *uplo,const f77_int *n,const float  *alpha,const float  *ap,const float  *x,const f77_int *incx,const float  *beta,float  *y,const f77_int *incy)
@@ -1854,32 +1854,32 @@ int xerbla(const char   *srname,const f77_int *info, ftnlen n)
 
 void ZAXPY(const f77_int *n,const dcomplex *za,const dcomplex *zx,const f77_int *incx,dcomplex *zy,const f77_int *incy)
 {
-    zaxpy_blis_impl( n, za, zx, incx, zy, incy);
+    zaxpy_( n, za, zx, incx, zy, incy);
 }
 
 void zaxpy(const f77_int *n,const dcomplex *za,const dcomplex *zx,const f77_int *incx,dcomplex *zy,const f77_int *incy)
 {
-    zaxpy_blis_impl( n, za, zx, incx, zy, incy);
+    zaxpy_( n, za, zx, incx, zy, incy);
 }
 
 void ZAXPY_(const f77_int *n,const dcomplex *za,const dcomplex *zx,const f77_int *incx,dcomplex *zy,const f77_int *incy)
 {
-    zaxpy_blis_impl( n, za, zx, incx, zy, incy);
+    zaxpy_( n, za, zx, incx, zy, incy);
 }
 
 void ZCOPY(const f77_int *n,const dcomplex *zx,const f77_int *incx,dcomplex *zy,const f77_int *incy)
 {
-    zcopy_blis_impl( n, zx, incx, zy, incy);
+    zcopy_( n, zx, incx, zy, incy);
 }
 
 void zcopy(const f77_int *n,const dcomplex *zx,const f77_int *incx,dcomplex *zy,const f77_int *incy)
 {
-    zcopy_blis_impl( n, zx, incx, zy, incy);
+    zcopy_( n, zx, incx, zy, incy);
 }
 
 void ZCOPY_(const f77_int *n,const dcomplex *zx,const f77_int *incx,dcomplex *zy,const f77_int *incy)
 {
-    zcopy_blis_impl( n, zx, incx, zy, incy);
+    zcopy_( n, zx, incx, zy, incy);
 }
 
 void ZDROT(const f77_int *n,dcomplex *cx,const f77_int *incx,dcomplex *cy,const f77_int *incy,const double *c,const double *s)
@@ -1899,17 +1899,17 @@ void ZDROT_(const f77_int *n,dcomplex *cx,const f77_int *incx,dcomplex *cy,const
 
 void ZDSCAL(const f77_int *n,const double *da,dcomplex *zx,const f77_int *incx)
 {
-    zdscal_blis_impl( n, da, zx, incx);
+    zdscal_( n, da, zx, incx);
 }
 
 void zdscal(const f77_int *n,const double *da,dcomplex *zx,const f77_int *incx)
 {
-    zdscal_blis_impl( n, da, zx, incx);
+    zdscal_( n, da, zx, incx);
 }
 
 void ZDSCAL_(const f77_int *n,const double *da,dcomplex *zx,const f77_int *incx)
 {
-    zdscal_blis_impl( n, da, zx, incx);
+    zdscal_( n, da, zx, incx);
 }
 
 void ZGBMV(const char   *trans,const f77_int *m,const f77_int *n,const f77_int *kl,const f77_int *ku,const dcomplex *alpha,const dcomplex *a,const f77_int *lda,const dcomplex *x,const f77_int *incx,const dcomplex *beta,dcomplex *y,const f77_int *incy)
@@ -2154,17 +2154,17 @@ void ZROTG_(dcomplex *ca,bla_dcomplex *cb,bla_double *c,dcomplex *s)
 
 void ZSCAL(const f77_int *n,const dcomplex *za,dcomplex *zx,const f77_int *incx)
 {
-    zscal_blis_impl( n, za, zx, incx);
+    zscal_( n, za, zx, incx);
 }
 
 void zscal(const f77_int *n,const dcomplex *za,dcomplex *zx,const f77_int *incx)
 {
-    zscal_blis_impl( n, za, zx, incx);
+    zscal_( n, za, zx, incx);
 }
 
 void ZSCAL_(const f77_int *n,const dcomplex *za,dcomplex *zx,const f77_int *incx)
 {
-    zscal_blis_impl( n, za, zx, incx);
+    zscal_( n, za, zx, incx);
 }
 
 void ZSWAP(const f77_int *n,dcomplex *zx,const f77_int *incx,dcomplex *zy,const f77_int *incy)
@@ -2350,32 +2350,32 @@ void ZTRSV_(const char   *uplo,const char   *trans,const char   *diag,const f77_
 
 void CDOTCSUB( const f77_int* n, const scomplex* x,const f77_int* incx, const scomplex* y, const f77_int* incy, scomplex* rval)
 {
-    cdotcsub_blis_impl( n, x, incx, y, incy, rval);
+    cdotcsub_( n, x, incx, y, incy, rval);
 }
 
 void cdotcsub( const f77_int* n, const scomplex* x,const f77_int* incx, const scomplex* y, const f77_int* incy, scomplex* rval)
 {
-    cdotcsub_blis_impl( n, x, incx, y, incy, rval);
+    cdotcsub_( n, x, incx, y, incy, rval);
 }
 
 void CDOTCSUB_( const f77_int* n, const scomplex* x,const f77_int* incx, const scomplex* y, const f77_int* incy, scomplex* rval)
 {
-    cdotcsub_blis_impl( n, x, incx, y, incy, rval);
+    cdotcsub_( n, x, incx, y, incy, rval);
 }
 
 void CDOTUSUB( const f77_int* n, const scomplex* x,const f77_int* incxy, const scomplex* y, const f77_int* incy, scomplex* rval)
 {
-    cdotusub_blis_impl( n, x, incxy, y, incy, rval);
+    cdotusub_( n, x, incxy, y, incy, rval);
 }
 
 void cdotusub( const f77_int* n, const scomplex* x,const f77_int* incxy, const scomplex* y, const f77_int* incy, scomplex* rval)
 {
-    cdotusub_blis_impl( n, x, incxy, y, incy, rval);
+    cdotusub_( n, x, incxy, y, incy, rval);
 }
 
 void CDOTUSUB_( const f77_int* n, const scomplex* x,const f77_int* incxy, const scomplex* y, const f77_int* incy, scomplex* rval)
 {
-    cdotusub_blis_impl( n, x, incxy, y, incy, rval);
+    cdotusub_( n, x, incxy, y, incy, rval);
 }
 
 void CGEMM3M( const f77_char* transa, const f77_char* transb, const f77_int* m, const f77_int* n, const f77_int* k, const scomplex* alpha, const scomplex* a, const f77_int* lda, const scomplex* b, const f77_int* ldb, const scomplex* beta, scomplex* c, const f77_int* ldc)
@@ -2485,47 +2485,47 @@ void COMATCOPY_(f77_char* trans, f77_int* rows, f77_int* cols, const scomplex* a
 
 void DASUMSUB(const f77_int* n, const double* x, const f77_int* incx, double* rval)
 {
-    dasumsub_blis_impl( n, x, incx, rval);
+    dasumsub_( n, x, incx, rval);
 }
 
 void dasumsub(const f77_int* n, const double* x, const f77_int* incx, double* rval)
 {
-    dasumsub_blis_impl( n, x, incx, rval);
+    dasumsub_( n, x, incx, rval);
 }
 
 void DASUMSUB_(const f77_int* n, const double* x, const f77_int* incx, double* rval)
 {
-    dasumsub_blis_impl( n, x, incx, rval);
+    dasumsub_( n, x, incx, rval);
 }
 
 void DAXPBY(const f77_int* n, const double* alpha, const double *x, const f77_int* incx, const double* beta, double *y, const f77_int* incy)
 {
-    daxpby_blis_impl( n, alpha, x, incx, beta, y, incy);
+    daxpby_( n, alpha, x, incx, beta, y, incy);
 }
 
 void daxpby(const f77_int* n, const double* alpha, const double *x, const f77_int* incx, const double* beta, double *y, const f77_int* incy)
 {
-    daxpby_blis_impl( n, alpha, x, incx, beta, y, incy);
+    daxpby_( n, alpha, x, incx, beta, y, incy);
 }
 
 void DAXPBY_(const f77_int* n, const double* alpha, const double *x, const f77_int* incx, const double* beta, double *y, const f77_int* incy)
 {
-    daxpby_blis_impl( n, alpha, x, incx, beta, y, incy);
+    daxpby_( n, alpha, x, incx, beta, y, incy);
 }
 
 void DDOTSUB(const f77_int* n, const double* x, const f77_int* incx, const double* y, const f77_int* incy, double* rval)
 {
-    ddotsub_blis_impl( n, x, incx, y, incy, rval);
+    ddotsub_( n, x, incx, y, incy, rval);
 }
 
 void ddotsub(const f77_int* n, const double* x, const f77_int* incx, const double* y, const f77_int* incy, double* rval)
 {
-    ddotsub_blis_impl( n, x, incx, y, incy, rval);
+    ddotsub_( n, x, incx, y, incy, rval);
 }
 
 void DDOTSUB_(const f77_int* n, const double* x, const f77_int* incx, const double* y, const f77_int* incy, double* rval)
 {
-    ddotsub_blis_impl( n, x, incx, y, incy, rval);
+    ddotsub_( n, x, incx, y, incy, rval);
 }
 
 void DGEMM_BATCH( const f77_char* transa_array, const f77_char* transb_array,const f77_int *m_array, const f77_int *n_array, const f77_int *k_array,const double* alpha_array, const double** a_array, const  f77_int *lda_array, const double** b_array, const f77_int *ldb_array, const double* beta_array, double** c_array, const f77_int *ldc_array, const f77_int* group_count, const f77_int *group_size)
@@ -2560,17 +2560,17 @@ void DGEMMT_( const f77_char* uploc, const f77_char* transa, const f77_char* tra
 
 void DNRM2SUB(const f77_int* n, const double* x, const f77_int* incx, double *rval)
 {
-    dnrm2sub_blis_impl( n, x, incx, rval);
+    dnrm2sub_( n, x, incx, rval);
 }
 
 void dnrm2sub(const f77_int* n, const double* x, const f77_int* incx, double *rval)
 {
-    dnrm2sub_blis_impl( n, x, incx, rval);
+    dnrm2sub_( n, x, incx, rval);
 }
 
 void DNRM2SUB_(const f77_int* n, const double* x, const f77_int* incx, double *rval)
 {
-    dnrm2sub_blis_impl( n, x, incx, rval);
+    dnrm2sub_( n, x, incx, rval);
 }
 
 void DOMATADD(f77_char* transa,f77_char* transb, f77_int* m, f77_int* n, const double* alpha, const double* A, f77_int* lda, const double* beta, const double* B, f77_int* ldb, double* C, f77_int* ldc)
@@ -2620,47 +2620,47 @@ void DOMATCOPY_(f77_char* trans, f77_int* rows, f77_int* cols, const double* alp
 
 void DZASUMSUB(const f77_int* n, const dcomplex* x, const f77_int* incx, double* rval)
 {
-    dzasumsub_blis_impl( n, x, incx, rval);
+    dzasumsub_( n, x, incx, rval);
 }
 
 void dzasumsub(const f77_int* n, const dcomplex* x, const f77_int* incx, double* rval)
 {
-    dzasumsub_blis_impl( n, x, incx, rval);
+    dzasumsub_( n, x, incx, rval);
 }
 
 void DZASUMSUB_(const f77_int* n, const dcomplex* x, const f77_int* incx, double* rval)
 {
-    dzasumsub_blis_impl( n, x, incx, rval);
+    dzasumsub_( n, x, incx, rval);
 }
 
 void DZNRM2SUB(const f77_int* n, const dcomplex* x, const f77_int* incx, double* rval)
 {
-    dznrm2sub_blis_impl( n, x, incx, rval);
+    dznrm2sub_( n, x, incx, rval);
 }
 
 void dznrm2sub(const f77_int* n, const dcomplex* x, const f77_int* incx, double* rval)
 {
-    dznrm2sub_blis_impl( n, x, incx, rval);
+    dznrm2sub_( n, x, incx, rval);
 }
 
 void DZNRM2SUB_(const f77_int* n, const dcomplex* x, const f77_int* incx, double* rval)
 {
-    dznrm2sub_blis_impl( n, x, incx, rval);
+    dznrm2sub_( n, x, incx, rval);
 }
 
 void ICAMAXSUB(const f77_int* n, const scomplex* x, const f77_int* incx, f77_int* rval)
 {
-    icamaxsub_blis_impl( n, x, incx, rval);
+    icamaxsub_( n, x, incx, rval);
 }
 
 void icamaxsub(const f77_int* n, const scomplex* x, const f77_int* incx, f77_int* rval)
 {
-    icamaxsub_blis_impl( n, x, incx, rval);
+    icamaxsub_( n, x, incx, rval);
 }
 
 void ICAMAXSUB_(const f77_int* n, const scomplex* x, const f77_int* incx, f77_int* rval)
 {
-    icamaxsub_blis_impl( n, x, incx, rval);
+    icamaxsub_( n, x, incx, rval);
 }
 
 f77_int ICAMIN( const f77_int* n, const scomplex* x, const f77_int* incx)
@@ -2680,32 +2680,32 @@ f77_int ICAMIN_( const f77_int* n, const scomplex* x, const f77_int* incx)
 
 void ICAMINSUB( const f77_int* n, const scomplex* x, const f77_int* incx, f77_int* rval)
 {
-    icaminsub_blis_impl( n, x, incx, rval);
+    icaminsub_( n, x, incx, rval);
 }
 
 void icaminsub( const f77_int* n, const scomplex* x, const f77_int* incx, f77_int* rval)
 {
-    icaminsub_blis_impl( n, x, incx, rval);
+    icaminsub_( n, x, incx, rval);
 }
 
 void ICAMINSUB_( const f77_int* n, const scomplex* x, const f77_int* incx, f77_int* rval)
 {
-    icaminsub_blis_impl( n, x, incx, rval);
+    icaminsub_( n, x, incx, rval);
 }
 
 void IDAMAXSUB( const f77_int* n, const double* x, const f77_int* incx, f77_int* rval)
 {
-    idamaxsub_blis_impl( n, x, incx, rval);
+    idamaxsub_( n, x, incx, rval);
 }
 
 void idamaxsub( const f77_int* n, const double* x, const f77_int* incx, f77_int* rval)
 {
-    idamaxsub_blis_impl( n, x, incx, rval);
+    idamaxsub_( n, x, incx, rval);
 }
 
 void IDAMAXSUB_( const f77_int* n, const double* x, const f77_int* incx, f77_int* rval)
 {
-    idamaxsub_blis_impl( n, x, incx, rval);
+    idamaxsub_( n, x, incx, rval);
 }
 
 f77_int IDAMIN( const f77_int* n, const double* x, const f77_int* incx)
@@ -2725,32 +2725,32 @@ f77_int IDAMIN_( const f77_int* n, const double* x, const f77_int* incx)
 
 void IDAMINSUB(const f77_int* n, const double* x, const f77_int* incx, f77_int* rval)
 {
-    idaminsub_blis_impl( n, x, incx, rval);
+    idaminsub_( n, x, incx, rval);
 }
 
 void idaminsub(const f77_int* n, const double* x, const f77_int* incx, f77_int* rval)
 {
-    idaminsub_blis_impl( n, x, incx, rval);
+    idaminsub_( n, x, incx, rval);
 }
 
 void IDAMINSUB_(const f77_int* n, const double* x, const f77_int* incx, f77_int* rval)
 {
-    idaminsub_blis_impl( n, x, incx, rval);
+    idaminsub_( n, x, incx, rval);
 }
 
 void ISAMAXSUB( const f77_int* n, const float* x, const f77_int* incx, f77_int* rval)
 {
-    isamaxsub_blis_impl( n, x, incx, rval);
+    isamaxsub_( n, x, incx, rval);
 }
 
 void isamaxsub( const f77_int* n, const float* x, const f77_int* incx, f77_int* rval)
 {
-    isamaxsub_blis_impl( n, x, incx, rval);
+    isamaxsub_( n, x, incx, rval);
 }
 
 void ISAMAXSUB_( const f77_int* n, const float* x, const f77_int* incx, f77_int* rval)
 {
-    isamaxsub_blis_impl( n, x, incx, rval);
+    isamaxsub_( n, x, incx, rval);
 }
 
 f77_int ISAMIN( const f77_int* n, const float* x, const f77_int* incx)
@@ -2770,32 +2770,32 @@ f77_int ISAMIN_( const f77_int* n, const float* x, const f77_int* incx)
 
 void ISAMINSUB( const f77_int* n, const float* x, const f77_int* incx, f77_int* rval)
 {
-    isaminsub_blis_impl( n, x, incx, rval);
+    isaminsub_( n, x, incx, rval);
 }
 
 void isaminsub( const f77_int* n, const float* x, const f77_int* incx, f77_int* rval)
 {
-    isaminsub_blis_impl( n, x, incx, rval);
+    isaminsub_( n, x, incx, rval);
 }
 
 void ISAMINSUB_( const f77_int* n, const float* x, const f77_int* incx, f77_int* rval)
 {
-    isaminsub_blis_impl( n, x, incx, rval);
+    isaminsub_( n, x, incx, rval);
 }
 
 void IZAMAXSUB( const f77_int* n, const dcomplex* x, const f77_int* incx, f77_int* rval)
 {
-    izamaxsub_blis_impl( n, x, incx, rval);
+    izamaxsub_( n, x, incx, rval);
 }
 
 void izamaxsub( const f77_int* n, const dcomplex* x, const f77_int* incx, f77_int* rval)
 {
-    izamaxsub_blis_impl( n, x, incx, rval);
+    izamaxsub_( n, x, incx, rval);
 }
 
 void IZAMAXSUB_( const f77_int* n, const dcomplex* x, const f77_int* incx, f77_int* rval)
 {
-    izamaxsub_blis_impl( n, x, incx, rval);
+    izamaxsub_( n, x, incx, rval);
 }
 
 f77_int IZAMIN( const f77_int* n, const dcomplex* x, const f77_int* incx)
@@ -2815,92 +2815,92 @@ f77_int IZAMIN_( const f77_int* n, const dcomplex* x, const f77_int* incx)
 
 void IZAMINSUB( const f77_int* n, const dcomplex* x, const f77_int* incx, f77_int* rval)
 {
-    izaminsub_blis_impl( n, x, incx, rval);
+    izaminsub_( n, x, incx, rval);
 }
 
 void izaminsub( const f77_int* n, const dcomplex* x, const f77_int* incx, f77_int* rval)
 {
-    izaminsub_blis_impl( n, x, incx, rval);
+    izaminsub_( n, x, incx, rval);
 }
 
 void IZAMINSUB_( const f77_int* n, const dcomplex* x, const f77_int* incx, f77_int* rval)
 {
-    izaminsub_blis_impl( n, x, incx, rval);
+    izaminsub_( n, x, incx, rval);
 }
 
 void SASUMSUB( const f77_int* n, const float* x, const f77_int* incx, float* rval)
 {
-    sasumsub_blis_impl( n, x, incx, rval);
+    sasumsub_( n, x, incx, rval);
 }
 
 void sasumsub( const f77_int* n, const float* x, const f77_int* incx, float* rval)
 {
-    sasumsub_blis_impl( n, x, incx, rval);
+    sasumsub_( n, x, incx, rval);
 }
 
 void SASUMSUB_( const f77_int* n, const float* x, const f77_int* incx, float* rval)
 {
-    sasumsub_blis_impl( n, x, incx, rval);
+    sasumsub_( n, x, incx, rval);
 }
 
 void SAXPBY( const f77_int* n, const float* alpha, const float *x, const f77_int* incx, const float* beta, float *y, const f77_int* incy)
 {
-    saxpby_blis_impl( n, alpha, x, incx, beta, y, incy);
+    saxpby_( n, alpha, x, incx, beta, y, incy);
 }
 
 void saxpby( const f77_int* n, const float* alpha, const float *x, const f77_int* incx, const float* beta, float *y, const f77_int* incy)
 {
-    saxpby_blis_impl( n, alpha, x, incx, beta, y, incy);
+    saxpby_( n, alpha, x, incx, beta, y, incy);
 }
 
 void SAXPBY_( const f77_int* n, const float* alpha, const float *x, const f77_int* incx, const float* beta, float *y, const f77_int* incy)
 {
-    saxpby_blis_impl( n, alpha, x, incx, beta, y, incy);
+    saxpby_( n, alpha, x, incx, beta, y, incy);
 }
 
 void SCASUMSUB( const f77_int* n, const scomplex* x, const f77_int* incx, float* rval)
 {
-    scasumsub_blis_impl( n, x, incx, rval);
+    scasumsub_( n, x, incx, rval);
 }
 
 void scasumsub( const f77_int* n, const scomplex* x, const f77_int* incx, float* rval)
 {
-    scasumsub_blis_impl( n, x, incx, rval);
+    scasumsub_( n, x, incx, rval);
 }
 
 void SCASUMSUB_( const f77_int* n, const scomplex* x, const f77_int* incx, float* rval)
 {
-    scasumsub_blis_impl( n, x, incx, rval);
+    scasumsub_( n, x, incx, rval);
 }
 
 void SCNRM2SUB( const f77_int* n, const scomplex* x, const f77_int* incx, float* rval)
 {
-    scnrm2sub_blis_impl( n, x, incx, rval);
+    scnrm2sub_( n, x, incx, rval);
 }
 
 void scnrm2sub( const f77_int* n, const scomplex* x, const f77_int* incx, float* rval)
 {
-    scnrm2sub_blis_impl( n, x, incx, rval);
+    scnrm2sub_( n, x, incx, rval);
 }
 
 void SCNRM2SUB_( const f77_int* n, const scomplex* x, const f77_int* incx, float* rval)
 {
-    scnrm2sub_blis_impl( n, x, incx, rval);
+    scnrm2sub_( n, x, incx, rval);
 }
 
 void SDOTSUB( const f77_int* n, const float* x, const f77_int* incx, const float* y, const f77_int* incy, float* rval)
 {
-    sdotsub_blis_impl( n, x, incx, y, incy, rval);
+    sdotsub_( n, x, incx, y, incy, rval);
 }
 
 void sdotsub( const f77_int* n, const float* x, const f77_int* incx, const float* y, const f77_int* incy, float* rval)
 {
-    sdotsub_blis_impl( n, x, incx, y, incy, rval);
+    sdotsub_( n, x, incx, y, incy, rval);
 }
 
 void SDOTSUB_( const f77_int* n, const float* x, const f77_int* incx, const float* y, const f77_int* incy, float* rval)
 {
-    sdotsub_blis_impl( n, x, incx, y, incy, rval);
+    sdotsub_( n, x, incx, y, incy, rval);
 }
 
 void SGEMM_BATCH(const f77_char* transa_array, const f77_char* transb_array,const f77_int *m_array, const f77_int *n_array, const f77_int *k_array,const float* alpha_array, const float** a_array, const  f77_int *lda_array, const float** b_array, const f77_int *ldb_array, const float* beta_array, float** c_array, const f77_int *ldc_array, const f77_int* group_count, const f77_int *group_size)
@@ -2950,17 +2950,17 @@ void SIMATCOPY_( f77_char* trans, f77_int* rows, f77_int* cols, const float* alp
 
 void SNRM2SUB( const f77_int* n, const float* x, const f77_int* incx, float *rval)
 {
-    snrm2sub_blis_impl( n, x, incx, rval);
+    snrm2sub_( n, x, incx, rval);
 }
 
 void snrm2sub( const f77_int* n, const float* x, const f77_int* incx, float *rval)
 {
-    snrm2sub_blis_impl( n, x, incx, rval);
+    snrm2sub_( n, x, incx, rval);
 }
 
 void SNRM2SUB_( const f77_int* n, const float* x, const f77_int* incx, float *rval)
 {
-    snrm2sub_blis_impl( n, x, incx, rval);
+    snrm2sub_( n, x, incx, rval);
 }
 
 void SOMATADD( f77_char* transa,f77_char* transb, f77_int* m, f77_int* n, const float* alpha, const float* A, f77_int* lda, const float* beta, const float* B, f77_int* ldb, float* C, f77_int* ldc)
@@ -3010,47 +3010,47 @@ void SOMATCOPY_( f77_char* trans, f77_int* rows, f77_int* cols, const float* alp
 
 void ZAXPBY( const f77_int* n, const dcomplex* alpha, const dcomplex *x, const f77_int* incx, const dcomplex* beta, dcomplex *y, const f77_int* incy)
 {
-    zaxpby_blis_impl( n, alpha, x, incx, beta, y, incy);
+    zaxpby_( n, alpha, x, incx, beta, y, incy);
 }
 
 void zaxpby( const f77_int* n, const dcomplex* alpha, const dcomplex *x, const f77_int* incx, const dcomplex* beta, dcomplex *y, const f77_int* incy)
 {
-    zaxpby_blis_impl( n, alpha, x, incx, beta, y, incy);
+    zaxpby_( n, alpha, x, incx, beta, y, incy);
 }
 
 void ZAXPBY_( const f77_int* n, const dcomplex* alpha, const dcomplex *x, const f77_int* incx, const dcomplex* beta, dcomplex *y, const f77_int* incy)
 {
-    zaxpby_blis_impl( n, alpha, x, incx, beta, y, incy);
+    zaxpby_( n, alpha, x, incx, beta, y, incy);
 }
 
 void ZDOTCSUB( const f77_int* n, const dcomplex* x, const f77_int* incx, const dcomplex* y, const f77_int* incy, dcomplex* rval)
 {
-    zdotcsub_blis_impl( n, x, incx, y, incy, rval);
+    zdotcsub_( n, x, incx, y, incy, rval);
 }
 
 void zdotcsub( const f77_int* n, const dcomplex* x, const f77_int* incx, const dcomplex* y, const f77_int* incy, dcomplex* rval)
 {
-    zdotcsub_blis_impl( n, x, incx, y, incy, rval);
+    zdotcsub_( n, x, incx, y, incy, rval);
 }
 
 void ZDOTCSUB_( const f77_int* n, const dcomplex* x, const f77_int* incx, const dcomplex* y, const f77_int* incy, dcomplex* rval)
 {
-    zdotcsub_blis_impl( n, x, incx, y, incy, rval);
+    zdotcsub_( n, x, incx, y, incy, rval);
 }
 
 void ZDOTUSUB( const f77_int* n, const dcomplex* x, const f77_int* incx,const dcomplex* y, const f77_int* incy, dcomplex* rval)
 {
-    zdotusub_blis_impl( n, x, incx, y, incy, rval);
+    zdotusub_( n, x, incx, y, incy, rval);
 }
 
 void zdotusub( const f77_int* n, const dcomplex* x, const f77_int* incx,const dcomplex* y, const f77_int* incy, dcomplex* rval)
 {
-    zdotusub_blis_impl( n, x, incx, y, incy, rval);
+    zdotusub_( n, x, incx, y, incy, rval);
 }
 
 void ZDOTUSUB_( const f77_int* n, const dcomplex* x, const f77_int* incx,const dcomplex* y, const f77_int* incy, dcomplex* rval)
 {
-    zdotusub_blis_impl( n, x, incx, y, incy, rval);
+    zdotusub_( n, x, incx, y, incy, rval);
 }
 
 void ZGEMM3M( const f77_char* transa, const f77_char* transb, const f77_int* m, const f77_int* n, const f77_int* k, const dcomplex* alpha, const dcomplex* a, const f77_int* lda, const dcomplex* b, const f77_int* ldb, const dcomplex* beta, dcomplex* c, const f77_int* ldc)
@@ -3178,47 +3178,47 @@ float SCABS1_(bla_scomplex* z)
 
 void SDSDOTSUB( const f77_int* n, float* sb, const float* x, const f77_int* incx, const float* y, const f77_int* incy, float* dot)
 {
-    sdsdotsub_blis_impl( n, sb, x, incx, y, incy, dot);
+    sdsdotsub_( n, sb, x, incx, y, incy, dot);
 }
 
 void sdsdotsub( const f77_int* n, float* sb, const float* x, const f77_int* incx, const float* y, const f77_int* incy, float* dot)
 {
-    sdsdotsub_blis_impl( n, sb, x, incx, y, incy, dot);
+    sdsdotsub_( n, sb, x, incx, y, incy, dot);
 }
 
 void SDSDOTSUB_( const f77_int* n, float* sb, const float* x, const f77_int* incx, const float* y, const f77_int* incy, float* dot)
 {
-    sdsdotsub_blis_impl( n, sb, x, incx, y, incy, dot);
+    sdsdotsub_( n, sb, x, incx, y, incy, dot);
 }
 
 void DSDOTSUB( const f77_int* n, const float* x, const f77_int* incx, const float* y, const f77_int* incy, double* dot)
 {
-    dsdotsub_blis_impl( n, x, incx, y, incy, dot);
+    dsdotsub_( n, x, incx, y, incy, dot);
 }
 
 void dsdotsub( const f77_int* n, const float* x, const f77_int* incx, const float* y, const f77_int* incy, double* dot)
 {
-    dsdotsub_blis_impl( n, x, incx, y, incy, dot);
+    dsdotsub_( n, x, incx, y, incy, dot);
 }
 
 void DSDOTSUB_( const f77_int* n, const float* x, const f77_int* incx, const float* y, const f77_int* incy, double* dot)
 {
-    dsdotsub_blis_impl( n, x, incx, y, incy, dot);
+    dsdotsub_( n, x, incx, y, incy, dot);
 }
 
 void CAXPBY( const f77_int* n,  const scomplex* alpha,  const scomplex *x,  const f77_int* incx,  const scomplex* beta,  scomplex *y,  const f77_int* incy)
 {
-    caxpby_blis_impl(n, alpha, x, incx, beta, y, incy);
+    caxpby_(n, alpha, x, incx, beta, y, incy);
 }
 
 void caxpby( const f77_int* n,  const scomplex* alpha,  const scomplex *x,  const f77_int* incx,  const scomplex* beta,  scomplex *y,  const f77_int* incy)
 {
-    caxpby_blis_impl(n, alpha, x, incx, beta, y, incy);
+    caxpby_(n, alpha, x, incx, beta, y, incy);
 }
 
 void CAXPBY_( const f77_int* n,  const scomplex* alpha,  const scomplex *x,  const f77_int* incx,  const scomplex* beta,  scomplex *y,  const f77_int* incy)
 {
-    caxpby_blis_impl(n, alpha, x, incx, beta, y, incy);
+    caxpby_(n, alpha, x, incx, beta, y, incy);
 }
 
 #endif

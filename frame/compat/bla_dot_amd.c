@@ -42,7 +42,7 @@
 #undef  GENTFUNCDOT
 #define GENTFUNCDOT( ftype, ch, chc, blis_conjx, blasname, blisname ) \
 \
-ftype PASTEF772S(ch,blasname,chc) \
+ftype PASTEF772(ch,blasname,chc) \
      ( \
        const f77_int* n, \
        const ftype*   x, const f77_int* incx, \
@@ -87,20 +87,10 @@ ftype PASTEF772S(ch,blasname,chc) \
     bli_finalize_auto(); \
 \
     return rho; \
-}\
-\
-ftype PASTEF772(ch,blasname,chc) \
-     ( \
-       const f77_int* n, \
-       const ftype*   x, const f77_int* incx, \
-       const ftype*   y, const f77_int* incy  \
-     ) \
-{ \
-  return PASTEF772S(ch,blasname,chc)( n, x, incx, y, incy );\
 }
 
 #ifdef BLIS_ENABLE_BLAS
-float sdot_blis_impl
+float sdot_
      (
        const f77_int* n,
        const float*   x, const f77_int* incx,
@@ -201,17 +191,7 @@ float sdot_blis_impl
     return rho;
 }
 
-float sdot_
-     (
-       const f77_int* n,
-       const float*   x, const f77_int* incx,
-       const float*   y, const f77_int* incy
-     )
-{
-  return sdot_blis_impl( n, x, incx, y, incy );
-}
-
-double ddot_blis_impl
+double ddot_
      (
        const f77_int* n,
        const double*   x, const f77_int* incx,
@@ -311,117 +291,8 @@ double ddot_blis_impl
     AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
     return rho;
 }
-double ddot_
-     (
-       const f77_int* n,
-       const double*   x, const f77_int* incx,
-       const double*   y, const f77_int* incy
-     )
-{
-  return ddot_blis_impl( n, x, incx, y, incy );
-}
 
 #ifdef BLIS_DISABLE_COMPLEX_RETURN_INTEL
-scomplex cdotu_blis_impl
-     (
-       const f77_int* n,
-       const scomplex*   x, const f77_int* incx,
-       const scomplex*   y, const f77_int* incy
-     )
-{
-    AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1);
-    AOCL_DTL_LOG_DOTV_INPUTS(AOCL_DTL_LEVEL_TRACE_1, 'C', *n, *incx, *incy);
-    dim_t  n0;
-    scomplex* x0;
-    scomplex* y0;
-    inc_t  incx0;
-    inc_t  incy0;
-    scomplex  rho;
-
-    /* Initialize BLIS. */
-//  bli_init_auto();
-
-    /* Convert/typecast negative values of n to zero. */
-    if ( *n < 0 ) n0 = ( dim_t )0;
-    else              n0 = ( dim_t )(*n);
-
-    /* If the input increments are negative, adjust the pointers so we can
-       use positive increments instead. */
-
-    if ( *incx < 0 )
-    {
-        /* The semantics of negative stride in BLAS are that the vector
-        operand be traversed in reverse order. (Another way to think
-        of this is that negative strides effectively reverse the order
-        of the vector, but without any explicit data movements.) This
-        is also how BLIS interprets negative strides. The differences
-        is that with BLAS, the caller *always* passes in the 0th (i.e.,
-        top-most or left-most) element of the vector, even when the
-        stride is negative. By contrast, in BLIS, negative strides are
-        used *relative* to the vector address as it is given. Thus, in
-        BLIS, if this backwards traversal is desired, the caller *must*
-        pass in the address to the (n-1)th (i.e., the bottom-most or
-        right-most) element along with a negative stride. */
-
-        x0    = ((scomplex*)x) + (n0-1)*(-*incx);
-        incx0 = ( inc_t )(*incx);
-
-    }
-    else
-    {
-        x0    = ((scomplex*)x);
-        incx0 = ( inc_t )(*incx);
-    }
-
-    if ( *incy < 0 )
-    {
-        y0    = ((scomplex*)y) + (n0-1)*(-*incy);
-        incy0 = ( inc_t )(*incy);
-
-    }
-    else
-    {
-        y0    = ((scomplex*)y);
-        incy0 = ( inc_t )(*incy);
-    }
-
-    // This function is invoked on all architectures including ‘generic’.
-    // Non-AVX platforms will use the kernels derived from the context.
-    if (bli_cpuid_is_avx_supported() == TRUE)
-    {
-        /* Call BLIS kernel. */
-        bli_cdotv_zen_int5
-        (
-        BLIS_NO_CONJUGATE,
-        BLIS_NO_CONJUGATE,
-        n0,
-        x0, incx0,
-        y0, incy0,
-        &rho,
-        NULL
-        );
-    }
-    else
-    {
-        /* Call BLIS interface. */
-        PASTEMAC2(c,dotv,BLIS_TAPI_EX_SUF)
-        (
-        BLIS_NO_CONJUGATE,
-        BLIS_NO_CONJUGATE,
-        n0,
-        x0, incx0,
-        y0, incy0,
-        &rho,
-        NULL,
-        NULL
-        );
-    }
-
-    /* Finalize BLIS. */
-//  bli_finalize_auto();
-    AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
-    return rho;
-}
 scomplex cdotu_
      (
        const f77_int* n,
@@ -429,10 +300,101 @@ scomplex cdotu_
        const scomplex*   y, const f77_int* incy
      )
 {
-  return cdotu_blis_impl( n, x, incx, y, incy );
+    AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1);
+    AOCL_DTL_LOG_DOTV_INPUTS(AOCL_DTL_LEVEL_TRACE_1, 'C', *n, *incx, *incy);
+    dim_t  n0;
+    scomplex* x0;
+    scomplex* y0;
+    inc_t  incx0;
+    inc_t  incy0;
+    scomplex  rho;
+
+    /* Initialize BLIS. */
+//  bli_init_auto();
+
+    /* Convert/typecast negative values of n to zero. */
+    if ( *n < 0 ) n0 = ( dim_t )0;
+    else              n0 = ( dim_t )(*n);
+
+    /* If the input increments are negative, adjust the pointers so we can
+       use positive increments instead. */
+
+    if ( *incx < 0 )
+    {
+        /* The semantics of negative stride in BLAS are that the vector
+        operand be traversed in reverse order. (Another way to think
+        of this is that negative strides effectively reverse the order
+        of the vector, but without any explicit data movements.) This
+        is also how BLIS interprets negative strides. The differences
+        is that with BLAS, the caller *always* passes in the 0th (i.e.,
+        top-most or left-most) element of the vector, even when the
+        stride is negative. By contrast, in BLIS, negative strides are
+        used *relative* to the vector address as it is given. Thus, in
+        BLIS, if this backwards traversal is desired, the caller *must*
+        pass in the address to the (n-1)th (i.e., the bottom-most or
+        right-most) element along with a negative stride. */
+
+        x0    = ((scomplex*)x) + (n0-1)*(-*incx);
+        incx0 = ( inc_t )(*incx);
+
+    }
+    else
+    {
+        x0    = ((scomplex*)x);
+        incx0 = ( inc_t )(*incx);
+    }
+
+    if ( *incy < 0 )
+    {
+        y0    = ((scomplex*)y) + (n0-1)*(-*incy);
+        incy0 = ( inc_t )(*incy);
+
+    }
+    else
+    {
+        y0    = ((scomplex*)y);
+        incy0 = ( inc_t )(*incy);
+    }
+
+    // This function is invoked on all architectures including ‘generic’.
+    // Non-AVX platforms will use the kernels derived from the context.
+    if (bli_cpuid_is_avx_supported() == TRUE)
+    {
+        /* Call BLIS kernel. */
+        bli_cdotv_zen_int5
+        (
+        BLIS_NO_CONJUGATE,
+        BLIS_NO_CONJUGATE,
+        n0,
+        x0, incx0,
+        y0, incy0,
+        &rho,
+        NULL
+        );
+    }
+    else
+    {
+        /* Call BLIS interface. */
+        PASTEMAC2(c,dotv,BLIS_TAPI_EX_SUF)
+        (
+        BLIS_NO_CONJUGATE,
+        BLIS_NO_CONJUGATE,
+        n0,
+        x0, incx0,
+        y0, incy0,
+        &rho,
+        NULL,
+        NULL
+        );
+    }
+
+    /* Finalize BLIS. */
+//  bli_finalize_auto();
+    AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
+    return rho;
 }
 
-dcomplex zdotu_blis_impl
+dcomplex zdotu_
      (
        const f77_int* n,
        const dcomplex*   x, const f77_int* incx,
@@ -535,17 +497,9 @@ dcomplex zdotu_blis_impl
 
     return rho;
 }
-dcomplex zdotu_
-     (
-       const f77_int* n,
-       const dcomplex*   x, const f77_int* incx,
-       const dcomplex*   y, const f77_int* incy
-     )
-{
-  return zdotu_blis_impl( n, x, incx, y, incy );
-}
 
-scomplex cdotc_blis_impl
+
+scomplex cdotc_
      (
        const f77_int* n,
        const scomplex*   x, const f77_int* incx,
@@ -647,17 +601,8 @@ scomplex cdotc_blis_impl
 
     return rho;
 }
-scomplex cdotc_
-     (
-       const f77_int* n,
-       const scomplex*   x, const f77_int* incx,
-       const scomplex*   y, const f77_int* incy
-     )
-{
-  return cdotc_blis_impl( n, x, incx, y, incy );
-}
 
-dcomplex zdotc_blis_impl
+dcomplex zdotc_
      (
        const f77_int* n,
        const dcomplex*   x, const f77_int* incx,
@@ -763,21 +708,13 @@ dcomplex zdotc_blis_impl
 
     return rho;
 }
-dcomplex zdotc_
-     (
-       const f77_int* n,
-       const dcomplex*   x, const f77_int* incx,
-       const dcomplex*   y, const f77_int* incy
-     )
-{
-  return zdotc_blis_impl( n, x, incx, y, incy );
-}
+
 #else // BLIS_DISABLE_COMPLEX_RETURN_INTEL
 // For the "intel" complex return type, use a hidden parameter to return the result
 #undef  GENTFUNCDOT
 #define GENTFUNCDOT( ftype, ch, chc, blis_conjx, blasname, blisname ) \
 \
-void PASTEF772S(ch,blasname,chc) \
+void PASTEF772(ch,blasname,chc) \
      ( \
        ftype*         rhop, \
        const f77_int* n, \
@@ -823,17 +760,6 @@ void PASTEF772S(ch,blasname,chc) \
         bli_finalize_auto(); \
 \
         *rhop = rho; \
-}\
-\
-void PASTEF772(ch,blasname,chc) \
-     ( \
-       ftype*         rhop, \
-       const f77_int* n, \
-       const ftype*   x, const f77_int* incx, \
-       const ftype*   y, const f77_int* incy  \
-     ) \
-{ \
-  PASTEF772S(ch,blasname,chc)( rhop, n, x, incx, y, incy );\
 }
 
 INSERT_GENTFUNCDOTC_BLAS( dot, dotv )
@@ -845,7 +771,7 @@ INSERT_GENTFUNCDOTC_BLAS( dot, dotv )
 
 // Input vectors stored in single precision, computed in double precision,
 // with result returned in single precision.
-float PASTEF77S(sd,sdot)
+float PASTEF77(sd,sdot)
      (
        const f77_int* n,
        const float*   sb,
@@ -856,7 +782,7 @@ float PASTEF77S(sd,sdot)
     return ( float )
            (
              ( double )(*sb) +
-             PASTEF77S(d,sdot)
+             PASTEF77(d,sdot)
              (
                n,
                x, incx,
@@ -864,20 +790,10 @@ float PASTEF77S(sd,sdot)
              )
            );
 }
-float PASTEF77(sd,sdot)
-     (
-       const f77_int* n,
-       const float*   sb,
-       const float*   x, const f77_int* incx,
-       const float*   y, const f77_int* incy
-     )
-{
-  return PASTEF77S(sd,sdot)( n,sb, x, incx, y, incy );
-}
 
 // Input vectors stored in single precision, computed in double precision,
 // with result returned in double precision.
-double PASTEF77S(d,sdot)
+double PASTEF77(d,sdot)
      (
        const f77_int* n,
        const float*   x, const f77_int* incx,
@@ -920,15 +836,6 @@ double PASTEF77S(d,sdot)
     AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
 
     return rho;
-}
-double PASTEF77(d,sdot)
-     (
-       const f77_int* n,
-       const float*   x, const f77_int* incx,
-       const float*   y, const f77_int* incy
-     )
-{
-  return PASTEF77S(d,sdot)( n, x, incx, y, incy );
 }
 
 #endif

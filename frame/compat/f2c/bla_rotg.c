@@ -5,8 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2022, Advanced Micro Devices, Inc. All rights reserved.
-   
+
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
    met:
@@ -46,8 +45,7 @@
 
 static bla_real sc_b4 = 1.f;
 
-/* Subroutine */ 
-int PASTEF77S(s,rotg)(bla_real *sa, bla_real *sb, bla_real *c__, bla_real *s)
+/* Subroutine */ int PASTEF77(s,rotg)(bla_real *sa, bla_real *sb, bla_real *c__, bla_real *s)
 {
     /* System generated locals */
     bla_real r__1, r__2;
@@ -107,8 +105,7 @@ L20:
 
 static bla_double dc_b4 = 1.;
 
-/* Subroutine */ 
-int PASTEF77S(d,rotg)(bla_double *da, bla_double *db, bla_double *c__, bla_double *s)
+/* Subroutine */ int PASTEF77(d,rotg)(bla_double *da, bla_double *db, bla_double *c__, bla_double *s)
 {
     /* System generated locals */
     bla_double d__1, d__2;
@@ -158,16 +155,6 @@ L20:
     *db = z__;
     return 0;
 } /* drotg_ */
-
-int PASTEF77(s,rotg)(bla_real *sa, bla_real *sb, bla_real *c__, bla_real *s)
-{
-  return PASTEF77S(s,rotg)( sa, sb, c__, s );
-}
-
-int PASTEF77(d,rotg)(bla_double *da, bla_double *db, bla_double *c__, bla_double *s)
-{
-  return PASTEF77S(d,rotg)( da, db, c__, s );
-}
 
 /* crotg.f -- translated by f2c (version 19991025).
    You must link the resulting object file with the libraries:

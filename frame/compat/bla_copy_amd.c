@@ -42,7 +42,7 @@
 #undef  GENTFUNC
 #define GENTFUNC( ftype, ch, blasname, blisname ) \
 \
-void PASTEF77S(ch,blasname) \
+void PASTEF77(ch,blasname) \
      ( \
        const f77_int* n, \
        const ftype*   x, const f77_int* incx, \
@@ -85,21 +85,11 @@ void PASTEF77S(ch,blasname) \
 \
 	   /* Finalize BLIS. */ \
 	   bli_finalize_auto(); \
-}\
-\
-void PASTEF77(ch,blasname) \
-     ( \
-       const f77_int* n, \
-       const ftype*   x, const f77_int* incx, \
-             ftype*   y, const f77_int* incy  \
-     ) \
-{ \
-  PASTEF77S(ch,blasname)( n, x, incx, y, incy ); \
 }
 
 #ifdef BLIS_ENABLE_BLAS
 
-void scopy_blis_impl
+void scopy_
 (
 	const f77_int* n,
 	const float*   x, const f77_int* incx,
@@ -193,17 +183,8 @@ void scopy_blis_impl
 	/* Finalize BLIS. */
 //    bli_finalize_auto();
 }
-void scopy_
-(
-	const f77_int* n,
-	const float*   x, const f77_int* incx,
-	float*   y, const f77_int* incy
-)
-{
-  scopy_blis_impl( n, x, incx, y, incy );
-}
 
-void dcopy_blis_impl
+void dcopy_
 (
 	const f77_int* n,
 	const double*   x, const f77_int* incx,
@@ -298,15 +279,7 @@ void dcopy_blis_impl
 	/* Finalize BLIS. */
 //    bli_finalize_auto();
 }
-void dcopy_
-(
-	const f77_int* n,
-	const double*   x, const f77_int* incx,
-	double*   y, const f77_int* incy
-)
-{
-  dcopy_blis_impl( n, x, incx, y, incy );
-}
+
 INSERT_GENTFUNC_BLAS_CZ(copy, copyv)
 
 #endif

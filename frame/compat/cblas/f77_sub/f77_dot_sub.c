@@ -5,8 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2022, Advanced Micro Devices, Inc. All rights reserved.
-   
+
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
    met:
@@ -44,22 +43,6 @@
 #undef  GENTFUNCDOT
 #define GENTFUNCDOT( ftype, ch, chc, blis_conjx, blasname, blisname ) \
 \
-void PASTEF773S(ch,blasname,chc,sub) \
-     ( \
-       const f77_int* n, \
-       const ftype*   x, const f77_int* incx, \
-       const ftype*   y, const f77_int* incy, \
-             ftype*   rval  \
-     ) \
-{ \
-	*rval = PASTEF772S(ch,blasname,chc) \
-	( \
-	  n, \
-	  x, incx, \
-	  y, incy \
-	); \
-}\
-\
 void PASTEF773(ch,blasname,chc,sub) \
      ( \
        const f77_int* n, \
@@ -68,7 +51,12 @@ void PASTEF773(ch,blasname,chc,sub) \
              ftype*   rval  \
      ) \
 { \
-  PASTEF773S(ch,blasname,chc,sub)( n, x, incx, y, incy, rval); \
+	*rval = PASTEF772(ch,blasname,chc) \
+	( \
+	  n, \
+	  x, incx, \
+	  y, incy \
+	); \
 }
 
 INSERT_GENTFUNCDOTR_BLAS( dot, NULL )
@@ -87,7 +75,7 @@ INSERT_GENTFUNCDOTC_BLAS( dot, NULL )
 #undef  GENTFUNCDOT
 #define GENTFUNCDOT( ftype, ch, chc, blis_conjx, blasname, blisname ) \
 \
-void PASTEF773S(ch,blasname,chc,sub) \
+void PASTEF773(ch,blasname,chc,sub) \
      ( \
        const f77_int* n, \
        const ftype*   x, const f77_int* incx, \
@@ -102,17 +90,6 @@ void PASTEF773S(ch,blasname,chc,sub) \
 	  x, incx, \
 	  y, incy \
 	); \
-}\
-\
-void PASTEF773(ch,blasname,chc,sub) \
-     ( \
-       const f77_int* n, \
-       const ftype*   x, const f77_int* incx, \
-       const ftype*   y, const f77_int* incy, \
-             ftype*   rval  \
-     ) \
-{ \
-  PASTEF773S(ch,blasname,chc,sub)( n, x, incx, y, incy, rval); \
 }
 
 INSERT_GENTFUNCDOTC_BLAS( dot, NULL )
@@ -123,23 +100,6 @@ INSERT_GENTFUNCDOTC_BLAS( dot, NULL )
 
 // Input vectors stored in single precision, computed in double precision,
 // with result returned in single precision.
-void PASTEF772S(sds,dot,sub)
-     (
-       const f77_int* n,
-       const float*  sb,
-       const float*   x, const f77_int* incx,
-       const float*   y, const f77_int* incy,
-             float*   rval
-     )
-{
-	*rval = PASTEF77S(sds,dot)
-	(
-	  n,
-	  sb,
-	  x, incx,
-	  y, incy
-	);
-}
 void PASTEF772(sds,dot,sub)
      (
        const f77_int* n,
@@ -149,26 +109,17 @@ void PASTEF772(sds,dot,sub)
              float*   rval
      )
 {
-  PASTEF772S(sds,dot,sub)( n, sb, x, incx, y, incy, rval);
-}
-
-// Input vectors stored in single precision, computed in double precision,
-// with result returned in double precision.
-void PASTEF772S(ds,dot,sub)
-     (
-       const f77_int* n,
-       const float*   x, const f77_int* incx,
-       const float*   y, const f77_int* incy,
-             double*  rval
-     )
-{
-	*rval = PASTEF77S(ds,dot)
+	*rval = PASTEF77(sds,dot)
 	(
 	  n,
+	  sb,
 	  x, incx,
 	  y, incy
 	);
 }
+
+// Input vectors stored in single precision, computed in double precision,
+// with result returned in double precision.
 void PASTEF772(ds,dot,sub)
      (
        const f77_int* n,
@@ -177,7 +128,12 @@ void PASTEF772(ds,dot,sub)
              double*  rval
      )
 {
-  PASTEF772S(ds,dot,sub)( n, x, incx, y, incy, rval);
+	*rval = PASTEF77(ds,dot)
+	(
+	  n,
+	  x, incx,
+	  y, incy
+	);
 }
 
 #endif

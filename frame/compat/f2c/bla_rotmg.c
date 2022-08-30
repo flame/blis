@@ -5,8 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2022, Advanced Micro Devices, Inc. All rights reserved.
-   
+
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
    met:
@@ -42,8 +41,7 @@
 	-lf2c -lm   (in that order)
 */
 
-/* Subroutine */ 
-int PASTEF77S(s,rotmg)(bla_real *sd1, bla_real *sd2, bla_real *sx1, const bla_real *sy1, bla_real *sparam)
+/* Subroutine */ int PASTEF77(s,rotmg)(bla_real *sd1, bla_real *sd2, bla_real *sx1, const bla_real *sy1, bla_real *sparam)
 {
     /* Initialized data */
 
@@ -283,8 +281,7 @@ L260:
 	-lf2c -lm   (in that order)
 */
 
-/* Subroutine */ 
-int PASTEF77S(d,rotmg)(bla_double *dd1, bla_double *dd2, bla_double *dx1, const bla_double *dy1, bla_double *dparam)
+/* Subroutine */ int PASTEF77(d,rotmg)(bla_double *dd1, bla_double *dd2, bla_double *dx1, const bla_double *dy1, bla_double *dparam)
 {
     /* Initialized data */
 
@@ -518,16 +515,6 @@ L260:
     dparam[1] = dflag;
     return 0;
 } /* drotmg_ */
-
-int PASTEF77(s,rotmg)(bla_real *sd1, bla_real *sd2, bla_real *sx1, const bla_real *sy1, bla_real *sparam)
-{
-  return PASTEF77S(s,rotmg)( sd1, sd2, sx1, sy1, sparam );
-}
-
-int PASTEF77(d,rotmg)(bla_double *dd1, bla_double *dd2, bla_double *dx1, const bla_double *dy1, bla_double *dparam)
-{
-  return PASTEF77S(d,rotmg)( dd1, dd2, dx1, dy1, dparam );
-}
 
 #endif
 
