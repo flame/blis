@@ -88,7 +88,7 @@ LPGEMM_MAIN_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_6x64)
 				 alpha, beta,
 				 is_last_k,
 			     post_op_c_i, post_op_c_j,
-			     post_ops_list
+			     post_ops_list, rs_c_downscale
 				);
 
 			b = b + ( 48 * k0_updated ); // k0x48 packed contiguosly.
@@ -107,7 +107,7 @@ LPGEMM_MAIN_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_6x64)
 				 alpha, beta,
 				 is_last_k,
 			     post_op_c_i, post_op_c_j,
-			     post_ops_list
+			     post_ops_list, rs_c_downscale
 				);
 
 			b = b + ( 32 * k0_updated ); // k0x32 packed contiguosly.
@@ -126,7 +126,7 @@ LPGEMM_MAIN_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_6x64)
 				 alpha, beta,
 				 is_last_k,
 			     post_op_c_i, post_op_c_j,
-			     post_ops_list
+			     post_ops_list, rs_c_downscale
 				);
 
 			b = b + ( 16 * k0_updated ); // k0x16 packed contiguosly.
@@ -145,7 +145,7 @@ LPGEMM_MAIN_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_6x64)
 				 alpha, beta, n0_rem,
 				 is_last_k,
 			     post_op_c_i, post_op_c_j,
-			     post_ops_list
+			     post_ops_list, rs_c_downscale
 				);
 
 			// No leftover fringe after this podint.
@@ -893,7 +893,7 @@ POST_OPS_6x64_DISABLE:
 				 alpha, beta,
 				 is_last_k,
 			     post_op_c_i, post_op_c_j,
-			     post_ops_list
+			     post_ops_list, rs_c_downscale
 				);
 		}		
 		else if ( m_partial_pieces == 4 )
@@ -908,7 +908,7 @@ POST_OPS_6x64_DISABLE:
 				 alpha, beta,
 				 is_last_k,
 			     post_op_c_i, post_op_c_j,
-			     post_ops_list
+			     post_ops_list, rs_c_downscale
 				);
 		}		
 		else if ( m_partial_pieces == 3 )
@@ -923,7 +923,7 @@ POST_OPS_6x64_DISABLE:
 				 alpha, beta,
 				 is_last_k,
 			     post_op_c_i, post_op_c_j,
-			     post_ops_list
+			     post_ops_list, rs_c_downscale
 				);
 		}		
 		else if ( m_partial_pieces == 2 )
@@ -938,7 +938,7 @@ POST_OPS_6x64_DISABLE:
 				 alpha, beta,
 				 is_last_k,
 			     post_op_c_i, post_op_c_j,
-			     post_ops_list
+			     post_ops_list, rs_c_downscale
 				);
 		}		
 		else if ( m_partial_pieces == 1 )
@@ -953,7 +953,7 @@ POST_OPS_6x64_DISABLE:
 				 alpha, beta,
 				 is_last_k,
 			     post_op_c_i, post_op_c_j,
-			     post_ops_list
+			     post_ops_list, rs_c_downscale
 				);
 		}		
 	}

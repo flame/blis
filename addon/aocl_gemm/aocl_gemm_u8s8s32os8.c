@@ -9,14 +9,14 @@
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
    met:
-	- Redistributions of source code must retain the above copyright
-	  notice, this list of conditions and the following disclaimer.
-	- Redistributions in binary form must reproduce the above copyright
-	  notice, this list of conditions and the following disclaimer in the
-	  documentation and/or other materials provided with the distribution.
-	- Neither the name(s) of the copyright holder(s) nor the names of its
-	  contributors may be used to endorse or promote products derived
-	  from this software without specific prior written permission.
+    - Redistributions of source code must retain the above copyright
+      notice, this list of conditions and the following disclaimer.
+    - Redistributions in binary form must reproduce the above copyright
+      notice, this list of conditions and the following disclaimer in the
+      documentation and/or other materials provided with the distribution.
+    - Neither the name(s) of the copyright holder(s) nor the names of its
+      contributors may be used to endorse or promote products derived
+      from this software without specific prior written permission.
 
    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
    "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -35,21 +35,21 @@
 #include "blis.h"
 #include "aocl_gemm_interface_apis.h"
 #include "lpgemm_types.h"
+#include "lpgemm_post_ops.h"
+#include "lpgemm_thread_decor_openmp.h"
 #include "lpgemm_5loop_interface_apis.h"
 #include "lpgemm_config.h"
 #include "lpgemm_utils.h"
-#include "lpgemm_thread_decor_openmp.h"
-#include "lpgemm_post_ops.h"
 
-AOCL_GEMM_MATMUL(uint8_t,int8_t,int16_t,u8s8s16os16)
+AOCL_GEMM_MATMUL(uint8_t,int8_t,int8_t,u8s8s32os8)
 {
 	trans_t blis_transa;
 	trans_t blis_transb;
 
-	// Check if avx ISA is supported, lpgemm u8s8s16os16 matmul only works with it.
-	if ( bli_cpuid_is_avx_supported() == FALSE )
+	// Check if avx512_vnni ISA is supported, lpgemm matmul only works with it.
+	if ( bli_cpuid_is_avx512vnni_supported() == FALSE )
 	{
-		printf(" AVX2 ISA not supported by processor, cannot perform lpgemm.\n");
+		printf(" AVX512_VNNI ISA not supported by processor, cannot perform lpgemm.\n");
 		return; // Error.
 	}
 
@@ -60,19 +60,19 @@ AOCL_GEMM_MATMUL(uint8_t,int8_t,int16_t,u8s8s16os16)
 	aocl_lpgemm_init_global_cntx();
 
 	// Null check for pointers.
-	if ((a == NULL) || (b == NULL) || (c == NULL))
+	if ( ( a == NULL ) || ( b == NULL ) || ( c == NULL ) )
 	{
 		return; // Error.
 	}
 
 	/* Map BLAS chars to their corresponding BLIS enumerated type value. */
-	bli_param_map_netlib_to_blis_trans(transa, &blis_transa);
-	bli_param_map_netlib_to_blis_trans(transb, &blis_transb);
+	bli_param_map_netlib_to_blis_trans( transa, &blis_transa );
+	bli_param_map_netlib_to_blis_trans( transb, &blis_transb );
 
 	/* Perform BLAS parameter checking. */
 	// Transpose not supported.
 	if ( ( blis_transa != BLIS_NO_TRANSPOSE ) ||
-		 ( blis_transb != BLIS_NO_TRANSPOSE ) )
+	     ( blis_transb != BLIS_NO_TRANSPOSE ) )
 	{
 		return; // Error.
 	}
@@ -82,13 +82,14 @@ AOCL_GEMM_MATMUL(uint8_t,int8_t,int16_t,u8s8s16os16)
 	}
 
 	// Row major input expected with leading dimensions equal to row stride.
-	if ((lda != k) || (ldb != n) || (ldc != n))
+	if ( ( lda != k ) || ( ldb != n ) || ( ldc != n ) )
 	{
 		return; // Error.
 	}
 
 	// Check if dimensions are valid.
-	if ((m <= 0) || (n <= 0) || (k <= 0) || (lda <= 0) || (ldb <= 0) || (ldc <= 0))
+	if ( ( m <= 0) || ( n <= 0 ) || ( k <= 0 ) ||
+	     ( lda <= 0 ) || ( ldb <= 0 ) || ( ldc <= 0 ) )
 	{
 		return; // Error.
 	}
@@ -102,20 +103,20 @@ AOCL_GEMM_MATMUL(uint8_t,int8_t,int16_t,u8s8s16os16)
 	AOCL_MEMORY_TAG mtag_a;
 	AOCL_MEMORY_TAG mtag_b;
 
-	bli_param_map_char_to_lpmtag(mem_format_a, &mtag_a);
-	bli_param_map_char_to_lpmtag(mem_format_b, &mtag_b);
+	bli_param_map_char_to_lpmtag( mem_format_a, &mtag_a );
+	bli_param_map_char_to_lpmtag( mem_format_b, &mtag_b );
 
 	// B matrix needs to be packed in a certain format in order to be loaded
 	// and used in VNNI instrution. As such the mtag_b always needs to be either
 	// packed or reordered. B matrix as it is (unpacked) cannot be used, and
 	// the mtag_b is set to packed to enable runtime packing.
-	if (mtag_b == UNPACKED)
+	if ( mtag_b == UNPACKED )
 	{
 		mtag_b = PACK;
 	}
 
 	// Only unpacked A supported now.
-	if (mtag_a != UNPACKED)
+	if ( mtag_a != UNPACKED )
 	{
 		return; // Error.
 	}
@@ -127,30 +128,30 @@ AOCL_GEMM_MATMUL(uint8_t,int8_t,int16_t,u8s8s16os16)
 	// Initialize a local runtime with global settings if necessary. Note
 	// that in the case that a runtime is passed in, we make a local copy.
 	rntm_t rntm_g;
-	bli_rntm_init_from_global(&rntm_g);
-	bli_membrk_rntm_set_membrk(&rntm_g);
+	bli_rntm_init_from_global( &rntm_g );
+	bli_membrk_rntm_set_membrk( &rntm_g );
 
 #ifdef BLIS_ENABLE_OPENMP
-	lpgemm_u8s8s16o16_openmp_thread_decorator
+	lpgemm_u8s8s32o32_openmp_thread_decorator
 	(
 	  m, n, k,
 	  a, rs_a, cs_a, mtag_a,
 	  b, rs_b, cs_b, mtag_b,
-	  c, rs_c,
+	  ( int32_t* )c, rs_c,
 	  alpha, beta,
 	  &rntm_g,
-	  post_op_list, FALSE
+	  post_op_list, TRUE
 	);
 #else
-	lpgemm_u8s8s16o16_thread_decorator
+	lpgemm_u8s8s32o32_thread_decorator
 	(
 	  m, n, k,
 	  a, rs_a, cs_a, mtag_a,
 	  b, rs_b, cs_b, mtag_b,
-	  c, rs_c,
+	  ( int32_t* )c, rs_c,
 	  alpha, beta,
 	  &rntm_g,
-	  post_op_list, FALSE
+	  post_op_list, TRUE
 	);
 #endif
 }

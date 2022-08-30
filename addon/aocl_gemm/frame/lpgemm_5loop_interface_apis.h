@@ -59,7 +59,8 @@ void lpgemm_rowvar_ ## LP_SFX \
        C_type                beta, \
        rntm_t*               rntm, \
        lpgemm_thrinfo_t*     thread, \
-       lpgemm_post_op*       post_op_list \
+       lpgemm_post_op*       post_op_list, \
+       bool                  c_downscale \
      ) \
 
 LPGEMM_5LOOP(uint8_t,int8_t,int32_t,u8s8s32o32);

@@ -477,7 +477,8 @@ void lpgemm_ ## LPGEMM_SFX ## _openmp_thread_decorator \
        C_type                alpha, \
        C_type                beta, \
        rntm_t*               rntm_g, \
-       lpgemm_post_op*       post_op_list \
+       lpgemm_post_op*       post_op_list, \
+       bool                  c_downscale \
      ) \
 { \
 	dim_t n_threads; \
@@ -537,7 +538,7 @@ void lpgemm_ ## LPGEMM_SFX ## _openmp_thread_decorator \
 		  beta, \
 		  &rntm_l, \
 		  &thread, \
-		  post_op_list \
+		  post_op_list, c_downscale \
 		); \
 	} \
 	if ( jc_ways > BLIS_LPGEMM_NUM_STATIC_COMMS ) \
@@ -572,7 +573,8 @@ void lpgemm_ ## LPGEMM_SFX ## _thread_decorator \
        C_type                alpha, \
        C_type                beta, \
        rntm_t*               rntm_g, \
-       lpgemm_post_op*       post_op_list \
+       lpgemm_post_op*       post_op_list, \
+       bool                  c_downscale \
      ) \
 { \
 	dim_t n_threads = 1; \
@@ -611,7 +613,7 @@ void lpgemm_ ## LPGEMM_SFX ## _thread_decorator \
 	  beta, \
 	  rntm_g, \
 	  &thread, \
-	  post_op_list \
+	  post_op_list, c_downscale \
 	); \
 } \
 

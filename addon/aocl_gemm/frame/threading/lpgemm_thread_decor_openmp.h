@@ -60,7 +60,8 @@ void lpgemm_ ## LPGEMM_SFX ## _openmp_thread_decorator \
        C_type                alpha, \
        C_type                beta, \
        rntm_t*               rntm_g, \
-       lpgemm_post_op*       post_op_list \
+       lpgemm_post_op*       post_op_list, \
+       bool                  c_downscale \
      ); \
 
 GEN_LPGEMM_OPENMP_DECORATOR_FN(uint8_t,int8_t,int16_t,u8s8s16o16)
@@ -89,7 +90,8 @@ void lpgemm_ ## LPGEMM_SFX ## _thread_decorator \
        C_type                alpha, \
        C_type                beta, \
        rntm_t*               rntm_g, \
-       lpgemm_post_op*       post_op_list \
+       lpgemm_post_op*       post_op_list, \
+       bool                  c_downscale \
      ); \
 
 GEN_LPGEMM_DECORATOR_FN(uint8_t,int8_t,int16_t,u8s8s16o16)

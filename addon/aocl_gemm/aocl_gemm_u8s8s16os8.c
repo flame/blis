@@ -41,7 +41,7 @@
 #include "lpgemm_thread_decor_openmp.h"
 #include "lpgemm_post_ops.h"
 
-AOCL_GEMM_MATMUL(uint8_t,int8_t,int16_t,u8s8s16os16)
+AOCL_GEMM_MATMUL(uint8_t,int8_t,int8_t,u8s8s16os8)
 {
 	trans_t blis_transa;
 	trans_t blis_transb;
@@ -136,10 +136,10 @@ AOCL_GEMM_MATMUL(uint8_t,int8_t,int16_t,u8s8s16os16)
 	  m, n, k,
 	  a, rs_a, cs_a, mtag_a,
 	  b, rs_b, cs_b, mtag_b,
-	  c, rs_c,
+	  ( int16_t* )c, rs_c,
 	  alpha, beta,
 	  &rntm_g,
-	  post_op_list, FALSE
+	  post_op_list, TRUE
 	);
 #else
 	lpgemm_u8s8s16o16_thread_decorator
@@ -147,10 +147,10 @@ AOCL_GEMM_MATMUL(uint8_t,int8_t,int16_t,u8s8s16os16)
 	  m, n, k,
 	  a, rs_a, cs_a, mtag_a,
 	  b, rs_b, cs_b, mtag_b,
-	  c, rs_c,
+	  ( int16_t* )c, rs_c,
 	  alpha, beta,
 	  &rntm_g,
-	  post_op_list, FALSE
+	  post_op_list, TRUE
 	);
 #endif
 }

@@ -124,7 +124,7 @@ AOCL_GEMM_MATMUL(float,float,float,f32f32f32of32)
 
 	// Convert post op struct to post op linked list format.
 	lpgemm_post_op post_op_list[AOCL_MAX_POST_OPS];
-	lpgemm_translate_to_post_ops_list( post_op_unparsed, post_op_list );
+	lpgemm_translate_to_post_ops_list( post_op_unparsed, post_op_list, ( void* )c );
 
 	// Initialize a local runtime with global settings if necessary. Note
 	// that in the case that a runtime is passed in, we make a local copy.
@@ -141,7 +141,7 @@ AOCL_GEMM_MATMUL(float,float,float,f32f32f32of32)
 	  c, rs_c,
 	  alpha, beta,
 	  &rntm_g,
-	  post_op_list
+	  post_op_list, FALSE
 	);
 #else
 	// Setting pack A by default for non open mp case.
@@ -155,7 +155,7 @@ AOCL_GEMM_MATMUL(float,float,float,f32f32f32of32)
 	  c, rs_c,
 	  alpha, beta,
 	  &rntm_g,
-	  post_op_list
+	  post_op_list, FALSE
 	);
 #endif
 

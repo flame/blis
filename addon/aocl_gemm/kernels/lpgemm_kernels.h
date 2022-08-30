@@ -59,7 +59,8 @@ void lpgemm_rowvar_ ## LP_SFX \
        bool            is_last_k, \
        dim_t           post_op_c_i, \
        dim_t           post_op_c_j, \
-       lpgemm_post_op* post_ops_list \
+       lpgemm_post_op* post_ops_list, \
+       const dim_t     rs_c_downscale \
      ) \
 
 LPGEMM_MAIN_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_6x64);
@@ -83,7 +84,8 @@ void lpgemm_rowvar_ ## LP_SFX \
        bool            is_last_k, \
        dim_t           post_op_c_i, \
        dim_t           post_op_c_j, \
-       lpgemm_post_op* post_ops_list \
+       lpgemm_post_op* post_ops_list, \
+       const dim_t     rs_c_downscale \
      ) \
 
 LPGEMM_M_FRINGE_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_5x64);
@@ -121,7 +123,8 @@ void lpgemm_rowvar_ ## LP_SFX \
        bool            is_last_k, \
        dim_t           post_op_c_i, \
        dim_t           post_op_c_j, \
-       lpgemm_post_op* post_ops_list \
+       lpgemm_post_op* post_ops_list, \
+       const dim_t     rs_c_downscale \
      ) \
 
 LPGEMM_N_FRINGE_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_6x16);
@@ -154,7 +157,8 @@ void lpgemm_rowvar_ ## LP_SFX \
        bool            is_last_k, \
        dim_t           post_op_c_i, \
        dim_t           post_op_c_j, \
-       lpgemm_post_op* post_ops_list \
+       lpgemm_post_op* post_ops_list, \
+       const dim_t     rs_c_downscale \
      ) \
 
 LPGEMM_N_LT_NR0_FRINGE_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_6xlt16);
@@ -180,7 +184,8 @@ void lpgemm_rowvar_ ## LP_SFX \
        bool            is_last_k, \
        dim_t           post_op_c_i, \
        dim_t           post_op_c_j, \
-       lpgemm_post_op* post_ops_list \
+       lpgemm_post_op* post_ops_list, \
+       const dim_t     rs_c_downscale \
      ) \
 
 LPGEMM_MN_FRINGE_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_5x16);
@@ -237,7 +242,8 @@ void lpgemm_rowvar_ ## LP_SFX \
        bool            is_last_k, \
        dim_t           post_op_c_i, \
        dim_t           post_op_c_j, \
-       lpgemm_post_op* post_ops_list \
+       lpgemm_post_op* post_ops_list, \
+       const dim_t     rs_c_downscale \
      ) \
 
 LPGEMM_MN_LT_NR0_FRINGE_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_5xlt16);

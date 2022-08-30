@@ -42,4 +42,44 @@
 	/* Apply scaling on for <= 0 elements.*/ \
 	reg = _mm512_mask_mullo_epi32( reg, relu_cmp_mask, reg, selector2 ); \
 
+#define CVT_MULRND_CVT32_CVT8(reg,selector,m_ind,n_ind) \
+	_mm_storeu_epi8 \
+	( \
+	  ( int8_t* )post_ops_list_temp->op_args3 + \
+	  ( rs_c_downscale * ( post_op_c_i + m_ind ) ) + post_op_c_j + ( n_ind * 16 ), \
+	  _mm512_cvtepi32_epi8 \
+	  ( \
+		_mm512_cvtps_epi32 \
+		( \
+		  _mm512_mul_round_ps \
+		  ( \
+			_mm512_cvtepi32_ps( reg ), \
+			( __m512 )selector, \
+			( _MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC ) \
+		  ) \
+		) \
+	  ) \
+	) \
+
+#define CVT_MULRND_CVT32_CVT8_LT16(reg,selector,m_ind,n_ind) \
+	_mm_storeu_epi8 \
+	( \
+	  buf0, \
+	  _mm512_cvtepi32_epi8 \
+	  ( \
+		_mm512_cvtps_epi32 \
+		( \
+		  _mm512_mul_round_ps \
+		  ( \
+			_mm512_cvtepi32_ps( reg ), \
+			( __m512 )selector, \
+			( _MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC ) \
+		  ) \
+		) \
+	  ) \
+	); \
+	memcpy( ( int8_t* )post_ops_list_temp->op_args3 + \
+	  ( rs_c_downscale * ( post_op_c_i + m_ind ) ) + post_op_c_j + \
+	  ( n_ind * 16 ) , buf0, ( n0_rem * sizeof( int8_t ) ) ); \
+
 #endif // LPGEMM_S32_KERN_MACROS_H

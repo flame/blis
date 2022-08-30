@@ -46,8 +46,8 @@ AOCL_GEMM_MATMUL(bfloat16,bfloat16,float,bf16bf16f32of32)
 	trans_t blis_transa;
 	trans_t blis_transb;
 
-	// Check if avx512_bf16 ISA is supported, lpgemm matmul only works with it.
-	if ( bli_cpuid_is_avx512_bf16_supported() == FALSE )
+	// Check if avx512_vnni ISA is supported, lpgemm matmul only works with it.
+	if ( bli_cpuid_is_avx512vnni_supported() == FALSE )
 	{
 		printf(" AVX512_BF16 ISA not supported by processor, cannot perform lpgemm.\n");
 		return; // Error.
@@ -123,7 +123,7 @@ AOCL_GEMM_MATMUL(bfloat16,bfloat16,float,bf16bf16f32of32)
 
 	// Convert post op struct to post op linked list format.
 	lpgemm_post_op post_op_list[AOCL_MAX_POST_OPS];
-	lpgemm_translate_to_post_ops_list( post_op_unparsed, post_op_list );
+	lpgemm_translate_to_post_ops_list( post_op_unparsed, post_op_list, ( void* )c );
 
 	// Initialize a local runtime with global settings if necessary. Note
 	// that in the case that a runtime is passed in, we make a local copy.
@@ -140,7 +140,7 @@ AOCL_GEMM_MATMUL(bfloat16,bfloat16,float,bf16bf16f32of32)
 	  c, rs_c,
 	  alpha, beta,
 	  &rntm_g,
-	  post_op_list
+	  post_op_list, FALSE
 	);
 #else
 	lpgemm_bf16bf16f32of32_thread_decorator
@@ -151,7 +151,7 @@ AOCL_GEMM_MATMUL(bfloat16,bfloat16,float,bf16bf16f32of32)
 	  c, rs_c,
 	  alpha, beta,
 	  &rntm_g,
-	  post_op_list
+	  post_op_list, FALSE
 	);
 #endif
 }

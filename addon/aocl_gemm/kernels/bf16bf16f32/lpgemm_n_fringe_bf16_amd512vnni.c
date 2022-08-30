@@ -420,7 +420,7 @@ POST_OPS_6xLT16_DISABLE:
 			  alpha, beta, n0_rem,
 			  is_last_k,
 			  post_op_c_i, post_op_c_j,
-			  post_ops_list
+			  post_ops_list, rs_c_downscale
 			);
 		}		
 		else if ( m_partial_pieces == 4 )
@@ -435,7 +435,7 @@ POST_OPS_6xLT16_DISABLE:
 			  alpha, beta, n0_rem,
 			  is_last_k,
 			  post_op_c_i, post_op_c_j,
-			  post_ops_list
+			  post_ops_list, rs_c_downscale
 			);
 		}		
 		else if ( m_partial_pieces == 3 )
@@ -450,7 +450,7 @@ POST_OPS_6xLT16_DISABLE:
 			  alpha, beta, n0_rem,
 			  is_last_k,
 			  post_op_c_i, post_op_c_j,
-			  post_ops_list
+			  post_ops_list, rs_c_downscale
 			);
 		}		
 		else if ( m_partial_pieces == 2 )
@@ -465,7 +465,7 @@ POST_OPS_6xLT16_DISABLE:
 			  alpha, beta, n0_rem,
 			  is_last_k,
 			  post_op_c_i, post_op_c_j,
-			  post_ops_list
+			  post_ops_list, rs_c_downscale
 			);
 		}		
 		else if ( m_partial_pieces == 1 )
@@ -480,7 +480,7 @@ POST_OPS_6xLT16_DISABLE:
 			  alpha, beta, n0_rem,
 			  is_last_k,
 			  post_op_c_i, post_op_c_j,
-			  post_ops_list
+			  post_ops_list, rs_c_downscale
 			);
 		}		
 	}    
@@ -834,7 +834,7 @@ POST_OPS_6x16_DISABLE:
 			  alpha, beta,
 			  is_last_k,
 			  post_op_c_i, post_op_c_j,
-			  post_ops_list
+			  post_ops_list, rs_c_downscale
 			);
 		}		
 		else if ( m_partial_pieces == 4 )
@@ -849,7 +849,7 @@ POST_OPS_6x16_DISABLE:
 			  alpha, beta,
 			  is_last_k,
 			  post_op_c_i, post_op_c_j,
-			  post_ops_list
+			  post_ops_list, rs_c_downscale
 			);
 		}		
 		else if ( m_partial_pieces == 3 )
@@ -864,7 +864,7 @@ POST_OPS_6x16_DISABLE:
 			  alpha, beta,
 			  is_last_k,
 			  post_op_c_i, post_op_c_j,
-			  post_ops_list
+			  post_ops_list, rs_c_downscale
 			);
 		}		
 		else if ( m_partial_pieces == 2 )
@@ -879,7 +879,7 @@ POST_OPS_6x16_DISABLE:
 			  alpha, beta,
 			  is_last_k,
 			  post_op_c_i, post_op_c_j,
-			  post_ops_list
+			  post_ops_list, rs_c_downscale
 			);
 		}		
 		else if ( m_partial_pieces == 1 )
@@ -894,7 +894,7 @@ POST_OPS_6x16_DISABLE:
 			  alpha, beta,
 			  is_last_k,
 			  post_op_c_i, post_op_c_j,
-			  post_ops_list
+			  post_ops_list, rs_c_downscale
 			);
 		}		
 	}	
@@ -1378,7 +1378,7 @@ POST_OPS_6x32_DISABLE:
 			  alpha, beta,
 			  is_last_k,
 			  post_op_c_i, post_op_c_j,
-			  post_ops_list
+			  post_ops_list, rs_c_downscale
 			);
 		}		
 		else if ( m_partial_pieces == 4 )
@@ -1393,7 +1393,7 @@ POST_OPS_6x32_DISABLE:
 			  alpha, beta,
 			  is_last_k,
 			  post_op_c_i, post_op_c_j,
-			  post_ops_list
+			  post_ops_list, rs_c_downscale
 			);
 		}		
 		else if ( m_partial_pieces == 3 )
@@ -1408,7 +1408,7 @@ POST_OPS_6x32_DISABLE:
 			  alpha, beta,
 			  is_last_k,
 			  post_op_c_i, post_op_c_j,
-			  post_ops_list
+			  post_ops_list, rs_c_downscale
 			);
 		}		
 		else if ( m_partial_pieces == 2 )
@@ -1423,7 +1423,7 @@ POST_OPS_6x32_DISABLE:
 			  alpha, beta,
 			  is_last_k,
 			  post_op_c_i, post_op_c_j,
-			  post_ops_list
+			  post_ops_list, rs_c_downscale
 			);
 		}		
 		else if ( m_partial_pieces == 1 )
@@ -1438,7 +1438,7 @@ POST_OPS_6x32_DISABLE:
 			  alpha, beta,
 			  is_last_k,
 			  post_op_c_i, post_op_c_j,
-			  post_ops_list
+			  post_ops_list, rs_c_downscale
 			);
 		}		
 	}	
@@ -2059,7 +2059,7 @@ POST_OPS_6x48_DISABLE:
 			  alpha, beta,
 			  is_last_k,
 			  post_op_c_i, post_op_c_j,
-			  post_ops_list
+			  post_ops_list, rs_c_downscale
 			);
 		}		
 		else if ( m_partial_pieces == 4 )
@@ -2074,7 +2074,7 @@ POST_OPS_6x48_DISABLE:
 			  alpha, beta,
 			  is_last_k,
 			  post_op_c_i, post_op_c_j,
-			  post_ops_list
+			  post_ops_list, rs_c_downscale
 			);
 		}		
 		else if ( m_partial_pieces == 3 )
@@ -2089,7 +2089,7 @@ POST_OPS_6x48_DISABLE:
 			  alpha, beta,
 			  is_last_k,
 			  post_op_c_i, post_op_c_j,
-			  post_ops_list
+			  post_ops_list, rs_c_downscale
 			);
 		}		
 		else if ( m_partial_pieces == 2 )
@@ -2104,7 +2104,7 @@ POST_OPS_6x48_DISABLE:
 			  alpha, beta,
 			  is_last_k,
 			  post_op_c_i, post_op_c_j,
-			  post_ops_list
+			  post_ops_list, rs_c_downscale
 			);
 		}		
 		else if ( m_partial_pieces == 1 )
@@ -2119,7 +2119,7 @@ POST_OPS_6x48_DISABLE:
 			  alpha, beta,
 			  is_last_k,
 			  post_op_c_i, post_op_c_j,
-			  post_ops_list
+			  post_ops_list, rs_c_downscale
 			);
 		}		
 	}	

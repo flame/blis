@@ -47,7 +47,8 @@ LPGEMM_MN_LT_NR0_FRINGE_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_5xlt16)
 						  &&POST_OPS_5xLT16_DISABLE,
 						  &&POST_OPS_BIAS_5xLT16,
 						  &&POST_OPS_RELU_5xLT16,
-						  &&POST_OPS_RELU_SCALE_5xLT16
+						  &&POST_OPS_RELU_SCALE_5xLT16,
+						  &&POST_OPS_DOWNSCALE_5xLT16
 						};
 	dim_t k_full_pieces = k0 / 4;
 	dim_t k_partial_pieces = k0 % 4;
@@ -280,6 +281,29 @@ POST_OPS_RELU_SCALE_5xLT16:
 
 			POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 		}
+POST_OPS_DOWNSCALE_5xLT16:
+	{
+		memcpy( buf0, ( ( float* )post_ops_list_temp->scale_factor +
+					post_op_c_j ), ( n0_rem * sizeof( float ) ) );
+		selector1 = _mm512_loadu_epi32( buf0 );
+
+		// c[0, 0-15]
+		CVT_MULRND_CVT32_CVT8_LT16(c_int32_0p0,selector1,0,0);
+
+		// c[1, 0-15]
+		CVT_MULRND_CVT32_CVT8_LT16(c_int32_1p0,selector1,1,0);
+
+		// c[2, 0-15]
+		CVT_MULRND_CVT32_CVT8_LT16(c_int32_2p0,selector1,2,0);
+
+		// c[3, 0-15]
+		CVT_MULRND_CVT32_CVT8_LT16(c_int32_3p0,selector1,3,0);
+
+		// c[4, 0-15]
+		CVT_MULRND_CVT32_CVT8_LT16(c_int32_4p0,selector1,4,0);
+
+		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+	}
 POST_OPS_5xLT16_DISABLE:
 		;
 		
@@ -325,7 +349,8 @@ LPGEMM_MN_LT_NR0_FRINGE_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_4xlt16)
 						  &&POST_OPS_4xLT16_DISABLE,
 						  &&POST_OPS_BIAS_4xLT16,
 						  &&POST_OPS_RELU_4xLT16,
-						  &&POST_OPS_RELU_SCALE_4xLT16
+						  &&POST_OPS_RELU_SCALE_4xLT16,
+						  &&POST_OPS_DOWNSCALE_4xLT16
 						};
 	dim_t k_full_pieces = k0 / 4;
 	dim_t k_partial_pieces = k0 % 4;
@@ -524,6 +549,26 @@ POST_OPS_RELU_SCALE_4xLT16:
 
 			POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 		}
+POST_OPS_DOWNSCALE_4xLT16:
+	{
+		memcpy( buf0, ( ( float* )post_ops_list_temp->scale_factor +
+					post_op_c_j ), ( n0_rem * sizeof( float ) ) );
+		selector1 = _mm512_loadu_epi32( buf0 );
+
+		// c[0, 0-15]
+		CVT_MULRND_CVT32_CVT8_LT16(c_int32_0p0,selector1,0,0);
+
+		// c[1, 0-15]
+		CVT_MULRND_CVT32_CVT8_LT16(c_int32_1p0,selector1,1,0);
+
+		// c[2, 0-15]
+		CVT_MULRND_CVT32_CVT8_LT16(c_int32_2p0,selector1,2,0);
+
+		// c[3, 0-15]
+		CVT_MULRND_CVT32_CVT8_LT16(c_int32_3p0,selector1,3,0);
+
+		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+	}
 POST_OPS_4xLT16_DISABLE:
 		;
 		
@@ -563,7 +608,8 @@ LPGEMM_MN_LT_NR0_FRINGE_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_3xlt16)
 						  &&POST_OPS_3xLT16_DISABLE,
 						  &&POST_OPS_BIAS_3xLT16,
 						  &&POST_OPS_RELU_3xLT16,
-						  &&POST_OPS_RELU_SCALE_3xLT16
+						  &&POST_OPS_RELU_SCALE_3xLT16,
+						  &&POST_OPS_DOWNSCALE_3xLT16
 						};
 	dim_t k_full_pieces = k0 / 4;
 	dim_t k_partial_pieces = k0 % 4;
@@ -726,6 +772,23 @@ POST_OPS_RELU_SCALE_3xLT16:
 
 			POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 		}
+POST_OPS_DOWNSCALE_3xLT16:
+	{
+		memcpy( buf0, ( ( float* )post_ops_list_temp->scale_factor +
+					post_op_c_j ), ( n0_rem * sizeof( float ) ) );
+		selector1 = _mm512_loadu_epi32( buf0 );
+
+		// c[0, 0-15]
+		CVT_MULRND_CVT32_CVT8_LT16(c_int32_0p0,selector1,0,0);
+
+		// c[1, 0-15]
+		CVT_MULRND_CVT32_CVT8_LT16(c_int32_1p0,selector1,1,0);
+
+		// c[2, 0-15]
+		CVT_MULRND_CVT32_CVT8_LT16(c_int32_2p0,selector1,2,0);
+
+		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+	}
 POST_OPS_3xLT16_DISABLE:
 		;
 		
@@ -759,7 +822,8 @@ LPGEMM_MN_LT_NR0_FRINGE_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_2xlt16)
 						  &&POST_OPS_2xLT16_DISABLE,
 						  &&POST_OPS_BIAS_2xLT16,
 						  &&POST_OPS_RELU_2xLT16,
-						  &&POST_OPS_RELU_SCALE_2xLT16
+						  &&POST_OPS_RELU_SCALE_2xLT16,
+						  &&POST_OPS_DOWNSCALE_2xLT16
 						};
 	dim_t k_full_pieces = k0 / 4;
 	dim_t k_partial_pieces = k0 % 4;
@@ -887,6 +951,20 @@ POST_OPS_RELU_SCALE_2xLT16:
 
 			POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 		}
+POST_OPS_DOWNSCALE_2xLT16:
+	{
+		memcpy( buf0, ( ( float* )post_ops_list_temp->scale_factor +
+					post_op_c_j ), ( n0_rem * sizeof( float ) ) );
+		selector1 = _mm512_loadu_epi32( buf0 );
+
+		// c[0, 0-15]
+		CVT_MULRND_CVT32_CVT8_LT16(c_int32_0p0,selector1,0,0);
+
+		// c[1, 0-15]
+		CVT_MULRND_CVT32_CVT8_LT16(c_int32_1p0,selector1,1,0);
+
+		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+	}
 POST_OPS_2xLT16_DISABLE:
 		;
 		
@@ -914,7 +992,8 @@ LPGEMM_MN_LT_NR0_FRINGE_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_1xlt16)
 						  &&POST_OPS_1xLT16_DISABLE,
 						  &&POST_OPS_BIAS_1xLT16,
 						  &&POST_OPS_RELU_1xLT16,
-						  &&POST_OPS_RELU_SCALE_1xLT16
+						  &&POST_OPS_RELU_SCALE_1xLT16,
+						  &&POST_OPS_DOWNSCALE_1xLT16
 						};
 	dim_t k_full_pieces = k0 / 4;
 	dim_t k_partial_pieces = k0 % 4;
@@ -1007,6 +1086,17 @@ POST_OPS_RELU_SCALE_1xLT16:
 
 			POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 		}
+POST_OPS_DOWNSCALE_1xLT16:
+	{
+		memcpy( buf0, ( ( float* )post_ops_list_temp->scale_factor +
+					post_op_c_j ), ( n0_rem * sizeof( float ) ) );
+		selector1 = _mm512_loadu_epi32( buf0 );
+
+		// c[0, 0-15]
+		CVT_MULRND_CVT32_CVT8_LT16(c_int32_0p0,selector1,0,0);
+
+		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+	}
 POST_OPS_1xLT16_DISABLE:
 		;
 		
@@ -1028,7 +1118,8 @@ LPGEMM_MN_FRINGE_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_5x16)
 						  &&POST_OPS_5x16_DISABLE,
 						  &&POST_OPS_BIAS_5x16,
 						  &&POST_OPS_RELU_5x16,
-						  &&POST_OPS_RELU_SCALE_5x16
+						  &&POST_OPS_RELU_SCALE_5x16,
+						  &&POST_OPS_DOWNSCALE_5x16
 						};
 	dim_t k_full_pieces = k0 / 4;
 	dim_t k_partial_pieces = k0 % 4;
@@ -1247,6 +1338,29 @@ POST_OPS_RELU_SCALE_5x16:
 
 		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 	}
+POST_OPS_DOWNSCALE_5x16:
+	{
+		selector1 =
+			_mm512_loadu_epi32( ( float* )post_ops_list_temp->scale_factor +
+							post_op_c_j + ( 0 * 16 ) );
+
+		// c[0, 0-15]
+		CVT_MULRND_CVT32_CVT8(c_int32_0p0,selector1,0,0);
+
+		// c[1, 0-15]
+		CVT_MULRND_CVT32_CVT8(c_int32_1p0,selector1,1,0);
+
+		// c[2, 0-15]
+		CVT_MULRND_CVT32_CVT8(c_int32_2p0,selector1,2,0);
+
+		// c[3, 0-15]
+		CVT_MULRND_CVT32_CVT8(c_int32_3p0,selector1,3,0);
+
+		// c[4, 0-15]
+		CVT_MULRND_CVT32_CVT8(c_int32_4p0,selector1,4,0);
+
+		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+	}
 POST_OPS_5x16_DISABLE:
 	;
 
@@ -1275,7 +1389,8 @@ LPGEMM_MN_FRINGE_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_4x16)
 						  &&POST_OPS_4x16_DISABLE,
 						  &&POST_OPS_BIAS_4x16,
 						  &&POST_OPS_RELU_4x16,
-						  &&POST_OPS_RELU_SCALE_4x16
+						  &&POST_OPS_RELU_SCALE_4x16,
+						  &&POST_OPS_DOWNSCALE_4x16
 						};
 	dim_t k_full_pieces = k0 / 4;
 	dim_t k_partial_pieces = k0 % 4;
@@ -1461,6 +1576,26 @@ POST_OPS_RELU_SCALE_4x16:
 
 		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 	}
+POST_OPS_DOWNSCALE_4x16:
+	{
+		selector1 =
+			_mm512_loadu_epi32( ( float* )post_ops_list_temp->scale_factor +
+							post_op_c_j + ( 0 * 16 ) );
+
+		// c[0, 0-15]
+		CVT_MULRND_CVT32_CVT8(c_int32_0p0,selector1,0,0);
+
+		// c[1, 0-15]
+		CVT_MULRND_CVT32_CVT8(c_int32_1p0,selector1,1,0);
+
+		// c[2, 0-15]
+		CVT_MULRND_CVT32_CVT8(c_int32_2p0,selector1,2,0);
+
+		// c[3, 0-15]
+		CVT_MULRND_CVT32_CVT8(c_int32_3p0,selector1,3,0);
+
+		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+	}
 POST_OPS_4x16_DISABLE:
 	;
 	
@@ -1486,7 +1621,8 @@ LPGEMM_MN_FRINGE_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_3x16)
 						  &&POST_OPS_3x16_DISABLE,
 						  &&POST_OPS_BIAS_3x16,
 						  &&POST_OPS_RELU_3x16,
-						  &&POST_OPS_RELU_SCALE_3x16
+						  &&POST_OPS_RELU_SCALE_3x16,
+						  &&POST_OPS_DOWNSCALE_3x16
 						};
 	dim_t k_full_pieces = k0 / 4;
 	dim_t k_partial_pieces = k0 % 4;
@@ -1639,6 +1775,23 @@ POST_OPS_RELU_SCALE_3x16:
 
 		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 	}
+POST_OPS_DOWNSCALE_3x16:
+	{
+		selector1 =
+			_mm512_loadu_epi32( ( float* )post_ops_list_temp->scale_factor +
+							post_op_c_j + ( 0 * 16 ) );
+
+		// c[0, 0-15]
+		CVT_MULRND_CVT32_CVT8(c_int32_0p0,selector1,0,0);
+
+		// c[1, 0-15]
+		CVT_MULRND_CVT32_CVT8(c_int32_1p0,selector1,1,0);
+
+		// c[2, 0-15]
+		CVT_MULRND_CVT32_CVT8(c_int32_2p0,selector1,2,0);
+
+		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+	}
 POST_OPS_3x16_DISABLE:
 	;
 	
@@ -1661,7 +1814,8 @@ LPGEMM_MN_FRINGE_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_2x16)
 						  &&POST_OPS_2x16_DISABLE,
 						  &&POST_OPS_BIAS_2x16,
 						  &&POST_OPS_RELU_2x16,
-						  &&POST_OPS_RELU_SCALE_2x16
+						  &&POST_OPS_RELU_SCALE_2x16,
+						  &&POST_OPS_DOWNSCALE_2x16
 						};
 	dim_t k_full_pieces = k0 / 4;
 	dim_t k_partial_pieces = k0 % 4;
@@ -1781,6 +1935,20 @@ POST_OPS_RELU_SCALE_2x16:
 
 		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 	}
+POST_OPS_DOWNSCALE_2x16:
+	{
+		selector1 =
+			_mm512_loadu_epi32( ( float* )post_ops_list_temp->scale_factor +
+							post_op_c_j + ( 0 * 16 ) );
+
+		// c[0, 0-15]
+		CVT_MULRND_CVT32_CVT8(c_int32_0p0,selector1,0,0);
+
+		// c[1, 0-15]
+		CVT_MULRND_CVT32_CVT8(c_int32_1p0,selector1,1,0);
+
+		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+	}
 POST_OPS_2x16_DISABLE:
 	;
 	
@@ -1800,7 +1968,8 @@ LPGEMM_MN_FRINGE_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_1x16)
 						  &&POST_OPS_1x16_DISABLE,
 						  &&POST_OPS_BIAS_1x16,
 						  &&POST_OPS_RELU_1x16,
-						  &&POST_OPS_RELU_SCALE_1x16
+						  &&POST_OPS_RELU_SCALE_1x16,
+						  &&POST_OPS_DOWNSCALE_1x16
 						};
 	dim_t k_full_pieces = k0 / 4;
 	dim_t k_partial_pieces = k0 % 4;
@@ -1887,6 +2056,17 @@ POST_OPS_RELU_SCALE_1x16:
 
 		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 	}
+POST_OPS_DOWNSCALE_1x16:
+	{
+		selector1 =
+			_mm512_loadu_epi32( ( float* )post_ops_list_temp->scale_factor +
+							post_op_c_j + ( 0 * 16 ) );
+
+		// c[0, 0-15]
+		CVT_MULRND_CVT32_CVT8(c_int32_0p0,selector1,0,0);
+
+		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+	}
 POST_OPS_1x16_DISABLE:
 	;
 	
@@ -1903,7 +2083,8 @@ LPGEMM_MN_FRINGE_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_5x32)
 						  &&POST_OPS_5x32_DISABLE,
 						  &&POST_OPS_BIAS_5x32,
 						  &&POST_OPS_RELU_5x32,
-						  &&POST_OPS_RELU_SCALE_5x32
+						  &&POST_OPS_RELU_SCALE_5x32,
+						  &&POST_OPS_DOWNSCALE_5x32
 						};
 	dim_t k_full_pieces = k0 / 4;
 	dim_t k_partial_pieces = k0 % 4;
@@ -2224,6 +2405,47 @@ POST_OPS_RELU_SCALE_5x32:
 
 		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 	}
+POST_OPS_DOWNSCALE_5x32:
+	{
+		selector1 =
+			_mm512_loadu_epi32( ( float* )post_ops_list_temp->scale_factor +
+							post_op_c_j + ( 0 * 16 ) );
+		selector2 =
+			_mm512_loadu_epi32( ( float* )post_ops_list_temp->scale_factor +
+							post_op_c_j + ( 1 * 16 ) );
+
+		// c[0, 0-15]
+		CVT_MULRND_CVT32_CVT8(c_int32_0p0,selector1,0,0);
+
+		// c[0, 16-31]
+		CVT_MULRND_CVT32_CVT8(c_int32_0p1,selector2,0,1);
+
+		// c[1, 0-15]
+		CVT_MULRND_CVT32_CVT8(c_int32_1p0,selector1,1,0);
+
+		// c[1, 16-31]
+		CVT_MULRND_CVT32_CVT8(c_int32_1p1,selector2,1,1);
+
+		// c[2, 0-15]
+		CVT_MULRND_CVT32_CVT8(c_int32_2p0,selector1,2,0);
+
+		// c[2, 16-31]
+		CVT_MULRND_CVT32_CVT8(c_int32_2p1,selector2,2,1);
+
+		// c[3, 0-15]
+		CVT_MULRND_CVT32_CVT8(c_int32_3p0,selector1,3,0);
+
+		// c[3, 16-31]
+		CVT_MULRND_CVT32_CVT8(c_int32_3p1,selector2,3,1);
+
+		// c[4, 0-15]
+		CVT_MULRND_CVT32_CVT8(c_int32_4p0,selector1,4,0);
+
+		// c[4, 16-31]
+		CVT_MULRND_CVT32_CVT8(c_int32_4p1,selector2,4,1);
+
+		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+	}
 POST_OPS_5x32_DISABLE:
 	;
 
@@ -2267,7 +2489,8 @@ LPGEMM_MN_FRINGE_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_4x32)
 						  &&POST_OPS_4x32_DISABLE,
 						  &&POST_OPS_BIAS_4x32,
 						  &&POST_OPS_RELU_4x32,
-						  &&POST_OPS_RELU_SCALE_4x32
+						  &&POST_OPS_RELU_SCALE_4x32,
+						  &&POST_OPS_DOWNSCALE_4x32
 						};
 	dim_t k_full_pieces = k0 / 4;
 	dim_t k_partial_pieces = k0 % 4;
@@ -2537,6 +2760,41 @@ POST_OPS_RELU_SCALE_4x32:
 
 		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 	}
+POST_OPS_DOWNSCALE_4x32:
+	{
+		selector1 =
+			_mm512_loadu_epi32( ( float* )post_ops_list_temp->scale_factor +
+							post_op_c_j + ( 0 * 16 ) );
+		selector2 =
+			_mm512_loadu_epi32( ( float* )post_ops_list_temp->scale_factor +
+							post_op_c_j + ( 1 * 16 ) );
+
+		// c[0, 0-15]
+		CVT_MULRND_CVT32_CVT8(c_int32_0p0,selector1,0,0);
+
+		// c[0, 16-31]
+		CVT_MULRND_CVT32_CVT8(c_int32_0p1,selector2,0,1);
+
+		// c[1, 0-15]
+		CVT_MULRND_CVT32_CVT8(c_int32_1p0,selector1,1,0);
+
+		// c[1, 16-31]
+		CVT_MULRND_CVT32_CVT8(c_int32_1p1,selector2,1,1);
+
+		// c[2, 0-15]
+		CVT_MULRND_CVT32_CVT8(c_int32_2p0,selector1,2,0);
+
+		// c[2, 16-31]
+		CVT_MULRND_CVT32_CVT8(c_int32_2p1,selector2,2,1);
+
+		// c[3, 0-15]
+		CVT_MULRND_CVT32_CVT8(c_int32_3p0,selector1,3,0);
+
+		// c[3, 16-31]
+		CVT_MULRND_CVT32_CVT8(c_int32_3p1,selector2,3,1);
+
+		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+	}
 POST_OPS_4x32_DISABLE:
 	;
 	
@@ -2574,7 +2832,8 @@ LPGEMM_MN_FRINGE_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_3x32)
 						  &&POST_OPS_3x32_DISABLE,
 						  &&POST_OPS_BIAS_3x32,
 						  &&POST_OPS_RELU_3x32,
-						  &&POST_OPS_RELU_SCALE_3x32
+						  &&POST_OPS_RELU_SCALE_3x32,
+						  &&POST_OPS_DOWNSCALE_3x32
 						};
 	dim_t k_full_pieces = k0 / 4;
 	dim_t k_partial_pieces = k0 % 4;
@@ -2793,6 +3052,35 @@ POST_OPS_RELU_SCALE_3x32:
 
 		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 	}
+POST_OPS_DOWNSCALE_3x32:
+	{
+		selector1 =
+			_mm512_loadu_epi32( ( float* )post_ops_list_temp->scale_factor +
+							post_op_c_j + ( 0 * 16 ) );
+		selector2 =
+			_mm512_loadu_epi32( ( float* )post_ops_list_temp->scale_factor +
+							post_op_c_j + ( 1 * 16 ) );
+
+		// c[0, 0-15]
+		CVT_MULRND_CVT32_CVT8(c_int32_0p0,selector1,0,0);
+
+		// c[0, 16-31]
+		CVT_MULRND_CVT32_CVT8(c_int32_0p1,selector2,0,1);
+
+		// c[1, 0-15]
+		CVT_MULRND_CVT32_CVT8(c_int32_1p0,selector1,1,0);
+
+		// c[1, 16-31]
+		CVT_MULRND_CVT32_CVT8(c_int32_1p1,selector2,1,1);
+
+		// c[2, 0-15]
+		CVT_MULRND_CVT32_CVT8(c_int32_2p0,selector1,2,0);
+
+		// c[2, 16-31]
+		CVT_MULRND_CVT32_CVT8(c_int32_2p1,selector2,2,1);
+
+		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+	}
 POST_OPS_3x32_DISABLE:
 	;
 	
@@ -2824,7 +3112,8 @@ LPGEMM_MN_FRINGE_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_2x32)
 						  &&POST_OPS_2x32_DISABLE,
 						  &&POST_OPS_BIAS_2x32,
 						  &&POST_OPS_RELU_2x32,
-						  &&POST_OPS_RELU_SCALE_2x32
+						  &&POST_OPS_RELU_SCALE_2x32,
+						  &&POST_OPS_DOWNSCALE_2x32
 						};
 	dim_t k_full_pieces = k0 / 4;
 	dim_t k_partial_pieces = k0 % 4;
@@ -2992,6 +3281,29 @@ POST_OPS_RELU_SCALE_2x32:
 
 		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 	}
+POST_OPS_DOWNSCALE_2x32:
+	{
+		selector1 =
+			_mm512_loadu_epi32( ( float* )post_ops_list_temp->scale_factor +
+							post_op_c_j + ( 0 * 16 ) );
+		selector2 =
+			_mm512_loadu_epi32( ( float* )post_ops_list_temp->scale_factor +
+							post_op_c_j + ( 1 * 16 ) );
+
+		// c[0, 0-15]
+		CVT_MULRND_CVT32_CVT8(c_int32_0p0,selector1,0,0);
+
+		// c[0, 16-31]
+		CVT_MULRND_CVT32_CVT8(c_int32_0p1,selector2,0,1);
+
+		// c[1, 0-15]
+		CVT_MULRND_CVT32_CVT8(c_int32_1p0,selector1,1,0);
+
+		// c[1, 16-31]
+		CVT_MULRND_CVT32_CVT8(c_int32_1p1,selector2,1,1);
+
+		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+	}
 POST_OPS_2x32_DISABLE:
 	;
 	
@@ -3017,7 +3329,8 @@ LPGEMM_MN_FRINGE_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_1x32)
 						  &&POST_OPS_1x32_DISABLE,
 						  &&POST_OPS_BIAS_1x32,
 						  &&POST_OPS_RELU_1x32,
-						  &&POST_OPS_RELU_SCALE_1x32
+						  &&POST_OPS_RELU_SCALE_1x32,
+						  &&POST_OPS_DOWNSCALE_1x32
 						};
 	dim_t k_full_pieces = k0 / 4;
 	dim_t k_partial_pieces = k0 % 4;
@@ -3134,6 +3447,23 @@ POST_OPS_RELU_SCALE_1x32:
 
 		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 	}
+POST_OPS_DOWNSCALE_1x32:
+	{
+		selector1 =
+			_mm512_loadu_epi32( ( float* )post_ops_list_temp->scale_factor +
+							post_op_c_j + ( 0 * 16 ) );
+		selector2 =
+			_mm512_loadu_epi32( ( float* )post_ops_list_temp->scale_factor +
+							post_op_c_j + ( 1 * 16 ) );
+
+		// c[0, 0-15]
+		CVT_MULRND_CVT32_CVT8(c_int32_0p0,selector1,0,0);
+
+		// c[0, 16-31]
+		CVT_MULRND_CVT32_CVT8(c_int32_0p1,selector2,0,1);
+
+		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+	}
 POST_OPS_1x32_DISABLE:
 	;
 	
@@ -3153,7 +3483,8 @@ LPGEMM_MN_FRINGE_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_5x48)
 						  &&POST_OPS_5x48_DISABLE,
 						  &&POST_OPS_BIAS_5x48,
 						  &&POST_OPS_RELU_5x48,
-						  &&POST_OPS_RELU_SCALE_5x48
+						  &&POST_OPS_RELU_SCALE_5x48,
+						  &&POST_OPS_DOWNSCALE_5x48
 						};
 	dim_t k_full_pieces = k0 / 4;
 	dim_t k_partial_pieces = k0 % 4;
@@ -3570,6 +3901,65 @@ POST_OPS_RELU_SCALE_5x48:
 
 		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 	}
+POST_OPS_DOWNSCALE_5x48:
+	{
+		selector1 =
+			_mm512_loadu_epi32( ( float* )post_ops_list_temp->scale_factor +
+							post_op_c_j + ( 0 * 16 ) );
+		selector2 =
+			_mm512_loadu_epi32( ( float* )post_ops_list_temp->scale_factor +
+							post_op_c_j + ( 1 * 16 ) );
+		a_int32_0 =
+			_mm512_loadu_epi32( ( float* )post_ops_list_temp->scale_factor +
+							post_op_c_j + ( 2 * 16 ) );
+
+		// c[0, 0-15]
+		CVT_MULRND_CVT32_CVT8(c_int32_0p0,selector1,0,0);
+
+		// c[0, 16-31]
+		CVT_MULRND_CVT32_CVT8(c_int32_0p1,selector2,0,1);
+
+		// c[0, 32-47]
+		CVT_MULRND_CVT32_CVT8(c_int32_0p2,a_int32_0,0,2);
+
+		// c[1, 0-15]
+		CVT_MULRND_CVT32_CVT8(c_int32_1p0,selector1,1,0);
+
+		// c[1, 16-31]
+		CVT_MULRND_CVT32_CVT8(c_int32_1p1,selector2,1,1);
+
+		// c[1, 32-47]
+		CVT_MULRND_CVT32_CVT8(c_int32_1p2,a_int32_0,1,2);
+
+		// c[2, 0-15]
+		CVT_MULRND_CVT32_CVT8(c_int32_2p0,selector1,2,0);
+
+		// c[2, 16-31]
+		CVT_MULRND_CVT32_CVT8(c_int32_2p1,selector2,2,1);
+
+		// c[2, 32-47]
+		CVT_MULRND_CVT32_CVT8(c_int32_2p2,a_int32_0,2,2);
+
+		// c[3, 0-15]
+		CVT_MULRND_CVT32_CVT8(c_int32_3p0,selector1,3,0);
+
+		// c[3, 16-31]
+		CVT_MULRND_CVT32_CVT8(c_int32_3p1,selector2,3,1);
+
+		// c[3, 32-47]
+		CVT_MULRND_CVT32_CVT8(c_int32_3p2,a_int32_0,3,2);
+
+		// c[4, 0-15]
+		CVT_MULRND_CVT32_CVT8(c_int32_4p0,selector1,4,0);
+
+		// c[4, 16-31]
+		CVT_MULRND_CVT32_CVT8(c_int32_4p1,selector2,4,1);
+
+		// c[4, 32-47]
+		CVT_MULRND_CVT32_CVT8(c_int32_4p2,a_int32_0,4,2);
+
+		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+	}
 POST_OPS_5x48_DISABLE:
 	;
 
@@ -3628,7 +4018,8 @@ LPGEMM_MN_FRINGE_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_4x48)
 						  &&POST_OPS_4x48_DISABLE,
 						  &&POST_OPS_BIAS_4x48,
 						  &&POST_OPS_RELU_4x48,
-						  &&POST_OPS_RELU_SCALE_4x48
+						  &&POST_OPS_RELU_SCALE_4x48,
+						  &&POST_OPS_DOWNSCALE_4x48
 						};
 	dim_t k_full_pieces = k0 / 4;
 	dim_t k_partial_pieces = k0 % 4;
@@ -3976,6 +4367,56 @@ POST_OPS_RELU_SCALE_4x48:
 
 		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 	}
+POST_OPS_DOWNSCALE_4x48:
+	{
+		selector1 =
+			_mm512_loadu_epi32( ( float* )post_ops_list_temp->scale_factor +
+							post_op_c_j + ( 0 * 16 ) );
+		selector2 =
+			_mm512_loadu_epi32( ( float* )post_ops_list_temp->scale_factor +
+							post_op_c_j + ( 1 * 16 ) );
+		a_int32_0 =
+			_mm512_loadu_epi32( ( float* )post_ops_list_temp->scale_factor +
+							post_op_c_j + ( 2 * 16 ) );
+
+		// c[0, 0-15]
+		CVT_MULRND_CVT32_CVT8(c_int32_0p0,selector1,0,0);
+
+		// c[0, 16-31]
+		CVT_MULRND_CVT32_CVT8(c_int32_0p1,selector2,0,1);
+
+		// c[0, 32-47]
+		CVT_MULRND_CVT32_CVT8(c_int32_0p2,a_int32_0,0,2);
+
+		// c[1, 0-15]
+		CVT_MULRND_CVT32_CVT8(c_int32_1p0,selector1,1,0);
+
+		// c[1, 16-31]
+		CVT_MULRND_CVT32_CVT8(c_int32_1p1,selector2,1,1);
+
+		// c[1, 32-47]
+		CVT_MULRND_CVT32_CVT8(c_int32_1p2,a_int32_0,1,2);
+
+		// c[2, 0-15]
+		CVT_MULRND_CVT32_CVT8(c_int32_2p0,selector1,2,0);
+
+		// c[2, 16-31]
+		CVT_MULRND_CVT32_CVT8(c_int32_2p1,selector2,2,1);
+
+		// c[2, 32-47]
+		CVT_MULRND_CVT32_CVT8(c_int32_2p2,a_int32_0,2,2);
+
+		// c[3, 0-15]
+		CVT_MULRND_CVT32_CVT8(c_int32_3p0,selector1,3,0);
+
+		// c[3, 16-31]
+		CVT_MULRND_CVT32_CVT8(c_int32_3p1,selector2,3,1);
+
+		// c[3, 32-47]
+		CVT_MULRND_CVT32_CVT8(c_int32_3p2,a_int32_0,3,2);
+
+		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+	}
 POST_OPS_4x48_DISABLE:
 	;
 	
@@ -4025,7 +4466,8 @@ LPGEMM_MN_FRINGE_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_3x48)
 						  &&POST_OPS_3x48_DISABLE,
 						  &&POST_OPS_BIAS_3x48,
 						  &&POST_OPS_RELU_3x48,
-						  &&POST_OPS_RELU_SCALE_3x48
+						  &&POST_OPS_RELU_SCALE_3x48,
+						  &&POST_OPS_DOWNSCALE_3x48
 						};
 	dim_t k_full_pieces = k0 / 4;
 	dim_t k_partial_pieces = k0 % 4;
@@ -4304,6 +4746,47 @@ POST_OPS_RELU_SCALE_3x48:
 
 		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 	}
+POST_OPS_DOWNSCALE_3x48:
+	{
+		selector1 =
+			_mm512_loadu_epi32( ( float* )post_ops_list_temp->scale_factor +
+							post_op_c_j + ( 0 * 16 ) );
+		selector2 =
+			_mm512_loadu_epi32( ( float* )post_ops_list_temp->scale_factor +
+							post_op_c_j + ( 1 * 16 ) );
+		a_int32_0 =
+			_mm512_loadu_epi32( ( float* )post_ops_list_temp->scale_factor +
+							post_op_c_j + ( 2 * 16 ) );
+
+		// c[0, 0-15]
+		CVT_MULRND_CVT32_CVT8(c_int32_0p0,selector1,0,0);
+
+		// c[0, 16-31]
+		CVT_MULRND_CVT32_CVT8(c_int32_0p1,selector2,0,1);
+
+		// c[0, 32-47]
+		CVT_MULRND_CVT32_CVT8(c_int32_0p2,a_int32_0,0,2);
+
+		// c[1, 0-15]
+		CVT_MULRND_CVT32_CVT8(c_int32_1p0,selector1,1,0);
+
+		// c[1, 16-31]
+		CVT_MULRND_CVT32_CVT8(c_int32_1p1,selector2,1,1);
+
+		// c[1, 32-47]
+		CVT_MULRND_CVT32_CVT8(c_int32_1p2,a_int32_0,1,2);
+
+		// c[2, 0-15]
+		CVT_MULRND_CVT32_CVT8(c_int32_2p0,selector1,2,0);
+
+		// c[2, 16-31]
+		CVT_MULRND_CVT32_CVT8(c_int32_2p1,selector2,2,1);
+
+		// c[2, 32-47]
+		CVT_MULRND_CVT32_CVT8(c_int32_2p2,a_int32_0,2,2);
+
+		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+	}
 POST_OPS_3x48_DISABLE:
 	;
 	
@@ -4344,7 +4827,8 @@ LPGEMM_MN_FRINGE_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_2x48)
 						  &&POST_OPS_2x48_DISABLE,
 						  &&POST_OPS_BIAS_2x48,
 						  &&POST_OPS_RELU_2x48,
-						  &&POST_OPS_RELU_SCALE_2x48
+						  &&POST_OPS_RELU_SCALE_2x48,
+						  &&POST_OPS_DOWNSCALE_2x48
 						};
 	dim_t k_full_pieces = k0 / 4;
 	dim_t k_partial_pieces = k0 % 4;
@@ -4554,6 +5038,38 @@ POST_OPS_RELU_SCALE_2x48:
 
 		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 	}
+POST_OPS_DOWNSCALE_2x48:
+	{
+		selector1 =
+			_mm512_loadu_epi32( ( float* )post_ops_list_temp->scale_factor +
+							post_op_c_j + ( 0 * 16 ) );
+		selector2 =
+			_mm512_loadu_epi32( ( float* )post_ops_list_temp->scale_factor +
+							post_op_c_j + ( 1 * 16 ) );
+		a_int32_0 =
+			_mm512_loadu_epi32( ( float* )post_ops_list_temp->scale_factor +
+							post_op_c_j + ( 2 * 16 ) );
+
+		// c[0, 0-15]
+		CVT_MULRND_CVT32_CVT8(c_int32_0p0,selector1,0,0);
+
+		// c[0, 16-31]
+		CVT_MULRND_CVT32_CVT8(c_int32_0p1,selector2,0,1);
+
+		// c[0, 32-47]
+		CVT_MULRND_CVT32_CVT8(c_int32_0p2,a_int32_0,0,2);
+
+		// c[1, 0-15]
+		CVT_MULRND_CVT32_CVT8(c_int32_1p0,selector1,1,0);
+
+		// c[1, 16-31]
+		CVT_MULRND_CVT32_CVT8(c_int32_1p1,selector2,1,1);
+
+		// c[1, 32-47]
+		CVT_MULRND_CVT32_CVT8(c_int32_1p2,a_int32_0,1,2);
+
+		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+	}
 POST_OPS_2x48_DISABLE:
 	;
 	
@@ -4585,7 +5101,8 @@ LPGEMM_MN_FRINGE_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_1x48)
 						  &&POST_OPS_1x48_DISABLE,
 						  &&POST_OPS_BIAS_1x48,
 						  &&POST_OPS_RELU_1x48,
-						  &&POST_OPS_RELU_SCALE_1x48
+						  &&POST_OPS_RELU_SCALE_1x48,
+						  &&POST_OPS_DOWNSCALE_1x48
 						};
 	dim_t k_full_pieces = k0 / 4;
 	dim_t k_partial_pieces = k0 % 4;
@@ -4723,6 +5240,29 @@ POST_OPS_RELU_SCALE_1x48:
 
 		// c[0, 32-47]
 		RELU_SCALE_OP_S32_AVX512(c_int32_0p2)
+
+		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+	}
+POST_OPS_DOWNSCALE_1x48:
+	{
+		selector1 =
+			_mm512_loadu_epi32( ( float* )post_ops_list_temp->scale_factor +
+							post_op_c_j + ( 0 * 16 ) );
+		selector2 =
+			_mm512_loadu_epi32( ( float* )post_ops_list_temp->scale_factor +
+							post_op_c_j + ( 1 * 16 ) );
+		a_int32_0 =
+			_mm512_loadu_epi32( ( float* )post_ops_list_temp->scale_factor +
+							post_op_c_j + ( 2 * 16 ) );
+
+		// c[0, 0-15]
+		CVT_MULRND_CVT32_CVT8(c_int32_0p0,selector1,0,0);
+
+		// c[0, 16-31]
+		CVT_MULRND_CVT32_CVT8(c_int32_0p1,selector2,0,1);
+
+		// c[0, 32-47]
+		CVT_MULRND_CVT32_CVT8(c_int32_0p2,a_int32_0,0,2);
 
 		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 	}

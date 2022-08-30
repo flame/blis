@@ -100,5 +100,8 @@ AOCL_GEMM_MATMUL(float,float,float,f32f32f32of32);
 AOCL_GEMM_MATMUL(uint8_t,int8_t,int32_t,u8s8s32os32);
 AOCL_GEMM_MATMUL(uint8_t,int8_t,int16_t,u8s8s16os16);
 AOCL_GEMM_MATMUL(bfloat16,bfloat16,float,bf16bf16f32of32);
+AOCL_GEMM_MATMUL(uint8_t,int8_t,int8_t,u8s8s32os8);
+AOCL_GEMM_MATMUL(uint8_t,int8_t,int8_t,u8s8s16os8);
+AOCL_GEMM_MATMUL(bfloat16,bfloat16,bfloat16,bf16bf16f32obf16);
 
 #endif // AOCL_GEMM_INTERFACE_H

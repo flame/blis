@@ -80,7 +80,7 @@ LPGEMM_MAIN_KERN(uint8_t,int8_t,int16_t,u8s8s16o16_6x32)
 				alpha, beta,
 				is_last_k,
 				post_op_c_i, post_op_c_j,
-				post_ops_list);
+				post_ops_list, rs_c_downscale);
 
 			b = b + (16 * k0_updated);
 			c = c + 16;
@@ -97,7 +97,7 @@ LPGEMM_MAIN_KERN(uint8_t,int8_t,int16_t,u8s8s16o16_6x32)
 				alpha, beta, n0_rem,
 				is_last_k,
 				post_op_c_i, post_op_c_j,
-				post_ops_list);
+				post_ops_list, rs_c_downscale);
 		}
 
 		// If fringe cases are encountered, return early
@@ -627,7 +627,7 @@ POST_OPS_6x32_DISABLE:
 				alpha, beta,
 				is_last_k,
 				post_op_c_i, post_op_c_j,
-				post_ops_list);
+				post_ops_list, rs_c_downscale);
 
 			// a pointer increment
 			a = a + (4 * ps_a);
@@ -644,7 +644,7 @@ POST_OPS_6x32_DISABLE:
 				alpha, beta,
 				is_last_k,
 				post_op_c_i, post_op_c_j,
-				post_ops_list);
+				post_ops_list, rs_c_downscale);
 
 			// a pointer increment
 			a = a + (2 * ps_a);
@@ -660,7 +660,7 @@ POST_OPS_6x32_DISABLE:
 				(c + (rs_c * m_full_pieces_loop_limit)), rs_c,
 				alpha, beta,is_last_k,
 				post_op_c_i, post_op_c_j,
-				post_ops_list);
+				post_ops_list, rs_c_downscale);
 		}
 	}
 }

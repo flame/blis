@@ -48,6 +48,7 @@ typedef enum
 	SUM = 1,
 	ELTWISE = 2,
 	BIAS = 3,
+	SCALE = 4,
 } AOCL_POST_OP_TYPE;
 
 typedef struct
@@ -63,7 +64,7 @@ typedef struct
 	void* scale_factor;
 	void* buff;
 	void* zero_point;
-} aocl_post_op_sum;
+} aocl_post_op_sum; // Also use for scale.
 
 typedef struct
 {

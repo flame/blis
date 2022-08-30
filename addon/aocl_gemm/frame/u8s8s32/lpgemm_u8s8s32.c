@@ -68,6 +68,8 @@ LPGEMM_5LOOP(uint8_t,int8_t,int32_t,u8s8s32o32)
 
 	int32_t* c_use_jc = NULL;
 	int32_t* c_use_ic = NULL;
+	dim_t rs_c_use = rs_c;
+	dim_t rs_c_downscale = rs_c;
 
 	// Pack buffer for A.
 	uint8_t* pack_a_buffer_u8s8s32o32;
@@ -79,6 +81,11 @@ LPGEMM_5LOOP(uint8_t,int8_t,int32_t,u8s8s32o32)
 	mem_t mem_b = BLIS_MEM_INITIALIZER;
 	siz_t mem_b_size_req = 0;
 	dim_t packb_min_NR = get_packb_u8s8s32o32_min_NR();
+
+	// Temporary buffer for C accumulation when downscaling is required.
+	int32_t* temp_scal_c_buffer_u8s8s32o32;
+	mem_t mem_scale_c = BLIS_MEM_INITIALIZER;
+	siz_t mem_scale_c_size_req = 0;
 
 	// kc needs to be a multiple of 4 so that it can be used with vpdpbusd
 	// instruction. Padding is added in cases this condition is not
@@ -95,14 +102,16 @@ LPGEMM_5LOOP(uint8_t,int8_t,int32_t,u8s8s32o32)
 
 	lpgemm_gen_thrinfo( thread, &thread_jc, &thread_ic );
 
-	// Compute the JC loop thread range for the current thread.
+	// Compute the JC, IC loop thread range for the current thread.
 	dim_t jc_start, jc_end;
 	bli_thread_range_sub( &thread_jc, n, NR, FALSE, &jc_start, &jc_end );
+
+	dim_t ic_start, ic_end;
+	bli_thread_range_sub( &thread_ic, m, MR, FALSE, &ic_start, &ic_end );
 
 	for ( dim_t jc = jc_start; jc < jc_end; jc += NC )
 	{
 		dim_t nc0 = bli_min( ( jc_end - jc ), NC );
-		c_use_jc = c + jc;
 
 		dim_t jc_cur_loop = jc;
 		dim_t jc_cur_loop_rem = 0;
@@ -116,6 +125,47 @@ LPGEMM_5LOOP(uint8_t,int8_t,int32_t,u8s8s32o32)
 			  &jc_cur_loop, &jc_cur_loop_rem,
 			  &nc0, &n_sub_updated
 			);
+		}
+
+		if ( c_downscale == FALSE )
+		{
+			c_use_jc = c + jc;
+		}
+		// Temp accumulaton buffer for C allocation.
+		else if ( c_downscale == TRUE )
+		{
+			mem_scale_c_size_req = sizeof( int32_t ) * nc0 * ( ic_end - ic_start );
+
+			lpgemm_alloc_mem_panel
+			(
+			  mem_scale_c_size_req, BLIS_BUFFER_FOR_C_PANEL,
+			  &mem_scale_c, rntm
+			);
+
+			temp_scal_c_buffer_u8s8s32o32 = bli_mem_buffer( &mem_scale_c );
+
+			c_use_jc = ( int32_t* )temp_scal_c_buffer_u8s8s32o32;
+
+			if ( beta != 0 )
+			{
+				dim_t i_temp = 0;
+				dim_t j_temp = 0;
+				// Upscale out C to temporary C matrix.
+				for ( dim_t i_dscale = ic_start; i_dscale < ic_end; ++i_dscale )
+				{
+					j_temp = 0;
+					for ( dim_t j_dscale = jc; j_dscale < nc0; ++j_dscale )
+					{
+						*( temp_scal_c_buffer_u8s8s32o32 + ( nc0 * i_temp ) + j_temp ) =
+								( int32_t )( *( c + ( rs_c * i_dscale ) + j_dscale ) );
+						j_temp++;
+					}
+					i_temp++;
+				}
+			}
+
+			// The temp c buffer stride is modified as opposed to original C matrix.
+			rs_c_use = nc0;
 		}
 
 		for ( dim_t pc = 0; pc < k; pc += KC )
@@ -227,13 +277,11 @@ LPGEMM_5LOOP(uint8_t,int8_t,int32_t,u8s8s32o32)
 				return;
 			}
 
-			dim_t ic_start, ic_end;
-			bli_thread_range_sub( &thread_ic, m, MR, FALSE, &ic_start, &ic_end );
-
 			for ( dim_t ic = ic_start; ic < ic_end; ic += MC )
 			{
 				dim_t mc0 = bli_min( ( ic_end - ic ), MC );
-				c_use_ic = c_use_jc + ( rs_c * ic );
+
+				c_use_ic = c_use_jc + ( rs_c_use * ic );
 
 				// Matrix A packed and reordered code path is not triggerred
 				// currently since we do not support it yet.
@@ -285,9 +333,9 @@ LPGEMM_5LOOP(uint8_t,int8_t,int32_t,u8s8s32o32)
 					  mc0, nr0, kc0,
 					  a_use, rs_a_use, cs_a_use, a_block_stride,
 					  ( b_use + ( jr * kc0_updated ) ), rs_b_use, cs_b_use,
-					  ( c_use_ic + jr ), rs_c, 1,
+					  ( c_use_ic + jr ), rs_c_use, 1,
 					  alpha, beta0,
-					  is_last_k, ic, ( jc + jr ), post_op_list
+					  is_last_k, ic, ( jc + jr ), post_op_list, rs_c_downscale
 					);
 				}
 			}
@@ -322,6 +370,13 @@ LPGEMM_5LOOP(uint8_t,int8_t,int32_t,u8s8s32o32)
 		if ( bli_mem_is_alloc( &mem_a ) )
 		{
 			bli_membrk_release( rntm, &mem_a );
+		}
+	}
+	if ( c_downscale == TRUE )
+	{
+		if ( bli_mem_is_alloc( &mem_scale_c ) )
+		{
+			bli_membrk_release( rntm, &mem_scale_c );
 		}
 	}
 }

@@ -390,7 +390,7 @@ POST_OPS_6x16_DISABLE:
 				alpha, beta,
 				is_last_k,
 				post_op_c_i, post_op_c_j,
-				post_ops_list);
+				post_ops_list, rs_c_downscale);
 
 			// a pointer increment
 			a = a + (4 * ps_a);
@@ -407,7 +407,7 @@ POST_OPS_6x16_DISABLE:
 				alpha, beta,
 				is_last_k,
 				post_op_c_i, post_op_c_j,
-				post_ops_list);
+				post_ops_list, rs_c_downscale);
 
 			// a pointer increment
 			a = a + (2 * ps_a);
@@ -424,7 +424,7 @@ POST_OPS_6x16_DISABLE:
 				alpha, beta,
 				is_last_k,
 				post_op_c_i, post_op_c_j,
-				post_ops_list);
+				post_ops_list, rs_c_downscale);
 		}
 	}
 }
@@ -813,7 +813,7 @@ POST_OPS_6xlt16_DISABLE:
 				alpha, beta, n0_rem,
 				is_last_k,
 				post_op_c_i, post_op_c_j,
-				post_ops_list);
+				post_ops_list, rs_c_downscale);
 
 			// a pointer increment
 			a = a + (4 * ps_a);
@@ -830,7 +830,7 @@ POST_OPS_6xlt16_DISABLE:
 				alpha, beta, n0_rem,
 				is_last_k,
 				post_op_c_i, post_op_c_j,
-				post_ops_list);
+				post_ops_list, rs_c_downscale);
 
 			// a pointer increment
 			a = a + (2 * ps_a);
@@ -847,7 +847,7 @@ POST_OPS_6xlt16_DISABLE:
 				alpha, beta, n0_rem,
 				is_last_k,
 				post_op_c_i, post_op_c_j,
-				post_ops_list);
+				post_ops_list, rs_c_downscale);
 		}
 	}
 }

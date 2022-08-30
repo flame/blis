@@ -41,7 +41,8 @@ typedef enum
 	POST_OPS_BIAS = 1,
 	POST_OPS_RELU = 2,
 	POST_OPS_RELU_SCALE = 3,
-	POST_OPS_SUM = 4,
+	POST_OPS_DOWNSCALE = 4,
+	POST_OPS_SUM = 5,
 } LPGEMM_POST_OP_CODE;
 
 // Used as an internal structure.
@@ -50,7 +51,7 @@ typedef struct lpgemm_post_op_t
 	LPGEMM_POST_OP_CODE op_code;
 	void* op_args1;
 	void* op_args2; // alpha, zero_point
-	void* op_args3; // beta
+	void* op_args3; // beta, downscale buffer/original C matrix
 	void* scale_factor;
 	bool is_power_of_2;
 	struct lpgemm_post_op_t* next;
@@ -59,7 +60,8 @@ typedef struct lpgemm_post_op_t
 void lpgemm_translate_to_post_ops_list
      (
        aocl_post_op*   post_op_unparsed,
-       lpgemm_post_op* post_op_list
+       lpgemm_post_op* post_op_list,
+       void*           scale_buffer
      );
 
 #define POST_OP_LABEL_LASTK_SAFE_JUMP \
