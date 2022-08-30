@@ -44,13 +44,6 @@ BLIS_EXPORT_BLAS void PASTEF77(ch,blasname) \
        const f77_int* n, \
        ftype*   x, const f77_int* incx, \
        ftype*   y, const f77_int* incy \
-     ); \
-\
-BLIS_EXPORT_BLAS void PASTEF77S(ch,blasname) \
-     ( \
-       const f77_int* n, \
-       ftype*   x, const f77_int* incx, \
-       ftype*   y, const f77_int* incy \
      );
 
 #ifdef BLIS_ENABLE_BLAS

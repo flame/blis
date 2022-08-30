@@ -141,7 +141,7 @@ void PASTEF77S(ch,blasname) \
     bli_finalize_auto(); \
 }\
 \
-void PASTEF77(ch,blasname) \
+void PASTEF77S(ch,blasname) \
      ( \
        const f77_char* transa, \
        const f77_int*  m, \
@@ -153,7 +153,7 @@ void PASTEF77(ch,blasname) \
              ftype*    y, const f77_int* incy  \
      ) \
 { \
-  PASTEF77S(ch,blasname) \
+  PASTEF77(ch,blasname) \
   ( transa, m, n, alpha, a, lda, x, incx, beta, y, incy ); \
 }
 
