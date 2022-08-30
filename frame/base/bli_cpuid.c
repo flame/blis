@@ -295,14 +295,10 @@ bool bli_cpuid_is_zen4
 	// For zen4 the family id is 0x19
 	if ( family != 0x19 ) return FALSE;
 
-	// Finally, check for specific models:
-	// Zen 4 maps to couple of different model number ranges
-	// we check for all of them.
-	const bool is_arch
-	=
-	(0x10 <= model && model <= 0x1f );
-
-	if ( !is_arch ) return FALSE;
+	// All family 0x19 CPUs that support AVX512 instructions are zen4,
+	// thus no need to check model numbers here. Family 0x19 CPUs that
+	// don't support AVX512 are zen3. Their model ranges are tested in
+	// a separate function below.
 
 	return TRUE;
 }
