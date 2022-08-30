@@ -31,6 +31,7 @@
    OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 */
+#include "aocl_bf16_type.h"
 
 #ifndef LPGEMM_F32_KERN_MACROS_H
 #define LPGEMM_F32_KERN_MACROS_H
@@ -41,5 +42,25 @@
  \
 	/* Apply scaling on for <= 0 elements.*/ \
 	reg = _mm512_mask_mul_ps( reg, relu_cmp_mask, reg, selector2 ); \
+
+#define CVT_F32_BF16(reg,m_ind,n_ind) \
+	_mm256_storeu_epi16 \
+	( \
+	  ( bfloat16* )post_ops_list_temp->op_args3 + \
+	  ( rs_c_downscale * ( post_op_c_i + m_ind ) ) + post_op_c_j + ( n_ind * 16 ), \
+	  (__m256i) \
+		_mm512_cvtneps_pbh( reg ) \	 
+	) \  
+
+#define CVT_F32_BF16_LT16(reg,m_ind,n_ind) \
+	_mm256_storeu_epi16 \
+	( \
+	  buf0, \
+		(__m256i) \
+		_mm512_cvtneps_pbh( reg ) \
+	); \
+	memcpy( ( bfloat16* )post_ops_list_temp->op_args3 + \
+	  ( rs_c_downscale * ( post_op_c_i + m_ind ) ) + post_op_c_j + \
+	  ( n_ind * 16 ) , buf0, ( n0_rem * sizeof( bfloat16 ) ) ); \  
 
 #endif // LPGEMM_F32_KERN_MACROS_H

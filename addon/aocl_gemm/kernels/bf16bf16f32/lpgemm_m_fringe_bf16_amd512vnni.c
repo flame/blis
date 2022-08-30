@@ -47,7 +47,8 @@ LPGEMM_M_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_5x64)
 						  &&POST_OPS_5x64_DISABLE,
 						  &&POST_OPS_BIAS_5x64,
 						  &&POST_OPS_RELU_5x64,
-						  &&POST_OPS_RELU_SCALE_5x64
+						  &&POST_OPS_RELU_SCALE_5x64,
+						  &&POST_OPS_DOWNSCALE_5x64
 						};
 	dim_t k_full_pieces = k0 / 2;
 	dim_t k_partial_pieces = k0 % 2;
@@ -595,6 +596,70 @@ POST_OPS_RELU_SCALE_5x64:
 
 		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 	}
+POST_OPS_DOWNSCALE_5x64:
+	{
+		// c[0, 0-15]
+		CVT_F32_BF16(c_float_0p0,0,0);
+
+		// c[0, 16-31]
+		CVT_F32_BF16(c_float_0p1,0,1);
+
+		// c[0, 32-47]
+		CVT_F32_BF16(c_float_0p2,0,2);
+
+		// c[0, 48-63]
+		CVT_F32_BF16(c_float_0p3,0,3);
+
+		// c[1, 0-15]
+		CVT_F32_BF16(c_float_1p0,1,0);
+
+		// c[1, 16-31]
+		CVT_F32_BF16(c_float_1p1,1,1);
+
+		// c[1, 32-47]
+		CVT_F32_BF16(c_float_1p2,1,2);
+
+		// c[1, 48-63]
+		CVT_F32_BF16(c_float_1p3,1,3);
+
+		// c[2, 0-15]
+		CVT_F32_BF16(c_float_2p0,2,0);
+
+		// c[2, 16-31]
+		CVT_F32_BF16(c_float_2p1,2,1);
+
+		// c[2, 32-47]
+		CVT_F32_BF16(c_float_2p2,2,2);
+
+		// c[2, 48-63]
+		CVT_F32_BF16(c_float_2p3,2,3);
+
+		// c[3, 0-15]
+		CVT_F32_BF16(c_float_3p0,3,0);
+
+		// c[3, 16-31]
+		CVT_F32_BF16(c_float_3p1,3,1);
+
+		// c[3, 32-47]
+		CVT_F32_BF16(c_float_3p2,3,2);
+
+		// c[3, 48-63]
+		CVT_F32_BF16(c_float_3p3,3,3);
+
+		// c[4, 0-15]
+		CVT_F32_BF16(c_float_4p0,4,0);
+
+		// c[4, 16-31]
+		CVT_F32_BF16(c_float_4p1,4,1);
+
+		// c[4, 32-47]
+		CVT_F32_BF16(c_float_4p2,4,2);
+
+		// c[4, 48-63]
+		CVT_F32_BF16(c_float_4p3,4,3);
+
+		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+	}		
 POST_OPS_5x64_DISABLE:
 	;
 	
@@ -668,7 +733,8 @@ LPGEMM_M_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_4x64)
 						  &&POST_OPS_4x64_DISABLE,
 						  &&POST_OPS_BIAS_4x64,
 						  &&POST_OPS_RELU_4x64,
-						  &&POST_OPS_RELU_SCALE_4x64
+						  &&POST_OPS_RELU_SCALE_4x64,
+						  &&POST_OPS_DOWNSCALE_4x64
 						};
 	dim_t k_full_pieces = k0 / 2;
 	dim_t k_partial_pieces = k0 % 2;
@@ -1123,6 +1189,59 @@ POST_OPS_RELU_SCALE_4x64:
 
 		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 	}
+POST_OPS_DOWNSCALE_4x64:
+	{
+		// c[0, 0-15]
+		CVT_F32_BF16(c_float_0p0,0,0);
+
+		// c[0, 16-31]
+		CVT_F32_BF16(c_float_0p1,0,1);
+
+		// c[0, 32-47]
+		CVT_F32_BF16(c_float_0p2,0,2);
+
+		// c[0, 48-63]
+		CVT_F32_BF16(c_float_0p3,0,3);
+
+		// c[1, 0-15]
+		CVT_F32_BF16(c_float_1p0,1,0);
+
+		// c[1, 16-31]
+		CVT_F32_BF16(c_float_1p1,1,1);
+
+		// c[1, 32-47]
+		CVT_F32_BF16(c_float_1p2,1,2);
+
+		// c[1, 48-63]
+		CVT_F32_BF16(c_float_1p3,1,3);
+
+		// c[2, 0-15]
+		CVT_F32_BF16(c_float_2p0,2,0);
+
+		// c[2, 16-31]
+		CVT_F32_BF16(c_float_2p1,2,1);
+
+		// c[2, 32-47]
+		CVT_F32_BF16(c_float_2p2,2,2);
+
+		// c[2, 48-63]
+		CVT_F32_BF16(c_float_2p3,2,3);
+
+		// c[3, 0-15]
+		CVT_F32_BF16(c_float_3p0,3,0);
+
+		// c[3, 16-31]
+		CVT_F32_BF16(c_float_3p1,3,1);
+
+		// c[3, 32-47]
+		CVT_F32_BF16(c_float_3p2,3,2);
+
+		// c[3, 48-63]
+		CVT_F32_BF16(c_float_3p3,3,3);
+
+		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+	}
+
 POST_OPS_4x64_DISABLE:
 	;
 	
@@ -1184,7 +1303,8 @@ LPGEMM_M_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_3x64)
 						  &&POST_OPS_3x64_DISABLE,
 						  &&POST_OPS_BIAS_3x64,
 						  &&POST_OPS_RELU_3x64,
-						  &&POST_OPS_RELU_SCALE_3x64
+						  &&POST_OPS_RELU_SCALE_3x64,
+						  &&POST_OPS_DOWNSCALE_3x64
 						};
 	dim_t k_full_pieces = k0 / 2;
 	dim_t k_partial_pieces = k0 % 2;
@@ -1545,6 +1665,46 @@ POST_OPS_RELU_SCALE_3x64:
 
 		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 	}
+POST_OPS_DOWNSCALE_3x64:
+	{
+		// c[0, 0-15]
+		CVT_F32_BF16(c_float_0p0,0,0);
+
+		// c[0, 16-31]
+		CVT_F32_BF16(c_float_0p1,0,1);
+
+		// c[0, 32-47]
+		CVT_F32_BF16(c_float_0p2,0,2);
+
+		// c[0, 48-63]
+		CVT_F32_BF16(c_float_0p3,0,3);
+
+		// c[1, 0-15]
+		CVT_F32_BF16(c_float_1p0,1,0);
+
+		// c[1, 16-31]
+		CVT_F32_BF16(c_float_1p1,1,1);
+
+		// c[1, 32-47]
+		CVT_F32_BF16(c_float_1p2,1,2);
+
+		// c[1, 48-63]
+		CVT_F32_BF16(c_float_1p3,1,3);
+
+		// c[2, 0-15]
+		CVT_F32_BF16(c_float_2p0,2,0);
+
+		// c[2, 16-31]
+		CVT_F32_BF16(c_float_2p1,2,1);
+
+		// c[2, 32-47]
+		CVT_F32_BF16(c_float_2p2,2,2);
+
+		// c[2, 48-63]
+		CVT_F32_BF16(c_float_2p3,2,3);
+
+		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+	}	
 POST_OPS_3x64_DISABLE:
 	;
 	
@@ -1594,7 +1754,8 @@ LPGEMM_M_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_2x64)
 						  &&POST_OPS_2x64_DISABLE,
 						  &&POST_OPS_BIAS_2x64,
 						  &&POST_OPS_RELU_2x64,
-						  &&POST_OPS_RELU_SCALE_2x64
+						  &&POST_OPS_RELU_SCALE_2x64,
+						  &&POST_OPS_DOWNSCALE_2x64
 						};
 	dim_t k_full_pieces = k0 / 2;
 	dim_t k_partial_pieces = k0 % 2;
@@ -1861,6 +2022,34 @@ POST_OPS_RELU_SCALE_2x64:
 
 		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 	}
+	POST_OPS_DOWNSCALE_2x64:
+	{
+		// c[0, 0-15]
+		CVT_F32_BF16(c_float_0p0,0,0);
+
+		// c[0, 16-31]
+		CVT_F32_BF16(c_float_0p1,0,1);
+
+		// c[0, 32-47]
+		CVT_F32_BF16(c_float_0p2,0,2);
+
+		// c[0, 48-63]
+		CVT_F32_BF16(c_float_0p3,0,3);
+
+		// c[1, 0-15]
+		CVT_F32_BF16(c_float_1p0,1,0);
+
+		// c[1, 16-31]
+		CVT_F32_BF16(c_float_1p1,1,1);
+
+		// c[1, 32-47]
+		CVT_F32_BF16(c_float_1p2,1,2);
+
+		// c[1, 48-63]
+		CVT_F32_BF16(c_float_1p3,1,3);
+
+		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+	}
 POST_OPS_2x64_DISABLE:
 	;
 	
@@ -1898,7 +2087,8 @@ LPGEMM_M_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_1x64)
 						  &&POST_OPS_1x64_DISABLE,
 						  &&POST_OPS_BIAS_1x64,
 						  &&POST_OPS_RELU_1x64,
-						  &&POST_OPS_RELU_SCALE_1x64
+						  &&POST_OPS_RELU_SCALE_1x64,
+						  &&POST_OPS_DOWNSCALE_1x64
 						};
 	dim_t k_full_pieces = k0 / 2;
 	dim_t k_partial_pieces = k0 % 2;
@@ -2061,6 +2251,22 @@ POST_OPS_RELU_SCALE_1x64:
 
 		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 	}
+POST_OPS_DOWNSCALE_1x64:
+	{
+		// c[0, 0-15]
+		CVT_F32_BF16(c_float_0p0,0,0);
+
+		// c[0, 16-31]
+		CVT_F32_BF16(c_float_0p1,0,1);
+
+		// c[0, 32-47]
+		CVT_F32_BF16(c_float_0p2,0,2);
+
+		// c[0, 48-63]
+		CVT_F32_BF16(c_float_0p3,0,3);
+
+		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+	}	
 POST_OPS_1x64_DISABLE:
 	;
     
