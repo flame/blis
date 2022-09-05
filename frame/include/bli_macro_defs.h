@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2018-2021, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2018-2022, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -162,11 +162,13 @@
 #define PASTEF77(ch1,name)                     ch1        ## name
 #define PASTEF772(ch1,ch2,name)                ch1 ## ch2 ## name
 #define PASTEF773(ch1,ch2,ch3,name)     ch1 ## ch2 ## ch3 ## name
+#define PASTEF77S(ch1,name)            ch1        ## name ## _blis_impl
 #else
 #define PASTEF770(name)                                      name ## _
 #define PASTEF77(ch1,name)                     ch1        ## name ## _
 #define PASTEF772(ch1,ch2,name)                ch1 ## ch2 ## name ## _
 #define PASTEF773(ch1,ch2,ch3,name)     ch1 ## ch2 ## ch3 ## name ## _
+#define PASTEF77S(ch1,name)            ch1        ## name ## _blis_impl
 #endif
 
 // -- Include other groups of macros

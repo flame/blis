@@ -7,7 +7,7 @@
  *
  * (Heavily hacked down from the original)
  *
- * Copyright (C) 2020 - 2021, Advanced Micro Devices, Inc. All rights reserved.
+ * Copyright (C) 2020 - 2022, Advanced Micro Devices, Inc. All rights reserved.
  *
  */
 
@@ -326,40 +326,40 @@
 /*
 * Level 3 BLAS
 */
-#define F77_chemm  chemm_
-#define F77_cherk  cherk_
-#define F77_cher2k cher2k_
-#define F77_zhemm  zhemm_
-#define F77_zherk  zherk_
-#define F77_zher2k zher2k_
-#define F77_sgemm  sgemm_
-#define F77_ssymm  ssymm_
-#define F77_ssyrk  ssyrk_
-#define F77_ssyr2k ssyr2k_
-#define F77_strmm  strmm_
-#define F77_strsm  strsm_
-#define F77_dgemm  dgemm_
-#define F77_dsymm  dsymm_
-#define F77_dsyrk  dsyrk_
-#define F77_dsyr2k dsyr2k_
-#define F77_dtrmm  dtrmm_
-#define F77_dtrsm  dtrsm_
-#define F77_cgemm  cgemm_
-#define F77_csymm  csymm_
-#define F77_csyrk  csyrk_
-#define F77_csyr2k csyr2k_
-#define F77_ctrmm  ctrmm_
-#define F77_ctrsm  ctrsm_
-#define F77_zgemm  zgemm_
-#define F77_zsymm  zsymm_
-#define F77_zsyrk  zsyrk_
-#define F77_zsyr2k zsyr2k_
-#define F77_ztrmm  ztrmm_
-#define F77_ztrsm  ztrsm_
-#define F77_dgemmt  dgemmt_
-#define F77_sgemmt  sgemmt_
-#define F77_cgemmt  cgemmt_
-#define F77_zgemmt  zgemmt_
+#define F77_chemm  chemm_blis_impl
+#define F77_cherk  cherk_blis_impl
+#define F77_cher2k cher2k_blis_impl
+#define F77_zhemm  zhemm_blis_impl
+#define F77_zherk  zherk_blis_impl
+#define F77_zher2k zher2k_blis_impl
+#define F77_sgemm  sgemm_blis_impl
+#define F77_ssymm  ssymm_blis_impl
+#define F77_ssyrk  ssyrk_blis_impl
+#define F77_ssyr2k ssyr2k_blis_impl
+#define F77_strmm  strmm_blis_impl
+#define F77_strsm  strsm_blis_impl
+#define F77_dgemm  dgemm_blis_impl
+#define F77_dsymm  dsymm_blis_impl
+#define F77_dsyrk  dsyrk_blis_impl
+#define F77_dsyr2k dsyr2k_blis_impl
+#define F77_dtrmm  dtrmm_blis_impl
+#define F77_dtrsm  dtrsm_blis_impl
+#define F77_cgemm  cgemm_blis_impl
+#define F77_csymm  csymm_blis_impl
+#define F77_csyrk  csyrk_blis_impl
+#define F77_csyr2k csyr2k_blis_impl
+#define F77_ctrmm  ctrmm_blis_impl
+#define F77_ctrsm  ctrsm_blis_impl
+#define F77_zgemm  zgemm_blis_impl
+#define F77_zsymm  zsymm_blis_impl
+#define F77_zsyrk  zsyrk_blis_impl
+#define F77_zsyr2k zsyr2k_blis_impl
+#define F77_ztrmm  ztrmm_blis_impl
+#define F77_ztrsm  ztrsm_blis_impl
+#define F77_dgemmt  dgemmt_blis_impl
+#define F77_sgemmt  sgemmt_blis_impl
+#define F77_cgemmt  cgemmt_blis_impl
+#define F77_zgemmt  zgemmt_blis_impl
 
 /*
 * Aux Function
@@ -375,8 +375,8 @@
 #define F77_daxpby     daxpby_
 #define F77_caxpby     caxpby_
 #define F77_zaxpby     zaxpby_
-#define F77_cgemm3m    cgemm3m_
-#define F77_zgemm3m    zgemm3m_
+#define F77_cgemm3m    cgemm3m_blis_impl
+#define F77_zgemm3m    zgemm3m_blis_impl
 
 #define F77_isamin_sub isaminsub_
 #define F77_idamin_sub idaminsub_
