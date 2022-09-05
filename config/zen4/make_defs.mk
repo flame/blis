@@ -86,10 +86,15 @@ ifeq ($(shell test $(GCC_VERSION) -ge 9; echo $$?),0)
 CKVECFLAGS     +=  -march=znver2 -mavx512f -mavx512dq -mavx512bw -mavx512vl -mavx512vnni -mfpmath=sse
 CRVECFLAGS     +=  -march=znver2
 else
-# If gcc is older than 9.1.0 but at least 6.1.0, then we can use -march=znver1
+ifeq ($(shell test $(GCC_VERSION) -ge 8; echo $$?),0)
+CKVECFLAGS     +=  -march=znver1 -mavx512f -mavx512dq -mavx512bw -mavx512vl -mavx512vnni -mfpmath=sse
+CRVECFLAGS     +=  -march=znver1
+else
+# If gcc is older than 8.0.0 but at least 6.1.0, then we can use -march=znver1
 # as the fallback option.
 CKVECFLAGS += -march=znver1 -mno-avx256-split-unaligned-store
 CRVECFLAGS += -march=znver1 -mno-avx256-split-unaligned-store
+endif # GCC 8
 endif # GCC 9
 endif # GCC 11
 endif # GCC 12
