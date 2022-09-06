@@ -362,6 +362,7 @@ BLIS_INLINE void lpgemm_bf16bf16f32of32_get_threading
 	{
 
 		dim_t NR = lpgemm_get_block_size_NR_global_cntx( BF16BF16F32OF32 );
+		dim_t MR = lpgemm_get_block_size_MR_global_cntx( BF16BF16F32OF32 );
 
 		if ( n <= NR )
 		{
@@ -374,6 +375,12 @@ BLIS_INLINE void lpgemm_bf16bf16f32of32_get_threading
 		{
 			// If BLIS_NUM_THREADS are set, generate jc,ic from the same.
 			bli_thread_partition_2x2( ( *n_threads ), m, n, ic_ways, jc_ways );
+			lpgemm_adjust_ic_jc_ways( m, n, n_threads, ic_ways, jc_ways );
+			lpgemm_pnl_wrk_heur_adjust_ic_jc_ways
+			(
+			  MR, NR, m, n,
+			  n_threads, ic_ways, jc_ways
+			);
 		}
 	}
 	else

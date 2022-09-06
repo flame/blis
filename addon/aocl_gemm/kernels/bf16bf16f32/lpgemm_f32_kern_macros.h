@@ -49,8 +49,8 @@
 	  ( bfloat16* )post_ops_list_temp->op_args3 + \
 	  ( rs_c_downscale * ( post_op_c_i + m_ind ) ) + post_op_c_j + ( n_ind * 16 ), \
 	  (__m256i) \
-		_mm512_cvtneps_pbh( reg ) \	 
-	) \  
+		_mm512_cvtneps_pbh( reg ) \
+	) \
 
 #define CVT_F32_BF16_LT16(reg,m_ind,n_ind) \
 	_mm256_storeu_epi16 \
@@ -61,6 +61,6 @@
 	); \
 	memcpy( ( bfloat16* )post_ops_list_temp->op_args3 + \
 	  ( rs_c_downscale * ( post_op_c_i + m_ind ) ) + post_op_c_j + \
-	  ( n_ind * 16 ) , buf0, ( n0_rem * sizeof( bfloat16 ) ) ); \  
+	  ( n_ind * 16 ) , buf0, ( n0_rem * sizeof( bfloat16 ) ) ); \
 
 #endif // LPGEMM_F32_KERN_MACROS_H
