@@ -54,7 +54,7 @@ void bli_gemmsup_ref_var1n
 {
 	const num_t  dt      = bli_obj_dt( c );
 
-    const dim_t  dt_size = bli_dt_size( dt );
+	const dim_t  dt_size = bli_dt_size( dt );
 
 	      bool   packa   = bli_rntm_pack_a( rntm );
 	      bool   packb   = bli_rntm_pack_b( rntm );
@@ -146,7 +146,10 @@ void bli_gemmsup_ref_var1n
 	const dim_t MC0 = bli_cntx_get_l3_sup_blksz_def_dt( dt, BLIS_MC, cntx );
 	const dim_t KC0 = bli_cntx_get_l3_sup_blksz_def_dt( dt, BLIS_KC, cntx );
 
-	dim_t KC;
+	/* Disable modification of KC since it seems to negatively impact certain operations (#644). */
+	dim_t KC = KC0;
+
+	/*
 	if      ( packa && packb )
 	{
 		KC = KC0;
@@ -171,7 +174,7 @@ void bli_gemmsup_ref_var1n
 		          stor_id == BLIS_CCR    ) KC = (( KC0 / 4 ) / 4 ) * 4;
 		else                               KC = KC0;
 	}
-	else /* if ( !packa && !packb ) */
+	else *//* if ( !packa && !packb ) *//*
 	{
 		if      ( FALSE                  ) KC = KC0;
 		else if ( stor_id == BLIS_RRC ||
@@ -182,6 +185,7 @@ void bli_gemmsup_ref_var1n
 		else if ( m <= 4*MR && n <= 4*NR ) KC = KC0 / 4;
 		else                               KC = (( KC0 / 5 ) / 4 ) * 4;
 	}
+	*/
 
 	/* Nudge NC up to a multiple of MR and MC up to a multiple of NR.
 	   NOTE: This is unique to variant 1 (ie: not performed in variant 2)
@@ -220,7 +224,7 @@ void bli_gemmsup_ref_var1n
 	const char* a_00       = buf_a;
 	const char* b_00       = buf_b;
 	      char* c_00       = buf_c;
-    const void* one        = bli_obj_buffer_for_const( dt, &BLIS_ONE );
+	const void* one        = bli_obj_buffer_for_const( dt, &BLIS_ONE );
 
 	auxinfo_t aux;
 
@@ -240,19 +244,8 @@ void bli_gemmsup_ref_var1n
 	   That is, this panel-block algorithm partitions an NC x KC submatrix
 	   of A to be packed in the 4th loop, and a KC x MC submatrix of B
 	   to be packed in the 3rd loop. */
-	/*                                  5thloop  4thloop         packa  3rdloop         packb  2ndloop  1stloop  ukrloop */
-	bszid_t bszids_nopack[6] = { BLIS_NC, BLIS_KC,               BLIS_MC,               BLIS_NR, BLIS_MR, BLIS_KR };
-	bszid_t bszids_packa [7] = { BLIS_NC, BLIS_KC, BLIS_NO_PART, BLIS_MC,               BLIS_NR, BLIS_MR, BLIS_KR };
-	bszid_t bszids_packb [7] = { BLIS_NC, BLIS_KC,               BLIS_MC, BLIS_NO_PART, BLIS_NR, BLIS_MR, BLIS_KR };
-	bszid_t bszids_packab[8] = { BLIS_NC, BLIS_KC, BLIS_NO_PART, BLIS_MC, BLIS_NO_PART, BLIS_NR, BLIS_MR, BLIS_KR };
-	bszid_t* bszids;
-\
-	/* Set the bszids pointer to the correct bszids array above based on which
-	   matrices (if any) are being packed. */
-	if ( packa ) { if ( packb ) bszids = bszids_packab;
-	               else         bszids = bszids_packa; }
-	else         { if ( packb ) bszids = bszids_packb;
-	               else         bszids = bszids_nopack; }
+	/*                    5thloop  4thloop         packa  3rdloop         packb  2ndloop  1stloop  ukrloop */
+	bszid_t bszids[8] = { BLIS_NC, BLIS_KC, BLIS_NO_PART, BLIS_MC, BLIS_NO_PART, BLIS_NR, BLIS_MR, BLIS_KR };
 \
 	/* Determine whether we are using more than one thread. */
 	const bool is_mt = ( bli_rntm_calc_num_threads( rntm ) > 1 );
@@ -273,21 +266,15 @@ void bli_gemmsup_ref_var1n
 	         thread_pc = bli_thrinfo_sub_node( thread_jc );
 	bli_thrinfo_sup_grow( rntm, bszids_pc, thread_pc );
 
-	bszid_t* bszids_pa;
-	if ( packa ) { bszids_pa = &bszids_pc[1];
-	               thread_pa = bli_thrinfo_sub_node( thread_pc ); }
-	else         { bszids_pa = &bszids_pc[0];
-	               thread_pa = thread_pc; }
+	bszid_t* bszids_pa = &bszids_pc[1];
+	         thread_pa = bli_thrinfo_sub_node( thread_pc );
 
 	bszid_t* bszids_ic = &bszids_pa[1];
 	         thread_ic = bli_thrinfo_sub_node( thread_pa );
 	bli_thrinfo_sup_grow( rntm, bszids_ic, thread_ic );
 
-	bszid_t* bszids_pb;
-	if ( packb ) { bszids_pb = &bszids_ic[1];
-				   thread_pb = bli_thrinfo_sub_node( thread_ic ); }
-	else         { bszids_pb = &bszids_ic[0];
-				   thread_pb = thread_ic; }
+	bszid_t* bszids_pb = &bszids_ic[1];
+	         thread_pb = bli_thrinfo_sub_node( thread_ic );
 
 	bszid_t* bszids_jr = &bszids_pb[1];
 	         thread_jr = bli_thrinfo_sub_node( thread_pb );
@@ -349,16 +336,16 @@ void bli_gemmsup_ref_var1n
 			  BLIS_BUFFER_FOR_B_PANEL, /* This algorithm packs matrix A to */
 			  stor_id,                 /* a "panel of B".                  */
 			  BLIS_NO_TRANSPOSE,
-              dt,
+			  dt,
 			  NC,     KC,       /* This "panel of B" is (at most) NC x KC. */
 			  nc_cur, kc_cur, MR,
 			  one,
 			  a_pc,   rs_a,      cs_a,
 			  ( void** )&a_use, &rs_a_use, &cs_a_use,
 			                    &ps_a_use,
-              cntx,
-              rntm,
-              &mem_a,
+			  cntx,
+			  rntm,
+			  &mem_a,
 			  thread_pa
 			);
 
@@ -407,16 +394,16 @@ void bli_gemmsup_ref_var1n
 				  BLIS_BUFFER_FOR_A_BLOCK, /* This algorithm packs matrix B to */
 				  stor_id,                 /* a "block of A".                  */
 				  BLIS_NO_TRANSPOSE,
-                  dt,
+				  dt,
 				  MC,     KC,       /* This "block of A" is (at most) KC x MC. */
 				  mc_cur, kc_cur, NR,
 				  one,
 				  b_ic,   cs_b,      rs_b,
 				  ( void** )&b_use, &cs_b_use, &rs_b_use,
 				                    &ps_b_use,
-                  cntx,
-                  rntm,
-                  &mem_b,
+				  cntx,
+				  rntm,
+				  &mem_b,
 				  thread_pb
 				);
 
@@ -497,15 +484,15 @@ void bli_gemmsup_ref_var1n
 	bli_packm_sup_finalize_mem
 	(
 	  packa,
-      rntm,
-      &mem_a,
+	  rntm,
+	  &mem_a,
 	  thread_pa
 	);
 	bli_packm_sup_finalize_mem
 	(
 	  packb,
-      rntm,
-      &mem_b,
+	  rntm,
+	  &mem_b,
 	  thread_pb
 	);
 
@@ -536,7 +523,7 @@ void bli_gemmsup_ref_var2m
      )
 {
 	const num_t  dt      = bli_obj_dt( c );
-    const dim_t  dt_size = bli_dt_size( dt );
+	const dim_t  dt_size = bli_dt_size( dt );
 
 	      bool   packa   = bli_rntm_pack_a( rntm );
 	      bool   packb   = bli_rntm_pack_b( rntm );
@@ -597,18 +584,18 @@ void bli_gemmsup_ref_var2m
 	bli_gemmsup_ref_var1n2m_opt_cases( dt, &trans, packa, packb, &stor_id, cntx );
 #endif
 
-    if ( bli_is_trans( trans ) )
-    {
-              bool   packtmp = packa; packa = packb; packb = packtmp;
-              conj_t conjtmp = conja; conja = conjb; conjb = conjtmp;
-              dim_t  len_tmp =     m;     m =     n;     n = len_tmp;
-        const void*  buf_tmp = buf_a; buf_a = buf_b; buf_b = buf_tmp;
-              inc_t  str_tmp =  rs_a;  rs_a =  cs_b;  cs_b = str_tmp;
-                     str_tmp =  cs_a;  cs_a =  rs_b;  rs_b = str_tmp;
-                     str_tmp =  rs_c;  rs_c =  cs_c;  cs_c = str_tmp;
+	if ( bli_is_trans( trans ) )
+	{
+		      bool   packtmp = packa; packa = packb; packb = packtmp;
+		      conj_t conjtmp = conja; conja = conjb; conjb = conjtmp;
+		      dim_t  len_tmp =     m;     m =     n;     n = len_tmp;
+		const void*  buf_tmp = buf_a; buf_a = buf_b; buf_b = buf_tmp;
+		      inc_t  str_tmp =  rs_a;  rs_a =  cs_b;  cs_b = str_tmp;
+		             str_tmp =  cs_a;  cs_a =  rs_b;  rs_b = str_tmp;
+		             str_tmp =  rs_c;  rs_c =  cs_c;  cs_c = str_tmp;
 
-        stor_id = bli_stor3_trans( stor_id );
-    }
+		stor_id = bli_stor3_trans( stor_id );
+	}
 
 	/* Query the context for various blocksizes. */
 	const dim_t NR  = bli_cntx_get_l3_sup_blksz_def_dt( dt, BLIS_NR, cntx );
@@ -617,7 +604,10 @@ void bli_gemmsup_ref_var2m
 	const dim_t MC  = bli_cntx_get_l3_sup_blksz_def_dt( dt, BLIS_MC, cntx );
 	const dim_t KC0 = bli_cntx_get_l3_sup_blksz_def_dt( dt, BLIS_KC, cntx );
 
-	dim_t KC;
+	/* Disable modification of KC since it seems to negatively impact certain operations (#644). */
+	dim_t KC = KC0;
+
+	/*
 	if      ( packa && packb )
 	{
 		KC = KC0;
@@ -642,7 +632,7 @@ void bli_gemmsup_ref_var2m
 		          stor_id == BLIS_CCR    ) KC = (( KC0 / 4 ) / 4 ) * 4;
 		else                               KC = KC0;
 	}
-	else /* if ( !packa && !packb ) */
+	else *//* if ( !packa && !packb ) *//*
 	{
 		if      ( stor_id == BLIS_RRR ||
 				  stor_id == BLIS_CCC    ) KC = KC0;
@@ -654,6 +644,7 @@ void bli_gemmsup_ref_var2m
 		else if ( m <= 4*MR && n <= 4*NR ) KC = KC0 / 4;
 		else                               KC = (( KC0 / 5 ) / 4 ) * 4;
 	}
+	*/
 
 	/* Query the maximum blocksize for NR, which implies a maximum blocksize
 	   extension for the final iteration. */
@@ -687,7 +678,7 @@ void bli_gemmsup_ref_var2m
 	const char* a_00       = buf_a;
 	const char* b_00       = buf_b;
 	      char* c_00       = buf_c;
-    const void* one        = bli_obj_buffer_for_const( dt, &BLIS_ONE );
+	const void* one        = bli_obj_buffer_for_const( dt, &BLIS_ONE );
 
 	auxinfo_t       aux;
 
@@ -786,16 +777,16 @@ void bli_gemmsup_ref_var2m
 			  BLIS_BUFFER_FOR_B_PANEL, /* This algorithm packs matrix B to */
 			  stor_id,                 /* a "panel of B."                  */
 			  BLIS_NO_TRANSPOSE,
-              dt,
+			  dt,
 			  NC,     KC,       /* This "panel of B" is (at most) KC x NC. */
 			  nc_cur, kc_cur, NR,
 			  one,
 			  b_pc,   cs_b,      rs_b,
 			  ( void** )&b_use, &cs_b_use, &rs_b_use,
 			                    &ps_b_use,
-              cntx,
-              rntm,
-              &mem_b,
+			  cntx,
+			  rntm,
+			  &mem_b,
 			  thread_pb
 			);
 
@@ -842,16 +833,16 @@ void bli_gemmsup_ref_var2m
 				  BLIS_BUFFER_FOR_A_BLOCK, /* This algorithm packs matrix A to */
 				  stor_id,                 /* a "block of A."                  */
 				  BLIS_NO_TRANSPOSE,
-                  dt,
+				  dt,
 				  MC,     KC,       /* This "block of A" is (at most) MC x KC. */
 				  mc_cur, kc_cur, MR,
 				  one,
 				  a_ic,   rs_a,      cs_a,
 				  ( void** )&a_use, &rs_a_use, &cs_a_use,
 				                    &ps_a_use,
-                  cntx,
-                  rntm,
-                  &mem_a,
+				  cntx,
+				  rntm,
+				  &mem_a,
 				  thread_pa
 				);
 
@@ -932,15 +923,15 @@ void bli_gemmsup_ref_var2m
 	bli_packm_sup_finalize_mem
 	(
 	  packa,
-      rntm,
-      &mem_a,
+	  rntm,
+	  &mem_a,
 	  thread_pa
 	);
 	bli_packm_sup_finalize_mem
 	(
 	  packb,
-      rntm,
-      &mem_b,
+	  rntm,
+	  &mem_b,
 	  thread_pb
 	);
 
