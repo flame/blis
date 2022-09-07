@@ -37,11 +37,11 @@
 
 // Public interface for the end user.
 
-typedef dim_t (*AOCL_progress_callback)(char *api,
-                                      dim_t lapi,
-                                      dim_t progress,
-                                      dim_t current_thread,
-                                      dim_t total_threads);
+typedef dim_t (*AOCL_progress_callback)(const char* const api,
+                                        const dim_t lapi,
+                                        const dim_t progress,
+                                        const dim_t current_thread,
+                                        const dim_t total_threads);
 
 BLIS_EXPORT_BLIS void AOCL_BLIS_set_progress(AOCL_progress_callback func);
 

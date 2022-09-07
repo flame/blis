@@ -48,14 +48,14 @@
 //#define CBLAS
 
 // Uncomment to enable progress printing.
-//#define PROGRESS_ENABLED
+#define PROGRESS_ENABLED
 
 #ifdef PROGRESS_ENABLED
-dim_t AOCL_progress(char *api,
-					dim_t lapi,
-					dim_t progress,
-					dim_t current_thread,
-					dim_t total_threads)
+dim_t AOCL_progress( const char* const api,
+		     const dim_t lapi,
+		     const dim_t progress,
+		     const dim_t current_thread,
+		     const dim_t total_threads )
 {
 	printf("\n%s, len = %ld, nt = %ld, tid = %ld, Processed %ld Elements",
 		   api, lapi, total_threads, current_thread, progress);
