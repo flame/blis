@@ -169,6 +169,7 @@ get-addon-cxxflags-for   = $(strip $(call load-var-for,COPTFLAGS,$(1)) \
                                    $(BUILD_CPPFLAGS) \
                                    $(BUILD_SYMFLAGS) \
                             )
+get-addon-kernel-c99flags-for = $(call get-kernel-cflags-for,$(1))
 
 # When compiling sandboxes, we use flags similar to those of general framework
 # source. This ensures that the same code can be linked and run across various
@@ -203,16 +204,17 @@ get-user-cflags-for      = $(strip $(call load-var-for,COPTFLAGS,$(1)) \
 
 # Define functions that return messages appropriate for each non-verbose line
 # of compilation output.
-get-noopt-text          = "(CFLAGS for no optimization)"
-get-refinit-text-for    = "('$(1)' CFLAGS for ref. kernel init)"
-get-refkern-text-for    = "('$(1)' CFLAGS for ref. kernels)"
-get-config-text-for     = "('$(1)' CFLAGS for config code)"
-get-frame-text-for      = "('$(1)' CFLAGS for framework code)"
-get-kernel-text-for     = "('$(1)' CFLAGS for kernels)"
-get-addon-c99text-for   = "('$(1)' CFLAGS for addons)"
-get-addon-cxxtext-for   = "('$(1)' CXXFLAGS for addons)"
-get-sandbox-c99text-for = "('$(1)' CFLAGS for sandboxes)"
-get-sandbox-cxxtext-for = "('$(1)' CXXFLAGS for sandboxes)"
+get-noopt-text            = "(CFLAGS for no optimization)"
+get-refinit-text-for      = "('$(1)' CFLAGS for ref. kernel init)"
+get-refkern-text-for      = "('$(1)' CFLAGS for ref. kernels)"
+get-config-text-for       = "('$(1)' CFLAGS for config code)"
+get-frame-text-for        = "('$(1)' CFLAGS for framework code)"
+get-kernel-text-for       = "('$(1)' CFLAGS for kernels)"
+get-addon-c99text-for     = "('$(1)' CFLAGS for addons)"
+get-addon-cxxtext-for     = "('$(1)' CXXFLAGS for addons)"
+get-addon-kernel-text-for = "('$(1)' CFLAGS for addon kernels)"
+get-sandbox-c99text-for   = "('$(1)' CFLAGS for sandboxes)"
+get-sandbox-cxxtext-for   = "('$(1)' CXXFLAGS for sandboxes)"
 
 
 
