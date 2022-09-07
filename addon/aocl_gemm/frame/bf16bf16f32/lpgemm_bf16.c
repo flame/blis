@@ -137,14 +137,25 @@ LPGEMM_5LOOP(bfloat16,bfloat16,float,bf16bf16f32of32)
 			{
 				dim_t i_temp = 0;
 				dim_t j_temp = 0;
+				int32_t temp_conv_buf = 0;
 				// Upscale out C to temporary C matrix.
 				for ( dim_t i_dscale = ic_start; i_dscale < ic_end; ++i_dscale )
 				{
 					j_temp = 0;
 					for ( dim_t j_dscale = jc; j_dscale < nc0; ++j_dscale )
 					{
-						*( temp_scal_c_buffer_bf16 + ( nc0 * i_temp ) + j_temp ) =
-								( float )( *( c + ( rs_c * i_dscale ) + j_dscale ) );
+						// Implemented with the idea sizeof(float)=4.
+						temp_conv_buf = 0;
+						temp_conv_buf = *( ( int16_t* )( ( bfloat16* )c +
+										( rs_c * i_dscale ) + j_dscale ) );
+
+						// Add 16 bits in the fractional part.
+						temp_conv_buf = temp_conv_buf << 16;
+
+						// Store the bytes in float format.
+						*( temp_scal_c_buffer_bf16 + ( nc0 * i_temp ) + j_temp )
+								= *( ( float* )( &temp_conv_buf ) );
+
 						j_temp++;
 					}
 					i_temp++;
@@ -193,7 +204,7 @@ LPGEMM_5LOOP(bfloat16,bfloat16,float,bf16bf16f32of32)
 					);
 
 					thread->comm[jc_work_id].sent_object =
-													bli_mem_buffer( &mem_b );
+							bli_mem_buffer( &mem_b );
 				}
 
 				// All threads in work group should wait till chief thread has
@@ -264,7 +275,17 @@ LPGEMM_5LOOP(bfloat16,bfloat16,float,bf16bf16f32of32)
 			for ( dim_t ic = ic_start; ic < ic_end; ic += MC )
 			{
 				dim_t mc0 = bli_min( ( ic_end - ic ), MC );
-				c_use_ic = c_use_jc + ( rs_c_use * ic );
+
+				// Only per thread C matrix is stored in temp buffer, so both
+				// per thread jc and ic start should be normalized to zero.
+				if ( c_downscale == TRUE )
+				{
+					c_use_ic = c_use_jc + ( rs_c_use * ( ic - ic_start ) );
+				}
+				else
+				{
+					c_use_ic = c_use_jc + ( rs_c_use * ic );
+				}
 
 				if ( mtag_a == UNPACKED )
 				{

@@ -143,10 +143,13 @@ LPGEMM_5LOOP(uint8_t,int8_t,int16_t,u8s8s16o16)
 				for ( dim_t i_dscale = ic_start; i_dscale < ic_end; ++i_dscale )
 				{
 					j_temp = 0;
-					for ( dim_t j_dscale = jc; j_dscale < nc0; ++j_dscale )
+					for ( dim_t j_dscale = jc; j_dscale < ( jc + nc0 ); ++j_dscale )
 					{
-						*( temp_scal_c_buffer_u8s8s16o16 + ( nc0 * i_dscale ) + j_dscale ) =
-								( int16_t )( *( c + ( rs_c * i_dscale ) + j_dscale ) );
+						*( temp_scal_c_buffer_u8s8s16o16 +
+								( nc0 * i_temp ) + j_temp ) =
+								( int16_t )( *( ( ( int8_t* )c ) +
+								( rs_c * i_dscale ) + j_dscale ) );
+
 						j_temp++;
 					}
 					i_temp++;
@@ -268,7 +271,17 @@ LPGEMM_5LOOP(uint8_t,int8_t,int16_t,u8s8s16o16)
 			for (dim_t ic = ic_start; ic < ic_end; ic += MC)
 			{
 				dim_t mc0 = bli_min((ic_end - ic), MC);
-				c_use_ic = c_use_jc + (rs_c_use * ic);
+
+				// Only per thread C matrix is stored in temp buffer, so both
+				// per thread jc and ic start should be normalized to zero.
+				if ( c_downscale == TRUE )
+				{
+					c_use_ic = c_use_jc + ( rs_c_use * ( ic - ic_start ) );
+				}
+				else
+				{
+					c_use_ic = c_use_jc + ( rs_c_use * ic );
+				}
 
 				a_use = a + (rs_a * ic) + (cs_a * pc);
 				cs_a_use = 1;

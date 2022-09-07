@@ -16,6 +16,8 @@ char bench_mode = 'p';
 
 int32_t global_n_repeat = 0;
 
+char global_dscale_out = 'n';
+
 #define _XSTR(str) #str
 #define XSTR(str) _XSTR(str)
 
@@ -27,7 +29,7 @@ void fill_array_ ## ctype ( void* arr, dim_t size ) \
 	ctype* temp_arr = ( ctype* ) arr; \
 	for ( dim_t i = 0; i < size; ++i ) \
 	{ \
-		temp_arr[i] = ( ctype )( i % 100 ); \
+		temp_arr[i] = ( ctype )( i % 10 ); \
 	} \
 } \
 
@@ -150,8 +152,10 @@ void mat_mul_ ## BLAS_SFX \
 	} */\
 } \
 
-GEN_BLIS_MAT_MUL_FUNC(uint8_t, int8_t, int16_t, u8s8s16os16)
+GEN_BLIS_MAT_MUL_FUNC(uint8_t,int8_t,int16_t,u8s8s16os16)
+GEN_BLIS_MAT_MUL_FUNC(uint8_t,int8_t,int8_t,u8s8s16os8)
 GEN_BLIS_MAT_MUL_FUNC(uint8_t,int8_t,int32_t,u8s8s32os32)
+GEN_BLIS_MAT_MUL_FUNC(uint8_t,int8_t,int8_t,u8s8s32os8)
 GEN_BLIS_MAT_MUL_FUNC(float,float,float,f32f32f32of32)
 
 double get_gflops
@@ -236,11 +240,13 @@ void mat_mul_bench_driver_ ## BLAS_SFX \
 	print_result( XSTR(BLAS_SFX), n_repeats, m, n, k, lda, ldb, ldc, min_time_diff); \
 } \
 
-GEN_MAT_MUL_BENCH_DRV_FUNC(uint8_t, int8_t, int16_t, u8s8s16os16)
+GEN_MAT_MUL_BENCH_DRV_FUNC(uint8_t,int8_t,int16_t,u8s8s16os16)
+GEN_MAT_MUL_BENCH_DRV_FUNC(uint8_t,int8_t,int8_t,u8s8s16os8)
 GEN_MAT_MUL_BENCH_DRV_FUNC(uint8_t,int8_t,int32_t,u8s8s32os32)
+GEN_MAT_MUL_BENCH_DRV_FUNC(uint8_t,int8_t,int8_t,u8s8s32os8)
 GEN_MAT_MUL_BENCH_DRV_FUNC(float,float,float,f32f32f32of32)
 
-#define GEN_MAT_MUL_ACC_CHK_DRV_FUNC(A_type,B_type,C_type,BLAS_SFX) \
+#define GEN_MAT_MUL_ACC_CHK_DRV_FUNC(A_type,B_type,C_type,DSCALE_type,SCALE_type,BLAS_SFX) \
 void mat_mul_accuracy_check_driver_ ## BLAS_SFX \
      ( \
        FILE*   fout, \
@@ -264,7 +270,8 @@ void mat_mul_accuracy_check_driver_ ## BLAS_SFX \
 	{ \
 		for ( dim_t j = 0; j < n; ++j ) \
 		{ \
-			C_type temp_accum = 0; \
+			DSCALE_type temp_accum = 0; \
+			C_type out_temp_accum = 0; \
  \
 			for ( dim_t p = 0; p < k; ++p) \
 			{ \
@@ -281,15 +288,17 @@ void mat_mul_accuracy_check_driver_ ## BLAS_SFX \
 				{ \
 					if ( post_op->seq_length >= 1 ) \
 					{ \
-						temp_accum += ( *( ( C_type* )post_op->bias.bias + j ) ); \
+						temp_accum += ( *( ( DSCALE_type* )post_op->bias.bias + j ) ); \
 					} \
-					if ( post_op->seq_length > 1 ) \
+					if ( ( post_op->seq_length > 1 ) && \
+						 ( post_op->seq_vector[1] == ELTWISE ) ) \
 					{ \
 						if ( post_op->eltwise.algo.alpha != NULL ) /* PReLU*/ \
 						{ \
 							temp_accum = ( temp_accum > 0 ) ? \
-									temp_accum : \
-									( temp_accum * *( ( C_type* ) post_op->eltwise.algo.alpha ) ); \
+								temp_accum : \
+								( temp_accum * \
+								*( ( DSCALE_type* ) post_op->eltwise.algo.alpha ) ); \
 						} \
 						else \
 						{ \
@@ -305,21 +314,30 @@ void mat_mul_accuracy_check_driver_ ## BLAS_SFX \
 						{ \
 							temp_accum = ( temp_accum > 0 ) ? \
 									temp_accum : \
-									( temp_accum * *( ( C_type* ) post_op->eltwise.algo.alpha ) ); \
+									( temp_accum * *( ( DSCALE_type* ) post_op->eltwise.algo.alpha ) ); \
 						} \
 						else \
 						{ \
 							temp_accum = ( temp_accum > 0 ) ? temp_accum : 0 ; \
 						} \
 					} \
-					if ( post_op->seq_length > 1 ) \
+					if ( ( post_op->seq_length > 1 ) && ( post_op->seq_vector[1] == BIAS ) ) \
 					{ \
-						temp_accum += ( *( ( C_type* )post_op->bias.bias + j ) ); \
+						temp_accum += ( *( ( DSCALE_type* )post_op->bias.bias + j ) ); \
 					} \
 				} \
 			} \
+			if ( global_dscale_out == 'y' ) \
+			{ \
+				out_temp_accum = ( C_type )lroundf( ( SCALE_type )temp_accum * \
+								( *( ( SCALE_type* )post_op->sum.scale_factor + j ) ) ); \
+			} \
+			else \
+			{ \
+				out_temp_accum = ( C_type )temp_accum; \
+			} \
  \
-			if ( *( c + ( ldc * i ) + j ) != temp_accum ) \
+			if ( *( c + ( ldc * i ) + j ) != out_temp_accum ) \
 			{ \
 				if ( fout ) \
 				{ \
@@ -328,7 +346,7 @@ void mat_mul_accuracy_check_driver_ ## BLAS_SFX \
 									XSTR(BLAS_SFX), m, n, k, lda, ldb, ldc ); \
 					fflush( fout ); \
 				} \
-				printf("failure, m: %ld, n: %ld, k: %ld\n", i, j, k); \
+				printf("failure, m: %ld, n: %ld, k: %ld\n", i, j, k ); \
 				goto cleanup_acc; \
 			} \
 		} \
@@ -337,12 +355,14 @@ cleanup_acc: \
 	return; \
 } \
 
-GEN_MAT_MUL_ACC_CHK_DRV_FUNC(uint8_t, int8_t, int16_t, u8s8s16os16)
-GEN_MAT_MUL_ACC_CHK_DRV_FUNC(uint8_t,int8_t,int32_t,u8s8s32os32)
-GEN_MAT_MUL_ACC_CHK_DRV_FUNC(float,float,float,f32f32f32of32)
+GEN_MAT_MUL_ACC_CHK_DRV_FUNC(uint8_t,int8_t,int16_t,int16_t,float,u8s8s16os16)
+GEN_MAT_MUL_ACC_CHK_DRV_FUNC(uint8_t,int8_t,int8_t,int16_t,float,u8s8s16os8)
+GEN_MAT_MUL_ACC_CHK_DRV_FUNC(uint8_t,int8_t,int32_t,int32_t,float,u8s8s32os32)
+GEN_MAT_MUL_ACC_CHK_DRV_FUNC(uint8_t,int8_t,int8_t,int32_t,float,u8s8s32os8)
+GEN_MAT_MUL_ACC_CHK_DRV_FUNC(float,float,float,float,float,f32f32f32of32)
 
 /* Only supports bias followed by RELU and vice versa for now.*/ \
-#define GEN_MAT_MUL_POST_OPS_CREATOR(C_type,BLAS_SFX) \
+#define GEN_MAT_MUL_POST_OPS_CREATOR(C_type,DSCALE_type,BLAS_SFX) \
 aocl_post_op* lpgemm_create_post_ops_struct_ ## BLAS_SFX \
      ( \
        dim_t m, \
@@ -353,13 +373,13 @@ aocl_post_op* lpgemm_create_post_ops_struct_ ## BLAS_SFX \
 	aocl_post_op* post_ops = NULL; \
 	post_ops = ( aocl_post_op* ) malloc( sizeof( aocl_post_op ) ); \
  \
-	if ( post_ops == NULL ) \
+	if ( ( post_ops == NULL ) && ( global_dscale_out == 'n' ) ) \
 	{ \
 		return NULL; \
 	} \
  \
-	/* Only supporting 2 post ops at max for now.*/ \
-	dim_t max_post_ops_seq_length = 2; \
+	/* Only supporting 3 post ops at max for now.*/ \
+	dim_t max_post_ops_seq_length = 3; \
 	post_ops->seq_vector = ( AOCL_POST_OP_TYPE* ) \
 							malloc \
 							( \
@@ -374,58 +394,94 @@ aocl_post_op* lpgemm_create_post_ops_struct_ ## BLAS_SFX \
 	} \
  \
 	/* Parse post ops list.*/ \
-	char* ops_tok = strtok(post_ops_str, ", " ); \
-	bool is_param_relu = FALSE; \
 	dim_t cur_op_index = 0; \
-	while ( ops_tok ) \
-	{ \
-		if ( strcmp( ops_tok, "bias") == 0 ) \
-		{ \
-			post_ops->seq_vector[cur_op_index] = BIAS; \
-		} \
-		else if ( strcmp( ops_tok, "relu") == 0 ) \
-		{ \
-			post_ops->seq_vector[cur_op_index] = ELTWISE; \
-		} \
-		else if ( strcmp( ops_tok, "prelu") == 0 ) \
-		{ \
-			post_ops->seq_vector[cur_op_index] = ELTWISE; \
-			is_param_relu = TRUE; \
-		} \
-		ops_tok = strtok( NULL, ", " ); \
-		cur_op_index++; \
-	} \
-	post_ops->seq_length = cur_op_index; \
- \
-	/* Allocate bias buffer, return early if alloc fails.*/ \
-	post_ops->bias.bias = malloc( n * sizeof( C_type ) ); \
-	if ( post_ops->bias.bias == NULL ) \
-	{ \
-		free( post_ops->seq_vector ); \
-		free( post_ops ); \
-		return NULL; \
-	} \
- \
-	GEN_FUNC_NAME(fill_array_post_ops_,C_type)( post_ops->bias.bias, n ); \
- \
-	post_ops->eltwise.is_power_of_2 = FALSE; \
-	post_ops->eltwise.scale_factor = NULL; \
+	/* Ensure the buffers that use NULL check in deinit code is properly set to NULL.*/ \
 	post_ops->eltwise.algo.alpha = NULL; \
-	post_ops->eltwise.algo.algo_type = RELU; \
-	if ( is_param_relu == TRUE ) \
+	post_ops->bias.bias = NULL; \
+	post_ops->sum.scale_factor = NULL; \
+	if ( post_ops_str != NULL ) \
 	{ \
-		post_ops->eltwise.algo.alpha = malloc( sizeof( C_type ) ); \
-		*( ( C_type* ) post_ops->eltwise.algo.alpha ) = ( C_type )6; \
-		post_ops->eltwise.algo.algo_type = PRELU; \
+		char* ops_tok = strtok(post_ops_str, ", " ); \
+		bool is_param_relu = FALSE; \
+		while ( ops_tok ) \
+		{ \
+			if ( strcmp( ops_tok, "bias") == 0 ) \
+			{ \
+				post_ops->seq_vector[cur_op_index] = BIAS; \
+			} \
+			else if ( strcmp( ops_tok, "relu") == 0 ) \
+			{ \
+				post_ops->seq_vector[cur_op_index] = ELTWISE; \
+			} \
+			else if ( strcmp( ops_tok, "prelu") == 0 ) \
+			{ \
+				post_ops->seq_vector[cur_op_index] = ELTWISE; \
+				is_param_relu = TRUE; \
+			} \
+			ops_tok = strtok( NULL, ", " ); \
+			cur_op_index++; \
+		} \
+ \
+		/* Allocate bias buffer, return early if alloc fails.*/ \
+		post_ops->bias.bias = malloc( n * sizeof( C_type ) ); \
+		if ( post_ops->bias.bias == NULL ) \
+		{ \
+			free( post_ops->seq_vector ); \
+			free( post_ops ); \
+			return NULL; \
+		} \
+		GEN_FUNC_NAME(fill_array_post_ops_,C_type)( post_ops->bias.bias, n ); \
+ \
+		post_ops->eltwise.is_power_of_2 = FALSE; \
+		post_ops->eltwise.scale_factor = NULL; \
+		post_ops->eltwise.algo.alpha = NULL; \
+		post_ops->eltwise.algo.algo_type = RELU; \
+		if ( is_param_relu == TRUE ) \
+		{ \
+			post_ops->eltwise.algo.alpha = malloc( sizeof( C_type ) ); \
+			*( ( C_type* ) post_ops->eltwise.algo.alpha ) = ( C_type )6; \
+			post_ops->eltwise.algo.algo_type = PRELU; \
+		} \
+		post_ops->eltwise.algo.beta = NULL; \
 	} \
-	post_ops->eltwise.algo.beta = NULL; \
+ \
+	if ( global_dscale_out == 'y' ) \
+	{ \
+		post_ops->seq_vector[cur_op_index] = SCALE; \
+		cur_op_index++; \
+ \
+		post_ops->sum.is_power_of_2 = FALSE; \
+		post_ops->sum.scale_factor = NULL; \
+		post_ops->sum.buff = NULL; \
+		post_ops->sum.zero_point = NULL; \
+		if ( global_dscale_out == 'y' ) \
+		{ \
+			/* Allocate scale buffer, return early if alloc fails.*/ \
+			post_ops->sum.scale_factor = malloc( n * sizeof( DSCALE_type ) ); \
+			if ( post_ops->sum.scale_factor == NULL ) \
+			{ \
+				free ( post_ops->bias.bias ); \
+				free( post_ops->seq_vector ); \
+				free( post_ops ); \
+				return NULL; \
+			} \
+			/* Fill scale factor.*/ \
+			DSCALE_type* temp_dscale_ptr = ( DSCALE_type* )post_ops->sum.scale_factor; \
+			for ( dim_t i = 0; i < n; ++i ) \
+			{ \
+				temp_dscale_ptr[i] = ( ( DSCALE_type )1 )/ ( ( DSCALE_type )1000 ); \
+			} \
+		} \
+	} \
+ \
+	post_ops->seq_length = cur_op_index; \
  \
 	return post_ops; \
 } \
 
-GEN_MAT_MUL_POST_OPS_CREATOR(int16_t,u8s8s16os16)
-GEN_MAT_MUL_POST_OPS_CREATOR(int32_t,u8s8s32os32)
-GEN_MAT_MUL_POST_OPS_CREATOR(float,f32f32f32of32)
+GEN_MAT_MUL_POST_OPS_CREATOR(int16_t,float,u8s8s16os16)
+GEN_MAT_MUL_POST_OPS_CREATOR(int32_t,float,u8s8s32os32)
+GEN_MAT_MUL_POST_OPS_CREATOR(float,float,f32f32f32of32)
 
 void lpgemm_destroy_post_ops_struct( aocl_post_op* post_ops )
 {
@@ -438,11 +494,14 @@ void lpgemm_destroy_post_ops_struct( aocl_post_op* post_ops )
 	{
 		free( post_ops->eltwise.algo.alpha );
 	}
+	if ( post_ops->sum.scale_factor != NULL )
+	{
+		free( post_ops->sum.scale_factor );
+	}
 	if ( post_ops->bias.bias != NULL )
 	{
 		free( post_ops->bias.bias );
 	}
-
 	if( post_ops->seq_vector != NULL )
 	{
 		free( post_ops->seq_vector );
@@ -451,7 +510,7 @@ void lpgemm_destroy_post_ops_struct( aocl_post_op* post_ops )
 	free( post_ops );
 }
 
-#define GEN_MAT_MUL_BENCH_MAIN_FUNC(A_type,B_type,C_type,BLAS_SFX) \
+#define GEN_MAT_MUL_BENCH_MAIN_FUNC(A_type,B_type,C_type,BLAS_SFX,REORDER_SFX) \
 void mat_mul_bench_main_ ## BLAS_SFX \
      ( \
        FILE*   fin, \
@@ -506,9 +565,9 @@ void mat_mul_bench_main_ ## BLAS_SFX \
 	GEN_FUNC_NAME(fill_array_,B_type)( b, ( k * n ) ); \
  \
 	aocl_post_op* post_op = NULL; \
-	if ( post_ops_str != NULL ) \
+	if ( ( post_ops_str != NULL ) || ( global_dscale_out == 'y' ) ) \
 	{ \
-		post_op = GEN_FUNC_NAME(lpgemm_create_post_ops_struct_,BLAS_SFX)( m, n, post_ops_str ); \
+		post_op = GEN_FUNC_NAME(lpgemm_create_post_ops_struct_,REORDER_SFX)( m, n, post_ops_str ); \
 		if ( post_op == NULL ) \
 		{ \
 			printf(" post op struct allocation failure, returning.\n"); \
@@ -534,10 +593,10 @@ void mat_mul_bench_main_ ## BLAS_SFX \
 	{ \
 		/* Reorder B.*/ \
 		siz_t b_reorder_buf_siz_req = \
-			GEN_FUNC_NAME(aocl_get_reorder_buf_size_,BLAS_SFX)( 'B', k, n ); \
+			GEN_FUNC_NAME(aocl_get_reorder_buf_size_,REORDER_SFX)( 'B', k, n ); \
  \
 		B_type* b_reorder = ( B_type* ) bli_malloc_user( b_reorder_buf_siz_req ); \
-		GEN_FUNC_NAME(aocl_reorder_,BLAS_SFX)( 'B', b, b_reorder, k, n, stride_b ); \
+		GEN_FUNC_NAME(aocl_reorder_,REORDER_SFX)( 'B', b, b_reorder, k, n, stride_b ); \
  \
 		GEN_FUNC_NAME(mat_mul_bench_driver_,BLAS_SFX) \
 		( \
@@ -555,7 +614,7 @@ void mat_mul_bench_main_ ## BLAS_SFX \
  \
 	if ( bench_mode == 'a' ) \
 	{ \
-		printf(" Running accuracy check.\n"); \
+		printf("Running accuracy check.\n"); \
 		GEN_FUNC_NAME(mat_mul_accuracy_check_driver_,BLAS_SFX) \
 		( \
 		  fout, m, n, k, \
@@ -589,9 +648,11 @@ void mat_mul_bench_main_ ## BLAS_SFX \
 	} \
 } \
 
-GEN_MAT_MUL_BENCH_MAIN_FUNC(uint8_t, int8_t, int16_t, u8s8s16os16)
-GEN_MAT_MUL_BENCH_MAIN_FUNC(uint8_t,int8_t,int32_t,u8s8s32os32)
-GEN_MAT_MUL_BENCH_MAIN_FUNC(float,float,float,f32f32f32of32)
+GEN_MAT_MUL_BENCH_MAIN_FUNC(uint8_t,int8_t,int16_t,u8s8s16os16,u8s8s16os16)
+GEN_MAT_MUL_BENCH_MAIN_FUNC(uint8_t,int8_t,int8_t,u8s8s16os8,u8s8s16os16)
+GEN_MAT_MUL_BENCH_MAIN_FUNC(uint8_t,int8_t,int32_t,u8s8s32os32,u8s8s32os32)
+GEN_MAT_MUL_BENCH_MAIN_FUNC(uint8_t,int8_t,int8_t,u8s8s32os8,u8s8s32os32)
+GEN_MAT_MUL_BENCH_MAIN_FUNC(float,float,float,f32f32f32of32,f32f32f32of32)
 
 int main( int argc, char** argv )
 {
@@ -616,7 +677,7 @@ int main( int argc, char** argv )
 	// Parse CLI arguments.
 	opterr = 0;
 	int opt_val;
-	while ( ( opt_val = getopt( argc, argv, "i:m:n:o:" ) ) != -1 )
+	while ( ( opt_val = getopt( argc, argv, "i:m:n:o:d" ) ) != -1 )
 	{
 		switch ( opt_val )
 		{
@@ -631,6 +692,9 @@ int main( int argc, char** argv )
 					break;
 			case 'o':
 					post_ops_str = optarg;
+					break;
+			case 'd':
+					global_dscale_out = 'y';
 					break;
 			default:
 					break;
@@ -713,12 +777,24 @@ int main( int argc, char** argv )
 		{
 			if ( ( op_type_char == 'i' ) || ( op_type_char == 'I' ) )
 			{
-				GEN_FUNC_NAME(mat_mul_bench_main_,u8s8s32os32)
-				(
-				  fin, fout, op_t,
-				  m, n, k, stride_a, stride_b, stride_c,
-				  post_ops_str_dest
-				);
+				if ( global_dscale_out == 'n' )
+				{
+					GEN_FUNC_NAME(mat_mul_bench_main_,u8s8s32os32)
+					(
+					  fin, fout, op_t,
+					  m, n, k, stride_a, stride_b, stride_c,
+					  post_ops_str_dest
+					);
+				}
+				else
+				{
+					GEN_FUNC_NAME(mat_mul_bench_main_,u8s8s32os8)
+					(
+					  fin, fout, op_t,
+					  m, n, k, stride_a, stride_b, stride_c,
+					  post_ops_str_dest
+					);
+				}
 			}
 			else if ( ( op_type_char == 'f' ) || ( op_type_char == 'F' ) )
 			{
@@ -731,12 +807,24 @@ int main( int argc, char** argv )
 			}
 			else if ((op_type_char == 's') || (op_type_char == 'S'))
 			{
-				GEN_FUNC_NAME(mat_mul_bench_main_, u8s8s16os16)
-				(
-					fin, fout, op_t,
-					m, n, k, stride_a, stride_b, stride_c,
-					post_ops_str_dest
-				);
+				if ( global_dscale_out == 'n' )
+				{
+					GEN_FUNC_NAME(mat_mul_bench_main_,u8s8s16os16)
+					(
+						fin, fout, op_t,
+						m, n, k, stride_a, stride_b, stride_c,
+						post_ops_str_dest
+					);
+				}
+				else
+				{
+					GEN_FUNC_NAME(mat_mul_bench_main_,u8s8s16os8)
+					(
+						fin, fout, op_t,
+						m, n, k, stride_a, stride_b, stride_c,
+						post_ops_str_dest
+					);
+				}
 			}
 			if ( post_ops_str != NULL )
 			{
