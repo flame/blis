@@ -8402,7 +8402,7 @@ BLIS_INLINE  err_t bli_dtrsm_small_XAltB_XAuB
     bool is_unitdiag = bli_obj_has_unit_diag(a);
 
     double AlphaVal = *(double *)AlphaObj->buffer;    //value of Alpha
-    double* restrict L = a->buffer;      //pointer to matrix A
+    double* restrict L = bli_obj_buffer_at_off(a);      //pointer to matrix A
     double *B =  bli_obj_buffer_at_off(b);       //pointer to matrix B
 
     double *a01, *a11, *b10, *b11;   //pointers for GEMM and TRSM blocks
@@ -10803,7 +10803,7 @@ BLIS_INLINE  err_t bli_dtrsm_small_XAutB_XAlB
     bool is_unitdiag = bli_obj_has_unit_diag(a);
 
     double AlphaVal = *(double *)AlphaObj->buffer;    //value of Alpha
-    double* restrict L = a->buffer;      //pointer to matrix A
+    double* restrict L = bli_obj_buffer_at_off(a);      //pointer to matrix A
     double *B =  bli_obj_buffer_at_off(b);       //pointer to matrix B
 
     double *a01, *a11, *b10, *b11;   //pointers for GEMM and TRSM blocks
@@ -13117,7 +13117,7 @@ BLIS_INLINE err_t bli_dtrsm_small_AltXB_AuXB
     dim_t k_iter;                         //number of times GEMM to be performed
 
     double AlphaVal = *(double *)AlphaObj->buffer;    //value of alpha
-    double *L =  a->buffer;               //pointer to  matrix A
+    double *L =  bli_obj_buffer_at_off(a);               //pointer to  matrix A
     double *B =  bli_obj_buffer_at_off(b);       //pointer to matrix B
 
     //pointers that point to blocks for GEMM and TRSM
@@ -15120,7 +15120,7 @@ BLIS_INLINE err_t bli_dtrsm_small_AutXB_AlXB
     dim_t k_iter;     //number of times GEMM to be performed
 
     double AlphaVal = *(double *)AlphaObj->buffer;    //value of alpha
-    double *L =  a->buffer;       //pointer to  matrix A
+    double *L =  bli_obj_buffer_at_off(a);       //pointer to  matrix A
     double *B =  bli_obj_buffer_at_off(b);       //pointer to matrix B
 
     double *a10, *a11, *b01, *b11;    //pointers that point to blocks for GEMM and TRSM
@@ -17721,8 +17721,8 @@ BLIS_INLINE  err_t bli_strsm_small_XAutB_XAlB
     bool is_unitdiag = bli_obj_has_unit_diag(a);
 
     float AlphaVal = *(float *)AlphaObj->buffer;    //value of Alpha
-    float* restrict L = a->buffer;      //pointer to matrix A
-    float* restrict B = b->buffer;      //pointer to matrix B
+    float* restrict L = bli_obj_buffer_at_off(a);      //pointer to matrix A
+    float* restrict B = bli_obj_buffer_at_off(b);      //pointer to matrix B
 
     float *a01, *a11, *b10, *b11;   //pointers for GEMM and TRSM blocks
 
@@ -21386,8 +21386,8 @@ BLIS_INLINE  err_t bli_strsm_small_XAltB_XAuB
     bool is_unitdiag = bli_obj_has_unit_diag(a);
 
     float AlphaVal = *(float *)AlphaObj->buffer;    //value of Alpha
-    float* restrict L = a->buffer;      //pointer to matrix A
-    float* restrict B = b->buffer;      //pointer to matrix B
+    float* restrict L = bli_obj_buffer_at_off(a);      //pointer to matrix A
+    float* restrict B = bli_obj_buffer_at_off(b);      //pointer to matrix B
 
     float *a01, *a11, *b10, *b11;   //pointers for GEMM and TRSM blocks
 
@@ -25225,8 +25225,8 @@ BLIS_INLINE err_t bli_strsm_small_AutXB_AlXB
     dim_t k_iter;     //number of times GEMM to be performed
 
     float AlphaVal = *(float *)AlphaObj->buffer;    //value of alpha
-    float *L =  a->buffer;       //pointer to  matrix A
-    float *B =  b->buffer;       //pointer to matrix B
+    float *L =  bli_obj_buffer_at_off(a);       //pointer to  matrix A
+    float *B =  bli_obj_buffer_at_off(b);       //pointer to matrix B
 
     float *a10, *a11, *b01, *b11;    //pointers that point to blocks for GEMM and TRSM
 
@@ -29591,8 +29591,8 @@ BLIS_INLINE err_t bli_strsm_small_AltXB_AuXB
     dim_t k_iter;                         //number of times GEMM to be performed
 
     float AlphaVal = *(float *)AlphaObj->buffer;    //value of alpha
-    float *L =  a->buffer;               //pointer to  matrix A
-    float *B =  b->buffer;               //pointer to matrix B
+    float *L =  bli_obj_buffer_at_off(a);               //pointer to  matrix A
+    float *B =  bli_obj_buffer_at_off(b);               //pointer to matrix B
 
     //pointers that point to blocks for GEMM and TRSM
     float *a10, *a11, *b01, *b11;
@@ -33732,8 +33732,8 @@ BLIS_INLINE err_t bli_ztrsm_small_AutXB_AlXB
     dim_t k_iter;     //number of times GEMM to be performed
 
     dcomplex AlphaVal = *(dcomplex *)AlphaObj->buffer;    //value of alpha
-    dcomplex *L =  a->buffer;       //pointer to  matrix A
-    dcomplex *B =  b->buffer;       //pointer to matrix B
+    dcomplex *L =  bli_obj_buffer_at_off(a);       //pointer to  matrix A
+    dcomplex *B =  bli_obj_buffer_at_off(b);       //pointer to matrix B
 
     dcomplex *a10, *a11, *b01, *b11;    //pointers that point to blocks for GEMM and TRSM
 
@@ -34962,8 +34962,8 @@ BLIS_INLINE err_t bli_ztrsm_small_AltXB_AuXB
     dim_t k_iter;                         //number of times GEMM to be performed
 
     dcomplex AlphaVal = *(dcomplex *)AlphaObj->buffer;    //value of alpha
-    dcomplex *L =  a->buffer;               //pointer to  matrix A
-    dcomplex *B =  b->buffer;               //pointer to matrix B
+    dcomplex *L =  bli_obj_buffer_at_off(a);               //pointer to  matrix A
+    dcomplex *B =  bli_obj_buffer_at_off(b);               //pointer to matrix B
 
     //pointers that point to blocks for GEMM and TRSM
     dcomplex *a10, *a11, *b01, *b11;
@@ -36187,8 +36187,8 @@ BLIS_INLINE err_t bli_ztrsm_small_XAutB_XAlB
     bool is_unitdiag = bli_obj_has_unit_diag(a);
 
     dcomplex AlphaVal = *(dcomplex *)AlphaObj->buffer;    //value of Alpha
-    dcomplex* restrict L = a->buffer;      //pointer to matrix A
-    dcomplex* restrict B = b->buffer;      //pointer to matrix B
+    dcomplex* restrict L = bli_obj_buffer_at_off(a);      //pointer to matrix A
+    dcomplex* restrict B = bli_obj_buffer_at_off(b);      //pointer to matrix B
 
     dcomplex *a01, *a11, *b10, *b11;   //pointers for GEMM and TRSM blocks
 
@@ -37648,8 +37648,8 @@ BLIS_INLINE err_t bli_ztrsm_small_XAltB_XAuB
     bool is_unitdiag = bli_obj_has_unit_diag(a);
 
     dcomplex AlphaVal = *(dcomplex *)AlphaObj->buffer;    //value of Alpha
-    dcomplex* restrict L = a->buffer;      //pointer to matrix A
-    dcomplex* restrict B = b->buffer;      //pointer to matrix B
+    dcomplex* restrict L = bli_obj_buffer_at_off(a);      //pointer to matrix A
+    dcomplex* restrict B = bli_obj_buffer_at_off(b);      //pointer to matrix B
 
     dcomplex *a01, *a11, *b10, *b11;   //pointers for GEMM and TRSM blocks
 
@@ -42230,8 +42230,8 @@ BLIS_INLINE err_t bli_ctrsm_small_AutXB_AlXB
 	dim_t k_iter;     //number of times GEMM to be performed
 
 	scomplex AlphaVal = *(scomplex *)AlphaObj->buffer;    //value of alpha
-	scomplex *L =  a->buffer;       //pointer to  matrix A
-	scomplex *B =  b->buffer;       //pointer to matrix B
+	scomplex *L =  bli_obj_buffer_at_off(a);       //pointer to  matrix A
+	scomplex *B =  bli_obj_buffer_at_off(b);       //pointer to matrix B
 
 	scomplex *a10, *a11, *b01, *b11;    //pointers that point to blocks for GEMM and TRSM
 
@@ -44474,8 +44474,8 @@ BLIS_INLINE err_t bli_ctrsm_small_AltXB_AuXB
 	dim_t k_iter;     //number of times GEMM to be performed
 
 	scomplex AlphaVal = *(scomplex *)AlphaObj->buffer;    //value of alpha
-	scomplex *L =  a->buffer;       //pointer to  matrix A
-	scomplex *B =  b->buffer;       //pointer to matrix B
+	scomplex *L =  bli_obj_buffer_at_off(a);       //pointer to  matrix A
+	scomplex *B =  bli_obj_buffer_at_off(b);       //pointer to matrix B
 
 	scomplex *a10, *a11, *b01, *b11;    //pointers that point to blocks for GEMM and TRSM
 
@@ -46696,8 +46696,8 @@ BLIS_INLINE  err_t bli_ctrsm_small_XAutB_XAlB
 	dim_t k_iter;     //number of times GEMM to be performed
 
 	scomplex AlphaVal = *(scomplex *)AlphaObj->buffer;    //value of alpha
-	scomplex *L =  a->buffer;       //pointer to  matrix A
-	scomplex *B =  b->buffer;       //pointer to matrix B
+	scomplex *L =  bli_obj_buffer_at_off(a);       //pointer to  matrix A
+	scomplex *B =  bli_obj_buffer_at_off(b);       //pointer to matrix B
 
 	scomplex *a01, *a11, *b10, *b11;    //pointers that point to blocks for GEMM and TRSM
 
@@ -46712,7 +46712,7 @@ BLIS_INLINE  err_t bli_ctrsm_small_XAutB_XAlB
 	__m256 ymm16, ymm17, ymm18, ymm19;
 
 	__m128 xmm0, xmm1, xmm2;
-    	__m128 xmm5;
+	__m128 xmm5;
 
 	gint_t required_packing_A = 1;
 	mem_t local_mem_buf_A_s = {0};
@@ -48139,8 +48139,8 @@ BLIS_INLINE  err_t bli_ctrsm_small_XAltB_XAuB
 	dim_t k_iter;     //number of times GEMM to be performed
 
 	scomplex AlphaVal = *(scomplex *)AlphaObj->buffer;    //value of alpha
-	scomplex *L =  a->buffer;       //pointer to  matrix A
-	scomplex *B =  b->buffer;       //pointer to matrix B
+	scomplex *L =  bli_obj_buffer_at_off(a);       //pointer to  matrix A
+	scomplex *B =  bli_obj_buffer_at_off(b);       //pointer to matrix B
 
 	scomplex *a01, *a11, *b10, *b11;    //pointers that point to blocks for GEMM and TRSM
 

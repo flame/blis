@@ -1318,7 +1318,7 @@ void ztrsm_blis_impl
             }
         }
     } // bli_cpuid_is_avx_supported
-#endif
+#endif// END of BLIS_ENABLE_SMALL_MATRIX_TRSM
 
     bli_trsmnat
     (
