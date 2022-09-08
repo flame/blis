@@ -22,11 +22,11 @@ One of the primary features of BLIS is that it provides a large set of dense lin
 
 Presently, BLIS supports several groups of operations:
   * **[Level-1v](BLISTypedAPI.md#level-1v-operations)**: Operations on vectors:
-    * [addv](BLISTypedAPI.md#addv), [amaxv](BLISTypedAPI.md#amaxv), [axpyv](BLISTypedAPI.md#axpyv), [copyv](BLISTypedAPI.md#copyv), [dotv](BLISTypedAPI.md#dotv), [dotxv](BLISTypedAPI.md#dotxv), [invertv](BLISTypedAPI.md#invertv), [scal2v](BLISTypedAPI.md#scal2v), [scalv](BLISTypedAPI.md#scalv), [setv](BLISTypedAPI.md#setv), [subv](BLISTypedAPI.md#subv), [swapv](BLISTypedAPI.md#swapv)
+    * [addv](BLISTypedAPI.md#addv), [amaxv](BLISTypedAPI.md#amaxv), [axpyv](BLISTypedAPI.md#axpyv), [copyv](BLISTypedAPI.md#copyv), [dotv](BLISTypedAPI.md#dotv), [dotxv](BLISTypedAPI.md#dotxv), [invertv](BLISTypedAPI.md#invertv), [invscalv](BLISTypedAPI.md#invscalv), [scalv](BLISTypedAPI.md#scalv), [scal2v](BLISTypedAPI.md#scal2v), [setv](BLISTypedAPI.md#setv), [subv](BLISTypedAPI.md#subv), [swapv](BLISTypedAPI.md#swapv)
   * **[Level-1d](BLISTypedAPI.md#level-1d-operations)**: Element-wise operations on matrix diagonals:
-    * [addd](BLISTypedAPI.md#addd), [axpyd](BLISTypedAPI.md#axpyd), [copyd](BLISTypedAPI.md#copyd), [invertd](BLISTypedAPI.md#invertd), [scald](BLISTypedAPI.md#scald), [scal2d](BLISTypedAPI.md#scal2d), [setd](BLISTypedAPI.md#setd), [setid](BLISTypedAPI.md#setid), [subd](BLISTypedAPI.md#subd)
+    * [addd](BLISTypedAPI.md#addd), [axpyd](BLISTypedAPI.md#axpyd), [copyd](BLISTypedAPI.md#copyd), [invertd](BLISTypedAPI.md#invertd), [invscald](BLISTypedAPI.md#invscald), [scald](BLISTypedAPI.md#scald), [scal2d](BLISTypedAPI.md#scal2d), [setd](BLISTypedAPI.md#setd), [setid](BLISTypedAPI.md#setid), [subd](BLISTypedAPI.md#subd)
   * **[Level-1m](BLISTypedAPI.md#level-1m-operations)**: Element-wise operations on matrices:
-    * [addm](BLISTypedAPI.md#addm), [axpym](BLISTypedAPI.md#axpym), [copym](BLISTypedAPI.md#copym), [scalm](BLISTypedAPI.md#scalm), [scal2m](BLISTypedAPI.md#scal2m), [setm](BLISTypedAPI.md#setm), [subm](BLISTypedAPI.md#subm)
+    * [addm](BLISTypedAPI.md#addm), [axpym](BLISTypedAPI.md#axpym), [copym](BLISTypedAPI.md#copym), [invscalm](BLISTypedAPI.md#invscalm), [scalm](BLISTypedAPI.md#scalm), [scal2m](BLISTypedAPI.md#scal2m), [setm](BLISTypedAPI.md#setm), [subm](BLISTypedAPI.md#subm)
   * **[Level-1f](BLISTypedAPI.md#level-1f-operations)**: Fused operations on multiple vectors:
     * [axpy2v](BLISTypedAPI.md#axpy2v), [dotaxpyv](BLISTypedAPI.md#dotaxpyv), [axpyf](BLISTypedAPI.md#axpyf), [dotxf](BLISTypedAPI.md#dotxf), [dotxaxpyf](BLISTypedAPI.md#dotxaxpyf)
   * **[Level-2](BLISTypedAPI.md#level-2-operations)**: Operations with one matrix and (at least) one vector operand:
@@ -81,6 +81,7 @@ BLIS supports the following 14 level-1v kernels. These kernels are used primaril
   * **dotv**: Performs a [dot product](BLISTypedAPI.md#dotv) where the output scalar is overwritten.
   * **dotxv**: Performs an [extended dot product](BLISTypedAPI.md#dotxv) operation where the dot product is first scaled and then accumulated into a scaled output scalar.
   * **invertv**: Performs an [element-wise vector inversion](BLISTypedAPI.md#invertv) operation.
+  * **invscalv**: Performs an [in-place (destructive) vector inverse-scaling](BLISTypedAPI.md#invscalv) operation.
   * **scalv**: Performs an [in-place (destructive) vector scaling](BLISTypedAPI.md#scalv) operation.
   * **scal2v**: Performs an [out-of-place (non-destructive) vector scaling](BLISTypedAPI.md#scal2v) operation.
   * **setv**: Performs a [vector broadcast](BLISTypedAPI.md#setv) operation.
@@ -184,6 +185,7 @@ datatype characters.
 | copyv            | `BLIS_COPYV_KER`      | `?copyv_ft`           |
 | dotxv            | `BLIS_DOTXV_KER`      | `?dotxv_ft`           |
 | invertv          | `BLIS_INVERTV_KER`    | `?invertv_ft`         |
+| invscalv         | `BLIS_INVSCALV_KER`   | `?invscalv_ft`        |
 | scalv            | `BLIS_SCALV_KER`      | `?scalv_ft`           |
 | scal2v           | `BLIS_SCAL2V_KER`     | `?scal2v_ft`          |
 | setv             | `BLIS_SETV_KER`       | `?setv_ft`            |
@@ -220,6 +222,7 @@ This section seeks to provide developers with a complete reference for each of t
     * [dotv](KernelsHowTo.md#dotv-kernel)
     * [dotxv](KernelsHowTo.md#dotxv-kernel)
     * [invertv](KernelsHowTo.md#invertv-kernel)
+    * [invscalv](KernelsHowTo.md#invscalv-kernel)
     * [scalv](KernelsHowTo.md#scalv-kernel)
     * [scal2v](KernelsHowTo.md#scal2v-kernel)
     * [setv](KernelsHowTo.md#setv-kernel)
@@ -926,6 +929,25 @@ void bli_?invertv_<suffix>
      )
 ```
 This kernel inverts all elements of an _n_-length vector `x`.
+
+---
+
+#### invscalv kernel
+```c
+void bli_?invscalv_<suffix>
+     (
+       conj_t           conjalpha,
+       dim_t            n,
+       ctype*  restrict alpha,
+       ctype*  restrict x, inc_t incx,
+       cntx_t* restrict cntx
+     )
+```
+This kernel performs the following operation:
+```
+  x := ( 1.0 / conjalpha(alpha) ) * x
+```
+where `x` is a vector of length _n_ stored with stride `incx` and `alpha` is a scalar.
 
 ---
 

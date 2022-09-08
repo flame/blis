@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2022, The University of Texas at Austin
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -32,26 +32,50 @@
 
 */
 
-//
-// Prototype function pointer query interface.
-//
+#include "blis.h"
 
-#undef  GENPROT
-#define GENPROT( opname ) \
+#undef  GENTFUNC
+#define GENTFUNC( ctype, ch, opname, arch, suf ) \
 \
-PASTECH2(opname,BLIS_TAPI_EX_SUF,_vft) \
-PASTEMAC2(opname,BLIS_TAPI_EX_SUF,_qfp)( num_t dt );
+void PASTEMAC3(ch,opname,arch,suf) \
+     ( \
+       conj_t           conjalpha, \
+       dim_t            n, \
+       ctype*  restrict alpha, \
+       ctype*  restrict x, inc_t incx, \
+       cntx_t*          cntx  \
+     ) \
+{ \
+	if ( bli_zero_dim1( n ) ) return; \
+\
+	/* If alpha is one, return. */ \
+	if ( PASTEMAC(ch,eq1)( *alpha ) ) return; \
+\
+	/* If alpha is zero, inv(alpha) is undefined. Bad user! Return early. */ \
+	if ( PASTEMAC(ch,eq0)( *alpha ) ) return; \
+\
+	ctype alpha_conj; \
+\
+	PASTEMAC(ch,copycjs)( conjalpha, *alpha, alpha_conj ); \
+\
+	if ( incx == 1 ) \
+	{ \
+		PRAGMA_SIMD \
+		for ( dim_t i = 0; i < n; ++i ) \
+		{ \
+			PASTEMAC(ch,invscals)( alpha_conj, x[i] ); \
+		} \
+	} \
+	else \
+	{ \
+		for ( dim_t i = 0; i < n; ++i ) \
+		{ \
+			PASTEMAC(ch,invscals)( alpha_conj, *x ); \
+\
+			x += incx; \
+		} \
+	} \
+}
 
-GENPROT( addd )
-GENPROT( copyd )
-GENPROT( subd )
-GENPROT( axpyd )
-GENPROT( scal2d )
-GENPROT( invertd )
-GENPROT( invscald )
-GENPROT( scald )
-GENPROT( setd )
-GENPROT( setid )
-GENPROT( shiftd )
-GENPROT( xpbyd )
+INSERT_GENTFUNC_BASIC2( invscalv, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX )
 

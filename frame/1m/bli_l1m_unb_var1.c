@@ -376,6 +376,7 @@ void PASTEMAC(ch,opname) \
 	} \
 }
 
+INSERT_GENTFUNC_BASIC2( invscalm_unb_var1, invscalv, BLIS_INVSCALV_KER )
 INSERT_GENTFUNC_BASIC2( scalm_unb_var1, scalv, BLIS_SCALV_KER )
 INSERT_GENTFUNC_BASIC2( setm_unb_var1,  setv,  BLIS_SETV_KER )
 

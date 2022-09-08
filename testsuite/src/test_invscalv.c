@@ -38,7 +38,7 @@
 
 
 // Static variables.
-static char*     op_str                    = "scalv";
+static char*     op_str                    = "invscalv";
 static char*     o_types                   = "v";  // y
 static char*     p_types                   = "c";  // conjalpha
 static thresh_t  thresh[BLIS_NUM_FP_TYPES] = { { 1e-04, 1e-05 },   // warn, pass for s
@@ -47,14 +47,14 @@ static thresh_t  thresh[BLIS_NUM_FP_TYPES] = { { 1e-04, 1e-05 },   // warn, pass
                                                { 1e-13, 1e-14 } }; // warn, pass for z
 
 // Local prototypes.
-void libblis_test_scalv_deps
+void libblis_test_invscalv_deps
      (
        thread_data_t* tdata,
        test_params_t* params,
        test_op_t*     op
      );
 
-void libblis_test_scalv_experiment
+void libblis_test_invscalv_experiment
      (
        test_params_t* params,
        test_op_t*     op,
@@ -67,14 +67,14 @@ void libblis_test_scalv_experiment
        double*        resid
      );
 
-void libblis_test_scalv_impl
+void libblis_test_invscalv_impl
      (
        iface_t   iface,
        obj_t*    alpha,
        obj_t*    y
      );
 
-void libblis_test_scalv_check
+void libblis_test_invscalv_check
      (
        test_params_t* params,
        obj_t*         alpha,
@@ -85,7 +85,7 @@ void libblis_test_scalv_check
 
 
 
-void libblis_test_scalv_deps
+void libblis_test_invscalv_deps
      (
        thread_data_t* tdata,
        test_params_t* params,
@@ -100,7 +100,7 @@ void libblis_test_scalv_deps
 
 
 
-void libblis_test_scalv
+void libblis_test_invscalv
      (
        thread_data_t* tdata,
        test_params_t* params,
@@ -116,7 +116,7 @@ void libblis_test_scalv
 	     libblis_test_l1v_is_disabled( op ) ) return;
 
 	// Call dependencies first.
-	if ( TRUE ) libblis_test_scalv_deps( tdata, params, op );
+	if ( TRUE ) libblis_test_invscalv_deps( tdata, params, op );
 
 	// Execute the test driver for each implementation requested.
 	//if ( op->front_seq == ENABLE )
@@ -129,13 +129,13 @@ void libblis_test_scalv
 		                        p_types,
 		                        o_types,
 		                        thresh,
-		                        libblis_test_scalv_experiment );
+		                        libblis_test_invscalv_experiment );
 	}
 }
 
 
 
-void libblis_test_scalv_experiment
+void libblis_test_invscalv_experiment
      (
        test_params_t* params,
        test_op_t*     op,
@@ -200,7 +200,7 @@ void libblis_test_scalv_experiment
 
 		time = bli_clock();
 
-		libblis_test_scalv_impl( iface, &alpha, &y );
+		libblis_test_invscalv_impl( iface, &alpha, &y );
 
 		time_min = bli_clock_min_diff( time_min, time );
 	}
@@ -210,7 +210,7 @@ void libblis_test_scalv_experiment
 	if ( bli_obj_is_complex( &y ) ) *perf *= 6.0;
 
 	// Perform checks.
-	libblis_test_scalv_check( params, &alpha, &y, &y_save, resid );
+	libblis_test_invscalv_check( params, &alpha, &y, &y_save, resid );
 
 	// Zero out performance and residual if output vector is empty.
 	libblis_test_check_empty_problem( &y, perf, resid );
@@ -222,7 +222,7 @@ void libblis_test_scalv_experiment
 
 
 
-void libblis_test_scalv_impl
+void libblis_test_invscalv_impl
      (
        iface_t   iface,
        obj_t*    alpha,
@@ -232,7 +232,7 @@ void libblis_test_scalv_impl
 	switch ( iface )
 	{
 		case BLIS_TEST_SEQ_FRONT_END:
-		bli_scalv( alpha, y );
+		bli_invscalv( alpha, y );
 		break;
 
 		default:
@@ -242,7 +242,7 @@ void libblis_test_scalv_impl
 
 
 
-void libblis_test_scalv_check
+void libblis_test_invscalv_check
      (
        test_params_t* params,
        obj_t*         alpha,
@@ -257,7 +257,6 @@ void libblis_test_scalv_check
 	dim_t  m       = bli_obj_vector_dim( y );
 
 	obj_t  norm_y_r;
-	obj_t  nalpha;
 
 	obj_t  y2;
 
@@ -272,28 +271,24 @@ void libblis_test_scalv_check
 	//
 	// Under these conditions, we assume that the implementation for
 	//
-	//   y := conjalpha(alpha) * y_orig
+	//   y := ( 1.0 / conjalpha(alpha) ) * y_orig
 	//
 	// is functioning correctly if
 	//
-	//   normfv( y + -conjalpha(alpha) * y_orig )
+	//   normfv( y_orig - conjalpha(alpha) * y )
 	//
 	// is negligible.
 	//
 
 	bli_obj_create( dt, m, 1, 0, 0, &y2 );
-    bli_copyv( y_orig, &y2 );
+    bli_copyv( y, &y2 );
 
-	bli_obj_scalar_init_detached( dt,      &nalpha );
 	bli_obj_scalar_init_detached( dt_real, &norm_y_r );
 
-	bli_copysc( alpha, &nalpha );
-	bli_mulsc( &BLIS_MINUS_ONE, &nalpha );
+	bli_scalv( alpha, &y2 );
+    bli_subv( y_orig, &y2 );
 
-	bli_scalv( &nalpha, &y2 );
-    bli_addv( &y2, y );
-
-    bli_normfv( y, &norm_y_r );
+    bli_normfv( &y2, &norm_y_r );
 
     bli_getsc( &norm_y_r, resid, &junk );
 

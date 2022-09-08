@@ -85,6 +85,7 @@ void PASTEMAC(opname,_check) \
        const obj_t*  x  \
     );
 
+GENTPROT( invscald )
 GENTPROT( scald )
 GENTPROT( setd )
 GENTPROT( setid )

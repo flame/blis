@@ -460,6 +460,7 @@ void PASTEMAC(opname,EX_SUF) \
 	); \
 }
 
+GENFRONT( invscalv )
 GENFRONT( scalv )
 GENFRONT( setv )
 

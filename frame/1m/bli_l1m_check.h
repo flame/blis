@@ -74,6 +74,7 @@ void PASTEMAC(opname,_check) \
        const obj_t* x  \
     );
 
+GENPROT( invscalm )
 GENPROT( scalm )
 GENPROT( setm )
 

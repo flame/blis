@@ -139,6 +139,18 @@ void PASTEMAC(ch,opname) \
      ); \
 
 
+#define INVSCALV_KER_PROT( ctype, ch, opname ) \
+\
+void PASTEMAC(ch,opname) \
+     ( \
+       conj_t           conjalpha, \
+       dim_t            n, \
+       ctype*  restrict alpha, \
+       ctype*  restrict x, inc_t incx, \
+       cntx_t*          cntx  \
+     ); \
+
+
 #define SCALV_KER_PROT( ctype, ch, opname ) \
 \
 void PASTEMAC(ch,opname) \
