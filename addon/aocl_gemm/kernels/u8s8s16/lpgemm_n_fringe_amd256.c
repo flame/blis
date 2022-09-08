@@ -352,226 +352,29 @@ POST_OPS_DOWNSCALE_6x16:
 			__m128i temp[2];
 			__m256i temp_32[2];
 			__m256 temp_float[2];
+			__m256 scale_1, scale_2;
+			__m256 res_1, res_2;
+			__m256i store_reg;
 
-			// Load the scale vector values into the register
-			__m256 scale_1 =
+			/* Load the scale vector values into the register*/
+			scale_1 =
 				_mm256_loadu_ps(
-					(float *)post_ops_list_temp->scale_factor +
-					post_op_c_j + (0 * 8));
-			__m256 scale_2 =
+				(float *)post_ops_list_temp->scale_factor +
+				post_op_c_j + (0 * 8));
+			scale_2 =
 				_mm256_loadu_ps(
-					(float *)post_ops_list_temp->scale_factor +
-					post_op_c_j + (1 * 8));
+				(float *)post_ops_list_temp->scale_factor +
+				post_op_c_j + (1 * 8));
 
-			// Extract the first 128 bits of the register
-			temp[0] = _mm256_extractf128_si256(c_int16_0p0, 0);
-
-			// Extract the second 128 bits of the register
-			temp[1] = _mm256_extractf128_si256(c_int16_0p0, 1);
-
-			// Since s16 values cannot be converted to f32 directly,
-			// they are converted to s32, then to f32 and the scale is performed
-			temp_32[0] = _mm256_cvtepi16_epi32(temp[0]);
-			temp_float[0] = _mm256_cvtepi32_ps(temp_32[0]);
-
-			temp_32[1] = _mm256_cvtepi16_epi32(temp[1]);
-			temp_float[1] = _mm256_cvtepi32_ps(temp_32[1]);
-
-			// Multiply the C matrix by the scale value
-			__m256 res_1 = _mm256_mul_ps(temp_float[0], scale_1);
-			__m256 res_2 = _mm256_mul_ps(temp_float[0], scale_2);
-
-			// Round the resultant value to the nearest integer
-			res_1 = _mm256_round_ps(res_1, (_MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC));
-			res_2 = _mm256_round_ps(res_2, (_MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC));
-
-			// Convert float32 scaled rounded value to int32
-			temp_32[0] = _mm256_cvtps_epi32(res_1);
-			temp_32[1] = _mm256_cvtps_epi32(res_2);
-
-			// Convert the s32 to s16
-			c_int16_0p0 = _mm256_packs_epi32(temp_32[0], temp_32[1]);
+			bli_mm256_s16_downscale2(c_int16_0p0, c_int16_1p0, 0, 1);
 
 			//--------------------------------------------------------------------------
 
-			// Extract the first 128 bits of the register
-			temp[0] = _mm256_extractf128_si256(c_int16_1p0, 0);
-
-			// Extract the second 128 bits of the register
-			temp[1] = _mm256_extractf128_si256(c_int16_1p0, 1);
-
-			// Since s16 values cannot be converted to f32 directly,
-			// they are converted to s32, then to f32 and the scale is performed
-			temp_32[0] = _mm256_cvtepi16_epi32(temp[0]);
-			temp_float[0] = _mm256_cvtepi32_ps(temp_32[0]);
-
-			temp_32[1] = _mm256_cvtepi16_epi32(temp[1]);
-			temp_float[1] = _mm256_cvtepi32_ps(temp_32[1]);
-
-			// Multiply the C matrix by the scale value
-			res_1 = _mm256_mul_ps(temp_float[0], scale_1);
-			res_2 = _mm256_mul_ps(temp_float[0], scale_2);
-
-			// Round the resultant value to the nearest integer
-			res_1 = _mm256_round_ps(res_1, (_MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC));
-			res_2 = _mm256_round_ps(res_2, (_MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC));
-
-			// Convert float32 scaled rounded value to int32
-			temp_32[0] = _mm256_cvtps_epi32(res_1);
-			temp_32[1] = _mm256_cvtps_epi32(res_2);
-
-			// Convert the s32 to s16
-			c_int16_1p0 = _mm256_packs_epi32(temp_32[0], temp_32[1]);
-
-			// Permute to make sure the order is correct
-			c_int16_1p0 = _mm256_permute4x64_epi64(c_int16_1p0, 0XD8);
-
-			__m256i store_reg = _mm256_packs_epi16(c_int16_0p0, c_int16_1p0);
-
-			_mm256_storeu_si256((__m256i *)(c + (rs_c * (ir + 0)) + (0 * 16)), store_reg);
+			bli_mm256_s16_downscale2(c_int16_2p0, c_int16_3p0, 2, 3);
 
 			//--------------------------------------------------------------------------
 
-			// Extract the first 128 bits of the register
-			temp[0] = _mm256_extractf128_si256(c_int16_2p0, 0);
-
-			// Extract the second 128 bits of the register
-			temp[1] = _mm256_extractf128_si256(c_int16_2p0, 1);
-
-			// Since s16 values cannot be converted to f32 directly,
-			// they are converted to s32, then to f32 and the scale is performed
-			temp_32[0] = _mm256_cvtepi16_epi32(temp[0]);
-			temp_float[0] = _mm256_cvtepi32_ps(temp_32[0]);
-
-			temp_32[1] = _mm256_cvtepi16_epi32(temp[1]);
-			temp_float[1] = _mm256_cvtepi32_ps(temp_32[1]);
-
-			// Multiply the C matrix by the scale value
-			res_1 = _mm256_mul_ps(temp_float[0], scale_1);
-			res_2 = _mm256_mul_ps(temp_float[0], scale_2);
-
-			// Round the resultant value to the nearest integer
-			res_1 = _mm256_round_ps(res_1, (_MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC));
-			res_2 = _mm256_round_ps(res_2, (_MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC));
-
-			// Convert float32 scaled rounded value to int32
-			temp_32[0] = _mm256_cvtps_epi32(res_1);
-			temp_32[1] = _mm256_cvtps_epi32(res_2);
-
-			// Convert the s32 to s16
-			c_int16_2p0 = _mm256_packs_epi32(temp_32[0], temp_32[1]);
-
-			// Permute to make sure the order is correct
-			c_int16_2p0 = _mm256_permute4x64_epi64(c_int16_2p0, 0XD8);
-			//--------------------------------------------------------------------------
-
-			// Extract the first 128 bits of the register
-			temp[0] = _mm256_extractf128_si256(c_int16_3p0, 0);
-
-			// Extract the second 128 bits of the register
-			temp[1] = _mm256_extractf128_si256(c_int16_3p0, 1);
-
-			// Since s16 values cannot be converted to f32 directly,
-			// they are converted to s32, then to f32 and the scale is performed
-			temp_32[0] = _mm256_cvtepi16_epi32(temp[0]);
-			temp_float[0] = _mm256_cvtepi32_ps(temp_32[0]);
-
-			temp_32[1] = _mm256_cvtepi16_epi32(temp[1]);
-			temp_float[1] = _mm256_cvtepi32_ps(temp_32[1]);
-
-			// Multiply the C matrix by the scale value
-			res_1 = _mm256_mul_ps(temp_float[0], scale_1);
-			res_2 = _mm256_mul_ps(temp_float[0], scale_2);
-
-			// Round the resultant value to the nearest integer
-			res_1 = _mm256_round_ps(res_1, (_MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC));
-			res_2 = _mm256_round_ps(res_2, (_MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC));
-
-			// Convert float32 scaled rounded value to int32
-			temp_32[0] = _mm256_cvtps_epi32(res_1);
-			temp_32[1] = _mm256_cvtps_epi32(res_2);
-
-			// Convert the s32 to s16
-			c_int16_3p0 = _mm256_packs_epi32(temp_32[0], temp_32[1]);
-
-			// Permute to make sure the order is correct
-			c_int16_3p0 = _mm256_permute4x64_epi64(c_int16_3p0, 0XD8);
-
-			store_reg = _mm256_packs_epi16(c_int16_2p0, c_int16_3p0);
-
-			_mm256_storeu_si256((__m256i *)(c + (rs_c * (ir + 0)) + (0 * 16)), store_reg);
-
-			//--------------------------------------------------------------------------
-
-			// Extract the first 128 bits of the register
-			temp[0] = _mm256_extractf128_si256(c_int16_4p0, 0);
-
-			// Extract the second 128 bits of the register
-			temp[1] = _mm256_extractf128_si256(c_int16_4p0, 1);
-
-			// Since s16 values cannot be converted to f32 directly,
-			// they are converted to s32, then to f32 and the scale is performed
-			temp_32[0] = _mm256_cvtepi16_epi32(temp[0]);
-			temp_float[0] = _mm256_cvtepi32_ps(temp_32[0]);
-
-			temp_32[1] = _mm256_cvtepi16_epi32(temp[1]);
-			temp_float[1] = _mm256_cvtepi32_ps(temp_32[1]);
-
-			// Multiply the C matrix by the scale value
-			res_1 = _mm256_mul_ps(temp_float[0], scale_1);
-			res_2 = _mm256_mul_ps(temp_float[0], scale_2);
-
-			// Round the resultant value to the nearest integer
-			res_1 = _mm256_round_ps(res_1, (_MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC));
-			res_2 = _mm256_round_ps(res_2, (_MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC));
-
-			// Convert float32 scaled rounded value to int32
-			temp_32[0] = _mm256_cvtps_epi32(res_1);
-			temp_32[1] = _mm256_cvtps_epi32(res_2);
-
-			// Convert the s32 to s16
-			c_int16_4p0 = _mm256_packs_epi32(temp_32[0], temp_32[1]);
-
-			// Permute to make sure the order is correct
-			c_int16_4p0 = _mm256_permute4x64_epi64(c_int16_4p0, 0XD8);
-
-			//--------------------------------------------------------------------------
-
-			// Extract the first 128 bits of the register
-			temp[0] = _mm256_extractf128_si256(c_int16_5p0, 0);
-
-			// Extract the second 128 bits of the register
-			temp[1] = _mm256_extractf128_si256(c_int16_5p0, 1);
-
-			// Since s16 values cannot be converted to f32 directly,
-			// they are converted to s32, then to f32 and the scale is performed
-			temp_32[0] = _mm256_cvtepi16_epi32(temp[0]);
-			temp_float[0] = _mm256_cvtepi32_ps(temp_32[0]);
-
-			temp_32[1] = _mm256_cvtepi16_epi32(temp[1]);
-			temp_float[1] = _mm256_cvtepi32_ps(temp_32[1]);
-
-			// Multiply the C matrix by the scale value
-			res_1 = _mm256_mul_ps(temp_float[0], scale_1);
-			res_2 = _mm256_mul_ps(temp_float[0], scale_2);
-
-			// Round the resultant value to the nearest integer
-			res_1 = _mm256_round_ps(res_1, (_MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC));
-			res_2 = _mm256_round_ps(res_2, (_MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC));
-
-			// Convert float32 scaled rounded value to int32
-			temp_32[0] = _mm256_cvtps_epi32(res_1);
-			temp_32[1] = _mm256_cvtps_epi32(res_2);
-
-			// Convert the s32 to s16
-			c_int16_5p0 = _mm256_packs_epi32(temp_32[0], temp_32[1]);
-
-			// Permute to make sure the order is correct
-			c_int16_5p0 = _mm256_permute4x64_epi64(c_int16_5p0, 0XD8);
-
-			store_reg = _mm256_packs_epi16(c_int16_4p0, c_int16_4p0);
-
-			_mm256_storeu_si256((__m256i *)(c + (rs_c * (ir + 0)) + (0 * 16)), store_reg);
+			bli_mm256_s16_downscale2(c_int16_4p0, c_int16_5p0, 4, 5);
 
 			POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 		}
@@ -987,226 +790,29 @@ POST_OPS_RELU_SCALE_6xlt16:
 			__m128i temp[2];
 			__m256i temp_32[2];
 			__m256 temp_float[2];
+			__m256 scale_1, scale_2;
+			__m256 res_1, res_2;
+			__m256i store_reg;
+
+			float float_buf[16];
+			int8 store_buf[16];
+
+			memcpy( float_buf, ( ( float* )post_ops_list_temp->scale_factor +
+					post_op_c_j ), ( n0_rem * sizeof( float ) ) );
 
 			// Load the scale vector values into the register
-			__m256 scale_1 =
-				_mm256_loadu_ps(
-					(float *)post_ops_list_temp->scale_factor +
-					post_op_c_j + (0 * 8));
-			__m256 scale_2 =
-				_mm256_loadu_ps(
-					(float *)post_ops_list_temp->scale_factor +
-					post_op_c_j + (1 * 8));
+			scale_1 = _mm256_loadu_ps(float_buf + (0 * 8));
+			scale_2 = _mm256_loadu_ps(float_buf + (1 * 8));
 
-			// Extract the first 128 bits of the register
-			temp[0] = _mm256_extractf128_si256(c_int16_0p0, 0);
-
-			// Extract the second 128 bits of the register
-			temp[1] = _mm256_extractf128_si256(c_int16_0p0, 1);
-
-			// Since s16 values cannot be converted to f32 directly,
-			// they are converted to s32, then to f32 and the scale is performed
-			temp_32[0] = _mm256_cvtepi16_epi32(temp[0]);
-			temp_float[0] = _mm256_cvtepi32_ps(temp_32[0]);
-
-			temp_32[1] = _mm256_cvtepi16_epi32(temp[1]);
-			temp_float[1] = _mm256_cvtepi32_ps(temp_32[1]);
-
-			// Multiply the C matrix by the scale value
-			__m256 res_1 = _mm256_mul_ps(temp_float[0], scale_1);
-			__m256 res_2 = _mm256_mul_ps(temp_float[0], scale_2);
-
-			// Round the resultant value to the nearest integer
-			res_1 = _mm256_round_ps(res_1, (_MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC));
-			res_2 = _mm256_round_ps(res_2, (_MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC));
-
-			// Convert float32 scaled rounded value to int32
-			temp_32[0] = _mm256_cvtps_epi32(res_1);
-			temp_32[1] = _mm256_cvtps_epi32(res_2);
-
-			// Convert the s32 to s16
-			c_int16_0p0 = _mm256_packs_epi32(temp_32[0], temp_32[1]);
+			bli_mm256_s16_downscale2_lt16(c_int16_0p0, c_int16_1p0, 0, 1)
 
 			//--------------------------------------------------------------------------
 
-			// Extract the first 128 bits of the register
-			temp[0] = _mm256_extractf128_si256(c_int16_1p0, 0);
-
-			// Extract the second 128 bits of the register
-			temp[1] = _mm256_extractf128_si256(c_int16_1p0, 1);
-
-			// Since s16 values cannot be converted to f32 directly,
-			// they are converted to s32, then to f32 and the scale is performed
-			temp_32[0] = _mm256_cvtepi16_epi32(temp[0]);
-			temp_float[0] = _mm256_cvtepi32_ps(temp_32[0]);
-
-			temp_32[1] = _mm256_cvtepi16_epi32(temp[1]);
-			temp_float[1] = _mm256_cvtepi32_ps(temp_32[1]);
-
-			// Multiply the C matrix by the scale value
-			res_1 = _mm256_mul_ps(temp_float[0], scale_1);
-			res_2 = _mm256_mul_ps(temp_float[0], scale_2);
-
-			// Round the resultant value to the nearest integer
-			res_1 = _mm256_round_ps(res_1, (_MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC));
-			res_2 = _mm256_round_ps(res_2, (_MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC));
-
-			// Convert float32 scaled rounded value to int32
-			temp_32[0] = _mm256_cvtps_epi32(res_1);
-			temp_32[1] = _mm256_cvtps_epi32(res_2);
-
-			// Convert the s32 to s16
-			c_int16_1p0 = _mm256_packs_epi32(temp_32[0], temp_32[1]);
-
-			// Permute to make sure the order is correct
-			c_int16_1p0 = _mm256_permute4x64_epi64(c_int16_1p0, 0XD8);
-
-			__m256i store_reg = _mm256_packs_epi16(c_int16_0p0, c_int16_1p0);
-
-			_mm256_storeu_si256((__m256i *)(c + (rs_c * (ir + 0)) + (0 * 16)), store_reg);
+			bli_mm256_s16_downscale2_lt16(c_int16_2p0, c_int16_3p0, 2, 3)
 
 			//--------------------------------------------------------------------------
 
-			// Extract the first 128 bits of the register
-			temp[0] = _mm256_extractf128_si256(c_int16_2p0, 0);
-
-			// Extract the second 128 bits of the register
-			temp[1] = _mm256_extractf128_si256(c_int16_2p0, 1);
-
-			// Since s16 values cannot be converted to f32 directly,
-			// they are converted to s32, then to f32 and the scale is performed
-			temp_32[0] = _mm256_cvtepi16_epi32(temp[0]);
-			temp_float[0] = _mm256_cvtepi32_ps(temp_32[0]);
-
-			temp_32[1] = _mm256_cvtepi16_epi32(temp[1]);
-			temp_float[1] = _mm256_cvtepi32_ps(temp_32[1]);
-
-			// Multiply the C matrix by the scale value
-			res_1 = _mm256_mul_ps(temp_float[0], scale_1);
-			res_2 = _mm256_mul_ps(temp_float[0], scale_2);
-
-			// Round the resultant value to the nearest integer
-			res_1 = _mm256_round_ps(res_1, (_MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC));
-			res_2 = _mm256_round_ps(res_2, (_MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC));
-
-			// Convert float32 scaled rounded value to int32
-			temp_32[0] = _mm256_cvtps_epi32(res_1);
-			temp_32[1] = _mm256_cvtps_epi32(res_2);
-
-			// Convert the s32 to s16
-			c_int16_2p0 = _mm256_packs_epi32(temp_32[0], temp_32[1]);
-
-			// Permute to make sure the order is correct
-			c_int16_2p0 = _mm256_permute4x64_epi64(c_int16_2p0, 0XD8);
-			//--------------------------------------------------------------------------
-
-			// Extract the first 128 bits of the register
-			temp[0] = _mm256_extractf128_si256(c_int16_3p0, 0);
-
-			// Extract the second 128 bits of the register
-			temp[1] = _mm256_extractf128_si256(c_int16_3p0, 1);
-
-			// Since s16 values cannot be converted to f32 directly,
-			// they are converted to s32, then to f32 and the scale is performed
-			temp_32[0] = _mm256_cvtepi16_epi32(temp[0]);
-			temp_float[0] = _mm256_cvtepi32_ps(temp_32[0]);
-
-			temp_32[1] = _mm256_cvtepi16_epi32(temp[1]);
-			temp_float[1] = _mm256_cvtepi32_ps(temp_32[1]);
-
-			// Multiply the C matrix by the scale value
-			res_1 = _mm256_mul_ps(temp_float[0], scale_1);
-			res_2 = _mm256_mul_ps(temp_float[0], scale_2);
-
-			// Round the resultant value to the nearest integer
-			res_1 = _mm256_round_ps(res_1, (_MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC));
-			res_2 = _mm256_round_ps(res_2, (_MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC));
-
-			// Convert float32 scaled rounded value to int32
-			temp_32[0] = _mm256_cvtps_epi32(res_1);
-			temp_32[1] = _mm256_cvtps_epi32(res_2);
-
-			// Convert the s32 to s16
-			c_int16_3p0 = _mm256_packs_epi32(temp_32[0], temp_32[1]);
-
-			// Permute to make sure the order is correct
-			c_int16_3p0 = _mm256_permute4x64_epi64(c_int16_3p0, 0XD8);
-
-			store_reg = _mm256_packs_epi16(c_int16_2p0, c_int16_3p0);
-
-			_mm256_storeu_si256((__m256i *)(c + (rs_c * (ir + 0)) + (0 * 16)), store_reg);
-
-			//--------------------------------------------------------------------------
-
-			// Extract the first 128 bits of the register
-			temp[0] = _mm256_extractf128_si256(c_int16_4p0, 0);
-
-			// Extract the second 128 bits of the register
-			temp[1] = _mm256_extractf128_si256(c_int16_4p0, 1);
-
-			// Since s16 values cannot be converted to f32 directly,
-			// they are converted to s32, then to f32 and the scale is performed
-			temp_32[0] = _mm256_cvtepi16_epi32(temp[0]);
-			temp_float[0] = _mm256_cvtepi32_ps(temp_32[0]);
-
-			temp_32[1] = _mm256_cvtepi16_epi32(temp[1]);
-			temp_float[1] = _mm256_cvtepi32_ps(temp_32[1]);
-
-			// Multiply the C matrix by the scale value
-			res_1 = _mm256_mul_ps(temp_float[0], scale_1);
-			res_2 = _mm256_mul_ps(temp_float[0], scale_2);
-
-			// Round the resultant value to the nearest integer
-			res_1 = _mm256_round_ps(res_1, (_MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC));
-			res_2 = _mm256_round_ps(res_2, (_MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC));
-
-			// Convert float32 scaled rounded value to int32
-			temp_32[0] = _mm256_cvtps_epi32(res_1);
-			temp_32[1] = _mm256_cvtps_epi32(res_2);
-
-			// Convert the s32 to s16
-			c_int16_4p0 = _mm256_packs_epi32(temp_32[0], temp_32[1]);
-
-			// Permute to make sure the order is correct
-			c_int16_4p0 = _mm256_permute4x64_epi64(c_int16_4p0, 0XD8);
-
-			//--------------------------------------------------------------------------
-
-			// Extract the first 128 bits of the register
-			temp[0] = _mm256_extractf128_si256(c_int16_5p0, 0);
-
-			// Extract the second 128 bits of the register
-			temp[1] = _mm256_extractf128_si256(c_int16_5p0, 1);
-
-			// Since s16 values cannot be converted to f32 directly,
-			// they are converted to s32, then to f32 and the scale is performed
-			temp_32[0] = _mm256_cvtepi16_epi32(temp[0]);
-			temp_float[0] = _mm256_cvtepi32_ps(temp_32[0]);
-
-			temp_32[1] = _mm256_cvtepi16_epi32(temp[1]);
-			temp_float[1] = _mm256_cvtepi32_ps(temp_32[1]);
-
-			// Multiply the C matrix by the scale value
-			res_1 = _mm256_mul_ps(temp_float[0], scale_1);
-			res_2 = _mm256_mul_ps(temp_float[0], scale_2);
-
-			// Round the resultant value to the nearest integer
-			res_1 = _mm256_round_ps(res_1, (_MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC));
-			res_2 = _mm256_round_ps(res_2, (_MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC));
-
-			// Convert float32 scaled rounded value to int32
-			temp_32[0] = _mm256_cvtps_epi32(res_1);
-			temp_32[1] = _mm256_cvtps_epi32(res_2);
-
-			// Convert the s32 to s16
-			c_int16_5p0 = _mm256_packs_epi32(temp_32[0], temp_32[1]);
-
-			// Permute to make sure the order is correct
-			c_int16_5p0 = _mm256_permute4x64_epi64(c_int16_5p0, 0XD8);
-
-			store_reg = _mm256_packs_epi16(c_int16_4p0, c_int16_4p0);
-
-			_mm256_storeu_si256((__m256i *)(c + (rs_c * (ir + 0)) + (0 * 16)), store_reg);
+			bli_mm256_s16_downscale2_lt16(c_int16_4p0, c_int16_5p0, 4, 5)
 
 			POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 		}
