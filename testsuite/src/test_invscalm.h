@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2018 - 2019, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -32,26 +33,10 @@
 
 */
 
-//
-// Prototype function pointer query interface.
-//
-
-#undef  GENPROT
-#define GENPROT( opname ) \
-\
-PASTECH2(opname,BLIS_TAPI_EX_SUF,_vft) \
-PASTEMAC2(opname,BLIS_TAPI_EX_SUF,_qfp)( num_t dt );
-
-GENPROT( addd )
-GENPROT( copyd )
-GENPROT( subd )
-GENPROT( axpyd )
-GENPROT( scal2d )
-GENPROT( invertd )
-GENPROT( invscald )
-GENPROT( scald )
-GENPROT( setd )
-GENPROT( setid )
-GENPROT( shiftd )
-GENPROT( xpbyd )
+void libblis_test_invscalm
+     (
+       thread_data_t* tdata,
+       test_params_t* params,
+       test_op_t*     op
+     );
 

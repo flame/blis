@@ -84,6 +84,7 @@ void PASTEMAC(opname,_check) \
 	bli_l1m_ax_check( alpha, x ); \
 }
 
+GENFRONT( invscalm )
 GENFRONT( scalm )
 GENFRONT( setm )
 
