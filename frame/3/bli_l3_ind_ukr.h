@@ -32,22 +32,63 @@
 
 */
 
+//
+// Define template prototypes for level-3 micro-kernels.
+//
 
-#undef  GENTPROTCO
-#define GENTPROTCO( ctype, ctype_r, ch, chr, varname ) \
+// 1m micro-kernels
+
+#undef  GENTPROT
+#define GENTPROT( ctype, ch, opname ) \
 \
-void PASTEMAC(ch,varname) \
+void PASTEMAC(ch,opname) \
      ( \
-       conj_t  conja, \
-       dim_t   panel_dim, \
-       dim_t   panel_dim_max, \
-       dim_t   panel_len, \
-       dim_t   panel_len_max, \
-       ctype*  kappa, \
-       ctype*  a, inc_t inca, inc_t lda, \
-       ctype*  p, inc_t is_p, inc_t ldp, \
-       cntx_t* cntx  \
+       dim_t               k, \
+       ctype*     restrict alpha, \
+       ctype*     restrict a, \
+       ctype*     restrict b, \
+       ctype*     restrict beta, \
+       ctype*     restrict c, inc_t rs_c, inc_t cs_c, \
+       auxinfo_t* restrict data, \
+       cntx_t*    restrict cntx  \
      );
 
-INSERT_GENTPROTCO_BASIC0( packm_cxk_3mis )
+INSERT_GENTPROT_BASIC0( gemm1m_ukr_name )
+
+
+#undef  GENTPROT
+#define GENTPROT( ctype, ch, opname ) \
+\
+void PASTEMAC(ch,opname) \
+     ( \
+       dim_t               k, \
+       ctype*     restrict alpha, \
+       ctype*     restrict a1x, \
+       ctype*     restrict a11, \
+       ctype*     restrict bx1, \
+       ctype*     restrict b11, \
+       ctype*     restrict c11, inc_t rs_c, inc_t cs_c, \
+       auxinfo_t* restrict data, \
+       cntx_t*    restrict cntx  \
+     );
+
+INSERT_GENTPROT_BASIC0( gemmtrsm1m_l_ukr_name )
+INSERT_GENTPROT_BASIC0( gemmtrsm1m_u_ukr_name )
+
+
+#undef  GENTPROT
+#define GENTPROT( ctype, ch, opname ) \
+\
+void PASTEMAC(ch,opname) \
+     ( \
+       ctype*     restrict a, \
+       ctype*     restrict b, \
+       ctype*     restrict c, inc_t rs_c, inc_t cs_c, \
+       auxinfo_t* restrict data, \
+       cntx_t*    restrict cntx  \
+     );
+
+INSERT_GENTPROT_BASIC0( trsm1m_l_ukr_name )
+INSERT_GENTPROT_BASIC0( trsm1m_u_ukr_name )
+
 

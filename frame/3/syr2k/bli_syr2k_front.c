@@ -54,10 +54,6 @@ void bli_syr2k_front
 	obj_t    b_local;
 	obj_t    at_local;
 
-	// Check parameters.
-	if ( bli_error_checking_is_enabled() )
-		bli_syr2k_check( alpha, a, b, beta, c, cntx );
-
 	// If alpha is zero, scale by beta and return.
 	if ( bli_obj_equals( alpha, &BLIS_ZERO ) )
 	{
