@@ -492,10 +492,10 @@ flat-header: check-env $(BLIS_H_FLAT)
 
 $(BLIS_H_FLAT): $(ALL_H99_FILES)
 ifeq ($(ENABLE_VERBOSE),yes)
-	$(FLATTEN_H) -c -v1 $(BLIS_H_SRC_PATH) $@ "./$(INCLUDE_DIR)" "$(ALL_H99_DIRPATHS)"
+	$(FLATTEN_H) -l -v1 $(BLIS_H_SRC_PATH) $@ "./$(INCLUDE_DIR)" "$(ALL_H99_DIRPATHS)"
 else
 	@echo -n "Generating monolithic blis.h"
-	@$(FLATTEN_H) -c -v1 $(BLIS_H_SRC_PATH) $@ "./$(INCLUDE_DIR)" "$(ALL_H99_DIRPATHS)"
+	@$(FLATTEN_H) -l -v1 $(BLIS_H_SRC_PATH) $@ "./$(INCLUDE_DIR)" "$(ALL_H99_DIRPATHS)"
 	@echo "Generated $@"
 endif
 
@@ -505,10 +505,10 @@ flat-cblas-header: check-env $(CBLAS_H_FLAT)
 
 $(CBLAS_H_FLAT): $(FRAME_H99_FILES)
 ifeq ($(ENABLE_VERBOSE),yes)
-	$(FLATTEN_H) -c -v1 $(CBLAS_H_SRC_PATH) $@ "./$(INCLUDE_DIR)" "$(ALL_H99_DIRPATHS)"
+	$(FLATTEN_H) -l -v1 $(CBLAS_H_SRC_PATH) $@ "./$(INCLUDE_DIR)" "$(ALL_H99_DIRPATHS)"
 else
 	@echo -n "Generating monolithic cblas.h"
-	@$(FLATTEN_H) -c -v1 $(CBLAS_H_SRC_PATH) $@ "./$(INCLUDE_DIR)" "$(ALL_H99_DIRPATHS)"
+	@$(FLATTEN_H) -l -v1 $(CBLAS_H_SRC_PATH) $@ "./$(INCLUDE_DIR)" "$(ALL_H99_DIRPATHS)"
 	@echo "Generated $@"
 endif
 
