@@ -1455,22 +1455,80 @@ get_compiler_version()
 	# The last part ({ read first rest ; echo $first ; }) is a workaround
 	# to OS X's egrep only returning the first match.
 	cc_vendor=$(echo "${vendor_string}" | egrep -o 'icc|gcc|clang|emcc|pnacl|IBM|oneAPI|crosstool-NG' | { read first rest ; echo $first ; })
+
+	# AOCC version strings contain both "clang" and "AOCC" substrings, and
+	# so we have perform a follow-up check to make sure cc_vendor gets set
+	# correctly.
+	aocc_grep=$(echo "${vendor_string}" | grep 'AOCC')
+	if [ -n "${aocc_grep}" ]; then
+		cc_vendor="aocc"
+	fi
+
+	# Begin parsing cc_vendor for the version string.
+
 	if [ "${cc_vendor}" = "crosstool-NG" ]; then
 	     # Treat compilers built by crosstool-NG (for eg: conda) as gcc.
 	     cc_vendor="gcc"
 	fi
 	if [ "${cc_vendor}" = "icc" -o \
 	     "${cc_vendor}" = "gcc" ]; then
+
 		cc_version=$(${cc} -dumpversion)
-	# If compiler is AOCC, first grep for clang and then the version number.
+
 	elif [ "${cc_vendor}" = "clang" ]; then
-		cc_version=$(echo "${vendor_string}" | egrep -o '(clang|LLVM) version [0-9]+\.[0-9]+\.?[0-9]*' | egrep -o '[0-9]+\.[0-9]+\.?[0-9]*')
+
+		cc_version=$(echo "${vendor_string}" \
+		             | egrep -o '(clang|LLVM) version [0-9]+\.[0-9]+\.?[0-9]*' \
+		             | egrep -o                      '[0-9]+\.[0-9]+\.?[0-9]*')
+
+	elif [ "${cc_vendor}" = "aocc" ]; then
+
+		aocc_ver21=$(echo "${vendor_string}" | grep 'AOCC.LLVM.2')
+
+		# Versions 2.0 and 2.1 had different version string formats from
+		# 2.2 and later, so we have to handle them separately.
+		# Examples:
+		# AOCC.LLVM.2.0.0.B191.2019_07_19 clang version 8.0.0 (CLANG: Jenkins AOCC_2_0_0-Build#191) (based on LLVM AOCC.LLVM.2.0.0.B191.2019_07_19)
+		# AOCC.LLVM.2.1.0.B1030.2019_11_12 clang version 9.0.0 (CLANG: Build#1030) (based on LLVM AOCC.LLVM.2.1.0.B1030.2019_11_12)
+		# AMD clang version 10.0.0 (CLANG: AOCC_2.2.0-Build#93 2020_06_25) (based on LLVM Mirror.Version.10.0.0)
+		# AMD clang version 11.0.0 (CLANG: AOCC_2.3.0-Build#85 2020_11_10) (based on LLVM Mirror.Version.11.0.0)
+		# AMD clang version 12.0.0 (CLANG: AOCC_3.0.0-Build#2 2020_11_05) (based on LLVM Mirror.Version.12.0.0)
+
+		if [ -n "${aocc_ver21}" ]; then
+
+			# Grep for the AOCC.LLVM.x.y.z substring first, and then isolate the
+			# version number. Also, the string may contain multiple instances of
+			# the version number, so only use the first occurrence.
+			cc_version=$(echo "${vendor_string}" \
+			             | egrep -o 'AOCC.LLVM.[0-9]+\.[0-9]+\.?[0-9]*' \
+			             | egrep -o           '[0-9]+\.[0-9]+\.?[0-9]*' \
+		                 | { read first rest ; echo $first ; })
+		else
+
+			# Grep for the AOCC_x.y.z substring first, and then isolate the
+			# version number. As of this writing, these version strings don't
+			# include multiple instances of the version, but we nonetheless
+			# take only the first occurrence as a future-oriented safety
+			# measure.
+			cc_version=$(echo "${vendor_string}" \
+			             | egrep -o 'AOCC_[0-9]+\.[0-9]+\.?[0-9]*' \
+			             | egrep -o      '[0-9]+\.[0-9]+\.?[0-9]*' \
+		                 | { read first rest ; echo $first ; })
+		fi
+
 	elif [ "${cc_vendor}" = "oneAPI" ]; then
+
 		# Treat Intel oneAPI's clang as clang, not icc.
 		cc_vendor="clang"
-		cc_version=$(echo "${vendor_string}" | egrep -o '[0-9]+\.[0-9]+\.[0-9]+\.?[0-9]*' | { read first rest ; echo ${first} ; })
+		cc_version=$(echo "${vendor_string}" \
+		             | egrep -o '[0-9]+\.[0-9]+\.[0-9]+\.?[0-9]*' \
+		             | { read first rest ; echo ${first} ; })
+
 	else
-		cc_version=$(echo "${vendor_string}" | egrep -o '[0-9]+\.[0-9]+\.?[0-9]*' | { read first rest ; echo ${first} ; })
+
+		cc_version=$(echo "${vendor_string}" \
+		             | egrep -o '[0-9]+\.[0-9]+\.?[0-9]*' \
+		             | { read first rest ; echo ${first} ; })
 	fi
 
 	# Parse the version number into its major, minor, and revision
@@ -1521,6 +1579,8 @@ check_compiler()
 	#   penryn: any
 	#
 	#   zen: gcc 6.0+[1], clang 4.0+
+	#   zen2: gcc 6.0+[1], clang 4.0+
+	#   zen3: gcc 6.0+[1], clang 4.0+
 	#   excavator: gcc 4.9+, clang 3.5+
 	#   steamroller: any
 	#   piledriver: any
@@ -1704,12 +1764,30 @@ check_compiler_version_ranges()
 	#   Newer versions of gcc support Zen2 via the '-march=znver2' option [6].
 	#
 	#   [5] https://gcc.gnu.org/onlinedocs/gcc-8.3.0/gcc/x86-Options.html#x86-Options
-	#   [6] https://gcc.gnu.org/onlinedocs/gcc-9.1.0/gcc/x86-Options.html#x86-Options
+	#   [6] https://gcc.gnu.org/onlinedocs/gcc-9.4.0/gcc/x86-Options.html#x86-Options
+	#
+	# range: gcc < 10.1 (ie: 9.4 or older)
+	# variable: gcc_older_than_10_1_0
+	# comments:
+	#   These older versions of gcc do not explicitly support the Zen3
+	#   microarchitecture; the newest microarchitectural value understood by
+	#   these versions is '-march=znver2' (if !gcc_older_than_9_1_0) [7].
+	#   Newer versions of gcc support Zen3 via the '-march=znver3' option [8].
+	#
+	#   [7] https://gcc.gnu.org/onlinedocs/gcc-9.4.0/gcc/x86-Options.html#x86-Options
+	#   [8] https://gcc.gnu.org/onlinedocs/gcc-10.3.0/gcc/x86-Options.html#x86-Options
 	#
 
 	gcc_older_than_4_9_0='no'
 	gcc_older_than_6_1_0='no'
 	gcc_older_than_9_1_0='no'
+	gcc_older_than_10_1_0='no'
+
+	clang_older_than_9_0_0='no'
+	clang_older_than_12_0_0='no'
+
+	aocc_older_than_2_0_0='no'
+	aocc_older_than_3_0_0='no'
 
 	echo "${script_name}: checking ${cc} ${cc_version} against known consequential version ranges."
 
@@ -1735,6 +1813,12 @@ check_compiler_version_ranges()
 			echo "${script_name}: note: found ${cc} version older than 9.1."
 			gcc_older_than_9_1_0='yes'
 		fi
+
+		# Check for gcc < 10.1.0 (ie: 9.4 or older).
+		if [ ${cc_major} -lt 10 ]; then
+			echo "${script_name}: note: found ${cc} version older than 10.1."
+			gcc_older_than_10_1_0='yes'
+		fi
 	fi
 
 	# icc
@@ -1744,7 +1828,34 @@ check_compiler_version_ranges()
 
 	# clang
 	if [ "x${cc_vendor}" = "xclang" ]; then
-		:
+
+		# Check for clang < 9.0.0.
+		if [ ${cc_major} -lt 9 ]; then
+			echo "${script_name}: note: found ${cc} version older than 9.0."
+			clang_older_than_9_0_0='yes'
+		fi
+
+		# Check for clang < 12.0.0.
+		if [ ${cc_major} -lt 12 ]; then
+			echo "${script_name}: note: found ${cc} version older than 12.0."
+			clang_older_than_12_0_0='yes'
+		fi
+	fi
+
+	# aocc
+	if [ "x${cc_vendor}" = "xaocc" ]; then
+
+		# Check for aocc < 2.0.0.
+		if [ ${cc_major} -lt 2 ]; then
+			echo "${script_name}: note: found ${cc} version older than 2.0."
+			aocc_older_than_2_0_0='yes'
+		fi
+
+		# Check for aocc < 3.0.0.
+		if [ ${cc_major} -lt 3 ]; then
+			echo "${script_name}: note: found ${cc} version older than 3.0."
+			aocc_older_than_3_0_0='yes'
+		fi
 	fi
 }
 
@@ -3441,6 +3552,11 @@ main()
 		| sed -e "s/@gcc_older_than_4_9_0@/${gcc_older_than_4_9_0}/g" \
 		| sed -e "s/@gcc_older_than_6_1_0@/${gcc_older_than_6_1_0}/g" \
 		| sed -e "s/@gcc_older_than_9_1_0@/${gcc_older_than_9_1_0}/g" \
+		| sed -e "s/@gcc_older_than_10_1_0@/${gcc_older_than_10_1_0}/g" \
+		| sed -e "s/@clang_older_than_9_0_0@/${clang_older_than_9_0_0}/g" \
+		| sed -e "s/@clang_older_than_12_0_0@/${clang_older_than_12_0_0}/g" \
+		| sed -e "s/@aocc_older_than_2_0_0@/${aocc_older_than_2_0_0}/g" \
+		| sed -e "s/@aocc_older_than_3_0_0@/${aocc_older_than_3_0_0}/g" \
 		| sed -e "s/@CC@/${cc_esc}/g" \
 		| sed -e "s/@CXX@/${cxx_esc}/g" \
 		| sed -e "s/@RANLIB@/${ranlib_esc}/g" \
