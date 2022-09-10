@@ -52,16 +52,10 @@ void PASTEMAC0(opname) \
        thrinfo_t* thread  \
      );
 
-//GENPROT( herk_blk_var1 )
-//GENPROT( herk_blk_var2 )
-//GENPROT( herk_blk_var3 )
+GENPROT( gemmt_x_ker_var2 )
 
-GENPROT( herk_x_ker_var2 )
-
-GENPROT( herk_l_ker_var2 )
-GENPROT( herk_u_ker_var2 )
-//GENPROT( herk_packa )
-//GENPROT( herk_packb )
+GENPROT( gemmt_l_ker_var2 )
+GENPROT( gemmt_u_ker_var2 )
 
 
 //
@@ -91,6 +85,6 @@ void PASTEMAC(ch,varname) \
        thrinfo_t* thread  \
      );
 
-INSERT_GENTPROT_BASIC0( herk_l_ker_var2 )
-INSERT_GENTPROT_BASIC0( herk_u_ker_var2 )
+INSERT_GENTPROT_BASIC0( gemmt_l_ker_var2 )
+INSERT_GENTPROT_BASIC0( gemmt_u_ker_var2 )
 

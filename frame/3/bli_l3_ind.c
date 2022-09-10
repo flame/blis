@@ -55,7 +55,8 @@ static bool bli_l3_ind_oper_impl[BLIS_NUM_IND_METHODS][BLIS_NUM_LEVEL3_OPS] =
 static BLIS_THREAD_LOCAL
 bool bli_l3_ind_oper_st[BLIS_NUM_IND_METHODS][BLIS_NUM_LEVEL3_OPS][2] =
 {
-        /*   gemm  gemmt  hemm  herk  her2k  symm  syrk  syr2k  trmm3  trmm  trsm  */
+        /*   gemm           gemmt          hemm           herk           her2k          symm
+             syrk           syr2k          trmm3          trmm           trsm  */
         /*    c     z    */
 /* 1m   */ { {FALSE,FALSE}, {FALSE,FALSE}, {FALSE,FALSE}, {FALSE,FALSE}, {FALSE,FALSE}, {FALSE,FALSE},
              {FALSE,FALSE}, {FALSE,FALSE}, {FALSE,FALSE}, {FALSE,FALSE}, {FALSE,FALSE}  },
@@ -80,11 +81,7 @@ ind_t PASTEMAC(opname,ind_find_avail)( num_t dt ) \
 GENFUNC( gemm, BLIS_GEMM )
 GENFUNC( gemmt, BLIS_GEMMT )
 GENFUNC( hemm, BLIS_HEMM )
-GENFUNC( herk, BLIS_HERK )
-GENFUNC( her2k, BLIS_HER2K )
 GENFUNC( symm, BLIS_SYMM )
-GENFUNC( syrk, BLIS_SYRK )
-GENFUNC( syr2k, BLIS_SYR2K )
 GENFUNC( trmm3, BLIS_TRMM3 )
 GENFUNC( trmm, BLIS_TRMM )
 GENFUNC( trsm, BLIS_TRSM )

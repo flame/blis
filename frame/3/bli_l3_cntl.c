@@ -54,7 +54,7 @@ void bli_l3_cntl_create_if
 	if ( cntl_orig == NULL )
 	{
 		if ( family == BLIS_GEMM ||
-		     family == BLIS_HERK ||
+		     family == BLIS_GEMMT ||
 		     family == BLIS_TRMM )
 		{
 			*cntl_use = bli_gemm_cntl_create( rntm, family, schema_a, schema_b );
@@ -97,7 +97,7 @@ void bli_l3_cntl_free
 	opid_t family = bli_cntl_family( cntl_use );
 
 	if ( family == BLIS_GEMM ||
-	     family == BLIS_HERK ||
+	     family == BLIS_GEMMT ||
 	     family == BLIS_TRMM )
 	{
 		bli_gemm_cntl_free( rntm, cntl_use, thread );

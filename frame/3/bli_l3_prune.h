@@ -64,9 +64,9 @@ GENPROT( gemm, m )
 GENPROT( gemm, n )
 GENPROT( gemm, k )
 
-GENPROT( herk, m )
-GENPROT( herk, n )
-GENPROT( herk, k )
+GENPROT( gemmt, m )
+GENPROT( gemmt, n )
+GENPROT( gemmt, k )
 
 GENPROT( trmm, m )
 GENPROT( trmm, n )
