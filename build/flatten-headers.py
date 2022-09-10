@@ -382,7 +382,7 @@ def main():
 
 	# Process our command line options.
 	try:
-		opts, args = getopt.getopt( sys.argv[1:], "o:rchv:" )
+		opts, args = getopt.getopt( sys.argv[1:], "o:rclhv:" )
 
 	except getopt.GetoptError as err:
 		# print help information and exit:
