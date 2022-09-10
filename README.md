@@ -94,6 +94,16 @@ all of which are available for free via the [edX platform](http://www.edx.org/).
 What's New
 ----------
 
+ * **Addons feature now available!** Have you ever wanted to quickly extend BLIS's
+operation support or define new custom BLIS APIs for your application, but were
+unsure of how to add your source code to BLIS? Do you want to isolate your custom
+code so that it only gets enabled when the user requests it? Do you like
+[sandboxes](docs/Sandboxes.md), but wish you didn't have to provide an
+implementation of `gemm`? If so, you should check out our new
+[addons](docs/Addons.md) feature. Addons act like optional extensions that can be
+created, enabled, and combined to suit your application's needs, all without
+formally integrating your code into the core BLIS framework.
+
  * **Multithreaded small/skinny matrix support for sgemm now available!** Thanks to
 funding and hardware support from Oracle, we have now accelerated `gemm` for
 single-precision real matrix problems where one or two dimensions is exceedingly
@@ -264,20 +274,13 @@ many will find BLIS's object-based APIs a delight to use when customizing
 or writing their own BLIS operations. (Objects are relatively lightweight
 `structs` and passed by address, which helps tame function calling overhead.)
 
- * **Multilayered API, exposed kernels, and sandboxes.** The BLIS framework
-exposes its
+ * **Multilayered API and exposed kernels.** The BLIS framework exposes its
 implementations in various layers, allowing expert developers to access exactly
 the functionality desired. This layered interface includes that of the
 lowest-level kernels, for those who wish to bypass the bulk of the framework.
 Optimizations can occur at various levels, in part thanks to exposed packing
 and unpacking facilities, which by default are highly parameterized and
-flexible. And more recently, BLIS introduced sandboxes--a way to provide
-alternative implementations of `gemm` that do not use any more of the BLIS
-infrastructure than is desired. Sandboxes provide a convenient and
-straightforward way of modifying the `gemm` implementation without disrupting
-any other level-3 operation or any other part of the framework. This works
-especially well when the developer wants to experiment with new optimizations
-or try a different algorithm.
+flexible.
 
  * **Functionality that grows with the community's needs.** As its name
 suggests, the BLIS framework is not a single library or static API, but rather
@@ -285,7 +288,9 @@ a nearly-complete template for instantiating high-performance BLAS-like
 libraries. Furthermore, the framework is extensible, allowing developers to
 leverage existing components to support new operations as they are identified.
 If such operations require new kernels for optimal efficiency, the framework
-and its APIs will be adjusted and extended accordingly.
+and its APIs will be adjusted and extended accordingly. Community developers
+who wish to experiment with creating new operations or APIs in BLIS can quickly
+and easily do so via the [Addons](docs/Addons.md) feature.
 
  * **Code re-use.** Auto-generation approaches to achieving the aforementioned
 goals tend to quickly lead to code bloat due to the multiple dimensions of
@@ -496,6 +501,11 @@ this guide.
 learn how to add new sub-configurations or configuration families, or are simply
 interested in learning how BLIS organizes its configurations and kernel sets,
 please read this thorough walkthrough of the configuration system.
+
+ * **[Addon Guide](docs/Addons.md).** If you are interested in learning
+about using BLIS addons--that is, enabling existing (or creating new) bundles
+of operation or API code that are built into a BLIS library--please read this
+document.
 
  * **[Sandbox Guide](docs/Sandboxes.md).** If you are interested in learning
 about using sandboxes in BLIS--that is, providing alternative implementations
