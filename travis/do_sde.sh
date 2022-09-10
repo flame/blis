@@ -16,8 +16,16 @@ SDE=$SDE_VERSION/sde64
 #curl --verbose --cookie jar.txt --output $SDE_TARBALL \
 #     https://software.intel.com/system/files/managed/2a/1a/$SDE_TARBALL
 
-curl --verbose --output $SDE_TARBALL \
-     https://software.intel.com/content/dam/develop/external/us/en/documents/downloads/$SDE_TARBALL
+#curl --verbose --output $SDE_TARBALL \
+#     https://software.intel.com/content/dam/develop/external/us/en/documents/downloads/$SDE_TARBALL
+
+CI_UTILS=ci-utils
+CI_UTILS_URL=https://github.com/flame/${CI_UTILS}.git
+CI_UTILS_SDE_DIR=sde
+SDE_DIRPATH=$CI_UTILS/$CI_UTILS_SDE_DIR
+
+git clone $CI_UTILS_URL
+mv $SDE_DIRPATH/$SDE_TARBALL .
 
 tar xvf $SDE_TARBALL
 
@@ -37,7 +45,8 @@ for LIB in $LD_SO $LIBC_SO $LIBM_SO; do
     sudo mv .tmp $LIB
 done
 
-for ARCH in penryn sandybridge haswell skx knl piledriver steamroller excavator zen; do
+#for ARCH in penryn sandybridge haswell skx knl piledriver steamroller excavator zen; do
+for ARCH in penryn sandybridge haswell skx knl zen; do
     if [ "$ARCH" = "knl" ]; then
         $SDE -knl -- ./test_libblis.x > output.testsuite
     else
