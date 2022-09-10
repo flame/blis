@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2021, The University of Texas at Austin
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -32,46 +32,10 @@
 
 */
 
-#ifndef BLIS_ARCH_CONFIG_PRE_H
-#define BLIS_ARCH_CONFIG_PRE_H
-
-
-// -- Naming-related kernel definitions ----------------------------------------
-
-// The default suffix appended to reference kernels.
-#define BLIS_REF_SUFFIX  _ref
-
-// A suffix used for labeling certain induced method aware functions.
-#define BLIS_IND_SUFFIX  _ind
-
-// Add an underscore to the BLIS kernel set string, if it was defined.
-#ifdef  BLIS_CNAME
-#define BLIS_CNAME_INFIX  PASTECH(_,BLIS_CNAME)
-#endif
-
-// Combine the CNAME and _ref for convenience to the code that defines
-// reference kernels.
-//#define BLIS_CNAME_REF_SUFFIX  PASTECH2(_,BLIS_CNAME,BLIS_REF_SUFFIX)
-
-// -- Prototype-generating macro definitions -----------------------------------
-
-// Prototype-generating macro for bli_cntx_init_<arch>*() functions.
-#define CNTX_INIT_PROTS( archname ) \
-\
-void PASTEMAC(cntx_init_,archname) \
-     ( \
-       cntx_t* cntx \
-     ); \
-void PASTEMAC2(cntx_init_,archname,BLIS_REF_SUFFIX) \
-     ( \
-       cntx_t* cntx \
-     ); \
-void PASTEMAC2(cntx_init_,archname,BLIS_IND_SUFFIX) \
-     ( \
-       ind_t   method, \
-       cntx_t* cntx \
+void bli_l3_set_schemas
+     (
+       obj_t*  a,
+       obj_t*  b,
+       obj_t*  c,
+       cntx_t* cntx
      );
-
-
-#endif
-

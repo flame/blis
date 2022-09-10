@@ -1531,9 +1531,6 @@ typedef struct cntx_s
 	func_t    unpackm_kers[ BLIS_NUM_UNPACKM_KERS ];
 
 	ind_t     method;
-	pack_t    schema_a_block;
-	pack_t    schema_b_panel;
-	pack_t    schema_c_panel;
 
 } cntx_t;
 

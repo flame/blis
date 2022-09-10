@@ -334,7 +334,14 @@
 	                        PASTEMAC(c,opname), PASTEMAC(z,opname) ); \
 }
 
+// -- Helper function for 1m ---------------------------------------------------
 
+void GENBAINAME(cntx_init_blkszs)
+     (
+       ind_t   method,
+       num_t   dt,
+       cntx_t* cntx
+     );
 
 // -----------------------------------------------------------------------------
 
@@ -589,10 +596,6 @@ void GENBARNAME(cntx_init)
 	// -- Set miscellaneous fields ---------------------------------------------
 
 	bli_cntx_set_method( BLIS_NAT, cntx );
-
-	bli_cntx_set_schema_a_block( BLIS_PACKED_ROW_PANELS, cntx );
-	bli_cntx_set_schema_b_panel( BLIS_PACKED_COL_PANELS, cntx );
-	bli_cntx_set_schema_c_panel( BLIS_NOT_PACKED,        cntx );
 }
 
 // -----------------------------------------------------------------------------
@@ -600,7 +603,6 @@ void GENBARNAME(cntx_init)
 void GENBAINAME(cntx_init)
      (
        ind_t   method,
-       num_t   dt,
        cntx_t* cntx
      )
 {
@@ -826,78 +828,12 @@ void GENBAINAME(cntx_init)
 	}
 	else if ( method == BLIS_1M )
 	{
-		const bool is_pb = FALSE;
+		//const bool is_pb = FALSE;
 
-		// We MUST set the induced method in the context prior to calling
-		// bli_cntx_l3_ukr_prefers_cols_dt() because that function queries
-		// the induced method. It needs the induced method value in order
-		// to determine whether to evaluate the "prefers column storage"
-		// predicate using the storage preference of the kernel for dt, or
-		// the storage preference of the kernel for the real projection of
-		// dt. Failing to set the induced method here can lead to strange
-		// undefined behavior at runtime if the native complex kernel's
-		// storage preference happens to not equal that of the native real
-		// kernel.
-		bli_cntx_set_method( method, cntx );
-
-		// Initialize the blocksizes according to the micro-kernel preference as
-		// well as the algorithm.
-		if ( bli_cntx_l3_vir_ukr_prefers_cols_dt( dt, BLIS_GEMM_UKR, cntx ) )
-		{
-			// This branch is used for algorithms 1m_c_bp, 1m_r_pb.
-
-			// Set the pack_t schemas for the c_bp or r_pb algorithms.
-			if ( !is_pb )
-			{
-				bli_cntx_set_schema_a_block( BLIS_PACKED_ROW_PANELS_1E, cntx );
-				bli_cntx_set_schema_b_panel( BLIS_PACKED_COL_PANELS_1R, cntx );
-			}
-			else // if ( is_pb )
-			{
-				bli_cntx_set_schema_b_panel( BLIS_PACKED_ROW_PANELS_1R, cntx );
-				bli_cntx_set_schema_a_block( BLIS_PACKED_COL_PANELS_1E, cntx );
-			}
-
-			bli_cntx_set_ind_blkszs
-			(
-			  method, 6,
-			  BLIS_NC, 1.0, 1.0,
-			  BLIS_KC, 2.0, 2.0, // halve kc...
-			  BLIS_MC, 2.0, 2.0, // halve mc...
-			  BLIS_NR, 1.0, 1.0,
-			  BLIS_MR, 2.0, 1.0, // ...and mr (but NOT packmr)
-			  BLIS_KR, 1.0, 1.0,
-			  cntx
-			);
-		}
-		else // if ( bli_cntx_l3_vir_ukr_prefers_rows_dt( dt, BLIS_GEMM_UKR, cntx ) )
-		{
-			// This branch is used for algorithms 1m_r_bp, 1m_c_pb.
-
-			// Set the pack_t schemas for the r_bp or c_pb algorithms.
-			if ( !is_pb )
-			{
-			    bli_cntx_set_schema_a_block( BLIS_PACKED_ROW_PANELS_1R, cntx );
-			    bli_cntx_set_schema_b_panel( BLIS_PACKED_COL_PANELS_1E, cntx );
-			}
-			else // if ( is_pb )
-			{
-			    bli_cntx_set_schema_b_panel( BLIS_PACKED_ROW_PANELS_1E, cntx );
-			    bli_cntx_set_schema_a_block( BLIS_PACKED_COL_PANELS_1R, cntx );
-			}
-
-			bli_cntx_set_ind_blkszs
-			(
-			  method, 6,
-			  BLIS_NC, 2.0, 2.0, // halve nc...
-			  BLIS_KC, 2.0, 2.0, // halve kc...
-			  BLIS_MC, 1.0, 1.0,
-			  BLIS_NR, 2.0, 1.0, // ...and nr (but NOT packnr)
-			  BLIS_MR, 1.0, 1.0,
-			  BLIS_KR, 1.0, 1.0,
-			  cntx
-			);
-		}
+		// Call a helper function to initialize blocksizes for each complex
+		// datatype.
+		GENBAINAME(cntx_init_blkszs)( method, BLIS_SCOMPLEX, cntx );
+		GENBAINAME(cntx_init_blkszs)( method, BLIS_DCOMPLEX, cntx );
 	}
 	else // if ( method == BLIS_NAT )
 	{
@@ -913,8 +849,8 @@ void GENBAINAME(cntx_init)
 	}
 	else if ( method == BLIS_3M1 )
 	{
-		bli_cntx_set_schema_a_block( BLIS_PACKED_ROW_PANELS_3MI, cntx );
-		bli_cntx_set_schema_b_panel( BLIS_PACKED_COL_PANELS_3MI, cntx );
+		//bli_cntx_set_schema_a_block( BLIS_PACKED_ROW_PANELS_3MI, cntx );
+		//bli_cntx_set_schema_b_panel( BLIS_PACKED_COL_PANELS_3MI, cntx );
 	}
 	else if ( method == BLIS_4MH )
 	{
@@ -922,8 +858,8 @@ void GENBAINAME(cntx_init)
 	}
 	else if ( method == BLIS_4M1A || method == BLIS_4M1B )
 	{
-		bli_cntx_set_schema_a_block( BLIS_PACKED_ROW_PANELS_4MI, cntx );
-		bli_cntx_set_schema_b_panel( BLIS_PACKED_COL_PANELS_4MI, cntx );
+		//bli_cntx_set_schema_a_block( BLIS_PACKED_ROW_PANELS_4MI, cntx );
+		//bli_cntx_set_schema_b_panel( BLIS_PACKED_COL_PANELS_4MI, cntx );
 	}
 	else if ( method == BLIS_1M )
 	{
@@ -939,6 +875,63 @@ void GENBAINAME(cntx_init)
 	}
 	else // if ( method == BLIS_NAT )
 	{
+	}
+}
+
+// -----------------------------------------------------------------------------
+
+void GENBAINAME(cntx_init_blkszs)
+     (
+       ind_t   method,
+       num_t   dt,
+       cntx_t* cntx
+     )
+{
+	// We MUST set the induced method in the context prior to calling
+	// bli_cntx_l3_vir_ukr_prefers_cols_dt() because that function queries
+	// the induced method. That function needs the induced method value in
+	// order to determine whether to evaluate the "prefers column storage"
+	// predicate using the storage preference of the kernel for dt, or
+	// the storage preference of the kernel for the real projection of
+	// dt. Failing to set the induced method here can lead to strange
+	// undefined behavior at runtime if the native complex kernel's
+	// storage preference happens to not equal that of the native real
+	// kernel.
+	bli_cntx_set_method( method, cntx );
+
+	// Initialize the blocksizes according to the micro-kernel preference as
+	// well as the algorithm.
+	if ( bli_cntx_l3_vir_ukr_prefers_cols_dt( dt, BLIS_GEMM_UKR, cntx ) )
+	{
+		// This branch is used for algorithm 1m_c_bp.
+
+		bli_cntx_set_ind_blkszs
+		(
+		  method, dt, 6,
+		  BLIS_NC, 1.0, 1.0,
+		  BLIS_KC, 2.0, 2.0, // halve kc...
+		  BLIS_MC, 2.0, 2.0, // halve mc...
+		  BLIS_NR, 1.0, 1.0,
+		  BLIS_MR, 2.0, 1.0, // ...and mr (but NOT packmr)
+		  BLIS_KR, 1.0, 1.0,
+		  cntx
+		);
+	}
+	else // if ( bli_cntx_l3_vir_ukr_prefers_rows_dt( dt, BLIS_GEMM_UKR, cntx ) )
+	{
+		// This branch is used for algorithm 1m_r_bp.
+
+		bli_cntx_set_ind_blkszs
+		(
+		  method, dt, 6,
+		  BLIS_NC, 2.0, 2.0, // halve nc...
+		  BLIS_KC, 2.0, 2.0, // halve kc...
+		  BLIS_MC, 1.0, 1.0,
+		  BLIS_NR, 2.0, 1.0, // ...and nr (but NOT packnr)
+		  BLIS_MR, 1.0, 1.0,
+		  BLIS_KR, 1.0, 1.0,
+		  cntx
+		);
 	}
 }
 

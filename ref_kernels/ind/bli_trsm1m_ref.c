@@ -67,7 +67,7 @@ void PASTEMAC3(ch,opname,arch,suf) \
 	const inc_t       ld_a  = cs_a; \
 	const inc_t       ld_b  = rs_b; \
 \
-	const pack_t      schema_b = bli_cntx_schema_b_panel( cntx ); \
+	const pack_t      schema_b = bli_auxinfo_schema_b( data ); \
 \
 	dim_t             iter, i, j, l; \
 	dim_t             n_behind; \
@@ -277,7 +277,7 @@ void PASTEMAC3(ch,opname,arch,suf) \
 	const inc_t       ld_a  = cs_a; \
 	const inc_t       ld_b  = rs_b; \
 \
-	const pack_t      schema_b = bli_cntx_schema_b_panel( cntx ); \
+	const pack_t      schema_b = bli_auxinfo_schema_b( data ); \
 \
 	dim_t             iter, i, j, l; \
 	dim_t             n_behind; \

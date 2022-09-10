@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2021, The University of Texas at Austin
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -32,46 +32,49 @@
 
 */
 
-#ifndef BLIS_ARCH_CONFIG_PRE_H
-#define BLIS_ARCH_CONFIG_PRE_H
+#include "blis.h"
 
+void bli_l3_set_schemas
+     (
+       obj_t*  a,
+       obj_t*  b,
+       obj_t*  c,
+       cntx_t* cntx
+     )
+{
+	// Begin with pack schemas for native execution.
+	pack_t schema_a = BLIS_PACKED_ROW_PANELS;
+	pack_t schema_b = BLIS_PACKED_COL_PANELS;
 
-// -- Naming-related kernel definitions ----------------------------------------
+	// When executing the 1m method, choose the appropriate pack schemas based
+	// on the microkernel preference encoded within the current cntx_t (which
+	// was presumably returned by the gks).
+	if ( bli_cntx_method( cntx ) == BLIS_1M )
+	{
+		num_t dt = bli_obj_domain( c ) | bli_obj_comp_prec( c );
 
-// The default suffix appended to reference kernels.
-#define BLIS_REF_SUFFIX  _ref
+		// Note that bli_cntx_l3_vir_ukr_prefers_cols_dt() will use the real
+		// projection of dt to query the preference of the corresponding native
+		// real-domain microkernel. This is what ultimately determines which
+		// variant of 1m is applicable.
+		if ( bli_cntx_l3_vir_ukr_prefers_cols_dt( dt, BLIS_GEMM_UKR, cntx ) )
+		{
+			schema_a = BLIS_PACKED_ROW_PANELS_1E;
+			schema_b = BLIS_PACKED_COL_PANELS_1R;
+		}
+		else
+		{
+			schema_a = BLIS_PACKED_ROW_PANELS_1R;
+			schema_b = BLIS_PACKED_COL_PANELS_1E;
+		}
+	}
 
-// A suffix used for labeling certain induced method aware functions.
-#define BLIS_IND_SUFFIX  _ind
-
-// Add an underscore to the BLIS kernel set string, if it was defined.
-#ifdef  BLIS_CNAME
-#define BLIS_CNAME_INFIX  PASTECH(_,BLIS_CNAME)
-#endif
-
-// Combine the CNAME and _ref for convenience to the code that defines
-// reference kernels.
-//#define BLIS_CNAME_REF_SUFFIX  PASTECH2(_,BLIS_CNAME,BLIS_REF_SUFFIX)
-
-// -- Prototype-generating macro definitions -----------------------------------
-
-// Prototype-generating macro for bli_cntx_init_<arch>*() functions.
-#define CNTX_INIT_PROTS( archname ) \
-\
-void PASTEMAC(cntx_init_,archname) \
-     ( \
-       cntx_t* cntx \
-     ); \
-void PASTEMAC2(cntx_init_,archname,BLIS_REF_SUFFIX) \
-     ( \
-       cntx_t* cntx \
-     ); \
-void PASTEMAC2(cntx_init_,archname,BLIS_IND_SUFFIX) \
-     ( \
-       ind_t   method, \
-       cntx_t* cntx \
-     );
-
-
-#endif
+	// Embed the schemas into the objects for A and B. This is a sort of hack
+	// for communicating the desired pack schemas to bli_gemm_cntl_create()
+	// (via bli_l3_thread_decorator() and bli_l3_cntl_create_if()). This allows
+	// us to subsequently access the schemas from the control tree, which
+	// hopefully reduces some confusion, particularly in bli_packm_init().
+	bli_obj_set_pack_schema( schema_a, a );
+	bli_obj_set_pack_schema( schema_b, b );
+}
 
