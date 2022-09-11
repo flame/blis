@@ -47,6 +47,7 @@ $ ./configure --enable-threading=pthreads auto
 ```
 You can also use the shorthand option for `--enable-threading`, which is `-t`:
 ```
+$ ./configure -t openmp auto
 $ ./configure -t pthreads auto
 ```
 For more complete and up-to-date information on the `--enable-threading` option, simply run `configure` with the `--help` (or `-h`) option:
@@ -109,12 +110,12 @@ Regardless of which method is employed, and which specific way within each metho
 
 **Note**: Please be aware of what happens if you try to specify both the automatic and manual ways, as it could otherwise confuse new users. Here are the important points:
  * Regardless of which broad method is used, **if multithreading is specified via both the automatic and manual ways, the values set via the manual way will always take precedence.**
- * Specifying parallelism for even *one* loop counts as specifying the manual way (in which case the ways of parallelism for the remaining loops will be assumed to be 1). And in the case of the environment variable method, setting the ways of parallelism for a loop to 1 counts as specifying parallelism! If you want to switch from using the manual way to automatic way, you must not only set (`export`) the `BLIS_NUM_THREADS` variable, but you must also `unset` all of the `BLIS_*_NT` variables.
- * If you have specified multithreading via *both* the automatic and manual ways, BLIS will **not** complain if the values are inconsistent with one another. (For example, you may request 12 total threads be used while also specifying 2 and 4 ways of parallelism within the JC and IC loops, respectively, for a total of 8 ways.) Furthermore, you will be able to query these inconsistent values via the runtime API both before and after multithreading executes.
+ * Specifying parallelism for even *one* loop counts as specifying the manual way (in which case the ways of parallelism for the remaining loops will be assumed to be 1). (Note: Setting the ways of parallelism for a loop to any value less than or equal to 1 does *not* count as specifying parallelism for that loop; in these cases, the default of 1 will silently be used instead.) If you want to switch from using the manual way to automatic way, you must not only set (`export`) the `BLIS_NUM_THREADS` variable, but you must either `unset` all of the `BLIS_*_NT` variables, or make sure they are all set to 1.
+ * If you have specified multithreading via *both* the automatic and manual ways, BLIS will **not** complain if the values are inconsistent with one another. (For example, you may request 12 total threads be used while also specifying 2 and 4 ways of parallelism within the JC and IC loops, respectively, for a total of 8 ways. 12 is obviously not equal to 8, and in this case the 8-thread specification will prevail.) Furthermore, you will be able to query these inconsistent values via the runtime API both before and after multithreading executes.
  * If multithreading is disabled, you **may still** specify multithreading values via either the manual or automatic ways. However, BLIS will silently ignore **all** of these values. A BLIS library that is built with multithreading disabled at configure-time will always run sequentially (from the perspective of a single application thread).
 
 Furthermore:
-* For small numbers of threads, the number requested will be honored faithfully. However, if you request a larger number of threads that happens to also be prime, BLIS will reduce the number by one in order to allow more more efficient thread factorizations. This behavior can be overridden by configuring BLIS with the `BLIS_ENABLE_AUTO_PRIME_NUM_THREADS` macro defined in the `bli_family_*.h` file of the relevant subconfiguration. Similarly, the threshold beyond which BLIS will reduce primes by one can be set via `BLIS_NT_MAX_PRIME`. (This latter value is ignored if the former macro is defined.)
+* For small numbers of threads, the number requested will be honored faithfully. However, if you request a larger number of threads that happens to also be prime, BLIS will reduce the number by one in order to allow more more efficient thread factorizations. This behavior can be overridden by configuring BLIS with the `BLIS_DISABLE_AUTO_PRIME_NUM_THREADS` macro defined in the `bli_family_*.h` file of the relevant target configuration. Similarly, the threshold beyond which BLIS will reduce primes by one can be set via `BLIS_NT_MAX_PRIME`. (This latter value is ignored if the former macro is defined.)
 
 ## Globally via environment variables
 
@@ -126,7 +127,7 @@ Regardless of whether you end up using the automatic or manual way of expressing
 
 ### Environment variables: the automatic way
 
-The automatic way of specifying parallelism entails simply setting the total number of threads you wish BLIS to employ in its parallelization. This total number of threads is captured by the `BLIS_NUM_THREADS` environment variable. You can set this variable prior to executing your BLIS-linked executable:
+The automatic way of specifying parallelism entails setting the total number of threads you wish BLIS to employ in its parallelization. This total number of threads is captured by the `BLIS_NUM_THREADS` environment variable. You can set this variable prior to executing your BLIS-linked executable:
 ```
 $ export GOMP_CPU_AFFINITY="..."  # optional step when using GNU libgomp.
 $ export BLIS_NUM_THREADS=16
@@ -201,7 +202,7 @@ So, for example, if we call
 ```c
 bli_thread_set_ways( 2, 1, 4, 1, 1 );
 ```
-we are requesting two ways of parallelism in the `JC` loop and 4 ways of parallelism in the `IC` loop.
+we are requesting two ways of parallelism in the `JC` loop and four ways of parallelism in the `IC` loop.
 Unlike environment variables, which only allow the user to set the parallelization strategy prior to running the executable, `bli_thread_set_ways()` may be called any time during the normal course of the BLIS-linked application's execution.
 
 ## Locally at runtime
@@ -214,11 +215,11 @@ As with environment variables and the global runtime API, there are two ways to 
 
 ### Initializing a rntm_t
 
-Before specifying the parallelism (automatically or manually), you must first allocate a special BLIS object called a `rntm_t` (runtime). The object is quite small (about 64 bytes), and so we recommend allocating it statically on the function stack:
+Before specifying the parallelism (automatically or manually), you must first allocate a special BLIS object called a `rntm_t` (runtime). The object is quite small (about 128 bytes), and so we recommend allocating it statically on the function stack:
 ```c
 rntm_t rntm;
 ```
-We **strongly recommend** initializing the `rntm_t`. This can be done in either of two ways.
+You **must** initialize the `rntm_t`. This can be done in either of two ways.
 If you want to initialize it as part of the declaration, you may do so via the default `BLIS_RNTM_INITIALIZER` macro:
 ```c
 rntm_t rntm = BLIS_RNTM_INITIALIZER;
@@ -229,7 +230,7 @@ bli_rntm_init( &rntm );
 ```
 As of this writing, BLIS treats a default-initialized `rntm_t` as a request for single-threaded execution.
 
-**Note**: If you choose to **not** initialize the `rntm_t` object, you **must** set its parallelism via either the automatic way or the manual way, described below. Passing a completely uninitialized `rntm_t` to a level-3 operation **will almost surely result in undefined behavior!**
+**Note**: If you choose to **not** initialize the `rntm_t` object and then pass it into a level-3 operation, **you will almost surely observe undefined behavior!** Please don't do this!
 
 ### Locally at runtime: the automatic way
 
@@ -259,9 +260,9 @@ we are requesting two ways of parallelism in the `IC` loop and three ways of par
 
 ### Locally at runtime: using the expert interfaces
 
-Regardless of whether you specified parallelism into your `rntm_t` object via the automatic or manual method, eventually you must use the data structure when calling a BLIS operation.
+Regardless of whether you specified parallelism into your `rntm_t` object via the automatic or manual method, eventually you must use the data structure when calling a BLIS operation in order for it to have any effect.
 
-Let's assume you wish to call `gemm`. To so do, simply use the expert interface, which takes two additional arguments: a `cntx_t` (context) and a `rntm_t`. For the context, you may simply pass in `NULL` and BLIS will select a default context (which is exactly what happens when you call the basic/non-expert interfaces). Here is an example of such a call:
+Let's assume you wish to call `gemm`. To so do, use the expert interface, which takes two additional arguments: a `cntx_t` (context) and a `rntm_t`. For the context, you may simply pass in `NULL` and BLIS will select a default context (which is exactly what happens when you call the basic/non-expert interfaces). Here is an example of such a call:
 ```c
 bli_gemm_ex( &alpha, &a, &b, &beta, &c, NULL, &rntm );
 ```
