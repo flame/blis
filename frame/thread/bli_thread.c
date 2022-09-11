@@ -1564,7 +1564,7 @@ void bli_thread_set_ways( dim_t jc, dim_t pc, dim_t ic, dim_t jr, dim_t ir )
 	// Acquire the mutex protecting global_rntm.
 	bli_pthread_mutex_lock( &global_rntm_mutex );
 
-	bli_rntm_set_ways_only( jc, pc, ic, jr, ir, &global_rntm );
+	bli_rntm_set_ways_only( jc, 1, ic, jr, ir, &global_rntm );
 
 	// Release the mutex protecting global_rntm.
 	bli_pthread_mutex_unlock( &global_rntm_mutex );

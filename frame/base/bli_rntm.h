@@ -154,7 +154,7 @@ BLIS_INLINE void bli_rntm_set_jc_ways_only( dim_t ways, rntm_t* rntm )
 }
 BLIS_INLINE void bli_rntm_set_pc_ways_only( dim_t ways, rntm_t* rntm )
 {
-	bli_rntm_set_ways_for_only( BLIS_KC, ways, rntm );
+	bli_rntm_set_ways_for_only( BLIS_KC, 1, rntm );
 }
 BLIS_INLINE void bli_rntm_set_ic_ways_only( dim_t ways, rntm_t* rntm )
 {
@@ -177,7 +177,7 @@ BLIS_INLINE void bli_rntm_set_ways_only( dim_t jc, dim_t pc, dim_t ic, dim_t jr,
 {
 	// Record the number of ways of parallelism per loop.
 	bli_rntm_set_jc_ways_only( jc, rntm );
-	bli_rntm_set_pc_ways_only( pc, rntm );
+	bli_rntm_set_pc_ways_only(  1, rntm );
 	bli_rntm_set_ic_ways_only( ic, rntm );
 	bli_rntm_set_jr_ways_only( jr, rntm );
 	bli_rntm_set_ir_ways_only( ir, rntm );
@@ -228,14 +228,16 @@ BLIS_INLINE void bli_rntm_set_ways( dim_t jc, dim_t pc, dim_t ic, dim_t jr, dim_
 {
 	// Record the number of ways of parallelism per loop.
 	bli_rntm_set_jc_ways_only( jc, rntm );
-	bli_rntm_set_pc_ways_only( pc, rntm );
+	bli_rntm_set_pc_ways_only(  1, rntm );
 	bli_rntm_set_ic_ways_only( ic, rntm );
 	bli_rntm_set_jr_ways_only( jr, rntm );
 	bli_rntm_set_ir_ways_only( ir, rntm );
 	bli_rntm_set_pr_ways_only(  1, rntm );
 
-	// Set the num_threads field to a default state.
-	bli_rntm_clear_num_threads_only( rntm );
+	// Set the num_threads field to the product of all the ways. The only
+	// benefit of doing this, though, is that the user can query the total
+	// number of threads from the rntm_t after calling this function.
+	bli_rntm_set_num_threads_only( jc * 1 * ic * jr * ir, rntm );
 }
 
 BLIS_INLINE void bli_rntm_set_pack_a( bool pack_a, rntm_t* rntm )
