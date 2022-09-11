@@ -1595,6 +1595,17 @@ void bli_thread_init_rntm_from_env
 	// function is only called from bli_thread_init(), which is only called
 	// by bli_init_once().
 
+	// NOTE: While much of the multithreading cpp case of this function may seem
+	// redundant with bli_rntm_set_ways_from_rntm(), we need them both. This
+	// function is only called to initialize the global rntm_t. Here, the
+	// consistency logic serves to make sure that sane values will be returned
+	// if the application (in the time between library initialization and when
+	// computation begins) subsequently queries the number of threads or ways
+	// via the runtime API. The bli_rntm_set_ways_from_rntm() function also
+	// needs the same consistency logic, but for a different reason: that
+	// function guarantees that the rntm_t has sane values in the event that the
+	// application passed in a custom rntm_t via an expert interface.
+
 	bool  auto_factor = FALSE;
 	dim_t nt;
 	dim_t jc, pc, ic, jr, ir;
