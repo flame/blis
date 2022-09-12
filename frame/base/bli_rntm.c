@@ -201,7 +201,7 @@ void bli_rntm_set_ways_from_rntm
 	// parallelism were set to meaningful values.
 	if ( nt > 1 ) nt_set   = TRUE;
 	if ( jc > 1 ) ways_set = TRUE;
-	if ( pc > 1 ) ways_set = TRUE;
+	if ( pc > 1 ) ways_set = TRUE; pc = 1; // Disable pc_nt values.
 	if ( ic > 1 ) ways_set = TRUE;
 	if ( jr > 1 ) ways_set = TRUE;
 	if ( ir > 1 ) ways_set = TRUE;
@@ -323,7 +323,7 @@ void bli_rntm_set_ways_from_rntm_sup
 	// parallelism were set to meaningful values.
 	if ( nt > 1 ) nt_set   = TRUE;
 	if ( jc > 1 ) ways_set = TRUE;
-	if ( pc > 1 ) ways_set = TRUE;
+	if ( pc > 1 ) ways_set = TRUE; pc = 1; // Disable pc_nt values.
 	if ( ic > 1 ) ways_set = TRUE;
 	if ( jr > 1 ) ways_set = TRUE;
 	if ( ir > 1 ) ways_set = TRUE;

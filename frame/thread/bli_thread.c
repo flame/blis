@@ -1622,7 +1622,7 @@ void bli_thread_init_rntm_from_env
 	// Read the environment variables for the number of threads (ways of
 	// parallelism) for each individual loop.
 	jc = bli_env_get_var( "BLIS_JC_NT", -1 );
-	pc = bli_env_get_var( "BLIS_PC_NT", -1 );
+	pc = bli_env_get_var( "BLIS_PC_NT", -1 ); pc = 1; // Disable PC_NT values.
 	ic = bli_env_get_var( "BLIS_IC_NT", -1 );
 	jr = bli_env_get_var( "BLIS_JR_NT", -1 );
 	ir = bli_env_get_var( "BLIS_IR_NT", -1 );
