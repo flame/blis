@@ -154,7 +154,7 @@ get-kernel-cflags-for    = $(strip $(call load-var-for,CKOPTFLAGS,$(1)) \
                                    $(BUILD_SYMFLAGS) \
                             )
 
-# When compiling sandboxes, we use flags similar to those of general framework
+# When compiling addons, we use flags similar to those of general framework
 # source. This ensures that the same code can be linked and run across various
 # sub-configurations.
 get-addon-c99flags-for   = $(strip $(call load-var-for,COPTFLAGS,$(1)) \
@@ -169,7 +169,15 @@ get-addon-cxxflags-for   = $(strip $(call load-var-for,COPTFLAGS,$(1)) \
                                    $(BUILD_CPPFLAGS) \
                                    $(BUILD_SYMFLAGS) \
                             )
-get-addon-kernel-c99flags-for = $(call get-kernel-cflags-for,$(1))
+# When compiling addon kernels, we use flags similar to those of kernels
+# flags, except we also include the addon header paths.
+get-addon-kernel-c99flags-for = $(strip $(call load-var-for,CKOPTFLAGS,$(1)) \
+                                        $(call load-var-for,CKVECFLAGS,$(1)) \
+                                        $(call get-noopt-cflags-for,$(1)) \
+                                        $(CADDONINCFLAGS) \
+                                        $(BUILD_CPPFLAGS) \
+                                        $(BUILD_SYMFLAGS) \
+                                 )
 
 # When compiling sandboxes, we use flags similar to those of general framework
 # source. This ensures that the same code can be linked and run across various
