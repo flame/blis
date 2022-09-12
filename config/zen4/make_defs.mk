@@ -146,12 +146,7 @@ endif # gcc
 
 # Flags specific to reference kernels.
 CROPTFLAGS     := $(CKOPTFLAGS)
-
-# Flags specific to reference kernels.
-# Note: We use AVX2 for reference kernels because, as Jeff Hammond says,
-# reference kernel code "is not going to achieve high enough SIMD utilization
-# to overcome the AVX-512 frequency drop". (Issue #187)
-CRVECFLAGS     += -mno-avx512f -mno-avx512vl -mno-avx512bw -mno-avx512dq -mno-avx512cd -funsafe-math-optimizations -ffp-contract=fast
+CRVECFLAGS     := $(CKVECFLAGS)
 
 # Store all of the variables here to new variables containing the
 # configuration name.
