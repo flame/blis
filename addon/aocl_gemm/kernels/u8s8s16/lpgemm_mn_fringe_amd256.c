@@ -280,13 +280,9 @@ POST_OPS_DOWNSCALE_4x16:
 			(float *)post_ops_list_temp->scale_factor +
 			post_op_c_j + (1 * 8));
 
-		bli_mm256_s16_downscale2(c_int16_0p0, c_int16_1p0, 0, 1);
+		BLI_MM256_S16_DOWNSCALE2(c_int16_0p0, c_int16_1p0, 0, 1);
 
-		//--------------------------------------------------------------------------
-
-		bli_mm256_s16_downscale2(c_int16_2p0, c_int16_3p0, 2, 3);
-
-		//--------------------------------------------------------------------------
+		BLI_MM256_S16_DOWNSCALE2(c_int16_2p0, c_int16_3p0, 2, 3);
 
 		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 	}
@@ -548,27 +544,25 @@ POST_OPS_RELU_SCALE_4xlt16:
 POST_OPS_DOWNSCALE_4xlt16:
 	{
 		__m128i temp[2];
-			__m256i temp_32[2];
-			__m256 temp_float[2];
-			__m256 scale_1, scale_2;
-			__m256 res_1, res_2;
-			__m256i store_reg;
+		__m256i temp_32[2];
+		__m256 temp_float[2];
+		__m256 scale_1, scale_2;
+		__m256 res_1, res_2;
+		__m256i store_reg;
 
-			float float_buf[16];
-			int8 store_buf[16];
+		float float_buf[16];
+		int8_t store_buf[16];
 
-			memcpy( float_buf, ( ( float* )post_ops_list_temp->scale_factor +
-					post_op_c_j ), ( n0_rem * sizeof( float ) ) );
+		memcpy( float_buf, ( ( float* )post_ops_list_temp->scale_factor +
+				post_op_c_j ), ( n0_rem * sizeof( float ) ) );
 
-			// Load the scale vector values into the register
-			scale_1 = _mm256_loadu_ps(float_buf + (0 * 8));
-			scale_2 = _mm256_loadu_ps(float_buf + (1 * 8));
+		// Load the scale vector values into the register
+		scale_1 = _mm256_loadu_ps(float_buf + (0 * 8));
+		scale_2 = _mm256_loadu_ps(float_buf + (1 * 8));
 
-			bli_mm256_s16_downscale2_lt16(c_int16_0p0, c_int16_1p0, 0, 1)
+		BLI_MM256_S16_DOWNSCALE2_LT16(c_int16_0p0, c_int16_1p0, 0, 1)
 
-			//--------------------------------------------------------------------------
-
-			bli_mm256_s16_downscale2_lt16(c_int16_2p0, c_int16_3p0, 2, 3)
+		BLI_MM256_S16_DOWNSCALE2_LT16(c_int16_2p0, c_int16_3p0, 2, 3)
 
 		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 	}
@@ -767,9 +761,7 @@ POST_OPS_DOWNSCALE_2x16:
 			(float *)post_ops_list_temp->scale_factor +
 			post_op_c_j + (1 * 8));
 
-		bli_mm256_s16_downscale2(c_int16_0p0, c_int16_1p0, 0, 1);
-
-		//--------------------------------------------------------------------------
+		BLI_MM256_S16_DOWNSCALE2(c_int16_0p0, c_int16_1p0, 0, 1);
 
 		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 	}
@@ -944,23 +936,23 @@ POST_OPS_RELU_SCALE_2xlt16:
 POST_OPS_DOWNSCALE_2xlt16:
 	{
 		__m128i temp[2];
-			__m256i temp_32[2];
-			__m256 temp_float[2];
-			__m256 scale_1, scale_2;
-			__m256 res_1, res_2;
-			__m256i store_reg;
+		__m256i temp_32[2];
+		__m256 temp_float[2];
+		__m256 scale_1, scale_2;
+		__m256 res_1, res_2;
+		__m256i store_reg;
 
-			float float_buf[16];
-			int8 store_buf[16];
+		float float_buf[16];
+		int8_t store_buf[16];
 
-			memcpy( float_buf, ( ( float* )post_ops_list_temp->scale_factor +
-					post_op_c_j ), ( n0_rem * sizeof( float ) ) );
+		memcpy( float_buf, ( ( float* )post_ops_list_temp->scale_factor +
+				post_op_c_j ), ( n0_rem * sizeof( float ) ) );
 
-			// Load the scale vector values into the register
-			scale_1 = _mm256_loadu_ps(float_buf + (0 * 8));
-			scale_2 = _mm256_loadu_ps(float_buf + (1 * 8));
+		// Load the scale vector values into the register
+		scale_1 = _mm256_loadu_ps(float_buf + (0 * 8));
+		scale_2 = _mm256_loadu_ps(float_buf + (1 * 8));
 
-			bli_mm256_s16_downscale2_lt16(c_int16_0p0, c_int16_1p0, 0, 1)
+		BLI_MM256_S16_DOWNSCALE2_LT16(c_int16_0p0, c_int16_1p0, 0, 1)
 
 		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 	}
@@ -1094,7 +1086,7 @@ POST_OPS_RELU_SCALE_1x16:
 POST_OPS_DOWNSCALE_1x16:
 	{
 		__m128i temp[2];
-		__m256i temp_32[2];
+		__m256i temp_32[2], zero_reg;
 		__m256 temp_float[2];
 		__m256 scale_1, scale_2;
 		__m256 res_1, res_2;
@@ -1110,9 +1102,9 @@ POST_OPS_DOWNSCALE_1x16:
 			(float *)post_ops_list_temp->scale_factor +
 			post_op_c_j + (1 * 8));
 
-		temp_32[1] = _mm256_setzero_si256();
+		zero_reg = _mm256_setzero_si256();
 
-		bli_mm256_s16_downscale2_edge(c_int16_0p0, temp_32[1])
+		BLI_MM256_S16_DOWNSCALE2_EDGE(c_int16_0p0, 0)
 
 		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 	}
@@ -1244,14 +1236,14 @@ POST_OPS_RELU_SCALE_1xlt16:
 POST_OPS_DOWNSCALE_1xlt16:
 	{
 		__m128i temp[2];
-		__m256i temp_32[2];
+		__m256i temp_32[2], zero_reg;
 		__m256 temp_float[2];
 		__m256 scale_1, scale_2;
 		__m256 res_1, res_2;
 		__m256i store_reg;
 
 		float float_buf[16];
-		int8 store_buf[16];
+		int8_t store_buf[16];
 
 		memcpy( float_buf, ( ( float* )post_ops_list_temp->scale_factor +
 				post_op_c_j ), ( n0_rem * sizeof( float ) ) );
@@ -1260,9 +1252,9 @@ POST_OPS_DOWNSCALE_1xlt16:
 		scale_1 = _mm256_loadu_ps(float_buf + (0 * 8));
 		scale_2 = _mm256_loadu_ps(float_buf + (1 * 8));
 
-		temp_32[1] = _mm256_setzero_si256();
+		zero_reg = _mm256_setzero_si256();
 
-		bli_mm256_s16_downscale2_edge_lt16(c_int16_0p0, temp_32[1])
+		BLI_MM256_S16_DOWNSCALE2_EDGE_LT16(c_int16_0p0, 0)
 	}
 POST_OPS_1xlt16_DISABLE:
 	;

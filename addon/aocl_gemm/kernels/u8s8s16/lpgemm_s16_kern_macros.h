@@ -54,7 +54,7 @@
 
 //--------------------------------------------------------------------------
 
-#define bli_mm256_s16_downscale(c_int16__p0, c_int16__p1, vec_loc)\
+#define BLI_MM256_S16_DOWNSCALE(c_int16__p0, c_int16__p1, vec_loc)\
 \
   /* Extract the first 128 bits of the register*/\
   temp[0] = _mm256_extractf128_si256(c_int16__p0, 0);\
@@ -62,16 +62,13 @@
   temp[1] = _mm256_extractf128_si256(c_int16__p0, 1);\
 \
   temp_32[0] = _mm256_cvtepi16_epi32(temp[0]);\
-  temp_float[0] = _mm256_cvtepi32_ps(temp_32[0]);\
-\
-  /* Since s16 values cannot be converted to f32 directly,
-	they are converted to s32, then to f32 and the scale is performed*/\
   temp_32[1] = _mm256_cvtepi16_epi32(temp[1]);\
+  temp_float[0] = _mm256_cvtepi32_ps(temp_32[0]);\
   temp_float[1] = _mm256_cvtepi32_ps(temp_32[1]);\
 \
   /* Multiply the C matrix by the scale value*/\
   res_1 = _mm256_mul_ps(temp_float[0], scale_1);\
-  res_2 = _mm256_mul_ps(temp_float[0], scale_2);\
+  res_2 = _mm256_mul_ps(temp_float[1], scale_2);\
 \
   /* Round the resultant value to the nearest integer*/\
   res_1 = _mm256_round_ps(res_1, (_MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC));\
@@ -94,16 +91,13 @@
 	temp[1] = _mm256_extractf128_si256(c_int16__p1, 1);\
 \
   temp_32[0] = _mm256_cvtepi16_epi32(temp[0]);\
-  temp_float[0] = _mm256_cvtepi32_ps(temp_32[0]);\
-\
-  /* Since s16 values cannot be converted to f32 directly,
-	they are converted to s32, then to f32 and the scale is performed*/\
   temp_32[1] = _mm256_cvtepi16_epi32(temp[1]);\
+  temp_float[0] = _mm256_cvtepi32_ps(temp_32[0]);\
   temp_float[1] = _mm256_cvtepi32_ps(temp_32[1]);\
 \
    /* Multiply the C matrix by the scale value*/\
   res_1 = _mm256_mul_ps(temp_float[0], scale_1);\
-  res_2 = _mm256_mul_ps(temp_float[0], scale_2);\
+  res_2 = _mm256_mul_ps(temp_float[1], scale_2);\
 \
   /* Round the resultant value to the nearest integer*/\
   res_1 = _mm256_round_ps(res_1, (_MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC));\
@@ -121,15 +115,16 @@
 \
    /* Convert the s16 to s8 */\
 	store_reg = _mm256_packs_epi16(c_int16__p0, c_int16__p1);\
+	store_reg = _mm256_permute4x64_epi64(store_reg, 0XD8);\
 \
   /* Store the result in s8 form */\
 	_mm256_storeu_si256((__m256i *)(( int8_t* )post_ops_list_temp->op_args3 + \
-	  ( rs_c_downscale * ( post_op_c_i + vec_loc ) ) + post_op_c_j + ( 0 * 16 )), store_reg);\
+	  ( rs_c_downscale * ( post_op_c_i + vec_loc ) ) + post_op_c_j), store_reg);\
 \
 
 //--------------------------------------------------------------------------
 
-#define bli_mm256_s16_downscale2(c_int16__p0, c_int16__p1, vec_loc1, vec_loc2)\
+#define BLI_MM256_S16_DOWNSCALE2(c_int16__p0, c_int16__p1, vec_loc1, vec_loc2)\
 \
   /* Extract the first 128 bits of the register*/\
   temp[0] = _mm256_extractf128_si256(c_int16__p0, 0);\
@@ -137,16 +132,13 @@
   temp[1] = _mm256_extractf128_si256(c_int16__p0, 1);\
 \
   temp_32[0] = _mm256_cvtepi16_epi32(temp[0]);\
-  temp_float[0] = _mm256_cvtepi32_ps(temp_32[0]);\
-\
-  /* Since s16 values cannot be converted to f32 directly,
-	they are converted to s32, then to f32 and the scale is performed*/\
   temp_32[1] = _mm256_cvtepi16_epi32(temp[1]);\
+  temp_float[0] = _mm256_cvtepi32_ps(temp_32[0]);\
   temp_float[1] = _mm256_cvtepi32_ps(temp_32[1]);\
 \
   /* Multiply the C matrix by the scale value*/\
   res_1 = _mm256_mul_ps(temp_float[0], scale_1);\
-  res_2 = _mm256_mul_ps(temp_float[0], scale_2);\
+  res_2 = _mm256_mul_ps(temp_float[1], scale_2);\
 \
   /* Round the resultant value to the nearest integer*/\
   res_1 = _mm256_round_ps(res_1, (_MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC));\
@@ -169,16 +161,13 @@
 	temp[1] = _mm256_extractf128_si256(c_int16__p1, 1);\
 \
   temp_32[0] = _mm256_cvtepi16_epi32(temp[0]);\
-  temp_float[0] = _mm256_cvtepi32_ps(temp_32[0]);\
-\
-  /* Since s16 values cannot be converted to f32 directly,
-	they are converted to s32, then to f32 and the scale is performed*/\
   temp_32[1] = _mm256_cvtepi16_epi32(temp[1]);\
+  temp_float[0] = _mm256_cvtepi32_ps(temp_32[0]);\
   temp_float[1] = _mm256_cvtepi32_ps(temp_32[1]);\
 \
    /* Multiply the C matrix by the scale value*/\
   res_1 = _mm256_mul_ps(temp_float[0], scale_1);\
-  res_2 = _mm256_mul_ps(temp_float[0], scale_2);\
+  res_2 = _mm256_mul_ps(temp_float[1], scale_2);\
 \
   /* Round the resultant value to the nearest integer*/\
   res_1 = _mm256_round_ps(res_1, (_MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC));\
@@ -196,6 +185,7 @@
 \
    /* Convert the s16 to s8 */\
 	store_reg = _mm256_packs_epi16(c_int16__p0, c_int16__p1);\
+  store_reg = _mm256_permute4x64_epi64(store_reg, 0XD8);\
   /* Extract the first 128 bits of the register*/\
   temp[0] = _mm256_extractf128_si256(store_reg, 0);\
   /* Extract the second 128 bits of the register*/\
@@ -203,14 +193,14 @@
 \
   /* Store the result in s8 form */\
 	_mm_storeu_si128((__m128i *)(( int8_t* )post_ops_list_temp->op_args3 + \
-	  ( rs_c_downscale * ( post_op_c_i + vec_loc1 ) ) + post_op_c_j + ( 0 * 16 )), temp[0]);\
+	  ( rs_c_downscale * ( post_op_c_i + vec_loc1 ) ) + post_op_c_j), temp[0]);\
   _mm_storeu_si128((__m128i *)(( int8_t* )post_ops_list_temp->op_args3 + \
-	  ( rs_c_downscale * ( post_op_c_i + vec_loc2 ) ) + post_op_c_j + ( 0 * 16 )), temp[1]);\
+	  ( rs_c_downscale * ( post_op_c_i + vec_loc2 ) ) + post_op_c_j), temp[1]);\
 \
 
 //--------------------------------------------------------------------------
 
-#define bli_mm256_s16_downscale2_lt16(c_int16__p0, c_int16__p1, vec_loc1, vec_loc2)\
+#define BLI_MM256_S16_DOWNSCALE2_LT16(c_int16__p0, c_int16__p1, vec_loc1, vec_loc2)\
 \
   /* Extract the first 128 bits of the register*/\
   temp[0] = _mm256_extractf128_si256(c_int16__p0, 0);\
@@ -218,16 +208,13 @@
   temp[1] = _mm256_extractf128_si256(c_int16__p0, 1);\
 \
   temp_32[0] = _mm256_cvtepi16_epi32(temp[0]);\
-  temp_float[0] = _mm256_cvtepi32_ps(temp_32[0]);\
-\
-  /* Since s16 values cannot be converted to f32 directly,
-	they are converted to s32, then to f32 and the scale is performed*/\
   temp_32[1] = _mm256_cvtepi16_epi32(temp[1]);\
+  temp_float[0] = _mm256_cvtepi32_ps(temp_32[0]);\
   temp_float[1] = _mm256_cvtepi32_ps(temp_32[1]);\
 \
   /* Multiply the C matrix by the scale value*/\
   res_1 = _mm256_mul_ps(temp_float[0], scale_1);\
-  res_2 = _mm256_mul_ps(temp_float[0], scale_2);\
+  res_2 = _mm256_mul_ps(temp_float[1], scale_2);\
 \
   /* Round the resultant value to the nearest integer*/\
   res_1 = _mm256_round_ps(res_1, (_MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC));\
@@ -250,16 +237,13 @@
 	temp[1] = _mm256_extractf128_si256(c_int16__p1, 1);\
 \
   temp_32[0] = _mm256_cvtepi16_epi32(temp[0]);\
-  temp_float[0] = _mm256_cvtepi32_ps(temp_32[0]);\
-\
-  /* Since s16 values cannot be converted to f32 directly,
-	they are converted to s32, then to f32 and the scale is performed*/\
   temp_32[1] = _mm256_cvtepi16_epi32(temp[1]);\
+  temp_float[0] = _mm256_cvtepi32_ps(temp_32[0]);\
   temp_float[1] = _mm256_cvtepi32_ps(temp_32[1]);\
 \
    /* Multiply the C matrix by the scale value*/\
   res_1 = _mm256_mul_ps(temp_float[0], scale_1);\
-  res_2 = _mm256_mul_ps(temp_float[0], scale_2);\
+  res_2 = _mm256_mul_ps(temp_float[1], scale_2);\
 \
   /* Round the resultant value to the nearest integer*/\
   res_1 = _mm256_round_ps(res_1, (_MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC));\
@@ -277,6 +261,7 @@
 \
    /* Convert the s16 to s8 */\
 	store_reg = _mm256_packs_epi16(c_int16__p0, c_int16__p1);\
+  store_reg = _mm256_permute4x64_epi64(store_reg, 0XD8);\
   /* Extract the first 128 bits of the register*/\
   temp[0] = _mm256_extractf128_si256(store_reg, 0);\
   /* Extract the second 128 bits of the register*/\
@@ -285,18 +270,18 @@
   /* Store the result in s8 form */\
   _mm_storeu_si128((__m128i *)store_buf, temp[0]);\
   memcpy( ( int8_t* )post_ops_list_temp->op_args3 + \
-	  ( rs_c_downscale * ( post_op_c_i + vec_loc1 ) ) + post_op_c_j + \
-	  ( 0 * 16 ) , store_buf, ( n0_rem * sizeof( int8_t ) ) ); \
+	  ( rs_c_downscale * ( post_op_c_i + vec_loc1 ) ) + post_op_c_j \
+	  , store_buf, ( n0_rem * sizeof( int8_t ) ) ); \
 \
   _mm_storeu_si128((__m128i *)store_buf, temp[1]);\
   memcpy( ( int8_t* )post_ops_list_temp->op_args3 + \
-	  ( rs_c_downscale * ( post_op_c_i + vec_loc1 ) ) + post_op_c_j + \
-	  ( 0 * 16 ) , store_buf, ( n0_rem * sizeof( int8_t ) ) ); \
+	  ( rs_c_downscale * ( post_op_c_i + vec_loc2 ) ) + post_op_c_j \
+	  , store_buf, ( n0_rem * sizeof( int8_t ) ) ); \
 \
 
 //--------------------------------------------------------------------------
 
-#define bli_mm256_s16_downscale2_edge(c_int16__p0, c_int16__p1)\
+#define BLI_MM256_S16_DOWNSCALE2_EDGE(c_int16__p0, vec_ind)\
 \
   /* Extract the first 128 bits of the register*/\
   temp[0] = _mm256_extractf128_si256(c_int16__p0, 0);\
@@ -304,16 +289,13 @@
   temp[1] = _mm256_extractf128_si256(c_int16__p0, 1);\
 \
   temp_32[0] = _mm256_cvtepi16_epi32(temp[0]);\
-  temp_float[0] = _mm256_cvtepi32_ps(temp_32[0]);\
-\
-  /* Since s16 values cannot be converted to f32 directly,
-	they are converted to s32, then to f32 and the scale is performed*/\
   temp_32[1] = _mm256_cvtepi16_epi32(temp[1]);\
+  temp_float[0] = _mm256_cvtepi32_ps(temp_32[0]);\
   temp_float[1] = _mm256_cvtepi32_ps(temp_32[1]);\
 \
   /* Multiply the C matrix by the scale value*/\
   res_1 = _mm256_mul_ps(temp_float[0], scale_1);\
-  res_2 = _mm256_mul_ps(temp_float[0], scale_2);\
+  res_2 = _mm256_mul_ps(temp_float[1], scale_2);\
 \
   /* Round the resultant value to the nearest integer*/\
   res_1 = _mm256_round_ps(res_1, (_MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC));\
@@ -329,25 +311,20 @@
   /*Permute to make sure the order is correct*/\
 	c_int16__p0 = _mm256_permute4x64_epi64(c_int16__p0, 0XD8);\
 \
-  /* Convert the s32 to s16 */\
-	c_int16__p1 = _mm256_packs_epi32(temp_32[0], temp_32[1]);\
-\
-  /*Permute to make sure the order is correct*/\
-	c_int16__p1 = _mm256_permute4x64_epi64(c_int16__p1, 0XD8);\
-\
    /* Convert the s16 to s8 */\
-	store_reg = _mm256_packs_epi16(c_int16__p0, c_int16__p1);\
+	store_reg = _mm256_packs_epi16(c_int16__p0, zero_reg);\
+  store_reg = _mm256_permute4x64_epi64(store_reg, 0XD8);\
   /* Extract the first 128 bits of the register*/\
   temp[0] = _mm256_extractf128_si256(store_reg, 0);\
 \
   /* Store the result in s8 form */\
 	_mm_storeu_si128((__m128i *)(( int8_t* )post_ops_list_temp->op_args3 + \
-	  ( rs_c_downscale * ( post_op_c_i + 0 ) ) + post_op_c_j + ( 0 * 16 )), temp[0]);\
+	( rs_c_downscale * ( post_op_c_i + vec_ind ) ) + post_op_c_j), temp[0]);\
 \
 
 //--------------------------------------------------------------------------
 
-#define bli_mm256_s16_downscale2_edge_lt16(c_int16__p0, c_int16__p1)\
+#define BLI_MM256_S16_DOWNSCALE2_EDGE_LT16(c_int16__p0, vec_ind)\
 \
   /* Extract the first 128 bits of the register*/\
   temp[0] = _mm256_extractf128_si256(c_int16__p0, 0);\
@@ -355,16 +332,13 @@
   temp[1] = _mm256_extractf128_si256(c_int16__p0, 1);\
 \
   temp_32[0] = _mm256_cvtepi16_epi32(temp[0]);\
-  temp_float[0] = _mm256_cvtepi32_ps(temp_32[0]);\
-\
-  /* Since s16 values cannot be converted to f32 directly,
-	they are converted to s32, then to f32 and the scale is performed*/\
   temp_32[1] = _mm256_cvtepi16_epi32(temp[1]);\
+  temp_float[0] = _mm256_cvtepi32_ps(temp_32[0]);\
   temp_float[1] = _mm256_cvtepi32_ps(temp_32[1]);\
 \
   /* Multiply the C matrix by the scale value*/\
   res_1 = _mm256_mul_ps(temp_float[0], scale_1);\
-  res_2 = _mm256_mul_ps(temp_float[0], scale_2);\
+  res_2 = _mm256_mul_ps(temp_float[1], scale_2);\
 \
   /* Round the resultant value to the nearest integer*/\
   res_1 = _mm256_round_ps(res_1, (_MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC));\
@@ -381,15 +355,16 @@
 	c_int16__p0 = _mm256_permute4x64_epi64(c_int16__p0, 0XD8);\
 \
    /* Convert the s16 to s8 */\
-	store_reg = _mm256_packs_epi16(c_int16__p0, c_int16__p1);\
+	store_reg = _mm256_packs_epi16(c_int16__p0, zero_reg);\
+  store_reg = _mm256_permute4x64_epi64(store_reg, 0XD8);\
   /* Extract the first 128 bits of the register*/\
   temp[0] = _mm256_extractf128_si256(store_reg, 0);\
 \
   /* Store the result in s8 form */\
   _mm_storeu_si128((__m128i *)store_buf, temp[0]);\
-  memcpy( ( int8_t* )post_ops_list_temp->op_args3 + \
-	  ( rs_c_downscale * ( post_op_c_i + 0 ) ) + post_op_c_j + \
-	  ( 0 * 16 ) , store_buf, ( n0_rem * sizeof( int8_t ) ) ); \
+  memcpy( (( int8_t* )post_ops_list_temp->op_args3 + \
+	  ( rs_c_downscale * ( post_op_c_i + vec_ind ) ) + post_op_c_j) \
+	  ,store_buf, ( n0_rem * sizeof( int8_t ) ) ); \
 \
 
 #endif //LPGEMM_S16_KERN_MACROS_H

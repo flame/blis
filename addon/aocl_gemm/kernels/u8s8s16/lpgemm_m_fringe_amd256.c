@@ -370,20 +370,13 @@ POST_OPS_DOWNSCALE_4x32:
 			(float *)post_ops_list_temp->scale_factor +
 			post_op_c_j + (1 * 8));
 
-		bli_mm256_s16_downscale(c_int16_0p0, c_int16_0p1, 0);
-		//--------------------------------------------------------------------------
+		BLI_MM256_S16_DOWNSCALE(c_int16_0p0, c_int16_0p1, 0);
 
-		bli_mm256_s16_downscale(c_int16_1p0, c_int16_1p1, 1);
-		
-		//--------------------------------------------------------------------------
+		BLI_MM256_S16_DOWNSCALE(c_int16_1p0, c_int16_1p1, 1);
 
-		bli_mm256_s16_downscale(c_int16_2p0, c_int16_2p1, 2);
-		
-		//--------------------------------------------------------------------------
+		BLI_MM256_S16_DOWNSCALE(c_int16_2p0, c_int16_2p1, 2);
 
-		bli_mm256_s16_downscale(c_int16_3p0, c_int16_3p1, 3);
-
-		//--------------------------------------------------------------------------
+		BLI_MM256_S16_DOWNSCALE(c_int16_3p0, c_int16_3p1, 3);
 
 		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 	}
@@ -632,12 +625,9 @@ POST_OPS_DOWNSCALE_2x32:
 			(float *)post_ops_list_temp->scale_factor +
 			post_op_c_j + (1 * 8));
 
-		bli_mm256_s16_downscale(c_int16_0p0, c_int16_0p1, 0);
-		//--------------------------------------------------------------------------
+		BLI_MM256_S16_DOWNSCALE(c_int16_0p0, c_int16_0p1, 0);
 
-		bli_mm256_s16_downscale(c_int16_1p0, c_int16_1p1, 1);
-		
-		//--------------------------------------------------------------------------
+		BLI_MM256_S16_DOWNSCALE(c_int16_1p0, c_int16_1p1, 1);
 
 		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 	}
@@ -814,8 +804,7 @@ POST_OPS_DOWNSCALE_1x32:
 			(float *)post_ops_list_temp->scale_factor +
 			post_op_c_j + (1 * 8));
 
-		bli_mm256_s16_downscale(c_int16_0p0, c_int16_0p1, 0);
-		//--------------------------------------------------------------------------
+		BLI_MM256_S16_DOWNSCALE(c_int16_0p0, c_int16_0p1, 0);
 
 		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 	}

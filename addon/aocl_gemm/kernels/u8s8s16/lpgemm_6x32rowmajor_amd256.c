@@ -582,26 +582,17 @@ POST_OPS_DOWNSCALE_6x32:
 				(float *)post_ops_list_temp->scale_factor +
 				post_op_c_j + (1 * 8));
 
-			bli_mm256_s16_downscale(c_int16_0p0, c_int16_0p1, 0);
-			//--------------------------------------------------------------------------
+			BLI_MM256_S16_DOWNSCALE(c_int16_0p0, c_int16_0p1, 0);
 
-			bli_mm256_s16_downscale(c_int16_1p0, c_int16_1p1, 1);
-			
-			//--------------------------------------------------------------------------
+			BLI_MM256_S16_DOWNSCALE(c_int16_1p0, c_int16_1p1, 1);
 
-			bli_mm256_s16_downscale(c_int16_2p0, c_int16_2p1, 2);
-			
-			//--------------------------------------------------------------------------
+			BLI_MM256_S16_DOWNSCALE(c_int16_2p0, c_int16_2p1, 2);
 
-			bli_mm256_s16_downscale(c_int16_3p0, c_int16_3p1, 3);
+			BLI_MM256_S16_DOWNSCALE(c_int16_3p0, c_int16_3p1, 3);
 
-			//--------------------------------------------------------------------------
+			BLI_MM256_S16_DOWNSCALE(c_int16_4p0, c_int16_4p1, 4);
 
-			bli_mm256_s16_downscale(c_int16_4p0, c_int16_4p1, 4);
-
-			//--------------------------------------------------------------------------
-
-			bli_mm256_s16_downscale(c_int16_5p0, c_int16_5p1, 5);
+			BLI_MM256_S16_DOWNSCALE(c_int16_5p0, c_int16_5p1, 5);
 
 			POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 		}
@@ -675,6 +666,7 @@ POST_OPS_6x32_DISABLE:
 			// a pointer increment
 			a = a + (4 * ps_a);
 			m_full_pieces_loop_limit += 4;
+			post_op_c_i += 4;
 		}
 
 		if (m_partial2 == 1)
@@ -692,6 +684,7 @@ POST_OPS_6x32_DISABLE:
 			// a pointer increment
 			a = a + (2 * ps_a);
 			m_full_pieces_loop_limit += 2;
+			post_op_c_i += 2;
 		}
 
 		if (m_partial == 1)
@@ -704,6 +697,7 @@ POST_OPS_6x32_DISABLE:
 				alpha, beta,is_last_k,
 				post_op_c_i, post_op_c_j,
 				post_ops_list, rs_c_downscale);
+			post_op_c_i += 1;
 		}
 	}
 }
