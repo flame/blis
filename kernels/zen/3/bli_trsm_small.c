@@ -8445,6 +8445,8 @@ BLIS_INLINE  err_t bli_dtrsm_small_XAltB_XAuB
 
     __m128d xmm5;
 
+    xmm5 = _mm_setzero_pd();
+
     /*
     Performs solving TRSM for 6 rows at a time from  0 to n/6 in steps of d_nr
     a. Load and pack A (a01 block), the size of packing 6x6 to 6x (n-6)
@@ -10846,6 +10848,8 @@ BLIS_INLINE  err_t bli_dtrsm_small_XAutB_XAlB
 
     __m128d xmm5;
 
+    xmm5 = _mm_setzero_pd();
+
     /*
     Performs solving TRSM for 6 rows at a time from  0 to n/6 in steps of d_nr
     a. Load and pack A (a01 block), the size of packing 6x6 to 6x (n-6)
@@ -13136,6 +13140,8 @@ BLIS_INLINE err_t bli_dtrsm_small_AltXB_AuXB
 
     __m128d xmm5;
 
+    xmm5 = _mm_setzero_pd();
+
     gint_t required_packing_A = 1;
     mem_t local_mem_buf_A_s = {0};
     double *D_A_pack = NULL;
@@ -15137,6 +15143,8 @@ BLIS_INLINE err_t bli_dtrsm_small_AutXB_AlXB
     __m256d ymm20;
 
     __m128d xmm5;
+
+    xmm5 = _mm_setzero_pd();
 
     gint_t required_packing_A = 1;
     mem_t local_mem_buf_A_s = {0};
@@ -17763,6 +17771,8 @@ BLIS_INLINE  err_t bli_strsm_small_XAutB_XAlB
     __m256 ymm12, ymm13, ymm14, ymm15;
 
     __m128 xmm5;
+
+    xmm5 = _mm_setzero_ps();
 
     /*
     Performs solving TRSM for 6 rows at a time from  0 to n/6 in steps of d_nr
@@ -21428,6 +21438,8 @@ BLIS_INLINE  err_t bli_strsm_small_XAltB_XAuB
     __m256 ymm12, ymm13, ymm14, ymm15;
 
     __m128 xmm5;
+
+    xmm5 = _mm_setzero_ps();
 
     /*
     Performs solving TRSM for 6 rows at a time from  0 to n/6 in steps of d_nr
@@ -33749,6 +33761,9 @@ BLIS_INLINE err_t bli_ztrsm_small_AutXB_AlXB
 
     __m128d xmm5, xmm4;
 
+    xmm4 = _mm_setzero_pd();
+    xmm5 = _mm_setzero_pd();
+
     gint_t required_packing_A = 1;
     mem_t local_mem_buf_A_s = {0};
     dcomplex *D_A_pack = NULL;
@@ -34979,6 +34994,9 @@ BLIS_INLINE err_t bli_ztrsm_small_AltXB_AuXB
     __m256d ymm16, ymm17, ymm18, ymm19;
 
     __m128d xmm5, xmm4;
+
+    xmm4 = _mm_setzero_pd();
+    xmm5 = _mm_setzero_pd();
 
     gint_t required_packing_A = 1;
     mem_t local_mem_buf_A_s = {0};
@@ -36230,6 +36248,8 @@ BLIS_INLINE err_t bli_ztrsm_small_XAutB_XAlB
     __m256d ymm16, ymm17, ymm18, ymm19;
 
     __m128d xmm5;
+
+    xmm5 = _mm_setzero_pd();
 
     for(j = (n-d_nr); (j+1) > 0; j -= d_nr)     //loop along 'N' direction
     {
@@ -37691,6 +37711,8 @@ BLIS_INLINE err_t bli_ztrsm_small_XAltB_XAuB
     __m256d ymm16, ymm17, ymm18, ymm19;
 
     __m128d xmm5;
+
+    xmm5 = _mm_setzero_pd();
 
     for(j = 0; (j+d_nr-1) < n; j += d_nr)     //loop along 'N' direction
     {
@@ -42248,6 +42270,13 @@ BLIS_INLINE err_t bli_ctrsm_small_AutXB_AlXB
 	__m128 xmm0, xmm1, xmm2, xmm3, xmm4;
     	__m128 xmm5;
 
+	xmm0 = _mm_setzero_ps();
+	xmm1 = _mm_setzero_ps();
+	xmm2 = _mm_setzero_ps();
+	xmm3 = _mm_setzero_ps();
+	xmm4 = _mm_setzero_ps();
+	xmm5 = _mm_setzero_ps();
+
 	gint_t required_packing_A = 1;
 	mem_t local_mem_buf_A_s = {0};
 	scomplex *D_A_pack = NULL;
@@ -44492,6 +44521,13 @@ BLIS_INLINE err_t bli_ctrsm_small_AltXB_AuXB
 	__m128 xmm0, xmm1, xmm2, xmm3, xmm4;
     	__m128 xmm5;
 
+	xmm0 = _mm_setzero_ps();
+	xmm1 = _mm_setzero_ps();
+	xmm2 = _mm_setzero_ps();
+	xmm3 = _mm_setzero_ps();
+	xmm4 = _mm_setzero_ps();
+	xmm5 = _mm_setzero_ps();
+
 	gint_t required_packing_A = 1;
 	mem_t local_mem_buf_A_s = {0};
 	scomplex *D_A_pack = NULL;
@@ -46714,6 +46750,11 @@ BLIS_INLINE  err_t bli_ctrsm_small_XAutB_XAlB
 	__m128 xmm0, xmm1, xmm2;
 	__m128 xmm5;
 
+	xmm0 = _mm_setzero_ps();
+	xmm1 = _mm_setzero_ps();
+	xmm2 = _mm_setzero_ps();
+	xmm5 = _mm_setzero_ps();
+
 	gint_t required_packing_A = 1;
 	mem_t local_mem_buf_A_s = {0};
 	scomplex *D_A_pack = NULL;
@@ -48155,6 +48196,11 @@ BLIS_INLINE  err_t bli_ctrsm_small_XAltB_XAuB
 
 	__m128 xmm0, xmm1, xmm2;
     	__m128 xmm5;
+
+	xmm0 = _mm_setzero_ps();
+	xmm1 = _mm_setzero_ps();
+	xmm2 = _mm_setzero_ps();
+	xmm5 = _mm_setzero_ps();
 
 	gint_t required_packing_A = 1;
 	mem_t local_mem_buf_A_s = {0};
