@@ -440,34 +440,55 @@ void PASTEMAC(ch,varname) \
 }
 #endif
 GENTFUNCR( float,   float,  s, s, normfv_unb_var1, sumsqv_unb_var1 )
-/*call sumsqv_unb_var1 if FAST_MATH is not defined else call dot-norm method*/\
-#ifndef BLIS_ENABLE_FAST_MATH
-GENTFUNCR( double,  double,  d, d, normfv_unb_var1, sumsqv_unb_var1 )
-#else
-#undef  GENTFUNCR
-#define GENTFUNCR( ctype, ctype_r, ch, chr, varname, kername ) \
-\
-void PASTEMAC(ch,varname) \
-     ( \
-       dim_t    n, \
-       ctype*   x, inc_t incx, \
-       ctype_r* norm, \
-       cntx_t*  cntx, \
-       rntm_t*  rntm  \
-     ) \
-{ \
-\
-    /* Compute the sum of the squares of the vector. */ \
-    PASTEMAC(ch,kername) \
-    ( \
-      n, \
-      x, incx, \
-      norm, \
-      cntx \
-    ); \
+
+void bli_dnormfv_unb_var1
+    ( 
+        dim_t    n, 
+        double*   x, 
+        inc_t incx, 
+        double* norm, 
+        cntx_t*  cntx, 
+        rntm_t*  rntm  
+    ) 
+{ 
+   
+   if( bli_cpuid_is_avx_supported() == TRUE )
+   {
+        bli_dnorm2fv_unb_var1_avx( n, x, incx, norm, cntx );
+   }
+   else
+   {
+        double* zero       = bli_d0;
+        double* one        = bli_d1;
+        double  scale; 
+        double  sumsq; 
+        double  sqrt_sumsq; 
+
+        // Initialize scale and sumsq to begin the summation.
+        bli_ddcopys( *zero, scale ); 
+        bli_ddcopys( *one,  sumsq ); 
+
+        // Compute the sum of the squares of the vector.
+
+        bli_dsumsqv_unb_var1 
+        ( 
+        n,
+        x, 
+        incx,
+        &scale,
+        &sumsq,
+        cntx,
+        rntm
+        );
+
+        // Compute: norm = scale * sqrt( sumsq ) 
+        bli_dsqrt2s( sumsq, sqrt_sumsq ); 
+        bli_dscals( scale, sqrt_sumsq ); 
+
+        // Store the final value to the output variable.
+        bli_dcopys( sqrt_sumsq, *norm );
+   }
 }
-GENTFUNCR( double,  double, d, d, normfv_unb_var1, norm2fv_unb_var1 )
-#endif
 
 #undef  GENTFUNCR
 #define GENTFUNCR( ctype, ctype_r, ch, chr, varname ) \

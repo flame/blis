@@ -53,8 +53,6 @@
 #define BLIS_SMALL_MATRIX_A_THRES_M_SYRK 96
 #define BLIS_SMALL_MATRIX_A_THRES_N_SYRK 128
 
-//#define BLIS_ENABLE_FAST_MATH
-
 // -- SIMD config  --------------------------------------------------------
 
 #define BLIS_SIMD_ALIGN_SIZE             64

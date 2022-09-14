@@ -59,8 +59,6 @@
 // BLIS), defining this macro as 1 yields better performance.
 #define AOCL_BLIS_MULTIINSTANCE   0
 
-//#define BLIS_ENABLE_FAST_MATH
-
 /*
  * Override the block sizes in the context to the block sizes used
  * by AVX2 GEMM+TRSM kernels, this is needed in Zen4 context as default

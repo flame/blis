@@ -186,6 +186,7 @@ blis: \
        bench_gemv_blis.x \
        bench_syrk_blis.x \
        bench_ger_blis.x \
+       bench_nrm2_blis.x \
        bench_scalv_blis.x \
        bench_dotv_blis.x \
        bench_trsv_blis.x \
@@ -201,6 +202,7 @@ openblas: \
       bench_gemv_openblas.x \
       bench_syrk_openblas.x \
       bench_ger_openblas.x \
+      bench_nrm2_openblas.x \
       bench_scalv_openblas.x \
       bench_dotv_openblas.x \
       bench_trsv_openblas.x \
@@ -231,6 +233,7 @@ mkl:  \
       bench_gemv_mkl.x \
       bench_syrk_mkl.x \
       bench_ger_mkl.x \
+      bench_nrm2_mkl.x \
       bench_scalv_mkl.x \
       bench_dotv_mkl.x \
       bench_trsv_mkl.x \

@@ -379,13 +379,10 @@ bool bli_cntx_trsm_small_thresh_is_met_zen
         dim_t n
     );
 
-#ifdef BLIS_ENABLE_FAST_MATH
-void bli_dnorm2fv_unb_var1
+void bli_dnorm2fv_unb_var1_avx
      (
        dim_t    n,
        double*   x, inc_t incx,
        double* norm,
        cntx_t*  cntx
      );
-#endif
-
