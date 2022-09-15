@@ -5,7 +5,8 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-
+   Copyright (C) 2020 - 2022, Advanced Micro Devices, Inc. All rights reserved.
+   
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
    met:
@@ -41,7 +42,8 @@
 	-lf2c -lm   (in that order)
 */
 
-/* Subroutine */ int PASTEF77(d,sbmv)(const bla_character *uplo, const bla_integer *n, const bla_integer *k, const bla_double *alpha, const bla_double *a, const bla_integer *lda, const bla_double *x, const bla_integer *incx, const bla_double *beta, bla_double *y, const bla_integer *incy)
+/* Subroutine */ 
+int PASTEF77S(d,sbmv)(const bla_character *uplo, const bla_integer *n, const bla_integer *k, const bla_double *alpha, const bla_double *a, const bla_integer *lda, const bla_double *x, const bla_integer *incx, const bla_double *beta, bla_double *y, const bla_integer *incy)
 {
     /* System generated locals */
     bla_integer a_dim1, a_offset, i__1, i__2, i__3, i__4;
@@ -392,7 +394,8 @@
 	-lf2c -lm   (in that order)
 */
 
-/* Subroutine */ int PASTEF77(s,sbmv)(const bla_character *uplo, const bla_integer *n, const bla_integer *k, const bla_real *alpha, const bla_real *a, const bla_integer *lda, const bla_real *x, const bla_integer *incx, const bla_real *beta, bla_real *y, const bla_integer *incy)
+/* Subroutine */ 
+int PASTEF77S(s,sbmv)(const bla_character *uplo, const bla_integer *n, const bla_integer *k, const bla_real *alpha, const bla_real *a, const bla_integer *lda, const bla_real *x, const bla_integer *incx, const bla_real *beta, bla_real *y, const bla_integer *incy)
 {
     /* System generated locals */
     bla_integer a_dim1, a_offset, i__1, i__2, i__3, i__4;
@@ -737,6 +740,16 @@
 /*     End of SSBMV . */
 
 } /* ssbmv_ */
+
+int PASTEF77(d,sbmv)(const bla_character *uplo, const bla_integer *n, const bla_integer *k, const bla_double *alpha, const bla_double *a, const bla_integer *lda, const bla_double *x, const bla_integer *incx, const bla_double *beta, bla_double *y, const bla_integer *incy)
+{
+  return PASTEF77S(d,sbmv)(uplo, n, k, alpha, a, lda, x, incx, beta, y, incy);
+}
+
+int PASTEF77(s,sbmv)(const bla_character *uplo, const bla_integer *n, const bla_integer *k, const bla_real *alpha, const bla_real *a, const bla_integer *lda, const bla_real *x, const bla_integer *incx, const bla_real *beta, bla_real *y, const bla_integer *incy)
+{
+  return PASTEF77S(s,sbmv)(uplo, n, k, alpha, a, lda, x, incx, beta, y, incy);
+}
 
 #endif
 

@@ -158,18 +158,24 @@
 #define PASTEMACT(ch1, ch2, ch3, ch4)   bli_ ## ch1 ## ch2 ## _ ## ch3 ## _ ## ch4
 // name-mangling macros.
 #ifdef BLIS_ENABLE_NO_UNDERSCORE_API
-#define PASTEF770(name)                                      name
-#define PASTEF77(ch1,name)                     ch1        ## name
-#define PASTEF772(ch1,ch2,name)                ch1 ## ch2 ## name
-#define PASTEF773(ch1,ch2,ch3,name)     ch1 ## ch2 ## ch3 ## name
-#define PASTEF77S(ch1,name)            ch1        ## name ## _blis_impl
+#define PASTEF770(name)                                                  name
+#define PASTEF77(ch1,name)                                        ch1 ## name
+#define PASTEF772(ch1,ch2,name)                            ch1 ## ch2 ## name
+#define PASTEF773(ch1,ch2,ch3,name)                 ch1 ## ch2 ## ch3 ## name
 #else
-#define PASTEF770(name)                                      name ## _
-#define PASTEF77(ch1,name)                     ch1        ## name ## _
-#define PASTEF772(ch1,ch2,name)                ch1 ## ch2 ## name ## _
-#define PASTEF773(ch1,ch2,ch3,name)     ch1 ## ch2 ## ch3 ## name ## _
-#define PASTEF77S(ch1,name)            ch1        ## name ## _blis_impl
+#define PASTEF770(name)                                            name ## _
+#define PASTEF77(ch1,name)                                  ch1 ## name ## _
+#define PASTEF772(ch1,ch2,name)                      ch1 ## ch2 ## name ## _
+#define PASTEF773(ch1,ch2,ch3,name)           ch1 ## ch2 ## ch3 ## name ## _
 #endif
+
+// Macros to define names _blis_impl suffix, *_blis_impl is the blis
+// blis implmenation of the respective API's which is invoked from CBLAS
+// and BLAS wrapper. 
+#define PASTEF770S(name)                                   name ## _blis_impl
+#define PASTEF77S(ch1,name)                         ch1 ## name ## _blis_impl
+#define PASTEF772S(ch1,ch2,name)             ch1 ## ch2 ## name ## _blis_impl
+#define PASTEF773S(ch1,ch2,ch3,name)  ch1 ## ch2 ## ch3 ## name ## _blis_impl
 
 // -- Include other groups of macros
 
