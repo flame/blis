@@ -67,6 +67,6 @@ BLIS_EXPORT_BLAS void PASTEF77S(ch,blasname) \
      );
 
 #ifdef BLIS_ENABLE_BLAS
-INSERT_GENTPROT_BLAS( gemm3m )
+INSERT_GENTPROT_BLAS_CZ( gemm3m )
 #endif
 
