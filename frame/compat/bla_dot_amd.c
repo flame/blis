@@ -35,7 +35,6 @@
 
 #include "blis.h"
 
-
 //
 // Define BLAS-to-BLIS interfaces.
 //
@@ -279,16 +278,122 @@ double ddot_blis_impl
     if (bli_cpuid_is_avx_supported() == TRUE)
     {
         /* Call BLIS kernel. */
+#ifdef BLIS_ENABLE_OPENMP
+        // For sizes less than or equal to 2500, optimal number of threads is 1,
+        // but due to the overhead of calling omp functions it is being done
+        // outside by directly calling ddotv so as to get maximum performance.
+        if ( n0 <= 2500 )
+        {
+            bli_ddotv_zen_int10
+            (
+                BLIS_NO_CONJUGATE,
+                BLIS_NO_CONJUGATE,
+                n0,
+                x0, incx0,
+                y0, incy0,
+                &rho,
+                NULL
+            );
+        }
+        else
+        {
+            rntm_t rntm;
+            double* rho_temp = NULL;
+            dim_t nt, n0_per_thread, n0_rem, nt_pred, npt, offset;
+            rho = 0;
+            // Initialize a local runtime with global settings.
+            bli_rntm_init_from_global(&rntm);
+
+            // Query the total number of threads from the rntm_t object.
+            nt = bli_rntm_num_threads(&rntm);
+            mem_t local_mem_buf = { 0 };
+
+            bli_membrk_rntm_set_membrk(&rntm);
+            siz_t buffer_size = bli_pool_block_size(bli_membrk_pool(
+                bli_packbuf_index(BLIS_BITVAL_BUFFER_FOR_A_BLOCK),
+                bli_rntm_membrk(&rntm)));
+
+            if ( (nt * sizeof(double)) > buffer_size )
+                return BLIS_NOT_YET_IMPLEMENTED;
+
+            bli_membrk_acquire_m(&rntm,
+                buffer_size,
+                BLIS_BITVAL_BUFFER_FOR_A_BLOCK,
+                &local_mem_buf);
+            if ( FALSE == bli_mem_is_alloc(&local_mem_buf) )
+                return BLIS_NULL_POINTER;
+            rho_temp = bli_mem_buffer(&local_mem_buf);
+            if ( NULL == rho_temp ) return BLIS_NULL_POINTER;
+#ifdef AOCL_DYNAMIC
+            // Calculate the optimal number of threads required
+            // based on input dimension. These conditions are taken
+            // after cheking the performance for range of dimensions
+            // and number of threads
+            if ( n0 <= 5000 ) nt_pred = 4;
+            else if ( n0 <= 15000 ) nt_pred = 8;
+            else if ( n0 <= 40000 ) nt_pred = 16;
+            else if ( n0 <= 200000 ) nt_pred = 32;
+            else nt_pred = nt;
+            nt = bli_min(nt_pred, nt);
+#endif
+            // Calculating the input sizes per thread
+            n0_per_thread = n0 / nt;
+            n0_rem = n0 % nt;
+
+            // Multithreading Implementation
+            #pragma omp parallel num_threads(nt)
+            {
+                dim_t t_id = omp_get_thread_num();
+                // The following conditions handle the optimal distribution of
+                // load among the threads.
+                // Say we have n0 = 50 & nt = 4.
+                // So we get 12 ( n0 / nt ) elements per thread along with 2
+                // remaining elements. Each of these remaining elements is given
+                // to the last threads, respectively.
+                // So, t0, t1, t2 and t3 gets 12, 12, 13 and 13 elements,
+                // respectively.
+                if ( t_id < ( nt - n0_rem ) )
+                {
+                    npt = n0_per_thread;
+                    offset = t_id * npt;
+                }
+                else
+                {
+                    npt = n0_per_thread + 1;
+                    offset = ( ( t_id * n0_per_thread ) +
+                               ( t_id - ( nt - n0_rem ) ) );
+                }
+                bli_ddotv_zen_int10
+                (
+                    BLIS_NO_CONJUGATE,
+                    BLIS_NO_CONJUGATE,
+                    npt,
+                    x0 + ( offset * incx0 ), incx0,
+                    y0 + ( offset * incy0 ), incy0,
+                    rho_temp + t_id,
+                    NULL
+                );
+            }
+            // Accumulating the nt threads output
+            for ( int i = 0; i < nt; i++ )
+                rho += rho_temp[i];
+
+            // Releasing the allocated memory
+            bli_membrk_release(&rntm, &local_mem_buf);
+        }
+#else
+        // Default call to ddotv for single-threaded work
         bli_ddotv_zen_int10
         (
-        BLIS_NO_CONJUGATE,
-        BLIS_NO_CONJUGATE,
-        n0,
-        x0, incx0,
-        y0, incy0,
-        &rho,
-        NULL
+            BLIS_NO_CONJUGATE,
+            BLIS_NO_CONJUGATE,
+            n0,
+            x0, incx0,
+            y0, incy0,
+            &rho,
+            NULL
         );
+#endif
     }
     else
     {
