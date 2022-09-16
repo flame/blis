@@ -51,7 +51,7 @@ void bli_packm_int
 
 	// Barrier so that we know threads are done with previous computation
 	// with the same packing buffer before starting to pack.
-	bli_thread_barrier( thread );
+	bli_thread_barrier( rntm, thread );
 
 	// Invoke the variant with kappa_use.
 	f
@@ -65,6 +65,6 @@ void bli_packm_int
 	);
 
 	// Barrier so that packing is done before computation.
-	bli_thread_barrier( thread );
+	bli_thread_barrier( rntm, thread );
 }
 

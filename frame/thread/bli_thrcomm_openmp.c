@@ -37,35 +37,13 @@
 
 #ifdef BLIS_ENABLE_OPENMP
 
-thrcomm_t* bli_thrcomm_create( rntm_t* rntm, dim_t n_threads )
-{
-	#ifdef BLIS_ENABLE_MEM_TRACING
-	printf( "bli_thrcomm_create(): " );
-	#endif
-
-	thrcomm_t* comm = bli_sba_acquire( rntm, sizeof(thrcomm_t) );
-
-	bli_thrcomm_init( n_threads, comm );
-
-	return comm;
-}
-
-void bli_thrcomm_free( rntm_t* rntm, thrcomm_t* comm )
-{
-	if ( comm == NULL ) return;
-
-	bli_thrcomm_cleanup( comm );
-
-	#ifdef BLIS_ENABLE_MEM_TRACING
-	printf( "bli_thrcomm_free(): " );
-	#endif
-
-	bli_sba_release( rntm, comm );
-}
-
 #ifndef BLIS_TREE_BARRIER
 
-void bli_thrcomm_init( dim_t n_threads, thrcomm_t* comm )
+// Define the non-tree barrier implementations of the init, cleanup, and
+// barrier functions. These are the default unless the tree barrier
+// versions are requested at compile-time.
+
+void bli_thrcomm_init_openmp( dim_t n_threads, thrcomm_t* comm )
 {
 	if ( comm == NULL ) return;
 	comm->sent_object = NULL;
@@ -75,14 +53,15 @@ void bli_thrcomm_init( dim_t n_threads, thrcomm_t* comm )
 }
 
 
-void bli_thrcomm_cleanup( thrcomm_t* comm )
+void bli_thrcomm_cleanup_openmp( thrcomm_t* comm )
 {
-	if ( comm == NULL ) return;
+	//if ( comm == NULL ) return;
+	return;
 }
 
 //'Normal' barrier for openmp
 //barrier routine taken from art of multicore programming
-void bli_thrcomm_barrier( dim_t t_id, thrcomm_t* comm )
+void bli_thrcomm_barrier_openmp( dim_t t_id, thrcomm_t* comm )
 {
 #if 0
 	if ( comm == NULL || comm->n_threads == 1 )
@@ -109,7 +88,10 @@ void bli_thrcomm_barrier( dim_t t_id, thrcomm_t* comm )
 
 #else
 
-void bli_thrcomm_init( dim_t n_threads, thrcomm_t* comm )
+// Define the tree barrier implementations of the init, cleanup, and
+// barrier functions.
+
+void bli_thrcomm_init_openmp( dim_t n_threads, thrcomm_t* comm )
 {
 	err_t r_val;
 
@@ -119,6 +101,23 @@ void bli_thrcomm_init( dim_t n_threads, thrcomm_t* comm )
 	comm->barriers = bli_malloc_intl( sizeof( barrier_t* ) * n_threads, &r_val );
 	bli_thrcomm_tree_barrier_create( n_threads, BLIS_TREE_BARRIER_ARITY, comm->barriers, 0 );
 }
+
+void bli_thrcomm_cleanup_openmp( thrcomm_t* comm )
+{
+	if ( comm == NULL ) return;
+	for ( dim_t i = 0; i < comm->n_threads; i++ )
+	{
+	   bli_thrcomm_tree_barrier_free( comm->barriers[i] );
+	}
+	bli_free_intl( comm->barriers );
+}
+
+void bli_thrcomm_barrier_openmp( dim_t t_id, thrcomm_t* comm )
+{
+	bli_thrcomm_tree_barrier( comm->barriers[t_id] );
+}
+
+// -- Helper functions ---------------------------------------------------------
 
 //Tree barrier used for Intel Xeon Phi
 barrier_t* bli_thrcomm_tree_barrier_create( int num_threads, int arity, barrier_t** leaves, int leaf_index )
@@ -164,16 +163,6 @@ barrier_t* bli_thrcomm_tree_barrier_create( int num_threads, int arity, barrier_
 	return me;
 }
 
-void bli_thrcomm_cleanup( thrcomm_t* comm )
-{
-	if ( comm == NULL ) return;
-	for ( dim_t i = 0; i < comm->n_threads; i++ )
-	{
-	   bli_thrcomm_tree_barrier_free( comm->barriers[i] );
-	}
-	bli_free_intl( comm->barriers );
-}
-
 void bli_thrcomm_tree_barrier_free( barrier_t* barrier )
 {
 	if ( barrier == NULL )
@@ -185,11 +174,6 @@ void bli_thrcomm_tree_barrier_free( barrier_t* barrier )
 		bli_free_intl( barrier );
 	}
 	return;
-}
-
-void bli_thrcomm_barrier( dim_t t_id, thrcomm_t* comm )
-{
-	bli_thrcomm_tree_barrier( comm->barriers[t_id] );
 }
 
 void bli_thrcomm_tree_barrier( barrier_t* barack )

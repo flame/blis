@@ -677,7 +677,7 @@ void PASTEMAC(ch,varname) \
 \
 			/* NOTE: This barrier is only needed if we are packing A (since
 			   that matrix is packed within the pc loop of this variant). */ \
-			if ( packa ) bli_thread_barrier( thread_pa ); \
+			if ( packa ) bli_thread_barrier( rntm, thread_pa ); \
 		} \
 	} \
 \
@@ -1298,7 +1298,7 @@ void PASTEMAC(ch,varname) \
 \
 			/* NOTE: This barrier is only needed if we are packing B (since
 			   that matrix is packed within the pc loop of this variant). */ \
-			if ( packb ) bli_thread_barrier( thread_pb ); \
+			if ( packb ) bli_thread_barrier( rntm, thread_pb ); \
 		} \
 	} \
 \

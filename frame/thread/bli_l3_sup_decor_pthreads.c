@@ -40,18 +40,18 @@
 // A data structure to assist in passing operands to additional threads.
 typedef struct thread_data
 {
-	      l3supint_t func;
-	      opid_t     family;
-	const obj_t*     alpha;
-	const obj_t*     a;
-	const obj_t*     b;
-	const obj_t*     beta;
-	const obj_t*     c;
-	const cntx_t*    cntx;
-	      rntm_t*    rntm;
-	      dim_t      tid;
-	      thrcomm_t* gl_comm;
-	      array_t*   array;
+	      l3supint_ft func;
+	      opid_t      family;
+	const obj_t*      alpha;
+	const obj_t*      a;
+	const obj_t*      b;
+	const obj_t*      beta;
+	const obj_t*      c;
+	const cntx_t*     cntx;
+	      rntm_t*     rntm;
+	      dim_t       tid;
+	      thrcomm_t*  gl_comm;
+	      array_t*    array;
 } thread_data_t;
 
 // Entry point for additional threads
@@ -59,7 +59,7 @@ void* bli_l3_sup_thread_entry( void* data_void )
 {
 	thread_data_t* data     = data_void;
 
-	      l3supint_t     func     = data->func;
+	      l3supint_ft    func     = data->func;
 	      opid_t         family   = data->family;
 	const obj_t*         alpha    = data->alpha;
 	const obj_t*         a        = data->a;
@@ -109,17 +109,17 @@ void* bli_l3_sup_thread_entry( void* data_void )
 	return NULL;
 }
 
-err_t bli_l3_sup_thread_decorator
+err_t bli_l3_sup_thread_decorator_pthreads
      (
-             l3supint_t func,
-             opid_t     family,
-       const obj_t*     alpha,
-       const obj_t*     a,
-       const obj_t*     b,
-       const obj_t*     beta,
-       const obj_t*     c,
-       const cntx_t*    cntx,
-             rntm_t*    rntm
+             l3supint_ft func,
+             opid_t      family,
+       const obj_t*      alpha,
+       const obj_t*      a,
+       const obj_t*      b,
+       const obj_t*      beta,
+       const obj_t*      c,
+       const cntx_t*     cntx,
+             rntm_t*     rntm
      )
 {
 	err_t r_val;
@@ -213,6 +213,13 @@ err_t bli_l3_sup_thread_decorator
 
 	return BLIS_SUCCESS;
 }
+
+#else
+
+// Define a dummy function bli_l3_thread_entry(), which is needed for
+// consistent dynamic linking behavior when building shared objects in Linux
+// or OSX, or Windows DLLs; otherwise, we risk having an unresolved symbol.
+void* bli_l3_sup_thread_entry( void* data_void ) { return NULL; }
 
 #endif
 
