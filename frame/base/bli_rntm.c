@@ -199,12 +199,12 @@ void bli_rntm_set_ways_from_rntm
 
 	// First, we establish whether or not the number of threads or ways of
 	// parallelism were set to meaningful values.
-	if ( nt > 1 ) nt_set   = TRUE;
-	if ( jc > 1 ) ways_set = TRUE;
-	if ( pc > 1 ) ways_set = TRUE; pc = 1; // Disable pc_nt values.
-	if ( ic > 1 ) ways_set = TRUE;
-	if ( jr > 1 ) ways_set = TRUE;
-	if ( ir > 1 ) ways_set = TRUE;
+	if ( nt > 1 ) { nt_set   = TRUE; }
+	if ( jc > 1 ) { ways_set = TRUE; }
+	if ( pc > 1 ) { ways_set = TRUE; pc = 1; } // Disable pc_nt values.
+	if ( ic > 1 ) { ways_set = TRUE; }
+	if ( jr > 1 ) { ways_set = TRUE; }
+	if ( ir > 1 ) { ways_set = TRUE; }
 
 	// Now we use the values of nt_set and ways_set to determine how to
 	// interpret the original values we found in the rntm_t object.
@@ -321,12 +321,12 @@ void bli_rntm_set_ways_from_rntm_sup
 
 	// First, we establish whether or not the number of threads or ways of
 	// parallelism were set to meaningful values.
-	if ( nt > 1 ) nt_set   = TRUE;
-	if ( jc > 1 ) ways_set = TRUE;
-	if ( pc > 1 ) ways_set = TRUE; pc = 1; // Disable pc_nt values.
-	if ( ic > 1 ) ways_set = TRUE;
-	if ( jr > 1 ) ways_set = TRUE;
-	if ( ir > 1 ) ways_set = TRUE;
+	if ( nt > 1 ) { nt_set   = TRUE; }
+	if ( jc > 1 ) { ways_set = TRUE; }
+	if ( pc > 1 ) { ways_set = TRUE; pc = 1; } // Disable pc_nt values.
+	if ( ic > 1 ) { ways_set = TRUE; }
+	if ( jr > 1 ) { ways_set = TRUE; }
+	if ( ir > 1 ) { ways_set = TRUE; }
 
 	// Now we use the values of nt_set and ways_set to determine how to
 	// interpret the original values we found in the rntm_t object.

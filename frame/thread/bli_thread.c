@@ -1622,7 +1622,7 @@ void bli_thread_init_rntm_from_env
 	// Read the environment variables for the number of threads (ways of
 	// parallelism) for each individual loop.
 	jc = bli_env_get_var( "BLIS_JC_NT", -1 );
-	pc = bli_env_get_var( "BLIS_PC_NT", -1 ); pc = 1; // Disable PC_NT values.
+	pc = bli_env_get_var( "BLIS_PC_NT", -1 );
 	ic = bli_env_get_var( "BLIS_IC_NT", -1 );
 	jr = bli_env_get_var( "BLIS_JR_NT", -1 );
 	ir = bli_env_get_var( "BLIS_IR_NT", -1 );
@@ -1640,12 +1640,12 @@ void bli_thread_init_rntm_from_env
 
 	// First, we establish whether or not the number of threads or ways of
 	// parallelism were set to meaningful values.
-	if ( nt > 1 ) nt_set   = TRUE;
-	if ( jc > 1 ) ways_set = TRUE;
-	if ( pc > 1 ) ways_set = TRUE;
-	if ( ic > 1 ) ways_set = TRUE;
-	if ( jr > 1 ) ways_set = TRUE;
-	if ( ir > 1 ) ways_set = TRUE;
+	if ( nt > 1 ) { nt_set   = TRUE; }
+	if ( jc > 1 ) { ways_set = TRUE; }
+	if ( pc > 1 ) { ways_set = TRUE; pc = 1; } // Disable pc_nt values.
+	if ( ic > 1 ) { ways_set = TRUE; }
+	if ( jr > 1 ) { ways_set = TRUE; }
+	if ( ir > 1 ) { ways_set = TRUE; }
 
 	// Now we use the values of nt_set and ways_set to determine how to
 	// interpret the original values we found in the rntm_t object.
