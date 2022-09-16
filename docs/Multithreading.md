@@ -243,15 +243,15 @@ Let's assume that you configured BLIS as follows:
 $ ./configure -t openmp,pthreads auto
 ```
 This will result in both OpenMP and pthreads implementations being compiled and included within the BLIS library, with OpenMP serving as the default (since it was listed first to the `-t` option). You can link your program against this BLIS library and force the use of pthreads (instead of OpenMP) globally at runtime via the following API:
-```
+```c
 void bli_thread_set_thread_impl( timpl_t ti );
 ```
 The function takes a `timpl_t`, which is an enumerated type that has three valid values corresponding to the three possible threading implementations: `BLIS_OPENMP`, `BLIS_POSIX`, and `BLIS_SINGLE`. Forcing use of pthreads is as simple as calling:
-```
+```c
 bli_thread_set_thread_impl( BLIS_POSIX )
 ```
 You can even disable multithreading altogether by forcing the use of the single-threaded code path:
-```
+```c
 bli_thread_set_thread_impl( BLIS_SINGLE )
 ```
 Note that if `BLIS_SINGLE` is specified, any other-related parameters previously set, such as via `bli_thread_set_num_threads()` or `bli_thread_set_ways()`, are ignored.
@@ -318,15 +318,15 @@ Let's assume that you configured BLIS as follows:
 $ ./configure -t openmp,pthreads auto
 ```
 This will result in both OpenMP and pthreads implementations being compiled and included within the BLIS library, with OpenMP serving as the default (since it was listed first to the `-t` option). You can link your program against this BLIS library and force the use of pthreads (instead of OpenMP) at runtime, on a per-call basis, by encoding your choice within your `rntm_t`:
-```
+```c
 void bli_rntm_set_thread_impl( timpl_t ti, rntm_t* rntm );
 ```
 The function takes a `timpl_t`, which is an enumerated type that has three valid values corresponding to the three possible threading implementations: `BLIS_OPENMP`, `BLIS_POSIX`, and `BLIS_SINGLE`. Forcing use of pthreads is as simple as calling:
-```
+```c
 bli_rntm_set_thread_impl( BLIS_POSIX, &rntm );
 ```
 You can even disable multithreading altogether by forcing the use of the single-threaded code path:
-```
+```c
 bli_rntm_set_thread_impl( BLIS_SINGLE, &rntm );
 ```
 Note that if `BLIS_SINGLE` is specified, any other-related parameters previously set within the `rntm_t`, such as via `bli_rntm_set_num_threads()` or `bli_rntm_set_ways()`, are ignored.
