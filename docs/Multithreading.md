@@ -10,7 +10,6 @@
     * [The automatic way](Multithreading.md#environment-variables-the-automatic-way)
     * [The manual way](Multithreading.md#environment-variables-the-manual-way)
     * [Overriding the default threading implementation](Multithreading.md#environment-variables-overriding-the-default-threading-implementation)
-### Environment variables: overriding the default threading implementation
   * [Globally at runtime](Multithreading.md#globally-at-runtime)
     * [The automatic way](Multithreading.md#globally-at-runtime-the-automatic-way)
     * [The manual way](Multithreading.md#globally-at-runtime-the-manual-way)
