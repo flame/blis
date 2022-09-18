@@ -202,14 +202,6 @@ BLIS_INLINE void bli_rntm_clear_ways_only( rntm_t* rntm )
 {
 	bli_rntm_set_ways_only( 1, 1, 1, 1, 1, rntm );
 }
-BLIS_INLINE void bli_rntm_clear_sba_pool( rntm_t* rntm )
-{
-	bli_rntm_set_sba_pool( NULL, rntm );
-}
-BLIS_INLINE void bli_rntm_clear_pba( rntm_t* rntm )
-{
-	bli_rntm_set_pba( NULL, rntm );
-}
 
 //
 // -- rntm_t modification (public API) -----------------------------------------
@@ -269,6 +261,10 @@ BLIS_INLINE void bli_rntm_disable_l3_sup( rntm_t* rntm )
 // -- rntm_t modification (internal use only) ----------------------------------
 //
 
+BLIS_INLINE void bli_rntm_clear_auto_factor( rntm_t* rntm )
+{
+	bli_rntm_set_auto_factor_only( FALSE, rntm );
+}
 BLIS_INLINE void bli_rntm_clear_pack_a( rntm_t* rntm )
 {
 	bli_rntm_set_pack_a( FALSE, rntm );
@@ -282,6 +278,15 @@ BLIS_INLINE void bli_rntm_clear_l3_sup( rntm_t* rntm )
 	bli_rntm_set_l3_sup( TRUE, rntm );
 }
 
+BLIS_INLINE void bli_rntm_clear_sba_pool( rntm_t* rntm )
+{
+	bli_rntm_set_sba_pool( NULL, rntm );
+}
+BLIS_INLINE void bli_rntm_clear_pba( rntm_t* rntm )
+{
+	bli_rntm_set_pba( NULL, rntm );
+}
+
 //
 // -- rntm_t initialization ----------------------------------------------------
 //
@@ -292,9 +297,9 @@ BLIS_INLINE void bli_rntm_clear_l3_sup( rntm_t* rntm )
 
 #define BLIS_RNTM_INITIALIZER \
         { \
-          .auto_factor = TRUE, \
           .num_threads = 1, \
           .thrloop     = { 1, 1, 1, 1, 1, 1 }, \
+          .auto_factor = FALSE, \
           .pack_a      = FALSE, \
           .pack_b      = FALSE, \
           .l3_sup      = TRUE, \
@@ -304,10 +309,10 @@ BLIS_INLINE void bli_rntm_clear_l3_sup( rntm_t* rntm )
 
 BLIS_INLINE void bli_rntm_init( rntm_t* rntm )
 {
-	bli_rntm_set_auto_factor_only( TRUE, rntm );
-
 	bli_rntm_clear_num_threads_only( rntm );
 	bli_rntm_clear_ways_only( rntm );
+
+	bli_rntm_clear_auto_factor( rntm );
 	bli_rntm_clear_pack_a( rntm );
 	bli_rntm_clear_pack_b( rntm );
 	bli_rntm_clear_l3_sup( rntm );
