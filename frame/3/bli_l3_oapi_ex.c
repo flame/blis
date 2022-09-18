@@ -56,10 +56,7 @@ void PASTEMAC(gemm,BLIS_OAPI_EX_SUF)
 	bli_init_once();
 
 	// If C has a zero dimension, return early.
-	if ( bli_obj_has_zero_dim( c ) )
-	{
-		return;
-	}
+	if ( bli_obj_has_zero_dim( c ) ) return;
 
 	// If alpha is zero, or if A or B has a zero dimension, scale C by beta
 	// and return early.
@@ -145,10 +142,7 @@ void PASTEMAC(gemmt,BLIS_OAPI_EX_SUF)
 	bli_init_once();
 
 	// If C has a zero dimension, return early.
-	if ( bli_obj_has_zero_dim( c ) )
-	{
-		return;
-	}
+	if ( bli_obj_has_zero_dim( c ) ) return;
 
 	// If alpha is zero, or if A or B has a zero dimension, scale C by beta
 	// and return early.
