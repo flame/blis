@@ -207,31 +207,6 @@ BLIS_INLINE void bli_rntm_clear_ways_only( rntm_t* rntm )
 // -- rntm_t modification (public API) -----------------------------------------
 //
 
-BLIS_INLINE void bli_rntm_set_num_threads( dim_t nt, rntm_t* rntm )
-{
-	// Record the total number of threads to use.
-	bli_rntm_set_num_threads_only( nt, rntm );
-
-	// Set the individual ways of parallelism to default states.
-	bli_rntm_clear_ways_only( rntm );
-}
-
-BLIS_INLINE void bli_rntm_set_ways( dim_t jc, dim_t pc, dim_t ic, dim_t jr, dim_t ir, rntm_t* rntm )
-{
-	// Record the number of ways of parallelism per loop.
-	bli_rntm_set_jc_ways_only( jc, rntm );
-	bli_rntm_set_pc_ways_only(  1, rntm );
-	bli_rntm_set_ic_ways_only( ic, rntm );
-	bli_rntm_set_jr_ways_only( jr, rntm );
-	bli_rntm_set_ir_ways_only( ir, rntm );
-	bli_rntm_set_pr_ways_only(  1, rntm );
-
-	// Set the num_threads field to the product of all the ways. The only
-	// benefit of doing this, though, is that the user can query the total
-	// number of threads from the rntm_t after calling this function.
-	bli_rntm_set_num_threads_only( jc * 1 * ic * jr * ir, rntm );
-}
-
 BLIS_INLINE void bli_rntm_set_pack_a( bool pack_a, rntm_t* rntm )
 {
 	// Set the bool indicating whether matrix A should be packed.
@@ -345,6 +320,22 @@ BLIS_INLINE dim_t bli_rntm_calc_num_threads
 
 BLIS_EXPORT_BLIS void bli_rntm_init_from_global( rntm_t* rntm );
 
+BLIS_EXPORT_BLIS void bli_rntm_set_num_threads
+     (
+       dim_t   nt,
+       rntm_t* rntm
+     );
+
+BLIS_EXPORT_BLIS void bli_rntm_set_ways
+     (
+       dim_t   jc,
+       dim_t   pc,
+       dim_t   ic,
+       dim_t   jr,
+       dim_t   ir,
+       rntm_t* rntm
+     );
+
 BLIS_EXPORT_BLIS void bli_rntm_set_ways_for_op
      (
        opid_t  l3_op,
@@ -355,7 +346,12 @@ BLIS_EXPORT_BLIS void bli_rntm_set_ways_for_op
        rntm_t* rntm
      );
 
-void bli_rntm_set_ways_from_rntm
+void bli_rntm_sanitize
+     (
+       rntm_t* rntm
+     );
+
+void bli_rntm_factorize
      (
        dim_t   m,
        dim_t   n,
@@ -363,7 +359,7 @@ void bli_rntm_set_ways_from_rntm
        rntm_t* rntm
      );
 
-void bli_rntm_set_ways_from_rntm_sup
+void bli_rntm_factorize_sup
      (
        dim_t   m,
        dim_t   n,

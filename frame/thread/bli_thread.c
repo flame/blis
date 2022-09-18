@@ -1561,13 +1561,25 @@ void bli_thread_set_ways( dim_t jc, dim_t pc, dim_t ic, dim_t jr, dim_t ir )
 	// We must ensure that global_rntm has been initialized.
 	bli_init_once();
 
+#ifdef BLIS_ENABLE_MULTITHREADING
+
 	// Acquire the mutex protecting global_rntm.
 	bli_pthread_mutex_lock( &global_rntm_mutex );
 
 	bli_rntm_set_ways_only( jc, 1, ic, jr, ir, &global_rntm );
 
+	// Ensure that the rntm_t is in a consistent state.
+	bli_rntm_sanitize( &global_rntm );
+
 	// Release the mutex protecting global_rntm.
 	bli_pthread_mutex_unlock( &global_rntm_mutex );
+
+#else
+
+	// When multithreading is disabled at compile time, ignore the user's
+	// request.
+
+#endif
 }
 
 void bli_thread_set_num_threads( dim_t n_threads )
@@ -1575,13 +1587,25 @@ void bli_thread_set_num_threads( dim_t n_threads )
 	// We must ensure that global_rntm has been initialized.
 	bli_init_once();
 
+#ifdef BLIS_ENABLE_MULTITHREADING
+
 	// Acquire the mutex protecting global_rntm.
 	bli_pthread_mutex_lock( &global_rntm_mutex );
 
 	bli_rntm_set_num_threads_only( n_threads, &global_rntm );
 
+	// Ensure that the rntm_t is in a consistent state.
+	bli_rntm_sanitize( &global_rntm );
+
 	// Release the mutex protecting global_rntm.
 	bli_pthread_mutex_unlock( &global_rntm_mutex );
+
+#else
+
+	// When multithreading is disabled at compile time, ignore the user's
+	// request.
+
+#endif
 }
 
 // ----------------------------------------------------------------------------
@@ -1620,15 +1644,15 @@ void bli_thread_init_rntm_from_env
 	// is initialized, and so we need to go one step further and process the
 	// rntm's contents into a standard form to ensure, for example, that none of
 	// the ways of parallelism are negative or zero (in case the user queries
-	// them later). Here, we pass in -1 for all three matrix dimensions to
-	// signal that we do not yet have those values, and therefore anything that
-	// would use them (such as thread auto-factorization) should be skipped.
-	bli_rntm_set_ways_from_rntm( -1, -1, -1, rntm );
+	// them later).
+	bli_rntm_sanitize( rntm );
 
-#endif
+#else
 
 	// When multithreading is disabled, the global rntm can keep the values it
 	// was assigned at (static) initialization time.
+
+#endif
 
 	//printf( "bli_thread_init_rntm_from_env()\n" ); bli_rntm_print( rntm );
 }
