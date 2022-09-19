@@ -42,7 +42,7 @@
 #undef  GENTFUNC
 #define GENTFUNC( ftype, ch, blasname, blisname ) \
 \
-void PASTEF77(ch,blasname) \
+void PASTEF77S(ch,blasname) \
      ( \
        const f77_int* n, \
        const ftype*   x, const f77_int* incx, \
@@ -85,6 +85,16 @@ void PASTEF77(ch,blasname) \
 \
 	   /* Finalize BLIS. */ \
 	   bli_finalize_auto(); \
+}\
+\
+void PASTEF77(ch,blasname) \
+     ( \
+       const f77_int* n, \
+       const ftype*   x, const f77_int* incx, \
+             ftype*   y, const f77_int* incy  \
+     ) \
+{ \
+  PASTEF77S(ch,blasname)( n, x, incx, y, incy ); \
 }
 
 #ifdef BLIS_ENABLE_BLAS

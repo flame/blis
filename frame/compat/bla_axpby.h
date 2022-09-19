@@ -5,7 +5,8 @@
    libraries.
 
    Copyright (C) 2020, Advanced Micro Devices, Inc.
-
+   Copyright (C) 2022, Advanced Micro Devices, Inc. All rights reserved.
+   
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
    met:
@@ -46,8 +47,17 @@ BLIS_EXPORT_BLAS void PASTEF77(ch,blasname) \
        const ftype*   x, const f77_int* incx, \
        const ftype*   beta, \
              ftype*   y, const f77_int* incy \
+     );\
+\
+BLIS_EXPORT_BLAS void PASTEF77S(ch,blasname) \
+     ( \
+       const f77_int* n, \
+       const ftype*   alpha, \
+       const ftype*   x, const f77_int* incx, \
+       const ftype*   beta, \
+             ftype*   y, const f77_int* incy \
      );
-
+     
 #ifdef BLIS_ENABLE_BLAS
 INSERT_GENTPROT_BLAS( axpby )
 #endif

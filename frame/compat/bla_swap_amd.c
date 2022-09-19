@@ -42,7 +42,7 @@
 #undef  GENTFUNC
 #define GENTFUNC( ftype, ch, blasname, blisname ) \
 \
-void PASTEF77(ch,blasname) \
+void PASTEF77S(ch,blasname) \
      ( \
        const f77_int* n, \
        ftype*   x, const f77_int* incx, \
@@ -80,11 +80,20 @@ void PASTEF77(ch,blasname) \
     AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1) \
     /* Finalize BLIS. */ \
     bli_finalize_auto(); \
+} \
+\
+void PASTEF77(ch,blasname) \
+	( \
+		const f77_int* n, \
+		ftype*   x, const f77_int* incx, \
+		ftype*   y, const f77_int* incy  \
+		) \
+{ \
+   PASTEF77S(ch,blasname)( n, x, incx, y, incy ); \
 }
-
 #ifdef BLIS_ENABLE_BLAS
 
-void sswap_
+void sswap_blis_impl
      (
        const f77_int* n,
        float*   x, const f77_int* incx,
@@ -173,7 +182,17 @@ void sswap_
     AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1)
 }
 
-void dswap_
+void sswap_
+     (
+       const f77_int* n,
+       float*   x, const f77_int* incx,
+       float*   y, const f77_int* incy
+     )
+{
+    sswap_blis_impl( n, x, incx, y, incy );
+}
+ 
+void dswap_blis_impl
      (
        const f77_int* n,
        double*   x, const f77_int* incx,
@@ -262,7 +281,16 @@ void dswap_
     AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1)
 }
 
-INSERT_GENTFUNC_BLAS_CZ( swap, swapv )
+void dswap_
+     (
+       const f77_int* n,
+       double*   x, const f77_int* incx,
+       double*   y, const f77_int* incy
+     )
+{
+    dswap_blis_impl( n, x, incx, y, incy ); 
+}
 
+INSERT_GENTFUNC_BLAS_CZ( swap, swapv )
 
 #endif

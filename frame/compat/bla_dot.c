@@ -42,7 +42,7 @@
 #undef  GENTFUNCDOT
 #define GENTFUNCDOT( ftype, ch, chc, blis_conjx, blasname, blisname ) \
 \
-ftype PASTEF772(ch,blasname,chc) \
+ftype PASTEF772S(ch,blasname,chc) \
      ( \
        const f77_int* n, \
        const ftype*   x, const f77_int* incx, \
@@ -87,6 +87,16 @@ ftype PASTEF772(ch,blasname,chc) \
     bli_finalize_auto(); \
 \
     return rho; \
+}\
+\
+ftype PASTEF772(ch,blasname,chc) \
+     ( \
+       const f77_int* n, \
+       const ftype*   x, const f77_int* incx, \
+       const ftype*   y, const f77_int* incy  \
+     ) \
+{ \
+  return PASTEF772S(ch,blasname,chc)( n, x, incx, y, incy );\
 }
 
 #ifdef BLIS_ENABLE_BLAS
@@ -100,7 +110,7 @@ INSERT_GENTFUNCDOTC_BLAS( dot, dotv )
 #undef  GENTFUNCDOT
 #define GENTFUNCDOT( ftype, ch, chc, blis_conjx, blasname, blisname ) \
 \
-void PASTEF772(ch,blasname,chc) \
+void PASTEF772S(ch,blasname,chc) \
      ( \
        ftype*         rhop, \
        const f77_int* n, \
@@ -146,6 +156,17 @@ void PASTEF772(ch,blasname,chc) \
         bli_finalize_auto(); \
 \
         *rhop = rho; \
+}\
+\
+void PASTEF772(ch,blasname,chc) \
+     ( \
+       ftype*         rhop, \
+       const f77_int* n, \
+       const ftype*   x, const f77_int* incx, \
+       const ftype*   y, const f77_int* incy  \
+     ) \
+{ \
+  PASTEF772S(ch,blasname,chc)( rhop, n, x, incx, y, incy );\
 }
 
 INSERT_GENTFUNCDOTC_BLAS( dot, dotv )
@@ -157,7 +178,7 @@ INSERT_GENTFUNCDOTC_BLAS( dot, dotv )
 
 // Input vectors stored in single precision, computed in double precision,
 // with result returned in single precision.
-float PASTEF77(sd,sdot)
+float PASTEF77S(sd,sdot)
      (
        const f77_int* n,
        const float*   sb,
@@ -176,10 +197,20 @@ float PASTEF77(sd,sdot)
              )
            );
 }
+float PASTEF77(sd,sdot)
+     (
+       const f77_int* n,
+       const float*   sb,
+       const float*   x, const f77_int* incx,
+       const float*   y, const f77_int* incy
+     )
+{
+  return PASTEF77S(sd,sdot)( n, sb, x, incx, y, incy );
+}
 
 // Input vectors stored in single precision, computed in double precision,
 // with result returned in double precision.
-double PASTEF77(d,sdot)
+double PASTEF77S(d,sdot)
      (
        const f77_int* n,
        const float*   x, const f77_int* incx,
@@ -222,6 +253,15 @@ double PASTEF77(d,sdot)
     AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
 
     return rho;
+}
+double PASTEF77(d,sdot)
+     (
+       const f77_int* n,
+       const float*   x, const f77_int* incx,
+       const float*   y, const f77_int* incy
+     )
+{
+  return PASTEF77S(d,sdot)( n, x, incx, y, incy );
 }
 
 #endif // BLIS_ENABLE_BLAS

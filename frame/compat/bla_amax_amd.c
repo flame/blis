@@ -41,7 +41,7 @@
 #undef  GENTFUNC
 #define GENTFUNC( ftype_x, chx, blasname, blisname ) \
 \
-f77_int PASTEF772(i,chx,blasname) \
+f77_int PASTEF772S(i,chx,blasname) \
      ( \
        const f77_int* n, \
        const ftype_x* x, const f77_int* incx  \
@@ -95,11 +95,20 @@ f77_int PASTEF772(i,chx,blasname) \
 \
     AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1) \
     return f77_index; \
+}\
+\
+f77_int PASTEF772(i,chx,blasname) \
+     ( \
+       const f77_int* n, \
+       const ftype_x* x, const f77_int* incx  \
+     ) \
+{ \
+  return PASTEF772S(i,chx,blasname)( n, x, incx );\
 }
 
 #ifdef BLIS_ENABLE_BLAS
 
-f77_int isamax_
+f77_int isamax_blis_impl
      (
        const f77_int* n,
        const float* x, const f77_int* incx
@@ -197,8 +206,16 @@ f77_int isamax_
 
     return f77_index;
 }
+f77_int isamax_
+     (
+       const f77_int* n,
+       const float* x, const f77_int* incx
+     )
+{
+  return isamax_blis_impl( n, x, incx ); 
+}
 
-f77_int idamax_
+f77_int idamax_blis_impl
      (
        const f77_int* n,
        const double* x, const f77_int* incx
@@ -293,7 +310,14 @@ f77_int idamax_
     AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
     return f77_index;
 }
-
+f77_int idamax_
+     (
+       const f77_int* n,
+       const double* x, const f77_int* incx
+     )
+{
+  return idamax_blis_impl( n, x, incx ); 
+}
 INSERT_GENTFUNC_BLAS_CZ( amax, amaxv )
 
 #endif

@@ -41,7 +41,7 @@
 #undef  GENTFUNC
 #define GENTFUNC( ftype_x, chx, blasname, blisname ) \
 \
-f77_int PASTEF772(i,chx,blasname) \
+f77_int PASTEF772S(i,chx,blasname) \
      ( \
        const f77_int* n, \
        const ftype_x* x, const f77_int* incx  \
@@ -95,6 +95,15 @@ f77_int PASTEF772(i,chx,blasname) \
 \
     AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1) \
     return f77_index; \
+}\
+\
+f77_int PASTEF772(i,chx,blasname) \
+     ( \
+       const f77_int* n, \
+       const ftype_x* x, const f77_int* incx  \
+     ) \
+{ \
+  return PASTEF772S(i,chx,blasname)( n, x, incx );\
 }
 
 #ifdef BLIS_ENABLE_BLAS
