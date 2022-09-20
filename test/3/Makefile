@@ -175,7 +175,7 @@ STR_VEN  := -DIMP_STR=\"vendor\"
 
 # Single or multithreaded string.
 STR_ST   := -DTHR_STR=\"st\"
-STR_MT   := -DTHR_STR=\"1s\"
+STR_MT   := -DTHR_STR=\"mt\"
 
 
 

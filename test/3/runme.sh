@@ -5,17 +5,24 @@ exec_root="test"
 out_root="output"
 delay=0.1
 
+# Bind threads to processors.
+#export OMP_PROC_BIND=true
+#export GOMP_CPU_AFFINITY="0 2 4 6 8 10 12 14 16 18 20 22 1 3 5 7 9 11 13 15 17 19 21 23"
+#export GOMP_CPU_AFFINITY="0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81 82 83 84 85 86 87 88 89 90 91 92 93 94 95 96 97 98 99 100 101 102 103"
+
+# ------------------
+
+# Problem size range for single- and multithreaded execution. Set psr_st and
+# psr_mt on a per-system basis below to override these default values.
+psr_st="100 1000 100"
+psr_mt="200 2000 200"
+
 sys="blis"
 #sys="stampede2"
 #sys="lonestar5"
 #sys="ul252"
 #sys="ul264"
 #sys="ul2128"
-
-# Bind threads to processors.
-#export OMP_PROC_BIND=true
-#export GOMP_CPU_AFFINITY="0 2 4 6 8 10 12 14 16 18 20 22 1 3 5 7 9 11 13 15 17 19 21 23"
-#export GOMP_CPU_AFFINITY="0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81 82 83 84 85 86 87 88 89 90 91 92 93 94 95 96 97 98 99 100 101 102 103"
 
 if [ ${sys} = "blis" ]; then
 
@@ -24,6 +31,8 @@ if [ ${sys} = "blis" ]; then
 	numactl=""
 	threads="jc1ic1jr1_st
 	         jc2ic2jr1_mt"
+	#psr_st="40 1000 40"
+	#psr_mt="40 4000 40"
 
 elif [ ${sys} = "stampede2" ]; then
 
@@ -33,6 +42,8 @@ elif [ ${sys} = "stampede2" ]; then
 	numactl=""
 	threads="jc1ic1jr1_st
 	         jc4ic12jr1_mt"
+	#psr_st="40 1000 40"
+	#psr_mt="40 4000 40"
 
 elif [ ${sys} = "lonestar5" ]; then
 
@@ -44,6 +55,8 @@ elif [ ${sys} = "lonestar5" ]; then
 	numactl=""
 	threads="jc1ic1jr1_st
 	         jc4ic3jr2_mt"
+	#psr_st="40 1000 40"
+	#psr_mt="40 4000 40"
 
 elif [ ${sys} = "ul252" ]; then
 
@@ -53,6 +66,8 @@ elif [ ${sys} = "ul252" ]; then
 	numactl=""
 	threads="jc1ic1jr1_st
 	         jc4ic13jr1_mt"
+	#psr_st="40 1000 40"
+	#psr_mt="40 4000 40"
 
 elif [ ${sys} = "ul264" ]; then
 
@@ -62,6 +77,8 @@ elif [ ${sys} = "ul264" ]; then
 	numactl="numactl --interleave=all"
 	threads="jc1ic1jr1_st
 	         jc2ic8jr4_mt"
+	#psr_st="40 1000 40"
+	#psr_mt="40 4000 40"
 
 elif [ ${sys} = "ul2128" ]; then
 
@@ -71,16 +88,14 @@ elif [ ${sys} = "ul2128" ]; then
 	numactl="numactl --interleave=all"
 	threads="jc1ic1jr1_st
 	         jc8ic4jr4_mt"
-	#threads="jc4ic4jr4_1s
-	#         jc8ic4jr4_2s"
-	#threads="jc1ic1jr1_st"
-	#threads="jc4ic4jr4_1s"
-	#threads="jc8ic4jr4_2s"
+
+	#psr_st="40 1000 40"
+	#psr_mt="40 4000 40"
 fi
 
 # Datatypes to test.
 test_dts="s d c z"
-#test_dts="s"
+test_dts="d"
 
 # Operations to test.
 test_ops="gemm_nn hemm_ll herk_ln trmm_llnn trsm_runn"
@@ -97,14 +112,14 @@ if [ "${impls}" = "all" ]; then
 	test_impls="openblas blis vendor eigen"
 fi
 
-# Problem size range.
-psizer="100 1000 100"
-
 # Number of repeats per problem size.
 nrepeats=3
 
 # The induced method to use ('native' or '1m').
 ind="native"
+
+# Quiet mode?
+quiet="yes"
 
 # For testing purposes.
 dryrun="no"
@@ -233,8 +248,14 @@ for th in ${threads}; do
 					else
 						export GOMP_CPU_AFFINITY="${GOMP_CPU_AFFINITYsave}"
 					fi
+
+					# Choose the mt problem size range.
+					psr="${psr_mt}"
+
 				else
 
+					# Set all environment variables to 1 to ensure single-
+					# threaded execution.
 					export BLIS_JC_NT=1
 					export BLIS_PC_NT=1
 					export BLIS_IC_NT=1
@@ -244,6 +265,15 @@ for th in ${threads}; do
 					export OPENBLAS_NUM_THREADS=1
 					export MKL_NUM_THREADS=1
 					export nt_use=1
+
+					# Choose the st problem size range.
+					psr="${psr_st}"
+				fi
+
+				if [ "${quiet}" = "yes" ]; then
+					qv="-q" # quiet
+				else
+					qv="-v" # verbose (the default)
 				fi
 
 				# Construct the name of the test executable.
@@ -253,18 +283,19 @@ for th in ${threads}; do
 				out_file="${out_root}_${tsuf}_${dt}${opname}_${oppars}_${im}.m"
 
 				# Use printf for its formatting capabilities.
-				printf 'Running %s %-22s %s %-7s %s %s %s > %s\n' \
+				printf 'Running %s %-21s %s %-7s %s %s %s %s > %s\n' \
 				       "${numactl}" "./${exec_name}" "-d ${dt}" \
 				                                     "-c ${oppars}" \
 				                                     "-i ${ind}" \
-				                                     "-p \"${psizer}\"" \
+				                                     "-p \"${psr}\"" \
 				                                     "-r ${nrepeats}" \
+				                                     "${qv}" \
 				                                     "${out_file}"
 
 				# Run executable with or without numactl, depending on how
 				# the numactl variable was set.
 				if [ "${dryrun}" = "no" ]; then
-					${numactl} ./${exec_name} -d ${dt} -c ${oppars} -i ${ind} -p "${psizer}" -r ${nrepeats} > ${out_file}
+					${numactl} ./${exec_name} -d ${dt} -c ${oppars} -i ${ind} -p "${psr}" -r ${nrepeats} ${qv} > ${out_file}
 				fi
 
 				# Bedtime!
