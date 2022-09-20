@@ -37,3 +37,6 @@
 // amaxv (intrinsics)
 AMAXV_KER_PROT( float,    s, amaxv_zen_int_avx512 )
 AMAXV_KER_PROT( double,   d, amaxv_zen_int_avx512 )
+
+GEMMTRSM_UKR_PROT( double,   d, gemmtrsm_l_zen_asm_16x14)
+GEMMTRSM_UKR_PROT( double,   d, gemmtrsm_u_zen_asm_16x14)

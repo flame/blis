@@ -77,10 +77,10 @@ void bli_cntx_init_zen4( cntx_t* cntx )
 
       // gemmtrsm_l
       BLIS_GEMMTRSM_L_UKR, BLIS_FLOAT,    bli_sgemmtrsm_l_haswell_asm_6x16, TRUE,
-      BLIS_GEMMTRSM_L_UKR, BLIS_DOUBLE,   bli_dgemmtrsm_l_haswell_asm_6x8,  TRUE,
+      BLIS_GEMMTRSM_L_UKR, BLIS_DOUBLE,   bli_dgemmtrsm_l_zen_asm_16x14,  TRUE,
       // gemmtrsm_u
       BLIS_GEMMTRSM_U_UKR, BLIS_FLOAT,    bli_sgemmtrsm_u_haswell_asm_6x16, TRUE,
-      BLIS_GEMMTRSM_U_UKR, BLIS_DOUBLE,   bli_dgemmtrsm_u_haswell_asm_6x8,  TRUE,
+      BLIS_GEMMTRSM_U_UKR, BLIS_DOUBLE,   bli_dgemmtrsm_u_zen_asm_16x14,  TRUE,
 
       cntx
     );
@@ -302,11 +302,11 @@ void bli_cntx_init_zen4( cntx_t* cntx )
 void bli_zen4_override_trsm_blkszs (cntx_t* cntx)
 {
     blksz_t blkszs[ BLIS_NUM_BLKSZS ];
-    bli_blksz_init_easy( &blkszs[ BLIS_MR ],     6,     6,     3,     3 );
-    bli_blksz_init_easy( &blkszs[ BLIS_NR ],    16,     8,     8,     4 );
-    bli_blksz_init_easy( &blkszs[ BLIS_MC ],   144,    72,   144,    72 );
-    bli_blksz_init_easy( &blkszs[ BLIS_KC ],   256,   492,   256,   256 );
-    bli_blksz_init_easy( &blkszs[ BLIS_NC ],  4080,  1600,  4080,  4080 );
+    bli_blksz_init_easy( &blkszs[ BLIS_MR ],     6,     16,     3,     3 );
+    bli_blksz_init_easy( &blkszs[ BLIS_NR ],    16,     14,     8,     4 );
+    bli_blksz_init_easy( &blkszs[ BLIS_MC ],   144,    240,   144,    72 );
+    bli_blksz_init_easy( &blkszs[ BLIS_KC ],   256,    512,   256,   256 );
+    bli_blksz_init_easy( &blkszs[ BLIS_NC ],  4080,   4004,  4080,  4080 );
 
 
     // Update the context with the current architecture's register and cache

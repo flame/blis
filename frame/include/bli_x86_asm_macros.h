@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2018, The University of Texas at Austin
-   Copyright (C) 2019, Advanced Micro Devices, Inc.
+   Copyright (C) 2019-22, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -1271,6 +1271,7 @@
 #else
 
 #define KMOVW(_0, _1) INSTR_(kmovw, _0, _1)
+#define KMOVQ(_0, _1) INSTR_(kmovq, _0, _1)
 #define JKNZD(_0, _1) INSTR_(kortestw, _0, _0) INSTR_(jnz, _1)
 
 #endif
@@ -1279,6 +1280,7 @@
 #define KSHIFTRW(_0, _1, _2) INSTR_(kshiftrw, _0, _1, _2)
 
 #define kmovw(_0, _1) KMOVW(_0, _1)
+#define kmovq(_0, _1) KMOVQ(_0, _1)
 #define jknzd(_0, _1) JKNZD(_0, _1)
 #define kxnorw(_0, _1, _2) KXNORW(_0, _1, _2)
 #define kshiftrw(_0, _1, _2) KSHIFTRW(_0, _1, _2)

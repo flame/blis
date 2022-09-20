@@ -195,7 +195,7 @@ void PASTEMAC(ch,varname) \
 	 * We need to revisit this when TRSM AVX-512 kernels are implemented.
 	 */ \
 	if ((bli_arch_query_id() == BLIS_ARCH_ZEN4) && \
-		(dt == BLIS_FLOAT || dt == BLIS_DOUBLE)) \
+		(dt == BLIS_FLOAT)) \
 	{ \
 		gemm_ukr = bli_cntx_get_l3_vir_ukr_dt( dt, BLIS_GEMM_AVX2_UKR, cntx ); \
 	} \
