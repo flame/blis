@@ -76,13 +76,25 @@ AOCL_GEMM_MATMUL(bfloat16,bfloat16,bfloat16,bf16bf16f32obf16)
 	{
 		return; // Error.
 	}
-	if ( ( order != 'r' ) && ( order != 'R' ) )
-	{
-		return; // Only row major supported.
-	}
 
-	// Row major input expected with leading dimensions equal to row stride.
-	if ( ( lda != k ) || ( ldb != n ) || ( ldc != n ) )
+	// Sanitize order input.
+	char order_use =
+			( ( order == 'r' ) || ( order == 'R' ) ||
+			  ( order == 'c' ) || ( order == 'C' ) ) ?
+			order : 'r';
+
+	bool is_row_major = ( ( order_use == 'r' ) || ( order_use == 'R' ) );
+	bool is_column_major = ( ( order_use == 'c' ) || ( order_use == 'C' ) );
+
+	// Row major input expected with leading dimensions >= row stride.
+	if ( ( is_row_major == TRUE ) &&
+		 ( ( lda < k ) || ( ldb < n ) || ( ldc < n ) ) )
+	{
+		return; // Error.
+	}
+	// Column major input expected with leading dimensions >= column stride.
+	else if ( ( is_column_major == TRUE ) &&
+			  ( ( lda < m ) || ( ldb < k ) || ( ldc < m ) ) )
 	{
 		return; // Error.
 	}
@@ -99,6 +111,7 @@ AOCL_GEMM_MATMUL(bfloat16,bfloat16,bfloat16,bf16bf16f32obf16)
 	const inc_t rs_b = ldb;
 	const inc_t cs_b = 1;
 	const inc_t rs_c = ldc;
+	const inc_t cs_c = 1;
 
 	AOCL_MEMORY_TAG mtag_a;
 	AOCL_MEMORY_TAG mtag_b;
@@ -110,20 +123,34 @@ AOCL_GEMM_MATMUL(bfloat16,bfloat16,bfloat16,bf16bf16f32obf16)
 	// and used in bf16 instrution. As such the mtag_b always needs to be either
 	// packed or reordered. B matrix as it is (unpacked) cannot be used, and
 	// the mtag_b is set to packed to enable runtime packing.
-	if ( mtag_b == UNPACKED )
+	if ( ( is_row_major == TRUE ) && ( mtag_b == UNPACKED ) )
 	{
 		mtag_b = PACK;
 	}
+	// Inputs swapped in column major, A becomes B from kernel point of view.
+	else if ( ( is_column_major == TRUE ) && ( mtag_a == UNPACKED ) )
+	{
+		mtag_a = PACK;
+	}
 
 	// Only unpacked A supported now.
-	if ( mtag_a != UNPACKED )
+	if ( ( is_row_major == TRUE ) && ( mtag_a != UNPACKED ) )
+	{
+		return; // Error.
+	}
+	// Inputs swapped in column major, B becomes A from kernel point of view.
+	else if ( ( is_column_major == TRUE ) && ( mtag_b != UNPACKED ) )
 	{
 		return; // Error.
 	}
 
 	// Convert post op struct to post op linked list format.
 	lpgemm_post_op post_op_list[AOCL_MAX_POST_OPS];
-	lpgemm_translate_to_post_ops_list( post_op_unparsed, post_op_list, ( void* )c );
+	lpgemm_translate_to_post_ops_list
+	(
+	  post_op_unparsed, post_op_list,
+	  ( void* )c, ( void* )( &order_use )
+	);
 
 	// Initialize a local runtime with global settings if necessary. Note
 	// that in the case that a runtime is passed in, we make a local copy.
@@ -132,26 +159,60 @@ AOCL_GEMM_MATMUL(bfloat16,bfloat16,bfloat16,bf16bf16f32obf16)
 	bli_membrk_rntm_set_membrk( &rntm_g );
 
 #ifdef BLIS_ENABLE_OPENMP
-	lpgemm_bf16bf16f32of32_openmp_thread_decorator
-	(
-	  m, n, k,
-	  a, rs_a, cs_a, mtag_a,
-	  b, rs_b, cs_b, mtag_b,
-	  ( float* )c, rs_c,
-	  alpha, beta,
-	  &rntm_g,
-	  post_op_list, TRUE
-	);
+	// Swapping inputs to induce row major computation for column major inputs.
+	if ( is_column_major == TRUE )
+	{
+		lpgemm_bf16bf16f32of32_openmp_thread_decorator
+		(
+		  n, m, k,
+		  b, rs_b, cs_b, mtag_b,
+		  a, rs_a, cs_a, mtag_a,
+		  ( float* )c, rs_c, cs_c,
+		  alpha, beta,
+		  &rntm_g,
+		  post_op_list, TRUE
+		);
+	}
+	else
+	{
+		lpgemm_bf16bf16f32of32_openmp_thread_decorator
+		(
+		  m, n, k,
+		  a, rs_a, cs_a, mtag_a,
+		  b, rs_b, cs_b, mtag_b,
+		  ( float* )c, rs_c, cs_c,
+		  alpha, beta,
+		  &rntm_g,
+		  post_op_list, TRUE
+		);
+	}
 #else
-	lpgemm_bf16bf16f32of32_thread_decorator
-	(
-	  m, n, k,
-	  a, rs_a, cs_a, mtag_a,
-	  b, rs_b, cs_b, mtag_b,
-	  ( float* )c, rs_c,
-	  alpha, beta,
-	  &rntm_g,
-	  post_op_list, TRUE
-	);
+	// Swapping inputs to induce row major computation for column major inputs.
+	if ( is_column_major == TRUE )
+	{
+		lpgemm_bf16bf16f32of32_thread_decorator
+		(
+		  n, m, k,
+		  b, rs_b, cs_b, mtag_b,
+		  a, rs_a, cs_a, mtag_a,
+		  ( float* )c, rs_c, cs_c,
+		  alpha, beta,
+		  &rntm_g,
+		  post_op_list, TRUE
+		);
+	}
+	else
+	{
+		lpgemm_bf16bf16f32of32_thread_decorator
+		(
+		  m, n, k,
+		  a, rs_a, cs_a, mtag_a,
+		  b, rs_b, cs_b, mtag_b,
+		  ( float* )c, rs_c, cs_c,
+		  alpha, beta,
+		  &rntm_g,
+		  post_op_list, TRUE
+		);
+	}
 #endif
 }

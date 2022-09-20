@@ -385,78 +385,169 @@ LPGEMM_M_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_5x64)
 	POST_OP_LABEL_LASTK_SAFE_JUMP
 POST_OPS_BIAS_5x64:
 	{
-		selector1 =
+		__m512 selector3;
+		__m512 selector4;
+
+		if ( ( *( char* )post_ops_list_temp->op_args2 == 'r' ) ||
+			 ( *( char* )post_ops_list_temp->op_args2 == 'R' ) )
+		{
+			selector1 =
 				_mm512_loadu_ps( ( float* )post_ops_list_temp->op_args1 +
-								post_op_c_j );
-		selector2 =
+							post_op_c_j );
+			selector2 =
 				_mm512_loadu_ps( ( float* )post_ops_list_temp->op_args1 +
-								post_op_c_j + ( 1 * 16 ) );
-		__m512 selector3 =
+							post_op_c_j + ( 1 * 16 ) );
+			selector3 =
 				_mm512_loadu_ps( ( float* )post_ops_list_temp->op_args1 +
-								post_op_c_j + ( 2 * 16 ) );
-		__m512 selector4 =
+							post_op_c_j + ( 2 * 16 ) );
+			selector4 =
 				_mm512_loadu_ps( ( float* )post_ops_list_temp->op_args1 +
-								post_op_c_j + ( 3 * 16 ) );
+							post_op_c_j + ( 3 * 16 ) );
 
-		// c[0,0-15]
-		c_float_0p0 = _mm512_add_ps( selector1, c_float_0p0 );
+			// c[0,0-15]
+			c_float_0p0 = _mm512_add_ps( selector1, c_float_0p0 );
 
-		// c[0, 16-31]
-		c_float_0p1 = _mm512_add_ps( selector2, c_float_0p1 );
+			// c[0, 16-31]
+			c_float_0p1 = _mm512_add_ps( selector2, c_float_0p1 );
 
-		// c[0,32-47]
-		c_float_0p2 = _mm512_add_ps( selector3, c_float_0p2 );
+			// c[0,32-47]
+			c_float_0p2 = _mm512_add_ps( selector3, c_float_0p2 );
 
-		// c[0,48-63]
-		c_float_0p3 = _mm512_add_ps( selector4, c_float_0p3 );
+			// c[0,48-63]
+			c_float_0p3 = _mm512_add_ps( selector4, c_float_0p3 );
 
-		// c[1,0-15]
-		c_float_1p0 = _mm512_add_ps( selector1, c_float_1p0 );
+			// c[1,0-15]
+			c_float_1p0 = _mm512_add_ps( selector1, c_float_1p0 );
 
-		// c[1, 16-31]
-		c_float_1p1 = _mm512_add_ps( selector2, c_float_1p1 );
+			// c[1, 16-31]
+			c_float_1p1 = _mm512_add_ps( selector2, c_float_1p1 );
 
-		// c[1,32-47]
-		c_float_1p2 = _mm512_add_ps( selector3, c_float_1p2 );
+			// c[1,32-47]
+			c_float_1p2 = _mm512_add_ps( selector3, c_float_1p2 );
 
-		// c[1,48-63]
-		c_float_1p3 = _mm512_add_ps( selector4, c_float_1p3 );
+			// c[1,48-63]
+			c_float_1p3 = _mm512_add_ps( selector4, c_float_1p3 );
 
-		// c[2,0-15]
-		c_float_2p0 = _mm512_add_ps( selector1, c_float_2p0 );
+			// c[2,0-15]
+			c_float_2p0 = _mm512_add_ps( selector1, c_float_2p0 );
 
-		// c[2, 16-31]
-		c_float_2p1 = _mm512_add_ps( selector2, c_float_2p1 );
+			// c[2, 16-31]
+			c_float_2p1 = _mm512_add_ps( selector2, c_float_2p1 );
 
-		// c[2,32-47]
-		c_float_2p2 = _mm512_add_ps( selector3, c_float_2p2 );
+			// c[2,32-47]
+			c_float_2p2 = _mm512_add_ps( selector3, c_float_2p2 );
 
-		// c[2,48-63]
-		c_float_2p3 = _mm512_add_ps( selector4, c_float_2p3 );
+			// c[2,48-63]
+			c_float_2p3 = _mm512_add_ps( selector4, c_float_2p3 );
 
-		// c[3,0-15]
-		c_float_3p0 = _mm512_add_ps( selector1, c_float_3p0 );
+			// c[3,0-15]
+			c_float_3p0 = _mm512_add_ps( selector1, c_float_3p0 );
 
-		// c[3, 16-31]
-		c_float_3p1 = _mm512_add_ps( selector2, c_float_3p1 );
+			// c[3, 16-31]
+			c_float_3p1 = _mm512_add_ps( selector2, c_float_3p1 );
 
-		// c[3,32-47]
-		c_float_3p2 = _mm512_add_ps( selector3, c_float_3p2 );
+			// c[3,32-47]
+			c_float_3p2 = _mm512_add_ps( selector3, c_float_3p2 );
 
-		// c[3,48-63]
-		c_float_3p3 = _mm512_add_ps( selector4, c_float_3p3 );
+			// c[3,48-63]
+			c_float_3p3 = _mm512_add_ps( selector4, c_float_3p3 );
 
-		// c[4,0-15]
-		c_float_4p0 = _mm512_add_ps( selector1, c_float_4p0 );
+			// c[4,0-15]
+			c_float_4p0 = _mm512_add_ps( selector1, c_float_4p0 );
 
-		// c[4, 16-31]
-		c_float_4p1 = _mm512_add_ps( selector2, c_float_4p1 );
+			// c[4, 16-31]
+			c_float_4p1 = _mm512_add_ps( selector2, c_float_4p1 );
 
-		// c[4,32-47]
-		c_float_4p2 = _mm512_add_ps( selector3, c_float_4p2 );
+			// c[4,32-47]
+			c_float_4p2 = _mm512_add_ps( selector3, c_float_4p2 );
 
-		// c[4,48-63]
-		c_float_4p3 = _mm512_add_ps( selector4, c_float_4p3 );
+			// c[4,48-63]
+			c_float_4p3 = _mm512_add_ps( selector4, c_float_4p3 );
+		}
+		else
+		{
+			// If original output was columns major, then by the time
+			// kernel sees it, the matrix would be accessed as if it were
+			// transposed. Due to this the bias array will be accessed by
+			// the ic index, and each bias element corresponds to an
+			// entire row of the transposed output array, instead of an
+			// entire column.
+			selector1 =
+				_mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 +
+							post_op_c_i + 0 ) );
+			selector2 =
+				_mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 +
+							post_op_c_i + 1 ) );
+			selector3 =
+				_mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 +
+							post_op_c_i + 2 ) );
+			selector4 =
+				_mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 +
+							post_op_c_i + 3 ) );
+			a_bf16_0 =
+				_mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 +
+							post_op_c_i + 4 ) );
+
+			// c[0,0-15]
+			c_float_0p0 = _mm512_add_ps( selector1, c_float_0p0 );
+
+			// c[0, 16-31]
+			c_float_0p1 = _mm512_add_ps( selector1, c_float_0p1 );
+
+			// c[0,32-47]
+			c_float_0p2 = _mm512_add_ps( selector1, c_float_0p2 );
+
+			// c[0,48-63]
+			c_float_0p3 = _mm512_add_ps( selector1, c_float_0p3 );
+
+			// c[1,0-15]
+			c_float_1p0 = _mm512_add_ps( selector2, c_float_1p0 );
+
+			// c[1, 16-31]
+			c_float_1p1 = _mm512_add_ps( selector2, c_float_1p1 );
+
+			// c[1,32-47]
+			c_float_1p2 = _mm512_add_ps( selector2, c_float_1p2 );
+
+			// c[1,48-63]
+			c_float_1p3 = _mm512_add_ps( selector2, c_float_1p3 );
+
+			// c[2,0-15]
+			c_float_2p0 = _mm512_add_ps( selector3, c_float_2p0 );
+
+			// c[2, 16-31]
+			c_float_2p1 = _mm512_add_ps( selector3, c_float_2p1 );
+
+			// c[2,32-47]
+			c_float_2p2 = _mm512_add_ps( selector3, c_float_2p2 );
+
+			// c[2,48-63]
+			c_float_2p3 = _mm512_add_ps( selector3, c_float_2p3 );
+
+			// c[3,0-15]
+			c_float_3p0 = _mm512_add_ps( selector4, c_float_3p0 );
+
+			// c[3, 16-31]
+			c_float_3p1 = _mm512_add_ps( selector4, c_float_3p1 );
+
+			// c[3,32-47]
+			c_float_3p2 = _mm512_add_ps( selector4, c_float_3p2 );
+
+			// c[3,48-63]
+			c_float_3p3 = _mm512_add_ps( selector4, c_float_3p3 );
+
+			// c[4,0-15]
+			c_float_4p0 = _mm512_add_ps( a_bf16_0, c_float_4p0 );
+
+			// c[4, 16-31]
+			c_float_4p1 = _mm512_add_ps( a_bf16_0, c_float_4p1 );
+
+			// c[4,32-47]
+			c_float_4p2 = _mm512_add_ps( a_bf16_0, c_float_4p2 );
+
+			// c[4,48-63]
+			c_float_4p3 = _mm512_add_ps( a_bf16_0, c_float_4p3 );
+		}
 
 		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 	}
@@ -1014,66 +1105,142 @@ LPGEMM_M_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_4x64)
 	POST_OP_LABEL_LASTK_SAFE_JUMP
 POST_OPS_BIAS_4x64:
 	{
-		selector1 =
+		__m512 selector3;
+		__m512 selector4;
+
+		if ( ( *( char* )post_ops_list_temp->op_args2 == 'r' ) ||
+			 ( *( char* )post_ops_list_temp->op_args2 == 'R' ) )
+		{
+			selector1 =
 				_mm512_loadu_ps( ( float* )post_ops_list_temp->op_args1 +
-								post_op_c_j );
-		selector2 =
+							post_op_c_j );
+			selector2 =
 				_mm512_loadu_ps( ( float* )post_ops_list_temp->op_args1 +
-								post_op_c_j + ( 1 * 16 ) );
-		__m512 selector3 =
+							post_op_c_j + ( 1 * 16 ) );
+			selector3 =
 				_mm512_loadu_ps( ( float* )post_ops_list_temp->op_args1 +
-								post_op_c_j + ( 2 * 16 ) );
-		__m512 selector4 =
+							post_op_c_j + ( 2 * 16 ) );
+			selector4 =
 				_mm512_loadu_ps( ( float* )post_ops_list_temp->op_args1 +
-								post_op_c_j + ( 3 * 16 ) );
+							post_op_c_j + ( 3 * 16 ) );
 
-		// c[0,0-15]
-		c_float_0p0 = _mm512_add_ps( selector1, c_float_0p0 );
+			// c[0,0-15]
+			c_float_0p0 = _mm512_add_ps( selector1, c_float_0p0 );
 
-		// c[0, 16-31]
-		c_float_0p1 = _mm512_add_ps( selector2, c_float_0p1 );
+			// c[0, 16-31]
+			c_float_0p1 = _mm512_add_ps( selector2, c_float_0p1 );
 
-		// c[0,32-47]
-		c_float_0p2 = _mm512_add_ps( selector3, c_float_0p2 );
+			// c[0,32-47]
+			c_float_0p2 = _mm512_add_ps( selector3, c_float_0p2 );
 
-		// c[0,48-63]
-		c_float_0p3 = _mm512_add_ps( selector4, c_float_0p3 );
+			// c[0,48-63]
+			c_float_0p3 = _mm512_add_ps( selector4, c_float_0p3 );
 
-		// c[1,0-15]
-		c_float_1p0 = _mm512_add_ps( selector1, c_float_1p0 );
+			// c[1,0-15]
+			c_float_1p0 = _mm512_add_ps( selector1, c_float_1p0 );
 
-		// c[1, 16-31]
-		c_float_1p1 = _mm512_add_ps( selector2, c_float_1p1 );
+			// c[1, 16-31]
+			c_float_1p1 = _mm512_add_ps( selector2, c_float_1p1 );
 
-		// c[1,32-47]
-		c_float_1p2 = _mm512_add_ps( selector3, c_float_1p2 );
+			// c[1,32-47]
+			c_float_1p2 = _mm512_add_ps( selector3, c_float_1p2 );
 
-		// c[1,48-63]
-		c_float_1p3 = _mm512_add_ps( selector4, c_float_1p3 );
+			// c[1,48-63]
+			c_float_1p3 = _mm512_add_ps( selector4, c_float_1p3 );
 
-		// c[2,0-15]
-		c_float_2p0 = _mm512_add_ps( selector1, c_float_2p0 );
+			// c[2,0-15]
+			c_float_2p0 = _mm512_add_ps( selector1, c_float_2p0 );
 
-		// c[2, 16-31]
-		c_float_2p1 = _mm512_add_ps( selector2, c_float_2p1 );
+			// c[2, 16-31]
+			c_float_2p1 = _mm512_add_ps( selector2, c_float_2p1 );
 
-		// c[2,32-47]
-		c_float_2p2 = _mm512_add_ps( selector3, c_float_2p2 );
+			// c[2,32-47]
+			c_float_2p2 = _mm512_add_ps( selector3, c_float_2p2 );
 
-		// c[2,48-63]
-		c_float_2p3 = _mm512_add_ps( selector4, c_float_2p3 );
+			// c[2,48-63]
+			c_float_2p3 = _mm512_add_ps( selector4, c_float_2p3 );
 
-		// c[3,0-15]
-		c_float_3p0 = _mm512_add_ps( selector1, c_float_3p0 );
+			// c[3,0-15]
+			c_float_3p0 = _mm512_add_ps( selector1, c_float_3p0 );
 
-		// c[3, 16-31]
-		c_float_3p1 = _mm512_add_ps( selector2, c_float_3p1 );
+			// c[3, 16-31]
+			c_float_3p1 = _mm512_add_ps( selector2, c_float_3p1 );
 
-		// c[3,32-47]
-		c_float_3p2 = _mm512_add_ps( selector3, c_float_3p2 );
+			// c[3,32-47]
+			c_float_3p2 = _mm512_add_ps( selector3, c_float_3p2 );
 
-		// c[3,48-63]
-		c_float_3p3 = _mm512_add_ps( selector4, c_float_3p3 );
+			// c[3,48-63]
+			c_float_3p3 = _mm512_add_ps( selector4, c_float_3p3 );
+		}
+		else
+		{
+			// If original output was columns major, then by the time
+			// kernel sees it, the matrix would be accessed as if it were
+			// transposed. Due to this the bias array will be accessed by
+			// the ic index, and each bias element corresponds to an
+			// entire row of the transposed output array, instead of an
+			// entire column.
+			selector1 =
+				_mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 +
+							post_op_c_i + 0 ) );
+			selector2 =
+				_mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 +
+							post_op_c_i + 1 ) );
+			selector3 =
+				_mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 +
+							post_op_c_i + 2 ) );
+			selector4 =
+				_mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 +
+							post_op_c_i + 3 ) );
+
+			// c[0,0-15]
+			c_float_0p0 = _mm512_add_ps( selector1, c_float_0p0 );
+
+			// c[0, 16-31]
+			c_float_0p1 = _mm512_add_ps( selector1, c_float_0p1 );
+
+			// c[0,32-47]
+			c_float_0p2 = _mm512_add_ps( selector1, c_float_0p2 );
+
+			// c[0,48-63]
+			c_float_0p3 = _mm512_add_ps( selector1, c_float_0p3 );
+
+			// c[1,0-15]
+			c_float_1p0 = _mm512_add_ps( selector2, c_float_1p0 );
+
+			// c[1, 16-31]
+			c_float_1p1 = _mm512_add_ps( selector2, c_float_1p1 );
+
+			// c[1,32-47]
+			c_float_1p2 = _mm512_add_ps( selector2, c_float_1p2 );
+
+			// c[1,48-63]
+			c_float_1p3 = _mm512_add_ps( selector2, c_float_1p3 );
+
+			// c[2,0-15]
+			c_float_2p0 = _mm512_add_ps( selector3, c_float_2p0 );
+
+			// c[2, 16-31]
+			c_float_2p1 = _mm512_add_ps( selector3, c_float_2p1 );
+
+			// c[2,32-47]
+			c_float_2p2 = _mm512_add_ps( selector3, c_float_2p2 );
+
+			// c[2,48-63]
+			c_float_2p3 = _mm512_add_ps( selector3, c_float_2p3 );
+
+			// c[3,0-15]
+			c_float_3p0 = _mm512_add_ps( selector4, c_float_3p0 );
+
+			// c[3, 16-31]
+			c_float_3p1 = _mm512_add_ps( selector4, c_float_3p1 );
+
+			// c[3,32-47]
+			c_float_3p2 = _mm512_add_ps( selector4, c_float_3p2 );
+
+			// c[3,48-63]
+			c_float_3p3 = _mm512_add_ps( selector4, c_float_3p3 );
+		}
 
 		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 	}
@@ -1526,55 +1693,116 @@ LPGEMM_M_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_3x64)
 	POST_OP_LABEL_LASTK_SAFE_JUMP
 POST_OPS_BIAS_3x64:
 	{
-		selector1 =
+		__m512 selector3;
+		__m512 selector4;
+
+		if ( ( *( char* )post_ops_list_temp->op_args2 == 'r' ) ||
+			 ( *( char* )post_ops_list_temp->op_args2 == 'R' ) )
+		{
+			selector1 =
 				_mm512_loadu_ps( ( float* )post_ops_list_temp->op_args1 +
-								post_op_c_j );
-		selector2 =
+							post_op_c_j );
+			selector2 =
 				_mm512_loadu_ps( ( float* )post_ops_list_temp->op_args1 +
-								post_op_c_j + ( 1 * 16 ) );
-		__m512 selector3 =
+							post_op_c_j + ( 1 * 16 ) );
+			selector3 =
 				_mm512_loadu_ps( ( float* )post_ops_list_temp->op_args1 +
-								post_op_c_j + ( 2 * 16 ) );
-		__m512 selector4 =
+							post_op_c_j + ( 2 * 16 ) );
+			selector4 =
 				_mm512_loadu_ps( ( float* )post_ops_list_temp->op_args1 +
-								post_op_c_j + ( 3 * 16 ) );
+							post_op_c_j + ( 3 * 16 ) );
 
-		// c[0,0-15]
-		c_float_0p0 = _mm512_add_ps( selector1, c_float_0p0 );
+			// c[0,0-15]
+			c_float_0p0 = _mm512_add_ps( selector1, c_float_0p0 );
 
-		// c[0, 16-31]
-		c_float_0p1 = _mm512_add_ps( selector2, c_float_0p1 );
+			// c[0, 16-31]
+			c_float_0p1 = _mm512_add_ps( selector2, c_float_0p1 );
 
-		// c[0,32-47]
-		c_float_0p2 = _mm512_add_ps( selector3, c_float_0p2 );
+			// c[0,32-47]
+			c_float_0p2 = _mm512_add_ps( selector3, c_float_0p2 );
 
-		// c[0,48-63]
-		c_float_0p3 = _mm512_add_ps( selector4, c_float_0p3 );
+			// c[0,48-63]
+			c_float_0p3 = _mm512_add_ps( selector4, c_float_0p3 );
 
-		// c[1,0-15]
-		c_float_1p0 = _mm512_add_ps( selector1, c_float_1p0 );
+			// c[1,0-15]
+			c_float_1p0 = _mm512_add_ps( selector1, c_float_1p0 );
 
-		// c[1, 16-31]
-		c_float_1p1 = _mm512_add_ps( selector2, c_float_1p1 );
+			// c[1, 16-31]
+			c_float_1p1 = _mm512_add_ps( selector2, c_float_1p1 );
 
-		// c[1,32-47]
-		c_float_1p2 = _mm512_add_ps( selector3, c_float_1p2 );
+			// c[1,32-47]
+			c_float_1p2 = _mm512_add_ps( selector3, c_float_1p2 );
 
-		// c[1,48-63]
-		c_float_1p3 = _mm512_add_ps( selector4, c_float_1p3 );
+			// c[1,48-63]
+			c_float_1p3 = _mm512_add_ps( selector4, c_float_1p3 );
 
-		// c[2,0-15]
-		c_float_2p0 = _mm512_add_ps( selector1, c_float_2p0 );
+			// c[2,0-15]
+			c_float_2p0 = _mm512_add_ps( selector1, c_float_2p0 );
 
-		// c[2, 16-31]
-		c_float_2p1 = _mm512_add_ps( selector2, c_float_2p1 );
+			// c[2, 16-31]
+			c_float_2p1 = _mm512_add_ps( selector2, c_float_2p1 );
 
-		// c[2,32-47]
-		c_float_2p2 = _mm512_add_ps( selector3, c_float_2p2 );
+			// c[2,32-47]
+			c_float_2p2 = _mm512_add_ps( selector3, c_float_2p2 );
 
-		// c[2,48-63]
-		c_float_2p3 = _mm512_add_ps( selector4, c_float_2p3 );
+			// c[2,48-63]
+			c_float_2p3 = _mm512_add_ps( selector4, c_float_2p3 );
+		}
+		else
+		{
+			// If original output was columns major, then by the time
+			// kernel sees it, the matrix would be accessed as if it were
+			// transposed. Due to this the bias array will be accessed by
+			// the ic index, and each bias element corresponds to an
+			// entire row of the transposed output array, instead of an
+			// entire column.
+			selector1 =
+				_mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 +
+							post_op_c_i + 0 ) );
+			selector2 =
+				_mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 +
+							post_op_c_i + 1 ) );
+			selector3 =
+				_mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 +
+							post_op_c_i + 2 ) );
 
+			// c[0,0-15]
+			c_float_0p0 = _mm512_add_ps( selector1, c_float_0p0 );
+
+			// c[0, 16-31]
+			c_float_0p1 = _mm512_add_ps( selector1, c_float_0p1 );
+
+			// c[0,32-47]
+			c_float_0p2 = _mm512_add_ps( selector1, c_float_0p2 );
+
+			// c[0,48-63]
+			c_float_0p3 = _mm512_add_ps( selector1, c_float_0p3 );
+
+			// c[1,0-15]
+			c_float_1p0 = _mm512_add_ps( selector2, c_float_1p0 );
+
+			// c[1, 16-31]
+			c_float_1p1 = _mm512_add_ps( selector2, c_float_1p1 );
+
+			// c[1,32-47]
+			c_float_1p2 = _mm512_add_ps( selector2, c_float_1p2 );
+
+			// c[1,48-63]
+			c_float_1p3 = _mm512_add_ps( selector2, c_float_1p3 );
+
+			// c[2,0-15]
+			c_float_2p0 = _mm512_add_ps( selector3, c_float_2p0 );
+
+			// c[2, 16-31]
+			c_float_2p1 = _mm512_add_ps( selector3, c_float_2p1 );
+
+			// c[2,32-47]
+			c_float_2p2 = _mm512_add_ps( selector3, c_float_2p2 );
+
+			// c[2,48-63]
+			c_float_2p3 = _mm512_add_ps( selector3, c_float_2p3 );
+		}
+		
 		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 	}
 POST_OPS_RELU_3x64:
@@ -1919,42 +2147,88 @@ LPGEMM_M_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_2x64)
 	POST_OP_LABEL_LASTK_SAFE_JUMP
 POST_OPS_BIAS_2x64:
 	{
-		selector1 =
+		__m512 selector3;
+		__m512 selector4;
+
+		if ( ( *( char* )post_ops_list_temp->op_args2 == 'r' ) ||
+			 ( *( char* )post_ops_list_temp->op_args2 == 'R' ) )
+		{
+			selector1 =
 				_mm512_loadu_ps( ( float* )post_ops_list_temp->op_args1 +
-								post_op_c_j );
-		selector2 =
+							post_op_c_j );
+			selector2 =
 				_mm512_loadu_ps( ( float* )post_ops_list_temp->op_args1 +
-								post_op_c_j + ( 1 * 16 ) );
-		__m512 selector3 =
+							post_op_c_j + ( 1 * 16 ) );
+			selector3 =
 				_mm512_loadu_ps( ( float* )post_ops_list_temp->op_args1 +
-								post_op_c_j + ( 2 * 16 ) );
-		__m512 selector4 =
+							post_op_c_j + ( 2 * 16 ) );
+			selector4 =
 				_mm512_loadu_ps( ( float* )post_ops_list_temp->op_args1 +
-								post_op_c_j + ( 3 * 16 ) );
+							post_op_c_j + ( 3 * 16 ) );
 
-		// c[0,0-15]
-		c_float_0p0 = _mm512_add_ps( selector1, c_float_0p0 );
+			// c[0,0-15]
+			c_float_0p0 = _mm512_add_ps( selector1, c_float_0p0 );
 
-		// c[0, 16-31]
-		c_float_0p1 = _mm512_add_ps( selector2, c_float_0p1 );
+			// c[0, 16-31]
+			c_float_0p1 = _mm512_add_ps( selector2, c_float_0p1 );
 
-		// c[0,32-47]
-		c_float_0p2 = _mm512_add_ps( selector3, c_float_0p2 );
+			// c[0,32-47]
+			c_float_0p2 = _mm512_add_ps( selector3, c_float_0p2 );
 
-		// c[0,48-63]
-		c_float_0p3 = _mm512_add_ps( selector4, c_float_0p3 );
+			// c[0,48-63]
+			c_float_0p3 = _mm512_add_ps( selector4, c_float_0p3 );
 
-		// c[1,0-15]
-		c_float_1p0 = _mm512_add_ps( selector1, c_float_1p0 );
+			// c[1,0-15]
+			c_float_1p0 = _mm512_add_ps( selector1, c_float_1p0 );
 
-		// c[1, 16-31]
-		c_float_1p1 = _mm512_add_ps( selector2, c_float_1p1 );
+			// c[1, 16-31]
+			c_float_1p1 = _mm512_add_ps( selector2, c_float_1p1 );
 
-		// c[1,32-47]
-		c_float_1p2 = _mm512_add_ps( selector3, c_float_1p2 );
+			// c[1,32-47]
+			c_float_1p2 = _mm512_add_ps( selector3, c_float_1p2 );
 
-		// c[1,48-63]
-		c_float_1p3 = _mm512_add_ps( selector4, c_float_1p3 );
+			// c[1,48-63]
+			c_float_1p3 = _mm512_add_ps( selector4, c_float_1p3 );
+		}
+		else
+		{
+			// If original output was columns major, then by the time
+			// kernel sees it, the matrix would be accessed as if it were
+			// transposed. Due to this the bias array will be accessed by
+			// the ic index, and each bias element corresponds to an
+			// entire row of the transposed output array, instead of an
+			// entire column.
+			selector1 =
+				_mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 +
+							post_op_c_i + 0 ) );
+			selector2 =
+				_mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 +
+							post_op_c_i + 1 ) );
+
+			// c[0,0-15]
+			c_float_0p0 = _mm512_add_ps( selector1, c_float_0p0 );
+
+			// c[0, 16-31]
+			c_float_0p1 = _mm512_add_ps( selector1, c_float_0p1 );
+
+			// c[0,32-47]
+			c_float_0p2 = _mm512_add_ps( selector1, c_float_0p2 );
+
+			// c[0,48-63]
+			c_float_0p3 = _mm512_add_ps( selector1, c_float_0p3 );
+
+			// c[1,0-15]
+			c_float_1p0 = _mm512_add_ps( selector2, c_float_1p0 );
+
+			// c[1, 16-31]
+			c_float_1p1 = _mm512_add_ps( selector2, c_float_1p1 );
+
+			// c[1,32-47]
+			c_float_1p2 = _mm512_add_ps( selector2, c_float_1p2 );
+
+			// c[1,48-63]
+			c_float_1p3 = _mm512_add_ps( selector2, c_float_1p3 );
+		}
 
 		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 	}
@@ -2184,30 +2458,61 @@ LPGEMM_M_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_1x64)
 	POST_OP_LABEL_LASTK_SAFE_JUMP
 POST_OPS_BIAS_1x64:
 	{
-		selector1 =
-				_mm512_loadu_ps( ( float* )post_ops_list_temp->op_args1 +
-								post_op_c_j );
-		selector2 =
-				_mm512_loadu_ps( ( float* )post_ops_list_temp->op_args1 +
-								post_op_c_j + ( 1 * 16 ) );
-		__m512 selector3 =
-				_mm512_loadu_ps( ( float* )post_ops_list_temp->op_args1 +
-								post_op_c_j + ( 2 * 16 ) );
-		__m512 selector4 =
-				_mm512_loadu_ps( ( float* )post_ops_list_temp->op_args1 +
-								post_op_c_j + ( 3 * 16 ) );
+		__m512 selector3;
+		__m512 selector4;
 
-		// c[0,0-15]
-		c_float_0p0 = _mm512_add_ps( selector1, c_float_0p0 );
+		if ( ( *( char* )post_ops_list_temp->op_args2 == 'r' ) ||
+			 ( *( char* )post_ops_list_temp->op_args2 == 'R' ) )
+		{
+			selector1 =
+				_mm512_loadu_ps( ( float* )post_ops_list_temp->op_args1 +
+							post_op_c_j );
+			selector2 =
+				_mm512_loadu_ps( ( float* )post_ops_list_temp->op_args1 +
+							post_op_c_j + ( 1 * 16 ) );
+			selector3 =
+				_mm512_loadu_ps( ( float* )post_ops_list_temp->op_args1 +
+							post_op_c_j + ( 2 * 16 ) );
+			selector4 =
+				_mm512_loadu_ps( ( float* )post_ops_list_temp->op_args1 +
+							post_op_c_j + ( 3 * 16 ) );
 
-		// c[0, 16-31]
-		c_float_0p1 = _mm512_add_ps( selector2, c_float_0p1 );
+			// c[0,0-15]
+			c_float_0p0 = _mm512_add_ps( selector1, c_float_0p0 );
 
-		// c[0,32-47]
-		c_float_0p2 = _mm512_add_ps( selector3, c_float_0p2 );
+			// c[0, 16-31]
+			c_float_0p1 = _mm512_add_ps( selector2, c_float_0p1 );
 
-		// c[0,48-63]
-		c_float_0p3 = _mm512_add_ps( selector4, c_float_0p3 );
+			// c[0,32-47]
+			c_float_0p2 = _mm512_add_ps( selector3, c_float_0p2 );
+
+			// c[0,48-63]
+			c_float_0p3 = _mm512_add_ps( selector4, c_float_0p3 );
+		}
+		else
+		{
+			// If original output was columns major, then by the time
+			// kernel sees it, the matrix would be accessed as if it were
+			// transposed. Due to this the bias array will be accessed by
+			// the ic index, and each bias element corresponds to an
+			// entire row of the transposed output array, instead of an
+			// entire column.
+			selector1 =
+				_mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 +
+							post_op_c_i + 0 ) );
+
+			// c[0,0-15]
+			c_float_0p0 = _mm512_add_ps( selector1, c_float_0p0 );
+
+			// c[0, 16-31]
+			c_float_0p1 = _mm512_add_ps( selector1, c_float_0p1 );
+
+			// c[0,32-47]
+			c_float_0p2 = _mm512_add_ps( selector1, c_float_0p2 );
+
+			// c[0,48-63]
+			c_float_0p3 = _mm512_add_ps( selector1, c_float_0p3 );
+		}
 
 		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 	}

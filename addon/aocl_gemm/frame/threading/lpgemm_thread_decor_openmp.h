@@ -57,6 +57,7 @@ void lpgemm_ ## LPGEMM_SFX ## _openmp_thread_decorator \
        const AOCL_MEMORY_TAG mtag_b, \
        C_type*               c, \
        const dim_t           rs_c, \
+       const dim_t           cs_c, \
        C_type                alpha, \
        C_type                beta, \
        rntm_t*               rntm_g, \
@@ -87,6 +88,7 @@ void lpgemm_ ## LPGEMM_SFX ## _thread_decorator \
        const AOCL_MEMORY_TAG mtag_b, \
        C_type*               c, \
        const dim_t           rs_c, \
+       const dim_t           cs_c, \
        C_type                alpha, \
        C_type                beta, \
        rntm_t*               rntm_g, \

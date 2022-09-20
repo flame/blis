@@ -218,24 +218,61 @@ LPGEMM_MN_LT_NR0_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_5xlt16)
 		POST_OP_LABEL_LASTK_SAFE_JUMP
 POST_OPS_BIAS_5xLT16:
 		{
-			memcpy( buf0, ( ( float* )post_ops_list_temp->op_args1 +
+			if ( ( *( char* )post_ops_list_temp->op_args2 == 'r' ) ||
+				 ( *( char* )post_ops_list_temp->op_args2 == 'R' ) )
+			{
+				memcpy( buf0, ( ( float* )post_ops_list_temp->op_args1 +
 						post_op_c_j ), ( n0_rem * sizeof( float ) ) );
-			selector1 = _mm512_loadu_ps( buf0 );
+				selector1 = _mm512_loadu_ps( buf0 );
 
-			// c[0,0-15]
-			c_float_0p0 = _mm512_add_ps( selector1, c_float_0p0 );
+				// c[0,0-15]
+				c_float_0p0 = _mm512_add_ps( selector1, c_float_0p0 );
 
-			// c[1,0-15]
-			c_float_1p0 = _mm512_add_ps( selector1, c_float_1p0 );
+				// c[1,0-15]
+				c_float_1p0 = _mm512_add_ps( selector1, c_float_1p0 );
 
-			// c[2,0-15]
-			c_float_2p0 = _mm512_add_ps( selector1, c_float_2p0 );
+				// c[2,0-15]
+				c_float_2p0 = _mm512_add_ps( selector1, c_float_2p0 );
 
-			// c[3,0-15]
-			c_float_3p0 = _mm512_add_ps( selector1, c_float_3p0 );
+				// c[3,0-15]
+				c_float_3p0 = _mm512_add_ps( selector1, c_float_3p0 );
 
-			// c[4,0-15]
-			c_float_4p0 = _mm512_add_ps( selector1, c_float_4p0 );
+				// c[4,0-15]
+				c_float_4p0 = _mm512_add_ps( selector1, c_float_4p0 );
+			}
+			else
+			{
+				selector1 =
+					_mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1
+								+ post_op_c_i + 0 ) );
+				selector2 =
+					_mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1
+								+ post_op_c_i + 1 ) );
+				__m512 selector3 =
+					_mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1
+								+ post_op_c_i + 2 ) );
+				__m512 selector4 =
+					_mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1
+								+ post_op_c_i + 3 ) );
+				a_bf16_0 =
+					_mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1
+								+ post_op_c_i + 4 ) );
+
+				// c[0,0-15]
+				c_float_0p0 = _mm512_add_ps( selector1, c_float_0p0 );
+
+				// c[1,0-15]
+				c_float_1p0 = _mm512_add_ps( selector2, c_float_1p0 );
+
+				// c[2,0-15]
+				c_float_2p0 = _mm512_add_ps( selector3, c_float_2p0 );
+
+				// c[3,0-15]
+				c_float_3p0 = _mm512_add_ps( selector4, c_float_3p0 );
+
+				// c[4,0-15]
+				c_float_4p0 = _mm512_add_ps( a_bf16_0, c_float_4p0 );
+			}
 
 			POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 		}
@@ -496,21 +533,52 @@ LPGEMM_MN_LT_NR0_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_4xlt16)
 		POST_OP_LABEL_LASTK_SAFE_JUMP
 POST_OPS_BIAS_4xLT16:
 		{
-			memcpy( buf0, ( ( float* )post_ops_list_temp->op_args1 +
+			if ( ( *( char* )post_ops_list_temp->op_args2 == 'r' ) ||
+				 ( *( char* )post_ops_list_temp->op_args2 == 'R' ) )
+			{
+				memcpy( buf0, ( ( float* )post_ops_list_temp->op_args1 +
 						post_op_c_j ), ( n0_rem * sizeof( float ) ) );
-			selector1 = _mm512_loadu_ps( buf0 );
+				selector1 = _mm512_loadu_ps( buf0 );
 
-			// c[0,0-15]
-			c_float_0p0 = _mm512_add_ps( selector1, c_float_0p0 );
+				// c[0,0-15]
+				c_float_0p0 = _mm512_add_ps( selector1, c_float_0p0 );
 
-			// c[1,0-15]
-			c_float_1p0 = _mm512_add_ps( selector1, c_float_1p0 );
+				// c[1,0-15]
+				c_float_1p0 = _mm512_add_ps( selector1, c_float_1p0 );
 
-			// c[2,0-15]
-			c_float_2p0 = _mm512_add_ps( selector1, c_float_2p0 );
+				// c[2,0-15]
+				c_float_2p0 = _mm512_add_ps( selector1, c_float_2p0 );
 
-			// c[3,0-15]
-			c_float_3p0 = _mm512_add_ps( selector1, c_float_3p0 );
+				// c[3,0-15]
+				c_float_3p0 = _mm512_add_ps( selector1, c_float_3p0 );
+			}
+			else
+			{
+				selector1 =
+					_mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1
+								+ post_op_c_i + 0 ) );
+				selector2 =
+					_mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1
+								+ post_op_c_i + 1 ) );
+				__m512 selector3 =
+					_mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1
+								+ post_op_c_i + 2 ) );
+				a_bf16_0 =
+					_mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1
+								+ post_op_c_i + 3 ) );
+
+				// c[0,0-15]
+				c_float_0p0 = _mm512_add_ps( selector1, c_float_0p0 );
+
+				// c[1,0-15]
+				c_float_1p0 = _mm512_add_ps( selector2, c_float_1p0 );
+
+				// c[2,0-15]
+				c_float_2p0 = _mm512_add_ps( selector3, c_float_2p0 );
+
+				// c[3,0-15]
+				c_float_3p0 = _mm512_add_ps( a_bf16_0, c_float_3p0 );
+			}
 
 			POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 		}
@@ -729,18 +797,43 @@ LPGEMM_MN_LT_NR0_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_3xlt16)
 		POST_OP_LABEL_LASTK_SAFE_JUMP
 POST_OPS_BIAS_3xLT16:
 		{
-			memcpy( buf0, ( ( float* )post_ops_list_temp->op_args1 +
+			if ( ( *( char* )post_ops_list_temp->op_args2 == 'r' ) ||
+				 ( *( char* )post_ops_list_temp->op_args2 == 'R' ) )
+			{
+				memcpy( buf0, ( ( float* )post_ops_list_temp->op_args1 +
 						post_op_c_j ), ( n0_rem * sizeof( float ) ) );
-			selector1 = _mm512_loadu_ps( buf0 );
+				selector1 = _mm512_loadu_ps( buf0 );
 
-			// c[0,0-15]
-			c_float_0p0 = _mm512_add_ps( selector1, c_float_0p0 );
+				// c[0,0-15]
+				c_float_0p0 = _mm512_add_ps( selector1, c_float_0p0 );
 
-			// c[1,0-15]
-			c_float_1p0 = _mm512_add_ps( selector1, c_float_1p0 );
+				// c[1,0-15]
+				c_float_1p0 = _mm512_add_ps( selector1, c_float_1p0 );
 
-			// c[2,0-15]
-			c_float_2p0 = _mm512_add_ps( selector1, c_float_2p0 );
+				// c[2,0-15]
+				c_float_2p0 = _mm512_add_ps( selector1, c_float_2p0 );
+			}
+			else
+			{
+				selector1 =
+					_mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1
+								+ post_op_c_i + 0 ) );
+				selector2 =
+					_mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1
+								+ post_op_c_i + 1 ) );
+				a_bf16_0 =
+					_mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1
+								+ post_op_c_i + 2 ) );
+
+				// c[0,0-15]
+				c_float_0p0 = _mm512_add_ps( selector1, c_float_0p0 );
+
+				// c[1,0-15]
+				c_float_1p0 = _mm512_add_ps( selector2, c_float_1p0 );
+
+				// c[2,0-15]
+				c_float_2p0 = _mm512_add_ps( a_bf16_0, c_float_2p0 );
+			}
 
 			POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 		}
@@ -918,15 +1011,34 @@ LPGEMM_MN_LT_NR0_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_2xlt16)
 		POST_OP_LABEL_LASTK_SAFE_JUMP
 POST_OPS_BIAS_2xLT16:
 		{
-			memcpy( buf0, ( ( float* )post_ops_list_temp->op_args1 +
+			if ( ( *( char* )post_ops_list_temp->op_args2 == 'r' ) ||
+				 ( *( char* )post_ops_list_temp->op_args2 == 'R' ) )
+			{
+				memcpy( buf0, ( ( float* )post_ops_list_temp->op_args1 +
 						post_op_c_j ), ( n0_rem * sizeof( float ) ) );
-			selector1 = _mm512_loadu_ps( buf0 );
+				selector1 = _mm512_loadu_ps( buf0 );
 
-			// c[0,0-15]
-			c_float_0p0 = _mm512_add_ps( selector1, c_float_0p0 );
+				// c[0,0-15]
+				c_float_0p0 = _mm512_add_ps( selector1, c_float_0p0 );
 
-			// c[1,0-15]
-			c_float_1p0 = _mm512_add_ps( selector1, c_float_1p0 );
+				// c[1,0-15]
+				c_float_1p0 = _mm512_add_ps( selector1, c_float_1p0 );
+			}
+			else
+			{
+				selector1 =
+					_mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1
+								+ post_op_c_i + 0 ) );
+				selector2 =
+					_mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1
+								+ post_op_c_i + 1 ) );
+
+				// c[0,0-15]
+				c_float_0p0 = _mm512_add_ps( selector1, c_float_0p0 );
+
+				// c[1,0-15]
+				c_float_1p0 = _mm512_add_ps( selector2, c_float_1p0 );
+			}
 
 			POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 		}
@@ -1063,12 +1175,25 @@ LPGEMM_MN_LT_NR0_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_1xlt16)
 		POST_OP_LABEL_LASTK_SAFE_JUMP
 POST_OPS_BIAS_1xLT16:
 		{
-			memcpy( buf0, ( ( float* )post_ops_list_temp->op_args1 +
+			if ( ( *( char* )post_ops_list_temp->op_args2 == 'r' ) ||
+				 ( *( char* )post_ops_list_temp->op_args2 == 'R' ) )
+			{
+				memcpy( buf0, ( ( float* )post_ops_list_temp->op_args1 +
 						post_op_c_j ), ( n0_rem * sizeof( float ) ) );
-			selector1 = _mm512_loadu_ps( buf0 );
+				selector1 = _mm512_loadu_ps( buf0 );
 
-			// c[0,0-15]
-			c_float_0p0 = _mm512_add_ps( selector1, c_float_0p0 );
+				// c[0,0-15]
+				c_float_0p0 = _mm512_add_ps( selector1, c_float_0p0 );
+			}
+			else
+			{
+				selector1 =
+					_mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1
+								+ post_op_c_i + 0 ) );
+
+				// c[0,0-15]
+				c_float_0p0 = _mm512_add_ps( selector1, c_float_0p0 );
+			}
 
 			POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 		}
@@ -1280,24 +1405,61 @@ LPGEMM_MN_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_5x16)
 	POST_OP_LABEL_LASTK_SAFE_JUMP
 POST_OPS_BIAS_5x16:
 	{
-		selector1 =
+		if ( ( *( char* )post_ops_list_temp->op_args2 == 'r' ) ||
+			 ( *( char* )post_ops_list_temp->op_args2 == 'R' ) )
+		{
+			selector1 =
 				_mm512_loadu_ps( ( float* )post_ops_list_temp->op_args1 +
-								post_op_c_j );
+							post_op_c_j );
 
-		// c[0,0-15]
-		c_float_0p0 = _mm512_add_ps( selector1, c_float_0p0 );
+			// c[0,0-15]
+			c_float_0p0 = _mm512_add_ps( selector1, c_float_0p0 );
 
-		// c[1,0-15]
-		c_float_1p0 = _mm512_add_ps( selector1, c_float_1p0 );
+			// c[1,0-15]
+			c_float_1p0 = _mm512_add_ps( selector1, c_float_1p0 );
 
-		// c[2,0-15]
-		c_float_2p0 = _mm512_add_ps( selector1, c_float_2p0 );
+			// c[2,0-15]
+			c_float_2p0 = _mm512_add_ps( selector1, c_float_2p0 );
 
-		// c[3,0-15]
-		c_float_3p0 = _mm512_add_ps( selector1, c_float_3p0 );
+			// c[3,0-15]
+			c_float_3p0 = _mm512_add_ps( selector1, c_float_3p0 );
 
-		// c[4,0-15]
-		c_float_4p0 = _mm512_add_ps( selector1, c_float_4p0 );
+			// c[4,0-15]
+			c_float_4p0 = _mm512_add_ps( selector1, c_float_4p0 );
+		}
+		else
+		{
+			selector1 =
+				_mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1
+							+ post_op_c_i + 0 ) );
+			selector2 =
+				_mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1
+							+ post_op_c_i + 1 ) );
+			__m512 selector3 =
+				_mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1
+							+ post_op_c_i + 2 ) );
+			__m512 selector4 =
+				_mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1
+							+ post_op_c_i + 3 ) );
+			__m512 selector5 =
+				_mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1
+							+ post_op_c_i + 4 ) );
+
+			// c[0,0-15]
+			c_float_0p0 = _mm512_add_ps( selector1, c_float_0p0 );
+
+			// c[1,0-15]
+			c_float_1p0 = _mm512_add_ps( selector2, c_float_1p0 );
+
+			// c[2,0-15]
+			c_float_2p0 = _mm512_add_ps( selector3, c_float_2p0 );
+
+			// c[3,0-15]
+			c_float_3p0 = _mm512_add_ps( selector4, c_float_3p0 );
+
+			// c[4,0-15]
+			c_float_4p0 = _mm512_add_ps( selector5, c_float_4p0 );
+		}
 
 		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 	}
@@ -1528,21 +1690,52 @@ LPGEMM_MN_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_4x16)
 	POST_OP_LABEL_LASTK_SAFE_JUMP
 POST_OPS_BIAS_4x16:
 	{
-		selector1 =
+		if ( ( *( char* )post_ops_list_temp->op_args2 == 'r' ) ||
+			 ( *( char* )post_ops_list_temp->op_args2 == 'R' ) )
+		{
+			selector1 =
 				_mm512_loadu_ps( ( float* )post_ops_list_temp->op_args1 +
-								post_op_c_j );
+							post_op_c_j );
 
-		// c[0,0-15]
-		c_float_0p0 = _mm512_add_ps( selector1, c_float_0p0 );
+			// c[0,0-15]
+			c_float_0p0 = _mm512_add_ps( selector1, c_float_0p0 );
 
-		// c[1,0-15]
-		c_float_1p0 = _mm512_add_ps( selector1, c_float_1p0 );
+			// c[1,0-15]
+			c_float_1p0 = _mm512_add_ps( selector1, c_float_1p0 );
 
-		// c[2,0-15]
-		c_float_2p0 = _mm512_add_ps( selector1, c_float_2p0 );
+			// c[2,0-15]
+			c_float_2p0 = _mm512_add_ps( selector1, c_float_2p0 );
 
-		// c[3,0-15]
-		c_float_3p0 = _mm512_add_ps( selector1, c_float_3p0 );
+			// c[3,0-15]
+			c_float_3p0 = _mm512_add_ps( selector1, c_float_3p0 );
+		}
+		else
+		{
+			selector1 =
+				_mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1
+							+ post_op_c_i + 0 ) );
+			selector2 =
+				_mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1
+							+ post_op_c_i + 1 ) );
+			__m512 selector3 =
+				_mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1
+							+ post_op_c_i + 2 ) );
+			__m512 selector4 =
+				_mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1
+							+ post_op_c_i + 3 ) );
+
+			// c[0,0-15]
+			c_float_0p0 = _mm512_add_ps( selector1, c_float_0p0 );
+
+			// c[1,0-15]
+			c_float_1p0 = _mm512_add_ps( selector2, c_float_1p0 );
+
+			// c[2,0-15]
+			c_float_2p0 = _mm512_add_ps( selector3, c_float_2p0 );
+
+			// c[3,0-15]
+			c_float_3p0 = _mm512_add_ps( selector4, c_float_3p0 );
+		}
 
 		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 	}
@@ -1737,18 +1930,43 @@ LPGEMM_MN_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_3x16)
 	POST_OP_LABEL_LASTK_SAFE_JUMP
 POST_OPS_BIAS_3x16:
 	{
-		selector1 =
+		if ( ( *( char* )post_ops_list_temp->op_args2 == 'r' ) ||
+			 ( *( char* )post_ops_list_temp->op_args2 == 'R' ) )
+		{
+			selector1 =
 				_mm512_loadu_ps( ( float* )post_ops_list_temp->op_args1 +
-								post_op_c_j );
+							post_op_c_j );
 
-		// c[0,0-15]
-		c_float_0p0 = _mm512_add_ps( selector1, c_float_0p0 );
+			// c[0,0-15]
+			c_float_0p0 = _mm512_add_ps( selector1, c_float_0p0 );
 
-		// c[1,0-15]
-		c_float_1p0 = _mm512_add_ps( selector1, c_float_1p0 );
+			// c[1,0-15]
+			c_float_1p0 = _mm512_add_ps( selector1, c_float_1p0 );
 
-		// c[2,0-15]
-		c_float_2p0 = _mm512_add_ps( selector1, c_float_2p0 );
+			// c[2,0-15]
+			c_float_2p0 = _mm512_add_ps( selector1, c_float_2p0 );
+		}
+		else
+		{
+			selector1 =
+				_mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1
+							+ post_op_c_i + 0 ) );
+			selector2 =
+				_mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1
+							+ post_op_c_i + 1 ) );
+			__m512 selector3 =
+				_mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1
+							+ post_op_c_i + 2 ) );
+
+			// c[0,0-15]
+			c_float_0p0 = _mm512_add_ps( selector1, c_float_0p0 );
+
+			// c[1,0-15]
+			c_float_1p0 = _mm512_add_ps( selector2, c_float_1p0 );
+
+			// c[2,0-15]
+			c_float_2p0 = _mm512_add_ps( selector3, c_float_2p0 );
+		}
 
 		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 	}
@@ -1908,15 +2126,34 @@ LPGEMM_MN_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_2x16)
 	POST_OP_LABEL_LASTK_SAFE_JUMP
 POST_OPS_BIAS_2x16:
 	{
-		selector1 =
+		if ( ( *( char* )post_ops_list_temp->op_args2 == 'r' ) ||
+			 ( *( char* )post_ops_list_temp->op_args2 == 'R' ) )
+		{
+			selector1 =
 				_mm512_loadu_ps( ( float* )post_ops_list_temp->op_args1 +
-								post_op_c_j );
+							post_op_c_j );
 
-		// c[0,0-15]
-		c_float_0p0 = _mm512_add_ps( selector1, c_float_0p0 );
+			// c[0,0-15]
+			c_float_0p0 = _mm512_add_ps( selector1, c_float_0p0 );
 
-		// c[1,0-15]
-		c_float_1p0 = _mm512_add_ps( selector1, c_float_1p0 );
+			// c[1,0-15]
+			c_float_1p0 = _mm512_add_ps( selector1, c_float_1p0 );
+		}
+		else
+		{
+			selector1 =
+				_mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1
+							+ post_op_c_i + 0 ) );
+			selector2 =
+				_mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1
+							+ post_op_c_i + 1 ) );
+
+			// c[0,0-15]
+			c_float_0p0 = _mm512_add_ps( selector1, c_float_0p0 );
+
+			// c[1,0-15]
+			c_float_1p0 = _mm512_add_ps( selector2, c_float_1p0 );
+		}
 
 		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 	}
@@ -2039,12 +2276,25 @@ LPGEMM_MN_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_1x16)
 	POST_OP_LABEL_LASTK_SAFE_JUMP
 POST_OPS_BIAS_1x16:
 	{
-		selector1 =
+		if ( ( *( char* )post_ops_list_temp->op_args2 == 'r' ) ||
+			 ( *( char* )post_ops_list_temp->op_args2 == 'R' ) )
+		{
+			selector1 =
 				_mm512_loadu_ps( ( float* )post_ops_list_temp->op_args1 +
-								post_op_c_j );
+							post_op_c_j );
 
-		// c[0,0-15]
-		c_float_0p0 = _mm512_add_ps( selector1, c_float_0p0 );
+			// c[0,0-15]
+			c_float_0p0 = _mm512_add_ps( selector1, c_float_0p0 );
+		}
+		else
+		{
+			selector1 =
+				_mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1
+							+ post_op_c_i + 0 ) );
+
+			// c[0,0-15]
+			c_float_0p0 = _mm512_add_ps( selector1, c_float_0p0 );
+		}
 
 		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 	}
@@ -2299,42 +2549,94 @@ LPGEMM_MN_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_5x32)
 	POST_OP_LABEL_LASTK_SAFE_JUMP
 POST_OPS_BIAS_5x32:
 	{
-		selector1 =
+		if ( ( *( char* )post_ops_list_temp->op_args2 == 'r' ) ||
+			 ( *( char* )post_ops_list_temp->op_args2 == 'R' ) )
+		{
+			selector1 =
 				_mm512_loadu_ps( ( float* )post_ops_list_temp->op_args1 +
-								post_op_c_j + ( 0 * 16 ) );
-		selector2 =
+							post_op_c_j + ( 0 * 16 ) );
+			selector2 =
 				_mm512_loadu_ps( ( float* )post_ops_list_temp->op_args1 +
-								post_op_c_j + ( 1 * 16 ) );
+							post_op_c_j + ( 1 * 16 ) );
 
-		// c[0,0-15]
-		c_float_0p0 = _mm512_add_ps( selector1, c_float_0p0 );
+			// c[0,0-15]
+			c_float_0p0 = _mm512_add_ps( selector1, c_float_0p0 );
 
-		// c[0, 16-31]
-		c_float_0p1 = _mm512_add_ps( selector2, c_float_0p1 );
+			// c[0, 16-31]
+			c_float_0p1 = _mm512_add_ps( selector2, c_float_0p1 );
 
-		// c[1,0-15]
-		c_float_1p0 = _mm512_add_ps( selector1, c_float_1p0 );
+			// c[1,0-15]
+			c_float_1p0 = _mm512_add_ps( selector1, c_float_1p0 );
 
-		// c[1, 16-31]
-		c_float_1p1 = _mm512_add_ps( selector2, c_float_1p1 );
+			// c[1, 16-31]
+			c_float_1p1 = _mm512_add_ps( selector2, c_float_1p1 );
 
-		// c[2,0-15]
-		c_float_2p0 = _mm512_add_ps( selector1, c_float_2p0 );
+			// c[2,0-15]
+			c_float_2p0 = _mm512_add_ps( selector1, c_float_2p0 );
 
-		// c[2, 16-31]
-		c_float_2p1 = _mm512_add_ps( selector2, c_float_2p1 );
+			// c[2, 16-31]
+			c_float_2p1 = _mm512_add_ps( selector2, c_float_2p1 );
 
-		// c[3,0-15]
-		c_float_3p0 = _mm512_add_ps( selector1, c_float_3p0 );
+			// c[3,0-15]
+			c_float_3p0 = _mm512_add_ps( selector1, c_float_3p0 );
 
-		// c[3, 16-31]
-		c_float_3p1 = _mm512_add_ps( selector2, c_float_3p1 );
+			// c[3, 16-31]
+			c_float_3p1 = _mm512_add_ps( selector2, c_float_3p1 );
 
-		// c[4,0-15]
-		c_float_4p0 = _mm512_add_ps( selector1, c_float_4p0 );
+			// c[4,0-15]
+			c_float_4p0 = _mm512_add_ps( selector1, c_float_4p0 );
 
-		// c[4, 16-31]
-		c_float_4p1 = _mm512_add_ps( selector2, c_float_4p1 );
+			// c[4, 16-31]
+			c_float_4p1 = _mm512_add_ps( selector2, c_float_4p1 );
+		}
+		else
+		{
+			selector1 =
+				_mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1
+							+ post_op_c_i + 0 ) );
+			selector2 =
+				_mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1
+							+ post_op_c_i + 1 ) );
+			__m512 selector3 =
+				_mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1
+							+ post_op_c_i + 2 ) );
+			__m512 selector4 =
+				_mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1
+							+ post_op_c_i + 3 ) );
+			__m512 selector5 =
+				_mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1
+							+ post_op_c_i + 4 ) );
+
+			// c[0,0-15]
+			c_float_0p0 = _mm512_add_ps( selector1, c_float_0p0 );
+
+			// c[0, 16-31]
+			c_float_0p1 = _mm512_add_ps( selector1, c_float_0p1 );
+
+			// c[1,0-15]
+			c_float_1p0 = _mm512_add_ps( selector2, c_float_1p0 );
+
+			// c[1, 16-31]
+			c_float_1p1 = _mm512_add_ps( selector2, c_float_1p1 );
+
+			// c[2,0-15]
+			c_float_2p0 = _mm512_add_ps( selector3, c_float_2p0 );
+
+			// c[2, 16-31]
+			c_float_2p1 = _mm512_add_ps( selector3, c_float_2p1 );
+
+			// c[3,0-15]
+			c_float_3p0 = _mm512_add_ps( selector4, c_float_3p0 );
+
+			// c[3, 16-31]
+			c_float_3p1 = _mm512_add_ps( selector4, c_float_3p1 );
+
+			// c[4,0-15]
+			c_float_4p0 = _mm512_add_ps( selector5, c_float_4p0 );
+
+			// c[4, 16-31]
+			c_float_4p1 = _mm512_add_ps( selector5, c_float_4p1 );
+		}
 
 		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 	}
@@ -2664,36 +2966,79 @@ LPGEMM_MN_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_4x32)
 	POST_OP_LABEL_LASTK_SAFE_JUMP
 POST_OPS_BIAS_4x32:
 	{
-		selector1 =
+		if ( ( *( char* )post_ops_list_temp->op_args2 == 'r' ) ||
+			 ( *( char* )post_ops_list_temp->op_args2 == 'R' ) )
+		{
+			selector1 =
 				_mm512_loadu_ps( ( float* )post_ops_list_temp->op_args1 +
-								post_op_c_j + ( 0 * 16 ) );
-		selector2 =
+							post_op_c_j + ( 0 * 16 ) );
+			selector2 =
 				_mm512_loadu_ps( ( float* )post_ops_list_temp->op_args1 +
-								post_op_c_j + ( 1 * 16 ) );
+							post_op_c_j + ( 1 * 16 ) );
 
-		// c[0,0-15]
-		c_float_0p0 = _mm512_add_ps( selector1, c_float_0p0 );
+			// c[0,0-15]
+			c_float_0p0 = _mm512_add_ps( selector1, c_float_0p0 );
 
-		// c[0, 16-31]
-		c_float_0p1 = _mm512_add_ps( selector2, c_float_0p1 );
+			// c[0, 16-31]
+			c_float_0p1 = _mm512_add_ps( selector2, c_float_0p1 );
 
-		// c[1,0-15]
-		c_float_1p0 = _mm512_add_ps( selector1, c_float_1p0 );
+			// c[1,0-15]
+			c_float_1p0 = _mm512_add_ps( selector1, c_float_1p0 );
 
-		// c[1, 16-31]
-		c_float_1p1 = _mm512_add_ps( selector2, c_float_1p1 );
+			// c[1, 16-31]
+			c_float_1p1 = _mm512_add_ps( selector2, c_float_1p1 );
 
-		// c[2,0-15]
-		c_float_2p0 = _mm512_add_ps( selector1, c_float_2p0 );
+			// c[2,0-15]
+			c_float_2p0 = _mm512_add_ps( selector1, c_float_2p0 );
 
-		// c[2, 16-31]
-		c_float_2p1 = _mm512_add_ps( selector2, c_float_2p1 );
+			// c[2, 16-31]
+			c_float_2p1 = _mm512_add_ps( selector2, c_float_2p1 );
 
-		// c[3,0-15]
-		c_float_3p0 = _mm512_add_ps( selector1, c_float_3p0 );
+			// c[3,0-15]
+			c_float_3p0 = _mm512_add_ps( selector1, c_float_3p0 );
 
-		// c[3, 16-31]
-		c_float_3p1 = _mm512_add_ps( selector2, c_float_3p1 );
+			// c[3, 16-31]
+			c_float_3p1 = _mm512_add_ps( selector2, c_float_3p1 );
+		}
+		else
+		{
+			selector1 =
+				_mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1
+							+ post_op_c_i + 0 ) );
+			selector2 =
+				_mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1
+							+ post_op_c_i + 1 ) );
+			__m512 selector3 =
+				_mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1
+							+ post_op_c_i + 2 ) );
+			__m512 selector4 =
+				_mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1
+							+ post_op_c_i + 3 ) );
+
+			// c[0,0-15]
+			c_float_0p0 = _mm512_add_ps( selector1, c_float_0p0 );
+
+			// c[0, 16-31]
+			c_float_0p1 = _mm512_add_ps( selector1, c_float_0p1 );
+
+			// c[1,0-15]
+			c_float_1p0 = _mm512_add_ps( selector2, c_float_1p0 );
+
+			// c[1, 16-31]
+			c_float_1p1 = _mm512_add_ps( selector2, c_float_1p1 );
+
+			// c[2,0-15]
+			c_float_2p0 = _mm512_add_ps( selector3, c_float_2p0 );
+
+			// c[2, 16-31]
+			c_float_2p1 = _mm512_add_ps( selector3, c_float_2p1 );
+
+			// c[3,0-15]
+			c_float_3p0 = _mm512_add_ps( selector4, c_float_3p0 );
+
+			// c[3, 16-31]
+			c_float_3p1 = _mm512_add_ps( selector4, c_float_3p1 );
+		}
 
 		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 	}
@@ -2966,30 +3311,64 @@ LPGEMM_MN_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_3x32)
 	POST_OP_LABEL_LASTK_SAFE_JUMP
 POST_OPS_BIAS_3x32:
 	{
-		selector1 =
+		if ( ( *( char* )post_ops_list_temp->op_args2 == 'r' ) ||
+			 ( *( char* )post_ops_list_temp->op_args2 == 'R' ) )
+		{
+			selector1 =
 				_mm512_loadu_ps( ( float* )post_ops_list_temp->op_args1 +
-								post_op_c_j + ( 0 * 16 ) );
-		selector2 =
+							post_op_c_j + ( 0 * 16 ) );
+			selector2 =
 				_mm512_loadu_ps( ( float* )post_ops_list_temp->op_args1 +
-								post_op_c_j + ( 1 * 16 ) );
+							post_op_c_j + ( 1 * 16 ) );
 
-		// c[0,0-15]
-		c_float_0p0 = _mm512_add_ps( selector1, c_float_0p0 );
+			// c[0,0-15]
+			c_float_0p0 = _mm512_add_ps( selector1, c_float_0p0 );
 
-		// c[0, 16-31]
-		c_float_0p1 = _mm512_add_ps( selector2, c_float_0p1 );
+			// c[0, 16-31]
+			c_float_0p1 = _mm512_add_ps( selector2, c_float_0p1 );
 
-		// c[1,0-15]
-		c_float_1p0 = _mm512_add_ps( selector1, c_float_1p0 );
+			// c[1,0-15]
+			c_float_1p0 = _mm512_add_ps( selector1, c_float_1p0 );
 
-		// c[1, 16-31]
-		c_float_1p1 = _mm512_add_ps( selector2, c_float_1p1 );
+			// c[1, 16-31]
+			c_float_1p1 = _mm512_add_ps( selector2, c_float_1p1 );
 
-		// c[2,0-15]
-		c_float_2p0 = _mm512_add_ps( selector1, c_float_2p0 );
+			// c[2,0-15]
+			c_float_2p0 = _mm512_add_ps( selector1, c_float_2p0 );
 
-		// c[2, 16-31]
-		c_float_2p1 = _mm512_add_ps( selector2, c_float_2p1 );
+			// c[2, 16-31]
+			c_float_2p1 = _mm512_add_ps( selector2, c_float_2p1 );
+		}
+		else
+		{
+			selector1 =
+				_mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1
+							+ post_op_c_i + 0 ) );
+			selector2 =
+				_mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1
+							+ post_op_c_i + 1 ) );
+			__m512 selector3 =
+				_mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1
+							+ post_op_c_i + 2 ) );
+
+			// c[0,0-15]
+			c_float_0p0 = _mm512_add_ps( selector1, c_float_0p0 );
+
+			// c[0, 16-31]
+			c_float_0p1 = _mm512_add_ps( selector1, c_float_0p1 );
+
+			// c[1,0-15]
+			c_float_1p0 = _mm512_add_ps( selector2, c_float_1p0 );
+
+			// c[1, 16-31]
+			c_float_1p1 = _mm512_add_ps( selector2, c_float_1p1 );
+
+			// c[2,0-15]
+			c_float_2p0 = _mm512_add_ps( selector3, c_float_2p0 );
+
+			// c[2, 16-31]
+			c_float_2p1 = _mm512_add_ps( selector3, c_float_2p1 );
+		}
 
 		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 	}
@@ -3205,24 +3584,49 @@ LPGEMM_MN_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_2x32)
 	POST_OP_LABEL_LASTK_SAFE_JUMP
 POST_OPS_BIAS_2x32:
 	{
-		selector1 =
+		if ( ( *( char* )post_ops_list_temp->op_args2 == 'r' ) ||
+			 ( *( char* )post_ops_list_temp->op_args2 == 'R' ) )
+		{
+			selector1 =
 				_mm512_loadu_ps( ( float* )post_ops_list_temp->op_args1 +
-								post_op_c_j + ( 0 * 16 ) );
-		selector2 =
+							post_op_c_j + ( 0 * 16 ) );
+			selector2 =
 				_mm512_loadu_ps( ( float* )post_ops_list_temp->op_args1 +
-								post_op_c_j + ( 1 * 16 ) );
+							post_op_c_j + ( 1 * 16 ) );
 
-		// c[0,0-15]
-		c_float_0p0 = _mm512_add_ps( selector1, c_float_0p0 );
+			// c[0,0-15]
+			c_float_0p0 = _mm512_add_ps( selector1, c_float_0p0 );
 
-		// c[0, 16-31]
-		c_float_0p1 = _mm512_add_ps( selector2, c_float_0p1 );
+			// c[0, 16-31]
+			c_float_0p1 = _mm512_add_ps( selector2, c_float_0p1 );
 
-		// c[1,0-15]
-		c_float_1p0 = _mm512_add_ps( selector1, c_float_1p0 );
+			// c[1,0-15]
+			c_float_1p0 = _mm512_add_ps( selector1, c_float_1p0 );
 
-		// c[1, 16-31]
-		c_float_1p1 = _mm512_add_ps( selector2, c_float_1p1 );
+			// c[1, 16-31]
+			c_float_1p1 = _mm512_add_ps( selector2, c_float_1p1 );
+		}
+		else
+		{
+			selector1 =
+				_mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1
+							+ post_op_c_i + 0 ) );
+			selector2 =
+				_mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1
+							+ post_op_c_i + 1 ) );
+
+			// c[0,0-15]
+			c_float_0p0 = _mm512_add_ps( selector1, c_float_0p0 );
+
+			// c[0, 16-31]
+			c_float_0p1 = _mm512_add_ps( selector1, c_float_0p1 );
+
+			// c[1,0-15]
+			c_float_1p0 = _mm512_add_ps( selector2, c_float_1p0 );
+
+			// c[1, 16-31]
+			c_float_1p1 = _mm512_add_ps( selector2, c_float_1p1 );
+		}
 
 		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 	}
@@ -3381,18 +3785,34 @@ LPGEMM_MN_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_1x32)
 	POST_OP_LABEL_LASTK_SAFE_JUMP
 POST_OPS_BIAS_1x32:
 	{
-		selector1 =
+		if ( ( *( char* )post_ops_list_temp->op_args2 == 'r' ) ||
+			 ( *( char* )post_ops_list_temp->op_args2 == 'R' ) )
+		{
+			selector1 =
 				_mm512_loadu_ps( ( float* )post_ops_list_temp->op_args1 +
-								post_op_c_j + ( 0 * 16 ) );
-		selector2 =
+							post_op_c_j + ( 0 * 16 ) );
+			selector2 =
 				_mm512_loadu_ps( ( float* )post_ops_list_temp->op_args1 +
-								post_op_c_j + ( 1 * 16 ) );
+							post_op_c_j + ( 1 * 16 ) );
 
-		// c[0,0-15]
-		c_float_0p0 = _mm512_add_ps( selector1, c_float_0p0 );
+			// c[0,0-15]
+			c_float_0p0 = _mm512_add_ps( selector1, c_float_0p0 );
 
-		// c[0, 16-31]
-		c_float_0p1 = _mm512_add_ps( selector2, c_float_0p1 );
+			// c[0, 16-31]
+			c_float_0p1 = _mm512_add_ps( selector2, c_float_0p1 );
+		}
+		else
+		{
+			selector1 =
+				_mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1
+							+ post_op_c_i + 0 ) );
+
+			// c[0,0-15]
+			c_float_0p0 = _mm512_add_ps( selector1, c_float_0p0 );
+
+			// c[0, 16-31]
+			c_float_0p1 = _mm512_add_ps( selector1, c_float_0p1 );
+		}
 
 		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 	}
@@ -3707,60 +4127,129 @@ LPGEMM_MN_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_5x48)
 	POST_OP_LABEL_LASTK_SAFE_JUMP
 POST_OPS_BIAS_5x48:
 	{
-		selector1 =
+		__m512 selector3;
+
+		if ( ( *( char* )post_ops_list_temp->op_args2 == 'r' ) ||
+			 ( *( char* )post_ops_list_temp->op_args2 == 'R' ) )
+		{
+			selector1 =
 				_mm512_loadu_ps( ( float* )post_ops_list_temp->op_args1 +
-								post_op_c_j + ( 0 * 16 ) );
-		selector2 =
+							post_op_c_j + ( 0 * 16 ) );
+			selector2 =
 				_mm512_loadu_ps( ( float* )post_ops_list_temp->op_args1 +
-								post_op_c_j + ( 1 * 16 ) );
-		__m512 selector3 =
+							post_op_c_j + ( 1 * 16 ) );
+			selector3 =
 				_mm512_loadu_ps( ( float* )post_ops_list_temp->op_args1 +
-								post_op_c_j + ( 2 * 16 ) );
+							post_op_c_j + ( 2 * 16 ) );
 
-		// c[0,0-15]
-		c_float_0p0 = _mm512_add_ps( selector1, c_float_0p0 );
+			// c[0,0-15]
+			c_float_0p0 = _mm512_add_ps( selector1, c_float_0p0 );
 
-		// c[0, 16-31]
-		c_float_0p1 = _mm512_add_ps( selector2, c_float_0p1 );
+			// c[0, 16-31]
+			c_float_0p1 = _mm512_add_ps( selector2, c_float_0p1 );
 
-		// c[0,32-47]
-		c_float_0p2 = _mm512_add_ps( selector3, c_float_0p2 );
+			// c[0,32-47]
+			c_float_0p2 = _mm512_add_ps( selector3, c_float_0p2 );
 
-		// c[1,0-15]
-		c_float_1p0 = _mm512_add_ps( selector1, c_float_1p0 );
+			// c[1,0-15]
+			c_float_1p0 = _mm512_add_ps( selector1, c_float_1p0 );
 
-		// c[1, 16-31]
-		c_float_1p1 = _mm512_add_ps( selector2, c_float_1p1 );
+			// c[1, 16-31]
+			c_float_1p1 = _mm512_add_ps( selector2, c_float_1p1 );
 
-		// c[1,32-47]
-		c_float_1p2 = _mm512_add_ps( selector3, c_float_1p2 );
+			// c[1,32-47]
+			c_float_1p2 = _mm512_add_ps( selector3, c_float_1p2 );
 
-		// c[2,0-15]
-		c_float_2p0 = _mm512_add_ps( selector1, c_float_2p0 );
+			// c[2,0-15]
+			c_float_2p0 = _mm512_add_ps( selector1, c_float_2p0 );
 
-		// c[2, 16-31]
-		c_float_2p1 = _mm512_add_ps( selector2, c_float_2p1 );
+			// c[2, 16-31]
+			c_float_2p1 = _mm512_add_ps( selector2, c_float_2p1 );
 
-		// c[2,32-47]
-		c_float_2p2 = _mm512_add_ps( selector3, c_float_2p2 );
+			// c[2,32-47]
+			c_float_2p2 = _mm512_add_ps( selector3, c_float_2p2 );
 
-		// c[3,0-15]
-		c_float_3p0 = _mm512_add_ps( selector1, c_float_3p0 );
+			// c[3,0-15]
+			c_float_3p0 = _mm512_add_ps( selector1, c_float_3p0 );
 
-		// c[3, 16-31]
-		c_float_3p1 = _mm512_add_ps( selector2, c_float_3p1 );
+			// c[3, 16-31]
+			c_float_3p1 = _mm512_add_ps( selector2, c_float_3p1 );
 
-		// c[3,32-47]
-		c_float_3p2 = _mm512_add_ps( selector3, c_float_3p2 );
+			// c[3,32-47]
+			c_float_3p2 = _mm512_add_ps( selector3, c_float_3p2 );
 
-		// c[4,0-15]
-		c_float_4p0 = _mm512_add_ps( selector1, c_float_4p0 );
+			// c[4,0-15]
+			c_float_4p0 = _mm512_add_ps( selector1, c_float_4p0 );
 
-		// c[4, 16-31]
-		c_float_4p1 = _mm512_add_ps( selector2, c_float_4p1 );
+			// c[4, 16-31]
+			c_float_4p1 = _mm512_add_ps( selector2, c_float_4p1 );
 
-		// c[4,32-47]
-		c_float_4p2 = _mm512_add_ps( selector3, c_float_4p2 );
+			// c[4,32-47]
+			c_float_4p2 = _mm512_add_ps( selector3, c_float_4p2 );
+		}
+		else
+		{
+			selector1 =
+				_mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1
+							+ post_op_c_i + 0 ) );
+			selector2 =
+				_mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1
+							+ post_op_c_i + 1 ) );
+			selector3 =
+				_mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1
+							+ post_op_c_i + 2 ) );
+			__m512 selector4 =
+				_mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1
+							+ post_op_c_i + 3 ) );
+			__m512 selector5 =
+				_mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1
+							+ post_op_c_i + 4 ) );
+
+			// c[0,0-15]
+			c_float_0p0 = _mm512_add_ps( selector1, c_float_0p0 );
+
+			// c[0, 16-31]
+			c_float_0p1 = _mm512_add_ps( selector1, c_float_0p1 );
+
+			// c[0,32-47]
+			c_float_0p2 = _mm512_add_ps( selector1, c_float_0p2 );
+
+			// c[1,0-15]
+			c_float_1p0 = _mm512_add_ps( selector2, c_float_1p0 );
+
+			// c[1, 16-31]
+			c_float_1p1 = _mm512_add_ps( selector2, c_float_1p1 );
+
+			// c[1,32-47]
+			c_float_1p2 = _mm512_add_ps( selector2, c_float_1p2 );
+
+			// c[2,0-15]
+			c_float_2p0 = _mm512_add_ps( selector3, c_float_2p0 );
+
+			// c[2, 16-31]
+			c_float_2p1 = _mm512_add_ps( selector3, c_float_2p1 );
+
+			// c[2,32-47]
+			c_float_2p2 = _mm512_add_ps( selector3, c_float_2p2 );
+
+			// c[3,0-15]
+			c_float_3p0 = _mm512_add_ps( selector4, c_float_3p0 );
+
+			// c[3, 16-31]
+			c_float_3p1 = _mm512_add_ps( selector4, c_float_3p1 );
+
+			// c[3,32-47]
+			c_float_3p2 = _mm512_add_ps( selector4, c_float_3p2 );
+
+			// c[4,0-15]
+			c_float_4p0 = _mm512_add_ps( selector5, c_float_4p0 );
+
+			// c[4, 16-31]
+			c_float_4p1 = _mm512_add_ps( selector5, c_float_4p1 );
+
+			// c[4,32-47]
+			c_float_4p2 = _mm512_add_ps( selector5, c_float_4p2 );
+		}
 
 		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 	}
@@ -4189,51 +4678,108 @@ LPGEMM_MN_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_4x48)
 	POST_OP_LABEL_LASTK_SAFE_JUMP
 POST_OPS_BIAS_4x48:
 	{
-		selector1 =
+		__m512 selector3;
+
+		if ( ( *( char* )post_ops_list_temp->op_args2 == 'r' ) ||
+			 ( *( char* )post_ops_list_temp->op_args2 == 'R' ) )
+		{
+			selector1 =
 				_mm512_loadu_ps( ( float* )post_ops_list_temp->op_args1 +
-								post_op_c_j + ( 0 * 16 ) );
-		selector2 =
+							post_op_c_j + ( 0 * 16 ) );
+			selector2 =
 				_mm512_loadu_ps( ( float* )post_ops_list_temp->op_args1 +
-								post_op_c_j + ( 1 * 16 ) );
-		__m512 selector3 =
+							post_op_c_j + ( 1 * 16 ) );
+			selector3 =
 				_mm512_loadu_ps( ( float* )post_ops_list_temp->op_args1 +
-								post_op_c_j + ( 2 * 16 ) );
+							post_op_c_j + ( 2 * 16 ) );
 
-		// c[0,0-15]
-		c_float_0p0 = _mm512_add_ps( selector1, c_float_0p0 );
+			// c[0,0-15]
+			c_float_0p0 = _mm512_add_ps( selector1, c_float_0p0 );
 
-		// c[0, 16-31]
-		c_float_0p1 = _mm512_add_ps( selector2, c_float_0p1 );
+			// c[0, 16-31]
+			c_float_0p1 = _mm512_add_ps( selector2, c_float_0p1 );
 
-		// c[0,32-47]
-		c_float_0p2 = _mm512_add_ps( selector3, c_float_0p2 );
+			// c[0,32-47]
+			c_float_0p2 = _mm512_add_ps( selector3, c_float_0p2 );
 
-		// c[1,0-15]
-		c_float_1p0 = _mm512_add_ps( selector1, c_float_1p0 );
+			// c[1,0-15]
+			c_float_1p0 = _mm512_add_ps( selector1, c_float_1p0 );
 
-		// c[1, 16-31]
-		c_float_1p1 = _mm512_add_ps( selector2, c_float_1p1 );
+			// c[1, 16-31]
+			c_float_1p1 = _mm512_add_ps( selector2, c_float_1p1 );
 
-		// c[1,32-47]
-		c_float_1p2 = _mm512_add_ps( selector3, c_float_1p2 );
+			// c[1,32-47]
+			c_float_1p2 = _mm512_add_ps( selector3, c_float_1p2 );
 
-		// c[2,0-15]
-		c_float_2p0 = _mm512_add_ps( selector1, c_float_2p0 );
+			// c[2,0-15]
+			c_float_2p0 = _mm512_add_ps( selector1, c_float_2p0 );
 
-		// c[2, 16-31]
-		c_float_2p1 = _mm512_add_ps( selector2, c_float_2p1 );
+			// c[2, 16-31]
+			c_float_2p1 = _mm512_add_ps( selector2, c_float_2p1 );
 
-		// c[2,32-47]
-		c_float_2p2 = _mm512_add_ps( selector3, c_float_2p2 );
+			// c[2,32-47]
+			c_float_2p2 = _mm512_add_ps( selector3, c_float_2p2 );
 
-		// c[3,0-15]
-		c_float_3p0 = _mm512_add_ps( selector1, c_float_3p0 );
+			// c[3,0-15]
+			c_float_3p0 = _mm512_add_ps( selector1, c_float_3p0 );
 
-		// c[3, 16-31]
-		c_float_3p1 = _mm512_add_ps( selector2, c_float_3p1 );
+			// c[3, 16-31]
+			c_float_3p1 = _mm512_add_ps( selector2, c_float_3p1 );
 
-		// c[3,32-47]
-		c_float_3p2 = _mm512_add_ps( selector3, c_float_3p2 );
+			// c[3,32-47]
+			c_float_3p2 = _mm512_add_ps( selector3, c_float_3p2 );
+		}
+		else
+		{
+			selector1 =
+				_mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1
+							+ post_op_c_i + 0 ) );
+			selector2 =
+				_mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1
+							+ post_op_c_i + 1 ) );
+			selector3 =
+				_mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1
+							+ post_op_c_i + 2 ) );
+			__m512 selector4 =
+				_mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1
+							+ post_op_c_i + 3 ) );
+
+			// c[0,0-15]
+			c_float_0p0 = _mm512_add_ps( selector1, c_float_0p0 );
+
+			// c[0, 16-31]
+			c_float_0p1 = _mm512_add_ps( selector1, c_float_0p1 );
+
+			// c[0,32-47]
+			c_float_0p2 = _mm512_add_ps( selector1, c_float_0p2 );
+
+			// c[1,0-15]
+			c_float_1p0 = _mm512_add_ps( selector2, c_float_1p0 );
+
+			// c[1, 16-31]
+			c_float_1p1 = _mm512_add_ps( selector2, c_float_1p1 );
+
+			// c[1,32-47]
+			c_float_1p2 = _mm512_add_ps( selector2, c_float_1p2 );
+
+			// c[2,0-15]
+			c_float_2p0 = _mm512_add_ps( selector3, c_float_2p0 );
+
+			// c[2, 16-31]
+			c_float_2p1 = _mm512_add_ps( selector3, c_float_2p1 );
+
+			// c[2,32-47]
+			c_float_2p2 = _mm512_add_ps( selector3, c_float_2p2 );
+
+			// c[3,0-15]
+			c_float_3p0 = _mm512_add_ps( selector4, c_float_3p0 );
+
+			// c[3, 16-31]
+			c_float_3p1 = _mm512_add_ps( selector4, c_float_3p1 );
+
+			// c[3,32-47]
+			c_float_3p2 = _mm512_add_ps( selector4, c_float_3p2 );
+		}
 
 		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 	}
@@ -4584,42 +5130,87 @@ LPGEMM_MN_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_3x48)
 	POST_OP_LABEL_LASTK_SAFE_JUMP
 POST_OPS_BIAS_3x48:
 	{
-		selector1 =
+		__m512 selector3;
+
+		if ( ( *( char* )post_ops_list_temp->op_args2 == 'r' ) ||
+			 ( *( char* )post_ops_list_temp->op_args2 == 'R' ) )
+		{
+			selector1 =
 				_mm512_loadu_ps( ( float* )post_ops_list_temp->op_args1 +
-								post_op_c_j + ( 0 * 16 ) );
-		selector2 =
+							post_op_c_j + ( 0 * 16 ) );
+			selector2 =
 				_mm512_loadu_ps( ( float* )post_ops_list_temp->op_args1 +
-								post_op_c_j + ( 1 * 16 ) );
-		__m512 selector3 =
+							post_op_c_j + ( 1 * 16 ) );
+			selector3 =
 				_mm512_loadu_ps( ( float* )post_ops_list_temp->op_args1 +
-								post_op_c_j + ( 2 * 16 ) );
+							post_op_c_j + ( 2 * 16 ) );
 
-		// c[0,0-15]
-		c_float_0p0 = _mm512_add_ps( selector1, c_float_0p0 );
+			// c[0,0-15]
+			c_float_0p0 = _mm512_add_ps( selector1, c_float_0p0 );
 
-		// c[0, 16-31]
-		c_float_0p1 = _mm512_add_ps( selector2, c_float_0p1 );
+			// c[0, 16-31]
+			c_float_0p1 = _mm512_add_ps( selector2, c_float_0p1 );
 
-		// c[0,32-47]
-		c_float_0p2 = _mm512_add_ps( selector3, c_float_0p2 );
+			// c[0,32-47]
+			c_float_0p2 = _mm512_add_ps( selector3, c_float_0p2 );
 
-		// c[1,0-15]
-		c_float_1p0 = _mm512_add_ps( selector1, c_float_1p0 );
+			// c[1,0-15]
+			c_float_1p0 = _mm512_add_ps( selector1, c_float_1p0 );
 
-		// c[1, 16-31]
-		c_float_1p1 = _mm512_add_ps( selector2, c_float_1p1 );
+			// c[1, 16-31]
+			c_float_1p1 = _mm512_add_ps( selector2, c_float_1p1 );
 
-		// c[1,32-47]
-		c_float_1p2 = _mm512_add_ps( selector3, c_float_1p2 );
+			// c[1,32-47]
+			c_float_1p2 = _mm512_add_ps( selector3, c_float_1p2 );
 
-		// c[2,0-15]
-		c_float_2p0 = _mm512_add_ps( selector1, c_float_2p0 );
+			// c[2,0-15]
+			c_float_2p0 = _mm512_add_ps( selector1, c_float_2p0 );
 
-		// c[2, 16-31]
-		c_float_2p1 = _mm512_add_ps( selector2, c_float_2p1 );
+			// c[2, 16-31]
+			c_float_2p1 = _mm512_add_ps( selector2, c_float_2p1 );
 
-		// c[2,32-47]
-		c_float_2p2 = _mm512_add_ps( selector3, c_float_2p2 );
+			// c[2,32-47]
+			c_float_2p2 = _mm512_add_ps( selector3, c_float_2p2 );
+		}
+		else
+		{
+			selector1 =
+				_mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1
+							+ post_op_c_i + 0 ) );
+			selector2 =
+				_mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1
+							+ post_op_c_i + 1 ) );
+			selector3 =
+				_mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1
+							+ post_op_c_i + 2 ) );
+
+			// c[0,0-15]
+			c_float_0p0 = _mm512_add_ps( selector1, c_float_0p0 );
+
+			// c[0, 16-31]
+			c_float_0p1 = _mm512_add_ps( selector1, c_float_0p1 );
+
+			// c[0,32-47]
+			c_float_0p2 = _mm512_add_ps( selector1, c_float_0p2 );
+
+			// c[1,0-15]
+			c_float_1p0 = _mm512_add_ps( selector2, c_float_1p0 );
+
+			// c[1, 16-31]
+			c_float_1p1 = _mm512_add_ps( selector2, c_float_1p1 );
+
+			// c[1,32-47]
+			c_float_1p2 = _mm512_add_ps( selector2, c_float_1p2 );
+
+			// c[2,0-15]
+			c_float_2p0 = _mm512_add_ps( selector3, c_float_2p0 );
+
+			// c[2, 16-31]
+			c_float_2p1 = _mm512_add_ps( selector3, c_float_2p1 );
+
+			// c[2,32-47]
+			c_float_2p2 = _mm512_add_ps( selector3, c_float_2p2 );
+		}
 
 		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 	}
@@ -4892,33 +5483,66 @@ LPGEMM_MN_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_2x48)
 	POST_OP_LABEL_LASTK_SAFE_JUMP
 POST_OPS_BIAS_2x48:
 	{
-		selector1 =
+		__m512 selector3;
+
+		if ( ( *( char* )post_ops_list_temp->op_args2 == 'r' ) ||
+			 ( *( char* )post_ops_list_temp->op_args2 == 'R' ) )
+		{
+			selector1 =
 				_mm512_loadu_ps( ( float* )post_ops_list_temp->op_args1 +
-								post_op_c_j + ( 0 * 16 ) );
-		selector2 =
+							post_op_c_j + ( 0 * 16 ) );
+			selector2 =
 				_mm512_loadu_ps( ( float* )post_ops_list_temp->op_args1 +
-								post_op_c_j + ( 1 * 16 ) );
-		__m512 selector3 =
+							post_op_c_j + ( 1 * 16 ) );
+			selector3 =
 				_mm512_loadu_ps( ( float* )post_ops_list_temp->op_args1 +
-								post_op_c_j + ( 2 * 16 ) );
+							post_op_c_j + ( 2 * 16 ) );
 
-		// c[0,0-15]
-		c_float_0p0 = _mm512_add_ps( selector1, c_float_0p0 );
+			// c[0,0-15]
+			c_float_0p0 = _mm512_add_ps( selector1, c_float_0p0 );
 
-		// c[0, 16-31]
-		c_float_0p1 = _mm512_add_ps( selector2, c_float_0p1 );
+			// c[0, 16-31]
+			c_float_0p1 = _mm512_add_ps( selector2, c_float_0p1 );
 
-		// c[0,32-47]
-		c_float_0p2 = _mm512_add_ps( selector3, c_float_0p2 );
+			// c[0,32-47]
+			c_float_0p2 = _mm512_add_ps( selector3, c_float_0p2 );
 
-		// c[1,0-15]
-		c_float_1p0 = _mm512_add_ps( selector1, c_float_1p0 );
+			// c[1,0-15]
+			c_float_1p0 = _mm512_add_ps( selector1, c_float_1p0 );
 
-		// c[1, 16-31]
-		c_float_1p1 = _mm512_add_ps( selector2, c_float_1p1 );
+			// c[1, 16-31]
+			c_float_1p1 = _mm512_add_ps( selector2, c_float_1p1 );
 
-		// c[1,32-47]
-		c_float_1p2 = _mm512_add_ps( selector3, c_float_1p2 );
+			// c[1,32-47]
+			c_float_1p2 = _mm512_add_ps( selector3, c_float_1p2 );
+		}
+		else
+		{
+			selector1 =
+				_mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1
+							+ post_op_c_i + 0 ) );
+			selector2 =
+				_mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1
+							+ post_op_c_i + 1 ) );
+
+			// c[0,0-15]
+			c_float_0p0 = _mm512_add_ps( selector1, c_float_0p0 );
+
+			// c[0, 16-31]
+			c_float_0p1 = _mm512_add_ps( selector1, c_float_0p1 );
+
+			// c[0,32-47]
+			c_float_0p2 = _mm512_add_ps( selector1, c_float_0p2 );
+
+			// c[1,0-15]
+			c_float_1p0 = _mm512_add_ps( selector2, c_float_1p0 );
+
+			// c[1, 16-31]
+			c_float_1p1 = _mm512_add_ps( selector2, c_float_1p1 );
+
+			// c[1,32-47]
+			c_float_1p2 = _mm512_add_ps( selector2, c_float_1p2 );
+		}
 
 		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 	}
@@ -5113,24 +5737,45 @@ LPGEMM_MN_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_1x48)
 	POST_OP_LABEL_LASTK_SAFE_JUMP
 POST_OPS_BIAS_1x48:
 	{
-		selector1 =
-				_mm512_loadu_ps( ( float* )post_ops_list_temp->op_args1 +
-								post_op_c_j + ( 0 * 16 ) );
-		selector2 =
-				_mm512_loadu_ps( ( float* )post_ops_list_temp->op_args1 +
-								post_op_c_j + ( 1 * 16 ) );
-		__m512 selector3 =
-				_mm512_loadu_ps( ( float* )post_ops_list_temp->op_args1 +
-								post_op_c_j + ( 2 * 16 ) );
+		__m512 selector3;
 
-		// c[0,0-15]
-		c_float_0p0 = _mm512_add_ps( selector1, c_float_0p0 );
+		if ( ( *( char* )post_ops_list_temp->op_args2 == 'r' ) ||
+			 ( *( char* )post_ops_list_temp->op_args2 == 'R' ) )
+		{
+			selector1 =
+				_mm512_loadu_ps( ( float* )post_ops_list_temp->op_args1 +
+							post_op_c_j + ( 0 * 16 ) );
+			selector2 =
+				_mm512_loadu_ps( ( float* )post_ops_list_temp->op_args1 +
+							post_op_c_j + ( 1 * 16 ) );
+			selector3 =
+				_mm512_loadu_ps( ( float* )post_ops_list_temp->op_args1 +
+							post_op_c_j + ( 2 * 16 ) );
 
-		// c[0, 16-31]
-		c_float_0p1 = _mm512_add_ps( selector2, c_float_0p1 );
+			// c[0,0-15]
+			c_float_0p0 = _mm512_add_ps( selector1, c_float_0p0 );
 
-		// c[0,32-47]
-		c_float_0p2 = _mm512_add_ps( selector3, c_float_0p2 );
+			// c[0, 16-31]
+			c_float_0p1 = _mm512_add_ps( selector2, c_float_0p1 );
+
+			// c[0,32-47]
+			c_float_0p2 = _mm512_add_ps( selector3, c_float_0p2 );
+		}
+		else
+		{
+			selector1 =
+				_mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1
+							+ post_op_c_i + 0 ) );
+
+			// c[0,0-15]
+			c_float_0p0 = _mm512_add_ps( selector1, c_float_0p0 );
+
+			// c[0, 16-31]
+			c_float_0p1 = _mm512_add_ps( selector1, c_float_0p1 );
+
+			// c[0,32-47]
+			c_float_0p2 = _mm512_add_ps( selector1, c_float_0p2 );
+		}
 
 		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 	}

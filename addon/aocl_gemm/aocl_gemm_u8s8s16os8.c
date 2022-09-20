@@ -76,7 +76,13 @@ AOCL_GEMM_MATMUL(uint8_t,int8_t,int8_t,u8s8s16os8)
 	{
 		return; // Error.
 	}
-	if ( ( order != 'r' ) && ( order != 'R' ) )
+
+	// Sanitize order input.
+	char order_use =
+			( ( order == 'r' ) || ( order == 'R' ) ||
+			  ( order == 'c' ) || ( order == 'C' ) ) ?
+			order : 'r';
+	if ( ( order_use != 'r' ) && ( order_use != 'R' ) )
 	{
 		return; // Only row major supported.
 	}
@@ -98,6 +104,7 @@ AOCL_GEMM_MATMUL(uint8_t,int8_t,int8_t,u8s8s16os8)
 	const inc_t rs_b = ldb;
 	const inc_t cs_b = 1;
 	const inc_t rs_c = ldc;
+	const inc_t cs_c = 1;
 
 	AOCL_MEMORY_TAG mtag_a;
 	AOCL_MEMORY_TAG mtag_b;
@@ -122,7 +129,11 @@ AOCL_GEMM_MATMUL(uint8_t,int8_t,int8_t,u8s8s16os8)
 
 	// Convert post op struct to post op linked list format.
 	lpgemm_post_op post_op_list[AOCL_MAX_POST_OPS];
-	lpgemm_translate_to_post_ops_list( post_op_unparsed, post_op_list, ( void* )c );
+	lpgemm_translate_to_post_ops_list
+	(
+	  post_op_unparsed, post_op_list,
+	  ( void* )c, ( void* )( &order_use )
+	);
 
 	// Initialize a local runtime with global settings if necessary. Note
 	// that in the case that a runtime is passed in, we make a local copy.
@@ -136,7 +147,7 @@ AOCL_GEMM_MATMUL(uint8_t,int8_t,int8_t,u8s8s16os8)
 	  m, n, k,
 	  a, rs_a, cs_a, mtag_a,
 	  b, rs_b, cs_b, mtag_b,
-	  ( int16_t* )c, rs_c,
+	  ( int16_t* )c, rs_c, cs_c,
 	  alpha, beta,
 	  &rntm_g,
 	  post_op_list, TRUE
@@ -147,7 +158,7 @@ AOCL_GEMM_MATMUL(uint8_t,int8_t,int8_t,u8s8s16os8)
 	  m, n, k,
 	  a, rs_a, cs_a, mtag_a,
 	  b, rs_b, cs_b, mtag_b,
-	  ( int16_t* )c, rs_c,
+	  ( int16_t* )c, rs_c, cs_c,
 	  alpha, beta,
 	  &rntm_g,
 	  post_op_list, TRUE

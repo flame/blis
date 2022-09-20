@@ -142,7 +142,7 @@ LPGEMM_5LOOP(bfloat16,bfloat16,float,bf16bf16f32of32)
 				for ( dim_t i_dscale = ic_start; i_dscale < ic_end; ++i_dscale )
 				{
 					j_temp = 0;
-					for ( dim_t j_dscale = jc; j_dscale < nc0; ++j_dscale )
+					for ( dim_t j_dscale = jc; j_dscale < ( jc + nc0 ); ++j_dscale )
 					{
 						// Implemented with the idea sizeof(float)=4.
 						temp_conv_buf = 0;

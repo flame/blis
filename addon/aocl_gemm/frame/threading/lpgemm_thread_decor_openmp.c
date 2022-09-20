@@ -481,6 +481,7 @@ void lpgemm_ ## LPGEMM_SFX ## _openmp_thread_decorator \
        const AOCL_MEMORY_TAG mtag_b, \
        C_type*               c, \
        const dim_t           rs_c, \
+       const dim_t           cs_c, \
        C_type                alpha, \
        C_type                beta, \
        rntm_t*               rntm_g, \
@@ -540,7 +541,7 @@ void lpgemm_ ## LPGEMM_SFX ## _openmp_thread_decorator \
 		  m, n, k, \
 		  a, rs_a, cs_a, mtag_a, \
 		  b, rs_b, cs_b, mtag_b, \
-		  c, rs_c, \
+		  c, rs_c, cs_c,\
 		  alpha, \
 		  beta, \
 		  &rntm_l, \
@@ -577,6 +578,7 @@ void lpgemm_ ## LPGEMM_SFX ## _thread_decorator \
        const AOCL_MEMORY_TAG mtag_b, \
        C_type*               c, \
        const dim_t           rs_c, \
+       const dim_t           cs_c, \
        C_type                alpha, \
        C_type                beta, \
        rntm_t*               rntm_g, \
@@ -615,7 +617,7 @@ void lpgemm_ ## LPGEMM_SFX ## _thread_decorator \
 	  m, n, k, \
 	  a, rs_a, cs_a, mtag_a, \
 	  b, rs_b, cs_b, mtag_b, \
-	  c, rs_c, \
+	  c, rs_c, cs_c, \
 	  alpha, \
 	  beta, \
 	  rntm_g, \

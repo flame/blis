@@ -55,6 +55,7 @@ GEN_FILL_ARRAY_POST_OPS_FUNC(float)
 #define GEN_BLIS_MAT_MUL_FUNC(A_type,B_type,C_type,BLAS_SFX) \
 void mat_mul_ ## BLAS_SFX \
      ( \
+       char    stor_order, \
        char    op_t, \
        dim_t   m, \
        dim_t   n, \
@@ -70,7 +71,7 @@ void mat_mul_ ## BLAS_SFX \
        aocl_post_op*  post_op\
      ) \
 { \
-	char storage = 'r'; \
+	char storage = stor_order; \
 	char transa = 'n'; \
 	char transb = 'n'; \
 	char reordera = 'n'; \
@@ -191,6 +192,7 @@ void print_result
 #define GEN_MAT_MUL_BENCH_DRV_FUNC(A_type,B_type,C_type,BLAS_SFX) \
 void mat_mul_bench_driver_ ## BLAS_SFX \
      ( \
+       char    stor_order, \
        char    op_t, \
        int32_t n_repeats, \
        dim_t   m, \
@@ -220,7 +222,7 @@ void mat_mul_bench_driver_ ## BLAS_SFX \
  \
 		GEN_FUNC_NAME(mat_mul_,BLAS_SFX) \
 		( \
-		  op_t, m, n, k, \
+		  stor_order, op_t, m, n, k, \
 		  alpha, \
 		  a, lda, \
 		  b, ldb, \
@@ -250,6 +252,7 @@ GEN_MAT_MUL_BENCH_DRV_FUNC(float,float,float,f32f32f32of32)
 void mat_mul_accuracy_check_driver_ ## BLAS_SFX \
      ( \
        FILE*   fout, \
+	   const char stor_order, \
        dim_t   m, \
        dim_t   n, \
        dim_t   k, \
@@ -266,6 +269,27 @@ void mat_mul_accuracy_check_driver_ ## BLAS_SFX \
        aocl_post_op*  post_op\
      ) \
 { \
+	dim_t rs_a = lda; \
+	dim_t cs_a = 1; \
+	dim_t rs_b = ldb; \
+	dim_t cs_b = 1; \
+	dim_t rs_c = ldc; \
+	dim_t cs_c = 1; \
+	dim_t rs_c_ref = ldc_ref; \
+	dim_t cs_c_ref = 1; \
+ \
+	if ( ( stor_order == 'C' ) || ( stor_order == 'c' ) ) \
+	{ \
+		rs_a = 1; \
+		cs_a = lda; \
+		rs_b = 1; \
+		cs_b = ldb; \
+		rs_c = 1; \
+		cs_c = ldc; \
+		rs_c_ref = 1; \
+		cs_c_ref = ldc_ref; \
+	} \
+ \
 	for ( dim_t i = 0; i < m; ++i ) \
 	{ \
 		for ( dim_t j = 0; j < n; ++j ) \
@@ -275,11 +299,12 @@ void mat_mul_accuracy_check_driver_ ## BLAS_SFX \
  \
 			for ( dim_t p = 0; p < k; ++p) \
 			{ \
-				temp_accum += ( *( a + ( i * lda ) + p ) * *( b + ( p * ldb ) + j ) ); \
+				temp_accum += ( *( a + ( i * rs_a ) + ( cs_a * p ) ) * \
+								*( b + ( rs_b * p ) + ( cs_b * j ) ) ); \
 			} \
  \
-			temp_accum = ( beta * ( * (c_ref + ( ldc_ref * i ) + j ) ) ) \
-			             + ( alpha * temp_accum ); \
+			temp_accum = ( beta * ( * (c_ref + ( rs_c_ref * i ) + \
+							( cs_c_ref * j ) ) ) ) + ( alpha * temp_accum ); \
  \
 			if ( post_op != NULL ) \
 			{ \
@@ -337,7 +362,7 @@ void mat_mul_accuracy_check_driver_ ## BLAS_SFX \
 				out_temp_accum = ( C_type )temp_accum; \
 			} \
  \
-			if ( *( c + ( ldc * i ) + j ) != out_temp_accum ) \
+			if ( *( c + ( rs_c * i ) + ( cs_c * j ) ) != out_temp_accum ) \
 			{ \
 				if ( fout ) \
 				{ \
@@ -515,6 +540,7 @@ void mat_mul_bench_main_ ## BLAS_SFX \
      ( \
        FILE*   fin, \
        FILE*   fout, \
+       char    stor_order, \
        char    op_t, \
        int32_t m, \
        int32_t n, \
@@ -580,7 +606,7 @@ void mat_mul_bench_main_ ## BLAS_SFX \
 		/* No reordering of B.*/ \
 		GEN_FUNC_NAME(mat_mul_bench_driver_,BLAS_SFX) \
 		( \
-		  op_t, n_repeats, m, n, k, \
+		  stor_order, op_t, n_repeats, m, n, k, \
 		  alpha, \
 		  a, stride_a, \
 		  b, stride_b, \
@@ -600,7 +626,7 @@ void mat_mul_bench_main_ ## BLAS_SFX \
  \
 		GEN_FUNC_NAME(mat_mul_bench_driver_,BLAS_SFX) \
 		( \
-		  op_t, n_repeats, m, n, k, \
+		  stor_order, op_t, n_repeats, m, n, k, \
 		  alpha, \
 		  a, stride_a, \
 		  b_reorder, stride_b, \
@@ -617,7 +643,7 @@ void mat_mul_bench_main_ ## BLAS_SFX \
 		printf("Running accuracy check.\n"); \
 		GEN_FUNC_NAME(mat_mul_accuracy_check_driver_,BLAS_SFX) \
 		( \
-		  fout, m, n, k, \
+		  fout, stor_order, m, n, k, \
 		  alpha, \
 		  a, stride_a, \
 		  b, stride_b, \
@@ -734,6 +760,7 @@ int main( int argc, char** argv )
 	
 	char op_type_char;
 	char op_t;
+	char stor_order;
 	int32_t m, n, k;
 	int32_t stride_a, stride_b, stride_c;
 
@@ -771,17 +798,22 @@ int main( int argc, char** argv )
 			}
 		}
 
-		while ( fscanf( fin, "%c %c %d %d %d %d %d %d\n",
-				&op_type_char, &op_t, &m, &n, &k,
-				&stride_a, &stride_b, &stride_c ) == 8 )
+		// Input format: data_type stor_type pack/reorder m n k lda ldb ldc
+		while ( fscanf( fin, "%c %c %c %d %d %d %d %d %d\n",
+				&op_type_char, &stor_order, &op_t, &m, &n, &k,
+				&stride_a, &stride_b, &stride_c ) == 9 )
 		{
+			stor_order = ( ( stor_order == 'r' ) || ( stor_order == 'R' ) ||
+							( stor_order == 'c' ) || ( stor_order == 'C' ) ) ?
+							stor_order : 'r';
+
 			if ( ( op_type_char == 'i' ) || ( op_type_char == 'I' ) )
 			{
 				if ( global_dscale_out == 'n' )
 				{
 					GEN_FUNC_NAME(mat_mul_bench_main_,u8s8s32os32)
 					(
-					  fin, fout, op_t,
+					  fin, fout, stor_order, op_t,
 					  m, n, k, stride_a, stride_b, stride_c,
 					  post_ops_str_dest
 					);
@@ -790,7 +822,7 @@ int main( int argc, char** argv )
 				{
 					GEN_FUNC_NAME(mat_mul_bench_main_,u8s8s32os8)
 					(
-					  fin, fout, op_t,
+					  fin, fout, stor_order, op_t,
 					  m, n, k, stride_a, stride_b, stride_c,
 					  post_ops_str_dest
 					);
@@ -800,7 +832,7 @@ int main( int argc, char** argv )
 			{
 				GEN_FUNC_NAME(mat_mul_bench_main_,f32f32f32of32)
 				(
-				  fin, fout, op_t,
+				  fin, fout, stor_order, op_t,
 				  m, n, k, stride_a, stride_b, stride_c,
 				  NULL
 				);
@@ -811,7 +843,7 @@ int main( int argc, char** argv )
 				{
 					GEN_FUNC_NAME(mat_mul_bench_main_,u8s8s16os16)
 					(
-						fin, fout, op_t,
+						fin, fout, stor_order, op_t,
 						m, n, k, stride_a, stride_b, stride_c,
 						post_ops_str_dest
 					);
@@ -820,7 +852,7 @@ int main( int argc, char** argv )
 				{
 					GEN_FUNC_NAME(mat_mul_bench_main_,u8s8s16os8)
 					(
-						fin, fout, op_t,
+						fin, fout, stor_order, op_t,
 						m, n, k, stride_a, stride_b, stride_c,
 						post_ops_str_dest
 					);

@@ -78,7 +78,7 @@ LPGEMM_5LOOP(float,float,float,f32f32f32of32)
 	float* c_use_ic = NULL;
 
 	// Only supporting row major with unit column strided C for now.
-	const dim_t cs_c = 1;
+	const dim_t cs_c_use = 1;
 
 	/* Compute partitioning step values for each matrix of each loop. */
 	inc_t ps_a_use;
@@ -222,7 +222,7 @@ LPGEMM_5LOOP(float,float,float,f32f32f32of32)
 					  ( float* )a_use, rs_a_use, cs_a_use,
 					  ( float* )( b_use + ( jr * ps_b_use ) ), rs_b_use, cs_b_use,
 					  &beta0,
-					  ( c_use_ic + jr ), rs_c, cs_c,
+					  ( c_use_ic + jr ), rs_c, cs_c_use,
 					  &aux, cntx
 					);
 				}

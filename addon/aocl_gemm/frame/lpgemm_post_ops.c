@@ -59,7 +59,8 @@ void lpgemm_translate_to_post_ops_list
      (
        aocl_post_op*   post_op_unparsed,
        lpgemm_post_op* post_op_list,
-       void*           scale_buffer
+       void*           scale_buffer,
+       void*           meta_arg
      )
 {
 	if ( post_op_unparsed == NULL )
@@ -129,7 +130,7 @@ void lpgemm_translate_to_post_ops_list
 					(
 					  ( post_op_list + i ), POST_OPS_BIAS,
 					  post_op_unparsed->bias.bias,
-					  NULL, NULL, NULL, FALSE
+					  meta_arg, NULL, NULL, FALSE
 					);
 					break;
 			case SCALE:
@@ -137,7 +138,7 @@ void lpgemm_translate_to_post_ops_list
 					(
 					  ( post_op_list + i ), POST_OPS_DOWNSCALE,
 					  post_op_unparsed->sum.zero_point,
-					  NULL, scale_buffer,
+					  meta_arg, scale_buffer,
 					  post_op_unparsed->sum.scale_factor, FALSE
 					);
 					break;

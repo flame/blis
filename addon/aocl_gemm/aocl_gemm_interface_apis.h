@@ -58,12 +58,12 @@ AOCL_GEMM_GET_REORDER_BUF_SIZE(bf16bf16f32of32);
 #define AOCL_GEMM_REORDER(B_type,LP_SFX) \
 BLIS_EXPORT_ADDON void aocl_reorder_ ## LP_SFX \
      ( \
-       const char   mat_type, \
+       const char    mat_type, \
        const B_type* input_buf_addr, \
        B_type*       reorder_buf_addr, \
-       const dim_t  k, \
-       const dim_t  n, \
-       const dim_t  ldb \
+       const dim_t   k, \
+       const dim_t   n, \
+       const dim_t   ldb \
      ) \
 
 AOCL_GEMM_REORDER(float,f32f32f32of32);
@@ -83,15 +83,15 @@ BLIS_EXPORT_ADDON void aocl_gemm_ ## LP_SFX \
        const dim_t   m, \
        const dim_t   n, \
        const dim_t   k, \
-       const C_type   alpha, \
-       const A_type*  a, \
+       const C_type  alpha, \
+       const A_type* a, \
        const dim_t   lda, \
        const char    mem_format_a, \
-       const B_type*  b, \
+       const B_type* b, \
        const dim_t   ldb, \
        const char    mem_format_b, \
-       const C_type   beta, \
-       C_type*        c, \
+       const C_type  beta, \
+       C_type*       c, \
        const dim_t   ldc, \
        aocl_post_op* post_op_unparsed \
      ) \
