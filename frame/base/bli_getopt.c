@@ -41,16 +41,15 @@ static const char OPT_MARKER = '-';
 
 void bli_getopt_init_state( int opterr, getopt_t* state )
 {
-	state->optarg = NULL;
-	state->optind = 1;
-	state->opterr = opterr;
-	state->optopt = 0;
+	state->nextchar = NULL;
+	state->optarg   = NULL;
+	state->optind   = 1;
+	state->opterr   = opterr;
+	state->optopt   = 0;
 }
 
 int bli_getopt( int argc, const char* const * argv, const char* optstring, getopt_t* state )
 {
-	static const char* nextchar = NULL;
-
 	const char* elem_str;
 	const char* optstr_char;
 
@@ -62,7 +61,7 @@ int bli_getopt( int argc, const char* const * argv, const char* optstring, getop
 	// an element of argv with more than one option character, in which
 	// case we need to pick up where we left off (which is the address
 	// contained in nextchar).
-	if ( nextchar == NULL )
+	if ( state->nextchar == NULL )
 	{
 		elem_str = argv[ state->optind ];
 
@@ -89,10 +88,10 @@ int bli_getopt( int argc, const char* const * argv, const char* optstring, getop
 		// character.
 
 		// Use the nextchar pointer as our element string.
-		elem_str = nextchar;
+		elem_str = state->nextchar;
 
 		// Reset nextchar to NULL.
-		nextchar = NULL;
+		state->nextchar = NULL;
 	}
 
 	// Find the first occurrence of elem_str[0] in optstring.
@@ -175,7 +174,7 @@ int bli_getopt( int argc, const char* const * argv, const char* optstring, getop
 	{
 		if ( strchr( optstring, elem_str[1] ) != NULL )
 		{
-			nextchar = &elem_str[1];
+			state->nextchar = &elem_str[1];
 			return *optstr_char;
 		}
 	}

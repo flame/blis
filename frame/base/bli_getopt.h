@@ -34,6 +34,7 @@
 
 typedef struct getopt_s
 {
+	const char* nextchar;
 	const char* optarg;
 	      int   optind;
 	      int   opterr;

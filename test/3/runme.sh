@@ -119,10 +119,10 @@ nrepeats=3
 ind="native"
 
 # Quiet mode?
-quiet="yes"
+#quiet="yes"
 
 # For testing purposes.
-dryrun="no"
+#dryrun="yes"
 
 # Save a copy of GOMP_CPU_AFFINITY so that if we have to unset it, we can
 # restore the value.
@@ -294,7 +294,7 @@ for th in ${threads}; do
 
 				# Run executable with or without numactl, depending on how
 				# the numactl variable was set.
-				if [ "${dryrun}" = "no" ]; then
+				if [ "${dryrun}" != "yes" ]; then
 					${numactl} ./${exec_name} -d ${dt} -c ${oppars} -i ${ind} -p "${psr}" -r ${nrepeats} ${qv} > ${out_file}
 				fi
 
