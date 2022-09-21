@@ -900,9 +900,8 @@ void libblis_test_output_params_struct( FILE* os, test_params_t* params )
 	libblis_test_fprintf_c( os, "--- BLIS parallelization info ---\n" );
 	libblis_test_fprintf_c( os, "\n" );
 	libblis_test_fprintf_c( os, "multithreading modes           %s\n", impl_str );
-	libblis_test_fprintf_c( os, "default mode                     \n" );
-	libblis_test_fprintf_c( os, "  when BLIS_THREAD_IMPL unset  %s\n", def_impl_unset_str );
-	libblis_test_fprintf_c( os, "  currently                    %s\n", def_impl_set_str );
+	libblis_test_fprintf_c( os, "  default mode                 %s\n", def_impl_unset_str );
+	libblis_test_fprintf_c( os, "  current mode                 %s\n", def_impl_set_str );
 	libblis_test_fprintf_c( os, "\n" );
 	libblis_test_fprintf_c( os, "thread auto-factorization        \n" );
 	libblis_test_fprintf_c( os, "  m dim thread ratio           %d\n", ( int )BLIS_THREAD_RATIO_M );
