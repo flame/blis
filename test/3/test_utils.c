@@ -35,6 +35,21 @@
 #include "blis.h"
 #include "test_utils.h"
 
+// Global string constants.
+const char* GLOB_DEF_DT_STR    = "d";
+const char* GLOB_DEF_SC_STR    = "ccc";
+const char* GLOB_DEF_IM_STR    = "native";
+
+const char* GLOB_DEF_PS_STR    = "50 1000 50";
+const char* GLOB_DEF_M_STR     = "-1";
+const char* GLOB_DEF_N_STR     = "-1";
+const char* GLOB_DEF_K_STR     = "-1";
+
+const char* GLOB_DEF_NR_STR    = "3";
+
+const char* GLOB_DEF_ALPHA_STR = "1.0";
+const char* GLOB_DEF_BETA_STR  = "1.0";
+
 
 void parse_cl_params( int argc, char** argv, init_fp fp, params_t* params )
 {
@@ -62,18 +77,18 @@ void parse_cl_params( int argc, char** argv, init_fp fp, params_t* params )
 	// Initialize the params_t struct with the caller-supplied function.
 	fp( params );
 
-	// Alias the binary name for conciseness.
-	char*    bin = params->bin;
+	// Copy the binary name pointer so we can use it later.
+	params->bin = argv[0];
 
-	// Copy the binary name so we can use it later.
-	strncpy( params->bin, argv[0], MAX_STRING_SIZE );
+	// Alias the binary name for conciseness.
+	const char* bin = params->bin;
 
 	// Initialize the state for running bli_getopt(). Here, 0 is the
 	// initial value for opterr, which suppresses error messages.
 	bli_getopt_init_state( 0, &state );
 
 	// Process all option arguments until we get a -1, which means we're done.
-	while( (opt = bli_getopt( argc, ( const char** )argv, "c:d:s:i:p:m:n:k:r:a:b:qvh", &state )) != -1 )
+	while( (opt = bli_getopt( argc, ( const char* const * )argv, "c:d:s:i:p:m:n:k:r:a:b:qvh", &state )) != -1 )
 	{
 		// Explicitly typecast opt, which is an int, to a char. (Failing to
 		// typecast resulted in at least one user-reported problem whereby
@@ -83,61 +98,61 @@ void parse_cl_params( int argc, char** argv, init_fp fp, params_t* params )
 		switch( opt_ch )
 		{
 			case 'c':
-			strncpy( params->pc_str, state.optarg, MAX_STRING_SIZE );
+			params->pc_str = state.optarg;
 			gave_option_c = TRUE;
 			break;
 
 			case 'd':
-			strncpy( params->dt_str, state.optarg, MAX_STRING_SIZE );
+			params->dt_str = state.optarg;
 			gave_option_d = TRUE;
 			break;
 
 			case 's':
-			strncpy( params->sc_str, state.optarg, MAX_STRING_SIZE );
+			params->sc_str = state.optarg;
 			gave_option_s = TRUE;
 			break;
 
 
 			case 'i':
-			strncpy( params->im_str, state.optarg, MAX_STRING_SIZE );
+			params->im_str = state.optarg;
 			gave_option_i = TRUE;
 			break;
 
 
 			case 'p':
-			strncpy( params->ps_str, state.optarg, MAX_STRING_SIZE );
+			params->ps_str = state.optarg;
 			gave_option_p = TRUE;
 			break;
 
 			case 'm':
-			strncpy( params->m_str, state.optarg, MAX_STRING_SIZE );
+			params->m_str = state.optarg;
 			gave_option_m = TRUE;
 			break;
 
 			case 'n':
-			strncpy( params->n_str, state.optarg, MAX_STRING_SIZE );
+			params->n_str = state.optarg;
 			gave_option_n = TRUE;
 			break;
 
 			case 'k':
-			strncpy( params->k_str, state.optarg, MAX_STRING_SIZE );
+			params->k_str = state.optarg;
 			gave_option_k = TRUE;
 			break;
 
 
 			case 'r':
-			strncpy( params->nr_str, state.optarg, MAX_STRING_SIZE );
+			params->nr_str = state.optarg;
 			gave_option_r = TRUE;
 			break;
 
 
 			case 'a':
-			strncpy( params->alpha_str, state.optarg, MAX_STRING_SIZE );
+			params->alpha_str = state.optarg;
 			gave_option_a = TRUE;
 			break;
 
 			case 'b':
-			strncpy( params->beta_str, state.optarg, MAX_STRING_SIZE );
+			params->beta_str = state.optarg;
 			gave_option_b = TRUE;
 			break;
 
@@ -485,11 +500,8 @@ void parse_cl_params( int argc, char** argv, init_fp fp, params_t* params )
 	// Inform the user of the values that were chosen (or defaulted to).
 	if ( params->verbose )
 	{
-		char def_str[ MAX_STRING_SIZE + 1 ];
-		char nul_str[ MAX_STRING_SIZE + 1 ];
-
-		sprintf( def_str, " (default)" );
-		sprintf( nul_str, " " );
+		const char* def_str = " (default)";
+		const char* nul_str = " ";
 
 		printf( "%%\n" );
 		printf( "%% operation:              %s\n", params->opname );
@@ -509,8 +521,11 @@ void parse_cl_params( int argc, char** argv, init_fp fp, params_t* params )
 		printf( "%% beta scalar:            %s%s\n", params->beta_str, ( gave_option_b ? nul_str : def_str ) );
 		printf( "%% ---\n" );
 		printf( "%% implementation:         %s\n", params->impl );
-		printf( "%% number of threads:      %s\n", params->nt_str );
-		printf( "%% thread affinity:        %s\n", params->af_str );
+		if ( params->nt == -1 )
+		printf( "%% number of threads:      %s\n", "unset (defaults to 1)" );
+		else
+		printf( "%% number of threads:      %ld\n", params->nt );
+		printf( "%% thread affinity:        %s\n", ( params->af_str == NULL ? "unset" : params->af_str ) );
 		printf( "%%\n" );
 	}
 
@@ -529,7 +544,6 @@ void parse_cl_params( int argc, char** argv, init_fp fp, params_t* params )
 void proc_params( params_t* params )
 {
 	dim_t nt;
-	char* af_str;
 
 	// Binary name doesn't need any conversion.
 
@@ -559,13 +573,11 @@ void proc_params( params_t* params )
 		nt = bli_env_get_var( "OMP_NUM_THREADS", -1 );
 	}
 
-	if ( nt == -1 ) sprintf( params->nt_str, "unset (defaults to 1)" );
-	else            sprintf( params->nt_str, "%ld", ( long int )nt );
+	// Store nt to the params_t struct.
+	params->nt = ( long int )nt;
 
-	af_str = bli_env_get_str( "GOMP_CPU_AFFINITY" );
-
-	if ( af_str == NULL ) sprintf( params->af_str, "unset" );
-	else                  sprintf( params->af_str, "%s", af_str );
+	// Store the affinity string pointer to the params_t struct.
+	params->af_str = bli_env_get_str( "GOMP_CPU_AFFINITY" );
 
 #if 0
 	dim_t nt    = bli_thread_get_num_threads();
@@ -599,13 +611,6 @@ void proc_params( params_t* params )
 	// Parse the induced method to the corresponding ind_t.
 	if      ( strncmp( params->im_str, "native", 6 ) == 0 )
 	{
-		params->im = BLIS_NAT;
-	}
-	else if ( strncmp( params->im_str, "nat",    3 ) == 0 )
-	{
-		// Standardize to the full name.
-		sprintf( params->im_str, "native" );
-
 		params->im = BLIS_NAT;
 	}
 	else if ( strncmp( params->im_str, "1m",     2 ) == 0 )

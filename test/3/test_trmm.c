@@ -39,6 +39,9 @@
 
 //#define PRINT
 
+static const char* LOCAL_OPNAME_STR = "trmm";
+static const char* LOCAL_PC_STR     = "llnn";
+
 int main( int argc, char** argv )
 {
 	obj_t    a, c;
@@ -112,7 +115,7 @@ int main( int argc, char** argv )
 	// matlab allocates space for the entire array once up-front.
 	for ( p = p_begin; p + p_inc <= p_max; p += p_inc ) ;
 
-	printf( "data_%s_%ctrmm_%s", THR_STR, dt_ch, IMP_STR );
+	printf( "data_%s_%ctrmm_%s", THR_STR, dt_ch, IMPL_STR );
 	printf( "( %4lu, 1:3 ) = [ %5lu %5lu %8.2f ];\n",
 	        ( unsigned long )(p - p_begin)/p_inc + 1,
 	        ( unsigned long )0,
@@ -304,7 +307,7 @@ int main( int argc, char** argv )
 
 		if ( bli_is_complex( dt ) ) gflops *= 4.0;
 
-		printf( "data_%s_%ctrmm_%s", THR_STR, dt_ch, IMP_STR );
+		printf( "data_%s_%ctrmm_%s", THR_STR, dt_ch, IMPL_STR );
 		printf( "( %4lu, 1:3 ) = [ %5lu %5lu %8.2f ];\n",
 		        ( unsigned long )(p - p_begin)/p_inc + 1,
 		        ( unsigned long )m,
@@ -325,21 +328,22 @@ int main( int argc, char** argv )
 
 void init_def_params( params_t* params )
 {
-	strncpy( params->opname,    "trmm",             MAX_STRING_SIZE );
-	strncpy( params->impl,      IMP_STR,            MAX_STRING_SIZE );
+	params->opname    = LOCAL_OPNAME_STR;
+	params->impl      = IMPL_STR;
 
-	strncpy( params->pc_str,    "llnn",             MAX_STRING_SIZE );
-	strncpy( params->dt_str,    GLOB_DEF_DT_STR,    MAX_STRING_SIZE );
-	strncpy( params->sc_str,    GLOB_DEF_SC_STR,    MAX_STRING_SIZE );
+	params->pc_str    = LOCAL_PC_STR;
+	params->dt_str    = GLOB_DEF_DT_STR;
+	params->sc_str    = GLOB_DEF_SC_STR;
 
-	strncpy( params->im_str,    GLOB_DEF_IM_STR,    MAX_STRING_SIZE );
+	params->im_str    = GLOB_DEF_IM_STR;
 
-	strncpy( params->ps_str,    GLOB_DEF_PS_STR,    MAX_STRING_SIZE );
-	strncpy( params->m_str,     GLOB_DEF_M_STR,     MAX_STRING_SIZE );
-	strncpy( params->n_str,     GLOB_DEF_N_STR,     MAX_STRING_SIZE );
+	params->ps_str    = GLOB_DEF_PS_STR;
+	params->m_str     = GLOB_DEF_M_STR;
+	params->n_str     = GLOB_DEF_N_STR;
 
-	strncpy( params->nr_str,    GLOB_DEF_NR_STR,    MAX_STRING_SIZE );
+	params->nr_str    = GLOB_DEF_NR_STR;
 
-	strncpy( params->alpha_str, GLOB_DEF_ALPHA_STR, MAX_STRING_SIZE );
+	params->alpha_str = GLOB_DEF_ALPHA_STR;
+	params->beta_str  = GLOB_DEF_BETA_STR;
 }
 

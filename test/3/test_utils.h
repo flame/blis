@@ -44,70 +44,58 @@
 extern "C" {
 #endif
 
-//#define GLOB_DEF_PC_STR   ""
-#define GLOB_DEF_DT_STR    "d"
-#define GLOB_DEF_SC_STR    "ccc"
-#define GLOB_DEF_IM_STR    "native"
-
-#define GLOB_DEF_PS_STR    "50 1000 50"
-#define GLOB_DEF_M_STR     "-1"
-#define GLOB_DEF_N_STR     "-1"
-#define GLOB_DEF_K_STR     "-1"
-
-#define GLOB_DEF_NR_STR    "3"
-
-#define GLOB_DEF_ALPHA_STR "1.0"
-#define GLOB_DEF_BETA_STR  "1.0"
-
 // String arrays allocated using this constant will always add 1 to
 // the value defined below, and so the total allocated will still be
 // a nice power of two.
 #define MAX_STRING_SIZE    31
 
 
+extern const char* GLOB_DEF_DT_STR;
+extern const char* GLOB_DEF_SC_STR;
+extern const char* GLOB_DEF_IM_STR;
+
+extern const char* GLOB_DEF_PS_STR;
+extern const char* GLOB_DEF_M_STR;
+extern const char* GLOB_DEF_N_STR;
+extern const char* GLOB_DEF_K_STR;
+
+extern const char* GLOB_DEF_NR_STR;
+
+extern const char* GLOB_DEF_ALPHA_STR;
+extern const char* GLOB_DEF_BETA_STR;
+
+
 typedef struct params_s
 {
 	// Binary name.
-	char bin[ MAX_STRING_SIZE + 1 ];
+	const char* bin;
 
 	// Operation name.
-	char opname[ MAX_STRING_SIZE + 1 ];
+	const char* opname;
 
 	// Implementation name.
-	char impl[ MAX_STRING_SIZE + 1 ];
-
-#if 0
-	char jc_nt_str[ MAX_STRING_SIZE + 1 ];
-	char pc_nt_str[ MAX_STRING_SIZE + 1 ];
-	char ic_nt_str[ MAX_STRING_SIZE + 1 ];
-	char jr_nt_str[ MAX_STRING_SIZE + 1 ];
-	char ir_nt_str[ MAX_STRING_SIZE + 1 ];
-	long int jc_nt;
-	long int pc_nt;
-	long int ic_nt;
-	long int jr_nt;
-	long int ir_nt;
-#endif
+	const char* impl;
 
 	// Multithreading parameters: number of threads and affinity string.
-	char  nt_str[ MAX_STRING_SIZE + 1 ];
-	char  af_str[ MAX_STRING_SIZE + 1 ];
+	const char* nt_str;
+	long int    nt;
+	const char* af_str;
 
 	// Parameter combinations, datatype, operand storage combination,
 	// and induced method.
-	char  pc_str[ MAX_STRING_SIZE + 1 ];
-	char  dt_str[ MAX_STRING_SIZE + 1 ];
-	char  sc_str[ MAX_STRING_SIZE + 1 ];
+	const char* pc_str;
+	const char* dt_str;
+	const char* sc_str;
 	num_t dt;
 
-	char  im_str[ MAX_STRING_SIZE + 1 ];
+	const char* im_str;
 	ind_t im;
 
 	// Problem size range and dimension specifiers.
-	char     ps_str[ MAX_STRING_SIZE + 1 ];
-	char     m_str[ MAX_STRING_SIZE + 1 ];
-	char     n_str[ MAX_STRING_SIZE + 1 ];
-	char     k_str[ MAX_STRING_SIZE + 1 ];
+	const char* ps_str;
+	const char* m_str;
+	const char* n_str;
+	const char* k_str;
 	long int sta;
 	long int end;
 	long int inc;
@@ -116,12 +104,12 @@ typedef struct params_s
 	long int k;
 
 	// Number of repeats.
-	char     nr_str[ MAX_STRING_SIZE + 1 ];
+	const char* nr_str;
 	long int nr;
 
 	// Value of alpha and beta.
-	char   alpha_str[ MAX_STRING_SIZE + 1 ];
-	char   beta_str[ MAX_STRING_SIZE + 1 ];
+	const char* alpha_str;
+	const char* beta_str;
 	double alpha;
 	double beta;
 

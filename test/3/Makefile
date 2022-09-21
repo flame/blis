@@ -168,10 +168,10 @@ DEF_BLA  := -DBLAS
 DEF_EIG  := -DEIGEN
 
 # Implementation string.
-STR_BLI  := -DIMP_STR=\"blis\"
-STR_OBL  := -DIMP_STR=\"openblas\"
-STR_EIG  := -DIMP_STR=\"eigen\"
-STR_VEN  := -DIMP_STR=\"vendor\"
+STR_BLI  := -DIMPL_STR=\"blis\"
+STR_OBL  := -DIMPL_STR=\"openblas\"
+STR_EIG  := -DIMPL_STR=\"eigen\"
+STR_VEN  := -DIMPL_STR=\"vendor\"
 
 # Single or multithreaded string.
 STR_ST   := -DTHR_STR=\"st\"
