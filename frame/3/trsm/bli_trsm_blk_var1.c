@@ -118,7 +118,7 @@ void bli_trsm_blk_var1
 	// We must execute a barrier here because the upcoming rank-k update
 	// requires the packed matrix B to be fully updated by the trsm
 	// subproblem.
-	bli_thread_barrier( thread );
+	bli_thread_barrier( rntm, thread );
 
 	// Isolate the remaining part of the column panel matrix A, which we do by
 	// acquiring the subpartition ahead of A11 (that is, A21 or A01, depending

@@ -35,10 +35,8 @@
 #ifndef BLIS_SBX_L3_DECOR_H
 #define BLIS_SBX_L3_DECOR_H
 
-// -- sup definitions ----------------------------------------------------------
-
 // Level-3 sup internal function type.
-typedef void (*l3sbxint_t)
+typedef void (*l3sbxint_ft)
      (
        obj_t*     alpha,
        obj_t*     a,
@@ -50,18 +48,37 @@ typedef void (*l3sbxint_t)
        thrinfo_t* thread
      );
 
-// Level-3 sup thread decorator prototype.
+// Level-3 thread decorator function type.
+typedef void (*l3sbx_decor_ft)
+     (
+       l3sbxint_ft func,
+       opid_t      family,
+       obj_t*      alpha,
+       obj_t*      a,
+       obj_t*      b,
+       obj_t*      beta,
+       obj_t*      c,
+       cntx_t*     cntx,
+       rntm_t*     rntm
+     );
+
+// Level-3 thread decorator prototype.
 void bls_l3_thread_decorator
      (
-       l3sbxint_t func,
-       opid_t     family,
-       obj_t*     alpha,
-       obj_t*     a,
-       obj_t*     b,
-       obj_t*     beta,
-       obj_t*     c,
-       cntx_t*    cntx,
-       rntm_t*    rntm
+       l3sbxint_ft func,
+       opid_t      family,
+       obj_t*      alpha,
+       obj_t*      a,
+       obj_t*      b,
+       obj_t*      beta,
+       obj_t*      c,
+       cntx_t*     cntx,
+       rntm_t*     rntm
+     );
+
+void bls_l3_thread_decorator_check
+     (
+       rntm_t* rntm
      );
 
 // Include definitions specific to the method of multithreading.

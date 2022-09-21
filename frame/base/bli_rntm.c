@@ -285,6 +285,11 @@ void bli_rntm_set_ways_from_rntm
 	bli_rntm_set_auto_factor_only( auto_factor, rntm );
 	bli_rntm_set_num_threads_only( nt, rntm );
 	bli_rntm_set_ways_only( jc, pc, ic, jr, ir, rntm );
+
+	// NOTE: The caller should have already set the timpl_t field of the rntm_t,
+	// either in the course of it being initialized via BLIS_RNTM_INITIALIZER
+	// or bli_rntm_init(), or by the user (subsequently) setting the value
+	// directly via bli_rntm_set_thread_impl().
 }
 
 void bli_rntm_set_ways_from_rntm_sup
@@ -418,16 +423,19 @@ void bli_rntm_print
        const rntm_t* rntm
      )
 {
-	dim_t af = bli_rntm_auto_factor( rntm );
+	timpl_t ti = bli_rntm_thread_impl( rntm );
 
-	dim_t nt = bli_rntm_num_threads( rntm );
+	dim_t   af = bli_rntm_auto_factor( rntm );
 
-	dim_t jc = bli_rntm_jc_ways( rntm );
-	dim_t pc = bli_rntm_pc_ways( rntm );
-	dim_t ic = bli_rntm_ic_ways( rntm );
-	dim_t jr = bli_rntm_jr_ways( rntm );
-	dim_t ir = bli_rntm_ir_ways( rntm );
+	dim_t   nt = bli_rntm_num_threads( rntm );
 
+	dim_t   jc = bli_rntm_jc_ways( rntm );
+	dim_t   pc = bli_rntm_pc_ways( rntm );
+	dim_t   ic = bli_rntm_ic_ways( rntm );
+	dim_t   jr = bli_rntm_jr_ways( rntm );
+	dim_t   ir = bli_rntm_ir_ways( rntm );
+
+	printf( "thread impl: %d\n", ti );
 	printf( "rntm contents    nt  jc  pc  ic  jr  ir\n" );
 	printf( "autofac? %1d | %4d%4d%4d%4d%4d%4d\n", (int)af,
 	                                               (int)nt, (int)jc, (int)pc,

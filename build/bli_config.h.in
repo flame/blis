@@ -53,10 +53,16 @@
 
 #if @enable_openmp@
 #define BLIS_ENABLE_OPENMP
+#if @enable_openmp_as_def@
+#define BLIS_ENABLE_OPENMP_AS_DEFAULT
+#endif
 #endif
 
 #if @enable_pthreads@
 #define BLIS_ENABLE_PTHREADS
+#if @enable_pthreads_as_def@
+#define BLIS_ENABLE_PTHREADS_AS_DEFAULT
+#endif
 #endif
 
 #if @enable_jrir_slab@

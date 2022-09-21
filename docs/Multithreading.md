@@ -1,5 +1,5 @@
 # Contents
-
+/
 * **[Contents](Multithreading.md#contents)**
 * **[Introduction](Multithreading.md#introduction)**
 * **[Enabling multithreading](Multithreading.md#enabling-multithreading)**
@@ -9,13 +9,16 @@
   * [Globally via environment variables](Multithreading.md#globally-via-environment-variables)
     * [The automatic way](Multithreading.md#environment-variables-the-automatic-way)
     * [The manual way](Multithreading.md#environment-variables-the-manual-way)
+    * [Overriding the default threading implementation](Multithreading.md#environment-variables-overriding-the-default-threading-implementation)
   * [Globally at runtime](Multithreading.md#globally-at-runtime)
     * [The automatic way](Multithreading.md#globally-at-runtime-the-automatic-way)
     * [The manual way](Multithreading.md#globally-at-runtime-the-manual-way)
+    * [Overriding the default threading implementation](Multithreading.md#globally-at-runtime-overriding-the-default-threading-implementation)
   * [Locally at runtime](Multithreading.md#locally-at-runtime)
     * [Initializing a rntm_t](Multithreading.md#initializing-a-rntm-t)
     * [The automatic way](Multithreading.md#locally-at-runtime-the-automatic-way)
     * [The manual way](Multithreading.md#locally-at-runtime-the-manual-way)
+    * [Overriding the default threading implementation](Multithreading.md#locally-at-runtime-overriding-the-default-threading-implementation)
     * [Using the expert interface](Multithreading.md#locally-at-runtime-using-the-expert-interface)
 * **[Known issues](Multithreading.md#known-issues)**
 * **[Conclusion](Multithreading.md#conclusion)**
@@ -35,13 +38,13 @@ To summarize: In order to observe multithreaded parallelism within a BLIS operat
 
 BLIS disables multithreading by default. In order to allow multithreaded parallelism from BLIS, you must first enable multithreading explicitly at configure-time.
 
-As of this writing, BLIS optionally supports multithreading via either OpenMP or POSIX threads.
+As of this writing, BLIS optionally supports multithreading via OpenMP or POSIX threads(or both).
 
 To enable multithreading via OpenMP, you must provide the `--enable-threading` option to the `configure` script:
 ```
 $ ./configure --enable-threading=openmp auto
 ```
-In this example, we target the `auto` configuration, which is like asking `configure` to choose the most appropriate configuration based on some detection heuristic (e.g. `cpuid` on x86_64). Similarly, to enable multithreading via POSIX threads (pthreads), specify the threading model as `pthreads` instead of `openmp`:
+In this example, we target the `auto` configuration, which is like asking `configure` to choose the most appropriate configuration based on some detection heuristic (e.g. `cpuid` on x86_64 hardware). Similarly, to enable multithreading via POSIX threads (pthreads), specify the threading model as `pthreads` instead of `openmp`:
 ```
 $ ./configure --enable-threading=pthreads auto
 ```
@@ -50,7 +53,12 @@ You can also use the shorthand option for `--enable-threading`, which is `-t`:
 $ ./configure -t openmp auto
 $ ./configure -t pthreads auto
 ```
-For more complete and up-to-date information on the `--enable-threading` option, simply run `configure` with the `--help` (or `-h`) option:
+You may even combine multiple threading implementations into the same library build. We call this "fat threading." When more than one option is given, the first option acts as the default. Note that no matter what arguments you specify for the `-t` option, the single-threaded implementation will always be available.
+```
+$ ./configure -t openmp,pthreads auto
+```
+In the above example, OpenMP will serve as the default threading implementation since it is listed first. This default can be overridden at runtime, though, which is discussed later on.
+For more complete and up-to-date information on the `--enable-threading` option, run `configure` with the `--help` (or `-h`) option:
 ```
 $ ./configure --help
 ```
@@ -129,11 +137,15 @@ Regardless of whether you end up using the automatic or manual way of expressing
 
 The automatic way of specifying parallelism entails setting the total number of threads you wish BLIS to employ in its parallelization. This total number of threads is captured by the `BLIS_NUM_THREADS` environment variable. You can set this variable prior to executing your BLIS-linked executable:
 ```
-$ export GOMP_CPU_AFFINITY="..."  # optional step when using GNU libgomp.
+$ export GOMP_CPU_AFFINITY="0-15"  # optional step when using GNU libgomp.
 $ export BLIS_NUM_THREADS=16
 $ ./my_blis_program
 ```
-This causes BLIS to automatically determine a reasonable threading strategy based on what is known about the operation and problem size. If `BLIS_NUM_THREADS` is not set, BLIS will attempt to query the value of `OMP_NUM_THREADS`. If neither variable is set, the default number of threads is 1.
+If you don't want or need your environment variable assignments to persist after `my_blis_program` completes, you can instead set the variables only for the duration of the program as follows:
+```
+$ GOMP_CPU_AFFINITY="0-15" BLIS_NUM_THREADS=16 ./my_blis_program
+```
+Either of these approaches causes BLIS to automatically determine a reasonable threading strategy based on what is known about the operation and problem size. If `BLIS_NUM_THREADS` is not set, BLIS will attempt to query the value of `BLIS_NT` (a shorthand alternative to `BLIS_NUM_THREADS`). If neither variable is defined, then BLIS will attempt to read `OMP_NUM_THREADS`. If none of these variables is set, the default number of threads is 1.
 
 **Note**: We *highly* discourage use of the `OMP_NUM_THREADS` environment variable to specify multithreading within BLIS and may remove support for it in the future. If you wish to set parallelism globally via environment variables, please use `BLIS_NUM_THREADS`.
 
@@ -165,6 +177,23 @@ Next, which combinations of loops to parallelize depends on which caches are sha
  * If compute resources share an L2 cache but have private L1 caches (example: pairs of cores), try parallelizing the `JR` loop. Here, threads share the same packed block of matrix A but read different packed micropanels of B into their private L1 caches. In some situations, *lightly* parallelizing the `IR` loop may also be effective.
 
 ![The primary algorithm for level-3 operations in BLIS](http://www.cs.utexas.edu/users/field/mm_algorithm_color.png)
+
+### Environment variables: overriding the default threading implementation
+
+Just as you may specify the number of threads for BLIS to use by setting environment variables prior to running your BLIS-linked application, you may also specify your preferred threading implementation. Suppose that you configured BLIS as follows:
+```
+$ ./configure -t openmp,pthreads auto
+```
+This will result in both OpenMP and pthreads implementations being compiled and included within the BLIS library, with OpenMP serving as the default (since it was listed first to the `-t` option). You can link your program against this BLIS library and force the use of pthreads (instead of OpenMP) via environment variables as follows:
+```
+$ BLIS_THREAD_IMPL=pthreads BLIS_NUM_THREADS=8 ./my_blis_program
+```
+You can even disable multithreading altogether by forcing the use of the single-threaded code path:
+```
+$ BLIS_THREAD_IMPL=single ./my_blis_program
+```
+Note that if `BLIS_THREAD_IMPL` is assigned to `single`, any other threading-related variables that may be set, such as `BLIS_NUM_THREADS` or any of the `BLIS_*_NT` variables, are ignored.
+If `BLIS_THREAD_IMPL` is not set, BLIS will attempt to query its shorthand alternative, `BLIS_TI`. If neither value is set, the configure-time default (in the example shown above, OpenMP) will prevail.
 
 ## Globally at runtime
 
@@ -206,6 +235,26 @@ bli_thread_set_ways( 2, 1, 4, 1, 1 );
 ```
 we are requesting 2 ways of parallelism in the `JC` loop and 4 ways of parallelism in the `IC` loop.
 Unlike environment variables, which only allow the user to set the parallelization strategy prior to running the executable, `bli_thread_set_ways()` may be called any time during the normal course of the BLIS-linked application's execution.
+
+### Globally at runtime: overriding the default threading implementation
+
+Let's assume that you configured BLIS as follows:
+```
+$ ./configure -t openmp,pthreads auto
+```
+This will result in both OpenMP and pthreads implementations being compiled and included within the BLIS library, with OpenMP serving as the default (since it was listed first to the `-t` option). You can link your program against this BLIS library and force the use of pthreads (instead of OpenMP) globally at runtime via the following API:
+```c
+void bli_thread_set_thread_impl( timpl_t ti );
+```
+The function takes a `timpl_t`, which is an enumerated type that has three valid values corresponding to the three possible threading implementations: `BLIS_OPENMP`, `BLIS_POSIX`, and `BLIS_SINGLE`. Forcing use of pthreads is as simple as calling:
+```c
+bli_thread_set_thread_impl( BLIS_POSIX )
+```
+You can even disable multithreading altogether by forcing the use of the single-threaded code path:
+```c
+bli_thread_set_thread_impl( BLIS_SINGLE )
+```
+Note that if `BLIS_SINGLE` is specified, any other-related parameters previously set, such as via `bli_thread_set_num_threads()` or `bli_thread_set_ways()`, are ignored.
 
 ## Locally at runtime
 
@@ -261,6 +310,26 @@ So, for example, if we call
 bli_rntm_set_ways( 1, 1, 2, 3, 1, &rntm );
 ```
 we are requesting two ways of parallelism in the `IC` loop and three ways of parallelism in the `JR` loop.
+
+### Locally at runtime: overriding the default threading implementation
+
+Let's assume that you configured BLIS as follows:
+```
+$ ./configure -t openmp,pthreads auto
+```
+This will result in both OpenMP and pthreads implementations being compiled and included within the BLIS library, with OpenMP serving as the default (since it was listed first to the `-t` option). You can link your program against this BLIS library and force the use of pthreads (instead of OpenMP) at runtime, on a per-call basis, by encoding your choice within your `rntm_t`:
+```c
+void bli_rntm_set_thread_impl( timpl_t ti, rntm_t* rntm );
+```
+The function takes a `timpl_t`, which is an enumerated type that has three valid values corresponding to the three possible threading implementations: `BLIS_OPENMP`, `BLIS_POSIX`, and `BLIS_SINGLE`. Forcing use of pthreads is as simple as calling:
+```c
+bli_rntm_set_thread_impl( BLIS_POSIX, &rntm );
+```
+You can even disable multithreading altogether by forcing the use of the single-threaded code path:
+```c
+bli_rntm_set_thread_impl( BLIS_SINGLE, &rntm );
+```
+Note that if `BLIS_SINGLE` is specified, any other-related parameters previously set within the `rntm_t`, such as via `bli_rntm_set_num_threads()` or `bli_rntm_set_ways()`, are ignored.
 
 ### Locally at runtime: using the expert interfaces
 
