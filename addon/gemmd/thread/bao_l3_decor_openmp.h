@@ -32,13 +32,22 @@
 
 */
 
-#ifndef BLIS_SBX_L3_DECOR_OPENMP_H
-#define BLIS_SBX_L3_DECOR_OPENMP_H
-
 // Definitions specific to situations when OpenMP multithreading is enabled.
 #ifdef BLIS_ENABLE_OPENMP
 
-#endif
+void bao_l3_thread_decorator_openmp
+     (
+       l3aoint_ft func,
+       opid_t     family,
+       obj_t*     alpha,
+       obj_t*     a,
+       obj_t*     d,
+       obj_t*     b,
+       obj_t*     beta,
+       obj_t*     c,
+       cntx_t*    cntx,
+       rntm_t*    rntm
+     );
 
 #endif
 

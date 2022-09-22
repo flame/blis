@@ -32,13 +32,18 @@
 
 */
 
-#ifndef BLIS_SBX_L3_DECOR_SINGLE_H
-#define BLIS_SBX_L3_DECOR_SINGLE_H
-
-// Definitions specific to situations when multithreading is disabled.
-#ifndef BLIS_ENABLE_MULTITHREADING
-
-#endif
-
-#endif
-
+void bao_l3_thread_decorator_single
+     (
+       l3aoint_ft func,
+       opid_t     family,
+       //pack_t     schema_a,
+       //pack_t     schema_b,
+       obj_t*     alpha,
+       obj_t*     a,
+       obj_t*     d,
+       obj_t*     b,
+       obj_t*     beta,
+       obj_t*     c,
+       cntx_t*    cntx,
+       rntm_t*    rntm
+     );

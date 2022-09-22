@@ -171,14 +171,22 @@ BLIS_INLINE void bli_thrinfo_set_sub_prenode( thrinfo_t* sub_prenode, thrinfo_t*
 
 // other thrinfo_t-related functions
 
-BLIS_INLINE void* bli_thread_broadcast( const thrinfo_t* t, void* p )
+BLIS_INLINE void* bli_thread_broadcast( const rntm_t* rntm, const thrinfo_t* t, void* p )
 {
-	return bli_thrcomm_bcast( t->ocomm_id, p, t->ocomm );
+	// We can't use any bli_rntm_*() APIs here because they haven't been
+	// defined yet. So we have to manually access the timpl_t field (le ugh).
+	//const timpl_t ti = bli_rntm_thread_impl( rntm );
+
+	return bli_thrcomm_bcast( rntm->thread_impl, t->ocomm_id, p, t->ocomm );
 }
 
-BLIS_INLINE void bli_thread_barrier( const thrinfo_t* t )
+BLIS_INLINE void bli_thread_barrier( const rntm_t* rntm, const thrinfo_t* t )
 {
-	bli_thrcomm_barrier( t->ocomm_id, t->ocomm );
+	// We can't use any bli_rntm_*() APIs here because they haven't been
+	// defined yet. So we have to manually access the timpl_t field (le ugh).
+	//const timpl_t ti = bli_rntm_thread_impl( rntm );
+
+	bli_thrcomm_barrier( rntm->thread_impl, t->ocomm_id, t->ocomm );
 }
 
 

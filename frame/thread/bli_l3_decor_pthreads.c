@@ -40,7 +40,7 @@
 // A data structure to assist in passing operands to additional threads.
 typedef struct thread_data
 {
-	      l3int_t    func;
+	      l3int_ft   func;
 	      opid_t     family;
 	const obj_t*     alpha;
 	const obj_t*     a;
@@ -60,7 +60,7 @@ void* bli_l3_thread_entry( void* data_void )
 {
 	const thread_data_t* data     = data_void;
 
-	const l3int_t        func     = data->func;
+	const l3int_ft       func     = data->func;
 	const opid_t         family   = data->family;
 	const obj_t*         alpha    = data->alpha;
 	const obj_t*         a        = data->a;
@@ -139,24 +139,33 @@ void* bli_l3_thread_entry( void* data_void )
 	return NULL;
 }
 
-void bli_l3_thread_decorator
+//#define PRINT_IMPL
+
+void bli_l3_thread_decorator_pthreads
      (
-             l3int_t func,
-             opid_t  family,
-       const obj_t*  alpha,
-       const obj_t*  a,
-       const obj_t*  b,
-       const obj_t*  beta,
-       const obj_t*  c,
-       const cntx_t* cntx,
-             rntm_t* rntm,
-             cntl_t* cntl
+             l3int_ft func,
+             opid_t   family,
+       const obj_t*   alpha,
+       const obj_t*   a,
+       const obj_t*   b,
+       const obj_t*   beta,
+       const obj_t*   c,
+       const cntx_t*  cntx,
+             rntm_t*  rntm,
+             cntl_t*  cntl
      )
 {
 	err_t r_val;
 
-	// Query the total number of threads from the context.
+	// Query the total number of threads from the rntm_t object.
 	const dim_t n_threads = bli_rntm_num_threads( rntm );
+
+#ifdef PRINT_IMPL
+	const timpl_t ti = bli_rntm_thread_impl( rntm );
+	printf( "l3_decor_pthrea: l3 decor with rntm.thread_impl  = %s\n",
+	        ( ti == BLIS_SINGLE ? "single" :
+	        ( ti == BLIS_OPENMP ? "openmp" : "pthreads" ) ) );
+#endif
 
 	// NOTE: The sba was initialized in bli_init().
 
@@ -243,6 +252,13 @@ void bli_l3_thread_decorator
 	#endif
 	bli_free_intl( datas );
 }
+
+#else
+
+// Define a dummy function bli_l3_thread_entry(), which is needed for
+// consistent dynamic linking behavior when building shared objects in Linux
+// or OSX, or Windows DLLs; otherwise, we risk having an unresolved symbol.
+void* bli_l3_thread_entry( void* data_void ) { return NULL; }
 
 #endif
 

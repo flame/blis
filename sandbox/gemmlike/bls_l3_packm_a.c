@@ -61,7 +61,7 @@ void PASTECH2(bls_,ch,opname) \
 \
 	/* Barrier to make sure all threads are caught up and ready to begin the
 	   packm stage. */ \
-	bli_thread_barrier( thread ); \
+	bli_thread_barrier( rntm, thread ); \
 \
 	/* Compute the size of the memory block eneded. */ \
 	siz_t size_needed = sizeof( ctype ) * m_pack * k_pack; \
@@ -90,7 +90,7 @@ void PASTECH2(bls_,ch,opname) \
 \
 		/* Broadcast the address of the chief thread's passed-in mem_t to all
 		   threads. */ \
-		mem_t* mem_p = bli_thread_broadcast( thread, mem ); \
+		mem_t* mem_p = bli_thread_broadcast( rntm, thread, mem ); \
 \
 		/* Non-chief threads: Copy the contents of the chief thread's
 		   passed-in mem_t to the passed-in mem_t for this thread. (The
@@ -139,7 +139,7 @@ void PASTECH2(bls_,ch,opname) \
 \
 			/* Broadcast the address of the chief thread's passed-in mem_t
 			   to all threads. */ \
-			mem_t* mem_p = bli_thread_broadcast( thread, mem ); \
+			mem_t* mem_p = bli_thread_broadcast( rntm, thread, mem ); \
 \
 			/* Non-chief threads: Copy the contents of the chief thread's
 			   passed-in mem_t to the passed-in mem_t for this thread. (The
@@ -317,7 +317,7 @@ void PASTECH2(bls_,ch,opname) \
 	); \
 \
 	/* Barrier so that packing is done before computation. */ \
-	bli_thread_barrier( thread ); \
+	bli_thread_barrier( rntm, thread ); \
 }
 
 //INSERT_GENTFUNC_BASIC0( packm_a )

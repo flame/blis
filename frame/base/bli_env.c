@@ -95,6 +95,8 @@ char* bli_env_get_str( const char* env )
 	return getenv( env );
 }
 
+
+
 #if 0
 #ifdef _MSC_VER
 #define strerror_r(errno,buf,len) strerror_s(buf,len,errno)

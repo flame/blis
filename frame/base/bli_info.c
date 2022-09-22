@@ -123,6 +123,22 @@ gint_t bli_info_get_enable_pthreads( void )
 	return 0;
 #endif
 }
+gint_t bli_info_get_enable_openmp_as_default( void )
+{
+#ifdef BLIS_ENABLE_OPENMP_AS_DEFAULT
+	return 1;
+#else
+	return 0;
+#endif
+}
+gint_t bli_info_get_enable_pthreads_as_default( void )
+{
+#ifdef BLIS_ENABLE_PTHREADS_AS_DEFAULT
+	return 1;
+#else
+	return 0;
+#endif
+}
 gint_t bli_info_get_thread_part_jrir_slab( void )
 {
 #ifdef BLIS_ENABLE_JRIR_SLAB

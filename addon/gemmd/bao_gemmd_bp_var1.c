@@ -458,7 +458,7 @@ void PASTECH2(bao_,ch,varname) \
 			/* This barrier is needed to prevent threads from starting to pack
 			   the next row panel of B before the current row panel is fully
 			   computed upon. */ \
-			bli_thread_barrier( thread_pb ); \
+			bli_thread_barrier( rntm, thread_pb ); \
 		} \
 	} \
 \
