@@ -40,7 +40,7 @@
 #include "lpgemm_utils.h"
 #include "lpgemm_5loop_interface_apis.h"
 
-AOCL_GEMM_MATMUL(float,float,float,f32f32f32of32)
+AOCL_GEMM_MATMUL(float,float,float,float,f32f32f32of32)
 {
 	trans_t blis_transa;
 	trans_t blis_transb;

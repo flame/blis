@@ -38,6 +38,21 @@ GEN_FILL_ARRAY_FUNC(int8_t)
 GEN_FILL_ARRAY_FUNC(float)
 GEN_FILL_ARRAY_FUNC(int32_t)
 
+inline void float_to_bf16( float* float_value, bfloat16* bf16_val )
+{
+	/*Set offset 2 to copy most significant 2 bytes of float 
+	to convert float values to bf16 values*/
+	memcpy( ( bf16_val ), (char *)( float_value ) + 2, sizeof ( bfloat16 ) );
+}
+
+inline void convert_float_arr_to_bf16( float* array, bfloat16* array_bf16, int size )
+{
+	for (int i=0; i< size; i++)
+	{
+		float_to_bf16( ( array + i ), ( array_bf16 + i ) );
+	}
+}
+
 #define GEN_FILL_ARRAY_POST_OPS_FUNC(ctype) \
 void fill_array_post_ops_ ## ctype ( void* arr, dim_t size ) \
 { \
@@ -52,7 +67,7 @@ GEN_FILL_ARRAY_POST_OPS_FUNC(int16_t)
 GEN_FILL_ARRAY_POST_OPS_FUNC(int32_t)
 GEN_FILL_ARRAY_POST_OPS_FUNC(float)
 
-#define GEN_BLIS_MAT_MUL_FUNC(A_type,B_type,C_type,BLAS_SFX) \
+#define GEN_BLIS_MAT_MUL_FUNC(A_type,B_type,C_type,ACCUM_type,BLAS_SFX) \
 void mat_mul_ ## BLAS_SFX \
      ( \
        char    stor_order, \
@@ -60,12 +75,12 @@ void mat_mul_ ## BLAS_SFX \
        dim_t   m, \
        dim_t   n, \
        dim_t   k, \
-       C_type  alpha, \
+       ACCUM_type  alpha, \
        A_type* a, \
        dim_t   lda, \
        B_type* b, \
        dim_t   ldb, \
-       C_type  beta, \
+       ACCUM_type  beta, \
        C_type* c, \
        dim_t   ldc, \
        aocl_post_op*  post_op\
@@ -153,11 +168,13 @@ void mat_mul_ ## BLAS_SFX \
 	} */\
 } \
 
-GEN_BLIS_MAT_MUL_FUNC(uint8_t,int8_t,int16_t,u8s8s16os16)
-GEN_BLIS_MAT_MUL_FUNC(uint8_t,int8_t,int8_t,u8s8s16os8)
-GEN_BLIS_MAT_MUL_FUNC(uint8_t,int8_t,int32_t,u8s8s32os32)
-GEN_BLIS_MAT_MUL_FUNC(uint8_t,int8_t,int8_t,u8s8s32os8)
-GEN_BLIS_MAT_MUL_FUNC(float,float,float,f32f32f32of32)
+GEN_BLIS_MAT_MUL_FUNC(uint8_t,int8_t,int16_t,int16_t,u8s8s16os16)
+GEN_BLIS_MAT_MUL_FUNC(uint8_t,int8_t,int8_t,int16_t,u8s8s16os8)
+GEN_BLIS_MAT_MUL_FUNC(uint8_t,int8_t,int32_t,int32_t,u8s8s32os32)
+GEN_BLIS_MAT_MUL_FUNC(uint8_t,int8_t,int8_t,int32_t,u8s8s32os8)
+GEN_BLIS_MAT_MUL_FUNC(bfloat16,bfloat16,float,float,bf16bf16f32of32)
+GEN_BLIS_MAT_MUL_FUNC(bfloat16,bfloat16,bfloat16,float,bf16bf16f32obf16)
+GEN_BLIS_MAT_MUL_FUNC(float,float,float,float,f32f32f32of32)
 
 double get_gflops
      (
@@ -189,7 +206,7 @@ void print_result
 			msg, m, n, k, lda, ldb, ldc, gflops, n_repeats);
 }
 
-#define GEN_MAT_MUL_BENCH_DRV_FUNC(A_type,B_type,C_type,BLAS_SFX) \
+#define GEN_MAT_MUL_BENCH_DRV_FUNC(A_type,B_type,C_type,ACCUM_type,BLAS_SFX) \
 void mat_mul_bench_driver_ ## BLAS_SFX \
      ( \
        char    stor_order, \
@@ -198,12 +215,12 @@ void mat_mul_bench_driver_ ## BLAS_SFX \
        dim_t   m, \
        dim_t   n, \
        dim_t   k, \
-       C_type  alpha, \
+       ACCUM_type  alpha, \
        A_type* a, \
        dim_t   lda, \
        B_type* b, \
        dim_t   ldb, \
-       C_type  beta, \
+       ACCUM_type  beta, \
        C_type* c, \
        dim_t   ldc, \
        aocl_post_op*  post_op\
@@ -242,26 +259,167 @@ void mat_mul_bench_driver_ ## BLAS_SFX \
 	print_result( XSTR(BLAS_SFX), n_repeats, m, n, k, lda, ldb, ldc, min_time_diff); \
 } \
 
-GEN_MAT_MUL_BENCH_DRV_FUNC(uint8_t,int8_t,int16_t,u8s8s16os16)
-GEN_MAT_MUL_BENCH_DRV_FUNC(uint8_t,int8_t,int8_t,u8s8s16os8)
-GEN_MAT_MUL_BENCH_DRV_FUNC(uint8_t,int8_t,int32_t,u8s8s32os32)
-GEN_MAT_MUL_BENCH_DRV_FUNC(uint8_t,int8_t,int8_t,u8s8s32os8)
-GEN_MAT_MUL_BENCH_DRV_FUNC(float,float,float,f32f32f32of32)
+GEN_MAT_MUL_BENCH_DRV_FUNC(uint8_t,int8_t,int16_t,int16_t,u8s8s16os16)
+GEN_MAT_MUL_BENCH_DRV_FUNC(uint8_t,int8_t,int8_t,int16_t,u8s8s16os8)
+GEN_MAT_MUL_BENCH_DRV_FUNC(uint8_t,int8_t,int32_t,int32_t,u8s8s32os32)
+GEN_MAT_MUL_BENCH_DRV_FUNC(uint8_t,int8_t,int8_t,int32_t,u8s8s32os8)
+GEN_MAT_MUL_BENCH_DRV_FUNC(bfloat16,bfloat16,float,float,bf16bf16f32of32)
+GEN_MAT_MUL_BENCH_DRV_FUNC(bfloat16,bfloat16,bfloat16,float,bf16bf16f32obf16)
+GEN_MAT_MUL_BENCH_DRV_FUNC(float,float,float,float,f32f32f32of32)
 
-#define GEN_MAT_MUL_ACC_CHK_DRV_FUNC(A_type,B_type,C_type,DSCALE_type,SCALE_type,BLAS_SFX) \
+
+#define GEN_MAT_MUL_ACC_CHK_DOWNSCALE(C_type,ACCUM_type,SCALE_type,BLAS_DOWNSCALE_SFX) \
+inline C_type mat_mul_accuracy_check_downscale_ ## BLAS_DOWNSCALE_SFX \
+     (\
+       ACCUM_type temp_accum,\
+       C_type out_temp_accum, \
+       aocl_post_op*  post_op, \
+       dim_t j \
+     )\
+{\
+	out_temp_accum = ( C_type )lroundf( ( SCALE_type )temp_accum * \
+					 ( *( ( SCALE_type* )post_op->sum.scale_factor + j ) ) ); \
+	return 	out_temp_accum; \
+}\
+
+GEN_MAT_MUL_ACC_CHK_DOWNSCALE(int8_t,int16_t,float,u8s8s16os8)
+GEN_MAT_MUL_ACC_CHK_DOWNSCALE(int8_t,int32_t,float,u8s8s32os8)
+
+inline bfloat16 mat_mul_accuracy_check_downscale_bf16bf16f32obf16
+     (
+       float temp_accum, 
+       bfloat16 out_temp_accum, 
+       aocl_post_op*  post_op, 
+       dim_t j
+     )
+{
+	float_to_bf16( ( &temp_accum ), ( &out_temp_accum ) );
+	return out_temp_accum;
+}
+
+#define GEN_MAT_MUL_ACC_CHK_ACCUM(A_type, B_type, C_type,ACCUM_type,BLAS_SFX) \
+inline ACCUM_type mat_mul_accuracy_check_accum_ ## BLAS_SFX \
+     (\
+       A_type* a, \
+       B_type* b, \
+       C_type* c_ref, \
+       ACCUM_type temp_accum,\
+       ACCUM_type  alpha, \
+       ACCUM_type beta, \
+       dim_t rs_a, \
+       dim_t rs_b, \
+       dim_t cs_a, \
+       dim_t cs_b, \
+       dim_t rs_c_ref, \
+       dim_t cs_c_ref, \
+       dim_t i, \
+       dim_t j, \
+       dim_t k \
+     )\
+{\
+	for ( dim_t p = 0; p < k; ++p) \
+	{ \
+		temp_accum += ( *( a + ( i * rs_a ) + ( cs_a * p ) ) * \
+		                 *( b + ( rs_b * p ) + ( cs_b * j ) ) ); \
+	} \
+\
+	temp_accum = ( beta * ( * (c_ref + ( rs_c_ref * i ) + ( cs_c_ref * j ) ) ) ) \
+			             + ( alpha * temp_accum ); \
+	return temp_accum; \
+}\
+
+GEN_MAT_MUL_ACC_CHK_ACCUM(uint8_t,int8_t,int8_t,int16_t,u8s8s16os8)
+GEN_MAT_MUL_ACC_CHK_ACCUM(uint8_t,int8_t,int16_t,int16_t,u8s8s16os16)
+GEN_MAT_MUL_ACC_CHK_ACCUM(uint8_t,int8_t,int8_t,int32_t,u8s8s32os8)
+GEN_MAT_MUL_ACC_CHK_ACCUM(uint8_t,int8_t,int32_t,int32_t,u8s8s32os32)
+GEN_MAT_MUL_ACC_CHK_ACCUM(float,float,float,float,f32f32f32of32)
+
+inline float bf16_to_float 
+     (
+       bfloat16 bf16_val
+     )
+{
+	int32_t inter_temp = *( ( int16_t* ) &bf16_val );
+	inter_temp = inter_temp << 16; 
+	float float_value = *( float* ) ( &inter_temp );
+	return float_value;
+}
+	
+inline float mat_mul_accuracy_check_accum_bf16bf16f32of32
+     (
+       bfloat16* a, 
+       bfloat16* b, 
+       float* c_ref, 
+       float temp_accum,
+       float  alpha, 
+       float beta, 
+       dim_t rs_a, 
+       dim_t rs_b,
+       dim_t cs_a, 
+       dim_t cs_b, 
+       dim_t rs_c_ref,
+       dim_t cs_c_ref, 
+       dim_t i, 
+       dim_t j, 
+       dim_t k 
+     )
+{
+	for ( dim_t p = 0; p < k; ++p) 
+	{ 
+		float a_float = bf16_to_float( *( a + i * rs_a + p * cs_a ) ); 
+		float b_float = bf16_to_float( *( b + p * rs_b + j * cs_b ) ); 
+		temp_accum += ( ( a_float ) * ( b_float ) ); 
+	} 
+	temp_accum = ( beta * ( * (c_ref + ( rs_c_ref * i ) + ( cs_c_ref * j ) ) ) ) 
+			             + ( alpha * temp_accum ); 
+	return temp_accum; 					 
+}
+
+inline float mat_mul_accuracy_check_accum_bf16bf16f32obf16
+     (
+       bfloat16* a, 
+       bfloat16* b, 
+       bfloat16* c_ref, 
+       float temp_accum,
+       float  alpha, 
+       float beta, 
+       dim_t rs_a, 
+       dim_t rs_b,
+       dim_t cs_a, 
+       dim_t cs_b, 
+       dim_t rs_c_ref,
+       dim_t cs_c_ref,  
+       dim_t i, 
+       dim_t j, 
+       dim_t k  
+     )
+{
+	for ( dim_t p = 0; p < k; ++p) 
+	{ 
+		float a_float = bf16_to_float( *( a + i*rs_a + p*cs_a ) ); 
+		float b_float = bf16_to_float( *( b + p*rs_b + j*cs_b ) ); 
+		temp_accum += ( ( a_float ) * ( b_float ) ); 
+	}  
+	float c_ref_float = bf16_to_float( *( c_ref + i*rs_c_ref + j*cs_c_ref ) ); 
+	temp_accum = ( beta * ( c_ref_float ) ) + ( alpha * temp_accum ); 
+
+	return temp_accum; 
+}
+
+#define GEN_MAT_MUL_ACC_CHK_DRV_FUNC(A_type,B_type,C_type,ACCUM_type,SCALE_type,BLAS_SFX,BLAS_DOWNSCALE_SFX) \
 void mat_mul_accuracy_check_driver_ ## BLAS_SFX \
      ( \
        FILE*   fout, \
-	   const char stor_order, \
+       const char stor_order, \
        dim_t   m, \
        dim_t   n, \
        dim_t   k, \
-       C_type  alpha, \
+       ACCUM_type  alpha, \
        A_type* a, \
        dim_t   lda, \
        B_type* b, \
        dim_t   ldb, \
-       C_type  beta, \
+       ACCUM_type  beta, \
        C_type* c, \
        dim_t   ldc, \
        C_type* c_ref, \
@@ -294,18 +452,12 @@ void mat_mul_accuracy_check_driver_ ## BLAS_SFX \
 	{ \
 		for ( dim_t j = 0; j < n; ++j ) \
 		{ \
-			DSCALE_type temp_accum = 0; \
+			ACCUM_type temp_accum = 0; \
 			C_type out_temp_accum = 0; \
  \
-			for ( dim_t p = 0; p < k; ++p) \
-			{ \
-				temp_accum += ( *( a + ( i * rs_a ) + ( cs_a * p ) ) * \
-								*( b + ( rs_b * p ) + ( cs_b * j ) ) ); \
-			} \
- \
-			temp_accum = ( beta * ( * (c_ref + ( rs_c_ref * i ) + \
-							( cs_c_ref * j ) ) ) ) + ( alpha * temp_accum ); \
- \
+			temp_accum = GEN_FUNC_NAME(mat_mul_accuracy_check_accum_,BLAS_SFX) \
+			    (a,b,c_ref,temp_accum,alpha,beta,rs_a,rs_b,cs_a,cs_b,rs_c_ref,cs_c_ref,i,j,k); \
+\
 			if ( post_op != NULL ) \
 			{ \
 				/* Apply bias followed by relu. */ \
@@ -313,7 +465,7 @@ void mat_mul_accuracy_check_driver_ ## BLAS_SFX \
 				{ \
 					if ( post_op->seq_length >= 1 ) \
 					{ \
-						temp_accum += ( *( ( DSCALE_type* )post_op->bias.bias + j ) ); \
+						temp_accum += ( *( ( ACCUM_type* )post_op->bias.bias + j ) ); \
 					} \
 					if ( ( post_op->seq_length > 1 ) && \
 						 ( post_op->seq_vector[1] == ELTWISE ) ) \
@@ -323,7 +475,7 @@ void mat_mul_accuracy_check_driver_ ## BLAS_SFX \
 							temp_accum = ( temp_accum > 0 ) ? \
 								temp_accum : \
 								( temp_accum * \
-								*( ( DSCALE_type* ) post_op->eltwise.algo.alpha ) ); \
+								*( ( ACCUM_type* ) post_op->eltwise.algo.alpha ) ); \
 						} \
 						else \
 						{ \
@@ -339,7 +491,7 @@ void mat_mul_accuracy_check_driver_ ## BLAS_SFX \
 						{ \
 							temp_accum = ( temp_accum > 0 ) ? \
 									temp_accum : \
-									( temp_accum * *( ( DSCALE_type* ) post_op->eltwise.algo.alpha ) ); \
+									( temp_accum * *( ( ACCUM_type* ) post_op->eltwise.algo.alpha ) ); \
 						} \
 						else \
 						{ \
@@ -348,14 +500,14 @@ void mat_mul_accuracy_check_driver_ ## BLAS_SFX \
 					} \
 					if ( ( post_op->seq_length > 1 ) && ( post_op->seq_vector[1] == BIAS ) ) \
 					{ \
-						temp_accum += ( *( ( DSCALE_type* )post_op->bias.bias + j ) ); \
+						temp_accum += ( *( ( ACCUM_type* )post_op->bias.bias + j ) ); \
 					} \
 				} \
 			} \
 			if ( global_dscale_out == 'y' ) \
 			{ \
-				out_temp_accum = ( C_type )lroundf( ( SCALE_type )temp_accum * \
-								( *( ( SCALE_type* )post_op->sum.scale_factor + j ) ) ); \
+				out_temp_accum = GEN_FUNC_NAME(mat_mul_accuracy_check_downscale_,BLAS_DOWNSCALE_SFX) \
+				        (temp_accum, out_temp_accum, post_op, j); \
 			} \
 			else \
 			{ \
@@ -380,11 +532,13 @@ cleanup_acc: \
 	return; \
 } \
 
-GEN_MAT_MUL_ACC_CHK_DRV_FUNC(uint8_t,int8_t,int16_t,int16_t,float,u8s8s16os16)
-GEN_MAT_MUL_ACC_CHK_DRV_FUNC(uint8_t,int8_t,int8_t,int16_t,float,u8s8s16os8)
-GEN_MAT_MUL_ACC_CHK_DRV_FUNC(uint8_t,int8_t,int32_t,int32_t,float,u8s8s32os32)
-GEN_MAT_MUL_ACC_CHK_DRV_FUNC(uint8_t,int8_t,int8_t,int32_t,float,u8s8s32os8)
-GEN_MAT_MUL_ACC_CHK_DRV_FUNC(float,float,float,float,float,f32f32f32of32)
+GEN_MAT_MUL_ACC_CHK_DRV_FUNC(uint8_t,int8_t,int16_t,int16_t,float,u8s8s16os16,u8s8s16os8)
+GEN_MAT_MUL_ACC_CHK_DRV_FUNC(uint8_t,int8_t,int8_t,int16_t,float,u8s8s16os8,u8s8s16os8)
+GEN_MAT_MUL_ACC_CHK_DRV_FUNC(uint8_t,int8_t,int32_t,int32_t,float,u8s8s32os32,u8s8s32os8)
+GEN_MAT_MUL_ACC_CHK_DRV_FUNC(uint8_t,int8_t,int8_t,int32_t,float,u8s8s32os8,u8s8s32os8)
+GEN_MAT_MUL_ACC_CHK_DRV_FUNC(bfloat16,bfloat16,float,float,float,bf16bf16f32of32,bf16bf16f32obf16)
+GEN_MAT_MUL_ACC_CHK_DRV_FUNC(bfloat16,bfloat16,bfloat16,float,float,bf16bf16f32obf16,bf16bf16f32obf16)
+GEN_MAT_MUL_ACC_CHK_DRV_FUNC(float,float,float,float,float,f32f32f32of32,bf16bf16f32obf16) 
 
 /* Only supports bias followed by RELU and vice versa for now.*/ \
 #define GEN_MAT_MUL_POST_OPS_CREATOR(C_type,DSCALE_type,BLAS_SFX) \
@@ -506,6 +660,7 @@ aocl_post_op* lpgemm_create_post_ops_struct_ ## BLAS_SFX \
 
 GEN_MAT_MUL_POST_OPS_CREATOR(int16_t,float,u8s8s16os16)
 GEN_MAT_MUL_POST_OPS_CREATOR(int32_t,float,u8s8s32os32)
+GEN_MAT_MUL_POST_OPS_CREATOR(float,float,bf16bf16f32of32) 
 GEN_MAT_MUL_POST_OPS_CREATOR(float,float,f32f32f32of32)
 
 void lpgemm_destroy_post_ops_struct( aocl_post_op* post_ops )
@@ -548,7 +703,7 @@ void mat_mul_bench_main_ ## BLAS_SFX \
        int32_t stride_a, \
        int32_t stride_b, \
        int32_t stride_c, \
-	   char*   post_ops_str \
+       char*   post_ops_str \
      ) \
 { \
 	if ( ( op_t != 'p' ) && ( op_t != 'P' ) && ( op_t != 'r' ) && ( op_t != 'R' ) ) \
@@ -680,6 +835,163 @@ GEN_MAT_MUL_BENCH_MAIN_FUNC(uint8_t,int8_t,int32_t,u8s8s32os32,u8s8s32os32)
 GEN_MAT_MUL_BENCH_MAIN_FUNC(uint8_t,int8_t,int8_t,u8s8s32os8,u8s8s32os32)
 GEN_MAT_MUL_BENCH_MAIN_FUNC(float,float,float,f32f32f32of32,f32f32f32of32)
 
+#define GEN_MAT_MUL_BENCH_MAIN_FUNC_BF16(C_type, BLAS_SFX) \
+void mat_mul_bench_main_ ## BLAS_SFX \
+     ( \
+       FILE*   fin, \
+       FILE*   fout, \
+	   char    stor_order, \
+       char    op_t, \
+       int32_t m, \
+       int32_t n, \
+       int32_t k, \
+       int32_t stride_a, \
+       int32_t stride_b, \
+       int32_t stride_c, \
+	   char*   post_ops_str \
+     ) \
+{ \
+	if ( ( op_t != 'p' ) && ( op_t != 'P' ) && ( op_t != 'r' ) && ( op_t != 'R' ) ) \
+	{ \
+		printf("The op_t ( 2nd arg in input.txt) is not valid\n");\
+		return; \
+	} \
+ \
+	int32_t n_repeats = bli_max( 30, bli_min(( 3e10 / ( ( int64_t )m * n * k )), 1000 )); \
+	if ( global_n_repeat > 0 ) \
+	{ \
+		n_repeats = global_n_repeat; \
+	} \
+ \
+	/* Get 64 byte aligned memory.*/ \
+	bfloat16* a = ( bfloat16* ) bli_malloc_user( sizeof( bfloat16 ) * m * k ); \
+	float *a_float = bli_malloc_user( m * k * sizeof( float )); \
+	for ( int32_t i = 0; i < m*k; ++i ) \
+    { \
+        a_float[i] = ( float ) ( i % 5 ); \
+    } \
+	convert_float_arr_to_bf16( a_float, a, m * k ); \
+ \
+	bfloat16* b = ( bfloat16* ) bli_malloc_user( sizeof( bfloat16 ) * n * k ); \
+	float *b_float = bli_malloc_user( k * n * sizeof( float ));  \
+	for ( int32_t i = 0; i < k*n; ++i ) \
+	{ \
+		b_float[i] = ( float ) ( i % 5 );\
+	} \
+	convert_float_arr_to_bf16( b_float, b, k * n ); \
+ \
+	C_type* c = ( C_type* ) bli_malloc_user( sizeof( C_type ) * m * n ); \
+	memset( ( void* ) c, 0, sizeof( C_type ) * m * n ); \
+ \
+	C_type* c_ref = ( C_type* ) bli_malloc_user( sizeof( C_type ) * m * n ); \
+	memset( ( void* ) c_ref, 0, sizeof( C_type ) * m * n ); \
+ \
+	float alpha; \
+	float beta; \
+	if ( bench_mode == 'p' ) \
+	{ \
+		alpha = 1; \
+		beta = 0; \
+	} \
+	else if ( bench_mode == 'a' ) \
+	{ \
+		alpha = 2; \
+		beta = 9; \
+	} 	\
+ \
+	aocl_post_op* post_op = NULL; \
+	if ( ( post_ops_str != NULL ) || ( global_dscale_out == 'y' ) ) \
+	{ \
+		post_op = lpgemm_create_post_ops_struct_bf16bf16f32of32( m, n, post_ops_str ); \
+		if ( post_op == NULL ) \
+		{ \
+			printf(" post op struct allocation failure, returning.\n"); \
+			return; \
+		} \
+	} \
+ \
+	if ( ( op_t == 'p' ) || ( op_t == 'P' ) ) \
+	{ \
+		/* No reordering of B.*/ \
+		GEN_FUNC_NAME(mat_mul_bench_driver_,BLAS_SFX) \
+		( \
+		  stor_order, op_t, n_repeats, m, n, k, \
+		  alpha, \
+		  a, stride_a, \
+		  b, stride_b, \
+		  beta, \
+		  c, stride_c, \
+		  post_op \
+		); \
+	} \
+	else if ( ( op_t == 'r' ) || ( op_t == 'R' ) ) \
+	{ \
+		/* Reorder B.*/ \
+		siz_t b_reorder_buf_siz_req = \
+			aocl_get_reorder_buf_size_bf16bf16f32of32( 'B', k, n ); \
+ \
+		bfloat16* b_reorder = ( bfloat16* ) bli_malloc_user( b_reorder_buf_siz_req ); \
+			aocl_reorder_bf16bf16f32of32( 'B', b, b_reorder, k, n, stride_b ); \
+ \
+		GEN_FUNC_NAME(mat_mul_bench_driver_,BLAS_SFX) \
+		( \
+		  stor_order, op_t, n_repeats, m, n, k, \
+		  alpha, \
+		  a, stride_a, \
+		  b_reorder, stride_b, \
+		  beta, \
+		  c, stride_c, \
+		  post_op \
+		); \
+	} \
+ \
+if ( bench_mode == 'a' ) \
+	{ \
+		printf(" Running accuracy check.\n"); \
+		GEN_FUNC_NAME(mat_mul_accuracy_check_driver_,BLAS_SFX) \
+		( \
+		  fout, stor_order, m, n, k, \
+		  alpha, \
+		  a, stride_a, \
+		  b, stride_b, \
+		  beta, \
+		  c, stride_c, \
+		  c_ref, stride_c, \
+		  post_op \
+		); \
+	} \
+ \
+	lpgemm_destroy_post_ops_struct( post_op ); \
+ \
+	if ( a != NULL ) \
+	{ \
+		bli_free_user( a ); \
+	} \
+	if ( b != NULL ) \
+	{ \
+		bli_free_user( b ); \
+	} \
+	if ( a_float != NULL ) \
+	{ \
+		bli_free_user( a_float ); \
+	} \
+	if ( b_float != NULL ) \
+	{ \
+		bli_free_user( b_float ); \
+	} \
+	if ( c != NULL ) \
+	{ \
+		bli_free_user( c ); \
+	} \
+	if ( c_ref != NULL ) \
+ 	{ \
+ 		bli_free_user( c_ref ); \
+ 	} \
+} \
+
+GEN_MAT_MUL_BENCH_MAIN_FUNC_BF16(float,bf16bf16f32of32)
+GEN_MAT_MUL_BENCH_MAIN_FUNC_BF16(bfloat16,bf16bf16f32obf16)
+
 int main( int argc, char** argv )
 {
 	FILE* fin  = NULL;
@@ -692,7 +1004,9 @@ int main( int argc, char** argv )
 						"\nPost ops can be executed optionaly by providing a " \
 						"coma separated list of ops after -o arg.\nCurrently " \
 						"bias and relu/prelu is supported and can be specified " \
-			 			"as a single post op or combination of the same. eg: -o bias,relu ; -o prelu.\n" );
+			 			"as a single post op or combination of the same. eg: -o bias,relu ; -o prelu." \
+						"\nDownscaled version of an API can be enabled by using -d arg. " \
+						"downscale is used to enable- u8s8s32os8, u8s8s16os8 or bf16bf16f32obf16 \n" );
 		exit( 1 );
 	}
 
@@ -857,6 +1171,27 @@ int main( int argc, char** argv )
 						post_ops_str_dest
 					);
 				}
+			}
+			if ((op_type_char == 'b') || (op_type_char == 'B'))
+			{
+				if ( global_dscale_out == 'n' )
+				{
+					GEN_FUNC_NAME(mat_mul_bench_main_, bf16bf16f32of32)
+					(
+						fin, fout, stor_order, op_t,
+						m, n, k, stride_a, stride_b, stride_c,
+						post_ops_str_dest
+					);
+				}
+				else
+				{
+					GEN_FUNC_NAME(mat_mul_bench_main_, bf16bf16f32obf16)
+					(
+						fin, fout, stor_order, op_t,
+						m, n, k, stride_a, stride_b, stride_c,
+						post_ops_str_dest
+					);
+				}	
 			}
 			if ( post_ops_str != NULL )
 			{

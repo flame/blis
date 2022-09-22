@@ -41,7 +41,7 @@
 #include "lpgemm_config.h"
 #include "lpgemm_utils.h"
 
-AOCL_GEMM_MATMUL(bfloat16,bfloat16,float,bf16bf16f32of32)
+AOCL_GEMM_MATMUL(bfloat16,bfloat16,float,float,bf16bf16f32of32)
 {
 	trans_t blis_transa;
 	trans_t blis_transb;

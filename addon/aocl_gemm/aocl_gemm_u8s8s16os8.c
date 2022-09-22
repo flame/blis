@@ -41,7 +41,7 @@
 #include "lpgemm_thread_decor_openmp.h"
 #include "lpgemm_post_ops.h"
 
-AOCL_GEMM_MATMUL(uint8_t,int8_t,int8_t,u8s8s16os8)
+AOCL_GEMM_MATMUL(uint8_t,int8_t,int8_t,int16_t,u8s8s16os8)
 {
 	trans_t blis_transa;
 	trans_t blis_transb;
