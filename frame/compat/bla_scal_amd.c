@@ -208,14 +208,14 @@ void dscal_blis_impl
     /* Initialize BLIS  */
     //bli_init_auto();
 
-	if (*n == 0 || alpha == NULL) {
-		AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
-		return;
-	}
-
     /* Convert typecast negative values of n to zero. */
     if ( *n < 0 ) n0 = ( dim_t )0;
-    else              n0 = ( dim_t )(*n);
+    else          n0 = ( dim_t )(*n);
+
+    if (*n == 0 || alpha == NULL) {
+        AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
+        return;
+    }
 
     /* If the input increments are negative, adjust the pointers so we can
        use positive increments instead. */
@@ -247,25 +247,98 @@ void dscal_blis_impl
     // This function is invoked on all architectures including ‘generic’.
     // Non-AVX platforms will use the kernels derived from the context.
     if (bli_cpuid_is_avx_supported() == TRUE){
-	    bli_dscalv_zen_int10
-		    (
-		     BLIS_NO_CONJUGATE,
-		     n0,
-		     (double*) alpha,
-		     x0, incx0,
-		     NULL
-		    );
+#ifdef BLIS_ENABLE_OPENMP
+        // For sizes less than 10000, optimal number of threads is 1, but
+        // due to the overhead of calling omp functions it is being done outside
+        // by directly calling dscalv so as to get maximum performance.
+        if ( n0 <= 10000 )
+        {
+            bli_dscalv_zen_int10
+            (
+              BLIS_NO_CONJUGATE,
+              n0,
+              (double*) alpha,
+              x0, incx0,
+              NULL
+            );
+        }
+        else
+        {
+            rntm_t rntm_local;
+            bli_rntm_init_from_global( &rntm_local );
+            dim_t nt = bli_rntm_num_threads( &rntm_local );
+
+#ifdef AOCL_DYNAMIC
+            dim_t nt_ideal;
+
+            if      ( n0 <= 20000 ) nt_ideal = 2;
+            else if ( n0 <= 50000 ) nt_ideal = 4;
+            else                    nt_ideal = 8;
+
+            nt = bli_min( nt_ideal, nt );
+#endif
+
+            dim_t n_elem_per_thrd = n0 / nt;
+            dim_t n_elem_rem = n0 % nt;
+
+            #pragma omp parallel num_threads( nt )
+            {
+                // The following conditions handle the optimal distribution of
+                // load among the threads.
+                // Say we have n0 = 50 & nt = 4.
+                // So we get 12 ( n0 / nt ) elements per thread along with 2
+                // remaining elements. Each of these remaining elements is given
+                // to the last threads, respectively.
+                // So, t0, t1, t2 and t3 gets 12, 12, 13 and 13 elements,
+                // respectively.
+                dim_t t_id = omp_get_thread_num();
+                dim_t npt, offset;
+
+                if ( t_id < ( nt - n_elem_rem ) )
+                {
+                    npt = n_elem_per_thrd;
+                    offset = t_id * npt * incx0;
+                }
+                else
+                {
+                    npt = n_elem_per_thrd + 1;
+                    offset = ( ( t_id * n_elem_per_thrd ) +
+                               ( t_id - ( nt - n_elem_rem ) ) ) * incx0;
+                }
+
+                bli_dscalv_zen_int10
+                (
+                  BLIS_NO_CONJUGATE,
+                  npt,
+                  (double*) alpha,
+                  x0 + offset, incx0,
+                  NULL
+                );
+            }
+        }
+#else
+        // Default call to dscalv for single-threaded work
+        bli_dscalv_zen_int10
+        (
+          BLIS_NO_CONJUGATE,
+          n0,
+          (double*) alpha,
+          x0, incx0,
+          NULL
+        );
+#endif
     }
-    else{
-	    PASTEMAC2(d,scalv,BLIS_TAPI_EX_SUF) \
-		    ( \
-		      BLIS_NO_CONJUGATE,\
-		      n0, \
-		      (double *)alpha,\
-		      x0, incx0,\
-		      NULL, \
-		      NULL  \
-		    );\
+    else
+    {
+        PASTEMAC2(d,scalv,BLIS_TAPI_EX_SUF) \
+          ( \
+            BLIS_NO_CONJUGATE,\
+            n0, \
+            (double *)alpha,\
+            x0, incx0,\
+            NULL, \
+            NULL  \
+          );\
     }
 
     /* Finalize BLIS. */
@@ -285,3 +358,4 @@ void dscal_
 INSERT_GENTFUNCSCAL_BLAS_CZ( scal, scalv )
 
 #endif
+
