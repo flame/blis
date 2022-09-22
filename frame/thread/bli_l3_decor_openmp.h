@@ -39,6 +39,20 @@
 // Definitions specific to situations when OpenMP multithreading is enabled.
 #ifdef BLIS_ENABLE_OPENMP
 
+void bli_l3_thread_decorator_openmp
+     (
+             l3int_ft func,
+             opid_t   family,
+       const obj_t*   alpha,
+       const obj_t*   a,
+       const obj_t*   b,
+       const obj_t*   beta,
+       const obj_t*   c,
+       const cntx_t*  cntx,
+             rntm_t*  rntm,
+             cntl_t*  cntl
+     );
+
 void bli_l3_thread_decorator_thread_check
      (
        dim_t      n_threads,

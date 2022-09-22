@@ -39,7 +39,7 @@
 // -- sup definitions ----------------------------------------------------------
 
 // Level-3 sup internal function type.
-typedef err_t (*l3supint_t)
+typedef err_t (*l3supint_ft)
      (
        const obj_t*     alpha,
        const obj_t*     a,
@@ -51,18 +51,37 @@ typedef err_t (*l3supint_t)
              thrinfo_t* thread
      );
 
+// Level-3 sup thread decorator function type.
+typedef err_t (*l3_sup_decor_ft)
+     (
+             l3supint_ft func,
+             opid_t      family,
+       const obj_t*      alpha,
+       const obj_t*      a,
+       const obj_t*      b,
+       const obj_t*      beta,
+       const obj_t*      c,
+       const cntx_t*     cntx,
+             rntm_t*     rntm
+     );
+
 // Level-3 sup thread decorator prototype.
 err_t bli_l3_sup_thread_decorator
      (
-             l3supint_t func,
-             opid_t     family,
-       const obj_t*     alpha,
-       const obj_t*     a,
-       const obj_t*     b,
-       const obj_t*     beta,
-       const obj_t*     c,
-       const cntx_t*    cntx,
-             rntm_t*    rntm
+             l3supint_ft func,
+             opid_t      family,
+       const obj_t*      alpha,
+       const obj_t*      a,
+       const obj_t*      b,
+       const obj_t*      beta,
+       const obj_t*      c,
+       const cntx_t*     cntx,
+             rntm_t*     rntm
+     );
+
+void bli_l3_sup_thread_decorator_check
+     (
+       rntm_t* rntm
      );
 
 // Include definitions specific to the method of multithreading for the

@@ -36,10 +36,8 @@
 #ifndef BLIS_L3_DECOR_H
 #define BLIS_L3_DECOR_H
 
-// -- conventional definitions -------------------------------------------------
-
 // Level-3 internal function type.
-typedef void (*l3int_t)
+typedef void (*l3int_ft)
      (
        const obj_t*     alpha,
        const obj_t*     a,
@@ -52,19 +50,39 @@ typedef void (*l3int_t)
              thrinfo_t* thread
      );
 
+// Level-3 thread decorator function type.
+typedef void (*l3_decor_ft)
+     (
+             l3int_ft func,
+             opid_t   family,
+       const obj_t*   alpha,
+       const obj_t*   a,
+       const obj_t*   b,
+       const obj_t*   beta,
+       const obj_t*   c,
+       const cntx_t*  cntx,
+             rntm_t*  rntm,
+             cntl_t*  cntl
+     );
+
 // Level-3 thread decorator prototype.
 void bli_l3_thread_decorator
      (
-             l3int_t func,
-             opid_t  family,
-       const obj_t*  alpha,
-       const obj_t*  a,
-       const obj_t*  b,
-       const obj_t*  beta,
-       const obj_t*  c,
-       const cntx_t* cntx,
-             rntm_t* rntm,
-             cntl_t* cntl
+             l3int_ft func,
+             opid_t   family,
+       const obj_t*   alpha,
+       const obj_t*   a,
+       const obj_t*   b,
+       const obj_t*   beta,
+       const obj_t*   c,
+       const cntx_t*  cntx,
+             rntm_t*  rntm,
+             cntl_t*  cntl
+     );
+
+void bli_l3_thread_decorator_check
+     (
+       rntm_t* rntm
      );
 
 // Include definitions specific to the method of multithreading for the

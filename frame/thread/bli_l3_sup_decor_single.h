@@ -35,10 +35,18 @@
 #ifndef BLIS_L3_SUP_DECOR_SINGLE_H
 #define BLIS_L3_SUP_DECOR_SINGLE_H
 
-// Definitions specific to situations when multithreading is disabled.
-#ifndef BLIS_ENABLE_MULTITHREADING
-
-#endif
+err_t bli_l3_sup_thread_decorator_single
+     (
+             l3supint_ft func,
+             opid_t      family,
+       const obj_t*      alpha,
+       const obj_t*      a,
+       const obj_t*      b,
+       const obj_t*      beta,
+       const obj_t*      c,
+       const cntx_t*     cntx,
+             rntm_t*     rntm
+     );
 
 #endif
 

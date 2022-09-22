@@ -35,36 +35,13 @@
 #ifndef BLIS_THRCOMM_PTHREADS_H
 #define BLIS_THRCOMM_PTHREADS_H
 
-// Define thrcomm_t for situations when POSIX multithreading is enabled.
+// Define these prototypes for situations when POSIX multithreading is enabled.
 #ifdef BLIS_ENABLE_PTHREADS 
 
-#ifdef BLIS_USE_PTHREAD_BARRIER
-struct thrcomm_s
-{
-	void*                 sent_object;
-	dim_t                 n_threads;
-
-	bli_pthread_barrier_t barrier;
-};
-#else
-struct thrcomm_s
-{
-	void*  sent_object;
-	dim_t  n_threads;
-
-	// NOTE: barrier_sense was originally a gint_t-based bool_t, but upon
-	// redefining bool_t as bool we discovered that some gcc __atomic built-ins
-	// don't allow the use of bool for the variables being operated upon.
-	// (Specifically, this was observed of __atomic_fetch_xor(), but it likely
-	// applies to all other related built-ins.) Thus, we get around this by
-	// redefining barrier_sense as a gint_t.
-	//volatile gint_t  barrier_sense;
-	gint_t barrier_sense;
-	dim_t  barrier_threads_arrived;
-};
-#endif
-
-typedef struct thrcomm_s thrcomm_t;
+// pthreads-specific function prototypes.
+void bli_thrcomm_init_pthreads( dim_t nt, thrcomm_t* comm );
+void bli_thrcomm_cleanup_pthreads( thrcomm_t* comm );
+void bli_thrcomm_barrier_pthreads( dim_t tid, thrcomm_t* comm );
 
 #endif
 

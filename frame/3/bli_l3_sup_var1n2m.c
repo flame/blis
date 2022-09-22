@@ -232,7 +232,7 @@ void bli_gemmsup_ref_var1n
 
 	mem_t mem_a = BLIS_MEM_INITIALIZER;
 	mem_t mem_b = BLIS_MEM_INITIALIZER;
-\
+
 	// Define an array of bszid_t ids, which will act as our substitute for
 	// the cntl_t tree.
 	// NOTE: These bszid_t values, and their order, match that of the bp
@@ -246,22 +246,22 @@ void bli_gemmsup_ref_var1n
 	// packed in the 3rd loop.
 	//                    5thloop  4thloop         packa  3rdloop         packb  2ndloop  1stloop  ukrloop
 	bszid_t bszids[8] = { BLIS_NC, BLIS_KC, BLIS_NO_PART, BLIS_MC, BLIS_NO_PART, BLIS_NR, BLIS_MR, BLIS_KR };
-\
+
 	// Determine whether we are using more than one thread.
 	const bool is_mt = ( bli_rntm_calc_num_threads( rntm ) > 1 );
-\
+
 	thrinfo_t* thread_jc = NULL;
 	thrinfo_t* thread_pc = NULL;
 	thrinfo_t* thread_pa = NULL;
 	thrinfo_t* thread_ic = NULL;
 	thrinfo_t* thread_pb = NULL;
 	thrinfo_t* thread_jr = NULL;
-\
+
 	// Pre-grow the thrinfo_t tree.
 	bszid_t* bszids_jc = bszids;
 	         thread_jc = thread;
 	bli_thrinfo_sup_grow( rntm, bszids_jc, thread_jc );
-\
+
 	bszid_t* bszids_pc = &bszids_jc[1];
 	         thread_pc = bli_thrinfo_sub_node( thread_jc );
 	bli_thrinfo_sup_grow( rntm, bszids_pc, thread_pc );
@@ -472,7 +472,7 @@ void bli_gemmsup_ref_var1n
 
 			// NOTE: This barrier is only needed if we are packing A (since
 			// that matrix is packed within the pc loop of this variant).
-			if ( packa ) bli_thread_barrier( thread_pa );
+			if ( packa ) bli_thread_barrier( rntm, thread_pa );
 		}
 	}
 
@@ -909,7 +909,7 @@ void bli_gemmsup_ref_var2m
 
 			// NOTE: This barrier is only needed if we are packing B (since
 			// that matrix is packed within the pc loop of this variant).
-			if ( packb ) bli_thread_barrier( thread_pb );
+			if ( packb ) bli_thread_barrier( rntm, thread_pb );
 		}
 	}
 

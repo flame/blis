@@ -102,7 +102,7 @@ void bli_rntm_set_ways
 
 	// Record the number of ways of parallelism per loop.
 	bli_rntm_set_jc_ways_only( jc, rntm );
-	bli_rntm_set_pc_ways_only(  1, rntm );
+	bli_rntm_set_pc_ways_only(  1, rntm ); // Disable pc_nt values.
 	bli_rntm_set_ic_ways_only( ic, rntm );
 	bli_rntm_set_jr_ways_only( jr, rntm );
 	bli_rntm_set_ir_ways_only( ir, rntm );
@@ -230,79 +230,100 @@ void bli_rntm_sanitize
 {
 #ifdef BLIS_ENABLE_MULTITHREADING
 
-	dim_t nt = bli_rntm_num_threads( rntm );
-	dim_t jc = bli_rntm_jc_ways( rntm );
-	dim_t pc = bli_rntm_pc_ways( rntm );
-	dim_t ic = bli_rntm_ic_ways( rntm );
-	dim_t jr = bli_rntm_jr_ways( rntm );
-	dim_t ir = bli_rntm_ir_ways( rntm );
+	timpl_t ti = bli_rntm_thread_impl( rntm );
+	dim_t   nt = bli_rntm_num_threads( rntm );
+	dim_t   jc = bli_rntm_jc_ways( rntm );
+	dim_t   pc = bli_rntm_pc_ways( rntm );
+	dim_t   ic = bli_rntm_ic_ways( rntm );
+	dim_t   jr = bli_rntm_jr_ways( rntm );
+	dim_t   ir = bli_rntm_ir_ways( rntm );
 
 	bool auto_factor = FALSE;
 
 	bool nt_set   = FALSE;
 	bool ways_set = FALSE;
 
-	// Some users are mischievous/dumb. Make sure they don't cause trouble.
-	if ( nt < 1 ) nt = 1;
-	if ( jc < 1 ) jc = 1;
-	if ( pc < 1 ) pc = 1;
-	if ( ic < 1 ) ic = 1;
-	if ( jr < 1 ) jr = 1;
-	if ( ir < 1 ) ir = 1;
-
-	// Now establish whether or not the number of threads or ways of
-	// parallelism were set to meaningful values.
-	if ( nt > 1 ) { nt_set   = TRUE; }
-	if ( jc > 1 ) { ways_set = TRUE; }
-	if ( pc > 1 ) { ways_set = TRUE; pc = 1; } // Disable pc_nt values.
-	if ( ic > 1 ) { ways_set = TRUE; }
-	if ( jr > 1 ) { ways_set = TRUE; }
-	if ( ir > 1 ) { ways_set = TRUE; }
-
-	// Next, we use the values of nt_set and ways_set to determine how to
-	// interpret the original values we found in the rntm_t object.
-
-	if ( ways_set == TRUE )
+	if ( ti == BLIS_SINGLE )
 	{
-		// If the per-loop ways of parallelism were set, then we use the values
-		// that were given and interpreted above. Since the per-loop ways are
-		// known, we can calculate the total number of threads. Notice that if
-		// the user also happened to set the total number of threads, that value
-		// is discarded in favor of the implied value from the per-loop ways of
-		// parallelism.
+		// If the threading implementation was set to BLIS_SINGLE, we ignore
+		// everything else.
 
-		nt = jc * pc * ic * jr * ir;
+		nt = 1;
+		jc = pc = ic = jr = ir = 1;
 		auto_factor = FALSE;
 	}
-	else if ( ways_set == FALSE && nt_set == TRUE )
+	else // if ( ti != BLIS_SINGLE )
 	{
-		// If the ways were not set but the number of thread was set, then we
-		// will attempt to automatically generate a thread factorization that
-		// will work given the problem size. This happens later, in
-		// bli_rntm_factorize().
+		// If the threading implementation was set to one of the true
+		// multithreading implementations (e.g. BLIS_OPENMP, BLIS_POSIX),
+		// we proceed to interpret and process the rntm_t's fields.
 
-		auto_factor = TRUE;
-	}
-	else // if ( ways_set == FALSE && nt_set == FALSE )
-	{
-		// If neither the ways nor the number of threads were set, then the
-		// rntm_t was not meaningfully changed since initialization. This means
-		// the ways are already 1, which will lead to the default behavior of
-		// single-threaded execution.
+		// Some users are mischievous/dumb. Make sure they don't cause trouble.
+		if ( nt < 1 ) nt = 1;
+		if ( jc < 1 ) jc = 1;
+		if ( pc < 1 ) pc = 1;
+		if ( ic < 1 ) ic = 1;
+		if ( jr < 1 ) jr = 1;
+		if ( ir < 1 ) ir = 1;
+
+		// Now establish whether or not the number of threads or ways of
+		// parallelism were set to meaningful values.
+		if ( nt > 1 ) { nt_set   = TRUE; }
+		if ( jc > 1 ) { ways_set = TRUE; }
+		if ( pc > 1 ) { ways_set = TRUE; pc = 1; } // Disable pc_nt values.
+		if ( ic > 1 ) { ways_set = TRUE; }
+		if ( jr > 1 ) { ways_set = TRUE; }
+		if ( ir > 1 ) { ways_set = TRUE; }
+
+		// Next, we use the values of nt_set and ways_set to determine how to
+		// interpret the original values we found in the rntm_t object.
+
+		if ( ways_set == TRUE )
+		{
+			// If the per-loop ways of parallelism were set, then we use the values
+			// that were given and interpreted above. Since the per-loop ways are
+			// known, we can calculate the total number of threads. Notice that if
+			// the user also happened to set the total number of threads, that value
+			// is discarded in favor of the implied value from the per-loop ways of
+			// parallelism.
+
+			nt = jc * pc * ic * jr * ir;
+			auto_factor = FALSE;
+		}
+		else if ( ways_set == FALSE && nt_set == TRUE )
+		{
+			// If the ways were not set but the number of thread was set, then we
+			// will attempt to automatically generate a thread factorization that
+			// will work given the problem size. This happens later, in
+			// bli_rntm_factorize().
+
+			auto_factor = TRUE;
+		}
+		else // if ( ways_set == FALSE && nt_set == FALSE )
+		{
+			// If neither the ways nor the number of threads were set, then the
+			// rntm_t was not meaningfully changed since initialization. This means
+			// the ways are already 1, which will lead to the default behavior of
+			// single-threaded execution.
+		}
 	}
 
 	// Save the results back in the rntm_t object.
-	bli_rntm_set_auto_factor_only( auto_factor, rntm );
+	// Note: We don't need to set the .thread_impl field of the rntm_t because
+	// it was not changed in the sanitization process.
+	//bli_rntm_set_thread_impl_only( ti, rntm );
 	bli_rntm_set_num_threads_only( nt, rntm );
 	bli_rntm_set_ways_only( jc, pc, ic, jr, ir, rntm );
+	bli_rntm_set_auto_factor_only( auto_factor, rntm );
 
 #else
 
 	// When multithreading is disabled, always set the per-loop ways of
 	// parallelism to 1.
-	bli_rntm_set_auto_factor_only( FALSE, rntm );
+	bli_rntm_set_thread_impl_only( BLIS_SINGLE, rntm );
 	bli_rntm_set_num_threads_only( 1, rntm );
 	bli_rntm_set_ways_only( 1, 1, 1, 1, 1, rntm );
+	bli_rntm_set_auto_factor_only( FALSE, rntm );
 
 #endif
 }
@@ -431,16 +452,19 @@ void bli_rntm_print
        const rntm_t* rntm
      )
 {
-	dim_t af = bli_rntm_auto_factor( rntm );
+	timpl_t ti = bli_rntm_thread_impl( rntm );
 
-	dim_t nt = bli_rntm_num_threads( rntm );
+	dim_t   af = bli_rntm_auto_factor( rntm );
 
-	dim_t jc = bli_rntm_jc_ways( rntm );
-	dim_t pc = bli_rntm_pc_ways( rntm );
-	dim_t ic = bli_rntm_ic_ways( rntm );
-	dim_t jr = bli_rntm_jr_ways( rntm );
-	dim_t ir = bli_rntm_ir_ways( rntm );
+	dim_t   nt = bli_rntm_num_threads( rntm );
 
+	dim_t   jc = bli_rntm_jc_ways( rntm );
+	dim_t   pc = bli_rntm_pc_ways( rntm );
+	dim_t   ic = bli_rntm_ic_ways( rntm );
+	dim_t   jr = bli_rntm_jr_ways( rntm );
+	dim_t   ir = bli_rntm_ir_ways( rntm );
+
+	printf( "thread impl: %d\n", ti );
 	printf( "rntm contents    nt  jc  pc  ic  jr  ir\n" );
 	printf( "autofac? %1d | %4d%4d%4d%4d%4d%4d\n", (int)af,
 	                                               (int)nt, (int)jc, (int)pc,

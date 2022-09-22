@@ -127,7 +127,7 @@ DEBUG_TYPE        := @debug_type@
 # Whether operating system support was requested via --enable-system.
 ENABLE_SYSTEM     := @enable_system@
 
-# The requested threading model.
+# The requested threading model(s).
 THREADING_MODEL   := @threading_model@
 
 # Whether the compiler supports "#pragma omp simd" via the -fopenmp-simd option.

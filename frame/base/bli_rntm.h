@@ -43,10 +43,12 @@
 /*
 typedef struct rntm_s
 {
-	bool      auto_factor;
+	timpl_t   thread_impl;
 
 	dim_t     num_threads;
 	dim_t     thrloop[ BLIS_NUM_LOOPS ];
+
+	bool      auto_factor;
 	bool      pack_a;
 	bool      pack_b;
 	bool      l3_sup;
@@ -60,6 +62,11 @@ typedef struct rntm_s
 //
 // -- rntm_t query (public API) ------------------------------------------------
 //
+
+BLIS_INLINE timpl_t bli_rntm_thread_impl( const rntm_t* rntm )
+{
+	return rntm->thread_impl;
+}
 
 BLIS_INLINE bool bli_rntm_auto_factor( const rntm_t* rntm )
 {
@@ -132,6 +139,11 @@ BLIS_INLINE pba_t* bli_rntm_pba( const rntm_t* rntm )
 //
 // -- rntm_t modification (internal use only) ----------------------------------
 //
+
+BLIS_INLINE void bli_rntm_set_thread_impl_only( timpl_t thread_impl, rntm_t* rntm )
+{
+	rntm->thread_impl = thread_impl;
+}
 
 BLIS_INLINE void bli_rntm_set_auto_factor_only( bool auto_factor, rntm_t* rntm )
 {
@@ -207,6 +219,12 @@ BLIS_INLINE void bli_rntm_clear_ways_only( rntm_t* rntm )
 // -- rntm_t modification (public API) -----------------------------------------
 //
 
+BLIS_INLINE void bli_rntm_set_thread_impl( timpl_t thread_impl, rntm_t* rntm )
+{
+	// Set the threading implementation to use.
+	bli_rntm_set_thread_impl_only( thread_impl, rntm );
+}
+
 BLIS_INLINE void bli_rntm_set_pack_a( bool pack_a, rntm_t* rntm )
 {
 	// Set the bool indicating whether matrix A should be packed.
@@ -235,6 +253,11 @@ BLIS_INLINE void bli_rntm_disable_l3_sup( rntm_t* rntm )
 //
 // -- rntm_t modification (internal use only) ----------------------------------
 //
+
+BLIS_INLINE void bli_rntm_clear_thread_impl( rntm_t* rntm )
+{
+	bli_rntm_set_thread_impl_only( BLIS_SINGLE, rntm );
+}
 
 BLIS_INLINE void bli_rntm_clear_auto_factor( rntm_t* rntm )
 {
@@ -272,6 +295,7 @@ BLIS_INLINE void bli_rntm_clear_pba( rntm_t* rntm )
 
 #define BLIS_RNTM_INITIALIZER \
         { \
+          .thread_impl = BLIS_SINGLE, \
           .num_threads = 1, \
           .thrloop     = { 1, 1, 1, 1, 1, 1 }, \
           .auto_factor = FALSE, \
@@ -284,6 +308,8 @@ BLIS_INLINE void bli_rntm_clear_pba( rntm_t* rntm )
 
 BLIS_INLINE void bli_rntm_init( rntm_t* rntm )
 {
+	bli_rntm_clear_thread_impl( rntm );
+
 	bli_rntm_clear_num_threads_only( rntm );
 	bli_rntm_clear_ways_only( rntm );
 
@@ -296,7 +322,9 @@ BLIS_INLINE void bli_rntm_init( rntm_t* rntm )
 	bli_rntm_clear_pba( rntm );
 }
 
+//
 // -- rntm_t total thread calculation ------------------------------------------
+//
 
 BLIS_INLINE dim_t bli_rntm_calc_num_threads
      (
@@ -314,9 +342,9 @@ BLIS_INLINE dim_t bli_rntm_calc_num_threads
 	return n_threads;
 }
 
-// -----------------------------------------------------------------------------
-
-// Function prototypes
+//
+// -- Function prototypes ------------------------------------------------------
+//
 
 BLIS_EXPORT_BLIS void bli_rntm_init_from_global( rntm_t* rntm );
 
