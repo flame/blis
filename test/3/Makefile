@@ -126,25 +126,6 @@ VENDOR_LIB     := $(MKL_LIB)
 VENDORP_LIB    := $(MKLP_LIB)
 
 
-#
-# --- Problem size definitions -------------------------------------------------
-#
-
-# Single core (single-threaded)
-PS_BEGIN := 48
-PS_MAX   := 2400
-PS_INC   := 48
-
-# Single-socket (multithreaded)
-P1_BEGIN := 120
-P1_MAX   := 6000
-P1_INC   := 120
-
-# Dual-socket (multithreaded)
-P2_BEGIN := 160
-P2_MAX   := 8000
-P2_INC   := 160
-
 
 #
 # --- General build definitions ------------------------------------------------
@@ -182,30 +163,19 @@ CXXFLAGS_MT    := -march=native $(CXXFLAGS)
 
 
 # Which library?
-BLI_DEF  := -DBLIS
-BLA_DEF  := -DBLAS
-EIG_DEF  := -DEIGEN
+DEF_BLI  := -DBLIS
+DEF_BLA  := -DBLAS
+DEF_EIG  := -DEIGEN
 
-# Complex implementation type
-D1M      := -DIND=BLIS_1M
-DNAT     := -DIND=BLIS_NAT
+# Implementation string.
+STR_BLI  := -DIMPL_STR=\"blis\"
+STR_OBL  := -DIMPL_STR=\"openblas\"
+STR_EIG  := -DIMPL_STR=\"eigen\"
+STR_VEN  := -DIMPL_STR=\"vendor\"
 
-# Implementation string
-#STR_1M   := -DSTR=\"1m\"
-STR_NAT  := -DSTR=\"asm_blis\"
-STR_OBL  := -DSTR=\"openblas\"
-STR_EIG  := -DSTR=\"eigen\"
-STR_VEN  := -DSTR=\"vendor\"
-
-# Single or multithreaded string
+# Single or multithreaded string.
 STR_ST   := -DTHR_STR=\"st\"
-STR_1S   := -DTHR_STR=\"1s\"
-STR_2S   := -DTHR_STR=\"2s\"
-
-# Problem size specification
-PDEF_ST  := -DP_BEGIN=$(PS_BEGIN)  -DP_INC=$(PS_INC)  -DP_MAX=$(PS_MAX)
-PDEF_1S  := -DP_BEGIN=$(P1_BEGIN) -DP_INC=$(P1_INC) -DP_MAX=$(P1_MAX)
-PDEF_2S  := -DP_BEGIN=$(P2_BEGIN) -DP_INC=$(P2_INC) -DP_MAX=$(P2_MAX)
+STR_MT   := -DTHR_STR=\"mt\"
 
 
 
@@ -213,188 +183,132 @@ PDEF_2S  := -DP_BEGIN=$(P2_BEGIN) -DP_INC=$(P2_INC) -DP_MAX=$(P2_MAX)
 # --- Targets/rules ------------------------------------------------------------
 #
 
-all:        all-st all-1s all-2s
-blis:       blis-st blis-1s blis-2s
-openblas:   openblas-st openblas-1s openblas-2s
-eigen:      eigen-st eigen-1s eigen-2s
-vendor:     vendor-st vendor-1s vendor-2s
-mkl:        vendor
-armpl:      vendor
+all:      all-st
 
-all-st:     blis-st openblas-st mkl-st eigen-st
-all-1s:     blis-1s openblas-1s mkl-1s eigen-1s
-all-2s:     blis-2s openblas-2s mkl-2s eigen-2s
+all-st:   blis-st openblas-st mkl-st eigen-st
+all-mt:   blis-mt openblas-mt mkl-mt eigen-mt
 
-blis-st:    blis-nat-st
-blis-1s:    blis-nat-1s
-blis-2s:    blis-nat-2s
-
-#blis-ind:   blis-ind-st blis-ind-mt
-blis-nat:   blis-nat-st blis-nat-1s blis-nat-2s
+blis:     blis-st
+openblas: openblas-st
+eigen:    eigen-st
+vendor:   vendor-st
+mkl:      mkl-st
 
 # Define the datatypes, operations, and implementations.
-DTS    := s d c z
 OPS    := gemm hemm herk trmm trsm
-BIMPLS := asm_blis openblas vendor
+BIMPLS := blis openblas vendor
 EIMPLS := eigen
 
-# Define functions to construct object filenames from the datatypes and
-# operations given an implementation. We define one function for single-
-# threaded, single-socket, and dual-socket filenames.
-get-st-objs = $(foreach dt,$(DTS),$(foreach op,$(OPS),test_$(dt)$(op)_$(PS_MAX)_$(1)_st.o))
-get-1s-objs = $(foreach dt,$(DTS),$(foreach op,$(OPS),test_$(dt)$(op)_$(P1_MAX)_$(1)_1s.o))
-get-2s-objs = $(foreach dt,$(DTS),$(foreach op,$(OPS),test_$(dt)$(op)_$(P2_MAX)_$(1)_2s.o))
+# Define a function to construct object filenames from the operations
+# given an implementation.
+get-st-objs = $(foreach op,$(OPS),test_$(op)_$(1)_st.o)
+get-mt-objs = $(foreach op,$(OPS),test_$(op)_$(1)_mt.o)
 
-# Construct object and binary names for single-threaded, single-socket, and
-# dual-socket files for BLIS, OpenBLAS, and a vendor library (e.g. MKL).
-BLIS_NAT_ST_OBJS := $(call get-st-objs,asm_blis)
-BLIS_NAT_ST_BINS := $(patsubst %.o,%.x,$(BLIS_NAT_ST_OBJS))
-BLIS_NAT_1S_OBJS := $(call get-1s-objs,asm_blis)
-BLIS_NAT_1S_BINS := $(patsubst %.o,%.x,$(BLIS_NAT_1S_OBJS))
-BLIS_NAT_2S_OBJS := $(call get-2s-objs,asm_blis)
-BLIS_NAT_2S_BINS := $(patsubst %.o,%.x,$(BLIS_NAT_2S_OBJS))
+# Construct object and binary names for single-threaded and multithreaded
+# files for BLIS, OpenBLAS, Eigen, and a vendor library (e.g. MKL).
+BLIS_ST_OBJS     := $(call get-st-objs,blis)
+BLIS_ST_BINS     := $(patsubst %.o,%.x,$(BLIS_ST_OBJS))
+
+BLIS_MT_OBJS     := $(call get-mt-objs,blis)
+BLIS_MT_BINS     := $(patsubst %.o,%.x,$(BLIS_MT_OBJS))
 
 OPENBLAS_ST_OBJS := $(call get-st-objs,openblas)
 OPENBLAS_ST_BINS := $(patsubst %.o,%.x,$(OPENBLAS_ST_OBJS))
-OPENBLAS_1S_OBJS := $(call get-1s-objs,openblas)
-OPENBLAS_1S_BINS := $(patsubst %.o,%.x,$(OPENBLAS_1S_OBJS))
-OPENBLAS_2S_OBJS := $(call get-2s-objs,openblas)
-OPENBLAS_2S_BINS := $(patsubst %.o,%.x,$(OPENBLAS_2S_OBJS))
+
+OPENBLAS_MT_OBJS := $(call get-mt-objs,openblas)
+OPENBLAS_MT_BINS := $(patsubst %.o,%.x,$(OPENBLAS_MT_OBJS))
 
 EIGEN_ST_OBJS    := $(call get-st-objs,eigen)
 EIGEN_ST_BINS    := $(patsubst %.o,%.x,$(EIGEN_ST_OBJS))
-EIGEN_1S_OBJS    := $(call get-1s-objs,eigen)
-EIGEN_1S_BINS    := $(patsubst %.o,%.x,$(EIGEN_1S_OBJS))
-EIGEN_2S_OBJS    := $(call get-2s-objs,eigen)
-EIGEN_2S_BINS    := $(patsubst %.o,%.x,$(EIGEN_2S_OBJS))
+
+EIGEN_MT_OBJS    := $(call get-mt-objs,eigen)
+EIGEN_MT_BINS    := $(patsubst %.o,%.x,$(EIGEN_MT_OBJS))
 
 VENDOR_ST_OBJS   := $(call get-st-objs,vendor)
 VENDOR_ST_BINS   := $(patsubst %.o,%.x,$(VENDOR_ST_OBJS))
-VENDOR_1S_OBJS   := $(call get-1s-objs,vendor)
-VENDOR_1S_BINS   := $(patsubst %.o,%.x,$(VENDOR_1S_OBJS))
-VENDOR_2S_OBJS   := $(call get-2s-objs,vendor)
-VENDOR_2S_BINS   := $(patsubst %.o,%.x,$(VENDOR_2S_OBJS))
+
+VENDOR_MT_OBJS   := $(call get-mt-objs,vendor)
+VENDOR_MT_BINS   := $(patsubst %.o,%.x,$(VENDOR_MT_OBJS))
+
+# List other miscellaneous object files
+UTIL_OBJS        := test_utils.o
+UTIL_HDRS        := test_utils.h
 
 # Define some targets associated with the above object/binary files.
-blis-nat-st: check-env $(BLIS_NAT_ST_BINS)
-blis-nat-1s: check-env $(BLIS_NAT_1S_BINS)
-blis-nat-2s: check-env $(BLIS_NAT_2S_BINS)
-
+blis-st:     check-env $(BLIS_ST_BINS)
+blis-mt:     check-env $(BLIS_MT_BINS)
 openblas-st: check-env $(OPENBLAS_ST_BINS)
-openblas-1s: check-env $(OPENBLAS_1S_BINS)
-openblas-2s: check-env $(OPENBLAS_2S_BINS)
-
-eigen-st: check-env $(EIGEN_ST_BINS)
-eigen-1s: check-env $(EIGEN_1S_BINS)
-eigen-2s: check-env $(EIGEN_2S_BINS)
-
-vendor-st: check-env $(VENDOR_ST_BINS)
-vendor-1s: check-env $(VENDOR_1S_BINS)
-vendor-2s: check-env $(VENDOR_2S_BINS)
-
-mkl-st: vendor-st
-mkl-1s: vendor-1s
-mkl-2s: vendor-2s
-
-armpl-st: vendor-st
-armpl-1s: vendor-1s
-armpl-2s: vendor-2s
+openblas-mt: check-env $(OPENBLAS_MT_BINS)
+eigen-st:    check-env $(EIGEN_ST_BINS)
+eigen-mt:    check-env $(EIGEN_MT_BINS)
+vendor-st:   check-env $(VENDOR_ST_BINS)
+vendor-mt:   check-env $(VENDOR_MT_BINS)
+mkl-st:      vendor-st
+mkl-mt:      vendor-mt
+armpl-st:    vendor-st
+armpl-mt:    vendor-mt
 
 # Mark the object files as intermediate so that make will remove them
 # automatically after building the binaries on which they depend.
-.INTERMEDIATE: $(BLIS_NAT_ST_OBJS) $(BLIS_NAT_1S_OBJS) $(BLIS_NAT_2S_OBJS)
-.INTERMEDIATE: $(OPENBLAS_ST_OBJS) $(OPENBLAS_1S_OBJS) $(OPENBLAS_2S_OBJS)
-.INTERMEDIATE: $(EIGEN_ST_OBJS)    $(EIGEN_1S_OBJS)    $(EIGEN_2S_OBJS)
-.INTERMEDIATE: $(VENDOR_ST_OBJS)   $(VENDOR_1S_OBJS)   $(VENDOR_2S_OBJS)
+.INTERMEDIATE: $(BLIS_ST_OBJS)     $(BLIS_MT_OBJS)
+.INTERMEDIATE: $(OPENBLAS_ST_OBJS) $(OPENBLAS_MT_OBJS)
+.INTERMEDIATE: $(EIGEN_ST_OBJS)    $(EIGEN_MT_OBJS)
+.INTERMEDIATE: $(VENDOR_ST_OBJS)   $(VENDOR_MT_OBJS)
+.INTERMEDIATE: $(UTIL_OBJS)
 
 
 # -- Object file rules --
 
-#$(TEST_OBJ_PATH)/%.o: $(TEST_SRC_PATH)/%.c
-#	$(CC) $(CFLAGS) -c $< -o $@
-
-# A function to return the datatype cpp macro def from the datatype
-# character.
-get-dt-cpp = $(strip \
-             $(if $(findstring s,$(1)),-DDT=BLIS_FLOAT    -DIS_FLOAT,\
-             $(if $(findstring d,$(1)),-DDT=BLIS_DOUBLE   -DIS_DOUBLE,\
-             $(if $(findstring c,$(1)),-DDT=BLIS_SCOMPLEX -DIS_SCOMPLEX,\
-                                       -DDT=BLIS_DCOMPLEX -DIS_DCOMPLEX))))
-
 # A function to return other cpp macros that help the test driver
 # identify the implementation.
-#get-bl-cpp = $(strip \
-#             $(if $(findstring     blis,$(1)),$(STR_NAT) $(BLI_DEF),\
-#             $(if $(findstring openblas,$(1)),$(STR_OBL) $(BLA_DEF),\
-#             $(if $(findstring    eigen,$(1)),$(STR_EIG) $(EIG_DEF),\
-#                                              $(STR_VEN) $(BLA_DEF)))))
-
 get-bl-cpp = $(strip \
-             $(if $(findstring     blis,$(1)),$(STR_NAT) $(BLI_DEF),\
-             $(if $(findstring openblas,$(1)),$(STR_OBL) $(BLA_DEF),\
+             $(if $(findstring     blis,$(1)),$(STR_BLI) $(DEF_BLI),\
+             $(if $(findstring openblas,$(1)),$(STR_OBL) $(DEF_BLA),\
              $(if $(and $(findstring eigen,$(1)),\
                         $(findstring  gemm,$(2))),\
-                                              $(STR_EIG) $(EIG_DEF),\
+                                              $(STR_EIG) $(DEF_EIG),\
              $(if       $(findstring eigen,$(1)),\
-                                              $(STR_EIG) $(BLA_DEF),\
-                                              $(STR_VEN) $(BLA_DEF))))))
+                                              $(STR_EIG) $(DEF_BLA),\
+                                              $(STR_VEN) $(DEF_BLA))))))
 
+# Rules for miscellaneous files.
+test_utils.o: test_utils.c test_utils.h
+	$(CC) $(CFLAGS) -c $< -o $@
 
 # Rules for BLIS and BLAS libraries.
 define make-st-rule
-test_$(1)$(2)_$(PS_MAX)_$(3)_st.o: test_$(op).c Makefile
-	$(CC) $(CFLAGS) $(PDEF_ST) $(call get-dt-cpp,$(1)) $(call get-bl-cpp,$(3),$(2)) $(DNAT) $(STR_ST) -c $$< -o $$@
+test_$(1)_$(2)_st.o: test_$(op).c Makefile
+	$(CC) $(CFLAGS) $(call get-bl-cpp,$(2),$(1)) $(STR_ST) -c $$< -o $$@
 endef
 
-define make-1s-rule
-test_$(1)$(2)_$(P1_MAX)_$(3)_1s.o: test_$(op).c Makefile
-	$(CC) $(CFLAGS) $(PDEF_1S) $(call get-dt-cpp,$(1)) $(call get-bl-cpp,$(3),$(2)) $(DNAT) $(STR_1S) -c $$< -o $$@
+define make-mt-rule
+test_$(1)_$(2)_mt.o: test_$(op).c Makefile
+	$(CC) $(CFLAGS) $(call get-bl-cpp,$(2),$(1)) $(STR_MT) -c $$< -o $$@
 endef
 
-define make-2s-rule
-test_$(1)$(2)_$(P2_MAX)_$(3)_2s.o: test_$(op).c Makefile
-	$(CC) $(CFLAGS) $(PDEF_2S) $(call get-dt-cpp,$(1)) $(call get-bl-cpp,$(3),$(2)) $(DNAT) $(STR_2S) -c $$< -o $$@
-endef
-
-$(foreach dt,$(DTS), \
 $(foreach op,$(OPS), \
-$(foreach im,$(BIMPLS),$(eval $(call make-st-rule,$(dt),$(op),$(im))))))
+$(foreach im,$(BIMPLS),$(eval $(call make-st-rule,$(op),$(im)))))
 
-$(foreach dt,$(DTS), \
 $(foreach op,$(OPS), \
-$(foreach im,$(BIMPLS),$(eval $(call make-1s-rule,$(dt),$(op),$(im))))))
-
-$(foreach dt,$(DTS), \
-$(foreach op,$(OPS), \
-$(foreach im,$(BIMPLS),$(eval $(call make-2s-rule,$(dt),$(op),$(im))))))
+$(foreach im,$(BIMPLS),$(eval $(call make-mt-rule,$(op),$(im)))))
 
 # Rules for Eigen.
+# NOTE: Eigen determines single- vs. multithreadedness at compile time.
 define make-eigst-rule
-test_$(1)$(2)_$(PS_MAX)_$(3)_st.o: test_$(op).c Makefile
-	$(CXX) $(CXXFLAGS_ST) $(PDEF_ST) $(call get-dt-cpp,$(1)) $(call get-bl-cpp,$(3),$(2)) $(DNAT) $(STR_ST) -c $$< -o $$@
+test_$(1)_$(2)_st.o: test_$(op).c Makefile
+	$(CXX) $(CXXFLAGS_ST) $(call get-bl-cpp,$(2),$(1)) $(STR_ST) -c $$< -o $$@
 endef
 
-define make-eig1s-rule
-test_$(1)$(2)_$(P1_MAX)_$(3)_1s.o: test_$(op).c Makefile
-	$(CXX) $(CXXFLAGS_MT) $(PDEF_1S) $(call get-dt-cpp,$(1)) $(call get-bl-cpp,$(3),$(2)) $(DNAT) $(STR_1S) -c $$< -o $$@
+define make-eigmt-rule
+test_$(1)_$(2)_mt.o: test_$(op).c Makefile
+	$(CXX) $(CXXFLAGS_MT) $(call get-bl-cpp,$(2),$(1)) $(STR_MT) -c $$< -o $$@
 endef
 
-define make-eig2s-rule
-test_$(1)$(2)_$(P2_MAX)_$(3)_2s.o: test_$(op).c Makefile
-	$(CXX) $(CXXFLAGS_MT) $(PDEF_2S) $(call get-dt-cpp,$(1)) $(call get-bl-cpp,$(3),$(2)) $(DNAT) $(STR_2S) -c $$< -o $$@
-endef
-
-$(foreach dt,$(DTS), \
 $(foreach op,$(OPS), \
-$(foreach im,$(EIMPLS),$(eval $(call make-eigst-rule,$(dt),$(op),$(im))))))
+$(foreach im,$(EIMPLS),$(eval $(call make-eigst-rule,$(op),$(im)))))
 
-$(foreach dt,$(DTS), \
 $(foreach op,$(OPS), \
-$(foreach im,$(EIMPLS),$(eval $(call make-eig1s-rule,$(dt),$(op),$(im))))))
-
-$(foreach dt,$(DTS), \
-$(foreach op,$(OPS), \
-$(foreach im,$(EIMPLS),$(eval $(call make-eig2s-rule,$(dt),$(op),$(im))))))
+$(foreach im,$(EIMPLS),$(eval $(call make-eigmt-rule,$(op),$(im)))))
 
 
 # -- Executable file rules --
@@ -404,44 +318,36 @@ $(foreach im,$(EIMPLS),$(eval $(call make-eig2s-rule,$(dt),$(op),$(im))))))
 # compatibility layer. This prevents BLIS from inadvertently getting called
 # for the BLAS routines we are trying to test with.
 
-test_%_$(PS_MAX)_asm_blis_st.x: test_%_$(PS_MAX)_asm_blis_st.o $(LIBBLIS_LINK)
-	$(CC) $(strip $<                    $(LIBBLIS_LINK) $(LDFLAGS) -o $@)
+# Combine the miscellaneous objects with libblis for conciseness (since all
+# driver binaries depend on these objects).
+COMMON_OBJS := $(UTIL_OBJS) $(LIBBLIS_LINK)
 
-test_%_$(P1_MAX)_asm_blis_1s.x: test_%_$(P1_MAX)_asm_blis_1s.o $(LIBBLIS_LINK)
-	$(CC) $(strip $<                    $(LIBBLIS_LINK) $(LDFLAGS) -o $@)
+test_%_blis_st.x:     test_%_blis_st.o     $(COMMON_OBJS)
+	$(CC) $(strip $<                    $(COMMON_OBJS) $(LDFLAGS) -o $@)
 
-test_%_$(P2_MAX)_asm_blis_2s.x: test_%_$(P2_MAX)_asm_blis_2s.o $(LIBBLIS_LINK)
-	$(CC) $(strip $<                    $(LIBBLIS_LINK) $(LDFLAGS) -o $@)
-
-
-test_%_$(PS_MAX)_openblas_st.x: test_%_$(PS_MAX)_openblas_st.o $(LIBBLIS_LINK)
-	$(CC) $(strip $<   $(OPENBLAS_LIB)  $(LIBBLIS_LINK) $(LDFLAGS) -o $@)
-
-test_%_$(P1_MAX)_openblas_1s.x: test_%_$(P1_MAX)_openblas_1s.o $(LIBBLIS_LINK)
-	$(CC) $(strip $<   $(OPENBLASP_LIB) $(LIBBLIS_LINK) $(LDFLAGS) -o $@)
-
-test_%_$(P2_MAX)_openblas_2s.x: test_%_$(P2_MAX)_openblas_2s.o $(LIBBLIS_LINK)
-	$(CC) $(strip $<   $(OPENBLASP_LIB) $(LIBBLIS_LINK) $(LDFLAGS) -o $@)
+test_%_blis_mt.x:     test_%_blis_mt.o     $(COMMON_OBJS)
+	$(CC) $(strip $<                    $(COMMON_OBJS) $(LDFLAGS) -o $@)
 
 
-test_%_$(PS_MAX)_eigen_st.x:    test_%_$(PS_MAX)_eigen_st.o    $(LIBBLIS_LINK)
-	$(CXX) $(strip $<  $(EIGEN_LIB)     $(LIBBLIS_LINK) $(LDFLAGS) -o $@)
+test_%_openblas_st.x: test_%_openblas_st.o $(COMMON_OBJS)
+	$(CC) $(strip $<   $(OPENBLAS_LIB)  $(COMMON_OBJS) $(LDFLAGS) -o $@)
 
-test_%_$(P1_MAX)_eigen_1s.x:    test_%_$(P1_MAX)_eigen_1s.o    $(LIBBLIS_LINK)
-	$(CXX) $(strip $<  $(EIGENP_LIB)    $(LIBBLIS_LINK) $(LDFLAGS) -o $@)
-
-test_%_$(P2_MAX)_eigen_2s.x:    test_%_$(P2_MAX)_eigen_2s.o    $(LIBBLIS_LINK)
-	$(CXX) $(strip $<  $(EIGENP_LIB)    $(LIBBLIS_LINK) $(LDFLAGS) -o $@)
+test_%_openblas_mt.x: test_%_openblas_mt.o $(COMMON_OBJS)
+	$(CC) $(strip $<   $(OPENBLASP_LIB) $(COMMON_OBJS) $(LDFLAGS) -o $@)
 
 
-test_%_$(PS_MAX)_vendor_st.x:   test_%_$(PS_MAX)_vendor_st.o   $(LIBBLIS_LINK)
-	$(CC) $(strip $<   $(VENDOR_LIB)    $(LIBBLIS_LINK) $(LDFLAGS) -o $@)
+test_%_eigen_st.x:    test_%_eigen_st.o    $(COMMON_OBJS)
+	$(CXX) $(strip $<  $(EIGEN_LIB)     $(COMMON_OBJS) $(LDFLAGS) -o $@)
 
-test_%_$(P1_MAX)_vendor_1s.x:   test_%_$(P1_MAX)_vendor_1s.o   $(LIBBLIS_LINK)
-	$(CC) $(strip $<   $(VENDORP_LIB)   $(LIBBLIS_LINK) $(LDFLAGS) -o $@)
+test_%_eigen_mt.x:    test_%_eigen_mt.o    $(COMMON_OBJS)
+	$(CXX) $(strip $<  $(EIGENP_LIB)    $(COMMON_OBJS) $(LDFLAGS) -o $@)
 
-test_%_$(P2_MAX)_vendor_2s.x:   test_%_$(P2_MAX)_vendor_2s.o   $(LIBBLIS_LINK)
-	$(CC) $(strip $<   $(VENDORP_LIB)   $(LIBBLIS_LINK) $(LDFLAGS) -o $@)
+
+test_%_vendor_st.x:   test_%_vendor_st.o   $(COMMON_OBJS)
+	$(CC) $(strip $<   $(VENDOR_LIB)    $(COMMON_OBJS) $(LDFLAGS) -o $@)
+
+test_%_vendor_mt.x:   test_%_vendor_mt.o   $(COMMON_OBJS)
+	$(CC) $(strip $<   $(VENDORP_LIB)   $(COMMON_OBJS) $(LDFLAGS) -o $@)
 
 
 # -- Environment check rules --
