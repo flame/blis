@@ -1092,29 +1092,37 @@ void PASTEMAC(ch,varname) \
 		{ \
 			sumsq_r = abs_chi1_r; \
 			scale_r = one_r; \
-			break; \
 		} \
 \
 		if ( bli_isnan( abs_chi1_i ) ) \
 		{ \
 			sumsq_r = abs_chi1_i; \
 			scale_r = one_r; \
-			break; \
 		} \
+\
+        if ( bli_isnan( sumsq_r ) ) \
+        { \
+            chi1 += incx; \
+            continue; \
+        } \
 \
 		if ( bli_isinf( abs_chi1_r ) ) \
 		{ \
 			sumsq_r = abs_chi1_r; \
 			scale_r = one_r; \
-			break; \
 		} \
 \
 		if ( bli_isinf( abs_chi1_i ) ) \
 		{ \
 			sumsq_r = abs_chi1_i; \
 			scale_r = one_r; \
-			break; \
 		} \
+\
+        if ( bli_isinf( sumsq_r ) ) \
+        { \
+            chi1 += incx; \
+            continue; \
+        } \
 \
 		/* Accumulate real component into sumsq, adjusting scale if
 		   needed. */ \
