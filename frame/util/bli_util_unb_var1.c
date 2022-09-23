@@ -1068,6 +1068,7 @@ void PASTEMAC(ch,varname) \
 	ctype_r scale_r; \
 	ctype_r sumsq_r; \
 	ctype_r abs_chi1_r; \
+	ctype_r abs_chi1_i; \
 	dim_t   i; \
 \
 	/* NOTE: This function attempts to mimic the algorithm for computing
@@ -1085,10 +1086,47 @@ void PASTEMAC(ch,varname) \
 		PASTEMAC2(ch,chr,gets)( *chi1, chi1_r, chi1_i ); \
 \
 		abs_chi1_r = bli_fabs( chi1_r ); \
+		abs_chi1_i = bli_fabs( chi1_i ); \
+\
+		if ( bli_isnan( abs_chi1_r ) ) \
+		{ \
+			sumsq_r = abs_chi1_r; \
+			scale_r = one_r; \
+		} \
+\
+		if ( bli_isnan( abs_chi1_i ) ) \
+		{ \
+			sumsq_r = abs_chi1_i; \
+			scale_r = one_r; \
+		} \
+\
+		if ( bli_isnan( sumsq_r ) ) \
+		{ \
+			chi1 += incx; \
+			continue; \
+		} \
+\
+		if ( bli_isinf( abs_chi1_r ) ) \
+		{ \
+			sumsq_r = abs_chi1_r; \
+			scale_r = one_r; \
+		} \
+\
+		if ( bli_isinf( abs_chi1_i ) ) \
+		{ \
+			sumsq_r = abs_chi1_i; \
+			scale_r = one_r; \
+		} \
+\
+		if ( bli_isinf( sumsq_r ) ) \
+		{ \
+			chi1 += incx; \
+			continue; \
+		} \
 \
 		/* Accumulate real component into sumsq, adjusting scale if
 		   needed. */ \
-		if ( abs_chi1_r > zero_r || bli_isnan( abs_chi1_r) ) \
+		if ( abs_chi1_r > zero_r ) \
 		{ \
 			if ( scale_r < abs_chi1_r ) \
 			{ \
@@ -1105,24 +1143,22 @@ void PASTEMAC(ch,varname) \
 			} \
 		} \
 \
-		abs_chi1_r = bli_fabs( chi1_i ); \
-\
 		/* Accumulate imaginary component into sumsq, adjusting scale if
 		   needed. */ \
-		if ( abs_chi1_r > zero_r || bli_isnan( abs_chi1_r) ) \
+		if ( abs_chi1_i > zero_r ) \
 		{ \
-			if ( scale_r < abs_chi1_r ) \
+			if ( scale_r < abs_chi1_i ) \
 			{ \
 				sumsq_r = one_r + \
-				          sumsq_r * ( scale_r / abs_chi1_r ) * \
-				                    ( scale_r / abs_chi1_r );  \
+				          sumsq_r * ( scale_r / abs_chi1_i ) * \
+				                    ( scale_r / abs_chi1_i );  \
 \
-				PASTEMAC(chr,copys)( abs_chi1_r, scale_r ); \
+				PASTEMAC(chr,copys)( abs_chi1_i, scale_r ); \
 			} \
 			else \
 			{ \
-				sumsq_r = sumsq_r + ( abs_chi1_r / scale_r ) * \
-				                    ( abs_chi1_r / scale_r );  \
+				sumsq_r = sumsq_r + ( abs_chi1_i / scale_r ) * \
+				                    ( abs_chi1_i / scale_r );  \
 			} \
 		} \
 \
