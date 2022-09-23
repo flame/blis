@@ -1085,10 +1085,39 @@ void PASTEMAC(ch,varname) \
 		PASTEMAC2(ch,chr,gets)( *chi1, chi1_r, chi1_i ); \
 \
 		abs_chi1_r = bli_fabs( chi1_r ); \
+		abs_chi1_r = bli_fabs( chi1_i ); \
+\
+		if ( bli_isnan( abs_chi1_r ) ) \
+		{ \
+			sumsq_r = abs_chi1_r; \
+			scale_r = one_r; \
+			break; \
+		} \
+\
+		if ( bli_isnan( abs_chi1_i ) ) \
+		{ \
+			sumsq_r = abs_chi1_i; \
+			scale_r = one_r; \
+			break; \
+		} \
+\
+		if ( bli_isinf( abs_chi1_r ) ) \
+		{ \
+			sumsq_r = abs_chi1_r; \
+			scale_r = one_r; \
+			break; \
+		} \
+\
+		if ( bli_isinf( abs_chi1_i ) ) \
+		{ \
+			sumsq_r = abs_chi1_i; \
+			scale_r = one_r; \
+			break; \
+		} \
 \
 		/* Accumulate real component into sumsq, adjusting scale if
 		   needed. */ \
-		if ( abs_chi1_r > zero_r || bli_isnan( abs_chi1_r) ) \
+		if ( abs_chi1_r > zero_r ) \
 		{ \
 			if ( scale_r < abs_chi1_r ) \
 			{ \
@@ -1105,11 +1134,9 @@ void PASTEMAC(ch,varname) \
 			} \
 		} \
 \
-		abs_chi1_r = bli_fabs( chi1_i ); \
-\
 		/* Accumulate imaginary component into sumsq, adjusting scale if
 		   needed. */ \
-		if ( abs_chi1_r > zero_r || bli_isnan( abs_chi1_r) ) \
+		if ( abs_chi1_r > zero_r ) \
 		{ \
 			if ( scale_r < abs_chi1_r ) \
 			{ \
