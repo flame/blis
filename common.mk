@@ -563,6 +563,11 @@ ifeq ($(DEBUG_TYPE),sde)
 LDFLAGS    := $(filter-out $(LIBMEMKIND),$(LDFLAGS))
 endif
 
+ifeq ($(ENABLE_AMD_OFFLOAD),yes)
+LDFLAGS    += -ldl
+LDFLAGS    += -L/opt/rocm/lib -lamdhip64 -lrocblas
+endif
+
 # Specify the shared library's 'soname' field.
 # NOTE: The flag for creating shared objects is different for Linux and OS X.
 ifeq ($(OS_NAME),Darwin)
@@ -1145,6 +1150,11 @@ CINCFLAGS       := -I$(BASE_INC_PATH) $(REF_KER_I_PATHS)
 # being compiled.
 ifeq ($(MK_ENABLE_CBLAS),yes)
 CINCFLAGS       += -I$(CBLAS_H_DIRPATH)
+endif
+
+# If AMD offloading is enabled, we also add the ROCm include directory
+ifeq ($(ENABLE_AMD_OFFLOAD),yes)
+CINCFLAGS	+= -I/opt/rocm/include -D__HIP_PLATFORM_AMD__=1
 endif
 
 # Obtain a list of header paths in the configured addons. Then add -I to each

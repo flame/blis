@@ -34,6 +34,9 @@
 */
 
 #include "blis.h"
+#ifdef BLIS_ENABLE_AMD_OFFLOAD
+#include "bli_offloader.h"
+#endif
 
 // -----------------------------------------------------------------------------
 
@@ -87,7 +90,11 @@ int bli_init_apis( void )
 	bli_pack_init();
 	bli_memsys_init();
 
-	return 0;
+#ifdef BLIS_ENABLE_AMD_OFFLOAD
+        bli_offloader_init();
+#endif
+
+        return 0;
 }
 
 int bli_finalize_apis( void )
@@ -98,6 +105,10 @@ int bli_finalize_apis( void )
 	bli_thread_finalize();
 	bli_ind_finalize();
 	bli_gks_finalize();
+
+#ifdef BLIS_ENABLE_AMD_OFFLOAD
+        bli_offloader_finalize();
+#endif
 
 	return 0;
 }

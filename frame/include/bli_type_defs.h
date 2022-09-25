@@ -1050,6 +1050,22 @@ typedef struct pba_s
 
 } pba_t;
 
+// -- optional: offloader state --
+
+#ifdef BLIS_ENABLE_AMD_OFFLOAD
+typedef struct offload_s
+{
+        bool never_offload_dgemm;
+        bool never_offload_sgemm;
+        bool never_offload_zgemm;
+        bool never_offload_cgemm;
+        struct _rocblas_handle* rocblas;
+        int64_t offload_sgemm_thresh;
+        int64_t offload_dgemm_thresh;
+        int64_t offload_cgemm_thresh;
+        int64_t offload_zgemm_thresh;
+} offload_t;
+#endif
 
 // -- Memory object type --
 
@@ -1465,6 +1481,11 @@ typedef struct rntm_s
 
 	// The packing block allocator, which is attached in the l3 thread decorator.
 	pba_t*    pba;
+
+#ifdef BLIS_ENABLE_AMD_OFFLOAD
+	// if offloading is enabled - this contains the offloader state
+	offload_t* offloader_state;
+#endif
 
 } rntm_t;
 

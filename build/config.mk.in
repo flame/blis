@@ -208,5 +208,8 @@ LIBPTHREAD        := @libpthread@
 # Whether we should use AMD-customized versions of certain framework files.
 ENABLE_AMD_FRAME_TWEAKS := @enable_amd_frame_tweaks@
 
+# Whether offloading to AMD accelerators should be attempted
+ENABLE_AMD_OFFLOAD := @enable_amd_offload@
+
 # end of ifndef CONFIG_MK_INCLUDED conditional block
 endif
