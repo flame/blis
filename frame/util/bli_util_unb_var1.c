@@ -453,12 +453,11 @@ void bli_dnormfv_unb_var1
 { 
 
    /* Disabled avx path for dnrm2 temporarily */
-   /*if( bli_cpuid_is_avx_supported() == TRUE )
+   if( bli_cpuid_is_avx_supported() == TRUE )
    {
         bli_dnorm2fv_unb_var1_avx( n, x, incx, norm, cntx );
    }
    else
-   */
    {
         double* zero       = bli_d0;
         double* one        = bli_d1;
