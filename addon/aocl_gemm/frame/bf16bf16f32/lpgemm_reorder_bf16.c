@@ -151,7 +151,7 @@ void reorderb_nr64_bf16bf16f32of32
 				// st = ( jc_cur_loop * k )    <traverse blocks 1,2,3,4>
 				//    + ( n_sub_updated * pc ) <traverse block 5>
 				//    + ( NC' * kc0_updated)   <traverse block 6>
-
+#ifdef BLIS_KERNELS_ZEN4
 				// B should always be packed.
 				packb_nr64_bf16bf16f32of32
 				(
@@ -162,6 +162,12 @@ void reorderb_nr64_bf16bf16f32of32
 					( rs_b * pc ) + jc ),
 				  rs_b, nc0, kc0, &rs_b_reorder, &cs_b_reorder
 				);
+#else
+				// Silence compiler warnings.
+				rs_b_reorder = 0;
+				cs_b_reorder = 0;
+				( void )rs_b;
+#endif
 			}
 
 			adjust_B_panel_reordered_jc( &jc, jc_cur_loop );

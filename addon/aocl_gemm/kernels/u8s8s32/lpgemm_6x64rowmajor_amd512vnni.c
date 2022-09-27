@@ -38,6 +38,7 @@
 #include "lpgemm_kernels.h"
 #include "lpgemm_s32_kern_macros.h"
 
+#ifdef BLIS_KERNELS_ZEN4
 // 6x64 int8o32 kernel
 LPGEMM_MAIN_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_6x64)
 {
@@ -1057,3 +1058,4 @@ POST_OPS_6x64_DISABLE:
 		}
 	}
 }
+#endif

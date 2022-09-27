@@ -40,6 +40,17 @@
 #define MR 6
 #define NR 64
 
+void get_packa_k64_u8s8s32o32_strides
+     (
+       dim_t* rs_a,
+       dim_t* cs_a
+     )
+{
+	*rs_a = 4;
+	*cs_a = 24;
+}
+
+#ifdef BLIS_KERNELS_ZEN4
 void packa_m5_k64_u8s8s32o32
      (
        uint8_t*       pack_a_buffer_u8s8s32o32,
@@ -79,16 +90,6 @@ void packa_m1_k64_u8s8s32o32
        const dim_t    lda,
        const dim_t    KC
      );
-
-void get_packa_k64_u8s8s32o32_strides
-     (
-       dim_t* rs_a,
-       dim_t* cs_a
-     )
-{
-	*rs_a = 4;
-	*cs_a = 24;
-}
 
 // TODO: k fringe till k=4, k%4=0 and padding to make k'%4 = 0 if k%4 != 0 originally.
 void packa_k64_u8s8s32o32
@@ -516,3 +517,4 @@ void packa_m1_k64_u8s8s32o32
 		_mm512_storeu_epi64( pack_a_buffer_u8s8s32o32 + ( ( kr * 1 ) + ( 0 ) ), a0 );
 	}
 }
+#endif

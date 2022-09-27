@@ -39,6 +39,17 @@
 #include "lpgemm_config.h"
 #include "aocl_bf16_type.h"
 
+void get_packb_nr64_bf16bf16f32of32_strides
+     (
+       dim_t* rs_b,
+       dim_t* cs_b
+     )
+{
+	*rs_b = lpgemm_get_block_size_NR_global_cntx( BF16BF16F32OF32 ) * 2;
+	*cs_b = lpgemm_get_block_size_NR_global_cntx( BF16BF16F32OF32 ) / 2;
+}
+
+#ifdef BLIS_KERNELS_ZEN4
 void packb_nrlt16_bf16bf16f32of32
     (
       bfloat16*       pack_b_buffer_bf16bf16f32of32,
@@ -54,7 +65,7 @@ void packb_nr16_bf16bf16f32of32
       const bfloat16* b,
       const dim_t     ldb,
       const dim_t     KC 
-    );    
+    );
 
 void packb_nr32_bf16bf16f32of32
     (
@@ -62,7 +73,7 @@ void packb_nr32_bf16bf16f32of32
       const bfloat16* b,
       const dim_t     ldb,
       const dim_t     KC 
-    );    
+    );
 
 void packb_nr48_bf16bf16f32of32
     (
@@ -70,17 +81,7 @@ void packb_nr48_bf16bf16f32of32
       const bfloat16* b,
       const dim_t     ldb,
       const dim_t     KC  
-    );    
-
-void get_packb_nr64_bf16bf16f32of32_strides
-     (
-       dim_t* rs_b,
-       dim_t* cs_b
-     )
-{
-	*rs_b = lpgemm_get_block_size_NR_global_cntx( BF16BF16F32OF32 ) * 2;
-	*cs_b = lpgemm_get_block_size_NR_global_cntx( BF16BF16F32OF32 ) / 2;
-}
+    );
 
 void packb_nr64_bf16bf16f32of32
     (
@@ -91,7 +92,7 @@ void packb_nr64_bf16bf16f32of32
       const dim_t     KC,  
       dim_t*          rs_b,
       dim_t*          cs_b
-    )    
+    )
 {       
     dim_t NR = 64;
 
@@ -501,4 +502,5 @@ void packb_nrlt16_bf16bf16f32of32
 		_mm256_storeu_epi64( pack_b_buffer_bf16bf16f32of32 + ( ( kr_new + 0 ) * NR ), b0 );
 		_mm256_storeu_epi64( pack_b_buffer_bf16bf16f32of32 + ( ( kr_new + 1 ) * NR ), a0 );
 	}    
-}    
+}
+#endif

@@ -235,6 +235,7 @@ LPGEMM_5LOOP(bfloat16,bfloat16,float,bf16bf16f32of32)
 				if ( ( jc_packb_end > jc_packb_start ) &&
 					 ( jc_packb_start < ( jc + nc0 ) ) )
 				{
+#ifdef BLIS_KERNELS_ZEN4
 					packb_nr64_bf16bf16f32of32
 					(
 					  pack_b_buffer_bf16 + ( jc_packb_start * kc0_updated ),
@@ -243,6 +244,7 @@ LPGEMM_5LOOP(bfloat16,bfloat16,float,bf16bf16f32of32)
 					  ( jc_packb_end - jc_packb_start ), kc0,
 					  &rs_b_use, &cs_b_use
 					);
+#endif
 				}
 				else
 				{
@@ -302,6 +304,7 @@ LPGEMM_5LOOP(bfloat16,bfloat16,float,bf16bf16f32of32)
 				{
 					dim_t nr0 = bli_min( ( nc0 - jr ), NR );
 
+#ifdef BLIS_KERNELS_ZEN4
 					// Reorder/Packed B, Reorder/Packed/Unpacked A call.
 					lpgemm_rowvar_bf16bf16f32of32_6x64 
 					(
@@ -312,6 +315,19 @@ LPGEMM_5LOOP(bfloat16,bfloat16,float,bf16bf16f32of32)
 					  alpha, beta0,
 					  is_last_k, ic, ( jc + jr ), post_op_list, rs_c_downscale
 					);
+#else
+					// Silence compiler warnings.
+					( void )b_use;
+					( void )a_block_stride;
+					( void )rs_c_downscale;
+					( void )is_last_k;
+					( void )c_use_ic;
+					( void )a_use;
+					( void )beta0;
+					( void )nr0;
+					( void )mc0;
+					( void )cs_a_use;
+#endif
 				}
 			}
 		}

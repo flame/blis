@@ -39,6 +39,7 @@
 #include "lpgemm_kernels.h"
 #include "lpgemm_f32_kern_macros.h"
 
+#ifdef BLIS_KERNELS_ZEN4
 // 5xlt16 bf16 fringe kernel
 LPGEMM_MN_LT_NR0_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_5xlt16)
 {
@@ -254,7 +255,7 @@ POST_OPS_BIAS_5xLT16:
 				__m512 selector4 =
 					_mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1
 								+ post_op_c_i + 3 ) );
-				a_bf16_0 =
+				__m512 selector5 =
 					_mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1
 								+ post_op_c_i + 4 ) );
 
@@ -271,7 +272,7 @@ POST_OPS_BIAS_5xLT16:
 				c_float_3p0 = _mm512_add_ps( selector4, c_float_3p0 );
 
 				// c[4,0-15]
-				c_float_4p0 = _mm512_add_ps( a_bf16_0, c_float_4p0 );
+				c_float_4p0 = _mm512_add_ps( selector5, c_float_4p0 );
 			}
 
 			POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
@@ -563,7 +564,7 @@ POST_OPS_BIAS_4xLT16:
 				__m512 selector3 =
 					_mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1
 								+ post_op_c_i + 2 ) );
-				a_bf16_0 =
+				__m512 selector4 =
 					_mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1
 								+ post_op_c_i + 3 ) );
 
@@ -577,7 +578,7 @@ POST_OPS_BIAS_4xLT16:
 				c_float_2p0 = _mm512_add_ps( selector3, c_float_2p0 );
 
 				// c[3,0-15]
-				c_float_3p0 = _mm512_add_ps( a_bf16_0, c_float_3p0 );
+				c_float_3p0 = _mm512_add_ps( selector4, c_float_3p0 );
 			}
 
 			POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
@@ -821,7 +822,7 @@ POST_OPS_BIAS_3xLT16:
 				selector2 =
 					_mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1
 								+ post_op_c_i + 1 ) );
-				a_bf16_0 =
+				__m512 selector3 =
 					_mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1
 								+ post_op_c_i + 2 ) );
 
@@ -832,7 +833,7 @@ POST_OPS_BIAS_3xLT16:
 				c_float_1p0 = _mm512_add_ps( selector2, c_float_1p0 );
 
 				// c[2,0-15]
-				c_float_2p0 = _mm512_add_ps( a_bf16_0, c_float_2p0 );
+				c_float_2p0 = _mm512_add_ps( selector3, c_float_2p0 );
 			}
 
 			POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
@@ -5839,3 +5840,4 @@ POST_OPS_1x48_DISABLE:
 	// c[0,32-47]
 	_mm512_storeu_ps( c + ( rs_c * 0 ) + ( 2*16 ), c_float_0p2 );
 }
+#endif

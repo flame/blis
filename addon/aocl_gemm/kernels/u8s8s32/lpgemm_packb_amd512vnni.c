@@ -40,6 +40,17 @@
 
 #define NR 64
 
+void get_packb_nr64_u8s8s32o32_strides
+     (
+       dim_t* rs_b,
+       dim_t* cs_b
+     )
+{
+	*rs_b = NR * 4;
+	*cs_b = NR;
+}
+
+#ifdef BLIS_KERNELS_ZEN4
 void packb_nrlt16_u8s8s32o32
      (
        int8_t*       pack_b_buffer_u8s8s32o32,
@@ -72,16 +83,6 @@ void packb_nr48_u8s8s32o32
        const dim_t   ldb,
        const dim_t   KC
      );
-
-void get_packb_nr64_u8s8s32o32_strides
-     (
-       dim_t* rs_b,
-       dim_t* cs_b
-     )
-{
-	*rs_b = NR * 4;
-	*cs_b = NR;
-}
 
 void packb_nr64_u8s8s32o32
      (
@@ -790,3 +791,4 @@ void packb_nrlt16_u8s8s32o32
 		_mm512_storeu_epi64( pack_b_buffer_u8s8s32o32 + ( ( kr_new + 0 ) * NR ), a0_zmm );
 	}
 }
+#endif

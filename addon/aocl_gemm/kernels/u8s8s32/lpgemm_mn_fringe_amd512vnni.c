@@ -39,6 +39,7 @@
 #include "lpgemm_kernels.h"
 #include "lpgemm_s32_kern_macros.h"
 
+#ifdef BLIS_KERNELS_ZEN4
 // 5xlt16 int8o32 fringe kernel
 LPGEMM_MN_LT_NR0_FRINGE_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_5xlt16)
 {
@@ -5279,3 +5280,4 @@ POST_OPS_1x48_DISABLE:
 	// c[0,32-47]
 	_mm512_storeu_epi32( c + ( rs_c * 0 ) + ( 2*16 ), c_int32_0p2 );
 }
+#endif

@@ -148,6 +148,7 @@ void reorderb_nr64_u8s8s32o32
 				// st = ( jc_cur_loop * k )    <traverse blocks 1,2,3,4>
 				//    + ( n_sub_updated * pc ) <traverse block 5>
 				//    + ( NC' * kc0_updated)   <traverse block 6>
+#ifdef BLIS_KERNELS_ZEN4
 				packb_nr64_u8s8s32o32
 				(
 				  ( ( ( int8_t* )b_reorder->storage.aligned_buffer ) +
@@ -157,6 +158,14 @@ void reorderb_nr64_u8s8s32o32
 					( rs_b * pc ) + jc ),
 				  rs_b, nc0, kc0, &rs_b_reorder, &cs_b_reorder
 				);
+#else
+				// Silence compiler warnings.
+				rs_b_reorder = 0;
+				cs_b_reorder = 0;
+				( void )kc0_updated;
+				( void )k_updated;
+				( void )rs_b;
+#endif
 			}
 
 			adjust_B_panel_reordered_jc( &jc, jc_cur_loop );
@@ -198,6 +207,7 @@ void reordera_mr6_u8s8s32o32
 		{
 			dim_t mc0 = bli_min( ( m - ic ), MC );
 
+#ifdef BLIS_KERNELS_ZEN4
 			packa_k64_u8s8s32o32
 			(
 			  ( ( ( uint8_t* )a_reorder->storage.aligned_buffer ) + ( pc * m ) +
@@ -205,6 +215,13 @@ void reordera_mr6_u8s8s32o32
 			  ( ( ( uint8_t* )a->storage.aligned_buffer ) + ( rs_a * ic ) + pc ),
 			  rs_a, mc0, kc0, &rs_a_reorder, &cs_a_reorder
 			);
+#else
+			rs_a_reorder = 0;
+			cs_a_reorder = 0;
+			( void )kc0_updated;
+			( void )rs_a;
+			( void )mc0;
+#endif
 		}
 	}
 

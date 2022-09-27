@@ -38,6 +38,7 @@
 #include "lpgemm_kernels.h"
 #include "lpgemm_f32_kern_macros.h"
 
+#ifdef BLIS_KERNELS_ZEN4
 // 6xlt16 bf16 fringe kernel
 LPGEMM_N_LT_NR0_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_6xlt16)
 {
@@ -328,7 +329,7 @@ POST_OPS_BIAS_6xLT16:
 				__m512 selector5 =
 					_mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1
 								+ post_op_c_i + 4 ) );
-				a_bf16_0 =
+				__m512 selector6 =
 					_mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1
 								+ post_op_c_i + 5 ) );
 
@@ -348,7 +349,7 @@ POST_OPS_BIAS_6xLT16:
 				c_float_4p0 = _mm512_add_ps( selector5, c_float_4p0 );
 
 				// c[5,0-15]
-				c_float_5p0 = _mm512_add_ps( a_bf16_0, c_float_5p0 );
+				c_float_5p0 = _mm512_add_ps( selector6, c_float_5p0 );
 			}
 
 			POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
@@ -827,7 +828,7 @@ POST_OPS_BIAS_6x16:
 				__m512 selector5 =
 					_mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1
 								+ post_op_c_i + 4 ) );
-				a_bf16_0 =
+				__m512 selector6 =
 					_mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1
 								+ post_op_c_i + 5 ) );
 
@@ -847,7 +848,7 @@ POST_OPS_BIAS_6x16:
 				c_float_4p0 = _mm512_add_ps( selector5, c_float_4p0 );
 
 				// c[5,0-15]
-				c_float_5p0 = _mm512_add_ps( a_bf16_0, c_float_5p0 );
+				c_float_5p0 = _mm512_add_ps( selector6, c_float_5p0 );
 			}
 
 			POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
@@ -1383,7 +1384,7 @@ POST_OPS_BIAS_6x32:
 				__m512 selector5 =
 					_mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1
 								+ post_op_c_i + 4 ) );
-				a_bf16_0 =
+				__m512 selector6 =
 					_mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1
 								+ post_op_c_i + 5 ) );
 
@@ -1418,10 +1419,10 @@ POST_OPS_BIAS_6x32:
 				c_float_4p1 = _mm512_add_ps( selector5, c_float_4p1 );
 
 				// c[5,0-15]
-				c_float_5p0 = _mm512_add_ps( a_bf16_0, c_float_5p0 );
+				c_float_5p0 = _mm512_add_ps( selector6, c_float_5p0 );
 
 				// c[5, 16-31]
-				c_float_5p1 = _mm512_add_ps( a_bf16_0, c_float_5p1 );
+				c_float_5p1 = _mm512_add_ps( selector6, c_float_5p1 );
 			}
 
 			POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
@@ -2112,7 +2113,7 @@ POST_OPS_BIAS_6x48:
 				__m512 selector5 =
 					_mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1
 								+ post_op_c_i + 4 ) );
-				a_bf16_0 =
+				__m512 selector6 =
 					_mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1
 								+ post_op_c_i + 5 ) );
 
@@ -2162,13 +2163,13 @@ POST_OPS_BIAS_6x48:
 				c_float_4p2 = _mm512_add_ps( selector5, c_float_4p2 );
 
 				// c[5,0-15]
-				c_float_5p0 = _mm512_add_ps( a_bf16_0, c_float_5p0 );
+				c_float_5p0 = _mm512_add_ps( selector6, c_float_5p0 );
 
 				// c[5, 16-31]
-				c_float_5p1 = _mm512_add_ps( a_bf16_0, c_float_5p1 );
+				c_float_5p1 = _mm512_add_ps( selector6, c_float_5p1 );
 
 				// c[5,32-47]
-				c_float_5p2 = _mm512_add_ps( a_bf16_0, c_float_5p2 );
+				c_float_5p2 = _mm512_add_ps( selector6, c_float_5p2 );
 			}
 
 			POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
@@ -2498,3 +2499,4 @@ POST_OPS_6x48_DISABLE:
 		}		
 	}	
 }
+#endif

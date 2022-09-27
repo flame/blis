@@ -239,6 +239,7 @@ LPGEMM_5LOOP(uint8_t,int8_t,int32_t,u8s8s32o32)
 				if ( ( jc_packb_end > jc_packb_start ) &&
 					 ( jc_packb_start < ( jc + nc0 ) ) )
 				{
+#ifdef BLIS_KERNELS_ZEN4
 					packb_nr64_u8s8s32o32
 					(
 					  pack_b_buffer_u8s8s32o32 + ( jc_packb_start * kc0_updated ),
@@ -247,6 +248,7 @@ LPGEMM_5LOOP(uint8_t,int8_t,int32_t,u8s8s32o32)
 					  ( jc_packb_end - jc_packb_start ), kc0,
 					  &rs_b_use, &cs_b_use
 					);
+#endif
 				}
 				else
 				{
@@ -308,6 +310,7 @@ LPGEMM_5LOOP(uint8_t,int8_t,int32_t,u8s8s32o32)
 					);
 					pack_a_buffer_u8s8s32o32 = ( uint8_t* )bli_mem_buffer( &mem_a );
 
+#ifdef BLIS_KERNELS_ZEN4
 					packa_k64_u8s8s32o32
 					(
 					  pack_a_buffer_u8s8s32o32,
@@ -315,6 +318,7 @@ LPGEMM_5LOOP(uint8_t,int8_t,int32_t,u8s8s32o32)
 					  mc0, kc0,
 					  &rs_a_use, &cs_a_use
 					);
+#endif
 					a_use = pack_a_buffer_u8s8s32o32;
 					a_block_stride = kc0_updated;
 				}
@@ -339,6 +343,7 @@ LPGEMM_5LOOP(uint8_t,int8_t,int32_t,u8s8s32o32)
 				{
 					dim_t nr0 = bli_min( ( nc0 - jr ), NR );
 
+#ifdef BLIS_KERNELS_ZEN4
 					// Reorder/Packed B, Reorder/Packed/Unpacked A call.
 					lpgemm_rowvar_u8s8s32o32_6x64
 					(
@@ -349,6 +354,17 @@ LPGEMM_5LOOP(uint8_t,int8_t,int32_t,u8s8s32o32)
 					  alpha, beta0,
 					  is_last_k, ic, ( jc + jr ), post_op_list, rs_c_downscale
 					);
+#else
+					// Silence compiler warnings.
+					( void )b_use;
+					( void )a_block_stride;
+					( void )rs_c_downscale;
+					( void )is_last_k;
+					( void )c_use_ic;
+					( void )a_use;
+					( void )beta0;
+					( void )nr0;
+#endif
 				}
 			}
 		}

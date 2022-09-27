@@ -39,6 +39,7 @@
 #include "lpgemm_kernels.h"
 #include "lpgemm_f32_kern_macros.h"
 
+#ifdef BLIS_KERNELS_ZEN4
 // 5x64 bf16 kernel
 LPGEMM_M_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_5x64)
 {
@@ -484,7 +485,7 @@ POST_OPS_BIAS_5x64:
 			selector4 =
 				_mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 +
 							post_op_c_i + 3 ) );
-			a_bf16_0 =
+			__m512 selector5 =
 				_mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 +
 							post_op_c_i + 4 ) );
 
@@ -537,16 +538,16 @@ POST_OPS_BIAS_5x64:
 			c_float_3p3 = _mm512_add_ps( selector4, c_float_3p3 );
 
 			// c[4,0-15]
-			c_float_4p0 = _mm512_add_ps( a_bf16_0, c_float_4p0 );
+			c_float_4p0 = _mm512_add_ps( selector5, c_float_4p0 );
 
 			// c[4, 16-31]
-			c_float_4p1 = _mm512_add_ps( a_bf16_0, c_float_4p1 );
+			c_float_4p1 = _mm512_add_ps( selector5, c_float_4p1 );
 
 			// c[4,32-47]
-			c_float_4p2 = _mm512_add_ps( a_bf16_0, c_float_4p2 );
+			c_float_4p2 = _mm512_add_ps( selector5, c_float_4p2 );
 
 			// c[4,48-63]
-			c_float_4p3 = _mm512_add_ps( a_bf16_0, c_float_4p3 );
+			c_float_4p3 = _mm512_add_ps( selector5, c_float_4p3 );
 		}
 
 		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
@@ -2588,3 +2589,4 @@ POST_OPS_1x64_DISABLE:
 	// c[0,48-63]
 	_mm512_storeu_ps( c + ( rs_c * 0 ) + ( 3*16 ), c_float_0p3 );
 }
+#endif
