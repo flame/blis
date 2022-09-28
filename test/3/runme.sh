@@ -5,7 +5,19 @@ exec_root="test"
 out_root="output"
 delay=0.1
 
-#sys="blis"
+# Bind threads to processors.
+#export OMP_PROC_BIND=true
+#export GOMP_CPU_AFFINITY="0 2 4 6 8 10 12 14 16 18 20 22 1 3 5 7 9 11 13 15 17 19 21 23"
+#export GOMP_CPU_AFFINITY="0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81 82 83 84 85 86 87 88 89 90 91 92 93 94 95 96 97 98 99 100 101 102 103"
+
+# ------------------
+
+# Problem size range for single- and multithreaded execution. Set psr_st and
+# psr_mt on a per-system basis below to override these default values.
+psr_st="100 1000 100"
+psr_mt="200 2000 200"
+
+sys="blis"
 #sys="stampede2"
 #sys="lonestar5"
 #sys="ul252"
@@ -14,19 +26,15 @@ delay=0.1
 sys="altra"
 # sys="altramax"
 
-# Bind threads to processors.
-#export OMP_PROC_BIND=true
-#export GOMP_CPU_AFFINITY="0 2 4 6 8 10 12 14 16 18 20 22 1 3 5 7 9 11 13 15 17 19 21 23"
-#export GOMP_CPU_AFFINITY="0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81 82 83 84 85 86 87 88 89 90 91 92 93 94 95 96 97 98 99 100 101 102 103"
-
 if [ ${sys} = "blis" ]; then
 
 	export GOMP_CPU_AFFINITY="0-3"
 
 	numactl=""
-	threads="jc1ic1jr1_2400
-	         jc2ic3jr2_6000
-	         jc4ic3jr2_8000"
+	threads="jc1ic1jr1_st
+	         jc2ic2jr1_mt"
+	#psr_st="40 1000 40"
+	#psr_mt="40 4000 40"
 
 elif [ ${sys} = "stampede2" ]; then
 
@@ -34,9 +42,10 @@ elif [ ${sys} = "stampede2" ]; then
 	exit 1
 
 	numactl=""
-	threads="jc1ic1jr1_2400
-	         jc4ic6jr1_6000
-	         jc4ic12jr1_8000"
+	threads="jc1ic1jr1_st
+	         jc4ic12jr1_mt"
+	#psr_st="40 1000 40"
+	#psr_mt="40 4000 40"
 
 elif [ ${sys} = "lonestar5" ]; then
 
@@ -46,9 +55,10 @@ elif [ ${sys} = "lonestar5" ]; then
 	#export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/opt/apps/intel/16.0.1.150/compilers_and_libraries_2016.1.150/linux/compiler/lib/intel64"
 
 	numactl=""
-	threads="jc1ic1jr1_2400
-	         jc2ic3jr2_6000
-	         jc4ic3jr2_8000"
+	threads="jc1ic1jr1_st
+	         jc4ic3jr2_mt"
+	#psr_st="40 1000 40"
+	#psr_mt="40 4000 40"
 
 elif [ ${sys} = "ul252" ]; then
 
@@ -56,9 +66,10 @@ elif [ ${sys} = "ul252" ]; then
 	export GOMP_CPU_AFFINITY="0-51"
 
 	numactl=""
-	threads="jc1ic1jr1_2400
-	         jc2ic13jr1_6000
-	         jc4ic13jr1_8000"
+	threads="jc1ic1jr1_st
+	         jc4ic13jr1_mt"
+	#psr_st="40 1000 40"
+	#psr_mt="40 4000 40"
 
 elif [ ${sys} = "ul264" ]; then
 
@@ -66,9 +77,10 @@ elif [ ${sys} = "ul264" ]; then
 	export GOMP_CPU_AFFINITY="0-63"
 
 	numactl="numactl --interleave=all"
-	threads="jc1ic1jr1_2400
-	         jc1ic8jr4_6000
-	         jc2ic8jr4_8000"
+	threads="jc1ic1jr1_st
+	         jc2ic8jr4_mt"
+	#psr_st="40 1000 40"
+	#psr_mt="40 4000 40"
 
 elif [ ${sys} = "ul2128" ]; then
 
@@ -76,14 +88,13 @@ elif [ ${sys} = "ul2128" ]; then
 	export GOMP_CPU_AFFINITY="0-1s"
 
 	numactl="numactl --interleave=all"
-	threads="jc1ic1jr1_2400
-	         jc4ic4jr4_6000
-	         jc8ic4jr4_8000"
-	#threads="jc4ic4jr4_6000
-	#         jc8ic4jr4_8000"
-	#threads="jc1ic1jr1_2400"
-	#threads="jc4ic4jr4_6000"
-	#threads="jc8ic4jr4_8000"
+	threads="jc1ic1jr1_st
+	         jc4ic4jr4_mt"
+	#threads="jc1ic1jr1_st
+	#         jc8ic4jr4_mt"
+	psr_st="48 2400 48"
+	psr_mt="120 6000 120"
+	#psr_mt="160 8000 160"
 
 elif [ ${sys} = "altra" ]; then
 
@@ -95,9 +106,13 @@ elif [ ${sys} = "altra" ]; then
 
 	numactl="numactl --localalloc"
 	# Temporarily reducing run to 12000 & 8000 to save time
-	threads="jc1ic1jr1_2400
-		jc1ic10jr8_8000
-		jc2ic10jr8_12000"
+	threads="jc1ic1jr1_st
+	         jc1ic10jr8_mt"
+	#threads="jc1ic1jr1_st
+	#         jc2ic10jr80_mt"
+	psr_st="48 2400 48"
+	psr_mt="160 8000 160"
+	#psr_mt="240 12000 240"
 
 elif [ ${sys} = "altramax" ]; then
 
@@ -108,52 +123,47 @@ elif [ ${sys} = "altramax" ]; then
 	export GOMP_CPU_AFFINITY="0 1 64 65 8 9 72 73 2 3 66 67 10 11 74 75 4 5 68 69 12 13 76 77 6 7 70 71 14 15 78 79 16 17 80 81 24 25 88 89 18 19 82 83 26 27 90 91 20 21 84 85 28 29 92 93 22 23 86 87 30 31 94 95 32 33 96 97 40 41 104 105 34 35 98 99 42 43 106 107 36 37 100 101 44 45 108 109 38 39 102 103 46 47 110 111 48 49 112 113 52 53 116 117 50 51 114 115 54 55 118 119 56 57 120 121 60 61 124 125 58 59 122 123 62 63 126 127"
 
 	numactl="numactl --localalloc"
+	threads="jc1ic1jr1_st
+	         jc1ic16jr8_mt"
+	#threads="jc1ic1jr1_st
+	#         jc2ic16jr8_mt"
+	psr_st="48 2400 48"
 	# Temporarily reducing run to 12000 to save time
-	threads="jc1ic1jr1_2400
-		jc1ic16jr8_12000
-		jc2ic16jr8_16000"
+	psr_mt="240 12000 240"
+	#psr_mt="320 16000 320"
 
 fi
 
 # Datatypes to test.
-test_dts="d s z c"
-#test_dts="d"
+test_dts="s d c z"
+test_dts="d"
 
 # Operations to test.
-test_ops="gemm hemm herk trmm trsm"
-#test_ops="gemm"
+test_ops="gemm_nn hemm_ll herk_ln trmm_runn trsm_runn"
+#test_ops="herk"
 
 # Implementations to test.
-impls="blis"
-#impls="openblas"
-#impls="vendor"
-#impls="other"
-#impls="eigen"
-# impls="all"
+test_impls="blis"
+#test_impls="openblas"
+#test_impls="vendor"
+#test_impls="eigen"
+#test_impls="all"
 
-if [ "${impls}" = "blis" ]; then
-
-	test_impls="asm_blis"
-
-elif [ "${impls}" = "openblas" ]; then
-
-	test_impls="openblas"
-
-elif [ "${impls}" = "vendor" ]; then
-
-	test_impls="vendor"
-
-elif [ "${impls}" = "eigen" ]; then
-
-	test_impls="eigen"
-
-elif [ "${impls}" = "other" ]; then
-
-	test_impls="openblas vendor eigen"
-else
-
-	test_impls="openblas asm_blis vendor eigen"
+if [ "${impls}" = "all" ]; then
+	test_impls="openblas blis vendor eigen"
 fi
+
+# Number of repeats per problem size.
+nrepeats=3
+
+# The induced method to use ('native' or '1m').
+ind="native"
+
+# Quiet mode?
+#quiet="yes"
+
+# For testing purposes.
+#dryrun="yes"
 
 # Save a copy of GOMP_CPU_AFFINITY so that if we have to unset it, we can
 # restore the value.
@@ -163,41 +173,63 @@ GOMP_CPU_AFFINITYsave=${GOMP_CPU_AFFINITY}
 # First perform real test cases.
 for th in ${threads}; do
 
+	#threads="jc1ic1jr1_st
+	#         jc8ic4jr4_mt"
+
 	# Start with one way of parallelism in each loop. We will now begin
 	# parsing the 'th' variable to update one or more of these threading
 	# parameters.
 	jc_nt=1; pc_nt=1; ic_nt=1; jr_nt=1; ir_nt=1
 
-	# Strip everything before and after the underscore so that what remains
-	# is the problem size and threading parameter string, respectively.
-	psize=${th##*_}; thinfo=${th%%_*}
+	# Strip everything before the understore so that what remains is the
+	# threading suffix.
+	tsuf=${th##*_};
+
+	# Strip everything after the understore so that what remains is the
+	# parallelism (threading) info.
+	thinfo=${th%%_*}
 
 	# Identify each threading parameter and insert a space before it.
-	thsep=$(echo -e ${thinfo} | sed -e "s/\([jip][cr]\)/ \1/g" )
+	thinfo_sep=$(echo -e ${thinfo} | sed -e "s/\([jip][cr]\)/ \1/g" )
 
 	nt=1
 
-	for loopnum in ${thsep}; do
+	for loopnum in ${thinfo_sep}; do
 
-		# Given the current string, which identifies a loop and the
-		# number of ways of parallelism for that loop, strip out
-		# the ways and loop separately to identify each.
+		# Given the current string, which identifies a loop and the number of
+		# ways of parallelism to be obtained from that loop, strip out the ways
+		# and loop separately to identify each.
 		loop=$(echo -e ${loopnum} | sed -e "s/[0-9]//g" )
-		num=$(echo -e ${loopnum} | sed -e "s/[a-z]//g" )
+		nways=$(echo -e ${loopnum} | sed -e "s/[a-z]//g" )
 
-		# Construct a string that we can evaluate to set the number
-		# of ways of parallelism for the current loop.
-		loop_nt_eq_num="${loop}_nt=${num}"
+		# Construct a string that we can evaluate to set the number of ways of
+		# parallelism for the current loop (e.g. jc_nt, ic_nt, jr_nt).
+		loop_nt_eq_num="${loop}_nt=${nways}"
 
 		# Update the total number of threads.
-		nt=$(expr ${nt} \* ${num})
+		nt=$(expr ${nt} \* ${nways})
 
 		# Evaluate the string to assign the ways to the variable.
 		eval ${loop_nt_eq_num}
 
 	done
 
-	echo "Switching to: jc${jc_nt} pc${pc_nt} ic${ic_nt} jr${jr_nt} ir${ir_nt} (nt = ${nt}) p_max${psize}"
+	# Find a binary using the test driver prefix and the threading suffix.
+	# Then strip everything before and after the max problem size that's
+	# encoded into the name of the binary.
+	binname=$(ls -1 ${exec_root}_*_${tsuf}.x | head -n1)
+
+	# Sanity check: If 'ls' couldn't find any binaries, then the user
+	# probably didn't build them. Inform the user and proceed to the next
+	# threading config.
+	if [ "${binname}" = "" ]; then
+
+		echo "Could not find binaries corresponding to '${tsuf}' threading config. Skipping."
+		continue
+	fi
+
+	# Let the user know what threading config we are working on.
+	echo "Switching to: jc${jc_nt} pc${pc_nt} ic${ic_nt} jr${jr_nt} ir${ir_nt} (nt = ${nt})"
 
 
 	for dt in ${test_dts}; do
@@ -206,28 +238,29 @@ for th in ${threads}; do
 
 			for op in ${test_ops}; do
 
+				# Strip everything before the understore so that what remains is
+				# the operation parameter string.
+				oppars=${op##*_};
+
+				# Strip everything after the understore so that what remains is
+				# the operation name (sans parameter encoding).
+				opname=${op%%_*}
+
 				# Eigen does not support multithreading for hemm, herk, trmm,
 				# or trsm. So if we're getting ready to execute an Eigen driver
 				# for one of these operations and nt > 1, we skip this test.
-				if [ "${im}"  = "eigen" ] && \
-				   [ "${op}" != "gemm"  ] && \
-				   [ "${nt}" != "1"     ]; then
+				if [ "${im}"      = "eigen" ] && \
+				   [ "${opname}" != "gemm"  ] && \
+				   [ "${nt}"     != "1"     ]; then
 					continue;
 				fi
 
-				# Find the threading suffix by probing the executable.
-				binname=$(ls ${exec_root}_${dt}${op}_${psize}_${im}_*.x)
-				suf_ext=${binname##*_}
-				suf=${suf_ext%%.*}
-
-				#echo "found file: ${binname} with suffix ${suf}"
-
 				# Set the number of threads according to th.
-				if [ "${suf}" = "1s" ] || [ "${suf}" = "2s" ]; then
+				if [ "${tsuf}" = "mt" ]; then
 
 					# Set the threading parameters based on the implementation
 					# that we are preparing to run.
-					if   [ "${im}" = "asm_blis" ]; then
+					if   [ "${im}" = "blis" ]; then
 						unset  OMP_NUM_THREADS
 						export BLIS_JC_NT=${jc_nt}
 						export BLIS_PC_NT=${pc_nt}
@@ -254,8 +287,14 @@ for th in ${threads}; do
 					else
 						export GOMP_CPU_AFFINITY="${GOMP_CPU_AFFINITYsave}"
 					fi
+
+					# Choose the mt problem size range.
+					psr="${psr_mt}"
+
 				else
 
+					# Set all environment variables to 1 to ensure single-
+					# threaded execution.
 					export BLIS_JC_NT=1
 					export BLIS_PC_NT=1
 					export BLIS_IC_NT=1
@@ -265,20 +304,38 @@ for th in ${threads}; do
 					export OPENBLAS_NUM_THREADS=1
 					export MKL_NUM_THREADS=1
 					export nt_use=1
+
+					# Choose the st problem size range.
+					psr="${psr_st}"
+				fi
+
+				if [ "${quiet}" = "yes" ]; then
+					qv="-q" # quiet
+				else
+					qv="-v" # verbose (the default)
 				fi
 
 				# Construct the name of the test executable.
-				exec_name="${exec_root}_${dt}${op}_${psize}_${im}_${suf}.x"
+				exec_name="${exec_root}_${opname}_${im}_${tsuf}.x"
 
 				# Construct the name of the output file.
-				out_file="${out_root}_${suf}_${dt}${op}_${im}.m"
+				out_file="${out_root}_${tsuf}_${dt}${opname}_${oppars}_${im}.m"
 
-				#echo "Running (nt = ${nt_use}) ./${exec_name} > ${out_file}"
-				echo "Running ${numactl} ./${exec_name} > ${out_file}"
+				# Use printf for its formatting capabilities.
+				printf 'Running %s %-21s %s %-7s %s %s %s %s > %s\n' \
+				       "${numactl}" "./${exec_name}" "-d ${dt}" \
+				                                     "-c ${oppars}" \
+				                                     "-i ${ind}" \
+				                                     "-p \"${psr}\"" \
+				                                     "-r ${nrepeats}" \
+				                                     "${qv}" \
+				                                     "${out_file}"
 
 				# Run executable with or without numactl, depending on how
 				# the numactl variable was set.
-				${numactl} ./${exec_name} > ${out_file}
+				if [ "${dryrun}" != "yes" ]; then
+					${numactl} ./${exec_name} -d ${dt} -c ${oppars} -i ${ind} -p "${psr}" -r ${nrepeats} ${qv} > ${out_file}
+				fi
 
 				# Bedtime!
 				sleep ${delay}

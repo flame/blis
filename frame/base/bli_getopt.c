@@ -37,20 +37,21 @@
 
 static const char OPT_MARKER = '-';
 
+//bool bli_char_is_in_str( char ch, const char* str );
+
 void bli_getopt_init_state( int opterr, getopt_t* state )
 {
-	state->optarg = NULL;
-	state->optind = 1;
-	state->opterr = opterr;
-	state->optopt = 0;
+	state->nextchar = NULL;
+	state->optarg   = NULL;
+	state->optind   = 1;
+	state->opterr   = opterr;
+	state->optopt   = 0;
 }
 
 int bli_getopt( int argc, char** const argv, const char* optstring, getopt_t* state )
 {
-	static char* nextchar = NULL;
-
-	char*        elem_str;
-	char*        optstr_char;
+	const char* elem_str;
+	const char* optstr_char;
 
 	// If argv contains no more arguments to process, return.
 	if ( state->optind == argc ) return -1;
@@ -60,7 +61,7 @@ int bli_getopt( int argc, char** const argv, const char* optstring, getopt_t* st
 	// an element of argv with more than one option character, in which
 	// case we need to pick up where we left off (which is the address
 	// contained in nextchar).
-	if ( nextchar == NULL )
+	if ( state->nextchar == NULL )
 	{
 		elem_str = argv[ state->optind ];
 
@@ -87,10 +88,10 @@ int bli_getopt( int argc, char** const argv, const char* optstring, getopt_t* st
 		// character.
 
 		// Use the nextchar pointer as our element string.
-		elem_str = nextchar;
+		elem_str = state->nextchar;
 
 		// Reset nextchar to NULL.
-		nextchar = NULL;
+		state->nextchar = NULL;
 	}
 
 	// Find the first occurrence of elem_str[0] in optstring.
@@ -130,17 +131,24 @@ int bli_getopt( int argc, char** const argv, const char* optstring, getopt_t* st
 				state->optind += 1;
 				return '?';
 			}
-			// If there are still more elements in argv yet to process AND
-			// the next one is an option, then the argument was omitted.
+			// If there are still more elements in argv yet to process AND the
+			// next one is an option marker, then the argument was omitted
+			// (unless the option marker is actually part of the argument,
+			// such as with negative numbers, e.g. -1, which is very likely
+			// if the char *after* the option marker is missing from optstring).
 			else if ( argv[ state->optind + 1 ][0] == OPT_MARKER )
 			{
-				if ( state->opterr == 1 ) fprintf( stderr, "bli_getopt(): **error**: option character '%c' is missing an argument (next element of argv is option '%c')\n", elem_str[0], argv[ state->optind + 1 ][1] );
+				// If the char after the option marker is present in optstring,
+				// then the first option argument is missing.
+				if ( strchr( optstring, argv[ state->optind + 1 ][1] ) != NULL )
+				{
+					if ( state->opterr == 1 ) fprintf( stderr, "bli_getopt(): **error**: option character '%c' is missing an argument (next element of argv is option '%c')\n", elem_str[0], argv[ state->optind + 1 ][1] );
 
-				state->optopt = *optstr_char;
-				state->optind += 1;
-				return '?';
+					state->optopt = *optstr_char;
+					state->optind += 1;
+					return '?';
+				}
 			}
-
 			// If no error was deteced above, we can safely assign optarg
 			// to be the next element in argv and increment optind by two.
 			state->optarg = argv[ state->optind + 1 ];
@@ -166,7 +174,7 @@ int bli_getopt( int argc, char** const argv, const char* optstring, getopt_t* st
 	{
 		if ( strchr( optstring, elem_str[1] ) != NULL )
 		{
-			nextchar = &elem_str[1];
+			state->nextchar = &elem_str[1];
 			return *optstr_char;
 		}
 	}
@@ -176,3 +184,13 @@ int bli_getopt( int argc, char** const argv, const char* optstring, getopt_t* st
 	return *optstr_char;
 }
 
+#if 0
+bool bli_char_is_in_str( char ch, const char* str )
+{
+	int chi = ( int )ch;
+
+	if ( strchr( str, chi ) == NULL ) return FALSE;
+
+	return TRUE;
+}
+#endif
