@@ -34,23 +34,21 @@
 
 #include "blis.h"
 
-#ifndef BLIS_ENABLE_MULTITHREADING
-
 #define SKIP_THRINFO_TREE
 
-void bls_l3_thread_decorator
+void bls_l3_thread_decorator_single
      (
-       l3sbxint_t func,
-       opid_t     family,
-       //pack_t     schema_a,
-       //pack_t     schema_b,
-       obj_t*     alpha,
-       obj_t*     a,
-       obj_t*     b,
-       obj_t*     beta,
-       obj_t*     c,
-       cntx_t*    cntx,
-       rntm_t*    rntm
+       l3sbxint_ft func,
+       opid_t      family,
+       //pack_t      schema_a,
+       //pack_t      schema_b,
+       obj_t*      alpha,
+       obj_t*      a,
+       obj_t*      b,
+       obj_t*      beta,
+       obj_t*      c,
+       cntx_t*     cntx,
+       rntm_t*     rntm
      )
 {
 	// For sequential execution, we use only one thread.
@@ -62,7 +60,7 @@ void bls_l3_thread_decorator
 	// with an internal lock to ensure only one application thread accesses
 	// the sba at a time. bli_sba_checkout_array() will also automatically
 	// resize the array_t, if necessary.
-	array_t* restrict array = bli_sba_checkout_array( n_threads );
+	array_t* array = bli_sba_checkout_array( n_threads );
 
 	// Access the pool_t* for thread 0 and embed it into the rntm.
 	bli_sba_rntm_set_pool( 0, array, rntm );
@@ -72,14 +70,14 @@ void bls_l3_thread_decorator
 
 #ifndef SKIP_THRINFO_TREE
 	// Allcoate a global communicator for the root thrinfo_t structures.
-	thrcomm_t* restrict gl_comm = bli_thrcomm_create( rntm, n_threads );
+	thrcomm_t* gl_comm = bli_thrcomm_create( rntm, n_threads );
 #endif
 
 
 	{
 		// NOTE: We don't need to create another copy of the rntm_t since
 		// it was already copied in one of the high-level oapi functions.
-		rntm_t* restrict rntm_p = rntm;
+		rntm_t* rntm_p = rntm;
 
 		// There is only one thread id (for the thief thread).
 		const dim_t tid = 0;
@@ -136,6 +134,4 @@ void bls_l3_thread_decorator
 	// mutual exclusion.
 	bli_sba_checkin_array( array );
 }
-
-#endif
 

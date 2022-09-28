@@ -4,7 +4,8 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2021, The University of Texas at Austin
+   Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2018, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -32,29 +33,63 @@
 
 */
 
-#ifndef BLIS_SBX_L3_DECOR_PTHREADS_H
-#define BLIS_SBX_L3_DECOR_PTHREADS_H
 
-// Definitions specific to situations when POSIX multithreading is enabled.
-#ifdef BLIS_ENABLE_PTHREADS
-
-// Thread entry point prototype.
-void* bls_l3_thread_entry( void* data_void );
-
-void bls_l3_thread_decorator_pthreads
+void bli_packm_sup_init_mem
      (
-       l3sbxint_ft func,
-       opid_t      family,
-       obj_t*      alpha,
-       obj_t*      a,
-       obj_t*      b,
-       obj_t*      beta,
-       obj_t*      c,
-       cntx_t*     cntx,
-       rntm_t*     rntm
+       bool       will_pack,
+       packbuf_t  pack_buf_type,
+       num_t      dt,
+       dim_t      m,
+       dim_t      k,
+       dim_t      mr,
+       rntm_t*    rntm,
+       mem_t*     mem,
+       thrinfo_t* thread
      );
 
-#endif
+void bli_packm_sup_finalize_mem
+     (
+       bool       did_pack,
+       rntm_t*    rntm,
+       mem_t*     mem,
+       thrinfo_t* thread
+     );
 
-#endif
+void bli_packm_sup_init
+     (
+             bool       will_pack,
+             stor3_t    stor_id,
+             pack_t*    schema,
+             dim_t      m,
+             dim_t      k,
+             dim_t      mr,
+             dim_t*     m_max,
+             dim_t*     k_max,
+       const void*      x, inc_t  rs_x, inc_t  cs_x,
+             void**     p, inc_t* rs_p, inc_t* cs_p,
+                           dim_t* pd_p, inc_t* ps_p,
+             mem_t*     mem
+     );
+
+void bli_packm_sup
+     (
+             bool       will_pack,
+             packbuf_t  pack_buf_type,
+             stor3_t    stor_id,
+             trans_t    transc,
+             num_t      dt,
+             dim_t      m_alloc,
+             dim_t      k_alloc,
+             dim_t      m,
+             dim_t      k,
+             dim_t      mr,
+       const void*      kappa,
+       const void*      a, inc_t  rs_a, inc_t  cs_a,
+             void**     p, inc_t* rs_p, inc_t* cs_p,
+                           inc_t* ps_p,
+       const cntx_t*    cntx,
+             rntm_t*    rntm,
+             mem_t*     mem,
+             thrinfo_t* thread
+     );
 

@@ -32,16 +32,25 @@
 
 */
 
-#ifndef BLIS_SBX_L3_DECOR_PTHREADS_H
-#define BLIS_SBX_L3_DECOR_PTHREADS_H
-
 // Definitions specific to situations when POSIX multithreading is enabled.
 #ifdef BLIS_ENABLE_PTHREADS
 
 // Thread entry point prototype.
 void* bao_l3_thread_entry( void* data_void );
 
-#endif
+void bao_l3_thread_decorator_pthreads
+     (
+       l3aoint_ft func,
+       opid_t     family,
+       obj_t*     alpha,
+       obj_t*     a,
+       obj_t*     d,
+       obj_t*     b,
+       obj_t*     beta,
+       obj_t*     c,
+       cntx_t*    cntx,
+       rntm_t*    rntm
+     );
 
 #endif
 

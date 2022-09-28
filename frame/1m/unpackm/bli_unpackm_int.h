@@ -37,6 +37,7 @@ void bli_unpackm_int
        obj_t*  p,
        obj_t*  a,
        cntx_t* cntx,
+       rntm_t* rntm,
        cntl_t* cntl,
        thrinfo_t* thread
      );

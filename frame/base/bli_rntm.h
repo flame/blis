@@ -43,6 +43,8 @@
 /*
 typedef struct rntm_s
 {
+	timpl_t   thread_impl;
+
 	bool      auto_factor;
 
 	dim_t     num_threads;
@@ -61,7 +63,12 @@ typedef struct rntm_s
 // -- rntm_t query (public API) ------------------------------------------------
 //
 
-BLIS_INLINE bool bli_rntm_auto_factor( rntm_t* rntm )
+BLIS_INLINE timpl_t bli_rntm_thread_impl( const rntm_t* rntm )
+{
+	return rntm->thread_impl;
+}
+
+BLIS_INLINE bool bli_rntm_auto_factor( const rntm_t* rntm )
 {
 	return rntm->auto_factor;
 }
@@ -149,6 +156,11 @@ BLIS_INLINE dim_t bli_rntm_equals( rntm_t* rntm1, rntm_t* rntm2 )
 // -- rntm_t modification (internal use only) ----------------------------------
 //
 
+BLIS_INLINE void bli_rntm_set_thread_impl_only( timpl_t thread_impl, rntm_t* rntm )
+{
+	rntm->thread_impl = thread_impl;
+}
+
 BLIS_INLINE void bli_rntm_set_auto_factor_only( bool auto_factor, rntm_t* rntm )
 {
 	rntm->auto_factor = auto_factor;
@@ -231,6 +243,12 @@ BLIS_INLINE void bli_rntm_clear_pba( rntm_t* rntm )
 // -- rntm_t modification (public API) -----------------------------------------
 //
 
+BLIS_INLINE void bli_rntm_set_thread_impl( timpl_t thread_impl, rntm_t* rntm )
+{
+	// Set the threading implementation to use.
+	bli_rntm_set_thread_impl_only( thread_impl, rntm );
+}
+
 BLIS_INLINE void bli_rntm_set_num_threads( dim_t nt, rntm_t* rntm )
 {
 	// Record the total number of threads to use.
@@ -306,6 +324,7 @@ BLIS_INLINE void bli_rntm_clear_l3_sup( rntm_t* rntm )
 
 #define BLIS_RNTM_INITIALIZER \
         { \
+          .thread_impl = SINGLE, \
           .auto_factor = TRUE, \
           .num_threads = -1, \
           .thrloop     = { -1, -1, -1, -1, -1, -1 }, \
@@ -318,6 +337,8 @@ BLIS_INLINE void bli_rntm_clear_l3_sup( rntm_t* rntm )
 
 BLIS_INLINE void bli_rntm_init( rntm_t* rntm )
 {
+	bli_rntm_set_thread_impl_only( BLIS_SINGLE, rntm );
+
 	bli_rntm_set_auto_factor_only( TRUE, rntm );
 
 	bli_rntm_clear_num_threads_only( rntm );
@@ -330,7 +351,9 @@ BLIS_INLINE void bli_rntm_init( rntm_t* rntm )
 	bli_rntm_clear_pba( rntm );
 }
 
+//
 // -- rntm_t total thread calculation ------------------------------------------
+//
 
 BLIS_INLINE dim_t bli_rntm_calc_num_threads
      (
@@ -348,9 +371,9 @@ BLIS_INLINE dim_t bli_rntm_calc_num_threads
 	return n_threads;
 }
 
-// -----------------------------------------------------------------------------
-
-// Function prototypes
+//
+// -- Function prototypes ------------------------------------------------------
+//
 
 BLIS_EXPORT_BLIS void bli_rntm_init_from_global( rntm_t* rntm );
 

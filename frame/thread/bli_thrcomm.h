@@ -36,11 +36,81 @@
 #ifndef BLIS_THRCOMM_H
 #define BLIS_THRCOMM_H
 
+// Define barrier_t, which is specific to the tree barrier in the OpenMP
+// implementation. This needs to be done first since it is (potentially)
+// used within the definition of thrcomm_t below.
+
+#ifdef BLIS_ENABLE_OPENMP
+#ifdef BLIS_TREE_BARRIER
+struct barrier_s
+{
+	int               arity;
+	int               count;
+	struct barrier_s* dad;
+	volatile int      signal;
+};
+typedef struct barrier_s barrier_t;
+#endif
+#endif
+
+// Define the thrcomm_t structure, which will be common to all threading
+// implementations.
+
+typedef struct thrcomm_s
+{
+	// -- Fields common to all threading implementations --
+
+	void*       sent_object;
+	dim_t       n_threads;
+	timpl_t     ti;
+
+	// NOTE: barrier_sense was originally a gint_t-based bool_t, but upon
+	// redefining bool_t as bool we discovered that some gcc __atomic built-ins
+	// don't allow the use of bool for the variables being operated upon.
+	// (Specifically, this was observed of __atomic_fetch_xor(), but it likely
+	// applies to all other related built-ins.) Thus, we get around this by
+	// redefining barrier_sense as a gint_t.
+	//volatile gint_t  barrier_sense;
+	gint_t barrier_sense;
+	dim_t  barrier_threads_arrived;
+
+	// -- Fields specific to OpenMP --
+
+	#ifdef BLIS_ENABLE_OPENMP
+	#ifdef BLIS_TREE_BARRIER
+	// This field is only needed if the tree barrier implementation is being
+	// compiled. The non-tree barrier code does not use it.
+	barrier_t** barriers;
+	#endif
+	#endif
+
+	// -- Fields specific to pthreads --
+
+	#ifdef BLIS_ENABLE_PTHREADS
+	#ifdef BLIS_USE_PTHREAD_BARRIER
+	// This field is only needed if the pthread_barrier_t implementation is
+	// being compiled. The non-pthread_barrier_t code does not use it.
+	bli_pthread_barrier_t barrier;
+	#endif
+	#endif
+
+} thrcomm_t;
+
+
+
+
+
 // Include definitions (mostly thrcomm_t) specific to the method of
 // multithreading.
 #include "bli_thrcomm_single.h"
 #include "bli_thrcomm_openmp.h"
 #include "bli_thrcomm_pthreads.h"
+
+// Define a function pointer type for each of the functions that are
+// "overloaded" by each method of multithreading.
+typedef void (*thrcomm_init_ft)( dim_t nt, thrcomm_t* comm );
+typedef void (*thrcomm_cleanup_ft)( thrcomm_t* comm );
+typedef void (*thrcomm_barrier_ft)( dim_t tid, thrcomm_t* comm );
 
 
 // thrcomm_t query (field only)
@@ -51,16 +121,22 @@ BLIS_INLINE dim_t bli_thrcomm_num_threads( thrcomm_t* comm )
 }
 
 
-// Thread communicator prototypes.
+// Threading method-agnostic function prototypes.
 thrcomm_t* bli_thrcomm_create( rntm_t* rntm, dim_t n_threads );
 void       bli_thrcomm_free( rntm_t* rntm, thrcomm_t* comm );
-void       bli_thrcomm_init( dim_t n_threads, thrcomm_t* comm );
-void       bli_thrcomm_cleanup( thrcomm_t* comm );
 
-BLIS_EXPORT_BLIS void  bli_thrcomm_barrier( dim_t thread_id, thrcomm_t* comm );
-BLIS_EXPORT_BLIS void* bli_thrcomm_bcast( dim_t inside_id, void* to_send, thrcomm_t* comm );
+// Threading method-specific function prototypes.
+// NOTE: These are the prototypes to the dispatcher functions and thus they
+// require the timpl_t as an argument. The threading-specific functions can
+// (and do) omit the timpl_t from their function signatures since their
+// threading implementation is intrinsically known.
+void                   bli_thrcomm_init( timpl_t ti, dim_t n_threads, thrcomm_t* comm );
+void                   bli_thrcomm_cleanup( timpl_t ti, thrcomm_t* comm );
+BLIS_EXPORT_BLIS void  bli_thrcomm_barrier( timpl_t ti, dim_t thread_id, thrcomm_t* comm );
 
-void       bli_thrcomm_barrier_atomic( dim_t thread_id, thrcomm_t* comm );
+// Other function prototypes.
+BLIS_EXPORT_BLIS void* bli_thrcomm_bcast( timpl_t ti, dim_t inside_id, void* to_send, thrcomm_t* comm );
+void                   bli_thrcomm_barrier_atomic( dim_t thread_id, thrcomm_t* comm );
 
 #endif
 

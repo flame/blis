@@ -34,13 +34,11 @@
 
 #include "blis.h"
 
-#ifndef BLIS_ENABLE_MULTITHREADING
-
 #define SKIP_THRINFO_TREE
 
-void bao_l3_thread_decorator
+void bao_l3_thread_decorator_single
      (
-       l3sbxint_t func,
+       l3aoint_ft func,
        opid_t     family,
        //pack_t     schema_a,
        //pack_t     schema_b,
@@ -138,6 +136,4 @@ void bao_l3_thread_decorator
 	// mutual exclusion.
 	bli_sba_checkin_array( array );
 }
-
-#endif
 

@@ -55,6 +55,19 @@ void PASTEMAC(gemm,BLIS_OAPI_EX_SUF)
 {
 	bli_init_once();
 
+	// If C has a zero dimension, return early.
+	if ( bli_obj_has_zero_dim( c ) ) return;
+
+	// If alpha is zero, or if A or B has a zero dimension, scale C by beta
+	// and return early.
+	if ( bli_obj_equals( alpha, &BLIS_ZERO ) ||
+	     bli_obj_has_zero_dim( a ) ||
+	     bli_obj_has_zero_dim( b ) )
+	{
+		bli_scalm( beta, c );
+		return;
+	}
+
 	// If the rntm is non-NULL, it may indicate that we should forgo sup
 	// handling altogether.
 	bool enable_sup = TRUE;
@@ -127,6 +140,19 @@ void PASTEMAC(gemmt,BLIS_OAPI_EX_SUF)
      )
 {
 	bli_init_once();
+
+	// If C has a zero dimension, return early.
+	if ( bli_obj_has_zero_dim( c ) ) return;
+
+	// If alpha is zero, or if A or B has a zero dimension, scale C by beta
+	// and return early.
+	if ( bli_obj_equals( alpha, &BLIS_ZERO ) ||
+	     bli_obj_has_zero_dim( a ) ||
+	     bli_obj_has_zero_dim( b ) )
+	{
+		bli_scalm( beta, c );
+		return;
+	}
 
 	// Initialize a local runtime with global settings if necessary. Note
 	// that in the case that a runtime is passed in, we make a local copy.

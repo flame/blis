@@ -39,6 +39,7 @@ void bli_unpackm_int
        obj_t*  p,
        obj_t*  a,
        cntx_t* cntx,
+       rntm_t* rntm,
        cntl_t* cntl,
        thrinfo_t* thread
      )
@@ -73,6 +74,6 @@ void bli_unpackm_int
     }
 
 	// Barrier so that unpacking is done before computation.
-    bli_thread_barrier( thread );
+	bli_thread_barrier( rntm, thread );
 }
 

@@ -37,24 +37,19 @@
 
 #ifdef BLIS_ENABLE_OPENMP
 
-// Define a dummy function bli_l3_sup_thread_entry(), which is needed in the
-// pthreads version, so that when building Windows DLLs (with OpenMP enabled
-// or no multithreading) we don't risk having an unresolved symbol.
-void* bli_l3_sup_thread_entry( void* data_void ) { return NULL; }
-
 //#define PRINT_THRINFO
 
-err_t bli_l3_sup_thread_decorator
+err_t bli_l3_sup_thread_decorator_openmp
      (
-       l3supint_t func,
-       opid_t     family,
-       obj_t*     alpha,
-       obj_t*     a,
-       obj_t*     b,
-       obj_t*     beta,
-       obj_t*     c,
-       cntx_t*    cntx,
-       rntm_t*    rntm
+       l3supint_ft func,
+       opid_t      family,
+       obj_t*      alpha,
+       obj_t*      a,
+       obj_t*      b,
+       obj_t*      beta,
+       obj_t*      c,
+       cntx_t*     cntx,
+       rntm_t*     rntm
      )
 {
 	// Query the total number of threads from the rntm_t object.

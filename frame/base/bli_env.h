@@ -38,6 +38,7 @@
 #define BLIS_ENV_H
 
 gint_t bli_env_get_var( const char* env, gint_t fallback );
+char*  bli_env_get_str( const char* env );
 //void  bli_env_set_var( const char* env, dim_t value );
 
 #endif
