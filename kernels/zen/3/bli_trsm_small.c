@@ -21044,8 +21044,6 @@ BLIS_INLINE  err_t bli_strsm_small_XAutB_XAlB
 
                 xmm0 = _mm_loadu_ps((float *)(a01 + rs_a * 0 + loop_count*6));
                 _mm_storeu_ps((float *)(ptr_a10_dup + p_lda * 0 + loop_count*6), xmm0);
-                xmm0 = _mm_loadl_pi(xmm1,(__m64 *)(a01 + rs_a * 0 + 4 + loop_count*6));
-                _mm_storel_pi((__m64 *)(ptr_a10_dup + p_lda * 0 + 4 + loop_count*6),xmm0);
             }
         }
 
@@ -24872,8 +24870,6 @@ BLIS_INLINE  err_t bli_strsm_small_XAltB_XAuB
 
                 xmm0 = _mm_loadu_ps((float *)(a01 + rs_a * 0 + loop_count*6));
                 _mm_storeu_ps((float *)(ptr_a10_dup + p_lda * 0 + loop_count*6), xmm0);
-                xmm0 = _mm_loadl_pi(xmm1,(__m64 *)(a01 + rs_a * 0 + 4 + loop_count*6));
-                _mm_storel_pi((__m64 *)(ptr_a10_dup + p_lda * 0 + 4 + loop_count*6),xmm0);
             }
         }
 
@@ -41889,7 +41885,7 @@ BLIS_INLINE void ctrsm_small_pack_diag_element
 	ymm16 = _mm256_permute_ps(ymm16, 0x44);\
 	\
 	ymm0 = _mm256_loadu_ps((float const *)(b11));\
-	ymm3 = _mm256_broadcast_ps((__m128 const *)&ones);\
+	ymm3 = _mm256_broadcast_ps((__m128 const *)&ones_a);\
 	ymm3 = _mm256_permute_ps(ymm3, 0x44);\
 	/*in register transpose
 	 * ymm0,ymm1,ymm2 holds
@@ -41939,7 +41935,7 @@ BLIS_INLINE void ctrsm_small_pack_diag_element
 \
 	ymm0 = _mm256_loadu_ps((float const *)(b11));\
 	ymm1 = _mm256_loadu_ps((float const *)(b11 + cs_b *1));\
-	ymm3 = _mm256_broadcast_ps((__m128 const *)&ones);\
+	ymm3 = _mm256_broadcast_ps((__m128 const *)&ones_a);\
 	ymm3 = _mm256_permute_ps(ymm3, 0x44);\
 	/*in register transpose
 	 * ymm0,ymm1,ymm2 holds
@@ -41996,7 +41992,7 @@ BLIS_INLINE void ctrsm_small_pack_diag_element
 	ymm0 = _mm256_loadu_ps((float const *)(b11));\
 	ymm1 = _mm256_loadu_ps((float const *)(b11 + cs_b *1));\
 	ymm2 = _mm256_loadu_ps((float const *)(b11 + cs_b *2));\
-	ymm3 = _mm256_broadcast_ps((__m128 const *)&ones);\
+	ymm3 = _mm256_broadcast_ps((__m128 const *)&ones_a);\
 	ymm3 = _mm256_permute_ps(ymm3, 0x44);\
 	/*in register transpose
 	 * ymm0,ymm1,ymm2 holds
@@ -42059,7 +42055,7 @@ BLIS_INLINE void ctrsm_small_pack_diag_element
 	ymm0 = _mm256_loadu_ps((float const *)(b11));\
 	ymm1 = _mm256_loadu_ps((float const *)(b11 + cs_b *1));\
 	ymm2 = _mm256_loadu_ps((float const *)(b11 + cs_b *2));\
-	ymm3 = _mm256_broadcast_ps((__m128 const *)&ones);\
+	ymm3 = _mm256_broadcast_ps((__m128 const *)&ones_a);\
 	ymm3 = _mm256_permute_ps(ymm3, 0x44);\
 	/*in register transpose
 	 * ymm0,ymm1,ymm2 holds
@@ -42216,7 +42212,6 @@ BLIS_INLINE void ctrsm_small_pack_diag_element
 	_mm256_storeu_ps((float *)(b11 + cs_b * 2 + 4), ymm2);\
 }
 
-
 BLIS_INLINE err_t bli_ctrsm_small_AutXB_AlXB
 (
     obj_t* AlphaObj,
@@ -42251,13 +42246,17 @@ BLIS_INLINE err_t bli_ctrsm_small_AutXB_AlXB
 	dim_t i, j, k;    //loop variables
 	dim_t k_iter;     //number of times GEMM to be performed
 
-	scomplex AlphaVal = *(scomplex *)AlphaObj->buffer;    //value of alpha
+	scomplex AlphaVal[2];
+        AlphaVal[0] = *(scomplex *)AlphaObj->buffer;    //value of alpha
+        AlphaVal[1] = *(scomplex *)AlphaObj->buffer;    //value of alpha
+    
 	scomplex *L =  bli_obj_buffer_at_off(a);       //pointer to  matrix A
 	scomplex *B =  bli_obj_buffer_at_off(b);       //pointer to matrix B
 
 	scomplex *a10, *a11, *b01, *b11;    //pointers that point to blocks for GEMM and TRSM
 
-	scomplex ones = {1.0, 1.0};
+	float ones = 1.0;
+        float ones_a[4] = {1.0, 1.0,1.0,1.0};
 	bool is_unitdiag = bli_obj_has_unit_diag(a);
 
 	//scratch registers
@@ -42270,14 +42269,14 @@ BLIS_INLINE err_t bli_ctrsm_small_AutXB_AlXB
 	__m128 xmm0, xmm1, xmm2, xmm3, xmm4;
     	__m128 xmm5;
 
-	xmm0 = _mm_setzero_ps();
+        xmm0 = _mm_setzero_ps();
 	xmm1 = _mm_setzero_ps();
 	xmm2 = _mm_setzero_ps();
 	xmm3 = _mm_setzero_ps();
 	xmm4 = _mm_setzero_ps();
 	xmm5 = _mm_setzero_ps();
-
-	gint_t required_packing_A = 1;
+    
+        gint_t required_packing_A = 1;
 	mem_t local_mem_buf_A_s = {0};
 	scomplex *D_A_pack = NULL;
 	scomplex d11_pack[d_mr] __attribute__((aligned(64)));
@@ -42306,8 +42305,8 @@ BLIS_INLINE err_t bli_ctrsm_small_AutXB_AlXB
 		D_A_pack = bli_mem_buffer(&local_mem_buf_A_s);
 		if(NULL==D_A_pack) return BLIS_NULL_POINTER;
 	}
-
-	/*
+    
+    /*
 	   Performs solving TRSM for 4 colmns at a time from  0 to m/4 in steps of d_mr
 	   a. Load, transpose, Pack A (a10 block), the size of packing 4x3 to 4x (m-4)
 	   First there will be no GEMM and no packing of a10 because it is only TRSM
@@ -42392,14 +42391,20 @@ BLIS_INLINE err_t bli_ctrsm_small_AutXB_AlXB
 			   */
 			////extract a00
 			ymm18 = _mm256_setr_ps(1.0, -1.0, 1.0, -1.0, 1.0, -1.0, 1.0, -1.0);
-			ymm1 = _mm256_broadcast_ps(( __m128 const *)(d11_pack));
+			ymm1 = _mm256_set_ps((d11_pack)->imag,(d11_pack)->real,
+						(d11_pack)->imag,(d11_pack)->real,
+			     			(d11_pack)->imag,(d11_pack)->real,
+						(d11_pack)->imag,(d11_pack)->real);
 			ymm1 = _mm256_permute_ps(ymm1, 0x44);
 #ifndef BLIS_ENABLE_TRSM_PREINVERSION
 			BLIS_CTRSM_DIV(ymm8)
 #else
 			BLIS_CTRSM_MUL(ymm8)
 #endif
-			ymm2 = _mm256_broadcast_ps((__m128 const *) (a11 + cs_a*1) );
+			ymm2 = _mm256_set_ps((a11 + cs_a*1)->imag,(a11 + cs_a*1)->real,
+						(a11 + cs_a*1)->imag,(a11 + cs_a*1)->real,
+						(a11 + cs_a*1)->imag,(a11 + cs_a*1)->real,
+						(a11 + cs_a*1)->imag,(a11 + cs_a*1)->real);
 			ymm2 = _mm256_permute_ps(ymm2, 0x44);
 			if(conjtransa)
 			{
@@ -42416,7 +42421,10 @@ BLIS_INLINE err_t bli_ctrsm_small_AutXB_AlXB
 			ymm16 = _mm256_fmaddsub_ps(ymm1, ymm2, ymm16);
 			ymm9 = _mm256_sub_ps(ymm9,ymm16);
 
-			ymm2 = _mm256_broadcast_ps((__m128 const *) (a11 + cs_a*2) );
+			ymm2 = _mm256_set_ps((a11 + cs_a*2)->imag,(a11 + cs_a*2)->real,
+						(a11 + cs_a*2)->imag,(a11 + cs_a*2)->real,
+						(a11 + cs_a*2)->imag,(a11 + cs_a*2)->real,
+						(a11 + cs_a*2)->imag,(a11 + cs_a*2)->real);
 			ymm2 = _mm256_permute_ps(ymm2, 0x44);
 			if(conjtransa)
 			{
@@ -42431,7 +42439,10 @@ BLIS_INLINE err_t bli_ctrsm_small_AutXB_AlXB
 			ymm16 = _mm256_fmaddsub_ps(ymm1, ymm2, ymm16);
 			ymm10 = _mm256_sub_ps(ymm10,ymm16);
 
-			ymm2 = _mm256_broadcast_ps((__m128 const *) (a11 + cs_a*3) );
+			ymm2 = _mm256_set_ps((a11 + cs_a*3)->imag,(a11 + cs_a*3)->real,
+						(a11 + cs_a*3)->imag,(a11 + cs_a*3)->real,
+						(a11 + cs_a*3)->imag,(a11 + cs_a*3)->real,
+						(a11 + cs_a*3)->imag,(a11 + cs_a*3)->real);
 			ymm2 = _mm256_permute_ps(ymm2, 0x44);
 			if(conjtransa)
 			{
@@ -42446,7 +42457,10 @@ BLIS_INLINE err_t bli_ctrsm_small_AutXB_AlXB
 			ymm16 = _mm256_fmaddsub_ps(ymm1, ymm2, ymm16);
 			ymm11 = _mm256_sub_ps(ymm11,ymm16);
 
-			ymm2 = _mm256_broadcast_ps((__m128 const *) (a11 + cs_a*4) );
+			ymm2 = _mm256_set_ps((a11 + cs_a*4)->imag,(a11 + cs_a*4)->real,
+						(a11 + cs_a*4)->imag,(a11 + cs_a*4)->real,
+						(a11 + cs_a*4)->imag,(a11 + cs_a*4)->real,
+						(a11 + cs_a*4)->imag,(a11 + cs_a*4)->real);
 			ymm2 = _mm256_permute_ps(ymm2, 0x44);
 			if(conjtransa)
 			{
@@ -42461,7 +42475,10 @@ BLIS_INLINE err_t bli_ctrsm_small_AutXB_AlXB
 			ymm16 = _mm256_fmaddsub_ps(ymm1, ymm2, ymm16);
 			ymm12 = _mm256_sub_ps(ymm12,ymm16);
 
-			ymm2 = _mm256_broadcast_ps((__m128 const *) (a11 + cs_a*5) );
+			ymm2 = _mm256_set_ps((a11 + cs_a*5)->imag,(a11 + cs_a*5)->real,
+						(a11 + cs_a*5)->imag,(a11 + cs_a*5)->real,
+						(a11 + cs_a*5)->imag,(a11 + cs_a*5)->real,
+						(a11 + cs_a*5)->imag,(a11 + cs_a*5)->real);
 			ymm2 = _mm256_permute_ps(ymm2, 0x44);
 			if(conjtransa)
 			{
@@ -42476,7 +42493,10 @@ BLIS_INLINE err_t bli_ctrsm_small_AutXB_AlXB
 			ymm16 = _mm256_fmaddsub_ps(ymm1, ymm2, ymm16);
 			ymm13 = _mm256_sub_ps(ymm13,ymm16);
 
-			ymm2 = _mm256_broadcast_ps((__m128 const *) (a11 + cs_a*6) );
+			ymm2 = _mm256_set_ps((a11 + cs_a*6)->imag,(a11 + cs_a*6)->real,
+						(a11 + cs_a*6)->imag,(a11 + cs_a*6)->real,
+						(a11 + cs_a*6)->imag,(a11 + cs_a*6)->real,
+						(a11 + cs_a*6)->imag,(a11 + cs_a*6)->real);
 			ymm2 = _mm256_permute_ps(ymm2, 0x44);
 			if(conjtransa)
 			{
@@ -42491,7 +42511,10 @@ BLIS_INLINE err_t bli_ctrsm_small_AutXB_AlXB
 			ymm16 = _mm256_fmaddsub_ps(ymm1, ymm2, ymm16);
 			ymm14 = _mm256_sub_ps(ymm14,ymm16);
 
-			ymm2 = _mm256_broadcast_ps((__m128 const *) (a11 + cs_a*7) );
+			ymm2 = _mm256_set_ps((a11 + cs_a*7)->imag,(a11 + cs_a*7)->real,
+						(a11 + cs_a*7)->imag,(a11 + cs_a*7)->real,
+						(a11 + cs_a*7)->imag,(a11 + cs_a*7)->real,
+						(a11 + cs_a*7)->imag,(a11 + cs_a*7)->real);
 			ymm2 = _mm256_permute_ps(ymm2, 0x44);
 			if(conjtransa)
 			{
@@ -42506,7 +42529,11 @@ BLIS_INLINE err_t bli_ctrsm_small_AutXB_AlXB
 			ymm16 = _mm256_fmaddsub_ps(ymm1, ymm2, ymm16);
 			ymm15 = _mm256_sub_ps(ymm15,ymm16);
 
-			ymm1 = _mm256_broadcast_ps(( __m128 const *)(d11_pack + 1));
+			ymm1 = _mm256_set_ps((d11_pack + 1)->imag,(d11_pack + 1)->real,
+						(d11_pack + 1)->imag,(d11_pack + 1)->real,
+						(d11_pack + 1)->imag,(d11_pack + 1)->real,
+						(d11_pack + 1)->imag,(d11_pack + 1)->real);
+            
 			ymm1 = _mm256_permute_ps(ymm1, 0x44);
 #ifndef BLIS_ENABLE_TRSM_PREINVERSION
 			BLIS_CTRSM_DIV(ymm9)
@@ -42517,7 +42544,10 @@ BLIS_INLINE err_t bli_ctrsm_small_AutXB_AlXB
 
 			a11 += rs_a;
 
-			ymm2 = _mm256_broadcast_ps((__m128 const *) (a11 + cs_a*2) );
+			ymm2 = _mm256_set_ps((a11 + cs_a*2)->imag,(a11 + cs_a*2)->real,
+						(a11 + cs_a*2)->imag,(a11 + cs_a*2)->real,
+						(a11 + cs_a*2)->imag,(a11 + cs_a*2)->real,
+						(a11 + cs_a*2)->imag,(a11 + cs_a*2)->real);
 			ymm2 = _mm256_permute_ps(ymm2, 0x44);
 			if(conjtransa)
 			{
@@ -42532,7 +42562,10 @@ BLIS_INLINE err_t bli_ctrsm_small_AutXB_AlXB
 			ymm16 = _mm256_fmaddsub_ps(ymm1, ymm2, ymm16);
 			ymm10 = _mm256_sub_ps(ymm10,ymm16);
 
-			ymm2 = _mm256_broadcast_ps((__m128 const *) (a11 + cs_a*3) );
+			ymm2 = _mm256_set_ps((a11 + cs_a*3)->imag,(a11 + cs_a*3)->real,
+						(a11 + cs_a*3)->imag,(a11 + cs_a*3)->real,
+						(a11 + cs_a*3)->imag,(a11 + cs_a*3)->real,
+						(a11 + cs_a*3)->imag,(a11 + cs_a*3)->real);
 			ymm2 = _mm256_permute_ps(ymm2, 0x44);
 			if(conjtransa)
 			{
@@ -42547,7 +42580,10 @@ BLIS_INLINE err_t bli_ctrsm_small_AutXB_AlXB
 			ymm16 = _mm256_fmaddsub_ps(ymm1, ymm2, ymm16);
 			ymm11 = _mm256_sub_ps(ymm11,ymm16);
 
-			ymm2 = _mm256_broadcast_ps((__m128 const *) (a11 + cs_a*4) );
+			ymm2 = _mm256_set_ps((a11 + cs_a*4)->imag,(a11 + cs_a*4)->real,
+						(a11 + cs_a*4)->imag,(a11 + cs_a*4)->real,
+						(a11 + cs_a*4)->imag,(a11 + cs_a*4)->real,
+						(a11 + cs_a*4)->imag,(a11 + cs_a*4)->real);
 			ymm2 = _mm256_permute_ps(ymm2, 0x44);
 			if(conjtransa)
 			{
@@ -42562,7 +42598,10 @@ BLIS_INLINE err_t bli_ctrsm_small_AutXB_AlXB
 			ymm16 = _mm256_fmaddsub_ps(ymm1, ymm2, ymm16);
 			ymm12 = _mm256_sub_ps(ymm12,ymm16);
 
-			ymm2 = _mm256_broadcast_ps((__m128 const *) (a11 + cs_a*5) );
+			ymm2 = _mm256_set_ps((a11 + cs_a*5)->imag,(a11 + cs_a*5)->real,
+						(a11 + cs_a*5)->imag,(a11 + cs_a*5)->real,
+						(a11 + cs_a*5)->imag,(a11 + cs_a*5)->real,
+						(a11 + cs_a*5)->imag,(a11 + cs_a*5)->real);
 			ymm2 = _mm256_permute_ps(ymm2, 0x44);
 			if(conjtransa)
 			{
@@ -42577,7 +42616,10 @@ BLIS_INLINE err_t bli_ctrsm_small_AutXB_AlXB
 			ymm16 = _mm256_fmaddsub_ps(ymm1, ymm2, ymm16);
 			ymm13 = _mm256_sub_ps(ymm13,ymm16);
 
-			ymm2 = _mm256_broadcast_ps((__m128 const *) (a11 + cs_a*6) );
+			ymm2 = _mm256_set_ps((a11 + cs_a*6)->imag,(a11 + cs_a*6)->real,
+						(a11 + cs_a*6)->imag,(a11 + cs_a*6)->real,
+						(a11 + cs_a*6)->imag,(a11 + cs_a*6)->real,
+						(a11 + cs_a*6)->imag,(a11 + cs_a*6)->real);
 			ymm2 = _mm256_permute_ps(ymm2, 0x44);
 			if(conjtransa)
 			{
@@ -42592,7 +42634,10 @@ BLIS_INLINE err_t bli_ctrsm_small_AutXB_AlXB
 			ymm16 = _mm256_fmaddsub_ps(ymm1, ymm2, ymm16);
 			ymm14 = _mm256_sub_ps(ymm14,ymm16);
 
-			ymm2 = _mm256_broadcast_ps((__m128 const *) (a11 + cs_a*7) );
+			ymm2 = _mm256_set_ps((a11 + cs_a*7)->imag,(a11 + cs_a*7)->real,
+						(a11 + cs_a*7)->imag,(a11 + cs_a*7)->real,
+						(a11 + cs_a*7)->imag,(a11 + cs_a*7)->real,
+						(a11 + cs_a*7)->imag,(a11 + cs_a*7)->real);
 			ymm2 = _mm256_permute_ps(ymm2, 0x44);
 			if(conjtransa)
 			{
@@ -42608,7 +42653,10 @@ BLIS_INLINE err_t bli_ctrsm_small_AutXB_AlXB
 			ymm15 = _mm256_sub_ps(ymm15,ymm16);
 
 
-			ymm1 = _mm256_broadcast_ps(( __m128 const *)(d11_pack + 2));
+			ymm1 = _mm256_set_ps((d11_pack + 2)->imag,(d11_pack + 2)->real,
+						(d11_pack + 2)->imag,(d11_pack + 2)->real,
+						(d11_pack + 2)->imag,(d11_pack + 2)->real,
+						(d11_pack + 2)->imag,(d11_pack + 2)->real);
 			ymm1 = _mm256_permute_ps(ymm1, 0x44);
 
 #ifndef BLIS_ENABLE_TRSM_PREINVERSION
@@ -42620,7 +42668,10 @@ BLIS_INLINE err_t bli_ctrsm_small_AutXB_AlXB
 
 			a11 += rs_a;
 
-			ymm2 = _mm256_broadcast_ps((__m128 const *) (a11 + cs_a*3) );
+			ymm2 = _mm256_set_ps((a11 + cs_a*3)->imag,(a11 + cs_a*3)->real,
+						(a11 + cs_a*3)->imag,(a11 + cs_a*3)->real,
+						(a11 + cs_a*3)->imag,(a11 + cs_a*3)->real,
+						(a11 + cs_a*3)->imag,(a11 + cs_a*3)->real);
 			ymm2 = _mm256_permute_ps(ymm2, 0x44);
 			if(conjtransa)
 			{
@@ -42635,7 +42686,10 @@ BLIS_INLINE err_t bli_ctrsm_small_AutXB_AlXB
 			ymm16 = _mm256_fmaddsub_ps(ymm1, ymm2, ymm16);
 			ymm11 = _mm256_sub_ps(ymm11,ymm16);
 
-			ymm2 = _mm256_broadcast_ps((__m128 const *) (a11 + cs_a*4) );
+			ymm2 = _mm256_set_ps((a11 + cs_a*4)->imag,(a11 + cs_a*4)->real,
+						(a11 + cs_a*4)->imag,(a11 + cs_a*4)->real,
+						(a11 + cs_a*4)->imag,(a11 + cs_a*4)->real,
+						(a11 + cs_a*4)->imag,(a11 + cs_a*4)->real);
 			ymm2 = _mm256_permute_ps(ymm2, 0x44);
 			if(conjtransa)
 			{
@@ -42650,7 +42704,10 @@ BLIS_INLINE err_t bli_ctrsm_small_AutXB_AlXB
 			ymm16 = _mm256_fmaddsub_ps(ymm1, ymm2, ymm16);
 			ymm12 = _mm256_sub_ps(ymm12,ymm16);
 
-			ymm2 = _mm256_broadcast_ps((__m128 const *) (a11 + cs_a*5) );
+			ymm2 = _mm256_set_ps((a11 + cs_a*5)->imag,(a11 + cs_a*5)->real,
+						(a11 + cs_a*5)->imag,(a11 + cs_a*5)->real,
+						(a11 + cs_a*5)->imag,(a11 + cs_a*5)->real,
+						(a11 + cs_a*5)->imag,(a11 + cs_a*5)->real);
 			ymm2 = _mm256_permute_ps(ymm2, 0x44);
 			if(conjtransa)
 			{
@@ -42665,7 +42722,10 @@ BLIS_INLINE err_t bli_ctrsm_small_AutXB_AlXB
 			ymm16 = _mm256_fmaddsub_ps(ymm1, ymm2, ymm16);
 			ymm13 = _mm256_sub_ps(ymm13,ymm16);
 
-			ymm2 = _mm256_broadcast_ps((__m128 const *) (a11 + cs_a*6) );
+			ymm2 = _mm256_set_ps((a11 + cs_a*6)->imag,(a11 + cs_a*6)->real,
+						(a11 + cs_a*6)->imag,(a11 + cs_a*6)->real,
+						(a11 + cs_a*6)->imag,(a11 + cs_a*6)->real,
+						(a11 + cs_a*6)->imag,(a11 + cs_a*6)->real);
 			ymm2 = _mm256_permute_ps(ymm2, 0x44);
 			if(conjtransa)
 			{
@@ -42680,7 +42740,10 @@ BLIS_INLINE err_t bli_ctrsm_small_AutXB_AlXB
 			ymm16 = _mm256_fmaddsub_ps(ymm1, ymm2, ymm16);
 			ymm14 = _mm256_sub_ps(ymm14,ymm16);
 
-			ymm2 = _mm256_broadcast_ps((__m128 const *) (a11 + cs_a*7) );
+			ymm2 = _mm256_set_ps((a11 + cs_a*7)->imag,(a11 + cs_a*7)->real,
+						(a11 + cs_a*7)->imag,(a11 + cs_a*7)->real,
+						(a11 + cs_a*7)->imag,(a11 + cs_a*7)->real,
+						(a11 + cs_a*7)->imag,(a11 + cs_a*7)->real);
 			ymm2 = _mm256_permute_ps(ymm2, 0x44);
 			if(conjtransa)
 			{
@@ -42696,7 +42759,10 @@ BLIS_INLINE err_t bli_ctrsm_small_AutXB_AlXB
 			ymm15 = _mm256_sub_ps(ymm15,ymm16);
 
 
-			ymm1 = _mm256_broadcast_ps(( __m128 const *)(d11_pack + 3));
+			ymm1 = _mm256_set_ps((d11_pack + 3)->imag,(d11_pack + 3)->real,
+						(d11_pack + 3)->imag,(d11_pack + 3)->real,
+						(d11_pack + 3)->imag,(d11_pack + 3)->real,
+						(d11_pack + 3)->imag,(d11_pack + 3)->real);
 			ymm1 = _mm256_permute_ps(ymm1, 0x44);
 #ifndef BLIS_ENABLE_TRSM_PREINVERSION
 			BLIS_CTRSM_DIV(ymm11)
@@ -42707,7 +42773,10 @@ BLIS_INLINE err_t bli_ctrsm_small_AutXB_AlXB
 
 			a11 += rs_a;
 
-			ymm2 = _mm256_broadcast_ps((__m128 const *) (a11 + cs_a*4) );
+			ymm2 = _mm256_set_ps((a11 + cs_a*4)->imag,(a11 + cs_a*4)->real,
+						(a11 + cs_a*4)->imag,(a11 + cs_a*4)->real,
+						(a11 + cs_a*4)->imag,(a11 + cs_a*4)->real,
+						(a11 + cs_a*4)->imag,(a11 + cs_a*4)->real);
 			ymm2 = _mm256_permute_ps(ymm2, 0x44);
 			if(conjtransa)
 			{
@@ -42722,7 +42791,10 @@ BLIS_INLINE err_t bli_ctrsm_small_AutXB_AlXB
 			ymm16 = _mm256_fmaddsub_ps(ymm1, ymm2, ymm16);
 			ymm12 = _mm256_sub_ps(ymm12,ymm16);
 
-			ymm2 = _mm256_broadcast_ps((__m128 const *) (a11 + cs_a*5) );
+			ymm2 = _mm256_set_ps((a11 + cs_a*5)->imag,(a11 + cs_a*5)->real,
+						(a11 + cs_a*5)->imag,(a11 + cs_a*5)->real,
+						(a11 + cs_a*5)->imag,(a11 + cs_a*5)->real,
+						(a11 + cs_a*5)->imag,(a11 + cs_a*5)->real);
 			ymm2 = _mm256_permute_ps(ymm2, 0x44);
 			if(conjtransa)
 			{
@@ -42737,7 +42809,10 @@ BLIS_INLINE err_t bli_ctrsm_small_AutXB_AlXB
 			ymm16 = _mm256_fmaddsub_ps(ymm1, ymm2, ymm16);
 			ymm13 = _mm256_sub_ps(ymm13,ymm16);
 
-			ymm2 = _mm256_broadcast_ps((__m128 const *) (a11 + cs_a*6) );
+			ymm2 = _mm256_set_ps((a11 + cs_a*6)->imag,(a11 + cs_a*6)->real,
+						(a11 + cs_a*6)->imag,(a11 + cs_a*6)->real,
+						(a11 + cs_a*6)->imag,(a11 + cs_a*6)->real,
+						(a11 + cs_a*6)->imag,(a11 + cs_a*6)->real);
 			ymm2 = _mm256_permute_ps(ymm2, 0x44);
 			if(conjtransa)
 			{
@@ -42752,7 +42827,10 @@ BLIS_INLINE err_t bli_ctrsm_small_AutXB_AlXB
 			ymm16 = _mm256_fmaddsub_ps(ymm1, ymm2, ymm16);
 			ymm14 = _mm256_sub_ps(ymm14,ymm16);
 
-			ymm2 = _mm256_broadcast_ps((__m128 const *) (a11 + cs_a*7) );
+			ymm2 = _mm256_set_ps((a11 + cs_a*7)->imag,(a11 + cs_a*7)->real,
+						(a11 + cs_a*7)->imag,(a11 + cs_a*7)->real,
+						(a11 + cs_a*7)->imag,(a11 + cs_a*7)->real,
+						(a11 + cs_a*7)->imag,(a11 + cs_a*7)->real);
 			ymm2 = _mm256_permute_ps(ymm2, 0x44);
 			if(conjtransa)
 			{
@@ -42768,7 +42846,10 @@ BLIS_INLINE err_t bli_ctrsm_small_AutXB_AlXB
 			ymm15 = _mm256_sub_ps(ymm15,ymm16);
 
 
-			ymm1 = _mm256_broadcast_ps(( __m128 const *)(d11_pack + 4));
+			ymm1 = _mm256_set_ps((d11_pack + 4)->imag,(d11_pack + 4)->real,
+						(d11_pack + 4)->imag,(d11_pack + 4)->real,
+						(d11_pack + 4)->imag,(d11_pack + 4)->real,
+						(d11_pack + 4)->imag,(d11_pack + 4)->real);
 			ymm1 = _mm256_permute_ps(ymm1, 0x44);
 #ifndef BLIS_ENABLE_TRSM_PREINVERSION
 			BLIS_CTRSM_DIV(ymm12)
@@ -42777,7 +42858,10 @@ BLIS_INLINE err_t bli_ctrsm_small_AutXB_AlXB
 #endif
 			a11 += rs_a;
 
-			ymm2 = _mm256_broadcast_ps((__m128 const *) (a11 + cs_a*5) );
+			ymm2 = _mm256_set_ps((a11 + cs_a*5)->imag,(a11 + cs_a*5)->real,
+						(a11 + cs_a*5)->imag,(a11 + cs_a*5)->real,
+						(a11 + cs_a*5)->imag,(a11 + cs_a*5)->real,
+						(a11 + cs_a*5)->imag,(a11 + cs_a*5)->real);
 			ymm2 = _mm256_permute_ps(ymm2, 0x44);
 			if(conjtransa)
 			{
@@ -42792,7 +42876,10 @@ BLIS_INLINE err_t bli_ctrsm_small_AutXB_AlXB
 			ymm16 = _mm256_fmaddsub_ps(ymm1, ymm2, ymm16);
 			ymm13 = _mm256_sub_ps(ymm13,ymm16);
 
-			ymm2 = _mm256_broadcast_ps((__m128 const *) (a11 + cs_a*6) );
+			ymm2 = _mm256_set_ps((a11 + cs_a*6)->imag,(a11 + cs_a*6)->real,
+						(a11 + cs_a*6)->imag,(a11 + cs_a*6)->real,
+						(a11 + cs_a*6)->imag,(a11 + cs_a*6)->real,
+						(a11 + cs_a*6)->imag,(a11 + cs_a*6)->real);
 			ymm2 = _mm256_permute_ps(ymm2, 0x44);
 			if(conjtransa)
 			{
@@ -42807,7 +42894,10 @@ BLIS_INLINE err_t bli_ctrsm_small_AutXB_AlXB
 			ymm16 = _mm256_fmaddsub_ps(ymm1, ymm2, ymm16);
 			ymm14 = _mm256_sub_ps(ymm14,ymm16);
 
-			ymm2 = _mm256_broadcast_ps((__m128 const *) (a11 + cs_a*7) );
+			ymm2 = _mm256_set_ps((a11 + cs_a*7)->imag,(a11 + cs_a*7)->real,
+						(a11 + cs_a*7)->imag,(a11 + cs_a*7)->real,
+						(a11 + cs_a*7)->imag,(a11 + cs_a*7)->real,
+						(a11 + cs_a*7)->imag,(a11 + cs_a*7)->real);
 			ymm2 = _mm256_permute_ps(ymm2, 0x44);
 			if(conjtransa)
 			{
@@ -42823,7 +42913,10 @@ BLIS_INLINE err_t bli_ctrsm_small_AutXB_AlXB
 			ymm15 = _mm256_sub_ps(ymm15,ymm16);
 
 
-			ymm1 = _mm256_broadcast_ps(( __m128 const *)(d11_pack + 5));
+			ymm1 = _mm256_set_ps((d11_pack + 5)->imag,(d11_pack + 5)->real,
+						(d11_pack + 5)->imag,(d11_pack + 5)->real,
+						(d11_pack + 5)->imag,(d11_pack + 5)->real,
+						(d11_pack + 5)->imag,(d11_pack + 5)->real);
 			ymm1 = _mm256_permute_ps(ymm1, 0x44);
 #ifndef BLIS_ENABLE_TRSM_PREINVERSION
 			BLIS_CTRSM_DIV(ymm13)
@@ -42833,7 +42926,10 @@ BLIS_INLINE err_t bli_ctrsm_small_AutXB_AlXB
 
 			a11 += rs_a;
 
-			ymm2 = _mm256_broadcast_ps((__m128 const *) (a11 + cs_a*6) );
+			ymm2 = _mm256_set_ps((a11 + cs_a*6)->imag,(a11 + cs_a*6)->real,
+						(a11 + cs_a*6)->imag,(a11 + cs_a*6)->real,
+						(a11 + cs_a*6)->imag,(a11 + cs_a*6)->real,
+						(a11 + cs_a*6)->imag,(a11 + cs_a*6)->real);
 			ymm2 = _mm256_permute_ps(ymm2, 0x44);
 			if(conjtransa)
 			{
@@ -42848,7 +42944,10 @@ BLIS_INLINE err_t bli_ctrsm_small_AutXB_AlXB
 			ymm16 = _mm256_fmaddsub_ps(ymm1, ymm2, ymm16);
 			ymm14 = _mm256_sub_ps(ymm14,ymm16);
 
-			ymm2 = _mm256_broadcast_ps((__m128 const *) (a11 + cs_a*7) );
+			ymm2 = _mm256_set_ps((a11 + cs_a*7)->imag,(a11 + cs_a*7)->real,
+						(a11 + cs_a*7)->imag,(a11 + cs_a*7)->real,
+						(a11 + cs_a*7)->imag,(a11 + cs_a*7)->real,
+						(a11 + cs_a*7)->imag,(a11 + cs_a*7)->real);
 			ymm2 = _mm256_permute_ps(ymm2, 0x44);
 			if(conjtransa)
 			{
@@ -42864,7 +42963,10 @@ BLIS_INLINE err_t bli_ctrsm_small_AutXB_AlXB
 			ymm15 = _mm256_sub_ps(ymm15,ymm16);
 
 
-			ymm1 = _mm256_broadcast_ps(( __m128 const *)(d11_pack + 6));
+			ymm1 = _mm256_set_ps((d11_pack + 6)->imag,(d11_pack + 6)->real,
+						(d11_pack + 6)->imag,(d11_pack + 6)->real,
+						(d11_pack + 6)->imag,(d11_pack + 6)->real,
+						(d11_pack + 6)->imag,(d11_pack + 6)->real);
 			ymm1 = _mm256_permute_ps(ymm1, 0x44);
 #ifndef BLIS_ENABLE_TRSM_PREINVERSION
 			BLIS_CTRSM_DIV(ymm14)
@@ -42874,7 +42976,10 @@ BLIS_INLINE err_t bli_ctrsm_small_AutXB_AlXB
 
 			a11 += rs_a;
 
-			ymm2 = _mm256_broadcast_ps((__m128 const *) (a11 + cs_a*7) );
+			ymm2 = _mm256_set_ps((a11 + cs_a*7)->imag,(a11 + cs_a*7)->real,
+						(a11 + cs_a*7)->imag,(a11 + cs_a*7)->real,
+						(a11 + cs_a*7)->imag,(a11 + cs_a*7)->real,
+						(a11 + cs_a*7)->imag,(a11 + cs_a*7)->real);
 			ymm2 = _mm256_permute_ps(ymm2, 0x44);
 			if(conjtransa)
 			{
@@ -42890,7 +42995,10 @@ BLIS_INLINE err_t bli_ctrsm_small_AutXB_AlXB
 			ymm15 = _mm256_sub_ps(ymm15,ymm16);
 
 
-			ymm1 = _mm256_broadcast_ps(( __m128 const *)(d11_pack + 7));
+			ymm1 = _mm256_set_ps((d11_pack + 7)->imag,(d11_pack + 7)->real,
+						(d11_pack + 7)->imag,(d11_pack + 7)->real,
+						(d11_pack + 7)->imag,(d11_pack + 7)->real,
+						(d11_pack + 7)->imag,(d11_pack + 7)->real);
 			ymm1 = _mm256_permute_ps(ymm1, 0x44);
 #ifndef BLIS_ENABLE_TRSM_PREINVERSION
 			BLIS_CTRSM_DIV(ymm15)
@@ -42919,8 +43027,8 @@ BLIS_INLINE err_t bli_ctrsm_small_AutXB_AlXB
 				BLIS_CTRSM_SMALL_GEMM_8mx2n(a10,b01,cs_b,p_lda,k_iter)
 
 				float zero = 0.0;
-				ymm16 = _mm256_broadcast_ss(&AlphaVal.real);
-				ymm17 = _mm256_broadcast_ss(&AlphaVal.imag);
+				ymm16 = _mm256_broadcast_ss(&AlphaVal[0].real);
+				ymm17 = _mm256_broadcast_ss(&AlphaVal[0].imag);
 				ymm2 = _mm256_broadcast_ss(&zero);
 				ymm3 = _mm256_broadcast_ss(&zero);
 				ymm6 = _mm256_broadcast_ss(&zero);
@@ -42971,8 +43079,8 @@ BLIS_INLINE err_t bli_ctrsm_small_AutXB_AlXB
 				BLIS_CTRSM_SMALL_GEMM_8mx1n(a10,b01,cs_b,p_lda,k_iter)
 
 				float zero = 0.0;
-				ymm16 = _mm256_broadcast_ss(&AlphaVal.real);
-				ymm17 = _mm256_broadcast_ss(&AlphaVal.imag);
+				ymm16 = _mm256_broadcast_ss(&AlphaVal[0].real);
+				ymm17 = _mm256_broadcast_ss(&AlphaVal[0].imag);
 				ymm2 = _mm256_broadcast_ss(&zero);
 				ymm3 = _mm256_broadcast_ss(&zero);
 				ymm6 = _mm256_broadcast_ss(&zero);
@@ -43040,14 +43148,20 @@ BLIS_INLINE err_t bli_ctrsm_small_AutXB_AlXB
 			ymm15 = _mm256_permute2f128_ps(ymm18,ymm19,0x31);
 
 			ymm18 = _mm256_setr_ps(1.0, -1.0, 1.0, -1.0, 1.0, -1.0, 1.0, -1.0);
-			ymm1 = _mm256_broadcast_ps(( __m128 const *)(d11_pack));
+			ymm1 = _mm256_set_ps((d11_pack)->imag,(d11_pack)->real,
+						(d11_pack)->imag,(d11_pack)->real,
+						(d11_pack)->imag,(d11_pack)->real,
+						(d11_pack)->imag,(d11_pack)->real);
 			ymm1 = _mm256_permute_ps(ymm1, 0x44);
 #ifndef BLIS_ENABLE_TRSM_PREINVERSION
 			BLIS_CTRSM_DIV(ymm8)
 #else
 			BLIS_CTRSM_MUL(ymm8)
 #endif
-			ymm2 = _mm256_broadcast_ps((__m128 const *) (a11 + cs_a*1) );
+			ymm2 = _mm256_set_ps((a11 + cs_a*1)->imag,(a11 + cs_a*1)->real,
+						(a11 + cs_a*1)->imag,(a11 + cs_a*1)->real,
+						(a11 + cs_a*1)->imag,(a11 + cs_a*1)->real,
+						(a11 + cs_a*1)->imag,(a11 + cs_a*1)->real);
 			ymm2 = _mm256_permute_ps(ymm2, 0x44);
 			if(conjtransa)
 			{
@@ -43064,7 +43178,10 @@ BLIS_INLINE err_t bli_ctrsm_small_AutXB_AlXB
 			ymm16 = _mm256_fmaddsub_ps(ymm1, ymm2, ymm16);
 			ymm9 = _mm256_sub_ps(ymm9,ymm16);
 
-			ymm2 = _mm256_broadcast_ps((__m128 const *) (a11 + cs_a*2) );
+			ymm2 = _mm256_set_ps((a11 + cs_a*2)->imag,(a11 + cs_a*2)->real,
+						(a11 + cs_a*2)->imag,(a11 + cs_a*2)->real,
+						(a11 + cs_a*2)->imag,(a11 + cs_a*2)->real,
+						(a11 + cs_a*2)->imag,(a11 + cs_a*2)->real);
 			ymm2 = _mm256_permute_ps(ymm2, 0x44);
 			if(conjtransa)
 			{
@@ -43079,7 +43196,10 @@ BLIS_INLINE err_t bli_ctrsm_small_AutXB_AlXB
 			ymm16 = _mm256_fmaddsub_ps(ymm1, ymm2, ymm16);
 			ymm10 = _mm256_sub_ps(ymm10,ymm16);
 
-			ymm2 = _mm256_broadcast_ps((__m128 const *) (a11 + cs_a*3) );
+			ymm2 = _mm256_set_ps((a11 + cs_a*3)->imag,(a11 + cs_a*3)->real,
+						(a11 + cs_a*3)->imag,(a11 + cs_a*3)->real,
+						(a11 + cs_a*3)->imag,(a11 + cs_a*3)->real,
+						(a11 + cs_a*3)->imag,(a11 + cs_a*3)->real);
 			ymm2 = _mm256_permute_ps(ymm2, 0x44);
 			if(conjtransa)
 			{
@@ -43094,7 +43214,10 @@ BLIS_INLINE err_t bli_ctrsm_small_AutXB_AlXB
 			ymm16 = _mm256_fmaddsub_ps(ymm1, ymm2, ymm16);
 			ymm11 = _mm256_sub_ps(ymm11,ymm16);
 
-			ymm2 = _mm256_broadcast_ps((__m128 const *) (a11 + cs_a*4) );
+			ymm2 = _mm256_set_ps((a11 + cs_a*4)->imag,(a11 + cs_a*4)->real,
+						(a11 + cs_a*4)->imag,(a11 + cs_a*4)->real,
+						(a11 + cs_a*4)->imag,(a11 + cs_a*4)->real,
+						(a11 + cs_a*4)->imag,(a11 + cs_a*4)->real);
 			ymm2 = _mm256_permute_ps(ymm2, 0x44);
 			if(conjtransa)
 			{
@@ -43109,7 +43232,10 @@ BLIS_INLINE err_t bli_ctrsm_small_AutXB_AlXB
 			ymm16 = _mm256_fmaddsub_ps(ymm1, ymm2, ymm16);
 			ymm12 = _mm256_sub_ps(ymm12,ymm16);
 
-			ymm2 = _mm256_broadcast_ps((__m128 const *) (a11 + cs_a*5) );
+			ymm2 = _mm256_set_ps((a11 + cs_a*5)->imag,(a11 + cs_a*5)->real,
+						(a11 + cs_a*5)->imag,(a11 + cs_a*5)->real,
+						(a11 + cs_a*5)->imag,(a11 + cs_a*5)->real,
+						(a11 + cs_a*5)->imag,(a11 + cs_a*5)->real);
 			ymm2 = _mm256_permute_ps(ymm2, 0x44);
 			if(conjtransa)
 			{
@@ -43124,7 +43250,10 @@ BLIS_INLINE err_t bli_ctrsm_small_AutXB_AlXB
 			ymm16 = _mm256_fmaddsub_ps(ymm1, ymm2, ymm16);
 			ymm13 = _mm256_sub_ps(ymm13,ymm16);
 
-			ymm2 = _mm256_broadcast_ps((__m128 const *) (a11 + cs_a*6) );
+			ymm2 = _mm256_set_ps((a11 + cs_a*6)->imag,(a11 + cs_a*6)->real,
+						(a11 + cs_a*6)->imag,(a11 + cs_a*6)->real,
+						(a11 + cs_a*6)->imag,(a11 + cs_a*6)->real,
+						(a11 + cs_a*6)->imag,(a11 + cs_a*6)->real);
 			ymm2 = _mm256_permute_ps(ymm2, 0x44);
 			if(conjtransa)
 			{
@@ -43139,7 +43268,10 @@ BLIS_INLINE err_t bli_ctrsm_small_AutXB_AlXB
 			ymm16 = _mm256_fmaddsub_ps(ymm1, ymm2, ymm16);
 			ymm14 = _mm256_sub_ps(ymm14,ymm16);
 
-			ymm2 = _mm256_broadcast_ps((__m128 const *) (a11 + cs_a*7) );
+			ymm2 = _mm256_set_ps((a11 + cs_a*7)->imag,(a11 + cs_a*7)->real,
+						(a11 + cs_a*7)->imag,(a11 + cs_a*7)->real,
+						(a11 + cs_a*7)->imag,(a11 + cs_a*7)->real,
+						(a11 + cs_a*7)->imag,(a11 + cs_a*7)->real);
 			ymm2 = _mm256_permute_ps(ymm2, 0x44);
 			if(conjtransa)
 			{
@@ -43154,7 +43286,10 @@ BLIS_INLINE err_t bli_ctrsm_small_AutXB_AlXB
 			ymm16 = _mm256_fmaddsub_ps(ymm1, ymm2, ymm16);
 			ymm15 = _mm256_sub_ps(ymm15,ymm16);
 
-			ymm1 = _mm256_broadcast_ps(( __m128 const *)(d11_pack + 1));
+			ymm1 = _mm256_set_ps((d11_pack + 1)->imag,(d11_pack + 1)->real,
+						(d11_pack + 1)->imag,(d11_pack + 1)->real,
+						(d11_pack + 1)->imag,(d11_pack + 1)->real,
+						(d11_pack + 1)->imag,(d11_pack + 1)->real);
 			ymm1 = _mm256_permute_ps(ymm1, 0x44);
 #ifndef BLIS_ENABLE_TRSM_PREINVERSION
 			BLIS_CTRSM_DIV(ymm9)
@@ -43165,7 +43300,10 @@ BLIS_INLINE err_t bli_ctrsm_small_AutXB_AlXB
 
 			a11 += rs_a;
 
-			ymm2 = _mm256_broadcast_ps((__m128 const *) (a11 + cs_a*2) );
+			ymm2 = _mm256_set_ps((a11 + cs_a*2)->imag,(a11 + cs_a*2)->real,
+						(a11 + cs_a*2)->imag,(a11 + cs_a*2)->real,
+						(a11 + cs_a*2)->imag,(a11 + cs_a*2)->real,
+						(a11 + cs_a*2)->imag,(a11 + cs_a*2)->real);
 			ymm2 = _mm256_permute_ps(ymm2, 0x44);
 			if(conjtransa)
 			{
@@ -43180,7 +43318,10 @@ BLIS_INLINE err_t bli_ctrsm_small_AutXB_AlXB
 			ymm16 = _mm256_fmaddsub_ps(ymm1, ymm2, ymm16);
 			ymm10 = _mm256_sub_ps(ymm10,ymm16);
 
-			ymm2 = _mm256_broadcast_ps((__m128 const *) (a11 + cs_a*3) );
+			ymm2 = _mm256_set_ps((a11 + cs_a*3)->imag,(a11 + cs_a*3)->real,
+						(a11 + cs_a*3)->imag,(a11 + cs_a*3)->real,
+						(a11 + cs_a*3)->imag,(a11 + cs_a*3)->real,
+						(a11 + cs_a*3)->imag,(a11 + cs_a*3)->real);
 			ymm2 = _mm256_permute_ps(ymm2, 0x44);
 			if(conjtransa)
 			{
@@ -43195,7 +43336,10 @@ BLIS_INLINE err_t bli_ctrsm_small_AutXB_AlXB
 			ymm16 = _mm256_fmaddsub_ps(ymm1, ymm2, ymm16);
 			ymm11 = _mm256_sub_ps(ymm11,ymm16);
 
-			ymm2 = _mm256_broadcast_ps((__m128 const *) (a11 + cs_a*4) );
+			ymm2 = _mm256_set_ps((a11 + cs_a*4)->imag,(a11 + cs_a*4)->real,
+						(a11 + cs_a*4)->imag,(a11 + cs_a*4)->real,
+						(a11 + cs_a*4)->imag,(a11 + cs_a*4)->real,
+						(a11 + cs_a*4)->imag,(a11 + cs_a*4)->real);
 			ymm2 = _mm256_permute_ps(ymm2, 0x44);
 			if(conjtransa)
 			{
@@ -43210,7 +43354,10 @@ BLIS_INLINE err_t bli_ctrsm_small_AutXB_AlXB
 			ymm16 = _mm256_fmaddsub_ps(ymm1, ymm2, ymm16);
 			ymm12 = _mm256_sub_ps(ymm12,ymm16);
 
-			ymm2 = _mm256_broadcast_ps((__m128 const *) (a11 + cs_a*5) );
+			ymm2 = _mm256_set_ps((a11 + cs_a*5)->imag,(a11 + cs_a*5)->real,
+						(a11 + cs_a*5)->imag,(a11 + cs_a*5)->real,
+						(a11 + cs_a*5)->imag,(a11 + cs_a*5)->real,
+						(a11 + cs_a*5)->imag,(a11 + cs_a*5)->real);
 			ymm2 = _mm256_permute_ps(ymm2, 0x44);
 			if(conjtransa)
 			{
@@ -43225,7 +43372,10 @@ BLIS_INLINE err_t bli_ctrsm_small_AutXB_AlXB
 			ymm16 = _mm256_fmaddsub_ps(ymm1, ymm2, ymm16);
 			ymm13 = _mm256_sub_ps(ymm13,ymm16);
 
-			ymm2 = _mm256_broadcast_ps((__m128 const *) (a11 + cs_a*6) );
+			ymm2 = _mm256_set_ps((a11 + cs_a*6)->imag,(a11 + cs_a*6)->real,
+						(a11 + cs_a*6)->imag,(a11 + cs_a*6)->real,
+						(a11 + cs_a*6)->imag,(a11 + cs_a*6)->real,
+						(a11 + cs_a*6)->imag,(a11 + cs_a*6)->real);
 			ymm2 = _mm256_permute_ps(ymm2, 0x44);
 			if(conjtransa)
 			{
@@ -43240,7 +43390,10 @@ BLIS_INLINE err_t bli_ctrsm_small_AutXB_AlXB
 			ymm16 = _mm256_fmaddsub_ps(ymm1, ymm2, ymm16);
 			ymm14 = _mm256_sub_ps(ymm14,ymm16);
 
-			ymm2 = _mm256_broadcast_ps((__m128 const *) (a11 + cs_a*7) );
+			ymm2 = _mm256_set_ps((a11 + cs_a*7)->imag,(a11 + cs_a*7)->real,
+						(a11 + cs_a*7)->imag,(a11 + cs_a*7)->real,
+						(a11 + cs_a*7)->imag,(a11 + cs_a*7)->real,
+						(a11 + cs_a*7)->imag,(a11 + cs_a*7)->real);
 			ymm2 = _mm256_permute_ps(ymm2, 0x44);
 			if(conjtransa)
 			{
@@ -43256,7 +43409,10 @@ BLIS_INLINE err_t bli_ctrsm_small_AutXB_AlXB
 			ymm15 = _mm256_sub_ps(ymm15,ymm16);
 
 
-			ymm1 = _mm256_broadcast_ps(( __m128 const *)(d11_pack + 2));
+			ymm1 = _mm256_set_ps((d11_pack + 2)->imag,(d11_pack + 2)->real,
+						(d11_pack + 2)->imag,(d11_pack + 2)->real,
+						(d11_pack + 2)->imag,(d11_pack + 2)->real,
+						(d11_pack + 2)->imag,(d11_pack + 2)->real);
 			ymm1 = _mm256_permute_ps(ymm1, 0x44);
 
 #ifndef BLIS_ENABLE_TRSM_PREINVERSION
@@ -43268,7 +43424,10 @@ BLIS_INLINE err_t bli_ctrsm_small_AutXB_AlXB
 
 			a11 += rs_a;
 
-			ymm2 = _mm256_broadcast_ps((__m128 const *) (a11 + cs_a*3) );
+			ymm2 = _mm256_set_ps((a11 + cs_a*3)->imag,(a11 + cs_a*3)->real,
+						(a11 + cs_a*3)->imag,(a11 + cs_a*3)->real,
+						(a11 + cs_a*3)->imag,(a11 + cs_a*3)->real,
+						(a11 + cs_a*3)->imag,(a11 + cs_a*3)->real);
 			ymm2 = _mm256_permute_ps(ymm2, 0x44);
 			if(conjtransa)
 			{
@@ -43283,7 +43442,10 @@ BLIS_INLINE err_t bli_ctrsm_small_AutXB_AlXB
 			ymm16 = _mm256_fmaddsub_ps(ymm1, ymm2, ymm16);
 			ymm11 = _mm256_sub_ps(ymm11,ymm16);
 
-			ymm2 = _mm256_broadcast_ps((__m128 const *) (a11 + cs_a*4) );
+			ymm2 = _mm256_set_ps((a11 + cs_a*4)->imag,(a11 + cs_a*4)->real,
+						(a11 + cs_a*4)->imag,(a11 + cs_a*4)->real,
+						(a11 + cs_a*4)->imag,(a11 + cs_a*4)->real,
+						(a11 + cs_a*4)->imag,(a11 + cs_a*4)->real);
 			ymm2 = _mm256_permute_ps(ymm2, 0x44);
 			if(conjtransa)
 			{
@@ -43298,7 +43460,10 @@ BLIS_INLINE err_t bli_ctrsm_small_AutXB_AlXB
 			ymm16 = _mm256_fmaddsub_ps(ymm1, ymm2, ymm16);
 			ymm12 = _mm256_sub_ps(ymm12,ymm16);
 
-			ymm2 = _mm256_broadcast_ps((__m128 const *) (a11 + cs_a*5) );
+			ymm2 = _mm256_set_ps((a11 + cs_a*5)->imag,(a11 + cs_a*5)->real,
+						(a11 + cs_a*5)->imag,(a11 + cs_a*5)->real,
+						(a11 + cs_a*5)->imag,(a11 + cs_a*5)->real,
+						(a11 + cs_a*5)->imag,(a11 + cs_a*5)->real);
 			ymm2 = _mm256_permute_ps(ymm2, 0x44);
 			if(conjtransa)
 			{
@@ -43313,7 +43478,10 @@ BLIS_INLINE err_t bli_ctrsm_small_AutXB_AlXB
 			ymm16 = _mm256_fmaddsub_ps(ymm1, ymm2, ymm16);
 			ymm13 = _mm256_sub_ps(ymm13,ymm16);
 
-			ymm2 = _mm256_broadcast_ps((__m128 const *) (a11 + cs_a*6) );
+			ymm2 = _mm256_set_ps((a11 + cs_a*6)->imag,(a11 + cs_a*6)->real,
+						(a11 + cs_a*6)->imag,(a11 + cs_a*6)->real,
+						(a11 + cs_a*6)->imag,(a11 + cs_a*6)->real,
+						(a11 + cs_a*6)->imag,(a11 + cs_a*6)->real);
 			ymm2 = _mm256_permute_ps(ymm2, 0x44);
 			if(conjtransa)
 			{
@@ -43328,7 +43496,10 @@ BLIS_INLINE err_t bli_ctrsm_small_AutXB_AlXB
 			ymm16 = _mm256_fmaddsub_ps(ymm1, ymm2, ymm16);
 			ymm14 = _mm256_sub_ps(ymm14,ymm16);
 
-			ymm2 = _mm256_broadcast_ps((__m128 const *) (a11 + cs_a*7) );
+			ymm2 = _mm256_set_ps((a11 + cs_a*7)->imag,(a11 + cs_a*7)->real,
+						(a11 + cs_a*7)->imag,(a11 + cs_a*7)->real,
+						(a11 + cs_a*7)->imag,(a11 + cs_a*7)->real,
+						(a11 + cs_a*7)->imag,(a11 + cs_a*7)->real);
 			ymm2 = _mm256_permute_ps(ymm2, 0x44);
 			if(conjtransa)
 			{
@@ -43344,7 +43515,10 @@ BLIS_INLINE err_t bli_ctrsm_small_AutXB_AlXB
 			ymm15 = _mm256_sub_ps(ymm15,ymm16);
 
 
-			ymm1 = _mm256_broadcast_ps(( __m128 const *)(d11_pack + 3));
+			ymm1 = _mm256_set_ps((d11_pack + 3)->imag,(d11_pack + 3)->real,
+						(d11_pack + 3)->imag,(d11_pack + 3)->real,
+						(d11_pack + 3)->imag,(d11_pack + 3)->real,
+						(d11_pack + 3)->imag,(d11_pack + 3)->real);
 			ymm1 = _mm256_permute_ps(ymm1, 0x44);
 #ifndef BLIS_ENABLE_TRSM_PREINVERSION
 			BLIS_CTRSM_DIV(ymm11)
@@ -43355,7 +43529,10 @@ BLIS_INLINE err_t bli_ctrsm_small_AutXB_AlXB
 
 			a11 += rs_a;
 
-			ymm2 = _mm256_broadcast_ps((__m128 const *) (a11 + cs_a*4) );
+			ymm2 = _mm256_set_ps((a11 + cs_a*4)->imag,(a11 + cs_a*4)->real,
+						(a11 + cs_a*4)->imag,(a11 + cs_a*4)->real,
+						(a11 + cs_a*4)->imag,(a11 + cs_a*4)->real,
+						(a11 + cs_a*4)->imag,(a11 + cs_a*4)->real);
 			ymm2 = _mm256_permute_ps(ymm2, 0x44);
 			if(conjtransa)
 			{
@@ -43370,7 +43547,10 @@ BLIS_INLINE err_t bli_ctrsm_small_AutXB_AlXB
 			ymm16 = _mm256_fmaddsub_ps(ymm1, ymm2, ymm16);
 			ymm12 = _mm256_sub_ps(ymm12,ymm16);
 
-			ymm2 = _mm256_broadcast_ps((__m128 const *) (a11 + cs_a*5) );
+			ymm2 = _mm256_set_ps((a11 + cs_a*5)->imag,(a11 + cs_a*5)->real,
+						(a11 + cs_a*5)->imag,(a11 + cs_a*5)->real,
+						(a11 + cs_a*5)->imag,(a11 + cs_a*5)->real,
+						(a11 + cs_a*5)->imag,(a11 + cs_a*5)->real);
 			ymm2 = _mm256_permute_ps(ymm2, 0x44);
 			if(conjtransa)
 			{
@@ -43385,7 +43565,10 @@ BLIS_INLINE err_t bli_ctrsm_small_AutXB_AlXB
 			ymm16 = _mm256_fmaddsub_ps(ymm1, ymm2, ymm16);
 			ymm13 = _mm256_sub_ps(ymm13,ymm16);
 
-			ymm2 = _mm256_broadcast_ps((__m128 const *) (a11 + cs_a*6) );
+			ymm2 = _mm256_set_ps((a11 + cs_a*6)->imag,(a11 + cs_a*6)->real,
+						(a11 + cs_a*6)->imag,(a11 + cs_a*6)->real,
+						(a11 + cs_a*6)->imag,(a11 + cs_a*6)->real,
+						(a11 + cs_a*6)->imag,(a11 + cs_a*6)->real);
 			ymm2 = _mm256_permute_ps(ymm2, 0x44);
 			if(conjtransa)
 			{
@@ -43400,7 +43583,10 @@ BLIS_INLINE err_t bli_ctrsm_small_AutXB_AlXB
 			ymm16 = _mm256_fmaddsub_ps(ymm1, ymm2, ymm16);
 			ymm14 = _mm256_sub_ps(ymm14,ymm16);
 
-			ymm2 = _mm256_broadcast_ps((__m128 const *) (a11 + cs_a*7) );
+			ymm2 = _mm256_set_ps((a11 + cs_a*7)->imag,(a11 + cs_a*7)->real,
+						(a11 + cs_a*7)->imag,(a11 + cs_a*7)->real,
+						(a11 + cs_a*7)->imag,(a11 + cs_a*7)->real,
+						(a11 + cs_a*7)->imag,(a11 + cs_a*7)->real);
 			ymm2 = _mm256_permute_ps(ymm2, 0x44);
 			if(conjtransa)
 			{
@@ -43416,7 +43602,10 @@ BLIS_INLINE err_t bli_ctrsm_small_AutXB_AlXB
 			ymm15 = _mm256_sub_ps(ymm15,ymm16);
 
 
-			ymm1 = _mm256_broadcast_ps(( __m128 const *)(d11_pack + 4));
+			ymm1 = _mm256_set_ps((d11_pack + 4)->imag,(d11_pack + 4)->real,
+						(d11_pack + 4)->imag,(d11_pack + 4)->real,
+						(d11_pack + 4)->imag,(d11_pack + 4)->real,
+						(d11_pack + 4)->imag,(d11_pack + 4)->real);
 			ymm1 = _mm256_permute_ps(ymm1, 0x44);
 #ifndef BLIS_ENABLE_TRSM_PREINVERSION
 			BLIS_CTRSM_DIV(ymm12)
@@ -43425,7 +43614,10 @@ BLIS_INLINE err_t bli_ctrsm_small_AutXB_AlXB
 #endif
 			a11 += rs_a;
 
-			ymm2 = _mm256_broadcast_ps((__m128 const *) (a11 + cs_a*5) );
+			ymm2 = _mm256_set_ps((a11 + cs_a*5)->imag,(a11 + cs_a*5)->real,
+						(a11 + cs_a*5)->imag,(a11 + cs_a*5)->real,
+						(a11 + cs_a*5)->imag,(a11 + cs_a*5)->real,
+						(a11 + cs_a*5)->imag,(a11 + cs_a*5)->real);
 			ymm2 = _mm256_permute_ps(ymm2, 0x44);
 			if(conjtransa)
 			{
@@ -43440,7 +43632,10 @@ BLIS_INLINE err_t bli_ctrsm_small_AutXB_AlXB
 			ymm16 = _mm256_fmaddsub_ps(ymm1, ymm2, ymm16);
 			ymm13 = _mm256_sub_ps(ymm13,ymm16);
 
-			ymm2 = _mm256_broadcast_ps((__m128 const *) (a11 + cs_a*6) );
+			ymm2 = _mm256_set_ps((a11 + cs_a*6)->imag,(a11 + cs_a*6)->real,
+						(a11 + cs_a*6)->imag,(a11 + cs_a*6)->real,
+						(a11 + cs_a*6)->imag,(a11 + cs_a*6)->real,
+						(a11 + cs_a*6)->imag,(a11 + cs_a*6)->real);
 			ymm2 = _mm256_permute_ps(ymm2, 0x44);
 			if(conjtransa)
 			{
@@ -43455,7 +43650,10 @@ BLIS_INLINE err_t bli_ctrsm_small_AutXB_AlXB
 			ymm16 = _mm256_fmaddsub_ps(ymm1, ymm2, ymm16);
 			ymm14 = _mm256_sub_ps(ymm14,ymm16);
 
-			ymm2 = _mm256_broadcast_ps((__m128 const *) (a11 + cs_a*7) );
+			ymm2 = _mm256_set_ps((a11 + cs_a*7)->imag,(a11 + cs_a*7)->real,
+						(a11 + cs_a*7)->imag,(a11 + cs_a*7)->real,
+						(a11 + cs_a*7)->imag,(a11 + cs_a*7)->real,
+						(a11 + cs_a*7)->imag,(a11 + cs_a*7)->real);
 			ymm2 = _mm256_permute_ps(ymm2, 0x44);
 			if(conjtransa)
 			{
@@ -43471,7 +43669,10 @@ BLIS_INLINE err_t bli_ctrsm_small_AutXB_AlXB
 			ymm15 = _mm256_sub_ps(ymm15,ymm16);
 
 
-			ymm1 = _mm256_broadcast_ps(( __m128 const *)(d11_pack + 5));
+			ymm1 = _mm256_set_ps((d11_pack + 5)->imag,(d11_pack + 5)->real,
+						(d11_pack + 5)->imag,(d11_pack + 5)->real,
+						(d11_pack + 5)->imag,(d11_pack + 5)->real,
+						(d11_pack + 5)->imag,(d11_pack + 5)->real);
 			ymm1 = _mm256_permute_ps(ymm1, 0x44);
 #ifndef BLIS_ENABLE_TRSM_PREINVERSION
 			BLIS_CTRSM_DIV(ymm13)
@@ -43481,7 +43682,10 @@ BLIS_INLINE err_t bli_ctrsm_small_AutXB_AlXB
 
 			a11 += rs_a;
 
-			ymm2 = _mm256_broadcast_ps((__m128 const *) (a11 + cs_a*6) );
+			ymm2 = _mm256_set_ps((a11 + cs_a*6)->imag,(a11 + cs_a*6)->real,
+						(a11 + cs_a*6)->imag,(a11 + cs_a*6)->real,
+						(a11 + cs_a*6)->imag,(a11 + cs_a*6)->real,
+						(a11 + cs_a*6)->imag,(a11 + cs_a*6)->real);
 			ymm2 = _mm256_permute_ps(ymm2, 0x44);
 			if(conjtransa)
 			{
@@ -43496,7 +43700,10 @@ BLIS_INLINE err_t bli_ctrsm_small_AutXB_AlXB
 			ymm16 = _mm256_fmaddsub_ps(ymm1, ymm2, ymm16);
 			ymm14 = _mm256_sub_ps(ymm14,ymm16);
 
-			ymm2 = _mm256_broadcast_ps((__m128 const *) (a11 + cs_a*7) );
+			ymm2 = _mm256_set_ps((a11 + cs_a*7)->imag,(a11 + cs_a*7)->real,
+						(a11 + cs_a*7)->imag,(a11 + cs_a*7)->real,
+						(a11 + cs_a*7)->imag,(a11 + cs_a*7)->real,
+						(a11 + cs_a*7)->imag,(a11 + cs_a*7)->real);
 			ymm2 = _mm256_permute_ps(ymm2, 0x44);
 			if(conjtransa)
 			{
@@ -43512,7 +43719,10 @@ BLIS_INLINE err_t bli_ctrsm_small_AutXB_AlXB
 			ymm15 = _mm256_sub_ps(ymm15,ymm16);
 
 
-			ymm1 = _mm256_broadcast_ps(( __m128 const *)(d11_pack + 6));
+			ymm1 = _mm256_set_ps((d11_pack + 6)->imag,(d11_pack + 6)->real,
+						(d11_pack + 6)->imag,(d11_pack + 6)->real,
+						(d11_pack + 6)->imag,(d11_pack + 6)->real,
+						(d11_pack + 6)->imag,(d11_pack + 6)->real);
 			ymm1 = _mm256_permute_ps(ymm1, 0x44);
 #ifndef BLIS_ENABLE_TRSM_PREINVERSION
 			BLIS_CTRSM_DIV(ymm14)
@@ -43522,7 +43732,10 @@ BLIS_INLINE err_t bli_ctrsm_small_AutXB_AlXB
 
 			a11 += rs_a;
 
-			ymm2 = _mm256_broadcast_ps((__m128 const *) (a11 + cs_a*7) );
+			ymm2 = _mm256_set_ps((a11 + cs_a*7)->imag,(a11 + cs_a*7)->real,
+						(a11 + cs_a*7)->imag,(a11 + cs_a*7)->real,
+						(a11 + cs_a*7)->imag,(a11 + cs_a*7)->real,
+						(a11 + cs_a*7)->imag,(a11 + cs_a*7)->real);
 			ymm2 = _mm256_permute_ps(ymm2, 0x44);
 			if(conjtransa)
 			{
@@ -43538,7 +43751,10 @@ BLIS_INLINE err_t bli_ctrsm_small_AutXB_AlXB
 			ymm15 = _mm256_sub_ps(ymm15,ymm16);
 
 
-			ymm1 = _mm256_broadcast_ps(( __m128 const *)(d11_pack + 7));
+			ymm1 = _mm256_set_ps((d11_pack + 7)->imag,(d11_pack + 7)->real,
+						(d11_pack + 7)->imag,(d11_pack + 7)->real,
+						(d11_pack + 7)->imag,(d11_pack + 7)->real,
+						(d11_pack + 7)->imag,(d11_pack + 7)->real);
 			ymm1 = _mm256_permute_ps(ymm1, 0x44);
 #ifndef BLIS_ENABLE_TRSM_PREINVERSION
 			BLIS_CTRSM_DIV(ymm15)
@@ -43654,14 +43870,20 @@ BLIS_INLINE err_t bli_ctrsm_small_AutXB_AlXB
 			BLIS_CTRSM_SMALL_NREG_TRANSPOSE_3x4(b11,cs_b,AlphaVal)
 
 			ymm18 = _mm256_setr_ps(1.0, -1.0, 1.0, -1.0, 1.0, -1.0, 1.0, -1.0);
-			ymm1 = _mm256_broadcast_ps(( __m128 const *)(d11_pack));
+			ymm1 = _mm256_set_ps((d11_pack)->imag,(d11_pack)->real,
+						(d11_pack)->imag,(d11_pack)->real,
+						(d11_pack)->imag,(d11_pack)->real,
+						(d11_pack)->imag,(d11_pack)->real);
 			ymm1 = _mm256_permute_ps(ymm1, 0x44);
 #ifndef BLIS_ENABLE_TRSM_PREINVERSION
 			BLIS_CTRSM_DIV(ymm8)
 #else
 			BLIS_CTRSM_MUL(ymm8)
 #endif
-			ymm2 = _mm256_broadcast_ps((__m128 const *) (a11 + cs_a*1) );
+			ymm2 = _mm256_set_ps((a11 + cs_a*1)->imag,(a11 + cs_a*1)->real,
+						(a11 + cs_a*1)->imag,(a11 + cs_a*1)->real,
+						(a11 + cs_a*1)->imag,(a11 + cs_a*1)->real,
+						(a11 + cs_a*1)->imag,(a11 + cs_a*1)->real);
 			ymm2 = _mm256_permute_ps(ymm2, 0x44);
 			if(conjtransa)
 			{
@@ -43677,7 +43899,10 @@ BLIS_INLINE err_t bli_ctrsm_small_AutXB_AlXB
 			ymm16 = _mm256_fmaddsub_ps(ymm1, ymm2, ymm16);
 			ymm9 = _mm256_sub_ps(ymm9,ymm16);
 
-			ymm2 = _mm256_broadcast_ps((__m128 const *) (a11 + cs_a*2) );
+			ymm2 = _mm256_set_ps((a11 + cs_a*2)->imag,(a11 + cs_a*2)->real,
+						(a11 + cs_a*2)->imag,(a11 + cs_a*2)->real,
+						(a11 + cs_a*2)->imag,(a11 + cs_a*2)->real,
+						(a11 + cs_a*2)->imag,(a11 + cs_a*2)->real);
 			ymm2 = _mm256_permute_ps(ymm2, 0x44);
 			if(conjtransa)
 			{
@@ -43691,7 +43916,10 @@ BLIS_INLINE err_t bli_ctrsm_small_AutXB_AlXB
 			ymm16 = _mm256_fmaddsub_ps(ymm1, ymm2, ymm16);
 			ymm10 = _mm256_sub_ps(ymm10,ymm16);
 
-			ymm2 = _mm256_broadcast_ps((__m128 const *) (a11 + cs_a*3) );
+			ymm2 = _mm256_set_ps((a11 + cs_a*3)->imag,(a11 + cs_a*3)->real,
+						(a11 + cs_a*3)->imag,(a11 + cs_a*3)->real,
+						(a11 + cs_a*3)->imag,(a11 + cs_a*3)->real,
+						(a11 + cs_a*3)->imag,(a11 + cs_a*3)->real);
 			ymm2 = _mm256_permute_ps(ymm2, 0x44);
 			if(conjtransa)
 			{
@@ -43706,7 +43934,10 @@ BLIS_INLINE err_t bli_ctrsm_small_AutXB_AlXB
 			ymm11 = _mm256_sub_ps(ymm11,ymm16);
 
 
-			ymm1 = _mm256_broadcast_ps(( __m128 const *)(d11_pack + 1));
+			ymm1 = _mm256_set_ps((d11_pack + 1)->imag,(d11_pack + 1)->real,
+						(d11_pack + 1)->imag,(d11_pack + 1)->real,
+						(d11_pack + 1)->imag,(d11_pack + 1)->real,
+						(d11_pack + 1)->imag,(d11_pack + 1)->real);
 			ymm1 = _mm256_permute_ps(ymm1, 0x44);
 #ifndef BLIS_ENABLE_TRSM_PREINVERSION
 			BLIS_CTRSM_DIV(ymm9)
@@ -43717,7 +43948,10 @@ BLIS_INLINE err_t bli_ctrsm_small_AutXB_AlXB
 
 			a11 += rs_a;
 
-			ymm2 = _mm256_broadcast_ps((__m128 const *) (a11 + cs_a*2) );
+			ymm2 = _mm256_set_ps((a11 + cs_a*2)->imag,(a11 + cs_a*2)->real,
+						(a11 + cs_a*2)->imag,(a11 + cs_a*2)->real,
+						(a11 + cs_a*2)->imag,(a11 + cs_a*2)->real,
+						(a11 + cs_a*2)->imag,(a11 + cs_a*2)->real);
 			ymm2 = _mm256_permute_ps(ymm2, 0x44);
 			if(conjtransa)
 			{
@@ -43731,7 +43965,10 @@ BLIS_INLINE err_t bli_ctrsm_small_AutXB_AlXB
 			ymm16 = _mm256_fmaddsub_ps(ymm1, ymm2, ymm16);
 			ymm10 = _mm256_sub_ps(ymm10,ymm16);
 
-			ymm2 = _mm256_broadcast_ps((__m128 const *) (a11 + cs_a*3) );
+			ymm2 = _mm256_set_ps((a11 + cs_a*3)->imag,(a11 + cs_a*3)->real,
+						(a11 + cs_a*3)->imag,(a11 + cs_a*3)->real,
+						(a11 + cs_a*3)->imag,(a11 + cs_a*3)->real,
+						(a11 + cs_a*3)->imag,(a11 + cs_a*3)->real);
 			ymm2 = _mm256_permute_ps(ymm2, 0x44);
 			if(conjtransa)
 			{
@@ -43747,7 +43984,10 @@ BLIS_INLINE err_t bli_ctrsm_small_AutXB_AlXB
 
 
 
-			ymm1 = _mm256_broadcast_ps(( __m128 const *)(d11_pack + 2));
+			ymm1 = _mm256_set_ps((d11_pack + 2)->imag,(d11_pack + 2)->real,
+						(d11_pack + 2)->imag,(d11_pack + 2)->real,
+						(d11_pack + 2)->imag,(d11_pack + 2)->real,
+						(d11_pack + 2)->imag,(d11_pack + 2)->real);
 			ymm1 = _mm256_permute_ps(ymm1, 0x44);
 
 #ifndef BLIS_ENABLE_TRSM_PREINVERSION
@@ -43759,7 +43999,10 @@ BLIS_INLINE err_t bli_ctrsm_small_AutXB_AlXB
 
 			a11 += rs_a;
 
-			ymm2 = _mm256_broadcast_ps((__m128 const *) (a11 + cs_a*3) );
+			ymm2 = _mm256_set_ps((a11 + cs_a*3)->imag,(a11 + cs_a*3)->real,
+						(a11 + cs_a*3)->imag,(a11 + cs_a*3)->real,
+						(a11 + cs_a*3)->imag,(a11 + cs_a*3)->real,
+						(a11 + cs_a*3)->imag,(a11 + cs_a*3)->real);
 			ymm2 = _mm256_permute_ps(ymm2, 0x44);
 			if(conjtransa)
 			{
@@ -43775,7 +44018,10 @@ BLIS_INLINE err_t bli_ctrsm_small_AutXB_AlXB
 
 
 
-			ymm1 = _mm256_broadcast_ps(( __m128 const *)(d11_pack + 3));
+			ymm1 = _mm256_set_ps((d11_pack + 3)->imag,(d11_pack + 3)->real,
+						(d11_pack + 3)->imag,(d11_pack + 3)->real,
+						(d11_pack + 3)->imag,(d11_pack + 3)->real,
+						(d11_pack + 3)->imag,(d11_pack + 3)->real);
 			ymm1 = _mm256_permute_ps(ymm1, 0x44);
 #ifndef BLIS_ENABLE_TRSM_PREINVERSION
 			BLIS_CTRSM_DIV(ymm11)
@@ -43803,7 +44049,7 @@ BLIS_INLINE err_t bli_ctrsm_small_AutXB_AlXB
 				///GEMM code begins///
 				BLIS_CTRSM_SMALL_GEMM_4mx2n(a10,b01,cs_b,p_lda,k_iter)
 				BLIS_CTRSM_SMALL_NREG_TRANSPOSE_2x4(b11,cs_b,AlphaVal)
-			}
+            }
 			else if(1 == n_rem)
 			{
 				///GEMM code begins///
@@ -43813,14 +44059,20 @@ BLIS_INLINE err_t bli_ctrsm_small_AutXB_AlXB
 
 
 			ymm18 = _mm256_setr_ps(1.0, -1.0, 1.0, -1.0, 1.0, -1.0, 1.0, -1.0);
-			ymm1 = _mm256_broadcast_ps(( __m128 const *)(d11_pack));
+			ymm1 = _mm256_set_ps((d11_pack)->imag,(d11_pack)->real,
+						(d11_pack)->imag,(d11_pack)->real,
+						(d11_pack)->imag,(d11_pack)->real,
+						(d11_pack)->imag,(d11_pack)->real);
 			ymm1 = _mm256_permute_ps(ymm1, 0x44);
 #ifndef BLIS_ENABLE_TRSM_PREINVERSION
 			BLIS_CTRSM_DIV(ymm8)
 #else
 			BLIS_CTRSM_MUL(ymm8)
 #endif
-			ymm2 = _mm256_broadcast_ps((__m128 const *) (a11 + cs_a*1) );
+			ymm2 = _mm256_set_ps((a11 + cs_a*1)->imag,(a11 + cs_a*1)->real,
+						(a11 + cs_a*1)->imag,(a11 + cs_a*1)->real,
+						(a11 + cs_a*1)->imag,(a11 + cs_a*1)->real,
+						(a11 + cs_a*1)->imag,(a11 + cs_a*1)->real);
 			ymm2 = _mm256_permute_ps(ymm2, 0x44);
 			if(conjtransa)
 			{
@@ -43836,7 +44088,10 @@ BLIS_INLINE err_t bli_ctrsm_small_AutXB_AlXB
 			ymm16 = _mm256_fmaddsub_ps(ymm1, ymm2, ymm16);
 			ymm9 = _mm256_sub_ps(ymm9,ymm16);
 
-			ymm2 = _mm256_broadcast_ps((__m128 const *) (a11 + cs_a*2) );
+			ymm2 = _mm256_set_ps((a11 + cs_a*2)->imag,(a11 + cs_a*2)->real,
+						(a11 + cs_a*2)->imag,(a11 + cs_a*2)->real,
+						(a11 + cs_a*2)->imag,(a11 + cs_a*2)->real,
+						(a11 + cs_a*2)->imag,(a11 + cs_a*2)->real);
 			ymm2 = _mm256_permute_ps(ymm2, 0x44);
 			if(conjtransa)
 			{
@@ -43850,7 +44105,10 @@ BLIS_INLINE err_t bli_ctrsm_small_AutXB_AlXB
 			ymm16 = _mm256_fmaddsub_ps(ymm1, ymm2, ymm16);
 			ymm10 = _mm256_sub_ps(ymm10,ymm16);
 
-			ymm2 = _mm256_broadcast_ps((__m128 const *) (a11 + cs_a*3) );
+			ymm2 = _mm256_set_ps((a11 + cs_a*3)->imag,(a11 + cs_a*3)->real,
+						(a11 + cs_a*3)->imag,(a11 + cs_a*3)->real,
+						(a11 + cs_a*3)->imag,(a11 + cs_a*3)->real,
+						(a11 + cs_a*3)->imag,(a11 + cs_a*3)->real);
 			ymm2 = _mm256_permute_ps(ymm2, 0x44);
 			if(conjtransa)
 			{
@@ -43865,7 +44123,10 @@ BLIS_INLINE err_t bli_ctrsm_small_AutXB_AlXB
 			ymm11 = _mm256_sub_ps(ymm11,ymm16);
 
 
-			ymm1 = _mm256_broadcast_ps(( __m128 const *)(d11_pack + 1));
+			ymm1 = _mm256_set_ps((d11_pack + 1)->imag,(d11_pack + 1)->real,
+						(d11_pack + 1)->imag,(d11_pack + 1)->real,
+						(d11_pack + 1)->imag,(d11_pack + 1)->real,
+						(d11_pack + 1)->imag,(d11_pack + 1)->real);
 			ymm1 = _mm256_permute_ps(ymm1, 0x44);
 #ifndef BLIS_ENABLE_TRSM_PREINVERSION
 			BLIS_CTRSM_DIV(ymm9)
@@ -43876,7 +44137,10 @@ BLIS_INLINE err_t bli_ctrsm_small_AutXB_AlXB
 
 			a11 += rs_a;
 
-			ymm2 = _mm256_broadcast_ps((__m128 const *) (a11 + cs_a*2) );
+			ymm2 = _mm256_set_ps((a11 + cs_a*2)->imag,(a11 + cs_a*2)->real,
+						(a11 + cs_a*2)->imag,(a11 + cs_a*2)->real,
+						(a11 + cs_a*2)->imag,(a11 + cs_a*2)->real,
+						(a11 + cs_a*2)->imag,(a11 + cs_a*2)->real);
 			ymm2 = _mm256_permute_ps(ymm2, 0x44);
 			if(conjtransa)
 			{
@@ -43890,7 +44154,10 @@ BLIS_INLINE err_t bli_ctrsm_small_AutXB_AlXB
 			ymm16 = _mm256_fmaddsub_ps(ymm1, ymm2, ymm16);
 			ymm10 = _mm256_sub_ps(ymm10,ymm16);
 
-			ymm2 = _mm256_broadcast_ps((__m128 const *) (a11 + cs_a*3) );
+			ymm2 = _mm256_set_ps((a11 + cs_a*3)->imag,(a11 + cs_a*3)->real,
+						(a11 + cs_a*3)->imag,(a11 + cs_a*3)->real,
+						(a11 + cs_a*3)->imag,(a11 + cs_a*3)->real,
+						(a11 + cs_a*3)->imag,(a11 + cs_a*3)->real);
 			ymm2 = _mm256_permute_ps(ymm2, 0x44);
 			if(conjtransa)
 			{
@@ -43906,7 +44173,10 @@ BLIS_INLINE err_t bli_ctrsm_small_AutXB_AlXB
 
 
 
-			ymm1 = _mm256_broadcast_ps(( __m128 const *)(d11_pack + 2));
+			ymm1 = _mm256_set_ps((d11_pack + 2)->imag,(d11_pack + 2)->real,
+						(d11_pack + 2)->imag,(d11_pack + 2)->real,
+						(d11_pack + 2)->imag,(d11_pack + 2)->real,
+						(d11_pack + 2)->imag,(d11_pack + 2)->real);
 			ymm1 = _mm256_permute_ps(ymm1, 0x44);
 
 #ifndef BLIS_ENABLE_TRSM_PREINVERSION
@@ -43918,7 +44188,10 @@ BLIS_INLINE err_t bli_ctrsm_small_AutXB_AlXB
 
 			a11 += rs_a;
 
-			ymm2 = _mm256_broadcast_ps((__m128 const *) (a11 + cs_a*3) );
+			ymm2 = _mm256_set_ps((a11 + cs_a*3)->imag,(a11 + cs_a*3)->real,
+						(a11 + cs_a*3)->imag,(a11 + cs_a*3)->real,
+						(a11 + cs_a*3)->imag,(a11 + cs_a*3)->real,
+						(a11 + cs_a*3)->imag,(a11 + cs_a*3)->real);
 			ymm2 = _mm256_permute_ps(ymm2, 0x44);
 			if(conjtransa)
 			{
@@ -43934,7 +44207,10 @@ BLIS_INLINE err_t bli_ctrsm_small_AutXB_AlXB
 
 
 
-			ymm1 = _mm256_broadcast_ps(( __m128 const *)(d11_pack + 3));
+			ymm1 = _mm256_set_ps((d11_pack + 3)->imag,(d11_pack + 3)->real,
+						(d11_pack + 3)->imag,(d11_pack + 3)->real,
+						(d11_pack + 3)->imag,(d11_pack + 3)->real,
+						(d11_pack + 3)->imag,(d11_pack + 3)->real);
 			ymm1 = _mm256_permute_ps(ymm1, 0x44);
 #ifndef BLIS_ENABLE_TRSM_PREINVERSION
 			BLIS_CTRSM_DIV(ymm11)
@@ -44502,13 +44778,17 @@ BLIS_INLINE err_t bli_ctrsm_small_AltXB_AuXB
 	dim_t i, j, k;    //loop variables
 	dim_t k_iter;     //number of times GEMM to be performed
 
-	scomplex AlphaVal = *(scomplex *)AlphaObj->buffer;    //value of alpha
+	scomplex AlphaVal[2];
+        AlphaVal[0] = *(scomplex *)AlphaObj->buffer;    //value of alpha
+        AlphaVal[1] = *(scomplex *)AlphaObj->buffer;    //value of alpha
+    
 	scomplex *L =  bli_obj_buffer_at_off(a);       //pointer to  matrix A
 	scomplex *B =  bli_obj_buffer_at_off(b);       //pointer to matrix B
 
 	scomplex *a10, *a11, *b01, *b11;    //pointers that point to blocks for GEMM and TRSM
 
-	scomplex ones = {1.0, 1.0};
+	float ones = 1.0;
+        float ones_a[4] = {1.0, 1.0,1.0,1.0};
 	bool is_unitdiag = bli_obj_has_unit_diag(a);
 
 	//scratch registers
@@ -44521,7 +44801,7 @@ BLIS_INLINE err_t bli_ctrsm_small_AltXB_AuXB
 	__m128 xmm0, xmm1, xmm2, xmm3, xmm4;
     	__m128 xmm5;
 
-	xmm0 = _mm_setzero_ps();
+        xmm0 = _mm_setzero_ps();
 	xmm1 = _mm_setzero_ps();
 	xmm2 = _mm_setzero_ps();
 	xmm3 = _mm_setzero_ps();
@@ -44645,14 +44925,24 @@ BLIS_INLINE err_t bli_ctrsm_small_AltXB_AuXB
 			   */
 			////extract a00
 			ymm18 = _mm256_setr_ps(1.0, -1.0, 1.0, -1.0, 1.0, -1.0, 1.0, -1.0);
-			ymm1 = _mm256_broadcast_ps(( __m128 const *)(d11_pack + 7));
+			ymm1 = _mm256_set_ps((d11_pack + 7)->imag,(d11_pack + 7)->real,
+						(d11_pack + 7)->imag,(d11_pack + 7)->real,
+						(d11_pack + 7)->imag,(d11_pack + 7)->real,
+						(d11_pack + 7)->imag,(d11_pack + 7)->real);
 			ymm1 = _mm256_permute_ps(ymm1, 0x44);
 #ifndef BLIS_ENABLE_TRSM_PREINVERSION
 			BLIS_CTRSM_DIV(ymm15)
 #else
 			BLIS_CTRSM_MUL(ymm15)
 #endif
-			ymm2 = _mm256_broadcast_ps((__m128 const *) (a11 + cs_a*6 + 7*rs_a));
+			ymm2 = _mm256_set_ps((a11 + cs_a*6 + 7*rs_a)->imag,
+						(a11 + cs_a*6 + 7*rs_a)->real,
+						(a11 + cs_a*6 + 7*rs_a)->imag,
+						(a11 + cs_a*6 + 7*rs_a)->real,
+						(a11 + cs_a*6 + 7*rs_a)->imag,
+						(a11 + cs_a*6 + 7*rs_a)->real,
+						(a11 + cs_a*6 + 7*rs_a)->imag,
+						(a11 + cs_a*6 + 7*rs_a)->real);
 			ymm2 = _mm256_permute_ps(ymm2, 0x44);
 			if(conjtransa)
 			{
@@ -44668,7 +44958,14 @@ BLIS_INLINE err_t bli_ctrsm_small_AltXB_AuXB
 			ymm16 = _mm256_fmaddsub_ps(ymm1, ymm2, ymm16);
 			ymm14 = _mm256_sub_ps(ymm14,ymm16);
 
-			ymm2 = _mm256_broadcast_ps((__m128 const *) (a11 + cs_a*5 + 7*rs_a));
+			ymm2 = _mm256_set_ps((a11 + cs_a*5 + 7*rs_a)->imag,
+						(a11 + cs_a*5 + 7*rs_a)->real,
+						(a11 + cs_a*5 + 7*rs_a)->imag,
+						(a11 + cs_a*5 + 7*rs_a)->real,
+						(a11 + cs_a*5 + 7*rs_a)->imag,
+						(a11 + cs_a*5 + 7*rs_a)->real,
+						(a11 + cs_a*5 + 7*rs_a)->imag,
+						(a11 + cs_a*5 + 7*rs_a)->real);
 			ymm2 = _mm256_permute_ps(ymm2, 0x44);
 			if(conjtransa)
 			{
@@ -44683,7 +44980,14 @@ BLIS_INLINE err_t bli_ctrsm_small_AltXB_AuXB
 			ymm16 = _mm256_fmaddsub_ps(ymm1, ymm2, ymm16);
 			ymm13 = _mm256_sub_ps(ymm13,ymm16);
 
-			ymm2 = _mm256_broadcast_ps((__m128 const *) (a11 + cs_a*4 + 7*rs_a));
+			ymm2 = _mm256_set_ps((a11 + cs_a*4 + 7*rs_a)->imag,
+						(a11 + cs_a*4 + 7*rs_a)->real,
+						(a11 + cs_a*4 + 7*rs_a)->imag,
+						(a11 + cs_a*4 + 7*rs_a)->real,
+						(a11 + cs_a*4 + 7*rs_a)->imag,
+						(a11 + cs_a*4 + 7*rs_a)->real,
+						(a11 + cs_a*4 + 7*rs_a)->imag,
+						(a11 + cs_a*4 + 7*rs_a)->real);
 			ymm2 = _mm256_permute_ps(ymm2, 0x44);
 			if(conjtransa)
 			{
@@ -44698,7 +45002,14 @@ BLIS_INLINE err_t bli_ctrsm_small_AltXB_AuXB
 			ymm16 = _mm256_fmaddsub_ps(ymm1, ymm2, ymm16);
 			ymm12 = _mm256_sub_ps(ymm12,ymm16);
 
-			ymm2 = _mm256_broadcast_ps((__m128 const *) (a11 + cs_a*3 + 7*rs_a));
+			ymm2 = _mm256_set_ps((a11 + cs_a*3 + 7*rs_a)->imag,
+						(a11 + cs_a*3 + 7*rs_a)->real,
+						(a11 + cs_a*3 + 7*rs_a)->imag,
+						(a11 + cs_a*3 + 7*rs_a)->real,
+						(a11 + cs_a*3 + 7*rs_a)->imag,
+						(a11 + cs_a*3 + 7*rs_a)->real,
+						(a11 + cs_a*3 + 7*rs_a)->imag,
+						(a11 + cs_a*3 + 7*rs_a)->real);
 			ymm2 = _mm256_permute_ps(ymm2, 0x44);
 			if(conjtransa)
 			{
@@ -44713,7 +45024,14 @@ BLIS_INLINE err_t bli_ctrsm_small_AltXB_AuXB
 			ymm16 = _mm256_fmaddsub_ps(ymm1, ymm2, ymm16);
 			ymm11 = _mm256_sub_ps(ymm11,ymm16);
 
-			ymm2 = _mm256_broadcast_ps((__m128 const *) (a11 + cs_a*2 + 7*rs_a));
+			ymm2 = _mm256_set_ps((a11 + cs_a*2 + 7*rs_a)->imag,
+						(a11 + cs_a*2 + 7*rs_a)->real,
+						(a11 + cs_a*2 + 7*rs_a)->imag,
+						(a11 + cs_a*2 + 7*rs_a)->real,
+						(a11 + cs_a*2 + 7*rs_a)->imag,
+						(a11 + cs_a*2 + 7*rs_a)->real,
+						(a11 + cs_a*2 + 7*rs_a)->imag,
+						(a11 + cs_a*2 + 7*rs_a)->real);
 			ymm2 = _mm256_permute_ps(ymm2, 0x44);
 			if(conjtransa)
 			{
@@ -44728,7 +45046,14 @@ BLIS_INLINE err_t bli_ctrsm_small_AltXB_AuXB
 			ymm16 = _mm256_fmaddsub_ps(ymm1, ymm2, ymm16);
 			ymm10 = _mm256_sub_ps(ymm10,ymm16);
 
-			ymm2 = _mm256_broadcast_ps((__m128 const *) (a11 + cs_a*1 + 7*rs_a));
+			ymm2 = _mm256_set_ps((a11 + cs_a*1 + 7*rs_a)->imag,
+						(a11 + cs_a*1 + 7*rs_a)->real,
+						(a11 + cs_a*1 + 7*rs_a)->imag,
+						(a11 + cs_a*1 + 7*rs_a)->real,
+						(a11 + cs_a*1 + 7*rs_a)->imag,
+						(a11 + cs_a*1 + 7*rs_a)->real,
+						(a11 + cs_a*1 + 7*rs_a)->imag,
+						(a11 + cs_a*1 + 7*rs_a)->real);
 			ymm2 = _mm256_permute_ps(ymm2, 0x44);
 			if(conjtransa)
 			{
@@ -44743,7 +45068,14 @@ BLIS_INLINE err_t bli_ctrsm_small_AltXB_AuXB
 			ymm16 = _mm256_fmaddsub_ps(ymm1, ymm2, ymm16);
 			ymm9 = _mm256_sub_ps(ymm9,ymm16);
 
-			ymm2 = _mm256_broadcast_ps((__m128 const *) (a11 + cs_a*0 + 7*rs_a));
+			ymm2 = _mm256_set_ps((a11 + cs_a*0 + 7*rs_a)->imag,
+						(a11 + cs_a*0 + 7*rs_a)->real,
+						(a11 + cs_a*0 + 7*rs_a)->imag,
+						(a11 + cs_a*0 + 7*rs_a)->real,
+						(a11 + cs_a*0 + 7*rs_a)->imag,
+						(a11 + cs_a*0 + 7*rs_a)->real,
+						(a11 + cs_a*0 + 7*rs_a)->imag,
+						(a11 + cs_a*0 + 7*rs_a)->real);
 			ymm2 = _mm256_permute_ps(ymm2, 0x44);
 			if(conjtransa)
 			{
@@ -44758,7 +45090,10 @@ BLIS_INLINE err_t bli_ctrsm_small_AltXB_AuXB
 			ymm16 = _mm256_fmaddsub_ps(ymm1, ymm2, ymm16);
 			ymm8 = _mm256_sub_ps(ymm8,ymm16);
 
-			ymm1 = _mm256_broadcast_ps(( __m128 const *)(d11_pack + 6));
+			ymm1 = _mm256_set_ps((d11_pack + 6)->imag,(d11_pack + 6)->real,
+						(d11_pack + 6)->imag,(d11_pack + 6)->real,
+						(d11_pack + 6)->imag,(d11_pack + 6)->real,
+						(d11_pack + 6)->imag,(d11_pack + 6)->real);
 			ymm1 = _mm256_permute_ps(ymm1, 0x44);
 #ifndef BLIS_ENABLE_TRSM_PREINVERSION
 			BLIS_CTRSM_DIV(ymm14)
@@ -44766,7 +45101,14 @@ BLIS_INLINE err_t bli_ctrsm_small_AltXB_AuXB
 			BLIS_CTRSM_MUL(ymm14)
 #endif
 
-			ymm2 = _mm256_broadcast_ps((__m128 const *) (a11 + cs_a*5 + 6*rs_a));
+			ymm2 = _mm256_set_ps((a11 + cs_a*5 + 6*rs_a)->imag,
+						(a11 + cs_a*5 + 6*rs_a)->real,
+						(a11 + cs_a*5 + 6*rs_a)->imag,
+						(a11 + cs_a*5 + 6*rs_a)->real,
+						(a11 + cs_a*5 + 6*rs_a)->imag,
+						(a11 + cs_a*5 + 6*rs_a)->real,
+						(a11 + cs_a*5 + 6*rs_a)->imag,
+						(a11 + cs_a*5 + 6*rs_a)->real);
 			ymm2 = _mm256_permute_ps(ymm2, 0x44);
 			if(conjtransa)
 			{
@@ -44781,7 +45123,14 @@ BLIS_INLINE err_t bli_ctrsm_small_AltXB_AuXB
 			ymm16 = _mm256_fmaddsub_ps(ymm1, ymm2, ymm16);
 			ymm13 = _mm256_sub_ps(ymm13,ymm16);
 
-			ymm2 = _mm256_broadcast_ps((__m128 const *) (a11 + cs_a*4 + 6*rs_a));
+			ymm2 = _mm256_set_ps((a11 + cs_a*4 + 6*rs_a)->imag,
+						(a11 + cs_a*4 + 6*rs_a)->real,
+						(a11 + cs_a*4 + 6*rs_a)->imag,
+						(a11 + cs_a*4 + 6*rs_a)->real,
+						(a11 + cs_a*4 + 6*rs_a)->imag,
+						(a11 + cs_a*4 + 6*rs_a)->real,
+						(a11 + cs_a*4 + 6*rs_a)->imag,
+						(a11 + cs_a*4 + 6*rs_a)->real);
 			ymm2 = _mm256_permute_ps(ymm2, 0x44);
 			if(conjtransa)
 			{
@@ -44796,7 +45145,14 @@ BLIS_INLINE err_t bli_ctrsm_small_AltXB_AuXB
 			ymm16 = _mm256_fmaddsub_ps(ymm1, ymm2, ymm16);
 			ymm12 = _mm256_sub_ps(ymm12,ymm16);
 
-			ymm2 = _mm256_broadcast_ps((__m128 const *) (a11 + cs_a*3 + 6*rs_a));
+			ymm2 = _mm256_set_ps((a11 + cs_a*3 + 6*rs_a)->imag,
+						(a11 + cs_a*3 + 6*rs_a)->real,
+						(a11 + cs_a*3 + 6*rs_a)->imag,
+						(a11 + cs_a*3 + 6*rs_a)->real,
+						(a11 + cs_a*3 + 6*rs_a)->imag,
+						(a11 + cs_a*3 + 6*rs_a)->real,
+						(a11 + cs_a*3 + 6*rs_a)->imag,
+						(a11 + cs_a*3 + 6*rs_a)->real);
 			ymm2 = _mm256_permute_ps(ymm2, 0x44);
 			if(conjtransa)
 			{
@@ -44811,7 +45167,14 @@ BLIS_INLINE err_t bli_ctrsm_small_AltXB_AuXB
 			ymm16 = _mm256_fmaddsub_ps(ymm1, ymm2, ymm16);
 			ymm11 = _mm256_sub_ps(ymm11,ymm16);
 
-			ymm2 = _mm256_broadcast_ps((__m128 const *) (a11 + cs_a*2 + 6*rs_a));
+			ymm2 = _mm256_set_ps((a11 + cs_a*2 + 6*rs_a)->imag,
+						(a11 + cs_a*2 + 6*rs_a)->real,
+						(a11 + cs_a*2 + 6*rs_a)->imag,
+						(a11 + cs_a*2 + 6*rs_a)->real,
+						(a11 + cs_a*2 + 6*rs_a)->imag,
+						(a11 + cs_a*2 + 6*rs_a)->real,
+						(a11 + cs_a*2 + 6*rs_a)->imag,
+						(a11 + cs_a*2 + 6*rs_a)->real);
 			ymm2 = _mm256_permute_ps(ymm2, 0x44);
 			if(conjtransa)
 			{
@@ -44826,7 +45189,14 @@ BLIS_INLINE err_t bli_ctrsm_small_AltXB_AuXB
 			ymm16 = _mm256_fmaddsub_ps(ymm1, ymm2, ymm16);
 			ymm10 = _mm256_sub_ps(ymm10,ymm16);
 
-			ymm2 = _mm256_broadcast_ps((__m128 const *) (a11 + cs_a*1 + 6*rs_a));
+			ymm2 = _mm256_set_ps((a11 + cs_a*1 + 6*rs_a)->imag,
+						(a11 + cs_a*1 + 6*rs_a)->real,
+						(a11 + cs_a*1 + 6*rs_a)->imag,
+						(a11 + cs_a*1 + 6*rs_a)->real,
+						(a11 + cs_a*1 + 6*rs_a)->imag,
+						(a11 + cs_a*1 + 6*rs_a)->real,
+						(a11 + cs_a*1 + 6*rs_a)->imag,
+						(a11 + cs_a*1 + 6*rs_a)->real);
 			ymm2 = _mm256_permute_ps(ymm2, 0x44);
 			if(conjtransa)
 			{
@@ -44841,7 +45211,14 @@ BLIS_INLINE err_t bli_ctrsm_small_AltXB_AuXB
 			ymm16 = _mm256_fmaddsub_ps(ymm1, ymm2, ymm16);
 			ymm9 = _mm256_sub_ps(ymm9,ymm16);
 
-			ymm2 = _mm256_broadcast_ps((__m128 const *) (a11 + cs_a*0 + 6*rs_a));
+			ymm2 = _mm256_set_ps((a11 + cs_a*0 + 6*rs_a)->imag,
+						(a11 + cs_a*0 + 6*rs_a)->real,
+						(a11 + cs_a*0 + 6*rs_a)->imag,
+						(a11 + cs_a*0 + 6*rs_a)->real,
+						(a11 + cs_a*0 + 6*rs_a)->imag,
+						(a11 + cs_a*0 + 6*rs_a)->real,
+						(a11 + cs_a*0 + 6*rs_a)->imag,
+						(a11 + cs_a*0 + 6*rs_a)->real);
 			ymm2 = _mm256_permute_ps(ymm2, 0x44);
 			if(conjtransa)
 			{
@@ -44857,7 +45234,10 @@ BLIS_INLINE err_t bli_ctrsm_small_AltXB_AuXB
 			ymm8 = _mm256_sub_ps(ymm8,ymm16);
 
 
-			ymm1 = _mm256_broadcast_ps(( __m128 const *)(d11_pack + 5));
+			ymm1 = _mm256_set_ps((d11_pack + 5)->imag,(d11_pack + 5)->real,
+						(d11_pack + 5)->imag,(d11_pack + 5)->real,
+						(d11_pack + 5)->imag,(d11_pack + 5)->real,
+						(d11_pack + 5)->imag,(d11_pack + 5)->real);
 			ymm1 = _mm256_permute_ps(ymm1, 0x44);
 
 #ifndef BLIS_ENABLE_TRSM_PREINVERSION
@@ -44867,7 +45247,14 @@ BLIS_INLINE err_t bli_ctrsm_small_AltXB_AuXB
 #endif
 
 
-			ymm2 = _mm256_broadcast_ps((__m128 const *) (a11 + cs_a*4 + 5*rs_a));
+			ymm2 = _mm256_set_ps((a11 + cs_a*4 + 5*rs_a)->imag,
+						(a11 + cs_a*4 + 5*rs_a)->real,
+						(a11 + cs_a*4 + 5*rs_a)->imag,
+						(a11 + cs_a*4 + 5*rs_a)->real,
+						(a11 + cs_a*4 + 5*rs_a)->imag,
+						(a11 + cs_a*4 + 5*rs_a)->real,
+						(a11 + cs_a*4 + 5*rs_a)->imag,
+						(a11 + cs_a*4 + 5*rs_a)->real);
 			ymm2 = _mm256_permute_ps(ymm2, 0x44);
 			if(conjtransa)
 			{
@@ -44882,7 +45269,14 @@ BLIS_INLINE err_t bli_ctrsm_small_AltXB_AuXB
 			ymm16 = _mm256_fmaddsub_ps(ymm1, ymm2, ymm16);
 			ymm12 = _mm256_sub_ps(ymm12,ymm16);
 
-			ymm2 = _mm256_broadcast_ps((__m128 const *) (a11 + cs_a*3 + 5*rs_a));
+			ymm2 = _mm256_set_ps((a11 + cs_a*3 + 5*rs_a)->imag,
+						(a11 + cs_a*3 + 5*rs_a)->real,
+						(a11 + cs_a*3 + 5*rs_a)->imag,
+						(a11 + cs_a*3 + 5*rs_a)->real,
+						(a11 + cs_a*3 + 5*rs_a)->imag,
+						(a11 + cs_a*3 + 5*rs_a)->real,
+						(a11 + cs_a*3 + 5*rs_a)->imag,
+						(a11 + cs_a*3 + 5*rs_a)->real);
 			ymm2 = _mm256_permute_ps(ymm2, 0x44);
 			if(conjtransa)
 			{
@@ -44897,7 +45291,14 @@ BLIS_INLINE err_t bli_ctrsm_small_AltXB_AuXB
 			ymm16 = _mm256_fmaddsub_ps(ymm1, ymm2, ymm16);
 			ymm11 = _mm256_sub_ps(ymm11,ymm16);
 
-			ymm2 = _mm256_broadcast_ps((__m128 const *) (a11 + cs_a*2 + 5*rs_a));
+			ymm2 = _mm256_set_ps((a11 + cs_a*2 + 5*rs_a)->imag,
+						(a11 + cs_a*2 + 5*rs_a)->real,
+						(a11 + cs_a*2 + 5*rs_a)->imag,
+						(a11 + cs_a*2 + 5*rs_a)->real,
+						(a11 + cs_a*2 + 5*rs_a)->imag,
+						(a11 + cs_a*2 + 5*rs_a)->real,
+						(a11 + cs_a*2 + 5*rs_a)->imag,
+						(a11 + cs_a*2 + 5*rs_a)->real);
 			ymm2 = _mm256_permute_ps(ymm2, 0x44);
 			if(conjtransa)
 			{
@@ -44912,7 +45313,14 @@ BLIS_INLINE err_t bli_ctrsm_small_AltXB_AuXB
 			ymm16 = _mm256_fmaddsub_ps(ymm1, ymm2, ymm16);
 			ymm10 = _mm256_sub_ps(ymm10,ymm16);
 
-			ymm2 = _mm256_broadcast_ps((__m128 const *) (a11 + cs_a*1 + 5*rs_a));
+			ymm2 = _mm256_set_ps((a11 + cs_a*1 + 5*rs_a)->imag,
+						(a11 + cs_a*1 + 5*rs_a)->real,
+						(a11 + cs_a*1 + 5*rs_a)->imag,
+						(a11 + cs_a*1 + 5*rs_a)->real,
+						(a11 + cs_a*1 + 5*rs_a)->imag,
+						(a11 + cs_a*1 + 5*rs_a)->real,
+						(a11 + cs_a*1 + 5*rs_a)->imag,
+						(a11 + cs_a*1 + 5*rs_a)->real);
 			ymm2 = _mm256_permute_ps(ymm2, 0x44);
 			if(conjtransa)
 			{
@@ -44927,7 +45335,14 @@ BLIS_INLINE err_t bli_ctrsm_small_AltXB_AuXB
 			ymm16 = _mm256_fmaddsub_ps(ymm1, ymm2, ymm16);
 			ymm9 = _mm256_sub_ps(ymm9,ymm16);
 
-			ymm2 = _mm256_broadcast_ps((__m128 const *) (a11 + cs_a*0 + 5*rs_a));
+			ymm2 = _mm256_set_ps((a11 + cs_a*0 + 5*rs_a)->imag,
+						(a11 + cs_a*0 + 5*rs_a)->real,
+						(a11 + cs_a*0 + 5*rs_a)->imag,
+						(a11 + cs_a*0 + 5*rs_a)->real,
+						(a11 + cs_a*0 + 5*rs_a)->imag,
+						(a11 + cs_a*0 + 5*rs_a)->real,
+						(a11 + cs_a*0 + 5*rs_a)->imag,
+						(a11 + cs_a*0 + 5*rs_a)->real);
 			ymm2 = _mm256_permute_ps(ymm2, 0x44);
 			if(conjtransa)
 			{
@@ -44943,7 +45358,10 @@ BLIS_INLINE err_t bli_ctrsm_small_AltXB_AuXB
 			ymm8 = _mm256_sub_ps(ymm8,ymm16);
 
 
-			ymm1 = _mm256_broadcast_ps(( __m128 const *)(d11_pack + 4));
+			ymm1 = _mm256_set_ps((d11_pack + 4)->imag,(d11_pack + 4)->real,
+						(d11_pack + 4)->imag,(d11_pack + 4)->real,
+						(d11_pack + 4)->imag,(d11_pack + 4)->real,
+						(d11_pack + 4)->imag,(d11_pack + 4)->real);
 			ymm1 = _mm256_permute_ps(ymm1, 0x44);
 #ifndef BLIS_ENABLE_TRSM_PREINVERSION
 			BLIS_CTRSM_DIV(ymm12)
@@ -44952,7 +45370,14 @@ BLIS_INLINE err_t bli_ctrsm_small_AltXB_AuXB
 #endif
 
 
-			ymm2 = _mm256_broadcast_ps((__m128 const *) (a11 + cs_a*3 + 4*rs_a));
+			ymm2 = _mm256_set_ps((a11 + cs_a*3 + 4*rs_a)->imag,
+						(a11 + cs_a*3 + 4*rs_a)->real,
+						(a11 + cs_a*3 + 4*rs_a)->imag,
+						(a11 + cs_a*3 + 4*rs_a)->real,
+						(a11 + cs_a*3 + 4*rs_a)->imag,
+						(a11 + cs_a*3 + 4*rs_a)->real,
+						(a11 + cs_a*3 + 4*rs_a)->imag,
+						(a11 + cs_a*3 + 4*rs_a)->real);
 			ymm2 = _mm256_permute_ps(ymm2, 0x44);
 			if(conjtransa)
 			{
@@ -44967,7 +45392,14 @@ BLIS_INLINE err_t bli_ctrsm_small_AltXB_AuXB
 			ymm16 = _mm256_fmaddsub_ps(ymm1, ymm2, ymm16);
 			ymm11 = _mm256_sub_ps(ymm11,ymm16);
 
-			ymm2 = _mm256_broadcast_ps((__m128 const *) (a11 + cs_a*2 + 4*rs_a));
+			ymm2 = _mm256_set_ps((a11 + cs_a*2 + 4*rs_a)->imag,
+						(a11 + cs_a*2 + 4*rs_a)->real,
+						(a11 + cs_a*2 + 4*rs_a)->imag,
+						(a11 + cs_a*2 + 4*rs_a)->real,
+						(a11 + cs_a*2 + 4*rs_a)->imag,
+						(a11 + cs_a*2 + 4*rs_a)->real,
+						(a11 + cs_a*2 + 4*rs_a)->imag,
+						(a11 + cs_a*2 + 4*rs_a)->real);
 			ymm2 = _mm256_permute_ps(ymm2, 0x44);
 			if(conjtransa)
 			{
@@ -44982,7 +45414,14 @@ BLIS_INLINE err_t bli_ctrsm_small_AltXB_AuXB
 			ymm16 = _mm256_fmaddsub_ps(ymm1, ymm2, ymm16);
 			ymm10 = _mm256_sub_ps(ymm10,ymm16);
 
-			ymm2 = _mm256_broadcast_ps((__m128 const *) (a11 + cs_a*1 + 4*rs_a));
+			ymm2 = _mm256_set_ps((a11 + cs_a*1 + 4*rs_a)->imag,
+						(a11 + cs_a*1 + 4*rs_a)->real,
+						(a11 + cs_a*1 + 4*rs_a)->imag,
+						(a11 + cs_a*1 + 4*rs_a)->real,
+						(a11 + cs_a*1 + 4*rs_a)->imag,
+						(a11 + cs_a*1 + 4*rs_a)->real,
+						(a11 + cs_a*1 + 4*rs_a)->imag,
+						(a11 + cs_a*1 + 4*rs_a)->real);
 			ymm2 = _mm256_permute_ps(ymm2, 0x44);
 			if(conjtransa)
 			{
@@ -44997,7 +45436,14 @@ BLIS_INLINE err_t bli_ctrsm_small_AltXB_AuXB
 			ymm16 = _mm256_fmaddsub_ps(ymm1, ymm2, ymm16);
 			ymm9 = _mm256_sub_ps(ymm9,ymm16);
 
-			ymm2 = _mm256_broadcast_ps((__m128 const *) (a11 + cs_a*0 + 4*rs_a));
+			ymm2 = _mm256_set_ps((a11 + cs_a*0 + 4*rs_a)->imag,
+						(a11 + cs_a*0 + 4*rs_a)->real,
+						(a11 + cs_a*0 + 4*rs_a)->imag,
+						(a11 + cs_a*0 + 4*rs_a)->real,
+						(a11 + cs_a*0 + 4*rs_a)->imag,
+						(a11 + cs_a*0 + 4*rs_a)->real,
+						(a11 + cs_a*0 + 4*rs_a)->imag,
+						(a11 + cs_a*0 + 4*rs_a)->real);
 			ymm2 = _mm256_permute_ps(ymm2, 0x44);
 			if(conjtransa)
 			{
@@ -45013,7 +45459,10 @@ BLIS_INLINE err_t bli_ctrsm_small_AltXB_AuXB
 			ymm8 = _mm256_sub_ps(ymm8,ymm16);
 
 
-			ymm1 = _mm256_broadcast_ps(( __m128 const *)(d11_pack + 3));
+			ymm1 = _mm256_set_ps((d11_pack + 3)->imag,(d11_pack + 3)->real,
+						(d11_pack + 3)->imag,(d11_pack + 3)->real,
+						(d11_pack + 3)->imag,(d11_pack + 3)->real,
+						(d11_pack + 3)->imag,(d11_pack + 3)->real);
 			ymm1 = _mm256_permute_ps(ymm1, 0x44);
 #ifndef BLIS_ENABLE_TRSM_PREINVERSION
 			BLIS_CTRSM_DIV(ymm11)
@@ -45021,7 +45470,14 @@ BLIS_INLINE err_t bli_ctrsm_small_AltXB_AuXB
 			BLIS_CTRSM_MUL(ymm11)
 #endif
 
-			ymm2 = _mm256_broadcast_ps((__m128 const *) (a11 + cs_a*2 + 3*rs_a));
+			ymm2 = _mm256_set_ps((a11 + cs_a*2 + 3*rs_a)->imag,
+						(a11 + cs_a*2 + 3*rs_a)->real,
+						(a11 + cs_a*2 + 3*rs_a)->imag,
+						(a11 + cs_a*2 + 3*rs_a)->real,
+						(a11 + cs_a*2 + 3*rs_a)->imag,
+						(a11 + cs_a*2 + 3*rs_a)->real,
+						(a11 + cs_a*2 + 3*rs_a)->imag,
+						(a11 + cs_a*2 + 3*rs_a)->real);
 			ymm2 = _mm256_permute_ps(ymm2, 0x44);
 			if(conjtransa)
 			{
@@ -45036,7 +45492,14 @@ BLIS_INLINE err_t bli_ctrsm_small_AltXB_AuXB
 			ymm16 = _mm256_fmaddsub_ps(ymm1, ymm2, ymm16);
 			ymm10 = _mm256_sub_ps(ymm10,ymm16);
 
-			ymm2 = _mm256_broadcast_ps((__m128 const *) (a11 + cs_a*1 + 3*rs_a));
+			ymm2 = _mm256_set_ps((a11 + cs_a*1 + 3*rs_a)->imag,
+						(a11 + cs_a*1 + 3*rs_a)->real,
+						(a11 + cs_a*1 + 3*rs_a)->imag,
+						(a11 + cs_a*1 + 3*rs_a)->real,
+						(a11 + cs_a*1 + 3*rs_a)->imag,
+						(a11 + cs_a*1 + 3*rs_a)->real,
+						(a11 + cs_a*1 + 3*rs_a)->imag,
+						(a11 + cs_a*1 + 3*rs_a)->real);
 			ymm2 = _mm256_permute_ps(ymm2, 0x44);
 			if(conjtransa)
 			{
@@ -45051,7 +45514,14 @@ BLIS_INLINE err_t bli_ctrsm_small_AltXB_AuXB
 			ymm16 = _mm256_fmaddsub_ps(ymm1, ymm2, ymm16);
 			ymm9 = _mm256_sub_ps(ymm9,ymm16);
 
-			ymm2 = _mm256_broadcast_ps((__m128 const *) (a11 + cs_a*0 + 3*rs_a));
+			ymm2 = _mm256_set_ps((a11 + cs_a*0 + 3*rs_a)->imag,
+						(a11 + cs_a*0 + 3*rs_a)->real,
+						(a11 + cs_a*0 + 3*rs_a)->imag,
+						(a11 + cs_a*0 + 3*rs_a)->real,
+						(a11 + cs_a*0 + 3*rs_a)->imag,
+						(a11 + cs_a*0 + 3*rs_a)->real,
+						(a11 + cs_a*0 + 3*rs_a)->imag,
+						(a11 + cs_a*0 + 3*rs_a)->real);
 			ymm2 = _mm256_permute_ps(ymm2, 0x44);
 			if(conjtransa)
 			{
@@ -45067,7 +45537,10 @@ BLIS_INLINE err_t bli_ctrsm_small_AltXB_AuXB
 			ymm8 = _mm256_sub_ps(ymm8,ymm16);
 
 
-			ymm1 = _mm256_broadcast_ps(( __m128 const *)(d11_pack + 2));
+			ymm1 = _mm256_set_ps((d11_pack + 2)->imag,(d11_pack + 2)->real,
+						(d11_pack + 2)->imag,(d11_pack + 2)->real,
+						(d11_pack + 2)->imag,(d11_pack + 2)->real,
+						(d11_pack + 2)->imag,(d11_pack + 2)->real);
 			ymm1 = _mm256_permute_ps(ymm1, 0x44);
 #ifndef BLIS_ENABLE_TRSM_PREINVERSION
 			BLIS_CTRSM_DIV(ymm10)
@@ -45076,7 +45549,14 @@ BLIS_INLINE err_t bli_ctrsm_small_AltXB_AuXB
 #endif
 
 
-			ymm2 = _mm256_broadcast_ps((__m128 const *) (a11 + cs_a + 2*rs_a));
+			ymm2 = _mm256_set_ps((a11 + cs_a*1 + 2*rs_a)->imag,
+						(a11 + cs_a*1 + 2*rs_a)->real,
+						(a11 + cs_a*1 + 2*rs_a)->imag,
+						(a11 + cs_a*1 + 2*rs_a)->real,
+						(a11 + cs_a*1 + 2*rs_a)->imag,
+						(a11 + cs_a*1 + 2*rs_a)->real,
+						(a11 + cs_a*1 + 2*rs_a)->imag,
+						(a11 + cs_a*1 + 2*rs_a)->real);
 			ymm2 = _mm256_permute_ps(ymm2, 0x44);
 			if(conjtransa)
 			{
@@ -45091,7 +45571,14 @@ BLIS_INLINE err_t bli_ctrsm_small_AltXB_AuXB
 			ymm16 = _mm256_fmaddsub_ps(ymm1, ymm2, ymm16);
 			ymm9 = _mm256_sub_ps(ymm9,ymm16);
 
-			ymm2 = _mm256_broadcast_ps((__m128 const *) (a11 + cs_a*0 + 2*rs_a));
+			ymm2 = _mm256_set_ps((a11 + cs_a*0 + 2*rs_a)->imag,
+						(a11 + cs_a*0 + 2*rs_a)->real,
+						(a11 + cs_a*0 + 2*rs_a)->imag,
+						(a11 + cs_a*0 + 2*rs_a)->real,
+						(a11 + cs_a*0 + 2*rs_a)->imag,
+						(a11 + cs_a*0 + 2*rs_a)->real,
+						(a11 + cs_a*0 + 2*rs_a)->imag,
+						(a11 + cs_a*0 + 2*rs_a)->real);
 			ymm2 = _mm256_permute_ps(ymm2, 0x44);
 			if(conjtransa)
 			{
@@ -45107,7 +45594,10 @@ BLIS_INLINE err_t bli_ctrsm_small_AltXB_AuXB
 			ymm8 = _mm256_sub_ps(ymm8,ymm16);
 
 
-			ymm1 = _mm256_broadcast_ps(( __m128 const *)(d11_pack + 1));
+			ymm1 = _mm256_set_ps((d11_pack + 1)->imag,(d11_pack + 1)->real,
+						(d11_pack + 1)->imag,(d11_pack + 1)->real,
+						(d11_pack + 1)->imag,(d11_pack + 1)->real,
+						(d11_pack + 1)->imag,(d11_pack + 1)->real);
 			ymm1 = _mm256_permute_ps(ymm1, 0x44);
 #ifndef BLIS_ENABLE_TRSM_PREINVERSION
 			BLIS_CTRSM_DIV(ymm9)
@@ -45116,7 +45606,14 @@ BLIS_INLINE err_t bli_ctrsm_small_AltXB_AuXB
 #endif
 
 
-			ymm2 = _mm256_broadcast_ps((__m128 const *) (a11 + rs_a) );
+			ymm2 = _mm256_set_ps((a11 + cs_a*0 + 1*rs_a)->imag,
+						(a11 + cs_a*0 + 1*rs_a)->real,
+						(a11 + cs_a*0 + 1*rs_a)->imag,
+						(a11 + cs_a*0 + 1*rs_a)->real,
+						(a11 + cs_a*0 + 1*rs_a)->imag,
+						(a11 + cs_a*0 + 1*rs_a)->real,
+						(a11 + cs_a*0 + 1*rs_a)->imag,
+						(a11 + cs_a*0 + 1*rs_a)->real);
 			ymm2 = _mm256_permute_ps(ymm2, 0x44);
 			if(conjtransa)
 			{
@@ -45132,7 +45629,10 @@ BLIS_INLINE err_t bli_ctrsm_small_AltXB_AuXB
 			ymm8 = _mm256_sub_ps(ymm8,ymm16);
 
 
-			ymm1 = _mm256_broadcast_ps(( __m128 const *)(d11_pack));
+			ymm1 = _mm256_set_ps((d11_pack)->imag,(d11_pack)->real,
+						(d11_pack)->imag,(d11_pack)->real,
+						(d11_pack)->imag,(d11_pack)->real,
+						(d11_pack)->imag,(d11_pack)->real);
 			ymm1 = _mm256_permute_ps(ymm1, 0x44);
 #ifndef BLIS_ENABLE_TRSM_PREINVERSION
 			BLIS_CTRSM_DIV(ymm8)
@@ -45163,8 +45663,8 @@ BLIS_INLINE err_t bli_ctrsm_small_AltXB_AuXB
 				BLIS_CTRSM_SMALL_GEMM_8mx2n(a10,b01,cs_b,p_lda,k_iter)
 
 				float zero = 0.0;
-				ymm16 = _mm256_broadcast_ss(&AlphaVal.real);
-				ymm17 = _mm256_broadcast_ss(&AlphaVal.imag);
+				ymm16 = _mm256_broadcast_ss(&AlphaVal[0].real);
+				ymm17 = _mm256_broadcast_ss(&AlphaVal[0].imag);
 				ymm2 = _mm256_broadcast_ss(&zero);
 				ymm3 = _mm256_broadcast_ss(&zero);
 				ymm6 = _mm256_broadcast_ss(&zero);
@@ -45215,8 +45715,8 @@ BLIS_INLINE err_t bli_ctrsm_small_AltXB_AuXB
 				BLIS_CTRSM_SMALL_GEMM_8mx1n(a10,b01,cs_b,p_lda,k_iter)
 
 				float zero = 0.0;
-				ymm16 = _mm256_broadcast_ss(&AlphaVal.real);
-				ymm17 = _mm256_broadcast_ss(&AlphaVal.imag);
+				ymm16 = _mm256_broadcast_ss(&AlphaVal[0].real);
+				ymm17 = _mm256_broadcast_ss(&AlphaVal[0].imag);
 				ymm2 = _mm256_broadcast_ss(&zero);
 				ymm3 = _mm256_broadcast_ss(&zero);
 				ymm6 = _mm256_broadcast_ss(&zero);
@@ -45285,14 +45785,24 @@ BLIS_INLINE err_t bli_ctrsm_small_AltXB_AuXB
 
 
 			ymm18 = _mm256_setr_ps(1.0, -1.0, 1.0, -1.0, 1.0, -1.0, 1.0, -1.0);
-			ymm1 = _mm256_broadcast_ps(( __m128 const *)(d11_pack + 7));
+			ymm1 = _mm256_set_ps((d11_pack + 7)->imag,(d11_pack + 7)->real,
+						(d11_pack + 7)->imag,(d11_pack + 7)->real,
+						(d11_pack + 7)->imag,(d11_pack + 7)->real,
+						(d11_pack + 7)->imag,(d11_pack + 7)->real);
 			ymm1 = _mm256_permute_ps(ymm1, 0x44);
 #ifndef BLIS_ENABLE_TRSM_PREINVERSION
 			BLIS_CTRSM_DIV(ymm15)
 #else
 			BLIS_CTRSM_MUL(ymm15)
 #endif
-			ymm2 = _mm256_broadcast_ps((__m128 const *) (a11 + cs_a*6 + 7*rs_a));
+			ymm2 = _mm256_set_ps((a11 + cs_a*6 + 7*rs_a)->imag,
+						(a11 + cs_a*6 + 7*rs_a)->real,
+						(a11 + cs_a*6 + 7*rs_a)->imag,
+						(a11 + cs_a*6 + 7*rs_a)->real,
+						(a11 + cs_a*6 + 7*rs_a)->imag,
+						(a11 + cs_a*6 + 7*rs_a)->real,
+						(a11 + cs_a*6 + 7*rs_a)->imag,
+						(a11 + cs_a*6 + 7*rs_a)->real);
 			ymm2 = _mm256_permute_ps(ymm2, 0x44);
 			if(conjtransa)
 			{
@@ -45309,7 +45819,14 @@ BLIS_INLINE err_t bli_ctrsm_small_AltXB_AuXB
 			ymm16 = _mm256_fmaddsub_ps(ymm1, ymm2, ymm16);
 			ymm14 = _mm256_sub_ps(ymm14,ymm16);
 
-			ymm2 = _mm256_broadcast_ps((__m128 const *) (a11 + cs_a*5 + 7*rs_a));
+			ymm2 = _mm256_set_ps((a11 + cs_a*5 + 7*rs_a)->imag,
+						(a11 + cs_a*5 + 7*rs_a)->real,
+						(a11 + cs_a*5 + 7*rs_a)->imag,
+						(a11 + cs_a*5 + 7*rs_a)->real,
+						(a11 + cs_a*5 + 7*rs_a)->imag,
+						(a11 + cs_a*5 + 7*rs_a)->real,
+						(a11 + cs_a*5 + 7*rs_a)->imag,
+						(a11 + cs_a*5 + 7*rs_a)->real);
 			ymm2 = _mm256_permute_ps(ymm2, 0x44);
 			if(conjtransa)
 			{
@@ -45324,7 +45841,14 @@ BLIS_INLINE err_t bli_ctrsm_small_AltXB_AuXB
 			ymm16 = _mm256_fmaddsub_ps(ymm1, ymm2, ymm16);
 			ymm13 = _mm256_sub_ps(ymm13,ymm16);
 
-			ymm2 = _mm256_broadcast_ps((__m128 const *) (a11 + cs_a*4 + 7*rs_a));
+			ymm2 = _mm256_set_ps((a11 + cs_a*4 + 7*rs_a)->imag,
+						(a11 + cs_a*4 + 7*rs_a)->real,
+						(a11 + cs_a*4 + 7*rs_a)->imag,
+						(a11 + cs_a*4 + 7*rs_a)->real,
+						(a11 + cs_a*4 + 7*rs_a)->imag,
+						(a11 + cs_a*4 + 7*rs_a)->real,
+						(a11 + cs_a*4 + 7*rs_a)->imag,
+						(a11 + cs_a*4 + 7*rs_a)->real);
 			ymm2 = _mm256_permute_ps(ymm2, 0x44);
 			if(conjtransa)
 			{
@@ -45339,7 +45863,14 @@ BLIS_INLINE err_t bli_ctrsm_small_AltXB_AuXB
 			ymm16 = _mm256_fmaddsub_ps(ymm1, ymm2, ymm16);
 			ymm12 = _mm256_sub_ps(ymm12,ymm16);
 
-			ymm2 = _mm256_broadcast_ps((__m128 const *) (a11 + cs_a*3 + 7*rs_a));
+			ymm2 = _mm256_set_ps((a11 + cs_a*3 + 7*rs_a)->imag,
+						(a11 + cs_a*3 + 7*rs_a)->real,
+						(a11 + cs_a*3 + 7*rs_a)->imag,
+						(a11 + cs_a*3 + 7*rs_a)->real,
+						(a11 + cs_a*3 + 7*rs_a)->imag,
+						(a11 + cs_a*3 + 7*rs_a)->real,
+						(a11 + cs_a*3 + 7*rs_a)->imag,
+						(a11 + cs_a*3 + 7*rs_a)->real);
 			ymm2 = _mm256_permute_ps(ymm2, 0x44);
 			if(conjtransa)
 			{
@@ -45354,7 +45885,14 @@ BLIS_INLINE err_t bli_ctrsm_small_AltXB_AuXB
 			ymm16 = _mm256_fmaddsub_ps(ymm1, ymm2, ymm16);
 			ymm11 = _mm256_sub_ps(ymm11,ymm16);
 
-			ymm2 = _mm256_broadcast_ps((__m128 const *) (a11 + cs_a*2 + 7*rs_a));
+			ymm2 = _mm256_set_ps((a11 + cs_a*2 + 7*rs_a)->imag,
+						(a11 + cs_a*2 + 7*rs_a)->real,
+						(a11 + cs_a*2 + 7*rs_a)->imag,
+						(a11 + cs_a*2 + 7*rs_a)->real,
+						(a11 + cs_a*2 + 7*rs_a)->imag,
+						(a11 + cs_a*2 + 7*rs_a)->real,
+						(a11 + cs_a*2 + 7*rs_a)->imag,
+						(a11 + cs_a*2 + 7*rs_a)->real);
 			ymm2 = _mm256_permute_ps(ymm2, 0x44);
 			if(conjtransa)
 			{
@@ -45369,7 +45907,14 @@ BLIS_INLINE err_t bli_ctrsm_small_AltXB_AuXB
 			ymm16 = _mm256_fmaddsub_ps(ymm1, ymm2, ymm16);
 			ymm10 = _mm256_sub_ps(ymm10,ymm16);
 
-			ymm2 = _mm256_broadcast_ps((__m128 const *) (a11 + cs_a*1 + 7*rs_a));
+			ymm2 = _mm256_set_ps((a11 + cs_a*1 + 7*rs_a)->imag,
+						(a11 + cs_a*1 + 7*rs_a)->real,
+						(a11 + cs_a*1 + 7*rs_a)->imag,
+						(a11 + cs_a*1 + 7*rs_a)->real,
+						(a11 + cs_a*1 + 7*rs_a)->imag,
+						(a11 + cs_a*1 + 7*rs_a)->real,
+						(a11 + cs_a*1 + 7*rs_a)->imag,
+						(a11 + cs_a*1 + 7*rs_a)->real);
 			ymm2 = _mm256_permute_ps(ymm2, 0x44);
 			if(conjtransa)
 			{
@@ -45384,7 +45929,14 @@ BLIS_INLINE err_t bli_ctrsm_small_AltXB_AuXB
 			ymm16 = _mm256_fmaddsub_ps(ymm1, ymm2, ymm16);
 			ymm9 = _mm256_sub_ps(ymm9,ymm16);
 
-			ymm2 = _mm256_broadcast_ps((__m128 const *) (a11 + cs_a*0 + 7*rs_a));
+			ymm2 = _mm256_set_ps((a11 + cs_a*0 + 7*rs_a)->imag,
+						(a11 + cs_a*0 + 7*rs_a)->real,
+						(a11 + cs_a*0 + 7*rs_a)->imag,
+						(a11 + cs_a*0 + 7*rs_a)->real,
+						(a11 + cs_a*0 + 7*rs_a)->imag,
+						(a11 + cs_a*0 + 7*rs_a)->real,
+						(a11 + cs_a*0 + 7*rs_a)->imag,
+						(a11 + cs_a*0 + 7*rs_a)->real);
 			ymm2 = _mm256_permute_ps(ymm2, 0x44);
 			if(conjtransa)
 			{
@@ -45399,7 +45951,10 @@ BLIS_INLINE err_t bli_ctrsm_small_AltXB_AuXB
 			ymm16 = _mm256_fmaddsub_ps(ymm1, ymm2, ymm16);
 			ymm8 = _mm256_sub_ps(ymm8,ymm16);
 
-			ymm1 = _mm256_broadcast_ps(( __m128 const *)(d11_pack + 6));
+			ymm1 = _mm256_set_ps((d11_pack + 6)->imag,(d11_pack + 6)->real,
+						(d11_pack + 6)->imag,(d11_pack + 6)->real,
+						(d11_pack + 6)->imag,(d11_pack + 6)->real,
+						(d11_pack + 6)->imag,(d11_pack + 6)->real);
 			ymm1 = _mm256_permute_ps(ymm1, 0x44);
 #ifndef BLIS_ENABLE_TRSM_PREINVERSION
 			BLIS_CTRSM_DIV(ymm14)
@@ -45407,7 +45962,14 @@ BLIS_INLINE err_t bli_ctrsm_small_AltXB_AuXB
 			BLIS_CTRSM_MUL(ymm14)
 #endif
 
-			ymm2 = _mm256_broadcast_ps((__m128 const *) (a11 + cs_a*5 + 6*rs_a));
+			ymm2 = _mm256_set_ps((a11 + cs_a*5 + 6*rs_a)->imag,
+						(a11 + cs_a*5 + 6*rs_a)->real,
+						(a11 + cs_a*5 + 6*rs_a)->imag,
+						(a11 + cs_a*5 + 6*rs_a)->real,
+						(a11 + cs_a*5 + 6*rs_a)->imag,
+						(a11 + cs_a*5 + 6*rs_a)->real,
+						(a11 + cs_a*5 + 6*rs_a)->imag,
+						(a11 + cs_a*5 + 6*rs_a)->real);
 			ymm2 = _mm256_permute_ps(ymm2, 0x44);
 			if(conjtransa)
 			{
@@ -45422,7 +45984,14 @@ BLIS_INLINE err_t bli_ctrsm_small_AltXB_AuXB
 			ymm16 = _mm256_fmaddsub_ps(ymm1, ymm2, ymm16);
 			ymm13 = _mm256_sub_ps(ymm13,ymm16);
 
-			ymm2 = _mm256_broadcast_ps((__m128 const *) (a11 + cs_a*4 + 6*rs_a));
+			ymm2 = _mm256_set_ps((a11 + cs_a*4 + 6*rs_a)->imag,
+						(a11 + cs_a*4 + 6*rs_a)->real,
+						(a11 + cs_a*4 + 6*rs_a)->imag,
+						(a11 + cs_a*4 + 6*rs_a)->real,
+						(a11 + cs_a*4 + 6*rs_a)->imag,
+						(a11 + cs_a*4 + 6*rs_a)->real,
+						(a11 + cs_a*4 + 6*rs_a)->imag,
+						(a11 + cs_a*4 + 6*rs_a)->real);
 			ymm2 = _mm256_permute_ps(ymm2, 0x44);
 			if(conjtransa)
 			{
@@ -45437,7 +46006,14 @@ BLIS_INLINE err_t bli_ctrsm_small_AltXB_AuXB
 			ymm16 = _mm256_fmaddsub_ps(ymm1, ymm2, ymm16);
 			ymm12 = _mm256_sub_ps(ymm12,ymm16);
 
-			ymm2 = _mm256_broadcast_ps((__m128 const *) (a11 + cs_a*3 + 6*rs_a));
+			ymm2 = _mm256_set_ps((a11 + cs_a*3 + 6*rs_a)->imag,
+						(a11 + cs_a*3 + 6*rs_a)->real,
+						(a11 + cs_a*3 + 6*rs_a)->imag,
+						(a11 + cs_a*3 + 6*rs_a)->real,
+						(a11 + cs_a*3 + 6*rs_a)->imag,
+						(a11 + cs_a*3 + 6*rs_a)->real,
+						(a11 + cs_a*3 + 6*rs_a)->imag,
+						(a11 + cs_a*3 + 6*rs_a)->real);
 			ymm2 = _mm256_permute_ps(ymm2, 0x44);
 			if(conjtransa)
 			{
@@ -45452,7 +46028,14 @@ BLIS_INLINE err_t bli_ctrsm_small_AltXB_AuXB
 			ymm16 = _mm256_fmaddsub_ps(ymm1, ymm2, ymm16);
 			ymm11 = _mm256_sub_ps(ymm11,ymm16);
 
-			ymm2 = _mm256_broadcast_ps((__m128 const *) (a11 + cs_a*2 + 6*rs_a));
+			ymm2 = _mm256_set_ps((a11 + cs_a*2 + 6*rs_a)->imag,
+						(a11 + cs_a*2 + 6*rs_a)->real,
+						(a11 + cs_a*2 + 6*rs_a)->imag,
+						(a11 + cs_a*2 + 6*rs_a)->real,
+						(a11 + cs_a*2 + 6*rs_a)->imag,
+						(a11 + cs_a*2 + 6*rs_a)->real,
+						(a11 + cs_a*2 + 6*rs_a)->imag,
+						(a11 + cs_a*2 + 6*rs_a)->real);
 			ymm2 = _mm256_permute_ps(ymm2, 0x44);
 			if(conjtransa)
 			{
@@ -45467,7 +46050,14 @@ BLIS_INLINE err_t bli_ctrsm_small_AltXB_AuXB
 			ymm16 = _mm256_fmaddsub_ps(ymm1, ymm2, ymm16);
 			ymm10 = _mm256_sub_ps(ymm10,ymm16);
 
-			ymm2 = _mm256_broadcast_ps((__m128 const *) (a11 + cs_a*1 + 6*rs_a));
+			ymm2 = _mm256_set_ps((a11 + cs_a*1 + 6*rs_a)->imag,
+						(a11 + cs_a*1 + 6*rs_a)->real,
+						(a11 + cs_a*1 + 6*rs_a)->imag,
+						(a11 + cs_a*1 + 6*rs_a)->real,
+						(a11 + cs_a*1 + 6*rs_a)->imag,
+						(a11 + cs_a*1 + 6*rs_a)->real,
+						(a11 + cs_a*1 + 6*rs_a)->imag,
+						(a11 + cs_a*1 + 6*rs_a)->real);
 			ymm2 = _mm256_permute_ps(ymm2, 0x44);
 			if(conjtransa)
 			{
@@ -45482,7 +46072,14 @@ BLIS_INLINE err_t bli_ctrsm_small_AltXB_AuXB
 			ymm16 = _mm256_fmaddsub_ps(ymm1, ymm2, ymm16);
 			ymm9 = _mm256_sub_ps(ymm9,ymm16);
 
-			ymm2 = _mm256_broadcast_ps((__m128 const *) (a11 + cs_a*0 + 6*rs_a));
+			ymm2 = _mm256_set_ps((a11 + cs_a*0 + 6*rs_a)->imag,
+						(a11 + cs_a*0 + 6*rs_a)->real,
+						(a11 + cs_a*0 + 6*rs_a)->imag,
+						(a11 + cs_a*0 + 6*rs_a)->real,
+						(a11 + cs_a*0 + 6*rs_a)->imag,
+						(a11 + cs_a*0 + 6*rs_a)->real,
+						(a11 + cs_a*0 + 6*rs_a)->imag,
+						(a11 + cs_a*0 + 6*rs_a)->real);
 			ymm2 = _mm256_permute_ps(ymm2, 0x44);
 			if(conjtransa)
 			{
@@ -45498,7 +46095,10 @@ BLIS_INLINE err_t bli_ctrsm_small_AltXB_AuXB
 			ymm8 = _mm256_sub_ps(ymm8,ymm16);
 
 
-			ymm1 = _mm256_broadcast_ps(( __m128 const *)(d11_pack + 5));
+			ymm1 = _mm256_set_ps((d11_pack + 5)->imag,(d11_pack + 5)->real,
+						(d11_pack + 5)->imag,(d11_pack + 5)->real,
+						(d11_pack + 5)->imag,(d11_pack + 5)->real,
+						(d11_pack + 5)->imag,(d11_pack + 5)->real);
 			ymm1 = _mm256_permute_ps(ymm1, 0x44);
 
 #ifndef BLIS_ENABLE_TRSM_PREINVERSION
@@ -45508,7 +46108,14 @@ BLIS_INLINE err_t bli_ctrsm_small_AltXB_AuXB
 #endif
 
 
-			ymm2 = _mm256_broadcast_ps((__m128 const *) (a11 + cs_a*4 + 5*rs_a));
+			ymm2 = _mm256_set_ps((a11 + cs_a*4 + 5*rs_a)->imag,
+						(a11 + cs_a*4 + 5*rs_a)->real,
+						(a11 + cs_a*4 + 5*rs_a)->imag,
+						(a11 + cs_a*4 + 5*rs_a)->real,
+						(a11 + cs_a*4 + 5*rs_a)->imag,
+						(a11 + cs_a*4 + 5*rs_a)->real,
+						(a11 + cs_a*4 + 5*rs_a)->imag,
+						(a11 + cs_a*4 + 5*rs_a)->real);
 			ymm2 = _mm256_permute_ps(ymm2, 0x44);
 			if(conjtransa)
 			{
@@ -45523,7 +46130,14 @@ BLIS_INLINE err_t bli_ctrsm_small_AltXB_AuXB
 			ymm16 = _mm256_fmaddsub_ps(ymm1, ymm2, ymm16);
 			ymm12 = _mm256_sub_ps(ymm12,ymm16);
 
-			ymm2 = _mm256_broadcast_ps((__m128 const *) (a11 + cs_a*3 + 5*rs_a));
+			ymm2 = _mm256_set_ps((a11 + cs_a*3 + 5*rs_a)->imag,
+						(a11 + cs_a*3 + 5*rs_a)->real,
+						(a11 + cs_a*3 + 5*rs_a)->imag,
+						(a11 + cs_a*3 + 5*rs_a)->real,
+						(a11 + cs_a*3 + 5*rs_a)->imag,
+						(a11 + cs_a*3 + 5*rs_a)->real,
+						(a11 + cs_a*3 + 5*rs_a)->imag,
+						(a11 + cs_a*3 + 5*rs_a)->real);
 			ymm2 = _mm256_permute_ps(ymm2, 0x44);
 			if(conjtransa)
 			{
@@ -45538,7 +46152,14 @@ BLIS_INLINE err_t bli_ctrsm_small_AltXB_AuXB
 			ymm16 = _mm256_fmaddsub_ps(ymm1, ymm2, ymm16);
 			ymm11 = _mm256_sub_ps(ymm11,ymm16);
 
-			ymm2 = _mm256_broadcast_ps((__m128 const *) (a11 + cs_a*2 + 5*rs_a));
+			ymm2 = _mm256_set_ps((a11 + cs_a*2 + 5*rs_a)->imag,
+						(a11 + cs_a*2 + 5*rs_a)->real,
+						(a11 + cs_a*2 + 5*rs_a)->imag,
+						(a11 + cs_a*2 + 5*rs_a)->real,
+						(a11 + cs_a*2 + 5*rs_a)->imag,
+						(a11 + cs_a*2 + 5*rs_a)->real,
+						(a11 + cs_a*2 + 5*rs_a)->imag,
+						(a11 + cs_a*2 + 5*rs_a)->real);
 			ymm2 = _mm256_permute_ps(ymm2, 0x44);
 			if(conjtransa)
 			{
@@ -45553,7 +46174,14 @@ BLIS_INLINE err_t bli_ctrsm_small_AltXB_AuXB
 			ymm16 = _mm256_fmaddsub_ps(ymm1, ymm2, ymm16);
 			ymm10 = _mm256_sub_ps(ymm10,ymm16);
 
-			ymm2 = _mm256_broadcast_ps((__m128 const *) (a11 + cs_a*1 + 5*rs_a));
+			ymm2 = _mm256_set_ps((a11 + cs_a*1 + 5*rs_a)->imag,
+						(a11 + cs_a*1 + 5*rs_a)->real,
+						(a11 + cs_a*1 + 5*rs_a)->imag,
+						(a11 + cs_a*1 + 5*rs_a)->real,
+						(a11 + cs_a*1 + 5*rs_a)->imag,
+						(a11 + cs_a*1 + 5*rs_a)->real,
+						(a11 + cs_a*1 + 5*rs_a)->imag,
+						(a11 + cs_a*1 + 5*rs_a)->real);
 			ymm2 = _mm256_permute_ps(ymm2, 0x44);
 			if(conjtransa)
 			{
@@ -45568,7 +46196,14 @@ BLIS_INLINE err_t bli_ctrsm_small_AltXB_AuXB
 			ymm16 = _mm256_fmaddsub_ps(ymm1, ymm2, ymm16);
 			ymm9 = _mm256_sub_ps(ymm9,ymm16);
 
-			ymm2 = _mm256_broadcast_ps((__m128 const *) (a11 + cs_a*0 + 5*rs_a));
+			ymm2 = _mm256_set_ps((a11 + cs_a*0 + 5*rs_a)->imag,
+						(a11 + cs_a*0 + 5*rs_a)->real,
+						(a11 + cs_a*0 + 5*rs_a)->imag,
+						(a11 + cs_a*0 + 5*rs_a)->real,
+						(a11 + cs_a*0 + 5*rs_a)->imag,
+						(a11 + cs_a*0 + 5*rs_a)->real,
+						(a11 + cs_a*0 + 5*rs_a)->imag,
+						(a11 + cs_a*0 + 5*rs_a)->real);
 			ymm2 = _mm256_permute_ps(ymm2, 0x44);
 			if(conjtransa)
 			{
@@ -45584,7 +46219,10 @@ BLIS_INLINE err_t bli_ctrsm_small_AltXB_AuXB
 			ymm8 = _mm256_sub_ps(ymm8,ymm16);
 
 
-			ymm1 = _mm256_broadcast_ps(( __m128 const *)(d11_pack + 4));
+			ymm1 = _mm256_set_ps((d11_pack + 4)->imag,(d11_pack + 4)->real,
+						(d11_pack + 4)->imag,(d11_pack + 4)->real,
+						(d11_pack + 4)->imag,(d11_pack + 4)->real,
+						(d11_pack + 4)->imag,(d11_pack + 4)->real);
 			ymm1 = _mm256_permute_ps(ymm1, 0x44);
 #ifndef BLIS_ENABLE_TRSM_PREINVERSION
 			BLIS_CTRSM_DIV(ymm12)
@@ -45593,7 +46231,14 @@ BLIS_INLINE err_t bli_ctrsm_small_AltXB_AuXB
 #endif
 
 
-			ymm2 = _mm256_broadcast_ps((__m128 const *) (a11 + cs_a*3 + 4*rs_a));
+			ymm2 = _mm256_set_ps((a11 + cs_a*3 + 4*rs_a)->imag,
+						(a11 + cs_a*3 + 4*rs_a)->real,
+						(a11 + cs_a*3 + 4*rs_a)->imag,
+						(a11 + cs_a*3 + 4*rs_a)->real,
+						(a11 + cs_a*3 + 4*rs_a)->imag,
+						(a11 + cs_a*3 + 4*rs_a)->real,
+						(a11 + cs_a*3 + 4*rs_a)->imag,
+						(a11 + cs_a*3 + 4*rs_a)->real);
 			ymm2 = _mm256_permute_ps(ymm2, 0x44);
 			if(conjtransa)
 			{
@@ -45608,7 +46253,14 @@ BLIS_INLINE err_t bli_ctrsm_small_AltXB_AuXB
 			ymm16 = _mm256_fmaddsub_ps(ymm1, ymm2, ymm16);
 			ymm11 = _mm256_sub_ps(ymm11,ymm16);
 
-			ymm2 = _mm256_broadcast_ps((__m128 const *) (a11 + cs_a*2 + 4*rs_a));
+			ymm2 = _mm256_set_ps((a11 + cs_a*2 + 4*rs_a)->imag,
+						(a11 + cs_a*2 + 4*rs_a)->real,
+						(a11 + cs_a*2 + 4*rs_a)->imag,
+						(a11 + cs_a*2 + 4*rs_a)->real,
+						(a11 + cs_a*2 + 4*rs_a)->imag,
+						(a11 + cs_a*2 + 4*rs_a)->real,
+						(a11 + cs_a*2 + 4*rs_a)->imag,
+						(a11 + cs_a*2 + 4*rs_a)->real);
 			ymm2 = _mm256_permute_ps(ymm2, 0x44);
 			if(conjtransa)
 			{
@@ -45623,7 +46275,14 @@ BLIS_INLINE err_t bli_ctrsm_small_AltXB_AuXB
 			ymm16 = _mm256_fmaddsub_ps(ymm1, ymm2, ymm16);
 			ymm10 = _mm256_sub_ps(ymm10,ymm16);
 
-			ymm2 = _mm256_broadcast_ps((__m128 const *) (a11 + cs_a*1 + 4*rs_a));
+			ymm2 = _mm256_set_ps((a11 + cs_a*1 + 4*rs_a)->imag,
+						(a11 + cs_a*1 + 4*rs_a)->real,
+						(a11 + cs_a*1 + 4*rs_a)->imag,
+						(a11 + cs_a*1 + 4*rs_a)->real,
+						(a11 + cs_a*1 + 4*rs_a)->imag,
+						(a11 + cs_a*1 + 4*rs_a)->real,
+						(a11 + cs_a*1 + 4*rs_a)->imag,
+						(a11 + cs_a*1 + 4*rs_a)->real);
 			ymm2 = _mm256_permute_ps(ymm2, 0x44);
 			if(conjtransa)
 			{
@@ -45638,7 +46297,14 @@ BLIS_INLINE err_t bli_ctrsm_small_AltXB_AuXB
 			ymm16 = _mm256_fmaddsub_ps(ymm1, ymm2, ymm16);
 			ymm9 = _mm256_sub_ps(ymm9,ymm16);
 
-			ymm2 = _mm256_broadcast_ps((__m128 const *) (a11 + cs_a*0 + 4*rs_a));
+			ymm2 = _mm256_set_ps((a11 + cs_a*0 + 4*rs_a)->imag,
+						(a11 + cs_a*0 + 4*rs_a)->real,
+						(a11 + cs_a*0 + 4*rs_a)->imag,
+						(a11 + cs_a*0 + 4*rs_a)->real,
+						(a11 + cs_a*0 + 4*rs_a)->imag,
+						(a11 + cs_a*0 + 4*rs_a)->real,
+						(a11 + cs_a*0 + 4*rs_a)->imag,
+						(a11 + cs_a*0 + 4*rs_a)->real);
 			ymm2 = _mm256_permute_ps(ymm2, 0x44);
 			if(conjtransa)
 			{
@@ -45654,7 +46320,10 @@ BLIS_INLINE err_t bli_ctrsm_small_AltXB_AuXB
 			ymm8 = _mm256_sub_ps(ymm8,ymm16);
 
 
-			ymm1 = _mm256_broadcast_ps(( __m128 const *)(d11_pack + 3));
+			ymm1 = _mm256_set_ps((d11_pack + 3)->imag,(d11_pack + 3)->real,
+						(d11_pack + 3)->imag,(d11_pack + 3)->real,
+						(d11_pack + 3)->imag,(d11_pack + 3)->real,
+						(d11_pack + 3)->imag,(d11_pack + 3)->real);
 			ymm1 = _mm256_permute_ps(ymm1, 0x44);
 #ifndef BLIS_ENABLE_TRSM_PREINVERSION
 			BLIS_CTRSM_DIV(ymm11)
@@ -45662,7 +46331,14 @@ BLIS_INLINE err_t bli_ctrsm_small_AltXB_AuXB
 			BLIS_CTRSM_MUL(ymm11)
 #endif
 
-			ymm2 = _mm256_broadcast_ps((__m128 const *) (a11 + cs_a*2 + 3*rs_a));
+			ymm2 = _mm256_set_ps((a11 + cs_a*2 + 3*rs_a)->imag,
+						(a11 + cs_a*2 + 3*rs_a)->real,
+						(a11 + cs_a*2 + 3*rs_a)->imag,
+						(a11 + cs_a*2 + 3*rs_a)->real,
+						(a11 + cs_a*2 + 3*rs_a)->imag,
+						(a11 + cs_a*2 + 3*rs_a)->real,
+						(a11 + cs_a*2 + 3*rs_a)->imag,
+						(a11 + cs_a*2 + 3*rs_a)->real);
 			ymm2 = _mm256_permute_ps(ymm2, 0x44);
 			if(conjtransa)
 			{
@@ -45677,7 +46353,14 @@ BLIS_INLINE err_t bli_ctrsm_small_AltXB_AuXB
 			ymm16 = _mm256_fmaddsub_ps(ymm1, ymm2, ymm16);
 			ymm10 = _mm256_sub_ps(ymm10,ymm16);
 
-			ymm2 = _mm256_broadcast_ps((__m128 const *) (a11 + cs_a*1 + 3*rs_a));
+			ymm2 = _mm256_set_ps((a11 + cs_a*1 + 3*rs_a)->imag,
+						(a11 + cs_a*1 + 3*rs_a)->real,
+						(a11 + cs_a*1 + 3*rs_a)->imag,
+						(a11 + cs_a*1 + 3*rs_a)->real,
+						(a11 + cs_a*1 + 3*rs_a)->imag,
+						(a11 + cs_a*1 + 3*rs_a)->real,
+						(a11 + cs_a*1 + 3*rs_a)->imag,
+						(a11 + cs_a*1 + 3*rs_a)->real);
 			ymm2 = _mm256_permute_ps(ymm2, 0x44);
 			if(conjtransa)
 			{
@@ -45692,7 +46375,14 @@ BLIS_INLINE err_t bli_ctrsm_small_AltXB_AuXB
 			ymm16 = _mm256_fmaddsub_ps(ymm1, ymm2, ymm16);
 			ymm9 = _mm256_sub_ps(ymm9,ymm16);
 
-			ymm2 = _mm256_broadcast_ps((__m128 const *) (a11 + cs_a*0 + 3*rs_a));
+			ymm2 = _mm256_set_ps((a11 + cs_a*0 + 3*rs_a)->imag,
+						(a11 + cs_a*0 + 3*rs_a)->real,
+						(a11 + cs_a*0 + 3*rs_a)->imag,
+						(a11 + cs_a*0 + 3*rs_a)->real,
+						(a11 + cs_a*0 + 3*rs_a)->imag,
+						(a11 + cs_a*0 + 3*rs_a)->real,
+						(a11 + cs_a*0 + 3*rs_a)->imag,
+						(a11 + cs_a*0 + 3*rs_a)->real);
 			ymm2 = _mm256_permute_ps(ymm2, 0x44);
 			if(conjtransa)
 			{
@@ -45708,7 +46398,10 @@ BLIS_INLINE err_t bli_ctrsm_small_AltXB_AuXB
 			ymm8 = _mm256_sub_ps(ymm8,ymm16);
 
 
-			ymm1 = _mm256_broadcast_ps(( __m128 const *)(d11_pack + 2));
+			ymm1 = _mm256_set_ps((d11_pack + 2)->imag,(d11_pack + 2)->real,
+						(d11_pack + 2)->imag,(d11_pack + 2)->real,
+						(d11_pack + 2)->imag,(d11_pack + 2)->real,
+						(d11_pack + 2)->imag,(d11_pack + 2)->real);
 			ymm1 = _mm256_permute_ps(ymm1, 0x44);
 #ifndef BLIS_ENABLE_TRSM_PREINVERSION
 			BLIS_CTRSM_DIV(ymm10)
@@ -45717,7 +46410,15 @@ BLIS_INLINE err_t bli_ctrsm_small_AltXB_AuXB
 #endif
 
 
-			ymm2 = _mm256_broadcast_ps((__m128 const *) (a11 + cs_a + 2*rs_a));
+			ymm2 = _mm256_set_ps((a11 + cs_a*1 + 2*rs_a)->imag,
+						(a11 + cs_a*1 + 2*rs_a)->real,
+						(a11 + cs_a*1 + 2*rs_a)->imag,
+						(a11 + cs_a*1 + 2*rs_a)->real,
+						(a11 + cs_a*1 + 2*rs_a)->imag,
+						(a11 + cs_a*1 + 2*rs_a)->real,
+						(a11 + cs_a*1 + 2*rs_a)->imag,
+						(a11 + cs_a*1 + 2*rs_a)->real);
+            
 			ymm2 = _mm256_permute_ps(ymm2, 0x44);
 			if(conjtransa)
 			{
@@ -45732,7 +46433,14 @@ BLIS_INLINE err_t bli_ctrsm_small_AltXB_AuXB
 			ymm16 = _mm256_fmaddsub_ps(ymm1, ymm2, ymm16);
 			ymm9 = _mm256_sub_ps(ymm9,ymm16);
 
-			ymm2 = _mm256_broadcast_ps((__m128 const *) (a11 + cs_a*0 + 2*rs_a));
+			ymm2 = _mm256_set_ps((a11 + cs_a*0 + 2*rs_a)->imag,
+						(a11 + cs_a*0 + 2*rs_a)->real,
+						(a11 + cs_a*0 + 2*rs_a)->imag,
+						(a11 + cs_a*0 + 2*rs_a)->real,
+						(a11 + cs_a*0 + 2*rs_a)->imag,
+						(a11 + cs_a*0 + 2*rs_a)->real,
+						(a11 + cs_a*0 + 2*rs_a)->imag,
+						(a11 + cs_a*0 + 2*rs_a)->real);
 			ymm2 = _mm256_permute_ps(ymm2, 0x44);
 			if(conjtransa)
 			{
@@ -45748,7 +46456,10 @@ BLIS_INLINE err_t bli_ctrsm_small_AltXB_AuXB
 			ymm8 = _mm256_sub_ps(ymm8,ymm16);
 
 
-			ymm1 = _mm256_broadcast_ps(( __m128 const *)(d11_pack + 1));
+			ymm1 = _mm256_set_ps((d11_pack + 1)->imag,(d11_pack + 1)->real,
+						(d11_pack + 1)->imag,(d11_pack + 1)->real,
+						(d11_pack + 1)->imag,(d11_pack + 1)->real,
+						(d11_pack + 1)->imag,(d11_pack + 1)->real);
 			ymm1 = _mm256_permute_ps(ymm1, 0x44);
 #ifndef BLIS_ENABLE_TRSM_PREINVERSION
 			BLIS_CTRSM_DIV(ymm9)
@@ -45757,7 +46468,14 @@ BLIS_INLINE err_t bli_ctrsm_small_AltXB_AuXB
 #endif
 
 
-			ymm2 = _mm256_broadcast_ps((__m128 const *) (a11 + rs_a) );
+			ymm2 = _mm256_set_ps((a11 + cs_a*0 + 1*rs_a)->imag,
+						(a11 + cs_a*0 + 1*rs_a)->real,
+						(a11 + cs_a*0 + 1*rs_a)->imag,
+						(a11 + cs_a*0 + 1*rs_a)->real,
+						(a11 + cs_a*0 + 1*rs_a)->imag,
+						(a11 + cs_a*0 + 1*rs_a)->real,
+						(a11 + cs_a*0 + 1*rs_a)->imag,
+						(a11 + cs_a*0 + 1*rs_a)->real);
 			ymm2 = _mm256_permute_ps(ymm2, 0x44);
 			if(conjtransa)
 			{
@@ -45773,7 +46491,10 @@ BLIS_INLINE err_t bli_ctrsm_small_AltXB_AuXB
 			ymm8 = _mm256_sub_ps(ymm8,ymm16);
 
 
-			ymm1 = _mm256_broadcast_ps(( __m128 const *)(d11_pack));
+			ymm1 = _mm256_set_ps((d11_pack)->imag,(d11_pack)->real,
+						(d11_pack)->imag,(d11_pack)->real,
+						(d11_pack)->imag,(d11_pack)->real,
+						(d11_pack)->imag,(d11_pack)->real);
 			ymm1 = _mm256_permute_ps(ymm1, 0x44);
 #ifndef BLIS_ENABLE_TRSM_PREINVERSION
 			BLIS_CTRSM_DIV(ymm8)
@@ -45891,7 +46612,10 @@ BLIS_INLINE err_t bli_ctrsm_small_AltXB_AuXB
 			BLIS_CTRSM_SMALL_NREG_TRANSPOSE_3x4(b11,cs_b,AlphaVal)
 
 			ymm18 = _mm256_setr_ps(1.0, -1.0, 1.0, -1.0, 1.0, -1.0, 1.0, -1.0);
-			ymm1 = _mm256_broadcast_ps(( __m128 const *)(d11_pack + 3));
+			ymm1 = _mm256_set_ps((d11_pack + 3)->imag,(d11_pack + 3)->real,
+						(d11_pack + 3)->imag,(d11_pack + 3)->real,
+						(d11_pack + 3)->imag,(d11_pack + 3)->real,
+						(d11_pack + 3)->imag,(d11_pack + 3)->real);
 			ymm1 = _mm256_permute_ps(ymm1, 0x44);
 #ifndef BLIS_ENABLE_TRSM_PREINVERSION
 			BLIS_CTRSM_DIV(ymm11)
@@ -45899,7 +46623,14 @@ BLIS_INLINE err_t bli_ctrsm_small_AltXB_AuXB
 			BLIS_CTRSM_MUL(ymm11)
 #endif
 
-			ymm2 = _mm256_broadcast_ps((__m128 const *) (a11 + cs_a*2 + 3*rs_a));
+			ymm2 = _mm256_set_ps((a11 + cs_a*2 + 3*rs_a)->imag,
+						(a11 + cs_a*2 + 3*rs_a)->real,
+						(a11 + cs_a*2 + 3*rs_a)->imag,
+						(a11 + cs_a*2 + 3*rs_a)->real,
+						(a11 + cs_a*2 + 3*rs_a)->imag,
+						(a11 + cs_a*2 + 3*rs_a)->real,
+						(a11 + cs_a*2 + 3*rs_a)->imag,
+						(a11 + cs_a*2 + 3*rs_a)->real);
 			ymm2 = _mm256_permute_ps(ymm2, 0x44);
 			if(conjtransa)
 			{
@@ -45913,7 +46644,14 @@ BLIS_INLINE err_t bli_ctrsm_small_AltXB_AuXB
 			ymm16 = _mm256_fmaddsub_ps(ymm1, ymm2, ymm16);
 			ymm10 = _mm256_sub_ps(ymm10,ymm16);
 
-			ymm2 = _mm256_broadcast_ps((__m128 const *) (a11 + cs_a*1 + 3*rs_a));
+			ymm2 = _mm256_set_ps((a11 + cs_a*1 + 3*rs_a)->imag,
+						(a11 + cs_a*1 + 3*rs_a)->real,
+						(a11 + cs_a*1 + 3*rs_a)->imag,
+						(a11 + cs_a*1 + 3*rs_a)->real,
+						(a11 + cs_a*1 + 3*rs_a)->imag,
+						(a11 + cs_a*1 + 3*rs_a)->real,
+						(a11 + cs_a*1 + 3*rs_a)->imag,
+						(a11 + cs_a*1 + 3*rs_a)->real);
 			ymm2 = _mm256_permute_ps(ymm2, 0x44);
 			if(conjtransa)
 			{
@@ -45927,7 +46665,14 @@ BLIS_INLINE err_t bli_ctrsm_small_AltXB_AuXB
 			ymm16 = _mm256_fmaddsub_ps(ymm1, ymm2, ymm16);
 			ymm9 = _mm256_sub_ps(ymm9,ymm16);
 
-			ymm2 = _mm256_broadcast_ps((__m128 const *) (a11 + cs_a*0 + 3*rs_a));
+			ymm2 = _mm256_set_ps((a11 + cs_a*0 + 3*rs_a)->imag,
+						(a11 + cs_a*0 + 3*rs_a)->real,
+						(a11 + cs_a*0 + 3*rs_a)->imag,
+						(a11 + cs_a*0 + 3*rs_a)->real,
+						(a11 + cs_a*0 + 3*rs_a)->imag,
+						(a11 + cs_a*0 + 3*rs_a)->real,
+						(a11 + cs_a*0 + 3*rs_a)->imag,
+						(a11 + cs_a*0 + 3*rs_a)->real);
 			ymm2 = _mm256_permute_ps(ymm2, 0x44);
 			if(conjtransa)
 			{
@@ -45942,7 +46687,10 @@ BLIS_INLINE err_t bli_ctrsm_small_AltXB_AuXB
 			ymm8 = _mm256_sub_ps(ymm8,ymm16);
 
 
-			ymm1 = _mm256_broadcast_ps(( __m128 const *)(d11_pack + 2));
+			ymm1 = _mm256_set_ps((d11_pack + 2)->imag,(d11_pack + 2)->real,
+						(d11_pack + 2)->imag,(d11_pack + 2)->real,
+						(d11_pack + 2)->imag,(d11_pack + 2)->real,
+						(d11_pack + 2)->imag,(d11_pack + 2)->real);
 			ymm1 = _mm256_permute_ps(ymm1, 0x44);
 #ifndef BLIS_ENABLE_TRSM_PREINVERSION
 			BLIS_CTRSM_DIV(ymm10)
@@ -45951,7 +46699,14 @@ BLIS_INLINE err_t bli_ctrsm_small_AltXB_AuXB
 #endif
 
 
-			ymm2 = _mm256_broadcast_ps((__m128 const *) (a11 + cs_a + 2*rs_a));
+			ymm2 = _mm256_set_ps((a11 + cs_a*1 + 2*rs_a)->imag,
+						(a11 + cs_a*1 + 2*rs_a)->real,
+						(a11 + cs_a*1 + 2*rs_a)->imag,
+						(a11 + cs_a*1 + 2*rs_a)->real,
+						(a11 + cs_a*1 + 2*rs_a)->imag,
+						(a11 + cs_a*1 + 2*rs_a)->real,
+						(a11 + cs_a*1 + 2*rs_a)->imag,
+						(a11 + cs_a*1 + 2*rs_a)->real);
 			ymm2 = _mm256_permute_ps(ymm2, 0x44);
 			if(conjtransa)
 			{
@@ -45965,7 +46720,14 @@ BLIS_INLINE err_t bli_ctrsm_small_AltXB_AuXB
 			ymm16 = _mm256_fmaddsub_ps(ymm1, ymm2, ymm16);
 			ymm9 = _mm256_sub_ps(ymm9,ymm16);
 
-			ymm2 = _mm256_broadcast_ps((__m128 const *) (a11 + cs_a*0 + 2*rs_a));
+			ymm2 = _mm256_set_ps((a11 + cs_a*0 + 2*rs_a)->imag,
+						(a11 + cs_a*0 + 2*rs_a)->real,
+						(a11 + cs_a*0 + 2*rs_a)->imag,
+						(a11 + cs_a*0 + 2*rs_a)->real,
+						(a11 + cs_a*0 + 2*rs_a)->imag,
+						(a11 + cs_a*0 + 2*rs_a)->real,
+						(a11 + cs_a*0 + 2*rs_a)->imag,
+						(a11 + cs_a*0 + 2*rs_a)->real);
 			ymm2 = _mm256_permute_ps(ymm2, 0x44);
 			if(conjtransa)
 			{
@@ -45980,7 +46742,10 @@ BLIS_INLINE err_t bli_ctrsm_small_AltXB_AuXB
 			ymm8 = _mm256_sub_ps(ymm8,ymm16);
 
 
-			ymm1 = _mm256_broadcast_ps(( __m128 const *)(d11_pack + 1));
+			ymm1 = _mm256_set_ps((d11_pack + 1)->imag,(d11_pack + 1)->real,
+						(d11_pack + 1)->imag,(d11_pack + 1)->real,
+						(d11_pack + 1)->imag,(d11_pack + 1)->real,
+						(d11_pack + 1)->imag,(d11_pack + 1)->real);
 			ymm1 = _mm256_permute_ps(ymm1, 0x44);
 #ifndef BLIS_ENABLE_TRSM_PREINVERSION
 			BLIS_CTRSM_DIV(ymm9)
@@ -45989,7 +46754,14 @@ BLIS_INLINE err_t bli_ctrsm_small_AltXB_AuXB
 #endif
 
 
-			ymm2 = _mm256_broadcast_ps((__m128 const *) (a11 + rs_a) );
+			ymm2 = _mm256_set_ps((a11 + cs_a*0 + 1*rs_a)->imag,
+						(a11 + cs_a*0 + 1*rs_a)->real,
+						(a11 + cs_a*0 + 1*rs_a)->imag,
+						(a11 + cs_a*0 + 1*rs_a)->real,
+						(a11 + cs_a*0 + 1*rs_a)->imag,
+						(a11 + cs_a*0 + 1*rs_a)->real,
+						(a11 + cs_a*0 + 1*rs_a)->imag,
+						(a11 + cs_a*0 + 1*rs_a)->real);
 			ymm2 = _mm256_permute_ps(ymm2, 0x44);
 			if(conjtransa)
 			{
@@ -46004,7 +46776,10 @@ BLIS_INLINE err_t bli_ctrsm_small_AltXB_AuXB
 			ymm8 = _mm256_sub_ps(ymm8,ymm16);
 
 
-			ymm1 = _mm256_broadcast_ps(( __m128 const *)(d11_pack));
+			ymm1 = _mm256_set_ps((d11_pack)->imag,(d11_pack)->real,
+						(d11_pack)->imag,(d11_pack)->real,
+						(d11_pack)->imag,(d11_pack)->real,
+						(d11_pack)->imag,(d11_pack)->real);
 			ymm1 = _mm256_permute_ps(ymm1, 0x44);
 #ifndef BLIS_ENABLE_TRSM_PREINVERSION
 			BLIS_CTRSM_DIV(ymm8)
@@ -46040,7 +46815,10 @@ BLIS_INLINE err_t bli_ctrsm_small_AltXB_AuXB
 			}
 
 			ymm18 = _mm256_setr_ps(1.0, -1.0, 1.0, -1.0, 1.0, -1.0, 1.0, -1.0);
-			ymm1 = _mm256_broadcast_ps(( __m128 const *)(d11_pack + 3));
+			ymm1 = _mm256_set_ps((d11_pack + 3)->imag,(d11_pack + 3)->real,
+						(d11_pack + 3)->imag,(d11_pack + 3)->real,
+						(d11_pack + 3)->imag,(d11_pack + 3)->real,
+						(d11_pack + 3)->imag,(d11_pack + 3)->real);
 			ymm1 = _mm256_permute_ps(ymm1, 0x44);
 #ifndef BLIS_ENABLE_TRSM_PREINVERSION
 			BLIS_CTRSM_DIV(ymm11)
@@ -46048,7 +46826,14 @@ BLIS_INLINE err_t bli_ctrsm_small_AltXB_AuXB
 			BLIS_CTRSM_MUL(ymm11)
 #endif
 
-			ymm2 = _mm256_broadcast_ps((__m128 const *) (a11 + cs_a*2 + 3*rs_a));
+			ymm2 = _mm256_set_ps((a11 + cs_a*2 + 3*rs_a)->imag,
+						(a11 + cs_a*2 + 3*rs_a)->real,
+						(a11 + cs_a*2 + 3*rs_a)->imag,
+						(a11 + cs_a*2 + 3*rs_a)->real,
+						(a11 + cs_a*2 + 3*rs_a)->imag,
+						(a11 + cs_a*2 + 3*rs_a)->real,
+						(a11 + cs_a*2 + 3*rs_a)->imag,
+						(a11 + cs_a*2 + 3*rs_a)->real);
 			ymm2 = _mm256_permute_ps(ymm2, 0x44);
 			if(conjtransa)
 			{
@@ -46062,7 +46847,14 @@ BLIS_INLINE err_t bli_ctrsm_small_AltXB_AuXB
 			ymm16 = _mm256_fmaddsub_ps(ymm1, ymm2, ymm16);
 			ymm10 = _mm256_sub_ps(ymm10,ymm16);
 
-			ymm2 = _mm256_broadcast_ps((__m128 const *) (a11 + cs_a*1 + 3*rs_a));
+			ymm2 = _mm256_set_ps((a11 + cs_a*1 + 3*rs_a)->imag,
+						(a11 + cs_a*1 + 3*rs_a)->real,
+						(a11 + cs_a*1 + 3*rs_a)->imag,
+						(a11 + cs_a*1 + 3*rs_a)->real,
+						(a11 + cs_a*1 + 3*rs_a)->imag,
+						(a11 + cs_a*1 + 3*rs_a)->real,
+						(a11 + cs_a*1 + 3*rs_a)->imag,
+						(a11 + cs_a*1 + 3*rs_a)->real);
 			ymm2 = _mm256_permute_ps(ymm2, 0x44);
 			if(conjtransa)
 			{
@@ -46076,7 +46868,14 @@ BLIS_INLINE err_t bli_ctrsm_small_AltXB_AuXB
 			ymm16 = _mm256_fmaddsub_ps(ymm1, ymm2, ymm16);
 			ymm9 = _mm256_sub_ps(ymm9,ymm16);
 
-			ymm2 = _mm256_broadcast_ps((__m128 const *) (a11 + cs_a*0 + 3*rs_a));
+			ymm2 = _mm256_set_ps((a11 + cs_a*0 + 3*rs_a)->imag,
+						(a11 + cs_a*0 + 3*rs_a)->real,
+						(a11 + cs_a*0 + 3*rs_a)->imag,
+						(a11 + cs_a*0 + 3*rs_a)->real,
+						(a11 + cs_a*0 + 3*rs_a)->imag,
+						(a11 + cs_a*0 + 3*rs_a)->real,
+						(a11 + cs_a*0 + 3*rs_a)->imag,
+						(a11 + cs_a*0 + 3*rs_a)->real);
 			ymm2 = _mm256_permute_ps(ymm2, 0x44);
 			if(conjtransa)
 			{
@@ -46091,7 +46890,10 @@ BLIS_INLINE err_t bli_ctrsm_small_AltXB_AuXB
 			ymm8 = _mm256_sub_ps(ymm8,ymm16);
 
 
-			ymm1 = _mm256_broadcast_ps(( __m128 const *)(d11_pack + 2));
+			ymm1 = _mm256_set_ps((d11_pack + 2)->imag,(d11_pack + 2)->real,
+						(d11_pack + 2)->imag,(d11_pack + 2)->real,
+						(d11_pack + 2)->imag,(d11_pack + 2)->real,
+						(d11_pack + 2)->imag,(d11_pack + 2)->real);
 			ymm1 = _mm256_permute_ps(ymm1, 0x44);
 #ifndef BLIS_ENABLE_TRSM_PREINVERSION
 			BLIS_CTRSM_DIV(ymm10)
@@ -46100,7 +46902,14 @@ BLIS_INLINE err_t bli_ctrsm_small_AltXB_AuXB
 #endif
 
 
-			ymm2 = _mm256_broadcast_ps((__m128 const *) (a11 + cs_a + 2*rs_a));
+			ymm2 = _mm256_set_ps((a11 + cs_a*1 + 2*rs_a)->imag,
+						(a11 + cs_a*1 + 2*rs_a)->real,
+						(a11 + cs_a*1 + 2*rs_a)->imag,
+						(a11 + cs_a*1 + 2*rs_a)->real,
+						(a11 + cs_a*1 + 2*rs_a)->imag,
+						(a11 + cs_a*1 + 2*rs_a)->real,
+						(a11 + cs_a*1 + 2*rs_a)->imag,
+						(a11 + cs_a*1 + 2*rs_a)->real);
 			ymm2 = _mm256_permute_ps(ymm2, 0x44);
 			if(conjtransa)
 			{
@@ -46114,7 +46923,14 @@ BLIS_INLINE err_t bli_ctrsm_small_AltXB_AuXB
 			ymm16 = _mm256_fmaddsub_ps(ymm1, ymm2, ymm16);
 			ymm9 = _mm256_sub_ps(ymm9,ymm16);
 
-			ymm2 = _mm256_broadcast_ps((__m128 const *) (a11 + cs_a*0 + 2*rs_a));
+			ymm2 = _mm256_set_ps((a11 + cs_a*0 + 2*rs_a)->imag,
+						(a11 + cs_a*0 + 2*rs_a)->real,
+						(a11 + cs_a*0 + 2*rs_a)->imag,
+						(a11 + cs_a*0 + 2*rs_a)->real,
+						(a11 + cs_a*0 + 2*rs_a)->imag,
+						(a11 + cs_a*0 + 2*rs_a)->real,
+						(a11 + cs_a*0 + 2*rs_a)->imag,
+						(a11 + cs_a*0 + 2*rs_a)->real);
 			ymm2 = _mm256_permute_ps(ymm2, 0x44);
 			if(conjtransa)
 			{
@@ -46129,7 +46945,10 @@ BLIS_INLINE err_t bli_ctrsm_small_AltXB_AuXB
 			ymm8 = _mm256_sub_ps(ymm8,ymm16);
 
 
-			ymm1 = _mm256_broadcast_ps(( __m128 const *)(d11_pack + 1));
+			ymm1 = _mm256_set_ps((d11_pack + 1)->imag,(d11_pack + 1)->real,
+						(d11_pack + 1)->imag,(d11_pack + 1)->real,
+						(d11_pack + 1)->imag,(d11_pack + 1)->real,
+						(d11_pack + 1)->imag,(d11_pack + 1)->real);
 			ymm1 = _mm256_permute_ps(ymm1, 0x44);
 #ifndef BLIS_ENABLE_TRSM_PREINVERSION
 			BLIS_CTRSM_DIV(ymm9)
@@ -46138,7 +46957,14 @@ BLIS_INLINE err_t bli_ctrsm_small_AltXB_AuXB
 #endif
 
 
-			ymm2 = _mm256_broadcast_ps((__m128 const *) (a11 + rs_a) );
+			ymm2 = _mm256_set_ps((a11 + cs_a*0 + 1*rs_a)->imag,
+						(a11 + cs_a*0 + 1*rs_a)->real,
+						(a11 + cs_a*0 + 1*rs_a)->imag,
+						(a11 + cs_a*0 + 1*rs_a)->real,
+						(a11 + cs_a*0 + 1*rs_a)->imag,
+						(a11 + cs_a*0 + 1*rs_a)->real,
+						(a11 + cs_a*0 + 1*rs_a)->imag,
+						(a11 + cs_a*0 + 1*rs_a)->real);
 			ymm2 = _mm256_permute_ps(ymm2, 0x44);
 			if(conjtransa)
 			{
@@ -46153,7 +46979,10 @@ BLIS_INLINE err_t bli_ctrsm_small_AltXB_AuXB
 			ymm8 = _mm256_sub_ps(ymm8,ymm16);
 
 
-			ymm1 = _mm256_broadcast_ps(( __m128 const *)(d11_pack));
+			ymm1 = _mm256_set_ps((d11_pack)->imag,(d11_pack)->real,
+						(d11_pack)->imag,(d11_pack)->real,
+						(d11_pack)->imag,(d11_pack)->real,
+						(d11_pack)->imag,(d11_pack)->real);
 			ymm1 = _mm256_permute_ps(ymm1, 0x44);
 #ifndef BLIS_ENABLE_TRSM_PREINVERSION
 			BLIS_CTRSM_DIV(ymm8)
@@ -46696,7 +47525,6 @@ BLIS_INLINE err_t bli_ctrsm_small_AltXB_AuXB
 	return BLIS_SUCCESS;
 }
 
-
 BLIS_INLINE  err_t bli_ctrsm_small_XAutB_XAlB
 (
     obj_t* AlphaObj,
@@ -46731,7 +47559,10 @@ BLIS_INLINE  err_t bli_ctrsm_small_XAutB_XAlB
 	dim_t i, j, k;    //loop variables
 	dim_t k_iter;     //number of times GEMM to be performed
 
-	scomplex AlphaVal = *(scomplex *)AlphaObj->buffer;    //value of alpha
+	scomplex AlphaVal[2]; 
+        AlphaVal[0] = *(scomplex *)AlphaObj->buffer;    //value of alpha
+        AlphaVal[1] = *(scomplex *)AlphaObj->buffer;    //value of alpha
+    
 	scomplex *L =  bli_obj_buffer_at_off(a);       //pointer to  matrix A
 	scomplex *B =  bli_obj_buffer_at_off(b);       //pointer to matrix B
 
@@ -46750,7 +47581,7 @@ BLIS_INLINE  err_t bli_ctrsm_small_XAutB_XAlB
 	__m128 xmm0, xmm1, xmm2;
 	__m128 xmm5;
 
-	xmm0 = _mm_setzero_ps();
+        xmm0 = _mm_setzero_ps();
 	xmm1 = _mm_setzero_ps();
 	xmm2 = _mm_setzero_ps();
 	xmm5 = _mm_setzero_ps();
@@ -46870,7 +47701,10 @@ BLIS_INLINE  err_t bli_ctrsm_small_XAutB_XAlB
 			   */
 			////extract a00
 			ymm18 = _mm256_setr_ps(1.0, -1.0, 1.0, -1.0, 1.0, -1.0, 1.0, -1.0);
-			ymm1 = _mm256_broadcast_ps(( __m128 const *)(d11_pack + 2));
+			ymm1 = _mm256_set_ps((d11_pack + 2)->imag,(d11_pack + 2)->real,
+						(d11_pack + 2)->imag,(d11_pack + 2)->real,
+						(d11_pack + 2)->imag,(d11_pack + 2)->real,
+						(d11_pack + 2)->imag,(d11_pack + 2)->real);
 			ymm1 = _mm256_permute_ps(ymm1, 0x44);
 #ifndef BLIS_ENABLE_TRSM_PREINVERSION
 			BLIS_CTRSM_TWO_DIV(ymm12, ymm13)
@@ -46878,7 +47712,14 @@ BLIS_INLINE  err_t bli_ctrsm_small_XAutB_XAlB
 			BLIS_CTRSM_MUL(ymm12)
 			BLIS_CTRSM_MUL(ymm13)
 #endif
-			ymm2 = _mm256_broadcast_ps((__m128 const *) (a11 + cs_a *2 + rs_a*1) );
+			ymm2 = _mm256_set_ps((a11 + cs_a *2 + rs_a*1)->imag,
+						(a11 + cs_a *2 + rs_a*1)->real,
+						(a11 + cs_a *2 + rs_a*1)->imag,
+						(a11 + cs_a *2 + rs_a*1)->real,
+						(a11 + cs_a *2 + rs_a*1)->imag,
+						(a11 + cs_a *2 + rs_a*1)->real,
+						(a11 + cs_a *2 + rs_a*1)->imag,
+						(a11 + cs_a *2 + rs_a*1)->real);
 			ymm2 = _mm256_permute_ps(ymm2, 0x44);
 			if(conjtransa)
 			{
@@ -46902,7 +47743,10 @@ BLIS_INLINE  err_t bli_ctrsm_small_XAutB_XAlB
 			ymm16 = _mm256_fmaddsub_ps(ymm1, ymm2, ymm16);
 			ymm11 = _mm256_sub_ps(ymm11,ymm16);
 
-			ymm2 = _mm256_broadcast_ps((__m128 const *) (a11 + cs_a*2) );
+			ymm2 = _mm256_set_ps((a11 + cs_a *2)->imag,(a11 + cs_a *2)->real,
+						(a11 + cs_a *2)->imag,(a11 + cs_a *2)->real,
+						(a11 + cs_a *2)->imag,(a11 + cs_a *2)->real,
+						(a11 + cs_a *2)->imag,(a11 + cs_a *2)->real);
 			ymm2 = _mm256_permute_ps(ymm2, 0x44);
 			if(conjtransa)
 			{
@@ -46923,7 +47767,10 @@ BLIS_INLINE  err_t bli_ctrsm_small_XAutB_XAlB
 			ymm9 = _mm256_sub_ps(ymm9,ymm16);
 
 
-			ymm1 = _mm256_broadcast_ps(( __m128 const *)(d11_pack + 1));
+			ymm1 = _mm256_set_ps((d11_pack + 1)->imag,(d11_pack + 1)->real,
+						(d11_pack + 1)->imag,(d11_pack + 1)->real,
+						(d11_pack + 1)->imag,(d11_pack + 1)->real,
+						(d11_pack + 1)->imag,(d11_pack + 1)->real);
 			ymm1 = _mm256_permute_ps(ymm1, 0x44);
 #ifndef BLIS_ENABLE_TRSM_PREINVERSION
 			BLIS_CTRSM_TWO_DIV(ymm10, ymm11)
@@ -46932,7 +47779,10 @@ BLIS_INLINE  err_t bli_ctrsm_small_XAutB_XAlB
 			BLIS_CTRSM_MUL(ymm11)
 #endif
 
-			ymm2 = _mm256_broadcast_ps((__m128 const *) (a11 + cs_a) );
+			ymm2 = _mm256_set_ps((a11 + cs_a)->imag,(a11 + cs_a)->real,
+						(a11 + cs_a)->imag,(a11 + cs_a)->real,
+						(a11 + cs_a)->imag,(a11 + cs_a)->real,
+						(a11 + cs_a)->imag,(a11 + cs_a)->real);
 			ymm2 = _mm256_permute_ps(ymm2, 0x44);
 			if(conjtransa)
 			{
@@ -46952,7 +47802,10 @@ BLIS_INLINE  err_t bli_ctrsm_small_XAutB_XAlB
 			ymm16 = _mm256_fmaddsub_ps(ymm1, ymm2, ymm16);
 			ymm9 = _mm256_sub_ps(ymm9,ymm16);
 
-			ymm1 = _mm256_broadcast_ps(( __m128 const *)(d11_pack));
+			ymm1 = _mm256_set_ps((d11_pack)->imag,(d11_pack)->real,
+						(d11_pack)->imag,(d11_pack)->real,
+						(d11_pack)->imag,(d11_pack)->real,
+						(d11_pack)->imag,(d11_pack)->real);
 			ymm1 = _mm256_permute_ps(ymm1, 0x44);
 
 #ifndef BLIS_ENABLE_TRSM_PREINVERSION
@@ -46989,14 +47842,24 @@ BLIS_INLINE  err_t bli_ctrsm_small_XAutB_XAlB
 			// Load b11 of size 4x6 and multiply with alpha
 			BLIS_PRE_CTRSM_SMALL_3x4(AlphaVal,b11,cs_b)
 			ymm18 = _mm256_setr_ps(1.0, -1.0, 1.0, -1.0, 1.0, -1.0, 1.0, -1.0);
-			ymm1 = _mm256_broadcast_ps(( __m128 const *)(d11_pack + 2));
+			ymm1 = _mm256_set_ps((d11_pack + 2)->imag,(d11_pack + 2)->real,
+						(d11_pack + 2)->imag,(d11_pack + 2)->real,
+						(d11_pack + 2)->imag,(d11_pack + 2)->real,
+						(d11_pack + 2)->imag,(d11_pack + 2)->real);
 			ymm1 = _mm256_permute_ps(ymm1, 0x44);
 #ifndef BLIS_ENABLE_TRSM_PREINVERSION
 			BLIS_CTRSM_DIV(ymm12)
 #else
 			BLIS_CTRSM_MUL(ymm12)
 #endif
-			ymm2 = _mm256_broadcast_ps((__m128 const *) (a11 + cs_a *2 + rs_a*1) );
+			ymm2 = _mm256_set_ps((a11 + cs_a *2 + rs_a*1)->imag,
+						(a11 + cs_a *2 + rs_a*1)->real,
+						(a11 + cs_a *2 + rs_a*1)->imag,
+						(a11 + cs_a *2 + rs_a*1)->real,
+						(a11 + cs_a *2 + rs_a*1)->imag,
+						(a11 + cs_a *2 + rs_a*1)->real,
+						(a11 + cs_a *2 + rs_a*1)->imag,
+						(a11 + cs_a *2 + rs_a*1)->real);
 			ymm2 = _mm256_permute_ps(ymm2, 0x44);
 			if(conjtransa)
 			{
@@ -47014,7 +47877,10 @@ BLIS_INLINE  err_t bli_ctrsm_small_XAutB_XAlB
 			ymm16 = _mm256_fmaddsub_ps(ymm1, ymm2, ymm16);
 			ymm10 = _mm256_sub_ps(ymm10,ymm16);
 
-			ymm2 = _mm256_broadcast_ps((__m128 const *) (a11 + cs_a*2) );
+			ymm2 = _mm256_set_ps((a11 + cs_a *2)->imag,(a11 + cs_a *2)->real,
+						(a11 + cs_a *2)->imag,(a11 + cs_a *2)->real,
+						(a11 + cs_a *2)->imag,(a11 + cs_a *2)->real,
+						(a11 + cs_a *2)->imag,(a11 + cs_a *2)->real);
 			ymm2 = _mm256_permute_ps(ymm2, 0x44);
 			if(conjtransa)
 			{
@@ -47028,7 +47894,10 @@ BLIS_INLINE  err_t bli_ctrsm_small_XAutB_XAlB
 			ymm16 = _mm256_fmaddsub_ps(ymm1, ymm2, ymm16);
 			ymm8 = _mm256_sub_ps(ymm8,ymm16);
 
-			ymm1 = _mm256_broadcast_ps(( __m128 const *)(d11_pack + 1));
+			ymm1 = _mm256_set_ps((d11_pack + 1)->imag,(d11_pack + 1)->real,
+						(d11_pack + 1)->imag,(d11_pack + 1)->real,
+						(d11_pack + 1)->imag,(d11_pack + 1)->real,
+						(d11_pack + 1)->imag,(d11_pack + 1)->real);
 			ymm1 = _mm256_permute_ps(ymm1, 0x44);
 #ifndef BLIS_ENABLE_TRSM_PREINVERSION
 			BLIS_CTRSM_DIV(ymm10)
@@ -47036,7 +47905,10 @@ BLIS_INLINE  err_t bli_ctrsm_small_XAutB_XAlB
 			BLIS_CTRSM_MUL(ymm10)
 #endif
 
-			ymm2 = _mm256_broadcast_ps((__m128 const *) (a11 + cs_a) );
+			ymm2 = _mm256_set_ps((a11 + cs_a)->imag,(a11 + cs_a)->real,
+						(a11 + cs_a)->imag,(a11 + cs_a)->real,
+						(a11 + cs_a)->imag,(a11 + cs_a)->real,
+						(a11 + cs_a)->imag,(a11 + cs_a)->real);
 			ymm2 = _mm256_permute_ps(ymm2, 0x44);
 			if(conjtransa)
 			{
@@ -47050,7 +47922,10 @@ BLIS_INLINE  err_t bli_ctrsm_small_XAutB_XAlB
 			ymm16 = _mm256_fmaddsub_ps(ymm1, ymm2, ymm16);
 			ymm8 = _mm256_sub_ps(ymm8,ymm16);
 
-			ymm1 = _mm256_broadcast_ps(( __m128 const *)(d11_pack));
+			ymm1 = _mm256_set_ps((d11_pack)->imag,(d11_pack)->real,
+						(d11_pack)->imag,(d11_pack)->real,
+						(d11_pack)->imag,(d11_pack)->real,
+						(d11_pack)->imag,(d11_pack)->real);
 			ymm1 = _mm256_permute_ps(ymm1, 0x44);
 
 #ifndef BLIS_ENABLE_TRSM_PREINVERSION
@@ -47087,14 +47962,24 @@ BLIS_INLINE  err_t bli_ctrsm_small_XAutB_XAlB
 			BLIS_PRE_CTRSM_SMALL_3x3(AlphaVal,b11,cs_b)
 
 			ymm18 = _mm256_setr_ps(1.0, -1.0, 1.0, -1.0, 1.0, -1.0, 1.0, -1.0);
-			ymm1 = _mm256_broadcast_ps(( __m128 const *)(d11_pack + 2));
+			ymm1 = _mm256_set_ps((d11_pack + 2)->imag,(d11_pack + 2)->real,
+						(d11_pack + 2)->imag,(d11_pack + 2)->real,
+						(d11_pack + 2)->imag,(d11_pack + 2)->real,
+						(d11_pack + 2)->imag,(d11_pack + 2)->real);
 			ymm1 = _mm256_permute_ps(ymm1, 0x44);
 #ifndef BLIS_ENABLE_TRSM_PREINVERSION
 			BLIS_CTRSM_DIV(ymm12)
 #else
 			BLIS_CTRSM_MUL(ymm12)
 #endif
-			ymm2 = _mm256_broadcast_ps((__m128 const *) (a11 + cs_a *2 + rs_a*1) );
+			ymm2 = _mm256_set_ps((a11 + cs_a *2 + rs_a*1)->imag,
+						(a11 + cs_a *2 + rs_a*1)->real,
+						(a11 + cs_a *2 + rs_a*1)->imag,
+						(a11 + cs_a *2 + rs_a*1)->real,
+						(a11 + cs_a *2 + rs_a*1)->imag,
+						(a11 + cs_a *2 + rs_a*1)->real,
+						(a11 + cs_a *2 + rs_a*1)->imag,
+						(a11 + cs_a *2 + rs_a*1)->real);
 			ymm2 = _mm256_permute_ps(ymm2, 0x44);
 			if(conjtransa)
 			{
@@ -47111,7 +47996,10 @@ BLIS_INLINE  err_t bli_ctrsm_small_XAutB_XAlB
 			ymm16 = _mm256_fmaddsub_ps(ymm1, ymm2, ymm16);
 			ymm10 = _mm256_sub_ps(ymm10,ymm16);
 
-			ymm2 = _mm256_broadcast_ps((__m128 const *) (a11 + cs_a*2) );
+			ymm2 = _mm256_set_ps((a11 + cs_a *2)->imag,(a11 + cs_a *2)->real,
+						(a11 + cs_a *2)->imag,(a11 + cs_a *2)->real,
+						(a11 + cs_a *2)->imag,(a11 + cs_a *2)->real,
+						(a11 + cs_a *2)->imag,(a11 + cs_a *2)->real);
 			ymm2 = _mm256_permute_ps(ymm2, 0x44);
 			if(conjtransa)
 			{
@@ -47125,7 +48013,10 @@ BLIS_INLINE  err_t bli_ctrsm_small_XAutB_XAlB
 			ymm16 = _mm256_fmaddsub_ps(ymm1, ymm2, ymm16);
 			ymm8 = _mm256_sub_ps(ymm8,ymm16);
 
-			ymm1 = _mm256_broadcast_ps(( __m128 const *)(d11_pack + 1));
+			ymm1 = _mm256_set_ps((d11_pack + 1)->imag,(d11_pack + 1)->real,
+						(d11_pack + 1)->imag,(d11_pack + 1)->real,
+						(d11_pack + 1)->imag,(d11_pack + 1)->real,
+						(d11_pack + 1)->imag,(d11_pack + 1)->real);
 			ymm1 = _mm256_permute_ps(ymm1, 0x44);
 #ifndef BLIS_ENABLE_TRSM_PREINVERSION
 			BLIS_CTRSM_DIV(ymm10)
@@ -47133,7 +48024,10 @@ BLIS_INLINE  err_t bli_ctrsm_small_XAutB_XAlB
 			BLIS_CTRSM_MUL(ymm10)
 #endif
 
-			ymm2 = _mm256_broadcast_ps((__m128 const *) (a11 + cs_a) );
+			ymm2 = _mm256_set_ps((a11 + cs_a)->imag,(a11 + cs_a)->real,
+						(a11 + cs_a)->imag,(a11 + cs_a)->real,
+						(a11 + cs_a)->imag,(a11 + cs_a)->real,
+						(a11 + cs_a)->imag,(a11 + cs_a)->real);
 			ymm2 = _mm256_permute_ps(ymm2, 0x44);
 			if(conjtransa)
 			{
@@ -47147,7 +48041,10 @@ BLIS_INLINE  err_t bli_ctrsm_small_XAutB_XAlB
 			ymm16 = _mm256_fmaddsub_ps(ymm1, ymm2, ymm16);
 			ymm8 = _mm256_sub_ps(ymm8,ymm16);
 
-			ymm1 = _mm256_broadcast_ps(( __m128 const *)(d11_pack));
+			ymm1 = _mm256_set_ps((d11_pack)->imag,(d11_pack)->real,
+						(d11_pack)->imag,(d11_pack)->real,
+						(d11_pack)->imag,(d11_pack)->real,
+						(d11_pack)->imag,(d11_pack)->real);
 			ymm1 = _mm256_permute_ps(ymm1, 0x44);
 
 #ifndef BLIS_ENABLE_TRSM_PREINVERSION
@@ -47195,14 +48092,24 @@ BLIS_INLINE  err_t bli_ctrsm_small_XAutB_XAlB
 			BLIS_PRE_CTRSM_SMALL_3x2(AlphaVal,b11,cs_b)
 
 			ymm18 = _mm256_setr_ps(1.0, -1.0, 1.0, -1.0, 1.0, -1.0, 1.0, -1.0);
-			ymm1 = _mm256_broadcast_ps(( __m128 const *)(d11_pack + 2));
+			ymm1 = _mm256_set_ps((d11_pack + 2)->imag,(d11_pack + 2)->real,
+						(d11_pack + 2)->imag,(d11_pack + 2)->real,
+						(d11_pack + 2)->imag,(d11_pack + 2)->real,
+						(d11_pack + 2)->imag,(d11_pack + 2)->real);
 			ymm1 = _mm256_permute_ps(ymm1, 0x44);
 #ifndef BLIS_ENABLE_TRSM_PREINVERSION
 			BLIS_CTRSM_DIV(ymm12)
 #else
 			BLIS_CTRSM_MUL(ymm12)
 #endif
-			ymm2 = _mm256_broadcast_ps((__m128 const *) (a11 + cs_a *2 + rs_a*1) );
+			ymm2 = _mm256_set_ps((a11 + cs_a *2 + rs_a*1)->imag,
+						(a11 + cs_a *2 + rs_a*1)->real,
+						(a11 + cs_a *2 + rs_a*1)->imag,
+						(a11 + cs_a *2 + rs_a*1)->real,
+						(a11 + cs_a *2 + rs_a*1)->imag,
+						(a11 + cs_a *2 + rs_a*1)->real,
+						(a11 + cs_a *2 + rs_a*1)->imag,
+						(a11 + cs_a *2 + rs_a*1)->real);
 			ymm2 = _mm256_permute_ps(ymm2, 0x44);
 			if(conjtransa)
 			{
@@ -47220,7 +48127,10 @@ BLIS_INLINE  err_t bli_ctrsm_small_XAutB_XAlB
 			ymm16 = _mm256_fmaddsub_ps(ymm1, ymm2, ymm16);
 			ymm10 = _mm256_sub_ps(ymm10,ymm16);
 
-			ymm2 = _mm256_broadcast_ps((__m128 const *) (a11 + cs_a*2) );
+			ymm2 = _mm256_set_ps((a11 + cs_a *2)->imag,(a11 + cs_a *2)->real,
+						(a11 + cs_a *2)->imag,(a11 + cs_a *2)->real,
+						(a11 + cs_a *2)->imag,(a11 + cs_a *2)->real,
+						(a11 + cs_a *2)->imag,(a11 + cs_a *2)->real);
 			ymm2 = _mm256_permute_ps(ymm2, 0x44);
 			if(conjtransa)
 			{
@@ -47234,7 +48144,10 @@ BLIS_INLINE  err_t bli_ctrsm_small_XAutB_XAlB
 			ymm16 = _mm256_fmaddsub_ps(ymm1, ymm2, ymm16);
 			ymm8 = _mm256_sub_ps(ymm8,ymm16);
 
-			ymm1 = _mm256_broadcast_ps(( __m128 const *)(d11_pack + 1));
+			ymm1 = _mm256_set_ps((d11_pack + 1)->imag,(d11_pack + 1)->real,
+						(d11_pack + 1)->imag,(d11_pack + 1)->real,
+						(d11_pack + 1)->imag,(d11_pack + 1)->real,
+						(d11_pack + 1)->imag,(d11_pack + 1)->real);
 			ymm1 = _mm256_permute_ps(ymm1, 0x44);
 #ifndef BLIS_ENABLE_TRSM_PREINVERSION
 			BLIS_CTRSM_DIV(ymm10)
@@ -47242,7 +48155,10 @@ BLIS_INLINE  err_t bli_ctrsm_small_XAutB_XAlB
 			BLIS_CTRSM_MUL(ymm10)
 #endif
 
-			ymm2 = _mm256_broadcast_ps((__m128 const *) (a11 + cs_a) );
+			ymm2 = _mm256_set_ps((a11 + cs_a)->imag,(a11 + cs_a)->real,
+						(a11 + cs_a)->imag,(a11 + cs_a)->real,
+						(a11 + cs_a)->imag,(a11 + cs_a)->real,
+						(a11 + cs_a)->imag,(a11 + cs_a)->real);
 			ymm2 = _mm256_permute_ps(ymm2, 0x44);
 			if(conjtransa)
 			{
@@ -47256,7 +48172,10 @@ BLIS_INLINE  err_t bli_ctrsm_small_XAutB_XAlB
 			ymm16 = _mm256_fmaddsub_ps(ymm1, ymm2, ymm16);
 			ymm8 = _mm256_sub_ps(ymm8,ymm16);
 
-			ymm1 = _mm256_broadcast_ps(( __m128 const *)(d11_pack));
+			ymm1 = _mm256_set_ps((d11_pack)->imag,(d11_pack)->real,
+						(d11_pack)->imag,(d11_pack)->real,
+						(d11_pack)->imag,(d11_pack)->real,
+						(d11_pack)->imag,(d11_pack)->real);
 			ymm1 = _mm256_permute_ps(ymm1, 0x44);
 
 #ifndef BLIS_ENABLE_TRSM_PREINVERSION
@@ -47294,14 +48213,24 @@ BLIS_INLINE  err_t bli_ctrsm_small_XAutB_XAlB
 			BLIS_PRE_CTRSM_SMALL_3x1(AlphaVal,b11,cs_b)
 
 			ymm18 = _mm256_setr_ps(1.0, -1.0, 1.0, -1.0, 1.0, -1.0, 1.0, -1.0);
-			ymm1 = _mm256_broadcast_ps(( __m128 const *)(d11_pack + 2));
+			ymm1 = _mm256_set_ps((d11_pack + 2)->imag,(d11_pack + 2)->real,
+						(d11_pack + 2)->imag,(d11_pack + 2)->real,
+						(d11_pack + 2)->imag,(d11_pack + 2)->real,
+						(d11_pack + 2)->imag,(d11_pack + 2)->real);
 			ymm1 = _mm256_permute_ps(ymm1, 0x44);
 #ifndef BLIS_ENABLE_TRSM_PREINVERSION
 			BLIS_CTRSM_DIV(ymm12)
 #else
 			BLIS_CTRSM_MUL(ymm12)
 #endif
-			ymm2 = _mm256_broadcast_ps((__m128 const *) (a11 + cs_a *2 + rs_a*1) );
+			ymm2 = _mm256_set_ps((a11 + cs_a *2 + rs_a*1)->imag,
+						(a11 + cs_a *2 + rs_a*1)->real,
+						(a11 + cs_a *2 + rs_a*1)->imag,
+						(a11 + cs_a *2 + rs_a*1)->real,
+						(a11 + cs_a *2 + rs_a*1)->imag,
+						(a11 + cs_a *2 + rs_a*1)->real,
+						(a11 + cs_a *2 + rs_a*1)->imag,
+						(a11 + cs_a *2 + rs_a*1)->real);
 			ymm2 = _mm256_permute_ps(ymm2, 0x44);
 			if(conjtransa)
 			{
@@ -47318,7 +48247,10 @@ BLIS_INLINE  err_t bli_ctrsm_small_XAutB_XAlB
 			ymm16 = _mm256_fmaddsub_ps(ymm1, ymm2, ymm16);
 			ymm10 = _mm256_sub_ps(ymm10,ymm16);
 
-			ymm2 = _mm256_broadcast_ps((__m128 const *) (a11 + cs_a*2) );
+			ymm2 = _mm256_set_ps((a11 + cs_a *2)->imag,(a11 + cs_a *2)->real,
+						(a11 + cs_a *2)->imag,(a11 + cs_a *2)->real,
+						(a11 + cs_a *2)->imag,(a11 + cs_a *2)->real,
+						(a11 + cs_a *2)->imag,(a11 + cs_a *2)->real);
 			ymm2 = _mm256_permute_ps(ymm2, 0x44);
 			if(conjtransa)
 			{
@@ -47332,7 +48264,10 @@ BLIS_INLINE  err_t bli_ctrsm_small_XAutB_XAlB
 			ymm16 = _mm256_fmaddsub_ps(ymm1, ymm2, ymm16);
 			ymm8 = _mm256_sub_ps(ymm8,ymm16);
 
-			ymm1 = _mm256_broadcast_ps(( __m128 const *)(d11_pack + 1));
+			ymm1 = _mm256_set_ps((d11_pack + 1)->imag,(d11_pack + 1)->real,
+						(d11_pack + 1)->imag,(d11_pack + 1)->real,
+						(d11_pack + 1)->imag,(d11_pack + 1)->real,
+						(d11_pack + 1)->imag,(d11_pack + 1)->real);
 			ymm1 = _mm256_permute_ps(ymm1, 0x44);
 #ifndef BLIS_ENABLE_TRSM_PREINVERSION
 			BLIS_CTRSM_DIV(ymm10)
@@ -47340,7 +48275,10 @@ BLIS_INLINE  err_t bli_ctrsm_small_XAutB_XAlB
 			BLIS_CTRSM_MUL(ymm10)
 #endif
 
-			ymm2 = _mm256_broadcast_ps((__m128 const *) (a11 + cs_a) );
+			ymm2 = _mm256_set_ps((a11 + cs_a)->imag,(a11 + cs_a)->real,
+						(a11 + cs_a)->imag,(a11 + cs_a)->real,
+						(a11 + cs_a)->imag,(a11 + cs_a)->real,
+						(a11 + cs_a)->imag,(a11 + cs_a)->real);
 			ymm2 = _mm256_permute_ps(ymm2, 0x44);
 			if(conjtransa)
 			{
@@ -47354,7 +48292,10 @@ BLIS_INLINE  err_t bli_ctrsm_small_XAutB_XAlB
 			ymm16 = _mm256_fmaddsub_ps(ymm1, ymm2, ymm16);
 			ymm8 = _mm256_sub_ps(ymm8,ymm16);
 
-			ymm1 = _mm256_broadcast_ps(( __m128 const *)(d11_pack));
+			ymm1 = _mm256_set_ps((d11_pack)->imag,(d11_pack)->real,
+						(d11_pack)->imag,(d11_pack)->real,
+						(d11_pack)->imag,(d11_pack)->real,
+						(d11_pack)->imag,(d11_pack)->real);
 			ymm1 = _mm256_permute_ps(ymm1, 0x44);
 
 #ifndef BLIS_ENABLE_TRSM_PREINVERSION
@@ -47508,7 +48449,10 @@ BLIS_INLINE  err_t bli_ctrsm_small_XAutB_XAlB
 			ymm11 = _mm256_sub_ps(ymm19, ymm11);
 
 			ymm18 = _mm256_setr_ps(1.0, -1.0, 1.0, -1.0, 1.0, -1.0, 1.0, -1.0);
-			ymm1 = _mm256_broadcast_ps(( __m128 const *)(d11_pack + 1));
+			ymm1 = _mm256_set_ps((d11_pack + 1)->imag,(d11_pack + 1)->real,
+						(d11_pack + 1)->imag,(d11_pack + 1)->real,
+						(d11_pack + 1)->imag,(d11_pack + 1)->real,
+						(d11_pack + 1)->imag,(d11_pack + 1)->real);
 			ymm1 = _mm256_permute_ps(ymm1, 0x44);
 #ifndef BLIS_ENABLE_TRSM_PREINVERSION
 			BLIS_CTRSM_TWO_DIV(ymm10, ymm11)
@@ -47517,7 +48461,10 @@ BLIS_INLINE  err_t bli_ctrsm_small_XAutB_XAlB
 			BLIS_CTRSM_MUL(ymm11)
 #endif
 
-			ymm2 = _mm256_broadcast_ps((__m128 const *) (a11 + cs_a) );
+			ymm2 = _mm256_set_ps((a11 + cs_a)->imag,(a11 + cs_a)->real,
+						(a11 + cs_a)->imag,(a11 + cs_a)->real,
+						(a11 + cs_a)->imag,(a11 + cs_a)->real,
+						(a11 + cs_a)->imag,(a11 + cs_a)->real);
 			ymm2 = _mm256_permute_ps(ymm2, 0x44);
 			if(conjtransa)
 			{
@@ -47537,7 +48484,10 @@ BLIS_INLINE  err_t bli_ctrsm_small_XAutB_XAlB
 			ymm16 = _mm256_fmaddsub_ps(ymm1, ymm2, ymm16);
 			ymm9 = _mm256_sub_ps(ymm9,ymm16);
 
-			ymm1 = _mm256_broadcast_ps(( __m128 const *)(d11_pack));
+			ymm1 = _mm256_set_ps((d11_pack)->imag,(d11_pack)->real,
+						(d11_pack)->imag,(d11_pack)->real,
+						(d11_pack)->imag,(d11_pack)->real,
+						(d11_pack)->imag,(d11_pack)->real);
 			ymm1 = _mm256_permute_ps(ymm1, 0x44);
 
 #ifndef BLIS_ENABLE_TRSM_PREINVERSION
@@ -47587,14 +48537,20 @@ BLIS_INLINE  err_t bli_ctrsm_small_XAutB_XAlB
 			ymm10 = _mm256_sub_ps(ymm19, ymm10);
 
 			ymm18 = _mm256_setr_ps(1.0, -1.0, 1.0, -1.0, 1.0, -1.0, 1.0, -1.0);
-			ymm1 = _mm256_broadcast_ps(( __m128 const *)(d11_pack + 1));
+			ymm1 = _mm256_set_ps((d11_pack + 1)->imag,(d11_pack + 1)->real,
+						(d11_pack + 1)->imag,(d11_pack + 1)->real,
+						(d11_pack + 1)->imag,(d11_pack + 1)->real,
+						(d11_pack + 1)->imag,(d11_pack + 1)->real);
 			ymm1 = _mm256_permute_ps(ymm1, 0x44);
 #ifndef BLIS_ENABLE_TRSM_PREINVERSION
 			BLIS_CTRSM_DIV(ymm10)
 #else
 			BLIS_CTRSM_MUL(ymm10)
 #endif
-			ymm2 = _mm256_broadcast_ps((__m128 const *) (a11 + cs_a*1) );
+			ymm2 = _mm256_set_ps((a11 + cs_a)->imag,(a11 + cs_a)->real,
+						(a11 + cs_a)->imag,(a11 + cs_a)->real,
+						(a11 + cs_a)->imag,(a11 + cs_a)->real,
+						(a11 + cs_a)->imag,(a11 + cs_a)->real);
 			ymm2 = _mm256_permute_ps(ymm2, 0x44);
 			if(conjtransa)
 			{
@@ -47610,7 +48566,10 @@ BLIS_INLINE  err_t bli_ctrsm_small_XAutB_XAlB
 			ymm16 = _mm256_fmaddsub_ps(ymm1, ymm2, ymm16);
 			ymm8 = _mm256_sub_ps(ymm8,ymm16);
 
-			ymm1 = _mm256_broadcast_ps(( __m128 const *)(d11_pack));
+			ymm1 = _mm256_set_ps((d11_pack)->imag,(d11_pack)->real,
+						(d11_pack)->imag,(d11_pack)->real,
+						(d11_pack)->imag,(d11_pack)->real,
+						(d11_pack)->imag,(d11_pack)->real);
 			ymm1 = _mm256_permute_ps(ymm1, 0x44);
 
 #ifndef BLIS_ENABLE_TRSM_PREINVERSION
@@ -47663,14 +48622,20 @@ BLIS_INLINE  err_t bli_ctrsm_small_XAutB_XAlB
 			ymm10 = _mm256_sub_ps(ymm19, ymm10);
 
 			ymm18 = _mm256_setr_ps(1.0, -1.0, 1.0, -1.0, 1.0, -1.0, 1.0, -1.0);
-			ymm1 = _mm256_broadcast_ps(( __m128 const *)(d11_pack + 1));
+			ymm1 = _mm256_set_ps((d11_pack + 1)->imag,(d11_pack + 1)->real,
+						(d11_pack + 1)->imag,(d11_pack + 1)->real,
+						(d11_pack + 1)->imag,(d11_pack + 1)->real,
+						(d11_pack + 1)->imag,(d11_pack + 1)->real);
 			ymm1 = _mm256_permute_ps(ymm1, 0x44);
 #ifndef BLIS_ENABLE_TRSM_PREINVERSION
 			BLIS_CTRSM_DIV(ymm10)
 #else
 			BLIS_CTRSM_MUL(ymm10)
 #endif
-			ymm2 = _mm256_broadcast_ps((__m128 const *) (a11 + cs_a*1) );
+			ymm2 = _mm256_set_ps((a11 + cs_a)->imag,(a11 + cs_a)->real,
+						(a11 + cs_a)->imag,(a11 + cs_a)->real,
+						(a11 + cs_a)->imag,(a11 + cs_a)->real,
+						(a11 + cs_a)->imag,(a11 + cs_a)->real);
 			ymm2 = _mm256_permute_ps(ymm2, 0x44);
 			if(conjtransa)
 			{
@@ -47686,7 +48651,10 @@ BLIS_INLINE  err_t bli_ctrsm_small_XAutB_XAlB
 			ymm16 = _mm256_fmaddsub_ps(ymm1, ymm2, ymm16);
 			ymm8 = _mm256_sub_ps(ymm8,ymm16);
 
-			ymm1 = _mm256_broadcast_ps(( __m128 const *)(d11_pack));
+			ymm1 = _mm256_set_ps((d11_pack)->imag,(d11_pack)->real,
+						(d11_pack)->imag,(d11_pack)->real,
+						(d11_pack)->imag,(d11_pack)->real,
+						(d11_pack)->imag,(d11_pack)->real);
 			ymm1 = _mm256_permute_ps(ymm1, 0x44);
 
 #ifndef BLIS_ENABLE_TRSM_PREINVERSION
@@ -47743,14 +48711,20 @@ BLIS_INLINE  err_t bli_ctrsm_small_XAutB_XAlB
 			ymm10 = _mm256_sub_ps(ymm19, ymm10);
 
 			ymm18 = _mm256_setr_ps(1.0, -1.0, 1.0, -1.0, 1.0, -1.0, 1.0, -1.0);
-			ymm1 = _mm256_broadcast_ps(( __m128 const *)(d11_pack + 1));
+			ymm1 = _mm256_set_ps((d11_pack + 1)->imag,(d11_pack + 1)->real,
+						(d11_pack + 1)->imag,(d11_pack + 1)->real,
+						(d11_pack + 1)->imag,(d11_pack + 1)->real,
+						(d11_pack + 1)->imag,(d11_pack + 1)->real);
 			ymm1 = _mm256_permute_ps(ymm1, 0x44);
 #ifndef BLIS_ENABLE_TRSM_PREINVERSION
 			BLIS_CTRSM_DIV(ymm10)
 #else
 			BLIS_CTRSM_MUL(ymm10)
 #endif
-			ymm2 = _mm256_broadcast_ps((__m128 const *) (a11 + cs_a*1) );
+			ymm2 = _mm256_set_ps((a11 + cs_a)->imag,(a11 + cs_a)->real,
+						(a11 + cs_a)->imag,(a11 + cs_a)->real,
+						(a11 + cs_a)->imag,(a11 + cs_a)->real,
+						(a11 + cs_a)->imag,(a11 + cs_a)->real);
 			ymm2 = _mm256_permute_ps(ymm2, 0x44);
 			if(conjtransa)
 			{
@@ -47766,7 +48740,10 @@ BLIS_INLINE  err_t bli_ctrsm_small_XAutB_XAlB
 			ymm16 = _mm256_fmaddsub_ps(ymm1, ymm2, ymm16);
 			ymm8 = _mm256_sub_ps(ymm8,ymm16);
 
-			ymm1 = _mm256_broadcast_ps(( __m128 const *)(d11_pack));
+			ymm1 = _mm256_set_ps((d11_pack)->imag,(d11_pack)->real,
+						(d11_pack)->imag,(d11_pack)->real,
+						(d11_pack)->imag,(d11_pack)->real,
+						(d11_pack)->imag,(d11_pack)->real);
 			ymm1 = _mm256_permute_ps(ymm1, 0x44);
 
 #ifndef BLIS_ENABLE_TRSM_PREINVERSION
@@ -47817,14 +48794,20 @@ BLIS_INLINE  err_t bli_ctrsm_small_XAutB_XAlB
 			ymm10 = _mm256_sub_ps(ymm19, ymm10);
 
 			ymm18 = _mm256_setr_ps(1.0, -1.0, 1.0, -1.0, 1.0, -1.0, 1.0, -1.0);
-			ymm1 = _mm256_broadcast_ps(( __m128 const *)(d11_pack + 1));
+			ymm1 = _mm256_set_ps((d11_pack + 1)->imag,(d11_pack + 1)->real,
+						(d11_pack + 1)->imag,(d11_pack + 1)->real,
+						(d11_pack + 1)->imag,(d11_pack + 1)->real,
+						(d11_pack + 1)->imag,(d11_pack + 1)->real);
 			ymm1 = _mm256_permute_ps(ymm1, 0x44);
 #ifndef BLIS_ENABLE_TRSM_PREINVERSION
 			BLIS_CTRSM_DIV(ymm10)
 #else
 			BLIS_CTRSM_MUL(ymm10)
 #endif
-			ymm2 = _mm256_broadcast_ps((__m128 const *) (a11 + cs_a*1) );
+			ymm2 = _mm256_set_ps((a11 + cs_a)->imag,(a11 + cs_a)->real,
+						(a11 + cs_a)->imag,(a11 + cs_a)->real,
+						(a11 + cs_a)->imag,(a11 + cs_a)->real,
+						(a11 + cs_a)->imag,(a11 + cs_a)->real);
 			ymm2 = _mm256_permute_ps(ymm2, 0x44);
 			if(conjtransa)
 			{
@@ -47840,7 +48823,10 @@ BLIS_INLINE  err_t bli_ctrsm_small_XAutB_XAlB
 			ymm16 = _mm256_fmaddsub_ps(ymm1, ymm2, ymm16);
 			ymm8 = _mm256_sub_ps(ymm8,ymm16);
 
-			ymm1 = _mm256_broadcast_ps(( __m128 const *)(d11_pack));
+			ymm1 = _mm256_set_ps((d11_pack)->imag,(d11_pack)->real,
+						(d11_pack)->imag,(d11_pack)->real,
+						(d11_pack)->imag,(d11_pack)->real,
+						(d11_pack)->imag,(d11_pack)->real);
 			ymm1 = _mm256_permute_ps(ymm1, 0x44);
 
 #ifndef BLIS_ENABLE_TRSM_PREINVERSION
@@ -47917,7 +48903,6 @@ BLIS_INLINE  err_t bli_ctrsm_small_XAutB_XAlB
 				_mm_storeu_ps((float *)(ptr_a10_dup + p_lda * 0 + x*3), xmm0);
 				xmm0 = _mm_loadl_pi(xmm1,(__m64 *)(a01 + rs_a * 0 + 2 + x*3));
 				_mm_storel_pi((__m64 *)(ptr_a10_dup + p_lda * 0 + 2 + x*3),xmm0);
-
 			}
 
 		}
@@ -47963,7 +48948,10 @@ BLIS_INLINE  err_t bli_ctrsm_small_XAutB_XAlB
 
 
 			ymm18 = _mm256_setr_ps(1.0, -1.0, 1.0, -1.0, 1.0, -1.0, 1.0, -1.0);
-			ymm1 = _mm256_broadcast_ps(( __m128 const *)(d11_pack));
+			ymm1 = _mm256_set_ps((d11_pack)->imag,(d11_pack)->real,
+						(d11_pack)->imag,(d11_pack)->real,
+						(d11_pack)->imag,(d11_pack)->real,
+						(d11_pack)->imag,(d11_pack)->real);
 			ymm1 = _mm256_permute_ps(ymm1, 0x44);
 #ifndef BLIS_ENABLE_TRSM_PREINVERSION
 			BLIS_CTRSM_TWO_DIV(ymm8, ymm9)
@@ -48003,7 +48991,10 @@ BLIS_INLINE  err_t bli_ctrsm_small_XAutB_XAlB
 
 
 			ymm18 = _mm256_setr_ps(1.0, -1.0, 1.0, -1.0, 1.0, -1.0, 1.0, -1.0);
-			ymm1 = _mm256_broadcast_ps(( __m128 const *)(d11_pack));
+			ymm1 = _mm256_set_ps((d11_pack)->imag,(d11_pack)->real,
+						(d11_pack)->imag,(d11_pack)->real,
+						(d11_pack)->imag,(d11_pack)->real,
+						(d11_pack)->imag,(d11_pack)->real);
 			ymm1 = _mm256_permute_ps(ymm1, 0x44);
 #ifndef BLIS_ENABLE_TRSM_PREINVERSION
 			BLIS_CTRSM_DIV(ymm8)
@@ -48043,7 +49034,10 @@ BLIS_INLINE  err_t bli_ctrsm_small_XAutB_XAlB
 
 
 			ymm18 = _mm256_setr_ps(1.0, -1.0, 1.0, -1.0, 1.0, -1.0, 1.0, -1.0);
-			ymm1 = _mm256_broadcast_ps(( __m128 const *)(d11_pack));
+			ymm1 = _mm256_set_ps((d11_pack)->imag,(d11_pack)->real,
+						(d11_pack)->imag,(d11_pack)->real,
+						(d11_pack)->imag,(d11_pack)->real,
+						(d11_pack)->imag,(d11_pack)->real);
 			ymm1 = _mm256_permute_ps(ymm1, 0x44);
 #ifndef BLIS_ENABLE_TRSM_PREINVERSION
 			BLIS_CTRSM_DIV(ymm8)
@@ -48083,7 +49077,10 @@ BLIS_INLINE  err_t bli_ctrsm_small_XAutB_XAlB
 
 
 			ymm18 = _mm256_setr_ps(1.0, -1.0, 1.0, -1.0, 1.0, -1.0, 1.0, -1.0);
-			ymm1 = _mm256_broadcast_ps(( __m128 const *)(d11_pack));
+			ymm1 = _mm256_set_ps((d11_pack)->imag,(d11_pack)->real,
+						(d11_pack)->imag,(d11_pack)->real,
+						(d11_pack)->imag,(d11_pack)->real,
+						(d11_pack)->imag,(d11_pack)->real);
 			ymm1 = _mm256_permute_ps(ymm1, 0x44);
 #ifndef BLIS_ENABLE_TRSM_PREINVERSION
 			BLIS_CTRSM_DIV(ymm8)
@@ -48120,7 +49117,10 @@ BLIS_INLINE  err_t bli_ctrsm_small_XAutB_XAlB
 			ymm8 = _mm256_sub_ps(ymm19, ymm8);
 
 			ymm18 = _mm256_setr_ps(1.0, -1.0, 1.0, -1.0, 1.0, -1.0, 1.0, -1.0);
-			ymm1 = _mm256_broadcast_ps(( __m128 const *)(d11_pack));
+			ymm1 = _mm256_set_ps((d11_pack)->imag,(d11_pack)->real,
+						(d11_pack)->imag,(d11_pack)->real,
+						(d11_pack)->imag,(d11_pack)->real,
+						(d11_pack)->imag,(d11_pack)->real);
 			ymm1 = _mm256_permute_ps(ymm1, 0x44);
 #ifndef BLIS_ENABLE_TRSM_PREINVERSION
 			BLIS_CTRSM_DIV(ymm8)
@@ -48179,7 +49179,10 @@ BLIS_INLINE  err_t bli_ctrsm_small_XAltB_XAuB
 	dim_t i, j, k;    //loop variables
 	dim_t k_iter;     //number of times GEMM to be performed
 
-	scomplex AlphaVal = *(scomplex *)AlphaObj->buffer;    //value of alpha
+	scomplex AlphaVal[2];
+        AlphaVal[0] = *(scomplex *)AlphaObj->buffer;    //value of alpha
+        AlphaVal[1] = *(scomplex *)AlphaObj->buffer;    //value of alpha
+    
 	scomplex *L =  bli_obj_buffer_at_off(a);       //pointer to  matrix A
 	scomplex *B =  bli_obj_buffer_at_off(b);       //pointer to matrix B
 
@@ -48197,7 +49200,7 @@ BLIS_INLINE  err_t bli_ctrsm_small_XAltB_XAuB
 	__m128 xmm0, xmm1, xmm2;
     	__m128 xmm5;
 
-	xmm0 = _mm_setzero_ps();
+        xmm0 = _mm_setzero_ps();
 	xmm1 = _mm_setzero_ps();
 	xmm2 = _mm_setzero_ps();
 	xmm5 = _mm_setzero_ps();
@@ -48318,7 +49321,10 @@ BLIS_INLINE  err_t bli_ctrsm_small_XAltB_XAuB
 			   */
 			////extract a00
 			ymm18 = _mm256_setr_ps(1.0, -1.0, 1.0, -1.0, 1.0, -1.0, 1.0, -1.0);
-			ymm1 = _mm256_broadcast_ps(( __m128 const *)(d11_pack));
+			ymm1 = _mm256_set_ps((d11_pack)->imag,(d11_pack)->real,
+						(d11_pack)->imag,(d11_pack)->real,
+						(d11_pack)->imag,(d11_pack)->real,
+						(d11_pack)->imag,(d11_pack)->real);
 			ymm1 = _mm256_permute_ps(ymm1, 0x44);
 #ifndef BLIS_ENABLE_TRSM_PREINVERSION
 			BLIS_CTRSM_TWO_DIV(ymm8, ymm9)
@@ -48326,7 +49332,10 @@ BLIS_INLINE  err_t bli_ctrsm_small_XAltB_XAuB
 			BLIS_CTRSM_MUL(ymm8)
 			BLIS_CTRSM_MUL(ymm9)
 #endif
-			ymm2 = _mm256_broadcast_ps((__m128 const *) (a11 + rs_a*1) );
+			ymm2 = _mm256_set_ps((a11 + rs_a*1)->imag,(a11 + rs_a*1)->real,
+						(a11 + rs_a*1)->imag,(a11 + rs_a*1)->real,
+						(a11 + rs_a*1)->imag,(a11 + rs_a*1)->real,
+						(a11 + rs_a*1)->imag,(a11 + rs_a*1)->real);
 			ymm2 = _mm256_permute_ps(ymm2, 0x44);
 			if(conjtransa)
 			{
@@ -48350,7 +49359,10 @@ BLIS_INLINE  err_t bli_ctrsm_small_XAltB_XAuB
 			ymm16 = _mm256_fmaddsub_ps(ymm1, ymm2, ymm16);
 			ymm11 = _mm256_sub_ps(ymm11,ymm16);
 
-			ymm2 = _mm256_broadcast_ps((__m128 const *) (a11 + rs_a*2) );
+			ymm2 = _mm256_set_ps((a11 + rs_a*2)->imag,(a11 + rs_a*2)->real,
+						(a11 + rs_a*2)->imag,(a11 + rs_a*2)->real,
+						(a11 + rs_a*2)->imag,(a11 + rs_a*2)->real,
+						(a11 + rs_a*2)->imag,(a11 + rs_a*2)->real);
 			ymm2 = _mm256_permute_ps(ymm2, 0x44);
 			if(conjtransa)
 			{
@@ -48372,7 +49384,10 @@ BLIS_INLINE  err_t bli_ctrsm_small_XAltB_XAuB
 			ymm13 = _mm256_sub_ps(ymm13,ymm16);
 
 
-			ymm1 = _mm256_broadcast_ps(( __m128 const *)(d11_pack + 1));
+			ymm1 = _mm256_set_ps((d11_pack + 1)->imag,(d11_pack + 1)->real,
+						(d11_pack + 1)->imag,(d11_pack + 1)->real,
+						(d11_pack + 1)->imag,(d11_pack + 1)->real,
+						(d11_pack + 1)->imag,(d11_pack + 1)->real);
 			ymm1 = _mm256_permute_ps(ymm1, 0x44);
 #ifndef BLIS_ENABLE_TRSM_PREINVERSION
 			BLIS_CTRSM_TWO_DIV(ymm10, ymm11)
@@ -48384,7 +49399,10 @@ BLIS_INLINE  err_t bli_ctrsm_small_XAltB_XAuB
 
 			a11 += cs_a;
 
-			ymm2 = _mm256_broadcast_ps((__m128 const *) (a11 + rs_a*2) );
+			ymm2 = _mm256_set_ps((a11 + rs_a*2)->imag,(a11 + rs_a*2)->real,
+						(a11 + rs_a*2)->imag,(a11 + rs_a*2)->real,
+						(a11 + rs_a*2)->imag,(a11 + rs_a*2)->real,
+						(a11 + rs_a*2)->imag,(a11 + rs_a*2)->real);
 			ymm2 = _mm256_permute_ps(ymm2, 0x44);
 			if(conjtransa)
 			{
@@ -48405,7 +49423,10 @@ BLIS_INLINE  err_t bli_ctrsm_small_XAltB_XAuB
 			ymm16 = _mm256_fmaddsub_ps(ymm1, ymm2, ymm16);
 			ymm13 = _mm256_sub_ps(ymm13,ymm16);
 
-			ymm1 = _mm256_broadcast_ps(( __m128 const *)(d11_pack + 2));
+			ymm1 = _mm256_set_ps((d11_pack + 2)->imag,(d11_pack + 2)->real,
+						(d11_pack + 2)->imag,(d11_pack + 2)->real,
+						(d11_pack + 2)->imag,(d11_pack + 2)->real,
+						(d11_pack + 2)->imag,(d11_pack + 2)->real);
 			ymm1 = _mm256_permute_ps(ymm1, 0x44);
 
 #ifndef BLIS_ENABLE_TRSM_PREINVERSION
@@ -48444,14 +49465,20 @@ BLIS_INLINE  err_t bli_ctrsm_small_XAltB_XAuB
 			BLIS_PRE_CTRSM_SMALL_3x4(AlphaVal,b11,cs_b)
 
 			ymm18 = _mm256_setr_ps(1.0, -1.0, 1.0, -1.0, 1.0, -1.0, 1.0, -1.0);
-			ymm1 = _mm256_broadcast_ps(( __m128 const *)(d11_pack));
+			ymm1 = _mm256_set_ps((d11_pack)->imag,(d11_pack)->real,
+						(d11_pack)->imag,(d11_pack)->real,
+						(d11_pack)->imag,(d11_pack)->real,
+						(d11_pack)->imag,(d11_pack)->real);
 			ymm1 = _mm256_permute_ps(ymm1, 0x44);
 #ifndef BLIS_ENABLE_TRSM_PREINVERSION
 			BLIS_CTRSM_DIV(ymm8)
 #else
 			BLIS_CTRSM_MUL(ymm8)
 #endif
-			ymm2 = _mm256_broadcast_ps((__m128 const *) (a11 + rs_a*1) );
+			ymm2 = _mm256_set_ps((a11 + rs_a*1)->imag,(a11 + rs_a*1)->real,
+						(a11 + rs_a*1)->imag,(a11 + rs_a*1)->real,
+						(a11 + rs_a*1)->imag,(a11 + rs_a*1)->real,
+						(a11 + rs_a*1)->imag,(a11 + rs_a*1)->real);
 			ymm2 = _mm256_permute_ps(ymm2, 0x44);
 			if(conjtransa)
 			{
@@ -48468,7 +49495,10 @@ BLIS_INLINE  err_t bli_ctrsm_small_XAltB_XAuB
 			ymm16 = _mm256_fmaddsub_ps(ymm1, ymm2, ymm16);
 			ymm10 = _mm256_sub_ps(ymm10,ymm16);
 
-			ymm2 = _mm256_broadcast_ps((__m128 const *) (a11 + rs_a*2) );
+			ymm2 = _mm256_set_ps((a11 + rs_a*2)->imag,(a11 + rs_a*2)->real,
+						(a11 + rs_a*2)->imag,(a11 + rs_a*2)->real,
+						(a11 + rs_a*2)->imag,(a11 + rs_a*2)->real,
+						(a11 + rs_a*2)->imag,(a11 + rs_a*2)->real);
 			ymm2 = _mm256_permute_ps(ymm2, 0x44);
 			if(conjtransa)
 			{
@@ -48484,7 +49514,10 @@ BLIS_INLINE  err_t bli_ctrsm_small_XAltB_XAuB
 			ymm12 = _mm256_sub_ps(ymm12,ymm16);
 
 
-			ymm1 = _mm256_broadcast_ps(( __m128 const *)(d11_pack + 1));
+			ymm1 = _mm256_set_ps((d11_pack + 1)->imag,(d11_pack + 1)->real,
+						(d11_pack + 1)->imag,(d11_pack + 1)->real,
+						(d11_pack + 1)->imag,(d11_pack + 1)->real,
+						(d11_pack + 1)->imag,(d11_pack + 1)->real);
 			ymm1 = _mm256_permute_ps(ymm1, 0x44);
 #ifndef BLIS_ENABLE_TRSM_PREINVERSION
 			BLIS_CTRSM_DIV(ymm10)
@@ -48495,7 +49528,10 @@ BLIS_INLINE  err_t bli_ctrsm_small_XAltB_XAuB
 
 			a11 += cs_a;
 
-			ymm2 = _mm256_broadcast_ps((__m128 const *) (a11 + rs_a*2) );
+			ymm2 = _mm256_set_ps((a11 + rs_a*2)->imag,(a11 + rs_a*2)->real,
+						(a11 + rs_a*2)->imag,(a11 + rs_a*2)->real,
+						(a11 + rs_a*2)->imag,(a11 + rs_a*2)->real,
+						(a11 + rs_a*2)->imag,(a11 + rs_a*2)->real);
 			ymm2 = _mm256_permute_ps(ymm2, 0x44);
 			if(conjtransa)
 			{
@@ -48511,7 +49547,10 @@ BLIS_INLINE  err_t bli_ctrsm_small_XAltB_XAuB
 			ymm12 = _mm256_sub_ps(ymm12,ymm16);
 
 
-			ymm1 = _mm256_broadcast_ps(( __m128 const *)(d11_pack + 2));
+			ymm1 = _mm256_set_ps((d11_pack + 2)->imag,(d11_pack + 2)->real,
+						(d11_pack + 2)->imag,(d11_pack + 2)->real,
+						(d11_pack + 2)->imag,(d11_pack + 2)->real,
+						(d11_pack + 2)->imag,(d11_pack + 2)->real);
 			ymm1 = _mm256_permute_ps(ymm1, 0x44);
 
 #ifndef BLIS_ENABLE_TRSM_PREINVERSION
@@ -48546,14 +49585,20 @@ BLIS_INLINE  err_t bli_ctrsm_small_XAltB_XAuB
 			BLIS_PRE_CTRSM_SMALL_3x3(AlphaVal,b11,cs_b)
 
 			ymm18 = _mm256_setr_ps(1.0, -1.0, 1.0, -1.0, 1.0, -1.0, 1.0, -1.0);
-			ymm1 = _mm256_broadcast_ps(( __m128 const *)(d11_pack));
+			ymm1 = _mm256_set_ps((d11_pack)->imag,(d11_pack)->real,
+						(d11_pack)->imag,(d11_pack)->real,
+						(d11_pack)->imag,(d11_pack)->real,
+						(d11_pack)->imag,(d11_pack)->real);
 			ymm1 = _mm256_permute_ps(ymm1, 0x44);
 #ifndef BLIS_ENABLE_TRSM_PREINVERSION
 			BLIS_CTRSM_DIV(ymm8)
 #else
 			BLIS_CTRSM_MUL(ymm8)
 #endif
-			ymm2 = _mm256_broadcast_ps((__m128 const *) (a11 + rs_a*1) );
+			ymm2 = _mm256_set_ps((a11 + rs_a*1)->imag,(a11 + rs_a*1)->real,
+						(a11 + rs_a*1)->imag,(a11 + rs_a*1)->real,
+						(a11 + rs_a*1)->imag,(a11 + rs_a*1)->real,
+						(a11 + rs_a*1)->imag,(a11 + rs_a*1)->real);
 			ymm2 = _mm256_permute_ps(ymm2, 0x44);
 			if(conjtransa)
 			{
@@ -48570,7 +49615,10 @@ BLIS_INLINE  err_t bli_ctrsm_small_XAltB_XAuB
 			ymm16 = _mm256_fmaddsub_ps(ymm1, ymm2, ymm16);
 			ymm10 = _mm256_sub_ps(ymm10,ymm16);
 
-			ymm2 = _mm256_broadcast_ps((__m128 const *) (a11 + rs_a*2) );
+			ymm2 = _mm256_set_ps((a11 + rs_a*2)->imag,(a11 + rs_a*2)->real,
+						(a11 + rs_a*2)->imag,(a11 + rs_a*2)->real,
+						(a11 + rs_a*2)->imag,(a11 + rs_a*2)->real,
+						(a11 + rs_a*2)->imag,(a11 + rs_a*2)->real);
 			ymm2 = _mm256_permute_ps(ymm2, 0x44);
 			if(conjtransa)
 			{
@@ -48586,7 +49634,10 @@ BLIS_INLINE  err_t bli_ctrsm_small_XAltB_XAuB
 			ymm12 = _mm256_sub_ps(ymm12,ymm16);
 
 
-			ymm1 = _mm256_broadcast_ps(( __m128 const *)(d11_pack + 1));
+			ymm1 = _mm256_set_ps((d11_pack + 1)->imag,(d11_pack + 1)->real,
+						(d11_pack + 1)->imag,(d11_pack + 1)->real,
+						(d11_pack + 1)->imag,(d11_pack + 1)->real,
+						(d11_pack + 1)->imag,(d11_pack + 1)->real);
 			ymm1 = _mm256_permute_ps(ymm1, 0x44);
 #ifndef BLIS_ENABLE_TRSM_PREINVERSION
 			BLIS_CTRSM_DIV(ymm10)
@@ -48597,7 +49648,10 @@ BLIS_INLINE  err_t bli_ctrsm_small_XAltB_XAuB
 
 			a11 += cs_a;
 
-			ymm2 = _mm256_broadcast_ps((__m128 const *) (a11 + rs_a*2) );
+			ymm2 = _mm256_set_ps((a11 + rs_a*2)->imag,(a11 + rs_a*2)->real,
+						(a11 + rs_a*2)->imag,(a11 + rs_a*2)->real,
+						(a11 + rs_a*2)->imag,(a11 + rs_a*2)->real,
+						(a11 + rs_a*2)->imag,(a11 + rs_a*2)->real);
 			ymm2 = _mm256_permute_ps(ymm2, 0x44);
 			if(conjtransa)
 			{
@@ -48613,7 +49667,10 @@ BLIS_INLINE  err_t bli_ctrsm_small_XAltB_XAuB
 			ymm12 = _mm256_sub_ps(ymm12,ymm16);
 
 
-			ymm1 = _mm256_broadcast_ps(( __m128 const *)(d11_pack + 2));
+			ymm1 = _mm256_set_ps((d11_pack + 2)->imag,(d11_pack + 2)->real,
+						(d11_pack + 2)->imag,(d11_pack + 2)->real,
+						(d11_pack + 2)->imag,(d11_pack + 2)->real,
+						(d11_pack + 2)->imag,(d11_pack + 2)->real);
 			ymm1 = _mm256_permute_ps(ymm1, 0x44);
 
 #ifndef BLIS_ENABLE_TRSM_PREINVERSION
@@ -48659,14 +49716,20 @@ BLIS_INLINE  err_t bli_ctrsm_small_XAltB_XAuB
 			BLIS_PRE_CTRSM_SMALL_3x2(AlphaVal,b11,cs_b)
 
 			ymm18 = _mm256_setr_ps(1.0, -1.0, 1.0, -1.0, 1.0, -1.0, 1.0, -1.0);
-			ymm1 = _mm256_broadcast_ps(( __m128 const *)(d11_pack));
+			ymm1 = _mm256_set_ps((d11_pack)->imag,(d11_pack)->real,
+						(d11_pack)->imag,(d11_pack)->real,
+						(d11_pack)->imag,(d11_pack)->real,
+						(d11_pack)->imag,(d11_pack)->real);
 			ymm1 = _mm256_permute_ps(ymm1, 0x44);
 #ifndef BLIS_ENABLE_TRSM_PREINVERSION
 			BLIS_CTRSM_DIV(ymm8)
 #else
 			BLIS_CTRSM_MUL(ymm8)
 #endif
-			ymm2 = _mm256_broadcast_ps((__m128 const *) (a11 + rs_a*1) );
+			ymm2 = _mm256_set_ps((a11 + rs_a*1)->imag,(a11 + rs_a*1)->real,
+						(a11 + rs_a*1)->imag,(a11 + rs_a*1)->real,
+						(a11 + rs_a*1)->imag,(a11 + rs_a*1)->real,
+						(a11 + rs_a*1)->imag,(a11 + rs_a*1)->real);
 			ymm2 = _mm256_permute_ps(ymm2, 0x44);
 			if(conjtransa)
 			{
@@ -48683,7 +49746,10 @@ BLIS_INLINE  err_t bli_ctrsm_small_XAltB_XAuB
 			ymm16 = _mm256_fmaddsub_ps(ymm1, ymm2, ymm16);
 			ymm10 = _mm256_sub_ps(ymm10,ymm16);
 
-			ymm2 = _mm256_broadcast_ps((__m128 const *) (a11 + rs_a*2) );
+			ymm2 = _mm256_set_ps((a11 + rs_a*2)->imag,(a11 + rs_a*2)->real,
+						(a11 + rs_a*2)->imag,(a11 + rs_a*2)->real,
+						(a11 + rs_a*2)->imag,(a11 + rs_a*2)->real,
+						(a11 + rs_a*2)->imag,(a11 + rs_a*2)->real);
 			ymm2 = _mm256_permute_ps(ymm2, 0x44);
 			if(conjtransa)
 			{
@@ -48699,7 +49765,10 @@ BLIS_INLINE  err_t bli_ctrsm_small_XAltB_XAuB
 			ymm12 = _mm256_sub_ps(ymm12,ymm16);
 
 
-			ymm1 = _mm256_broadcast_ps(( __m128 const *)(d11_pack + 1));
+			ymm1 = _mm256_set_ps((d11_pack + 1)->imag,(d11_pack + 1)->real,
+						(d11_pack + 1)->imag,(d11_pack + 1)->real,
+						(d11_pack + 1)->imag,(d11_pack + 1)->real,
+						(d11_pack + 1)->imag,(d11_pack + 1)->real);
 			ymm1 = _mm256_permute_ps(ymm1, 0x44);
 #ifndef BLIS_ENABLE_TRSM_PREINVERSION
 			BLIS_CTRSM_DIV(ymm10)
@@ -48710,7 +49779,10 @@ BLIS_INLINE  err_t bli_ctrsm_small_XAltB_XAuB
 
 			a11 += cs_a;
 
-			ymm2 = _mm256_broadcast_ps((__m128 const *) (a11 + rs_a*2) );
+			ymm2 = _mm256_set_ps((a11 + rs_a*2)->imag,(a11 + rs_a*2)->real,
+						(a11 + rs_a*2)->imag,(a11 + rs_a*2)->real,
+						(a11 + rs_a*2)->imag,(a11 + rs_a*2)->real,
+						(a11 + rs_a*2)->imag,(a11 + rs_a*2)->real);
 			ymm2 = _mm256_permute_ps(ymm2, 0x44);
 			if(conjtransa)
 			{
@@ -48726,7 +49798,10 @@ BLIS_INLINE  err_t bli_ctrsm_small_XAltB_XAuB
 			ymm12 = _mm256_sub_ps(ymm12,ymm16);
 
 
-			ymm1 = _mm256_broadcast_ps(( __m128 const *)(d11_pack + 2));
+			ymm1 = _mm256_set_ps((d11_pack + 2)->imag,(d11_pack + 2)->real,
+						(d11_pack + 2)->imag,(d11_pack + 2)->real,
+						(d11_pack + 2)->imag,(d11_pack + 2)->real,
+						(d11_pack + 2)->imag,(d11_pack + 2)->real);
 			ymm1 = _mm256_permute_ps(ymm1, 0x44);
 
 #ifndef BLIS_ENABLE_TRSM_PREINVERSION
@@ -48765,14 +49840,20 @@ BLIS_INLINE  err_t bli_ctrsm_small_XAltB_XAuB
 			BLIS_PRE_CTRSM_SMALL_3x1(AlphaVal,b11,cs_b)
 
 			ymm18 = _mm256_setr_ps(1.0, -1.0, 1.0, -1.0, 1.0, -1.0, 1.0, -1.0);
-			ymm1 = _mm256_broadcast_ps(( __m128 const *)(d11_pack));
+			ymm1 = _mm256_set_ps((d11_pack)->imag,(d11_pack)->real,
+						(d11_pack)->imag,(d11_pack)->real,
+						(d11_pack)->imag,(d11_pack)->real,
+						(d11_pack)->imag,(d11_pack)->real);
 			ymm1 = _mm256_permute_ps(ymm1, 0x44);
 #ifndef BLIS_ENABLE_TRSM_PREINVERSION
 			BLIS_CTRSM_DIV(ymm8)
 #else
 			BLIS_CTRSM_MUL(ymm8)
 #endif
-			ymm2 = _mm256_broadcast_ps((__m128 const *) (a11 + rs_a*1) );
+			ymm2 = _mm256_set_ps((a11 + rs_a*1)->imag,(a11 + rs_a*1)->real,
+						(a11 + rs_a*1)->imag,(a11 + rs_a*1)->real,
+						(a11 + rs_a*1)->imag,(a11 + rs_a*1)->real,
+						(a11 + rs_a*1)->imag,(a11 + rs_a*1)->real);
 			ymm2 = _mm256_permute_ps(ymm2, 0x44);
 			if(conjtransa)
 			{
@@ -48789,7 +49870,10 @@ BLIS_INLINE  err_t bli_ctrsm_small_XAltB_XAuB
 			ymm16 = _mm256_fmaddsub_ps(ymm1, ymm2, ymm16);
 			ymm10 = _mm256_sub_ps(ymm10,ymm16);
 
-			ymm2 = _mm256_broadcast_ps((__m128 const *) (a11 + rs_a*2) );
+			ymm2 = _mm256_set_ps((a11 + rs_a*2)->imag,(a11 + rs_a*2)->real,
+						(a11 + rs_a*2)->imag,(a11 + rs_a*2)->real,
+						(a11 + rs_a*2)->imag,(a11 + rs_a*2)->real,
+						(a11 + rs_a*2)->imag,(a11 + rs_a*2)->real);
 			ymm2 = _mm256_permute_ps(ymm2, 0x44);
 			if(conjtransa)
 			{
@@ -48805,7 +49889,10 @@ BLIS_INLINE  err_t bli_ctrsm_small_XAltB_XAuB
 			ymm12 = _mm256_sub_ps(ymm12,ymm16);
 
 
-			ymm1 = _mm256_broadcast_ps(( __m128 const *)(d11_pack + 1));
+			ymm1 = _mm256_set_ps((d11_pack + 1)->imag,(d11_pack + 1)->real,
+						(d11_pack + 1)->imag,(d11_pack + 1)->real,
+						(d11_pack + 1)->imag,(d11_pack + 1)->real,
+						(d11_pack + 1)->imag,(d11_pack + 1)->real);
 			ymm1 = _mm256_permute_ps(ymm1, 0x44);
 #ifndef BLIS_ENABLE_TRSM_PREINVERSION
 			BLIS_CTRSM_DIV(ymm10)
@@ -48816,7 +49903,10 @@ BLIS_INLINE  err_t bli_ctrsm_small_XAltB_XAuB
 
 			a11 += cs_a;
 
-			ymm2 = _mm256_broadcast_ps((__m128 const *) (a11 + rs_a*2) );
+			ymm2 = _mm256_set_ps((a11 + rs_a*2)->imag,(a11 + rs_a*2)->real,
+						(a11 + rs_a*2)->imag,(a11 + rs_a*2)->real,
+						(a11 + rs_a*2)->imag,(a11 + rs_a*2)->real,
+						(a11 + rs_a*2)->imag,(a11 + rs_a*2)->real);
 			ymm2 = _mm256_permute_ps(ymm2, 0x44);
 			if(conjtransa)
 			{
@@ -48832,7 +49922,10 @@ BLIS_INLINE  err_t bli_ctrsm_small_XAltB_XAuB
 			ymm12 = _mm256_sub_ps(ymm12,ymm16);
 
 
-			ymm1 = _mm256_broadcast_ps(( __m128 const *)(d11_pack + 2));
+			ymm1 = _mm256_set_ps((d11_pack + 2)->imag,(d11_pack + 2)->real,
+						(d11_pack + 2)->imag,(d11_pack + 2)->real,
+						(d11_pack + 2)->imag,(d11_pack + 2)->real,
+						(d11_pack + 2)->imag,(d11_pack + 2)->real);
 			ymm1 = _mm256_permute_ps(ymm1, 0x44);
 
 #ifndef BLIS_ENABLE_TRSM_PREINVERSION
@@ -48983,7 +50076,10 @@ BLIS_INLINE  err_t bli_ctrsm_small_XAltB_XAuB
 
 
 			ymm18 = _mm256_setr_ps(1.0, -1.0, 1.0, -1.0, 1.0, -1.0, 1.0, -1.0);
-			ymm1 = _mm256_broadcast_ps(( __m128 const *)(d11_pack));
+			ymm1 = _mm256_set_ps((d11_pack)->imag,(d11_pack)->real,
+						(d11_pack)->imag,(d11_pack)->real,
+						(d11_pack)->imag,(d11_pack)->real,
+						(d11_pack)->imag,(d11_pack)->real);
 			ymm1 = _mm256_permute_ps(ymm1, 0x44);
 #ifndef BLIS_ENABLE_TRSM_PREINVERSION
 			BLIS_CTRSM_TWO_DIV(ymm8, ymm9)
@@ -48991,7 +50087,10 @@ BLIS_INLINE  err_t bli_ctrsm_small_XAltB_XAuB
 			BLIS_CTRSM_MUL(ymm8)
 			BLIS_CTRSM_MUL(ymm9)
 #endif
-			ymm2 = _mm256_broadcast_ps((__m128 const *) (a11 + rs_a*1) );
+			ymm2 = _mm256_set_ps((a11 + rs_a*1)->imag,(a11 + rs_a*1)->real,
+						(a11 + rs_a*1)->imag,(a11 + rs_a*1)->real,
+						(a11 + rs_a*1)->imag,(a11 + rs_a*1)->real,
+						(a11 + rs_a*1)->imag,(a11 + rs_a*1)->real);
 			ymm2 = _mm256_permute_ps(ymm2, 0x44);
 			if(conjtransa)
 			{
@@ -49014,7 +50113,10 @@ BLIS_INLINE  err_t bli_ctrsm_small_XAltB_XAuB
 			ymm16 = _mm256_fmaddsub_ps(ymm1, ymm2, ymm16);
 			ymm11 = _mm256_sub_ps(ymm11,ymm16);
 
-			ymm1 = _mm256_broadcast_ps(( __m128 const *)(d11_pack + 1));
+			ymm1 = _mm256_set_ps((d11_pack + 1)->imag,(d11_pack + 1)->real,
+						(d11_pack + 1)->imag,(d11_pack + 1)->real,
+						(d11_pack + 1)->imag,(d11_pack + 1)->real,
+						(d11_pack + 1)->imag,(d11_pack + 1)->real);
 			ymm1 = _mm256_permute_ps(ymm1, 0x44);
 
 #ifndef BLIS_ENABLE_TRSM_PREINVERSION
@@ -49064,14 +50166,20 @@ BLIS_INLINE  err_t bli_ctrsm_small_XAltB_XAuB
 			ymm10 = _mm256_sub_ps(ymm19, ymm10);
 
 			ymm18 = _mm256_setr_ps(1.0, -1.0, 1.0, -1.0, 1.0, -1.0, 1.0, -1.0);
-			ymm1 = _mm256_broadcast_ps(( __m128 const *)(d11_pack));
+			ymm1 = _mm256_set_ps((d11_pack)->imag,(d11_pack)->real,
+						(d11_pack)->imag,(d11_pack)->real,
+						(d11_pack)->imag,(d11_pack)->real,
+						(d11_pack)->imag,(d11_pack)->real);
 			ymm1 = _mm256_permute_ps(ymm1, 0x44);
 #ifndef BLIS_ENABLE_TRSM_PREINVERSION
 			BLIS_CTRSM_DIV(ymm8)
 #else
 			BLIS_CTRSM_MUL(ymm8)
 #endif
-			ymm2 = _mm256_broadcast_ps((__m128 const *) (a11 + rs_a*1) );
+			ymm2 = _mm256_set_ps((a11 + rs_a*1)->imag,(a11 + rs_a*1)->real,
+						(a11 + rs_a*1)->imag,(a11 + rs_a*1)->real,
+						(a11 + rs_a*1)->imag,(a11 + rs_a*1)->real,
+						(a11 + rs_a*1)->imag,(a11 + rs_a*1)->real);
 			ymm2 = _mm256_permute_ps(ymm2, 0x44);
 			if(conjtransa)
 			{
@@ -49088,7 +50196,10 @@ BLIS_INLINE  err_t bli_ctrsm_small_XAltB_XAuB
 			ymm16 = _mm256_fmaddsub_ps(ymm1, ymm2, ymm16);
 			ymm10 = _mm256_sub_ps(ymm10,ymm16);
 
-			ymm1 = _mm256_broadcast_ps(( __m128 const *)(d11_pack + 1));
+			ymm1 = _mm256_set_ps((d11_pack + 1)->imag,(d11_pack + 1)->real,
+						(d11_pack + 1)->imag,(d11_pack + 1)->real,
+						(d11_pack + 1)->imag,(d11_pack + 1)->real,
+						(d11_pack + 1)->imag,(d11_pack + 1)->real);
 			ymm1 = _mm256_permute_ps(ymm1, 0x44);
 
 #ifndef BLIS_ENABLE_TRSM_PREINVERSION
@@ -49142,14 +50253,20 @@ BLIS_INLINE  err_t bli_ctrsm_small_XAltB_XAuB
 			ymm10 = _mm256_sub_ps(ymm19, ymm10);
 
 			ymm18 = _mm256_setr_ps(1.0, -1.0, 1.0, -1.0, 1.0, -1.0, 1.0, -1.0);
-			ymm1 = _mm256_broadcast_ps(( __m128 const *)(d11_pack));
+			ymm1 = _mm256_set_ps((d11_pack)->imag,(d11_pack)->real,
+						(d11_pack)->imag,(d11_pack)->real,
+						(d11_pack)->imag,(d11_pack)->real,
+						(d11_pack)->imag,(d11_pack)->real);
 			ymm1 = _mm256_permute_ps(ymm1, 0x44);
 #ifndef BLIS_ENABLE_TRSM_PREINVERSION
 			BLIS_CTRSM_DIV(ymm8)
 #else
 			BLIS_CTRSM_MUL(ymm8)
 #endif
-			ymm2 = _mm256_broadcast_ps((__m128 const *) (a11 + rs_a*1) );
+			ymm2 = _mm256_set_ps((a11 + rs_a*1)->imag,(a11 + rs_a*1)->real,
+						(a11 + rs_a*1)->imag,(a11 + rs_a*1)->real,
+						(a11 + rs_a*1)->imag,(a11 + rs_a*1)->real,
+						(a11 + rs_a*1)->imag,(a11 + rs_a*1)->real);
 			ymm2 = _mm256_permute_ps(ymm2, 0x44);
 			if(conjtransa)
 			{
@@ -49166,7 +50283,10 @@ BLIS_INLINE  err_t bli_ctrsm_small_XAltB_XAuB
 			ymm16 = _mm256_fmaddsub_ps(ymm1, ymm2, ymm16);
 			ymm10 = _mm256_sub_ps(ymm10,ymm16);
 
-			ymm1 = _mm256_broadcast_ps(( __m128 const *)(d11_pack + 1));
+			ymm1 = _mm256_set_ps((d11_pack + 1)->imag,(d11_pack + 1)->real,
+						(d11_pack + 1)->imag,(d11_pack + 1)->real,
+						(d11_pack + 1)->imag,(d11_pack + 1)->real,
+						(d11_pack + 1)->imag,(d11_pack + 1)->real);
 			ymm1 = _mm256_permute_ps(ymm1, 0x44);
 
 #ifndef BLIS_ENABLE_TRSM_PREINVERSION
@@ -49202,6 +50322,7 @@ BLIS_INLINE  err_t bli_ctrsm_small_XAltB_XAuB
 			///GEMM implementation starts///
 			BLIS_CTRSM_SMALL_GEMM_2nx2m(a01,b10,cs_b,p_lda,k_iter)
 			ymm16 = _mm256_broadcast_ps(( __m128 const *)(&AlphaVal));
+
 			ymm16 = _mm256_permute_ps(ymm16, 0x44);
 
 			xmm0 = _mm_loadu_ps((float const *)(b11));
@@ -49224,14 +50345,20 @@ BLIS_INLINE  err_t bli_ctrsm_small_XAltB_XAuB
 			ymm10 = _mm256_sub_ps(ymm19, ymm10);
 
 			ymm18 = _mm256_setr_ps(1.0, -1.0, 1.0, -1.0, 1.0, -1.0, 1.0, -1.0);
-			ymm1 = _mm256_broadcast_ps(( __m128 const *)(d11_pack));
+			ymm1 = _mm256_set_ps((d11_pack)->imag,(d11_pack)->real,
+						(d11_pack)->imag,(d11_pack)->real,
+						(d11_pack)->imag,(d11_pack)->real,
+						(d11_pack)->imag,(d11_pack)->real);
 			ymm1 = _mm256_permute_ps(ymm1, 0x44);
 #ifndef BLIS_ENABLE_TRSM_PREINVERSION
 			BLIS_CTRSM_DIV(ymm8)
 #else
 			BLIS_CTRSM_MUL(ymm8)
 #endif
-			ymm2 = _mm256_broadcast_ps((__m128 const *) (a11 + rs_a*1) );
+			ymm2 = _mm256_set_ps((a11 + rs_a*1)->imag,(a11 + rs_a*1)->real,
+						(a11 + rs_a*1)->imag,(a11 + rs_a*1)->real,
+						(a11 + rs_a*1)->imag,(a11 + rs_a*1)->real,
+						(a11 + rs_a*1)->imag,(a11 + rs_a*1)->real);
 			ymm2 = _mm256_permute_ps(ymm2, 0x44);
 			if(conjtransa)
 			{
@@ -49248,7 +50375,10 @@ BLIS_INLINE  err_t bli_ctrsm_small_XAltB_XAuB
 			ymm16 = _mm256_fmaddsub_ps(ymm1, ymm2, ymm16);
 			ymm10 = _mm256_sub_ps(ymm10,ymm16);
 
-			ymm1 = _mm256_broadcast_ps(( __m128 const *)(d11_pack + 1));
+			ymm1 = _mm256_set_ps((d11_pack + 1)->imag,(d11_pack + 1)->real,
+						(d11_pack + 1)->imag,(d11_pack + 1)->real,
+						(d11_pack + 1)->imag,(d11_pack + 1)->real,
+						(d11_pack + 1)->imag,(d11_pack + 1)->real);
 			ymm1 = _mm256_permute_ps(ymm1, 0x44);
 
 #ifndef BLIS_ENABLE_TRSM_PREINVERSION
@@ -49301,14 +50431,20 @@ BLIS_INLINE  err_t bli_ctrsm_small_XAltB_XAuB
 			ymm10 = _mm256_sub_ps(ymm19, ymm10);
 
 			ymm18 = _mm256_setr_ps(1.0, -1.0, 1.0, -1.0, 1.0, -1.0, 1.0, -1.0);
-			ymm1 = _mm256_broadcast_ps(( __m128 const *)(d11_pack));
+			ymm1 = _mm256_set_ps((d11_pack)->imag,(d11_pack)->real,
+						(d11_pack)->imag,(d11_pack)->real,
+						(d11_pack)->imag,(d11_pack)->real,
+						(d11_pack)->imag,(d11_pack)->real);
 			ymm1 = _mm256_permute_ps(ymm1, 0x44);
 #ifndef BLIS_ENABLE_TRSM_PREINVERSION
 			BLIS_CTRSM_DIV(ymm8)
 #else
 			BLIS_CTRSM_MUL(ymm8)
 #endif
-			ymm2 = _mm256_broadcast_ps((__m128 const *) (a11 + rs_a*1) );
+			ymm2 = _mm256_set_ps((a11 + rs_a*1)->imag,(a11 + rs_a*1)->real,
+						(a11 + rs_a*1)->imag,(a11 + rs_a*1)->real,
+						(a11 + rs_a*1)->imag,(a11 + rs_a*1)->real,
+						(a11 + rs_a*1)->imag,(a11 + rs_a*1)->real);
 			ymm2 = _mm256_permute_ps(ymm2, 0x44);
 			if(conjtransa)
 			{
@@ -49325,7 +50461,10 @@ BLIS_INLINE  err_t bli_ctrsm_small_XAltB_XAuB
 			ymm16 = _mm256_fmaddsub_ps(ymm1, ymm2, ymm16);
 			ymm10 = _mm256_sub_ps(ymm10,ymm16);
 
-			ymm1 = _mm256_broadcast_ps(( __m128 const *)(d11_pack + 1));
+			ymm1 = _mm256_set_ps((d11_pack + 1)->imag,(d11_pack + 1)->real,
+						(d11_pack + 1)->imag,(d11_pack + 1)->real,
+						(d11_pack + 1)->imag,(d11_pack + 1)->real,
+						(d11_pack + 1)->imag,(d11_pack + 1)->real);
 			ymm1 = _mm256_permute_ps(ymm1, 0x44);
 
 #ifndef BLIS_ENABLE_TRSM_PREINVERSION
@@ -49445,7 +50584,10 @@ BLIS_INLINE  err_t bli_ctrsm_small_XAltB_XAuB
 
 
 			ymm18 = _mm256_setr_ps(1.0, -1.0, 1.0, -1.0, 1.0, -1.0, 1.0, -1.0);
-			ymm1 = _mm256_broadcast_ps(( __m128 const *)(d11_pack));
+			ymm1 = _mm256_set_ps((d11_pack)->imag,(d11_pack)->real,
+						(d11_pack)->imag,(d11_pack)->real,
+						(d11_pack)->imag,(d11_pack)->real,
+						(d11_pack)->imag,(d11_pack)->real);
 			ymm1 = _mm256_permute_ps(ymm1, 0x44);
 #ifndef BLIS_ENABLE_TRSM_PREINVERSION
 			BLIS_CTRSM_TWO_DIV(ymm8, ymm9)
@@ -49485,7 +50627,10 @@ BLIS_INLINE  err_t bli_ctrsm_small_XAltB_XAuB
 
 
 			ymm18 = _mm256_setr_ps(1.0, -1.0, 1.0, -1.0, 1.0, -1.0, 1.0, -1.0);
-			ymm1 = _mm256_broadcast_ps(( __m128 const *)(d11_pack));
+			ymm1 = _mm256_set_ps((d11_pack)->imag,(d11_pack)->real,
+						(d11_pack)->imag,(d11_pack)->real,
+						(d11_pack)->imag,(d11_pack)->real,
+						(d11_pack)->imag,(d11_pack)->real);
 			ymm1 = _mm256_permute_ps(ymm1, 0x44);
 #ifndef BLIS_ENABLE_TRSM_PREINVERSION
 			BLIS_CTRSM_DIV(ymm8)
@@ -49528,7 +50673,10 @@ BLIS_INLINE  err_t bli_ctrsm_small_XAltB_XAuB
 
 
 			ymm18 = _mm256_setr_ps(1.0, -1.0, 1.0, -1.0, 1.0, -1.0, 1.0, -1.0);
-			ymm1 = _mm256_broadcast_ps(( __m128 const *)(d11_pack));
+			ymm1 = _mm256_set_ps((d11_pack)->imag,(d11_pack)->real,
+						(d11_pack)->imag,(d11_pack)->real,
+						(d11_pack)->imag,(d11_pack)->real,
+						(d11_pack)->imag,(d11_pack)->real);
 			ymm1 = _mm256_permute_ps(ymm1, 0x44);
 #ifndef BLIS_ENABLE_TRSM_PREINVERSION
 			BLIS_CTRSM_DIV(ymm8)
@@ -49571,7 +50719,10 @@ BLIS_INLINE  err_t bli_ctrsm_small_XAltB_XAuB
 
 
 			ymm18 = _mm256_setr_ps(1.0, -1.0, 1.0, -1.0, 1.0, -1.0, 1.0, -1.0);
-			ymm1 = _mm256_broadcast_ps(( __m128 const *)(d11_pack));
+			ymm1 = _mm256_set_ps((d11_pack)->imag,(d11_pack)->real,
+						(d11_pack)->imag,(d11_pack)->real,
+						(d11_pack)->imag,(d11_pack)->real,
+						(d11_pack)->imag,(d11_pack)->real);
 			ymm1 = _mm256_permute_ps(ymm1, 0x44);
 #ifndef BLIS_ENABLE_TRSM_PREINVERSION
 			BLIS_CTRSM_DIV(ymm8)
@@ -49611,7 +50762,10 @@ BLIS_INLINE  err_t bli_ctrsm_small_XAltB_XAuB
 			ymm8 = _mm256_sub_ps(ymm19, ymm8);
 
 			ymm18 = _mm256_setr_ps(1.0, -1.0, 1.0, -1.0, 1.0, -1.0, 1.0, -1.0);
-			ymm1 = _mm256_broadcast_ps(( __m128 const *)(d11_pack));
+			ymm1 = _mm256_set_ps((d11_pack)->imag,(d11_pack)->real,
+						(d11_pack)->imag,(d11_pack)->real,
+						(d11_pack)->imag,(d11_pack)->real,
+						(d11_pack)->imag,(d11_pack)->real);
 			ymm1 = _mm256_permute_ps(ymm1, 0x44);
 #ifndef BLIS_ENABLE_TRSM_PREINVERSION
 			BLIS_CTRSM_DIV(ymm8)
@@ -49637,6 +50791,7 @@ BLIS_INLINE  err_t bli_ctrsm_small_XAltB_XAuB
 
 	return BLIS_SUCCESS;
 }
+
 
 /*
  * Check if the TRSM small path should be taken for this
