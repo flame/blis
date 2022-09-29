@@ -1121,6 +1121,7 @@ showconfig: check-env
 	@echo "install libdir:          $(INSTALL_LIBDIR)"
 	@echo "install includedir:      $(INSTALL_INCDIR)"
 	@echo "install sharedir:        $(INSTALL_SHAREDIR)"
+	@echo "ASan support:            $(ENABLE_ASAN)"
 	@echo "debugging status:        $(DEBUG_TYPE)"
 	@echo "multithreading status:   $(THREADING_MODEL)"
 	@echo "enable BLAS API?         $(MK_ENABLE_BLAS)"

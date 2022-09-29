@@ -118,6 +118,7 @@ get-noopt-cxxflags-for   = $(strip $(CFLAGS_PRESET) \
 get-refinit-cflags-for   = $(strip $(call load-var-for,COPTFLAGS,$(1)) \
                                    $(call get-noopt-cflags-for,$(1)) \
                                    -DBLIS_CNAME=$(1) \
+                                   $(ASAN_CPPFLAGS) \
                                    $(BUILD_CPPFLAGS) \
                                    $(BUILD_SYMFLAGS) \
                                    -DBLIS_IN_REF_KERNEL=1 \
@@ -129,6 +130,7 @@ get-refkern-cflags-for   = $(strip $(call load-var-for,CROPTFLAGS,$(1)) \
                                    $(call get-noopt-cflags-for,$(1)) \
                                    $(COMPSIMDFLAGS) \
                                    -DBLIS_CNAME=$(1) \
+                                   $(ASAN_CPPFLAGS) \
                                    $(BUILD_CPPFLAGS) \
                                    $(BUILD_SYMFLAGS) \
                                    -DBLIS_IN_REF_KERNEL=1 \
@@ -137,12 +139,14 @@ get-refkern-cflags-for   = $(strip $(call load-var-for,CROPTFLAGS,$(1)) \
 
 get-config-cflags-for    = $(strip $(call load-var-for,COPTFLAGS,$(1)) \
                                    $(call get-noopt-cflags-for,$(1)) \
+                                   $(ASAN_CPPFLAGS) \
                                    $(BUILD_CPPFLAGS) \
                                    $(BUILD_SYMFLAGS) \
                             )
 
 get-frame-cflags-for     = $(strip $(call load-var-for,COPTFLAGS,$(1)) \
                                    $(call get-noopt-cflags-for,$(1)) \
+                                   $(ASAN_CPPFLAGS) \
                                    $(BUILD_CPPFLAGS) \
                                    $(BUILD_SYMFLAGS) \
                             )
@@ -553,6 +557,11 @@ ifeq ($(DEBUG_TYPE),sde)
 LDFLAGS    := $(filter-out $(LIBMEMKIND),$(LDFLAGS))
 endif
 
+# Never use libmemkind with Intel SDE.
+ifeq ($(ENABLE_ASAN),yes)
+LDFLAGS    += -fsanitize=address
+endif
+
 # Specify the shared library's 'soname' field.
 # NOTE: The flag for creating shared objects is different for Linux and OS X.
 ifeq ($(OS_NAME),Darwin)
@@ -785,6 +794,14 @@ $(foreach c, $(CONFIG_LIST_FAM), $(eval $(call append-var-for,CXXLANGFLAGS,$(c))
 # Enable clock_gettime() in time.h.
 CPPROCFLAGS := -D_POSIX_C_SOURCE=200112L
 $(foreach c, $(CONFIG_LIST_FAM), $(eval $(call append-var-for,CPPROCFLAGS,$(c))))
+
+# --- Address Sanitizer flags ---
+
+ifeq ($(ENABLE_ASAN),yes)
+ASAN_CPPFLAGS := -fsanitize=address
+else
+ASAN_CPPFLAGS :=
+endif
 
 # --- Threading flags ---
 
