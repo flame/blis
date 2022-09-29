@@ -308,7 +308,55 @@ void PASTEMAC(ch,varname) \
 
 //INSERT_GENTFUNCR_BASIC( normfv_unb_var1, sumsqv_unb_var1 )
 GENTFUNCR( scomplex, float,  c, s, normfv_unb_var1, sumsqv_unb_var1 )
-GENTFUNCR( dcomplex, double, z, d, normfv_unb_var1, sumsqv_unb_var1 )
+
+void bli_znormfv_unb_var1
+    ( 
+        dim_t    n, 
+        dcomplex*   x, 
+        inc_t incx, 
+        double* norm, 
+        cntx_t*  cntx, 
+        rntm_t*  rntm  
+    ) 
+{ 
+   
+   if ( bli_cpuid_is_avx_supported() == TRUE )
+   {
+        bli_dznorm2fv_unb_var1_avx2( n, x, incx, norm, cntx );
+   }
+   else
+   {
+        double* zero       = bli_d0;
+        double* one        = bli_d1;
+        double  scale; 
+        double  sumsq; 
+        double  sqrt_sumsq; 
+
+        // Initialize scale and sumsq to begin the summation.
+        bli_dcopys( *zero, scale ); 
+        bli_dcopys( *one,  sumsq ); 
+
+        // Compute the sum of the squares of the vector.
+
+        bli_zsumsqv_unb_var1 
+        ( 
+            n,
+            x, 
+            incx,
+            &scale,
+            &sumsq,
+            cntx,
+            rntm
+        );
+
+        // Compute: norm = scale * sqrt( sumsq ) 
+        bli_dsqrt2s( sumsq, sqrt_sumsq ); 
+        bli_dscals( scale, sqrt_sumsq ); 
+
+        // Store the final value to the output variable.
+        bli_dcopys( sqrt_sumsq, *norm );
+   }
+}
 
 #undef  GENTFUNCR
 // We've disabled the dotv-based implementation because that method of
@@ -455,7 +503,7 @@ void bli_dnormfv_unb_var1
    /* Disabled avx path for dnrm2 temporarily */
    if( bli_cpuid_is_avx_supported() == TRUE )
    {
-        bli_dnorm2fv_unb_var1_avx( n, x, incx, norm, cntx );
+        bli_dnorm2fv_unb_var1_avx2( n, x, incx, norm, cntx );
    }
    else
    {

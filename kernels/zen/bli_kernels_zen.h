@@ -379,7 +379,7 @@ bool bli_cntx_trsm_small_thresh_is_met_zen
         dim_t n
     );
 
-void bli_dnorm2fv_unb_var1_avx
+void bli_dnorm2fv_unb_var1_avx2
      (
        dim_t    n,
        double*   x, inc_t incx,
@@ -387,6 +387,13 @@ void bli_dnorm2fv_unb_var1_avx
        cntx_t*  cntx
      );
 
+void bli_dznorm2fv_unb_var1_avx2
+     (
+       dim_t    n,
+       dcomplex*   x, inc_t incx,
+       double* norm,
+       cntx_t*  cntx
+     );
 void bli_zdscalv_zen_int10
      (
        conj_t           conjalpha,
