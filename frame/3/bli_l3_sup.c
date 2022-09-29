@@ -42,7 +42,7 @@ err_t bli_gemmsup
        const obj_t*  beta,
        const obj_t*  c,
        const cntx_t* cntx,
-             rntm_t* rntm
+       const rntm_t* rntm
      )
 {
 	// Return early if small matrix handling is disabled at configure-time.
@@ -127,7 +127,7 @@ printf( "dims: %d %d %d (threshs: %d %d %d)\n",
 	  beta,
 	  c,
 	  cntx,
-	  rntm
+	  &rntm_l
 	);
 }
 
@@ -140,7 +140,7 @@ err_t bli_gemmtsup
        const obj_t*  beta,
        const obj_t*  c,
        const cntx_t* cntx,
-             rntm_t* rntm
+       const rntm_t* rntm
      )
 {
 	// Return early if small matrix handling is disabled at configure-time.
@@ -196,7 +196,7 @@ err_t bli_gemmtsup
 	  beta,
 	  c,
 	  cntx,
-	  rntm
+	  &rntm_l
 	);
 }
 

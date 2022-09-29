@@ -74,7 +74,7 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 	  ( ctype* )x, incx, \
 	            asum, \
 	  ( cntx_t* )cntx, \
-	  rntm  \
+	  ( rntm_t* )rntm  \
 	); \
 }
 
@@ -110,7 +110,7 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 	  m, \
 	  a, rs_a, cs_a, \
 	  ( cntx_t* )cntx, \
-	  rntm  \
+	  ( rntm_t* )rntm  \
 	); \
 }
 
@@ -153,7 +153,7 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 	  ( ctype* )x, incx, \
 	            norm, \
 	  ( cntx_t* )cntx, \
-	  rntm  \
+	  ( rntm_t* )rntm  \
 	); \
 }
 
@@ -204,7 +204,7 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 	  ( ctype* )x, rs_x, cs_x, \
 	            norm, \
 	  ( cntx_t* )cntx, \
-	  rntm  \
+	  ( rntm_t* )rntm  \
 	); \
 }
 
@@ -248,7 +248,7 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 		  n, \
 		  x, incx, \
 		  ( cntx_t* )cntx, \
-		  rntm  \
+		  ( rntm_t* )rntm  \
 		); \
 \
 		/* Check the 1-norm of the randomzied vector. In the unlikely event that
@@ -310,7 +310,7 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 		  n, \
 		  x, rs_x, cs_x, \
 		  ( cntx_t* )cntx, \
-		  rntm  \
+		  ( rntm_t* )rntm  \
 		); \
 \
 		/* Check the 1-norm of the randomzied matrix. In the unlikely event that
@@ -366,7 +366,7 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 	            scale, \
 	            sumsq, \
 	  ( cntx_t* )cntx, \
-	  rntm  \
+	  ( rntm_t* )rntm  \
 	); \
 }
 

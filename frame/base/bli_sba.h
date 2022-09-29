@@ -52,21 +52,15 @@ void bli_sba_checkin_array
        array_t* array
      );
 
-void bli_sba_rntm_set_pool
-     (
-       siz_t    index,
-       array_t* array,
-       rntm_t*  rntm
-     );
-
 void* bli_sba_acquire
      (
-       rntm_t* rntm,
+       pool_t* pool,
        siz_t   req_size
      );
+
 void bli_sba_release
      (
-       rntm_t* rntm,
+       pool_t* pool,
        void*   block
      );
 

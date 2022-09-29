@@ -47,7 +47,7 @@ typedef err_t (*l3supint_t)
        const obj_t*     beta,
        const obj_t*     c,
        const cntx_t*    cntx,
-             rntm_t*    rntm,
+       const rntm_t*    rntm,
              thrinfo_t* thread
      );
 
@@ -62,7 +62,7 @@ err_t bli_l3_sup_thread_decorator
        const obj_t*     beta,
        const obj_t*     c,
        const cntx_t*    cntx,
-             rntm_t*    rntm
+       const rntm_t*    rntm
      );
 
 // Include definitions specific to the method of multithreading for the

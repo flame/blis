@@ -48,7 +48,7 @@ void bli_gemmsup_ref_var1n
        const obj_t*  c,
              stor3_t stor_id,
        const cntx_t* cntx,
-             rntm_t* rntm,
+       const rntm_t* rntm,
              thrinfo_t* thread
      )
 {
@@ -228,57 +228,15 @@ void bli_gemmsup_ref_var1n
 
 	auxinfo_t aux;
 
-	mem_t mem_a = BLIS_MEM_INITIALIZER;
-	mem_t mem_b = BLIS_MEM_INITIALIZER;
-\
-	/* Define an array of bszid_t ids, which will act as our substitute for
-	   the cntl_t tree.
-	   NOTE: These bszid_t values, and their order, match that of the bp
-	   algorithm (variant 2) because they are not used to query actual
-	   blocksizes but rather query the ways of parallelism for the various
-	   loops. For example, the 2nd loop in variant 1 partitions in the m
-	   dimension (in increments of MR), but parallelizes that m dimension
-	   with BLIS_JR_NT. The only difference is that the _packa and _packb
-	   arrays have been adjusted for the semantic difference in order in
-	   which packa and packb nodes are encountered in the thrinfo tree.
-	   That is, this panel-block algorithm partitions an NC x KC submatrix
-	   of A to be packed in the 4th loop, and a KC x MC submatrix of B
-	   to be packed in the 3rd loop. */
-	/*                    5thloop  4thloop         packa  3rdloop         packb  2ndloop  1stloop  ukrloop */
-	bszid_t bszids[8] = { BLIS_NC, BLIS_KC, BLIS_NO_PART, BLIS_MC, BLIS_NO_PART, BLIS_NR, BLIS_MR, BLIS_KR };
-\
 	/* Determine whether we are using more than one thread. */
 	const bool is_mt = ( bli_rntm_calc_num_threads( rntm ) > 1 );
-\
-	thrinfo_t* thread_jc = NULL;
-	thrinfo_t* thread_pc = NULL;
-	thrinfo_t* thread_pa = NULL;
-	thrinfo_t* thread_ic = NULL;
-	thrinfo_t* thread_pb = NULL;
-	thrinfo_t* thread_jr = NULL;
-\
-	/* Grow the thrinfo_t tree. */
-	bszid_t* bszids_jc = bszids;
-	         thread_jc = thread;
-	bli_thrinfo_sup_grow( rntm, bszids_jc, thread_jc );
-\
-	bszid_t* bszids_pc = &bszids_jc[1];
-	         thread_pc = bli_thrinfo_sub_node( thread_jc );
-	bli_thrinfo_sup_grow( rntm, bszids_pc, thread_pc );
 
-	bszid_t* bszids_pa = &bszids_pc[1];
-	         thread_pa = bli_thrinfo_sub_node( thread_pc );
-
-	bszid_t* bszids_ic = &bszids_pa[1];
-	         thread_ic = bli_thrinfo_sub_node( thread_pa );
-	bli_thrinfo_sup_grow( rntm, bszids_ic, thread_ic );
-
-	bszid_t* bszids_pb = &bszids_ic[1];
-	         thread_pb = bli_thrinfo_sub_node( thread_ic );
-
-	bszid_t* bszids_jr = &bszids_pb[1];
-	         thread_jr = bli_thrinfo_sub_node( thread_pb );
-	bli_thrinfo_sup_grow( rntm, bszids_jr, thread_jr );
+	thrinfo_t* thread_jc = thread;
+	thrinfo_t* thread_pc = bli_thrinfo_sub_node( thread_jc );
+	thrinfo_t* thread_pa = bli_thrinfo_sub_node( thread_pc );
+	thrinfo_t* thread_ic = bli_thrinfo_sub_node( thread_pa );
+	thrinfo_t* thread_pb = bli_thrinfo_sub_node( thread_ic );
+	thrinfo_t* thread_jr = bli_thrinfo_sub_node( thread_pb );
 
 	/* Compute the JC loop thread range for the current thread. */
 	dim_t jc_start, jc_end;
@@ -344,8 +302,6 @@ void bli_gemmsup_ref_var1n
 			  ( void** )&a_use, &rs_a_use, &cs_a_use,
 			                    &ps_a_use,
 			  cntx,
-			  rntm,
-			  &mem_a,
 			  thread_pa
 			);
 
@@ -402,8 +358,6 @@ void bli_gemmsup_ref_var1n
 				  ( void** )&b_use, &cs_b_use, &rs_b_use,
 				                    &ps_b_use,
 				  cntx,
-				  rntm,
-				  &mem_b,
 				  thread_pb
 				);
 
@@ -484,15 +438,11 @@ void bli_gemmsup_ref_var1n
 	bli_packm_sup_finalize_mem
 	(
 	  packa,
-	  rntm,
-	  &mem_a,
 	  thread_pa
 	);
 	bli_packm_sup_finalize_mem
 	(
 	  packb,
-	  rntm,
-	  &mem_b,
 	  thread_pb
 	);
 
@@ -518,7 +468,7 @@ void bli_gemmsup_ref_var2m
        const obj_t*     c,
              stor3_t    stor_id,
        const cntx_t*    cntx,
-             rntm_t*    rntm,
+       const rntm_t*    rntm,
              thrinfo_t* thread
      )
 {
@@ -682,46 +632,15 @@ void bli_gemmsup_ref_var2m
 
 	auxinfo_t       aux;
 
-	mem_t mem_a = BLIS_MEM_INITIALIZER;
-	mem_t mem_b = BLIS_MEM_INITIALIZER;
-
-	/* Define an array of bszid_t ids, which will act as our substitute for
-	   the cntl_t tree. */
-	/*                    5thloop  4thloop         packb  3rdloop         packa  2ndloop  1stloop  ukrloop */
-	bszid_t bszids[8] = { BLIS_NC, BLIS_KC, BLIS_NO_PART, BLIS_MC, BLIS_NO_PART, BLIS_NR, BLIS_MR, BLIS_KR };
-
 	/* Determine whether we are using more than one thread. */
 	const bool is_mt = ( bli_rntm_calc_num_threads( rntm ) > 1 );
 
-	thrinfo_t* thread_jc = NULL;
-	thrinfo_t* thread_pc = NULL;
-	thrinfo_t* thread_pb = NULL;
-	thrinfo_t* thread_ic = NULL;
-	thrinfo_t* thread_pa = NULL;
-	thrinfo_t* thread_jr = NULL;
-
-	/* Grow the thrinfo_t tree. */
-	bszid_t* bszids_jc = bszids;
-	         thread_jc = thread;
-	bli_thrinfo_sup_grow( rntm, bszids_jc, thread_jc );
-
-	bszid_t* bszids_pc = &bszids_jc[1];
-	         thread_pc = bli_thrinfo_sub_node( thread_jc );
-	bli_thrinfo_sup_grow( rntm, bszids_pc, thread_pc );
-
-	bszid_t* bszids_pb = &bszids_pc[1];
-	         thread_pb = bli_thrinfo_sub_node( thread_pc );
-
-	bszid_t* bszids_ic = &bszids_pb[1];
-	         thread_ic = bli_thrinfo_sub_node( thread_pb );
-	bli_thrinfo_sup_grow( rntm, bszids_ic, thread_ic );
-
-	bszid_t* bszids_pa = &bszids_ic[1];
-	         thread_pa = bli_thrinfo_sub_node( thread_ic );
-
-	bszid_t* bszids_jr = &bszids_pa[1];
-	         thread_jr = bli_thrinfo_sub_node( thread_pa );
-	bli_thrinfo_sup_grow( rntm, bszids_jr, thread_jr );
+	thrinfo_t* thread_jc = thread;
+	thrinfo_t* thread_pc = bli_thrinfo_sub_node( thread_jc );
+	thrinfo_t* thread_pb = bli_thrinfo_sub_node( thread_pc );
+	thrinfo_t* thread_ic = bli_thrinfo_sub_node( thread_pb );
+	thrinfo_t* thread_pa = bli_thrinfo_sub_node( thread_ic );
+	thrinfo_t* thread_jr = bli_thrinfo_sub_node( thread_pa );
 
 	/* Compute the JC loop thread range for the current thread. */
 	dim_t jc_start, jc_end;
@@ -785,8 +704,6 @@ void bli_gemmsup_ref_var2m
 			  ( void** )&b_use, &cs_b_use, &rs_b_use,
 			                    &ps_b_use,
 			  cntx,
-			  rntm,
-			  &mem_b,
 			  thread_pb
 			);
 
@@ -841,8 +758,6 @@ void bli_gemmsup_ref_var2m
 				  ( void** )&a_use, &rs_a_use, &cs_a_use,
 				                    &ps_a_use,
 				  cntx,
-				  rntm,
-				  &mem_a,
 				  thread_pa
 				);
 
@@ -923,15 +838,11 @@ void bli_gemmsup_ref_var2m
 	bli_packm_sup_finalize_mem
 	(
 	  packa,
-	  rntm,
-	  &mem_a,
 	  thread_pa
 	);
 	bli_packm_sup_finalize_mem
 	(
 	  packb,
-	  rntm,
-	  &mem_b,
 	  thread_pb
 	);
 

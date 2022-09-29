@@ -42,7 +42,7 @@ err_t bli_gemmsup_int
        const obj_t*  beta,
        const obj_t*  c,
        const cntx_t* cntx,
-             rntm_t* rntm,
+       const rntm_t* rntm,
              thrinfo_t* thread
      )
 {
@@ -94,12 +94,12 @@ err_t bli_gemmsup_int
 	const dim_t  n           = bli_obj_width( c );
 	const dim_t  MR          = bli_cntx_get_blksz_def_dt( dt, BLIS_MR, cntx );
 	const dim_t  NR          = bli_cntx_get_blksz_def_dt( dt, BLIS_NR, cntx );
-	const bool   auto_factor = bli_rntm_auto_factor( rntm );
-	const dim_t  n_threads   = bli_rntm_num_threads( rntm );
+	const bool  auto_factor = bli_rntm_auto_factor( rntm );
+	const dim_t n_threads   = bli_rntm_num_threads( rntm );
 	bool         use_bp      = TRUE;
 	dim_t        jc_new;
 	dim_t        ic_new;
-
+    rntm_t       rntm_l = *rntm;
 
 	if ( is_primary )
 	{
@@ -137,32 +137,31 @@ err_t bli_gemmsup_int
 			// Update the ways of parallelism for the jc and ic loops, and then
 			// update the current thread's root thrinfo_t node according to the
 			// new ways of parallelism value for the jc loop.
-			bli_rntm_set_ways_only( jc_new, 1, ic_new, 1, 1, rntm );
-			bli_l3_sup_thrinfo_update_root( rntm, thread );
+			bli_rntm_set_ways_only( jc_new, 1, ic_new, 1, 1, &rntm_l );
+			bli_l3_sup_thrinfo_update( &rntm_l, &thread );
 		}
-
 
 		if ( use_bp )
 		{
 			#ifdef TRACEVAR
-			if ( bli_thread_am_ochief( thread ) )
+			if ( bli_thread_am_chief( thread ) )
 			printf( "bli_l3_sup_int(): var2m primary\n" );
 			#endif
 			// block-panel macrokernel; m -> mc, mr; n -> nc, nr: var2()
 			bli_gemmsup_ref_var2m( BLIS_NO_TRANSPOSE,
 			                       alpha, a, b, beta, c,
-			                       stor_id, cntx, rntm, thread );
+			                       stor_id, cntx, &rntm_l, thread );
 		}
 		else // use_pb
 		{
 			#ifdef TRACEVAR
-			if ( bli_thread_am_ochief( thread ) )
+			if ( bli_thread_am_chief( thread ) )
 			printf( "bli_l3_sup_int(): var1n primary\n" );
 			#endif
 			// panel-block macrokernel; m -> nc*,mr; n -> mc*,nr: var1()
 			bli_gemmsup_ref_var1n( BLIS_NO_TRANSPOSE,
 			                       alpha, a, b, beta, c,
-			                       stor_id, cntx, rntm, thread );
+			                       stor_id, cntx, &rntm_l, thread );
 			// *requires nudging of nc up to be a multiple of mr.
 		}
 	}
@@ -202,32 +201,32 @@ err_t bli_gemmsup_int
 			// Update the ways of parallelism for the jc and ic loops, and then
 			// update the current thread's root thrinfo_t node according to the
 			// new ways of parallelism value for the jc loop.
-			bli_rntm_set_ways_only( jc_new, 1, ic_new, 1, 1, rntm );
-			bli_l3_sup_thrinfo_update_root( rntm, thread );
+			bli_rntm_set_ways_only( jc_new, 1, ic_new, 1, 1, &rntm_l );
+			bli_l3_sup_thrinfo_update( &rntm_l, &thread );
 		}
 
 
 		if ( use_bp )
 		{
 			#ifdef TRACEVAR
-			if ( bli_thread_am_ochief( thread ) )
+			if ( bli_thread_am_chief( thread ) )
 			printf( "bli_l3_sup_int(): var2m non-primary\n" );
 			#endif
 			// panel-block macrokernel; m -> nc, nr; n -> mc, mr: var2() + trans
 			bli_gemmsup_ref_var2m( BLIS_TRANSPOSE,
 			                       alpha, a, b, beta, c,
-			                       stor_id, cntx, rntm, thread );
+			                       stor_id, cntx, &rntm_l, thread );
 		}
 		else // use_pb
 		{
 			#ifdef TRACEVAR
-			if ( bli_thread_am_ochief( thread ) )
+			if ( bli_thread_am_chief( thread ) )
 			printf( "bli_l3_sup_int(): var1n non-primary\n" );
 			#endif
 			// block-panel macrokernel; m -> mc*,nr; n -> nc*,mr: var1() + trans
 			bli_gemmsup_ref_var1n( BLIS_TRANSPOSE,
 			                       alpha, a, b, beta, c,
-			                       stor_id, cntx, rntm, thread );
+			                       stor_id, cntx, &rntm_l, thread );
 			// *requires nudging of mc up to be a multiple of nr.
 		}
 	}
@@ -246,7 +245,7 @@ err_t bli_gemmtsup_int
        const obj_t*  beta,
        const obj_t*  c,
        const cntx_t* cntx,
-             rntm_t* rntm,
+       const rntm_t* rntm,
              thrinfo_t* thread
      )
 {
@@ -273,7 +272,7 @@ err_t bli_gemmtsup_int
 	bool         use_bp      = TRUE;
 	dim_t        jc_new;
 	dim_t        ic_new;
-
+    rntm_t       rntm_l = *rntm;
 
 	if ( is_primary )
 	{
@@ -311,35 +310,35 @@ err_t bli_gemmtsup_int
 			// Update the ways of parallelism for the jc and ic loops, and then
 			// update the current thread's root thrinfo_t node according to the
 			// new ways of parallelism value for the jc loop.
-			bli_rntm_set_ways_only( jc_new, 1, ic_new, 1, 1, rntm );
-			bli_l3_sup_thrinfo_update_root( rntm, thread );
+			bli_rntm_set_ways_only( jc_new, 1, ic_new, 1, 1, &rntm_l );
+			bli_l3_sup_thrinfo_update( &rntm_l, &thread );
 		}
 
 
 		if ( use_bp )
 		{
 			#ifdef TRACEVAR
-			if ( bli_thread_am_ochief( thread ) )
+			if ( bli_thread_am_chief( thread ) )
 			printf( "bli_l3_sup_int(): var2m primary\n" );
 			#endif
 			// block-panel macrokernel; m -> mc, mr; n -> nc, nr: var2()
 #if 0
 			bli_gemmtsup_ref_var2m( BLIS_NO_TRANSPOSE,
 			                        alpha, a, b, beta, c,
-			                        stor_id, cntx, rntm, thread );
+			                        stor_id, cntx, &rntm_l, thread );
 #endif
 		}
 		else // use_pb
 		{
 			#ifdef TRACEVAR
-			if ( bli_thread_am_ochief( thread ) )
+			if ( bli_thread_am_chief( thread ) )
 			printf( "bli_l3_sup_int(): var1n primary\n" );
 			#endif
 			// panel-block macrokernel; m -> nc*,mr; n -> mc*,nr: var1()
 #if 0
 			bli_gemmtsup_ref_var1n( BLIS_NO_TRANSPOSE,
 			                        alpha, a, b, beta, c,
-			                        stor_id, cntx, rntm, thread );
+			                        stor_id, cntx, &rntm_l, thread );
 #endif
 			// *requires nudging of nc up to be a multiple of mr.
 		}
@@ -380,35 +379,35 @@ err_t bli_gemmtsup_int
 			// Update the ways of parallelism for the jc and ic loops, and then
 			// update the current thread's root thrinfo_t node according to the
 			// new ways of parallelism value for the jc loop.
-			bli_rntm_set_ways_only( jc_new, 1, ic_new, 1, 1, rntm );
-			bli_l3_sup_thrinfo_update_root( rntm, thread );
+			bli_rntm_set_ways_only( jc_new, 1, ic_new, 1, 1, &rntm_l );
+			bli_l3_sup_thrinfo_update( &rntm_l, &thread );
 		}
 
 
 		if ( use_bp )
 		{
 			#ifdef TRACEVAR
-			if ( bli_thread_am_ochief( thread ) )
+			if ( bli_thread_am_chief( thread ) )
 			printf( "bli_l3_sup_int(): var2m non-primary\n" );
 			#endif
 			// panel-block macrokernel; m -> nc, nr; n -> mc, mr: var2() + trans
 #if 0
 			bli_gemmtsup_ref_var2m( BLIS_TRANSPOSE,
 			                        alpha, a, b, beta, c,
-			                        stor_id, cntx, rntm, thread );
+			                        stor_id, cntx, &rntm_l, thread );
 #endif
 		}
 		else // use_pb
 		{
 			#ifdef TRACEVAR
-			if ( bli_thread_am_ochief( thread ) )
+			if ( bli_thread_am_chief( thread ) )
 			printf( "bli_l3_sup_int(): var1n non-primary\n" );
 			#endif
 			// block-panel macrokernel; m -> mc*,nr; n -> nc*,mr: var1() + trans
 #if 0
 			bli_gemmtsup_ref_var1n( BLIS_TRANSPOSE,
 			                        alpha, a, b, beta, c,
-			                        stor_id, cntx, rntm, thread );
+			                        stor_id, cntx, &rntm_l, thread );
 #endif
 			// *requires nudging of mc up to be a multiple of nr.
 		}

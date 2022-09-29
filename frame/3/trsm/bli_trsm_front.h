@@ -41,7 +41,7 @@ void bli_trsm_front
        const obj_t*  b,
        const cntx_t* cntx,
              rntm_t* rntm,
-             cntl_t* cntl
+       const cntl_t* cntl
      );
 
 #ifdef BLIS_ENABLE_SMALL_MATRIX
@@ -52,7 +52,7 @@ err_t bli_trsm_small
        obj_t*  a,
        obj_t*  b,
        cntx_t* cntx,
-       cntl_t* cntl
+ const cntl_t* cntl
      );
 #endif
 

@@ -50,7 +50,7 @@ void PASTEMAC0(opname) \
        const obj_t*     c, \
              stor3_t    eff_id, \
        const cntx_t*    cntx, \
-             rntm_t*    rntm, \
+       const rntm_t*    rntm, \
              thrinfo_t* thread  \
      );
 

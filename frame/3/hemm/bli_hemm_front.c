@@ -44,7 +44,7 @@ void bli_hemm_front
        const obj_t*  c,
        const cntx_t* cntx,
              rntm_t* rntm,
-             cntl_t* cntl
+       const cntl_t* cntl
      )
 {
 	bli_init_once();

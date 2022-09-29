@@ -35,9 +35,7 @@
 
 #include "blis.h"
 
-thrinfo_t BLIS_PACKM_SINGLE_THREADED = {};
-thrinfo_t BLIS_GEMM_SINGLE_THREADED  = {};
-thrcomm_t BLIS_SINGLE_COMM           = {};
+thrcomm_t BLIS_SINGLE_COMM = {};
 
 // The global rntm_t structure. (The definition resides in bli_rntm.c.)
 extern rntm_t global_rntm;
@@ -51,8 +49,6 @@ extern bli_pthread_mutex_t global_rntm_mutex;
 void bli_thread_init( void )
 {
 	bli_thrcomm_init( 1, &BLIS_SINGLE_COMM );
-	bli_packm_thrinfo_init_single( &BLIS_PACKM_SINGLE_THREADED );
-	bli_l3_thrinfo_init_single( &BLIS_GEMM_SINGLE_THREADED );
 
 	// Read the environment variables and use them to initialize the
 	// global runtime object.

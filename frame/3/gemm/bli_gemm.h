@@ -32,10 +32,11 @@
 
 */
 
+// bli_gemm_var.h must be included before bli_gemm_cntl.h
+#include "bli_gemm_var.h"
+
 #include "bli_gemm_cntl.h"
 #include "bli_gemm_front.h"
-
-#include "bli_gemm_var.h"
 
 #include "bli_gemm_ind_opt.h"
 

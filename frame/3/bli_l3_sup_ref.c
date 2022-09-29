@@ -42,7 +42,7 @@ err_t bli_gemmsup_ref
        const obj_t*  beta,
        const obj_t*  c,
        const cntx_t* cntx,
-             rntm_t* rntm
+       const rntm_t* rntm
      )
 {
 	// This function implements the default gemmsup handler. If you are a
@@ -53,25 +53,6 @@ err_t bli_gemmsup_ref
 	// Check parameters.
 	if ( bli_error_checking_is_enabled() )
 		bli_gemm_check( alpha, a, b, beta, c, cntx );
-
-#if 0
-	// NOTE: This special case handling is done within the variants.
-
-	// If alpha is zero, scale by beta and return.
-	if ( bli_obj_equals( alpha, &BLIS_ZERO ) )
-	{
-		bli_scalm( beta, c );
-		return;
-	}
-
-	// If A or B has a zero dimension, scale C by beta and return early.
-	if ( bli_obj_has_zero_dim( a ) ||
-	     bli_obj_has_zero_dim( b ) )
-	{
-		bli_scalm( beta, c );
-		return BLIS_SUCCESS;
-	}
-#endif
 
 	const stor3_t stor_id = bli_obj_stor3_from_strides( c, a, b );
 
@@ -89,20 +70,21 @@ err_t bli_gemmsup_ref
 
 	// Parse and interpret the contents of the rntm_t object to properly
 	// set the ways of parallelism for each loop.
+    rntm_t rntm_l = *rntm;
 	bli_rntm_set_ways_from_rntm_sup
 	(
 	  bli_obj_length( c ),
 	  bli_obj_width( c ),
 	  bli_obj_width( a ),
-	  rntm
+	  &rntm_l
 	);
 
 #if 0
-	printf( "rntm.pack_a = %d\n", ( int )bli_rntm_pack_a( rntm ) );
-	printf( "rntm.pack_b = %d\n", ( int )bli_rntm_pack_b( rntm ) );
+	printf( "rntm.pack_a = %d\n", ( int )bli_rntm_pack_a( &rntm_l ) );
+	printf( "rntm.pack_b = %d\n", ( int )bli_rntm_pack_b( &rntm_l ) );
 
-	//bli_rntm_set_pack_a( 0, rntm );
-	//bli_rntm_set_pack_b( 0, rntm );
+	//bli_rntm_set_pack_a( 0, &rntm_l );
+	//bli_rntm_set_pack_b( 0, &rntm_l );
 #endif
 
 	return
@@ -116,7 +98,7 @@ err_t bli_gemmsup_ref
 	  beta,
 	  c,
 	  cntx,
-	  rntm
+	  &rntm_l
 	);
 }
 
@@ -130,7 +112,7 @@ err_t bli_gemmtsup_ref
        const obj_t*  beta,
        const obj_t*  c,
        const cntx_t* cntx,
-             rntm_t* rntm
+       const rntm_t* rntm
      )
 {
 	// This function implements the default gemmtsup handler. If you are a
@@ -163,12 +145,13 @@ err_t bli_gemmtsup_ref
 
 	// Parse and interpret the contents of the rntm_t object to properly
 	// set the ways of parallelism for each loop.
+    rntm_t rntm_l = *rntm;
 	bli_rntm_set_ways_from_rntm_sup
 	(
 	  bli_obj_length( c ),
 	  bli_obj_width( c ),
 	  bli_obj_width( a ),
-	  rntm
+	  &rntm_l
 	);
 
 	return
@@ -182,7 +165,7 @@ err_t bli_gemmtsup_ref
 	  beta,
 	  c,
 	  cntx,
-	  rntm
+	  &rntm_l
 	);
 }
 

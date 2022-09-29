@@ -57,9 +57,8 @@ void bli_packm_blk_var1
        const obj_t*   c,
              obj_t*   p,
        const cntx_t*  cntx,
-             rntm_t*  rntm,
-             cntl_t*  cntl,
-       const thrinfo_t* thread
+       const cntl_t*  cntl,
+             thrinfo_t* thread
      )
 {
 	// Extract various fields from the control tree.
@@ -71,7 +70,7 @@ void bli_packm_blk_var1
 	// Every thread initializes p and determines the size of memory
 	// block needed (which gets embedded into the otherwise "blank" mem_t
 	// entry in the control tree node). Return early if no packing is required.
-	if ( !bli_packm_init( c, p, cntx, rntm, cntl, thread ) )
+	if ( !bli_packm_init( c, p, cntx, cntl, thread ) )
 		return;
 
 	// Check parameters.
@@ -272,7 +271,7 @@ void bli_packm_blk_var1
 				                p_use,       ldp,
 				                       is_p_use,
 				                ( cntx_t* )cntx,
-				                params );
+				                bli_cntl_params( cntl ) );
 			}
 
 			// NOTE: This value is usually LESS than ps_p because triangular
@@ -304,7 +303,7 @@ void bli_packm_blk_var1
 				                c_begin, incc, ldc,
 				                p_begin,       ldp, is_p,
 				                ( cntx_t* )cntx,
-				                params );
+				                bli_cntl_params( cntl ) );
 			}
 		}
 

@@ -37,21 +37,21 @@
 
 cntl_t* bli_gemm_cntl_create
      (
-       rntm_t* rntm,
+       pool_t* pool,
        opid_t  family,
        pack_t  schema_a,
        pack_t  schema_b,
        void_fp ker
      )
 {
-	return bli_gemmbp_cntl_create( rntm, family, schema_a, schema_b, ker );
+	return bli_gemmbp_cntl_create( pool, family, schema_a, schema_b, ker );
 }
 
 // -----------------------------------------------------------------------------
 
 cntl_t* bli_gemmbp_cntl_create
      (
-       rntm_t* rntm,
+       pool_t* pool,
        opid_t  family,
        pack_t  schema_a,
        pack_t  schema_b,
@@ -73,7 +73,7 @@ cntl_t* bli_gemmbp_cntl_create
 	// Create two nodes for the macro-kernel.
 	cntl_t* gemm_cntl_bu_ke = bli_gemm_cntl_create_node
 	(
-	  rntm,    // the thread's runtime structure
+	  pool,    // the thread's runtime structure
 	  family,  // the operation family
 	  BLIS_MR, // needed for bli_thrinfo_rgrow()
 	  NULL,    // variant function pointer not used
@@ -82,7 +82,7 @@ cntl_t* bli_gemmbp_cntl_create
 
 	cntl_t* gemm_cntl_bp_bu = bli_gemm_cntl_create_node
 	(
-	  rntm,    // the thread's runtime structure
+	  pool,    // the thread's runtime structure
 	  family,
 	  BLIS_NR, // not used by macro-kernel, but needed for bli_thrinfo_rgrow()
 	  macro_kernel_fp,
@@ -92,7 +92,7 @@ cntl_t* bli_gemmbp_cntl_create
 	// Create a node for packing matrix A.
 	cntl_t* gemm_cntl_packa = bli_packm_cntl_create_node
 	(
-	  rntm,
+	  pool,
 	  bli_l3_packa,  // pack the left-hand operand
 	  BLIS_MR,
 	  BLIS_KR,
@@ -107,7 +107,7 @@ cntl_t* bli_gemmbp_cntl_create
 	// Create a node for partitioning the m dimension by MC.
 	cntl_t* gemm_cntl_op_bp = bli_gemm_cntl_create_node
 	(
-	  rntm,
+	  pool,
 	  family,
 	  BLIS_MC,
 	  bli_gemm_blk_var1,
@@ -117,7 +117,7 @@ cntl_t* bli_gemmbp_cntl_create
 	// Create a node for packing matrix B.
 	cntl_t* gemm_cntl_packb = bli_packm_cntl_create_node
 	(
-	  rntm,
+	  pool,
 	  bli_l3_packb,  // pack the right-hand operand
 	  BLIS_NR,
 	  BLIS_KR,
@@ -132,7 +132,7 @@ cntl_t* bli_gemmbp_cntl_create
 	// Create a node for partitioning the k dimension by KC.
 	cntl_t* gemm_cntl_mm_op = bli_gemm_cntl_create_node
 	(
-	  rntm,
+	  pool,
 	  family,
 	  BLIS_KC,
 	  bli_gemm_blk_var3,
@@ -142,7 +142,7 @@ cntl_t* bli_gemmbp_cntl_create
 	// Create a node for partitioning the n dimension by NC.
 	cntl_t* gemm_cntl_vl_mm = bli_gemm_cntl_create_node
 	(
-	  rntm,
+	  pool,
 	  family,
 	  BLIS_NC,
 	  bli_gemm_blk_var2,
@@ -253,25 +253,24 @@ cntl_t* bli_gemmpb_cntl_create
 
 void bli_gemm_cntl_free
      (
-       rntm_t*    rntm,
-       cntl_t*    cntl,
-       thrinfo_t* thread
+       pool_t* pool,
+       cntl_t* cntl
      )
 {
-	bli_cntl_free( rntm, cntl, thread );
+	bli_cntl_free( pool, cntl );
 }
 
 // -----------------------------------------------------------------------------
 
 cntl_t* bli_gemm_cntl_create_node
      (
-       rntm_t* rntm,
+       pool_t* pool,
        opid_t  family,
        bszid_t bszid,
        void_fp var_func,
        cntl_t* sub_node
      )
 {
-	return bli_cntl_create_node( rntm, family, bszid, var_func, NULL, sub_node );
+	return bli_cntl_create_node( pool, family, bszid, var_func, NULL, sub_node );
 }
 

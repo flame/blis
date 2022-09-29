@@ -51,7 +51,6 @@ typedef void (*FUNCPTR_T)
        void*   beta,
        void*   c, inc_t rs_c, inc_t cs_c,
        cntx_t* cntx,
-       rntm_t* rntm,
        thrinfo_t* thread
      );
 
@@ -64,8 +63,7 @@ void bli_trmm_lu_ker_var2
        const obj_t*  b,
        const obj_t*  c,
        const cntx_t* cntx,
-             rntm_t* rntm,
-             cntl_t* cntl,
+       const cntl_t* cntl,
              thrinfo_t* thread
      )
 {
@@ -121,7 +119,6 @@ void bli_trmm_lu_ker_var2
 	  ( void* )buf_beta,
 	           buf_c, rs_c, cs_c,
 	  ( cntx_t* )cntx,
-	  rntm,
 	  thread
 	);
 }
@@ -144,7 +141,6 @@ void PASTEMAC(ch,varname) \
        void*   beta, \
        void*   c, inc_t rs_c, inc_t cs_c, \
        cntx_t* cntx, \
-       rntm_t* rntm, \
        thrinfo_t* thread  \
      ) \
 { \

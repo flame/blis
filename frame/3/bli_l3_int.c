@@ -42,8 +42,7 @@ void bli_l3_int
        const obj_t*  beta,
        const obj_t*  c,
        const cntx_t* cntx,
-             rntm_t* rntm,
-             cntl_t* cntl,
+       const cntl_t* cntl,
              thrinfo_t* thread
      )
 {
@@ -68,7 +67,7 @@ void bli_l3_int
 	if ( bli_obj_has_zero_dim( a ) ||
 	     bli_obj_has_zero_dim( b ) )
 	{
-		if ( bli_thread_am_ochief( thread ) )
+		if ( bli_thread_am_chief( thread ) )
 			bli_scalm( beta, c );
 		bli_thread_barrier( thread );
 		return;
@@ -82,7 +81,7 @@ void bli_l3_int
 		// This should never execute.
 		bli_abort();
 
-		if ( bli_thread_am_ochief( thread ) )
+		if ( bli_thread_am_chief( thread ) )
 			bli_scalm( beta, c );
 		bli_thread_barrier( thread );
 		return;
@@ -130,9 +129,6 @@ void bli_l3_int
 	if ( !bli_obj_equals( beta, &BLIS_ONE ) )
 		bli_obj_scalar_apply_scalar( beta, &c_local );
 
-	// Create the next node in the thrinfo_t structure.
-	bli_thrinfo_grow( rntm, cntl, thread );
-
 	// Extract the function pointer from the current control tree node.
 	l3_var_oft f = bli_cntl_var_func( cntl );
 
@@ -143,7 +139,6 @@ void bli_l3_int
 	  &b_local,
 	  &c_local,
 	  cntx,
-	  rntm,
 	  cntl,
 	  thread
 	);

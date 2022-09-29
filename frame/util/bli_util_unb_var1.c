@@ -34,7 +34,6 @@
 */
 
 #include "blis.h"
-#include <fenv.h>
 
 //
 // Define BLAS-like interfaces with typed operands.

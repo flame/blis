@@ -69,8 +69,8 @@ void bli_gemm_md_front
        const obj_t*  beta,
        const obj_t*  c,
        const cntx_t* cntx,
-             rntm_t* rntm,
-             cntl_t* cntl
+       const rntm_t* rntm,
+       const cntl_t* cntl
      );
 
 void bli_gemm_md_zgemm
@@ -81,8 +81,8 @@ void bli_gemm_md_zgemm
        const obj_t*  beta,
        const obj_t*  c,
        const cntx_t* cntx,
-             rntm_t* rntm,
-             cntl_t* cntl
+       const rntm_t* rntm,
+       const cntl_t* cntl
      );
 
 // -----------------------------------------------------------------------------

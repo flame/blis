@@ -52,8 +52,8 @@ BLIS_INLINE dim_t bli_thrcomm_num_threads( thrcomm_t* comm )
 
 
 // Thread communicator prototypes.
-thrcomm_t* bli_thrcomm_create( rntm_t* rntm, dim_t n_threads );
-void       bli_thrcomm_free( rntm_t* rntm, thrcomm_t* comm );
+thrcomm_t* bli_thrcomm_create( pool_t* sba_pool, dim_t n_threads );
+void       bli_thrcomm_free( pool_t* sba_pool, thrcomm_t* comm );
 void       bli_thrcomm_init( dim_t n_threads, thrcomm_t* comm );
 void       bli_thrcomm_cleanup( thrcomm_t* comm );
 

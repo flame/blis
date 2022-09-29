@@ -40,7 +40,7 @@ err_t bli_gemmsup_ref
        const obj_t*  beta,
        const obj_t*  c,
        const cntx_t* cntx,
-             rntm_t* rntm
+       const rntm_t* rntm
      );
 
 err_t bli_gemmtsup_ref
@@ -51,6 +51,6 @@ err_t bli_gemmtsup_ref
        const obj_t*  beta,
        const obj_t*  c,
        const cntx_t* cntx,
-             rntm_t* rntm
+       const rntm_t* rntm
      );
 

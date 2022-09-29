@@ -231,16 +231,14 @@ void libblis_test_gemm_ukr_experiment
 	libblis_test_mobj_randomize( params, TRUE, &c );
 	bli_copym( &c, &c_save );
 
-	rntm_t rntm;
-	bli_rntm_init( &rntm );
-	bli_pba_rntm_set_pba( &rntm );
+	array_t* array = bli_sba_checkout_array( 1 );
 
 	// Transpose B to B^T for packing.
 	bli_obj_induce_trans( &b );
 
 	// Create pack objects for a and b, and pack them to ap and bp,
 	// respectively.
-	cntl_t* cntl_a = libblis_test_pobj_create
+	thrinfo_t* thread_a = libblis_test_pobj_create
 	(
 	  BLIS_MR,
 	  BLIS_KR,
@@ -249,9 +247,9 @@ void libblis_test_gemm_ukr_experiment
 	  BLIS_BUFFER_FOR_A_BLOCK,
 	  &a, &ap,
 	  cntx,
-	  &rntm
+	  array
 	);
-	cntl_t* cntl_b = libblis_test_pobj_create
+	thrinfo_t* thread_b = libblis_test_pobj_create
 	(
 	  BLIS_NR,
 	  BLIS_KR,
@@ -260,7 +258,7 @@ void libblis_test_gemm_ukr_experiment
 	  BLIS_BUFFER_FOR_B_PANEL,
 	  &b, &bp,
 	  cntx,
-	  &rntm
+	  array
 	);
 
 	// Transpose B^T back to B and Bp^T back to Bp.
@@ -293,8 +291,8 @@ void libblis_test_gemm_ukr_experiment
 
 	// Free the control tree nodes and release their cached mem_t entries
 	// back to the pba.
-	bli_cntl_free( &rntm, cntl_a, &BLIS_PACKM_SINGLE_THREADED );
-	bli_cntl_free( &rntm, cntl_b, &BLIS_PACKM_SINGLE_THREADED );
+	bli_thrinfo_free( thread_a );
+	bli_thrinfo_free( thread_b );
 
 	// Free the test objects.
 	bli_obj_free( &a );
