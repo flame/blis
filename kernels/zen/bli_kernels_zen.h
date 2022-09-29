@@ -386,3 +386,12 @@ void bli_dnorm2fv_unb_var1_avx
        double* norm,
        cntx_t*  cntx
      );
+
+void bli_zdscalv_zen_int10
+     (
+       conj_t           conjalpha,
+       dim_t            n,
+       double* restrict alpha,
+       dcomplex* restrict x, inc_t incx,
+       cntx_t* restrict cntx
+     );

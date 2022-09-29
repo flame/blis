@@ -159,8 +159,8 @@ GENTFUNCR2( dcomplex, double, z, d, blasname, blisname )
 \
 GENTFUNCSCAL( scomplex, scomplex, c,  , blasname, blisname ) \
 GENTFUNCSCAL( dcomplex, dcomplex, z,  , blasname, blisname ) \
-GENTFUNCSCAL( scomplex, float,    c, s, blasname, blisname ) \
-GENTFUNCSCAL( dcomplex, double,   z, d, blasname, blisname )
+GENTFUNCSCAL( scomplex, float,    c, s, blasname, blisname )
+// GENTFUNCSCAL( dcomplex, double,   z, d, blasname, blisname )
 
 
 #define INSERT_GENTFUNCSCAL_BLAS( blasname, blisname ) \

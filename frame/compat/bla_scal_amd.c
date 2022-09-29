@@ -355,6 +355,176 @@ void dscal_
   dscal_blis_impl( n, alpha, x, incx );
 }
 
+void zdscal_blis_impl
+     (
+       const f77_int* n,
+       const double* alpha,
+       dcomplex*   x, const f77_int* incx
+     )
+{
+    AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1)
+    AOCL_DTL_LOG_SCAL_INPUTS(AOCL_DTL_LEVEL_TRACE_1, 'Z', (void *) alpha, *n, *incx );
+    dim_t  n0;
+    dcomplex* x0;
+    inc_t  incx0;
+    /* Initialize BLIS. */
+    //bli_init_auto();
+
+    /* Convert/typecast negative values of n to zero. */
+    if ( *n < 0 ) n0 = ( dim_t )0;
+    else          n0 = ( dim_t )(*n);
+
+    if (*n == 0 || alpha == NULL) {
+      AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
+      return;
+    }
+
+    /* If the input increments are negative, adjust the pointers so we can
+       use positive increments instead. */
+    if ( *incx < 0 )
+    {
+        /* The semantics of negative stride in BLAS are that the vector
+        operand be traversed in reverse order. (Another way to think
+        of this is that negative strides effectively reverse the order
+        of the vector, but without any explicit data movements.) This
+        is also how BLIS interprets negative strides. The differences
+        is that with BLAS, the caller *always* passes in the 0th (i.e.,
+        top-most or left-most) element of the vector, even when the
+        stride is negative. By contrast, in BLIS, negative strides are
+        used *relative* to the vector address as it is given. Thus, in
+        BLIS, if this backwards traversal is desired, the caller *must*
+        pass in the address to the (n-1)th (i.e., the bottom-most or
+        right-most) element along with a negative stride. */
+
+        x0    = (x) + (n0-1)*(-*incx);
+        incx0 = ( inc_t )(*incx);
+    }
+    else
+    {
+        x0    = (x);
+        incx0 = ( inc_t )(*incx);
+    }
+
+    // This function is invoked on all architectures including ‘generic’.
+    // Non-AVX platforms will use the kernels derived from the context.
+    if ( bli_cpuid_is_avx_supported() == TRUE )
+    {
+#ifdef BLIS_ENABLE_OPENMP
+        // For sizes less than 10000, optimal number of threads is 1, but
+        // due to the overhead of calling omp functions it is being done outside
+        // by directly calling dscalv so as to get maximum performance.
+        if ( n0 <= 10000 )
+        {
+            bli_zdscalv_zen_int10
+            (
+              BLIS_NO_CONJUGATE,
+              n0,
+              (double*) alpha,
+              x0, incx0,
+              NULL
+            );
+        }
+        else
+        {
+            rntm_t rntm_local;
+            bli_rntm_init_from_global( &rntm_local );
+            dim_t nt = bli_rntm_num_threads( &rntm_local );
+
+#ifdef AOCL_DYNAMIC
+            dim_t nt_ideal;
+
+            if      ( n0 <= 20000 )   nt_ideal = 4;
+            else if ( n0 <= 1000000 ) nt_ideal = 8;
+            else if ( n0 <= 2500000 ) nt_ideal = 12;
+            else if ( n0 <= 5000000 ) nt_ideal = 32;
+            else                      nt_ideal = 64;
+
+            nt = bli_min( nt_ideal, nt );
+#endif
+            dim_t n_elem_per_thread = n0 / nt;
+            dim_t n_elem_rem = n0 % nt;
+
+            #pragma omp parallel num_threads( nt )
+            {
+                // The following conditions handle the optimal distribution of
+                // load among the threads.
+                // Say we have n0 = 50 & nt = 4.
+                // So we get 12 ( n0 / nt ) elements per thread along with 2
+                // remaining elements. Each of these remaining elements is given
+                // to the last threads, respectively.
+                // So, t0, t1, t2 and t3 gets 12, 12, 13 and 13 elements,
+                // respectively.
+                dim_t t_id = omp_get_thread_num();
+                dim_t npt, offset;
+
+                if ( t_id < ( nt - n_elem_rem ) )
+                {
+                    npt = n_elem_per_thread;
+                    offset = t_id * npt * incx0;
+                }
+                else
+                {
+                    npt = n_elem_per_thread + 1;
+                    offset = ( ( t_id * n_elem_per_thread ) + 
+                               ( t_id - ( nt - n_elem_rem ) ) ) * incx0;
+                }
+
+                bli_zdscalv_zen_int10
+                (
+                  BLIS_NO_CONJUGATE,
+                  npt,
+                  (double *) alpha,
+                  x0 + offset, incx0,
+                  NULL
+                );
+            }
+        }
+#else
+        // Default call to zdscalv for single-threaded work
+        bli_zdscalv_zen_int10
+        (
+          BLIS_NO_CONJUGATE,
+          n0,
+          (double *) alpha,
+          x0, incx0,
+          NULL
+        );
+#endif
+    }
+    else
+    {
+        // Sub-optimal implementation for zdscal
+        // by casting alpha to the double complex domain and
+        // calling the zscal
+        dcomplex  alpha_cast;
+        PASTEMAC2(d,z,copys)( *alpha, alpha_cast );
+
+        /* Call BLIS interface. */ \
+        PASTEMAC2(z,scalv,BLIS_TAPI_EX_SUF) \
+        ( \
+          BLIS_NO_CONJUGATE, \
+          n0, \
+          &alpha_cast, \
+          x0, incx0, \
+          NULL, \
+          NULL  \
+        ); \
+    }
+
+    AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1)
+}
+
+void zdscal_
+     (
+       const f77_int* n,
+       const double* alpha,
+       dcomplex*   x, const f77_int* incx
+     )
+{
+    zdscal_blis_impl( n, alpha, x, incx );
+}
+
+
 INSERT_GENTFUNCSCAL_BLAS_CZ( scal, scalv )
 
 #endif
