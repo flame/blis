@@ -121,6 +121,9 @@ PYTHON            := @PYTHON@
 CFLAGS_PRESET     := @cflags_preset@
 LDFLAGS_PRESET    := @ldflags_preset@
 
+# Whether to compile and link the Address Sanitizer library
+ENABLE_ASAN       := @enable_asan@
+
 # The level of debugging info to generate.
 DEBUG_TYPE        := @debug_type@
 

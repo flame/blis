@@ -230,6 +230,15 @@ print_usage()
 	echo "                 Enabling this option WILL NEGATIVELY IMPACT PERFORMANCE."
 	echo "                 Please use only for informational/debugging purposes."
 	echo " "
+	echo "   --enable-asan, --disable-asan"
+	echo " "
+	echo "                 Enable (disable by default) compiling and linking"
+    echo "                 framework code with the Address Sanitizer (Asan) library."
+    echo "                 Optimized kernels are NOT compiled with ASan support"
+    echo "                 due to limitations of register assignment in inline assembly."
+	echo "                 Enabling this option WILL NEGATIVELY IMPACT PERFORMANCE."
+	echo "                 Please use only for informational/debugging purposes."
+	echo " "
 	echo "   -i SIZE, --int-size=SIZE"
 	echo " "
 	echo "                 Set the size (in bits) of internal BLIS integers and"
@@ -2451,6 +2460,9 @@ main()
 	debug_type=''
 	debug_flag=''
 
+	# A flag indicating whether Address Sanitizer should be used.
+	enable_asan='no'
+
 	# The system flag.
 	enable_system='yes'
 
@@ -2568,6 +2580,12 @@ main()
 						enable-debug)
 							debug_flag=1
 							debug_type=noopt
+							;;
+						enable-asan)
+							enable_asan='yes'
+							;;
+						disable-asan)
+							enable_asan='no'
 							;;
 						enable-debug=*)
 							debug_flag=1
@@ -3357,6 +3375,14 @@ main()
 		echo "${script_name}: no preset LDFLAGS detected."
 	fi
 
+	# Check if the ASan flag was specified.
+	if [ "x${enable_asan}" = "xyes" ]; then
+		echo "${script_name}: enabling ASan support (except optimized kernels)."
+	else
+        enable_asan='no'
+		echo "${script_name}: ASan support disabled."
+	fi
+
 	# Check if the debug flag was specified.
 	if [ -n "${debug_flag}" ]; then
 		if [ "x${debug_type}" = "xopt" ]; then
@@ -3917,7 +3943,7 @@ main()
 	# Create a #define for the configuration family (config_name).
 	uconf=$(echo ${config_name} | tr '[:lower:]' '[:upper:]')
 	config_name_define="#define BLIS_FAMILY_${uconf}\n"
-	
+
 	# Create a list of #defines, one for each configuration in config_list.
 	config_list_defines=""
 	for conf in ${config_list}; do
@@ -4012,6 +4038,7 @@ main()
 		| sed -e "s/@libpthread@/${libpthread_esc}/g" \
 		| sed -e "s/@cflags_preset@/${cflags_preset_esc}/g" \
 		| sed -e "s/@ldflags_preset@/${ldflags_preset_esc}/g" \
+		| sed -e "s/@enable_asan@/${enable_asan}/g" \
 		| sed -e "s/@debug_type@/${debug_type}/g" \
 		| sed -e "s/@enable_system@/${enable_system}/g" \
 		| sed -e "s/@threading_model@/${threading_model}/g" \
