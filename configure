@@ -232,12 +232,13 @@ print_usage()
 	echo " "
 	echo "   --enable-asan, --disable-asan"
 	echo " "
-	echo "                 Enable (disable by default) compiling and linking"
-    echo "                 framework code with the Address Sanitizer (Asan) library."
-    echo "                 Optimized kernels are NOT compiled with ASan support"
-    echo "                 due to limitations of register assignment in inline assembly."
-	echo "                 Enabling this option WILL NEGATIVELY IMPACT PERFORMANCE."
-	echo "                 Please use only for informational/debugging purposes."
+	echo "                 Enable (disable by default) compiling and linking BLIS"
+	echo "                 framework code with the AddressSanitizer (ASan) library."
+	echo "                 Optimized kernels are NOT compiled with ASan support due"
+	echo "                 to limitations of register assignment in inline assembly."
+	echo "                 WARNING: ENABLING THIS OPTION WILL NEGATIVELY IMPACT"
+	echo "                 PERFORMANCE. Please use only for informational/debugging"
+	echo "                 purposes."
 	echo " "
 	echo "   -i SIZE, --int-size=SIZE"
 	echo " "
@@ -2460,7 +2461,7 @@ main()
 	debug_type=''
 	debug_flag=''
 
-	# A flag indicating whether Address Sanitizer should be used.
+	# A flag indicating whether AddressSanitizer should be used.
 	enable_asan='no'
 
 	# The system flag.
@@ -2581,18 +2582,18 @@ main()
 							debug_flag=1
 							debug_type=noopt
 							;;
-						enable-asan)
-							enable_asan='yes'
-							;;
-						disable-asan)
-							enable_asan='no'
-							;;
 						enable-debug=*)
 							debug_flag=1
 							debug_type=${OPTARG#*=}
 							;;
 						disable-debug)
 							debug_flag=0
+							;;
+						enable-asan)
+							enable_asan='yes'
+							;;
+						disable-asan)
+							enable_asan='no'
 							;;
 						enable-verbose-make)
 							enable_verbose='yes'
@@ -3375,12 +3376,18 @@ main()
 		echo "${script_name}: no preset LDFLAGS detected."
 	fi
 
-	# Check if the ASan flag was specified.
-	if [ "x${enable_asan}" = "xyes" ]; then
-		echo "${script_name}: enabling ASan support (except optimized kernels)."
+	# Check if the verbose make flag was specified.
+	if [ "x${enable_verbose}" = "xyes" ]; then
+		echo "${script_name}: enabling verbose make output. (disable with 'make V=0'.)"
 	else
-        enable_asan='no'
-		echo "${script_name}: ASan support disabled."
+		echo "${script_name}: disabling verbose make output. (enable with 'make V=1'.)"
+	fi
+
+	# Check if the ARG_MAX hack was requested.
+	if [ "x${enable_arg_max_hack}" = "xyes" ]; then
+		echo "${script_name}: enabling ARG_MAX hack."
+	else
+		echo "${script_name}: disabling ARG_MAX hack."
 	fi
 
 	# Check if the debug flag was specified.
@@ -3399,29 +3406,24 @@ main()
 		echo "${script_name}: debug symbols disabled."
 	fi
 
-	# Check if the verbose make flag was specified.
-	if [ "x${enable_verbose}" = "xyes" ]; then
-		echo "${script_name}: enabling verbose make output. (disable with 'make V=0'.)"
+	# Check if the AddressSanitizer flag was specified.
+	if [ "x${enable_asan}" = "xyes" ]; then
+		echo "${script_name}: enabling AddressSanitizer support (except for optimized kernels)."
 	else
-		echo "${script_name}: disabling verbose make output. (enable with 'make V=1'.)"
+        enable_asan='no'
+		echo "${script_name}: AddressSanitizer support disabled."
 	fi
 
-	# Check if the ARG_MAX hack was requested.
-	if [ "x${enable_arg_max_hack}" = "xyes" ]; then
-		echo "${script_name}: enabling ARG_MAX hack."
-	else
-		echo "${script_name}: disabling ARG_MAX hack."
-	fi
-
-	enable_shared_01=1
 	# Check if the static lib flag was specified.
 	if   [ "x${enable_static}" = "xyes" -a "x${enable_shared}" = "xyes" ]; then
 		echo "${script_name}: building BLIS as both static and shared libraries."
+		enable_shared_01=1
+	elif [ "x${enable_static}" = "xno"  -a "x${enable_shared}" = "xyes" ]; then
+		echo "${script_name}: building BLIS as a shared library (static library disabled)."
+		enable_shared_01=1
 	elif [ "x${enable_static}" = "xyes" -a "x${enable_shared}" = "xno"  ]; then
 		echo "${script_name}: building BLIS as a static library (shared library disabled)."
 		enable_shared_01=0
-	elif [ "x${enable_static}" = "xno"  -a "x${enable_shared}" = "xyes" ]; then
-		echo "${script_name}: building BLIS as a shared library (static library disabled)."
 	else
 		echo "${script_name}: Both static and shared libraries were disabled."
 		echo "${script_name}: *** Please enable one (or both) to continue."
