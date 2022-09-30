@@ -258,7 +258,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m
 	prefetch(0, mem(rcx, rdi, 1, 3*8)) // prefetch c + 1*rs_c
 	prefetch(0, mem(rcx, rdi, 2, 3*8)) // prefetch c + 2*rs_c
 #endif
-	lea(mem(r8,  r8,  4), rbp)         // rbp = 5*rs_a
+	lea(mem(r8,  r8,  4), rcx)         // rcx = 5*rs_a
 
 	
 
@@ -277,7 +277,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m
 #if 1
 	prefetch(0, mem(rax, r10, 1, 0*8)) // prefetch rax + 3*rs_a
 	prefetch(0, mem(rax, r8,  4, 0*8)) // prefetch rax + 4*rs_a
-	prefetch(0, mem(rax, rbp, 1, 0*8)) // prefetch rax + 5*rs_a
+	prefetch(0, mem(rax, rcx, 1, 0*8)) // prefetch rax + 5*rs_a
 #endif
 
 	vmovupd(mem(rax       ), ymm0)
@@ -341,7 +341,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m
 #if 1
 	prefetch(0, mem(rax, r10, 1, 0*8)) // prefetch rax + 3*rs_a
 	prefetch(0, mem(rax, r8,  4, 0*8)) // prefetch rax + 4*rs_a
-	prefetch(0, mem(rax, rbp, 1, 0*8)) // prefetch rax + 5*rs_a
+	prefetch(0, mem(rax, rcx, 1, 0*8)) // prefetch rax + 5*rs_a
 #endif
 
 	vmovupd(mem(rax       ), ymm0)
@@ -423,7 +423,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m
 #if 1
 	prefetch(0, mem(rax, r10, 1, 0*8)) // prefetch rax + 3*rs_a
 	prefetch(0, mem(rax, r8,  4, 0*8)) // prefetch rax + 4*rs_a
-	prefetch(0, mem(rax, rbp, 1, 0*8)) // prefetch rax + 5*rs_a
+	prefetch(0, mem(rax, rcx, 1, 0*8)) // prefetch rax + 5*rs_a
 #endif
 
 	vmovupd(mem(rax       ), ymm0)
@@ -560,6 +560,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m
 	//mov(var(rs_c), rdi)                // load rs_c
 	//lea(mem(, rdi, 8), rdi)            // rs_c *= sizeof(double)
 
+	lea(mem(r12), rcx)                 // rcx = c_iijj;
 	mov(var(alpha), rax)               // load address of alpha
 	mov(var(beta), rbx)                // load address of beta
 	vbroadcastsd(mem(rax), ymm0)       // load alpha and duplicate
@@ -677,7 +678,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m
       [a_next] "m" (a_next),
       [b_next] "m" (b_next)*/
 	: // register clobber list
-	  "rax", "rbx", "rcx", "rdx", "rsi", "rdi", "rbp",
+	  "rax", "rbx", "rcx", "rdx", "rsi", "rdi",
 	  "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15",
 	  "xmm0", "xmm1", "xmm2", "xmm3",
 	  "xmm4", "xmm5", "xmm6", "xmm7",
@@ -12950,7 +12951,7 @@ void bli_dgemmsup_rd_haswell_asm_6x4m
 	prefetch(0, mem(rcx, rdi, 1, 3*8)) // prefetch c + 1*rs_c
 	prefetch(0, mem(rcx, rdi, 2, 3*8)) // prefetch c + 2*rs_c
 #endif
-	lea(mem(r8,  r8,  4), rbp)         // rbp = 5*rs_a
+	lea(mem(r8,  r8,  4), rcx)         // rcx = 5*rs_a
 	
 
 	
@@ -12969,7 +12970,7 @@ void bli_dgemmsup_rd_haswell_asm_6x4m
 #if 1
 	prefetch(0, mem(rax, r10, 1, 0*8)) // prefetch rax + 3*rs_a
 	prefetch(0, mem(rax, r8,  4, 0*8)) // prefetch rax + 4*rs_a
-	prefetch(0, mem(rax, rbp, 1, 0*8)) // prefetch rax + 5*rs_a
+	prefetch(0, mem(rax, rcx, 1, 0*8)) // prefetch rax + 5*rs_a
 #endif
 
 	vmovupd(mem(rax       ), ymm0)
@@ -13033,7 +13034,7 @@ void bli_dgemmsup_rd_haswell_asm_6x4m
 #if 1
 	prefetch(0, mem(rax, r10, 1, 0*8)) // prefetch rax + 3*rs_a
 	prefetch(0, mem(rax, r8,  4, 0*8)) // prefetch rax + 4*rs_a
-	prefetch(0, mem(rax, rbp, 1, 0*8)) // prefetch rax + 5*rs_a
+	prefetch(0, mem(rax, rcx, 1, 0*8)) // prefetch rax + 5*rs_a
 #endif
 
 	vmovupd(mem(rax       ), ymm0)
@@ -13115,7 +13116,7 @@ void bli_dgemmsup_rd_haswell_asm_6x4m
 #if 1
 	prefetch(0, mem(rax, r10, 1, 0*8)) // prefetch rax + 3*rs_a
 	prefetch(0, mem(rax, r8,  4, 0*8)) // prefetch rax + 4*rs_a
-	prefetch(0, mem(rax, rbp, 1, 0*8)) // prefetch rax + 5*rs_a
+	prefetch(0, mem(rax, rcx, 1, 0*8)) // prefetch rax + 5*rs_a
 #endif
 	
 	vmovupd(mem(rax       ), ymm0)
@@ -13251,6 +13252,7 @@ void bli_dgemmsup_rd_haswell_asm_6x4m
 	//mov(var(rs_c), rdi)                // load rs_c
 	//lea(mem(, rdi, 8), rdi)            // rs_c *= sizeof(double)
 
+	lea(mem(r12), rcx)                 // rcx = c + 3*ii*rs_c;
 	mov(var(alpha), rax)               // load address of alpha
 	mov(var(beta), rbx)                // load address of beta
 	vbroadcastsd(mem(rax), ymm0)       // load alpha and duplicate
@@ -13361,7 +13363,7 @@ void bli_dgemmsup_rd_haswell_asm_6x4m
       [a_next] "m" (a_next),
       [b_next] "m" (b_next)*/
 	: // register clobber list
-	  "rax", "rbx", "rcx", "rdx", "rsi", "rdi", "rbp",
+	  "rax", "rbx", "rcx", "rdx", "rsi", "rdi",
 	  "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15",
 	  "xmm0", "xmm1", "xmm2", "xmm3",
 	  "xmm4", "xmm5", "xmm6", "xmm7",
