@@ -224,7 +224,7 @@ double ddot_blis_impl
     double* y0;
     inc_t  incx0;
     inc_t  incy0;
-    double  rho;
+    double  rho = 0.0;
 
     /* Initialize BLIS. */
 //  bli_init_auto();
@@ -299,7 +299,7 @@ double ddot_blis_impl
         {
             rntm_t rntm;
             double* rho_temp = NULL;
-            dim_t nt, n0_per_thread, n0_rem, nt_pred, npt, offset;
+            dim_t nt, n0_per_thread, n0_rem, nt_pred;
             rho = 0;
             // Initialize a local runtime with global settings.
             bli_rntm_init_from_global(&rntm);
@@ -352,6 +352,7 @@ double ddot_blis_impl
                 // to the last threads, respectively.
                 // So, t0, t1, t2 and t3 gets 12, 12, 13 and 13 elements,
                 // respectively.
+                dim_t npt, offset;
                 if ( t_id < ( nt - n0_rem ) )
                 {
                     npt = n0_per_thread;

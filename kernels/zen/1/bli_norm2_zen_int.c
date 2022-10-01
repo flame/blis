@@ -604,8 +604,8 @@ void bli_dznorm2fv_unb_var1_avx2
 
         for (; ( i + 4 ) <= n; i = i + 4)
         {
-            x0v.v = _mm256_loadu_pd( xt );
-            x1v.v = _mm256_loadu_pd( xt + 2 );
+            x0v.v = _mm256_loadu_pd( (double*) xt );
+            x1v.v = _mm256_loadu_pd( (double*) (xt + 2) );
 
             // Getting the abs of the vector elements.
             x0v.v = _mm256_andnot_pd( temp.v, x0v.v );
@@ -727,7 +727,7 @@ void bli_dznorm2fv_unb_var1_avx2
 
         for ( ; ( i + 2 ) <= n; i = i + 2 )
         {
-            x0v.v = _mm256_loadu_pd( xt );
+            x0v.v = _mm256_loadu_pd( (double*) xt );
 
             // Getting the abs of the vector elements.
             x0v.v = _mm256_andnot_pd( temp.v, x0v.v );
