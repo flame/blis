@@ -137,7 +137,7 @@ void bli_cntx_init_zen4( cntx_t* cntx )
 
       // amaxv
       BLIS_AMAXV_KER,  BLIS_FLOAT,  bli_samaxv_zen_int_avx512,
-      BLIS_AMAXV_KER,  BLIS_DOUBLE, bli_damaxv_zen_int_avx512,
+      BLIS_AMAXV_KER,  BLIS_DOUBLE, bli_damaxv_zen_int,
 
       // axpbyv
       BLIS_AXPBYV_KER, BLIS_FLOAT, bli_saxpbyv_zen_int10,
