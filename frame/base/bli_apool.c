@@ -188,7 +188,7 @@ void bli_apool_free_block
 		if ( pool != NULL )
 		{
 			// Finalize the pool.
-			bli_pool_finalize( pool );
+			bli_pool_finalize( pool, FALSE );
 
 			#ifdef BLIS_ENABLE_MEM_TRACING
 			printf( "bli_apool_free_block(): pool_t %d: ", ( int )i );
