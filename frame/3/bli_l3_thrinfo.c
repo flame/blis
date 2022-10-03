@@ -44,12 +44,16 @@ thrinfo_t* bli_l3_thrinfo_create
        const cntl_t*     cntl
      )
 {
+	pool_t* pool = NULL;
+	if ( array != NULL )
+		pool = bli_apool_array_elem( id, array );
+
 	// Create the root thrinfo_t node.
 	thrinfo_t* root = bli_thrinfo_create_root
 	(
 	  gl_comm,
 	  id,
-      bli_apool_array_elem( id, array ),
+      pool,
       bli_pba_query()
 	);
 

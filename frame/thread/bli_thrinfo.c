@@ -99,6 +99,8 @@ void bli_thrinfo_free
 	thrinfo_t* thrinfo_sub_prenode = bli_thrinfo_sub_prenode( thread );
 	thrinfo_t* thrinfo_sub_node    = bli_thrinfo_sub_node( thread );
     pool_t*    sba_pool            = bli_thread_sba_pool( thread );
+	mem_t*     cntl_mem_p          = bli_thread_mem( thread );
+    pba_t*     pba                 = bli_thread_pba( thread );
 
 	// Recursively free all children of the current thrinfo_t.
 	if ( thrinfo_sub_prenode != NULL )
@@ -126,6 +128,16 @@ void bli_thrinfo_free
 	#ifdef BLIS_ENABLE_MEM_TRACING
 	printf( "bli_thrinfo_free(): " );
 	#endif
+
+	// Free any allocated memory from the pba.
+	if ( bli_mem_is_alloc( cntl_mem_p ) )
+	{
+		bli_pba_release
+		(
+		  pba,
+		  cntl_mem_p
+		);
+	}
 
 	// Free the thrinfo_t struct.
 	bli_sba_release( sba_pool, thread );

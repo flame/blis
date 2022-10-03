@@ -232,8 +232,6 @@ void libblis_test_trsm_ukr_experiment
 	libblis_test_mobj_randomize( params, TRUE, &c );
 	bli_copym( &c, &c_save );
 
-	array_t* array = bli_sba_checkout_array( 1 );
-
 	// Create pack objects for a and b, and pack them to ap and bp,
 	// respectively.
 	thrinfo_t* thread_a = libblis_test_pobj_create
@@ -244,8 +242,7 @@ void libblis_test_trsm_ukr_experiment
 	  BLIS_PACKED_ROW_PANELS,
 	  BLIS_BUFFER_FOR_A_BLOCK,
 	  &a, &ap,
-	  cntx,
-	  array
+	  cntx
 	);
 
 	// Set the diagonal offset of ap.
@@ -277,8 +274,7 @@ bli_printm( "ap", &ap, "%5.2f", "" );
 		  BLIS_PACKED_COL_PANELS,
 		  BLIS_BUFFER_FOR_B_PANEL,
 		  &b, &bp,
-		  cntx,
-		  array
+		  cntx
 		);
 
 		// Transpose B^T back to B and Bp^T back to Bp.
