@@ -228,7 +228,8 @@ void bli_pool_init
      );
 void bli_pool_finalize
      (
-       pool_t* pool
+       pool_t* pool,
+       bool    reinit
      );
 void bli_pool_reinit
      (
