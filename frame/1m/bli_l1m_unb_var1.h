@@ -98,6 +98,7 @@ void PASTEMAC2(ch,opname,_unb_var1) \
        rntm_t* rntm  \
      );
 
+INSERT_GENTPROT_BASIC0( invscalm )
 INSERT_GENTPROT_BASIC0( scalm )
 INSERT_GENTPROT_BASIC0( setm )
 

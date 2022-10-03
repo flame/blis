@@ -169,10 +169,23 @@ print_usage()
 	echo " "
 	echo "   -t MODEL, --enable-threading[=MODEL], --disable-threading"
 	echo " "
-	echo "                 Enable threading in the library, using threading model"
-	echo "                 MODEL={openmp,pthreads,no}. If MODEL=no or "
-	echo "                 --disable-threading is specified, threading will be"
-	echo "                 disabled. The default is 'no'."
+	echo "                 Enable threading in the library, using threading model(s)"
+	echo "                 MODEL={single,openmp,pthreads,auto}. If multiple values"
+	echo "                 are specified within MODEL, they will all be compiled into"
+	echo "                 BLIS, and the choice of which to use will be determined at"
+	echo "                 runtime. If the user does not express a preference (by"
+	echo "                 setting the BLIS_THREAD_IMPL environment variable to"
+	echo "                 'single', 'openmp', or 'pthreads'; by calling the global"
+	echo "                 runtime API bli_thread_set_thread_impl(); or by encoding a"
+	echo "                 choice on a per-call basis within a rntm_t passed into the"
+	echo "                 expert API), then the first model listed in MODEL will be"
+	echo "                 used by default. Note that 'single' is silently appended"
+	echo "                 to whatever the user specifies in MODEL, meaning that"
+	echo "                 single-threaded functionality will always be available,"
+	echo "                 even if it is not requested and even if it is not enabled"
+	echo "                 by default. Even --disable-threading is actually shorthand"
+	echo "                 for --enable-threading=single (which is the default when"
+	echo "                 the option is not specified)."
 	echo " "
 	echo "   --enable-system, --disable-system"
 	echo " "
@@ -211,7 +224,7 @@ print_usage()
 	echo " "
 	echo "   --enable-mem-tracing, --disable-mem-tracing"
 	echo " "
-	echo "                 Enable (disable by default) output to stdout that traces"
+	echo "                 Enable (disabled by default) output to stdout that traces"
 	echo "                 the allocation and freeing of memory, including the names"
 	echo "                 of the functions that triggered the allocation/freeing."
 	echo "                 Enabling this option WILL NEGATIVELY IMPACT PERFORMANCE."
@@ -219,12 +232,13 @@ print_usage()
 	echo " "
 	echo "   --enable-asan, --disable-asan"
 	echo " "
-	echo "                 Enable (disable by default) compiling and linking"
-    echo "                 framework code with the Address Sanitizer (Asan) library."
-    echo "                 Optimized kernels are NOT compiled with ASan support"
-    echo "                 due to limitations of register assignment in inline assembly."
-	echo "                 Enabling this option WILL NEGATIVELY IMPACT PERFORMANCE."
-	echo "                 Please use only for informational/debugging purposes."
+	echo "                 Enable (disabled by default) compiling and linking BLIS"
+	echo "                 framework code with the AddressSanitizer (ASan) library."
+	echo "                 Optimized kernels are NOT compiled with ASan support due"
+	echo "                 to limitations of register assignment in inline assembly."
+	echo "                 WARNING: ENABLING THIS OPTION WILL NEGATIVELY IMPACT"
+	echo "                 PERFORMANCE. Please use only for informational/debugging"
+	echo "                 purposes."
 	echo " "
 	echo "   -i SIZE, --int-size=SIZE"
 	echo " "
@@ -2447,7 +2461,7 @@ main()
 	debug_type=''
 	debug_flag=''
 
-	# A flag indicating whether Address Sanitizer should be used.
+	# A flag indicating whether AddressSanitizer should be used.
 	enable_asan='no'
 
 	# The system flag.
@@ -2568,18 +2582,18 @@ main()
 							debug_flag=1
 							debug_type=noopt
 							;;
-						enable-asan)
-							enable_asan='yes'
-							;;
-						disable-asan)
-							enable_asan='no'
-							;;
 						enable-debug=*)
 							debug_flag=1
 							debug_type=${OPTARG#*=}
 							;;
 						disable-debug)
 							debug_flag=0
+							;;
+						enable-asan)
+							enable_asan='yes'
+							;;
+						disable-asan)
+							enable_asan='no'
 							;;
 						enable-verbose-make)
 							enable_verbose='yes'
@@ -2624,7 +2638,7 @@ main()
 							threading_model=${OPTARG#*=}
 							;;
 						disable-threading)
-							threading_model='off'
+							threading_model='single'
 							;;
 						thread-part-jrir=*)
 							thread_part_jrir=${OPTARG#*=}
@@ -3362,12 +3376,18 @@ main()
 		echo "${script_name}: no preset LDFLAGS detected."
 	fi
 
-	# Check if the ASan flag was specified.
-	if [ "x${enable_asan}" = "xyes" ]; then
-		echo "${script_name}: enabling ASan support (except optimized kernels)."
+	# Check if the verbose make flag was specified.
+	if [ "x${enable_verbose}" = "xyes" ]; then
+		echo "${script_name}: enabling verbose make output. (disable with 'make V=0'.)"
 	else
-        enable_asan='no'
-		echo "${script_name}: ASan support disabled."
+		echo "${script_name}: disabling verbose make output. (enable with 'make V=1'.)"
+	fi
+
+	# Check if the ARG_MAX hack was requested.
+	if [ "x${enable_arg_max_hack}" = "xyes" ]; then
+		echo "${script_name}: enabling ARG_MAX hack."
+	else
+		echo "${script_name}: disabling ARG_MAX hack."
 	fi
 
 	# Check if the debug flag was specified.
@@ -3386,29 +3406,24 @@ main()
 		echo "${script_name}: debug symbols disabled."
 	fi
 
-	# Check if the verbose make flag was specified.
-	if [ "x${enable_verbose}" = "xyes" ]; then
-		echo "${script_name}: enabling verbose make output. (disable with 'make V=0'.)"
+	# Check if the AddressSanitizer flag was specified.
+	if [ "x${enable_asan}" = "xyes" ]; then
+		echo "${script_name}: enabling AddressSanitizer support (except for optimized kernels)."
 	else
-		echo "${script_name}: disabling verbose make output. (enable with 'make V=1'.)"
+        enable_asan='no'
+		echo "${script_name}: AddressSanitizer support disabled."
 	fi
 
-	# Check if the ARG_MAX hack was requested.
-	if [ "x${enable_arg_max_hack}" = "xyes" ]; then
-		echo "${script_name}: enabling ARG_MAX hack."
-	else
-		echo "${script_name}: disabling ARG_MAX hack."
-	fi
-
-	enable_shared_01=1
 	# Check if the static lib flag was specified.
 	if   [ "x${enable_static}" = "xyes" -a "x${enable_shared}" = "xyes" ]; then
 		echo "${script_name}: building BLIS as both static and shared libraries."
+		enable_shared_01=1
+	elif [ "x${enable_static}" = "xno"  -a "x${enable_shared}" = "xyes" ]; then
+		echo "${script_name}: building BLIS as a shared library (static library disabled)."
+		enable_shared_01=1
 	elif [ "x${enable_static}" = "xyes" -a "x${enable_shared}" = "xno"  ]; then
 		echo "${script_name}: building BLIS as a static library (shared library disabled)."
 		enable_shared_01=0
-	elif [ "x${enable_static}" = "xno"  -a "x${enable_shared}" = "xyes" ]; then
-		echo "${script_name}: building BLIS as a shared library (static library disabled)."
 	else
 		echo "${script_name}: Both static and shared libraries were disabled."
 		echo "${script_name}: *** Please enable one (or both) to continue."
@@ -3446,35 +3461,181 @@ main()
 	fi
 
 	# Check the threading model flag and standardize its value, if needed.
-	# NOTE: 'omp' is deprecated but still supported; 'openmp' is preferred.
+	# Note that single-threaded mode will always be enabled, but not necessarily
+	# by default.
+	enable_single='yes'
 	enable_openmp='no'
-	enable_openmp_01=0
 	enable_pthreads='no'
+	enable_single_01=1
+	enable_openmp_01=0
 	enable_pthreads_01=0
-	if [ "x${threading_model}" = "xauto" ]; then
+	parsed_tm=''
+	first_tm=''
+	enable_single_as_def_01=0
+	enable_openmp_as_def_01=0
+	enable_pthreads_as_def_01=0
+
+	# Convert whatever reasonable separator the user may have used into a space.
+	threading_model_list=$(echo "${threading_model}" | sed -e "s/[,+]/ /g")
+
+	# Search for all recognized values and standardize them to one of four
+	# strings: 'single', 'openmp', 'pthreads', 'auto'. Notice that we keep
+	# the strings in the same order as they originally appeared.
+	for word in ${threading_model_list}; do
+
+		if [ "x${word}" = "xsingle" ] ||
+		   [ "x${word}" = "xnone"   ] ||
+		   [ "x${word}" = "xoff"    ] ||
+		   [ "x${word}" = "xno"     ]; then
+
+			parsed_tm="${parsed_tm} single"
+
+		elif [ "x${word}" = "xopenmp" ] ||
+			 [ "x${word}" = "xomp"    ]; then
+
+			parsed_tm="${parsed_tm} openmp"
+
+		elif [ "x${word}" = "xpthreads" ] ||
+			 [ "x${word}" = "xpthread"  ] ||
+			 [ "x${word}" = "xposix"    ]; then
+
+			parsed_tm="${parsed_tm} pthreads"
+
+		elif [ "x${word}" = "xauto" ]; then
+
+			parsed_tm="${parsed_tm} auto"
+
+		else
+
+			echo "${script_name}: *** Unsupported threading model: ${word}."
+			exit 1
+		fi
+	done
+
+	# Always enable single-threaded behavior. If the user explicitly
+	# requested 'single' as well as other modes, the first occurrence will
+	# be kept when duplicates are removed, which will preserve the order
+	# for purposes of determining which mode will be the default (absent
+	# any explicit choice at runtime).
+	parsed_tm="${parsed_tm} single"
+
+	# Remove duplicates, if they exist.
+	parsed_tm=$(rm_duplicate_words_simple "${parsed_tm}")
+
+	#echo "parsed_tm0: _${parsed_tm}_"
+
+	# If parsed_tm contains 'auto', substitute in the automatic choice
+	# based on which compiler family is being used.
+	if [ "$(is_in_list "auto" "${parsed_tm}")" = "true" ]; then
+
+		# If 'auto' was found in the threading model string, we ignore any
+		# other choice that may have been expressed and leave everything
+		# disabled. (The Makefile will automatically choose a model based
+		# on information such as the compiler.)
 		echo "${script_name}: determining the threading model automatically."
-	elif [ "x${threading_model}" = "xopenmp" ] ||
-	     [ "x${threading_model}" = "xomp" ]; then
-		echo "${script_name}: using OpenMP for threading."
-		enable_openmp='yes'
-		enable_openmp_01=1
-		threading_model="openmp" # Standardize the value.
-	elif [ "x${threading_model}" = "xpthreads" ] ||
-	     [ "x${threading_model}" = "xpthread" ] ||
-	     [ "x${threading_model}" = "xposix" ]; then
-		echo "${script_name}: using POSIX threads for threading."
-		enable_pthreads='yes'
-		enable_pthreads_01=1
-		threading_model="pthreads" # Standardize the value.
-	elif [ "x${threading_model}" = "xoff" ] ||
-	     [ "x${threading_model}" = "xno" ] ||
-	     [ "x${threading_model}" = "xnone" ]; then
-		echo "${script_name}: threading is disabled."
-		threading_model="off"
-	else
-		echo "${script_name}: *** Unsupported threading model: ${threading_model}."
-		exit 1
+
+		# Use OpenMP for gcc and icc, but pthreads for clang.
+		if   [ "${cc_vendor}" = "gcc" ]; then
+
+			selected_tm="openmp"
+			echo "${script_name}:   automatically selected OpenMP."
+
+		elif [ "${cc_vendor}" = "icc" ]; then
+
+			selected_tm="openmp"
+			echo "${script_name}:   automatically selected OpenMP."
+
+		elif [ "${cc_vendor}" = "clang" ]; then
+
+			selected_tm="pthreads"
+			echo "${script_name}:   automatically selected pthreads."
+		fi
+
+		# Substitute the selected threading model for 'auto' in parsed_tm.
+		parsed_tm=$(substitute_words "auto" "${selected_tm}" "${parsed_tm}")
 	fi
+
+	#echo "parsed_tm1: _${parsed_tm}_"
+
+	# Remove any extra whitespace.
+	parsed_tm=$(canonicalize_ws "${parsed_tm}")
+
+	#echo "parsed_tm2: _${parsed_tm}_"
+
+	# Find the first word. This will be the default threading model.
+	first_tm=${parsed_tm%% *}
+
+	#echo "first_tm0:  _${first_tm}_"
+
+	# Now that we've standardized the list, removed duplicates, and handled
+	# the possibility of 'auto' being among the listed threading models, we can
+	# proceed to formally processing each threading model to enable. Since
+	# 'auto' has been converted to 'openmp' or 'pthreads', we only need to
+	# handle the remaining three options (openmp, pthreads, and single) going
+	# forward.
+	for word in ${parsed_tm}; do
+
+		if [ "x${word}" = "xsingle" ]; then
+
+			echo "${script_name}: enabling support for single-threading."
+			enable_single='yes'
+			enable_single_01=1
+
+		elif [ "x${word}" = "xopenmp" ]; then
+
+			echo "${script_name}: enabling support for threading via OpenMP."
+			enable_openmp='yes'
+			enable_openmp_01=1
+
+		elif [ "x${word}" = "xpthreads" ]; then
+
+			echo "${script_name}: enabling support for threading via pthreads."
+			enable_pthreads='yes'
+			enable_pthreads_01=1
+		fi
+	done
+
+	# Define boolean variables that can easily be interpreted with #ifdef
+	# directives.
+	if [ "x${first_tm}" = "xsingle" ]; then
+
+		enable_single_as_def_01=1
+		enable_openmp_as_def_01=0
+		enable_pthreads_as_def_01=0
+
+	elif [ "x${first_tm}" = "xopenmp" ]; then
+
+		enable_single_as_def_01=0
+		enable_openmp_as_def_01=1
+		enable_pthreads_as_def_01=0
+
+	elif [ "x${first_tm}" = "xpthreads" ]; then
+
+		enable_single_as_def_01=0
+		enable_openmp_as_def_01=0
+		enable_pthreads_as_def_01=1
+	fi
+
+	# If either OpenMP or pthreads was enabled, given that single-threaded mode is
+	# also always enabled, remind the user which one will serve as the default
+	# (that is, absent any explicit choice at runtime).
+	if [ "x${enable_openmp}"   = "xyes" ] ||
+	   [ "x${enable_pthreads}" = "xyes" ]; then
+
+		if   [ "x${first_tm}"   = "xsingle" ]; then
+			echo "${script_name}: threading will default to single-threaded."
+		elif [ "x${first_tm}"   = "xopenmp" ]; then
+			echo "${script_name}: threading will default to OpenMP."
+		elif [ "x${first_tm}"   = "xpthreads" ]; then
+			echo "${script_name}: threading will default to pthreads."
+		fi
+	fi
+
+	# Copy the final parsed threading model list back to the original variable.
+	threading_model="${parsed_tm}"
+
+	#echo "parsed_tm: _${parsed_tm}_"
+	#echo "first_tm:  _${first_tm}_"
 
 	# Check the method of assigning micropanels to threads in the JR and IR
 	# loops.
@@ -3487,7 +3648,7 @@ main()
 		echo "${script_name}: requesting round-robin threading in jr and ir loops."
 		enable_jrir_rr_01=1
 	else
-		echo "${script_name}: *** Unsupported method of thread partitioning in jr and ir loops: ${threading_model}."
+		echo "${script_name}: *** Unsupported method of thread partitioning in jr and ir loops: ${thread_part_jrir}."
 		exit 1
 	fi
 
@@ -3918,7 +4079,9 @@ main()
 		| perl -pe "s/\@kernel_list_defines\@/${kernel_list_defines}/g" \
 		| sed   -e "s/@enable_system@/${enable_system_01}/g" \
 		| sed   -e "s/@enable_openmp@/${enable_openmp_01}/g" \
+		| sed   -e "s/@enable_openmp_as_def@/${enable_openmp_as_def_01}/g" \
 		| sed   -e "s/@enable_pthreads@/${enable_pthreads_01}/g" \
+		| sed   -e "s/@enable_pthreads_as_def@/${enable_pthreads_as_def_01}/g" \
 		| sed   -e "s/@enable_jrir_slab@/${enable_jrir_slab_01}/g" \
 		| sed   -e "s/@enable_jrir_rr@/${enable_jrir_rr_01}/g" \
 		| sed   -e "s/@enable_pba_pools@/${enable_pba_pools_01}/g" \

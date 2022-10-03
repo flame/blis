@@ -334,9 +334,6 @@ void bli_pool_checkin_block
 	// Query the top_index of the pool.
 	const siz_t top_index = bli_pool_top_index( pool );
 
-    // Check for double-free and other conditions which exhaust the memory pool
-    if ( top_index == 0 ) bli_abort();
-
 	#ifdef BLIS_ENABLE_MEM_TRACING
 	printf( "bli_pool_checkin_block(): checking in block %d of size %d "
 	        "(align %d, offset %d).\n",
@@ -345,6 +342,10 @@ void bli_pool_checkin_block
 	                              ( int )bli_pool_offset_size( pool ) );
 	fflush( stdout );
 	#endif
+
+	// Check for double-free and other conditions which may prematurely
+	// exhaust the memory pool.
+	if ( top_index == 0 ) bli_abort();
 
 	// Copy the caller's pblk_t struct to the block at top_index - 1.
 	block_ptrs[ top_index - 1 ] = *block;
@@ -406,7 +407,10 @@ void bli_pool_grow
 		bli_malloc_intl( block_ptrs_len_new * sizeof( pblk_t ), &r_val );
 
 		// Copy the contents of the old block_ptrs array to the new/resized
-		// array.
+		// array. Notice that we copy the entire array, including elements
+		// corresponding to blocks that have been checked out. Those elements
+		// were set to NULL upon checkout, and so it's important to copy them
+		// into the new block_ptrs array.
 		for ( dim_t i = 0; i < num_blocks_cur; ++i )
 		{
 			block_ptrs_new[i] = block_ptrs_cur[i];

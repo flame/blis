@@ -35,7 +35,6 @@
 
 #include "blis.h"
 
-
 static func_t packm_struc_cxk_kers[BLIS_NUM_PACK_SCHEMA_TYPES] =
 {
     /* float (0)  scomplex (1)  double (2)  dcomplex (3) */

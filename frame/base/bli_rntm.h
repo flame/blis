@@ -43,10 +43,12 @@
 /*
 typedef struct rntm_s
 {
-	bool      auto_factor;
+	timpl_t   thread_impl;
 
 	dim_t     num_threads;
-	dim_t*    thrloop;
+	dim_t     thrloop[ BLIS_NUM_LOOPS ];
+
+	bool      auto_factor;
 	bool      pack_a;
 	bool      pack_b;
 	bool      l3_sup;
@@ -56,6 +58,11 @@ typedef struct rntm_s
 //
 // -- rntm_t query (public API) ------------------------------------------------
 //
+
+BLIS_INLINE timpl_t bli_rntm_thread_impl( const rntm_t* rntm )
+{
+	return rntm->thread_impl;
+}
 
 BLIS_INLINE bool bli_rntm_auto_factor( const rntm_t* rntm )
 {
@@ -105,6 +112,7 @@ BLIS_INLINE bool bli_rntm_pack_b( const rntm_t* rntm )
 {
 	return ( bool )( rntm->pack_b );
 }
+
 BLIS_INLINE bool bli_rntm_l3_sup( const rntm_t* rntm )
 {
 	return rntm->l3_sup;
@@ -113,6 +121,11 @@ BLIS_INLINE bool bli_rntm_l3_sup( const rntm_t* rntm )
 //
 // -- rntm_t modification (internal use only) ----------------------------------
 //
+
+BLIS_INLINE void bli_rntm_set_thread_impl_only( timpl_t thread_impl, rntm_t* rntm )
+{
+	rntm->thread_impl = thread_impl;
+}
 
 BLIS_INLINE void bli_rntm_set_auto_factor_only( bool auto_factor, rntm_t* rntm )
 {
@@ -135,7 +148,7 @@ BLIS_INLINE void bli_rntm_set_jc_ways_only( dim_t ways, rntm_t* rntm )
 }
 BLIS_INLINE void bli_rntm_set_pc_ways_only( dim_t ways, rntm_t* rntm )
 {
-	bli_rntm_set_ways_for_only( BLIS_KC, ways, rntm );
+	bli_rntm_set_ways_for_only( BLIS_KC, 1, rntm );
 }
 BLIS_INLINE void bli_rntm_set_ic_ways_only( dim_t ways, rntm_t* rntm )
 {
@@ -158,7 +171,7 @@ BLIS_INLINE void bli_rntm_set_ways_only( dim_t jc, dim_t pc, dim_t ic, dim_t jr,
 {
 	// Record the number of ways of parallelism per loop.
 	bli_rntm_set_jc_ways_only( jc, rntm );
-	bli_rntm_set_pc_ways_only( pc, rntm );
+	bli_rntm_set_pc_ways_only(  1, rntm );
 	bli_rntm_set_ic_ways_only( ic, rntm );
 	bli_rntm_set_jr_ways_only( jr, rntm );
 	bli_rntm_set_ir_ways_only( ir, rntm );
@@ -167,38 +180,21 @@ BLIS_INLINE void bli_rntm_set_ways_only( dim_t jc, dim_t pc, dim_t ic, dim_t jr,
 
 BLIS_INLINE void bli_rntm_clear_num_threads_only( rntm_t* rntm )
 {
-	bli_rntm_set_num_threads_only( -1, rntm );
+	bli_rntm_set_num_threads_only( 1, rntm );
 }
 BLIS_INLINE void bli_rntm_clear_ways_only( rntm_t* rntm )
 {
-	bli_rntm_set_ways_only( -1, -1, -1, -1, -1, rntm );
+	bli_rntm_set_ways_only( 1, 1, 1, 1, 1, rntm );
 }
 
 //
 // -- rntm_t modification (public API) -----------------------------------------
 //
 
-BLIS_INLINE void bli_rntm_set_num_threads( dim_t nt, rntm_t* rntm )
+BLIS_INLINE void bli_rntm_set_thread_impl( timpl_t thread_impl, rntm_t* rntm )
 {
-	// Record the total number of threads to use.
-	bli_rntm_set_num_threads_only( nt, rntm );
-
-	// Set the individual ways of parallelism to default states.
-	bli_rntm_clear_ways_only( rntm );
-}
-
-BLIS_INLINE void bli_rntm_set_ways( dim_t jc, dim_t pc, dim_t ic, dim_t jr, dim_t ir, rntm_t* rntm )
-{
-	// Record the number of ways of parallelism per loop.
-	bli_rntm_set_jc_ways_only( jc, rntm );
-	bli_rntm_set_pc_ways_only( pc, rntm );
-	bli_rntm_set_ic_ways_only( ic, rntm );
-	bli_rntm_set_jr_ways_only( jr, rntm );
-	bli_rntm_set_ir_ways_only( ir, rntm );
-	bli_rntm_set_pr_ways_only(  1, rntm );
-
-	// Set the num_threads field to a default state.
-	bli_rntm_clear_num_threads_only( rntm );
+	// Set the threading implementation to use.
+	bli_rntm_set_thread_impl_only( thread_impl, rntm );
 }
 
 BLIS_INLINE void bli_rntm_set_pack_a( bool pack_a, rntm_t* rntm )
@@ -211,12 +207,12 @@ BLIS_INLINE void bli_rntm_set_pack_b( bool pack_b, rntm_t* rntm )
 	// Set the bool indicating whether matrix B should be packed.
 	rntm->pack_b = pack_b;
 }
+
 BLIS_INLINE void bli_rntm_set_l3_sup( bool l3_sup, rntm_t* rntm )
 {
 	// Set the bool indicating whether level-3 sup handling is enabled.
 	rntm->l3_sup = l3_sup;
 }
-
 BLIS_INLINE void bli_rntm_enable_l3_sup( rntm_t* rntm )
 {
 	bli_rntm_set_l3_sup( TRUE, rntm );
@@ -225,10 +221,20 @@ BLIS_INLINE void bli_rntm_disable_l3_sup( rntm_t* rntm )
 {
 	bli_rntm_set_l3_sup( FALSE, rntm );
 }
+
 //
 // -- rntm_t modification (internal use only) ----------------------------------
 //
 
+BLIS_INLINE void bli_rntm_clear_thread_impl( rntm_t* rntm )
+{
+	bli_rntm_set_thread_impl_only( BLIS_SINGLE, rntm );
+}
+
+BLIS_INLINE void bli_rntm_clear_auto_factor( rntm_t* rntm )
+{
+	bli_rntm_set_auto_factor_only( FALSE, rntm );
+}
 BLIS_INLINE void bli_rntm_clear_pack_a( rntm_t* rntm )
 {
 	bli_rntm_set_pack_a( FALSE, rntm );
@@ -252,9 +258,10 @@ BLIS_INLINE void bli_rntm_clear_l3_sup( rntm_t* rntm )
 
 #define BLIS_RNTM_INITIALIZER \
         { \
-          .auto_factor = TRUE, \
-          .num_threads = -1, \
-          .thrloop     = { -1, -1, -1, -1, -1, -1 }, \
+          .thread_impl = BLIS_SINGLE, \
+          .num_threads = 1, \
+          .thrloop     = { 1, 1, 1, 1, 1, 1 }, \
+          .auto_factor = FALSE, \
           .pack_a      = FALSE, \
           .pack_b      = FALSE, \
           .l3_sup      = TRUE, \
@@ -262,16 +269,20 @@ BLIS_INLINE void bli_rntm_clear_l3_sup( rntm_t* rntm )
 
 BLIS_INLINE void bli_rntm_init( rntm_t* rntm )
 {
-	bli_rntm_set_auto_factor_only( TRUE, rntm );
+	bli_rntm_clear_thread_impl( rntm );
 
 	bli_rntm_clear_num_threads_only( rntm );
 	bli_rntm_clear_ways_only( rntm );
+
+	bli_rntm_clear_auto_factor( rntm );
 	bli_rntm_clear_pack_a( rntm );
 	bli_rntm_clear_pack_b( rntm );
 	bli_rntm_clear_l3_sup( rntm );
 }
 
+//
 // -- rntm_t total thread calculation ------------------------------------------
+//
 
 BLIS_INLINE dim_t bli_rntm_calc_num_threads
      (
@@ -289,11 +300,27 @@ BLIS_INLINE dim_t bli_rntm_calc_num_threads
 	return n_threads;
 }
 
-// -----------------------------------------------------------------------------
-
-// Function prototypes
+//
+// -- Function prototypes ------------------------------------------------------
+//
 
 BLIS_EXPORT_BLIS void bli_rntm_init_from_global( rntm_t* rntm );
+
+BLIS_EXPORT_BLIS void bli_rntm_set_num_threads
+     (
+       dim_t   nt,
+       rntm_t* rntm
+     );
+
+BLIS_EXPORT_BLIS void bli_rntm_set_ways
+     (
+       dim_t   jc,
+       dim_t   pc,
+       dim_t   ic,
+       dim_t   jr,
+       dim_t   ir,
+       rntm_t* rntm
+     );
 
 BLIS_EXPORT_BLIS void bli_rntm_set_ways_for_op
      (
@@ -305,7 +332,12 @@ BLIS_EXPORT_BLIS void bli_rntm_set_ways_for_op
        rntm_t* rntm
      );
 
-void bli_rntm_set_ways_from_rntm
+void bli_rntm_sanitize
+     (
+       rntm_t* rntm
+     );
+
+void bli_rntm_factorize
      (
        dim_t   m,
        dim_t   n,
@@ -313,7 +345,7 @@ void bli_rntm_set_ways_from_rntm
        rntm_t* rntm
      );
 
-void bli_rntm_set_ways_from_rntm_sup
+void bli_rntm_factorize_sup
      (
        dim_t   m,
        dim_t   n,

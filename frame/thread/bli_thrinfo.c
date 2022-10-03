@@ -130,7 +130,7 @@ void bli_thrinfo_free
 	#endif
 
 	// Free any allocated memory from the pba.
-	if ( bli_mem_is_alloc( cntl_mem_p ) )
+	if ( bli_mem_is_alloc( cntl_mem_p ) && bli_thread_am_chief( thread ) )
 	{
 		bli_pba_release
 		(
@@ -151,6 +151,7 @@ thrinfo_t* bli_thrinfo_split
        thrinfo_t* thread_par
      )
 {
+    const timpl_t ti                 = bli_thrcomm_thread_impl( bli_thrinfo_comm( thread_par ) );
 	const dim_t   parent_num_threads = bli_thread_num_threads( thread_par );
 	const dim_t   parent_thread_id   = bli_thread_thread_id( thread_par );
           pool_t* sba_pool           = bli_thread_sba_pool( thread_par );
@@ -208,7 +209,7 @@ thrinfo_t* bli_thrinfo_split
     	// object and store it in the array element corresponding to the
     	// parent's work id.
     	if ( child_thread_id == 0 )
-    		new_comms[ child_work_id ] = bli_thrcomm_create( sba_pool, child_num_threads );
+    		new_comms[ child_work_id ] = bli_thrcomm_create( sba_pool, ti, child_num_threads );
 
     	bli_thread_barrier( thread_par );
 
@@ -240,5 +241,34 @@ thrinfo_t* bli_thrinfo_split
 	}
 
 	return thread_chl;
+}
+
+void bli_thrinfo_print
+     (
+       thrinfo_t* thread
+     )
+{
+	printf( " lvl   nt  tid nway wkid free\n" );
+    bli_thrinfo_print_sub( thread, 0 );
+}
+
+void bli_thrinfo_print_sub
+     (
+       thrinfo_t* thread,
+       gint_t     level
+     )
+{
+    if ( thread == NULL ) return;
+
+    printf( "%4ld %4ld %4ld %4ld %4ld %4ld\n",
+            ( unsigned long )level,
+            ( unsigned long )bli_thread_num_threads( thread ),
+            ( unsigned long )bli_thread_thread_id( thread ),
+            ( unsigned long )bli_thread_n_way( thread ),
+            ( unsigned long )bli_thread_work_id( thread ),
+            ( unsigned long )bli_thrinfo_needs_free_comm( thread ));
+
+    bli_thrinfo_print_sub( bli_thrinfo_sub_prenode( thread ), level+1 );
+    bli_thrinfo_print_sub( bli_thrinfo_sub_node( thread ), level+1 );
 }
 

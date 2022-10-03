@@ -622,6 +622,20 @@ typedef enum
 #define bli_nat  BLIS_NAT
 
 
+// -- Threading implementation type --
+
+typedef enum
+{
+	BLIS_SINGLE = 0,
+	BLIS_OPENMP,
+	BLIS_POSIX,
+
+	// BLIS_NUM_THREAD_IMPLS must be last!
+	BLIS_NUM_THREAD_IMPLS
+
+} timpl_t;
+
+
 // -- Kernel ID types --
 
 typedef enum
@@ -635,6 +649,7 @@ typedef enum
 	BLIS_DOTV_KER,
 	BLIS_DOTXV_KER,
 	BLIS_INVERTV_KER,
+	BLIS_INVSCALV_KER,
 	BLIS_SCALV_KER,
 	BLIS_SCAL2V_KER,
 	BLIS_SETV_KER,
@@ -1428,6 +1443,8 @@ typedef struct cntx_s
 typedef struct rntm_s
 {
 	// "External" fields: these may be queried by the end-user.
+	timpl_t   thread_impl;
+
 	bool      auto_factor;
 
 	dim_t     num_threads;

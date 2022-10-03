@@ -150,7 +150,7 @@ err_t bli_gemmsup_int
 			// block-panel macrokernel; m -> mc, mr; n -> nc, nr: var2()
 			bli_gemmsup_ref_var2m( BLIS_NO_TRANSPOSE,
 			                       alpha, a, b, beta, c,
-			                       stor_id, cntx, &rntm_l, thread );
+			                       stor_id, cntx, &rntm_l, bli_thrinfo_sub_node( thread ) );
 		}
 		else // use_pb
 		{
@@ -161,7 +161,7 @@ err_t bli_gemmsup_int
 			// panel-block macrokernel; m -> nc*,mr; n -> mc*,nr: var1()
 			bli_gemmsup_ref_var1n( BLIS_NO_TRANSPOSE,
 			                       alpha, a, b, beta, c,
-			                       stor_id, cntx, &rntm_l, thread );
+			                       stor_id, cntx, &rntm_l, bli_thrinfo_sub_node( thread ) );
 			// *requires nudging of nc up to be a multiple of mr.
 		}
 	}
@@ -215,7 +215,7 @@ err_t bli_gemmsup_int
 			// panel-block macrokernel; m -> nc, nr; n -> mc, mr: var2() + trans
 			bli_gemmsup_ref_var2m( BLIS_TRANSPOSE,
 			                       alpha, a, b, beta, c,
-			                       stor_id, cntx, &rntm_l, thread );
+			                       stor_id, cntx, &rntm_l, bli_thrinfo_sub_node( thread ) );
 		}
 		else // use_pb
 		{
@@ -226,7 +226,7 @@ err_t bli_gemmsup_int
 			// block-panel macrokernel; m -> mc*,nr; n -> nc*,mr: var1() + trans
 			bli_gemmsup_ref_var1n( BLIS_TRANSPOSE,
 			                       alpha, a, b, beta, c,
-			                       stor_id, cntx, &rntm_l, thread );
+			                       stor_id, cntx, &rntm_l, bli_thrinfo_sub_node( thread ) );
 			// *requires nudging of mc up to be a multiple of nr.
 		}
 	}
@@ -325,7 +325,7 @@ err_t bli_gemmtsup_int
 #if 0
 			bli_gemmtsup_ref_var2m( BLIS_NO_TRANSPOSE,
 			                        alpha, a, b, beta, c,
-			                        stor_id, cntx, &rntm_l, thread );
+			                        stor_id, cntx, &rntm_l, bli_thrinfo_sub_node( thread ) );
 #endif
 		}
 		else // use_pb
@@ -338,7 +338,7 @@ err_t bli_gemmtsup_int
 #if 0
 			bli_gemmtsup_ref_var1n( BLIS_NO_TRANSPOSE,
 			                        alpha, a, b, beta, c,
-			                        stor_id, cntx, &rntm_l, thread );
+			                        stor_id, cntx, &rntm_l, bli_thrinfo_sub_node( thread ) );
 #endif
 			// *requires nudging of nc up to be a multiple of mr.
 		}
@@ -394,7 +394,7 @@ err_t bli_gemmtsup_int
 #if 0
 			bli_gemmtsup_ref_var2m( BLIS_TRANSPOSE,
 			                        alpha, a, b, beta, c,
-			                        stor_id, cntx, &rntm_l, thread );
+			                        stor_id, cntx, &rntm_l, bli_thrinfo_sub_node( thread ) );
 #endif
 		}
 		else // use_pb
@@ -407,7 +407,7 @@ err_t bli_gemmtsup_int
 #if 0
 			bli_gemmtsup_ref_var1n( BLIS_TRANSPOSE,
 			                        alpha, a, b, beta, c,
-			                        stor_id, cntx, &rntm_l, thread );
+			                        stor_id, cntx, &rntm_l, bli_thrinfo_sub_node( thread ) );
 #endif
 			// *requires nudging of mc up to be a multiple of nr.
 		}

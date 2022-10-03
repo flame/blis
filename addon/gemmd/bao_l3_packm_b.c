@@ -90,7 +90,7 @@ void PASTECH2(bao_,ch,opname) \
 \
 		/* Broadcast the address of the chief thread's passed-in mem_t to all
 		   threads. */ \
-		mem_t* mem_p = bli_thread_broadcast( thread, mem ); \
+		mem_t* mem_p = bli_thread_broadcast( rntm, thread, mem ); \
 \
 		/* Non-chief threads: Copy the contents of the chief thread's
 		   passed-in mem_t to the passed-in mem_t for this thread. (The
@@ -139,7 +139,7 @@ void PASTECH2(bao_,ch,opname) \
 \
 			/* Broadcast the address of the chief thread's passed-in mem_t
 			   to all threads. */ \
-			mem_t* mem_p = bli_thread_broadcast( thread, mem ); \
+			mem_t* mem_p = bli_thread_broadcast( rntm, thread, mem ); \
 \
 			/* Non-chief threads: Copy the contents of the chief thread's
 			   passed-in mem_t to the passed-in mem_t for this thread. (The

@@ -37,24 +37,19 @@
 
 #ifdef BLIS_ENABLE_OPENMP
 
-// Define a dummy function bli_l3_sup_thread_entry(), which is needed in the
-// pthreads version, so that when building Windows DLLs (with OpenMP enabled
-// or no multithreading) we don't risk having an unresolved symbol.
-void* bli_l3_sup_thread_entry( void* data_void ) { return NULL; }
-
 //#define PRINT_THRINFO
 
-err_t bli_l3_sup_thread_decorator
+err_t bli_l3_sup_thread_decorator_openmp
      (
-             l3supint_t func,
-             opid_t     family,
-       const obj_t*     alpha,
-       const obj_t*     a,
-       const obj_t*     b,
-       const obj_t*     beta,
-       const obj_t*     c,
-       const cntx_t*    cntx,
-       const rntm_t*    rntm
+             l3supint_ft func,
+             opid_t      family,
+       const obj_t*      alpha,
+       const obj_t*      a,
+       const obj_t*      b,
+       const obj_t*      beta,
+       const obj_t*      c,
+       const cntx_t*     cntx,
+       const rntm_t*     rntm
      )
 {
 	// Query the total number of threads from the rntm_t object.
@@ -69,7 +64,8 @@ err_t bli_l3_sup_thread_decorator
 	array_t* array = bli_sba_checkout_array( n_threads );
 
 	// Allcoate a global communicator for the root thrinfo_t structures.
-	thrcomm_t* gl_comm = bli_thrcomm_create( NULL, n_threads );
+	timpl_t    ti      = bli_rntm_thread_impl( rntm );
+	thrcomm_t* gl_comm = bli_thrcomm_create( NULL, ti, n_threads );
 
 	_Pragma( "omp parallel num_threads(n_threads)" )
 	{
@@ -100,7 +96,7 @@ err_t bli_l3_sup_thread_decorator
 		  c,
 		  cntx,
 		  rntm_p,
-		  bli_thrinfo_sub_node( thread )
+		  thread
 		);
 
 		// Free the current thread's thrinfo_t structure.

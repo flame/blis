@@ -255,6 +255,7 @@ void libblis_test_level1v_ops( thread_data_t* tdata, test_params_t* params, test
 	libblis_test_dotv( tdata, params, &(ops->dotv) );
 	libblis_test_dotxv( tdata, params, &(ops->dotxv) );
 	libblis_test_normfv( tdata, params, &(ops->normfv) );
+	libblis_test_invscalv( tdata, params, &(ops->invscalv) );
 	libblis_test_scalv( tdata, params, &(ops->scalv) );
 	libblis_test_scal2v( tdata, params, &(ops->scal2v) );
 	libblis_test_setv( tdata, params, &(ops->setv) );
@@ -270,6 +271,7 @@ void libblis_test_level1m_ops( thread_data_t* tdata, test_params_t* params, test
 	libblis_test_axpym( tdata, params, &(ops->axpym) );
 	libblis_test_copym( tdata, params, &(ops->copym) );
 	libblis_test_normfm( tdata, params, &(ops->normfm) );
+	libblis_test_invscalm( tdata, params, &(ops->invscalm) );
 	libblis_test_scalm( tdata, params, &(ops->scalm) );
 	libblis_test_scal2m( tdata, params, &(ops->scal2m) );
 	libblis_test_setm( tdata, params, &(ops->setm) );
@@ -370,6 +372,7 @@ void libblis_test_read_ops_file( char* input_filename, test_ops_t* ops )
 	libblis_test_read_op_info( ops, input_stream, BLIS_NOID, BLIS_TEST_DIMS_M,   2, &(ops->dotv) );
 	libblis_test_read_op_info( ops, input_stream, BLIS_NOID, BLIS_TEST_DIMS_M,   2, &(ops->dotxv) );
 	libblis_test_read_op_info( ops, input_stream, BLIS_NOID, BLIS_TEST_DIMS_M,   0, &(ops->normfv) );
+	libblis_test_read_op_info( ops, input_stream, BLIS_NOID, BLIS_TEST_DIMS_M,   1, &(ops->invscalv) );
 	libblis_test_read_op_info( ops, input_stream, BLIS_NOID, BLIS_TEST_DIMS_M,   1, &(ops->scalv) );
 	libblis_test_read_op_info( ops, input_stream, BLIS_NOID, BLIS_TEST_DIMS_M,   1, &(ops->scal2v) );
 	libblis_test_read_op_info( ops, input_stream, BLIS_NOID, BLIS_TEST_DIMS_M,   0, &(ops->setv) );
@@ -381,6 +384,7 @@ void libblis_test_read_ops_file( char* input_filename, test_ops_t* ops )
 	libblis_test_read_op_info( ops, input_stream, BLIS_NOID, BLIS_TEST_DIMS_MN,  1, &(ops->axpym) );
 	libblis_test_read_op_info( ops, input_stream, BLIS_NOID, BLIS_TEST_DIMS_MN,  1, &(ops->copym) );
 	libblis_test_read_op_info( ops, input_stream, BLIS_NOID, BLIS_TEST_DIMS_MN,  0, &(ops->normfm) );
+	libblis_test_read_op_info( ops, input_stream, BLIS_NOID, BLIS_TEST_DIMS_MN,  1, &(ops->invscalm) );
 	libblis_test_read_op_info( ops, input_stream, BLIS_NOID, BLIS_TEST_DIMS_MN,  1, &(ops->scalm) );
 	libblis_test_read_op_info( ops, input_stream, BLIS_NOID, BLIS_TEST_DIMS_MN,  1, &(ops->scal2m) );
 	libblis_test_read_op_info( ops, input_stream, BLIS_NOID, BLIS_TEST_DIMS_MN,  0, &(ops->setm) );
@@ -771,13 +775,34 @@ void libblis_test_output_params_struct( FILE* os, test_params_t* params )
 	else
 		int_type_size = sizeof(gint_t) * 8;
 
-	char impl_str[16];
+	char impl_str[32];
+	char def_impl_set_str[32];
+	char def_impl_unset_str[32];
 	char jrir_str[16];
 
-	// Describe the threading implementation.
-	if      ( bli_info_get_enable_openmp()   ) sprintf( impl_str, "openmp" );
-	else if ( bli_info_get_enable_pthreads() ) sprintf( impl_str, "pthreads" );
-	else    /* threading disabled */           sprintf( impl_str, "disabled" );
+	const bool    has_openmp      = bli_info_get_enable_openmp();
+	const bool    has_pthreads    = bli_info_get_enable_pthreads();
+	const bool    openmp_is_def   = bli_info_get_enable_openmp_as_default();
+	const bool    pthreads_is_def = bli_info_get_enable_pthreads_as_default();
+	const timpl_t ti              = bli_thread_get_thread_impl();
+
+	// List the available threading implementation(s).
+	if      ( has_openmp && has_pthreads   ) sprintf( impl_str, "openmp,pthreads,single" );
+	else if ( has_openmp                   ) sprintf( impl_str, "openmp,single" );
+	else if (               has_pthreads   ) sprintf( impl_str, "pthreads,single" );
+	else                                     sprintf( impl_str, "single only" );
+
+	// Describe the default threading implementation that would be active if
+	// or when BLIS_THREAD_IMPL is unset.
+	if      ( openmp_is_def   ) sprintf( def_impl_unset_str, "openmp" );
+	else if ( pthreads_is_def ) sprintf( def_impl_unset_str, "pthreads" );
+	else                        sprintf( def_impl_unset_str, "single" );
+
+	// Describe the default threading implementation as the testsuite was
+	// currently run.
+	if      ( ti == BLIS_OPENMP ) sprintf( def_impl_set_str, "openmp" );
+	else if ( ti == BLIS_POSIX  ) sprintf( def_impl_set_str, "pthreads" );
+	else                          sprintf( def_impl_set_str, "single" );
 
 	// Describe the status of jrir thread partitioning.
 	if   ( bli_info_get_thread_part_jrir_slab() ) sprintf( jrir_str, "slab" );
@@ -791,8 +816,7 @@ void libblis_test_output_params_struct( FILE* os, test_params_t* params )
 	char ir_nt_str[16];
 
 	// Query the number of ways of parallelism per loop (and overall) and
-	// convert these values into strings, with "unset" being used if the
-	// value returned was -1 (indicating the environment variable was unset).
+	// convert these values into strings.
 	dim_t nt    = bli_thread_get_num_threads();
 	dim_t jc_nt = bli_thread_get_jc_nt();
 	dim_t pc_nt = bli_thread_get_pc_nt();
@@ -800,18 +824,12 @@ void libblis_test_output_params_struct( FILE* os, test_params_t* params )
 	dim_t jr_nt = bli_thread_get_jr_nt();
 	dim_t ir_nt = bli_thread_get_ir_nt();
 
-	if (    nt == -1 ) sprintf(    nt_str, "unset" );
-	else               sprintf(    nt_str, "%d", ( int )   nt );
-	if ( jc_nt == -1 ) sprintf( jc_nt_str, "unset" );
-	else               sprintf( jc_nt_str, "%d", ( int )jc_nt );
-	if ( pc_nt == -1 ) sprintf( pc_nt_str, "unset" );
-	else               sprintf( pc_nt_str, "%d", ( int )pc_nt );
-	if ( ic_nt == -1 ) sprintf( ic_nt_str, "unset" );
-	else               sprintf( ic_nt_str, "%d", ( int )ic_nt );
-	if ( jr_nt == -1 ) sprintf( jr_nt_str, "unset" );
-	else               sprintf( jr_nt_str, "%d", ( int )jr_nt );
-	if ( ir_nt == -1 ) sprintf( ir_nt_str, "unset" );
-	else               sprintf( ir_nt_str, "%d", ( int )ir_nt );
+	sprintf(    nt_str, "%d", ( int )   nt );
+	sprintf( jc_nt_str, "%d", ( int )jc_nt );
+	sprintf( pc_nt_str, "%d", ( int )pc_nt );
+	sprintf( ic_nt_str, "%d", ( int )ic_nt );
+	sprintf( jr_nt_str, "%d", ( int )jr_nt );
+	sprintf( ir_nt_str, "%d", ( int )ir_nt );
 
 	// Set up rntm_t objects for each of the four families:
 	// gemm, herk, trmm, trsm.
@@ -881,7 +899,9 @@ void libblis_test_output_params_struct( FILE* os, test_params_t* params )
 	libblis_test_fprintf_c( os, "\n" );
 	libblis_test_fprintf_c( os, "--- BLIS parallelization info ---\n" );
 	libblis_test_fprintf_c( os, "\n" );
-	libblis_test_fprintf_c( os, "multithreading                 %s\n", impl_str );
+	libblis_test_fprintf_c( os, "multithreading modes           %s\n", impl_str );
+	libblis_test_fprintf_c( os, "  default mode                 %s\n", def_impl_unset_str );
+	libblis_test_fprintf_c( os, "  current mode                 %s\n", def_impl_set_str );
 	libblis_test_fprintf_c( os, "\n" );
 	libblis_test_fprintf_c( os, "thread auto-factorization        \n" );
 	libblis_test_fprintf_c( os, "  m dim thread ratio           %d\n", ( int )BLIS_THREAD_RATIO_M );
@@ -2713,8 +2733,9 @@ void libblis_test_vobj_randomize( test_params_t* params, bool normalize, obj_t* 
 		bli_normfv( x, &kappa_r );
 		libblis_test_ceil_pow2( &kappa_r );
 		bli_copysc( &kappa_r, &kappa );
-		bli_invertsc( &kappa );
-		bli_scalv( &kappa, x );
+		//bli_invertsc( &kappa );
+		//bli_scalv( &kappa, x );
+		bli_invscalv( &kappa, x );
 	}
 }
 
@@ -2752,8 +2773,9 @@ void libblis_test_mobj_randomize( test_params_t* params, bool normalize, obj_t* 
 		bli_norm1m( a, &kappa_r );
 		libblis_test_ceil_pow2( &kappa_r );
 		bli_copysc( &kappa_r, &kappa );
-		bli_invertsc( &kappa );
-		bli_scalm( &kappa, a );
+		//bli_invertsc( &kappa );
+		//bli_scalm( &kappa, a );
+		bli_invscalm( &kappa, a );
 	}
 }
 

@@ -35,19 +35,17 @@
 
 #include "blis.h"
 
-#ifndef BLIS_ENABLE_MULTITHREADING
-
-err_t bli_l3_sup_thread_decorator
+err_t bli_l3_sup_thread_decorator_single
      (
-             l3supint_t func,
-             opid_t     family,
-       const obj_t*     alpha,
-       const obj_t*     a,
-       const obj_t*     b,
-       const obj_t*     beta,
-       const obj_t*     c,
-       const cntx_t*    cntx,
-       const rntm_t*    rntm
+             l3supint_ft func,
+             opid_t      family,
+       const obj_t*      alpha,
+       const obj_t*      a,
+       const obj_t*      b,
+       const obj_t*      beta,
+       const obj_t*      c,
+       const cntx_t*     cntx,
+       const rntm_t*     rntm
      )
 {
 	// For sequential execution, we use only one thread.
@@ -76,8 +74,11 @@ err_t bli_l3_sup_thread_decorator
 		  c,
 		  cntx,
 		  rntm,
-		  bli_thrinfo_sub_node( thread )
+		  thread
 		);
+
+		// Free the current thread's thrinfo_t structure.
+		bli_thrinfo_free( thread );
 	}
 
 	// Check the array_t back into the small block allocator. Similar to the
@@ -87,6 +88,4 @@ err_t bli_l3_sup_thread_decorator
 
 	return BLIS_SUCCESS;
 }
-
-#endif
 

@@ -260,6 +260,7 @@ void PASTEMAC(opname,EX_SUF) \
 	); \
 }
 
+GENFRONT( invscald )
 GENFRONT( scald )
 GENFRONT( setd )
 

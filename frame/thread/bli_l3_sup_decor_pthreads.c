@@ -40,18 +40,18 @@
 // A data structure to assist in passing operands to additional threads.
 typedef struct thread_data
 {
-	      l3supint_t func;
-	      opid_t     family;
-	const obj_t*     alpha;
-	const obj_t*     a;
-	const obj_t*     b;
-	const obj_t*     beta;
-	const obj_t*     c;
-	const cntx_t*    cntx;
-	const rntm_t*    rntm;
-	      dim_t      tid;
-	      thrcomm_t* gl_comm;
-	      array_t*   array;
+	      l3supint_ft func;
+	      opid_t      family;
+	const obj_t*      alpha;
+	const obj_t*      a;
+	const obj_t*      b;
+	const obj_t*      beta;
+	const obj_t*      c;
+	const cntx_t*     cntx;
+	const rntm_t*     rntm;
+	      dim_t       tid;
+	      thrcomm_t*  gl_comm;
+	      array_t*    array;
 } thread_data_t;
 
 // Entry point for additional threads
@@ -59,7 +59,7 @@ void* bli_l3_sup_thread_entry( void* data_void )
 {
 	thread_data_t* data     = data_void;
 
-	      l3supint_t     func     = data->func;
+	      l3supint_ft    func     = data->func;
 	      opid_t         family   = data->family;
 	const obj_t*         alpha    = data->alpha;
 	const obj_t*         a        = data->a;
@@ -74,6 +74,9 @@ void* bli_l3_sup_thread_entry( void* data_void )
 
 	( void )family;
 
+	// Create a thread-local copy of the master thread's rntm_t. This is
+	// necessary since we want each thread to be able to track its own
+	// small block pool_t as it executes down the function stack.
 	rntm_t  rntm_l = *rntm;
 	rntm_t* rntm_p = &rntm_l;
     pool_t* pool   = bli_apool_array_elem( tid, array );
@@ -90,7 +93,7 @@ void* bli_l3_sup_thread_entry( void* data_void )
 	  c,
 	  cntx,
 	  rntm_p,
-	  bli_thrinfo_sub_node( thread )
+	  thread
 	);
 
 	// Free the current thread's thrinfo_t structure.
@@ -99,17 +102,17 @@ void* bli_l3_sup_thread_entry( void* data_void )
 	return NULL;
 }
 
-err_t bli_l3_sup_thread_decorator
+err_t bli_l3_sup_thread_decorator_pthreads
      (
-             l3supint_t func,
-             opid_t     family,
-       const obj_t*     alpha,
-       const obj_t*     a,
-       const obj_t*     b,
-       const obj_t*     beta,
-       const obj_t*     c,
-       const cntx_t*    cntx,
-       const rntm_t*    rntm
+             l3supint_ft func,
+             opid_t      family,
+       const obj_t*      alpha,
+       const obj_t*      a,
+       const obj_t*      b,
+       const obj_t*      beta,
+       const obj_t*      c,
+       const cntx_t*     cntx,
+       const rntm_t*     rntm
      )
 {
 	err_t r_val;
@@ -126,7 +129,8 @@ err_t bli_l3_sup_thread_decorator
 	array_t* array = bli_sba_checkout_array( n_threads );
 
 	// Allocate a global communicator for the root thrinfo_t structures.
-	thrcomm_t* gl_comm = bli_thrcomm_create( NULL, n_threads );
+	timpl_t    ti      = bli_rntm_thread_impl( rntm );
+	thrcomm_t* gl_comm = bli_thrcomm_create( NULL, ti, n_threads );
 
 	// Allocate an array of pthread objects and auxiliary data structs to pass
 	// to the thread entry functions.
@@ -193,6 +197,13 @@ err_t bli_l3_sup_thread_decorator
 
 	return BLIS_SUCCESS;
 }
+
+#else
+
+// Define a dummy function bli_l3_thread_entry(), which is needed for
+// consistent dynamic linking behavior when building shared objects in Linux
+// or OSX, or Windows DLLs; otherwise, we risk having an unresolved symbol.
+void* bli_l3_sup_thread_entry( void* data_void ) { return NULL; }
 
 #endif
 

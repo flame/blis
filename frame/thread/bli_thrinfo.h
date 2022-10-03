@@ -239,4 +239,15 @@ thrinfo_t* bli_thrinfo_split
        thrinfo_t* thread_par
      );
 
+void bli_thrinfo_print
+     (
+       thrinfo_t* thread
+     );
+
+void bli_thrinfo_print_sub
+     (
+       thrinfo_t* thread,
+       gint_t     level
+     );
+
 #endif

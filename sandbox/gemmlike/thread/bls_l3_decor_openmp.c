@@ -36,16 +36,11 @@
 
 #ifdef BLIS_ENABLE_OPENMP
 
-// Define a dummy thread entry function, which is needed in the pthreads
-// version, so that when building Windows DLLs (with OpenMP enabled or with
-// no multithreading) we don't risk having an unresolved symbol.
-void* bls_l3_thread_entry( void* data_void ) { return NULL; }
-
 //#define PRINT_THRINFO
 
-void bls_l3_thread_decorator
+void bls_l3_thread_decorator_openmp
      (
-       l3sbxint_t func,
+       l3sbxint_ft func,
        opid_t     family,
        obj_t*     alpha,
        obj_t*     a,
@@ -65,7 +60,7 @@ void bls_l3_thread_decorator
 	// with an internal lock to ensure only one application thread accesses
 	// the sba at a time. bli_sba_checkout_array() will also automatically
 	// resize the array_t, if necessary.
-	array_t* restrict array = bli_sba_checkout_array( n_threads );
+	array_t* array = bli_sba_checkout_array( n_threads );
 
 	// Access the pool_t* for thread 0 and embed it into the rntm. We do
 	// this up-front only so that we have the rntm_t.sba_pool field
@@ -78,7 +73,7 @@ void bls_l3_thread_decorator
 	bli_pba_rntm_set_pba( rntm );
 
 	// Allcoate a global communicator for the root thrinfo_t structures.
-	thrcomm_t* restrict gl_comm = bli_thrcomm_create( rntm, n_threads );
+	thrcomm_t* gl_comm = bli_thrcomm_create( rntm, n_threads );
 
 
 	_Pragma( "omp parallel num_threads(n_threads)" )
@@ -93,8 +88,6 @@ void bls_l3_thread_decorator
 		const dim_t tid = omp_get_thread_num();
 
 		// Check for a somewhat obscure OpenMP thread-mistmatch issue.
-		// NOTE: This calls the same function used for the conventional/large
-		// code path.
 		bli_l3_thread_decorator_thread_check( n_threads, tid, gl_comm, rntm_p );
 
 		// Use the thread id to access the appropriate pool_t* within the

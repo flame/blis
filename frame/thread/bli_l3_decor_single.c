@@ -35,22 +35,32 @@
 
 #include "blis.h"
 
-#ifndef BLIS_ENABLE_MULTITHREADING
+//#define PRINT_IMPL
 
-void bli_l3_thread_decorator
+void bli_l3_thread_decorator_single
      (
-             l3int_t func,
-             opid_t  family,
-       const obj_t*  alpha,
-       const obj_t*  a,
-       const obj_t*  b,
-       const obj_t*  beta,
-       const obj_t*  c,
-       const cntx_t* cntx,
-       const rntm_t* rntm,
-       const cntl_t* cntl
+             l3int_ft func,
+             opid_t   family,
+       const obj_t*   alpha,
+       const obj_t*   a,
+       const obj_t*   b,
+       const obj_t*   beta,
+       const obj_t*   c,
+       const cntx_t*  cntx,
+       const rntm_t*  rntm,
+       const cntl_t*  cntl
      )
 {
+	// For sequential execution, we use only one thread.
+	const dim_t n_threads = 1;
+
+#ifdef PRINT_IMPL
+	const timpl_t ti = bli_rntm_thread_impl( rntm );
+	printf( "l3_decor_single: l3 decor with rntm.thread_impl  = %s\n",
+	        ( ti == BLIS_SINGLE ? "single" :
+	        ( ti == BLIS_OPENMP ? "openmp" : "pthreads" ) ) );
+#endif
+
 	obj_t a_t, b_t;
 	bli_obj_alias_to( a, &a_t );
 	bli_obj_alias_to( b, &b_t );
@@ -65,9 +75,6 @@ void bli_l3_thread_decorator
 	pack_t schema_b = bli_obj_pack_schema( &b_t );
 	bli_obj_set_pack_schema( BLIS_NOT_PACKED, &a_t );
 	bli_obj_set_pack_schema( BLIS_NOT_PACKED, &b_t );
-
-	// For sequential execution, we use only one thread.
-	const dim_t n_threads = 1;
 
 	// NOTE: The sba was initialized in bli_init().
 
@@ -120,7 +127,7 @@ void bli_l3_thread_decorator
 		);
 
 		// Free the thread's local control tree.
-		bli_l3_cntl_free( rntm_p, cntl_use );
+		bli_l3_cntl_free( pool, cntl_use );
 
 		// Free the current thread's thrinfo_t structure.
 		bli_thrinfo_free( thread );
@@ -135,6 +142,4 @@ void bli_l3_thread_decorator
 	// mutual exclusion.
 	bli_sba_checkin_array( array );
 }
-
-#endif
 
