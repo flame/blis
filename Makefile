@@ -1161,6 +1161,7 @@ showconfig: check-env
 	@echo "install includedir:         $(INSTALL_INCDIR)"
 	@echo "install sharedir:           $(INSTALL_SHAREDIR)"
 	@echo "debugging status:           $(DEBUG_TYPE)"
+	@echo "enable AddressSanitizer?    $(MK_ENABLE_ASAN)"
 	@echo "enabled threading model(s): $(THREADING_MODEL)"
 	@echo "enable BLAS API?            $(MK_ENABLE_BLAS)"
 	@echo "enable CBLAS API?           $(MK_ENABLE_CBLAS)"
