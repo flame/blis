@@ -226,6 +226,7 @@ thrinfo_t* bli_thrinfo_create
        pba_t*     pba
      );
 
+BLIS_EXPORT_BLIS
 void bli_thrinfo_free
      (
        thrinfo_t* thread
