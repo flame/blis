@@ -247,7 +247,7 @@ void bli_trsm_rl_ker_var2
 			/* Compute the addresses of the triangular block B11 and the
 			   panel B21. */
 			const char* b11 = b1;
-			const char* b21 = b1 + k_b11 * PACKNR;
+			const char* b21 = b1 + k_b11 * PACKNR * dt_size;
 			/*b21 = bli_ptr_inc_by_frac( b1, sizeof( ctype ), k_b11 * PACKNR, 1 );*/
 
 			/* Compute the panel stride for the current micro-panel. */
@@ -263,8 +263,8 @@ void bli_trsm_rl_ker_var2
 				dim_t m_cur = ( bli_is_not_edge_f( i, m_iter, m_left ) ? MR : m_left );
 
 				/* Compute the addresses of the A11 block and A12 panel. */
-				const char* a11  = a1 + off_b11 * PACKMR;
-				const char* a12  = a1 + off_b21 * PACKMR;
+				const char* a11  = a1 + off_b11 * PACKMR * dt_size;
+				const char* a12  = a1 + off_b21 * PACKMR * dt_size;
 
 				/* Compute the addresses of the next panels of A and B. */
 				const char* a2 = a1;

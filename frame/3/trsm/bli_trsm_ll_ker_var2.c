@@ -243,13 +243,13 @@ void bli_trsm_ll_ker_var2
 				/* Compute the addresses of the panel A10 and the triangular
 				   block A11. */
 				const char* a10 = a1;
-				const char* a11 = a1 + k_a10 * PACKMR;
+				const char* a11 = a1 + k_a10 * PACKMR * dt_size;
 				/*a11 = bli_ptr_inc_by_frac( a1, sizeof( ctype ), k_a10 * PACKMR, 1 );*/
 
 				/* Compute the addresses of the panel B01 and the block
 				   B11. */
-				const char* b01 = b1 + off_a10 * PACKNR;
-				const char* b11 = b1 + off_a11 * PACKNR;
+				const char* b01 = b1 + off_a10 * PACKNR * dt_size;
+				const char* b11 = b1 + off_a11 * PACKNR * dt_size;
 
 				/* Compute the addresses of the next panels of A and B. */
 				const char* a2 = a1 + ps_a_cur;

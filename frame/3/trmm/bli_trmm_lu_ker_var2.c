@@ -233,7 +233,7 @@ void bli_trmm_lu_ker_var2
 				/* NOTE: ir loop parallelism disabled for now. */
 				/*if ( bli_trmm_my_iter( i, ir_thread ) ) {*/
 
-				const char* b1_i = b1 + off_a1112 * PACKNR;
+				const char* b1_i = b1 + off_a1112 * PACKNR * dt_size;
 
 				/* Compute the addresses of the next panels of A and B. */
 				const char* a2 = a1;

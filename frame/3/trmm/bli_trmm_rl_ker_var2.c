@@ -125,14 +125,6 @@ void bli_trmm_rl_ker_var2
 	   it is implicitly zero. So we do nothing. */
 	if ( bli_is_strictly_above_diag_n( diagoffb, k, n ) ) return;
 
-	/* Compute k_full. For all trmm, k_full is simply k. This is
-	   needed because some parameter combinations of trmm reduce k
-	   to advance past zero regions in the triangular matrix, and
-	   when computing the imaginary stride of A (the non-triangular
-	   matrix), which is used by 4m1/3m1 implementations, we need
-	   this unreduced value of k. */
-	dim_t k_full = k;
-
 	/* If there is a zero region above where the diagonal of B intersects
 	   the left edge of the panel, adjust the pointer to A and treat this
 	   case as if the diagonal offset were zero. Note that we don't need to
@@ -328,7 +320,7 @@ void bli_trmm_rl_ker_var2
 
 				dim_t m_cur = ( bli_is_not_edge_f( i, m_iter, m_left ) ? MR : m_left );
 
-				const char* a1_i = a1 + off_b1121 * PACKMR;
+				const char* a1_i = a1 + off_b1121 * PACKMR * dt_size;
 
 				/* Compute the addresses of the next panels of A and B. */
 				const char* a2 = a1;

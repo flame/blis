@@ -99,13 +99,11 @@ void bli_gemmt_u_ker_var2
 	      dim_t  k         = bli_obj_width( a );
 
 	const void*  buf_a     = bli_obj_buffer_at_off( a );
-	const inc_t  cs_a      = bli_obj_col_stride( a );
 	const inc_t  is_a      = bli_obj_imag_stride( a );
 	const dim_t  pd_a      = bli_obj_panel_dim( a );
 	const inc_t  ps_a      = bli_obj_panel_stride( a );
 
 	const void*  buf_b     = bli_obj_buffer_at_off( b );
-	const inc_t  rs_b      = bli_obj_row_stride( b );
 	const inc_t  is_b      = bli_obj_imag_stride( b );
 	const dim_t  pd_b      = bli_obj_panel_dim( b );
 	const inc_t  ps_b      = bli_obj_panel_stride( b );
@@ -126,10 +124,8 @@ void bli_gemmt_u_ker_var2
 	const void* buf_beta  = bli_obj_internal_scalar_buffer( c );
 
 	/* Alias some constants to simpler names. */
-	const dim_t     MR         = pd_a;
-	const dim_t     NR         = pd_b;
-	/*const dim_t     PACKMR     = cs_a;*/
-	/*const dim_t     PACKNR     = rs_b;*/
+	const dim_t MR = pd_a;
+	const dim_t NR = pd_b;
 
 	/* Query the context for the micro-kernel address and cast it to its
 	   function pointer type. */
@@ -140,11 +136,11 @@ void bli_gemmt_u_ker_var2
 	   temporary buffer are set so that they match the storage of the
 	   original C matrix. For example, if C is column-stored, ct will be
 	   column-stored as well. */
-	char           ct[ BLIS_STACK_BUF_MAX_SIZE ]
-	                    __attribute__((aligned(BLIS_STACK_BUF_ALIGN_SIZE)));
-	const bool      col_pref    = bli_cntx_ukr_prefers_cols_dt( dt, BLIS_GEMM_VIR_UKR, cntx );
-	const inc_t     rs_ct       = ( col_pref ? 1 : NR );
-	const inc_t     cs_ct       = ( col_pref ? MR : 1 );
+	      char  ct[ BLIS_STACK_BUF_MAX_SIZE ]
+	                __attribute__((aligned(BLIS_STACK_BUF_ALIGN_SIZE)));
+	const bool  col_pref    = bli_cntx_ukr_prefers_cols_dt( dt, BLIS_GEMM_VIR_UKR, cntx );
+	const inc_t rs_ct       = ( col_pref ? 1 : NR );
+	const inc_t cs_ct       = ( col_pref ? MR : 1 );
 
 	const void* zero       = bli_obj_buffer_for_const( dt, &BLIS_ZERO );
 	const char* a_cast     = buf_a;
@@ -185,8 +181,8 @@ void bli_gemmt_u_ker_var2
 		dim_t j        = jp * NR;
 		      n        = n - j;
 		      diagoffc = diagoffc % NR;
-		      c_cast   = c_cast + (j  )*cs_c;
-		      b_cast   = b_cast + (jp )*ps_b;
+		      c_cast   = c_cast + (j  )*cs_c*dt_size;
+		      b_cast   = b_cast + (jp )*ps_b*dt_size;
 	}
 
 	/* If there is a zero region below where the diagonal of C intersects
@@ -209,12 +205,12 @@ void bli_gemmt_u_ker_var2
 	if ( m_left ) ++m_iter;
 
 	/* Determine some increments used to step through A, B, and C. */
-	inc_t rstep_a = ps_a;
+	inc_t rstep_a = ps_a * dt_size;
 
-	inc_t cstep_b = ps_b;
+	inc_t cstep_b = ps_b * dt_size;
 
-	inc_t rstep_c = rs_c * MR;
-	inc_t cstep_c = cs_c * NR;
+	inc_t rstep_c = rs_c * MR * dt_size;
+	inc_t cstep_c = cs_c * NR * dt_size;
 
 	/* Save the pack schemas of A and B to the auxinfo_t object. */
     auxinfo_t aux;

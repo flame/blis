@@ -256,13 +256,13 @@ void bli_trsm_lu_ker_var2
 				/* Compute the addresses of the triangular block A11 and the
 				   panel A12. */
 				const char* a11 = a1;
-				const char* a12 = a1 + k_a11 * PACKMR;
+				const char* a12 = a1 + k_a11 * PACKMR * dt_size;
 				/*a12 = bli_ptr_inc_by_frac( a1, sizeof( ctype ), k_a11 * PACKMR, 1 );*/
 
 				/* Compute the addresses of the panel B01 and the block
 				   B11. */
-				const char* b11 = b1 + off_a11 * PACKNR;
-				const char* b21 = b1 + off_a12 * PACKNR;
+				const char* b11 = b1 + off_a11 * PACKNR * dt_size;
+				const char* b21 = b1 + off_a12 * PACKNR * dt_size;
 
 				/* Compute the addresses of the next panels of A and B. */
 				const char* a2 = a1 + ps_a_cur;
