@@ -79,7 +79,18 @@ thrinfo_t* bli_l3_thrinfo_grow
 
     if ( sub_prenode != NULL )
     {
-        thrinfo_t* thread_chl = bli_l3_thrinfo_grow( thread_cur, rntm, sub_prenode );
+        // A pre-node is only used in the IC loop of trsm. In this case,
+        // we cannot actually thread in the m dimension due to data dependencies
+        // and so all parallelism must be moved down to the JR loop.
+        rntm_t rntm_l = *rntm;
+        const dim_t ic_nway = bli_rntm_ic_ways( &rntm_l );
+        const dim_t jr_nway = bli_rntm_jr_ways( &rntm_l );
+        bli_rntm_set_ic_ways_only(               1, &rntm_l );
+        bli_rntm_set_jr_ways_only( ic_nway*jr_nway, &rntm_l );
+
+        // Use thread_par instead of thread_cur since we *don't* want to
+        // do any parallelism at this level.
+        thrinfo_t* thread_chl = bli_l3_thrinfo_grow( thread_par, &rntm_l, sub_prenode );
         bli_thrinfo_set_sub_prenode( thread_chl, thread_cur );
     }
 
