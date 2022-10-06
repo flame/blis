@@ -52,7 +52,7 @@ void bli_gemm_ex
        const obj_t*  beta,
        const obj_t*  c,
        const cntx_t* cntx,
-             rntm_t* rntm
+       const rntm_t* rntm
      )
 {
 	bli_init_once();

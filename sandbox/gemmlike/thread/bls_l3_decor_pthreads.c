@@ -76,19 +76,11 @@ void* bls_l3_thread_entry( void* data_void )
 	// Create a thread-local copy of the master thread's rntm_t. This is
 	// necessary since we want each thread to be able to track its own
 	// small block pool_t as it executes down the function stack.
-	rntm_t           rntm_l = *rntm;
-	rntm_t* restrict rntm_p = &rntm_l;
+	rntm_t rntm_l = *rntm;
 
-	// Use the thread id to access the appropriate pool_t* within the
-	// array_t, and use it to set the sba_pool field within the rntm_t.
-	// If the pool_t* element within the array_t is NULL, it will first
-	// be allocated/initialized.
-	bli_sba_rntm_set_pool( tid, array, rntm_p );
-
-	thrinfo_t* thread = NULL;
-
-	// Create the root node of the current thread's thrinfo_t structure.
-	bli_l3_sup_thrinfo_create_root( tid, gl_comm, rntm_p, &thread );
+	// Create the root node of the thread's thrinfo_t structure.
+    pool_t*    pool   = bli_apool_array_elem( tid, array );
+	thrinfo_t* thread = bli_l3_sup_thrinfo_create( tid, gl_comm, pool, &rntm_l );
 
 	func
 	(
@@ -98,12 +90,12 @@ void* bls_l3_thread_entry( void* data_void )
 	  beta,
 	  c,
 	  cntx,
-	  rntm_p,
-	  thread
+	  &rntm_l,
+	  bli_thrinfo_sub_node( thread )
 	);
 
 	// Free the current thread's thrinfo_t structure.
-	bli_l3_sup_thrinfo_free( rntm_p, thread );
+	bli_thrinfo_free( thread );
 
 	return NULL;
 }
@@ -132,20 +124,10 @@ void bls_l3_thread_decorator_pthreads
 	// with an internal lock to ensure only one application thread accesses
 	// the sba at a time. bli_sba_checkout_array() will also automatically
 	// resize the array_t, if necessary.
-	array_t* restrict array = bli_sba_checkout_array( n_threads );
-
-	// Access the pool_t* for thread 0 and embed it into the rntm. We do
-	// this up-front only so that we have the rntm_t.sba_pool field
-	// initialized and ready for the global communicator creation below.
-	bli_sba_rntm_set_pool( 0, array, rntm );
-
-	// Set the packing block allocator field of the rntm. This will be
-	// inherited by all of the child threads when they make local copies of
-	// the rntm below.
-	bli_pba_rntm_set_pba( rntm );
+	array_t* array = bli_sba_checkout_array( n_threads );
 
 	// Allocate a global communicator for the root thrinfo_t structures.
-	thrcomm_t* gl_comm = bli_thrcomm_create( rntm, n_threads );
+	thrcomm_t* gl_comm = bli_thrcomm_create( NULL, BLIS_POSIX, n_threads );
 
 	// Allocate an array of pthread objects and auxiliary data structs to pass
 	// to the thread entry functions.

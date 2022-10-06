@@ -41,7 +41,7 @@
 \
 void PASTECH2(bls_,ch,varname) \
      ( \
-       trans_t          transc, \
+       conj_t           conjc, \
        pack_t           schema, \
        dim_t            m, \
        dim_t            n, \
