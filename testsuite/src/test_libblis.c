@@ -2592,11 +2592,9 @@ void libblis_test_mobj_create( test_params_t* params, num_t dt, trans_t trans, c
 
 
 
-#if 0
-cntl_t* libblis_test_pobj_create( bszid_t bmult_id_m, bszid_t bmult_id_n, invdiag_t inv_diag, pack_t pack_schema, packbuf_t pack_buf, obj_t* a, obj_t* p, cntx_t* cntx )
+cntl_t* libblis_test_pobj_create( bszid_t bmult_id_m, bszid_t bmult_id_n, invdiag_t inv_diag, pack_t pack_schema, packbuf_t pack_buf, obj_t* a, obj_t* p, cntx_t* cntx, rntm_t* rntm )
 {
 	bool   does_inv_diag;
-	rntm_t rntm;
 
 	if ( inv_diag == BLIS_NO_INVERT_DIAG ) does_inv_diag = FALSE;
 	else                                   does_inv_diag = TRUE;
@@ -2606,7 +2604,6 @@ cntl_t* libblis_test_pobj_create( bszid_t bmult_id_m, bszid_t bmult_id_n, invdia
 	(
 	  NULL, // we don't need the small block allocator from the runtime.
 	  NULL, // func ptr is not referenced b/c we don't call via l3 _int().
-	  bli_packm_blk_var1,
 	  bmult_id_m,
 	  bmult_id_n,
 	  does_inv_diag,
@@ -2617,20 +2614,13 @@ cntl_t* libblis_test_pobj_create( bszid_t bmult_id_m, bszid_t bmult_id_n, invdia
 	  NULL  // no child node needed
 	);
 
-	// Initialize a local-to-BLIS rntm_t. This is simply so we have something
-	// to pass into bli_l3_packm(). The function doesn't (currently) use the
-	// runtime object, and even if it did, one with default values would work
-	// fine here.
-	bli_rntm_init( &rntm );
-
 	// Pack the contents of A to P.
-	bli_l3_packm( a, p, cntx, &rntm, cntl, &BLIS_PACKM_SINGLE_THREADED );
+	bli_packm_blk_var1( a, p, cntx, rntm, cntl, &BLIS_PACKM_SINGLE_THREADED );
 
 	// Return the control tree pointer so the caller can free the cntl_t and its
 	// mem_t entry later on.
 	return cntl;
 }
-#endif
 
 
 void libblis_test_vobj_create( test_params_t* params, num_t dt, char storage, dim_t m, obj_t* x )

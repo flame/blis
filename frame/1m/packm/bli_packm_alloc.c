@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2016, Hewlett Packard Enterprise Development LP
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -32,16 +33,67 @@
 
 */
 
-void bli_gemm_int
+#include "blis.h"
+
+void* bli_packm_alloc
      (
-       obj_t*  alpha,
-       obj_t*  a,
-       obj_t*  b,
-       obj_t*  beta,
-       obj_t*  c,
-       cntx_t* cntx,
-       rntm_t* rntm,
-       cntl_t* cntl,
+       siz_t      size_needed,
+       rntm_t*    rntm,
+       cntl_t*    cntl,
        thrinfo_t* thread
-     );
+     )
+{
+	// Query the pack buffer type from the control tree node.
+	packbuf_t pack_buf_type = bli_cntl_packm_params_pack_buf_type( cntl );
+
+	// Query the address of the mem_t entry within the control tree node.
+	mem_t* cntl_mem_p = bli_cntl_pack_mem( cntl );
+
+	mem_t* local_mem_p;
+	mem_t  local_mem_s;
+
+	siz_t cntl_mem_size = 0;
+
+	if ( bli_mem_is_alloc( cntl_mem_p ) )
+		cntl_mem_size = bli_mem_size( cntl_mem_p );
+
+	if ( cntl_mem_size < size_needed )
+	{
+		if ( bli_thread_am_ochief( thread ) )
+		{
+			// The chief thread releases the existing block associated with
+			// the mem_t entry in the control tree, and then re-acquires a
+			// new block, saving the associated mem_t entry to local_mem_s.
+			if ( bli_mem_is_alloc( cntl_mem_p ) )
+			{
+				bli_pba_release
+				(
+				  rntm,
+				  cntl_mem_p
+				);
+            }
+			bli_pba_acquire_m
+			(
+			  rntm,
+			  size_needed,
+			  pack_buf_type,
+			  &local_mem_s
+			);
+		}
+
+		// Broadcast the address of the chief thread's local mem_t entry to
+		// all threads.
+		local_mem_p = bli_thread_broadcast( thread, &local_mem_s );
+
+		// Save the chief thread's local mem_t entry to the mem_t field in
+		// this thread's control tree node.
+		*cntl_mem_p = *local_mem_p;
+
+		// Barrier so that the master thread doesn't return from the function
+		// before we are done reading.
+		bli_thread_barrier( thread );
+	}
+
+	return bli_mem_buffer( cntl_mem_p );
+}
 

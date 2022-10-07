@@ -1180,39 +1180,25 @@ struct cntx_s;
 struct rntm_s;
 struct thrinfo_s;
 
-typedef void (*obj_pack_fn_t)
+typedef void (*obj_pack_ft)
     (
-      mdim_t            mat,
-      mem_t*            mem,
       struct obj_s*     a,
       struct obj_s*     ap,
       struct cntx_s*    cntx,
       struct rntm_s*    rntm,
+      struct cntl_s*    cntl,
       struct thrinfo_s* thread
     );
 
-typedef void (*obj_ker_fn_t)
+typedef void (*obj_ker_ft)
     (
       struct obj_s*     a,
       struct obj_s*     b,
       struct obj_s*     c,
       struct cntx_s*    cntx,
       struct rntm_s*    rntm,
+      struct cntl_s*    cntl,
       struct thrinfo_s* thread
-    );
-
-typedef void (*obj_ukr_fn_t)
-    (
-      dim_t                   m,
-      dim_t                   n,
-      dim_t                   k,
-      void*          restrict alpha,
-      void*          restrict a, inc_t rs_a, inc_t cs_a,
-      void*          restrict b, inc_t rs_b, inc_t cs_b,
-      void*          restrict beta,
-      void*          restrict c, inc_t rs_c, inc_t cs_c,
-      auxinfo_t*     restrict data,
-      struct cntx_s* restrict cntx
     );
 
 typedef struct obj_s
@@ -1245,13 +1231,11 @@ typedef struct obj_s
 	dim_t         m_panel;  // m dimension of a "full" panel
 	dim_t         n_panel;  // n dimension of a "full" panel
 
-	// User data pointer
-	void*         user_data;
-
-	// Function pointers
-	obj_pack_fn_t pack;
-	obj_ker_fn_t  ker;
-	obj_ukr_fn_t  ukr;
+	// User-customizable fields
+	obj_pack_ft   pack_fn;
+	void*         pack_params;
+	obj_ker_ft    ker_fn;
+	void*         ker_params;
 
 } obj_t;
 
@@ -1291,11 +1275,10 @@ typedef struct obj_s
 	.m_panel   = 0, \
 	.n_panel   = 0, \
 \
-	.user_data = NULL, \
-\
-	.pack      = NULL, \
-	.ker       = NULL, \
-	.ukr       = NULL  \
+	.pack_fn     = NULL, \
+	.pack_params = NULL, \
+	.ker_fn      = NULL, \
+	.ker_params  = NULL  \
 }
 
 #define BLIS_OBJECT_INITIALIZER_1X1 \
@@ -1325,11 +1308,10 @@ typedef struct obj_s
 	.m_panel   = 0, \
 	.n_panel   = 0, \
 \
-	.user_data = NULL, \
-\
-	.pack      = NULL, \
-	.ker       = NULL, \
-	.ukr       = NULL  \
+	.pack_fn     = NULL, \
+	.pack_params = NULL, \
+	.ker_fn      = NULL, \
+	.ker_params  = NULL  \
 }
 
 // Define these macros here since they must be updated if contents of
@@ -1364,11 +1346,10 @@ BLIS_INLINE void bli_obj_init_full_shallow_copy_of( obj_t* a, obj_t* b )
 	b->m_panel   = a->m_panel;
 	b->n_panel   = a->n_panel;
 
-	b->user_data = a->user_data;
-
-	b->pack      = a->pack;
-	b->ker       = a->ker;
-	b->ukr       = a->ukr;
+	b->pack_fn     = a->pack_fn;
+	b->pack_params = a->pack_params;
+	b->ker_fn      = a->ker_fn;
+	b->ker_params  = a->ker_params;
 }
 
 BLIS_INLINE void bli_obj_init_subpart_from( obj_t* a, obj_t* b )
@@ -1403,11 +1384,10 @@ BLIS_INLINE void bli_obj_init_subpart_from( obj_t* a, obj_t* b )
 	b->m_panel   = a->m_panel;
 	b->n_panel   = a->n_panel;
 
-	b->user_data = a->user_data;
-
-	b->pack      = a->pack;
-	b->ker       = a->ker;
-	b->ukr       = a->ukr;
+	b->pack_fn     = a->pack_fn;
+	b->pack_params = a->pack_params;
+	b->ker_fn      = a->ker_fn;
+	b->ker_params  = a->ker_params;
 }
 
 // Initializors for global scalar constants.

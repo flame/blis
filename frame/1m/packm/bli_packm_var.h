@@ -45,6 +45,7 @@ BLIS_EXPORT_BLIS void PASTEMAC0(opname) \
        obj_t*   c, \
        obj_t*   p, \
        cntx_t*  cntx, \
+       rntm_t*  rntm, \
        cntl_t*  cntl, \
        thrinfo_t* t  \
      );

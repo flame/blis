@@ -85,31 +85,38 @@ void bli_packm_blk_var1
        obj_t*   c,
        obj_t*   p,
        cntx_t*  cntx,
+       rntm_t*  rntm,
        cntl_t*  cntl,
-       thrinfo_t* t
+       thrinfo_t* thread
      )
 {
-#ifdef BLIS_ENABLE_GEMM_MD
-	// Call a different packm implementation when the storage and target
-	// datatypes differ.
-	if ( bli_obj_dt( c ) != bli_obj_target_dt( c ) )
-	{
-		bli_packm_blk_var1_md( c, p, cntx, cntl, t );
+	// Extract various fields from the control tree.
+	pack_t schema  = bli_cntl_packm_params_pack_schema( cntl );
+	bool   invdiag = bli_cntl_packm_params_does_invert_diag( cntl );
+	bool   revifup = bli_cntl_packm_params_rev_iter_if_upper( cntl );
+	bool   reviflo = bli_cntl_packm_params_rev_iter_if_lower( cntl );
+
+	// Every thread initializes p and determines the size of memory
+	// block needed (which gets embedded into the otherwise "blank" mem_t
+	// entry in the control tree node). Return early if no packing is required.
+	if ( !bli_packm_init( c, p, cntx, rntm, cntl, thread ) )
 		return;
-	}
-#endif
+
+	// Check parameters.
+	if ( bli_error_checking_is_enabled() )
+		bli_packm_int_check( c, p, cntx );
+
+	//num_t     dt_c       = bli_obj_dt( c );
+	//dim_t     dt_c_size  = bli_dt_size( dt_c );
 
 	num_t     dt_p       = bli_obj_dt( p );
+	//dim_t     dt_p_size  = bli_dt_size( dt_p );
 
 	struc_t   strucc     = bli_obj_struc( c );
 	doff_t    diagoffc   = bli_obj_diag_offset( c );
 	diag_t    diagc      = bli_obj_diag( c );
 	uplo_t    uploc      = bli_obj_uplo( c );
 	trans_t   transc     = bli_obj_conjtrans_status( c );
-	pack_t    schema     = bli_obj_pack_schema( p );
-	bool      invdiag    = bli_obj_has_inverted_diag( p );
-	bool      revifup    = bli_obj_is_pack_rev_if_upper( p );
-	bool      reviflo    = bli_obj_is_pack_rev_if_lower( p );
 
 	dim_t     m_p        = bli_obj_length( p );
 	dim_t     n_p        = bli_obj_width( p );
@@ -127,15 +134,10 @@ void bli_packm_blk_var1
 	dim_t     pd_p       = bli_obj_panel_dim( p );
 	inc_t     ps_p       = bli_obj_panel_stride( p );
 
-	obj_t     kappa;
-	void*     buf_kappa;
-
-	func_t*   packm_kers;
-	void_fp   packm_ker;
-
-	FUNCPTR_T f;
-
-
+	obj_t     kappa_local;
+#if 1
+	void*     buf_kappa  = bli_packm_scalar( &kappa_local, p );
+#else
 	// Treatment of kappa (ie: packing during scaling) depends on
 	// whether we are executing an induced method.
 	if ( bli_is_nat_packed( schema ) )
@@ -181,41 +183,20 @@ void bli_packm_blk_var1
 		// Acquire the buffer to the kappa chosen above.
 		buf_kappa = bli_obj_buffer_for_1x1( dt_p, kappa_p );
 	}
-
-
-	// The original idea here was to read the packm_ukr from the context
-	// if it is non-NULL. The problem is, it requires that we be able to
-	// assume that the packm_ukr field is initialized to NULL, which it
-	// currently is not.
-
-	//func_t* cntx_packm_kers = bli_cntx_get_packm_ukr( cntx );
-
-	//if ( bli_func_is_null_dt( dt_c, cntx_packm_kers ) )
-	{
-		// If the packm structure-aware kernel func_t in the context is
-		// NULL (which is the default value after the context is created),
-		// we use the default lookup table to determine the right func_t
-		// for the current schema.
-		const dim_t i = bli_pack_schema_index( schema );
-
-		packm_kers = &packm_struc_cxk_kers[ i ];
-	}
-#if 0
-	else // cntx's packm func_t overrides
-	{
-		// If the packm structure-aware kernel func_t in the context is
-		// non-NULL (ie: assumed to be valid), we use that instead.
-		//packm_kers = bli_cntx_packm_ukrs( cntx );
-		packm_kers = cntx_packm_kers;
-	}
 #endif
 
+
+	// We use the default lookup table to determine the right func_t
+    // for the current schema.
+	const dim_t i = bli_pack_schema_index( schema );
+	func_t* packm_kers = &packm_struc_cxk_kers[ i ];
+
 	// Query the datatype-specific function pointer from the func_t object.
-	packm_ker = bli_func_get_dt( dt_p, packm_kers );
+	void_fp packm_ker = bli_func_get_dt( dt_p, packm_kers );
 
 	// Index into the type combination array to extract the correct
 	// function pointer.
-	f = ftypes[dt_p];
+	FUNCPTR_T f = ftypes[dt_p];
 
 	// Invoke the function.
 	f( strucc,
@@ -238,7 +219,7 @@ void bli_packm_blk_var1
 	          pd_p, ps_p,
 	   packm_ker,
 	   cntx,
-	   t );
+	   thread );
 }
 
 

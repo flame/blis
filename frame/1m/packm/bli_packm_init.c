@@ -35,6 +35,7 @@
 
 #include "blis.h"
 
+#if 0
 siz_t bli_packm_init
      (
        obj_t*  a,
@@ -430,5 +431,214 @@ siz_t bli_packm_init_pack
 	}
 
 	return size_p;
+}
+#endif
+
+
+
+bool bli_packm_init
+     (
+       obj_t*  c,
+       obj_t*  p,
+       cntx_t* cntx,
+       rntm_t* rntm,
+       cntl_t* cntl,
+       thrinfo_t* thread
+     )
+{
+	bli_init_once();
+
+	// The purpose of packm_init() is to initialize an object P so that
+	// a source object A can be packed into P via one of the packm
+	// implementations. This initialization precedes the acquisition of a
+	// suitable block of memory from the memory allocator (if such a block
+	// of memory has not already been allocated previously).
+
+	// Check parameters.
+	if ( bli_error_checking_is_enabled() )
+		bli_packm_init_check( c, p, cntx );
+
+	// We begin by copying the fields of A.
+	bli_obj_alias_to( c, p );
+
+	// If the object is marked as being filled with zeros, then we can skip
+	// the packm operation entirely and alias.
+	if ( bli_obj_is_zeros( c ) )
+		return false;
+
+	// Extract various fields from the control tree.
+	bszid_t bmult_id_m   = bli_cntl_packm_params_bmid_m( cntl );
+	bszid_t bmult_id_n   = bli_cntl_packm_params_bmid_n( cntl );
+	pack_t  schema       = bli_cntl_packm_params_pack_schema( cntl );
+	num_t   dt_tar       = bli_obj_target_dt( c );
+	num_t   dt_scalar    = bli_obj_scalar_dt( c );
+	dim_t   bmult_m_def  = bli_cntx_get_blksz_def_dt( dt_tar, bmult_id_m, cntx );
+	dim_t   bmult_m_pack = bli_cntx_get_blksz_max_dt( dt_tar, bmult_id_m, cntx );
+	dim_t   bmult_n_def  = bli_cntx_get_blksz_def_dt( dt_tar, bmult_id_n, cntx );
+	dim_t   bmult_n_pack = bli_cntx_get_blksz_max_dt( dt_tar, bmult_id_n, cntx );
+
+	// Typecast the internal scalar value to the target datatype.
+	// Note that if the typecasting is needed, this must happen BEFORE we
+	// change the datatype of P to reflect the target_dt.
+	if ( dt_scalar != dt_tar )
+	{
+		bli_obj_scalar_cast_to( dt_tar, p );
+	}
+
+	// Update the storage datatype of P to be the target datatype of A.
+	bli_obj_set_dt( dt_tar, p );
+	bli_obj_set_elem_size( bli_dt_size( dt_tar ), p );
+
+	// Store the pack schema to the object.
+	bli_obj_set_pack_schema( schema, p );
+
+	// Clear the conjugation field from the object since matrix packing
+	// in BLIS is deemed to take care of all conjugation necessary.
+	bli_obj_set_conj( BLIS_NO_CONJUGATE, p );
+
+	// Since we are packing micropanels, mark P as dense.
+	bli_obj_set_uplo( BLIS_DENSE, p );
+
+	// Reset the view offsets to (0,0).
+	bli_obj_set_offs( 0, 0, p );
+
+	// Compute the dimensions padded by the dimension multiples. These
+	// dimensions will be the dimensions of the packed matrices, including
+	// zero-padding, and will be used by the macro- and micro-kernels.
+	// We compute them by starting with the effective dimensions of A (now
+	// in P) and aligning them to the dimension multiples (typically equal
+	// to register blocksizes). This does waste a little bit of space for
+	// level-2 operations, but that's okay with us.
+	dim_t m_p     = bli_obj_length( p );
+	dim_t n_p     = bli_obj_width( p );
+	dim_t m_p_pad = bli_align_dim_to_mult( m_p, bmult_m_def );
+	dim_t n_p_pad = bli_align_dim_to_mult( n_p, bmult_n_def );
+
+	// Save the padded dimensions into the packed object. It is important
+	// to save these dimensions since they represent the actual dimensions
+	// of the zero-padded matrix.
+	bli_obj_set_padded_dims( m_p_pad, n_p_pad, p );
+
+	// Now we prepare to compute strides, align them, and compute the
+	// total number of bytes needed for the packed buffer. Then we use
+	// that value to acquire an appropriate block of memory from the
+	// memory allocator.
+
+	// Extract the element size for the packed object.
+	siz_t elem_size_p = bli_obj_elem_size( p );
+	siz_t size_p;
+
+	if ( bli_is_row_packed( schema ) &&
+	     bli_is_panel_packed( schema ) )
+	{
+		// The panel dimension (for each datatype) should be equal to the
+		// default (logical) blocksize multiple in the m dimension.
+		dim_t m_panel = bmult_m_def;
+
+		// The "column stride" of a row-micropanel packed object is interpreted
+		// as the column stride WITHIN a micropanel. Thus, this is equal to the
+		// packing (storage) blocksize multiple, which may be equal to the
+		// default (logical) blocksize multiple).
+		inc_t cs_p = bmult_m_pack;
+
+		// The "row stride" of a row-micropanel packed object is interpreted
+		// as the row stride WITHIN a micropanel. Thus, it is unit.
+		inc_t rs_p = 1;
+
+		// The "panel stride" of a micropanel packed object is interpreted as
+		// the distance between the (0,0) element of panel k and the (0,0)
+		// element of panel k+1. We use the padded width computed above to
+		// allow for zero-padding (if necessary/desired) along the far end
+		// of each micropanel (ie: the right edge of the matrix). Zero-padding
+		// can also occur along the long edge of the last micropanel if the m
+		// dimension of the matrix is not a whole multiple of MR.
+		inc_t ps_p = cs_p * n_p_pad;
+
+		// As a general rule, we don't want micropanel strides to be odd. There
+		// are very few instances where this can happen, but we've seen it happen
+		// more than zero times (such as for certain small problems), and so we
+		// check for it here.
+		if ( bli_is_odd( ps_p ) ) ps_p += 1;
+
+		// Set the imaginary stride (in units of fundamental elements).
+		// This is the number of real elements that must be traversed before
+		// reaching the imaginary part of the packed micropanel. NOTE: the
+		// imaginary stride is mostly vestigial and left over from the 3m
+		// and 4m implementations.
+		inc_t is_p = 1;
+
+		// Store the strides and panel dimension in P.
+		bli_obj_set_strides( rs_p, cs_p, p );
+		bli_obj_set_imag_stride( is_p, p );
+		bli_obj_set_panel_dim( m_panel, p );
+		bli_obj_set_panel_stride( ps_p, p );
+		bli_obj_set_panel_length( m_panel, p );
+		bli_obj_set_panel_width( n_p, p );
+
+		// Compute the size of the packed buffer.
+		size_p = ps_p * ( m_p_pad / m_panel ) * elem_size_p;
+	}
+	else //if ( bli_is_col_packed( schema ) &&
+	     //     bli_is_panel_packed( schema ) )
+	{
+		// The panel dimension (for each datatype) should be equal to the
+		// default (logical) blocksize multiple in the n dimension.
+		dim_t n_panel = bmult_n_def;
+
+		// The "row stride" of a column-micropanel packed object is interpreted
+		// as the row stride WITHIN a micropanel. Thus, this is equal to the
+		// packing (storage) blocksize multiple (which may be equal to the
+		// default (logical) blocksize multiple.
+		inc_t rs_p = bmult_n_pack;
+
+		// The "column stride" of a column-micropanel packed object is
+		// interpreted as the column stride WITHIN a micropanel. Thus, it is
+		// unit.
+		inc_t cs_p = 1;
+
+		// The "panel stride" of a micropanel packed object is interpreted as
+		// the distance between the (0,0) element of panel k and the (0,0)
+		// element of panel k+1. We use the padded length computed above to
+		// allow for zero-padding (if necessary/desired) along the far end
+		// of each micropanel (ie: the bottom edge of the matrix). Zero-padding
+		// can also occur along the long edge of the last micropanel if the n
+		// dimension of the matrix is not a whole multiple of NR.
+		inc_t ps_p = m_p_pad * rs_p;
+
+		// As a general rule, we don't want micropanel strides to be odd.
+		// NOTE: This safety feature *may* not be necessary anymore, but was
+		// definitely needed to support certain variations of the 3m method.
+		if ( bli_is_odd( ps_p ) ) ps_p += 1;
+
+		// Set the imaginary stride (in units of fundamental elements).
+		// This is the number of real elements that must be traversed before
+		// reaching the imaginary part of the packed micropanel. NOTE: the
+		// imaginary stride is mostly vestigial and left over from the 3m
+		// and 4m implementations.
+		inc_t is_p = 1;
+
+		// Store the strides and panel dimension in P.
+		bli_obj_set_strides( rs_p, cs_p, p );
+		bli_obj_set_imag_stride( is_p, p );
+		bli_obj_set_panel_dim( n_panel, p );
+		bli_obj_set_panel_stride( ps_p, p );
+		bli_obj_set_panel_length( m_p, p );
+		bli_obj_set_panel_width( n_panel, p );
+
+		// Compute the size of the packed buffer.
+		size_p = ps_p * ( n_p_pad / n_panel ) * elem_size_p;
+	}
+
+	// If the requested size is zero, then we don't need to do any allocation.
+	if ( size_p == 0 )
+		return false;
+
+	// Update the buffer address in p to point to the buffer associated
+	// with the mem_t entry acquired from the memory broker (now cached in
+	// the control tree node).
+	void* buffer = bli_packm_alloc( size_p, rntm, cntl, thread );
+	bli_obj_set_buffer( buffer, p );
+
+	return true;
 }
 

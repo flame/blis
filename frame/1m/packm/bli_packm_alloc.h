@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2018 - 2019, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -32,35 +33,11 @@
 
 */
 
-void bli_packm_unb_var1
+BLIS_EXPORT_BLIS void* bli_packm_alloc
      (
-       obj_t*  c,
-       obj_t*  p,
-       cntx_t* cntx,
+       siz_t   size_needed,
+       rntm_t* rntm,
        cntl_t* cntl,
        thrinfo_t* thread
      );
-
-
-#undef  GENTPROT
-#define GENTPROT( ctype, ch, varname ) \
-\
-void PASTEMAC(ch,varname) \
-     ( \
-       struc_t strucc, \
-       doff_t  diagoffc, \
-       diag_t  diagc, \
-       uplo_t  uploc, \
-       trans_t transc, \
-       dim_t   m, \
-       dim_t   n, \
-       dim_t   m_max, \
-       dim_t   n_max, \
-       void*   kappa, \
-       void*   c, inc_t rs_c, inc_t cs_c, \
-       void*   p, inc_t rs_p, inc_t cs_p, \
-       cntx_t* cntx  \
-     );
-
-INSERT_GENTPROT_BASIC0( packm_unb_var1 )
 

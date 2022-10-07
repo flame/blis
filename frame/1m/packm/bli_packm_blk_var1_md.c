@@ -62,6 +62,7 @@ void bli_packm_blk_var1_md
        obj_t*   c,
        obj_t*   p,
        cntx_t*  cntx,
+       rntm_t*  rntm,
        cntl_t*  cntl,
        thrinfo_t* t
      )

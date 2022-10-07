@@ -34,7 +34,7 @@
 
 #include "blis.h"
 
-void bli_trsm_packa
+void bli_l3_packa
      (
        obj_t*  a,
        obj_t*  b,
@@ -45,12 +45,19 @@ void bli_trsm_packa
        thrinfo_t* thread
      )
 {
-	obj_t a_pack;
+	obj_t a_local, a_pack;
+
+	bli_obj_alias_to( a, &a_local );
+	if ( bli_obj_has_trans( a ) )
+	{
+		bli_obj_induce_trans( &a_local );
+		bli_obj_set_onlytrans( BLIS_NO_TRANSPOSE, &a_local );
+	}
 
 	// Pack matrix A according to the control tree node.
-	bli_l3_packm
+	bli_packm_int
 	(
-	  a,
+	  &a_local,
 	  &a_pack,
 	  cntx,
 	  rntm,
@@ -59,7 +66,7 @@ void bli_trsm_packa
 	);
 
 	// Proceed with execution using packed matrix A.
-	bli_trsm_int
+	bli_l3_int
 	(
 	  &BLIS_ONE,
 	  &a_pack,
@@ -75,7 +82,7 @@ void bli_trsm_packa
 
 // -----------------------------------------------------------------------------
 
-void bli_trsm_packb
+void bli_l3_packb
      (
        obj_t*  a,
        obj_t*  b,
@@ -86,25 +93,49 @@ void bli_trsm_packb
        thrinfo_t* thread
      )
 {
-	obj_t b_pack;
+	obj_t bt_local, bt_pack;
+
+	// We always pass B^T to bli_l3_int.
+	bli_obj_alias_to( b, &bt_local );
+#if 0
+	if ( bli_obj_has_trans( b ) )
+	{
+		bli_obj_set_onlytrans( BLIS_NO_TRANSPOSE, &bt_local );
+	}
+	else
+	{
+		bli_obj_induce_trans( &bt_local );
+	}
+#else
+	if ( bli_obj_has_trans( b ) )
+	{
+		bli_obj_induce_trans( &bt_local );
+		bli_obj_set_onlytrans( BLIS_NO_TRANSPOSE, &bt_local );
+	}
+#endif
 
 	// Pack matrix B according to the control tree node.
-	bli_l3_packm
+	bli_packm_int
 	(
-	  b,
-	  &b_pack,
+	  &bt_local,
+	  &bt_pack,
 	  cntx,
 	  rntm,
 	  cntl,
 	  thread
 	);
 
+#if 0
+	// Transpose packed object back to B.
+	bli_obj_induce_trans( &bt_pack );
+#endif
+
 	// Proceed with execution using packed matrix B.
-	bli_trsm_int
+	bli_l3_int
 	(
 	  &BLIS_ONE,
 	  a,
-	  &b_pack,
+	  &bt_pack,
 	  &BLIS_ONE,
 	  c,
 	  cntx,

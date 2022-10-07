@@ -1189,52 +1189,48 @@ BLIS_INLINE stor3_t bli_obj_stor3_from_strides( obj_t* c, obj_t* a, obj_t* b )
 
 // -- User-provided information macros --
 
-// User data query
-
-BLIS_INLINE void* bli_obj_user_data( obj_t* obj )
-{
-	return obj->user_data;
-}
-
-// User data modification
-
-BLIS_INLINE void bli_obj_set_user_data( void* data, obj_t* obj )
-{
-	obj->user_data = data;
-}
-
 // Function pointer query
 
-BLIS_INLINE obj_pack_fn_t bli_obj_pack_fn( obj_t* obj )
+BLIS_INLINE obj_pack_ft bli_obj_pack_fn( obj_t* obj )
 {
-	return obj->pack;
+	return obj->pack_fn;
 }
 
-BLIS_INLINE obj_ker_fn_t bli_obj_ker_fn( obj_t* obj )
+BLIS_INLINE void* bli_obj_pack_params( obj_t* obj )
 {
-	return obj->ker;
+	return obj->pack_params;
 }
 
-BLIS_INLINE obj_ukr_fn_t bli_obj_ukr_fn( obj_t* obj )
+BLIS_INLINE obj_ker_ft bli_obj_ker_fn( obj_t* obj )
 {
-	return obj->ukr;
+	return obj->ker_fn;
+}
+
+BLIS_INLINE void* bli_obj_ker_params( obj_t* obj )
+{
+	return obj->ker_params;
 }
 
 // Function pointer modification
 
-BLIS_INLINE void bli_obj_set_pack_fn( obj_pack_fn_t pack, obj_t* obj )
+BLIS_INLINE void bli_obj_set_pack_fn( obj_pack_ft pack_fn, obj_t* obj )
 {
-	obj->pack = pack;
+	obj->pack_fn = pack_fn;
 }
 
-BLIS_INLINE void bli_obj_set_ker_fn( obj_ker_fn_t ker, obj_t* obj )
+BLIS_INLINE void bli_obj_set_pack_params( void* pack_params, obj_t* obj )
 {
-	obj->ker = ker;
+	obj->pack_params = pack_params;
 }
 
-BLIS_INLINE void bli_obj_set_ukr_fn( obj_ukr_fn_t ukr, obj_t* obj )
+BLIS_INLINE void bli_obj_set_ker_fn( obj_ker_ft ker_fn, obj_t* obj )
 {
-	obj->ukr = ukr;
+	obj->ker_fn = ker_fn;
+}
+
+BLIS_INLINE void bli_obj_set_ker_params( void* ker_params, obj_t* obj )
+{
+	obj->ker_params = ker_params;
 }
 
 
@@ -1355,6 +1351,18 @@ BLIS_INLINE void* bli_obj_buffer_for_1x1( num_t dt, obj_t* obj )
 	       ( bli_obj_is_const( obj ) ? bli_obj_buffer_for_const( dt, obj )
 	                                 : bli_obj_buffer_at_off( obj )
 	       );
+}
+
+// Adjust the pointer based on current offsets, zero the offsets, and then
+// set the current object as the root. For obj_t's with at least one non-zero
+// offset, this effectively makes the obj_t "forget" that it was ever a view
+// into a larger matrix.
+
+BLIS_INLINE void bli_obj_reset_origin( obj_t* obj )
+{
+	bli_obj_set_buffer( bli_obj_buffer_at_off( obj ), obj );
+	bli_obj_set_offs( 0, 0, obj );
+	bli_obj_set_as_root( obj );
 }
 
 // Make a full alias (shallow copy).
@@ -1482,7 +1490,13 @@ BLIS_INLINE void bli_obj_scalar_set_dt_buffer( obj_t* obj, num_t dt_aux, num_t* 
 
 BLIS_INLINE void bli_obj_swap( obj_t* a, obj_t* b )
 {
+	bool a_root_is_self = ( bli_obj_root( a ) == a );
+	bool b_root_is_self = ( bli_obj_root( b ) == b );
+
 	obj_t t = *b; *b = *a; *a = t;
+
+	if ( a_root_is_self ) bli_obj_set_as_root( b );
+	if ( b_root_is_self ) bli_obj_set_as_root( a );
 }
 
 // Swap object pack schemas.

@@ -71,7 +71,7 @@ void bli_gemm_blk_var3
 		                        i, b_alg, b, &b1 );
 
 		// Perform gemm subproblem.
-		bli_gemm_int
+		bli_l3_int
 		(
 		  &BLIS_ONE,
 		  &a1,

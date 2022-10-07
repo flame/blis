@@ -119,7 +119,7 @@ BLIS_INLINE void bli_pba_unlock( pba_t* pba )
 
 // -----------------------------------------------------------------------------
 
-pba_t* bli_pba_query( void );
+BLIS_EXPORT_BLIS pba_t* bli_pba_query( void );
 
 void bli_pba_init
      (
@@ -144,10 +144,15 @@ void bli_pba_release
        mem_t*  mem
      );
 
-void bli_pba_rntm_set_pba
+BLIS_INLINE void bli_pba_rntm_set_pba
      (
        rntm_t* rntm
-     );
+     )
+{
+	pba_t* pba = bli_pba_query();
+
+	bli_rntm_set_pba( pba, rntm );
+}
 
 siz_t bli_pba_pool_size
      (
