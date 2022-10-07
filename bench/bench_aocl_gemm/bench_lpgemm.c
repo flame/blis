@@ -277,7 +277,7 @@ inline C_type mat_mul_accuracy_check_downscale_ ## BLAS_DOWNSCALE_SFX \
        dim_t j \
      )\
 {\
-	out_temp_accum = ( C_type )lroundf( ( SCALE_type )temp_accum * \
+	out_temp_accum = ( C_type )nearbyintf( ( SCALE_type )temp_accum * \
 					 ( *( ( SCALE_type* )post_op->sum.scale_factor + j ) ) ); \
 	return 	out_temp_accum; \
 }\
