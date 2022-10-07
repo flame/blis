@@ -83,7 +83,7 @@ BLIS_INLINE packbuf_t bli_cntl_packm_params_pack_buf_type( cntl_t* cntl )
 
 // -----------------------------------------------------------------------------
 
-cntl_t* bli_packm_cntl_create_node
+BLIS_EXPORT_BLIS cntl_t* bli_packm_cntl_create_node
      (
        rntm_t*   rntm,
        void_fp   var_func,
