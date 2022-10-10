@@ -84,6 +84,7 @@ extern "C" {
 
 #include "bli_thread.h"
 #include "bli_pthread.h"
+#include "bli_affinity.h"
 
 
 // -- Constant definitions --
