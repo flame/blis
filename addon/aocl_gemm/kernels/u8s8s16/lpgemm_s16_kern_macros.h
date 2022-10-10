@@ -34,6 +34,8 @@
 
 #ifndef LPGEMM_S16_KERN_MACROS_H
 #define LPGEMM_S16_KERN_MACROS_H
+#define S8_MIN  (-128)
+#define S8_MAX  (+127)
 
 #define RELU_SCALE_OP_S16_AVX2(reg) \
 	selector1 = _mm256_setzero_si256();\
@@ -70,11 +72,15 @@
   res_1 = _mm256_mul_ps(temp_float[0], scale_1);\
   res_2 = _mm256_mul_ps(temp_float[1], scale_2);\
 \
-  /* Round the resultant value to the nearest integer*/\
-  res_1 = _mm256_round_ps(res_1, (_MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC));\
-  res_2 = _mm256_round_ps(res_2, (_MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC));\
+  /* Round the resultant value to the nearest float value and clip the values between [-128, 127] */\
+  res_1 = _mm256_min_ps(_mm256_max_ps \
+          (_mm256_round_ps(res_1, (_MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC)), \
+          _mm256_set1_ps(( float )S8_MIN)), _mm256_set1_ps(( float )S8_MAX));\
+  res_2 = _mm256_min_ps(_mm256_max_ps \
+          (_mm256_round_ps (res_2, (_MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC)), \
+          _mm256_set1_ps(( float )S8_MIN)), _mm256_set1_ps(( float )S8_MAX));\
 \
-  /* Convert float32 scaled rounded value to int32 */\
+  /* Convert the clipped float32 scaled rounded value to int32 */\
   temp_32[0] = _mm256_cvtps_epi32(res_1);\
   temp_32[1] = _mm256_cvtps_epi32(res_2);\
 \
@@ -99,11 +105,15 @@
   res_1 = _mm256_mul_ps(temp_float[0], scale_1);\
   res_2 = _mm256_mul_ps(temp_float[1], scale_2);\
 \
-  /* Round the resultant value to the nearest integer*/\
-  res_1 = _mm256_round_ps(res_1, (_MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC));\
-  res_2 = _mm256_round_ps(res_2, (_MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC));\
+  /* Round the resultant value to the nearest float value and clip the values between [-128, 127] */\
+  res_1 = _mm256_min_ps(_mm256_max_ps \
+          (_mm256_round_ps (res_1, (_MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC)), \
+          _mm256_set1_ps(( float )S8_MIN)), _mm256_set1_ps(( float )S8_MAX));\
+  res_2 = _mm256_min_ps(_mm256_max_ps \
+          (_mm256_round_ps (res_2, (_MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC)), \
+          _mm256_set1_ps(( float )S8_MIN)), _mm256_set1_ps(( float )S8_MAX));\
 \
-  /* Convert float32 scaled rounded value to int32 */\
+  /* Convert the clipped float32 scaled rounded value to int32 */\
   temp_32[0] = _mm256_cvtps_epi32(res_1);\
   temp_32[1] = _mm256_cvtps_epi32(res_2);\
 \
@@ -140,11 +150,15 @@
   res_1 = _mm256_mul_ps(temp_float[0], scale_1);\
   res_2 = _mm256_mul_ps(temp_float[1], scale_2);\
 \
-  /* Round the resultant value to the nearest integer*/\
-  res_1 = _mm256_round_ps(res_1, (_MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC));\
-  res_2 = _mm256_round_ps(res_2, (_MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC));\
+  /* Round the resultant value to the nearest float value and clip the values between [-128, 127] */\
+  res_1 = _mm256_min_ps(_mm256_max_ps \
+         (_mm256_round_ps(res_1, (_MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC)), \
+          _mm256_set1_ps(( float )S8_MIN)), _mm256_set1_ps(( float )S8_MAX));\
+  res_2 = _mm256_min_ps(_mm256_max_ps \
+          (_mm256_round_ps(res_2, (_MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC)), \
+          _mm256_set1_ps(( float )S8_MIN)), _mm256_set1_ps(( float )S8_MAX));\
 \
-  /* Convert float32 scaled rounded value to int32 */\
+  /* Convert the clipped float32 scaled rounded value to int32 */\
   temp_32[0] = _mm256_cvtps_epi32(res_1);\
   temp_32[1] = _mm256_cvtps_epi32(res_2);\
 \
@@ -169,11 +183,15 @@
   res_1 = _mm256_mul_ps(temp_float[0], scale_1);\
   res_2 = _mm256_mul_ps(temp_float[1], scale_2);\
 \
-  /* Round the resultant value to the nearest integer*/\
-  res_1 = _mm256_round_ps(res_1, (_MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC));\
-  res_2 = _mm256_round_ps(res_2, (_MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC));\
+  /* Round the resultant value to the nearest float value and clip the values between [-128, 127] */\
+  res_1 = _mm256_min_ps(_mm256_max_ps \
+          (_mm256_round_ps(res_1, (_MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC)), \
+          _mm256_set1_ps(( float )S8_MIN)), _mm256_set1_ps(( float )S8_MAX));\
+  res_2 = _mm256_min_ps(_mm256_max_ps \
+          (_mm256_round_ps(res_2, (_MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC)), \
+          _mm256_set1_ps(( float )S8_MIN)), _mm256_set1_ps(( float )S8_MAX));\
 \
-  /* Convert float32 scaled rounded value to int32 */\
+  /* Convert the clipped float32 scaled rounded value to int32 */\
   temp_32[0] = _mm256_cvtps_epi32(res_1);\
   temp_32[1] = _mm256_cvtps_epi32(res_2);\
 \
@@ -216,11 +234,15 @@
   res_1 = _mm256_mul_ps(temp_float[0], scale_1);\
   res_2 = _mm256_mul_ps(temp_float[1], scale_2);\
 \
-  /* Round the resultant value to the nearest integer*/\
-  res_1 = _mm256_round_ps(res_1, (_MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC));\
-  res_2 = _mm256_round_ps(res_2, (_MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC));\
+  /* Round the resultant value to the nearest float value and clip the values between [-128, 127] */\
+  res_1 = _mm256_min_ps(_mm256_max_ps \
+          (_mm256_round_ps(res_1, (_MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC)), \
+          _mm256_set1_ps (( float )S8_MIN)), _mm256_set1_ps (( float )S8_MAX));\
+  res_2 = _mm256_min_ps(_mm256_max_ps \
+          (_mm256_round_ps(res_2, (_MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC)), \
+          _mm256_set1_ps (( float )S8_MIN)), _mm256_set1_ps (( float )S8_MAX));\
 \
-  /* Convert float32 scaled rounded value to int32 */\
+  /* Convert the clipped float32 scaled rounded value to int32 */\
   temp_32[0] = _mm256_cvtps_epi32(res_1);\
   temp_32[1] = _mm256_cvtps_epi32(res_2);\
 \
@@ -245,11 +267,15 @@
   res_1 = _mm256_mul_ps(temp_float[0], scale_1);\
   res_2 = _mm256_mul_ps(temp_float[1], scale_2);\
 \
-  /* Round the resultant value to the nearest integer*/\
-  res_1 = _mm256_round_ps(res_1, (_MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC));\
-  res_2 = _mm256_round_ps(res_2, (_MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC));\
+  /* Round the resultant value to the nearest float value and clip the values between [-128, 127] */\
+  res_1 = _mm256_min_ps(_mm256_max_ps \
+          (_mm256_round_ps(res_1, (_MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC)), \
+          _mm256_set1_ps (( float )S8_MIN)), _mm256_set1_ps (( float )S8_MAX));\
+  res_2 = _mm256_min_ps(_mm256_max_ps \
+          (_mm256_round_ps(res_2, (_MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC)), \
+          _mm256_set1_ps (( float )S8_MIN)), _mm256_set1_ps (( float )S8_MAX));\
 \
-  /* Convert float32 scaled rounded value to int32 */\
+  /* Convert the clipped float32 scaled rounded value to int32 */\
   temp_32[0] = _mm256_cvtps_epi32(res_1);\
   temp_32[1] = _mm256_cvtps_epi32(res_2);\
 \
@@ -297,11 +323,15 @@
   res_1 = _mm256_mul_ps(temp_float[0], scale_1);\
   res_2 = _mm256_mul_ps(temp_float[1], scale_2);\
 \
-  /* Round the resultant value to the nearest integer*/\
-  res_1 = _mm256_round_ps(res_1, (_MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC));\
-  res_2 = _mm256_round_ps(res_2, (_MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC));\
+  /* Round the resultant value to the nearest float value and clip the values between [-128, 127] */\
+  res_1 = _mm256_min_ps(_mm256_max_ps \
+          (_mm256_round_ps(res_1, (_MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC)), \
+          _mm256_set1_ps (( float )S8_MIN)), _mm256_set1_ps (( float )S8_MAX));\
+  res_2 = _mm256_min_ps(_mm256_max_ps \
+          (_mm256_round_ps(res_2, (_MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC)), \
+          _mm256_set1_ps (( float )S8_MIN)), _mm256_set1_ps (( float )S8_MAX));\
 \
-  /* Convert float32 scaled rounded value to int32 */\
+  /* Convert the clipped float32 scaled rounded value to int32 */\
   temp_32[0] = _mm256_cvtps_epi32(res_1);\
   temp_32[1] = _mm256_cvtps_epi32(res_2);\
 \
@@ -340,11 +370,15 @@
   res_1 = _mm256_mul_ps(temp_float[0], scale_1);\
   res_2 = _mm256_mul_ps(temp_float[1], scale_2);\
 \
-  /* Round the resultant value to the nearest integer*/\
-  res_1 = _mm256_round_ps(res_1, (_MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC));\
-  res_2 = _mm256_round_ps(res_2, (_MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC));\
+  /* Round the resultant value to the nearest float value and clip the values between [-128, 127] */\
+  res_1 = _mm256_min_ps(_mm256_max_ps \
+          (_mm256_round_ps(res_1, (_MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC)), \
+          _mm256_set1_ps (( float )S8_MIN)), _mm256_set1_ps (( float )S8_MAX));\
+  res_2 = _mm256_min_ps(_mm256_max_ps \
+          (_mm256_round_ps(res_2, (_MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC)), \
+          _mm256_set1_ps (( float )S8_MIN)), _mm256_set1_ps (( float )S8_MAX));\
 \
-  /* Convert float32 scaled rounded value to int32 */\
+  /* Convert the clipped float32 scaled rounded value to int32 */\
   temp_32[0] = _mm256_cvtps_epi32(res_1);\
   temp_32[1] = _mm256_cvtps_epi32(res_2);\
 \

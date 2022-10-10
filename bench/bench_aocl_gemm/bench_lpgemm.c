@@ -8,6 +8,9 @@
 
 #include "blis.h"
 
+#define S8_MIN  (-128)
+#define S8_MAX  (+127)
+
 // Mode can be one of the follwoing:
 // 	1. p - performance, used for benchmarks.
 // 	2. a - accuracy, used to test accuracy/correctness.
@@ -267,6 +270,15 @@ GEN_MAT_MUL_BENCH_DRV_FUNC(bfloat16,bfloat16,float,float,bf16bf16f32of32)
 GEN_MAT_MUL_BENCH_DRV_FUNC(bfloat16,bfloat16,bfloat16,float,bf16bf16f32obf16)
 GEN_MAT_MUL_BENCH_DRV_FUNC(float,float,float,float,f32f32f32of32)
 
+int max (int a, int b)
+{
+	return ( a > b ? a : b );
+}
+
+int min (int a, int b)
+{
+	return ( a < b ? a : b );
+}
 
 #define GEN_MAT_MUL_ACC_CHK_DOWNSCALE(C_type,ACCUM_type,SCALE_type,BLAS_DOWNSCALE_SFX) \
 inline C_type mat_mul_accuracy_check_downscale_ ## BLAS_DOWNSCALE_SFX \
@@ -277,8 +289,8 @@ inline C_type mat_mul_accuracy_check_downscale_ ## BLAS_DOWNSCALE_SFX \
        dim_t j \
      )\
 {\
-	out_temp_accum = ( C_type )nearbyintf( ( SCALE_type )temp_accum * \
-					 ( *( ( SCALE_type* )post_op->sum.scale_factor + j ) ) ); \
+	out_temp_accum = ( C_type ) min ( max ( nearbyintf( ( SCALE_type )temp_accum * \
+		( *( ( SCALE_type* )post_op->sum.scale_factor + j ) ) ), S8_MIN ), S8_MAX ) ; \
 	return 	out_temp_accum; \
 }\
 

@@ -34,6 +34,8 @@
 
 #ifndef LPGEMM_S32_KERN_MACROS_H
 #define LPGEMM_S32_KERN_MACROS_H
+#define S8_MIN  (-128)
+#define S8_MAX  (+127)
 
 #define RELU_SCALE_OP_S32_AVX512(reg) \
 	/* Generate indenx of elements <= 0.*/ \
@@ -51,11 +53,19 @@
 	  ( \
 		_mm512_cvtps_epi32 \
 		( \
-		  _mm512_mul_round_ps \
+		  _mm512_min_ps \
 		  ( \
-			_mm512_cvtepi32_ps( reg ), \
-			( __m512 )selector, \
-			( _MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC ) \
+			_mm512_max_ps \
+			( \
+			  _mm512_mul_round_ps \
+			  ( \
+				_mm512_cvtepi32_ps( reg ), \
+				( __m512 )selector, \
+				( _MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC ) \
+			  ) \
+			  , _mm512_set1_ps (( float )S8_MIN) \
+			) \
+			, _mm512_set1_ps (( float )S8_MAX) \
 		  ) \
 		) \
 	  ) \
@@ -69,11 +79,19 @@
 	  ( \
 		_mm512_cvtps_epi32 \
 		( \
-		  _mm512_mul_round_ps \
+		  _mm512_min_ps \
 		  ( \
-			_mm512_cvtepi32_ps( reg ), \
-			( __m512 )selector, \
-			( _MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC ) \
+			_mm512_max_ps \
+			( \
+			  _mm512_mul_round_ps \
+			  ( \
+				_mm512_cvtepi32_ps( reg ), \
+				( __m512 )selector, \
+				( _MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC ) \
+			  ) \
+			  , _mm512_set1_ps (( float )S8_MIN) \
+			) \
+			, _mm512_set1_ps (( float )S8_MAX) \
 		  ) \
 		) \
 	  ) \
