@@ -1,4 +1,4 @@
-##Copyright (C) 2021, Advanced Micro Devices, Inc. All rights reserved.##
+##Copyright (C) 2022, Advanced Micro Devices, Inc. All rights reserved.##
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src)
 

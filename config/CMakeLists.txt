@@ -1,4 +1,4 @@
-##Copyright (C) 2021, Advanced Micro Devices, Inc. All rights reserved. ##
+##Copyright (C) 2022, Advanced Micro Devices, Inc. All rights reserved. ##
 
 if(${TARGET_ARCH} STREQUAL zen4)
 message("The configuration is : ${TARGET_ARCH}")
