@@ -106,7 +106,7 @@ void bli_gemmt_front
 	  &c_local,
 	  cntx,
 	  rntm,
-	  cntl
+	  NULL
 	);
 }
 

@@ -40,5 +40,6 @@ void bli_hemm_front
        const obj_t*  b,
        const obj_t*  beta,
        const obj_t*  c,
-       const cntx_t* cntx
+       const cntx_t* cntx,
+             rntm_t* rntm
      );
