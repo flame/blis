@@ -69,7 +69,7 @@
 // to be 32 bits, since explicit selection of 32 bits is prohibited at
 // configure-time (and explicit or automatic selection of 64 bits is fine
 // and would have had the same result).
-#if BLIS_BLAS_INT_SIZE == 64
+#if BLIS_BLAS_INT_TYPE_SIZE == 64
   #undef  BLIS_INT_TYPE_SIZE
   #define BLIS_INT_TYPE_SIZE 64
 #endif
