@@ -34,31 +34,22 @@
 
 void bli_l3_adjust_kc
       (
-        const obj_t* a, \
-        const obj_t* b, \
-              dim_t  mr, \
-              dim_t  nr, \
-              dim_t* bsize, \
-              dim_t* bsize_max, \
-              opid_t family \
+        const obj_t*  a,
+        const obj_t*  b,
+              dim_t*  b_alg,
+              dim_t*  b_max,
+        const cntx_t* cntx,
+        const cntl_t* cntl
       );
 
-
-#undef  GENPROT
-#define GENPROT( opname ) \
-\
-void PASTEMAC0(opname) \
-      ( \
-        const obj_t* a, \
-        const obj_t* b, \
-              dim_t  mr, \
-              dim_t  nr, \
-              dim_t* bsize, \
-              dim_t* bsize_max \
+dim_t bli_l3_determine_kc
+      (
+              dir_t   direct,
+              dim_t   i,
+              dim_t   dim,
+        const obj_t*  a,
+        const obj_t*  b,
+              bszid_t bszid,
+        const cntx_t* cntx,
+        const cntl_t* cntl
       );
-
-GENPROT( gemm_adjust_kc )
-GENPROT( gemmt_adjust_kc )
-GENPROT( trmm_adjust_kc )
-GENPROT( trsm_adjust_kc )
-

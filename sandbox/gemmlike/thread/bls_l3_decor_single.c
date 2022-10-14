@@ -62,50 +62,16 @@ void bls_l3_thread_decorator_single
 	// resize the array_t, if necessary.
 	array_t* array = bli_sba_checkout_array( n_threads );
 
-	// Access the pool_t* for thread 0 and embed it into the rntm.
-	bli_sba_rntm_set_pool( 0, array, rntm );
-
-	// Set the packing block allocator field of the rntm.
-	bli_pba_rntm_set_pba( rntm );
-
-#ifndef SKIP_THRINFO_TREE
 	// Allcoate a global communicator for the root thrinfo_t structures.
-	thrcomm_t* gl_comm = bli_thrcomm_create( rntm, n_threads );
-#endif
-
+	thrcomm_t* gl_comm = &BLIS_SINGLE_COMM;
 
 	{
-		// NOTE: We don't need to create another copy of the rntm_t since
-		// it was already copied in one of the high-level oapi functions.
-		rntm_t* rntm_p = rntm;
-
 		// There is only one thread id (for the thief thread).
 		const dim_t tid = 0;
 
-		// Use the thread id to access the appropriate pool_t* within the
-		// array_t, and use it to set the sba_pool field within the rntm_t.
-		// If the pool_t* element within the array_t is NULL, it will first
-		// be allocated/initialized.
-		// NOTE: This is commented out because, in the single-threaded case,
-		// this is redundant since it's already been done above.
-		//bli_sba_rntm_set_pool( tid, array, rntm_p );
-
-#ifndef SKIP_THRINFO_TREE
-		thrinfo_t* thread = NULL;
-
-		// Create the root node of the thread's thrinfo_t structure.
-		bli_l3_sup_thrinfo_create_root( tid, gl_comm, rntm_p, &thread );
-#else
-		// This optimization allows us to use one of the global thrinfo_t
-		// objects for single-threaded execution rather than grow one from
-		// scratch. The key is that bli_thrinfo_sup_grow(), which is called
-		// from within the variants, will immediately return if it detects
-		// that the thrinfo_t* passed into it is either
-		// &BLIS_GEMM_SINGLE_THREADED or &BLIS_PACKM_SINGLE_THREADED.
-		thrinfo_t* thread = &BLIS_GEMM_SINGLE_THREADED;
-
-		( void )tid;
-#endif
+    	// Create the root node of the thread's thrinfo_t structure.
+        pool_t*    pool   = bli_apool_array_elem( tid, array );
+    	thrinfo_t* thread = bli_l3_sup_thrinfo_create( tid, gl_comm, pool, rntm );
 
 		func
 		(
@@ -115,14 +81,12 @@ void bls_l3_thread_decorator_single
 		  beta,
 		  c,
 		  cntx,
-		  rntm_p,
-		  thread
+		  rntm,
+	      bli_thrinfo_sub_node( thread )
 		);
 
-#ifndef SKIP_THRINFO_TREE
 		// Free the current thread's thrinfo_t structure.
-		bli_l3_sup_thrinfo_free( rntm_p, thread );
-#endif
+		bli_thrinfo_free( thread );
 	}
 
 	// We shouldn't free the global communicator since it was already freed

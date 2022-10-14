@@ -4,7 +4,8 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2021, The University of Texas at Austin
+   Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2018 - 2019, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -32,43 +33,28 @@
 
 */
 
+
 //
-// Prototype BLAS-like interfaces to the variants.
+// Prototype conditional control tree creation functions.
 //
 
-#undef  GENTPROT
-#define GENTPROT( ctype, ch, varname ) \
-\
-void PASTECH2(bls_,ch,varname) \
-     ( \
-       conj_t           conjc, \
-       pack_t           schema, \
-       dim_t            m, \
-       dim_t            n, \
-       dim_t            m_max, \
-       dim_t            n_max, \
-       ctype*  restrict kappa, \
-       ctype*  restrict c, inc_t rs_c, inc_t cs_c, \
-       ctype*  restrict p, inc_t rs_p, inc_t cs_p, \
-                           dim_t pd_p, inc_t ps_p, \
-       cntx_t* restrict cntx, \
-       thrinfo_t* restrict thread  \
+void bli_l3_cntl_create_if
+     (
+             opid_t   family,
+             pack_t   schema_a,
+             pack_t   schema_b,
+       const obj_t*   a,
+       const obj_t*   b,
+       const obj_t*   c,
+             pool_t*  pool,
+       const cntl_t*  cntl_orig,
+             cntl_t** cntl_use
      );
 
-//INSERT_GENTPROT_BASIC0( packm_var1 )
-GENTPROT( float,    s, packm_var1 )
-GENTPROT( double,   d, packm_var1 )
-GENTPROT( scomplex, c, packm_var1 )
-GENTPROT( dcomplex, z, packm_var1 )
+BLIS_EXPORT_BLIS
+void bli_l3_cntl_free
+     (
+       pool_t* pool,
+       cntl_t* cntl_use
+     );
 
-//INSERT_GENTPROT_BASIC0( packm_var2 )
-GENTPROT( float,    s, packm_var2 )
-GENTPROT( double,   d, packm_var2 )
-GENTPROT( scomplex, c, packm_var2 )
-GENTPROT( dcomplex, z, packm_var2 )
-
-//INSERT_GENTPROT_BASIC0( packm_var3 )
-GENTPROT( float,    s, packm_var3 )
-GENTPROT( double,   d, packm_var3 )
-GENTPROT( scomplex, c, packm_var3 )
-GENTPROT( dcomplex, z, packm_var3 )

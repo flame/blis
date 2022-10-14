@@ -37,112 +37,59 @@
 
 void bli_l3_adjust_kc
       (
-        const obj_t* a,
-        const obj_t* b,
-              dim_t  mr,
-              dim_t  nr,
-              dim_t* bsize,
-              dim_t* bsize_max,
-              opid_t family
+        const obj_t*  a,
+        const obj_t*  b,
+              dim_t*  b_alg,
+              dim_t*  b_max,
+        const cntx_t* cntx,
+        const cntl_t* cntl
       )
 {
-	if      ( family == BLIS_GEMM )
-		bli_gemm_adjust_kc( a, b, mr, nr, bsize, bsize_max );
-	else if ( family == BLIS_GEMMT )
-		bli_gemmt_adjust_kc( a, b, mr, nr, bsize, bsize_max );
-	else if ( family == BLIS_TRMM )
-		bli_trmm_adjust_kc( a, b, mr, nr, bsize, bsize_max );
-	else if ( family == BLIS_TRSM )
-		bli_trsm_adjust_kc( a, b, mr, nr, bsize, bsize_max );
-}
+	const opid_t family = bli_cntl_family( cntl );
+	const num_t  dt     = bli_obj_exec_dt( a );
+	      dim_t  mnr    = 1;
 
-// -----------------------------------------------------------------------------
-
-void bli_gemm_adjust_kc
-      (
-        const obj_t* a,
-        const obj_t* b,
-              dim_t  mr,
-              dim_t  nr,
-              dim_t* bsize,
-              dim_t* bsize_max
-      )
-{
-	/* Nudge the default and maximum kc blocksizes up to the nearest
-	   multiple of MR if A is Hermitian or symmetric, or NR if B is
-	   Hermitian or symmetric. If neither case applies, then we leave
-	   the blocksizes unchanged. */
-	if      ( bli_obj_root_is_herm_or_symm( a ) )
+	// Nudge the default and maximum kc blocksizes up to the nearest
+	// multiple of MR if A is Hermitian, symmetric, or triangular or
+    // NR if B is Hermitian, symmetric, or triangular. If neither case
+    // applies, then we leave the blocksizes unchanged. For trsm we
+    // always use MR (rather than sometimes using NR) because even
+    // when the triangle is on the right, packing of that matrix uses
+    // MR, since only left-side trsm micro-kernels are supported.
+	if ( !bli_obj_root_is_general( a ) || family == BLIS_TRSM )
 	{
-        *bsize     = bli_align_dim_to_mult( *bsize, mr );
-        *bsize_max = bli_align_dim_to_mult( *bsize_max, mr );
+		mnr = bli_cntx_get_blksz_def_dt( dt, BLIS_MR, cntx );
 	}
-	else if ( bli_obj_root_is_herm_or_symm( b ) )
+	else if ( !bli_obj_root_is_general( b ) )
 	{
-        *bsize     = bli_align_dim_to_mult( *bsize, nr );
-        *bsize_max = bli_align_dim_to_mult( *bsize_max, nr );
+		mnr = bli_cntx_get_blksz_def_dt( dt, BLIS_NR, cntx );
 	}
+
+	*b_alg = bli_align_dim_to_mult( *b_alg, mnr );
+	*b_max = bli_align_dim_to_mult( *b_max, mnr );
 }
 
-// -----------------------------------------------------------------------------
-
-void bli_gemmt_adjust_kc
+dim_t bli_l3_determine_kc
       (
-        const obj_t* a,
-        const obj_t* b,
-              dim_t  mr,
-              dim_t  nr,
-              dim_t* bsize,
-              dim_t* bsize_max
+              dir_t   direct,
+              dim_t   i,
+              dim_t   dim,
+        const obj_t*  a,
+        const obj_t*  b,
+              bszid_t bszid,
+        const cntx_t* cntx,
+        const cntl_t* cntl
       )
 {
-	/* Notice that for gemmt, we do not need to perform any special handling
-	   for the default and maximum kc blocksizes vis-a-vis MR or NR. */
-}
+	const num_t    dt    = bli_obj_exec_dt( a );
+	const blksz_t* bsize = bli_cntx_get_blksz( bszid, cntx );
+	      dim_t    b_alg = bli_blksz_get_def( dt, bsize );
+	      dim_t    b_max = bli_blksz_get_max( dt, bsize );
 
-// -----------------------------------------------------------------------------
+	bli_l3_adjust_kc( a, b, &b_alg, &b_max, cntx, cntl );
 
-void bli_trmm_adjust_kc
-      (
-        const obj_t* a,
-        const obj_t* b,
-              dim_t  mr,
-              dim_t  nr,
-              dim_t* bsize,
-              dim_t* bsize_max
-      )
-{
-	/* Nudge the default and maximum kc blocksizes up to the nearest
-	   multiple of MR if the triangular matrix is on the left, or NR
-	   if the triangular matrix is one the right. */
-	dim_t mnr;
-	if ( bli_obj_root_is_triangular( a ) )
-		mnr = mr;
+	if ( direct == BLIS_FWD )
+		return bli_determine_blocksize_f_sub( i, dim, b_alg, b_max );
 	else
-		mnr = nr;
-
-    *bsize     = bli_align_dim_to_mult( *bsize, mnr );
-    *bsize_max = bli_align_dim_to_mult( *bsize_max, mnr );
+		return bli_determine_blocksize_b_sub( i, dim, b_alg, b_max );
 }
-
-// -----------------------------------------------------------------------------
-
-void bli_trsm_adjust_kc
-      (
-        const obj_t* a,
-        const obj_t* b,
-              dim_t  mr,
-              dim_t  nr,
-              dim_t* bsize,
-              dim_t* bsize_max
-      )
-{
-	/* Nudge the default and maximum kc blocksizes up to the nearest
-	   multiple of MR. We always use MR (rather than sometimes using NR)
-	   because even when the triangle is on the right, packing of that
-	   matrix uses MR, since only left-side trsm micro-kernels are
-	   supported. */
-    *bsize     = bli_align_dim_to_mult( *bsize, mr );
-    *bsize_max = bli_align_dim_to_mult( *bsize_max, mr );
-}
-

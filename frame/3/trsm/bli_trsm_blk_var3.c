@@ -63,8 +63,8 @@ void bli_trsm_blk_var3
 	for ( dim_t i = 0; i < k_trans; i += b_alg )
 	{
 		// Determine the current algorithmic blocksize.
-		b_alg = bli_trsm_determine_kc( direct, i, k_trans, &ap, &bp,
-		                               bli_cntl_part( cntl ), cntx );
+		b_alg = bli_l3_determine_kc( direct, i, k_trans, &ap, &bp,
+		                             bli_cntl_bszid( cntl ), cntx, cntl );
 
 		// Acquire partitions for A1 and B1.
 		obj_t a1, b1;
@@ -87,7 +87,7 @@ void bli_trsm_blk_var3
 		);
 
 		//bli_thread_ibarrier( thread );
-		bli_thread_barrier( rntm, bli_thrinfo_sub_node( thread ) );
+		bli_thread_barrier( bli_thrinfo_sub_node( thread ) );
 
 		// This variant executes multiple rank-k updates. Therefore, if the
 		// internal alpha scalars on A/B and C are non-zero, we must ensure
