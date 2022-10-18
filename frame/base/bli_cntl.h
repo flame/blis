@@ -45,14 +45,7 @@ struct cntl_s
 	void_fp        var_func;
 	struct cntl_s* sub_prenode;
 	struct cntl_s* sub_node;
-
-	// Optional fields (needed only by some operations such as packm).
-	// NOTE: first field of params must be a uint64_t containing the size
-	// of the struct.
 	void*          params;
-
-	// Internal fields that track "cached" data.
-	mem_t          pack_mem;
 };
 typedef struct cntl_s cntl_t;
 */
@@ -62,7 +55,7 @@ typedef struct cntl_s cntl_t;
 
 BLIS_EXPORT_BLIS cntl_t* bli_cntl_create_node
      (
-       rntm_t* rntm,
+       pool_t* pool,
        opid_t  family,
        bszid_t bszid,
        void_fp var_func,
@@ -72,7 +65,7 @@ BLIS_EXPORT_BLIS cntl_t* bli_cntl_create_node
 
 BLIS_EXPORT_BLIS void bli_cntl_free_node
      (
-       rntm_t* rntm,
+       pool_t* pool,
        cntl_t* cntl
      );
 
@@ -85,28 +78,14 @@ BLIS_EXPORT_BLIS void bli_cntl_clear_node
 
 BLIS_EXPORT_BLIS void bli_cntl_free
      (
-       rntm_t*    rntm,
-       cntl_t*    cntl,
-       thrinfo_t* thread
-     );
-
-BLIS_EXPORT_BLIS void bli_cntl_free_w_thrinfo
-     (
-       rntm_t*    rntm,
-       cntl_t*    cntl,
-       thrinfo_t* thread
-     );
-
-BLIS_EXPORT_BLIS void bli_cntl_free_wo_thrinfo
-     (
-       rntm_t*    rntm,
-       cntl_t*    cntl
+       pool_t* pool,
+       cntl_t* cntl
      );
 
 BLIS_EXPORT_BLIS cntl_t* bli_cntl_copy
      (
-       rntm_t* rntm,
-       cntl_t* cntl
+             pool_t* pool,
+       const cntl_t* cntl
      );
 
 BLIS_EXPORT_BLIS void bli_cntl_mark_family
@@ -163,11 +142,6 @@ BLIS_INLINE uint64_t bli_cntl_params_size( const cntl_t* cntl )
 	return *( ( uint64_t* )(cntl->params) );
 }
 
-BLIS_INLINE mem_t* bli_cntl_pack_mem( cntl_t* cntl )
-{
-	return &(cntl->pack_mem);
-}
-
 // cntl_t query (complex)
 
 BLIS_INLINE bool bli_cntl_is_null( const cntl_t* cntl )
@@ -218,10 +192,5 @@ BLIS_INLINE void bli_cntl_set_sub_node( cntl_t* sub_node, cntl_t* cntl )
 BLIS_INLINE void bli_cntl_set_params( void* params, cntl_t* cntl )
 {
 	cntl->params = params;
-}
-
-BLIS_INLINE void bli_cntl_set_pack_mem( mem_t* pack_mem, cntl_t* cntl )
-{
-	cntl->pack_mem = *pack_mem;
 }
 

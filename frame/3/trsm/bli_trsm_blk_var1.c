@@ -43,8 +43,7 @@ void bli_trsm_blk_var1
        const obj_t*  b,
        const obj_t*  c,
        const cntx_t* cntx,
-             rntm_t* rntm,
-             cntl_t* cntl,
+       const cntl_t* cntl,
              thrinfo_t* thread
      )
 {
@@ -81,7 +80,7 @@ void bli_trsm_blk_var1
 	for ( dim_t i = my_start; i < my_end; i += b_alg )
 	{
 		b_alg = bli_determine_blocksize( direct, i, my_end, &a11,
-		                                 bli_cntl_bszid( cntl ), cntx );
+		                                 bli_cntl_part( cntl ), cntx );
 
 		// Acquire partitions for A1 and C1.
 		obj_t a11_1, c1_1;
@@ -105,7 +104,6 @@ void bli_trsm_blk_var1
 		  &BLIS_ONE,
 		  &c1_1,
 		  cntx,
-		  rntm,
 		  bli_cntl_sub_prenode( cntl ),
 		  bli_thrinfo_sub_prenode( thread )
 		);
@@ -152,7 +150,7 @@ void bli_trsm_blk_var1
 	{
 		// Determine the current algorithmic blocksize.
 		b_alg = bli_determine_blocksize( direct, i, my_end, &ax1,
-		                                 bli_cntl_bszid( cntl ), cntx );
+		                                 bli_cntl_part( cntl ), cntx );
 
 		// Acquire partitions for A1 and C1.
 		obj_t a11, c1;
@@ -177,7 +175,6 @@ void bli_trsm_blk_var1
 		  &BLIS_ONE,
 		  &c1,
 		  cntx,
-		  rntm,
 		  bli_cntl_sub_node( cntl ),
 		  bli_thrinfo_sub_node( thread )
 		);

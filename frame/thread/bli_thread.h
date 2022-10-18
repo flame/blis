@@ -42,11 +42,8 @@
 
 // Include thread info (thrinfo_t) object definitions and prototypes.
 #include "bli_thrinfo.h"
-#include "bli_thrinfo_sup.h"
 
 // Include some operation-specific thrinfo_t prototypes.
-// Note that the bli_packm_thrinfo.h must be included before the others!
-#include "bli_packm_thrinfo.h"
 #include "bli_l3_thrinfo.h"
 
 // Include the level-3 thread decorator and related definitions and prototypes

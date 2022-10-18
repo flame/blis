@@ -57,9 +57,8 @@ void bli_packm_blk_var1
        const obj_t*   c,
              obj_t*   p,
        const cntx_t*  cntx,
-             rntm_t*  rntm,
-             cntl_t*  cntl,
-       const thrinfo_t* thread
+       const cntl_t*  cntl,
+             thrinfo_t* thread
      )
 {
 	// Extract various fields from the control tree.
@@ -71,7 +70,7 @@ void bli_packm_blk_var1
 	// Every thread initializes p and determines the size of memory
 	// block needed (which gets embedded into the otherwise "blank" mem_t
 	// entry in the control tree node). Return early if no packing is required.
-	if ( !bli_packm_init( c, p, cntx, rntm, cntl, thread ) )
+	if ( !bli_packm_init( c, p, cntx, cntl, thread ) )
 		return;
 
 	// Check parameters.
@@ -161,8 +160,8 @@ void bli_packm_blk_var1
 
 	// Query the number of threads and thread ids from the current thread's
 	// packm thrinfo_t node.
-	const dim_t nt  = bli_thread_n_way( thread );
-	const dim_t tid = bli_thread_work_id( thread );
+	const dim_t nt  = bli_thread_num_threads( thread );
+	const dim_t tid = bli_thread_thread_id( thread );
 
 	// Determine the thread range and increment using the current thread's
 	// packm thrinfo_t node. NOTE: The definition of bli_thread_range_jrir()

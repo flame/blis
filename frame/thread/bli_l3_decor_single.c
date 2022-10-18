@@ -35,32 +35,22 @@
 
 #include "blis.h"
 
-//#define PRINT_IMPL
+#ifndef BLIS_ENABLE_MULTITHREADING
 
-void bli_l3_thread_decorator_single
+void bli_l3_thread_decorator
      (
-             l3int_ft func,
-             opid_t   family,
-       const obj_t*   alpha,
-       const obj_t*   a,
-       const obj_t*   b,
-       const obj_t*   beta,
-       const obj_t*   c,
-       const cntx_t*  cntx,
-             rntm_t*  rntm,
-             cntl_t*  cntl
+             l3int_t func,
+             opid_t  family,
+       const obj_t*  alpha,
+       const obj_t*  a,
+       const obj_t*  b,
+       const obj_t*  beta,
+       const obj_t*  c,
+       const cntx_t* cntx,
+       const rntm_t* rntm,
+       const cntl_t* cntl
      )
 {
-	// For sequential execution, we use only one thread.
-	const dim_t n_threads = 1;
-
-#ifdef PRINT_IMPL
-	const timpl_t ti = bli_rntm_thread_impl( rntm );
-	printf( "l3_decor_single: l3 decor with rntm.thread_impl  = %s\n",
-	        ( ti == BLIS_SINGLE ? "single" :
-	        ( ti == BLIS_OPENMP ? "openmp" : "pthreads" ) ) );
-#endif
-
 	obj_t a_t, b_t;
 	bli_obj_alias_to( a, &a_t );
 	bli_obj_alias_to( b, &b_t );
@@ -76,6 +66,9 @@ void bli_l3_thread_decorator_single
 	bli_obj_set_pack_schema( BLIS_NOT_PACKED, &a_t );
 	bli_obj_set_pack_schema( BLIS_NOT_PACKED, &b_t );
 
+	// For sequential execution, we use only one thread.
+	const dim_t n_threads = 1;
+
 	// NOTE: The sba was initialized in bli_init().
 
 	// Check out an array_t from the small block allocator. This is done
@@ -84,31 +77,10 @@ void bli_l3_thread_decorator_single
 	// resize the array_t, if necessary.
 	array_t* array = bli_sba_checkout_array( n_threads );
 
-	// Access the pool_t* for thread 0 and embed it into the rntm. We do
-	// this up-front only so that we can create the global comm below.
-	bli_sba_rntm_set_pool( 0, array, rntm );
-
-	// Set the packing block allocator field of the rntm.
-	bli_pba_rntm_set_pba( rntm );
-
-	// Allcoate a global communicator for the root thrinfo_t structures.
-	thrcomm_t* gl_comm = bli_thrcomm_create( rntm, n_threads );
-#if 0
-	timpl_t ti2 = bli_rntm_thread_impl( rntm );
-	printf( "l3_decor_single: created thrcomm_t.ti            = %s\n",
-	        ( ti2 == BLIS_SINGLE ? "single" :
-	        ( ti2 == BLIS_OPENMP ? "openmp" : "pthreads" ) ) );
-#endif
-
+	// Use the single-threaded communicator
+	thrcomm_t* gl_comm = &BLIS_SINGLE_COMM;
 
 	{
-		// NOTE: We don't need to create another copy of the rntm_t since
-		// it was already copied in one of the high-level oapi functions.
-		rntm_t* rntm_p = rntm;
-
-		cntl_t*    cntl_use;
-		thrinfo_t* thread;
-
 		const dim_t tid = 0;
 
 		// Use the thread id to access the appropriate pool_t* within the
@@ -126,12 +98,8 @@ void bli_l3_thread_decorator_single
 		// consistently providing local aliases, we can then eliminate aliasing
 		// elsewhere.
 
-		// Create a default control tree for the operation, if needed.
-		bli_l3_cntl_create_if( family, schema_a, schema_b,
-		                       &a_t, &b_t, c, rntm_p, cntl, &cntl_use );
-
 		// Create the root node of the thread's thrinfo_t structure.
-		bli_l3_thrinfo_create_root( tid, gl_comm, rntm_p, cntl_use, &thread );
+		thrinfo_t* thread = bli_l3_thrinfo_create( tid, gl_comm, array, rntm, cntl );
 
 		func
 		(
@@ -141,25 +109,19 @@ void bli_l3_thread_decorator_single
 		  beta,
 		  c,
 		  cntx,
-		  rntm_p,
-		  cntl_use,
+		  cntl,
 		  thread
 		);
 
-		// Free the thread's local control tree.
-		bli_l3_cntl_free( rntm_p, cntl_use, thread );
-
 		// Free the current thread's thrinfo_t structure.
-		bli_l3_thrinfo_free( rntm_p, thread );
+		bli_thrinfo_free( thread );
 	}
-
-	// We shouldn't free the global communicator since it was already freed
-	// by the global communicator's chief thread in bli_l3_thrinfo_free()
-	// (called above).
 
 	// Check the array_t back into the small block allocator. Similar to the
 	// check-out, this is done using a lock embedded within the sba to ensure
 	// mutual exclusion.
 	bli_sba_checkin_array( array );
 }
+
+#endif
 

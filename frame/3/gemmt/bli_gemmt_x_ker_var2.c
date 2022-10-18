@@ -46,8 +46,7 @@ void bli_gemmt_x_ker_var2
        const obj_t*  ah,
        const obj_t*  c,
        const cntx_t* cntx,
-             rntm_t* rntm,
-             cntl_t* cntl,
+       const cntl_t* cntl,
              thrinfo_t* thread
      )
 {
@@ -68,7 +67,6 @@ void bli_gemmt_x_ker_var2
 	  ah,
 	  c,
 	  cntx,
-	  rntm,
 	  cntl,
 	  thread
 	);

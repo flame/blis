@@ -41,6 +41,5 @@ void bli_gemmt_front
        const obj_t*  beta,
        const obj_t*  c,
        const cntx_t* cntx,
-             rntm_t* rntm,
-             cntl_t* cntl
+             rntm_t* rntm
      );

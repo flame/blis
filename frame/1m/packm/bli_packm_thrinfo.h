@@ -5,7 +5,6 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2018 - 2019, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -62,44 +61,5 @@
 
   #define bli_packm_my_iter bli_packm_my_iter_rr
 
-#endif
-
-
-//
-// thrinfo_t APIs specific to packm.
-//
-
-#if 0
-thrinfo_t* bli_packm_thrinfo_create
-     (
-       thrcomm_t* ocomm,
-       dim_t      ocomm_id,
-       dim_t      n_way,
-       dim_t      work_id,
-       thrinfo_t* sub_node
-     );
-#endif
-
-void bli_packm_thrinfo_init
-     (
-       thrinfo_t* thread,
-       thrcomm_t* ocomm,
-       dim_t      ocomm_id,
-       dim_t      n_way,
-       dim_t      work_id,
-       bszid_t    bszid,
-       thrinfo_t* sub_node
-     );
-
-void bli_packm_thrinfo_init_single
-     (
-       thrinfo_t* thread
-     );
-
-#if 0
-void bli_packm_thrinfo_free
-     (
-       thrinfo_t* thread
-     );
 #endif
 

@@ -40,8 +40,7 @@ void bli_gemm_blk_var3
        const obj_t*  b,
        const obj_t*  c,
        const cntx_t* cntx,
-             rntm_t* rntm,
-             cntl_t* cntl,
+       const cntl_t* cntl,
              thrinfo_t* thread
      )
 {
@@ -64,8 +63,8 @@ void bli_gemm_blk_var3
 	for ( dim_t i = 0; i < k_trans; i += b_alg )
 	{
 		// Determine the current algorithmic blocksize.
-		b_alg = bli_l3_determine_kc( direct, i, k_trans, &ap, &bp,
-		                             bli_cntl_bszid( cntl ), cntx, cntl );
+		b_alg = bli_determine_blocksize( direct, i, k_trans, &bp,
+		                                 bli_cntl_part_params_blksz( cntl ) );
 
 		// Acquire partitions for A1 and B1.
 		obj_t a1, b1;
@@ -83,7 +82,6 @@ void bli_gemm_blk_var3
 		  &BLIS_ONE,
 		  &cs,
 		  cntx,
-		  rntm,
 		  bli_cntl_sub_node( cntl ),
 		  bli_thrinfo_sub_node( thread )
 		);

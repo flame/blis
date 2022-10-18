@@ -54,7 +54,7 @@ typedef void (*PASTECH(opname,_oft)) \
   const obj_t*  beta, \
   const obj_t*  c, \
   const cntx_t* cntx, \
-        rntm_t* rntm  \
+  const rntm_t* rntm  \
 );
 
 GENTDEF( gemm )
@@ -77,7 +77,7 @@ typedef void (*PASTECH(opname,_oft)) \
   const obj_t*  beta, \
   const obj_t*  c, \
   const cntx_t* cntx, \
-        rntm_t* rntm  \
+  const rntm_t* rntm  \
 );
 
 GENTDEF( hemm )
@@ -97,7 +97,7 @@ typedef void (*PASTECH(opname,_oft)) \
   const obj_t*  beta, \
   const obj_t*  c, \
   const cntx_t* cntx, \
-        rntm_t* rntm  \
+  const rntm_t* rntm  \
 );
 
 GENTDEF( herk )
@@ -116,7 +116,7 @@ typedef void (*PASTECH(opname,_oft)) \
   const obj_t*  a, \
   const obj_t*  b, \
   const cntx_t* cntx, \
-        rntm_t* rntm  \
+  const rntm_t* rntm  \
 );
 
 GENTDEF( trmm )

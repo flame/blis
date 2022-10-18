@@ -37,19 +37,24 @@
 
 #ifdef BLIS_ENABLE_OPENMP
 
+// Define a dummy function bli_l3_sup_thread_entry(), which is needed in the
+// pthreads version, so that when building Windows DLLs (with OpenMP enabled
+// or no multithreading) we don't risk having an unresolved symbol.
+void* bli_l3_sup_thread_entry( void* data_void ) { return NULL; }
+
 //#define PRINT_THRINFO
 
-err_t bli_l3_sup_thread_decorator_openmp
+err_t bli_l3_sup_thread_decorator
      (
-             l3supint_ft func,
-             opid_t      family,
-       const obj_t*      alpha,
-       const obj_t*      a,
-       const obj_t*      b,
-       const obj_t*      beta,
-       const obj_t*      c,
-       const cntx_t*     cntx,
-             rntm_t*     rntm
+             l3supint_t func,
+             opid_t     family,
+       const obj_t*     alpha,
+       const obj_t*     a,
+       const obj_t*     b,
+       const obj_t*     beta,
+       const obj_t*     c,
+       const cntx_t*    cntx,
+       const rntm_t*    rntm
      )
 {
 	// Query the total number of threads from the rntm_t object.
@@ -63,19 +68,8 @@ err_t bli_l3_sup_thread_decorator_openmp
 	// resize the array_t, if necessary.
 	array_t* array = bli_sba_checkout_array( n_threads );
 
-	// Access the pool_t* for thread 0 and embed it into the rntm. We do
-	// this up-front only so that we have the rntm_t.sba_pool field
-	// initialized and ready for the global communicator creation below.
-	bli_sba_rntm_set_pool( 0, array, rntm );
-
-	// Set the packing block allocator field of the rntm. This will be
-	// inherited by all of the child threads when they make local copies of
-	// the rntm below.
-	bli_pba_rntm_set_pba( rntm );
-
 	// Allcoate a global communicator for the root thrinfo_t structures.
-	thrcomm_t* gl_comm = bli_thrcomm_create( rntm, n_threads );
-
+	thrcomm_t* gl_comm = bli_thrcomm_create( NULL, n_threads );
 
 	_Pragma( "omp parallel num_threads(n_threads)" )
 	{
@@ -93,16 +87,8 @@ err_t bli_l3_sup_thread_decorator_openmp
 		// code path.
 		bli_l3_thread_decorator_thread_check( n_threads, tid, gl_comm, rntm_p );
 
-		// Use the thread id to access the appropriate pool_t* within the
-		// array_t, and use it to set the sba_pool field within the rntm_t.
-		// If the pool_t* element within the array_t is NULL, it will first
-		// be allocated/initialized.
-		bli_sba_rntm_set_pool( tid, array, rntm_p );
-
-		thrinfo_t* thread = NULL;
-
 		// Create the root node of the thread's thrinfo_t structure.
-		bli_l3_sup_thrinfo_create_root( tid, gl_comm, rntm_p, &thread );
+		thrinfo_t* thread = bli_l3_sup_thrinfo_create( tid, gl_comm, array, rntm_p );
 
 		func
 		(
@@ -117,12 +103,12 @@ err_t bli_l3_sup_thread_decorator_openmp
 		);
 
 		// Free the current thread's thrinfo_t structure.
-		bli_l3_sup_thrinfo_free( rntm_p, thread );
+		bli_thrinfo_free( thread );
 	}
 
-	// We shouldn't free the global communicator since it was already freed
-	// by the global communicator's chief thread in bli_l3_thrinfo_free()
-	// (called from the thread entry function).
+	// Free the global communicator, because the root thrinfo_t node
+    // never frees its communicator.
+    bli_thrcomm_free( NULL, gl_comm );
 
 	// Check the array_t back into the small block allocator. Similar to the
 	// check-out, this is done using a lock embedded within the sba to ensure

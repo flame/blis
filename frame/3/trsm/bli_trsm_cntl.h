@@ -35,7 +35,7 @@
 
 cntl_t* bli_trsm_cntl_create
      (
-       rntm_t* rntm,
+       pool_t* pool,
        side_t  side,
        pack_t  schema_a,
        pack_t  schema_b,
@@ -44,7 +44,7 @@ cntl_t* bli_trsm_cntl_create
 
 cntl_t* bli_trsm_l_cntl_create
      (
-       rntm_t* rntm,
+       pool_t* pool,
        pack_t  schema_a,
        pack_t  schema_b,
        void_fp ker
@@ -52,7 +52,7 @@ cntl_t* bli_trsm_l_cntl_create
 
 cntl_t* bli_trsm_r_cntl_create
      (
-       rntm_t* rntm,
+       pool_t* pool,
        pack_t  schema_a,
        pack_t  schema_b,
        void_fp ker
@@ -60,16 +60,15 @@ cntl_t* bli_trsm_r_cntl_create
 
 void bli_trsm_cntl_free
      (
-       rntm_t*    rntm,
-       cntl_t*    cntl,
-       thrinfo_t* thread
+       pool_t* pool,
+       cntl_t* cntl
      );
 
 // -----------------------------------------------------------------------------
 
 cntl_t* bli_trsm_cntl_create_node
      (
-       rntm_t* rntm,
+       pool_t* pool,
        opid_t  family,
        bszid_t bszid,
        void_fp var_func,
