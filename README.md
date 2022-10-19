@@ -97,6 +97,17 @@ all of which are available for free via the [edX platform](http://www.edx.org/).
 What's New
 ----------
 
+ * **Join us on Discord!** In 2021, we soft-launched our [Discord](https://discord.com/)
+server by privately inviting current and former collaborators, attendees of our BLIS
+Retreat, as well as other associates within the BLIS ecosystem. I'm happy to announce
+that our community continues to grow as it attracts new developers, users, and other
+interested parties! If you'd like to hang out with other BLIS users and developers,
+ask a question, discuss future features, or just say hello, please feel free to join us!
+We've put together a [step-by-step guide](docs/Discord.md) for creating an account and
+joining our cozy enclave. We even have a monthly "BLIS happy hour" event where people
+can casually come together for a video chat, Q&A, brainstorm session, or whatever it
+happens to unfold into!
+
  * **Addons feature now available!** Have you ever wanted to quickly extend BLIS's
 operation support or define new custom BLIS APIs for your application, but were
 unsure of how to add your source code to BLIS? Do you want to isolate your custom
@@ -500,6 +511,10 @@ empirically measured performance of `gemm` on select hardware architectures
 within BLIS and other BLAS libraries when performing matrix problems where one
 or two dimensions is exceedingly small.
 
+ * **[Discord](docs/Discord.md).** This document describes how to: create an
+account on Discord (if you don't already have one); obtain a private invite
+link; and use that invite link to join our BLIS server on Discord.
+
  * **[Release Notes](docs/ReleaseNotes.md).** This document tracks a summary of
 changes included with each new version of BLIS, along with contributor credits
 for key features.
@@ -610,16 +625,15 @@ has Linux, OSX and Windows binary packages for x86_64.
 Discussion
 ----------
 
-You can keep in touch with developers and other users of the project by joining
-one of the following mailing lists:
+Most of the active discussions are now happening on our [Discord](https://discord.com/)
+server. Users and developers alike are welcome! Please see the
+[Discord guide](docs/Discord.md) for a walkthrough of how to join us.
+
+You can also still stay in touch by using either of the following mailing lists:
 
  * [blis-devel](https://groups.google.com/group/blis-devel): Please join and
 post to this mailing list if you are a BLIS developer, or if you are trying
 to use BLIS beyond simply linking to it as a BLAS library.
-**Note:** Most of the interesting discussions happen here; don't be afraid to
-join! If you would like to submit a bug report, or discuss a possible bug,
-please consider opening a [new issue](https://github.com/flame/blis/issues) on
-github.
 
  * [blis-discuss](https://groups.google.com/group/blis-discuss): Please join and
 post to this mailing list if you have general questions or feedback regarding
