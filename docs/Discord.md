@@ -46,6 +46,8 @@ Congratulations! You're now a member of Discord and ready to join individual com
 
 ## Obtaining the invite link
 
+The BLIS community consists of a number of "channels" within a single Discord server. The BLIS server, however, is not public and cannot be found via the Discord directory service. Therefore, you'll need an invite link in order to join.
+
 Since we do not have access to an official Captcha-like service to confirm that you are, indeed, a human interested in the BLIS community, we have instead obfuscated our link in a way that should be easy for a human to unmangle.
 
 Here's an example invite link (for demonstration purposes only): `https://discord.gg/abC2jUVeip`
@@ -61,9 +63,7 @@ Once you decipher the invite link, copy it to your clipboard so it's ready to us
 
 ## Joining the BLIS server
 
-The BLIS community consists of a number of "channels" within a single Discord "server." The BLIS server, however, is not public and cannot be found via the Discord directory service. Therefore, you'll need an invite link in order to join.
-
-The easiest way to obtain an invite link is by deciphering the link from the [previous section](#obtaining-the-invite-link). Once you have reconstructed the link and copied it to your clipboard, follow these steps in order to join the BLIS server:
+Once you have the invite link copied to your clipboard, follow these steps in order to join the BLIS server:
 
 *NOTE: We recommend executing these steps using a desktop web browser. Once you've joined the BLIS server, you can proceed to use your client(s) of choice (mobile app, desktop app, or web browser).*
 
