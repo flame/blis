@@ -271,7 +271,7 @@ void bli_trsm_rl_ker_var2
 				/* Compute the addresses of the next panels of A and B. */
 				const char* a2 = a1;
 				/*if ( bli_is_last_iter_rr( i, m_iter, 0, 1 ) ) */
-				if ( i + bli_thread_num_threads(thread) >= m_iter )
+				if ( i + bli_thrinfo_num_threads(thread) >= m_iter )
 				{
 					a2 = a_cast;
 					b2 = b1 + ps_b_cur;
@@ -320,7 +320,7 @@ void bli_trsm_rl_ker_var2
 				/* Compute the addresses of the next panels of A and B. */
 				const char* a2 = a1;
 				/*if ( bli_is_last_iter_rr( i, m_iter, 0, 1 ) ) */
-				if ( i + bli_thread_num_threads(thread) >= m_iter )
+				if ( i + bli_thrinfo_num_threads(thread) >= m_iter )
 				{
 					a2 = a_cast;
 					b2 = b1 + cstep_b;

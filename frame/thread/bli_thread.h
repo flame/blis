@@ -221,8 +221,8 @@ BLIS_INLINE void bli_thread_range_jrir_rr
      )
 {
 	// Use interleaved partitioning of jr/ir loops.
-	*start = bli_thread_work_id( thread );
-	*inc   = bli_thread_n_way( thread );
+	*start = bli_thrinfo_work_id( thread );
+	*inc   = bli_thrinfo_n_way( thread );
 	*end   = n;
 }
 
@@ -292,8 +292,8 @@ BLIS_INLINE void bli_thread_range_weighted_jrir
 #else
 
 	// Use interleaved partitioning of jr/ir loops.
-	*start = bli_thread_work_id( thread );
-	*inc   = bli_thread_n_way( thread );
+	*start = bli_thrinfo_work_id( thread );
+	*inc   = bli_thrinfo_n_way( thread );
 	*end   = n;
 
 #endif

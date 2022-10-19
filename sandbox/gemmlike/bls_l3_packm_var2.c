@@ -121,8 +121,8 @@ void PASTECH2(bls_,ch,varname) \
 \
 	/* Query the number of threads and thread ids from the current thread's
 	   packm thrinfo_t node. */ \
-	const dim_t nt  = bli_thread_num_threads( thread ); \
-	const dim_t tid = bli_thread_thread_id( thread ); \
+	const dim_t nt  = bli_thrinfo_num_threads( thread ); \
+	const dim_t tid = bli_thrinfo_thread_id( thread ); \
 \
 	/* Suppress warnings in case tid isn't used (ie: as in slab partitioning). */ \
 	( void )nt; \

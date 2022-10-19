@@ -61,8 +61,8 @@ void* bli_packm_alloc_ex
      )
 {
 	// Query the address of the mem_t entry within the control tree node.
-	mem_t* cntl_mem_p = bli_thread_mem( thread );
-    pba_t* pba        = bli_thread_pba( thread );
+	mem_t* cntl_mem_p = bli_thrinfo_mem( thread );
+    pba_t* pba        = bli_thrinfo_pba( thread );
 
 	mem_t* local_mem_p;
 	mem_t  local_mem_s;
@@ -74,7 +74,7 @@ void* bli_packm_alloc_ex
 
 	if ( cntl_mem_size < size_needed )
 	{
-		if ( bli_thread_am_chief( thread ) )
+		if ( bli_thrinfo_am_chief( thread ) )
 		{
 			// The chief thread releases the existing block associated with
 			// the mem_t entry in the control tree, and then re-acquires a
@@ -99,7 +99,7 @@ void* bli_packm_alloc_ex
 
 		// Broadcast the address of the chief thread's local mem_t entry to
 		// all threads.
-		local_mem_p = bli_thread_broadcast( rntm, thread, &local_mem_s );
+		local_mem_p = bli_thrinfo_broadcast( thread, &local_mem_s );
 
 		// Save the chief thread's local mem_t entry to the mem_t field in
 		// this thread's control tree node.
@@ -107,7 +107,7 @@ void* bli_packm_alloc_ex
 
 		// Barrier so that the master thread doesn't return from the function
 		// before we are done reading.
-		bli_thread_barrier( rntm, thread );
+		bli_thrinfo_barrier( thread );
 	}
 
 	return bli_mem_buffer( cntl_mem_p );

@@ -39,6 +39,7 @@ void bli_unpackm_int
        const obj_t*  p,
        const obj_t*  a,
        const cntx_t* cntx,
+       const rntm_t* rntm,
        const cntl_t* cntl,
        const thrinfo_t* thread
      )
@@ -60,19 +61,19 @@ void bli_unpackm_int
 	f = bli_cntl_unpackm_params_var_func( cntl );
 
 	// Invoke the variant.
-    if ( bli_thread_am_chief( thread ) )
+    if ( bli_thrinfo_am_chief( thread ) )
 	{
-        f
+		f
 		(
 		  p,
-          a,
+		  a,
 		  cntx,
-          cntl,
+		  cntl,
 		  thread
 		);
-    }
+	}
 
 	// Barrier so that unpacking is done before computation.
-    bli_thread_barrier( thread );
+	bli_thrinfo_barrier( thread );
 }
 

@@ -152,9 +152,9 @@ void bli_l3_sup_thrinfo_update
      )
 {
     thrcomm_t* gl_comm = bli_thrinfo_comm( *root );
-    dim_t      tid     = bli_thread_thread_id( *root );
-    pool_t*    pool    = bli_thread_sba_pool( *root );
-    dim_t      nt      = bli_thread_num_threads( *root );
+    dim_t      tid     = bli_thrinfo_thread_id( *root );
+    pool_t*    pool    = bli_thrinfo_sba_pool( *root );
+    dim_t      nt      = bli_thrinfo_num_threads( *root );
 
     // Return early in single-threaded execution
     // since the thread control tree may not have been
@@ -174,7 +174,7 @@ void bli_l3_thrinfo_print_gemm_paths
 {
 	// In order to query the number of threads, we query the only thread we
 	// know exists: thread 0.
-	dim_t n_threads = bli_thread_num_threads( threads[0] );
+	dim_t n_threads = bli_thrinfo_num_threads( threads[0] );
 
 	// For the purposes of printing the "header" information that is common
 	// to the various instances of a thrinfo_t (ie: across all threads), we
@@ -207,44 +207,44 @@ void bli_l3_thrinfo_print_gemm_paths
 
 	if ( !jc_info ) goto print_header;
 
-	jc_way  = bli_thread_n_way( jc_info );
-	jc_nt   = bli_thread_num_threads( jc_info );
+	jc_way  = bli_thrinfo_n_way( jc_info );
+	jc_nt   = bli_thrinfo_num_threads( jc_info );
 	pc_info = bli_thrinfo_sub_node( jc_info );
 
 	if ( !pc_info ) goto print_header;
 
-	pc_way  = bli_thread_n_way( pc_info );
-	pc_nt   = bli_thread_num_threads( pc_info );
+	pc_way  = bli_thrinfo_n_way( pc_info );
+	pc_nt   = bli_thrinfo_num_threads( pc_info );
 	pb_info = bli_thrinfo_sub_node( pc_info );
 
 	if ( !pb_info ) goto print_header;
 
-	pb_way  = bli_thread_n_way( pb_info );
-	pb_nt   = bli_thread_num_threads( pb_info );
+	pb_way  = bli_thrinfo_n_way( pb_info );
+	pb_nt   = bli_thrinfo_num_threads( pb_info );
 	ic_info = bli_thrinfo_sub_node( pb_info );
 
 	if ( !ic_info ) goto print_header;
 
-	ic_way  = bli_thread_n_way( ic_info );
-	ic_nt   = bli_thread_num_threads( ic_info );
+	ic_way  = bli_thrinfo_n_way( ic_info );
+	ic_nt   = bli_thrinfo_num_threads( ic_info );
 	pa_info = bli_thrinfo_sub_node( ic_info );
 
 	if ( !pa_info ) goto print_header;
 
-	pa_way  = bli_thread_n_way( pa_info );
-	pa_nt   = bli_thread_num_threads( pa_info );
+	pa_way  = bli_thrinfo_n_way( pa_info );
+	pa_nt   = bli_thrinfo_num_threads( pa_info );
 	jr_info = bli_thrinfo_sub_node( pa_info );
 
 	if ( !jr_info ) goto print_header;
 
-	jr_way  = bli_thread_n_way( jr_info );
-	jr_nt   = bli_thread_num_threads( jr_info );
+	jr_way  = bli_thrinfo_n_way( jr_info );
+	jr_nt   = bli_thrinfo_num_threads( jr_info );
 	ir_info = bli_thrinfo_sub_node( jr_info );
 
 	if ( !ir_info ) goto print_header;
 
-	ir_way  = bli_thread_n_way( ir_info );
-	ir_nt   = bli_thread_num_threads( ir_info );
+	ir_way  = bli_thrinfo_n_way( ir_info );
+	ir_nt   = bli_thrinfo_num_threads( ir_info );
 
 	print_header:
 
@@ -279,44 +279,44 @@ void bli_l3_thrinfo_print_gemm_paths
 
 		if ( !jc_info ) goto print_thrinfo;
 
-		jc_comm_id = bli_thread_thread_id( jc_info );
-		jc_work_id = bli_thread_work_id( jc_info );
+		jc_comm_id = bli_thrinfo_thread_id( jc_info );
+		jc_work_id = bli_thrinfo_work_id( jc_info );
 		pc_info    = bli_thrinfo_sub_node( jc_info );
 
 		if ( !pc_info ) goto print_thrinfo;
 
-		pc_comm_id = bli_thread_thread_id( pc_info );
-		pc_work_id = bli_thread_work_id( pc_info );
+		pc_comm_id = bli_thrinfo_thread_id( pc_info );
+		pc_work_id = bli_thrinfo_work_id( pc_info );
 		pb_info    = bli_thrinfo_sub_node( pc_info );
 
 		if ( !pb_info ) goto print_thrinfo;
 
-		pb_comm_id = bli_thread_thread_id( pb_info );
-		pb_work_id = bli_thread_work_id( pb_info );
+		pb_comm_id = bli_thrinfo_thread_id( pb_info );
+		pb_work_id = bli_thrinfo_work_id( pb_info );
 		ic_info    = bli_thrinfo_sub_node( pb_info );
 
 		if ( !ic_info ) goto print_thrinfo;
 
-		ic_comm_id = bli_thread_thread_id( ic_info );
-		ic_work_id = bli_thread_work_id( ic_info );
+		ic_comm_id = bli_thrinfo_thread_id( ic_info );
+		ic_work_id = bli_thrinfo_work_id( ic_info );
 		pa_info    = bli_thrinfo_sub_node( ic_info );
 
 		if ( !pa_info ) goto print_thrinfo;
 
-		pa_comm_id = bli_thread_thread_id( pa_info );
-		pa_work_id = bli_thread_work_id( pa_info );
+		pa_comm_id = bli_thrinfo_thread_id( pa_info );
+		pa_work_id = bli_thrinfo_work_id( pa_info );
 		jr_info    = bli_thrinfo_sub_node( pa_info );
 
 		if ( !jr_info ) goto print_thrinfo;
 
-		jr_comm_id = bli_thread_thread_id( jr_info );
-		jr_work_id = bli_thread_work_id( jr_info );
+		jr_comm_id = bli_thrinfo_thread_id( jr_info );
+		jr_work_id = bli_thrinfo_work_id( jr_info );
 		ir_info    = bli_thrinfo_sub_node( jr_info );
 
 		if ( !ir_info ) goto print_thrinfo;
 
-		ir_comm_id = bli_thread_thread_id( ir_info );
-		ir_work_id = bli_thread_work_id( ir_info );
+		ir_comm_id = bli_thrinfo_thread_id( ir_info );
+		ir_work_id = bli_thrinfo_work_id( ir_info );
 
 		print_thrinfo:
 
@@ -352,7 +352,7 @@ void bli_l3_thrinfo_print_trsm_paths
 {
 	// In order to query the number of threads, we query the only thread we
 	// know exists: thread 0.
-	dim_t n_threads = bli_thread_num_threads( threads[0] );
+	dim_t n_threads = bli_thrinfo_num_threads( threads[0] );
 
 	// For the purposes of printing the "header" information that is common
 	// to the various instances of a thrinfo_t (ie: across all threads), we
@@ -387,26 +387,26 @@ void bli_l3_thrinfo_print_trsm_paths
 
 	if ( !jc_info ) goto print_header;
 
-	jc_way   = bli_thread_n_way( jc_info );
-	jc_nt    = bli_thread_num_threads( jc_info );
+	jc_way   = bli_thrinfo_n_way( jc_info );
+	jc_nt    = bli_thrinfo_num_threads( jc_info );
 	pc_info  = bli_thrinfo_sub_node( jc_info );
 
 	if ( !pc_info ) goto print_header;
 
-	pc_way   = bli_thread_n_way( pc_info );
-	pc_nt    = bli_thread_num_threads( pc_info );
+	pc_way   = bli_thrinfo_n_way( pc_info );
+	pc_nt    = bli_thrinfo_num_threads( pc_info );
 	pb_info  = bli_thrinfo_sub_node( pc_info );
 
 	if ( !pb_info ) goto print_header;
 
-	pb_way   = bli_thread_n_way( pb_info );
-	pb_nt    = bli_thread_num_threads( pb_info );
+	pb_way   = bli_thrinfo_n_way( pb_info );
+	pb_nt    = bli_thrinfo_num_threads( pb_info );
 	ic_info  = bli_thrinfo_sub_node( pb_info );
 
 	if ( !ic_info ) goto print_header;
 
-	ic_way   = bli_thread_n_way( ic_info );
-	ic_nt    = bli_thread_num_threads( ic_info );
+	ic_way   = bli_thrinfo_n_way( ic_info );
+	ic_nt    = bli_thrinfo_num_threads( ic_info );
 	pa_info  = bli_thrinfo_sub_node( ic_info );
 	pa_info0 = bli_thrinfo_sub_prenode( ic_info );
 
@@ -414,39 +414,39 @@ void bli_l3_thrinfo_print_trsm_paths
 
 	if ( !pa_info0 ) goto check_header_node;
 
-	pa_way0  = bli_thread_n_way( pa_info0 );
-	pa_nt0   = bli_thread_num_threads( pa_info0 );
+	pa_way0  = bli_thrinfo_n_way( pa_info0 );
+	pa_nt0   = bli_thrinfo_num_threads( pa_info0 );
 	jr_info0 = bli_thrinfo_sub_node( pa_info0 );
 
 	if ( !jr_info0 ) goto check_header_node;
 
-	jr_way0  = bli_thread_n_way( jr_info0 );
-	jr_nt0   = bli_thread_num_threads( jr_info0 );
+	jr_way0  = bli_thrinfo_n_way( jr_info0 );
+	jr_nt0   = bli_thrinfo_num_threads( jr_info0 );
 	ir_info0 = bli_thrinfo_sub_node( jr_info0 );
 
 	if ( !ir_info0 ) goto check_header_node;
 
-	ir_way0  = bli_thread_n_way( ir_info0 );
-	ir_nt0   = bli_thread_num_threads( ir_info0 );
+	ir_way0  = bli_thrinfo_n_way( ir_info0 );
+	ir_nt0   = bli_thrinfo_num_threads( ir_info0 );
 
 	check_header_node:
 
 	if ( !pa_info ) goto print_header;
 
-	pa_way  = bli_thread_n_way( pa_info );
-	pa_nt   = bli_thread_num_threads( pa_info );
+	pa_way  = bli_thrinfo_n_way( pa_info );
+	pa_nt   = bli_thrinfo_num_threads( pa_info );
 	jr_info = bli_thrinfo_sub_node( pa_info );
 
 	if ( !jr_info ) goto print_header;
 
-	jr_way  = bli_thread_n_way( jr_info );
-	jr_nt   = bli_thread_num_threads( jr_info );
+	jr_way  = bli_thrinfo_n_way( jr_info );
+	jr_nt   = bli_thrinfo_num_threads( jr_info );
 	ir_info = bli_thrinfo_sub_node( jr_info );
 
 	if ( !ir_info ) goto print_header;
 
-	ir_way  = bli_thread_n_way( ir_info );
-	ir_nt   = bli_thread_num_threads( ir_info );
+	ir_way  = bli_thrinfo_n_way( ir_info );
+	ir_nt   = bli_thrinfo_num_threads( ir_info );
 
 	print_header:
 
@@ -489,26 +489,26 @@ void bli_l3_thrinfo_print_trsm_paths
 
 		if ( !jc_info ) goto print_thrinfo;
 
-		jc_comm_id = bli_thread_thread_id( jc_info );
-		jc_work_id = bli_thread_work_id( jc_info );
+		jc_comm_id = bli_thrinfo_thread_id( jc_info );
+		jc_work_id = bli_thrinfo_work_id( jc_info );
 		pc_info    = bli_thrinfo_sub_node( jc_info );
 
 		if ( !pc_info ) goto print_thrinfo;
 
-		pc_comm_id = bli_thread_thread_id( pc_info );
-		pc_work_id = bli_thread_work_id( pc_info );
+		pc_comm_id = bli_thrinfo_thread_id( pc_info );
+		pc_work_id = bli_thrinfo_work_id( pc_info );
 		pb_info    = bli_thrinfo_sub_node( pc_info );
 
 		if ( !pb_info ) goto print_thrinfo;
 
-		pb_comm_id = bli_thread_thread_id( pb_info );
-		pb_work_id = bli_thread_work_id( pb_info );
+		pb_comm_id = bli_thrinfo_thread_id( pb_info );
+		pb_work_id = bli_thrinfo_work_id( pb_info );
 		ic_info    = bli_thrinfo_sub_node( pb_info );
 
 		if ( !ic_info ) goto print_thrinfo;
 
-		ic_comm_id = bli_thread_thread_id( ic_info );
-		ic_work_id = bli_thread_work_id( ic_info );
+		ic_comm_id = bli_thrinfo_thread_id( ic_info );
+		ic_work_id = bli_thrinfo_work_id( ic_info );
 		pa_info    = bli_thrinfo_sub_node( ic_info );
 		pa_info0   = bli_thrinfo_sub_prenode( ic_info );
 
@@ -516,39 +516,39 @@ void bli_l3_thrinfo_print_trsm_paths
 
 		if ( !pa_info0 ) goto check_thrinfo_node;
 
-		pa_comm_id0 = bli_thread_thread_id( pa_info0 );
-		pa_work_id0 = bli_thread_work_id( pa_info0 );
+		pa_comm_id0 = bli_thrinfo_thread_id( pa_info0 );
+		pa_work_id0 = bli_thrinfo_work_id( pa_info0 );
 		jr_info0    = bli_thrinfo_sub_node( pa_info0 );
 
 		if ( !jr_info0 ) goto check_thrinfo_node;
 
-		jr_comm_id0 = bli_thread_thread_id( jr_info0 );
-		jr_work_id0 = bli_thread_work_id( jr_info0 );
+		jr_comm_id0 = bli_thrinfo_thread_id( jr_info0 );
+		jr_work_id0 = bli_thrinfo_work_id( jr_info0 );
 		ir_info0    = bli_thrinfo_sub_node( jr_info0 );
 
 		if ( !ir_info0 ) goto check_thrinfo_node;
 
-		ir_comm_id0 = bli_thread_thread_id( ir_info0 );
-		ir_work_id0 = bli_thread_work_id( ir_info0 );
+		ir_comm_id0 = bli_thrinfo_thread_id( ir_info0 );
+		ir_work_id0 = bli_thrinfo_work_id( ir_info0 );
 
 		check_thrinfo_node:
 
 		if ( !pa_info ) goto print_thrinfo;
 
-		pa_comm_id = bli_thread_thread_id( pa_info );
-		pa_work_id = bli_thread_work_id( pa_info );
+		pa_comm_id = bli_thrinfo_thread_id( pa_info );
+		pa_work_id = bli_thrinfo_work_id( pa_info );
 		jr_info    = bli_thrinfo_sub_node( pa_info );
 
 		if ( !jr_info ) goto print_thrinfo;
 
-		jr_comm_id = bli_thread_thread_id( jr_info );
-		jr_work_id = bli_thread_work_id( jr_info );
+		jr_comm_id = bli_thrinfo_thread_id( jr_info );
+		jr_work_id = bli_thrinfo_work_id( jr_info );
 		ir_info    = bli_thrinfo_sub_node( jr_info );
 
 		if ( !ir_info ) goto print_thrinfo;
 
-		ir_comm_id = bli_thread_thread_id( ir_info );
-		ir_work_id = bli_thread_work_id( ir_info );
+		ir_comm_id = bli_thrinfo_thread_id( ir_info );
+		ir_work_id = bli_thrinfo_work_id( ir_info );
 
 		print_thrinfo:
 #else
@@ -580,8 +580,8 @@ void bli_l3_thrinfo_print_trsm_paths
 		}
 		else
 		{
-			jc_comm_id = bli_thread_thread_id( jc_info );
-			jc_work_id = bli_thread_work_id( jc_info );
+			jc_comm_id = bli_thrinfo_thread_id( jc_info );
+			jc_work_id = bli_thrinfo_work_id( jc_info );
 			pc_info = bli_thrinfo_sub_node( jc_info );
 
 			if ( !pc_info )
@@ -591,8 +591,8 @@ void bli_l3_thrinfo_print_trsm_paths
 			}
 			else
 			{
-				pc_comm_id = bli_thread_thread_id( pc_info );
-				pc_work_id = bli_thread_work_id( pc_info );
+				pc_comm_id = bli_thrinfo_thread_id( pc_info );
+				pc_work_id = bli_thrinfo_work_id( pc_info );
 				pb_info = bli_thrinfo_sub_node( pc_info );
 
 				if ( !pb_info )
@@ -602,8 +602,8 @@ void bli_l3_thrinfo_print_trsm_paths
 				}
 				else
 				{
-					pb_comm_id = bli_thread_thread_id( pb_info );
-					pb_work_id = bli_thread_work_id( pb_info );
+					pb_comm_id = bli_thrinfo_thread_id( pb_info );
+					pb_work_id = bli_thrinfo_work_id( pb_info );
 					ic_info = bli_thrinfo_sub_node( pb_info );
 
 					if ( !ic_info )
@@ -613,8 +613,8 @@ void bli_l3_thrinfo_print_trsm_paths
 					}
 					else
 					{
-						ic_comm_id = bli_thread_thread_id( ic_info );
-						ic_work_id = bli_thread_work_id( ic_info );
+						ic_comm_id = bli_thrinfo_thread_id( ic_info );
+						ic_work_id = bli_thrinfo_work_id( ic_info );
 						pa_info0 = bli_thrinfo_sub_prenode( ic_info );
 						pa_info = bli_thrinfo_sub_node( ic_info );
 
@@ -626,8 +626,8 @@ void bli_l3_thrinfo_print_trsm_paths
 						}
 						else
 						{
-							pa_comm_id0 = bli_thread_thread_id( pa_info0 );
-							pa_work_id0 = bli_thread_work_id( pa_info0 );
+							pa_comm_id0 = bli_thrinfo_thread_id( pa_info0 );
+							pa_work_id0 = bli_thrinfo_work_id( pa_info0 );
 							jr_info0 = bli_thrinfo_sub_node( pa_info0 );
 
 							if ( !jr_info0 )
@@ -637,8 +637,8 @@ void bli_l3_thrinfo_print_trsm_paths
 							}
 							else
 							{
-								jr_comm_id0 = bli_thread_thread_id( jr_info0 );
-								jr_work_id0 = bli_thread_work_id( jr_info0 );
+								jr_comm_id0 = bli_thrinfo_thread_id( jr_info0 );
+								jr_work_id0 = bli_thrinfo_work_id( jr_info0 );
 								ir_info0 = bli_thrinfo_sub_node( jr_info0 );
 
 								if ( !ir_info0 )
@@ -648,8 +648,8 @@ void bli_l3_thrinfo_print_trsm_paths
 								}
 								else
 								{
-									ir_comm_id0 = bli_thread_thread_id( ir_info0 );
-									ir_work_id0 = bli_thread_work_id( ir_info0 );
+									ir_comm_id0 = bli_thrinfo_thread_id( ir_info0 );
+									ir_work_id0 = bli_thrinfo_work_id( ir_info0 );
 								}
 							}
 						}
@@ -662,8 +662,8 @@ void bli_l3_thrinfo_print_trsm_paths
 						}
 						else
 						{
-							pa_comm_id = bli_thread_thread_id( pa_info );
-							pa_work_id = bli_thread_work_id( pa_info );
+							pa_comm_id = bli_thrinfo_thread_id( pa_info );
+							pa_work_id = bli_thrinfo_work_id( pa_info );
 							jr_info = bli_thrinfo_sub_node( pa_info );
 
 							if ( !jr_info )
@@ -673,8 +673,8 @@ void bli_l3_thrinfo_print_trsm_paths
 							}
 							else
 							{
-								jr_comm_id = bli_thread_thread_id( jr_info );
-								jr_work_id = bli_thread_work_id( jr_info );
+								jr_comm_id = bli_thrinfo_thread_id( jr_info );
+								jr_work_id = bli_thrinfo_work_id( jr_info );
 								ir_info = bli_thrinfo_sub_node( jr_info );
 
 								if ( !ir_info )
@@ -684,8 +684,8 @@ void bli_l3_thrinfo_print_trsm_paths
 								}
 								else
 								{
-									ir_comm_id = bli_thread_thread_id( ir_info );
-									ir_work_id = bli_thread_work_id( ir_info );
+									ir_comm_id = bli_thrinfo_thread_id( ir_info );
+									ir_work_id = bli_thrinfo_work_id( ir_info );
 								}
 							}
 						}
@@ -723,7 +723,7 @@ void bli_l3_thrinfo_free_paths
        thrinfo_t** threads
      )
 {
-	dim_t n_threads = bli_thread_num_threads( threads[0] );
+	dim_t n_threads = bli_thrinfo_num_threads( threads[0] );
 	dim_t i;
 
 	for ( i = 0; i < n_threads; ++i )

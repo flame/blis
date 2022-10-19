@@ -37,53 +37,53 @@
 
 void bli_packm_sup_init_mem
      (
-         bool       will_pack,
-         packbuf_t  pack_buf_type,
-         num_t      dt,
-         dim_t      m,
-         dim_t      k,
-         dim_t      mr,
-         thrinfo_t* thread
+       bool       will_pack,
+       packbuf_t  pack_buf_type,
+       num_t      dt,
+       dim_t      m,
+       dim_t      k,
+       dim_t      mr,
+       thrinfo_t* thread
      )
 {
-	/* Inspect whether we are going to be packing matrix A. */
+	// Inspect whether we are going to be packing matrix A.
 	if ( will_pack == FALSE )
 	{
 	}
-	else /* if ( will_pack == TRUE ) */
+	else // if ( will_pack == TRUE )
 	{
-        mem_t* mem = bli_thread_mem( thread );
-        pba_t* pba = bli_thread_pba( thread );
+        mem_t* mem = bli_thrinfo_mem( thread );
+        pba_t* pba = bli_thrinfo_pba( thread );
 
-		/* NOTE: This "rounding up" of the last upanel is actually optional
-		   for the rrc/crc cases, but absolutely necessary for the other cases
-		   since we NEED that last micropanel to have the same ldim (cs_p) as
-		   the other micropanels. Why? So that millikernels can use the same
-		   upanel ldim for all iterations of the ir loop. */
+		// NOTE: This "rounding up" of the last upanel is actually optional
+		// for the rrc/crc cases, but absolutely necessary for the other cases
+		// since we NEED that last micropanel to have the same ldim (cs_p) as
+		// the other micropanels. Why? So that millikernels can use the same
+		// upanel ldim for all iterations of the ir loop.
 		const dim_t m_pack = ( m / mr + ( m % mr ? 1 : 0 ) ) * mr;
 		const dim_t k_pack = k;
 
-		/* Barrier to make sure all threads are caught up and ready to begin
-		   the packm stage. */
-		bli_thread_barrier( thread );
+		// Barrier to make sure all threads are caught up and ready to begin
+		// the packm stage.
+		bli_thrinfo_barrier( thread );
 
-		/* Compute the size of the memory block eneded. */
+		// Compute the size of the memory block eneded.
 		siz_t size_needed = bli_dt_size( dt ) * m_pack * k_pack;
 
-		/* Check the mem_t entry provided by the caller. If it is unallocated,
-		   then we need to acquire a block from the memory broker. */
+		// Check the mem_t entry provided by the caller. If it is unallocated,
+		// then we need to acquire a block from the pba.
 		if ( bli_mem_is_unalloc( mem ) )
 		{
-			if ( bli_thread_am_chief( thread ) )
+			if ( bli_thrinfo_am_chief( thread ) )
 			{
-				/* Acquire directly to the chief thread's mem_t that was
-				   passed in. It needs to be that mem_t struct, and not a
-				   local (temporary) mem_t, since there is no barrier until
-				   after packing is finished, which could allow a race
-				   condition whereby the chief thread exits the current
-				   function before the other threads have a chance to copy
-				   from it. (A barrier would fix that race condition, but
-				   then again, I prefer to keep barriers to a minimum.) */
+				// Acquire directly to the chief thread's mem_t that was
+				// passed in. It needs to be that mem_t struct, and not a
+				// local (temporary) mem_t, since there is no barrier until
+				// after packing is finished, which could allow a race
+				// condition whereby the chief thread exits the current
+				// function before the other threads have a chance to copy
+				// from it. (A barrier would fix that race condition, but
+				// then again, I prefer to keep barriers to a minimum.)
 				bli_pba_acquire_m
 				(
 				  pba,
@@ -93,41 +93,41 @@ void bli_packm_sup_init_mem
 				);
 			}
 
-			/* Broadcast the address of the chief thread's passed-in mem_t
-			   to all threads. */
-			mem_t* mem_p = bli_thread_broadcast( thread, mem );
+			// Broadcast the address of the chief thread's passed-in mem_t
+			// to all threads.
+			mem_t* mem_p = bli_thrinfo_broadcast( thread, mem );
 
-			/* Non-chief threads: Copy the contents of the chief thread's
-			   passed-in mem_t to the passed-in mem_t for this thread. (The
-			   chief thread already has the mem_t, so it does not need to
-			   perform any copy.) */
-			if ( !bli_thread_am_chief( thread ) )
+			// Non-chief threads: Copy the contents of the chief thread's
+			// passed-in mem_t to the passed-in mem_t for this thread. (The
+			// chief thread already has the mem_t, so it does not need to
+			// perform any copy.)
+			if ( !bli_thrinfo_am_chief( thread ) )
 			{
 				*mem = *mem_p;
 			}
 		}
-		else /* if ( bli_mem_is_alloc( mem ) ) */
+		else // if ( bli_mem_is_alloc( mem ) )
 		{
-			/* If the mem_t entry provided by the caller does NOT contain a NULL
-			   buffer, then a block has already been acquired from the memory
-			   broker and cached by the caller. */
+			// If the mem_t entry provided by the caller does NOT contain a NULL
+			// buffer, then a block has already been acquired from the pba and
+			// cached by the caller.
 
-			/* As a sanity check, we should make sure that the mem_t object isn't
-			   associated with a block that is too small compared to the size of
-			   the packed matrix buffer that is needed, according to the value
-			   computed above. */
+			// As a sanity check, we should make sure that the mem_t object isn't
+			// associated with a block that is too small compared to the size of
+			// the packed matrix buffer that is needed, according to the value
+			// computed above.
 			siz_t mem_size = bli_mem_size( mem );
 
 			if ( mem_size < size_needed )
 			{
-				if ( bli_thread_am_chief( thread ) )
+				if ( bli_thrinfo_am_chief( thread ) )
 				{
-					/* The chief thread releases the existing block associated
-					   with the mem_t, and then re-acquires a new block, saving
-					   the associated mem_t to its passed-in mem_t. (See coment
-					   above for why the acquisition needs to be directly to
-					   the chief thread's passed-in mem_t and not a local
-					   (temporary) mem_t. */
+					// The chief thread releases the existing block associated
+					// with the mem_t, and then re-acquires a new block, saving
+					// the associated mem_t to its passed-in mem_t. (See coment
+					// above for why the acquisition needs to be directly to
+					// the chief thread's passed-in mem_t and not a local
+					// (temporary) mem_t.
 					bli_pba_release
 					(
 					  pba,
@@ -142,23 +142,23 @@ void bli_packm_sup_init_mem
 					);
 				}
 
-				/* Broadcast the address of the chief thread's passed-in mem_t
-				   to all threads. */
-				mem_t* mem_p = bli_thread_broadcast( thread, mem );
+				// Broadcast the address of the chief thread's passed-in mem_t
+				// to all threads.
+				mem_t* mem_p = bli_thrinfo_broadcast( thread, mem );
 
-				/* Non-chief threads: Copy the contents of the chief thread's
-				   passed-in mem_t to the passed-in mem_t for this thread. (The
-				   chief thread already has the mem_t, so it does not need to
-				   perform any copy.) */
-				if ( !bli_thread_am_chief( thread ) )
+				// Non-chief threads: Copy the contents of the chief thread's
+				// passed-in mem_t to the passed-in mem_t for this thread. (The
+				// chief thread already has the mem_t, so it does not need to
+				// perform any copy.)
+				if ( !bli_thrinfo_am_chief( thread ) )
 				{
 					*mem = *mem_p;
 				}
 			}
 			else
 			{
-				/* If the mem_t entry is already allocated and sufficiently large,
-				   then we use it as-is. No action is needed. */
+				// If the mem_t entry is already allocated and sufficiently large,
+				// then we use it as-is. No action is needed.
 			}
 		}
 	}
@@ -170,21 +170,21 @@ void bli_packm_sup_finalize_mem
        thrinfo_t* thread
      )
 {
-	/* Inspect whether we previously packed matrix A. */
+	// Inspect whether we previously packed matrix A.
 	if ( did_pack == FALSE )
 	{
-		/* If we didn't pack matrix A, there's nothing to be done. */
+		// If we didn't pack matrix A, there's nothing to be done.
 	}
-	else /* if ( did_pack == TRUE ) */
+	else // if ( did_pack == TRUE )
 	{
-        mem_t* mem = bli_thread_mem( thread );
-        pba_t* pba = bli_thread_pba( thread );
+        mem_t* mem = bli_thrinfo_mem( thread );
+        pba_t* pba = bli_thrinfo_pba( thread );
 
 		if ( thread != NULL )
-		if ( bli_thread_am_chief( thread ) )
+		if ( bli_thrinfo_am_chief( thread ) )
 		{
-			/* Check the mem_t entry provided by the caller. Only proceed if it
-			   is allocated, which it should be. */
+			// Check the mem_t entry provided by the caller. Only proceed if it
+			// is allocated, which it should be.
 			if ( bli_mem_is_alloc( mem ) )
 			{
 				bli_pba_release
@@ -213,74 +213,73 @@ void bli_packm_sup_init
              thrinfo_t* thread
      )
 {
-	/* Inspect whether we are going to be packing matrix A. */
+	// Inspect whether we are going to be packing matrix A.
 	if ( will_pack == FALSE )
 	{
 		*m_max = m;
 		*k_max = k;
 
-		/* Set the parameters for use with no packing of A (ie: using the
-		   source matrix A directly). */
+		// Set the parameters for use with no packing of A (ie: using the
+		// source matrix A directly).
 		{
-			/* Use the strides of the source matrix as the final values. */
+			// Use the strides of the source matrix as the final values.
 			*rs_p = rs_x;
 			*cs_p = cs_x;
 
 			*pd_p = mr;
 			*ps_p = mr * rs_x;
 
-			/* Set the schema to "not packed" to indicate that packing will be
-			   skipped. */
+			// Set the schema to "not packed" to indicate that packing will be
+			// skipped.
 			*schema = BLIS_NOT_PACKED;
 		}
 
-		/* Since we won't be packing, simply update the buffer address provided
-		   by the caller to point to source matrix. */
+		// Since we won't be packing, simply update the buffer address provided
+		// by the caller to point to source matrix.
 		*p = ( void* )x;
 	}
-	else /* if ( will_pack == TRUE ) */
+	else // if ( will_pack == TRUE )
 	{
-		/* NOTE: This is "rounding up" of the last upanel is actually optional
-		   for the rrc/crc cases, but absolutely necessary for the other cases
-		   since we NEED that last micropanel to have the same ldim (cs_p) as
-		   the other micropanels. Why? So that millikernels can use the same
-		   upanel ldim for all iterations of the ir loop. */
+		// NOTE: This is "rounding up" of the last upanel is actually optional
+		// for the rrc/crc cases, but absolutely necessary for the other cases
+		// since we NEED that last micropanel to have the same ldim (cs_p) as
+		// the other micropanels. Why? So that millikernels can use the same
+		// upanel ldim for all iterations of the ir loop.
 		*m_max = ( m / mr + ( m % mr ? 1 : 0 ) ) * mr;
 		*k_max = k;
 
-		/* Determine the dimensions and strides for the packed matrix A. */
+		// Determine the dimensions and strides for the packed matrix A.
 		if ( stor_id == BLIS_RRC ||
 			 stor_id == BLIS_CRC )
 		{
-			/* stor3_t id values _RRC and _CRC: pack A to plain row storage. */
+			// stor3_t id values _RRC and _CRC: pack A to plain row storage.
 			*rs_p = k;
 			*cs_p = 1;
 
 			*pd_p = mr;
 			*ps_p = mr * k;
 
-			/* Set the schema to "row packed" to indicate packing to plain
-			   row storage. */
+			// Set the schema to "row packed" to indicate packing to plain
+			// row storage.
 			*schema = BLIS_PACKED_ROWS;
 		}
 		else
 		{
-			/* All other stor3_t ids: pack A to column-stored row-panels. */
+			// All other stor3_t ids: pack A to column-stored row-panels.
 			*rs_p = 1;
 			*cs_p = mr;
 
 			*pd_p = mr;
 			*ps_p = mr * k;
 
-			/* Set the schema to "packed row panels" to indicate packing to
-			   conventional column-stored row panels. */
+			// Set the schema to "packed row panels" to indicate packing to
+			// conventional column-stored row panels.
 			*schema = BLIS_PACKED_ROW_PANELS;
 		}
 
-		/* Set the buffer address provided by the caller to point to the
-		   memory associated with the mem_t entry acquired from the memory
-		   broker. */
-		*p = bli_mem_buffer( bli_thread_mem( thread ) );
+		// Set the buffer address provided by the caller to point to the
+		// memory associated with the mem_t entry acquired from the pba.
+		*p = bli_mem_buffer( bli_thrinfo_mem( thread ) );
 	}
 }
 
@@ -345,8 +344,8 @@ void bli_packm_sup
 	dim_t  k_max;
 	dim_t  pd_p;
 
-	/* Prepare the packing destination buffer. If packing is not requested,
-	   this function will reduce to a no-op. */
+	// Prepare the packing destination buffer. If packing is not requested,
+	// this function will reduce to a no-op.
 	bli_packm_sup_init_mem
 	(
 	  will_pack,
@@ -355,9 +354,9 @@ void bli_packm_sup
 	  thread
 	);
 
-	/* Determine the packing buffer and related parameters for matrix A. If A
-	   will not be packed, then a_use will be set to point to a and the _a_use
-	   strides will be set accordingly. */
+	// Determine the packing buffer and related parameters for matrix A. If A
+	// will not be packed, then a_use will be set to point to a and the _a_use
+	// strides will be set accordingly.
 	bli_packm_sup_init
 	(
 	  will_pack,
@@ -371,24 +370,20 @@ void bli_packm_sup
 	  thread
 	);
 
-	/* Inspect whether we are going to be packing matrix A. */
+	// Inspect whether we are going to be packing matrix A.
 	if ( will_pack == FALSE )
 	{
-		/* If we aren't going to pack matrix A, then there's nothing to do. */
+		// If we aren't going to pack matrix A, then there's nothing to do.
 
-		/*
-		printf( "blis_ packm_sup_a: not packing A.\n" );
-		*/
+		// printf( "blis_ packm_sup_a: not packing A.\n" );
 	}
-	else /* if ( will_pack == TRUE ) */
+	else // if ( will_pack == TRUE )
 	{
 		if ( schema == BLIS_PACKED_ROWS )
 		{
-			/*
-			printf( "blis_ packm_sup_a: packing A to rows.\n" );
-			*/
+			// printf( "blis_ packm_sup_a: packing A to rows.\n" );
 
-			/* For plain packing by rows, use var2. */
+			// For plain packing by rows, use var2.
 			packm_sup_var2[ dt ]
 			(
 			  transc,
@@ -397,18 +392,16 @@ void bli_packm_sup
 			  k,
 			  ( void* )kappa,
 			  ( void* )a,  rs_a,  cs_a,
-			  *p, *rs_p, *cs_p,
+			          *p, *rs_p, *cs_p,
 			  ( cntx_t* )cntx,
 			  thread
 			);
 		}
-		else /* if ( schema == BLIS_PACKED_ROW_PANELS ) */
+		else // if ( schema == BLIS_PACKED_ROW_PANELS )
 		{
-			/*
-			printf( "blis_ packm_sup_a: packing A to row panels.\n" );
-			*/
+			// printf( "blis_ packm_sup_a: packing A to row panels.\n" );
 
-			/* For packing to column-stored row panels, use var1. */
+			// For packing to column-stored row panels, use var1.
 			packm_sup_var1[ dt ]
 			(
 			  transc,
@@ -419,15 +412,15 @@ void bli_packm_sup
 			  k_max,
 			  ( void* )kappa,
 			  ( void* )a,  rs_a,  cs_a,
-			  *p, *rs_p, *cs_p,
-			      pd_p,  *ps_p,
+			          *p, *rs_p, *cs_p,
+			               pd_p, *ps_p,
 			  ( cntx_t* )cntx,
 			  thread
 			);
 		}
 
-		/* Barrier so that packing is done before computation. */
-		bli_thread_barrier( thread );
+		// Barrier so that packing is done before computation.
+		bli_thrinfo_barrier( thread );
 	}
 }
 

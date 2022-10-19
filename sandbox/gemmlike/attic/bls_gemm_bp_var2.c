@@ -374,8 +374,8 @@ void PASTECH2(bls_,ch,varname) \
 				/* Query the number of threads and thread ids for the JR loop.
 				   NOTE: These values are only needed when computing the next
 				   micropanel of B. */ \
-				const dim_t jr_nt  = bli_thread_n_way( thread_jr ); \
-				const dim_t jr_tid = bli_thread_work_id( thread_jr ); \
+				const dim_t jr_nt  = bli_thrinfo_n_way( thread_jr ); \
+				const dim_t jr_tid = bli_thrinfo_work_id( thread_jr ); \
 \
 				/* Compute number of primary and leftover components of the JR loop. */ \
 				dim_t jr_iter = ( nc_cur + NR - 1 ) / NR; \
@@ -404,8 +404,8 @@ void PASTECH2(bls_,ch,varname) \
 					/* Query the number of threads and thread ids for the IR loop.
 					   NOTE: These values are only needed when computing the next
 					   micropanel of A. */ \
-					const dim_t ir_nt  = bli_thread_n_way( thread_ir ); \
-					const dim_t ir_tid = bli_thread_work_id( thread_ir ); \
+					const dim_t ir_nt  = bli_thrinfo_n_way( thread_ir ); \
+					const dim_t ir_tid = bli_thrinfo_work_id( thread_ir ); \
 \
 					/* Compute number of primary and leftover components of the IR loop. */ \
 					dim_t ir_iter = ( mc_cur + MR - 1 ) / MR; \
@@ -464,7 +464,7 @@ void PASTECH2(bls_,ch,varname) \
 			/* This barrier is needed to prevent threads from starting to pack
 			   the next row panel of B before the current row panel is fully
 			   computed upon. */ \
-			bli_thread_barrier( thread_pb ); \
+			bli_thrinfo_barrier( thread_pb ); \
 		} \
 	} \
 \

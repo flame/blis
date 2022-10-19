@@ -75,28 +75,26 @@ typedef struct thrinfo_s thrinfo_t;
 
 //
 // thrinfo_t functions
-// NOTE: The naming of these should be made consistent at some point.
-// (ie: bli_thrinfo_ vs. bli_thread_)
 //
 
 // thrinfo_t query (field only)
 
-BLIS_INLINE dim_t bli_thread_num_threads( const thrinfo_t* t )
+BLIS_INLINE dim_t bli_thrinfo_num_threads( const thrinfo_t* t )
 {
 	return (t->comm)->n_threads;
 }
 
-BLIS_INLINE dim_t bli_thread_thread_id( const thrinfo_t* t )
+BLIS_INLINE dim_t bli_thrinfo_thread_id( const thrinfo_t* t )
 {
 	return t->thread_id;
 }
 
-BLIS_INLINE dim_t bli_thread_n_way( const thrinfo_t* t )
+BLIS_INLINE dim_t bli_thrinfo_n_way( const thrinfo_t* t )
 {
 	return t->n_way;
 }
 
-BLIS_INLINE dim_t bli_thread_work_id( const thrinfo_t* t )
+BLIS_INLINE dim_t bli_thrinfo_work_id( const thrinfo_t* t )
 {
 	return t->work_id;
 }
@@ -111,17 +109,17 @@ BLIS_INLINE bool bli_thrinfo_needs_free_comm( const thrinfo_t* t )
 	return t->free_comm;
 }
 
-BLIS_INLINE pool_t* bli_thread_sba_pool( const thrinfo_t* t )
+BLIS_INLINE pool_t* bli_thrinfo_sba_pool( const thrinfo_t* t )
 {
 	return t->sba_pool;
 }
 
-BLIS_INLINE pba_t* bli_thread_pba( const thrinfo_t* t )
+BLIS_INLINE pba_t* bli_thrinfo_pba( const thrinfo_t* t )
 {
 	return t->pba;
 }
 
-BLIS_INLINE mem_t* bli_thread_mem( thrinfo_t* t )
+BLIS_INLINE mem_t* bli_thrinfo_mem( thrinfo_t* t )
 {
 	return &t->mem;
 }
@@ -138,7 +136,7 @@ BLIS_INLINE thrinfo_t* bli_thrinfo_sub_prenode( const thrinfo_t* t )
 
 // thrinfo_t query (complex)
 
-BLIS_INLINE bool bli_thread_am_chief( const thrinfo_t* t )
+BLIS_INLINE bool bli_thrinfo_am_chief( const thrinfo_t* t )
 {
 	return t->thread_id == 0;
 }
@@ -192,12 +190,12 @@ BLIS_INLINE void bli_thrinfo_set_sub_prenode( thrinfo_t* sub_prenode, thrinfo_t*
 
 // other thrinfo_t-related functions
 
-BLIS_INLINE void* bli_thread_broadcast( const thrinfo_t* t, void* p )
+BLIS_INLINE void* bli_thrinfo_broadcast( const thrinfo_t* t, void* p )
 {
 	return bli_thrcomm_bcast( t->thread_id, p, t->comm );
 }
 
-BLIS_INLINE void bli_thread_barrier( const thrinfo_t* t )
+BLIS_INLINE void bli_thrinfo_barrier( const thrinfo_t* t )
 {
 	bli_thrcomm_barrier( t->thread_id, t->comm );
 }

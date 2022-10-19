@@ -67,9 +67,9 @@ void bli_l3_int
 	if ( bli_obj_has_zero_dim( a ) ||
 	     bli_obj_has_zero_dim( b ) )
 	{
-		if ( bli_thread_am_chief( thread ) )
+		if ( bli_thrinfo_am_chief( thread ) )
 			bli_scalm( beta, c );
-		bli_thread_barrier( rntm, thread );
+		bli_thrinfo_barrier( thread );
 		return;
 	}
 
@@ -81,9 +81,9 @@ void bli_l3_int
 		// This should never execute.
 		bli_abort();
 
-		if ( bli_thread_am_chief( thread ) )
+		if ( bli_thrinfo_am_chief( thread ) )
 			bli_scalm( beta, c );
-		bli_thread_barrier( rntm, thread );
+		bli_thrinfo_barrier( thread );
 		return;
 	}
 

@@ -198,8 +198,8 @@ void bli_trsm_lu_ker_var2
 
 	/* Query the number of threads and thread ids for each loop. */
     thrinfo_t* thread = bli_thrinfo_sub_node( thread_par );
-	dim_t jr_nt  = bli_thread_n_way( thread );
-	dim_t jr_tid = bli_thread_work_id( thread );
+	dim_t jr_nt  = bli_thrinfo_n_way( thread );
+	dim_t jr_tid = bli_thrinfo_work_id( thread );
 
 	dim_t jr_start, jr_end;
 	dim_t jr_inc;

@@ -160,8 +160,8 @@ void bli_packm_blk_var1
 
 	// Query the number of threads and thread ids from the current thread's
 	// packm thrinfo_t node.
-	const dim_t nt  = bli_thread_num_threads( thread );
-	const dim_t tid = bli_thread_thread_id( thread );
+	const dim_t nt  = bli_thrinfo_num_threads( thread );
+	const dim_t tid = bli_thrinfo_thread_id( thread );
 
 	// Determine the thread range and increment using the current thread's
 	// packm thrinfo_t node. NOTE: The definition of bli_thread_range_jrir()

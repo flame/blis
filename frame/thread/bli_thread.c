@@ -101,11 +101,11 @@ void bli_thread_range_sub
              dim_t*     end
      )
 {
-	dim_t      n_way      = bli_thread_n_way( thread );
+	dim_t      n_way      = bli_thrinfo_n_way( thread );
 
 	if ( n_way == 1 ) { *start = 0; *end = n; return; }
 
-	dim_t      work_id    = bli_thread_work_id( thread );
+	dim_t      work_id    = bli_thrinfo_work_id( thread );
 
 	dim_t      all_start  = 0;
 	dim_t      all_end    = n;
@@ -541,8 +541,8 @@ siz_t bli_thread_range_weighted_sub
              dim_t*     j_end_thr
      )
 {
-	dim_t      n_way   = bli_thread_n_way( thread );
-	dim_t      my_id   = bli_thread_work_id( thread );
+	dim_t      n_way   = bli_thrinfo_n_way( thread );
+	dim_t      my_id   = bli_thrinfo_work_id( thread );
 
 	dim_t      bf_left = n % bf;
 
