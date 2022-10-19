@@ -32,26 +32,12 @@
 
 */
 
-#ifndef BLIS_L3_SUP_DECOR_OPENMP_H
-#define BLIS_L3_SUP_DECOR_OPENMP_H
+#include "blis.h"
 
-// Definitions specific to situations when OpenMP multithreading is enabled.
-#ifdef BLIS_ENABLE_OPENMP
+//#define PRINT_IMPL
 
-err_t bli_l3_sup_thread_decorator_openmp
-     (
-             l3supint_ft func,
-             opid_t      family,
-       const obj_t*      alpha,
-       const obj_t*      a,
-       const obj_t*      b,
-       const obj_t*      beta,
-       const obj_t*      c,
-       const cntx_t*     cntx,
-             rntm_t*     rntm
-     );
-
-#endif
-
-#endif
+void bli_thread_launch_single( dim_t nt, thread_func_t func, const void* params )
+{
+    func( &BLIS_SINGLE_COMM, 0, params );
+}
 

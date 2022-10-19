@@ -152,8 +152,7 @@ void bli_trsm_front
 	  alpha,
 	  &c_local,
 	  cntx,
-	  rntm,
-	  NULL
+	  rntm
 	);
 }
 

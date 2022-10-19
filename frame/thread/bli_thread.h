@@ -46,17 +46,20 @@
 // Include some operation-specific thrinfo_t prototypes.
 #include "bli_l3_thrinfo.h"
 
-// Include the level-3 thread decorator and related definitions and prototypes
-// for the conventional code path.
-#include "bli_l3_decor.h"
+// Thread lanuch prototypes. Must go before including implementation headers.
+typedef void (*thread_func_t)( thrcomm_t* gl_comm, dim_t tid, const void* params );
 
-// Include the level-3 thread decorator and related definitions and prototypes
-// for the sup code path.
-#include "bli_l3_sup_decor.h"
+// Include threading implementations.
+#include "bli_thread_openmp.h"
+#include "bli_thread_pthreads.h"
+#include "bli_thread_single.h"
 
 // Initialization-related prototypes.
 void bli_thread_init( void );
 void bli_thread_finalize( void );
+
+BLIS_EXPORT_BLIS
+void bli_thread_launch( timpl_t ti, dim_t nt, thread_func_t func, const void* params );
 
 // Thread range-related prototypes.
 

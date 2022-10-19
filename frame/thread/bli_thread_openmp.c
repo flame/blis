@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2021, The University of Texas at Austin
+   Copyright (C) 2014, The University of Texas at Austin
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -32,26 +32,26 @@
 
 */
 
-#ifndef BLIS_SBX_L3_DECOR_OPENMP_H
-#define BLIS_SBX_L3_DECOR_OPENMP_H
+#include "blis.h"
 
-// Definitions specific to situations when OpenMP multithreading is enabled.
 #ifdef BLIS_ENABLE_OPENMP
 
-void bls_l3_thread_decorator_openmp
-     (
-       l3sbxint_ft func,
-       opid_t      family,
-       obj_t*      alpha,
-       obj_t*      a,
-       obj_t*      b,
-       obj_t*      beta,
-       obj_t*      c,
-       cntx_t*     cntx,
-       rntm_t*     rntm
-     );
+void bli_thread_launch_openmp( dim_t n_threads, thread_func_t func, const void* params )
+{
+	thrcomm_t* gl_comm = bli_thrcomm_create( BLIS_OPENMP, NULL, n_threads );
 
-#endif
+	_Pragma( "omp parallel num_threads(n_threads)" )
+	{
+		// Query the thread's id from OpenMP.
+		const dim_t tid = omp_get_thread_num();
+
+		func( gl_comm, tid, params );
+	}
+
+	// Free the global communicator, because the root thrinfo_t node
+	// never frees its communicator.
+	bli_thrcomm_free( NULL, gl_comm );
+}
 
 #endif
 

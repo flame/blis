@@ -170,8 +170,7 @@ void bli_trmm3_front
 	  beta,
 	  &c_local,
 	  cntx,
-	  rntm,
-	  NULL
+	  rntm
 	);
 }
 

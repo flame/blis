@@ -243,8 +243,7 @@ void bli_gemm_front
 	  betap,
 	  cp,
 	  cntx,
-	  rntm,
-	  NULL
+	  rntm
 	);
 
 #ifdef BLIS_ENABLE_GEMM_MD

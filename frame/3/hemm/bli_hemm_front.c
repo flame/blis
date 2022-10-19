@@ -160,8 +160,7 @@ void bli_hemm_front
 	  beta,
 	  &c_local,
 	  cntx,
-	  rntm,
-	  NULL
+	  rntm
 	);
 }
 

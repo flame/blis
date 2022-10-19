@@ -32,16 +32,26 @@
 
 */
 
-#include "blis.h"
+#ifndef BLIS_SBX_L3_DECOR_H
+#define BLIS_SBX_L3_DECOR_H
 
-#define SKIP_THRINFO_TREE
+// Level-3 sup internal function type.
+typedef void (*l3sbxint_ft)
+     (
+       obj_t*     alpha,
+       obj_t*     a,
+       obj_t*     b,
+       obj_t*     beta,
+       obj_t*     c,
+       cntx_t*    cntx,
+       rntm_t*    rntm,
+       thrinfo_t* thread
+     );
 
-void bls_l3_thread_decorator_single
+void bls_l3_thread_decorator
      (
        l3sbxint_ft func,
        opid_t      family,
-       //pack_t      schema_a,
-       //pack_t      schema_b,
        obj_t*      alpha,
        obj_t*      a,
        obj_t*      b,
@@ -49,53 +59,7 @@ void bls_l3_thread_decorator_single
        obj_t*      c,
        cntx_t*     cntx,
        rntm_t*     rntm
-     )
-{
-	// For sequential execution, we use only one thread.
-	const dim_t n_threads = 1;
+     );
 
-	// NOTE: The sba was initialized in bli_init().
-
-	// Check out an array_t from the small block allocator. This is done
-	// with an internal lock to ensure only one application thread accesses
-	// the sba at a time. bli_sba_checkout_array() will also automatically
-	// resize the array_t, if necessary.
-	array_t* array = bli_sba_checkout_array( n_threads );
-
-	// Allcoate a global communicator for the root thrinfo_t structures.
-	thrcomm_t* gl_comm = &BLIS_SINGLE_COMM;
-
-	{
-		// There is only one thread id (for the thief thread).
-		const dim_t tid = 0;
-
-    	// Create the root node of the thread's thrinfo_t structure.
-        pool_t*    pool   = bli_apool_array_elem( tid, array );
-    	thrinfo_t* thread = bli_l3_sup_thrinfo_create( tid, gl_comm, pool, rntm );
-
-		func
-		(
-		  alpha,
-		  a,
-		  b,
-		  beta,
-		  c,
-		  cntx,
-		  rntm,
-	      bli_thrinfo_sub_node( thread )
-		);
-
-		// Free the current thread's thrinfo_t structure.
-		bli_thrinfo_free( thread );
-	}
-
-	// We shouldn't free the global communicator since it was already freed
-	// by the global communicator's chief thread in bli_l3_thrinfo_free()
-	// (called above).
-
-	// Check the array_t back into the small block allocator. Similar to the
-	// check-out, this is done using a lock embedded within the sba to ensure
-	// mutual exclusion.
-	bli_sba_checkin_array( array );
-}
+#endif
 

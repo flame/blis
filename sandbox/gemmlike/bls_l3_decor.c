@@ -34,51 +34,79 @@
 
 #include "blis.h"
 
-// Initialize a function pointer array containing function addresses for
-// each of the threading-specific level-3 sup thread decorators.
-
-static l3_sup_decor_ft l3_sup_decor_fpa[ BLIS_NUM_THREAD_IMPLS ] =
+struct l3_sbx_decor_params_s
 {
-	[BLIS_SINGLE] = bli_l3_sup_thread_decorator_single,
-	[BLIS_OPENMP] =
-#if   defined(BLIS_ENABLE_OPENMP)
-	                bli_l3_sup_thread_decorator_openmp,
-#elif defined(BLIS_ENABLE_PTHREADS)
-	                NULL,
-#else
-	                NULL,
-#endif
-	[BLIS_POSIX]  =
-#if   defined(BLIS_ENABLE_PTHREADS)
-	                bli_l3_sup_thread_decorator_pthreads,
-#elif defined(BLIS_ENABLE_OPENMP)
-	                NULL,
-#else
-	                NULL,
-#endif
+	l3sbxint_ft func;
+	opid_t      family;
+	obj_t*      alpha;
+	obj_t*      a;
+	obj_t*      b;
+	obj_t*      beta;
+	obj_t*      c;
+	cntx_t*     cntx;
+	rntm_t*     rntm;
+	array_t*    array;
 };
+typedef struct l3_sbx_decor_params_s l3_sbx_decor_params_t;
 
-// Define a dispatcher that chooses a threading-specific function from the
-// above function pointer array.
+static void bls_l3_thread_decorator_entry( thrcomm_t* gl_comm, dim_t tid, const void* data_void )
+{
+	const l3_sbx_decor_params_t* data   = data_void;
 
-err_t bli_l3_sup_thread_decorator
+	l3sbxint_ft func   = data->func;
+	opid_t      family = data->family;
+	obj_t*      alpha  = data->alpha;
+	obj_t*      a      = data->a;
+	obj_t*      b      = data->b;
+	obj_t*      beta   = data->beta;
+	obj_t*      c      = data->c;
+	cntx_t*     cntx   = data->cntx;
+	rntm_t*     rntm   = data->rntm;
+	array_t*    array  = data->array;
+
+	( void )family;
+
+	// Create the root node of the thread's thrinfo_t structure.
+	pool_t*    pool   = bli_apool_array_elem( tid, array );
+	thrinfo_t* thread = bli_l3_sup_thrinfo_create( tid, gl_comm, pool, rntm );
+
+	func
+	(
+	  alpha,
+	  a,
+	  b,
+	  beta,
+	  c,
+	  cntx,
+	  rntm,
+	  bli_thrinfo_sub_node( thread )
+	);
+
+	// Free the current thread's thrinfo_t structure.
+	bli_thrinfo_free( thread );
+}
+
+void bls_l3_thread_decorator
      (
-             l3supint_ft func,
-             opid_t      family,
-       const obj_t*      alpha,
-       const obj_t*      a,
-       const obj_t*      b,
-       const obj_t*      beta,
-       const obj_t*      c,
-       const cntx_t*     cntx,
-             rntm_t*     rntm
+       l3sbxint_ft func,
+       opid_t      family,
+       obj_t*      alpha,
+       obj_t*      a,
+       obj_t*      b,
+       obj_t*      beta,
+       obj_t*      c,
+       cntx_t*     cntx,
+       rntm_t*     rntm
      )
 {
-	rntm_t rntm_l;
+	rntm_t rntm_l = *rntm;
 
 	// Query the threading implementation and the number of threads requested.
-	timpl_t ti = bli_rntm_thread_impl( rntm );
-	dim_t   nt = bli_rntm_num_threads( rntm );
+	timpl_t ti = bli_rntm_thread_impl( &rntm_l );
+	dim_t   nt = bli_rntm_num_threads( &rntm_l );
+
+	if ( bli_error_checking_is_enabled() )
+		bli_l3_thread_decorator_check( &rntm_l );
 
 #ifdef BLIS_ENABLE_NT1_VIA_SINGLE
 	if ( nt == 1 )
@@ -101,37 +129,31 @@ err_t bli_l3_sup_thread_decorator
 		// than one thread. Here, we choose to favor the requested threading
 		// implementation over the number of threads, and so reset all
 		// parallelism parameters to 1.
-		rntm_l = *rntm;
 		nt = 1;
 		bli_rntm_set_ways_only( 1, 1, 1, 1, 1, &rntm_l );
 		bli_rntm_set_num_threads_only( 1, &rntm_l );
-		rntm = &rntm_l;
 	}
 
-	// Use the timpl_t value to index into the corresponding function address
-	// from the function pointer array.
-	const l3_sup_decor_ft fp = l3_sup_decor_fpa[ ti ];
+	// Check out an array_t from the small block allocator. This is done
+	// with an internal lock to ensure only one application thread accesses
+	// the sba at a time. bli_sba_checkout_array() will also automatically
+	// resize the array_t, if necessary.
+	array_t* array = bli_sba_checkout_array( nt );
 
-	// Call the threading-specific decorator function.
-	return fp
-	(
-	  func,
-	  family,
-	  alpha,
-	  a,
-	  b,
-	  beta,
-	  c,
-	  cntx,
-	  rntm
-	);
-}
+	l3_sbx_decor_params_t params;
+	params.func   = func;
+	params.family = family;
+	params.alpha  = alpha;
+	params.a      = a;
+	params.b      = b;
+	params.beta   = beta;
+	params.c      = c;
+	params.cntx   = cntx;
+	params.rntm   = &rntm_l;
+	params.array  = array;
 
-void bli_l3_sup_thread_decorator_check
-     (
-       rntm_t* rntm
-     )
-{
-	bli_l3_sup_thread_decorator_check( rntm );
+	bli_thread_launch( ti, nt, bls_l3_thread_decorator_entry, &params );
+
+	bli_sba_checkin_array( array );
 }
 

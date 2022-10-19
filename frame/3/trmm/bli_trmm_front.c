@@ -178,8 +178,7 @@ void bli_trmm_front
 	  &BLIS_ZERO,
 	  &c_local,
 	  cntx,
-	  rntm,
-	  NULL
+	  rntm
 	);
 }
 

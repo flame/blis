@@ -5,7 +5,6 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2018, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -40,92 +39,33 @@
 // A data structure to assist in passing operands to additional threads.
 typedef struct thread_data
 {
-	      l3supint_t func;
-	      opid_t     family;
-	const obj_t*     alpha;
-	const obj_t*     a;
-	const obj_t*     b;
-	const obj_t*     beta;
-	const obj_t*     c;
-	const cntx_t*    cntx;
-	const rntm_t*    rntm;
-	      dim_t      tid;
-	      thrcomm_t* gl_comm;
-	      array_t*   array;
+	      dim_t         tid;
+          thrcomm_t*    gl_comm;
+          thread_func_t func;
+	const void*         params;
 } thread_data_t;
 
 // Entry point for additional threads
-void* bli_l3_sup_thread_entry( void* data_void )
+static void* bli_posix_thread_entry( void* data_void )
 {
-	thread_data_t* data     = data_void;
+	const thread_data_t* data     = data_void;
 
-	      l3supint_t     func     = data->func;
-	      opid_t         family   = data->family;
-	const obj_t*         alpha    = data->alpha;
-	const obj_t*         a        = data->a;
-	const obj_t*         b        = data->b;
-	const obj_t*         beta     = data->beta;
-	const obj_t*         c        = data->c;
-	const cntx_t*        cntx     = data->cntx;
-	const rntm_t*        rntm     = data->rntm;
-	      dim_t          tid      = data->tid;
-	      array_t*       array    = data->array;
-	      thrcomm_t*     gl_comm  = data->gl_comm;
+	const dim_t         tid      = data->tid;
+	      thrcomm_t*    gl_comm  = data->gl_comm;
+          thread_func_t func     = data->func;
+	const void*         params   = data->params;
 
-	( void )family;
-
-	rntm_t  rntm_l = *rntm;
-	rntm_t* rntm_p = &rntm_l;
-
-	// Create the root node of the current thread's thrinfo_t structure.
-	thrinfo_t* thread = bli_l3_sup_thrinfo_create( tid, gl_comm, array, rntm_p );
-
-	func
-	(
-	  alpha,
-	  a,
-	  b,
-	  beta,
-	  c,
-	  cntx,
-	  rntm_p,
-	  thread
-	);
-
-	// Free the current thread's thrinfo_t structure.
-	bli_thrinfo_free( thread );
+    func( gl_comm, tid, params );
 
 	return NULL;
 }
 
-err_t bli_l3_sup_thread_decorator
-     (
-             l3supint_t func,
-             opid_t     family,
-       const obj_t*     alpha,
-       const obj_t*     a,
-       const obj_t*     b,
-       const obj_t*     beta,
-       const obj_t*     c,
-       const cntx_t*    cntx,
-       const rntm_t*    rntm
-     )
+void bli_thread_launch_pthreads( dim_t n_threads, thread_func_t func, const void* params )
 {
 	err_t r_val;
 
-	// Query the total number of threads from the context.
-	const dim_t n_threads = bli_rntm_num_threads( rntm );
-
-	// NOTE: The sba was initialized in bli_init().
-
-	// Check out an array_t from the small block allocator. This is done
-	// with an internal lock to ensure only one application thread accesses
-	// the sba at a time. bli_sba_checkout_array() will also automatically
-	// resize the array_t, if necessary.
-	array_t* array = bli_sba_checkout_array( n_threads );
-
 	// Allocate a global communicator for the root thrinfo_t structures.
-	thrcomm_t* gl_comm = bli_thrcomm_create( NULL, n_threads );
+	thrcomm_t* gl_comm = bli_thrcomm_create( BLIS_POSIX, NULL, n_threads );
 
 	// Allocate an array of pthread objects and auxiliary data structs to pass
 	// to the thread entry functions.
@@ -145,24 +85,16 @@ err_t bli_l3_sup_thread_decorator
 	for ( dim_t tid = n_threads - 1; 0 <= tid; tid-- )
 	{
 		// Set up thread data for additional threads (beyond thread 0).
-		datas[tid].func     = func;
-		datas[tid].family   = family;
-		datas[tid].alpha    = alpha;
-		datas[tid].a        = a;
-		datas[tid].b        = b;
-		datas[tid].beta     = beta;
-		datas[tid].c        = c;
-		datas[tid].cntx     = cntx;
-		datas[tid].rntm     = rntm;
 		datas[tid].tid      = tid;
 		datas[tid].gl_comm  = gl_comm;
-		datas[tid].array    = array;
+		datas[tid].func     = func;
+		datas[tid].params   = params;
 
 		// Spawn additional threads for ids greater than 1.
 		if ( tid != 0 )
-			bli_pthread_create( &pthreads[tid], NULL, &bli_l3_sup_thread_entry, &datas[tid] );
+			bli_pthread_create( &pthreads[tid], NULL, &bli_posix_thread_entry, &datas[tid] );
 		else
-			bli_l3_sup_thread_entry( ( void* )(&datas[0]) );
+			bli_posix_thread_entry( &datas[0] );
 	}
 
 	// Thread 0 waits for additional threads to finish.
@@ -175,11 +107,6 @@ err_t bli_l3_sup_thread_decorator
     // never frees its communicator.
     bli_thrcomm_free( NULL, gl_comm );
 
-	// Check the array_t back into the small block allocator. Similar to the
-	// check-out, this is done using a lock embedded within the sba to ensure
-	// mutual exclusion.
-	bli_sba_checkin_array( array );
-
 	#ifdef BLIS_ENABLE_MEM_TRACING
 	printf( "bli_l3_thread_decorator().pth: " );
 	#endif
@@ -189,8 +116,6 @@ err_t bli_l3_sup_thread_decorator
 	printf( "bli_l3_thread_decorator().pth: " );
 	#endif
 	bli_free_intl( datas );
-
-	return BLIS_SUCCESS;
 }
 
 #endif

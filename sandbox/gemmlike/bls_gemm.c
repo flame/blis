@@ -33,7 +33,6 @@
 */
 
 #include "blis.h"
-#include "thread/bls_l3_decor.h"
 
 //
 // -- Define the gemm-like operation's object API ------------------------------

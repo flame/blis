@@ -4,7 +4,8 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2021, The University of Texas at Austin
+   Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2018, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -32,59 +33,37 @@
 
 */
 
-#ifndef BLIS_SBX_L3_DECOR_H
-#define BLIS_SBX_L3_DECOR_H
+#ifndef BLIS_L3_SUP_DECOR_H
+#define BLIS_L3_SUP_DECOR_H
+
+// -- sup definitions ----------------------------------------------------------
 
 // Level-3 sup internal function type.
-typedef void (*l3sbxint_ft)
+typedef err_t (*l3supint_ft)
      (
-       obj_t*     alpha,
-       obj_t*     a,
-       obj_t*     b,
-       obj_t*     beta,
-       obj_t*     c,
-       cntx_t*    cntx,
-       rntm_t*    rntm,
-       thrinfo_t* thread
+       const obj_t*     alpha,
+       const obj_t*     a,
+       const obj_t*     b,
+       const obj_t*     beta,
+       const obj_t*     c,
+       const cntx_t*    cntx,
+       const rntm_t*    rntm,
+             thrinfo_t* thread
      );
 
-// Level-3 thread decorator function type.
-typedef void (*l3sbx_decor_ft)
+// Level-3 sup thread decorator prototype.
+err_t bli_l3_sup_thread_decorator
      (
-       l3sbxint_ft func,
-       opid_t      family,
-       obj_t*      alpha,
-       obj_t*      a,
-       obj_t*      b,
-       obj_t*      beta,
-       obj_t*      c,
-       cntx_t*     cntx,
-       rntm_t*     rntm
+             l3supint_ft func,
+             opid_t      family,
+       const obj_t*      alpha,
+       const obj_t*      a,
+       const obj_t*      b,
+       const obj_t*      beta,
+       const obj_t*      c,
+       const cntx_t*     cntx,
+       const rntm_t*     rntm
      );
-
-// Level-3 thread decorator prototype.
-void bls_l3_thread_decorator
-     (
-       l3sbxint_ft func,
-       opid_t      family,
-       obj_t*      alpha,
-       obj_t*      a,
-       obj_t*      b,
-       obj_t*      beta,
-       obj_t*      c,
-       cntx_t*     cntx,
-       rntm_t*     rntm
-     );
-
-void bls_l3_thread_decorator_check
-     (
-       rntm_t* rntm
-     );
-
-// Include definitions specific to the method of multithreading.
-#include "bls_l3_decor_single.h"
-#include "bls_l3_decor_openmp.h"
-#include "bls_l3_decor_pthreads.h"
 
 #endif
 

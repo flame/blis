@@ -5,7 +5,6 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2018, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -33,44 +32,15 @@
 
 */
 
-#ifndef BLIS_L3_DECOR_H
-#define BLIS_L3_DECOR_H
+#ifndef BLIS_THREAD_PTHREADS_H
+#define BLIS_THREAD_PTHREADS_H
 
-// -- conventional definitions -------------------------------------------------
+// Definitions specific to situations when POSIX multithreading is enabled.
+#ifdef BLIS_ENABLE_PTHREADS
 
-// Level-3 internal function type.
-typedef void (*l3int_t)
-     (
-       const obj_t*     alpha,
-       const obj_t*     a,
-       const obj_t*     b,
-       const obj_t*     beta,
-       const obj_t*     c,
-       const cntx_t*    cntx,
-       const cntl_t*    cntl,
-             thrinfo_t* thread
-     );
+void bli_thread_launch_pthreads( dim_t nt, thread_func_t func, const void* params );
 
-// Level-3 thread decorator prototype.
-void bli_l3_thread_decorator
-     (
-             l3int_t func,
-             opid_t  family,
-       const obj_t*  alpha,
-       const obj_t*  a,
-       const obj_t*  b,
-       const obj_t*  beta,
-       const obj_t*  c,
-       const cntx_t* cntx,
-       const rntm_t* rntm,
-       const cntl_t* cntl
-     );
-
-// Include definitions specific to the method of multithreading for the
-// conventional code path.
-#include "bli_l3_decor_single.h"
-#include "bli_l3_decor_openmp.h"
-#include "bli_l3_decor_pthreads.h"
+#endif
 
 #endif
 
