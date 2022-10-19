@@ -2,6 +2,7 @@
 
 [![Build Status](https://api.travis-ci.com/flame/blis.svg?branch=master)](https://app.travis-ci.com/github/flame/blis)
 [![Build Status](https://ci.appveyor.com/api/projects/status/github/flame/blis?branch=master&svg=true)](https://ci.appveyor.com/project/shpc/blis/branch/master)
+[![Discord docs](docs/images/discord.svg =100x)](docs/Discord.md)
 
 Contents
 --------
@@ -17,7 +18,7 @@ Contents
 * **[Documentation](#documentation)**
 * **[Performance](#performance)**
 * **[External Packages](#external-packages)**
-* **[Discussion](#discussion)**
+* **[Discussion](#discussion)** [![Discord](https://assets-global.website-files.com/6257adef93867e50d84d30e2/62594fddd654fc29fcc07359_cb48d2a8d4991281d7a6a95d2f58195e.svg =100x)](docs/Discord.md)
 * **[Contributing](#contributing)**
 * **[Citations](#citations)**
 * **[Funding](#funding)**

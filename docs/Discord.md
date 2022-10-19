@@ -57,11 +57,11 @@ Here's an example invite link (for demonstration purposes only): `https://discor
 
 Notice that the link consists of `https://discord.gg/` followed by a 10-character string consisting of lower- and upper-case letters, and (typically) one numerical digit.
 
-As an interested human, you'll need to reconstruct the 10-character string from the alphabet soup we provide below and then append it to the part of the link containing the Discord domain name. Notice that digits are spelled out, and the case (lower or upper) is indicated accordingly.
+As an interested human, you'll need to reconstruct the 10-character string from the mangled string that we provide by removing the dashes and equal signs.
 
-Today's alphabet soup consists of `ee` `ZEE` `ex` `pee` `zee` `nine` `pee` `KAY` `ess` `ex`.
+Our invite link is: `https://discord.gg/e-Zx=p-z9=p-Ks=x`.
 
-Note that the soup of the day may change from time to time. (This will only affect people who have not yet joined.)
+Note that this link may change from time to time. (But this will only affect people who have not yet joined.)
 
 
 ## Joining the BLIS server
