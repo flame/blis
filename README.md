@@ -4,6 +4,8 @@
 [![Build Status](https://ci.appveyor.com/api/projects/status/github/flame/blis?branch=master&svg=true)](https://ci.appveyor.com/project/shpc/blis/branch/master)
 [![Discord docs](docs/images/discord.svg =100x)](docs/Discord.md)
 
+[<img alt="Join us on Discord!" height="100px" src="docs/images/discord.svg" />](docs/Discord.md)
+
 Contents
 --------
 
