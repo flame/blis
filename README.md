@@ -99,7 +99,7 @@ What's New
 
  * **Join us on Discord!** In 2021, we soft-launched our [Discord](https://discord.com/)
 server by privately inviting current and former collaborators, attendees of our BLIS
-Retreat, as well as other associates within the BLIS ecosystem. I'm happy to announce
+Retreat, as well as other associates within the BLIS ecosystem. We're happy to announce
 that our community continues to grow as it attracts new developers, users, and other
 interested parties! If you'd like to hang out with other BLIS users and developers,
 ask a question, discuss future features, or just say hello, please feel free to join us!

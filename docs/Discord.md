@@ -12,17 +12,17 @@
 This file walks the reader through basic instructions for joining the BLIS
 community on [Discord](https://discord.com).
 
-Discord is free to use for everyone. You can optionally pay for premium features via their "Nitro" subscription, but Nitro is not necessary for most casual users.
+Discord is free to use for everyone. You can optionally pay for premium features via their [Nitro](https://discord.com/nitro) subscription, but Nitro is not necessary for most casual users.
 
-You may use Discord in any or all of the following ways:
+Discord offers several kinds of clients. Users may use Discord via:
 
-- On mobile devices via the Android and iOS app stores
-- Through a tab or window in a [web browser](https://discord.com/login)
-- Via their standalone desktop application, available for download via their [Download](https://discord.com/download) page.
+- the official Android and iOS apps on mobile devices
+- a [web browser](https://discord.com/login)
+- the standalone desktop application, available from their [Download](https://discord.com/download) page.
 
 You can even stay logged in on multiple devices! Each one will automatically sync itself to newly sent/received messages.
 
-In this document, we'll walk you through each step necessary to join the BLIS Discord community. First, we'll talk about how to [create a Discord account](#creating-an-account). Then, we'll explain how to [obtain the invite link](#obtaining-the-invite-link). And finally, we'll tell you how to use that invite link to [join the BLIS Discord server](#joining-the-blis-server).
+In this document, we'll walk you through each step necessary to join the BLIS Discord community. First, we'll talk about how to [create a Discord account](#creating-an-account) (if you don't already have one). Then, we'll explain how to [obtain the invite link](#obtaining-the-invite-link). And finally, we'll tell you how to use that invite link to [join the BLIS Discord server](#joining-the-blis-server).
 
 
 ## Creating an account
@@ -45,7 +45,7 @@ Congratulations! You're now a member of Discord and ready to join individual com
 
 ## Obtaining the invite link
 
-Ever since the BLIS Discord server was created in 2021, we envisioned one day posting a permanent invite link in the official documentation (such as the GitHub-rendered [README.md](README.md) file.
+Ever since the BLIS Discord server was created in 2021, we envisioned one day posting a permanent invite link in the official documentation (i.e., the [README.md](README.md) or a related markdown document).
 
 However, due to a (perhaps irrational) concern for spammers, scammers, data-mining bots, and the like, we hesitated. Eventually, though, we decided to try it out.
 
@@ -53,7 +53,7 @@ While we do not have access to an official Captcha-like service to confirm that 
 
 Once you decipher the invite link, you shouldn't enter it into your web browser immediately. Instead, copy it to your clipboard so it's ready to use in the appropriate step within the next section, [Joining the BLIS server](#joining-the-blis-server).
 
-Here's an example link (for demonstration purposes only): `https://discord.gg/abC2jUVeip`
+Here's an example invite link (for demonstration purposes only): `https://discord.gg/abC2jUVeip`
 
 Notice that the link consists of `https://discord.gg/` followed by a 10-character string consisting of lower- and upper-case letters, and (typically) one numerical digit.
 
@@ -66,16 +66,16 @@ Note that the soup of the day may change from time to time. (This will only affe
 
 ## Joining the BLIS server
 
-The BLIS community consists of a number of "channels" within a single Discord "server." The BLIS server, however, is not public and cannot be found via the Discord directory service. Therefore, you'll need a special invite link in order to join.
+The BLIS community consists of a number of "channels" within a single Discord "server." The BLIS server, however, is not public and cannot be found via the Discord directory service. Therefore, you'll need an invite link in order to join.
 
-Once you've deciphered the link from the [previous section](#obtaining-the-invite-link), follow these steps in order to join the BLIS server:
+The easiest way to obtain an invite link is by deciphering the link from the [previous section](#obtaining-the-invite-link). Once you have reconstructed the link and copied it to your clipboard, follow these steps in order to join the BLIS server:
 
 *NOTE: We recommend executing these steps using a desktop web browser. Once you've joined the BLIS server, you can proceed to use your client(s) of choice (mobile app, desktop app, or web browser).*
 
-1. Log in to Discord.
+1. Log in to the [Discord website](https://discord.com).
 2. Once logged in, on the left-hand side of the UI, click on the button with the "+" symbol. This will bring up a dialog asking if you want to create a server.
 3. At the bottom of the dialog, there will be a section asking, "Have an invite already?" Click the button below it labeled "Join a Server".
-4. Copy and paste the invite link into the prompt and click "Join Server".
+4. Paste the invite link into the prompt and click "Join Server".
 5. This should bring up a dialog stating that you've been invited to join the BLIS server. Click on "Accept Invite". This will trigger a new dialog informing you that your account has been updated with the invitation.
 
 That's it! Now that you've joined our server, please consider introducing yourself in `#general`! We love hearing about how application developers and end-users are using BLIS.
@@ -100,11 +100,11 @@ And some YouTube videos:
 
 Some things I recommend setting up shortly after you create your account:
 
-- Take note of your username's "tag" or disambiguator. This is a four-digit number that gets appended to the end of your username (e.g. `bsmith#1234`), which helps when others need to identify you when there are multiple users with the same username.
+- Take note of your username's "tag" or disambiguator. This is a randomly-assigned four-digit number that gets implicitly appended to the end of your username (e.g. `bsmith#1234`), which helps when others need to tell you apart from others who have the same username.
 - Not happy with your username? You can change it!
 - Review your privacy settings, and consider using two-factor authentication.
 - Personalize your account with a custom profile image.
-- Consider switching to the "dark" theme (if you like dark modes on other sites or on mobile devices).
+- Consider switching to the "dark" theme (if you prefer dark modes on other websites or on mobile devices).
 - Tweak other appearence settings such as the font size or UI compactness.
 - Set up your notifications.
 
