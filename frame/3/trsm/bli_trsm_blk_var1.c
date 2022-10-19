@@ -44,7 +44,7 @@ void bli_trsm_blk_var1
        const obj_t*  c,
        const cntx_t* cntx,
        const cntl_t* cntl,
-             thrinfo_t* thread
+             thrinfo_t* thread_par
      )
 {
 	obj_t ap, cp;
@@ -66,7 +66,13 @@ void bli_trsm_blk_var1
 	                        0, kc, &cp, &c1 );
 
 	// All threads iterate over the entire diagonal block A11.
+    thrinfo_t* thread_pre = bli_thrinfo_sub_prenode( thread_par );
 	dim_t my_start = 0, my_end = kc;
+	//bli_thread_range_mdim
+	//(
+	//  direct, thread_pre, &a11, b, &c1, cntl, cntx,
+	//  &my_start, &my_end
+	//);
 
 #ifdef PRINT
 	printf( "bli_trsm_blk_var1(): a11 is %d x %d at offsets (%3d, %3d)\n",
@@ -80,7 +86,7 @@ void bli_trsm_blk_var1
 	for ( dim_t i = my_start; i < my_end; i += b_alg )
 	{
 		b_alg = bli_determine_blocksize( direct, i, my_end, &a11,
-		                                 bli_cntl_part( cntl ), cntx );
+		                                 bli_cntl_bszid( cntl ), cntx );
 
 		// Acquire partitions for A1 and C1.
 		obj_t a11_1, c1_1;
@@ -105,7 +111,7 @@ void bli_trsm_blk_var1
 		  &c1_1,
 		  cntx,
 		  bli_cntl_sub_prenode( cntl ),
-		  bli_thrinfo_sub_prenode( thread )
+		  thread_pre
 		);
 	}
 
@@ -116,7 +122,7 @@ void bli_trsm_blk_var1
 	// We must execute a barrier here because the upcoming rank-k update
 	// requires the packed matrix B to be fully updated by the trsm
 	// subproblem.
-	bli_thread_barrier( rntm, thread );
+	bli_thread_barrier( thread_par );
 
 	// Isolate the remaining part of the column panel matrix A, which we do by
 	// acquiring the subpartition ahead of A11 (that is, A21 or A01, depending
@@ -135,6 +141,7 @@ void bli_trsm_blk_var1
 
 	// Determine the current thread's subpartition range for the gemm
 	// subproblem over Ax1.
+    thrinfo_t* thread = bli_thrinfo_sub_node( thread_par );
 	bli_thread_range_mdim
 	(
 	  direct, thread, &ax1, b, &cx1, cntl, cntx,
@@ -150,7 +157,7 @@ void bli_trsm_blk_var1
 	{
 		// Determine the current algorithmic blocksize.
 		b_alg = bli_determine_blocksize( direct, i, my_end, &ax1,
-		                                 bli_cntl_part( cntl ), cntx );
+		                                 bli_cntl_bszid( cntl ), cntx );
 
 		// Acquire partitions for A1 and C1.
 		obj_t a11, c1;
@@ -176,7 +183,7 @@ void bli_trsm_blk_var1
 		  &c1,
 		  cntx,
 		  bli_cntl_sub_node( cntl ),
-		  bli_thrinfo_sub_node( thread )
+		  thread
 		);
 	}
 #ifdef PRINT

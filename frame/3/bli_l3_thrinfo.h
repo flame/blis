@@ -80,7 +80,7 @@ thrinfo_t* bli_l3_thrinfo_create
        const cntl_t*     cntl
      );
 
-thrinfo_t* bli_l3_thrinfo_grow
+void bli_l3_thrinfo_grow
      (
              thrinfo_t*  thread_par,
        const rntm_t*     rntm,

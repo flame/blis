@@ -41,13 +41,15 @@ void bli_trsm_blk_var3
        const obj_t*  c,
        const cntx_t* cntx,
        const cntl_t* cntl,
-             thrinfo_t* thread
+             thrinfo_t* thread_par
      )
 {
 	obj_t ap, bp, cs;
 	bli_obj_alias_to( a, &ap );
 	bli_obj_alias_to( b, &bp );
 	bli_obj_alias_to( c, &cs );
+
+    thrinfo_t* thread = bli_thrinfo_sub_node( thread_par );
 
 	// Determine the direction in which to partition (forwards or backwards).
 	dir_t direct = bli_l3_direct( &ap, &bp, &cs, cntl );
@@ -83,7 +85,7 @@ void bli_trsm_blk_var3
 		  &cs,
 		  cntx,
 		  bli_cntl_sub_node( cntl ),
-		  bli_thrinfo_sub_node( thread )
+		  thread
 		);
 
 		// This variant executes multiple rank-k updates. Therefore, if the

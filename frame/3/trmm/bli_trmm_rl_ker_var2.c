@@ -42,7 +42,7 @@ void bli_trmm_rl_ker_var2
        const obj_t*  c,
        const cntx_t* cntx,
        const cntl_t* cntl,
-             thrinfo_t* thread
+             thrinfo_t* thread_par
      )
 {
 	const num_t     dt        = bli_obj_exec_dt( c );
@@ -169,6 +169,7 @@ void bli_trmm_rl_ker_var2
 	bli_auxinfo_set_schema_a( schema_a, &aux );
 	bli_auxinfo_set_schema_b( schema_b, &aux );
 
+    thrinfo_t* thread = bli_thrinfo_sub_node( thread_par );
 	thrinfo_t* caucus = bli_thrinfo_sub_node( thread );
 
 	dim_t jr_nt  = bli_thread_n_way( thread );

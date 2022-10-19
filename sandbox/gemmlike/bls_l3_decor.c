@@ -79,7 +79,7 @@ static void bls_l3_thread_decorator_entry( thrcomm_t* gl_comm, dim_t tid, const 
 	  c,
 	  cntx,
 	  rntm,
-	  bli_thrinfo_sub_node( thread )
+	  thread
 	);
 
 	// Free the current thread's thrinfo_t structure.

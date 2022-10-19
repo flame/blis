@@ -40,7 +40,7 @@ void bli_packm_int
              obj_t*  p,
        const cntx_t* cntx,
        const cntl_t* cntl,
-             thrinfo_t* thread
+             thrinfo_t* thread_par
      )
 {
 	bli_init_once();
@@ -50,7 +50,8 @@ void bli_packm_int
 
 	// Barrier so that we know threads are done with previous computation
 	// with the same packing buffer before starting to pack.
-	bli_thread_barrier( rntm, thread );
+    thrinfo_t* thread = bli_thrinfo_sub_node( thread_par );
+	bli_thread_barrier( thread );
 
 	// Invoke the variant with kappa_use.
 	f
@@ -63,6 +64,6 @@ void bli_packm_int
 	);
 
 	// Barrier so that packing is done before computation.
-	bli_thread_barrier( rntm, thread );
+	bli_thread_barrier( thread );
 }
 

@@ -43,9 +43,6 @@
 // Include thread info (thrinfo_t) object definitions and prototypes.
 #include "bli_thrinfo.h"
 
-// Include some operation-specific thrinfo_t prototypes.
-#include "bli_l3_thrinfo.h"
-
 // Thread lanuch prototypes. Must go before including implementation headers.
 typedef void (*thread_func_t)( thrcomm_t* gl_comm, dim_t tid, const void* params );
 

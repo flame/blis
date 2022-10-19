@@ -42,7 +42,7 @@ void bli_trsm_ru_ker_var2
        const obj_t*  c,
        const cntx_t* cntx,
        const cntl_t* cntl,
-             thrinfo_t* thread
+             thrinfo_t* thread_par
      )
 {
 	const num_t     dt        = bli_obj_exec_dt( c );
@@ -180,6 +180,8 @@ void bli_trsm_ru_ker_var2
 	   know that the underlying buffer was already allocated to have an n
 	   dimension that is a multiple of PACKNR, with the region between the
 	   last column and the next multiple of NR zero-padded accordingly. */
+
+    thrinfo_t* thread = bli_thrinfo_sub_node( thread_par );
 
 	/* Compute number of primary and leftover components of the m and n
        dimensions. */

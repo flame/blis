@@ -186,7 +186,7 @@ void PASTECH2(bls_,ch,varname) \
 \
 	auxinfo_t       aux; \
 \
-	thrinfo_t* restrict thread_jc = thread; \
+	thrinfo_t* restrict thread_jc = bli_thrinfo_sub_node( thread ); \
 	thrinfo_t* restrict thread_pc = bli_thrinfo_sub_node( thread_jc ); \
 	thrinfo_t* restrict thread_pb = bli_thrinfo_sub_node( thread_pc ); \
 	thrinfo_t* restrict thread_ic = bli_thrinfo_sub_node( thread_pb ); \

@@ -42,7 +42,7 @@ void bli_trsm_ll_ker_var2
        const obj_t*  c,
        const cntx_t* cntx,
        const cntl_t* cntl,
-             thrinfo_t* thread
+             thrinfo_t* thread_par
      )
 {
 	const num_t     dt        = bli_obj_exec_dt( c );
@@ -186,6 +186,7 @@ void bli_trsm_ll_ker_var2
 	/*thrinfo_t* caucus = bli_thrinfo_sub_node( thread );*/
 
 	/* Query the number of threads and thread ids for each loop. */
+    thrinfo_t* thread = bli_thrinfo_sub_node( thread_par );
 	dim_t jr_nt  = bli_thread_n_way( thread );
 	dim_t jr_tid = bli_thread_work_id( thread );
 
