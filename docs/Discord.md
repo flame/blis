@@ -23,7 +23,7 @@ You can even stay logged in on multiple devices! Each one will automatically syn
 
 In this document, we'll walk you through each step necessary to join the BLIS Discord community. First, we'll talk about how to [create a Discord account](#creating-an-account) (if you don't already have one). Then, we'll explain how to [obtain the invite link](#obtaining-the-invite-link). And finally, we'll tell you how to use that invite link to [join the BLIS Discord server](#joining-the-blis-server).
 
-If you want to skip straight to the invite link, go to the [obtain the invite link](#obtaining-the-invite-link). Just be sure to remove the dashes and equal signs!
+If you already use Discord and want to skip straight to the invite link, you can find it [here](#obtaining-the-invite-link). Just be sure to manually remove the dashes (`-`) and equal signs (`=`) before using it!
 
 
 ## Creating an account
@@ -52,9 +52,9 @@ Here's an example invite link (for demonstration purposes only): `https://discor
 
 Notice that the link consists of `https://discord.gg/` followed by a 10-character string consisting of lower- and upper-case letters, and (typically) one numerical digit.
 
-Our invite link may be found below. *However*, you must first unmangle the URL by removing the dashes and equal signs.
+Our invite link may be found below. *Note that you must first unmangle the URL by removing the dashes and equal signs.*
 
-The BLIS Discord invite link is: **https://discord.gg/e-Zx=p-z9=p-Ks=x** .
+**The BLIS Discord invite link is:** **https://discord.gg/e-Zx=p-z9=p-Ks=x**
 
 Note that this link may change from time to time. (But this will only affect people who have not yet joined.)
 
