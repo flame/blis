@@ -22,6 +22,8 @@ You may use Discord in any or all of the following ways:
 
 You can even stay logged in on multiple devices! Each one will automatically sync itself to newly sent/received messages.
 
+In this document, we'll walk you through each step necessary to join the BLIS Discord community. First, we'll talk about how to [create a Discord account](#creating-an-account). Then, we'll explain how to [obtain the invite link](#obtaining-the-invite-link). And finally, we'll tell you how to use that invite link to [join the BLIS Discord server](#joining-the-blis-server).
+
 
 ## Creating an account
 
@@ -49,17 +51,17 @@ However, due to a (perhaps irrational) concern for spammers, scammers, data-mini
 
 While we do not have access to an official Captcha-like service to confirm that you are, indeed, a human interested in the BLIS community, we have our own creative way of obscuring the link from all but the most sophisticated software. (And honestly, if your bot figures out our invite link, it probably deserves a chance to join us since it might be sentient.)
 
-Once you decipher the invite link, you shouldn't enter it into your web browser immediately. Please keep it handy for the appropriate step within the next section, [Joining the BLIS server](#joining-the-blis-server).
+Once you decipher the invite link, you shouldn't enter it into your web browser immediately. Instead, copy it to your clipboard so it's ready to use in the appropriate step within the next section, [Joining the BLIS server](#joining-the-blis-server).
 
 Here's an example link (for demonstration purposes only): `https://discord.gg/abC2jUVeip`
 
-Notice that the link consists of `https://discord.gg/` followed by a 10-character string consisting of lower- and upper-case letters, and (typically) one number.
+Notice that the link consists of `https://discord.gg/` followed by a 10-character string consisting of lower- and upper-case letters, and (typically) one numerical digit.
 
-As an interested human, you'll need to reconstruct the 10-character string from the alphabet soup we provide below and then append it to the part of the link containing the Discord domain name. Notice that numbers are spelled out, and the case (lower or upper) is indicated accordingly.
+As an interested human, you'll need to reconstruct the 10-character string from the alphabet soup we provide below and then append it to the part of the link containing the Discord domain name. Notice that digits are spelled out, and the case (lower or upper) is indicated accordingly.
 
 Today's alphabet soup consists of `ee` `ZEE` `ex` `pee` `zee` `nine` `pee` `KAY` `ess` `ex`.
 
-Note that the soup of the day may change from time to time.
+Note that the soup of the day may change from time to time. (This will only affect people who have not yet joined.)
 
 
 ## Joining the BLIS server
