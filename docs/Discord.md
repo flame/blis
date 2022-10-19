@@ -9,8 +9,7 @@
 
 ## Introduction
 
-This file walks the reader through basic instructions for joining the BLIS
-community on [Discord](https://discord.com).
+This file walks the reader through basic instructions for joining the BLIS community on [Discord](https://discord.com).
 
 Discord is free to use for everyone. You can optionally pay for premium features via their [Nitro](https://discord.com/nitro) subscription, but Nitro is not necessary for most casual users.
 
@@ -23,6 +22,8 @@ Discord offers several kinds of clients. Users may use Discord via:
 You can even stay logged in on multiple devices! Each one will automatically sync itself to newly sent/received messages.
 
 In this document, we'll walk you through each step necessary to join the BLIS Discord community. First, we'll talk about how to [create a Discord account](#creating-an-account) (if you don't already have one). Then, we'll explain how to [obtain the invite link](#obtaining-the-invite-link). And finally, we'll tell you how to use that invite link to [join the BLIS Discord server](#joining-the-blis-server).
+
+If you want to skip straight to the invite link, go to the [obtain the invite link](#obtaining-the-invite-link). Just be sure to remove the dashes and equal signs!
 
 
 ## Creating an account
@@ -45,23 +46,19 @@ Congratulations! You're now a member of Discord and ready to join individual com
 
 ## Obtaining the invite link
 
-Ever since the BLIS Discord server was created in 2021, we envisioned one day posting a permanent invite link in the official documentation (i.e., the [README.md](README.md) or a related markdown document).
-
-However, due to a (perhaps irrational) concern for spammers, scammers, data-mining bots, and the like, we hesitated. Eventually, though, we decided to try it out.
-
-While we do not have access to an official Captcha-like service to confirm that you are, indeed, a human interested in the BLIS community, we have our own creative way of obscuring the link from all but the most sophisticated software. (And honestly, if your bot figures out our invite link, it probably deserves a chance to join us since it might be sentient.)
-
-Once you decipher the invite link, you shouldn't enter it into your web browser immediately. Instead, copy it to your clipboard so it's ready to use in the appropriate step within the next section, [Joining the BLIS server](#joining-the-blis-server).
+Since we do not have access to an official Captcha-like service to confirm that you are, indeed, a human interested in the BLIS community, we have instead obfuscated our link in a way that should be easy for a human to unmangle.
 
 Here's an example invite link (for demonstration purposes only): `https://discord.gg/abC2jUVeip`
 
 Notice that the link consists of `https://discord.gg/` followed by a 10-character string consisting of lower- and upper-case letters, and (typically) one numerical digit.
 
-As an interested human, you'll need to reconstruct the 10-character string from the mangled string that we provide by removing the dashes and equal signs.
+Our invite link may be found below. *However*, you must first unmangle the URL by removing the dashes and equal signs.
 
-Our invite link is: `https://discord.gg/e-Zx=p-z9=p-Ks=x`.
+The BLIS Discord invite link is: **https://discord.gg/e-Zx=p-z9=p-Ks=x** .
 
 Note that this link may change from time to time. (But this will only affect people who have not yet joined.)
+
+Once you decipher the invite link, you shouldn't enter it into your web browser immediately. Instead, copy it to your clipboard so it's ready to use in the appropriate step within the next section, [Joining the BLIS server](#joining-the-blis-server).
 
 
 ## Joining the BLIS server
