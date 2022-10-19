@@ -1,7 +1,7 @@
 ## Contents
 
 * **[Introduction](Discord.md#introduction)**
-* **[Joining Discord](Discord.md#joining-discord)**
+* **[Creating an account](Discord.md#creating-an-account)**
 * **[Obtaining the invite link](Discord.md#obtaining-the-invite-link)**
 * **[Joining the BLIS server](Addons.md#joining-the-blis-server)**
 * **[Additional resources](Discord.md#additional-resources)**
@@ -17,19 +17,19 @@ Discord is free to use for everyone. You can optionally pay for premium features
 You may use Discord in any or all of the following ways:
 
 - On mobile devices via the Android and iOS app stores
-- Through a tab or window in a [web browser](https://discord.com/login))
+- Through a tab or window in a [web browser](https://discord.com/login)
 - Via their standalone desktop application, available for download via their [Download](https://discord.com/download) page.
 
 You can even stay logged in on multiple devices! Each one will automatically sync itself to newly sent/received messages.
 
 
-## Joining Discord
+## Creating an account
 
 If you don't already have a Discord account, you'll need to first create one.
 
 As of this writing, you may follow these steps to create your account:
 
-*NOTE: We recommend executing these steps using a desktop web browser (or standalone desktop app) rather than the mobile app. Once you've signed up and joined the BLIS server, you can proceed to use your client(s) of choice (mobile app, desktop app, or web browser).*
+*NOTE: We recommend executing these steps using a desktop web browser. Once you've created your account and joined the BLIS server, you can proceed to use your client(s) of choice (mobile app, desktop app, or web browser).*
 
 1. Go to [https://discord.com](https://discord.com) and click on "Login" at the top-right.
 2. At the bottom of the dialog, click the "Register" link.
@@ -43,7 +43,7 @@ Congratulations! You're now a member of Discord and ready to join individual com
 
 ## Obtaining the invite link
 
-Ever since first creating the Discord server in 2021, we envisioned one day posting a permanent invite link in the official documentation (such as the GitHub-rendered [README.md](README.md) file.
+Ever since the BLIS Discord server was created in 2021, we envisioned one day posting a permanent invite link in the official documentation (such as the GitHub-rendered [README.md](README.md) file.
 
 However, due to a (perhaps irrational) concern for spammers, scammers, data-mining bots, and the like, we hesitated. Eventually, though, we decided to try it out.
 
@@ -57,18 +57,18 @@ Notice that the link consists of `https://discord.gg/` followed by a 10-characte
 
 As an interested human, you'll need to reconstruct the 10-character string from the alphabet soup we provide below and then append it to the part of the link containing the Discord domain name. Notice that numbers are spelled out, and the case (lower or upper) is indicated accordingly.
 
-Today's alphabet soup consists of **ee** **ZEE** **ex** **pee** **zee** **nine** **pee** **KAY** **ess** **ex**.
+Today's alphabet soup consists of `ee` `ZEE` `ex` `pee` `zee` `nine` `pee` `KAY` `ess` `ex`.
 
 Note that the soup of the day may change from time to time.
 
 
 ## Joining the BLIS server
 
-The BLIS community consists of a number of "channels" within a single Discord "server." The BLIS server, however, is not public and cannot be found via the Discord directory service. Therefore, you'll need a special invite link in order to join. (More on that in a bit.)
+The BLIS community consists of a number of "channels" within a single Discord "server." The BLIS server, however, is not public and cannot be found via the Discord directory service. Therefore, you'll need a special invite link in order to join.
 
-Once you have a Discord account, you will need an invite link. Once you've deciphered the link from the [previous section](#the-invite-link), follow these steps in order to join the BLIS server:
+Once you've deciphered the link from the [previous section](#obtaining-the-invite-link), follow these steps in order to join the BLIS server:
 
-*NOTE: We recommend executing these steps using a desktop web browser (or standalone desktop app) rather than the mobile app. Once you've joined the BLIS server, you can proceed to use your client(s) of choice (mobile app, desktop app, or web browser).*
+*NOTE: We recommend executing these steps using a desktop web browser. Once you've joined the BLIS server, you can proceed to use your client(s) of choice (mobile app, desktop app, or web browser).*
 
 1. Log in to Discord.
 2. Once logged in, on the left-hand side of the UI, click on the button with the "+" symbol. This will bring up a dialog asking if you want to create a server.
