@@ -1,13 +1,13 @@
 ## Contents
 
-* **[Introduction](Discord.md#introduction)**
+* **[Introduction to Discord](Discord.md#introduction-to-discord)**
 * **[Creating an account](Discord.md#creating-an-account)**
 * **[Obtaining the invite link](Discord.md#obtaining-the-invite-link)**
 * **[Joining the BLIS server](Discord.md#joining-the-blis-server)**
 * **[Additional resources](Discord.md#additional-resources)**
 
 
-## Introduction
+## Introduction to Discord
 
 This file walks the reader through basic instructions for joining the BLIS community on [Discord](https://discord.com).
 
@@ -54,7 +54,7 @@ Here's an example invite link (for demonstration purposes only): `https://discor
 
 Notice that the link consists of `https://discord.gg/` followed by a 10-character string consisting of lower- and upper-case letters, and (typically) one numerical digit.
 
-**The BLIS Discord invite link is:** **https://discord.gg/e-Zx=p-z9=p-Ks=x**
+**The BLIS Discord invite link is: https://discord.gg/e-Zx=p-z9=p-Ks=x**
 
 *Note that you **must** remove the dashes (`-`) and equal signs (`=`) before using the link!*
 
