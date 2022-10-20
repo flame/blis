@@ -3,7 +3,7 @@
 * **[Introduction](Discord.md#introduction)**
 * **[Creating an account](Discord.md#creating-an-account)**
 * **[Obtaining the invite link](Discord.md#obtaining-the-invite-link)**
-* **[Joining the BLIS server](Addons.md#joining-the-blis-server)**
+* **[Joining the BLIS server](Discord.md#joining-the-blis-server)**
 * **[Additional resources](Discord.md#additional-resources)**
 
 
