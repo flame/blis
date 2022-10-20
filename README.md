@@ -3,7 +3,7 @@
 [![Build Status](https://api.travis-ci.com/flame/blis.svg?branch=master)](https://app.travis-ci.com/github/flame/blis)
 [![Build Status](https://ci.appveyor.com/api/projects/status/github/flame/blis?branch=master&svg=true)](https://ci.appveyor.com/project/shpc/blis/branch/master)
 
-[<img alt="Discord logo" title="Join us on Discord!" height="32px" src="docs/images/discord.svg" />](docs/Discord.md)
+[<img alt="Discord logo" title="Join us on Discord!" height="32px" align="top" src="docs/images/discord.svg" />](docs/Discord.md)
 
 Contents
 --------
