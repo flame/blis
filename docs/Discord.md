@@ -14,6 +14,8 @@
 
 This file walks the reader through basic instructions for joining the BLIS community on [Discord](https://discord.com).
 
+If you'd like to hang out with other BLIS users and developers, ask a question, discuss future features, or just say hello, please feel free to join us!
+
 Discord is free to use for everyone. You can optionally pay for premium features via their [Nitro](https://discord.com/nitro) subscription, but Nitro is not necessary for most casual users.
 
 Discord offers several kinds of clients. Users may use Discord via:

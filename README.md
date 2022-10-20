@@ -430,6 +430,9 @@ If/when you have time, we *strongly* encourage you to read the detailed
 walkthrough of the build system found in our [Build System](docs/BuildSystem.md)
 guide.
 
+If you are still having trouble, you are welcome to [join us on Discord](docs/Discord.md)
+for further information and/or assistance.
+
 Example Code
 ------------
 
