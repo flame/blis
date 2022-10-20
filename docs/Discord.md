@@ -1,4 +1,4 @@
-*DISCLAIMER: The [BLIS](https://github.com/flame/blis) project is not affiliated with [Discord Inc.](https://discord.com/company) in any way, and we use the Discord logo with their permission.*
+*NOTE: The [BLIS](https://github.com/flame/blis) project is not affiliated with [Discord Inc.](https://discord.com/company) in any way, and we use the Discord logo with their permission.*
 
 
 ## Contents
