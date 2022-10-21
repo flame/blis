@@ -55,7 +55,7 @@ Congratulations! You're now a member of Discord and ready to join individual com
 
 ## Obtaining the invite link
 
-Since we do not have access to an official Captcha-like service to confirm that you are, indeed, a human interested in the BLIS community, we have instead obfuscated our invite link in a way that should be easy for a human to unmangle.
+Since we do not have access to an official Captcha-like service to confirm that you are not a software bot, we have instead obfuscated our invite link in a way that should be easy for a human to unmangle.
 
 Here's an example invite link (for reference purposes only): `https://discord.gg/abC2jUVeip`
 
