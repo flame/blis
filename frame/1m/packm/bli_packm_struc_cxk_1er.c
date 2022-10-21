@@ -67,7 +67,10 @@ void PASTEMAC(ch,varname) \
 \
 	/* Determine the dimensions and relative strides of the micro-panel
 	   based on its pack schema. */ \
+/*
 	if ( bli_is_col_packed( schema ) ) \
+*/ \
+	if ( 0 ) \
 	{ \
 		/* Prepare to pack to row-stored column panel. */ \
 		panel_dim     = n_panel; \
@@ -218,41 +221,6 @@ void PASTEMAC(ch,varname) \
 	} \
 */ \
 \
-	if ( bli_is_triangular( strucc ) ) \
-	{ \
-		/* If this micro-panel is an edge case in both panel dimension and
-		   length, then it must be a bottom-right corner case, which
-		   typically only happens for micro-panels being packed for trsm.
-		   (It also happens for trmm if kr > 1.) Here, we set the part of
-		   the diagonal that extends into the zero-padded region to
-		   identity. This prevents NaNs and Infs from creeping into the
-		   computation. If this code does execute for trmm, it is okay,
-		   because those 1.0's that extend into the bottom-right region
-		   end up getting muliplied by the 0.0's in the zero-padded region
-		   of the other matrix. */ \
-		if ( m_panel != m_panel_max && \
-		     n_panel != n_panel_max ) \
-		{ \
-			ctype* restrict one    = PASTEMAC(ch,1); \
-			dim_t           offm   = m_panel; \
-			dim_t           offn   = n_panel; \
-			dim_t           m_edge = m_panel_max - m_panel; \
-			dim_t           n_edge = n_panel_max - n_panel; \
-\
-			PASTEMAC(ch,set1ms_mxn_diag) \
-			( \
-			  schema, \
-			  offm, \
-			  offn, \
-			  m_edge, \
-			  n_edge, \
-			  one, \
-			  p, rs_p, cs_p, ldp  \
-			); \
-		} \
-	} \
-\
-\
 /*
 	if ( bli_is_1r_packed( schema ) ) { \
 	PASTEMAC(chr,fprintm)( stdout, "packm_struc_cxk_1er (1r): bp", m_panel_max, 2*n_panel_max, \
@@ -307,8 +275,12 @@ void PASTEMAC(ch,varname) \
 	   schema bit that encodes row or column is describing the form of
 	   micro-panel, not the storage in the micro-panel. Hence the
 	   mismatch in "row" and "column" semantics. */ \
+/*
 	row_stored = bli_is_col_packed( schema ); \
 	col_stored = bli_is_row_packed( schema ); \
+*/ \
+	row_stored = FALSE; \
+	col_stored = TRUE; \
 \
 	/* Handle the case where the micro-panel does NOT intersect the
 	   diagonal separately from the case where it does intersect. */ \
@@ -635,6 +607,37 @@ void PASTEMAC(ch,varname) \
 			  p11, rs_p, cs_p, ldp  \
 			); \
 		} \
+	} \
+\
+	/* If this micro-panel is an edge case in both panel dimension and
+	   length, then it must be a bottom-right corner case, which
+	   typically only happens for micro-panels being packed for trsm.
+	   (It also happens for trmm if kr > 1.) Here, we set the part of
+	   the diagonal that extends into the zero-padded region to
+	   identity. This prevents NaNs and Infs from creeping into the
+	   computation. If this code does execute for trmm, it is okay,
+	   because those 1.0's that extend into the bottom-right region
+	   end up getting muliplied by the 0.0's in the zero-padded region
+	   of the other matrix. */ \
+	if ( m_panel != m_panel_max && \
+		 n_panel != n_panel_max ) \
+	{ \
+		ctype* restrict one    = PASTEMAC(ch,1); \
+		dim_t           offm   = m_panel; \
+		dim_t           offn   = n_panel; \
+		dim_t           m_edge = m_panel_max - m_panel; \
+		dim_t           n_edge = n_panel_max - n_panel; \
+\
+		PASTEMAC(ch,set1ms_mxn_diag) \
+		( \
+		  schema, \
+		  offm, \
+		  offn, \
+		  m_edge, \
+		  n_edge, \
+		  one, \
+		  p, rs_p, cs_p, ldp  \
+		); \
 	} \
 }
 

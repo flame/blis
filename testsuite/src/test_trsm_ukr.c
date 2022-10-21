@@ -268,13 +268,15 @@ bli_printm( "ap", &ap, "%5.2f", "" );
 	{
 		bli_copym( &c_save, &c );
 
+#if 1
 		// Transpose B to B^T for packing.
-		//bli_obj_induce_trans( &b );
+		bli_obj_induce_trans( &b );
+#endif
 
 		cntl_t* cntl_b = libblis_test_pobj_create
 		(
-		  BLIS_MR,
 		  BLIS_NR,
+		  BLIS_MR,
 		  BLIS_NO_INVERT_DIAG,
 		  BLIS_PACKED_COL_PANELS,
 		  BLIS_BUFFER_FOR_B_PANEL,
@@ -283,9 +285,11 @@ bli_printm( "ap", &ap, "%5.2f", "" );
 		  &rntm
 		);
 
+#if 1
 		// Transpose B^T back to B and Bp^T back to Bp.
-		//bli_obj_induce_trans( &b );
-		//bli_obj_induce_trans( &bp );
+		bli_obj_induce_trans( &b );
+		bli_obj_induce_trans( &bp );
+#endif
 
 		time = bli_clock();
 

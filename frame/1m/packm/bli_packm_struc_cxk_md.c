@@ -64,7 +64,10 @@ void PASTEMAC2(chc,chp,varname) \
 \
 	/* Determine the dimensions and relative strides of the micro-panel
 	   based on its pack schema. */ \
+/*
 	if ( bli_is_col_packed( schema ) ) \
+*/ \
+	if ( 0 ) \
 	{ \
 		/* Prepare to pack to row-stored column panel. */ \
 		panel_dim     = n_panel; \

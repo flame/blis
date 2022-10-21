@@ -150,11 +150,11 @@ void bli_trmm_front
 #ifdef BLIS_DISABLE_TRMM_RIGHT_IF_JC_GT_1_ELSE_DISABLE_LEFT_IF_DP
 
 	// This case was added for the Ampere platforms.
-	
+
 	// As noted above, for dual socket (Jc > 1), disable trmm right
 	// dramatically improves performance by avoiding the forced Jc=1 for
 	// right-side trmm.
-	
+
 	// On the other hand, for single socket double-precision trmm (where we
 	// already have Jc = 1), performance is significantly improved by
 	// disabling trmm left and forcing a transpose to a right-side operation.
@@ -184,11 +184,11 @@ void bli_trmm_front
 		bli_obj_induce_trans( &b_local );
 		bli_obj_induce_trans( &c_local );
 	}
-	
+
 #else /* not BLIS_DISABLE_TRMM_RIGHT_IF_JC_GT_1_ELSE_DISABLE_LEFT_IF_DP */
 
 	// The default case
-	
+
 	// NOTE: This case computes right-side trmm natively with trmm_rl and
 	// trmm_ru macrokernels. This code path always gives us the opportunity
 	// to transpose the entire operation so that the effective storage format

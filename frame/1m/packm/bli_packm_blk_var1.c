@@ -90,6 +90,16 @@ void bli_packm_blk_var1
        thrinfo_t* thread
      )
 {
+#ifdef BLIS_ENABLE_GEMM_MD
+	// Call a different packm implementation when the storage and target
+	// datatypes differ.
+	if ( bli_obj_dt( c ) != bli_obj_target_dt( c ) )
+	{
+		bli_packm_blk_var1_md( c, p, cntx, rntm, cntl, thread );
+		return;
+	}
+#endif
+
 	// Extract various fields from the control tree.
 	pack_t schema  = bli_cntl_packm_params_pack_schema( cntl );
 	bool   invdiag = bli_cntl_packm_params_does_invert_diag( cntl );
@@ -314,8 +324,12 @@ void PASTEMAC(ch,varname) \
 	   schema bit that encodes row or column is describing the form of
 	   micro-panel, not the storage in the micro-panel. Hence the
 	   mismatch in "row" and "column" semantics. */ \
+/*
 	row_stored = bli_is_col_packed( schema ); \
 	col_stored = bli_is_row_packed( schema ); \
+*/ \
+	row_stored = FALSE; \
+	col_stored = TRUE; \
 \
 	/* If the row storage flag indicates row storage, then we are packing
 	   to column panels; otherwise, if the strides indicate column storage,

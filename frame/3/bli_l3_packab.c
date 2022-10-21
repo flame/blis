@@ -95,9 +95,9 @@ void bli_l3_packb
 {
 	obj_t bt_local, bt_pack;
 
-	// We always pass B^T to bli_l3_int.
+	// We always pass B^T to bli_l3_int().
 	bli_obj_alias_to( b, &bt_local );
-#if 0
+#if 1
 	if ( bli_obj_has_trans( b ) )
 	{
 		bli_obj_set_onlytrans( BLIS_NO_TRANSPOSE, &bt_local );
@@ -125,7 +125,7 @@ void bli_l3_packb
 	  thread
 	);
 
-#if 0
+#if 1
 	// Transpose packed object back to B.
 	bli_obj_induce_trans( &bt_pack );
 #endif

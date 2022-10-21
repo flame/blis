@@ -67,7 +67,10 @@ void PASTEMAC(ch,varname) \
 \
 	/* Determine the dimensions and relative strides of the micro-panel
 	   based on its pack schema. */ \
+/*
 	if ( bli_is_col_packed( schema ) ) \
+*/ \
+	if ( 0 ) \
 	{ \
 		/* Prepare to pack to row-stored column panel. */ \
 		panel_dim     = n_panel; \
@@ -312,8 +315,12 @@ void PASTEMAC(ch,varname) \
 	   schema bit that encodes row or column is describing the form of
 	   micro-panel, not the storage in the micro-panel. Hence the
 	   mismatch in "row" and "column" semantics. */ \
+/*
 	row_stored = bli_is_col_packed( schema ); \
 	col_stored = bli_is_row_packed( schema ); \
+*/ \
+	row_stored = FALSE; \
+	col_stored = TRUE; \
 \
 	/* Handle the case where the micro-panel does NOT intersect the
 	   diagonal separately from the case where it does intersect. */ \

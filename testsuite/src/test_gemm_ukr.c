@@ -235,8 +235,10 @@ void libblis_test_gemm_ukr_experiment
 	bli_rntm_init( &rntm );
 	bli_pba_rntm_set_pba( &rntm );
 
+#if 1
 	// Transpose B to B^T for packing.
-	//bli_obj_induce_trans( &b );
+	bli_obj_induce_trans( &b );
+#endif
 
 	// Create pack objects for a and b, and pack them to ap and bp,
 	// respectively.
@@ -253,8 +255,8 @@ void libblis_test_gemm_ukr_experiment
 	);
 	cntl_t* cntl_b = libblis_test_pobj_create
 	(
-	  BLIS_KR,
 	  BLIS_NR,
+	  BLIS_KR,
 	  BLIS_NO_INVERT_DIAG,
 	  BLIS_PACKED_COL_PANELS,
 	  BLIS_BUFFER_FOR_B_PANEL,
@@ -263,9 +265,11 @@ void libblis_test_gemm_ukr_experiment
 	  &rntm
 	);
 
+#if 1
 	// Transpose B^T back to B and Bp^T back to Bp.
-	//bli_obj_induce_trans( &b );
-	//bli_obj_induce_trans( &bp );
+	bli_obj_induce_trans( &b );
+	bli_obj_induce_trans( &bp );
+#endif
 
 	// Repeat the experiment n_repeats times and record results. 
 	for ( i = 0; i < n_repeats; ++i )

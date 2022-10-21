@@ -67,11 +67,22 @@ void bli_packm_blk_var1_md
        thrinfo_t* t
      )
 {
+	// Extract various fields from the control tree.
+	pack_t schema  = bli_cntl_packm_params_pack_schema( cntl );
+
+	// Every thread initializes p and determines the size of memory
+	// block needed (which gets embedded into the otherwise "blank" mem_t
+	// entry in the control tree node). Return early if no packing is required.
+	if ( !bli_packm_init( c, p, cntx, rntm, cntl, t ) )
+		return;
+
+	if ( bli_error_checking_is_enabled() )
+		bli_packm_int_check( c, p, cntx );
+
 	num_t     dt_c       = bli_obj_dt( c );
 	num_t     dt_p       = bli_obj_dt( p );
 
 	trans_t   transc     = bli_obj_conjtrans_status( c );
-	pack_t    schema     = bli_obj_pack_schema( p );
 
 	dim_t     m_p        = bli_obj_length( p );
 	dim_t     n_p        = bli_obj_width( p );
@@ -89,12 +100,10 @@ void bli_packm_blk_var1_md
 	dim_t     pd_p       = bli_obj_panel_dim( p );
 	inc_t     ps_p       = bli_obj_panel_stride( p );
 
-	obj_t     kappa;
-	void*     buf_kappa;
-
-	FUNCPTR_T f;
-
-
+	obj_t     kappa_local;
+#if 1
+	void*     buf_kappa  = bli_packm_scalar( &kappa_local, p );
+#else
 	// Treatment of kappa (ie: packing during scaling) depends on
 	// whether we are executing an induced method.
 	if ( bli_is_nat_packed( schema ) )
@@ -138,11 +147,12 @@ void bli_packm_blk_var1_md
 		// Acquire the buffer to the kappa chosen above.
 		buf_kappa = bli_obj_buffer_for_1x1( dt_p, kappa_p );
 	}
+#endif
 
 
 	// Index into the type combination array to extract the correct
 	// function pointer.
-	f = ftypes[dt_c][dt_p];
+	FUNCPTR_T f = ftypes[dt_c][dt_p];
 
 	// Invoke the function.
 	f(
@@ -227,8 +237,12 @@ void PASTEMAC2(chc,chp,varname) \
 	   schema bit that encodes row or column is describing the form of
 	   micro-panel, not the storage in the micro-panel. Hence the
 	   mismatch in "row" and "column" semantics. */ \
+/*
 	row_stored = bli_is_col_packed( schema ); \
 	col_stored = bli_is_row_packed( schema ); \
+*/ \
+	row_stored = FALSE; \
+	col_stored = TRUE; \
 \
 	( void )col_stored; \
 \

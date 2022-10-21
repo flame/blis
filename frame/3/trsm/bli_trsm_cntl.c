@@ -165,8 +165,8 @@ cntl_t* bli_trsm_l_cntl_create
 	(
 	  rntm,
 	  bli_l3_packb,
-	  BLIS_MR,
 	  BLIS_NR,
+	  BLIS_MR,
 	  FALSE,   // do NOT invert diagonal
 	  FALSE,   // reverse iteration if upper?
 	  FALSE,   // reverse iteration if lower?

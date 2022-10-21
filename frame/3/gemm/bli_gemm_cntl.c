@@ -114,8 +114,8 @@ cntl_t* bli_gemmbp_cntl_create
 	(
 	  rntm,
 	  bli_l3_packb,  // pack the right-hand operand
-	  BLIS_KR,
 	  BLIS_NR,
+	  BLIS_KR,
 	  FALSE,   // do NOT invert diagonal
 	  FALSE,   // reverse iteration if upper?
 	  FALSE,   // reverse iteration if lower?
@@ -187,8 +187,8 @@ cntl_t* bli_gemmpb_cntl_create
 	(
 	  bli_gemm_packb,  // pack the right-hand operand
 	  bli_packm_blk_var1,
-	  BLIS_KR,
 	  BLIS_MR,
+	  BLIS_KR,
 	  FALSE,   // do NOT invert diagonal
 	  FALSE,   // reverse iteration if upper?
 	  FALSE,   // reverse iteration if lower?
