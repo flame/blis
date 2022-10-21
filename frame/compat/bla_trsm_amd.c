@@ -967,40 +967,8 @@ void dtrsm_blis_impl
                 return;
             }
         }
-        // bli_trsm_small_mt is performing better than native multithread
-        // for certain sizes of m & n.
-#ifdef BLIS_ENABLE_OPENMP
-        rntm_t rntm;
-        bli_rntm_init_from_global( &rntm );
-        // Query the total number of threads from the rntm_t object.
-        dim_t n_threads = bli_rntm_num_threads( &rntm );
-        if ( ( (n_threads  >  1) && (m0 <= 1500) && (n0 <= 1500) ) ||
-            ( (n_threads == 32) && (m0 <= 2300) && (n0 <= 2300) ) ||
-            ( (n_threads == 16) && (m0 <= 3800) && (n0 <= 3800) ) ||
-            ( (n_threads ==  8) && (m0 <= 2800) && (n0 <= 2800) ) ||
-            ( (n_threads ==  4) && (m0 <= 2000) && (n0 <= 2000) ) ||
-            ( (n_threads ==  2) && (m0 <= 2000) && (n0 <= 2000) ) )
-        {
-            err_t status;
-            status = bli_trsm_small_mt(
-                    blis_side,
-                    &alphao,
-                    &ao,
-                    &bo,
-                    NULL,
-                    NULL);
-            if ( status == BLIS_SUCCESS )
-            {
-                AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO);
-                /* Finalize BLIS. */
-                bli_finalize_auto();
-                return;
-            }
-        }
-#endif// BLIS_ENABLE_OPENMP
     } // bli_cpuid_is_avx_supported
 #endif// END of BLIS_ENABLE_SMALL_MATRIX_TRSM
-
 
     bli_trsmnat
     (
