@@ -3,18 +3,22 @@
 
 ## Contents
 
+* **[Welcome](Discord.md#welcome)**
 * **[Introduction to Discord](Discord.md#introduction-to-discord)**
 * **[Creating an account](Discord.md#creating-an-account)**
 * **[Obtaining the invite link](Discord.md#obtaining-the-invite-link)**
 * **[Joining the BLIS server](Discord.md#joining-the-blis-server)**
 * **[Additional resources](Discord.md#additional-resources)**
 
+## Welcome
+
+In 2021, we soft-launched our Discord server by privately inviting current and former collaborators, attendees of our BLIS Retreat, as well as other participants within the BLIS ecosystem. We are excited by the results thus far, and are happy to announce that our new community is now open to the broader public!
+
+If you'd like to hang out with other BLIS users and developers, ask a question, discuss future features, or just say hello, please feel free to join us on Discord! Joining our server is also a great way to get announcements for new versions, workshop events, video chat parties, and other infrequent updates.
 
 ## Introduction to Discord
 
-This file walks the reader through basic instructions for joining the BLIS community on [Discord](https://discord.com).
-
-If you'd like to hang out with other BLIS users and developers, ask a question, discuss future features, or just say hello, please feel free to join us!
+The remaining sections of this file walk the reader through basic instructions for joining the BLIS community on [Discord](https://discord.com).
 
 Discord is free to use for everyone. You can optionally pay for premium features via their [Nitro](https://discord.com/nitro) subscription, but Nitro is not necessary for most casual users.
 

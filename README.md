@@ -101,7 +101,7 @@ What's New
 
  * **Join us on Discord!** In 2021, we soft-launched our [Discord](https://discord.com/)
 server by privately inviting current and former collaborators, attendees of our BLIS
-Retreat, as well as other associates within the BLIS ecosystem. We've been thrilled by
+Retreat, as well as other participants within the BLIS ecosystem. We've been thrilled by
 the results thus far, and are happy to announce that our new community is now open to
 the broader public! If you'd like to hang out with other BLIS users and developers,
 ask a question, discuss future features, or just say hello, please feel free to join us!
