@@ -16,6 +16,8 @@ In 2021, we soft-launched our Discord server by privately inviting current and f
 
 If you'd like to hang out with other BLIS users and developers, ask a question, discuss future features, or just say hello, please feel free to join us on Discord! Joining our server is also a great way to get announcements for new versions, workshop events, video chat parties, and other infrequent updates.
 
+**If you already use Discord** and want to skip straight to the invite link, you can find it [here](#obtaining-the-invite-link). Just be sure to manually remove the dashes (`-`) and equal signs (`=`) before using it!
+
 ## Introduction to Discord
 
 The remaining sections of this file walk the reader through basic instructions for joining the BLIS community on [Discord](https://discord.com).
@@ -31,8 +33,6 @@ Discord offers several kinds of clients. Users may use Discord via:
 You can even stay logged in on multiple devices! Each one will automatically sync itself to newly sent/received messages.
 
 In this document, we'll walk you through each step necessary to join the BLIS Discord community. First, we'll talk about how to [create a Discord account](#creating-an-account) (if you don't already have one). Then, we'll explain how to [obtain the invite link](#obtaining-the-invite-link). And finally, we'll tell you how to use that invite link to [join the BLIS Discord server](#joining-the-blis-server).
-
-**If you already use Discord** and want to skip straight to the invite link, you can find it [here](#obtaining-the-invite-link). Just be sure to manually remove the dashes (`-`) and equal signs (`=`) before using it!
 
 
 ## Creating an account
