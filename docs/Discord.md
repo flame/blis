@@ -55,11 +55,9 @@ Congratulations! You're now a member of Discord and ready to join individual com
 
 ## Obtaining the invite link
 
-The BLIS community consists of a number of "channels" within a single Discord server. The BLIS server, however, is not public and cannot be found via the Discord directory service. Therefore, you'll need an invite link in order to join.
+Since we do not have access to an official Captcha-like service to confirm that you are, indeed, a human interested in the BLIS community, we have instead obfuscated our invite link in a way that should be easy for a human to unmangle.
 
-Since we do not have access to an official Captcha-like service to confirm that you are, indeed, a human interested in the BLIS community, we have instead obfuscated our link in a way that should be easy for a human to unmangle.
-
-Here's an example invite link (for demonstration purposes only): `https://discord.gg/abC2jUVeip`
+Here's an example invite link (for reference purposes only): `https://discord.gg/abC2jUVeip`
 
 Notice that the link consists of `https://discord.gg/` followed by a 10-character string consisting of lower- and upper-case letters, and (typically) one numerical digit.
 
