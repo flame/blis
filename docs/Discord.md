@@ -12,9 +12,9 @@
 
 ## Welcome
 
-In 2021, we soft-launched our Discord server by privately inviting current and former collaborators, attendees of our BLIS Retreat, as well as other participants within the BLIS ecosystem. We are excited by the results thus far, and are happy to announce that our new community is now open to the broader public!
+In 2021, we soft-launched our Discord server by privately inviting current and former collaborators, attendees of our BLIS Retreat, as well as other participants within the BLIS ecosystem. We've been thrilled by the results thus far, and are happy to announce that our new community is now open to the broader public!
 
-If you'd like to hang out with other BLIS users and developers, ask a question, discuss future features, or just say hello, please feel free to join us on Discord! Joining our server is also a great way to get announcements for new versions, workshop events, video chat parties, and other infrequent updates.
+If you'd like to hang out with other BLIS users and developers, ask a question, discuss future features, or just say hello, please feel free to join us! Joining our server is also a great way to get announcements for new versions, workshop events, video chat parties, and other infrequent updates.
 
 **If you already use Discord** and want to skip straight to the invite link, you can find it [here](#obtaining-the-invite-link). Just be sure to manually remove the dashes (`-`) and equal signs (`=`) before using it!
 
