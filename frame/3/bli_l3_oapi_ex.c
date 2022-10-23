@@ -122,7 +122,7 @@ void PASTEMAC(gemm,BLIS_OAPI_EX_SUF)
 		bli_gemm_check( alpha, a, b, beta, c, cntx );
 
 	// Invoke the operation's front-end and request the default control tree.
-	bli_gemm_front( alpha, a, b, beta, c, cntx, &rntm_l, NULL );
+	bli_gemm_front( alpha, a, b, beta, c, cntx, &rntm_l );
 }
 
 #endif
