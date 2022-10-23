@@ -233,7 +233,7 @@ void bli_gemmsup_ref_var1n
 	// Determine whether we are using more than one thread.
 	const bool is_mt = ( bli_rntm_calc_num_threads( rntm ) > 1 );
 
-	thrinfo_t* thread_jc = thread;
+	thrinfo_t* thread_jc = bli_thrinfo_sub_node( thread );
 	thrinfo_t* thread_pc = bli_thrinfo_sub_node( thread_jc );
 	thrinfo_t* thread_pa = bli_thrinfo_sub_node( thread_pc );
 	thrinfo_t* thread_ic = bli_thrinfo_sub_node( thread_pa );
@@ -635,7 +635,7 @@ void bli_gemmsup_ref_var2m
 	// Determine whether we are using more than one thread.
 	const bool is_mt = ( bli_rntm_calc_num_threads( rntm ) > 1 );
 
-	thrinfo_t* thread_jc = thread;
+	thrinfo_t* thread_jc = bli_thrinfo_sub_node( thread );
 	thrinfo_t* thread_pc = bli_thrinfo_sub_node( thread_jc );
 	thrinfo_t* thread_pb = bli_thrinfo_sub_node( thread_pc );
 	thrinfo_t* thread_ic = bli_thrinfo_sub_node( thread_pb );
