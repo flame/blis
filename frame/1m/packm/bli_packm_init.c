@@ -74,7 +74,7 @@ bool bli_packm_init
 	dim_t   bmult_m_def  = bli_cntx_get_blksz_def_dt( dt_tar, bmult_id_m, cntx );
 	dim_t   bmult_m_pack = bli_cntx_get_blksz_max_dt( dt_tar, bmult_id_m, cntx );
 	dim_t   bmult_n_def  = bli_cntx_get_blksz_def_dt( dt_tar, bmult_id_n, cntx );
-	dim_t   bmult_n_pack = bli_cntx_get_blksz_max_dt( dt_tar, bmult_id_n, cntx );
+	//dim_t   bmult_n_pack = bli_cntx_get_blksz_max_dt( dt_tar, bmult_id_n, cntx );
 
 	// Typecast the internal scalar value to the target datatype.
 	// Note that if the typecasting is needed, this must happen BEFORE we
