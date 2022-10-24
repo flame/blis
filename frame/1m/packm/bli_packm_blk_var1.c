@@ -186,7 +186,9 @@ void bli_packm_blk_var1
 		// on which was selected at configure-time.
 		// The definition of bli_packm_my_iter() will depend on whether slab
 		// or round-robin partitioning was requested at configure-time.
-		bool   my_iter         = bli_is_triangular( strucc )
+		bool   my_iter         = bli_is_triangular( strucc ) &&
+		                         bli_intersects_diag_n( diagoffc_i, panel_dim_i,
+		                                                panel_len_full )
 			? bli_packm_my_iter_rr( it, it_start, it_end, tid, nt )
 			: bli_packm_my_iter   ( it, it_start, it_end, tid, nt );
 
