@@ -36,7 +36,6 @@
 struct packm_params_s
 {
 	uint64_t      size; // size field must be present and come first.
-	packm_var_oft var_func;
 	bszid_t       bmid_m;
 	bszid_t       bmid_n;
 	bool          does_invert_diag;
@@ -46,11 +45,6 @@ struct packm_params_s
 	packbuf_t     pack_buf_type;
 };
 typedef struct packm_params_s packm_params_t;
-
-BLIS_INLINE packm_var_oft bli_cntl_packm_params_var_func( cntl_t* cntl )
-{
-	packm_params_t* ppp = ( packm_params_t* )cntl->params; return ppp->var_func;
-}
 
 BLIS_INLINE bszid_t bli_cntl_packm_params_bmid_m( cntl_t* cntl )
 {
@@ -93,7 +87,6 @@ cntl_t* bli_packm_cntl_create_node
      (
        rntm_t*   rntm,
        void_fp   var_func,
-       void_fp   packm_var_func,
        bszid_t   bmid_m,
        bszid_t   bmid_n,
        bool      does_invert_diag,
