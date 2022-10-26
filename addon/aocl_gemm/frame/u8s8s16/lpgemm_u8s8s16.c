@@ -43,11 +43,13 @@
 // B should always be packed.
 LPGEMM_5LOOP(uint8_t,int8_t,int16_t,u8s8s16o16)
 {
-	const dim_t NC = lpgemm_get_block_size_NC_global_cntx( U8S8S16OS16 );
-	const dim_t KC = lpgemm_get_block_size_KC_global_cntx( U8S8S16OS16 );
-	const dim_t MC = lpgemm_get_block_size_MC_global_cntx( U8S8S16OS16 );
+	dim_t NC = lpgemm_get_block_size_NC_global_cntx( U8S8S16OS16 );
+	dim_t KC = lpgemm_get_block_size_KC_global_cntx( U8S8S16OS16 );
+	dim_t MC = lpgemm_get_block_size_MC_global_cntx( U8S8S16OS16 );
 	const dim_t NR = lpgemm_get_block_size_NR_global_cntx( U8S8S16OS16 );
 	const dim_t MR = lpgemm_get_block_size_MR_global_cntx( U8S8S16OS16 );
+
+	lpgemm_mod_block_size_s16(m, n, k, &MC, &NC, &KC);
 	
 	if (mtag_b == UNPACKED)
 	{

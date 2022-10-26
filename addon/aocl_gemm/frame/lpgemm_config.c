@@ -59,9 +59,11 @@ BLIS_INLINE void lpgemm_set_block_sizes_global_cntx
 // to be configurable from application.
 void aocl_lpgemm_init_global_cntx()
 {
-    lpgemm_set_block_sizes_global_cntx( U8S8S32OS32, 144, 1024, 2048, 64, 6 );
-    lpgemm_set_block_sizes_global_cntx( U8S8S16OS16, 144, 1024, 1024, 32, 6 );
-    lpgemm_set_block_sizes_global_cntx( BF16BF16F32OF32, 144, 1024, 2048, 64, 6 );
+  lpgemm_set_block_sizes_global_cntx( U8S8S16OS16, 252, 2048, 2048, 32, 6 );
+#ifdef BLIS_KERNELS_ZEN4
+  lpgemm_set_block_sizes_global_cntx( U8S8S32OS32, 144, 1024, 2048, 64, 6 );
+  lpgemm_set_block_sizes_global_cntx( BF16BF16F32OF32, 144, 1024, 2048, 64, 6 );
+#endif
 }
 
 dim_t lpgemm_get_block_size_MC_global_cntx( AOCL_OPERATION_TYPE op_type )
@@ -87,4 +89,35 @@ dim_t lpgemm_get_block_size_NR_global_cntx( AOCL_OPERATION_TYPE op_type )
 dim_t lpgemm_get_block_size_MR_global_cntx( AOCL_OPERATION_TYPE op_type )
 {
 	return global_cntx_t_list[op_type].blksz.MR;
+}
+
+void lpgemm_mod_block_size_s16
+       (
+          dim_t m, dim_t n, dim_t k,
+          dim_t* MC, dim_t* NC, dim_t* KC
+       )
+{
+  const dim_t range[4] = {1024, 512, 256, 128};
+
+  if (n < *NC)
+  {
+    for (dim_t i = 0; i < 4; ++i)
+    {
+      if (n <= range[i])
+      {
+        *NC = range[i];
+      }
+    }
+  }
+
+  if (k < *KC)
+  {
+    for (dim_t i = 0; i < 4; ++i)
+    {
+      if (k <= range[i])
+      {
+        *KC = range[i];
+      }
+    }
+  }
 }

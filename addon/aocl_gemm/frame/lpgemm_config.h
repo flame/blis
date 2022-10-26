@@ -52,4 +52,10 @@ dim_t lpgemm_get_block_size_NR_global_cntx( AOCL_OPERATION_TYPE op_type );
 
 dim_t lpgemm_get_block_size_MR_global_cntx( AOCL_OPERATION_TYPE op_type );
 
+void lpgemm_mod_block_size_s16
+       (
+          dim_t m, dim_t n, dim_t k,
+          dim_t* MC, dim_t* NC, dim_t* KC
+       );
+
 #endif //LPGEMM_CONFIG_H

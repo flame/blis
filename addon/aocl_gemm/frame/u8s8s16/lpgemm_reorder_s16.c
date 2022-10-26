@@ -43,15 +43,17 @@ void aocl_reorderb_nr32_u8s8s16o16
        lpgemm_obj_t *b_reorder
      )
 {
-	const dim_t NC = lpgemm_get_block_size_NC_global_cntx(U8S8S16OS16);
-	const dim_t KC = lpgemm_get_block_size_KC_global_cntx(U8S8S16OS16);
-	const dim_t NR = lpgemm_get_block_size_NR_global_cntx(U8S8S16OS16);
+	dim_t NC = lpgemm_get_block_size_NC_global_cntx(U8S8S16OS16);
+	dim_t KC = lpgemm_get_block_size_KC_global_cntx(U8S8S16OS16);
+	dim_t NR = lpgemm_get_block_size_NR_global_cntx(U8S8S16OS16);
 
 	// Extracting the matrix properties from the lpgemm object
 	dim_t rs_b = b->rs;
 	dim_t n = b->width;
 	dim_t k = b->length;
-
+	
+	lpgemm_mod_block_size_s16(0, n, k, NULL, &NC, &KC);
+	
 	dim_t rs_b_reorder;
 	dim_t cs_b_reorder;
 
