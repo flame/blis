@@ -1335,6 +1335,17 @@ blacklistbu_add()
 	fi
 }
 
+blacklistos_add()
+{
+	# Check whether we've already blacklisted the given sub-config so
+	# we don't output redundant messages.
+	if [ $(is_in_list "$1" "${config_blist}") == "false" ]; then
+
+		echowarn "The operating system does not support building '$1'; adding to blacklist."
+		config_blist="${config_blist} $1"
+	fi
+}
+
 blacklist_init()
 {
 	config_blist=""
@@ -1986,6 +1997,13 @@ check_assembler()
 
 	if [ "x${knows_avx512dq}" == "xno" ]; then
 		blacklistbu_add "skx"
+	fi
+}
+
+check_os()
+{
+	if [[ "$(uname -s)" == "Darwin" && "$(uname -m)" == "arm64" ]]; then
+		blacklistos_add "armsve"
 	fi
 }
 
@@ -2885,6 +2903,9 @@ main()
 	# will also be blacklisted.
 	get_binutils_version
 	check_assembler
+
+    # Check if there is any incompatibility due to the operating system.
+	check_os
 
 	# Remove duplicates and whitespace from the blacklist.
 	blacklist_cleanup
