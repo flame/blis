@@ -52,8 +52,8 @@ void bli_packm_sup_init_mem
 	}
 	else // if ( will_pack == TRUE )
 	{
-        mem_t* mem = bli_thrinfo_mem( thread );
-        pba_t* pba = bli_thrinfo_pba( thread );
+		mem_t* mem = bli_thrinfo_mem( thread );
+		pba_t* pba = bli_thrinfo_pba( thread );
 
 		// NOTE: This "rounding up" of the last upanel is actually optional
 		// for the rrc/crc cases, but absolutely necessary for the other cases
@@ -177,8 +177,8 @@ void bli_packm_sup_finalize_mem
 	}
 	else // if ( did_pack == TRUE )
 	{
-        mem_t* mem = bli_thrinfo_mem( thread );
-        pba_t* pba = bli_thrinfo_pba( thread );
+		mem_t* mem = bli_thrinfo_mem( thread );
+		pba_t* pba = bli_thrinfo_pba( thread );
 
 		if ( thread != NULL )
 		if ( bli_thrinfo_am_chief( thread ) )

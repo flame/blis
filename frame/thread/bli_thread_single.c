@@ -34,10 +34,10 @@
 
 #include "blis.h"
 
-//#define PRINT_IMPL
-
 void bli_thread_launch_single( dim_t nt, thread_func_t func, const void* params )
 {
+	// Call the thread entry point, passing the global single-threaded
+	// communicator, thread id of 0, and the params struct as arguments.
     func( &BLIS_SINGLE_COMM, 0, params );
 }
 

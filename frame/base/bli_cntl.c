@@ -149,7 +149,7 @@ cntl_t* bli_cntl_copy
 	// field.
 	cntl_t* cntl_copy = bli_cntl_create_node
 	(
-      pool,
+	  pool,
 	  bli_cntl_family( cntl ),
 	  bli_cntl_bszid( cntl ),
 	  bli_cntl_var_func( cntl ),

@@ -64,7 +64,7 @@ void PASTEMAC(ch,op) \
 \
 	PASTEMAC3(ch,ch,ch,xpbys_mxn_l) \
 	( \
-      diagoff, \
+	  diagoff, \
 	  m, n, \
 	  x_cast, rs_x, cs_x, \
 	  b_cast, \
@@ -87,7 +87,7 @@ void bli_gemmt_l_ker_var2
      )
 {
 	const num_t  dt        = bli_obj_exec_dt( c );
-    const dim_t  dt_size   = bli_dt_size( dt );
+	const dim_t  dt_size   = bli_dt_size( dt );
 
 	      doff_t diagoffc  = bli_obj_diag_offset( c );
 
@@ -123,19 +123,19 @@ void bli_gemmt_l_ker_var2
 	const void* buf_alpha = bli_obj_internal_scalar_buffer( &scalar_b );
 	const void* buf_beta  = bli_obj_internal_scalar_buffer( c );
 
-	/* Alias some constants to simpler names. */
+	// Alias some constants to simpler names.
 	const dim_t MR = pd_a;
 	const dim_t NR = pd_b;
 
-	/* Query the context for the micro-kernel address and cast it to its
-	   function pointer type. */
+	// Query the context for the micro-kernel address and cast it to its
+	// function pointer type.
 	gemm_ukr_vft    gemm_ukr        = bli_cntx_get_l3_vir_ukr_dt( dt, BLIS_GEMM_UKR, cntx );
-    xpbys_mxn_l_vft xpbys_mxn_l_ukr = xpbys_mxn_l[ dt ];
+	xpbys_mxn_l_vft xpbys_mxn_l_ukr = xpbys_mxn_l[ dt ];
 
-	/* Temporary C buffer for edge cases. Note that the strides of this
-	   temporary buffer are set so that they match the storage of the
-	   original C matrix. For example, if C is column-stored, ct will be
-	   column-stored as well. */
+	// Temporary C buffer for edge cases. Note that the strides of this
+	// temporary buffer are set so that they match the storage of the
+	// original C matrix. For example, if C is column-stored, ct will be
+	// column-stored as well.
 	      char  ct[ BLIS_STACK_BUF_MAX_SIZE ]
 	                __attribute__((aligned(BLIS_STACK_BUF_ALIGN_SIZE)));
 	const bool  col_pref    = bli_cntx_ukr_prefers_cols_dt( dt, BLIS_GEMM_VIR_UKR, cntx );
@@ -163,16 +163,16 @@ void bli_gemmt_l_ker_var2
 	     cs_c == (no assumptions)
 	*/
 
-	/* If any dimension is zero, return immediately. */
+	// If any dimension is zero, return immediately.
 	if ( bli_zero_dim3( m, n, k ) ) return;
 
-	/* Safeguard: If the current panel of C is entirely above the diagonal,
-	   it is not stored. So we do nothing. */
+	// Safeguard: If the current panel of C is entirely above the diagonal,
+	// it is not stored. So we do nothing.
 	if ( bli_is_strictly_above_diag_n( diagoffc, m, n ) ) return;
 
-	/* If there is a zero region above where the diagonal of C intersects
-	   the left edge of the panel, adjust the pointer to C and A and treat
-	   this case as if the diagonal offset were zero. */
+	// If there is a zero region above where the diagonal of C intersects
+	// the left edge of the panel, adjust the pointer to C and A and treat
+	// this case as if the diagonal offset were zero.
 	if ( diagoffc < 0 )
 	{
 		dim_t ip       = -diagoffc / MR;
@@ -183,16 +183,16 @@ void bli_gemmt_l_ker_var2
 		      a_cast   = a_cast + (ip )*ps_a*dt_size;
 	}
 
-	/* If there is a zero region to the right of where the diagonal
-	   of C intersects the bottom of the panel, shrink it to prevent
-	   "no-op" iterations from executing. */
+	// If there is a zero region to the right of where the diagonal
+	// of C intersects the bottom of the panel, shrink it to prevent
+	// "no-op" iterations from executing.
 	if ( diagoffc + m < n )
 	{
 		n = diagoffc + m;
 	}
 
-	/* Compute number of primary and leftover components of the m and n
-	   dimensions. */
+	// Compute number of primary and leftover components of the m and n
+	// dimensions.
 	dim_t n_iter = n / NR;
 	dim_t n_left = n % NR;
 
@@ -202,7 +202,7 @@ void bli_gemmt_l_ker_var2
 	if ( n_left ) ++n_iter;
 	if ( m_left ) ++m_iter;
 
-	/* Determine some increments used to step through A, B, and C. */
+	// Determine some increments used to step through A, B, and C.
 	inc_t rstep_a = ps_a * dt_size;
 
 	inc_t cstep_b = ps_b * dt_size;
@@ -210,25 +210,25 @@ void bli_gemmt_l_ker_var2
 	inc_t rstep_c = rs_c * MR * dt_size;
 	inc_t cstep_c = cs_c * NR * dt_size;
 
-	/* Save the pack schemas of A and B to the auxinfo_t object. */
-    auxinfo_t aux;
+	// Save the pack schemas of A and B to the auxinfo_t object.
+	auxinfo_t aux;
 	bli_auxinfo_set_schema_a( schema_a, &aux );
 	bli_auxinfo_set_schema_b( schema_b, &aux );
 
-	/* Save the imaginary stride of A and B to the auxinfo_t object. */
+	// Save the imaginary stride of A and B to the auxinfo_t object.
 	bli_auxinfo_set_is_a( is_a, &aux );
 	bli_auxinfo_set_is_b( is_b, &aux );
 
-	/* Save the desired output datatype (indicating no typecasting). */
-	/*bli_auxinfo_set_dt_on_output( dt, &aux );*/
+	// Save the desired output datatype (indicating no typecasting).
+	//bli_auxinfo_set_dt_on_output( dt, &aux );*/
 
-	/* The 'thread' argument points to the thrinfo_t node for the 2nd (jr)
-	   loop around the microkernel. Here we query the thrinfo_t node for the
-	   1st (ir) loop around the microkernel. */
-    thrinfo_t* thread = bli_thrinfo_sub_node( thread_par );
+	// The 'thread' argument points to the thrinfo_t node for the 2nd (jr)
+	// loop around the microkernel. Here we query the thrinfo_t node for the
+	// 1st (ir) loop around the microkernel.
+	thrinfo_t* thread = bli_thrinfo_sub_node( thread_par );
 	thrinfo_t* caucus = bli_thrinfo_sub_node( thread );
 
-	/* Query the number of threads and thread ids for each loop. */
+	// Query the number of threads and thread ids for each loop.
 	dim_t jr_nt  = bli_thrinfo_n_way( thread );
 	dim_t jr_tid = bli_thrinfo_work_id( thread );
 	dim_t ir_nt  = bli_thrinfo_n_way( caucus );
@@ -238,41 +238,41 @@ void bli_gemmt_l_ker_var2
 	dim_t ir_start, ir_end;
 	dim_t jr_inc,   ir_inc;
 
-	/* Note that we partition the 2nd loop into two regions: the rectangular
-	   part of C, and the triangular portion. */
+	// Note that we partition the 2nd loop into two regions: the rectangular
+	// part of C, and the triangular portion.
 	dim_t n_iter_rct;
 	dim_t n_iter_tri;
 
 	if ( bli_is_strictly_below_diag_n( diagoffc, m, n ) )
 	{
-		/* If the entire panel of C does not intersect the diagonal, there is
-		   no triangular region, and therefore we can skip the second set of
-		   loops. */
+		// If the entire panel of C does not intersect the diagonal, there is
+		// no triangular region, and therefore we can skip the second set of
+		// loops.
 		n_iter_rct = n_iter;
 		n_iter_tri = 0;
 	}
 	else
 	{
-		/* If the panel of C does intersect the diagonal, compute the number of
-		   iterations in the rectangular region by dividing NR into the diagonal
-		   offset. Any remainder from this integer division is discarded, which
-		   is what we want. That is, we want the rectangular region to contain
-		   as many columns of whole microtiles as possible without including any
-		   microtiles that intersect the diagonal. The number of iterations in
-		   the triangular (or trapezoidal) region is computed as the remaining
-		   number of iterations in the n dimension. */
+		// If the panel of C does intersect the diagonal, compute the number of
+		// iterations in the rectangular region by dividing NR into the diagonal
+		// offset. Any remainder from this integer division is discarded, which
+		// is what we want. That is, we want the rectangular region to contain
+		// as many columns of whole microtiles as possible without including any
+		// microtiles that intersect the diagonal. The number of iterations in
+		// the triangular (or trapezoidal) region is computed as the remaining
+		// number of iterations in the n dimension.
 		n_iter_rct = diagoffc / NR;
 		n_iter_tri = n_iter - n_iter_rct;
 	}
 
-	/* Determine the thread range and increment for the 2nd and 1st loops for
-	   the initial rectangular region of C (if it exists).
-	   NOTE: The definition of bli_thread_range_jrir() will depend on whether
-	   slab or round-robin partitioning was requested at configure-time. */
+	// Determine the thread range and increment for the 2nd and 1st loops for
+	// the initial rectangular region of C (if it exists).
+	// NOTE: The definition of bli_thread_range_jrir() will depend on whether
+	// slab or round-robin partitioning was requested at configure-time.
 	bli_thread_range_jrir( thread, n_iter_rct, 1, FALSE, &jr_start, &jr_end, &jr_inc );
 	bli_thread_range_jrir( caucus, m_iter,     1, FALSE, &ir_start, &ir_end, &ir_inc );
 
-	/* Loop over the n dimension (NR columns at a time). */
+	// Loop over the n dimension (NR columns at a time).
 	for ( dim_t j = jr_start; j < jr_end; j += jr_inc )
 	{
 		const char* b1 = b_cast + j * cstep_b;
@@ -280,22 +280,22 @@ void bli_gemmt_l_ker_var2
 
 		dim_t n_cur = ( bli_is_not_edge_f( j, n_iter, n_left ) ? NR : n_left );
 
-		/* Initialize our next panel of B to be the current panel of B. */
+		// Initialize our next panel of B to be the current panel of B.
 		const char* b2 = b1;
 
-		/* Interior loop over the m dimension (MR rows at a time). */
+		// Interior loop over the m dimension (MR rows at a time).
 		for ( dim_t i = ir_start; i < ir_end; i += ir_inc )
 		{
 			const char* a1  = a_cast + i * rstep_a;
 			      char* c11 = c1     + i * rstep_c;
 
-			/* No need to compute the diagonal offset for the rectangular
-			   region. */
-			/*diagoffc_ij = diagoffc - (doff_t)j*NR + (doff_t)i*MR;*/
+			// No need to compute the diagonal offset for the rectangular
+			// region.
+			//diagoffc_ij = diagoffc - (doff_t)j*NR + (doff_t)i*MR;*/
 
 			dim_t m_cur = ( bli_is_not_edge_f( i, m_iter, m_left ) ? MR : m_left );
 
-			/* Compute the addresses of the next panels of A and B. */
+			// Compute the addresses of the next panels of A and B.
 			const char* a2 = bli_gemmt_get_next_a_upanel( a1, rstep_a, ir_inc );
 			if ( bli_is_last_iter( i, m_iter, ir_tid, ir_nt ) )
 			{
@@ -305,20 +305,20 @@ void bli_gemmt_l_ker_var2
 					b2 = b_cast;
 			}
 
-			/* Save addresses of next panels of A and B to the auxinfo_t
-			   object. */
+			// Save addresses of next panels of A and B to the auxinfo_t
+			// object.
 			bli_auxinfo_set_next_a( a2, &aux );
 			bli_auxinfo_set_next_b( b2, &aux );
 
-			/* If the diagonal intersects the current MR x NR submatrix, we
-			   compute it the temporary buffer and then add in the elements
-			   on or below the diagonal.
-			   Otherwise, if the submatrix is strictly below the diagonal,
-			   we compute and store as we normally would.
-			   And if we're strictly above the diagonal, we do nothing and
-			   continue. */
+			// If the diagonal intersects the current MR x NR submatrix, we
+			// compute it the temporary buffer and then add in the elements
+			// on or below the diagonal.
+			// Otherwise, if the submatrix is strictly below the diagonal,
+			// we compute and store as we normally would.
+			// And if we're strictly above the diagonal, we do nothing and
+			// continue.
 			{
-				/* Invoke the gemm micro-kernel. */
+				// Invoke the gemm micro-kernel.
 				gemm_ukr
 				(
 				  m_cur,
@@ -336,20 +336,20 @@ void bli_gemmt_l_ker_var2
 		}
 	}
 
-	/* If there is no triangular region, then we're done. */
+	// If there is no triangular region, then we're done.
 	if ( n_iter_tri == 0 ) return;
 
-	/* Use round-robin assignment of micropanels to threads in the 2nd loop
-	   and the default (slab or rr) partitioning in the 1st loop for the
-	   remaining triangular region of C. */
+	// Use round-robin assignment of micropanels to threads in the 2nd loop
+	// and the default (slab or rr) partitioning in the 1st loop for the
+	// remaining triangular region of C.
 	bli_thread_range_jrir_rr( thread, n_iter_tri, 1, FALSE, &jr_start, &jr_end, &jr_inc );
 
-	/* Advance the start and end iteration offsets for the triangular region
-	   by the number of iterations used for the rectangular region. */
+	// Advance the start and end iteration offsets for the triangular region
+	// by the number of iterations used for the rectangular region.
 	jr_start += n_iter_rct;
 	jr_end   += n_iter_rct;
 
-	/* Loop over the n dimension (NR columns at a time). */
+	// Loop over the n dimension (NR columns at a time).
 	for ( dim_t j = jr_start; j < jr_end; j += jr_inc )
 	{
 		const char* b1 = b_cast + j * cstep_b;
@@ -357,21 +357,21 @@ void bli_gemmt_l_ker_var2
 
 		dim_t n_cur = ( bli_is_not_edge_f( j, n_iter, n_left ) ? NR : n_left );
 
-		/* Initialize our next panel of B to be the current panel of B. */
+		// Initialize our next panel of B to be the current panel of B.
 		const char* b2 = b1;
 
-		/* Interior loop over the m dimension (MR rows at a time). */
+		// Interior loop over the m dimension (MR rows at a time).
 		for ( dim_t i = ir_start; i < ir_end; i += ir_inc )
 		{
 			const char* a1  = a_cast + i * rstep_a;
 			      char* c11 = c1     + i * rstep_c;
 
-			/* Compute the diagonal offset for the submatrix at (i,j). */
+			// Compute the diagonal offset for the submatrix at (i,j).
 			doff_t diagoffc_ij = diagoffc - (doff_t)j*NR + (doff_t)i*MR;
 
 			dim_t  m_cur = ( bli_is_not_edge_f( i, m_iter, m_left ) ? MR : m_left );
 
-			/* Compute the addresses of the next panels of A and B. */
+			// Compute the addresses of the next panels of A and B.
 			const char* a2 = bli_gemmt_get_next_a_upanel( a1, rstep_a, ir_inc );
 			if ( bli_is_last_iter( i, m_iter, ir_tid, ir_nt ) )
 			{
@@ -381,21 +381,21 @@ void bli_gemmt_l_ker_var2
 					b2 = b_cast;
 			}
 
-			/* Save addresses of next panels of A and B to the auxinfo_t
-			   object. */
+			// Save addresses of next panels of A and B to the auxinfo_t
+			// object.
 			bli_auxinfo_set_next_a( a2, &aux );
 			bli_auxinfo_set_next_b( b2, &aux );
 
-			/* If the diagonal intersects the current MR x NR submatrix, we
-			   compute it the temporary buffer and then add in the elements
-			   on or below the diagonal.
-			   Otherwise, if the submatrix is strictly below the diagonal,
-			   we compute and store as we normally would.
-			   And if we're strictly above the diagonal, we do nothing and
-			   continue. */
+			// If the diagonal intersects the current MR x NR submatrix, we
+			// compute it the temporary buffer and then add in the elements
+			// on or below the diagonal.
+			// Otherwise, if the submatrix is strictly below the diagonal,
+			// we compute and store as we normally would.
+			// And if we're strictly above the diagonal, we do nothing and
+			// continue.
 			if ( bli_intersects_diag_n( diagoffc_ij, m_cur, n_cur ) )
 			{
-				/* Invoke the gemm micro-kernel. */
+				// Invoke the gemm micro-kernel.
 				gemm_ukr
 				(
 				  MR,
@@ -410,16 +410,16 @@ void bli_gemmt_l_ker_var2
 				  ( cntx_t* )cntx
 				);
 
-				/* Scale C and add the result to only the stored part. */
+				// Scale C and add the result to only the stored part.
 				xpbys_mxn_l_ukr( diagoffc_ij,
-	                             m_cur, n_cur,
-	                             ct,  rs_ct, cs_ct,
-	                             ( void* )beta_cast,
-	                             c11, rs_c,  cs_c );
+				                 m_cur, n_cur,
+				                 ct,  rs_ct, cs_ct,
+				                 ( void* )beta_cast,
+				                 c11, rs_c,  cs_c );
 			}
 			else if ( bli_is_strictly_below_diag_n( diagoffc_ij, m_cur, n_cur ) )
 			{
-				/* Invoke the gemm micro-kernel. */
+				// Invoke the gemm micro-kernel.
 				gemm_ukr
 				(
 				  m_cur,

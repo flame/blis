@@ -46,7 +46,7 @@ void bli_trsm_ll_ker_var2
      )
 {
 	const num_t     dt        = bli_obj_exec_dt( c );
-    const dim_t     dt_size   = bli_dt_size( dt );
+	const dim_t     dt_size   = bli_dt_size( dt );
 
 	      doff_t    diagoffa  = bli_obj_diag_offset( a );
 
@@ -87,13 +87,13 @@ void bli_trsm_ll_ker_var2
 	// packing.
 	const void* buf_alpha2 = bli_obj_internal_scalar_buffer( c );
 
-	/* Alias some constants to simpler names. */
+	// Alias some constants to simpler names.
 	const dim_t MR     = pd_a;
 	const dim_t NR     = pd_b;
 	const dim_t PACKMR = cs_a;
 	const dim_t PACKNR = rs_b;
 
-	/* Cast the micro-kernel address to its function pointer type. */
+	// Cast the micro-kernel address to its function pointer type.
 	gemmtrsm_ukr_vft gemmtrsm_ukr = bli_cntx_get_l3_vir_ukr_dt( dt, BLIS_GEMMTRSM_L_UKR, cntx );
 	gemm_ukr_vft     gemm_ukr     = bli_cntx_get_l3_vir_ukr_dt( dt, BLIS_GEMM_UKR, cntx );
 
@@ -118,32 +118,32 @@ void bli_trsm_ll_ker_var2
 	     cs_c == (no assumptions)
 	*/
 
-	/* Safety trap: Certain indexing within this macro-kernel does not
-	   work as intended if both MR and NR are odd. */
+	// Safety trap: Certain indexing within this macro-kernel does not
+	// work as intended if both MR and NR are odd.
 	if ( ( bli_is_odd( PACKMR ) && bli_is_odd( NR ) ) ||
 	     ( bli_is_odd( PACKNR ) && bli_is_odd( MR ) ) ) bli_abort();
 
-	/* If any dimension is zero, return immediately. */
+	// If any dimension is zero, return immediately.
 	if ( bli_zero_dim3( m, n, k ) ) return;
 
-	/* Safeguard: If matrix A is above the diagonal, it is implicitly zero.
-	   So we do nothing. */
+	// Safeguard: If matrix A is above the diagonal, it is implicitly zero.
+	// So we do nothing.
 	if ( bli_is_strictly_above_diag_n( diagoffa, m, k ) ) return;
 
-	/* Compute k_full as k inflated up to a multiple of MR. This is
-	   needed because some parameter combinations of trsm reduce k
-	   to advance past zero regions in the triangular matrix, and
-	   when computing the imaginary stride of B (the non-triangular
-	   matrix), which is used by 4m1/3m1 implementations, we need
-	   this unreduced value of k. */
+	// Compute k_full as k inflated up to a multiple of MR. This is
+	// needed because some parameter combinations of trsm reduce k
+	// to advance past zero regions in the triangular matrix, and
+	// when computing the imaginary stride of B (the non-triangular
+	// matrix), which is used by 4m1/3m1 implementations, we need
+	// this unreduced value of k.
 	if ( k % MR != 0 ) k += MR - ( k % MR );
 
-	/* If there is a zero region above where the diagonal of A intersects the
-	   left edge of the block, adjust the pointer to C and treat this case as
-	   if the diagonal offset were zero. This skips over the region that was
-	   not packed. (Note we assume the diagonal offset is a multiple of MR;
-	   this assumption will hold as long as the cache blocksizes are each a
-	   multiple of MR and NR.) */
+	// If there is a zero region above where the diagonal of A intersects the
+	// left edge of the block, adjust the pointer to C and treat this case as
+	// if the diagonal offset were zero. This skips over the region that was
+	// not packed. (Note we assume the diagonal offset is a multiple of MR;
+	// this assumption will hold as long as the cache blocksizes are each a
+	// multiple of MR and NR.)
 	if ( diagoffa < 0 )
 	{
 		m        += diagoffa;
@@ -151,13 +151,13 @@ void bli_trsm_ll_ker_var2
 		diagoffa  = 0;
 	}
 
-	/* NOTE: We don't need to check that m is a multiple of PACKMR since we
-	   know that the underlying buffer was already allocated to have an m
-	   dimension that is a multiple of PACKMR, with the region between the
-	   last row and the next multiple of MR zero-padded accordingly. */
+	// NOTE: We don't need to check that m is a multiple of PACKMR since we
+	// know that the underlying buffer was already allocated to have an m
+	// dimension that is a multiple of PACKMR, with the region between the
+	// last row and the next multiple of MR zero-padded accordingly.
 
-	/* Compute number of primary and leftover components of the m and n
-       dimensions. */
+	// Compute number of primary and leftover components of the m and n
+	// dimensions.
 	dim_t n_iter = n / NR;
 	dim_t n_left = n % NR;
 
@@ -167,7 +167,7 @@ void bli_trsm_ll_ker_var2
 	if ( n_left ) ++n_iter;
 	if ( m_left ) ++m_iter;
 
-	/* Determine some increments used to step through A, B, and C. */
+	// Determine some increments used to step through A, B, and C.
 	inc_t rstep_a = ps_a * dt_size;
 
 	inc_t cstep_b = ps_b * dt_size;
@@ -175,84 +175,84 @@ void bli_trsm_ll_ker_var2
 	inc_t rstep_c = rs_c * MR * dt_size;
 	inc_t cstep_c = cs_c * NR * dt_size;
 
-	/* Save the pack schemas of A and B to the auxinfo_t object. */
-    auxinfo_t aux;
+	// Save the pack schemas of A and B to the auxinfo_t object.
+	auxinfo_t aux;
 	bli_auxinfo_set_schema_a( schema_a, &aux );
 	bli_auxinfo_set_schema_b( schema_b, &aux );
 
-	/* We don't bother querying the thrinfo_t node for the 1st loop because
-	   we can't parallelize that loop in trsm due to the inter-iteration
-	   dependencies that exist. */
-	/*thrinfo_t* caucus = bli_thrinfo_sub_node( thread );*/
+	// We don't bother querying the thrinfo_t node for the 1st loop because
+	// we can't parallelize that loop in trsm due to the inter-iteration
+	// dependencies that exist.
+	//thrinfo_t* caucus = bli_thrinfo_sub_node( thread );
 
-	/* Query the number of threads and thread ids for each loop. */
-    thrinfo_t* thread = bli_thrinfo_sub_node( thread_par );
+	// Query the number of threads and thread ids for each loop.
+	thrinfo_t* thread = bli_thrinfo_sub_node( thread_par );
 	dim_t jr_nt  = bli_thrinfo_n_way( thread );
 	dim_t jr_tid = bli_thrinfo_work_id( thread );
 
 	dim_t jr_start, jr_end;
 	dim_t jr_inc;
 
-	/* Determine the thread range and increment for the 2nd loop.
-	   NOTE: The definition of bli_thread_range_jrir() will depend on whether
-	   slab or round-robin partitioning was requested at configure-time.
-	   NOTE: Parallelism in the 1st loop is unattainable due to the
-	   inter-iteration dependencies present in trsm. */
+	// Determine the thread range and increment for the 2nd loop.
+	// NOTE: The definition of bli_thread_range_jrir() will depend on whether
+	// slab or round-robin partitioning was requested at configure-time.
+	// NOTE: Parallelism in the 1st loop is unattainable due to the
+	// inter-iteration dependencies present in trsm.
 	bli_thread_range_jrir( thread, n_iter, 1, FALSE, &jr_start, &jr_end, &jr_inc );
 
-	/* Loop over the n dimension (NR columns at a time). */
+	// Loop over the n dimension (NR columns at a time).
 	for ( dim_t j = jr_start; j < jr_end; j += jr_inc )
 	{
 		const char* b1 = b_cast + j * cstep_b;
 		      char* c1 = c_cast + j * cstep_c;
 
-	          dim_t n_cur = ( bli_is_not_edge_f( j, n_iter, n_left ) ? NR : n_left );
+		      dim_t n_cur = ( bli_is_not_edge_f( j, n_iter, n_left ) ? NR : n_left );
 
-		/* Initialize our next panel of B to be the current panel of B. */
+		// Initialize our next panel of B to be the current panel of B.
 		const char* b2  = b1;
 
 		const char* a1  = a_cast;
 		      char* c11 = c1 + (0  )*rstep_c;
 
-		/* Loop over the m dimension (MR rows at a time). */
+		// Loop over the m dimension (MR rows at a time).
 		for ( dim_t i = 0; i < m_iter; ++i )
 		{
 			doff_t diagoffa_i = diagoffa + ( doff_t )i*MR;
 
 			dim_t m_cur = ( bli_is_not_edge_f( i, m_iter, m_left ) ? MR : m_left );
 
-			/* If the current panel of A intersects the diagonal, use a
-			   special micro-kernel that performs a fused gemm and trsm.
-			   If the current panel of A resides below the diagonal, use a
-			   a regular gemm micro-kernel. Otherwise, if it is above the
-			   diagonal, it was not packed (because it is implicitly zero)
-			   and so we do nothing. */
+			// If the current panel of A intersects the diagonal, use a
+			// special micro-kernel that performs a fused gemm and trsm.
+			// If the current panel of A resides below the diagonal, use a
+			// a regular gemm micro-kernel. Otherwise, if it is above the
+			// diagonal, it was not packed (because it is implicitly zero)
+			// and so we do nothing.
 			if ( bli_intersects_diag_n( diagoffa_i, MR, k ) )
 			{
-				/* Compute various offsets into and lengths of parts of A. */
+				// Compute various offsets into and lengths of parts of A.
 				dim_t off_a10 = 0;
 				dim_t k_a1011 = diagoffa_i + MR;
 				dim_t k_a10   = k_a1011 - MR;
 				dim_t off_a11 = k_a10;
 
-				/* Compute the panel stride for the current diagonal-
-				   intersecting micro-panel. */
+				// Compute the panel stride for the current diagonal-
+				// intersecting micro-panel.
 				inc_t ps_a_cur  = k_a1011 * PACKMR;
 				      ps_a_cur += ( bli_is_odd( ps_a_cur ) ? 1 : 0 );
-                      ps_a_cur *= dt_size;
+				      ps_a_cur *= dt_size;
 
-				/* Compute the addresses of the panel A10 and the triangular
-				   block A11. */
+				// Compute the addresses of the panel A10 and the triangular
+				// block A11.
 				const char* a10 = a1;
 				const char* a11 = a1 + k_a10 * PACKMR * dt_size;
-				/*a11 = bli_ptr_inc_by_frac( a1, sizeof( ctype ), k_a10 * PACKMR, 1 );*/
+				//a11 = bli_ptr_inc_by_frac( a1, sizeof( ctype ), k_a10 * PACKMR, 1 );
 
-				/* Compute the addresses of the panel B01 and the block
-				   B11. */
+				// Compute the addresses of the panel B01 and the block
+				// B11.
 				const char* b01 = b1 + off_a10 * PACKNR * dt_size;
 				const char* b11 = b1 + off_a11 * PACKNR * dt_size;
 
-				/* Compute the addresses of the next panels of A and B. */
+				// Compute the addresses of the next panels of A and B.
 				const char* a2 = a1 + ps_a_cur;
 				if ( bli_is_last_iter_rr( i, m_iter, 0, 1 ) )
 				{
@@ -262,8 +262,8 @@ void bli_trsm_ll_ker_var2
 						b2 = b_cast;
 				}
 
-				/* Save addresses of next panels of A and B to the auxinfo_t
-				   object. */
+				// Save addresses of next panels of A and B to the auxinfo_t
+				// object.
 				bli_auxinfo_set_next_a( a2, &aux );
 				bli_auxinfo_set_next_b( b2, &aux );
 
@@ -286,7 +286,7 @@ void bli_trsm_ll_ker_var2
 			}
 			else if ( bli_is_strictly_below_diag_n( diagoffa_i, MR, k ) )
 			{
-				/* Compute the addresses of the next panels of A and B. */
+				// Compute the addresses of the next panels of A and B.
 				const char* a2 = a1 + rstep_a;
 				if ( bli_is_last_iter_rr( i, m_iter, 0, 1 ) )
 				{
@@ -296,12 +296,12 @@ void bli_trsm_ll_ker_var2
 						b2 = b_cast;
 				}
 
-				/* Save addresses of next panels of A and B to the auxinfo_t
-				   object. */
+				// Save addresses of next panels of A and B to the auxinfo_t
+				// object.
 				bli_auxinfo_set_next_a( a2, &aux );
 				bli_auxinfo_set_next_b( b2, &aux );
 
-				/* Invoke the gemm micro-kernel. */
+				// Invoke the gemm micro-kernel.
 				gemm_ukr
 				(
 				  m_cur,
@@ -322,22 +322,18 @@ void bli_trsm_ll_ker_var2
 			c11 += rstep_c;
 		}
 	}
+}
 
 /*
 PASTEMAC(d,fprintm)( stdout, "trsm_ll_ker_var2: a11p_r computed", MR, MR,
                      ( double* )a11, 1, PACKMR, "%4.1f", "" );
-*/
 
-/*
 PASTEMAC(ch,fprintm)( stdout, "trsm_ll_ker_var2: a1 (diag)", MR, k_a1011, a1, 1, MR, "%5.2f", "" );
 PASTEMAC(ch,fprintm)( stdout, "trsm_ll_ker_var2: a11 (diag)", MR, MR, a11, 1, MR, "%5.2f", "" );
 PASTEMAC(ch,fprintm)( stdout, "trsm_ll_ker_var2: b1 (diag)", k_a1011, NR, bp_i, NR, 1, "%5.2f", "" );
 PASTEMAC(ch,fprintm)( stdout, "trsm_ll_ker_var2: bp11 (diag)", MR, NR, bp11, NR, 1, "%5.2f", "" );
-*/
 
-/*
 PASTEMAC(ch,fprintm)( stdout, "trsm_ll_ker_var2: a1 (ndiag)", MR, k_full, a1, 1, MR, "%5.2f", "" );
 PASTEMAC(ch,fprintm)( stdout, "trsm_ll_ker_var2: b1 (ndiag)", k_full, NR, bp, NR, 1, "%5.2f", "" );
 */
-}
 

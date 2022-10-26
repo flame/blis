@@ -53,13 +53,6 @@ cntl_t* bli_gemmbp_cntl_create
        void_fp ker
      );
 
-#if 0
-cntl_t* bli_gemmpb_cntl_create
-     (
-       opid_t family,
-     );
-#endif
-
 // -----------------------------------------------------------------------------
 
 void bli_gemm_cntl_free

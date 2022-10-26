@@ -46,11 +46,11 @@ struct thrinfo_s
 	// Our thread id within the thread communicator.
 	dim_t              thread_id;
 
-	// The number of communicators which are "siblings" of our communicator
+	// The number of communicators which are "siblings" of our communicator.
 	dim_t              n_way;
 
-	// What we're working on. This is the same for all threads in the same
-    // communicator, and 0 <= work_id < n_way.
+	// An id to identify what we're working on. This is the same for all threads
+	// in the same communicator, and 0 <= work_id < n_way.
 	dim_t              work_id;
 
 	// When freeing, should the communicators in this node be freed? Usually,
@@ -65,7 +65,7 @@ struct thrinfo_s
 	// The packing block allocator.
 	pba_t*             pba;
 
-	// Storage for allocated memory obtained from the PBA.
+	// Storage for allocated memory obtained from the packing block allocator.
 	mem_t              mem;
 
 	struct thrinfo_s*  sub_prenode;
@@ -224,8 +224,7 @@ thrinfo_t* bli_thrinfo_create
        pba_t*     pba
      );
 
-BLIS_EXPORT_BLIS
-void bli_thrinfo_free
+BLIS_EXPORT_BLIS void bli_thrinfo_free
      (
        thrinfo_t* thread
      );

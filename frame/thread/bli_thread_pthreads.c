@@ -40,8 +40,8 @@
 typedef struct thread_data
 {
 	      dim_t         tid;
-          thrcomm_t*    gl_comm;
-          thread_func_t func;
+	      thrcomm_t*    gl_comm;
+	      thread_func_t func;
 	const void*         params;
 } thread_data_t;
 
@@ -50,12 +50,14 @@ static void* bli_posix_thread_entry( void* data_void )
 {
 	const thread_data_t* data     = data_void;
 
-	const dim_t         tid      = data->tid;
-	      thrcomm_t*    gl_comm  = data->gl_comm;
-          thread_func_t func     = data->func;
-	const void*         params   = data->params;
+	const dim_t          tid      = data->tid;
+	      thrcomm_t*     gl_comm  = data->gl_comm;
+          thread_func_t  func     = data->func;
+	const void*          params   = data->params;
 
-    func( gl_comm, tid, params );
+	// Call the thread entry point, passing the global communicator, the
+	// thread id, and the params struct as arguments.
+	func( gl_comm, tid, params );
 
 	return NULL;
 }
@@ -64,8 +66,11 @@ void bli_thread_launch_pthreads( dim_t n_threads, thread_func_t func, const void
 {
 	err_t r_val;
 
+	const timpl_t ti = BLIS_POSIX;
+
 	// Allocate a global communicator for the root thrinfo_t structures.
-	thrcomm_t* gl_comm = bli_thrcomm_create( BLIS_POSIX, NULL, n_threads );
+	pool_t*    gl_comm_pool = NULL;
+	thrcomm_t* gl_comm      = bli_thrcomm_create( ti, gl_comm_pool, n_threads );
 
 	// Allocate an array of pthread objects and auxiliary data structs to pass
 	// to the thread entry functions.
@@ -104,9 +109,10 @@ void bli_thread_launch_pthreads( dim_t n_threads, thread_func_t func, const void
 	}
 
 	// Free the global communicator, because the root thrinfo_t node
-    // never frees its communicator.
-    bli_thrcomm_free( NULL, gl_comm );
+	// never frees its communicator.
+	bli_thrcomm_free( gl_comm_pool, gl_comm );
 
+	// Free the array of pthread objects and auxiliary data structs.
 	#ifdef BLIS_ENABLE_MEM_TRACING
 	printf( "bli_l3_thread_decorator().pth: " );
 	#endif

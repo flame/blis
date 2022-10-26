@@ -53,13 +53,13 @@ thrinfo_t* bli_l3_thrinfo_create
 	(
 	  gl_comm,
 	  id,
-      pool,
-      bli_pba_query()
+	  pool,
+	  bli_pba_query()
 	);
 
-    bli_l3_thrinfo_grow( root, rntm, cntl );
+	bli_l3_thrinfo_grow( root, rntm, cntl );
 
-    return root;
+	return root;
 }
 
 void bli_l3_thrinfo_grow
@@ -69,36 +69,36 @@ void bli_l3_thrinfo_grow
        const cntl_t*     cntl
      )
 {
-    const cntl_t* sub_prenode = bli_cntl_sub_prenode( cntl );
-    const cntl_t* sub_node    = bli_cntl_sub_node( cntl );
-    const bszid_t bszid       = bli_cntl_bszid( cntl );
-    const dim_t   n_way       = bli_rntm_ways_for( bszid, rntm );
+	const cntl_t* sub_prenode = bli_cntl_sub_prenode( cntl );
+	const cntl_t* sub_node    = bli_cntl_sub_node( cntl );
+	const bszid_t bszid       = bli_cntl_bszid( cntl );
+	const dim_t   n_way       = bli_rntm_ways_for( bszid, rntm );
 
-    thrinfo_t* thread_cur = bli_thrinfo_split( n_way, thread_par );
-    bli_thrinfo_set_sub_node( thread_cur, thread_par );
+	thrinfo_t* thread_cur = bli_thrinfo_split( n_way, thread_par );
+	bli_thrinfo_set_sub_node( thread_cur, thread_par );
 
-    if ( sub_prenode != NULL )
-    {
-        // A pre-node is only used in the IC loop of trsm. In this case,
-        // we cannot actually thread in the m dimension due to data dependencies
-        // and so all parallelism must be moved down to the JR loop.
-        rntm_t rntm_l = *rntm;
-        const dim_t ic_nway = bli_rntm_ic_ways( &rntm_l );
-        const dim_t jr_nway = bli_rntm_jr_ways( &rntm_l );
-        bli_rntm_set_ic_ways_only(               1, &rntm_l );
-        bli_rntm_set_jr_ways_only( ic_nway*jr_nway, &rntm_l );
+	if ( sub_prenode != NULL )
+	{
+		// A pre-node is only used in the IC loop of trsm. In this case,
+		// we cannot actually thread in the m dimension due to data dependencies
+		// and so all parallelism must be moved down to the JR loop.
+		rntm_t rntm_l = *rntm;
+		const dim_t ic_nway = bli_rntm_ic_ways( &rntm_l );
+		const dim_t jr_nway = bli_rntm_jr_ways( &rntm_l );
+		bli_rntm_set_ic_ways_only(               1, &rntm_l );
+		bli_rntm_set_jr_ways_only( ic_nway*jr_nway, &rntm_l );
 
-        // Use thread_pre instead of thread_cur since we *don't* want to
-        // do any parallelism at this level.
-        thrinfo_t* thread_pre = bli_thrinfo_split( 1, thread_par );
-        bli_thrinfo_set_sub_prenode( thread_pre, thread_par );
-        bli_l3_thrinfo_grow( thread_pre, &rntm_l, sub_prenode );
-    }
+		// Use thread_pre instead of thread_cur since we *don't* want to
+		// do any parallelism at this level.
+		thrinfo_t* thread_pre = bli_thrinfo_split( 1, thread_par );
+		bli_thrinfo_set_sub_prenode( thread_pre, thread_par );
+		bli_l3_thrinfo_grow( thread_pre, &rntm_l, sub_prenode );
+	}
 
-    if ( sub_node != NULL )
-    {
-        bli_l3_thrinfo_grow( thread_cur, rntm, sub_node );
-    }
+	if ( sub_node != NULL )
+	{
+		bli_l3_thrinfo_grow( thread_cur, rntm, sub_node );
+	}
 }
 
 // -----------------------------------------------------------------------------
@@ -116,33 +116,33 @@ thrinfo_t* bli_l3_sup_thrinfo_create
 	(
 	  gl_comm,
 	  id,
-      pool,
-      bli_pba_query()
+	  pool,
+	  bli_pba_query()
 	);
 
-    const dim_t n_way_jc = bli_rntm_ways_for( BLIS_NC, rntm );
-    const dim_t n_way_pc = bli_rntm_ways_for( BLIS_KC, rntm );
-    const dim_t n_way_ic = bli_rntm_ways_for( BLIS_MC, rntm );
-    const dim_t n_way_jr = bli_rntm_ways_for( BLIS_NR, rntm );
-    const dim_t n_way_ir = bli_rntm_ways_for( BLIS_MR, rntm );
+	const dim_t n_way_jc = bli_rntm_ways_for( BLIS_NC, rntm );
+	const dim_t n_way_pc = bli_rntm_ways_for( BLIS_KC, rntm );
+	const dim_t n_way_ic = bli_rntm_ways_for( BLIS_MC, rntm );
+	const dim_t n_way_jr = bli_rntm_ways_for( BLIS_NR, rntm );
+	const dim_t n_way_ir = bli_rntm_ways_for( BLIS_MR, rntm );
 
-    thrinfo_t* thread_jc = bli_thrinfo_split( n_way_jc,      root );
-    thrinfo_t* thread_pc = bli_thrinfo_split( n_way_pc, thread_jc );
-    thrinfo_t* thread_pb = bli_thrinfo_split(        1, thread_pc );
-    thrinfo_t* thread_ic = bli_thrinfo_split( n_way_ic, thread_pb );
-    thrinfo_t* thread_pa = bli_thrinfo_split(        1, thread_ic );
-    thrinfo_t* thread_jr = bli_thrinfo_split( n_way_jr, thread_pa );
-    thrinfo_t* thread_ir = bli_thrinfo_split( n_way_ir, thread_jr );
+	thrinfo_t* thread_jc = bli_thrinfo_split( n_way_jc,      root );
+	thrinfo_t* thread_pc = bli_thrinfo_split( n_way_pc, thread_jc );
+	thrinfo_t* thread_pb = bli_thrinfo_split(        1, thread_pc );
+	thrinfo_t* thread_ic = bli_thrinfo_split( n_way_ic, thread_pb );
+	thrinfo_t* thread_pa = bli_thrinfo_split(        1, thread_ic );
+	thrinfo_t* thread_jr = bli_thrinfo_split( n_way_jr, thread_pa );
+	thrinfo_t* thread_ir = bli_thrinfo_split( n_way_ir, thread_jr );
 
-    bli_thrinfo_set_sub_node( thread_jc,      root );
-    bli_thrinfo_set_sub_node( thread_pc, thread_jc );
-    bli_thrinfo_set_sub_node( thread_pb, thread_pc );
-    bli_thrinfo_set_sub_node( thread_ic, thread_pb );
-    bli_thrinfo_set_sub_node( thread_pa, thread_ic );
-    bli_thrinfo_set_sub_node( thread_jr, thread_pa );
-    bli_thrinfo_set_sub_node( thread_ir, thread_jr );
+	bli_thrinfo_set_sub_node( thread_jc,      root );
+	bli_thrinfo_set_sub_node( thread_pc, thread_jc );
+	bli_thrinfo_set_sub_node( thread_pb, thread_pc );
+	bli_thrinfo_set_sub_node( thread_ic, thread_pb );
+	bli_thrinfo_set_sub_node( thread_pa, thread_ic );
+	bli_thrinfo_set_sub_node( thread_jr, thread_pa );
+	bli_thrinfo_set_sub_node( thread_ir, thread_jr );
 
-    return root;
+	return root;
 }
 
 void bli_l3_sup_thrinfo_update
@@ -151,18 +151,18 @@ void bli_l3_sup_thrinfo_update
              thrinfo_t** root
      )
 {
-    thrcomm_t* gl_comm = bli_thrinfo_comm( *root );
-    dim_t      tid     = bli_thrinfo_thread_id( *root );
-    pool_t*    pool    = bli_thrinfo_sba_pool( *root );
-    dim_t      nt      = bli_thrinfo_num_threads( *root );
+	thrcomm_t* gl_comm = bli_thrinfo_comm( *root );
+	dim_t      tid     = bli_thrinfo_thread_id( *root );
+	pool_t*    pool    = bli_thrinfo_sba_pool( *root );
+	dim_t      nt      = bli_thrinfo_num_threads( *root );
 
-    // Return early in single-threaded execution
-    // since the thread control tree may not have been
-    // allocated normally
-    if ( nt == 1 ) return;
+	// Return early in single-threaded execution
+	// since the thread control tree may not have been
+	// allocated normally
+	if ( nt == 1 ) return;
 
-    bli_thrinfo_free( *root );
-    *root = bli_l3_sup_thrinfo_create( tid, gl_comm, pool, rntm );
+	bli_thrinfo_free( *root );
+	*root = bli_l3_sup_thrinfo_create( tid, gl_comm, pool, rntm );
 }
 
 // -----------------------------------------------------------------------------
@@ -258,7 +258,7 @@ void bli_l3_thrinfo_print_gemm_paths
 	( unsigned long )jr_nt,
 	( unsigned long )ir_nt );
 	printf( "xx_way:   %4ld %4ld %4ld %4ld %4ld %4ld %4ld\n",
-    ( unsigned long )jc_way,
+	( unsigned long )jc_way,
 	( unsigned long )pc_way,
 	( unsigned long )pb_way,
 	( unsigned long )ic_way,

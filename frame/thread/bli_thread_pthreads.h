@@ -38,7 +38,12 @@
 // Definitions specific to situations when POSIX multithreading is enabled.
 #ifdef BLIS_ENABLE_PTHREADS
 
-void bli_thread_launch_pthreads( dim_t nt, thread_func_t func, const void* params );
+void bli_thread_launch_pthreads
+     (
+             dim_t         nt,
+             thread_func_t func,
+       const void*         params
+     );
 
 #endif
 

@@ -51,8 +51,7 @@ void bli_l3_cntl_create_if
              cntl_t** cntl_use
      );
 
-BLIS_EXPORT_BLIS
-void bli_l3_cntl_free
+BLIS_EXPORT_BLIS void bli_l3_cntl_free
      (
        pool_t* pool,
        cntl_t* cntl_use

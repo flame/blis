@@ -73,18 +73,18 @@ cntl_t* bli_trsm_l_cntl_create
 
 	cntl_t* gemm_cntl_bu_ke = bli_trsm_cntl_create_node
 	(
-	  pool,    // the thread's runtime structure
-	  family,  // the operation family
-	  BLIS_MR, // needed for bli_thrinfo_rgrow()
-	  NULL,    // variant function pointer not used
-	  NULL     // no sub-node; this is the leaf of the tree.
+	  pool,         // the thread's sba pool
+	  family,       // the operation family
+	  BLIS_MR,
+	  NULL,         // variant function pointer not used
+	  NULL          // no sub-node; this is the leaf of the tree.
 	);
 
 	cntl_t* gemm_cntl_bp_bu = bli_trsm_cntl_create_node
 	(
 	  pool,
 	  family,
-	  BLIS_NR, // not used by macro-kernel, but needed for bli_thrinfo_rgrow()
+	  BLIS_NR,
 	  macro_kernel_p,
 	  gemm_cntl_bu_ke
 	);
@@ -96,10 +96,10 @@ cntl_t* bli_trsm_l_cntl_create
 	  bli_l3_packa, // trsm operation's packm function for A.
 	  BLIS_MR,
 	  BLIS_MR,
-	  FALSE,   // do NOT invert diagonal
-	  TRUE,    // reverse iteration if upper?
-	  FALSE,   // reverse iteration if lower?
-	  schema_a, // normally BLIS_PACKED_ROW_PANELS
+	  FALSE,        // do NOT invert diagonal
+	  TRUE,         // reverse iteration if upper?
+	  FALSE,        // reverse iteration if lower?
+	  schema_a,     // normally BLIS_PACKED_ROW_PANELS
 	  BLIS_BUFFER_FOR_A_BLOCK,
 	  gemm_cntl_bp_bu
 	);
@@ -110,18 +110,18 @@ cntl_t* bli_trsm_l_cntl_create
 
 	cntl_t* trsm_cntl_bu_ke = bli_trsm_cntl_create_node
 	(
-	  pool,    // the thread's runtime structure
-	  family,  // the operation family
-	  BLIS_MR, // needed for bli_thrinfo_rgrow()
-	  NULL,    // variant function pointer not used
-	  NULL     // no sub-node; this is the leaf of the tree.
+	  pool,         // the thread's sba pool
+	  family,       // the operation family
+	  BLIS_MR,
+	  NULL,         // variant function pointer not used
+	  NULL          // no sub-node; this is the leaf of the tree.
 	);
 
 	cntl_t* trsm_cntl_bp_bu = bli_trsm_cntl_create_node
 	(
 	  pool,
 	  family,
-	  BLIS_NR, // not used by macro-kernel, but needed for bli_thrinfo_rgrow()
+	  BLIS_NR,
 	  macro_kernel_p,
 	  trsm_cntl_bu_ke
 	);
@@ -134,13 +134,13 @@ cntl_t* bli_trsm_l_cntl_create
 	  BLIS_MR,
 	  BLIS_MR,
 #ifdef BLIS_ENABLE_TRSM_PREINVERSION
-	  TRUE,    // invert diagonal
+	  TRUE,         // invert diagonal
 #else
-	  FALSE,   // do NOT invert diagonal
+	  FALSE,        // do NOT invert diagonal
 #endif
-	  TRUE,    // reverse iteration if upper?
-	  FALSE,   // reverse iteration if lower?
-	  schema_a, // normally BLIS_PACKED_ROW_PANELS
+	  TRUE,         // reverse iteration if upper?
+	  FALSE,        // reverse iteration if lower?
+	  schema_a,     // normally BLIS_PACKED_ROW_PANELS
 	  BLIS_BUFFER_FOR_A_BLOCK,
 	  trsm_cntl_bp_bu
 	);
@@ -170,10 +170,10 @@ cntl_t* bli_trsm_l_cntl_create
 	  bli_l3_packb,
 	  BLIS_NR,
 	  BLIS_MR,
-	  FALSE,   // do NOT invert diagonal
-	  FALSE,   // reverse iteration if upper?
-	  FALSE,   // reverse iteration if lower?
-	  schema_b, // normally BLIS_PACKED_COL_PANELS
+	  FALSE,        // do NOT invert diagonal
+	  FALSE,        // reverse iteration if upper?
+	  FALSE,        // reverse iteration if lower?
+	  schema_b,     // normally BLIS_PACKED_COL_PANELS
 	  BLIS_BUFFER_FOR_B_PANEL,
 	  trsm_cntl_op_bp
 	);

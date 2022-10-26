@@ -46,7 +46,7 @@ void bli_trsm_rl_ker_var2
      )
 {
 	const num_t     dt        = bli_obj_exec_dt( c );
-    const dim_t     dt_size   = bli_dt_size ( dt );
+	const dim_t     dt_size   = bli_dt_size ( dt );
 
 	      doff_t    diagoffb  = bli_obj_diag_offset( b );
 
@@ -87,18 +87,18 @@ void bli_trsm_rl_ker_var2
 	// packing.
 	const void* buf_alpha2 = bli_obj_internal_scalar_buffer( c );
 
-	/* Alias some constants to simpler names. */
+	// Alias some constants to simpler names.
 	const dim_t     MR          = pd_a;
 	const dim_t     NR          = pd_b;
 	const dim_t     PACKMR      = cs_a;
 	const dim_t     PACKNR      = rs_b;
 
-	/* Cast the micro-kernel address to its function pointer type. */
-	/* NOTE: We use the upper-triangular gemmtrsm ukernel because, while
-	   the current macro-kernel targets the "rl" case (right-side/lower-
-	   triangular), it becomes upper-triangular after the kernel operation
-	   is transposed so that all kernel instances are of the "left"
-	   variety (since those are the only trsm ukernels that exist). */
+	// Cast the micro-kernel address to its function pointer type.
+	// NOTE: We use the upper-triangular gemmtrsm ukernel because, while
+	// the current macro-kernel targets the "rl" case (right-side/lower-
+	// triangular), it becomes upper-triangular after the kernel operation
+	// is transposed so that all kernel instances are of the "left"
+	// variety (since those are the only trsm ukernels that exist).
 	gemmtrsm_ukr_vft gemmtrsm_ukr = bli_cntx_get_l3_vir_ukr_dt( dt, BLIS_GEMMTRSM_U_UKR, cntx );
 	gemm_ukr_vft     gemm_ukr     = bli_cntx_get_l3_vir_ukr_dt( dt, BLIS_GEMM_UKR, cntx );
 
@@ -149,7 +149,7 @@ void bli_trsm_rl_ker_var2
 	   adjust the pointer to B since packm would have simply skipped over
 	   the region that was not stored. */
 	if ( diagoffb < 0 )
-	{\
+	{
 		k        += diagoffb;
 		a_cast   -= diagoffb * PACKMR * dt_size;
 		diagoffb  = 0;
@@ -185,10 +185,10 @@ void bli_trsm_rl_ker_var2
 	   dimension that is a multiple of PACKNR, with the region between the
 	   last column and the next multiple of NR zero-padded accordingly. */
 
-    thrinfo_t* thread = bli_thrinfo_sub_node( thread_par );
+	thrinfo_t* thread = bli_thrinfo_sub_node( thread_par );
 
 	/* Compute number of primary and leftover components of the m and n
-       dimensions. */
+	   dimensions. */
 	dim_t n_iter = n / NR;
 	dim_t n_left = n % NR;
 
@@ -209,7 +209,7 @@ void bli_trsm_rl_ker_var2
 	/* Save the pack schemas of A and B to the auxinfo_t object.
 	   NOTE: We swap the values for A and B since the triangular
 	   "A" matrix is actually contained within B. */
-    auxinfo_t aux;
+	auxinfo_t aux;
 	bli_auxinfo_set_schema_a( schema_b, &aux );
 	bli_auxinfo_set_schema_b( schema_a, &aux );
 
@@ -254,8 +254,8 @@ void bli_trsm_rl_ker_var2
 
 			/* Compute the panel stride for the current micro-panel. */
 			inc_t ps_b_cur  = k_b1121 * PACKNR;
-    			  ps_b_cur += ( bli_is_odd( ps_b_cur ) ? 1 : 0 );
-    			  ps_b_cur *= dt_size;
+				  ps_b_cur += ( bli_is_odd( ps_b_cur ) ? 1 : 0 );
+				  ps_b_cur *= dt_size;
 
 			/* Loop over the m dimension (MR rows at a time). */
 			for ( dim_t i = 0; i < m_iter; ++i )

@@ -50,7 +50,7 @@ void bli_packm_int
 
 	// Barrier so that we know threads are done with previous computation
 	// with the same packing buffer before starting to pack.
-    thrinfo_t* thread = bli_thrinfo_sub_node( thread_par );
+	thrinfo_t* thread = bli_thrinfo_sub_node( thread_par );
 	bli_thrinfo_barrier( thread );
 
 	// Invoke the variant with kappa_use.

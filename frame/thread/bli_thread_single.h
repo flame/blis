@@ -35,7 +35,12 @@
 #ifndef BLIS_THREAD_SINGLE_H
 #define BLIS_THREAD_SINGLE_H
 
-void bli_thread_launch_single( dim_t nt, thread_func_t func, const void* params );
+void bli_thread_launch_single
+     (
+             dim_t         nt,
+             thread_func_t func,
+       const void*         params
+     );
 
 #endif
 

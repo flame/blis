@@ -61,7 +61,7 @@ void bli_unpackm_int
 	f = bli_cntl_unpackm_params_var_func( cntl );
 
 	// Invoke the variant.
-    if ( bli_thrinfo_am_chief( thread ) )
+	if ( bli_thrinfo_am_chief( thread ) )
 	{
 		f
 		(

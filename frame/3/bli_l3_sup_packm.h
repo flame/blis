@@ -36,13 +36,13 @@
 
 void bli_packm_sup_init_mem
      (
-         bool       will_pack,
-         packbuf_t  pack_buf_type,
-         num_t      dt,
-         dim_t      m,
-         dim_t      k,
-         dim_t      mr,
-         thrinfo_t* thread
+       bool       will_pack,
+       packbuf_t  pack_buf_type,
+       num_t      dt,
+       dim_t      m,
+       dim_t      k,
+       dim_t      mr,
+       thrinfo_t* thread
      );
 
 void bli_packm_sup_finalize_mem

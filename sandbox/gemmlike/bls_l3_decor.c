@@ -67,8 +67,8 @@ static void bls_l3_thread_decorator_entry( thrcomm_t* gl_comm, dim_t tid, const 
 	( void )family;
 
 	// Create the root node of the thread's thrinfo_t structure.
-	pool_t*    pool   = bli_apool_array_elem( tid, array );
-	thrinfo_t* thread = bli_l3_sup_thrinfo_create( tid, gl_comm, pool, rntm );
+	pool_t*    sba_pool = bli_apool_array_elem( tid, array );
+	thrinfo_t* thread   = bli_l3_sup_thrinfo_create( tid, gl_comm, sba_pool, rntm );
 
 	func
 	(
@@ -140,6 +140,8 @@ void bls_l3_thread_decorator
 	// resize the array_t, if necessary.
 	array_t* array = bli_sba_checkout_array( nt );
 
+	// Declare a params struct and embed within it all of the information
+	// that is relevant to the computation.
 	l3_sbx_decor_params_t params;
 	params.func   = func;
 	params.family = family;
@@ -152,8 +154,14 @@ void bls_l3_thread_decorator
 	params.rntm   = &rntm_l;
 	params.array  = array;
 
+	// Launch the threads using the threading implementation specified by ti,
+	// and use bli_l3_thread_decorator_entry() as their entry points. The
+	// params struct will be passed along to each thread.
 	bli_thread_launch( ti, nt, bls_l3_thread_decorator_entry, &params );
 
+	// Check the array_t back into the small block allocator. Similar to the
+	// check-out, this is done using a lock embedded within the sba to ensure
+	// mutual exclusion.
 	bli_sba_checkin_array( array );
 }
 

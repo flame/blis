@@ -37,11 +37,11 @@
 
 void bli_gemm_blk_var2
      (
-       const obj_t*  a,
-       const obj_t*  b,
-       const obj_t*  c,
-       const cntx_t* cntx,
-       const cntl_t* cntl,
+       const obj_t*     a,
+       const obj_t*     b,
+       const obj_t*     c,
+       const cntx_t*    cntx,
+       const cntl_t*    cntl,
              thrinfo_t* thread_par
      )
 {
@@ -57,7 +57,7 @@ void bli_gemm_blk_var2
 
 	// Determine the current thread's subpartition range.
 	dim_t my_start, my_end;
-    thrinfo_t* thread = bli_thrinfo_sub_node( thread_par );
+	thrinfo_t* thread = bli_thrinfo_sub_node( thread_par );
 	bli_thread_range_ndim
 	(
 	  direct, thread, a, &bp, &cp, cntl, cntx,

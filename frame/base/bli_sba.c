@@ -65,7 +65,6 @@ void* bli_sba_acquire
 	err_t r_val;
 
 #ifdef BLIS_ENABLE_SBA_POOLS
-	pblk_t pblk;
 
 	// We don't expect NULL sba_pool pointers in the normal course of BLIS
 	// operation. However, there are rare instances where it is convenient
@@ -81,6 +80,8 @@ void* bli_sba_acquire
 	}
 	else
 	{
+		pblk_t pblk;
+
 		// Query the block_size of the pool_t so that we can request the exact
 		// size present.
 		const siz_t block_size = bli_pool_block_size( pool );
@@ -100,6 +101,7 @@ void* bli_sba_acquire
 		// The block address is stored within the pblk_t.
 		block = bli_pblk_buf( &pblk );
 	}
+
 #else
 
 	block = bli_malloc_intl( req_size, &r_val );
@@ -117,7 +119,6 @@ void bli_sba_release
      )
 {
 #ifdef BLIS_ENABLE_SBA_POOLS
-	pblk_t pblk;
 
 	if ( pool == NULL )
 	{
@@ -125,6 +126,8 @@ void bli_sba_release
 	}
 	else
 	{
+		pblk_t pblk;
+
 		// Query the block_size field from the pool. This is not super-important
 		// for this particular application of the pool_t (that is, the "leaf"
 		// component of the sba), but it seems like good housekeeping to maintain
@@ -141,6 +144,7 @@ void bli_sba_release
 		// data structure--an array of pblk_t.)
 		bli_pool_checkin_block( &pblk, pool );
 	}
+
 #else
 
 	bli_free_intl( block );
@@ -153,11 +157,11 @@ array_t* bli_sba_checkout_array
        const siz_t n_threads
      )
 {
-	#ifndef BLIS_ENABLE_SBA_POOLS
-	return NULL;
-	#endif
-
+#ifdef BLIS_ENABLE_SBA_POOLS
 	return bli_apool_checkout_array( n_threads, &sba );
+#else
+	return NULL;
+#endif
 }
 
 void bli_sba_checkin_array
@@ -165,11 +169,10 @@ void bli_sba_checkin_array
        array_t* array
      )
 {
-	#ifndef BLIS_ENABLE_SBA_POOLS
-	return;
-	#endif
-
+#ifdef BLIS_ENABLE_SBA_POOLS
 	bli_apool_checkin_array( array, &sba );
+#else
+	return;
+#endif
 }
-
 

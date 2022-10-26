@@ -45,16 +45,16 @@ thrinfo_t* bli_thrinfo_create_root
        pba_t*     pba
      )
 {
-    return bli_thrinfo_create
-     (
-       comm,
-       thread_id,
-       1,
-       0,
-       FALSE,
-       sba_pool,
-       pba
-     );
+	return bli_thrinfo_create
+	(
+	  comm,
+	  thread_id,
+	  1,
+	  0,
+	  FALSE,
+	  sba_pool,
+	  pba
+	);
 }
 
 thrinfo_t* bli_thrinfo_create
@@ -72,21 +72,21 @@ thrinfo_t* bli_thrinfo_create
 	printf( "bli_thrinfo_create(): " );
 	#endif
 
-    thrinfo_t* thread = bli_sba_acquire( sba_pool, sizeof( thrinfo_t ) );
+	thrinfo_t* thread = bli_sba_acquire( sba_pool, sizeof( thrinfo_t ) );
 
 	bli_thrinfo_set_comm( comm, thread );
 	bli_thrinfo_set_thread_id( thread_id, thread );
 	bli_thrinfo_set_n_way( n_way, thread );
 	bli_thrinfo_set_work_id( work_id, thread );
 	bli_thrinfo_set_free_comm( free_comm, thread );
-    bli_thrinfo_set_sba_pool( sba_pool, thread );
-    bli_thrinfo_set_pba( pba, thread );
-    bli_mem_clear( bli_thrinfo_mem( thread ) );
+	bli_thrinfo_set_sba_pool( sba_pool, thread );
+	bli_thrinfo_set_pba( pba, thread );
+	bli_mem_clear( bli_thrinfo_mem( thread ) );
 
 	bli_thrinfo_set_sub_node( NULL, thread );
 	bli_thrinfo_set_sub_prenode( NULL, thread );
 
-    return thread;
+	return thread;
 }
 
 void bli_thrinfo_free
@@ -98,9 +98,9 @@ void bli_thrinfo_free
 
 	thrinfo_t* thrinfo_sub_prenode = bli_thrinfo_sub_prenode( thread );
 	thrinfo_t* thrinfo_sub_node    = bli_thrinfo_sub_node( thread );
-    pool_t*    sba_pool            = bli_thrinfo_sba_pool( thread );
+	pool_t*    sba_pool            = bli_thrinfo_sba_pool( thread );
 	mem_t*     cntl_mem_p          = bli_thrinfo_mem( thread );
-    pba_t*     pba                 = bli_thrinfo_pba( thread );
+	pba_t*     pba                 = bli_thrinfo_pba( thread );
 
 	// Recursively free all children of the current thrinfo_t.
 	if ( thrinfo_sub_prenode != NULL )
@@ -151,11 +151,12 @@ thrinfo_t* bli_thrinfo_split
        thrinfo_t* thread_par
      )
 {
-    const timpl_t ti                 = bli_thrcomm_thread_impl( bli_thrinfo_comm( thread_par ) );
-	const dim_t   parent_num_threads = bli_thrinfo_num_threads( thread_par );
-	const dim_t   parent_thread_id   = bli_thrinfo_thread_id( thread_par );
-          pool_t* sba_pool           = bli_thrinfo_sba_pool( thread_par );
-          pba_t*  pba                = bli_thrinfo_pba( thread_par );
+	      thrcomm_t* parent_comm        = bli_thrinfo_comm( thread_par );
+	const timpl_t    ti                 = bli_thrcomm_thread_impl( parent_comm );
+	const dim_t      parent_num_threads = bli_thrinfo_num_threads( thread_par );
+	const dim_t      parent_thread_id   = bli_thrinfo_thread_id( thread_par );
+	      pool_t*    sba_pool           = bli_thrinfo_sba_pool( thread_par );
+	      pba_t*     pba                = bli_thrinfo_pba( thread_par );
 
 	// Sanity check: make sure the number of threads in the parent's
 	// communicator is divisible by the number of new sub-groups.
@@ -170,64 +171,64 @@ thrinfo_t* bli_thrinfo_split
 	// - the current thread's id within the new communicator,
 	// - the current thread's work id, given the ways of parallelism
 	//   to be obtained within the next loop.
-    const dim_t child_num_threads = parent_num_threads / n_way;
-    const dim_t child_thread_id   = parent_thread_id % child_num_threads;
-    const dim_t child_work_id     = parent_thread_id / child_num_threads;
+	const dim_t child_num_threads = parent_num_threads / n_way;
+	const dim_t child_thread_id   = parent_thread_id % child_num_threads;
+	const dim_t child_work_id     = parent_thread_id / child_num_threads;
 
 	thrcomm_t*  static_comms[ BLIS_NUM_STATIC_COMMS ];
 	thrcomm_t** new_comms = NULL;
-    thrcomm_t*  my_comm = NULL;
-    bool        free_comm = FALSE;
+	thrcomm_t*  my_comm = NULL;
+	bool        free_comm = FALSE;
 
-    if ( n_way == 1 )
-    {
-        my_comm = bli_thrinfo_comm( thread_par );
-    }
-    else if ( n_way == parent_num_threads )
-    {
-        my_comm = &BLIS_SINGLE_COMM;
-    }
-    else
-    {
-    	// The parent's chief thread creates a temporary array of thrcomm_t
-    	// pointers.
-    	if ( bli_thrinfo_am_chief( thread_par ) )
-    	{
-    		err_t r_val;
+	if ( n_way == 1 )
+	{
+		my_comm = parent_comm;
+	}
+	else if ( n_way == parent_num_threads )
+	{
+		my_comm = &BLIS_SINGLE_COMM;
+	}
+	else
+	{
+		// The parent's chief thread creates a temporary array of thrcomm_t
+		// pointers.
+		if ( bli_thrinfo_am_chief( thread_par ) )
+		{
+			err_t r_val;
 
-    		if ( n_way > BLIS_NUM_STATIC_COMMS )
-    			new_comms = bli_malloc_intl( n_way * sizeof( thrcomm_t* ), &r_val );
-    		else
-    			new_comms = static_comms;
-    	}
+			if ( n_way > BLIS_NUM_STATIC_COMMS )
+				new_comms = bli_malloc_intl( n_way * sizeof( thrcomm_t* ), &r_val );
+			else
+				new_comms = static_comms;
+		}
 
-    	// Broadcast the temporary array to all threads in the parent's
-    	// communicator.
-    	new_comms = bli_thrinfo_broadcast( thread_par, new_comms );
+		// Broadcast the temporary array to all threads in the parent's
+		// communicator.
+		new_comms = bli_thrinfo_broadcast( thread_par, new_comms );
 
-    	// Chiefs in the child communicator allocate the communicator
-    	// object and store it in the array element corresponding to the
-    	// parent's work id.
-    	if ( child_thread_id == 0 )
-    		new_comms[ child_work_id ] = bli_thrcomm_create( ti, sba_pool, child_num_threads );
+		// Chiefs in the child communicator allocate the communicator
+		// object and store it in the array element corresponding to the
+		// parent's work id.
+		if ( child_thread_id == 0 )
+			new_comms[ child_work_id ] = bli_thrcomm_create( ti, sba_pool, child_num_threads );
 
-    	bli_thrinfo_barrier( thread_par );
+		bli_thrinfo_barrier( thread_par );
 
-        my_comm = new_comms[ child_work_id ];
-        free_comm = TRUE;
-    }
+		my_comm = new_comms[ child_work_id ];
+		free_comm = TRUE;
+	}
 
 	// All threads create a new thrinfo_t node using the communicator
 	// that was created by their chief, as identified by parent_work_id.
 	thrinfo_t* thread_chl = bli_thrinfo_create
 	(
-       my_comm,
-       child_thread_id,
-       n_way,
-       child_work_id,
-       free_comm,
-       sba_pool,
-       pba
+	  my_comm,
+	  child_thread_id,
+	  n_way,
+	  child_work_id,
+	  free_comm,
+	  sba_pool,
+	  pba
 	);
 
 	bli_thrinfo_barrier( thread_par );
@@ -235,8 +236,8 @@ thrinfo_t* bli_thrinfo_split
 	// The parent's chief thread frees the temporary array of thrcomm_t
 	// pointers.
 	if ( bli_thrinfo_am_chief( thread_par ) &&
-         new_comms != static_comms )
-    {
+	     new_comms != static_comms )
+	{
 		bli_free_intl( new_comms );
 	}
 
@@ -249,7 +250,7 @@ void bli_thrinfo_print
      )
 {
 	printf( " lvl   nt  tid nway wkid free\n" );
-    bli_thrinfo_print_sub( thread, 0 );
+	bli_thrinfo_print_sub( thread, 0 );
 }
 
 void bli_thrinfo_print_sub
@@ -258,17 +259,17 @@ void bli_thrinfo_print_sub
        gint_t     level
      )
 {
-    if ( thread == NULL ) return;
+	if ( thread == NULL ) return;
 
-    printf( "%4ld %4ld %4ld %4ld %4ld %4ld\n",
-            ( unsigned long )level,
-            ( unsigned long )bli_thrinfo_num_threads( thread ),
-            ( unsigned long )bli_thrinfo_thread_id( thread ),
-            ( unsigned long )bli_thrinfo_n_way( thread ),
-            ( unsigned long )bli_thrinfo_work_id( thread ),
-            ( unsigned long )bli_thrinfo_needs_free_comm( thread ));
+	printf( "%4ld %4ld %4ld %4ld %4ld %4ld\n",
+	        ( unsigned long )level,
+	        ( unsigned long )bli_thrinfo_num_threads( thread ),
+	        ( unsigned long )bli_thrinfo_thread_id( thread ),
+	        ( unsigned long )bli_thrinfo_n_way( thread ),
+	        ( unsigned long )bli_thrinfo_work_id( thread ),
+	        ( unsigned long )bli_thrinfo_needs_free_comm( thread ));
 
-    bli_thrinfo_print_sub( bli_thrinfo_sub_prenode( thread ), level+1 );
-    bli_thrinfo_print_sub( bli_thrinfo_sub_node( thread ), level+1 );
+	bli_thrinfo_print_sub( bli_thrinfo_sub_prenode( thread ), level+1 );
+	bli_thrinfo_print_sub( bli_thrinfo_sub_node( thread ), level+1 );
 }
 

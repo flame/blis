@@ -55,13 +55,17 @@ typedef void (*thread_func_t)( thrcomm_t* gl_comm, dim_t tid, const void* params
 void bli_thread_init( void );
 void bli_thread_finalize( void );
 
-BLIS_EXPORT_BLIS
-void bli_thread_launch( timpl_t ti, dim_t nt, thread_func_t func, const void* params );
+BLIS_EXPORT_BLIS void bli_thread_launch
+     (
+             timpl_t       ti,
+             dim_t         nt,
+             thread_func_t func,
+       const void*         params
+     );
 
 // Thread range-related prototypes.
 
-BLIS_EXPORT_BLIS
-void bli_thread_range_sub
+BLIS_EXPORT_BLIS void bli_thread_range_sub
      (
        const thrinfo_t* thread,
              dim_t      n,

@@ -51,7 +51,7 @@ typedef struct l3_decor_params_s l3_decor_params_t;
 
 static void bli_l3_thread_decorator_entry( thrcomm_t* gl_comm, dim_t tid, const void* data_void )
 {
-    const l3_decor_params_t* data    = data_void;
+	const l3_decor_params_t* data    = data_void;
 
 	const l3int_ft           func    = data->func;
 	const opid_t             family  = data->family;
@@ -89,13 +89,13 @@ static void bli_l3_thread_decorator_entry( thrcomm_t* gl_comm, dim_t tid, const 
 
 	// Create a default control tree for the operation, if needed.
 	cntl_t* cntl_use;
-    pool_t* pool = bli_apool_array_elem( tid, array );
+	pool_t* sba_pool = bli_apool_array_elem( tid, array );
 	bli_l3_cntl_create_if( family, schema_a, schema_b,
-	                       &a_t, &b_t, &c_t, pool, NULL, &cntl_use );
+	                       &a_t, &b_t, &c_t, sba_pool, NULL, &cntl_use );
 
 	// Create the root node of the current thread's thrinfo_t structure.
-    // The root node is the *parent* of the node corresponding to the first
-    // control tree node.
+	// The root node is the *parent* of the node corresponding to the first
+	// control tree node.
 	thrinfo_t* thread = bli_l3_thrinfo_create( tid, gl_comm, array, rntm, cntl_use );
 
 	func
@@ -111,7 +111,7 @@ static void bli_l3_thread_decorator_entry( thrcomm_t* gl_comm, dim_t tid, const 
 	);
 
 	// Free the thread's local control tree.
-	bli_l3_cntl_free( pool, cntl_use );
+	bli_l3_cntl_free( sba_pool, cntl_use );
 
 	// Free the current thread's thrinfo_t structure.
 	bli_thrinfo_free( thread );
@@ -183,7 +183,7 @@ void bli_l3_thread_decorator
 	// resize the array_t, if necessary.
 	array_t* array = bli_sba_checkout_array( nt );
 
-    l3_decor_params_t params;
+	l3_decor_params_t params;
 	params.func     = func;
 	params.family   = family;
 	params.alpha    = alpha;
@@ -195,9 +195,15 @@ void bli_l3_thread_decorator
 	params.rntm     = &rntm_l;
 	params.array    = array;
 
+	// Launch the threads using the threading implementation specified by ti,
+	// and use bli_l3_thread_decorator_entry() as their entry points. The
+	// params struct will be passed along to each thread.
 	bli_thread_launch( ti, nt, bli_l3_thread_decorator_entry, &params );
 
-    bli_sba_checkin_array( array );
+	// Check the array_t back into the small block allocator. Similar to the
+	// check-out, this is done using a lock embedded within the sba to ensure
+	// mutual exclusion.
+	bli_sba_checkin_array( array );
 }
 
 void bli_l3_thread_decorator_check
@@ -214,12 +220,12 @@ void bli_l3_thread_decorator_check
 
 	if (
 #ifndef BLIS_ENABLE_OPENMP
-	    ti == BLIS_OPENMP ||
+	     ti == BLIS_OPENMP ||
 #endif
 #ifndef BLIS_ENABLE_PTHREADS
-	    ti == BLIS_POSIX ||
+	     ti == BLIS_POSIX ||
 #endif
-	    FALSE
+	     FALSE
 	   )
 	{
 		fprintf( stderr, "\n" );
@@ -280,7 +286,7 @@ void bli_l3_thread_decorator_thread_check
 		{
 			bli_thrcomm_init( BLIS_OPENMP, 1, gl_comm );
 			bli_rntm_set_num_threads_only( 1, rntm );
-	 		bli_rntm_set_ways_only( 1, 1, 1, 1, 1, rntm );
+			bli_rntm_set_ways_only( 1, 1, 1, 1, 1, rntm );
 		}
 
 		// Synchronize all threads and continue.

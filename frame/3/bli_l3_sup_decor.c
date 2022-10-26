@@ -51,7 +51,7 @@ typedef struct l3_sup_decor_params_s l3_sup_decor_params_t;
 
 static void bli_l3_sup_thread_decorator_entry( thrcomm_t* gl_comm, dim_t tid, const void* data_void )
 {
-    const l3_sup_decor_params_t* data    = data_void;
+	const l3_sup_decor_params_t* data    = data_void;
 
 	const l3supint_ft            func    = data->func;
 	const opid_t                 family  = data->family;
@@ -154,7 +154,7 @@ err_t bli_l3_sup_thread_decorator
 	// resize the array_t, if necessary.
 	array_t* array = bli_sba_checkout_array( nt );
 
-    l3_sup_decor_params_t params;
+	l3_sup_decor_params_t params;
 	params.func   = func;
 	params.family = family;
 	params.alpha  = alpha;

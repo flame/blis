@@ -118,18 +118,18 @@ void bli_gemmsup_ref_var1n
 	// Note: This code explicitly performs the swaps that could be done
 	// implicitly in other BLIS contexts where a type-specific helper function
 	// was being called.
-    if ( bli_is_trans( trans ) )
-    {
-              bool   packtmp = packa; packa = packb; packb = packtmp;
-              conj_t conjtmp = conja; conja = conjb; conjb = conjtmp;
-              dim_t  len_tmp =     m;     m =     n;     n = len_tmp;
-        const void*  buf_tmp = buf_a; buf_a = buf_b; buf_b = buf_tmp;
-              inc_t  str_tmp =  rs_a;  rs_a =  cs_b;  cs_b = str_tmp;
-                     str_tmp =  cs_a;  cs_a =  rs_b;  rs_b = str_tmp;
-                     str_tmp =  rs_c;  rs_c =  cs_c;  cs_c = str_tmp;
+	if ( bli_is_trans( trans ) )
+	{
+		      bool   packtmp = packa; packa = packb; packb = packtmp;
+		      conj_t conjtmp = conja; conja = conjb; conjb = conjtmp;
+		      dim_t  len_tmp =     m;     m =     n;     n = len_tmp;
+		const void*  buf_tmp = buf_a; buf_a = buf_b; buf_b = buf_tmp;
+		      inc_t  str_tmp =  rs_a;  rs_a =  cs_b;  cs_b = str_tmp;
+		             str_tmp =  cs_a;  cs_a =  rs_b;  rs_b = str_tmp;
+		             str_tmp =  rs_c;  rs_c =  cs_c;  cs_c = str_tmp;
 
-        stor_id = bli_stor3_trans( stor_id );
-    }
+		stor_id = bli_stor3_trans( stor_id );
+	}
 
 	// This transposition of the stor3_t id value is inherent to variant 1.
 	// The reason: we assume that variant 2 is the "main" variant. The
@@ -280,7 +280,7 @@ void bli_gemmsup_ref_var1n
 			// Only apply beta to the first iteration of the pc loop.
 			const void* beta_use = ( pp == 0 ? buf_beta : one );
 
-		          char* a_use;
+			      char* a_use;
 			      inc_t rs_a_use, cs_a_use, ps_a_use;
 
 			// Determine the packing buffer and related parameters for matrix

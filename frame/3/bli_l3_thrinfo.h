@@ -70,8 +70,7 @@
 
 // -----------------------------------------------------------------------------
 
-BLIS_EXPORT_BLIS
-thrinfo_t* bli_l3_thrinfo_create
+BLIS_EXPORT_BLIS thrinfo_t* bli_l3_thrinfo_create
      (
              dim_t       id,
              thrcomm_t*  gl_comm,

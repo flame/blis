@@ -253,7 +253,7 @@ void bli_gemm_ker_var2
 	// The 'thread' argument points to the thrinfo_t node for the 2nd (jr)
 	// loop around the microkernel. Here we query the thrinfo_t node for the
 	// 1st (ir) loop around the microkernel.
-    thrinfo_t* thread = bli_thrinfo_sub_node( thread_par );
+	thrinfo_t* thread = bli_thrinfo_sub_node( thread_par );
 	thrinfo_t* caucus = bli_thrinfo_sub_node( thread );
 
 	// Query the number of threads and thread ids for each loop.

@@ -291,7 +291,7 @@ bli_printm( "ap", &ap, "%5.2f", "" );
 
 		// Free the control tree nodes and release their cached mem_t entries
 		// back to the memory broker.
-        bli_thrinfo_free( thread_b );
+		bli_thrinfo_free( thread_b );
 	}
 
 	// Estimate the performance of the best experiment repeat.
@@ -306,7 +306,7 @@ bli_printm( "ap", &ap, "%5.2f", "" );
 
 	// Free the control tree nodes and release their cached mem_t entries
 	// back to the memory broker.
-    bli_thrinfo_free( thread_a );
+	bli_thrinfo_free( thread_a );
 
 	// Free the test objects.
 	bli_obj_free( &a );

@@ -70,6 +70,12 @@ void bli_l3_cntl_create_if
 		{
 			side_t side;
 
+			// NOTE: We no longer ever use right-sided trsm, and therefore this
+			// function will only ever get called with side = BLIS_LEFT, which
+			// means that in the future, we can remove the a, b, and c operands
+			// from the function signature. (This assumes that the call to
+			// bli_obj_ker_fn( c ) is replaced in some future reorganization
+			// that moves the .ker_fn argument from obj_t to, say, the rntm_t.)
 			if ( bli_obj_is_triangular( a ) ) side = BLIS_LEFT;
 			else                              side = BLIS_RIGHT;
 

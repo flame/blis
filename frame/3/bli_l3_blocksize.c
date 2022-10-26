@@ -51,11 +51,11 @@ void bli_l3_adjust_kc
 
 	// Nudge the default and maximum kc blocksizes up to the nearest
 	// multiple of MR if A is Hermitian, symmetric, or triangular or
-    // NR if B is Hermitian, symmetric, or triangular. If neither case
-    // applies, then we leave the blocksizes unchanged. For trsm we
-    // always use MR (rather than sometimes using NR) because even
-    // when the triangle is on the right, packing of that matrix uses
-    // MR, since only left-side trsm micro-kernels are supported.
+	// NR if B is Hermitian, symmetric, or triangular. If neither case
+	// applies, then we leave the blocksizes unchanged. For trsm we
+	// always use MR (rather than sometimes using NR) because even
+	// when the triangle is on the right, packing of that matrix uses
+	// MR, since only left-side trsm micro-kernels are supported.
 	if ( !bli_obj_root_is_general( a ) || family == BLIS_TRSM )
 	{
 		mnr = bli_cntx_get_blksz_def_dt( dt, BLIS_MR, cntx );
@@ -93,3 +93,4 @@ dim_t bli_l3_determine_kc
 	else
 		return bli_determine_blocksize_b_sub( i, dim, b_alg, b_max );
 }
+

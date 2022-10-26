@@ -46,7 +46,7 @@ void bli_trmm_ll_ker_var2
      )
 {
 	const num_t     dt        = bli_obj_exec_dt( c );
-    const dim_t     dt_size   = bli_dt_size( dt );
+	const dim_t     dt_size   = bli_dt_size( dt );
 
 	      doff_t    diagoffa  = bli_obj_diag_offset( a );
 
@@ -82,14 +82,14 @@ void bli_trmm_ll_ker_var2
 	const void* buf_alpha = bli_obj_internal_scalar_buffer( &scalar_b );
 	const void* buf_beta  = bli_obj_internal_scalar_buffer( c );
 
-	/* Alias some constants to simpler names. */
+	// Alias some constants to simpler names.
 	const dim_t     MR         = pd_a;
 	const dim_t     NR         = pd_b;
 	const dim_t     PACKMR     = cs_a;
 	const dim_t     PACKNR     = rs_b;
 
-	/* Query the context for the micro-kernel address and cast it to its
-	   function pointer type. */
+	// Query the context for the micro-kernel address and cast it to its
+	// function pointer type.
 	gemm_ukr_vft gemm_ukr   = bli_cntx_get_l3_vir_ukr_dt( dt, BLIS_GEMM_UKR, cntx );
 
 	const void* one        = bli_obj_buffer_for_const( dt, &BLIS_ONE );
@@ -113,24 +113,24 @@ void bli_trmm_ll_ker_var2
 	     cs_c == (no assumptions)
 	*/
 
-	/* Safety trap: Certain indexing within this macro-kernel does not
-	   work as intended if both MR and NR are odd. */
+	// Safety trap: Certain indexing within this macro-kernel does not
+	// work as intended if both MR and NR are odd.
 	if ( ( bli_is_odd( PACKMR ) && bli_is_odd( NR ) ) ||
 	     ( bli_is_odd( PACKNR ) && bli_is_odd( MR ) ) ) bli_abort();
 
-	/* If any dimension is zero, return immediately. */
+	// If any dimension is zero, return immediately.
 	if ( bli_zero_dim3( m, n, k ) ) return;
 
-	/* Safeguard: If the current block of A is entirely above the diagonal,
-	   it is implicitly zero. So we do nothing. */
+	// Safeguard: If the current block of A is entirely above the diagonal,
+	// it is implicitly zero. So we do nothing.
 	if ( bli_is_strictly_above_diag_n( diagoffa, m, k ) ) return;
 
-	/* If there is a zero region above where the diagonal of A intersects the
-	   left edge of the block, adjust the pointer to C and treat this case as
-	   if the diagonal offset were zero. This skips over the region that was
-	   not packed. (Note we assume the diagonal offset is a multiple of MR;
-	   this assumption will hold as long as the cache blocksizes are each a
-	   multiple of MR and NR.) */
+	// If there is a zero region above where the diagonal of A intersects the
+	// left edge of the block, adjust the pointer to C and treat this case as
+	// if the diagonal offset were zero. This skips over the region that was
+	// not packed. (Note we assume the diagonal offset is a multiple of MR;
+	// this assumption will hold as long as the cache blocksizes are each a
+	// multiple of MR and NR.)
 	if ( diagoffa < 0 )
 	{
 		m        += diagoffa;
@@ -138,8 +138,8 @@ void bli_trmm_ll_ker_var2
 		diagoffa  = 0;
 	}
 
-	/* Compute number of primary and leftover components of the m and n
-	   dimensions. */
+	// Compute number of primary and leftover components of the m and n
+	// dimensions.
 	dim_t n_iter = n / NR;
 	dim_t n_left = n % NR;
 
@@ -149,7 +149,7 @@ void bli_trmm_ll_ker_var2
 	if ( n_left ) ++n_iter;
 	if ( m_left ) ++m_iter;
 
-	/* Determine some increments used to step through A, B, and C. */
+	// Determine some increments used to step through A, B, and C.
 	inc_t rstep_a = ps_a * dt_size;
 
 	inc_t cstep_b = ps_b * dt_size;
@@ -157,35 +157,35 @@ void bli_trmm_ll_ker_var2
 	inc_t rstep_c = rs_c * MR * dt_size;
 	inc_t cstep_c = cs_c * NR * dt_size;
 
-	/* Save the pack schemas of A and B to the auxinfo_t object. */
-    auxinfo_t aux;
+	// Save the pack schemas of A and B to the auxinfo_t object.
+	auxinfo_t aux;
 	bli_auxinfo_set_schema_a( schema_a, &aux );
 	bli_auxinfo_set_schema_b( schema_b, &aux );
 
-	/* The 'thread' argument points to the thrinfo_t node for the 2nd (jr)
-	   loop around the microkernel. Here we query the thrinfo_t node for the
-	   1st (ir) loop around the microkernel. */
-	/*thrinfo_t* ir_thread = bli_thrinfo_sub_node( thread );*/
+	// The 'thread' argument points to the thrinfo_t node for the 2nd (jr)
+	// loop around the microkernel. Here we query the thrinfo_t node for the
+	// 1st (ir) loop around the microkernel.
+	//thrinfo_t* ir_thread = bli_thrinfo_sub_node( thread );
 
-	/* Query the number of threads and thread ids for each loop. */
-    thrinfo_t* thread = bli_thrinfo_sub_node( thread_par );
+	// Query the number of threads and thread ids for each loop.
+	thrinfo_t* thread = bli_thrinfo_sub_node( thread_par );
 	dim_t jr_nt  = bli_thrinfo_n_way( thread );
 	dim_t jr_tid = bli_thrinfo_work_id( thread );
-	/*dim_t ir_nt  = bli_thrinfo_n_way( ir_thread );
-	dim_t ir_tid = bli_thrinfo_work_id( ir_thread );*/
+	//dim_t ir_nt  = bli_thrinfo_n_way( ir_thread );
+	//dim_t ir_tid = bli_thrinfo_work_id( ir_thread );
 
 	dim_t jr_start, jr_end;
-	/*dim_t ir_start, ir_end;*/
+	//dim_t ir_start, ir_end;
 	dim_t jr_inc;
 
-	/* Determine the thread range and increment for the 2nd loop.
-	   NOTE: The definition of bli_thread_range_jrir() will depend on whether
-	   slab or round-robin partitioning was requested at configure-time.
-	   NOTE: Parallelism in the 1st loop is disabled for now. */
+	// Determine the thread range and increment for the 2nd loop.
+	// NOTE: The definition of bli_thread_range_jrir() will depend on whether
+	// slab or round-robin partitioning was requested at configure-time.
+	// NOTE: Parallelism in the 1st loop is disabled for now.
 	bli_thread_range_jrir( thread, n_iter, 1, FALSE, &jr_start, &jr_end, &jr_inc );
-	/*bli_thread_range_jrir_rr( caucus, m_iter, 1, FALSE, &ir_start, &ir_end, &ir_inc );*/
+	//bli_thread_range_jrir_rr( caucus, m_iter, 1, FALSE, &ir_start, &ir_end, &ir_inc );
 
-	/* Loop over the n dimension (NR columns at a time). */
+	// Loop over the n dimension (NR columns at a time).
 	for ( dim_t j = jr_start; j < jr_end; j += jr_inc )
 	{
 		const char* b1 = b_cast + j * cstep_b;
@@ -193,43 +193,43 @@ void bli_trmm_ll_ker_var2
 
 		dim_t n_cur = ( bli_is_not_edge_f( j, n_iter, n_left ) ? NR : n_left );
 
-		/* Initialize our next panel of B to be the current panel of B. */
+		// Initialize our next panel of B to be the current panel of B.
 		const char* b2 = b1;
 
 		const char* a1  = a_cast;
 		      char* c11 = c1;
 
-		/* Loop over the m dimension (MR rows at a time). */
+		// Loop over the m dimension (MR rows at a time).
 		for ( dim_t i = 0; i < m_iter; ++i )
 		{
 			doff_t diagoffa_i = diagoffa + ( doff_t )i*MR;
 
 			dim_t  m_cur = ( bli_is_not_edge_f( i, m_iter, m_left ) ? MR : m_left );
 
-			/* If the current panel of A intersects the diagonal, scale C
-			   by beta. If it is strictly below the diagonal, scale by one.
-			   This allows the current macro-kernel to work for both trmm
-			   and trmm3. */
+			// If the current panel of A intersects the diagonal, scale C
+			// by beta. If it is strictly below the diagonal, scale by one.
+			// This allows the current macro-kernel to work for both trmm
+			// and trmm3.
 			if ( bli_intersects_diag_n( diagoffa_i, MR, k ) )
 			{
-				/* Determine the offset to and length of the panel that was
-				   packed so we can index into the corresponding location in
-				   b1. */
+				// Determine the offset to and length of the panel that was
+				// packed so we can index into the corresponding location in
+				// b1.
 				dim_t off_a1011 = 0;
 				dim_t k_a1011   = bli_min( diagoffa_i + MR, k );
 
-				/* Compute the panel stride for the current diagonal-
-				   intersecting micro-panel. */
+				// Compute the panel stride for the current diagonal-
+				// intersecting micro-panel.
 				inc_t ps_a_cur  = k_a1011 * PACKMR;
-    				  ps_a_cur += ( bli_is_odd( ps_a_cur ) ? 1 : 0 );
-    				  ps_a_cur *= dt_size;
+				      ps_a_cur += ( bli_is_odd( ps_a_cur ) ? 1 : 0 );
+				      ps_a_cur *= dt_size;
 
-				/* NOTE: ir loop parallelism disabled for now. */
-				/*if ( bli_trmm_my_iter( i, ir_thread ) ) {*/
+				// NOTE: ir loop parallelism disabled for now.
+				//if ( bli_trmm_my_iter( i, ir_thread ) ) {
 
 				const char* b1_i = b1 + off_a1011 * PACKNR * dt_size;
 
-				/* Compute the addresses of the next panels of A and B. */
+				// Compute the addresses of the next panels of A and B.
 				const char* a2 = a1;
 				if ( bli_is_last_iter_rr( i, m_iter, 0, 1 ) )
 				{
@@ -239,12 +239,12 @@ void bli_trmm_ll_ker_var2
 						b2 = b_cast;
 				}
 
-				/* Save addresses of next panels of A and B to the auxinfo_t
-				   object. */
+				// Save addresses of next panels of A and B to the auxinfo_t
+				// object.
 				bli_auxinfo_set_next_a( a2, &aux );
 				bli_auxinfo_set_next_b( b2, &aux );
 
-				/* Invoke the gemm micro-kernel. */
+				// Invoke the gemm micro-kernel.
 				gemm_ukr
 				(
 				  m_cur,
@@ -258,16 +258,16 @@ void bli_trmm_ll_ker_var2
 				  &aux,
 				  ( cntx_t* )cntx
 				);
-				/*}*/
+				//}
 
 				a1 += ps_a_cur;
 			}
 			else if ( bli_is_strictly_below_diag_n( diagoffa_i, MR, k ) )
 			{
-				/* NOTE: ir loop parallelism disabled for now. */
-				/*if ( bli_trmm_my_iter( i, ir_thread ) ) {*/
+				// NOTE: ir loop parallelism disabled for now.
+				//if ( bli_trmm_my_iter( i, ir_thread ) ) {
 
-				/* Compute the addresses of the next panels of A and B. */
+				// Compute the addresses of the next panels of A and B.
 				const char* a2 = a1;
 				if ( bli_is_last_iter_rr( i, m_iter, 0, 1 ) )
 				{
@@ -277,12 +277,12 @@ void bli_trmm_ll_ker_var2
 						b2 = b_cast;
 				}
 
-				/* Save addresses of next panels of A and B to the auxinfo_t
-				   object. */
+				// Save addresses of next panels of A and B to the auxinfo_t
+				// object.
 				bli_auxinfo_set_next_a( a2, &aux );
 				bli_auxinfo_set_next_b( b2, &aux );
 
-				/* Invoke the gemm micro-kernel. */
+				// Invoke the gemm micro-kernel.
 				gemm_ukr
 				(
 				  m_cur,
@@ -296,7 +296,7 @@ void bli_trmm_ll_ker_var2
 				  &aux,
 				  ( cntx_t* )cntx
 				);
-				/*}*/
+				//}
 
 				a1 += rstep_a;
 			}
@@ -304,7 +304,8 @@ void bli_trmm_ll_ker_var2
 			c11 += rstep_c;
 		}
 	}
-/*PASTEMAC(ch,fprintm)( stdout, "trmm_ll_ker_var2: a1", MR, k_a1011, a1, 1, MR, "%4.1f", "" );*/
-/*PASTEMAC(ch,fprintm)( stdout, "trmm_ll_ker_var2: b1", k_a1011, NR, b1_i, NR, 1, "%4.1f", "" );*/
 }
+
+//PASTEMAC(ch,fprintm)( stdout, "trmm_ll_ker_var2: a1", MR, k_a1011, a1, 1, MR, "%4.1f", "" );
+//PASTEMAC(ch,fprintm)( stdout, "trmm_ll_ker_var2: b1", k_a1011, NR, b1_i, NR, 1, "%4.1f", "" );
 

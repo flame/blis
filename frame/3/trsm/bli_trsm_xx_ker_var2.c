@@ -51,9 +51,8 @@ void bli_trsm_xx_ker_var2
              thrinfo_t* thread
      )
 {
-	dim_t      side;
-	dim_t      uplo;
-	l3_var_oft f;
+	dim_t side;
+	dim_t uplo;
 
 	// Set two bools: one based on the implied side parameter (the structure
 	// of the root object) and one based on the uplo field of the triangular
@@ -72,7 +71,7 @@ void bli_trsm_xx_ker_var2
 	}
 
 	// Index into the variant array to extract the correct function pointer.
-	f = vars[side][uplo];
+	l3_var_oft f = vars[side][uplo];
 
 	// Call the macrokernel.
 	f

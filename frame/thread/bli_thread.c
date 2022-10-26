@@ -44,7 +44,12 @@ extern rntm_t global_rntm;
 // resides in bli_rntm.c.)
 extern bli_pthread_mutex_t global_rntm_mutex;
 
-typedef void (*thread_launch_t)( dim_t nt, thread_func_t func, const void* params );
+typedef void (*thread_launch_t)
+     (
+             dim_t         nt,
+             thread_func_t func,
+       const void*         params
+     );
 
 static thread_launch_t thread_launch_fpa[ BLIS_NUM_THREAD_IMPLS ] =
 {
@@ -84,9 +89,15 @@ void bli_thread_finalize( void )
 
 // -----------------------------------------------------------------------------
 
-void bli_thread_launch( timpl_t ti, dim_t nt, thread_func_t func, const void* params )
+void bli_thread_launch
+     (
+             timpl_t       ti,
+             dim_t         nt,
+             thread_func_t func,
+       const void*         params
+     )
 {
-    thread_launch_fpa[ti]( nt, func, params );
+	thread_launch_fpa[ti]( nt, func, params );
 }
 
 // -----------------------------------------------------------------------------

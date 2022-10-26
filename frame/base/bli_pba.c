@@ -117,7 +117,7 @@ void bli_pba_acquire_m
 
 		// For general-use buffer requests, dynamically allocating memory
 		// is assumed to be sufficient.
-        err_t r_val;
+		err_t r_val;
 		void* buf = bli_fmalloc_align( malloc_fp, req_size, align_size, &r_val );
 
 		// Initialize the mem_t object with:

@@ -64,6 +64,5 @@ void bli_sba_release
        void*   block
      );
 
-
 #endif
 

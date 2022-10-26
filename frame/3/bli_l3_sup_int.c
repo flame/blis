@@ -137,7 +137,7 @@ err_t bli_gemmsup_int
 			// Update the ways of parallelism for the jc and ic loops, and then
 			// update the current thread's root thrinfo_t node according to the
 			// new ways of parallelism value for the jc loop.
-            rntm_t rntm_l = *rntm;
+			rntm_t rntm_l = *rntm;
 			bli_rntm_set_ways_only( jc_new, 1, ic_new, 1, 1, &rntm_l );
 			bli_l3_sup_thrinfo_update( &rntm_l, &thread );
 		}
@@ -203,7 +203,7 @@ err_t bli_gemmsup_int
 			// Update the ways of parallelism for the jc and ic loops, and then
 			// update the current thread's root thrinfo_t node according to the
 			// new ways of parallelism value for the jc loop.
-            rntm_t rntm_l = *rntm;
+			rntm_t rntm_l = *rntm;
 			bli_rntm_set_ways_only( jc_new, 1, ic_new, 1, 1, &rntm_l );
 			bli_l3_sup_thrinfo_update( &rntm_l, &thread );
 		}
@@ -313,7 +313,7 @@ err_t bli_gemmtsup_int
 			// Update the ways of parallelism for the jc and ic loops, and then
 			// update the current thread's root thrinfo_t node according to the
 			// new ways of parallelism value for the jc loop.
-            rntm_t rntm_l = *rntm;
+			rntm_t rntm_l = *rntm;
 			bli_rntm_set_ways_only( jc_new, 1, ic_new, 1, 1, &rntm_l );
 			bli_l3_sup_thrinfo_update( &rntm_l, &thread );
 		}
@@ -383,7 +383,7 @@ err_t bli_gemmtsup_int
 			// Update the ways of parallelism for the jc and ic loops, and then
 			// update the current thread's root thrinfo_t node according to the
 			// new ways of parallelism value for the jc loop.
-            rntm_t rntm_l = *rntm;
+			rntm_t rntm_l = *rntm;
 			bli_rntm_set_ways_only( jc_new, 1, ic_new, 1, 1, &rntm_l );
 			bli_l3_sup_thrinfo_update( &rntm_l, &thread );
 		}

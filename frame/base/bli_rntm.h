@@ -76,7 +76,7 @@ BLIS_INLINE dim_t bli_rntm_num_threads( const rntm_t* rntm )
 
 BLIS_INLINE dim_t bli_rntm_ways_for( bszid_t bszid, const rntm_t* rntm )
 {
-	return bszid == BLIS_NO_PART ? 1 : rntm->thrloop[ bszid ];
+	return ( bszid == BLIS_NO_PART ? 1 : rntm->thrloop[ bszid ] );
 }
 
 BLIS_INLINE dim_t bli_rntm_jc_ways( const rntm_t* rntm )

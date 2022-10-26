@@ -64,7 +64,7 @@ void PASTECH2(bls_,ch,opname) \
 	/* Compute the size of the memory block eneded. */ \
 	siz_t size_needed = sizeof( ctype ) * m_pack * k_pack; \
 \
-    mem_t* mem = bli_thrinfo_mem( thread ); \
+	mem_t* mem = bli_thrinfo_mem( thread ); \
 \
 	/* Check the mem_t entry provided by the caller. If it is unallocated,
 	   then we need to acquire a block from the packed block allocator. */ \
@@ -274,7 +274,7 @@ void PASTECH2(bls_,ch,opname) \
 	  kappa, \
 	  a,  rs_a,  cs_a, \
 	  *p, *rs_p, *cs_p, \
-		  pd_p,  *ps_p, \
+	      pd_p,  *ps_p, \
 	  cntx, \
 	  thread  \
 	); \

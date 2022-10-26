@@ -136,43 +136,32 @@ void bli_thrcomm_init( timpl_t ti, dim_t nt, thrcomm_t* comm )
 {
 	const thrcomm_init_ft fp = init_fpa[ ti ];
 
+	// Sanity check: the function pointer queried from the function pointer
+	// array should never be NULL.
 	if ( fp == NULL ) bli_abort();
 
 	// Call the threading-specific init function.
 	fp( nt, comm );
 
 	// Embed the type of threading implementation within the thrcomm_t struct.
-	// This can be used later to make sure the application doesn't use a
-	// thrcomm_t initialized with threading type A with the API for threading
-	// type B. Note that we wait until after the init function has returned
-	// in case that function zeros out the entire struct before setting the
-	// fields.
+	// Note that we wait until after the init function has returned in case
+	// that function zeros out the entire struct before setting the fields.
 	comm->ti = ti;
 }
 
 void bli_thrcomm_cleanup( thrcomm_t* comm )
 {
-    const timpl_t            ti = bli_thrcomm_thread_impl( comm );
-	const thrcomm_cleanup_ft fp = cleanup_fpa[ ti ];
-
-	if ( fp == NULL ) bli_abort();
-
 	// If comm is BLIS_SINGLE_COMM, we return early since there is no cleanup,
 	// especially if it is being used with a threading implementation that
 	// would normally want to free its thrcomm_t resources.
 	if ( comm == &BLIS_SINGLE_COMM ) return;
 
-	// Sanity check. Make sure the threading implementation we were asked to use
-	// is the same as the implementation that initialized the thrcomm_t object.
-	if ( ti != comm->ti )
-	{
-		printf( "bli_thrcomm_cleanup(): thrcomm_t.ti = %s, but request via rntm_t.ti = %s\n",
-		        ( comm->ti == BLIS_SINGLE ? "single" :
-		        ( comm->ti == BLIS_OPENMP ? "openmp" : "pthreads" ) ),
-		        ( ti       == BLIS_SINGLE ? "single" :
-		        ( ti       == BLIS_OPENMP ? "openmp" : "pthreads" ) ) );
-		bli_abort();
-	}
+	const timpl_t            ti = bli_thrcomm_thread_impl( comm );
+	const thrcomm_cleanup_ft fp = cleanup_fpa[ ti ];
+
+	// Sanity check: the function pointer queried from the function pointer
+	// array should never be NULL.
+	if ( fp == NULL ) bli_abort();
 
 	// Call the threading-specific cleanup function.
 	fp( comm );
@@ -180,26 +169,12 @@ void bli_thrcomm_cleanup( thrcomm_t* comm )
 
 void bli_thrcomm_barrier( dim_t tid, thrcomm_t* comm )
 {
-    const timpl_t            ti = bli_thrcomm_thread_impl( comm );
+	const timpl_t            ti = bli_thrcomm_thread_impl( comm );
 	const thrcomm_barrier_ft fp = barrier_fpa[ ti ];
 
+	// Sanity check: the function pointer queried from the function pointer
+	// array should never be NULL.
 	if ( fp == NULL ) bli_abort();
-
-	// Sanity check. Make sure the threading implementation we were asked to use
-	// is the same as the implementation that initialized the thrcomm_t object.
-	// We skip this check if comm is BLIS_SINGLE_COMM since the timpl_t value
-	// embedded in comm will often be different than that of BLIS_SINGLE_COMM
-	// (but we don't return early since we still need to barrier... wait, or do
-	// we?).
-	if ( ti != comm->ti && comm != &BLIS_SINGLE_COMM )
-	{
-		printf( "bli_thrcomm_barrier(): thrcomm_t.ti = %s, but request via rntm_t.ti = %s\n",
-		        ( comm->ti == BLIS_SINGLE ? "single" :
-		        ( comm->ti == BLIS_OPENMP ? "openmp" : "pthreads" ) ),
-		        ( ti       == BLIS_SINGLE ? "single" :
-		        ( ti       == BLIS_OPENMP ? "openmp" : "pthreads" ) ) );
-		bli_abort();
-	}
 
 	// Call the threading-specific barrier function.
 	fp( tid, comm );
