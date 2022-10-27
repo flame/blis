@@ -76,7 +76,7 @@ void* bli_sba_acquire
 	// would be timed.)
 	if ( pool == NULL )
 	{
-	    block = bli_malloc_intl( req_size, &r_val );
+		block = bli_malloc_intl( req_size, &r_val );
 	}
 	else
 	{
@@ -122,7 +122,7 @@ void bli_sba_release
 
 	if ( pool == NULL )
 	{
-	    bli_free_intl( block );
+		bli_free_intl( block );
 	}
 	else
 	{

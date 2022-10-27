@@ -274,7 +274,7 @@ void PASTECH2(bls_,ch,opname) \
 	  kappa, \
 	  a,  rs_a,  cs_a, \
 	  *p, *rs_p, *cs_p, \
-	      pd_p,  *ps_p, \
+	       pd_p, *ps_p, \
 	  cntx, \
 	  thread  \
 	); \

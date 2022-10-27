@@ -52,7 +52,7 @@ static void* bli_posix_thread_entry( void* data_void )
 
 	const dim_t          tid      = data->tid;
 	      thrcomm_t*     gl_comm  = data->gl_comm;
-          thread_func_t  func     = data->func;
+	      thread_func_t  func     = data->func;
 	const void*          params   = data->params;
 
 	// Call the thread entry point, passing the global communicator, the
