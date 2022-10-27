@@ -270,10 +270,10 @@ void PASTEMAC(ch,varname) \
 	bli_auxinfo_set_is_b( is_b, &aux ); \
 \
 	thrinfo_t* caucus    = bli_thrinfo_sub_node( thread ); \
-	dim_t jr_num_threads = bli_thread_n_way( thread ); \
-	dim_t jr_thread_id   = bli_thread_work_id( thread ); \
-	dim_t ir_num_threads = bli_thread_n_way( caucus ); \
-	dim_t ir_thread_id   = bli_thread_work_id( caucus ); \
+	dim_t jr_num_threads = bli_thrinfo_n_way( thread ); \
+	dim_t jr_thread_id   = bli_thrinfo_work_id( thread ); \
+	dim_t ir_num_threads = bli_thrinfo_n_way( caucus ); \
+	dim_t ir_thread_id   = bli_thrinfo_work_id( caucus ); \
 \
 	/* Loop over the n dimension (NR columns at a time). */ \
 	for ( j = jr_thread_id; j < n_iter; j += jr_num_threads ) \

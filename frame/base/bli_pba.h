@@ -132,7 +132,7 @@ void bli_pba_finalize
 
 void bli_pba_acquire_m
      (
-       rntm_t*   rntm,
+       pba_t*    pba,
        siz_t     req_size,
        packbuf_t buf_type,
        mem_t*    mem
@@ -140,19 +140,9 @@ void bli_pba_acquire_m
 
 void bli_pba_release
      (
-       rntm_t* rntm,
-       mem_t*  mem
+       pba_t* pba,
+       mem_t* mem
      );
-
-BLIS_INLINE void bli_pba_rntm_set_pba
-     (
-       rntm_t* rntm
-     )
-{
-	pba_t* pba = bli_pba_query();
-
-	bli_rntm_set_pba( pba, rntm );
-}
 
 siz_t bli_pba_pool_size
      (

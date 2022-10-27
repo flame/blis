@@ -322,8 +322,8 @@ void PASTEMAC(ch,varname) \
 	c1 = c_cast; \
 \
 	thrinfo_t* ir_thread      = bli_thrinfo_sub_node( jr_thread ); \
-	dim_t jr_num_threads      = bli_thread_n_way( jr_thread ); \
-	dim_t jr_thread_id        = bli_thread_work_id( jr_thread ); \
+	dim_t jr_num_threads      = bli_thrinfo_n_way( jr_thread ); \
+	dim_t jr_thread_id        = bli_thrinfo_work_id( jr_thread ); \
 \
 	/* Loop over the n dimension (NR columns at a time). */ \
 	for ( j = 0; j < n_iter; ++j ) \

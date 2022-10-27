@@ -41,18 +41,18 @@
 // - The first char encodes the type of x.
 // - The second char encodes the type of y.
 
-#define bli_sscopy1es( a, bri, bir ) {}
-#define bli_dscopy1es( a, bri, bir ) {}
-#define bli_cscopy1es( a, bri, bir ) {}
-#define bli_zscopy1es( a, bri, bir ) {}
+#define bli_sscopy1es( a, bri, bir ) { ( void )a; ( void )bri; ( void )bir; }
+#define bli_dscopy1es( a, bri, bir ) { ( void )a; ( void )bri; ( void )bir; }
+#define bli_cscopy1es( a, bri, bir ) { ( void )a; ( void )bri; ( void )bir; }
+#define bli_zscopy1es( a, bri, bir ) { ( void )a; ( void )bri; ( void )bir; }
 
-#define bli_sdcopy1es( a, bri, bir ) {}
-#define bli_ddcopy1es( a, bri, bir ) {}
-#define bli_cdcopy1es( a, bri, bir ) {}
-#define bli_zdcopy1es( a, bri, bir ) {}
+#define bli_sdcopy1es( a, bri, bir ) { ( void )a; ( void )bri; ( void )bir; }
+#define bli_ddcopy1es( a, bri, bir ) { ( void )a; ( void )bri; ( void )bir; }
+#define bli_cdcopy1es( a, bri, bir ) { ( void )a; ( void )bri; ( void )bir; }
+#define bli_zdcopy1es( a, bri, bir ) { ( void )a; ( void )bri; ( void )bir; }
 
-#define bli_sccopy1es( a, bri, bir ) {}
-#define bli_dccopy1es( a, bri, bir ) {}
+#define bli_sccopy1es( a, bri, bir ) { ( void )a; ( void )bri; ( void )bir; }
+#define bli_dccopy1es( a, bri, bir ) { ( void )a; ( void )bri; ( void )bir; }
 #define bli_cccopy1es( a, bri, bir ) \
 { \
 	bli_cccopyris(  bli_creal(a), bli_cimag(a), bli_creal(bri), bli_cimag(bri) ); \
@@ -64,8 +64,8 @@
 	bli_zccopyris( -bli_zimag(a), bli_zreal(a), bli_creal(bir), bli_cimag(bir) ); \
 }
 
-#define bli_szcopy1es( a, bri, bir ) {}
-#define bli_dzcopy1es( a, bri, bir ) {}
+#define bli_szcopy1es( a, bri, bir ) { ( void )a; ( void )bri; ( void )bir; }
+#define bli_dzcopy1es( a, bri, bir ) { ( void )a; ( void )bri; ( void )bir; }
 #define bli_czcopy1es( a, bri, bir ) \
 { \
 	bli_czcopyris(  bli_creal(a), bli_cimag(a), bli_zreal(bri), bli_zimag(bri) ); \

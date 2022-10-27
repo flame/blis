@@ -145,8 +145,8 @@ void PASTEMAC(ch,varname) \
 \
 	/* Query the number of threads and thread ids from the current thread's
 	   packm thrinfo_t node. */ \
-	const dim_t nt  = bli_thread_n_way( thread ); \
-	const dim_t tid = bli_thread_work_id( thread ); \
+	const dim_t nt  = bli_thrinfo_n_way( thread ); \
+	const dim_t tid = bli_thrinfo_work_id( thread ); \
 \
 	/* Suppress warnings in case tid isn't used (ie: as in slab partitioning). */ \
 	( void )nt; \
@@ -234,9 +234,9 @@ PASTEMAC(ch,fprintm)( stdout, "packm_blk_var1: a packed", *m_panel_max, *n_panel
 \
 /*
 if ( col_stored ) { \
-	if ( bli_thread_work_id( thread ) == 0 ) \
+	if ( bli_thrinfo_work_id( thread ) == 0 ) \
 	{ \
-	printf( "packm_blk_var1: thread %lu  (a = %p, ap = %p)\n", bli_thread_work_id( thread ), c_use, p_use ); \
+	printf( "packm_blk_var1: thread %lu  (a = %p, ap = %p)\n", bli_thrinfo_work_id( thread ), c_use, p_use ); \
 	fflush( stdout ); \
 	PASTEMAC(ch,fprintm)( stdout, "packm_blk_var1: a", *m_panel_use, *n_panel_use, \
 	                      ( ctype* )c_use,         rs_c, cs_c, "%4.1f", "" ); \
@@ -244,10 +244,10 @@ if ( col_stored ) { \
 	                      ( ctype* )p_use,         rs_p, cs_p, "%4.1f", "" ); \
 	fflush( stdout ); \
 	} \
-bli_thread_barrier( rntm, thread ); \
-	if ( bli_thread_work_id( thread ) == 1 ) \
+bli_thrinfo_barrier( thread ); \
+	if ( bli_thrinfo_work_id( thread ) == 1 ) \
 	{ \
-	printf( "packm_blk_var1: thread %lu  (a = %p, ap = %p)\n", bli_thread_work_id( thread ), c_use, p_use ); \
+	printf( "packm_blk_var1: thread %lu  (a = %p, ap = %p)\n", bli_thrinfo_work_id( thread ), c_use, p_use ); \
 	fflush( stdout ); \
 	PASTEMAC(ch,fprintm)( stdout, "packm_blk_var1: a", *m_panel_use, *n_panel_use, \
 	                      ( ctype* )c_use,         rs_c, cs_c, "%4.1f", "" ); \
@@ -255,12 +255,12 @@ bli_thread_barrier( rntm, thread ); \
 	                      ( ctype* )p_use,         rs_p, cs_p, "%4.1f", "" ); \
 	fflush( stdout ); \
 	} \
-bli_thread_barrier( rntm, thread ); \
+bli_thrinfo_barrier( thread ); \
 } \
 else { \
-	if ( bli_thread_work_id( thread ) == 0 ) \
+	if ( bli_thrinfo_work_id( thread ) == 0 ) \
 	{ \
-	printf( "packm_blk_var1: thread %lu  (b = %p, bp = %p)\n", bli_thread_work_id( thread ), c_use, p_use ); \
+	printf( "packm_blk_var1: thread %lu  (b = %p, bp = %p)\n", bli_thrinfo_work_id( thread ), c_use, p_use ); \
 	fflush( stdout ); \
 	PASTEMAC(ch,fprintm)( stdout, "packm_blk_var1: b", *m_panel_use, *n_panel_use, \
 	                      ( ctype* )c_use,         rs_c, cs_c, "%4.1f", "" ); \
@@ -268,10 +268,10 @@ else { \
 	                      ( ctype* )p_use,         rs_p, cs_p, "%4.1f", "" ); \
 	fflush( stdout ); \
 	} \
-bli_thread_barrier( rntm, thread ); \
-	if ( bli_thread_work_id( thread ) == 1 ) \
+bli_thrinfo_barrier( thread ); \
+	if ( bli_thrinfo_work_id( thread ) == 1 ) \
 	{ \
-	printf( "packm_blk_var1: thread %lu  (b = %p, bp = %p)\n", bli_thread_work_id( thread ), c_use, p_use ); \
+	printf( "packm_blk_var1: thread %lu  (b = %p, bp = %p)\n", bli_thrinfo_work_id( thread ), c_use, p_use ); \
 	fflush( stdout ); \
 	PASTEMAC(ch,fprintm)( stdout, "packm_blk_var1: b", *m_panel_use, *n_panel_use, \
 	                      ( ctype* )c_use,         rs_c, cs_c, "%4.1f", "" ); \
@@ -279,7 +279,7 @@ bli_thread_barrier( rntm, thread ); \
 	                      ( ctype* )p_use,         rs_p, cs_p, "%4.1f", "" ); \
 	fflush( stdout ); \
 	} \
-bli_thread_barrier( rntm, thread ); \
+bli_thrinfo_barrier( thread ); \
 } \
 */
 /*
@@ -388,8 +388,8 @@ void PASTEMAC(ch,varname) \
 \
 	/* Query the number of threads and thread ids from the current thread's
 	   packm thrinfo_t node. */ \
-	const dim_t nt  = bli_thread_n_way( thread ); \
-	const dim_t tid = bli_thread_work_id( thread ); \
+	const dim_t nt  = bli_thrinfo_n_way( thread ); \
+	const dim_t tid = bli_thrinfo_work_id( thread ); \
 \
 	/* Suppress warnings in case tid isn't used (ie: as in slab partitioning). */ \
 	( void )nt; \

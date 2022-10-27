@@ -52,10 +52,6 @@ typedef struct rntm_s
 	bool      pack_a;
 	bool      pack_b;
 	bool      l3_sup;
-
-	pool_t*   sba_pool;
-	pba_t*    pba;
-
 } rntm_t;
 */
 
@@ -80,7 +76,7 @@ BLIS_INLINE dim_t bli_rntm_num_threads( const rntm_t* rntm )
 
 BLIS_INLINE dim_t bli_rntm_ways_for( bszid_t bszid, const rntm_t* rntm )
 {
-	return rntm->thrloop[ bszid ];
+	return ( bszid == BLIS_NO_PART ? 1 : rntm->thrloop[ bszid ] );
 }
 
 BLIS_INLINE dim_t bli_rntm_jc_ways( const rntm_t* rntm )
@@ -120,20 +116,6 @@ BLIS_INLINE bool bli_rntm_pack_b( const rntm_t* rntm )
 BLIS_INLINE bool bli_rntm_l3_sup( const rntm_t* rntm )
 {
 	return rntm->l3_sup;
-}
-
-//
-// -- rntm_t query (internal use only) -----------------------------------------
-//
-
-BLIS_INLINE pool_t* bli_rntm_sba_pool( const rntm_t* rntm )
-{
-	return rntm->sba_pool;
-}
-
-BLIS_INLINE pba_t* bli_rntm_pba( const rntm_t* rntm )
-{
-	return rntm->pba;
 }
 
 //
@@ -194,16 +176,6 @@ BLIS_INLINE void bli_rntm_set_ways_only( dim_t jc, dim_t pc, dim_t ic, dim_t jr,
 	bli_rntm_set_jr_ways_only( jr, rntm );
 	bli_rntm_set_ir_ways_only( ir, rntm );
 	bli_rntm_set_pr_ways_only(  1, rntm );
-}
-
-BLIS_INLINE void bli_rntm_set_sba_pool( pool_t* sba_pool, rntm_t* rntm )
-{
-	rntm->sba_pool = sba_pool;
-}
-
-BLIS_INLINE void bli_rntm_set_pba( pba_t* pba, rntm_t* rntm )
-{
-	rntm->pba = pba;
 }
 
 BLIS_INLINE void bli_rntm_clear_num_threads_only( rntm_t* rntm )
@@ -276,15 +248,6 @@ BLIS_INLINE void bli_rntm_clear_l3_sup( rntm_t* rntm )
 	bli_rntm_set_l3_sup( TRUE, rntm );
 }
 
-BLIS_INLINE void bli_rntm_clear_sba_pool( rntm_t* rntm )
-{
-	bli_rntm_set_sba_pool( NULL, rntm );
-}
-BLIS_INLINE void bli_rntm_clear_pba( rntm_t* rntm )
-{
-	bli_rntm_set_pba( NULL, rntm );
-}
-
 //
 // -- rntm_t initialization ----------------------------------------------------
 //
@@ -302,8 +265,6 @@ BLIS_INLINE void bli_rntm_clear_pba( rntm_t* rntm )
           .pack_a      = FALSE, \
           .pack_b      = FALSE, \
           .l3_sup      = TRUE, \
-          .sba_pool    = NULL, \
-          .pba         = NULL, \
         }  \
 
 BLIS_INLINE void bli_rntm_init( rntm_t* rntm )
@@ -317,9 +278,6 @@ BLIS_INLINE void bli_rntm_init( rntm_t* rntm )
 	bli_rntm_clear_pack_a( rntm );
 	bli_rntm_clear_pack_b( rntm );
 	bli_rntm_clear_l3_sup( rntm );
-
-	bli_rntm_clear_sba_pool( rntm );
-	bli_rntm_clear_pba( rntm );
 }
 
 //

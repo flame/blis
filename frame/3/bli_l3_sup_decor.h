@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2018 - 2019, Advanced Micro Devices, Inc.
+   Copyright (C) 2018, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -33,43 +33,37 @@
 
 */
 
-#include "blis.h"
+#ifndef BLIS_L3_SUP_DECOR_H
+#define BLIS_L3_SUP_DECOR_H
 
-void bli_packm_thrinfo_init
-     (
-       thrinfo_t* thread,
-       thrcomm_t* ocomm,
-       dim_t      ocomm_id,
-       dim_t      n_way,
-       dim_t      work_id,
-       bszid_t    bszid,
-       thrinfo_t* sub_node
-     )
-{
-	bli_thrinfo_init
-	(
-	  thread,
-	  ocomm, ocomm_id,
-	  n_way, work_id,
-	  FALSE,
-	  BLIS_NO_PART,
-	  sub_node
-	);
-}
+// -- sup definitions ----------------------------------------------------------
 
-void bli_packm_thrinfo_init_single
+// Level-3 sup internal function type.
+typedef err_t (*l3supint_ft)
      (
-       thrinfo_t* thread
-     )
-{
-	bli_packm_thrinfo_init
-	(
-	  thread,
-	  &BLIS_SINGLE_COMM, 0,
-	  1,
-	  0,
-	  BLIS_NO_PART,
-	  NULL
-	);
-}
+       const obj_t*     alpha,
+       const obj_t*     a,
+       const obj_t*     b,
+       const obj_t*     beta,
+       const obj_t*     c,
+       const cntx_t*    cntx,
+       const rntm_t*    rntm,
+             thrinfo_t* thread
+     );
+
+// Level-3 sup thread decorator prototype.
+err_t bli_l3_sup_thread_decorator
+     (
+             l3supint_ft func,
+             opid_t      family,
+       const obj_t*      alpha,
+       const obj_t*      a,
+       const obj_t*      b,
+       const obj_t*      beta,
+       const obj_t*      c,
+       const cntx_t*     cntx,
+       const rntm_t*     rntm
+     );
+
+#endif
 

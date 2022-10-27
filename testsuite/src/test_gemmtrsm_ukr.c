@@ -283,13 +283,9 @@ void libblis_test_gemmtrsm_ukr_experiment
 	bli_copym( &b11, &c11 );
 	bli_copym( &c11, &c11_save );
 
-	rntm_t rntm;
-	bli_rntm_init( &rntm );
-	bli_pba_rntm_set_pba( &rntm );
-
 	// Create pack objects for a and b, and pack them to ap and bp,
 	// respectively.
-	cntl_t* cntl_a = libblis_test_pobj_create
+	thrinfo_t* thread_a = libblis_test_pobj_create
 	(
 	  BLIS_MR,
 	  BLIS_MR,
@@ -297,8 +293,7 @@ void libblis_test_gemmtrsm_ukr_experiment
 	  BLIS_PACKED_ROW_PANELS,
 	  BLIS_BUFFER_FOR_A_BLOCK,
 	  &a, &ap,
-	  cntx,
-	  &rntm
+	  cntx
 	);
 
 	// Set the diagonal offset of ap.
@@ -315,7 +310,7 @@ bli_printm( "a", &a, "%5.2f", "" );
 bli_printm( "ap", &ap, "%5.2f", "" );
 #endif
 
-	cntl_t* cntl_b = NULL;
+	thrinfo_t* thread_b = NULL;
 
 	// Repeat the experiment n_repeats times and record results.
 	for ( i = 0; i < n_repeats; ++i )
@@ -325,7 +320,7 @@ bli_printm( "ap", &ap, "%5.2f", "" );
 		// Transpose B to B^T for packing.
 		bli_obj_induce_trans( &b );
 
-		cntl_b = libblis_test_pobj_create
+		thread_b = libblis_test_pobj_create
 		(
 		  BLIS_NR,
 		  BLIS_MR,
@@ -333,8 +328,7 @@ bli_printm( "ap", &ap, "%5.2f", "" );
 		  BLIS_PACKED_COL_PANELS,
 		  BLIS_BUFFER_FOR_B_PANEL,
 		  &b, &bp,
-		  cntx,
-		  &rntm
+		  cntx
 		);
 
 		// Transpose B^T back to B and Bp^T back to Bp.
@@ -362,9 +356,9 @@ bli_printm( "ap", &ap, "%5.2f", "" );
 		// to perform the correctness check later.
 		if ( i < n_repeats - 1 )
 		{
-			// Free the control tree nodes and release their cached mem_t entries
+			// Free the thread control tree nodes and release their cached mem_t entries
 			// back to the memory broker.
-			bli_cntl_free( &rntm, cntl_b, &BLIS_PACKM_SINGLE_THREADED );
+			bli_thrinfo_free( thread_b );
 		}
 	}
 
@@ -401,11 +395,11 @@ bli_printm( "ap", &ap, "%5.2f", "" );
 	// Zero out performance and residual if output matrix is empty.
 	//libblis_test_check_empty_problem( &c11, perf, resid );
 
-	// Free the control tree nodes and release their cached mem_t entries
+	// Free the thread control tree nodes and release their cached mem_t entries
 	// back to the pba.
-	bli_cntl_free( &rntm, cntl_a, &BLIS_PACKM_SINGLE_THREADED );
-	if ( cntl_b )
-	    bli_cntl_free( &rntm, cntl_b, &BLIS_PACKM_SINGLE_THREADED );
+	bli_thrinfo_free( thread_a );
+	if ( thread_b )
+	    bli_thrinfo_free( thread_b );
 
 	// Free the test objects.
 	bli_obj_free( &a_big );

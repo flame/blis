@@ -242,8 +242,7 @@ void PASTEF77(ch,blasname) \
 		  &betao, \
 		  &co, \
 		  cntx, \
-		  rntm, \
-		  NULL  \
+		  rntm \
 		); \
 	} \
 \

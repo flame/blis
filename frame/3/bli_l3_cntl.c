@@ -44,8 +44,8 @@ void bli_l3_cntl_create_if
        const obj_t*   a,
        const obj_t*   b,
        const obj_t*   c,
-             rntm_t*  rntm,
-             cntl_t*  cntl_orig,
+             pool_t*  pool,
+       const cntl_t*  cntl_orig,
              cntl_t** cntl_use
      )
 {
@@ -59,7 +59,7 @@ void bli_l3_cntl_create_if
 		{
 			*cntl_use = bli_gemm_cntl_create
 			(
-			  rntm,
+			  pool,
 			  family,
 			  schema_a,
 			  schema_b,
@@ -70,12 +70,18 @@ void bli_l3_cntl_create_if
 		{
 			side_t side;
 
+			// NOTE: We no longer ever use right-sided trsm, and therefore this
+			// function will only ever get called with side = BLIS_LEFT, which
+			// means that in the future, we can remove the a, b, and c operands
+			// from the function signature. (This assumes that the call to
+			// bli_obj_ker_fn( c ) is replaced in some future reorganization
+			// that moves the .ker_fn argument from obj_t to, say, the rntm_t.)
 			if ( bli_obj_is_triangular( a ) ) side = BLIS_LEFT;
 			else                              side = BLIS_RIGHT;
 
 			*cntl_use = bli_trsm_cntl_create
 			(
-			  rntm,
+			  pool,
 			  side,
 			  schema_a,
 			  schema_b,
@@ -88,7 +94,7 @@ void bli_l3_cntl_create_if
 		// If the user provided a control tree, create a copy and use it
 		// instead (so that threads can use its local tree as a place to
 		// cache things like pack mem_t entries).
-		*cntl_use = bli_cntl_copy( rntm, cntl_orig );
+		*cntl_use = bli_cntl_copy( pool, cntl_orig );
 
 		// Recursively set the family fields of the newly copied control tree
 		// nodes.
@@ -98,9 +104,8 @@ void bli_l3_cntl_create_if
 
 void bli_l3_cntl_free
      (
-       rntm_t*    rntm,
-       cntl_t*    cntl_use,
-       thrinfo_t* thread
+       pool_t* pool,
+       cntl_t* cntl_use
      )
 {
 	// NOTE: We don't actually need to call separate _cntl_free() functions
@@ -114,11 +119,11 @@ void bli_l3_cntl_free
 	     family == BLIS_GEMMT ||
 	     family == BLIS_TRMM )
 	{
-		bli_gemm_cntl_free( rntm, cntl_use, thread );
+		bli_gemm_cntl_free( pool, cntl_use );
 	}
 	else // if ( family == BLIS_TRSM )
 	{
-		bli_trsm_cntl_free( rntm, cntl_use, thread );
+		bli_trsm_cntl_free( pool, cntl_use );
 	}
 }
 

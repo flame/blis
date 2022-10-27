@@ -32,6 +32,16 @@
 
 */
 
+void bli_l3_adjust_kc
+      (
+        const obj_t*  a,
+        const obj_t*  b,
+              dim_t*  b_alg,
+              dim_t*  b_max,
+        const cntx_t* cntx,
+        const cntl_t* cntl
+      );
+
 dim_t bli_l3_determine_kc
       (
               dir_t   direct,
@@ -43,50 +53,3 @@ dim_t bli_l3_determine_kc
         const cntx_t* cntx,
         const cntl_t* cntl
       );
-
-
-#undef  GENPROT
-#define GENPROT( opname ) \
-\
-dim_t PASTEMAC0(opname) \
-      ( \
-               dir_t   direct, \
-               dim_t   i, \
-               dim_t   dim, \
-         const obj_t*  a, \
-         const obj_t*  b, \
-               bszid_t bszid, \
-         const cntx_t* cntx  \
-      );
-
-GENPROT( gemm_determine_kc )
-GENPROT( gemmt_determine_kc )
-GENPROT( trmm_determine_kc )
-GENPROT( trsm_determine_kc )
-
-
-#undef  GENPROT
-#define GENPROT( opname ) \
-\
-dim_t PASTEMAC0(opname) \
-      ( \
-               dim_t   i, \
-               dim_t   dim, \
-         const obj_t*  a, \
-         const obj_t*  b, \
-               bszid_t bszid, \
-         const cntx_t* cntx  \
-      );
-
-GENPROT( gemm_determine_kc_f )
-GENPROT( gemm_determine_kc_b )
-
-GENPROT( gemmt_determine_kc_f )
-GENPROT( gemmt_determine_kc_b )
-
-GENPROT( trmm_determine_kc_f )
-GENPROT( trmm_determine_kc_b )
-
-GENPROT( trsm_determine_kc_f )
-GENPROT( trsm_determine_kc_b )
-

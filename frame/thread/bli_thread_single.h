@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2021, The University of Texas at Austin
+   Copyright (C) 2014, The University of Texas at Austin
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -32,26 +32,15 @@
 
 */
 
-#ifndef BLIS_SBX_L3_DECOR_OPENMP_H
-#define BLIS_SBX_L3_DECOR_OPENMP_H
+#ifndef BLIS_THREAD_SINGLE_H
+#define BLIS_THREAD_SINGLE_H
 
-// Definitions specific to situations when OpenMP multithreading is enabled.
-#ifdef BLIS_ENABLE_OPENMP
-
-void bls_l3_thread_decorator_openmp
+void bli_thread_launch_single
      (
-       l3sbxint_ft func,
-       opid_t      family,
-       obj_t*      alpha,
-       obj_t*      a,
-       obj_t*      b,
-       obj_t*      beta,
-       obj_t*      c,
-       cntx_t*     cntx,
-       rntm_t*     rntm
+             dim_t         nt,
+             thread_func_t func,
+       const void*         params
      );
-
-#endif
 
 #endif
 

@@ -265,10 +265,10 @@ void PASTECH2(blx_,ch,varname) \
 	thrinfo_t* caucus = bli_thrinfo_sub_node( thread ); \
 \
 	/* Query the number of threads and thread ids for each loop. */ \
-	dim_t jr_nt  = bli_thread_n_way( thread ); \
-	dim_t jr_tid = bli_thread_work_id( thread ); \
-	dim_t ir_nt  = bli_thread_n_way( caucus ); \
-	dim_t ir_tid = bli_thread_work_id( caucus ); \
+	dim_t jr_nt  = bli_thrinfo_n_way( thread ); \
+	dim_t jr_tid = bli_thrinfo_work_id( thread ); \
+	dim_t ir_nt  = bli_thrinfo_n_way( caucus ); \
+	dim_t ir_tid = bli_thrinfo_work_id( caucus ); \
 \
 	dim_t jr_start, jr_end; \
 	dim_t ir_start, ir_end; \
