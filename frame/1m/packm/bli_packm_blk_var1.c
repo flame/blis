@@ -58,7 +58,7 @@ void bli_packm_blk_var1
              obj_t*   p,
        const cntx_t*  cntx,
        const cntl_t*  cntl,
-             thrinfo_t* thread
+             thrinfo_t* thread_par
      )
 {
 	// Extract various fields from the control tree.
@@ -70,8 +70,15 @@ void bli_packm_blk_var1
 	// Every thread initializes p and determines the size of memory
 	// block needed (which gets embedded into the otherwise "blank" mem_t
 	// entry in the control tree node). Return early if no packing is required.
-	if ( !bli_packm_init( c, p, cntx, cntl, thread ) )
+	if ( !bli_packm_init( c, p, cntx, cntl, bli_thrinfo_sub_node( thread_par ) ) )
 		return;
+
+    // Use the sub-prenode. In bli_l3_thrinfo_grow, this node
+    // was created to represent the team of threads as a group
+    // of single-threaded teams. This is necessary since the
+    // work distribution functions all work off of the work_id and
+    // n_way fields.
+	thrinfo_t* thread = bli_thrinfo_sub_prenode( thread_par );
 
 	// Check parameters.
 	if ( bli_error_checking_is_enabled() )
@@ -160,8 +167,8 @@ void bli_packm_blk_var1
 
 	// Query the number of threads and thread ids from the current thread's
 	// packm thrinfo_t node.
-	const dim_t nt  = bli_thrinfo_num_threads( thread );
-	const dim_t tid = bli_thrinfo_thread_id( thread );
+	const dim_t nt  = bli_thrinfo_n_way( thread );
+	const dim_t tid = bli_thrinfo_work_id( thread );
 
 	// Determine the thread range and increment using the current thread's
 	// packm thrinfo_t node. NOTE: The definition of bli_thread_range_jrir()

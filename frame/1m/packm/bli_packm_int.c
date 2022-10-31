@@ -60,7 +60,7 @@ void bli_packm_int
 	  p,
 	  cntx,
 	  cntl,
-	  thread
+	  thread_par
 	);
 
 	// Barrier so that packing is done before computation.
