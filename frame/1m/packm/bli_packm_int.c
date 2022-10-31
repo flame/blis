@@ -36,10 +36,10 @@
 
 void bli_packm_int
      (
-       const obj_t*  a,
-             obj_t*  p,
-       const cntx_t* cntx,
-       const cntl_t* cntl,
+       const obj_t*     a,
+             obj_t*     p,
+       const cntx_t*    cntx,
+       const cntl_t*    cntl,
              thrinfo_t* thread_par
      )
 {
@@ -53,7 +53,16 @@ void bli_packm_int
 	thrinfo_t* thread = bli_thrinfo_sub_node( thread_par );
 	bli_thrinfo_barrier( thread );
 
-	// Invoke the variant with kappa_use.
+	// Invoke the packm variant.
+	// NOTE: The packing kernel uses two communicators: one which represents a
+	// single workgroup of many threads, and one which represents a group of
+	// many single-member workgroups. The former communicator is used for
+	// barriers and thread communication (i.e. broadcasting the pack buffer
+	// pointer), while the latter communicator is used for partitioning work.
+	// This is because all of the thread range functions rely on the work_id
+	// and number of workgroups (n_way). Thus, we pass along the parent
+	// thrinfo_t node which has these two communicators as the sub-node and
+	// sub-prenode, respectively.
 	f
 	(
 	  a,

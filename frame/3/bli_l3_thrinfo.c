@@ -77,17 +77,18 @@ void bli_l3_thrinfo_grow
 	thrinfo_t* thread_cur = bli_thrinfo_split( n_way, thread_par );
 	bli_thrinfo_set_sub_node( thread_cur, thread_par );
 
-    if ( bszid == BLIS_NO_PART )
-    {
-        // A hack: the packing code needs a thread communicator which represents
-        // a group of single-threaded teams working together. However, the
-        // "normal" packm thrinfo_t node has a single team with multiple threads.
-        // So, we create a sub-prenode on the thrinfo_t tree which splits this
-        // single team into multiple single-threaded teams.
-        const dim_t n_threads = bli_thrinfo_num_threads( thread_par );
+	if ( bszid == BLIS_NO_PART )
+	{
+		// A hack: the packing code needs a thread communicator which represents
+		// a group of single-member thread teams working cooperatively However,
+		// the "normal" packm thrinfo_t node has a single team of multiple
+		// threads. Our solution (for now) is to create a sub-prenode on the
+		// thrinfo_t tree which splits this single team into multiple
+		// single-member thread teams.
+		const dim_t n_threads = bli_thrinfo_num_threads( thread_par );
 		thrinfo_t* thread_pre = bli_thrinfo_split( n_threads, thread_par );
 		bli_thrinfo_set_sub_prenode( thread_pre, thread_par );
-    }
+	}
 	else if ( sub_prenode != NULL )
 	{
 		// A pre-node is only used in the IC loop of trsm. In this case,
@@ -99,13 +100,12 @@ void bli_l3_thrinfo_grow
 		bli_rntm_set_ic_ways_only(               1, &rntm_l );
 		bli_rntm_set_jr_ways_only( ic_nway*jr_nway, &rntm_l );
 
-		// Use thread_pre instead of thread_cur since we *don't* want to
-		// do any parallelism at this level. The thread_pre node is
-        // attached to thread_par and not thread_cur! This results in a
-        // split "one level higher" than in the corresponding cntl_t tree.
-        // This is intentional since two different thrinfo_t nodes will
-        // be used at the cntl_t node for trsm variant 1 (one for trsm,
-        // one for gemm).
+		// Use thread_pre instead of thread_cur since we *don't* want to do any
+		// parallelism at this level. So the thread_pre node gets attached to
+		// thread_par and not thread_cur! This results in a split "one level
+		// higher" than in the corresponding cntl_t tree. This is intentional
+		// since two different thrinfo_t nodes will be used at the cntl_t node
+		// for trsm blocked variant 1 (one for trsm, one for gemm).
 		thrinfo_t* thread_pre = bli_thrinfo_split( 1, thread_par );
 		bli_thrinfo_set_sub_prenode( thread_pre, thread_par );
 		bli_l3_thrinfo_grow( thread_pre, &rntm_l, sub_prenode );
