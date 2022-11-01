@@ -39,6 +39,10 @@
 
 #ifdef BLIS_USE_HPX_BARRIER
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 // Define the pthread_barrier_t implementations of the init, cleanup, and
 // barrier functions.
 
@@ -59,7 +63,15 @@ void bli_thrcomm_barrier( dim_t t_id, thrcomm_t* comm )
 	comm->barrier->arrive_and_wait();
 }
 
+#ifdef __cplusplus
+}
+#endif
+
 #else
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 // Define the non-pthread_barrier_t implementations of the init, cleanup,
 // and barrier functions. These are the default unless the pthread_barrier_t
@@ -82,6 +94,10 @@ void bli_thrcomm_barrier_hpx( dim_t t_id, thrcomm_t* comm )
 {
 	bli_thrcomm_barrier_atomic( t_id, comm );
 }
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif
 

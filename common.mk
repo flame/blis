@@ -427,6 +427,7 @@ KERNELS_FRAG_PATH  := ./obj/$(CONFIG_NAME)/$(KERNELS_DIR)
 ADDON_FRAG_PATH    := ./obj/$(CONFIG_NAME)/$(ADDON_DIR)
 SANDBOX_FRAG_PATH  := ./obj/$(CONFIG_NAME)/$(SANDBOX_DIR)
 
+ENABLE_HPX := no
 
 
 #
@@ -824,6 +825,7 @@ endif
 # gets added to begin with.
 
 CTHREADFLAGS :=
+CXXTHREADFLAGS :=
 
 ifeq ($(CC_VENDOR),gcc)
 #ifneq ($(findstring auto,$(THREADING_MODEL)),)
@@ -838,12 +840,13 @@ CTHREADFLAGS += -pthread
 LDFLAGS      += $(LIBPTHREAD)
 endif
 ifneq ($(findstring hpx,$(THREADING_MODEL)),)
-ifeq ($(debug_flag),1)
-CXXTHREADFLAGS += `pkg-config --cflags hpx_application_debug`
-LDFLAGS      += `pkg-config --libs hpx_application_debug`
-else
+ENABLE_HPX := yes
+ifneq ($(findstring yes,$(ENABLE_DEBUG)),)
 CXXTHREADFLAGS += `pkg-config --cflags hpx_application`
 LDFLAGS      += `pkg-config --libs hpx_application`
+else
+CXXTHREADFLAGS += `pkg-config --cflags hpx_application_debug`
+LDFLAGS      += `pkg-config --libs hpx_application_debug`
 endif
 endif
 endif
@@ -861,12 +864,13 @@ CTHREADFLAGS += -pthread
 LDFLAGS      += $(LIBPTHREAD)
 endif
 ifneq ($(findstring hpx,$(THREADING_MODEL)),)
-ifeq ($(debug_flag),1)
-CXXTHREADFLAGS += `pkg-config --cflags hpx_application_debug`
-LDFLAGS      += `pkg-config --libs hpx_application_debug`
-else
+ENABLE_HPX := yes
+ifneq ($(findstring yes,$(ENABLE_DEBUG)),)
 CXXTHREADFLAGS += `pkg-config --cflags hpx_application`
 LDFLAGS      += `pkg-config --libs hpx_application`
+else
+CXXTHREADFLAGS += `pkg-config --cflags hpx_application_debug`
+LDFLAGS      += `pkg-config --libs hpx_application_debug`
 endif
 endif
 endif
@@ -884,12 +888,13 @@ CTHREADFLAGS += -pthread
 LDFLAGS      += $(LIBPTHREAD)
 endif
 ifneq ($(findstring hpx,$(THREADING_MODEL)),)
-ifeq ($(debug_flag),1)
-CXXTHREADFLAGS += `pkg-config --cflags hpx_application_debug`
-LDFLAGS      += `pkg-config --libs hpx_application_debug`
-else
+ENABLE_HPX := yes
+ifneq ($(findstring yes,$(ENABLE_DEBUG)),)
 CXXTHREADFLAGS += `pkg-config --cflags hpx_application`
 LDFLAGS      += `pkg-config --libs hpx_application`
+else
+CXXTHREADFLAGS += `pkg-config --cflags hpx_application_debug`
+LDFLAGS      += `pkg-config --libs hpx_application_debug`
 endif
 endif
 endif

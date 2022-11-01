@@ -112,7 +112,7 @@ typedef struct thrcomm_s
 #include "bli_thrcomm_single.h"
 #include "bli_thrcomm_openmp.h"
 #include "bli_thrcomm_pthreads.h"
-#include "bli_thrcomm_hpx.hpp"
+#include "bli_thrcomm_hpx.h"
 
 // Define a function pointer type for each of the functions that are
 // "overloaded" by each method of multithreading.

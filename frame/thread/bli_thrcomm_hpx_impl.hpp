@@ -32,8 +32,8 @@
 
 */
 
-#ifndef BLIS_THRCOMM_HPX_H
-#define BLIS_THRCOMM_HPX_H
+#ifndef BLIS_THRCOMM_HPX_IMPL_H
+#define BLIS_THRCOMM_HPX_IMPL_H
 
 // Define these prototypes for situations when POSIX multithreading is enabled.
 #ifdef BLIS_ENABLE_HPX

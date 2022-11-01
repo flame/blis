@@ -36,7 +36,7 @@
 #include "blis.h"
 
 #ifdef BLIS_ENABLE_HPX
-#include "bli_thread_hpx.hpp"
+#include "bli_thread_hpx.h"
 #endif
 
 thrcomm_t BLIS_SINGLE_COMM = {};
@@ -75,9 +75,9 @@ static thread_launch_t thread_launch_fpa[ BLIS_NUM_THREAD_IMPLS ] =
 	                NULL,
 #endif
 	[BLIS_HPX] =
-#if   defined(BLIS_ENABLE_OPENMP)
+#if   defined(BLIS_ENABLE_HPX)
 	                bli_thread_launch_hpx,
-#elif defined(BLIS_ENABLE_PTHREADS)
+#elif defined(BLIS_ENABLE_OPENMP)
 	                NULL,
 #else
 	                NULL,

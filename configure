@@ -2478,6 +2478,7 @@ main()
 	# The user-given debug type and a flag indicating it was given.
 	debug_type=''
 	debug_flag=''
+	enable_debug='no'
 
 	# A flag indicating whether AddressSanitizer should be used.
 	enable_asan='no'
@@ -3422,8 +3423,10 @@ main()
 			debug_type='noopt'
 			echo "${script_name}: enabling debug symbols; optimizations disabled."
 		fi
+		enable_debug='yes'
 	else
 		debug_type='off'
+		enable_debug='no'
 		echo "${script_name}: debug symbols disabled."
 	fi
 

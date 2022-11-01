@@ -51,7 +51,7 @@ typedef struct thread_data
 // Entry point for additional threads
 static void* bli_hpx_thread_entry( void* data_void )
 {
-	const thread_data_t* data     = data_void;
+	const thread_data_t* data     = static_cast<thread_data_t*>(data_void);
 
 	const dim_t          tid      = data->tid;
 	      thrcomm_t*     gl_comm  = data->gl_comm;
@@ -85,16 +85,15 @@ void bli_thread_launch_hpx( dim_t n_threads, thread_func_t func, const void* par
 	#ifdef BLIS_ENABLE_MEM_TRACING
 	printf( "bli_l3_thread_decorator().pth: " );
 	#endif
-	bli_pthread_t* pthreads = bli_malloc_intl( sizeof( bli_pthread_t ) * n_threads, &r_val );
 
 	#ifdef BLIS_ENABLE_MEM_TRACING
 	printf( "bli_l3_thread_decorator().pth: " );
 	#endif
-	thread_data_t* datas    = bli_malloc_intl( sizeof( thread_data_t ) * n_threads, &r_val );
+	thread_data_t* datas    = static_cast<thread_data_t*>(bli_malloc_intl( sizeof( thread_data_t ) * n_threads, &r_val ));
 
 	// NOTE: We must iterate backwards so that the chief thread (thread id 0)
 	// can spawn all other threads before proceeding with its own computation.
-	auto irange = hpx::util::detail::make_counting_shape(num_seg);
+	auto irange = hpx::util::detail::make_counting_shape(n_threads);
 
         hpx::for_each(hpx::execution::par, hpx::util::begin(irange), hpx::util::end(irange),
 	[&datas, &gl_comm, &func, &params](const dim_t tid) {
@@ -115,7 +114,6 @@ void bli_thread_launch_hpx( dim_t n_threads, thread_func_t func, const void* par
 	#ifdef BLIS_ENABLE_MEM_TRACING
 	printf( "bli_l3_thread_decorator().pth: " );
 	#endif
-	bli_free_intl( pthreads );
 
 	#ifdef BLIS_ENABLE_MEM_TRACING
 	printf( "bli_l3_thread_decorator().pth: " );
