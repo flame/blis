@@ -842,11 +842,11 @@ endif
 ifneq ($(findstring hpx,$(THREADING_MODEL)),)
 ENABLE_HPX := yes
 ifneq ($(findstring yes,$(ENABLE_DEBUG)),)
-CXXTHREADFLAGS += `pkg-config --cflags hpx_application`
-LDFLAGS      += `pkg-config --libs hpx_application`
+CXXTHREADFLAGS += `pkg-config --cflags hpx_component`
+LDFLAGS      += `pkg-config --libs hpx_component`
 else
-CXXTHREADFLAGS += `pkg-config --cflags hpx_application_debug`
-LDFLAGS      += `pkg-config --libs hpx_application_debug`
+CXXTHREADFLAGS += `pkg-config --cflags hpx_component_debug`
+LDFLAGS      += `pkg-config --libs hpx_component_debug`
 endif
 endif
 endif
@@ -866,11 +866,11 @@ endif
 ifneq ($(findstring hpx,$(THREADING_MODEL)),)
 ENABLE_HPX := yes
 ifneq ($(findstring yes,$(ENABLE_DEBUG)),)
-CXXTHREADFLAGS += `pkg-config --cflags hpx_application`
-LDFLAGS      += `pkg-config --libs hpx_application`
+CXXTHREADFLAGS += `pkg-config --cflags hpx_component`
+LDFLAGS      += `pkg-config --libs hpx_component`
 else
-CXXTHREADFLAGS += `pkg-config --cflags hpx_application_debug`
-LDFLAGS      += `pkg-config --libs hpx_application_debug`
+CXXTHREADFLAGS += `pkg-config --cflags hpx_component_debug`
+LDFLAGS      += `pkg-config --libs hpx_component_debug`
 endif
 endif
 endif
@@ -890,11 +890,11 @@ endif
 ifneq ($(findstring hpx,$(THREADING_MODEL)),)
 ENABLE_HPX := yes
 ifneq ($(findstring yes,$(ENABLE_DEBUG)),)
-CXXTHREADFLAGS += `pkg-config --cflags hpx_application`
-LDFLAGS      += `pkg-config --libs hpx_application`
+CXXTHREADFLAGS += `pkg-config --cflags hpx_component`
+LDFLAGS      += `pkg-config --libs hpx_component`
 else
-CXXTHREADFLAGS += `pkg-config --cflags hpx_application_debug`
-LDFLAGS      += `pkg-config --libs hpx_application_debug`
+CXXTHREADFLAGS += `pkg-config --cflags hpx_component_debug`
+LDFLAGS      += `pkg-config --libs hpx_component_debug`
 endif
 endif
 endif
