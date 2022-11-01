@@ -2,6 +2,7 @@ _Recipient of the **[2023 James H. Wilkinson Prize for Numerical Software](https
 
 _Recipient of the **[2020 SIAM Activity Group on Supercomputing Best Paper Prize](https://www.siam.org/prizes-recognition/activity-group-prizes/detail/siag-sc-best-paper-prize)**_
 
+
 ![The BLIS cat is sleeping.](http://www.cs.utexas.edu/users/field/blis_cat.png)
 
 [![Build Status](https://api.travis-ci.com/flame/blis.svg?branch=master)](https://app.travis-ci.com/github/flame/blis)
@@ -818,7 +819,7 @@ within the BLIS Framework},
 Awards
 ------
  
-* **[2023 James H. Wilkinson Prize for Numerical Software.](https://www.siam.org/prizes-recognition/major-prizes-lectures/detail/james-h-wilkinson-prize-for-numerical-software)**
+ * **[2023 James H. Wilkinson Prize for Numerical Software.](https://www.siam.org/prizes-recognition/major-prizes-lectures/detail/james-h-wilkinson-prize-for-numerical-software)**
 This prize is awarded once every four years to the authors of an outstanding piece of
 numerical software, or to individuals who have made an outstanding contribution to an
 existing piece of numerical software. The selection committee sought to recognize the
@@ -832,7 +833,9 @@ paper, as determined by the selection committee, in the field of parallel scient
 and engineering computing published within the four calendar years preceding the
 award year. The prize was chosen for the paper ["The BLIS Framework: Experiments in
 Portability."](#citations) and awarded at the [2020 SIAM Conference on Parallel Processing for Scientific Computing](https://www.siam.org/conferences/cm/conference/pp20) in Seattle where Robert van de Geijn delivered [a talk on BLIS](https://meetings.siam.org/sess/dsp_programsess.cfm?SESSIONCODE=68266) and accepted the prize alongside other coauthors.
-   - [Oden Institute’s SHPC Group Win SIAM Best Paper Prize](https://www.oden.utexas.edu/about/news/ScienceHighPerfomanceComputingSIAMBestPaperPrize/)
+See also:
+   * [SIAM News | January 2020 Prize Spotlight](https://sinews.siam.org/Details-Page/january-2020-prize-spotlight#Field&Robert)
+   * [Oden Institute's SHPC Group Win SIAM Best Paper Prize](https://www.oden.utexas.edu/about/news/ScienceHighPerfomanceComputingSIAMBestPaperPrize/)
 
 Funding
 -------
