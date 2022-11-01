@@ -825,7 +825,9 @@ numerical software, or to individuals who have made an outstanding contribution 
 existing piece of numerical software. The selection committee sought to recognize the
 recipients "for the development of [BLIS](https://github.com/flame/blis), a portable
 open-source software framework that facilitates rapid instantiation of
-high-performance BLAS and BLAS-like operations targeting modern CPUs."
+high-performance BLAS and BLAS-like operations targeting modern CPUs." The prize will
+be awarded at the
+[2023 SIAM Conference on Computational Science and Engineering](https://www.siam.org/conferences/cm/conference/cse23) in Amsterdam.
 
  * **[2020 SIAM Activity Group on Supercomputing Best Paper Prize.](https://www.siam.org/prizes-recognition/activity-group-prizes/detail/siag-sc-best-paper-prize)**
 This prize is awarded once every two years to the authors of the most outstanding
