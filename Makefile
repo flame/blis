@@ -503,7 +503,6 @@ flat-header: check-env $(BLIS_H_FLAT)
 
 $(BLIS_H_FLAT): $(ALL_H99_FILES)
 ifeq ($(ENABLE_VERBOSE),yes)
-	@echo -n "**HERE->***\t$(FLATTEN_H)"
 	$(FLATTEN_H) -l -v1 $(BLIS_H_SRC_PATH) $@ "./$(INCLUDE_DIR)" "$(ALL_H99_DIRPATHS)"
 else
 	@echo -n "Generating monolithic blis.h"
@@ -547,6 +546,8 @@ endef
 # config_name, used to look up the CFLAGS to use during compilation.
 define make-frame-rule
 $(BASE_OBJ_FRAME_PATH)/%.o: $(FRAME_PATH)/%.c $(BLIS_H_FLAT) $(MAKE_DEFS_MK_PATHS)
+$(BASE_OBJ_FRAME_PATH)/%.o: $(FRAME_PATH)/%.cpp $(BLIS_H_FLAT) $(MAKE_DEFS_MK_PATHS)
+
 ifeq ($(ENABLE_VERBOSE),yes)
 	$(CC) $(call get-frame-cflags-for,$(1)) -c $$< -o $$@
 else

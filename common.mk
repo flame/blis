@@ -112,6 +112,7 @@ get-noopt-cxxflags-for   = $(strip $(CFLAGS_PRESET) \
                                    $(call load-var-for,CXXLANGFLAGS,$(1)) \
                                    $(call load-var-for,CPPROCFLAGS,$(1)) \
                                    $(CTHREADFLAGS) \
+                                   $(CXXTHREADFLAGS) \
                                    $(CINCFLAGS) $(VERS_DEF) \
                             )
 
@@ -348,7 +349,7 @@ REFNM              := ref
 # Source suffixes.
 CONFIG_SRC_SUFS    := c
 KERNELS_SRC_SUFS   := c s S
-FRAME_SRC_SUFS     := c
+FRAME_SRC_SUFS     := c cpp
 
 ADDON_C99_SUFS     := c
 ADDON_CXX_SUFS     := cc cpp cxx
@@ -837,8 +838,13 @@ CTHREADFLAGS += -pthread
 LDFLAGS      += $(LIBPTHREAD)
 endif
 ifneq ($(findstring hpx,$(THREADING_MODEL)),)
-CTHREADFLAGS += `pkg-config --cflags hpx_application_debug`
+ifeq ($(debug_flag),1)
+CXXTHREADFLAGS += `pkg-config --cflags hpx_application_debug`
 LDFLAGS      += `pkg-config --libs hpx_application_debug`
+else
+CXXTHREADFLAGS += `pkg-config --cflags hpx_application`
+LDFLAGS      += `pkg-config --libs hpx_application`
+endif
 endif
 endif
 
@@ -855,8 +861,13 @@ CTHREADFLAGS += -pthread
 LDFLAGS      += $(LIBPTHREAD)
 endif
 ifneq ($(findstring hpx,$(THREADING_MODEL)),)
-CTHREADFLAGS += `pkg-config --cflags hpx_application_debug`
+ifeq ($(debug_flag),1)
+CXXTHREADFLAGS += `pkg-config --cflags hpx_application_debug`
 LDFLAGS      += `pkg-config --libs hpx_application_debug`
+else
+CXXTHREADFLAGS += `pkg-config --cflags hpx_application`
+LDFLAGS      += `pkg-config --libs hpx_application`
+endif
 endif
 endif
 
@@ -873,8 +884,13 @@ CTHREADFLAGS += -pthread
 LDFLAGS      += $(LIBPTHREAD)
 endif
 ifneq ($(findstring hpx,$(THREADING_MODEL)),)
-CTHREADFLAGS += `pkg-config --cflags hpx_application_debug`
+ifeq ($(debug_flag),1)
+CXXTHREADFLAGS += `pkg-config --cflags hpx_application_debug`
 LDFLAGS      += `pkg-config --libs hpx_application_debug`
+else
+CXXTHREADFLAGS += `pkg-config --cflags hpx_application`
+LDFLAGS      += `pkg-config --libs hpx_application`
+endif
 endif
 endif
 

@@ -38,14 +38,7 @@
 // Definitions specific to situations when POSIX multithreading is enabled.
 #ifdef BLIS_ENABLE_HPX
 
-#include "bli_type_defs.h"
-#include "bli_thread.h"
-
-extern "C" {
-
-void bli_thread_launch_hpx(dim_t n_threads, thread_func_t func, const void* params);
-
-}
+#include "bli_thread_hpx_impl.hpp"
 
 #endif
 

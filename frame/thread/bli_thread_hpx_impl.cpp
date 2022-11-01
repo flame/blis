@@ -65,6 +65,10 @@ static void* bli_hpx_thread_entry( void* data_void )
 	return NULL;
 }
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 void bli_thread_launch_hpx( dim_t n_threads, thread_func_t func, const void* params )
 {
 	err_t r_val;
@@ -118,5 +122,9 @@ void bli_thread_launch_hpx( dim_t n_threads, thread_func_t func, const void* par
 	#endif
 	bli_free_intl( datas );
 }
+
+#ifdef __cplusplus
+} // end extern "C"
+#endif
 
 #endif
