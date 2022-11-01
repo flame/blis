@@ -503,6 +503,7 @@ flat-header: check-env $(BLIS_H_FLAT)
 
 $(BLIS_H_FLAT): $(ALL_H99_FILES)
 ifeq ($(ENABLE_VERBOSE),yes)
+	@echo -n "**HERE->***\t$(FLATTEN_H)"
 	$(FLATTEN_H) -l -v1 $(BLIS_H_SRC_PATH) $@ "./$(INCLUDE_DIR)" "$(ALL_H99_DIRPATHS)"
 else
 	@echo -n "Generating monolithic blis.h"

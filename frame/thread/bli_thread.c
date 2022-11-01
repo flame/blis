@@ -35,6 +35,10 @@
 
 #include "blis.h"
 
+#ifdef BLIS_ENABLE_HPX
+#include "bli_thread_hpx.hpp"
+#endif
+
 thrcomm_t BLIS_SINGLE_COMM = {};
 
 // The global rntm_t structure. (The definition resides in bli_rntm.c.)
@@ -66,6 +70,14 @@ static thread_launch_t thread_launch_fpa[ BLIS_NUM_THREAD_IMPLS ] =
 #if   defined(BLIS_ENABLE_PTHREADS)
 	                bli_thread_launch_pthreads,
 #elif defined(BLIS_ENABLE_OPENMP)
+	                NULL,
+#else
+	                NULL,
+#endif
+	[BLIS_HPX] =
+#if   defined(BLIS_ENABLE_OPENMP)
+	                bli_thread_launch_hpx,
+#elif defined(BLIS_ENABLE_PTHREADS)
 	                NULL,
 #else
 	                NULL,

@@ -836,6 +836,10 @@ ifneq ($(findstring pthreads,$(THREADING_MODEL)),)
 CTHREADFLAGS += -pthread
 LDFLAGS      += $(LIBPTHREAD)
 endif
+ifneq ($(findstring hpx,$(THREADING_MODEL)),)
+CTHREADFLAGS += `pkg-config --cflags hpx_application_debug`
+LDFLAGS      += `pkg-config --libs hpx_application_debug`
+endif
 endif
 
 ifeq ($(CC_VENDOR),icc)
@@ -850,6 +854,10 @@ ifneq ($(findstring pthreads,$(THREADING_MODEL)),)
 CTHREADFLAGS += -pthread
 LDFLAGS      += $(LIBPTHREAD)
 endif
+ifneq ($(findstring hpx,$(THREADING_MODEL)),)
+CTHREADFLAGS += `pkg-config --cflags hpx_application_debug`
+LDFLAGS      += `pkg-config --libs hpx_application_debug`
+endif
 endif
 
 ifeq ($(CC_VENDOR),clang)
@@ -863,6 +871,10 @@ endif
 ifneq ($(findstring pthreads,$(THREADING_MODEL)),)
 CTHREADFLAGS += -pthread
 LDFLAGS      += $(LIBPTHREAD)
+endif
+ifneq ($(findstring hpx,$(THREADING_MODEL)),)
+CTHREADFLAGS += `pkg-config --cflags hpx_application_debug`
+LDFLAGS      += `pkg-config --libs hpx_application_debug`
 endif
 endif
 

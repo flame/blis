@@ -32,13 +32,21 @@
 
 */
 
-#include "blis.h"
-#include "bli_type_defs.h"
+#ifndef BLIS_THREAD_HPX_H
+#define BLIS_THREAD_HPX_H
 
-void bli_cntx_init_generic( cntx_t* cntx )
-{
-	// Set default kernel blocksizes and functions.
-	bli_cntx_init_generic_ref( cntx );
+// Definitions specific to situations when POSIX multithreading is enabled.
+#ifdef BLIS_ENABLE_HPX
+
+#include "bli_type_defs.h"
+#include "bli_thread.h"
+
+extern "C" {
+
+void bli_thread_launch_hpx(dim_t n_threads, thread_func_t func, const void* params);
 
 }
 
+#endif
+
+#endif
