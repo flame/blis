@@ -1,4 +1,5 @@
-CXX=g++
+-include $(SHARE_PATH)/common.mk
+
 all:
 	$(CXX) -O3 -I../../../include/x86_64 `pkg-config --cflags hpx_application` -DHPX_APPLICATION_NAME=00obj_basic -o 00obj_basic 00obj_basic.cpp -L../../../lib/x86_64 `pkg-config --libs hpx_application` -lblis
 	$(CXX) -O3 -I../../../include/x86_64 `pkg-config --cflags hpx_application` -DHPX_APPLICATION_NAME=01obj_attach -o 01obj_attach 01obj_attach.cpp -L../../../lib/x86_64 `pkg-config --libs hpx_application` -lblis
