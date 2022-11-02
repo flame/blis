@@ -818,7 +818,7 @@ within the BLIS Framework},
 
 Awards
 ------
- 
+
  * **[2023 James H. Wilkinson Prize for Numerical Software.](https://www.siam.org/prizes-recognition/major-prizes-lectures/detail/james-h-wilkinson-prize-for-numerical-software)**
 This prize is awarded once every four years to the authors of an outstanding piece of
 numerical software, or to individuals who have made an outstanding contribution to an
