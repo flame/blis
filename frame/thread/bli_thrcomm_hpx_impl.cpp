@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2022 Tactical Computing Laboratories, LLC
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -33,12 +34,72 @@
 */
 
 #include "blis.h"
-#include "bli_type_defs.h"
 
-void bli_cntx_init_generic( cntx_t* cntx )
+#ifdef BLIS_ENABLE_HPX
+
+#ifdef BLIS_USE_HPX_BARRIER
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+// Define the pthread_barrier_t implementations of the init, cleanup, and
+// barrier functions.
+
+void bli_thrcomm_init_hpx( dim_t n_threads, thrcomm_t* comm )
 {
-	// Set default kernel blocksizes and functions.
-	bli_cntx_init_generic_ref( cntx );
-
+	if ( comm == NULL ) return;
+	comm->barrier = new hpx:barrier<>(); 
 }
+
+void bli_thrcomm_cleanup_hpx( thrcomm_t* comm )
+{
+	if ( comm == NULL ) return;
+	delete comm->barrier;
+}
+
+void bli_thrcomm_barrier( dim_t t_id, thrcomm_t* comm )
+{
+	comm->barrier->arrive_and_wait();
+}
+
+#ifdef __cplusplus
+}
+#endif
+
+#else
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+// Define the non-pthread_barrier_t implementations of the init, cleanup,
+// and barrier functions. These are the default unless the pthread_barrier_t
+// versions are requested at compile-time.
+
+void bli_thrcomm_init_hpx( dim_t n_threads, thrcomm_t* comm )
+{
+	if ( comm == NULL ) return;
+	comm->sent_object = NULL;
+	comm->n_threads = n_threads;
+	comm->barrier_sense = 0;
+	comm->barrier_threads_arrived = 0;
+}
+
+void bli_thrcomm_cleanup_hpx( thrcomm_t* comm )
+{
+}
+
+void bli_thrcomm_barrier_hpx( dim_t t_id, thrcomm_t* comm )
+{
+	bli_thrcomm_barrier_atomic( t_id, comm );
+}
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif
+
+#endif
 

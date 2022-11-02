@@ -6,6 +6,7 @@
 
    Copyright (C) 2014, The University of Texas at Austin
    Copyright (C) 2018 - 2019, Advanced Micro Devices, Inc.
+   Copyright (C) 2022 Tactical Computing Laboratories, LLC
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -64,6 +65,15 @@
 #define BLIS_ENABLE_PTHREADS_AS_DEFAULT
 #endif
 #endif
+
+#if @enable_hpx@
+#define BLIS_ENABLE_HPX
+#if @enable_hpx_as_def@
+#define BLIS_ENABLE_HPX_AS_DEFAULT
+#endif
+#endif
+
+
 
 #if @enable_jrir_slab@
 #define BLIS_ENABLE_JRIR_SLAB

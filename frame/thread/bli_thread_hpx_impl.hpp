@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2022 Tactical Computing Laboratories, LLC
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -32,13 +33,22 @@
 
 */
 
-#include "blis.h"
-#include "bli_type_defs.h"
+#ifndef BLIS_THREAD_HPX_IMPL_H
+#define BLIS_THREAD_HPX_IMPL_H
 
-void bli_cntx_init_generic( cntx_t* cntx )
-{
-	// Set default kernel blocksizes and functions.
-	bli_cntx_init_generic_ref( cntx );
+// Definitions specific to situations when POSIX multithreading is enabled.
+#ifdef BLIS_ENABLE_HPX
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+void bli_thread_launch_hpx(dim_t n_threads, thread_func_t func, const void* params);
+
+#ifdef __cplusplus
 }
+#endif
 
+#endif
+
+#endif

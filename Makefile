@@ -6,6 +6,7 @@
 #
 #  Copyright (C) 2014, The University of Texas at Austin
 #  Copyright (C) 2022, Advanced Micro Devices, Inc.
+#  Copyright (C) 2022 Tactical Computing Laboratories, LLC
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -551,6 +552,16 @@ ifeq ($(ENABLE_VERBOSE),yes)
 else
 	@echo "Compiling $$@" $(call get-frame-text-for,$(1))
 	@$(CC) $(call get-frame-cflags-for,$(1)) -c $$< -o $$@
+endif
+
+$(BASE_OBJ_FRAME_PATH)/%.o: $(FRAME_PATH)/%.cpp $(BLIS_H_FLAT) $(MAKE_DEFS_MK_PATHS)
+ifeq ($(ENABLE_HPX),yes)
+ifeq ($(ENABLE_VERBOSE),yes)
+	$(CXX) $(call get-addon-cxxflags-for,$(1)) -c $$< -o $$@
+else
+	@echo "Compiling $$@" $(call get-addon-cxxtext-for,$(1))
+	@$(CXX) $(call get-addon-cxxflags-for,$(1)) -c $$< -o $$@
+endif
 endif
 endef
 

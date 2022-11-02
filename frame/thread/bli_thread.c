@@ -6,6 +6,7 @@
 
    Copyright (C) 2014, The University of Texas at Austin
    Copyright (C) 2018 - 2019, Advanced Micro Devices, Inc.
+   Copyright (C) 2022 Tactical Computing Laboratories, LLC
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -34,6 +35,10 @@
 */
 
 #include "blis.h"
+
+#ifdef BLIS_ENABLE_HPX
+#include "bli_thread_hpx.h"
+#endif
 
 thrcomm_t BLIS_SINGLE_COMM = {};
 
@@ -65,6 +70,14 @@ static thread_launch_t thread_launch_fpa[ BLIS_NUM_THREAD_IMPLS ] =
 	[BLIS_POSIX]  =
 #if   defined(BLIS_ENABLE_PTHREADS)
 	                bli_thread_launch_pthreads,
+#elif defined(BLIS_ENABLE_OPENMP)
+	                NULL,
+#else
+	                NULL,
+#endif
+	[BLIS_HPX] =
+#if   defined(BLIS_ENABLE_HPX)
+	                bli_thread_launch_hpx,
 #elif defined(BLIS_ENABLE_OPENMP)
 	                NULL,
 #else

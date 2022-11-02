@@ -6,6 +6,7 @@
 
    Copyright (C) 2014, The University of Texas at Austin
    Copyright (C) 2018 - 2019, Advanced Micro Devices, Inc.
+   Copyright (C) 2022 Tactical Computing Laboratories, LLC
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -94,6 +95,13 @@ typedef struct thrcomm_s
 	#endif
 	#endif
 
+	#ifdef BLIS_ENABLE_PTHREADS
+	#ifdef BLIS_USE_PTHREAD_BARRIER
+	hpx::barrier<> * barrier;
+	#endif
+	#endif
+
+
 } thrcomm_t;
 
 
@@ -105,6 +113,7 @@ typedef struct thrcomm_s
 #include "bli_thrcomm_single.h"
 #include "bli_thrcomm_openmp.h"
 #include "bli_thrcomm_pthreads.h"
+#include "bli_thrcomm_hpx.h"
 
 // Define a function pointer type for each of the functions that are
 // "overloaded" by each method of multithreading.

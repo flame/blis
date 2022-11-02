@@ -49,6 +49,7 @@ typedef void (*thread_func_t)( thrcomm_t* gl_comm, dim_t tid, const void* params
 // Include threading implementations.
 #include "bli_thread_openmp.h"
 #include "bli_thread_pthreads.h"
+#include "bli_thread_hpx.h"
 #include "bli_thread_single.h"
 
 // Initialization-related prototypes.

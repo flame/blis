@@ -7,6 +7,7 @@
    Copyright (C) 2014, The University of Texas at Austin
    Copyright (C) 2016, Hewlett Packard Enterprise Development LP
    Copyright (C) 2020, Advanced Micro Devices, Inc.
+   Copyright (C) 2022 Tactical Computing Laboratories, LLC
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -44,9 +45,10 @@
 
 #ifdef __cplusplus
   // For C++, include stdint.h.
-  #include <stdint.h>
+  #include <cstdint>
 #elif __STDC_VERSION__ >= 199901L
   // For C99 (or later), include stdint.h.
+  #include <stddef.h>
   #include <stdint.h>
   #include <stdbool.h>
 #else
@@ -629,6 +631,7 @@ typedef enum
 	BLIS_SINGLE = 0,
 	BLIS_OPENMP,
 	BLIS_POSIX,
+	BLIS_HPX,
 
 	// BLIS_NUM_THREAD_IMPLS must be last!
 	BLIS_NUM_THREAD_IMPLS

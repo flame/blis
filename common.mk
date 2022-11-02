@@ -5,6 +5,7 @@
 #  libraries.
 #
 #  Copyright (C) 2014, The University of Texas at Austin
+#  Copyright (C) 2022 Tactical Computing Laboratories, LLC
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -112,6 +113,7 @@ get-noopt-cxxflags-for   = $(strip $(CFLAGS_PRESET) \
                                    $(call load-var-for,CXXLANGFLAGS,$(1)) \
                                    $(call load-var-for,CPPROCFLAGS,$(1)) \
                                    $(CTHREADFLAGS) \
+                                   $(CXXTHREADFLAGS) \
                                    $(CINCFLAGS) $(VERS_DEF) \
                             )
 
@@ -348,7 +350,7 @@ REFNM              := ref
 # Source suffixes.
 CONFIG_SRC_SUFS    := c
 KERNELS_SRC_SUFS   := c s S
-FRAME_SRC_SUFS     := c
+FRAME_SRC_SUFS     := c cpp
 
 ADDON_C99_SUFS     := c
 ADDON_CXX_SUFS     := cc cpp cxx
@@ -426,6 +428,7 @@ KERNELS_FRAG_PATH  := ./obj/$(CONFIG_NAME)/$(KERNELS_DIR)
 ADDON_FRAG_PATH    := ./obj/$(CONFIG_NAME)/$(ADDON_DIR)
 SANDBOX_FRAG_PATH  := ./obj/$(CONFIG_NAME)/$(SANDBOX_DIR)
 
+ENABLE_HPX := no
 
 
 #
@@ -823,6 +826,7 @@ endif
 # gets added to begin with.
 
 CTHREADFLAGS :=
+CXXTHREADFLAGS :=
 
 ifeq ($(CC_VENDOR),gcc)
 #ifneq ($(findstring auto,$(THREADING_MODEL)),)
@@ -835,6 +839,16 @@ endif
 ifneq ($(findstring pthreads,$(THREADING_MODEL)),)
 CTHREADFLAGS += -pthread
 LDFLAGS      += $(LIBPTHREAD)
+endif
+ifneq ($(findstring hpx,$(THREADING_MODEL)),)
+ENABLE_HPX := yes
+ifneq ($(findstring yes,$(ENABLE_DEBUG)),)
+CXXTHREADFLAGS += `pkg-config --cflags hpx_component`
+LDFLAGS      += `pkg-config --libs hpx_component`
+else
+CXXTHREADFLAGS += `pkg-config --cflags hpx_component_debug`
+LDFLAGS      += `pkg-config --libs hpx_component_debug`
+endif
 endif
 endif
 
@@ -850,6 +864,16 @@ ifneq ($(findstring pthreads,$(THREADING_MODEL)),)
 CTHREADFLAGS += -pthread
 LDFLAGS      += $(LIBPTHREAD)
 endif
+ifneq ($(findstring hpx,$(THREADING_MODEL)),)
+ENABLE_HPX := yes
+ifneq ($(findstring yes,$(ENABLE_DEBUG)),)
+CXXTHREADFLAGS += `pkg-config --cflags hpx_component`
+LDFLAGS      += `pkg-config --libs hpx_component`
+else
+CXXTHREADFLAGS += `pkg-config --cflags hpx_component_debug`
+LDFLAGS      += `pkg-config --libs hpx_component_debug`
+endif
+endif
 endif
 
 ifeq ($(CC_VENDOR),clang)
@@ -863,6 +887,16 @@ endif
 ifneq ($(findstring pthreads,$(THREADING_MODEL)),)
 CTHREADFLAGS += -pthread
 LDFLAGS      += $(LIBPTHREAD)
+endif
+ifneq ($(findstring hpx,$(THREADING_MODEL)),)
+ENABLE_HPX := yes
+ifneq ($(findstring yes,$(ENABLE_DEBUG)),)
+CXXTHREADFLAGS += `pkg-config --cflags hpx_component`
+LDFLAGS      += `pkg-config --libs hpx_component`
+else
+CXXTHREADFLAGS += `pkg-config --cflags hpx_component_debug`
+LDFLAGS      += `pkg-config --libs hpx_component_debug`
+endif
 endif
 endif
 
