@@ -40,10 +40,11 @@ cntl_t* bli_gemm_cntl_create
        rntm_t* rntm,
        opid_t  family,
        pack_t  schema_a,
-       pack_t  schema_b
+       pack_t  schema_b,
+       void_fp ker
      )
 {
-	return bli_gemmbp_cntl_create( rntm, family, schema_a, schema_b );
+	return bli_gemmbp_cntl_create( rntm, family, schema_a, schema_b, ker );
 }
 
 // -----------------------------------------------------------------------------
@@ -53,17 +54,21 @@ cntl_t* bli_gemmbp_cntl_create
        rntm_t* rntm,
        opid_t  family,
        pack_t  schema_a,
-       pack_t  schema_b
+       pack_t  schema_b,
+       void_fp ker
      )
 {
 	void_fp macro_kernel_fp;
 
-	// Use the function pointers to the macrokernels that use slab
-	// assignment of micropanels to threads in the jr and ir loops.
+	// Choose the default macrokernel based on the operation family...
 	if      ( family == BLIS_GEMM ) macro_kernel_fp = bli_gemm_ker_var2;
 	else if ( family == BLIS_GEMMT ) macro_kernel_fp = bli_gemmt_x_ker_var2;
 	else if ( family == BLIS_TRMM ) macro_kernel_fp = bli_trmm_xx_ker_var2;
 	else /* should never execute */ macro_kernel_fp = NULL;
+
+	// ...unless a non-NULL kernel function pointer is passed in, in which
+	// case we use that instead.
+	if ( ker ) macro_kernel_fp = ker;
 
 	// Create two nodes for the macro-kernel.
 	cntl_t* gemm_cntl_bu_ke = bli_gemm_cntl_create_node

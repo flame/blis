@@ -256,6 +256,8 @@ int offsets[16] __attribute__((aligned(0x1000))) = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9
 //#define LOOPMON
 void bli_sgemm_knc_asm_30x16
      (
+       dim_t               m,
+       dim_t               n,
        dim_t               k,
        float*     restrict alpha,
        float*     restrict a,
@@ -273,80 +275,82 @@ void bli_sgemm_knc_asm_30x16
 
     uint64_t k64 = k;
 
+    GEMM_UKR_SETUP_CT( s, 30, 16, true );
+
 #ifdef MONITORS
     int toph, topl, both, botl, midl, midh, mid2l, mid2h;
 #endif
 #ifdef LOOPMON
     int tlooph, tloopl, blooph, bloopl;
 #endif
-    
+
     __asm
     {
 #ifdef MONITORS
         rdtsc
         mov topl, eax
-        mov toph, edx 
+        mov toph, edx
 #endif
         vpxord  zmm0,  zmm0, zmm0
         vmovaps zmm1,  zmm0  //clear out registers
-        vmovaps zmm2,  zmm0 
+        vmovaps zmm2,  zmm0
         mov rsi, k64  //loop index
-        vmovaps zmm3,  zmm0 
+        vmovaps zmm3,  zmm0
 
         mov r11, rs_c           //load row stride
-        vmovaps zmm4,  zmm0 
+        vmovaps zmm4,  zmm0
         sal r11, 2              //scale row stride
-        vmovaps zmm5,  zmm0 
+        vmovaps zmm5,  zmm0
         mov r15, a              //load address of a
-        vmovaps zmm6,  zmm0 
+        vmovaps zmm6,  zmm0
         mov rbx, b              //load address of b
-        vmovaps zmm7,  zmm0 
+        vmovaps zmm7,  zmm0
 
-        vmovaps zmm8,  zmm0 
+        vmovaps zmm8,  zmm0
         lea r10, [r11 + 2*r11 + 0] //r10 has 3 * r11
         vmovaps zmm9,  zmm0
-        vmovaps zmm10, zmm0 
-        mov rdi, r11    
-        vmovaps zmm11, zmm0 
+        vmovaps zmm10, zmm0
+        mov rdi, r11
+        vmovaps zmm11, zmm0
         sal rdi, 2              //rdi has 4*r11
 
-        vmovaps zmm12, zmm0 
+        vmovaps zmm12, zmm0
         mov rcx, c              //load address of c for prefetching
-        vmovaps zmm13, zmm0 
-        vmovaps zmm14, zmm0 
+        vmovaps zmm13, zmm0
+        vmovaps zmm14, zmm0
         mov r8, k64
-        vmovaps zmm15, zmm0 
+        vmovaps zmm15, zmm0
 
         vmovaps zmm16, zmm0
         vmovaps zmm17, zmm0
         mov r13, L2_PREFETCH_DIST*4*16
-        vmovaps zmm18, zmm0 
+        vmovaps zmm18, zmm0
         mov r14, L2_PREFETCH_DIST*4*32
-        vmovaps zmm19, zmm0 
-        vmovaps zmm20, zmm0 
-        vmovaps zmm21, zmm0 
-        vmovaps zmm22, zmm0 
+        vmovaps zmm19, zmm0
+        vmovaps zmm20, zmm0
+        vmovaps zmm21, zmm0
+        vmovaps zmm22, zmm0
 
-        vmovaps zmm23, zmm0 
+        vmovaps zmm23, zmm0
         sub r8, 30 + L2_PREFETCH_DIST       //Check if we have over 40 operations to do.
-        vmovaps zmm24, zmm0 
+        vmovaps zmm24, zmm0
         mov r8, 30
-        vmovaps zmm25, zmm0 
+        vmovaps zmm25, zmm0
         mov r9, 16*4                         //amount to increment b* by each iteration
-        vmovaps zmm26, zmm0 
+        vmovaps zmm26, zmm0
         mov r12, 32*4                       //amount to increment a* by each iteration
-        vmovaps zmm27, zmm0 
-        vmovaps zmm28, zmm0 
-        vmovaps zmm29, zmm0 
+        vmovaps zmm27, zmm0
+        vmovaps zmm28, zmm0
+        vmovaps zmm29, zmm0
 
 #ifdef MONITORS
         rdtsc
         mov midl, eax
-        mov midh, edx 
+        mov midh, edx
 #endif
         jle CONSIDER_UNDER_40
         sub rsi, 30 + L2_PREFETCH_DIST
-        
+
         //First 30 iterations
         LOOPREFECHCL2:
             ONE_ITER_PC_L2(rcx)
@@ -357,26 +361,26 @@ void bli_sgemm_knc_asm_30x16
         LOOPMAIN:
             ONE_ITER_MAIN_LOOP(rcx, rsi)
         jne LOOPMAIN
-        
+
         //Penultimate 22 iterations.
         //Break these off from the main loop to avoid prefetching extra shit.
         mov r14, a_next
         mov r13, b_next
         sub r14, r15
         sub r13, rbx
-        
+
         mov rsi, L2_PREFETCH_DIST-10
         LOOPMAIN2:
             ONE_ITER_MAIN_LOOP(rcx, rsi)
         jne LOOPMAIN2
-        
-        
+
+
         //Last 10 iterations
         mov r8, 10
         LOOPREFETCHCL1:
             ONE_ITER_PC_L1(rcx)
         jne LOOPREFETCHCL1
-       
+
 
         jmp POSTACCUM
 
@@ -384,7 +388,7 @@ void bli_sgemm_knc_asm_30x16
         //Used when <= 40 iterations
         CONSIDER_UNDER_40:
         mov rsi, k64
-        test rsi, rsi 
+        test rsi, rsi
         je POSTACCUM
         LOOP_UNDER_40:
             ONE_ITER_MAIN_LOOP(rcx, rsi)
@@ -403,13 +407,8 @@ void bli_sgemm_knc_asm_30x16
         mov r9, c               //load address of c for update
         mov r12, alpha          //load address of alpha
 
-        // Check if C is row stride. If not, jump to the slow scattered update
-        mov r14, cs_c
-        dec r14
-        jne SCATTEREDUPDATE
-
         mov r14, beta
-        vbroadcastss zmm31, 0[r14] 
+        vbroadcastss zmm31, 0[r14]
 
 
         vmulps zmm0, zmm0, 0[r12]{1to16}
@@ -467,7 +466,7 @@ void bli_sgemm_knc_asm_30x16
         vmovaps [r9+2*r11+0], zmm14
         vmovaps [r9+r10+0], zmm15
         add r9, rdi
-        
+
         vmulps zmm16, zmm16, 0[r12]{1to16}
         vmulps zmm17, zmm17, 0[r12]{1to16}
         vmulps zmm18, zmm18, 0[r12]{1to16}
@@ -516,48 +515,6 @@ void bli_sgemm_knc_asm_30x16
         vfmadd231ps zmm29, zmm31, [r9+r11+0]
         vmovaps [r9+0], zmm28
         vmovaps [r9+r11+0], zmm29
-        
-        jmp END
-        
-        SCATTEREDUPDATE:
-        
-        mov r10, offsetPtr 
-        vmovaps zmm31, 0[r10] 
-        vpbroadcastd zmm30, cs_c 
-        mov r13, beta
-        vpmulld zmm30, zmm31, zmm30 
-
-        mov ebx, 0xFFFF
-        UPDATE_C_ROW_SCATTERED(zmm0, 0, r9) 
-        UPDATE_C_ROW_SCATTERED(zmm1, 1, r9) 
-        UPDATE_C_ROW_SCATTERED(zmm2, 2, r9) 
-        UPDATE_C_ROW_SCATTERED(zmm3, 3, r9) 
-        UPDATE_C_ROW_SCATTERED(zmm4, 4, r9) 
-        UPDATE_C_ROW_SCATTERED(zmm5, 5, r9) 
-        UPDATE_C_ROW_SCATTERED(zmm6, 6, r9) 
-        UPDATE_C_ROW_SCATTERED(zmm7, 7, r9) 
-        UPDATE_C_ROW_SCATTERED(zmm8, 8, r9) 
-        UPDATE_C_ROW_SCATTERED(zmm9, 9, r9) 
-        UPDATE_C_ROW_SCATTERED(zmm10, 10, r9) 
-        UPDATE_C_ROW_SCATTERED(zmm11, 11, r9) 
-        UPDATE_C_ROW_SCATTERED(zmm12, 12, r9) 
-        UPDATE_C_ROW_SCATTERED(zmm13, 13, r9) 
-        UPDATE_C_ROW_SCATTERED(zmm14, 14, r9) 
-        UPDATE_C_ROW_SCATTERED(zmm15, 15, r9) 
-        UPDATE_C_ROW_SCATTERED(zmm16, 16, r9) 
-        UPDATE_C_ROW_SCATTERED(zmm17, 17, r9) 
-        UPDATE_C_ROW_SCATTERED(zmm18, 18, r9) 
-        UPDATE_C_ROW_SCATTERED(zmm19, 19, r9) 
-        UPDATE_C_ROW_SCATTERED(zmm20, 20, r9) 
-        UPDATE_C_ROW_SCATTERED(zmm21, 21, r9) 
-        UPDATE_C_ROW_SCATTERED(zmm22, 22, r9) 
-        UPDATE_C_ROW_SCATTERED(zmm23, 23, r9) 
-        UPDATE_C_ROW_SCATTERED(zmm24, 24, r9) 
-        UPDATE_C_ROW_SCATTERED(zmm25, 25, r9) 
-        UPDATE_C_ROW_SCATTERED(zmm26, 26, r9) 
-        UPDATE_C_ROW_SCATTERED(zmm27, 27, r9) 
-        UPDATE_C_ROW_SCATTERED(zmm28, 28, r9) 
-        UPDATE_C_ROW_SCATTERED(zmm29, 29, r9)
 
         END:
 #ifdef MONITORS
@@ -566,6 +523,8 @@ void bli_sgemm_knc_asm_30x16
         mov both, edx
 #endif
     }
+
+    GEMM_UKR_FLUSH_CT( s );
 
 #ifdef LOOPMON
     printf("looptime = \t%d\n", bloopl - tloopl);

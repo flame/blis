@@ -165,17 +165,6 @@ void PASTECH2(bao_,ch,varname) \
 	PASTECH(ch,gemm_ukr_ft) \
                gemm_ukr = bli_cntx_get_l3_nat_ukr_dt( dt, BLIS_GEMM_UKR, cntx ); \
 \
-	/* Temporary C buffer for edge cases. Note that the strides of this
-	   temporary buffer are set so that they match the storage of the
-	   original C matrix. For example, if C is column-stored, ct will be
-	   column-stored as well. */ \
-	ctype       ct[ BLIS_STACK_BUF_MAX_SIZE \
-	                / sizeof( ctype ) ] \
-	                __attribute__((aligned(BLIS_STACK_BUF_ALIGN_SIZE))); \
-	const bool col_pref = bli_cntx_l3_nat_ukr_prefers_cols_dt( dt, BLIS_GEMM_UKR, cntx ); \
-	const inc_t rs_ct   = ( col_pref ? 1 : NR ); \
-	const inc_t cs_ct   = ( col_pref ? MR : 1 ); \
-\
 	/* Compute partitioning step values for each matrix of each loop. */ \
 	const inc_t jcstep_c = cs_c; \
 	const inc_t jcstep_b = cs_b; \
@@ -203,7 +192,6 @@ void PASTECH2(bao_,ch,varname) \
 	ctype           alpha_local = *alpha_cast; \
 	ctype           beta_local  = *beta_cast; \
 	ctype           one_local   = *PASTEMAC(ch,1); \
-	ctype           zero_local  = *PASTEMAC(ch,0); \
 \
 	auxinfo_t       aux; \
 \
@@ -449,47 +437,20 @@ void PASTECH2(bao_,ch,varname) \
 						bli_auxinfo_set_next_a( a2, &aux ); \
 						bli_auxinfo_set_next_b( b2, &aux ); \
 \
-						/* Handle interior and edge cases separately. */ \
-						if ( mr_cur == MR && nr_cur == NR ) \
-						{ \
-							/* Invoke the gemm microkernel. */ \
-							gemm_ukr \
-							( \
-							  kc_cur, \
-							  &alpha_local, \
-							  a_ir, \
-							  b_jr, \
-							  beta_use, \
-							  c_ir, rs_c, cs_c, \
-							  &aux, \
-							  cntx  \
-							); \
-						} \
-						else \
-						{ \
-							/* Invoke the gemm microkernel. */ \
-							gemm_ukr \
-							( \
-							  kc_cur, \
-							  &alpha_local, \
-							  a_ir, \
-							  b_jr, \
-							  &zero_local, \
-							  ct, rs_ct, cs_ct, \
-							  &aux, \
-							  cntx  \
-							); \
-\
-							/* Scale the bottom edge of C and add the result from above. */ \
-							PASTEMAC(ch,xpbys_mxn) \
-							( \
-							  mr_cur, \
-							  nr_cur, \
-							  ct,   rs_ct, cs_ct, \
-							  beta_use, \
-							  c_ir, rs_c,  cs_c \
-							); \
-						} \
+						/* Invoke the gemm microkernel. */ \
+						gemm_ukr \
+						( \
+						  mr_cur, \
+						  nr_cur, \
+						  kc_cur, \
+						  &alpha_local, \
+						  a_ir, \
+						  b_jr, \
+						  beta_use, \
+						  c_ir, rs_c, cs_c, \
+						  &aux, \
+						  cntx  \
+						); \
 					} \
 				} \
 			} \
