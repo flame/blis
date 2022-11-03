@@ -244,7 +244,7 @@ print_usage()
 	echo " "
 	echo "                 Set the size (in bits) of internal BLIS integers and"
 	echo "                 integer types used in native BLIS interfaces. The"
-	echo "                 default inteter type size is architecture dependent."
+	echo "                 default integer type size is architecture dependent."
 	echo "                 (Hint: You can always find this value printed at the"
 	echo "                 beginning of the testsuite output.)"
 	echo " "
