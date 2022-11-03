@@ -35,7 +35,7 @@
 
 #include "blis.h"
 
-static gemm_var_oft vars[2] =
+static l3_var_oft vars[2] =
 {
 	bli_gemmt_l_ker_var2, bli_gemmt_u_ker_var2,
 };
@@ -51,8 +51,8 @@ void bli_gemmt_x_ker_var2
        thrinfo_t* thread
      )
 {
-	dim_t        uplo;
-	gemm_var_oft f;
+	dim_t      uplo;
+	l3_var_oft f;
 
 	// Set a bool based on the uplo field of C's root object.
 	if ( bli_obj_root_is_lower( c ) ) uplo = 0;

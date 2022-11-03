@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2016, Hewlett Packard Enterprise Development LP
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -32,16 +33,44 @@
 
 */
 
-void bli_trsm_int
-     (
-       obj_t*  alpha,
-       obj_t*  a,
-       obj_t*  b,
-       obj_t*  beta,
-       obj_t*  c,
-       cntx_t* cntx,
-       rntm_t* rntm,
-       cntl_t* cntl,
-       thrinfo_t* thread
-     );
+#include "blis.h"
+
+void* bli_packm_scalar( obj_t* kappa, obj_t* p )
+{
+	num_t  dt_p   = bli_obj_dt( p );
+	pack_t schema = bli_obj_pack_schema( p );
+
+	// The value for kappa we use will depends on whether the scalar
+	// attached to A has a nonzero imaginary component. If it does,
+	// then we will apply the scalar during packing to facilitate
+	// implementing induced complex domain algorithms in terms of
+	// real domain micro-kernels. (In the aforementioned situation,
+	// applying a real scalar is easy, but applying a complex one is
+	// harder, so we avoid the need altogether with the code below.)
+	if ( bli_obj_scalar_has_nonzero_imag( p ) &&
+	     !bli_is_nat_packed( schema ) )
+	{
+		//printf( "applying non-zero imag kappa\n_p" );
+
+		// Detach the scalar.
+		bli_obj_scalar_detach( p, kappa );
+
+		// Reset the attached scalar (to 1.0).
+		bli_obj_scalar_reset( p );
+
+		return bli_obj_buffer_for_1x1( dt_p, kappa );
+	}
+	// This branch is also for native execution, where we assume that
+	// the micro-kernel will always apply the alpha scalar of the
+	// higher-level operation. Thus, we use BLIS_ONE for kappa so
+	// that the underlying packm implementation does not perform
+	// any scaling during packing.
+	else
+	{
+		// If the internal scalar of A has only a real component, then
+		// we will apply it later (in the micro-kernel), and so we will
+		// use BLIS_ONE to indicate no scaling during packing.
+		return bli_obj_buffer_for_1x1( dt_p, &BLIS_ONE );
+	}
+}
 

@@ -35,11 +35,10 @@
 
 #include "blis.h"
 
-cntl_t* bli_packm_cntl_create_node
+BLIS_EXPORT_BLIS cntl_t* bli_packm_cntl_create_node
      (
        rntm_t*   rntm,
        void_fp   var_func,
-       void_fp   packm_var_func,
        bszid_t   bmid_m,
        bszid_t   bmid_n,
        bool      does_invert_diag,
@@ -62,7 +61,6 @@ cntl_t* bli_packm_cntl_create_node
 
 	// Initialize the packm_params_t struct.
 	params->size              = sizeof( packm_params_t );
-	params->var_func          = packm_var_func;
 	params->bmid_m            = bmid_m;
 	params->bmid_n            = bmid_n;
 	params->does_invert_diag  = does_invert_diag;

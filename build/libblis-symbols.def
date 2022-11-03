@@ -1307,7 +1307,6 @@ bli_pba_init_pools
 bli_pba_pool_size
 bli_pba_query
 bli_pba_release
-bli_pba_rntm_set_pba
 bli_memsys_finalize
 bli_memsys_init
 bli_mkherm

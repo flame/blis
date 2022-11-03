@@ -65,6 +65,14 @@ void bli_trmm3_front
 	bli_obj_alias_to( b, &b_local );
 	bli_obj_alias_to( c, &c_local );
 
+	// Set the obj_t buffer field to the location currently implied by the row
+	// and column offsets and then zero the offsets. If any of the original
+	// obj_t's were views into larger matrices, this step effectively makes
+	// those obj_t's "forget" their lineage.
+	bli_obj_reset_origin( &a_local );
+	bli_obj_reset_origin( &b_local );
+	bli_obj_reset_origin( &c_local );
+
 	// We do not explicitly implement the cases where A is transposed.
 	// However, we can still handle them. Specifically, if A is marked as
 	// needing a transposition, we simply induce a transposition. This
@@ -139,13 +147,6 @@ void bli_trmm3_front
 	// Set the pack schemas within the objects.
 	bli_l3_set_schemas( &a_local, &b_local, &c_local, cntx );
 
-	// Set each alias as the root object.
-	// NOTE: We MUST wait until we are done potentially swapping the objects
-	// before setting the root fields!
-	bli_obj_set_as_root( &a_local );
-	bli_obj_set_as_root( &b_local );
-	bli_obj_set_as_root( &c_local );
-
 	// Parse and interpret the contents of the rntm_t object to properly
 	// set the ways of parallelism for each loop, and then make any
 	// additional modifications necessary for the current operation.
@@ -162,7 +163,7 @@ void bli_trmm3_front
 	// Invoke the internal back-end.
 	bli_l3_thread_decorator
 	(
-	  bli_gemm_int,
+	  bli_l3_int,
 	  BLIS_TRMM, // operation family id
 	  alpha,
 	  &a_local,

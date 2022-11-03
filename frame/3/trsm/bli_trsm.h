@@ -34,7 +34,5 @@
 
 #include "bli_trsm_cntl.h"
 #include "bli_trsm_front.h"
-#include "bli_trsm_int.h"
-
 #include "bli_trsm_var.h"
 

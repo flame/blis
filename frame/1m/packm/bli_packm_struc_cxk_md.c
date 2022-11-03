@@ -41,53 +41,26 @@
 \
 void PASTEMAC2(chc,chp,varname) \
      ( \
+       struc_t           strucc, \
+       diag_t            diagc, \
+       uplo_t            uploc, \
        conj_t            conjc, \
        pack_t            schema, \
-       dim_t             m_panel, \
-       dim_t             n_panel, \
-       dim_t             m_panel_max, \
-       dim_t             n_panel_max, \
+       bool              invdiag, \
+       dim_t             panel_dim, \
+       dim_t             panel_len, \
+       dim_t             panel_dim_max, \
+       dim_t             panel_len_max, \
+       dim_t             panel_dim_off, \
+       dim_t             panel_len_off, \
        ctype_p* restrict kappa, \
-       ctype_c* restrict c, inc_t rs_c, inc_t cs_c, \
-       ctype_p* restrict p, inc_t rs_p, inc_t cs_p, \
+       ctype_c* restrict c, inc_t incc, inc_t ldc, \
+       ctype_p* restrict p,             inc_t ldp, \
                             inc_t is_p, \
-       cntx_t*           cntx  \
+       cntx_t*           cntx, \
+       void*             params \
      ) \
 { \
-	dim_t  panel_dim; \
-	dim_t  panel_dim_max; \
-	dim_t  panel_len; \
-	dim_t  panel_len_max; \
-	inc_t  incc, ldc; \
-	inc_t        ldp; \
-\
-\
-	/* Determine the dimensions and relative strides of the micro-panel
-	   based on its pack schema. */ \
-	if ( bli_is_col_packed( schema ) ) \
-	{ \
-		/* Prepare to pack to row-stored column panel. */ \
-		panel_dim     = n_panel; \
-		panel_dim_max = n_panel_max; \
-		panel_len     = m_panel; \
-		panel_len_max = m_panel_max; \
-		incc          = cs_c; \
-		ldc           = rs_c; \
-		ldp           = rs_p; \
-	} \
-	else /* if ( bli_is_row_packed( schema ) ) */ \
-	{ \
-		/* Prepare to pack to column-stored row panel. */ \
-		panel_dim     = m_panel; \
-		panel_dim_max = m_panel_max; \
-		panel_len     = n_panel; \
-		panel_len_max = n_panel_max; \
-		incc          = rs_c; \
-		ldc           = cs_c; \
-		ldp           = cs_p; \
-	} \
-\
-\
 	if ( bli_is_nat_packed( schema ) ) \
 	{ \
 		/* Sanity check: Make sure that kappa is 1.0. Mixed-datatype alpha
@@ -318,7 +291,7 @@ void PASTEMAC2(cha,chp,opname) \
        conj_t            conja, \
        dim_t             m, \
        dim_t             n, \
-	   ctype_p* restrict kappa, \
+       ctype_p* restrict kappa, \
        ctype_a* restrict a, inc_t inca, inc_t lda, \
        ctype_p* restrict p,             inc_t ldp  \
      ) \
@@ -445,7 +418,7 @@ void PASTEMAC2(cha,chp,opname) \
        conj_t            conja, \
        dim_t             m, \
        dim_t             n, \
-	   ctype_p* restrict kappa, \
+       ctype_p* restrict kappa, \
        ctype_a* restrict a, inc_t inca, inc_t lda, \
        ctype_p* restrict p,             inc_t ldp  \
      ) \

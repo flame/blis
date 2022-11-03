@@ -171,7 +171,6 @@ void libblis_test_trsm_ukr_experiment
 	num_t        datatype;
 
 	dim_t        m, n;
-	inc_t        ldap, ldbp;
 
 	char         sc_a = 'c';
 	char         sc_b = 'r';
@@ -195,11 +194,6 @@ void libblis_test_trsm_ukr_experiment
 	// Fix m and n to MR and NR, respectively.
 	m = bli_cntx_get_blksz_def_dt( datatype, BLIS_MR, cntx );
 	n = bli_cntx_get_blksz_def_dt( datatype, BLIS_NR, cntx );
-
-	// Also query PACKMR and PACKNR as the leading dimensions to ap and bp,
-	// respectively.
-	ldap = bli_cntx_get_blksz_max_dt( datatype, BLIS_MR, cntx );
-	ldbp = bli_cntx_get_blksz_max_dt( datatype, BLIS_NR, cntx );
 
 	// Store the register blocksizes so that the driver can retrieve the
 	// values later when printing results.
@@ -238,7 +232,10 @@ void libblis_test_trsm_ukr_experiment
 	libblis_test_mobj_randomize( params, TRUE, &c );
 	bli_copym( &c, &c_save );
 
-#if 0
+	rntm_t rntm;
+	bli_rntm_init( &rntm );
+	bli_pba_rntm_set_pba( &rntm );
+
 	// Create pack objects for a and b, and pack them to ap and bp,
 	// respectively.
 	cntl_t* cntl_a = libblis_test_pobj_create
@@ -249,50 +246,9 @@ void libblis_test_trsm_ukr_experiment
 	  BLIS_PACKED_ROW_PANELS,
 	  BLIS_BUFFER_FOR_A_BLOCK,
 	  &a, &ap,
-	  cntx
+	  cntx,
+	  &rntm
 	);
-	cntl_t* cntl_b = libblis_test_pobj_create
-	(
-	  BLIS_MR,
-	  BLIS_NR,
-	  BLIS_NO_INVERT_DIAG,
-	  BLIS_PACKED_COL_PANELS,
-	  BLIS_BUFFER_FOR_B_PANEL,
-	  &b, &bp,
-	  cntx
-	);
-#endif
-
-	// Create the packed objects. Use packmr and packnr as the leading
-	// dimensions of ap and bp, respectively. Note that we use the ldims
-	// instead of the matrix dimensions for allocation purposes here.
-	// This is a little hacky and was prompted when trying to support
-	// configurations such as power9 that employ duplication/broadcasting
-	// of elements in one of the packed matrix objects. Thankfully, packm
-	// doesn't care about those dimensions and instead relies on
-	// information taken from the source object. Thus, this is merely
-	// about coaxing bli_obj_create() in allocating enough space for our
-	// purposes.
-	bli_obj_create( datatype, ldap, m, 1, ldap, &ap );
-	bli_obj_create( datatype, m, ldbp, ldbp, 1, &bp );
-
-	// Set up the objects for packing. Calling packm_init_pack() does everything
-	// except checkout a memory pool block and save its address to the obj_t's.
-	// However, it does overwrite the buffer field of packed object with that of
-	// the source object (as a side-effect of bli_obj_alias_to(); that buffer
-	// field would normally be overwritten yet again by the address from the
-	// memory pool block). So, we have to save the buffer address that was
-	// allocated so we can re-store it to the object afterward.
-	void* buf_ap = bli_obj_buffer( &ap );
-	void* buf_bp = bli_obj_buffer( &bp );
-	bli_packm_init_pack( BLIS_INVERT_DIAG, BLIS_PACKED_ROW_PANELS,
-	                     BLIS_PACK_FWD_IF_UPPER, BLIS_PACK_FWD_IF_LOWER,
-	                     BLIS_MR, BLIS_KR, &a, &ap, cntx );
-	bli_packm_init_pack( BLIS_NO_INVERT_DIAG, BLIS_PACKED_COL_PANELS,
-	                     BLIS_PACK_FWD_IF_UPPER, BLIS_PACK_FWD_IF_LOWER,
-	                     BLIS_KR, BLIS_NR, &b, &bp, cntx );
-	bli_obj_set_buffer( buf_ap, &ap );
-	bli_obj_set_buffer( buf_bp, &bp );
 
 	// Set the diagonal offset of ap.
 	bli_obj_set_diag_offset( 0, &ap );
@@ -302,23 +258,34 @@ void libblis_test_trsm_ukr_experiment
 	// know which set of micro-kernels (lower or upper) to choose from.
 	bli_obj_set_uplo( uploa, &ap );
 
-	// Pack the data from the source objects.
-	bli_packm_blk_var1( &a, &ap, cntx, NULL, &BLIS_PACKM_SINGLE_THREADED );
-	bli_packm_blk_var1( &b, &bp, cntx, NULL, &BLIS_PACKM_SINGLE_THREADED );
-
 #if 0
 bli_printm( "a", &a, "%5.2f", "" );
 bli_printm( "ap", &ap, "%5.2f", "" );
 #endif
 
-	// Repeat the experiment n_repeats times and record results. 
+	// Repeat the experiment n_repeats times and record results.
 	for ( i = 0; i < n_repeats; ++i )
 	{
-		// Re-pack the contents of b to bp.
-		//bli_packm_blk_var1( &b, &bp, cntx, cntl_b, &BLIS_PACKM_SINGLE_THREADED );
-		bli_packm_blk_var1( &b, &bp, cntx, NULL, &BLIS_PACKM_SINGLE_THREADED );
-
 		bli_copym( &c_save, &c );
+
+		// Transpose B to B^T for packing.
+		bli_obj_induce_trans( &b );
+
+		cntl_t* cntl_b = libblis_test_pobj_create
+		(
+		  BLIS_NR,
+		  BLIS_MR,
+		  BLIS_NO_INVERT_DIAG,
+		  BLIS_PACKED_COL_PANELS,
+		  BLIS_BUFFER_FOR_B_PANEL,
+		  &b, &bp,
+		  cntx,
+		  &rntm
+		);
+
+		// Transpose B^T back to B and Bp^T back to Bp.
+		bli_obj_induce_trans( &b );
+		bli_obj_induce_trans( &bp );
 
 		time = bli_clock();
 
@@ -327,6 +294,10 @@ bli_printm( "ap", &ap, "%5.2f", "" );
 		                            cntx );
 
 		time_min = bli_clock_min_diff( time_min, time );
+
+		// Free the control tree nodes and release their cached mem_t entries
+		// back to the memory broker.
+		bli_cntl_free( &rntm, cntl_b, &BLIS_PACKM_SINGLE_THREADED );
 	}
 
 	// Estimate the performance of the best experiment repeat.
@@ -339,16 +310,9 @@ bli_printm( "ap", &ap, "%5.2f", "" );
 	// Zero out performance and residual if output matrix is empty.
 	//libblis_test_check_empty_problem( &c, perf, resid );
 
-#if 0
 	// Free the control tree nodes and release their cached mem_t entries
 	// back to the memory broker.
-	bli_cntl_free( NULL, cntl_a, &BLIS_PACKM_SINGLE_THREADED );
-	bli_cntl_free( NULL, cntl_b, &BLIS_PACKM_SINGLE_THREADED );
-#endif
-
-	// Free the packed objects.
-	bli_obj_free( &ap );
-	bli_obj_free( &bp );
+	bli_cntl_free( &rntm, cntl_a, &BLIS_PACKM_SINGLE_THREADED );
 
 	// Free the test objects.
 	bli_obj_free( &a );
