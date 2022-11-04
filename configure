@@ -2346,10 +2346,6 @@ main()
 	# of the distribution and the directory in which we are building.
 	cur_dirpath="."
 
-	# The file in which the version string is kept.
-	version_file="version"
-	version_filepath="${dist_path}/${version_file}"
-
 	# The name of and path to the directory named "build" in the top-level
 	# directory of the source distribution.
 	build_dir='build'
@@ -2431,9 +2427,13 @@ main()
 
 	# -- Version-related --
 
+	# The file in which the version string is kept.
+	version_file="version"
+	version_filepath="${build_dirpath}/${version_file}"
+
 	# The shared library (.so) version file.
 	so_version_file='so_version'
-	so_version_filepath="${dist_path}/${so_version_file}"
+	so_version_filepath="${build_dirpath}/${so_version_file}"
 
 	# The major and minor/build .so version numbers.
 	so_version_major=''
