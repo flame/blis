@@ -4,7 +4,6 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2014, The University of Texas at Austin
    Copyright (C) 2022 Tactical Computing Laboratories, LLC
 
    Redistribution and use in source and binary forms, with or without
@@ -49,7 +48,7 @@ extern "C" {
 void bli_thrcomm_init_hpx( dim_t n_threads, thrcomm_t* comm )
 {
 	if ( comm == NULL ) return;
-	comm->barrier = new hpx:barrier<>(); 
+	comm->barrier = new hpx:barrier<>();
 }
 
 void bli_thrcomm_cleanup_hpx( thrcomm_t* comm )
