@@ -33,7 +33,6 @@
 */
 
 #include "blis.h"
-#include "bli_type_defs.h"
 
 void bli_cntx_init_generic( cntx_t* cntx )
 {
