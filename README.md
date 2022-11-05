@@ -265,7 +265,7 @@ writing complex kernels.
 
  * **Advanced multithreading support.** BLIS allows multiple levels of
 symmetric multithreading for nearly all level-3 operations. (Currently, users
-may choose to obtain parallelism via either OpenMP or POSIX threads). This
+may choose to obtain parallelism via OpenMP, POSIX threads, or HPX). This
 means that matrices may be partitioned in multiple dimensions simultaneously to
 attain scalable, high-performance parallelism on multicore and many-core
 architectures. The key to this innovation is a thread-specific control tree

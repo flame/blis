@@ -170,7 +170,7 @@ print_usage()
 	echo "   -t MODEL, --enable-threading[=MODEL], --disable-threading"
 	echo " "
 	echo "                 Enable threading in the library, using threading model(s)"
-	echo "                 MODEL={single,openmp,pthreads,auto}. If multiple values"
+	echo "                 MODEL={single,openmp,pthreads,hpx,auto}. If multiple values"
 	echo "                 are specified within MODEL, they will all be compiled into"
 	echo "                 BLIS, and the choice of which to use will be determined at"
 	echo "                 runtime. If the user does not express a preference (by"
@@ -3532,7 +3532,6 @@ main()
 
 			parsed_tm="${parsed_tm} hpx"
 
-
 		elif [ "x${word}" = "xauto" ]; then
 
 			parsed_tm="${parsed_tm} auto"
@@ -3625,11 +3624,12 @@ main()
 			enable_pthreads='yes'
 			enable_pthreads_01=1
 
-                elif [ "x${word}" = "xhpx" ]; then
+		elif [ "x${word}" = "xhpx" ]; then
 
-                        echo "${script_name}: enabling support for threading via hpx."
-                        enable_hpx='yes'
-                        enable_hpx_01=1
+			echo "${script_name}: enabling support for threading via hpx."
+			enable_hpx='yes'
+			enable_hpx_01=1
+
 		fi
 
 	done
