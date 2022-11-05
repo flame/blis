@@ -66,6 +66,10 @@ int main( int argc, char** argv )
 	test_params_t params;
 	test_ops_t    ops;
 
+#ifdef BLIS_ENABLE_HPX
+    bli_thread_initialize_hpx( 1, argv );
+#endif
+
 	// Initialize libblis.
 	//bli_init();
 
@@ -88,8 +92,12 @@ int main( int argc, char** argv )
 	// Finalize libblis.
 	bli_finalize();
 
+#ifdef BLIS_ENABLE_HPX
+    return bli_thread_finalize_hpx();
+#else
 	// Return peacefully.
 	return 0;
+#endif
 }
 
 

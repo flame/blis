@@ -45,6 +45,10 @@ void bli_thread_launch_hpx
        const void*         params
      );
 
+void bli_thread_initialize_hpx( int argc, char** argv );
+
+int bli_thread_finalize_hpx();
+
 #endif
 
 #endif

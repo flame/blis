@@ -38,8 +38,11 @@
 
 #include <hpx/local/execution.hpp>
 #include <hpx/parallel/algorithms/for_each.hpp>
+#include <hpx/hpx_start.hpp>
 
 extern "C"
+{
+
 void bli_thread_launch_hpx
      (
              dim_t         n_threads,
@@ -65,5 +68,18 @@ void bli_thread_launch_hpx
 	// never frees its communicator.
 	bli_thrcomm_free( gl_comm_pool, gl_comm );
 }
+
+void bli_thread_initialize_hpx( int argc, char** argv )
+{
+    hpx::start( nullptr, argc, argv );
+}
+
+int bli_thread_finalize_hpx()
+{
+    hpx::apply([]() { hpx::finalize(); });
+    return hpx::stop();
+}
+
+} // extern "C"
 
 #endif

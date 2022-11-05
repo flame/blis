@@ -3671,7 +3671,7 @@ main()
 	# (that is, absent any explicit choice at runtime).
 	if [ "x${enable_openmp}"   = "xyes" ] ||
 	   [ "x${enable_pthreads}" = "xyes" ] ||
-	   [ "x${enable_hpx}" = "xyes" ]; then
+	   [ "x${enable_hpx}"      = "xyes" ]; then
 
 		if   [ "x${first_tm}"   = "xsingle" ]; then
 			echo "${script_name}: threading will default to single-threaded."

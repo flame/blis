@@ -881,13 +881,8 @@ endif
 
 # Threading flags for HPX
 ifneq ($(findstring hpx,$(THREADING_MODEL)),)
-ifneq ($(findstring yes,$(ENABLE_DEBUG)),)
-HPX_CXXFLAGS := $(shell pkg-config --cflags hpx_component_debug)
-HPX_LDFLAGS  := $(filter-out -shared,$(shell pkg-config --libs hpx_component_debug))
-else
 HPX_CXXFLAGS := $(shell pkg-config --cflags hpx_component)
 HPX_LDFLAGS  := $(filter-out -shared,$(shell pkg-config --libs hpx_component))
-endif
 CTHREADFLAGS += $(filter-out -std=%,$(HPX_CXXFLAGS))
 LDFLAGS      += $(HPX_LDFLAGS)
 ifeq ($(OS_NAME),Darwin)

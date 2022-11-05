@@ -106,7 +106,7 @@ static thrcomm_cleanup_ft cleanup_fpa[ BLIS_NUM_THREAD_IMPLS ] =
 	                NULL,
 #endif
 	[BLIS_HPX]  =
-#if   defined(BLIS_ENABLE_PTHREADS)
+#if   defined(BLIS_ENABLE_HPX)
 	                bli_thrcomm_cleanup_hpx,
 #else
 	                NULL,
@@ -128,7 +128,7 @@ static thrcomm_barrier_ft barrier_fpa[ BLIS_NUM_THREAD_IMPLS ] =
 	                bli_thrcomm_barrier_single,
 #endif
 	[BLIS_HPX]  =
-#if   defined(BLIS_ENABLE_PTHREADS)
+#if   defined(BLIS_ENABLE_HPX)
 	                bli_thrcomm_barrier_hpx,
 #else
 	                bli_thrcomm_barrier_single,
