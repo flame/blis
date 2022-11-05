@@ -35,10 +35,12 @@
 #ifndef BLIS_THRCOMM_HPX_H
 #define BLIS_THRCOMM_HPX_H
 
-// Define these prototypes for situations when POSIX multithreading is enabled.
+// Define these prototypes for situations when HPX multithreading is enabled.
 #ifdef BLIS_ENABLE_HPX
 
-#include "bli_thrcomm_hpx_impl.hpp"
+void bli_thrcomm_init_hpx( dim_t nt, thrcomm_t* comm );
+void bli_thrcomm_cleanup_hpx( thrcomm_t* comm );
+void bli_thrcomm_barrier_hpx( dim_t tid, thrcomm_t* comm );
 
 #endif
 

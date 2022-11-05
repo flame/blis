@@ -35,10 +35,15 @@
 #ifndef BLIS_THREAD_HPX_H
 #define BLIS_THREAD_HPX_H
 
-// Definitions specific to situations when POSIX multithreading is enabled.
+// Definitions specific to situations when HPX multithreading is enabled.
 #ifdef BLIS_ENABLE_HPX
 
-#include "bli_thread_hpx_impl.hpp"
+void bli_thread_launch_hpx
+     (
+             dim_t         nt,
+             thread_func_t func,
+       const void*         params
+     );
 
 #endif
 

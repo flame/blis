@@ -32,22 +32,61 @@
 
 */
 
-#ifndef BLIS_THREAD_HPX_IMPL_H
-#define BLIS_THREAD_HPX_IMPL_H
+#include "blis.h"
 
-// Definitions specific to situations when POSIX multithreading is enabled.
 #ifdef BLIS_ENABLE_HPX
 
-#ifdef __cplusplus
 extern "C" {
-#endif
 
-void bli_thread_launch_hpx(dim_t n_threads, thread_func_t func, const void* params);
+#ifdef BLIS_USE_HPX_BARRIER
 
-#ifdef __cplusplus
+// Define the pthread_barrier_t implementations of the init, cleanup, and
+// barrier functions.
+
+void bli_thrcomm_init_hpx( dim_t n_threads, thrcomm_t* comm )
+{
+	if ( comm == nullptr ) return;
+	comm->barrier = new hpx:barrier<>();
 }
-#endif
+
+void bli_thrcomm_cleanup_hpx( thrcomm_t* comm )
+{
+	if ( comm == nullptr ) return;
+	delete comm->barrier;
+}
+
+void bli_thrcomm_barrier( dim_t t_id, thrcomm_t* comm )
+{
+	comm->barrier->arrive_and_wait();
+}
+
+#else
+
+// Define the non-hpx::barrier implementations of the init, cleanup,
+// and barrier functions. These are the default unless the hpx::barrier
+// versions are requested at compile-time.
+
+void bli_thrcomm_init_hpx( dim_t n_threads, thrcomm_t* comm )
+{
+	if ( comm == nullptr ) return;
+	comm->sent_object = nullptr;
+	comm->n_threads = n_threads;
+	comm->barrier_sense = 0;
+	comm->barrier_threads_arrived = 0;
+}
+
+void bli_thrcomm_cleanup_hpx( thrcomm_t* comm )
+{
+}
+
+void bli_thrcomm_barrier_hpx( dim_t t_id, thrcomm_t* comm )
+{
+	bli_thrcomm_barrier_atomic( t_id, comm );
+}
+
+} // extern "C"
 
 #endif
 
 #endif
+
