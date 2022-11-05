@@ -94,8 +94,8 @@ typedef struct thrcomm_s
 	#endif
 	#endif
 
-	#ifdef BLIS_ENABLE_PTHREADS
-	#ifdef BLIS_USE_PTHREAD_BARRIER
+	#ifdef BLIS_ENABLE_HPX
+	#ifdef BLIS_USE_HPX_BARRIER
 	hpx::barrier<> * barrier;
 	#endif
 	#endif
