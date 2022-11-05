@@ -554,7 +554,7 @@ else
 endif
 
 $(BASE_OBJ_FRAME_PATH)/%.o: $(FRAME_PATH)/%.cpp $(BLIS_H_FLAT) $(MAKE_DEFS_MK_PATHS)
-ifeq ($(ENABLE_HPX),yes)
+ifneq ($(findstring hpx,$(THREADING_MODEL)),)
 ifeq ($(ENABLE_VERBOSE),yes)
 	$(CXX) $(call get-addon-cxxflags-for,$(1)) -c $$< -o $$@
 else

@@ -4095,6 +4095,7 @@ main()
 		| sed -e "s/@ldflags_preset@/${ldflags_preset_esc}/g" \
 		| sed -e "s/@enable_asan@/${enable_asan}/g" \
 		| sed -e "s/@debug_type@/${debug_type}/g" \
+		| sed -e "s/@enable_debug@/${enable_debug}/g" \
 		| sed -e "s/@enable_system@/${enable_system}/g" \
 		| sed -e "s/@threading_model@/${threading_model}/g" \
 		| sed -e "s/@prefix@/${prefix_esc}/g" \

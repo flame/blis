@@ -427,8 +427,6 @@ KERNELS_FRAG_PATH  := ./obj/$(CONFIG_NAME)/$(KERNELS_DIR)
 ADDON_FRAG_PATH    := ./obj/$(CONFIG_NAME)/$(ADDON_DIR)
 SANDBOX_FRAG_PATH  := ./obj/$(CONFIG_NAME)/$(SANDBOX_DIR)
 
-ENABLE_HPX := no
-
 
 #
 # --- Library name and local paths ---------------------------------------------
@@ -689,8 +687,12 @@ endif
 
 # --- Linker program ---
 
-# Use whatever compiler was chosen.
+# Use whatever compiler was chosen. A C++ compiler must be used if HPX is enabled.
+ifneq ($(findstring hpx,$(THREADING_MODEL)),)
+LINKER     := $(CXX)
+else
 LINKER     := $(CC)
+endif
 
 # --- Warning flags ---
 
@@ -800,14 +802,22 @@ endif
 CLANGFLAGS := -std=c99
 $(foreach c, $(CONFIG_LIST_FAM), $(eval $(call append-var-for,CLANGFLAGS,$(c))))
 
-# Enable C++11.
+# Enable C++11, or C++17 if HPX threading is enabled.
+ifneq ($(findstring hpx,$(THREADING_MODEL)),)
+CXXLANGFLAGS := -std=c++17
+else
 CXXLANGFLAGS := -std=c++11
+endif
 $(foreach c, $(CONFIG_LIST_FAM), $(eval $(call append-var-for,CXXLANGFLAGS,$(c))))
 
 # --- C Preprocessor flags ---
 
 # Enable clock_gettime() in time.h.
 CPPROCFLAGS := -D_POSIX_C_SOURCE=200112L
+# Enable ip_mreq on macOS which is needed for ASIO which is needed for HPX
+ifeq ($(OS_NAME),Darwin)
+CPPROCFLAGS += -D_DARWIN_C_SOURCE
+endif
 $(foreach c, $(CONFIG_LIST_FAM), $(eval $(call append-var-for,CPPROCFLAGS,$(c))))
 
 # --- AddressSanitizer flags ---
@@ -839,16 +849,6 @@ ifneq ($(findstring pthreads,$(THREADING_MODEL)),)
 CTHREADFLAGS += -pthread
 LDFLAGS      += $(LIBPTHREAD)
 endif
-ifneq ($(findstring hpx,$(THREADING_MODEL)),)
-ENABLE_HPX := yes
-ifneq ($(findstring yes,$(ENABLE_DEBUG)),)
-CXXTHREADFLAGS += `pkg-config --cflags hpx_component`
-LDFLAGS      += `pkg-config --libs hpx_component`
-else
-CXXTHREADFLAGS += `pkg-config --cflags hpx_component_debug`
-LDFLAGS      += `pkg-config --libs hpx_component_debug`
-endif
-endif
 endif
 
 ifeq ($(CC_VENDOR),icc)
@@ -862,16 +862,6 @@ endif
 ifneq ($(findstring pthreads,$(THREADING_MODEL)),)
 CTHREADFLAGS += -pthread
 LDFLAGS      += $(LIBPTHREAD)
-endif
-ifneq ($(findstring hpx,$(THREADING_MODEL)),)
-ENABLE_HPX := yes
-ifneq ($(findstring yes,$(ENABLE_DEBUG)),)
-CXXTHREADFLAGS += `pkg-config --cflags hpx_component`
-LDFLAGS      += `pkg-config --libs hpx_component`
-else
-CXXTHREADFLAGS += `pkg-config --cflags hpx_component_debug`
-LDFLAGS      += `pkg-config --libs hpx_component_debug`
-endif
 endif
 endif
 
@@ -887,15 +877,22 @@ ifneq ($(findstring pthreads,$(THREADING_MODEL)),)
 CTHREADFLAGS += -pthread
 LDFLAGS      += $(LIBPTHREAD)
 endif
-ifneq ($(findstring hpx,$(THREADING_MODEL)),)
-ENABLE_HPX := yes
-ifneq ($(findstring yes,$(ENABLE_DEBUG)),)
-CXXTHREADFLAGS += `pkg-config --cflags hpx_component`
-LDFLAGS      += `pkg-config --libs hpx_component`
-else
-CXXTHREADFLAGS += `pkg-config --cflags hpx_component_debug`
-LDFLAGS      += `pkg-config --libs hpx_component_debug`
 endif
+
+# Threading flags for HPX
+ifneq ($(findstring hpx,$(THREADING_MODEL)),)
+ifneq ($(findstring yes,$(ENABLE_DEBUG)),)
+HPX_CXXFLAGS := $(shell pkg-config --cflags hpx_component_debug)
+HPX_LDFLAGS  := $(filter-out -shared,$(shell pkg-config --libs hpx_component_debug))
+else
+HPX_CXXFLAGS := $(shell pkg-config --cflags hpx_component)
+HPX_LDFLAGS  := $(filter-out -shared,$(shell pkg-config --libs hpx_component))
+endif
+CTHREADFLAGS += $(filter-out -std=%,$(HPX_CXXFLAGS))
+LDFLAGS      += $(HPX_LDFLAGS)
+ifeq ($(OS_NAME),Darwin)
+RPATH_PREFIX := -Wl,-rpath,
+LDFLAGS      += $(patsubst -L%,$(RPATH_PREFIX)%,$(filter -L%,$(HPX_LDFLAGS)))
 endif
 endif
 
