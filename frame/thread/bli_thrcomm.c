@@ -115,17 +115,17 @@ static thrcomm_barrier_ft barrier_fpa[ BLIS_NUM_THREAD_IMPLS ] =
 #if   defined(BLIS_ENABLE_OPENMP)
 	                bli_thrcomm_barrier_openmp,
 #elif defined(BLIS_ENABLE_PTHREADS)
-	                bli_thrcomm_barrier_pthreads,
+	                NULL,
 #else
-	                bli_thrcomm_barrier_single,
+	                NULL,
 #endif
 	[BLIS_POSIX]  =
 #if   defined(BLIS_ENABLE_PTHREADS)
 	                bli_thrcomm_barrier_pthreads,
 #elif defined(BLIS_ENABLE_OPENMP)
-	                bli_thrcomm_barrier_openmp,
+	                NULL,
 #else
-	                bli_thrcomm_barrier_single,
+	                NULL,
 #endif
 };
 
