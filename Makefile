@@ -553,12 +553,14 @@ else
 	@$(CC) $(call get-frame-cflags-for,$(1)) -c $$< -o $$@
 endif
 
+ifneq ($(findstring hpx,$(THREADING_MODEL)),)
 $(BASE_OBJ_FRAME_PATH)/%.o: $(FRAME_PATH)/%.cpp $(BLIS_H_FLAT) $(MAKE_DEFS_MK_PATHS)
 ifeq ($(ENABLE_VERBOSE),yes)
-	$(CXX) $(call get-addon-cxxflags-for,$(1)) -c $$< -o $$@
+	$(CXX) $(call get-frame-cxxflags-for,$(1)) -c $$< -o $$@
 else
-	@echo "Compiling $$@" $(call get-addon-cxxtext-for,$(1))
-	@$(CXX) $(call get-addon-cxxflags-for,$(1)) -c $$< -o $$@
+	@echo "Compiling $$@" $(call get-frame-cxxtext-for,$(1))
+	@$(CXX) $(call get-frame-cxxflags-for,$(1)) -c $$< -o $$@
+endif
 endif
 endef
 

@@ -152,6 +152,13 @@ get-frame-cflags-for     = $(strip $(call load-var-for,COPTFLAGS,$(1)) \
                                    $(BUILD_SYMFLAGS) \
                             )
 
+get-frame-cxxflags-for   = $(strip $(call load-var-for,COPTFLAGS,$(1)) \
+                                   $(call get-noopt-cxxflags-for,$(1)) \
+                                   $(BUILD_ASANFLAGS) \
+                                   $(BUILD_CPPFLAGS) \
+                                   $(BUILD_SYMFLAGS) \
+                            )
+
 get-kernel-cflags-for    = $(strip $(call load-var-for,CKOPTFLAGS,$(1)) \
                                    $(call load-var-for,CKVECFLAGS,$(1)) \
                                    $(call get-noopt-cflags-for,$(1)) \
@@ -225,6 +232,7 @@ get-refinit-text-for      = "('$(1)' CFLAGS for ref. kernel init)"
 get-refkern-text-for      = "('$(1)' CFLAGS for ref. kernels)"
 get-config-text-for       = "('$(1)' CFLAGS for config code)"
 get-frame-text-for        = "('$(1)' CFLAGS for framework code)"
+get-frame-cxxtext-for     = "('$(1)' CXXFLAGS for framework code)"
 get-kernel-text-for       = "('$(1)' CFLAGS for kernels)"
 get-addon-c99text-for     = "('$(1)' CFLAGS for addons)"
 get-addon-cxxtext-for     = "('$(1)' CXXFLAGS for addons)"
@@ -349,7 +357,11 @@ REFNM              := ref
 # Source suffixes.
 CONFIG_SRC_SUFS    := c
 KERNELS_SRC_SUFS   := c s S
+ifneq ($(findstring hpx,$(THREADING_MODEL)),)
 FRAME_SRC_SUFS     := c cpp
+else
+FRAME_SRC_SUFS     := c
+endif
 
 ADDON_C99_SUFS     := c
 ADDON_CXX_SUFS     := cc cpp cxx
