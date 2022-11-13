@@ -94,6 +94,13 @@ typedef struct thrcomm_s
 	#endif
 	#endif
 
+	#ifdef BLIS_ENABLE_HPX
+	#ifdef BLIS_USE_HPX_BARRIER
+	hpx::barrier<> * barrier;
+	#endif
+	#endif
+
+
 } thrcomm_t;
 
 
@@ -105,6 +112,7 @@ typedef struct thrcomm_s
 #include "bli_thrcomm_single.h"
 #include "bli_thrcomm_openmp.h"
 #include "bli_thrcomm_pthreads.h"
+#include "bli_thrcomm_hpx.h"
 
 // Define a function pointer type for each of the functions that are
 // "overloaded" by each method of multithreading.

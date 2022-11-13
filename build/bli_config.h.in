@@ -65,6 +65,13 @@
 #endif
 #endif
 
+#if @enable_hpx@
+#define BLIS_ENABLE_HPX
+#if @enable_hpx_as_def@
+#define BLIS_ENABLE_HPX_AS_DEFAULT
+#endif
+#endif
+
 #if @enable_jrir_slab@
 #define BLIS_ENABLE_JRIR_SLAB
 #endif

@@ -70,6 +70,11 @@ static real c_b81 = 0.f;
 /*  ===================================================================== */
 /* Main program */ int main(void)
 {
+#ifdef BLIS_ENABLE_HPX
+    char* program = "dblat1";
+    bli_thread_initialize_hpx( 1, &program );
+#endif
+
     /* Initialized data */
 
     static doublereal sfac = 9.765625e-4;
@@ -85,7 +90,7 @@ static real c_b81 = 0.f;
 
     /* Local variables */
     integer ic;
-    extern /* Subroutine */ int check0_(doublereal *), check1_(doublereal *), 
+    extern /* Subroutine */ int check0_(doublereal *), check1_(doublereal *),
 	    check2_(doublereal *), check3_(doublereal *), header_(void);
 
     /* Fortran I/O blocks */
@@ -124,11 +129,11 @@ static real c_b81 = 0.f;
 	combla_1.incy = 9999;
 	if (combla_1.icase == 3 || combla_1.icase == 11) {
 	    check0_(&sfac);
-	} else if (combla_1.icase == 7 || combla_1.icase == 8 || 
+	} else if (combla_1.icase == 7 || combla_1.icase == 8 ||
 		combla_1.icase == 9 || combla_1.icase == 10) {
 	    check1_(&sfac);
-	} else if (combla_1.icase == 1 || combla_1.icase == 2 || 
-		combla_1.icase == 5 || combla_1.icase == 6 || combla_1.icase 
+	} else if (combla_1.icase == 1 || combla_1.icase == 2 ||
+		combla_1.icase == 5 || combla_1.icase == 6 || combla_1.icase
 		== 12 || combla_1.icase == 13) {
 	    check2_(&sfac);
 	} else if (combla_1.icase == 4) {
@@ -143,7 +148,12 @@ static real c_b81 = 0.f;
     }
     s_stop("", (ftnlen)0);
 
-    return 0;
+#ifdef BLIS_ENABLE_HPX
+    return bli_thread_finalize_hpx();
+#else
+	// Return peacefully.
+	return 0;
+#endif
 } /* main */
 
 /* Subroutine */ int header_(void)
@@ -201,17 +211,17 @@ static real c_b81 = 0.f;
     static doublereal dc1[8] = { .6,.8,-.6,.8,.6,1.,0.,1. };
 
     /* Builtin functions */
-    integer s_wsle(cilist *), do_lio(integer *, integer *, char *, ftnlen), 
+    integer s_wsle(cilist *), do_lio(integer *, integer *, char *, ftnlen),
 	    e_wsle(void);
     /* Subroutine */ int s_stop(char *, ftnlen);
 
     /* Local variables */
     integer i__, k;
     doublereal sa, sb, sc, ss, dtemp[9];
-    extern /* Subroutine */ int drotg_(doublereal *, doublereal *, doublereal 
-	    *, doublereal *), stest_(integer *, doublereal *, doublereal *, 
-	    doublereal *, doublereal *), stest1_(doublereal *, doublereal *, 
-	    doublereal *, doublereal *), drotmg_(doublereal *, doublereal *, 
+    extern /* Subroutine */ int drotg_(doublereal *, doublereal *, doublereal
+	    *, doublereal *), stest_(integer *, doublereal *, doublereal *,
+	    doublereal *, doublereal *), stest1_(doublereal *, doublereal *,
+	    doublereal *, doublereal *), drotmg_(doublereal *, doublereal *,
 	    doublereal *, doublereal *, doublereal *);
 
     /* Fortran I/O blocks */
@@ -319,7 +329,7 @@ L40:
     doublereal d__1;
 
     /* Builtin functions */
-    integer s_wsle(cilist *), do_lio(integer *, integer *, char *, ftnlen), 
+    integer s_wsle(cilist *), do_lio(integer *, integer *, char *, ftnlen),
 	    e_wsle(void);
     /* Subroutine */ int s_stop(char *, ftnlen);
 
@@ -328,12 +338,12 @@ L40:
     doublereal sx[8];
     integer np1, len;
     extern doublereal dnrm2_(integer *, doublereal *, integer *);
-    extern /* Subroutine */ int dscal_(integer *, doublereal *, doublereal *, 
+    extern /* Subroutine */ int dscal_(integer *, doublereal *, doublereal *,
 	    integer *);
     extern doublereal dasum_(integer *, doublereal *, integer *);
     doublereal stemp[1], strue[8];
-    extern /* Subroutine */ int stest_(integer *, doublereal *, doublereal *, 
-	    doublereal *, doublereal *), itest1_(integer *, integer *), 
+    extern /* Subroutine */ int stest_(integer *, doublereal *, doublereal *,
+	    doublereal *, doublereal *), itest1_(integer *, integer *),
 	    stest1_(doublereal *, doublereal *, doublereal *, doublereal *);
     extern integer idamax_(integer *, doublereal *, integer *);
 
@@ -375,11 +385,11 @@ L40:
 		stest1_(&d__1, stemp, stemp, sfac);
 	    } else if (combla_1.icase == 9) {
 /*              .. DSCAL .. */
-		dscal_(&combla_1.n, &sa[(combla_1.incx - 1) * 5 + np1 - 1], 
+		dscal_(&combla_1.n, &sa[(combla_1.incx - 1) * 5 + np1 - 1],
 			sx, &combla_1.incx);
 		i__1 = len;
 		for (i__ = 1; i__ <= i__1; ++i__) {
-		    strue[i__ - 1] = dtrue5[i__ + (np1 + combla_1.incx * 5 << 
+		    strue[i__ - 1] = dtrue5[i__ + (np1 + combla_1.incx * 5 <<
 			    3) - 49];
 /* L40: */
 		}
@@ -446,71 +456,71 @@ L40:
 	    -3.,-4.,5.,0.,0.,2.,-3.,0.,1.,5.,2.,0.,-4. };
     static struct {
 	doublereal e_1[448];
-	} equiv_3 = {{ .6, 0., 0., 0., 0., 0., 0., .6, 0., 0., 0., 0., 0., 0., 
-		.6, 0., 0., 0., 0., 0., 0., .6, 0., 0., 0., 0., 0., 0., .6, 
-		0., 0., 0., 0., 0., 0., -.8, 0., 0., 0., 0., 0., 0., -.9, 0., 
-		0., 0., 0., 0., 0., 3.5, 0., 0., 0., 0., 0., 0., .6, .1, 0., 
-		0., 0., 0., 0., -.8, 3.8, 0., 0., 0., 0., 0., -.9, 2.8, 0., 
+	} equiv_3 = {{ .6, 0., 0., 0., 0., 0., 0., .6, 0., 0., 0., 0., 0., 0.,
+		.6, 0., 0., 0., 0., 0., 0., .6, 0., 0., 0., 0., 0., 0., .6,
+		0., 0., 0., 0., 0., 0., -.8, 0., 0., 0., 0., 0., 0., -.9, 0.,
+		0., 0., 0., 0., 0., 3.5, 0., 0., 0., 0., 0., 0., .6, .1, 0.,
+		0., 0., 0., 0., -.8, 3.8, 0., 0., 0., 0., 0., -.9, 2.8, 0.,
 		0., 0., 0., 0., 3.5, -.4, 0., 0., 0., 0., 0., .6, .1, -.5, .8,
 		 0., 0., 0., -.8, 3.8, -2.2, -1.2, 0., 0., 0., -.9, 2.8, -1.4,
-		 -1.3, 0., 0., 0., 3.5, -.4, -2.2, 4.7, 0., 0., 0., .6, 0., 
-		0., 0., 0., 0., 0., .6, 0., 0., 0., 0., 0., 0., .6, 0., 0., 
-		0., 0., 0., 0., .6, 0., 0., 0., 0., 0., 0., .6, 0., 0., 0., 
-		0., 0., 0., -.8, 0., 0., 0., 0., 0., 0., -.9, 0., 0., 0., 0., 
-		0., 0., 3.5, 0., 0., 0., 0., 0., 0., .6, .1, -.5, 0., 0., 0., 
+		 -1.3, 0., 0., 0., 3.5, -.4, -2.2, 4.7, 0., 0., 0., .6, 0.,
+		0., 0., 0., 0., 0., .6, 0., 0., 0., 0., 0., 0., .6, 0., 0.,
+		0., 0., 0., 0., .6, 0., 0., 0., 0., 0., 0., .6, 0., 0., 0.,
+		0., 0., 0., -.8, 0., 0., 0., 0., 0., 0., -.9, 0., 0., 0., 0.,
+		0., 0., 3.5, 0., 0., 0., 0., 0., 0., .6, .1, -.5, 0., 0., 0.,
 		0., 0., .1, -3., 0., 0., 0., 0., -.3, .1, -2., 0., 0., 0., 0.,
-		 3.3, .1, -2., 0., 0., 0., 0., .6, .1, -.5, .8, .9, -.3, -.4, 
-		-2., .1, 1.4, .8, .6, -.3, -2.8, -1.8, .1, 1.3, .8, 0., -.3, 
-		-1.9, 3.8, .1, -3.1, .8, 4.8, -.3, -1.5, .6, 0., 0., 0., 0., 
-		0., 0., .6, 0., 0., 0., 0., 0., 0., .6, 0., 0., 0., 0., 0., 
-		0., .6, 0., 0., 0., 0., 0., 0., .6, 0., 0., 0., 0., 0., 0., 
+		 3.3, .1, -2., 0., 0., 0., 0., .6, .1, -.5, .8, .9, -.3, -.4,
+		-2., .1, 1.4, .8, .6, -.3, -2.8, -1.8, .1, 1.3, .8, 0., -.3,
+		-1.9, 3.8, .1, -3.1, .8, 4.8, -.3, -1.5, .6, 0., 0., 0., 0.,
+		0., 0., .6, 0., 0., 0., 0., 0., 0., .6, 0., 0., 0., 0., 0.,
+		0., .6, 0., 0., 0., 0., 0., 0., .6, 0., 0., 0., 0., 0., 0.,
 		-.8, 0., 0., 0., 0., 0., 0., -.9, 0., 0., 0., 0., 0., 0., 3.5,
 		 0., 0., 0., 0., 0., 0., .6, .1, -.5, 0., 0., 0., 0., 4.8, .1,
-		 -3., 0., 0., 0., 0., 3.3, .1, -2., 0., 0., 0., 0., 2.1, .1, 
-		-2., 0., 0., 0., 0., .6, .1, -.5, .8, .9, -.3, -.4, -1.6, .1, 
-		-2.2, .8, 5.4, -.3, -2.8, -1.5, .1, -1.4, .8, 3.6, -.3, -1.9, 
+		 -3., 0., 0., 0., 0., 3.3, .1, -2., 0., 0., 0., 0., 2.1, .1,
+		-2., 0., 0., 0., 0., .6, .1, -.5, .8, .9, -.3, -.4, -1.6, .1,
+		-2.2, .8, 5.4, -.3, -2.8, -1.5, .1, -1.4, .8, 3.6, -.3, -1.9,
 		3.7, .1, -2.2, .8, 3.6, -.3, -1.5, .6, 0., 0., 0., 0., 0., 0.,
-		 .6, 0., 0., 0., 0., 0., 0., .6, 0., 0., 0., 0., 0., 0., .6, 
-		0., 0., 0., 0., 0., 0., .6, 0., 0., 0., 0., 0., 0., -.8, 0., 
-		0., 0., 0., 0., 0., -.9, 0., 0., 0., 0., 0., 0., 3.5, 0., 0., 
-		0., 0., 0., 0., .6, .1, 0., 0., 0., 0., 0., -.8, -1., 0., 0., 
+		 .6, 0., 0., 0., 0., 0., 0., .6, 0., 0., 0., 0., 0., 0., .6,
+		0., 0., 0., 0., 0., 0., .6, 0., 0., 0., 0., 0., 0., -.8, 0.,
+		0., 0., 0., 0., 0., -.9, 0., 0., 0., 0., 0., 0., 3.5, 0., 0.,
+		0., 0., 0., 0., .6, .1, 0., 0., 0., 0., 0., -.8, -1., 0., 0.,
 		0., 0., 0., -.9, -.8, 0., 0., 0., 0., 0., 3.5, .8, 0., 0., 0.,
 		 0., 0., .6, .1, -.5, .8, 0., 0., 0., -.8, -1., 1.4, -1.6, 0.,
-		 0., 0., -.9, -.8, 1.3, -1.6, 0., 0., 0., 3.5, .8, -3.1, 4.8, 
+		 0., 0., -.9, -.8, 1.3, -1.6, 0., 0., 0., 3.5, .8, -3.1, 4.8,
 		0., 0., 0. }};
 
     static struct {
 	doublereal e_1[448];
-	} equiv_7 = {{ .5, 0., 0., 0., 0., 0., 0., .5, 0., 0., 0., 0., 0., 0., 
-		.5, 0., 0., 0., 0., 0., 0., .5, 0., 0., 0., 0., 0., 0., .5, 
-		0., 0., 0., 0., 0., 0., .7, 0., 0., 0., 0., 0., 0., 1.7, 0., 
+	} equiv_7 = {{ .5, 0., 0., 0., 0., 0., 0., .5, 0., 0., 0., 0., 0., 0.,
+		.5, 0., 0., 0., 0., 0., 0., .5, 0., 0., 0., 0., 0., 0., .5,
+		0., 0., 0., 0., 0., 0., .7, 0., 0., 0., 0., 0., 0., 1.7, 0.,
 		0., 0., 0., 0., 0., -2.6, 0., 0., 0., 0., 0., 0., .5, -.9, 0.,
-		 0., 0., 0., 0., .7, -4.8, 0., 0., 0., 0., 0., 1.7, -.7, 0., 
-		0., 0., 0., 0., -2.6, 3.5, 0., 0., 0., 0., 0., .5, -.9, .3, 
-		.7, 0., 0., 0., .7, -4.8, 3., 1.1, 0., 0., 0., 1.7, -.7, -.7, 
+		 0., 0., 0., 0., .7, -4.8, 0., 0., 0., 0., 0., 1.7, -.7, 0.,
+		0., 0., 0., 0., -2.6, 3.5, 0., 0., 0., 0., 0., .5, -.9, .3,
+		.7, 0., 0., 0., .7, -4.8, 3., 1.1, 0., 0., 0., 1.7, -.7, -.7,
 		2.3, 0., 0., 0., -2.6, 3.5, -.7, -3.6, 0., 0., 0., .5, 0., 0.,
-		 0., 0., 0., 0., .5, 0., 0., 0., 0., 0., 0., .5, 0., 0., 0., 
-		0., 0., 0., .5, 0., 0., 0., 0., 0., 0., .5, 0., 0., 0., 0., 
-		0., 0., .7, 0., 0., 0., 0., 0., 0., 1.7, 0., 0., 0., 0., 0., 
+		 0., 0., 0., 0., .5, 0., 0., 0., 0., 0., 0., .5, 0., 0., 0.,
+		0., 0., 0., .5, 0., 0., 0., 0., 0., 0., .5, 0., 0., 0., 0.,
+		0., 0., .7, 0., 0., 0., 0., 0., 0., 1.7, 0., 0., 0., 0., 0.,
 		0., -2.6, 0., 0., 0., 0., 0., 0., .5, -.9, .3, 0., 0., 0., 0.,
-		 4., -.9, -.3, 0., 0., 0., 0., -.5, -.9, 1.5, 0., 0., 0., 0., 
+		 4., -.9, -.3, 0., 0., 0., 0., -.5, -.9, 1.5, 0., 0., 0., 0.,
 		-1.5, -.9, -1.8, 0., 0., 0., 0., .5, -.9, .3, .7, -.6, .2, .8,
-		 3.7, -.9, -1.2, .7, -1.5, .2, 2.2, -.3, -.9, 2.1, .7, -1.6, 
-		.2, 2., -1.6, -.9, -2.1, .7, 2.9, .2, -3.8, .5, 0., 0., 0., 
-		0., 0., 0., .5, 0., 0., 0., 0., 0., 0., .5, 0., 0., 0., 0., 
-		0., 0., .5, 0., 0., 0., 0., 0., 0., .5, 0., 0., 0., 0., 0., 
-		0., .7, 0., 0., 0., 0., 0., 0., 1.7, 0., 0., 0., 0., 0., 0., 
+		 3.7, -.9, -1.2, .7, -1.5, .2, 2.2, -.3, -.9, 2.1, .7, -1.6,
+		.2, 2., -1.6, -.9, -2.1, .7, 2.9, .2, -3.8, .5, 0., 0., 0.,
+		0., 0., 0., .5, 0., 0., 0., 0., 0., 0., .5, 0., 0., 0., 0.,
+		0., 0., .5, 0., 0., 0., 0., 0., 0., .5, 0., 0., 0., 0., 0.,
+		0., .7, 0., 0., 0., 0., 0., 0., 1.7, 0., 0., 0., 0., 0., 0.,
 		-2.6, 0., 0., 0., 0., 0., 0., .5, -.9, 0., 0., 0., 0., 0., 4.,
-		 -6.3, 0., 0., 0., 0., 0., -.5, .3, 0., 0., 0., 0., 0., -1.5, 
-		3., 0., 0., 0., 0., 0., .5, -.9, .3, .7, 0., 0., 0., 3.7, 
-		-7.2, 3., 1.7, 0., 0., 0., -.3, .9, -.7, 1.9, 0., 0., 0., 
-		-1.6, 2.7, -.7, -3.4, 0., 0., 0., .5, 0., 0., 0., 0., 0., 0., 
-		.5, 0., 0., 0., 0., 0., 0., .5, 0., 0., 0., 0., 0., 0., .5, 
-		0., 0., 0., 0., 0., 0., .5, 0., 0., 0., 0., 0., 0., .7, 0., 
+		 -6.3, 0., 0., 0., 0., 0., -.5, .3, 0., 0., 0., 0., 0., -1.5,
+		3., 0., 0., 0., 0., 0., .5, -.9, .3, .7, 0., 0., 0., 3.7,
+		-7.2, 3., 1.7, 0., 0., 0., -.3, .9, -.7, 1.9, 0., 0., 0.,
+		-1.6, 2.7, -.7, -3.4, 0., 0., 0., .5, 0., 0., 0., 0., 0., 0.,
+		.5, 0., 0., 0., 0., 0., 0., .5, 0., 0., 0., 0., 0., 0., .5,
+		0., 0., 0., 0., 0., 0., .5, 0., 0., 0., 0., 0., 0., .7, 0.,
 		0., 0., 0., 0., 0., 1.7, 0., 0., 0., 0., 0., 0., -2.6, 0., 0.,
-		 0., 0., 0., 0., .5, -.9, .3, 0., 0., 0., 0., .7, -.9, 1.2, 
+		 0., 0., 0., 0., .5, -.9, .3, 0., 0., 0., 0., .7, -.9, 1.2,
 		0., 0., 0., 0., 1.7, -.9, .5, 0., 0., 0., 0., -2.6, -.9, -1.3,
-		 0., 0., 0., 0., .5, -.9, .3, .7, -.6, .2, .8, .7, -.9, 1.2, 
+		 0., 0., 0., 0., .5, -.9, .3, .7, -.6, .2, .8, .7, -.9, 1.2,
 		.7, -1.5, .2, 1.6, 1.7, -.9, .5, .7, -1.6, .2, 2.4, -2.6, -.9,
 		 -1.3, .7, 2.9, .2, -4. }};
 
@@ -521,7 +531,7 @@ L40:
     doublereal d__1;
 
     /* Builtin functions */
-    integer s_wsle(cilist *), do_lio(integer *, integer *, char *, ftnlen), 
+    integer s_wsle(cilist *), do_lio(integer *, integer *, char *, ftnlen),
 	    e_wsle(void);
     /* Subroutine */ int s_stop(char *, ftnlen);
 
@@ -532,7 +542,7 @@ L40:
     doublereal sx[7], sy[7];
     integer kni;
     doublereal stx[7], sty[7];
-    extern doublereal ddot_(integer *, doublereal *, integer *, doublereal *, 
+    extern doublereal ddot_(integer *, doublereal *, integer *, doublereal *,
 	    integer *);
     integer kpar, lenx, leny;
 #define dt19x ((doublereal *)&equiv_3)
@@ -547,16 +557,16 @@ L40:
 #define dt19yc ((doublereal *)&equiv_7 + 224)
 #define dt19yd ((doublereal *)&equiv_7 + 336)
     extern doublereal dsdot_(integer *, real *, integer *, real *, integer *);
-    extern /* Subroutine */ int dcopy_(integer *, doublereal *, integer *, 
+    extern /* Subroutine */ int dcopy_(integer *, doublereal *, integer *,
 	    doublereal *, integer *);
     integer ksize;
-    extern /* Subroutine */ int daxpy_(integer *, doublereal *, doublereal *, 
-	    integer *, doublereal *, integer *), drotm_(integer *, doublereal 
+    extern /* Subroutine */ int daxpy_(integer *, doublereal *, doublereal *,
+	    integer *, doublereal *, integer *), drotm_(integer *, doublereal
 	    *, integer *, doublereal *, integer *, doublereal *), dswap_(
 	    integer *, doublereal *, integer *, doublereal *, integer *);
     doublereal ssize[7];
-    extern /* Subroutine */ int stest_(integer *, doublereal *, doublereal *, 
-	    doublereal *, doublereal *), stest1_(doublereal *, doublereal *, 
+    extern /* Subroutine */ int stest_(integer *, doublereal *, doublereal *,
+	    doublereal *, doublereal *), stest1_(doublereal *, doublereal *,
 	    doublereal *, doublereal *);
 
     /* Fortran I/O blocks */
@@ -616,7 +626,7 @@ L40:
 /*              .. DDOT .. */
 		d__1 = ddot_(&combla_1.n, sx, &combla_1.incx, sy, &
 			combla_1.incy);
-		stest1_(&d__1, &dt7[kn + (ki << 2) - 5], &ssize1[kn - 1], 
+		stest1_(&d__1, &dt7[kn + (ki << 2) - 5], &ssize1[kn - 1],
 			sfac);
 	    } else if (combla_1.icase == 2) {
 /*              .. DAXPY .. */
@@ -653,9 +663,9 @@ L40:
 		    for (i__ = 1; i__ <= 7; ++i__) {
 			sx[i__ - 1] = dx1[i__ - 1];
 			sy[i__ - 1] = dy1[i__ - 1];
-			stx[i__ - 1] = dt19x[i__ + (kpar + (kni << 2)) * 7 - 
+			stx[i__ - 1] = dt19x[i__ + (kpar + (kni << 2)) * 7 -
 				36];
-			sty[i__ - 1] = dt19y[i__ + (kpar + (kni << 2)) * 7 - 
+			sty[i__ - 1] = dt19y[i__ + (kpar + (kni << 2)) * 7 -
 				36];
 		    }
 
@@ -746,7 +756,7 @@ L40:
 	    1.17,1.17,1.17,1.17,1.17,1.17,1.17 };
 
     /* Builtin functions */
-    integer s_wsle(cilist *), do_lio(integer *, integer *, char *, ftnlen), 
+    integer s_wsle(cilist *), do_lio(integer *, integer *, char *, ftnlen),
 	    e_wsle(void);
     /* Subroutine */ int s_stop(char *, ftnlen);
 
@@ -755,13 +765,13 @@ L40:
     doublereal sx[7], sy[7], stx[7], sty[7];
     integer lenx, leny;
     doublereal mwpc[11];
-    extern /* Subroutine */ int drot_(integer *, doublereal *, integer *, 
+    extern /* Subroutine */ int drot_(integer *, doublereal *, integer *,
 	    doublereal *, integer *, doublereal *, doublereal *);
     integer mwpn[11];
     doublereal mwps[11], mwpx[5], mwpy[5];
     integer ksize;
     doublereal copyx[5], copyy[5];
-    extern /* Subroutine */ int stest_(integer *, doublereal *, doublereal *, 
+    extern /* Subroutine */ int stest_(integer *, doublereal *, doublereal *,
 	    doublereal *, doublereal *);
     doublereal mwptx[55]	/* was [11][5] */, mwpty[55]	/* was [11][5]
 	     */;
@@ -1090,11 +1100,11 @@ L40:
 
 } /* testdsdot_ */
 
-/* Subroutine */ int stest1_(doublereal *scomp1, doublereal *strue1, 
+/* Subroutine */ int stest1_(doublereal *scomp1, doublereal *strue1,
 	doublereal *ssize, doublereal *sfac)
 {
     doublereal scomp[1], strue[1];
-    extern /* Subroutine */ int stest_(integer *, doublereal *, doublereal *, 
+    extern /* Subroutine */ int stest_(integer *, doublereal *, doublereal *,
 	    doublereal *, doublereal *);
 
 /*     ************************* STEST1 ***************************** */

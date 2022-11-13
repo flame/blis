@@ -170,12 +170,12 @@ print_usage()
 	echo "   -t MODEL, --enable-threading[=MODEL], --disable-threading"
 	echo " "
 	echo "                 Enable threading in the library, using threading model(s)"
-	echo "                 MODEL={single,openmp,pthreads,auto}. If multiple values"
+	echo "                 MODEL={single,openmp,pthreads,hpx,auto}. If multiple values"
 	echo "                 are specified within MODEL, they will all be compiled into"
 	echo "                 BLIS, and the choice of which to use will be determined at"
 	echo "                 runtime. If the user does not express a preference (by"
 	echo "                 setting the BLIS_THREAD_IMPL environment variable to"
-	echo "                 'single', 'openmp', or 'pthreads'; by calling the global"
+	echo "                 'single', 'openmp', 'pthreads', or 'hpx'; by calling the global"
 	echo "                 runtime API bli_thread_set_thread_impl(); or by encoding a"
 	echo "                 choice on a per-call basis within a rntm_t passed into the"
 	echo "                 expert API), then the first model listed in MODEL will be"
@@ -2478,6 +2478,7 @@ main()
 	# The user-given debug type and a flag indicating it was given.
 	debug_type=''
 	debug_flag=''
+	enable_debug='no'
 
 	# A flag indicating whether AddressSanitizer should be used.
 	enable_asan='no'
@@ -3461,8 +3462,10 @@ main()
 			debug_type='noopt'
 			echo "${script_name}: enabling debug symbols; optimizations disabled."
 		fi
+		enable_debug='yes'
 	else
 		debug_type='off'
+		enable_debug='no'
 		echo "${script_name}: debug symbols disabled."
 	fi
 
@@ -3526,14 +3529,17 @@ main()
 	enable_single='yes'
 	enable_openmp='no'
 	enable_pthreads='no'
+	enable_hpx='no'
 	enable_single_01=1
 	enable_openmp_01=0
 	enable_pthreads_01=0
+	enable_hpx_01=0
 	parsed_tm=''
 	first_tm=''
 	enable_single_as_def_01=0
 	enable_openmp_as_def_01=0
 	enable_pthreads_as_def_01=0
+	enable_hpx_as_def_01=0
 
 	# Convert whatever reasonable separator the user may have used into a space.
 	threading_model_list=$(echo "${threading_model}" | sed -e "s/[,+]/ /g")
@@ -3560,6 +3566,10 @@ main()
 			 [ "x${word}" = "xposix"    ]; then
 
 			parsed_tm="${parsed_tm} pthreads"
+
+		elif [ "x${word}" = "xhpx" ]; then
+
+			parsed_tm="${parsed_tm} hpx"
 
 		elif [ "x${word}" = "xauto" ]; then
 
@@ -3652,7 +3662,15 @@ main()
 			echo "${script_name}: enabling support for threading via pthreads."
 			enable_pthreads='yes'
 			enable_pthreads_01=1
+
+		elif [ "x${word}" = "xhpx" ]; then
+
+			echo "${script_name}: enabling support for threading via hpx."
+			enable_hpx='yes'
+			enable_hpx_01=1
+
 		fi
+
 	done
 
 	# Define boolean variables that can easily be interpreted with #ifdef
@@ -3662,25 +3680,37 @@ main()
 		enable_single_as_def_01=1
 		enable_openmp_as_def_01=0
 		enable_pthreads_as_def_01=0
+		enable_hpx_as_def_01=0
 
 	elif [ "x${first_tm}" = "xopenmp" ]; then
 
 		enable_single_as_def_01=0
 		enable_openmp_as_def_01=1
 		enable_pthreads_as_def_01=0
+		enable_hpx_as_def_01=0
 
 	elif [ "x${first_tm}" = "xpthreads" ]; then
 
 		enable_single_as_def_01=0
 		enable_openmp_as_def_01=0
 		enable_pthreads_as_def_01=1
+		enable_hpx_as_def_01=0
+
+	elif [ "x${first_tm}" = "xhpx" ]; then
+
+		enable_single_as_def_01=0
+		enable_openmp_as_def_01=0
+		enable_pthreads_as_def_01=0
+		enable_hpx_as_def_01=1
+
 	fi
 
 	# If either OpenMP or pthreads was enabled, given that single-threaded mode is
 	# also always enabled, remind the user which one will serve as the default
 	# (that is, absent any explicit choice at runtime).
 	if [ "x${enable_openmp}"   = "xyes" ] ||
-	   [ "x${enable_pthreads}" = "xyes" ]; then
+	   [ "x${enable_pthreads}" = "xyes" ] ||
+	   [ "x${enable_hpx}"      = "xyes" ]; then
 
 		if   [ "x${first_tm}"   = "xsingle" ]; then
 			echo "${script_name}: threading will default to single-threaded."
@@ -3688,6 +3718,8 @@ main()
 			echo "${script_name}: threading will default to OpenMP."
 		elif [ "x${first_tm}"   = "xpthreads" ]; then
 			echo "${script_name}: threading will default to pthreads."
+		elif [ "x${first_tm}"   = "xhpx" ]; then
+			echo "${script_name}: threading will default to HPX."
 		fi
 	fi
 
@@ -4102,6 +4134,7 @@ main()
 		| sed -e "s/@ldflags_preset@/${ldflags_preset_esc}/g" \
 		| sed -e "s/@enable_asan@/${enable_asan}/g" \
 		| sed -e "s/@debug_type@/${debug_type}/g" \
+		| sed -e "s/@enable_debug@/${enable_debug}/g" \
 		| sed -e "s/@enable_system@/${enable_system}/g" \
 		| sed -e "s/@threading_model@/${threading_model}/g" \
 		| sed -e "s/@prefix@/${prefix_esc}/g" \
@@ -4142,6 +4175,8 @@ main()
 		| sed   -e "s/@enable_openmp_as_def@/${enable_openmp_as_def_01}/g" \
 		| sed   -e "s/@enable_pthreads@/${enable_pthreads_01}/g" \
 		| sed   -e "s/@enable_pthreads_as_def@/${enable_pthreads_as_def_01}/g" \
+		| sed   -e "s/@enable_hpx@/${enable_hpx_01}/g" \
+		| sed   -e "s/@enable_hpx_as_def@/${enable_hpx_as_def_01}/g" \
 		| sed   -e "s/@enable_jrir_slab@/${enable_jrir_slab_01}/g" \
 		| sed   -e "s/@enable_jrir_rr@/${enable_jrir_rr_01}/g" \
 		| sed   -e "s/@enable_pba_pools@/${enable_pba_pools_01}/g" \
