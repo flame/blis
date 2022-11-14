@@ -71,13 +71,13 @@ void bli_thread_launch_hpx
 
 void bli_thread_initialize_hpx( int argc, char** argv )
 {
-    hpx::start( nullptr, argc, argv );
+	hpx::start( nullptr, argc, argv );
 }
 
 int bli_thread_finalize_hpx()
 {
-    hpx::apply([]() { hpx::finalize(); });
-    return hpx::stop();
+	hpx::apply([]() { hpx::finalize(); });
+	return hpx::stop();
 }
 
 } // extern "C"

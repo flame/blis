@@ -94,12 +94,13 @@ typedef struct thrcomm_s
 	#endif
 	#endif
 
+	// -- Fields specific to HPX --
+
 	#ifdef BLIS_ENABLE_HPX
 	#ifdef BLIS_USE_HPX_BARRIER
 	hpx::barrier<> * barrier;
 	#endif
 	#endif
-
 
 } thrcomm_t;
 

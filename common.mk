@@ -256,6 +256,7 @@ files-that-dont-contain = $(strip $(foreach f, $(1), $(if $(findstring $(2),$(f)
 rm-dups = $(if $1,$(firstword $1) $(call rm-dups,$(filter-out $(firstword $1),$1)))
 
 
+
 #
 # --- Include makefile configuration file --------------------------------------
 #
@@ -440,6 +441,7 @@ ADDON_FRAG_PATH    := ./obj/$(CONFIG_NAME)/$(ADDON_DIR)
 SANDBOX_FRAG_PATH  := ./obj/$(CONFIG_NAME)/$(SANDBOX_DIR)
 
 
+
 #
 # --- Library name and local paths ---------------------------------------------
 #
@@ -514,6 +516,8 @@ LIBBLIS_SO_OUTPUT_NAME := $(LIBBLIS_SO_MAJ_PATH)
 else
 LIBBLIS_SO_OUTPUT_NAME := $(LIBBLIS_SO_PATH)
 endif
+
+
 
 #
 # --- Utility program definitions ----------------------------------------------
@@ -642,6 +646,7 @@ LIBBLIS_L      := $(LIBBLIS_SO)
 LIBBLIS_LINK   := $(LIBBLIS_SO_PATH)
 endif
 endif
+
 
 
 #
@@ -826,7 +831,7 @@ $(foreach c, $(CONFIG_LIST_FAM), $(eval $(call append-var-for,CXXLANGFLAGS,$(c))
 
 # Enable clock_gettime() in time.h.
 CPPROCFLAGS := -D_POSIX_C_SOURCE=200112L
-# Enable ip_mreq on macOS which is needed for ASIO which is needed for HPX
+# Enable ip_mreq on macOS which is needed for ASIO which is needed for HPX.
 ifeq ($(OS_NAME),Darwin)
 CPPROCFLAGS += -D_DARWIN_C_SOURCE
 endif
@@ -891,7 +896,7 @@ LDFLAGS      += $(LIBPTHREAD)
 endif
 endif
 
-# Threading flags for HPX
+# Threading flags for HPX.
 ifneq ($(findstring hpx,$(THREADING_MODEL)),)
 HPX_CXXFLAGS := $(shell pkg-config --cflags hpx_component)
 HPX_LDFLAGS  := $(filter-out -shared,$(shell pkg-config --libs hpx_component))
