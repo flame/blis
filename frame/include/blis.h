@@ -111,6 +111,7 @@ extern "C" {
 #include "bli_malloc.h"
 #include "bli_const.h"
 #include "bli_obj.h"
+#include "bli_obj_numa.h"
 #include "bli_obj_scalar.h"
 #include "bli_blksz.h"
 #include "bli_func.h"
