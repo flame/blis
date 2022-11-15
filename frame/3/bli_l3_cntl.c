@@ -57,7 +57,14 @@ void bli_l3_cntl_create_if
 		     family == BLIS_GEMMT ||
 		     family == BLIS_TRMM )
 		{
-			*cntl_use = bli_gemm_cntl_create( rntm, family, schema_a, schema_b );
+			*cntl_use = bli_gemm_cntl_create
+			(
+			  rntm,
+			  family,
+			  schema_a,
+			  schema_b,
+			  bli_obj_ker_fn( c )
+			);
 		}
 		else // if ( family == BLIS_TRSM )
 		{
@@ -66,7 +73,14 @@ void bli_l3_cntl_create_if
 			if ( bli_obj_is_triangular( a ) ) side = BLIS_LEFT;
 			else                              side = BLIS_RIGHT;
 
-			*cntl_use = bli_trsm_cntl_create( rntm, side, schema_a, schema_b );
+			*cntl_use = bli_trsm_cntl_create
+			(
+			  rntm,
+			  side,
+			  schema_a,
+			  schema_b,
+			  bli_obj_ker_fn( c )
+			);
 		}
 	}
 	else

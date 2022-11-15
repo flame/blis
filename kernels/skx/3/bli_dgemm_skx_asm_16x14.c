@@ -153,24 +153,28 @@
 static int64_t offsets[16] __attribute__((aligned(64))) =
     { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15};
 
-void bli_dgemm_skx_asm_16x14(
-                              dim_t            k_,
-                              double* restrict alpha,
-                              double* restrict a,
-                              double* restrict b,
-                              double* restrict beta,
-                              double* restrict c, inc_t rs_c_, inc_t cs_c_,
-                              auxinfo_t*       data,
-                              cntx_t* restrict cntx
-                            )
+void bli_dgemm_skx_asm_16x14
+     (
+       dim_t            m,
+       dim_t            n,
+       dim_t            k_,
+       double* restrict alpha,
+       double* restrict a,
+       double* restrict b,
+       double* restrict beta,
+       double* restrict c, inc_t rs_c_, inc_t cs_c_,
+       auxinfo_t*       data,
+       cntx_t* restrict cntx
+     )
 {
     (void)data;
     (void)cntx;
 
-    const int64_t* offsetPtr = &offsets[0];
-    const int64_t k = k_;
-    const int64_t rs_c = rs_c_*8;
-    const int64_t cs_c = cs_c_*8;
+    int64_t k = k_;
+    int64_t rs_c = rs_c_;
+    int64_t cs_c = cs_c_;
+
+    GEMM_UKR_SETUP_CT( d, 16, 14, false );
 
     BEGIN_ASM()
 
@@ -220,6 +224,8 @@ void bli_dgemm_skx_asm_16x14(
 
     MOV(R12, VAR(rs_c))
     MOV(R10, VAR(cs_c))
+    LEA(R12, MEM(,R12,8))
+    LEA(R10, MEM(,R10,8))
 
     MOV(RDI, RSI)
     AND(RSI, IMM(3))
@@ -320,119 +326,41 @@ void bli_dgemm_skx_asm_16x14(
     MOV(RAX, R12)
     MOV(RBX, R10)
 
-    // Check if C is column stride.
-    CMP(RAX, IMM(8))
-    JNE(SCATTEREDUPDATE)
+    VCOMISD(XMM(1), XMM(2))
+    JE(COLSTORBZ)
 
-        VCOMISD(XMM(1), XMM(2))
-        JE(COLSTORBZ)
-
-            UPDATE_C( 4, 5)
-            UPDATE_C( 6, 7)
-            UPDATE_C( 8, 9)
-            UPDATE_C(10,11)
-            UPDATE_C(12,13)
-            UPDATE_C(14,15)
-            UPDATE_C(16,17)
-            UPDATE_C(18,19)
-            UPDATE_C(20,21)
-            UPDATE_C(22,23)
-            UPDATE_C(24,25)
-            UPDATE_C(26,27)
-            UPDATE_C(28,29)
-            UPDATE_C(30,31)
-
-        JMP(END)
-        LABEL(COLSTORBZ)
-
-            UPDATE_C_BZ( 4, 5)
-            UPDATE_C_BZ( 6, 7)
-            UPDATE_C_BZ( 8, 9)
-            UPDATE_C_BZ(10,11)
-            UPDATE_C_BZ(12,13)
-            UPDATE_C_BZ(14,15)
-            UPDATE_C_BZ(16,17)
-            UPDATE_C_BZ(18,19)
-            UPDATE_C_BZ(20,21)
-            UPDATE_C_BZ(22,23)
-            UPDATE_C_BZ(24,25)
-            UPDATE_C_BZ(26,27)
-            UPDATE_C_BZ(28,29)
-            UPDATE_C_BZ(30,31)
+        UPDATE_C( 4, 5)
+        UPDATE_C( 6, 7)
+        UPDATE_C( 8, 9)
+        UPDATE_C(10,11)
+        UPDATE_C(12,13)
+        UPDATE_C(14,15)
+        UPDATE_C(16,17)
+        UPDATE_C(18,19)
+        UPDATE_C(20,21)
+        UPDATE_C(22,23)
+        UPDATE_C(24,25)
+        UPDATE_C(26,27)
+        UPDATE_C(28,29)
+        UPDATE_C(30,31)
 
     JMP(END)
-    LABEL(SCATTEREDUPDATE)
+    LABEL(COLSTORBZ)
 
-        VMULPD(ZMM( 4), ZMM( 4), ZMM(0))
-        VMULPD(ZMM( 5), ZMM( 5), ZMM(0))
-        VMULPD(ZMM( 6), ZMM( 6), ZMM(0))
-        VMULPD(ZMM( 7), ZMM( 7), ZMM(0))
-        VMULPD(ZMM( 8), ZMM( 8), ZMM(0))
-        VMULPD(ZMM( 9), ZMM( 9), ZMM(0))
-        VMULPD(ZMM(10), ZMM(10), ZMM(0))
-        VMULPD(ZMM(11), ZMM(11), ZMM(0))
-        VMULPD(ZMM(12), ZMM(12), ZMM(0))
-        VMULPD(ZMM(13), ZMM(13), ZMM(0))
-        VMULPD(ZMM(14), ZMM(14), ZMM(0))
-        VMULPD(ZMM(15), ZMM(15), ZMM(0))
-        VMULPD(ZMM(16), ZMM(16), ZMM(0))
-        VMULPD(ZMM(17), ZMM(17), ZMM(0))
-        VMULPD(ZMM(18), ZMM(18), ZMM(0))
-        VMULPD(ZMM(19), ZMM(19), ZMM(0))
-        VMULPD(ZMM(20), ZMM(20), ZMM(0))
-        VMULPD(ZMM(21), ZMM(21), ZMM(0))
-        VMULPD(ZMM(22), ZMM(22), ZMM(0))
-        VMULPD(ZMM(23), ZMM(23), ZMM(0))
-        VMULPD(ZMM(24), ZMM(24), ZMM(0))
-        VMULPD(ZMM(25), ZMM(25), ZMM(0))
-        VMULPD(ZMM(26), ZMM(26), ZMM(0))
-        VMULPD(ZMM(27), ZMM(27), ZMM(0))
-        VMULPD(ZMM(28), ZMM(28), ZMM(0))
-        VMULPD(ZMM(29), ZMM(29), ZMM(0))
-        VMULPD(ZMM(30), ZMM(30), ZMM(0))
-        VMULPD(ZMM(31), ZMM(31), ZMM(0))
-
-        VCOMISD(XMM(1), XMM(2))
-
-        MOV(RDI, VAR(offsetPtr))
-        VPBROADCASTQ(ZMM(0), RAX)
-        VPMULLQ(ZMM(2), ZMM(0), MEM(RDI))
-        VPMULLQ(ZMM(3), ZMM(0), MEM(RDI,64))
-
-        JE(SCATTERBZ)
-
-            UPDATE_C_COL_SCATTERED( 4, 5)
-            UPDATE_C_COL_SCATTERED( 6, 7)
-            UPDATE_C_COL_SCATTERED( 8, 9)
-            UPDATE_C_COL_SCATTERED(10,11)
-            UPDATE_C_COL_SCATTERED(12,13)
-            UPDATE_C_COL_SCATTERED(14,15)
-            UPDATE_C_COL_SCATTERED(16,17)
-            UPDATE_C_COL_SCATTERED(18,19)
-            UPDATE_C_COL_SCATTERED(20,21)
-            UPDATE_C_COL_SCATTERED(22,23)
-            UPDATE_C_COL_SCATTERED(24,25)
-            UPDATE_C_COL_SCATTERED(26,27)
-            UPDATE_C_COL_SCATTERED(28,29)
-            UPDATE_C_COL_SCATTERED(30,31)
-
-        JMP(END)
-        LABEL(SCATTERBZ)
-
-            UPDATE_C_BZ_COL_SCATTERED( 4, 5)
-            UPDATE_C_BZ_COL_SCATTERED( 6, 7)
-            UPDATE_C_BZ_COL_SCATTERED( 8, 9)
-            UPDATE_C_BZ_COL_SCATTERED(10,11)
-            UPDATE_C_BZ_COL_SCATTERED(12,13)
-            UPDATE_C_BZ_COL_SCATTERED(14,15)
-            UPDATE_C_BZ_COL_SCATTERED(16,17)
-            UPDATE_C_BZ_COL_SCATTERED(18,19)
-            UPDATE_C_BZ_COL_SCATTERED(20,21)
-            UPDATE_C_BZ_COL_SCATTERED(22,23)
-            UPDATE_C_BZ_COL_SCATTERED(24,25)
-            UPDATE_C_BZ_COL_SCATTERED(26,27)
-            UPDATE_C_BZ_COL_SCATTERED(28,29)
-            UPDATE_C_BZ_COL_SCATTERED(30,31)
+        UPDATE_C_BZ( 4, 5)
+        UPDATE_C_BZ( 6, 7)
+        UPDATE_C_BZ( 8, 9)
+        UPDATE_C_BZ(10,11)
+        UPDATE_C_BZ(12,13)
+        UPDATE_C_BZ(14,15)
+        UPDATE_C_BZ(16,17)
+        UPDATE_C_BZ(18,19)
+        UPDATE_C_BZ(20,21)
+        UPDATE_C_BZ(22,23)
+        UPDATE_C_BZ(24,25)
+        UPDATE_C_BZ(26,27)
+        UPDATE_C_BZ(28,29)
+        UPDATE_C_BZ(30,31)
 
     LABEL(END)
 
@@ -449,8 +377,7 @@ void bli_dgemm_skx_asm_16x14(
           [beta]      "m" (beta),
           [c]         "m" (c),
           [rs_c]      "m" (rs_c),
-          [cs_c]      "m" (cs_c),
-          [offsetPtr] "m" (offsetPtr)
+          [cs_c]      "m" (cs_c)
         : // register clobber list
           "rax", "rbx", "rcx", "rdx", "rdi", "rsi", "r8", "r9", "r10", "r11", "r12",
           "r13", "r14", "r15", "zmm0", "zmm1", "zmm2", "zmm3", "zmm4", "zmm5",
@@ -459,4 +386,6 @@ void bli_dgemm_skx_asm_16x14(
           "zmm22", "zmm23", "zmm24", "zmm25", "zmm26", "zmm27", "zmm28", "zmm29",
           "zmm30", "zmm31", "memory"
     )
+
+    GEMM_UKR_FLUSH_CT( d );
 }
