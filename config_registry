@@ -14,7 +14,7 @@ amd64_legacy:   excavator steamroller piledriver bulldozer generic
 amd64:          zen3 zen2 zen generic
 arm64:          armsve firestorm thunderx2 cortexa57 cortexa53 generic
 arm32:          cortexa15 cortexa9 generic
-power:		power10 power9 generic
+power:          power10 power9 generic
 
 # Intel architectures.
 skx:         skx/skx/haswell/zen
@@ -46,6 +46,12 @@ cortexa9:    cortexa9/armv7a
 power10:     power10
 power9:      power9
 bgq:         bgq
+
+# RISC-V architectures.
+rv32i:       rv32i/rvi
+rv64i:       rv64i/rvi
+rv32iv:      rv32iv/rviv
+rv64iv:      rv64iv/rviv
 
 # Generic architectures.
 generic:     generic

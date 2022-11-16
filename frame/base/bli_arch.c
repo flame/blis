@@ -263,6 +263,20 @@ arch_t bli_arch_query_id_impl( void )
 		id = BLIS_ARCH_BGQ;
 		#endif
 
+		// RISC-V microarchitectures
+		#ifdef BLIS_FAMILY_RV32I
+		id = BLIS_ARCH_RV32I;
+		#endif
+		#ifdef BLIS_FAMILY_RV64I
+		id = BLIS_ARCH_RV64I;
+		#endif
+		#ifdef BLIS_FAMILY_RV32IV
+		id = BLIS_ARCH_RV32IV;
+		#endif
+		#ifdef BLIS_FAMILY_RV64IV
+		id = BLIS_ARCH_RV64IV;
+		#endif
+
 		// Generic microarchitecture.
 		#ifdef BLIS_FAMILY_GENERIC
 		id = BLIS_ARCH_GENERIC;
@@ -317,6 +331,11 @@ static const char* config_name[ BLIS_NUM_ARCHS ] =
     "power9",
     "power7",
     "bgq",
+
+    "rv32i",
+    "rv64i",
+    "rv32iv",
+    "rv64iv",
 
     "generic"
 };
