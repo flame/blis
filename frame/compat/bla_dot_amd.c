@@ -300,6 +300,7 @@ double ddot_blis_impl
             rntm_t rntm;
             double* rho_temp = NULL;
             dim_t nt, n0_per_thread, n0_rem, nt_pred;
+            dim_t i;
             rho = 0;
             // Initialize a local runtime with global settings.
             bli_rntm_init_from_global(&rntm);
@@ -324,6 +325,13 @@ double ddot_blis_impl
                 return BLIS_NULL_POINTER;
             rho_temp = bli_mem_buffer(&local_mem_buf);
             if ( NULL == rho_temp ) return BLIS_NULL_POINTER;
+
+            // Initializing rho_temp array to 0
+            for ( i = 0; i < nt; i++ )
+            {
+                rho_temp[i] = 0;
+            }
+
 #ifdef AOCL_DYNAMIC
             // Calculate the optimal number of threads required
             // based on input dimension. These conditions are taken
@@ -340,43 +348,72 @@ double ddot_blis_impl
             n0_per_thread = n0 / nt;
             n0_rem = n0 % nt;
 
-            // Multithreading Implementation
             #pragma omp parallel num_threads(nt)
             {
+                // Getting the actual number of threads that are spawned.
+                dim_t nt_real = omp_get_num_threads();
                 dim_t t_id = omp_get_thread_num();
-                // The following conditions handle the optimal distribution of
-                // load among the threads.
-                // Say we have n0 = 50 & nt = 4.
-                // So we get 12 ( n0 / nt ) elements per thread along with 2
-                // remaining elements. Each of these remaining elements is given
-                // to the last threads, respectively.
-                // So, t0, t1, t2 and t3 gets 12, 12, 13 and 13 elements,
-                // respectively.
-                dim_t npt, offset;
-                if ( t_id < ( nt - n0_rem ) )
+
+                // The actual number of threads spawned might be different
+                // from the predicted number of threads for which this parallel
+                // region is being generated. Thus, in such a case we are
+                // falling back to the Single-Threaded call.
+                if ( nt_real != nt )
                 {
-                    npt = n0_per_thread;
-                    offset = t_id * npt;
+                    // More than one thread can still be spawned but since we
+                    // are falling back to the ST call, we are
+                    // calling the kernel from thread 0 only.
+                    if ( t_id == 0 )
+                    {
+                        bli_ddotv_zen_int10
+                        (
+                          BLIS_NO_CONJUGATE,
+                          BLIS_NO_CONJUGATE,
+                          n0,
+                          x0, incx0,
+                          y0, incy0,
+                          rho_temp,
+                          NULL
+                        );
+                    }
                 }
                 else
                 {
-                    npt = n0_per_thread + 1;
-                    offset = ( ( t_id * n0_per_thread ) +
-                               ( t_id - ( nt - n0_rem ) ) );
+                    // The following conditions handle the optimal distribution
+                    // of load among the threads.
+                    // Say we have n0 = 50 & nt = 4.
+                    // So we get 12 ( n0 / nt ) elements per thread along with 2
+                    // remaining elements. Each of these remaining elements is
+                    // given to the last threads, respectively.
+                    // So, t0, t1, t2 and t3 gets 12, 12, 13 and 13 elements,
+                    // respectively.
+                    dim_t npt, offset;
+                    if ( t_id < ( nt - n0_rem ) )
+                    {
+                        npt = n0_per_thread;
+                        offset = t_id * npt;
+                    }
+                    else
+                    {
+                        npt = n0_per_thread + 1;
+                        offset = ( ( t_id * n0_per_thread ) +
+                                ( t_id - ( nt - n0_rem ) ) );
+                    }
+                    bli_ddotv_zen_int10
+                    (
+                      BLIS_NO_CONJUGATE,
+                      BLIS_NO_CONJUGATE,
+                      npt,
+                      x0 + ( offset * incx0 ), incx0,
+                      y0 + ( offset * incy0 ), incy0,
+                      rho_temp + t_id,
+                      NULL
+                    );
                 }
-                bli_ddotv_zen_int10
-                (
-                    BLIS_NO_CONJUGATE,
-                    BLIS_NO_CONJUGATE,
-                    npt,
-                    x0 + ( offset * incx0 ), incx0,
-                    y0 + ( offset * incy0 ), incy0,
-                    rho_temp + t_id,
-                    NULL
-                );
             }
-            // Accumulating the nt threads output
-            for ( int i = 0; i < nt; i++ )
+
+            // Accumulating the nt thread outputs to rho
+            for ( i = 0; i < nt; i++ )
                 rho += rho_temp[i];
 
             // Releasing the allocated memory
