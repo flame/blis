@@ -89,28 +89,30 @@
  * +---+ +---+ +---+
  *
  */
-#define DGEMM_8X6_MKER_LOOP_PLAIN(C00,C01,C02,C10,C11,C12,C20,C21,C22,C30,C31,C32,C40,C41,C42,C50,C51,C52,C60,C61,C62,C70,C71,C72,A0,A1,A2,A3,B0,B1,B2,AADDR,ASHIFT,BADDR,BSHIFT,LOADNEXT,CADDR,RSC,LASTB,PRFC) \
+#define DGEMM_8X6_MKER_LOOP(SUFFIX,C00,C01,C02,C10,C11,C12,C20,C21,C22,C30,C31,C32,C40,C41,C42,C50,C51,C52,C60,C61,C62,C70,C71,C72,A0,A1,A2,A3,B0,B1,B2,AADDR,ASHIFT,BADDR,BSHIFT,LOADNEXT,CADDR,RSC,LASTB,PRFC) \
   GEMM_PRFC_FH_ ##PRFC (CADDR) \
-  DGEMM_2X2_NANOKERNEL(C00,C10,B0,A0) \
+  DGEMM_2X2_NANOKERNEL_ ##SUFFIX (C00,C10,B0,A0) \
   GEMM_PRFC_LH_FWD_ ##PRFC (CADDR,RSC,LASTB) \
-  DGEMM_2X2_NANOKERNEL(C20,C30,B0,A1) \
+  DGEMM_2X2_NANOKERNEL_ ##SUFFIX (C20,C30,B0,A1) \
   GEMM_PRFC_FH_ ##PRFC (CADDR) \
-  DGEMM_2X2_NANOKERNEL(C01,C11,B1,A0) \
+  DGEMM_2X2_NANOKERNEL_ ##SUFFIX (C01,C11,B1,A0) \
   GEMM_PRFC_LH_FWD_ ##PRFC (CADDR,RSC,LASTB) \
-  DGEMM_2X2_NANOKERNEL(C21,C31,B1,A1) \
+  DGEMM_2X2_NANOKERNEL_ ##SUFFIX (C21,C31,B1,A1) \
   GEMM_PRFC_FH_ ##PRFC (CADDR) \
-  DGEMM_2X2_NANOKERNEL(C02,C12,B2,A0) \
+  DGEMM_2X2_NANOKERNEL_ ##SUFFIX (C02,C12,B2,A0) \
   GEMM_PRFC_LH_FWD_ ##PRFC (CADDR,RSC,LASTB) \
-  DGEMM_2X2_NANOKERNEL(C22,C32,B2,A1) \
+  DGEMM_2X2_NANOKERNEL_ ##SUFFIX (C22,C32,B2,A1) \
   DGEMM_LOAD2V_ ##LOADNEXT (A0,A1,AADDR,ASHIFT) \
-  DGEMM_2X2_NANOKERNEL(C40,C50,B0,A2) \
-  DGEMM_2X2_NANOKERNEL(C60,C70,B0,A3) \
+  DGEMM_2X2_NANOKERNEL_ ##SUFFIX (C40,C50,B0,A2) \
+  GEMM_PRFC_FH_ ##PRFC (CADDR) \
+  DGEMM_2X2_NANOKERNEL_ ##SUFFIX (C60,C70,B0,A3) \
   DGEMM_LOAD1V_ ##LOADNEXT (B0,BADDR,BSHIFT) \
-  DGEMM_2X2_NANOKERNEL(C41,C51,B1,A2) \
-  DGEMM_2X2_NANOKERNEL(C61,C71,B1,A3) \
+  DGEMM_2X2_NANOKERNEL_ ##SUFFIX (C41,C51,B1,A2) \
+  GEMM_PRFC_LH_FWD_ ##PRFC (CADDR,RSC,LASTB) \
+  DGEMM_2X2_NANOKERNEL_ ##SUFFIX (C61,C71,B1,A3) \
   DGEMM_LOAD1V_ ##LOADNEXT (B1,BADDR,BSHIFT+16) \
-  DGEMM_2X2_NANOKERNEL(C42,C52,B2,A2) \
-  DGEMM_2X2_NANOKERNEL(C62,C72,B2,A3)
+  DGEMM_2X2_NANOKERNEL_ ##SUFFIX (C42,C52,B2,A2) \
+  DGEMM_2X2_NANOKERNEL_ ##SUFFIX (C62,C72,B2,A3)
 
 // Interleaving load or not.
 #define DGEMM_LOAD1V_noload(V1,ADDR,IMM)
@@ -295,6 +297,7 @@ LABEL(SPREFETCH_ABNEXT)
 " prfm            PLDL1STRM, [x0, 64*2]           \n\t" //  to try to activate hardware prefetcher.
 " prfm            PLDL1STRM, [x1, 64*0]           \n\t"
 " prfm            PLDL1STRM, [x1, 64*1]           \n\t"
+" prfm            PLDL1STRM, [x1, 64*2]           \n\t"
 " prfm            PLDL1STRM, [x1, 64*3]           \n\t"
 "                                                 \n\t"
 " fmov            d26, #1.0                       \n\t"
@@ -436,13 +439,13 @@ void bli_dgemm_armv8a_asm_8x6r
 //  V[24:27] <- A
 //  V[28:31] <- B
 // Under this scheme, the following is defined:
-#define DGEMM_8X6_MKER_LOOP_PLAIN_LOC(A0,A1,A2,A3,B0,B1,B2,AADDR,ASHIFT,BADDR,BSHIFT,LOADNEXT,PRFC) \
-  DGEMM_8X6_MKER_LOOP_PLAIN(0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,A0,A1,A2,A3,B0,B1,B2,AADDR,ASHIFT,BADDR,BSHIFT,LOADNEXT,x9,x6,40,PRFC)
+#define DGEMM_8X6_MKER_LOOP_LOC(SUFFIX,A0,A1,A2,A3,B0,B1,B2,AADDR,ASHIFT,BADDR,BSHIFT,LOADNEXT,PRFC) \
+  DGEMM_8X6_MKER_LOOP(SUFFIX,0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,A0,A1,A2,A3,B0,B1,B2,AADDR,ASHIFT,BADDR,BSHIFT,LOADNEXT,x9,x6,40,PRFC)
 // Load from memory.
 LABEL(DLOAD_ABC)
 "                                                 \n\t" // No-microkernel early return is a must
 " cmp             x4, #0                          \n\t" //  to avoid out-of-boundary read.
-BEQ(DCLEAR_CCOLS)
+BEQ(DK_LEFT_LOOP_INIT)
 "                                                 \n\t"
 " ldr             q24, [x0, #16*0]                \n\t" // Load A.
 " ldr             q25, [x0, #16*1]                \n\t"
@@ -455,52 +458,40 @@ BEQ(DCLEAR_CCOLS)
 " ldr             q30, [x1, #16*2]                \n\t"
 " add             x1, x1, x3                      \n\t"
 " ldr             q31, [x1, #16*0]                \n\t"
-LABEL(DCLEAR_CCOLS) // Clear registers & prefetch some of C microtiles.
-GEMM_PRFC_FH_load(x9)           // Prefetch C 0.5/8.
-CLEAR8V(0,1,2,3,4,5,6,7)
-GEMM_PRFC_LH_FWD_load(x9,x6,40) // Prefetch C 1/8.
-CLEAR8V(8,9,10,11,12,13,14,15)
-GEMM_PRFC_FH_load(x9)           // Prefetch C 1.5/8.
-CLEAR8V(16,17,18,19,20,21,22,23)
-GEMM_PRFC_LH_FWD_load(x9,x6,40) // Prefetch C 2/8.
-// No-microkernel early return, once again.
-BEQ(DK_LEFT_LOOP)
 //
 // Microkernel is defined here as:
-#define DGEMM_8X6_MKER_LOOP_PLAIN_LOC_FWD(A0,A1,A2,A3,B0,B1,B2,PRFC) \
-  DGEMM_8X6_MKER_LOOP_PLAIN_LOC(A0,A1,A2,A3,B0,B1,B2,x0,0,x1,16,load,PRFC) \
+#define DGEMM_8X6_MKER_LOOP_LOC_FWD(SUFFIX,A0,A1,A2,A3,B0,B1,B2,PRFC) \
+  DGEMM_8X6_MKER_LOOP_LOC(SUFFIX,A0,A1,A2,A3,B0,B1,B2,x0,0,x1,16,load,PRFC) \
  "add             x1, x1, x3                      \n\t" \
  "ldr             q"#B2", [x1, #16*0]             \n\t" \
  "ldr             q"#A2", [x0, #16*2]             \n\t" \
  "ldr             q"#A3", [x0, #16*3]             \n\t" \
  "add             x0, x0, x2                      \n\t"
 // Start microkernel loop -- Special treatment for the very first loop.
-DGEMM_8X6_MKER_LOOP_PLAIN_LOC_FWD(24,25,26,27,28,29,30,load) // Prefetch C 3-5/8.
-DGEMM_8X6_MKER_LOOP_PLAIN_LOC_FWD(24,25,26,27,31,28,29,load) // Prefetch C 6-8/8.
-"                                                 \n\t" // Decrease counter before final replica.
-" subs            x4, x4, #1                      \n\t" // Branch early to avoid reading excess mem.
-BEQ(DFIN_MKER_LOOP)
-DGEMM_8X6_MKER_LOOP_PLAIN_LOC_FWD(24,25,26,27,30,31,28,noload)
-DGEMM_8X6_MKER_LOOP_PLAIN_LOC_FWD(24,25,26,27,29,30,31,noload)
+" subs            x4, x4, #1                      \n\t" // Decrease counter in advance.
+DGEMM_8X6_MKER_LOOP_LOC_FWD(INIT,24,25,26,27,28,29,30,load) // Prefetch C 1-4/8.
+DGEMM_8X6_MKER_LOOP_LOC_FWD(PLAIN,24,25,26,27,31,28,29,load) // Prefetch C 5-8/8.
+BEQ(DFIN_MKER_LOOP) // Branch early to avoid reading excess mem.
+DGEMM_8X6_MKER_LOOP_LOC_FWD(PLAIN,24,25,26,27,30,31,28,noload)
+DGEMM_8X6_MKER_LOOP_LOC_FWD(PLAIN,24,25,26,27,29,30,31,noload)
 // Start microkernel loop.
 LABEL(DK_MKER_LOOP)
-DGEMM_8X6_MKER_LOOP_PLAIN_LOC_FWD(24,25,26,27,28,29,30,noload)
-DGEMM_8X6_MKER_LOOP_PLAIN_LOC_FWD(24,25,26,27,31,28,29,noload)
-"                                                 \n\t" // Decrease counter before final replica.
-" subs            x4, x4, #1                      \n\t" // Branch early to avoid reading excess mem.
-BEQ(DFIN_MKER_LOOP)
-DGEMM_8X6_MKER_LOOP_PLAIN_LOC_FWD(24,25,26,27,30,31,28,noload)
-DGEMM_8X6_MKER_LOOP_PLAIN_LOC_FWD(24,25,26,27,29,30,31,noload)
+" subs            x4, x4, #1                      \n\t" // Decrease counter in advance.
+DGEMM_8X6_MKER_LOOP_LOC_FWD(PLAIN,24,25,26,27,28,29,30,noload)
+DGEMM_8X6_MKER_LOOP_LOC_FWD(PLAIN,24,25,26,27,31,28,29,noload)
+BEQ(DFIN_MKER_LOOP) // Branch early to avoid reading excess mem.
+DGEMM_8X6_MKER_LOOP_LOC_FWD(PLAIN,24,25,26,27,30,31,28,noload)
+DGEMM_8X6_MKER_LOOP_LOC_FWD(PLAIN,24,25,26,27,29,30,31,noload)
 BRANCH(DK_MKER_LOOP)
 //
 // Final microkernel loop.
 LABEL(DFIN_MKER_LOOP)
-DGEMM_8X6_MKER_LOOP_PLAIN_LOC(24,25,26,27,30,31,28,x0,0,x1,16,load,noload)
+DGEMM_8X6_MKER_LOOP_LOC(PLAIN,24,25,26,27,30,31,28,x0,0,x1,16,load,noload)
 " add             x1, x1, x3                      \n\t"
 " ldr             q26, [x0, #16*2]                \n\t"
 " ldr             q27, [x0, #16*3]                \n\t"
 " add             x0, x0, x2                      \n\t"
-DGEMM_8X6_MKER_LOOP_PLAIN_LOC(24,25,26,27,29,30,31,xzr,-1,xzr,-1,noload,noload)
+DGEMM_8X6_MKER_LOOP_LOC(PLAIN,24,25,26,27,29,30,31,xzr,-1,xzr,-1,noload,noload)
 //
 // Loops left behind microkernels.
 LABEL(DK_LEFT_LOOP)
@@ -516,8 +507,29 @@ BEQ(DWRITE_MEM_PREP)
 " ldr             q30, [x1, #16*2]                \n\t"
 " add             x1, x1, x3                      \n\t"
 " sub             x8, x8, #1                      \n\t"
-DGEMM_8X6_MKER_LOOP_PLAIN_LOC(24,25,26,27,28,29,30,xzr,-1,xzr,-1,noload,noload)
+DGEMM_8X6_MKER_LOOP_LOC(PLAIN,24,25,26,27,28,29,30,xzr,-1,xzr,-1,noload,noload)
 BRANCH(DK_LEFT_LOOP)
+LABEL(DK_LEFT_LOOP_INIT)
+" cmp             x8, #0                          \n\t" // End of exec.
+BEQ(DCLEAR_CCOLS)
+" ldr             q24, [x0, #16*0]                \n\t" // Load A col.
+" ldr             q25, [x0, #16*1]                \n\t"
+" ldr             q26, [x0, #16*2]                \n\t"
+" ldr             q27, [x0, #16*3]                \n\t"
+" add             x0, x0, x2                      \n\t"
+" ldr             q28, [x1, #16*0]                \n\t" // Load B row.
+" ldr             q29, [x1, #16*1]                \n\t"
+" ldr             q30, [x1, #16*2]                \n\t"
+" add             x1, x1, x3                      \n\t"
+" sub             x8, x8, #1                      \n\t"
+DGEMM_8X6_MKER_LOOP_LOC(INIT,24,25,26,27,28,29,30,xzr,-1,xzr,-1,noload,noload)
+BRANCH(DK_LEFT_LOOP)
+//
+// No FMUL at all to clear C up. Have to zeroize.
+LABEL(DCLEAR_CCOLS)
+CLEAR8V(0,1,2,3,4,5,6,7)
+CLEAR8V(8,9,10,11,12,13,14,15)
+CLEAR8V(16,17,18,19,20,21,22,23)
 //
 // Scale and write to memory.
 LABEL(DWRITE_MEM_PREP)
@@ -534,6 +546,7 @@ LABEL(DPREFETCH_ABNEXT)
 " prfm            PLDL1STRM, [x0, 64*2]           \n\t" //  to try to activate hardware prefetcher.
 " prfm            PLDL1STRM, [x1, 64*0]           \n\t"
 " prfm            PLDL1STRM, [x1, 64*1]           \n\t"
+" prfm            PLDL1STRM, [x1, 64*2]           \n\t"
 " prfm            PLDL1STRM, [x1, 64*3]           \n\t"
 "                                                 \n\t"
 " fmov            d26, #1.0                       \n\t"
