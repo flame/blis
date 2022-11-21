@@ -372,7 +372,7 @@ LABEL(SEND_WRITE_MEM)
   [beta]   "m" (beta),
   [a_next] "m" (a_next),
   [b_next] "m" (b_next)
-: "x0","x1","x2","x3","x4","x5","x6","x7","x8","x9",
+: "x0","x1","x2","x3","x4","x5","x6","x8","x9",
   "v0","v1","v2","v3","v4","v5","v6","v7",
   "v8","v9","v10","v11","v12","v13","v14","v15",
   "v16","v17","v18","v19",
@@ -411,28 +411,14 @@ void bli_dgemm_armv8a_asm_8x6r
   uint64_t k_left = k % 4;
   uint64_t rs_c   = rs_c0;
   uint64_t cs_c   = cs_c0;
+  // TODO: Aggregated str instructions.
 
   GEMM_UKR_SETUP_CT( d, 8, 6, true );
 
   __asm__ volatile
   (
-" ldr             x0, %[a]                        \n\t"
-" ldr             x1, %[b]                        \n\t"
-" mov             x2, #8                          \n\t" // Column-skip of A.
-" mov             x3, #6                          \n\t" // Row-skip of B.
-"                                                 \n\t"
-" ldr             x5, %[c]                        \n\t"
-" ldr             x6, %[rs_c]                     \n\t" // Row-skip of C. (column-skip == 1)
-"                                                 \n\t"
-"                                                 \n\t" // Multiply some address skips by sizeof(double).
-" lsl             x2, x2, #3                      \n\t" // cs_a
-" lsl             x3, x3, #3                      \n\t" // rs_b
-" lsl             x6, x6, #3                      \n\t" // rs_c
-"                                                 \n\t"
-" mov             x9, x5                          \n\t"
-"                                                 \n\t"
-" ldr             x4, %[k_mker]                   \n\t" // Number of loops.
-" ldr             x8, %[k_left]                   \n\t"
+" lsl             %3, %3, #3                      \n\t" // rs_c *= sizeof(double).
+" mov             x9, %2                          \n\t" // Address of C for prefetching.
 "                                                 \n\t"
 // Storage scheme:
 //  V[ 0:23] <- C
@@ -440,35 +426,35 @@ void bli_dgemm_armv8a_asm_8x6r
 //  V[28:31] <- B
 // Under this scheme, the following is defined:
 #define DGEMM_8X6_MKER_LOOP_LOC(SUFFIX,A0,A1,A2,A3,B0,B1,B2,AADDR,ASHIFT,BADDR,BSHIFT,LOADNEXT,PRFC) \
-  DGEMM_8X6_MKER_LOOP(SUFFIX,0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,A0,A1,A2,A3,B0,B1,B2,AADDR,ASHIFT,BADDR,BSHIFT,LOADNEXT,x9,x6,40,PRFC)
+  DGEMM_8X6_MKER_LOOP(SUFFIX,0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,A0,A1,A2,A3,B0,B1,B2,AADDR,ASHIFT,BADDR,BSHIFT,LOADNEXT,x9,%3,40,PRFC)
 // Load from memory.
 LABEL(DLOAD_ABC)
 "                                                 \n\t" // No-microkernel early return is a must
-" cmp             x4, #0                          \n\t" //  to avoid out-of-boundary read.
+" cmp             %4, #0                          \n\t" //  to avoid out-of-boundary read.
 BEQ(DK_LEFT_LOOP_INIT)
 "                                                 \n\t"
-" ldr             q24, [x0, #16*0]                \n\t" // Load A.
-" ldr             q25, [x0, #16*1]                \n\t"
-" ldr             q26, [x0, #16*2]                \n\t"
-" ldr             q27, [x0, #16*3]                \n\t"
-" add             x0, x0, x2                      \n\t"
+" ldr             q24, [%0, #16*0]                \n\t" // Load A.
+" ldr             q25, [%0, #16*1]                \n\t"
+" ldr             q26, [%0, #16*2]                \n\t"
+" ldr             q27, [%0, #16*3]                \n\t"
+" add             %0, %0, #64                     \n\t"
 "                                                 \n\t"
-" ldr             q28, [x1, #16*0]                \n\t" // Load B.
-" ldr             q29, [x1, #16*1]                \n\t"
-" ldr             q30, [x1, #16*2]                \n\t"
-" add             x1, x1, x3                      \n\t"
-" ldr             q31, [x1, #16*0]                \n\t"
+" ldr             q28, [%1, #16*0]                \n\t" // Load B.
+" ldr             q29, [%1, #16*1]                \n\t"
+" ldr             q30, [%1, #16*2]                \n\t"
+" add             %1, %1, #48                     \n\t"
+" ldr             q31, [%1, #16*0]                \n\t"
 //
 // Microkernel is defined here as:
 #define DGEMM_8X6_MKER_LOOP_LOC_FWD(SUFFIX,A0,A1,A2,A3,B0,B1,B2,PRFC) \
-  DGEMM_8X6_MKER_LOOP_LOC(SUFFIX,A0,A1,A2,A3,B0,B1,B2,x0,0,x1,16,load,PRFC) \
- "add             x1, x1, x3                      \n\t" \
- "ldr             q"#B2", [x1, #16*0]             \n\t" \
- "ldr             q"#A2", [x0, #16*2]             \n\t" \
- "ldr             q"#A3", [x0, #16*3]             \n\t" \
- "add             x0, x0, x2                      \n\t"
+  DGEMM_8X6_MKER_LOOP_LOC(SUFFIX,A0,A1,A2,A3,B0,B1,B2,%0,0,%1,16,load,PRFC) \
+ "add             %1, %1, #48                     \n\t" \
+ "ldr             q"#B2", [%1, #16*0]             \n\t" \
+ "ldr             q"#A2", [%0, #16*2]             \n\t" \
+ "ldr             q"#A3", [%0, #16*3]             \n\t" \
+ "add             %0, %0, #64                     \n\t"
 // Start microkernel loop -- Special treatment for the very first loop.
-" subs            x4, x4, #1                      \n\t" // Decrease counter in advance.
+" subs            %4, %4, #1                      \n\t" // Decrease counter in advance.
 DGEMM_8X6_MKER_LOOP_LOC_FWD(INIT,24,25,26,27,28,29,30,load) // Prefetch C 1-4/8.
 DGEMM_8X6_MKER_LOOP_LOC_FWD(PLAIN,24,25,26,27,31,28,29,load) // Prefetch C 5-8/8.
 BEQ(DFIN_MKER_LOOP) // Branch early to avoid reading excess mem.
@@ -476,7 +462,7 @@ DGEMM_8X6_MKER_LOOP_LOC_FWD(PLAIN,24,25,26,27,30,31,28,noload)
 DGEMM_8X6_MKER_LOOP_LOC_FWD(PLAIN,24,25,26,27,29,30,31,noload)
 // Start microkernel loop.
 LABEL(DK_MKER_LOOP)
-" subs            x4, x4, #1                      \n\t" // Decrease counter in advance.
+" subs            %4, %4, #1                      \n\t" // Decrease counter in advance.
 DGEMM_8X6_MKER_LOOP_LOC_FWD(PLAIN,24,25,26,27,28,29,30,noload)
 DGEMM_8X6_MKER_LOOP_LOC_FWD(PLAIN,24,25,26,27,31,28,29,noload)
 BEQ(DFIN_MKER_LOOP) // Branch early to avoid reading excess mem.
@@ -486,42 +472,42 @@ BRANCH(DK_MKER_LOOP)
 //
 // Final microkernel loop.
 LABEL(DFIN_MKER_LOOP)
-DGEMM_8X6_MKER_LOOP_LOC(PLAIN,24,25,26,27,30,31,28,x0,0,x1,16,load,noload)
-" add             x1, x1, x3                      \n\t"
-" ldr             q26, [x0, #16*2]                \n\t"
-" ldr             q27, [x0, #16*3]                \n\t"
-" add             x0, x0, x2                      \n\t"
+DGEMM_8X6_MKER_LOOP_LOC(PLAIN,24,25,26,27,30,31,28,%0,0,%1,16,load,noload)
+" add             %1, %1, #48                     \n\t"
+" ldr             q26, [%0, #16*2]                \n\t"
+" ldr             q27, [%0, #16*3]                \n\t"
+" add             %0, %0, #64                     \n\t"
 DGEMM_8X6_MKER_LOOP_LOC(PLAIN,24,25,26,27,29,30,31,xzr,-1,xzr,-1,noload,noload)
 //
 // Loops left behind microkernels.
 LABEL(DK_LEFT_LOOP)
-" cmp             x8, #0                          \n\t" // End of exec.
+" cmp             %5, #0                          \n\t" // End of exec.
 BEQ(DWRITE_MEM_PREP)
-" ldr             q24, [x0, #16*0]                \n\t" // Load A col.
-" ldr             q25, [x0, #16*1]                \n\t"
-" ldr             q26, [x0, #16*2]                \n\t"
-" ldr             q27, [x0, #16*3]                \n\t"
-" add             x0, x0, x2                      \n\t"
-" ldr             q28, [x1, #16*0]                \n\t" // Load B row.
-" ldr             q29, [x1, #16*1]                \n\t"
-" ldr             q30, [x1, #16*2]                \n\t"
-" add             x1, x1, x3                      \n\t"
-" sub             x8, x8, #1                      \n\t"
+" ldr             q24, [%0, #16*0]                \n\t" // Load A col.
+" ldr             q25, [%0, #16*1]                \n\t"
+" ldr             q26, [%0, #16*2]                \n\t"
+" ldr             q27, [%0, #16*3]                \n\t"
+" add             %0, %0, #64                     \n\t"
+" ldr             q28, [%1, #16*0]                \n\t" // Load B row.
+" ldr             q29, [%1, #16*1]                \n\t"
+" ldr             q30, [%1, #16*2]                \n\t"
+" add             %1, %1, #48                     \n\t"
+" sub             %5, %5, #1                      \n\t"
 DGEMM_8X6_MKER_LOOP_LOC(PLAIN,24,25,26,27,28,29,30,xzr,-1,xzr,-1,noload,noload)
 BRANCH(DK_LEFT_LOOP)
 LABEL(DK_LEFT_LOOP_INIT)
-" cmp             x8, #0                          \n\t" // End of exec.
+" cmp             %5, #0                          \n\t" // End of exec.
 BEQ(DCLEAR_CCOLS)
-" ldr             q24, [x0, #16*0]                \n\t" // Load A col.
-" ldr             q25, [x0, #16*1]                \n\t"
-" ldr             q26, [x0, #16*2]                \n\t"
-" ldr             q27, [x0, #16*3]                \n\t"
-" add             x0, x0, x2                      \n\t"
-" ldr             q28, [x1, #16*0]                \n\t" // Load B row.
-" ldr             q29, [x1, #16*1]                \n\t"
-" ldr             q30, [x1, #16*2]                \n\t"
-" add             x1, x1, x3                      \n\t"
-" sub             x8, x8, #1                      \n\t"
+" ldr             q24, [%0, #16*0]                \n\t" // Load A col.
+" ldr             q25, [%0, #16*1]                \n\t"
+" ldr             q26, [%0, #16*2]                \n\t"
+" ldr             q27, [%0, #16*3]                \n\t"
+" add             %0, %0, #64                     \n\t"
+" ldr             q28, [%1, #16*0]                \n\t" // Load B row.
+" ldr             q29, [%1, #16*1]                \n\t"
+" ldr             q30, [%1, #16*2]                \n\t"
+" add             %1, %1, #48                     \n\t"
+" sub             %5, %5, #1                      \n\t"
 DGEMM_8X6_MKER_LOOP_LOC(INIT,24,25,26,27,28,29,30,xzr,-1,xzr,-1,noload,noload)
 BRANCH(DK_LEFT_LOOP)
 //
@@ -533,21 +519,17 @@ CLEAR8V(16,17,18,19,20,21,22,23)
 //
 // Scale and write to memory.
 LABEL(DWRITE_MEM_PREP)
-" ldr             x4, %[alpha]                    \n\t" // Load alpha & beta (address).
-" ldr             x8, %[beta]                     \n\t"
-" ld1r            {v24.2d}, [x4]                  \n\t" // Load alpha & beta.
-" ld1r            {v25.2d}, [x8]                  \n\t"
+" ld1r            {v24.2d}, [%[alpha]]            \n\t" // Load alpha & beta.
+" ld1r            {v25.2d}, [%[beta]]             \n\t"
 "                                                 \n\t"
 LABEL(DPREFETCH_ABNEXT)
-" ldr             x0, %[a_next]                   \n\t"
-" ldr             x1, %[b_next]                   \n\t"
-" prfm            PLDL1STRM, [x0, 64*0]           \n\t" // Do not know cache line size,
-" prfm            PLDL1STRM, [x0, 64*1]           \n\t" //  issue some number of prfm instructions
-" prfm            PLDL1STRM, [x0, 64*2]           \n\t" //  to try to activate hardware prefetcher.
-" prfm            PLDL1STRM, [x1, 64*0]           \n\t"
-" prfm            PLDL1STRM, [x1, 64*1]           \n\t"
-" prfm            PLDL1STRM, [x1, 64*2]           \n\t"
-" prfm            PLDL1STRM, [x1, 64*3]           \n\t"
+" prfm            PLDL1STRM, [%[a_next], 64*0]    \n\t" // Do not know cache line size,
+" prfm            PLDL1STRM, [%[a_next], 64*1]    \n\t" //  issue some number of prfm instructions
+" prfm            PLDL1STRM, [%[a_next], 64*2]    \n\t" //  to try to activate hardware prefetcher.
+" prfm            PLDL1STRM, [%[b_next], 64*0]    \n\t"
+" prfm            PLDL1STRM, [%[b_next], 64*1]    \n\t"
+" prfm            PLDL1STRM, [%[b_next], 64*2]    \n\t"
+" prfm            PLDL1STRM, [%[b_next], 64*3]    \n\t"
 "                                                 \n\t"
 " fmov            d26, #1.0                       \n\t"
 " fcmp            d24, d26                        \n\t"
@@ -557,8 +539,8 @@ DSCALE8V(8,9,10,11,12,13,14,15,24,0)
 DSCALE8V(16,17,18,19,20,21,22,23,24,0)
 LABEL(DUNIT_ALPHA)
 "                                                 \n\t"
-" mov             x9, x5                          \n\t" // C address for loading.
-"                                                 \n\t" // C address for storing is x5 itself.
+" mov             x9, %2                          \n\t" // C address for loading.
+"                                                 \n\t" // C address for storing is %2 itself.
 //
 // Contiguous C-storage.
 LABEL(DWRITE_MEM_R)
@@ -567,52 +549,52 @@ LABEL(DWRITE_MEM_R)
 "                                                 \n\t" //  multiple times for skipping load.
 // Row 0 & 1:
 BEQ(DZERO_BETA_R_0_1)
-DLOADC_3V_R_FWD(26,27,28,x9,0,x6)
-DLOADC_3V_R_FWD(29,30,31,x9,0,x6)
+DLOADC_3V_R_FWD(26,27,28,x9,0,%3)
+DLOADC_3V_R_FWD(29,30,31,x9,0,%3)
 DSCALEA2V(0,1,26,27,25,0)
 DSCALEA2V(2,3,28,29,25,0)
 DSCALEA2V(4,5,30,31,25,0)
 LABEL(DZERO_BETA_R_0_1)
-DSTOREC_3V_R_FWD(0,1,2,x5,0,x6)
-DSTOREC_3V_R_FWD(3,4,5,x5,0,x6)
+DSTOREC_3V_R_FWD(0,1,2,%2,0,%3)
+DSTOREC_3V_R_FWD(3,4,5,%2,0,%3)
 // Row 2 & 3 & 4 & 5:
 BEQ(DZERO_BETA_R_2_3_4_5)
-DLOADC_3V_R_FWD(26,27,28,x9,0,x6)
-DLOADC_3V_R_FWD(29,30,31,x9,0,x6)
-DLOADC_3V_R_FWD(0,1,2,x9,0,x6)
-DLOADC_3V_R_FWD(3,4,5,x9,0,x6)
+DLOADC_3V_R_FWD(26,27,28,x9,0,%3)
+DLOADC_3V_R_FWD(29,30,31,x9,0,%3)
+DLOADC_3V_R_FWD(0,1,2,x9,0,%3)
+DLOADC_3V_R_FWD(3,4,5,x9,0,%3)
 DSCALEA4V(6,7,8,9,26,27,28,29,25,0)
 DSCALEA4V(10,11,12,13,30,31,0,1,25,0)
 DSCALEA4V(14,15,16,17,2,3,4,5,25,0)
 LABEL(DZERO_BETA_R_2_3_4_5)
-DSTOREC_3V_R_FWD(6,7,8,x5,0,x6)
-DSTOREC_3V_R_FWD(9,10,11,x5,0,x6)
-DSTOREC_3V_R_FWD(12,13,14,x5,0,x6)
-DSTOREC_3V_R_FWD(15,16,17,x5,0,x6)
+DSTOREC_3V_R_FWD(6,7,8,%2,0,%3)
+DSTOREC_3V_R_FWD(9,10,11,%2,0,%3)
+DSTOREC_3V_R_FWD(12,13,14,%2,0,%3)
+DSTOREC_3V_R_FWD(15,16,17,%2,0,%3)
 // Row 6 & 7
 BEQ(DZERO_BETA_R_6_7)
-DLOADC_3V_R_FWD(26,27,28,x9,0,x6)
-DLOADC_3V_R_FWD(29,30,31,x9,0,x6)
+DLOADC_3V_R_FWD(26,27,28,x9,0,%3)
+DLOADC_3V_R_FWD(29,30,31,x9,0,%3)
 DSCALEA2V(18,19,26,27,25,0)
 DSCALEA2V(20,21,28,29,25,0)
 DSCALEA2V(22,23,30,31,25,0)
 LABEL(DZERO_BETA_R_6_7)
-DSTOREC_3V_R_FWD(18,19,20,x5,0,x6)
-DSTOREC_3V_R_FWD(21,22,23,x5,0,x6)
+DSTOREC_3V_R_FWD(18,19,20,%2,0,%3)
+DSTOREC_3V_R_FWD(21,22,23,%2,0,%3)
 // Done.
 LABEL(DEND_WRITE_MEM)
+: "+r" (a),      // %0
+  "+r" (b),      // %1
+  "+r" (c),      // %2
+  "+r" (rs_c),   // %3
+  "+r" (k_mker), // %4
+  "+r" (k_left), // %5
+  [alpha]  "+r" (alpha),
+  [beta]   "+r" (beta),
+  [a_next] "+r" (a_next),
+  [b_next] "+r" (b_next)
 :
-: [a]      "m" (a),
-  [b]      "m" (b),
-  [c]      "m" (c),
-  [rs_c]   "m" (rs_c),
-  [k_mker] "m" (k_mker),
-  [k_left] "m" (k_left),
-  [alpha]  "m" (alpha),
-  [beta]   "m" (beta),
-  [a_next] "m" (a_next),
-  [b_next] "m" (b_next)
-: "x0","x1","x2","x3","x4","x5","x6","x7","x8","x9",
+: "x9",
   "v0","v1","v2","v3","v4","v5","v6","v7",
   "v8","v9","v10","v11","v12","v13","v14","v15",
   "v16","v17","v18","v19",
