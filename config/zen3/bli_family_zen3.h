@@ -52,8 +52,8 @@
 // All zen3 specific code should be included in this macro
 #define BLIS_CONFIG_ZEN3
 
-#define BLIS_ENABLE_SMALL_MATRIX
-#define BLIS_ENABLE_SMALL_MATRIX_TRSM
+//#define BLIS_ENABLE_SMALL_MATRIX
+//#define BLIS_ENABLE_SMALL_MATRIX_TRSM
 
 
 // This will select the threshold below which small matrix code will be called.

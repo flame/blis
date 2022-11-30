@@ -52,7 +52,7 @@ err_t bli_gemm_small
        const obj_t*  beta,
        const obj_t*  c,
        const cntx_t* cntx,
-       const cntl_t* cntl
+             cntl_t* cntl
      );
 #endif
 
