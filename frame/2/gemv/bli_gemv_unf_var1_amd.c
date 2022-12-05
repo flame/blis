@@ -501,13 +501,6 @@ void bli_sgemv_unf_var1
       return;
     }
 
-// If both multithreading and OpenMP are enabled, GEMV will multithread
-#if defined(BLIS_ENABLE_MULTITHREADING) && defined(BLIS_ENABLE_OPENMP)
-    bool is_omp_mt_enabled = TRUE;
-#else
-    bool is_omp_mt_enabled = FALSE;
-#endif
-
     dim_t nt_max;
 
     rntm_t rnmt_obj;
@@ -517,9 +510,23 @@ void bli_sgemv_unf_var1
     // Query the total number of threads from the rntm_t object.
     nt_max = bli_rntm_num_threads( &rnmt_obj );
 
-    if ( ( nt_max > 1 ) & ( is_omp_mt_enabled == TRUE ) )
+    if (nt_max<=0)
     {
+        // nt is less than one if BLIS manual setting of parallelism
+        // has been used. Parallelism here will be product of values.
+        dim_t jc, pc, ic, jr, ir;
+        jc = bli_rntm_jc_ways( &rnmt_obj );
+        pc = bli_rntm_pc_ways( &rnmt_obj );
+        ic = bli_rntm_ic_ways( &rnmt_obj );
+        jr = bli_rntm_jr_ways( &rnmt_obj );
+        ir = bli_rntm_ir_ways( &rnmt_obj );
+        nt_max = jc*pc*ic*jr*ir;
+    }
+
+// If OpenMP is enabled, GEMV will multithread
 #ifdef BLIS_ENABLE_OPENMP
+    if ( nt_max > 1 )
+    {
         b_fuse = 4;
 
         //Setting the thread count to the maximum number of threads provided
@@ -545,10 +552,10 @@ void bli_sgemv_unf_var1
           cntx,
           nt
         );
-#endif// BLIS_ENABLE_OPENMP
     }
     else
     {
+#endif// BLIS_ENABLE_OPENMP
         b_fuse = 8;
 
         for ( i = 0; i < n_iter; i += f )
@@ -575,7 +582,9 @@ void bli_sgemv_unf_var1
               cntx
             );
         }
+#ifdef BLIS_ENABLE_OPENMP
     }
+#endif// BLIS_ENABLE_OPENMP
 }
 
 INSERT_GENTFUNC_BASIC0_CZ( gemv_unf_var1 )

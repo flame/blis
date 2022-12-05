@@ -307,6 +307,20 @@ double ddot_blis_impl
 
             // Query the total number of threads from the rntm_t object.
             nt = bli_rntm_num_threads(&rntm);
+
+            if (nt<=0)
+            {
+                // nt is less than one if BLIS manual setting of parallelism
+                // has been used. Parallelism here will be product of values.
+                dim_t jc, pc, ic, jr, ir;
+	        jc = bli_rntm_jc_ways( &rntm );
+	        pc = bli_rntm_pc_ways( &rntm );
+	        ic = bli_rntm_ic_ways( &rntm );
+	        jr = bli_rntm_jr_ways( &rntm );
+	        ir = bli_rntm_ir_ways( &rntm );
+                nt = jc*pc*ic*jr*ir;
+            }
+
             mem_t local_mem_buf = { 0 };
 
             bli_membrk_rntm_set_membrk(&rntm);
@@ -348,7 +362,7 @@ double ddot_blis_impl
             n0_per_thread = n0 / nt;
             n0_rem = n0 % nt;
 
-            #pragma omp parallel num_threads(nt)
+            _Pragma( "omp parallel num_threads(nt)" )
             {
                 // Getting the actual number of threads that are spawned.
                 dim_t nt_real = omp_get_num_threads();

@@ -565,7 +565,7 @@ void bli_multi_sgemv_4x2
     // Calculate the total number of multithreaded iteration
     total_iteration = b_n / b_fuse;
 
-#pragma omp parallel for num_threads(n_threads)
+    _Pragma( "omp parallel for num_threads(n_threads)" )
     for (dim_t j = 0; j < total_iteration; j++)
     {
         float *A1 = a + (b_fuse * j) * lda;

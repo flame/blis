@@ -268,6 +268,19 @@ void dscal_blis_impl
             bli_rntm_init_from_global( &rntm_local );
             dim_t nt = bli_rntm_num_threads( &rntm_local );
 
+            if (nt<=0)
+            {
+                // nt is less than one if BLIS manual setting of parallelism
+                // has been used. Parallelism here will be product of values.
+                dim_t jc, pc, ic, jr, ir;
+	        jc = bli_rntm_jc_ways( &rntm_local );
+	        pc = bli_rntm_pc_ways( &rntm_local );
+	        ic = bli_rntm_ic_ways( &rntm_local );
+	        jr = bli_rntm_jr_ways( &rntm_local );
+	        ir = bli_rntm_ir_ways( &rntm_local );
+                nt = jc*pc*ic*jr*ir;
+            }
+
 #ifdef AOCL_DYNAMIC
             dim_t nt_ideal;
 
@@ -281,7 +294,7 @@ void dscal_blis_impl
             dim_t n_elem_per_thrd = n0 / nt;
             dim_t n_elem_rem = n0 % nt;
 
-            #pragma omp parallel num_threads( nt )
+            _Pragma( "omp parallel num_threads(nt)" )
             {
                 // Getting the actual number of threads that are spawned.
                 dim_t nt_real = omp_get_num_threads();
@@ -457,6 +470,19 @@ void zdscal_blis_impl
             bli_rntm_init_from_global( &rntm_local );
             dim_t nt = bli_rntm_num_threads( &rntm_local );
 
+            if (nt<=0)
+            {
+                // nt is less than one if BLIS manual setting of parallelism
+                // has been used. Parallelism here will be product of values.
+                dim_t jc, pc, ic, jr, ir;
+	        jc = bli_rntm_jc_ways( &rntm_local );
+	        pc = bli_rntm_pc_ways( &rntm_local );
+	        ic = bli_rntm_ic_ways( &rntm_local );
+	        jr = bli_rntm_jr_ways( &rntm_local );
+	        ir = bli_rntm_ir_ways( &rntm_local );
+                nt = jc*pc*ic*jr*ir;
+            }
+
 #ifdef AOCL_DYNAMIC
             dim_t nt_ideal;
 
@@ -471,7 +497,7 @@ void zdscal_blis_impl
             dim_t n_elem_per_thread = n0 / nt;
             dim_t n_elem_rem = n0 % nt;
 
-            #pragma omp parallel num_threads( nt )
+            _Pragma( "omp parallel num_threads(nt)" )
             {
                 // Getting the actual number of threads that are spawned.
                 dim_t nt_real = omp_get_num_threads();
