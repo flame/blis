@@ -284,9 +284,9 @@
 
 # --- Level-3 --------------------------------------------------------------
 
-2        # gemm
+1        # gemm
 -1 -1 -1 #   dimensions: m n k
-nn       #   parameters: transa transb
+??       #   parameters: transa transb
 
 1        # gemmt
 -1 -1    #   dimensions: m k
@@ -296,9 +296,9 @@ nn       #   parameters: transa transb
 -1 -1    #   dimensions: m n
 ????     #   parameters: side uploa conja transb
 
-2        # herk
+1        # herk
 -1 -1    #   dimensions: m k
-?n       #   parameters: uploc transa
+??       #   parameters: uploc transa
 
 1        # her2k
 -1 -1    #   dimensions: m k
@@ -316,15 +316,15 @@ nn       #   parameters: transa transb
 -1 -1    #   dimensions: m k
 ???      #   parameters: uploc transa transb
 
-2        # trmm
+1        # trmm
 -1 -1    #   dimensions: m n
-??nn     #   parameters: side uploa transa diaga
+????     #   parameters: side uploa transa diaga
 
 1        # trmm3
 -1 -1    #   dimensions: m n
 ????n    #   parameters: side uploa transa diaga transb
 
-2        # trsm
+1        # trsm
 -1 -1    #   dimensions: m n
-??nn     #   parameters: side uploa transa diaga
+????     #   parameters: side uploa transa diaga
 
