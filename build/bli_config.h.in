@@ -80,6 +80,10 @@
 #define BLIS_ENABLE_JRIR_RR
 #endif
 
+#if @enable_jrir_tlb@
+#define BLIS_ENABLE_JRIR_TLB
+#endif
+
 #if @enable_pba_pools@
 #define BLIS_ENABLE_PBA_POOLS
 #else

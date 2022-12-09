@@ -151,6 +151,7 @@
 #define BLIS_FREE_USER                   free
 #endif
 
+
 // -- Other system-related definitions -----------------------------------------
 
 // Size of a virtual memory page. This is used to align blocks within the
@@ -244,6 +245,7 @@
 #ifndef BLIS_POOL_ADDR_OFFSET_SIZE_GEN
 #define BLIS_POOL_ADDR_OFFSET_SIZE_GEN   0
 #endif
+
 
 // -- MR and NR blocksizes (only for reference kernels) ------------------------
 

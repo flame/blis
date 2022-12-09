@@ -143,12 +143,44 @@ void bli_rntm_set_ways_for_op
 	// kind of information is already stored in the rntm_t object.
 	bli_rntm_factorize( m, n, k, rntm );
 
-#if 0
-printf( "bli_rntm_set_ways_for_op()\n" );
-bli_rntm_print( rntm );
-#endif
+	#if 0
+	printf( "bli_rntm_set_ways_for_op()\n" );
+	bli_rntm_print( rntm );
+	#endif
 
 	// Now modify the number of ways, if necessary, based on the operation.
+
+	// Consider gemm (hemm, symm), gemmt (herk, her2k, syrk, syr2k), and
+	// trmm (trmm, trmm3).
+	if (
+#ifdef BLIS_ENABLE_JRIR_TLB
+	     l3_op == BLIS_GEMM  ||
+	     l3_op == BLIS_GEMMT ||
+	     l3_op == BLIS_TRMM  ||
+#endif
+	     FALSE
+	   )
+	{
+		dim_t jc = bli_rntm_jc_ways( rntm );
+		dim_t pc = bli_rntm_pc_ways( rntm );
+		dim_t ic = bli_rntm_ic_ways( rntm );
+		dim_t jr = bli_rntm_jr_ways( rntm );
+		dim_t ir = bli_rntm_ir_ways( rntm );
+
+		// If TLB is enabled for gemm or gemmt, redirect any ir loop parallelism
+		// into the jr loop.
+		bli_rntm_set_ways_only
+		(
+		  jc,
+		  pc,
+		  ic,
+		  jr * ir,
+		  1,
+		  rntm
+		);
+	}
+
+	// Consider trmm, trmm3, trsm.
 	if ( l3_op == BLIS_TRMM ||
 	     l3_op == BLIS_TRSM )
 	{

@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2018 - 2019, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -32,34 +33,41 @@
 
 */
 
-//
-// thrinfo_t macros specific to packm.
-//
+#include "blis.h"
 
-/*
-#define bli_packm_thread_my_iter( index, thread ) \
-\
-	( index % thread->n_way == thread->work_id % thread->n_way )
-*/
+static l3_var_oft vars[2] =
+{
+	bli_gemmt_l_ker_var2b, bli_gemmt_u_ker_var2b,
+};
 
-#define bli_packm_my_iter_rr( i, start, end, work_id, n_way ) \
-\
-	( i % n_way == work_id % n_way )
+void bli_gemmt_x_ker_var2b
+     (
+       const obj_t*     a,
+       const obj_t*     ah,
+       const obj_t*     c,
+       const cntx_t*    cntx,
+       const cntl_t*    cntl,
+             thrinfo_t* thread_par
+     )
+{
+	dim_t uplo;
 
-#define bli_packm_my_iter_sl( i, start, end, work_id, n_way ) \
-\
-	( start <= i && i < end )
+	// Set a bool based on the uplo field of C's root object.
+	if ( bli_obj_root_is_lower( c ) ) uplo = 0;
+	else                              uplo = 1;
 
-// Define a general-purpose version of bli_packm_my_iter() whose definition
-// depends on whether slab or round-robin partitioning was requested at
-// configure-time.
-#ifdef BLIS_ENABLE_JRIR_SLAB
+	// Index into the variant array to extract the correct function pointer.
+	l3_var_oft f = vars[uplo];
 
-  #define bli_packm_my_iter bli_packm_my_iter_sl
-
-#else // BLIS_ENABLE_JRIR_RR
-
-  #define bli_packm_my_iter bli_packm_my_iter_rr
-
-#endif
+	// Call the macrokernel.
+	f
+	(
+	  a,
+	  ah,
+	  c,
+	  cntx,
+	  cntl,
+	  thread_par
+	);
+}
 

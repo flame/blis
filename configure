@@ -340,16 +340,36 @@ print_usage()
 	echo " "
 	echo "   -r METHOD, --thread-part-jrir=METHOD"
 	echo " "
-	echo "                 Request a method of assigning micropanels to threads in"
-	echo "                 the JR and IR loops. Valid values for METHOD are 'slab'"
-	echo "                 and 'rr'. Using 'slab' assigns (as much as possible)"
-	echo "                 contiguous regions of micropanels to each thread while"
-	echo "                 using 'rr' assigns micropanels to threads in a round-"
-	echo "                 robin fashion. The chosen method also applies during"
-	echo "                 the packing of A and B. The default method is 'slab'."
-	echo "                 NOTE: Specifying this option constitutes a request,"
-	echo "                 which may be ignored in select situations if the"
-	echo "                 implementation has a good reason to do so."
+	echo "                 Select a strategy for partitioning computation in JR and"
+	echo "                 IR loops and assigning that computation to threads. Valid"
+	echo "                 values for METHOD are 'rr', 'slab', and 'tlb':"
+	echo "                  'rr':   Assign the computation associated with whole"
+	echo "                          columns of microtiles to threads in a round-"
+	echo "                          robin fashion. When selected, round-robin"
+	echo "                          assignment is also employed during packing."
+	echo "                  'slab': Partition the computation into N contiguous"
+	echo "                          regions, where each region contains a whole"
+	echo "                          number of microtile columns, and assign one"
+	echo "                          region to each thread. For some operations, the"
+	echo "                          number of microtile columns contained within a"
+	echo "                          given region may differ from that of other"
+	echo "                          regions, depending on how much work is implied"
+	echo "                          by each region. When selected, slab assignment"
+	echo "                          is also employed during packing."
+	echo "                  'tlb':  Tile-level load balancing is similar to slab,"
+	echo "                          except that regions will be divided at a more"
+	echo "                          granular level (individual microtiles instead"
+	echo "                          of whole columns of microtiles) to ensure more"
+	echo "                          equitable assignment of work to threads. When"
+	echo "                          selected, tlb will only be employed for level-3"
+	echo "                          operations except trsm; due to practical and"
+	echo "                          algorithmic limitations, slab partitioning will"
+	echo "                          be used instead during packing and for trsm."
+	echo "                 The default strategy is 'tlb'. NOTE: Specifying this"
+	echo "                 option constitutes a request, which may be ignored in"
+	echo "                 select situations if implementation has a good reason to"
+	echo "                 do so. (See description of 'tlb' above for an example of"
+	echo "                 this.)"
 	echo " "
 	echo "   --disable-trsm-preinversion, --enable-trsm-preinversion"
 	echo " "
@@ -2490,7 +2510,7 @@ main()
 	threading_model='off'
 
 	# The method of assigning micropanels to threads in the JR and JR loops.
-	thread_part_jrir='slab'
+	thread_part_jrir='tlb'
 
 	# Option variables.
 	quiet_flag=''
@@ -3731,16 +3751,20 @@ main()
 
 	# Check the method of assigning micropanels to threads in the JR and IR
 	# loops.
-	enable_jrir_slab_01=0
 	enable_jrir_rr_01=0
-	if [ "x${thread_part_jrir}" = "xslab" ]; then
-		echo "${script_name}: requesting slab threading in jr and ir loops."
-		enable_jrir_slab_01=1
-	elif [ "x${thread_part_jrir}" = "xrr" ]; then
-		echo "${script_name}: requesting round-robin threading in jr and ir loops."
+	enable_jrir_slab_01=0
+	enable_jrir_tlb_01=0
+	if   [ "x${thread_part_jrir}" = "xrr" ]; then
+		echo "${script_name}: requesting round-robin threading in jr and/or ir loops."
 		enable_jrir_rr_01=1
+	elif [ "x${thread_part_jrir}" = "xslab" ]; then
+		echo "${script_name}: requesting slab threading in jr and/or ir loops."
+		enable_jrir_slab_01=1
+	elif [ "x${thread_part_jrir}" = "xtlb" ]; then
+		echo "${script_name}: requesting tile-level load balancing in unified jr+ir loop."
+		enable_jrir_tlb_01=1
 	else
-		echo "${script_name}: *** Unsupported method of thread partitioning in jr and ir loops: ${thread_part_jrir}."
+		echo "${script_name}: *** Unsupported method of thread partitioning in jr/ir loops: ${thread_part_jrir}."
 		exit 1
 	fi
 
@@ -4177,8 +4201,9 @@ main()
 		| sed   -e "s/@enable_pthreads_as_def@/${enable_pthreads_as_def_01}/g" \
 		| sed   -e "s/@enable_hpx@/${enable_hpx_01}/g" \
 		| sed   -e "s/@enable_hpx_as_def@/${enable_hpx_as_def_01}/g" \
-		| sed   -e "s/@enable_jrir_slab@/${enable_jrir_slab_01}/g" \
 		| sed   -e "s/@enable_jrir_rr@/${enable_jrir_rr_01}/g" \
+		| sed   -e "s/@enable_jrir_slab@/${enable_jrir_slab_01}/g" \
+		| sed   -e "s/@enable_jrir_tlb@/${enable_jrir_tlb_01}/g" \
 		| sed   -e "s/@enable_pba_pools@/${enable_pba_pools_01}/g" \
 		| sed   -e "s/@enable_sba_pools@/${enable_sba_pools_01}/g" \
 		| sed   -e "s/@enable_mem_tracing@/${enable_mem_tracing_01}/g" \

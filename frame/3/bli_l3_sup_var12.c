@@ -357,11 +357,11 @@ void PASTEMAC(ch,varname) \
 						   object. */ \
 /*
 						ctype* a2 = bli_gemm_get_next_a_upanel( a_ir, irstep_a, ir_inc ); \
-						if ( bli_is_last_iter( i, ir_iter, 0, 1 ) ) \
+						if ( bli_is_last_iter_slrr( i, ir_iter, 0, 1 ) ) \
 						{ \
 							a2 = a_00; \
 							b2 = bli_gemm_get_next_b_upanel( b_jr, jrstep_b, jr_inc ); \
-							if ( bli_is_last_iter( j, jr_iter, 0, 1 ) ) \
+							if ( bli_is_last_iter_slrr( j, jr_iter, 0, 1 ) ) \
 								b2 = b_00; \
 						} \
 \

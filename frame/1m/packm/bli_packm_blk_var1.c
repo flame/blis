@@ -170,11 +170,11 @@ void bli_packm_blk_var1
 	const dim_t tid = bli_thrinfo_work_id( thread );
 
 	// Determine the thread range and increment using the current thread's
-	// packm thrinfo_t node. NOTE: The definition of bli_thread_range_jrir()
+	// packm thrinfo_t node. NOTE: The definition of bli_thread_range_slrr()
 	// will depend on whether slab or round-robin partitioning was requested
 	// at configure-time.
 	dim_t it_start, it_end, it_inc;
-	bli_thread_range_jrir( thread, n_iter, 1, FALSE, &it_start, &it_end, &it_inc );
+	bli_thread_range_slrr( thread, n_iter, 1, FALSE, &it_start, &it_end, &it_inc );
 
 	char* p_begin = p_cast;
 
@@ -190,15 +190,15 @@ void bli_packm_blk_var1
 
 		inc_t  p_inc           = ps_p;
 
-		// NOTE: We MUST use round-robin work allocation (bli_packm_my_iter_rr())
+		// NOTE: We MUST use round-robin work allocation (bli_is_my_iter_rr())
 		// when packing micropanels of a triangular matrix. Hermitian/symmetric
-		// and general packing may use slab or round-robin (bli_packm_my_iter()),
+		// and general packing may use slab or round-robin (bli_is_my_iter()),
 		// depending on which was selected at configure-time.
 		bool my_iter = ( bli_is_triangular( strucc ) &&
 		                 bli_intersects_diag_n( diagoffc_i, panel_dim_i,
 		                                        panel_len_full )
-		                 ? bli_packm_my_iter_rr( it, it_start, it_end, tid, nt )
-		                 : bli_packm_my_iter   ( it, it_start, it_end, tid, nt )
+		                 ? bli_is_my_iter_rr( it,                   tid, nt )
+		                 : bli_is_my_iter   ( it, it_start, it_end, tid, nt )
 		               );
 
 		if ( bli_is_triangular( strucc ) &&

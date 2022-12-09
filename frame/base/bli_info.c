@@ -156,7 +156,7 @@ gint_t bli_info_get_enable_hpx_as_default( void )
 	return 0;
 #endif
 }
-gint_t bli_info_get_thread_part_jrir_slab( void )
+gint_t bli_info_get_thread_jrir_slab( void )
 {
 #ifdef BLIS_ENABLE_JRIR_SLAB
 	return 1;
@@ -164,9 +164,17 @@ gint_t bli_info_get_thread_part_jrir_slab( void )
 	return 0;
 #endif
 }
-gint_t bli_info_get_thread_part_jrir_rr( void )
+gint_t bli_info_get_thread_jrir_rr( void )
 {
 #ifdef BLIS_ENABLE_JRIR_RR
+	return 1;
+#else
+	return 0;
+#endif
+}
+gint_t bli_info_get_thread_jrir_tlb( void )
+{
+#ifdef BLIS_ENABLE_JRIR_TLB
 	return 1;
 #else
 	return 0;
