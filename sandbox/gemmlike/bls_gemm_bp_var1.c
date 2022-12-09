@@ -348,11 +348,11 @@ void PASTECH2(bls_,ch,varname) \
 \
 						/* Compute the addresses of the next micropanels of A and B. */ \
 						a2 = bli_gemm_get_next_a_upanel( a_ir, ps_a_use, 1 ); \
-						if ( bli_is_last_iter( i, ir_end, ir_tid, ir_nt ) ) \
+						if ( bli_is_last_iter_slrr( i, ir_end, ir_tid, ir_nt ) ) \
 						{ \
 							a2 = a_ic_use; \
 							b2 = bli_gemm_get_next_b_upanel( b_jr, ps_b_use, 1 ); \
-							if ( bli_is_last_iter( j, jr_end, jr_tid, jr_nt ) ) \
+							if ( bli_is_last_iter_slrr( j, jr_end, jr_tid, jr_nt ) ) \
 								b2 = b_pc_use; \
 						} \
 \
