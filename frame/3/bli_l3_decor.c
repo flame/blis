@@ -37,13 +37,13 @@
 struct l3_decor_params_s
 {
 	      l3int_ft func;
-	      opid_t   family;
 	const obj_t*   alpha;
 	const obj_t*   a;
 	const obj_t*   b;
 	const obj_t*   beta;
 	const obj_t*   c;
 	const cntx_t*  cntx;
+	const cntl_t*  cntl;
 	      rntm_t*  rntm;
 	      array_t* array;
 };
@@ -54,64 +54,34 @@ static void bli_l3_thread_decorator_entry( thrcomm_t* gl_comm, dim_t tid, const 
 	const l3_decor_params_t* data    = data_void;
 
 	const l3int_ft           func    = data->func;
-	const opid_t             family  = data->family;
 	const obj_t*             alpha   = data->alpha;
 	const obj_t*             a       = data->a;
 	const obj_t*             b       = data->b;
 	const obj_t*             beta    = data->beta;
 	const obj_t*             c       = data->c;
 	const cntx_t*            cntx    = data->cntx;
+	const cntl_t*            cntl    = data->cntl;
 	      rntm_t*            rntm    = data->rntm;
 	      array_t*           array   = data->array;
 
 	bli_l3_thread_decorator_thread_check( gl_comm, rntm );
 
-	// Alias thread-local copies of A, B, and C. These will be the objects
-	// we pass down the algorithmic function stack. Making thread-local
-	// aliases is highly recommended in case a thread needs to change any
-	// of the properties of an object without affecting other threads'
-	// objects.
-	obj_t a_t, b_t, c_t;
-	bli_obj_alias_to( a, &a_t );
-	bli_obj_alias_to( b, &b_t );
-	bli_obj_alias_to( c, &c_t );
-
-	// This is part of a hack to support mixed domain in bli_gemm_front().
-	// Sometimes we need to specify a non-standard schema for A and B, and
-	// we decided to transmit them via the schema field in the obj_t's
-	// rather than pass them in as function parameters. Once the values
-	// have been read, we immediately reset them back to their expected
-	// values for unpacked objects.
-	pack_t schema_a = bli_obj_pack_schema( &a_t );
-	pack_t schema_b = bli_obj_pack_schema( &b_t );
-	bli_obj_set_pack_schema( BLIS_NOT_PACKED, &a_t );
-	bli_obj_set_pack_schema( BLIS_NOT_PACKED, &b_t );
-
-	// Create a default control tree for the operation, if needed.
-	cntl_t* cntl_use;
-	pool_t* sba_pool = bli_apool_array_elem( tid, array );
-	bli_l3_cntl_create_if( family, schema_a, schema_b,
-	                       &a_t, &b_t, &c_t, sba_pool, NULL, &cntl_use );
-
 	// Create the root node of the current thread's thrinfo_t structure.
 	// The root node is the *parent* of the node corresponding to the first
 	// control tree node.
-	thrinfo_t* thread = bli_l3_thrinfo_create( tid, gl_comm, array, rntm, cntl_use );
+	thrinfo_t* thread = bli_l3_thrinfo_create( tid, gl_comm, array, rntm, cntl );
 
 	func
 	(
 	  alpha,
-	  &a_t,
-	  &b_t,
+	  a,
+	  b,
 	  beta,
-	  &c_t,
+	  c,
 	  cntx,
-	  cntl_use,
+	  cntl,
 	  thread
 	);
-
-	// Free the thread's local control tree.
-	bli_l3_cntl_free( sba_pool, cntl_use );
 
 	// Free the current thread's thrinfo_t structure.
 	bli_thrinfo_free( thread );
@@ -120,13 +90,13 @@ static void bli_l3_thread_decorator_entry( thrcomm_t* gl_comm, dim_t tid, const 
 void bli_l3_thread_decorator
      (
              l3int_ft func,
-             opid_t   family,
        const obj_t*   alpha,
        const obj_t*   a,
        const obj_t*   b,
        const obj_t*   beta,
        const obj_t*   c,
        const cntx_t*  cntx,
+       const cntl_t*  cntl,
        const rntm_t*  rntm
      )
 {
@@ -185,13 +155,13 @@ void bli_l3_thread_decorator
 
 	l3_decor_params_t params;
 	params.func     = func;
-	params.family   = family;
 	params.alpha    = alpha;
 	params.a        = a;
 	params.b        = b;
 	params.beta     = beta;
 	params.c        = c;
 	params.cntx     = cntx;
+	params.cntl     = cntl;
 	params.rntm     = &rntm_l;
 	params.array    = array;
 

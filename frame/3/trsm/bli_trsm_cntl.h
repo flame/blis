@@ -58,12 +58,6 @@ cntl_t* bli_trsm_r_cntl_create
        void_fp ker
      );
 
-void bli_trsm_cntl_free
-     (
-       pool_t* pool,
-       cntl_t* cntl
-     );
-
 // -----------------------------------------------------------------------------
 
 cntl_t* bli_trsm_cntl_create_node

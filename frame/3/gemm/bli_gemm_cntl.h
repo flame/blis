@@ -55,14 +55,6 @@ cntl_t* bli_gemmbp_cntl_create
 
 // -----------------------------------------------------------------------------
 
-void bli_gemm_cntl_free
-     (
-       pool_t* pool,
-       cntl_t* cntl
-     );
-
-// -----------------------------------------------------------------------------
-
 cntl_t* bli_gemm_cntl_create_node
      (
        pool_t* pool,

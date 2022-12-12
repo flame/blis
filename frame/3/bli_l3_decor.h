@@ -53,13 +53,13 @@ typedef void (*l3int_ft)
 void bli_l3_thread_decorator
      (
              l3int_ft func,
-             opid_t   family,
        const obj_t*   alpha,
        const obj_t*   a,
        const obj_t*   b,
        const obj_t*   beta,
        const obj_t*   c,
        const cntx_t*  cntx,
+       const cntl_t*  cntl,
        const rntm_t*  rntm
      );
 

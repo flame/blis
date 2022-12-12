@@ -141,18 +141,41 @@ void bli_trsm_front
 	  rntm
 	);
 
+	// This is part of a hack to support mixed domain in bli_gemm_front().
+	// Sometimes we need to specify a non-standard schema for A and B, and
+	// we decided to transmit them via the schema field in the obj_t's
+	// rather than pass them in as function parameters. Once the values
+	// have been read, we immediately reset them back to their expected
+	// values for unpacked objects.
+	pack_t schema_a = bli_obj_pack_schema( &a_local );
+	pack_t schema_b = bli_obj_pack_schema( &b_local );
+	bli_obj_set_pack_schema( BLIS_NOT_PACKED, &a_local );
+	bli_obj_set_pack_schema( BLIS_NOT_PACKED, &b_local );
+
+	cntl_t* cntl = bli_trsm_cntl_create
+	(
+	  NULL,
+	  bli_obj_is_triangular( a ) ? BLIS_LEFT : BLIS_RIGHT,
+	  schema_a,
+	  schema_b,
+	  bli_obj_ker_fn( &c_local )
+	);
+
 	// Invoke the internal back-end.
 	bli_l3_thread_decorator
 	(
 	  bli_l3_int,
-	  BLIS_TRSM, // operation family id
 	  alpha,
 	  &a_local,
 	  &b_local,
 	  alpha,
 	  &c_local,
 	  cntx,
+      cntl,
 	  rntm
 	);
+
+	// Free the thread's local control tree.
+	bli_cntl_free( NULL, cntl );
 }
 

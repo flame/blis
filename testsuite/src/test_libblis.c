@@ -2699,7 +2699,7 @@ thrinfo_t* libblis_test_pobj_create( bszid_t bmult_id_m, bszid_t bmult_id_n, inv
 	bli_packm_blk_var1( a, p, cntx, cntl, thread );
 
 	// Free the control tree.
-	bli_l3_cntl_free( NULL, cntl );
+	bli_cntl_free( NULL, cntl );
 
 	// Return the thread control tree pointer so the caller can free the thrinfo_t and its
 	// mem_t entry later on.

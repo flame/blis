@@ -299,15 +299,6 @@ cntl_t* bli_trsm_r_cntl_create
 	return trsm_cntl_vl_mm;
 }
 
-void bli_trsm_cntl_free
-     (
-       pool_t* pool,
-       cntl_t* cntl
-     )
-{
-	bli_cntl_free( pool, cntl );
-}
-
 // -----------------------------------------------------------------------------
 
 cntl_t* bli_trsm_cntl_create_node
