@@ -59,8 +59,8 @@ void bli_sgemm_armv7a_int_4x4
 
     GEMM_UKR_SETUP_CT( s, 4, 4, false );
 
-	void* a_next = bli_auxinfo_next_a( data );
-	void* b_next = bli_auxinfo_next_b( data );
+	const void* a_next = bli_auxinfo_next_a( data );
+	const void* b_next = bli_auxinfo_next_b( data );
 
 	float32x4_t alphav;
 	alphav = vmovq_n_f32( *alpha );

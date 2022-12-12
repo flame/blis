@@ -54,8 +54,8 @@ void bli_sgemm_piledriver_asm_16x3
        cntx_t*             cntx
      )
 {
-	void*   a_next = bli_auxinfo_next_a( data );
-	void*   b_next = bli_auxinfo_next_b( data );
+	const void*   a_next = bli_auxinfo_next_a( data );
+	const void*   b_next = bli_auxinfo_next_b( data );
 
 	// Typecast local copies of integers in case dim_t and inc_t are a
 	// different size than is expected by load instructions.
@@ -535,8 +535,8 @@ void bli_dgemm_piledriver_asm_8x3
        cntx_t*             cntx
      )
 {
-	void*   a_next = bli_auxinfo_next_a( data );
-	void*   b_next = bli_auxinfo_next_b( data );
+	const void*   a_next = bli_auxinfo_next_a( data );
+	const void*   b_next = bli_auxinfo_next_b( data );
 
 	// Typecast local copies of integers in case dim_t and inc_t are a
 	// different size than is expected by load instructions.
@@ -991,8 +991,8 @@ void bli_cgemm_piledriver_asm_4x2
        cntx_t*             cntx
      )
 {
-	void*   a_next = bli_auxinfo_next_a( data );
-	void*   b_next = bli_auxinfo_next_b( data );
+	const void*   a_next = bli_auxinfo_next_a( data );
+	const void*   b_next = bli_auxinfo_next_b( data );
 
 	// Typecast local copies of integers in case dim_t and inc_t are a
 	// different size than is expected by load instructions.
@@ -1401,8 +1401,8 @@ void bli_zgemm_piledriver_asm_2x2
        cntx_t*             cntx
      )
 {
-	void*   a_next = bli_auxinfo_next_a( data );
-	void*   b_next = bli_auxinfo_next_b( data );
+	const void*   a_next = bli_auxinfo_next_a( data );
+	const void*   b_next = bli_auxinfo_next_b( data );
 
 	// Typecast local copies of integers in case dim_t and inc_t are a
 	// different size than is expected by load instructions.

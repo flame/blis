@@ -151,7 +151,7 @@ void bli_dgemmsup_rv_armv8a_asm_6x8n
     dgemmsup_ker_ft ker_fp1 = NULL;
     dgemmsup_ker_ft ker_fp2 = NULL;
     dim_t           mr1, mr2;
-    
+
     if ( m0 == 9 )
     {
       ker_fp1 = bli_dgemmsup_rv_armv8a_asm_5x8n; mr1 = 5;
@@ -201,8 +201,8 @@ void bli_dgemmsup_rv_armv8a_asm_6x8n
   // LLVM has very bad routing ability for inline asm.
   // Limit number of registers in case of Clang compilation.
 #ifndef __clang__
-  void*    a_next = bli_auxinfo_next_a( data );
-  void*    b_next = bli_auxinfo_next_b( data );
+  const void*    a_next = bli_auxinfo_next_a( data );
+  const void*    b_next = bli_auxinfo_next_b( data );
 #endif
   uint64_t ps_b   = bli_auxinfo_ps_b( data );
 

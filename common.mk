@@ -726,6 +726,15 @@ ifeq ($(CC_VENDOR),clang)
 CWARNFLAGS += -Wno-tautological-compare -Wno-pass-failed
 endif
 
+# Disable other annoying warnings.
+ifeq ($(CC_VENDOR),clang)
+CWARNFLAGS += -Wno-maybe-uninitialized
+else
+ifeq ($(CC_VENDOR),gcc)
+CWARNFLAGS += -Wno-maybe-uninitialized -Wno-comment
+endif
+endif
+
 $(foreach c, $(CONFIG_LIST_FAM), $(eval $(call append-var-for,CWARNFLAGS,$(c))))
 
 # --- Position-independent code flags (shared libraries only) ---
