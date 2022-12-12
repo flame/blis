@@ -19,6 +19,12 @@ include(GoogleTest)
 
 enable_testing()
 
+# Temporarily disable for Windows
+# Set the path to the BLIS installation.
+if(WIN32)
+    message(FATAL_ERROR "GTestSuite has been temporarily disabled on Windows.")
+endif()
+
 # Set the path to the BLIS installation.
 if(NOT(BLIS_PATH))
     message(FATAL_ERROR "Need to provide a BLIS installation path during CMake invocation. Please use
@@ -43,7 +49,7 @@ endif()
 
 option(ENABLE_VALGRIND "Run tests using valgrind" OFF)
 
-option(ENABLE_ASAN "Run tests using Address Sanatizer" OFF)
+option(ENABLE_ASAN "Run tests using Address Sanitizer" OFF)
 
 # Set variable if the platform is Linux based.
 if(UNIX AND NOT APPLE)
@@ -61,11 +67,12 @@ set(INC_PATH ${CMAKE_CURRENT_SOURCE_DIR}/inc)
 # Set compiler options and BLIS library for Linux.
 if(LINUX)
     # Add compiler definition.
-
     add_compile_options(-g -Wall -Wno-unused-function -Wfatal-errors -fPIC)
-
+    if(ENABLE_VALGRIND)
+        add_definitions(-D__GTEST_VALGRIND_TEST__)
+    endif()
+    
     if(ENABLE_ASAN)
-       add_definitions(-D__GTEST_VALGRIND_TEST__)
        add_compile_options(-fsanitize=address -static-libsan)
     endif()
 
@@ -229,6 +236,10 @@ add_executable(gtest_libblis
 
 target_include_directories(gtest_libblis PUBLIC ${INC_PATH} ${BLIS_INCLUDE})
 target_link_libraries(gtest_libblis gtest gtest_main ${Blis_LIBRARY} pthread)
+
+if(ENABLE_ASAN)
+    target_link_libraries( gtest_libblis -fsanitize=address)
+endif()
 
 # Linking appropriate threading library.
 if(ENABLE_THREADING STREQUAL "openmp")

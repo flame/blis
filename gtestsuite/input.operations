@@ -68,177 +68,177 @@
 
 # --- Utility --------------------------------------------------------------
 
-0        # randv
+1        # randv
 -1       #   dimensions: m
 
-0        # randm
+1        # randm
 -1 -1    #   dimensions: m n
 
 
 # --- Level-1v -------------------------------------------------------------
 
-0        # addv
+1        # addv
 -1       #   dimensions: m
 ?        #   parameters: conjx
 
-0        # amaxv
+1        # amaxv
 -1       #   dimensions: m
 
-0        # axpbyv
--1       #   dimensions: m
-?        #   parameters: conjx
-
-0        # axpyv
+1        # axpbyv
 -1       #   dimensions: m
 ?        #   parameters: conjx
 
-0        # copyv
+1        # axpyv
 -1       #   dimensions: m
 ?        #   parameters: conjx
 
-0        # dotv
+1        # copyv
+-1       #   dimensions: m
+?        #   parameters: conjx
+
+1        # dotv
 -1       #   dimensions: m
 ??       #   parameters: conjx conjy
 
-0        # dotxv
+1        # dotxv
 -1       #   dimensions: m
 ??       #   parameters: conjx conjy
 
-0        # normfv
+1        # normfv
 -1       #   dimensions: m
 
-0        # scalv
+1        # scalv
 -1       #   dimensions: m
 ?        #   parameters: conjbeta
 
-0        # scal2v
+1        # scal2v
 -1       #   dimensions: m
 ?        #   parameters: conjx
 
-0        # setv
+1        # setv
 -1       #   dimensions: m
 
-0        # subv
+1        # subv
 -1       #   dimensions: m
 ?        #   parameters: conjx
 
-0        # xpbyv
+1        # xpbyv
 -1       #   dimensions: m
 ?        #   parameters: conjx
 
 
 # --- Level-1m -------------------------------------------------------------
 
-0        # addm
+1        # addm
 -1 -2    #   dimensions: m n
 ?        #   parameters: transa
 
-0        # axpym
+1        # axpym
 -1 -1    #   dimensions: m n
 ?        #   parameters: transa
 
-0        # copym
+1        # copym
 -1 -2    #   dimensions: m n
 ?        #   parameters: transa
 
-0        # normfm
+1        # normfm
 -1 -2    #   dimensions: m n
 
-0        # scalm
+1        # scalm
 -1 -2    #   dimensions: m n
 ?        #   parameters: conjbeta
 
-0        # scal2m
+1        # scal2m
 -1 -2    #   dimensions: m n
 ?        #   parameters: transa
 
-0        # setm
+1        # setm
 -1 -2    #   dimensions: m n
 
-0        # subm
+1        # subm
 -1 -2    #   dimensions: m n
 ?        #   parameters: transa
 
-0        # xpbym
+1        # xpbym
 -1 -1    #   dimensions: m n
 ?        #   parameters: transa
 
 
 # --- Level-1f kernels -----------------------------------------------------
 
-0        # axpy2v
+1        # axpy2v
 -1       #   dimensions: m
 ??       #   parameters: conjx conjy
 
-0        # dotaxpyv
+1        # dotaxpyv
 -1       #   dimensions: m
 ???      #   parameters: conjxt conjx conjy
 
-0        # axpyf
+1        # axpyf
 -1       #   dimensions: m
 ??       #   parameters: conja conjx
 
-0        # dotxf
+1        # dotxf
 -1       #   dimensions: m
 ??       #   parameters: conjat conjx
 
-0        # dotxaxpyf
+1        # dotxaxpyf
 -1       #   dimensions: m
 ????     #   parameters: conjat conja conjw conjx
 
 
 # --- Level-2 --------------------------------------------------------------
 
-0        # gemv
+1        # gemv
 -1 -2    #   dimensions: m n
 ??       #   parameters: transa conjx
 
-0        # ger
+1        # ger
 -1 -2    #   dimensions: m n
 ??       #   parameters: conjx conjy
 
-0        # hemv
+1        # hemv
 -1       #   dimensions: m
 ???      #   parameters: uploa conja conjx
 
-0        # her
+1        # her
 -1       #   dimensions: m
 ??       #   parameters: uploc conjx
 
-0        # her2
+1        # her2
 -1       #   dimensions: m
 ???      #   parameters: uploc conjx conjy
 
-0        # symv
+1        # symv
 -1       #   dimensions: m
 ???      #   parameters: uploa conja conjx
 
-0        # syr
+1        # syr
 -1       #   dimensions: m
 ??       #   parameters: uploc conjx
 
-0        # syr2
+1        # syr2
 -1       #   dimensions: m
 ???      #   parameters: uploc conjx conjy
 
-0        # trmv
+1        # trmv
 -1       #   dimensions: m
 ???      #   parameters: uploa transa diaga
 
-0        # trsv
+1        # trsv
 -1       #   dimensions: m
 ???      #   parameters: uploa transa diaga
 
 
 # --- Level-3 micro-kernels ------------------------------------------------
 
-0        # gemm
+1        # gemm
 -1       #   dimensions: k
 
-0        # trsm
+1        # trsm
 ?        #   parameters: uploa
 
-0        # gemmtrsm
+1        # gemmtrsm
 -1       #   dimensions: k
 ?        #   parameters: uploa
 
@@ -249,73 +249,73 @@
 -1 -1 -1 #   dimensions: m n k
 ??       #   parameters: transa transb
 
-0        # gemmt
+1        # gemmt
 -1 -1    #   dimensions: m k
 ???      #   parameters: uploc transa transb
 
-0        # hemm
+1        # hemm
 -1 -1    #   dimensions: m n
 ??       #   parameters: side uploa
 
-0        # herk
+1        # herk
 -1 -1    #   dimensions: m k
 ??       #   parameters: uploc trans
 
-0        # her2k
+1        # her2k
 -1 -1    #   dimensions: m k
 ??       #   parameters: uploc trans
 
-0        # symm
+1        # symm
 -1 -1    #   dimensions: m n
 ??       #   parameters: side uploa
 
-0        # syrk
+1        # syrk
 -1 -1    #   dimensions: m k
 ??       #   parameters: uploc trans
 
-0        # syr2k
+1        # syr2k
 -1 -1    #   dimensions: m k
 ??       #   parameters: uploc trans
 
-0        # trmm
+1        # trmm
 -1 -1    #   dimensions: m n
 ????     #   parameters: side uploa transa diaga
 
-0        # trmm3
+1        # trmm3
 -1 -1    #   dimensions: m n
 ?????    #   parameters: side uploa transa diaga transb
 
-0        # trsm
+1        # trsm
 -1 -1    #   dimensions: m n
 ????     #   parameters: side uploa transa diaga
 
 # --- lpgemm --------------------------------------------------------------
 
-0        # gemm_u8s8s32os32
+1        # gemm_u8s8s32os32
 -1 -1 -1 #   dimensions: m n k
 nn       #   parameters: transa transb
 
-0        # gemm_u8s8s32os8
+1        # gemm_u8s8s32os8
 -1 -1 -1 #   dimensions: m n k
 nn       #   parameters: transa transb
 
-0        # gemm_f32f32f32of32
+1        # gemm_f32f32f32of32
 -1 -1 -1 #   dimensions: m n k
 nn       #   parameters: transa transb
 
-0        # gemm_u8s8s16os16
+1        # gemm_u8s8s16os16
 -1 -1 -1 #   dimensions: m n k
 nn       #   parameters: transa transb
 
-0        # gemm_u8s8s16os8
+1        # gemm_u8s8s16os8
 -1 -1 -1 #   dimensions: m n k
 nn       #   parameters: transa transb
 
-0        # gemm_bf16bf16f32of32
+1        # gemm_bf16bf16f32of32
 -1 -1 -1 #   dimensions: m n k
 nn       #   parameters: transa transb
 
-0        # gemm_bf16bf16f32obf16
+1        # gemm_bf16bf16f32obf16
 -1 -1 -1 #   dimensions: m n k
 nn       #   parameters: transa transb
 
