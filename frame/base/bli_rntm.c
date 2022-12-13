@@ -54,8 +54,11 @@ void bli_rntm_init_from_global( rntm_t* rntm )
 
 	dim_t jc, pc, ic, jr, ir;
 
-	// We must ensure that global_rntm and tl_rntm have been initialized.
+	// We must ensure that global_rntm has been initialized
 	bli_init_once();
+
+	// We must also ensure that tl_rntm has been updated.
+	bli_thread_update_tl();
 
 	// Acquire the mutex protecting global_rntm.
 	bli_pthread_mutex_lock( &global_rntm_mutex );

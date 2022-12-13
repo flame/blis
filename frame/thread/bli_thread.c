@@ -64,6 +64,8 @@ void bli_thread_init( void )
 	// to ensure all thread local get information from any BLIS environment
 	// variables set, as these are not re-read for performance reasons.
 	bli_thread_init_rntm_from_env( &global_rntm );
+	// Initialize tl_rntm.
+	bli_thread_update_rntm_from_env( &tl_rntm );
 }
 
 void bli_thread_update_tl( void )
