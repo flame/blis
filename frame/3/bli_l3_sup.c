@@ -92,6 +92,9 @@ err_t bli_gemmsup
 	if ( rntm == NULL ) { bli_rntm_init_from_global( &rntm_l ); }
 	else                { rntm_l = *rntm;                       }
 
+    if ( !bli_rntm_l3_sup( &rntm_l ) )
+        return BLIS_FAILURE;
+
 #if 0
 const num_t dt = bli_obj_dt( c );
 const dim_t m  = bli_obj_length( c );

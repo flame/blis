@@ -38,6 +38,33 @@
 // Define object-based interfaces (expert).
 //
 
+err_t bli_l3_return_early_if_trivial
+      (
+       const obj_t*  alpha,
+       const obj_t*  a,
+       const obj_t*  b,
+       const obj_t*  beta,
+       const obj_t*  c
+      )
+{
+
+	// If C has a zero dimension, return early.
+	if ( bli_obj_has_zero_dim( c ) )
+        return BLIS_SUCCESS;
+
+	// If alpha is zero, or if A or B has a zero dimension, scale C by beta
+	// and return early.
+	if ( bli_obj_equals( alpha, &BLIS_ZERO ) ||
+	     bli_obj_has_zero_dim( a ) ||
+	     bli_obj_has_zero_dim( b ) )
+	{
+		bli_scalm( beta, c );
+		return BLIS_SUCCESS;
+	}
+
+    return BLIS_FAILURE;
+}
+
 // If a sandbox was enabled, we forgo defining bli_gemm_ex() since it will be
 // defined in the sandbox environment.
 #ifndef BLIS_ENABLE_SANDBOX
@@ -59,37 +86,18 @@ void PASTEMAC(gemm,BLIS_OAPI_EX_SUF)
 	if ( bli_error_checking_is_enabled() )
 		bli_gemm_check( alpha, a, b, beta, c, cntx );
 
-	// If C has a zero dimension, return early.
-	if ( bli_obj_has_zero_dim( c ) ) return;
-
-	// If alpha is zero, or if A or B has a zero dimension, scale C by beta
-	// and return early.
-	if ( bli_obj_equals( alpha, &BLIS_ZERO ) ||
-	     bli_obj_has_zero_dim( a ) ||
-	     bli_obj_has_zero_dim( b ) )
-	{
-		bli_scalm( beta, c );
+	// Check for zero dimensions, alpha == 0, or other conditions which
+    // mean that we don't actually have to perform a full l3 operation.
+	if ( bli_l3_return_early_if_trivial( alpha, a, b, beta, c ) == BLIS_SUCCESS)
 		return;
-	}
 
-	// If the rntm is non-NULL, it may indicate that we should forgo sup
-	// handling altogether.
-	bool enable_sup = TRUE;
-	if ( rntm != NULL ) enable_sup = bli_rntm_l3_sup( rntm );
-
-	if ( enable_sup )
-	{
-		// Execute the small/unpacked oapi handler. If it finds that the problem
-		// does not fall within the thresholds that define "small", or for some
-		// other reason decides not to use the small/unpacked implementation,
-		// the function returns with BLIS_FAILURE, which causes execution to
-		// proceed towards the conventional implementation.
-		err_t result = bli_gemmsup( alpha, a, b, beta, c, cntx, rntm );
-		if ( result == BLIS_SUCCESS )
-		{
-			return;
-		}
-	}
+	// Execute the small/unpacked oapi handler. If it finds that the problem
+	// does not fall within the thresholds that define "small", or for some
+	// other reason decides not to use the small/unpacked implementation,
+	// the function returns with BLIS_FAILURE, which causes execution to
+	// proceed towards the conventional implementation.
+	if ( bli_gemmsup( alpha, a, b, beta, c, cntx, rntm ) == BLIS_SUCCESS )
+		return;
 
 	// Initialize a local runtime with global settings if necessary. Note
 	// that in the case that a runtime is passed in, we make a local copy.
@@ -381,18 +389,10 @@ void PASTEMAC(gemmt,BLIS_OAPI_EX_SUF)
 	if ( bli_error_checking_is_enabled() )
 		bli_gemmt_check( alpha, a, b, beta, c, cntx );
 
-	// If C has a zero dimension, return early.
-	if ( bli_obj_has_zero_dim( c ) ) return;
-
-	// If alpha is zero, or if A or B has a zero dimension, scale C by beta
-	// and return early.
-	if ( bli_obj_equals( alpha, &BLIS_ZERO ) ||
-	     bli_obj_has_zero_dim( a ) ||
-	     bli_obj_has_zero_dim( b ) )
-	{
-		bli_scalm( beta, c );
+	// Check for zero dimensions, alpha == 0, or other conditions which
+    // mean that we don't actually have to perform a full l3 operation.
+	if ( bli_l3_return_early_if_trivial( alpha, a, b, beta, c ) == BLIS_SUCCESS)
 		return;
-	}
 
 	// Initialize a local runtime with global settings if necessary. Note
 	// that in the case that a runtime is passed in, we make a local copy.
@@ -564,7 +564,6 @@ void PASTEMAC(syr2k,BLIS_OAPI_EX_SUF)
 {
 	bli_init_once();
 
-
 	// Check parameters.
 	if ( bli_error_checking_is_enabled() )
 		bli_syr2k_check( alpha, a, b, beta, c, cntx );
@@ -601,6 +600,11 @@ void PASTEMAC(hemm,BLIS_OAPI_EX_SUF)
 	if ( bli_error_checking_is_enabled() )
 		bli_hemm_check( side, alpha, a, b, beta, c, cntx );
 
+	// Check for zero dimensions, alpha == 0, or other conditions which
+    // mean that we don't actually have to perform a full l3 operation.
+	if ( bli_l3_return_early_if_trivial( alpha, a, b, beta, c ) == BLIS_SUCCESS)
+		return;
+
 	// Initialize a local runtime with global settings if necessary. Note
 	// that in the case that a runtime is passed in, we make a local copy.
 	rntm_t rntm_l;
@@ -631,13 +635,6 @@ void PASTEMAC(hemm,BLIS_OAPI_EX_SUF)
 	obj_t   a_local;
 	obj_t   b_local;
 	obj_t   c_local;
-
-	// If alpha is zero, scale by beta and return.
-	if ( bli_obj_equals( alpha, &BLIS_ZERO ) )
-	{
-		bli_scalm( beta, c );
-		return;
-	}
 
 	// Alias A, B, and C in case we need to apply transformations.
 	bli_obj_alias_to( a, &a_local );
@@ -786,6 +783,11 @@ void PASTEMAC(symm,BLIS_OAPI_EX_SUF)
 	if ( bli_error_checking_is_enabled() )
 		bli_symm_check( side, alpha, a, b, beta, c, cntx );
 
+	// Check for zero dimensions, alpha == 0, or other conditions which
+    // mean that we don't actually have to perform a full l3 operation.
+	if ( bli_l3_return_early_if_trivial( alpha, a, b, beta, c ) == BLIS_SUCCESS)
+		return;
+
 	// Initialize a local runtime with global settings if necessary. Note
 	// that in the case that a runtime is passed in, we make a local copy.
 	rntm_t rntm_l;
@@ -816,13 +818,6 @@ void PASTEMAC(symm,BLIS_OAPI_EX_SUF)
 	obj_t   a_local;
 	obj_t   b_local;
 	obj_t   c_local;
-
-	// If alpha is zero, scale by beta and return.
-	if ( bli_obj_equals( alpha, &BLIS_ZERO ) )
-	{
-		bli_scalm( beta, c );
-		return;
-	}
 
 	// Alias A, B, and C in case we need to apply transformations.
 	bli_obj_alias_to( a, &a_local );
@@ -970,6 +965,11 @@ void PASTEMAC(trmm3,BLIS_OAPI_EX_SUF)
 	if ( bli_error_checking_is_enabled() )
 		bli_trmm3_check( side, alpha, a, b, beta, c, cntx );
 
+	// Check for zero dimensions, alpha == 0, or other conditions which
+    // mean that we don't actually have to perform a full l3 operation.
+	if ( bli_l3_return_early_if_trivial( alpha, a, b, beta, c ) == BLIS_SUCCESS)
+		return;
+
 	// Initialize a local runtime with global settings if necessary. Note
 	// that in the case that a runtime is passed in, we make a local copy.
 	rntm_t rntm_l;
@@ -1000,13 +1000,6 @@ void PASTEMAC(trmm3,BLIS_OAPI_EX_SUF)
 	obj_t   a_local;
 	obj_t   b_local;
 	obj_t   c_local;
-
-	// If alpha is zero, scale by beta and return.
-	if ( bli_obj_equals( alpha, &BLIS_ZERO ) )
-	{
-		bli_scalm( beta, c );
-		return;
-	}
 
 	// Alias A, B, and C so we can tweak the objects if necessary.
 	bli_obj_alias_to( a, &a_local );
@@ -1220,6 +1213,11 @@ void PASTEMAC(trmm,BLIS_OAPI_EX_SUF)
 	if ( bli_error_checking_is_enabled() )
 		bli_trmm_check( side, alpha, a, b, cntx );
 
+	// Check for zero dimensions, alpha == 0, or other conditions which
+    // mean that we don't actually have to perform a full l3 operation.
+	if ( bli_l3_return_early_if_trivial( alpha, a, b, &BLIS_ZERO, b ) == BLIS_SUCCESS)
+		return;
+
 	// Initialize a local runtime with global settings if necessary. Note
 	// that in the case that a runtime is passed in, we make a local copy.
 	rntm_t rntm_l;
@@ -1249,13 +1247,6 @@ void PASTEMAC(trmm,BLIS_OAPI_EX_SUF)
 	obj_t   a_local;
 	obj_t   b_local;
 	obj_t   c_local;
-
-	// If alpha is zero, scale by beta and return.
-	if ( bli_obj_equals( alpha, &BLIS_ZERO ) )
-	{
-		bli_scalm( alpha, b );
-		return;
-	}
 
 	// Alias A and B so we can tweak the objects if necessary.
 	bli_obj_alias_to( a, &a_local );
@@ -1421,6 +1412,11 @@ void PASTEMAC(trsm,BLIS_OAPI_EX_SUF)
 	if ( bli_error_checking_is_enabled() )
 		bli_trsm_check( side, alpha, a, b, cntx );
 
+	// Check for zero dimensions, alpha == 0, or other conditions which
+    // mean that we don't actually have to perform a full l3 operation.
+	if ( bli_l3_return_early_if_trivial( alpha, a, b, &BLIS_ZERO, b ) == BLIS_SUCCESS)
+		return;
+
 	// Initialize a local runtime with global settings if necessary. Note
 	// that in the case that a runtime is passed in, we make a local copy.
 	rntm_t rntm_l;
@@ -1457,13 +1453,6 @@ void PASTEMAC(trsm,BLIS_OAPI_EX_SUF)
 	if ( status == BLIS_SUCCESS ) return;
 #endif
 #endif
-
-	// If alpha is zero, scale by beta and return.
-	if ( bli_obj_equals( alpha, &BLIS_ZERO ) )
-	{
-		bli_scalm( alpha, b );
-		return;
-	}
 
 	// Alias A and B so we can tweak the objects if necessary.
 	bli_obj_alias_to( a, &a_local );
