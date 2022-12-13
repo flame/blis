@@ -394,7 +394,7 @@ void bli_packm_sup
 			  ( void* )a,  rs_a,  cs_a,
 			          *p, *rs_p, *cs_p,
 			  ( cntx_t* )cntx,
-			  thread
+			  bli_thrinfo_sub_prenode( thread )
 			);
 		}
 		else // if ( schema == BLIS_PACKED_ROW_PANELS )
@@ -415,7 +415,7 @@ void bli_packm_sup
 			          *p, *rs_p, *cs_p,
 			               pd_p, *ps_p,
 			  ( cntx_t* )cntx,
-			  thread
+			  bli_thrinfo_sub_prenode( thread )
 			);
 		}
 
