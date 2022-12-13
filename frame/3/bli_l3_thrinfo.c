@@ -150,6 +150,15 @@ thrinfo_t* bli_l3_sup_thrinfo_create
 	thrinfo_t* thread_jr = bli_thrinfo_split( n_way_jr, thread_pa );
 	thrinfo_t* thread_ir = bli_thrinfo_split( n_way_ir, thread_jr );
 
+	const dim_t n_way_pb = bli_thrinfo_num_threads( thread_pb );
+	const dim_t n_way_pa = bli_thrinfo_num_threads( thread_pa );
+
+	// Create and set the prenodes for the packb and packa thrinfo_t nodes.
+	thrinfo_t* thread_pb_single = bli_thrinfo_split( n_way_pb, thread_pb );
+	thrinfo_t* thread_pa_single = bli_thrinfo_split( n_way_pa, thread_pa );
+	bli_thrinfo_set_sub_prenode( thread_pb_single, thread_pb );
+	bli_thrinfo_set_sub_prenode( thread_pa_single, thread_pa );
+
 	bli_thrinfo_set_sub_node( thread_jc,      root );
 	bli_thrinfo_set_sub_node( thread_pc, thread_jc );
 	bli_thrinfo_set_sub_node( thread_pb, thread_pc );
