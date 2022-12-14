@@ -3755,16 +3755,16 @@ main()
 	enable_jrir_slab_01=0
 	enable_jrir_tlb_01=0
 	if   [ "x${thread_part_jrir}" = "xrr" ]; then
-		echo "${script_name}: requesting round-robin threading in jr and/or ir loops."
+		echo "${script_name}: requesting round-robin (rr) work partitioning in jr and/or ir loops."
 		enable_jrir_rr_01=1
 	elif [ "x${thread_part_jrir}" = "xslab" ]; then
-		echo "${script_name}: requesting slab threading in jr and/or ir loops."
+		echo "${script_name}: requesting slab work partitioning in jr and/or ir loops."
 		enable_jrir_slab_01=1
 	elif [ "x${thread_part_jrir}" = "xtlb" ]; then
-		echo "${script_name}: requesting tile-level load balancing in unified jr+ir loop."
+		echo "${script_name}: requesting tile-level load balancing (tlb) in unified jr+ir loop."
 		enable_jrir_tlb_01=1
 	else
-		echo "${script_name}: *** Unsupported method of thread partitioning in jr/ir loops: ${thread_part_jrir}."
+		echo "${script_name}: *** Unsupported method of work partitioning in jr/ir loops: ${thread_part_jrir}."
 		exit 1
 	fi
 
