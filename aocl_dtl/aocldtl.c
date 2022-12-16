@@ -5,7 +5,7 @@
  *               These functions are invoked though macros by
  *               end user.
  *
- * Copyright (C) 2020-2022, Advanced Micro Devices, Inc. All rights reserved.
+ * Copyright (C) 2020-2023, Advanced Micro Devices, Inc. All rights reserved.
  *
  *=======================================================================*/
 #include "blis.h"
@@ -129,7 +129,7 @@ void DTL_Initialize(
 
 #if (AOCL_DTL_LOG_ENABLE || AOCL_DTL_DUMP_ENABLE)
     
-    /* Check if DTL logging is requested via envoronment variable */ 
+    /* Check if DTL logging is requested via environment variable */
     gbIsLoggingEnabled = bli_env_get_var( "AOCL_VERBOSE", TRUE );
 #endif
 

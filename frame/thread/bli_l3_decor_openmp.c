@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2018-2022, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2018-2023, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -145,7 +145,7 @@ void bli_l3_thread_decorator
 		tls_aoclprogress_counter = 0;
 
 		// We send the update only after certain threshold is reached, 
-		// The thresold is defined as AOCL_PROGRESS_FREQUENCY. 
+		// The threshold is defined as AOCL_PROGRESS_FREQUENCY.
 		// This variable stores the counter value when last update was sent. 
 		// It is compared with current counter value to see if it is time to
 		// send the next update.

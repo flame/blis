@@ -5,7 +5,7 @@
 #  libraries.
 #
 #  Copyright (C) 2014, The University of Texas at Austin
-#  Copyright (C) 2022, Advanced Micro Devices, Inc. All rights reserved.
+#  Copyright (C) 2019-2023, Advanced Micro Devices, Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -96,7 +96,7 @@ ifeq ($(CC_VENDOR),clang)
 # AMD clang version 11.0.0 (CLANG: AOCC_2.3.0-Build#85 2020_11_10) (based on LLVM Mirror.Version.11.0.0)
 # AMD clang version 12.0.0 (CLANG: AOCC_3.0.0-Build#2 2020_11_05) (based on LLVM Mirror.Version.12.0.0)
 
-# For our prupose we just want to know if it version 2x or 3x
+# For our purpose we just want to know if it version 2x or 3x
 
 # for version 3x we will enable znver3
 ifeq ($(strip $(shell $(CC) -v |&head -1 |grep -c 'AOCC_3')),1)

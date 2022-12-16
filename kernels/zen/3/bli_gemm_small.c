@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2017-2022, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2017-2023, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -165,25 +165,25 @@ err_t bli_gemm_small
 #ifndef BLIS_ENABLE_MULTITHREADING
             // bli_dgemm_small_At is called directly from blas interface for
             // sizes within thresholds.
-            // Avoinding calling of bli_dgemm_small_At from gemm_front
+            // Avoiding calling of bli_dgemm_small_At from gemm_front
             // and directing to native implementation.
             return BLIS_NOT_YET_IMPLEMENTED;
 #else
             return bli_dgemm_small_At(alpha, a, b, beta, c, cntx, cntl);
 #endif
         }
-    if(dt == BLIS_DCOMPLEX)
-    {
+        if(dt == BLIS_DCOMPLEX)
+        {
 #ifndef BLIS_ENABLE_MULTITHREADING
             // bli_zgemm_small_At is called directly from blas interface for
             // sizes within thresholds.
-            // Avoinding calling of bli_zgemm_small_At from gemm_front
+            // Avoiding calling of bli_zgemm_small_At from gemm_front
             // and directing to native implementation.
             return BLIS_NOT_YET_IMPLEMENTED;
 #else
-        return bli_zgemm_small_At(alpha, a, b, beta, c, cntx, cntl);
+            return bli_zgemm_small_At(alpha, a, b, beta, c, cntx, cntl);
 #endif
-    }
+        }
 
         if (bli_obj_has_notrans( b ))
         {
@@ -1827,7 +1827,7 @@ static err_t bli_sgemm_small
         double *C = bli_obj_buffer_at_off(c); // pointer to elements of Matrix C
 
         double *tA = A, *tB = B, *tC = C;//, *tA_pack;
-        double *tA_packed; // temprorary pointer to hold packed A memory pointer
+        double *tA_packed; // temporary pointer to hold packed A memory pointer
         guint_t row_idx_packed; //packed A memory row index
         guint_t lda_packed; //lda of packed A
         guint_t col_idx_start; //starting index after A matrix is packed.
@@ -4341,7 +4341,7 @@ err_t bli_dgemm_small_At
         double *C = bli_obj_buffer_at_off(c); // pointer to elements of Matrix C
 
         double *tA = A, *tB = B, *tC = C;//, *tA_pack;
-        double *tA_packed; // temprorary pointer to hold packed A memory pointer
+        double *tA_packed; // temporary pointer to hold packed A memory pointer
         guint_t row_idx_packed; //packed A memory row index
         guint_t lda_packed; //lda of packed A
         dim_t tb_inc_row = 1; // row stride of matrix B
@@ -5822,7 +5822,7 @@ err_t bli_zgemm_small
         dcomplex *C = bli_obj_buffer_at_off(c); //pointer to elements of Matrix C
 
         dcomplex *tA = A, *tB = B, *tC = C;//, *tA_pack;
-        dcomplex *tA_packed; //temprorary pointer to hold packed A memory pointer
+        dcomplex *tA_packed; //temporary pointer to hold packed A memory pointer
         guint_t row_idx_packed; //packed A memory row index
         guint_t lda_packed; //lda of packed A
         guint_t col_idx_start; //starting index after A matrix is packed.
@@ -9779,7 +9779,7 @@ err_t bli_zgemm_small_At
         dcomplex *C = bli_obj_buffer_at_off(c); //pointer to elements of Matrix C
 
         dcomplex *tA = A, *tB = B, *tC = C;//, *tA_pack;
-        dcomplex *tA_packed; // temprorary pointer to hold packed A memory pointer
+        dcomplex *tA_packed; // temporary pointer to hold packed A memory pointer
         guint_t row_idx_packed; //packed A memory row index
         guint_t lda_packed; //lda of packed A
         dim_t tb_inc_row = 1; // row stride of matrix B
