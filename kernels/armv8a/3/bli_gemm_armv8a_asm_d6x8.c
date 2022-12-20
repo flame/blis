@@ -91,7 +91,7 @@ void bli_sgemm_armv8a_asm_8x12
 	uint64_t rs_c   = rs_c0;
 	uint64_t cs_c   = cs_c0;
 
-	GEMM_UKR_SETUP_CT( s, 8, 12, false );
+	GEMM_UKR_SETUP_AUXCT( s, 8, 12, false );
 
 
 	__asm__ volatile
@@ -1116,7 +1116,7 @@ void bli_sgemm_armv8a_asm_8x12
 	 "v28", "v29", "v30", "v31"
 	);
 
-	GEMM_UKR_FLUSH_CT( s );
+	GEMM_UKR_FLUSH_AUXCT( s );
 }
 
 
@@ -1183,7 +1183,7 @@ void bli_dgemm_armv8a_asm_6x8
 	uint64_t rs_c   = rs_c0;
 	uint64_t cs_c   = cs_c0;
 
-	GEMM_UKR_SETUP_CT( d, 6, 8, false );
+	GEMM_UKR_SETUP_AUXCT( d, 6, 8, false );
 
 
 	__asm__ volatile
@@ -2143,6 +2143,6 @@ void bli_dgemm_armv8a_asm_6x8
 	 "v28", "v29", "v30", "v31"
 	);
 
-	GEMM_UKR_FLUSH_CT( d );
+	GEMM_UKR_FLUSH_AUXCT( d );
 }
 

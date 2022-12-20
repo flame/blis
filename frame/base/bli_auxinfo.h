@@ -83,6 +83,12 @@ BLIS_INLINE void* bli_auxinfo_params( auxinfo_t* ai )
     return ai->params;
 }
 
+BLIS_INLINE void* bli_auxinfo_ct( auxinfo_t* ai )
+{
+	return ai->ct;
+}
+
+
 
 // auxinfo_t field modification
 
@@ -134,6 +140,11 @@ BLIS_INLINE void bli_auxinfo_set_ukr( void_fp ukr, auxinfo_t* ai )
 BLIS_INLINE void bli_auxinfo_set_params( void* params, auxinfo_t* ai )
 {
     ai->params = params;
+}
+
+BLIS_INLINE void bli_auxinfo_set_ct( void* ct, auxinfo_t* ai )
+{
+    ai->ct = ct;
 }
 
 #endif

@@ -168,6 +168,17 @@ void PASTEMAC(ch,varname) \
 	PASTECH(ch,gemm_ukr_ft) \
 	                gemm_ukr   = bli_cntx_get_l3_vir_ukr_dt( dt, BLIS_GEMM_UKR, cntx ); \
 \
+	/* Temporary C buffer for edge cases. Note that the strides of this
+	   temporary buffer are set so that they match the storage of the
+	   original C matrix. For example, if C is column-stored, ct will be
+	   column-stored as well. */ \
+	ctype           ct[ BLIS_STACK_BUF_MAX_SIZE \
+	                    / sizeof( ctype ) ] \
+	                    __attribute__((aligned(BLIS_STACK_BUF_ALIGN_SIZE))); \
+	const bool      col_pref    = bli_cntx_l3_vir_ukr_prefers_cols_dt( dt, BLIS_GEMM_UKR, cntx ); \
+	const inc_t     rs_ct       = ( col_pref ? 1 : NR ); \
+	const inc_t     cs_ct       = ( col_pref ? MR : 1 ); \
+\
 	ctype* restrict one        = PASTEMAC(ch,1); \
 	ctype* restrict a_cast     = a; \
 	ctype* restrict b_cast     = b; \
@@ -282,6 +293,8 @@ void PASTEMAC(ch,varname) \
 \
 	/* Save the imaginary stride of A to the auxinfo_t object. */ \
 	bli_auxinfo_set_is_a( istep_a, &aux ); \
+\
+	bli_auxinfo_set_ct( ct, &aux ); \
 \
 	/* The 'thread' argument points to the thrinfo_t node for the 2nd (jr)
 	   loop around the microkernel. Here we query the thrinfo_t node for the

@@ -280,6 +280,8 @@ void PASTEMAC(ch,varname) \
 	bli_auxinfo_set_is_a( is_a, &aux ); \
 	bli_auxinfo_set_is_b( is_b, &aux ); \
 \
+	bli_auxinfo_set_ct( ct, &aux ); \
+\
 	/* Save the desired output datatype (indicating no typecasting). */ \
 	/*bli_auxinfo_set_dt_on_output( dt, &aux );*/ \
 \

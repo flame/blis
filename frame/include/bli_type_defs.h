@@ -1159,6 +1159,8 @@ typedef struct
 	void_fp ukr;
 	void*   params;
 
+	void*   ct;
+
 } auxinfo_t;
 
 

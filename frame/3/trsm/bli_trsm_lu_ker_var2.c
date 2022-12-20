@@ -321,6 +321,8 @@ void PASTEMAC(ch,varname) \
 	/* Save the imaginary stride of B to the auxinfo_t object. */ \
 	bli_auxinfo_set_is_b( istep_b, &aux ); \
 \
+	bli_auxinfo_set_ct( ct, &aux ); \
+\
 	/* We don't bother querying the thrinfo_t node for the 1st loop because
 	   we can't parallelize that loop in trsm due to the inter-iteration
 	   dependencies that exist. */ \
