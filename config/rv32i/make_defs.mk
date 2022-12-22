@@ -45,7 +45,7 @@ THIS_CONFIG    := rv32i
 # NOTE: The build system will append these variables with various
 # general-purpose/configuration-agnostic flags in common.mk. You
 # may specify additional flags here as needed.
-CPPROCFLAGS    := -mabi=ilp32d
+CPPROCFLAGS    := -mabi=ilp32
 CMISCFLAGS     :=
 CPICFLAGS      :=
 CWARNFLAGS     := -Wall -Wno-unused-function -Wfatal-errors
@@ -57,7 +57,7 @@ endif
 ifeq ($(DEBUG_TYPE),noopt)
 COPTFLAGS      := -O0
 else
-COPTFLAGS      := -O2 -march=rv32ia
+COPTFLAGS      := -O2 -march=rv32i
 endif
 
 # Flags specific to optimized kernels.
