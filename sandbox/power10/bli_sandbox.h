@@ -35,6 +35,10 @@
 #ifndef BLIS_SANDBOX_H
 #define BLIS_SANDBOX_H
 
+#ifndef BLIS_SANDBOX_POWER10
+#define BLIS_SANDBOX_POWER10
+#endif
+
 #include "blis.h"
 #include "gemm_prototypes.h"
 
