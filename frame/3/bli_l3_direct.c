@@ -45,9 +45,12 @@ dir_t bli_l3_direct
 	// Query the operation family.
 	opid_t family = bli_cntl_family( cntl );
 
-	if      ( family == BLIS_GEMM ) return bli_gemm_direct( a, b, c );
+	if      ( family == BLIS_GEMM ||
+	          family == BLIS_HEMM ||
+	          family == BLIS_SYMM ) return bli_gemm_direct( a, b, c );
 	else if ( family == BLIS_GEMMT ) return bli_gemmt_direct( a, b, c );
-	else if ( family == BLIS_TRMM ) return bli_trmm_direct( a, b, c );
+	else if ( family == BLIS_TRMM ||
+	          family == BLIS_TRMM3 ) return bli_trmm_direct( a, b, c );
 	else if ( family == BLIS_TRSM ) return bli_trsm_direct( a, b, c );
 
 	// This should never execute.

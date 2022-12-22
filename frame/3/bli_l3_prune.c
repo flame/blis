@@ -46,7 +46,9 @@ void bli_l3_prune_unref_mparts_m
 	/* Query the operation family. */
 	opid_t family = bli_cntl_family( cntl );
 
-	if      ( family == BLIS_GEMM )
+	if      ( family == BLIS_GEMM ||
+	          family == BLIS_HEMM ||
+	          family == BLIS_SYMM )
 	{
 		/* No pruning is necessary for gemm. */
 		return;
@@ -59,6 +61,7 @@ void bli_l3_prune_unref_mparts_m
 		bli_prune_unref_mparts( c, BLIS_M, a, BLIS_M );
 	}
 	else if ( family == BLIS_TRMM ||
+	          family == BLIS_TRMM3 ||
 	          family == BLIS_TRSM )
 	{
 		/* Prune any unreferenced part from the subpartition of A (that would
@@ -79,7 +82,9 @@ void bli_l3_prune_unref_mparts_n
 	/* Query the operation family. */
 	opid_t family = bli_cntl_family( cntl );
 
-	if      ( family == BLIS_GEMM )
+	if      ( family == BLIS_GEMM ||
+	          family == BLIS_HEMM ||
+	          family == BLIS_SYMM )
 	{
 		/* No pruning is necessary for gemm. */
 		return;
@@ -92,6 +97,7 @@ void bli_l3_prune_unref_mparts_n
 		bli_prune_unref_mparts( c, BLIS_N, b, BLIS_N );
 	}
 	else if ( family == BLIS_TRMM ||
+	          family == BLIS_TRMM3 ||
 	          family == BLIS_TRSM )
 	{
 		/* Prune any unreferenced part from the subpartition of B (that would
@@ -112,7 +118,9 @@ void bli_l3_prune_unref_mparts_k
 	/* Query the operation family. */
 	opid_t family = bli_cntl_family( cntl );
 
-	if      ( family == BLIS_GEMM )
+	if      ( family == BLIS_GEMM ||
+	          family == BLIS_HEMM ||
+	          family == BLIS_SYMM )
 	{
 		/* No pruning is necessary for gemm. */
 		return;
@@ -123,6 +131,7 @@ void bli_l3_prune_unref_mparts_k
 		return;
 	}
 	else if ( family == BLIS_TRMM ||
+	          family == BLIS_TRMM3 ||
 	          family == BLIS_TRSM )
 	{
 		/* Prune any unreferenced part from the subpartition of A (that would

@@ -61,9 +61,12 @@ cntl_t* bli_gemmbp_cntl_create
 	void_fp macro_kernel_fp;
 
 	// Choose the default macrokernel based on the operation family...
-	if      ( family == BLIS_GEMM ) macro_kernel_fp = bli_gemm_ker_var2;
+	if      ( family == BLIS_GEMM ||
+              family == BLIS_HEMM ||
+              family == BLIS_SYMM ) macro_kernel_fp = bli_gemm_ker_var2;
 	else if ( family == BLIS_GEMMT ) macro_kernel_fp = bli_gemmt_x_ker_var2;
-	else if ( family == BLIS_TRMM ) macro_kernel_fp = bli_trmm_xx_ker_var2;
+	else if ( family == BLIS_TRMM ||
+	          family == BLIS_TRMM3 ) macro_kernel_fp = bli_trmm_xx_ker_var2;
 	else /* should never execute */ macro_kernel_fp = NULL;
 
 	// ...unless a non-NULL kernel function pointer is passed in, in which

@@ -204,19 +204,6 @@ void PASTEMAC(gemm,BLIS_OAPI_EX_SUF)
 	alpha = &BLIS_ONE;
 	beta  = &BLIS_ONE;
 
-	// Parse and interpret the contents of the rntm_t object to properly
-	// set the ways of parallelism for each loop, and then make any
-	// additional modifications necessary for the current operation.
-	bli_rntm_set_ways_for_op
-	(
-	  BLIS_GEMM,
-	  BLIS_LEFT, // ignored for gemm/hemm/symm
-	  bli_obj_length( &c_local ),
-	  bli_obj_width( &c_local ),
-	  bli_obj_width( &a_local ),
-	  &rntm_l
-	);
-
 	      obj_t* cp    = &c_local;
 	const obj_t* betap = beta;
 
@@ -334,7 +321,7 @@ void PASTEMAC(gemm,BLIS_OAPI_EX_SUF)
 	  cp,
 	  cntx,
 	  cntl,
-	  &rntm_l
+	  rntm
 	);
 
 	// Free the thread's local control tree.
@@ -384,12 +371,6 @@ void PASTEMAC(gemmt,BLIS_OAPI_EX_SUF)
 	if ( bli_l3_return_early_if_trivial( alpha, a, b, beta, c ) == BLIS_SUCCESS)
 		return;
 
-	// Initialize a local runtime with global settings if necessary. Note
-	// that in the case that a runtime is passed in, we make a local copy.
-	rntm_t rntm_l;
-	if ( rntm == NULL ) { bli_rntm_init_from_global( &rntm_l ); }
-	else                { rntm_l = *rntm;                       }
-
 	// Default to using native execution.
 	num_t dt = bli_obj_dt( c );
 	ind_t im = BLIS_NAT;
@@ -435,19 +416,6 @@ void PASTEMAC(gemmt,BLIS_OAPI_EX_SUF)
 	// Set the pack schemas within the objects, as appropriate.
 	bli_l3_set_schemas( &a_local, &b_local, &c_local, cntx );
 
-	// Parse and interpret the contents of the rntm_t object to properly
-	// set the ways of parallelism for each loop, and then make any
-	// additional modifications necessary for the current operation.
-	bli_rntm_set_ways_for_op
-	(
-	  BLIS_GEMM,
-	  BLIS_LEFT, // ignored for gemm/hemm/symm/gemmt
-	  bli_obj_length( &c_local ),
-	  bli_obj_width( &c_local ),
-	  bli_obj_width( &a_local ),
-	  &rntm_l
-	);
-
 	// This is part of a hack to support mixed domain in bli_gemm_front().
 	// Sometimes we need to specify a non-standard schema for A and B, and
 	// we decided to transmit them via the schema field in the obj_t's
@@ -479,7 +447,7 @@ void PASTEMAC(gemmt,BLIS_OAPI_EX_SUF)
 	  &c_local,
 	  cntx,
 	  cntl,
-	  &rntm_l
+	  rntm
 	);
 
 	// Free the thread's local control tree.
@@ -505,18 +473,11 @@ void PASTEMAC(her2k,BLIS_OAPI_EX_SUF)
 		bli_her2k_check( alpha, a, b, beta, c, cntx );
 
 	obj_t alphah;
-	bli_obj_alias_to( alpha, &alphah );
-	bli_obj_toggle_conj( &alphah );
-
 	obj_t ah;
-	bli_obj_alias_to( a, &ah );
-	bli_obj_toggle_trans( &ah );
-	bli_obj_toggle_conj( &ah );
-
 	obj_t bh;
-	bli_obj_alias_to( b, &bh );
-	bli_obj_toggle_trans( &bh );
-	bli_obj_toggle_conj( &bh );
+	bli_obj_alias_with_conj( BLIS_CONJUGATE, alpha, &alphah );
+	bli_obj_alias_with_trans( BLIS_CONJ_TRANSPOSE, a, &ah );
+	bli_obj_alias_with_trans( BLIS_CONJ_TRANSPOSE, b, &bh );
 
 	// Invoke gemmt twice, using beta only the first time.
 	PASTEMAC(gemmt,BLIS_OAPI_EX_SUF)(   alpha, a, &bh,      beta, c, cntx, rntm );
@@ -550,12 +511,9 @@ void PASTEMAC(syr2k,BLIS_OAPI_EX_SUF)
 		bli_syr2k_check( alpha, a, b, beta, c, cntx );
 
 	obj_t at;
-	bli_obj_alias_to( a, &at );
-	bli_obj_toggle_trans( &at );
-
 	obj_t bt;
-	bli_obj_alias_to( b, &bt );
-	bli_obj_toggle_trans( &bt );
+	bli_obj_alias_with_trans( BLIS_TRANSPOSE, a, &at );
+	bli_obj_alias_with_trans( BLIS_TRANSPOSE, b, &bt );
 
 	// Invoke gemmt twice, using beta only the first time.
 	PASTEMAC(gemmt,BLIS_OAPI_EX_SUF)( alpha, a, &bt,      beta, c, cntx, rntm );
@@ -585,12 +543,6 @@ void PASTEMAC(hemm,BLIS_OAPI_EX_SUF)
     // mean that we don't actually have to perform a full l3 operation.
 	if ( bli_l3_return_early_if_trivial( alpha, a, b, beta, c ) == BLIS_SUCCESS)
 		return;
-
-	// Initialize a local runtime with global settings if necessary. Note
-	// that in the case that a runtime is passed in, we make a local copy.
-	rntm_t rntm_l;
-	if ( rntm == NULL ) { bli_rntm_init_from_global( &rntm_l ); }
-	else                { rntm_l = *rntm;                       }
 
 	// Default to using native execution.
 	num_t dt = bli_obj_dt( c );
@@ -685,19 +637,6 @@ void PASTEMAC(hemm,BLIS_OAPI_EX_SUF)
 	// Set the pack schemas within the objects.
 	bli_l3_set_schemas( &a_local, &b_local, &c_local, cntx );
 
-	// Parse and interpret the contents of the rntm_t object to properly
-	// set the ways of parallelism for each loop, and then make any
-	// additional modifications necessary for the current operation.
-	bli_rntm_set_ways_for_op
-	(
-	  BLIS_HEMM,
-	  BLIS_LEFT, // ignored for gemm/hemm/symm
-	  bli_obj_length( &c_local ),
-	  bli_obj_width( &c_local ),
-	  bli_obj_width( &a_local ),
-	  &rntm_l
-	);
-
 	// This is part of a hack to support mixed domain in bli_gemm_front().
 	// Sometimes we need to specify a non-standard schema for A and B, and
 	// we decided to transmit them via the schema field in the obj_t's
@@ -712,7 +651,7 @@ void PASTEMAC(hemm,BLIS_OAPI_EX_SUF)
 	cntl_t* cntl = bli_gemm_cntl_create
 	(
 	  NULL,
-	  BLIS_GEMM,
+	  BLIS_HEMM,
 	  schema_a,
 	  schema_b,
 	  bli_obj_ker_fn( c )
@@ -729,7 +668,7 @@ void PASTEMAC(hemm,BLIS_OAPI_EX_SUF)
 	  &c_local,
 	  cntx,
 	  cntl,
-	  &rntm_l
+	  rntm
 	);
 
 	// Free the thread's local control tree.
@@ -759,12 +698,6 @@ void PASTEMAC(symm,BLIS_OAPI_EX_SUF)
     // mean that we don't actually have to perform a full l3 operation.
 	if ( bli_l3_return_early_if_trivial( alpha, a, b, beta, c ) == BLIS_SUCCESS)
 		return;
-
-	// Initialize a local runtime with global settings if necessary. Note
-	// that in the case that a runtime is passed in, we make a local copy.
-	rntm_t rntm_l;
-	if ( rntm == NULL ) { bli_rntm_init_from_global( &rntm_l ); }
-	else                { rntm_l = *rntm;                       }
 
 	// Default to using native execution.
 	num_t dt = bli_obj_dt( c );
@@ -858,19 +791,6 @@ void PASTEMAC(symm,BLIS_OAPI_EX_SUF)
 	// Set the pack schemas within the objects.
 	bli_l3_set_schemas( &a_local, &b_local, &c_local, cntx );
 
-	// Parse and interpret the contents of the rntm_t object to properly
-	// set the ways of parallelism for each loop, and then make any
-	// additional modifications necessary for the current operation.
-	bli_rntm_set_ways_for_op
-	(
-	  BLIS_SYMM,
-	  BLIS_LEFT, // ignored for gemm/hemm/symm
-	  bli_obj_length( &c_local ),
-	  bli_obj_width( &c_local ),
-	  bli_obj_width( &a_local ),
-	  &rntm_l
-	);
-
 	// This is part of a hack to support mixed domain in bli_gemm_front().
 	// Sometimes we need to specify a non-standard schema for A and B, and
 	// we decided to transmit them via the schema field in the obj_t's
@@ -885,7 +805,7 @@ void PASTEMAC(symm,BLIS_OAPI_EX_SUF)
 	cntl_t* cntl = bli_gemm_cntl_create
 	(
 	  NULL,
-	  BLIS_GEMM,
+	  BLIS_SYMM,
 	  schema_a,
 	  schema_b,
 	  bli_obj_ker_fn( c )
@@ -902,7 +822,7 @@ void PASTEMAC(symm,BLIS_OAPI_EX_SUF)
 	  &c_local,
 	  cntx,
 	  cntl,
-	  &rntm_l
+	  rntm
 	);
 
 	// Free the thread's local control tree.
@@ -932,12 +852,6 @@ void PASTEMAC(trmm3,BLIS_OAPI_EX_SUF)
     // mean that we don't actually have to perform a full l3 operation.
 	if ( bli_l3_return_early_if_trivial( alpha, a, b, beta, c ) == BLIS_SUCCESS)
 		return;
-
-	// Initialize a local runtime with global settings if necessary. Note
-	// that in the case that a runtime is passed in, we make a local copy.
-	rntm_t rntm_l;
-	if ( rntm == NULL ) { bli_rntm_init_from_global( &rntm_l ); }
-	else                { rntm_l = *rntm;                       }
 
 	// Default to using native execution.
 	num_t dt = bli_obj_dt( c );
@@ -1042,19 +956,6 @@ void PASTEMAC(trmm3,BLIS_OAPI_EX_SUF)
 	// Set the pack schemas within the objects.
 	bli_l3_set_schemas( &a_local, &b_local, &c_local, cntx );
 
-	// Parse and interpret the contents of the rntm_t object to properly
-	// set the ways of parallelism for each loop, and then make any
-	// additional modifications necessary for the current operation.
-	bli_rntm_set_ways_for_op
-	(
-	  BLIS_TRMM3,
-	  side,
-	  bli_obj_length( &c_local ),
-	  bli_obj_width( &c_local ),
-	  bli_obj_width( &a_local ),
-	  &rntm_l
-	);
-
 	// This is part of a hack to support mixed domain in bli_gemm_front().
 	// Sometimes we need to specify a non-standard schema for A and B, and
 	// we decided to transmit them via the schema field in the obj_t's
@@ -1069,7 +970,7 @@ void PASTEMAC(trmm3,BLIS_OAPI_EX_SUF)
 	cntl_t* cntl = bli_gemm_cntl_create
 	(
 	  NULL,
-	  BLIS_TRMM,
+	  BLIS_TRMM3,
 	  schema_a,
 	  schema_b,
 	  bli_obj_ker_fn( &c_local )
@@ -1086,7 +987,7 @@ void PASTEMAC(trmm3,BLIS_OAPI_EX_SUF)
 	  &c_local,
 	  cntx,
 	  cntl,
-	  &rntm_l
+	  rntm
 	);
 
 	// Free the thread's local control tree.
@@ -1111,9 +1012,7 @@ void PASTEMAC(herk,BLIS_OAPI_EX_SUF)
 		bli_herk_check( alpha, a, beta, c, cntx );
 
 	obj_t ah;
-	bli_obj_alias_to( a, &ah );
-	bli_obj_toggle_trans( &ah );
-	bli_obj_toggle_conj( &ah );
+	bli_obj_alias_with_trans( BLIS_CONJ_TRANSPOSE, a, &ah );
 
 	PASTEMAC(gemmt,BLIS_OAPI_EX_SUF)( alpha, a, &ah, beta, c, cntx, rntm );
 
@@ -1144,8 +1043,7 @@ void PASTEMAC(syrk,BLIS_OAPI_EX_SUF)
 		bli_syrk_check( alpha, a, beta, c, cntx );
 
 	obj_t at;
-	bli_obj_alias_to( a, &at );
-	bli_obj_toggle_trans( &at );
+	bli_obj_alias_with_trans( BLIS_TRANSPOSE, a, &at );
 
 	PASTEMAC(gemmt,BLIS_OAPI_EX_SUF)( alpha, a, &at, beta, c, cntx, rntm );
 }
@@ -1171,12 +1069,6 @@ void PASTEMAC(trmm,BLIS_OAPI_EX_SUF)
     // mean that we don't actually have to perform a full l3 operation.
 	if ( bli_l3_return_early_if_trivial( alpha, a, b, &BLIS_ZERO, b ) == BLIS_SUCCESS)
 		return;
-
-	// Initialize a local runtime with global settings if necessary. Note
-	// that in the case that a runtime is passed in, we make a local copy.
-	rntm_t rntm_l;
-	if ( rntm == NULL ) { bli_rntm_init_from_global( &rntm_l ); }
-	else                { rntm_l = *rntm;                       }
 
 	// Default to using native execution.
 	num_t dt = bli_obj_dt( b );
@@ -1289,19 +1181,6 @@ void PASTEMAC(trmm,BLIS_OAPI_EX_SUF)
 	// Set the pack schemas within the objects.
 	bli_l3_set_schemas( &a_local, &b_local, &c_local, cntx );
 
-	// Parse and interpret the contents of the rntm_t object to properly
-	// set the ways of parallelism for each loop, and then make any
-	// additional modifications necessary for the current operation.
-	bli_rntm_set_ways_for_op
-	(
-	  BLIS_TRMM,
-	  side,
-	  bli_obj_length( &c_local ),
-	  bli_obj_width( &c_local ),
-	  bli_obj_width( &a_local ),
-	  &rntm_l
-	);
-
 	// This is part of a hack to support mixed domain in bli_gemm_front().
 	// Sometimes we need to specify a non-standard schema for A and B, and
 	// we decided to transmit them via the schema field in the obj_t's
@@ -1333,7 +1212,7 @@ void PASTEMAC(trmm,BLIS_OAPI_EX_SUF)
 	  &c_local,
 	  cntx,
 	  cntl,
-	  &rntm_l
+	  rntm
 	);
 
 	// Free the thread's local control tree.
@@ -1361,12 +1240,6 @@ void PASTEMAC(trsm,BLIS_OAPI_EX_SUF)
     // mean that we don't actually have to perform a full l3 operation.
 	if ( bli_l3_return_early_if_trivial( alpha, a, b, &BLIS_ZERO, b ) == BLIS_SUCCESS)
 		return;
-
-	// Initialize a local runtime with global settings if necessary. Note
-	// that in the case that a runtime is passed in, we make a local copy.
-	rntm_t rntm_l;
-	if ( rntm == NULL ) { bli_rntm_init_from_global( &rntm_l ); }
-	else                { rntm_l = *rntm;                       }
 
 	// Default to using native execution.
 	num_t dt = bli_obj_dt( b );
@@ -1453,19 +1326,6 @@ void PASTEMAC(trsm,BLIS_OAPI_EX_SUF)
 	// Set the pack schemas within the objects.
 	bli_l3_set_schemas( &a_local, &b_local, &c_local, cntx );
 
-	// Parse and interpret the contents of the rntm_t object to properly
-	// set the ways of parallelism for each loop, and then make any
-	// additional modifications necessary for the current operation.
-	bli_rntm_set_ways_for_op
-	(
-	  BLIS_TRSM,
-	  side,
-	  bli_obj_length( &c_local ),
-	  bli_obj_width( &c_local ),
-	  bli_obj_width( &a_local ),
-	  &rntm_l
-	);
-
 	// This is part of a hack to support mixed domain in bli_gemm_front().
 	// Sometimes we need to specify a non-standard schema for A and B, and
 	// we decided to transmit them via the schema field in the obj_t's
@@ -1497,7 +1357,7 @@ void PASTEMAC(trsm,BLIS_OAPI_EX_SUF)
 	  &c_local,
 	  cntx,
 	  cntl,
-	  &rntm_l
+	  rntm
 	);
 
 	// Free the thread's local control tree.

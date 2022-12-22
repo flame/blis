@@ -720,9 +720,12 @@ siz_t bli_thread_range_mdim
 	// function will mistakenly skip over unstored regions of the
 	// structured matrix, even though they represent part of that matrix
 	// that will be dense and full (after packing).
-	if      ( family == BLIS_GEMM ) { x = a; use_weighted = FALSE; }
+	if      ( family == BLIS_GEMM ||
+              family == BLIS_HEMM ||
+              family == BLIS_SYMM ) { x = a; use_weighted = FALSE; }
 	else if ( family == BLIS_GEMMT ) { x = c; use_weighted = TRUE;  }
-	else if ( family == BLIS_TRMM ) { x = a; use_weighted = TRUE;  }
+	else if ( family == BLIS_TRMM ||
+              family == BLIS_TRMM3 ) { x = a; use_weighted = TRUE;  }
 	else    /*family == BLIS_TRSM*/ { x = a; use_weighted = FALSE; }
 
 	if ( use_weighted )
@@ -779,9 +782,12 @@ siz_t bli_thread_range_ndim
 	// function will mistakenly skip over unstored regions of the
 	// structured matrix, even though they represent part of that matrix
 	// that will be dense and full (after packing).
-	if      ( family == BLIS_GEMM ) { x = b; use_weighted = FALSE; }
+	if      ( family == BLIS_GEMM ||
+              family == BLIS_HEMM ||
+              family == BLIS_SYMM ) { x = b; use_weighted = FALSE; }
 	else if ( family == BLIS_GEMMT ) { x = c; use_weighted = TRUE;  }
-	else if ( family == BLIS_TRMM ) { x = b; use_weighted = TRUE;  }
+	else if ( family == BLIS_TRMM ||
+              family == BLIS_TRMM3 ) { x = b; use_weighted = TRUE;  }
 	else    /*family == BLIS_TRSM*/ { x = b; use_weighted = FALSE; }
 
 	if ( use_weighted )
