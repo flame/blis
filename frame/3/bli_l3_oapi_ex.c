@@ -47,7 +47,6 @@ err_t bli_l3_return_early_if_trivial
        const obj_t*  c
       )
 {
-
 	// If C has a zero dimension, return early.
 	if ( bli_obj_has_zero_dim( c ) )
         return BLIS_SUCCESS;
@@ -129,10 +128,6 @@ void PASTEMAC(gemm,BLIS_OAPI_EX_SUF)
 	// method id determined above.
 	if ( cntx == NULL ) cntx = bli_gks_query_ind_cntx( im );
 
-	obj_t   a_local;
-	obj_t   b_local;
-	obj_t   c_local;
-
 #if 0
 #ifdef BLIS_ENABLE_SMALL_MATRIX
 	// Only handle small problems separately for homogeneous datatypes.
@@ -147,17 +142,12 @@ void PASTEMAC(gemm,BLIS_OAPI_EX_SUF)
 #endif
 
 	// Alias A, B, and C in case we need to apply transformations.
-	bli_obj_alias_to( a, &a_local );
-	bli_obj_alias_to( b, &b_local );
-	bli_obj_alias_to( c, &c_local );
-
-	// Set the obj_t buffer field to the location currently implied by the row
-	// and column offsets and then zero the offsets. If any of the original
-	// obj_t's were views into larger matrices, this step effectively makes
-	// those obj_t's "forget" their lineage.
-	bli_obj_reset_origin( &a_local );
-	bli_obj_reset_origin( &b_local );
-	bli_obj_reset_origin( &c_local );
+	obj_t a_local;
+	obj_t b_local;
+	obj_t c_local;
+	bli_obj_alias_and_reset_origin( a, &a_local );
+	bli_obj_alias_and_reset_origin( b, &b_local );
+	bli_obj_alias_and_reset_origin( c, &c_local );
 
 	// An optimization: If C is stored by rows and the micro-kernel prefers
 	// contiguous columns, or if C is stored by columns and the micro-kernel
@@ -421,22 +411,13 @@ void PASTEMAC(gemmt,BLIS_OAPI_EX_SUF)
 	// method id determined above.
 	if ( cntx == NULL ) cntx = bli_gks_query_ind_cntx( im );
 
-	obj_t   a_local;
-	obj_t   b_local;
-	obj_t   c_local;
-
 	// Alias A, B, and C in case we need to apply transformations.
-	bli_obj_alias_to( a, &a_local );
-	bli_obj_alias_to( b, &b_local );
-	bli_obj_alias_to( c, &c_local );
-
-	// Set the obj_t buffer field to the location currently implied by the row
-	// and column offsets and then zero the offsets. If any of the original
-	// obj_t's were views into larger matrices, this step effectively makes
-	// those obj_t's "forget" their lineage.
-	bli_obj_reset_origin( &a_local );
-	bli_obj_reset_origin( &b_local );
-	bli_obj_reset_origin( &c_local );
+	obj_t a_local;
+	obj_t b_local;
+	obj_t c_local;
+	bli_obj_alias_and_reset_origin( a, &a_local );
+	bli_obj_alias_and_reset_origin( b, &b_local );
+	bli_obj_alias_and_reset_origin( c, &c_local );
 
 	// An optimization: If C is stored by rows and the micro-kernel prefers
 	// contiguous columns, or if C is stored by columns and the micro-kernel
@@ -632,22 +613,13 @@ void PASTEMAC(hemm,BLIS_OAPI_EX_SUF)
 	// method id determined above.
 	if ( cntx == NULL ) cntx = bli_gks_query_ind_cntx( im );
 
-	obj_t   a_local;
-	obj_t   b_local;
-	obj_t   c_local;
-
 	// Alias A, B, and C in case we need to apply transformations.
-	bli_obj_alias_to( a, &a_local );
-	bli_obj_alias_to( b, &b_local );
-	bli_obj_alias_to( c, &c_local );
-
-	// Set the obj_t buffer field to the location currently implied by the row
-	// and column offsets and then zero the offsets. If any of the original
-	// obj_t's were views into larger matrices, this step effectively makes
-	// those obj_t's "forget" their lineage.
-	bli_obj_reset_origin( &a_local );
-	bli_obj_reset_origin( &b_local );
-	bli_obj_reset_origin( &c_local );
+	obj_t a_local;
+	obj_t b_local;
+	obj_t c_local;
+	bli_obj_alias_and_reset_origin( a, &a_local );
+	bli_obj_alias_and_reset_origin( b, &b_local );
+	bli_obj_alias_and_reset_origin( c, &c_local );
 
 #ifdef BLIS_DISABLE_HEMM_RIGHT
 	// NOTE: This case casts right-side hemm in terms of left side. This is
@@ -815,22 +787,13 @@ void PASTEMAC(symm,BLIS_OAPI_EX_SUF)
 	// method id determined above.
 	if ( cntx == NULL ) cntx = bli_gks_query_ind_cntx( im );
 
-	obj_t   a_local;
-	obj_t   b_local;
-	obj_t   c_local;
-
 	// Alias A, B, and C in case we need to apply transformations.
-	bli_obj_alias_to( a, &a_local );
-	bli_obj_alias_to( b, &b_local );
-	bli_obj_alias_to( c, &c_local );
-
-	// Set the obj_t buffer field to the location currently implied by the row
-	// and column offsets and then zero the offsets. If any of the original
-	// obj_t's were views into larger matrices, this step effectively makes
-	// those obj_t's "forget" their lineage.
-	bli_obj_reset_origin( &a_local );
-	bli_obj_reset_origin( &b_local );
-	bli_obj_reset_origin( &c_local );
+	obj_t a_local;
+	obj_t b_local;
+	obj_t c_local;
+	bli_obj_alias_and_reset_origin( a, &a_local );
+	bli_obj_alias_and_reset_origin( b, &b_local );
+	bli_obj_alias_and_reset_origin( c, &c_local );
 
 #ifdef BLIS_DISABLE_SYMM_RIGHT
 	// NOTE: This case casts right-side symm in terms of left side. This is
@@ -997,22 +960,13 @@ void PASTEMAC(trmm3,BLIS_OAPI_EX_SUF)
 	// method id determined above.
 	if ( cntx == NULL ) cntx = bli_gks_query_ind_cntx( im );
 
-	obj_t   a_local;
-	obj_t   b_local;
-	obj_t   c_local;
-
 	// Alias A, B, and C so we can tweak the objects if necessary.
-	bli_obj_alias_to( a, &a_local );
-	bli_obj_alias_to( b, &b_local );
-	bli_obj_alias_to( c, &c_local );
-
-	// Set the obj_t buffer field to the location currently implied by the row
-	// and column offsets and then zero the offsets. If any of the original
-	// obj_t's were views into larger matrices, this step effectively makes
-	// those obj_t's "forget" their lineage.
-	bli_obj_reset_origin( &a_local );
-	bli_obj_reset_origin( &b_local );
-	bli_obj_reset_origin( &c_local );
+	obj_t a_local;
+	obj_t b_local;
+	obj_t c_local;
+	bli_obj_alias_and_reset_origin( a, &a_local );
+	bli_obj_alias_and_reset_origin( b, &b_local );
+	bli_obj_alias_and_reset_origin( c, &c_local );
 
 	// We do not explicitly implement the cases where A is transposed.
 	// However, we can still handle them. Specifically, if A is marked as
@@ -1244,22 +1198,13 @@ void PASTEMAC(trmm,BLIS_OAPI_EX_SUF)
 	// method id determined above.
 	if ( cntx == NULL ) cntx = bli_gks_query_ind_cntx( im );
 
-	obj_t   a_local;
-	obj_t   b_local;
-	obj_t   c_local;
-
 	// Alias A and B so we can tweak the objects if necessary.
-	bli_obj_alias_to( a, &a_local );
-	bli_obj_alias_to( b, &b_local );
-	bli_obj_alias_to( b, &c_local );
-
-	// Set the obj_t buffer field to the location currently implied by the row
-	// and column offsets and then zero the offsets. If any of the original
-	// obj_t's were views into larger matrices, this step effectively makes
-	// those obj_t's "forget" their lineage.
-	bli_obj_reset_origin( &a_local );
-	bli_obj_reset_origin( &b_local );
-	bli_obj_reset_origin( &c_local );
+	obj_t a_local;
+	obj_t b_local;
+	obj_t c_local;
+	bli_obj_alias_and_reset_origin( a, &a_local );
+	bli_obj_alias_and_reset_origin( b, &b_local );
+	bli_obj_alias_and_reset_origin( b, &c_local );
 
 	// We do not explicitly implement the cases where A is transposed.
 	// However, we can still handle them. Specifically, if A is marked as
@@ -1443,10 +1388,6 @@ void PASTEMAC(trsm,BLIS_OAPI_EX_SUF)
 	// method id determined above.
 	if ( cntx == NULL ) cntx = bli_gks_query_ind_cntx( im );
 
-	obj_t   a_local;
-	obj_t   b_local;
-	obj_t   c_local;
-
 #if 0
 #ifdef BLIS_ENABLE_SMALL_MATRIX_TRSM
 	gint_t status = bli_trsm_small( side, alpha, a, b, cntx, cntl );
@@ -1455,17 +1396,12 @@ void PASTEMAC(trsm,BLIS_OAPI_EX_SUF)
 #endif
 
 	// Alias A and B so we can tweak the objects if necessary.
-	bli_obj_alias_to( a, &a_local );
-	bli_obj_alias_to( b, &b_local );
-	bli_obj_alias_to( b, &c_local );
-
-	// Set the obj_t buffer field to the location currently implied by the row
-	// and column offsets and then zero the offsets. If any of the original
-	// obj_t's were views into larger matrices, this step effectively makes
-	// those obj_t's "forget" their lineage.
-	bli_obj_reset_origin( &a_local );
-	bli_obj_reset_origin( &b_local );
-	bli_obj_reset_origin( &c_local );
+	obj_t a_local;
+	obj_t b_local;
+	obj_t c_local;
+	bli_obj_alias_and_reset_origin( a, &a_local );
+	bli_obj_alias_and_reset_origin( b, &b_local );
+	bli_obj_alias_and_reset_origin( b, &c_local );
 
 	// We do not explicitly implement the cases where A is transposed.
 	// However, we can still handle them. Specifically, if A is marked as

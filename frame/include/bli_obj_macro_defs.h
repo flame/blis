@@ -1398,6 +1398,14 @@ BLIS_INLINE void bli_obj_alias_with_conj( conj_t conja, const obj_t* a, obj_t* b
 	bli_obj_apply_conj( conja, b );
 }
 
+// Create an alias with the offsets set to zero.
+
+BLIS_INLINE void bli_obj_alias_and_reset_origin( const obj_t* a, obj_t* b )
+{
+	bli_obj_alias_to( a, b );
+    bli_obj_reset_origin( b );
+}
+
 // Alias only the real part.
 
 BLIS_INLINE void bli_obj_real_part( const obj_t* c, obj_t* r )
