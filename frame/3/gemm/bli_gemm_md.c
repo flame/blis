@@ -43,6 +43,8 @@ void bli_gemm_md
              obj_t*   b,
        const obj_t*   beta,
              obj_t*   c,
+             pack_t*  schema_a,
+             pack_t*  schema_b,
              cntx_t*  cntx_local,
        const cntx_t** cntx
      )
@@ -59,42 +61,42 @@ void bli_gemm_md
 	if      ( c_is_real && a_is_real && b_is_real )
 	{
 		// C_real += A_real * B_real
-		doms = bli_gemm_md_rrr( a, b, beta, c, cntx_local, cntx );
+		doms = bli_gemm_md_rrr( a, b, beta, c, schema_a, schema_b, cntx_local, cntx );
 	}
 	else if ( c_is_comp && a_is_comp && b_is_comp )
 	{
 		// C_complex += A_complex * B_complex
-		doms = bli_gemm_md_ccc( a, b, beta, c, cntx_local, cntx );
+		doms = bli_gemm_md_ccc( a, b, beta, c, schema_a, schema_b, cntx_local, cntx );
 	}
 	else if ( c_is_comp && a_is_comp && b_is_real )
 	{
 		// C_complex += A_complex * B_real
-		doms = bli_gemm_md_ccr( a, b, beta, c, cntx_local, cntx );
+		doms = bli_gemm_md_ccr( a, b, beta, c, schema_a, schema_b, cntx_local, cntx );
 	}
 	else if ( c_is_comp && a_is_real && b_is_comp )
 	{
 		// C_complex += A_real * B_complex
-		doms = bli_gemm_md_crc( a, b, beta, c, cntx_local, cntx );
+		doms = bli_gemm_md_crc( a, b, beta, c, schema_a, schema_b, cntx_local, cntx );
 	}
 	else if ( c_is_real && a_is_comp && b_is_comp )
 	{
 		// C_real += A_complex * B_complex
-		doms = bli_gemm_md_rcc( a, b, beta, c, cntx_local, cntx );
+		doms = bli_gemm_md_rcc( a, b, beta, c, schema_a, schema_b, cntx_local, cntx );
 	}
 	else if ( c_is_comp && a_is_real && b_is_real )
 	{
 		// C_complex += A_real * B_real
-		doms = bli_gemm_md_crr( a, b, beta, c, cntx_local, cntx );
+		doms = bli_gemm_md_crr( a, b, beta, c, schema_a, schema_b, cntx_local, cntx );
 	}
 	else if ( c_is_real && a_is_comp && b_is_real )
 	{
 		// C_real += A_complex * B_real
-		doms = bli_gemm_md_rcr( a, b, beta, c, cntx_local, cntx );
+		doms = bli_gemm_md_rcr( a, b, beta, c, schema_a, schema_b, cntx_local, cntx );
 	}
 	else if ( c_is_real && a_is_real && b_is_comp )
 	{
 		// C_real += A_real * B_complex
-		doms = bli_gemm_md_rrc( a, b, beta, c, cntx_local, cntx );
+		doms = bli_gemm_md_rrc( a, b, beta, c, schema_a, schema_b, cntx_local, cntx );
 	}
 	else
 	{
@@ -152,6 +154,8 @@ mddm_t bli_gemm_md_ccr
              obj_t*   b,
        const obj_t*   beta,
              obj_t*   c,
+             pack_t*  schema_a,
+             pack_t*  schema_b,
              cntx_t*  cntx_local,
        const cntx_t** cntx
      )
@@ -189,9 +193,11 @@ mddm_t bli_gemm_md_ccr
 
 		// We must swap the pack schemas because the schemas were set before
 		// the objects were swapped.
-		bli_obj_swap_pack_schemas( a, b );
+        pack_t tmp = *schema_a;
+        *schema_a = *schema_b;
+        *schema_b = tmp;
 
-		return bli_gemm_md_crc( a, b, beta, c, cntx_local, cntx );
+		return bli_gemm_md_crc( a, b, beta, c, schema_a, schema_b, cntx_local, cntx );
 	}
 
 	// Create a local copy of the context and then prepare to use this
@@ -260,6 +266,8 @@ mddm_t bli_gemm_md_crc
              obj_t*   b,
        const obj_t*   beta,
              obj_t*   c,
+             pack_t*  schema_a,
+             pack_t*  schema_b,
              cntx_t*  cntx_local,
        const cntx_t** cntx
      )
@@ -297,9 +305,11 @@ mddm_t bli_gemm_md_crc
 
 		// We must swap the pack schemas because the schemas were set before
 		// the objects were swapped.
-		bli_obj_swap_pack_schemas( a, b );
+        pack_t tmp = *schema_a;
+        *schema_a = *schema_b;
+        *schema_b = tmp;
 
-		return bli_gemm_md_ccr( a, b, beta, c, cntx_local, cntx );
+		return bli_gemm_md_ccr( a, b, beta, c, schema_a, schema_b, cntx_local, cntx );
 	}
 
 	// Create a local copy of the context and then prepare to use this
@@ -368,6 +378,8 @@ mddm_t bli_gemm_md_rcc
              obj_t*   b,
        const obj_t*   beta,
              obj_t*   c,
+             pack_t*  schema_a,
+             pack_t*  schema_b,
              cntx_t*  cntx_local,
        const cntx_t** cntx
      )
@@ -425,9 +437,8 @@ mddm_t bli_gemm_md_rcc
 
 	// Use the 1r pack schema for both A and B with the conjugation
 	// of A or B toggled (to produce ar * br - ai * bi).
-	bli_obj_set_pack_schema( BLIS_PACKED_ROW_PANELS_1R, a );
-	bli_obj_set_pack_schema( BLIS_PACKED_COL_PANELS_1R, b );
-
+    *schema_a = BLIS_PACKED_ROW_PANELS_1R;
+    *schema_b = BLIS_PACKED_ROW_PANELS_1R;
 	bli_obj_toggle_conj( b );
 
 	// We also need to copy over the packm kernels from the 1m
@@ -460,6 +471,8 @@ mddm_t bli_gemm_md_crr
              obj_t*   b,
        const obj_t*   beta,
              obj_t*   c,
+             pack_t*  schema_a,
+             pack_t*  schema_b,
              cntx_t*  cntx_local,
        const cntx_t** cntx
      )
@@ -517,6 +530,8 @@ mddm_t bli_gemm_md_rcr
              obj_t*   b,
        const obj_t*   beta,
              obj_t*   c,
+             pack_t*  schema_a,
+             pack_t*  schema_b,
              cntx_t*  cntx_local,
        const cntx_t** cntx
      )
@@ -555,6 +570,8 @@ mddm_t bli_gemm_md_rrc
              obj_t*   b,
        const obj_t*   beta,
              obj_t*   c,
+             pack_t*  schema_a,
+             pack_t*  schema_b,
              cntx_t*  cntx_local,
        const cntx_t** cntx
      )
@@ -593,6 +610,8 @@ mddm_t bli_gemm_md_rrr
              obj_t*   b,
        const obj_t*   beta,
              obj_t*   c,
+             pack_t*  schema_a,
+             pack_t*  schema_b,
              cntx_t*  cntx_local,
        const cntx_t** cntx
      )
@@ -623,6 +642,8 @@ mddm_t bli_gemm_md_ccc
              obj_t*   b,
        const obj_t*   beta,
              obj_t*   c,
+             pack_t*  schema_a,
+             pack_t*  schema_b,
              cntx_t*  cntx_local,
        const cntx_t** cntx
      )

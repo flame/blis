@@ -162,8 +162,10 @@ void PASTEMAC(gemm,BLIS_OAPI_EX_SUF)
 		bli_obj_induce_trans( &c_local );
 	}
 
-	// Set the pack schemas within the objects.
-	bli_l3_set_schemas( &a_local, &b_local, &c_local, cntx );
+	// Set the pack schemas.
+	pack_t schema_a;
+	pack_t schema_b;
+	bli_l3_set_schemas( bli_obj_dt( &c_local ), &schema_a, &schema_b, cntx );
 
 #ifdef BLIS_ENABLE_GEMM_MD
 	cntx_t cntx_local;
@@ -182,7 +184,7 @@ void PASTEMAC(gemm,BLIS_OAPI_EX_SUF)
 		// Handle mixed datatype cases in bli_gemm_md(), which may modify
 		// the objects or the context. (If the context is modified, cntx
 		// is adjusted to point to cntx_local.)
-		bli_gemm_md( &a_local, &b_local, beta, &c_local, &cntx_local, &cntx );
+		bli_gemm_md( &a_local, &b_local, beta, &c_local, &schema_a, &schema_b, &cntx_local, &cntx );
 	}
 #endif
 
@@ -289,17 +291,6 @@ void PASTEMAC(gemm,BLIS_OAPI_EX_SUF)
 	}
 #endif
 #endif
-
-	// This is part of a hack to support mixed domain in bli_gemm_front().
-	// Sometimes we need to specify a non-standard schema for A and B, and
-	// we decided to transmit them via the schema field in the obj_t's
-	// rather than pass them in as function parameters. Once the values
-	// have been read, we immediately reset them back to their expected
-	// values for unpacked objects.
-	pack_t schema_a = bli_obj_pack_schema( &a_local );
-	pack_t schema_b = bli_obj_pack_schema( &b_local );
-	bli_obj_set_pack_schema( BLIS_NOT_PACKED, &a_local );
-	bli_obj_set_pack_schema( BLIS_NOT_PACKED, &b_local );
 
 	cntl_t* cntl = bli_gemm_cntl_create
 	(
@@ -413,19 +404,10 @@ void PASTEMAC(gemmt,BLIS_OAPI_EX_SUF)
 		bli_obj_induce_trans( &c_local );
 	}
 
-	// Set the pack schemas within the objects, as appropriate.
-	bli_l3_set_schemas( &a_local, &b_local, &c_local, cntx );
-
-	// This is part of a hack to support mixed domain in bli_gemm_front().
-	// Sometimes we need to specify a non-standard schema for A and B, and
-	// we decided to transmit them via the schema field in the obj_t's
-	// rather than pass them in as function parameters. Once the values
-	// have been read, we immediately reset them back to their expected
-	// values for unpacked objects.
-	pack_t schema_a = bli_obj_pack_schema( &a_local );
-	pack_t schema_b = bli_obj_pack_schema( &b_local );
-	bli_obj_set_pack_schema( BLIS_NOT_PACKED, &a_local );
-	bli_obj_set_pack_schema( BLIS_NOT_PACKED, &b_local );
+	// Set the pack schemas.
+	pack_t schema_a;
+	pack_t schema_b;
+	bli_l3_set_schemas( bli_obj_dt( &c_local ), &schema_a, &schema_b, cntx );
 
 	cntl_t* cntl = bli_gemm_cntl_create
 	(
@@ -634,19 +616,10 @@ void PASTEMAC(hemm,BLIS_OAPI_EX_SUF)
 	}
 #endif
 
-	// Set the pack schemas within the objects.
-	bli_l3_set_schemas( &a_local, &b_local, &c_local, cntx );
-
-	// This is part of a hack to support mixed domain in bli_gemm_front().
-	// Sometimes we need to specify a non-standard schema for A and B, and
-	// we decided to transmit them via the schema field in the obj_t's
-	// rather than pass them in as function parameters. Once the values
-	// have been read, we immediately reset them back to their expected
-	// values for unpacked objects.
-	pack_t schema_a = bli_obj_pack_schema( &a_local );
-	pack_t schema_b = bli_obj_pack_schema( &b_local );
-	bli_obj_set_pack_schema( BLIS_NOT_PACKED, &a_local );
-	bli_obj_set_pack_schema( BLIS_NOT_PACKED, &b_local );
+	// Set the pack schemas.
+	pack_t schema_a;
+	pack_t schema_b;
+	bli_l3_set_schemas( bli_obj_dt( &c_local ), &schema_a, &schema_b, cntx );
 
 	cntl_t* cntl = bli_gemm_cntl_create
 	(
@@ -788,19 +761,10 @@ void PASTEMAC(symm,BLIS_OAPI_EX_SUF)
 	}
 #endif
 
-	// Set the pack schemas within the objects.
-	bli_l3_set_schemas( &a_local, &b_local, &c_local, cntx );
-
-	// This is part of a hack to support mixed domain in bli_gemm_front().
-	// Sometimes we need to specify a non-standard schema for A and B, and
-	// we decided to transmit them via the schema field in the obj_t's
-	// rather than pass them in as function parameters. Once the values
-	// have been read, we immediately reset them back to their expected
-	// values for unpacked objects.
-	pack_t schema_a = bli_obj_pack_schema( &a_local );
-	pack_t schema_b = bli_obj_pack_schema( &b_local );
-	bli_obj_set_pack_schema( BLIS_NOT_PACKED, &a_local );
-	bli_obj_set_pack_schema( BLIS_NOT_PACKED, &b_local );
+	// Set the pack schemas.
+	pack_t schema_a;
+	pack_t schema_b;
+	bli_l3_set_schemas( bli_obj_dt( &c_local ), &schema_a, &schema_b, cntx );
 
 	cntl_t* cntl = bli_gemm_cntl_create
 	(
@@ -953,19 +917,10 @@ void PASTEMAC(trmm3,BLIS_OAPI_EX_SUF)
 
 #endif
 
-	// Set the pack schemas within the objects.
-	bli_l3_set_schemas( &a_local, &b_local, &c_local, cntx );
-
-	// This is part of a hack to support mixed domain in bli_gemm_front().
-	// Sometimes we need to specify a non-standard schema for A and B, and
-	// we decided to transmit them via the schema field in the obj_t's
-	// rather than pass them in as function parameters. Once the values
-	// have been read, we immediately reset them back to their expected
-	// values for unpacked objects.
-	pack_t schema_a = bli_obj_pack_schema( &a_local );
-	pack_t schema_b = bli_obj_pack_schema( &b_local );
-	bli_obj_set_pack_schema( BLIS_NOT_PACKED, &a_local );
-	bli_obj_set_pack_schema( BLIS_NOT_PACKED, &b_local );
+	// Set the pack schemas.
+	pack_t schema_a;
+	pack_t schema_b;
+	bli_l3_set_schemas( bli_obj_dt( &c_local ), &schema_a, &schema_b, cntx );
 
 	cntl_t* cntl = bli_gemm_cntl_create
 	(
@@ -1178,19 +1133,10 @@ void PASTEMAC(trmm,BLIS_OAPI_EX_SUF)
 
 #endif
 
-	// Set the pack schemas within the objects.
-	bli_l3_set_schemas( &a_local, &b_local, &c_local, cntx );
-
-	// This is part of a hack to support mixed domain in bli_gemm_front().
-	// Sometimes we need to specify a non-standard schema for A and B, and
-	// we decided to transmit them via the schema field in the obj_t's
-	// rather than pass them in as function parameters. Once the values
-	// have been read, we immediately reset them back to their expected
-	// values for unpacked objects.
-	pack_t schema_a = bli_obj_pack_schema( &a_local );
-	pack_t schema_b = bli_obj_pack_schema( &b_local );
-	bli_obj_set_pack_schema( BLIS_NOT_PACKED, &a_local );
-	bli_obj_set_pack_schema( BLIS_NOT_PACKED, &b_local );
+	// Set the pack schemas.
+	pack_t schema_a;
+	pack_t schema_b;
+	bli_l3_set_schemas( bli_obj_dt( &c_local ), &schema_a, &schema_b, cntx );
 
 	cntl_t* cntl = bli_gemm_cntl_create
 	(
@@ -1323,19 +1269,10 @@ void PASTEMAC(trsm,BLIS_OAPI_EX_SUF)
 
 #endif
 
-	// Set the pack schemas within the objects.
-	bli_l3_set_schemas( &a_local, &b_local, &c_local, cntx );
-
-	// This is part of a hack to support mixed domain in bli_gemm_front().
-	// Sometimes we need to specify a non-standard schema for A and B, and
-	// we decided to transmit them via the schema field in the obj_t's
-	// rather than pass them in as function parameters. Once the values
-	// have been read, we immediately reset them back to their expected
-	// values for unpacked objects.
-	pack_t schema_a = bli_obj_pack_schema( &a_local );
-	pack_t schema_b = bli_obj_pack_schema( &b_local );
-	bli_obj_set_pack_schema( BLIS_NOT_PACKED, &a_local );
-	bli_obj_set_pack_schema( BLIS_NOT_PACKED, &b_local );
+	// Set the pack schemas.
+	pack_t schema_a;
+	pack_t schema_b;
+	bli_l3_set_schemas( bli_obj_dt( &c_local ), &schema_a, &schema_b, cntx );
 
 	cntl_t* cntl = bli_trsm_cntl_create
 	(

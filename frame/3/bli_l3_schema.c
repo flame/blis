@@ -36,45 +36,35 @@
 
 void bli_l3_set_schemas
      (
-             obj_t*  a,
-             obj_t*  b,
-       const obj_t*  c,
+             num_t   dt,
+             pack_t* schema_a,
+             pack_t* schema_b,
        const cntx_t* cntx
      )
 {
 	// Begin with pack schemas for native execution.
-	pack_t schema_a = BLIS_PACKED_ROW_PANELS;
-	pack_t schema_b = BLIS_PACKED_COL_PANELS;
+	*schema_a = BLIS_PACKED_ROW_PANELS;
+	*schema_b = BLIS_PACKED_COL_PANELS;
 
 	// When executing the 1m method, choose the appropriate pack schemas based
 	// on the microkernel preference encoded within the current cntx_t (which
 	// was presumably returned by the gks).
 	if ( bli_cntx_method( cntx ) == BLIS_1M )
 	{
-		num_t dt = bli_obj_domain( c ) | bli_obj_comp_prec( c );
-
 		// Note that bli_cntx_l3_vir_ukr_prefers_cols_dt() will use the real
 		// projection of dt to query the preference of the corresponding native
 		// real-domain microkernel. This is what ultimately determines which
 		// variant of 1m is applicable.
-		if ( bli_cntx_ukr_prefers_cols_dt( dt, BLIS_GEMM_VIR_UKR, cntx ) )
+		if ( bli_cntx_ukr_prefers_cols_dt( bli_dt_proj_to_real( dt ), BLIS_GEMM_UKR, cntx ) )
 		{
-			schema_a = BLIS_PACKED_ROW_PANELS_1E;
-			schema_b = BLIS_PACKED_COL_PANELS_1R;
+			*schema_a = BLIS_PACKED_ROW_PANELS_1E;
+			*schema_b = BLIS_PACKED_COL_PANELS_1R;
 		}
 		else
 		{
-			schema_a = BLIS_PACKED_ROW_PANELS_1R;
-			schema_b = BLIS_PACKED_COL_PANELS_1E;
+			*schema_a = BLIS_PACKED_ROW_PANELS_1R;
+			*schema_b = BLIS_PACKED_COL_PANELS_1E;
 		}
 	}
-
-	// Embed the schemas into the objects for A and B. This is a sort of hack
-	// for communicating the desired pack schemas to bli_gemm_cntl_create()
-	// (via bli_l3_thread_decorator() and bli_l3_cntl_create_if()). This allows
-	// us to subsequently access the schemas from the control tree, which
-	// hopefully reduces some confusion, particularly in bli_packm_init().
-	bli_obj_set_pack_schema( schema_a, a );
-	bli_obj_set_pack_schema( schema_b, b );
 }
 

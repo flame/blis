@@ -34,8 +34,8 @@
 
 void bli_l3_set_schemas
      (
-             obj_t*  a,
-             obj_t*  b,
-       const obj_t*  c,
+             num_t   dt,
+             pack_t* schema_a,
+             pack_t* schema_b,
        const cntx_t* cntx
      );

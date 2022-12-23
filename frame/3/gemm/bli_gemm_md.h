@@ -47,17 +47,19 @@ void bli_gemm_md
              obj_t*   b,
        const obj_t*   beta,
              obj_t*   c,
+             pack_t*  schema_a,
+             pack_t*  schema_b,
              cntx_t*  cntx_local,
        const cntx_t** cntx
      );
-mddm_t bli_gemm_md_ccc( obj_t* a, obj_t* b, const obj_t* beta, obj_t* c, cntx_t* cntx_l, const cntx_t** cntx );
-mddm_t bli_gemm_md_ccr( obj_t* a, obj_t* b, const obj_t* beta, obj_t* c, cntx_t* cntx_l, const cntx_t** cntx );
-mddm_t bli_gemm_md_crc( obj_t* a, obj_t* b, const obj_t* beta, obj_t* c, cntx_t* cntx_l, const cntx_t** cntx );
-mddm_t bli_gemm_md_rcc( obj_t* a, obj_t* b, const obj_t* beta, obj_t* c, cntx_t* cntx_l, const cntx_t** cntx );
-mddm_t bli_gemm_md_rrc( obj_t* a, obj_t* b, const obj_t* beta, obj_t* c, cntx_t* cntx_l, const cntx_t** cntx );
-mddm_t bli_gemm_md_rcr( obj_t* a, obj_t* b, const obj_t* beta, obj_t* c, cntx_t* cntx_l, const cntx_t** cntx );
-mddm_t bli_gemm_md_crr( obj_t* a, obj_t* b, const obj_t* beta, obj_t* c, cntx_t* cntx_l, const cntx_t** cntx );
-mddm_t bli_gemm_md_rrr( obj_t* a, obj_t* b, const obj_t* beta, obj_t* c, cntx_t* cntx_l, const cntx_t** cntx );
+mddm_t bli_gemm_md_ccc( obj_t* a, obj_t* b, const obj_t* beta, obj_t* c, pack_t* schema_a, pack_t* schema_b, cntx_t* cntx_l, const cntx_t** cntx );
+mddm_t bli_gemm_md_ccr( obj_t* a, obj_t* b, const obj_t* beta, obj_t* c, pack_t* schema_a, pack_t* schema_b, cntx_t* cntx_l, const cntx_t** cntx );
+mddm_t bli_gemm_md_crc( obj_t* a, obj_t* b, const obj_t* beta, obj_t* c, pack_t* schema_a, pack_t* schema_b, cntx_t* cntx_l, const cntx_t** cntx );
+mddm_t bli_gemm_md_rcc( obj_t* a, obj_t* b, const obj_t* beta, obj_t* c, pack_t* schema_a, pack_t* schema_b, cntx_t* cntx_l, const cntx_t** cntx );
+mddm_t bli_gemm_md_rrc( obj_t* a, obj_t* b, const obj_t* beta, obj_t* c, pack_t* schema_a, pack_t* schema_b, cntx_t* cntx_l, const cntx_t** cntx );
+mddm_t bli_gemm_md_rcr( obj_t* a, obj_t* b, const obj_t* beta, obj_t* c, pack_t* schema_a, pack_t* schema_b, cntx_t* cntx_l, const cntx_t** cntx );
+mddm_t bli_gemm_md_crr( obj_t* a, obj_t* b, const obj_t* beta, obj_t* c, pack_t* schema_a, pack_t* schema_b, cntx_t* cntx_l, const cntx_t** cntx );
+mddm_t bli_gemm_md_rrr( obj_t* a, obj_t* b, const obj_t* beta, obj_t* c, pack_t* schema_a, pack_t* schema_b, cntx_t* cntx_l, const cntx_t** cntx );
 
 // -----------------------------------------------------------------------------
 

@@ -1507,17 +1507,6 @@ BLIS_INLINE void bli_obj_swap( obj_t* a, obj_t* b )
 	if ( b_root_is_self ) bli_obj_set_as_root( a );
 }
 
-// Swap object pack schemas.
-
-BLIS_INLINE void bli_obj_swap_pack_schemas( obj_t* a, obj_t* b )
-{
-	const pack_t schema_a = bli_obj_pack_schema( a );
-	const pack_t schema_b = bli_obj_pack_schema( b );
-
-	bli_obj_set_pack_schema( schema_b, a );
-	bli_obj_set_pack_schema( schema_a, b );
-}
-
 // Induce a transposition on an object: swap dimensions, increments, and
 // offsets, then clear the trans bit.
 
