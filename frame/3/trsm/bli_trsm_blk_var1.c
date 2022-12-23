@@ -104,10 +104,8 @@ void bli_trsm_blk_var1
 		// Perform trsm subproblem.
 		bli_l3_int
 		(
-		  &BLIS_ONE,
 		  &a11_1,
 		  b,
-		  &BLIS_ONE,
 		  &c1_1,
 		  cntx,
 		  bli_cntl_sub_prenode( cntl ),
@@ -176,10 +174,8 @@ void bli_trsm_blk_var1
 		// function as before, since we're calling the same macrokernel.)
 		bli_l3_int
 		(
-		  &BLIS_ONE,
 		  &a11,
 		  b,
-		  &BLIS_ONE,
 		  &c1,
 		  cntx,
 		  bli_cntl_sub_node( cntl ),

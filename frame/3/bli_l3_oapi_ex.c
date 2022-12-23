@@ -64,6 +64,34 @@ err_t bli_l3_return_early_if_trivial
     return BLIS_FAILURE;
 }
 
+void bli_l3_attach_scalars
+      (
+        const obj_t* alpha,
+              obj_t* a,
+              obj_t* b,
+        const obj_t* beta,
+              obj_t* c
+      )
+{
+	// If alpha is non-unit, typecast and apply it to the scalar attached
+	// to B, unless it happens to be triangular.
+	if ( bli_obj_root_is_triangular( b ) )
+	{
+		if ( !bli_obj_equals( alpha, &BLIS_ONE ) )
+			bli_obj_scalar_apply_scalar( alpha, a );
+	}
+	else // if ( bli_obj_root_is_triangular( b ) )
+	{
+		if ( !bli_obj_equals( alpha, &BLIS_ONE ) )
+			bli_obj_scalar_apply_scalar( alpha, b );
+	}
+
+	// If beta is non-unit, typecast and apply it to the scalar attached
+	// to C.
+	if ( !bli_obj_equals( beta, &BLIS_ONE ) )
+		bli_obj_scalar_apply_scalar( beta, c );
+}
+
 // If a sandbox was enabled, we forgo defining bli_gemm_ex() since it will be
 // defined in the sandbox environment.
 #ifndef BLIS_ENABLE_SANDBOX
@@ -97,12 +125,6 @@ void PASTEMAC(gemm,BLIS_OAPI_EX_SUF)
 	// proceed towards the conventional implementation.
 	if ( bli_gemmsup( alpha, a, b, beta, c, cntx, rntm ) == BLIS_SUCCESS )
 		return;
-
-	// Initialize a local runtime with global settings if necessary. Note
-	// that in the case that a runtime is passed in, we make a local copy.
-	rntm_t rntm_l;
-	if ( rntm == NULL ) { bli_rntm_init_from_global( &rntm_l ); }
-	else                { rntm_l = *rntm;                       }
 
 	// Default to using native execution.
 	num_t dt = bli_obj_dt( c );
@@ -145,9 +167,9 @@ void PASTEMAC(gemm,BLIS_OAPI_EX_SUF)
 	obj_t a_local;
 	obj_t b_local;
 	obj_t c_local;
-	bli_obj_alias_and_reset_origin( a, &a_local );
-	bli_obj_alias_and_reset_origin( b, &b_local );
-	bli_obj_alias_and_reset_origin( c, &c_local );
+	bli_obj_alias_submatrix( a, &a_local );
+	bli_obj_alias_submatrix( b, &b_local );
+	bli_obj_alias_submatrix( c, &c_local );
 
 	// An optimization: If C is stored by rows and the micro-kernel prefers
 	// contiguous columns, or if C is stored by columns and the micro-kernel
@@ -188,26 +210,9 @@ void PASTEMAC(gemm,BLIS_OAPI_EX_SUF)
 	}
 #endif
 
-	// Next, we handle the possibility of needing to typecast alpha to the
-	// computation datatype and/or beta to the storage datatype of C.
+    bli_l3_attach_scalars( alpha, &a_local, &b_local, beta, &c_local );
 
-	// Attach alpha to B, and in the process typecast alpha to the target
-	// datatype of the matrix (which in this case is equal to the computation
-	// datatype).
-	bli_obj_scalar_attach( BLIS_NO_CONJUGATE, alpha, &b_local );
-
-	// Attach beta to C, and in the process typecast beta to the target
-	// datatype of the matrix (which in this case is equal to the storage
-	// datatype of C).
-	bli_obj_scalar_attach( BLIS_NO_CONJUGATE, beta,  &c_local );
-
-	// Change the alpha and beta pointers to BLIS_ONE since the values have
-	// now been typecast and attached to the matrices above.
-	alpha = &BLIS_ONE;
-	beta  = &BLIS_ONE;
-
-	      obj_t* cp    = &c_local;
-	const obj_t* betap = beta;
+	obj_t* cp = &c_local;
 
 #ifdef BLIS_ENABLE_GEMM_MD
 #ifdef BLIS_ENABLE_GEMM_MD_EXTRA_MEM
@@ -285,8 +290,7 @@ void PASTEMAC(gemm,BLIS_OAPI_EX_SUF)
 		// temporary storage, and then using xpbym to scale the
 		// output matrix by beta and accumulate/cast the A*B product.
 		//bli_castm( &c_local, &ct );
-		betap = &BLIS_ZERO;
-
+		bli_obj_scalar_attach( BLIS_NO_CONJUGATE, &BLIS_ZERO, &ct );
 		cp = &ct;
 	}
 #endif
@@ -297,18 +301,14 @@ void PASTEMAC(gemm,BLIS_OAPI_EX_SUF)
 	  NULL,
 	  BLIS_GEMM,
 	  schema_a,
-	  schema_b,
-	  bli_obj_ker_fn( c )
+	  schema_b
 	);
 
 	// Invoke the internal back-end via the thread handler.
 	bli_l3_thread_decorator
 	(
-	  bli_l3_int,
-	  alpha,
 	  &a_local,
 	  &b_local,
-	  betap,
 	  cp,
 	  cntx,
 	  cntl,
@@ -324,13 +324,7 @@ void PASTEMAC(gemm,BLIS_OAPI_EX_SUF)
 	// we copy/accumulate the result back to C and then release the object.
 	if ( use_ct )
 	{
-		obj_t beta_local;
-
-		bli_obj_scalar_detach( &c_local, &beta_local );
-
-		//bli_castnzm( &ct, &c_local );
-		bli_xpbym( &ct, &beta_local, &c_local );
-
+		bli_xpbym( &ct, beta, &c_local );
 		bli_obj_free( &ct );
 	}
 #endif
@@ -387,9 +381,9 @@ void PASTEMAC(gemmt,BLIS_OAPI_EX_SUF)
 	obj_t a_local;
 	obj_t b_local;
 	obj_t c_local;
-	bli_obj_alias_and_reset_origin( a, &a_local );
-	bli_obj_alias_and_reset_origin( b, &b_local );
-	bli_obj_alias_and_reset_origin( c, &c_local );
+	bli_obj_alias_submatrix( a, &a_local );
+	bli_obj_alias_submatrix( b, &b_local );
+	bli_obj_alias_submatrix( c, &c_local );
 
 	// An optimization: If C is stored by rows and the micro-kernel prefers
 	// contiguous columns, or if C is stored by columns and the micro-kernel
@@ -414,18 +408,16 @@ void PASTEMAC(gemmt,BLIS_OAPI_EX_SUF)
 	  NULL,
 	  BLIS_GEMMT,
 	  schema_a,
-	  schema_b,
-	  bli_obj_ker_fn( c )
+	  schema_b
 	);
+
+    bli_l3_attach_scalars( alpha, &a_local, &b_local, beta, &c_local );
 
 	// Invoke the internal back-end via the thread handler.
 	bli_l3_thread_decorator
 	(
-	  bli_l3_int,
-	  alpha,
 	  &a_local,
 	  &b_local,
-	  beta,
 	  &c_local,
 	  cntx,
 	  cntl,
@@ -551,9 +543,9 @@ void PASTEMAC(hemm,BLIS_OAPI_EX_SUF)
 	obj_t a_local;
 	obj_t b_local;
 	obj_t c_local;
-	bli_obj_alias_and_reset_origin( a, &a_local );
-	bli_obj_alias_and_reset_origin( b, &b_local );
-	bli_obj_alias_and_reset_origin( c, &c_local );
+	bli_obj_alias_submatrix( a, &a_local );
+	bli_obj_alias_submatrix( b, &b_local );
+	bli_obj_alias_submatrix( c, &c_local );
 
 #ifdef BLIS_DISABLE_HEMM_RIGHT
 	// NOTE: This case casts right-side hemm in terms of left side. This is
@@ -626,18 +618,16 @@ void PASTEMAC(hemm,BLIS_OAPI_EX_SUF)
 	  NULL,
 	  BLIS_HEMM,
 	  schema_a,
-	  schema_b,
-	  bli_obj_ker_fn( c )
+	  schema_b
 	);
+
+    bli_l3_attach_scalars( alpha, &a_local, &b_local, beta, &c_local );
 
 	// Invoke the internal back-end.
 	bli_l3_thread_decorator
 	(
-	  bli_l3_int,
-	  alpha,
 	  &a_local,
 	  &b_local,
-	  beta,
 	  &c_local,
 	  cntx,
 	  cntl,
@@ -697,9 +687,9 @@ void PASTEMAC(symm,BLIS_OAPI_EX_SUF)
 	obj_t a_local;
 	obj_t b_local;
 	obj_t c_local;
-	bli_obj_alias_and_reset_origin( a, &a_local );
-	bli_obj_alias_and_reset_origin( b, &b_local );
-	bli_obj_alias_and_reset_origin( c, &c_local );
+	bli_obj_alias_submatrix( a, &a_local );
+	bli_obj_alias_submatrix( b, &b_local );
+	bli_obj_alias_submatrix( c, &c_local );
 
 #ifdef BLIS_DISABLE_SYMM_RIGHT
 	// NOTE: This case casts right-side symm in terms of left side. This is
@@ -771,18 +761,16 @@ void PASTEMAC(symm,BLIS_OAPI_EX_SUF)
 	  NULL,
 	  BLIS_SYMM,
 	  schema_a,
-	  schema_b,
-	  bli_obj_ker_fn( c )
+	  schema_b
 	);
+
+    bli_l3_attach_scalars( alpha, &a_local, &b_local, beta, &c_local );
 
 	// Invoke the internal back-end.
 	bli_l3_thread_decorator
 	(
-	  bli_l3_int,
-	  alpha,
 	  &a_local,
 	  &b_local,
-	  beta,
 	  &c_local,
 	  cntx,
 	  cntl,
@@ -842,9 +830,9 @@ void PASTEMAC(trmm3,BLIS_OAPI_EX_SUF)
 	obj_t a_local;
 	obj_t b_local;
 	obj_t c_local;
-	bli_obj_alias_and_reset_origin( a, &a_local );
-	bli_obj_alias_and_reset_origin( b, &b_local );
-	bli_obj_alias_and_reset_origin( c, &c_local );
+	bli_obj_alias_submatrix( a, &a_local );
+	bli_obj_alias_submatrix( b, &b_local );
+	bli_obj_alias_submatrix( c, &c_local );
 
 	// We do not explicitly implement the cases where A is transposed.
 	// However, we can still handle them. Specifically, if A is marked as
@@ -927,18 +915,16 @@ void PASTEMAC(trmm3,BLIS_OAPI_EX_SUF)
 	  NULL,
 	  BLIS_TRMM3,
 	  schema_a,
-	  schema_b,
-	  bli_obj_ker_fn( &c_local )
+	  schema_b
 	);
+
+    bli_l3_attach_scalars( alpha, &a_local, &b_local, beta, &c_local );
 
 	// Invoke the internal back-end.
 	bli_l3_thread_decorator
 	(
-	  bli_l3_int,
-	  alpha,
 	  &a_local,
 	  &b_local,
-	  beta,
 	  &c_local,
 	  cntx,
 	  cntl,
@@ -1049,9 +1035,9 @@ void PASTEMAC(trmm,BLIS_OAPI_EX_SUF)
 	obj_t a_local;
 	obj_t b_local;
 	obj_t c_local;
-	bli_obj_alias_and_reset_origin( a, &a_local );
-	bli_obj_alias_and_reset_origin( b, &b_local );
-	bli_obj_alias_and_reset_origin( b, &c_local );
+	bli_obj_alias_submatrix( a, &a_local );
+	bli_obj_alias_submatrix( b, &b_local );
+	bli_obj_alias_submatrix( b, &c_local );
 
 	// We do not explicitly implement the cases where A is transposed.
 	// However, we can still handle them. Specifically, if A is marked as
@@ -1143,18 +1129,16 @@ void PASTEMAC(trmm,BLIS_OAPI_EX_SUF)
 	  NULL,
 	  BLIS_TRMM,
 	  schema_a,
-	  schema_b,
-	  bli_obj_ker_fn( &c_local )
+	  schema_b
 	);
+
+    bli_l3_attach_scalars( alpha, &a_local, &b_local, &BLIS_ZERO, &c_local );
 
 	// Invoke the internal back-end.
 	bli_l3_thread_decorator
 	(
-	  bli_l3_int,
-	  alpha,
 	  &a_local,
 	  &b_local,
-	  &BLIS_ZERO,
 	  &c_local,
 	  cntx,
 	  cntl,
@@ -1218,9 +1202,9 @@ void PASTEMAC(trsm,BLIS_OAPI_EX_SUF)
 	obj_t a_local;
 	obj_t b_local;
 	obj_t c_local;
-	bli_obj_alias_and_reset_origin( a, &a_local );
-	bli_obj_alias_and_reset_origin( b, &b_local );
-	bli_obj_alias_and_reset_origin( b, &c_local );
+	bli_obj_alias_submatrix( a, &a_local );
+	bli_obj_alias_submatrix( b, &b_local );
+	bli_obj_alias_submatrix( b, &c_local );
 
 	// We do not explicitly implement the cases where A is transposed.
 	// However, we can still handle them. Specifically, if A is marked as
@@ -1279,18 +1263,16 @@ void PASTEMAC(trsm,BLIS_OAPI_EX_SUF)
 	  NULL,
 	  bli_obj_is_triangular( a ) ? BLIS_LEFT : BLIS_RIGHT,
 	  schema_a,
-	  schema_b,
-	  bli_obj_ker_fn( &c_local )
+	  schema_b
 	);
+
+    bli_l3_attach_scalars( alpha, &a_local, &b_local, alpha, &c_local );
 
 	// Invoke the internal back-end.
 	bli_l3_thread_decorator
 	(
-	  bli_l3_int,
-	  alpha,
 	  &a_local,
 	  &b_local,
-	  alpha,
 	  &c_local,
 	  cntx,
 	  cntl,

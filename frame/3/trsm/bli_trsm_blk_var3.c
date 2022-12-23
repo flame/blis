@@ -78,10 +78,8 @@ void bli_trsm_blk_var3
 		// Perform trsm subproblem.
 		bli_l3_int
 		(
-		  &BLIS_ONE,
 		  &a1,
 		  &b1,
-		  &BLIS_ONE,
 		  &cs,
 		  cntx,
 		  bli_cntl_sub_node( cntl ),

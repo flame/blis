@@ -1187,53 +1187,6 @@ BLIS_INLINE stor3_t bli_obj_stor3_from_strides( const obj_t* c, const obj_t* a, 
 }
 
 
-// -- User-provided information macros --
-
-// Function pointer query
-
-BLIS_INLINE obj_pack_fn_t bli_obj_pack_fn( const obj_t* obj )
-{
-	return obj->pack_fn;
-}
-
-BLIS_INLINE void* bli_obj_pack_params( const obj_t* obj )
-{
-	return obj->pack_params;
-}
-
-BLIS_INLINE obj_ker_fn_t bli_obj_ker_fn( const obj_t* obj )
-{
-	return obj->ker_fn;
-}
-
-BLIS_INLINE void* bli_obj_ker_params( const obj_t* obj )
-{
-	return obj->ker_params;
-}
-
-// Function pointer modification
-
-BLIS_INLINE void bli_obj_set_pack_fn( obj_pack_fn_t pack_fn, obj_t* obj )
-{
-	obj->pack_fn = pack_fn;
-}
-
-BLIS_INLINE void bli_obj_set_pack_params( void* params, obj_t* obj )
-{
-	obj->pack_params = params;
-}
-
-BLIS_INLINE void bli_obj_set_ker_fn( obj_ker_fn_t ker_fn, obj_t* obj )
-{
-	obj->ker_fn = ker_fn;
-}
-
-BLIS_INLINE void bli_obj_set_ker_params( void* params, obj_t* obj )
-{
-	obj->ker_params = params;
-}
-
-
 // -- Initialization-related macros --
 
 // Finish the initialization started by the matrix-specific static initializer
@@ -1396,14 +1349,6 @@ BLIS_INLINE void bli_obj_alias_with_conj( conj_t conja, const obj_t* a, obj_t* b
 {
 	bli_obj_alias_to( a, b );
 	bli_obj_apply_conj( conja, b );
-}
-
-// Create an alias with the offsets set to zero.
-
-BLIS_INLINE void bli_obj_alias_and_reset_origin( const obj_t* a, obj_t* b )
-{
-	bli_obj_alias_to( a, b );
-    bli_obj_reset_origin( b );
 }
 
 // Alias only the real part.
@@ -1592,5 +1537,19 @@ BLIS_INLINE void bli_obj_reflect_about_diag( obj_t* obj )
 	bli_obj_toggle_trans( obj );
 }
 
+// Create an alias which refers to only a portion of the original matrix
+// without any "historical baggage", stripping out all offsets, transposes,
+// and references to the original root object.
+
+BLIS_INLINE void bli_obj_alias_submatrix( const obj_t* a, obj_t* b )
+{
+	bli_obj_alias_to( a, b );
+    bli_obj_reset_origin( b );
+    if ( bli_obj_has_trans( b ) )
+    {
+        bli_obj_induce_trans( b );
+        bli_obj_set_onlytrans( BLIS_NO_TRANSPOSE, b );
+    }
+}
 
 #endif

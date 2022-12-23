@@ -36,11 +36,8 @@
 
 struct l3_decor_params_s
 {
-	      l3int_ft func;
-	const obj_t*   alpha;
 	const obj_t*   a;
 	const obj_t*   b;
-	const obj_t*   beta;
 	const obj_t*   c;
 	const cntx_t*  cntx;
 	const cntl_t*  cntl;
@@ -53,11 +50,8 @@ static void bli_l3_thread_decorator_entry( thrcomm_t* gl_comm, dim_t tid, const 
 {
 	const l3_decor_params_t* data    = data_void;
 
-	const l3int_ft           func    = data->func;
-	const obj_t*             alpha   = data->alpha;
 	const obj_t*             a       = data->a;
 	const obj_t*             b       = data->b;
-	const obj_t*             beta    = data->beta;
 	const obj_t*             c       = data->c;
 	const cntx_t*            cntx    = data->cntx;
 	const cntl_t*            cntl    = data->cntl;
@@ -71,12 +65,10 @@ static void bli_l3_thread_decorator_entry( thrcomm_t* gl_comm, dim_t tid, const 
 	// control tree node.
 	thrinfo_t* thread = bli_l3_thrinfo_create( tid, gl_comm, array, rntm, cntl );
 
-	func
+  	bli_l3_int
 	(
-	  alpha,
 	  a,
 	  b,
-	  beta,
 	  c,
 	  cntx,
 	  cntl,
@@ -89,11 +81,8 @@ static void bli_l3_thread_decorator_entry( thrcomm_t* gl_comm, dim_t tid, const 
 
 void bli_l3_thread_decorator
      (
-             l3int_ft func,
-       const obj_t*   alpha,
        const obj_t*   a,
        const obj_t*   b,
-       const obj_t*   beta,
        const obj_t*   c,
        const cntx_t*  cntx,
        const cntl_t*  cntl,
@@ -169,11 +158,8 @@ void bli_l3_thread_decorator
 	array_t* array = bli_sba_checkout_array( nt );
 
 	l3_decor_params_t params;
-	params.func     = func;
-	params.alpha    = alpha;
 	params.a        = a;
 	params.b        = b;
-	params.beta     = beta;
 	params.c        = c;
 	params.cntx     = cntx;
 	params.cntl     = cntl;

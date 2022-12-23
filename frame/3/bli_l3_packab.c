@@ -66,10 +66,8 @@ void bli_l3_packa
 	// Proceed with execution using packed matrix A.
 	bli_l3_int
 	(
-	  &BLIS_ONE,
 	  &a_pack,
 	  b,
-	  &BLIS_ONE,
 	  c,
 	  cntx,
 	  bli_cntl_sub_node( cntl ),
@@ -118,10 +116,8 @@ void bli_l3_packb
 	// Proceed with execution using packed matrix B.
 	bli_l3_int
 	(
-	  &BLIS_ONE,
 	  a,
 	  &bt_pack,
-	  &BLIS_ONE,
 	  c,
 	  cntx,
 	  bli_cntl_sub_node( cntl ),

@@ -40,30 +40,23 @@ cntl_t* bli_trsm_cntl_create
        pool_t* pool,
        side_t  side,
        pack_t  schema_a,
-       pack_t  schema_b,
-       void_fp ker
+       pack_t  schema_b
      )
 {
 	if ( bli_is_left( side ) )
-		return bli_trsm_l_cntl_create( pool, schema_a, schema_b, ker );
+		return bli_trsm_l_cntl_create( pool, schema_a, schema_b );
 	else
-		return bli_trsm_r_cntl_create( pool, schema_a, schema_b, ker );
+		return bli_trsm_r_cntl_create( pool, schema_a, schema_b );
 }
 
 cntl_t* bli_trsm_l_cntl_create
      (
        pool_t* pool,
        pack_t  schema_a,
-       pack_t  schema_b,
-       void_fp ker
+       pack_t  schema_b
      )
 {
-	void_fp macro_kernel_p;
-
-	// Set the default macrokernel. If a non-NULL kernel function pointer is
-	// passed in, we use that instead.
-	macro_kernel_p = bli_trsm_xx_ker_var2;
-	if ( ker ) macro_kernel_p = ker;
+	void_fp macro_kernel_p = bli_trsm_xx_ker_var2;
 
 	const opid_t family = BLIS_TRSM;
 
@@ -205,15 +198,11 @@ cntl_t* bli_trsm_r_cntl_create
      (
        pool_t* pool,
        pack_t  schema_a,
-       pack_t  schema_b,
-       void_fp ker
+       pack_t  schema_b
      )
 {
 	// NOTE: trsm macrokernels are presently disabled for right-side execution.
-	// Set the default macrokernel. If a non-NULL kernel function pointer is
-	// passed in, we use that instead.
 	void_fp macro_kernel_p = bli_trsm_xx_ker_var2;
-	if ( ker ) macro_kernel_p = ker;
 
 	const opid_t family = BLIS_TRSM;
 

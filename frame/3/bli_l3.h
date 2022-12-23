@@ -38,7 +38,6 @@
 #include "bli_l3_sup_decor.h"
 
 #include "bli_l3_check.h"
-#include "bli_l3_int.h"
 #include "bli_l3_packab.h"
 
 // Define function types.
@@ -47,6 +46,7 @@
 #include "bli_l3_oft.h"
 #include "bli_l3_oft_var.h"
 
+#include "bli_l3_int.h"
 #include "bli_l3_blocksize.h"
 #include "bli_l3_direct.h"
 #include "bli_l3_prune.h"

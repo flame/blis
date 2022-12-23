@@ -82,10 +82,8 @@ void bli_gemm_blk_var2
 		// Perform gemm subproblem.
 		bli_l3_int
 		(
-		  &BLIS_ONE,
 		  a,
 		  &b1,
-		  &BLIS_ONE,
 		  &c1,
 		  cntx,
 		  bli_cntl_sub_node( cntl ),

@@ -38,8 +38,7 @@ cntl_t* bli_gemm_cntl_create
        pool_t* pool,
        opid_t  family,
        pack_t  schema_a,
-       pack_t  schema_b,
-       void_fp ker
+       pack_t  schema_b
      );
 
 // -----------------------------------------------------------------------------
@@ -49,8 +48,7 @@ cntl_t* bli_gemmbp_cntl_create
        pool_t* pool,
        opid_t  family,
        pack_t  schema_a,
-       pack_t  schema_b,
-       void_fp ker
+       pack_t  schema_b
      );
 
 // -----------------------------------------------------------------------------

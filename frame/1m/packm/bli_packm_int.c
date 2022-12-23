@@ -45,9 +45,6 @@ void bli_packm_int
 {
 	bli_init_once();
 
-	// Extract the function pointer from the object.
-	packm_var_oft f = bli_obj_pack_fn( a );
-
 	// Barrier so that we know threads are done with previous computation
 	// with the same packing buffer before starting to pack.
 	thrinfo_t* thread = bli_thrinfo_sub_node( thread_par );
@@ -63,7 +60,7 @@ void bli_packm_int
 	// and number of workgroups (n_way). Thus, we pass along the parent
 	// thrinfo_t node which has these two communicators as the sub-node and
 	// sub-prenode, respectively.
-	f
+	bli_packm_blk_var1
 	(
 	  a,
 	  p,

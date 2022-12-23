@@ -1168,31 +1168,6 @@ typedef struct constdata_s
 // -- BLIS object type definitions ---------------------------------------------
 //
 
-// Forward declarations for function pointer types
-struct obj_s;
-struct cntx_s;
-struct rntm_s;
-struct thrinfo_s;
-
-typedef void (*obj_pack_fn_t)
-    (
-      const struct obj_s*     a,
-            struct obj_s*     ap,
-      const struct cntx_s*    cntx,
-      const struct cntl_s*    cntl,
-            struct thrinfo_s* thread
-    );
-
-typedef void (*obj_ker_fn_t)
-    (
-      const struct obj_s*     a,
-      const struct obj_s*     b,
-      const struct obj_s*     c,
-      const struct cntx_s*    cntx,
-      const struct cntl_s*    cntl,
-            struct thrinfo_s* thread
-    );
-
 typedef struct obj_s
 {
 	// Basic fields
@@ -1222,12 +1197,6 @@ typedef struct obj_s
 	                        // usually MR or NR)
 	dim_t         m_panel;  // m dimension of a "full" panel
 	dim_t         n_panel;  // n dimension of a "full" panel
-
-	// User-customizable fields
-	obj_pack_fn_t pack_fn;
-	void*         pack_params;
-	obj_ker_fn_t  ker_fn;
-	void*         ker_params;
 
 } obj_t;
 
@@ -1266,11 +1235,6 @@ typedef struct obj_s
 	.pd          = 0, \
 	.m_panel     = 0, \
 	.n_panel     = 0, \
-\
-	.pack_fn     = NULL, \
-	.pack_params = NULL, \
-	.ker_fn      = NULL, \
-	.ker_params  = NULL  \
 }
 
 #define BLIS_OBJECT_INITIALIZER_1X1 \
@@ -1299,11 +1263,6 @@ typedef struct obj_s
 	.pd          = 0, \
 	.m_panel     = 0, \
 	.n_panel     = 0, \
-\
-	.pack_fn     = NULL, \
-	.pack_params = NULL, \
-	.ker_fn      = NULL, \
-	.ker_params  = NULL  \
 }
 
 // Define these macros here since they must be updated if contents of
@@ -1337,11 +1296,6 @@ BLIS_INLINE void bli_obj_init_full_shallow_copy_of( const obj_t* a, obj_t* b )
 	b->pd          = a->pd;
 	b->m_panel     = a->m_panel;
 	b->n_panel     = a->n_panel;
-
-	b->pack_fn     = a->pack_fn;
-	b->pack_params = a->pack_params;
-	b->ker_fn      = a->ker_fn;
-	b->ker_params  = a->ker_params;
 }
 
 BLIS_INLINE void bli_obj_init_subpart_from( const obj_t* a, obj_t* b )
@@ -1375,11 +1329,6 @@ BLIS_INLINE void bli_obj_init_subpart_from( const obj_t* a, obj_t* b )
 	b->pd          = a->pd;
 	b->m_panel     = a->m_panel;
 	b->n_panel     = a->n_panel;
-
-	b->pack_fn     = a->pack_fn;
-	b->pack_params = a->pack_params;
-	b->ker_fn      = a->ker_fn;
-	b->ker_params  = a->ker_params;
 }
 
 // Initializors for global scalar constants.

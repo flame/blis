@@ -40,11 +40,10 @@ cntl_t* bli_gemm_cntl_create
        pool_t* pool,
        opid_t  family,
        pack_t  schema_a,
-       pack_t  schema_b,
-       void_fp ker
+       pack_t  schema_b
      )
 {
-	return bli_gemmbp_cntl_create( pool, family, schema_a, schema_b, ker );
+	return bli_gemmbp_cntl_create( pool, family, schema_a, schema_b );
 }
 
 // -----------------------------------------------------------------------------
@@ -54,13 +53,12 @@ cntl_t* bli_gemmbp_cntl_create
        pool_t* pool,
        opid_t  family,
        pack_t  schema_a,
-       pack_t  schema_b,
-       void_fp ker
+       pack_t  schema_b
      )
 {
 	void_fp macro_kernel_fp;
 
-	// Choose the default macrokernel based on the operation family...
+	// Choose the default macrokernel based on the operation family.
 	if      ( family == BLIS_GEMM ||
               family == BLIS_HEMM ||
               family == BLIS_SYMM ) macro_kernel_fp = bli_gemm_ker_var2;
@@ -68,10 +66,6 @@ cntl_t* bli_gemmbp_cntl_create
 	else if ( family == BLIS_TRMM ||
 	          family == BLIS_TRMM3 ) macro_kernel_fp = bli_trmm_xx_ker_var2;
 	else /* should never execute */ macro_kernel_fp = NULL;
-
-	// ...unless a non-NULL kernel function pointer is passed in, in which
-	// case we use that instead.
-	if ( ker ) macro_kernel_fp = ker;
 
 	// Create two nodes for the macro-kernel.
 	cntl_t* gemm_cntl_bu_ke = bli_gemm_cntl_create_node

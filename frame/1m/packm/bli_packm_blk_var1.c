@@ -129,17 +129,6 @@ void bli_packm_blk_var1
 		packm_ker_cast = packm_struc_cxk_md[ dt_c ][ dt_p ];
 	}
 
-	// Query the address of the packm params field of the obj_t. The user might
-	// have set this field in order to specify a custom packm kernel.
-	packm_blk_var1_params_t* params = bli_obj_pack_params( c );
-
-	if ( params && params->ukr_fn[ dt_c ][ dt_p ] )
-	{
-		// Query the user-provided packing kernel from the obj_t. If provided,
-		// this overrides the kernel determined above.
-		packm_ker_cast = params->ukr_fn[ dt_c ][ dt_p ];
-	}
-
 	// Compute the total number of iterations we'll need.
 	dim_t n_iter = iter_dim / panel_dim_max + ( iter_dim % panel_dim_max ? 1 : 0 );
 
@@ -278,7 +267,7 @@ void bli_packm_blk_var1
 				                p_use,       ldp,
 				                       is_p_use,
 				                ( cntx_t* )cntx,
-				                params );
+				                NULL );
 			}
 
 			// NOTE: This value is usually LESS than ps_p because triangular
@@ -310,7 +299,7 @@ void bli_packm_blk_var1
 				                c_begin, incc, ldc,
 				                p_begin,       ldp, is_p,
 				                ( cntx_t* )cntx,
-				                params );
+				                NULL );
 			}
 		}
 
