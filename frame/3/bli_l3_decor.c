@@ -76,6 +76,9 @@ static void bli_l3_thread_decorator_entry( thrcomm_t* gl_comm, dim_t tid, const 
 	);
 
 	// Free the current thread's thrinfo_t structure.
+    // The barrier is very important as it prevents memory being released by the
+    // chief of some thread sub-group before its peers are done using it.
+    bli_thrinfo_barrier( thread );
 	bli_thrinfo_free( thread );
 }
 
