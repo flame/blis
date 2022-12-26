@@ -55,6 +55,10 @@ BLIS_INLINE const void* bli_auxinfo_next_b( const auxinfo_t* ai )
 {
 	return ai->b_next;
 }
+BLIS_INLINE const void* bli_auxinfo_next_c( const auxinfo_t* ai )
+{
+	return ai->c_next;
+}
 
 BLIS_INLINE inc_t bli_auxinfo_is_a( const auxinfo_t* ai )
 {
@@ -102,6 +106,10 @@ BLIS_INLINE void bli_auxinfo_set_next_a( const void* p, auxinfo_t* ai )
 BLIS_INLINE void bli_auxinfo_set_next_b( const void* p, auxinfo_t* ai )
 {
 	ai->b_next = p;
+}
+BLIS_INLINE void bli_auxinfo_set_next_c( const void* p, auxinfo_t* ai )
+{
+	ai->c_next = p;
 }
 BLIS_INLINE void bli_auxinfo_set_next_ab( const void* ap, const void* bp, auxinfo_t* ai )
 {

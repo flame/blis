@@ -291,18 +291,25 @@ void bli_gemm_ker_var2
 
 			// Compute the addresses of the next panels of A and B.
 			const char* a2 = bli_gemm_get_next_a_upanel( a1, rstep_a, ir_inc );
+			const char* c2 = bli_gemm_get_next_c_utilem( c11, rstep_c, ir_inc );
 			if ( bli_is_last_iter( i, ir_end, ir_tid, ir_nt ) )
 			{
 				a2 = a_cast;
 				b2 = bli_gemm_get_next_b_upanel( b1, cstep_b, jr_inc );
+				c2 = bli_gemm_get_next_c_utilen( c1, cstep_c, jr_inc );
 				if ( bli_is_last_iter( j, jr_end, jr_tid, jr_nt ) )
+				{
 					b2 = b_cast;
+					c2 = bli_gemm_get_next_c_utilem( c_cast, rs_c, m );
+					c2 = bli_gemm_get_next_c_utilem( c2, rstep_c, ir_inc );
+				}
 			}
 
 			// Save addresses of next panels of A and B to the auxinfo_t
 			// object.
 			bli_auxinfo_set_next_a( a2, &aux );
 			bli_auxinfo_set_next_b( b2, &aux );
+			bli_auxinfo_set_next_c( c2, &aux );
 
 			// Edge case handling now occurs within the microkernel itself, but
 			// we must still explicitly accumulate to a temporary microtile in

@@ -43,6 +43,8 @@
 // change depending on BLIS_ENABLE_JRIR_SLAB / BLIS_ENABLE_JRIR_RR.
 #define bli_gemm_get_next_a_upanel( a1, step, inc ) ( a1 + step * inc )
 #define bli_gemm_get_next_b_upanel( b1, step, inc ) ( b1 + step * inc )
+#define bli_gemm_get_next_c_utilem( c1, step, inc ) ( c1 + step * inc )
+#define bli_gemm_get_next_c_utilen( c1, step, inc ) ( c1 + step * inc )
 
 // gemmt
 
