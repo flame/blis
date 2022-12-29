@@ -83,6 +83,8 @@ LPGEMM_5LOOP(bfloat16,bfloat16,float,bf16bf16f32of32)
 	// Is required to decide whether to apply post ops or not.
 	bool is_last_k = FALSE;
 
+	lpgemm_post_op_attr post_ops_attr;
+
 	// Generate thrinfo objects for jc and ic loops from lpgemm_thrinfo_t.
 	thrinfo_t thread_jc;
 	thrinfo_t thread_ic;
@@ -304,6 +306,12 @@ LPGEMM_5LOOP(bfloat16,bfloat16,float,bf16bf16f32of32)
 				{
 					dim_t nr0 = bli_min( ( nc0 - jr ), NR );
 
+					// Post ops meta attributes.
+					post_ops_attr.post_op_c_i = ic;
+					post_ops_attr.post_op_c_j = ( jc + jr );
+					post_ops_attr.rs_c_downscale = rs_c_downscale;
+					post_ops_attr.is_last_k = is_last_k;
+
 #ifdef BLIS_KERNELS_ZEN4
 					// Reorder/Packed B, Reorder/Packed/Unpacked A call.
 					lpgemm_rowvar_bf16bf16f32of32_6x64 
@@ -313,7 +321,7 @@ LPGEMM_5LOOP(bfloat16,bfloat16,float,bf16bf16f32of32)
 					  ( b_use + ( jr * kc0_updated ) ), rs_b_use, cs_b_use,
 					  ( c_use_ic + jr ), rs_c_use, 1,
 					  alpha, beta0,
-					  is_last_k, ic, ( jc + jr ), post_op_list, rs_c_downscale
+					  post_op_list, post_ops_attr
 					);
 #else
 					// Silence compiler warnings.

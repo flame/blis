@@ -259,10 +259,10 @@ POST_OPS_BIAS_4x32:
 	{
 		selector1 =
 			_mm256_loadu_si256( (__m256i const *)((int16_t *)post_ops_list_temp->op_args1 +
-							post_op_c_j + ( 0 * 16 )) );
+							post_ops_attr.post_op_c_j + ( 0 * 16 )) );
 		selector2 =
 			_mm256_loadu_si256( (__m256i const *)((int16_t *)post_ops_list_temp->op_args1 +
-							post_op_c_j + ( 1 * 16 )) );
+							post_ops_attr.post_op_c_j + ( 1 * 16 )) );
 		
 		// c[0,0-15]
 		c_int16_0p0 = _mm256_add_epi16( selector1, c_int16_0p0 );
@@ -364,11 +364,11 @@ POST_OPS_DOWNSCALE_4x32:
 		scale_1 =
 			_mm256_loadu_ps(
 			(float *)post_ops_list_temp->scale_factor +
-			post_op_c_j + (0 * 8));
+			post_ops_attr.post_op_c_j + (0 * 8));
 		scale_2 =
 			_mm256_loadu_ps(
 			(float *)post_ops_list_temp->scale_factor +
-			post_op_c_j + (1 * 8));
+			post_ops_attr.post_op_c_j + (1 * 8));
 
 		BLI_MM256_S16_DOWNSCALE(c_int16_0p0, c_int16_0p1, 0);
 
@@ -550,10 +550,10 @@ POST_OPS_BIAS_2x32:
 	{
 		selector1 =
 			_mm256_loadu_si256( (__m256i const *)((int16_t *)post_ops_list_temp->op_args1 +
-							post_op_c_j + ( 0 * 16 )) );
+							post_ops_attr.post_op_c_j + ( 0 * 16 )) );
 		selector2 =
 			_mm256_loadu_si256( (__m256i const *)((int16_t *)post_ops_list_temp->op_args1 +
-							post_op_c_j + ( 1 * 16 )) );
+							post_ops_attr.post_op_c_j + ( 1 * 16 )) );
 		
 		// c[0,0-15]
 		c_int16_0p0 = _mm256_add_epi16( selector1, c_int16_0p0 );
@@ -619,11 +619,11 @@ POST_OPS_DOWNSCALE_2x32:
 		scale_1 =
 			_mm256_loadu_ps(
 			(float *)post_ops_list_temp->scale_factor +
-			post_op_c_j + (0 * 8));
+			post_ops_attr.post_op_c_j + (0 * 8));
 		scale_2 =
 			_mm256_loadu_ps(
 			(float *)post_ops_list_temp->scale_factor +
-			post_op_c_j + (1 * 8));
+			post_ops_attr.post_op_c_j + (1 * 8));
 
 		BLI_MM256_S16_DOWNSCALE(c_int16_0p0, c_int16_0p1, 0);
 
@@ -747,10 +747,10 @@ POST_OPS_BIAS_1x32:
 	{
 		selector1 =
 			_mm256_loadu_si256( (__m256i const *)((int16_t *)post_ops_list_temp->op_args1 +
-							post_op_c_j + ( 0 * 16 )) );
+							post_ops_attr.post_op_c_j + ( 0 * 16 )) );
 		selector2 =
 			_mm256_loadu_si256( (__m256i const *)((int16_t *)post_ops_list_temp->op_args1 +
-							post_op_c_j + ( 1 * 16 )) );
+							post_ops_attr.post_op_c_j + ( 1 * 16 )) );
 		
 		// c[0,0-15]
 		c_int16_0p0 = _mm256_add_epi16( selector1, c_int16_0p0 );
@@ -798,11 +798,11 @@ POST_OPS_DOWNSCALE_1x32:
 		scale_1 =
 			_mm256_loadu_ps(
 			(float *)post_ops_list_temp->scale_factor +
-			post_op_c_j + (0 * 8));
+			post_ops_attr.post_op_c_j + (0 * 8));
 		scale_2 =
 			_mm256_loadu_ps(
 			(float *)post_ops_list_temp->scale_factor +
-			post_op_c_j + (1 * 8));
+			post_ops_attr.post_op_c_j + (1 * 8));
 
 		BLI_MM256_S16_DOWNSCALE(c_int16_0p0, c_int16_0p1, 0);
 

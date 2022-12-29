@@ -47,20 +47,23 @@
 	_mm256_storeu_epi16 \
 	( \
 	  ( bfloat16* )post_ops_list_temp->op_args3 + \
-	  ( rs_c_downscale * ( post_op_c_i + m_ind ) ) + post_op_c_j + ( n_ind * 16 ), \
-	  (__m256i) \
-		_mm512_cvtneps_pbh( reg ) \
+	  ( post_ops_attr.rs_c_downscale * ( post_ops_attr.post_op_c_i + m_ind ) ) + \
+	  post_ops_attr.post_op_c_j + ( n_ind * 16 ), \
+	  (__m256i) _mm512_cvtneps_pbh( reg ) \
 	) \
 
 #define CVT_F32_BF16_LT16(reg,m_ind,n_ind) \
 	_mm256_storeu_epi16 \
 	( \
 	  buf0, \
-		(__m256i) \
-		_mm512_cvtneps_pbh( reg ) \
+	  (__m256i) _mm512_cvtneps_pbh( reg ) \
 	); \
-	memcpy( ( bfloat16* )post_ops_list_temp->op_args3 + \
-	  ( rs_c_downscale * ( post_op_c_i + m_ind ) ) + post_op_c_j + \
-	  ( n_ind * 16 ) , buf0, ( n0_rem * sizeof( bfloat16 ) ) ); \
+	memcpy \
+	( \
+	  ( bfloat16* )post_ops_list_temp->op_args3 + \
+	  ( post_ops_attr.rs_c_downscale * ( post_ops_attr.post_op_c_i + m_ind ) ) + \
+	  post_ops_attr.post_op_c_j + ( n_ind * 16 ), \
+	  buf0, ( n0_rem * sizeof( bfloat16 ) ) \
+	); \
 
 #endif // LPGEMM_F32_KERN_MACROS_H

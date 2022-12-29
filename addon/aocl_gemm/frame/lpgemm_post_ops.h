@@ -57,6 +57,18 @@ typedef struct lpgemm_post_op_t
 	struct lpgemm_post_op_t* next;
 } lpgemm_post_op;
 
+// Used as an internal structure.
+typedef struct lpgemm_post_op_attr_t
+{
+	dim_t post_op_c_i;
+	dim_t post_op_c_j;
+	dim_t rs_c_downscale;
+	dim_t cs_c_downscale;
+	void* buf_downscale;
+	bool is_first_k;
+	bool is_last_k;
+} lpgemm_post_op_attr;
+
 void lpgemm_translate_to_post_ops_list
      (
        aocl_post_op*   post_op_unparsed,
@@ -66,7 +78,7 @@ void lpgemm_translate_to_post_ops_list
      );
 
 #define POST_OP_LABEL_LASTK_SAFE_JUMP \
-		if ( ( is_last_k == TRUE ) && ( post_ops_list_temp != NULL ) ) \
+		if ( ( post_ops_attr.is_last_k == TRUE ) && ( post_ops_list_temp != NULL ) ) \
 		{ \
 			goto *post_ops_labels[post_ops_list_temp->op_code]; \
 		} \

@@ -93,8 +93,21 @@ LPGEMM_5LOOP(uint8_t,int8_t,int32_t,u8s8s32o32)
 	// buffer needs to be updated.
 	dim_t k_updated = make_multiple_of_n( k, 4 );
 
-	// Is required to decide whether to apply post ops or not.
+	// To decide whether to apply post ops or not.
 	bool is_last_k = FALSE;
+
+	// To decide whether to use original s8 C or temp buffer for beta scale.
+	bool is_first_k = FALSE;
+
+	lpgemm_post_op_attr post_ops_attr;
+	if ( c_downscale == TRUE )
+	{
+		post_ops_attr.buf_downscale = c;
+	}
+	else
+	{
+		post_ops_attr.buf_downscale = NULL;
+	}
 
 	// Generate thrinfo objects for jc and ic loops from lpgemm_thrinfo_t.
 	thrinfo_t thread_jc;
@@ -146,27 +159,6 @@ LPGEMM_5LOOP(uint8_t,int8_t,int32_t,u8s8s32o32)
 
 			c_use_jc = ( int32_t* )temp_scal_c_buffer_u8s8s32o32;
 
-			if ( beta != 0 )
-			{
-				dim_t i_temp = 0;
-				dim_t j_temp = 0;
-				// Upscale out C to temporary C matrix.
-				for ( dim_t i_dscale = ic_start; i_dscale < ic_end; ++i_dscale )
-				{
-					j_temp = 0;
-					for ( dim_t j_dscale = jc; j_dscale < ( jc + nc0 ); ++j_dscale )
-					{
-						*( temp_scal_c_buffer_u8s8s32o32 +
-								( nc0 * i_temp ) + j_temp ) =
-								( int32_t )( *( ( ( int8_t* )c ) +
-								( rs_c * i_dscale ) + j_dscale ) );
-
-						j_temp++;
-					}
-					i_temp++;
-				}
-			}
-
 			// The temp c buffer stride is modified as opposed to original C matrix.
 			rs_c_use = nc0;
 		}
@@ -183,7 +175,12 @@ LPGEMM_5LOOP(uint8_t,int8_t,int32_t,u8s8s32o32)
 			// needs to be updated.
 			dim_t kc0_updated = make_multiple_of_n( kc0, 4 );
 
+			// No parallelization in k dim, k always starts at 0.
+			is_first_k = ( pc == 0 ) ? ( TRUE ) : ( FALSE );
+			post_ops_attr.is_first_k = is_first_k;
+
 			is_last_k = ( ( pc + KC ) >= k ) ? ( TRUE ) : ( FALSE );
+			post_ops_attr.is_last_k = is_last_k;
 
 			if ( mtag_b == PACK )
 			{
@@ -343,6 +340,11 @@ LPGEMM_5LOOP(uint8_t,int8_t,int32_t,u8s8s32o32)
 				{
 					dim_t nr0 = bli_min( ( nc0 - jr ), NR );
 
+					// Post ops meta attributes.
+					post_ops_attr.post_op_c_i = ic;
+					post_ops_attr.post_op_c_j = ( jc + jr );
+					post_ops_attr.rs_c_downscale = rs_c_downscale;
+
 #ifdef BLIS_KERNELS_ZEN4
 					// Reorder/Packed B, Reorder/Packed/Unpacked A call.
 					lpgemm_rowvar_u8s8s32o32_6x64
@@ -352,7 +354,7 @@ LPGEMM_5LOOP(uint8_t,int8_t,int32_t,u8s8s32o32)
 					  ( b_use + ( jr * kc0_updated ) ), rs_b_use, cs_b_use,
 					  ( c_use_ic + jr ), rs_c_use, 1,
 					  alpha, beta0,
-					  is_last_k, ic, ( jc + jr ), post_op_list, rs_c_downscale
+					  post_op_list, post_ops_attr
 					);
 #else
 					// Silence compiler warnings.

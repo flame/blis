@@ -41,26 +41,23 @@
 #define LPGEMM_MAIN_KERN(A_type,B_type,C_type,LP_SFX) \
 void lpgemm_rowvar_ ## LP_SFX \
      ( \
-       const dim_t     m0, \
-       const dim_t     n0, \
-       const dim_t     k0, \
-       const A_type*   a, \
-       const dim_t     rs_a, \
-       const dim_t     cs_a, \
-       const dim_t     ps_a, \
-       const B_type*   b, \
-       const dim_t     rs_b, \
-       const dim_t     cs_b, \
-       C_type*         c, \
-       const dim_t     rs_c, \
-       const dim_t     cs_c, \
-       const C_type    alpha, \
-       const C_type    beta, \
-       bool            is_last_k, \
-       dim_t           post_op_c_i, \
-       dim_t           post_op_c_j, \
-       lpgemm_post_op* post_ops_list, \
-       const dim_t     rs_c_downscale \
+       const dim_t         m0, \
+       const dim_t         n0, \
+       const dim_t         k0, \
+       const A_type*       a, \
+       const dim_t         rs_a, \
+       const dim_t         cs_a, \
+       const dim_t         ps_a, \
+       const B_type*       b, \
+       const dim_t         rs_b, \
+       const dim_t         cs_b, \
+       C_type*             c, \
+       const dim_t         rs_c, \
+       const dim_t         cs_c, \
+       const C_type        alpha, \
+       const C_type        beta, \
+       lpgemm_post_op*     post_ops_list, \
+       lpgemm_post_op_attr post_ops_attr \
      ) \
 
 LPGEMM_MAIN_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_6x64);
@@ -70,22 +67,19 @@ LPGEMM_MAIN_KERN(bfloat16,bfloat16,float,bf16bf16f32of32_6x64);
 #define LPGEMM_M_FRINGE_KERN(A_type,B_type,C_type,LP_SFX) \
 void lpgemm_rowvar_ ## LP_SFX \
      ( \
-       const dim_t     k0, \
-       const A_type*   a, \
-       const dim_t     rs_a, \
-       const dim_t     cs_a, \
-       const B_type*   b, \
-       const dim_t     rs_b, \
-       const dim_t     cs_b, \
-       C_type*         c, \
-       const dim_t     rs_c, \
-       const C_type    alpha, \
-       const C_type    beta, \
-       bool            is_last_k, \
-       dim_t           post_op_c_i, \
-       dim_t           post_op_c_j, \
-       lpgemm_post_op* post_ops_list, \
-       const dim_t     rs_c_downscale \
+       const dim_t         k0, \
+       const A_type*       a, \
+       const dim_t         rs_a, \
+       const dim_t         cs_a, \
+       const B_type*       b, \
+       const dim_t         rs_b, \
+       const dim_t         cs_b, \
+       C_type*             c, \
+       const dim_t         rs_c, \
+       const C_type        alpha, \
+       const C_type        beta, \
+       lpgemm_post_op*     post_ops_list, \
+       lpgemm_post_op_attr post_ops_attr \
      ) \
 
 LPGEMM_M_FRINGE_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_5x64);
@@ -107,24 +101,21 @@ LPGEMM_M_FRINGE_KERN(bfloat16,bfloat16,float,bf16bf16f32of32_1x64);
 #define LPGEMM_N_FRINGE_KERN(A_type,B_type,C_type,LP_SFX) \
 void lpgemm_rowvar_ ## LP_SFX \
      ( \
-       const dim_t     m0, \
-       const dim_t     k0, \
-       const A_type*   a, \
-       const dim_t     rs_a, \
-       const dim_t     cs_a, \
-       const dim_t     ps_a, \
-       const B_type*   b, \
-       const dim_t     rs_b, \
-       const dim_t     cs_b, \
-       C_type*         c, \
-       const dim_t     rs_c, \
-       const C_type    alpha, \
-       const C_type    beta, \
-       bool            is_last_k, \
-       dim_t           post_op_c_i, \
-       dim_t           post_op_c_j, \
-       lpgemm_post_op* post_ops_list, \
-       const dim_t     rs_c_downscale \
+       const dim_t         m0, \
+       const dim_t         k0, \
+       const A_type*       a, \
+       const dim_t         rs_a, \
+       const dim_t         cs_a, \
+       const dim_t         ps_a, \
+       const B_type*       b, \
+       const dim_t         rs_b, \
+       const dim_t         cs_b, \
+       C_type*             c, \
+       const dim_t         rs_c, \
+       const C_type        alpha, \
+       const C_type        beta, \
+       lpgemm_post_op*     post_ops_list, \
+       lpgemm_post_op_attr post_ops_attr \
      ) \
 
 LPGEMM_N_FRINGE_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_6x16);
@@ -140,25 +131,22 @@ LPGEMM_N_FRINGE_KERN(bfloat16,bfloat16,float,bf16bf16f32of32_6x48);
 #define LPGEMM_N_LT_NR0_FRINGE_KERN(A_type,B_type,C_type,LP_SFX) \
 void lpgemm_rowvar_ ## LP_SFX \
      ( \
-       const dim_t     m0, \
-       const dim_t     k0, \
-       const A_type*   a, \
-       const dim_t     rs_a, \
-       const dim_t     cs_a, \
-       const dim_t     ps_a, \
-       const B_type*   b, \
-       const dim_t     rs_b, \
-       const dim_t     cs_b, \
-       C_type*         c, \
-       const dim_t     rs_c, \
-       const C_type    alpha, \
-       const C_type    beta, \
-       const dim_t     n0_rem, \
-       bool            is_last_k, \
-       dim_t           post_op_c_i, \
-       dim_t           post_op_c_j, \
-       lpgemm_post_op* post_ops_list, \
-       const dim_t     rs_c_downscale \
+       const dim_t         m0, \
+       const dim_t         k0, \
+       const A_type*       a, \
+       const dim_t         rs_a, \
+       const dim_t         cs_a, \
+       const dim_t         ps_a, \
+       const B_type*       b, \
+       const dim_t         rs_b, \
+       const dim_t         cs_b, \
+       C_type*             c, \
+       const dim_t         rs_c, \
+       const C_type        alpha, \
+       const C_type        beta, \
+       const dim_t         n0_rem, \
+       lpgemm_post_op*     post_ops_list, \
+       lpgemm_post_op_attr post_ops_attr \
      ) \
 
 LPGEMM_N_LT_NR0_FRINGE_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_6xlt16);
@@ -170,22 +158,19 @@ LPGEMM_N_LT_NR0_FRINGE_KERN(bfloat16,bfloat16,float,bf16bf16f32of32_6xlt16);
 #define LPGEMM_MN_FRINGE_KERN(A_type,B_type,C_type,LP_SFX) \
 void lpgemm_rowvar_ ## LP_SFX \
      ( \
-       const dim_t     k0, \
-       const A_type*   a, \
-       const dim_t     rs_a, \
-       const dim_t     cs_a, \
-       const B_type*   b, \
-       const dim_t     rs_b, \
-       const dim_t     cs_b, \
-       C_type*         c, \
-       const dim_t     rs_c, \
-       const C_type    alpha, \
-       const C_type    beta, \
-       bool            is_last_k, \
-       dim_t           post_op_c_i, \
-       dim_t           post_op_c_j, \
-       lpgemm_post_op* post_ops_list, \
-       const dim_t     rs_c_downscale \
+       const dim_t         k0, \
+       const A_type*       a, \
+       const dim_t         rs_a, \
+       const dim_t         cs_a, \
+       const B_type*       b, \
+       const dim_t         rs_b, \
+       const dim_t         cs_b, \
+       C_type*             c, \
+       const dim_t         rs_c, \
+       const C_type        alpha, \
+       const C_type        beta, \
+       lpgemm_post_op*     post_ops_list, \
+       lpgemm_post_op_attr post_ops_attr \
      ) \
 
 LPGEMM_MN_FRINGE_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_5x16);
@@ -227,23 +212,20 @@ LPGEMM_MN_FRINGE_KERN(bfloat16,bfloat16,float,bf16bf16f32of32_1x48);
 #define LPGEMM_MN_LT_NR0_FRINGE_KERN(A_type,B_type,C_type,LP_SFX) \
 void lpgemm_rowvar_ ## LP_SFX \
      ( \
-       const dim_t     k0, \
-       const A_type*   a, \
-       const dim_t     rs_a, \
-       const dim_t     cs_a, \
-       const B_type*   b, \
-       const dim_t     rs_b, \
-       const dim_t     cs_b, \
-       C_type*         c, \
-       const dim_t     rs_c, \
-       const C_type    alpha, \
-       const C_type    beta, \
-       const dim_t     n0_rem, \
-       bool            is_last_k, \
-       dim_t           post_op_c_i, \
-       dim_t           post_op_c_j, \
-       lpgemm_post_op* post_ops_list, \
-       const dim_t     rs_c_downscale \
+       const dim_t         k0, \
+       const A_type*       a, \
+       const dim_t         rs_a, \
+       const dim_t         cs_a, \
+       const B_type*       b, \
+       const dim_t         rs_b, \
+       const dim_t         cs_b, \
+       C_type*             c, \
+       const dim_t         rs_c, \
+       const C_type        alpha, \
+       const C_type        beta, \
+       const dim_t         n0_rem, \
+       lpgemm_post_op*     post_ops_list, \
+       lpgemm_post_op_attr post_ops_attr \
      ) \
 
 LPGEMM_MN_LT_NR0_FRINGE_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_5xlt16);

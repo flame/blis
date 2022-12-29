@@ -208,8 +208,8 @@ POST_OPS_BIAS_4x16:
 	{
 		selector1 =
 			_mm256_loadu_si256( (__m256i const *)((int16_t *)post_ops_list_temp->op_args1 +
-							post_op_c_j + ( 0 * 16 )) );
-							
+							post_ops_attr.post_op_c_j + ( 0 * 16 )) );
+
 		// c[0,0-15]
 		c_int16_0p0 = _mm256_add_epi16( selector1, c_int16_0p0 );
 
@@ -274,11 +274,11 @@ POST_OPS_DOWNSCALE_4x16:
 		scale_1 =
 			_mm256_loadu_ps(
 			(float *)post_ops_list_temp->scale_factor +
-			post_op_c_j + (0 * 8));
+			post_ops_attr.post_op_c_j + (0 * 8));
 		scale_2 =
 			_mm256_loadu_ps(
 			(float *)post_ops_list_temp->scale_factor +
-			post_op_c_j + (1 * 8));
+			post_ops_attr.post_op_c_j + (1 * 8));
 
 		BLI_MM256_S16_DOWNSCALE2(c_int16_0p0, c_int16_1p0, 0, 1);
 
@@ -484,9 +484,9 @@ LPGEMM_MN_LT_NR0_FRINGE_KERN(uint8_t,int8_t,int16_t,u8s8s16o16_4xlt16)
 	POST_OP_LABEL_LASTK_SAFE_JUMP
 POST_OPS_BIAS_4xlt16:
 	{
-		memcpy( buf0, ( ( int16_t* )post_ops_list_temp->op_args1 
-			+ post_op_c_j + ( 0 * 16 ) ), ( n0_rem * sizeof( int16_t ) ) );
-		
+		memcpy( buf0, ( ( int16_t* )post_ops_list_temp->op_args1
+			+ post_ops_attr.post_op_c_j + ( 0 * 16 ) ), ( n0_rem * sizeof( int16_t ) ) );
+
 		selector1 =
 			_mm256_loadu_si256( (__m256i const *) buf0 );
 
@@ -554,7 +554,7 @@ POST_OPS_DOWNSCALE_4xlt16:
 		int8_t store_buf[16];
 
 		memcpy( float_buf, ( ( float* )post_ops_list_temp->scale_factor +
-				post_op_c_j ), ( n0_rem * sizeof( float ) ) );
+				post_ops_attr.post_op_c_j ), ( n0_rem * sizeof( float ) ) );
 
 		// Load the scale vector values into the register
 		scale_1 = _mm256_loadu_ps(float_buf + (0 * 8));
@@ -707,8 +707,8 @@ POST_OPS_BIAS_2x16:
 	{
 		selector1 =
 			_mm256_loadu_si256( (__m256i const *)((int16_t *)post_ops_list_temp->op_args1 +
-							post_op_c_j + ( 0 * 16 )) );
-		
+							post_ops_attr.post_op_c_j + ( 0 * 16 )) );
+
 		// c[0,0-15]
 		c_int16_0p0 = _mm256_add_epi16( selector1, c_int16_0p0 );
 
@@ -755,11 +755,11 @@ POST_OPS_DOWNSCALE_2x16:
 		scale_1 =
 			_mm256_loadu_ps(
 			(float *)post_ops_list_temp->scale_factor +
-			post_op_c_j + (0 * 8));
+			post_ops_attr.post_op_c_j + (0 * 8));
 		scale_2 =
 			_mm256_loadu_ps(
 			(float *)post_ops_list_temp->scale_factor +
-			post_op_c_j + (1 * 8));
+			post_ops_attr.post_op_c_j + (1 * 8));
 
 		BLI_MM256_S16_DOWNSCALE2(c_int16_0p0, c_int16_1p0, 0, 1);
 
@@ -895,11 +895,11 @@ LPGEMM_MN_LT_NR0_FRINGE_KERN(uint8_t,int8_t,int16_t,u8s8s16o16_2xlt16)
 POST_OPS_BIAS_2xlt16:
 	{
 		memcpy( buf0, ( ( int16_t* )post_ops_list_temp->op_args1 +
-			post_op_c_j + ( 0 * 16 ) ), ( n0_rem * sizeof( int16_t ) ) );
+			post_ops_attr.post_op_c_j + ( 0 * 16 ) ), ( n0_rem * sizeof( int16_t ) ) );
 
 		selector1 =
 			_mm256_loadu_si256( (__m256i const *) buf0);
-		
+
 		// c[0,0-15]
 		c_int16_0p0 = _mm256_add_epi16( selector1, c_int16_0p0 );
 
@@ -946,7 +946,7 @@ POST_OPS_DOWNSCALE_2xlt16:
 		int8_t store_buf[16];
 
 		memcpy( float_buf, ( ( float* )post_ops_list_temp->scale_factor +
-				post_op_c_j ), ( n0_rem * sizeof( float ) ) );
+				post_ops_attr.post_op_c_j ), ( n0_rem * sizeof( float ) ) );
 
 		// Load the scale vector values into the register
 		scale_1 = _mm256_loadu_ps(float_buf + (0 * 8));
@@ -1057,7 +1057,7 @@ POST_OPS_BIAS_1x16:
 	{
 		selector1 =
 			_mm256_loadu_si256( (__m256i const *)((int16_t *)post_ops_list_temp->op_args1 +
-							post_op_c_j + ( 0 * 16 )) );
+							post_ops_attr.post_op_c_j + ( 0 * 16 )) );
 
 		// c[0,0-15]
 		c_int16_0p0 = _mm256_add_epi16( selector1, c_int16_0p0 );
@@ -1096,11 +1096,11 @@ POST_OPS_DOWNSCALE_1x16:
 		scale_1 =
 			_mm256_loadu_ps(
 			(float *)post_ops_list_temp->scale_factor +
-			post_op_c_j + (0 * 8));
+			post_ops_attr.post_op_c_j + (0 * 8));
 		scale_2 =
 			_mm256_loadu_ps(
 			(float *)post_ops_list_temp->scale_factor +
-			post_op_c_j + (1 * 8));
+			post_ops_attr.post_op_c_j + (1 * 8));
 
 		zero_reg = _mm256_setzero_si256();
 
@@ -1203,8 +1203,8 @@ LPGEMM_MN_LT_NR0_FRINGE_KERN(uint8_t,int8_t,int16_t,u8s8s16o16_1xlt16)
 	POST_OP_LABEL_LASTK_SAFE_JUMP
 POST_OPS_BIAS_1xlt16:
 	{
-		memcpy( buf0, ( ( int16_t* )post_ops_list_temp->op_args1 
-			+ post_op_c_j + ( 0 * 16 ) ), ( n0_rem * sizeof( int16_t ) ) );
+		memcpy( buf0, ( ( int16_t* )post_ops_list_temp->op_args1
+			+ post_ops_attr.post_op_c_j + ( 0 * 16 ) ), ( n0_rem * sizeof( int16_t ) ) );
 
 		selector1 =
 			_mm256_loadu_si256( (__m256i const *)buf0 );
@@ -1246,7 +1246,7 @@ POST_OPS_DOWNSCALE_1xlt16:
 		int8_t store_buf[16];
 
 		memcpy( float_buf, ( ( float* )post_ops_list_temp->scale_factor +
-				post_op_c_j ), ( n0_rem * sizeof( float ) ) );
+				post_ops_attr.post_op_c_j ), ( n0_rem * sizeof( float ) ) );
 
 		// Load the scale vector values into the register
 		scale_1 = _mm256_loadu_ps(float_buf + (0 * 8));

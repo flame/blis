@@ -223,7 +223,7 @@ POST_OPS_BIAS_5xLT16:
 				 ( *( char* )post_ops_list_temp->op_args2 == 'R' ) )
 			{
 				memcpy( buf0, ( ( float* )post_ops_list_temp->op_args1 +
-						post_op_c_j ), ( n0_rem * sizeof( float ) ) );
+						post_ops_attr.post_op_c_j ), ( n0_rem * sizeof( float ) ) );
 				selector1 = _mm512_loadu_ps( buf0 );
 
 				// c[0,0-15]
@@ -245,19 +245,19 @@ POST_OPS_BIAS_5xLT16:
 			{
 				selector1 =
 					_mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1
-								+ post_op_c_i + 0 ) );
+								+ post_ops_attr.post_op_c_i + 0 ) );
 				selector2 =
 					_mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1
-								+ post_op_c_i + 1 ) );
+								+ post_ops_attr.post_op_c_i + 1 ) );
 				__m512 selector3 =
 					_mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1
-								+ post_op_c_i + 2 ) );
+								+ post_ops_attr.post_op_c_i + 2 ) );
 				__m512 selector4 =
 					_mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1
-								+ post_op_c_i + 3 ) );
+								+ post_ops_attr.post_op_c_i + 3 ) );
 				__m512 selector5 =
 					_mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1
-								+ post_op_c_i + 4 ) );
+								+ post_ops_attr.post_op_c_i + 4 ) );
 
 				// c[0,0-15]
 				c_float_0p0 = _mm512_add_ps( selector1, c_float_0p0 );
@@ -538,7 +538,7 @@ POST_OPS_BIAS_4xLT16:
 				 ( *( char* )post_ops_list_temp->op_args2 == 'R' ) )
 			{
 				memcpy( buf0, ( ( float* )post_ops_list_temp->op_args1 +
-						post_op_c_j ), ( n0_rem * sizeof( float ) ) );
+						post_ops_attr.post_op_c_j ), ( n0_rem * sizeof( float ) ) );
 				selector1 = _mm512_loadu_ps( buf0 );
 
 				// c[0,0-15]
@@ -557,16 +557,16 @@ POST_OPS_BIAS_4xLT16:
 			{
 				selector1 =
 					_mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1
-								+ post_op_c_i + 0 ) );
+								+ post_ops_attr.post_op_c_i + 0 ) );
 				selector2 =
 					_mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1
-								+ post_op_c_i + 1 ) );
+								+ post_ops_attr.post_op_c_i + 1 ) );
 				__m512 selector3 =
 					_mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1
-								+ post_op_c_i + 2 ) );
+								+ post_ops_attr.post_op_c_i + 2 ) );
 				__m512 selector4 =
 					_mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1
-								+ post_op_c_i + 3 ) );
+								+ post_ops_attr.post_op_c_i + 3 ) );
 
 				// c[0,0-15]
 				c_float_0p0 = _mm512_add_ps( selector1, c_float_0p0 );
@@ -802,7 +802,7 @@ POST_OPS_BIAS_3xLT16:
 				 ( *( char* )post_ops_list_temp->op_args2 == 'R' ) )
 			{
 				memcpy( buf0, ( ( float* )post_ops_list_temp->op_args1 +
-						post_op_c_j ), ( n0_rem * sizeof( float ) ) );
+						post_ops_attr.post_op_c_j ), ( n0_rem * sizeof( float ) ) );
 				selector1 = _mm512_loadu_ps( buf0 );
 
 				// c[0,0-15]
@@ -818,13 +818,13 @@ POST_OPS_BIAS_3xLT16:
 			{
 				selector1 =
 					_mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1
-								+ post_op_c_i + 0 ) );
+								+ post_ops_attr.post_op_c_i + 0 ) );
 				selector2 =
 					_mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1
-								+ post_op_c_i + 1 ) );
+								+ post_ops_attr.post_op_c_i + 1 ) );
 				__m512 selector3 =
 					_mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1
-								+ post_op_c_i + 2 ) );
+								+ post_ops_attr.post_op_c_i + 2 ) );
 
 				// c[0,0-15]
 				c_float_0p0 = _mm512_add_ps( selector1, c_float_0p0 );
@@ -1016,7 +1016,7 @@ POST_OPS_BIAS_2xLT16:
 				 ( *( char* )post_ops_list_temp->op_args2 == 'R' ) )
 			{
 				memcpy( buf0, ( ( float* )post_ops_list_temp->op_args1 +
-						post_op_c_j ), ( n0_rem * sizeof( float ) ) );
+						post_ops_attr.post_op_c_j ), ( n0_rem * sizeof( float ) ) );
 				selector1 = _mm512_loadu_ps( buf0 );
 
 				// c[0,0-15]
@@ -1029,10 +1029,10 @@ POST_OPS_BIAS_2xLT16:
 			{
 				selector1 =
 					_mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1
-								+ post_op_c_i + 0 ) );
+								+ post_ops_attr.post_op_c_i + 0 ) );
 				selector2 =
 					_mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1
-								+ post_op_c_i + 1 ) );
+								+ post_ops_attr.post_op_c_i + 1 ) );
 
 				// c[0,0-15]
 				c_float_0p0 = _mm512_add_ps( selector1, c_float_0p0 );
@@ -1180,7 +1180,7 @@ POST_OPS_BIAS_1xLT16:
 				 ( *( char* )post_ops_list_temp->op_args2 == 'R' ) )
 			{
 				memcpy( buf0, ( ( float* )post_ops_list_temp->op_args1 +
-						post_op_c_j ), ( n0_rem * sizeof( float ) ) );
+						post_ops_attr.post_op_c_j ), ( n0_rem * sizeof( float ) ) );
 				selector1 = _mm512_loadu_ps( buf0 );
 
 				// c[0,0-15]
@@ -1190,7 +1190,7 @@ POST_OPS_BIAS_1xLT16:
 			{
 				selector1 =
 					_mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1
-								+ post_op_c_i + 0 ) );
+								+ post_ops_attr.post_op_c_i + 0 ) );
 
 				// c[0,0-15]
 				c_float_0p0 = _mm512_add_ps( selector1, c_float_0p0 );
@@ -1411,7 +1411,7 @@ POST_OPS_BIAS_5x16:
 		{
 			selector1 =
 				_mm512_loadu_ps( ( float* )post_ops_list_temp->op_args1 +
-							post_op_c_j );
+							post_ops_attr.post_op_c_j );
 
 			// c[0,0-15]
 			c_float_0p0 = _mm512_add_ps( selector1, c_float_0p0 );
@@ -1432,19 +1432,19 @@ POST_OPS_BIAS_5x16:
 		{
 			selector1 =
 				_mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1
-							+ post_op_c_i + 0 ) );
+							+ post_ops_attr.post_op_c_i + 0 ) );
 			selector2 =
 				_mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1
-							+ post_op_c_i + 1 ) );
+							+ post_ops_attr.post_op_c_i + 1 ) );
 			__m512 selector3 =
 				_mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1
-							+ post_op_c_i + 2 ) );
+							+ post_ops_attr.post_op_c_i + 2 ) );
 			__m512 selector4 =
 				_mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1
-							+ post_op_c_i + 3 ) );
+							+ post_ops_attr.post_op_c_i + 3 ) );
 			__m512 selector5 =
 				_mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1
-							+ post_op_c_i + 4 ) );
+							+ post_ops_attr.post_op_c_i + 4 ) );
 
 			// c[0,0-15]
 			c_float_0p0 = _mm512_add_ps( selector1, c_float_0p0 );
@@ -1696,7 +1696,7 @@ POST_OPS_BIAS_4x16:
 		{
 			selector1 =
 				_mm512_loadu_ps( ( float* )post_ops_list_temp->op_args1 +
-							post_op_c_j );
+							post_ops_attr.post_op_c_j );
 
 			// c[0,0-15]
 			c_float_0p0 = _mm512_add_ps( selector1, c_float_0p0 );
@@ -1714,16 +1714,16 @@ POST_OPS_BIAS_4x16:
 		{
 			selector1 =
 				_mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1
-							+ post_op_c_i + 0 ) );
+							+ post_ops_attr.post_op_c_i + 0 ) );
 			selector2 =
 				_mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1
-							+ post_op_c_i + 1 ) );
+							+ post_ops_attr.post_op_c_i + 1 ) );
 			__m512 selector3 =
 				_mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1
-							+ post_op_c_i + 2 ) );
+							+ post_ops_attr.post_op_c_i + 2 ) );
 			__m512 selector4 =
 				_mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1
-							+ post_op_c_i + 3 ) );
+							+ post_ops_attr.post_op_c_i + 3 ) );
 
 			// c[0,0-15]
 			c_float_0p0 = _mm512_add_ps( selector1, c_float_0p0 );
@@ -1936,7 +1936,7 @@ POST_OPS_BIAS_3x16:
 		{
 			selector1 =
 				_mm512_loadu_ps( ( float* )post_ops_list_temp->op_args1 +
-							post_op_c_j );
+							post_ops_attr.post_op_c_j );
 
 			// c[0,0-15]
 			c_float_0p0 = _mm512_add_ps( selector1, c_float_0p0 );
@@ -1951,13 +1951,13 @@ POST_OPS_BIAS_3x16:
 		{
 			selector1 =
 				_mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1
-							+ post_op_c_i + 0 ) );
+							+ post_ops_attr.post_op_c_i + 0 ) );
 			selector2 =
 				_mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1
-							+ post_op_c_i + 1 ) );
+							+ post_ops_attr.post_op_c_i + 1 ) );
 			__m512 selector3 =
 				_mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1
-							+ post_op_c_i + 2 ) );
+							+ post_ops_attr.post_op_c_i + 2 ) );
 
 			// c[0,0-15]
 			c_float_0p0 = _mm512_add_ps( selector1, c_float_0p0 );
@@ -2132,7 +2132,7 @@ POST_OPS_BIAS_2x16:
 		{
 			selector1 =
 				_mm512_loadu_ps( ( float* )post_ops_list_temp->op_args1 +
-							post_op_c_j );
+							post_ops_attr.post_op_c_j );
 
 			// c[0,0-15]
 			c_float_0p0 = _mm512_add_ps( selector1, c_float_0p0 );
@@ -2144,10 +2144,10 @@ POST_OPS_BIAS_2x16:
 		{
 			selector1 =
 				_mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1
-							+ post_op_c_i + 0 ) );
+							+ post_ops_attr.post_op_c_i + 0 ) );
 			selector2 =
 				_mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1
-							+ post_op_c_i + 1 ) );
+							+ post_ops_attr.post_op_c_i + 1 ) );
 
 			// c[0,0-15]
 			c_float_0p0 = _mm512_add_ps( selector1, c_float_0p0 );
@@ -2282,7 +2282,7 @@ POST_OPS_BIAS_1x16:
 		{
 			selector1 =
 				_mm512_loadu_ps( ( float* )post_ops_list_temp->op_args1 +
-							post_op_c_j );
+							post_ops_attr.post_op_c_j );
 
 			// c[0,0-15]
 			c_float_0p0 = _mm512_add_ps( selector1, c_float_0p0 );
@@ -2291,7 +2291,7 @@ POST_OPS_BIAS_1x16:
 		{
 			selector1 =
 				_mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1
-							+ post_op_c_i + 0 ) );
+							+ post_ops_attr.post_op_c_i + 0 ) );
 
 			// c[0,0-15]
 			c_float_0p0 = _mm512_add_ps( selector1, c_float_0p0 );
@@ -2555,10 +2555,10 @@ POST_OPS_BIAS_5x32:
 		{
 			selector1 =
 				_mm512_loadu_ps( ( float* )post_ops_list_temp->op_args1 +
-							post_op_c_j + ( 0 * 16 ) );
+							post_ops_attr.post_op_c_j + ( 0 * 16 ) );
 			selector2 =
 				_mm512_loadu_ps( ( float* )post_ops_list_temp->op_args1 +
-							post_op_c_j + ( 1 * 16 ) );
+							post_ops_attr.post_op_c_j + ( 1 * 16 ) );
 
 			// c[0,0-15]
 			c_float_0p0 = _mm512_add_ps( selector1, c_float_0p0 );
@@ -2594,19 +2594,19 @@ POST_OPS_BIAS_5x32:
 		{
 			selector1 =
 				_mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1
-							+ post_op_c_i + 0 ) );
+							+ post_ops_attr.post_op_c_i + 0 ) );
 			selector2 =
 				_mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1
-							+ post_op_c_i + 1 ) );
+							+ post_ops_attr.post_op_c_i + 1 ) );
 			__m512 selector3 =
 				_mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1
-							+ post_op_c_i + 2 ) );
+							+ post_ops_attr.post_op_c_i + 2 ) );
 			__m512 selector4 =
 				_mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1
-							+ post_op_c_i + 3 ) );
+							+ post_ops_attr.post_op_c_i + 3 ) );
 			__m512 selector5 =
 				_mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1
-							+ post_op_c_i + 4 ) );
+							+ post_ops_attr.post_op_c_i + 4 ) );
 
 			// c[0,0-15]
 			c_float_0p0 = _mm512_add_ps( selector1, c_float_0p0 );
@@ -2972,10 +2972,10 @@ POST_OPS_BIAS_4x32:
 		{
 			selector1 =
 				_mm512_loadu_ps( ( float* )post_ops_list_temp->op_args1 +
-							post_op_c_j + ( 0 * 16 ) );
+							post_ops_attr.post_op_c_j + ( 0 * 16 ) );
 			selector2 =
 				_mm512_loadu_ps( ( float* )post_ops_list_temp->op_args1 +
-							post_op_c_j + ( 1 * 16 ) );
+							post_ops_attr.post_op_c_j + ( 1 * 16 ) );
 
 			// c[0,0-15]
 			c_float_0p0 = _mm512_add_ps( selector1, c_float_0p0 );
@@ -3005,16 +3005,16 @@ POST_OPS_BIAS_4x32:
 		{
 			selector1 =
 				_mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1
-							+ post_op_c_i + 0 ) );
+							+ post_ops_attr.post_op_c_i + 0 ) );
 			selector2 =
 				_mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1
-							+ post_op_c_i + 1 ) );
+							+ post_ops_attr.post_op_c_i + 1 ) );
 			__m512 selector3 =
 				_mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1
-							+ post_op_c_i + 2 ) );
+							+ post_ops_attr.post_op_c_i + 2 ) );
 			__m512 selector4 =
 				_mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1
-							+ post_op_c_i + 3 ) );
+							+ post_ops_attr.post_op_c_i + 3 ) );
 
 			// c[0,0-15]
 			c_float_0p0 = _mm512_add_ps( selector1, c_float_0p0 );
@@ -3317,10 +3317,10 @@ POST_OPS_BIAS_3x32:
 		{
 			selector1 =
 				_mm512_loadu_ps( ( float* )post_ops_list_temp->op_args1 +
-							post_op_c_j + ( 0 * 16 ) );
+							post_ops_attr.post_op_c_j + ( 0 * 16 ) );
 			selector2 =
 				_mm512_loadu_ps( ( float* )post_ops_list_temp->op_args1 +
-							post_op_c_j + ( 1 * 16 ) );
+							post_ops_attr.post_op_c_j + ( 1 * 16 ) );
 
 			// c[0,0-15]
 			c_float_0p0 = _mm512_add_ps( selector1, c_float_0p0 );
@@ -3344,13 +3344,13 @@ POST_OPS_BIAS_3x32:
 		{
 			selector1 =
 				_mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1
-							+ post_op_c_i + 0 ) );
+							+ post_ops_attr.post_op_c_i + 0 ) );
 			selector2 =
 				_mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1
-							+ post_op_c_i + 1 ) );
+							+ post_ops_attr.post_op_c_i + 1 ) );
 			__m512 selector3 =
 				_mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1
-							+ post_op_c_i + 2 ) );
+							+ post_ops_attr.post_op_c_i + 2 ) );
 
 			// c[0,0-15]
 			c_float_0p0 = _mm512_add_ps( selector1, c_float_0p0 );
@@ -3590,10 +3590,10 @@ POST_OPS_BIAS_2x32:
 		{
 			selector1 =
 				_mm512_loadu_ps( ( float* )post_ops_list_temp->op_args1 +
-							post_op_c_j + ( 0 * 16 ) );
+							post_ops_attr.post_op_c_j + ( 0 * 16 ) );
 			selector2 =
 				_mm512_loadu_ps( ( float* )post_ops_list_temp->op_args1 +
-							post_op_c_j + ( 1 * 16 ) );
+							post_ops_attr.post_op_c_j + ( 1 * 16 ) );
 
 			// c[0,0-15]
 			c_float_0p0 = _mm512_add_ps( selector1, c_float_0p0 );
@@ -3611,10 +3611,10 @@ POST_OPS_BIAS_2x32:
 		{
 			selector1 =
 				_mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1
-							+ post_op_c_i + 0 ) );
+							+ post_ops_attr.post_op_c_i + 0 ) );
 			selector2 =
 				_mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1
-							+ post_op_c_i + 1 ) );
+							+ post_ops_attr.post_op_c_i + 1 ) );
 
 			// c[0,0-15]
 			c_float_0p0 = _mm512_add_ps( selector1, c_float_0p0 );
@@ -3791,10 +3791,10 @@ POST_OPS_BIAS_1x32:
 		{
 			selector1 =
 				_mm512_loadu_ps( ( float* )post_ops_list_temp->op_args1 +
-							post_op_c_j + ( 0 * 16 ) );
+							post_ops_attr.post_op_c_j + ( 0 * 16 ) );
 			selector2 =
 				_mm512_loadu_ps( ( float* )post_ops_list_temp->op_args1 +
-							post_op_c_j + ( 1 * 16 ) );
+							post_ops_attr.post_op_c_j + ( 1 * 16 ) );
 
 			// c[0,0-15]
 			c_float_0p0 = _mm512_add_ps( selector1, c_float_0p0 );
@@ -3806,7 +3806,7 @@ POST_OPS_BIAS_1x32:
 		{
 			selector1 =
 				_mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1
-							+ post_op_c_i + 0 ) );
+							+ post_ops_attr.post_op_c_i + 0 ) );
 
 			// c[0,0-15]
 			c_float_0p0 = _mm512_add_ps( selector1, c_float_0p0 );
@@ -4135,13 +4135,13 @@ POST_OPS_BIAS_5x48:
 		{
 			selector1 =
 				_mm512_loadu_ps( ( float* )post_ops_list_temp->op_args1 +
-							post_op_c_j + ( 0 * 16 ) );
+							post_ops_attr.post_op_c_j + ( 0 * 16 ) );
 			selector2 =
 				_mm512_loadu_ps( ( float* )post_ops_list_temp->op_args1 +
-							post_op_c_j + ( 1 * 16 ) );
+							post_ops_attr.post_op_c_j + ( 1 * 16 ) );
 			selector3 =
 				_mm512_loadu_ps( ( float* )post_ops_list_temp->op_args1 +
-							post_op_c_j + ( 2 * 16 ) );
+							post_ops_attr.post_op_c_j + ( 2 * 16 ) );
 
 			// c[0,0-15]
 			c_float_0p0 = _mm512_add_ps( selector1, c_float_0p0 );
@@ -4192,19 +4192,19 @@ POST_OPS_BIAS_5x48:
 		{
 			selector1 =
 				_mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1
-							+ post_op_c_i + 0 ) );
+							+ post_ops_attr.post_op_c_i + 0 ) );
 			selector2 =
 				_mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1
-							+ post_op_c_i + 1 ) );
+							+ post_ops_attr.post_op_c_i + 1 ) );
 			selector3 =
 				_mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1
-							+ post_op_c_i + 2 ) );
+							+ post_ops_attr.post_op_c_i + 2 ) );
 			__m512 selector4 =
 				_mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1
-							+ post_op_c_i + 3 ) );
+							+ post_ops_attr.post_op_c_i + 3 ) );
 			__m512 selector5 =
 				_mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1
-							+ post_op_c_i + 4 ) );
+							+ post_ops_attr.post_op_c_i + 4 ) );
 
 			// c[0,0-15]
 			c_float_0p0 = _mm512_add_ps( selector1, c_float_0p0 );
@@ -4686,13 +4686,13 @@ POST_OPS_BIAS_4x48:
 		{
 			selector1 =
 				_mm512_loadu_ps( ( float* )post_ops_list_temp->op_args1 +
-							post_op_c_j + ( 0 * 16 ) );
+							post_ops_attr.post_op_c_j + ( 0 * 16 ) );
 			selector2 =
 				_mm512_loadu_ps( ( float* )post_ops_list_temp->op_args1 +
-							post_op_c_j + ( 1 * 16 ) );
+							post_ops_attr.post_op_c_j + ( 1 * 16 ) );
 			selector3 =
 				_mm512_loadu_ps( ( float* )post_ops_list_temp->op_args1 +
-							post_op_c_j + ( 2 * 16 ) );
+							post_ops_attr.post_op_c_j + ( 2 * 16 ) );
 
 			// c[0,0-15]
 			c_float_0p0 = _mm512_add_ps( selector1, c_float_0p0 );
@@ -4734,16 +4734,16 @@ POST_OPS_BIAS_4x48:
 		{
 			selector1 =
 				_mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1
-							+ post_op_c_i + 0 ) );
+							+ post_ops_attr.post_op_c_i + 0 ) );
 			selector2 =
 				_mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1
-							+ post_op_c_i + 1 ) );
+							+ post_ops_attr.post_op_c_i + 1 ) );
 			selector3 =
 				_mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1
-							+ post_op_c_i + 2 ) );
+							+ post_ops_attr.post_op_c_i + 2 ) );
 			__m512 selector4 =
 				_mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1
-							+ post_op_c_i + 3 ) );
+							+ post_ops_attr.post_op_c_i + 3 ) );
 
 			// c[0,0-15]
 			c_float_0p0 = _mm512_add_ps( selector1, c_float_0p0 );
@@ -5138,13 +5138,13 @@ POST_OPS_BIAS_3x48:
 		{
 			selector1 =
 				_mm512_loadu_ps( ( float* )post_ops_list_temp->op_args1 +
-							post_op_c_j + ( 0 * 16 ) );
+							post_ops_attr.post_op_c_j + ( 0 * 16 ) );
 			selector2 =
 				_mm512_loadu_ps( ( float* )post_ops_list_temp->op_args1 +
-							post_op_c_j + ( 1 * 16 ) );
+							post_ops_attr.post_op_c_j + ( 1 * 16 ) );
 			selector3 =
 				_mm512_loadu_ps( ( float* )post_ops_list_temp->op_args1 +
-							post_op_c_j + ( 2 * 16 ) );
+							post_ops_attr.post_op_c_j + ( 2 * 16 ) );
 
 			// c[0,0-15]
 			c_float_0p0 = _mm512_add_ps( selector1, c_float_0p0 );
@@ -5177,13 +5177,13 @@ POST_OPS_BIAS_3x48:
 		{
 			selector1 =
 				_mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1
-							+ post_op_c_i + 0 ) );
+							+ post_ops_attr.post_op_c_i + 0 ) );
 			selector2 =
 				_mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1
-							+ post_op_c_i + 1 ) );
+							+ post_ops_attr.post_op_c_i + 1 ) );
 			selector3 =
 				_mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1
-							+ post_op_c_i + 2 ) );
+							+ post_ops_attr.post_op_c_i + 2 ) );
 
 			// c[0,0-15]
 			c_float_0p0 = _mm512_add_ps( selector1, c_float_0p0 );
@@ -5491,13 +5491,13 @@ POST_OPS_BIAS_2x48:
 		{
 			selector1 =
 				_mm512_loadu_ps( ( float* )post_ops_list_temp->op_args1 +
-							post_op_c_j + ( 0 * 16 ) );
+							post_ops_attr.post_op_c_j + ( 0 * 16 ) );
 			selector2 =
 				_mm512_loadu_ps( ( float* )post_ops_list_temp->op_args1 +
-							post_op_c_j + ( 1 * 16 ) );
+							post_ops_attr.post_op_c_j + ( 1 * 16 ) );
 			selector3 =
 				_mm512_loadu_ps( ( float* )post_ops_list_temp->op_args1 +
-							post_op_c_j + ( 2 * 16 ) );
+							post_ops_attr.post_op_c_j + ( 2 * 16 ) );
 
 			// c[0,0-15]
 			c_float_0p0 = _mm512_add_ps( selector1, c_float_0p0 );
@@ -5521,10 +5521,10 @@ POST_OPS_BIAS_2x48:
 		{
 			selector1 =
 				_mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1
-							+ post_op_c_i + 0 ) );
+							+ post_ops_attr.post_op_c_i + 0 ) );
 			selector2 =
 				_mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1
-							+ post_op_c_i + 1 ) );
+							+ post_ops_attr.post_op_c_i + 1 ) );
 
 			// c[0,0-15]
 			c_float_0p0 = _mm512_add_ps( selector1, c_float_0p0 );
@@ -5745,13 +5745,13 @@ POST_OPS_BIAS_1x48:
 		{
 			selector1 =
 				_mm512_loadu_ps( ( float* )post_ops_list_temp->op_args1 +
-							post_op_c_j + ( 0 * 16 ) );
+							post_ops_attr.post_op_c_j + ( 0 * 16 ) );
 			selector2 =
 				_mm512_loadu_ps( ( float* )post_ops_list_temp->op_args1 +
-							post_op_c_j + ( 1 * 16 ) );
+							post_ops_attr.post_op_c_j + ( 1 * 16 ) );
 			selector3 =
 				_mm512_loadu_ps( ( float* )post_ops_list_temp->op_args1 +
-							post_op_c_j + ( 2 * 16 ) );
+							post_ops_attr.post_op_c_j + ( 2 * 16 ) );
 
 			// c[0,0-15]
 			c_float_0p0 = _mm512_add_ps( selector1, c_float_0p0 );
@@ -5766,7 +5766,7 @@ POST_OPS_BIAS_1x48:
 		{
 			selector1 =
 				_mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1
-							+ post_op_c_i + 0 ) );
+							+ post_ops_attr.post_op_c_i + 0 ) );
 
 			// c[0,0-15]
 			c_float_0p0 = _mm512_add_ps( selector1, c_float_0p0 );

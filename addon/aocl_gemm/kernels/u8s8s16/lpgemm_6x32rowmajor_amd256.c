@@ -79,13 +79,11 @@ LPGEMM_MAIN_KERN(uint8_t,int8_t,int16_t,u8s8s16o16_6x32)
 				b, ((rs_b / 2) * 1), cs_b,
 				c, rs_c,
 				alpha, beta,
-				is_last_k,
-				post_op_c_i, post_op_c_j,
-				post_ops_list, rs_c_downscale);
+				post_ops_list, post_ops_attr);
 
 			b = b + (16 * k0_updated);
 			c = c + 16;
-			post_op_c_j += 16;
+			post_ops_attr.post_op_c_j += 16;
 		}
 
 		if (n0_rem > 0)
@@ -96,9 +94,7 @@ LPGEMM_MAIN_KERN(uint8_t,int8_t,int16_t,u8s8s16o16_6x32)
 				b, ((rs_b / 2) * 1), cs_b,
 				c, rs_c,
 				alpha, beta, n0_rem,
-				is_last_k,
-				post_op_c_i, post_op_c_j,
-				post_ops_list, rs_c_downscale);
+				post_ops_list, post_ops_attr);
 		}
 
 		// If fringe cases are encountered, return early
@@ -432,11 +428,11 @@ POST_OPS_BIAS_6x32:
 			__m256i selector1 =
 				_mm256_loadu_si256( (__m256i const *)(
 					(int16_t *)post_ops_list_temp->op_args1 +
-								post_op_c_j + ( 0 * 16 )) );
+								post_ops_attr.post_op_c_j + ( 0 * 16 )) );
 			__m256i selector2 =
 				_mm256_loadu_si256( (__m256i const *)(
 					(int16_t *)post_ops_list_temp->op_args1 +
-								post_op_c_j + ( 1 * 16 )) );
+								post_ops_attr.post_op_c_j + ( 1 * 16 )) );
 
 			// c[0,0-15]
 			c_int16_0p0 = _mm256_add_epi16(selector1, c_int16_0p0);
@@ -576,11 +572,11 @@ POST_OPS_DOWNSCALE_6x32:
 			scale_1 =
 				_mm256_loadu_ps(
 				(float *)post_ops_list_temp->scale_factor +
-				post_op_c_j + (0 * 8));
+				post_ops_attr.post_op_c_j + (0 * 8));
 			scale_2 =
 				_mm256_loadu_ps(
 				(float *)post_ops_list_temp->scale_factor +
-				post_op_c_j + (1 * 8));
+				post_ops_attr.post_op_c_j + (1 * 8));
 
 			BLI_MM256_S16_DOWNSCALE(c_int16_0p0, c_int16_0p1, 0);
 
@@ -637,7 +633,7 @@ POST_OPS_6x32_DISABLE:
 		_mm256_storeu_si256( (__m256i *)(c + ( rs_c * ( ir + 5 ) ) + ( 1*16 )), c_int16_5p1 );
 		
 		a = a + ( MR * ps_a );
-		post_op_c_i += MR;
+		post_ops_attr.post_op_c_i += MR;
 	}
 
 	if (m_partial_pieces > 0)
@@ -659,14 +655,12 @@ POST_OPS_6x32_DISABLE:
 				b, rs_b, cs_b,
 				(c + (rs_c * m_full_pieces_loop_limit)), rs_c,
 				alpha, beta,
-				is_last_k,
-				post_op_c_i, post_op_c_j,
-				post_ops_list, rs_c_downscale);
+				post_ops_list, post_ops_attr);
 
 			// a pointer increment
 			a = a + (4 * ps_a);
 			m_full_pieces_loop_limit += 4;
-			post_op_c_i += 4;
+			post_ops_attr.post_op_c_i += 4;
 		}
 
 		if (m_partial2 == 1)
@@ -677,14 +671,12 @@ POST_OPS_6x32_DISABLE:
 				b, rs_b, cs_b,
 				(c + (rs_c * m_full_pieces_loop_limit)), rs_c,
 				alpha, beta,
-				is_last_k,
-				post_op_c_i, post_op_c_j,
-				post_ops_list, rs_c_downscale);
+				post_ops_list, post_ops_attr);
 
 			// a pointer increment
 			a = a + (2 * ps_a);
 			m_full_pieces_loop_limit += 2;
-			post_op_c_i += 2;
+			post_ops_attr.post_op_c_i += 2;
 		}
 
 		if (m_partial == 1)
@@ -694,10 +686,9 @@ POST_OPS_6x32_DISABLE:
 				a, rs_a, cs_a,
 				b, rs_b, cs_b,
 				(c + (rs_c * m_full_pieces_loop_limit)), rs_c,
-				alpha, beta,is_last_k,
-				post_op_c_i, post_op_c_j,
-				post_ops_list, rs_c_downscale);
-			post_op_c_i += 1;
+				alpha, beta,
+				post_ops_list, post_ops_attr);
+			post_ops_attr.post_op_c_i += 1;
 		}
 	}
 }

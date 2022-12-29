@@ -276,7 +276,7 @@ POST_OPS_BIAS_6x16:
 		{
 			selector1 =
 				_mm256_loadu_si256( (__m256i const *)((int16_t *)post_ops_list_temp->op_args1 +
-								post_op_c_j + ( 0 * 16 )) );
+								post_ops_attr.post_op_c_j + ( 0 * 16 )) );
 			
 			// c[0,0-15]
 			c_int16_0p0 = _mm256_add_epi16( selector1, c_int16_0p0 );
@@ -360,11 +360,11 @@ POST_OPS_DOWNSCALE_6x16:
 			scale_1 =
 				_mm256_loadu_ps(
 				(float *)post_ops_list_temp->scale_factor +
-				post_op_c_j + (0 * 8));
+				post_ops_attr.post_op_c_j + (0 * 8));
 			scale_2 =
 				_mm256_loadu_ps(
 				(float *)post_ops_list_temp->scale_factor +
-				post_op_c_j + (1 * 8));
+				post_ops_attr.post_op_c_j + (1 * 8));
 
 			BLI_MM256_S16_DOWNSCALE2(c_int16_0p0, c_int16_1p0, 0, 1);
 
@@ -397,7 +397,7 @@ POST_OPS_6x16_DISABLE:
 		_mm256_storeu_si256( (__m256i *)(c + ( rs_c * ( ir + 5 ) ) + ( 0 * 16 ) ), c_int16_5p0 );
 		
 		a = a + ( MR * ps_a );
-		post_op_c_i += MR;
+		post_ops_attr.post_op_c_i += MR;
 	}
 
 	if (m_partial_pieces > 0)
@@ -416,14 +416,12 @@ POST_OPS_6x16_DISABLE:
 				b, rs_b, cs_b,
 				(c + (rs_c * m_full_pieces_loop_limit)), rs_c,
 				alpha, beta,
-				is_last_k,
-				post_op_c_i, post_op_c_j,
-				post_ops_list, rs_c_downscale);
+				post_ops_list, post_ops_attr);
 
 			// a pointer increment
 			a = a + (4 * ps_a);
 			m_full_pieces_loop_limit += 4;
-			post_op_c_i += 4;
+			post_ops_attr.post_op_c_i += 4;
 		}
 
 		if (m_partial2 == 1)
@@ -434,14 +432,12 @@ POST_OPS_6x16_DISABLE:
 				b, rs_b, cs_b,
 				(c + (rs_c * m_full_pieces_loop_limit)), rs_c,
 				alpha, beta,
-				is_last_k,
-				post_op_c_i, post_op_c_j,
-				post_ops_list, rs_c_downscale);
+				post_ops_list, post_ops_attr);
 
 			// a pointer increment
 			a = a + (2 * ps_a);
 			m_full_pieces_loop_limit += 2;
-			post_op_c_i += 2;
+			post_ops_attr.post_op_c_i += 2;
 		}
 
 		if (m_partial == 1)
@@ -452,10 +448,8 @@ POST_OPS_6x16_DISABLE:
 				b, rs_b, cs_b,
 				(c + (rs_c * m_full_pieces_loop_limit)), rs_c,
 				alpha, beta,
-				is_last_k,
-				post_op_c_i, post_op_c_j,
-				post_ops_list, rs_c_downscale);
-			post_op_c_i += 1;
+				post_ops_list, post_ops_attr);
+			post_ops_attr.post_op_c_i += 1;
 		}
 	}
 }
@@ -709,7 +703,7 @@ LPGEMM_N_LT_NR0_FRINGE_KERN(uint8_t,int8_t,int16_t,u8s8s16o16_6xlt16)
 POST_OPS_BIAS_6xlt16:
 		{
 			memcpy( buf0, ( ( int16_t* )post_ops_list_temp->op_args1 +
-							post_op_c_j + ( 0 * 16 ) ),
+							post_ops_attr.post_op_c_j + ( 0 * 16 ) ),
 							( n0_rem * sizeof( int16_t ) ) );
 
 			selector1 =
@@ -797,7 +791,7 @@ POST_OPS_RELU_SCALE_6xlt16:
 			int8_t store_buf[16];
 
 			memcpy( float_buf, ( ( float* )post_ops_list_temp->scale_factor +
-					post_op_c_j ), ( n0_rem * sizeof( float ) ) );
+					post_ops_attr.post_op_c_j ), ( n0_rem * sizeof( float ) ) );
 
 			// Load the scale vector values into the register
 			scale_1 = _mm256_loadu_ps(float_buf + (0 * 8));
@@ -851,7 +845,7 @@ POST_OPS_6xlt16_DISABLE:
 		memcpy(c + (rs_c * (ir + 5)) + (0 * 16), buf5, (n0_rem * sizeof(int16_t)));
 
 		a = a + (MR * ps_a);
-		post_op_c_i += MR;
+		post_ops_attr.post_op_c_i += MR;
 	}
 
 	if (m_partial_pieces > 0)
@@ -870,14 +864,12 @@ POST_OPS_6xlt16_DISABLE:
 				b, rs_b, cs_b,
 				(c + (rs_c * m_full_pieces_loop_limit)), rs_c,
 				alpha, beta, n0_rem,
-				is_last_k,
-				post_op_c_i, post_op_c_j,
-				post_ops_list, rs_c_downscale);
+				post_ops_list, post_ops_attr);
 
 			// a pointer increment
 			a = a + (4 * ps_a);
 			m_full_pieces_loop_limit += 4;
-			post_op_c_i += 4;
+			post_ops_attr.post_op_c_i += 4;
 		}
 
 		if (m_partial2 == 1)
@@ -888,14 +880,12 @@ POST_OPS_6xlt16_DISABLE:
 				b, rs_b, cs_b,
 				(c + (rs_c * m_full_pieces_loop_limit)), rs_c,
 				alpha, beta, n0_rem,
-				is_last_k,
-				post_op_c_i, post_op_c_j,
-				post_ops_list, rs_c_downscale);
+				post_ops_list, post_ops_attr);
 
 			// a pointer increment
 			a = a + (2 * ps_a);
 			m_full_pieces_loop_limit += 2;
-			post_op_c_i += 2;
+			post_ops_attr.post_op_c_i += 2;
 		}
 
 		if (m_partial == 1)
@@ -906,10 +896,8 @@ POST_OPS_6xlt16_DISABLE:
 				b, rs_b, cs_b,
 				(c + (rs_c * m_full_pieces_loop_limit)), rs_c,
 				alpha, beta, n0_rem,
-				is_last_k,
-				post_op_c_i, post_op_c_j,
-				post_ops_list, rs_c_downscale);
-			post_op_c_i += 1;
+				post_ops_list, post_ops_attr);
+			post_ops_attr.post_op_c_i += 1;
 		}
 	}
 }

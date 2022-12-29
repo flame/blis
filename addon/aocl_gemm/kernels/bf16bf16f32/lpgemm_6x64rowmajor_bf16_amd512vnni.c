@@ -88,14 +88,12 @@ LPGEMM_MAIN_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_6x64)
 				 b, ( ( rs_b / 4 ) * 3 ), cs_b,
 				 c, rs_c,
 				 alpha, beta,
-				 is_last_k,
-			     post_op_c_i, post_op_c_j,
-			     post_ops_list, rs_c_downscale
+			     post_ops_list, post_ops_attr
 				);
 
 			b = b + ( 48 * k0_updated ); // k0x48 packed contiguosly.
 			c = c + 48;
-			post_op_c_j += 48;
+			post_ops_attr.post_op_c_j += 48;
 		}
 
 		else if ( n0_32 == 1 )
@@ -107,14 +105,12 @@ LPGEMM_MAIN_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_6x64)
 				 b, ( ( rs_b / 4 ) * 2 ), cs_b,
 				 c, rs_c,
 				 alpha, beta,
-				 is_last_k,
-			     post_op_c_i, post_op_c_j,
-			     post_ops_list, rs_c_downscale
+			     post_ops_list, post_ops_attr
 				);
 
 			b = b + ( 32 * k0_updated ); // k0x32 packed contiguosly.
 			c = c + 32;
-			post_op_c_j += 32;
+			post_ops_attr.post_op_c_j += 32;
 		}
 
 		else if ( n0_16 == 1 )
@@ -126,14 +122,12 @@ LPGEMM_MAIN_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_6x64)
 				 b, ( ( rs_b / 4 ) * 1 ), cs_b,
 				 c, rs_c,
 				 alpha, beta,
-				 is_last_k,
-			     post_op_c_i, post_op_c_j,
-			     post_ops_list, rs_c_downscale
+			     post_ops_list, post_ops_attr
 				);
 
 			b = b + ( 16 * k0_updated ); // k0x16 packed contiguosly.
 			c = c + 16;
-			post_op_c_j += 16;
+			post_ops_attr.post_op_c_j += 16;
 		}
 
 		if ( n0_rem > 0 )
@@ -145,9 +139,7 @@ LPGEMM_MAIN_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_6x64)
 				 b, ( ( rs_b / 4 ) * 1 ), cs_b,
 				 c, rs_c,
 				 alpha, beta, n0_rem,
-				 is_last_k,
-			     post_op_c_i, post_op_c_j,
-			     post_ops_list, rs_c_downscale
+			     post_ops_list, post_ops_attr
 				);
 
 			// No leftover fringe after this podint.
@@ -687,16 +679,16 @@ POST_OPS_BIAS_6x64:
 			{
 				selector1 =
 					_mm512_loadu_ps( ( float* )post_ops_list_temp->op_args1 +
-									post_op_c_j + ( 0 * 16 ) );
+							post_ops_attr.post_op_c_j + ( 0 * 16 ) );
 				selector2 =
 					_mm512_loadu_ps( ( float* )post_ops_list_temp->op_args1 +
-									post_op_c_j + ( 1 * 16 ) );
+							post_ops_attr.post_op_c_j + ( 1 * 16 ) );
 				selector3 =
 					_mm512_loadu_ps( ( float* )post_ops_list_temp->op_args1 +
-									post_op_c_j + ( 2 * 16 ) );
+							post_ops_attr.post_op_c_j + ( 2 * 16 ) );
 				selector4 =
 					_mm512_loadu_ps( ( float* )post_ops_list_temp->op_args1 +
-									post_op_c_j + ( 3 * 16 ) );
+							post_ops_attr.post_op_c_j + ( 3 * 16 ) );
 
 				// c[0,0-15]
 				c_float_0p0 = _mm512_add_ps( selector1, c_float_0p0 );
@@ -780,22 +772,22 @@ POST_OPS_BIAS_6x64:
 				// entire column.
 				selector1 =
 					_mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 +
-									post_op_c_i + 0 ) );
+							post_ops_attr.post_op_c_i + 0 ) );
 				selector2 =
 					_mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 +
-									post_op_c_i + 1 ) );
+							post_ops_attr.post_op_c_i + 1 ) );
 				selector3 =
 					_mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 +
-									post_op_c_i + 2 ) );
+							post_ops_attr.post_op_c_i + 2 ) );
 				selector4 =
 					_mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 +
-									post_op_c_i + 3 ) );
+							post_ops_attr.post_op_c_i + 3 ) );
 				__m512 selector5 =
 					_mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 +
-									post_op_c_i + 4 ) );
+							post_ops_attr.post_op_c_i + 4 ) );
 				__m512 selector6 =
 					_mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args1 +
-									post_op_c_i + 5 ) );
+							post_ops_attr.post_op_c_i + 5 ) );
 
 				// c[0,0-15]
 				c_float_0p0 = _mm512_add_ps( selector1, c_float_0p0 );
@@ -1031,7 +1023,7 @@ POST_OPS_RELU_SCALE_6x64:
 			RELU_SCALE_OP_F32_AVX512(c_float_5p3)
 
 			POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
-		}   
+		}
 POST_OPS_DOWNSCALE_6x64:
 {
 	        // c[0, 0-15]
@@ -1186,7 +1178,7 @@ POST_OPS_6x64_DISABLE:
 		_mm512_storeu_ps( c + ( rs_c * ( ir + 5 ) ) + ( 3*16 ), c_float_5p3 );
 
 		a = a + ( MR * ps_a );
-		post_op_c_i += MR;
+		post_ops_attr.post_op_c_i += MR;
 	}
 
 	if ( m_partial_pieces > 0 )
@@ -1201,77 +1193,67 @@ POST_OPS_6x64_DISABLE:
 			// required before calling m fringe kernels.
 			dim_t cs_a_use = ( cs_a == 2 ) ? 2 : ( ( cs_a / 6 ) * 5 );
 			lpgemm_rowvar_bf16bf16f32of32_5x64
-				(
-				 k0,
-				 a, rs_a, cs_a_use,
-				 b, rs_b, cs_b,
-				 ( c + ( rs_c * m_full_pieces_loop_limit ) ), rs_c,
-				 alpha, beta,
-				 is_last_k,
-			     post_op_c_i, post_op_c_j,
-			     post_ops_list, rs_c_downscale
-				);
-		}		
+			(
+			  k0,
+			  a, rs_a, cs_a_use,
+			  b, rs_b, cs_b,
+			  ( c + ( rs_c * m_full_pieces_loop_limit ) ), rs_c,
+			  alpha, beta,
+			  post_ops_list, post_ops_attr
+			);
+		}
 		else if ( m_partial_pieces == 4 )
 		{
 			dim_t cs_a_use = ( cs_a == 2 ) ? 2 : ( ( cs_a / 6 ) * 4 );
 			lpgemm_rowvar_bf16bf16f32of32_4x64
-				(
-				 k0,
-				 a, rs_a, cs_a_use,
-				 b, rs_b, cs_b,
-				 ( c + ( rs_c * m_full_pieces_loop_limit ) ), rs_c,
-				 alpha, beta,
-				 is_last_k,
-			     post_op_c_i, post_op_c_j,
-			     post_ops_list, rs_c_downscale
-				);
-		}		
+			(
+			  k0,
+			  a, rs_a, cs_a_use,
+			  b, rs_b, cs_b,
+			  ( c + ( rs_c * m_full_pieces_loop_limit ) ), rs_c,
+			  alpha, beta,
+			  post_ops_list, post_ops_attr
+			);
+		}
 		else if ( m_partial_pieces == 3 )
 		{
 			dim_t cs_a_use = ( cs_a == 2 ) ? 2 : ( ( cs_a / 6 ) * 3 );
 			lpgemm_rowvar_bf16bf16f32of32_3x64
-				(
-				 k0,
-				 a, rs_a, cs_a_use,
-				 b, rs_b, cs_b,
-				 ( c + ( rs_c * m_full_pieces_loop_limit ) ), rs_c,
-				 alpha, beta,
-				 is_last_k,
-			     post_op_c_i, post_op_c_j,
-			     post_ops_list, rs_c_downscale
-				);
-		}		
+			(
+			  k0,
+			  a, rs_a, cs_a_use,
+			  b, rs_b, cs_b,
+			  ( c + ( rs_c * m_full_pieces_loop_limit ) ), rs_c,
+			  alpha, beta,
+			  post_ops_list, post_ops_attr
+			);
+		}
 		else if ( m_partial_pieces == 2 )
 		{
 			dim_t cs_a_use = ( cs_a == 2 ) ? 2 : ( ( cs_a / 6 ) * 2 );
 			lpgemm_rowvar_bf16bf16f32of32_2x64
-				(
-				 k0,
-				 a, rs_a, cs_a_use,
-				 b, rs_b, cs_b,
-				 ( c + ( rs_c * m_full_pieces_loop_limit ) ), rs_c,
-				 alpha, beta,
-				 is_last_k,
-			     post_op_c_i, post_op_c_j,
-			     post_ops_list, rs_c_downscale
-				);
-		}		
+			(
+			  k0,
+			  a, rs_a, cs_a_use,
+			  b, rs_b, cs_b,
+			  ( c + ( rs_c * m_full_pieces_loop_limit ) ), rs_c,
+			  alpha, beta,
+			  post_ops_list, post_ops_attr
+			);
+		}
 		else if ( m_partial_pieces == 1 )
 		{
 			dim_t cs_a_use = ( cs_a == 2 ) ? 2 : ( ( cs_a / 6 ) * 1 );
 			lpgemm_rowvar_bf16bf16f32of32_1x64
-				(
-				 k0,
-				 a, rs_a, cs_a_use,
-				 b, rs_b, cs_b,
-				 ( c + ( rs_c * m_full_pieces_loop_limit ) ), rs_c,
-				 alpha, beta,
-				 is_last_k,
-			     post_op_c_i, post_op_c_j,
-			     post_ops_list, rs_c_downscale
-				);
-		}		
+			(
+			  k0,
+			  a, rs_a, cs_a_use,
+			  b, rs_b, cs_b,
+			  ( c + ( rs_c * m_full_pieces_loop_limit ) ), rs_c,
+			  alpha, beta,
+			  post_ops_list, post_ops_attr
+			);
+		}
 	}
 }
 #endif

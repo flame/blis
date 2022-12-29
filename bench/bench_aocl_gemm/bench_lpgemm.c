@@ -38,8 +38,10 @@ void fill_array_ ## ctype ( void* arr, dim_t size ) \
 
 GEN_FILL_ARRAY_FUNC(uint8_t)
 GEN_FILL_ARRAY_FUNC(int8_t)
+GEN_FILL_ARRAY_FUNC(int16_t)
 GEN_FILL_ARRAY_FUNC(float)
 GEN_FILL_ARRAY_FUNC(int32_t)
+GEN_FILL_ARRAY_FUNC(bfloat16)
 
 inline void float_to_bf16( float* float_value, bfloat16* bf16_val )
 {
@@ -535,7 +537,7 @@ void mat_mul_accuracy_check_driver_ ## BLAS_SFX \
 									XSTR(BLAS_SFX), m, n, k, lda, ldb, ldc ); \
 					fflush( fout ); \
 				} \
-				printf("failure, m: %ld, n: %ld, k: %ld\n", i, j, k ); \
+				printf("failure, m: %ld, n: %ld, k: %ld\n", i, j, k); \
 				goto cleanup_acc; \
 			} \
 		} \
@@ -746,7 +748,7 @@ void mat_mul_bench_main_ ## BLAS_SFX \
 	if ( bench_mode == 'p' ) \
 	{ \
 		alpha = 1; \
-		beta = 0; \
+		beta = 1; \
 	} \
 	else if ( bench_mode == 'a' ) \
 	{ \
@@ -903,7 +905,7 @@ void mat_mul_bench_main_ ## BLAS_SFX \
 	if ( bench_mode == 'p' ) \
 	{ \
 		alpha = 1; \
-		beta = 0; \
+		beta = 1; \
 	} \
 	else if ( bench_mode == 'a' ) \
 	{ \

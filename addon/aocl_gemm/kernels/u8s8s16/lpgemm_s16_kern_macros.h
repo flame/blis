@@ -128,8 +128,12 @@
 	store_reg = _mm256_permute4x64_epi64(store_reg, 0XD8);\
 \
   /* Store the result in s8 form */\
-	_mm256_storeu_si256((__m256i *)(( int8_t* )post_ops_list_temp->op_args3 + \
-	  ( rs_c_downscale * ( post_op_c_i + vec_loc ) ) + post_op_c_j), store_reg);\
+	_mm256_storeu_si256 \
+	( \
+	  (__m256i *)(( int8_t* )post_ops_list_temp->op_args3 + \
+	  ( post_ops_attr.rs_c_downscale * ( post_ops_attr.post_op_c_i + vec_loc ) ) + \
+	  post_ops_attr.post_op_c_j), store_reg \
+	);\
 \
 
 //--------------------------------------------------------------------------
@@ -210,10 +214,18 @@
   temp[1] = _mm256_extractf128_si256(store_reg, 1);\
 \
   /* Store the result in s8 form */\
-	_mm_storeu_si128((__m128i *)(( int8_t* )post_ops_list_temp->op_args3 + \
-	  ( rs_c_downscale * ( post_op_c_i + vec_loc1 ) ) + post_op_c_j), temp[0]);\
-  _mm_storeu_si128((__m128i *)(( int8_t* )post_ops_list_temp->op_args3 + \
-	  ( rs_c_downscale * ( post_op_c_i + vec_loc2 ) ) + post_op_c_j), temp[1]);\
+	_mm_storeu_si128 \
+	( \
+	  (__m128i *)(( int8_t* )post_ops_list_temp->op_args3 + \
+	  ( post_ops_attr.rs_c_downscale * ( post_ops_attr.post_op_c_i + vec_loc1 ) ) + \
+	  post_ops_attr.post_op_c_j), temp[0] \
+	);\
+	_mm_storeu_si128 \
+	( \
+	  (__m128i *)(( int8_t* )post_ops_list_temp->op_args3 + \
+	  ( post_ops_attr.rs_c_downscale * ( post_ops_attr.post_op_c_i + vec_loc2 ) ) + \
+	  post_ops_attr.post_op_c_j), temp[1] \
+	);\
 \
 
 //--------------------------------------------------------------------------
@@ -295,14 +307,20 @@
 \
   /* Store the result in s8 form */\
   _mm_storeu_si128((__m128i *)store_buf, temp[0]);\
-  memcpy( ( int8_t* )post_ops_list_temp->op_args3 + \
-	  ( rs_c_downscale * ( post_op_c_i + vec_loc1 ) ) + post_op_c_j \
-	  , store_buf, ( n0_rem * sizeof( int8_t ) ) ); \
+  memcpy( \
+  ( \
+    int8_t* )post_ops_list_temp->op_args3 + \
+    ( post_ops_attr.rs_c_downscale * ( post_ops_attr.post_op_c_i + vec_loc1 ) ) + \
+    post_ops_attr.post_op_c_j, store_buf, ( n0_rem * sizeof( int8_t ) ) \
+  ); \
 \
   _mm_storeu_si128((__m128i *)store_buf, temp[1]);\
-  memcpy( ( int8_t* )post_ops_list_temp->op_args3 + \
-	  ( rs_c_downscale * ( post_op_c_i + vec_loc2 ) ) + post_op_c_j \
-	  , store_buf, ( n0_rem * sizeof( int8_t ) ) ); \
+  memcpy \
+  ( \
+    ( int8_t* )post_ops_list_temp->op_args3 + \
+    ( post_ops_attr.rs_c_downscale * ( post_ops_attr.post_op_c_i + vec_loc2 ) ) + \
+    post_ops_attr.post_op_c_j, store_buf, ( n0_rem * sizeof( int8_t ) ) \
+  ); \
 \
 
 //--------------------------------------------------------------------------
@@ -348,8 +366,12 @@
   temp[0] = _mm256_extractf128_si256(store_reg, 0);\
 \
   /* Store the result in s8 form */\
-	_mm_storeu_si128((__m128i *)(( int8_t* )post_ops_list_temp->op_args3 + \
-	( rs_c_downscale * ( post_op_c_i + vec_ind ) ) + post_op_c_j), temp[0]);\
+	_mm_storeu_si128 \
+	( \
+	  (__m128i *)(( int8_t* )post_ops_list_temp->op_args3 + \
+	  ( post_ops_attr.rs_c_downscale * ( post_ops_attr.post_op_c_i + vec_ind ) ) + \
+	  post_ops_attr.post_op_c_j), temp[0] \
+	);\
 \
 
 //--------------------------------------------------------------------------
@@ -396,9 +418,12 @@
 \
   /* Store the result in s8 form */\
   _mm_storeu_si128((__m128i *)store_buf, temp[0]);\
-  memcpy( (( int8_t* )post_ops_list_temp->op_args3 + \
-	  ( rs_c_downscale * ( post_op_c_i + vec_ind ) ) + post_op_c_j) \
-	  ,store_buf, ( n0_rem * sizeof( int8_t ) ) ); \
+  memcpy \
+  ( \
+    (( int8_t* )post_ops_list_temp->op_args3 + \
+    ( post_ops_attr.rs_c_downscale * ( post_ops_attr.post_op_c_i + vec_ind ) ) + \
+    post_ops_attr.post_op_c_j), store_buf, ( n0_rem * sizeof( int8_t ) ) \
+  ); \
 \
 
 #endif //LPGEMM_S16_KERN_MACROS_H
