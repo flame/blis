@@ -30,9 +30,49 @@
    (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
    OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-*/
 
-GEMM_UKR_PROT( float,    s, gemm_rviv_4vx4 )
-GEMM_UKR_PROT( double,   d, gemm_rviv_4vx4 )
-GEMM_UKR_PROT( scomplex, c, gemm_rviv_4vx4 )
-GEMM_UKR_PROT( dcomplex, z, gemm_rviv_4vx4 )
+*/
+#include "blis.h"
+
+
+extern
+void bli_zgemm_rviv_asm_4vx4
+    (
+      uint64_t               k,
+      dcomplex*     restrict alpha,
+      dcomplex*     restrict a,
+      dcomplex*     restrict b,
+      dcomplex*     restrict beta,
+      dcomplex*     restrict c, uint64_t rs_c, uint64_t cs_c
+    );
+
+
+void bli_zgemm_rviv_4vx4
+     (
+       dim_t               m,
+       dim_t               n,
+       dim_t               k,
+       dcomplex*  restrict alpha,
+       dcomplex*  restrict a,
+       dcomplex*  restrict b,
+       dcomplex*  restrict beta,
+       dcomplex*  restrict c, inc_t rs_c0, inc_t cs_c0,
+       auxinfo_t*          data,
+       cntx_t*             cntx
+     )
+{
+    // Use local copy in case dim_t has a different size than expected in the assembly kernel
+    uint64_t _k     = k;
+    uint64_t rs_c   = rs_c0;
+    uint64_t cs_c   = cs_c0;
+
+    // Extract vector-length dependent mr, nr that are fixed at configure time.
+    const inc_t mr = bli_cntx_get_blksz_def_dt( BLIS_DCOMPLEX, BLIS_MR, cntx );
+    const inc_t nr = 4;
+
+    GEMM_UKR_SETUP_CT( z, mr, nr, false );
+
+    bli_zgemm_rviv_asm_4vx4(_k, alpha, a, b, beta, c, rs_c, cs_c);
+
+    GEMM_UKR_FLUSH_CT( z );
+}

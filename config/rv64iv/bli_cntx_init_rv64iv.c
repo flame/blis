@@ -47,6 +47,8 @@ void bli_cntx_init_rv64iv( cntx_t* cntx )
 	const uint32_t v = num_fp32_per_vector();
 	const uint32_t mr_s = 4 * v;
 	const uint32_t mr_d = 2 * v;
+	const uint32_t mr_c = 2 * v;
+	const uint32_t mr_z = v;
 
 	// TODO: Register different kernels based on the value
 	// of v to avoid MC becoming too big. (e.g. 2vx8)
@@ -57,8 +59,10 @@ void bli_cntx_init_rv64iv( cntx_t* cntx )
 	  cntx,
 
 	  // level-3
-	  BLIS_GEMM_UKR, BLIS_FLOAT,  bli_sgemm_rviv_4vx4,
-	  BLIS_GEMM_UKR, BLIS_DOUBLE, bli_dgemm_rviv_4vx4,
+	  BLIS_GEMM_UKR, BLIS_FLOAT,    bli_sgemm_rviv_4vx4,
+	  BLIS_GEMM_UKR, BLIS_DOUBLE,   bli_dgemm_rviv_4vx4,
+	  BLIS_GEMM_UKR, BLIS_SCOMPLEX, bli_cgemm_rviv_4vx4,
+	  BLIS_GEMM_UKR, BLIS_DCOMPLEX, bli_zgemm_rviv_4vx4,
 
 	  BLIS_VA_END
 	);
@@ -69,19 +73,21 @@ void bli_cntx_init_rv64iv( cntx_t* cntx )
 	  cntx,
 
 	  // level-3
-	  BLIS_GEMM_UKR_ROW_PREF, BLIS_FLOAT,  FALSE,
-	  BLIS_GEMM_UKR_ROW_PREF, BLIS_DOUBLE, FALSE,
+	  BLIS_GEMM_UKR_ROW_PREF, BLIS_FLOAT,    FALSE,
+	  BLIS_GEMM_UKR_ROW_PREF, BLIS_DOUBLE,   FALSE,
+	  BLIS_GEMM_UKR_ROW_PREF, BLIS_SCOMPLEX, FALSE,
+	  BLIS_GEMM_UKR_ROW_PREF, BLIS_DCOMPLEX, FALSE,
 
 	  BLIS_VA_END
 	);
 
 	// Initialize level-3 blocksize objects with architecture-specific values.
-	//                                              s        d      c      z
-	bli_blksz_init_easy( &blkszs[ BLIS_MR ],     mr_s,    mr_d,    -1,    -1 );
-	bli_blksz_init_easy( &blkszs[ BLIS_NR ],        4,       4,    -1,    -1 );
-	bli_blksz_init_easy( &blkszs[ BLIS_MC ],  20*mr_s, 20*mr_d,    -1,    -1 );
-	bli_blksz_init_easy( &blkszs[ BLIS_KC ],      640,     320,    -1,    -1 );
-	bli_blksz_init_easy( &blkszs[ BLIS_NC ],     3072,    3072,    -1,    -1 );
+	//                                              s        d        c      z
+	bli_blksz_init_easy( &blkszs[ BLIS_MR ],     mr_s,    mr_d,    mr_c,    mr_z );
+	bli_blksz_init_easy( &blkszs[ BLIS_NR ],        4,       4,       4,       4 );
+	bli_blksz_init_easy( &blkszs[ BLIS_MC ],  20*mr_s, 20*mr_d, 60*mr_c, 30*mr_z );
+	bli_blksz_init_easy( &blkszs[ BLIS_KC ],      640,     320,     320,     160 );
+	bli_blksz_init_easy( &blkszs[ BLIS_NC ],     3072,    3072,    3072,    3072 );
 
 	// Update the context with the current architecture's register and cache
 	// blocksizes (and multiples) for native execution.
