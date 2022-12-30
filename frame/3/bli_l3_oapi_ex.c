@@ -296,12 +296,13 @@ void PASTEMAC(gemm,BLIS_OAPI_EX_SUF)
 #endif
 #endif
 
-	cntl_t* cntl = bli_gemm_cntl_create
+	gemm_cntl_t cntl;
+	bli_gemm_cntl_init
 	(
-	  NULL,
 	  BLIS_GEMM,
 	  schema_a,
-	  schema_b
+	  schema_b,
+	  &cntl
 	);
 
 	// Invoke the internal back-end via the thread handler.
@@ -311,12 +312,9 @@ void PASTEMAC(gemm,BLIS_OAPI_EX_SUF)
 	  &b_local,
 	  cp,
 	  cntx,
-	  cntl,
+	  bli_gemm_cntl_root( &cntl ),
 	  rntm
 	);
-
-	// Free the thread's local control tree.
-	bli_cntl_free( NULL, cntl );
 
 #ifdef BLIS_ENABLE_GEMM_MD
 #ifdef BLIS_ENABLE_GEMM_MD_EXTRA_MEM
@@ -402,16 +400,16 @@ void PASTEMAC(gemmt,BLIS_OAPI_EX_SUF)
 	pack_t schema_a;
 	pack_t schema_b;
 	bli_l3_set_schemas( bli_obj_dt( &c_local ), &schema_a, &schema_b, cntx );
+	bli_l3_attach_scalars( alpha, &a_local, &b_local, beta, &c_local );
 
-	cntl_t* cntl = bli_gemm_cntl_create
+	gemm_cntl_t cntl;
+	bli_gemm_cntl_init
 	(
-	  NULL,
 	  BLIS_GEMMT,
 	  schema_a,
-	  schema_b
+	  schema_b,
+	  &cntl
 	);
-
-    bli_l3_attach_scalars( alpha, &a_local, &b_local, beta, &c_local );
 
 	// Invoke the internal back-end via the thread handler.
 	bli_l3_thread_decorator
@@ -420,12 +418,9 @@ void PASTEMAC(gemmt,BLIS_OAPI_EX_SUF)
 	  &b_local,
 	  &c_local,
 	  cntx,
-	  cntl,
+	  bli_gemm_cntl_root( &cntl ),
 	  rntm
 	);
-
-	// Free the thread's local control tree.
-	bli_cntl_free( NULL, cntl );
 }
 
 
@@ -492,6 +487,60 @@ void PASTEMAC(syr2k,BLIS_OAPI_EX_SUF)
 	// Invoke gemmt twice, using beta only the first time.
 	PASTEMAC(gemmt,BLIS_OAPI_EX_SUF)( alpha, a, &bt,      beta, c, cntx, rntm );
 	PASTEMAC(gemmt,BLIS_OAPI_EX_SUF)( alpha, b, &at, &BLIS_ONE, c, cntx, rntm );
+}
+
+
+void PASTEMAC(herk,BLIS_OAPI_EX_SUF)
+     (
+       const obj_t*  alpha,
+       const obj_t*  a,
+       const obj_t*  beta,
+       const obj_t*  c,
+       const cntx_t* cntx,
+       const rntm_t* rntm
+     )
+{
+	bli_init_once();
+
+	// Check parameters.
+	if ( bli_error_checking_is_enabled() )
+		bli_herk_check( alpha, a, beta, c, cntx );
+
+	obj_t ah;
+	bli_obj_alias_with_trans( BLIS_CONJ_TRANSPOSE, a, &ah );
+
+	PASTEMAC(gemmt,BLIS_OAPI_EX_SUF)( alpha, a, &ah, beta, c, cntx, rntm );
+
+	// The Hermitian rank-k product was computed as Re(alpha)*A*A', even for the
+	// diagonal elements. Mathematically, the imaginary components of
+	// diagonal elements of a Hermitian rank-k product should always be
+	// zero. However, in practice, they sometimes accumulate meaningless
+	// non-zero values. To prevent this, we explicitly set those values
+	// to zero before returning.
+	bli_setid( &BLIS_ZERO, c );
+}
+
+
+void PASTEMAC(syrk,BLIS_OAPI_EX_SUF)
+     (
+       const obj_t*  alpha,
+       const obj_t*  a,
+       const obj_t*  beta,
+       const obj_t*  c,
+       const cntx_t* cntx,
+       const rntm_t* rntm
+     )
+{
+	bli_init_once();
+
+	// Check parameters.
+	if ( bli_error_checking_is_enabled() )
+		bli_syrk_check( alpha, a, beta, c, cntx );
+
+	obj_t at;
+	bli_obj_alias_with_trans( BLIS_TRANSPOSE, a, &at );
+
+	PASTEMAC(gemmt,BLIS_OAPI_EX_SUF)( alpha, a, &at, beta, c, cntx, rntm );
 }
 
 
@@ -612,16 +661,16 @@ void PASTEMAC(hemm,BLIS_OAPI_EX_SUF)
 	pack_t schema_a;
 	pack_t schema_b;
 	bli_l3_set_schemas( bli_obj_dt( &c_local ), &schema_a, &schema_b, cntx );
+    bli_l3_attach_scalars( alpha, &a_local, &b_local, beta, &c_local );
 
-	cntl_t* cntl = bli_gemm_cntl_create
+	gemm_cntl_t cntl;
+	bli_gemm_cntl_init
 	(
-	  NULL,
 	  BLIS_HEMM,
 	  schema_a,
-	  schema_b
+	  schema_b,
+	  &cntl
 	);
-
-    bli_l3_attach_scalars( alpha, &a_local, &b_local, beta, &c_local );
 
 	// Invoke the internal back-end.
 	bli_l3_thread_decorator
@@ -630,12 +679,9 @@ void PASTEMAC(hemm,BLIS_OAPI_EX_SUF)
 	  &b_local,
 	  &c_local,
 	  cntx,
-	  cntl,
+	  bli_gemm_cntl_root( &cntl ),
 	  rntm
 	);
-
-	// Free the thread's local control tree.
-	bli_cntl_free( NULL, cntl );
 }
 
 
@@ -755,16 +801,16 @@ void PASTEMAC(symm,BLIS_OAPI_EX_SUF)
 	pack_t schema_a;
 	pack_t schema_b;
 	bli_l3_set_schemas( bli_obj_dt( &c_local ), &schema_a, &schema_b, cntx );
+    bli_l3_attach_scalars( alpha, &a_local, &b_local, beta, &c_local );
 
-	cntl_t* cntl = bli_gemm_cntl_create
+	gemm_cntl_t cntl;
+	bli_gemm_cntl_init
 	(
-	  NULL,
 	  BLIS_SYMM,
 	  schema_a,
-	  schema_b
+	  schema_b,
+	  &cntl
 	);
-
-    bli_l3_attach_scalars( alpha, &a_local, &b_local, beta, &c_local );
 
 	// Invoke the internal back-end.
 	bli_l3_thread_decorator
@@ -773,12 +819,9 @@ void PASTEMAC(symm,BLIS_OAPI_EX_SUF)
 	  &b_local,
 	  &c_local,
 	  cntx,
-	  cntl,
+	  bli_gemm_cntl_root( &cntl ),
 	  rntm
 	);
-
-	// Free the thread's local control tree.
-	bli_cntl_free( NULL, cntl );
 }
 
 
@@ -909,16 +952,16 @@ void PASTEMAC(trmm3,BLIS_OAPI_EX_SUF)
 	pack_t schema_a;
 	pack_t schema_b;
 	bli_l3_set_schemas( bli_obj_dt( &c_local ), &schema_a, &schema_b, cntx );
+    bli_l3_attach_scalars( alpha, &a_local, &b_local, beta, &c_local );
 
-	cntl_t* cntl = bli_gemm_cntl_create
+	gemm_cntl_t cntl;
+	bli_gemm_cntl_init
 	(
-	  NULL,
 	  BLIS_TRMM3,
 	  schema_a,
-	  schema_b
+	  schema_b,
+	  &cntl
 	);
-
-    bli_l3_attach_scalars( alpha, &a_local, &b_local, beta, &c_local );
 
 	// Invoke the internal back-end.
 	bli_l3_thread_decorator
@@ -927,66 +970,9 @@ void PASTEMAC(trmm3,BLIS_OAPI_EX_SUF)
 	  &b_local,
 	  &c_local,
 	  cntx,
-	  cntl,
+	  bli_gemm_cntl_root( &cntl ),
 	  rntm
 	);
-
-	// Free the thread's local control tree.
-	bli_cntl_free( NULL, cntl );
-}
-
-
-void PASTEMAC(herk,BLIS_OAPI_EX_SUF)
-     (
-       const obj_t*  alpha,
-       const obj_t*  a,
-       const obj_t*  beta,
-       const obj_t*  c,
-       const cntx_t* cntx,
-       const rntm_t* rntm
-     )
-{
-	bli_init_once();
-
-	// Check parameters.
-	if ( bli_error_checking_is_enabled() )
-		bli_herk_check( alpha, a, beta, c, cntx );
-
-	obj_t ah;
-	bli_obj_alias_with_trans( BLIS_CONJ_TRANSPOSE, a, &ah );
-
-	PASTEMAC(gemmt,BLIS_OAPI_EX_SUF)( alpha, a, &ah, beta, c, cntx, rntm );
-
-	// The Hermitian rank-k product was computed as Re(alpha)*A*A', even for the
-	// diagonal elements. Mathematically, the imaginary components of
-	// diagonal elements of a Hermitian rank-k product should always be
-	// zero. However, in practice, they sometimes accumulate meaningless
-	// non-zero values. To prevent this, we explicitly set those values
-	// to zero before returning.
-	bli_setid( &BLIS_ZERO, c );
-}
-
-
-void PASTEMAC(syrk,BLIS_OAPI_EX_SUF)
-     (
-       const obj_t*  alpha,
-       const obj_t*  a,
-       const obj_t*  beta,
-       const obj_t*  c,
-       const cntx_t* cntx,
-       const rntm_t* rntm
-     )
-{
-	bli_init_once();
-
-	// Check parameters.
-	if ( bli_error_checking_is_enabled() )
-		bli_syrk_check( alpha, a, beta, c, cntx );
-
-	obj_t at;
-	bli_obj_alias_with_trans( BLIS_TRANSPOSE, a, &at );
-
-	PASTEMAC(gemmt,BLIS_OAPI_EX_SUF)( alpha, a, &at, beta, c, cntx, rntm );
 }
 
 
@@ -1123,16 +1109,16 @@ void PASTEMAC(trmm,BLIS_OAPI_EX_SUF)
 	pack_t schema_a;
 	pack_t schema_b;
 	bli_l3_set_schemas( bli_obj_dt( &c_local ), &schema_a, &schema_b, cntx );
+    bli_l3_attach_scalars( alpha, &a_local, &b_local, &BLIS_ZERO, &c_local );
 
-	cntl_t* cntl = bli_gemm_cntl_create
+	gemm_cntl_t cntl;
+	bli_gemm_cntl_init
 	(
-	  NULL,
 	  BLIS_TRMM,
 	  schema_a,
-	  schema_b
+	  schema_b,
+	  &cntl
 	);
-
-    bli_l3_attach_scalars( alpha, &a_local, &b_local, &BLIS_ZERO, &c_local );
 
 	// Invoke the internal back-end.
 	bli_l3_thread_decorator
@@ -1141,12 +1127,9 @@ void PASTEMAC(trmm,BLIS_OAPI_EX_SUF)
 	  &b_local,
 	  &c_local,
 	  cntx,
-	  cntl,
+	  bli_gemm_cntl_root( &cntl ),
 	  rntm
 	);
-
-	// Free the thread's local control tree.
-	bli_cntl_free( NULL, cntl );
 }
 
 
@@ -1257,16 +1240,16 @@ void PASTEMAC(trsm,BLIS_OAPI_EX_SUF)
 	pack_t schema_a;
 	pack_t schema_b;
 	bli_l3_set_schemas( bli_obj_dt( &c_local ), &schema_a, &schema_b, cntx );
+    bli_l3_attach_scalars( alpha, &a_local, &b_local, alpha, &c_local );
 
-	cntl_t* cntl = bli_trsm_cntl_create
+    trsm_cntl_t cntl;
+	bli_trsm_cntl_init
 	(
-	  NULL,
 	  bli_obj_is_triangular( a ) ? BLIS_LEFT : BLIS_RIGHT,
 	  schema_a,
-	  schema_b
+	  schema_b,
+      &cntl
 	);
-
-    bli_l3_attach_scalars( alpha, &a_local, &b_local, alpha, &c_local );
 
 	// Invoke the internal back-end.
 	bli_l3_thread_decorator
@@ -1275,10 +1258,7 @@ void PASTEMAC(trsm,BLIS_OAPI_EX_SUF)
 	  &b_local,
 	  &c_local,
 	  cntx,
-	  cntl,
+	  bli_trsm_cntl_root( &cntl ),
 	  rntm
 	);
-
-	// Free the thread's local control tree.
-	bli_cntl_free( NULL, cntl );
 }

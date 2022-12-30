@@ -46,12 +46,24 @@ struct cntl_s
 	struct cntl_s* sub_prenode;
 	struct cntl_s* sub_node;
 	void*          params;
+	uint64_t       size;
 };
 typedef struct cntl_s cntl_t;
 */
 
 
 // -- Control tree prototypes --
+
+BLIS_EXPORT_BLIS void bli_cntl_init_node
+     (
+       opid_t  family,
+       bszid_t bszid,
+       void_fp var_func,
+       cntl_t* sub_node,
+       cntl_t* cntl
+     );
+
+#if 0
 
 BLIS_EXPORT_BLIS cntl_t* bli_cntl_create_node
      (
@@ -69,24 +81,20 @@ BLIS_EXPORT_BLIS void bli_cntl_free_node
        cntl_t* cntl
      );
 
-BLIS_EXPORT_BLIS void bli_cntl_clear_node
-     (
-       cntl_t* cntl
-     );
-
-// -----------------------------------------------------------------------------
-
 BLIS_EXPORT_BLIS void bli_cntl_free
      (
        pool_t* pool,
        cntl_t* cntl
      );
 
-BLIS_EXPORT_BLIS cntl_t* bli_cntl_copy
+#endif
+
+BLIS_EXPORT_BLIS void bli_cntl_clear_node
      (
-             pool_t* pool,
-       const cntl_t* cntl
+       cntl_t* cntl
      );
+
+// -----------------------------------------------------------------------------
 
 BLIS_EXPORT_BLIS void bli_cntl_mark_family
      (
@@ -131,24 +139,7 @@ BLIS_INLINE cntl_t* bli_cntl_sub_node( const cntl_t* cntl )
 	return cntl->sub_node;
 }
 
-BLIS_INLINE void* bli_cntl_params( const cntl_t* cntl )
-{
-	return cntl->params;
-}
-
-BLIS_INLINE uint64_t bli_cntl_params_size( const cntl_t* cntl )
-{
-	// The first 64 bytes is always the size of the params structure.
-	return *( ( uint64_t* )(cntl->params) );
-}
-
 // cntl_t query (complex)
-
-BLIS_INLINE bool bli_cntl_is_null( const cntl_t* cntl )
-{
-	return ( bool )
-	       ( cntl == NULL );
-}
 
 BLIS_INLINE bool bli_cntl_is_leaf( const cntl_t* cntl )
 {
@@ -187,10 +178,5 @@ BLIS_INLINE void bli_cntl_set_sub_prenode( cntl_t* sub_prenode, cntl_t* cntl )
 BLIS_INLINE void bli_cntl_set_sub_node( cntl_t* sub_node, cntl_t* cntl )
 {
 	cntl->sub_node = sub_node;
-}
-
-BLIS_INLINE void bli_cntl_set_params( void* params, cntl_t* cntl )
-{
-	cntl->params = params;
 }
 

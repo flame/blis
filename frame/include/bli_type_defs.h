@@ -1074,7 +1074,6 @@ struct cntl_s
 	void_fp        var_func;
 	struct cntl_s* sub_prenode;
 	struct cntl_s* sub_node;
-	void*          params;
 };
 typedef struct cntl_s cntl_t;
 

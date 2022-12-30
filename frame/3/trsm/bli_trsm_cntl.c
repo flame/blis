@@ -35,27 +35,28 @@
 
 #include "blis.h"
 
-cntl_t* bli_trsm_cntl_create
+void bli_trsm_cntl_init
      (
-       pool_t* pool,
-       side_t  side,
-       pack_t  schema_a,
-       pack_t  schema_b
+       side_t       side,
+       pack_t       schema_a,
+       pack_t       schema_b,
+       trsm_cntl_t* cntl
      )
 {
 	if ( bli_is_left( side ) )
-		return bli_trsm_l_cntl_create( pool, schema_a, schema_b );
+		return bli_trsm_l_cntl_init( schema_a, schema_b, cntl );
 	else
-		return bli_trsm_r_cntl_create( pool, schema_a, schema_b );
+		return bli_trsm_r_cntl_init( schema_a, schema_b, cntl );
 }
 
-cntl_t* bli_trsm_l_cntl_create
+void bli_trsm_l_cntl_init
      (
-       pool_t* pool,
-       pack_t  schema_a,
-       pack_t  schema_b
+       pack_t       schema_a,
+       pack_t       schema_b,
+       trsm_cntl_t* cntl
      )
 {
+    // Set the default macrokernel.
 	void_fp macro_kernel_p = bli_trsm_xx_ker_var2;
 
 	const opid_t family = BLIS_TRSM;
@@ -64,28 +65,27 @@ cntl_t* bli_trsm_l_cntl_create
 	// Create nodes for packing A and the macro-kernel (gemm branch).
 	//
 
-	cntl_t* gemm_cntl_bu_ke = bli_trsm_cntl_create_node
+	bli_cntl_init_node
 	(
-	  pool,         // the thread's sba pool
 	  family,       // the operation family
 	  BLIS_MR,
 	  NULL,         // variant function pointer not used
-	  NULL          // no sub-node; this is the leaf of the tree.
+	  NULL,         // no sub-node; this is the leaf of the tree.
+      &cntl->part_ir_gemm
 	);
 
-	cntl_t* gemm_cntl_bp_bu = bli_trsm_cntl_create_node
+	bli_cntl_init_node
 	(
-	  pool,
 	  family,
 	  BLIS_NR,
 	  macro_kernel_p,
-	  gemm_cntl_bu_ke
+	  &cntl->part_ir_gemm,
+      &cntl->part_jr_gemm
 	);
 
 	// Create a node for packing matrix A.
-	cntl_t* gemm_cntl_packa = bli_packm_cntl_create_node
+	bli_packm_cntl_init_node
 	(
-	  pool,
 	  bli_l3_packa, // trsm operation's packm function for A.
 	  BLIS_MR,
 	  BLIS_MR,
@@ -94,35 +94,35 @@ cntl_t* bli_trsm_l_cntl_create
 	  FALSE,        // reverse iteration if lower?
 	  schema_a,     // normally BLIS_PACKED_ROW_PANELS
 	  BLIS_BUFFER_FOR_A_BLOCK,
-	  gemm_cntl_bp_bu
+	  &cntl->part_jr_gemm,
+      &cntl->pack_a_gemm
 	);
 
 	//
 	// Create nodes for packing A and the macro-kernel (trsm branch).
 	//
 
-	cntl_t* trsm_cntl_bu_ke = bli_trsm_cntl_create_node
+	bli_cntl_init_node
 	(
-	  pool,         // the thread's sba pool
 	  family,       // the operation family
 	  BLIS_MR,
 	  NULL,         // variant function pointer not used
-	  NULL          // no sub-node; this is the leaf of the tree.
+	  NULL,         // no sub-node; this is the leaf of the tree.
+      &cntl->part_ir_trsm
 	);
 
-	cntl_t* trsm_cntl_bp_bu = bli_trsm_cntl_create_node
+	bli_cntl_init_node
 	(
-	  pool,
 	  family,
 	  BLIS_NR,
 	  macro_kernel_p,
-	  trsm_cntl_bu_ke
+	  &cntl->part_ir_trsm,
+      &cntl->part_jr_trsm
 	);
 
 	// Create a node for packing matrix A.
-	cntl_t* trsm_cntl_packa = bli_packm_cntl_create_node
+	bli_packm_cntl_init_node
 	(
-	  pool,
 	  bli_l3_packa, // trsm operation's packm function for A.
 	  BLIS_MR,
 	  BLIS_MR,
@@ -135,31 +135,31 @@ cntl_t* bli_trsm_l_cntl_create
 	  FALSE,        // reverse iteration if lower?
 	  schema_a,     // normally BLIS_PACKED_ROW_PANELS
 	  BLIS_BUFFER_FOR_A_BLOCK,
-	  trsm_cntl_bp_bu
+	  &cntl->part_jr_trsm,
+      &cntl->pack_a_trsm
 	);
 
 	// -------------------------------------------------------------------------
 
 	// Create a node for partitioning the m dimension by MC.
 	// NOTE: We attach the gemm sub-tree as the main branch.
-	cntl_t* trsm_cntl_op_bp = bli_trsm_cntl_create_node
+	bli_cntl_init_node
 	(
-	  pool,
 	  family,
 	  BLIS_MC,
 	  bli_trsm_blk_var1,
-	  gemm_cntl_packa
+	  &cntl->pack_a_gemm.cntl,
+      &cntl->part_ic
 	);
 
 	// Attach the trsm sub-tree as the auxiliary "prenode" branch.
-	bli_cntl_set_sub_prenode( trsm_cntl_packa, trsm_cntl_op_bp );
+	bli_cntl_set_sub_prenode( &cntl->pack_a_trsm.cntl, &cntl->part_ic );
 
 	// -------------------------------------------------------------------------
 
 	// Create a node for packing matrix B.
-	cntl_t* trsm_cntl_packb = bli_packm_cntl_create_node
+	bli_packm_cntl_init_node
 	(
-	  pool,
 	  bli_l3_packb,
 	  BLIS_NR,
 	  BLIS_MR,
@@ -168,67 +168,66 @@ cntl_t* bli_trsm_l_cntl_create
 	  FALSE,        // reverse iteration if lower?
 	  schema_b,     // normally BLIS_PACKED_COL_PANELS
 	  BLIS_BUFFER_FOR_B_PANEL,
-	  trsm_cntl_op_bp
+	  &cntl->part_ic,
+      &cntl->pack_b
 	);
 
 	// Create a node for partitioning the k dimension by KC.
-	cntl_t* trsm_cntl_mm_op = bli_trsm_cntl_create_node
+	bli_cntl_init_node
 	(
-	  pool,
 	  family,
 	  BLIS_KC,
 	  bli_trsm_blk_var3,
-	  trsm_cntl_packb
+	  &cntl->pack_b.cntl,
+      &cntl->part_pc
 	);
 
 	// Create a node for partitioning the n dimension by NC.
-	cntl_t* trsm_cntl_vl_mm = bli_trsm_cntl_create_node
+	bli_cntl_init_node
 	(
-	  pool,
 	  family,
 	  BLIS_NC,
 	  bli_trsm_blk_var2,
-	  trsm_cntl_mm_op
+	  &cntl->part_pc,
+      &cntl->part_jc
 	);
-
-	return trsm_cntl_vl_mm;
 }
 
-cntl_t* bli_trsm_r_cntl_create
+void bli_trsm_r_cntl_init
      (
-       pool_t* pool,
-       pack_t  schema_a,
-       pack_t  schema_b
+       pack_t       schema_a,
+       pack_t       schema_b,
+       trsm_cntl_t* cntl
      )
 {
 	// NOTE: trsm macrokernels are presently disabled for right-side execution.
+    // Set the default macrokernel.
 	void_fp macro_kernel_p = bli_trsm_xx_ker_var2;
 
 	const opid_t family = BLIS_TRSM;
 
 	// Create two nodes for the macro-kernel.
-	cntl_t* trsm_cntl_bu_ke = bli_trsm_cntl_create_node
+	bli_cntl_init_node
 	(
-	  pool,
 	  family,
 	  BLIS_MR, // needed for bli_thrinfo_rgrow()
 	  NULL,    // variant function pointer not used
-	  NULL     // no sub-node; this is the leaf of the tree.
+	  NULL,    // no sub-node; this is the leaf of the tree.
+      &cntl->part_ir_trsm
 	);
 
-	cntl_t* trsm_cntl_bp_bu = bli_trsm_cntl_create_node
+	bli_cntl_init_node
 	(
-	  pool,
 	  family,
 	  BLIS_NR, // not used by macro-kernel, but needed for bli_thrinfo_rgrow()
 	  macro_kernel_p,
-	  trsm_cntl_bu_ke
+	  &cntl->part_ir_trsm,
+      &cntl->part_jr_trsm
 	);
 
 	// Create a node for packing matrix A.
-	cntl_t* trsm_cntl_packa = bli_packm_cntl_create_node
+	bli_packm_cntl_init_node
 	(
-	  pool,
 	  bli_l3_packa,
 	  BLIS_NR,
 	  BLIS_MR,
@@ -237,23 +236,23 @@ cntl_t* bli_trsm_r_cntl_create
 	  FALSE,   // reverse iteration if lower?
 	  schema_a, // normally BLIS_PACKED_ROW_PANELS
 	  BLIS_BUFFER_FOR_A_BLOCK,
-	  trsm_cntl_bp_bu
+	  &cntl->part_jr_trsm,
+      &cntl->pack_a_trsm
 	);
 
 	// Create a node for partitioning the m dimension by MC.
-	cntl_t* trsm_cntl_op_bp = bli_trsm_cntl_create_node
+	bli_cntl_init_node
 	(
-	  pool,
 	  family,
 	  BLIS_MC,
 	  bli_trsm_blk_var1,
-	  trsm_cntl_packa
+	  &cntl->pack_a_trsm.cntl,
+      &cntl->part_ic
 	);
 
 	// Create a node for packing matrix B.
-	cntl_t* trsm_cntl_packb = bli_packm_cntl_create_node
+	bli_packm_cntl_init_node
 	(
-	  pool,
 	  bli_l3_packb,
 	  BLIS_MR,
 	  BLIS_MR,
@@ -262,43 +261,28 @@ cntl_t* bli_trsm_r_cntl_create
 	  TRUE,    // reverse iteration if lower?
 	  schema_b, // normally BLIS_PACKED_COL_PANELS
 	  BLIS_BUFFER_FOR_B_PANEL,
-	  trsm_cntl_op_bp
+	  &cntl->part_ic,
+      &cntl->pack_b
 	);
 
 	// Create a node for partitioning the k dimension by KC.
-	cntl_t* trsm_cntl_mm_op = bli_trsm_cntl_create_node
+	bli_cntl_init_node
 	(
-	  pool,
 	  family,
 	  BLIS_KC,
 	  bli_trsm_blk_var3,
-	  trsm_cntl_packb
+	  &cntl->pack_b.cntl,
+      &cntl->part_pc
 	);
 
 	// Create a node for partitioning the n dimension by NC.
-	cntl_t* trsm_cntl_vl_mm = bli_trsm_cntl_create_node
+	bli_cntl_init_node
 	(
-	  pool,
 	  family,
 	  BLIS_NC,
 	  bli_trsm_blk_var2,
-	  trsm_cntl_mm_op
+	  &cntl->part_pc,
+      &cntl->part_jc
 	);
-
-	return trsm_cntl_vl_mm;
-}
-
-// -----------------------------------------------------------------------------
-
-cntl_t* bli_trsm_cntl_create_node
-     (
-       pool_t* pool,
-       opid_t  family,
-       bszid_t bszid,
-       void_fp var_func,
-       cntl_t* sub_node
-     )
-{
-	return bli_cntl_create_node( pool, family, bszid, var_func, NULL, sub_node );
 }
 

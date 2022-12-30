@@ -35,58 +35,40 @@
 
 #include "blis.h"
 
-BLIS_EXPORT_BLIS cntl_t* bli_packm_cntl_create_node
+void bli_packm_cntl_init_node
      (
-       pool_t*   pool,
-       void_fp   var_func,
-       bszid_t   bmid_m,
-       bszid_t   bmid_n,
-       bool      does_invert_diag,
-       bool      rev_iter_if_upper,
-       bool      rev_iter_if_lower,
-       pack_t    pack_schema,
-       packbuf_t pack_buf_type,
-       cntl_t*   sub_node
+       void_fp       var_func,
+       bszid_t       bmid_m,
+       bszid_t       bmid_n,
+       bool          does_invert_diag,
+       bool          rev_iter_if_upper,
+       bool          rev_iter_if_lower,
+       pack_t        pack_schema,
+       packbuf_t     pack_buf_type,
+       cntl_t*       sub_node,
+       packm_cntl_t* cntl
      )
 {
-	cntl_t*         cntl;
-	packm_params_t* params;
-
-	#ifdef BLIS_ENABLE_MEM_TRACING
-	printf( "bli_packm_cntl_create_node(): " );
-	#endif
-
-	// Allocate a packm_params_t struct.
-	params = bli_sba_acquire( pool, sizeof( packm_params_t ) );
-
-	// Initialize the packm_params_t struct.
-	params->size              = sizeof( packm_params_t );
-	params->bmid_m            = bmid_m;
-	params->bmid_n            = bmid_n;
-	params->does_invert_diag  = does_invert_diag;
-	params->rev_iter_if_upper = rev_iter_if_upper;
-	params->rev_iter_if_lower = rev_iter_if_lower;
-	params->pack_schema       = pack_schema;
-	params->pack_buf_type     = pack_buf_type;
-
-	#ifdef BLIS_ENABLE_MEM_TRACING
-	printf( "bli_packm_cntl_create_node(): " );
-	#endif
+	// Initialize the packm_cntl_t struct.
+	cntl->bmid_m            = bmid_m;
+	cntl->bmid_n            = bmid_n;
+	cntl->does_invert_diag  = does_invert_diag;
+	cntl->rev_iter_if_upper = rev_iter_if_upper;
+	cntl->rev_iter_if_lower = rev_iter_if_lower;
+	cntl->pack_schema       = pack_schema;
+	cntl->pack_buf_type     = pack_buf_type;
 
 	// It's important that we set the bszid field to BLIS_NO_PART to indicate
 	// that no blocksize partitioning is performed. bli_cntl_free() will rely
 	// on this information to know how to step through the thrinfo_t tree in
 	// sync with the cntl_t tree.
-	cntl = bli_cntl_create_node
+	bli_cntl_init_node
 	(
-	  pool,
 	  BLIS_NOID,
 	  BLIS_NO_PART,
 	  var_func,
-	  params,
-	  sub_node
+	  sub_node,
+      &cntl->cntl
 	);
-
-	return cntl;
 }
 

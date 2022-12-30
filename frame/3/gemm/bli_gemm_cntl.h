@@ -33,32 +33,38 @@
 
 */
 
-cntl_t* bli_gemm_cntl_create
+struct gemm_cntl_s
+{
+          cntl_t part_ir;
+          cntl_t part_jr;
+    packm_cntl_t pack_a;
+          cntl_t part_ic;
+    packm_cntl_t pack_b;
+          cntl_t part_pc;
+          cntl_t part_jc;
+};
+typedef struct gemm_cntl_s gemm_cntl_t;
+
+void bli_gemm_cntl_init
      (
-       pool_t* pool,
-       opid_t  family,
-       pack_t  schema_a,
-       pack_t  schema_b
+       opid_t       family,
+       pack_t       schema_a,
+       pack_t       schema_b,
+       gemm_cntl_t* cntl
      );
+
+BLIS_INLINE cntl_t* bli_gemm_cntl_root( gemm_cntl_t* cntl )
+{
+    return &cntl->part_jc;
+}
 
 // -----------------------------------------------------------------------------
 
-cntl_t* bli_gemmbp_cntl_create
+void bli_gemmbp_cntl_init
      (
-       pool_t* pool,
-       opid_t  family,
-       pack_t  schema_a,
-       pack_t  schema_b
-     );
-
-// -----------------------------------------------------------------------------
-
-cntl_t* bli_gemm_cntl_create_node
-     (
-       pool_t* pool,
-       opid_t  family,
-       bszid_t bszid,
-       void_fp var_func,
-       cntl_t* sub_node
+       opid_t       family,
+       pack_t       schema_a,
+       pack_t       schema_b,
+       gemm_cntl_t* cntl
      );
 

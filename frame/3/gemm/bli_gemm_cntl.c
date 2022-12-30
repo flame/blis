@@ -35,25 +35,25 @@
 
 #include "blis.h"
 
-cntl_t* bli_gemm_cntl_create
+void bli_gemm_cntl_init
      (
-       pool_t* pool,
-       opid_t  family,
-       pack_t  schema_a,
-       pack_t  schema_b
+       opid_t       family,
+       pack_t       schema_a,
+       pack_t       schema_b,
+       gemm_cntl_t* cntl
      )
 {
-	return bli_gemmbp_cntl_create( pool, family, schema_a, schema_b );
+	bli_gemmbp_cntl_init( family, schema_a, schema_b, cntl );
 }
 
 // -----------------------------------------------------------------------------
 
-cntl_t* bli_gemmbp_cntl_create
+void bli_gemmbp_cntl_init
      (
-       pool_t* pool,
-       opid_t  family,
-       pack_t  schema_a,
-       pack_t  schema_b
+       opid_t       family,
+       pack_t       schema_a,
+       pack_t       schema_b,
+       gemm_cntl_t* cntl
      )
 {
 	void_fp macro_kernel_fp;
@@ -68,28 +68,27 @@ cntl_t* bli_gemmbp_cntl_create
 	else /* should never execute */ macro_kernel_fp = NULL;
 
 	// Create two nodes for the macro-kernel.
-	cntl_t* gemm_cntl_bu_ke = bli_gemm_cntl_create_node
+	bli_cntl_init_node
 	(
-	  pool,         // the thread's sba pool
 	  family,       // the operation family
 	  BLIS_MR,
 	  NULL,         // variant function pointer not used
-	  NULL          // no sub-node; this is the leaf of the tree.
+	  NULL,         // no sub-node; this is the leaf of the tree.
+      &cntl->part_ir
 	);
 
-	cntl_t* gemm_cntl_bp_bu = bli_gemm_cntl_create_node
+	bli_cntl_init_node
 	(
-	  pool,         // the thread's sba pool
 	  family,
 	  BLIS_NR,
 	  macro_kernel_fp,
-	  gemm_cntl_bu_ke
+      &cntl->part_ir,
+      &cntl->part_jr
 	);
 
 	// Create a node for packing matrix A.
-	cntl_t* gemm_cntl_packa = bli_packm_cntl_create_node
+	bli_packm_cntl_init_node
 	(
-	  pool,
 	  bli_l3_packa, // pack the left-hand operand
 	  BLIS_MR,
 	  BLIS_KR,
@@ -98,23 +97,23 @@ cntl_t* bli_gemmbp_cntl_create
 	  FALSE,        // reverse iteration if lower?
 	  schema_a,     // normally BLIS_PACKED_ROW_PANELS
 	  BLIS_BUFFER_FOR_A_BLOCK,
-	  gemm_cntl_bp_bu
+      &cntl->part_jr,
+      &cntl->pack_a
 	);
 
 	// Create a node for partitioning the m dimension by MC.
-	cntl_t* gemm_cntl_op_bp = bli_gemm_cntl_create_node
+	bli_cntl_init_node
 	(
-	  pool,
 	  family,
 	  BLIS_MC,
 	  bli_gemm_blk_var1,
-	  gemm_cntl_packa
+      &cntl->pack_a.cntl,
+      &cntl->part_ic
 	);
 
 	// Create a node for packing matrix B.
-	cntl_t* gemm_cntl_packb = bli_packm_cntl_create_node
+	bli_packm_cntl_init_node
 	(
-	  pool,
 	  bli_l3_packb, // pack the right-hand operand
 	  BLIS_NR,
 	  BLIS_KR,
@@ -123,43 +122,28 @@ cntl_t* bli_gemmbp_cntl_create
 	  FALSE,        // reverse iteration if lower?
 	  schema_b,     // normally BLIS_PACKED_COL_PANELS
 	  BLIS_BUFFER_FOR_B_PANEL,
-	  gemm_cntl_op_bp
+      &cntl->part_ic,
+      &cntl->pack_b
 	);
 
 	// Create a node for partitioning the k dimension by KC.
-	cntl_t* gemm_cntl_mm_op = bli_gemm_cntl_create_node
+	bli_cntl_init_node
 	(
-	  pool,
 	  family,
 	  BLIS_KC,
 	  bli_gemm_blk_var3,
-	  gemm_cntl_packb
+      &cntl->pack_b.cntl,
+      &cntl->part_pc
 	);
 
 	// Create a node for partitioning the n dimension by NC.
-	cntl_t* gemm_cntl_vl_mm = bli_gemm_cntl_create_node
+	bli_cntl_init_node
 	(
-	  pool,
 	  family,
 	  BLIS_NC,
 	  bli_gemm_blk_var2,
-	  gemm_cntl_mm_op
+      &cntl->part_pc,
+      &cntl->part_jc
 	);
-
-	return gemm_cntl_vl_mm;
-}
-
-// -----------------------------------------------------------------------------
-
-cntl_t* bli_gemm_cntl_create_node
-     (
-       pool_t* pool,
-       opid_t  family,
-       bszid_t bszid,
-       void_fp var_func,
-       cntl_t* sub_node
-     )
-{
-	return bli_cntl_create_node( pool, family, bszid, var_func, NULL, sub_node );
 }
 

@@ -33,36 +33,45 @@
 
 */
 
-cntl_t* bli_trsm_cntl_create
+struct trsm_cntl_s
+{
+          cntl_t part_ir_trsm;
+          cntl_t part_jr_trsm;
+    packm_cntl_t pack_a_trsm;
+          cntl_t part_ir_gemm;
+          cntl_t part_jr_gemm;
+    packm_cntl_t pack_a_gemm;
+          cntl_t part_ic;
+    packm_cntl_t pack_b;
+          cntl_t part_pc;
+          cntl_t part_jc;
+};
+typedef struct trsm_cntl_s trsm_cntl_t;
+
+void bli_trsm_cntl_init
      (
-       pool_t* pool,
-       side_t  side,
-       pack_t  schema_a,
-       pack_t  schema_b
+       side_t       side,
+       pack_t       schema_a,
+       pack_t       schema_b,
+       trsm_cntl_t* cntl
      );
 
-cntl_t* bli_trsm_l_cntl_create
+BLIS_INLINE cntl_t* bli_trsm_cntl_root( trsm_cntl_t* cntl )
+{
+    return &cntl->part_jc;
+}
+
+void bli_trsm_l_cntl_init
      (
-       pool_t* pool,
-       pack_t  schema_a,
-       pack_t  schema_b
+       pack_t       schema_a,
+       pack_t       schema_b,
+       trsm_cntl_t* cntl
      );
 
-cntl_t* bli_trsm_r_cntl_create
+void bli_trsm_r_cntl_init
      (
-       pool_t* pool,
-       pack_t  schema_a,
-       pack_t  schema_b
-     );
-
-// -----------------------------------------------------------------------------
-
-cntl_t* bli_trsm_cntl_create_node
-     (
-       pool_t* pool,
-       opid_t  family,
-       bszid_t bszid,
-       void_fp var_func,
-       cntl_t* sub_node
+       pack_t       schema_a,
+       pack_t       schema_b,
+       trsm_cntl_t* cntl
      );
 

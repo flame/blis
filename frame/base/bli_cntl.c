@@ -35,6 +35,24 @@
 
 #include "blis.h"
 
+void bli_cntl_init_node
+     (
+       opid_t  family,
+       bszid_t bszid,
+       void_fp var_func,
+       cntl_t* sub_node,
+       cntl_t* cntl
+     )
+{
+	bli_cntl_set_family( family, cntl );
+	bli_cntl_set_bszid( bszid, cntl );
+	bli_cntl_set_var_func( var_func, cntl );
+	bli_cntl_set_sub_prenode( NULL, cntl );
+	bli_cntl_set_sub_node( sub_node, cntl );
+}
+
+#if 0
+
 cntl_t* bli_cntl_create_node
      (
        pool_t* pool,
@@ -76,21 +94,6 @@ void bli_cntl_free_node
 
 	bli_sba_release( pool, cntl );
 }
-
-void bli_cntl_clear_node
-     (
-       cntl_t* cntl
-     )
-{
-	// Clear various fields in the control tree. Clearing these fields
-	// actually is not needed, but we do it for debugging/completeness.
-	bli_cntl_set_var_func( NULL, cntl );
-	bli_cntl_set_params( NULL, cntl );
-	bli_cntl_set_sub_prenode( NULL, cntl );
-	bli_cntl_set_sub_node( NULL, cntl );
-}
-
-// -----------------------------------------------------------------------------
 
 void bli_cntl_free
      (
@@ -135,77 +138,21 @@ void bli_cntl_free
 	bli_cntl_free_node( pool, cntl );
 }
 
-// -----------------------------------------------------------------------------
+#endif
 
-cntl_t* bli_cntl_copy
+void bli_cntl_clear_node
      (
-             pool_t* pool,
-       const cntl_t* cntl
+       cntl_t* cntl
      )
 {
-	// Make a copy of the current node. Notice that the source node
-	// should NOT have any allocated/cached mem_t entries, and that
-	// bli_cntl_create_node() creates a node with a cleared mem_t
-	// field.
-	cntl_t* cntl_copy = bli_cntl_create_node
-	(
-	  pool,
-	  bli_cntl_family( cntl ),
-	  bli_cntl_bszid( cntl ),
-	  bli_cntl_var_func( cntl ),
-	  NULL, NULL
-	);
-
-	// Check the params field of the existing control tree; if it's non-NULL,
-	// copy it.
-	if ( bli_cntl_params( cntl ) != NULL )
-	{
-		// Detect the size of the params struct by reading the first field
-		// as a uint64_t, and then allocate this many bytes for a new params
-		// struct.
-		uint64_t params_size = bli_cntl_params_size( cntl );
-		void*    params_orig = bli_cntl_params( cntl );
-		void*    params_copy = bli_sba_acquire( pool, ( size_t )params_size );
-
-		// Copy the original params struct to the new memory region.
-		memcpy( params_copy, params_orig, params_size );
-
-		// Save the address of the new params struct into the new control
-		// tree node.
-		bli_cntl_set_params( params_copy, cntl_copy );
-	}
-
-	// If the sub-prenode exists, copy it recursively.
-	if ( bli_cntl_sub_prenode( cntl ) != NULL )
-	{
-		cntl_t* sub_prenode_copy = bli_cntl_copy
-		(
-		  pool,
-		  bli_cntl_sub_prenode( cntl )
-		);
-
-		// Save the address of the new sub-node (sub-tree) to the existing
-		// node.
-		bli_cntl_set_sub_prenode( sub_prenode_copy, cntl_copy );
-	}
-
-	// If the sub-node exists, copy it recursively.
-	if ( bli_cntl_sub_node( cntl ) != NULL )
-	{
-		cntl_t* sub_node_copy = bli_cntl_copy
-		(
-		  pool,
-		  bli_cntl_sub_node( cntl )
-		);
-
-		// Save the address of the new sub-node (sub-tree) to the existing
-		// node.
-		bli_cntl_set_sub_node( sub_node_copy, cntl_copy );
-	}
-
-	// Return the address of the newly created node.
-	return cntl_copy;
+	// Clear various fields in the control tree. Clearing these fields
+	// actually is not needed, but we do it for debugging/completeness.
+	bli_cntl_set_var_func( NULL, cntl );
+	bli_cntl_set_sub_prenode( NULL, cntl );
+	bli_cntl_set_sub_node( NULL, cntl );
 }
+
+// -----------------------------------------------------------------------------
 
 void bli_cntl_mark_family
      (

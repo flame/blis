@@ -62,10 +62,10 @@ void bli_packm_blk_var1
      )
 {
 	// Extract various fields from the control tree.
-	pack_t schema  = bli_cntl_packm_params_pack_schema( cntl );
-	bool   invdiag = bli_cntl_packm_params_does_invert_diag( cntl );
-	bool   revifup = bli_cntl_packm_params_rev_iter_if_upper( cntl );
-	bool   reviflo = bli_cntl_packm_params_rev_iter_if_lower( cntl );
+	pack_t schema  = bli_packm_cntl_pack_schema( cntl );
+	bool   invdiag = bli_packm_cntl_does_invert_diag( cntl );
+	bool   revifup = bli_packm_cntl_rev_iter_if_upper( cntl );
+	bool   reviflo = bli_packm_cntl_rev_iter_if_lower( cntl );
 
 	// Every thread initializes p and determines the size of memory block
 	// needed (which gets embedded into the otherwise "blank" mem_t entry

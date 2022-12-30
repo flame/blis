@@ -2679,9 +2679,9 @@ thrinfo_t* libblis_test_pobj_create( bszid_t bmult_id_m, bszid_t bmult_id_n, inv
 	bli_rntm_init( &rntm );
 
 	// Create a control tree node for the packing operation.
-	cntl_t* cntl = bli_packm_cntl_create_node
+    packm_cntl_t cntl;
+	bli_packm_cntl_init_node
 	(
-	  NULL, // pass NULL as the pool so that malloc() is used.
 	  NULL, // func ptr is not referenced b/c we don't call via l3 _int().
 	  bmult_id_m,
 	  bmult_id_n,
@@ -2690,16 +2690,14 @@ thrinfo_t* libblis_test_pobj_create( bszid_t bmult_id_m, bszid_t bmult_id_n, inv
 	  FALSE,
 	  pack_schema,
 	  pack_buf,
-	  NULL  // no child node needed
+	  NULL, // no child node needed
+      &cntl
 	);
 
-	thrinfo_t* thread = bli_l3_thrinfo_create( 0, &BLIS_SINGLE_COMM, NULL, &rntm, cntl );
+	thrinfo_t* thread = bli_l3_thrinfo_create( 0, &BLIS_SINGLE_COMM, NULL, &rntm, &cntl.cntl );
 
 	// Pack the contents of A to P.
-	bli_packm_blk_var1( a, p, cntx, cntl, thread );
-
-	// Free the control tree.
-	bli_cntl_free( NULL, cntl );
+	bli_packm_blk_var1( a, p, cntx, &cntl.cntl, thread );
 
 	// Return the thread control tree pointer so the caller can free the thrinfo_t and its
 	// mem_t entry later on.
