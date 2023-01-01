@@ -75,18 +75,37 @@ void bli_gemmbp_cntl_init
 	          family == BLIS_TRMM3 ) macro_kernel_fp = bli_trmm_xx_ker_var2;
 	else /* should never execute */ macro_kernel_fp = NULL;
 
-    const num_t dt      = bli_obj_comp_dt( c );
-    const dim_t ir_mult = bli_cntx_get_blksz_def_dt( dt, BLIS_MR, cntx );
-    const dim_t jr_mult = bli_cntx_get_blksz_def_dt( dt, BLIS_NR, cntx );
-    const dim_t ic_mult = bli_cntx_get_blksz_def_dt( dt, BLIS_MR, cntx );
-    const dim_t jc_mult = bli_cntx_get_blksz_def_dt( dt, BLIS_NR, cntx );
+    const num_t dt       = bli_obj_comp_dt( c );
+    const dim_t ir_bsize = bli_cntx_get_blksz_def_dt( dt, BLIS_MR, cntx );
+    const dim_t jr_bsize = bli_cntx_get_blksz_def_dt( dt, BLIS_NR, cntx );
+    const dim_t ic_alg   = bli_cntx_get_blksz_def_dt( dt, BLIS_MC, cntx );
+    const dim_t ic_max   = bli_cntx_get_blksz_max_dt( dt, BLIS_MC, cntx );
+    const dim_t ic_mult  = bli_cntx_get_blksz_def_dt( dt, BLIS_MR, cntx );
+          dim_t pc_alg   = bli_cntx_get_blksz_def_dt( dt, BLIS_KC, cntx );
+          dim_t pc_max   = bli_cntx_get_blksz_max_dt( dt, BLIS_KC, cntx );
+    const dim_t pc_mult  = 1;
+    const dim_t jc_alg   = bli_cntx_get_blksz_def_dt( dt, BLIS_NC, cntx );
+    const dim_t jc_max   = bli_cntx_get_blksz_max_dt( dt, BLIS_NC, cntx );
+    const dim_t jc_mult  = bli_cntx_get_blksz_def_dt( dt, BLIS_NR, cntx );
+
+    bli_l3_adjust_kc
+    (
+      family,
+      a,
+      b,
+      &pc_alg,
+      &pc_max,
+      cntx
+    );
 
 	// Create two nodes for the macro-kernel.
 	bli_part_cntl_init_node
 	(
 	  NULL,         // variant function pointer not used
-	  BLIS_MR,      // block side id
-      ir_mult,      // block side mult
+	  BLIS_MR,      // block size id
+      ir_bsize,     // algorithmic block size
+      ir_bsize,     // max block size
+      ir_bsize,     // block size mult
       FALSE,        // use weighted partitioning
 	  NULL,         // no sub-node; this is the leaf of the tree.
       &cntl->part_ir
@@ -96,7 +115,9 @@ void bli_gemmbp_cntl_init
 	(
 	  macro_kernel_fp,
 	  BLIS_NR,
-      jr_mult,
+      jr_bsize,
+      jr_bsize,
+      jr_bsize,
       FALSE,
       &cntl->part_ir.cntl,
       &cntl->part_jr
@@ -122,6 +143,8 @@ void bli_gemmbp_cntl_init
 	(
 	  bli_gemm_blk_var1,
 	  BLIS_MC,
+      ic_alg,
+      ic_max,
       ic_mult,
       bli_obj_is_triangular( a ) || bli_obj_is_triangular( c ),
       &cntl->pack_a.cntl,
@@ -148,7 +171,9 @@ void bli_gemmbp_cntl_init
 	(
 	  bli_gemm_blk_var3,
 	  BLIS_KC,
-      1,
+      pc_alg,
+      pc_max,
+      pc_mult,
       FALSE,
       &cntl->pack_b.cntl,
       &cntl->part_pc
@@ -159,6 +184,8 @@ void bli_gemmbp_cntl_init
 	(
 	  bli_gemm_blk_var2,
 	  BLIS_NC,
+      jc_alg,
+      jc_max,
       jc_mult,
       bli_obj_is_triangular( b ) || bli_obj_is_triangular( c ),
       &cntl->part_pc.cntl,

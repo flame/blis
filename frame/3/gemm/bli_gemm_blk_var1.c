@@ -61,7 +61,7 @@ void bli_gemm_blk_var1
 	bli_thread_range_mdim
 	(
 	  direct,
-      bli_part_cntl_bmult( cntl ),
+      bli_part_cntl_b_mult( cntl ),
       bli_part_cntl_use_weighted( cntl ),
       thread, &ap, b, &cp,
 	  &my_start, &my_end
@@ -72,8 +72,9 @@ void bli_gemm_blk_var1
 	for ( dim_t i = my_start; i < my_end; i += b_alg )
 	{
 		// Determine the current algorithmic blocksize.
-		b_alg = bli_determine_blocksize( direct, i, my_end, &ap,
-		                                 bli_cntl_bszid( cntl ), cntx );
+		b_alg = bli_determine_blocksize( direct, i, my_end,
+		                                 bli_part_cntl_b_alg( cntl ),
+		                                 bli_part_cntl_b_max( cntl ) );
 
 		// Acquire partitions for A1 and C1.
 		obj_t a1, c1;

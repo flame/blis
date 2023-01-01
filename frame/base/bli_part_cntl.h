@@ -37,14 +37,26 @@
 struct part_cntl_s
 {
 	cntl_t cntl; // cntl field must be present and come first.
-	dim_t  bmult;
+	dim_t  b_alg;
+	dim_t  b_max;
+	dim_t  b_mult;
     bool   use_weighted;
 };
 typedef struct part_cntl_s part_cntl_t;
 
-BLIS_INLINE dim_t bli_part_cntl_bmult( const cntl_t* cntl )
+BLIS_INLINE dim_t bli_part_cntl_b_alg( const cntl_t* cntl )
 {
-	part_cntl_t* ppp = ( part_cntl_t* )cntl; return ppp->bmult;
+	part_cntl_t* ppp = ( part_cntl_t* )cntl; return ppp->b_alg;
+}
+
+BLIS_INLINE dim_t bli_part_cntl_b_max( const cntl_t* cntl )
+{
+	part_cntl_t* ppp = ( part_cntl_t* )cntl; return ppp->b_max;
+}
+
+BLIS_INLINE dim_t bli_part_cntl_b_mult( const cntl_t* cntl )
+{
+	part_cntl_t* ppp = ( part_cntl_t* )cntl; return ppp->b_mult;
 }
 
 BLIS_INLINE bool bli_part_cntl_use_weighted( const cntl_t* cntl )
@@ -58,7 +70,9 @@ void bli_part_cntl_init_node
      (
        void_fp      var_func,
        bszid_t      bszid,
-       dim_t        bmult,
+       dim_t        b_alg,
+       dim_t        b_max,
+       dim_t        b_mult,
        bool         use_weighted,
        cntl_t*      sub_node,
        part_cntl_t* cntl

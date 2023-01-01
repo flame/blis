@@ -39,14 +39,18 @@ void bli_part_cntl_init_node
      (
        void_fp      var_func,
        bszid_t      bszid,
-       dim_t        bmult,
+       dim_t        b_alg,
+       dim_t        b_max,
+       dim_t        b_mult,
        bool         use_weighted,
        cntl_t*      sub_node,
        part_cntl_t* cntl
      )
 {
 	// Initialize the part_cntl_t struct.
-	cntl->bmult        = bmult;
+	cntl->b_alg        = b_alg;
+	cntl->b_max        = b_max;
+	cntl->b_mult       = b_mult;
     cntl->use_weighted = use_weighted;
 
 	bli_cntl_init_node

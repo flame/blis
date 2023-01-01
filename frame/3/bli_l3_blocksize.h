@@ -34,22 +34,10 @@
 
 void bli_l3_adjust_kc
       (
+              opid_t  family,
         const obj_t*  a,
         const obj_t*  b,
               dim_t*  b_alg,
               dim_t*  b_max,
-        const cntx_t* cntx,
-        const cntl_t* cntl
-      );
-
-dim_t bli_l3_determine_kc
-      (
-              dir_t   direct,
-              dim_t   i,
-              dim_t   dim,
-        const obj_t*  a,
-        const obj_t*  b,
-              bszid_t bszid,
-        const cntx_t* cntx,
-        const cntl_t* cntl
+        const cntx_t* cntx
       );

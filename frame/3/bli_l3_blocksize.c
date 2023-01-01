@@ -37,17 +37,16 @@
 
 void bli_l3_adjust_kc
       (
+              opid_t  family,
         const obj_t*  a,
         const obj_t*  b,
               dim_t*  b_alg,
               dim_t*  b_max,
-        const cntx_t* cntx,
-        const cntl_t* cntl
+        const cntx_t* cntx
       )
 {
-	const opid_t family = bli_cntl_family( cntl );
-	const num_t  dt     = bli_obj_exec_dt( a );
-	      dim_t  mnr    = 1;
+	const num_t  dt  = bli_obj_exec_dt( a );
+	      dim_t  mnr = 1;
 
 	// Nudge the default and maximum kc blocksizes up to the nearest
 	// multiple of MR if A is Hermitian, symmetric, or triangular or
@@ -67,30 +66,5 @@ void bli_l3_adjust_kc
 
 	*b_alg = bli_align_dim_to_mult( *b_alg, mnr );
 	*b_max = bli_align_dim_to_mult( *b_max, mnr );
-}
-
-dim_t bli_l3_determine_kc
-      (
-              dir_t   direct,
-              dim_t   i,
-              dim_t   dim,
-        const obj_t*  a,
-        const obj_t*  b,
-              bszid_t bszid,
-        const cntx_t* cntx,
-        const cntl_t* cntl
-      )
-{
-	const num_t    dt    = bli_obj_exec_dt( a );
-	const blksz_t* bsize = bli_cntx_get_blksz( bszid, cntx );
-	      dim_t    b_alg = bli_blksz_get_def( dt, bsize );
-	      dim_t    b_max = bli_blksz_get_max( dt, bsize );
-
-	bli_l3_adjust_kc( a, b, &b_alg, &b_max, cntx, cntl );
-
-	if ( direct == BLIS_FWD )
-		return bli_determine_blocksize_f_sub( i, dim, b_alg, b_max );
-	else
-		return bli_determine_blocksize_b_sub( i, dim, b_alg, b_max );
 }
 
