@@ -49,7 +49,6 @@ typedef void (*FUNCPTR_T)
        void*   restrict beta,
        void*   restrict c, inc_t rs_c, inc_t cs_c,
        cntx_t* restrict cntx,
-       rntm_t* restrict rntm,
        thrinfo_t* restrict thread
      );
 
@@ -63,14 +62,13 @@ static FUNCPTR_T GENARRAY_PREF(ftypes,bls_,gemm_bp_var1);
 
 void bls_gemm_bp_var1
      (
-       obj_t*  alpha,
-       obj_t*  a,
-       obj_t*  b,
-       obj_t*  beta,
-       obj_t*  c,
-       cntx_t* cntx,
-       rntm_t* rntm,
-       thrinfo_t* thread
+       const obj_t*     alpha,
+       const obj_t*     a,
+       const obj_t*     b,
+       const obj_t*     beta,
+       const obj_t*     c,
+       const cntx_t*    cntx,
+             thrinfo_t* thread
      )
 {
 	const num_t    dt        = bli_obj_dt( c );
@@ -114,8 +112,7 @@ void bls_gemm_bp_var1
 	  buf_b, rs_b, cs_b,
 	  buf_beta,
 	  buf_c, rs_c, cs_c,
-	  cntx,
-	  rntm,
+	  ( cntx_t* )cntx,
 	  thread
 	);
 }
@@ -140,7 +137,6 @@ void PASTECH2(bls_,ch,varname) \
        void*   restrict beta, \
        void*   restrict c, inc_t rs_c, inc_t cs_c, \
        cntx_t* restrict cntx, \
-       rntm_t* restrict rntm, \
        thrinfo_t* restrict thread  \
      ) \
 { \
