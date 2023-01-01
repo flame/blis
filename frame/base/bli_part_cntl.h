@@ -33,46 +33,34 @@
 
 */
 
-struct gemm_cntl_s
+
+struct part_cntl_s
 {
-     part_cntl_t part_ir;
-     part_cntl_t part_jr;
-    packm_cntl_t pack_a;
-     part_cntl_t part_ic;
-    packm_cntl_t pack_b;
-     part_cntl_t part_pc;
-     part_cntl_t part_jc;
+	cntl_t cntl; // cntl field must be present and come first.
+	dim_t  bmult;
+    bool   use_weighted;
 };
-typedef struct gemm_cntl_s gemm_cntl_t;
+typedef struct part_cntl_s part_cntl_t;
 
-void bli_gemm_cntl_init
-     (
-             opid_t       family,
-       const obj_t*       a,
-       const obj_t*       b,
-       const obj_t*       c,
-             pack_t       schema_a,
-             pack_t       schema_b,
-       const cntx_t*      cntx,
-             gemm_cntl_t* cntl
-     );
-
-BLIS_INLINE cntl_t* bli_gemm_cntl_root( gemm_cntl_t* cntl )
+BLIS_INLINE dim_t bli_part_cntl_bmult( const cntl_t* cntl )
 {
-    return (cntl_t*)&cntl->part_jc;
+	part_cntl_t* ppp = ( part_cntl_t* )cntl; return ppp->bmult;
+}
+
+BLIS_INLINE bool bli_part_cntl_use_weighted( const cntl_t* cntl )
+{
+	part_cntl_t* ppp = ( part_cntl_t* )cntl; return ppp->use_weighted;
 }
 
 // -----------------------------------------------------------------------------
 
-void bli_gemmbp_cntl_init
+void bli_part_cntl_init_node
      (
-             opid_t       family,
-       const obj_t*       a,
-       const obj_t*       b,
-       const obj_t*       c,
-             pack_t       schema_a,
-             pack_t       schema_b,
-       const cntx_t*      cntx,
-             gemm_cntl_t* cntl
+       void_fp      var_func,
+       bszid_t      bszid,
+       dim_t        bmult,
+       bool         use_weighted,
+       cntl_t*      sub_node,
+       part_cntl_t* cntl
      );
 

@@ -35,43 +35,54 @@
 
 struct trsm_cntl_s
 {
-          cntl_t part_ir_trsm;
-          cntl_t part_jr_trsm;
+     part_cntl_t part_ir_trsm;
+     part_cntl_t part_jr_trsm;
     packm_cntl_t pack_a_trsm;
-          cntl_t part_ir_gemm;
-          cntl_t part_jr_gemm;
+     part_cntl_t part_ir_gemm;
+     part_cntl_t part_jr_gemm;
     packm_cntl_t pack_a_gemm;
-          cntl_t part_ic;
+     part_cntl_t part_ic;
     packm_cntl_t pack_b;
-          cntl_t part_pc;
-          cntl_t part_jc;
+     part_cntl_t part_pc;
+     part_cntl_t part_jc;
 };
 typedef struct trsm_cntl_s trsm_cntl_t;
 
 void bli_trsm_cntl_init
      (
-       side_t       side,
-       pack_t       schema_a,
-       pack_t       schema_b,
-       trsm_cntl_t* cntl
+       const obj_t*       a,
+       const obj_t*       b,
+       const obj_t*       c,
+             pack_t       schema_a,
+             pack_t       schema_b,
+       const cntx_t*      cntx,
+             trsm_cntl_t* cntl
      );
 
 BLIS_INLINE cntl_t* bli_trsm_cntl_root( trsm_cntl_t* cntl )
 {
-    return &cntl->part_jc;
+    return (cntl_t*)&cntl->part_jc;
 }
 
 void bli_trsm_l_cntl_init
      (
-       pack_t       schema_a,
-       pack_t       schema_b,
-       trsm_cntl_t* cntl
+       const obj_t*       a,
+       const obj_t*       b,
+       const obj_t*       c,
+             pack_t       schema_a,
+             pack_t       schema_b,
+       const cntx_t*      cntx,
+             trsm_cntl_t* cntl
      );
 
 void bli_trsm_r_cntl_init
      (
-       pack_t       schema_a,
-       pack_t       schema_b,
-       trsm_cntl_t* cntl
+       const obj_t*       a,
+       const obj_t*       b,
+       const obj_t*       c,
+             pack_t       schema_a,
+             pack_t       schema_b,
+       const cntx_t*      cntx,
+             trsm_cntl_t* cntl
      );
 

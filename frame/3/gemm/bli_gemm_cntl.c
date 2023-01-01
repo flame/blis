@@ -37,23 +37,31 @@
 
 void bli_gemm_cntl_init
      (
-       opid_t       family,
-       pack_t       schema_a,
-       pack_t       schema_b,
-       gemm_cntl_t* cntl
+             opid_t       family,
+       const obj_t*       a,
+       const obj_t*       b,
+       const obj_t*       c,
+             pack_t       schema_a,
+             pack_t       schema_b,
+       const cntx_t*      cntx,
+             gemm_cntl_t* cntl
      )
 {
-	bli_gemmbp_cntl_init( family, schema_a, schema_b, cntl );
+	bli_gemmbp_cntl_init( family, a, b, c, schema_a, schema_b, cntx, cntl );
 }
 
 // -----------------------------------------------------------------------------
 
 void bli_gemmbp_cntl_init
      (
-       opid_t       family,
-       pack_t       schema_a,
-       pack_t       schema_b,
-       gemm_cntl_t* cntl
+             opid_t       family,
+       const obj_t*       a,
+       const obj_t*       b,
+       const obj_t*       c,
+             pack_t       schema_a,
+             pack_t       schema_b,
+       const cntx_t*      cntx,
+             gemm_cntl_t* cntl
      )
 {
 	void_fp macro_kernel_fp;
@@ -67,22 +75,30 @@ void bli_gemmbp_cntl_init
 	          family == BLIS_TRMM3 ) macro_kernel_fp = bli_trmm_xx_ker_var2;
 	else /* should never execute */ macro_kernel_fp = NULL;
 
+    const num_t dt      = bli_obj_comp_dt( c );
+    const dim_t ir_mult = bli_cntx_get_blksz_def_dt( dt, BLIS_MR, cntx );
+    const dim_t jr_mult = bli_cntx_get_blksz_def_dt( dt, BLIS_NR, cntx );
+    const dim_t ic_mult = bli_cntx_get_blksz_def_dt( dt, BLIS_MR, cntx );
+    const dim_t jc_mult = bli_cntx_get_blksz_def_dt( dt, BLIS_NR, cntx );
+
 	// Create two nodes for the macro-kernel.
-	bli_cntl_init_node
+	bli_part_cntl_init_node
 	(
-	  family,       // the operation family
-	  BLIS_MR,
 	  NULL,         // variant function pointer not used
+	  BLIS_MR,      // block side id
+      ir_mult,      // block side mult
+      FALSE,        // use weighted partitioning
 	  NULL,         // no sub-node; this is the leaf of the tree.
       &cntl->part_ir
 	);
 
-	bli_cntl_init_node
+	bli_part_cntl_init_node
 	(
-	  family,
-	  BLIS_NR,
 	  macro_kernel_fp,
-      &cntl->part_ir,
+	  BLIS_NR,
+      jr_mult,
+      FALSE,
+      &cntl->part_ir.cntl,
       &cntl->part_jr
 	);
 
@@ -97,16 +113,17 @@ void bli_gemmbp_cntl_init
 	  FALSE,        // reverse iteration if lower?
 	  schema_a,     // normally BLIS_PACKED_ROW_PANELS
 	  BLIS_BUFFER_FOR_A_BLOCK,
-      &cntl->part_jr,
+      &cntl->part_jr.cntl,
       &cntl->pack_a
 	);
 
 	// Create a node for partitioning the m dimension by MC.
-	bli_cntl_init_node
+	bli_part_cntl_init_node
 	(
-	  family,
-	  BLIS_MC,
 	  bli_gemm_blk_var1,
+	  BLIS_MC,
+      ic_mult,
+      bli_obj_is_triangular( a ) || bli_obj_is_triangular( c ),
       &cntl->pack_a.cntl,
       &cntl->part_ic
 	);
@@ -122,28 +139,32 @@ void bli_gemmbp_cntl_init
 	  FALSE,        // reverse iteration if lower?
 	  schema_b,     // normally BLIS_PACKED_COL_PANELS
 	  BLIS_BUFFER_FOR_B_PANEL,
-      &cntl->part_ic,
+      &cntl->part_ic.cntl,
       &cntl->pack_b
 	);
 
 	// Create a node for partitioning the k dimension by KC.
-	bli_cntl_init_node
+	bli_part_cntl_init_node
 	(
-	  family,
-	  BLIS_KC,
 	  bli_gemm_blk_var3,
+	  BLIS_KC,
+      1,
+      FALSE,
       &cntl->pack_b.cntl,
       &cntl->part_pc
 	);
 
 	// Create a node for partitioning the n dimension by NC.
-	bli_cntl_init_node
+	bli_part_cntl_init_node
 	(
-	  family,
-	  BLIS_NC,
 	  bli_gemm_blk_var2,
-      &cntl->part_pc,
+	  BLIS_NC,
+      jc_mult,
+      bli_obj_is_triangular( b ) || bli_obj_is_triangular( c ),
+      &cntl->part_pc.cntl,
       &cntl->part_jc
 	);
+
+    bli_cntl_mark_family( family, bli_gemm_cntl_root( cntl ) );
 }
 

@@ -300,8 +300,12 @@ void PASTEMAC(gemm,BLIS_OAPI_EX_SUF)
 	bli_gemm_cntl_init
 	(
 	  BLIS_GEMM,
+	  &a_local,
+	  &b_local,
+	  cp,
 	  schema_a,
 	  schema_b,
+      cntx,
 	  &cntl
 	);
 
@@ -406,8 +410,12 @@ void PASTEMAC(gemmt,BLIS_OAPI_EX_SUF)
 	bli_gemm_cntl_init
 	(
 	  BLIS_GEMMT,
+	  &a_local,
+	  &b_local,
+	  &c_local,
 	  schema_a,
 	  schema_b,
+      cntx,
 	  &cntl
 	);
 
@@ -667,8 +675,12 @@ void PASTEMAC(hemm,BLIS_OAPI_EX_SUF)
 	bli_gemm_cntl_init
 	(
 	  BLIS_HEMM,
+	  &a_local,
+	  &b_local,
+	  &c_local,
 	  schema_a,
 	  schema_b,
+      cntx,
 	  &cntl
 	);
 
@@ -807,8 +819,12 @@ void PASTEMAC(symm,BLIS_OAPI_EX_SUF)
 	bli_gemm_cntl_init
 	(
 	  BLIS_SYMM,
+	  &a_local,
+	  &b_local,
+	  &c_local,
 	  schema_a,
 	  schema_b,
+      cntx,
 	  &cntl
 	);
 
@@ -958,8 +974,12 @@ void PASTEMAC(trmm3,BLIS_OAPI_EX_SUF)
 	bli_gemm_cntl_init
 	(
 	  BLIS_TRMM3,
+	  &a_local,
+	  &b_local,
+	  &c_local,
 	  schema_a,
 	  schema_b,
+      cntx,
 	  &cntl
 	);
 
@@ -1115,8 +1135,12 @@ void PASTEMAC(trmm,BLIS_OAPI_EX_SUF)
 	bli_gemm_cntl_init
 	(
 	  BLIS_TRMM,
+	  &a_local,
+	  &b_local,
+	  &c_local,
 	  schema_a,
 	  schema_b,
+      cntx,
 	  &cntl
 	);
 
@@ -1245,9 +1269,12 @@ void PASTEMAC(trsm,BLIS_OAPI_EX_SUF)
     trsm_cntl_t cntl;
 	bli_trsm_cntl_init
 	(
-	  bli_obj_is_triangular( a ) ? BLIS_LEFT : BLIS_RIGHT,
+	  &a_local,
+	  &b_local,
+	  &c_local,
 	  schema_a,
 	  schema_b,
+      cntx,
       &cntl
 	);
 

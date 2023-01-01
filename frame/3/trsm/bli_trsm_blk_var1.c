@@ -68,11 +68,6 @@ void bli_trsm_blk_var1
 	// All threads iterate over the entire diagonal block A11.
 	thrinfo_t* thread_pre = bli_thrinfo_sub_prenode( thread_par );
 	dim_t my_start = 0, my_end = kc;
-	//bli_thread_range_mdim
-	//(
-	//  direct, thread_pre, &a11, b, &c1, cntl, cntx,
-	//  &my_start, &my_end
-	//);
 
 #ifdef PRINT
 	printf( "bli_trsm_blk_var1(): a11 is %d x %d at offsets (%3d, %3d)\n",
@@ -142,7 +137,10 @@ void bli_trsm_blk_var1
 	thrinfo_t* thread = bli_thrinfo_sub_node( thread_par );
 	bli_thread_range_mdim
 	(
-	  direct, thread, &ax1, b, &cx1, cntl, cntx,
+	  direct,
+      bli_part_cntl_bmult( cntl ),
+      bli_part_cntl_use_weighted( cntl ),
+      thread, &ax1, b, &cx1,
 	  &my_start, &my_end
 	);
 

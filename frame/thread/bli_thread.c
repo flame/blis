@@ -685,124 +685,68 @@ siz_t bli_thread_range_weighted_sub
 siz_t bli_thread_range_mdim
      (
              dir_t      direct,
+             dim_t      bmult,
+             bool       use_weighted,
        const thrinfo_t* thr,
        const obj_t*     a,
        const obj_t*     b,
        const obj_t*     c,
-       const cntl_t*    cntl,
-       const cntx_t*    cntx,
              dim_t*     start,
              dim_t*     end
      )
 {
-	bszid_t  bszid  = bli_cntl_bszid( cntl );
-	opid_t   family = bli_cntl_family( cntl );
+	const obj_t* x  = bli_obj_is_upper_or_lower( c ) ? c : a;
 
-	// This is part of trsm's current implementation, whereby right side
-	// cases are implemented in left-side micro-kernels, which requires
-	// we swap the usage of the register blocksizes for the purposes of
-	// packing A and B.
-	if ( family == BLIS_TRSM )
-	{
-		if ( bli_obj_root_is_triangular( a ) ) bszid = BLIS_MR;
-		else                                   bszid = BLIS_NR;
-	}
-
-	const blksz_t* bmult  = bli_cntx_get_bmult( bszid, cntx );
-	const obj_t*   x;
-	bool     use_weighted;
-
-	// Use the operation family to choose the one of the two matrices
-	// being partitioned that potentially has structure, and also to
-	// decide whether or not we need to use weighted range partitioning.
-	// NOTE: It's important that we use non-weighted range partitioning
-	// for hemm and symm (ie: the gemm family) because the weighted
-	// function will mistakenly skip over unstored regions of the
-	// structured matrix, even though they represent part of that matrix
-	// that will be dense and full (after packing).
-	if      ( family == BLIS_GEMM ||
-              family == BLIS_HEMM ||
-              family == BLIS_SYMM ) { x = a; use_weighted = FALSE; }
-	else if ( family == BLIS_GEMMT ) { x = c; use_weighted = TRUE;  }
-	else if ( family == BLIS_TRMM ||
-              family == BLIS_TRMM3 ) { x = a; use_weighted = TRUE;  }
-	else    /*family == BLIS_TRSM*/ { x = a; use_weighted = FALSE; }
+    blksz_t bmults;
+    bli_blksz_set_def( bmult, bli_obj_dt( x ), &bmults );
 
 	if ( use_weighted )
 	{
 		if ( direct == BLIS_FWD )
-			return bli_thread_range_weighted_t2b( thr, x, bmult, start, end );
+			return bli_thread_range_weighted_t2b( thr, x, &bmults, start, end );
 		else
-			return bli_thread_range_weighted_b2t( thr, x, bmult, start, end );
+			return bli_thread_range_weighted_b2t( thr, x, &bmults, start, end );
 	}
 	else
 	{
 		if ( direct == BLIS_FWD )
-			return bli_thread_range_t2b( thr, x, bmult, start, end );
+			return bli_thread_range_t2b( thr, x, &bmults, start, end );
 		else
-			return bli_thread_range_b2t( thr, x, bmult, start, end );
+			return bli_thread_range_b2t( thr, x, &bmults, start, end );
 	}
 }
 
 siz_t bli_thread_range_ndim
      (
              dir_t      direct,
+             dim_t      bmult,
+             bool       use_weighted,
        const thrinfo_t* thr,
        const obj_t*     a,
        const obj_t*     b,
        const obj_t*     c,
-       const cntl_t*    cntl,
-       const cntx_t*    cntx,
              dim_t*     start,
              dim_t*     end
      )
 {
-	bszid_t  bszid  = bli_cntl_bszid( cntl );
-	opid_t   family = bli_cntl_family( cntl );
+	const obj_t* x  = bli_obj_is_upper_or_lower( c ) ? c : b;
 
-	// This is part of trsm's current implementation, whereby right side
-	// cases are implemented in left-side micro-kernels, which requires
-	// we swap the usage of the register blocksizes for the purposes of
-	// packing A and B.
-	if ( family == BLIS_TRSM )
-	{
-		if ( bli_obj_root_is_triangular( b ) ) bszid = BLIS_MR;
-		else                                   bszid = BLIS_NR;
-	}
-
-	const blksz_t* bmult  = bli_cntx_get_bmult( bszid, cntx );
-	const obj_t*   x;
-	bool     use_weighted;
-
-	// Use the operation family to choose the one of the two matrices
-	// being partitioned that potentially has structure, and also to
-	// decide whether or not we need to use weighted range partitioning.
-	// NOTE: It's important that we use non-weighted range partitioning
-	// for hemm and symm (ie: the gemm family) because the weighted
-	// function will mistakenly skip over unstored regions of the
-	// structured matrix, even though they represent part of that matrix
-	// that will be dense and full (after packing).
-	if      ( family == BLIS_GEMM ||
-              family == BLIS_HEMM ||
-              family == BLIS_SYMM ) { x = b; use_weighted = FALSE; }
-	else if ( family == BLIS_GEMMT ) { x = c; use_weighted = TRUE;  }
-	else if ( family == BLIS_TRMM ||
-              family == BLIS_TRMM3 ) { x = b; use_weighted = TRUE;  }
-	else    /*family == BLIS_TRSM*/ { x = b; use_weighted = FALSE; }
+    blksz_t bmults;
+    bli_blksz_set_def( bmult, bli_obj_dt( x ), &bmults );
 
 	if ( use_weighted )
 	{
 		if ( direct == BLIS_FWD )
-			return bli_thread_range_weighted_l2r( thr, x, bmult, start, end );
+			return bli_thread_range_weighted_l2r( thr, x, &bmults, start, end );
 		else
-			return bli_thread_range_weighted_r2l( thr, x, bmult, start, end );
+			return bli_thread_range_weighted_r2l( thr, x, &bmults, start, end );
 	}
 	else
 	{
 		if ( direct == BLIS_FWD )
-			return bli_thread_range_l2r( thr, x, bmult, start, end );
+			return bli_thread_range_l2r( thr, x, &bmults, start, end );
 		else
-			return bli_thread_range_r2l( thr, x, bmult, start, end );
+			return bli_thread_range_r2l( thr, x, &bmults, start, end );
 	}
 }
 

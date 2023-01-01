@@ -127,6 +127,7 @@ extern "C" {
 #include "bli_memsys.h"
 #include "bli_mem.h"
 #include "bli_part.h"
+#include "bli_part_cntl.h"
 #include "bli_prune.h"
 #include "bli_query.h"
 #include "bli_auxinfo.h"

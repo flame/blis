@@ -82,14 +82,14 @@ BLIS_EXPORT_BLIS void bli_thread_range_sub
 siz_t PASTEMAC0( opname ) \
      ( \
              dir_t      direct, \
+             dim_t      bmult, \
+             bool       use_weighted, \
        const thrinfo_t* thr, \
        const obj_t*     a, \
        const obj_t*     b, \
        const obj_t*     c, \
-       const cntl_t*    cntl, \
-       const cntx_t*    cntx, \
              dim_t*     start, \
-             dim_t*     end  \
+             dim_t*     end \
      );
 
 GENPROT( thread_range_mdim )

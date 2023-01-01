@@ -60,7 +60,10 @@ void bli_trsm_blk_var2
 	thrinfo_t* thread = bli_thrinfo_sub_node( thread_par );
 	bli_thread_range_ndim
 	(
-	  direct, thread, a, &bp, &cp, cntl, cntx,
+	  direct,
+      bli_part_cntl_bmult( cntl ),
+      bli_part_cntl_use_weighted( cntl ),
+      thread, a, &bp, &cp,
 	  &my_start, &my_end
 	);
 

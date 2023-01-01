@@ -60,7 +60,10 @@ void bli_gemm_blk_var1
 	thrinfo_t* thread = bli_thrinfo_sub_node( thread_par );
 	bli_thread_range_mdim
 	(
-	  direct, thread, &ap, b, &cp, cntl, cntx,
+	  direct,
+      bli_part_cntl_bmult( cntl ),
+      bli_part_cntl_use_weighted( cntl ),
+      thread, &ap, b, &cp,
 	  &my_start, &my_end
 	);
 
