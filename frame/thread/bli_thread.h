@@ -95,27 +95,17 @@ siz_t PASTEMAC0( opname ) \
 GENPROT( thread_range_mdim )
 GENPROT( thread_range_ndim )
 
-#undef  GENPROT
-#define GENPROT( opname ) \
-\
-siz_t PASTEMAC0( opname ) \
-     ( \
-       const thrinfo_t* thr, \
-       const obj_t*     a, \
-       const blksz_t*   bmult, \
-             dim_t*     start, \
-             dim_t*     end  \
+siz_t bli_thread_range
+     (
+       const thrinfo_t* thr,
+       const obj_t*     a,
+             dim_t      bmult,
+             mdim_t     dim,
+             dir_t      direct,
+             bool       use_weighted,
+             dim_t*     start,
+             dim_t*     end
      );
-
-GENPROT( thread_range_l2r )
-GENPROT( thread_range_r2l )
-GENPROT( thread_range_t2b )
-GENPROT( thread_range_b2t )
-
-GENPROT( thread_range_weighted_l2r )
-GENPROT( thread_range_weighted_r2l )
-GENPROT( thread_range_weighted_t2b )
-GENPROT( thread_range_weighted_b2t )
 
 
 dim_t bli_thread_range_width_l

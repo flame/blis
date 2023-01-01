@@ -108,6 +108,60 @@ void bli_thread_launch
 
 // -----------------------------------------------------------------------------
 
+siz_t bli_thread_range_mdim
+     (
+             dir_t      direct,
+             dim_t      bmult,
+             bool       use_weighted,
+       const thrinfo_t* thr,
+       const obj_t*     a,
+       const obj_t*     b,
+       const obj_t*     c,
+             dim_t*     start,
+             dim_t*     end
+     )
+{
+	return bli_thread_range
+    (
+      thr,
+      bli_obj_is_upper_or_lower( c ) ? c : a,
+      bmult,
+      BLIS_M,
+      direct,
+      use_weighted,
+      start,
+      end
+    );
+}
+
+siz_t bli_thread_range_ndim
+     (
+             dir_t      direct,
+             dim_t      bmult,
+             bool       use_weighted,
+       const thrinfo_t* thr,
+       const obj_t*     a,
+       const obj_t*     b,
+       const obj_t*     c,
+             dim_t*     start,
+             dim_t*     end
+     )
+{
+	return bli_thread_range
+    (
+      thr,
+      bli_obj_is_upper_or_lower( c ) ? c : b,
+      bmult,
+      BLIS_N,
+      direct,
+      use_weighted,
+      start,
+      end
+    );
+}
+
+// -----------------------------------------------------------------------------
+
 void bli_thread_range_sub
      (
        const thrinfo_t* thread,
@@ -250,86 +304,6 @@ void bli_thread_range_sub
 			*end   = hi_start + (work_id-n_th_lo+1) * size_hi;
 		}
 	}
-}
-
-siz_t bli_thread_range_l2r
-     (
-       const thrinfo_t* thr,
-       const obj_t*     a,
-       const blksz_t*   bmult,
-             dim_t*     start,
-             dim_t*     end
-     )
-{
-	num_t dt = bli_obj_dt( a );
-	dim_t m  = bli_obj_length_after_trans( a );
-	dim_t n  = bli_obj_width_after_trans( a );
-	dim_t bf = bli_blksz_get_def( dt, bmult );
-
-	bli_thread_range_sub( thr, n, bf,
-	                      FALSE, start, end );
-
-	return m * ( *end - *start );
-}
-
-siz_t bli_thread_range_r2l
-     (
-       const thrinfo_t* thr,
-       const obj_t*     a,
-       const blksz_t*   bmult,
-             dim_t*     start,
-             dim_t*     end
-     )
-{
-	num_t dt = bli_obj_dt( a );
-	dim_t m  = bli_obj_length_after_trans( a );
-	dim_t n  = bli_obj_width_after_trans( a );
-	dim_t bf = bli_blksz_get_def( dt, bmult );
-
-	bli_thread_range_sub( thr, n, bf,
-	                      TRUE, start, end );
-
-	return m * ( *end - *start );
-}
-
-siz_t bli_thread_range_t2b
-     (
-       const thrinfo_t* thr,
-       const obj_t*     a,
-       const blksz_t*   bmult,
-             dim_t*     start,
-             dim_t*     end
-     )
-{
-	num_t dt = bli_obj_dt( a );
-	dim_t m  = bli_obj_length_after_trans( a );
-	dim_t n  = bli_obj_width_after_trans( a );
-	dim_t bf = bli_blksz_get_def( dt, bmult );
-
-	bli_thread_range_sub( thr, m, bf,
-	                      FALSE, start, end );
-
-	return n * ( *end - *start );
-}
-
-siz_t bli_thread_range_b2t
-     (
-       const thrinfo_t* thr,
-       const obj_t*     a,
-       const blksz_t*   bmult,
-             dim_t*     start,
-             dim_t*     end
-     )
-{
-	num_t dt = bli_obj_dt( a );
-	dim_t m  = bli_obj_length_after_trans( a );
-	dim_t n  = bli_obj_width_after_trans( a );
-	dim_t bf = bli_blksz_get_def( dt, bmult );
-
-	bli_thread_range_sub( thr, m, bf,
-	                      TRUE, start, end );
-
-	return n * ( *end - *start );
 }
 
 // -----------------------------------------------------------------------------
@@ -682,279 +656,55 @@ siz_t bli_thread_range_weighted_sub
 	return area;
 }
 
-siz_t bli_thread_range_mdim
+siz_t bli_thread_range
      (
+       const thrinfo_t* thr,
+       const obj_t*     a,
+             dim_t      bf,
+             mdim_t     dim,
              dir_t      direct,
-             dim_t      bmult,
              bool       use_weighted,
-       const thrinfo_t* thr,
-       const obj_t*     a,
-       const obj_t*     b,
-       const obj_t*     c,
              dim_t*     start,
              dim_t*     end
      )
 {
-	const obj_t* x  = bli_obj_is_upper_or_lower( c ) ? c : a;
+	doff_t diagoff = bli_obj_diag_offset( a );
+	uplo_t uplo    = bli_obj_uplo( a );
+	dim_t  m       = bli_obj_length( a );
+	dim_t  n       = bli_obj_width( a );
 
-    blksz_t bmults;
-    bli_blksz_set_def( bmult, bli_obj_dt( x ), &bmults );
-
-	if ( use_weighted )
+	// Support implicit transposition.
+    // The code below assumes that the n dimension is being partitioned.
+    // If this is not what is requested then perform an additional
+    // logical transposition.
+	if ( ( dim == BLIS_M && !bli_obj_has_trans( a ) ) ||
+	     ( dim == BLIS_N &&  bli_obj_has_trans( a ) ) )
 	{
-		if ( direct == BLIS_FWD )
-			return bli_thread_range_weighted_t2b( thr, x, &bmults, start, end );
-		else
-			return bli_thread_range_weighted_b2t( thr, x, &bmults, start, end );
-	}
-	else
-	{
-		if ( direct == BLIS_FWD )
-			return bli_thread_range_t2b( thr, x, &bmults, start, end );
-		else
-			return bli_thread_range_b2t( thr, x, &bmults, start, end );
-	}
-}
-
-siz_t bli_thread_range_ndim
-     (
-             dir_t      direct,
-             dim_t      bmult,
-             bool       use_weighted,
-       const thrinfo_t* thr,
-       const obj_t*     a,
-       const obj_t*     b,
-       const obj_t*     c,
-             dim_t*     start,
-             dim_t*     end
-     )
-{
-	const obj_t* x  = bli_obj_is_upper_or_lower( c ) ? c : b;
-
-    blksz_t bmults;
-    bli_blksz_set_def( bmult, bli_obj_dt( x ), &bmults );
-
-	if ( use_weighted )
-	{
-		if ( direct == BLIS_FWD )
-			return bli_thread_range_weighted_l2r( thr, x, &bmults, start, end );
-		else
-			return bli_thread_range_weighted_r2l( thr, x, &bmults, start, end );
-	}
-	else
-	{
-		if ( direct == BLIS_FWD )
-			return bli_thread_range_l2r( thr, x, &bmults, start, end );
-		else
-			return bli_thread_range_r2l( thr, x, &bmults, start, end );
-	}
-}
-
-siz_t bli_thread_range_weighted_l2r
-     (
-       const thrinfo_t* thr,
-       const obj_t*     a,
-       const blksz_t*   bmult,
-             dim_t*     start,
-             dim_t*     end
-     )
-{
-	siz_t area;
-
-	// This function assigns area-weighted ranges in the n dimension
-	// where the total range spans 0 to n-1 with 0 at the left end and
-	// n-1 at the right end.
-
-	if ( bli_obj_intersects_diag( a ) &&
-	     bli_obj_is_upper_or_lower( a ) )
-	{
-		num_t  dt      = bli_obj_dt( a );
-		doff_t diagoff = bli_obj_diag_offset( a );
-		uplo_t uplo    = bli_obj_uplo( a );
-		dim_t  m       = bli_obj_length( a );
-		dim_t  n       = bli_obj_width( a );
-		dim_t  bf      = bli_blksz_get_def( dt, bmult );
-
-		// Support implicit transposition.
-		if ( bli_obj_has_trans( a ) )
-		{
-			bli_reflect_about_diag( &diagoff, &uplo, &m, &n );
-		}
-
-		area =
-		bli_thread_range_weighted_sub
-		(
-		  thr, diagoff, uplo, m, n, bf,
-		  FALSE, start, end
-		);
-	}
-	else // if dense or zeros
-	{
-		area = bli_thread_range_l2r
-		(
-		  thr, a, bmult,
-		  start, end
-		);
-	}
-
-	return area;
-}
-
-siz_t bli_thread_range_weighted_r2l
-     (
-       const thrinfo_t* thr,
-       const obj_t*     a,
-       const blksz_t*   bmult,
-             dim_t*     start,
-             dim_t*     end
-     )
-{
-	siz_t area;
-
-	// This function assigns area-weighted ranges in the n dimension
-	// where the total range spans 0 to n-1 with 0 at the right end and
-	// n-1 at the left end.
-
-	if ( bli_obj_intersects_diag( a ) &&
-	     bli_obj_is_upper_or_lower( a ) )
-	{
-		num_t  dt      = bli_obj_dt( a );
-		doff_t diagoff = bli_obj_diag_offset( a );
-		uplo_t uplo    = bli_obj_uplo( a );
-		dim_t  m       = bli_obj_length( a );
-		dim_t  n       = bli_obj_width( a );
-		dim_t  bf      = bli_blksz_get_def( dt, bmult );
-
-		// Support implicit transposition.
-		if ( bli_obj_has_trans( a ) )
-		{
-			bli_reflect_about_diag( &diagoff, &uplo, &m, &n );
-		}
-
-		bli_rotate180_trapezoid( &diagoff, &uplo, &m, &n );
-
-		area =
-		bli_thread_range_weighted_sub
-		(
-		  thr, diagoff, uplo, m, n, bf,
-		  TRUE, start, end
-		);
-	}
-	else // if dense or zeros
-	{
-		area = bli_thread_range_r2l
-		(
-		  thr, a, bmult,
-		  start, end
-		);
-	}
-
-	return area;
-}
-
-siz_t bli_thread_range_weighted_t2b
-     (
-       const thrinfo_t* thr,
-       const obj_t*     a,
-       const blksz_t*   bmult,
-             dim_t*     start,
-             dim_t*     end
-     )
-{
-	siz_t area;
-
-	// This function assigns area-weighted ranges in the m dimension
-	// where the total range spans 0 to m-1 with 0 at the top end and
-	// m-1 at the bottom end.
-
-	if ( bli_obj_intersects_diag( a ) &&
-	     bli_obj_is_upper_or_lower( a ) )
-	{
-		num_t  dt      = bli_obj_dt( a );
-		doff_t diagoff = bli_obj_diag_offset( a );
-		uplo_t uplo    = bli_obj_uplo( a );
-		dim_t  m       = bli_obj_length( a );
-		dim_t  n       = bli_obj_width( a );
-		dim_t  bf      = bli_blksz_get_def( dt, bmult );
-
-		// Support implicit transposition.
-		if ( bli_obj_has_trans( a ) )
-		{
-			bli_reflect_about_diag( &diagoff, &uplo, &m, &n );
-		}
-
 		bli_reflect_about_diag( &diagoff, &uplo, &m, &n );
-
-		area =
-		bli_thread_range_weighted_sub
-		(
-		  thr, diagoff, uplo, m, n, bf,
-		  FALSE, start, end
-		);
-	}
-	else // if dense or zeros
-	{
-		area = bli_thread_range_t2b
-		(
-		  thr, a, bmult,
-		  start, end
-		);
 	}
 
-	return area;
-}
-
-siz_t bli_thread_range_weighted_b2t
-     (
-       const thrinfo_t* thr,
-       const obj_t*     a,
-       const blksz_t*   bmult,
-             dim_t*     start,
-             dim_t*     end
-     )
-{
-	siz_t area;
-
-	// This function assigns area-weighted ranges in the m dimension
-	// where the total range spans 0 to m-1 with 0 at the bottom end and
-	// m-1 at the top end.
-
-	if ( bli_obj_intersects_diag( a ) &&
+	// If the area is trapezoidal and weighting is requested, assign
+    // area-weighted ranges in the indicated dimension and direction.
+	if ( use_weighted &&
+         bli_obj_intersects_diag( a ) &&
 	     bli_obj_is_upper_or_lower( a ) )
 	{
-		num_t  dt      = bli_obj_dt( a );
-		doff_t diagoff = bli_obj_diag_offset( a );
-		uplo_t uplo    = bli_obj_uplo( a );
-		dim_t  m       = bli_obj_length( a );
-		dim_t  n       = bli_obj_width( a );
-		dim_t  bf      = bli_blksz_get_def( dt, bmult );
-
-		// Support implicit transposition.
-		if ( bli_obj_has_trans( a ) )
+		if ( direct != BLIS_FWD )
 		{
-			bli_reflect_about_diag( &diagoff, &uplo, &m, &n );
+			bli_rotate180_trapezoid( &diagoff, &uplo, &m, &n );
 		}
 
-		bli_reflect_about_diag( &diagoff, &uplo, &m, &n );
-
-		bli_rotate180_trapezoid( &diagoff, &uplo, &m, &n );
-
-		area = bli_thread_range_weighted_sub
+		return bli_thread_range_weighted_sub
 		(
-		  thr, diagoff, uplo, m, n, bf,
-		  TRUE, start, end
+		  thr, diagoff, uplo, m, n, bf, direct != BLIS_FWD, start, end
 		);
 	}
 	else // if dense or zeros
 	{
-		area = bli_thread_range_b2t
-		(
-		  thr, a, bmult,
-		  start, end
-		);
-	}
+		bli_thread_range_sub( thr, n, bf, direct != BLIS_FWD, start, end );
 
-	return area;
+    	return m * ( *end - *start );
+	}
 }
 
 // -----------------------------------------------------------------------------

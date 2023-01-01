@@ -114,7 +114,6 @@ int main( int argc, char** argv )
 	char   out_ch;
 
 	obj_t   a;
-	blksz_t bfs;
 
 	thrinfo_t thrinfo;
 	dim_t  m, n;
@@ -272,7 +271,7 @@ int main( int argc, char** argv )
 		else               n = ( dim_t )n_input;
 
 		dt = BLIS_DOUBLE;
-		
+
 		bli_obj_create( dt, m, n, 0, 0, &a );
 
 		bli_obj_set_struc( BLIS_TRIANGULAR, &a );
@@ -280,8 +279,6 @@ int main( int argc, char** argv )
 		bli_obj_set_diag_offset( diagoffa, &a );
 
 		bli_randm( &a );
-
-		bli_blksz_init_easy( &bfs, bf, bf, bf, bf );
 
 		printf( "%4u x %4u  ", ( unsigned )m, ( unsigned )n );
 
@@ -291,13 +288,13 @@ int main( int argc, char** argv )
 			thrinfo.work_id = t;
 
 			if      ( part_n_dim && go_fwd )
-				area = bli_thread_range_weighted_l2r( &thrinfo, &a, &bfs, &start, &end );
+				area = bli_thread_range( &thrinfo, &a, bf, BLIS_N, BLIS_FWD, TRUE, &start, &end );
 			else if ( part_n_dim && go_bwd )
-				area = bli_thread_range_weighted_r2l( &thrinfo, &a, &bfs, &start, &end );
+				area = bli_thread_range( &thrinfo, &a, bf, BLIS_N, BLIS_BWD, TRUE, &start, &end );
 			else if ( part_m_dim && go_fwd )
-				area = bli_thread_range_weighted_t2b( &thrinfo, &a, &bfs, &start, &end );
+				area = bli_thread_range( &thrinfo, &a, bf, BLIS_M, BLIS_FWD, TRUE, &start, &end );
 			else // ( part_m_dim && go_bwd )
-				area = bli_thread_range_weighted_b2t( &thrinfo, &a, &bfs, &start, &end );
+				area = bli_thread_range( &thrinfo, &a, bf, BLIS_M, BLIS_BWD, TRUE, &start, &end );
 
 			width = end - start;
 
