@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2019-22, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2019-23, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -73,6 +73,7 @@ err_t bli_gemmsup
     trans_t transa = bli_obj_conjtrans_status( a );
     trans_t transb = bli_obj_conjtrans_status( b );
 
+
     //Don't use sup for currently unsupported storage types in cgemmsup
     if(bli_obj_is_scomplex(c) &&
     (((stor_id == BLIS_RRC)||(stor_id == BLIS_CRC))
@@ -95,16 +96,48 @@ err_t bli_gemmsup
     }
 
 
-    // Obtain a valid (native) context from the gks if necessary.
+    // Obtain a valid context from the gks if necessary.
     // NOTE: This must be done before calling the _check() function, since
     // that function assumes the context pointer is valid.
     if ( cntx == NULL ) cntx = bli_gks_query_cntx();
+
+    // Creating a local copy of cntx inorder to store overrided blocksizes
+    // and kernel fucntion pointers.
+    // This can be removed when we use same blocksizes and function pointers
+    // for all level-3 SUP routines.
+    cntx_t cntx_gemm = *cntx;
+
 
     // Initialize a local runtime with global settings if necessary. Note
     // that in the case that a runtime is passed in, we make a local copy.
     rntm_t rntm_l;
     if ( rntm == NULL ) { bli_rntm_init_from_global( &rntm_l ); rntm = &rntm_l; }
     else                { rntm_l = *rntm;                       rntm = &rntm_l; }
+
+#if defined(BLIS_FAMILY_ZEN4) || defined(BLIS_FAMILY_AMDZEN)
+
+    if((bli_arch_query_id() == BLIS_ARCH_ZEN4) && (bli_obj_dt(a) == BLIS_DOUBLE))
+    {
+        // This check will be removed once transpose and store of C matrix inside
+        // the kernel is supported.
+        if((stor_id == BLIS_RCC || stor_id == BLIS_CRR || stor_id == BLIS_RRC))
+        {
+            AOCL_DTL_TRACE_EXIT_ERR(AOCL_DTL_LEVEL_TRACE_2, "SUP - Unsuppported storage type for dgemm.");
+            return BLIS_FAILURE;
+        }
+        // override the existing blocksizes with 24x8 specific ones.
+        // This can be removed when we use same blocksizes and function pointers
+        // for all level-3 SUP routines.
+        bli_zen4_override_gemm_blkszs(&cntx_gemm);
+
+        // Pack A to avoid RD kernels.
+        if((stor_id == BLIS_CRC || stor_id == BLIS_RRC))
+        {
+            bli_rntm_set_pack_a(1, rntm);//packa
+        }
+    }
+
+#endif
 
 #ifdef AOCL_DYNAMIC
     // Calculating optimal nt and corresponding factorization (ic,jc) here, so
@@ -158,7 +191,7 @@ err_t bli_gemmsup
       b,
       beta,
       c,
-      cntx,
+      &cntx_gemm,
       rntm
     );
 

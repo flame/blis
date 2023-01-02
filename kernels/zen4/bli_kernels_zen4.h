@@ -119,3 +119,46 @@ TRSMSMALL_KER_PROT( d, trsm_small_AltXB_AuXB_AVX512 )
 #ifdef BLIS_ENABLE_OPENMP
 TRSMSMALL_PROT(trsm_small_mt_AVX512)
 #endif
+
+// Dgemm sup RV kernels
+GEMMSUP_KER_PROT( double,  d, gemmsup_rv_zen4_asm_24x8m)
+GEMMSUP_KER_PROT( double,  d, gemmsup_rv_zen4_asm_24x7m)
+GEMMSUP_KER_PROT( double,  d, gemmsup_rv_zen4_asm_24x6m)
+GEMMSUP_KER_PROT( double,  d, gemmsup_rv_zen4_asm_24x5m)
+GEMMSUP_KER_PROT( double,  d, gemmsup_rv_zen4_asm_24x4m)
+GEMMSUP_KER_PROT( double,  d, gemmsup_rv_zen4_asm_24x3m)
+GEMMSUP_KER_PROT( double,  d, gemmsup_rv_zen4_asm_24x2m)
+GEMMSUP_KER_PROT( double,  d, gemmsup_rv_zen4_asm_24x1m)
+
+GEMMSUP_KER_PROT( double,  d, gemmsup_rv_zen4_asm_24x8)
+GEMMSUP_KER_PROT( double,  d, gemmsup_rv_zen4_asm_16x8)
+GEMMSUP_KER_PROT( double,  d, gemmsup_rv_zen4_asm_8x8)
+
+GEMMSUP_KER_PROT( double,  d, gemmsup_rv_zen4_asm_24x7)
+GEMMSUP_KER_PROT( double,  d, gemmsup_rv_zen4_asm_16x7)
+GEMMSUP_KER_PROT( double,  d, gemmsup_rv_zen4_asm_8x7)
+
+GEMMSUP_KER_PROT( double,  d, gemmsup_rv_zen4_asm_24x6)
+GEMMSUP_KER_PROT( double,  d, gemmsup_rv_zen4_asm_16x6)
+GEMMSUP_KER_PROT( double,  d, gemmsup_rv_zen4_asm_8x6)
+
+GEMMSUP_KER_PROT( double,  d, gemmsup_rv_zen4_asm_24x5)
+GEMMSUP_KER_PROT( double,  d, gemmsup_rv_zen4_asm_16x5)
+GEMMSUP_KER_PROT( double,  d, gemmsup_rv_zen4_asm_8x5)
+
+GEMMSUP_KER_PROT( double,  d, gemmsup_rv_zen4_asm_24x4)
+GEMMSUP_KER_PROT( double,  d, gemmsup_rv_zen4_asm_16x4)
+GEMMSUP_KER_PROT( double,  d, gemmsup_rv_zen4_asm_8x4)
+
+GEMMSUP_KER_PROT( double,  d, gemmsup_rv_zen4_asm_24x3)
+GEMMSUP_KER_PROT( double,  d, gemmsup_rv_zen4_asm_16x3)
+GEMMSUP_KER_PROT( double,  d, gemmsup_rv_zen4_asm_8x3)
+
+GEMMSUP_KER_PROT( double,  d, gemmsup_rv_zen4_asm_24x2)
+GEMMSUP_KER_PROT( double,  d, gemmsup_rv_zen4_asm_16x2)
+GEMMSUP_KER_PROT( double,  d, gemmsup_rv_zen4_asm_8x2)
+
+GEMMSUP_KER_PROT( double,  d, gemmsup_rv_zen4_asm_24x1)
+GEMMSUP_KER_PROT( double,  d, gemmsup_rv_zen4_asm_16x1)
+GEMMSUP_KER_PROT( double,  d, gemmsup_rv_zen4_asm_8x1)
+

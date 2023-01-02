@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2019, Advanced Micro Devices, Inc.
+   Copyright (C) 2019-23, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -198,9 +198,28 @@ BLIS_INLINE void bli_gemmsup_ref_var1n2m_opt_cases
 	}
 	else
 	{
-		//bli_check_error_code( BLIS_NOT_YET_IMPLEMENTED );
-		printf( "libblis: sup var1n2m_opt_cases not yet implemented for column-preferential kernels.\n" );
-		bli_abort();
+		if ( dt == BLIS_DOUBLE )
+		{
+			// The optimizations are only done for CRC and RRC storage schemes to avoid RD kernels.
+			// Optimizations for other storage schemes is yet to be done.
+			if ( packa )
+			{
+				if( *eff_id == BLIS_CRC )
+				{
+					*eff_id = BLIS_CCC;
+				}
+				else if ( *eff_id == BLIS_RRC )
+				{
+					*trans = bli_trans_toggled( *trans );
+					*eff_id = BLIS_RCC;
+				}
+			}
+		}
+		else
+		{
+			printf( "libblis: sup var1n2m_opt_cases not yet implemented for column-preferential kernels for S, C and Z datatypes.\n" );
+			bli_abort();
+		}
 	}
 }
 

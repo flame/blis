@@ -10,4 +10,7 @@ target_sources("${PROJECT_NAME}"
      ${CMAKE_CURRENT_SOURCE_DIR}/bli_gemmsup_rv_zen_s6x64.h
      ${CMAKE_CURRENT_SOURCE_DIR}/bli_gemmsup_rv_zen_s6x64m.c
      ${CMAKE_CURRENT_SOURCE_DIR}/bli_gemmsup_rv_zen_s6x64n.c
-    )
+     ${CMAKE_CURRENT_SOURCE_DIR}/bli_dgemmsup_rv_zen4_asm_24x8m.c
+)
+
+add_subdirectory(d24x8)

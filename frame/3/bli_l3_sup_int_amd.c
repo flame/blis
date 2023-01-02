@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2019-22, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2019-23, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -66,6 +66,16 @@ err_t bli_gemmsup_int
 	                                     stor_id == BLIS_RRC ||
 	                                     stor_id == BLIS_RCR ||
 	                                     stor_id == BLIS_CRR );
+
+	const bool    is_rcc_crc_ccr_ccc = !is_rrr_rrc_rcr_crr;
+	const bool    row_pref = bli_cntx_l3_sup_ker_prefers_rows_dt( dt, stor_id, cntx );
+	const bool    col_pref = !row_pref;
+
+	// For row-preferred kernels, rrr_rrc_rcr_crr becomes primary
+	// For col-preferred kernels, rcc_crc_ccr_ccc becomes primary
+	const bool    is_primary = ( row_pref && is_rrr_rrc_rcr_crr ) ||
+		                   ( col_pref && is_rcc_crc_ccr_ccc );
+
 	#ifdef TRACEVAR
 	if ( bli_thread_am_ochief( thread ) )
 	  printf( "bli_l3_sup_int(): var2m primary\n" );
@@ -78,12 +88,11 @@ err_t bli_gemmsup_int
 		return BLIS_FAILURE;
 	}
 
-	if ( is_rrr_rrc_rcr_crr )
+	if ( is_primary )
 	{
 	  // This branch handles:
 	  //  - rrr rrc rcr crr for row-preferential kernels
 	  //  - rcc crc ccr ccc for column-preferential kernels
-	  //  - Currently only row-preferential kernels are only supported.
 
 	  // calculate number of micropanels in m and n dimensions and
 	  // recalculate the automatic thread factorization based on these number of  micropanels 
@@ -164,7 +173,6 @@ err_t bli_gemmsup_int
 	  // This branch handles:
 	  //  - rrr rrc rcr crr for column-preferential kernels
 	  //  - rcc crc ccr ccc for row-preferential kernels
-          //  - Currently only row-preferential kernels are only supported.
 	  const dim_t mu = n / MR; // the n becomes m after a transposition
 	  const dim_t nu = m / NR; // the m becomes n after a transposition
 

@@ -240,7 +240,9 @@ void bli_cntx_init_zen4( cntx_t* cntx )
     bli_cntx_set_l3_sup_kers
     (
       30,
-      //BLIS_RCR, BLIS_DOUBLE, bli_dgemmsup_r_haswell_ref,
+      // 6x8 kernels will still be used for gemmt/syrk sup
+      // In case of gemm, a special function will be used to override
+      // these blocksizes and functions with 24x8-specific ones.
       BLIS_RRR, BLIS_DOUBLE, bli_dgemmsup_rv_haswell_asm_6x8m, TRUE,
       BLIS_RRC, BLIS_DOUBLE, bli_dgemmsup_rd_haswell_asm_6x8m, TRUE,
       BLIS_RCR, BLIS_DOUBLE, bli_dgemmsup_rv_haswell_asm_6x8m, TRUE,
@@ -330,6 +332,50 @@ void bli_zen4_override_trsm_blkszs (cntx_t* cntx)
       BLIS_MC, &blkszs[ BLIS_MC ], BLIS_MR,
       BLIS_NR, &blkszs[ BLIS_NR ], BLIS_NR,
       BLIS_MR, &blkszs[ BLIS_MR ], BLIS_MR,
+      cntx
+    );
+}
+
+
+// Since gemmt/syrk SUP requires block sizes to be 6x8,
+// We use this function to override blocksizes and kernel functions
+// with AVX-512 ones for DGEMM only.
+// This function needs to be removed once checks are added around
+// 6x8-specific gemmt code.
+void bli_zen4_override_gemm_blkszs (cntx_t* cntx)
+{
+    blksz_t blkszs[ BLIS_NUM_BLKSZS ];
+
+    bli_blksz_init     ( &blkszs[ BLIS_MR ],    6,     24,     3,      3,
+                                                9,     9,     3,      3    );
+    bli_blksz_init_easy( &blkszs[ BLIS_NR ],    16,    8,     8,      4    );
+    bli_blksz_init_easy( &blkszs[ BLIS_KC ],    512,   480,   128,    64   );
+    bli_blksz_init_easy( &blkszs[ BLIS_MC ],    144,   144,    72,     36   );
+    
+    // Update the context with the current architecture's register and cache
+    // blocksizes (and multiples) for native execution.
+    bli_cntx_set_l3_sup_blkszs
+    (
+      4,
+      // level-3
+      BLIS_KC, &blkszs[ BLIS_KC ],
+      BLIS_MC, &blkszs[ BLIS_MC ],
+      BLIS_NR, &blkszs[ BLIS_NR ],
+      BLIS_MR, &blkszs[ BLIS_MR ],
+      cntx
+    );
+
+    bli_cntx_set_l3_sup_kers
+    (
+      8,
+      BLIS_RRR, BLIS_DOUBLE, bli_dgemmsup_rv_zen4_asm_24x8m, FALSE,
+      BLIS_RRC, BLIS_DOUBLE, bli_dgemmsup_rv_zen4_asm_24x8m, FALSE,
+      BLIS_RCR, BLIS_DOUBLE, bli_dgemmsup_rv_zen4_asm_24x8m, FALSE,
+      BLIS_RCC, BLIS_DOUBLE, bli_dgemmsup_rv_zen4_asm_24x8m, FALSE,
+      BLIS_CRR, BLIS_DOUBLE, bli_dgemmsup_rv_zen4_asm_24x8m, FALSE,
+      BLIS_CRC, BLIS_DOUBLE, bli_dgemmsup_rv_zen4_asm_24x8m, FALSE,
+      BLIS_CCR, BLIS_DOUBLE, bli_dgemmsup_rv_zen4_asm_24x8m, FALSE,
+      BLIS_CCC, BLIS_DOUBLE, bli_dgemmsup_rv_zen4_asm_24x8m, FALSE,
       cntx
     );
 }
