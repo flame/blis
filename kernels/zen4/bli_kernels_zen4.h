@@ -55,6 +55,7 @@ PACKM_KER_PROT( dcomplex, z, packm_zen4_asm_4xk )
 // native dgemm kernel
 GEMM_UKR_PROT( double,   d, gemm_zen4_asm_32x6 )
 GEMM_UKR_PROT( double,   d, gemm_zen4_asm_8x24 )
+GEMM_UKR_PROT( dcomplex, z, gemm_zen4_asm_12x4 )
 
 //sgemm rv sup
 GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen_asm_6x64m_avx512 )

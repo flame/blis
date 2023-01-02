@@ -345,6 +345,7 @@ if(${TARGET_ARCH} STREQUAL zen4 OR
   set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/kernels/zen4/3/bli_gemmtrsm_u_zen4_8x24.c       PROPERTIES COMPILE_FLAGS /arch:AVX512)
   set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/kernels/skx/3/bli_dgemm_skx_asm_16x14.c         PROPERTIES COMPILE_FLAGS /arch:AVX512)
   set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/kernels/skx/3/bli_sgemm_skx_asm_32x12_l2.c      PROPERTIES COMPILE_FLAGS /arch:AVX512)
+  set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/kernels/zen4/3/bli_zgemm_zen4_asm_12x4.c         PROPERTIES COMPILE_FLAGS /arch:AVX512)
   set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/kernels/zen4/3/bli_trsm_small_AVX512.c          PROPERTIES COMPILE_FLAGS /arch:AVX512)
   set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/kernels/zen4/3/sup/bli_gemmsup_rd_zen_s6x64.h   PROPERTIES COMPILE_FLAGS /arch:AVX512)
   set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/kernels/zen4/3/sup/bli_gemmsup_rd_zen_s6x64.c   PROPERTIES COMPILE_FLAGS /arch:AVX512)

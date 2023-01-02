@@ -41,12 +41,12 @@
 
 #define BLI_CNTX_DEFAULT_BLKSZ_LIST(blkszs) \
     /*                                           s      d      c      z */  \
-    bli_blksz_init_easy( &blkszs[ BLIS_MR ],    32,    32,     3,     3 );  \
+    bli_blksz_init_easy( &blkszs[ BLIS_MR ],    32,    32,     3,    12 );  \
     bli_blksz_init_easy( &blkszs[ BLIS_NR ],    12,     6,     8,     4 );  \
-    bli_blksz_init_easy( &blkszs[ BLIS_MC ],   512,   128,   144,    18 );  \
-    bli_blksz_init     ( &blkszs[ BLIS_KC ],   480,   512,   256,   566,    \
-                                               480,   320,   256,   566 );  \
-    bli_blksz_init_easy( &blkszs[ BLIS_NC ],  6144,  4002,  4080,   256 );  \
+    bli_blksz_init_easy( &blkszs[ BLIS_MC ],   512,   128,   144,    60 );  \
+    bli_blksz_init     ( &blkszs[ BLIS_KC ],   480,   512,   256,   512,    \
+                                               480,   320,   256,   160 );  \
+    bli_blksz_init_easy( &blkszs[ BLIS_NC ],  6144,  4002,  4080,  2004 );  \
                                                                             \
     bli_blksz_init_easy( &blkszs[ BLIS_AF ],     8,     8,    -1,    -1 );  \
     bli_blksz_init_easy( &blkszs[ BLIS_DF ],     8,     8,    -1,    -1 );  \
@@ -70,9 +70,10 @@ void bli_cntx_init_zen4( cntx_t* cntx )
       BLIS_GEMM_UKR,       BLIS_FLOAT ,   bli_sgemm_skx_asm_32x12_l2,   FALSE,
       BLIS_GEMM_UKR,       BLIS_DOUBLE,   bli_dgemm_zen4_asm_32x6,      FALSE,
       BLIS_GEMM_UKR,       BLIS_SCOMPLEX, bli_cgemm_haswell_asm_3x8,    TRUE,
-      BLIS_GEMM_UKR,       BLIS_DCOMPLEX, bli_zgemm_haswell_asm_3x4,    TRUE,
+      /*bli_zgemm_zen4_asm_12x4 is a column preferred kernel*/
+      BLIS_GEMM_UKR,       BLIS_DCOMPLEX, bli_zgemm_zen4_asm_12x4,      FALSE,
 
-	  // Different  GEMM kernels are used for TRSM for zen4 architecture
+      // Different  GEMM kernels are used for TRSM for zen4 architecture
       BLIS_GEMM_FOR_TRSM_UKR,       BLIS_FLOAT,    bli_sgemm_haswell_asm_6x16,  TRUE,
       BLIS_GEMM_FOR_TRSM_UKR,       BLIS_DOUBLE,   bli_dgemm_zen4_asm_8x24,     TRUE,
 
