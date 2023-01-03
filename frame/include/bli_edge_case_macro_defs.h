@@ -157,7 +157,7 @@
 	GEMM_UKR_SETUP_AUXCT_PRE(ch,mr,nr,row_major); \
 	const bool _use_ct = ( row_major ? cs_c != 1 : rs_c != 1 ) || \
 	                     m != mr || n != nr || \
-	                     ( (uintptr_t)_c % alignment ) || \
+	                     ( (uintptr_t)_ct % alignment ) || \
 	                     ( ( ( row_major ? _rs_c : _cs_c )*sizeof( PASTEMAC(ch,ctype) ) ) % alignment ); \
 	GEMM_UKR_SETUP_AUXCT_POST(ch);
 

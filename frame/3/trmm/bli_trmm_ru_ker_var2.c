@@ -175,9 +175,6 @@ void PASTEMAC(ch,varname) \
 	ctype           ct[ BLIS_STACK_BUF_MAX_SIZE \
 	                    / sizeof( ctype ) ] \
 	                    __attribute__((aligned(BLIS_STACK_BUF_ALIGN_SIZE))); \
-	const bool      col_pref    = bli_cntx_l3_vir_ukr_prefers_cols_dt( dt, BLIS_GEMM_UKR, cntx ); \
-	const inc_t     rs_ct       = ( col_pref ? 1 : NR ); \
-	const inc_t     cs_ct       = ( col_pref ? MR : 1 ); \
 \
 	ctype* restrict one        = PASTEMAC(ch,1); \
 	ctype* restrict a_cast     = a; \

@@ -81,8 +81,8 @@ void bli_sgemm_armv8a_asm_8x12
        cntx_t*    restrict cntx
      )
 {
-	void* a_next = bli_auxinfo_next_a (data);
-	void* b_next = bli_auxinfo_next_b (data);
+	void* a_next = bli_auxinfo_next_a( data );
+	void* b_next = bli_auxinfo_next_b( data );
 
 	// Typecast local copies of integers in case dim_t and inc_t are a
 	// different size than is expected by load instructions.
@@ -91,7 +91,7 @@ void bli_sgemm_armv8a_asm_8x12
 	uint64_t rs_c   = rs_c0;
 	uint64_t cs_c   = cs_c0;
 
-	GEMM_UKR_SETUP_AUXCT( s, 8, 12, false );
+	GEMM_UKR_SETUP_AUXCT_ANY( s, 8, 12, false );
 
 
 	__asm__ volatile
@@ -1183,7 +1183,7 @@ void bli_dgemm_armv8a_asm_6x8
 	uint64_t rs_c   = rs_c0;
 	uint64_t cs_c   = cs_c0;
 
-	GEMM_UKR_SETUP_AUXCT( d, 6, 8, false );
+	GEMM_UKR_SETUP_AUXCT_ANY( d, 6, 8, false );
 
 
 	__asm__ volatile
