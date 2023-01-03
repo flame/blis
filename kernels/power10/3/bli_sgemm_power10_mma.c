@@ -67,6 +67,8 @@ void bli_sgemm_power10_mma_8x16
         cntx_t*             cntx
     )
 {
+    if ( k == 0 ) return;
+
     // Typecast local copies of integers in case dim_t and inc_t are a
     // different size than is expected by load instructions.
     // (1 is subtracted from k0 because 1 iteration of the k loop is pulled out)
