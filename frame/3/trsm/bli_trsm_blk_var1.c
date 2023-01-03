@@ -52,7 +52,7 @@ void bli_trsm_blk_var1
 	bli_obj_alias_to( c, &cp );
 
 	// Determine the direction in which to partition (forwards or backwards).
-	dir_t direct = bli_l3_direct( &ap, b, &cp, cntl );
+	const dir_t direct = bli_part_cntl_direct( cntl );
 
 	// Prune any zero region that exists along the partitioning dimension.
 	bli_l3_prune_unref_mparts_m( &ap, b, &cp );

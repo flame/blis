@@ -52,7 +52,7 @@ void bli_gemm_blk_var3
 	thrinfo_t* thread = bli_thrinfo_sub_node( thread_par );
 
 	// Determine the direction in which to partition (forwards or backwards).
-	dir_t direct = bli_l3_direct( &ap, &bp, &cs, cntl );
+	const dir_t direct = bli_part_cntl_direct( cntl );
 
 	// Prune any zero region that exists along the partitioning dimension.
 	bli_l3_prune_unref_mparts_k( &ap, &bp, &cs );

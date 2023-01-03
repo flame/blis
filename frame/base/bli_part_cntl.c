@@ -42,6 +42,7 @@ void bli_part_cntl_init_node
        dim_t        b_alg,
        dim_t        b_max,
        dim_t        b_mult,
+       dir_t        direct,
        bool         use_weighted,
        cntl_t*      sub_node,
        part_cntl_t* cntl
@@ -51,6 +52,7 @@ void bli_part_cntl_init_node
 	cntl->b_alg        = b_alg;
 	cntl->b_max        = b_max;
 	cntl->b_mult       = b_mult;
+    cntl->direct       = direct;
     cntl->use_weighted = use_weighted;
 
 	bli_cntl_init_node

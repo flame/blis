@@ -48,7 +48,6 @@
 
 #include "bli_l3_int.h"
 #include "bli_l3_blocksize.h"
-#include "bli_l3_direct.h"
 #include "bli_l3_prune.h"
 #include "bli_l3_schema.h"
 

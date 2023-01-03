@@ -42,7 +42,7 @@ void bli_l3_prune_unref_mparts_m
              obj_t*  c
      )
 {
-    if ( bli_obj_is_triangular( c ) )
+    if ( bli_obj_is_upper_or_lower( c ) )
     {
 		/* Prune any unreferenced part from the subpartition of C (that would
 		   be encountered from partitioning in the m dimension) and adjust the
@@ -69,7 +69,7 @@ void bli_l3_prune_unref_mparts_n
              obj_t*  c
      )
 {
-    if ( bli_obj_is_triangular( c ) )
+    if ( bli_obj_is_upper_or_lower( c ) )
     {
 		/* Prune any unreferenced part from the subpartition of C (that would
 		   be encountered from partitioning in the n dimension) and adjust the

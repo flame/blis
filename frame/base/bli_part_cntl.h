@@ -40,6 +40,7 @@ struct part_cntl_s
 	dim_t  b_alg;
 	dim_t  b_max;
 	dim_t  b_mult;
+    dir_t  direct;
     bool   use_weighted;
 };
 typedef struct part_cntl_s part_cntl_t;
@@ -59,6 +60,11 @@ BLIS_INLINE dim_t bli_part_cntl_b_mult( const cntl_t* cntl )
 	part_cntl_t* ppp = ( part_cntl_t* )cntl; return ppp->b_mult;
 }
 
+BLIS_INLINE dir_t bli_part_cntl_direct( const cntl_t* cntl )
+{
+	part_cntl_t* ppp = ( part_cntl_t* )cntl; return ppp->direct;
+}
+
 BLIS_INLINE bool bli_part_cntl_use_weighted( const cntl_t* cntl )
 {
 	part_cntl_t* ppp = ( part_cntl_t* )cntl; return ppp->use_weighted;
@@ -73,6 +79,7 @@ void bli_part_cntl_init_node
        dim_t        b_alg,
        dim_t        b_max,
        dim_t        b_mult,
+       dir_t        direct,
        bool         use_weighted,
        cntl_t*      sub_node,
        part_cntl_t* cntl
