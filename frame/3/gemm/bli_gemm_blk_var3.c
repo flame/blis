@@ -55,7 +55,7 @@ void bli_gemm_blk_var3
 	dir_t direct = bli_l3_direct( &ap, &bp, &cs, cntl );
 
 	// Prune any zero region that exists along the partitioning dimension.
-	bli_l3_prune_unref_mparts_k( &ap, &bp, &cs, cntl );
+	bli_l3_prune_unref_mparts_k( &ap, &bp, &cs );
 
 	// Query dimension in partitioning direction.
 	dim_t k_trans = bli_obj_width_after_trans( &ap );

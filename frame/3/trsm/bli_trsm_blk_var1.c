@@ -55,7 +55,7 @@ void bli_trsm_blk_var1
 	dir_t direct = bli_l3_direct( &ap, b, &cp, cntl );
 
 	// Prune any zero region that exists along the partitioning dimension.
-	bli_l3_prune_unref_mparts_m( &ap, b, &cp, cntl );
+	bli_l3_prune_unref_mparts_m( &ap, b, &cp );
 
 	// Isolate the diagonal block A11 and its corresponding row panel C1.
 	const dim_t kc = bli_obj_width_after_trans( &ap );

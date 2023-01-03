@@ -53,7 +53,7 @@ void bli_gemm_blk_var1
 	const dir_t direct = bli_l3_direct( &ap, b, &cp, cntl );
 
 	// Prune any zero region that exists along the partitioning dimension.
-	bli_l3_prune_unref_mparts_m( &ap, b, &cp, cntl );
+	bli_l3_prune_unref_mparts_m( &ap, b, &cp );
 
 	// Determine the current thread's subpartition range.
 	dim_t my_start, my_end;
