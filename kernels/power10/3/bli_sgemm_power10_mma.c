@@ -67,13 +67,10 @@ void bli_sgemm_power10_mma_8x16
         cntx_t*             cntx
     )
 {
-    if ( k == 0 ) return;
-
     // Typecast local copies of integers in case dim_t and inc_t are a
     // different size than is expected by load instructions.
-    // (1 is subtracted from k0 because 1 iteration of the k loop is pulled out)
-    uint64_t k_iter = (k-1) / 4;
-    uint64_t k_left = (k-1) % 4;
+    uint64_t k_iter = k / 4;
+    uint64_t k_left = k % 4;
 
     uint64_t rs_c   = rs_c0;
 
@@ -86,6 +83,16 @@ void bli_sgemm_power10_mma_8x16
     __vector_quad acc0, acc1, acc2, acc3,
                   acc4, acc5, acc6, acc7;
 
+    // initialize the accumulators to zeros
+    __builtin_mma_xxsetaccz(&acc0);
+    __builtin_mma_xxsetaccz(&acc1);
+    __builtin_mma_xxsetaccz(&acc2);
+    __builtin_mma_xxsetaccz(&acc3);
+    __builtin_mma_xxsetaccz(&acc4);
+    __builtin_mma_xxsetaccz(&acc5);
+    __builtin_mma_xxsetaccz(&acc6);
+    __builtin_mma_xxsetaccz(&acc7);
+
     float* restrict A0 = a;
     float* restrict B0 = b;
     float* restrict C0 = c;
@@ -96,18 +103,6 @@ void bli_sgemm_power10_mma_8x16
     /* Load elements into vector registers */
     vec_t *ca = (vec_t *) A0;
     vec_t *rb = (vec_t *) B0;
-
-    /* Compute accumulate outer products and override accumulators with result */
-    __builtin_mma_xvf32ger (&acc0, ca[0], rb[0]);
-    __builtin_mma_xvf32ger (&acc1, ca[0], rb[1]);
-    __builtin_mma_xvf32ger (&acc2, ca[0], rb[2]);
-    __builtin_mma_xvf32ger (&acc3, ca[0], rb[3]);
-    __builtin_mma_xvf32ger (&acc4, ca[1], rb[0]);
-    __builtin_mma_xvf32ger (&acc5, ca[1], rb[1]);
-    __builtin_mma_xvf32ger (&acc6, ca[1], rb[2]);
-    __builtin_mma_xvf32ger (&acc7, ca[1], rb[3]);
-
-    S_INCREMENT
 
     // k loop (unrolled by 4)
     for (int k = 0; k<k_iter; k++)

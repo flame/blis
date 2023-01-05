@@ -74,14 +74,10 @@ void bli_dgemm_power10_mma_8x8
         cntx_t*             cntx
     )
 {
-
-    if ( k == 0 ) return;
-
     // Typecast local copies of integers in case dim_t and inc_t are a
     // different size than is expected by load instructions.
-    // (1 is subtracted from k0 because 1 iteration of the k loop is pulled out)
-    uint64_t k_iter = (k-1) / 4;
-    uint64_t k_left = (k-1) % 4;
+    uint64_t k_iter = k / 4;
+    uint64_t k_left = k % 4;
 
     uint64_t rs_c   = rs_c0;
 
@@ -111,6 +107,16 @@ void bli_dgemm_power10_mma_8x8
         instruction (general outer product instruction syntax: xv???ger??). */
     __vector_quad acc0, acc1, acc2, acc3,
                   acc4, acc5, acc6, acc7;
+
+    // initialize the accumulators to zeros
+    __builtin_mma_xxsetaccz(&acc0);
+    __builtin_mma_xxsetaccz(&acc1);
+    __builtin_mma_xxsetaccz(&acc2);
+    __builtin_mma_xxsetaccz(&acc3);
+    __builtin_mma_xxsetaccz(&acc4);
+    __builtin_mma_xxsetaccz(&acc5);
+    __builtin_mma_xxsetaccz(&acc6);
+    __builtin_mma_xxsetaccz(&acc7);
 
     /* 2 vector pairs are necessary for a double precision outer product
        instruction. */
@@ -142,19 +148,6 @@ void bli_dgemm_power10_mma_8x8
 
     */
     D_ASSEMBLE_VEC_PAIR
-
-    /* Compute accumulate outer products and override accumulators with result */
-    __builtin_mma_xvf64ger (&acc0, colA_1, rb[0]);
-    __builtin_mma_xvf64ger (&acc1, colA_1, rb[1]);
-    __builtin_mma_xvf64ger (&acc2, colA_1, rb[2]);
-    __builtin_mma_xvf64ger (&acc3, colA_1, rb[3]);
-    __builtin_mma_xvf64ger (&acc4, colA_2, rb[0]);
-    __builtin_mma_xvf64ger (&acc5, colA_2, rb[1]);
-    __builtin_mma_xvf64ger (&acc6, colA_2, rb[2]);
-    __builtin_mma_xvf64ger (&acc7, colA_2, rb[3]);
-
-    /* Move A and B pointers */
-    D_INCREMENT
 
     // k loop (unrolled by 4)
     for (int k = 0; k<k_iter; k++)
