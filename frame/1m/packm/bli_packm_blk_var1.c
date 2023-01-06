@@ -178,71 +178,98 @@ void bli_packm_blk_var1
 
 	char* p_begin = p_cast;
 
-	// Iterate over every logical micropanel in the source matrix.
-	for ( dim_t ic  = ic0,    ip  = ip0,    it  = 0; it < n_iter;
-	            ic += ic_inc, ip += ip_inc, it += 1 )
+	if ( !bli_is_triangular( strucc ) ||
+	     bli_is_stored_subpart_n( diagoffc, uploc, iter_dim, panel_len_full ) )
 	{
-		dim_t  panel_dim_i     = bli_min( panel_dim_max, iter_dim - ic );
-		dim_t  panel_dim_off_i = panel_dim_off + ic;
+		// This case executes if the panel is either dense, belongs
+		// to a Hermitian or symmetric matrix, which includes stored,
+		// unstored, and diagonal-intersecting panels, or belongs
+		// to a completely stored part of a triangular matrix.
 
-		doff_t diagoffc_i      = diagoffc + (ip  )*diagoffc_inc;
-		char*  c_begin         = c_cast   + (ic  )*incc*dt_c_size;
-
-		inc_t  p_inc           = ps_p;
-
-		// NOTE: We MUST use round-robin work allocation (bli_packm_my_iter_rr())
-		// when packing micropanels of a triangular matrix. Hermitian/symmetric
-		// and general packing may use slab or round-robin (bli_packm_my_iter()),
-		// depending on which was selected at configure-time.
-		bool my_iter = ( bli_is_triangular( strucc ) &&
-		                 bli_intersects_diag_n( diagoffc_i, panel_dim_i,
-		                                        panel_len_full )
-		                 ? bli_packm_my_iter_rr( it, it_start, it_end, tid, nt )
-		                 : bli_packm_my_iter   ( it, it_start, it_end, tid, nt )
-		               );
-
-		if ( bli_is_triangular( strucc ) &&
-		     bli_is_unstored_subpart_n( diagoffc_i, uploc, panel_dim_i, panel_len_full ) )
+		// Iterate over every logical micropanel in the source matrix.
+		for ( dim_t ic  = ic0,    ip  = ip0,    it  = 0; it < n_iter;
+		            ic += ic_inc, ip += ip_inc, it += 1 )
 		{
-			// This case executes if the panel belongs to a triangular
-			// matrix AND is completely unstored (ie: zero). If the panel
-			// is unstored, we do nothing. (Notice that we don't even
-			// increment p_begin.)
+			dim_t  panel_dim_i     = bli_min( panel_dim_max, iter_dim - ic );
+			dim_t  panel_dim_off_i = panel_dim_off + ic;
 
-			continue;
+			char*  c_begin         = c_cast   + (ic  )*incc*dt_c_size;
+
+			// Hermitian/symmetric and general packing may use slab or
+			// round-robin (bli_packm_my_iter()), depending on which was
+			// selected at configure-time.
+			if ( bli_packm_my_iter( it, it_start, it_end, tid, nt ) )
+			{
+				packm_ker_cast( bli_is_triangular( strucc ) ? BLIS_GENERAL : strucc,
+				                diagc,
+				                uploc,
+				                conjc,
+				                schema,
+				                invdiag,
+				                panel_dim_i,
+				                panel_len_full,
+				                panel_dim_max,
+				                panel_len_max,
+				                panel_dim_off_i,
+				                panel_len_off,
+				                kappa_cast,
+				                c_begin, incc, ldc,
+				                p_begin,       ldp, is_p,
+				                ( cntx_t* )cntx,
+				                params );
+			}
+
+			p_begin += ps_p*dt_p_size;
 		}
-		else if ( bli_is_triangular( strucc ) &&
-		          bli_intersects_diag_n( diagoffc_i, panel_dim_i, panel_len_full ) )
-		{
-			// This case executes if the panel belongs to a triangular
-			// matrix AND is diagonal-intersecting. Notice that we
-			// cannot bury the following conditional logic into
-			// packm_struc_cxk() because we need to know the value of
-			// panel_len_max_i so we can properly increment p_inc.
+	}
+	else
+	{
+		// This case executes if the panel belongs to a diagonal-intersecting
+		// part of a triangular matrix.
 
-			// Sanity check. Diagonals should not intersect the short end of
-			// a micro-panel. If they do, then somehow the constraints on
-			// cache blocksizes being a whole multiple of the register
-			// blocksizes was somehow violated.
-			if ( diagoffc_i < 0 )
+		// Iterate over every logical micropanel in the source matrix.
+		for ( dim_t ic  = ic0,    ip  = ip0,    it  = 0; it < n_iter;
+		            ic += ic_inc, ip += ip_inc, it += 1 )
+		{
+			dim_t  panel_dim_i     = bli_min( panel_dim_max, iter_dim - ic );
+			dim_t  panel_dim_off_i = panel_dim_off + ic;
+
+			doff_t diagoffc_i      = diagoffc + (ip  )*diagoffc_inc;
+			char*  c_begin         = c_cast   + (ic  )*incc*dt_c_size;
+
+			if ( bli_is_unstored_subpart_n( diagoffc_i, uploc, panel_dim_i,
+			                                panel_len_full ) )
+				continue;
+
+			// Sanity check. Diagonals should not intersect the short edge of
+			// a micro-panel (typically corresponding to a register blocksize).
+			// If they do, then the constraints on cache blocksizes being a
+			// whole multiple of the register blocksizes was somehow violated.
+			if ( ( diagoffc_i > -panel_dim_i &&
+			       diagoffc_i < 0 ) ||
+			     ( diagoffc_i > panel_len_full &&
+			       diagoffc_i < panel_len_full + panel_dim_i ) )
 				bli_check_error_code( BLIS_NOT_YET_IMPLEMENTED );
 
-			dim_t  panel_off_i;
-			dim_t  panel_len_i;
-			dim_t  panel_len_max_i;
+			dim_t panel_off_i     = 0;
+			dim_t panel_len_i     = panel_len_full;
+			dim_t panel_len_max_i = panel_len_max;
 
-			if ( bli_is_lower( uploc ) )
+			if ( bli_intersects_diag_n( diagoffc_i, panel_dim_i, panel_len_full ) )
 			{
-				panel_off_i     = 0;
-				panel_len_i     = bli_abs( diagoffc_i ) + panel_dim_i;
-				panel_len_max_i = bli_min( bli_abs( diagoffc_i ) + panel_dim_max,
-				                           panel_len_max );
-			}
-			else // if ( bli_is_upper( uploc ) )
-			{
-				panel_off_i     = bli_abs( diagoffc_i );
-				panel_len_i     = panel_len_full - panel_off_i;
-				panel_len_max_i = panel_len_max  - panel_off_i;
+				if ( bli_is_lower( uploc ) )
+				{
+					panel_off_i     = 0;
+					panel_len_i     = diagoffc_i + panel_dim_i;
+					panel_len_max_i = bli_min( diagoffc_i + panel_dim_max,
+					                           panel_len_max );
+				}
+				else // if ( bli_is_upper( uploc ) )
+				{
+					panel_off_i     = diagoffc_i;
+					panel_len_i     = panel_len_full - panel_off_i;
+					panel_len_max_i = panel_len_max  - panel_off_i;
+				}
 			}
 
 			dim_t panel_len_off_i = panel_off_i + panel_len_off;
@@ -259,7 +286,9 @@ void bli_packm_blk_var1
 			// We nudge the imaginary stride up by one if it is odd.
 			is_p_use += ( bli_is_odd( is_p_use ) ? 1 : 0 );
 
-			if ( my_iter )
+			// NOTE: We MUST use round-robin work allocation (bli_packm_my_iter_rr())
+			// when packing micropanels of a triangular matrix.
+			if ( bli_packm_my_iter_rr( it, it_start, it_end, tid, nt ) )
 			{
 				packm_ker_cast( strucc,
 				                diagc,
@@ -284,37 +313,8 @@ void bli_packm_blk_var1
 			// NOTE: This value is usually LESS than ps_p because triangular
 			// matrices usually have several micro-panels that are shorter
 			// than a "full" micro-panel.
-			p_inc = is_p_use;
+			p_begin += is_p_use*dt_p_size;
 		}
-		else
-		{
-			// This case executes if the panel is either dense, or belongs
-			// to a Hermitian or symmetric matrix, which includes stored,
-			// unstored, and diagonal-intersecting panels.
-
-			if ( my_iter )
-			{
-				packm_ker_cast( bli_is_triangular( strucc ) ? BLIS_GENERAL : strucc,
-				                diagc,
-				                uploc,
-				                conjc,
-				                schema,
-				                invdiag,
-				                panel_dim_i,
-				                panel_len_full,
-				                panel_dim_max,
-				                panel_len_max,
-				                panel_dim_off_i,
-				                panel_len_off,
-				                kappa_cast,
-				                c_begin, incc, ldc,
-				                p_begin,       ldp, is_p,
-				                ( cntx_t* )cntx,
-				                params );
-			}
-		}
-
-		p_begin += p_inc*dt_p_size;
 	}
 }
 
