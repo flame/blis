@@ -237,15 +237,18 @@ void bli_packm_blk_var1
 			doff_t diagoffc_i      = diagoffc + (ip  )*diagoffc_inc;
 			char*  c_begin         = c_cast   + (ic  )*incc*dt_c_size;
 
-			if ( bli_is_unstored_subpart_n( diagoffc_i, uploc, panel_dim_i, panel_len_full ) )
+			if ( bli_is_unstored_subpart_n( diagoffc_i, uploc, panel_dim_i,
+			                                panel_len_full ) )
 				continue;
 
-			// Sanity check. Diagonals should not intersect the short end of
-			// a micro-panel. If they do, then somehow the constraints on
-			// cache blocksizes being a whole multiple of the register
-			// blocksizes was somehow violated.
-			if ( ( diagoffc_i > -panel_dim_i && diagoffc_i < 0 ) ||
-			     ( diagoffc_i > panel_len_full && diagoffc_i < panel_len_full + panel_dim_i ) )
+			// Sanity check. Diagonals should not intersect the short edge of
+			// a micro-panel (typically corresponding to a register blocksize).
+			// If they do, then the constraints on cache blocksizes being a
+			// whole multiple of the register blocksizes was somehow violated.
+			if ( ( diagoffc_i > -panel_dim_i &&
+			       diagoffc_i < 0 ) ||
+			     ( diagoffc_i > panel_len_full &&
+			       diagoffc_i < panel_len_full + panel_dim_i ) )
 				bli_check_error_code( BLIS_NOT_YET_IMPLEMENTED );
 
 			dim_t panel_off_i     = 0;
