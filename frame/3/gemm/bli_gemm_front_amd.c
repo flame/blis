@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2018 - 2022, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2018 - 2023, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -132,7 +132,14 @@ void bli_gemm_front
 	// Attach alpha to B, and in the process typecast alpha to the target
 	// datatype of the matrix (which in this case is equal to the computation
 	// datatype).
-	bli_obj_scalar_attach( BLIS_NO_CONJUGATE, alpha, &b_local );
+
+	// In case of dzgemm, if the microkernel prefers column output,
+	// we will induce a transposition and perform C+= A*B 
+	// where A( formerly B) is complex. Hence attach alpha to A.
+	if ( bli_gemm_md_is_ccr( &a_local, &b_local, &c_local ))
+		bli_obj_scalar_attach( BLIS_NO_CONJUGATE, alpha, &a_local );
+	else
+		bli_obj_scalar_attach( BLIS_NO_CONJUGATE, alpha, &b_local );
 
 	// Attach beta to C, and in the process typecast beta to the target
 	// datatype of the matrix (which in this case is equal to the storage

@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2022, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2022-23, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -48,6 +48,11 @@ void bli_gemm_packa
 {
 	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_5);
 	obj_t a_pack;
+
+	// BY setting family id to BLIS_GEMM_MD, we indicate packing kernels
+	// to scale alpha while packing.
+	if(bli_obj_dt(c) != bli_obj_dt(b))
+		bli_cntl_set_family(BLIS_GEMM_MD, cntl);
 
 	// Pack matrix A according to the control tree node.
 	bli_l3_packm
