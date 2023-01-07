@@ -230,14 +230,19 @@ void bli_gemmt_u_ker_var2b
 	thrinfo_t* thread = bli_thrinfo_sub_node( thread_par );
 	//thrinfo_t* caucus = bli_thrinfo_sub_node( thread );
 
+	const dim_t jr_nt  = bli_thrinfo_n_way( thread );
+	const dim_t jr_tid = bli_thrinfo_work_id( thread );
+	//const dim_t ir_nt  = bli_thrinfo_n_way( caucus );
+	//const dim_t ir_tid = bli_thrinfo_work_id( caucus );
+
 	// Determine the starting microtile offsets and number of microtiles to
 	// compute for each thread. Note that assignment of microtiles is done
 	// according to the tlb policy.
 	dim_t jr_st, ir_st;
 	const dim_t n_ut_for_me
 	=
-	bli_thread_range_tlb( thread, diagoffc, BLIS_UPPER, m, n, MR, NR,
-	                      &jr_st, &ir_st );
+	bli_thread_range_tlb_u( jr_nt, jr_tid, diagoffc, m_iter, n_iter, MR, NR,
+	                        &jr_st, &ir_st );
 
 	// It's possible that there are so few microtiles relative to the number
 	// of threads that one or more threads gets no work. If that happens, those

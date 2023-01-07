@@ -37,15 +37,16 @@
 
 dim_t bli_thread_range_tlb
      (
-       thrinfo_t* thread,
-       doff_t     diagoff,
-       uplo_t     uplo,
-       dim_t      m,
-       dim_t      n,
-       dim_t      mr,
-       dim_t      nr,
-       inc_t*     j_st_p,
-       inc_t*     i_st_p
+       const dim_t  nt,
+       const dim_t  tid,
+       const doff_t diagoff,
+       const uplo_t uplo,
+       const dim_t  m_iter,
+       const dim_t  n_iter,
+       const dim_t  mr,
+       const dim_t  nr,
+             inc_t* j_st_p,
+             inc_t* i_st_p
      );
 dim_t bli_thread_range_tlb_l
      (
@@ -85,7 +86,33 @@ dim_t bli_thread_range_tlb_d
 
 // ---
 
-dim_t bli_thread_range_tlb_trmm_l
+dim_t bli_thread_range_tlb_trmm_ll
+     (
+       const dim_t  nt,
+       const dim_t  tid,
+       const doff_t diagoff,
+       const dim_t  m_iter,
+       const dim_t  n_iter,
+       const dim_t  k_iter,
+       const dim_t  mr,
+       const dim_t  nr,
+             inc_t* j_st_p,
+             inc_t* i_st_p
+     );
+dim_t bli_thread_range_tlb_trmm_lu
+     (
+       const dim_t  nt,
+       const dim_t  tid,
+       const doff_t diagoff,
+       const dim_t  m_iter,
+       const dim_t  n_iter,
+       const dim_t  k_iter,
+       const dim_t  mr,
+       const dim_t  nr,
+             inc_t* j_st_p,
+             inc_t* i_st_p
+     );
+dim_t bli_thread_range_tlb_trmm_lx
      (
        const dim_t  nt,
        const dim_t  tid,
@@ -99,6 +126,7 @@ dim_t bli_thread_range_tlb_trmm_l
              inc_t* j_st_p,
              inc_t* i_st_p
      );
+#if 0
 dim_t bli_thread_range_tlb_trmm_r
      (
        const dim_t  nt,
@@ -113,10 +141,37 @@ dim_t bli_thread_range_tlb_trmm_r
              inc_t* j_st_p,
              inc_t* i_st_p
      );
+#endif
 
 // ---
 
 dim_t bli_thread_range_tlb_trmm_rl
+     (
+       const dim_t  nt,
+       const dim_t  tid,
+       const doff_t diagoff,
+       const dim_t  m_iter,
+       const dim_t  n_iter,
+       const dim_t  k_iter,
+       const dim_t  mr,
+       const dim_t  nr,
+             inc_t* j_st_p,
+             inc_t* i_st_p
+     );
+dim_t bli_thread_range_tlb_trmm_ru
+     (
+       const dim_t  nt,
+       const dim_t  tid,
+       const doff_t diagoff,
+       const dim_t  m_iter,
+       const dim_t  n_iter,
+       const dim_t  k_iter,
+       const dim_t  mr,
+       const dim_t  nr,
+             inc_t* j_st_p,
+             inc_t* i_st_p
+     );
+dim_t bli_thread_range_tlb_trmm_rl_ex
      (
        const dim_t  nt,
        const dim_t  tid,

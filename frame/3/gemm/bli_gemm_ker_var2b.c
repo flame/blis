@@ -252,16 +252,18 @@ void bli_gemm_ker_var2b
 	thrinfo_t* thread = bli_thrinfo_sub_node( thread_par );
 	//thrinfo_t* caucus = bli_thrinfo_sub_node( thread );
 
-	const dim_t jr_inc = 1;
-	const dim_t ir_inc = 1;
+	const dim_t jr_nt  = bli_thrinfo_n_way( thread );
+	const dim_t jr_tid = bli_thrinfo_work_id( thread );
+	//const dim_t ir_nt  = bli_thrinfo_n_way( caucus );
+	//const dim_t ir_tid = bli_thrinfo_work_id( caucus );
 
 	// Determine the starting microtile offsets and number of microtiles to
 	// compute for each thread. Note that assignment of microtiles is done
 	// according to the tlb policy.
-	dim_t jr_st, ir_st; \
+	dim_t jr_st, ir_st;
 	const dim_t n_ut_for_me
 	=
-	bli_thread_range_tlb( thread, 0, BLIS_DENSE, m, n, MR, NR, &jr_st, &ir_st );
+	bli_thread_range_tlb_d( jr_nt, jr_tid, m_iter, n_iter, MR, NR, &jr_st, &ir_st );
 
 	// It's possible that there are so few microtiles relative to the number
 	// of threads that one or more threads gets no work. If that happens, those
@@ -303,11 +305,11 @@ void bli_gemm_ker_var2b
 			                      ? MR : m_left );
 
 			// Compute the addresses of the next panels of A and B.
-			const char* a2 = bli_gemm_get_next_a_upanel( a1, rstep_a, ir_inc );
+			const char* a2 = bli_gemm_get_next_a_upanel( a1, rstep_a, 1 );
 			if ( bli_is_last_iter_sl( i, m_iter ) )
 			{
 				a2 = a_cast;
-				b2 = bli_gemm_get_next_b_upanel( b1, cstep_b, jr_inc );
+				b2 = bli_gemm_get_next_b_upanel( b1, cstep_b, 1 );
 				bli_auxinfo_set_next_b( b2, &aux );
 			}
 

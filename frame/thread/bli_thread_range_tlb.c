@@ -44,27 +44,18 @@
 
 dim_t bli_thread_range_tlb
      (
-       thrinfo_t* thread,
-       doff_t     diagoff,
-       uplo_t     uplo,
-       dim_t      m,
-       dim_t      n,
-       dim_t      mr,
-       dim_t      nr,
-       inc_t*     j_st_p,
-       inc_t*     i_st_p
+       const dim_t  nt,
+       const dim_t  tid,
+       const doff_t diagoff,
+       const uplo_t uplo,
+       const dim_t  m_iter,
+       const dim_t  n_iter,
+       const dim_t  mr,
+       const dim_t  nr,
+             inc_t* j_st_p,
+             inc_t* i_st_p
      )
 {
-	// Query the number of ways of parallelism in the JR loop and the current
-	// communicator id within that set of ways.
-	const dim_t nt  = bli_thrinfo_n_way( thread );
-	const dim_t tid = bli_thrinfo_work_id( thread );
-
-	// Compute the number of microtiles in each dimension (i.e., iterations
-	// in the JR loop and IR loop).
-	const dim_t n_iter = n / nr + ( n % nr ? 1 : 0 );
-	const dim_t m_iter = m / mr + ( m % mr ? 1 : 0 );
-
 	dim_t n_ut_for_me;
 
 	if ( bli_is_lower( uplo ) )
@@ -769,6 +760,7 @@ BLIS_INLINE dim_t bli_tlb_trmm_rl_k_iter
 	return k_iter - bli_max( -diagoff_iter + jr_iter, 0 );
 }
 
+#if 0
 dim_t bli_thread_range_tlb_trmm_r
      (
        const dim_t  nt,
@@ -790,7 +782,7 @@ dim_t bli_thread_range_tlb_trmm_r
 	{
 		inc_t j_en_l, i_en_l;
 
-		n_ut_for_me = bli_thread_range_tlb_trmm_rl
+		n_ut_for_me = bli_thread_range_tlb_trmm_rl_ex
 		(
 		  nt, tid, diagoff, m_iter, n_iter, k_iter, mr, nr,
 		  j_st_p, i_st_p, &j_en_l, &i_en_l
@@ -808,7 +800,7 @@ dim_t bli_thread_range_tlb_trmm_r
 		const dim_t  tid_rev     = nt - tid - 1;
 		const doff_t diagoff_rev = nr*n_iter - ( nr*k_iter + diagoff );
 
-		n_ut_for_me = bli_thread_range_tlb_trmm_rl
+		n_ut_for_me = bli_thread_range_tlb_trmm_rl_ex
 		(
 		  nt, tid_rev, diagoff_rev, m_iter, n_iter, k_iter, mr, nr,
 		  &j_st_l, &i_st_l, &j_en_l, &i_en_l
@@ -827,8 +819,75 @@ dim_t bli_thread_range_tlb_trmm_r
 
 	return n_ut_for_me;
 }
+#endif
 
 dim_t bli_thread_range_tlb_trmm_rl
+     (
+       const dim_t  nt,
+       const dim_t  tid,
+       const doff_t diagoff,
+       const dim_t  m_iter,
+       const dim_t  n_iter,
+       const dim_t  k_iter,
+       const dim_t  mr,
+       const dim_t  nr,
+             inc_t* j_st_p,
+             inc_t* i_st_p
+     )
+{
+	inc_t j_en_l, i_en_l;
+
+	return bli_thread_range_tlb_trmm_rl_ex
+	(
+	  nt, tid, diagoff, m_iter, n_iter, k_iter, mr, nr,
+	  j_st_p, i_st_p, &j_en_l, &i_en_l
+	);
+}
+
+dim_t bli_thread_range_tlb_trmm_ru
+     (
+       const dim_t  nt,
+       const dim_t  tid,
+       const doff_t diagoff,
+       const dim_t  m_iter,
+       const dim_t  n_iter,
+       const dim_t  k_iter,
+       const dim_t  mr,
+       const dim_t  nr,
+             inc_t* j_st_p,
+             inc_t* i_st_p
+     )
+{
+	inc_t j_st_l, i_st_l;
+	inc_t j_en_l, i_en_l;
+
+	// Reverse the effective tid and use the diagonal offset as if the m and
+	// n dimension were reversed (similar to a 180 degree rotation). This
+	// transforms the problem into one of allocating ranges for a lower-
+	// triangular matrix, for which we already have a special routine.
+	const dim_t  tid_rev     = nt - tid - 1;
+	const doff_t diagoff_rev = nr*n_iter - ( nr*k_iter + diagoff );
+
+	const dim_t n_ut_for_me = bli_thread_range_tlb_trmm_rl_ex
+	(
+	  nt, tid_rev, diagoff_rev, m_iter, n_iter, k_iter, mr, nr,
+	  &j_st_l, &i_st_l, &j_en_l, &i_en_l
+	);
+
+	// The ending j and i offsets will serve as our starting offsets
+	// returned to the caller, but first we have to reverse the offsets so
+	// that their semantics are once again relative to an upper-triangular
+	// matrix.
+	j_en_l = n_iter - j_en_l - 1;
+	i_en_l = m_iter - i_en_l - 1;
+
+	*j_st_p = j_en_l;
+	*i_st_p = i_en_l;
+
+	return n_ut_for_me;
+}
+
+dim_t bli_thread_range_tlb_trmm_rl_ex
      (
        const dim_t  nt,
        const dim_t  tid,
@@ -1324,7 +1383,49 @@ dim_t bli_thread_range_tlb_trmm_rl
 
 // -----------------------------------------------------------------------------
 
-dim_t bli_thread_range_tlb_trmm_l
+dim_t bli_thread_range_tlb_trmm_ll
+     (
+       const dim_t  nt,
+       const dim_t  tid,
+       const doff_t diagoff,
+       const dim_t  m_iter,
+       const dim_t  n_iter,
+       const dim_t  k_iter,
+       const dim_t  mr,
+       const dim_t  nr,
+             inc_t* j_st_p,
+             inc_t* i_st_p
+     )
+{
+	return bli_thread_range_tlb_trmm_lx
+	(
+	  nt, tid, diagoff, BLIS_LOWER, m_iter, n_iter, k_iter, mr, nr,
+	  j_st_p, i_st_p
+	);
+}
+
+dim_t bli_thread_range_tlb_trmm_lu
+     (
+       const dim_t  nt,
+       const dim_t  tid,
+       const doff_t diagoff,
+       const dim_t  m_iter,
+       const dim_t  n_iter,
+       const dim_t  k_iter,
+       const dim_t  mr,
+       const dim_t  nr,
+             inc_t* j_st_p,
+             inc_t* i_st_p
+     )
+{
+	return bli_thread_range_tlb_trmm_lx
+	(
+	  nt, tid, diagoff, BLIS_UPPER, m_iter, n_iter, k_iter, mr, nr,
+	  j_st_p, i_st_p
+	);
+}
+
+dim_t bli_thread_range_tlb_trmm_lx
      (
        const dim_t  nt,
        const dim_t  tid,

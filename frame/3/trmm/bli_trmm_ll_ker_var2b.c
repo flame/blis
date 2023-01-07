@@ -179,9 +179,8 @@ void bli_trmm_ll_ker_var2b
 	dim_t jr_st, ir_st;
 	const dim_t n_ut_for_me
 	=
-	bli_thread_range_tlb_trmm_l( jr_nt, jr_tid, diagoffa, BLIS_LOWER,
-	                             m_iter, n_iter, k_iter, MR, NR,
-	                             &jr_st, &ir_st );
+	bli_thread_range_tlb_trmm_ll( jr_nt, jr_tid, diagoffa, m_iter, n_iter, k_iter,
+	                              MR, NR, &jr_st, &ir_st );
 
 #if 0
 	printf( "tid: %ld  m,n,k_iter: %ld %ld %ld\n", tid, m_iter, n_iter, k_iter );

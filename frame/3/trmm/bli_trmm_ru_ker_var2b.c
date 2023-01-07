@@ -198,9 +198,8 @@ void bli_trmm_ru_ker_var2b
 	dim_t jr_st, ir_st;
 	const dim_t n_ut_for_me
 	=
-	bli_thread_range_tlb_trmm_r( jr_nt, jr_tid, diagoffb, BLIS_UPPER,
-	                             m_iter, n_iter, k_iter, MR, NR,
-	                             &jr_st, &ir_st );
+	bli_thread_range_tlb_trmm_ru( jr_nt, jr_tid, diagoffb, m_iter, n_iter, k_iter,
+	                              MR, NR, &jr_st, &ir_st );
 
 #if 0
 	printf( "tid %ld: final range: jr_st, ir_st: %ld %ld  (n_ut_for_me: %ld)\n",

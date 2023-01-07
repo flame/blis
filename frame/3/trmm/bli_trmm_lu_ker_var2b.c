@@ -188,9 +188,8 @@ void bli_trmm_lu_ker_var2b
 	dim_t jr_st, ir_st;
 	const dim_t n_ut_for_me
 	=
-	bli_thread_range_tlb_trmm_l( jr_nt, jr_tid, diagoffa, BLIS_UPPER,
-	                             m_iter, n_iter, k_iter, MR, NR,
-	                             &jr_st, &ir_st );
+	bli_thread_range_tlb_trmm_lu( jr_nt, jr_tid, diagoffa, m_iter, n_iter, k_iter,
+	                              MR, NR, &jr_st, &ir_st );
 
 	// It's possible that there are so few microtiles relative to the number
 	// of threads that one or more threads gets no work. If that happens, those
