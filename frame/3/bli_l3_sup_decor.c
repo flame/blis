@@ -85,6 +85,11 @@ static void bli_l3_sup_thread_decorator_entry( thrcomm_t* gl_comm, dim_t tid, co
 	);
 
 	// Free the current thread's thrinfo_t structure.
+	// NOTE: The barrier here is very important as it prevents memory being
+	// released by the chief of some thread sub-group before its peers are done
+	// using it. See PR #702 for more info [1].
+	// [1] https://github.com/flame/blis/pull/702
+	bli_thrinfo_barrier( thread );
 	bli_thrinfo_free( thread );
 }
 

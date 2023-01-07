@@ -130,13 +130,10 @@ void bli_gemm_ker_var2
 	const char* alpha_cast = bli_obj_internal_scalar_buffer( &scalar_b );
 	const char* beta_cast  = bli_obj_internal_scalar_buffer( c );
 
-	// If 1m is being employed on a column- or row-stored matrix with a
-	// real-valued beta, we can use the real domain macro-kernel, which
-	// eliminates a little overhead associated with the 1m virtual
-	// micro-kernel.
-	// Only employ this optimization if the storage datatype of C is
-	// equal to the execution/computation datatype.
 #if 1
+	// Under certain conditions, we can avoid the overhead of calling the 1m
+	// virtual microkernel by having the real-domain macrokernel execute with
+	// the real-domain microkernel. (See the function definition for details.)
 	if ( bli_cntx_method( cntx ) == BLIS_1M )
 	{
 		bli_gemm_ind_recast_1m_params
@@ -148,7 +145,8 @@ void bli_gemm_ker_var2
 		  &m, &n, &k,
 		  &pd_a, &ps_a,
 		  &pd_b, &ps_b,
-		  &rs_c, &cs_c
+		  &rs_c, &cs_c,
+		  cntx
 		);
 	}
 #endif

@@ -148,7 +148,8 @@ void bli_gemm_ker_var2b
 		  &m, &n, &k,
 		  &pd_a, &ps_a,
 		  &pd_b, &ps_b,
-		  &rs_c, &cs_c
+		  &rs_c, &cs_c,
+		  cntx
 		);
 	}
 #endif
