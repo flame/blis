@@ -35,6 +35,7 @@
 #ifndef BLIS_THREAD_RANGE_TLB_H
 #define BLIS_THREAD_RANGE_TLB_H
 
+#if 0
 dim_t bli_thread_range_tlb
      (
        const dim_t  nt,
@@ -48,6 +49,7 @@ dim_t bli_thread_range_tlb
              inc_t* j_st_p,
              inc_t* i_st_p
      );
+#endif
 dim_t bli_thread_range_tlb_l
      (
        const dim_t  nt,
@@ -112,7 +114,7 @@ dim_t bli_thread_range_tlb_trmm_lu
              inc_t* j_st_p,
              inc_t* i_st_p
      );
-dim_t bli_thread_range_tlb_trmm_lx
+dim_t bli_thread_range_tlb_trmm_lx_impl
      (
        const dim_t  nt,
        const dim_t  tid,
@@ -171,7 +173,7 @@ dim_t bli_thread_range_tlb_trmm_ru
              inc_t* j_st_p,
              inc_t* i_st_p
      );
-dim_t bli_thread_range_tlb_trmm_rl_ex
+dim_t bli_thread_range_tlb_trmm_rl_impl
      (
        const dim_t  nt,
        const dim_t  tid,

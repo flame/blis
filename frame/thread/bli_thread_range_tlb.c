@@ -42,6 +42,7 @@
 //#define PRINT_RESULT
 
 
+#if 0
 dim_t bli_thread_range_tlb
      (
        const dim_t  nt,
@@ -82,6 +83,7 @@ dim_t bli_thread_range_tlb
 
 	return n_ut_for_me;
 }
+#endif
 
 // -----------------------------------------------------------------------------
 
@@ -760,6 +762,320 @@ BLIS_INLINE dim_t bli_tlb_trmm_rl_k_iter
 	return k_iter - bli_max( -diagoff_iter + jr_iter, 0 );
 }
 
+// -----------------------------------------------------------------------------
+
+dim_t bli_thread_range_tlb_trmm_ll
+     (
+       const dim_t  nt,
+       const dim_t  tid,
+       const doff_t diagoff,
+       const dim_t  m_iter,
+       const dim_t  n_iter,
+       const dim_t  k_iter,
+       const dim_t  mr,
+       const dim_t  nr,
+             inc_t* j_st_p,
+             inc_t* i_st_p
+     )
+{
+	return bli_thread_range_tlb_trmm_lx_impl
+	(
+	  nt, tid, diagoff, BLIS_LOWER, m_iter, n_iter, k_iter, mr, nr,
+	  j_st_p, i_st_p
+	);
+}
+
+dim_t bli_thread_range_tlb_trmm_lu
+     (
+       const dim_t  nt,
+       const dim_t  tid,
+       const doff_t diagoff,
+       const dim_t  m_iter,
+       const dim_t  n_iter,
+       const dim_t  k_iter,
+       const dim_t  mr,
+       const dim_t  nr,
+             inc_t* j_st_p,
+             inc_t* i_st_p
+     )
+{
+	return bli_thread_range_tlb_trmm_lx_impl
+	(
+	  nt, tid, diagoff, BLIS_UPPER, m_iter, n_iter, k_iter, mr, nr,
+	  j_st_p, i_st_p
+	);
+}
+
+dim_t bli_thread_range_tlb_trmm_lx_impl
+     (
+       const dim_t  nt,
+       const dim_t  tid,
+       const doff_t diagoff,
+       const uplo_t uplo,
+       const dim_t  m_iter,
+       const dim_t  n_iter,
+       const dim_t  k_iter,
+       const dim_t  mr,
+       const dim_t  nr,
+             inc_t* j_st_p,
+             inc_t* i_st_p
+     )
+{
+	// Assumption: 0 <= diagoff (lower); diagoff <= 0 (upper).
+	// Make sure to prune leading rows (lower) or columns (upper) beforehand!
+	if      ( bli_is_lower( uplo ) && diagoff < 0 ) bli_abort();
+	else if ( bli_is_upper( uplo ) && diagoff > 0 ) bli_abort();
+
+	// Single-threaded cases are simple and allow early returns.
+	if ( nt == 1 )
+	{
+		const dim_t n_ut_for_me = m_iter * n_iter;
+
+		*j_st_p = 0;
+		*i_st_p = 0;
+
+		return n_ut_for_me;
+	}
+
+	//
+	// -- Step 1: Compute the computational flop cost of each utile column -----
+	//
+
+	// Normalize the diagonal offset by mr so that it represents the offset in
+	// units of mr x mr chunks.
+	const doff_t diagoff_iter = diagoff / mr;
+
+	// Determine the actual k dimension, in units of mr x mr iterations, capped
+	// by the k_iter given by the caller.
+
+	PGUARD printf( "---------------------------\n" );
+	PGUARD printf( "m_iter:             %7ld\n", m_iter );
+	PGUARD printf( "n_iter:             %7ld\n", n_iter );
+	PGUARD printf( "k_iter:             %7ld\n", k_iter );
+	PGUARD printf( "mr:                 %7ld\n", mr );
+	PGUARD printf( "nr:                 %7ld\n", nr );
+	PGUARD printf( "diagoff_iter:       %7ld\n", diagoff_iter );
+
+	dim_t uops_per_col = 0;
+
+	// Compute the computation flop cost of each microtile column, normalized
+	// by the number of flops performed by each mr x nr rank-1 update. This
+	// is simply the sum of all of the k dimensions of each micropanel, up to
+	// and including (lower) or starting from (upper) the part that intersects
+	// the diagonal, or the right (lower) or left (upper) edge of the matrix,
+	// as applicable.
+	for ( dim_t i = 0; i < m_iter; ++i )
+	{
+		// Don't allow k_a1011 to exceed k_iter, which is the maximum possible
+		// k dimension (in units of mr x mr chunks of micropanel).
+		const dim_t k_i_iter
+		= bli_tlb_trmm_lx_k_iter( diagoff_iter, uplo, k_iter, i );
+
+		uops_per_col += k_i_iter;
+	}
+
+	PGUARD printf( "uops_per_col:       %7ld\n", uops_per_col );
+
+	//
+	// -- Step 2: Compute key flop counts (per thread, per column, etc.) -------
+	//
+
+	// Compute the total cost for the entire block-panel multiply.
+	const dim_t total_uops = uops_per_col * n_iter;
+
+	// Compute the number of microtile ops to allocate per thread as well as the
+	// number of leftover microtile ops.
+	const dim_t n_uops_per_thr = total_uops / nt;
+	const dim_t n_uops_pt_left = total_uops % nt;
+
+	PGUARD printf( "---------------------------\n" );
+	PGUARD printf( "total_uops:         %7ld\n", total_uops );
+	PGUARD printf( "n_uops_per_thr:     %7ld\n", n_uops_per_thr );
+	PGUARD printf( "n_uops_pt_left:     %7ld\n", n_uops_pt_left );
+
+	//
+	// -- Step 3: Compute the starting j/i utile offset for a given tid --------
+	//
+
+	PGUARD printf( "---------------------------\n" );
+	PGUARD printf( "total_utiles:       %7ld\n", m_iter * n_iter );
+	PGUARD printf( "---------------------------\n" );
+
+	dim_t j_st_cur = 0; dim_t j_en_cur = 0;
+	dim_t i_st_cur = 0; dim_t i_en_cur = 0;
+
+	PGUARD printf( "          tid %ld will start at j,i: %ld %ld\n",
+	               ( dim_t )0, j_st_cur, i_st_cur );
+
+	// Find the utile update that pushes uops_tba to 0 or less.
+#ifdef PRINT_MODE
+	for ( dim_t tid_i = 0; tid_i < nt; ++tid_i )
+#else
+	for ( dim_t tid_i = 0; tid_i < nt - 1; ++tid_i )
+#endif
+	{
+		const dim_t uops_ta     = n_uops_per_thr + ( tid_i < n_uops_pt_left ? 1 : 0 );
+		      dim_t uops_tba    = uops_ta;
+		      dim_t j           = j_st_cur;
+		      dim_t n_ut_for_me = 0;
+		      bool  done_e      = FALSE;
+
+		PGUARD printf( "tid_i: %ld  n_uops to alloc: %3ld \n", tid_i, uops_tba );
+
+		// This code begins allocating uops when the starting point is somewhere
+		// after the first microtile. Typically this will not be enough to
+		// allocate all uops, except for small matrices (and/or high numbers of
+		// threads), in which case the code signals an early finish (via done_e).
+		if ( 0 < i_st_cur )
+		{
+			dim_t i;
+
+			//PGUARD printf( "tid_i: %ld  uops left to alloc: %2ld \n", tid_i, uops_tba );
+
+			for ( i = i_st_cur; i < m_iter; ++i )
+			{
+				n_ut_for_me += 1;
+
+				const dim_t uops_tba_new
+				= uops_tba -
+				  bli_tlb_trmm_lx_k_iter( diagoff_iter, uplo, k_iter, i );
+
+				uops_tba = uops_tba_new;
+
+				PGUARD printf( "tid_i: %ld  i: %2ld  (1 n_ut_cur: %ld) (uops_alloc: %ld)\n",
+				               tid_i, i, n_ut_for_me, uops_ta - uops_tba );
+
+				if ( uops_tba_new <= 0 ) { j_en_cur = j; i_en_cur = i; done_e = TRUE;
+				                           break; }
+			}
+
+			if ( i == m_iter ) j += 1;
+		}
+
+		// This code advances over as many columns of utiles as possible and then
+		// walks down to the correct utile within the subsequent column. However,
+		// it gets skipped entirely if the previous code block was able to
+		// allocate all of the current tid's uops.
+		if ( !done_e )
+		{
+			const dim_t j_inc0  = uops_tba / uops_per_col;
+			const dim_t j_left0 = uops_tba % uops_per_col;
+
+			// We need to set a hard limit on how much j_inc can be. Namely,
+			// it should not exceed the number of utile columns that are left
+			// in the matrix. We also correctly compute j_left when the initial
+			// computation of j_inc0 above exceeds the revised j_inc, but this
+			// is mostly only so that in these situations the debug statements
+			// report the correct numbers.
+			const dim_t j_inc  = bli_min( j_inc0, n_iter - j );
+			const dim_t delta  = j_inc0 - j_inc;
+			const dim_t j_left = j_left0 + delta * uops_per_col;
+
+			// Increment j by the number of full utile columns we allocate, and
+			// set the remaining utile ops to be allocated to the remainder.
+			j       += j_inc;
+			uops_tba = j_left;
+
+			n_ut_for_me += j_inc * m_iter;
+
+			PGUARD printf( "tid_i: %ld  advanced to col: %2ld  (uops traversed: %ld)\n",
+			               tid_i, j, uops_per_col * j_inc );
+			PGUARD printf( "tid_i: %ld  j: %2ld  (  n_ut_cur: %ld) (uops_alloc: %ld)\n",
+			               tid_i, j, n_ut_for_me, uops_ta - uops_tba );
+			PGUARD printf( "tid_i: %ld  uops left to alloc: %2ld \n", tid_i, j_left );
+
+			if ( uops_tba == 0 )
+			{
+				// If advancing j_inc columns allocated all of our uops, then
+				// designate the last iteration of the previous column as the
+				// end point.
+				j_en_cur = j - 1;
+				i_en_cur = m_iter - 1;
+			}
+			else if ( j >  n_iter ) bli_abort(); // safety check.
+			else if ( j == n_iter )
+			{
+				// If we still have at least some uops to allocate, and advancing
+				// j_inc columns landed us at the beginning of the first non-
+				// existent column (column n_iter), then we're done. (The fact
+				// that we didn't get to allocate all of our uops just means that
+				// the lower tids slightly overshot their allocations, leaving
+				// fewer uops for the last thread.)
+			}
+			else // if ( 0 < uops_tba && j < n_iter )
+			{
+				// If we have at least some uops to allocate, and we still have
+				// at least some columns to process, then we search for the
+				// utile that will put us over the top.
+
+				for ( dim_t i = 0; i < m_iter; ++i )
+				{
+					n_ut_for_me += 1;
+
+					const dim_t uops_tba_new
+					= uops_tba -
+					  bli_tlb_trmm_lx_k_iter( diagoff_iter, uplo, k_iter, i );
+
+					uops_tba = uops_tba_new;
+
+					PGUARD printf( "tid_i: %ld  i: %2ld  (4 n_ut_cur: %ld) (uops_alloc: %ld)\n",
+					               tid_i, i, n_ut_for_me, uops_ta - uops_tba );
+
+					if ( uops_tba_new <= 0 ) { j_en_cur = j; i_en_cur = i;
+					                           break; }
+				}
+			}
+		}
+
+
+		PGUARD printf( "tid_i: %ld         (5 n_ut_cur: %ld) (overshoot: %ld out of %ld)\n",
+		                tid_i, n_ut_for_me, -uops_tba, uops_ta );
+
+		if ( tid_i == tid )
+		{
+			*j_st_p = j_st_cur;
+			*i_st_p = i_st_cur;
+			return n_ut_for_me;
+		}
+
+		// Use the current tid's ending i,j values to determine the starting i,j
+		// values for the next tid.
+		j_st_cur = j_en_cur;
+		i_st_cur = i_en_cur + 1;
+		if ( i_st_cur == m_iter ) { j_st_cur += 1; i_st_cur = 0; }
+
+		PGUARD printf( "tid_i: %ld         (6 n_ut_cur: %ld)\n",
+		               tid_i, n_ut_for_me );
+		PGUARD printf( "tid_i: %ld  tid %ld will start at j,i: %ld %ld\n",
+		               tid_i, tid_i + 1, j_st_cur, i_st_cur );
+		PGUARD printf( "---------------------------\n" );
+	}
+
+#ifndef PRINT_MODE
+
+	//
+	// -- Step 4: Handle the last thread's allocation --------------------------
+	//
+
+	// An optimization: The above loop runs to nt - 1 rather than nt since it's
+	// easy to count the number of utiles allocated to the last thread.
+	const dim_t n_ut_for_me = m_iter - i_st_cur +
+	                          (n_iter - j_st_cur - 1) * m_iter;
+	*j_st_p = j_st_cur;
+	*i_st_p = i_st_cur;
+
+	PGUARD printf( "tid_i: %ld         (7 n_ut_for_me: %ld) (j,i_st: %ld %ld)\n",
+	               tid, n_ut_for_me, j_st_cur, i_st_cur );
+
+	return n_ut_for_me;
+#else
+	// This line should never execute, but we need it to satisfy the compiler.
+	return -1;
+#endif
+}
+
+// -----------------------------------------------------------------------------
+
 #if 0
 dim_t bli_thread_range_tlb_trmm_r
      (
@@ -782,7 +1098,7 @@ dim_t bli_thread_range_tlb_trmm_r
 	{
 		inc_t j_en_l, i_en_l;
 
-		n_ut_for_me = bli_thread_range_tlb_trmm_rl_ex
+		n_ut_for_me = bli_thread_range_tlb_trmm_rl_impl
 		(
 		  nt, tid, diagoff, m_iter, n_iter, k_iter, mr, nr,
 		  j_st_p, i_st_p, &j_en_l, &i_en_l
@@ -800,7 +1116,7 @@ dim_t bli_thread_range_tlb_trmm_r
 		const dim_t  tid_rev     = nt - tid - 1;
 		const doff_t diagoff_rev = nr*n_iter - ( nr*k_iter + diagoff );
 
-		n_ut_for_me = bli_thread_range_tlb_trmm_rl_ex
+		n_ut_for_me = bli_thread_range_tlb_trmm_rl_impl
 		(
 		  nt, tid_rev, diagoff_rev, m_iter, n_iter, k_iter, mr, nr,
 		  &j_st_l, &i_st_l, &j_en_l, &i_en_l
@@ -837,7 +1153,7 @@ dim_t bli_thread_range_tlb_trmm_rl
 {
 	inc_t j_en_l, i_en_l;
 
-	return bli_thread_range_tlb_trmm_rl_ex
+	return bli_thread_range_tlb_trmm_rl_impl
 	(
 	  nt, tid, diagoff, m_iter, n_iter, k_iter, mr, nr,
 	  j_st_p, i_st_p, &j_en_l, &i_en_l
@@ -868,7 +1184,7 @@ dim_t bli_thread_range_tlb_trmm_ru
 	const dim_t  tid_rev     = nt - tid - 1;
 	const doff_t diagoff_rev = nr*n_iter - ( nr*k_iter + diagoff );
 
-	const dim_t n_ut_for_me = bli_thread_range_tlb_trmm_rl_ex
+	const dim_t n_ut_for_me = bli_thread_range_tlb_trmm_rl_impl
 	(
 	  nt, tid_rev, diagoff_rev, m_iter, n_iter, k_iter, mr, nr,
 	  &j_st_l, &i_st_l, &j_en_l, &i_en_l
@@ -887,7 +1203,7 @@ dim_t bli_thread_range_tlb_trmm_ru
 	return n_ut_for_me;
 }
 
-dim_t bli_thread_range_tlb_trmm_rl_ex
+dim_t bli_thread_range_tlb_trmm_rl_impl
      (
        const dim_t  nt,
        const dim_t  tid,
@@ -1372,318 +1688,6 @@ dim_t bli_thread_range_tlb_trmm_rl_ex
 	*i_en_p = m_iter - 1;
 
 	PGUARD printf( "tid_i: %ld         (E n_ut_for_me: %ld) (j,i_st: %ld %ld)\n",
-	               tid, n_ut_for_me, j_st_cur, i_st_cur );
-
-	return n_ut_for_me;
-#else
-	// This line should never execute, but we need it to satisfy the compiler.
-	return -1;
-#endif
-}
-
-// -----------------------------------------------------------------------------
-
-dim_t bli_thread_range_tlb_trmm_ll
-     (
-       const dim_t  nt,
-       const dim_t  tid,
-       const doff_t diagoff,
-       const dim_t  m_iter,
-       const dim_t  n_iter,
-       const dim_t  k_iter,
-       const dim_t  mr,
-       const dim_t  nr,
-             inc_t* j_st_p,
-             inc_t* i_st_p
-     )
-{
-	return bli_thread_range_tlb_trmm_lx
-	(
-	  nt, tid, diagoff, BLIS_LOWER, m_iter, n_iter, k_iter, mr, nr,
-	  j_st_p, i_st_p
-	);
-}
-
-dim_t bli_thread_range_tlb_trmm_lu
-     (
-       const dim_t  nt,
-       const dim_t  tid,
-       const doff_t diagoff,
-       const dim_t  m_iter,
-       const dim_t  n_iter,
-       const dim_t  k_iter,
-       const dim_t  mr,
-       const dim_t  nr,
-             inc_t* j_st_p,
-             inc_t* i_st_p
-     )
-{
-	return bli_thread_range_tlb_trmm_lx
-	(
-	  nt, tid, diagoff, BLIS_UPPER, m_iter, n_iter, k_iter, mr, nr,
-	  j_st_p, i_st_p
-	);
-}
-
-dim_t bli_thread_range_tlb_trmm_lx
-     (
-       const dim_t  nt,
-       const dim_t  tid,
-       const doff_t diagoff,
-       const uplo_t uplo,
-       const dim_t  m_iter,
-       const dim_t  n_iter,
-       const dim_t  k_iter,
-       const dim_t  mr,
-       const dim_t  nr,
-             inc_t* j_st_p,
-             inc_t* i_st_p
-     )
-{
-	// Assumption: 0 <= diagoff (lower); diagoff <= 0 (upper).
-	// Make sure to prune leading rows (lower) or columns (upper) beforehand!
-	if      ( bli_is_lower( uplo ) && diagoff < 0 ) bli_abort();
-	else if ( bli_is_upper( uplo ) && diagoff > 0 ) bli_abort();
-
-	// Single-threaded cases are simple and allow early returns.
-	if ( nt == 1 )
-	{
-		const dim_t n_ut_for_me = m_iter * n_iter;
-
-		*j_st_p = 0;
-		*i_st_p = 0;
-
-		return n_ut_for_me;
-	}
-
-	//
-	// -- Step 1: Compute the computational flop cost of each utile column -----
-	//
-
-	// Normalize the diagonal offset by mr so that it represents the offset in
-	// units of mr x mr chunks.
-	const doff_t diagoff_iter = diagoff / mr;
-
-	// Determine the actual k dimension, in units of mr x mr iterations, capped
-	// by the k_iter given by the caller.
-
-	PGUARD printf( "---------------------------\n" );
-	PGUARD printf( "m_iter:             %7ld\n", m_iter );
-	PGUARD printf( "n_iter:             %7ld\n", n_iter );
-	PGUARD printf( "k_iter:             %7ld\n", k_iter );
-	PGUARD printf( "mr:                 %7ld\n", mr );
-	PGUARD printf( "nr:                 %7ld\n", nr );
-	PGUARD printf( "diagoff_iter:       %7ld\n", diagoff_iter );
-
-	dim_t uops_per_col = 0;
-
-	// Compute the computation flop cost of each microtile column, normalized
-	// by the number of flops performed by each mr x nr rank-1 update. This
-	// is simply the sum of all of the k dimensions of each micropanel, up to
-	// and including (lower) or starting from (upper) the part that intersects
-	// the diagonal, or the right (lower) or left (upper) edge of the matrix,
-	// as applicable.
-	for ( dim_t i = 0; i < m_iter; ++i )
-	{
-		// Don't allow k_a1011 to exceed k_iter, which is the maximum possible
-		// k dimension (in units of mr x mr chunks of micropanel).
-		const dim_t k_i_iter
-		= bli_tlb_trmm_lx_k_iter( diagoff_iter, uplo, k_iter, i );
-
-		uops_per_col += k_i_iter;
-	}
-
-	PGUARD printf( "uops_per_col:       %7ld\n", uops_per_col );
-
-	//
-	// -- Step 2: Compute key flop counts (per thread, per column, etc.) -------
-	//
-
-	// Compute the total cost for the entire block-panel multiply.
-	const dim_t total_uops = uops_per_col * n_iter;
-
-	// Compute the number of microtile ops to allocate per thread as well as the
-	// number of leftover microtile ops.
-	const dim_t n_uops_per_thr = total_uops / nt;
-	const dim_t n_uops_pt_left = total_uops % nt;
-
-	PGUARD printf( "---------------------------\n" );
-	PGUARD printf( "total_uops:         %7ld\n", total_uops );
-	PGUARD printf( "n_uops_per_thr:     %7ld\n", n_uops_per_thr );
-	PGUARD printf( "n_uops_pt_left:     %7ld\n", n_uops_pt_left );
-
-	//
-	// -- Step 3: Compute the starting j/i utile offset for a given tid --------
-	//
-
-	PGUARD printf( "---------------------------\n" );
-	PGUARD printf( "total_utiles:       %7ld\n", m_iter * n_iter );
-	PGUARD printf( "---------------------------\n" );
-
-	dim_t j_st_cur = 0; dim_t j_en_cur = 0;
-	dim_t i_st_cur = 0; dim_t i_en_cur = 0;
-
-	PGUARD printf( "          tid %ld will start at j,i: %ld %ld\n",
-	               ( dim_t )0, j_st_cur, i_st_cur );
-
-	// Find the utile update that pushes uops_tba to 0 or less.
-#ifdef PRINT_MODE
-	for ( dim_t tid_i = 0; tid_i < nt; ++tid_i )
-#else
-	for ( dim_t tid_i = 0; tid_i < nt - 1; ++tid_i )
-#endif
-	{
-		const dim_t uops_ta     = n_uops_per_thr + ( tid_i < n_uops_pt_left ? 1 : 0 );
-		      dim_t uops_tba    = uops_ta;
-		      dim_t j           = j_st_cur;
-		      dim_t n_ut_for_me = 0;
-		      bool  done_e      = FALSE;
-
-		PGUARD printf( "tid_i: %ld  n_uops to alloc: %3ld \n", tid_i, uops_tba );
-
-		// This code begins allocating uops when the starting point is somewhere
-		// after the first microtile. Typically this will not be enough to
-		// allocate all uops, except for small matrices (and/or high numbers of
-		// threads), in which case the code signals an early finish (via done_e).
-		if ( 0 < i_st_cur )
-		{
-			dim_t i;
-
-			//PGUARD printf( "tid_i: %ld  uops left to alloc: %2ld \n", tid_i, uops_tba );
-
-			for ( i = i_st_cur; i < m_iter; ++i )
-			{
-				n_ut_for_me += 1;
-
-				const dim_t uops_tba_new
-				= uops_tba -
-				  bli_tlb_trmm_lx_k_iter( diagoff_iter, uplo, k_iter, i );
-
-				uops_tba = uops_tba_new;
-
-				PGUARD printf( "tid_i: %ld  i: %2ld  (1 n_ut_cur: %ld) (uops_alloc: %ld)\n",
-				               tid_i, i, n_ut_for_me, uops_ta - uops_tba );
-
-				if ( uops_tba_new <= 0 ) { j_en_cur = j; i_en_cur = i; done_e = TRUE;
-				                           break; }
-			}
-
-			if ( i == m_iter ) j += 1;
-		}
-
-		// This code advances over as many columns of utiles as possible and then
-		// walks down to the correct utile within the subsequent column. However,
-		// it gets skipped entirely if the previous code block was able to
-		// allocate all of the current tid's uops.
-		if ( !done_e )
-		{
-			const dim_t j_inc0  = uops_tba / uops_per_col;
-			const dim_t j_left0 = uops_tba % uops_per_col;
-
-			// We need to set a hard limit on how much j_inc can be. Namely,
-			// it should not exceed the number of utile columns that are left
-			// in the matrix. We also correctly compute j_left when the initial
-			// computation of j_inc0 above exceeds the revised j_inc, but this
-			// is mostly only so that in these situations the debug statements
-			// report the correct numbers.
-			const dim_t j_inc  = bli_min( j_inc0, n_iter - j );
-			const dim_t delta  = j_inc0 - j_inc;
-			const dim_t j_left = j_left0 + delta * uops_per_col;
-
-			// Increment j by the number of full utile columns we allocate, and
-			// set the remaining utile ops to be allocated to the remainder.
-			j       += j_inc;
-			uops_tba = j_left;
-
-			n_ut_for_me += j_inc * m_iter;
-
-			PGUARD printf( "tid_i: %ld  advanced to col: %2ld  (uops traversed: %ld)\n",
-			               tid_i, j, uops_per_col * j_inc );
-			PGUARD printf( "tid_i: %ld  j: %2ld  (  n_ut_cur: %ld) (uops_alloc: %ld)\n",
-			               tid_i, j, n_ut_for_me, uops_ta - uops_tba );
-			PGUARD printf( "tid_i: %ld  uops left to alloc: %2ld \n", tid_i, j_left );
-
-			if ( uops_tba == 0 )
-			{
-				// If advancing j_inc columns allocated all of our uops, then
-				// designate the last iteration of the previous column as the
-				// end point.
-				j_en_cur = j - 1;
-				i_en_cur = m_iter - 1;
-			}
-			else if ( j >  n_iter ) bli_abort(); // safety check.
-			else if ( j == n_iter )
-			{
-				// If we still have at least some uops to allocate, and advancing
-				// j_inc columns landed us at the beginning of the first non-
-				// existent column (column n_iter), then we're done. (The fact
-				// that we didn't get to allocate all of our uops just means that
-				// the lower tids slightly overshot their allocations, leaving
-				// fewer uops for the last thread.)
-			}
-			else // if ( 0 < uops_tba && j < n_iter )
-			{
-				// If we have at least some uops to allocate, and we still have
-				// at least some columns to process, then we search for the
-				// utile that will put us over the top.
-
-				for ( dim_t i = 0; i < m_iter; ++i )
-				{
-					n_ut_for_me += 1;
-
-					const dim_t uops_tba_new
-					= uops_tba -
-					  bli_tlb_trmm_lx_k_iter( diagoff_iter, uplo, k_iter, i );
-
-					uops_tba = uops_tba_new;
-
-					PGUARD printf( "tid_i: %ld  i: %2ld  (4 n_ut_cur: %ld) (uops_alloc: %ld)\n",
-					               tid_i, i, n_ut_for_me, uops_ta - uops_tba );
-
-					if ( uops_tba_new <= 0 ) { j_en_cur = j; i_en_cur = i;
-					                           break; }
-				}
-			}
-		}
-
-
-		PGUARD printf( "tid_i: %ld         (5 n_ut_cur: %ld) (overshoot: %ld out of %ld)\n",
-		                tid_i, n_ut_for_me, -uops_tba, uops_ta );
-
-		if ( tid_i == tid )
-		{
-			*j_st_p = j_st_cur;
-			*i_st_p = i_st_cur;
-			return n_ut_for_me;
-		}
-
-		// Use the current tid's ending i,j values to determine the starting i,j
-		// values for the next tid.
-		j_st_cur = j_en_cur;
-		i_st_cur = i_en_cur + 1;
-		if ( i_st_cur == m_iter ) { j_st_cur += 1; i_st_cur = 0; }
-
-		PGUARD printf( "tid_i: %ld         (6 n_ut_cur: %ld)\n",
-		               tid_i, n_ut_for_me );
-		PGUARD printf( "tid_i: %ld  tid %ld will start at j,i: %ld %ld\n",
-		               tid_i, tid_i + 1, j_st_cur, i_st_cur );
-		PGUARD printf( "---------------------------\n" );
-	}
-
-#ifndef PRINT_MODE
-
-	//
-	// -- Step 4: Handle the last thread's allocation --------------------------
-	//
-
-	// An optimization: The above loop runs to nt - 1 rather than nt since it's
-	// easy to count the number of utiles allocated to the last thread.
-	const dim_t n_ut_for_me = m_iter - i_st_cur +
-	                          (n_iter - j_st_cur - 1) * m_iter;
-	*j_st_p = j_st_cur;
-	*i_st_p = i_st_cur;
-
-	PGUARD printf( "tid_i: %ld         (7 n_ut_for_me: %ld) (j,i_st: %ld %ld)\n",
 	               tid, n_ut_for_me, j_st_cur, i_st_cur );
 
 	return n_ut_for_me;
