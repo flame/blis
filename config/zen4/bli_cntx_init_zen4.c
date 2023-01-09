@@ -246,14 +246,14 @@ void bli_cntx_init_zen4( cntx_t* cntx )
       BLIS_CRC, BLIS_DOUBLE, bli_dgemmsup_rd_haswell_asm_6x8n, TRUE,
       BLIS_CCR, BLIS_DOUBLE, bli_dgemmsup_rv_haswell_asm_6x8n, TRUE,
       BLIS_CCC, BLIS_DOUBLE, bli_dgemmsup_rv_haswell_asm_6x8n, TRUE,
-      BLIS_RRR, BLIS_FLOAT, bli_sgemmsup_rv_zen_asm_6x16m, TRUE,
-      BLIS_RRC, BLIS_FLOAT, bli_sgemmsup_rd_zen_asm_6x16m, TRUE,
-      BLIS_RCR, BLIS_FLOAT, bli_sgemmsup_rv_zen_asm_6x16m, TRUE,
-      BLIS_RCC, BLIS_FLOAT, bli_sgemmsup_rv_zen_asm_6x16n, TRUE,
-      BLIS_CRR, BLIS_FLOAT, bli_sgemmsup_rv_zen_asm_6x16m, TRUE,
-      BLIS_CRC, BLIS_FLOAT, bli_sgemmsup_rd_zen_asm_6x16n, TRUE,
-      BLIS_CCR, BLIS_FLOAT, bli_sgemmsup_rv_zen_asm_6x16n, TRUE,
-      BLIS_CCC, BLIS_FLOAT, bli_sgemmsup_rv_zen_asm_6x16n, TRUE,
+      BLIS_RRR, BLIS_FLOAT, bli_sgemmsup_rv_zen_asm_6x64m_avx512, TRUE,
+      BLIS_RRC, BLIS_FLOAT, bli_sgemmsup_rd_zen_asm_6x64m_avx512, TRUE,
+      BLIS_RCR, BLIS_FLOAT, bli_sgemmsup_rv_zen_asm_6x64m_avx512, TRUE,
+      BLIS_RCC, BLIS_FLOAT, bli_sgemmsup_rv_zen_asm_6x64n_avx512, TRUE,
+      BLIS_CRR, BLIS_FLOAT, bli_sgemmsup_rv_zen_asm_6x64m_avx512, TRUE,
+      BLIS_CRC, BLIS_FLOAT, bli_sgemmsup_rd_zen_asm_6x64n_avx512, TRUE,
+      BLIS_CCR, BLIS_FLOAT, bli_sgemmsup_rv_zen_asm_6x64n_avx512, TRUE,
+      BLIS_CCC, BLIS_FLOAT, bli_sgemmsup_rv_zen_asm_6x64n_avx512, TRUE,
       BLIS_RRR, BLIS_SCOMPLEX, bli_cgemmsup_rv_zen_asm_3x8m, TRUE,
       BLIS_RCR, BLIS_SCOMPLEX, bli_cgemmsup_rv_zen_asm_3x8m, TRUE,
       BLIS_CRR, BLIS_SCOMPLEX, bli_cgemmsup_rv_zen_asm_3x8m, TRUE,
@@ -275,11 +275,11 @@ void bli_cntx_init_zen4( cntx_t* cntx )
     // values.
     //                                           s      d      c      z
     bli_blksz_init     ( &blkszs[ BLIS_MR ],    6,     6,     3,      3,
-                                                9,     9,     3,      3    );
-    bli_blksz_init_easy( &blkszs[ BLIS_NR ],    16,    8,     8,      4    );
-    bli_blksz_init_easy( &blkszs[ BLIS_MC ],    144,   72,    72,     36   );
+                                                6,     9,     3,      3    );
+    bli_blksz_init_easy( &blkszs[ BLIS_NR ],    64,    8,     8,      4    );
+    bli_blksz_init_easy( &blkszs[ BLIS_MC ],    192,   72,    72,     36   );
     bli_blksz_init_easy( &blkszs[ BLIS_KC ],    512,   256,   128,    64   );
-    bli_blksz_init_easy( &blkszs[ BLIS_NC ],    8160,  4080,  2040,   1020 );
+    bli_blksz_init_easy( &blkszs[ BLIS_NC ],    8064,  4080,  2040,   1020 );
 
     // Update the context with the current architecture's register and cache
     // blocksizes for small/unpacked level-3 problems.

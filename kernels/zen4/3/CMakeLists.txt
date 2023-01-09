@@ -7,3 +7,5 @@ target_sources("${PROJECT_NAME}"
     ${CMAKE_CURRENT_SOURCE_DIR}/bli_dgemm_zen4_asm_32x6.c
     ${CMAKE_CURRENT_SOURCE_DIR}/bli_trsm_small_AVX512.c
     )
+
+add_subdirectory(sup)
