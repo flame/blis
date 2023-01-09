@@ -45,8 +45,10 @@ THIS_CONFIG    := rv32iv
 # NOTE: The build system will append these variables with various
 # general-purpose/configuration-agnostic flags in common.mk. You
 # may specify additional flags here as needed.
-CPPROCFLAGS    := -mabi=ilp32d
-CMISCFLAGS     :=
+CPPROCFLAGS    := -DRISCV_SIZE=32
+# Atomic instructions must be enabled either via hardware
+# (-march=rv32iav) or by linking against libatomic
+CMISCFLAGS     := -march=rv32iv -mabi=ilp32d
 CPICFLAGS      :=
 CWARNFLAGS     := -Wall -Wno-unused-function -Wfatal-errors
 
@@ -57,7 +59,7 @@ endif
 ifeq ($(DEBUG_TYPE),noopt)
 COPTFLAGS      := -O0
 else
-COPTFLAGS      := -O2 -ftree-vectorize -march=rv32iav
+COPTFLAGS      := -O0
 endif
 
 # Flags specific to optimized kernels.
@@ -75,7 +77,9 @@ endif
 # Flags specific to reference kernels.
 CROPTFLAGS     := $(CKOPTFLAGS)
 ifeq ($(CC_VENDOR),gcc)
-CRVECFLAGS     := $(CKVECFLAGS) -funsafe-math-optimizations -ffp-contract=fast
+# Lower compiler optimization to -O1. At -O3, gcc version 12.0.1 20220505
+# computes offsets for the matrix ab in the ref gemm kernel incorrectly.
+CRVECFLAGS     := $(CKVECFLAGS) -O1
 else
 ifeq ($(CC_VENDOR),clang)
 CRVECFLAGS     := $(CKVECFLAGS) -funsafe-math-optimizations -ffp-contract=fast

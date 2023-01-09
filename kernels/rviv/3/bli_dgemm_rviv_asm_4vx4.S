@@ -1,3 +1,5 @@
+#if RISCV_SIZE==64
+
 #define REALNAME bli_dgemm_rviv_asm_4vx4
     .text
     .global     REALNAME
@@ -411,3 +413,5 @@ END:
     ld s0,0(sp)
     addi sp,sp,64
     ret
+
+#endif // RISCV_SIZE==64

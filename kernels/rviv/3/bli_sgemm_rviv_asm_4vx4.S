@@ -1,3 +1,5 @@
+#if RISCV_SIZE==64
+
 #define REALNAME bli_sgemm_rviv_asm_4vx4
     .text
     .global     REALNAME
@@ -83,7 +85,7 @@
 
 REALNAME:
     addi sp,sp,-64
-    sd s7,56(sp)
+    sd s7,56(sp)    // sw s7,56(sp)
     sd s6,48(sp)
     sd s5,40(sp)
     sd s4,32(sp)
@@ -402,7 +404,7 @@ BETANOTZERO:
     vse32.v AB33, (C13_ptr)
 
 END:
-    ld s7,56(sp)
+    ld s7,56(sp)    // lw
     ld s6,48(sp)
     ld s5,40(sp)
     ld s4,32(sp)
@@ -412,3 +414,5 @@ END:
     ld s0,0(sp)
     addi sp,sp,64
     ret
+
+#endif // RISCV_SIZE==64

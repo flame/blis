@@ -45,8 +45,13 @@ THIS_CONFIG    := rv64iv
 # NOTE: The build system will append these variables with various
 # general-purpose/configuration-agnostic flags in common.mk. You
 # may specify additional flags here as needed.
-CPPROCFLAGS    := -mabi=lp64d
-CMISCFLAGS     :=
+CPPROCFLAGS    := -DRISCV_SIZE=64
+# Atomic instructions must be enabled either via hardware
+# (-march=rv64iav) or by linking against libatomic
+# The latest compiler build hits an 'internal compiler error'
+# when compiling the reference gemm kernels. Workaround
+# via -march=rv64imv or, with atomics, -march=rv64imav
+CMISCFLAGS     := -march=rv64iv -mabi=lp64d
 CPICFLAGS      :=
 CWARNFLAGS     := -Wall -Wno-unused-function -Wfatal-errors
 
@@ -57,7 +62,7 @@ endif
 ifeq ($(DEBUG_TYPE),noopt)
 COPTFLAGS      := -O0
 else
-COPTFLAGS      := -O2 -ftree-vectorize -march=rv64iav
+COPTFLAGS      := -O2 -ftree-vectorize
 endif
 
 # Flags specific to optimized kernels.
@@ -75,7 +80,8 @@ endif
 # Flags specific to reference kernels.
 CROPTFLAGS     := $(CKOPTFLAGS)
 ifeq ($(CC_VENDOR),gcc)
-CRVECFLAGS     := $(CKVECFLAGS) -funsafe-math-optimizations -ffp-contract=fast
+# Lower compiler optimization. cinvscalv fails at -O1
+CRVECFLAGS     := $(CKVECFLAGS) -O0
 else
 ifeq ($(CC_VENDOR),clang)
 CRVECFLAGS     := $(CKVECFLAGS) -funsafe-math-optimizations -ffp-contract=fast
