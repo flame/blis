@@ -7,7 +7,7 @@
  *
  * (Heavily hacked down from the original)
  *
- * Copyright (C) 2020 - 2022, Advanced Micro Devices, Inc. All rights reserved.
+ * Copyright (C) 2020 - 2023, Advanced Micro Devices, Inc. All rights reserved.
  *
  */
 
@@ -172,6 +172,7 @@
 #define F77_sgemmt  sgemmt
 #define F77_cgemmt  cgemmt
 #define F77_zgemmt  zgemmt
+#define F77_dzgemm  dzgemm
 
 /*
 * Aux Function
@@ -359,6 +360,7 @@
 #define F77_sgemmt  sgemmt_blis_impl
 #define F77_cgemmt  cgemmt_blis_impl
 #define F77_zgemmt  zgemmt_blis_impl
+#define F77_dzgemm  dzgemm_blis_impl
 
 /*
 * Aux Function

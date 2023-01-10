@@ -952,7 +952,7 @@ void zgemm_
 
 INSERT_GENTFUNC_BLAS_SC( gemm, gemm )
 
-void dzgemm_
+void dzgemm_blis_impl
      (
        const f77_char* transa,
        const f77_char* transb,
@@ -1055,4 +1055,20 @@ void dzgemm_
     bli_finalize_auto();
 }// end of dzgemm_
 
+void dzgemm_
+     (
+       const f77_char* transa,
+       const f77_char* transb,
+       const f77_int*  m,
+       const f77_int*  n,
+       const f77_int*  k,
+       const dcomplex*    alpha,
+       const double*    a, const f77_int* lda,
+       const dcomplex*    b, const f77_int* ldb,
+       const dcomplex*    beta,
+             dcomplex*    c, const f77_int* ldc
+     )
+{
+    dzgemm_blis_impl( transa, transb, m, n, k, alpha, a, lda, b, ldb, beta, c, ldc );
+}
 #endif

@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2022, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2022-23, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -68,7 +68,6 @@ BLIS_EXPORT_BLAS void PASTEF77S(ch,blasname) \
      );
 
 #ifdef BLIS_ENABLE_BLAS
-#if 1
 BLIS_EXPORT_BLAS void dzgemm_
      (
        const f77_char* transa, \
@@ -82,7 +81,20 @@ BLIS_EXPORT_BLAS void dzgemm_
        const dcomplex*    beta, \
              dcomplex*    c, const f77_int* ldc  \
      );
-#endif
+
+BLIS_EXPORT_BLAS void dzgemm_blis_impl
+     (
+       const f77_char* transa, \
+       const f77_char* transb, \
+       const f77_int*  m, \
+       const f77_int*  n, \
+       const f77_int*  k, \
+       const dcomplex*    alpha, \
+       const double*    a, const f77_int* lda, \
+       const dcomplex*    b, const f77_int* ldb, \
+       const dcomplex*    beta, \
+             dcomplex*    c, const f77_int* ldc  \
+     );
 INSERT_GENTPROT_BLAS( gemm )
 
 #endif
