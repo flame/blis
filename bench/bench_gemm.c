@@ -109,6 +109,10 @@ int main( int argc, char** argv )
         printf("Error opening output file %s\n", argv[2]);
         exit(1);
     }
+	if (argc > 3)
+	{
+		n_repeats = atoi(argv[3]);
+	}
 
     fprintf(fout, "Dt transa transb m n k alphaR alphaI lda ldb betaR betaI ldc gflops\n");
 

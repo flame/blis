@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2020 - 2022, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2020 - 2023, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -33,10 +33,7 @@
 
 */
 // -- level-1m --
-PACKM_KER_PROT(double, d, packm_8xk_gen_zen)
-PACKM_KER_PROT(double, d, packm_6xk_gen_zen)
-PACKM_KER_PROT(double, d, packm_8xk_nn_zen)
-PACKM_KER_PROT(double, d, packm_6xk_nn_zen)
+// Removed - reference packm kernels are used
 
 
 // -- level-1v --

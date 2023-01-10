@@ -6,7 +6,7 @@
 
    Copyright (C) 2014, The University of Texas at Austin
    Copyright (C) 2016, Hewlett Packard Enterprise Development LP
-   Copyright (C) 2021 - 22, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2021 - 23, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -756,6 +756,7 @@ typedef enum
 	BLIS_PACKM_29XK_KER = 29,
 	BLIS_PACKM_30XK_KER = 30,
 	BLIS_PACKM_31XK_KER = 31,
+	BLIS_PACKM_32XK_KER = 32,
 
 	BLIS_UNPACKM_0XK_KER  = 0,
 	BLIS_UNPACKM_1XK_KER  = 1,
@@ -792,7 +793,7 @@ typedef enum
 
 } l1mkr_t;
 
-#define BLIS_NUM_PACKM_KERS   32
+#define BLIS_NUM_PACKM_KERS   33
 #define BLIS_NUM_UNPACKM_KERS 32
 
 
@@ -803,7 +804,7 @@ typedef enum
 	BLIS_GEMMTRSM_U_UKR,
 	BLIS_TRSM_L_UKR,
 	BLIS_TRSM_U_UKR,
-	BLIS_GEMM_AVX2_UKR
+	BLIS_GEMM_FOR_TRSM_UKR
 } l3ukr_t;
 
 #define BLIS_NUM_LEVEL3_UKRS 6

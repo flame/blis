@@ -1,4 +1,4 @@
-##Copyright (C) 2022, Advanced Micro Devices, Inc. All rights reserved.##
+##Copyright (C) 2022-2023, Advanced Micro Devices, Inc. All rights reserved.##
 
 cmake_minimum_required(VERSION 3.0.0)
 
@@ -336,10 +336,11 @@ endif()
 
 if(${TARGET_ARCH} STREQUAL zen4 OR 
    ${TARGET_ARCH} STREQUAL amdzen)
-  set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/kernels/zen4/1/bli_amaxv_zen_int_avx512.c PROPERTIES COMPILE_FLAGS /arch:AVX512)
-  set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/kernels/zen4/3/bli_gemmtrsm_l_zen_16x14.c PROPERTIES COMPILE_FLAGS /arch:AVX512)
-  set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/kernels/zen4/3/bli_gemmtrsm_u_zen_16x14.c PROPERTIES COMPILE_FLAGS /arch:AVX512)
-  set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/kernels/skx/3/bli_dgemm_skx_asm_16x14.c PROPERTIES COMPILE_FLAGS /arch:AVX512)
+  set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/kernels/zen4/1/bli_amaxv_zen_int_avx512.c  PROPERTIES COMPILE_FLAGS /arch:AVX512)
+  set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/kernels/zen4/3/bli_dgemm_zen4_asm_32x6.c   PROPERTIES COMPILE_FLAGS /arch:AVX512)
+  set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/kernels/zen4/3/bli_gemmtrsm_l_zen_16x14.c  PROPERTIES COMPILE_FLAGS /arch:AVX512)
+  set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/kernels/zen4/3/bli_gemmtrsm_u_zen_16x14.c  PROPERTIES COMPILE_FLAGS /arch:AVX512)
+  set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/kernels/skx/3/bli_dgemm_skx_asm_16x14.c    PROPERTIES COMPILE_FLAGS /arch:AVX512)
   set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/kernels/skx/3/bli_sgemm_skx_asm_32x12_l2.c PROPERTIES COMPILE_FLAGS /arch:AVX512)
 endif()
 

@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2018 - 2022, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2018 - 2023, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -174,7 +174,7 @@ void bli_trsm_front
 		 * We need to revisit this when TRSM AVX-512 kernels are implemented.
 		 */
 		if ( (bli_arch_query_id() == BLIS_ARCH_ZEN4)  &&
-			 (bli_obj_dt(a) == BLIS_FLOAT) )
+			 ((bli_obj_dt(a) == BLIS_FLOAT) || (bli_obj_dt(a) == BLIS_DOUBLE)) )
 		{
 			bli_zen4_override_trsm_blkszs(&cntx_trsm);
 		}

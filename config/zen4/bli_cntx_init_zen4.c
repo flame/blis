@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2022, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2022-2023, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -41,12 +41,12 @@
 
 #define BLI_CNTX_DEFAULT_BLKSZ_LIST(blkszs) \
     /*                                           s      d      c      z */  \
-    bli_blksz_init_easy( &blkszs[ BLIS_MR ],    32,    16,     3,     3 );  \
-    bli_blksz_init_easy( &blkszs[ BLIS_NR ],    12,    14,     8,     4 );  \
-    bli_blksz_init_easy( &blkszs[ BLIS_MC ],   512,   240,   144,    18 );  \
+    bli_blksz_init_easy( &blkszs[ BLIS_MR ],    32,    32,     3,     3 );  \
+    bli_blksz_init_easy( &blkszs[ BLIS_NR ],    12,     6,     8,     4 );  \
+    bli_blksz_init_easy( &blkszs[ BLIS_MC ],   512,   128,   144,    18 );  \
     bli_blksz_init     ( &blkszs[ BLIS_KC ],   480,   512,   256,   566,    \
                                                480,   320,   256,   566 );  \
-    bli_blksz_init_easy( &blkszs[ BLIS_NC ],  6144,  4004,  4080,   256 );  \
+    bli_blksz_init_easy( &blkszs[ BLIS_NC ],  6144,  4002,  4080,   256 );  \
                                                                             \
     bli_blksz_init_easy( &blkszs[ BLIS_AF ],     8,     8,    -1,    -1 );  \
     bli_blksz_init_easy( &blkszs[ BLIS_DF ],     8,     8,    -1,    -1 );  \
@@ -68,19 +68,20 @@ void bli_cntx_init_zen4( cntx_t* cntx )
       10,
       // gemm
       BLIS_GEMM_UKR,       BLIS_FLOAT ,   bli_sgemm_skx_asm_32x12_l2,   FALSE,
-      BLIS_GEMM_UKR,       BLIS_DOUBLE,   bli_dgemm_skx_asm_16x14,      FALSE,
-      BLIS_GEMM_UKR,       BLIS_SCOMPLEX, bli_cgemm_haswell_asm_3x8,        TRUE,
-      BLIS_GEMM_UKR,       BLIS_DCOMPLEX, bli_zgemm_haswell_asm_3x4,        TRUE,
+      BLIS_GEMM_UKR,       BLIS_DOUBLE,   bli_dgemm_zen4_asm_32x6,      FALSE,
+      BLIS_GEMM_UKR,       BLIS_SCOMPLEX, bli_cgemm_haswell_asm_3x8,    TRUE,
+      BLIS_GEMM_UKR,       BLIS_DCOMPLEX, bli_zgemm_haswell_asm_3x4,    TRUE,
 
-      BLIS_GEMM_AVX2_UKR,       BLIS_FLOAT,    bli_sgemm_haswell_asm_6x16,       TRUE,
-      BLIS_GEMM_AVX2_UKR,       BLIS_DOUBLE,   bli_dgemm_haswell_asm_6x8,        TRUE,
+	  // Different  GEMM kernels are used for TRSM for zen4 architecture
+      BLIS_GEMM_FOR_TRSM_UKR,       BLIS_FLOAT,    bli_sgemm_haswell_asm_6x16,  TRUE,
+      BLIS_GEMM_FOR_TRSM_UKR,       BLIS_DOUBLE,   bli_dgemm_skx_asm_16x14,     FALSE,
 
       // gemmtrsm_l
       BLIS_GEMMTRSM_L_UKR, BLIS_FLOAT,    bli_sgemmtrsm_l_haswell_asm_6x16, TRUE,
-      BLIS_GEMMTRSM_L_UKR, BLIS_DOUBLE,   bli_dgemmtrsm_l_zen_asm_16x14,  TRUE,
+      BLIS_GEMMTRSM_L_UKR, BLIS_DOUBLE,   bli_dgemmtrsm_l_zen_asm_16x14,    TRUE,
       // gemmtrsm_u
       BLIS_GEMMTRSM_U_UKR, BLIS_FLOAT,    bli_sgemmtrsm_u_haswell_asm_6x16, TRUE,
-      BLIS_GEMMTRSM_U_UKR, BLIS_DOUBLE,   bli_dgemmtrsm_u_zen_asm_16x14,  TRUE,
+      BLIS_GEMMTRSM_U_UKR, BLIS_DOUBLE,   bli_dgemmtrsm_u_zen_asm_16x14,    TRUE,
 
       cntx
     );
@@ -99,11 +100,13 @@ void bli_cntx_init_zen4( cntx_t* cntx )
     // packm kernels
     bli_cntx_set_packm_kers
     (
-      8,
+      10,
       BLIS_PACKM_6XK_KER,  BLIS_FLOAT,    bli_spackm_haswell_asm_6xk,
       BLIS_PACKM_16XK_KER, BLIS_FLOAT,    bli_spackm_haswell_asm_16xk,
       BLIS_PACKM_6XK_KER,  BLIS_DOUBLE,   bli_dpackm_haswell_asm_6xk,
       BLIS_PACKM_8XK_KER,  BLIS_DOUBLE,   bli_dpackm_haswell_asm_8xk,
+      BLIS_PACKM_24XK_KER, BLIS_DOUBLE,   bli_dpackm_zen4_asm_24xk,
+      BLIS_PACKM_32XK_KER, BLIS_DOUBLE,   bli_dpackm_32xk_zen4_ref,
       BLIS_PACKM_3XK_KER,  BLIS_SCOMPLEX, bli_cpackm_haswell_asm_3xk,
       BLIS_PACKM_8XK_KER,  BLIS_SCOMPLEX, bli_cpackm_haswell_asm_8xk,
       BLIS_PACKM_3XK_KER,  BLIS_DCOMPLEX, bli_zpackm_haswell_asm_3xk,
