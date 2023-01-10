@@ -122,7 +122,7 @@ AOCL_GEMM_REORDER(float,f32f32f32of32)
 	float* restrict kappa_cast = &one_local;
 
 	// Set the schema to "row stored column panels" to indicate packing to
-	// conventional column-stored row panels.
+	// conventional row-stored column panels.
 	pack_t schema = BLIS_PACKED_COL_PANELS;
 	trans_t transc = BLIS_NO_TRANSPOSE;
 	conj_t conjc = bli_extract_conj( transc );

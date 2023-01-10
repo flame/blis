@@ -458,8 +458,9 @@ BLIS_INLINE void lpgemm_f32f32f32of32_get_threading
 	{
 		if ( ( k > page_size_b_floatx2 ) ||
 			 ( ( k <= page_size_b_floatx2 ) &&
-				  ( m_ic > MT_2 ) && ( n_jc >= NT ) ) )
+			   ( m_ic > MT_2 ) && ( n_jc >= NT ) ) )
 		{
+			bli_rntm_set_pack_b( 1, rntm_g );
 			bli_rntm_set_pack_a( 1, rntm_g );
 		}
 	}

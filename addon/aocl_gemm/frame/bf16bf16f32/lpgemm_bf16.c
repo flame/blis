@@ -335,6 +335,7 @@ LPGEMM_5LOOP(bfloat16,bfloat16,float,bf16bf16f32of32)
 					( void )nr0;
 					( void )mc0;
 					( void )cs_a_use;
+					( void )post_ops_attr;
 #endif
 				}
 			}

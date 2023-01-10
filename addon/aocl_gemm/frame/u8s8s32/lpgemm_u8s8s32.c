@@ -366,6 +366,7 @@ LPGEMM_5LOOP(uint8_t,int8_t,int32_t,u8s8s32o32)
 					( void )a_use;
 					( void )beta0;
 					( void )nr0;
+					( void )post_ops_attr;
 #endif
 				}
 			}

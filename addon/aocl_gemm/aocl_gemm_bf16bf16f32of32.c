@@ -106,6 +106,7 @@ AOCL_GEMM_MATMUL(bfloat16,bfloat16,float,float,bf16bf16f32of32)
 		return; // Error.
 	}
 
+	// The strides are set assuming a row major kernel.
 	const inc_t rs_a = lda;
 	const inc_t cs_a = 1;
 	const inc_t rs_b = ldb;
@@ -118,6 +119,12 @@ AOCL_GEMM_MATMUL(bfloat16,bfloat16,float,float,bf16bf16f32of32)
 
 	bli_param_map_char_to_lpmtag( mem_format_a, &mtag_a );
 	bli_param_map_char_to_lpmtag( mem_format_b, &mtag_b );
+
+	if ( ( is_column_major == TRUE ) && ( mtag_b == REORDERED ) )
+	{
+		// Reorder not supported with column major inputs.
+		return;
+	}
 
 	// B matrix needs to be packed in a certain format in order to be loaded
 	// and used in bf16 instrution. As such the mtag_b always needs to be either
