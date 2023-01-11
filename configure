@@ -365,7 +365,7 @@ print_usage()
 	echo "                          operations except trsm; due to practical and"
 	echo "                          algorithmic limitations, slab partitioning will"
 	echo "                          be used instead during packing and for trsm."
-	echo "                 The default strategy is 'tlb'. NOTE: Specifying this"
+	echo "                 The default strategy is 'slab'. NOTE: Specifying this"
 	echo "                 option constitutes a request, which may be ignored in"
 	echo "                 select situations if implementation has a good reason to"
 	echo "                 do so. (See description of 'tlb' above for an example of"
@@ -2510,7 +2510,7 @@ main()
 	threading_model='off'
 
 	# The method of assigning micropanels to threads in the JR and JR loops.
-	thread_part_jrir='tlb'
+	thread_part_jrir='slab'
 
 	# Option variables.
 	quiet_flag=''
