@@ -201,7 +201,5 @@ void bli_gemmbp_cntl_init
       &cntl->part_pc.cntl,
       &cntl->part_jc
 	);
-
-    bli_cntl_mark_family( family, bli_gemm_cntl_root( cntl ) );
 }
 

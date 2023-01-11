@@ -37,14 +37,12 @@
 
 void bli_cntl_init_node
      (
-       opid_t  family,
        bszid_t bszid,
        void_fp var_func,
        cntl_t* sub_node,
        cntl_t* cntl
      )
 {
-	bli_cntl_set_family( family, cntl );
 	bli_cntl_set_bszid( bszid, cntl );
 	bli_cntl_set_var_func( var_func, cntl );
 	bli_cntl_set_sub_prenode( NULL, cntl );
@@ -56,7 +54,6 @@ void bli_cntl_init_node
 cntl_t* bli_cntl_create_node
      (
        pool_t* pool,
-       opid_t  family,
        bszid_t bszid,
        void_fp var_func,
        void*   params,
@@ -72,7 +69,6 @@ cntl_t* bli_cntl_create_node
 	// Allocate the cntl_t struct.
 	cntl = bli_sba_acquire( pool, sizeof( cntl_t ) );
 
-	bli_cntl_set_family( family, cntl );
 	bli_cntl_set_bszid( bszid, cntl );
 	bli_cntl_set_var_func( var_func, cntl );
 	bli_cntl_set_params( params, cntl );
@@ -150,65 +146,5 @@ void bli_cntl_clear_node
 	bli_cntl_set_var_func( NULL, cntl );
 	bli_cntl_set_sub_prenode( NULL, cntl );
 	bli_cntl_set_sub_node( NULL, cntl );
-}
-
-// -----------------------------------------------------------------------------
-
-void bli_cntl_mark_family
-     (
-       opid_t  family,
-       cntl_t* cntl
-     )
-{
-	// This function sets the family field of all cntl tree nodes that are
-	// children of cntl. It's used by bli_l3_cntl_create_if() after making
-	// a copy of a user-given cntl tree, if the user provided one, to mark
-	// the operation family, which is used to determine appropriate behavior
-	// by various functions when executing the blocked variants.
-
-	// Set the family of the root node.
-	bli_cntl_set_family( family, cntl );
-
-	// Recursively set the family field of the sub-tree rooted at the sub-node,
-	// if it exists.
-	if ( bli_cntl_sub_prenode( cntl ) != NULL )
-	{
-		bli_cntl_mark_family( family, bli_cntl_sub_prenode( cntl ) );
-	}
-
-	// Recursively set the family field of the sub-tree rooted at the prenode,
-	// if it exists.
-	if ( bli_cntl_sub_node( cntl ) != NULL )
-	{
-		bli_cntl_mark_family( family, bli_cntl_sub_node( cntl ) );
-	}
-}
-
-// -----------------------------------------------------------------------------
-
-dim_t bli_cntl_calc_num_threads_in
-     (
-       const rntm_t* rntm,
-       const cntl_t* cntl
-     )
-{
-	dim_t n_threads_in = 1;
-
-	for ( ; cntl != NULL; cntl = bli_cntl_sub_node( cntl ) )
-	{
-		bszid_t bszid = bli_cntl_bszid( cntl );
-		dim_t   cur_way;
-
-		// We assume bszid is in {NC,KC,MC,NR,MR,KR} if it is not
-		// BLIS_NO_PART.
-		if ( bszid != BLIS_NO_PART )
-			cur_way = bli_rntm_ways_for( bszid, rntm );
-		else
-			cur_way = 1;
-
-		n_threads_in *= cur_way;
-	}
-
-	return n_threads_in;
 }
 

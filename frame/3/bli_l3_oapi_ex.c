@@ -312,6 +312,7 @@ void PASTEMAC(gemm,BLIS_OAPI_EX_SUF)
 	// Invoke the internal back-end via the thread handler.
 	bli_l3_thread_decorator
 	(
+      BLIS_GEMM,
 	  &a_local,
 	  &b_local,
 	  cp,
@@ -422,6 +423,7 @@ void PASTEMAC(gemmt,BLIS_OAPI_EX_SUF)
 	// Invoke the internal back-end via the thread handler.
 	bli_l3_thread_decorator
 	(
+      BLIS_GEMMT,
 	  &a_local,
 	  &b_local,
 	  &c_local,
@@ -687,6 +689,7 @@ void PASTEMAC(hemm,BLIS_OAPI_EX_SUF)
 	// Invoke the internal back-end.
 	bli_l3_thread_decorator
 	(
+      BLIS_HEMM,
 	  &a_local,
 	  &b_local,
 	  &c_local,
@@ -831,6 +834,7 @@ void PASTEMAC(symm,BLIS_OAPI_EX_SUF)
 	// Invoke the internal back-end.
 	bli_l3_thread_decorator
 	(
+      BLIS_SYMM,
 	  &a_local,
 	  &b_local,
 	  &c_local,
@@ -986,6 +990,7 @@ void PASTEMAC(trmm3,BLIS_OAPI_EX_SUF)
 	// Invoke the internal back-end.
 	bli_l3_thread_decorator
 	(
+      BLIS_TRMM3,
 	  &a_local,
 	  &b_local,
 	  &c_local,
@@ -1147,6 +1152,7 @@ void PASTEMAC(trmm,BLIS_OAPI_EX_SUF)
 	// Invoke the internal back-end.
 	bli_l3_thread_decorator
 	(
+      BLIS_TRMM,
 	  &a_local,
 	  &b_local,
 	  &c_local,
@@ -1281,6 +1287,7 @@ void PASTEMAC(trsm,BLIS_OAPI_EX_SUF)
 	// Invoke the internal back-end.
 	bli_l3_thread_decorator
 	(
+      BLIS_TRSM,
 	  &a_local,
 	  &b_local,
 	  &c_local,

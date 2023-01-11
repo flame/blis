@@ -84,6 +84,7 @@ static void bli_l3_thread_decorator_entry( thrcomm_t* gl_comm, dim_t tid, const 
 
 void bli_l3_thread_decorator
      (
+             opid_t   family,
        const obj_t*   a,
        const obj_t*   b,
        const obj_t*   c,
@@ -101,7 +102,7 @@ void bli_l3_thread_decorator
 	// additional modifications necessary for the current operation.
 	bli_rntm_set_ways_for_op
 	(
-	  bli_cntl_family( cntl ),
+	  family,
 	  bli_obj_is_triangular( a ) ? BLIS_LEFT : BLIS_RIGHT, // ignored for gemm/hemm/symm
 	  bli_obj_length( c ),
 	  bli_obj_width( c ),

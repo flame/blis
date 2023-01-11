@@ -1068,8 +1068,6 @@ typedef struct mem_s
 
 struct cntl_s
 {
-	// Basic fields (usually required).
-	opid_t         family;
 	bszid_t        bszid;
 	void_fp        var_func;
 	struct cntl_s* sub_prenode;

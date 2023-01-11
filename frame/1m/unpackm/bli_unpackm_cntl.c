@@ -56,7 +56,6 @@ void bli_unpackm_cntl_init_node
 	// sync with the cntl_t tree.
 	bli_cntl_init_node
 	(
-	  BLIS_NOID,
 	  BLIS_NO_PART,
 	  var_func,
 	  sub_node,

@@ -40,7 +40,6 @@
 struct cntl_s
 {
 	// Basic fields (usually required).
-	opid_t         family;
 	bszid_t        bszid;
 	void_fp        var_func;
 	struct cntl_s* sub_prenode;
@@ -56,7 +55,6 @@ typedef struct cntl_s cntl_t;
 
 BLIS_EXPORT_BLIS void bli_cntl_init_node
      (
-       opid_t  family,
        bszid_t bszid,
        void_fp var_func,
        cntl_t* sub_node,
@@ -96,28 +94,7 @@ BLIS_EXPORT_BLIS void bli_cntl_clear_node
 
 // -----------------------------------------------------------------------------
 
-BLIS_EXPORT_BLIS void bli_cntl_mark_family
-     (
-       opid_t  family,
-       cntl_t* cntl
-     );
-
-// -----------------------------------------------------------------------------
-
-dim_t bli_cntl_calc_num_threads_in
-     (
-       const rntm_t* rntm,
-       const cntl_t* cntl
-     );
-
-// -----------------------------------------------------------------------------
-
 // cntl_t query (fields only)
-
-BLIS_INLINE opid_t bli_cntl_family( const cntl_t* cntl )
-{
-	return cntl->family;
-}
 
 BLIS_INLINE bszid_t bli_cntl_bszid( const cntl_t* cntl )
 {
@@ -147,18 +124,7 @@ BLIS_INLINE bool bli_cntl_is_leaf( const cntl_t* cntl )
 	       ( bli_cntl_sub_node( cntl ) == NULL );
 }
 
-BLIS_INLINE bool bli_cntl_does_part( const cntl_t* cntl )
-{
-	return ( bool )
-	       ( bli_cntl_bszid( cntl ) != BLIS_NO_PART );
-}
-
 // cntl_t modification
-
-BLIS_INLINE void bli_cntl_set_family( opid_t family, cntl_t* cntl )
-{
-	cntl->family = family;
-}
 
 BLIS_INLINE void bli_cntl_set_bszid( bszid_t bszid, cntl_t* cntl )
 {

@@ -39,6 +39,7 @@
 // Level-3 thread decorator prototype.
 void bli_l3_thread_decorator
      (
+             opid_t   family,
        const obj_t*   a,
        const obj_t*   b,
        const obj_t*   c,

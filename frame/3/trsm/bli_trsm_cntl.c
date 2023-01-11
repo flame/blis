@@ -66,7 +66,6 @@ void bli_trsm_l_cntl_init
     // Set the default macrokernel.
 	void_fp macro_kernel_p = bli_trsm_xx_ker_var2;
 
-	const opid_t family   = BLIS_TRSM;
     const dir_t  direct   = bli_obj_is_lower( a ) ? BLIS_FWD : BLIS_BWD;
     const num_t  dt       = bli_obj_comp_dt( c );
     const dim_t  ir_bsize = bli_cntx_get_blksz_def_dt( dt, BLIS_MR, cntx );
@@ -249,8 +248,6 @@ void bli_trsm_l_cntl_init
 	  &cntl->part_pc.cntl,
       &cntl->part_jc
 	);
-
-    bli_cntl_mark_family( family, bli_trsm_cntl_root( cntl ) );
 }
 
 void bli_trsm_r_cntl_init
@@ -268,7 +265,6 @@ void bli_trsm_r_cntl_init
     // Set the default macrokernel.
 	void_fp macro_kernel_p = bli_trsm_xx_ker_var2;
 
-	const opid_t family   = BLIS_TRSM;
 	const dir_t  direct   = bli_obj_is_lower( b ) ? BLIS_BWD : BLIS_FWD;
     const num_t  dt       = bli_obj_comp_dt( c );
     const dim_t  ir_bsize = bli_cntx_get_blksz_def_dt( dt, BLIS_MR, cntx );
@@ -391,7 +387,5 @@ void bli_trsm_r_cntl_init
 	  &cntl->part_pc.cntl,
       &cntl->part_jc
 	);
-
-    bli_cntl_mark_family( family, bli_trsm_cntl_root( cntl ) );
 }
 

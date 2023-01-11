@@ -57,7 +57,6 @@ void bli_part_cntl_init_node
 
 	bli_cntl_init_node
 	(
-	  BLIS_NOID,
 	  bszid,
 	  var_func,
 	  sub_node,
