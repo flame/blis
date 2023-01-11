@@ -233,16 +233,18 @@ void bli_gemmsup_ref_var1n
 	// Determine whether we are using more than one thread.
 	const bool is_mt = ( bli_rntm_calc_num_threads( rntm ) > 1 );
 
-	thrinfo_t* thread_jc = bli_thrinfo_sub_node( thread );
-	thrinfo_t* thread_pc = bli_thrinfo_sub_node( thread_jc );
-	thrinfo_t* thread_pa = bli_thrinfo_sub_node( thread_pc );
-	thrinfo_t* thread_ic = bli_thrinfo_sub_node( thread_pa );
-	thrinfo_t* thread_pb = bli_thrinfo_sub_node( thread_ic );
-	thrinfo_t* thread_jr = bli_thrinfo_sub_node( thread_pb );
+	thrinfo_t* thread_jc = bli_thrinfo_sub_node( 0, thread );
+	thrinfo_t* thread_pc = bli_thrinfo_sub_node( 0, thread_jc );
+	thrinfo_t* thread_pa = bli_thrinfo_sub_node( 0, thread_pc );
+	thrinfo_t* thread_ic = bli_thrinfo_sub_node( 0, thread_pa );
+	thrinfo_t* thread_pb = bli_thrinfo_sub_node( 0, thread_ic );
+	thrinfo_t* thread_jr = bli_thrinfo_sub_node( 0, thread_pb );
 
 	// Compute the JC loop thread range for the current thread.
 	dim_t jc_start, jc_end;
-	bli_thread_range_sub( thread_jc, m, MR, FALSE, &jc_start, &jc_end );
+    dim_t jc_tid = bli_thrinfo_work_id( thread_jc );
+    dim_t jc_nt  = bli_thrinfo_num_threads( thread_jc );
+	bli_thread_range_sub( jc_tid, jc_nt, m, MR, FALSE, &jc_start, &jc_end );
 	const dim_t m_local = jc_end - jc_start;
 
 	// Compute number of primary and leftover components of the JC loop.
@@ -319,7 +321,9 @@ void bli_gemmsup_ref_var1n
 
 			// Compute the IC loop thread range for the current thread.
 			dim_t ic_start, ic_end;
-			bli_thread_range_sub( thread_ic, n, NR, FALSE, &ic_start, &ic_end );
+            dim_t ic_tid = bli_thrinfo_work_id( thread_ic );
+            dim_t ic_nt  = bli_thrinfo_num_threads( thread_ic );
+			bli_thread_range_sub( ic_tid, ic_nt, n, NR, FALSE, &ic_start, &ic_end );
 			const dim_t n_local = ic_end - ic_start;
 
 			// Compute number of primary and leftover components of the IC loop.
@@ -389,7 +393,9 @@ void bli_gemmsup_ref_var1n
 
 				// Compute the JR loop thread range for the current thread.
 				dim_t jr_start, jr_end;
-				bli_thread_range_sub( thread_jr, jr_iter, 1, FALSE, &jr_start, &jr_end );
+                dim_t jr_tid = bli_thrinfo_work_id( thread_jr );
+                dim_t jr_nt  = bli_thrinfo_num_threads( thread_jr );
+				bli_thread_range_sub( jr_tid, jr_nt, jr_iter, 1, FALSE, &jr_start, &jr_end );
 
 				// Loop over the m dimension (NR columns at a time).
 				//for ( dim_t j = 0; j < jr_iter; j += 1 )
@@ -635,16 +641,18 @@ void bli_gemmsup_ref_var2m
 	// Determine whether we are using more than one thread.
 	const bool is_mt = ( bli_rntm_calc_num_threads( rntm ) > 1 );
 
-	thrinfo_t* thread_jc = bli_thrinfo_sub_node( thread );
-	thrinfo_t* thread_pc = bli_thrinfo_sub_node( thread_jc );
-	thrinfo_t* thread_pb = bli_thrinfo_sub_node( thread_pc );
-	thrinfo_t* thread_ic = bli_thrinfo_sub_node( thread_pb );
-	thrinfo_t* thread_pa = bli_thrinfo_sub_node( thread_ic );
-	thrinfo_t* thread_jr = bli_thrinfo_sub_node( thread_pa );
+	thrinfo_t* thread_jc = bli_thrinfo_sub_node( 0, thread );
+	thrinfo_t* thread_pc = bli_thrinfo_sub_node( 0, thread_jc );
+	thrinfo_t* thread_pb = bli_thrinfo_sub_node( 0, thread_pc );
+	thrinfo_t* thread_ic = bli_thrinfo_sub_node( 0, thread_pb );
+	thrinfo_t* thread_pa = bli_thrinfo_sub_node( 0, thread_ic );
+	thrinfo_t* thread_jr = bli_thrinfo_sub_node( 0, thread_pa );
 
 	// Compute the JC loop thread range for the current thread.
 	dim_t jc_start, jc_end;
-	bli_thread_range_sub( thread_jc, n, NR, FALSE, &jc_start, &jc_end );
+    dim_t jc_tid = bli_thrinfo_work_id( thread_jc );
+    dim_t jc_nt  = bli_thrinfo_num_threads( thread_jc );
+	bli_thread_range_sub( jc_tid, jc_nt, n, NR, FALSE, &jc_start, &jc_end );
 	const dim_t n_local = jc_end - jc_start;
 
 	// Compute number of primary and leftover components of the JC loop.
@@ -719,7 +727,9 @@ void bli_gemmsup_ref_var2m
 
 			// Compute the IC loop thread range for the current thread.
 			dim_t ic_start, ic_end;
-			bli_thread_range_sub( thread_ic, m, MR, FALSE, &ic_start, &ic_end );
+            dim_t ic_tid = bli_thrinfo_work_id( thread_ic );
+            dim_t ic_nt  = bli_thrinfo_num_threads( thread_ic );
+			bli_thread_range_sub( ic_tid, ic_nt, m, MR, FALSE, &ic_start, &ic_end );
 			const dim_t m_local = ic_end - ic_start;
 
 			// Compute number of primary and leftover components of the IC loop.
@@ -787,7 +797,9 @@ void bli_gemmsup_ref_var2m
 
 				// Compute the JR loop thread range for the current thread.
 				dim_t jr_start, jr_end;
-				bli_thread_range_sub( thread_jr, jr_iter, 1, FALSE, &jr_start, &jr_end );
+                dim_t jr_tid = bli_thrinfo_work_id( thread_jr );
+                dim_t jr_nt  = bli_thrinfo_num_threads( thread_jr );
+				bli_thread_range_sub( jr_tid, jr_nt, jr_iter, 1, FALSE, &jr_start, &jr_end );
 
 				// Loop over the n dimension (NR columns at a time).
 				//for ( dim_t j = 0; j < jr_iter; j += 1 )

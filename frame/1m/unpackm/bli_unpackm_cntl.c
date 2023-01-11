@@ -39,7 +39,6 @@ void bli_unpackm_cntl_init_node
      (
        void_fp         var_func,
        void_fp         unpackm_var_func,
-       cntl_t*         sub_node,
        unpackm_cntl_t* cntl
      )
 {
@@ -56,9 +55,7 @@ void bli_unpackm_cntl_init_node
 	// sync with the cntl_t tree.
 	bli_cntl_init_node
 	(
-	  BLIS_NO_PART,
 	  var_func,
-	  sub_node,
       &cntl->cntl
 	);
 }

@@ -194,10 +194,10 @@ void bli_trsm_lu_ker_var2
 	// We don't bother querying the thrinfo_t node for the 1st loop because
 	// we can't parallelize that loop in trsm due to the inter-iteration
 	// dependencies that exist.
-	//thrinfo_t* caucus = bli_thrinfo_sub_node( thread );
+	//thrinfo_t* caucus = bli_thrinfo_sub_node( 0, thread );
 
 	// Query the number of threads and thread ids for each loop.
-	thrinfo_t* thread = bli_thrinfo_sub_node( thread_par );
+	thrinfo_t* thread = bli_thrinfo_sub_node( 0, thread_par );
 	dim_t jr_nt  = bli_thrinfo_n_way( thread );
 	dim_t jr_tid = bli_thrinfo_work_id( thread );
 
@@ -209,7 +209,7 @@ void bli_trsm_lu_ker_var2
 	// slab or round-robin partitioning was requested at configure-time.
 	// NOTE: Parallelism in the 1st loop is unattainable due to the
 	// inter-iteration dependencies present in trsm.
-	bli_thread_range_jrir( thread, n_iter, 1, FALSE, &jr_start, &jr_end, &jr_inc );
+	bli_thread_range_jrir( jr_tid, jr_nt, n_iter, 1, FALSE, &jr_start, &jr_end, &jr_inc );
 
 	// Loop over the n dimension (NR columns at a time).
 	for ( dim_t j = jr_start; j < jr_end; j += jr_inc )

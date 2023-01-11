@@ -81,9 +81,9 @@ BLIS_EXPORT_BLIS thrinfo_t* bli_l3_thrinfo_create
 
 void bli_l3_thrinfo_grow
      (
-             thrinfo_t*  thread_par,
-       const rntm_t*     rntm,
-       const cntl_t*     cntl
+             thrinfo_t* thread,
+       const rntm_t*    rntm,
+       const cntl_t*    cntl
      );
 
 thrinfo_t* bli_l3_sup_thrinfo_create

@@ -75,13 +75,11 @@ BLIS_INLINE bool bli_part_cntl_use_weighted( const cntl_t* cntl )
 void bli_part_cntl_init_node
      (
        void_fp      var_func,
-       bszid_t      bszid,
        dim_t        b_alg,
        dim_t        b_max,
        dim_t        b_mult,
        dir_t        direct,
        bool         use_weighted,
-       cntl_t*      sub_node,
        part_cntl_t* cntl
      );
 

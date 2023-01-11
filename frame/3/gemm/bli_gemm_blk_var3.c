@@ -49,7 +49,7 @@ void bli_gemm_blk_var3
 	bli_obj_alias_to( b, &bp );
 	bli_obj_alias_to( c, &cs );
 
-	thrinfo_t* thread = bli_thrinfo_sub_node( thread_par );
+	thrinfo_t* thread = bli_thrinfo_sub_node( 0, thread_par );
 
 	// Determine the direction in which to partition (forwards or backwards).
 	const dir_t direct = bli_part_cntl_direct( cntl );
@@ -83,7 +83,7 @@ void bli_gemm_blk_var3
 		  &b1,
 		  &cs,
 		  cntx,
-		  bli_cntl_sub_node( cntl ),
+		  bli_cntl_sub_node( 0, cntl ),
 		  thread
 		);
 

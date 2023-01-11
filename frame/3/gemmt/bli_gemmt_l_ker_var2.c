@@ -225,8 +225,8 @@ void bli_gemmt_l_ker_var2
 	// The 'thread' argument points to the thrinfo_t node for the 2nd (jr)
 	// loop around the microkernel. Here we query the thrinfo_t node for the
 	// 1st (ir) loop around the microkernel.
-	thrinfo_t* thread = bli_thrinfo_sub_node( thread_par );
-	thrinfo_t* caucus = bli_thrinfo_sub_node( thread );
+	thrinfo_t* thread = bli_thrinfo_sub_node( 0, thread_par );
+	thrinfo_t* caucus = bli_thrinfo_sub_node( 0, thread );
 
 	// Query the number of threads and thread ids for each loop.
 	dim_t jr_nt  = bli_thrinfo_n_way( thread );
@@ -269,8 +269,8 @@ void bli_gemmt_l_ker_var2
 	// the initial rectangular region of C (if it exists).
 	// NOTE: The definition of bli_thread_range_jrir() will depend on whether
 	// slab or round-robin partitioning was requested at configure-time.
-	bli_thread_range_jrir( thread, n_iter_rct, 1, FALSE, &jr_start, &jr_end, &jr_inc );
-	bli_thread_range_jrir( caucus, m_iter,     1, FALSE, &ir_start, &ir_end, &ir_inc );
+	bli_thread_range_jrir( jr_tid, jr_nt, n_iter_rct, 1, FALSE, &jr_start, &jr_end, &jr_inc );
+	bli_thread_range_jrir( ir_tid, ir_nt, m_iter,     1, FALSE, &ir_start, &ir_end, &ir_inc );
 
 	// Loop over the n dimension (NR columns at a time).
 	for ( dim_t j = jr_start; j < jr_end; j += jr_inc )
@@ -342,7 +342,7 @@ void bli_gemmt_l_ker_var2
 	// Use round-robin assignment of micropanels to threads in the 2nd loop
 	// and the default (slab or rr) partitioning in the 1st loop for the
 	// remaining triangular region of C.
-	bli_thread_range_jrir_rr( thread, n_iter_tri, 1, FALSE, &jr_start, &jr_end, &jr_inc );
+	bli_thread_range_jrir_rr( jr_tid, jr_nt, n_iter_tri, 1, FALSE, &jr_start, &jr_end, &jr_inc );
 
 	// Advance the start and end iteration offsets for the triangular region
 	// by the number of iterations used for the rectangular region.

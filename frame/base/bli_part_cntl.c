@@ -38,13 +38,11 @@
 void bli_part_cntl_init_node
      (
        void_fp      var_func,
-       bszid_t      bszid,
        dim_t        b_alg,
        dim_t        b_max,
        dim_t        b_mult,
        dir_t        direct,
        bool         use_weighted,
-       cntl_t*      sub_node,
        part_cntl_t* cntl
      )
 {
@@ -57,9 +55,7 @@ void bli_part_cntl_init_node
 
 	bli_cntl_init_node
 	(
-	  bszid,
 	  var_func,
-	  sub_node,
       &cntl->cntl
 	);
 }

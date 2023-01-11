@@ -94,7 +94,6 @@ void bli_packm_cntl_init_node
        bool          rev_iter_if_lower,
        pack_t        pack_schema,
        packbuf_t     pack_buf_type,
-       cntl_t*       sub_node,
        packm_cntl_t* cntl
      );
 

@@ -84,7 +84,6 @@ static void bli_l3_thread_decorator_entry( thrcomm_t* gl_comm, dim_t tid, const 
 
 void bli_l3_thread_decorator
      (
-             opid_t   family,
        const obj_t*   a,
        const obj_t*   b,
        const obj_t*   c,
@@ -97,18 +96,15 @@ void bli_l3_thread_decorator
     if ( rntm != NULL ) rntm_l = *rntm;
     else bli_rntm_init_from_global( &rntm_l );
 
-	// Parse and interpret the contents of the rntm_t object to properly
-	// set the ways of parallelism for each loop, and then make any
-	// additional modifications necessary for the current operation.
-	bli_rntm_set_ways_for_op
-	(
-	  family,
-	  bli_obj_is_triangular( a ) ? BLIS_LEFT : BLIS_RIGHT, // ignored for gemm/hemm/symm
-	  bli_obj_length( c ),
-	  bli_obj_width( c ),
-	  bli_obj_width( a ),
-	  &rntm_l
-	);
+	// Set the number of ways for each loop, if needed, depending on what
+	// kind of information is already stored in the rntm_t object.
+	bli_rntm_factorize
+    (
+      bli_obj_length( c ),
+      bli_obj_width( c ),
+      bli_obj_width( a ),
+      &rntm_l
+    );
 
 	// Query the threading implementation and the number of threads requested.
 	timpl_t ti = bli_rntm_thread_impl( &rntm_l );

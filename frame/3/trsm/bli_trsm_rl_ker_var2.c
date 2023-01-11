@@ -185,7 +185,7 @@ void bli_trsm_rl_ker_var2
 	   dimension that is a multiple of PACKNR, with the region between the
 	   last column and the next multiple of NR zero-padded accordingly. */
 
-	thrinfo_t* thread = bli_thrinfo_sub_node( thread_par );
+	thrinfo_t* thread = bli_thrinfo_sub_node( 0, thread_par );
 
 	/* Compute number of primary and leftover components of the m and n
 	   dimensions. */

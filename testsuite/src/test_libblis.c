@@ -859,12 +859,14 @@ void libblis_test_output_params_struct( FILE* os, test_params_t* params )
 	bli_rntm_init_from_global( &trsm_l );
 	bli_rntm_init_from_global( &trsm_r );
 
+    /*
 	bli_rntm_set_ways_for_op( BLIS_GEMM, BLIS_LEFT,  m, n, k, &gemm );
 	bli_rntm_set_ways_for_op( BLIS_HERK, BLIS_LEFT,  m, n, k, &herk );
 	bli_rntm_set_ways_for_op( BLIS_TRMM, BLIS_LEFT,  m, n, k, &trmm_l );
 	bli_rntm_set_ways_for_op( BLIS_TRMM, BLIS_RIGHT, m, n, k, &trmm_r );
 	bli_rntm_set_ways_for_op( BLIS_TRSM, BLIS_LEFT,  m, n, k, &trsm_l );
 	bli_rntm_set_ways_for_op( BLIS_TRSM, BLIS_RIGHT, m, n, k, &trsm_r );
+    */
 
 	// Output some system parameters.
 	libblis_test_fprintf_c( os, "\n" );
@@ -929,6 +931,7 @@ void libblis_test_output_params_struct( FILE* os, test_params_t* params )
 	libblis_test_fprintf_c( os, "  environment        %5s %5s %5s %5s %5s %5s\n",
 	                                                               nt_str, jc_nt_str, pc_nt_str,
 	                                                            ic_nt_str, jr_nt_str, ir_nt_str );
+    /*
 	libblis_test_fprintf_c( os, "  gemm   (m,n,k=1000)      %5d %5d %5d %5d %5d\n",
 	                                ( int )bli_rntm_jc_ways( &gemm ), ( int )bli_rntm_pc_ways( &gemm ),
 	                                ( int )bli_rntm_ic_ways( &gemm ),
@@ -953,6 +956,7 @@ void libblis_test_output_params_struct( FILE* os, test_params_t* params )
 	                                ( int )bli_rntm_jc_ways( &trsm_r ), ( int )bli_rntm_pc_ways( &trsm_r ),
 	                                ( int )bli_rntm_ic_ways( &trsm_r ),
 	                                ( int )bli_rntm_jr_ways( &trsm_r ), ( int )bli_rntm_ir_ways( &trsm_r ) );
+    */
 	libblis_test_fprintf_c( os, "\n" );
 	libblis_test_fprintf_c( os, "thread partitioning              \n" );
 	//libblis_test_fprintf_c( os, "  jc/ic loops                  %s\n", "slab" );
@@ -2690,7 +2694,6 @@ thrinfo_t* libblis_test_pobj_create( bszid_t bmult_id_m, bszid_t bmult_id_n, inv
 	  FALSE,
 	  pack_schema,
 	  pack_buf,
-	  NULL, // no child node needed
       &cntl
 	);
 

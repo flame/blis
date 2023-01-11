@@ -186,17 +186,19 @@ void PASTECH2(bls_,ch,varname) \
 \
 	auxinfo_t       aux; \
 \
-	thrinfo_t* restrict thread_jc = bli_thrinfo_sub_node( thread ); \
-	thrinfo_t* restrict thread_pc = bli_thrinfo_sub_node( thread_jc ); \
-	thrinfo_t* restrict thread_pb = bli_thrinfo_sub_node( thread_pc ); \
-	thrinfo_t* restrict thread_ic = bli_thrinfo_sub_node( thread_pb ); \
-	thrinfo_t* restrict thread_pa = bli_thrinfo_sub_node( thread_ic ); \
-	thrinfo_t* restrict thread_jr = bli_thrinfo_sub_node( thread_pa ); \
-	thrinfo_t* restrict thread_ir = bli_thrinfo_sub_node( thread_jr ); \
+	thrinfo_t* restrict thread_jc = bli_thrinfo_sub_node( 0, thread ); \
+	thrinfo_t* restrict thread_pc = bli_thrinfo_sub_node( 0, thread_jc ); \
+	thrinfo_t* restrict thread_pb = bli_thrinfo_sub_node( 0, thread_pc ); \
+	thrinfo_t* restrict thread_ic = bli_thrinfo_sub_node( 0, thread_pb ); \
+	thrinfo_t* restrict thread_pa = bli_thrinfo_sub_node( 0, thread_ic ); \
+	thrinfo_t* restrict thread_jr = bli_thrinfo_sub_node( 0, thread_pa ); \
+	thrinfo_t* restrict thread_ir = bli_thrinfo_sub_node( 0, thread_jr ); \
 \
 	/* Compute the JC loop thread range for the current thread. */ \
 	dim_t jc_start, jc_end; \
-	bli_thread_range_sub( thread_jc, n, NR, FALSE, &jc_start, &jc_end ); \
+    dim_t jc_tid = bli_thrinfo_work_id( thread_jc ); \
+    dim_t jc_nt  = bli_thrinfo_n_way( thread_jc ); \
+	bli_thread_range_sub( jc_tid, jc_nt, n, NR, FALSE, &jc_start, &jc_end ); \
 	const dim_t n_local = jc_end - jc_start; \
 \
 	/* Compute number of primary and leftover components of the JC loop. */ \
@@ -256,7 +258,9 @@ void PASTECH2(bls_,ch,varname) \
 \
 			/* Compute the IC loop thread range for the current thread. */ \
 			dim_t ic_start, ic_end; \
-			bli_thread_range_sub( thread_ic, m, MR, FALSE, &ic_start, &ic_end ); \
+            dim_t ic_tid = bli_thrinfo_work_id( thread_ic ); \
+            dim_t ic_nt  = bli_thrinfo_n_way( thread_ic ); \
+			bli_thread_range_sub( ic_tid, ic_nt, m, MR, FALSE, &ic_start, &ic_end ); \
 			const dim_t m_local = ic_end - ic_start; \
 \
 			/* Compute number of primary and leftover components of the IC loop. */ \
@@ -306,7 +310,7 @@ void PASTECH2(bls_,ch,varname) \
 \
 				/* Compute the JR loop thread range for the current thread. */ \
 				dim_t jr_start, jr_end; \
-				bli_thread_range_sub( thread_jr, jr_iter, 1, FALSE, &jr_start, &jr_end ); \
+				bli_thread_range_sub( jr_tid, jr_nt, jr_iter, 1, FALSE, &jr_start, &jr_end ); \
 \
 				/* Loop over the n dimension (NR columns at a time). */ \
 				for ( dim_t j = jr_start; j < jr_end; j += 1 ) \
@@ -333,7 +337,7 @@ void PASTECH2(bls_,ch,varname) \
 \
 					/* Compute the IR loop thread range for the current thread. */ \
 					dim_t ir_start, ir_end; \
-					bli_thread_range_sub( thread_ir, ir_iter, 1, FALSE, &ir_start, &ir_end ); \
+					bli_thread_range_sub( ir_tid, ir_nt, ir_iter, 1, FALSE, &ir_start, &ir_end ); \
 \
 					/* Loop over the m dimension (MR rows at a time). */ \
 					for ( dim_t i = ir_start; i < ir_end; i += 1 ) \

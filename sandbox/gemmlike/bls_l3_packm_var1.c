@@ -134,7 +134,7 @@ void PASTECH2(bls_,ch,varname) \
 	   packm thrinfo_t node. NOTE: The definition of bli_thread_range_jrir()
 	   will depend on whether slab or round-robin partitioning was requested
 	   at configure-time. */ \
-	bli_thread_range_jrir( thread, n_iter, 1, FALSE, &it_start, &it_end, &it_inc ); \
+	bli_thread_range_jrir( tid, nt, n_iter, 1, FALSE, &it_start, &it_end, &it_inc ); \
 \
 	/* Iterate over every logical micropanel in the source matrix. */ \
 	for ( ic  = ic0,    it  = 0; it < n_iter; \

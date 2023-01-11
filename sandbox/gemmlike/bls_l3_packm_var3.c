@@ -132,7 +132,7 @@ void PASTECH2(bls_,ch,varname) \
 \
 	/* Determine the thread range and increment using the current thread's
 	   packm thrinfo_t node. */ \
-	bli_thread_range_sub( thread, panel_len, 1, FALSE, &pr_start, &pr_end ); \
+	bli_thread_range_sub( tid, nt, panel_len, 1, FALSE, &pr_start, &pr_end ); \
 \
 	/* Define instances of panel_len and panel_len_max that are specific to
 	   the local thread. */ \

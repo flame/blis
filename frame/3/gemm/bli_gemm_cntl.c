@@ -77,6 +77,7 @@ void bli_gemmbp_cntl_init
 
     const bool  a_lo_tri = bli_obj_is_triangular( a ) && bli_obj_is_lower( a );
     const bool  b_up_tri = bli_obj_is_triangular( b ) && bli_obj_is_upper( b );
+    const bool  trmm_r   = family == BLIS_TRMM && bli_obj_is_triangular( b );
     const num_t dt       = bli_obj_comp_dt( c );
     const dim_t ir_bsize = bli_cntx_get_blksz_def_dt( dt, BLIS_MR, cntx );
     const dim_t jr_bsize = bli_cntx_get_blksz_def_dt( dt, BLIS_NR, cntx );
@@ -107,28 +108,30 @@ void bli_gemmbp_cntl_init
 	bli_part_cntl_init_node
 	(
 	  NULL,         // variant function pointer not used
-	  BLIS_MR,      // block size id
       ir_bsize,     // algorithmic block size
       ir_bsize,     // max block size
       ir_bsize,     // block size mult
       BLIS_FWD,     // partioning direction
       FALSE,        // use weighted partitioning
-	  NULL,         // no sub-node; this is the leaf of the tree.
       &cntl->part_ir
 	);
 
 	bli_part_cntl_init_node
 	(
 	  macro_kernel_fp,
-	  BLIS_NR,
       jr_bsize,
       jr_bsize,
       jr_bsize,
       BLIS_FWD,
       FALSE,
-      &cntl->part_ir.cntl,
       &cntl->part_jr
 	);
+    bli_cntl_attach_sub_node
+    (
+      BLIS_THREAD_NR,
+      &cntl->part_ir.cntl,
+      &cntl->part_jr.cntl
+    );
 
 	// Create a node for packing matrix A.
 	bli_packm_cntl_init_node
@@ -141,23 +144,32 @@ void bli_gemmbp_cntl_init
 	  FALSE,        // reverse iteration if lower?
 	  schema_a,     // normally BLIS_PACKED_ROW_PANELS
 	  BLIS_BUFFER_FOR_A_BLOCK,
-      &cntl->part_jr.cntl,
       &cntl->pack_a
 	);
+    bli_cntl_attach_sub_node
+    (
+      BLIS_THREAD_NONE,
+      &cntl->part_jr.cntl,
+      &cntl->pack_a.cntl
+    );
 
 	// Create a node for partitioning the m dimension by MC.
 	bli_part_cntl_init_node
 	(
 	  bli_gemm_blk_var1,
-	  BLIS_MC,
       ic_alg,
       ic_max,
       ic_mult,
       ic_dir,
-      bli_obj_is_triangular( a ) || bli_obj_is_triangular( c ),
-      &cntl->pack_a.cntl,
+      bli_obj_is_triangular( a ) || bli_obj_is_upper_or_lower( c ),
       &cntl->part_ic
 	);
+    bli_cntl_attach_sub_node
+    (
+      trmm_r ? BLIS_THREAD_MC | BLIS_THREAD_NC : BLIS_THREAD_MC,
+      &cntl->pack_a.cntl,
+      &cntl->part_ic.cntl
+    );
 
 	// Create a node for packing matrix B.
 	bli_packm_cntl_init_node
@@ -170,36 +182,49 @@ void bli_gemmbp_cntl_init
 	  FALSE,        // reverse iteration if lower?
 	  schema_b,     // normally BLIS_PACKED_COL_PANELS
 	  BLIS_BUFFER_FOR_B_PANEL,
-      &cntl->part_ic.cntl,
       &cntl->pack_b
 	);
+    bli_cntl_attach_sub_node
+    (
+      BLIS_THREAD_NONE,
+      &cntl->part_ic.cntl,
+      &cntl->pack_b.cntl
+    );
 
 	// Create a node for partitioning the k dimension by KC.
 	bli_part_cntl_init_node
 	(
 	  bli_gemm_blk_var3,
-	  BLIS_KC,
       pc_alg,
       pc_max,
       pc_mult,
       pc_dir,
       FALSE,
-      &cntl->pack_b.cntl,
       &cntl->part_pc
 	);
+    bli_cntl_attach_sub_node
+    (
+      BLIS_THREAD_KC,
+      &cntl->pack_b.cntl,
+      &cntl->part_pc.cntl
+    );
 
 	// Create a node for partitioning the n dimension by NC.
 	bli_part_cntl_init_node
 	(
 	  bli_gemm_blk_var2,
-	  BLIS_NC,
       jc_alg,
       jc_max,
       jc_mult,
       jc_dir,
-      bli_obj_is_triangular( b ) || bli_obj_is_triangular( c ),
-      &cntl->part_pc.cntl,
+      bli_obj_is_triangular( b ) || bli_obj_is_upper_or_lower( c ),
       &cntl->part_jc
 	);
+    bli_cntl_attach_sub_node
+    (
+      trmm_r ? BLIS_THREAD_NONE : BLIS_THREAD_NC,
+      &cntl->part_pc.cntl,
+      &cntl->part_jc.cntl
+    );
 }
 

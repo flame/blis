@@ -94,9 +94,11 @@ void bli_l3_attach_scalars
 
 // If a sandbox was enabled, we forgo defining bli_gemm_ex() since it will be
 // defined in the sandbox environment.
-#ifndef BLIS_ENABLE_SANDBOX
-
+#ifdef BLIS_ENABLE_SANDBOX
+void PASTEMAC(gemm_def,BLIS_OAPI_EX_SUF)
+#else
 void PASTEMAC(gemm,BLIS_OAPI_EX_SUF)
+#endif
      (
        const obj_t*  alpha,
        const obj_t*  a,
@@ -312,7 +314,6 @@ void PASTEMAC(gemm,BLIS_OAPI_EX_SUF)
 	// Invoke the internal back-end via the thread handler.
 	bli_l3_thread_decorator
 	(
-      BLIS_GEMM,
 	  &a_local,
 	  &b_local,
 	  cp,
@@ -333,8 +334,6 @@ void PASTEMAC(gemm,BLIS_OAPI_EX_SUF)
 #endif
 #endif
 }
-
-#endif
 
 
 void PASTEMAC(gemmt,BLIS_OAPI_EX_SUF)
@@ -423,7 +422,6 @@ void PASTEMAC(gemmt,BLIS_OAPI_EX_SUF)
 	// Invoke the internal back-end via the thread handler.
 	bli_l3_thread_decorator
 	(
-      BLIS_GEMMT,
 	  &a_local,
 	  &b_local,
 	  &c_local,
@@ -689,7 +687,6 @@ void PASTEMAC(hemm,BLIS_OAPI_EX_SUF)
 	// Invoke the internal back-end.
 	bli_l3_thread_decorator
 	(
-      BLIS_HEMM,
 	  &a_local,
 	  &b_local,
 	  &c_local,
@@ -834,7 +831,6 @@ void PASTEMAC(symm,BLIS_OAPI_EX_SUF)
 	// Invoke the internal back-end.
 	bli_l3_thread_decorator
 	(
-      BLIS_SYMM,
 	  &a_local,
 	  &b_local,
 	  &c_local,
@@ -990,7 +986,6 @@ void PASTEMAC(trmm3,BLIS_OAPI_EX_SUF)
 	// Invoke the internal back-end.
 	bli_l3_thread_decorator
 	(
-      BLIS_TRMM3,
 	  &a_local,
 	  &b_local,
 	  &c_local,
@@ -1152,7 +1147,6 @@ void PASTEMAC(trmm,BLIS_OAPI_EX_SUF)
 	// Invoke the internal back-end.
 	bli_l3_thread_decorator
 	(
-      BLIS_TRMM,
 	  &a_local,
 	  &b_local,
 	  &c_local,
@@ -1287,7 +1281,6 @@ void PASTEMAC(trsm,BLIS_OAPI_EX_SUF)
 	// Invoke the internal back-end.
 	bli_l3_thread_decorator
 	(
-      BLIS_TRSM,
 	  &a_local,
 	  &b_local,
 	  &c_local,

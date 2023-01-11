@@ -50,7 +50,6 @@ void bli_unpackm_cntl_init_node
      (
        void_fp         var_func,
        void_fp         unpackm_var_func,
-       cntl_t*         sub_node,
        unpackm_cntl_t* cntl
      );
 

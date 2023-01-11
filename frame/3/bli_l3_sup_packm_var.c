@@ -145,8 +145,8 @@ void PASTEMAC(ch,varname) \
 \
 	/* Query the number of threads and thread ids from the current thread's
 	   packm thrinfo_t node. */ \
-	const dim_t nt  = bli_thrinfo_n_way( thread ); \
-	const dim_t tid = bli_thrinfo_work_id( thread ); \
+	const dim_t nt  = bli_thrinfo_num_threads( thread ); \
+	const dim_t tid = bli_thrinfo_thread_id( thread ); \
 \
 	/* Suppress warnings in case tid isn't used (ie: as in slab partitioning). */ \
 	( void )nt; \
@@ -158,7 +158,7 @@ void PASTEMAC(ch,varname) \
 	   packm thrinfo_t node. NOTE: The definition of bli_thread_range_jrir()
 	   will depend on whether slab or round-robin partitioning was requested
 	   at configure-time. */ \
-	bli_thread_range_jrir( thread, n_iter, 1, FALSE, &it_start, &it_end, &it_inc ); \
+	bli_thread_range_jrir( tid, nt, n_iter, 1, FALSE, &it_start, &it_end, &it_inc ); \
 \
 	/* Iterate over every logical micropanel in the source matrix. */ \
 	for ( ic  = ic0,    it  = 0; it < n_iter; \
@@ -388,8 +388,8 @@ void PASTEMAC(ch,varname) \
 \
 	/* Query the number of threads and thread ids from the current thread's
 	   packm thrinfo_t node. */ \
-	const dim_t nt  = bli_thrinfo_n_way( thread ); \
-	const dim_t tid = bli_thrinfo_work_id( thread ); \
+	const dim_t nt  = bli_thrinfo_num_threads( thread ); \
+	const dim_t tid = bli_thrinfo_thread_id( thread ); \
 \
 	/* Suppress warnings in case tid isn't used (ie: as in slab partitioning). */ \
 	( void )nt; \
@@ -401,7 +401,7 @@ void PASTEMAC(ch,varname) \
 	   packm thrinfo_t node. NOTE: The definition of bli_thread_range_jrir()
 	   will depend on whether slab or round-robin partitioning was requested
 	   at configure-time. */ \
-	bli_thread_range_jrir( thread, n_iter, 1, FALSE, &it_start, &it_end, &it_inc ); \
+	bli_thread_range_jrir( tid, nt, n_iter, 1, FALSE, &it_start, &it_end, &it_inc ); \
 \
 	/* Iterate over every logical micropanel in the source matrix. */ \
 	for ( it = 0; it < n_iter; it += 1 ) \

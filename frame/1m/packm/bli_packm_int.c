@@ -47,7 +47,7 @@ void bli_packm_int
 
 	// Barrier so that we know threads are done with previous computation
 	// with the same packing buffer before starting to pack.
-	thrinfo_t* thread = bli_thrinfo_sub_node( thread_par );
+	thrinfo_t* thread = bli_thrinfo_sub_node( 0, thread_par );
 	bli_thrinfo_barrier( thread );
 
 	// Invoke the packm variant.
@@ -66,7 +66,7 @@ void bli_packm_int
 	  p,
 	  cntx,
 	  cntl,
-	  thread_par
+	  thread
 	);
 
 	// Barrier so that packing is done before computation.

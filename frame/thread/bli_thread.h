@@ -68,12 +68,13 @@ BLIS_EXPORT_BLIS void bli_thread_launch
 
 BLIS_EXPORT_BLIS void bli_thread_range_sub
      (
-       const thrinfo_t* thread,
-             dim_t      n,
-             dim_t      bf,
-             bool       handle_edge_low,
-             dim_t*     start,
-             dim_t*     end
+       dim_t  work_id,
+       dim_t  n_way,
+       dim_t  n,
+       dim_t  bf,
+       bool   handle_edge_low,
+       dim_t* start,
+       dim_t* end
      );
 
 #undef  GENPROT
@@ -206,55 +207,58 @@ void                     bli_thread_init_rntm_from_env( rntm_t* rntm );
 
 BLIS_INLINE void bli_thread_range_jrir_rr
      (
-       const thrinfo_t* thread,
-             dim_t      n,
-             dim_t      bf,
-             bool       handle_edge_low,
-             dim_t*     start,
-             dim_t*     end,
-             dim_t*     inc
+       dim_t  tid,
+       dim_t  nt,
+       dim_t  n,
+       dim_t  bf,
+       bool   handle_edge_low,
+       dim_t* start,
+       dim_t* end,
+       dim_t* inc
      )
 {
 	// Use interleaved partitioning of jr/ir loops.
-	*start = bli_thrinfo_work_id( thread );
-	*inc   = bli_thrinfo_n_way( thread );
+	*start = tid;
+	*inc   = nt;
 	*end   = n;
 }
 
 BLIS_INLINE void bli_thread_range_jrir_sl
      (
-       const thrinfo_t* thread,
-             dim_t      n,
-             dim_t      bf,
-             bool       handle_edge_low,
-             dim_t*     start,
-             dim_t*     end,
-             dim_t*     inc
+       dim_t  tid,
+       dim_t  nt,
+       dim_t  n,
+       dim_t  bf,
+       bool   handle_edge_low,
+       dim_t* start,
+       dim_t* end,
+       dim_t* inc
      )
 {
 	// Use contiguous slab partitioning of jr/ir loops.
-	bli_thread_range_sub( thread, n, bf, handle_edge_low, start, end );
+	bli_thread_range_sub( tid, nt, n, bf, handle_edge_low, start, end );
 	*inc = 1;
 }
 
 BLIS_INLINE void bli_thread_range_jrir
      (
-       const thrinfo_t* thread,
-             dim_t      n,
-             dim_t      bf,
-             bool       handle_edge_low,
-             dim_t*     start,
-             dim_t*     end,
-             dim_t*     inc
+       dim_t  tid,
+       dim_t  nt,
+       dim_t  n,
+       dim_t  bf,
+       bool   handle_edge_low,
+       dim_t* start,
+       dim_t* end,
+       dim_t* inc
      )
 {
 	// Define a general-purpose version of bli_thread_range_jrir() whose
 	// definition depends on whether slab or round-robin partitioning was
 	// requested at configure-time.
 #ifdef BLIS_ENABLE_JRIR_SLAB
-	bli_thread_range_jrir_sl( thread, n, bf, handle_edge_low, start, end, inc );
+	bli_thread_range_jrir_sl( tid, nt, n, bf, handle_edge_low, start, end, inc );
 #else
-	bli_thread_range_jrir_rr( thread, n, bf, handle_edge_low, start, end, inc );
+	bli_thread_range_jrir_rr( tid, nt, n, bf, handle_edge_low, start, end, inc );
 #endif
 }
 

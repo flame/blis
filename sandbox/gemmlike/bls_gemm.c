@@ -159,10 +159,8 @@ void bls_gemm_ex
 	// Parse and interpret the contents of the rntm_t object to properly
 	// set the ways of parallelism for each loop, and then make any
 	// additional modifications necessary for the current operation.
-	bli_rntm_set_ways_for_op
+	bli_rntm_factorize
 	(
-	  BLIS_GEMM,
-	  BLIS_LEFT, // ignored for gemm/hemm/symm
 	  bli_obj_length( &c_local ),
 	  bli_obj_width( &c_local ),
 	  bli_obj_width( &a_local ),

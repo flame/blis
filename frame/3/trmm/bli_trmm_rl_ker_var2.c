@@ -169,8 +169,8 @@ void bli_trmm_rl_ker_var2
 	bli_auxinfo_set_schema_a( schema_a, &aux );
 	bli_auxinfo_set_schema_b( schema_b, &aux );
 
-	thrinfo_t* thread = bli_thrinfo_sub_node( thread_par );
-	thrinfo_t* caucus = bli_thrinfo_sub_node( thread );
+	thrinfo_t* thread = bli_thrinfo_sub_node( 0, thread_par );
+	thrinfo_t* caucus = bli_thrinfo_sub_node( 0, thread );
 
 	dim_t jr_nt  = bli_thrinfo_n_way( thread );
 	dim_t jr_tid = bli_thrinfo_work_id( thread );
@@ -210,8 +210,8 @@ void bli_trmm_rl_ker_var2
 	// NOTE: The definition of bli_thread_range_jrir() will depend on whether
 	// slab or round-robin partitioning was requested at configure-time.
 	// NOTE: Parallelism in the 1st loop is disabled for now.
-	bli_thread_range_jrir( thread, n_iter_rct, 1, FALSE, &jr_start, &jr_end, &jr_inc );
-	bli_thread_range_jrir( caucus, m_iter,     1, FALSE, &ir_start, &ir_end, &ir_inc );
+	bli_thread_range_jrir( jr_tid, jr_nt, n_iter_rct, 1, FALSE, &jr_start, &jr_end, &jr_inc );
+	bli_thread_range_jrir( ir_tid, ir_nt, m_iter,     1, FALSE, &ir_start, &ir_end, &ir_inc );
 
 	// Loop over the n dimension (NR columns at a time).
 	for ( dim_t j = jr_start; j < jr_end; j += jr_inc )

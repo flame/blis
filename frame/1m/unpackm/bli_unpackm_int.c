@@ -58,7 +58,7 @@ void bli_unpackm_int
 
 	// Barrier so that we know threads are done with previous computation
 	// with the same packing buffer before starting to pack.
-	thrinfo_t* thread = bli_thrinfo_sub_node( thread_par );
+	thrinfo_t* thread = bli_thrinfo_sub_node( 0, thread_par );
 	bli_thrinfo_barrier( thread );
 
 	// Extract the function pointer from the current control tree node.
@@ -71,7 +71,7 @@ void bli_unpackm_int
 	  a,
 	  cntx,
 	  cntl,
-	  thread_par
+	  thread
 	);
 
 	// Barrier so that unpacking is done before computation.

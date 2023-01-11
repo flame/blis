@@ -164,19 +164,16 @@ siz_t bli_thread_range_ndim
 
 void bli_thread_range_sub
      (
-       const thrinfo_t* thread,
-             dim_t      n,
-             dim_t      bf,
-             bool       handle_edge_low,
-             dim_t*     start,
-             dim_t*     end
+       dim_t  work_id,
+       dim_t  n_way,
+       dim_t  n,
+       dim_t  bf,
+       bool   handle_edge_low,
+       dim_t* start,
+       dim_t* end
      )
 {
-	dim_t      n_way      = bli_thrinfo_n_way( thread );
-
 	if ( n_way == 1 ) { *start = 0; *end = n; return; }
-
-	dim_t      work_id    = bli_thrinfo_work_id( thread );
 
 	dim_t      all_start  = 0;
 	dim_t      all_end    = n;
@@ -701,7 +698,16 @@ siz_t bli_thread_range
 	}
 	else // if dense or zeros
 	{
-		bli_thread_range_sub( thr, n, bf, direct != BLIS_FWD, start, end );
+		bli_thread_range_sub
+        (
+          bli_thrinfo_work_id( thr ),
+          bli_thrinfo_n_way( thr ),
+          n,
+          bf,
+          direct != BLIS_FWD,
+          start,
+          end
+        );
 
     	return m * ( *end - *start );
 	}

@@ -66,7 +66,7 @@ void bli_trsm_blk_var1
 	                        0, kc, &cp, &c1 );
 
 	// All threads iterate over the entire diagonal block A11.
-	thrinfo_t* thread_pre = bli_thrinfo_sub_prenode( thread_par );
+	thrinfo_t* thread_pre = bli_thrinfo_sub_node( 0, thread_par );
 	dim_t my_start = 0, my_end = kc;
 
 #ifdef PRINT
@@ -104,7 +104,7 @@ void bli_trsm_blk_var1
 		  b,
 		  &c1_1,
 		  cntx,
-		  bli_cntl_sub_prenode( cntl ),
+		  bli_cntl_sub_node( 0, cntl ),
 		  thread_pre
 		);
 	}
@@ -135,7 +135,7 @@ void bli_trsm_blk_var1
 
 	// Determine the current thread's subpartition range for the gemm
 	// subproblem over Ax1.
-	thrinfo_t* thread = bli_thrinfo_sub_node( thread_par );
+	thrinfo_t* thread = bli_thrinfo_sub_node( 1, thread_par );
 	bli_thread_range_mdim
 	(
 	  direct,
@@ -178,7 +178,7 @@ void bli_trsm_blk_var1
 		  b,
 		  &c1,
 		  cntx,
-		  bli_cntl_sub_node( cntl ),
+		  bli_cntl_sub_node( 1, cntl ),
 		  thread
 		);
 	}

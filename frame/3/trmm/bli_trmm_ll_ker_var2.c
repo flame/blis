@@ -165,10 +165,10 @@ void bli_trmm_ll_ker_var2
 	// The 'thread' argument points to the thrinfo_t node for the 2nd (jr)
 	// loop around the microkernel. Here we query the thrinfo_t node for the
 	// 1st (ir) loop around the microkernel.
-	//thrinfo_t* ir_thread = bli_thrinfo_sub_node( thread );
+	//thrinfo_t* ir_thread = bli_thrinfo_sub_node( 0, thread );
 
 	// Query the number of threads and thread ids for each loop.
-	thrinfo_t* thread = bli_thrinfo_sub_node( thread_par );
+	thrinfo_t* thread = bli_thrinfo_sub_node( 0, thread_par );
 	dim_t jr_nt  = bli_thrinfo_n_way( thread );
 	dim_t jr_tid = bli_thrinfo_work_id( thread );
 	//dim_t ir_nt  = bli_thrinfo_n_way( ir_thread );
@@ -182,8 +182,8 @@ void bli_trmm_ll_ker_var2
 	// NOTE: The definition of bli_thread_range_jrir() will depend on whether
 	// slab or round-robin partitioning was requested at configure-time.
 	// NOTE: Parallelism in the 1st loop is disabled for now.
-	bli_thread_range_jrir( thread, n_iter, 1, FALSE, &jr_start, &jr_end, &jr_inc );
-	//bli_thread_range_jrir_rr( caucus, m_iter, 1, FALSE, &ir_start, &ir_end, &ir_inc );
+	bli_thread_range_jrir( jr_tid, jr_nt, n_iter, 1, FALSE, &jr_start, &jr_end, &jr_inc );
+	//bli_thread_range_jrir_rr( ir_tid, ir_nt, m_iter, 1, FALSE, &ir_start, &ir_end, &ir_inc );
 
 	// Loop over the n dimension (NR columns at a time).
 	for ( dim_t j = jr_start; j < jr_end; j += jr_inc )
