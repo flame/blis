@@ -42,12 +42,12 @@ static l3_var_oft vars[2] =
 
 void bli_gemmt_x_ker_var2
      (
-       const obj_t*  a,
-       const obj_t*  ah,
-       const obj_t*  c,
-       const cntx_t* cntx,
-       const cntl_t* cntl,
-             thrinfo_t* thread
+       const obj_t*     a,
+       const obj_t*     ah,
+       const obj_t*     c,
+       const cntx_t*    cntx,
+       const cntl_t*    cntl,
+             thrinfo_t* thread_par
      )
 {
 	dim_t uplo;
@@ -67,7 +67,7 @@ void bli_gemmt_x_ker_var2
 	  c,
 	  cntx,
 	  cntl,
-	  thread
+	  thread_par
 	);
 }
 

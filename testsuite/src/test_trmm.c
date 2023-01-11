@@ -271,7 +271,10 @@ void libblis_test_trmm_impl
 	switch ( iface )
 	{
 		case BLIS_TEST_SEQ_FRONT_END:
+//bli_printm( "a", a, "%5.2f", "" );
+//bli_printm( "b", b, "%5.2f", "" );
 		bli_trmm( side, alpha, a, b );
+//bli_printm( "b after", b, "%5.2f", "" );
 		break;
 
 		default:

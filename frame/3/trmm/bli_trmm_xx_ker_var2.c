@@ -43,12 +43,12 @@ static l3_var_oft vars[2][2] =
 
 void bli_trmm_xx_ker_var2
      (
-       const obj_t*  a,
-       const obj_t*  b,
-       const obj_t*  c,
-       const cntx_t* cntx,
-       const cntl_t* cntl,
-             thrinfo_t* thread
+       const obj_t*     a,
+       const obj_t*     b,
+       const obj_t*     c,
+       const cntx_t*    cntx,
+       const cntl_t*    cntl,
+             thrinfo_t* thread_par
      )
 {
 	dim_t side;
@@ -81,7 +81,7 @@ void bli_trmm_xx_ker_var2
 	  c,
 	  cntx,
 	  cntl,
-	  thread
+	  thread_par
 	);
 }
 
