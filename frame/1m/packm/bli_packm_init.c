@@ -65,9 +65,9 @@ bool bli_packm_init
 		return false;
 
 	// Extract various fields from the control tree.
-	bszid_t bmult_id_m   = bli_packm_cntl_bmid_m( cntl );
-	bszid_t bmult_id_n   = bli_packm_cntl_bmid_n( cntl );
-	pack_t  schema       = bli_packm_cntl_pack_schema( cntl );
+	bszid_t bmult_id_m   = bli_packm_def_cntl_bmid_m( cntl );
+	bszid_t bmult_id_n   = bli_packm_def_cntl_bmid_n( cntl );
+	pack_t  schema       = bli_packm_def_cntl_pack_schema( cntl );
 	num_t   dt_tar       = bli_obj_target_dt( c );
 	num_t   dt_scalar    = bli_obj_scalar_dt( c );
 	dim_t   bmult_m_def  = bli_cntx_get_blksz_def_dt( dt_tar, bmult_id_m, cntx );

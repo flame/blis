@@ -35,13 +35,13 @@
 
 struct gemm_cntl_s
 {
-     part_cntl_t part_ir;
-     part_cntl_t part_jr;
-    packm_cntl_t pack_a;
-     part_cntl_t part_ic;
-    packm_cntl_t pack_b;
-     part_cntl_t part_pc;
-     part_cntl_t part_jc;
+         part_cntl_t part_ir;
+         part_cntl_t part_jr;
+    packm_def_cntl_t pack_a;
+         part_cntl_t part_ic;
+    packm_def_cntl_t pack_b;
+         part_cntl_t part_pc;
+         part_cntl_t part_jc;
 };
 typedef struct gemm_cntl_s gemm_cntl_t;
 

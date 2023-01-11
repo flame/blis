@@ -35,6 +35,7 @@
 
 #include "blis.h"
 
+
 void bli_gemm_cntl_init
      (
              opid_t       family,
@@ -75,23 +76,28 @@ void bli_gemmbp_cntl_init
 	          family == BLIS_TRMM3 ) macro_kernel_fp = bli_trmm_xx_ker_var2;
 	else /* should never execute */ macro_kernel_fp = NULL;
 
+    const num_t dt_a     = bli_obj_dt( a );
+    const num_t dt_b     = bli_obj_dt( b );
+    const num_t dt_ap    = bli_obj_target_dt( a );
+    const num_t dt_bp    = bli_obj_target_dt( b );
+    const num_t dt_comp  = bli_obj_exec_dt( c );
+
     const bool  a_lo_tri = bli_obj_is_triangular( a ) && bli_obj_is_lower( a );
     const bool  b_up_tri = bli_obj_is_triangular( b ) && bli_obj_is_upper( b );
     const bool  trmm_r   = family == BLIS_TRMM && bli_obj_is_triangular( b );
-    const num_t dt       = bli_obj_comp_dt( c );
-    const dim_t ir_bsize = bli_cntx_get_blksz_def_dt( dt, BLIS_MR, cntx );
-    const dim_t jr_bsize = bli_cntx_get_blksz_def_dt( dt, BLIS_NR, cntx );
-    const dim_t ic_alg   = bli_cntx_get_blksz_def_dt( dt, BLIS_MC, cntx );
-    const dim_t ic_max   = bli_cntx_get_blksz_max_dt( dt, BLIS_MC, cntx );
-    const dim_t ic_mult  = bli_cntx_get_blksz_def_dt( dt, BLIS_MR, cntx );
+    const dim_t ir_bsize = bli_cntx_get_blksz_def_dt( dt_comp, BLIS_MR, cntx );
+    const dim_t jr_bsize = bli_cntx_get_blksz_def_dt( dt_comp, BLIS_NR, cntx );
+    const dim_t ic_alg   = bli_cntx_get_blksz_def_dt( dt_comp, BLIS_MC, cntx );
+    const dim_t ic_max   = bli_cntx_get_blksz_max_dt( dt_comp, BLIS_MC, cntx );
+    const dim_t ic_mult  = bli_cntx_get_blksz_def_dt( dt_comp, BLIS_MR, cntx );
     const dir_t ic_dir   = a_lo_tri ? BLIS_BWD : BLIS_FWD;
-          dim_t pc_alg   = bli_cntx_get_blksz_def_dt( dt, BLIS_KC, cntx );
-          dim_t pc_max   = bli_cntx_get_blksz_max_dt( dt, BLIS_KC, cntx );
+          dim_t pc_alg   = bli_cntx_get_blksz_def_dt( dt_comp, BLIS_KC, cntx );
+          dim_t pc_max   = bli_cntx_get_blksz_max_dt( dt_comp, BLIS_KC, cntx );
     const dim_t pc_mult  = 1;
     const dir_t pc_dir   = a_lo_tri || b_up_tri ? BLIS_BWD : BLIS_FWD;
-    const dim_t jc_alg   = bli_cntx_get_blksz_def_dt( dt, BLIS_NC, cntx );
-    const dim_t jc_max   = bli_cntx_get_blksz_max_dt( dt, BLIS_NC, cntx );
-    const dim_t jc_mult  = bli_cntx_get_blksz_def_dt( dt, BLIS_NR, cntx );
+    const dim_t jc_alg   = bli_cntx_get_blksz_def_dt( dt_comp, BLIS_NC, cntx );
+    const dim_t jc_max   = bli_cntx_get_blksz_max_dt( dt_comp, BLIS_NC, cntx );
+    const dim_t jc_mult  = bli_cntx_get_blksz_def_dt( dt_comp, BLIS_NR, cntx );
     const dir_t jc_dir   = b_up_tri ? BLIS_BWD : BLIS_FWD;
 
     bli_l3_adjust_kc
@@ -129,14 +135,16 @@ void bli_gemmbp_cntl_init
     bli_cntl_attach_sub_node
     (
       BLIS_THREAD_NR,
-      &cntl->part_ir.cntl,
-      &cntl->part_jr.cntl
+      ( cntl_t* )&cntl->part_ir,
+      ( cntl_t* )&cntl->part_jr
     );
 
 	// Create a node for packing matrix A.
-	bli_packm_cntl_init_node
+	bli_packm_def_cntl_init_node
 	(
 	  bli_l3_packa, // pack the left-hand operand
+      dt_a,
+      dt_ap,
 	  BLIS_MR,
 	  BLIS_KR,
 	  FALSE,        // do NOT invert diagonal
@@ -149,8 +157,8 @@ void bli_gemmbp_cntl_init
     bli_cntl_attach_sub_node
     (
       BLIS_THREAD_NONE,
-      &cntl->part_jr.cntl,
-      &cntl->pack_a.cntl
+      ( cntl_t* )&cntl->part_jr,
+      ( cntl_t* )&cntl->pack_a
     );
 
 	// Create a node for partitioning the m dimension by MC.
@@ -167,14 +175,16 @@ void bli_gemmbp_cntl_init
     bli_cntl_attach_sub_node
     (
       trmm_r ? BLIS_THREAD_MC | BLIS_THREAD_NC : BLIS_THREAD_MC,
-      &cntl->pack_a.cntl,
-      &cntl->part_ic.cntl
+      ( cntl_t* )&cntl->pack_a,
+      ( cntl_t* )&cntl->part_ic
     );
 
 	// Create a node for packing matrix B.
-	bli_packm_cntl_init_node
+	bli_packm_def_cntl_init_node
 	(
 	  bli_l3_packb, // pack the right-hand operand
+      dt_b,
+      dt_bp,
 	  BLIS_NR,
 	  BLIS_KR,
 	  FALSE,        // do NOT invert diagonal
@@ -187,8 +197,8 @@ void bli_gemmbp_cntl_init
     bli_cntl_attach_sub_node
     (
       BLIS_THREAD_NONE,
-      &cntl->part_ic.cntl,
-      &cntl->pack_b.cntl
+      ( cntl_t* )&cntl->part_ic,
+      ( cntl_t* )&cntl->pack_b
     );
 
 	// Create a node for partitioning the k dimension by KC.
@@ -205,8 +215,8 @@ void bli_gemmbp_cntl_init
     bli_cntl_attach_sub_node
     (
       BLIS_THREAD_KC,
-      &cntl->pack_b.cntl,
-      &cntl->part_pc.cntl
+      ( cntl_t* )&cntl->pack_b,
+      ( cntl_t* )&cntl->part_pc
     );
 
 	// Create a node for partitioning the n dimension by NC.
@@ -223,8 +233,8 @@ void bli_gemmbp_cntl_init
     bli_cntl_attach_sub_node
     (
       trmm_r ? BLIS_THREAD_NONE : BLIS_THREAD_NC,
-      &cntl->part_pc.cntl,
-      &cntl->part_jc.cntl
+      ( cntl_t* )&cntl->part_pc,
+      ( cntl_t* )&cntl->part_jc
     );
 }
 

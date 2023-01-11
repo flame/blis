@@ -35,20 +35,45 @@
 
 #include "blis.h"
 
+
 void bli_packm_cntl_init_node
      (
        void_fp       var_func,
-       bszid_t       bmid_m,
-       bszid_t       bmid_n,
-       bool          does_invert_diag,
-       bool          rev_iter_if_upper,
-       bool          rev_iter_if_lower,
-       pack_t        pack_schema,
-       packbuf_t     pack_buf_type,
+       packm_var_oft var,
        packm_cntl_t* cntl
      )
 {
 	// Initialize the packm_cntl_t struct.
+	cntl->var = var;
+
+	bli_cntl_init_node
+	(
+	  var_func,
+      &cntl->cntl
+	);
+}
+
+void bli_packm_def_cntl_init_node
+     (
+       void_fp           var_func,
+       num_t             dt_a,
+       num_t             dt_p,
+       bszid_t           bmid_m,
+       bszid_t           bmid_n,
+       bool              does_invert_diag,
+       bool              rev_iter_if_upper,
+       bool              rev_iter_if_lower,
+       pack_t            pack_schema,
+       packbuf_t         pack_buf_type,
+       packm_def_cntl_t* cntl
+     )
+{
+    static void_fp GENARRAY(packm_struc_cxk,packm_struc_cxk);
+    static void_fp GENARRAY2_ALL(packm_struc_cxk_md,packm_struc_cxk_md);
+
+	// Initialize the packm_def_cntl_t struct.
+	cntl->ukr               = dt_a == dt_p ? packm_struc_cxk[ dt_a ]
+                                           : packm_struc_cxk_md[ dt_a ][ dt_p ];
 	cntl->bmid_m            = bmid_m;
 	cntl->bmid_n            = bmid_n;
 	cntl->does_invert_diag  = does_invert_diag;
@@ -57,13 +82,10 @@ void bli_packm_cntl_init_node
 	cntl->pack_schema       = pack_schema;
 	cntl->pack_buf_type     = pack_buf_type;
 
-	// It's important that we set the bszid field to BLIS_NO_PART to indicate
-	// that no blocksize partitioning is performed. bli_cntl_free() will rely
-	// on this information to know how to step through the thrinfo_t tree in
-	// sync with the cntl_t tree.
-	bli_cntl_init_node
+	bli_packm_cntl_init_node
 	(
 	  var_func,
+      bli_packm_blk_var1,
       &cntl->cntl
 	);
 }

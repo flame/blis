@@ -36,22 +36,6 @@
 #include "blis.h"
 
 
-static func_t packm_struc_cxk_kers[BLIS_NUM_PACK_SCHEMA_TYPES] =
-{
-    /* float (0)  scomplex (1)  double (2)  dcomplex (3) */
-// 0000 row/col panels
-    { { bli_spackm_struc_cxk,      bli_cpackm_struc_cxk,
-        bli_dpackm_struc_cxk,      bli_zpackm_struc_cxk,      } },
-// 0001 row/col panels: 1m-expanded (1e)
-    { { NULL,                      bli_cpackm_struc_cxk,
-        NULL,                      bli_zpackm_struc_cxk,  } },
-// 0010 row/col panels: 1m-reordered (1r)
-    { { NULL,                      bli_cpackm_struc_cxk,
-        NULL,                      bli_zpackm_struc_cxk,  } },
-};
-
-static void_fp GENARRAY2_ALL(packm_struc_cxk_md,packm_struc_cxk_md);
-
 void bli_packm_blk_var1
      (
        const obj_t*     c,
@@ -62,10 +46,10 @@ void bli_packm_blk_var1
      )
 {
 	// Extract various fields from the control tree.
-	pack_t schema  = bli_packm_cntl_pack_schema( cntl );
-	bool   invdiag = bli_packm_cntl_does_invert_diag( cntl );
-	bool   revifup = bli_packm_cntl_rev_iter_if_upper( cntl );
-	bool   reviflo = bli_packm_cntl_rev_iter_if_lower( cntl );
+	pack_t schema  = bli_packm_def_cntl_pack_schema( cntl );
+	bool   invdiag = bli_packm_def_cntl_does_invert_diag( cntl );
+	bool   revifup = bli_packm_def_cntl_rev_iter_if_upper( cntl );
+	bool   reviflo = bli_packm_def_cntl_rev_iter_if_lower( cntl );
 
 	// Every thread initializes p and determines the size of memory block
 	// needed (which gets embedded into the otherwise "blank" mem_t entry
@@ -110,18 +94,8 @@ void bli_packm_blk_var1
 	obj_t   kappa_local;
 	char*   kappa_cast     = bli_packm_scalar( &kappa_local, p );
 
-	// we use the default lookup table to determine the right func_t
-	// for the current schema.
-	func_t* packm_kers = &packm_struc_cxk_kers[ bli_pack_schema_index( schema ) ];
-
-	// Query the datatype-specific function pointer from the func_t object.
-	packm_ker_vft packm_ker_cast = bli_func_get_dt( dt_p, packm_kers );
-
-	// For mixed-precision gemm, select the proper kernel (only dense panels).
-	if ( dt_c != dt_p )
-	{
-		packm_ker_cast = packm_struc_cxk_md[ dt_c ][ dt_p ];
-	}
+	// Query the datatype-specific function pointer from the control tree.
+	packm_ker_vft packm_ker_cast = bli_packm_def_cntl_ukr( cntl );
 
 	// Compute the total number of iterations we'll need.
 	dim_t n_iter = iter_dim / panel_dim_max + ( iter_dim % panel_dim_max ? 1 : 0 );

@@ -35,6 +35,7 @@
 
 #include "blis.h"
 
+
 void bli_trsm_cntl_init
      (
        const obj_t*       a,
@@ -66,19 +67,24 @@ void bli_trsm_l_cntl_init
     // Set the default macrokernel.
 	void_fp macro_kernel_p = bli_trsm_xx_ker_var2;
 
+    const num_t dt_a     = bli_obj_dt( a );
+    const num_t dt_b     = bli_obj_dt( b );
+    const num_t dt_ap    = bli_obj_target_dt( a );
+    const num_t dt_bp    = bli_obj_target_dt( b );
+    const num_t dt_comp  = bli_obj_comp_dt( c );
+
     const dir_t  direct   = bli_obj_is_lower( a ) ? BLIS_FWD : BLIS_BWD;
-    const num_t  dt       = bli_obj_comp_dt( c );
-    const dim_t  ir_bsize = bli_cntx_get_blksz_def_dt( dt, BLIS_MR, cntx );
-    const dim_t  jr_bsize = bli_cntx_get_blksz_def_dt( dt, BLIS_NR, cntx );
-    const dim_t  ic_alg   = bli_cntx_get_blksz_def_dt( dt, BLIS_MC, cntx );
-    const dim_t  ic_max   = bli_cntx_get_blksz_max_dt( dt, BLIS_MC, cntx );
-    const dim_t  ic_mult  = bli_cntx_get_blksz_def_dt( dt, BLIS_MR, cntx );
-          dim_t  pc_alg   = bli_cntx_get_blksz_def_dt( dt, BLIS_KC, cntx );
-          dim_t  pc_max   = bli_cntx_get_blksz_max_dt( dt, BLIS_KC, cntx );
+    const dim_t  ir_bsize = bli_cntx_get_blksz_def_dt( dt_comp, BLIS_MR, cntx );
+    const dim_t  jr_bsize = bli_cntx_get_blksz_def_dt( dt_comp, BLIS_NR, cntx );
+    const dim_t  ic_alg   = bli_cntx_get_blksz_def_dt( dt_comp, BLIS_MC, cntx );
+    const dim_t  ic_max   = bli_cntx_get_blksz_max_dt( dt_comp, BLIS_MC, cntx );
+    const dim_t  ic_mult  = bli_cntx_get_blksz_def_dt( dt_comp, BLIS_MR, cntx );
+          dim_t  pc_alg   = bli_cntx_get_blksz_def_dt( dt_comp, BLIS_KC, cntx );
+          dim_t  pc_max   = bli_cntx_get_blksz_max_dt( dt_comp, BLIS_KC, cntx );
     const dim_t  pc_mult  = 1;
-    const dim_t  jc_alg   = bli_cntx_get_blksz_def_dt( dt, BLIS_NC, cntx );
-    const dim_t  jc_max   = bli_cntx_get_blksz_max_dt( dt, BLIS_NC, cntx );
-    const dim_t  jc_mult  = bli_cntx_get_blksz_def_dt( dt, BLIS_NR, cntx );
+    const dim_t  jc_alg   = bli_cntx_get_blksz_def_dt( dt_comp, BLIS_NC, cntx );
+    const dim_t  jc_max   = bli_cntx_get_blksz_max_dt( dt_comp, BLIS_NC, cntx );
+    const dim_t  jc_mult  = bli_cntx_get_blksz_def_dt( dt_comp, BLIS_NR, cntx );
 
     bli_l3_adjust_kc
     (
@@ -118,14 +124,16 @@ void bli_trsm_l_cntl_init
     bli_cntl_attach_sub_node
     (
       BLIS_THREAD_MR | BLIS_THREAD_NR,
-      &cntl->part_ir_gemm.cntl,
-      &cntl->part_jr_gemm.cntl
+      ( cntl_t* )&cntl->part_ir_gemm,
+      ( cntl_t* )&cntl->part_jr_gemm
     );
 
 	// Create a node for packing matrix A.
-	bli_packm_cntl_init_node
+	bli_packm_def_cntl_init_node
 	(
 	  bli_l3_packa, // trsm operation's packm function for A.
+      dt_a,
+      dt_ap,
 	  BLIS_MR,
 	  BLIS_MR,
 	  FALSE,        // do NOT invert diagonal
@@ -138,8 +146,8 @@ void bli_trsm_l_cntl_init
     bli_cntl_attach_sub_node
     (
       BLIS_THREAD_NONE,
-      &cntl->part_jr_gemm.cntl,
-      &cntl->pack_a_gemm.cntl
+      ( cntl_t* )&cntl->part_jr_gemm,
+      ( cntl_t* )&cntl->pack_a_gemm
     );
 
 	//
@@ -170,14 +178,16 @@ void bli_trsm_l_cntl_init
     bli_cntl_attach_sub_node
     (
       BLIS_THREAD_MC | BLIS_THREAD_KC | BLIS_THREAD_NR,
-      &cntl->part_ir_trsm.cntl,
-      &cntl->part_jr_trsm.cntl
+      ( cntl_t* )&cntl->part_ir_trsm,
+      ( cntl_t* )&cntl->part_jr_trsm
     );
 
 	// Create a node for packing matrix A.
-	bli_packm_cntl_init_node
+	bli_packm_def_cntl_init_node
 	(
 	  bli_l3_packa, // trsm operation's packm function for A.
+      dt_a,
+      dt_ap,
 	  BLIS_MR,
 	  BLIS_MR,
 #ifdef BLIS_ENABLE_TRSM_PREINVERSION
@@ -194,8 +204,8 @@ void bli_trsm_l_cntl_init
     bli_cntl_attach_sub_node
     (
       BLIS_THREAD_NONE,
-      &cntl->part_jr_trsm.cntl,
-      &cntl->pack_a_trsm.cntl
+      ( cntl_t* )&cntl->part_jr_trsm,
+      ( cntl_t* )&cntl->pack_a_trsm
     );
 
 	// -------------------------------------------------------------------------
@@ -215,22 +225,24 @@ void bli_trsm_l_cntl_init
     bli_cntl_attach_sub_node
     (
       BLIS_THREAD_NONE,
-      &cntl->pack_a_trsm.cntl,
-      &cntl->part_ic.cntl
+      ( cntl_t* )&cntl->pack_a_trsm,
+      ( cntl_t* )&cntl->part_ic
     );
     bli_cntl_attach_sub_node
     (
       BLIS_THREAD_MC | BLIS_THREAD_KC,
-      &cntl->pack_a_gemm.cntl,
-      &cntl->part_ic.cntl
+      ( cntl_t* )&cntl->pack_a_gemm,
+      ( cntl_t* )&cntl->part_ic
     );
 
 	// -------------------------------------------------------------------------
 
 	// Create a node for packing matrix B.
-	bli_packm_cntl_init_node
+	bli_packm_def_cntl_init_node
 	(
 	  bli_l3_packb,
+      dt_b,
+      dt_bp,
 	  BLIS_NR,
 	  BLIS_MR,
 	  FALSE,        // do NOT invert diagonal
@@ -243,8 +255,8 @@ void bli_trsm_l_cntl_init
     bli_cntl_attach_sub_node
     (
       BLIS_THREAD_NONE,
-      &cntl->part_ic.cntl,
-      &cntl->pack_b.cntl
+      ( cntl_t* )&cntl->part_ic,
+      ( cntl_t* )&cntl->pack_b
     );
 
 	// Create a node for partitioning the k dimension by KC.
@@ -261,8 +273,8 @@ void bli_trsm_l_cntl_init
     bli_cntl_attach_sub_node
     (
       BLIS_THREAD_NONE,
-      &cntl->pack_b.cntl,
-      &cntl->part_pc.cntl
+      ( cntl_t* )&cntl->pack_b,
+      ( cntl_t* )&cntl->part_pc
     );
 
 	// Create a node for partitioning the n dimension by NC.
@@ -279,8 +291,8 @@ void bli_trsm_l_cntl_init
     bli_cntl_attach_sub_node
     (
       BLIS_THREAD_NC,
-      &cntl->part_pc.cntl,
-      &cntl->part_jc.cntl
+      ( cntl_t* )&cntl->part_pc,
+      ( cntl_t* )&cntl->part_jc
     );
 }
 
@@ -299,19 +311,24 @@ void bli_trsm_r_cntl_init
     // Set the default macrokernel.
 	void_fp macro_kernel_p = bli_trsm_xx_ker_var2;
 
+    const num_t dt_a     = bli_obj_dt( a );
+    const num_t dt_b     = bli_obj_dt( b );
+    const num_t dt_ap    = bli_obj_target_dt( a );
+    const num_t dt_bp    = bli_obj_target_dt( b );
+    const num_t dt_comp  = bli_obj_comp_dt( c );
+
 	const dir_t  direct   = bli_obj_is_lower( b ) ? BLIS_BWD : BLIS_FWD;
-    const num_t  dt       = bli_obj_comp_dt( c );
-    const dim_t  ir_bsize = bli_cntx_get_blksz_def_dt( dt, BLIS_MR, cntx );
-    const dim_t  jr_bsize = bli_cntx_get_blksz_def_dt( dt, BLIS_NR, cntx );
-    const dim_t  ic_alg   = bli_cntx_get_blksz_def_dt( dt, BLIS_MC, cntx );
-    const dim_t  ic_max   = bli_cntx_get_blksz_max_dt( dt, BLIS_MC, cntx );
-    const dim_t  ic_mult  = bli_cntx_get_blksz_def_dt( dt, BLIS_NR, cntx ); //note: different!
-          dim_t  pc_alg   = bli_cntx_get_blksz_def_dt( dt, BLIS_KC, cntx );
-          dim_t  pc_max   = bli_cntx_get_blksz_max_dt( dt, BLIS_KC, cntx );
+    const dim_t  ir_bsize = bli_cntx_get_blksz_def_dt( dt_comp, BLIS_MR, cntx );
+    const dim_t  jr_bsize = bli_cntx_get_blksz_def_dt( dt_comp, BLIS_NR, cntx );
+    const dim_t  ic_alg   = bli_cntx_get_blksz_def_dt( dt_comp, BLIS_MC, cntx );
+    const dim_t  ic_max   = bli_cntx_get_blksz_max_dt( dt_comp, BLIS_MC, cntx );
+    const dim_t  ic_mult  = bli_cntx_get_blksz_def_dt( dt_comp, BLIS_NR, cntx ); //note: different!
+          dim_t  pc_alg   = bli_cntx_get_blksz_def_dt( dt_comp, BLIS_KC, cntx );
+          dim_t  pc_max   = bli_cntx_get_blksz_max_dt( dt_comp, BLIS_KC, cntx );
     const dim_t  pc_mult  = 1;
-    const dim_t  jc_alg   = bli_cntx_get_blksz_def_dt( dt, BLIS_NC, cntx );
-    const dim_t  jc_max   = bli_cntx_get_blksz_max_dt( dt, BLIS_NC, cntx );
-    const dim_t  jc_mult  = bli_cntx_get_blksz_def_dt( dt, BLIS_MR, cntx ); //note: different!
+    const dim_t  jc_alg   = bli_cntx_get_blksz_def_dt( dt_comp, BLIS_NC, cntx );
+    const dim_t  jc_max   = bli_cntx_get_blksz_max_dt( dt_comp, BLIS_NC, cntx );
+    const dim_t  jc_mult  = bli_cntx_get_blksz_def_dt( dt_comp, BLIS_MR, cntx ); //note: different!
 
     bli_l3_adjust_kc
     (
@@ -348,14 +365,16 @@ void bli_trsm_r_cntl_init
     bli_cntl_attach_sub_node
     (
       BLIS_THREAD_NONE,
-      &cntl->part_ir_trsm.cntl,
-      &cntl->part_jr_trsm.cntl
+      ( cntl_t* )&cntl->part_ir_trsm,
+      ( cntl_t* )&cntl->part_jr_trsm
     );
 
 	// Create a node for packing matrix A.
-	bli_packm_cntl_init_node
+	bli_packm_def_cntl_init_node
 	(
 	  bli_l3_packa,
+      dt_a,
+      dt_ap,
 	  BLIS_NR,
 	  BLIS_MR,
 	  FALSE,   // do NOT invert diagonal
@@ -368,8 +387,8 @@ void bli_trsm_r_cntl_init
     bli_cntl_attach_sub_node
     (
       BLIS_THREAD_NONE,
-      &cntl->part_jr_trsm.cntl,
-      &cntl->pack_a_trsm.cntl
+      ( cntl_t* )&cntl->part_jr_trsm,
+      ( cntl_t* )&cntl->pack_a_trsm
     );
 
 	// Create a node for partitioning the m dimension by MC.
@@ -386,14 +405,16 @@ void bli_trsm_r_cntl_init
     bli_cntl_attach_sub_node
     (
       BLIS_THREAD_MC | BLIS_THREAD_KC | BLIS_THREAD_NC | BLIS_THREAD_MR | BLIS_THREAD_NR,
-      &cntl->pack_a_trsm.cntl,
-      &cntl->part_ic.cntl
+      ( cntl_t* )&cntl->pack_a_trsm,
+      ( cntl_t* )&cntl->part_ic
     );
 
 	// Create a node for packing matrix B.
-	bli_packm_cntl_init_node
+	bli_packm_def_cntl_init_node
 	(
 	  bli_l3_packb,
+      dt_b,
+      dt_bp,
 	  BLIS_MR,
 	  BLIS_MR,
 	  TRUE,    // do NOT invert diagonal
@@ -406,8 +427,8 @@ void bli_trsm_r_cntl_init
     bli_cntl_attach_sub_node
     (
       BLIS_THREAD_NONE,
-      &cntl->part_ic.cntl,
-      &cntl->pack_b.cntl
+      ( cntl_t* )&cntl->part_ic,
+      ( cntl_t* )&cntl->pack_b
     );
 
 	// Create a node for partitioning the k dimension by KC.
@@ -424,8 +445,8 @@ void bli_trsm_r_cntl_init
     bli_cntl_attach_sub_node
     (
       BLIS_THREAD_NONE,
-      &cntl->pack_b.cntl,
-      &cntl->part_pc.cntl
+      ( cntl_t* )&cntl->pack_b,
+      ( cntl_t* )&cntl->part_pc
     );
 
 	// Create a node for partitioning the n dimension by NC.
@@ -442,8 +463,8 @@ void bli_trsm_r_cntl_init
     bli_cntl_attach_sub_node
     (
       BLIS_THREAD_NONE,
-      &cntl->part_pc.cntl,
-      &cntl->part_jc.cntl
+      ( cntl_t* )&cntl->part_pc,
+      ( cntl_t* )&cntl->part_jc
     );
 }
 
