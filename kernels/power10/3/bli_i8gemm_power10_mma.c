@@ -32,6 +32,8 @@
 
 */
 
+#ifdef BLIS_SANDBOX_POWER10
+
 #include "vector_int_macros.h"
 
 #define I8_ACCUMULATE \
@@ -139,3 +141,4 @@ void bli_i8gemm_power10_mma_8x16
         SAVE_ACC_bz(iv4sf_t, &acc7, rs_c, 12+4*rs_c);
     }
 }
+#endif // BLIS_SANDBOX_POWER10
