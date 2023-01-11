@@ -35,11 +35,11 @@
 
 struct trsm_cntl_s
 {
-         part_cntl_t part_ir_trsm;
-         part_cntl_t part_jr_trsm;
+              cntl_t part_ir_trsm;
+              cntl_t part_jr_trsm;
     packm_def_cntl_t pack_a_trsm;
-         part_cntl_t part_ir_gemm;
-         part_cntl_t part_jr_gemm;
+              cntl_t part_ir_gemm;
+              cntl_t part_jr_gemm;
     packm_def_cntl_t pack_a_gemm;
          part_cntl_t part_ic;
     packm_def_cntl_t pack_b;

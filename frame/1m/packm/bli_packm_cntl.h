@@ -45,8 +45,9 @@ struct packm_def_cntl_s
 {
 	packm_cntl_t  cntl; // cntl field must be present and come first.
     packm_ker_vft ukr;
-	bszid_t       bmid_m;
-	bszid_t       bmid_n;
+    dim_t         bmult_m_def;
+    dim_t         bmult_m_pack;
+    dim_t         bmult_n_def;
 	bool          does_invert_diag;
 	bool          rev_iter_if_upper;
 	bool          rev_iter_if_lower;
@@ -60,14 +61,19 @@ BLIS_INLINE packm_var_oft bli_packm_cntl_variant( const cntl_t* cntl )
 	return ( ( packm_cntl_t* ) cntl )->var;
 }
 
-BLIS_INLINE bszid_t bli_packm_def_cntl_bmid_m( const cntl_t* cntl )
+BLIS_INLINE dim_t bli_packm_def_cntl_bmult_m_def( const cntl_t* cntl )
 {
-	return ( ( packm_def_cntl_t* ) cntl )->bmid_m;
+	return ( ( packm_def_cntl_t* ) cntl )->bmult_m_def;
 }
 
-BLIS_INLINE bszid_t bli_packm_def_cntl_bmid_n( const cntl_t* cntl )
+BLIS_INLINE dim_t bli_packm_def_cntl_bmult_m_pack( const cntl_t* cntl )
 {
-	return ( ( packm_def_cntl_t* ) cntl )->bmid_n;
+	return ( ( packm_def_cntl_t* ) cntl )->bmult_m_pack;
+}
+
+BLIS_INLINE dim_t bli_packm_def_cntl_bmult_n_def( const cntl_t* cntl )
+{
+	return ( ( packm_def_cntl_t* ) cntl )->bmult_n_def;
 }
 
 BLIS_INLINE bool bli_packm_def_cntl_does_invert_diag( const cntl_t* cntl )
@@ -114,8 +120,9 @@ void bli_packm_def_cntl_init_node
        void_fp           var_func,
        num_t             dt_a,
        num_t             dt_p,
-       bszid_t           bmid_m,
-       bszid_t           bmid_n,
+       dim_t             bmult_m_def,
+       dim_t             bmult_m_pack,
+       dim_t             bmult_n_def,
        bool              does_invert_diag,
        bool              rev_iter_if_upper,
        bool              rev_iter_if_lower,

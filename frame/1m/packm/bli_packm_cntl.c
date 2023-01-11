@@ -58,8 +58,9 @@ void bli_packm_def_cntl_init_node
        void_fp           var_func,
        num_t             dt_a,
        num_t             dt_p,
-       bszid_t           bmid_m,
-       bszid_t           bmid_n,
+       dim_t             bmult_m_def,
+       dim_t             bmult_m_pack,
+       dim_t             bmult_n_def,
        bool              does_invert_diag,
        bool              rev_iter_if_upper,
        bool              rev_iter_if_lower,
@@ -74,8 +75,9 @@ void bli_packm_def_cntl_init_node
 	// Initialize the packm_def_cntl_t struct.
 	cntl->ukr               = dt_a == dt_p ? packm_struc_cxk[ dt_a ]
                                            : packm_struc_cxk_md[ dt_a ][ dt_p ];
-	cntl->bmid_m            = bmid_m;
-	cntl->bmid_n            = bmid_n;
+	cntl->bmult_m_def       = bmult_m_def;
+	cntl->bmult_m_pack      = bmult_m_pack;
+	cntl->bmult_n_def       = bmult_n_def;
 	cntl->does_invert_diag  = does_invert_diag;
 	cntl->rev_iter_if_upper = rev_iter_if_upper;
 	cntl->rev_iter_if_lower = rev_iter_if_lower;

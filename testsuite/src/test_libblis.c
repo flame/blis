@@ -2675,22 +2675,24 @@ void libblis_test_mobj_create( test_params_t* params, num_t dt, trans_t trans, c
 thrinfo_t* libblis_test_pobj_create( bszid_t bmult_id_m, bszid_t bmult_id_n, invdiag_t inv_diag, pack_t pack_schema, packbuf_t pack_buf, obj_t* a, obj_t* p, cntx_t* cntx )
 {
 	bool does_inv_diag;
-
 	if ( inv_diag == BLIS_NO_INVERT_DIAG ) does_inv_diag = FALSE;
 	else                                   does_inv_diag = TRUE;
 
 	rntm_t rntm;
 	bli_rntm_init( &rntm );
 
+    num_t dt = bli_obj_dt( a );
+
 	// Create a control tree node for the packing operation.
     packm_def_cntl_t cntl;
 	bli_packm_def_cntl_init_node
 	(
 	  NULL, // func ptr is not referenced b/c we don't call via l3 _int().
-      bli_obj_dt( a ),
-      bli_obj_dt( a ),
-	  bmult_id_m,
-	  bmult_id_n,
+      dt,
+      dt,
+	  bli_cntx_get_blksz_def_dt( dt, bmult_id_m, cntx ),
+	  bli_cntx_get_blksz_max_dt( dt, bmult_id_m, cntx ),
+	  bli_cntx_get_blksz_def_dt( dt, bmult_id_n, cntx ),
 	  does_inv_diag,
 	  FALSE,
 	  FALSE,

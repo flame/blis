@@ -54,12 +54,12 @@ void bli_packm_blk_var1
 	// Every thread initializes p and determines the size of memory block
 	// needed (which gets embedded into the otherwise "blank" mem_t entry
 	// in the control tree node). Return early if no packing is required.
-	if ( !bli_packm_init( c, p, cntx, cntl, thread ) )
+	if ( !bli_packm_init( c, p, cntl, thread ) )
 		return;
 
 	// Check parameters.
 	if ( bli_error_checking_is_enabled() )
-		bli_packm_int_check( c, p, cntx );
+		bli_packm_int_check( c, p );
 
 	num_t   dt_c           = bli_obj_dt( c );
 	dim_t   dt_c_size      = bli_dt_size( dt_c );

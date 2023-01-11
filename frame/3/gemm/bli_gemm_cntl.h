@@ -35,8 +35,8 @@
 
 struct gemm_cntl_s
 {
-         part_cntl_t part_ir;
-         part_cntl_t part_jr;
+              cntl_t part_ir;
+              cntl_t part_jr;
     packm_def_cntl_t pack_a;
          part_cntl_t part_ic;
     packm_def_cntl_t pack_b;

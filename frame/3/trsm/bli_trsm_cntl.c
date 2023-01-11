@@ -67,24 +67,28 @@ void bli_trsm_l_cntl_init
     // Set the default macrokernel.
 	void_fp macro_kernel_p = bli_trsm_xx_ker_var2;
 
-    const num_t dt_a     = bli_obj_dt( a );
-    const num_t dt_b     = bli_obj_dt( b );
-    const num_t dt_ap    = bli_obj_target_dt( a );
-    const num_t dt_bp    = bli_obj_target_dt( b );
-    const num_t dt_comp  = bli_obj_comp_dt( c );
+    const num_t dt_a         = bli_obj_dt( a );
+    const num_t dt_b         = bli_obj_dt( b );
+    const num_t dt_ap        = bli_obj_target_dt( a );
+    const num_t dt_bp        = bli_obj_target_dt( b );
+    const num_t dt_exec      = bli_obj_exec_dt( c );
 
-    const dir_t  direct   = bli_obj_is_lower( a ) ? BLIS_FWD : BLIS_BWD;
-    const dim_t  ir_bsize = bli_cntx_get_blksz_def_dt( dt_comp, BLIS_MR, cntx );
-    const dim_t  jr_bsize = bli_cntx_get_blksz_def_dt( dt_comp, BLIS_NR, cntx );
-    const dim_t  ic_alg   = bli_cntx_get_blksz_def_dt( dt_comp, BLIS_MC, cntx );
-    const dim_t  ic_max   = bli_cntx_get_blksz_max_dt( dt_comp, BLIS_MC, cntx );
-    const dim_t  ic_mult  = bli_cntx_get_blksz_def_dt( dt_comp, BLIS_MR, cntx );
-          dim_t  pc_alg   = bli_cntx_get_blksz_def_dt( dt_comp, BLIS_KC, cntx );
-          dim_t  pc_max   = bli_cntx_get_blksz_max_dt( dt_comp, BLIS_KC, cntx );
-    const dim_t  pc_mult  = 1;
-    const dim_t  jc_alg   = bli_cntx_get_blksz_def_dt( dt_comp, BLIS_NC, cntx );
-    const dim_t  jc_max   = bli_cntx_get_blksz_max_dt( dt_comp, BLIS_NC, cntx );
-    const dim_t  jc_mult  = bli_cntx_get_blksz_def_dt( dt_comp, BLIS_NR, cntx );
+    const dir_t direct       = bli_obj_is_lower( a ) ? BLIS_FWD : BLIS_BWD;
+    const dim_t ic_alg       = bli_cntx_get_blksz_def_dt( dt_exec, BLIS_MC, cntx );
+    const dim_t ic_max       = bli_cntx_get_blksz_max_dt( dt_exec, BLIS_MC, cntx );
+    const dim_t ic_mult      = bli_cntx_get_blksz_def_dt( dt_exec, BLIS_MR, cntx );
+          dim_t pc_alg       = bli_cntx_get_blksz_def_dt( dt_exec, BLIS_KC, cntx );
+          dim_t pc_max       = bli_cntx_get_blksz_max_dt( dt_exec, BLIS_KC, cntx );
+    const dim_t pc_mult      = 1;
+    const dim_t jc_alg       = bli_cntx_get_blksz_def_dt( dt_exec, BLIS_NC, cntx );
+    const dim_t jc_max       = bli_cntx_get_blksz_max_dt( dt_exec, BLIS_NC, cntx );
+    const dim_t jc_mult      = bli_cntx_get_blksz_def_dt( dt_exec, BLIS_NR, cntx );
+
+    const dim_t bmult_m_def  = bli_cntx_get_blksz_def_dt(   dt_ap, BLIS_MR, cntx );
+    const dim_t bmult_m_pack = bli_cntx_get_blksz_max_dt(   dt_ap, BLIS_MR, cntx );
+    const dim_t bmult_n_def  = bli_cntx_get_blksz_def_dt(   dt_bp, BLIS_NR, cntx );
+    const dim_t bmult_n_pack = bli_cntx_get_blksz_max_dt(   dt_bp, BLIS_NR, cntx );
+    const dim_t bmult_k_def  = bmult_m_def;
 
     bli_l3_adjust_kc
     (
@@ -100,25 +104,15 @@ void bli_trsm_l_cntl_init
 	// Create nodes for packing A and the macro-kernel (gemm branch).
 	//
 
-	bli_part_cntl_init_node
+	bli_cntl_init_node
 	(
 	  NULL,         // variant function pointer not used
-      ir_bsize,     // algorithmic block size
-      ir_bsize,     // max block size
-      ir_bsize,     // block size mult
-      BLIS_FWD,     // partitioning direction
-      FALSE,        // use weighted partitioning
       &cntl->part_ir_gemm
 	);
 
-	bli_part_cntl_init_node
+	bli_cntl_init_node
 	(
 	  macro_kernel_p,
-      jr_bsize,
-      jr_bsize,
-      jr_bsize,
-      BLIS_FWD,
-      FALSE,
       &cntl->part_jr_gemm
 	);
     bli_cntl_attach_sub_node
@@ -134,8 +128,9 @@ void bli_trsm_l_cntl_init
 	  bli_l3_packa, // trsm operation's packm function for A.
       dt_a,
       dt_ap,
-	  BLIS_MR,
-	  BLIS_MR,
+	  bmult_m_def,
+	  bmult_m_pack,
+	  bmult_k_def,
 	  FALSE,        // do NOT invert diagonal
 	  TRUE,         // reverse iteration if upper?
 	  FALSE,        // reverse iteration if lower?
@@ -154,25 +149,15 @@ void bli_trsm_l_cntl_init
 	// Create nodes for packing A and the macro-kernel (trsm branch).
 	//
 
-	bli_part_cntl_init_node
+	bli_cntl_init_node
 	(
 	  NULL,
-      ir_bsize,
-      ir_bsize,
-      ir_bsize,
-      BLIS_FWD,
-      FALSE,
       &cntl->part_ir_trsm
 	);
 
-	bli_part_cntl_init_node
+	bli_cntl_init_node
 	(
 	  macro_kernel_p,
-      jr_bsize,
-      jr_bsize,
-      jr_bsize,
-      BLIS_FWD,
-      FALSE,
       &cntl->part_jr_trsm
 	);
     bli_cntl_attach_sub_node
@@ -188,8 +173,9 @@ void bli_trsm_l_cntl_init
 	  bli_l3_packa, // trsm operation's packm function for A.
       dt_a,
       dt_ap,
-	  BLIS_MR,
-	  BLIS_MR,
+	  bmult_m_def,
+	  bmult_m_pack,
+	  bmult_k_def,
 #ifdef BLIS_ENABLE_TRSM_PREINVERSION
 	  TRUE,         // invert diagonal
 #else
@@ -243,8 +229,9 @@ void bli_trsm_l_cntl_init
 	  bli_l3_packb,
       dt_b,
       dt_bp,
-	  BLIS_NR,
-	  BLIS_MR,
+	  bmult_n_def,
+	  bmult_n_pack,
+	  bmult_k_def,
 	  FALSE,        // do NOT invert diagonal
 	  FALSE,        // reverse iteration if upper?
 	  FALSE,        // reverse iteration if lower?
@@ -311,24 +298,28 @@ void bli_trsm_r_cntl_init
     // Set the default macrokernel.
 	void_fp macro_kernel_p = bli_trsm_xx_ker_var2;
 
-    const num_t dt_a     = bli_obj_dt( a );
-    const num_t dt_b     = bli_obj_dt( b );
-    const num_t dt_ap    = bli_obj_target_dt( a );
-    const num_t dt_bp    = bli_obj_target_dt( b );
-    const num_t dt_comp  = bli_obj_comp_dt( c );
+    const num_t dt_a         = bli_obj_dt( a );
+    const num_t dt_b         = bli_obj_dt( b );
+    const num_t dt_ap        = bli_obj_target_dt( a );
+    const num_t dt_bp        = bli_obj_target_dt( b );
+    const num_t dt_exec      = bli_obj_exec_dt( c );
 
-	const dir_t  direct   = bli_obj_is_lower( b ) ? BLIS_BWD : BLIS_FWD;
-    const dim_t  ir_bsize = bli_cntx_get_blksz_def_dt( dt_comp, BLIS_MR, cntx );
-    const dim_t  jr_bsize = bli_cntx_get_blksz_def_dt( dt_comp, BLIS_NR, cntx );
-    const dim_t  ic_alg   = bli_cntx_get_blksz_def_dt( dt_comp, BLIS_MC, cntx );
-    const dim_t  ic_max   = bli_cntx_get_blksz_max_dt( dt_comp, BLIS_MC, cntx );
-    const dim_t  ic_mult  = bli_cntx_get_blksz_def_dt( dt_comp, BLIS_NR, cntx ); //note: different!
-          dim_t  pc_alg   = bli_cntx_get_blksz_def_dt( dt_comp, BLIS_KC, cntx );
-          dim_t  pc_max   = bli_cntx_get_blksz_max_dt( dt_comp, BLIS_KC, cntx );
-    const dim_t  pc_mult  = 1;
-    const dim_t  jc_alg   = bli_cntx_get_blksz_def_dt( dt_comp, BLIS_NC, cntx );
-    const dim_t  jc_max   = bli_cntx_get_blksz_max_dt( dt_comp, BLIS_NC, cntx );
-    const dim_t  jc_mult  = bli_cntx_get_blksz_def_dt( dt_comp, BLIS_MR, cntx ); //note: different!
+	const dir_t direct       = bli_obj_is_lower( b ) ? BLIS_BWD : BLIS_FWD;
+    const dim_t ic_alg       = bli_cntx_get_blksz_def_dt( dt_exec, BLIS_MC, cntx );
+    const dim_t ic_max       = bli_cntx_get_blksz_max_dt( dt_exec, BLIS_MC, cntx );
+    const dim_t ic_mult      = bli_cntx_get_blksz_def_dt( dt_exec, BLIS_NR, cntx ); //note: different!
+          dim_t pc_alg       = bli_cntx_get_blksz_def_dt( dt_exec, BLIS_KC, cntx );
+          dim_t pc_max       = bli_cntx_get_blksz_max_dt( dt_exec, BLIS_KC, cntx );
+    const dim_t pc_mult      = bli_cntx_get_blksz_def_dt( dt_exec, BLIS_KR, cntx );
+    const dim_t jc_alg       = bli_cntx_get_blksz_def_dt( dt_exec, BLIS_NC, cntx );
+    const dim_t jc_max       = bli_cntx_get_blksz_max_dt( dt_exec, BLIS_NC, cntx );
+    const dim_t jc_mult      = bli_cntx_get_blksz_def_dt( dt_exec, BLIS_MR, cntx ); //note: different!
+
+    const dim_t bmult_m_def  = bli_cntx_get_blksz_def_dt(   dt_ap, BLIS_NR, cntx );
+    const dim_t bmult_m_pack = bli_cntx_get_blksz_max_dt(   dt_ap, BLIS_NR, cntx );
+    const dim_t bmult_n_def  = bli_cntx_get_blksz_def_dt(   dt_bp, BLIS_MR, cntx );
+    const dim_t bmult_n_pack = bli_cntx_get_blksz_max_dt(   dt_bp, BLIS_MR, cntx );
+    const dim_t bmult_k_def  = bmult_n_def;
 
     bli_l3_adjust_kc
     (
@@ -341,25 +332,15 @@ void bli_trsm_r_cntl_init
     );
 
 	// Create two nodes for the macro-kernel.
-	bli_part_cntl_init_node
+	bli_cntl_init_node
 	(
 	  NULL,         // variant function pointer not used
-      ir_bsize,     // algorithmic block size
-      ir_bsize,     // max block size
-      ir_bsize,     // block size mult
-      BLIS_FWD,     // partitioning direction
-      FALSE,        // use weighted partitioning
       &cntl->part_ir_trsm
 	);
 
-	bli_part_cntl_init_node
+	bli_cntl_init_node
 	(
 	  macro_kernel_p,
-      jr_bsize,
-      jr_bsize,
-      jr_bsize,
-      BLIS_FWD,
-      FALSE,
       &cntl->part_jr_trsm
 	);
     bli_cntl_attach_sub_node
@@ -375,8 +356,9 @@ void bli_trsm_r_cntl_init
 	  bli_l3_packa,
       dt_a,
       dt_ap,
-	  BLIS_NR,
-	  BLIS_MR,
+	  bmult_m_def,
+	  bmult_m_pack,
+	  bmult_k_def,
 	  FALSE,   // do NOT invert diagonal
 	  FALSE,   // reverse iteration if upper?
 	  FALSE,   // reverse iteration if lower?
@@ -415,8 +397,9 @@ void bli_trsm_r_cntl_init
 	  bli_l3_packb,
       dt_b,
       dt_bp,
-	  BLIS_MR,
-	  BLIS_MR,
+	  bmult_n_def,
+	  bmult_n_pack,
+	  bmult_k_def,
 	  TRUE,    // do NOT invert diagonal
 	  FALSE,   // reverse iteration if upper?
 	  TRUE,    // reverse iteration if lower?

@@ -39,7 +39,6 @@ bool bli_packm_init
      (
        const obj_t*  c,
              obj_t*  p,
-       const cntx_t* cntx,
        const cntl_t* cntl,
              thrinfo_t* thread
      )
@@ -54,7 +53,7 @@ bool bli_packm_init
 
 	// Check parameters.
 	if ( bli_error_checking_is_enabled() )
-		bli_packm_init_check( c, p, cntx );
+		bli_packm_init_check( c, p );
 
 	// We begin by copying the fields of A.
 	bli_obj_alias_to( c, p );
@@ -65,14 +64,12 @@ bool bli_packm_init
 		return false;
 
 	// Extract various fields from the control tree.
-	bszid_t bmult_id_m   = bli_packm_def_cntl_bmid_m( cntl );
-	bszid_t bmult_id_n   = bli_packm_def_cntl_bmid_n( cntl );
 	pack_t  schema       = bli_packm_def_cntl_pack_schema( cntl );
 	num_t   dt_tar       = bli_obj_target_dt( c );
 	num_t   dt_scalar    = bli_obj_scalar_dt( c );
-	dim_t   bmult_m_def  = bli_cntx_get_blksz_def_dt( dt_tar, bmult_id_m, cntx );
-	dim_t   bmult_m_pack = bli_cntx_get_blksz_max_dt( dt_tar, bmult_id_m, cntx );
-	dim_t   bmult_n_def  = bli_cntx_get_blksz_def_dt( dt_tar, bmult_id_n, cntx );
+	dim_t   bmult_m_def  = bli_packm_def_cntl_bmult_m_def( cntl );
+	dim_t   bmult_m_pack = bli_packm_def_cntl_bmult_m_pack( cntl );
+	dim_t   bmult_n_def  = bli_packm_def_cntl_bmult_n_def( cntl );
 
 	// Typecast the internal scalar value to the target datatype.
 	// Note that if the typecasting is needed, this must happen BEFORE we
