@@ -37,8 +37,9 @@
 
 BLIS_EXPORT_BLIS arch_t bli_arch_query_id( void );
 
-void bli_arch_set_id_once( void );
-void bli_arch_set_id( void );
+void   bli_arch_set_id_once( void );
+void   bli_arch_set_id( void );
+arch_t bli_arch_query_id_impl( void );
 
 BLIS_EXPORT_BLIS const char*  bli_arch_string( arch_t id );
 
