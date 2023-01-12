@@ -65,30 +65,30 @@ void bli_trsm_l_cntl_init
      )
 {
     // Set the default macrokernel.
-	void_fp macro_kernel_p = bli_trsm_xx_ker_var2;
+	const void_fp macro_kernel_p = bli_obj_is_lower( a ) ? bli_trsm_ll_ker_var2 : bli_trsm_lu_ker_var2;
 
-    const num_t dt_a         = bli_obj_dt( a );
-    const num_t dt_b         = bli_obj_dt( b );
-    const num_t dt_ap        = bli_obj_target_dt( a );
-    const num_t dt_bp        = bli_obj_target_dt( b );
-    const num_t dt_exec      = bli_obj_exec_dt( c );
+    const num_t   dt_a           = bli_obj_dt( a );
+    const num_t   dt_b           = bli_obj_dt( b );
+    const num_t   dt_ap          = bli_obj_target_dt( a );
+    const num_t   dt_bp          = bli_obj_target_dt( b );
+    const num_t   dt_exec        = bli_obj_exec_dt( c );
 
-    const dir_t direct       = bli_obj_is_lower( a ) ? BLIS_FWD : BLIS_BWD;
-    const dim_t ic_alg       = bli_cntx_get_blksz_def_dt( dt_exec, BLIS_MC, cntx );
-    const dim_t ic_max       = bli_cntx_get_blksz_max_dt( dt_exec, BLIS_MC, cntx );
-    const dim_t ic_mult      = bli_cntx_get_blksz_def_dt( dt_exec, BLIS_MR, cntx );
-          dim_t pc_alg       = bli_cntx_get_blksz_def_dt( dt_exec, BLIS_KC, cntx );
-          dim_t pc_max       = bli_cntx_get_blksz_max_dt( dt_exec, BLIS_KC, cntx );
-    const dim_t pc_mult      = 1;
-    const dim_t jc_alg       = bli_cntx_get_blksz_def_dt( dt_exec, BLIS_NC, cntx );
-    const dim_t jc_max       = bli_cntx_get_blksz_max_dt( dt_exec, BLIS_NC, cntx );
-    const dim_t jc_mult      = bli_cntx_get_blksz_def_dt( dt_exec, BLIS_NR, cntx );
+    const dir_t   direct         = bli_obj_is_lower( a ) ? BLIS_FWD : BLIS_BWD;
+    const dim_t   ic_alg         = bli_cntx_get_blksz_def_dt( dt_exec, BLIS_MC, cntx );
+    const dim_t   ic_max         = bli_cntx_get_blksz_max_dt( dt_exec, BLIS_MC, cntx );
+    const dim_t   ic_mult        = bli_cntx_get_blksz_def_dt( dt_exec, BLIS_MR, cntx );
+          dim_t   pc_alg         = bli_cntx_get_blksz_def_dt( dt_exec, BLIS_KC, cntx );
+          dim_t   pc_max         = bli_cntx_get_blksz_max_dt( dt_exec, BLIS_KC, cntx );
+    const dim_t   pc_mult        = 1;
+    const dim_t   jc_alg         = bli_cntx_get_blksz_def_dt( dt_exec, BLIS_NC, cntx );
+    const dim_t   jc_max         = bli_cntx_get_blksz_max_dt( dt_exec, BLIS_NC, cntx );
+    const dim_t   jc_mult        = bli_cntx_get_blksz_def_dt( dt_exec, BLIS_NR, cntx );
 
-    const dim_t bmult_m_def  = bli_cntx_get_blksz_def_dt(   dt_ap, BLIS_MR, cntx );
-    const dim_t bmult_m_pack = bli_cntx_get_blksz_max_dt(   dt_ap, BLIS_MR, cntx );
-    const dim_t bmult_n_def  = bli_cntx_get_blksz_def_dt(   dt_bp, BLIS_NR, cntx );
-    const dim_t bmult_n_pack = bli_cntx_get_blksz_max_dt(   dt_bp, BLIS_NR, cntx );
-    const dim_t bmult_k_def  = bmult_m_def;
+    const dim_t   bmult_m_def    = bli_cntx_get_blksz_def_dt(   dt_ap, BLIS_MR, cntx );
+    const dim_t   bmult_m_pack   = bli_cntx_get_blksz_max_dt(   dt_ap, BLIS_MR, cntx );
+    const dim_t   bmult_n_def    = bli_cntx_get_blksz_def_dt(   dt_bp, BLIS_NR, cntx );
+    const dim_t   bmult_n_pack   = bli_cntx_get_blksz_max_dt(   dt_bp, BLIS_NR, cntx );
+    const dim_t   bmult_k_def    = bmult_m_def;
 
     bli_l3_adjust_kc
     (
@@ -296,30 +296,30 @@ void bli_trsm_r_cntl_init
 {
 	// NOTE: trsm macrokernels are presently disabled for right-side execution.
     // Set the default macrokernel.
-	void_fp macro_kernel_p = bli_trsm_xx_ker_var2;
+	const void_fp macro_kernel_p = bli_obj_is_lower( b ) ? bli_trsm_rl_ker_var2 : bli_trsm_ru_ker_var2;
 
-    const num_t dt_a         = bli_obj_dt( a );
-    const num_t dt_b         = bli_obj_dt( b );
-    const num_t dt_ap        = bli_obj_target_dt( a );
-    const num_t dt_bp        = bli_obj_target_dt( b );
-    const num_t dt_exec      = bli_obj_exec_dt( c );
+    const num_t   dt_a           = bli_obj_dt( a );
+    const num_t   dt_b           = bli_obj_dt( b );
+    const num_t   dt_ap          = bli_obj_target_dt( a );
+    const num_t   dt_bp          = bli_obj_target_dt( b );
+    const num_t   dt_exec        = bli_obj_exec_dt( c );
 
-	const dir_t direct       = bli_obj_is_lower( b ) ? BLIS_BWD : BLIS_FWD;
-    const dim_t ic_alg       = bli_cntx_get_blksz_def_dt( dt_exec, BLIS_MC, cntx );
-    const dim_t ic_max       = bli_cntx_get_blksz_max_dt( dt_exec, BLIS_MC, cntx );
-    const dim_t ic_mult      = bli_cntx_get_blksz_def_dt( dt_exec, BLIS_NR, cntx ); //note: different!
-          dim_t pc_alg       = bli_cntx_get_blksz_def_dt( dt_exec, BLIS_KC, cntx );
-          dim_t pc_max       = bli_cntx_get_blksz_max_dt( dt_exec, BLIS_KC, cntx );
-    const dim_t pc_mult      = bli_cntx_get_blksz_def_dt( dt_exec, BLIS_KR, cntx );
-    const dim_t jc_alg       = bli_cntx_get_blksz_def_dt( dt_exec, BLIS_NC, cntx );
-    const dim_t jc_max       = bli_cntx_get_blksz_max_dt( dt_exec, BLIS_NC, cntx );
-    const dim_t jc_mult      = bli_cntx_get_blksz_def_dt( dt_exec, BLIS_MR, cntx ); //note: different!
+	const dir_t   direct         = bli_obj_is_lower( b ) ? BLIS_BWD : BLIS_FWD;
+    const dim_t   ic_alg         = bli_cntx_get_blksz_def_dt( dt_exec, BLIS_MC, cntx );
+    const dim_t   ic_max         = bli_cntx_get_blksz_max_dt( dt_exec, BLIS_MC, cntx );
+    const dim_t   ic_mult        = bli_cntx_get_blksz_def_dt( dt_exec, BLIS_NR, cntx ); //note: different!
+          dim_t   pc_alg         = bli_cntx_get_blksz_def_dt( dt_exec, BLIS_KC, cntx );
+          dim_t   pc_max         = bli_cntx_get_blksz_max_dt( dt_exec, BLIS_KC, cntx );
+    const dim_t   pc_mult        = bli_cntx_get_blksz_def_dt( dt_exec, BLIS_KR, cntx );
+    const dim_t   jc_alg         = bli_cntx_get_blksz_def_dt( dt_exec, BLIS_NC, cntx );
+    const dim_t   jc_max         = bli_cntx_get_blksz_max_dt( dt_exec, BLIS_NC, cntx );
+    const dim_t   jc_mult        = bli_cntx_get_blksz_def_dt( dt_exec, BLIS_MR, cntx ); //note: different!
 
-    const dim_t bmult_m_def  = bli_cntx_get_blksz_def_dt(   dt_ap, BLIS_NR, cntx );
-    const dim_t bmult_m_pack = bli_cntx_get_blksz_max_dt(   dt_ap, BLIS_NR, cntx );
-    const dim_t bmult_n_def  = bli_cntx_get_blksz_def_dt(   dt_bp, BLIS_MR, cntx );
-    const dim_t bmult_n_pack = bli_cntx_get_blksz_max_dt(   dt_bp, BLIS_MR, cntx );
-    const dim_t bmult_k_def  = bmult_n_def;
+    const dim_t   bmult_m_def    = bli_cntx_get_blksz_def_dt(   dt_ap, BLIS_NR, cntx );
+    const dim_t   bmult_m_pack   = bli_cntx_get_blksz_max_dt(   dt_ap, BLIS_NR, cntx );
+    const dim_t   bmult_n_def    = bli_cntx_get_blksz_def_dt(   dt_bp, BLIS_MR, cntx );
+    const dim_t   bmult_n_pack   = bli_cntx_get_blksz_max_dt(   dt_bp, BLIS_MR, cntx );
+    const dim_t   bmult_k_def    = bmult_n_def;
 
     bli_l3_adjust_kc
     (

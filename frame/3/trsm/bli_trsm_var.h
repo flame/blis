@@ -55,8 +55,6 @@ GENPROT( trsm_blk_var1 )
 GENPROT( trsm_blk_var2 )
 GENPROT( trsm_blk_var3 )
 
-GENPROT( trsm_xx_ker_var2 )
-
 GENPROT( trsm_ll_ker_var2 )
 GENPROT( trsm_lu_ker_var2 )
 GENPROT( trsm_rl_ker_var2 )

@@ -65,16 +65,23 @@ void bli_gemmbp_cntl_init
              gemm_cntl_t* cntl
      )
 {
-	void_fp macro_kernel_fp;
+	void_fp macro_kernel_fp = NULL;
 
-	// Choose the default macrokernel based on the operation family.
-	if      ( family == BLIS_GEMM ||
-              family == BLIS_HEMM ||
-              family == BLIS_SYMM ) macro_kernel_fp = bli_gemm_ker_var2;
-	else if ( family == BLIS_GEMMT ) macro_kernel_fp = bli_gemmt_x_ker_var2;
+	if ( family == BLIS_GEMMT )
+    {
+        macro_kernel_fp = bli_obj_is_lower( c ) ? bli_gemmt_l_ker_var2 : bli_gemmt_u_ker_var2;
+    }
 	else if ( family == BLIS_TRMM ||
-	          family == BLIS_TRMM3 ) macro_kernel_fp = bli_trmm_xx_ker_var2;
-	else /* should never execute */ macro_kernel_fp = NULL;
+	          family == BLIS_TRMM3 )
+    {
+        macro_kernel_fp = bli_obj_is_triangular( a )
+            ? bli_obj_is_lower( a ) ? bli_trmm_ll_ker_var2 : bli_trmm_lu_ker_var2
+            : bli_obj_is_lower( b ) ? bli_trmm_rl_ker_var2 : bli_trmm_ru_ker_var2;
+    }
+	else
+    {
+        macro_kernel_fp = bli_gemm_ker_var2;
+    }
 
     const num_t dt_a         = bli_obj_dt( a );
     const num_t dt_b         = bli_obj_dt( b );
@@ -85,6 +92,7 @@ void bli_gemmbp_cntl_init
     const bool  a_lo_tri     = bli_obj_is_triangular( a ) && bli_obj_is_lower( a );
     const bool  b_up_tri     = bli_obj_is_triangular( b ) && bli_obj_is_upper( b );
     const bool  trmm_r       = family == BLIS_TRMM && bli_obj_is_triangular( b );
+
     const dim_t ic_alg       = bli_cntx_get_blksz_def_dt( dt_exec, BLIS_MC, cntx );
     const dim_t ic_max       = bli_cntx_get_blksz_max_dt( dt_exec, BLIS_MC, cntx );
     const dim_t ic_mult      = bli_cntx_get_blksz_def_dt( dt_exec, BLIS_MR, cntx );

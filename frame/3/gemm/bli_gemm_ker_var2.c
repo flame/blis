@@ -47,7 +47,7 @@ typedef void (*xpbys_mxn_vft)
 #undef GENTFUNC2
 #define GENTFUNC2(ctypex,ctypey,chx,chy,op) \
 \
-void PASTEMAC2(chx,chy,op) \
+static void PASTEMAC2(chx,chy,op) \
     ( \
       dim_t m, \
       dim_t n, \
