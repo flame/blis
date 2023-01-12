@@ -67,14 +67,27 @@
 
 // The arch_t id for the currently running hardware. We initialize to -1,
 // which will be overwritten upon calling bli_arch_set_id().
-static arch_t id = -1;
+static arch_t cached_id = -1;
 
 arch_t bli_arch_query_id( void )
 {
+
+#ifdef BLIS_ENABLE_GKS_CACHING
+
+	// Deep-query the arch_t id once via bli_pthread_once(). Since we are
+	// constrained by the pthread interface to pthread_once(), the id must be
+	// "returned" indirectly via a static variable (cached_id).
 	bli_arch_set_id_once();
 
-	// Simply return the id that was previously cached.
-	return id;
+	// Return the id that was previously cached.
+	return cached_id;
+
+#else
+
+	// Deep-query and return a fresh arch_t.
+	return bli_arch_query_id_impl();
+
+#endif
 }
 
 // -----------------------------------------------------------------------------
@@ -85,6 +98,9 @@ static bli_pthread_once_t once_id = BLIS_PTHREAD_ONCE_INIT;
 
 void bli_arch_set_id_once( void )
 {
+	// When this file is being compiled as part of the configure script's
+	// hardware auto-detection driver, we avoid calling the bli_pthread APIs
+	// so that we aren't required to include those symbols in the executable.
 #ifndef BLIS_CONFIGURETIME_CPUID
 	bli_pthread_once( &once_id, bli_arch_set_id );
 #endif
@@ -94,6 +110,16 @@ void bli_arch_set_id_once( void )
 
 void bli_arch_set_id( void )
 {
+	// Deep-query the arch_t and save it in the static variable (cached_id).
+	cached_id = bli_arch_query_id_impl();
+}
+
+// -----------------------------------------------------------------------------
+
+arch_t bli_arch_query_id_impl( void )
+{
+	arch_t id;
+
 	// Check the environment variable BLIS_ARCH_DEBUG to see if the user
 	// requested that we echo the result of the subconfiguration selection.
 	bool do_logging = bli_env_get_var( "BLIS_ARCH_DEBUG", 0 );
@@ -103,6 +129,9 @@ void bli_arch_set_id( void )
 	// requested that we use a specific subconfiguration.
 	dim_t req_id = bli_env_get_var( "BLIS_ARCH_TYPE", -1 );
 
+	// When this file is being compiled as part of the configure script's
+	// hardware auto-detection driver, we avoid calling the bli_check APIs
+	// so that we aren't required to include those symbols in the executable.
 #ifndef BLIS_CONFIGURETIME_CPUID
 	if ( req_id != -1 )
 	{
@@ -243,8 +272,12 @@ void bli_arch_set_id( void )
 		fprintf( stderr, "libblis: selecting sub-configuration '%s'.\n",
 				 bli_arch_string( id ) );
 
-	//printf( "blis_arch_query_id(): id = %u\n", id );
-	//exit(1);
+	#if 0
+	printf( "blis_arch_query_id_impl(): id = %u\n", id );
+	exit(1);
+	#endif
+
+	return id;
 }
 
 // -----------------------------------------------------------------------------

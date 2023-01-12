@@ -69,6 +69,17 @@
 
 // -- MULTITHREADING -----------------------------------------------------------
 
+// Enable caching of queried cntx_t pointers in the gks?
+#ifdef BLIS_DISABLE_GKS_CACHING
+  #undef BLIS_ENABLE_GKS_CACHING
+#else
+  // Default behavior is enabled.
+  #define BLIS_ENABLE_GKS_CACHING
+#endif
+
+
+// -- MULTITHREADING -----------------------------------------------------------
+
 // Enable multithreading via POSIX threads.
 #ifdef BLIS_ENABLE_PTHREADS
   // No additional definitions needed.

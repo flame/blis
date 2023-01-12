@@ -701,7 +701,7 @@ int bli_pthread_barrier_wait
 // Note that bli_pthread_switch_t has the following properties:
 //
 // 1. Access to a switch is protected by a mutex specific to that switch, and
-//    therefore state changes and thread-safe.
+//    therefore state changes are thread-safe.
 //
 // 2. An initialized switch always starts in the "off" state.
 //
