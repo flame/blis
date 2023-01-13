@@ -32,69 +32,40 @@
 
 */
 
-#include "blis.h"
+#ifndef BLIS_LT_H
+#define BLIS_LT_H
 
-//
-// Define function pointer query interfaces.
-//
 
-#undef  GENFRONT
-#define GENFRONT( opname ) \
-\
-GENARRAY_FPA( PASTECH2(opname,BLIS_TAPI_EX_SUF,_vft), \
-              PASTECH(opname,BLIS_TAPI_EX_SUF) ); \
-\
-PASTECH2(opname,BLIS_TAPI_EX_SUF,_vft) \
-PASTEMAC2(opname,BLIS_TAPI_EX_SUF,_qfp)( num_t dt ) \
-{ \
-	return PASTECH2(opname,BLIS_TAPI_EX_SUF,_fpa)[ dt ]; \
-}
+// lt (passed by value)
 
-GENFRONT( asumv )
-GENFRONT( mkherm )
-GENFRONT( mksymm )
-GENFRONT( mktrim )
-GENFRONT( norm1v )
-GENFRONT( normfv )
-GENFRONT( normiv )
-GENFRONT( norm1m )
-GENFRONT( normfm )
-GENFRONT( normim )
-GENFRONT( randv )
-GENFRONT( randnv )
-GENFRONT( randm )
-GENFRONT( randnm )
-GENFRONT( sumsqv )
+#define bli_slt( a, b )  (          (a) <          (b) )
+#define bli_dlt( a, b )  (          (a) <          (b) )
+#define bli_clt( a, b )  ( bli_creal(a) < bli_creal(b) )
+#define bli_zlt( a, b )  ( bli_zreal(a) < bli_zreal(b) )
+#define bli_ilt( a, b )  (          (a) <          (b) )
 
-// -----------------------------------------------------------------------------
+// lt0
 
-// Operations with only basic interfaces.
+#define bli_slt0( a )  (          (a) < 0.0F )
+#define bli_dlt0( a )  (          (a) < 0.0  )
+#define bli_clt0( a )  ( bli_creal(a) < 0.0F )
+#define bli_zlt0( a )  ( bli_zreal(a) < 0.0  )
 
-#undef  GENFRONT
-#define GENFRONT( opname ) \
-\
-/*
-GENARRAY_FPA( void_fp, opname ); \
-*/ \
-\
-GENARRAY_FPA( PASTECH(opname,_vft), \
-              PASTECH0(opname) ); \
-\
-PASTECH(opname,_vft) \
-PASTEMAC(opname,_qfp)( num_t dt ) \
-{ \
-	return PASTECH(opname,_fpa)[ dt ]; \
-}
+// gt (passed by value)
 
-GENFRONT( eqsc )
-GENFRONT( eqv )
-GENFRONT( eqm )
-GENFRONT( ltsc )
-GENFRONT( ltesc )
-GENFRONT( gtsc )
-GENFRONT( gtesc )
-GENFRONT( fprintv )
-GENFRONT( fprintm )
-//GENFRONT( printv )
-//GENFRONT( printm )
+#define bli_sgt( a, b )  (          (a) >          (b) )
+#define bli_dgt( a, b )  (          (a) >          (b) )
+#define bli_cgt( a, b )  ( bli_creal(a) > bli_creal(b) )
+#define bli_zgt( a, b )  ( bli_zreal(a) > bli_zreal(b) )
+#define bli_igt( a, b )  (          (a) >          (b) )
 
+// gt0
+
+#define bli_sgt0( a )  (          (a) > 0.0F )
+#define bli_dgt0( a )  (          (a) > 0.0  )
+#define bli_cgt0( a )  ( bli_creal(a) > 0.0F )
+#define bli_zgt0( a )  ( bli_zreal(a) > 0.0  )
+
+
+
+#endif

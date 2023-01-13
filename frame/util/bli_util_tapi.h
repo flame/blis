@@ -207,6 +207,22 @@ INSERT_GENTPROT_BASIC0( eqm )
 \
 BLIS_EXPORT_BLIS void PASTEMAC(ch,opname) \
      ( \
+       const ctype* chi, \
+       const ctype* psi, \
+             bool*  is  \
+     );
+
+INSERT_GENTPROT_BASIC0( ltsc )
+INSERT_GENTPROT_BASIC0( ltesc )
+INSERT_GENTPROT_BASIC0( gtsc )
+INSERT_GENTPROT_BASIC0( gtesc )
+
+
+#undef  GENTPROT
+#define GENTPROT( ctype, ch, opname ) \
+\
+BLIS_EXPORT_BLIS void PASTEMAC(ch,opname) \
+     ( \
        const char* s1, \
              dim_t n, \
        const void* x, inc_t incx, \

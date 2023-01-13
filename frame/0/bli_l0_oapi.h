@@ -63,17 +63,8 @@ GENPROT( addsc )
 GENPROT( divsc )
 GENPROT( mulsc )
 GENPROT( sqrtsc )
+GENPROT( sqrtrsc )
 GENPROT( subsc )
-
-
-#undef  GENPROT
-#define GENPROT( opname ) \
-\
-BLIS_EXPORT_BLIS void PASTEMAC0(opname) \
-     ( \
-       const obj_t* chi  \
-     );
-
 GENPROT( invertsc )
 
 

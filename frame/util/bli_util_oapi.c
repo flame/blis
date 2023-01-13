@@ -531,6 +531,56 @@ GENFRONT( eqm )
 \
 void PASTEMAC0(opname) \
      ( \
+       const obj_t* chi, \
+       const obj_t* psi, \
+             bool*  is  \
+     ) \
+{ \
+	bli_init_once(); \
+\
+	num_t dt_chi = bli_obj_dt( chi ); \
+	num_t dt_psi = bli_obj_dt( psi ); \
+	num_t dt; \
+\
+	if ( bli_error_checking_is_enabled() ) \
+		PASTEMAC(opname,_check)( chi, psi, is ); \
+\
+	/* Decide which datatype will be used to query the buffer from the
+	   constant object (if there is one). */ \
+	if ( bli_is_constant( dt_psi ) ) dt = dt_chi; \
+	else                             dt = dt_psi; \
+\
+	/* If chi and psi are both constants, then we compare only the dcomplex
+	   fields. */ \
+	if ( bli_is_constant( dt ) ) dt = BLIS_DOUBLE; \
+\
+	void* buf_chi = bli_obj_buffer_for_1x1( dt, chi ); \
+	void* buf_psi = bli_obj_buffer_for_1x1( dt, psi ); \
+\
+	/* Query a type-specific function pointer, except one that uses
+	   void* for function arguments instead of typed pointers. */ \
+	PASTECH(opname,_vft) f = \
+	PASTEMAC(opname,_qfp)( dt ); \
+\
+	f \
+	( \
+	  buf_chi, \
+	  buf_psi, \
+	  is  \
+	); \
+}
+
+GENFRONT( ltsc )
+GENFRONT( ltesc )
+GENFRONT( gtsc )
+GENFRONT( gtesc )
+
+
+#undef  GENFRONT
+#define GENFRONT( opname ) \
+\
+void PASTEMAC0(opname) \
+     ( \
              FILE*  file, \
        const char*  s1, \
        const obj_t* x, \

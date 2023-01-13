@@ -100,6 +100,7 @@ void libblis_test_trmv_deps
 	libblis_test_subv( tdata, params, &(op->ops->subv) );
 	libblis_test_copyv( tdata, params, &(op->ops->copyv) );
 	libblis_test_scalv( tdata, params, &(op->ops->scalv) );
+	libblis_test_copym( tdata, params, &(op->ops->copym) );
 	libblis_test_gemv( tdata, params, &(op->ops->gemv) );
 }
 
@@ -324,6 +325,11 @@ void libblis_test_trmv_check
 
 	bli_obj_set_struc( BLIS_GENERAL, &a_local );
 	bli_obj_set_uplo( BLIS_DENSE, &a_local );
+
+	// If matrix A has an implicit unit diagonal, we have to make it explicit
+	// for the gemv below.
+	if ( bli_obj_has_unit_diag( a ) )
+		bli_setd( &BLIS_ONE, &a_local );
 
 	bli_gemv( alpha, &a_local, x_orig, &BLIS_ZERO, &y );
 

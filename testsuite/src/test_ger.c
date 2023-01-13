@@ -101,6 +101,7 @@ void libblis_test_ger_deps
 	libblis_test_subv( tdata, params, &(op->ops->subv) );
 	libblis_test_scal2v( tdata, params, &(op->ops->scal2v) );
 	libblis_test_dotv( tdata, params, &(op->ops->dotv) );
+	libblis_test_copym( tdata, params, &(op->ops->copym) );
 	libblis_test_gemv( tdata, params, &(op->ops->gemv) );
 }
 

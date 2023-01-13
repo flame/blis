@@ -55,20 +55,8 @@ GENFRONT( copysc )
 GENFRONT( divsc )
 GENFRONT( mulsc )
 GENFRONT( sqrtsc )
+GENFRONT( sqrtrsc )
 GENFRONT( subsc )
-
-
-#undef  GENFRONT
-#define GENFRONT( opname ) \
-\
-void PASTEMAC(opname,_check) \
-     ( \
-       const obj_t* chi  \
-     ) \
-{ \
-	bli_l0_xsc_check( chi ); \
-}
-
 GENFRONT( invertsc )
 
 
@@ -357,7 +345,7 @@ void bli_l0_xxbsc_check
      (
        const obj_t* chi,
        const obj_t* psi,
-       const bool*  is_eq
+       const bool*  is
      )
 {
 	err_t e_val;
