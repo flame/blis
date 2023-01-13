@@ -61,12 +61,7 @@ cntl_t* bli_gemmbp_cntl_create
 	void_fp macro_kernel_fp;
 
 	// Choose the default macrokernel based on the operation family...
-	if      ( family == BLIS_GEMM )  macro_kernel_fp =
-	                                   #ifdef BLIS_ENABLE_JRIR_TLB
-	                                   bli_gemm_ker_var2b;
-	                                   #else // ifdef ( _SLAB || _RR )
-	                                   bli_gemm_ker_var2;
-	                                   #endif
+	if      ( family == BLIS_GEMM )  macro_kernel_fp = bli_gemm_ker_var2;
 	else if ( family == BLIS_GEMMT ) macro_kernel_fp =
 	                                   #ifdef BLIS_ENABLE_JRIR_TLB
 	                                   bli_gemmt_x_ker_var2b;
