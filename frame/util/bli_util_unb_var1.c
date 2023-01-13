@@ -323,12 +323,11 @@ void bli_cnormfv_unb_var1
     {
         return;
     }
-    /* Disable AVX2 codepath.
     if ( bli_cpuid_is_avx_supported() == TRUE )
     {
         bli_scnorm2fv_unb_var1_avx2( n, x, incx, norm, cntx );
     }
-    else*/
+    else
     {
         float* zero       = bli_s0;
         float* one        = bli_s1;
