@@ -37,11 +37,11 @@
 
 void bli_trsm_ru_ker_var2
      (
-       const obj_t*  a,
-       const obj_t*  b,
-       const obj_t*  c,
-       const cntx_t* cntx,
-       const cntl_t* cntl,
+       const obj_t*     a,
+       const obj_t*     b,
+       const obj_t*     c,
+       const cntx_t*    cntx,
+       const cntl_t*    cntl,
              thrinfo_t* thread_par
      )
 {
@@ -244,7 +244,7 @@ void bli_trsm_ru_ker_var2
 			// block B11.
 			const char* b01 = b1;
 			const char* b11 = b1 + k_b01 * PACKNR * dt_size;
-			//b11 = bli_ptr_inc_by_frac( b1, sizeof( ctype ), k_b01 * PACKNR, 1 );*/
+			//b11 = bli_ptr_inc_by_frac( b1, sizeof( ctype ), k_b01 * PACKNR, 1 );
 
 			// Compute the panel stride for the current micro-panel.
 			inc_t ps_b_cur  = k_b0111 * PACKNR;

@@ -37,11 +37,11 @@
 
 void bli_trsm_ll_ker_var2
      (
-       const obj_t*  a,
-       const obj_t*  b,
-       const obj_t*  c,
-       const cntx_t* cntx,
-       const cntl_t* cntl,
+       const obj_t*     a,
+       const obj_t*     b,
+       const obj_t*     c,
+       const cntx_t*    cntx,
+       const cntl_t*    cntl,
              thrinfo_t* thread_par
      )
 {
@@ -158,47 +158,44 @@ void bli_trsm_ll_ker_var2
 
 	// Compute number of primary and leftover components of the m and n
 	// dimensions.
-	dim_t n_iter = n / NR;
-	dim_t n_left = n % NR;
+	const dim_t n_iter = n / NR + ( n % NR ? 1 : 0 );
+	const dim_t n_left = n % NR;
 
-	dim_t m_iter = m / MR;
-	dim_t m_left = m % MR;
-
-	if ( n_left ) ++n_iter;
-	if ( m_left ) ++m_iter;
+	const dim_t m_iter = m / MR + ( m % MR ? 1 : 0 );
+	const dim_t m_left = m % MR;
 
 	// Determine some increments used to step through A, B, and C.
-	inc_t rstep_a = ps_a * dt_size;
+	const inc_t rstep_a = ps_a * dt_size;
 
-	inc_t cstep_b = ps_b * dt_size;
+	const inc_t cstep_b = ps_b * dt_size;
 
-	inc_t rstep_c = rs_c * MR * dt_size;
-	inc_t cstep_c = cs_c * NR * dt_size;
+	const inc_t rstep_c = rs_c * MR * dt_size;
+	const inc_t cstep_c = cs_c * NR * dt_size;
+
+	auxinfo_t aux;
 
 	// Save the pack schemas of A and B to the auxinfo_t object.
-	auxinfo_t aux;
 	bli_auxinfo_set_schema_a( schema_a, &aux );
 	bli_auxinfo_set_schema_b( schema_b, &aux );
 
 	// We don't bother querying the thrinfo_t node for the 1st loop because
 	// we can't parallelize that loop in trsm due to the inter-iteration
 	// dependencies that exist.
+	thrinfo_t* thread = bli_thrinfo_sub_node( 0, thread_par );
 	//thrinfo_t* caucus = bli_thrinfo_sub_node( 0, thread );
 
 	// Query the number of threads and thread ids for each loop.
-	thrinfo_t* thread = bli_thrinfo_sub_node( 0, thread_par );
-	dim_t jr_nt  = bli_thrinfo_n_way( thread );
-	dim_t jr_tid = bli_thrinfo_work_id( thread );
+	const dim_t jr_nt  = bli_thrinfo_n_way( thread );
+	const dim_t jr_tid = bli_thrinfo_work_id( thread );
 
-	dim_t jr_start, jr_end;
-	dim_t jr_inc;
+	dim_t jr_start, jr_end, jr_inc;
 
 	// Determine the thread range and increment for the 2nd loop.
-	// NOTE: The definition of bli_thread_range_jrir() will depend on whether
+	// NOTE: The definition of bli_thread_range_slrr() will depend on whether
 	// slab or round-robin partitioning was requested at configure-time.
 	// NOTE: Parallelism in the 1st loop is unattainable due to the
 	// inter-iteration dependencies present in trsm.
-	bli_thread_range_jrir( jr_tid, jr_nt, n_iter, 1, FALSE, &jr_start, &jr_end, &jr_inc );
+	bli_thread_range_slrr( jr_tid, jr_nt, n_iter, 1, FALSE, &jr_start, &jr_end, &jr_inc );
 
 	// Loop over the n dimension (NR columns at a time).
 	for ( dim_t j = jr_start; j < jr_end; j += jr_inc )
@@ -206,7 +203,8 @@ void bli_trsm_ll_ker_var2
 		const char* b1 = b_cast + j * cstep_b;
 		      char* c1 = c_cast + j * cstep_c;
 
-		      dim_t n_cur = ( bli_is_not_edge_f( j, n_iter, n_left ) ? NR : n_left );
+		const dim_t n_cur = ( bli_is_not_edge_f( j, n_iter, n_left )
+		                      ? NR : n_left );
 
 		// Initialize our next panel of B to be the current panel of B.
 		const char* b2  = b1;
@@ -217,9 +215,10 @@ void bli_trsm_ll_ker_var2
 		// Loop over the m dimension (MR rows at a time).
 		for ( dim_t i = 0; i < m_iter; ++i )
 		{
-			doff_t diagoffa_i = diagoffa + ( doff_t )i*MR;
+			const doff_t diagoffa_i = diagoffa + ( doff_t )i*MR;
 
-			dim_t m_cur = ( bli_is_not_edge_f( i, m_iter, m_left ) ? MR : m_left );
+			const dim_t m_cur = ( bli_is_not_edge_f( i, m_iter, m_left )
+			                      ? MR : m_left );
 
 			// If the current panel of A intersects the diagonal, use a
 			// special micro-kernel that performs a fused gemm and trsm.
@@ -230,10 +229,10 @@ void bli_trsm_ll_ker_var2
 			if ( bli_intersects_diag_n( diagoffa_i, MR, k ) )
 			{
 				// Compute various offsets into and lengths of parts of A.
-				dim_t off_a10 = 0;
-				dim_t k_a1011 = diagoffa_i + MR;
-				dim_t k_a10   = k_a1011 - MR;
-				dim_t off_a11 = k_a10;
+				const dim_t off_a10 = 0;
+				const dim_t k_a1011 = diagoffa_i + MR;
+				const dim_t k_a10   = k_a1011 - MR;
+				const dim_t off_a11 = k_a10;
 
 				// Compute the panel stride for the current diagonal-
 				// intersecting micro-panel.
@@ -258,7 +257,7 @@ void bli_trsm_ll_ker_var2
 				{
 					a2 = a_cast;
 					b2 = b1;
-					if ( bli_is_last_iter( j, n_iter, jr_tid, jr_nt ) )
+					if ( bli_is_last_iter_slrr( j, n_iter, jr_tid, jr_nt ) )
 						b2 = b_cast;
 				}
 
@@ -292,7 +291,7 @@ void bli_trsm_ll_ker_var2
 				{
 					a2 = a_cast;
 					b2 = b1;
-					if ( bli_is_last_iter( j, n_iter, jr_tid, jr_nt ) )
+					if ( bli_is_last_iter_slrr( j, n_iter, jr_tid, jr_nt ) )
 						b2 = b_cast;
 				}
 

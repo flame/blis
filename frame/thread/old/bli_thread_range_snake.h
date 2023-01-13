@@ -32,34 +32,22 @@
 
 */
 
-//
-// thrinfo_t macros specific to packm.
-//
+#ifndef BLIS_THREAD_RANGE_SNAKE_H
+#define BLIS_THREAD_RANGE_SNAKE_H
 
-/*
-#define bli_packm_thread_my_iter( index, thread ) \
-\
-	( index % thread->n_way == thread->work_id % thread->n_way )
-*/
-
-#define bli_packm_my_iter_rr( i, start, end, work_id, n_way ) \
-\
-	( i % n_way == work_id % n_way )
-
-#define bli_packm_my_iter_sl( i, start, end, work_id, n_way ) \
-\
-	( start <= i && i < end )
-
-// Define a general-purpose version of bli_packm_my_iter() whose definition
-// depends on whether slab or round-robin partitioning was requested at
-// configure-time.
-#ifdef BLIS_ENABLE_JRIR_SLAB
-
-  #define bli_packm_my_iter bli_packm_my_iter_sl
-
-#else // BLIS_ENABLE_JRIR_RR
-
-  #define bli_packm_my_iter bli_packm_my_iter_rr
-
+#if 0
+void bli_thread_range_snake_jr
+     (
+       const thrinfo_t* thread,
+             doff_t     diagoff,
+             uplo_t     uplo,
+             dim_t      n,
+             dim_t      bf,
+             bool       handle_edge_low,
+             dim_t*     start,
+             dim_t*     end,
+             dim_t*     inc
+     );
 #endif
 
+#endif

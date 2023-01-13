@@ -83,6 +83,10 @@ extern "C" {
 // -- Threading definitions --
 
 #include "bli_thread.h"
+#include "bli_thread_range.h"
+#include "bli_thread_range_slab_rr.h"
+#include "bli_thread_range_tlb.h"
+
 #include "bli_pthread.h"
 
 

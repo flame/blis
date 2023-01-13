@@ -39,7 +39,6 @@
 #include "bli_packm_init.h"
 #include "bli_packm_int.h"
 #include "bli_packm_scalar.h"
-#include "bli_packm_thrinfo.h"
 
 #include "bli_packm_part.h"
 

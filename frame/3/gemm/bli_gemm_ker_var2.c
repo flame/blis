@@ -47,7 +47,7 @@ typedef void (*xpbys_mxn_vft)
 #undef GENTFUNC2
 #define GENTFUNC2(ctypex,ctypey,chx,chy,op) \
 \
-static void PASTEMAC2(chx,chy,op) \
+BLIS_INLINE void PASTEMAC2(chx,chy,op) \
     ( \
       dim_t m, \
       dim_t n, \
@@ -77,31 +77,31 @@ static xpbys_mxn_vft GENARRAY2_ALL(xpbys_mxn, xpbys_mxn_fn);
 
 void bli_gemm_ker_var2
      (
-       const obj_t*  a,
-       const obj_t*  b,
-       const obj_t*  c,
-       const cntx_t* cntx,
-       const cntl_t* cntl,
+       const obj_t*     a,
+       const obj_t*     b,
+       const obj_t*     c,
+       const cntx_t*    cntx,
+       const cntl_t*    cntl,
              thrinfo_t* thread_par
      )
 {
 	      num_t  dt_exec   = bli_obj_exec_dt( c );
 	      num_t  dt_c      = bli_obj_dt( c );
 
-	      pack_t schema_a  = bli_obj_pack_schema( a );
-	      pack_t schema_b  = bli_obj_pack_schema( b );
+	const pack_t schema_a  = bli_obj_pack_schema( a );
+	const pack_t schema_b  = bli_obj_pack_schema( b );
 
 	      dim_t  m         = bli_obj_length( c );
 	      dim_t  n         = bli_obj_width( c );
 	      dim_t  k         = bli_obj_width( a );
 
 	const char*  a_cast    = bli_obj_buffer_at_off( a );
-	      inc_t  is_a      = bli_obj_imag_stride( a );
+	const inc_t  is_a      = bli_obj_imag_stride( a );
 	      dim_t  pd_a      = bli_obj_panel_dim( a );
 	      inc_t  ps_a      = bli_obj_panel_stride( a );
 
 	const char*  b_cast    = bli_obj_buffer_at_off( b );
-	      inc_t  is_b      = bli_obj_imag_stride( b );
+	const inc_t  is_b      = bli_obj_imag_stride( b );
 	      dim_t  pd_b      = bli_obj_panel_dim( b );
 	      inc_t  ps_b      = bli_obj_panel_stride( b );
 
@@ -116,8 +116,7 @@ void bli_gemm_ker_var2
 	// NOTE: We know that the internal scalars of A and B are already of the
 	// target datatypes because the necessary typecasting would have already
 	// taken place during bli_packm_init().
-	obj_t     scalar_a;
-	obj_t     scalar_b;
+	obj_t scalar_a, scalar_b;
 	bli_obj_scalar_detach( a, &scalar_a );
 	bli_obj_scalar_detach( b, &scalar_b );
 	bli_mulsc( &scalar_a, &scalar_b );
@@ -131,13 +130,10 @@ void bli_gemm_ker_var2
 	const char* alpha_cast = bli_obj_internal_scalar_buffer( &scalar_b );
 	const char* beta_cast  = bli_obj_internal_scalar_buffer( c );
 
-	// If 1m is being employed on a column- or row-stored matrix with a
-	// real-valued beta, we can use the real domain macro-kernel, which
-	// eliminates a little overhead associated with the 1m virtual
-	// micro-kernel.
-	// Only employ this optimization if the storage datatype of C is
-	// equal to the execution/computation datatype.
 #if 1
+	// Under certain conditions, we can avoid the overhead of calling the 1m
+	// virtual microkernel by having the real-domain macrokernel execute with
+	// the real-domain microkernel. (See the function definition for details.)
 	if ( bli_cntx_method( cntx ) == BLIS_1M )
 	{
 		bli_gemm_ind_recast_1m_params
@@ -149,7 +145,8 @@ void bli_gemm_ker_var2
 		  &m, &n, &k,
 		  &pd_a, &ps_a,
 		  &pd_b, &ps_b,
-		  &rs_c, &cs_c
+		  &rs_c, &cs_c,
+		  cntx
 		);
 	}
 #endif
@@ -211,22 +208,19 @@ void bli_gemm_ker_var2
 
 	// Compute number of primary and leftover components of the m and n
 	// dimensions.
-	dim_t n_iter = n / NR;
-	dim_t n_left = n % NR;
+	const dim_t n_iter = n / NR + ( n % NR ? 1 : 0 );
+	const dim_t n_left = n % NR;
 
-	dim_t m_iter = m / MR;
-	dim_t m_left = m % MR;
-
-	if ( n_left ) ++n_iter;
-	if ( m_left ) ++m_iter;
+	const dim_t m_iter = m / MR + ( m % MR ? 1 : 0 );
+	const dim_t m_left = m % MR;
 
 	// Determine some increments used to step through A, B, and C.
-	inc_t rstep_a = ps_a * dt_size;
+	const inc_t rstep_a = ps_a * dt_size;
 
-	inc_t cstep_b = ps_b * dt_size;
+	const inc_t cstep_b = ps_b * dt_size;
 
-	inc_t rstep_c = rs_c * MR * dt_c_size;
-	inc_t cstep_c = cs_c * NR * dt_c_size;
+	const inc_t rstep_c = rs_c * MR * dt_c_size;
+	const inc_t cstep_c = cs_c * NR * dt_c_size;
 
 	auxinfo_t aux;
 
@@ -249,20 +243,19 @@ void bli_gemm_ker_var2
 	thrinfo_t* caucus = bli_thrinfo_sub_node( 0, thread );
 
 	// Query the number of threads and thread ids for each loop.
-	dim_t jr_nt  = bli_thrinfo_n_way( thread );
-	dim_t jr_tid = bli_thrinfo_work_id( thread );
-	dim_t ir_nt  = bli_thrinfo_n_way( caucus );
-	dim_t ir_tid = bli_thrinfo_work_id( caucus );
+	const dim_t jr_nt  = bli_thrinfo_n_way( thread );
+	const dim_t jr_tid = bli_thrinfo_work_id( thread );
+	const dim_t ir_nt  = bli_thrinfo_n_way( caucus );
+	const dim_t ir_tid = bli_thrinfo_work_id( caucus );
 
-	dim_t jr_start, jr_end;
-	dim_t ir_start, ir_end;
-	dim_t jr_inc,   ir_inc;
+	dim_t jr_start, jr_end, jr_inc;
+	dim_t ir_start, ir_end, ir_inc;
 
 	// Determine the thread range and increment for the 2nd and 1st loops.
-	// NOTE: The definition of bli_thread_range_jrir() will depend on whether
+	// NOTE: The definition of bli_thread_range_slrr() will depend on whether
 	// slab or round-robin partitioning was requested at configure-time.
-	bli_thread_range_jrir( jr_tid, jr_nt, n_iter, 1, FALSE, &jr_start, &jr_end, &jr_inc );
-	bli_thread_range_jrir( ir_tid, ir_nt, m_iter, 1, FALSE, &ir_start, &ir_end, &ir_inc );
+	bli_thread_range_slrr( jr_tid, jr_nt, n_iter, 1, FALSE, &jr_start, &jr_end, &jr_inc );
+	bli_thread_range_slrr( ir_tid, ir_nt, m_iter, 1, FALSE, &ir_start, &ir_end, &ir_inc );
 
 	// Loop over the n dimension (NR columns at a time).
 	for ( dim_t j = jr_start; j < jr_end; j += jr_inc )
@@ -270,7 +263,9 @@ void bli_gemm_ker_var2
 		const char* b1 = b_cast + j * cstep_b;
 		      char* c1 = c_cast + j * cstep_c;
 
-		const dim_t n_cur = ( bli_is_not_edge_f( j, n_iter, n_left ) ? NR : n_left );
+		// Compute the current microtile's width.
+		const dim_t n_cur = ( bli_is_not_edge_f( j, n_iter, n_left )
+		                      ? NR : n_left );
 
 		// Initialize our next panel of B to be the current panel of B.
 		const char* b2 = b1;
@@ -281,15 +276,17 @@ void bli_gemm_ker_var2
 			const char* a1  = a_cast + i * rstep_a;
 			      char* c11 = c1     + i * rstep_c;
 
-			const dim_t m_cur = ( bli_is_not_edge_f( i, m_iter, m_left ) ? MR : m_left );
+			// Compute the current microtile's length.
+			const dim_t m_cur = ( bli_is_not_edge_f( i, m_iter, m_left )
+			                      ? MR : m_left );
 
 			// Compute the addresses of the next panels of A and B.
 			const char* a2 = bli_gemm_get_next_a_upanel( a1, rstep_a, ir_inc );
-			if ( bli_is_last_iter( i, ir_end, ir_tid, ir_nt ) )
+			if ( bli_is_last_iter_slrr( i, ir_end, ir_tid, ir_nt ) )
 			{
 				a2 = a_cast;
 				b2 = bli_gemm_get_next_b_upanel( b1, cstep_b, jr_inc );
-				if ( bli_is_last_iter( j, jr_end, jr_tid, jr_nt ) )
+				if ( bli_is_last_iter_slrr( j, jr_end, jr_tid, jr_nt ) )
 					b2 = b_cast;
 			}
 
@@ -336,22 +333,20 @@ void bli_gemm_ker_var2
 				  ( cntx_t* )cntx
 				);
 
-				// Accumulate to C with type-casting.
+				// Accumulate to C with typecasting.
 				xpbys_mxn[ dt_exec ][ dt_c ]
 				(
-				    m_cur, n_cur,
-				    &ct, rs_ct, cs_ct,
-				    ( void* )beta_cast,
-				    c11, rs_c, cs_c
+				  m_cur, n_cur,
+				  &ct, rs_ct, cs_ct,
+				  ( void* )beta_cast,
+				  c11, rs_c, cs_c
 				);
 			}
 		}
 	}
-
-/*
-PASTEMAC(ch,fprintm)( stdout, "gemm_ker_var2: b1", k, NR, b1, NR, 1, "%4.1f", "" );
-PASTEMAC(ch,fprintm)( stdout, "gemm_ker_var2: a1", MR, k, a1, 1, MR, "%4.1f", "" );
-PASTEMAC(ch,fprintm)( stdout, "gemm_ker_var2: c after", m_cur, n_cur, c11, rs_c, cs_c, "%4.1f", "" );
-*/
 }
+
+//PASTEMAC(ch,fprintm)( stdout, "gemm_ker_var2: b1", k, NR, b1, NR, 1, "%4.1f", "" );
+//PASTEMAC(ch,fprintm)( stdout, "gemm_ker_var2: a1", MR, k, a1, 1, MR, "%4.1f", "" );
+//PASTEMAC(ch,fprintm)( stdout, "gemm_ker_var2: c after", m_cur, n_cur, c11, rs_c, cs_c, "%4.1f", "" );
 

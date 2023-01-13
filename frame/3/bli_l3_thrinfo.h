@@ -39,22 +39,22 @@
 
 // gemm
 
-// NOTE: The definition of bli_gemm_get_next_?_upanel() does not need to
-// change depending on BLIS_ENABLE_JRIR_SLAB / BLIS_ENABLE_JRIR_RR.
 #define bli_gemm_get_next_a_upanel( a1, step, inc ) ( a1 + step * inc )
 #define bli_gemm_get_next_b_upanel( b1, step, inc ) ( b1 + step * inc )
 
 // gemmt
 
-// NOTE: The definition of bli_gemmt_get_next_?_upanel() does not need to
-// change depending on BLIS_ENABLE_JRIR_SLAB / BLIS_ENABLE_JRIR_RR.
 #define bli_gemmt_get_next_a_upanel( a1, step, inc ) ( a1 + step * inc )
 #define bli_gemmt_get_next_b_upanel( b1, step, inc ) ( b1 + step * inc )
 
+// NOTE: Here, we assume NO parallelism in the IR loop.
+#define bli_gemmt_l_wrap_a_upanel( a0, step, doff_j, mr, nr ) \
+        ( a0 + ( (-doff_j + 1*nr) / mr ) * step )
+#define bli_gemmt_u_wrap_a_upanel( a0, step, doff_j, mr, nr ) \
+        ( a0 )
+
 // trmm
 
-// NOTE: The definition of bli_trmm_get_next_?_upanel() does not need to
-// change depending on BLIS_ENABLE_JRIR_SLAB / BLIS_ENABLE_JRIR_RR.
 #define bli_trmm_get_next_a_upanel( a1, step, inc ) ( a1 + step * inc )
 #define bli_trmm_get_next_b_upanel( b1, step, inc ) ( b1 + step * inc )
 

@@ -786,7 +786,7 @@ void libblis_test_output_params_struct( FILE* os, test_params_t* params )
 	char impl_str[32];
 	char def_impl_set_str[32];
 	char def_impl_unset_str[32];
-	char jrir_str[16];
+	char jrir_str[32];
 
 	const bool    has_openmp      = bli_info_get_enable_openmp();
 	const bool    has_pthreads    = bli_info_get_enable_pthreads();
@@ -821,8 +821,9 @@ void libblis_test_output_params_struct( FILE* os, test_params_t* params )
 	else                          sprintf( def_impl_set_str, "single" );
 
 	// Describe the status of jrir thread partitioning.
-	if   ( bli_info_get_thread_part_jrir_slab() ) sprintf( jrir_str, "slab" );
-	else /*bli_info_get_thread_part_jrir_rr()*/   sprintf( jrir_str, "round-robin" );
+	if      ( bli_info_get_thread_jrir_slab() ) sprintf( jrir_str, "slab" );
+	else if ( bli_info_get_thread_jrir_rr()   ) sprintf( jrir_str, "round-robin" );
+	else    /*bli_info_get_thread_jrir_tlb()*/  sprintf( jrir_str, "tile-level (slab)" );
 
 	char nt_str[16];
 	char jc_nt_str[16];

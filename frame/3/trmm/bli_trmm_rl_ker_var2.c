@@ -37,11 +37,11 @@
 
 void bli_trmm_rl_ker_var2
      (
-       const obj_t*  a,
-       const obj_t*  b,
-       const obj_t*  c,
-       const cntx_t* cntx,
-       const cntl_t* cntl,
+       const obj_t*     a,
+       const obj_t*     b,
+       const obj_t*     c,
+       const cntx_t*    cntx,
+       const cntl_t*    cntl,
              thrinfo_t* thread_par
      )
 {
@@ -147,39 +147,40 @@ void bli_trmm_rl_ker_var2
 
 	// Compute number of primary and leftover components of the m and n
 	// dimensions.
-	dim_t n_iter = n / NR;
-	dim_t n_left = n % NR;
+	const dim_t n_iter = n / NR + ( n % NR ? 1 : 0 );
+	const dim_t n_left = n % NR;
 
-	dim_t m_iter = m / MR;
-	dim_t m_left = m % MR;
-
-	if ( n_left ) ++n_iter;
-	if ( m_left ) ++m_iter;
+	const dim_t m_iter = m / MR + ( m % MR ? 1 : 0 );
+	const dim_t m_left = m % MR;
 
 	// Determine some increments used to step through A, B, and C.
-	inc_t rstep_a = ps_a * dt_size;
+	const inc_t rstep_a = ps_a * dt_size;
 
-	inc_t cstep_b = ps_b * dt_size;
+	const inc_t cstep_b = ps_b * dt_size;
 
-	inc_t rstep_c = rs_c * MR * dt_size;
-	inc_t cstep_c = cs_c * NR * dt_size;
+	const inc_t rstep_c = rs_c * MR * dt_size;
+	const inc_t cstep_c = cs_c * NR * dt_size;
+
+	auxinfo_t aux;
 
 	// Save the pack schemas of A and B to the auxinfo_t object.
-	auxinfo_t aux;
 	bli_auxinfo_set_schema_a( schema_a, &aux );
 	bli_auxinfo_set_schema_b( schema_b, &aux );
 
+	// The 'thread' argument points to the thrinfo_t node for the 2nd (jr)
+	// loop around the microkernel. Here we query the thrinfo_t node for the
+	// 1st (ir) loop around the microkernel.
 	thrinfo_t* thread = bli_thrinfo_sub_node( 0, thread_par );
 	thrinfo_t* caucus = bli_thrinfo_sub_node( 0, thread );
 
-	dim_t jr_nt  = bli_thrinfo_n_way( thread );
-	dim_t jr_tid = bli_thrinfo_work_id( thread );
-	dim_t ir_nt  = bli_thrinfo_n_way( caucus );
-	dim_t ir_tid = bli_thrinfo_work_id( caucus );
+	// Query the number of threads and thread ids for each loop.
+	const dim_t jr_nt  = bli_thrinfo_n_way( thread );
+	const dim_t jr_tid = bli_thrinfo_work_id( thread );
+	const dim_t ir_nt  = bli_thrinfo_n_way( caucus );
+	const dim_t ir_tid = bli_thrinfo_work_id( caucus );
 
-	dim_t jr_start, jr_end;
-	dim_t ir_start, ir_end;
-	dim_t jr_inc,   ir_inc;
+	dim_t jr_start, jr_end, jr_inc;
+	dim_t ir_start, ir_end, ir_inc;
 
 	// Note that we partition the 2nd loop into two regions: the rectangular
 	// part of B, and the triangular portion.
@@ -207,11 +208,11 @@ void bli_trmm_rl_ker_var2
 
 	// Determine the thread range and increment for the 2nd and 1st loops for
 	// the initial rectangular region of B (if it exists).
-	// NOTE: The definition of bli_thread_range_jrir() will depend on whether
+	// NOTE: The definition of bli_thread_range_slrr() will depend on whether
 	// slab or round-robin partitioning was requested at configure-time.
 	// NOTE: Parallelism in the 1st loop is disabled for now.
-	bli_thread_range_jrir( jr_tid, jr_nt, n_iter_rct, 1, FALSE, &jr_start, &jr_end, &jr_inc );
-	bli_thread_range_jrir( ir_tid, ir_nt, m_iter,     1, FALSE, &ir_start, &ir_end, &ir_inc );
+	bli_thread_range_slrr( jr_tid, jr_nt, n_iter_rct, 1, FALSE, &jr_start, &jr_end, &jr_inc );
+	bli_thread_range_slrr( ir_tid, ir_nt, m_iter,     1, FALSE, &ir_start, &ir_end, &ir_inc );
 
 	// Loop over the n dimension (NR columns at a time).
 	for ( dim_t j = jr_start; j < jr_end; j += jr_inc )
@@ -219,7 +220,7 @@ void bli_trmm_rl_ker_var2
 		const char* b1 = b_cast + j * cstep_b;
 		      char* c1 = c_cast + j * cstep_c;
 
-		dim_t n_cur = ( bli_is_not_edge_f( j, n_iter, n_left ) ? NR : n_left );
+		const dim_t n_cur = ( bli_is_not_edge_f( j, n_iter, n_left ) ? NR : n_left );
 
 		// Initialize our next panel of B to be the current panel of B.
 		const char* b2 = b1;
@@ -231,15 +232,15 @@ void bli_trmm_rl_ker_var2
 				const char* a1  = a_cast + i * rstep_a;
 				      char* c11 = c1     + i * rstep_c;
 
-				dim_t m_cur = ( bli_is_not_edge_f( i, m_iter, m_left ) ? MR : m_left );
+				const dim_t m_cur = ( bli_is_not_edge_f( i, m_iter, m_left ) ? MR : m_left );
 
 				// Compute the addresses of the next panels of A and B.
 				const char* a2 = bli_trmm_get_next_a_upanel( a1, rstep_a, ir_inc );
-				if ( bli_is_last_iter( i, m_iter, ir_tid, ir_nt ) )
+				if ( bli_is_last_iter_slrr( i, m_iter, ir_tid, ir_nt ) )
 				{
 					a2 = a_cast;
 					b2 = bli_trmm_get_next_b_upanel( b1, cstep_b, jr_inc );
-					if ( bli_is_last_iter( j, n_iter, jr_tid, jr_nt ) )
+					if ( bli_is_last_iter_slrr( j, n_iter, jr_tid, jr_nt ) )
 						b2 = b_cast;
 				}
 
@@ -271,7 +272,7 @@ void bli_trmm_rl_ker_var2
 
 	// Use round-robin assignment of micropanels to threads in the 2nd and
 	// 1st loops for the remaining triangular region of B (if it exists).
-	// NOTE: We don't need to call bli_thread_range_jrir_rr() here since we
+	// NOTE: We don't need to call bli_thread_range_rr() here since we
 	// employ a hack that calls for each thread to execute every iteration
 	// of the jr and ir loops but skip all but the pointer increment for
 	// iterations that are not assigned to it.
@@ -285,18 +286,18 @@ void bli_trmm_rl_ker_var2
 	// Loop over the n dimension (NR columns at a time).
 	for ( dim_t j = jr_start; j < n_iter; ++j )
 	{
-		doff_t diagoffb_j = diagoffb - ( doff_t )j*NR;
+		const doff_t diagoffb_j = diagoffb - ( doff_t )j*NR;
 
 		// Determine the offset to the beginning of the panel that
 		// was packed so we can index into the corresponding location
 		// in A. Then compute the length of that panel.
-		dim_t off_b1121 = bli_max( -diagoffb_j, 0 );
-		dim_t k_b1121   = k - off_b1121;
+		const dim_t off_b1121 = bli_max( -diagoffb_j, 0 );
+		const dim_t k_b1121   = k - off_b1121;
 
 		const char* a1  = a_cast;
 		      char* c11 = c1;
 
-		dim_t n_cur = ( bli_is_not_edge_f( j, n_iter, n_left ) ? NR : n_left );
+		const dim_t n_cur = ( bli_is_not_edge_f( j, n_iter, n_left ) ? NR : n_left );
 
 		// Initialize our next panel of B to be the current panel of B.
 		const char* b2 = b1;
@@ -319,7 +320,7 @@ void bli_trmm_rl_ker_var2
 			{
 				if ( bli_trmm_my_iter_rr( i, caucus ) ) {
 
-				dim_t m_cur = ( bli_is_not_edge_f( i, m_iter, m_left ) ? MR : m_left );
+				const dim_t m_cur = ( bli_is_not_edge_f( i, m_iter, m_left ) ? MR : m_left );
 
 				const char* a1_i = a1 + off_b1121 * PACKMR * dt_size;
 

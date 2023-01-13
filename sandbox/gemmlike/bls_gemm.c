@@ -170,16 +170,16 @@ void bls_gemm_ex
 	// Spawn threads (if applicable), where bls_gemm_int() is the thread entry
 	// point function for each thread. This also begins the process of creating
 	// the thrinfo_t tree, which contains thread communicators.
-	bls_l3_thread_decorator
+	bli_l3_sup_thread_decorator
 	(
 	  bls_gemm_int,
 	  BLIS_GEMM, // operation family id
-	  ( obj_t* )alpha,
-	  ( obj_t* )&a_local,
-	  ( obj_t* )&b_local,
-	  ( obj_t* )beta,
-	  ( obj_t* )&c_local,
-	  ( cntx_t* )cntx,
+	  alpha,
+	  &a_local,
+	  &b_local,
+	  beta,
+	  &c_local,
+	  cntx,
 	  &rntm_l
 	);
 }
@@ -188,16 +188,16 @@ void bls_gemm_ex
 // -- Define the gemm-like operation's thread entry point ----------------------
 //
 
-void bls_gemm_int
+err_t bls_gemm_int
      (
-       obj_t*  alpha,
-       obj_t*  a,
-       obj_t*  b,
-       obj_t*  beta,
-       obj_t*  c,
-       cntx_t* cntx,
-       rntm_t* rntm,
-       thrinfo_t* thread
+       const obj_t*     alpha,
+       const obj_t*     a,
+       const obj_t*     b,
+       const obj_t*     beta,
+       const obj_t*     c,
+       const cntx_t*    cntx,
+       const rntm_t*    rntm,
+             thrinfo_t* thread
      )
 {
 	// In this function, we choose the gemm implementation that is executed
@@ -212,9 +212,10 @@ void bls_gemm_int
 	  beta,
 	  c,
 	  cntx,
-	  rntm,
 	  thread
 	);
+
+	return BLIS_SUCCESS;
 }
 
 //

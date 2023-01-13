@@ -65,6 +65,7 @@ GENPROT( gemm_blk_var1 )
 GENPROT( gemm_blk_var2 )
 GENPROT( gemm_blk_var3 )
 
-GENPROT( gemm_ker_var1 )
 GENPROT( gemm_ker_var2 )
+
+GENPROT( gemm_ker_var2b )
 

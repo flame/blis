@@ -927,7 +927,6 @@ BLIS_INLINE stor3_t bli_stor3_transb( stor3_t id )
 }
 
 
-
 // index-related
 
 BLIS_INLINE bool bli_is_edge_f( dim_t i, dim_t n_iter, dim_t n_left )
@@ -954,7 +953,7 @@ BLIS_INLINE bool bli_is_not_edge_b( dim_t i, dim_t n_iter, dim_t n_left )
 	       ( i != 0 || n_left == 0 );
 }
 
-BLIS_INLINE bool bli_is_last_iter_sl( dim_t i, dim_t end_iter, dim_t tid, dim_t nth )
+BLIS_INLINE bool bli_is_last_iter_sl( dim_t i, dim_t end_iter )
 {
 	return ( bool )
 	       ( i == end_iter - 1 );
@@ -966,12 +965,56 @@ BLIS_INLINE bool bli_is_last_iter_rr( dim_t i, dim_t end_iter, dim_t tid, dim_t 
 	       ( i == end_iter - 1 - ( ( end_iter - tid - 1 ) % nth ) );
 }
 
-BLIS_INLINE bool bli_is_last_iter( dim_t i, dim_t end_iter, dim_t tid, dim_t nth )
+BLIS_INLINE bool bli_is_last_iter_slrr( dim_t i, dim_t end_iter, dim_t tid, dim_t nth )
 {
 #ifdef BLIS_ENABLE_JRIR_SLAB
-	return bli_is_last_iter_sl( i, end_iter, tid, nth );
+	return bli_is_last_iter_sl( i, end_iter );
 #else // BLIS_ENABLE_JRIR_RR
 	return bli_is_last_iter_rr( i, end_iter, tid, nth );
+#endif
+}
+
+BLIS_INLINE bool bli_is_last_iter_l( dim_t i, dim_t end_iter, dim_t tid, dim_t nth )
+{
+	return bli_is_last_iter_slrr( i, end_iter, tid, nth );
+}
+
+BLIS_INLINE bool bli_is_last_iter_u( doff_t diagoff, dim_t mr, dim_t nr, inc_t inc )
+{
+	return bli_is_strictly_below_diag_n( diagoff + inc*mr, mr, nr );
+}
+
+BLIS_INLINE bool bli_is_last_iter_tlb_l( dim_t i, dim_t end_iter )
+{
+	return bli_is_last_iter_sl( i, end_iter );
+}
+
+BLIS_INLINE bool bli_is_last_iter_tlb_u( doff_t diagoff, dim_t mr, dim_t nr )
+{
+	return bli_is_strictly_below_diag_n( diagoff + 1*mr, mr, nr );
+}
+
+BLIS_INLINE bool bli_is_my_iter_sl( dim_t i, dim_t st, dim_t en )
+{
+	return ( st <= i && i < en );
+}
+
+BLIS_INLINE bool bli_is_my_iter_rr( dim_t i, dim_t work_id, dim_t n_way )
+{
+	return ( i % n_way == work_id % n_way );
+}
+
+BLIS_INLINE bool bli_is_my_iter( dim_t i, dim_t st, dim_t en, dim_t work_id, dim_t n_way )
+{
+	// NOTE: This function is (as of this writing) only called from packm.
+	// If the structure of the cpp macros below is ever changed, make sure
+	// it is still consistent with that of bli_thread_range_slrr() since
+	// these functions are used together in packm.
+
+#ifdef BLIS_ENABLE_JRIR_RR
+	return bli_is_my_iter_rr( i, work_id, n_way );
+#else // ifdef ( _SLAB || _TLB )
+	return bli_is_my_iter_sl( i, st, en );
 #endif
 }
 

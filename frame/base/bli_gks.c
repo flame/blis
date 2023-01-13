@@ -35,8 +35,8 @@
 
 #include "blis.h"
 
-// The array of cntx_t* pointers to cache modified contexts used by
-// induced methods.
+// The array of cntx_t* pointers to cache modified contexts used by induced
+// methods.
 static cntx_t** gks[ BLIS_NUM_ARCHS ];
 
 // The array of function pointers holding the registered context initialization
@@ -51,6 +51,13 @@ static void_fp  cntx_ref_init[ BLIS_NUM_ARCHS ];
 typedef void (*nat_cntx_init_ft)( cntx_t* cntx );
 typedef void (*ref_cntx_init_ft)( cntx_t* cntx );
 typedef void (*ind_cntx_init_ft)( ind_t method, cntx_t* cntx );
+
+// Cached copies of the pointers to the native and induced contexts for the
+// active subconfiguration. When BLIS_ENABLE_GKS_CACHING is enabled, these
+// pointers will be set once and then reused to fulfill subsequent context
+// queries.
+static cntx_t* cached_cntx_nat = NULL;
+static cntx_t* cached_cntx_ind = NULL;
 
 // -----------------------------------------------------------------------------
 
@@ -216,6 +223,18 @@ void bli_gks_init( void )
 		                                              bli_cntx_init_generic_ind );
 #endif
 	}
+
+#ifdef BLIS_ENABLE_GKS_CACHING
+	// Deep-query and cache the native and induced method contexts so they are
+	// ready to go when needed (by BLIS or the application). Notice that we use
+	// the _noinit() APIs, which skip their internal calls to bli_init_once().
+	// The reasons: (1) Skipping that call is necessary to prevent an infinite
+	// loop since the current function, bli_gks_init(), is called from within
+	// bli_init_once(); and (2) we can guarantee that the gks has been
+	// initialized given that bli_gks_init() is about to return.
+	cached_cntx_nat = ( cntx_t* )bli_gks_query_nat_cntx_noinit();
+	cached_cntx_ind = ( cntx_t* )bli_gks_query_ind_cntx_noinit( BLIS_1M );
+#endif
 }
 
 // -----------------------------------------------------------------------------
@@ -267,6 +286,12 @@ void bli_gks_finalize( void )
 
 	}
 	// END CRITICAL SECTION
+
+#ifdef BLIS_ENABLE_GKS_CACHING
+	// Clear the cached pointers to the native and induced contexts.
+	cached_cntx_nat = NULL;
+	cached_cntx_ind = NULL;
+#endif
 }
 
 // -----------------------------------------------------------------------------
@@ -475,10 +500,38 @@ const cntx_t* bli_gks_query_cntx( void )
 	return bli_gks_query_nat_cntx();
 }
 
+// -----------------------------------------------------------------------------
+
 const cntx_t* bli_gks_query_nat_cntx( void )
 {
 	bli_init_once();
 
+#ifdef BLIS_ENABLE_GKS_CACHING
+
+	// Return a pointer to the context for native execution that was deep-
+	// queried and cached at the end of bli_gks_init().
+	return cached_cntx_nat;
+
+#else
+
+	// Deep-query and return the address of a context for native execution.
+	return bli_gks_query_nat_cntx_impl();
+
+#endif
+}
+
+const cntx_t* bli_gks_query_nat_cntx_noinit( void )
+{
+	// NOTE: This function purposefully avoids calling bli_init_once() so that
+	// it is safe to call during inititalization.
+
+	return bli_gks_query_nat_cntx_impl();
+}
+
+// -----------------------------------------------------------------------------
+
+const cntx_t* bli_gks_query_nat_cntx_impl( void )
+{
 	// Return the address of the native context for the architecture id
 	// corresponding to the current hardware, as determined by
 	// bli_arch_query_id().
@@ -494,18 +547,42 @@ const cntx_t* bli_gks_query_nat_cntx( void )
 
 // -----------------------------------------------------------------------------
 
-const cntx_t* bli_gks_query_cntx_noinit( void )
+const cntx_t* bli_gks_query_ind_cntx
+     (
+       ind_t ind
+     )
 {
-	// This function is identical to bli_gks_query_cntx(), except that it
-	// does not call bli_init_once().
+	bli_init_once();
 
-	// Query the architecture id.
-	arch_t id = bli_arch_query_id();
+#ifdef BLIS_ENABLE_GKS_CACHING
 
-	// Use the architecture id to look up a pointer to its context.
-	const cntx_t* cntx = bli_gks_lookup_nat_cntx( id );
+	// If for some reason the native context was requested, we return its
+	// address instead of the one for induced execution.
+	if ( ind == BLIS_NAT ) return cached_cntx_nat;
 
-	return cntx;
+	// Return a pointer to the context for the induced method that was deep-
+	// queried and cached at the end of bli_gks_init().
+	return cached_cntx_ind;
+
+#else
+
+	// Deep-query and return the address of a context for the requested induced
+	// method. (In this case, caching never takes place since it was disabled
+	// at configure-time.)
+	return bli_gks_query_ind_cntx_impl( ind );
+
+#endif
+}
+
+const cntx_t* bli_gks_query_ind_cntx_noinit
+     (
+       ind_t ind
+     )
+{
+	// NOTE: This function purposefully avoids calling bli_init_once() so that
+	// it is safe to call during inititalization.
+
+	return bli_gks_query_ind_cntx_impl( ind );
 }
 
 // -----------------------------------------------------------------------------
@@ -514,15 +591,14 @@ const cntx_t* bli_gks_query_cntx_noinit( void )
 // with a new entry corresponding to a context for an ind_t value.
 static bli_pthread_mutex_t gks_mutex = BLIS_PTHREAD_MUTEX_INITIALIZER;
 
-const cntx_t* bli_gks_query_ind_cntx
+const cntx_t* bli_gks_query_ind_cntx_impl
      (
        ind_t ind
      )
 {
-	bli_init_once();
-
 	cntx_t* gks_id_ind;
 	err_t r_val;
+
 
 	// Return the address of a context that will be suited for executing a
 	// level-3 operation via the requested induced method (and datatype) for
@@ -532,10 +608,13 @@ const cntx_t* bli_gks_query_ind_cntx
 	// This function is called when a level-3 operation via induced method is
 	// called, e.g. bli_gemm1m(). If this is the first time that induced method
 	// is being executed since bli_gks_init(), the necessary context structure
-	// is allocated and initialized. If this is not the first time, then the
-	// address of a previously-allocated and initialized (cached) context is
-	// returned. Note that much of this must be done with mutual exclusion to
-	// ensure thread safety and deterministic behavior.
+	// is allocated. If this is not the first time a context for the requested
+	// induced method was queried, then the memory will already be allocated
+	// and initialized, and the previous cntx_t struct will be overwritten.
+	// The function will then return the address to the newly-initialized (or
+	// previously-allocated-but-reinitialized) cntx_t struct. Note that some of
+	// this function must be executed with mutual exclusion to ensure thread
+	// safety and deterministic behavior.
 
 	// Query the architecture id.
 	arch_t id = bli_arch_query_id();
@@ -583,23 +662,24 @@ const cntx_t* bli_gks_query_ind_cntx
 			// gks_id[ ind ].
 			gks_id_ind    = bli_calloc_intl( sizeof( cntx_t ), &r_val );
 			gks_id[ ind ] = gks_id_ind;
-
-			// Before we can call the induced method context initialization
-			// function on the newly allocated structure, we must first copy
-			// over the contents of the native context.
-			*gks_id_ind = *gks_id_nat;
-
-			// Use the architecture id to look up the function pointer to the
-			// context initialization function for induced methods.
-			ind_cntx_init_ft f = cntx_ind_init[ id ];
-
-			// Now we modify the context (so that it contains the proper values
-			// for its induced method) by calling the context initialization
-			// function for the current induced method. (That function assumes
-			// that the context is pre- initialized with values for native
-			// execution.)
-			f( ind, gks_id_ind );
 		}
+
+		// Before we can call the induced method context initialization
+		// function on the newly allocated structure, we must first copy
+		// over the contents of the native context. If a previous context
+		// was already copied, this will overwrite those previous values.
+		*gks_id_ind = *gks_id_nat;
+
+		// Use the architecture id to look up the function pointer to the
+		// context initialization function for induced methods.
+		ind_cntx_init_ft f = cntx_ind_init[ id ];
+
+		// Now we modify the context (so that it contains the proper values
+		// for its induced method) by calling the context initialization
+		// function for the current induced method. (That function assumes
+		// that the context is pre-initialized with values for native
+		// execution.)
+		f( ind, gks_id_ind );
 	}
 	// END CRITICAL SECTION
 

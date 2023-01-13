@@ -86,6 +86,26 @@ void bli_gemmbp_cntl_init
 {
 	void_fp macro_kernel_fp = NULL;
 
+#ifdef BLIS_ENABLE_JRIR_TLB
+
+	if ( family == BLIS_GEMMT )
+    {
+        macro_kernel_fp = bli_obj_is_lower( c ) ? bli_gemmt_l_ker_var2b : bli_gemmt_u_ker_var2b;
+    }
+	else if ( family == BLIS_TRMM ||
+	          family == BLIS_TRMM3 )
+    {
+        macro_kernel_fp = bli_obj_is_triangular( a )
+            ? bli_obj_is_lower( a ) ? bli_trmm_ll_ker_var2b : bli_trmm_lu_ker_var2b
+            : bli_obj_is_lower( b ) ? bli_trmm_rl_ker_var2b : bli_trmm_ru_ker_var2b;
+    }
+	else
+    {
+        macro_kernel_fp = bli_gemm_ker_var2b;
+    }
+
+#else
+
 	if ( family == BLIS_GEMMT )
     {
         macro_kernel_fp = bli_obj_is_lower( c ) ? bli_gemmt_l_ker_var2 : bli_gemmt_u_ker_var2;
@@ -101,6 +121,8 @@ void bli_gemmbp_cntl_init
     {
         macro_kernel_fp = bli_gemm_ker_var2;
     }
+
+#endif
 
     const num_t        dt_a         = bli_obj_dt( a );
     const num_t        dt_b         = bli_obj_dt( b );

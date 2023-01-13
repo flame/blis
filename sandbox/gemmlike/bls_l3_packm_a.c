@@ -276,7 +276,7 @@ void PASTECH2(bls_,ch,opname) \
 	  *p, *rs_p, *cs_p, \
 	       pd_p, *ps_p, \
 	  cntx, \
-	  thread  \
+	  bli_thrinfo_sub_prenode( thread )  \
 	); \
 \
 	/* Barrier so that packing is done before computation. */ \
