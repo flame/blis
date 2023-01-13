@@ -89,6 +89,7 @@ BLIS_EXPORT_BLIS void PASTEMAC(opname,EX_SUF) \
        BLIS_OAPI_EX_PARAMS  \
      ); 
 
+GENTPROT( invscald )
 GENTPROT( scald )
 GENTPROT( setd )
 GENTPROT( setid )

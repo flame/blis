@@ -203,6 +203,8 @@
 #define dotxv_ker_name     GENARNAME(dotxv)
 #undef  invertv_ker_name
 #define invertv_ker_name   GENARNAME(invertv)
+#undef  invscalv_ker_name
+#define invscalv_ker_name  GENARNAME(invscalv)
 #undef  scalv_ker_name
 #define scalv_ker_name     GENARNAME(scalv)
 #undef  scal2v_ker_name
@@ -446,20 +448,21 @@ void GENBARNAME(cntx_init)
 
 	funcs = bli_cntx_l1v_kers_buf( cntx );
 
-	gen_func_init( &funcs[ BLIS_ADDV_KER ],    addv_ker_name    );
-	gen_func_init( &funcs[ BLIS_AMAXV_KER ],   amaxv_ker_name   );
-	gen_func_init( &funcs[ BLIS_AXPBYV_KER ],  axpbyv_ker_name  );
-	gen_func_init( &funcs[ BLIS_AXPYV_KER ],   axpyv_ker_name   );
-	gen_func_init( &funcs[ BLIS_COPYV_KER ],   copyv_ker_name   );
-	gen_func_init( &funcs[ BLIS_DOTV_KER ],    dotv_ker_name    );
-	gen_func_init( &funcs[ BLIS_DOTXV_KER ],   dotxv_ker_name   );
-	gen_func_init( &funcs[ BLIS_INVERTV_KER ], invertv_ker_name );
-	gen_func_init( &funcs[ BLIS_SCALV_KER ],   scalv_ker_name   );
-	gen_func_init( &funcs[ BLIS_SCAL2V_KER ],  scal2v_ker_name  );
-	gen_func_init( &funcs[ BLIS_SETV_KER ],    setv_ker_name    );
-	gen_func_init( &funcs[ BLIS_SUBV_KER ],    subv_ker_name    );
-	gen_func_init( &funcs[ BLIS_SWAPV_KER ],   swapv_ker_name   );
-	gen_func_init( &funcs[ BLIS_XPBYV_KER ],   xpbyv_ker_name   );
+	gen_func_init( &funcs[ BLIS_ADDV_KER ],     addv_ker_name     );
+	gen_func_init( &funcs[ BLIS_AMAXV_KER ],    amaxv_ker_name    );
+	gen_func_init( &funcs[ BLIS_AXPBYV_KER ],   axpbyv_ker_name   );
+	gen_func_init( &funcs[ BLIS_AXPYV_KER ],    axpyv_ker_name    );
+	gen_func_init( &funcs[ BLIS_COPYV_KER ],    copyv_ker_name    );
+	gen_func_init( &funcs[ BLIS_DOTV_KER ],     dotv_ker_name     );
+	gen_func_init( &funcs[ BLIS_DOTXV_KER ],    dotxv_ker_name    );
+	gen_func_init( &funcs[ BLIS_INVERTV_KER ],  invertv_ker_name  );
+	gen_func_init( &funcs[ BLIS_INVSCALV_KER ], invscalv_ker_name );
+	gen_func_init( &funcs[ BLIS_SCALV_KER ],    scalv_ker_name    );
+	gen_func_init( &funcs[ BLIS_SCAL2V_KER ],   scal2v_ker_name   );
+	gen_func_init( &funcs[ BLIS_SETV_KER ],     setv_ker_name     );
+	gen_func_init( &funcs[ BLIS_SUBV_KER ],     subv_ker_name     );
+	gen_func_init( &funcs[ BLIS_SWAPV_KER ],    swapv_ker_name    );
+	gen_func_init( &funcs[ BLIS_XPBYV_KER ],    xpbyv_ker_name    );
 
 
 	// -- Set level-1m (packm/unpackm) kernels ---------------------------------

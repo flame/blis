@@ -36,11 +36,11 @@
 This index provides a quick way to jump directly to the description for each operation discussed later in the [Computational function reference](BLISTypedAPI.md#computational-function-reference) section:
 
   * **[Level-1v](BLISTypedAPI.md#level-1v-operations)**: Operations on vectors:
-    * [addv](BLISTypedAPI.md#addv), [amaxv](BLISTypedAPI.md#amaxv), [axpyv](BLISTypedAPI.md#axpyv), [axpbyv](BLISTypedAPI.md#axpbyv), [copyv](BLISTypedAPI.md#copyv), [dotv](BLISTypedAPI.md#dotv), [dotxv](BLISTypedAPI.md#dotxv), [invertv](BLISTypedAPI.md#invertv), [scal2v](BLISTypedAPI.md#scal2v), [scalv](BLISTypedAPI.md#scalv), [setv](BLISTypedAPI.md#setv), [subv](BLISTypedAPI.md#subv), [swapv](BLISTypedAPI.md#swapv), [xpbyv](BLISTypedAPI.md#xpbyv)
+    * [addv](BLISTypedAPI.md#addv), [amaxv](BLISTypedAPI.md#amaxv), [axpyv](BLISTypedAPI.md#axpyv), [axpbyv](BLISTypedAPI.md#axpbyv), [copyv](BLISTypedAPI.md#copyv), [dotv](BLISTypedAPI.md#dotv), [dotxv](BLISTypedAPI.md#dotxv), [invertv](BLISTypedAPI.md#invertv), [invscalv](BLISTypedAPI.md#invscalv), [scalv](BLISTypedAPI.md#scalv), [scal2v](BLISTypedAPI.md#scal2v), [setv](BLISTypedAPI.md#setv), [subv](BLISTypedAPI.md#subv), [swapv](BLISTypedAPI.md#swapv), [xpbyv](BLISTypedAPI.md#xpbyv)
   * **[Level-1d](BLISTypedAPI.md#level-1d-operations)**: Element-wise operations on matrix diagonals:
-    * [addd](BLISTypedAPI.md#addd), [axpyd](BLISTypedAPI.md#axpyd), [copyd](BLISTypedAPI.md#copyd), [invertd](BLISTypedAPI.md#invertd), [scald](BLISTypedAPI.md#scald), [scal2d](BLISTypedAPI.md#scal2d), [setd](BLISTypedAPI.md#setd), [setid](BLISTypedAPI.md#setid), [shiftd](BLISTypedAPI.md#shiftd), [subd](BLISTypedAPI.md#subd), [xpbyd](BLISTypedAPI.md#xpbyd)
+    * [addd](BLISTypedAPI.md#addd), [axpyd](BLISTypedAPI.md#axpyd), [copyd](BLISTypedAPI.md#copyd), [invertd](BLISTypedAPI.md#invertd), [invscald](BLISTypedAPI.md#invscald), [scald](BLISTypedAPI.md#scald), [scal2d](BLISTypedAPI.md#scal2d), [setd](BLISTypedAPI.md#setd), [setid](BLISTypedAPI.md#setid), [shiftd](BLISTypedAPI.md#shiftd), [subd](BLISTypedAPI.md#subd), [xpbyd](BLISTypedAPI.md#xpbyd)
   * **[Level-1m](BLISTypedAPI.md#level-1m-operations)**: Element-wise operations on matrices:
-    * [addm](BLISTypedAPI.md#addm), [axpym](BLISTypedAPI.md#axpym), [copym](BLISTypedAPI.md#copym), [scalm](BLISTypedAPI.md#scalm), [scal2m](BLISTypedAPI.md#scal2m), [setm](BLISTypedAPI.md#setm), [subm](BLISTypedAPI.md#subm)
+    * [addm](BLISTypedAPI.md#addm), [axpym](BLISTypedAPI.md#axpym), [copym](BLISTypedAPI.md#copym), [invscalm](BLISTypedAPI.md#invscalm), [scalm](BLISTypedAPI.md#scalm), [scal2m](BLISTypedAPI.md#scal2m), [setm](BLISTypedAPI.md#setm), [subm](BLISTypedAPI.md#subm)
   * **[Level-1f](BLISTypedAPI.md#level-1f-operations)**: Fused operations on multiple vectors:
     * [axpy2v](BLISTypedAPI.md#axpy2v), [dotaxpyv](BLISTypedAPI.md#dotaxpyv), [axpyf](BLISTypedAPI.md#axpyf), [dotxf](BLISTypedAPI.md#dotxf), [dotxaxpyf](BLISTypedAPI.md#dotxaxpyf)
   * **[Level-2](BLISTypedAPI.md#level-2-operations)**: Operations with one matrix and (at least) one vector operand:
@@ -369,6 +369,24 @@ Invert all elements of an _n_-length vector `x`.
 
 ---
 
+#### invscalv
+```c
+void bli_?invscalv
+     (
+       conj_t  conjalpha,
+       dim_t   n,
+       ctype*  alpha,
+       ctype*  x, inc_t incx
+     );
+```
+Perform
+```
+  x := ( 1.0 / conjalpha(alpha) ) * x
+```
+where `x` is a vector of length _n_, and `alpha` is a scalar.
+
+---
+
 #### scalv
 ```c
 void bli_?scalv
@@ -542,6 +560,21 @@ void bli_?invertd
        doff_t  diagoffa,
        dim_t   m,
        dim_t   n,
+       ctype*  a, inc_t rsa, inc_t csa
+     );
+```
+
+---
+
+#### invscald
+```c
+void bli_?invscald
+     (
+       conj_t  conjalpha,
+       doff_t  diagoffa,
+       dim_t   m,
+       dim_t   n,
+       ctype*  alpha,
        ctype*  a, inc_t rsa, inc_t csa
      );
 ```
@@ -734,6 +767,27 @@ Perform
   B := transa(A)
 ```
 where `B` is an _m x n_ matrix, `A` is stored as a dense matrix, or lower- or upper-triangular/trapezoidal matrix, as specified by `uploa`, with the diagonal offset of `A` specified by `diagoffa` and unit/non-unit nature of the diagonal specified by `diaga`. If `uploa` indicates lower or upper storage, only that part of matrix `A` will be referenced and used to update `B`.
+
+---
+
+#### invscalm
+```c
+void bli_?invscalm
+     (
+       conj_t  conjalpha,
+       doff_t  diagoffa,
+       uplo_t  uploa,
+       dim_t   m,
+       dim_t   n,
+       ctype*  alpha,
+       ctype*  a, inc_t rsa, inc_t csa
+     );
+```
+Perform
+```
+  A := ( 1.0 / conjalpha(alpha) ) * A
+```
+where `A` is an _m x n_ matrix stored as a dense matrix, or lower- or upper-triangular/trapezoidal matrix, as specified by `uploa`, with the diagonal offset of `A` specified by `diagoffa`. If `uploa` indicates lower or upper storage, only that part of matrix `A` will be updated.
 
 ---
 

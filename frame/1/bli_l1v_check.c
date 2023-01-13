@@ -165,6 +165,7 @@ void PASTEMAC(opname,_check) \
 	bli_l1v_ax_check( alpha, x ); \
 }
 
+GENFRONT( invscalv )
 GENFRONT( scalv )
 GENFRONT( setv )
 

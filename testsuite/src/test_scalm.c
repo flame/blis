@@ -40,7 +40,7 @@
 // Static variables.
 static char*     op_str                    = "scalm";
 static char*     o_types                   = "m";  // x
-static char*     p_types                   = "c";  // conjbeta
+static char*     p_types                   = "c";  // conjalpha
 static thresh_t  thresh[BLIS_NUM_FP_TYPES] = { { 1e-04, 1e-05 },   // warn, pass for s
                                                { 1e-04, 1e-05 },   // warn, pass for c
                                                { 1e-13, 1e-14 },   // warn, pass for d
@@ -70,14 +70,14 @@ void libblis_test_scalm_experiment
 void libblis_test_scalm_impl
      (
        iface_t   iface,
-       obj_t*    beta,
+       obj_t*    alpha,
        obj_t*    y
      );
 
 void libblis_test_scalm_check
      (
        test_params_t* params,
-       obj_t*         beta,
+       obj_t*         alpha,
        obj_t*         y,
        obj_t*         y_save,
        double*        resid
@@ -157,9 +157,9 @@ void libblis_test_scalm_experiment
 
 	dim_t        m, n;
 
-	conj_t       conjbeta;
+	conj_t       conjalpha;
 
-	obj_t        beta, y;
+	obj_t        alpha, y;
 	obj_t        y_save;
 
 
@@ -171,10 +171,10 @@ void libblis_test_scalm_experiment
 	n = libblis_test_get_dim_from_prob_size( op->dim_spec[1], p_cur );
 
 	// Map parameter characters to BLIS constants.
-	bli_param_map_char_to_blis_conj( pc_str[0], &conjbeta );
+	bli_param_map_char_to_blis_conj( pc_str[0], &conjalpha );
 
 	// Create test scalars.
-	bli_obj_scalar_init_detached( datatype, &beta );
+	bli_obj_scalar_init_detached( datatype, &alpha );
 
 	// Create test operands (vectors and/or matrices).
 	libblis_test_mobj_create( params, datatype, BLIS_NO_TRANSPOSE,
@@ -182,19 +182,19 @@ void libblis_test_scalm_experiment
 	libblis_test_mobj_create( params, datatype, BLIS_NO_TRANSPOSE,
 	                          sc_str[0], m, n, &y_save );
 
-	// Set beta to 0 + i.
-	//bli_setsc( 0.0, 1.0, &beta );
+	// Set alpha to 0 + i.
+	//bli_setsc( 0.0, 1.0, &alpha );
 	if ( bli_obj_is_real( &y ) )
-		bli_setsc( -2.0,  0.0, &beta );
+		bli_setsc( -2.0,  0.0, &alpha );
 	else
-		bli_setsc(  0.0, -2.0, &beta );
+		bli_setsc(  0.0, -2.0, &alpha );
 
 	// Randomize and save y.
 	libblis_test_mobj_randomize( params, FALSE, &y );
 	bli_copym( &y, &y_save );
 
 	// Apply the parameters.
-	bli_obj_set_conj( conjbeta, &beta );
+	bli_obj_set_conj( conjalpha, &alpha );
 
 	// Repeat the experiment n_repeats times and record results. 
 	for ( i = 0; i < n_repeats; ++i )
@@ -203,7 +203,7 @@ void libblis_test_scalm_experiment
 
 		time = bli_clock();
 
-		libblis_test_scalm_impl( iface, &beta, &y );
+		libblis_test_scalm_impl( iface, &alpha, &y );
 
 		time_min = bli_clock_min_diff( time_min, time );
 	}
@@ -213,7 +213,7 @@ void libblis_test_scalm_experiment
 	if ( bli_obj_is_complex( &y ) ) *perf *= 6.0;
 
 	// Perform checks.
-	libblis_test_scalm_check( params, &beta, &y, &y_save, resid );
+	libblis_test_scalm_check( params, &alpha, &y, &y_save, resid );
 
 	// Zero out performance and residual if output matrix is empty.
 	libblis_test_check_empty_problem( &y, perf, resid );
@@ -228,14 +228,14 @@ void libblis_test_scalm_experiment
 void libblis_test_scalm_impl
      (
        iface_t   iface,
-       obj_t*    beta,
+       obj_t*    alpha,
        obj_t*    y
      )
 {
 	switch ( iface )
 	{
 		case BLIS_TEST_SEQ_FRONT_END:
-		bli_scalm( beta, y );
+		bli_scalm( alpha, y );
 		break;
 
 		default:
@@ -248,7 +248,7 @@ void libblis_test_scalm_impl
 void libblis_test_scalm_check
      (
        test_params_t* params,
-       obj_t*         beta,
+       obj_t*         alpha,
        obj_t*         y,
        obj_t*         y_orig,
        double*        resid
@@ -261,7 +261,7 @@ void libblis_test_scalm_check
 	dim_t  n       = bli_obj_width( y );
 
 	obj_t  norm_y_r;
-	obj_t  nbeta;
+	obj_t  nalpha;
 
 	obj_t  y2;
 
@@ -271,16 +271,16 @@ void libblis_test_scalm_check
 	// Pre-conditions:
 	// - y_orig is randomized.
 	// Note:
-	// - beta should have a non-zero imaginary component in the complex
+	// - alpha should have a non-zero imaginary component in the complex
 	//   cases in order to more fully exercise the implementation.
 	//
 	// Under these conditions, we assume that the implementation for
 	//
-	//   y := conjbeta(beta) * y_orig
+	//   y := conjalpha(alpha) * y_orig
 	//
 	// is functioning correctly if
 	//
-	//   normfm( y + -conjbeta(beta) * y_orig )
+	//   normfm( y + -conjalpha(alpha) * y_orig )
 	//
 	// is negligible.
 	//
@@ -288,13 +288,13 @@ void libblis_test_scalm_check
 	bli_obj_create( dt, m, n, 0, 0, &y2 );
 	bli_copym( y_orig, &y2 );
 
-	bli_obj_scalar_init_detached( dt,      &nbeta );
+	bli_obj_scalar_init_detached( dt,      &nalpha );
 	bli_obj_scalar_init_detached( dt_real, &norm_y_r );
 
-	bli_copysc( beta, &nbeta );
-	bli_mulsc( &BLIS_MINUS_ONE, &nbeta );
+	bli_copysc( alpha, &nalpha );
+	bli_mulsc( &BLIS_MINUS_ONE, &nalpha );
 
-	bli_scalm( &nbeta, &y2 );
+	bli_scalm( &nalpha, &y2 );
 	bli_addm( &y2, y );
 	
 	bli_normfm( y, &norm_y_r );

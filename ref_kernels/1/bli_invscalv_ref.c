@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2022, The University of Texas at Austin
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -32,84 +32,50 @@
 
 */
 
+#include "blis.h"
 
-//
-// Prototype object-based check functions.
-//
-
-#undef  GENPROT
-#define GENPROT( opname ) \
+#undef  GENTFUNC
+#define GENTFUNC( ctype, ch, opname, arch, suf ) \
 \
-void PASTEMAC(opname,_check) \
+void PASTEMAC3(ch,opname,arch,suf) \
      ( \
-       obj_t*  x, \
-       obj_t*  y  \
-    );
-
-GENPROT( addm )
-GENPROT( copym )
-GENPROT( subm )
-
-
-#undef  GENPROT
-#define GENPROT( opname ) \
+       conj_t           conjalpha, \
+       dim_t            n, \
+       ctype*  restrict alpha, \
+       ctype*  restrict x, inc_t incx, \
+       cntx_t*          cntx  \
+     ) \
+{ \
+	if ( bli_zero_dim1( n ) ) return; \
 \
-void PASTEMAC(opname,_check) \
-     ( \
-       obj_t*  alpha, \
-       obj_t*  x, \
-       obj_t*  y  \
-    );
-
-GENPROT( axpym )
-GENPROT( scal2m )
-
-
-#undef  GENPROT
-#define GENPROT( opname ) \
+	/* If alpha is one, return. */ \
+	if ( PASTEMAC(ch,eq1)( *alpha ) ) return; \
 \
-void PASTEMAC(opname,_check) \
-     ( \
-       obj_t*  alpha, \
-       obj_t*  x  \
-    );
-
-GENPROT( invscalm )
-GENPROT( scalm )
-GENPROT( setm )
-
-
-#undef  GENPROT
-#define GENPROT( opname ) \
+	/* If alpha is zero, inv(alpha) is undefined. Bad user! Return early. */ \
+	if ( PASTEMAC(ch,eq0)( *alpha ) ) return; \
 \
-void PASTEMAC(opname,_check) \
-     ( \
-       obj_t*  x, \
-       obj_t*  beta, \
-       obj_t*  y  \
-    );
+	ctype alpha_conj; \
+\
+	PASTEMAC(ch,copycjs)( conjalpha, *alpha, alpha_conj ); \
+\
+	if ( incx == 1 ) \
+	{ \
+		PRAGMA_SIMD \
+		for ( dim_t i = 0; i < n; ++i ) \
+		{ \
+			PASTEMAC(ch,invscals)( alpha_conj, x[i] ); \
+		} \
+	} \
+	else \
+	{ \
+		for ( dim_t i = 0; i < n; ++i ) \
+		{ \
+			PASTEMAC(ch,invscals)( alpha_conj, *x ); \
+\
+			x += incx; \
+		} \
+	} \
+}
 
-GENPROT( xpbym )
-
-
-// -----------------------------------------------------------------------------
-
-void bli_l1m_xy_check
-     (
-       obj_t*  x,
-       obj_t*  y 
-     );
-
-void bli_l1m_axy_check
-     (
-       obj_t*  alpha,
-       obj_t*  x,
-       obj_t*  y 
-     );
-
-void bli_l1m_ax_check
-     (
-       obj_t*  alpha,
-       obj_t*  x 
-     );
+INSERT_GENTFUNC_BASIC2( invscalv, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX )
 

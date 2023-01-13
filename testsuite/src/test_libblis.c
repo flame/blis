@@ -253,6 +253,7 @@ void libblis_test_level1v_ops( thread_data_t* tdata, test_params_t* params, test
 	libblis_test_dotv( tdata, params, &(ops->dotv) );
 	libblis_test_dotxv( tdata, params, &(ops->dotxv) );
 	libblis_test_normfv( tdata, params, &(ops->normfv) );
+	libblis_test_invscalv( tdata, params, &(ops->invscalv) );
 	libblis_test_scalv( tdata, params, &(ops->scalv) );
 	libblis_test_scal2v( tdata, params, &(ops->scal2v) );
 	libblis_test_setv( tdata, params, &(ops->setv) );
@@ -268,6 +269,7 @@ void libblis_test_level1m_ops( thread_data_t* tdata, test_params_t* params, test
 	libblis_test_axpym( tdata, params, &(ops->axpym) );
 	libblis_test_copym( tdata, params, &(ops->copym) );
 	libblis_test_normfm( tdata, params, &(ops->normfm) );
+	libblis_test_invscalm( tdata, params, &(ops->invscalm) );
 	libblis_test_scalm( tdata, params, &(ops->scalm) );
 	libblis_test_scal2m( tdata, params, &(ops->scal2m) );
 	libblis_test_setm( tdata, params, &(ops->setm) );
@@ -368,6 +370,7 @@ void libblis_test_read_ops_file( char* input_filename, test_ops_t* ops )
 	libblis_test_read_op_info( ops, input_stream, BLIS_NOID, BLIS_TEST_DIMS_M,   2, &(ops->dotv) );
 	libblis_test_read_op_info( ops, input_stream, BLIS_NOID, BLIS_TEST_DIMS_M,   2, &(ops->dotxv) );
 	libblis_test_read_op_info( ops, input_stream, BLIS_NOID, BLIS_TEST_DIMS_M,   0, &(ops->normfv) );
+	libblis_test_read_op_info( ops, input_stream, BLIS_NOID, BLIS_TEST_DIMS_M,   1, &(ops->invscalv) );
 	libblis_test_read_op_info( ops, input_stream, BLIS_NOID, BLIS_TEST_DIMS_M,   1, &(ops->scalv) );
 	libblis_test_read_op_info( ops, input_stream, BLIS_NOID, BLIS_TEST_DIMS_M,   1, &(ops->scal2v) );
 	libblis_test_read_op_info( ops, input_stream, BLIS_NOID, BLIS_TEST_DIMS_M,   0, &(ops->setv) );
@@ -379,6 +382,7 @@ void libblis_test_read_ops_file( char* input_filename, test_ops_t* ops )
 	libblis_test_read_op_info( ops, input_stream, BLIS_NOID, BLIS_TEST_DIMS_MN,  1, &(ops->axpym) );
 	libblis_test_read_op_info( ops, input_stream, BLIS_NOID, BLIS_TEST_DIMS_MN,  1, &(ops->copym) );
 	libblis_test_read_op_info( ops, input_stream, BLIS_NOID, BLIS_TEST_DIMS_MN,  0, &(ops->normfm) );
+	libblis_test_read_op_info( ops, input_stream, BLIS_NOID, BLIS_TEST_DIMS_MN,  1, &(ops->invscalm) );
 	libblis_test_read_op_info( ops, input_stream, BLIS_NOID, BLIS_TEST_DIMS_MN,  1, &(ops->scalm) );
 	libblis_test_read_op_info( ops, input_stream, BLIS_NOID, BLIS_TEST_DIMS_MN,  1, &(ops->scal2m) );
 	libblis_test_read_op_info( ops, input_stream, BLIS_NOID, BLIS_TEST_DIMS_MN,  0, &(ops->setm) );
@@ -2664,8 +2668,9 @@ void libblis_test_vobj_randomize( test_params_t* params, bool normalize, obj_t* 
 		bli_normfv( x, &kappa_r );
 		libblis_test_ceil_pow2( &kappa_r );
 		bli_copysc( &kappa_r, &kappa );
-		bli_invertsc( &kappa );
-		bli_scalv( &kappa, x );
+		//bli_invertsc( &kappa );
+		//bli_scalv( &kappa, x );
+		bli_invscalv( &kappa, x );
 	}
 }
 
@@ -2703,8 +2708,9 @@ void libblis_test_mobj_randomize( test_params_t* params, bool normalize, obj_t* 
 		bli_norm1m( a, &kappa_r );
 		libblis_test_ceil_pow2( &kappa_r );
 		bli_copysc( &kappa_r, &kappa );
-		bli_invertsc( &kappa );
-		bli_scalm( &kappa, a );
+		//bli_invertsc( &kappa );
+		//bli_scalm( &kappa, a );
+		bli_invscalm( &kappa, a );
 	}
 }
 

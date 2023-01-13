@@ -91,6 +91,12 @@ INSERT_GENTPROT_BASIC0( invertv_ker_name )
 
 
 #undef  GENTPROT
+#define GENTPROT INVSCALV_KER_PROT
+
+INSERT_GENTPROT_BASIC0( invscalv_ker_name )
+
+
+#undef  GENTPROT
 #define GENTPROT SCALV_KER_PROT
 
 INSERT_GENTPROT_BASIC0( scalv_ker_name )

@@ -308,6 +308,7 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 	 ); \
 }
 
+INSERT_GENTFUNC_BASIC2( invscald, invscalv, BLIS_INVSCALV_KER )
 INSERT_GENTFUNC_BASIC2( scald, scalv, BLIS_SCALV_KER )
 INSERT_GENTFUNC_BASIC2( setd,  setv,  BLIS_SETV_KER )
 

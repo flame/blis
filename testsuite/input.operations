@@ -138,9 +138,13 @@
 1        # normfv
 -1       #   dimensions: m
 
+1        # invscalv
+-1       #   dimensions: m
+?        #   parameters: conjalpha
+
 1        # scalv
 -1       #   dimensions: m
-?        #   parameters: conjbeta
+?        #   parameters: conjalpha
 
 1        # scal2v
 -1       #   dimensions: m
@@ -175,9 +179,13 @@
 1        # normfm
 -1 -2    #   dimensions: m n
 
+1        # invscalm
+-1 -2    #   dimensions: m n
+?        #   parameters: conjalpha
+
 1        # scalm
 -1 -2    #   dimensions: m n
-?        #   parameters: conjbeta
+?        #   parameters: conjalpha
 
 1        # scal2m
 -1 -2    #   dimensions: m n

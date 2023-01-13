@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2018 - 2019, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -32,84 +33,10 @@
 
 */
 
-
-//
-// Prototype object-based check functions.
-//
-
-#undef  GENPROT
-#define GENPROT( opname ) \
-\
-void PASTEMAC(opname,_check) \
-     ( \
-       obj_t*  x, \
-       obj_t*  y  \
-    );
-
-GENPROT( addm )
-GENPROT( copym )
-GENPROT( subm )
-
-
-#undef  GENPROT
-#define GENPROT( opname ) \
-\
-void PASTEMAC(opname,_check) \
-     ( \
-       obj_t*  alpha, \
-       obj_t*  x, \
-       obj_t*  y  \
-    );
-
-GENPROT( axpym )
-GENPROT( scal2m )
-
-
-#undef  GENPROT
-#define GENPROT( opname ) \
-\
-void PASTEMAC(opname,_check) \
-     ( \
-       obj_t*  alpha, \
-       obj_t*  x  \
-    );
-
-GENPROT( invscalm )
-GENPROT( scalm )
-GENPROT( setm )
-
-
-#undef  GENPROT
-#define GENPROT( opname ) \
-\
-void PASTEMAC(opname,_check) \
-     ( \
-       obj_t*  x, \
-       obj_t*  beta, \
-       obj_t*  y  \
-    );
-
-GENPROT( xpbym )
-
-
-// -----------------------------------------------------------------------------
-
-void bli_l1m_xy_check
+void libblis_test_invscalm
      (
-       obj_t*  x,
-       obj_t*  y 
-     );
-
-void bli_l1m_axy_check
-     (
-       obj_t*  alpha,
-       obj_t*  x,
-       obj_t*  y 
-     );
-
-void bli_l1m_ax_check
-     (
-       obj_t*  alpha,
-       obj_t*  x 
+       thread_data_t* tdata,
+       test_params_t* params,
+       test_op_t*     op
      );
 

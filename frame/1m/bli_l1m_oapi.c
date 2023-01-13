@@ -237,6 +237,7 @@ void PASTEMAC(opname,EX_SUF) \
 	); \
 }
 
+GENFRONT( invscalm )
 GENFRONT( scalm )
 
 

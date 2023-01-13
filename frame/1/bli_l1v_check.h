@@ -140,6 +140,7 @@ void PASTEMAC(opname,_check) \
        obj_t*  x  \
      );
 
+GENTPROT( invscalv )
 GENTPROT( scalv )
 GENTPROT( setv )
 

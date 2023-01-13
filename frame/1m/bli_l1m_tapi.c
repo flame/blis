@@ -378,6 +378,7 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 	); \
 }
 
+INSERT_GENTFUNC_BASIC0( invscalm )
 INSERT_GENTFUNC_BASIC0( scalm )
 INSERT_GENTFUNC_BASIC0( setm )
 

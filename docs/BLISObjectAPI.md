@@ -41,11 +41,11 @@
 This index provides a quick way to jump directly to the description for each operation discussed later in the [Computational function reference](BLISObjectAPI.md#computational-function-reference) section:
 
   * **[Level-1v](BLISObjectAPI.md#level-1v-operations)**: Operations on vectors:
-    * [addv](BLISObjectAPI.md#addv), [amaxv](BLISObjectAPI.md#amaxv), [axpyv](BLISObjectAPI.md#axpyv), [axpbyv](BLISObjectAPI.md#axpbyv), [copyv](BLISObjectAPI.md#copyv), [dotv](BLISObjectAPI.md#dotv), [dotxv](BLISObjectAPI.md#dotxv), [invertv](BLISObjectAPI.md#invertv), [scal2v](BLISObjectAPI.md#scal2v), [scalv](BLISObjectAPI.md#scalv), [setv](BLISObjectAPI.md#setv), [setrv](BLISObjectAPI.md#setrv), [setiv](BLISObjectAPI.md#setiv), [subv](BLISObjectAPI.md#subv), [swapv](BLISObjectAPI.md#swapv), [xpbyv](BLISObjectAPI.md#xpbyv)
+    * [addv](BLISObjectAPI.md#addv), [amaxv](BLISObjectAPI.md#amaxv), [axpyv](BLISObjectAPI.md#axpyv), [axpbyv](BLISObjectAPI.md#axpbyv), [copyv](BLISObjectAPI.md#copyv), [dotv](BLISObjectAPI.md#dotv), [dotxv](BLISObjectAPI.md#dotxv), [invertv](BLISObjectAPI.md#invertv), [invscalv](BLISObjectAPI.md#invscalv), [scalv](BLISObjectAPI.md#scalv), [scal2v](BLISObjectAPI.md#scal2v), [setv](BLISObjectAPI.md#setv), [setrv](BLISObjectAPI.md#setrv), [setiv](BLISObjectAPI.md#setiv), [subv](BLISObjectAPI.md#subv), [swapv](BLISObjectAPI.md#swapv), [xpbyv](BLISObjectAPI.md#xpbyv)
   * **[Level-1d](BLISObjectAPI.md#level-1d-operations)**: Element-wise operations on matrix diagonals:
-    * [addd](BLISObjectAPI.md#addd), [axpyd](BLISObjectAPI.md#axpyd), [copyd](BLISObjectAPI.md#copyd), [invertd](BLISObjectAPI.md#invertd), [scald](BLISObjectAPI.md#scald), [scal2d](BLISObjectAPI.md#scal2d), [setd](BLISObjectAPI.md#setd), [setid](BLISObjectAPI.md#setid), [shiftd](BLISObjectAPI.md#shiftd), [subd](BLISObjectAPI.md#subd), [xpbyd](BLISObjectAPI.md#xpbyd)
+    * [addd](BLISObjectAPI.md#addd), [axpyd](BLISObjectAPI.md#axpyd), [copyd](BLISObjectAPI.md#copyd), [invertd](BLISObjectAPI.md#invertd), [invscald](BLISObjectAPI.md#invscald), [scald](BLISObjectAPI.md#scald), [scal2d](BLISObjectAPI.md#scal2d), [setd](BLISObjectAPI.md#setd), [setid](BLISObjectAPI.md#setid), [shiftd](BLISObjectAPI.md#shiftd), [subd](BLISObjectAPI.md#subd), [xpbyd](BLISObjectAPI.md#xpbyd)
   * **[Level-1m](BLISObjectAPI.md#level-1m-operations)**: Element-wise operations on matrices:
-    * [addm](BLISObjectAPI.md#addm), [axpym](BLISObjectAPI.md#axpym), [copym](BLISObjectAPI.md#copym), [scalm](BLISObjectAPI.md#scalm), [scal2m](BLISObjectAPI.md#scal2m), [setm](BLISObjectAPI.md#setm), [setrm](BLISObjectAPI.md#setrm), [setim](BLISObjectAPI.md#setim), [subm](BLISObjectAPI.md#subm)
+    * [addm](BLISObjectAPI.md#addm), [axpym](BLISObjectAPI.md#axpym), [copym](BLISObjectAPI.md#copym), [invscalm](BLISObjectAPI.md#invscalm), [scalm](BLISObjectAPI.md#scalm), [scal2m](BLISObjectAPI.md#scal2m), [setm](BLISObjectAPI.md#setm), [setrm](BLISObjectAPI.md#setrm), [setim](BLISObjectAPI.md#setim), [subm](BLISObjectAPI.md#subm)
   * **[Level-1f](BLISObjectAPI.md#level-1f-operations)**: Fused operations on multiple vectors:
     * [axpy2v](BLISObjectAPI.md#axpy2v), [dotaxpyv](BLISObjectAPI.md#dotaxpyv), [axpyf](BLISObjectAPI.md#axpyf), [dotxf](BLISObjectAPI.md#dotxf), [dotxaxpyf](BLISObjectAPI.md#dotxaxpyf)
   * **[Level-2](BLISObjectAPI.md#level-2-operations)**: Operations with one matrix and (at least) one vector operand:
@@ -845,6 +845,24 @@ Invert all elements of an _n_-length vector `x`.
 
 ---
 
+#### invscalv
+```c
+void bli_invscalv
+     (
+       obj_t*  alpha,
+       obj_t*  x
+     );
+```
+Perform
+```
+  x := ( 1.0 / conj?(alpha) ) * x
+```
+where `x` is a vector of length _n_, and `alpha` is a scalar.
+
+Observed object properties: `conj?(alpha)`.
+
+---
+
 #### scalv
 ```c
 void bli_scalv
@@ -1049,6 +1067,19 @@ Observed object properties: `diagoff(A)`.
 
 ---
 
+#### invscald
+```c
+void bli_invscald
+     (
+       obj_t*  alpha,
+       obj_t*  a
+     );
+```
+
+Observed object properties: `conj?(alpha)`, `diagoff(A)`.
+
+---
+
 #### scald
 ```c
 void bli_scald
@@ -1210,6 +1241,24 @@ where `B` is an _m x n_ matrix, `A` is stored as a dense matrix, or lower- or up
 If `uplo(A)` indicates lower or upper storage, only that part of matrix `A` will be referenced and used to update `B`.
 
 Observed object properties: `diagoff(A)`, `diag(A)`, `uplo(A)`, `trans?(A)`.
+
+---
+
+#### invscalm
+```c
+void bli_invscalm
+     (
+       obj_t*  alpha,
+       obj_t*  a
+     );
+```
+Perform
+```
+  A := ( 1.0 / conj?(alpha) ) * A
+```
+where `A` is an _m x n_ matrix stored as a dense matrix, or lower- or upper-triangular/trapezoidal matrix with arbitrary diagonal offset. If `uplo(A)` indicates lower or upper storage, only that part of matrix `A` will be updated.
+
+Observed object properties: `conj?(alpha)`, `diagoff(A)`, `uplo(A)`.
 
 ---
 

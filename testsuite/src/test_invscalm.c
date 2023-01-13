@@ -38,8 +38,8 @@
 
 
 // Static variables.
-static char*     op_str                    = "scalv";
-static char*     o_types                   = "v";  // y
+static char*     op_str                    = "invscalm";
+static char*     o_types                   = "m";  // x
 static char*     p_types                   = "c";  // conjalpha
 static thresh_t  thresh[BLIS_NUM_FP_TYPES] = { { 1e-04, 1e-05 },   // warn, pass for s
                                                { 1e-04, 1e-05 },   // warn, pass for c
@@ -47,14 +47,14 @@ static thresh_t  thresh[BLIS_NUM_FP_TYPES] = { { 1e-04, 1e-05 },   // warn, pass
                                                { 1e-13, 1e-14 } }; // warn, pass for z
 
 // Local prototypes.
-void libblis_test_scalv_deps
+void libblis_test_invscalm_deps
      (
        thread_data_t* tdata,
        test_params_t* params,
        test_op_t*     op
      );
 
-void libblis_test_scalv_experiment
+void libblis_test_invscalm_experiment
      (
        test_params_t* params,
        test_op_t*     op,
@@ -67,40 +67,39 @@ void libblis_test_scalv_experiment
        double*        resid
      );
 
-void libblis_test_scalv_impl
+void libblis_test_invscalm_impl
      (
        iface_t   iface,
        obj_t*    alpha,
        obj_t*    y
      );
 
-void libblis_test_scalv_check
+void libblis_test_invscalm_check
      (
        test_params_t* params,
        obj_t*         alpha,
        obj_t*         y,
-       obj_t*         y_orig,
+       obj_t*         y_save,
        double*        resid
      );
 
 
 
-void libblis_test_scalv_deps
+void libblis_test_invscalm_deps
      (
        thread_data_t* tdata,
        test_params_t* params,
        test_op_t*     op
      )
 {
-	libblis_test_randv( tdata, params, &(op->ops->randv) );
-	libblis_test_normfv( tdata, params, &(op->ops->normfv) );
-	libblis_test_addv( tdata, params, &(op->ops->addv) );
-	libblis_test_copyv( tdata, params, &(op->ops->copyv) );
+	libblis_test_randm( tdata, params, &(op->ops->randm) );
+	libblis_test_normfm( tdata, params, &(op->ops->normfm) );
+	libblis_test_copym( tdata, params, &(op->ops->copym) );
 }
 
 
 
-void libblis_test_scalv
+void libblis_test_invscalm
      (
        thread_data_t* tdata,
        test_params_t* params,
@@ -113,10 +112,10 @@ void libblis_test_scalv
 
 	// Return early if operation is disabled.
 	if ( libblis_test_op_is_disabled( op ) ||
-	     libblis_test_l1v_is_disabled( op ) ) return;
+	     libblis_test_l1m_is_disabled( op ) ) return;
 
 	// Call dependencies first.
-	if ( TRUE ) libblis_test_scalv_deps( tdata, params, op );
+	if ( TRUE ) libblis_test_invscalm_deps( tdata, params, op );
 
 	// Execute the test driver for each implementation requested.
 	//if ( op->front_seq == ENABLE )
@@ -129,13 +128,13 @@ void libblis_test_scalv
 		                        p_types,
 		                        o_types,
 		                        thresh,
-		                        libblis_test_scalv_experiment );
+		                        libblis_test_invscalm_experiment );
 	}
 }
 
 
 
-void libblis_test_scalv_experiment
+void libblis_test_invscalm_experiment
      (
        test_params_t* params,
        test_op_t*     op,
@@ -156,7 +155,7 @@ void libblis_test_scalv_experiment
 
 	num_t        datatype;
 
-	dim_t        m;
+	dim_t        m, n;
 
 	conj_t       conjalpha;
 
@@ -167,8 +166,9 @@ void libblis_test_scalv_experiment
 	// Use the datatype of the first char in the datatype combination string.
 	bli_param_map_char_to_blis_dt( dc_str[0], &datatype );
 
-	// Map the dimension specifier to an actual dimension.
+	// Map the dimension specifier to actual dimensions.
 	m = libblis_test_get_dim_from_prob_size( op->dim_spec[0], p_cur );
+	n = libblis_test_get_dim_from_prob_size( op->dim_spec[1], p_cur );
 
 	// Map parameter characters to BLIS constants.
 	bli_param_map_char_to_blis_conj( pc_str[0], &conjalpha );
@@ -177,18 +177,21 @@ void libblis_test_scalv_experiment
 	bli_obj_scalar_init_detached( datatype, &alpha );
 
 	// Create test operands (vectors and/or matrices).
-	libblis_test_vobj_create( params, datatype, sc_str[0], m, &y );
-	libblis_test_vobj_create( params, datatype, sc_str[0], m, &y_save );
+	libblis_test_mobj_create( params, datatype, BLIS_NO_TRANSPOSE,
+	                          sc_str[0], m, n, &y );
+	libblis_test_mobj_create( params, datatype, BLIS_NO_TRANSPOSE,
+	                          sc_str[0], m, n, &y_save );
 
-	// Set alpha.
+	// Set alpha to 0 + i.
+	//bli_setsc( 0.0, 1.0, &alpha );
 	if ( bli_obj_is_real( &y ) )
 		bli_setsc( -2.0,  0.0, &alpha );
 	else
 		bli_setsc(  0.0, -2.0, &alpha );
 
 	// Randomize and save y.
-	libblis_test_vobj_randomize( params, FALSE, &y );
-	bli_copyv( &y, &y_save );
+	libblis_test_mobj_randomize( params, FALSE, &y );
+	bli_copym( &y, &y_save );
 
 	// Apply the parameters.
 	bli_obj_set_conj( conjalpha, &alpha );
@@ -196,23 +199,23 @@ void libblis_test_scalv_experiment
 	// Repeat the experiment n_repeats times and record results. 
 	for ( i = 0; i < n_repeats; ++i )
 	{
-		bli_copyv( &y_save, &y );
+		bli_copym( &y_save, &y );
 
 		time = bli_clock();
 
-		libblis_test_scalv_impl( iface, &alpha, &y );
+		libblis_test_invscalm_impl( iface, &alpha, &y );
 
 		time_min = bli_clock_min_diff( time_min, time );
 	}
 
 	// Estimate the performance of the best experiment repeat.
-	*perf = ( 1.0 * m ) / time_min / FLOPS_PER_UNIT_PERF;
+	*perf = ( 1.0 * m * n ) / time_min / FLOPS_PER_UNIT_PERF;
 	if ( bli_obj_is_complex( &y ) ) *perf *= 6.0;
 
 	// Perform checks.
-	libblis_test_scalv_check( params, &alpha, &y, &y_save, resid );
+	libblis_test_invscalm_check( params, &alpha, &y, &y_save, resid );
 
-	// Zero out performance and residual if output vector is empty.
+	// Zero out performance and residual if output matrix is empty.
 	libblis_test_check_empty_problem( &y, perf, resid );
 
 	// Free the test objects.
@@ -222,7 +225,7 @@ void libblis_test_scalv_experiment
 
 
 
-void libblis_test_scalv_impl
+void libblis_test_invscalm_impl
      (
        iface_t   iface,
        obj_t*    alpha,
@@ -232,7 +235,7 @@ void libblis_test_scalv_impl
 	switch ( iface )
 	{
 		case BLIS_TEST_SEQ_FRONT_END:
-		bli_scalv( alpha, y );
+		bli_invscalm( alpha, y );
 		break;
 
 		default:
@@ -242,7 +245,7 @@ void libblis_test_scalv_impl
 
 
 
-void libblis_test_scalv_check
+void libblis_test_invscalm_check
      (
        test_params_t* params,
        obj_t*         alpha,
@@ -254,10 +257,10 @@ void libblis_test_scalv_check
 	num_t  dt      = bli_obj_dt( y );
 	num_t  dt_real = bli_obj_dt_proj_to_real( y );
 
-	dim_t  m       = bli_obj_vector_dim( y );
+	dim_t  m       = bli_obj_length( y );
+	dim_t  n       = bli_obj_width( y );
 
 	obj_t  norm_y_r;
-	obj_t  nalpha;
 
 	obj_t  y2;
 
@@ -272,31 +275,27 @@ void libblis_test_scalv_check
 	//
 	// Under these conditions, we assume that the implementation for
 	//
-	//   y := conjalpha(alpha) * y_orig
+	//   y := ( 1.0 / conjalpha(alpha) ) * y_orig
 	//
 	// is functioning correctly if
 	//
-	//   normfv( y + -conjalpha(alpha) * y_orig )
+	//   normfv( y_orig - conjalpha(alpha) * y )
 	//
 	// is negligible.
 	//
 
-	bli_obj_create( dt, m, 1, 0, 0, &y2 );
-    bli_copyv( y_orig, &y2 );
+	bli_obj_create( dt, m, n, 0, 0, &y2 );
+	bli_copym( y, &y2 );
 
-	bli_obj_scalar_init_detached( dt,      &nalpha );
 	bli_obj_scalar_init_detached( dt_real, &norm_y_r );
 
-	bli_copysc( alpha, &nalpha );
-	bli_mulsc( &BLIS_MINUS_ONE, &nalpha );
+	bli_scalm( alpha, &y2 );
+	bli_subm( y_orig, &y2 );
+	
+	bli_normfm( &y2, &norm_y_r );
 
-	bli_scalv( &nalpha, &y2 );
-    bli_addv( &y2, y );
+	bli_getsc( &norm_y_r, resid, &junk );
 
-    bli_normfv( y, &norm_y_r );
-
-    bli_getsc( &norm_y_r, resid, &junk );
-
-    bli_obj_free( &y2 );
+	bli_obj_free( &y2 );
 }
 

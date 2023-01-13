@@ -158,7 +158,7 @@ typedef void (*PASTECH3(ch,opname,EX_SUF,tsuf)) \
 
 INSERT_GENTDEF( invertv )
 
-// scalv, setv
+// invscalv, scalv, setv
 
 #undef  GENTDEF
 #define GENTDEF( ctype, ch, opname, tsuf ) \
@@ -172,6 +172,7 @@ typedef void (*PASTECH3(ch,opname,EX_SUF,tsuf)) \
        BLIS_TAPI_EX_PARAMS  \
      );
 
+INSERT_GENTDEF( invscalv )
 INSERT_GENTDEF( scalv )
 INSERT_GENTDEF( setv )
 
