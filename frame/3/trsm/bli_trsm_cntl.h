@@ -33,18 +33,44 @@
 
 */
 
+struct trsm_var_cntl_s
+{
+    cntl_t           cntl; //this field must be present and come first
+    gemmtrsm_ukr_vft gemmtrsm_ukr;
+    gemm_ukr_vft     gemm_ukr;
+};
+typedef struct trsm_var_cntl_s trsm_var_cntl_t;
+
+BLIS_INLINE gemmtrsm_ukr_vft bli_trsm_var_cntl_gemmtrsm_ukr( const cntl_t* cntl )
+{
+    return ( ( const trsm_var_cntl_t* ) cntl )->gemmtrsm_ukr;
+}
+
+BLIS_INLINE gemm_ukr_vft bli_trsm_var_cntl_gemm_ukr( const cntl_t* cntl )
+{
+    return ( ( const trsm_var_cntl_t* ) cntl )->gemm_ukr;
+}
+
+void bli_trsm_var_cntl_init_node
+     (
+       void_fp          var_func,
+       gemmtrsm_ukr_vft gemmtrsm_ukr,
+       gemm_ukr_vft     gemm_ukr,
+       trsm_var_cntl_t* cntl
+     );
+
 struct trsm_cntl_s
 {
-              cntl_t part_ir_trsm;
-              cntl_t part_jr_trsm;
-    packm_def_cntl_t pack_a_trsm;
-              cntl_t part_ir_gemm;
-              cntl_t part_jr_gemm;
-    packm_def_cntl_t pack_a_gemm;
-         part_cntl_t part_ic;
-    packm_def_cntl_t pack_b;
-         part_cntl_t part_pc;
          part_cntl_t part_jc;
+         part_cntl_t part_pc;
+    packm_def_cntl_t pack_b;
+         part_cntl_t part_ic;
+    packm_def_cntl_t pack_a_trsm;
+     trsm_var_cntl_t trsm_ker;
+    packm_def_cntl_t pack_a_gemm;
+     trsm_var_cntl_t gemm_ker;
+              cntl_t ir_loop_gemm;
+              cntl_t ir_loop_trsm;
 };
 typedef struct trsm_cntl_s trsm_cntl_t;
 
@@ -58,11 +84,6 @@ void bli_trsm_cntl_init
        const cntx_t*      cntx,
              trsm_cntl_t* cntl
      );
-
-BLIS_INLINE cntl_t* bli_trsm_cntl_root( trsm_cntl_t* cntl )
-{
-    return (cntl_t*)&cntl->part_jc;
-}
 
 void bli_trsm_l_cntl_init
      (

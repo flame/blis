@@ -36,6 +36,25 @@
 #include "blis.h"
 
 
+void bli_trsm_var_cntl_init_node
+     (
+       void_fp          var_func,
+       gemmtrsm_ukr_vft gemmtrsm_ukr,
+       gemm_ukr_vft     gemm_ukr,
+       trsm_var_cntl_t* cntl
+     )
+{
+	// Initialize the gemm_var_cntl_t struct.
+	cntl->gemmtrsm_ukr = gemmtrsm_ukr;
+	cntl->gemm_ukr     = gemm_ukr;
+
+	bli_cntl_init_node
+	(
+	  var_func,
+      &cntl->cntl
+	);
+}
+
 void bli_trsm_cntl_init
      (
        const obj_t*       a,
@@ -64,31 +83,34 @@ void bli_trsm_l_cntl_init
              trsm_cntl_t* cntl
      )
 {
-    // Set the default macrokernel.
-	const void_fp macro_kernel_p = bli_obj_is_lower( a ) ? bli_trsm_ll_ker_var2 : bli_trsm_lu_ker_var2;
+    const num_t            dt_a           = bli_obj_dt( a );
+    const num_t            dt_b           = bli_obj_dt( b );
+    const num_t            dt_ap          = bli_obj_target_dt( a );
+    const num_t            dt_bp          = bli_obj_target_dt( b );
+    const num_t            dt_exec        = bli_obj_exec_dt( c );
 
-    const num_t   dt_a           = bli_obj_dt( a );
-    const num_t   dt_b           = bli_obj_dt( b );
-    const num_t   dt_ap          = bli_obj_target_dt( a );
-    const num_t   dt_bp          = bli_obj_target_dt( b );
-    const num_t   dt_exec        = bli_obj_exec_dt( c );
+	const void_fp          macro_kernel_p = bli_obj_is_lower( a ) ? bli_trsm_ll_ker_var2 : bli_trsm_lu_ker_var2;
+	const gemmtrsm_ukr_vft gemmtrsm_ukr   = bli_obj_is_lower( a )
+        ? bli_cntx_get_ukr_dt( dt_exec, BLIS_GEMMTRSM_L_VIR_UKR, cntx )
+        : bli_cntx_get_ukr_dt( dt_exec, BLIS_GEMMTRSM_U_VIR_UKR, cntx );
+	const gemm_ukr_vft     gemm_ukr       = bli_cntx_get_ukr_dt( dt_exec, BLIS_GEMM_VIR_UKR, cntx );
 
-    const dir_t   direct         = bli_obj_is_lower( a ) ? BLIS_FWD : BLIS_BWD;
-    const dim_t   ic_alg         = bli_cntx_get_blksz_def_dt( dt_exec, BLIS_MC, cntx );
-    const dim_t   ic_max         = bli_cntx_get_blksz_max_dt( dt_exec, BLIS_MC, cntx );
-    const dim_t   ic_mult        = bli_cntx_get_blksz_def_dt( dt_exec, BLIS_MR, cntx );
-          dim_t   pc_alg         = bli_cntx_get_blksz_def_dt( dt_exec, BLIS_KC, cntx );
-          dim_t   pc_max         = bli_cntx_get_blksz_max_dt( dt_exec, BLIS_KC, cntx );
-    const dim_t   pc_mult        = 1;
-    const dim_t   jc_alg         = bli_cntx_get_blksz_def_dt( dt_exec, BLIS_NC, cntx );
-    const dim_t   jc_max         = bli_cntx_get_blksz_max_dt( dt_exec, BLIS_NC, cntx );
-    const dim_t   jc_mult        = bli_cntx_get_blksz_def_dt( dt_exec, BLIS_NR, cntx );
+    const dir_t            direct         = bli_obj_is_lower( a ) ? BLIS_FWD : BLIS_BWD;
+    const dim_t            ic_alg         = bli_cntx_get_blksz_def_dt( dt_exec, BLIS_MC, cntx );
+    const dim_t            ic_max         = bli_cntx_get_blksz_max_dt( dt_exec, BLIS_MC, cntx );
+    const dim_t            ic_mult        = bli_cntx_get_blksz_def_dt( dt_exec, BLIS_MR, cntx );
+          dim_t            pc_alg         = bli_cntx_get_blksz_def_dt( dt_exec, BLIS_KC, cntx );
+          dim_t            pc_max         = bli_cntx_get_blksz_max_dt( dt_exec, BLIS_KC, cntx );
+    const dim_t            pc_mult        = 1;
+    const dim_t            jc_alg         = bli_cntx_get_blksz_def_dt( dt_exec, BLIS_NC, cntx );
+    const dim_t            jc_max         = bli_cntx_get_blksz_max_dt( dt_exec, BLIS_NC, cntx );
+    const dim_t            jc_mult        = bli_cntx_get_blksz_def_dt( dt_exec, BLIS_NR, cntx );
 
-    const dim_t   bmult_m_def    = bli_cntx_get_blksz_def_dt(   dt_ap, BLIS_MR, cntx );
-    const dim_t   bmult_m_pack   = bli_cntx_get_blksz_max_dt(   dt_ap, BLIS_MR, cntx );
-    const dim_t   bmult_n_def    = bli_cntx_get_blksz_def_dt(   dt_bp, BLIS_NR, cntx );
-    const dim_t   bmult_n_pack   = bli_cntx_get_blksz_max_dt(   dt_bp, BLIS_NR, cntx );
-    const dim_t   bmult_k_def    = bmult_m_def;
+    const dim_t            bmult_m_def    = bli_cntx_get_blksz_def_dt(   dt_ap, BLIS_MR, cntx );
+    const dim_t            bmult_m_pack   = bli_cntx_get_blksz_max_dt(   dt_ap, BLIS_MR, cntx );
+    const dim_t            bmult_n_def    = bli_cntx_get_blksz_def_dt(   dt_bp, BLIS_NR, cntx );
+    const dim_t            bmult_n_pack   = bli_cntx_get_blksz_max_dt(   dt_bp, BLIS_NR, cntx );
+    const dim_t            bmult_k_def    = bmult_m_def;
 
     bli_l3_adjust_kc
     (
@@ -107,19 +129,21 @@ void bli_trsm_l_cntl_init
 	bli_cntl_init_node
 	(
 	  NULL,         // variant function pointer not used
-      &cntl->part_ir_gemm
+      &cntl->ir_loop_gemm
 	);
 
-	bli_cntl_init_node
+	bli_trsm_var_cntl_init_node
 	(
 	  macro_kernel_p,
-      &cntl->part_jr_gemm
+      gemmtrsm_ukr,
+      gemm_ukr,
+      &cntl->gemm_ker
 	);
     bli_cntl_attach_sub_node
     (
       BLIS_THREAD_MR | BLIS_THREAD_NR,
-      ( cntl_t* )&cntl->part_ir_gemm,
-      ( cntl_t* )&cntl->part_jr_gemm
+      ( cntl_t* )&cntl->ir_loop_gemm,
+      ( cntl_t* )&cntl->gemm_ker
     );
 
 	// Create a node for packing matrix A.
@@ -141,7 +165,7 @@ void bli_trsm_l_cntl_init
     bli_cntl_attach_sub_node
     (
       BLIS_THREAD_NONE,
-      ( cntl_t* )&cntl->part_jr_gemm,
+      ( cntl_t* )&cntl->gemm_ker,
       ( cntl_t* )&cntl->pack_a_gemm
     );
 
@@ -152,19 +176,21 @@ void bli_trsm_l_cntl_init
 	bli_cntl_init_node
 	(
 	  NULL,
-      &cntl->part_ir_trsm
+      &cntl->ir_loop_trsm
 	);
 
-	bli_cntl_init_node
+	bli_trsm_var_cntl_init_node
 	(
 	  macro_kernel_p,
-      &cntl->part_jr_trsm
+      gemmtrsm_ukr,
+      gemm_ukr,
+      &cntl->trsm_ker
 	);
     bli_cntl_attach_sub_node
     (
       BLIS_THREAD_MC | BLIS_THREAD_KC | BLIS_THREAD_NR,
-      ( cntl_t* )&cntl->part_ir_trsm,
-      ( cntl_t* )&cntl->part_jr_trsm
+      ( cntl_t* )&cntl->ir_loop_trsm,
+      ( cntl_t* )&cntl->trsm_ker
     );
 
 	// Create a node for packing matrix A.
@@ -190,7 +216,7 @@ void bli_trsm_l_cntl_init
     bli_cntl_attach_sub_node
     (
       BLIS_THREAD_NONE,
-      ( cntl_t* )&cntl->part_jr_trsm,
+      ( cntl_t* )&cntl->trsm_ker,
       ( cntl_t* )&cntl->pack_a_trsm
     );
 
@@ -294,32 +320,34 @@ void bli_trsm_r_cntl_init
              trsm_cntl_t* cntl
      )
 {
-	// NOTE: trsm macrokernels are presently disabled for right-side execution.
-    // Set the default macrokernel.
-	const void_fp macro_kernel_p = bli_obj_is_lower( b ) ? bli_trsm_rl_ker_var2 : bli_trsm_ru_ker_var2;
+    const num_t            dt_a           = bli_obj_dt( a );
+    const num_t            dt_b           = bli_obj_dt( b );
+    const num_t            dt_ap          = bli_obj_target_dt( a );
+    const num_t            dt_bp          = bli_obj_target_dt( b );
+    const num_t            dt_exec        = bli_obj_exec_dt( c );
 
-    const num_t   dt_a           = bli_obj_dt( a );
-    const num_t   dt_b           = bli_obj_dt( b );
-    const num_t   dt_ap          = bli_obj_target_dt( a );
-    const num_t   dt_bp          = bli_obj_target_dt( b );
-    const num_t   dt_exec        = bli_obj_exec_dt( c );
+	const void_fp          macro_kernel_p = bli_obj_is_lower( b ) ? bli_trsm_rl_ker_var2 : bli_trsm_ru_ker_var2;
+	const gemmtrsm_ukr_vft gemmtrsm_ukr   = bli_obj_is_lower( b )
+        ? bli_cntx_get_ukr_dt( dt_exec, BLIS_GEMMTRSM_L_VIR_UKR, cntx )
+        : bli_cntx_get_ukr_dt( dt_exec, BLIS_GEMMTRSM_U_VIR_UKR, cntx );
+	const gemm_ukr_vft     gemm_ukr       = bli_cntx_get_ukr_dt( dt_exec, BLIS_GEMM_VIR_UKR, cntx );
 
-	const dir_t   direct         = bli_obj_is_lower( b ) ? BLIS_BWD : BLIS_FWD;
-    const dim_t   ic_alg         = bli_cntx_get_blksz_def_dt( dt_exec, BLIS_MC, cntx );
-    const dim_t   ic_max         = bli_cntx_get_blksz_max_dt( dt_exec, BLIS_MC, cntx );
-    const dim_t   ic_mult        = bli_cntx_get_blksz_def_dt( dt_exec, BLIS_NR, cntx ); //note: different!
-          dim_t   pc_alg         = bli_cntx_get_blksz_def_dt( dt_exec, BLIS_KC, cntx );
-          dim_t   pc_max         = bli_cntx_get_blksz_max_dt( dt_exec, BLIS_KC, cntx );
-    const dim_t   pc_mult        = bli_cntx_get_blksz_def_dt( dt_exec, BLIS_KR, cntx );
-    const dim_t   jc_alg         = bli_cntx_get_blksz_def_dt( dt_exec, BLIS_NC, cntx );
-    const dim_t   jc_max         = bli_cntx_get_blksz_max_dt( dt_exec, BLIS_NC, cntx );
-    const dim_t   jc_mult        = bli_cntx_get_blksz_def_dt( dt_exec, BLIS_MR, cntx ); //note: different!
+	const dir_t            direct         = bli_obj_is_lower( b ) ? BLIS_BWD : BLIS_FWD;
+    const dim_t            ic_alg         = bli_cntx_get_blksz_def_dt( dt_exec, BLIS_MC, cntx );
+    const dim_t            ic_max         = bli_cntx_get_blksz_max_dt( dt_exec, BLIS_MC, cntx );
+    const dim_t            ic_mult        = bli_cntx_get_blksz_def_dt( dt_exec, BLIS_NR, cntx ); //note: different!
+          dim_t            pc_alg         = bli_cntx_get_blksz_def_dt( dt_exec, BLIS_KC, cntx );
+          dim_t            pc_max         = bli_cntx_get_blksz_max_dt( dt_exec, BLIS_KC, cntx );
+    const dim_t            pc_mult        = bli_cntx_get_blksz_def_dt( dt_exec, BLIS_KR, cntx );
+    const dim_t            jc_alg         = bli_cntx_get_blksz_def_dt( dt_exec, BLIS_NC, cntx );
+    const dim_t            jc_max         = bli_cntx_get_blksz_max_dt( dt_exec, BLIS_NC, cntx );
+    const dim_t            jc_mult        = bli_cntx_get_blksz_def_dt( dt_exec, BLIS_MR, cntx ); //note: different!
 
-    const dim_t   bmult_m_def    = bli_cntx_get_blksz_def_dt(   dt_ap, BLIS_NR, cntx );
-    const dim_t   bmult_m_pack   = bli_cntx_get_blksz_max_dt(   dt_ap, BLIS_NR, cntx );
-    const dim_t   bmult_n_def    = bli_cntx_get_blksz_def_dt(   dt_bp, BLIS_MR, cntx );
-    const dim_t   bmult_n_pack   = bli_cntx_get_blksz_max_dt(   dt_bp, BLIS_MR, cntx );
-    const dim_t   bmult_k_def    = bmult_n_def;
+    const dim_t            bmult_m_def    = bli_cntx_get_blksz_def_dt(   dt_ap, BLIS_NR, cntx );
+    const dim_t            bmult_m_pack   = bli_cntx_get_blksz_max_dt(   dt_ap, BLIS_NR, cntx );
+    const dim_t            bmult_n_def    = bli_cntx_get_blksz_def_dt(   dt_bp, BLIS_MR, cntx );
+    const dim_t            bmult_n_pack   = bli_cntx_get_blksz_max_dt(   dt_bp, BLIS_MR, cntx );
+    const dim_t            bmult_k_def    = bmult_n_def;
 
     bli_l3_adjust_kc
     (
@@ -335,19 +363,21 @@ void bli_trsm_r_cntl_init
 	bli_cntl_init_node
 	(
 	  NULL,         // variant function pointer not used
-      &cntl->part_ir_trsm
+      &cntl->ir_loop_trsm
 	);
 
-	bli_cntl_init_node
+	bli_trsm_var_cntl_init_node
 	(
 	  macro_kernel_p,
-      &cntl->part_jr_trsm
+      gemmtrsm_ukr,
+      gemm_ukr,
+      &cntl->trsm_ker
 	);
     bli_cntl_attach_sub_node
     (
       BLIS_THREAD_NONE,
-      ( cntl_t* )&cntl->part_ir_trsm,
-      ( cntl_t* )&cntl->part_jr_trsm
+      ( cntl_t* )&cntl->ir_loop_trsm,
+      ( cntl_t* )&cntl->trsm_ker
     );
 
 	// Create a node for packing matrix A.
@@ -369,7 +399,7 @@ void bli_trsm_r_cntl_init
     bli_cntl_attach_sub_node
     (
       BLIS_THREAD_NONE,
-      ( cntl_t* )&cntl->part_jr_trsm,
+      ( cntl_t* )&cntl->trsm_ker,
       ( cntl_t* )&cntl->pack_a_trsm
     );
 

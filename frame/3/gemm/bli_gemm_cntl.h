@@ -33,15 +33,41 @@
 
 */
 
+struct gemm_var_cntl_s
+{
+    cntl_t       cntl; //this field must be present and come first
+    gemm_ukr_vft ukr;
+    bool         row_pref;
+};
+typedef struct gemm_var_cntl_s gemm_var_cntl_t;
+
+BLIS_INLINE gemm_ukr_vft bli_gemm_var_cntl_ukr( const cntl_t* cntl )
+{
+    return ( ( const gemm_var_cntl_t* ) cntl )->ukr;
+}
+
+BLIS_INLINE bool bli_gemm_var_cntl_row_pref( const cntl_t* cntl )
+{
+    return ( ( const gemm_var_cntl_t* ) cntl )->row_pref;
+}
+
+void bli_gemm_var_cntl_init_node
+     (
+       void_fp          var_func,
+       gemm_ukr_vft     ukr,
+       bool             row_pref,
+       gemm_var_cntl_t* cntl
+     );
+
 struct gemm_cntl_s
 {
-              cntl_t part_ir;
-              cntl_t part_jr;
-    packm_def_cntl_t pack_a;
-         part_cntl_t part_ic;
-    packm_def_cntl_t pack_b;
-         part_cntl_t part_pc;
          part_cntl_t part_jc;
+         part_cntl_t part_pc;
+    packm_def_cntl_t pack_b;
+         part_cntl_t part_ic;
+    packm_def_cntl_t pack_a;
+     gemm_var_cntl_t ker;
+              cntl_t ir_loop;
 };
 typedef struct gemm_cntl_s gemm_cntl_t;
 
@@ -56,11 +82,6 @@ void bli_gemm_cntl_init
        const cntx_t*      cntx,
              gemm_cntl_t* cntl
      );
-
-BLIS_INLINE cntl_t* bli_gemm_cntl_root( gemm_cntl_t* cntl )
-{
-    return (cntl_t*)&cntl->part_jc;
-}
 
 // -----------------------------------------------------------------------------
 

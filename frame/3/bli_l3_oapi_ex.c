@@ -318,7 +318,7 @@ void PASTEMAC(gemm,BLIS_OAPI_EX_SUF)
 	  &b_local,
 	  cp,
 	  cntx,
-	  bli_gemm_cntl_root( &cntl ),
+	  ( cntl_t* )&cntl,
 	  rntm
 	);
 
@@ -426,7 +426,7 @@ void PASTEMAC(gemmt,BLIS_OAPI_EX_SUF)
 	  &b_local,
 	  &c_local,
 	  cntx,
-	  bli_gemm_cntl_root( &cntl ),
+	  ( cntl_t* )&cntl,
 	  rntm
 	);
 }
@@ -691,7 +691,7 @@ void PASTEMAC(hemm,BLIS_OAPI_EX_SUF)
 	  &b_local,
 	  &c_local,
 	  cntx,
-	  bli_gemm_cntl_root( &cntl ),
+	  ( cntl_t* )&cntl,
 	  rntm
 	);
 }
@@ -835,7 +835,7 @@ void PASTEMAC(symm,BLIS_OAPI_EX_SUF)
 	  &b_local,
 	  &c_local,
 	  cntx,
-	  bli_gemm_cntl_root( &cntl ),
+	  ( cntl_t* )&cntl,
 	  rntm
 	);
 }
@@ -990,7 +990,7 @@ void PASTEMAC(trmm3,BLIS_OAPI_EX_SUF)
 	  &b_local,
 	  &c_local,
 	  cntx,
-	  bli_gemm_cntl_root( &cntl ),
+	  ( cntl_t* )&cntl,
 	  rntm
 	);
 }
@@ -1151,7 +1151,7 @@ void PASTEMAC(trmm,BLIS_OAPI_EX_SUF)
 	  &b_local,
 	  &c_local,
 	  cntx,
-	  bli_gemm_cntl_root( &cntl ),
+	  ( cntl_t* )&cntl,
 	  rntm
 	);
 }
@@ -1285,7 +1285,7 @@ void PASTEMAC(trsm,BLIS_OAPI_EX_SUF)
 	  &b_local,
 	  &c_local,
 	  cntx,
-	  bli_trsm_cntl_root( &cntl ),
+	  ( cntl_t* )&cntl,
 	  rntm
 	);
 }

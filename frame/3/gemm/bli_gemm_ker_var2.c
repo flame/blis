@@ -182,7 +182,7 @@ void bli_gemm_ker_var2
 
 	// Query the context for the micro-kernel address and cast it to its
 	// function pointer type.
-	gemm_ukr_vft gemm_ukr = bli_cntx_get_l3_vir_ukr_dt( dt_exec, BLIS_GEMM_UKR, cntx );
+	gemm_ukr_vft gemm_ukr = bli_gemm_var_cntl_ukr( cntl );
 
 	// Temporary C buffer for edge cases. Note that the strides of this
 	// temporary buffer are set so that they match the storage of the
@@ -190,9 +190,9 @@ void bli_gemm_ker_var2
 	// column-stored as well.
 	char        ct[ BLIS_STACK_BUF_MAX_SIZE ]
 	                __attribute__((aligned(BLIS_STACK_BUF_ALIGN_SIZE)));
-	const bool  col_pref    = bli_cntx_ukr_prefers_cols_dt( dt_exec, BLIS_GEMM_VIR_UKR, cntx );
-	const inc_t rs_ct       = ( col_pref ? 1 : NR );
-	const inc_t cs_ct       = ( col_pref ? MR : 1 );
+	const bool  row_pref    = bli_gemm_var_cntl_row_pref( cntl );
+	const inc_t rs_ct       = ( row_pref ? NR : 1 );
+	const inc_t cs_ct       = ( row_pref ? 1 : MR );
 	const char* zero        = bli_obj_buffer_for_const( dt_exec, &BLIS_ZERO );
 
 	//
