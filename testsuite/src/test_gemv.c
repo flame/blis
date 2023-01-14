@@ -104,6 +104,7 @@ void libblis_test_gemv_deps
 	libblis_test_subv( tdata, params, &(op->ops->subv) );
 	libblis_test_copyv( tdata, params, &(op->ops->copyv) );
 	libblis_test_scalv( tdata, params, &(op->ops->scalv) );
+	libblis_test_copym( tdata, params, &(op->ops->copym) );
 }
 
 

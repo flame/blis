@@ -476,6 +476,27 @@ INSERT_GENTFUNC_BASIC0( eqm )
 
 
 #undef  GENTFUNC
+#define GENTFUNC( ctype, ch, opname, kername ) \
+\
+void PASTEMAC(ch,opname) \
+     ( \
+       const ctype* chi, \
+       const ctype* psi, \
+             bool*  is  \
+     ) \
+{ \
+	bli_init_once(); \
+\
+	*is = PASTEMAC(ch,kername)( *chi, *psi ); \
+}
+
+INSERT_GENTFUNC_BASIC( ltsc,  lt )
+INSERT_GENTFUNC_BASIC( ltesc, lte )
+INSERT_GENTFUNC_BASIC( gtsc,  gt )
+INSERT_GENTFUNC_BASIC( gtesc, gte )
+
+
+#undef  GENTFUNC
 #define GENTFUNC( ctype, ch, opname, varname ) \
 \
 void PASTEMAC(ch,opname) \

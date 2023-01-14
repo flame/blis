@@ -82,6 +82,11 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 \
 	/* When the diagonal of an upper- or lower-stored matrix is unit,
 	   we handle it with a separate post-processing step. */ \
+	/* NOTE: This code was disabled after I realized that when matrix A has the
+	   properties of having a unit diagonal (and being lower or upper stored),
+	   the operation should only read the strictly lower/upper triangle and
+	   leave the diagonal of B untouched. */ \
+/*
 	if ( bli_is_upper_or_lower( uplox ) && \
 	     bli_is_unit_diag( diagx ) ) \
 	{ \
@@ -98,6 +103,7 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 		  rntm  \
 		); \
 	} \
+*/ \
 }
 
 INSERT_GENTFUNC_BASIC( addm, addd )
@@ -146,6 +152,11 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 \
 	/* When the diagonal of an upper- or lower-stored matrix is unit,
 	   we handle it with a separate post-processing step. */ \
+	/* NOTE: This code was disabled after I realized that when matrix A has the
+	   properties of having a unit diagonal (and being lower or upper stored),
+	   the operation should only read the strictly lower/upper triangle and
+	   leave the diagonal of B untouched. */ \
+/*
 	if ( bli_is_upper_or_lower( uplox ) && \
 	     bli_is_unit_diag( diagx ) ) \
 	{ \
@@ -167,6 +178,7 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 		  rntm  \
 		); \
 	} \
+*/ \
 }
 
 INSERT_GENTFUNC_BASIC0( copym )
@@ -219,6 +231,11 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 \
 	/* When the diagonal of an upper- or lower-stored matrix is unit,
 	   we handle it with a separate post-processing step. */ \
+	/* NOTE: This code was disabled after I realized that when matrix A has the
+	   properties of having a unit diagonal (and being lower or upper stored),
+	   the operation should only read the strictly lower/upper triangle and
+	   leave the diagonal of B untouched. */ \
+/*
 	if ( bli_is_upper_or_lower( uplox ) && \
 	     bli_is_unit_diag( diagx ) ) \
 	{ \
@@ -236,6 +253,7 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 		  rntm  \
 		); \
 	} \
+*/ \
 }
 
 INSERT_GENTFUNC_BASIC0( axpym )
@@ -307,6 +325,11 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 \
 	/* When the diagonal of an upper- or lower-stored matrix is unit,
 	   we handle it with a separate post-processing step. */ \
+	/* NOTE: This code was disabled after I realized that when matrix A has the
+	   properties of having a unit diagonal (and being lower or upper stored),
+	   the operation should only read the strictly lower/upper triangle and
+	   leave the diagonal of B untouched. */ \
+/*
 	if ( bli_is_upper_or_lower( uplox ) && \
 	     bli_is_unit_diag( diagx ) ) \
 	{ \
@@ -327,6 +350,7 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 		  rntm  \
 		); \
 	} \
+*/ \
 }
 
 INSERT_GENTFUNC_BASIC0( scal2m )
@@ -441,6 +465,11 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 \
 	/* When the diagonal of an upper- or lower-stored matrix is unit,
 	   we handle it with a separate post-processing step. */ \
+	/* NOTE: This code was disabled after I realized that when matrix A has the
+	   properties of having a unit diagonal (and being lower or upper stored),
+	   the operation should only read the strictly lower/upper triangle and
+	   leave the diagonal of B untouched. */ \
+/*
 	if ( bli_is_upper_or_lower( uplox ) && \
 	     bli_is_unit_diag( diagx ) ) \
 	{ \
@@ -458,6 +487,7 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 		  rntm  \
 		); \
 	} \
+*/ \
 }
 
 INSERT_GENTFUNC_BASIC0( xpbym )

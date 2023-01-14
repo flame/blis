@@ -234,7 +234,7 @@ void bli_acquire_mpart_mdim
 
 
 	// Compute the diagonal offset based on the m and n offsets.
-	doff_t diag_off_inc = ( doff_t )offm_inc - ( doff_t )offn_inc;
+	doff_t diagoff_inc = ( doff_t )offm_inc - ( doff_t )offn_inc;
 
 
 	// Begin by copying the info, elem size, buffer, row stride, and column
@@ -250,13 +250,13 @@ void bli_acquire_mpart_mdim
 	{
 		bli_obj_set_dims( m_part, n_part, sub_obj );
 		bli_obj_inc_offs( offm_inc, offn_inc, sub_obj );
-		bli_obj_inc_diag_offset( diag_off_inc, sub_obj );
+		bli_obj_inc_diag_offset( diagoff_inc, sub_obj );
 	}
 	else // if ( bli_obj_has_trans( obj ) )
 	{
 		bli_obj_set_dims( n_part, m_part, sub_obj );
 		bli_obj_inc_offs( offn_inc, offm_inc, sub_obj );
-		bli_obj_inc_diag_offset( -diag_off_inc, sub_obj );
+		bli_obj_inc_diag_offset( -diagoff_inc, sub_obj );
 	}
 
 
@@ -457,7 +457,7 @@ void bli_acquire_mpart_ndim
 
 
 	// Compute the diagonal offset based on the m and n offsets.
-	doff_t diag_off_inc = ( doff_t )offm_inc - ( doff_t )offn_inc;
+	doff_t diagoff_inc = ( doff_t )offm_inc - ( doff_t )offn_inc;
 
 
 	// Begin by copying the info, elem size, buffer, row stride, and column
@@ -473,13 +473,13 @@ void bli_acquire_mpart_ndim
 	{
 		bli_obj_set_dims( m_part, n_part, sub_obj );
 		bli_obj_inc_offs( offm_inc, offn_inc, sub_obj );
-		bli_obj_inc_diag_offset( diag_off_inc, sub_obj );
+		bli_obj_inc_diag_offset( diagoff_inc, sub_obj );
 	}
 	else // if ( bli_obj_has_trans( obj ) )
 	{
 		bli_obj_set_dims( n_part, m_part, sub_obj );
 		bli_obj_inc_offs( offn_inc, offm_inc, sub_obj );
-		bli_obj_inc_diag_offset( -diag_off_inc, sub_obj );
+		bli_obj_inc_diag_offset( -diagoff_inc, sub_obj );
 	}
 
 
@@ -709,7 +709,7 @@ void bli_acquire_mpart_mndim
 
 
 	// Compute the diagonal offset based on the m and n offsets.
-	doff_t diag_off_inc = ( doff_t )offm_inc - ( doff_t )offn_inc;
+	doff_t diagoff_inc = ( doff_t )offm_inc - ( doff_t )offn_inc;
 
 
 	// Begin by copying the info, elem size, buffer, row stride, and column
@@ -725,13 +725,13 @@ void bli_acquire_mpart_mndim
 	{
 		bli_obj_set_dims( m_part, n_part, sub_obj );
 		bli_obj_inc_offs( offm_inc, offn_inc, sub_obj );
-		bli_obj_inc_diag_offset( diag_off_inc, sub_obj );
+		bli_obj_inc_diag_offset( diagoff_inc, sub_obj );
 	}
 	else // if ( bli_obj_has_trans( obj ) )
 	{
 		bli_obj_set_dims( n_part, m_part, sub_obj );
 		bli_obj_inc_offs( offn_inc, offm_inc, sub_obj );
-		bli_obj_inc_diag_offset( -diag_off_inc, sub_obj );
+		bli_obj_inc_diag_offset( -diagoff_inc, sub_obj );
 	}
 
 	// If the root matrix is not general (ie: has structure defined by the

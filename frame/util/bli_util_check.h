@@ -125,10 +125,14 @@ void PASTEMAC(opname,_check) \
      ( \
        const obj_t* chi, \
        const obj_t* psi, \
-       const bool*  is_eq  \
+       const bool*  is  \
      );
 
 GENTPROT( eqsc )
+GENTPROT( ltsc )
+GENTPROT( ltesc )
+GENTPROT( gtsc )
+GENTPROT( gtesc )
 
 
 #undef  GENPROT
@@ -138,7 +142,7 @@ void PASTEMAC(opname,_check) \
      ( \
        const obj_t* x, \
        const obj_t* y, \
-       const bool*  is_eq  \
+       const bool*  is  \
     );
 
 GENPROT( eqv )
