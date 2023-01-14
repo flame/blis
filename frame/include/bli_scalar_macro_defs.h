@@ -154,6 +154,8 @@
 #include "bli_dotjs.h"
 
 #include "bli_eq.h"
+#include "bli_lt.h"
+#include "bli_lte.h"
 
 #include "bli_fprints.h"
 

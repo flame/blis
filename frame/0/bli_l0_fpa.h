@@ -50,6 +50,7 @@ GENPROT( mulsc )
 GENPROT( subsc )
 GENPROT( invertsc )
 GENPROT( sqrtsc )
+GENPROT( sqrtrsc )
 GENPROT( unzipsc )
 GENPROT( zipsc )
 

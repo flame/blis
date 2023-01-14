@@ -207,7 +207,7 @@ typedef void (*PASTECH2(ch,opname,tsuf)) \
        conj_t  conjchi, \
        ctype*  chi, \
        ctype*  psi, \
-       bool*   is_eq  \
+       bool*   is  \
      );
 
 INSERT_GENTDEF( eqsc )
@@ -223,7 +223,7 @@ typedef void (*PASTECH2(ch,opname,tsuf)) \
        dim_t   n, \
        ctype*  x, inc_t incx, \
        ctype*  y, inc_t incy, \
-       bool*   is_eq  \
+       bool*   is  \
      );
 
 INSERT_GENTDEF( eqv )
@@ -243,10 +243,27 @@ typedef void (*PASTECH2(ch,opname,tsuf)) \
        dim_t   n, \
        ctype*  x, inc_t rs_x, inc_t cs_x, \
        ctype*  y, inc_t rs_y, inc_t cs_y, \
-       bool*   is_eq  \
+       bool*   is  \
      );
 
 INSERT_GENTDEF( eqm )
+
+// ltsc, ltesc, gtsc, gtesc
+
+#undef  GENTDEF
+#define GENTDEF( ctype, ch, opname, tsuf ) \
+\
+typedef void (*PASTECH2(ch,opname,tsuf)) \
+     ( \
+       ctype* chi, \
+       ctype* psi, \
+       bool*  is  \
+     );
+
+INSERT_GENTDEF( ltsc )
+INSERT_GENTDEF( ltesc )
+INSERT_GENTDEF( gtsc )
+INSERT_GENTDEF( gtesc )
 
 #endif // #ifdef BLIS_OAPI_BASIC
 

@@ -231,6 +231,9 @@ void libblis_test_all_ops( thread_data_t* tdata, test_params_t* params, test_ops
 
 	// Test the level-3 operations.
 	libblis_test_level3_ops( tdata, params, ops );
+
+	// Test the level-4 operations.
+	libblis_test_level4_ops( tdata, params, ops );
 }
 
 
@@ -332,6 +335,16 @@ void libblis_test_level3_ops( thread_data_t* tdata, test_params_t* params, test_
 
 
 
+void libblis_test_level4_ops( thread_data_t* tdata, test_params_t* params, test_ops_t* ops )
+{
+	libblis_test_chol( tdata, params, &(ops->chol) );
+	libblis_test_trinv( tdata, params, &(ops->trinv) );
+	libblis_test_ttmm( tdata, params, &(ops->ttmm) );
+	libblis_test_hpdinv( tdata, params, &(ops->hpdinv) );
+}
+
+
+
 void libblis_test_read_ops_file( char* input_filename, test_ops_t* ops )
 {
 	FILE* input_stream;
@@ -354,8 +367,9 @@ void libblis_test_read_ops_file( char* input_filename, test_ops_t* ops )
 	libblis_test_read_section_override( ops, input_stream, &(ops->l2_over) );
 	libblis_test_read_section_override( ops, input_stream, &(ops->l3ukr_over) );
 	libblis_test_read_section_override( ops, input_stream, &(ops->l3_over) );
+	libblis_test_read_section_override( ops, input_stream, &(ops->l4_over) );
 
-	//                                            dimensions          n_param   operation
+	//                                                       dimensions          n_param   operation
 
 	// Utility operations
 	libblis_test_read_op_info( ops, input_stream, BLIS_NOID, BLIS_TEST_DIMS_M,   0, &(ops->randv) );
@@ -425,6 +439,12 @@ void libblis_test_read_ops_file( char* input_filename, test_ops_t* ops )
 	libblis_test_read_op_info( ops, input_stream, BLIS_TRMM,  BLIS_TEST_DIMS_MN,  4, &(ops->trmm) );
 	libblis_test_read_op_info( ops, input_stream, BLIS_TRMM3, BLIS_TEST_DIMS_MN,  5, &(ops->trmm3) );
 	libblis_test_read_op_info( ops, input_stream, BLIS_TRSM,  BLIS_TEST_DIMS_MN,  4, &(ops->trsm) );
+
+	// Level-4
+	libblis_test_read_op_info( ops, input_stream, BLIS_NOID,  BLIS_TEST_DIMS_M,   1, &(ops->chol) );
+	libblis_test_read_op_info( ops, input_stream, BLIS_NOID,  BLIS_TEST_DIMS_M,   2, &(ops->trinv) );
+	libblis_test_read_op_info( ops, input_stream, BLIS_NOID,  BLIS_TEST_DIMS_M,   1, &(ops->ttmm) );
+	libblis_test_read_op_info( ops, input_stream, BLIS_NOID,  BLIS_TEST_DIMS_M,   1, &(ops->hpdinv) );
 
 	// Output the section overrides.
 	libblis_test_output_section_overrides( stdout, ops );
@@ -734,6 +754,7 @@ void libblis_test_output_section_overrides( FILE* os, test_ops_t* ops )
 	libblis_test_fprintf_c( os, "Level-2 operations           %d\n", ops->l2_over );
 	libblis_test_fprintf_c( os, "Level-3 micro-kernels        %d\n", ops->l3ukr_over );
 	libblis_test_fprintf_c( os, "Level-3 operations           %d\n", ops->l3_over );
+	libblis_test_fprintf_c( os, "Level-4 operations           %d\n", ops->l4_over );
 	libblis_test_fprintf_c( os, "\n" );
 	libblis_test_fprintf( os, "\n" );
 }
@@ -3194,6 +3215,12 @@ int libblis_test_l3ukr_is_disabled( test_op_t* op )
 int libblis_test_l3_is_disabled( test_op_t* op )
 {
 	if ( op->ops->l3_over == DISABLE ) return TRUE;
+	else                               return FALSE;
+}
+
+int libblis_test_l4_is_disabled( test_op_t* op )
+{
+	if ( op->ops->l4_over == DISABLE ) return TRUE;
 	else                               return FALSE;
 }
 

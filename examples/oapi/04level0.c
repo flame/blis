@@ -166,7 +166,7 @@ int main( int argc, char** argv )
 	bli_normfsc( &zeta, &alpha );
 	bli_printm( "alpha := normf( zeta )  # normf() = complex modulus in complex domain.", &alpha, "%4.1f", "" );
 
-	bli_invertsc( &gamma );
+	bli_invertsc( &gamma, &gamma );
 	bli_printm( "gamma := 1.0 / gamma", &gamma, "%4.2f", "" );
 
 

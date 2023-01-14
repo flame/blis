@@ -51,17 +51,8 @@ GENTPROT( copysc )
 GENTPROT( divsc )
 GENTPROT( mulsc )
 GENTPROT( sqrtsc )
+GENTPROT( sqrtrsc )
 GENTPROT( subsc )
-
-
-#undef  GENTPROT
-#define GENTPROT( opname ) \
-\
-void PASTEMAC(opname,_check) \
-     ( \
-       obj_t*  chi  \
-     );
-
 GENTPROT( invertsc )
 
 
@@ -152,5 +143,5 @@ void bli_l0_xxbsc_check
      (
        obj_t*  chi,
        obj_t*  psi,
-       bool*   is_eq
+       bool*   is
      );

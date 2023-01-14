@@ -216,6 +216,7 @@ typedef struct test_ops_s
 	int       l2_over;
 	int       l3ukr_over;
 	int       l3_over;
+	int       l4_over;
 
 	// util
 	test_op_t randv;
@@ -286,6 +287,12 @@ typedef struct test_ops_s
 	test_op_t trmm3;
 	test_op_t trsm;
 
+	// level-4
+	test_op_t chol;
+	test_op_t trinv;
+	test_op_t ttmm;
+	test_op_t hpdinv;
+
 } test_ops_t;
 
 
@@ -323,6 +330,7 @@ void libblis_test_level1f_ops( thread_data_t* tdata, test_params_t* params, test
 void libblis_test_level2_ops( thread_data_t* tdata, test_params_t* params, test_ops_t* ops );
 void libblis_test_level3_ukrs( thread_data_t* tdata, test_params_t* params, test_ops_t* ops );
 void libblis_test_level3_ops( thread_data_t* tdata, test_params_t* params, test_ops_t* ops );
+void libblis_test_level4_ops( thread_data_t* tdata, test_params_t* params, test_ops_t* ops );
 
 void libblis_test_read_params_file( char* input_filename, test_params_t* params );
 void libblis_test_read_ops_file( char* input_filename, test_ops_t* ops );
@@ -471,6 +479,7 @@ int  libblis_test_l1f_is_disabled( test_op_t* op );
 int  libblis_test_l2_is_disabled( test_op_t* op );
 int  libblis_test_l3ukr_is_disabled( test_op_t* op );
 int  libblis_test_l3_is_disabled( test_op_t* op );
+int  libblis_test_l4_is_disabled( test_op_t* op );
 int  libblis_test_dt_str_has_sp_char( test_params_t* params );
 int  libblis_test_dt_str_has_sp_char_str( int n, char* str );
 int  libblis_test_dt_str_has_dp_char( test_params_t* params );
@@ -562,3 +571,8 @@ char libblis_test_proj_dtchar_to_precchar( char dt_char );
 #include "test_trmm3.h"
 #include "test_trsm.h"
 
+// Level-4
+#include "test_chol.h"
+#include "test_trinv.h"
+#include "test_ttmm.h"
+#include "test_hpdinv.h"

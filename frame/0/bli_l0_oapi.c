@@ -115,38 +115,6 @@ GENFRONT( addsc )
 GENFRONT( divsc )
 GENFRONT( mulsc )
 GENFRONT( subsc )
-
-
-#undef  GENFRONT
-#define GENFRONT( opname ) \
-\
-void PASTEMAC0(opname) \
-     ( \
-       obj_t*  chi  \
-     ) \
-{ \
-	bli_init_once(); \
-\
-	num_t     dt        = bli_obj_dt( chi ); \
-\
-	conj_t    conjchi   = bli_obj_conj_status( chi ); \
-\
-	void*     buf_chi   = bli_obj_buffer_for_1x1( dt, chi ); \
-\
-	if ( bli_error_checking_is_enabled() ) \
-	    PASTEMAC(opname,_check)( chi ); \
-\
-	/* Query a type-specific function pointer, except one that uses
-	   void* for function arguments instead of typed pointers. */ \
-	PASTECH(opname,_vft) f = PASTEMAC(opname,_qfp)( dt ); \
-\
-	f \
-	( \
-	  conjchi, \
-	  buf_chi  \
-	); \
-}
-
 GENFRONT( invertsc )
 
 
@@ -181,6 +149,7 @@ void PASTEMAC0(opname) \
 }
 
 GENFRONT( sqrtsc )
+GENFRONT( sqrtrsc )
 
 
 #undef  GENFRONT

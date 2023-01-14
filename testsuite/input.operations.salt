@@ -95,6 +95,7 @@
 1        # Level-2
 1        # Level-3 micro-kernels
 1        # Level-3
+1        # Level-4
 
 
 # --- Utility --------------------------------------------------------------
@@ -328,3 +329,21 @@ nn       #   parameters: transa transb
 -1 -1    #   dimensions: m n
 ??n?     #   parameters: side uploa transa diaga
 
+
+# --- Level-4 --------------------------------------------------------------
+
+1        # chol
+-1       #   dimensions: m
+?        #   parameters: uploa
+
+1        # trinv
+-1       #   dimensions: m
+??       #   parameters: uploa diaga
+
+1        # ttmm
+-1       #   dimensions: m
+?        #   parameters: uploa
+
+1        # hpdinv
+-1       #   dimensions: m
+?        #   parameters: uplo

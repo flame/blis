@@ -51,17 +51,6 @@ INSERT_GENTPROT_BASIC0( addsc )
 INSERT_GENTPROT_BASIC0( divsc )
 INSERT_GENTPROT_BASIC0( mulsc )
 INSERT_GENTPROT_BASIC0( subsc )
-
-
-#undef  GENTPROT
-#define GENTPROT( ctype, ch, opname ) \
-\
-BLIS_EXPORT_BLIS void PASTEMAC(ch,opname) \
-     ( \
-       conj_t  conjchi, \
-       ctype*  chi  \
-     );
-
 INSERT_GENTPROT_BASIC0( invertsc )
 
 
@@ -88,6 +77,7 @@ BLIS_EXPORT_BLIS void PASTEMAC(ch,opname) \
      );
 
 INSERT_GENTPROT_BASIC0( sqrtsc )
+INSERT_GENTPROT_BASIC0( sqrtrsc )
 
 
 #undef  GENTPROT

@@ -56,6 +56,7 @@ GENFRONT( mulsc )
 GENFRONT( subsc )
 GENFRONT( invertsc )
 GENFRONT( sqrtsc )
+GENFRONT( sqrtrsc )
 GENFRONT( unzipsc )
 GENFRONT( zipsc )
 

@@ -678,6 +678,18 @@ ifeq ($(CC_VENDOR),clang)
 CWARNFLAGS += -Wno-tautological-compare -Wno-pass-failed
 endif
 
+# Disable discarded qualifier warnings.
+# NOTE: This is a temporary hack until the 'ampere' branch can catch up to the
+# point in the 'master' brange lineage where const correctness is implemented
+# throughout BLIS's higher-level APIs.
+ifeq ($(CC_VENDOR),gcc)
+CWARNFLAGS     := -Wno-discarded-qualifiers
+else
+ifeq ($(CC_VENDOR),clang)
+CWARNFLAGS     := -Wno-incompatible-pointer-types-discards-qualifiers -Wno-unused-but-set-variable
+endif
+endif
+
 $(foreach c, $(CONFIG_LIST_FAM), $(eval $(call append-var-for,CWARNFLAGS,$(c))))
 
 # --- Position-independent code flags (shared libraries only) ---

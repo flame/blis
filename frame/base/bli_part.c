@@ -123,7 +123,7 @@ void bli_acquire_mpart_mdim
 	dim_t  n_part   = 0;
 	inc_t  offm_inc = 0;
 	inc_t  offn_inc = 0;
-	doff_t diag_off_inc;
+	doff_t diagoff_inc;
 
 
 	// Call a special function for partitioning packed objects. (By only
@@ -235,7 +235,7 @@ void bli_acquire_mpart_mdim
 
 
 	// Compute the diagonal offset based on the m and n offsets.
-	diag_off_inc = ( doff_t )offm_inc - ( doff_t )offn_inc;
+	diagoff_inc = ( doff_t )offm_inc - ( doff_t )offn_inc;
 
 
 	// Begin by copying the info, elem size, buffer, row stride, and column
@@ -251,13 +251,13 @@ void bli_acquire_mpart_mdim
 	{
 		bli_obj_set_dims( m_part, n_part, sub_obj );
 		bli_obj_inc_offs( offm_inc, offn_inc, sub_obj );
-		bli_obj_inc_diag_offset( diag_off_inc, sub_obj );
+		bli_obj_inc_diag_offset( diagoff_inc, sub_obj );
 	}
 	else // if ( bli_obj_has_trans( obj ) )
 	{
 		bli_obj_set_dims( n_part, m_part, sub_obj );
 		bli_obj_inc_offs( offn_inc, offm_inc, sub_obj );
-		bli_obj_inc_diag_offset( -diag_off_inc, sub_obj );
+		bli_obj_inc_diag_offset( -diagoff_inc, sub_obj );
 	}
 
 
@@ -347,7 +347,7 @@ void bli_acquire_mpart_ndim
 	dim_t  n_part   = 0;
 	inc_t  offm_inc = 0;
 	inc_t  offn_inc = 0;
-	doff_t diag_off_inc;
+	doff_t diagoff_inc;
 
 
 	// Call a special function for partitioning packed objects. (By only
@@ -459,7 +459,7 @@ void bli_acquire_mpart_ndim
 
 
 	// Compute the diagonal offset based on the m and n offsets.
-	diag_off_inc = ( doff_t )offm_inc - ( doff_t )offn_inc;
+	diagoff_inc = ( doff_t )offm_inc - ( doff_t )offn_inc;
 
 
 	// Begin by copying the info, elem size, buffer, row stride, and column
@@ -475,13 +475,13 @@ void bli_acquire_mpart_ndim
 	{
 		bli_obj_set_dims( m_part, n_part, sub_obj );
 		bli_obj_inc_offs( offm_inc, offn_inc, sub_obj );
-		bli_obj_inc_diag_offset( diag_off_inc, sub_obj );
+		bli_obj_inc_diag_offset( diagoff_inc, sub_obj );
 	}
 	else // if ( bli_obj_has_trans( obj ) )
 	{
 		bli_obj_set_dims( n_part, m_part, sub_obj );
 		bli_obj_inc_offs( offn_inc, offm_inc, sub_obj );
-		bli_obj_inc_diag_offset( -diag_off_inc, sub_obj );
+		bli_obj_inc_diag_offset( -diagoff_inc, sub_obj );
 	}
 
 
@@ -571,7 +571,7 @@ void bli_acquire_mpart_mndim
 	dim_t  n_part   = 0;
 	inc_t  offm_inc = 0;
 	inc_t  offn_inc = 0;
-	doff_t diag_off_inc;
+	doff_t diagoff_inc;
 
 
 	// Call a special function for partitioning packed objects. (By only
@@ -712,7 +712,7 @@ void bli_acquire_mpart_mndim
 
 
 	// Compute the diagonal offset based on the m and n offsets.
-	diag_off_inc = ( doff_t )offm_inc - ( doff_t )offn_inc;
+	diagoff_inc = ( doff_t )offm_inc - ( doff_t )offn_inc;
 
 
 	// Begin by copying the info, elem size, buffer, row stride, and column
@@ -728,13 +728,13 @@ void bli_acquire_mpart_mndim
 	{
 		bli_obj_set_dims( m_part, n_part, sub_obj );
 		bli_obj_inc_offs( offm_inc, offn_inc, sub_obj );
-		bli_obj_inc_diag_offset( diag_off_inc, sub_obj );
+		bli_obj_inc_diag_offset( diagoff_inc, sub_obj );
 	}
 	else // if ( bli_obj_has_trans( obj ) )
 	{
 		bli_obj_set_dims( n_part, m_part, sub_obj );
 		bli_obj_inc_offs( offn_inc, offm_inc, sub_obj );
-		bli_obj_inc_diag_offset( -diag_off_inc, sub_obj );
+		bli_obj_inc_diag_offset( -diagoff_inc, sub_obj );
 	}
 
 	// If the root matrix is not general (ie: has structure defined by the
@@ -857,5 +857,201 @@ void bli_acquire_vi
 		bli_acquire_mpart_mdim( BLIS_FWD, BLIS_SUBPART1, i, 1, obj, sub_obj );
 	else // if ( bli_obj_is_row_vector( obj ) )
 		bli_acquire_mpart_ndim( BLIS_FWD, BLIS_SUBPART1, i, 1, obj, sub_obj );
+}
+
+
+// -- Multi-partition acquisition ----------------------------------------------
+
+
+void bli_acquire_mparts_tl2br
+     (
+             dim_t  ij,
+             dim_t  b,
+       const obj_t* a,
+             obj_t* a00, obj_t* a01, obj_t* a02,
+             obj_t* a10, obj_t* a11, obj_t* a12,
+             obj_t* a20, obj_t* a21, obj_t* a22
+     )
+{
+	bli_acquire_mparts_mndim
+	(
+	  BLIS_FWD,
+	  ij, b, a,
+	  a00, a01, a02,
+	  a10, a11, a12,
+	  a20, a21, a22
+	);
+}
+
+
+void bli_acquire_mparts_mndim
+     (
+             dir_t  direct,
+             dim_t  ij,
+             dim_t  b,
+       const obj_t* a,
+             obj_t* a00, obj_t* a01, obj_t* a02,
+             obj_t* a10, obj_t* a11, obj_t* a12,
+             obj_t* a20, obj_t* a21, obj_t* a22
+     )
+{
+	dim_t  m;
+	dim_t  n;
+
+
+	// Check parameters.
+	//if ( bli_error_checking_is_enabled() )
+	//{
+	//	bli_acquire_mparts_tl2br_check
+	//	(
+	//	  ij, b, a,
+	//	  a00, a01, a02,
+	//	  a10, a11, a12,
+	//	  a20, a21, a22
+	//	);
+	//}
+
+
+	// Query the m and n dimensions of the object (accounting for
+	// transposition, if indicated).
+#if 0
+	if ( bli_obj_has_notrans( a ) )
+	{
+#endif
+		m = bli_obj_length( a );
+		n = bli_obj_width( a );
+#if 0
+	}
+	else // if ( bli_obj_has_trans( a ) )
+	{
+		bli_check_error_code( BLIS_NOT_YET_IMPLEMENTED );
+		m = bli_obj_width( a );
+		n = bli_obj_length( a );
+	}
+#endif
+
+
+	// Foolproofing: do not let b exceed what's left of min(m,n) at
+	// row/column offset ij.
+	dim_t min_m_n = bli_min( m, n );
+	if ( b > min_m_n - ij ) b = min_m_n - ij;
+
+
+	// NOTE: Most of this function implicitly assumes moving forward.
+	// When moving backward, we have to relocate ij.
+	if ( direct == BLIS_BWD )
+	{
+		// Modify ij to account for the fact that we are moving backwards.
+		ij = min_m_n - ij - b;
+	}
+
+
+	// Compute offset increments and dimensions based on which
+	// subpartition is being requested, assuming no transposition.
+
+	// Left column of subpartitions
+	if ( a00 != NULL )
+	{
+		// A00 (offm,offn) unchanged.
+		// A00 is ij x ij.
+		const inc_t offm_inc = 0;
+		const inc_t offn_inc = 0;
+		const dim_t m_part   = ij;
+		const dim_t n_part   = ij;
+
+		bli_acquire_init_subpart( offm_inc, offn_inc, m_part, n_part, a, a00 );
+	}
+	if ( a10 != NULL )
+	{
+		// A10 (offm,offn) += (ij,0).
+		// A10 is b x ij.
+		const inc_t offm_inc = ij;
+		const inc_t offn_inc = 0;
+		const dim_t m_part   = b;
+		const dim_t n_part   = ij;
+
+		bli_acquire_init_subpart( offm_inc, offn_inc, m_part, n_part, a, a10 );
+	}
+	if ( a20 != NULL )
+	{
+		// A20 (offm,offn) += (ij+b,0).
+		// A20 is (m-ij-b) x ij.
+		const inc_t offm_inc = ij + b;
+		const inc_t offn_inc = 0;
+		const dim_t m_part   = m - ij - b;
+		const dim_t n_part   = ij;
+
+		bli_acquire_init_subpart( offm_inc, offn_inc, m_part, n_part, a, a20 );
+	}
+
+	// Middle column of subpartitions.
+	if ( a01 != NULL )
+	{
+		// A01 (offm,offn) += (0,ij).
+		// A01 is ij x b.
+		const inc_t offm_inc = 0;
+		const inc_t offn_inc = ij;
+		const dim_t m_part   = ij;
+		const dim_t n_part   = b;
+
+		bli_acquire_init_subpart( offm_inc, offn_inc, m_part, n_part, a, a01 );
+	}
+	if ( a11 != NULL )
+	{
+		// A11 (offm,offn) += (ij,ij).
+		// A11 is b x b.
+		const inc_t offm_inc = ij;
+		const inc_t offn_inc = ij;
+		const dim_t m_part   = b;
+		const dim_t n_part   = b;
+
+		bli_acquire_init_subpart( offm_inc, offn_inc, m_part, n_part, a, a11 );
+	}
+	if ( a21 != NULL )
+	{
+		// A21 (offm,offn) += (ij+b,ij).
+		// A21 is (m-ij-b) x b.
+		const inc_t offm_inc = ij + b;
+		const inc_t offn_inc = ij;
+		const dim_t m_part   = m - ij - b;
+		const dim_t n_part   = b;
+
+		bli_acquire_init_subpart( offm_inc, offn_inc, m_part, n_part, a, a21 );
+	}
+
+	// Right column of subpartitions.
+	if ( a02 != NULL )
+	{
+		// A02 (offm,offn) += (0,ij+b).
+		// A02 is ij x (n-ij-b).
+		const inc_t offm_inc = 0;
+		const inc_t offn_inc = ij + b;
+		const dim_t m_part   = ij;
+		const dim_t n_part   = n - ij - b;
+
+		bli_acquire_init_subpart( offm_inc, offn_inc, m_part, n_part, a, a02 );
+	}
+	if ( a12 != NULL )
+	{
+		// A12 (offm,offn) += (ij,ij+b).
+		// A12 is b x (n-ij-b).
+		const inc_t offm_inc = ij;
+		const inc_t offn_inc = ij + b;
+		const dim_t m_part   = b;
+		const dim_t n_part   = n - ij - b;
+
+		bli_acquire_init_subpart( offm_inc, offn_inc, m_part, n_part, a, a12 );
+	}
+	if ( a22 != NULL )
+	{
+		// A22 (offm,offn) += (ij+b,ij+b).
+		// A22 is (m-ij-b) x (n-ij-b).
+		const inc_t offm_inc = ij + b;
+		const inc_t offn_inc = ij + b;
+		const dim_t m_part   = m - ij - b;
+		const dim_t n_part   = n - ij - b;
+
+		bli_acquire_init_subpart( offm_inc, offn_inc, m_part, n_part, a, a22 );
+	}
 }
 

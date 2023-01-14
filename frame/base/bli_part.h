@@ -118,3 +118,68 @@ BLIS_EXPORT_BLIS void bli_acquire_vi
        obj_t*    sub_obj
      );
 
+// -- Multi-partition acquisition ----------------------------------------------
+
+void bli_acquire_mparts_tl2br
+     (
+             dim_t  ij,
+             dim_t  b,
+       const obj_t* a,
+             obj_t* a00, obj_t* a01, obj_t* a02,
+             obj_t* a10, obj_t* a11, obj_t* a12,
+             obj_t* a20, obj_t* a21, obj_t* a22
+     );
+
+void bli_acquire_mparts_mndim
+     (
+             dir_t  direct,
+             dim_t  ij,
+             dim_t  b,
+       const obj_t* a,
+             obj_t* a00, obj_t* a01, obj_t* a02,
+             obj_t* a10, obj_t* a11, obj_t* a12,
+             obj_t* a20, obj_t* a21, obj_t* a22
+     );
+
+// -- Static/inline helper functions -------------------------------------------
+
+BLIS_INLINE void bli_acquire_init_subpart
+     (
+             inc_t  offm_inc,
+             inc_t  offn_inc,
+	         dim_t  m_part,
+	         dim_t  n_part,
+	   const obj_t* a,
+	         obj_t* axx
+     )
+{
+	// Compute the diagonal offset based on the m and n offsets.
+	doff_t diagoff_inc = ( doff_t )offm_inc - ( doff_t )offn_inc;
+
+	// Begin by copying the info, elem size, buffer, row stride, and column
+	// stride fields of the parent object. Note that this omits copying view
+	// information because the new partition will have its own dimensions
+	// and offsets.
+	bli_obj_init_subpart_from( a, axx );
+
+	// Modify offsets and dimensions of requested partition based on
+	// whether it needs to be transposed.
+#if 0
+	if ( bli_obj_has_notrans( a ) )
+	{
+#endif
+		bli_obj_set_dims( m_part, n_part, axx );
+		bli_obj_inc_offs( offm_inc, offn_inc, axx );
+		bli_obj_inc_diag_offset( diagoff_inc, axx );
+#if 0
+	}
+	else // if ( bli_obj_has_trans( a ) )
+	{
+		bli_check_error_code( BLIS_NOT_YET_IMPLEMENTED );
+		bli_obj_set_dims( n_part, m_part, axx );
+		bli_obj_inc_offs( offn_inc, offm_inc, axx );
+		bli_obj_inc_diag_offset( -diagoff_inc, axx );
+	}
+#endif
+}
+

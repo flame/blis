@@ -192,6 +192,11 @@ extern "C" {
 #include "bli_l3.h"
 
 
+// -- Level-4 operations --
+
+#include "bli_l4.h"
+
+
 // -- Utility operations --
 
 #include "bli_util.h"

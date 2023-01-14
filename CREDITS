@@ -3,12 +3,13 @@ BLIS framework
 Acknowledgements
 ---
 
-The BLIS framework was primarily authored by
+The BLIS framework was originally authored by
 
   Field Van Zee            @fgvanzee           (The University of Texas at Austin)
 
 but many others have contributed code and feedback, including
 
+  Jay Acosta               @jay-acosta         (Oracle)
   Sameer Agarwal           @sandwichmaker      (Google)
   Murtaza Ali                                  (Texas Instruments)
   Sajid Ali                @s-sajid-ali        (Northwestern University)
