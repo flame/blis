@@ -956,9 +956,6 @@ void dtrsm_blis_impl
 
             // Query the architecture ID
             arch_t id = bli_arch_query_id();
-#if defined(BLIS_KERNELS_ZEN4)
-            bool uplo, transa;
-#endif
             switch(id)
             {
                 case BLIS_ARCH_ZEN4:
@@ -969,11 +966,8 @@ void dtrsm_blis_impl
                     // for n < 200 avx2 kernels are performing better, but if
                     // n is a multiple of 8 then there will be no fringe case for avx512,
                     // in such cases avx512 kernels will perform better.
-                    uplo = bli_obj_is_upper(&ao);
-                    transa = bli_obj_has_trans(&ao);
-                    if(( ((blis_side == BLIS_RIGHT) && (uplo == true) && (transa == false)) ||
-                      ((blis_side == BLIS_RIGHT) && (uplo == false) && (transa == true))) && 
-                      ((n0 > 400) && (m0 > 50)))
+                    if( (blis_side == BLIS_RIGHT) && 
+                      ((n0 > 300) && (m0 > 50)))
                     {
                         status = bli_trsm_small_AVX512(
                             blis_side,
