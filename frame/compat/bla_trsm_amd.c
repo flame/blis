@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2019 - 2022, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2019 - 2023, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -953,14 +953,66 @@ void dtrsm_blis_impl
             (is_parallel && (m0+n0)<320))
         {
             err_t status;
-            status = bli_trsm_small(
-                blis_side,
-                &alphao,
-                &ao,
-                &bo,
-                NULL,
-                NULL,
-                is_parallel);
+
+            // Query the architecture ID
+            arch_t id = bli_arch_query_id();
+#if defined(BLIS_KERNELS_ZEN4)
+            bool uplo, transa;
+#endif
+            switch(id)
+            {
+                case BLIS_ARCH_ZEN4:
+#if defined(BLIS_KERNELS_ZEN4)
+                    // check if variant is RUN[N/U] or RLT[N/U]
+                    // this is a temporary fix, will be removed when all variants are added
+
+                    // for n < 200 avx2 kernels are performing better, but if
+                    // n is a multiple of 8 then there will be no fringe case for avx512,
+                    // in such cases avx512 kernels will perform better.
+                    uplo = bli_obj_is_upper(&ao);
+                    transa = bli_obj_has_trans(&ao);
+                    if(( ((blis_side == BLIS_RIGHT) && (uplo == true) && (transa == false)) ||
+                      ((blis_side == BLIS_RIGHT) && (uplo == false) && (transa == true))) && 
+                      ((n0 > 400) && (m0 > 50)))
+                    {
+                        status = bli_trsm_small_AVX512(
+                            blis_side,
+                            &alphao,
+                            &ao,
+                            &bo,
+                            NULL,
+                            NULL,
+                            is_parallel);
+                    }
+                    else
+                    {
+                        status = bli_trsm_small(
+                            blis_side,
+                            &alphao,
+                            &ao,
+                            &bo,
+                            NULL,
+                            NULL,
+                            is_parallel);
+                    }
+                    break;
+#endif
+
+                case BLIS_ARCH_ZEN:
+                case BLIS_ARCH_ZEN2:
+                case BLIS_ARCH_ZEN3:
+                    status = bli_trsm_small(
+                        blis_side,
+                        &alphao,
+                        &ao,
+                        &bo,
+                        NULL,
+                        NULL,
+                        is_parallel);
+                    break;
+                default:
+                    status = BLIS_NOT_YET_IMPLEMENTED;
+            }
             if (status == BLIS_SUCCESS)
             {
                 AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO);

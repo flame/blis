@@ -67,3 +67,10 @@ GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen_asm_8x32m )
 GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen_asm_4x32m )
 GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen_asm_2x32m )
 GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen_asm_1x32m )
+
+
+TRSMSUP_PROT(trsm_small_AVX512)
+TRSMSUP_KER_PROT( d, trsm_small_AutXB_AlXB_AVX512 )
+TRSMSUP_KER_PROT( d, trsm_small_XAltB_XAuB_AVX512 )
+TRSMSUP_KER_PROT( d, trsm_small_XAutB_XAlB_AVX512 )
+TRSMSUP_KER_PROT( d, trsm_small_AltXB_AuXB_AVX512 )

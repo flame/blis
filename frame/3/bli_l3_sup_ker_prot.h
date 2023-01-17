@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2019, Advanced Micro Devices, Inc.
+   Copyright (C) 2019-2023, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -52,5 +52,31 @@ void PASTEMAC(ch,opname) \
        ctype*     restrict c, inc_t rs_c, inc_t cs_c, \
        auxinfo_t* restrict data, \
        cntx_t*    restrict cntx  \
+     );
+
+
+
+#define TRSMSUP_PROT( opname ) \
+\
+err_t PASTEMAC0(opname) \
+     ( \
+       side_t   side, \
+       obj_t*   alpha, \
+       obj_t*   a, \
+       obj_t*   b, \
+       cntx_t*  cntx, \
+       cntl_t*  cntl, \
+       bool     is_parallel \
+     );
+
+#define TRSMSUP_KER_PROT( ch, opname ) \
+\
+BLIS_INLINE err_t PASTEMAC(ch,opname) \
+     ( \
+       obj_t*   AlphaObj, \
+       obj_t*   a, \
+       obj_t*   b, \
+       cntx_t*  cntx, \
+       cntl_t*  cntl \
      );
 
