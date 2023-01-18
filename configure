@@ -46,7 +46,7 @@ print_usage()
 	fi
 
 	# Echo usage info.
-        cat <<EOF
+ 	cat <<EOF
 
  ${script_name} (BLIS ${version})
 
@@ -436,6 +436,7 @@ print_usage()
    configuration.
 
 EOF
+
 	# Exit with non-zero exit status
 	exit 1
 }
