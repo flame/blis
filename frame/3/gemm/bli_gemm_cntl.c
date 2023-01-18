@@ -67,23 +67,6 @@ void bli_gemm_cntl_init
              gemm_cntl_t* cntl
      )
 {
-	bli_gemmbp_cntl_init( family, a, b, c, schema_a, schema_b, cntx, cntl );
-}
-
-// -----------------------------------------------------------------------------
-
-void bli_gemmbp_cntl_init
-     (
-             opid_t       family,
-       const obj_t*       a,
-       const obj_t*       b,
-       const obj_t*       c,
-             pack_t       schema_a,
-             pack_t       schema_b,
-       const cntx_t*      cntx,
-             gemm_cntl_t* cntl
-     )
-{
 	void_fp macro_kernel_fp = NULL;
 
 #ifdef BLIS_ENABLE_JRIR_TLB
