@@ -333,10 +333,6 @@ void bli_gemm_ker_var2
 			{
 				a2 = a_cast;
 				b2 = bli_gemm_get_next_b_upanel( b1, cstep_b, jr_inc );
-				// FGVZ: The potential benefit of this wrap-around code is so
-				// minor as to not be worthwhile (and doesn't work for tlb anyway).
-				//if ( bli_is_last_iter_slrr( j, jr_end, jr_tid, jr_nt ) )
-				//	b2 = b_cast;
 			}
 
 			// Save addresses of next panels of A and B to the auxinfo_t
