@@ -263,17 +263,17 @@ void bli_gemm_ker_var2
 	bli_thread_range_tlb_d( jr_nt, jr_tid, m_iter, n_iter, MR, NR,
 	                        &jr_start, &ir_start );
 
-    // Always increment by 1 in both dimensions.
-    jr_inc = 1;
-    ir_inc = 1;
+	// Always increment by 1 in both dimensions.
+	jr_inc = 1;
+	ir_inc = 1;
 
-    // Each thread iterates over the entire panel of C until it exhausts its
+	// Each thread iterates over the entire panel of C until it exhausts its
 	// assigned set of microtiles.
-    jr_end = n_iter;
-    ir_end = m_iter;
+	jr_end = n_iter;
+	ir_end = m_iter;
 
-    // Successive iterations of the ir loop should start at 0.
-    const dim_t ir_next = 0;
+	// Successive iterations of the ir loop should start at 0.
+	const dim_t ir_next = 0;
 
 #else // ifdef ( _SLAB || _RR )
 
@@ -290,12 +290,12 @@ void bli_gemm_ker_var2
 	bli_thread_range_slrr( thread, n_iter, 1, FALSE, &jr_start, &jr_end, &jr_inc );
 	bli_thread_range_slrr( caucus, m_iter, 1, FALSE, &ir_start, &ir_end, &ir_inc );
 
-    // Calculate the total number of microtiles assigned to this thread.
-    dim_t n_ut_for_me = ( ( ir_end + ir_inc - 1 - ir_start ) / ir_inc ) *
-                        ( ( jr_end + jr_inc - 1 - jr_start ) / jr_inc );
+	// Calculate the total number of microtiles assigned to this thread.
+	dim_t n_ut_for_me = ( ( ir_end + ir_inc - 1 - ir_start ) / ir_inc ) *
+	                    ( ( jr_end + jr_inc - 1 - jr_start ) / jr_inc );
 
-    // Each succesive iteration of the ir loop always starts at ir_start.
-    const dim_t ir_next = ir_start;
+	// Each succesive iteration of the ir loop always starts at ir_start.
+	const dim_t ir_next = ir_start;
 
 #endif
 
@@ -397,7 +397,7 @@ void bli_gemm_ker_var2
 			n_ut_for_me -= 1; if ( n_ut_for_me == 0 ) return;
 		}
 
-        ir_start = ir_next;
+		ir_start = ir_next;
 	}
 }
 
