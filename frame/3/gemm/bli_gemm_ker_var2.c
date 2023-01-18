@@ -244,26 +244,65 @@ void bli_gemm_ker_var2
 	bli_auxinfo_set_ukr( gemm_ukr, &aux );
 	bli_auxinfo_set_params( params, &aux );
 
-	// The 'thread' argument points to the thrinfo_t node for the 2nd (jr)
-	// loop around the microkernel. Here we query the thrinfo_t node for the
-	// 1st (ir) loop around the microkernel.
-	thrinfo_t* thread = bli_thrinfo_sub_node( thread_par );
-	thrinfo_t* caucus = bli_thrinfo_sub_node( thread );
-
-	// Query the number of threads and thread ids for each loop.
-	const dim_t jr_nt  = bli_thrinfo_n_way( thread );
-	const dim_t jr_tid = bli_thrinfo_work_id( thread );
-	const dim_t ir_nt  = bli_thrinfo_n_way( caucus );
-	const dim_t ir_tid = bli_thrinfo_work_id( caucus );
-
 	dim_t jr_start, jr_end, jr_inc;
 	dim_t ir_start, ir_end, ir_inc;
+
+#ifdef BLIS_ENABLE_JRIR_TLB
+
+	// Query the number of threads and thread ids for the jr loop around
+	// the microkernel.
+	thrinfo_t* thread = bli_thrinfo_sub_node( thread_par );
+	const dim_t jr_nt  = bli_thrinfo_n_way( thread );
+	const dim_t jr_tid = bli_thrinfo_work_id( thread );
+
+	const dim_t ir_nt  = 1;
+	const dim_t ir_tid = 0;
+
+	dim_t n_ut_for_me
+	=
+	bli_thread_range_tlb_d( jr_nt, jr_tid, m_iter, n_iter, MR, NR,
+	                        &jr_start, &ir_start );
+
+	// Always increment by 1 in both dimensions.
+	jr_inc = 1;
+	ir_inc = 1;
+
+	// Each thread iterates over the entire panel of C until it exhausts its
+	// assigned set of microtiles.
+	jr_end = n_iter;
+	ir_end = m_iter;
+
+	// Successive iterations of the ir loop should start at 0.
+	const dim_t ir_next = 0;
+
+#else // ifdef ( _SLAB || _RR )
+
+	// Query the number of threads and thread ids for the ir loop around
+	// the microkernel.
+	thrinfo_t* thread = bli_thrinfo_sub_node( thread_par );
+	thrinfo_t* caucus = bli_thrinfo_sub_node( thread );
+	const dim_t ir_nt  = bli_thrinfo_n_way( caucus );
+	const dim_t ir_tid = bli_thrinfo_work_id( caucus );
 
 	// Determine the thread range and increment for the 2nd and 1st loops.
 	// NOTE: The definition of bli_thread_range_slrr() will depend on whether
 	// slab or round-robin partitioning was requested at configure-time.
 	bli_thread_range_slrr( thread, n_iter, 1, FALSE, &jr_start, &jr_end, &jr_inc );
 	bli_thread_range_slrr( caucus, m_iter, 1, FALSE, &ir_start, &ir_end, &ir_inc );
+
+	// Calculate the total number of microtiles assigned to this thread.
+	dim_t n_ut_for_me = ( ( ir_end + ir_inc - 1 - ir_start ) / ir_inc ) *
+	                    ( ( jr_end + jr_inc - 1 - jr_start ) / jr_inc );
+
+	// Each succesive iteration of the ir loop always starts at ir_start.
+	const dim_t ir_next = ir_start;
+
+#endif
+
+	// It's possible that there are so few microtiles relative to the number
+	// of threads that one or more threads gets no work. If that happens, those
+	// threads can return early.
+	if ( n_ut_for_me == 0 ) return;
 
 	// Loop over the n dimension (NR columns at a time).
 	for ( dim_t j = jr_start; j < jr_end; j += jr_inc )
@@ -294,8 +333,6 @@ void bli_gemm_ker_var2
 			{
 				a2 = a_cast;
 				b2 = bli_gemm_get_next_b_upanel( b1, cstep_b, jr_inc );
-				if ( bli_is_last_iter_slrr( j, jr_end, jr_tid, jr_nt ) )
-					b2 = b_cast;
 			}
 
 			// Save addresses of next panels of A and B to the auxinfo_t
@@ -350,7 +387,13 @@ void bli_gemm_ker_var2
 				  c11, rs_c, cs_c
 				);
 			}
+
+			// Decrement the number of microtiles assigned to the thread; once
+			// it reaches zero, return immediately.
+			n_ut_for_me -= 1; if ( n_ut_for_me == 0 ) return;
 		}
+
+		ir_start = ir_next;
 	}
 }
 
