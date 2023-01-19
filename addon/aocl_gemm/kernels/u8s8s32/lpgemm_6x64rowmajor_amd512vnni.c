@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2022, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2022-23, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -48,6 +48,7 @@ LPGEMM_MAIN_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_6x64)
 						  &&POST_OPS_BIAS_6x64,
 						  &&POST_OPS_RELU_6x64,
 						  &&POST_OPS_RELU_SCALE_6x64,
+						  &&POST_OPS_GELU_6x64,
 						  &&POST_OPS_DOWNSCALE_6x64
 						};
 
@@ -720,6 +721,86 @@ POST_OPS_RELU_SCALE_6x64:
 
 			POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 		}
+POST_OPS_GELU_6x64:
+		{
+			__m512 dn, z, x, r2, r, y, x_tanh;
+			__m512i q;
+
+			// c[0, 0-15]
+			GELU_TANH_S32_AVX512(c_int32_0p0, y, r, r2, x, z, dn, x_tanh, q)
+
+			// c[0, 16-31]
+			GELU_TANH_S32_AVX512(c_int32_0p1, y, r, r2, x, z, dn, x_tanh, q)
+
+			// c[0, 32-47]
+			GELU_TANH_S32_AVX512(c_int32_0p2, y, r, r2, x, z, dn, x_tanh, q)
+
+			// c[0, 48-63]
+			GELU_TANH_S32_AVX512(c_int32_0p3, y, r, r2, x, z, dn, x_tanh, q)
+
+			// c[1, 0-15]
+			GELU_TANH_S32_AVX512(c_int32_1p0, y, r, r2, x, z, dn, x_tanh, q)
+
+			// c[1, 16-31]
+			GELU_TANH_S32_AVX512(c_int32_1p1, y, r, r2, x, z, dn, x_tanh, q)
+
+			// c[1, 32-47]
+			GELU_TANH_S32_AVX512(c_int32_1p2, y, r, r2, x, z, dn, x_tanh, q)
+
+			// c[1, 48-63]
+			GELU_TANH_S32_AVX512(c_int32_1p3, y, r, r2, x, z, dn, x_tanh, q)
+
+			// c[2, 0-15]
+			GELU_TANH_S32_AVX512(c_int32_2p0, y, r, r2, x, z, dn, x_tanh, q)
+
+			// c[2, 16-31]
+			GELU_TANH_S32_AVX512(c_int32_2p1, y, r, r2, x, z, dn, x_tanh, q)
+
+			// c[2, 32-47]
+			GELU_TANH_S32_AVX512(c_int32_2p2, y, r, r2, x, z, dn, x_tanh, q)
+
+			// c[2, 48-63]
+			GELU_TANH_S32_AVX512(c_int32_2p3, y, r, r2, x, z, dn, x_tanh, q)
+
+			// c[3, 0-15]
+			GELU_TANH_S32_AVX512(c_int32_3p0, y, r, r2, x, z, dn, x_tanh, q)
+
+			// c[3, 16-31]
+			GELU_TANH_S32_AVX512(c_int32_3p1, y, r, r2, x, z, dn, x_tanh, q)
+
+			// c[3, 32-47]
+			GELU_TANH_S32_AVX512(c_int32_3p2, y, r, r2, x, z, dn, x_tanh, q)
+
+			// c[3, 48-63]
+			GELU_TANH_S32_AVX512(c_int32_3p3, y, r, r2, x, z, dn, x_tanh, q)
+
+			// c[4, 0-15]
+			GELU_TANH_S32_AVX512(c_int32_4p0, y, r, r2, x, z, dn, x_tanh, q)
+
+			// c[4, 16-31]
+			GELU_TANH_S32_AVX512(c_int32_4p1, y, r, r2, x, z, dn, x_tanh, q)
+
+			// c[4, 32-47]
+			GELU_TANH_S32_AVX512(c_int32_4p2, y, r, r2, x, z, dn, x_tanh, q)
+
+			// c[4, 48-63]
+			GELU_TANH_S32_AVX512(c_int32_4p3, y, r, r2, x, z, dn, x_tanh, q)
+
+			// c[5, 0-15]
+			GELU_TANH_S32_AVX512(c_int32_5p0, y, r, r2, x, z, dn, x_tanh, q)
+
+			// c[5, 16-31]
+			GELU_TANH_S32_AVX512(c_int32_5p1, y, r, r2, x, z, dn, x_tanh, q)
+
+			// c[5, 32-47]
+			GELU_TANH_S32_AVX512(c_int32_5p2, y, r, r2, x, z, dn, x_tanh, q)
+
+			// c[5, 48-63]
+			GELU_TANH_S32_AVX512(c_int32_5p3, y, r, r2, x, z, dn, x_tanh, q)
+
+			POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+		}
+
 POST_OPS_DOWNSCALE_6x64:
 		{
 			selector1 =

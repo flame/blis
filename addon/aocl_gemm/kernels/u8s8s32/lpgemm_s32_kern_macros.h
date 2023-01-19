@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2022, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2022-23, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -31,6 +31,9 @@
    OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 */
+
+#include "math_utils.h"
+#include "gelu.h"
 
 #ifndef LPGEMM_S32_KERN_MACROS_H
 #define LPGEMM_S32_KERN_MACROS_H
@@ -106,7 +109,7 @@
 	scratch1 = _mm512_cvtepi8_epi32( _mm_loadu_epi8( ( int8_t* )buf_ ) ); \
 	S32_BETA_FMA(reg,scratch1,scratch2) \
 
-// Relu macro
+// ReLU scale (Parametric ReLU):  f(x) = x, when x > 0 and f(x) = a*x when x <= 0
 #define RELU_SCALE_OP_S32_AVX512(reg) \
 	/* Generate indenx of elements <= 0.*/ \
 	relu_cmp_mask = _mm512_cmple_epi32_mask( reg, selector1 ); \
@@ -165,5 +168,14 @@
 #define STORE_S32_NLT16(reg,buf_,m_ir,m_ind,n_ind) \
 	_mm512_storeu_epi32( buf_, reg ); \
 	memcpy( c + ( rs_c * ( m_ir + m_ind ) ) + ( n_ind * 16 ), buf_, ( n0_rem * sizeof( int32_t ) ) ); \
+
+/* GeLU (x) = 0.5* x * (1 + tanh ( 0.797884 * ( x + ( 0.044715 * x^3 ) ) ) )  */ 
+#define GELU_TANH_S32_AVX512(reg, y, r, r2, x, z, dn, x_tanh, q) \
+\
+	y = _mm512_cvtepi32_ps( reg ); \
+\
+	GELU_TANH_F32_AVX512_DEF(y, r, r2, x, z, dn, x_tanh, q); \
+\
+	reg = _mm512_cvtps_epi32 (y); \
 
 #endif // LPGEMM_S32_KERN_MACROS_H

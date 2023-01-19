@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2022, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2022-23, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -45,6 +45,7 @@ LPGEMM_MAIN_KERN(uint8_t,int8_t,int16_t,u8s8s16o16_6x32)
 			&&POST_OPS_BIAS_6x32,
 			&&POST_OPS_RELU_6x32,
 			&&POST_OPS_RELU_SCALE_6x32,
+			&&POST_OPS_GELU_6x32,
 			&&POST_OPS_DOWNSCALE_6x32
 		};
 
@@ -559,6 +560,50 @@ POST_OPS_RELU_SCALE_6x32:
 
 			POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 		}
+POST_OPS_GELU_6x32:
+		{
+			__m256 dn, z, x, r2, r, y1, y2, x_tanh;
+			__m256i q;
+
+			// c[0,0-15]
+			GELU_TANH_S16_AVX2(c_int16_0p0, y1, y2, r, r2, x, z, dn, x_tanh, q)
+
+			// c[0,16-31]
+			GELU_TANH_S16_AVX2(c_int16_0p1, y1, y2, r, r2, x, z, dn, x_tanh, q)
+
+			// c[1,0-15]
+			GELU_TANH_S16_AVX2(c_int16_1p0, y1, y2, r, r2, x, z, dn, x_tanh, q)
+
+			// c[1,16-31]
+			GELU_TANH_S16_AVX2(c_int16_1p1, y1, y2, r, r2, x, z, dn, x_tanh, q)
+
+			// c[2,0-15]
+			GELU_TANH_S16_AVX2(c_int16_2p0, y1, y2, r, r2, x, z, dn, x_tanh, q)
+
+			// c[2,16-31]
+			GELU_TANH_S16_AVX2(c_int16_2p1, y1, y2, r, r2, x, z, dn, x_tanh, q)
+
+			// c[3,0-15]
+			GELU_TANH_S16_AVX2(c_int16_3p0, y1, y2, r, r2, x, z, dn, x_tanh, q)
+
+			// c[3,16-31]
+			GELU_TANH_S16_AVX2(c_int16_3p1, y1, y2, r, r2, x, z, dn, x_tanh, q)
+
+			// c[4,0-15]
+			GELU_TANH_S16_AVX2(c_int16_4p0, y1, y2, r, r2, x, z, dn, x_tanh, q)
+
+			// c[4,16-31]
+			GELU_TANH_S16_AVX2(c_int16_4p1, y1, y2, r, r2, x, z, dn, x_tanh, q)
+
+			// c[5,0-15]
+			GELU_TANH_S16_AVX2(c_int16_5p0, y1, y2, r, r2, x, z, dn, x_tanh, q)
+
+			// c[5,16-31]
+			GELU_TANH_S16_AVX2(c_int16_5p1, y1, y2, r, r2, x, z, dn, x_tanh, q)
+
+			POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+		}
+
 POST_OPS_DOWNSCALE_6x32:
 		{
 			__m128i temp[2];

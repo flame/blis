@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2022, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2022-23, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -31,11 +31,15 @@
    OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 */
+
 #include "aocl_bf16_type.h"
+#include "math_utils.h"
+#include "gelu.h"
 
 #ifndef LPGEMM_F32_KERN_MACROS_H
 #define LPGEMM_F32_KERN_MACROS_H
 
+/* ReLU scale (Parametric ReLU):  f(x) = x, when x > 0 and f(x) = a*x when x <= 0 */
 #define RELU_SCALE_OP_F32_AVX512(reg) \
 	/* Generate indenx of elements <= 0.*/ \
 	relu_cmp_mask = _mm512_cmple_ps_mask( reg, selector1 ); \
@@ -65,5 +69,10 @@
 	  post_ops_attr.post_op_c_j + ( n_ind * 16 ), \
 	  buf0, ( n0_rem * sizeof( bfloat16 ) ) \
 	); \
+
+/* GeLU (x) = 0.5* x * (1 + tanh ( 0.797884 * ( x + ( 0.044715 * x^3 ) ) ) )  */
+#define GELU_TANH_F32_AVX512(reg, r, r2, x, z, dn, x_tanh, q) \
+\
+	GELU_TANH_F32_AVX512_DEF(reg, r, r2, x, z, dn, x_tanh, q); \
 
 #endif // LPGEMM_F32_KERN_MACROS_H

@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2022, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2022-23, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -49,6 +49,7 @@ LPGEMM_MN_LT_NR0_FRINGE_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_5xlt16)
 						  &&POST_OPS_BIAS_5xLT16,
 						  &&POST_OPS_RELU_5xLT16,
 						  &&POST_OPS_RELU_SCALE_5xLT16,
+						  &&POST_OPS_GELU_5xLT16,
 						  &&POST_OPS_DOWNSCALE_5xLT16
 						};
 	dim_t k_full_pieces = k0 / 4;
@@ -283,6 +284,29 @@ POST_OPS_RELU_SCALE_5xLT16:
 
 			POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 		}
+POST_OPS_GELU_5xLT16:
+		{
+			__m512 dn, z, x, r2, r, y, x_tanh;
+			__m512i q;
+
+			// c[0, 0-15]
+			GELU_TANH_S32_AVX512(c_int32_0p0, y, r, r2, x, z, dn, x_tanh, q)
+
+			// c[1, 0-15]
+			GELU_TANH_S32_AVX512(c_int32_1p0, y, r, r2, x, z, dn, x_tanh, q)
+
+			// c[2, 0-15]
+			GELU_TANH_S32_AVX512(c_int32_2p0, y, r, r2, x, z, dn, x_tanh, q)
+
+			// c[3, 0-15]
+			GELU_TANH_S32_AVX512(c_int32_3p0, y, r, r2, x, z, dn, x_tanh, q)
+
+			// c[4, 0-15]
+			GELU_TANH_S32_AVX512(c_int32_4p0, y, r, r2, x, z, dn, x_tanh, q)
+
+			POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+		}
+
 POST_OPS_DOWNSCALE_5xLT16:
 		{
 			memcpy( buf0, ( ( float* )post_ops_list_temp->scale_factor +
@@ -361,6 +385,7 @@ LPGEMM_MN_LT_NR0_FRINGE_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_4xlt16)
 						  &&POST_OPS_BIAS_4xLT16,
 						  &&POST_OPS_RELU_4xLT16,
 						  &&POST_OPS_RELU_SCALE_4xLT16,
+						  &&POST_OPS_GELU_4xLT16,
 						  &&POST_OPS_DOWNSCALE_4xLT16
 						};
 	dim_t k_full_pieces = k0 / 4;
@@ -562,6 +587,26 @@ POST_OPS_RELU_SCALE_4xLT16:
 
 			POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 		}
+POST_OPS_GELU_4xLT16:
+		{
+			__m512 dn, z, x, r2, r, y, x_tanh;
+			__m512i q;
+
+			// c[0, 0-15]
+			GELU_TANH_S32_AVX512(c_int32_0p0, y, r, r2, x, z, dn, x_tanh, q)
+
+			// c[1, 0-15]
+			GELU_TANH_S32_AVX512(c_int32_1p0, y, r, r2, x, z, dn, x_tanh, q)
+
+			// c[2, 0-15]
+			GELU_TANH_S32_AVX512(c_int32_2p0, y, r, r2, x, z, dn, x_tanh, q)
+
+			// c[3, 0-15]
+			GELU_TANH_S32_AVX512(c_int32_3p0, y, r, r2, x, z, dn, x_tanh, q)
+
+			POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+		}
+
 POST_OPS_DOWNSCALE_4xLT16:
 		{
 			memcpy( buf0, ( ( float* )post_ops_list_temp->scale_factor +
@@ -631,6 +676,7 @@ LPGEMM_MN_LT_NR0_FRINGE_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_3xlt16)
 						  &&POST_OPS_BIAS_3xLT16,
 						  &&POST_OPS_RELU_3xLT16,
 						  &&POST_OPS_RELU_SCALE_3xLT16,
+						  &&POST_OPS_GELU_3xLT16,
 						  &&POST_OPS_DOWNSCALE_3xLT16
 						};
 	dim_t k_full_pieces = k0 / 4;
@@ -797,6 +843,23 @@ POST_OPS_RELU_SCALE_3xLT16:
 
 			POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 		}
+POST_OPS_GELU_3xLT16:
+		{
+			__m512 dn, z, x, r2, r, y, x_tanh;
+			__m512i q;
+
+			// c[0, 0-15]
+			GELU_TANH_S32_AVX512(c_int32_0p0, y, r, r2, x, z, dn, x_tanh, q)
+
+			// c[1, 0-15]
+			GELU_TANH_S32_AVX512(c_int32_1p0, y, r, r2, x, z, dn, x_tanh, q)
+
+			// c[2, 0-15]
+			GELU_TANH_S32_AVX512(c_int32_2p0, y, r, r2, x, z, dn, x_tanh, q)
+
+			POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+		}
+
 POST_OPS_DOWNSCALE_3xLT16:
 		{
 			memcpy( buf0, ( ( float* )post_ops_list_temp->scale_factor +
@@ -857,6 +920,7 @@ LPGEMM_MN_LT_NR0_FRINGE_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_2xlt16)
 						  &&POST_OPS_BIAS_2xLT16,
 						  &&POST_OPS_RELU_2xLT16,
 						  &&POST_OPS_RELU_SCALE_2xLT16,
+						  &&POST_OPS_GELU_2xLT16,
 						  &&POST_OPS_DOWNSCALE_2xLT16
 						};
 	dim_t k_full_pieces = k0 / 4;
@@ -989,6 +1053,20 @@ POST_OPS_RELU_SCALE_2xLT16:
 
 			POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 		}
+POST_OPS_GELU_2xLT16:
+		{
+			__m512 dn, z, x, r2, r, y, x_tanh;
+			__m512i q;
+
+			// c[0, 0-15]
+			GELU_TANH_S32_AVX512(c_int32_0p0, y, r, r2, x, z, dn, x_tanh, q)
+
+			// c[1, 0-15]
+			GELU_TANH_S32_AVX512(c_int32_1p0, y, r, r2, x, z, dn, x_tanh, q)
+
+			POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+		}
+
 POST_OPS_DOWNSCALE_2xLT16:
 		{
 			memcpy( buf0, ( ( float* )post_ops_list_temp->scale_factor +
@@ -1040,6 +1118,7 @@ LPGEMM_MN_LT_NR0_FRINGE_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_1xlt16)
 						  &&POST_OPS_BIAS_1xLT16,
 						  &&POST_OPS_RELU_1xLT16,
 						  &&POST_OPS_RELU_SCALE_1xLT16,
+						  &&POST_OPS_GELU_1xLT16,
 						  &&POST_OPS_DOWNSCALE_1xLT16
 						};
 	dim_t k_full_pieces = k0 / 4;
@@ -1138,6 +1217,17 @@ POST_OPS_RELU_SCALE_1xLT16:
 
 			POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 		}
+POST_OPS_GELU_1xLT16:
+		{
+			__m512 dn, z, x, r2, r, y, x_tanh;
+			__m512i q;
+
+			// c[0, 0-15]
+			GELU_TANH_S32_AVX512(c_int32_0p0, y, r, r2, x, z, dn, x_tanh, q)
+
+			POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+		}
+
 POST_OPS_DOWNSCALE_1xLT16:
 		{
 			memcpy( buf0, ( ( float* )post_ops_list_temp->scale_factor +
@@ -1180,6 +1270,7 @@ LPGEMM_MN_FRINGE_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_5x16)
 						  &&POST_OPS_BIAS_5x16,
 						  &&POST_OPS_RELU_5x16,
 						  &&POST_OPS_RELU_SCALE_5x16,
+						  &&POST_OPS_GELU_5x16,
 						  &&POST_OPS_DOWNSCALE_5x16
 						};
 	dim_t k_full_pieces = k0 / 4;
@@ -1410,6 +1501,29 @@ POST_OPS_RELU_SCALE_5x16:
 
 		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 	}
+POST_OPS_GELU_5x16:
+	{
+		__m512 dn, z, x, r2, r, y, x_tanh;
+		__m512i q;
+
+		// c[0, 0-15]
+		GELU_TANH_S32_AVX512(c_int32_0p0, y, r, r2, x, z, dn, x_tanh, q)
+
+		// c[1, 0-15]
+		GELU_TANH_S32_AVX512(c_int32_1p0, y, r, r2, x, z, dn, x_tanh, q)
+
+		// c[2, 0-15]
+		GELU_TANH_S32_AVX512(c_int32_2p0, y, r, r2, x, z, dn, x_tanh, q)
+
+		// c[3, 0-15]
+		GELU_TANH_S32_AVX512(c_int32_3p0, y, r, r2, x, z, dn, x_tanh, q)
+
+		// c[4, 0-15]
+		GELU_TANH_S32_AVX512(c_int32_4p0, y, r, r2, x, z, dn, x_tanh, q)
+
+		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+	}
+
 POST_OPS_DOWNSCALE_5x16:
 	{
 		selector1 =
@@ -1488,6 +1602,7 @@ LPGEMM_MN_FRINGE_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_4x16)
 						  &&POST_OPS_BIAS_4x16,
 						  &&POST_OPS_RELU_4x16,
 						  &&POST_OPS_RELU_SCALE_4x16,
+						  &&POST_OPS_GELU_4x16,
 						  &&POST_OPS_DOWNSCALE_4x16
 						};
 	dim_t k_full_pieces = k0 / 4;
@@ -1684,6 +1799,26 @@ POST_OPS_RELU_SCALE_4x16:
 
 		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 	}
+POST_OPS_GELU_4x16:
+	{
+		__m512 dn, z, x, r2, r, y, x_tanh;
+		__m512i q;
+
+		// c[0, 0-15]
+		GELU_TANH_S32_AVX512(c_int32_0p0, y, r, r2, x, z, dn, x_tanh, q)
+
+		// c[1, 0-15]
+		GELU_TANH_S32_AVX512(c_int32_1p0, y, r, r2, x, z, dn, x_tanh, q)
+
+		// c[2, 0-15]
+		GELU_TANH_S32_AVX512(c_int32_2p0, y, r, r2, x, z, dn, x_tanh, q)
+
+		// c[3, 0-15]
+		GELU_TANH_S32_AVX512(c_int32_3p0, y, r, r2, x, z, dn, x_tanh, q)
+
+		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+	}
+
 POST_OPS_DOWNSCALE_4x16:
 	{
 		selector1 =
@@ -1753,6 +1888,7 @@ LPGEMM_MN_FRINGE_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_3x16)
 						  &&POST_OPS_BIAS_3x16,
 						  &&POST_OPS_RELU_3x16,
 						  &&POST_OPS_RELU_SCALE_3x16,
+						  &&POST_OPS_GELU_3x16,
 						  &&POST_OPS_DOWNSCALE_3x16
 						};
 	dim_t k_full_pieces = k0 / 4;
@@ -1915,6 +2051,23 @@ POST_OPS_RELU_SCALE_3x16:
 
 		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 	}
+POST_OPS_GELU_3x16:
+	{
+		__m512 dn, z, x, r2, r, y, x_tanh;
+		__m512i q;
+
+		// c[0, 0-15]
+		GELU_TANH_S32_AVX512(c_int32_0p0, y, r, r2, x, z, dn, x_tanh, q)
+
+		// c[1, 0-15]
+		GELU_TANH_S32_AVX512(c_int32_1p0, y, r, r2, x, z, dn, x_tanh, q)
+
+		// c[2, 0-15]
+		GELU_TANH_S32_AVX512(c_int32_2p0, y, r, r2, x, z, dn, x_tanh, q)
+
+		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+	}
+
 POST_OPS_DOWNSCALE_3x16:
 	{
 		selector1 =
@@ -1975,6 +2128,7 @@ LPGEMM_MN_FRINGE_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_2x16)
 						  &&POST_OPS_BIAS_2x16,
 						  &&POST_OPS_RELU_2x16,
 						  &&POST_OPS_RELU_SCALE_2x16,
+						  &&POST_OPS_GELU_2x16,
 						  &&POST_OPS_DOWNSCALE_2x16
 						};
 	dim_t k_full_pieces = k0 / 4;
@@ -2103,6 +2257,20 @@ POST_OPS_RELU_SCALE_2x16:
 
 		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 	}
+POST_OPS_GELU_2x16:
+	{
+		__m512 dn, z, x, r2, r, y, x_tanh;
+		__m512i q;
+
+		// c[0, 0-15]
+		GELU_TANH_S32_AVX512(c_int32_0p0, y, r, r2, x, z, dn, x_tanh, q)
+
+		// c[1, 0-15]
+		GELU_TANH_S32_AVX512(c_int32_1p0, y, r, r2, x, z, dn, x_tanh, q)
+
+		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+	}
+
 POST_OPS_DOWNSCALE_2x16:
 	{
 		selector1 =
@@ -2154,6 +2322,7 @@ LPGEMM_MN_FRINGE_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_1x16)
 						  &&POST_OPS_BIAS_1x16,
 						  &&POST_OPS_RELU_1x16,
 						  &&POST_OPS_RELU_SCALE_1x16,
+						  &&POST_OPS_GELU_1x16,
 						  &&POST_OPS_DOWNSCALE_1x16
 						};
 	dim_t k_full_pieces = k0 / 4;
@@ -2248,6 +2417,17 @@ POST_OPS_RELU_SCALE_1x16:
 
 		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 	}
+POST_OPS_GELU_1x16:
+	{
+		__m512 dn, z, x, r2, r, y, x_tanh;
+		__m512i q;
+
+		// c[0, 0-15]
+		GELU_TANH_S32_AVX512(c_int32_0p0, y, r, r2, x, z, dn, x_tanh, q)
+
+		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+	}
+
 POST_OPS_DOWNSCALE_1x16:
 	{
 		selector1 =
@@ -2290,6 +2470,7 @@ LPGEMM_MN_FRINGE_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_5x32)
 						  &&POST_OPS_BIAS_5x32,
 						  &&POST_OPS_RELU_5x32,
 						  &&POST_OPS_RELU_SCALE_5x32,
+						  &&POST_OPS_GELU_5x32,
 						  &&POST_OPS_DOWNSCALE_5x32
 						};
 	dim_t k_full_pieces = k0 / 4;
@@ -2597,6 +2778,44 @@ POST_OPS_RELU_SCALE_5x32:
 
 		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 	}
+POST_OPS_GELU_5x32:
+	{
+		__m512 dn, z, x, r2, r, y, x_tanh;
+		__m512i q;
+
+		// c[0, 0-15]
+		GELU_TANH_S32_AVX512(c_int32_0p0, y, r, r2, x, z, dn, x_tanh, q)
+
+		// c[0, 16-31]
+		GELU_TANH_S32_AVX512(c_int32_0p1, y, r, r2, x, z, dn, x_tanh, q)
+
+		// c[1, 0-15]
+		GELU_TANH_S32_AVX512(c_int32_1p0, y, r, r2, x, z, dn, x_tanh, q)
+
+		// c[1, 16-31]
+		GELU_TANH_S32_AVX512(c_int32_1p1, y, r, r2, x, z, dn, x_tanh, q)
+
+		// c[2, 0-15]
+		GELU_TANH_S32_AVX512(c_int32_2p0, y, r, r2, x, z, dn, x_tanh, q)
+
+		// c[2, 16-31]
+		GELU_TANH_S32_AVX512(c_int32_2p1, y, r, r2, x, z, dn, x_tanh, q)
+
+		// c[3, 0-15]
+		GELU_TANH_S32_AVX512(c_int32_3p0, y, r, r2, x, z, dn, x_tanh, q)
+
+		// c[3, 16-31]
+		GELU_TANH_S32_AVX512(c_int32_3p1, y, r, r2, x, z, dn, x_tanh, q)
+
+		// c[4, 0-15]
+		GELU_TANH_S32_AVX512(c_int32_4p0, y, r, r2, x, z, dn, x_tanh, q)
+
+		// c[4, 16-31]
+		GELU_TANH_S32_AVX512(c_int32_4p1, y, r, r2, x, z, dn, x_tanh, q)
+
+		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+	}
+
 POST_OPS_DOWNSCALE_5x32:
 	{
 		selector1 =
@@ -2723,6 +2942,7 @@ LPGEMM_MN_FRINGE_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_4x32)
 						  &&POST_OPS_BIAS_4x32,
 						  &&POST_OPS_RELU_4x32,
 						  &&POST_OPS_RELU_SCALE_4x32,
+						  &&POST_OPS_GELU_4x32,
 						  &&POST_OPS_DOWNSCALE_4x32
 						};
 	dim_t k_full_pieces = k0 / 4;
@@ -2983,6 +3203,38 @@ POST_OPS_RELU_SCALE_4x32:
 
 		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 	}
+POST_OPS_GELU_4x32:
+	{
+		__m512 dn, z, x, r2, r, y, x_tanh;
+		__m512i q;
+
+		// c[0, 0-15]
+		GELU_TANH_S32_AVX512(c_int32_0p0, y, r, r2, x, z, dn, x_tanh, q)
+
+		// c[0, 16-31]
+		GELU_TANH_S32_AVX512(c_int32_0p1, y, r, r2, x, z, dn, x_tanh, q)
+
+		// c[1, 0-15]
+		GELU_TANH_S32_AVX512(c_int32_1p0, y, r, r2, x, z, dn, x_tanh, q)
+
+		// c[1, 16-31]
+		GELU_TANH_S32_AVX512(c_int32_1p1, y, r, r2, x, z, dn, x_tanh, q)
+
+		// c[2, 0-15]
+		GELU_TANH_S32_AVX512(c_int32_2p0, y, r, r2, x, z, dn, x_tanh, q)
+
+		// c[2, 16-31]
+		GELU_TANH_S32_AVX512(c_int32_2p1, y, r, r2, x, z, dn, x_tanh, q)
+
+		// c[3, 0-15]
+		GELU_TANH_S32_AVX512(c_int32_3p0, y, r, r2, x, z, dn, x_tanh, q)
+
+		// c[3, 16-31]
+		GELU_TANH_S32_AVX512(c_int32_3p1, y, r, r2, x, z, dn, x_tanh, q)
+
+		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+	}
+
 POST_OPS_DOWNSCALE_4x32:
 	{
 		selector1 =
@@ -3091,6 +3343,7 @@ LPGEMM_MN_FRINGE_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_3x32)
 						  &&POST_OPS_BIAS_3x32,
 						  &&POST_OPS_RELU_3x32,
 						  &&POST_OPS_RELU_SCALE_3x32,
+						  &&POST_OPS_GELU_3x32,
 						  &&POST_OPS_DOWNSCALE_3x32
 						};
 	dim_t k_full_pieces = k0 / 4;
@@ -3304,6 +3557,32 @@ POST_OPS_RELU_SCALE_3x32:
 
 		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 	}
+POST_OPS_GELU_3x32:
+	{
+		__m512 dn, z, x, r2, r, y, x_tanh;
+		__m512i q;
+
+		// c[0, 0-15]
+		GELU_TANH_S32_AVX512(c_int32_0p0, y, r, r2, x, z, dn, x_tanh, q)
+
+		// c[0, 16-31]
+		GELU_TANH_S32_AVX512(c_int32_0p1, y, r, r2, x, z, dn, x_tanh, q)
+
+		// c[1, 0-15]
+		GELU_TANH_S32_AVX512(c_int32_1p0, y, r, r2, x, z, dn, x_tanh, q)
+
+		// c[1, 16-31]
+		GELU_TANH_S32_AVX512(c_int32_1p1, y, r, r2, x, z, dn, x_tanh, q)
+
+		// c[2, 0-15]
+		GELU_TANH_S32_AVX512(c_int32_2p0, y, r, r2, x, z, dn, x_tanh, q)
+
+		// c[2, 16-31]
+		GELU_TANH_S32_AVX512(c_int32_2p1, y, r, r2, x, z, dn, x_tanh, q)
+
+		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+	}
+
 POST_OPS_DOWNSCALE_3x32:
 	{
 		selector1 =
@@ -3394,6 +3673,7 @@ LPGEMM_MN_FRINGE_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_2x32)
 						  &&POST_OPS_BIAS_2x32,
 						  &&POST_OPS_RELU_2x32,
 						  &&POST_OPS_RELU_SCALE_2x32,
+						  &&POST_OPS_GELU_2x32,
 						  &&POST_OPS_DOWNSCALE_2x32
 						};
 	dim_t k_full_pieces = k0 / 4;
@@ -3560,6 +3840,25 @@ POST_OPS_RELU_SCALE_2x32:
 
 		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 	}
+POST_OPS_GELU_2x32:
+	{
+		__m512 dn, z, x, r2, r, y, x_tanh;
+		__m512i q;
+
+		// c[0, 0-15]
+		GELU_TANH_S32_AVX512(c_int32_0p0, y, r, r2, x, z, dn, x_tanh, q)
+
+		// c[0, 16-31]
+		GELU_TANH_S32_AVX512(c_int32_0p1, y, r, r2, x, z, dn, x_tanh, q)
+
+		// c[1, 0-15]
+		GELU_TANH_S32_AVX512(c_int32_1p0, y, r, r2, x, z, dn, x_tanh, q)
+
+		// c[1, 16-31]
+		GELU_TANH_S32_AVX512(c_int32_1p1, y, r, r2, x, z, dn, x_tanh, q)
+
+		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+	}
 POST_OPS_DOWNSCALE_2x32:
 	{
 		selector1 =
@@ -3632,6 +3931,7 @@ LPGEMM_MN_FRINGE_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_1x32)
 						  &&POST_OPS_BIAS_1x32,
 						  &&POST_OPS_RELU_1x32,
 						  &&POST_OPS_RELU_SCALE_1x32,
+						  &&POST_OPS_GELU_1x32,
 						  &&POST_OPS_DOWNSCALE_1x32
 						};
 	dim_t k_full_pieces = k0 / 4;
@@ -3751,6 +4051,20 @@ POST_OPS_RELU_SCALE_1x32:
 
 		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 	}
+POST_OPS_GELU_1x32:
+	{
+		__m512 dn, z, x, r2, r, y, x_tanh;
+		__m512i q;
+
+		// c[0, 0-15]
+		GELU_TANH_S32_AVX512(c_int32_0p0, y, r, r2, x, z, dn, x_tanh, q)
+
+		// c[0, 16-31]
+		GELU_TANH_S32_AVX512(c_int32_0p1, y, r, r2, x, z, dn, x_tanh, q)
+
+		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+	}
+
 POST_OPS_DOWNSCALE_1x32:
 	{
 		selector1 =
@@ -3805,6 +4119,7 @@ LPGEMM_MN_FRINGE_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_5x48)
 						  &&POST_OPS_BIAS_5x48,
 						  &&POST_OPS_RELU_5x48,
 						  &&POST_OPS_RELU_SCALE_5x48,
+						  &&POST_OPS_GELU_5x48,
 						  &&POST_OPS_DOWNSCALE_5x48
 						};
 	dim_t k_full_pieces = k0 / 4;
@@ -4183,6 +4498,59 @@ POST_OPS_RELU_SCALE_5x48:
 
 		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 	}
+POST_OPS_GELU_5x48:
+	{
+		__m512 dn, z, x, r2, r, y, x_tanh;
+		__m512i q;
+
+		// c[0, 0-15]
+		GELU_TANH_S32_AVX512(c_int32_0p0, y, r, r2, x, z, dn, x_tanh, q)
+
+		// c[0, 16-31]
+		GELU_TANH_S32_AVX512(c_int32_0p1, y, r, r2, x, z, dn, x_tanh, q)
+
+		// c[0, 32-47]
+		GELU_TANH_S32_AVX512(c_int32_0p2, y, r, r2, x, z, dn, x_tanh, q)
+
+		// c[1, 0-15]
+		GELU_TANH_S32_AVX512(c_int32_1p0, y, r, r2, x, z, dn, x_tanh, q)
+
+		// c[1, 16-31]
+		GELU_TANH_S32_AVX512(c_int32_1p1, y, r, r2, x, z, dn, x_tanh, q)
+
+		// c[1, 32-47]
+		GELU_TANH_S32_AVX512(c_int32_1p2, y, r, r2, x, z, dn, x_tanh, q)
+
+		// c[2, 0-15]
+		GELU_TANH_S32_AVX512(c_int32_2p0, y, r, r2, x, z, dn, x_tanh, q)
+
+		// c[2, 16-31]
+		GELU_TANH_S32_AVX512(c_int32_2p1, y, r, r2, x, z, dn, x_tanh, q)
+
+		// c[2, 32-47]
+		GELU_TANH_S32_AVX512(c_int32_2p2, y, r, r2, x, z, dn, x_tanh, q)
+
+		// c[3, 0-15]
+		GELU_TANH_S32_AVX512(c_int32_3p0, y, r, r2, x, z, dn, x_tanh, q)
+
+		// c[3, 16-31]
+		GELU_TANH_S32_AVX512(c_int32_3p1, y, r, r2, x, z, dn, x_tanh, q)
+
+		// c[3, 32-47]
+		GELU_TANH_S32_AVX512(c_int32_3p2, y, r, r2, x, z, dn, x_tanh, q)
+
+		// c[4, 0-15]
+		GELU_TANH_S32_AVX512(c_int32_4p0, y, r, r2, x, z, dn, x_tanh, q)
+
+		// c[4, 16-31]
+		GELU_TANH_S32_AVX512(c_int32_4p1, y, r, r2, x, z, dn, x_tanh, q)
+
+		// c[4, 32-47]
+		GELU_TANH_S32_AVX512(c_int32_4p2, y, r, r2, x, z, dn, x_tanh, q)
+
+		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+	}
+
 POST_OPS_DOWNSCALE_5x48:
 	{
 		selector1 =
@@ -4357,6 +4725,7 @@ LPGEMM_MN_FRINGE_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_4x48)
 						  &&POST_OPS_BIAS_4x48,
 						  &&POST_OPS_RELU_4x48,
 						  &&POST_OPS_RELU_SCALE_4x48,
+						  &&POST_OPS_GELU_4x48,
 						  &&POST_OPS_DOWNSCALE_4x48
 						};
 	dim_t k_full_pieces = k0 / 4;
@@ -4675,6 +5044,50 @@ POST_OPS_RELU_SCALE_4x48:
 
 		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 	}
+POST_OPS_GELU_4x48:
+	{
+		__m512 dn, z, x, r2, r, y, x_tanh;
+		__m512i q;
+
+		// c[0, 0-15]
+		GELU_TANH_S32_AVX512(c_int32_0p0, y, r, r2, x, z, dn, x_tanh, q)
+
+		// c[0, 16-31]
+		GELU_TANH_S32_AVX512(c_int32_0p1, y, r, r2, x, z, dn, x_tanh, q)
+
+		// c[0, 32-47]
+		GELU_TANH_S32_AVX512(c_int32_0p2, y, r, r2, x, z, dn, x_tanh, q)
+
+		// c[1, 0-15]
+		GELU_TANH_S32_AVX512(c_int32_1p0, y, r, r2, x, z, dn, x_tanh, q)
+
+		// c[1, 16-31]
+		GELU_TANH_S32_AVX512(c_int32_1p1, y, r, r2, x, z, dn, x_tanh, q)
+
+		// c[1, 32-47]
+		GELU_TANH_S32_AVX512(c_int32_1p2, y, r, r2, x, z, dn, x_tanh, q)
+
+		// c[2, 0-15]
+		GELU_TANH_S32_AVX512(c_int32_2p0, y, r, r2, x, z, dn, x_tanh, q)
+
+		// c[2, 16-31]
+		GELU_TANH_S32_AVX512(c_int32_2p1, y, r, r2, x, z, dn, x_tanh, q)
+
+		// c[2, 32-47]
+		GELU_TANH_S32_AVX512(c_int32_2p2, y, r, r2, x, z, dn, x_tanh, q)
+
+		// c[3, 0-15]
+		GELU_TANH_S32_AVX512(c_int32_3p0, y, r, r2, x, z, dn, x_tanh, q)
+
+		// c[3, 16-31]
+		GELU_TANH_S32_AVX512(c_int32_3p1, y, r, r2, x, z, dn, x_tanh, q)
+
+		// c[3, 32-47]
+		GELU_TANH_S32_AVX512(c_int32_3p2, y, r, r2, x, z, dn, x_tanh, q)
+
+		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+	}
+
 POST_OPS_DOWNSCALE_4x48:
 	{
 		selector1 =
@@ -4822,6 +5235,7 @@ LPGEMM_MN_FRINGE_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_3x48)
 						  &&POST_OPS_BIAS_3x48,
 						  &&POST_OPS_RELU_3x48,
 						  &&POST_OPS_RELU_SCALE_3x48,
+						  &&POST_OPS_GELU_3x48,
 						  &&POST_OPS_DOWNSCALE_3x48
 						};
 	dim_t k_full_pieces = k0 / 4;
@@ -5080,6 +5494,41 @@ POST_OPS_RELU_SCALE_3x48:
 
 		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 	}
+POST_OPS_GELU_3x48:
+	{
+		__m512 dn, z, x, r2, r, y, x_tanh;
+		__m512i q;
+
+		// c[0, 0-15]
+		GELU_TANH_S32_AVX512(c_int32_0p0, y, r, r2, x, z, dn, x_tanh, q)
+
+		// c[0, 16-31]
+		GELU_TANH_S32_AVX512(c_int32_0p1, y, r, r2, x, z, dn, x_tanh, q)
+
+		// c[0, 32-47]
+		GELU_TANH_S32_AVX512(c_int32_0p2, y, r, r2, x, z, dn, x_tanh, q)
+
+		// c[1, 0-15]
+		GELU_TANH_S32_AVX512(c_int32_1p0, y, r, r2, x, z, dn, x_tanh, q)
+
+		// c[1, 16-31]
+		GELU_TANH_S32_AVX512(c_int32_1p1, y, r, r2, x, z, dn, x_tanh, q)
+
+		// c[1, 32-47]
+		GELU_TANH_S32_AVX512(c_int32_1p2, y, r, r2, x, z, dn, x_tanh, q)
+
+		// c[2, 0-15]
+		GELU_TANH_S32_AVX512(c_int32_2p0, y, r, r2, x, z, dn, x_tanh, q)
+
+		// c[2, 16-31]
+		GELU_TANH_S32_AVX512(c_int32_2p1, y, r, r2, x, z, dn, x_tanh, q)
+
+		// c[2, 32-47]
+		GELU_TANH_S32_AVX512(c_int32_2p2, y, r, r2, x, z, dn, x_tanh, q)
+
+		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+	}
+
 POST_OPS_DOWNSCALE_3x48:
 	{
 		selector1 =
@@ -5200,6 +5649,7 @@ LPGEMM_MN_FRINGE_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_2x48)
 						  &&POST_OPS_BIAS_2x48,
 						  &&POST_OPS_RELU_2x48,
 						  &&POST_OPS_RELU_SCALE_2x48,
+						  &&POST_OPS_GELU_2x48,
 						  &&POST_OPS_DOWNSCALE_2x48
 						};
 	dim_t k_full_pieces = k0 / 4;
@@ -5398,6 +5848,32 @@ POST_OPS_RELU_SCALE_2x48:
 
 		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 	}
+POST_OPS_GELU_2x48:
+	{
+		__m512 dn, z, x, r2, r, y, x_tanh;
+		__m512i q;
+
+		// c[0, 0-15]
+		GELU_TANH_S32_AVX512(c_int32_0p0, y, r, r2, x, z, dn, x_tanh, q)
+
+		// c[0, 16-31]
+		GELU_TANH_S32_AVX512(c_int32_0p1, y, r, r2, x, z, dn, x_tanh, q)
+
+		// c[0, 32-47]
+		GELU_TANH_S32_AVX512(c_int32_0p2, y, r, r2, x, z, dn, x_tanh, q)
+
+		// c[1, 0-15]
+		GELU_TANH_S32_AVX512(c_int32_1p0, y, r, r2, x, z, dn, x_tanh, q)
+
+		// c[1, 16-31]
+		GELU_TANH_S32_AVX512(c_int32_1p1, y, r, r2, x, z, dn, x_tanh, q)
+
+		// c[1, 32-47]
+		GELU_TANH_S32_AVX512(c_int32_1p2, y, r, r2, x, z, dn, x_tanh, q)
+
+		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+	}
+
 POST_OPS_DOWNSCALE_2x48:
 	{
 		selector1 =
@@ -5491,6 +5967,7 @@ LPGEMM_MN_FRINGE_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_1x48)
 						  &&POST_OPS_BIAS_1x48,
 						  &&POST_OPS_RELU_1x48,
 						  &&POST_OPS_RELU_SCALE_1x48,
+						  &&POST_OPS_GELU_1x48,
 						  &&POST_OPS_DOWNSCALE_1x48
 						};
 	dim_t k_full_pieces = k0 / 4;
@@ -5629,6 +6106,23 @@ POST_OPS_RELU_SCALE_1x48:
 
 		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 	}
+POST_OPS_GELU_1x48:
+	{
+		__m512 dn, z, x, r2, r, y, x_tanh;
+		__m512i q;
+
+		// c[0, 0-15]
+		GELU_TANH_S32_AVX512(c_int32_0p0, y, r, r2, x, z, dn, x_tanh, q)
+
+		// c[0, 16-31]
+		GELU_TANH_S32_AVX512(c_int32_0p1, y, r, r2, x, z, dn, x_tanh, q)
+
+		// c[0, 32-47]
+		GELU_TANH_S32_AVX512(c_int32_0p2, y, r, r2, x, z, dn, x_tanh, q)
+
+		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+	}
+
 POST_OPS_DOWNSCALE_1x48:
 	{
 		selector1 =

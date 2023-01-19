@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2022, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2022-23, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -49,6 +49,7 @@ LPGEMM_MN_FRINGE_KERN(uint8_t,int8_t,int16_t,u8s8s16o16_4x16)
 			&&POST_OPS_BIAS_4x16,
 			&&POST_OPS_RELU_4x16,
 			&&POST_OPS_RELU_SCALE_4x16,
+			&&POST_OPS_GELU_4x16,
 			&&POST_OPS_DOWNSCALE_4x16
 		};
 
@@ -261,6 +262,26 @@ POST_OPS_RELU_SCALE_4x16:
 
 		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 	}
+POST_OPS_GELU_4x16:
+	{
+		__m256 dn, z, x, r2, r, y1, y2, x_tanh;
+		__m256i q;
+
+		// c[0,0-15]
+		GELU_TANH_S16_AVX2(c_int16_0p0, y1, y2, r, r2, x, z, dn, x_tanh, q)
+
+		// c[1,0-15]
+		GELU_TANH_S16_AVX2(c_int16_1p0, y1, y2, r, r2, x, z, dn, x_tanh, q)
+
+		// c[2,0-15]
+		GELU_TANH_S16_AVX2(c_int16_2p0, y1, y2, r, r2, x, z, dn, x_tanh, q)
+
+		// c[3,0-15]
+		GELU_TANH_S16_AVX2(c_int16_3p0, y1, y2, r, r2, x, z, dn, x_tanh, q)
+
+		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+	}
+
 POST_OPS_DOWNSCALE_4x16:
 	{
 		__m128i temp[2];
@@ -314,6 +335,7 @@ LPGEMM_MN_LT_NR0_FRINGE_KERN(uint8_t,int8_t,int16_t,u8s8s16o16_4xlt16)
 			&&POST_OPS_BIAS_4xlt16,
 			&&POST_OPS_RELU_4xlt16,
 			&&POST_OPS_RELU_SCALE_4xlt16,
+			&&POST_OPS_GELU_4xlt16,
 			&&POST_OPS_DOWNSCALE_4xlt16
 		};
 
@@ -541,6 +563,26 @@ POST_OPS_RELU_SCALE_4xlt16:
 
 		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 	}
+POST_OPS_GELU_4xlt16:
+	{
+		__m256 dn, z, x, r2, r, y1, y2, x_tanh;
+		__m256i q;
+
+		// c[0,0-15]
+		GELU_TANH_S16_AVX2(c_int16_0p0, y1, y2, r, r2, x, z, dn, x_tanh, q)
+
+		// c[1,0-15]
+		GELU_TANH_S16_AVX2(c_int16_1p0, y1, y2, r, r2, x, z, dn, x_tanh, q)
+
+		// c[2,0-15]
+		GELU_TANH_S16_AVX2(c_int16_2p0, y1, y2, r, r2, x, z, dn, x_tanh, q)
+
+		// c[3,0-15]
+		GELU_TANH_S16_AVX2(c_int16_3p0, y1, y2, r, r2, x, z, dn, x_tanh, q)
+
+		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+	}
+
 POST_OPS_DOWNSCALE_4xlt16:
 	{
 		__m128i temp[2];
@@ -604,6 +646,7 @@ LPGEMM_MN_FRINGE_KERN(uint8_t,int8_t,int16_t,u8s8s16o16_2x16)
 			&&POST_OPS_BIAS_2x16,
 			&&POST_OPS_RELU_2x16,
 			&&POST_OPS_RELU_SCALE_2x16,
+			&&POST_OPS_GELU_2x16,
 			&&POST_OPS_DOWNSCALE_2x16
 		};
 
@@ -742,6 +785,20 @@ POST_OPS_RELU_SCALE_2x16:
 
 		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 	}
+POST_OPS_GELU_2x16:
+	{
+		__m256 dn, z, x, r2, r, y1, y2, x_tanh;
+		__m256i q;
+
+		// c[0,0-15]
+		GELU_TANH_S16_AVX2(c_int16_0p0, y1, y2, r, r2, x, z, dn, x_tanh, q)
+
+		// c[1,0-15]
+		GELU_TANH_S16_AVX2(c_int16_1p0, y1, y2, r, r2, x, z, dn, x_tanh, q)
+
+		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+	}
+
 POST_OPS_DOWNSCALE_2x16:
 	{
 		__m128i temp[2];
@@ -787,6 +844,7 @@ LPGEMM_MN_LT_NR0_FRINGE_KERN(uint8_t,int8_t,int16_t,u8s8s16o16_2xlt16)
 			&&POST_OPS_BIAS_2xlt16,
 			&&POST_OPS_RELU_2xlt16,
 			&&POST_OPS_RELU_SCALE_2xlt16,
+			&&POST_OPS_GELU_2xlt16,
 			&&POST_OPS_DOWNSCALE_2xlt16
 		};
 
@@ -933,6 +991,20 @@ POST_OPS_RELU_SCALE_2xlt16:
 
 		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 	}
+POST_OPS_GELU_2xlt16:
+	{
+		__m256 dn, z, x, r2, r, y1, y2, x_tanh;
+		__m256i q;
+
+		// c[0,0-15]
+		GELU_TANH_S16_AVX2(c_int16_0p0, y1, y2, r, r2, x, z, dn, x_tanh, q)
+
+		// c[1,0-15]
+		GELU_TANH_S16_AVX2(c_int16_1p0, y1, y2, r, r2, x, z, dn, x_tanh, q)
+
+		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+	}
+
 POST_OPS_DOWNSCALE_2xlt16:
 	{
 		__m128i temp[2];
@@ -983,6 +1055,7 @@ LPGEMM_MN_FRINGE_KERN(uint8_t,int8_t,int16_t,u8s8s16o16_1x16)
 			&&POST_OPS_BIAS_1x16,
 			&&POST_OPS_RELU_1x16,
 			&&POST_OPS_RELU_SCALE_1x16,
+			&&POST_OPS_GELU_1x16,
 			&&POST_OPS_DOWNSCALE_1x16
 		};
 
@@ -1083,6 +1156,17 @@ POST_OPS_RELU_SCALE_1x16:
 
 		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 	}
+POST_OPS_GELU_1x16:
+	{
+		__m256 dn, z, x, r2, r, y1, y2, x_tanh;
+		__m256i q;
+
+		// c[0,0-15]
+		GELU_TANH_S16_AVX2(c_int16_0p0, y1, y2, r, r2, x, z, dn, x_tanh, q)
+
+		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+	}
+
 POST_OPS_DOWNSCALE_1x16:
 	{
 		__m128i temp[2];
@@ -1127,6 +1211,7 @@ LPGEMM_MN_LT_NR0_FRINGE_KERN(uint8_t,int8_t,int16_t,u8s8s16o16_1xlt16)
 			&&POST_OPS_BIAS_1xlt16,
 			&&POST_OPS_RELU_1xlt16,
 			&&POST_OPS_RELU_SCALE_1xlt16,
+			&&POST_OPS_GELU_1xlt16,
 			&&POST_OPS_DOWNSCALE_1xlt16
 		};
 
@@ -1233,6 +1318,17 @@ POST_OPS_RELU_SCALE_1xlt16:
 
 		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 	}
+POST_OPS_GELU_1xlt16:
+	{
+		__m256 dn, z, x, r2, r, y1, y2, x_tanh;
+		__m256i q;
+
+		// c[0,0-15]
+		GELU_TANH_S16_AVX2(c_int16_0p0, y1, y2, r, r2, x, z, dn, x_tanh, q)
+
+		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+	}
+
 POST_OPS_DOWNSCALE_1xlt16:
 	{
 		__m128i temp[2];

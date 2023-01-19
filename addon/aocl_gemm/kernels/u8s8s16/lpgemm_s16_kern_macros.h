@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2022, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2022-23, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -37,6 +37,10 @@
 #define S8_MIN  (-128)
 #define S8_MAX  (+127)
 
+#include "math_utils.h"
+#include "gelu.h"
+
+/* ReLU scale (Parametric ReLU):  f(x) = x, when x > 0 and f(x) = a*x when x <= 0 */
 #define RELU_SCALE_OP_S16_AVX2(reg) \
 	selector1 = _mm256_setzero_si256();\
 	selector1 = _mm256_cmpgt_epi16 ( selector1, reg ); \
@@ -425,5 +429,19 @@
     post_ops_attr.post_op_c_j), store_buf, ( n0_rem * sizeof( int8_t ) ) \
   ); \
 \
+
+//--------------------------------------------------------------------------
+/* GeLU (x) = 0.5* x * (1 + tanh ( 0.797884 * ( x + ( 0.044715 * x^3 ) ) ) )  */
+#define GELU_TANH_S16_AVX2(reg, y1, y2, r, r2, x, z, dn, x_tanh, q) \
+\
+	y1 = _mm256_cvtepi32_ps( _mm256_cvtepi16_epi32(_mm256_extractf128_si256(reg, 0)) ); \
+	y2 = _mm256_cvtepi32_ps( _mm256_cvtepi16_epi32(_mm256_extractf128_si256(reg, 1)) ); \
+\
+	GELU_TANH_F32_AVX2_DEF(y1, r, r2, x, z, dn, x_tanh, q); \
+\
+	GELU_TANH_F32_AVX2_DEF(y2, r, r2, x, z, dn, x_tanh, q); \
+\
+	reg = _mm256_packs_epi32(_mm256_cvtps_epi32(y1), _mm256_cvtps_epi32(y2));\
+	reg = _mm256_permute4x64_epi64(reg, 0XD8);\
 
 #endif //LPGEMM_S16_KERN_MACROS_H

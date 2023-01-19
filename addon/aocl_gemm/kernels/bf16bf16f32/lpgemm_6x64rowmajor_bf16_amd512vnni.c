@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2022, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2022-23, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -48,10 +48,11 @@ LPGEMM_MAIN_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_6x64)
 						  &&POST_OPS_BIAS_6x64,
 						  &&POST_OPS_RELU_6x64,
 						  &&POST_OPS_RELU_SCALE_6x64,
+						  &&POST_OPS_GELU_6x64,
 						  &&POST_OPS_DOWNSCALE_6x64
 						};
 	dim_t MR = 6;
-	dim_t NR = 64;  
+	dim_t NR = 64;
 
 	dim_t m_full_pieces = m0 / MR;
 	dim_t m_full_pieces_loop_limit = m_full_pieces * MR;
@@ -209,19 +210,19 @@ LPGEMM_MAIN_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_6x64)
 			b0 = (__m512bh)_mm512_loadu_epi16( b + ( rs_b * kr ) + ( cs_b * 0 ) );
 
 			// Broadcast a[0,kr:kr+2]
-			a_bf16_0 = (__m512bh)_mm512_set1_epi32( 
+			a_bf16_0 = (__m512bh)_mm512_set1_epi32(
 					*( int32_t* )(a + ( rs_a * 0 ) + ( cs_a * kr ) ) );
 
 			b1 = (__m512bh)_mm512_loadu_epi16( b + ( rs_b * kr ) + ( cs_b * 1 ) );
 			b2 = (__m512bh)_mm512_loadu_epi16( b + ( rs_b * kr ) + ( cs_b * 2 ) );
-			b3 = (__m512bh)_mm512_loadu_epi16( b + ( rs_b * kr ) + ( cs_b * 3 ) );		
+			b3 = (__m512bh)_mm512_loadu_epi16( b + ( rs_b * kr ) + ( cs_b * 3 ) );
 
 			// Perform column direction mat-mul with k = 2.
 			// c[0,0-63] = a[0,kr:kr+2]*b[kr:kr+2,0-63]
 			c_float_0p0 = _mm512_dpbf16_ps( c_float_0p0, a_bf16_0, b0 );
 
 			// Broadcast a[1,kr:kr+2].
-			a_bf16_1 = (__m512bh)_mm512_set1_epi32( 
+			a_bf16_1 = (__m512bh)_mm512_set1_epi32(
 					*( int32_t* )( a + ( rs_a * 1 ) + ( cs_a * kr ) ) );
 
 			c_float_0p1 = _mm512_dpbf16_ps( c_float_0p1, a_bf16_0, b1 );
@@ -233,7 +234,7 @@ LPGEMM_MAIN_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_6x64)
 			c_float_1p0 = _mm512_dpbf16_ps( c_float_1p0, a_bf16_1, b0 );
 
 			// Broadcast a[2,kr:kr+2].
-			a_bf16_0 = (__m512bh)_mm512_set1_epi32( 
+			a_bf16_0 = (__m512bh)_mm512_set1_epi32(
 					*( int32_t* )( a + ( rs_a * 2 ) + ( cs_a * kr ) ) );
 
 			c_float_1p1 = _mm512_dpbf16_ps( c_float_1p1, a_bf16_1, b1 );
@@ -245,7 +246,7 @@ LPGEMM_MAIN_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_6x64)
 			c_float_2p0 = _mm512_dpbf16_ps( c_float_2p0, a_bf16_0, b0 );
 
 			// Broadcast a[3,kr:kr+2].
-			a_bf16_1 = (__m512bh)_mm512_set1_epi32( 
+			a_bf16_1 = (__m512bh)_mm512_set1_epi32(
 					*( int32_t* )( a + ( rs_a * 3 ) + ( cs_a * kr ) ) );
 
 			c_float_2p1 = _mm512_dpbf16_ps( c_float_2p1, a_bf16_0, b1 );
@@ -257,7 +258,7 @@ LPGEMM_MAIN_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_6x64)
 			c_float_3p0 = _mm512_dpbf16_ps( c_float_3p0, a_bf16_1, b0 );
 
 			// Broadcast a[4,kr:kr+2].
-			a_bf16_0 = (__m512bh)_mm512_set1_epi32( 
+			a_bf16_0 = (__m512bh)_mm512_set1_epi32(
 					*( int32_t* )( a + ( rs_a * 4 ) + ( cs_a * kr ) ) );
 
 			c_float_3p1 = _mm512_dpbf16_ps( c_float_3p1, a_bf16_1, b1 );
@@ -269,7 +270,7 @@ LPGEMM_MAIN_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_6x64)
 			c_float_4p0 = _mm512_dpbf16_ps( c_float_4p0, a_bf16_0, b0 );
 
 			// Broadcast a[5,kr:kr+2].
-			a_bf16_1 = (__m512bh)_mm512_set1_epi32( 
+			a_bf16_1 = (__m512bh)_mm512_set1_epi32(
 					*( int32_t* )( a + ( rs_a * 5 ) + ( cs_a * kr ) ) );
 
 			c_float_4p1 = _mm512_dpbf16_ps( c_float_4p1, a_bf16_0, b1 );
@@ -664,7 +665,7 @@ LPGEMM_MAIN_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_6x64)
 			// c[5,48-63]
 			selector1 = _mm512_loadu_ps( c + ( rs_c * ( ir + 5 ) ) + ( 3*16 ) );
 			selector1 = _mm512_mul_ps( selector2, selector1 );
-			c_float_5p3 = _mm512_add_ps( selector1, c_float_5p3 );			
+			c_float_5p3 = _mm512_add_ps( selector1, c_float_5p3 );
 		}
 		// Post Ops
 		lpgemm_post_op* post_ops_list_temp = post_ops_list;
@@ -1024,6 +1025,86 @@ POST_OPS_RELU_SCALE_6x64:
 
 			POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 		}
+POST_OPS_GELU_6x64:
+		{
+			__m512 dn, z, x, r2, r, x_tanh;
+			__m512i q;
+
+			// c[0, 0-15]
+			GELU_TANH_F32_AVX512(c_float_0p0, r, r2, x, z, dn, x_tanh, q)
+
+			// c[0, 16-31]
+			GELU_TANH_F32_AVX512(c_float_0p1, r, r2, x, z, dn, x_tanh, q)
+
+			// c[0, 32-47]
+			GELU_TANH_F32_AVX512(c_float_0p2, r, r2, x, z, dn, x_tanh, q)
+
+			// c[0, 48-63]
+			GELU_TANH_F32_AVX512(c_float_0p3, r, r2, x, z, dn, x_tanh, q)
+
+			// c[1, 0-15]
+			GELU_TANH_F32_AVX512(c_float_1p0, r, r2, x, z, dn, x_tanh, q)
+
+			// c[1, 16-31]
+			GELU_TANH_F32_AVX512(c_float_1p1, r, r2, x, z, dn, x_tanh, q)
+
+			// c[1, 32-47]
+			GELU_TANH_F32_AVX512(c_float_1p2, r, r2, x, z, dn, x_tanh, q)
+
+			// c[1, 48-63]
+			GELU_TANH_F32_AVX512(c_float_1p3, r, r2, x, z, dn, x_tanh, q)
+
+			// c[2, 0-15]
+			GELU_TANH_F32_AVX512(c_float_2p0, r, r2, x, z, dn, x_tanh, q)
+
+			// c[2, 16-31]
+			GELU_TANH_F32_AVX512(c_float_2p1, r, r2, x, z, dn, x_tanh, q)
+
+			// c[2, 32-47]
+			GELU_TANH_F32_AVX512(c_float_2p2, r, r2, x, z, dn, x_tanh, q)
+
+			// c[2, 48-63]
+			GELU_TANH_F32_AVX512(c_float_2p3, r, r2, x, z, dn, x_tanh, q)
+
+			// c[3, 0-15]
+			GELU_TANH_F32_AVX512(c_float_3p0, r, r2, x, z, dn, x_tanh, q)
+
+			// c[3, 16-31]
+			GELU_TANH_F32_AVX512(c_float_3p1, r, r2, x, z, dn, x_tanh, q)
+
+			// c[3, 32-47]
+			GELU_TANH_F32_AVX512(c_float_3p2, r, r2, x, z, dn, x_tanh, q)
+
+			// c[3, 48-63]
+			GELU_TANH_F32_AVX512(c_float_3p3, r, r2, x, z, dn, x_tanh, q)
+
+			// c[4, 0-15]
+			GELU_TANH_F32_AVX512(c_float_4p0, r, r2, x, z, dn, x_tanh, q)
+
+			// c[4, 16-31]
+			GELU_TANH_F32_AVX512(c_float_4p1, r, r2, x, z, dn, x_tanh, q)
+
+			// c[4, 32-47]
+			GELU_TANH_F32_AVX512(c_float_4p2, r, r2, x, z, dn, x_tanh, q)
+
+			// c[4, 48-63]
+			GELU_TANH_F32_AVX512(c_float_4p3, r, r2, x, z, dn, x_tanh, q)
+
+			// c[5, 0-15]
+			GELU_TANH_F32_AVX512(c_float_5p0, r, r2, x, z, dn, x_tanh, q)
+
+			// c[5, 16-31]
+			GELU_TANH_F32_AVX512(c_float_5p1, r, r2, x, z, dn, x_tanh, q)
+
+			// c[5, 32-47]
+			GELU_TANH_F32_AVX512(c_float_5p2, r, r2, x, z, dn, x_tanh, q)
+
+			// c[5, 48-63]
+			GELU_TANH_F32_AVX512(c_float_5p3, r, r2, x, z, dn, x_tanh, q)
+
+			POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+		}
+
 POST_OPS_DOWNSCALE_6x64:
 {
 	        // c[0, 0-15]
