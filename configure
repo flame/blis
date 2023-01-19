@@ -46,396 +46,396 @@ print_usage()
 	fi
 
 	# Echo usage info.
-	echo " "
-	echo " ${script_name} (BLIS ${version})"
-	#echo " "
-	#echo " BLIS ${version}"
-	echo " "
-	echo " Configure BLIS's build system for compilation using a specified"
-	echo " configuration directory."
-	echo " "
-	echo " Usage:"
-	echo " "
-	echo "   ${script_name} [options] [env. vars.] confname"
-	echo " "
-	echo " Arguments:"
-	echo " "
-	echo "   confname      The name of the sub-directory inside of the 'config'"
-	echo "                 directory containing the desired BLIS configuration."
-	echo "                 Note that confname MUST be specified; if it is not,"
-	echo "                 configure will complain. To build a completely generic"
-	echo "                 implementation, use the 'generic' configuration"
-	echo " "
-	echo " Options:"
-	echo " "
-	echo "   -p PREFIX, --prefix=PREFIX"
-	echo " "
-	echo "                 The common installation prefix for all files. If given,"
-	echo "                 this option effectively implies:"
-	echo "                   --libdir=EXECPREFIX/lib"
-	echo "                   --includedir=PREFIX/include"
-	echo "                   --sharedir=PREFIX/share"
-	echo "                 where EXECPREFIX defaults to PREFIX. If this option is"
-	echo "                 not given, PREFIX defaults to '${prefix_def}'. If PREFIX"
-	echo "                 refers to a directory that does not exist, it will be"
-	echo "                 created."
-	echo " "
-	echo "   --exec-prefix=EXECPREFIX"
-	echo " "
-	echo "                 The installation prefix for libraries. Specifically, if"
-	echo "                 given, this option effectively implies:"
-	echo "                   --libdir=EXECPREFIX/lib"
-	echo "                 If not given, EXECPREFIX defaults to PREFIX, which may be"
-	echo "                 modified by the --prefix option. If EXECPREFIX refers to"
-	echo "                 a directory that does not exist, it will be created."
-	echo " "
-	echo "   --libdir=LIBDIR"
-	echo " "
-	echo "                 The path to which make will install libraries. If not"
-	echo "                 given, LIBDIR defaults to PREFIX/lib. If LIBDIR refers to"
-	echo "                 a directory that does not exist, it will be created."
-	echo " "
-	echo "   --includedir=INCDIR"
-	echo " "
-	echo "                 The path to which make will install development header"
-	echo "                 files. If not given, INCDIR defaults to PREFIX/include."
-	echo "                 If INCDIR refers to a directory that does not exist, it"
-	echo "                 will be created."
-	echo " "
-	echo "   --sharedir=SHAREDIR"
-	echo " "
-	echo "                 The path to which make will makefile fragments containing"
-	echo "                 make variables determined by configure (e.g. CC, CFLAGS,"
-	echo "                 and LDFLAGS). These files allow certain BLIS makefiles,"
-	echo "                 such as those in the examples or testsuite directories, to"
-	echo "                 operate on an installed copy of BLIS rather than a local"
-	echo "                 (and possibly uninstalled) copy. If not given, SHAREDIR"
-	echo "                 defaults to PREFIX/share. If SHAREDIR refers to a"
-	echo "                 directory that does not exist, it will be created."
-	echo " "
-	echo "   --enable-verbose-make, --disable-verbose-make"
-	echo " "
-	echo "                 Enable (disabled by default) verbose compilation output"
-	echo "                 during make."
-	echo " "
-	echo "   --enable-arg-max-hack --disable-arg-max-hack"
-	echo " "
-	echo "                 Enable (disabled by default) build system logic that"
-	echo "                 will allow archiving/linking the static/shared library"
-	echo "                 even if the command plus command line arguments exceeds"
-	echo "                 the operating system limit (ARG_MAX)."
-	echo " "
-	echo "   -d DEBUG, --enable-debug[=DEBUG]"
-	echo " "
-	echo "                 Enable debugging symbols in the library. If argument"
-	echo "                 DEBUG is given as 'opt', then optimization flags are"
-	echo "                 kept in the framework, otherwise optimization is"
-	echo "                 turned off."
-	echo " "
-	echo "   --disable-static, --enable-static"
-	echo " "
-	echo "                 Disable (enabled by default) building BLIS as a static"
-	echo "                 library. If the static library build is disabled, the"
-	echo "                 shared library build must remain enabled."
-	echo " "
-	echo "   --disable-shared, --enable-shared"
-	echo " "
-	echo "                 Disable (enabled by default) building BLIS as a shared"
-	echo "                 library. If the shared library build is disabled, the"
-	echo "                 static library build must remain enabled."
-	echo " "
-	echo "   --enable-rpath, --disable-rpath"
-	echo " "
-	echo "                 Enable (disabled by default) setting an install_name for"
-	echo "                 dynamic libraries on macOS which starts with @rpath rather"
-	echo "                 than the absolute install path."
-	echo " "
-	echo "   -e SYMBOLS, --export-shared[=SYMBOLS]"
-	echo " "
-	echo "                 Specify the subset of library symbols that are exported"
-	echo "                 within a shared library. Valid values for SYMBOLS are:"
-	echo "                 'public' (the default) and 'all'. By default, only"
-	echo "                 functions and variables that belong to public APIs are"
-	echo "                 exported in shared libraries. However, the user may"
-	echo "                 instead export all symbols in BLIS, even those that were"
-	echo "                 intended for internal use only. Note that the public APIs"
-	echo "                 encompass all functions that almost any user would ever"
-	echo "                 want to call, including the BLAS/CBLAS compatibility APIs"
-	echo "                 as well as the basic and expert interfaces to the typed"
-	echo "                 and object APIs that are unique to BLIS. Also note that"
-	echo "                 changing this option to 'all' will have no effect in some"
-	echo "                 environments, such as when compiling with clang on"
-	echo "                 Windows."
-	echo " "
-	echo "   -t MODEL, --enable-threading[=MODEL], --disable-threading"
-	echo " "
-	echo "                 Enable threading in the library, using threading model(s)"
-	echo "                 MODEL={single,openmp,pthreads,hpx,auto}. If multiple values"
-	echo "                 are specified within MODEL, they will all be compiled into"
-	echo "                 BLIS, and the choice of which to use will be determined at"
-	echo "                 runtime. If the user does not express a preference (by"
-	echo "                 setting the BLIS_THREAD_IMPL environment variable to"
-	echo "                 'single', 'openmp', 'pthreads', or 'hpx'; by calling the"
-	echo "                 global runtime API bli_thread_set_thread_impl(); or by"
-	echo "                 encoding a choice on a per-call basis within a rntm_t"
-	echo "                 passed into the expert API), then the first model listed"
-	echo "                 in MODEL will be used by default. Note that 'single' is"
-	echo "                 silently appended to whatever the user specifies in MODEL,"
-	echo "                 meaning that single-threaded functionality will always be"
-	echo "                 available, even if it is not requested and even if it is"
-	echo "                 not enabled by default. Even --disable-threading is"
-	echo "                 actually shorthand for --enable-threading=single (which is"
-	echo "                 the default when the option is not specified)."
-	echo " "
-	echo "   --enable-system, --disable-system"
-	echo " "
-	echo "                 Enable conventional operating system support, such as"
-	echo "                 pthreads for thread-safety. The default state is enabled."
-	echo "                 However, in rare circumstances you may wish to configure"
-	echo "                 BLIS for use with a minimal or nonexistent operating"
-	echo "                 system (e.g. hardware simulators). In these situations,"
-	echo "                 --disable-system may be used to jettison all compile-time"
-	echo "                 and link-time dependencies outside of the standard C"
-	echo "                 library. When disabled, this option also forces the use"
-	echo "                 of --disable-threading."
-	echo " "
-	echo "   --disable-pba-pools, --enable-pba-pools"
-	echo "   --disable-sba-pools, --enable-sba-pools"
-	echo " "
-	echo "                 Disable (enabled by default) use of internal memory pools"
-	echo "                 within the packing block allocator (pba) and/or the small"
-	echo "                 block allocator (sba). The former is used to allocate"
-	echo "                 memory used to pack submatrices while the latter is used"
-	echo "                 to allocate control/thread tree nodes and thread"
-	echo "                 communicators. Both allocations take place in the context"
-	echo "                 of level-3 operations. When the pba is disabled, the"
-	echo "                 malloc()-like function specified by BLIS_MALLOC_POOL is"
-	echo "                 called on-demand whenever a packing block is needed, and"
-	echo "                 when the sba is disabled, the malloc()-like function"
-	echo "                 specified by BLIS_MALLOC_INTL is called whenever a small"
-	echo "                 block is needed, with the two allocators calling free()-"
-	echo "                 like functions BLIS_FREE_POOL and BLIS_FREE_INTL,"
-	echo "                 respectively when blocks are released. When enabled,"
-	echo "                 either or both pools are populated via the same functions"
-	echo "                 mentioned previously, and henceforth blocks are checked"
-	echo "                 out and in. The library quickly reaches a state in which"
-	echo "                 it no longer needs to call malloc() or free(), even"
-	echo "                 across many separate level-3 operation invocations."
-	echo " "
-	echo "   --enable-mem-tracing, --disable-mem-tracing"
-	echo " "
-	echo "                 Enable (disabled by default) output to stdout that traces"
-	echo "                 the allocation and freeing of memory, including the names"
-	echo "                 of the functions that triggered the allocation/freeing."
-	echo "                 Enabling this option WILL NEGATIVELY IMPACT PERFORMANCE."
-	echo "                 Please use only for informational/debugging purposes."
-	echo " "
-	echo "   --enable-asan, --disable-asan"
-	echo " "
-	echo "                 Enable (disabled by default) compiling and linking BLIS"
-	echo "                 framework code with the AddressSanitizer (ASan) library."
-	echo "                 Optimized kernels are NOT compiled with ASan support due"
-	echo "                 to limitations of register assignment in inline assembly."
-	echo "                 WARNING: ENABLING THIS OPTION WILL NEGATIVELY IMPACT"
-	echo "                 PERFORMANCE. Please use only for informational/debugging"
-	echo "                 purposes."
-	echo " "
-	echo "   -i SIZE, --int-size=SIZE"
-	echo " "
-	echo "                 Set the size (in bits) of internal BLIS integers and"
-	echo "                 integer types used in native BLIS interfaces. The"
-	echo "                 default integer type size is architecture dependent."
-	echo "                 (Hint: You can always find this value printed at the"
-	echo "                 beginning of the testsuite output.)"
-	echo " "
-	echo "   -b SIZE, --blas-int-size=SIZE"
-	echo " "
-	echo "                 Set the size (in bits) of integer types in external"
-	echo "                 BLAS and CBLAS interfaces, if enabled. The default"
-	echo "                 integer type size used in BLAS/CBLAS is 32 bits."
-	echo " "
-	echo "   --disable-blas, --enable-blas"
-	echo " "
-	echo "                 Disable (enabled by default) building the BLAS"
-	echo "                 compatibility layer."
-	echo " "
-	echo "   --enable-cblas, --disable-cblas"
-	echo " "
-	echo "                 Enable (disabled by default) building the CBLAS"
-	echo "                 compatibility layer. This automatically enables the"
-	echo "                 BLAS compatibility layer as well."
-	echo " "
-	echo "   --disable-mixed-dt, --enable-mixed-dt"
-	echo " "
-	echo "                 Disable (enabled by default) support for mixing the"
-	echo "                 storage domain and/or storage precision of matrix"
-	echo "                 operands for the gemm operation, as well as support"
-	echo "                 for computing in a precision different from one or"
-	echo "                 both of matrices A and B."
-	echo " "
-	echo "   --disable-mixed-dt-extra-mem, --enable-mixed-dt-extra-mem"
-	echo " "
-	echo "                 Disable (enabled by default) support for additional"
-	echo "                 mixed datatype optimizations that require temporarily"
-	echo "                 allocating extra memory--specifically, a single m x n"
-	echo "                 matrix (per application thread) whose storage datatype"
-	echo "                 is equal to the computation datatype. This option may"
-	echo "                 only be enabled when mixed domain/precision support is"
-	echo "                 enabled."
-	echo " "
-	echo "   --disable-sup-handling, --enable-sup-handling"
-	echo " "
-	echo "                 Disable (enabled by default) handling of small/skinny"
-	echo "                 matrix problems via separate code branches. When disabled,"
-	echo "                 these small/skinny level-3 operations will be performed by"
-	echo "                 the conventional implementation, which is optimized for"
-	echo "                 medium and large problems. Note that what qualifies as"
-	echo "                 \"small\" depends on thresholds that may vary by sub-"
-	echo "                 configuration."
-	echo " "
-	echo "   --enable-amd-frame-tweaks, --disable-amd-frame-tweaks"
-	echo " "
-	echo "                 Enable building with certain framework files that have"
-	echo "                 been customized by AMD for Zen-based microarchitectures."
-	echo "                 The default counterparts of these files must be portable,"
-	echo "                 and so these customized files may provide some (typically"
-	echo "                 modest) performance improvement for some select operations"
-	echo "                 and/or APIs, though there may a few (tiny dimension) cases"
-	echo "                 where the improvement is more pronounced. Note that the"
-	echo "                 target configuration must be Zen-based (or 'amd64') for"
-	echo "                 this option to have any effect. (Also note that this"
-	echo "                 option is NOT to be confused with enabling AMD *kernels*,"
-	echo "                 which are determined by the BLIS subconfiguration used at"
-	echo "                 runtime.) By default, these customized files are disabled."
-	echo " "
-	echo "   -a NAME --enable-addon=NAME"
-	echo " "
-	echo "                 Enable the code provided by an addon. An addon consists"
-	echo "                 of a separate directory of code that provides additional"
-	echo "                 APIs, implementations, and/or operations that would"
-	echo "                 otherwise not be present within a build of BLIS. This"
-	echo "                 option may be used multiple times to specify the inclusion"
-	echo "                 of multiple addons. By default, no addons are enabled."
-	echo " "
-	echo "   -s NAME --enable-sandbox=NAME"
-	echo " "
-	echo "                 Enable a separate sandbox implementation of gemm. This"
-	echo "                 option disables BLIS's conventional gemm implementation"
-	echo "                 (which shares common infrastructure with other level-3"
-	echo "                 operations) and instead compiles and uses the code in"
-	echo "                 the NAME directory, which is expected to be a sub-"
-	echo "                 directory of 'sandbox'. By default, no sandboxes are"
-	echo "                 enabled."
-	echo " "
-	echo "   --with-memkind, --without-memkind"
-	echo " "
-	echo "                 Forcibly enable or disable the use of libmemkind's"
-	echo "                 hbw_malloc() and hbw_free() as substitutes for malloc()"
-	echo "                 and free(), respectively, when allocating memory for"
-	echo "                 BLIS's memory pools, which are used to manage buffers"
-	echo "                 into which matrices are packed. The default behavior"
-	echo "                 for this option is environment-dependent; if configure"
-	echo "                 detects the presence of libmemkind, libmemkind is used"
-	echo "                 by default, and otherwise it is not used by default."
-	echo " "
-	echo "   -r METHOD, --thread-part-jrir=METHOD"
-	echo " "
-	echo "                 Select a strategy for partitioning computation in JR and"
-	echo "                 IR loops and assigning that computation to threads. Valid"
-	echo "                 values for METHOD are 'rr', 'slab', and 'tlb':"
-	echo "                  'rr':   Assign the computation associated with whole"
-	echo "                          columns of microtiles to threads in a round-"
-	echo "                          robin fashion. When selected, round-robin"
-	echo "                          assignment is also employed during packing."
-	echo "                  'slab': Partition the computation into N contiguous"
-	echo "                          regions, where each region contains a whole"
-	echo "                          number of microtile columns, and assign one"
-	echo "                          region to each thread. For some operations, the"
-	echo "                          number of microtile columns contained within a"
-	echo "                          given region may differ from that of other"
-	echo "                          regions, depending on how much work is implied"
-	echo "                          by each region. When selected, slab assignment"
-	echo "                          is also employed during packing."
-	echo "                  'tlb':  Tile-level load balancing is similar to slab,"
-	echo "                          except that regions will be divided at a more"
-	echo "                          granular level (individual microtiles instead"
-	echo "                          of whole columns of microtiles) to ensure more"
-	echo "                          equitable assignment of work to threads. When"
-	echo "                          selected, tlb will only be employed for level-3"
-	echo "                          operations except trsm; due to practical and"
-	echo "                          algorithmic limitations, slab partitioning will"
-	echo "                          be used instead during packing and for trsm."
-	echo "                 The default strategy is 'slab'. NOTE: Specifying this"
-	echo "                 option constitutes a request, which may be ignored in"
-	echo "                 select situations if implementation has a good reason to"
-	echo "                 do so. (See description of 'tlb' above for an example of"
-	echo "                 this.)"
-	echo " "
-	echo "   --disable-trsm-preinversion, --enable-trsm-preinversion"
-	echo " "
-	echo "                 Disable (enabled by default) pre-inversion of triangular"
-	echo "                 matrix diagonals when performing trsm. When pre-inversion"
-	echo "                 is enabled, diagonal elements are inverted outside of the"
-	echo "                 microkernel (e.g. during packing) so that the microkernel"
-	echo "                 can use multiply instructions. When disabled, division"
-	echo "                 instructions are used within the microkernel. Executing"
-	echo "                 these division instructions within the microkernel will"
-	echo "                 incur a performance penalty, but numerical robustness will"
-	echo "                 improve for certain cases involving denormal numbers that"
-	echo "                 would otherwise result in overflow in the pre-inverted"
-	echo "                 values."
-	echo " "
-	echo "   --force-version=STRING"
-	echo " "
-	echo "                 Force configure to use an arbitrary version string"
-	echo "                 STRING. This option may be useful when repackaging"
-	echo "                 custom versions of BLIS by outside organizations."
-	echo " "
-	echo "   -c, --show-config-lists"
-	echo " "
-	echo "                 Print the config and kernel lists, and kernel-to-config"
-	echo "                 map after they are read from file. This can be useful"
-	echo "                 when debugging certain configuration issues, and/or as"
-	echo "                 a sanity check to make sure these lists are constituted"
-	echo "                 as expected."
-	echo " "
-	echo "   --complex-return=gnu|intel"
-	echo " "
-	echo "                 Specify the way in which complex numbers are returned"
-	echo "                 from Fortran functions, either \"gnu\" (return in"
-	echo "                 registers) or \"intel\" (return via hidden argument)."
-	echo "                 If not specified and the environment variable FC is set,"
-	echo "                 attempt to determine the return type from the compiler."
-	echo "                 Otherwise, the default is \"gnu\"."
-	echo " "
-	echo "   -q, --quiet   Suppress informational output. By default, configure"
-	echo "                 is verbose. (NOTE: -q is not yet implemented)"
-	echo " "
-	echo "   -h, --help    Output this information and quit."
-	echo " "
-	echo " Environment Variables:"
-	echo " "
-	echo "   CC            Specifies the C compiler to use."
-	echo "   CXX           Specifies the C++ compiler to use (sandbox only)."
-	echo "   FC            Specifies the Fortran compiler to use (only to determine --complex-return)."
-	echo "   AR            Specifies the static library archiver to use."
-	echo "   RANLIB        Specifies the ranlib (library indexer) executable to use."
-	echo "   PYTHON        Specifies the python interpreter to use."
-	echo "   CFLAGS        Specifies additional compiler flags to use (prepended)."
-	echo "   LDFLAGS       Specifies additional linker flags to use (prepended)."
-	echo "   LIBPTHREAD    Pthreads library to use."
-	echo " "
-	echo "   Environment variables are traditionally set prior to running configure:"
-	echo " "
-	echo "     CC=gcc ./configure [options] haswell"
-	echo " "
-	echo "   However, they may also be specified as command line options, e.g.:"
-	echo " "
-	echo "     ./configure [options] CC=gcc haswell"
-	echo " "
-	echo "   Note that not all compilers are compatible with a given"
-	echo "   configuration."
-	echo " "
+ 	cat <<EOF
+
+ ${script_name} (BLIS ${version})
+
+ Configure BLIS's build system for compilation using a specified
+ configuration directory.
+
+ Usage:
+
+   ${script_name} [options] [env. vars.] confname
+
+ Arguments:
+
+   confname      The name of the sub-directory inside of the 'config'
+                 directory containing the desired BLIS configuration.
+                 Note that confname MUST be specified; if it is not,
+                 configure will complain. To build a completely generic
+                 implementation, use the 'generic' configuration
+
+ Options:
+
+   -p PREFIX, --prefix=PREFIX
+
+                 The common installation prefix for all files. If given,
+                 this option effectively implies:
+                   --libdir=EXECPREFIX/lib
+                   --includedir=PREFIX/include
+                   --sharedir=PREFIX/share
+                 where EXECPREFIX defaults to PREFIX. If this option is
+                 not given, PREFIX defaults to '${prefix_def}'. If PREFIX
+                 refers to a directory that does not exist, it will be
+                 created.
+
+   --exec-prefix=EXECPREFIX
+
+                 The installation prefix for libraries. Specifically, if
+                 given, this option effectively implies:
+                   --libdir=EXECPREFIX/lib
+                 If not given, EXECPREFIX defaults to PREFIX, which may be
+                 modified by the --prefix option. If EXECPREFIX refers to
+                 a directory that does not exist, it will be created.
+
+   --libdir=LIBDIR
+
+                 The path to which make will install libraries. If not
+                 given, LIBDIR defaults to PREFIX/lib. If LIBDIR refers to
+                 a directory that does not exist, it will be created.
+
+   --includedir=INCDIR
+
+                 The path to which make will install development header
+                 files. If not given, INCDIR defaults to PREFIX/include.
+                 If INCDIR refers to a directory that does not exist, it
+                 will be created.
+
+   --sharedir=SHAREDIR
+
+                 The path to which make will makefile fragments containing
+                 make variables determined by configure (e.g. CC, CFLAGS,
+                 and LDFLAGS). These files allow certain BLIS makefiles,
+                 such as those in the examples or testsuite directories, to
+                 operate on an installed copy of BLIS rather than a local
+                 (and possibly uninstalled) copy. If not given, SHAREDIR
+                 defaults to PREFIX/share. If SHAREDIR refers to a
+                 directory that does not exist, it will be created.
+
+   --enable-verbose-make, --disable-verbose-make
+
+                 Enable (disabled by default) verbose compilation output
+                 during make.
+
+   --enable-arg-max-hack --disable-arg-max-hack
+
+                 Enable (disabled by default) build system logic that
+                 will allow archiving/linking the static/shared library
+                 even if the command plus command line arguments exceeds
+                 the operating system limit (ARG_MAX).
+
+   -d DEBUG, --enable-debug[=DEBUG]
+
+                 Enable debugging symbols in the library. If argument
+                 DEBUG is given as 'opt', then optimization flags are
+                 kept in the framework, otherwise optimization is
+                 turned off.
+
+   --disable-static, --enable-static
+
+                 Disable (enabled by default) building BLIS as a static
+                 library. If the static library build is disabled, the
+                 shared library build must remain enabled.
+
+   --disable-shared, --enable-shared
+
+                 Disable (enabled by default) building BLIS as a shared
+                 library. If the shared library build is disabled, the
+                 static library build must remain enabled.
+
+   --enable-rpath, --disable-rpath
+
+                 Enable (disabled by default) setting an install_name for
+                 dynamic libraries on macOS which starts with @rpath rather
+                 than the absolute install path.
+
+   -e SYMBOLS, --export-shared[=SYMBOLS]
+
+                 Specify the subset of library symbols that are exported
+                 within a shared library. Valid values for SYMBOLS are:
+                 'public' (the default) and 'all'. By default, only
+                 functions and variables that belong to public APIs are
+                 exported in shared libraries. However, the user may
+                 instead export all symbols in BLIS, even those that were
+                 intended for internal use only. Note that the public APIs
+                 encompass all functions that almost any user would ever
+                 want to call, including the BLAS/CBLAS compatibility APIs
+                 as well as the basic and expert interfaces to the typed
+                 and object APIs that are unique to BLIS. Also note that
+                 changing this option to 'all' will have no effect in some
+                 environments, such as when compiling with clang on
+                 Windows.
+
+   -t MODEL, --enable-threading[=MODEL], --disable-threading
+
+                 Enable threading in the library, using threading model(s)
+                 MODEL={single,openmp,pthreads,hpx,auto}. If multiple values
+                 are specified within MODEL, they will all be compiled into
+                 BLIS, and the choice of which to use will be determined at
+                 runtime. If the user does not express a preference (by
+                 setting the BLIS_THREAD_IMPL environment variable to
+                 'single', 'openmp', 'pthreads', or 'hpx'; by calling the
+                 global runtime API bli_thread_set_thread_impl(); or by
+                 encoding a choice on a per-call basis within a rntm_t
+                 passed into the expert API), then the first model listed
+                 in MODEL will be used by default. Note that 'single' is
+                 silently appended to whatever the user specifies in MODEL,
+                 meaning that single-threaded functionality will always be
+                 available, even if it is not requested and even if it is
+                 not enabled by default. Even --disable-threading is
+                 actually shorthand for --enable-threading=single (which is
+                 the default when the option is not specified).
+
+   --enable-system, --disable-system
+
+                 Enable conventional operating system support, such as
+                 pthreads for thread-safety. The default state is enabled.
+                 However, in rare circumstances you may wish to configure
+                 BLIS for use with a minimal or nonexistent operating
+                 system (e.g. hardware simulators). In these situations,
+                 --disable-system may be used to jettison all compile-time
+                 and link-time dependencies outside of the standard C
+                 library. When disabled, this option also forces the use
+                 of --disable-threading.
+
+   --disable-pba-pools, --enable-pba-pools
+   --disable-sba-pools, --enable-sba-pools
+
+                 Disable (enabled by default) use of internal memory pools
+                 within the packing block allocator (pba) and/or the small
+                 block allocator (sba). The former is used to allocate
+                 memory used to pack submatrices while the latter is used
+                 to allocate control/thread tree nodes and thread
+                 communicators. Both allocations take place in the context
+                 of level-3 operations. When the pba is disabled, the
+                 malloc()-like function specified by BLIS_MALLOC_POOL is
+                 called on-demand whenever a packing block is needed, and
+                 when the sba is disabled, the malloc()-like function
+                 specified by BLIS_MALLOC_INTL is called whenever a small
+                 block is needed, with the two allocators calling free()-
+                 like functions BLIS_FREE_POOL and BLIS_FREE_INTL,
+                 respectively when blocks are released. When enabled,
+                 either or both pools are populated via the same functions
+                 mentioned previously, and henceforth blocks are checked
+                 out and in. The library quickly reaches a state in which
+                 it no longer needs to call malloc() or free(), even
+                 across many separate level-3 operation invocations.
+
+   --enable-mem-tracing, --disable-mem-tracing
+
+                 Enable (disabled by default) output to stdout that traces
+                 the allocation and freeing of memory, including the names
+                 of the functions that triggered the allocation/freeing.
+                 Enabling this option WILL NEGATIVELY IMPACT PERFORMANCE.
+                 Please use only for informational/debugging purposes.
+
+   --enable-asan, --disable-asan
+
+                 Enable (disabled by default) compiling and linking BLIS
+                 framework code with the AddressSanitizer (ASan) library.
+                 Optimized kernels are NOT compiled with ASan support due
+                 to limitations of register assignment in inline assembly.
+                 WARNING: ENABLING THIS OPTION WILL NEGATIVELY IMPACT
+                 PERFORMANCE. Please use only for informational/debugging
+                 purposes.
+
+   -i SIZE, --int-size=SIZE
+
+                 Set the size (in bits) of internal BLIS integers and
+                 integer types used in native BLIS interfaces. The
+                 default integer type size is architecture dependent.
+                 (Hint: You can always find this value printed at the
+                 beginning of the testsuite output.)
+
+   -b SIZE, --blas-int-size=SIZE
+
+                 Set the size (in bits) of integer types in external
+                 BLAS and CBLAS interfaces, if enabled. The default
+                 integer type size used in BLAS/CBLAS is 32 bits.
+
+   --disable-blas, --enable-blas
+
+                 Disable (enabled by default) building the BLAS
+                 compatibility layer.
+
+   --enable-cblas, --disable-cblas
+
+                 Enable (disabled by default) building the CBLAS
+                 compatibility layer. This automatically enables the
+                 BLAS compatibility layer as well.
+
+   --disable-mixed-dt, --enable-mixed-dt
+
+                 Disable (enabled by default) support for mixing the
+                 storage domain and/or storage precision of matrix
+                 operands for the gemm operation, as well as support
+                 for computing in a precision different from one or
+                 both of matrices A and B.
+
+   --disable-mixed-dt-extra-mem, --enable-mixed-dt-extra-mem
+
+                 Disable (enabled by default) support for additional
+                 mixed datatype optimizations that require temporarily
+                 allocating extra memory--specifically, a single m x n
+                 matrix (per application thread) whose storage datatype
+                 is equal to the computation datatype. This option may
+                 only be enabled when mixed domain/precision support is
+                 enabled.
+
+   --disable-sup-handling, --enable-sup-handling
+
+                 Disable (enabled by default) handling of small/skinny
+                 matrix problems via separate code branches. When disabled,
+                 these small/skinny level-3 operations will be performed by
+                 the conventional implementation, which is optimized for
+                 medium and large problems. Note that what qualifies as
+                 "small" depends on thresholds that may vary by sub-
+                 configuration.
+
+   --enable-amd-frame-tweaks, --disable-amd-frame-tweaks
+
+                 Enable building with certain framework files that have
+                 been customized by AMD for Zen-based microarchitectures.
+                 The default counterparts of these files must be portable,
+                 and so these customized files may provide some (typically
+                 modest) performance improvement for some select operations
+                 and/or APIs, though there may a few (tiny dimension) cases
+                 where the improvement is more pronounced. Note that the
+                 target configuration must be Zen-based (or 'amd64') for
+                 this option to have any effect. (Also note that this
+                 option is NOT to be confused with enabling AMD *kernels*,
+                 which are determined by the BLIS subconfiguration used at
+                 runtime.) By default, these customized files are disabled.
+
+   -a NAME --enable-addon=NAME
+
+                 Enable the code provided by an addon. An addon consists
+                 of a separate directory of code that provides additional
+                 APIs, implementations, and/or operations that would
+                 otherwise not be present within a build of BLIS. This
+                 option may be used multiple times to specify the inclusion
+                 of multiple addons. By default, no addons are enabled.
+
+   -s NAME --enable-sandbox=NAME
+
+                 Enable a separate sandbox implementation of gemm. This
+                 option disables BLIS's conventional gemm implementation
+                 (which shares common infrastructure with other level-3
+                 operations) and instead compiles and uses the code in
+                 the NAME directory, which is expected to be a sub-
+                 directory of 'sandbox'. By default, no sandboxes are
+                 enabled.
+
+   --with-memkind, --without-memkind
+
+                 Forcibly enable or disable the use of libmemkind's
+                 hbw_malloc() and hbw_free() as substitutes for malloc()
+                 and free(), respectively, when allocating memory for
+                 BLIS's memory pools, which are used to manage buffers
+                 into which matrices are packed. The default behavior
+                 for this option is environment-dependent; if configure
+                 detects the presence of libmemkind, libmemkind is used
+                 by default, and otherwise it is not used by default.
+
+   -r METHOD, --thread-part-jrir=METHOD
+
+                 Select a strategy for partitioning computation in JR and
+                 IR loops and assigning that computation to threads. Valid
+                 values for METHOD are 'rr', 'slab', and 'tlb':
+                  'rr':   Assign the computation associated with whole
+                          columns of microtiles to threads in a round-
+                          robin fashion. When selected, round-robin
+                          assignment is also employed during packing.
+                  'slab': Partition the computation into N contiguous
+                          regions, where each region contains a whole
+                          number of microtile columns, and assign one
+                          region to each thread. For some operations, the
+                          number of microtile columns contained within a
+                          given region may differ from that of other
+                          regions, depending on how much work is implied
+                          by each region. When selected, slab assignment
+                          is also employed during packing.
+                  'tlb':  Tile-level load balancing is similar to slab,
+                          except that regions will be divided at a more
+                          granular level (individual microtiles instead
+                          of whole columns of microtiles) to ensure more
+                          equitable assignment of work to threads. When
+                          selected, tlb will only be employed for level-3
+                          operations except trsm; due to practical and
+                          algorithmic limitations, slab partitioning will
+                          be used instead during packing and for trsm.
+                 The default strategy is 'slab'. NOTE: Specifying this
+                 option constitutes a request, which may be ignored in
+                 select situations if implementation has a good reason to
+                 do so. (See description of 'tlb' above for an example of
+                 this.)
+
+   --disable-trsm-preinversion, --enable-trsm-preinversion
+
+                 Disable (enabled by default) pre-inversion of triangular
+                 matrix diagonals when performing trsm. When pre-inversion
+                 is enabled, diagonal elements are inverted outside of the
+                 microkernel (e.g. during packing) so that the microkernel
+                 can use multiply instructions. When disabled, division
+                 instructions are used within the microkernel. Executing
+                 these division instructions within the microkernel will
+                 incur a performance penalty, but numerical robustness will
+                 improve for certain cases involving denormal numbers that
+                 would otherwise result in overflow in the pre-inverted
+                 values.
+
+   --force-version=STRING
+
+                 Force configure to use an arbitrary version string
+                 STRING. This option may be useful when repackaging
+                 custom versions of BLIS by outside organizations.
+
+   -c, --show-config-lists
+
+                 Print the config and kernel lists, and kernel-to-config
+                 map after they are read from file. This can be useful
+                 when debugging certain configuration issues, and/or as
+                 a sanity check to make sure these lists are constituted
+                 as expected.
+
+   --complex-return=gnu|intel
+
+                 Specify the way in which complex numbers are returned
+                 from Fortran functions, either "gnu" (return in
+                 registers) or "intel" (return via hidden argument).
+                 If not specified and the environment variable FC is set,
+                 attempt to determine the return type from the compiler.
+                 Otherwise, the default is "gnu".
+
+   -q, --quiet   Suppress informational output. By default, configure
+                 is verbose. (NOTE: -q is not yet implemented)
+
+   -h, --help    Output this information and quit.
+
+ Environment Variables:
+
+   CC            Specifies the C compiler to use.
+   CXX           Specifies the C++ compiler to use (sandbox only).
+   FC            Specifies the Fortran compiler to use (only to determine --complex-return).
+   AR            Specifies the static library archiver to use.
+   RANLIB        Specifies the ranlib (library indexer) executable to use.
+   PYTHON        Specifies the python interpreter to use.
+   CFLAGS        Specifies additional compiler flags to use (prepended).
+   LDFLAGS       Specifies additional linker flags to use (prepended).
+   LIBPTHREAD    Pthreads library to use.
+
+   Environment variables are traditionally set prior to running configure:
+
+     CC=gcc ./configure [options] haswell
+
+   However, they may also be specified as command line options, e.g.:
+
+     ./configure [options] CC=gcc haswell
+
+   Note that not all compilers are compatible with a given
+   configuration.
+
+EOF
 
 	# Exit with non-zero exit status
 	exit 1
