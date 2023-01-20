@@ -810,7 +810,7 @@ siz_t bli_thread_range
           bli_thrinfo_n_way( thr ),
           n,
           bf,
-		  direct = BLIS_BWD,
+		  direct == BLIS_BWD,
           start,
           end
         );
