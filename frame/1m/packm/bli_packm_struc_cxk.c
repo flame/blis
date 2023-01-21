@@ -39,25 +39,27 @@
 \
 void PASTEMAC(ch,varname) \
      ( \
-       struc_t strucc, \
-       diag_t  diagc, \
-       uplo_t  uploc, \
-       conj_t  conjc, \
-       pack_t  schema, \
-       bool    invdiag, \
-       dim_t   panel_dim, \
-       dim_t   panel_len, \
-       dim_t   panel_dim_max, \
-       dim_t   panel_len_max, \
-       dim_t   panel_dim_off, \
-       dim_t   panel_len_off, \
-       ctype*  kappa, \
-       ctype*  c, inc_t incc, inc_t ldc, \
-       ctype*  p,             inc_t ldp, \
-                  inc_t is_p, \
-       cntx_t* cntx  \
+             struc_t strucc, \
+             diag_t  diagc, \
+             uplo_t  uploc, \
+             conj_t  conjc, \
+             pack_t  schema, \
+             bool    invdiag, \
+             dim_t   panel_dim, \
+             dim_t   panel_len, \
+             dim_t   panel_dim_max, \
+             dim_t   panel_len_max, \
+             dim_t   panel_dim_off, \
+             dim_t   panel_len_off, \
+       const void*   kappa, \
+       const void*   c, inc_t incc, inc_t ldc, \
+             void*   p,             inc_t ldp, \
+       const cntx_t* cntx, \
+       const void*   params  \
      ) \
 { \
+	( void )panel_dim_max; \
+\
 	num_t   dt            = PASTEMAC(ch,type); \
 	num_t   dt_r          = PASTEMAC(chr,type); \
 	dim_t   panel_len_pad = panel_len_max - panel_len; \
@@ -79,8 +81,8 @@ void PASTEMAC(ch,varname) \
 		                                         : BLIS_PACKM_MRXMR_DIAG_1ER_KER; \
 	} \
 \
-	PASTECH2(ch,cxk_kername,_ker_ft) f_cxk = bli_cntx_get_ukr_dt( dt, cxk_ker_id, cntx ); \
-	PASTECH2(ch,cxc_kername,_ker_ft) f_cxc = bli_cntx_get_ukr_dt( dt, cxc_ker_id, cntx ); \
+	packm_cxk_ker_vft f_cxk      = bli_cntx_get_ukr_dt( dt, cxk_ker_id, cntx ); \
+	packm_cxc_diag_ker_vft f_cxc = bli_cntx_get_ukr_dt( dt, cxc_ker_id, cntx ); \
 \
 	/* For general matrices, pack and return early */ \
 	if ( bli_is_general( strucc ) ) \
@@ -95,7 +97,8 @@ void PASTEMAC(ch,varname) \
 		  kappa, \
 		  c, incc, ldc, \
 		  p,       ldp, \
-		  cntx  \
+		  cntx, \
+		  params  \
 		); \
 		return; \
 	} \
@@ -118,9 +121,9 @@ void PASTEMAC(ch,varname) \
 		dim_t  p10_dim     = panel_dim; \
 		dim_t  p10_len     = bli_min( diagoffc, panel_len ); \
 		dim_t  p10_len_max = p10_len == panel_len ? panel_len_max : p10_len; \
-		ctype* p10         = p; \
+		ctype* p10         = ( ctype* )p; \
 		conj_t conjc10     = conjc; \
-		ctype* c10         = c; \
+		ctype* c10         = ( ctype* )c; \
 		inc_t  incc10      = incc; \
 		inc_t  ldc10       = ldc; \
 \
@@ -185,7 +188,8 @@ void PASTEMAC(ch,varname) \
 			  kappa, \
 			  c10, incc10, ldc10, \
 			  p10,         ldp, \
-			  cntx  \
+			  cntx, \
+			  params  \
 			); \
 		} \
 	} \
@@ -197,9 +201,9 @@ void PASTEMAC(ch,varname) \
 		dim_t  p11_dim     = panel_dim; \
 		dim_t  p11_len_max = panel_dim + ( diagoffc + panel_dim == panel_len \
 		                                   ? panel_len_pad : 0 ); \
-		ctype* p11         = p + i * ldp; \
+		ctype* p11         = ( ctype* )p + i * ldp; \
 		conj_t conjc11     = conjc; \
-		ctype* c11         = c + i * ldc; \
+		ctype* c11         = ( ctype* )c + i * ldc; \
 		inc_t  incc11      = incc; \
 		inc_t  ldc11       = ldc; \
 \
@@ -216,7 +220,8 @@ void PASTEMAC(ch,varname) \
 		  kappa, \
 		  c11, incc11, ldc11, \
 		  p11,         ldp, \
-		  cntx  \
+		  cntx, \
+		  params  \
 		); \
 	} \
 \
@@ -229,9 +234,9 @@ void PASTEMAC(ch,varname) \
 		/* If we are packing p12, then it is always the last partial block \
 		   and so we should make sure to pad with zeros if necessary. */ \
 		dim_t  p12_len_max = p12_len + panel_len_pad; \
-		ctype* p12         = p + i * ldp; \
+		ctype* p12         = ( ctype* )p + i * ldp; \
 		conj_t conjc12     = conjc; \
-		ctype* c12         = c + i * ldc; \
+		ctype* c12         = ( ctype* )c + i * ldc; \
 		inc_t  incc12      = incc; \
 		inc_t  ldc12       = ldc; \
 \
@@ -296,7 +301,8 @@ void PASTEMAC(ch,varname) \
 			  kappa, \
 			  c12, incc12, ldc12, \
 			  p12,         ldp, \
-			  cntx  \
+			  cntx, \
+			  params  \
 			); \
 		} \
 	} \

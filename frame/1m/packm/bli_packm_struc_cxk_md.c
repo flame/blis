@@ -41,24 +41,23 @@
 \
 void PASTEMAC2(chc,chp,varname) \
      ( \
-       struc_t           strucc, \
-       diag_t            diagc, \
-       uplo_t            uploc, \
-       conj_t            conjc, \
-       pack_t            schema, \
-       bool              invdiag, \
-       dim_t             panel_dim, \
-       dim_t             panel_len, \
-       dim_t             panel_dim_max, \
-       dim_t             panel_len_max, \
-       dim_t             panel_dim_off, \
-       dim_t             panel_len_off, \
-       ctype_p* restrict kappa, \
-       ctype_c* restrict c, inc_t incc, inc_t ldc, \
-       ctype_p* restrict p,             inc_t ldp, \
-                            inc_t is_p, \
-       cntx_t*           cntx, \
-       void*             params \
+             struc_t strucc, \
+             diag_t  diagc, \
+             uplo_t  uploc, \
+             conj_t  conjc, \
+             pack_t  schema, \
+             bool    invdiag, \
+             dim_t   panel_dim, \
+             dim_t   panel_len, \
+             dim_t   panel_dim_max, \
+             dim_t   panel_len_max, \
+             dim_t   panel_dim_off, \
+             dim_t   panel_len_off, \
+       const void*   kappa, \
+       const void*   c, inc_t incc, inc_t ldc, \
+             void*   p,             inc_t ldp, \
+       const cntx_t* cntx, \
+       const void*   params \
      ) \
 { \
 	if ( bli_is_nat_packed( schema ) ) \
@@ -66,7 +65,7 @@ void PASTEMAC2(chc,chp,varname) \
 		/* Sanity check: Make sure that kappa is 1.0. Mixed-datatype alpha
 		   values are never handled when packing for native execution;
 		   instead, they are passed along to the micro-kernel. */ \
-		if ( !PASTEMAC(chp,eq1)( *kappa ) ) \
+		if ( !PASTEMAC(chp,eq1)( *( ctype_p* )kappa ) ) \
 			bli_check_error_code( BLIS_NOT_YET_IMPLEMENTED ); \
 \
 		/* Treat the micro-panel as panel_dim x panel_len and column-stored
@@ -78,8 +77,8 @@ void PASTEMAC2(chc,chp,varname) \
 		  ( trans_t )conjc, \
 		  panel_dim, \
 		  panel_len, \
-		  c, incc, ldc, \
-		  p,    1, ldp  \
+		  ( ctype_c* )c, incc, ldc, \
+		  ( ctype_p* )p,    1, ldp  \
 		); \
 \
 		/* If panel_dim < panel_dim_max, then we zero those unused rows. */ \
@@ -89,7 +88,7 @@ void PASTEMAC2(chc,chp,varname) \
 			const dim_t       i      = panel_dim; \
 			const dim_t       m_edge = panel_dim_max - i; \
 			const dim_t       n_edge = panel_len_max; \
-			ctype_p*          p_edge = p + (i  )*1; \
+			ctype_p*          p_edge = ( ctype_p* )p + (i  )*1; \
 \
 			PASTEMAC2(chp,setm,BLIS_TAPI_EX_SUF) \
 			( \
@@ -113,7 +112,7 @@ void PASTEMAC2(chc,chp,varname) \
 			const dim_t       j      = panel_len; \
 			const dim_t       m_edge = panel_dim_max; \
 			const dim_t       n_edge = panel_len_max - j; \
-			ctype_p*          p_edge = p + (j  )*ldp; \
+			ctype_p*          p_edge = ( ctype_p* )p + (j  )*ldp; \
 \
 			PASTEMAC2(chp,setm,BLIS_TAPI_EX_SUF) \
 			( \
@@ -140,9 +139,9 @@ void PASTEMAC2(chc,chp,varname) \
 		  conjc, \
 		  panel_dim, \
 		  panel_len, \
-		  kappa, \
-		  c, incc, ldc, \
-		  p,       ldp  \
+		  ( ctype_p* )kappa, \
+		  ( ctype_c* )c, incc, ldc, \
+		  ( ctype_p* )p,       ldp  \
 		); \
 \
 		/* If panel_dim < panel_dim_max, then we zero those unused rows. */ \
@@ -166,7 +165,7 @@ void PASTEMAC2(chc,chp,varname) \
 			  m_edge, \
 			  n_edge, \
 			  zero, \
-			  p, 1, ldp, ldp  \
+			  ( ctype_p* )p, 1, ldp, ldp  \
 			); \
 		} \
 \
@@ -191,7 +190,7 @@ void PASTEMAC2(chc,chp,varname) \
 			  m_edge, \
 			  n_edge, \
 			  zero, \
-			  p, 1, ldp, ldp  \
+			  ( ctype_p* )p, 1, ldp, ldp  \
 			); \
 		} \
 	} \
@@ -205,9 +204,9 @@ void PASTEMAC2(chc,chp,varname) \
 		  conjc, \
 		  panel_dim, \
 		  panel_len, \
-		  kappa, \
-		  c, incc, ldc, \
-		  p,       ldp  \
+		  ( ctype_p* )kappa, \
+		  ( ctype_c* )c, incc, ldc, \
+		  ( ctype_p* )p,       ldp  \
 		); \
 \
 		/* If panel_dim < panel_dim_max, then we zero those unused rows. */ \
@@ -231,7 +230,7 @@ void PASTEMAC2(chc,chp,varname) \
 			  m_edge, \
 			  n_edge, \
 			  zero, \
-			  p, 1, ldp, ldp  \
+			  ( ctype_p* )p, 1, ldp, ldp  \
 			); \
 		} \
 \
@@ -256,7 +255,7 @@ void PASTEMAC2(chc,chp,varname) \
 			  m_edge, \
 			  n_edge, \
 			  zero, \
-			  p, 1, ldp, ldp  \
+			  ( ctype_p* )p, 1, ldp, ldp  \
 			); \
 		} \
 	} \

@@ -37,23 +37,23 @@
 \
 void PASTEMAC(ch,varname) \
      ( \
-       struc_t strucc, \
-       diag_t  diagc, \
-       uplo_t  uploc, \
-       conj_t  conjc, \
-       pack_t  schema, \
-       bool    invdiag, \
-       dim_t   panel_dim, \
-       dim_t   panel_len, \
-       dim_t   panel_dim_max, \
-       dim_t   panel_len_max, \
-       dim_t   panel_dim_off, \
-       dim_t   panel_len_off, \
-       ctype*  kappa, \
-       ctype*  c, inc_t incc, inc_t ldc, \
-       ctype*  p,             inc_t ldp, \
-                  inc_t is_p, \
-       cntx_t* cntx  \
+             struc_t strucc, \
+             diag_t  diagc, \
+             uplo_t  uploc, \
+             conj_t  conjc, \
+             pack_t  schema, \
+             bool    invdiag, \
+             dim_t   panel_dim, \
+             dim_t   panel_len, \
+             dim_t   panel_dim_max, \
+             dim_t   panel_len_max, \
+             dim_t   panel_dim_off, \
+             dim_t   panel_len_off, \
+       const void*   kappa, \
+       const void*   c, inc_t incc, inc_t ldc, \
+             void*   p,             inc_t ldp, \
+       const cntx_t* cntx, \
+       const void*   params  \
      );
 
 INSERT_GENTPROT_BASIC0( packm_struc_cxk )

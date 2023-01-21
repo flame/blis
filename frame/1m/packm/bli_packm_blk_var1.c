@@ -85,7 +85,6 @@ void bli_packm_blk_var1
 
 	char*   p_cast         = bli_obj_buffer( p );
 	inc_t   ldp            = bli_obj_col_stride( p );
-	inc_t   is_p           = bli_obj_imag_stride( p );
 	dim_t   panel_dim_max  = bli_obj_panel_dim( p );
 	inc_t   ps_p           = bli_obj_panel_stride( p );
 
@@ -96,6 +95,7 @@ void bli_packm_blk_var1
 
 	// Query the datatype-specific function pointer from the control tree.
 	packm_ker_vft packm_ker_cast = bli_packm_def_cntl_ukr( cntl );
+    const void*   params         = bli_packm_def_cntl_ukr_params( cntl );
 
 	// Compute the total number of iterations we'll need.
 	dim_t n_iter = iter_dim / panel_dim_max + ( iter_dim % panel_dim_max ? 1 : 0 );
@@ -171,9 +171,9 @@ void bli_packm_blk_var1
 				                panel_len_off,
 				                kappa_cast,
 				                c_begin, incc, ldc,
-				                p_begin,       ldp, is_p,
-				                ( cntx_t* )cntx,
-				                NULL );
+				                p_begin,       ldp,
+				                cntx,
+				                params );
 			}
 
 			p_begin += ps_p*dt_p_size;
@@ -262,9 +262,8 @@ void bli_packm_blk_var1
 				                kappa_cast,
 				                c_use, incc, ldc,
 				                p_use,       ldp,
-				                       is_p_use,
-				                ( cntx_t* )cntx,
-				                NULL );
+				                cntx,
+				                params );
 			}
 
 			// NOTE: This value is usually LESS than ps_p because triangular

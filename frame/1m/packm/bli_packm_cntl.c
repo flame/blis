@@ -40,11 +40,13 @@ void bli_packm_cntl_init_node
      (
        void_fp       var_func,
        packm_var_oft var,
+       const void*   params,
        packm_cntl_t* cntl
      )
 {
 	// Initialize the packm_cntl_t struct.
-	cntl->var = var;
+	cntl->var    = var;
+    cntl->params = params;
 
 	bli_cntl_init_node
 	(
@@ -69,8 +71,8 @@ void bli_packm_def_cntl_init_node
        packm_def_cntl_t* cntl
      )
 {
-    static void_fp GENARRAY(packm_struc_cxk,packm_struc_cxk);
-    static void_fp GENARRAY2_ALL(packm_struc_cxk_md,packm_struc_cxk_md);
+    static packm_ker_vft GENARRAY(packm_struc_cxk,packm_struc_cxk);
+    static packm_ker_vft GENARRAY2_ALL(packm_struc_cxk_md,packm_struc_cxk_md);
 
 	// Initialize the packm_def_cntl_t struct.
 	cntl->ukr               = dt_a == dt_p ? packm_struc_cxk[ dt_a ]
@@ -83,11 +85,13 @@ void bli_packm_def_cntl_init_node
 	cntl->rev_iter_if_lower = rev_iter_if_lower;
 	cntl->pack_schema       = pack_schema;
 	cntl->pack_buf_type     = pack_buf_type;
+    cntl->params            = NULL;
 
 	bli_packm_cntl_init_node
 	(
 	  var_func,
       bli_packm_blk_var1,
+      NULL,
       &cntl->cntl
 	);
 }

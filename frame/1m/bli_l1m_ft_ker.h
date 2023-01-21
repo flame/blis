@@ -44,32 +44,26 @@
 
 // NOTE: This is the function type for the structure-aware "kernel".
 
-#undef  GENTDEF
-#define GENTDEF( ctype, ch, opname, tsuf ) \
-\
-typedef void (*PASTECH3(ch,opname,_ker,tsuf)) \
-     ( \
-       struc_t         strucc, \
-       diag_t          diagc, \
-       uplo_t          uploc, \
-       conj_t          conjc, \
-       pack_t          schema, \
-       bool            invdiag, \
-       dim_t           panel_dim, \
-       dim_t           panel_len, \
-       dim_t           panel_dim_max, \
-       dim_t           panel_len_max, \
-       dim_t           panel_dim_off, \
-       dim_t           panel_len_off, \
-       ctype* restrict kappa, \
-       ctype* restrict c, inc_t incc, inc_t ldc, \
-       ctype* restrict p,             inc_t ldp, \
-                          inc_t is_p, \
-       cntx_t*         cntx, \
-       void*           params \
+typedef void (*packm_ker_vft)
+     (
+             struc_t strucc,
+             diag_t  diagc,
+             uplo_t  uploc,
+             conj_t  conjc,
+             pack_t  schema,
+             bool    invdiag,
+             dim_t   panel_dim,
+             dim_t   panel_len,
+             dim_t   panel_dim_max,
+             dim_t   panel_len_max,
+             dim_t   panel_dim_off,
+             dim_t   panel_len_off,
+       const void*   kappa,
+       const void*   c, inc_t incc, inc_t ldc,
+             void*   p,             inc_t ldp,
+       const cntx_t* cntx,
+       const void*   params
      );
-
-INSERT_GENTDEF( packm )
 
 
 // NOTE: the following macros generate packm kernel function type definitions
@@ -77,65 +71,53 @@ INSERT_GENTDEF( packm )
 
 // packm_ker
 
-#undef  GENTDEF
-#define GENTDEF( ctype, ch, opname, tsuf ) \
-\
-typedef void (*PASTECH3(ch,opname,_ker,tsuf)) \
-     ( \
-       conj_t           conja, \
-       pack_t           schema, \
-       dim_t            cdim, \
-       dim_t            n, \
-       dim_t            n_max, \
-       ctype*  restrict kappa, \
-       ctype*  restrict a, inc_t inca, inc_t lda, \
-       ctype*  restrict p,             inc_t ldp, \
-       cntx_t*          cntx  \
+typedef void (*packm_cxk_ker_vft)
+     (
+             conj_t  conja,
+             pack_t  schema,
+             dim_t   cdim,
+             dim_t   n,
+             dim_t   n_max,
+       const void*   kappa,
+       const void*   a, inc_t inca, inc_t lda,
+             void*   p,             inc_t ldp,
+       const cntx_t* cntx,
+       const void*   params
      );
-
-INSERT_GENTDEF( packm_cxk )
 
 // unpackm_ker
 
-#undef  GENTDEF
-#define GENTDEF( ctype, ch, opname, tsuf ) \
-\
-typedef void (*PASTECH3(ch,opname,_ker,tsuf)) \
-     ( \
-       conj_t           conja, \
-       pack_t           schema, \
-       dim_t            cdim, \
-       dim_t            n, \
-       ctype*  restrict kappa, \
-       ctype*  restrict p,             inc_t ldp, \
-       ctype*  restrict a, inc_t inca, inc_t lda, \
-       cntx_t*          cntx \
+typedef void (*unpackm_cxk_ker_vft)
+     (
+             conj_t  conja,
+             pack_t  schema,
+             dim_t   cdim,
+             dim_t   n,
+       const void*   kappa,
+       const void*   p,             inc_t ldp,
+             void*   a, inc_t inca, inc_t lda,
+       const cntx_t* cntx,
+       const void*   params
      );
-
-INSERT_GENTDEF( unpackm_cxk )
 
 // packm_diag_ker
 
-#undef  GENTDEF
-#define GENTDEF( ctype, ch, opname, tsuf ) \
-\
-typedef void (*PASTECH3(ch,opname,_ker,tsuf)) \
-     ( \
-       struc_t          struca, \
-       diag_t           diaga, \
-       uplo_t           uploa, \
-       conj_t           conja, \
-       pack_t           schema, \
-       bool             invdiag, \
-       dim_t            cdim, \
-       dim_t            n_max, \
-       ctype*  restrict kappa, \
-       ctype*  restrict a, inc_t inca, inc_t lda, \
-       ctype*  restrict p,             inc_t ldp, \
-       cntx_t*          cntx \
+typedef void (*packm_cxc_diag_ker_vft)
+     (
+             struc_t struca,
+             diag_t  diaga,
+             uplo_t  uploa,
+             conj_t  conja,
+             pack_t  schema,
+             bool    invdiag,
+             dim_t   cdim,
+             dim_t   n_max,
+       const void*   kappa,
+       const void*   a, inc_t inca, inc_t lda,
+             void*   p,             inc_t ldp,
+       const cntx_t* cntx,
+       const void*   params
      );
-
-INSERT_GENTDEF( packm_cxc_diag )
 
 
 #endif
