@@ -851,7 +851,6 @@ void libblis_test_output_params_struct( FILE* os, test_params_t* params )
 	// Set up rntm_t objects for each of the four families:
 	// gemm, herk, trmm, trsm.
 	rntm_t gemm, herk, trmm_l, trmm_r, trsm_l, trsm_r;
-	dim_t  m = 1000, n = 1000, k = 1000;
 
 	bli_rntm_init_from_global( &gemm   );
 	bli_rntm_init_from_global( &herk   );
@@ -861,6 +860,7 @@ void libblis_test_output_params_struct( FILE* os, test_params_t* params )
 	bli_rntm_init_from_global( &trsm_r );
 
     /*
+	dim_t  m = 1000, n = 1000, k = 1000;
 	bli_rntm_set_ways_for_op( BLIS_GEMM, BLIS_LEFT,  m, n, k, &gemm );
 	bli_rntm_set_ways_for_op( BLIS_HERK, BLIS_LEFT,  m, n, k, &herk );
 	bli_rntm_set_ways_for_op( BLIS_TRMM, BLIS_LEFT,  m, n, k, &trmm_l );
