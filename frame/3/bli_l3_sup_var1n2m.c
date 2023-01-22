@@ -194,8 +194,8 @@ void bli_gemmsup_ref_var1n
 	// Nudge NC up to a multiple of MR and MC up to a multiple of NR.
 	// NOTE: This is unique to variant 1 (ie: not performed in variant 2)
 	// because MC % MR == 0 and NC % NR == 0 is already enforced at runtime.
-	const dim_t NC  = bli_align_dim_to_mult( NC0, MR );
-	const dim_t MC  = bli_align_dim_to_mult( MC0, NR );
+	const dim_t NC  = bli_align_dim_to_mult( NC0, MR, true );
+	const dim_t MC  = bli_align_dim_to_mult( MC0, NR, true );
 
 	// Query the maximum blocksize for MR, which implies a maximum blocksize
 	// extension for the final iteration.

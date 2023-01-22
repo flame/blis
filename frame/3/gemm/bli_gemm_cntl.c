@@ -124,8 +124,8 @@ void bli_gemm_cntl_init
     const dim_t        ic_max       = bli_cntx_get_blksz_max_dt( dt_exec, BLIS_MC, cntx );
     const dim_t        ic_mult      = bli_cntx_get_blksz_def_dt( dt_exec, BLIS_MR, cntx );
     const dir_t        ic_dir       = a_lo_tri ? BLIS_BWD : BLIS_FWD;
-          dim_t        pc_alg       = bli_cntx_get_blksz_def_dt( dt_exec, BLIS_KC, cntx );
-          dim_t        pc_max       = bli_cntx_get_blksz_max_dt( dt_exec, BLIS_KC, cntx );
+    const dim_t        pc_alg       = bli_cntx_get_blksz_def_dt( dt_exec, BLIS_KC, cntx );
+    const dim_t        pc_max       = bli_cntx_get_blksz_max_dt( dt_exec, BLIS_KC, cntx );
     const dim_t        pc_mult      = bli_cntx_get_blksz_def_dt( dt_exec, BLIS_KR, cntx );
     const dir_t        pc_dir       = a_lo_tri || b_up_tri ? BLIS_BWD : BLIS_FWD;
     const dim_t        jc_alg       = bli_cntx_get_blksz_def_dt( dt_exec, BLIS_NC, cntx );
@@ -138,16 +138,6 @@ void bli_gemm_cntl_init
     const dim_t        bmult_n_def  = bli_cntx_get_blksz_def_dt(   dt_bp, BLIS_NR, cntx );
     const dim_t        bmult_n_pack = bli_cntx_get_blksz_max_dt(   dt_bp, BLIS_NR, cntx );
     const dim_t        bmult_k_def  = bli_cntx_get_blksz_def_dt( dt_exec, BLIS_KR, cntx );
-
-    bli_l3_adjust_kc
-    (
-      family,
-      a,
-      b,
-      &pc_alg,
-      &pc_max,
-      cntx
-    );
 
 	// Create two nodes for the macro-kernel.
 	bli_cntl_init_node
@@ -269,5 +259,68 @@ void bli_gemm_cntl_init
       ( cntl_t* )&cntl->part_pc,
       ( cntl_t* )&cntl->part_jc
     );
+
+    bli_gemm_cntl_finalize
+    (
+      family,
+      a,
+      b,
+      c,
+      cntl
+    );
+}
+
+void bli_gemm_cntl_finalize
+     (
+             opid_t       family,
+       const obj_t*       a,
+       const obj_t*       b,
+       const obj_t*       c,
+             gemm_cntl_t* cntl
+     )
+{
+    ( void )c;
+
+          dim_t ic_alg  = bli_part_cntl_b_alg( ( cntl_t* )&cntl->part_ic );
+          dim_t ic_max  = bli_part_cntl_b_max( ( cntl_t* )&cntl->part_ic );
+    const dim_t ic_mult = bli_part_cntl_b_mult( ( cntl_t* )&cntl->part_ic );
+          dim_t pc_alg  = bli_part_cntl_b_alg( ( cntl_t* )&cntl->part_pc );
+          dim_t pc_max  = bli_part_cntl_b_max( ( cntl_t* )&cntl->part_pc );
+          dim_t jc_alg  = bli_part_cntl_b_alg( ( cntl_t* )&cntl->part_jc );
+          dim_t jc_max  = bli_part_cntl_b_max( ( cntl_t* )&cntl->part_jc );
+    const dim_t jc_mult = bli_part_cntl_b_mult( ( cntl_t* )&cntl->part_jc );
+
+    //
+    // Ensure that:
+    //
+    // 1. KC is a multiple of MR (NR) if A (B) is triangular, hermitian, or symmetric.
+    //    KC is always rounded up.
+    //
+    // 2. MC and NR are multiples of MR and NR, respectively. MC and NC are always
+    //    rounded down.
+    //
+
+    bli_l3_adjust_kc
+    (
+      family,
+      a,
+      b,
+      &pc_alg,
+      &pc_max,
+      ic_mult,
+      jc_mult
+    );
+
+    ic_alg = bli_align_dim_to_mult( ic_alg, ic_mult, false );
+    ic_max = bli_align_dim_to_mult( ic_max, ic_mult, false );
+    jc_alg = bli_align_dim_to_mult( jc_alg, jc_mult, false );
+    jc_max = bli_align_dim_to_mult( jc_max, jc_mult, false );
+
+    bli_part_cntl_set_b_alg( ic_alg, ( cntl_t* )&cntl->part_ic );
+    bli_part_cntl_set_b_max( ic_max, ( cntl_t* )&cntl->part_ic );
+    bli_part_cntl_set_b_alg( pc_alg, ( cntl_t* )&cntl->part_pc );
+    bli_part_cntl_set_b_max( pc_max, ( cntl_t* )&cntl->part_pc );
+    bli_part_cntl_set_b_alg( jc_alg, ( cntl_t* )&cntl->part_jc );
+    bli_part_cntl_set_b_max( jc_max, ( cntl_t* )&cntl->part_jc );
 }
 

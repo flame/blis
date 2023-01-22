@@ -39,5 +39,6 @@ void bli_l3_adjust_kc
         const obj_t*  b,
               dim_t*  b_alg,
               dim_t*  b_max,
-        const cntx_t* cntx
+              dim_t   mr,
+              dim_t   nr
       );

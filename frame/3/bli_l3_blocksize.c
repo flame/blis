@@ -42,11 +42,11 @@ void bli_l3_adjust_kc
         const obj_t*  b,
               dim_t*  b_alg,
               dim_t*  b_max,
-        const cntx_t* cntx
+              dim_t   mr,
+              dim_t   nr
       )
 {
-	const num_t  dt  = bli_obj_exec_dt( a );
-	      dim_t  mnr = 1;
+	dim_t  mnr = 1;
 
 	// Nudge the default and maximum kc blocksizes up to the nearest
 	// multiple of MR if A is Hermitian, symmetric, or triangular or
@@ -57,14 +57,14 @@ void bli_l3_adjust_kc
 	// MR, since only left-side trsm micro-kernels are supported.
 	if ( !bli_obj_root_is_general( a ) || family == BLIS_TRSM )
 	{
-		mnr = bli_cntx_get_blksz_def_dt( dt, BLIS_MR, cntx );
+		mnr = mr;
 	}
 	else if ( !bli_obj_root_is_general( b ) )
 	{
-		mnr = bli_cntx_get_blksz_def_dt( dt, BLIS_NR, cntx );
+		mnr = nr;
 	}
 
-	*b_alg = bli_align_dim_to_mult( *b_alg, mnr );
-	*b_max = bli_align_dim_to_mult( *b_max, mnr );
+	*b_alg = bli_align_dim_to_mult( *b_alg, mnr, true );
+	*b_max = bli_align_dim_to_mult( *b_max, mnr, true );
 }
 

@@ -127,7 +127,8 @@ BLIS_EXPORT_BLIS const char* bli_dt_string
 BLIS_EXPORT_BLIS dim_t bli_align_dim_to_mult
      (
        dim_t dim,
-       dim_t dim_mult
+       dim_t dim_mult,
+       bool  round_up
      );
 
 BLIS_EXPORT_BLIS dim_t bli_align_dim_to_size

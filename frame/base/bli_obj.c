@@ -554,18 +554,19 @@ const char* bli_dt_string
 dim_t bli_align_dim_to_mult
      (
        dim_t dim,
-       dim_t dim_mult
+       dim_t dim_mult,
+       bool  round_up
      )
 {
 	// We return the dimension unmodified if the multiple is zero
 	// (to avoid division by zero).
 	if ( dim_mult == 0 ) return dim;
 
-	dim = ( ( dim + dim_mult - 1 ) /
-	        dim_mult ) *
-	        dim_mult;
+	if ( round_up )
+		dim += dim_mult - 1;
 
-	return dim;
+	// Avoid rounding down to zero.
+	return bli_max( dim_mult, ( dim / dim_mult ) * dim_mult );
 }
 
 dim_t bli_align_dim_to_size

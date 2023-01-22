@@ -119,7 +119,8 @@ void bli_trsm_l_cntl_init
       b,
       &pc_alg,
       &pc_max,
-      cntx
+      ic_mult,
+      jc_mult
     );
 
 	//
@@ -356,7 +357,8 @@ void bli_trsm_r_cntl_init
       b,
       &pc_alg,
       &pc_max,
-      cntx
+      ic_mult,
+      jc_mult
     );
 
 	// Create two nodes for the macro-kernel.

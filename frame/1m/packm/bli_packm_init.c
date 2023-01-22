@@ -105,8 +105,8 @@ bool bli_packm_init
 	// level-2 operations, but that's okay with us.
 	dim_t m_p     = bli_obj_length( p );
 	dim_t n_p     = bli_obj_width( p );
-	dim_t m_p_pad = bli_align_dim_to_mult( m_p, bmult_m_def );
-	dim_t n_p_pad = bli_align_dim_to_mult( n_p, bmult_n_def );
+	dim_t m_p_pad = bli_align_dim_to_mult( m_p, bmult_m_def, true );
+	dim_t n_p_pad = bli_align_dim_to_mult( n_p, bmult_n_def, true );
 
 	// Save the padded dimensions into the packed object. It is important
 	// to save these dimensions since they represent the actual dimensions

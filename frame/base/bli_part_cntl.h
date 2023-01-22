@@ -45,29 +45,58 @@ struct part_cntl_s
 };
 typedef struct part_cntl_s part_cntl_t;
 
+// -----------------------------------------------------------------------------
+
 BLIS_INLINE dim_t bli_part_cntl_b_alg( const cntl_t* cntl )
 {
-	part_cntl_t* ppp = ( part_cntl_t* )cntl; return ppp->b_alg;
+	return ( ( const part_cntl_t* )cntl )->b_alg;
 }
 
 BLIS_INLINE dim_t bli_part_cntl_b_max( const cntl_t* cntl )
 {
-	part_cntl_t* ppp = ( part_cntl_t* )cntl; return ppp->b_max;
+	return ( ( const part_cntl_t* )cntl )->b_max;
 }
 
 BLIS_INLINE dim_t bli_part_cntl_b_mult( const cntl_t* cntl )
 {
-	part_cntl_t* ppp = ( part_cntl_t* )cntl; return ppp->b_mult;
+	return ( ( const part_cntl_t* )cntl )->b_mult;
 }
 
 BLIS_INLINE dir_t bli_part_cntl_direct( const cntl_t* cntl )
 {
-	part_cntl_t* ppp = ( part_cntl_t* )cntl; return ppp->direct;
+	return ( ( const part_cntl_t* )cntl )->direct;
 }
 
 BLIS_INLINE bool bli_part_cntl_use_weighted( const cntl_t* cntl )
 {
-	part_cntl_t* ppp = ( part_cntl_t* )cntl; return ppp->use_weighted;
+	return ( ( const part_cntl_t* )cntl )->use_weighted;
+}
+
+// -----------------------------------------------------------------------------
+
+BLIS_INLINE void bli_part_cntl_set_b_alg( dim_t b_alg, const cntl_t* cntl )
+{
+	( ( part_cntl_t* )cntl )->b_alg = b_alg;
+}
+
+BLIS_INLINE void bli_part_cntl_set_b_max( dim_t b_max, const cntl_t* cntl )
+{
+	( ( part_cntl_t* )cntl )->b_max = b_max;
+}
+
+BLIS_INLINE void bli_part_cntl_set_b_mult( dim_t b_mult, const cntl_t* cntl )
+{
+	( ( part_cntl_t* )cntl )->b_mult = b_mult;
+}
+
+BLIS_INLINE void bli_part_cntl_set_direct( dir_t direct, const cntl_t* cntl )
+{
+	( ( part_cntl_t* )cntl )->direct = direct;
+}
+
+BLIS_INLINE void bli_part_cntl_set_use_weighted( bool use_weighted, const cntl_t* cntl )
+{
+	( ( part_cntl_t* )cntl )->use_weighted = use_weighted;
 }
 
 // -----------------------------------------------------------------------------

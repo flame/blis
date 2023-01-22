@@ -39,7 +39,7 @@
 
 struct cntl_s
 {
-    void_fp         var_func;
+    l3_var_oft var_func;
     struct
     {
         dim_t          ways;

@@ -41,24 +41,6 @@ struct trsm_var_cntl_s
 };
 typedef struct trsm_var_cntl_s trsm_var_cntl_t;
 
-BLIS_INLINE gemmtrsm_ukr_vft bli_trsm_var_cntl_gemmtrsm_ukr( const cntl_t* cntl )
-{
-    return ( ( const trsm_var_cntl_t* ) cntl )->gemmtrsm_ukr;
-}
-
-BLIS_INLINE gemm_ukr_vft bli_trsm_var_cntl_gemm_ukr( const cntl_t* cntl )
-{
-    return ( ( const trsm_var_cntl_t* ) cntl )->gemm_ukr;
-}
-
-void bli_trsm_var_cntl_init_node
-     (
-       void_fp          var_func,
-       gemmtrsm_ukr_vft gemmtrsm_ukr,
-       gemm_ukr_vft     gemm_ukr,
-       trsm_var_cntl_t* cntl
-     );
-
 struct trsm_cntl_s
 {
          part_cntl_t part_jc;
@@ -73,6 +55,28 @@ struct trsm_cntl_s
               cntl_t ir_loop_trsm;
 };
 typedef struct trsm_cntl_s trsm_cntl_t;
+
+// -----------------------------------------------------------------------------
+
+BLIS_INLINE gemmtrsm_ukr_vft bli_trsm_var_cntl_gemmtrsm_ukr( const cntl_t* cntl )
+{
+    return ( ( const trsm_var_cntl_t* ) cntl )->gemmtrsm_ukr;
+}
+
+BLIS_INLINE gemm_ukr_vft bli_trsm_var_cntl_gemm_ukr( const cntl_t* cntl )
+{
+    return ( ( const trsm_var_cntl_t* ) cntl )->gemm_ukr;
+}
+
+// -----------------------------------------------------------------------------
+
+void bli_trsm_var_cntl_init_node
+     (
+       void_fp          var_func,
+       gemmtrsm_ukr_vft gemmtrsm_ukr,
+       gemm_ukr_vft     gemm_ukr,
+       trsm_var_cntl_t* cntl
+     );
 
 void bli_trsm_cntl_init
      (

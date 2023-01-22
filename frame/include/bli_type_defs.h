@@ -1082,7 +1082,8 @@ typedef struct mem_s
 
 struct cntl_s
 {
-    void_fp         var_func;
+    // Actually this is a l3_var_oft, but that type hasn't been defined yet
+    void_fp var_func;
     struct
     {
         dim_t          ways;

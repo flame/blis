@@ -180,6 +180,7 @@ void bli_gemm_ker_var2
 	// Query the context for the micro-kernel address and cast it to its
 	// function pointer type.
 	gemm_ukr_vft gemm_ukr = bli_gemm_var_cntl_ukr( cntl );
+    const void*  params   = bli_gemm_var_cntl_params( cntl );
 
 	// Temporary C buffer for edge cases. Note that the strides of this
 	// temporary buffer are set so that they match the storage of the
@@ -234,7 +235,7 @@ void bli_gemm_ker_var2
 
 	// Save the virtual microkernel address and the params.
 	bli_auxinfo_set_ukr( gemm_ukr, &aux );
-	bli_auxinfo_set_params( NULL, &aux );
+	bli_auxinfo_set_params( params, &aux );
 
 	// The 'thread' argument points to the thrinfo_t node for the 2nd (jr)
 	// loop around the microkernel. Here we query the thrinfo_t node for the
