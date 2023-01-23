@@ -263,18 +263,136 @@ void daxpy_blis_impl
   // Non-AVX platforms will use the kernels derived from the context.
   if (bli_cpuid_is_avx_supported() == TRUE)
   {
-      bli_daxpyv_zen_int10
-      (
-        BLIS_NO_CONJUGATE,
-        n0,
-        (double*)alpha,
-        x0, incx0,
-        y0, incy0,
-        NULL
-      );
+#ifdef BLIS_ENABLE_OPENMP
+        // For sizes less than 100, optimal number of threads is 1, but
+        // due to the overhead of calling omp functions it is being done outside
+        // by directly calling daxpyv so as to get maximum performance.
+        if ( n0 <= 100 )
+        {
+		bli_daxpyv_zen_int10
+		  (
+			BLIS_NO_CONJUGATE,
+			n0,
+			(double*)alpha,
+			x0, incx0,
+			y0, incy0,
+			NULL
+		  );
+	}
+	else
+	{
+		rntm_t rntm_local;
+		bli_rntm_init_from_global( &rntm_local );
+            	dim_t nt = bli_rntm_num_threads( &rntm_local );
+            	if (nt <= 0)
+            	{
+                	// nt is less than one if BLIS manual setting of parallelism
+                	// has been used. Parallelism here will be product of values.
+                	dim_t jc, pc, ic, jr, ir;
+	        	jc = bli_rntm_jc_ways( &rntm_local );
+	        	pc = bli_rntm_pc_ways( &rntm_local );
+	        	ic = bli_rntm_ic_ways( &rntm_local );
+	        	jr = bli_rntm_jr_ways( &rntm_local );
+	        	ir = bli_rntm_ir_ways( &rntm_local );
+                	nt = jc*pc*ic*jr*ir;
+		}
+#ifdef AOCL_DYNAMIC
+            dim_t nt_ideal;
 
+	    // Below tuning is based on Empirical Data collected on Genoa.
+	    // On Milan, perf. vs number of threads is similar, but boundaries might vary slightly.
+
+            if      ( n0 <= 10000 ) nt_ideal = 2;
+            else if ( n0 <= 250000 ) nt_ideal = 8;
+            else if ( n0 <= 750000 ) nt_ideal = 16;
+            else if ( n0 <= 2000000 ) nt_ideal = 32;
+            else                    nt_ideal = nt;
+
+            nt = bli_min( nt_ideal, nt );
+#endif
+            dim_t n_elem_per_thrd = n0 / nt;
+            dim_t n_elem_rem = n0 % nt;
+	    _Pragma( "omp parallel num_threads(nt)" )
+            {
+                // Getting the actual number of threads that are spawned.
+                dim_t nt_real = omp_get_num_threads();
+                dim_t t_id = omp_get_thread_num();
+                // The actual number of threads spawned might be different
+                // from the predicted number of threads for which this parallel
+                // region is being generated. Thus, in such a case we are
+                // falling back to the Single-Threaded call.
+                if ( nt_real != nt )
+                {
+                    // More than one thread can still be spawned but since we
+                    // are falling back to the ST call, we are
+                    // calling the kernel from thread 0 only.
+                    if ( t_id == 0 )
+                    {
+			    bli_daxpyv_zen_int10
+				    (
+					BLIS_NO_CONJUGATE,
+					n0,
+					(double*)alpha,
+					x0, incx0,
+					y0, incy0,
+					NULL
+				  );
+                    }
+                }
+                else
+                {
+                    // The following conditions handle the optimal distribution of
+                    // load among the threads.
+                    // Say we have n0 = 50 & nt = 4.
+                    // So we get 12 ( n0 / nt ) elements per thread along with 2
+                    // remaining elements. Each of these remaining elements is given
+                    // to the last threads, respectively.
+                    // So, t0, t1, t2 and t3 gets 12, 12, 13 and 13 elements,
+                    // respectively.
+                    dim_t npt, offsetx0, offsety0;
+                    if ( t_id < ( nt - n_elem_rem ) )
+                    {
+                        npt = n_elem_per_thrd;
+			// Stride can be non-unit for both x and y vectors.
+                        offsetx0 = t_id * npt * incx0;
+			offsety0 = t_id * npt * incy0;
+                    }
+                    else
+                    {
+                        npt = n_elem_per_thrd + 1;
+			// Stride can be non-unit for both x and y vectors.
+                        offsetx0 = ( ( t_id * n_elem_per_thrd ) +
+                                  ( t_id - ( nt - n_elem_rem ) ) ) * incx0;
+			offsety0 = ( ( t_id * n_elem_per_thrd ) +
+                                  ( t_id - ( nt - n_elem_rem ) ) ) * incy0;
+                    }
+		    bli_daxpyv_zen_int10
+		    (
+			BLIS_NO_CONJUGATE,
+			npt,
+			(double*)alpha,
+			x0 + offsetx0, incx0,
+			y0 + offsety0, incy0,
+			NULL
+		    );
+                }
+            }
+	}
+#else //BLIS_ENABLE_OPENMP
+
+			bli_daxpyv_zen_int10
+			  (
+				BLIS_NO_CONJUGATE,
+				n0,
+				(double*)alpha,
+				x0, incx0,
+				y0, incy0,
+				NULL
+			  );
+
+#endif //BLIS_ENABLE_OPENMP
   }
-  else
+  else //if (bli_cpuid_is_avx_supported() == TRUE)
   {
       PASTEMAC2(d,axpyv,BLIS_TAPI_EX_SUF)
       (
@@ -287,7 +405,7 @@ void daxpy_blis_impl
         NULL
       );
 
-  }
+  } // if (bli_cpuid_is_avx_supported() == TRUE)
 
   AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
   /* Finalize BLIS. */
