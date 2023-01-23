@@ -84,7 +84,7 @@ void bli_gemm_cntl_init
     }
 	else
     {
-        macro_kernel_fp = bli_gemm_ker_var2b;
+        macro_kernel_fp = bli_gemm_ker_var2;
     }
 
 #else

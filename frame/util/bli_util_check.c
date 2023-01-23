@@ -144,13 +144,17 @@ void PASTEMAC(opname,_check) \
      ( \
        const obj_t* chi, \
        const obj_t* psi, \
-       const bool*  is_eq  \
+       const bool*  is  \
      ) \
 { \
-	bli_l0_xxbsc_check( chi, psi, is_eq ); \
+	bli_l0_xxbsc_check( chi, psi, is ); \
 }
 
 GENFRONT( eqsc )
+GENFRONT( ltsc )
+GENFRONT( ltesc )
+GENFRONT( gtsc )
+GENFRONT( gtesc )
 
 
 #undef  GENFRONT
@@ -160,7 +164,7 @@ void PASTEMAC(opname,_check) \
      ( \
        const obj_t* x, \
        const obj_t* y, \
-       const bool*  is_eq  \
+       const bool*  is  \
      ) \
 { \
 	bli_l1v_xy_check( x, y ); \
@@ -176,7 +180,7 @@ void PASTEMAC(opname,_check) \
      ( \
        const obj_t* x, \
        const obj_t* y, \
-       const bool*  is_eq  \
+       const bool*  is  \
      ) \
 { \
 	bli_l1m_xy_check( x, y ); \

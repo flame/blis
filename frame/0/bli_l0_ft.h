@@ -37,7 +37,7 @@
 // -- Level-0 function types ---------------------------------------------------
 //
 
-// addsc, divsc, subsc
+// addsc, divsc, subsc, invertsc
 
 #undef  GENTDEF
 #define GENTDEF( ctype, ch, opname, tsuf ) \
@@ -52,18 +52,6 @@ typedef void (*PASTECH2(ch,opname,tsuf)) \
 INSERT_GENTDEF( addsc )
 INSERT_GENTDEF( divsc )
 INSERT_GENTDEF( subsc )
-
-// invertsc
-
-#undef  GENTDEF
-#define GENTDEF( ctype, ch, opname, tsuf ) \
-\
-typedef void (*PASTECH2(ch,opname,tsuf)) \
-     ( \
-       conj_t  conjchi, \
-       ctype*  chi  \
-     );
-
 INSERT_GENTDEF( invertsc )
 
 // mulsc
@@ -118,6 +106,19 @@ typedef void (*PASTECH2(ch,opname,tsuf)) \
      );
 
 INSERT_GENTDEF( sqrtsc )
+
+// sqrtrsc
+
+#undef  GENTDEF
+#define GENTDEF( ctype, ch, opname, tsuf ) \
+\
+typedef void (*PASTECH2(ch,opname,tsuf)) \
+     ( \
+       const ctype* chi, \
+             ctype* psi  \
+     );
+
+INSERT_GENTDEF( sqrtrsc )
 
 // getsc
 

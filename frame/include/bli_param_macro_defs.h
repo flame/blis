@@ -967,10 +967,10 @@ BLIS_INLINE bool bli_is_last_iter_rr( dim_t i, dim_t end_iter, dim_t tid, dim_t 
 
 BLIS_INLINE bool bli_is_last_iter_slrr( dim_t i, dim_t end_iter, dim_t tid, dim_t nth )
 {
-#ifdef BLIS_ENABLE_JRIR_SLAB
-	return bli_is_last_iter_sl( i, end_iter );
-#else // BLIS_ENABLE_JRIR_RR
+#ifdef BLIS_ENABLE_JRIR_RR
 	return bli_is_last_iter_rr( i, end_iter, tid, nth );
+#else // ifdef ( _SLAB || _TLB )
+	return bli_is_last_iter_sl( i, end_iter );
 #endif
 }
 

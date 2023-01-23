@@ -147,12 +147,16 @@ BLIS_EXPORT_BLIS void PASTEMAC0(opname) \
      ( \
        const obj_t* x, \
        const obj_t* y, \
-             bool*  is_eq  \
+             bool*  is  \
      );
 
 GENPROT( eqsc )
 GENPROT( eqv )
 GENPROT( eqm )
+GENPROT( ltsc )
+GENPROT( ltesc )
+GENPROT( gtsc )
+GENPROT( gtesc )
 
 
 #undef  GENPROT
