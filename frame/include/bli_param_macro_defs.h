@@ -569,6 +569,12 @@ BLIS_INLINE bool bli_is_gen_stored( inc_t rs, inc_t cs )
 	         bli_abs( cs ) != 1 );
 }
 
+BLIS_INLINE bool bli_is_preferentially_stored( inc_t rs, inc_t cs, bool row_pref )
+{
+	return ( bli_is_row_stored( rs, cs ) &&  row_pref ) ||
+           ( bli_is_col_stored( rs, cs ) && !row_pref );
+}
+
 BLIS_INLINE bool bli_is_row_tilted( dim_t m, dim_t n, inc_t rs, inc_t cs )
 {
 	return ( bool )
