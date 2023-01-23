@@ -130,7 +130,7 @@ void bli_gemm_ker_var2
 	const char* alpha_cast = bli_obj_internal_scalar_buffer( &scalar_b );
 	const char* beta_cast  = bli_obj_internal_scalar_buffer( c );
 
-#if 1
+#if 0
 	// Under certain conditions, we can avoid the overhead of calling the 1m
 	// virtual microkernel by having the real-domain macrokernel execute with
 	// the real-domain microkernel. (See the function definition for details.)
@@ -274,6 +274,8 @@ void bli_gemm_ker_var2
 	// the microkernel.
 	thrinfo_t* thread = bli_thrinfo_sub_node( 0, thread_par );
 	thrinfo_t* caucus = bli_thrinfo_sub_node( 0, thread );
+	const dim_t jr_nt  = bli_thrinfo_n_way( thread );
+	const dim_t jr_tid = bli_thrinfo_work_id( thread );
 	const dim_t ir_nt  = bli_thrinfo_n_way( caucus );
 	const dim_t ir_tid = bli_thrinfo_work_id( caucus );
 
