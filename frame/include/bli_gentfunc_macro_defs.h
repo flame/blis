@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2020 - 22, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2020 - 23, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -154,13 +154,10 @@ GENTFUNCR2( dcomplex, double, z, d, blasname, blisname )
 
 // -- Extended two-operand macro (used only for scal) --
 
-
-#define INSERT_GENTFUNCSCAL_BLAS_CZ( blasname, blisname ) \
+#define INSERT_GENTFUNCSCAL_BLAS_C( blasname, blisname ) \
 \
 GENTFUNCSCAL( scomplex, scomplex, c,  , blasname, blisname ) \
-GENTFUNCSCAL( dcomplex, dcomplex, z,  , blasname, blisname ) \
 GENTFUNCSCAL( scomplex, float,    c, s, blasname, blisname )
-// GENTFUNCSCAL( dcomplex, double,   z, d, blasname, blisname )
 
 
 #define INSERT_GENTFUNCSCAL_BLAS( blasname, blisname ) \

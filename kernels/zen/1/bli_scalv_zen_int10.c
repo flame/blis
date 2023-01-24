@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2017 - 2022, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2017 - 2023, Advanced Micro Devices, Inc. All rights reserved.
    Copyright (C) 2018, The University of Texas at Austin
 
    Redistribution and use in source and binary forms, with or without
@@ -798,5 +798,193 @@ void bli_zdscalv_zen_int10
 
 			x0 += 2 * incx;
 		}
+	}
+}
+
+void bli_zscalv_zen_int
+	(
+	conj_t           conjalpha,
+	dim_t            n,
+	dcomplex* restrict alpha,
+	dcomplex* restrict x, inc_t incx,
+	cntx_t* restrict cntx
+	)
+{
+	// If the vector dimension is zero, or if alpha is unit, return early.
+	if (bli_zero_dim1(n) || PASTEMAC(z, eq1)(*alpha))
+		return;
+
+	if (PASTEMAC(z, eq0)(*alpha))
+	{
+		// Expert interface of setv is invoked when alpha is zero
+		dcomplex *zero = PASTEMAC(z, 0);
+
+		/* When alpha is zero all the element in x are set to zero */
+		PASTEMAC2(z, setv, BLIS_TAPI_EX_SUF)
+		(
+			BLIS_NO_CONJUGATE,
+			n,
+			zero,
+			x, incx,
+			cntx,
+			NULL
+		);
+
+		return;
+	}
+
+	dim_t i = 0;
+	dcomplex alpha_conj;
+	double *x0 = (double *)x;
+
+	// Performs conjugation of alpha based on conjalpha
+	PASTEMAC(z, copycjs)(conjalpha, *alpha, alpha_conj)
+
+	double real = alpha_conj.real;
+	double imag = alpha_conj.imag;
+
+	/*When incx is 1 and n >= 2 it is possible to use AVX2 instructions*/
+	if (incx == 1 && n >= 2)
+	{
+		dim_t const n_elem_per_reg = 4;
+
+		__m256d alpha_real_ymm, alpha_imag_ymm;
+
+		alpha_real_ymm = _mm256_broadcast_sd(&real);
+		alpha_imag_ymm = _mm256_broadcast_sd(&imag);
+
+		__m256d x_vec_ymm[4], temp_ymm[8];
+
+		/*  Code logic
+
+			Consider,
+			x1= a1 + ib1, x2 = a1 + ib2
+			alpha = p + iq
+
+			Vector values
+			x_vec_ymm = a1, b1, a2, b2
+			alpha_real_ymm = p, p, p, p
+			alpha_imag_ymm = q, q, q, q
+
+			Computation
+
+			All real values
+			temp_1 = x_vec_ymm * alpha_real_ymm = a1p, b1p, a2p, b2p
+
+			All imaginary values
+			temp_2 = x_vec_ymm * alpha_imag_ymm = a1q, b1q, a2q, b2q
+
+			permute temp_2 to get
+
+			b1q, a1q, b2q, a2q
+
+			addsub temp_1 and temp_2 to get the final result
+			and then store
+		*/
+
+		for (; (i + 7) < n; i += 8)
+		{
+			x_vec_ymm[0] = _mm256_loadu_pd(x0);
+			x_vec_ymm[1] = _mm256_loadu_pd(x0 + n_elem_per_reg);
+			x_vec_ymm[2] = _mm256_loadu_pd(x0 + 2 * n_elem_per_reg);
+			x_vec_ymm[3] = _mm256_loadu_pd(x0 + 3 * n_elem_per_reg);
+
+			temp_ymm[0] = _mm256_mul_pd(x_vec_ymm[0], alpha_real_ymm);
+			temp_ymm[1] = _mm256_mul_pd(x_vec_ymm[0], alpha_imag_ymm);
+			temp_ymm[2] = _mm256_mul_pd(x_vec_ymm[1], alpha_real_ymm);
+			temp_ymm[3] = _mm256_mul_pd(x_vec_ymm[1], alpha_imag_ymm);
+			temp_ymm[4] = _mm256_mul_pd(x_vec_ymm[2], alpha_real_ymm);
+			temp_ymm[5] = _mm256_mul_pd(x_vec_ymm[2], alpha_imag_ymm);
+			temp_ymm[6] = _mm256_mul_pd(x_vec_ymm[3], alpha_real_ymm);
+			temp_ymm[7] = _mm256_mul_pd(x_vec_ymm[3], alpha_imag_ymm);
+
+			temp_ymm[1] = _mm256_permute_pd(temp_ymm[1], 0b0101);
+			temp_ymm[3] = _mm256_permute_pd(temp_ymm[3], 0b0101);
+			temp_ymm[5] = _mm256_permute_pd(temp_ymm[5], 0b0101);
+			temp_ymm[7] = _mm256_permute_pd(temp_ymm[7], 0b0101);
+
+			/*
+				a[i+63:i] := b[i+63:i] - c[i+63:i] for odd indices
+				a[i+63:i] := b[i+63:i] + c[i+63:i] for even indices
+			*/
+			temp_ymm[0] = _mm256_addsub_pd(temp_ymm[0], temp_ymm[1]);
+			temp_ymm[2] = _mm256_addsub_pd(temp_ymm[2], temp_ymm[3]);
+			temp_ymm[4] = _mm256_addsub_pd(temp_ymm[4], temp_ymm[5]);
+			temp_ymm[6] = _mm256_addsub_pd(temp_ymm[6], temp_ymm[7]);
+
+			_mm256_storeu_pd(x0, temp_ymm[0]);
+			_mm256_storeu_pd(x0 + n_elem_per_reg, temp_ymm[2]);
+			_mm256_storeu_pd(x0 + 2 * n_elem_per_reg, temp_ymm[4]);
+			_mm256_storeu_pd(x0 + 3 * n_elem_per_reg, temp_ymm[6]);
+
+			x0 += 4 * n_elem_per_reg;
+		}
+
+		for (; (i + 3) < n; i += 4)
+		{
+			x_vec_ymm[0] = _mm256_loadu_pd(x0);
+			x_vec_ymm[1] = _mm256_loadu_pd(x0 + n_elem_per_reg);
+
+			temp_ymm[0] = _mm256_mul_pd(x_vec_ymm[0], alpha_real_ymm);
+			temp_ymm[1] = _mm256_mul_pd(x_vec_ymm[0], alpha_imag_ymm);
+			temp_ymm[2] = _mm256_mul_pd(x_vec_ymm[1], alpha_real_ymm);
+			temp_ymm[3] = _mm256_mul_pd(x_vec_ymm[1], alpha_imag_ymm);
+
+			temp_ymm[1] = _mm256_permute_pd(temp_ymm[1], 0b0101);
+			temp_ymm[3] = _mm256_permute_pd(temp_ymm[3], 0b0101);
+
+			temp_ymm[0] = _mm256_addsub_pd(temp_ymm[0], temp_ymm[1]);
+			temp_ymm[2] = _mm256_addsub_pd(temp_ymm[2], temp_ymm[3]);
+
+			_mm256_storeu_pd(x0, temp_ymm[0]);
+			_mm256_storeu_pd(x0 + n_elem_per_reg, temp_ymm[2]);
+
+			x0 += 2 * n_elem_per_reg;
+		}
+
+		for (; (i + 1) < n; i += 2)
+		{
+			x_vec_ymm[0] = _mm256_loadu_pd(x0);
+
+			temp_ymm[0] = _mm256_mul_pd(x_vec_ymm[0], alpha_real_ymm);
+			temp_ymm[1] = _mm256_mul_pd(x_vec_ymm[0], alpha_imag_ymm);
+
+			temp_ymm[1] = _mm256_permute_pd(temp_ymm[1], 0b0101);
+
+			temp_ymm[0] = _mm256_addsub_pd(temp_ymm[0], temp_ymm[1]);
+
+			_mm256_storeu_pd(x0, temp_ymm[0]);
+
+			x0 += n_elem_per_reg;
+		}
+	}
+
+	// Issue vzeroupper instruction to clear upper lanes of ymm registers.
+	// This avoids a performance penalty caused by false dependencies when
+	// transitioning from from AVX to SSE instructions (which may occur
+	// later, especially if BLIS is compiled with -mfpmath=sse).
+	_mm256_zeroupper();
+
+	/* In double complex data type the computation of
+	unit stride elements can still be vectorized using SSE*/
+	__m128d temp_ymm[2], alpha_real_ymm, alpha_imag_ymm, x_vec_ymm;
+
+	alpha_real_ymm = _mm_set1_pd(real);
+	alpha_imag_ymm = _mm_set1_pd(imag);
+
+	for (; i < n; i++)
+	{
+		x_vec_ymm = _mm_loadu_pd(x0);
+
+		temp_ymm[0] = _mm_mul_pd(x_vec_ymm, alpha_real_ymm);
+		temp_ymm[1] = _mm_mul_pd(x_vec_ymm, alpha_imag_ymm);
+
+		temp_ymm[1] = _mm_permute_pd(temp_ymm[1], 0b01);
+
+		temp_ymm[0] = _mm_addsub_pd(temp_ymm[0], temp_ymm[1]);
+
+		_mm_storeu_pd(x0, temp_ymm[0]);
+
+		x0 += 2 * incx;
 	}
 }

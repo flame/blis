@@ -81,6 +81,7 @@ DOTXV_KER_PROT( scomplex, c, dotxv_zen_int )
 // scalv (intrinsics)
 SCALV_KER_PROT( float,    s, scalv_zen_int )
 SCALV_KER_PROT( double,   d, scalv_zen_int )
+SCALV_KER_PROT( dcomplex, z, scalv_zen_int )
 
 // scalv (intrinsics unrolled x10)
 SCALV_KER_PROT( float,    s, scalv_zen_int10 )
