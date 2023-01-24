@@ -1,12 +1,10 @@
-#if RISCV_SIZE==64
-
 #define REALNAME bli_zgemm_rviv_asm_4vx4
     .text
     .align      2
     .global     REALNAME
 
-// void REALNAME(uint64_t k, dcomplex* alpha, dcomplex* a, dcomplex* b,
-//               dcomplex* beta, dcomplex* c, uint64_t rs_c, uint64_t cs_c)
+// void REALNAME(uintptr_t k, dcomplex* alpha, dcomplex* a, dcomplex* b,
+//               dcomplex* beta, dcomplex* c, uintptr_t rs_c, uintptr_t cs_c)
 //
 // register arguments:
 // a0   k
@@ -112,6 +110,7 @@
 
 REALNAME:
     addi sp,sp,-64
+#if RISCV_SIZE == 64
     sd s7,56(sp)
     sd s6,48(sp)
     sd s5,40(sp)
@@ -120,6 +119,16 @@ REALNAME:
     sd s2,16(sp)
     sd s1,8(sp)
     sd s0,0(sp)
+#else
+    sw s7,56(sp)
+    sw s6,48(sp)
+    sw s5,40(sp)
+    sw s4,32(sp)
+    sw s3,24(sp)
+    sw s2,16(sp)
+    sw s1,8(sp)
+    sw s0,0(sp)
+#endif
 
     li tmp, 256
     vsetvli s0, tmp, e64, m1, ta, ma
@@ -142,23 +151,22 @@ REALNAME:
     add A11_ptr, A10_ptr, s0
 
     // Zero-initialize accumulators
-    fmv.d.x fa3, zero
-    vfmv.v.f AB00_re, fa3
-    vfmv.v.f AB00_im, fa3
-    vfmv.v.f AB01_re, fa3
-    vfmv.v.f AB01_im, fa3
-    vfmv.v.f AB02_re, fa3
-    vfmv.v.f AB02_im, fa3
-    vfmv.v.f AB03_re, fa3
-    vfmv.v.f AB03_im, fa3
-    vfmv.v.f AB10_re, fa3
-    vfmv.v.f AB10_im, fa3
-    vfmv.v.f AB11_re, fa3
-    vfmv.v.f AB11_im, fa3
-    vfmv.v.f AB12_re, fa3
-    vfmv.v.f AB12_im, fa3
-    vfmv.v.f AB13_re, fa3
-    vfmv.v.f AB13_im, fa3
+    vxor.vv AB00_re, AB00_re, AB00_re
+    vxor.vv AB00_im, AB00_im, AB00_im
+    vxor.vv AB01_re, AB01_re, AB01_re
+    vxor.vv AB01_im, AB01_im, AB01_im
+    vxor.vv AB02_re, AB02_re, AB02_re
+    vxor.vv AB02_im, AB02_im, AB02_im
+    vxor.vv AB03_re, AB03_re, AB03_re
+    vxor.vv AB03_im, AB03_im, AB03_im
+    vxor.vv AB10_re, AB10_re, AB10_re
+    vxor.vv AB10_im, AB10_im, AB10_im
+    vxor.vv AB11_re, AB11_re, AB11_re
+    vxor.vv AB11_im, AB11_im, AB11_im
+    vxor.vv AB12_re, AB12_re, AB12_re
+    vxor.vv AB12_im, AB12_im, AB12_im
+    vxor.vv AB13_re, AB13_re, AB13_re
+    vxor.vv AB13_im, AB13_im, AB13_im
 
     li tmp, 3
     ble loop_counter, tmp, TAIL_UNROLL_2
@@ -574,7 +582,7 @@ MULTIPLYALPHA:
     fld BETA_re, (a4)
     fld BETA_im, 8(a4)
 
-    fmv.d.x fa4, zero
+    fcvt.s.w fa4, x0 // Set fa4 to zero
     feq.d tmp, ALPHA_im, fa4
     bne tmp, zero, ALPHAREAL
 
@@ -765,6 +773,7 @@ BETAZERO:
     vsseg2e64.v AB13_re, (C13_ptr)
 
 END:
+#if RISCV_SIZE == 64
     ld s7,56(sp)
     ld s6,48(sp)
     ld s5,40(sp)
@@ -773,7 +782,15 @@ END:
     ld s2,16(sp)
     ld s1,8(sp)
     ld s0,0(sp)
+#else
+    lw s7,56(sp)
+    lw s6,48(sp)
+    lw s5,40(sp)
+    lw s4,32(sp)
+    lw s3,24(sp)
+    lw s2,16(sp)
+    lw s1,8(sp)
+    lw s0,0(sp)
+#endif
     addi sp,sp,64
     ret
-
-#endif // RISCV_SIZE==64

@@ -38,12 +38,12 @@
 extern
 void bli_dgemm_rviv_asm_4vx4
     (
-      uint64_t             k,
+      uintptr_t            k,
       double*     restrict alpha,
       double*     restrict a,
       double*     restrict b,
       double*     restrict beta,
-      double*     restrict c, uint64_t rs_c, uint64_t cs_c
+      double*     restrict c, uintptr_t rs_c, uintptr_t cs_c
     );
 
 void bli_dgemm_rviv_4vx4
@@ -61,9 +61,9 @@ void bli_dgemm_rviv_4vx4
      )
 {
     // Use local copy in case dim_t has a different size than expected in the assembly kernel
-    uint64_t _k     = k;
-    uint64_t rs_c   = rs_c0;
-    uint64_t cs_c   = cs_c0;
+    uintptr_t _k     = k;
+    uintptr_t rs_c   = rs_c0;
+    uintptr_t cs_c   = cs_c0;
 
     // Extract vector-length dependent mr, nr that are fixed at configure time.
     const inc_t mr = bli_cntx_get_blksz_def_dt( BLIS_DOUBLE, BLIS_MR, cntx );

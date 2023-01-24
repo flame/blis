@@ -1,11 +1,9 @@
-#if RISCV_SIZE==64
-
 #define REALNAME bli_sgemm_rviv_asm_4vx4
     .text
     .global     REALNAME
 
-// void REALNAME(uint64_t k, float* alpha, float* a, float* b,
-//               float* beta, float* c, uint64_t rs_c, uint64_t cs_c)
+// void REALNAME(uintptr_t k, float* alpha, float* a, float* b,
+//               float* beta, float* c, uintptr_t rs_c, uintptr_t cs_c)
 //
 // register arguments:
 // a0   k
@@ -85,7 +83,8 @@
 
 REALNAME:
     addi sp,sp,-64
-    sd s7,56(sp)    // sw s7,56(sp)
+#if RISCV_SIZE == 64
+    sd s7,56(sp)
     sd s6,48(sp)
     sd s5,40(sp)
     sd s4,32(sp)
@@ -93,6 +92,16 @@ REALNAME:
     sd s2,16(sp)
     sd s1,8(sp)
     sd s0,0(sp)
+#else
+    sw s7,56(sp)
+    sw s6,48(sp)
+    sw s5,40(sp)
+    sw s4,32(sp)
+    sw s3,24(sp)
+    sw s2,16(sp)
+    sw s1,8(sp)
+    sw s0,0(sp)
+#endif
 
     li tmp, 256
     vsetvli s0, tmp, e32, m1, ta, ma
@@ -117,23 +126,22 @@ REALNAME:
     slli s0, s0, 2 // length of a column of A in bytes
 
     // Zero-initialize accumulators
-    fmv.w.x fa3, zero
-    vfmv.v.f AB00, fa3
-    vfmv.v.f AB01, fa3
-    vfmv.v.f AB02, fa3
-    vfmv.v.f AB03, fa3
-    vfmv.v.f AB10, fa3
-    vfmv.v.f AB11, fa3
-    vfmv.v.f AB12, fa3
-    vfmv.v.f AB13, fa3
-    vfmv.v.f AB20, fa3
-    vfmv.v.f AB21, fa3
-    vfmv.v.f AB22, fa3
-    vfmv.v.f AB23, fa3
-    vfmv.v.f AB30, fa3
-    vfmv.v.f AB31, fa3
-    vfmv.v.f AB32, fa3
-    vfmv.v.f AB33, fa3
+    vxor.vv AB00, AB00, AB00
+    vxor.vv AB01, AB01, AB01
+    vxor.vv AB02, AB02, AB02
+    vxor.vv AB03, AB03, AB03
+    vxor.vv AB10, AB10, AB10
+    vxor.vv AB11, AB11, AB11
+    vxor.vv AB12, AB12, AB12
+    vxor.vv AB13, AB13, AB13
+    vxor.vv AB20, AB20, AB20
+    vxor.vv AB21, AB21, AB21
+    vxor.vv AB22, AB22, AB22
+    vxor.vv AB23, AB23, AB23
+    vxor.vv AB30, AB30, AB30
+    vxor.vv AB31, AB31, AB31
+    vxor.vv AB32, AB32, AB32
+    vxor.vv AB33, AB33, AB33
 
     li tmp, 1
     ble loop_counter, tmp, TAIL
@@ -295,7 +303,7 @@ MULTIPLYALPHA:
     vfmul.vf AB32, AB32, ALPHA
     vfmul.vf AB33, AB33, ALPHA
 
-    fmv.w.x fa4, zero
+    fcvt.s.w fa4, x0 // Set fa4 to zero
     feq.s tmp, BETA, fa4
     beq tmp, zero, BETANOTZERO
 
@@ -404,7 +412,8 @@ BETANOTZERO:
     vse32.v AB33, (C13_ptr)
 
 END:
-    ld s7,56(sp)    // lw
+#if RISCV_SIZE == 64
+    ld s7,56(sp)
     ld s6,48(sp)
     ld s5,40(sp)
     ld s4,32(sp)
@@ -412,7 +421,15 @@ END:
     ld s2,16(sp)
     ld s1,8(sp)
     ld s0,0(sp)
+#else
+    lw s7,56(sp)
+    lw s6,48(sp)
+    lw s5,40(sp)
+    lw s4,32(sp)
+    lw s3,24(sp)
+    lw s2,16(sp)
+    lw s1,8(sp)
+    lw s0,0(sp)
+#endif
     addi sp,sp,64
     ret
-
-#endif // RISCV_SIZE==64
