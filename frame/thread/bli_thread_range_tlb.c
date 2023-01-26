@@ -142,11 +142,11 @@ dim_t bli_thread_range_tlb_l
 	const dim_t offn_ut_nonrect = ( diagoffmin / nr );
 
 	PGUARD printf( "---------------------------\n" );
-	PGUARD printf( "min(diagoff,n):     %7ld\n", diagoffmin );
-	PGUARD printf( "offn_ut_nonrect:    %7ld\n", offn_ut_nonrect );
-	PGUARD printf( "offn_nonrect:       %7ld\n", offn_nonrect );
-	PGUARD printf( "diagoff_nonrect:    %7ld\n", diagoff_nonrect );
-	PGUARD printf( "n_nonrect:          %7ld\n", n_nonrect );
+	PGUARD printf( "min(diagoff,n):     %7ld\n", (long) diagoffmin );
+	PGUARD printf( "offn_ut_nonrect:    %7ld\n", (long) offn_ut_nonrect );
+	PGUARD printf( "offn_nonrect:       %7ld\n", (long) offn_nonrect );
+	PGUARD printf( "diagoff_nonrect:    %7ld\n", (long) diagoff_nonrect );
+	PGUARD printf( "n_nonrect:          %7ld\n", (long) n_nonrect );
 	PGUARD printf( "---------------------------\n" );
 
 	dim_t num_unref_ut = 0;
@@ -168,10 +168,10 @@ dim_t bli_thread_range_tlb_l
 
 		num_unref_ut += num_unref_ut_j;
 
-		PGUARD printf( "j                   %7ld\n", j );
-		PGUARD printf( "diagoff_j           %7ld\n", diagoff_j );
-		PGUARD printf( "num_unref_ut_j      %7ld\n", num_unref_ut_j );
-		PGUARD printf( "num_unref_ut        %7ld\n", num_unref_ut );
+		PGUARD printf( "j                   %7ld\n", (long) j );
+		PGUARD printf( "diagoff_j           %7ld\n", (long) diagoff_j );
+		PGUARD printf( "num_unref_ut_j      %7ld\n", (long) num_unref_ut_j );
+		PGUARD printf( "num_unref_ut        %7ld\n", (long) num_unref_ut );
 		PGUARD printf( "\n" );
 	}
 	PGUARD printf( "---------------------------\n" );
@@ -180,12 +180,12 @@ dim_t bli_thread_range_tlb_l
 	const dim_t tri_ref_area   = nonrect_area - tri_unref_area;
 	const dim_t total_ref_area = rect_area + tri_ref_area;
 
-	PGUARD printf( "gross area:         %7ld\n", m * n );
-	PGUARD printf( "rect_area:          %7ld\n", rect_area );
-	PGUARD printf( "nonrect_area:       %7ld\n", nonrect_area );
-	PGUARD printf( "tri_unref_area:     %7ld\n", tri_unref_area );
-	PGUARD printf( "tri_ref_area:       %7ld\n", tri_ref_area );
-	PGUARD printf( "total_ref_area:     %7ld\n", total_ref_area );
+	PGUARD printf( "gross area:         %7ld\n", (long) m * n );
+	PGUARD printf( "rect_area:          %7ld\n", (long) rect_area );
+	PGUARD printf( "nonrect_area:       %7ld\n", (long) nonrect_area );
+	PGUARD printf( "tri_unref_area:     %7ld\n", (long) tri_unref_area );
+	PGUARD printf( "tri_ref_area:       %7ld\n", (long) tri_ref_area );
+	PGUARD printf( "total_ref_area:     %7ld\n", (long) total_ref_area );
 	PGUARD printf( "---------------------------\n" );
 
 	//
@@ -196,9 +196,9 @@ dim_t bli_thread_range_tlb_l
 	//const dim_t n_ut_tri_ref  = tri_ref_area   / ( mr * nr );
 	const dim_t n_ut_rect     = rect_area      / ( mr * nr );
 
-	PGUARD printf( "n_ut_ref:           %7ld\n", n_ut_ref );
-	//PGUARD printf( "n_ut_tri_ref:       %7ld\n", n_ut_tri_ref );
-	PGUARD printf( "n_ut_rect:          %7ld\n", n_ut_rect );
+	PGUARD printf( "n_ut_ref:           %7ld\n", (long) n_ut_ref );
+	//PGUARD printf( "n_ut_tri_ref:       %7ld\n", (long) n_ut_tri_ref );
+	PGUARD printf( "n_ut_rect:          %7ld\n", (long) n_ut_rect );
 	PGUARD printf( "---------------------------\n" );
 
 	// Compute the number of microtiles to allocate per thread as well as the
@@ -206,20 +206,20 @@ dim_t bli_thread_range_tlb_l
 	const dim_t n_ut_per_thr = n_ut_ref / nt;
 	const dim_t n_ut_pt_left = n_ut_ref % nt;
 
-	PGUARD printf( "n_ut_per_thr:       %7ld\n", n_ut_per_thr );
-	PGUARD printf( "n_ut_pt_left:       %7ld\n", n_ut_pt_left );
+	PGUARD printf( "n_ut_per_thr:       %7ld\n", (long) n_ut_per_thr );
+	PGUARD printf( "n_ut_pt_left:       %7ld\n", (long) n_ut_pt_left );
 	PGUARD printf( "---------------------------\n" );
 
 	const dim_t n_ut_per_col = m_iter;
 
-	PGUARD printf( "n_ut_per_col:       %7ld\n", n_ut_per_col );
+	PGUARD printf( "n_ut_per_col:       %7ld\n", (long) n_ut_per_col );
 
 	// Allocate one of the leftover microtiles to the current thread if its
 	// tid is one of the lower thread ids.
 	const dim_t n_ut_for_me = n_ut_per_thr + ( tid < n_ut_pt_left ? 1 : 0 );
 
-	PGUARD printf( "n_ut_for_me:        %7ld (%ld+%ld)\n", n_ut_for_me,
-	               n_ut_per_thr, n_ut_for_me - n_ut_per_thr );
+	PGUARD printf( "n_ut_for_me:        %7ld (%ld+%ld)\n", (long) n_ut_for_me,
+	               (long) n_ut_per_thr, (long) n_ut_for_me - n_ut_per_thr );
 
 	// Compute the number of utiles prior to the current thread's starting
 	// point. This is the sum of all n_ut_for_me for all thread ids less
@@ -228,7 +228,7 @@ dim_t bli_thread_range_tlb_l
 	// n_ut_pt_left.
 	const dim_t n_ut_before = tid * n_ut_per_thr + bli_min( tid, n_ut_pt_left );
 
-	PGUARD printf( "n_ut_before:        %7ld\n", n_ut_before );
+	PGUARD printf( "n_ut_before:        %7ld\n", (long) n_ut_before );
 	PGUARD printf( "---------------------------\n" );
 
 	//
@@ -251,13 +251,14 @@ dim_t bli_thread_range_tlb_l
 
 		const dim_t ut_index_rect_st = n_ut_before;
 
-		PGUARD printf( "ut_index_st:        %7ld\n", ut_index_rect_st );
+		PGUARD printf( "ut_index_st:        %7ld\n", (long) ut_index_rect_st );
 		PGUARD printf( "---------------------------\n" );
 
 		j_st = ut_index_rect_st / n_ut_per_col;
 		i_st = ut_index_rect_st % n_ut_per_col;
 
-		PGUARD printf( "j_st, i_st (fnl=)      %4ld,%4ld\n", j_st, i_st );
+		PGUARD printf( "j_st, i_st (fnl=)      %4ld,%4ld\n",
+                       (long) j_st, (long) i_st );
 	}
 	else // if ( n_ut_rect <= n_ut_before )
 	{
@@ -274,19 +275,19 @@ dim_t bli_thread_range_tlb_l
 		// advance past to get to the diagonal region.
 		const dim_t n_ut_col_adv = offn_ut_nonrect;
 
-		PGUARD printf( "n_ut_col_adv:       %7ld\n", n_ut_col_adv );
+		PGUARD printf( "n_ut_col_adv:       %7ld\n", (long) n_ut_col_adv );
 
 		// In order to find j_st and i_st, we need to "allocate" n_ut_before
 		// microtiles.
 		dim_t n_ut_tba = n_ut_before;
 
-		PGUARD printf( "n_ut_tba:           %7ld\n", n_ut_tba );
+		PGUARD printf( "n_ut_tba:           %7ld\n", (long) n_ut_tba );
 
 		// Advance past the rectangular region, decrementing n_ut_tba
 		// accordingly.
 		n_ut_tba -= n_ut_per_col * n_ut_col_adv;
 
-		PGUARD printf( "n_ut_tba_1:         %7ld\n", n_ut_tba );
+		PGUARD printf( "n_ut_tba_1:         %7ld\n", (long) n_ut_tba );
 		PGUARD printf( "\n" );
 
 		// In case n_ut_tba == 0. Only happens when n_ut_before == n_ut_rect.
@@ -299,11 +300,11 @@ dim_t bli_thread_range_tlb_l
 			const dim_t n_ut_skip_j   = bli_max( -diagoff_j / mr, 0 );
 			const dim_t n_ut_this_col = n_ut_per_col - n_ut_skip_j;
 
-			PGUARD printf( "j:                  %7ld\n", j );
-			PGUARD printf( "diagoff_j:          %7ld\n", diagoff_j );
-			PGUARD printf( "n_ut_skip_j:        %7ld\n", n_ut_skip_j );
-			PGUARD printf( "n_ut_this_col:      %7ld\n", n_ut_this_col );
-			PGUARD printf( "n_ut_tba_j0:        %7ld\n", n_ut_tba );
+			PGUARD printf( "j:                  %7ld\n", (long) j );
+			PGUARD printf( "diagoff_j:          %7ld\n", (long) diagoff_j );
+			PGUARD printf( "n_ut_skip_j:        %7ld\n", (long) n_ut_skip_j );
+			PGUARD printf( "n_ut_this_col:      %7ld\n", (long) n_ut_this_col );
+			PGUARD printf( "n_ut_tba_j0:        %7ld\n", (long) n_ut_tba );
 
 			if ( n_ut_tba < n_ut_this_col )
 			{
@@ -313,7 +314,8 @@ dim_t bli_thread_range_tlb_l
 				// intersects the diagonal and then add n_ut_tba.
 				j_st = j;
 				i_st = n_ut_skip_j + n_ut_tba;
-				PGUARD printf( "j_st, i_st (fnl<)      %4ld,%4ld\n", j_st, i_st );
+				PGUARD printf( "j_st, i_st (fnl<)      %4ld,%4ld\n",
+                               (long)  j_st, (long) i_st );
 			}
 			else if ( n_ut_tba == n_ut_this_col )
 			{
@@ -326,7 +328,8 @@ dim_t bli_thread_range_tlb_l
 
 				j_st = j + 1;
 				i_st = n_ut_skip_jp1;
-				PGUARD printf( "j_st, i_st (fnl=)      %4ld,%4ld\n", j_st, i_st );
+				PGUARD printf( "j_st, i_st (fnl=)      %4ld,%4ld\n",
+                               (long) j_st, (long) i_st );
 			}
 
 			// No matter what (especially if the number of utiles to allocate
@@ -336,7 +339,7 @@ dim_t bli_thread_range_tlb_l
 			// zero (or less), in which case this will be the final iteration.)
 			n_ut_tba -= n_ut_this_col;
 
-			PGUARD printf( "n_ut_tba_j1:        %7ld\n", n_ut_tba );
+			PGUARD printf( "n_ut_tba_j1:        %7ld\n", (long) n_ut_tba );
 			PGUARD printf( "\n" );
 		}
 	}
@@ -350,7 +353,7 @@ dim_t bli_thread_range_tlb_l
 
 	#ifdef PRINT_RESULT
 	printf( "j_st, i_st (mem)       %4ld,%4ld  (n_ut: %4ld)\n",
-	        j_st, i_st, n_ut_for_me );
+	        (long) j_st, (long) i_st, (long) n_ut_for_me );
 	#endif
 
 	// Return the number of utiles that this thread was allocated.
@@ -414,11 +417,11 @@ dim_t bli_thread_range_tlb_u
 	const dim_t offn_ut_rect    = n_iter + ( diagoffmin / nr );
 
 	PGUARD printf( "---------------------------\n" );
-	PGUARD printf( "max(diagoff,-m):    %7ld\n", diagoffmin );
-	PGUARD printf( "offn_ut_rect:       %7ld\n", offn_ut_rect );
-	PGUARD printf( "offn_rect:          %7ld\n", offn_rect );
-	PGUARD printf( "diagoff_nonrect:    %7ld\n", diagoff_nonrect );
-	PGUARD printf( "n_nonrect:          %7ld\n", n_nonrect );
+	PGUARD printf( "max(diagoff,-m):    %7ld\n", (long) diagoffmin );
+	PGUARD printf( "offn_ut_rect:       %7ld\n", (long) offn_ut_rect );
+	PGUARD printf( "offn_rect:          %7ld\n", (long) offn_rect );
+	PGUARD printf( "diagoff_nonrect:    %7ld\n", (long) diagoff_nonrect );
+	PGUARD printf( "n_nonrect:          %7ld\n", (long) n_nonrect );
 	PGUARD printf( "---------------------------\n" );
 
 	dim_t num_unref_ut = 0;
@@ -443,10 +446,10 @@ dim_t bli_thread_range_tlb_u
 
 		num_unref_ut += num_unref_ut_j;
 
-		PGUARD printf( "j                   %7ld\n", j );
-		PGUARD printf( "diagoff_j - nr      %7ld\n", diagoff_j - nr );
-		PGUARD printf( "num_unref_ut_j      %7ld\n", num_unref_ut_j );
-		PGUARD printf( "num_unref_ut        %7ld\n", num_unref_ut );
+		PGUARD printf( "j                   %7ld\n", (long) j );
+		PGUARD printf( "diagoff_j - nr      %7ld\n", (long) diagoff_j - nr );
+		PGUARD printf( "num_unref_ut_j      %7ld\n", (long) num_unref_ut_j );
+		PGUARD printf( "num_unref_ut        %7ld\n", (long) num_unref_ut );
 		PGUARD printf( "\n" );
 	}
 	PGUARD printf( "---------------------------\n" );
@@ -455,12 +458,12 @@ dim_t bli_thread_range_tlb_u
 	const dim_t tri_ref_area   = nonrect_area - tri_unref_area;
 	const dim_t total_ref_area = rect_area + tri_ref_area;
 
-	PGUARD printf( "gross area:         %7ld\n", m * n );
-	PGUARD printf( "rect_area:          %7ld\n", rect_area );
-	PGUARD printf( "nonrect_area:       %7ld\n", nonrect_area );
-	PGUARD printf( "tri_unref_area:     %7ld\n", tri_unref_area );
-	PGUARD printf( "tri_ref_area:       %7ld\n", tri_ref_area );
-	PGUARD printf( "total_ref_area:     %7ld\n", total_ref_area );
+	PGUARD printf( "gross area:         %7ld\n", (long) m * n );
+	PGUARD printf( "rect_area:          %7ld\n", (long) rect_area );
+	PGUARD printf( "nonrect_area:       %7ld\n", (long) nonrect_area );
+	PGUARD printf( "tri_unref_area:     %7ld\n", (long) tri_unref_area );
+	PGUARD printf( "tri_ref_area:       %7ld\n", (long) tri_ref_area );
+	PGUARD printf( "total_ref_area:     %7ld\n", (long) total_ref_area );
 	PGUARD printf( "---------------------------\n" );
 
 	//
@@ -471,8 +474,8 @@ dim_t bli_thread_range_tlb_u
 	const dim_t n_ut_tri_ref  = tri_ref_area   / ( mr * nr );
 	//const dim_t n_ut_rect     = rect_area      / ( mr * nr );
 
-	PGUARD printf( "n_ut_ref:           %7ld\n", n_ut_ref );
-	PGUARD printf( "n_ut_tri_ref:       %7ld\n", n_ut_tri_ref );
+	PGUARD printf( "n_ut_ref:           %7ld\n", (long) n_ut_ref );
+	PGUARD printf( "n_ut_tri_ref:       %7ld\n", (long) n_ut_tri_ref );
 	//PGUARD printf( "n_ut_rect:          %7ld\n", n_ut_rect );
 	PGUARD printf( "---------------------------\n" );
 
@@ -481,20 +484,20 @@ dim_t bli_thread_range_tlb_u
 	const dim_t n_ut_per_thr = n_ut_ref / nt;
 	const dim_t n_ut_pt_left = n_ut_ref % nt;
 
-	PGUARD printf( "n_ut_per_thr:       %7ld\n", n_ut_per_thr );
-	PGUARD printf( "n_ut_pt_left:       %7ld\n", n_ut_pt_left );
+	PGUARD printf( "n_ut_per_thr:       %7ld\n", (long) n_ut_per_thr );
+	PGUARD printf( "n_ut_pt_left:       %7ld\n", (long) n_ut_pt_left );
 	PGUARD printf( "---------------------------\n" );
 
 	const dim_t n_ut_per_col = m_iter;
 
-	PGUARD printf( "n_ut_per_col:       %7ld\n", n_ut_per_col );
+	PGUARD printf( "n_ut_per_col:       %7ld\n", (long) n_ut_per_col );
 
 	// Allocate one of the leftover microtiles to the current thread if its
 	// tid is one of the lower thread ids.
 	const dim_t n_ut_for_me = n_ut_per_thr + ( tid < n_ut_pt_left ? 1 : 0 );
 
-	PGUARD printf( "n_ut_for_me:        %7ld (%ld+%ld)\n", n_ut_for_me,
-	               n_ut_per_thr, n_ut_for_me - n_ut_per_thr );
+	PGUARD printf( "n_ut_for_me:        %7ld (%ld+%ld)\n", (long) n_ut_for_me,
+	               (long) n_ut_per_thr, (long) n_ut_for_me - n_ut_per_thr );
 
 	// Compute the number of utiles prior to the current thread's starting
 	// point. This is the sum of all n_ut_for_me for all thread ids less
@@ -503,7 +506,7 @@ dim_t bli_thread_range_tlb_u
 	// n_ut_pt_left.
 	const dim_t n_ut_before = tid * n_ut_per_thr + bli_min( tid, n_ut_pt_left );
 
-	PGUARD printf( "n_ut_before:        %7ld\n", n_ut_before );
+	PGUARD printf( "n_ut_before:        %7ld\n", (long) n_ut_before );
 	PGUARD printf( "---------------------------\n" );
 
 	//
@@ -526,13 +529,14 @@ dim_t bli_thread_range_tlb_u
 
 		const dim_t ut_index_rect_st = n_ut_before - n_ut_tri_ref;
 
-		PGUARD printf( "ut_index_rect_st:   %7ld\n", ut_index_rect_st );
+		PGUARD printf( "ut_index_rect_st:   %7ld\n", (long) ut_index_rect_st );
 		PGUARD printf( "---------------------------\n" );
 
 		j_st = offn_ut_rect + ut_index_rect_st / n_ut_per_col;
 		i_st =                ut_index_rect_st % n_ut_per_col;
 
-		PGUARD printf( "j_st, i_st (fnl=)      %4ld,%4ld\n", j_st, i_st );
+		PGUARD printf( "j_st, i_st (fnl=)      %4ld,%4ld\n",
+                       (long) j_st, (long) i_st );
 	}
 	else // if ( n_ut_before < n_ut_tri_ref )
 	{
@@ -549,19 +553,19 @@ dim_t bli_thread_range_tlb_u
 		// advance past to get to the diagonal region.
 		const dim_t n_ut_col_adv = 0;
 
-		PGUARD printf( "n_ut_col_adv:       %7ld\n", n_ut_col_adv );
+		PGUARD printf( "n_ut_col_adv:       %7ld\n", (long) n_ut_col_adv );
 
 		// In order to find j_st and i_st, we need to "allocate" n_ut_before
 		// microtiles.
 		dim_t n_ut_tba = n_ut_before;
 
-		PGUARD printf( "n_ut_tba:           %7ld\n", n_ut_tba );
+		PGUARD printf( "n_ut_tba:           %7ld\n", (long) n_ut_tba );
 
 		// No need to advance since the upper-trapezoid begins with the
 		// diagonal region.
 		//n_ut_tba -= 0;
 
-		PGUARD printf( "n_ut_tba_1:         %7ld\n", n_ut_tba );
+		PGUARD printf( "n_ut_tba_1:         %7ld\n", (long) n_ut_tba );
 		PGUARD printf( "\n" );
 
 		// In case n_ut_tba == 0. Only happens when n_ut_before == 0.
@@ -574,11 +578,11 @@ dim_t bli_thread_range_tlb_u
 			const dim_t n_ut_skip_j   = bli_max( ( m + diagoff_j - nr ) / mr, 0 );
 			const dim_t n_ut_this_col = n_ut_per_col - n_ut_skip_j;
 
-			PGUARD printf( "j:                  %7ld\n", j );
-			PGUARD printf( "diagoff_j:          %7ld\n", diagoff_j );
-			PGUARD printf( "n_ut_skip_j:        %7ld\n", n_ut_skip_j );
-			PGUARD printf( "n_ut_this_col:      %7ld\n", n_ut_this_col );
-			PGUARD printf( "n_ut_tba_j0:        %7ld\n", n_ut_tba );
+			PGUARD printf( "j:                  %7ld\n", (long) j );
+			PGUARD printf( "diagoff_j:          %7ld\n", (long) diagoff_j );
+			PGUARD printf( "n_ut_skip_j:        %7ld\n", (long) n_ut_skip_j );
+			PGUARD printf( "n_ut_this_col:      %7ld\n", (long) n_ut_this_col );
+			PGUARD printf( "n_ut_tba_j0:        %7ld\n", (long) n_ut_tba );
 
 			if ( n_ut_tba < n_ut_this_col )
 			{
@@ -587,7 +591,8 @@ dim_t bli_thread_range_tlb_u
 				// column. To find i_st, we simply use n_ut_tba.
 				j_st = j;
 				i_st = n_ut_tba;
-				PGUARD printf( "j_st, i_st (fnl<)      %4ld,%4ld\n", j_st, i_st );
+				PGUARD printf( "j_st, i_st (fnl<)      %4ld,%4ld\n",
+                               (long) j_st, (long) i_st );
 			}
 			else if ( n_ut_tba == n_ut_this_col )
 			{
@@ -597,7 +602,8 @@ dim_t bli_thread_range_tlb_u
 
 				j_st = j + 1;
 				i_st = 0;
-				PGUARD printf( "j_st, i_st (fnl=)      %4ld,%4ld\n", j_st, i_st );
+				PGUARD printf( "j_st, i_st (fnl=)      %4ld,%4ld\n",
+                               (long) j_st, (long) i_st );
 			}
 
 			// No matter what (especially if the number of utiles to allocate
@@ -607,7 +613,7 @@ dim_t bli_thread_range_tlb_u
 			// zero (or less), in which case this will be the final iteration.)
 			n_ut_tba -= n_ut_this_col;
 
-			PGUARD printf( "n_ut_tba_j1:        %7ld\n", n_ut_tba );
+			PGUARD printf( "n_ut_tba_j1:        %7ld\n", (long) n_ut_tba );
 			PGUARD printf( "\n" );
 		}
 	}
@@ -621,7 +627,7 @@ dim_t bli_thread_range_tlb_u
 
 	#ifdef PRINT_RESULT
 	printf( "j_st, i_st (mem)       %4ld,%4ld  (n_ut: %4ld)\n",
-	         j_st, i_st, n_ut_for_me );
+            (long) j_st, (long) i_st, (long) n_ut_for_me );
 	#endif
 
 	// Return the number of utiles that this thread was allocated.
@@ -666,7 +672,7 @@ dim_t bli_thread_range_tlb_d
 
 	const dim_t total_ref_area = m_rect * n_rect;
 
-	PGUARD printf( "total_ref_area:     %7ld\n", total_ref_area );
+	PGUARD printf( "total_ref_area:     %7ld\n", (long) total_ref_area );
 	PGUARD printf( "---------------------------\n" );
 
 	//
@@ -675,7 +681,7 @@ dim_t bli_thread_range_tlb_d
 
 	const dim_t n_ut_ref = total_ref_area / ( mr * nr );
 
-	PGUARD printf( "n_ut_ref:           %7ld\n", n_ut_ref );
+	PGUARD printf( "n_ut_ref:           %7ld\n", (long) n_ut_ref );
 	PGUARD printf( "---------------------------\n" );
 
 	// Compute the number of microtiles to allocate per thread as well as the
@@ -683,20 +689,20 @@ dim_t bli_thread_range_tlb_d
 	const dim_t n_ut_per_thr = n_ut_ref / nt;
 	const dim_t n_ut_pt_left = n_ut_ref % nt;
 
-	PGUARD printf( "n_ut_per_thr:       %7ld\n", n_ut_per_thr );
-	PGUARD printf( "n_ut_pt_left:       %7ld\n", n_ut_pt_left );
+	PGUARD printf( "n_ut_per_thr:       %7ld\n", (long) n_ut_per_thr );
+	PGUARD printf( "n_ut_pt_left:       %7ld\n", (long) n_ut_pt_left );
 	PGUARD printf( "---------------------------\n" );
 
 	const dim_t n_ut_per_col = m_iter;
 
-	PGUARD printf( "n_ut_per_col:       %7ld\n", n_ut_per_col );
+	PGUARD printf( "n_ut_per_col:       %7ld\n", (long) n_ut_per_col );
 
 	// Allocate one of the leftover microtiles to the current thread if its
 	// tid is one of the lower thread ids.
 	const dim_t n_ut_for_me = n_ut_per_thr + ( tid < n_ut_pt_left ? 1 : 0 );
 
-	PGUARD printf( "n_ut_for_me:        %7ld (%ld+%ld)\n", n_ut_for_me,
-	               n_ut_per_thr, n_ut_for_me - n_ut_per_thr );
+	PGUARD printf( "n_ut_for_me:        %7ld (%ld+%ld)\n", (long) n_ut_for_me,
+	               (long) n_ut_per_thr, (long) n_ut_for_me - n_ut_per_thr );
 
 	// Compute the number of utiles prior to the current thread's starting
 	// point. This is the sum of all n_ut_for_me for all thread ids less
@@ -705,7 +711,7 @@ dim_t bli_thread_range_tlb_d
 	// n_ut_pt_left.
 	const dim_t n_ut_before = tid * n_ut_per_thr + bli_min( tid, n_ut_pt_left );
 
-	PGUARD printf( "n_ut_before:        %7ld\n", n_ut_before );
+	PGUARD printf( "n_ut_before:        %7ld\n", (long) n_ut_before );
 	PGUARD printf( "---------------------------\n" );
 
 	//
@@ -714,7 +720,7 @@ dim_t bli_thread_range_tlb_d
 
 	const dim_t ut_index_st = n_ut_before;
 
-	PGUARD printf( "ut_index_st:        %7ld\n", ut_index_st );
+	PGUARD printf( "ut_index_st:        %7ld\n", (long) ut_index_st );
 	PGUARD printf( "---------------------------\n" );
 
 	const dim_t j_st = ut_index_st / n_ut_per_col;
@@ -849,12 +855,12 @@ dim_t bli_thread_range_tlb_trmm_lx_impl
 	// by the k_iter given by the caller.
 
 	PGUARD printf( "---------------------------\n" );
-	PGUARD printf( "m_iter:             %7ld\n", m_iter );
-	PGUARD printf( "n_iter:             %7ld\n", n_iter );
-	PGUARD printf( "k_iter:             %7ld\n", k_iter );
-	PGUARD printf( "mr:                 %7ld\n", mr );
-	PGUARD printf( "nr:                 %7ld\n", nr );
-	PGUARD printf( "diagoff_iter:       %7ld\n", diagoff_iter );
+	PGUARD printf( "m_iter:             %7ld\n", (long) m_iter );
+	PGUARD printf( "n_iter:             %7ld\n", (long) n_iter );
+	PGUARD printf( "k_iter:             %7ld\n", (long) k_iter );
+	PGUARD printf( "mr:                 %7ld\n", (long) mr );
+	PGUARD printf( "nr:                 %7ld\n", (long) nr );
+	PGUARD printf( "diagoff_iter:       %7ld\n", (long) diagoff_iter );
 
 	dim_t uops_per_col = 0;
 
@@ -874,7 +880,7 @@ dim_t bli_thread_range_tlb_trmm_lx_impl
 		uops_per_col += k_i_iter;
 	}
 
-	PGUARD printf( "uops_per_col:       %7ld\n", uops_per_col );
+	PGUARD printf( "uops_per_col:       %7ld\n", (long) uops_per_col );
 
 	//
 	// -- Step 2: Compute key flop counts (per thread, per column, etc.) -------
@@ -889,23 +895,23 @@ dim_t bli_thread_range_tlb_trmm_lx_impl
 	const dim_t n_uops_pt_left = total_uops % nt;
 
 	PGUARD printf( "---------------------------\n" );
-	PGUARD printf( "total_uops:         %7ld\n", total_uops );
-	PGUARD printf( "n_uops_per_thr:     %7ld\n", n_uops_per_thr );
-	PGUARD printf( "n_uops_pt_left:     %7ld\n", n_uops_pt_left );
+	PGUARD printf( "total_uops:         %7ld\n", (long) total_uops );
+	PGUARD printf( "n_uops_per_thr:     %7ld\n", (long) n_uops_per_thr );
+	PGUARD printf( "n_uops_pt_left:     %7ld\n", (long) n_uops_pt_left );
 
 	//
 	// -- Step 3: Compute the starting j/i utile offset for a given tid --------
 	//
 
 	PGUARD printf( "---------------------------\n" );
-	PGUARD printf( "total_utiles:       %7ld\n", m_iter * n_iter );
+	PGUARD printf( "total_utiles:       %7ld\n", (long) m_iter * n_iter );
 	PGUARD printf( "---------------------------\n" );
 
 	dim_t j_st_cur = 0; dim_t j_en_cur = 0;
 	dim_t i_st_cur = 0; dim_t i_en_cur = 0;
 
 	PGUARD printf( "          tid %ld will start at j,i: %ld %ld\n",
-	               ( dim_t )0, j_st_cur, i_st_cur );
+	               0l, (long) j_st_cur, (long) i_st_cur );
 
 	// Find the utile update that pushes uops_tba to 0 or less.
 #ifdef PRINT_MODE
@@ -920,7 +926,7 @@ dim_t bli_thread_range_tlb_trmm_lx_impl
 		      dim_t n_ut_for_me = 0;
 		      bool  done_e      = FALSE;
 
-		PGUARD printf( "tid_i: %ld  n_uops to alloc: %3ld \n", tid_i, uops_tba );
+        PGUARD printf( "tid_i: %ld  n_uops to alloc: %3ld \n", (long) tid_i, (long) uops_tba );
 
 		// This code begins allocating uops when the starting point is somewhere
 		// after the first microtile. Typically this will not be enough to
@@ -930,7 +936,7 @@ dim_t bli_thread_range_tlb_trmm_lx_impl
 		{
 			dim_t i;
 
-			//PGUARD printf( "tid_i: %ld  uops left to alloc: %2ld \n", tid_i, uops_tba );
+			//PGUARD printf( "tid_i: %ld  uops left to alloc: %2ld \n", (long) tid_i, (long) uops_tba );
 
 			for ( i = i_st_cur; i < m_iter; ++i )
 			{
@@ -943,7 +949,8 @@ dim_t bli_thread_range_tlb_trmm_lx_impl
 				uops_tba = uops_tba_new;
 
 				PGUARD printf( "tid_i: %ld  i: %2ld  (1 n_ut_cur: %ld) (uops_alloc: %ld)\n",
-				               tid_i, i, n_ut_for_me, uops_ta - uops_tba );
+				               (long) tid_i, (long) i, (long) n_ut_for_me,
+                               (long) uops_ta - uops_tba );
 
 				if ( uops_tba_new <= 0 ) { j_en_cur = j; i_en_cur = i; done_e = TRUE;
 				                           break; }
@@ -979,10 +986,12 @@ dim_t bli_thread_range_tlb_trmm_lx_impl
 			n_ut_for_me += j_inc * m_iter;
 
 			PGUARD printf( "tid_i: %ld  advanced to col: %2ld  (uops traversed: %ld)\n",
-			               tid_i, j, uops_per_col * j_inc );
+			               (long) tid_i, (long) j, (long) uops_per_col * j_inc );
 			PGUARD printf( "tid_i: %ld  j: %2ld  (  n_ut_cur: %ld) (uops_alloc: %ld)\n",
-			               tid_i, j, n_ut_for_me, uops_ta - uops_tba );
-			PGUARD printf( "tid_i: %ld  uops left to alloc: %2ld \n", tid_i, j_left );
+			               (long) tid_i, (long) j, (long) n_ut_for_me,
+                           (long) uops_ta - uops_tba );
+			PGUARD printf( "tid_i: %ld  uops left to alloc: %2ld \n",
+                           (long) tid_i, (long) j_left );
 
 			if ( uops_tba == 0 )
 			{
@@ -1019,7 +1028,8 @@ dim_t bli_thread_range_tlb_trmm_lx_impl
 					uops_tba = uops_tba_new;
 
 					PGUARD printf( "tid_i: %ld  i: %2ld  (4 n_ut_cur: %ld) (uops_alloc: %ld)\n",
-					               tid_i, i, n_ut_for_me, uops_ta - uops_tba );
+					               (long) tid_i, (long) i,
+                                   (long) n_ut_for_me, (long) uops_ta - uops_tba );
 
 					if ( uops_tba_new <= 0 ) { j_en_cur = j; i_en_cur = i;
 					                           break; }
@@ -1029,7 +1039,7 @@ dim_t bli_thread_range_tlb_trmm_lx_impl
 
 
 		PGUARD printf( "tid_i: %ld         (5 n_ut_cur: %ld) (overshoot: %ld out of %ld)\n",
-		                tid_i, n_ut_for_me, -uops_tba, uops_ta );
+                       (long)  tid_i, (long) n_ut_for_me, -(long) uops_tba, (long) uops_ta );
 
 		if ( tid_i == tid )
 		{
@@ -1045,9 +1055,10 @@ dim_t bli_thread_range_tlb_trmm_lx_impl
 		if ( i_st_cur == m_iter ) { j_st_cur += 1; i_st_cur = 0; }
 
 		PGUARD printf( "tid_i: %ld         (6 n_ut_cur: %ld)\n",
-		               tid_i, n_ut_for_me );
+		               (long) tid_i, (long) n_ut_for_me );
 		PGUARD printf( "tid_i: %ld  tid %ld will start at j,i: %ld %ld\n",
-		               tid_i, tid_i + 1, j_st_cur, i_st_cur );
+		               (long) tid_i, (long) tid_i + 1,
+                       (long) j_st_cur, (long) i_st_cur );
 		PGUARD printf( "---------------------------\n" );
 	}
 
@@ -1065,7 +1076,8 @@ dim_t bli_thread_range_tlb_trmm_lx_impl
 	*i_st_p = i_st_cur;
 
 	PGUARD printf( "tid_i: %ld         (7 n_ut_for_me: %ld) (j,i_st: %ld %ld)\n",
-	               tid, n_ut_for_me, j_st_cur, i_st_cur );
+	               (long) tid, (long) n_ut_for_me,
+                   (long) j_st_cur, (long) i_st_cur );
 
 	return n_ut_for_me;
 #else
@@ -1263,14 +1275,14 @@ dim_t bli_thread_range_tlb_trmm_rl_impl
 	const dim_t offn_ut_nonrect = diagoffmin_iter;
 
 	PGUARD printf( "---------------------------\n" );
-	PGUARD printf( "m_iter:             %7ld\n", m_iter );
-	PGUARD printf( "k_iter:             %7ld\n", k_iter );
-	PGUARD printf( "n_iter:             %7ld\n", n_iter );
-	PGUARD printf( "min(diagoff_it,n):  %7ld\n", diagoffmin_iter );
-	PGUARD printf( "offn_ut_nonrect:    %7ld\n", offn_ut_nonrect );
-	PGUARD printf( "offn_nonrect:       %7ld\n", offn_nonrect );
-	PGUARD printf( "diagoff_nonrect:    %7ld\n", diagoff_nonrect );
-	PGUARD printf( "n_nonrect:          %7ld\n", n_nonrect );
+	PGUARD printf( "m_iter:             %7ld\n", (long) m_iter );
+	PGUARD printf( "k_iter:             %7ld\n", (long) k_iter );
+	PGUARD printf( "n_iter:             %7ld\n", (long) n_iter );
+	PGUARD printf( "min(diagoff_it,n):  %7ld\n", (long) diagoffmin_iter );
+	PGUARD printf( "offn_ut_nonrect:    %7ld\n", (long) offn_ut_nonrect );
+	PGUARD printf( "offn_nonrect:       %7ld\n", (long) offn_nonrect );
+	PGUARD printf( "diagoff_nonrect:    %7ld\n", (long) diagoff_nonrect );
+	PGUARD printf( "n_nonrect:          %7ld\n", (long) n_nonrect );
 	PGUARD printf( "---------------------------\n" );
 
 	const dim_t num_unref_ut0 = n_nonrect * ( n_nonrect - 1 ) / 2;
@@ -1283,16 +1295,16 @@ dim_t bli_thread_range_tlb_trmm_rl_impl
 	const dim_t tri_ref_vol    = tri_ref_area * m_iter;
 	const dim_t total_vol      = total_ref_area * m_iter;
 
-	PGUARD printf( "gross_area:         %7ld\n", gross_area );
-	PGUARD printf( "nonrect_area:       %7ld\n", nonrect_area );
-	PGUARD printf( "tri_unref_area:     %7ld\n", tri_unref_area );
-	PGUARD printf( "rect_area:          %7ld\n", rect_area );
-	PGUARD printf( "tri_ref_area:       %7ld\n", tri_ref_area );
-	PGUARD printf( "total_ref_area:     %7ld\n", total_ref_area );
+	PGUARD printf( "gross_area:         %7ld\n", (long) gross_area );
+	PGUARD printf( "nonrect_area:       %7ld\n", (long) nonrect_area );
+	PGUARD printf( "tri_unref_area:     %7ld\n", (long) tri_unref_area );
+	PGUARD printf( "rect_area:          %7ld\n", (long) rect_area );
+	PGUARD printf( "tri_ref_area:       %7ld\n", (long) tri_ref_area );
+	PGUARD printf( "total_ref_area:     %7ld\n", (long) total_ref_area );
 	PGUARD printf( "---------------------------\n" );
-	PGUARD printf( "rect_vol (uops):    %7ld\n", rect_vol );
-	PGUARD printf( "tri_ref_vol (uops): %7ld\n", tri_ref_vol );
-	PGUARD printf( "total_vol (uops):   %7ld\n", total_vol );
+	PGUARD printf( "rect_vol (uops):    %7ld\n", (long) rect_vol );
+	PGUARD printf( "tri_ref_vol (uops): %7ld\n", (long) tri_ref_vol );
+	PGUARD printf( "total_vol (uops):   %7ld\n", (long) total_vol );
 	PGUARD printf( "---------------------------\n" );
 
 	//
@@ -1308,14 +1320,14 @@ dim_t bli_thread_range_tlb_trmm_rl_impl
 	const dim_t n_uops_per_thr = total_uops / nt;
 	const dim_t n_uops_pt_left = total_uops % nt;
 
-	PGUARD printf( "n_threads:          %7ld\n", nt );
-	PGUARD printf( "n_uops_per_thr:     %7ld\n", n_uops_per_thr );
-	PGUARD printf( "n_uops_pt_left:     %7ld\n", n_uops_pt_left );
+	PGUARD printf( "n_threads:          %7ld\n", (long) nt );
+	PGUARD printf( "n_uops_per_thr:     %7ld\n", (long) n_uops_per_thr );
+	PGUARD printf( "n_uops_pt_left:     %7ld\n", (long) n_uops_pt_left );
 	PGUARD printf( "---------------------------\n" );
 
 	const dim_t uops_per_col_rect = m_iter * k_iter;
 
-	PGUARD printf( "uops_per_col_rect:  %7ld\n", uops_per_col_rect );
+	PGUARD printf( "uops_per_col_rect:  %7ld\n", (long) uops_per_col_rect );
 
 	// Allocate one of the leftover uops to the current thread if its tid is
 	// one of the lower thread ids.
@@ -1329,7 +1341,7 @@ dim_t bli_thread_range_tlb_trmm_rl_impl
 	//
 
 	PGUARD printf( "---------------------------\n" );
-	PGUARD printf( "total_utiles:       %7ld\n", m_iter * n_iter );
+	PGUARD printf( "total_utiles:       %7ld\n", (long) m_iter * n_iter );
 	PGUARD printf( "---------------------------\n" );
 
 	dim_t j_st_cur = 0; dim_t j_en_cur = 0;
@@ -1349,9 +1361,11 @@ dim_t bli_thread_range_tlb_trmm_rl_impl
 		      bool  done_e      = FALSE;
 		      bool  search_tri  = FALSE;
 
-		PGUARD printf( "tid_i: %ld  n_uops_ta:    %3ld \n", tid_i, uops_tba );
+              PGUARD printf( "tid_i: %ld  n_uops_ta:    %3ld \n",
+                             (long) tid_i, (long) uops_tba );
 		PGUARD printf( "tid_i: %ld  j: %2ld  (  n_ut_cur: %ld) (uops_alloc: %ld)\n",
-		                tid_i, j, n_ut_for_me, uops_ta - uops_tba );
+                       (long) tid_i, (long) j, (long) n_ut_for_me,
+                       (long) uops_ta - uops_tba );
 
 		// This code begins allocating uops when the starting point is somewhere
 		// after the first microtile. Typically this will not be enough to
@@ -1381,7 +1395,8 @@ dim_t bli_thread_range_tlb_trmm_rl_impl
 				uops_tba = uops_tba_new;
 
 				PGUARD printf( "tid_i: %ld  i: %2ld  (0 n_ut_cur: %ld) (uops_alloc: %ld) (k_iter_j: %ld)\n",
-				                tid_i, i, n_ut_for_me, uops_ta - uops_tba, k_iter_j );
+                               (long) tid_i, (long) i, (long) n_ut_for_me,
+                               (long) uops_ta - uops_tba, k_iter_j );
 
 				if ( uops_tba_new <= 0 ) { j_en_cur = j; i_en_cur = i; done_e = TRUE;
 				                           break; }
@@ -1428,7 +1443,8 @@ dim_t bli_thread_range_tlb_trmm_rl_impl
 			}
 
 			PGUARD printf( "tid_i: %ld  i: %2ld  (* n_ut_cur: %ld) (uops_alloc: %ld)\n",
-						   tid_i, i-1, n_ut_for_me, uops_ta - uops_tba );
+						   (long) tid_i, (long) i-1, (long) n_ut_for_me,
+                           (long) uops_ta - uops_tba );
 
 			// If we allocated all utiles in the column (regardless of whether we finished
 			// allocating utiles for the current thread), increment j to the next column,
@@ -1442,7 +1458,8 @@ dim_t bli_thread_range_tlb_trmm_rl_impl
 				if ( j == n_iter ) { j_en_cur = j - 1; i_en_cur = m_iter - 1; done_e = TRUE; }
 
 				PGUARD printf( "tid_i: %ld  j: %2ld  (! n_ut_cur: %ld) (uops_alloc: %ld)\n",
-							   tid_i, j, n_ut_for_me, uops_ta - uops_tba );
+							   (long) tid_i, (long) j, (long) n_ut_for_me,
+                               (long) uops_ta - uops_tba );
 			}
 
 			#endif
@@ -1484,10 +1501,12 @@ dim_t bli_thread_range_tlb_trmm_rl_impl
 				n_ut_for_me += j_inc * m_iter;
 
 				PGUARD printf( "tid_i: %ld  advanced to col: %2ld  (uops traversed: %ld)\n",
-				               tid_i, j, uops_per_col_rect * j_inc );
+				               (long) tid_i, (long) j, (long) uops_per_col_rect * j_inc );
 				PGUARD printf( "tid_i: %ld  j: %2ld  (1 n_ut_cur: %ld) (uops_alloc: %ld)\n",
-				                tid_i, j, n_ut_for_me, uops_ta - uops_tba );
-				PGUARD printf( "tid_i: %ld  uops left to alloc: %2ld \n", tid_i, j_left );
+                               (long) tid_i, (long) j, (long) n_ut_for_me,
+                               (long) uops_ta - uops_tba );
+				PGUARD printf( "tid_i: %ld  uops left to alloc: %2ld \n",
+                               (long) tid_i, (long) j_left );
 
 				if ( uops_tba == 0 )
 				{
@@ -1499,7 +1518,8 @@ dim_t bli_thread_range_tlb_trmm_rl_impl
 					search_tri = FALSE;
 
 					PGUARD printf( "tid_i: %ld  j: %2ld  (2 n_ut_cur: %ld) (uops_alloc: %ld)\n",
-					               tid_i, j, n_ut_for_me, uops_ta - uops_tba );
+					               (long) tid_i, (long) j, (long) n_ut_for_me,
+                                   (long) uops_ta - uops_tba );
 				}
 				else if ( j >  n_iter ) bli_abort(); // Safety check; should never execute.
 				else if ( j == n_iter )
@@ -1512,7 +1532,8 @@ dim_t bli_thread_range_tlb_trmm_rl_impl
 					// fewer uops for the last thread.)
 					search_tri = FALSE;
 					PGUARD printf( "tid_i: %ld  j: %2ld  (3 n_ut_cur: %ld) (uops_alloc: %ld)\n",
-					               tid_i, j, n_ut_for_me, uops_ta - uops_tba );
+					               (long) tid_i, (long) j, (long) n_ut_for_me,
+                                   (long) uops_ta - uops_tba );
 				}
 				else if ( j < diagoff_iter )
 				{
@@ -1524,7 +1545,8 @@ dim_t bli_thread_range_tlb_trmm_rl_impl
 					// over the top.
 					search_tri = FALSE;
 					PGUARD printf( "tid_i: %ld  j: %2ld  (4 n_ut_cur: %ld) (uops_alloc: %ld)\n",
-					               tid_i, j, n_ut_for_me, uops_ta - uops_tba );
+					               (long) tid_i, (long) j, (long)  n_ut_for_me,
+                                   (long) uops_ta - uops_tba );
 				}
 				else // if ( 0 < uops_tba && j == diagoff_iter && j < n_iter )
 				{
@@ -1534,17 +1556,19 @@ dim_t bli_thread_range_tlb_trmm_rl_impl
 					// region.
 					search_tri = TRUE;
 					PGUARD printf( "tid_i: %ld  j: %2ld  (5 n_ut_cur: %ld) (uops_alloc: %ld)\n",
-					               tid_i, j, n_ut_for_me, uops_ta - uops_tba );
+					               (long) tid_i, (long) j, (long) n_ut_for_me,
+                                   (long) uops_ta - uops_tba );
 				}
 			}
 			else /* if ( diagoff_iter <= j ) */
 			{
 				PGUARD printf( "tid_i: %ld  j: %2ld >= diagoff_iter: %ld\n",
-				               tid_i, j, diagoff_iter );
+				               (long) tid_i, (long) j, (long) diagoff_iter );
 				search_tri = TRUE;
 			}
 
-			PGUARD printf( "tid_i: %ld  j: %2ld  search_tri: %d\n", tid_i, j, search_tri );
+			PGUARD printf( "tid_i: %ld  j: %2ld  search_tri: %ld\n", (long) tid_i,
+                           (long) j, (long) search_tri );
 
 			if ( search_tri )
 			{
@@ -1557,12 +1581,13 @@ dim_t bli_thread_range_tlb_trmm_rl_impl
 					const dim_t n_uops_j = k_iter_j * m_iter;
 
 					PGUARD printf( "tid_i: %ld  j: %2ld  (6 n_ut_cur: %ld) (uops_alloc: %ld) (n_uops_j: %ld)\n",
-					               tid_i, j, n_ut_for_me, uops_ta - uops_tba, n_uops_j );
+					               (long) tid_i, (long) j, (long) n_ut_for_me,
+                                   (long) uops_ta - uops_tba, (long) n_uops_j );
 
 					if ( uops_tba == 0 )
 					{
 						PGUARD printf( "tid_i: %ld  j: %2ld  (7 n_ut_cur: %ld) (uops_alloc: %ld)\n",
-						               tid_i, j, n_ut_for_me, uops_ta - uops_tba );
+						               (long) tid_i, (long) j, (long) n_ut_for_me, (long) uops_ta - uops_tba );
 						// If advancing over the previous column allocated all of
 						// our uops, then designate the last iteration of the
 						// previous column as the end point.
@@ -1580,12 +1605,14 @@ dim_t bli_thread_range_tlb_trmm_rl_impl
 						uops_tba -= n_uops_j;
 
 						PGUARD printf( "tid_i: %ld  j: %2ld  (8 n_ut_cur: %ld) (uops_alloc: %ld)\n",
-						               tid_i, j, n_ut_for_me, uops_ta - uops_tba );
+						               (long) tid_i, (long) j, (long) n_ut_for_me,
+                                       (long) uops_ta - uops_tba );
 					}
 					else // if ( uops_tba < n_uops_j )
 					{
 						PGUARD printf( "tid_i: %ld  j: %2ld  (9 n_ut_cur: %ld) (uops_alloc: %ld)\n",
-						               tid_i, j, n_ut_for_me, uops_ta - uops_tba );
+						               (long) tid_i, (long) j, (long) n_ut_for_me,
+                                       (long) uops_ta - uops_tba );
 						// If we can finish allocating all the remaining uops
 						// with the utiles in the current column, then we break
 						// out of the loop without updating j, n_ut_for_me, or
@@ -1604,7 +1631,8 @@ dim_t bli_thread_range_tlb_trmm_rl_impl
 				const dim_t k_iter_j = bli_tlb_trmm_rl_k_iter( diagoff_iter, k_iter, j );
 
 				PGUARD printf( "tid_i: %ld  j: %2ld  (A n_ut_cur: %ld) (uops_alloc: %ld) (k_iter_j: %ld)\n",
-				               tid_i, j, n_ut_for_me, uops_ta - uops_tba, k_iter_j );
+				               (long) tid_i, (long) j, (long) n_ut_for_me,
+                               (long) uops_ta - uops_tba, (long) k_iter_j );
 
 				#if 0
 
@@ -1615,7 +1643,7 @@ dim_t bli_thread_range_tlb_trmm_rl_impl
 					const dim_t uops_tba_new = uops_tba - k_iter_j;
 					uops_tba = uops_tba_new;
 					PGUARD printf( "tid_i: %ld  i: %2ld  (B n_ut_cur: %ld) (uops_alloc: %ld)\n",
-					               tid_i, i, n_ut_for_me, uops_ta - uops_tba );
+					               (long) tid_i, (long) i, (long) n_ut_for_me, uops_ta - uops_tba );
 					if ( uops_tba_new <= 0 ) { j_en_cur = j; i_en_cur = i; break; }
 				}
 
@@ -1636,7 +1664,8 @@ dim_t bli_thread_range_tlb_trmm_rl_impl
 				j_en_cur = j; i_en_cur = i;
 
 				PGUARD printf( "tid_i: %ld  i: %2ld  (b n_ut_cur: %ld) (uops_alloc: %ld)\n",
-				               tid_i, i, n_ut_for_me, uops_ta - uops_tba );
+				               (long) tid_i, (long) i, (long) n_ut_for_me,
+                               (long) uops_ta - uops_tba );
 
 				#endif
 			}
@@ -1648,7 +1677,7 @@ dim_t bli_thread_range_tlb_trmm_rl_impl
 		}
 
 		PGUARD printf( "tid_i: %ld  done!  (C n_ut_cur: %ld) (overshoot: %ld out of %ld)\n",
-					   tid_i, n_ut_for_me, -uops_tba, uops_ta );
+					   (long) tid_i, (long) n_ut_for_me, -(long) uops_tba, (long) uops_ta );
 
 		if ( tid_i == tid )
 		{
@@ -1666,9 +1695,10 @@ dim_t bli_thread_range_tlb_trmm_rl_impl
 		if ( i_st_cur == m_iter ) { j_st_cur += 1; i_st_cur = 0; }
 
 		PGUARD printf( "tid_i: %ld         (D n_ut_cur: %ld)\n",
-					   tid_i, n_ut_for_me );
+					   (long) tid_i, (long) n_ut_for_me );
 		PGUARD printf( "tid_i: %ld  tid %ld will start at j,i: %ld %ld\n",
-					   tid_i, tid_i + 1, j_st_cur, i_st_cur );
+					   (long) tid_i, (long) tid_i + 1,
+                       (long) j_st_cur, (long) i_st_cur );
 		PGUARD printf( "---------------------------\n" );
 	}
 
@@ -1688,7 +1718,8 @@ dim_t bli_thread_range_tlb_trmm_rl_impl
 	*i_en_p = m_iter - 1;
 
 	PGUARD printf( "tid_i: %ld         (E n_ut_for_me: %ld) (j,i_st: %ld %ld)\n",
-	               tid, n_ut_for_me, j_st_cur, i_st_cur );
+	               (long) tid, (long) n_ut_for_me,
+                   (long) j_st_cur, (long) i_st_cur );
 
 	return n_ut_for_me;
 #else
@@ -1696,4 +1727,3 @@ dim_t bli_thread_range_tlb_trmm_rl_impl
 	return -1;
 #endif
 }
-
