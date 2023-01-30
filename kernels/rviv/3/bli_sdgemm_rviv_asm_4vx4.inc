@@ -88,8 +88,7 @@ REALNAME:
     vsetvli s0, tmp, VTYPE, m1, ta, ma
     slli s0, s0, DATASHIFT      // vector length in bytes
 
-    // Workaround for `mul rs_c, rs_c, s0` because rv64iv does not support `mul`
-    mv rs_c, s0                 // Assumes unit row skip
+    mv rs_c, s0
     slli cs_c, cs_c, DATASHIFT  // count in FP steps
 
     // Set up pointers

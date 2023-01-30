@@ -73,9 +73,7 @@ void bli_dgemm_rviv_4vx4
 
     GEMM_UKR_SETUP_CT( d, mr, nr, false );
 
-    assert( rs_c == 1 );
-
-    bli_dgemm_rviv_asm_4vx4( k, alpha, a, b, beta, c, rs_c, cs_c );
+    bli_dgemm_rviv_asm_4vx4( k, alpha, a, b, beta, c, rs_c * num_fp64_per_vector(), cs_c );
 
     GEMM_UKR_FLUSH_CT( d );
 }
