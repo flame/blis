@@ -33,5 +33,7 @@
 */
 
 #include "blis.h"
+#include <assert.h>
+#include <stdint.h>
 
-uint32_t num_fp32_per_vector();
+uint32_t num_fp32_per_vector(void);

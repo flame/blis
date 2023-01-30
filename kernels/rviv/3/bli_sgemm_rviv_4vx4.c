@@ -32,18 +32,18 @@
 
 
 */
-#include "blis.h"
+#include "bli_rviv_utils.h"
 
-
-extern
 void bli_sgemm_rviv_asm_4vx4
     (
-      uintptr_t             k,
+      intptr_t            k,
       float*     restrict alpha,
       float*     restrict a,
       float*     restrict b,
       float*     restrict beta,
-      float*     restrict c, uintptr_t rs_c, uintptr_t cs_c
+      float*     restrict c,
+      intptr_t            rs_c,
+      intptr_t            cs_c
     );
 
 void bli_sgemm_rviv_4vx4
@@ -55,15 +55,17 @@ void bli_sgemm_rviv_4vx4
        float*     restrict a,
        float*     restrict b,
        float*     restrict beta,
-       float*     restrict c, inc_t rs_c0, inc_t cs_c0,
+       float*     restrict c,
+       inc_t               rs_c,
+       inc_t               cs_c,
        auxinfo_t*          data,
        cntx_t*             cntx
      )
 {
-    // Use local copy in case dim_t has a different size than expected in the assembly kernel
-    uintptr_t _k     = k;
-    uintptr_t rs_c   = rs_c0;
-    uintptr_t cs_c   = cs_c0;
+    // The assembly kernels always take native machine-sized integer arguments.
+    // dim_t and inc_t are normally defined as being machine-sized. If larger, assert.
+    bli_static_assert( sizeof(dim_t) <= sizeof(intptr_t) &&
+                       sizeof(inc_t) <= sizeof(intptr_t) );
 
     // Extract vector-length dependent mr, nr that are fixed at configure time.
     const inc_t mr = bli_cntx_get_blksz_def_dt( BLIS_FLOAT, BLIS_MR, cntx );
@@ -71,8 +73,9 @@ void bli_sgemm_rviv_4vx4
 
     GEMM_UKR_SETUP_CT( s, mr, nr, false );
 
-    bli_sgemm_rviv_asm_4vx4(_k, alpha, a, b, beta, c, rs_c, cs_c);
+    assert( rs_c == 1 );
+
+    bli_sgemm_rviv_asm_4vx4( k, alpha, a, b, beta, c, rs_c, cs_c );
 
     GEMM_UKR_FLUSH_CT( s );
 }
-

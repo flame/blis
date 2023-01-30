@@ -34,7 +34,8 @@
 
 #include "blis.h"
 
-uint32_t num_fp32_per_vector() {
+uint32_t num_fp32_per_vector(void)
+{
     uint32_t velem = 0;
     __asm__ volatile
     (

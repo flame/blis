@@ -1,9 +1,8 @@
-#define REALNAME bli_dgemm_rviv_asm_4vx4
     .text
     .global     REALNAME
 
-// void REALNAME(uintptr_t k, double* alpha, double* a, double* b,
-//               double* beta, double* c, uintptr_t rs_c, uintptr_t cs_c)
+// void REALNAME(intptr_t k, void* alpha, void* a, void* b,
+//               void* beta, void* c, intptr_t rs_c, intptr_t cs_c)
 //
 // register arguments:
 // a0   k
@@ -19,27 +18,26 @@
 
 #define loop_counter a0
 
-#define A0_ptr a2
-#define A1_ptr t0
-#define A2_ptr t1
-#define A3_ptr t2
+#define A0_ptr    a2
+#define A1_ptr    t0
+#define A2_ptr    t1
+#define A3_ptr    t2
 
+#define B_row_ptr a3
 
-#define B_row_ptr  a3
+#define C00_ptr   a5
+#define C01_ptr   t3
+#define C02_ptr   t4
+#define C03_ptr   t5
+#define C10_ptr   s1
+#define C11_ptr   s2
+#define C12_ptr   s3
+#define C13_ptr   s4
 
-#define C00_ptr  a5
-#define C01_ptr  t3
-#define C02_ptr  t4
-#define C03_ptr  t5
-#define C10_ptr  s1
-#define C11_ptr  s2
-#define C12_ptr  s3
-#define C13_ptr  s4
+#define tmp    t6
 
-#define tmp   t6
-
-#define ALPHA fa1
-#define BETA  fa2
+#define ALPHA  fa1
+#define BETA   fa2
 
 #define B00    fa4
 #define B01    fa5
@@ -51,15 +49,15 @@
 #define B12    fa2
 #define B13    fa3
 
-#define A00   v24
-#define A10   v25
-#define A20   v26
-#define A30   v27
+#define A00    v24
+#define A10    v25
+#define A20    v26
+#define A30    v27
 
-#define A01   v28
-#define A11   v29
-#define A21   v30
-#define A31   v31
+#define A01    v28
+#define A11    v29
+#define A21    v30
+#define A31    v31
 
 #define AB00   v0
 #define AB01   v1
@@ -78,36 +76,21 @@
 #define AB32   v14
 #define AB33   v15
 
-#define rs_c  a6
-#define cs_c  a7
+#define rs_c   a6
+#define cs_c   a7
 
 REALNAME:
-    addi sp,sp,-64
-#if RISCV_SIZE == 64
-    sd s7,56(sp)
-    sd s6,48(sp)
-    sd s5,40(sp)
-    sd s4,32(sp)
-    sd s3,24(sp)
-    sd s2,16(sp)
-    sd s1,8(sp)
-    sd s0,0(sp)
-#else
-    sw s7,56(sp)
-    sw s6,48(sp)
-    sw s5,40(sp)
-    sw s4,32(sp)
-    sw s3,24(sp)
-    sw s2,16(sp)
-    sw s1,8(sp)
-    sw s0,0(sp)
-#endif
+    #include "rviv_save_registers.inc"
 
+    // Arbitrarily long length
+    // TODO: Find a better way of querying MAXVL
     li tmp, 256
-    vsetvli s0, tmp, e64, m1, ta, ma
-    slli s0, s0, 3      // vector length in bytes
-    mv rs_c, s0         // Assumes unit row skip
-    slli cs_c, cs_c, 3  // count in FP64 steps
+    vsetvli s0, tmp, VTYPE, m1, ta, ma
+    slli s0, s0, DATASHIFT      // vector length in bytes
+
+    // Workaround for `mul rs_c, rs_c, s0` because rv64iv does not support `mul`
+    mv rs_c, s0                 // Assumes unit row skip
+    slli cs_c, cs_c, DATASHIFT  // count in FP steps
 
     // Set up pointers
     add C01_ptr, C00_ptr, cs_c
@@ -146,16 +129,16 @@ REALNAME:
     ble loop_counter, tmp, TAIL
 
     // Load B(l,0:3)
-    fld B00, (B_row_ptr)
-    fld B01, 8(B_row_ptr)
-    fld B02, 16(B_row_ptr)
-    fld B03, 24(B_row_ptr)
+    FLOAD B00, 0*DATASIZE(B_row_ptr)
+    FLOAD B01, 1*DATASIZE(B_row_ptr)
+    FLOAD B02, 2*DATASIZE(B_row_ptr)
+    FLOAD B03, 3*DATASIZE(B_row_ptr)
 
     // Load A(:,l)
-    vle64.v A00, (A0_ptr)
-    vle64.v A10, (A1_ptr)
-    vle64.v A20, (A2_ptr)
-    vle64.v A30, (A3_ptr)
+    VLE A00, (A0_ptr)
+    VLE A10, (A1_ptr)
+    VLE A20, (A2_ptr)
+    VLE A30, (A3_ptr)
 
 LOOP_K:
     addi loop_counter, loop_counter, -2
@@ -177,17 +160,17 @@ LOOP_K:
     vfmacc.vf AB13, B03, A10
 
     // Load B(l+1,0:3)
-    fld B10, 32(B_row_ptr)
-    fld B11, 40(B_row_ptr)
-    fld B12, 48(B_row_ptr)
-    fld B13, 56(B_row_ptr)
-    addi B_row_ptr, B_row_ptr, 64
+    FLOAD B10, 4*DATASIZE(B_row_ptr)
+    FLOAD B11, 5*DATASIZE(B_row_ptr)
+    FLOAD B12, 6*DATASIZE(B_row_ptr)
+    FLOAD B13, 7*DATASIZE(B_row_ptr)
+    addi B_row_ptr, B_row_ptr, 8*DATASIZE
 
     // Load A(:,l+1)
-    vle64.v A01, (A0_ptr)
-    vle64.v A11, (A1_ptr)
-    vle64.v A21, (A2_ptr)
-    vle64.v A31, (A3_ptr)
+    VLE A01, (A0_ptr)
+    VLE A11, (A1_ptr)
+    VLE A21, (A2_ptr)
+    VLE A31, (A3_ptr)
 
     vfmacc.vf AB20, B00, A20
     vfmacc.vf AB21, B01, A20
@@ -229,15 +212,15 @@ LOOP_K:
     ble loop_counter, tmp, TAIL
 
     // Load next row of B and next column of A for the next iteration
-    fld B00, (B_row_ptr)
-    fld B01, 8(B_row_ptr)
-    fld B02, 16(B_row_ptr)
-    fld B03, 24(B_row_ptr)
+    FLOAD B00, 0*DATASIZE(B_row_ptr)
+    FLOAD B01, 1*DATASIZE(B_row_ptr)
+    FLOAD B02, 2*DATASIZE(B_row_ptr)
+    FLOAD B03, 3*DATASIZE(B_row_ptr)
 
-    vle64.v A00, (A0_ptr)
-    vle64.v A10, (A1_ptr)
-    vle64.v A20, (A2_ptr)
-    vle64.v A30, (A3_ptr)
+    VLE A00, (A0_ptr)
+    VLE A10, (A1_ptr)
+    VLE A20, (A2_ptr)
+    VLE A30, (A3_ptr)
 
     j LOOP_K
 
@@ -245,16 +228,16 @@ TAIL:
     beqz loop_counter, MULTIPLYALPHA
 
     // Load row of B
-    fld B00, (B_row_ptr)
-    fld B01, 8(B_row_ptr)
-    fld B02, 16(B_row_ptr)
-    fld B03, 24(B_row_ptr)
+    FLOAD B00, 0*DATASIZE(B_row_ptr)
+    FLOAD B01, 1*DATASIZE(B_row_ptr)
+    FLOAD B02, 2*DATASIZE(B_row_ptr)
+    FLOAD B03, 3*DATASIZE(B_row_ptr)
 
     // Load A(:,l)
-    vle64.v A00, (A0_ptr)
-    vle64.v A10, (A1_ptr)
-    vle64.v A20, (A2_ptr)
-    vle64.v A30, (A3_ptr)
+    VLE A00, (A0_ptr)
+    VLE A10, (A1_ptr)
+    VLE A20, (A2_ptr)
+    VLE A30, (A3_ptr)
 
     vfmacc.vf AB00, B00, A00
     vfmacc.vf AB01, B01, A00
@@ -276,10 +259,9 @@ TAIL:
     vfmacc.vf AB32, B02, A30
     vfmacc.vf AB33, B03, A30
 
-
 MULTIPLYALPHA:
-    fld ALPHA,(a1)
-    fld BETA, (a4)
+    FLOAD ALPHA, (a1)
+    FLOAD BETA,  (a4)
 
     // Multiply with alpha
     vfmul.vf AB00, AB00, ALPHA
@@ -302,73 +284,73 @@ MULTIPLYALPHA:
     vfmul.vf AB32, AB32, ALPHA
     vfmul.vf AB33, AB33, ALPHA
 
-    fcvt.s.w fa4, x0 // Set fa4 to zero
-    feq.d tmp, BETA, fa4
+    FZERO(fa4) // Set fa4 to zero
+    FEQ tmp, BETA, fa4
     beq tmp, zero, BETANOTZERO
 
 BETAZERO:
-    vse64.v AB00, (C00_ptr)
-    vse64.v AB01, (C01_ptr)
-    vse64.v AB02, (C02_ptr)
-    vse64.v AB03, (C03_ptr)
+    VSE AB00, (C00_ptr)
+    VSE AB01, (C01_ptr)
+    VSE AB02, (C02_ptr)
+    VSE AB03, (C03_ptr)
 
     add C00_ptr, C10_ptr, rs_c  // advance pointers to row 2*VLEN
     add C01_ptr, C11_ptr, rs_c
     add C02_ptr, C12_ptr, rs_c
     add C03_ptr, C13_ptr, rs_c
 
-    vse64.v AB10, (C10_ptr)
-    vse64.v AB11, (C11_ptr)
-    vse64.v AB12, (C12_ptr)
-    vse64.v AB13, (C13_ptr)
+    VSE AB10, (C10_ptr)
+    VSE AB11, (C11_ptr)
+    VSE AB12, (C12_ptr)
+    VSE AB13, (C13_ptr)
 
     add C10_ptr, C00_ptr, rs_c  // advance pointers to row 3*VLEN
     add C11_ptr, C01_ptr, rs_c
     add C12_ptr, C02_ptr, rs_c
     add C13_ptr, C03_ptr, rs_c
 
-    vse64.v AB20, (C00_ptr)
-    vse64.v AB21, (C01_ptr)
-    vse64.v AB22, (C02_ptr)
-    vse64.v AB23, (C03_ptr)
+    VSE AB20, (C00_ptr)
+    VSE AB21, (C01_ptr)
+    VSE AB22, (C02_ptr)
+    VSE AB23, (C03_ptr)
 
-    vse64.v AB30, (C10_ptr)
-    vse64.v AB31, (C11_ptr)
-    vse64.v AB32, (C12_ptr)
-    vse64.v AB33, (C13_ptr)
+    VSE AB30, (C10_ptr)
+    VSE AB31, (C11_ptr)
+    VSE AB32, (C12_ptr)
+    VSE AB33, (C13_ptr)
 
     j END
 
 BETANOTZERO:
-    vle64.v v16, (C00_ptr)  // Load C(0:VLEN-1, 0:3)
-    vle64.v v17, (C01_ptr)
-    vle64.v v18, (C02_ptr)
-    vle64.v v19, (C03_ptr)
+    VLE v16, (C00_ptr)  // Load C(0:VLEN-1, 0:3)
+    VLE v17, (C01_ptr)
+    VLE v18, (C02_ptr)
+    VLE v19, (C03_ptr)
 
     vfmacc.vf AB00, BETA, v16
     vfmacc.vf AB01, BETA, v17
     vfmacc.vf AB02, BETA, v18
     vfmacc.vf AB03, BETA, v19
 
-    vse64.v AB00, (C00_ptr)  // Store C(0:VLEN-1, 0:3)
-    vse64.v AB01, (C01_ptr)
-    vse64.v AB02, (C02_ptr)
-    vse64.v AB03, (C03_ptr)
+    VSE AB00, (C00_ptr)  // Store C(0:VLEN-1, 0:3)
+    VSE AB01, (C01_ptr)
+    VSE AB02, (C02_ptr)
+    VSE AB03, (C03_ptr)
 
-    vle64.v v20, (C10_ptr)  // Load C(VLEN:2*VLEN-1, 0:3)
-    vle64.v v21, (C11_ptr)
-    vle64.v v22, (C12_ptr)
-    vle64.v v23, (C13_ptr)
+    VLE v20, (C10_ptr)  // Load C(VLEN:2*VLEN-1, 0:3)
+    VLE v21, (C11_ptr)
+    VLE v22, (C12_ptr)
+    VLE v23, (C13_ptr)
 
     vfmacc.vf AB10, BETA, v20
     vfmacc.vf AB11, BETA, v21
     vfmacc.vf AB12, BETA, v22
     vfmacc.vf AB13, BETA, v23
 
-    vse64.v AB10, (C10_ptr)  // Store C(VLEN:2*VLEN-1, 0:3)
-    vse64.v AB11, (C11_ptr)
-    vse64.v AB12, (C12_ptr)
-    vse64.v AB13, (C13_ptr)
+    VSE AB10, (C10_ptr)  // Store C(VLEN:2*VLEN-1, 0:3)
+    VSE AB11, (C11_ptr)
+    VSE AB12, (C12_ptr)
+    VSE AB13, (C13_ptr)
 
     add C00_ptr, C10_ptr, rs_c  // advance pointers to row 2*VLEN
     add C01_ptr, C11_ptr, rs_c
@@ -380,55 +362,36 @@ BETANOTZERO:
     add C12_ptr, C02_ptr, rs_c
     add C13_ptr, C03_ptr, rs_c
 
-    vle64.v v16, (C00_ptr)  // Load C(2*VLEN:3*VLEN-1, 0:3)
-    vle64.v v17, (C01_ptr)
-    vle64.v v18, (C02_ptr)
-    vle64.v v19, (C03_ptr)
+    VLE v16, (C00_ptr)  // Load C(2*VLEN:3*VLEN-1, 0:3)
+    VLE v17, (C01_ptr)
+    VLE v18, (C02_ptr)
+    VLE v19, (C03_ptr)
 
     vfmacc.vf AB20, BETA, v16
     vfmacc.vf AB21, BETA, v17
     vfmacc.vf AB22, BETA, v18
     vfmacc.vf AB23, BETA, v19
 
-    vse64.v AB20, (C00_ptr)  // Store C(2*VLEN:3*VLEN-1, 0:3)
-    vse64.v AB21, (C01_ptr)
-    vse64.v AB22, (C02_ptr)
-    vse64.v AB23, (C03_ptr)
+    VSE AB20, (C00_ptr)  // Store C(2*VLEN:3*VLEN-1, 0:3)
+    VSE AB21, (C01_ptr)
+    VSE AB22, (C02_ptr)
+    VSE AB23, (C03_ptr)
 
-    vle64.v v20, (C10_ptr)  // Load C(3*VLEN:4*VLEN-1, 0:3)
-    vle64.v v21, (C11_ptr)
-    vle64.v v22, (C12_ptr)
-    vle64.v v23, (C13_ptr)
+    VLE v20, (C10_ptr)  // Load C(3*VLEN:4*VLEN-1, 0:3)
+    VLE v21, (C11_ptr)
+    VLE v22, (C12_ptr)
+    VLE v23, (C13_ptr)
 
     vfmacc.vf AB30, BETA, v20
     vfmacc.vf AB31, BETA, v21
     vfmacc.vf AB32, BETA, v22
     vfmacc.vf AB33, BETA, v23
 
-    vse64.v AB30, (C10_ptr)  // Store C(3*VLEN:4*VLEN-1, 0:3)
-    vse64.v AB31, (C11_ptr)
-    vse64.v AB32, (C12_ptr)
-    vse64.v AB33, (C13_ptr)
+    VSE AB30, (C10_ptr)  // Store C(3*VLEN:4*VLEN-1, 0:3)
+    VSE AB31, (C11_ptr)
+    VSE AB32, (C12_ptr)
+    VSE AB33, (C13_ptr)
 
 END:
-#if RISCV_SIZE == 64
-    ld s7,56(sp)
-    ld s6,48(sp)
-    ld s5,40(sp)
-    ld s4,32(sp)
-    ld s3,24(sp)
-    ld s2,16(sp)
-    ld s1,8(sp)
-    ld s0,0(sp)
-#else
-    lw s7,56(sp)
-    lw s6,48(sp)
-    lw s5,40(sp)
-    lw s4,32(sp)
-    lw s3,24(sp)
-    lw s2,16(sp)
-    lw s1,8(sp)
-    lw s0,0(sp)
-#endif
-    addi sp,sp,64
+    #include "rviv_restore_registers.inc"
     ret
