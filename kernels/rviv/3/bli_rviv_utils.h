@@ -34,13 +34,28 @@
 
 #include "blis.h"
 
-uint32_t num_fp32_per_vector(void)
+inline uint32_t num_fp32_per_vector(void)
 {
     uint32_t velem = 0;
     __asm__ volatile
     (
     " li a5, 256                         \n\t"
     " vsetvli a4, a5, e32, m1, ta, ma    \n\t"
+    " mv %[velem], a4                    \n\t"
+    : [velem] "=r" (velem)
+    :
+    : "a4", "a5"
+    );
+    return velem;
+}
+
+inline uint32_t num_fp64_per_vector(void)
+{
+    uint32_t velem = 0;
+    __asm__ volatile
+    (
+    " li a5, 256                         \n\t"
+    " vsetvli a4, a5, e64, m1, ta, ma    \n\t"
     " mv %[velem], a4                    \n\t"
     : [velem] "=r" (velem)
     :
