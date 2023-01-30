@@ -74,20 +74,20 @@ GCC_VERSION := $(strip $(shell $(CC) -dumpversion | cut -d. -f1))
 
 # gcc 11.0 or later:
 ifeq ($(shell test $(GCC_VERSION) -ge 11; echo $$?),0)
-# Update CKOPTFLAGS for gcc 11+ to use O3 optimization without
-# -ftree-partial-pre flag. This flag results in suboptimal code
-# generation for instrinsics based kernels.
-ifneq ($(DEBUG_TYPE),noopt)
-CKOPTFLAGS     := -O2 -fgcse-after-reload -fipa-cp-clone -floop-interchange -floop-unroll-and-jam -fpeel-loops -fpredictive-commoning -fsplit-loops -fsplit-paths -ftree-loop-distribution -funswitch-loops -fvect-cost-model=dynamic -fversion-loops-for-strides -fomit-frame-pointer
-endif
-
 CKVECFLAGS     +=  -march=znver3 -mavx512f -mavx512dq -mavx512bw -mavx512vl -mavx512vnni -mavx512bf16 -mfpmath=sse
 CRVECFLAGS     +=  -march=znver3
+# Update CKOPTFLAGS for gcc to use O3 optimization without
+# -ftree-pre and -ftree-partial-pre flag. These flag results
+# in suboptimal code generation for instrinsic based kernels.
+# The -ftree-loop-vectorize results in ineffecient code gen
+# for amd optimized l1 kernels based on instrinsics.
+CKOPTFLAGS     += -fno-tree-partial-pre -fno-tree-pre -fno-tree-loop-vectorize
 else
 # gcc 9.0 or later:
 ifeq ($(shell test $(GCC_VERSION) -ge 9; echo $$?),0)
 CKVECFLAGS     +=  -march=znver2 -mavx512f -mavx512dq -mavx512bw -mavx512vl -mavx512vnni -mfpmath=sse
 CRVECFLAGS     +=  -march=znver2
+CKOPTFLAGS     += -fno-tree-partial-pre -fno-tree-pre -fno-tree-loop-vectorize
 else
 ifeq ($(shell test $(GCC_VERSION) -ge 8; echo $$?),0)
 CKVECFLAGS     +=  -march=znver1 -mavx512f -mavx512dq -mavx512bw -mavx512vl -mavx512vnni -mfpmath=sse

@@ -75,9 +75,16 @@ GCC_VERSION := $(strip $(shell $(CC) -dumpversion | cut -d. -f1))
 # gcc 9.0 or later:
 ifeq ($(shell test $(GCC_VERSION) -ge 11; echo $$?),0)
 CKVECFLAGS     += -march=znver3
+# Update CKOPTFLAGS for gcc to use O3 optimization without
+# -ftree-pre and -ftree-partial-pre flag. These flag results
+# in suboptimal code gen for instrinsic based kernels.
+# The -ftree-loop-vectorize results in ineffecient code gen
+# for amd optimized l1 kernels based on instrinsics.
+CKOPTFLAGS     += -fno-tree-partial-pre -fno-tree-pre -fno-tree-loop-vectorize
 else
 ifeq ($(shell test $(GCC_VERSION) -ge 9; echo $$?),0)
 CKVECFLAGS     += -march=znver2
+CKOPTFLAGS     += -fno-tree-partial-pre -fno-tree-pre -fno-tree-loop-vectorize
 else
 # If gcc is older than 9.1.0 but at least 6.1.0, then we can use -march=znver1
 # as the fallback option.
