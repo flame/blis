@@ -118,6 +118,10 @@
 REALNAME:
     #include "rviv_save_registers.h"
 
+    csrr s0, vlenb
+	FZERO(fzero)
+    vsetvli zero, zero, VTYPE, m1, ta, ma
+
     // Set up pointers
     add C01_ptr, C00_ptr, cs_c
     add C02_ptr, C01_ptr, cs_c
@@ -126,10 +130,6 @@ REALNAME:
     add C11_ptr, C01_ptr, rs_c
     add C12_ptr, C02_ptr, rs_c
     add C13_ptr, C03_ptr, rs_c
-
-    csrr s0, vlenb
-	FZERO(fzero)
-    vsetvli zero, zero, VTYPE, m1, ta, ma
 
     add A1_ptr, A0_ptr, s0
     add A2_ptr, A1_ptr, s0
