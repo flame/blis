@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2023, The University of Texas at Austin
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -32,6 +32,7 @@
 
 
 */
+
 #include "bli_rviv_utils.h"
 
 void bli_sgemm_rviv_asm_4vx4
@@ -41,9 +42,7 @@ void bli_sgemm_rviv_asm_4vx4
       float*     restrict a,
       float*     restrict b,
       float*     restrict beta,
-      float*     restrict c,
-      intptr_t            rs_c,
-      intptr_t            cs_c
+      float*     restrict c, intptr_t rs_c, intptr_t cs_c
     );
 
 void bli_sgemm_rviv_4vx4
@@ -55,9 +54,7 @@ void bli_sgemm_rviv_4vx4
        float*     restrict a,
        float*     restrict b,
        float*     restrict beta,
-       float*     restrict c,
-       inc_t               rs_c,
-       inc_t               cs_c,
+       float*     restrict c, inc_t rs_c, inc_t cs_c,
        auxinfo_t*          data,
        cntx_t*             cntx
      )
@@ -73,7 +70,8 @@ void bli_sgemm_rviv_4vx4
 
     GEMM_UKR_SETUP_CT( s, mr, nr, false );
 
-    bli_sgemm_rviv_asm_4vx4( k, alpha, a, b, beta, c, rs_c * num_fp32_per_vector(), cs_c );
+    bli_sgemm_rviv_asm_4vx4( k, alpha, a, b, beta, c,
+							 rs_c * get_vlenb(), cs_c * sizeof(float) );
 
     GEMM_UKR_FLUSH_CT( s );
 }

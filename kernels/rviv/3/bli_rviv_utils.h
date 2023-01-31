@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2023, The University of Texas at Austin
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -33,33 +33,14 @@
 */
 
 #include "blis.h"
+#include <stdint.h>
 
-inline uint32_t num_fp32_per_vector(void)
+inline uintptr_t get_vlenb(void)
 {
-    uint32_t velem = 0;
-    __asm__ volatile
-    (
-    " li a5, 256                         \n\t"
-    " vsetvli a4, a5, e32, m1, ta, ma    \n\t"
-    " mv %[velem], a4                    \n\t"
-    : [velem] "=r" (velem)
-    :
-    : "a4", "a5"
+    uintptr_t vlenb = 0;
+    __asm__ volatile (
+       " csrr %0, vlenb"    // vector length in bytes
+      : "=r" (vlenb)
     );
-    return velem;
-}
-
-inline uint32_t num_fp64_per_vector(void)
-{
-    uint32_t velem = 0;
-    __asm__ volatile
-    (
-    " li a5, 256                         \n\t"
-    " vsetvli a4, a5, e64, m1, ta, ma    \n\t"
-    " mv %[velem], a4                    \n\t"
-    : [velem] "=r" (velem)
-    :
-    : "a4", "a5"
-    );
-    return velem;
+    return vlenb;
 }

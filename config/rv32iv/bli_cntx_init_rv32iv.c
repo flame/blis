@@ -48,7 +48,7 @@ void bli_cntx_init_rv32iv( cntx_t* cntx )
 	// v >= 4. Embedded cores, however, may implement the minimal configuration,
 	// which allows VLEN = 32 bits. Here, we assume VLEN >= 128 and otherwise
 	// fall back to the reference kernels.
-	const uint32_t v = num_fp32_per_vector();
+	const uint32_t v = get_vlenb() / sizeof(float);
 	if (v >= 4) {
 		const uint32_t mr_s = 4 * v;
 		const uint32_t mr_d = 2 * v;

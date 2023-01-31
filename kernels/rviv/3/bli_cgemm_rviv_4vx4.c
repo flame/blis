@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2023, The University of Texas at Austin
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -41,9 +41,7 @@ void bli_cgemm_rviv_asm_4vx4
       scomplex*     restrict a,
       scomplex*     restrict b,
       scomplex*     restrict beta,
-      scomplex*     restrict c,
-      intptr_t               rs_c,
-      intptr_t               cs_c
+      scomplex*     restrict c, intptr_t rs_c, intptr_t cs_c
     );
 
 void bli_cgemm_rviv_4vx4
@@ -55,9 +53,7 @@ void bli_cgemm_rviv_4vx4
        scomplex*  restrict a,
        scomplex*  restrict b,
        scomplex*  restrict beta,
-       scomplex*  restrict c,
-       inc_t               rs_c,
-       inc_t               cs_c,
+       scomplex*  restrict c, inc_t rs_c, inc_t cs_c,
        auxinfo_t*          data,
        cntx_t*             cntx
      )
@@ -73,9 +69,8 @@ void bli_cgemm_rviv_4vx4
 
     GEMM_UKR_SETUP_CT( c, mr, nr, false );
 
-    assert( rs_c == 1 );
-
-    bli_cgemm_rviv_asm_4vx4( k, alpha, a, b, beta, c, rs_c, cs_c );
+    bli_cgemm_rviv_asm_4vx4( k, alpha, a, b, beta, c,
+							 rs_c * get_vlenb(), cs_c * sizeof(scomplex) );
 
     GEMM_UKR_FLUSH_CT( c );
 }

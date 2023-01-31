@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2023, The University of Texas at Austin
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -30,8 +30,8 @@
    (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
    OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-
 */
+
 #include "bli_rviv_utils.h"
 
 void bli_zgemm_rviv_asm_4vx4
@@ -41,9 +41,7 @@ void bli_zgemm_rviv_asm_4vx4
       dcomplex*     restrict a,
       dcomplex*     restrict b,
       dcomplex*     restrict beta,
-      dcomplex*     restrict c,
-      intptr_t               rs_c,
-      intptr_t               cs_c
+      dcomplex*     restrict c, intptr_t rs_c, intptr_t cs_c
     );
 
 
@@ -56,9 +54,7 @@ void bli_zgemm_rviv_4vx4
        dcomplex*  restrict a,
        dcomplex*  restrict b,
        dcomplex*  restrict beta,
-       dcomplex*  restrict c,
-       inc_t               rs_c,
-       inc_t               cs_c,
+       dcomplex*  restrict c, inc_t rs_c, inc_t cs_c,
        auxinfo_t*          data,
        cntx_t*             cntx
      )
@@ -74,9 +70,8 @@ void bli_zgemm_rviv_4vx4
 
     GEMM_UKR_SETUP_CT( z, mr, nr, false );
 
-    assert( rs_c == 1 );
-
-    bli_zgemm_rviv_asm_4vx4( k, alpha, a, b, beta, c, rs_c, cs_c );
+    bli_zgemm_rviv_asm_4vx4( k, alpha, a, b, beta, c,
+							 rs_c * get_vlenb(), cs_c * sizeof(dcomplex) );
 
     GEMM_UKR_FLUSH_CT( z );
 }
