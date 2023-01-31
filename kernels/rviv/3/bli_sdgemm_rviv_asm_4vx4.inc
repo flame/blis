@@ -125,6 +125,7 @@ REALNAME:
     add C12_ptr, C02_ptr, rs_c
     add C13_ptr, C03_ptr, rs_c
 
+    vsetvli zero, zero, VTYPE, m1, ta, ma
     csrr s0, vlenb
     add A1_ptr, A0_ptr, s0
     add A2_ptr, A1_ptr, s0

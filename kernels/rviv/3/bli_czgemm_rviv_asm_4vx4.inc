@@ -155,6 +155,7 @@ REALNAME:
     add C12_ptr, C02_ptr, rs_c
     add C13_ptr, C03_ptr, rs_c
 
+    vsetvli zero, zero, VTYPE, m1, ta, ma
     csrr s0, vlenb
     add A10_ptr, A00_ptr, s0
     slli s0, s0, 1      // length of a column of A in bytes
