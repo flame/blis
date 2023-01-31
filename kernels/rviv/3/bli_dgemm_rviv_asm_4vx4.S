@@ -42,4 +42,4 @@
 #define VLE vle64.v
 #define VSE vse64.v
 
-#include "bli_sdgemm_rviv_asm_4vx4.inc"
+#include "bli_sdgemm_rviv_asm_4vx4.h"

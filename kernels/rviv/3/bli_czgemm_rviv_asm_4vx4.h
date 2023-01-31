@@ -96,6 +96,8 @@
 #define B13_re    ft6
 #define B13_im    ft7
 
+#define fzero     ft8
+
 #define A00_re    v24
 #define A00_im    v25
 #define A10_re    v26
@@ -144,7 +146,7 @@
 #define cs_c  a7
 
 REALNAME:
-    #include "rviv_save_registers.inc"
+    #include "rviv_save_registers.h"
 
     // Set up pointers
     add C01_ptr, C00_ptr, cs_c
@@ -155,8 +157,10 @@ REALNAME:
     add C12_ptr, C02_ptr, rs_c
     add C13_ptr, C03_ptr, rs_c
 
-    vsetvli zero, zero, VTYPE, m1, ta, ma
     csrr s0, vlenb
+    vsetvli zero, zero, VTYPE, m1, ta, ma
+	FZERO(fzero)
+
     add A10_ptr, A00_ptr, s0
     slli s0, s0, 1      // length of a column of A in bytes
     add A01_ptr, A00_ptr, s0
@@ -179,6 +183,9 @@ REALNAME:
     vxor.vv AB12_im, AB12_im, AB12_im
     vxor.vv AB13_re, AB13_re, AB13_re
     vxor.vv AB13_im, AB13_im, AB13_im
+
+    // Handle k == 0
+	beqz loop_counter, MULTIPLYBETA
 
     li tmp, 3
     ble loop_counter, tmp, TAIL_UNROLL_2
@@ -593,8 +600,7 @@ MULTIPLYALPHA:
     FLOAD BETA_re,  0*REALSIZE(a4)
     FLOAD BETA_im,  1*REALSIZE(a4)
 
-    FZERO(fa4) // Set fa4 to zero
-    FEQ tmp, ALPHA_im, fa4
+    FEQ tmp, ALPHA_im, fzero
     bne tmp, zero, ALPHAREAL
 
     // [AB00, ..., AB03] * alpha
@@ -655,7 +661,7 @@ ALPHAREAL:
     vfmul.vf AB13_im, AB13_im, ALPHA_re
 
 MULTIPLYBETA:
-    FEQ tmp, BETA_im, fa4  // fa4 is zero
+    FEQ tmp, BETA_im, fzero
     bne tmp, zero, BETAREAL
 
     // Load and deinterleave C(0:VLEN-1, 0:1)
@@ -729,7 +735,7 @@ MULTIPLYBETA:
     j END
 
 BETAREAL:
-    FEQ tmp, BETA_re, fa4 // fa4 is zero
+    FEQ tmp, BETA_re, fzero
     bne tmp, zero, BETAZERO
 
     // Load and deinterleave C(0:VLEN-1, 0:3)
@@ -790,5 +796,5 @@ BETAZERO:
     VSE AB13_re, (C13_ptr)
 
 END:
-    #include "rviv_restore_registers.inc"
+    #include "rviv_restore_registers.h"
     ret

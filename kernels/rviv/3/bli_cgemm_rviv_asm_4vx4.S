@@ -42,4 +42,4 @@
 #define VLE vlseg2e32.v
 #define VSE vsseg2e32.v
 
-#include "bli_czgemm_rviv_asm_4vx4.inc"
+#include "bli_czgemm_rviv_asm_4vx4.h"

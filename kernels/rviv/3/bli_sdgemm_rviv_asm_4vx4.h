@@ -83,6 +83,8 @@
 #define B12    fa2
 #define B13    fa3
 
+#define fzero  ft8
+
 #define A00    v24
 #define A10    v25
 #define A20    v26
@@ -114,7 +116,7 @@
 #define cs_c   a7
 
 REALNAME:
-    #include "rviv_save_registers.inc"
+    #include "rviv_save_registers.h"
 
     // Set up pointers
     add C01_ptr, C00_ptr, cs_c
@@ -125,11 +127,15 @@ REALNAME:
     add C12_ptr, C02_ptr, rs_c
     add C13_ptr, C03_ptr, rs_c
 
-    vsetvli zero, zero, VTYPE, m1, ta, ma
     csrr s0, vlenb
+	FZERO(fzero)
+    vsetvli zero, zero, VTYPE, m1, ta, ma
+
     add A1_ptr, A0_ptr, s0
     add A2_ptr, A1_ptr, s0
     add A3_ptr, A2_ptr, s0
+
+    slli s0, s0, 2 // length of a column of A in bytes
 
     // Zero-initialize accumulators
     vxor.vv AB00, AB00, AB00
@@ -149,7 +155,8 @@ REALNAME:
     vxor.vv AB32, AB32, AB32
     vxor.vv AB33, AB33, AB33
 
-    slli s0, s0, 2 // length of a column of A in bytes
+	// Handle k == 0
+	beqz loop_counter, MULTIPLYBETA
 
     li tmp, 1
     ble loop_counter, tmp, TAIL
@@ -310,8 +317,8 @@ MULTIPLYALPHA:
     vfmul.vf AB32, AB32, ALPHA
     vfmul.vf AB33, AB33, ALPHA
 
-    FZERO(fa4) // Set fa4 to zero
-    FEQ tmp, BETA, fa4
+FMULTIPLYBETA:
+    FEQ tmp, BETA, fzero
     beq tmp, zero, BETANOTZERO
 
 BETAZERO:
@@ -419,5 +426,5 @@ BETANOTZERO:
     VSE AB33, (C13_ptr)
 
 END:
-    #include "rviv_restore_registers.inc"
+    #include "rviv_restore_registers.h"
     ret
