@@ -33,7 +33,6 @@
 */
 
 #include "blis.h"
-#include <stdint.h>
 
 inline uintptr_t get_vlenb(void)
 {
