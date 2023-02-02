@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2023, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -69,7 +70,7 @@ void PASTEMAC3(ch,opname,arch,suf) \
 		); \
 		return; \
 	} \
-	else if ( PASTEMAC(ch,eq0)( *alpha ) ) \
+	else if ( PASTEMAC(ch,eq1)( *alpha ) ) \
 	{ \
 		/* If alpha is one, use copyv. */ \
 \
@@ -79,7 +80,7 @@ void PASTEMAC3(ch,opname,arch,suf) \
 \
 		copyv_p \
 		( \
-		  BLIS_NO_CONJUGATE, \
+		  conjx, \
 		  n, \
 		  x, incx, \
 		  y, incy, \
