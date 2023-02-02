@@ -39,6 +39,4 @@
 // -- REGISTER BLOCK SIZES (FOR REFERENCE KERNELS) ----------------------------
 
 
-
 //#endif
-

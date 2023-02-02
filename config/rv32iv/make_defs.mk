@@ -36,7 +36,7 @@
 # Declare the name of the current configuration and add it to the
 # running list of configurations included by common.mk.
 THIS_CONFIG    := rv32iv
-#CONFIGS_INCL   += $(THIS_CONFIG)
+#CONFIGS_INCL	+= $(THIS_CONFIG)
 
 #
 # --- Determine the C compiler and related flags ---
@@ -94,4 +94,3 @@ endif
 # Store all of the variables here to new variables containing the
 # configuration name.
 $(eval $(call store-make-defs,$(THIS_CONFIG)))
-

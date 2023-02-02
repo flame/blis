@@ -37,8 +37,8 @@
 
 void bli_cntx_init_rv64i( cntx_t* cntx )
 {
-	// Set default kernel blocksizes and functions.
-	bli_cntx_init_rv64i_ref( cntx );
+    // Set default kernel blocksizes and functions.
+    bli_cntx_init_rv64i_ref( cntx );
 
-	// -------------------------------------------------------------------------
+    // -------------------------------------------------------------------------
 }

@@ -36,73 +36,74 @@
 
 void bli_cntx_init_rv32iv( cntx_t* cntx )
 {
-	blksz_t blkszs[ BLIS_NUM_BLKSZS ];
+    blksz_t blkszs[ BLIS_NUM_BLKSZS ];
 
-	// Set default kernel blocksizes and functions.
-	bli_cntx_init_rv32iv_ref( cntx );
+    // Set default kernel blocksizes and functions.
+    bli_cntx_init_rv32iv_ref( cntx );
 
-	// -------------------------------------------------------------------------
+    // -------------------------------------------------------------------------
 
-	// A reasonable assumptions for application cores is VLEN >= 128 bits, i.e.,
-	// v >= 4. Embedded cores, however, may implement the minimal configuration,
-	// which allows VLEN = 32 bits. Here, we assume VLEN >= 128 and otherwise
-	// fall back to the reference kernels.
-	const uint32_t v = get_vlenb() / sizeof(float);
-	if (v >= 4) {
-		const uint32_t mr_s = 4 * v;
-		const uint32_t mr_d = 2 * v;
-		const uint32_t mr_c = 2 * v;
-		const uint32_t mr_z = v;
+    // A reasonable assumptions for application cores is VLEN >= 128 bits, i.e.,
+    // v >= 4. Embedded cores, however, may implement the minimal configuration,
+    // which allows VLEN = 32 bits. Here, we assume VLEN >= 128 and otherwise
+    // fall back to the reference kernels.
+    const uint32_t v = get_vlenb() / sizeof(float);
 
-		// Update the context with optimized native gemm micro-kernels.
-		bli_cntx_set_ukrs
-		(
-		  cntx,
+    if (v >= 4) {
+        const uint32_t mr_s = 4 * v;
+        const uint32_t mr_d = 2 * v;
+        const uint32_t mr_c = 2 * v;
+        const uint32_t mr_z = v;
 
-		  // level-3
-		  BLIS_GEMM_UKR, BLIS_FLOAT,    bli_sgemm_rviv_4vx4,
-		  BLIS_GEMM_UKR, BLIS_DOUBLE,   bli_dgemm_rviv_4vx4,
-		  BLIS_GEMM_UKR, BLIS_SCOMPLEX, bli_cgemm_rviv_4vx4,
-		  BLIS_GEMM_UKR, BLIS_DCOMPLEX, bli_zgemm_rviv_4vx4,
+        // Update the context with optimized native gemm micro-kernels.
+        bli_cntx_set_ukrs
+        (
+          cntx,
 
-		  BLIS_VA_END
-		);
+          // level-3
+          BLIS_GEMM_UKR, BLIS_FLOAT,    bli_sgemm_rviv_4vx4,
+          BLIS_GEMM_UKR, BLIS_DOUBLE,   bli_dgemm_rviv_4vx4,
+          BLIS_GEMM_UKR, BLIS_SCOMPLEX, bli_cgemm_rviv_4vx4,
+          BLIS_GEMM_UKR, BLIS_DCOMPLEX, bli_zgemm_rviv_4vx4,
 
-		// Update the context with storage preferences.
-		bli_cntx_set_ukr_prefs
-		(
-		  cntx,
+          BLIS_VA_END
+        );
 
-		  // level-3
-		  BLIS_GEMM_UKR_ROW_PREF, BLIS_FLOAT,    FALSE,
-		  BLIS_GEMM_UKR_ROW_PREF, BLIS_DOUBLE,   FALSE,
-		  BLIS_GEMM_UKR_ROW_PREF, BLIS_SCOMPLEX, FALSE,
-		  BLIS_GEMM_UKR_ROW_PREF, BLIS_DCOMPLEX, FALSE,
+        // Update the context with storage preferences.
+        bli_cntx_set_ukr_prefs
+        (
+          cntx,
 
-		  BLIS_VA_END
-		);
+          // level-3
+          BLIS_GEMM_UKR_ROW_PREF, BLIS_FLOAT,    FALSE,
+          BLIS_GEMM_UKR_ROW_PREF, BLIS_DOUBLE,   FALSE,
+          BLIS_GEMM_UKR_ROW_PREF, BLIS_SCOMPLEX, FALSE,
+          BLIS_GEMM_UKR_ROW_PREF, BLIS_DCOMPLEX, FALSE,
 
-		// Initialize level-3 blocksize objects with architecture-specific values.
-		//                                              s        d        c        z
-		bli_blksz_init_easy( &blkszs[ BLIS_MR ],     mr_s,    mr_d,    mr_c,    mr_z );
-		bli_blksz_init_easy( &blkszs[ BLIS_NR ],        4,       4,       4,       4 );
-		bli_blksz_init_easy( &blkszs[ BLIS_MC ],  20*mr_s, 20*mr_d, 60*mr_c, 30*mr_z );
-		bli_blksz_init_easy( &blkszs[ BLIS_KC ],      640,     320,     320,     160 );
-		bli_blksz_init_easy( &blkszs[ BLIS_NC ],     3072,    3072,    3072,    3072 );
+          BLIS_VA_END
+        );
 
-		bli_cntx_set_blkszs
-		(
-		  cntx,
+        // Initialize level-3 blocksize objects with architecture-specific values.
+        //                                              s        d        c        z
+        bli_blksz_init_easy( &blkszs[ BLIS_MR ],     mr_s,    mr_d,    mr_c,    mr_z );
+        bli_blksz_init_easy( &blkszs[ BLIS_NR ],        4,       4,       4,       4 );
+        bli_blksz_init_easy( &blkszs[ BLIS_MC ],  20*mr_s, 20*mr_d, 60*mr_c, 30*mr_z );
+        bli_blksz_init_easy( &blkszs[ BLIS_KC ],      640,     320,     320,     160 );
+        bli_blksz_init_easy( &blkszs[ BLIS_NC ],     3072,    3072,    3072,    3072 );
 
-		  // level-3
-		  BLIS_NC, &blkszs[ BLIS_NC ], BLIS_NR,
-		  BLIS_KC, &blkszs[ BLIS_KC ], BLIS_KR,
-		  BLIS_MC, &blkszs[ BLIS_MC ], BLIS_MR,
-		  BLIS_NR, &blkszs[ BLIS_NR ], BLIS_NR,
-		  BLIS_MR, &blkszs[ BLIS_MR ], BLIS_MR,
+        bli_cntx_set_blkszs
+        (
+          cntx,
 
-		  BLIS_VA_END
-		);
+          // level-3
+          BLIS_NC, &blkszs[ BLIS_NC ], BLIS_NR,
+          BLIS_KC, &blkszs[ BLIS_KC ], BLIS_KR,
+          BLIS_MC, &blkszs[ BLIS_MC ], BLIS_MR,
+          BLIS_NR, &blkszs[ BLIS_NR ], BLIS_NR,
+          BLIS_MR, &blkszs[ BLIS_MR ], BLIS_MR,
+
+          BLIS_VA_END
+        );
 
   }
 }
