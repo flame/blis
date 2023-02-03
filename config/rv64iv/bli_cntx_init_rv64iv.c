@@ -32,7 +32,6 @@
 
 */
 
-#include "blis.h"
 #include "../../kernels/rviv/3/bli_rviv_utils.h"
 
 void bli_cntx_init_rv64iv( cntx_t* cntx )

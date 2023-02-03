@@ -317,7 +317,7 @@ MULTIPLYALPHA:
     vfmul.vf AB32, AB32, ALPHA
     vfmul.vf AB33, AB33, ALPHA
 
-FMULTIPLYBETA:
+MULTIPLYBETA:
     FEQ tmp, BETA, fzero
     beq tmp, zero, BETANOTZERO
 

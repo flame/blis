@@ -34,7 +34,7 @@
 
 #include "blis.h"
 
-inline uintptr_t get_vlenb(void)
+static inline uintptr_t get_vlenb(void)
 {
     uintptr_t vlenb = 0;
     __asm__ volatile (
