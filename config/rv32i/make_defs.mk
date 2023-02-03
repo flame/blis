@@ -52,6 +52,9 @@ CMISCFLAGS     := -march=rv32i -mabi=ilp32
 CPICFLAGS      :=
 CWARNFLAGS     := -Wall -Wno-unused-function -Wfatal-errors
 
+# In case the A extension is not available
+LDFLAGS        += -latomic
+
 ifneq ($(DEBUG_TYPE),off)
 CDBGFLAGS      := -g
 endif

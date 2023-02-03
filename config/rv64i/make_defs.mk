@@ -46,11 +46,12 @@ THIS_CONFIG    := rv64i
 # general-purpose/configuration-agnostic flags in common.mk. You
 # may specify additional flags here as needed.
 CPPROCFLAGS    := -DRISCV_SIZE=64
-# Atomic instructions must be enabled either via hardware
-# (-march=rv64ia) or by linking against libatomic
 CMISCFLAGS     := -march=rv64i -mabi=lp64
 CPICFLAGS      :=
 CWARNFLAGS     := -Wall -Wno-unused-function -Wfatal-errors
+
+# In case the A extension is not available
+LDFLAGS        += -latomic
 
 ifneq ($(DEBUG_TYPE),off)
 CDBGFLAGS      := -g

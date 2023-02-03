@@ -46,14 +46,12 @@ THIS_CONFIG    := rv64iv
 # general-purpose/configuration-agnostic flags in common.mk. You
 # may specify additional flags here as needed.
 CPPROCFLAGS    := -DRISCV_SIZE=64
-# Atomic instructions must be enabled either via hardware
-# (-march=rv64iav) or by linking against libatomic
-# The latest compiler build hits an 'internal compiler error'
-# when compiling the reference gemm kernels. Workaround
-# via -march=rv64imv or, with atomics, -march=rv64imav
 CMISCFLAGS     := -march=rv64iv -mabi=lp64d
 CPICFLAGS      :=
 CWARNFLAGS     := -Wall -Wno-unused-function -Wfatal-errors
+
+# In case the A extension is not available
+LDFLAGS        += -latomic
 
 ifneq ($(DEBUG_TYPE),off)
 CDBGFLAGS      := -g
