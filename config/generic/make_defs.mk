@@ -70,8 +70,11 @@ CKVECFLAGS     :=
 else
 ifeq ($(CC_VENDOR),clang)
 CKVECFLAGS     :=
+ifeq ($(CC_VENDOR),nvc)
+CKVECFLAGS     :=
 else
-$(error gcc, icc, or clang is required for this configuration.)
+$(error gcc, icc, nvc, or clang is required for this configuration.)
+endif
 endif
 endif
 endif
