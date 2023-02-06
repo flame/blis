@@ -101,7 +101,7 @@ get-noopt-cflags-for     = $(strip $(CFLAGS_PRESET) \
                                    $(call load-var-for,CLANGFLAGS,$(1)) \
                                    $(call load-var-for,CPPROCFLAGS,$(1)) \
                                    $(CTHREADFLAGS) \
-                                   $(CINCFLAGS) $(VERS_DEF) \
+                                   $(CINCFLAGS) \
                             )
 
 get-noopt-cxxflags-for   = $(strip $(CFLAGS_PRESET) \
@@ -113,7 +113,7 @@ get-noopt-cxxflags-for   = $(strip $(CFLAGS_PRESET) \
                                    $(call load-var-for,CPPROCFLAGS,$(1)) \
                                    $(CTHREADFLAGS) \
                                    $(CXXTHREADFLAGS) \
-                                   $(CINCFLAGS) $(VERS_DEF) \
+                                   $(CINCFLAGS) \
                             )
 
 get-refinit-cflags-for   = $(strip $(call load-var-for,COPTFLAGS,$(1)) \
@@ -1231,10 +1231,6 @@ BLIS_CONFIG_H   := ./bli_config.h
 #
 # --- Special preprocessor macro definitions -----------------------------------
 #
-
-# Define a C preprocessor macro to communicate the current version so that it
-# can be embedded into the library and queried later.
-VERS_DEF       := -DBLIS_VERSION_STRING=\"$(VERSION)\"
 
 # Define a C preprocessor flag that is *only* defined when BLIS is being
 # compiled. (In other words, an application that #includes blis.h will not

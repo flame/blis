@@ -4194,6 +4194,7 @@ main()
 		| perl -pe "s/\@config_name_define\@/${config_name_define}/g" \
 		| perl -pe "s/\@config_list_defines\@/${config_list_defines}/g" \
 		| perl -pe "s/\@kernel_list_defines\@/${kernel_list_defines}/g" \
+		| sed   -e "s/@version@/${version_esc}/g" \
 		| sed   -e "s/@enable_system@/${enable_system_01}/g" \
 		| sed   -e "s/@enable_openmp@/${enable_openmp_01}/g" \
 		| sed   -e "s/@enable_openmp_as_def@/${enable_openmp_as_def_01}/g" \

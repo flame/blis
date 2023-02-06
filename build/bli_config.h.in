@@ -45,6 +45,8 @@
 // Enabled kernel sets (kernel_list)
 @kernel_list_defines@
 
+#define BLIS_VERSION_STRING "@version@"
+
 #if @enable_system@
 #define BLIS_ENABLE_SYSTEM
 #else
