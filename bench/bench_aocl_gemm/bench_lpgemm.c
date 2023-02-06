@@ -799,7 +799,7 @@ void mat_mul_bench_main_ ## BLAS_SFX \
 	if ( bench_mode == 'p' ) \
 	{ \
 		alpha = 1; \
-		beta = 1; \
+		beta = 0; \
 	} \
 	else if ( bench_mode == 'a' ) \
 	{ \
@@ -956,7 +956,7 @@ void mat_mul_bench_main_ ## BLAS_SFX \
 	if ( bench_mode == 'p' ) \
 	{ \
 		alpha = 1; \
-		beta = 1; \
+		beta = 0; \
 	} \
 	else if ( bench_mode == 'a' ) \
 	{ \

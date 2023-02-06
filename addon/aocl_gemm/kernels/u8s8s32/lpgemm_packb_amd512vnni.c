@@ -135,7 +135,7 @@ void packb_nr64_u8s8s32o32
 			b0 = _mm512_loadu_epi8( b + ( ldb * ( kr + 1 ) ) + jc );
 			c0 = _mm512_loadu_epi8( b + ( ldb * ( kr + 2 ) ) + jc );
 			d0 = _mm512_loadu_epi8( b + ( ldb * ( kr + 3 ) ) + jc );
-			
+
 			a01 = _mm512_unpacklo_epi8( a0, b0 );
 			a0 = _mm512_unpackhi_epi8( a0, b0 );
 
@@ -188,7 +188,7 @@ void packb_nr64_u8s8s32o32
 				c0 = _mm512_setzero_si512();
 				d0 = _mm512_setzero_si512();
 			}
-			
+
 			a01 = _mm512_unpacklo_epi8( a0, b0 );
 			a0 = _mm512_unpackhi_epi8( a0, b0 );
 
@@ -313,7 +313,7 @@ void packb_nr48_u8s8s32o32
 		b0_32 = _mm256_loadu_epi8( b + ( ldb * ( kr + 1 ) ) );
 		c0_32 = _mm256_loadu_epi8( b + ( ldb * ( kr + 2 ) ) );
 		d0_32 = _mm256_loadu_epi8( b + ( ldb * ( kr + 3 ) ) );
-		
+
 		a01_32 = _mm256_unpacklo_epi8( a0_32, b0_32 );
 		a0_32 = _mm256_unpackhi_epi8( a0_32, b0_32 );
 
@@ -325,7 +325,7 @@ void packb_nr48_u8s8s32o32
 
 		d0_32 = _mm256_unpacklo_epi16( a0_32, c0_32 );
 		c01_32 = _mm256_unpackhi_epi16( a0_32, c0_32 );
-		
+
 		a0_32 = _mm256_shuffle_i32x4( b0_32,  a01_32, 0x0 ); // 0 elem
 		c0_32 = _mm256_shuffle_i32x4( b0_32,  a01_32, 0x3 ); // 2 elem
 		b0_32 = _mm256_shuffle_i32x4( d0_32,  c01_32, 0x0 ); // 1 elem
@@ -361,10 +361,10 @@ void packb_nr48_u8s8s32o32
 		a0_zmm = _mm512_inserti32x4( a0_zmm, a01_16, 0x1 );
 		a0_zmm = _mm512_inserti32x4( a0_zmm, d0_16, 0x2 );
 		a0_zmm = _mm512_inserti32x4( a0_zmm, c01_16, 0x3 );
-		
+
 		// Last 4x16 elements.
 		_mm512_storeu_epi64( pack_b_buffer_u8s8s32o32 + ( ( kr_new + 2 ) * NR ), a0_zmm );
-		
+
 		// The 4th 16byte chunk will be ignored, since its not part of the original data,
 		// but is here due to the packing in 4 16byte chunks format.
 		kr_new += 3;
@@ -378,7 +378,7 @@ void packb_nr48_u8s8s32o32
 			b0_32 = _mm256_loadu_epi8( b + ( ldb * ( k_full_pieces + 1 ) ) );
 			c0_32 = _mm256_loadu_epi8( b + ( ldb * ( k_full_pieces + 2 ) ) );
 			d0_32 = _mm256_setzero_si256();
-		
+
 			a0_16 = _mm_loadu_epi8( b + ( ldb * ( k_full_pieces + 0 ) ) + ( 32 ) );
 			b0_16 = _mm_loadu_epi8( b + ( ldb * ( k_full_pieces + 1 ) ) + ( 32 ) );
 			c0_16 = _mm_loadu_epi8( b + ( ldb * ( k_full_pieces + 2 ) ) + ( 32 ) );
@@ -391,7 +391,7 @@ void packb_nr48_u8s8s32o32
 			b0_32 = _mm256_loadu_epi8( b + ( ldb * ( k_full_pieces + 1 ) ) );
 			c0_32 = _mm256_setzero_si256();
 			d0_32 = _mm256_setzero_si256();
-		
+
 			a0_16 = _mm_loadu_epi8( b + ( ldb * ( k_full_pieces + 0 ) ) + ( 32 ) );
 			b0_16 = _mm_loadu_epi8( b + ( ldb * ( k_full_pieces + 1 ) ) + ( 32 ) );
 			c0_16 = _mm_setzero_si128();
@@ -403,13 +403,13 @@ void packb_nr48_u8s8s32o32
 			b0_32 = _mm256_setzero_si256();
 			c0_32 = _mm256_setzero_si256();
 			d0_32 = _mm256_setzero_si256();
-		
+
 			a0_16 = _mm_loadu_epi8( b + ( ldb * ( k_full_pieces + 0 ) ) + ( 32 ) );
 			b0_16 = _mm_setzero_si128();
 			c0_16 = _mm_setzero_si128();
 			d0_16 = _mm_setzero_si128();
 		}
-		
+
 		a01_32 = _mm256_unpacklo_epi8( a0_32, b0_32 );
 		a0_32 = _mm256_unpackhi_epi8( a0_32, b0_32 );
 
@@ -421,7 +421,7 @@ void packb_nr48_u8s8s32o32
 
 		d0_32 = _mm256_unpacklo_epi16( a0_32, c0_32 );
 		c01_32 = _mm256_unpackhi_epi16( a0_32, c0_32 );
-		
+
 		a0_32 = _mm256_shuffle_i32x4( b0_32,  a01_32, 0x0 ); // 0 elem
 		c0_32 = _mm256_shuffle_i32x4( b0_32,  a01_32, 0x3 ); // 2 elem
 		b0_32 = _mm256_shuffle_i32x4( d0_32,  c01_32, 0x0 ); // 1 elem
@@ -451,7 +451,7 @@ void packb_nr48_u8s8s32o32
 		a0_zmm = _mm512_inserti32x4( a0_zmm, a01_16, 0x1 );
 		a0_zmm = _mm512_inserti32x4( a0_zmm, d0_16, 0x2 );
 		a0_zmm = _mm512_inserti32x4( a0_zmm, c01_16, 0x3 );
-		
+
 		// Last 4x16 elements.
 		_mm512_storeu_epi64( pack_b_buffer_u8s8s32o32 + ( ( kr_new + 2 ) * NR ), a0_zmm );
 	}
@@ -487,7 +487,7 @@ void packb_nr32_u8s8s32o32
 		b0_32 = _mm256_loadu_epi8( b + ( ldb * ( kr + 1 ) ) );
 		c0_32 = _mm256_loadu_epi8( b + ( ldb * ( kr + 2 ) ) );
 		d0_32 = _mm256_loadu_epi8( b + ( ldb * ( kr + 3 ) ) );
-		
+
 		a01_32 = _mm256_unpacklo_epi8( a0_32, b0_32 );
 		a0_32 = _mm256_unpackhi_epi8( a0_32, b0_32 );
 
@@ -499,7 +499,7 @@ void packb_nr32_u8s8s32o32
 
 		d0_32 = _mm256_unpacklo_epi16( a0_32, c0_32 );
 		c01_32 = _mm256_unpackhi_epi16( a0_32, c0_32 );
-		
+
 		a0_32 = _mm256_shuffle_i32x4( b0_32,  a01_32, 0x0 ); // 0 elem
 		c0_32 = _mm256_shuffle_i32x4( b0_32,  a01_32, 0x3 ); // 2 elem
 		b0_32 = _mm256_shuffle_i32x4( d0_32,  c01_32, 0x0 ); // 1 elem
@@ -543,7 +543,7 @@ void packb_nr32_u8s8s32o32
 			c0_32 = _mm256_setzero_si256();
 			d0_32 = _mm256_setzero_si256();
 		}
-		
+
 		a01_32 = _mm256_unpacklo_epi8( a0_32, b0_32 );
 		a0_32 = _mm256_unpackhi_epi8( a0_32, b0_32 );
 
@@ -555,7 +555,7 @@ void packb_nr32_u8s8s32o32
 
 		d0_32 = _mm256_unpacklo_epi16( a0_32, c0_32 );
 		c01_32 = _mm256_unpackhi_epi16( a0_32, c0_32 );
-		
+
 		a0_32 = _mm256_shuffle_i32x4( b0_32,  a01_32, 0x0 ); // 0 elem
 		c0_32 = _mm256_shuffle_i32x4( b0_32,  a01_32, 0x3 ); // 2 elem
 		b0_32 = _mm256_shuffle_i32x4( d0_32,  c01_32, 0x0 ); // 1 elem
@@ -617,10 +617,10 @@ void packb_nr16_u8s8s32o32
 		a0_zmm = _mm512_inserti32x4( a0_zmm, a01_16, 0x1 );
 		a0_zmm = _mm512_inserti32x4( a0_zmm, d0_16, 0x2 );
 		a0_zmm = _mm512_inserti32x4( a0_zmm, c01_16, 0x3 );
-		
+
 		// Last 4x16 elements.
 		_mm512_storeu_epi64( pack_b_buffer_u8s8s32o32 + ( ( kr_new + 0 ) * NR ), a0_zmm );
-		
+
 		// The 2nd, 3rd, and 4th 16byte chunk will be ignored, since its not part of the original data,
 		// but is here due to the packing in 4 16byte chunks format.
 		kr_new += 1;
@@ -666,7 +666,7 @@ void packb_nr16_u8s8s32o32
 		a0_zmm = _mm512_inserti32x4( a0_zmm, a01_16, 0x1 );
 		a0_zmm = _mm512_inserti32x4( a0_zmm, d0_16, 0x2 );
 		a0_zmm = _mm512_inserti32x4( a0_zmm, c01_16, 0x3 );
-		
+
 		// Last 4x16 elements.
 		_mm512_storeu_epi64( pack_b_buffer_u8s8s32o32 + ( ( kr_new + 0 ) * NR ), a0_zmm );
 	}
@@ -728,10 +728,10 @@ void packb_nrlt16_u8s8s32o32
 		a0_zmm = _mm512_inserti32x4( a0_zmm, a01_16, 0x1 );
 		a0_zmm = _mm512_inserti32x4( a0_zmm, d0_16, 0x2 );
 		a0_zmm = _mm512_inserti32x4( a0_zmm, c01_16, 0x3 );
-		
+
 		// Last 4x16 elements.
 		_mm512_storeu_epi64( pack_b_buffer_u8s8s32o32 + ( ( kr_new + 0 ) * NR ), a0_zmm );
-		
+
 		// The 2nd, 3rd, and 4th 16byte chunk will be ignored, since its not part of the original data,
 		// but is here due to the packing in 4 16byte chunks format.
 		kr_new += 1;
@@ -786,7 +786,7 @@ void packb_nrlt16_u8s8s32o32
 		a0_zmm = _mm512_inserti32x4( a0_zmm, a01_16, 0x1 );
 		a0_zmm = _mm512_inserti32x4( a0_zmm, d0_16, 0x2 );
 		a0_zmm = _mm512_inserti32x4( a0_zmm, c01_16, 0x3 );
-		
+
 		// Last 4x16 elements.
 		_mm512_storeu_epi64( pack_b_buffer_u8s8s32o32 + ( ( kr_new + 0 ) * NR ), a0_zmm );
 	}

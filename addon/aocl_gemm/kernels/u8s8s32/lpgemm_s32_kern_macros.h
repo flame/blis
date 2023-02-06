@@ -47,19 +47,19 @@
 	S32_BETA_FMA(reg,scratch1,scratch2) \
 
 #define S32_S32_BETA_OP2(m_ir,m_ind,scratch1,scratch2) \
-		S32_S32_BETA_OP(c_int32_ ## m_ind ## p0,m_ir,m_ind,0,scratch1,scratch2); \
-		S32_S32_BETA_OP(c_int32_ ## m_ind ## p1,m_ir,m_ind,1,scratch1,scratch2); \
+	S32_S32_BETA_OP(c_int32_ ## m_ind ## p0,m_ir,m_ind,0,scratch1,scratch2); \
+	S32_S32_BETA_OP(c_int32_ ## m_ind ## p1,m_ir,m_ind,1,scratch1,scratch2); \
 
 #define S32_S32_BETA_OP3(m_ir,m_ind,scratch1,scratch2) \
-		S32_S32_BETA_OP(c_int32_ ## m_ind ## p0,m_ir,m_ind,0,scratch1,scratch2); \
-		S32_S32_BETA_OP(c_int32_ ## m_ind ## p1,m_ir,m_ind,1,scratch1,scratch2); \
-		S32_S32_BETA_OP(c_int32_ ## m_ind ## p2,m_ir,m_ind,2,scratch1,scratch2); \
+	S32_S32_BETA_OP(c_int32_ ## m_ind ## p0,m_ir,m_ind,0,scratch1,scratch2); \
+	S32_S32_BETA_OP(c_int32_ ## m_ind ## p1,m_ir,m_ind,1,scratch1,scratch2); \
+	S32_S32_BETA_OP(c_int32_ ## m_ind ## p2,m_ir,m_ind,2,scratch1,scratch2); \
 
 #define S32_S32_BETA_OP4(m_ir,m_ind,scratch1,scratch2) \
-		S32_S32_BETA_OP(c_int32_ ## m_ind ## p0,m_ir,m_ind,0,scratch1,scratch2); \
-		S32_S32_BETA_OP(c_int32_ ## m_ind ## p1,m_ir,m_ind,1,scratch1,scratch2); \
-		S32_S32_BETA_OP(c_int32_ ## m_ind ## p2,m_ir,m_ind,2,scratch1,scratch2); \
-		S32_S32_BETA_OP(c_int32_ ## m_ind ## p3,m_ir,m_ind,3,scratch1,scratch2); \
+	S32_S32_BETA_OP(c_int32_ ## m_ind ## p0,m_ir,m_ind,0,scratch1,scratch2); \
+	S32_S32_BETA_OP(c_int32_ ## m_ind ## p1,m_ir,m_ind,1,scratch1,scratch2); \
+	S32_S32_BETA_OP(c_int32_ ## m_ind ## p2,m_ir,m_ind,2,scratch1,scratch2); \
+	S32_S32_BETA_OP(c_int32_ ## m_ind ## p3,m_ir,m_ind,3,scratch1,scratch2); \
 
 // Downscale beta op.
 #define S8_S32_BETA_OP(reg,m_ir,m_ind,n_ind,scratch1,scratch2) \
@@ -76,36 +76,27 @@
 	S32_BETA_FMA(reg,scratch1,scratch2) \
 
 #define S8_S32_BETA_OP2(m_ir,m_ind,scratch1,scratch2) \
-		S8_S32_BETA_OP(c_int32_ ## m_ind ## p0,m_ir,m_ind,0,scratch1,scratch2); \
-		S8_S32_BETA_OP(c_int32_ ## m_ind ## p1,m_ir,m_ind,1,scratch1,scratch2); \
+	S8_S32_BETA_OP(c_int32_ ## m_ind ## p0,m_ir,m_ind,0,scratch1,scratch2); \
+	S8_S32_BETA_OP(c_int32_ ## m_ind ## p1,m_ir,m_ind,1,scratch1,scratch2); \
 
 #define S8_S32_BETA_OP3(m_ir,m_ind,scratch1,scratch2) \
-		S8_S32_BETA_OP(c_int32_ ## m_ind ## p0,m_ir,m_ind,0,scratch1,scratch2); \
-		S8_S32_BETA_OP(c_int32_ ## m_ind ## p1,m_ir,m_ind,1,scratch1,scratch2); \
-		S8_S32_BETA_OP(c_int32_ ## m_ind ## p2,m_ir,m_ind,2,scratch1,scratch2); \
+	S8_S32_BETA_OP(c_int32_ ## m_ind ## p0,m_ir,m_ind,0,scratch1,scratch2); \
+	S8_S32_BETA_OP(c_int32_ ## m_ind ## p1,m_ir,m_ind,1,scratch1,scratch2); \
+	S8_S32_BETA_OP(c_int32_ ## m_ind ## p2,m_ir,m_ind,2,scratch1,scratch2); \
 
 #define S8_S32_BETA_OP4(m_ir,m_ind,scratch1,scratch2) \
-		S8_S32_BETA_OP(c_int32_ ## m_ind ## p0,m_ir,m_ind,0,scratch1,scratch2); \
-		S8_S32_BETA_OP(c_int32_ ## m_ind ## p1,m_ir,m_ind,1,scratch1,scratch2); \
-		S8_S32_BETA_OP(c_int32_ ## m_ind ## p2,m_ir,m_ind,2,scratch1,scratch2); \
-		S8_S32_BETA_OP(c_int32_ ## m_ind ## p3,m_ir,m_ind,3,scratch1,scratch2); \
+	S8_S32_BETA_OP(c_int32_ ## m_ind ## p0,m_ir,m_ind,0,scratch1,scratch2); \
+	S8_S32_BETA_OP(c_int32_ ## m_ind ## p1,m_ir,m_ind,1,scratch1,scratch2); \
+	S8_S32_BETA_OP(c_int32_ ## m_ind ## p2,m_ir,m_ind,2,scratch1,scratch2); \
+	S8_S32_BETA_OP(c_int32_ ## m_ind ## p3,m_ir,m_ind,3,scratch1,scratch2); \
 
 // Default n < 16 beta macro
-#define S32_S32_BETA_OP_NLT16(reg,buf_,m_ir,m_ind,n_ind,scratch1,scratch2) \
-	memcpy( buf_, ( c + ( rs_c * ( m_ir + m_ind ) ) + ( n_ind * 16 ) ), ( n0_rem * sizeof( int32_t ) ) ); \
+#define S32_S32_BETA_OP_NLT16F(reg,buf_,scratch1,scratch2) \
 	scratch1 = _mm512_loadu_epi32( buf_ ); \
 	S32_BETA_FMA(reg,scratch1,scratch2) \
 
 // Downscale n < 16 beta macro
-#define S8_S32_BETA_OP_NLT16(reg,buf_,m_ind,n_ind,scratch1,scratch2) \
-	memcpy \
-	( \
-	  ( int8_t* )buf_, \
-	  ( int8_t* )post_ops_attr.buf_downscale + \
-	  ( post_ops_attr.rs_c_downscale * ( post_ops_attr.post_op_c_i + m_ind ) ) + \
-	  post_ops_attr.post_op_c_j + ( n_ind * 16 ), \
-	  ( n0_rem * sizeof( int32_t ) ) \
-	); \
+#define S8_S32_BETA_OP_NLT16F(reg,buf_,scratch1,scratch2) \
 	scratch1 = _mm512_cvtepi8_epi32( _mm_loadu_epi8( ( int8_t* )buf_ ) ); \
 	S32_BETA_FMA(reg,scratch1,scratch2) \
 
@@ -152,22 +143,6 @@
 	    ( _MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC ) \
 	  ) \
 	) \
-
-// Downscale n < 16 store macro
-#define CVT_STORE_S32_S8_NLT16(reg,buf_,m_ind,n_ind) \
-	_mm512_mask_cvtsepi32_storeu_epi8( ( int8_t* )buf_, mask_all1, reg ); \
-	memcpy \
-	( \
-	  ( int8_t* )post_ops_attr.buf_downscale + \
-	  ( post_ops_attr.rs_c_downscale * ( post_ops_attr.post_op_c_i + m_ind ) ) + \
-	  post_ops_attr.post_op_c_j + ( n_ind * 16 ), \
-	  ( int8_t* )buf_, ( n0_rem * sizeof( int8_t ) ) \
-	); \
-
-// Default n < 16 store macro
-#define STORE_S32_NLT16(reg,buf_,m_ir,m_ind,n_ind) \
-	_mm512_storeu_epi32( buf_, reg ); \
-	memcpy( c + ( rs_c * ( m_ir + m_ind ) ) + ( n_ind * 16 ), buf_, ( n0_rem * sizeof( int32_t ) ) ); \
 
 /* GeLU (x) = 0.5* x * (1 + tanh ( 0.797884 * ( x + ( 0.044715 * x^3 ) ) ) )  */ 
 #define GELU_TANH_S32_AVX512(reg, y, r, r2, x, z, dn, x_tanh, q) \
