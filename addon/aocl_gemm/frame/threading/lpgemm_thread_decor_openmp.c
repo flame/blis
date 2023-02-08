@@ -483,8 +483,8 @@ void lpgemm_ ## LPGEMM_SFX ## _openmp_thread_decorator \
        C_type*               c, \
        const dim_t           rs_c, \
        const dim_t           cs_c, \
-       C_type                alpha, \
-       C_type                beta, \
+       const C_type          alpha, \
+       const C_type          beta, \
        rntm_t*               rntm_g, \
        lpgemm_post_op*       post_op_list, \
        bool                  c_downscale \
@@ -580,8 +580,8 @@ void lpgemm_ ## LPGEMM_SFX ## _thread_decorator \
        C_type*               c, \
        const dim_t           rs_c, \
        const dim_t           cs_c, \
-       C_type                alpha, \
-       C_type                beta, \
+       const C_type          alpha, \
+       const C_type          beta, \
        rntm_t*               rntm_g, \
        lpgemm_post_op*       post_op_list, \
        bool                  c_downscale \

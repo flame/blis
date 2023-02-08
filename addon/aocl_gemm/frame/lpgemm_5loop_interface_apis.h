@@ -56,8 +56,8 @@ void lpgemm_rowvar_ ## LP_SFX \
        C_type*               c, \
        const dim_t           rs_c, \
        const dim_t           cs_c, \
-       C_type                alpha, \
-       C_type                beta, \
+       const C_type          alpha, \
+       const C_type          beta, \
        rntm_t*               rntm, \
        lpgemm_thrinfo_t*     thread, \
        lpgemm_post_op*       post_op_list, \
