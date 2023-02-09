@@ -34,6 +34,7 @@
 
 #include "blis.h"
 
+
 #define PACKM_BODY( ctype, ch, pragma, cdim, inca, op ) \
 \
 do \
@@ -50,20 +51,21 @@ do \
 	} \
 } while(0)
 
+
 #undef  GENTFUNC
 #define GENTFUNC( ctype, ch, opname, mnr0, bb0, arch, suf ) \
 \
 void PASTEMAC3(ch,opname,arch,suf) \
      ( \
-       conj_t           conja, \
-       pack_t           schema, \
-       dim_t            cdim, \
-       dim_t            n, \
-       dim_t            n_max, \
-       ctype*  restrict kappa, \
-       ctype*  restrict a, inc_t inca, inc_t lda, \
-       ctype*  restrict p,             inc_t ldp, \
-       cntx_t*          cntx \
+             conj_t  conja, \
+             pack_t  schema, \
+             dim_t   cdim, \
+             dim_t   n, \
+             dim_t   n_max, \
+       const ctype*  kappa, \
+       const ctype*  a, inc_t inca, inc_t lda, \
+             ctype*  p,             inc_t ldp, \
+       const cntx_t* cntx  \
      ) \
 { \
 	const dim_t     mnr        = PASTECH2(mnr0, _, ch); \
@@ -71,9 +73,9 @@ void PASTEMAC3(ch,opname,arch,suf) \
 	const dim_t     cdim_max   = bli_cntx_get_blksz_def_dt( dt, mnr0, cntx ); \
 	const dim_t     dfac       = PASTECH2(bb0, _, ch); \
 \
-	ctype           kappa_cast = *( ctype* )kappa; \
-	ctype* restrict alpha1     = a; \
-	ctype* restrict pi1        = p; \
+	      ctype           kappa_cast = *( ctype* )kappa; \
+	const ctype* restrict alpha1     = a; \
+	      ctype* restrict pi1        = p; \
 \
 	if ( cdim == mnr && mnr != -1 ) \
 	{ \

@@ -42,17 +42,17 @@
 \
 void PASTEMAC3(ch,opname,arch,suf) \
      ( \
-       dim_t               m, \
-       dim_t               n, \
-       dim_t               k, \
-       ctype*     restrict alpha, \
-       ctype*     restrict a1x, \
-       ctype*     restrict a11, \
-       ctype*     restrict bx1, \
-       ctype*     restrict b11, \
-       ctype*     restrict c11, inc_t rs_c, inc_t cs_c, \
-       auxinfo_t*          data, \
-       cntx_t*             cntx  \
+             dim_t      m, \
+             dim_t      n, \
+             dim_t      k, \
+       const ctype*     alpha, \
+       const ctype*     a1x, \
+       const ctype*     a11, \
+       const ctype*     bx1, \
+             ctype*     b11, \
+             ctype*     c11, inc_t rs_c, inc_t cs_c, \
+             auxinfo_t* data, \
+       const cntx_t*    cntx  \
      ) \
 { \
 	const num_t dt     = PASTEMAC(ch,type); \
@@ -69,7 +69,7 @@ printf( "bli_gemmtrsm_ref(): cs_b = %d\n", (int)cs_b ); \
 printf( "bli_gemmtrsm_ref(): k nr = %d %d\n", (int)k, (int)nr ); \
 */ \
 \
-	ctype*      minus_one = PASTEMAC(ch,m1); \
+	const ctype* minus_one = PASTEMAC(ch,m1); \
 \
 	PASTECH(ch,gemm_ukr_ft) \
 	            gemm_ukr = bli_cntx_get_ukr_dt( dt, BLIS_GEMM_UKR, cntx ); \
@@ -83,7 +83,7 @@ PASTEMAC(d,fprintm)( stdout, "gemmtrsm_ukr: b11", mr, 2*nr, \
                      (double*)b11, rs_b, 1, "%5.2f", "" ); \
 */ \
 \
-	ctype           ct[ BLIS_STACK_BUF_MAX_SIZE \
+	      ctype     ct[ BLIS_STACK_BUF_MAX_SIZE \
 	                    / sizeof( ctype ) ] \
 	                    __attribute__((aligned(BLIS_STACK_BUF_ALIGN_SIZE))); \
 	/* to FGVZ: Should we be querying the preference of BLIS_GEMMTRSM_?_UKR
@@ -100,9 +100,9 @@ PASTEMAC(d,fprintm)( stdout, "gemmtrsm_ukr: b11", mr, 2*nr, \
 \
 	const bool      use_ct   = ( m < mr || n < nr ); \
 \
-	ctype* restrict c11_use  = c11; \
-	inc_t           rs_c_use = rs_c; \
-	inc_t           cs_c_use = cs_c; \
+	      ctype*    c11_use  = c11; \
+	      inc_t     rs_c_use = rs_c; \
+	      inc_t     cs_c_use = cs_c; \
 \
 	if ( use_ct ) \
 	{ \

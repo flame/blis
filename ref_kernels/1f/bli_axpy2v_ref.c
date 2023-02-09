@@ -40,15 +40,15 @@
 \
 void PASTEMAC3(ch,opname,arch,suf) \
      ( \
-       conj_t           conjx, \
-       conj_t           conjy, \
-       dim_t            n, \
-       ctype*  restrict alphax, \
-       ctype*  restrict alphay, \
-       ctype*  restrict x, inc_t incx, \
-       ctype*  restrict y, inc_t incy, \
-       ctype*  restrict z, inc_t incz, \
-       cntx_t*          cntx  \
+             conj_t  conjx, \
+             conj_t  conjy, \
+             dim_t   n, \
+       const ctype*  alphax, \
+       const ctype*  alphay, \
+       const ctype*  x, inc_t incx, \
+       const ctype*  y, inc_t incy, \
+             ctype*  z, inc_t incz, \
+       const cntx_t* cntx  \
      ) \
 { \
 	if ( bli_zero_dim1( n ) ) return; \

@@ -110,15 +110,15 @@ static int32_t offsets[32] __attribute__((aligned(64))) =
 
 void bli_spackm_knl_asm_16xk
      (
-       conj_t           conja,
-       pack_t           schema,
-       dim_t            cdim_,
-       dim_t            n_,
-       dim_t            n_max_,
-       float*  restrict kappa_,
-       float*  restrict a_, inc_t inca_, inc_t lda_,
-       float*  restrict p_,              inc_t ldp_,
-       cntx_t*          cntx
+             conj_t  conja,
+             pack_t  schema,
+             dim_t   cdim_,
+             dim_t   n_,
+             dim_t   n_max_,
+       const float*  kappa_,
+       const float*  a_, inc_t inca_, inc_t lda_,
+             float*  p_,              inc_t ldp_,
+       const cntx_t* cntx
      )
 {
     const int32_t* offsetPtr = &offsets[0];
@@ -377,15 +377,15 @@ void bli_spackm_knl_asm_16xk
 
 void bli_spackm_knl_asm_24xk
      (
-       conj_t           conja,
-       pack_t           schema,
-       dim_t            cdim_,
-       dim_t            n_,
-       dim_t            n_max_,
-       float*  restrict kappa_,
-       float*  restrict a_, inc_t inca_, inc_t lda_,
-       float*  restrict p_,              inc_t ldp_,
-       cntx_t*          cntx
+             conj_t  conja,
+             pack_t  schema,
+             dim_t   cdim_,
+             dim_t   n_,
+             dim_t   n_max_,
+       const float*  kappa_,
+       const float*  a_, inc_t inca_, inc_t lda_,
+             float*  p_,              inc_t ldp_,
+       const cntx_t* cntx
      )
 {
     const int32_t* offsetPtr = &offsets[0];

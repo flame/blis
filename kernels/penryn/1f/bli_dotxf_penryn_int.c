@@ -45,16 +45,16 @@ typedef union
 
 void bli_ddotxf_penryn_int
      (
-       conj_t           conjat,
-       conj_t           conjx,
-       dim_t            m,
-       dim_t            b_n,
-       double* restrict alpha,
-       double* restrict a, inc_t inca, inc_t lda,
-       double* restrict x, inc_t incx,
-       double* restrict beta,
-       double* restrict y, inc_t incy,
-       cntx_t*          cntx
+             conj_t  conjat,
+             conj_t  conjx,
+             dim_t   m,
+             dim_t   b_n,
+       const double* alpha,
+       const double* a, inc_t inca, inc_t lda,
+       const double* x, inc_t incx,
+       const double* beta,
+             double* y, inc_t incy,
+       const cntx_t* cntx
      )
 {
 	double*  restrict alpha_cast = alpha;

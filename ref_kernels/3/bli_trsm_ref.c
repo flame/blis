@@ -42,11 +42,11 @@
 \
 void PASTEMAC3(ch,opname,arch,suf) \
      ( \
-       ctype*     restrict a, \
-       ctype*     restrict b, \
-       ctype*     restrict c, inc_t rs_c, inc_t cs_c, \
-       auxinfo_t*          data, \
-       cntx_t*             cntx  \
+       const ctype*     a, \
+             ctype*     b, \
+             ctype*     c, inc_t rs_c, inc_t cs_c, \
+             auxinfo_t* data, \
+       const cntx_t*    cntx  \
      ) \
 { \
 	const num_t     dt     = PASTEMAC(ch,type); \
@@ -66,22 +66,19 @@ void PASTEMAC3(ch,opname,arch,suf) \
 	const inc_t     rs_b   = packnr; \
 	const inc_t     cs_b   = bli_cntx_get_blksz_def_dt( dt, BLIS_BBN, cntx ); \
 \
-	dim_t           iter, i, j, l; \
-	dim_t           n_behind; \
-\
-	for ( iter = 0; iter < m; ++iter ) \
+	for ( dim_t iter = 0; iter < m; ++iter ) \
 	{ \
-		i        = iter; \
-		n_behind = i; \
+		dim_t i        = iter; \
+		dim_t n_behind = i; \
 \
-		ctype* restrict alpha11 = a + (i  )*rs_a + (i  )*cs_a; \
-		ctype* restrict a10t    = a + (i  )*rs_a + (0  )*cs_a; \
-		ctype* restrict B0      = b + (0  )*rs_b + (0  )*cs_b; \
-		ctype* restrict b1      = b + (i  )*rs_b + (0  )*cs_b; \
+		const ctype* restrict alpha11 = a + (i  )*rs_a + (i  )*cs_a; \
+		const ctype* restrict a10t    = a + (i  )*rs_a + (0  )*cs_a; \
+		      ctype* restrict B0      = b + (0  )*rs_b + (0  )*cs_b; \
+		      ctype* restrict b1      = b + (i  )*rs_b + (0  )*cs_b; \
 \
 		/* b1 = b1 - a10t * B0; */ \
 		/* b1 = b1 / alpha11; */ \
-		for ( j = 0; j < n; ++j ) \
+		for ( dim_t j = 0; j < n; ++j ) \
 		{ \
 			ctype* restrict b01     = B0 + (0  )*rs_b + (j  )*cs_b; \
 			ctype* restrict beta11  = b1 + (0  )*rs_b + (j  )*cs_b; \
@@ -91,10 +88,10 @@ void PASTEMAC3(ch,opname,arch,suf) \
 \
 			/* beta11 = beta11 - a10t * b01; */ \
 			PASTEMAC(ch,set0s)( rho11 ); \
-			for ( l = 0; l < n_behind; ++l ) \
+			for ( dim_t l = 0; l < n_behind; ++l ) \
 			{ \
-				ctype* restrict alpha10 = a10t + (l  )*cs_a; \
-				ctype* restrict beta01  = b01  + (l  )*rs_b; \
+				const ctype* restrict alpha10 = a10t + (l  )*cs_a; \
+				      ctype* restrict beta01  = b01  + (l  )*rs_b; \
 \
 				PASTEMAC(ch,axpys)( *alpha10, *beta01, rho11 ); \
 			} \
@@ -158,10 +155,10 @@ void PASTEMAC3(ch,opname,arch,suf) \
 		dim_t i        = m - iter - 1; \
 		dim_t n_behind = iter; \
 \
-		ctype* restrict alpha11 = a + (i  )*rs_a + (i  )*cs_a; \
-		ctype* restrict a12t    = a + (i  )*rs_a + (i+1)*cs_a; \
-		ctype* restrict b1      = b + (i  )*rs_b + (0  )*cs_b; \
-		ctype* restrict B2      = b + (i+1)*rs_b + (0  )*cs_b; \
+		const ctype* restrict alpha11 = a + (i  )*rs_a + (i  )*cs_a; \
+		const ctype* restrict a12t    = a + (i  )*rs_a + (i+1)*cs_a; \
+		      ctype* restrict b1      = b + (i  )*rs_b + (0  )*cs_b; \
+		      ctype* restrict B2      = b + (i+1)*rs_b + (0  )*cs_b; \
 \
 		/* b1 = b1 - a12t * B2; */ \
 		/* b1 = b1 / alpha11; */ \
@@ -177,8 +174,8 @@ void PASTEMAC3(ch,opname,arch,suf) \
 			PASTEMAC(ch,set0s)( rho11 ); \
 			for ( dim_t l = 0; l < n_behind; ++l ) \
 			{ \
-				ctype* restrict alpha12 = a12t + (l  )*cs_a; \
-				ctype* restrict beta21  = b21  + (l  )*rs_b; \
+				const ctype* restrict alpha12 = a12t + (l  )*cs_a; \
+				      ctype* restrict beta21  = b21  + (l  )*rs_b; \
 \
 				PASTEMAC(ch,axpys)( *alpha12, *beta21, rho11 ); \
 			} \

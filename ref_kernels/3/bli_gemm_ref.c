@@ -42,16 +42,16 @@
 \
 static void PASTEMAC3(ch,opname,arch,suf) \
      ( \
-       dim_t               m, \
-       dim_t               n, \
-       dim_t               k, \
-       ctype*     restrict alpha, \
-       ctype*     restrict a, \
-       ctype*     restrict b, \
-       ctype*     restrict beta, \
-       ctype*     restrict c, inc_t rs_c, inc_t cs_c, \
-       auxinfo_t*          data, \
-       cntx_t*             cntx  \
+             dim_t      m, \
+             dim_t      n, \
+             dim_t      k, \
+       const ctype*     alpha, \
+       const ctype*     a, \
+       const ctype*     b, \
+       const ctype*     beta, \
+             ctype*     c, inc_t rs_c, inc_t cs_c, \
+             auxinfo_t* data, \
+       const cntx_t*    cntx  \
      ) \
 { \
 	const num_t dt     = PASTEMAC(ch,type); \
@@ -71,32 +71,26 @@ static void PASTEMAC3(ch,opname,arch,suf) \
 	const inc_t rs_ab  = 1; \
 	const inc_t cs_ab  = m; \
 \
-	dim_t       l, j, i; \
-\
-	ctype       ai; \
-	ctype       bj; \
-\
-\
 	/* Initialize the accumulator elements in ab to zero. */ \
-	for ( i = 0; i < m * n; ++i ) \
+	for ( dim_t i = 0; i < m * n; ++i ) \
 	{ \
 		PASTEMAC(ch,set0s)( *(ab + i) ); \
 	} \
 \
 	/* Perform a series of k rank-1 updates into ab. */ \
-	for ( l = 0; l < k; ++l ) \
+	for ( dim_t l = 0; l < k; ++l ) \
 	{ \
 		ctype* restrict abij = ab; \
 \
 		/* In an optimized implementation, these two loops over MR and NR
 		   are typically fully unrolled. */ \
-		for ( j = 0; j < n; ++j ) \
+		for ( dim_t j = 0; j < n; ++j ) \
 		{ \
-			bj = *(b + j*cs_b); \
+			ctype bj = *(b + j*cs_b); \
 \
-			for ( i = 0; i < m; ++i ) \
+			for ( dim_t i = 0; i < m; ++i ) \
 			{ \
-				ai = *(a + i*rs_a); \
+				ctype ai = *(a + i*rs_a); \
 \
 				PASTEMAC(ch,dots)( ai, bj, *abij ); \
 \
@@ -109,7 +103,7 @@ static void PASTEMAC3(ch,opname,arch,suf) \
 	} \
 \
 	/* Scale the result in ab by alpha. */ \
-	for ( i = 0; i < m * n; ++i ) \
+	for ( dim_t i = 0; i < m * n; ++i ) \
 	{ \
 		PASTEMAC(ch,scals)( *alpha, *(ab + i) ); \
 	} \
@@ -151,22 +145,26 @@ INSERT_GENTFUNC_BASIC2( gemm_gen, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX )
 \
 void PASTEMAC3(ch,opname,arch,suf) \
      ( \
-       dim_t               m, \
-       dim_t               n, \
-       dim_t               k, \
-       ctype*     restrict alpha, \
-       ctype*     restrict a, \
-       ctype*     restrict b, \
-       ctype*     restrict beta, \
-       ctype*     restrict c, inc_t rs_c, inc_t cs_c, \
-       auxinfo_t*          data, \
-       cntx_t*             cntx  \
+             dim_t      m, \
+             dim_t      n, \
+             dim_t      k, \
+       const ctype*     alpha, \
+       const ctype*     a, \
+       const ctype*     b, \
+       const ctype*     beta, \
+             ctype*     c, inc_t rs_c, inc_t cs_c, \
+             auxinfo_t* data, \
+       const cntx_t*    cntx  \
      ) \
 { \
 \
 	const dim_t mr = PASTECH(BLIS_MR_,ch); \
 	const dim_t nr = PASTECH(BLIS_NR_,ch); \
 \
+	/* If either BLIS_MR_? or BLIS_NR_? was left undefined by the subconfig,
+	   the compiler can't fully unroll the MR and NR loop iterations below,
+	   which means there's no benefit to using this kernel over a general-
+	   purpose implementation instead. */ \
 	if ( mr == -1 || nr == -1 ) \
 	{ \
 		PASTEMAC3(ch,gemm_gen,arch,suf) \
@@ -185,7 +183,7 @@ void PASTEMAC3(ch,opname,arch,suf) \
 		return; \
 	} \
 \
-	ctype       ab[ BLIS_STACK_BUF_MAX_SIZE \
+	      ctype ab[ BLIS_STACK_BUF_MAX_SIZE \
 	                / sizeof( ctype ) ] \
 	                __attribute__((aligned(BLIS_STACK_BUF_ALIGN_SIZE))); \
 	const inc_t rs_ab  = nr; \

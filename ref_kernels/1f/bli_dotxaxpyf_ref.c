@@ -40,20 +40,20 @@
 \
 void PASTEMAC3(ch,opname,arch,suf) \
      ( \
-       conj_t           conjat, \
-       conj_t           conja, \
-       conj_t           conjw, \
-       conj_t           conjx, \
-       dim_t            m, \
-       dim_t            b_n, \
-       ctype*  restrict alpha, \
-       ctype*  restrict a, inc_t inca, inc_t lda, \
-       ctype*  restrict w, inc_t incw, \
-       ctype*  restrict x, inc_t incx, \
-       ctype*  restrict beta, \
-       ctype*  restrict y, inc_t incy, \
-       ctype*  restrict z, inc_t incz, \
-       cntx_t*          cntx  \
+             conj_t  conjat, \
+             conj_t  conja, \
+             conj_t  conjw, \
+             conj_t  conjx, \
+             dim_t   m, \
+             dim_t   b_n, \
+       const ctype*  alpha, \
+       const ctype*  a, inc_t inca, inc_t lda, \
+       const ctype*  w, inc_t incw, \
+       const ctype*  x, inc_t incx, \
+       const ctype*  beta, \
+             ctype*  y, inc_t incy, \
+             ctype*  z, inc_t incz, \
+       const cntx_t* cntx  \
      ) \
 { \
 	/* A is m x n.                   */ \

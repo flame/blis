@@ -49,15 +49,15 @@
 
 void bli_spackm_armv8a_int_12xk
      (
-       conj_t              conja,
-       pack_t              schema,
-       dim_t               cdim0,
-       dim_t               k0,
-       dim_t               k0_max,
-       float*     restrict kappa,
-       float*     restrict a, inc_t inca0, inc_t lda0,
-       float*     restrict p,              inc_t ldp0,
-       cntx_t*             cntx
+             conj_t  conja,
+             pack_t  schema,
+             dim_t   cdim0,
+             dim_t   k0,
+             dim_t   k0_max,
+       const float*  kappa,
+       const float*  a, inc_t inca0, inc_t lda0,
+             float*  p,              inc_t ldp0,
+       const cntx_t* cntx
      )
 {
   // This is the panel dimension assumed by the packm kernel.

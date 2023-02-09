@@ -45,16 +45,16 @@ typedef union
 
 void bli_ddotaxpyv_penryn_int
      (
-       conj_t           conjxt,
-       conj_t           conjx,
-       conj_t           conjy,
-       dim_t            n,
-       double* restrict alpha,
-       double* restrict x, inc_t incx,
-       double* restrict y, inc_t incy,
-       double* restrict rho,
-       double* restrict z, inc_t incz,
-       cntx_t*          cntx
+             conj_t  conjxt,
+             conj_t  conjx,
+             conj_t  conjy,
+             dim_t   n,
+       const double* alpha,
+       const double* x, inc_t incx,
+       const double* y, inc_t incy,
+             double* rho,
+             double* z, inc_t incz,
+       const cntx_t* cntx
      )
 {
 	double*  restrict alpha_cast = alpha;

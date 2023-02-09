@@ -34,6 +34,7 @@
 
 #include "blis.h"
 
+
 #define PACKM_1E_BODY( ctype, ch, pragma, cdim, inca2, op ) \
 \
 do \
@@ -56,6 +57,7 @@ do \
 	} \
 } while(0)
 
+
 #define PACKM_1R_BODY( ctype, ch, pragma, cdim, inca2, op ) \
 \
 do \
@@ -74,20 +76,21 @@ do \
 	} \
 } while(0)
 
+
 #undef  GENTFUNCCO
 #define GENTFUNCCO( ctype, ctype_r, ch, chr, opname, mnr0, bb0, arch, suf ) \
 \
 void PASTEMAC3(ch,opname,arch,suf) \
      ( \
-       conj_t           conja, \
-       pack_t           schema, \
-       dim_t            cdim, \
-       dim_t            n, \
-       dim_t            n_max, \
-       ctype*  restrict kappa, \
-       ctype*  restrict a, inc_t inca, inc_t lda, \
-       ctype*  restrict p,             inc_t ldp, \
-       cntx_t*          cntx  \
+             conj_t  conja, \
+             pack_t  schema, \
+             dim_t   cdim, \
+             dim_t   n, \
+             dim_t   n_max, \
+       const ctype*  kappa, \
+       const ctype*  a, inc_t inca, inc_t lda, \
+             ctype*  p,             inc_t ldp, \
+       const cntx_t* cntx  \
      ) \
 { \
 	const dim_t dfac = PASTECH2(bb0, _, chr); \
@@ -103,11 +106,11 @@ void PASTEMAC3(ch,opname,arch,suf) \
 		const inc_t       lda2    = 2 * lda; \
 		const inc_t       ldp2    = 2 * ldp; \
 \
-		ctype_r           kappa_r = ( ( ctype_r* )kappa )[0]; \
-		ctype_r           kappa_i = ( ( ctype_r* )kappa )[1]; \
-		ctype_r* restrict alpha1  = ( ctype_r* )a; \
-		ctype_r* restrict pi1_ri  = ( ctype_r* )p; \
-		ctype_r* restrict pi1_ir  = ( ctype_r* )p + ldp; \
+		      ctype_r           kappa_r = ( ( ctype_r* )kappa )[0]; \
+		      ctype_r           kappa_i = ( ( ctype_r* )kappa )[1]; \
+		const ctype_r* restrict alpha1  = ( ctype_r* )a; \
+		      ctype_r* restrict pi1_ri  = ( ctype_r* )p; \
+		      ctype_r* restrict pi1_ir  = ( ctype_r* )p + ldp; \
 \
 		if ( cdim == mnr && mnr != -1 ) \
 		{ \
@@ -144,11 +147,11 @@ void PASTEMAC3(ch,opname,arch,suf) \
 		const inc_t       lda2    = 2 * lda; \
 		const inc_t       ldp2    = 2 * ldp; \
 \
-		ctype_r           kappa_r = ( ( ctype_r* )kappa )[0]; \
-		ctype_r           kappa_i = ( ( ctype_r* )kappa )[1]; \
-		ctype_r* restrict alpha1  = ( ctype_r* )a; \
-		ctype_r* restrict pi1_r   = ( ctype_r* )p; \
-		ctype_r* restrict pi1_i   = ( ctype_r* )p + ldp; \
+		      ctype_r           kappa_r = ( ( ctype_r* )kappa )[0]; \
+		      ctype_r           kappa_i = ( ( ctype_r* )kappa )[1]; \
+		const ctype_r* restrict alpha1  = ( ctype_r* )a; \
+		      ctype_r* restrict pi1_r   = ( ctype_r* )p; \
+		      ctype_r* restrict pi1_i   = ( ctype_r* )p + ldp; \
 \
 		if ( cdim == mnr && mnr != -1 ) \
 		{ \

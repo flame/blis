@@ -45,19 +45,19 @@ typedef union
 
 void bli_daxpy2v_penryn_int
      (
-       conj_t           conjx,
-       conj_t           conjy,
-       dim_t            n,
-       double* restrict alpha,
-       double* restrict beta,
-       double* restrict x, inc_t incx,
-       double* restrict y, inc_t incy,
-       double* restrict z, inc_t incz,
-       cntx_t*          cntx
+             conj_t  conjx,
+             conj_t  conjy,
+             dim_t   n,
+       const double* alphax,
+       const double* alphay,
+       const double* x, inc_t incx,
+       const double* y, inc_t incy,
+             double* z, inc_t incz,
+       const cntx_t* cntx
      )
 {
-	double*  restrict alpha_cast  = alpha;
-	double*  restrict beta_cast   = beta;
+	double*  restrict alpha_cast  = alphax;
+	double*  restrict beta_cast   = alphay;
 	double*  restrict x_cast      = x;
 	double*  restrict y_cast      = y;
 	double*  restrict z_cast      = z;

@@ -43,15 +43,15 @@
 \
 void PASTEMAC(ch,varname) \
      ( \
-       conj_t           conja, \
-       pack_t           schema, \
-       dim_t            cdim, \
-       dim_t            n, \
-       dim_t            n_max, \
-       ctype*  restrict kappa, \
-       ctype*  restrict a, inc_t inca, inc_t lda, \
-       ctype*  restrict p,             inc_t ldp, \
-       cntx_t*          cntx  \
+             conj_t  conja, \
+             pack_t  schema, \
+             dim_t   cdim, \
+             dim_t   n, \
+             dim_t   n_max, \
+       const ctype*  kappa, \
+       const ctype*  a, inc_t inca, inc_t lda, \
+             ctype*  p,             inc_t ldp, \
+       const cntx_t* cntx  \
      );
 
 
@@ -61,14 +61,14 @@ void PASTEMAC(ch,varname) \
 \
 void PASTEMAC(ch,varname) \
      ( \
-       conj_t           conja, \
-       pack_t           schema, \
-       dim_t            cdim, \
-       dim_t            n, \
-       ctype*  restrict kappa, \
-       ctype*  restrict p,             inc_t ldp, \
-       ctype*  restrict a, inc_t inca, inc_t lda, \
-       cntx_t*          cntx \
+             conj_t  conja, \
+             pack_t  schema, \
+             dim_t   cdim, \
+             dim_t   n, \
+       const ctype*  kappa, \
+       const ctype*  p,             inc_t ldp, \
+             ctype*  a, inc_t inca, inc_t lda, \
+       const cntx_t* cntx  \
      );
 
 
@@ -78,17 +78,17 @@ void PASTEMAC(ch,varname) \
 \
 void PASTEMAC(ch,varname) \
      ( \
-       struc_t          struca, \
-       diag_t           diaga, \
-       uplo_t           uploa, \
-       conj_t           conja, \
-       pack_t           schema, \
-       bool             invdiag, \
-       dim_t            cdim, \
-       dim_t            n_max, \
-       ctype*  restrict kappa, \
-       ctype*  restrict a, inc_t inca, inc_t lda, \
-       ctype*  restrict p,             inc_t ldp, \
-       cntx_t*          cntx \
+             struc_t struca, \
+             diag_t  diaga, \
+             uplo_t  uploa, \
+             conj_t  conja, \
+             pack_t  schema, \
+             bool    invdiag, \
+             dim_t   cdim, \
+             dim_t   n_max, \
+       const ctype*  kappa, \
+       const ctype*  a, inc_t inca, inc_t lda, \
+             ctype*  p,             inc_t ldp, \
+       const cntx_t* cntx \
      );
 

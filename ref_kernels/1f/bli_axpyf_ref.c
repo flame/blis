@@ -40,15 +40,15 @@
 \
 void PASTEMAC3(ch,opname,arch,suf) \
      ( \
-       conj_t           conja, \
-       conj_t           conjx, \
-       dim_t            m, \
-       dim_t            b_n, \
-       ctype*  restrict alpha, \
-       ctype*  restrict a, inc_t inca, inc_t lda, \
-       ctype*  restrict x, inc_t incx, \
-       ctype*  restrict y, inc_t incy, \
-       cntx_t*          cntx  \
+             conj_t  conja, \
+             conj_t  conjx, \
+             dim_t   m, \
+             dim_t   b_n, \
+       const ctype*  alpha, \
+       const ctype*  a, inc_t inca, inc_t lda, \
+       const ctype*  x, inc_t incx, \
+             ctype*  y, inc_t incy, \
+       const cntx_t* cntx  \
      ) \
 { \
 	if ( bli_zero_dim1( m ) ) return; \
@@ -101,9 +101,9 @@ void PASTEMAC3(ch,opname,arch,suf) \
 \
 		for ( dim_t i = 0; i < b_n; ++i ) \
 		{ \
-			ctype* restrict a1   = a + (0  )*inca + (i  )*lda; \
-			ctype* restrict chi1 = x + (i  )*incx; \
-			ctype* restrict y1   = y + (0  )*incy; \
+			const ctype* restrict a1   = a + (0  )*inca + (i  )*lda; \
+			const ctype* restrict chi1 = x + (i  )*incx; \
+			      ctype* restrict y1   = y + (0  )*incy; \
 \
 			ctype alpha_chi1; \
 \

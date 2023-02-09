@@ -58,16 +58,16 @@
 
 void bli_shgemm_power10_mma_8x16
     (
-        dim_t              m,
-        dim_t              n,
-        dim_t              k,
-        float*     restrict alpha,
-        float16*  restrict a,
-        float16*  restrict b,
-        float*     restrict beta,
-        float*     restrict c, inc_t rs_c0, inc_t cs_c0,
-        auxinfo_t*          data,
-        cntx_t*             cntx
+              dim_t      m,
+              dim_t      n,
+              dim_t      k,
+        const float*     alpha,
+        const float16*   a,
+        const float16*   b,
+        const float*     beta,
+              float*     c, inc_t rs_c0, inc_t cs_c0,
+              auxinfo_t* data,
+        const cntx_t*    cntx
     )
 {
 

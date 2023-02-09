@@ -58,17 +58,17 @@
 
 void bli_sgemmtrsm_u_haswell_asm_6x16
      (
-       dim_t               m,
-       dim_t               n,
-       dim_t               k0,
-       float*     restrict alpha,
-       float*     restrict a10,
-       float*     restrict a11,
-       float*     restrict b01,
-       float*     restrict b11,
-       float*     restrict c11, inc_t rs_c0, inc_t cs_c0,
-       auxinfo_t*          data,
-       cntx_t*             cntx
+             dim_t      m, \
+             dim_t      n, \
+             dim_t      k0, \
+       const float*     alpha, \
+       const float*     a12, \
+       const float*     a11, \
+       const float*     b21, \
+             float*     b11, \
+             float*     c11, inc_t rs_c0, inc_t cs_c0, \
+             auxinfo_t* data, \
+       const cntx_t*    cntx  \
      )
 {
 	//void*   a_next = bli_auxinfo_next_a( data );
@@ -90,8 +90,8 @@ void bli_sgemmtrsm_u_haswell_asm_6x16
 	vzeroall() // zero all xmm/ymm registers.
 
 
-	mov(var(a10), rax) // load address of a.
-	mov(var(b01), rbx) // load address of b.
+	mov(var(a12), rax) // load address of a.
+	mov(var(b21), rbx) // load address of b.
 
 	add(imm(32*4), rbx)
 	 // initialize loop by pre-loading
@@ -285,7 +285,7 @@ void bli_sgemmtrsm_u_haswell_asm_6x16
 
 	label(.SPOSTACCUM)
 
-	 // ymm4..ymm15 = -a10 * b01
+	 // ymm4..ymm15 = -a12 * b21
 
 
 
@@ -304,7 +304,7 @@ void bli_sgemmtrsm_u_haswell_asm_6x16
 	mov(rdx, r14) // save rdx = b11+8*cs_b for later
 
 
-	 // b11 := alpha * b11 - a10 * b01
+	 // b11 := alpha * b11 - a12 * b21
 	vfmsub231ps(mem(rcx), ymm3, ymm4)
 	add(rdi, rcx)
 	vfmsub231ps(mem(rdx), ymm3, ymm5)
@@ -816,8 +816,8 @@ void bli_sgemmtrsm_u_haswell_asm_6x16
 	: // input operands
 	  [k_iter] "m" (k_iter), // 0
 	  [k_left] "m" (k_left), // 1
-	  [a10]    "m" (a10),    // 2
-	  [b01]    "m" (b01),    // 3
+	  [a12]    "m" (a12),    // 2
+	  [b21]    "m" (b21),    // 3
 	  [beta]   "m" (beta),   // 4
 	  [alpha]  "m" (alpha),  // 5
 	  [a11]    "m" (a11),    // 6
@@ -854,17 +854,17 @@ void bli_sgemmtrsm_u_haswell_asm_6x16
 
 void bli_dgemmtrsm_u_haswell_asm_6x8
      (
-       dim_t               m,
-       dim_t               n,
-       dim_t               k0,
-       double*    restrict alpha,
-       double*    restrict a10,
-       double*    restrict a11,
-       double*    restrict b01,
-       double*    restrict b11,
-       double*    restrict c11, inc_t rs_c0, inc_t cs_c0,
-       auxinfo_t*          data,
-       cntx_t*             cntx
+             dim_t      m, \
+             dim_t      n, \
+             dim_t      k0, \
+       const double*    alpha, \
+       const double*    a12, \
+       const double*    a11, \
+       const double*    b21, \
+             double*    b11, \
+             double*    c11, inc_t rs_c0, inc_t cs_c0, \
+             auxinfo_t* data, \
+       const cntx_t*    cntx  \
      )
 {
 	//void*   a_next = bli_auxinfo_next_a( data );
@@ -886,8 +886,8 @@ void bli_dgemmtrsm_u_haswell_asm_6x8
 	vzeroall() // zero all xmm/ymm registers.
 
 
-	mov(var(a10), rax) // load address of a.
-	mov(var(b01), rbx) // load address of b.
+	mov(var(a12), rax) // load address of a.
+	mov(var(b21), rbx) // load address of b.
 
 	add(imm(32*4), rbx)
 	 // initialize loop by pre-loading
@@ -1083,7 +1083,7 @@ void bli_dgemmtrsm_u_haswell_asm_6x8
 
 	label(.DPOSTACCUM)
 
-	 // ymm4..ymm15 = -a10 * b01
+	 // ymm4..ymm15 = -a12 * b21
 
 
 
@@ -1103,7 +1103,7 @@ void bli_dgemmtrsm_u_haswell_asm_6x8
 	mov(rdx, r14) // save rdx = b11+4*cs_b for later
 
 
-	 // b11 := alpha * b11 - a10 * b01
+	 // b11 := alpha * b11 - a12 * b21
 	vfmsub231pd(mem(rcx), ymm3, ymm4)
 	add(rdi, rcx)
 	vfmsub231pd(mem(rdx), ymm3, ymm5)
@@ -1575,8 +1575,8 @@ void bli_dgemmtrsm_u_haswell_asm_6x8
 	: // input operands
 	  [k_iter] "m" (k_iter), // 0
 	  [k_left] "m" (k_left), // 1
-	  [a10]    "m" (a10),    // 2
-	  [b01]    "m" (b01),    // 3
+	  [a12]    "m" (a12),    // 2
+	  [b21]    "m" (b21),    // 3
 	  [beta]   "m" (beta),   // 4
 	  [alpha]  "m" (alpha),  // 5
 	  [a11]    "m" (a11),    // 6

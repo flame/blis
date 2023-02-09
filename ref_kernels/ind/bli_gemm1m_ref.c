@@ -39,16 +39,16 @@
 \
 void PASTEMAC3(ch,opname,arch,suf) \
      ( \
-       dim_t               m, \
-       dim_t               n, \
-       dim_t               k, \
-       ctype*     restrict alpha, \
-       ctype*     restrict a, \
-       ctype*     restrict b, \
-       ctype*     restrict beta, \
-       ctype*     restrict c, inc_t rs_c, inc_t cs_c, \
-       auxinfo_t*          data, \
-       cntx_t*             cntx  \
+             dim_t      m, \
+             dim_t      n, \
+             dim_t      k, \
+       const ctype*     alpha, \
+       const ctype*     a, \
+       const ctype*     b, \
+       const ctype*     beta, \
+             ctype*     c, inc_t rs_c, inc_t cs_c, \
+             auxinfo_t* data, \
+       const cntx_t*    cntx  \
      ) \
 { \
 	const num_t       dt        = PASTEMAC(ch,type); \
@@ -67,29 +67,30 @@ void PASTEMAC3(ch,opname,arch,suf) \
 \
 	const dim_t       k2        = 2 * k; \
 \
-	ctype             ct[ BLIS_STACK_BUF_MAX_SIZE \
+	      ctype       ct[ BLIS_STACK_BUF_MAX_SIZE \
 	                      / sizeof( ctype_r ) ] \
 	                      __attribute__((aligned(BLIS_STACK_BUF_ALIGN_SIZE))); \
-	inc_t             rs_ct; \
-	inc_t             cs_ct; \
+	      inc_t       rs_ct; \
+	      inc_t       cs_ct; \
 \
-	ctype_r* restrict a_r       = ( ctype_r* )a; \
+	const ctype_r*    a_r       = ( ctype_r* )a; \
 \
-	ctype_r* restrict b_r       = ( ctype_r* )b; \
+	const ctype_r*    b_r       = ( ctype_r* )b; \
 \
-	ctype_r* restrict zero_r    = PASTEMAC(chr,0); \
+	const ctype_r*    zero_r    = PASTEMAC(chr,0); \
 \
-	ctype_r* restrict alpha_r   = &PASTEMAC(ch,real)( *alpha ); \
-	ctype_r* restrict alpha_i   = &PASTEMAC(ch,imag)( *alpha ); \
+	const ctype_r*    alpha_r   = &PASTEMAC(ch,real)( *alpha ); \
+	const ctype_r*    alpha_i   = &PASTEMAC(ch,imag)( *alpha ); \
 \
-	ctype_r* restrict beta_r    = &PASTEMAC(ch,real)( *beta ); \
-	ctype_r* restrict beta_i    = &PASTEMAC(ch,imag)( *beta ); \
+	const ctype_r*    beta_r    = &PASTEMAC(ch,real)( *beta ); \
+	const ctype_r*    beta_i    = &PASTEMAC(ch,imag)( *beta ); \
 \
-	ctype_r*          c_use; \
-	inc_t             rs_c_use; \
-	inc_t             cs_c_use; \
+	      ctype_r*    c_use; \
 \
-	bool              using_ct; \
+	      inc_t       rs_c_use; \
+	      inc_t       cs_c_use; \
+\
+	      bool        using_ct; \
 \
 /*
 	PASTEMAC(chr,fprintm)( stdout, "gemm_ukr: a", mr, 2*k, \
@@ -171,13 +172,11 @@ void PASTEMAC3(ch,opname,arch,suf) \
 		  cntx  \
 		); \
 \
-		dim_t i, j; \
-\
 		/* Accumulate the final result in ct back to c. */ \
 		if ( PASTEMAC(ch,eq1)( *beta ) ) \
 		{ \
-			for ( j = 0; j < n; ++j ) \
-			for ( i = 0; i < m; ++i ) \
+			for ( dim_t j = 0; j < n; ++j ) \
+			for ( dim_t i = 0; i < m; ++i ) \
 			{ \
 				PASTEMAC(ch,adds)( *(ct + i*rs_ct + j*cs_ct), \
 				                   *(c  + i*rs_c  + j*cs_c ) ); \
@@ -185,8 +184,8 @@ void PASTEMAC3(ch,opname,arch,suf) \
 		} \
 		else if ( PASTEMAC(ch,eq0)( *beta ) ) \
 		{ \
-			for ( j = 0; j < n; ++j ) \
-			for ( i = 0; i < m; ++i ) \
+			for ( dim_t j = 0; j < n; ++j ) \
+			for ( dim_t i = 0; i < m; ++i ) \
 			{ \
 				PASTEMAC(ch,copys)( *(ct + i*rs_ct + j*cs_ct), \
 				                    *(c  + i*rs_c  + j*cs_c ) ); \
@@ -194,8 +193,8 @@ void PASTEMAC3(ch,opname,arch,suf) \
 		} \
 		else \
 		{ \
-			for ( j = 0; j < n; ++j ) \
-			for ( i = 0; i < m; ++i ) \
+			for ( dim_t j = 0; j < n; ++j ) \
+			for ( dim_t i = 0; i < m; ++i ) \
 			{ \
 				PASTEMAC(ch,xpbys)( *(ct + i*rs_ct + j*cs_ct), \
 				                    *beta, \

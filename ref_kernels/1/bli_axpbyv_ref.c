@@ -39,13 +39,13 @@
 \
 void PASTEMAC3(ch,opname,arch,suf) \
      ( \
-       conj_t           conjx, \
-       dim_t            n, \
-       ctype*  restrict alpha, \
-       ctype*  restrict x, inc_t incx, \
-       ctype*  restrict beta, \
-       ctype*  restrict y, inc_t incy, \
-       cntx_t*          cntx  \
+             conj_t  conjx, \
+             dim_t   n, \
+       const ctype*  alpha, \
+       const ctype*  x, inc_t incx, \
+       const ctype*  beta, \
+             ctype*  y, inc_t incy, \
+       const cntx_t* cntx  \
      ) \
 { \
 	if ( bli_zero_dim1( n ) ) return; \
@@ -56,7 +56,7 @@ void PASTEMAC3(ch,opname,arch,suf) \
 		{ \
 			/* If alpha is zero and beta is zero, set to zero. */ \
 \
-			ctype* zero = PASTEMAC(ch,0); \
+			const ctype* zero = PASTEMAC(ch,0); \
 \
 			/* Query the context for the kernel function pointer. */ \
 			const num_t             dt     = PASTEMAC(ch,type); \

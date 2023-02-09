@@ -39,11 +39,11 @@
 
 void bli_ssetv_zen_int
      (
-       conj_t           conjalpha,
-       dim_t            n,
-       float*  restrict alpha,
-       float*  restrict x, inc_t incx,
-       cntx_t*          cntx
+             conj_t  conjalpha,
+             dim_t   n,
+       const float*  alpha,
+             float*  x, inc_t incx,
+       const cntx_t* cntx
      )
 {
 	const dim_t num_elem_per_reg = 8;
@@ -132,13 +132,13 @@ void bli_ssetv_zen_int
 	}
 }
 
-void  bli_dsetv_zen_int
+void bli_dsetv_zen_int
      (
-       conj_t           conjalpha,
-       dim_t            n,
-       double* restrict alpha,
-       double* restrict x, inc_t incx,
-       cntx_t*          cntx
+             conj_t  conjalpha,
+             dim_t   n,
+       const double* alpha,
+             double* x, inc_t incx,
+       const cntx_t* cntx
      )
 {
 	const dim_t num_elem_per_reg = 4;

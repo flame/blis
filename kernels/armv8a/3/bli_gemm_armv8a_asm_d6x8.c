@@ -67,16 +67,16 @@
 
 void bli_sgemm_armv8a_asm_8x12
      (
-       dim_t               m,
-       dim_t               n,
-       dim_t               k,
-       float*     restrict alpha,
-       float*     restrict a,
-       float*     restrict b,
-       float*     restrict beta,
-       float*     restrict c, inc_t rs_c0, inc_t cs_c0,
-       auxinfo_t*          data,
-       cntx_t*             cntx
+             dim_t      m,
+             dim_t      n,
+             dim_t      k,
+       const float*     alpha,
+       const float*     a,
+       const float*     b,
+       const float*     beta,
+             float*     c, inc_t rs_c0, inc_t cs_c0,
+             auxinfo_t* data,
+       const cntx_t*    cntx
      )
 {
 	void* a_next = bli_auxinfo_next_a( data );
@@ -790,16 +790,16 @@ void bli_sgemm_armv8a_asm_8x12
  */
 void bli_dgemm_armv8a_asm_6x8
      (
-       dim_t               m,
-       dim_t               n,
-       dim_t               k,
-       double*    restrict alpha,
-       double*    restrict a,
-       double*    restrict b,
-       double*    restrict beta,
-       double*    restrict c, inc_t rs_c0, inc_t cs_c0,
-       auxinfo_t*          data,
-       cntx_t*             cntx
+             dim_t      m,
+             dim_t      n,
+             dim_t      k,
+       const double*    alpha,
+       const double*    a,
+       const double*    b,
+       const double*    beta,
+             double*    c, inc_t rs_c0, inc_t cs_c0,
+             auxinfo_t* data,
+       const cntx_t*    cntx
      )
 {
 #ifdef DISPLAY_DEBUG_INFO

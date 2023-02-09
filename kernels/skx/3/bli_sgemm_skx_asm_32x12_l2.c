@@ -319,16 +319,16 @@ static int64_t offsets[16] __attribute__((aligned(64))) =
 
 void bli_sgemm_skx_asm_32x12_l2
      (
-       dim_t            m,
-       dim_t            n,
-       dim_t            k_,
-       float* restrict alpha,
-       float* restrict a,
-       float* restrict b,
-       float* restrict beta,
-       float* restrict c, inc_t rs_c_, inc_t cs_c_,
-       auxinfo_t*       data,
-       cntx_t*          cntx
+             dim_t      m,
+             dim_t      n,
+             dim_t      k_,
+       const float*     alpha,
+       const float*     a,
+       const float*     b,
+       const float*     beta,
+             float*     c, inc_t rs_c_, inc_t cs_c_,
+             auxinfo_t* data,
+       const cntx_t*    cntx
      )
 {
     (void)data;

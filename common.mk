@@ -1181,7 +1181,7 @@ CBLAS_H_FLAT    := $(BASE_INC_PATH)/$(CBLAS_H)
 # files will be needed when compiling bli_cntx_ref.c with the monolithic header.
 ifeq ($(strip $(SHARE_PATH)),.)
 REF_KER_SRC     := $(DIST_PATH)/$(REFKERN_DIR)/bli_cntx_ref.c
-REF_KER_HEADERS := $(shell $(GREP) "\#include" $(REF_KER_SRC) | sed -e "s/\#include [\"<]\([a-zA-Z0-9\_\.\/\-]*\)[\">].*/\1/g" | $(GREP) -v $(BLIS_H))
+REF_KER_HEADERS := $(shell $(GREP) "#include" $(REF_KER_SRC) | sed -e "s/\#include [\"<]\([a-zA-Z0-9\_\.\/\-]*\)[\">].*/\1/g" | $(GREP) -v $(BLIS_H))
 endif
 
 # Match each header found above with the path to that header, and then strip

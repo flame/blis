@@ -45,16 +45,16 @@
 
 void bli_zgemm_armsve_asm_2vx10_unindexed
      (
-       dim_t               m,
-       dim_t               n,
-       dim_t               k,
-       dcomplex*  restrict alpha,
-       dcomplex*  restrict a,
-       dcomplex*  restrict b,
-       dcomplex*  restrict beta,
-       dcomplex*  restrict c, inc_t rs_c0, inc_t cs_c0,
-       auxinfo_t*          data,
-       cntx_t*             cntx
+             dim_t      m, \
+             dim_t      n, \
+             dim_t      k, \
+       const dcomplex*  alpha, \
+       const dcomplex*  a, \
+       const dcomplex*  b, \
+       const dcomplex*  beta, \
+             dcomplex*  c, inc_t rs_c0, inc_t cs_c0, \
+             auxinfo_t* data, \
+       const cntx_t*    cntx  \
      )
 {
   void* a_next = bli_auxinfo_next_a( data );

@@ -57,16 +57,16 @@
 
 void bli_i8gemm_power10_mma_8x16
     (
-        dim_t               m,
-        dim_t               n,
-        dim_t               k,
-        int32_t*       restrict alpha,
-        int8_t*    restrict a,
-        int8_t*    restrict b,
-        int32_t*       restrict beta,
-        int32_t*       restrict c, inc_t rs_c0, inc_t cs_c0,
-        auxinfo_t*          data,
-        cntx_t*             cntx
+              dim_t      m,
+              dim_t      n,
+              dim_t      k,
+        const int32_t*   alpha,
+        const int8_t*    a,
+        const int8_t*    b,
+        const int32_t*   beta,
+              int32_t*   c, inc_t rs_c0, inc_t cs_c0,
+              auxinfo_t* data,
+        const cntx_t*    cntx
     )
 {
     uint64_t k_iter = (k-1) / 4;

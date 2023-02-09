@@ -43,15 +43,15 @@ PACKM_KER_PROT( double,   d, packm_6xk_haswell_ref )
 
 void bli_dpackm_haswell_asm_6xk
      (
-       conj_t              conja,
-       pack_t              schema,
-       dim_t               cdim0,
-       dim_t               k0,
-       dim_t               k0_max,
-       double*    restrict kappa,
-       double*    restrict a, inc_t inca0, inc_t lda0,
-       double*    restrict p,              inc_t ldp0,
-       cntx_t*             cntx
+             conj_t  conja,
+             pack_t  schema,
+             dim_t   cdim0,
+             dim_t   k0,
+             dim_t   k0_max,
+       const double* kappa,
+       const double* a, inc_t inca0, inc_t lda0,
+             double* p,              inc_t ldp0,
+       const cntx_t* cntx
      )
 {
 #if 0

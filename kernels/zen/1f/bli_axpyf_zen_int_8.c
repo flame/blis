@@ -56,15 +56,15 @@ typedef union
 
 void bli_saxpyf_zen_int_8
      (
-       conj_t           conja,
-       conj_t           conjx,
-       dim_t            m,
-       dim_t            b_n,
-       float*  restrict alpha,
-       float*  restrict a, inc_t inca, inc_t lda,
-       float*  restrict x, inc_t incx,
-       float*  restrict y, inc_t incy,
-       cntx_t*          cntx
+             conj_t  conja,
+             conj_t  conjx,
+             dim_t   m,
+             dim_t   b_n,
+       const float*  alpha,
+       const float*  a, inc_t inca, inc_t lda,
+       const float*  x, inc_t incx,
+             float*  y, inc_t incy,
+       const cntx_t* cntx
      )
 {
 	const dim_t      fuse_fac       = 8;
@@ -75,17 +75,6 @@ void bli_saxpyf_zen_int_8
 	dim_t            i;
 	dim_t            m_viter;
 	dim_t            m_left;
-
-	float*  restrict a0;
-	float*  restrict a1;
-	float*  restrict a2;
-	float*  restrict a3;
-	float*  restrict a4;
-	float*  restrict a5;
-	float*  restrict a6;
-	float*  restrict a7;
-
-	float*  restrict y0;
 
 	v8sf_t           chi0v, chi1v, chi2v, chi3v;
 	v8sf_t           chi4v, chi5v, chi6v, chi7v;
@@ -108,10 +97,10 @@ void bli_saxpyf_zen_int_8
 
 		for ( i = 0; i < b_n; ++i )
 		{
-			float* a1   = a + (0  )*inca + (i  )*lda;
-			float* chi1 = x + (i  )*incx;
-			float* y1   = y + (0  )*incy;
-			float  alpha_chi1;
+			const float* restrict a1   = a + (0  )*inca + (i  )*lda;
+			const float* restrict chi1 = x + (i  )*incx;
+			      float* restrict y1   = y + (0  )*incy;
+			      float           alpha_chi1;
 
 			PASTEMAC(s,copycjs)( conjx, *chi1, alpha_chi1 );
 			PASTEMAC(s,scals)( *alpha, alpha_chi1 );
@@ -146,15 +135,15 @@ void bli_saxpyf_zen_int_8
 		m_left  = m;
 	}
 
-	a0   = a + 0*lda;
-	a1   = a + 1*lda;
-	a2   = a + 2*lda;
-	a3   = a + 3*lda;
-	a4   = a + 4*lda;
-	a5   = a + 5*lda;
-	a6   = a + 6*lda;
-	a7   = a + 7*lda;
-	y0   = y;
+	const float* restrict a0   = a + 0*lda;
+	const float* restrict a1   = a + 1*lda;
+	const float* restrict a2   = a + 2*lda;
+	const float* restrict a3   = a + 3*lda;
+	const float* restrict a4   = a + 4*lda;
+	const float* restrict a5   = a + 5*lda;
+	const float* restrict a6   = a + 6*lda;
+	const float* restrict a7   = a + 7*lda;
+	      float* restrict y0   = y;
 
 	chi0 = *( x + 0*incx );
 	chi1 = *( x + 1*incx );
@@ -265,15 +254,15 @@ void bli_saxpyf_zen_int_8
 
 void bli_daxpyf_zen_int_8
      (
-       conj_t           conja,
-       conj_t           conjx,
-       dim_t            m,
-       dim_t            b_n,
-       double* restrict alpha,
-       double* restrict a, inc_t inca, inc_t lda,
-       double* restrict x, inc_t incx,
-       double* restrict y, inc_t incy,
-       cntx_t*          cntx
+             conj_t  conja,
+             conj_t  conjx,
+             dim_t   m,
+             dim_t   b_n,
+       const double* alpha,
+       const double* a, inc_t inca, inc_t lda,
+       const double* x, inc_t incx,
+             double* y, inc_t incy,
+       const cntx_t* cntx
      )
 {
 	const dim_t      fuse_fac       = 8;
@@ -284,17 +273,6 @@ void bli_daxpyf_zen_int_8
 	dim_t            i;
 	dim_t            m_viter;
 	dim_t            m_left;
-
-	double* restrict a0;
-	double* restrict a1;
-	double* restrict a2;
-	double* restrict a3;
-	double* restrict a4;
-	double* restrict a5;
-	double* restrict a6;
-	double* restrict a7;
-
-	double* restrict y0;
 
 	v4df_t           chi0v, chi1v, chi2v, chi3v;
 	v4df_t           chi4v, chi5v, chi6v, chi7v;
@@ -317,10 +295,10 @@ void bli_daxpyf_zen_int_8
 
 		for ( i = 0; i < b_n; ++i )
 		{
-			double* a1   = a + (0  )*inca + (i  )*lda;
-			double* chi1 = x + (i  )*incx;
-			double* y1   = y + (0  )*incy;
-			double  alpha_chi1;
+			const double* restrict a1   = a + (0  )*inca + (i  )*lda;
+			const double* restrict chi1 = x + (i  )*incx;
+			      double* restrict y1   = y + (0  )*incy;
+			      double           alpha_chi1;
 
 			PASTEMAC(d,copycjs)( conjx, *chi1, alpha_chi1 );
 			PASTEMAC(d,scals)( *alpha, alpha_chi1 );
@@ -355,15 +333,15 @@ void bli_daxpyf_zen_int_8
 		m_left  = m;
 	}
 
-	a0   = a + 0*lda;
-	a1   = a + 1*lda;
-	a2   = a + 2*lda;
-	a3   = a + 3*lda;
-	a4   = a + 4*lda;
-	a5   = a + 5*lda;
-	a6   = a + 6*lda;
-	a7   = a + 7*lda;
-	y0   = y;
+	const double* restrict a0   = a + 0*lda;
+	const double* restrict a1   = a + 1*lda;
+	const double* restrict a2   = a + 2*lda;
+	const double* restrict a3   = a + 3*lda;
+	const double* restrict a4   = a + 4*lda;
+	const double* restrict a5   = a + 5*lda;
+	const double* restrict a6   = a + 6*lda;
+	const double* restrict a7   = a + 7*lda;
+	      double* restrict y0   = y;
 
 	chi0 = *( x + 0*incx );
 	chi1 = *( x + 1*incx );
