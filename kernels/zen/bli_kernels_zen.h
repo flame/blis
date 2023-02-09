@@ -92,8 +92,9 @@ SWAPV_KER_PROT(float,   s, swapv_zen_int8 )
 SWAPV_KER_PROT(double,  d, swapv_zen_int8 )
 
 // copyv (intrinsics)
-COPYV_KER_PROT( float,    s, copyv_zen_int )
-COPYV_KER_PROT( double,   d, copyv_zen_int )
+COPYV_KER_PROT( float,      s, copyv_zen_int )
+COPYV_KER_PROT( double,     d, copyv_zen_int )
+COPYV_KER_PROT( dcomplex,   z, copyv_zen_int )
 
 //
 SETV_KER_PROT(float,    s, setv_zen_int)

@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2019-2020, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2019-2023, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -341,3 +341,320 @@ void bli_dcopyv_zen_int
 	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_2)
 }
 
+void bli_zcopyv_zen_int
+(
+	conj_t           conjx,
+	dim_t            n,
+	dcomplex*  restrict x, inc_t incx,
+	dcomplex*  restrict y, inc_t incy,
+	cntx_t* restrict cntx
+)
+{
+	// If the vector dimension is zero return early.
+	if (bli_zero_dim1(n))
+	{
+		AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_2)
+		return;
+	}
+
+	dim_t i = 0;
+	dcomplex *x0 = x;
+	dcomplex *y0 = y;
+
+	if (bli_is_conj(conjx))
+	{
+
+		if (incx == 1 && incy == 1)
+		{
+			const dim_t n_elem_per_reg = 2;
+			__m256d x_vec[8];
+
+			__m256d conj_reg = _mm256_setr_pd(1, -1, 1, -1);
+
+			for (; (i + 15) < n; i += 16)
+			{
+				/* 4 double values = 2 double complex values are loaded*/
+				x_vec[0] = _mm256_loadu_pd((double *)x0);
+				x_vec[1] = _mm256_loadu_pd((double *)(x0 + n_elem_per_reg));
+				x_vec[2] = _mm256_loadu_pd((double *)(x0 + 2 * n_elem_per_reg));
+				x_vec[3] = _mm256_loadu_pd((double *)(x0 + 3 * n_elem_per_reg));
+				x_vec[4] = _mm256_loadu_pd((double *)(x0 + 4 * n_elem_per_reg));
+				x_vec[5] = _mm256_loadu_pd((double *)(x0 + 5 * n_elem_per_reg));
+				x_vec[6] = _mm256_loadu_pd((double *)(x0 + 6 * n_elem_per_reg));
+				x_vec[7] = _mm256_loadu_pd((double *)(x0 + 7 * n_elem_per_reg));
+
+				/* Perform conjugation by multiplying the imaginary
+				   part with -1 and real part with 1*/
+				x_vec[0] = _mm256_mul_pd(x_vec[0], conj_reg);
+				x_vec[1] = _mm256_mul_pd(x_vec[1], conj_reg);
+				x_vec[2] = _mm256_mul_pd(x_vec[2], conj_reg);
+				x_vec[3] = _mm256_mul_pd(x_vec[3], conj_reg);
+				x_vec[4] = _mm256_mul_pd(x_vec[4], conj_reg);
+				x_vec[5] = _mm256_mul_pd(x_vec[5], conj_reg);
+				x_vec[6] = _mm256_mul_pd(x_vec[6], conj_reg);
+				x_vec[7] = _mm256_mul_pd(x_vec[7], conj_reg);
+
+				_mm256_storeu_pd((double *)y0, x_vec[0]);
+				_mm256_storeu_pd((double *)(y0 + n_elem_per_reg), x_vec[1]);
+				_mm256_storeu_pd((double *)(y0 + 2 * n_elem_per_reg), x_vec[2]);
+				_mm256_storeu_pd((double *)(y0 + 3 * n_elem_per_reg), x_vec[3]);
+				_mm256_storeu_pd((double *)(y0 + 4 * n_elem_per_reg), x_vec[4]);
+				_mm256_storeu_pd((double *)(y0 + 5 * n_elem_per_reg), x_vec[5]);
+				_mm256_storeu_pd((double *)(y0 + 6 * n_elem_per_reg), x_vec[6]);
+				_mm256_storeu_pd((double *)(y0 + 7 * n_elem_per_reg), x_vec[7]);
+
+				x0 += 8 * n_elem_per_reg;
+				y0 += 8 * n_elem_per_reg;
+			}
+
+			for (; (i + 7) < n; i += 8)
+			{
+				x_vec[0] = _mm256_loadu_pd((double *)x0);
+				x_vec[1] = _mm256_loadu_pd((double *)(x0 + n_elem_per_reg));
+				x_vec[2] = _mm256_loadu_pd((double *)(x0 + 2 * n_elem_per_reg));
+				x_vec[3] = _mm256_loadu_pd((double *)(x0 + 3 * n_elem_per_reg));
+
+				x_vec[0] = _mm256_mul_pd(x_vec[0], conj_reg);
+				x_vec[1] = _mm256_mul_pd(x_vec[1], conj_reg);
+				x_vec[2] = _mm256_mul_pd(x_vec[2], conj_reg);
+				x_vec[3] = _mm256_mul_pd(x_vec[3], conj_reg);
+
+				x0 += 4 * n_elem_per_reg;
+
+				_mm256_storeu_pd((double *)y0, x_vec[0]);
+				_mm256_storeu_pd((double *)(y0 + n_elem_per_reg), x_vec[1]);
+				_mm256_storeu_pd((double *)(y0 + 2 * n_elem_per_reg), x_vec[2]);
+				_mm256_storeu_pd((double *)(y0 + 3 * n_elem_per_reg), x_vec[3]);
+
+				y0 += 4 * n_elem_per_reg;
+			}
+
+			for (; (i + 3) < n; i += 4)
+			{
+				x_vec[0] = _mm256_loadu_pd((double *)x0);
+				x_vec[1] = _mm256_loadu_pd((double *)(x0 + n_elem_per_reg));
+
+				x0 += 2 * n_elem_per_reg;
+
+				x_vec[0] = _mm256_mul_pd(x_vec[0], conj_reg);
+				x_vec[1] = _mm256_mul_pd(x_vec[1], conj_reg);
+
+				_mm256_storeu_pd((double *)y0, x_vec[0]);
+				_mm256_storeu_pd((double *)(y0 + n_elem_per_reg), x_vec[1]);
+
+				y0 += 2 * n_elem_per_reg;
+			}
+
+			for (; (i + 1) < n; i += 2)
+			{
+				x_vec[0] = _mm256_loadu_pd((double *)x0);
+
+				x_vec[0] = _mm256_mul_pd(x_vec[0], conj_reg);
+
+				x0 += n_elem_per_reg;
+
+				_mm256_storeu_pd((double *)y0, x_vec[0]);
+
+				y0 += n_elem_per_reg;
+			}
+
+			// Issue vzeroupper instruction to clear upper lanes of ymm registers.
+			// This avoids a performance penalty caused by false dependencies when
+			// transitioning from from AVX to SSE instructions (which may occur
+			// as soon as the n_left cleanup loop below if BLIS is compiled with
+			// -mfpmath=sse).
+			_mm256_zeroupper();
+		}
+		else
+		{
+			/*Since double complex elements are of size 128 bits, vectorization
+			can be done using XMM registers when incx and incy are not 1. This is done
+			in the else condition.*/
+			__m128d conj_reg = _mm_setr_pd(1, -1);
+			__m128d x_vec[4];
+
+			for (; (i + 3) < n; i += 4)
+			{
+				/* 2 double values = 1 double complex value(s) are(is) loaded*/
+				x_vec[0] = _mm_loadu_pd((double *)x0);
+				x_vec[1] = _mm_loadu_pd((double *)(x0 + incx));
+				x_vec[2] = _mm_loadu_pd((double *)(x0 + 2 * incx));
+				x_vec[3] = _mm_loadu_pd((double *)(x0 + 3 * incx));
+
+				x_vec[0] = _mm_mul_pd(x_vec[0], conj_reg);
+				x_vec[1] = _mm_mul_pd(x_vec[1], conj_reg);
+				x_vec[2] = _mm_mul_pd(x_vec[2], conj_reg);
+				x_vec[3] = _mm_mul_pd(x_vec[3], conj_reg);
+
+				_mm_storeu_pd((double *)y0, x_vec[0]);
+				_mm_storeu_pd((double *)(y0 + incy), x_vec[1]);
+				_mm_storeu_pd((double *)(y0 + 2 * incy), x_vec[2]);
+				_mm_storeu_pd((double *)(y0 + 3 * incy), x_vec[3]);
+
+				x0 += 4 * incx;
+				y0 += 4 * incy;
+			}
+
+			for (; (i + 1) < n; i += 2)
+			{
+				x_vec[0] = _mm_loadu_pd((double *)x0);
+				x_vec[1] = _mm_loadu_pd((double *)(x0 + incx));
+
+				x_vec[0] = _mm_mul_pd(x_vec[0], conj_reg);
+				x_vec[1] = _mm_mul_pd(x_vec[1], conj_reg);
+
+				_mm_storeu_pd((double *)y0, x_vec[0]);
+				_mm_storeu_pd((double *)(y0 + incy), x_vec[1]);
+
+				x0 += 2 * incx;
+				y0 += 2 * incy;
+			}
+		}
+
+		__m128d conj_reg = _mm_setr_pd(1, -1);
+		__m128d x_vec[1];
+
+		for (; i < n; i += 1)
+		{
+			x_vec[0] = _mm_loadu_pd((double *)x0);
+
+			x_vec[0] = _mm_mul_pd(x_vec[0], conj_reg);
+
+			_mm_storeu_pd((double *)y0, x_vec[0]);
+
+			x0 += incx;
+			y0 += incy;
+		}
+	}
+	else
+	{
+
+		if (incx == 1 && incy == 1)
+		{
+			const dim_t n_elem_per_reg = 2;
+			__m256d x_vec[8];
+
+			for (; (i + 15) < n; i += 16)
+			{
+				x_vec[0] = _mm256_loadu_pd((double *)x0);
+				x_vec[1] = _mm256_loadu_pd((double *)(x0 + n_elem_per_reg));
+				x_vec[2] = _mm256_loadu_pd((double *)(x0 + 2 * n_elem_per_reg));
+				x_vec[3] = _mm256_loadu_pd((double *)(x0 + 3 * n_elem_per_reg));
+				x_vec[4] = _mm256_loadu_pd((double *)(x0 + 4 * n_elem_per_reg));
+				x_vec[5] = _mm256_loadu_pd((double *)(x0 + 5 * n_elem_per_reg));
+				x_vec[6] = _mm256_loadu_pd((double *)(x0 + 6 * n_elem_per_reg));
+				x_vec[7] = _mm256_loadu_pd((double *)(x0 + 7 * n_elem_per_reg));
+
+				x0 += 8 * n_elem_per_reg;
+
+				_mm256_storeu_pd((double *)y0, x_vec[0]);
+				_mm256_storeu_pd((double *)(y0 + n_elem_per_reg), x_vec[1]);
+				_mm256_storeu_pd((double *)(y0 + 2 * n_elem_per_reg), x_vec[2]);
+				_mm256_storeu_pd((double *)(y0 + 3 * n_elem_per_reg), x_vec[3]);
+				_mm256_storeu_pd((double *)(y0 + 4 * n_elem_per_reg), x_vec[4]);
+				_mm256_storeu_pd((double *)(y0 + 5 * n_elem_per_reg), x_vec[5]);
+				_mm256_storeu_pd((double *)(y0 + 6 * n_elem_per_reg), x_vec[6]);
+				_mm256_storeu_pd((double *)(y0 + 7 * n_elem_per_reg), x_vec[7]);
+
+				y0 += 8 * n_elem_per_reg;
+			}
+
+			for (; (i + 7) < n; i += 8)
+			{
+				x_vec[0] = _mm256_loadu_pd((double *)x0);
+				x_vec[1] = _mm256_loadu_pd((double *)(x0 + n_elem_per_reg));
+				x_vec[2] = _mm256_loadu_pd((double *)(x0 + 2 * n_elem_per_reg));
+				x_vec[3] = _mm256_loadu_pd((double *)(x0 + 3 * n_elem_per_reg));
+
+				x0 += 4 * n_elem_per_reg;
+
+				_mm256_storeu_pd((double *)y0, x_vec[0]);
+				_mm256_storeu_pd((double *)(y0 + n_elem_per_reg), x_vec[1]);
+				_mm256_storeu_pd((double *)(y0 + 2 * n_elem_per_reg), x_vec[2]);
+				_mm256_storeu_pd((double *)(y0 + 3 * n_elem_per_reg), x_vec[3]);
+
+				y0 += 4 * n_elem_per_reg;
+			}
+
+			for (; (i + 3) < n; i += 4)
+			{
+				x_vec[0] = _mm256_loadu_pd((double *)x0);
+				x_vec[1] = _mm256_loadu_pd((double *)(x0 + n_elem_per_reg));
+
+				x0 += 2 * n_elem_per_reg;
+
+				_mm256_storeu_pd((double *)y0, x_vec[0]);
+				_mm256_storeu_pd((double *)(y0 + n_elem_per_reg), x_vec[1]);
+
+				y0 += 2 * n_elem_per_reg;
+			}
+
+			for (; (i + 1) < n; i += 2)
+			{
+				x_vec[0] = _mm256_loadu_pd((double *)x0);
+
+				x0 += n_elem_per_reg;
+
+				_mm256_storeu_pd((double *)y0, x_vec[0]);
+
+				y0 += n_elem_per_reg;
+			}
+
+			// Issue vzeroupper instruction to clear upper lanes of ymm registers.
+			// This avoids a performance penalty caused by false dependencies when
+			// transitioning from from AVX to SSE instructions (which may occur
+			// as soon as the n_left cleanup loop below if BLIS is compiled with
+			// -mfpmath=sse).
+			_mm256_zeroupper();
+		}
+		else
+		{
+			/*Since double complex elements are of size 128 bits, vectorization
+			can be done using XMM registers when incx and incy are not 1. This is done
+			in the else condition.*/
+			__m128d x_vec[4];
+
+			for (; (i + 3) < n; i += 4)
+			{
+				x_vec[0] = _mm_loadu_pd((double *)x0);
+				x_vec[1] = _mm_loadu_pd((double *)(x0 + incx));
+				x_vec[2] = _mm_loadu_pd((double *)(x0 + 2 * incx));
+				x_vec[3] = _mm_loadu_pd((double *)(x0 + 3 * incx));
+
+				x0 += 4 * incx;
+
+				_mm_storeu_pd((double *)y0, x_vec[0]);
+				_mm_storeu_pd((double *)(y0 + incy), x_vec[1]);
+				_mm_storeu_pd((double *)(y0 + 2 * incy), x_vec[2]);
+				_mm_storeu_pd((double *)(y0 + 3 * incy), x_vec[3]);
+
+				y0 += 4 * incy;
+			}
+
+			for (; (i + 1) < n; i += 2)
+			{
+				x_vec[0] = _mm_loadu_pd((double *)x0);
+				x_vec[1] = _mm_loadu_pd((double *)(x0 + incx));
+
+				x0 += 2 * incx;
+
+				_mm_storeu_pd((double *)y0, x_vec[0]);
+				_mm_storeu_pd((double *)(y0 + incy), x_vec[1]);
+
+				y0 += 2 * incy;
+			}
+		}
+		__m128d x_vec[1];
+
+		for (; i < n; i += 1)
+		{
+			x_vec[0] = _mm_loadu_pd((double *)x0);
+
+			x0 += incx;
+
+			_mm_storeu_pd((double *)y0, x_vec[0]);
+
+			y0 += incy;
+		}
+	}
+}
