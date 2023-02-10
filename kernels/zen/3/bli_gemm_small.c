@@ -61,36 +61,6 @@ static err_t bli_sgemm_small
        cntl_t* cntl
      );
 
-err_t bli_dgemm_small
-     (
-       obj_t*  alpha,
-       obj_t*  a,
-       obj_t*  b,
-       obj_t*  beta,
-       obj_t*  c,
-       cntx_t* cntx,
-       cntl_t* cntl
-     );
-err_t bli_zgemm_small
-     (
-       obj_t*  alpha,
-       obj_t*  a,
-       obj_t*  b,
-       obj_t*  beta,
-       obj_t*  c,
-       cntx_t* cntx,
-       cntl_t* cntl
-     );
-err_t bli_zgemm_small_At
-     (
-       obj_t*  alpha,
-       obj_t*  a,
-       obj_t*  b,
-       obj_t*  beta,
-       obj_t*  c,
-       cntx_t* cntx,
-       cntl_t* cntl
-     );
 static err_t bli_sgemm_small_atbn
      (
        obj_t*  alpha,
@@ -1785,7 +1755,7 @@ static err_t bli_sgemm_small
 
 };
 
-/*static*/ err_t bli_dgemm_small
+err_t bli_dgemm_small
      (
        obj_t*  alpha,
        obj_t*  a,
