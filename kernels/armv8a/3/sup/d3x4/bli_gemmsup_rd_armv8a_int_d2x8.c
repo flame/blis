@@ -65,10 +65,10 @@ void bli_dgemmsup_rd_armv8a_int_2x8
              dim_t      n0,
              dim_t      k0,
        const double*    alpha,
-       const double*    a, inc_t rs_a0, inc_t cs_a0,
-       const double*    b, inc_t rs_b0, inc_t cs_b0,
+       const double*    a, inc_t rs_a, inc_t cs_a,
+       const double*    b, inc_t rs_b, inc_t cs_b,
        const double*    beta,
-             double*    c, inc_t rs_c0, inc_t cs_c0,
+             double*    c, inc_t rs_c, inc_t cs_c,
              auxinfo_t* data,
        const cntx_t*    cntx
      )

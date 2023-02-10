@@ -84,10 +84,12 @@
 #define DGEMM_LOAD1V_load(V1,ADDR,IMM) \
 " ldr  q"#V1", ["#ADDR", #"#IMM"] \n\t"
 
-// #define DGEMM_LOAD2V_noload(V1,V2,ADDR,IMM)
-// #define DGEMM_LOAD2V_load(V1,V2,ADDR,IMM) \
-//   DGEMM_LOAD1V_load(V1,ADDR,IMM) \
-//   DGEMM_LOAD1V_load(V2,ADDR,IMM+16)
+#if 0
+ #define DGEMM_LOAD2V_noload(V1,V2,ADDR,IMM)
+ #define DGEMM_LOAD2V_load(V1,V2,ADDR,IMM) \
+   DGEMM_LOAD1V_load(V1,ADDR,IMM) \
+   DGEMM_LOAD1V_load(V2,ADDR,IMM+16)
+#endif
 
 #define DGEMM_LOAD1V_G_noload(V1,ADDR,ST)
 #define DGEMM_LOAD1V_G_load(V1,ADDR,ST) \

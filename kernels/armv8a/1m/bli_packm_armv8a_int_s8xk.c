@@ -69,7 +69,7 @@ void bli_spackm_armv8a_int_8xk
   uint64_t       k_left = k0 % 4;
 
   const float*   a_loc  = a;
-  const float*   p_loc  = p;
+        float*   p_loc  = p;
 
   // NOTE: For the purposes of the comments in this packm kernel, we
   // interpret inca and lda as rs_a and cs_a, respectively, and similarly
