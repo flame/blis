@@ -133,7 +133,7 @@ void bli_daxpy2v_penryn_int
 
 	const double* restrict x1 = x_cast;
 	const double* restrict y1 = y_cast;
-	const double* restrict z1 = z_cast;
+	      double* restrict z1 = z_cast;
 
 	if ( n_pre == 1 )
 	{

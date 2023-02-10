@@ -111,19 +111,19 @@ void bli_ddotxaxpyf_penryn_int
 		return;
 	}
 
-    m_pre = 0;
+	m_pre = 0;
 
-    // If there is anything that would interfere with our use of aligned
-    // vector loads/stores, call the reference implementation.
+	// If there is anything that would interfere with our use of aligned
+	// vector loads/stores, call the reference implementation.
 	if ( b_n < bli_cntx_get_blksz_def_dt( BLIS_DOUBLE, BLIS_XF, cntx ) )
 	{
 		use_ref = TRUE;
 	}
-    else if ( inca != 1 || incw != 1 || incx != 1 || incy != 1 || incz != 1 ||
+	else if ( inca != 1 || incw != 1 || incx != 1 || incy != 1 || incz != 1 ||
 	          bli_is_unaligned_to( ( siz_t )(lda*sizeof(double)), 16 ) )
-    {
-        use_ref = TRUE;
-    }
+	{
+		use_ref = TRUE;
+	}
 	else if ( bli_is_unaligned_to( ( siz_t )a, 16 ) ||
 	          bli_is_unaligned_to( ( siz_t )w, 16 ) ||
 	          bli_is_unaligned_to( ( siz_t )z, 16 ) ||
