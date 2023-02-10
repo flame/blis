@@ -121,7 +121,7 @@ void bli_daxpyv_penryn_int
 	alpha1c = *alpha_cast;
 
 	const double* restrict x1 = x_cast;
-	const double* restrict y1 = y_cast;
+	      double* restrict y1 = y_cast;
 
 	if ( n_pre == 1 )
 	{
