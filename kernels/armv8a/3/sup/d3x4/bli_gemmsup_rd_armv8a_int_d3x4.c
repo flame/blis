@@ -59,18 +59,18 @@
  */
 void bli_dgemmsup_rd_armv8a_int_3x4
      (
-       conj_t              conja,
-       conj_t              conjb,
-       dim_t               m0,
-       dim_t               n0,
-       dim_t               k0,
-       double*    restrict alpha,
-       double*    restrict a, inc_t rs_a, inc_t cs_a,
-       double*    restrict b, inc_t rs_b, inc_t cs_b,
-       double*    restrict beta,
-       double*    restrict c, inc_t rs_c, inc_t cs_c,
-       auxinfo_t*          data,
-       cntx_t*             cntx
+             conj_t     conja,
+             conj_t     conjb,
+             dim_t      m0,
+             dim_t      n0,
+             dim_t      k0,
+       const double*    alpha,
+       const double*    a, inc_t rs_a0, inc_t cs_a0,
+       const double*    b, inc_t rs_b0, inc_t cs_b0,
+       const double*    beta,
+             double*    c, inc_t rs_c0, inc_t cs_c0,
+             auxinfo_t* data,
+       const cntx_t*    cntx
      )
 {
   // if ( m0 == 3 && n0 == 4 )
@@ -88,9 +88,9 @@ void bli_dgemmsup_rd_armv8a_int_3x4
   assert( m0 <= 3 );
   assert( n0 <= 4 );
 
-  double *a_loc = a;
-  double *b_loc = b;
-  double *c_loc = c;
+  const double *a_loc = a;
+  const double *b_loc = b;
+        double *c_loc = c;
 
   uint64_t k_mker = k0 / 2;
   uint64_t k_left = k0 % 2;

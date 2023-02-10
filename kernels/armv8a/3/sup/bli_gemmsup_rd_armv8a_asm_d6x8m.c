@@ -277,8 +277,8 @@ void bli_dgemmsup_rd_armv8a_asm_6x8m
   // LLVM has very bad routing ability for inline asm.
   // Limit number of registers in case of Clang compilation.
 #ifndef __clang__
-  void*    a_next = bli_auxinfo_next_a( data );
-  void*    b_next = bli_auxinfo_next_b( data );
+  const void* a_next = bli_auxinfo_next_a( data );
+  const void* b_next = bli_auxinfo_next_b( data );
 #endif
 
   // Typecast local copies of integers in case dim_t and inc_t are a

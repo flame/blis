@@ -67,8 +67,9 @@ void bli_dpackm_armv8a_int_6xk
   // different size than is expected by load instructions.
   uint64_t       k_iter = k0 / 2;
   uint64_t       k_left = k0 % 2;
-  double*        a_loc  = a;
-  double*        p_loc  = p;
+
+  const double*  a_loc  = a;
+        double*  p_loc  = p;
 
   // NOTE: For the purposes of the comments in this packm kernel, we
   // interpret inca and lda as rs_a and cs_a, respectively, and similarly

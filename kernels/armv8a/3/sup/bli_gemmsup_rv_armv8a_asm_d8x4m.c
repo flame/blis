@@ -119,8 +119,9 @@ void bli_dgemmsup_rv_armv8a_asm_8x4m
   //  and cannot be registered in configurations.
   assert( n0 == 4 );
 
-  void*    a_next = bli_auxinfo_next_a( data );
-  void*    b_next = bli_auxinfo_next_b( data );
+  const void* a_next = bli_auxinfo_next_a( data );
+  const void* b_next = bli_auxinfo_next_b( data );
+
   uint64_t ps_a   = bli_auxinfo_ps_a( data );
 
   // Typecast local copies of integers in case dim_t and inc_t are a
