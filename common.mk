@@ -534,6 +534,7 @@ GREP       := grep
 EGREP      := grep -E
 XARGS      := xargs
 INSTALL    := install -c
+DEVNULL    := /dev/null
 
 # Script for creating a monolithic header file.
 #FLATTEN_H  := $(DIST_PATH)/build/flatten-headers.sh
@@ -1181,7 +1182,18 @@ CBLAS_H_FLAT    := $(BASE_INC_PATH)/$(CBLAS_H)
 # files will be needed when compiling bli_cntx_ref.c with the monolithic header.
 ifeq ($(strip $(SHARE_PATH)),.)
 REF_KER_SRC     := $(DIST_PATH)/$(REFKERN_DIR)/bli_cntx_ref.c
-REF_KER_HEADERS := $(shell $(GREP) "\#include" $(REF_KER_SRC) | sed -e "s/\#include [\"<]\([a-zA-Z0-9\_\.\/\-]*\)[\">].*/\1/g" | $(GREP) -v $(BLIS_H))
+#
+# NOTE: A redirect to /dev/null has been added to the grep command below because
+# as of version 3.8, grep outputs warnings when encountering stray backslashes
+# in regular expressions [1]. Versions older than 3.8 not only do not complain,
+# but actually seem to *require* the backslash, perhaps because of the way we
+# are invoking grep via GNU make's shell command. WHEN DEBUGGING ANYTHING
+# INVOLVING THE MAKE VARIABLE BELOW, PLEASE CONSIDER TEMPORARILY REMOVING THE
+# REDIRECT TO /dev/null SO THAT YOU SEE ANY MESSAGES SENT TO STANDARD ERROR.
+#
+# [1] https://lists.gnu.org/archive/html/info-gnu/2022-09/msg00001.html
+#
+REF_KER_HEADERS := $(shell $(GREP) "\#include" $(REF_KER_SRC) 2> $(DEVNULL) | sed -e "s/\#include [\"<]\([a-zA-Z0-9\_\.\/\-]*\)[\">].*/\1/g" | $(GREP) -v $(BLIS_H))
 endif
 
 # Match each header found above with the path to that header, and then strip
