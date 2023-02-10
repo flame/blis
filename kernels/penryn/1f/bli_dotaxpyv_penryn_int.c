@@ -57,27 +57,24 @@ void bli_ddotaxpyv_penryn_int
        const cntx_t* cntx
      )
 {
-	double*  restrict alpha_cast = alpha;
-	double*  restrict x_cast     = x;
-	double*  restrict y_cast     = y;
-	double*  restrict rho_cast   = rho;
-	double*  restrict z_cast     = z;
+	const double*  restrict alpha_cast = alpha;
+	const double*  restrict x_cast     = x;
+	const double*  restrict y_cast     = y;
+	      double*  restrict rho_cast   = rho;
+	      double*  restrict z_cast     = z;
 
-	dim_t             n_pre;
-	dim_t             n_run;
-	dim_t             n_left;
+	      dim_t             n_pre;
+	      dim_t             n_run;
+	      dim_t             n_left;
 
-	double*  restrict chi1;
-	double*  restrict psi1;
-	double*  restrict zeta1;
-	double            alpha1c, chi1c, psi1c, rho1c;
-	dim_t             i;
-	//inc_t             stepx, stepy, stepz;
+	      double            alpha1c, chi1c, psi1c, rho1c;
+	      dim_t             i;
+	      //inc_t             stepx, stepy, stepz;
 
-	v2df_t            alphav, rhov;
-	v2df_t            x1v, y1v, z1v;
+	      v2df_t            alphav, rhov;
+	      v2df_t            x1v, y1v, z1v;
 
-	bool              use_ref = FALSE;
+	      bool              use_ref = FALSE;
 
 	// If the vector lengths are zero, set rho to zero and return.
 	if ( bli_zero_dim1( n ) )
@@ -142,9 +139,9 @@ void bli_ddotaxpyv_penryn_int
 
 	alpha1c = *alpha_cast;
 
-	chi1  = x_cast;
-	psi1  = y_cast;
-	zeta1 = z_cast;
+	const double* restrict chi1  = x_cast;
+	const double* restrict psi1  = y_cast;
+	      double* restrict zeta1 = z_cast;
 
 	if ( n_pre == 1 )
 	{

@@ -282,9 +282,11 @@ ahead*/
     VMOVAPD(ZMM(0), MEM(RAX,(16*n+0)*8)) \
     VMOVAPD(ZMM(1), MEM(RAX,(16*n+8)*8))
 
+#if 0
 //This is an array used for the scatter/gather instructions.
 static int64_t offsets[16] __attribute__((aligned(64))) =
     { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15};
+#endif
 
 
 void bli_dgemm_skx_asm_16x12_l2

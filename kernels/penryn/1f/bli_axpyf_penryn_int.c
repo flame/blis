@@ -56,32 +56,27 @@ void bli_daxpyf_penryn_int
        const cntx_t* cntx
      )
 {
-	double*  restrict alpha_cast = alpha;
-	double*  restrict a_cast = a;
-	double*  restrict x_cast = x;
-	double*  restrict y_cast = y;
-	dim_t             i;
+	const double*  restrict alpha_cast = alpha;
+	const double*  restrict a_cast = a;
+	const double*  restrict x_cast = x;
+	      double*  restrict y_cast = y;
+	      dim_t             i;
 
-	const dim_t       n_elem_per_reg = 2;
-	const dim_t       n_iter_unroll  = 2;
+	const dim_t             n_elem_per_reg = 2;
+	const dim_t             n_iter_unroll  = 2;
 
-	dim_t             m_pre;
-	dim_t             m_run;
-	dim_t             m_left;
+	      dim_t             m_pre;
+	      dim_t             m_run;
+	      dim_t             m_left;
 
-    double*  restrict a0;
-    double*  restrict a1;
-    double*  restrict a2;
-    double*  restrict a3;
-    double*  restrict y0;
-    double            a0c, a1c, a2c, a3c;
-    double            chi0, chi1, chi2, chi3;
+          double            a0c, a1c, a2c, a3c;
+          double            chi0, chi1, chi2, chi3;
 
-	v2df_t            a00v, a01v, a02v, a03v, y0v;
-	v2df_t            a10v, a11v, a12v, a13v, y1v;
-	v2df_t            chi0v, chi1v, chi2v, chi3v;
+	      v2df_t            a00v, a01v, a02v, a03v, y0v;
+	      v2df_t            a10v, a11v, a12v, a13v, y1v;
+	      v2df_t            chi0v, chi1v, chi2v, chi3v;
 
-	bool              use_ref = FALSE;
+	      bool              use_ref = FALSE;
 
 
 	if ( bli_zero_dim2( m, b_n ) ) return;
@@ -136,11 +131,11 @@ void bli_daxpyf_penryn_int
 	m_run       = ( m - m_pre ) / ( n_elem_per_reg * n_iter_unroll );
 	m_left      = ( m - m_pre ) % ( n_elem_per_reg * n_iter_unroll );
 
-	a0   = a_cast + 0*lda;
-	a1   = a_cast + 1*lda;
-	a2   = a_cast + 2*lda;
-	a3   = a_cast + 3*lda;
-	y0   = y_cast;
+	const double* restrict a0   = a_cast + 0*lda;
+	const double* restrict a1   = a_cast + 1*lda;
+	const double* restrict a2   = a_cast + 2*lda;
+	const double* restrict a3   = a_cast + 3*lda;
+	      double* restrict y0   = y_cast;
 
 	chi0 = *(x_cast + 0*incx);
 	chi1 = *(x_cast + 1*incx);

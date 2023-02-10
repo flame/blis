@@ -54,24 +54,22 @@ void bli_ddotv_penryn_int
        const cntx_t* cntx
      )
 {
-	double*  restrict x_cast   = x;
-	double*  restrict y_cast   = y;
-	double*  restrict rho_cast = rho;
-	dim_t             i;
+	const double*  restrict x_cast   = x;
+	const double*  restrict y_cast   = y;
+	      double*  restrict rho_cast = rho;
+	      dim_t             i;
 
-	dim_t             n_pre;
-	dim_t             n_run;
-	dim_t             n_left;
+	      dim_t             n_pre;
+	      dim_t             n_run;
+	      dim_t             n_left;
 
-	double*  restrict x1;
-	double*  restrict y1;
-	double            rho1;
-	double            x1c, y1c;
+	      double            rho1;
+	      double            x1c, y1c;
 
-	v2df_t            rho1v;
-	v2df_t            x1v, y1v;
+	      v2df_t            rho1v;
+	      v2df_t            x1v, y1v;
 
-	bool              use_ref = FALSE;
+	      bool              use_ref = FALSE;
 
 	// If the vector lengths are zero, set rho to zero and return.
 	if ( bli_zero_dim1( n ) )
@@ -122,8 +120,8 @@ void bli_ddotv_penryn_int
 	n_run       = ( n - n_pre ) / 2;
 	n_left      = ( n - n_pre ) % 2;
 
-	x1 = x_cast;
-	y1 = y_cast;
+	const double* restrict x1 = x_cast;
+	const double* restrict y1 = y_cast;
 
 	PASTEMAC(d,set0s)( rho1 );
 
