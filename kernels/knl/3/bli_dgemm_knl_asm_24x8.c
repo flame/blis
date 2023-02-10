@@ -185,16 +185,16 @@ static int32_t offsets[32] __attribute__((aligned(64))) =
 //#define LOOPMON
 void bli_dgemm_knl_asm_24x8
      (
-       dim_t               m,
-       dim_t               n,
-       dim_t               k_,
-       double*    restrict alpha,
-       double*    restrict a,
-       double*    restrict b,
-       double*    restrict beta,
-       double*    restrict c, inc_t rs_c_, inc_t cs_c_,
-       auxinfo_t*          data,
-       cntx_t*             cntx
+             dim_t      m,
+             dim_t      n,
+             dim_t      k_,
+       const double*    alpha,
+       const double*    a,
+       const double*    b,
+       const double*    beta,
+             double*    c, inc_t rs_c_, inc_t cs_c_,
+             auxinfo_t* data,
+       const cntx_t*    cntx
      )
 {
     (void)data;
