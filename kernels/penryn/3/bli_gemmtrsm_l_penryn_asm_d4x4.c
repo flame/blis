@@ -60,7 +60,7 @@ void bli_dgemmtrsm_l_penryn_asm_4x4
        const cntx_t*    cntx
      )
 {
-	void*   b_next  = bli_auxinfo_next_b( data );
+	const void* b_next  = bli_auxinfo_next_b( data );
 
 	// Typecast local copies of integers in case dim_t and inc_t are a
 	// different size than is expected by load instructions.

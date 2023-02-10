@@ -154,7 +154,7 @@ void bli_ddotxf_penryn_int
 	const double* restrict x1 = a_cast +   lda;
 	const double* restrict x2 = a_cast + 2*lda;
 	const double* restrict x3 = a_cast + 3*lda;
-	      double* restrict y0 = x_cast;
+	const double* restrict y0 = x_cast;
 
 	PASTEMAC(d,set0s)( rho0 );
 	PASTEMAC(d,set0s)( rho1 );
