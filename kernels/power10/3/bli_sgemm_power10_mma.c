@@ -77,7 +77,7 @@ void bli_sgemm_power10_mma_8x16
     GEMM_UKR_SETUP_CT( s, 8, 16, true );
 
     fv4sf_t result[4];
-      fv4sf_t *rowC;
+    fv4sf_t *rowC;
 
     // accumulators that will hold the matrix product
     __vector_quad acc0, acc1, acc2, acc3,
@@ -93,9 +93,9 @@ void bli_sgemm_power10_mma_8x16
     __builtin_mma_xxsetaccz(&acc6);
     __builtin_mma_xxsetaccz(&acc7);
 
-    float* restrict A0 = a;
-    float* restrict B0 = b;
-    float* restrict C0 = c;
+    const float* restrict A0 = a;
+    const float* restrict B0 = b;
+          float* restrict C0 = c;
 
     float alpha_ = *alpha,
           beta_  = *beta;

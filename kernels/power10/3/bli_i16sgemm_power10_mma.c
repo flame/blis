@@ -75,9 +75,9 @@ void bli_i16sgemm_power10_mma_8x16
 
     uint64_t rs_c   = rs_c0;
 
-    short* restrict A0 = a;
-    short* restrict B0 = b;
-    int*   restrict C0 = c;
+    const short* restrict A0 = a;
+    const short* restrict B0 = b;
+          int*   restrict C0 = c;
 
     int alpha_ = *alpha,
         beta_ = *beta;

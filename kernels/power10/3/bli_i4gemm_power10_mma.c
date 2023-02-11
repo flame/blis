@@ -75,9 +75,9 @@ void bli_i4gemm_power10_mma_8x16
 
     uint64_t rs_c   = rs_c0;
 
-    nibbles* restrict A0 = a;
-    nibbles* restrict B0 = b;
-    int*     restrict C0 = c;
+    const nibbles* restrict A0 = a;
+    const nibbles* restrict B0 = b;
+          int*     restrict C0 = c;
 
     int alpha_ = *alpha,
         beta_ = *beta;

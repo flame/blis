@@ -83,9 +83,9 @@ void bli_dgemm_power10_mma_8x8
 
     GEMM_UKR_SETUP_CT( d, 8, 8, true );
 
-    double* restrict A0 = a;
-    double* restrict B0 = b;
-    double* restrict C0 = c;
+    const double* restrict A0 = a;
+    const double* restrict B0 = b;
+          double* restrict C0 = c;
 
     double alpha_ = *alpha,
            beta_ = *beta;

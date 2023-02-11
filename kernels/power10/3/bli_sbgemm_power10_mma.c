@@ -76,9 +76,9 @@ void bli_sbgemm_power10_mma_8x16
 
     uint64_t rs_c   = rs_c0;
 
-    bfloat16* restrict A0 = a;
-    bfloat16* restrict B0 = b;
-    float* restrict C0 = c;
+    const bfloat16* restrict A0 = a;
+    const bfloat16* restrict B0 = b;
+          float*    restrict C0 = c;
 
     float alpha_= *alpha,
           beta_ = *beta;

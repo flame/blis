@@ -234,9 +234,9 @@ void bli_zgemm_bgq_int_4x4
 {
     GEMM_UKR_SETUP_CT_ANY( z, 4, 4, false );
 
-    double* a_d = ( double* )a;
-    double* b_d = ( double* )b;
-    double* c_d = ( double* )c;
+    const double* a_d = ( double* )a;
+    const double* b_d = ( double* )b;
+          double* c_d = ( double* )c;
 
     //Registers for storing C.
     //2 2x4 subblocks of C, c0, and c1
