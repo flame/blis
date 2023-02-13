@@ -73,6 +73,7 @@ void bli_sgemm_power10_mma_8x16
     uint64_t k_left = k % 4;
 
     uint64_t rs_c   = rs_c0;
+    uint64_t cs_c   = cs_c0;
 
     GEMM_UKR_SETUP_CT( s, 8, 16, true );
 

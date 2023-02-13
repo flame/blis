@@ -80,6 +80,7 @@ void bli_dgemm_power10_mma_8x8
     uint64_t k_left = k % 4;
 
     uint64_t rs_c   = rs_c0;
+    uint64_t cs_c   = cs_c0;
 
     GEMM_UKR_SETUP_CT( d, 8, 8, true );
 

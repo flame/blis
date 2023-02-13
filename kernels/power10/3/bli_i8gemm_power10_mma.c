@@ -73,6 +73,7 @@ void bli_i8gemm_power10_mma_8x16
     uint64_t k_left = (k-1) % 4;
 
     uint64_t rs_c   = rs_c0;
+    //uint64_t cs_c   = cs_c0;
 
     const int8_t* restrict A0 = a;
     const int8_t* restrict B0 = b;

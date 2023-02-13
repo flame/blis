@@ -74,6 +74,7 @@ void bli_i16sgemm_power10_mma_8x16
     uint64_t k_left = (k-1) % 4;
 
     uint64_t rs_c   = rs_c0;
+    //uint64_t cs_c   = cs_c0;
 
     const short* restrict A0 = a;
     const short* restrict B0 = b;

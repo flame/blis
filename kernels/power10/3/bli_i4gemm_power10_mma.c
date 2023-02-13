@@ -74,6 +74,7 @@ void bli_i4gemm_power10_mma_8x16
     uint64_t k_left = (k-1) % 4;
 
     uint64_t rs_c   = rs_c0;
+    //uint64_t cs_c   = cs_c0;
 
     const nibbles* restrict A0 = a;
     const nibbles* restrict B0 = b;
