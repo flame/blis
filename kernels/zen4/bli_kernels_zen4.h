@@ -166,3 +166,23 @@ GEMMSUP_KER_PROT( double,  d, gemmsup_rv_zen4_asm_24x1)
 GEMMSUP_KER_PROT( double,  d, gemmsup_rv_zen4_asm_16x1)
 GEMMSUP_KER_PROT( double,  d, gemmsup_rv_zen4_asm_8x1)
 
+// Zgemm sup CV kernels
+GEMMSUP_KER_PROT( dcomplex,   z, gemmsup_cv_zen4_asm_12x4m )
+GEMMSUP_KER_PROT( dcomplex,   z, gemmsup_cv_zen4_asm_12x3m )
+GEMMSUP_KER_PROT( dcomplex,   z, gemmsup_cv_zen4_asm_12x2m )
+GEMMSUP_KER_PROT( dcomplex,   z, gemmsup_cv_zen4_asm_12x1m )
+
+GEMMSUP_KER_PROT( dcomplex,   z, gemmsup_cv_zen4_asm_8x4 )
+GEMMSUP_KER_PROT( dcomplex,   z, gemmsup_cv_zen4_asm_8x3 )
+GEMMSUP_KER_PROT( dcomplex,   z, gemmsup_cv_zen4_asm_8x2 )
+GEMMSUP_KER_PROT( dcomplex,   z, gemmsup_cv_zen4_asm_8x1 )
+
+GEMMSUP_KER_PROT( dcomplex,   z, gemmsup_cv_zen4_asm_4x4 )
+GEMMSUP_KER_PROT( dcomplex,   z, gemmsup_cv_zen4_asm_4x3 )
+GEMMSUP_KER_PROT( dcomplex,   z, gemmsup_cv_zen4_asm_4x2 )
+GEMMSUP_KER_PROT( dcomplex,   z, gemmsup_cv_zen4_asm_4x1 )
+
+GEMMSUP_KER_PROT( dcomplex,   z, gemmsup_cv_zen4_asm_2x4 )
+GEMMSUP_KER_PROT( dcomplex,   z, gemmsup_cv_zen4_asm_2x3 )
+GEMMSUP_KER_PROT( dcomplex,   z, gemmsup_cv_zen4_asm_2x2 )
+GEMMSUP_KER_PROT( dcomplex,   z, gemmsup_cv_zen4_asm_2x1 )

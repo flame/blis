@@ -198,7 +198,7 @@ BLIS_INLINE void bli_gemmsup_ref_var1n2m_opt_cases
 	}
 	else
 	{
-		if ( dt == BLIS_DOUBLE )
+		if ( ( dt == BLIS_DOUBLE ) || ( dt == BLIS_DCOMPLEX ) )
 		{
 			// The optimizations are only done for CRC and RRC storage schemes to avoid RD kernels.
 			// Optimizations for other storage schemes is yet to be done.

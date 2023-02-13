@@ -138,7 +138,7 @@ void bli_cntx_init_zen4( cntx_t* cntx )
     // Update the context with optimized level-1v kernels.
     bli_cntx_set_l1v_kers
     (
-      27,
+      28,
 
       // amaxv
       BLIS_AMAXV_KER,  BLIS_FLOAT,  bli_samaxv_zen_int_avx512,
@@ -165,6 +165,7 @@ void bli_cntx_init_zen4( cntx_t* cntx )
       // dotxv
       BLIS_DOTXV_KER,  BLIS_FLOAT,  bli_sdotxv_zen_int,
       BLIS_DOTXV_KER,  BLIS_DOUBLE, bli_ddotxv_zen_int,
+      BLIS_DOTXV_KER,  BLIS_DCOMPLEX, bli_zdotxv_zen_int,
 
       // scalv
       BLIS_SCALV_KER,  BLIS_FLOAT,  bli_sscalv_zen_int10,
@@ -193,7 +194,7 @@ void bli_cntx_init_zen4( cntx_t* cntx )
     //
     // These are reference block sizes and may be overridden based on
     // number of threads used at runtime.
- 
+
     BLI_CNTX_DEFAULT_BLKSZ_LIST(blkszs);
 
     // Update the context with the current architecture's register and cache
@@ -267,24 +268,24 @@ void bli_cntx_init_zen4( cntx_t* cntx )
       BLIS_RCC, BLIS_SCOMPLEX, bli_cgemmsup_rv_zen_asm_3x8n, TRUE,
       BLIS_CCR, BLIS_SCOMPLEX, bli_cgemmsup_rv_zen_asm_3x8n, TRUE,
       BLIS_CCC, BLIS_SCOMPLEX, bli_cgemmsup_rv_zen_asm_3x8n, TRUE,
-      BLIS_RRR, BLIS_DCOMPLEX, bli_zgemmsup_rv_zen_asm_3x4m, TRUE,
-      BLIS_RRC, BLIS_DCOMPLEX, bli_zgemmsup_rd_zen_asm_3x4m, TRUE,
-      BLIS_RCR, BLIS_DCOMPLEX, bli_zgemmsup_rv_zen_asm_3x4m, TRUE,
-      BLIS_RCC, BLIS_DCOMPLEX, bli_zgemmsup_rv_zen_asm_3x4n, TRUE,
-      BLIS_CRR, BLIS_DCOMPLEX, bli_zgemmsup_rv_zen_asm_3x4m, TRUE,
-      BLIS_CRC, BLIS_DCOMPLEX, bli_zgemmsup_rd_zen_asm_3x4n, TRUE,
-      BLIS_CCR, BLIS_DCOMPLEX, bli_zgemmsup_rv_zen_asm_3x4n, TRUE,
-      BLIS_CCC, BLIS_DCOMPLEX, bli_zgemmsup_rv_zen_asm_3x4n, TRUE,
+      BLIS_RRR, BLIS_DCOMPLEX, bli_zgemmsup_cv_zen4_asm_12x4m, FALSE,
+      BLIS_RRC, BLIS_DCOMPLEX, bli_zgemmsup_cv_zen4_asm_12x4m, FALSE,
+      BLIS_RCR, BLIS_DCOMPLEX, bli_zgemmsup_cv_zen4_asm_12x4m, FALSE,
+      BLIS_RCC, BLIS_DCOMPLEX, bli_zgemmsup_cv_zen4_asm_12x4m, FALSE,
+      BLIS_CRR, BLIS_DCOMPLEX, bli_zgemmsup_cv_zen4_asm_12x4m, FALSE,
+      BLIS_CRC, BLIS_DCOMPLEX, bli_zgemmsup_cv_zen4_asm_12x4m, FALSE,
+      BLIS_CCR, BLIS_DCOMPLEX, bli_zgemmsup_cv_zen4_asm_12x4m, FALSE,
+      BLIS_CCC, BLIS_DCOMPLEX, bli_zgemmsup_cv_zen4_asm_12x4m, FALSE,
       cntx
     );
 
     // Initialize level-3 sup blocksize objects with architecture-specific
     // values.
     //                                           s      d      c      z
-    bli_blksz_init     ( &blkszs[ BLIS_MR ],    6,     6,     3,      3,
-                                                6,     9,     3,      3    );
+    bli_blksz_init     ( &blkszs[ BLIS_MR ],    6,     6,     3,      12,
+                                                6,     9,     3,      12    );
     bli_blksz_init_easy( &blkszs[ BLIS_NR ],    64,    8,     8,      4    );
-    bli_blksz_init_easy( &blkszs[ BLIS_MC ],    192,   72,    72,     36   );
+    bli_blksz_init_easy( &blkszs[ BLIS_MC ],    192,   72,    72,     48   );
     bli_blksz_init_easy( &blkszs[ BLIS_KC ],    512,   256,   128,    64   );
     bli_blksz_init_easy( &blkszs[ BLIS_NC ],    8064,  4080,  2040,   1020 );
 
@@ -306,11 +307,11 @@ void bli_cntx_init_zen4( cntx_t* cntx )
  * Override the block sizes in the context to the block sizes used
  * by AVX2 GEMM+TRSM kernels, this is needed in Zen4 context as default
  * GEMM kernels are AVX512 based and uses different block sizes.
- * 
+ *
  * This function should be called in TRSM path before performing
- * any packing operations. 
- * 
- * Also the context must be restored to default values by calling 
+ * any packing operations.
+ *
+ * Also the context must be restored to default values by calling
  * bli_zen4_restore_default_blkszs() before exiting TRSM Path
  */
 void bli_zen4_override_trsm_blkszs (cntx_t* cntx)
@@ -353,7 +354,7 @@ void bli_zen4_override_gemm_blkszs (cntx_t* cntx)
     bli_blksz_init_easy( &blkszs[ BLIS_NR ],    16,    8,     8,      4    );
     bli_blksz_init_easy( &blkszs[ BLIS_KC ],    512,   480,   128,    64   );
     bli_blksz_init_easy( &blkszs[ BLIS_MC ],    144,   144,    72,     36   );
-    
+
     // Update the context with the current architecture's register and cache
     // blocksizes (and multiples) for native execution.
     bli_cntx_set_l3_sup_blkszs
@@ -387,16 +388,16 @@ void bli_zen4_override_gemm_blkszs (cntx_t* cntx)
  *
  * This function should be called to restore the block sizes to there
  * default values if they where overriden by calling
- * bli_zen4_override_trsm_blkszs() to enable AVX2 GEMM kernels in the 
+ * bli_zen4_override_trsm_blkszs() to enable AVX2 GEMM kernels in the
  * TRSM path.
- * 
+ *
  */
 void bli_zen4_restore_default_blkszs (cntx_t* cntx)
 {
     blksz_t blkszs[ BLIS_NUM_BLKSZS ];
 
     BLI_CNTX_DEFAULT_BLKSZ_LIST(blkszs);
-    
+
     // Update the context with the current architecture's register and cache
     // blocksizes (and multiples) for native execution.
     bli_cntx_set_blkszs

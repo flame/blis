@@ -334,7 +334,7 @@ elseif(${ENABLE_SIMD_FLAGS} MATCHES "SSE2")
   add_definitions(/arch:SSE2)
 endif()
 
-if(${TARGET_ARCH} STREQUAL zen4 OR 
+if(${TARGET_ARCH} STREQUAL zen4 OR
    ${TARGET_ARCH} STREQUAL amdzen)
   set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/kernels/zen4/1/bli_amaxv_zen_int_avx512.c       PROPERTIES COMPILE_FLAGS /arch:AVX512)
   set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/kernels/zen4/3/bli_dgemm_zen4_asm_32x6.c        PROPERTIES COMPILE_FLAGS /arch:AVX512)
@@ -355,6 +355,7 @@ if(${TARGET_ARCH} STREQUAL zen4 OR
   set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/kernels/zen4/3/sup/bli_gemmsup_rv_zen_s6x64.c   PROPERTIES COMPILE_FLAGS /arch:AVX512)
   set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/kernels/zen4/3/sup/bli_gemmsup_rv_zen_s6x64m.c  PROPERTIES COMPILE_FLAGS /arch:AVX512)
   set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/kernels/zen4/3/sup/bli_gemmsup_rv_zen_s6x64n.c  PROPERTIES COMPILE_FLAGS /arch:AVX512)
+  set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/kernels/zen4/3/sup/bli_gemmsup_cv_zen_z12x4m.c  PROPERTIES COMPILE_FLAGS /arch:AVX512)
   set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/kernels/zen4/3/sup/bli_dgemmsup_rv_zen4_asm_24x8m.c  PROPERTIES COMPILE_FLAGS /arch:AVX512)
   set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/kernels/zen4/3/sup/d24x8/bli_dgemmsup_rv_zen4_asm_Mx1.c  PROPERTIES COMPILE_FLAGS /arch:AVX512)
   set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/kernels/zen4/3/sup/d24x8/bli_dgemmsup_rv_zen4_asm_Mx2.c  PROPERTIES COMPILE_FLAGS /arch:AVX512)

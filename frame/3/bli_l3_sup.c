@@ -116,18 +116,30 @@ err_t bli_gemmsup
 
 #if defined(BLIS_FAMILY_ZEN4) || defined(BLIS_FAMILY_AMDZEN)
 
-    if((bli_arch_query_id() == BLIS_ARCH_ZEN4) && (bli_obj_dt(a) == BLIS_DOUBLE))
+    if((bli_arch_query_id() == BLIS_ARCH_ZEN4))
     {
-        // override the existing blocksizes with 24x8 specific ones.
-        // This can be removed when we use same blocksizes and function pointers
-        // for all level-3 SUP routines.
-        bli_zen4_override_gemm_blkszs(&cntx_gemm);
-
-        // Pack A to avoid RD kernels.
-        if((stor_id == BLIS_CRC || stor_id == BLIS_RRC))
+        if( bli_obj_dt(a) == BLIS_DOUBLE )
         {
-            bli_rntm_set_pack_a(1, rntm);//packa
+            // override the existing blocksizes with 24x8 specific ones.
+            // This can be removed when we use same blocksizes and function pointers
+            // for all level-3 SUP routines.
+            bli_zen4_override_gemm_blkszs(&cntx_gemm);
+
+            // Pack A to avoid RD kernels.
+            if((stor_id == BLIS_CRC || stor_id == BLIS_RRC))
+            {
+                bli_rntm_set_pack_a(1, rntm);//packa
+            }
         }
+        else if( bli_obj_dt(a) == BLIS_DCOMPLEX )
+        {
+            // Pack A to avoid RD kernels.
+            if((stor_id == BLIS_CRC || stor_id == BLIS_RRC))
+            {
+                bli_rntm_set_pack_a(1, rntm);//packa
+            }
+        }
+        else ;
     }
 
 #endif

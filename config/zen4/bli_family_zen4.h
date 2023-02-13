@@ -64,11 +64,11 @@
  * Override the block sizes in the context to the block sizes used
  * by AVX2 GEMM+TRSM kernels, this is needed in Zen4 context as default
  * GEMM kernels are AVX512 based and uses different block sizes.
- * 
+ *
  * This function should be called in TRSM path before performing
- * any packing operations. 
- * 
- * Also the context must be restored to default values by calling 
+ * any packing operations.
+ *
+ * Also the context must be restored to default values by calling
  * bli_zen4_restore_default_blkszs() before exiting TRSM Path
  */
 BLIS_EXPORT_BLIS void bli_zen4_override_trsm_blkszs (cntx_t* cntx);
@@ -80,9 +80,9 @@ BLIS_EXPORT_BLIS void bli_zen4_override_gemm_blkszs (cntx_t* cntx);
  *
  * This function should be called to restore the block sizes to there
  * default values if they where overriden by calling
- * bli_zen4_override_trsm_blkszs() to enable AVX2 GEMM kernels in the 
+ * bli_zen4_override_trsm_blkszs() to enable AVX2 GEMM kernels in the
  * TRSM path.
- * 
+ *
  */
 BLIS_EXPORT_BLIS void bli_zen4_restore_default_blkszs (cntx_t* cntx);
 
