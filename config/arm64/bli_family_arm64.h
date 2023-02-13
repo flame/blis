@@ -40,7 +40,7 @@
 
 #define BLIS_SIMD_ALIGN_SIZE 16
 
-#define BLIS_SIMD_MAX_SIZE 512
+//#define BLIS_SIMD_MAX_SIZE 512
 #define BLIS_SIMD_MAX_NUM_REGISTERS 32
 
 // SVE-specific configs.
