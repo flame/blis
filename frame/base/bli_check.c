@@ -837,12 +837,7 @@ err_t bli_check_sufficient_stack_buf_size( const cntx_t* cntx )
 		// of it (real or imaginary part) at a time.
 
 		if ( mr * nr * dt_size > BLIS_STACK_BUF_MAX_SIZE )
-		{
 			e_val = BLIS_INSUFFICIENT_STACK_BUF_SIZE;
-			fprintf( stderr, "DEBUG: Ruh roh... mr * nr * dt_size > BLIS_STACK_BUF_MAX_SIZE :(\n" );
-			fprintf( stderr, "DEBUG: mr x nr = %d x %d    dt_size = %d\n", (int)mr, (int)nr, (int)dt_size );
-			fprintf( stderr, "DEBUG: BLIS_STACK_BUF_MAX_SIZE = %d\n" , (int)BLIS_STACK_BUF_MAX_SIZE );
-		}
 	}
 
 	return e_val;
