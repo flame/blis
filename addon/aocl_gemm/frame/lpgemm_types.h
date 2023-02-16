@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2022, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2022-2023, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -47,9 +47,11 @@ typedef enum
 {
 	U8S8S16OS16 = 0, // uint8_t - A, int8_t - B, int16_t - C
 	U8S8S32OS32 = 1, // uint8_t - A, int8_t - B, int32_t - C
-	F16F16F16OF16 = 2, // float16 - A, float16 - B, float16 - C
+	F32F32F32OF32 = 2, // float - A, float - B, float - C
 	BF16BF16F32OF32 = 3 // bf16 - A, bf16 - B, float - C
 } AOCL_OPERATION_TYPE;
+
+#define AOCL_OPERATION_TYPE_LEN 4
 
 typedef enum
 {
@@ -102,7 +104,19 @@ typedef struct
 
 typedef struct
 {
+	dim_t packa_rs;
+	dim_t packa_cs;
+	dim_t packb_rs;
+	dim_t packb_cs;
+} lpgemm_pack_strides_t;
+
+typedef struct
+{
 	lpgemm_block_size_t blksz;
+	void_fp kern_fun_ptr;
+	void_fp packa_fun_ptr;
+	void_fp packb_fun_ptr;
+	lpgemm_pack_strides_t pack_s;
 } lpgemm_cntx_t;
 
 typedef struct

@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2022, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2022-2023, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -40,14 +40,36 @@
 #include "lpgemm_thrinfo_utils.h"
 #include "lpgemm_config.h"
 
+// Kernel function prototypes
+typedef void (*lpgemm_rowvar_bf16)
+     (
+       const dim_t,
+       const dim_t,
+       const dim_t,
+       const bfloat16*,
+       const dim_t,
+       const dim_t,
+       const dim_t,
+       const bfloat16*,
+       const dim_t,
+       const dim_t,
+       float*,
+       const dim_t,
+       const dim_t,
+       const float,
+       const float,
+       lpgemm_post_op*,
+       lpgemm_post_op_attr
+     );
+
 // B should always be packed.
 LPGEMM_5LOOP(bfloat16,bfloat16,float,bf16bf16f32of32)
 {
-	dim_t NC = lpgemm_get_block_size_NC_global_cntx( BF16BF16F32OF32 );
-	dim_t KC = lpgemm_get_block_size_KC_global_cntx( BF16BF16F32OF32 );
-	dim_t MC = lpgemm_get_block_size_MC_global_cntx( BF16BF16F32OF32 );
-	dim_t NR = lpgemm_get_block_size_NR_global_cntx( BF16BF16F32OF32 );
-	dim_t MR = lpgemm_get_block_size_MR_global_cntx( BF16BF16F32OF32 );
+	dim_t NC = lcntx->blksz.NC;
+	dim_t KC = lcntx->blksz.KC;
+	dim_t MC = lcntx->blksz.MC;
+	dim_t NR = lcntx->blksz.NR;
+	dim_t MR = lcntx->blksz.MR;
 
 	const int16_t* a_use = NULL;
 	dim_t cs_a_use = cs_a;
@@ -237,8 +259,7 @@ LPGEMM_5LOOP(bfloat16,bfloat16,float,bf16bf16f32of32)
 				if ( ( jc_packb_end > jc_packb_start ) &&
 					 ( jc_packb_start < ( jc + nc0 ) ) )
 				{
-#ifdef BLIS_KERNELS_ZEN4
-					packb_nr64_bf16bf16f32of32
+					( ( packb_bf16 )lcntx->packb_fun_ptr )
 					(
 					  pack_b_buffer_bf16 + ( jc_packb_start * kc0_updated ),
 					  ( b + ( rs_b * pc ) + ( cs_b * jc ) +
@@ -246,11 +267,10 @@ LPGEMM_5LOOP(bfloat16,bfloat16,float,bf16bf16f32of32)
 					  ( jc_packb_end - jc_packb_start ), kc0,
 					  &rs_b_use, &cs_b_use
 					);
-#endif
 				}
 				else
 				{
-					get_packb_nr64_bf16bf16f32of32_strides( &rs_b_use, &cs_b_use );
+					lpgemm_get_packb_strides( lcntx, &rs_b_use, &cs_b_use );
 				}
 
 				// All threads in work group should wait till B matrix packing
@@ -273,7 +293,7 @@ LPGEMM_5LOOP(bfloat16,bfloat16,float,bf16bf16f32of32)
 						( n_sub_updated * pc ) +
 						( jc_cur_loop_rem * kc0_updated );
 
-				get_packb_nr64_bf16bf16f32of32_strides( &rs_b_use, &cs_b_use );
+				lpgemm_get_packb_strides( lcntx, &rs_b_use, &cs_b_use );
 			}
 
 			for ( dim_t ic = ic_start; ic < ic_end; ic += MC )
@@ -312,9 +332,8 @@ LPGEMM_5LOOP(bfloat16,bfloat16,float,bf16bf16f32of32)
 					post_ops_attr.rs_c_downscale = rs_c_downscale;
 					post_ops_attr.is_last_k = is_last_k;
 
-#ifdef BLIS_KERNELS_ZEN4
 					// Reorder/Packed B, Reorder/Packed/Unpacked A call.
-					lpgemm_rowvar_bf16bf16f32of32_6x64 
+					( ( lpgemm_rowvar_bf16 )lcntx->kern_fun_ptr )
 					(
 					  mc0, nr0, kc0,
 					  a_use, rs_a, cs_a_use, a_block_stride,
@@ -323,20 +342,6 @@ LPGEMM_5LOOP(bfloat16,bfloat16,float,bf16bf16f32of32)
 					  alpha, beta0,
 					  post_op_list, post_ops_attr
 					);
-#else
-					// Silence compiler warnings.
-					( void )b_use;
-					( void )a_block_stride;
-					( void )rs_c_downscale;
-					( void )is_last_k;
-					( void )c_use_ic;
-					( void )a_use;
-					( void )beta0;
-					( void )nr0;
-					( void )mc0;
-					( void )cs_a_use;
-					( void )post_ops_attr;
-#endif
 				}
 			}
 		}

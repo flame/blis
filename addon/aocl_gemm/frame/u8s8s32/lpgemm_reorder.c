@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2022, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2022-2023, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -41,13 +41,15 @@
 
 void reorderb_nr64_u8s8s32o32
      (
-       lpgemm_obj_t* b,
-       lpgemm_obj_t* b_reorder
+       lpgemm_obj_t*  b,
+       lpgemm_obj_t*  b_reorder,
+       rntm_t*        rntm,
+       lpgemm_cntx_t* lcntx
      )
 {
-	dim_t NC = lpgemm_get_block_size_NC_global_cntx( U8S8S32OS32 );
-	dim_t NR = lpgemm_get_block_size_NR_global_cntx( U8S8S32OS32 );
-	dim_t KC = lpgemm_get_block_size_KC_global_cntx( U8S8S32OS32 );
+	dim_t NC = lcntx->blksz.NC;
+	dim_t KC = lcntx->blksz.KC;
+	dim_t NR = lcntx->blksz.NR;
 
 	dim_t rs_b = b->rs;
 	dim_t rs_b_reorder;
@@ -62,12 +64,7 @@ void reorderb_nr64_u8s8s32o32
 	// buffer needs to be updated.
 	dim_t k_updated = make_multiple_of_n( k, 4 );
 
-	// Initialize a local runtime with global settings if necessary. Note
-	// that in the case that a runtime is passed in, we make a local copy.
-	rntm_t rntm_g;
-	bli_rntm_init_from_global( &rntm_g );
-
-	dim_t n_threads = bli_rntm_num_threads( &rntm_g );
+	dim_t n_threads = bli_rntm_num_threads( rntm );
 	n_threads = ( n_threads > 0 ) ? n_threads : 1;
 
 #ifdef BLIS_ENABLE_OPENMP
@@ -148,8 +145,7 @@ void reorderb_nr64_u8s8s32o32
 				// st = ( jc_cur_loop * k )    <traverse blocks 1,2,3,4>
 				//    + ( n_sub_updated * pc ) <traverse block 5>
 				//    + ( NC' * kc0_updated)   <traverse block 6>
-#ifdef BLIS_KERNELS_ZEN4
-				packb_nr64_u8s8s32o32
+				( ( packb_s32 )lcntx->packb_fun_ptr )
 				(
 				  ( ( ( int8_t* )b_reorder->storage.aligned_buffer ) +
 					( jc_cur_loop * k_updated ) + ( n_sub_updated * pc ) +
@@ -158,14 +154,6 @@ void reorderb_nr64_u8s8s32o32
 					( rs_b * pc ) + jc ),
 				  rs_b, nc0, kc0, &rs_b_reorder, &cs_b_reorder
 				);
-#else
-				// Silence compiler warnings.
-				rs_b_reorder = 0;
-				cs_b_reorder = 0;
-				( void )kc0_updated;
-				( void )k_updated;
-				( void )rs_b;
-#endif
 			}
 
 			adjust_B_panel_reordered_jc( &jc, jc_cur_loop );
@@ -179,12 +167,14 @@ void reorderb_nr64_u8s8s32o32
 
 void reordera_mr6_u8s8s32o32
      (
-       lpgemm_obj_t* a,
-       lpgemm_obj_t* a_reorder
+       lpgemm_obj_t*  a,
+       lpgemm_obj_t*  a_reorder,
+       rntm_t*        rntm,
+       lpgemm_cntx_t* lcntx
      )
 {
-	dim_t MC = lpgemm_get_block_size_MC_global_cntx( U8S8S32OS32 );
-	dim_t KC = lpgemm_get_block_size_KC_global_cntx( U8S8S32OS32 );
+	dim_t MC = lcntx->blksz.MC;
+	dim_t KC = lcntx->blksz.KC;
 
 	dim_t rs_a = a->rs;
 	dim_t rs_a_reorder;
@@ -207,21 +197,13 @@ void reordera_mr6_u8s8s32o32
 		{
 			dim_t mc0 = bli_min( ( m - ic ), MC );
 
-#ifdef BLIS_KERNELS_ZEN4
-			packa_k64_u8s8s32o32
+			( ( packa_s32 )lcntx->packa_fun_ptr )
 			(
 			  ( ( ( uint8_t* )a_reorder->storage.aligned_buffer ) + ( pc * m ) +
 				( ic * kc0_updated ) ),
 			  ( ( ( uint8_t* )a->storage.aligned_buffer ) + ( rs_a * ic ) + pc ),
 			  rs_a, mc0, kc0, &rs_a_reorder, &cs_a_reorder
 			);
-#else
-			rs_a_reorder = 0;
-			cs_a_reorder = 0;
-			( void )kc0_updated;
-			( void )rs_a;
-			( void )mc0;
-#endif
 		}
 	}
 

@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2022, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2022-2023, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -37,6 +37,7 @@
 #include "lpgemm_types.h"
 #include "lpgemm_post_ops.h"
 #include "lpgemm_thread_decor_openmp.h"
+#include "lpgemm_config.h"
 #include "lpgemm_utils.h"
 #include "lpgemm_5loop_interface_apis.h"
 
@@ -54,6 +55,9 @@ AOCL_GEMM_MATMUL(float,float,float,float,f32f32f32of32)
 
 	/* Initialize BLIS. */
 	bli_init_auto();
+
+	// Initialize lpgemm context.
+	aocl_lpgemm_init_global_cntx();
 
 	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1);
 	AOCL_DTL_LOG_GEMM_INPUTS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(s), transa, transb, m, n, k,\
@@ -150,14 +154,14 @@ AOCL_GEMM_MATMUL(float,float,float,float,f32f32f32of32)
 	if ( ( is_row_major == TRUE ) && ( mtag_a == REORDERED ) )
 	{
 		AOCL_DTL_TRACE_EXIT_ERR(AOCL_DTL_LEVEL_TRACE_1, \
-						"A matrix reordering not supported.");
+				"A matrix reordering not supported for row major inputs.");
 		return; // Error.
 	}
 	// Inputs swapped in column major, A becomes B from kernel point of view.
 	else if ( ( is_column_major == TRUE ) && ( mtag_b == REORDERED ) )
 	{
 		AOCL_DTL_TRACE_EXIT_ERR(AOCL_DTL_LEVEL_TRACE_1, \
-						"A matrix reordering not supported.");
+				"B matrix reordering not supported for column major inputs.");
 		return; // Error.
 	}
 
@@ -175,7 +179,12 @@ AOCL_GEMM_MATMUL(float,float,float,float,f32f32f32of32)
 	bli_rntm_init_from_global( &rntm_g );
 	bli_membrk_rntm_set_membrk( &rntm_g );
 
+	lpgemm_cntx_t* lcntx_g = lpgemm_get_global_cntx_obj( F32F32F32OF32 );
+
 #ifdef BLIS_ENABLE_OPENMP
+	// The lpgemm_cntx_t argument will be NULL for f32 since it still uses
+	// BLIS cntx_t internally. Its a workaround for now and will be replaced
+	// with lpgemm_cntx_t eventually.
 	// Swapping inputs to induce row major computation for column major inputs.
 	if ( is_column_major == TRUE )
 	{
@@ -186,7 +195,7 @@ AOCL_GEMM_MATMUL(float,float,float,float,f32f32f32of32)
 		  a, rs_a, cs_a, mtag_a,
 		  c, rs_c, cs_c,
 		  alpha, beta,
-		  &rntm_g,
+		  &rntm_g, lcntx_g,
 		  post_op_list, FALSE
 		);
 	}
@@ -199,7 +208,7 @@ AOCL_GEMM_MATMUL(float,float,float,float,f32f32f32of32)
 		  b, rs_b, cs_b, mtag_b,
 		  c, rs_c, cs_c,
 		  alpha, beta,
-		  &rntm_g,
+		  &rntm_g, lcntx_g,
 		  post_op_list, FALSE
 		);
 	}
@@ -218,7 +227,7 @@ AOCL_GEMM_MATMUL(float,float,float,float,f32f32f32of32)
 		  a, rs_a, cs_a, mtag_a,
 		  c, rs_c, cs_c,
 		  alpha, beta,
-		  &rntm_g,
+		  &rntm_g, lcntx_g,
 		  post_op_list, FALSE
 		);
 	}
@@ -231,7 +240,7 @@ AOCL_GEMM_MATMUL(float,float,float,float,f32f32f32of32)
 		  b, rs_b, cs_b, mtag_b,
 		  c, rs_c, cs_c,
 		  alpha, beta,
-		  &rntm_g,
+		  &rntm_g, lcntx_g,
 		  post_op_list, FALSE
 		);
 	}

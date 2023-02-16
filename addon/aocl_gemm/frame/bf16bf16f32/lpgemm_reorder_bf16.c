@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2022, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2022-2023, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -40,14 +40,16 @@
 #include "aocl_bf16_type.h"
 
 void reorderb_nr64_bf16bf16f32of32
-  (
-    lpgemm_obj_t *b,
-    lpgemm_obj_t *b_reorder
-  )
-{   
-	dim_t NC = lpgemm_get_block_size_NC_global_cntx( BF16BF16F32OF32 );
-	dim_t NR = lpgemm_get_block_size_NR_global_cntx( BF16BF16F32OF32 );
-	dim_t KC = lpgemm_get_block_size_KC_global_cntx( BF16BF16F32OF32 );
+     (
+       lpgemm_obj_t*  b,
+       lpgemm_obj_t*  b_reorder,
+       rntm_t*        rntm,
+       lpgemm_cntx_t* lcntx
+     )
+{
+	dim_t NC = lcntx->blksz.NC;
+	dim_t KC = lcntx->blksz.KC;
+	dim_t NR = lcntx->blksz.NR;
 
 	// Extracting the matrix properties from the lpgemm object
 	dim_t rs_b = b->rs;
@@ -64,12 +66,7 @@ void reorderb_nr64_bf16bf16f32of32
 	dim_t k_updated = k;
 	k_updated += (k_updated & 0x1);
 
-	// Initialize a local runtime with global settings if necessary. Note
-	// that in the case that a runtime is passed in, we make a local copy.
-	rntm_t rntm_g;
-	bli_rntm_init_from_global( &rntm_g );
-
-	dim_t n_threads = bli_rntm_num_threads( &rntm_g );
+	dim_t n_threads = bli_rntm_num_threads( rntm );
 	n_threads = ( n_threads > 0 ) ? n_threads : 1;
 
 #ifdef BLIS_ENABLE_OPENMP
@@ -151,9 +148,7 @@ void reorderb_nr64_bf16bf16f32of32
 				// st = ( jc_cur_loop * k )    <traverse blocks 1,2,3,4>
 				//    + ( n_sub_updated * pc ) <traverse block 5>
 				//    + ( NC' * kc0_updated)   <traverse block 6>
-#ifdef BLIS_KERNELS_ZEN4
-				// B should always be packed.
-				packb_nr64_bf16bf16f32of32
+				( ( packb_bf16 )lcntx->packb_fun_ptr )
 				(
 				  ( ( ( bfloat16* )b_reorder->storage.aligned_buffer ) +
 					( jc_cur_loop * k_updated ) + ( n_sub_updated * pc ) +
@@ -162,12 +157,6 @@ void reorderb_nr64_bf16bf16f32of32
 					( rs_b * pc ) + jc ),
 				  rs_b, nc0, kc0, &rs_b_reorder, &cs_b_reorder
 				);
-#else
-				// Silence compiler warnings.
-				rs_b_reorder = 0;
-				cs_b_reorder = 0;
-				( void )rs_b;
-#endif
 			}
 
 			adjust_B_panel_reordered_jc( &jc, jc_cur_loop );

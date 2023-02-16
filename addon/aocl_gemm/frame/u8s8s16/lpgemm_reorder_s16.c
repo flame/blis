@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2022, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2022-2023, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -39,21 +39,23 @@
 
 void aocl_reorderb_nr32_u8s8s16o16
      (
-       lpgemm_obj_t *b,
-       lpgemm_obj_t *b_reorder
+       lpgemm_obj_t*  b,
+       lpgemm_obj_t*  b_reorder,
+       rntm_t*        rntm,
+       lpgemm_cntx_t* lcntx
      )
 {
-	dim_t NC = lpgemm_get_block_size_NC_global_cntx(U8S8S16OS16);
-	dim_t KC = lpgemm_get_block_size_KC_global_cntx(U8S8S16OS16);
-	dim_t NR = lpgemm_get_block_size_NR_global_cntx(U8S8S16OS16);
+	dim_t NC = lcntx->blksz.NC;
+	dim_t KC = lcntx->blksz.KC;
+	dim_t NR = lcntx->blksz.NR;
 
 	// Extracting the matrix properties from the lpgemm object
 	dim_t rs_b = b->rs;
 	dim_t n = b->width;
 	dim_t k = b->length;
-	
+
 	lpgemm_mod_block_size_s16(0, n, k, NULL, &NC, &KC);
-	
+
 	dim_t rs_b_reorder;
 	dim_t cs_b_reorder;
 
@@ -62,12 +64,7 @@ void aocl_reorderb_nr32_u8s8s16o16
 	// Making multiple of 2 to suit k in vpmaddubsw
 	k_updated += (k_updated & 0x1);
 
-	// Initialize a local runtime with global settings if necessary. Note
-	// that in the case that a runtime is passed in, we make a local copy.
-	rntm_t rntm_g;
-	bli_rntm_init_from_global( &rntm_g );
-
-	dim_t n_threads = bli_rntm_num_threads( &rntm_g );
+	dim_t n_threads = bli_rntm_num_threads( rntm );
 	n_threads = ( n_threads > 0 ) ? n_threads : 1;
 
 #ifdef BLIS_ENABLE_OPENMP
@@ -148,7 +145,7 @@ void aocl_reorderb_nr32_u8s8s16o16
 				// st = ( jc_cur_loop * k )    <traverse blocks 1,2,3,4>
 				//    + ( n_sub_updated * pc ) <traverse block 5>
 				//    + ( NC' * kc0_updated)   <traverse block 6>
-				packb_nr32_u8s8s16o16
+				( ( packb_s16 )lcntx->packb_fun_ptr )
 				(
 				  ( ( ( int8_t* )b_reorder->storage.aligned_buffer ) +
 					( jc_cur_loop * k_updated ) + ( n_sub_updated * pc ) +

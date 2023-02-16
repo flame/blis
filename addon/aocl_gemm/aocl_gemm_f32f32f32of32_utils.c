@@ -34,6 +34,7 @@
 
 #include "blis.h"
 #include "aocl_gemm_interface_apis.h"
+#include "lpgemm_config.h"
 #include "lpgemm_utils.h"
 
 AOCL_GEMM_GET_REORDER_BUF_SIZE(f32f32f32of32)
@@ -52,6 +53,9 @@ AOCL_GEMM_GET_REORDER_BUF_SIZE(f32f32f32of32)
 
 	/* Initialize BLIS. */
 	bli_init_auto();
+
+	// Initialize lpgemm context.
+	aocl_lpgemm_init_global_cntx();
 
 	// Query the global cntx.
 	cntx_t* cntx = bli_gks_query_cntx();
@@ -94,6 +98,9 @@ AOCL_GEMM_REORDER(float,f32f32f32of32)
 
 	/* Initialize BLIS. */
 	bli_init_auto();
+
+	// Initialize lpgemm context.
+	aocl_lpgemm_init_global_cntx();
 
 	// Query the global cntx.
 	cntx_t* cntx = bli_gks_query_cntx();

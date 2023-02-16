@@ -39,6 +39,28 @@
 #include "lpgemm_thrinfo_utils.h"
 #include "lpgemm_kernels.h"
 
+// Kernel function prototypes
+typedef void (*lpgemm_rowvar_f32)
+     (
+       const dim_t,
+       const dim_t,
+       const dim_t,
+       const float*,
+       const dim_t,
+       const dim_t,
+       const dim_t,
+       const float*,
+       const dim_t,
+       const dim_t,
+       float*,
+       const dim_t,
+       const dim_t,
+       const float,
+       const float,
+       lpgemm_post_op*,
+       lpgemm_post_op_attr
+     );
+
 void lpgemm_pack_a_f32f32f32of32
      (
        const float* input_buf_addr_a,
@@ -339,28 +361,16 @@ LPGEMM_5LOOP(float,float,float,f32f32f32of32)
                     post_ops_attr.post_op_c_j = ( jc + jr );
                     post_ops_attr.rs_c_downscale = rs_c_downscale;
 
-#ifdef BLIS_KERNELS_ZEN4
                     // Reordered/unpacked B, reordered/unpacked A.
-                    lpgemm_rowvar_f32f32f32of32_avx512_6x64m
+                    ( ( lpgemm_rowvar_f32 )lcntx->kern_fun_ptr )
                     (
                       mc0, nr0, kc0,
-                      ( float* )a_use, rs_a_use, cs_a_use,ps_a_use,
+                      ( float* )a_use, rs_a_use, cs_a_use, ps_a_use,
                       ( float* )( b_use + ( jr * ps_b_use ) ), rs_b_use, cs_b_use,
                       ( c_use_ic + jr ), rs_c, cs_c_use,
                       alpha , beta0,
                       post_op_list, post_ops_attr
                     );
-#else
-                    // Silence compiler warnings.
-                    ( void )b_use;
-                    ( void )rs_c_downscale;
-                    ( void )is_last_k;
-                    ( void )c_use_ic;
-                    ( void )a_use;
-                    ( void )beta0;
-                    ( void )nr0;
-                    ( void )post_ops_attr;
-#endif
                 }
             }
         }

@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2022, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2022-2023, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -37,10 +37,12 @@
 
 #include "lpgemm_types.h"
 
-void reorderb_nr64_bf16bf16f32of32    
-  (
-    lpgemm_obj_t *b,
-    lpgemm_obj_t *b_reorder
-  );
+void reorderb_nr64_bf16bf16f32of32
+     (
+       lpgemm_obj_t * b,
+       lpgemm_obj_t * b_reorder,
+       rntm_t*        rntm,
+       lpgemm_cntx_t* lcntx
+     );
 
 #endif // LPGEMM_REORDER_H

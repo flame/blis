@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2022, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2022-2023, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -41,14 +41,36 @@
 #include "lpgemm_thrinfo_utils.h"
 #include "lpgemm_config.h"
 
+// Kernel function prototypes
+typedef void (*lpgemm_rowvar_s32)
+     (
+       const dim_t,
+       const dim_t,
+       const dim_t,
+       const uint8_t*,
+       const dim_t,
+       const dim_t,
+       const dim_t,
+       const int8_t*,
+       const dim_t,
+       const dim_t,
+       int32_t*,
+       const dim_t,
+       const dim_t,
+       const int32_t,
+       const int32_t,
+       lpgemm_post_op*,
+       lpgemm_post_op_attr
+     );
+
 // B should always be packed.
 LPGEMM_5LOOP(uint8_t,int8_t,int32_t,u8s8s32o32)
 {
-	dim_t NC = lpgemm_get_block_size_NC_global_cntx( U8S8S32OS32 );
-	dim_t KC = lpgemm_get_block_size_KC_global_cntx( U8S8S32OS32 );
-	dim_t MC = lpgemm_get_block_size_MC_global_cntx( U8S8S32OS32 );
-	dim_t NR = lpgemm_get_block_size_NR_global_cntx( U8S8S32OS32 );
-	dim_t MR = lpgemm_get_block_size_MR_global_cntx( U8S8S32OS32 );
+	dim_t NC = lcntx->blksz.NC;
+	dim_t KC = lcntx->blksz.KC;
+	dim_t MC = lcntx->blksz.MC;
+	dim_t NR = lcntx->blksz.NR;
+	dim_t MR = lcntx->blksz.MR;
 
 	if ( mtag_b == UNPACKED )
 	{
@@ -236,8 +258,7 @@ LPGEMM_5LOOP(uint8_t,int8_t,int32_t,u8s8s32o32)
 				if ( ( jc_packb_end > jc_packb_start ) &&
 					 ( jc_packb_start < ( jc + nc0 ) ) )
 				{
-#ifdef BLIS_KERNELS_ZEN4
-					packb_nr64_u8s8s32o32
+					( ( packb_s32 )lcntx->packb_fun_ptr )
 					(
 					  pack_b_buffer_u8s8s32o32 + ( jc_packb_start * kc0_updated ),
 					  ( b + ( rs_b * pc ) + ( cs_b * jc ) +
@@ -245,11 +266,10 @@ LPGEMM_5LOOP(uint8_t,int8_t,int32_t,u8s8s32o32)
 					  ( jc_packb_end - jc_packb_start ), kc0,
 					  &rs_b_use, &cs_b_use
 					);
-#endif
 				}
 				else
 				{
-					get_packb_nr64_u8s8s32o32_strides( &rs_b_use, &cs_b_use );
+					lpgemm_get_packb_strides( lcntx, &rs_b_use, &cs_b_use );
 				}
 
 				// All threads in work group should wait till B matrix packing
@@ -271,7 +291,7 @@ LPGEMM_5LOOP(uint8_t,int8_t,int32_t,u8s8s32o32)
 						( n_sub_updated * pc ) +
 						( jc_cur_loop_rem * kc0_updated );
 
-				get_packb_nr64_u8s8s32o32_strides( &rs_b_use, &cs_b_use );
+				lpgemm_get_packb_strides( lcntx, &rs_b_use, &cs_b_use );
 			}
 			else
 			{
@@ -307,21 +327,19 @@ LPGEMM_5LOOP(uint8_t,int8_t,int32_t,u8s8s32o32)
 					);
 					pack_a_buffer_u8s8s32o32 = ( uint8_t* )bli_mem_buffer( &mem_a );
 
-#ifdef BLIS_KERNELS_ZEN4
-					packa_k64_u8s8s32o32
+					( ( packa_s32 )lcntx->packa_fun_ptr )
 					(
 					  pack_a_buffer_u8s8s32o32,
 					  ( a + ( rs_a * ic ) + pc ), rs_a,
 					  mc0, kc0,
 					  &rs_a_use, &cs_a_use
 					);
-#endif
 					a_use = pack_a_buffer_u8s8s32o32;
 					a_block_stride = kc0_updated;
 				}
 				else if ( mtag_a == REORDERED )
 				{
-					get_packa_k64_u8s8s32o32_strides( &rs_a_use, &cs_a_use );
+					lpgemm_get_packa_strides( lcntx, &rs_a_use, &cs_a_use );
 					a_use = a + ( pc * m ) + ( kc0_updated * ic );
 					a_block_stride = kc0_updated;
 				}
@@ -345,9 +363,8 @@ LPGEMM_5LOOP(uint8_t,int8_t,int32_t,u8s8s32o32)
 					post_ops_attr.post_op_c_j = ( jc + jr );
 					post_ops_attr.rs_c_downscale = rs_c_downscale;
 
-#ifdef BLIS_KERNELS_ZEN4
 					// Reorder/Packed B, Reorder/Packed/Unpacked A call.
-					lpgemm_rowvar_u8s8s32o32_6x64
+					( ( lpgemm_rowvar_s32 )lcntx->kern_fun_ptr )
 					(
 					  mc0, nr0, kc0,
 					  a_use, rs_a_use, cs_a_use, a_block_stride,
@@ -356,18 +373,6 @@ LPGEMM_5LOOP(uint8_t,int8_t,int32_t,u8s8s32o32)
 					  alpha, beta0,
 					  post_op_list, post_ops_attr
 					);
-#else
-					// Silence compiler warnings.
-					( void )b_use;
-					( void )a_block_stride;
-					( void )rs_c_downscale;
-					( void )is_last_k;
-					( void )c_use_ic;
-					( void )a_use;
-					( void )beta0;
-					( void )nr0;
-					( void )post_ops_attr;
-#endif
 				}
 			}
 		}

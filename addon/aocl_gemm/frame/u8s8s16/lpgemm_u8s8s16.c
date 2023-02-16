@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2022, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2022-2023, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -40,17 +40,39 @@
 #include "lpgemm_config.h"
 #include "lpgemm_thrinfo_utils.h"
 
+// Kernel function prototypes
+typedef void (*lpgemm_rowvar_s16)
+     (
+       const dim_t,
+       const dim_t,
+       const dim_t,
+       const uint8_t*,
+       const dim_t,
+       const dim_t,
+       const dim_t,
+       const int8_t*,
+       const dim_t,
+       const dim_t,
+       int16_t*,
+       const dim_t,
+       const dim_t,
+       const int16_t,
+       const int16_t,
+       lpgemm_post_op*,
+       lpgemm_post_op_attr
+     );
+
 // B should always be packed.
 LPGEMM_5LOOP(uint8_t,int8_t,int16_t,u8s8s16o16)
 {
-	dim_t NC = lpgemm_get_block_size_NC_global_cntx( U8S8S16OS16 );
-	dim_t KC = lpgemm_get_block_size_KC_global_cntx( U8S8S16OS16 );
-	dim_t MC = lpgemm_get_block_size_MC_global_cntx( U8S8S16OS16 );
-	const dim_t NR = lpgemm_get_block_size_NR_global_cntx( U8S8S16OS16 );
-	const dim_t MR = lpgemm_get_block_size_MR_global_cntx( U8S8S16OS16 );
+	dim_t NC = lcntx->blksz.NC;
+	dim_t KC = lcntx->blksz.KC;
+	dim_t MC = lcntx->blksz.MC;
+	const dim_t NR = lcntx->blksz.NR;
+	const dim_t MR = lcntx->blksz.MR;
 
 	lpgemm_mod_block_size_s16(m, n, k, &MC, &NC, &KC);
-	
+
 	if (mtag_b == UNPACKED)
 	{
 		// Error: can only work with packed B now.
@@ -204,9 +226,11 @@ LPGEMM_5LOOP(uint8_t,int8_t,int16_t,u8s8s16o16)
 
 				// All threads in work group should wait till chief thread has
 				// finished allocating the packing buffers.
-				bli_thrcomm_barrier(
-					bli_thread_ocomm_id(&thread_ic),
-					&thread->comm[jc_work_id]);
+				bli_thrcomm_barrier
+				(
+				  bli_thread_ocomm_id(&thread_ic),
+				  &thread->comm[jc_work_id]
+				);
 
 				pack_b_buffer_u8s8s16o16 =
 					(int8_t *)thread->comm[jc_work_id].sent_object;
@@ -228,9 +252,9 @@ LPGEMM_5LOOP(uint8_t,int8_t,int16_t,u8s8s16o16)
 				if ((jc_packb_end > jc_packb_start) &&
 					(jc_packb_start < (jc + nc0)))
 				{
-					packb_nr32_u8s8s16o16
+					( ( packb_s16 )lcntx->packb_fun_ptr )
 					(
-						pack_b_buffer_u8s8s16o16 + 
+						pack_b_buffer_u8s8s16o16 +
 						 (jc_packb_start * kc0_updated),
 						(b + (rs_b * pc) + (cs_b * jc) +
 						 (cs_b * jc_packb_start)),
@@ -241,7 +265,7 @@ LPGEMM_5LOOP(uint8_t,int8_t,int16_t,u8s8s16o16)
 				}
 				else
 				{
-					get_packb_nr32_u8s8s16o16_strides(&rs_b_use, &cs_b_use);
+					lpgemm_get_packb_strides( lcntx, &rs_b_use, &cs_b_use );
 				}
 
 				// All threads in work group should wait till B matrix packing
@@ -264,7 +288,7 @@ LPGEMM_5LOOP(uint8_t,int8_t,int16_t,u8s8s16o16)
 						(n_sub_updated * pc) +
 						(jc_cur_loop_rem * kc0_updated);
 
-				get_packb_nr32_u8s8s16o16_strides(&rs_b_use, &cs_b_use);
+				lpgemm_get_packb_strides( lcntx, &rs_b_use, &cs_b_use );
 			}
 			else
 			{
@@ -303,14 +327,14 @@ LPGEMM_5LOOP(uint8_t,int8_t,int16_t,u8s8s16o16)
 					post_ops_attr.is_last_k = is_last_k;
 
 					// Calls for reorder B
-					lpgemm_rowvar_u8s8s16o16_6x32
+					( ( lpgemm_rowvar_s16 )lcntx->kern_fun_ptr )
 					(
 						mc0, nr0, kc0,
 						a_use, rs_a_use, cs_a_use, a_block_stride,
 						(b_use + (jr * kc0_updated)), rs_b_use, cs_b_use,
 						(c_use_ic + jr), rs_c_use, 1,
 						alpha, beta0,
-					  	post_op_list, post_ops_attr 
+					  	post_op_list, post_ops_attr
 					);
 				}
 			}

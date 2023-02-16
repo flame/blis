@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2022, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2022-2023, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -158,6 +158,8 @@ AOCL_GEMM_MATMUL(bfloat16,bfloat16,bfloat16,float,bf16bf16f32obf16)
 	bli_rntm_init_from_global( &rntm_g );
 	bli_membrk_rntm_set_membrk( &rntm_g );
 
+	lpgemm_cntx_t* lcntx_g = lpgemm_get_global_cntx_obj( BF16BF16F32OF32 );
+
 #ifdef BLIS_ENABLE_OPENMP
 	// Swapping inputs to induce row major computation for column major inputs.
 	if ( is_column_major == TRUE )
@@ -169,7 +171,7 @@ AOCL_GEMM_MATMUL(bfloat16,bfloat16,bfloat16,float,bf16bf16f32obf16)
 		  a, rs_a, cs_a, mtag_a,
 		  ( float* )c, rs_c, cs_c,
 		  alpha, beta,
-		  &rntm_g,
+		  &rntm_g, lcntx_g,
 		  post_op_list, TRUE
 		);
 	}
@@ -182,7 +184,7 @@ AOCL_GEMM_MATMUL(bfloat16,bfloat16,bfloat16,float,bf16bf16f32obf16)
 		  b, rs_b, cs_b, mtag_b,
 		  ( float* )c, rs_c, cs_c,
 		  alpha, beta,
-		  &rntm_g,
+		  &rntm_g, lcntx_g,
 		  post_op_list, TRUE
 		);
 	}
@@ -197,7 +199,7 @@ AOCL_GEMM_MATMUL(bfloat16,bfloat16,bfloat16,float,bf16bf16f32obf16)
 		  a, rs_a, cs_a, mtag_a,
 		  ( float* )c, rs_c, cs_c,
 		  alpha, beta,
-		  &rntm_g,
+		  &rntm_g, lcntx_g,
 		  post_op_list, TRUE
 		);
 	}
@@ -210,7 +212,7 @@ AOCL_GEMM_MATMUL(bfloat16,bfloat16,bfloat16,float,bf16bf16f32obf16)
 		  b, rs_b, cs_b, mtag_b,
 		  ( float* )c, rs_c, cs_c,
 		  alpha, beta,
-		  &rntm_g,
+		  &rntm_g, lcntx_g,
 		  post_op_list, TRUE
 		);
 	}
