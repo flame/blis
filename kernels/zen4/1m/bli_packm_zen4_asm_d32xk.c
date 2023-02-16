@@ -86,6 +86,7 @@ void bli_dpackm_zen4_asm_32xk
 	// assembly region, this constraint should be lifted.
 	const bool     unitk  = bli_deq1( *kappa );
 
+	double* restrict pi1        = p;
 
 	// -------------------------------------------------------------------------
 
@@ -100,10 +101,10 @@ void bli_dpackm_zen4_asm_32xk
 					for ( dim_t k = k0; k != 0; --k )
 					{
 						for ( dim_t i = 0 ; i < 32 ; i++ ) {
-							bli_dcopyjs( *(a + i), *(p + i) );
+							bli_dcopyjs( *(a + i), *(pi1 + i) );
 						}
 						a += lda;
-						p    += ldp;
+						pi1    += ldp;
 					}
 				}
 				else
@@ -111,10 +112,10 @@ void bli_dpackm_zen4_asm_32xk
 					for ( dim_t k = k0; k != 0; --k )
 					{
 						for ( dim_t i = 0 ; i < 32 ; i++ ) {
-							bli_dcopyjs( *(a + i*inca), *(p + i) );
+							bli_dcopyjs( *(a + i*inca), *(pi1 + i) );
 						}
 						a += lda;
-						p    += ldp;
+						pi1    += ldp;
 					}
 				}
 			}
@@ -126,10 +127,10 @@ void bli_dpackm_zen4_asm_32xk
 					{
 						_mm_prefetch( a + (8*lda), _MM_HINT_T0 );
 						for ( dim_t i = 0 ; i < 32 ; i++ ) {
-							bli_dcopys( *(a + i), *(p + i) );
+							bli_dcopys( *(a + i), *(pi1 + i) );
 						}
 						a += lda;
-						p    += ldp;
+						pi1    += ldp;
 					}
 				}
 				else
@@ -137,10 +138,10 @@ void bli_dpackm_zen4_asm_32xk
 					for ( dim_t k = k0; k != 0; --k )
 					{
 						for ( dim_t i = 0 ; i < 32 ; i++ ) {
-							bli_dcopys( *(a + i*inca), *(p + i) );
+							bli_dcopys( *(a + i*inca), *(pi1 + i) );
 						}
 						a += lda;
-						p    += ldp;
+						pi1    += ldp;
 					}
 				}
 			}
@@ -154,10 +155,10 @@ void bli_dpackm_zen4_asm_32xk
 					for ( dim_t k = k0; k != 0; --k )
 					{
 						for ( dim_t i = 0 ; i < 32 ; i++ ) {
-							bli_dscal2js( *kappa, *(a + i), *(p + i) );
+							bli_dscal2js( *kappa, *(a + i), *(pi1 + i) );
 						}
 						a += lda;
-						p    += ldp;
+						pi1    += ldp;
 					}
 				}
 				else
@@ -165,10 +166,10 @@ void bli_dpackm_zen4_asm_32xk
 					for ( dim_t k = k0; k != 0; --k )
 					{
 						for ( dim_t i = 0 ; i < 32 ; i++ ) {
-							bli_dscal2js( *kappa, *(a + i*inca), *(p + i) );
+							bli_dscal2js( *kappa, *(a + i*inca), *(pi1 + i) );
 						}
 						a += lda;
-						p    += ldp;
+						pi1    += ldp;
 					}
 				}
 			}
@@ -179,10 +180,10 @@ void bli_dpackm_zen4_asm_32xk
 					for ( dim_t k = k0; k != 0; --k )
 					{
 						for ( dim_t i = 0 ; i < 32 ; i++ ) {
-							bli_dscal2s( *kappa, *(a + i), *(p + i) );
+							bli_dscal2s( *kappa, *(a + i), *(pi1 + i) );
 						}
 						a += lda;
-						p    += ldp;
+						pi1    += ldp;
 					}
 				}
 				else
@@ -190,10 +191,10 @@ void bli_dpackm_zen4_asm_32xk
 					for ( dim_t k = k0; k != 0; --k )
 					{
 						for ( dim_t i = 0 ; i < 32 ; i++ ) {
-							bli_dscal2s( *kappa, *(a + i*inca), *(p + i) );
+							bli_dscal2s( *kappa, *(a + i*inca), *(pi1 + i) );
 						}
 						a += lda;
-						p    += ldp;
+						pi1    += ldp;
 					}
 				}
 			}
@@ -223,7 +224,8 @@ void bli_dpackm_zen4_asm_32xk
 			const dim_t      i      = cdim0;
 			const dim_t      m_edge = mnr - cdim0;
 			const dim_t      n_edge = k0_max;
-			double* restrict p_edge = p + (i  )*1;
+			double* restrict p_cast = p;
+			double* restrict p_edge = p_cast + (i  )*1;
 
 			bli_dset0s_mxn
 			(
@@ -241,7 +243,8 @@ void bli_dpackm_zen4_asm_32xk
 		const dim_t      j      = k0;
 		const dim_t      m_edge = mnr;
 		const dim_t      n_edge = k0_max - k0;
-		double* restrict p_edge = p + (j  )*ldp;
+		double* restrict p_cast = p;
+		double* restrict p_edge = p_cast + (j  )*ldp;
 
 		bli_dset0s_mxn
 		(
