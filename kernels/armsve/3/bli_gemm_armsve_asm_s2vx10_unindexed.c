@@ -57,8 +57,8 @@ void bli_sgemm_armsve_asm_2vx10_unindexed
        cntx_t*             cntx
      )
 {
-  void* a_next = bli_auxinfo_next_a( data );
-  void* b_next = bli_auxinfo_next_b( data );
+  const void* a_next = bli_auxinfo_next_a( data );
+  const void* b_next = bli_auxinfo_next_b( data );
 
   // Typecast local copies of integers in case dim_t and inc_t are a
   // different size than is expected by load instructions.
@@ -67,7 +67,7 @@ void bli_sgemm_armsve_asm_2vx10_unindexed
   uint64_t rs_c   = rs_c0;
   uint64_t cs_c   = cs_c0;
 
-  GEMM_UKR_SETUP_CT( s, m, 10, false );
+  GEMM_UKR_SETUP_CT_ANY( s, m, 10, false );
 
   __asm__ volatile (
 " mov             x0, xzr                         \n\t"
@@ -82,7 +82,7 @@ void bli_sgemm_armsve_asm_2vx10_unindexed
 " mov             x3, #10                         \n\t" // Row-skip of B.
 "                                                 \n\t"
 " ldr             x5, %[c]                        \n\t"
-// " ldr             x6, %[rs_c]                     \n\t" // Row-skip of C.
+" ldr             x6, %[rs_c]                     \n\t" // Row-skip of C.
 " ldr             x7, %[cs_c]                     \n\t" // Column-skip of C.
 #ifdef _A64FX
 " mov             x8, 0x3                         \n\t" // Tag C address.
@@ -120,8 +120,8 @@ BEQ(END_CCOL_PRFM)
 GEMM_ACOL_CONTIGUOUS_LOAD(z28,z29,p0,p1,x0)
 "                                                 \n\t"
 LABEL(CCOL_PRFM)
-// " cmp             x6, #1                          \n\t"
-// BNE(END_CCOL_PRFM) // Do not prefetch for generic C storage.
+" cmp             x6, #1                          \n\t"
+BNE(END_CCOL_PRFM) // Do not prefetch for generic C storage.
 " mov             x16, x5                         \n\t"
 " prfm            PLDL1STRM, [x16]                \n\t"
 " add             x16, x16, x7                    \n\t"
@@ -256,8 +256,8 @@ SCALE_COL20(z0,z1,z2,z3,z4,z5,z6,z7,z8,z9,z10,z11,z12,z13,z14,z15,z16,z17,z18,z1
 LABEL(UNIT_ALPHA)
 " mov             x9, x5                          \n\t" // C address for loading.
 "                                                 \n\t" // C address for storing is x5 itself.
-// " cmp             x6, #1                          \n\t"
-// BNE(WRITE_MEM_G)
+" cmp             x6, #1                          \n\t"
+BNE(WRITE_MEM_G)
 "                                                 \n\t"
 LABEL(WRITE_MEM_C)
 "                                                 \n\t" // Available scratch: Z[20-30].
@@ -268,17 +268,26 @@ GEMM_C_LOAD_UKER_C(z20,z22,z24,z26,z28,z21,z23,z25,z27,z29,p0,p1,x9,x7)
 GEMM_C_FMLA_UKER(z0,z2,z4,z6,z8,z1,z3,z5,z7,z9,p0,z20,z22,z24,z26,z28,z21,z23,z25,z27,z29,z31)
 GEMM_C_LOAD_UKER_C(z20,z22,z24,z26,z28,z21,z23,z25,z27,z29,p0,p1,x9,x7)
 GEMM_C_FMLA_UKER(z10,z12,z14,z16,z18,z11,z13,z15,z17,z19,p0,z20,z22,z24,z26,z28,z21,z23,z25,z27,z29,z31)
-"                                                 \n\t"
 LABEL(BETA_ZERO_C)
 GEMM_C_STORE_UKER_C(z0,z2,z4,z6,z8,z1,z3,z5,z7,z9,p0,p1,x5,x7)
 GEMM_C_STORE_UKER_C(z10,z12,z14,z16,z18,z11,z13,z15,z17,z19,p0,p1,x5,x7)
-// BRANCH(END_WRITE_MEM)
-// "                                                 \n\t"
-// LABEL(END_WRITE_MEM)
-// BRANCH(END_EXEC)
-// "                                                 \n\t"
-// LABEL(END_ERROR)
-// " mov             x0, #1                          \n\t" // Return error.
+BRANCH(END_EXEC)
+// Generic-storage case -- Mainly for transposed storage.
+LABEL(WRITE_MEM_G)
+" mov             x8, xzr                         \n\t"
+" incb            x8                              \n\t"
+" madd            x8, x8, x6, xzr                 \n\t" // C-column's logical 1-vector skip.
+" index           z30.s, wzr, w6                  \n\t" // Skips passed to index is not multiplied by 8.
+"                                                 \n\t"
+" fcmp            s31, #0.0                       \n\t" // Skip loading if *beta == 0 to override NaN.
+BEQ(BETA_ZERO_G)
+GEMM_C_LOAD_UKER_G(z20,z22,z24,z26,z28,z21,z23,z25,z27,z29,z30,p0,p1,x9,x7,x8,x16)
+GEMM_C_FMLA_UKER(z0,z2,z4,z6,z8,z1,z3,z5,z7,z9,p0,z20,z22,z24,z26,z28,z21,z23,z25,z27,z29,z31)
+GEMM_C_LOAD_UKER_G(z20,z22,z24,z26,z28,z21,z23,z25,z27,z29,z30,p0,p1,x9,x7,x8,x16)
+GEMM_C_FMLA_UKER(z10,z12,z14,z16,z18,z11,z13,z15,z17,z19,p0,z20,z22,z24,z26,z28,z21,z23,z25,z27,z29,z31)
+LABEL(BETA_ZERO_G)
+GEMM_C_STORE_UKER_G(z0,z2,z4,z6,z8,z1,z3,z5,z7,z9,z30,p0,p1,x5,x7,x8,x16)
+GEMM_C_STORE_UKER_G(z10,z12,z14,z16,z18,z11,z13,z15,z17,z19,z30,p0,p1,x5,x7,x8,x16)
 LABEL(END_EXEC)
 " mov             x0, #0                          \n\t" // Return normal.
 :
