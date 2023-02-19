@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2018 - 2022, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2018 - 2023, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -209,6 +209,17 @@ void libblis_test_gemmtrsm_ukr_experiment
 	// Query a context.
 	cntx = bli_gks_query_cntx();
 
+	// If TRSM and GEMM have different blocksizes and blocksizes
+	// are changed in global cntx object, when GEMM and TRSM are
+	// called in parallel, blocksizes in global cntx object will
+	// not be correct
+	// to fix this a local copy of cntx is created, so that 
+	// overriding the blocksizes does not impact the global cntx
+	// object.
+	// This is a temporary fix, a better fix is to create a
+	// separate blocksz_trsm array in cntx.
+	cntx_t cntx_trsm = *cntx;
+
 #if defined(BLIS_FAMILY_AMDZEN) ||  defined(BLIS_FAMILY_ZEN4) 
 	/* Zen4 TRSM Fixme:
 	 *
@@ -222,9 +233,11 @@ void libblis_test_gemmtrsm_ukr_experiment
 	 * 
 	 * We need to revisit this when TRSM AVX-512 kernels are implemented.
 	 */  
-	if (bli_arch_query_id() == BLIS_ARCH_ZEN4)
+		if ( (bli_arch_query_id() == BLIS_ARCH_ZEN4)  &&
+			 ((dc_str[0] == 's') || (dc_str[0] == 'd') ||
+			  (dc_str[0] == 'S') || (dc_str[0] == 'D')) )
 	{
-		bli_zen4_override_trsm_blkszs(cntx);
+		bli_zen4_override_trsm_blkszs(&cntx_trsm);
 	}
 #endif
 
@@ -235,13 +248,13 @@ void libblis_test_gemmtrsm_ukr_experiment
 	k = libblis_test_get_dim_from_prob_size( op->dim_spec[0], p_cur );
 
 
-	m = bli_cntx_get_blksz_def_dt( datatype, BLIS_MR, cntx );
-	n = bli_cntx_get_blksz_def_dt( datatype, BLIS_NR, cntx );
+	m = bli_cntx_get_blksz_def_dt( datatype, BLIS_MR, &cntx_trsm );
+	n = bli_cntx_get_blksz_def_dt( datatype, BLIS_NR, &cntx_trsm );
 
 	// Also query PACKMR and PACKNR as the leading dimensions to ap and bp,
 	// respectively.
-	ldap = bli_cntx_get_blksz_max_dt( datatype, BLIS_MR, cntx );
-	ldbp = bli_cntx_get_blksz_max_dt( datatype, BLIS_NR, cntx );
+	ldap = bli_cntx_get_blksz_max_dt( datatype, BLIS_MR, &cntx_trsm );
+	ldbp = bli_cntx_get_blksz_max_dt( datatype, BLIS_NR, &cntx_trsm);
 
 
 	// Store the register blocksizes so that the driver can retrieve the
@@ -361,10 +374,10 @@ void libblis_test_gemmtrsm_ukr_experiment
 	void* buf_bp = bli_obj_buffer( &bp );
 	bli_packm_init_pack( BLIS_INVERT_DIAG, BLIS_PACKED_ROW_PANELS,
 	                     BLIS_PACK_FWD_IF_UPPER, BLIS_PACK_FWD_IF_LOWER,
-	                     BLIS_MR, BLIS_KR, &a, &ap, cntx );
+	                     BLIS_MR, BLIS_KR, &a, &ap, &cntx_trsm );
 	bli_packm_init_pack( BLIS_NO_INVERT_DIAG, BLIS_PACKED_COL_PANELS,
 	                     BLIS_PACK_FWD_IF_UPPER, BLIS_PACK_FWD_IF_LOWER,
-	                     BLIS_KR, BLIS_NR, &b, &bp, cntx );
+	                     BLIS_KR, BLIS_NR, &b, &bp, &cntx_trsm );
 	bli_obj_set_buffer( buf_ap, &ap );
 	bli_obj_set_buffer( buf_bp, &bp );
 
@@ -378,8 +391,8 @@ void libblis_test_gemmtrsm_ukr_experiment
 	bli_obj_set_uplo( uploa, &ap );
 
 	// Pack the data from the source objects.
-	bli_packm_blk_var1( &a, &ap, cntx, NULL, &BLIS_PACKM_SINGLE_THREADED );
-	bli_packm_blk_var1( &b, &bp, cntx, NULL, &BLIS_PACKM_SINGLE_THREADED );
+	bli_packm_blk_var1( &a, &ap, &cntx_trsm, NULL, &BLIS_PACKM_SINGLE_THREADED );
+	bli_packm_blk_var1( &b, &bp, &cntx_trsm, NULL, &BLIS_PACKM_SINGLE_THREADED );
 
 	// Create subpartitions from the a and b panels.
 	bli_gemmtrsm_ukr_make_subparts( k, &ap, &bp,
@@ -402,13 +415,13 @@ bli_printm( "ap", &ap, "%5.2f", "" );
 
 		// Re-pack (restore) the contents of b to bp.
 		//bli_packm_blk_var1( &b, &bp, &cntx, cntl_b, &BLIS_PACKM_SINGLE_THREADED );
-		bli_packm_blk_var1( &b, &bp, cntx, NULL, &BLIS_PACKM_SINGLE_THREADED );
+		bli_packm_blk_var1( &b, &bp, &cntx_trsm, NULL, &BLIS_PACKM_SINGLE_THREADED );
 
 		time = bli_clock();
 
 		libblis_test_gemmtrsm_ukr_impl( iface, side, &alpha,
 		                                &a1xp, &a11p, &bx1p, &b11p, &c11,
-		                                cntx );
+		                                &cntx_trsm );
 
 		time_min = bli_clock_min_diff( time_min, time );
 	}
@@ -463,19 +476,6 @@ bli_printm( "ap", &ap, "%5.2f", "" );
 	bli_obj_free( &b );
 	bli_obj_free( &c11 );
 	bli_obj_free( &c11_save );
-
-#if defined(BLIS_FAMILY_AMDZEN) ||  defined(BLIS_FAMILY_ZEN4) 
-	/* Zen4 TRSM Fixme:
-	 *
-	 * We have overrding the block sizes at the start of this function
-	 * Since the context is created only once we need to ensure that the 
-	 * default block sizes are restored for the subsequent operations.
-	 */  
-	if (bli_arch_query_id() == BLIS_ARCH_ZEN4)
-	{
-		bli_zen4_restore_default_blkszs(cntx);
-	}
-#endif
 
 }
 
