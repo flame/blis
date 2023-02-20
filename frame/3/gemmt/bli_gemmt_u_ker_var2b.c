@@ -135,7 +135,7 @@ void bli_gemmt_u_ker_var2b
 
 	// Query the context for the micro-kernel address and cast it to its
 	// function pointer type.
-	gemm_ukr_vft    gemm_ukr        = bli_cntx_get_l3_vir_ukr_dt( dt_exec, BLIS_GEMM_UKR, cntx );
+	gemm_ukr_ft     gemm_ukr        = bli_cntx_get_l3_vir_ukr_dt( dt_exec, BLIS_GEMM_UKR, cntx );
 	xpbys_mxn_u_vft xpbys_mxn_u_ukr = xpbys_mxn_u[ dt_exec ];
 
 	// Temporary C buffer for edge cases. Note that the strides of this

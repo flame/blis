@@ -37,89 +37,18 @@
 // Define template prototypes for level-1f kernels.
 //
 
-#define AXPY2V_KER_PROT( ctype, ch, opname ) \
+#undef  L1FTPROT
+#define L1FTPROT( ctype, ch, funcname, opname ) \
 \
-void PASTEMAC(ch,opname) \
+void PASTEMAC(ch,funcname) \
      ( \
-             conj_t  conjx, \
-             conj_t  conjy, \
-             dim_t   n, \
-       const ctype*  alphax, \
-       const ctype*  alphay, \
-       const ctype*  x, inc_t incx, \
-       const ctype*  y, inc_t incy, \
-             ctype*  z, inc_t incz, \
-       const cntx_t* cntx  \
+       PASTECH(opname,_params), \
+       BLIS_CNTX_PARAM  \
      );
 
-
-#define AXPYF_KER_PROT( ctype, ch, opname ) \
-\
-void PASTEMAC(ch,opname) \
-     ( \
-             conj_t  conja, \
-             conj_t  conjx, \
-             dim_t   m, \
-             dim_t   b_n, \
-       const ctype*  alpha, \
-       const ctype*  a, inc_t inca, inc_t lda, \
-       const ctype*  x, inc_t incx, \
-             ctype*  y, inc_t incy, \
-       const cntx_t* cntx  \
-     );
-
-
-#define DOTAXPYV_KER_PROT( ctype, ch, opname ) \
-\
-void PASTEMAC(ch,opname) \
-     ( \
-             conj_t  conjxt, \
-             conj_t  conjx, \
-             conj_t  conjy, \
-             dim_t   m, \
-       const ctype*  alpha, \
-       const ctype*  x, inc_t incx, \
-       const ctype*  y, inc_t incy, \
-             ctype*  rho, \
-             ctype*  z, inc_t incz, \
-       const cntx_t* cntx  \
-     );
-
-
-#define DOTXAXPYF_KER_PROT( ctype, ch, opname ) \
-\
-void PASTEMAC(ch,opname) \
-     ( \
-             conj_t  conjat, \
-             conj_t  conja, \
-             conj_t  conjw, \
-             conj_t  conjx, \
-             dim_t   m, \
-             dim_t   b_n, \
-       const ctype*  alpha, \
-       const ctype*  a, inc_t inca, inc_t lda, \
-       const ctype*  w, inc_t incw, \
-       const ctype*  x, inc_t incx, \
-       const ctype*  beta, \
-             ctype*  y, inc_t incy, \
-             ctype*  z, inc_t incz, \
-       const cntx_t* cntx  \
-     );
-
-
-#define DOTXF_KER_PROT( ctype, ch, opname ) \
-\
-void PASTEMAC(ch,opname) \
-     ( \
-             conj_t  conjat, \
-             conj_t  conjx, \
-             dim_t   m, \
-             dim_t   b_n, \
-       const ctype*  alpha, \
-       const ctype*  a, inc_t inca, inc_t lda, \
-       const ctype*  x, inc_t incx, \
-       const ctype*  beta, \
-             ctype*  y, inc_t incy, \
-       const cntx_t* cntx  \
-     );
+#define AXPY2V_KER_PROT(    ctype, ch, fn )  L1FTPROT( ctype, ch, fn, axpy2v );
+#define AXPYF_KER_PROT(     ctype, ch, fn )  L1FTPROT( ctype, ch, fn, axpyf );
+#define DOTAXPYV_KER_PROT(  ctype, ch, fn )  L1FTPROT( ctype, ch, fn, dotaxpyv );
+#define DOTXAXPYF_KER_PROT( ctype, ch, fn )  L1FTPROT( ctype, ch, fn, dotxaxpyf );
+#define DOTXF_KER_PROT(     ctype, ch, fn )  L1FTPROT( ctype, ch, fn, dotxf );
 

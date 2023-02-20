@@ -37,189 +37,28 @@
 // Define template prototypes for level-1v kernels.
 //
 
-#define ADDV_KER_PROT( ctype, ch, opname ) \
+#undef  L1VTPROT
+#define L1VTPROT( ctype, ch, funcname, opname ) \
 \
-void PASTEMAC(ch,opname) \
-      ( \
-             conj_t  conjx, \
-             dim_t   n, \
-       const ctype*  x, inc_t incx, \
-             ctype*  y, inc_t incy, \
-       const cntx_t* cntx  \
-      );
-
-
-#define AMAXV_KER_PROT( ctype, ch, opname ) \
-\
-void PASTEMAC(ch,opname) \
+void PASTEMAC(ch,funcname) \
      ( \
-             dim_t   n, \
-       const ctype*  x, inc_t incx, \
-             dim_t*  index, \
-       const cntx_t* cntx  \
-     ); \
+       PASTECH(opname,_params), \
+       BLIS_CNTX_PARAM  \
+     );
 
-
-#define AXPBYV_KER_PROT( ctype, ch, opname ) \
-\
-void PASTEMAC(ch,opname) \
-     ( \
-             conj_t  conjx, \
-             dim_t   n, \
-       const ctype*  alpha, \
-       const ctype*  x, inc_t incx, \
-       const ctype*  beta, \
-             ctype*  y, inc_t incy, \
-       const cntx_t* cntx  \
-     ); \
-
-
-#define AXPYV_KER_PROT( ctype, ch, opname ) \
-\
-void PASTEMAC(ch,opname) \
-     ( \
-             conj_t  conjx, \
-             dim_t   n, \
-       const ctype*  alpha, \
-       const ctype*  x, inc_t incx, \
-             ctype*  y, inc_t incy, \
-       const cntx_t* cntx  \
-     ); \
-
-
-#define COPYV_KER_PROT( ctype, ch, opname ) \
-\
-void PASTEMAC(ch,opname) \
-      ( \
-             conj_t  conjx, \
-             dim_t   n, \
-       const ctype*  x, inc_t incx, \
-             ctype*  y, inc_t incy, \
-       const cntx_t* cntx  \
-      );
-
-
-#define DOTV_KER_PROT( ctype, ch, opname ) \
-\
-void PASTEMAC(ch,opname) \
-     ( \
-             conj_t  conjx, \
-             conj_t  conjy, \
-             dim_t   n, \
-       const ctype*  x, inc_t incx, \
-       const ctype*  y, inc_t incy, \
-             ctype*  rho, \
-       const cntx_t* cntx  \
-     ); \
-
-
-#define DOTXV_KER_PROT( ctype, ch, opname ) \
-\
-void PASTEMAC(ch,opname) \
-     ( \
-             conj_t  conjx, \
-             conj_t  conjy, \
-             dim_t   n, \
-       const ctype*  alpha, \
-       const ctype*  x, inc_t incx, \
-       const ctype*  y, inc_t incy, \
-       const ctype*  beta, \
-             ctype*  rho, \
-       const cntx_t* cntx  \
-     ); \
-
-
-#define INVERTV_KER_PROT( ctype, ch, opname ) \
-\
-void PASTEMAC(ch,opname) \
-     ( \
-             dim_t   n, \
-             ctype*  x, inc_t incx, \
-       const cntx_t* cntx  \
-     ); \
-
-
-#define INVSCALV_KER_PROT( ctype, ch, opname ) \
-\
-void PASTEMAC(ch,opname) \
-     ( \
-             conj_t  conjalpha, \
-             dim_t   n, \
-       const ctype*  alpha, \
-             ctype*  x, inc_t incx, \
-       const cntx_t* cntx  \
-     ); \
-
-
-#define SCALV_KER_PROT( ctype, ch, opname ) \
-\
-void PASTEMAC(ch,opname) \
-     ( \
-             conj_t  conjalpha, \
-             dim_t   n, \
-       const ctype*  alpha, \
-             ctype*  x, inc_t incx, \
-       const cntx_t* cntx  \
-     ); \
-
-
-#define SCAL2V_KER_PROT( ctype, ch, opname ) \
-\
-void PASTEMAC(ch,opname) \
-     ( \
-             conj_t  conjx, \
-             dim_t   n, \
-       const ctype*  alpha, \
-       const ctype*  x, inc_t incx, \
-             ctype*  y, inc_t incy, \
-       const cntx_t* cntx  \
-     ); \
-
-
-#define SETV_KER_PROT( ctype, ch, opname ) \
-\
-void PASTEMAC(ch,opname) \
-     ( \
-             conj_t  conjalpha, \
-             dim_t   n, \
-       const ctype*  alpha, \
-             ctype*  x, inc_t incx, \
-       const cntx_t* cntx  \
-     ); \
-
-
-#define SUBV_KER_PROT( ctype, ch, opname ) \
-\
-void PASTEMAC(ch,opname) \
-      ( \
-             conj_t  conjx, \
-             dim_t   n, \
-       const ctype*  x, inc_t incx, \
-             ctype*  y, inc_t incy, \
-       const cntx_t* cntx  \
-      );
-
-
-#define SWAPV_KER_PROT( ctype, ch, opname ) \
-\
-void PASTEMAC(ch,opname) \
-     ( \
-             dim_t   n, \
-             ctype*  x, inc_t incx, \
-             ctype*  y, inc_t incy, \
-       const cntx_t* cntx  \
-     ); \
-
-
-#define XPBYV_KER_PROT( ctype, ch, opname ) \
-\
-void PASTEMAC(ch,opname) \
-     ( \
-             conj_t  conjx, \
-             dim_t   n, \
-       const ctype*  x, inc_t incx, \
-       const ctype*  beta, \
-             ctype*  y, inc_t incy, \
-       const cntx_t* cntx  \
-     ); \
+#define ADDV_KER_PROT(     ctype, ch, fn )  L1VTPROT( ctype, ch, fn, addv );
+#define AMAXV_KER_PROT(    ctype, ch, fn )  L1VTPROT( ctype, ch, fn, amaxv );
+#define AXPBYV_KER_PROT(   ctype, ch, fn )  L1VTPROT( ctype, ch, fn, axpbyv );
+#define AXPYV_KER_PROT(    ctype, ch, fn )  L1VTPROT( ctype, ch, fn, axpyv );
+#define COPYV_KER_PROT(    ctype, ch, fn )  L1VTPROT( ctype, ch, fn, copyv );
+#define DOTV_KER_PROT(     ctype, ch, fn )  L1VTPROT( ctype, ch, fn, dotv );
+#define DOTXV_KER_PROT(    ctype, ch, fn )  L1VTPROT( ctype, ch, fn, dotxv );
+#define INVERTV_KER_PROT(  ctype, ch, fn )  L1VTPROT( ctype, ch, fn, invertv );
+#define INVSCALV_KER_PROT( ctype, ch, fn )  L1VTPROT( ctype, ch, fn, invscalv );
+#define SCALV_KER_PROT(    ctype, ch, fn )  L1VTPROT( ctype, ch, fn, scalv );
+#define SCAL2V_KER_PROT(   ctype, ch, fn )  L1VTPROT( ctype, ch, fn, scal2v );
+#define SETV_KER_PROT(     ctype, ch, fn )  L1VTPROT( ctype, ch, fn, setv );
+#define SUBV_KER_PROT(     ctype, ch, fn )  L1VTPROT( ctype, ch, fn, subv );
+#define SWAPV_KER_PROT(    ctype, ch, fn )  L1VTPROT( ctype, ch, fn, swapv );
+#define XPBYV_KER_PROT(    ctype, ch, fn )  L1VTPROT( ctype, ch, fn, xpbyv );
 

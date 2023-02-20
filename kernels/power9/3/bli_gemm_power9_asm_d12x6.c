@@ -40,11 +40,11 @@ void bli_dgemm_power9_asm_12x6
              dim_t      m,
              dim_t      n,
              dim_t      k,
-       const double*    alpha,
-       const double*    a,
-       const double*    b,
-       const double*    beta,
-             double*    c, inc_t rs_c0, inc_t cs_c0,
+       const void*      alpha,
+       const void*      a,
+       const void*      b,
+       const void*      beta,
+             void*      c, inc_t rs_c0, inc_t cs_c0,
              auxinfo_t* data,
        const cntx_t*    cntx
      )

@@ -47,9 +47,9 @@ void bli_strsm_u_penryn_asm_8x4
 
 void bli_dtrsm_u_penryn_asm_4x4
      (
-       const double*    a11,
-             double*    b11,
-             double*    c11, inc_t rs_c0, inc_t cs_c0,
+       const void*      a11,
+             void*      b11,
+             void*      c11, inc_t rs_c0, inc_t cs_c0,
              auxinfo_t* data,
        const cntx_t*    cntx
      )

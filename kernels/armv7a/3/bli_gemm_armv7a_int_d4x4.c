@@ -40,15 +40,21 @@ void bli_sgemm_armv7a_int_4x4
              dim_t      m,
              dim_t      n,
              dim_t      k,
-       const float*     alpha,
-       const float*     a,
-       const float*     b,
-       const float*     beta,
-             float*     c, inc_t rs_c0, inc_t cs_c0,
+       const void*      alpha0,
+       const void*      a0,
+       const void*      b0,
+       const void*      beta0,
+             void*      c0, inc_t rs_c0, inc_t cs_c0,
              auxinfo_t* data,
        const cntx_t*    cntx
      )
 {
+	const float* alpha = alpha0;
+	const float* a     = a0;
+	const float* b     = b0;
+	const float* beta  = beta0;
+	      float* c     = c0;
+
 	// Typecast local copies of integers in case dim_t and inc_t are a
 	// different size than is expected by load instructions.
 	uint32_t k_iter = k / 4;
@@ -246,15 +252,21 @@ void bli_dgemm_armv7a_int_4x4
              dim_t      m,
              dim_t      n,
              dim_t      k,
-       const double*    alpha,
-       const double*    a,
-       const double*    b,
-       const double*    beta,
-             double*    c, inc_t rs_c0, inc_t cs_c0,
+       const void*      alpha0,
+       const void*      a0,
+       const void*      b0,
+       const void*      beta0,
+             void*      c0, inc_t rs_c0, inc_t cs_c0,
              auxinfo_t* data,
        const cntx_t*    cntx
      )
 {
+	const double* alpha = alpha0;
+	const double* a     = a0;
+	const double* b     = b0;
+	const double* beta  = beta0;
+	      double* c     = c0;
+
 	// Typecast local copies of integers in case dim_t and inc_t are a
 	// different size than is expected by load instructions.
 	//uint32_t k_iter = k0 / 4;

@@ -65,11 +65,11 @@ void bli_dgemm_power10_mma_8x8
              dim_t      m,
              dim_t      n,
              dim_t      k,
-       const double*    alpha,
-       const double*    a,
-       const double*    b,
-       const double*    beta,
-             double*    c, inc_t rs_c0, inc_t cs_c0,
+       const void*      alpha,
+       const void*      a,
+       const void*      b,
+       const void*      beta,
+             void*      c, inc_t rs_c0, inc_t cs_c0,
              auxinfo_t* data,
        const cntx_t*    cntx
     )
@@ -88,8 +88,8 @@ void bli_dgemm_power10_mma_8x8
     const double* restrict B0 = b;
           double* restrict C0 = c;
 
-    double alpha_ = *alpha,
-           beta_ = *beta;
+    double alpha_ = *((double*)alpha),
+           beta_  = *((double*)beta);
 
     dv4sf_t result[4];
     dv4sf_t *rowC;

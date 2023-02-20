@@ -32,31 +32,28 @@
 
 */
 
+#ifndef BLIS_L1M_KER_FT_H
+#define BLIS_L1M_KER_FT_H
+
+
 //
-// Define template prototypes for level-3 micro-kernels.
+// -- Level-1m kernel function types -------------------------------------------
 //
 
-// Note: Instead of defining function prototype macro templates and then
-// instantiating those macros to define the individual function prototypes,
-// we simply alias the official operations' prototypes as defined in
-// bli_l3_ukr_prot.h.
+#undef  GENTDEF
+#define GENTDEF( opname ) \
+\
+typedef void (*PASTECH(opname,_ker_ft)) \
+     ( \
+       PASTECH(opname,_params), \
+       BLIS_CNTX_PARAM  \
+     );
 
-#undef  GENTPROT
-#define GENTPROT GEMM_UKR_PROT
-
-INSERT_GENTPROT_BASIC0( gemm_ukr_name )
-
-
-#undef  GENTPROT
-#define GENTPROT GEMMTRSM_UKR_PROT
-
-INSERT_GENTPROT_BASIC0( gemmtrsm_l_ukr_name )
-INSERT_GENTPROT_BASIC0( gemmtrsm_u_ukr_name )
+GENTDEF( packm )
+GENTDEF( packm_cxk )
+GENTDEF( unpackm_cxk )
+GENTDEF( packm_cxc_diag )
 
 
-#undef  GENTPROT
-#define GENTPROT TRSM_UKR_PROT
-
-INSERT_GENTPROT_BASIC0( trsm_l_ukr_name )
-INSERT_GENTPROT_BASIC0( trsm_u_ukr_name )
+#endif
 

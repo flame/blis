@@ -42,24 +42,29 @@ void PASTEMAC3(ch,opname,arch,suf) \
              dim_t      m, \
              dim_t      n, \
              dim_t      k, \
-       const ctype*     alpha, \
-       const ctype*     a1x, \
-       const ctype*     a11, \
-       const ctype*     bx1, \
-             ctype*     b11, \
-             ctype*     c11, inc_t rs_c, inc_t cs_c, \
+       const void*      alpha0, \
+       const void*      a1x0, \
+       const void*      a110, \
+       const void*      bx10, \
+             void*      b110, \
+             void*      c110, inc_t rs_c, inc_t cs_c, \
              auxinfo_t* data, \
        const cntx_t*    cntx  \
      ) \
 { \
+	const ctype*      alpha       = alpha0; \
+	const ctype*      a1x         = a1x0; \
+	const ctype*      a11         = a110; \
+	const ctype*      bx1         = bx10; \
+	      ctype*      b11         = b110; \
+	      ctype*      c11         = c110; \
+\
 	const num_t       dt          = PASTEMAC(ch,type); \
 	const num_t       dt_r        = PASTEMAC(chr,type); \
 \
-	PASTECH(chr,gemm_ukr_ft) \
-	                  rgemm_ukr   = bli_cntx_get_ukr_dt( dt_r, BLIS_GEMM_UKR, cntx ); \
+	      gemm_ukr_ft rgemm_ukr   = bli_cntx_get_ukr_dt( dt_r, BLIS_GEMM_UKR, cntx ); \
 \
-	PASTECH(ch,trsm_ukr_ft) \
-	                ctrsm_vir_ukr = bli_cntx_get_l3_vir_ukr_dt( dt, trsmkerid, cntx ); \
+	      trsm_ukr_ft ctrsm_vukr  = bli_cntx_get_l3_vir_ukr_dt( dt, trsmkerid, cntx ); \
 \
 	const bool        col_pref_r  = bli_cntx_ukr_prefers_cols_dt( dt_r, BLIS_GEMM_UKR, cntx ); \
 \
@@ -265,7 +270,7 @@ void PASTEMAC3(ch,opname,arch,suf) \
 \
 	/* b11 = inv(a11) * b11;
 	   c11 = b11; */ \
-	ctrsm_vir_ukr \
+	ctrsm_vukr \
 	( \
 	  a11, \
 	  b11, \

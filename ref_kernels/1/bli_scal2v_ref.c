@@ -41,13 +41,17 @@ void PASTEMAC3(ch,opname,arch,suf) \
      ( \
              conj_t  conjx, \
              dim_t   n, \
-       const ctype*  alpha, \
-       const ctype*  x, inc_t incx, \
-             ctype*  y, inc_t incy, \
+       const void*   alpha0, \
+       const void*   x0, inc_t incx, \
+             void*   y0, inc_t incy, \
        const cntx_t* cntx  \
      ) \
 { \
 	if ( bli_zero_dim1( n ) ) return; \
+\
+	const ctype* alpha = alpha0; \
+	const ctype* x     = x0; \
+	      ctype* y     = y0; \
 \
 	if ( PASTEMAC(ch,eq0)( *alpha ) ) \
 	{ \
@@ -56,15 +60,15 @@ void PASTEMAC3(ch,opname,arch,suf) \
 		const ctype* zero = PASTEMAC(ch,0); \
 \
 		/* Query the context for the kernel function pointer. */ \
-		const num_t             dt     = PASTEMAC(ch,type); \
-		PASTECH(ch,setv_ker_ft) setv_p = bli_cntx_get_ukr_dt( dt, BLIS_SETV_KER, cntx ); \
+		const num_t dt     = PASTEMAC(ch,type); \
+		setv_ker_ft setv_p = bli_cntx_get_ukr_dt( dt, BLIS_SETV_KER, cntx ); \
 \
 		setv_p \
 		( \
 		  BLIS_NO_CONJUGATE, \
 		  n, \
 		  zero, \
-		  y, incy, \
+		  y0, incy, \
 		  cntx  \
 		); \
 		return; \
@@ -74,15 +78,15 @@ void PASTEMAC3(ch,opname,arch,suf) \
 		/* If alpha is one, use copyv. */ \
 \
 		/* Query the context for the kernel function pointer. */ \
-		const num_t              dt      = PASTEMAC(ch,type); \
-		PASTECH(ch,copyv_ker_ft) copyv_p = bli_cntx_get_ukr_dt( dt, BLIS_COPYV_KER, cntx ); \
+		const num_t  dt      = PASTEMAC(ch,type); \
+		copyv_ker_ft copyv_p = bli_cntx_get_ukr_dt( dt, BLIS_COPYV_KER, cntx ); \
 \
 		copyv_p \
 		( \
 		  BLIS_NO_CONJUGATE, \
 		  n, \
-		  x, incx, \
-		  y, incy, \
+		  x0, incx, \
+		  y0, incy, \
 		  cntx  \
 		); \
 		return; \

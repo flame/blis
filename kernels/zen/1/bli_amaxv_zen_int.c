@@ -102,11 +102,13 @@ typedef union
 void bli_samaxv_zen_int
      (
              dim_t   n,
-       const float*  x, inc_t incx,
-             dim_t*  i_max,
+       const void*   x0, inc_t incx,
+             dim_t*  index,
        const cntx_t* cntx
      )
 {
+	const float* restrict x = x0;
+
 	const float* restrict minus_one = PASTEMAC(s,m1);
 	const dim_t* restrict zero_i    = PASTEMAC(i,0);
 
@@ -121,7 +123,7 @@ void bli_samaxv_zen_int
 	   the behavior of netlib BLAS's i?amax() routines. */
 	if ( bli_zero_dim1( n ) )
 	{
-		PASTEMAC(i,copys)( *zero_i, *i_max );
+		PASTEMAC(i,copys)( *zero_i, *index );
 		return;
 	}
 
@@ -259,7 +261,7 @@ void bli_samaxv_zen_int
 	_mm256_zeroupper();
 
 	/* Store final index to output variable. */
-	*i_max = i_max_l;
+	*index = i_max_l;
 }
 
 // -----------------------------------------------------------------------------
@@ -267,11 +269,13 @@ void bli_samaxv_zen_int
 void bli_damaxv_zen_int
      (
              dim_t   n,
-       const double* x, inc_t incx,
-             dim_t*  i_max,
+       const void*   x0, inc_t incx,
+             dim_t*  index,
        const cntx_t* cntx
      )
 {
+	const double* restrict x = x0;
+
 	const double* restrict minus_one = PASTEMAC(d,m1);
 	const dim_t*  restrict zero_i    = PASTEMAC(i,0);
 
@@ -286,7 +290,7 @@ void bli_damaxv_zen_int
 	   the behavior of netlib BLAS's i?amax() routines. */
 	if ( bli_zero_dim1( n ) )
 	{
-		PASTEMAC(i,copys)( *zero_i, *i_max );
+		PASTEMAC(i,copys)( *zero_i, *index );
 		return;
 	}
 
@@ -415,7 +419,7 @@ void bli_damaxv_zen_int
 	_mm256_zeroupper();
 
 	/* Store final index to output variable. */
-	*i_max = i_max_l;
+	*index = i_max_l;
 }
 
 // -----------------------------------------------------------------------------
@@ -428,7 +432,7 @@ void PASTEMAC(ch,varname) \
      ( \
        dim_t    n, \
        ctype*   x, inc_t incx, \
-       dim_t*   i_max, \
+       dim_t*   index, \
        cntx_t*  cntx  \
      ) \
 { \
@@ -442,7 +446,7 @@ void PASTEMAC(ch,varname) \
 	dim_t    i; \
 \
 	/* Initialize the index of the maximum absolute value to zero. */ \
-	PASTEMAC(i,copys)( zero_i, *i_max ); \
+	PASTEMAC(i,copys)( zero_i, *index ); \
 \
 	/* If the vector length is zero, return early. This directly emulates
 	   the behavior of netlib BLAS's i?amax() routines. */ \
@@ -477,7 +481,7 @@ void PASTEMAC(ch,varname) \
 			if ( abs_chi1_max < abs_chi1 || bli_isnan( abs_chi1 ) ) \
 			{ \
 				abs_chi1_max = abs_chi1; \
-				*i_max       = i; \
+				*index       = i; \
 			} \
 		} \
 	} \
@@ -507,7 +511,7 @@ void PASTEMAC(ch,varname) \
 			if ( abs_chi1_max < abs_chi1 || bli_isnan( abs_chi1 ) ) \
 			{ \
 				abs_chi1_max = abs_chi1; \
-				*i_max       = i; \
+				*index       = i; \
 			} \
 		} \
 	} \

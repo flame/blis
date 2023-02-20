@@ -48,15 +48,21 @@ void PASTEMAC3(ch,opname,arch,suf) \
              dim_t      m, \
              dim_t      n, \
              dim_t      k, \
-       const ctype*     alpha, \
-       const ctype*     a, inc_t rs_a, inc_t cs_a, \
-       const ctype*     b, inc_t rs_b, inc_t cs_b, \
-       const ctype*     beta, \
-             ctype*     c, inc_t rs_c, inc_t cs_c, \
+       const void*      alpha0, \
+       const void*      a0, inc_t rs_a, inc_t cs_a, \
+       const void*      b0, inc_t rs_b, inc_t cs_b, \
+       const void*      beta0, \
+             void*      c0, inc_t rs_c, inc_t cs_c, \
              auxinfo_t* data, \
        const cntx_t*    cntx  \
      ) \
 { \
+	const ctype* restrict alpha = alpha0; \
+	const ctype* restrict a     = a0; \
+	const ctype* restrict b     = b0; \
+	const ctype* restrict beta  = beta0; \
+	      ctype* restrict c     = c0; \
+\
 	/* NOTE: This microkernel can actually handle arbitrarily large
 	   values of m, n, and k. */ \
 \
@@ -253,15 +259,21 @@ void PASTEMAC3(ch,opname,arch,suf) \
              dim_t      m, \
              dim_t      n, \
              dim_t      k, \
-       const ctype*     alpha, \
-       const ctype*     a, inc_t rs_a, inc_t cs_a, \
-       const ctype*     b, inc_t rs_b, inc_t cs_b, \
-       const ctype*     beta, \
-             ctype*     c, inc_t rs_c, inc_t cs_c, \
+       const void*      alpha0, \
+       const void*      a0, inc_t rs_a, inc_t cs_a, \
+       const void*      b0, inc_t rs_b, inc_t cs_b, \
+       const void*      beta0, \
+             void*      c0, inc_t rs_c, inc_t cs_c, \
              auxinfo_t* data, \
        const cntx_t*    cntx  \
      ) \
 { \
+	const ctype* restrict alpha = alpha0; \
+	const ctype* restrict a     = a0; \
+	const ctype* restrict b     = b0; \
+	const ctype* restrict beta  = beta0; \
+	      ctype* restrict c     = c0; \
+\
 	/* NOTE: This microkernel can actually handle arbitrarily large
 	   values of m, n, and k. */ \
 \

@@ -61,12 +61,12 @@ void bli_sgemmtrsm_l_haswell_asm_6x16
              dim_t      m, \
              dim_t      n, \
              dim_t      k0, \
-       const float*     alpha, \
-       const float*     a10, \
-       const float*     a11, \
-       const float*     b01, \
-             float*     b11, \
-             float*     c11, inc_t rs_c0, inc_t cs_c0, \
+       const void*      alpha, \
+       const void*      a10, \
+       const void*      a11, \
+       const void*      b01, \
+             void*      b11, \
+             void*      c11, inc_t rs_c0, inc_t cs_c0, \
              auxinfo_t* data, \
        const cntx_t*    cntx  \
      )
@@ -852,12 +852,12 @@ void bli_dgemmtrsm_l_haswell_asm_6x8
              dim_t      m, \
              dim_t      n, \
              dim_t      k0, \
-       const double*    alpha, \
-       const double*    a10, \
-       const double*    a11, \
-       const double*    b01, \
-             double*    b11, \
-             double*    c11, inc_t rs_c0, inc_t cs_c0, \
+       const void*      alpha, \
+       const void*      a10, \
+       const void*      a11, \
+       const void*      b01, \
+             void*      b11, \
+             void*      c11, inc_t rs_c0, inc_t cs_c0, \
              auxinfo_t* data, \
        const cntx_t*    cntx  \
      )

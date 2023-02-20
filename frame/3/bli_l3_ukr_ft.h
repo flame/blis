@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2019, Advanced Micro Devices, Inc.
+   Copyright (C) 2014, The University of Texas at Austin
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -32,37 +32,27 @@
 
 */
 
-#ifndef BLIS_L3_SUP_FT_KER_H
-#define BLIS_L3_SUP_FT_KER_H
+#ifndef BLIS_L3_UKR_FT_H
+#define BLIS_L3_UKR_FT_H
 
 
 //
-// -- Level-3 small/unpacked kernel function types -----------------------------
+// -- Level-3 micro-kernel function types --------------------------------------
 //
-
-// gemmsup
 
 #undef  GENTDEF
-#define GENTDEF( ctype, ch, opname, tsuf ) \
+#define GENTDEF( opname ) \
 \
-typedef void (*PASTECH3(ch,opname,_ker,tsuf)) \
+typedef void (*PASTECH(opname,_ukr_ft)) \
      ( \
-             conj_t     conja, \
-             conj_t     conjb, \
-             dim_t      m, \
-             dim_t      n, \
-             dim_t      k, \
-       const ctype*     alpha, \
-       const ctype*     a, inc_t rs_a, inc_t cs_a, \
-       const ctype*     b, inc_t rs_b, inc_t cs_b, \
-       const ctype*     beta, \
-             ctype*     c, inc_t rs_c, inc_t cs_c, \
-             auxinfo_t* data, \
-       const cntx_t*    cntx  \
+       PASTECH(opname,_params), \
+       BLIS_AUXINFO_PARAM, \
+       BLIS_CNTX_PARAM  \
      );
 
-INSERT_GENTDEF( gemmsup )
-
+GENTDEF( gemm )
+GENTDEF( gemmtrsm )
+GENTDEF( trsm )
 
 #endif
 

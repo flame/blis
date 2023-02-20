@@ -42,14 +42,20 @@ void PASTEMAC3(ch,opname,arch,suf) \
              conj_t  conjx, \
              conj_t  conjy, \
              dim_t   n, \
-       const ctype*  alpha, \
-       const ctype*  x, inc_t incx, \
-       const ctype*  y, inc_t incy, \
-       const ctype*  beta, \
-             ctype*  rho, \
+       const void*   alpha0, \
+       const void*   x0, inc_t incx, \
+       const void*   y0, inc_t incy, \
+       const void*   beta0, \
+             void*   rho0, \
        const cntx_t* cntx  \
      ) \
 { \
+	const ctype* alpha = alpha0; \
+	const ctype* x     = x0; \
+	const ctype* y     = y0; \
+	const ctype* beta  = beta0; \
+	      ctype* rho   = rho0; \
+\
 	ctype dotxy; \
 \
 	/* If beta is zero, clear rho. Otherwise, scale by beta. */ \

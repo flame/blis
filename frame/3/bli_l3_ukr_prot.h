@@ -36,52 +36,17 @@
 // Define template prototypes for level-3 micro-kernels.
 //
 
-#define GEMM_UKR_PROT( ctype, ch, opname ) \
-        GEMM_UKR_PROT2( ctype, ctype, ch, opname )
-
-#define GEMM_UKR_PROT2( ctype_in, ctype_out, ch, opname ) \
+#undef  L3TPROT
+#define L3TPROT( ctype, ch, funcname, opname ) \
 \
-void PASTEMAC(ch,opname) \
+void PASTEMAC(ch,funcname) \
      ( \
-             dim_t      m, \
-             dim_t      n, \
-             dim_t      k, \
-       const ctype_out* alpha, \
-       const ctype_in*  a, \
-       const ctype_in*  b, \
-       const ctype_out* beta, \
-             ctype_out* c, inc_t rs_c, inc_t cs_c, \
-             auxinfo_t* data, \
-       const cntx_t*    cntx  \
+       PASTECH(opname,_params), \
+       BLIS_AUXINFO_PARAM, \
+       BLIS_CNTX_PARAM  \
      );
 
-
-#define GEMMTRSM_UKR_PROT( ctype, ch, opname ) \
-\
-void PASTEMAC(ch,opname) \
-     ( \
-             dim_t      m, \
-             dim_t      n, \
-             dim_t      k, \
-       const ctype*     alpha, \
-       const ctype*     a1x, \
-       const ctype*     a11, \
-       const ctype*     bx1, \
-             ctype*     b11, \
-             ctype*     c11, inc_t rs_c, inc_t cs_c, \
-             auxinfo_t* data, \
-       const cntx_t*    cntx  \
-     );
-
-
-#define TRSM_UKR_PROT( ctype, ch, opname ) \
-\
-void PASTEMAC(ch,opname) \
-     ( \
-       const ctype*     a, \
-             ctype*     b, \
-             ctype*     c, inc_t rs_c, inc_t cs_c, \
-             auxinfo_t* data, \
-       const cntx_t*    cntx  \
-     );
+#define GEMM_UKR_PROT(     ctype, ch, fn )  L3TPROT( ctype, ch, fn, gemm );
+#define GEMMTRSM_UKR_PROT( ctype, ch, fn )  L3TPROT( ctype, ch, fn, gemmtrsm );
+#define TRSM_UKR_PROT(     ctype, ch, fn )  L3TPROT( ctype, ch, fn, trsm );
 

@@ -41,12 +41,15 @@ void PASTEMAC3(ch,opname,arch,suf) \
      ( \
              conj_t  conjx, \
              dim_t   n, \
-       const ctype*  x, inc_t incx, \
-             ctype*  y, inc_t incy, \
+       const void*   x0, inc_t incx, \
+             void*   y0, inc_t incy, \
        const cntx_t* cntx  \
      ) \
 { \
 	if ( bli_zero_dim1( n ) ) return; \
+\
+	const ctype* restrict x = x0; \
+	      ctype* restrict y = y0; \
 \
 	if ( bli_is_conj( conjx ) ) \
 	{ \

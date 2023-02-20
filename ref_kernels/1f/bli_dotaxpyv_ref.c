@@ -44,15 +44,21 @@ void PASTEMAC3(ch,opname,arch,suf) \
              conj_t  conjx, \
              conj_t  conjy, \
              dim_t   m, \
-       const ctype*  alpha, \
-       const ctype*  x, inc_t incx, \
-       const ctype*  y, inc_t incy, \
-             ctype*  rho, \
-             ctype*  z, inc_t incz, \
+       const void*   alpha0, \
+       const void*   x0, inc_t incx, \
+       const void*   y0, inc_t incy, \
+             void*   rho0, \
+             void*   z0, inc_t incz, \
        const cntx_t* cntx  \
      ) \
 { \
 	if ( bli_zero_dim1( m ) ) return; \
+\
+	const ctype* restrict alpha = alpha0; \
+	const ctype* restrict x     = x0; \
+	const ctype* restrict y     = y0; \
+	      ctype* restrict rho   = rho0; \
+	      ctype* restrict z     = z0; \
 \
 	if ( incz == 1 && incx == 1 && incy == 1 ) \
 	{ \
@@ -129,13 +135,9 @@ void PASTEMAC3(ch,opname,arch,suf) \
 	{ \
 \
 		/* Query the context for the kernel function pointer. */ \
-		const num_t              dt     = PASTEMAC(ch,type); \
-		PASTECH(ch,dotv_ker_ft)  kfp_dv \
-		= \
-		bli_cntx_get_ukr_dt( dt, BLIS_DOTV_KER, cntx ); \
-		PASTECH(ch,axpyv_ker_ft) kfp_av \
-		= \
-		bli_cntx_get_ukr_dt( dt, BLIS_AXPYV_KER, cntx ); \
+		const num_t  dt     = PASTEMAC(ch,type); \
+		dotv_ker_ft  kfp_dv = bli_cntx_get_ukr_dt( dt, BLIS_DOTV_KER, cntx ); \
+		axpyv_ker_ft kfp_av = bli_cntx_get_ukr_dt( dt, BLIS_AXPYV_KER, cntx ); \
 \
 		kfp_dv \
 		( \

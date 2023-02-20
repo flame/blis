@@ -42,13 +42,17 @@
 \
 void PASTEMAC3(ch,opname,arch,suf) \
      ( \
-       const ctype*     a, \
-             ctype*     b, \
-             ctype*     c, inc_t rs_c, inc_t cs_c, \
+       const void*      a0, \
+             void*      b0, \
+             void*      c0, inc_t rs_c, inc_t cs_c, \
              auxinfo_t* data, \
        const cntx_t*    cntx  \
      ) \
 { \
+	const ctype*    a      = a0; \
+	      ctype*    b      = b0; \
+	      ctype*    c      = c0; \
+\
 	const num_t     dt     = PASTEMAC(ch,type); \
 \
 	const dim_t     mr     = bli_cntx_get_blksz_def_dt( dt, BLIS_MR, cntx ); \
@@ -126,13 +130,17 @@ INSERT_GENTFUNC_BASIC3( trsm_l, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX, invscals )
 \
 void PASTEMAC3(ch,opname,arch,suf) \
      ( \
-       ctype*     restrict a, \
-       ctype*     restrict b, \
-       ctype*     restrict c, inc_t rs_c, inc_t cs_c, \
-       auxinfo_t*          data, \
-       cntx_t*             cntx  \
+       const void*      a0, \
+             void*      b0, \
+             void*      c0, inc_t rs_c, inc_t cs_c, \
+             auxinfo_t* data, \
+       const cntx_t*    cntx  \
      ) \
 { \
+	const ctype*    a      = a0; \
+	      ctype*    b      = b0; \
+	      ctype*    c      = c0; \
+\
 	const num_t     dt     = PASTEMAC(ch,type); \
 \
 	const dim_t     mr     = bli_cntx_get_blksz_def_dt( dt, BLIS_MR, cntx ); \

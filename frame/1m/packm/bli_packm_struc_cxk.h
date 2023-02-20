@@ -53,6 +53,7 @@ void PASTEMAC(ch,varname) \
        ctype*  c, inc_t incc, inc_t ldc, \
        ctype*  p,             inc_t ldp, \
                   inc_t is_p, \
+       void*   params, \
        cntx_t* cntx  \
      );
 

@@ -53,11 +53,11 @@ void bli_sgemm_power7_int_8x4
               dim_t      m,
               dim_t      n,
               dim_t      k,
-        const float*     alpha,
-        const float*     a,
-        const float*     b,
-        const float*     beta,
-              float*     c, inc_t rs_c, inc_t cs_c,
+        const void*      alpha0,
+        const void*      a0,
+        const void*      b0,
+        const void*      beta0,
+              void*      c0, inc_t rs_c, inc_t cs_c,
               auxinfo_t* data,
         const cntx_t*    cntx
      )
@@ -67,6 +67,12 @@ void bli_sgemm_power7_int_8x4
     const long LDA = MR, LDB = NR;
     long i, j, kk;
     float c00;
+
+    const float* alpha = alpha0;
+    const float* a     = a0;
+    const float* b     = b0;
+    const float* beta  = beta0;
+          float* c     = c0;
 
     for (i=0; i < m; i++) {
         for (j=0; j < n; j++) {
@@ -95,15 +101,21 @@ void bli_dgemm_power7_int_8x4
              dim_t      m,
              dim_t      n,
              dim_t      k,
-       const double*    alpha,
-       const double*    a,
-       const double*    b,
-       const double*    beta,
-             double*    c, inc_t rs_c, inc_t cs_c,
+       const void*      alpha0,
+       const void*      a0,
+       const void*      b0,
+       const void*      beta0,
+             void*      c0, inc_t rs_c, inc_t cs_c,
              auxinfo_t* data,
        const cntx_t*    cntx
      )
 {
+    const double* alpha = alpha0;
+    const double* a     = a0;
+    const double* b     = b0;
+    const double* beta  = beta0;
+          double* c     = c0;
+
     if ( cs_c == 1 )
     {
         // Optimized code for case where C rows are contiguous (i.e. C is row-major)
@@ -452,11 +464,11 @@ void bli_cgemm_power7_int_8x4
              dim_t      m,
              dim_t      n,
              dim_t      k,
-       const scomplex*  alpha,
-       const scomplex*  a,
-       const scomplex*  b,
-       const scomplex*  beta,
-             scomplex*  c, inc_t rs_c0, inc_t cs_c0,
+       const void*      alpha0,
+       const void*      a0,
+       const void*      b0,
+       const void*      beta0,
+             void*      c0, inc_t rs_c0, inc_t cs_c0,
              auxinfo_t* data,
        const cntx_t*    cntx
      )
@@ -466,6 +478,12 @@ void bli_cgemm_power7_int_8x4
     const long LDA = MR, LDB = NR;
     int i, j, kk;
     scomplex c00;
+
+    const scomplex* alpha = alpha0;
+    const scomplex* a     = a0;
+    const scomplex* b     = b0;
+    const scomplex* beta  = beta0;
+          scomplex* c     = c0;
 
     for (i=0; i < m; i++) {
         for (j=0; j < n; j++) {
@@ -505,11 +523,11 @@ void bli_zgemm_power7_int_8x4
              dim_t      m,
              dim_t      n,
              dim_t      k,
-       const dcomplex*  alpha,
-       const dcomplex*  a,
-       const dcomplex*  b,
-       const dcomplex*  beta,
-             dcomplex*  c, inc_t rs_c0, inc_t cs_c0,
+       const void*      alpha0,
+       const void*      a0,
+       const void*      b0,
+       const void*      beta0,
+             void*      c0, inc_t rs_c0, inc_t cs_c0,
              auxinfo_t* data,
        const cntx_t*    cntx
      )
@@ -519,6 +537,12 @@ void bli_zgemm_power7_int_8x4
     const long LDA = MR, LDB = NR;
     int i, j, kk;
     dcomplex c00;
+
+    const dcomplex* alpha = alpha0;
+    const dcomplex* a     = a0;
+    const dcomplex* b     = b0;
+    const dcomplex* beta  = beta0;
+          dcomplex* c     = c0;
 
     for (i=0; i < m; i++) {
         for (j=0; j < n; j++) {

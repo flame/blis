@@ -68,7 +68,6 @@ void bli_ddotxaxpyf_penryn_int
 	const double*  restrict x_cast     = x;
 	      double*  restrict y_cast     = y;
 	      double*  restrict z_cast     = z;
-	      dim_t             i;
 
 	const dim_t             n_elem_per_reg = 2;
 	const dim_t             n_iter_unroll  = 2;
@@ -98,7 +97,7 @@ void bli_ddotxaxpyf_penryn_int
 	// If the vector lengths are zero, scale y by beta and return.
 	if ( bli_zero_dim1( m ) )
 	{
-		dscalv_ker_ft f = bli_cntx_get_ukr_dt( BLIS_DOUBLE, BLIS_SCALV_KER, cntx );
+		scalv_ker_ft f = bli_cntx_get_ukr_dt( BLIS_DOUBLE, BLIS_SCALV_KER, cntx );
 
 		f
 		(
@@ -143,7 +142,8 @@ void bli_ddotxaxpyf_penryn_int
 
 	if ( use_ref == TRUE )
 	{
-		ddotxaxpyf_ker_ft f = bli_cntx_get_ukr_dt( BLIS_DOUBLE, BLIS_DOTXAXPYF_KER, cntx );
+		dotxaxpyf_ker_ft f = bli_cntx_get_ukr_dt( BLIS_DOUBLE, BLIS_DOTXAXPYF_KER, cntx );
+		#if 0
 		f
 		(
 		  conjat,
@@ -161,6 +161,8 @@ void bli_ddotxaxpyf_penryn_int
 		  z_cast, incz,
 		  cntx
 		);
+		#endif
+		bli_abort();
 		return;
 	}
 
@@ -230,8 +232,8 @@ void bli_ddotxaxpyf_penryn_int
 
 	/* y = beta * y + alpha * A^T w; */ \
 	/* z =        z + alpha * A   x; */ \
-	//for ( i = 0; i < m_run; ++i )
-	for ( i = m_run; i != 0; --i )
+	//for ( dim_t i = 0; i < m_run; ++i )
+	for ( dim_t i = m_run; i != 0; --i )
 	{
 		z1v.v = _mm_load_pd( ( double* )(z1 + 0*n_elem_per_reg) );
 		w1v.v = _mm_load_pd( ( double* )(w1 + 0*n_elem_per_reg) );
@@ -302,7 +304,7 @@ void bli_ddotxaxpyf_penryn_int
 
 	if ( m_left > 0 )
 	{
-		for ( i = 0; i < m_left; ++i )
+		for ( dim_t i = 0; i < m_left; ++i )
 		{
 			a0c = *a0;
 			//a1c = *a1;

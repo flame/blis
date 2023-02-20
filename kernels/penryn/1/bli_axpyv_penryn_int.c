@@ -47,16 +47,15 @@ void bli_daxpyv_penryn_int
      (
              conj_t  conjx,
              dim_t   n,
-       const double* alpha,
-       const double* x, inc_t incx,
-             double* y, inc_t incy,
+       const void*   alpha0,
+       const void*   x0, inc_t incx,
+             void*   y0, inc_t incy,
        const cntx_t* cntx
      )
 {
-	const double*  restrict alpha_cast = alpha;
-	const double*  restrict x_cast = x;
-	      double*  restrict y_cast = y;
-	      dim_t             i;
+	const double*  restrict alpha_cast = alpha0;
+	const double*  restrict x_cast     = x0;
+	      double*  restrict y_cast     = y0;
 
 	const dim_t             n_elem_per_reg = 2;
 	const dim_t             n_iter_unroll  = 4;
@@ -135,7 +134,7 @@ void bli_daxpyv_penryn_int
 
 	alpha1v.v = _mm_loaddup_pd( ( double* )&alpha1c );
 
-	for ( i = 0; i < n_run; ++i )
+	for ( dim_t i = 0; i < n_run; ++i )
 	{
 		y1v.v = _mm_load_pd( ( double* )y1 );
 		x1v.v = _mm_load_pd( ( double* )x1 );

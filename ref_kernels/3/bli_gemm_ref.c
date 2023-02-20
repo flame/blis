@@ -45,15 +45,21 @@ static void PASTEMAC3(ch,opname,arch,suf) \
              dim_t      m, \
              dim_t      n, \
              dim_t      k, \
-       const ctype*     alpha, \
-       const ctype*     a, \
-       const ctype*     b, \
-       const ctype*     beta, \
-             ctype*     c, inc_t rs_c, inc_t cs_c, \
+       const void*      alpha0, \
+       const void*      a0, \
+       const void*      b0, \
+       const void*      beta0, \
+             void*      c0, inc_t rs_c, inc_t cs_c, \
              auxinfo_t* data, \
        const cntx_t*    cntx  \
      ) \
 { \
+	const ctype* alpha = alpha0; \
+	const ctype* a     = a0; \
+	const ctype* b     = b0; \
+	const ctype* beta  = beta0; \
+	      ctype* c     = c0; \
+\
 	const num_t dt     = PASTEMAC(ch,type); \
 \
 	const inc_t packmr = bli_cntx_get_blksz_max_dt( dt, BLIS_MR, cntx ); \
@@ -148,15 +154,20 @@ void PASTEMAC3(ch,opname,arch,suf) \
              dim_t      m, \
              dim_t      n, \
              dim_t      k, \
-       const ctype*     alpha, \
-       const ctype*     a, \
-       const ctype*     b, \
-       const ctype*     beta, \
-             ctype*     c, inc_t rs_c, inc_t cs_c, \
+       const void*      alpha0, \
+       const void*      a0, \
+       const void*      b0, \
+       const void*      beta0, \
+             void*      c0, inc_t rs_c, inc_t cs_c, \
              auxinfo_t* data, \
        const cntx_t*    cntx  \
      ) \
 { \
+	const ctype* alpha = alpha0; \
+	const ctype* a     = a0; \
+	const ctype* b     = b0; \
+	const ctype* beta  = beta0; \
+	      ctype* c     = c0; \
 \
 	const dim_t mr = PASTECH(BLIS_MR_,ch); \
 	const dim_t nr = PASTECH(BLIS_NR_,ch); \

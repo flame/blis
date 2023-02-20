@@ -109,7 +109,8 @@ void bli_ddotaxpyv_penryn_int
 	// Call the reference implementation if needed.
 	if ( use_ref == TRUE )
 	{
-		ddotaxpyv_ker_ft f = bli_cntx_get_ukr_dt( BLIS_DOUBLE, BLIS_DOTAXPYV_KER, cntx );
+		#if 0
+		dotaxpyv_ker_ft f = bli_cntx_get_ukr_dt( BLIS_DOUBLE, BLIS_DOTAXPYV_KER, cntx );
 
 		f
 		(
@@ -124,6 +125,8 @@ void bli_ddotaxpyv_penryn_int
 		  z, incz,
 		  cntx
 		);
+		#endif
+		bli_abort();
 		return;
 	}
 

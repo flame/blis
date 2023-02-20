@@ -59,14 +59,20 @@ void bli_sdotxv_zen_int
              conj_t  conjx,
              conj_t  conjy,
              dim_t   n,
-       const float*  alpha,
-       const float*  x, inc_t incx,
-       const float*  y, inc_t incy,
-       const float*  beta,
-             float*  rho,
+       const void*   alpha0,
+       const void*   x0, inc_t incx,
+       const void*   y0, inc_t incy,
+       const void*   beta0,
+             void*   rho0,
        const cntx_t* cntx
      )
 {
+	const float*  alpha = alpha0;
+	const float*  x     = x0;
+	const float*  y     = y0;
+	const float*  beta  = beta0;
+	      float*  rho   = rho0;
+
 	const dim_t      n_elem_per_reg = 8;
 	const dim_t      n_iter_unroll  = 4;
 
@@ -74,7 +80,7 @@ void bli_sdotxv_zen_int
 	dim_t            n_viter;
 	dim_t            n_left;
 
-	float            rho0;
+	float            rho_l;
 
 	v8sf_t           rho0v, rho1v, rho2v, rho3v;
 	v8sf_t           x0v, y0v;
@@ -111,8 +117,8 @@ void bli_sdotxv_zen_int
 	}
 
 	// Initialize local pointers.
-	const float* restrict x0 = x;
-	const float* restrict y0 = y;
+	const float* restrict xp = x;
+	const float* restrict yp = y;
 
 	// Initialize the unrolled iterations' rho vectors to zero.
 	rho0v.v = _mm256_setzero_ps();
@@ -123,17 +129,17 @@ void bli_sdotxv_zen_int
 	for ( i = 0; i < n_viter; ++i )
 	{
 		// Load the x and y input vector elements.
-		x0v.v = _mm256_loadu_ps( x0 + 0*n_elem_per_reg );
-		y0v.v = _mm256_loadu_ps( y0 + 0*n_elem_per_reg );
+		x0v.v = _mm256_loadu_ps( xp + 0*n_elem_per_reg );
+		y0v.v = _mm256_loadu_ps( yp + 0*n_elem_per_reg );
 
-		x1v.v = _mm256_loadu_ps( x0 + 1*n_elem_per_reg );
-		y1v.v = _mm256_loadu_ps( y0 + 1*n_elem_per_reg );
+		x1v.v = _mm256_loadu_ps( xp + 1*n_elem_per_reg );
+		y1v.v = _mm256_loadu_ps( yp + 1*n_elem_per_reg );
 
-		x2v.v = _mm256_loadu_ps( x0 + 2*n_elem_per_reg );
-		y2v.v = _mm256_loadu_ps( y0 + 2*n_elem_per_reg );
+		x2v.v = _mm256_loadu_ps( xp + 2*n_elem_per_reg );
+		y2v.v = _mm256_loadu_ps( yp + 2*n_elem_per_reg );
 
-		x3v.v = _mm256_loadu_ps( x0 + 3*n_elem_per_reg );
-		y3v.v = _mm256_loadu_ps( y0 + 3*n_elem_per_reg );
+		x3v.v = _mm256_loadu_ps( xp + 3*n_elem_per_reg );
+		y3v.v = _mm256_loadu_ps( yp + 3*n_elem_per_reg );
 
 		// Compute the element-wise product of the x and y vectors,
 		// storing in the corresponding rho vectors.
@@ -142,8 +148,8 @@ void bli_sdotxv_zen_int
 		rho2v.v = _mm256_fmadd_ps( x2v.v, y2v.v, rho2v.v );
 		rho3v.v = _mm256_fmadd_ps( x3v.v, y3v.v, rho3v.v );
 
-		x0 += ( n_elem_per_reg * n_iter_unroll );
-		y0 += ( n_elem_per_reg * n_iter_unroll );
+		xp += ( n_elem_per_reg * n_iter_unroll );
+		yp += ( n_elem_per_reg * n_iter_unroll );
 	}
 
 	// Accumulate the unrolled rho vectors into a single vector.
@@ -152,8 +158,8 @@ void bli_sdotxv_zen_int
 	rho0v.v += rho3v.v;
 
 	// Accumulate the final rho vector into a single scalar result.
-	rho0 = rho0v.f[0] + rho0v.f[1] + rho0v.f[2] + rho0v.f[3] +
-	       rho0v.f[4] + rho0v.f[5] + rho0v.f[6] + rho0v.f[7];
+	rho_l = rho0v.f[0] + rho0v.f[1] + rho0v.f[2] + rho0v.f[3] +
+	        rho0v.f[4] + rho0v.f[5] + rho0v.f[6] + rho0v.f[7];
 
 	// Issue vzeroupper instruction to clear upper lanes of ymm registers.
 	// This avoids a performance penalty caused by false dependencies when
@@ -165,17 +171,17 @@ void bli_sdotxv_zen_int
 	// If there are leftover iterations, perform them with scalar code.
 	for ( i = 0; i < n_left; ++i )
 	{
-		const float x0c = *x0;
-		const float y0c = *y0;
+		const float x0c = *xp;
+		const float y0c = *yp;
 
-		rho0 += x0c * y0c;
+		rho_l += x0c * y0c;
 
-		x0 += incx;
-		y0 += incy;
+		xp += incx;
+		yp += incy;
 	}
 
 	// Accumulate the final result into the output variable.
-	PASTEMAC(s,axpys)( *alpha, rho0, *rho );
+	PASTEMAC(s,axpys)( *alpha, rho_l, *rho );
 }
 
 // -----------------------------------------------------------------------------
@@ -185,14 +191,20 @@ void bli_ddotxv_zen_int
              conj_t  conjx,
              conj_t  conjy,
              dim_t   n,
-       const double* alpha,
-       const double* x, inc_t incx,
-       const double* y, inc_t incy,
-       const double* beta,
-             double* rho,
+       const void*   alpha0,
+       const void*   x0, inc_t incx,
+       const void*   y0, inc_t incy,
+       const void*   beta0,
+             void*   rho0,
        const cntx_t* cntx
      )
 {
+	const double*  alpha = alpha0;
+	const double*  x     = x0;
+	const double*  y     = y0;
+	const double*  beta  = beta0;
+	      double*  rho   = rho0;
+
 	const dim_t      n_elem_per_reg = 4;
 	const dim_t      n_iter_unroll  = 4;
 
@@ -200,7 +212,7 @@ void bli_ddotxv_zen_int
 	dim_t            n_viter;
 	dim_t            n_left;
 
-	double           rho0;
+	double           rho_l;
 
 	v4df_t           rho0v, rho1v, rho2v, rho3v;
 	v4df_t           x0v, y0v;
@@ -237,8 +249,8 @@ void bli_ddotxv_zen_int
 	}
 
 	// Initialize local pointers.
-	const double* restrict x0 = x;
-	const double* restrict y0 = y;
+	const double* restrict xp = x;
+	const double* restrict yp = y;
 
 	// Initialize the unrolled iterations' rho vectors to zero.
 	rho0v.v = _mm256_setzero_pd();
@@ -249,17 +261,17 @@ void bli_ddotxv_zen_int
 	for ( i = 0; i < n_viter; ++i )
 	{
 		// Load the x and y input vector elements.
-		x0v.v = _mm256_loadu_pd( x0 + 0*n_elem_per_reg );
-		y0v.v = _mm256_loadu_pd( y0 + 0*n_elem_per_reg );
+		x0v.v = _mm256_loadu_pd( xp + 0*n_elem_per_reg );
+		y0v.v = _mm256_loadu_pd( yp + 0*n_elem_per_reg );
 
-		x1v.v = _mm256_loadu_pd( x0 + 1*n_elem_per_reg );
-		y1v.v = _mm256_loadu_pd( y0 + 1*n_elem_per_reg );
+		x1v.v = _mm256_loadu_pd( xp + 1*n_elem_per_reg );
+		y1v.v = _mm256_loadu_pd( yp + 1*n_elem_per_reg );
 
-		x2v.v = _mm256_loadu_pd( x0 + 2*n_elem_per_reg );
-		y2v.v = _mm256_loadu_pd( y0 + 2*n_elem_per_reg );
+		x2v.v = _mm256_loadu_pd( xp + 2*n_elem_per_reg );
+		y2v.v = _mm256_loadu_pd( yp + 2*n_elem_per_reg );
 
-		x3v.v = _mm256_loadu_pd( x0 + 3*n_elem_per_reg );
-		y3v.v = _mm256_loadu_pd( y0 + 3*n_elem_per_reg );
+		x3v.v = _mm256_loadu_pd( xp + 3*n_elem_per_reg );
+		y3v.v = _mm256_loadu_pd( yp + 3*n_elem_per_reg );
 
 		// Compute the element-wise product of the x and y vectors,
 		// storing in the corresponding rho vectors.
@@ -268,8 +280,8 @@ void bli_ddotxv_zen_int
 		rho2v.v = _mm256_fmadd_pd( x2v.v, y2v.v, rho2v.v );
 		rho3v.v = _mm256_fmadd_pd( x3v.v, y3v.v, rho3v.v );
 
-		x0 += ( n_elem_per_reg * n_iter_unroll );
-		y0 += ( n_elem_per_reg * n_iter_unroll );
+		xp += ( n_elem_per_reg * n_iter_unroll );
+		yp += ( n_elem_per_reg * n_iter_unroll );
 	}
 
 	// Accumulate the unrolled rho vectors into a single vector.
@@ -278,7 +290,7 @@ void bli_ddotxv_zen_int
 	rho0v.v += rho3v.v;
 
 	// Accumulate the final rho vector into a single scalar result.
-	rho0 = rho0v.d[0] + rho0v.d[1] + rho0v.d[2] + rho0v.d[3];
+	rho_l = rho0v.d[0] + rho0v.d[1] + rho0v.d[2] + rho0v.d[3];
 
 	// Issue vzeroupper instruction to clear upper lanes of ymm registers.
 	// This avoids a performance penalty caused by false dependencies when
@@ -290,16 +302,16 @@ void bli_ddotxv_zen_int
 	// If there are leftover iterations, perform them with scalar code.
 	for ( i = 0; i < n_left; ++i )
 	{
-		const double x0c = *x0;
-		const double y0c = *y0;
+		const double x0c = *xp;
+		const double y0c = *yp;
 
-		rho0 += x0c * y0c;
+		rho_l += x0c * y0c;
 
-		x0 += incx;
-		y0 += incy;
+		xp += incx;
+		yp += incy;
 	}
 
 	// Accumulate the final result into the output variable.
-	PASTEMAC(d,axpys)( *alpha, rho0, *rho );
+	PASTEMAC(d,axpys)( *alpha, rho_l, *rho );
 }
 

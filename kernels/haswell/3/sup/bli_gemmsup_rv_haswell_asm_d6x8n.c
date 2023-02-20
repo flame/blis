@@ -88,11 +88,11 @@ void bli_dgemmsup_rv_haswell_asm_6x8n
              dim_t      m0,
              dim_t      n0,
              dim_t      k0,
-       const double*    alpha,
-       const double*    a, inc_t rs_a0, inc_t cs_a0,
-       const double*    b, inc_t rs_b0, inc_t cs_b0,
-       const double*    beta,
-             double*    c, inc_t rs_c0, inc_t cs_c0,
+       const void*      alpha,
+       const void*      a, inc_t rs_a0, inc_t cs_a0,
+       const void*      b, inc_t rs_b0, inc_t cs_b0,
+       const void*      beta,
+             void*      c, inc_t rs_c0, inc_t cs_c0,
              auxinfo_t* data,
        const cntx_t*    cntx
      )
@@ -103,17 +103,17 @@ void bli_dgemmsup_rv_haswell_asm_6x8n
 	// dispatch other ?x8m kernels, as needed.
 	if ( m_left )
 	{
-		      double* cij = c;
-		const double* bj  = b;
-		const double* ai  = a;
+		      double* cij = ( double* )c;
+		const double* bj  = ( double* )b;
+		const double* ai  = ( double* )a;
 
 #if 1
 		// We add special handling for slightly inflated MR blocksizes
 		// at edge cases, up to a maximum of 9.
 		if ( 6 < m0 )
 		{
-			dgemmsup_ker_ft ker_fp1 = NULL;
-			dgemmsup_ker_ft ker_fp2 = NULL;
+			gemmsup_ker_ft  ker_fp1 = NULL;
+			gemmsup_ker_ft  ker_fp2 = NULL;
 			dim_t           mr1, mr2;
 
 			if ( m0 == 7 )
@@ -154,7 +154,7 @@ void bli_dgemmsup_rv_haswell_asm_6x8n
 		}
 #endif
 
-		dgemmsup_ker_ft ker_fps[6] =
+		gemmsup_ker_ft  ker_fps[6] =
 		{
 		  NULL,
 		  bli_dgemmsup_rv_haswell_asm_1x8n,
@@ -164,7 +164,7 @@ void bli_dgemmsup_rv_haswell_asm_6x8n
 		  bli_dgemmsup_rv_haswell_asm_5x8n
 		};
 
-		dgemmsup_ker_ft ker_fp = ker_fps[ m_left ];
+		gemmsup_ker_ft  ker_fp = ker_fps[ m_left ];
 
 		ker_fp
 		(
@@ -882,11 +882,11 @@ void bli_dgemmsup_rv_haswell_asm_6x8n
 		const dim_t      mr_cur = 6;
 		const dim_t      j_edge = n0 - ( dim_t )n_left;
 
-		      double* cij = c + j_edge*cs_c;
-		const double* ai  = a;
-		//const double* bj  = b + j_edge*cs_b;
-		//const double* bj  = b + ( j_edge / 8 ) * ps_b;
-		const double* bj  = b + n_iter * ps_b;
+		      double* cij = ( double* )c + j_edge*cs_c;
+		const double* ai  = ( double* )a;
+		//const double* bj  = ( double* )b + j_edge*cs_b;
+		//const double* bj  = ( double* )b + ( j_edge / 8 ) * ps_b;
+		const double* bj  = ( double* )b + n_iter * ps_b;
 
 		if ( 6 <= n_left )
 		{
@@ -954,11 +954,11 @@ void bli_dgemmsup_rv_haswell_asm_5x8n
              dim_t      m0,
              dim_t      n0,
              dim_t      k0,
-       const double*    alpha,
-       const double*    a, inc_t rs_a0, inc_t cs_a0,
-       const double*    b, inc_t rs_b0, inc_t cs_b0,
-       const double*    beta,
-             double*    c, inc_t rs_c0, inc_t cs_c0,
+       const void*      alpha,
+       const void*      a, inc_t rs_a0, inc_t cs_a0,
+       const void*      b, inc_t rs_b0, inc_t cs_b0,
+       const void*      beta,
+             void*      c, inc_t rs_c0, inc_t cs_c0,
              auxinfo_t* data,
        const cntx_t*    cntx
      )
@@ -1630,11 +1630,11 @@ void bli_dgemmsup_rv_haswell_asm_5x8n
 		const dim_t      mr_cur = 5;
 		const dim_t      j_edge = n0 - ( dim_t )n_left;
 
-		      double* cij = c + j_edge*cs_c;
-		const double* ai  = a;
-		//const double* bj  = b + j_edge*cs_b;
-		//const double* bj  = b + ( j_edge / 8 ) * ps_b;
-		const double* bj  = b + n_iter * ps_b;
+		      double* cij = ( double* )c + j_edge*cs_c;
+		const double* ai  = ( double* )a;
+		//const double* bj  = ( double* )b + j_edge*cs_b;
+		//const double* bj  = ( double* )b + ( j_edge / 8 ) * ps_b;
+		const double* bj  = ( double* )b + n_iter * ps_b;
 
 		if ( 6 <= n_left )
 		{
@@ -1702,11 +1702,11 @@ void bli_dgemmsup_rv_haswell_asm_4x8n
              dim_t      m0,
              dim_t      n0,
              dim_t      k0,
-       const double*    alpha,
-       const double*    a, inc_t rs_a0, inc_t cs_a0,
-       const double*    b, inc_t rs_b0, inc_t cs_b0,
-       const double*    beta,
-             double*    c, inc_t rs_c0, inc_t cs_c0,
+       const void*      alpha,
+       const void*      a, inc_t rs_a0, inc_t cs_a0,
+       const void*      b, inc_t rs_b0, inc_t cs_b0,
+       const void*      beta,
+             void*      c, inc_t rs_c0, inc_t cs_c0,
              auxinfo_t* data,
        const cntx_t*    cntx
      )
@@ -2287,11 +2287,11 @@ void bli_dgemmsup_rv_haswell_asm_4x8n
 		const dim_t      mr_cur = 4;
 		const dim_t      j_edge = n0 - ( dim_t )n_left;
 
-		      double* cij = c + j_edge*cs_c;
-		const double* ai  = a;
-		//const double* bj  = b + j_edge*cs_b;
-		//const double* bj  = b + ( j_edge / 8 ) * ps_b;
-		const double* bj  = b + n_iter * ps_b;
+		      double* cij = ( double* )c + j_edge*cs_c;
+		const double* ai  = ( double* )a;
+		//const double* bj  = ( double* )b + j_edge*cs_b;
+		//const double* bj  = ( double* )b + ( j_edge / 8 ) * ps_b;
+		const double* bj  = ( double* )b + n_iter * ps_b;
 
 		if ( 6 <= n_left )
 		{
@@ -2350,11 +2350,11 @@ void bli_dgemmsup_rv_haswell_asm_3x8n
              dim_t      m0,
              dim_t      n0,
              dim_t      k0,
-       const double*    alpha,
-       const double*    a, inc_t rs_a0, inc_t cs_a0,
-       const double*    b, inc_t rs_b0, inc_t cs_b0,
-       const double*    beta,
-             double*    c, inc_t rs_c0, inc_t cs_c0,
+       const void*      alpha,
+       const void*      a, inc_t rs_a0, inc_t cs_a0,
+       const void*      b, inc_t rs_b0, inc_t cs_b0,
+       const void*      beta,
+             void*      c, inc_t rs_c0, inc_t cs_c0,
              auxinfo_t* data,
        const cntx_t*    cntx
      )
@@ -2965,11 +2965,11 @@ void bli_dgemmsup_rv_haswell_asm_3x8n
 		const dim_t      mr_cur = 3;
 		const dim_t      j_edge = n0 - ( dim_t )n_left;
 
-		      double* cij = c + j_edge*cs_c;
-		const double* ai  = a;
-		//const double* bj  = b + j_edge*cs_b;
-		//const double* bj  = b + ( j_edge / 8 ) * ps_b;
-		const double* bj  = b + n_iter * ps_b;
+		      double* cij = ( double* )c + j_edge*cs_c;
+		const double* ai  = ( double* )a;
+		//const double* bj  = ( double* )b + j_edge*cs_b;
+		//const double* bj  = ( double* )b + ( j_edge / 8 ) * ps_b;
+		const double* bj  = ( double* )b + n_iter * ps_b;
 
 		if ( 6 <= n_left )
 		{
@@ -3028,11 +3028,11 @@ void bli_dgemmsup_rv_haswell_asm_2x8n
              dim_t      m0,
              dim_t      n0,
              dim_t      k0,
-       const double*    alpha,
-       const double*    a, inc_t rs_a0, inc_t cs_a0,
-       const double*    b, inc_t rs_b0, inc_t cs_b0,
-       const double*    beta,
-             double*    c, inc_t rs_c0, inc_t cs_c0,
+       const void*      alpha,
+       const void*      a, inc_t rs_a0, inc_t cs_a0,
+       const void*      b, inc_t rs_b0, inc_t cs_b0,
+       const void*      beta,
+             void*      c, inc_t rs_c0, inc_t cs_c0,
              auxinfo_t* data,
        const cntx_t*    cntx
      )
@@ -3524,11 +3524,11 @@ void bli_dgemmsup_rv_haswell_asm_2x8n
 		const dim_t      mr_cur = 2;
 		const dim_t      j_edge = n0 - ( dim_t )n_left;
 
-		      double* cij = c + j_edge*cs_c;
-		const double* ai  = a;
-		//const double* bj  = b + j_edge*cs_b;
-		//const double* bj  = b + ( j_edge / 8 ) * ps_b;
-		const double* bj  = b + n_iter * ps_b;
+		      double* cij = ( double* )c + j_edge*cs_c;
+		const double* ai  = ( double* )a;
+		//const double* bj  = ( double* )b + j_edge*cs_b;
+		//const double* bj  = ( double* )b + ( j_edge / 8 ) * ps_b;
+		const double* bj  = ( double* )b + n_iter * ps_b;
 
 		if ( 6 <= n_left )
 		{
@@ -3587,11 +3587,11 @@ void bli_dgemmsup_rv_haswell_asm_1x8n
              dim_t      m0,
              dim_t      n0,
              dim_t      k0,
-       const double*    alpha,
-       const double*    a, inc_t rs_a0, inc_t cs_a0,
-       const double*    b, inc_t rs_b0, inc_t cs_b0,
-       const double*    beta,
-             double*    c, inc_t rs_c0, inc_t cs_c0,
+       const void*      alpha,
+       const void*      a, inc_t rs_a0, inc_t cs_a0,
+       const void*      b, inc_t rs_b0, inc_t cs_b0,
+       const void*      beta,
+             void*      c, inc_t rs_c0, inc_t cs_c0,
              auxinfo_t* data,
        const cntx_t*    cntx
      )
@@ -4047,11 +4047,11 @@ void bli_dgemmsup_rv_haswell_asm_1x8n
 		const dim_t      mr_cur = 1;
 		const dim_t      j_edge = n0 - ( dim_t )n_left;
 
-		      double* cij = c + j_edge*cs_c;
-		const double* ai  = a;
-		//const double* bj  = b + j_edge*cs_b;
-		//const double* bj  = b + ( j_edge / 8 ) * ps_b;
-		const double* bj  = b + n_iter * ps_b;
+		      double* cij = ( double* )c + j_edge*cs_c;
+		const double* ai  = ( double* )a;
+		//const double* bj  = ( double* )b + j_edge*cs_b;
+		//const double* bj  = ( double* )b + ( j_edge / 8 ) * ps_b;
+		const double* bj  = ( double* )b + n_iter * ps_b;
 
 		if ( 6 <= n_left )
 		{

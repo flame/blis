@@ -70,11 +70,11 @@ void bli_sgemm_armv8a_asm_8x12
              dim_t      m,
              dim_t      n,
              dim_t      k,
-       const float*     alpha,
-       const float*     a,
-       const float*     b,
-       const float*     beta,
-             float*     c, inc_t rs_c0, inc_t cs_c0,
+       const void*      alpha,
+       const void*      a,
+       const void*      b,
+       const void*      beta,
+             void*      c, inc_t rs_c0, inc_t cs_c0,
              auxinfo_t* data,
        const cntx_t*    cntx
      )
@@ -793,11 +793,11 @@ void bli_dgemm_armv8a_asm_6x8
              dim_t      m,
              dim_t      n,
              dim_t      k,
-       const double*    alpha,
-       const double*    a,
-       const double*    b,
-       const double*    beta,
-             double*    c, inc_t rs_c0, inc_t cs_c0,
+       const void*      alpha,
+       const void*      a,
+       const void*      b,
+       const void*      beta,
+             void*      c0, inc_t rs_c0, inc_t cs_c0,
              auxinfo_t* data,
        const cntx_t*    cntx
      )
@@ -815,7 +815,6 @@ void bli_dgemm_armv8a_asm_6x8
 	}
 
 #endif
-
 
 	const void* a_next = bli_auxinfo_next_a( data );
 	const void* b_next = bli_auxinfo_next_b( data );

@@ -42,12 +42,16 @@ void PASTEMAC3(ch,opname,arch,suf) \
              conj_t  conjx, \
              conj_t  conjy, \
              dim_t   n, \
-       const ctype*  x, inc_t incx, \
-       const ctype*  y, inc_t incy, \
-             ctype*  rho, \
+       const void*   x0, inc_t incx, \
+       const void*   y0, inc_t incy, \
+             void*   rho0, \
        const cntx_t* cntx  \
      ) \
 { \
+	const ctype* x   = x0; \
+	const ctype* y   = y0; \
+	      ctype* rho = rho0; \
+\
 	ctype dotxy; \
 \
 	if ( bli_zero_dim1( n ) ) \

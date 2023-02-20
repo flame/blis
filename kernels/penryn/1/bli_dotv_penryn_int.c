@@ -48,15 +48,15 @@ void bli_ddotv_penryn_int
              conj_t  conjx,
              conj_t  conjy,
              dim_t   n,
-       const double* x, inc_t incx,
-       const double* y, inc_t incy,
-             double* rho,
+       const void*   x0, inc_t incx,
+       const void*   y0, inc_t incy,
+             void*   rho0,
        const cntx_t* cntx
      )
 {
-	const double*  restrict x_cast   = x;
-	const double*  restrict y_cast   = y;
-	      double*  restrict rho_cast = rho;
+	const double*  restrict x_cast   = x0;
+	const double*  restrict y_cast   = y0;
+	      double*  restrict rho_cast = rho0;
 	      dim_t             i;
 
 	      dim_t             n_pre;

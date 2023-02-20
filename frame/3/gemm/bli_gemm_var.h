@@ -40,7 +40,7 @@
 
 typedef struct
 {
-	gemm_ukr_vft ukr;
+	gemm_ukr_ft ukr;
 } gemm_ker_params_t;
 
 

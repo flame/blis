@@ -40,12 +40,15 @@
 void PASTEMAC3(ch,opname,arch,suf) \
      ( \
              dim_t   n, \
-             ctype*  x, inc_t incx, \
-             ctype*  y, inc_t incy, \
+             void*   x0, inc_t incx, \
+             void*   y0, inc_t incy, \
        const cntx_t* cntx  \
      ) \
 { \
 	if ( bli_zero_dim1( n ) ) return; \
+\
+	ctype* x = x0; \
+	ctype* y = y0; \
 \
 	if ( incx == 1 && incy == 1 ) \
 	{ \

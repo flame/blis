@@ -50,12 +50,12 @@ void bli_dgemmtrsm_u_penryn_asm_4x4
              dim_t      m,
              dim_t      n,
              dim_t      k0,
-       const double*    alpha,
-       const double*    a12,
-       const double*    a11,
-       const double*    b21,
-             double*    b11,
-             double*    c11, inc_t rs_c0, inc_t cs_c0,
+       const void*      alpha,
+       const void*      a12,
+       const void*      a11,
+       const void*      b21,
+             void*      b11,
+             void*      c11, inc_t rs_c0, inc_t cs_c0,
              auxinfo_t* data,
        const cntx_t*    cntx
      )

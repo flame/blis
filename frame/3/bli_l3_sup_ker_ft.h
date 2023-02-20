@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2019, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -32,74 +32,25 @@
 
 */
 
-#ifndef BLIS_L3_FT_UKR_H
-#define BLIS_L3_FT_UKR_H
+#ifndef BLIS_L3_SUP_KER_FT_H
+#define BLIS_L3_SUP_KER_FT_H
 
 
 //
-// -- Level-3 micro-kernel function types --------------------------------------
+// -- Level-3 small/unpacked kernel function types -----------------------------
 //
 
-// gemm
-
 #undef  GENTDEF
-#define GENTDEF( ctype, ch, opname, tsuf ) \
+#define GENTDEF( opname ) \
 \
-typedef void (*PASTECH3(ch,opname,_ukr,tsuf)) \
+typedef void (*PASTECH(opname,_ker_ft)) \
      ( \
-             dim_t      m, \
-             dim_t      n, \
-             dim_t      k, \
-       const ctype*     alpha, \
-       const ctype*     a, \
-       const ctype*     b, \
-       const ctype*     beta, \
-             ctype*     c, inc_t rs_c, inc_t cs_c, \
-             auxinfo_t* data, \
-       const cntx_t*    cntx  \
+       PASTECH(opname,_params), \
+       BLIS_AUXINFO_PARAM, \
+       BLIS_CNTX_PARAM  \
      );
 
-INSERT_GENTDEF( gemm )
-
-
-// gemmtrsm_[lu]
-
-#undef  GENTDEF
-#define GENTDEF( ctype, ch, opname, tsuf ) \
-\
-typedef void (*PASTECH3(ch,opname,_ukr,tsuf)) \
-     ( \
-             dim_t      m, \
-             dim_t      n, \
-             dim_t      k, \
-       const ctype*     alpha, \
-       const ctype*     a1x, \
-       const ctype*     a11, \
-       const ctype*     bx1, \
-             ctype*     b11, \
-             ctype*     c11, inc_t rs_c, inc_t cs_c, \
-             auxinfo_t* data, \
-       const cntx_t*    cntx  \
-     );
-
-INSERT_GENTDEF( gemmtrsm )
-
-
-// trsm_[lu]
-
-#undef  GENTDEF
-#define GENTDEF( ctype, ch, opname, tsuf ) \
-\
-typedef void (*PASTECH3(ch,opname,_ukr,tsuf)) \
-     ( \
-       const ctype*     a, \
-             ctype*     b, \
-             ctype*     c, inc_t rs_c, inc_t cs_c, \
-             auxinfo_t* data, \
-       const cntx_t*    cntx  \
-     );
-
-INSERT_GENTDEF( trsm )
+GENTDEF( gemmsup )
 
 
 #endif

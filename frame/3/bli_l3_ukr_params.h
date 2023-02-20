@@ -32,42 +32,54 @@
 
 */
 
+#ifndef BLIS_L3_UKR_PARAMS_H
+#define BLIS_L3_UKR_PARAMS_H
 
-//
-// Define template prototypes for level-1f kernels.
-//
+// -- conventional kernels --
 
-// Note: Instead of defining function prototype macro templates and then
-// instantiating those macros to define the individual function prototypes,
-// we simply alias the official operations' prototypes as defined in
-// bli_l1f_ker_prot.h.
+#define gemm_params \
+\
+             dim_t  m, \
+             dim_t  n, \
+             dim_t  k, \
+       const void*  alpha, \
+       const void*  a, \
+       const void*  b, \
+       const void*  beta, \
+             void*  c, inc_t rs_c, inc_t cs_c
 
-#undef  GENTPROT
-#define GENTPROT AXPY2V_KER_PROT
+#define gemmtrsm_params \
+\
+             dim_t  m, \
+             dim_t  n, \
+             dim_t  k, \
+       const void*  alpha, \
+       const void*  a1x, \
+       const void*  a11, \
+       const void*  bx1, \
+             void*  b11, \
+             void*  c11, inc_t rs_c, inc_t cs_c
 
-INSERT_GENTPROT_BASIC0( axpy2v_ker_name )
+#define trsm_params \
+\
+       const void*  a, \
+             void*  b, \
+             void*  c, inc_t rs_c, inc_t cs_c
 
+// -- sup kernels --
 
-#undef  GENTPROT
-#define GENTPROT AXPYF_KER_PROT
+#define gemmsup_params \
+\
+             conj_t conja, \
+             conj_t conjb, \
+             dim_t  m, \
+             dim_t  n, \
+             dim_t  k, \
+       const void*  alpha, \
+       const void*  a, inc_t rs_a, inc_t cs_a, \
+       const void*  b, inc_t rs_b, inc_t cs_b, \
+       const void*  beta, \
+             void*  c, inc_t rs_c, inc_t cs_c
 
-INSERT_GENTPROT_BASIC0( axpyf_ker_name )
-
-
-#undef  GENTPROT
-#define GENTPROT DOTAXPYV_KER_PROT
-
-INSERT_GENTPROT_BASIC0( dotaxpyv_ker_name )
-
-
-#undef  GENTPROT
-#define GENTPROT DOTXAXPYF_KER_PROT
-
-INSERT_GENTPROT_BASIC0( dotxaxpyf_ker_name )
-
-
-#undef  GENTPROT
-#define GENTPROT DOTXF_KER_PROT
-
-INSERT_GENTPROT_BASIC0( dotxf_ker_name )
+#endif
 

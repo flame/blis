@@ -62,9 +62,9 @@ void PASTEMAC3(ch,opname,arch,suf) \
              dim_t   cdim, \
              dim_t   n, \
              dim_t   n_max, \
-       const ctype*  kappa, \
-       const ctype*  a, inc_t inca, inc_t lda, \
-             ctype*  p,             inc_t ldp, \
+       const void*   kappa, \
+       const void*   a, inc_t inca, inc_t lda, \
+             void*   p,             inc_t ldp, \
        const cntx_t* cntx  \
      ) \
 { \

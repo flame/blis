@@ -41,11 +41,14 @@ void bli_scopyv_zen_int
      (
              conj_t  conjx,
              dim_t   n,
-       const float*  x, inc_t incx,
-             float*  y, inc_t incy,
+       const void*   x0, inc_t incx,
+             void*   y0, inc_t incy,
        const cntx_t* cntx
      )
 {
+	const float* x = x0;
+	      float* y = y0;
+
 	const dim_t num_elem_per_reg = 8;
 	dim_t       i = 0;
 	__m256      xv[16];
@@ -190,11 +193,14 @@ void bli_dcopyv_zen_int
      (
              conj_t  conjx,
              dim_t   n,
-       const double* x, inc_t incx,
-             double* y, inc_t incy,
+       const void*   x0, inc_t incx,
+             void*   y0, inc_t incy,
        const cntx_t* cntx
      )
 {
+	const double* x = x0;
+	      double* y = y0;
+
 	const dim_t num_elem_per_reg = 4;
 	dim_t       i = 0;
 	__m256d     xv[16];

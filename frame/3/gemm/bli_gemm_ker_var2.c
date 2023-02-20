@@ -179,14 +179,14 @@ void bli_gemm_ker_var2
 
 	// Query the context for the micro-kernel address and cast it to its
 	// function pointer type.
-	gemm_ukr_vft gemm_ukr = bli_cntx_get_l3_vir_ukr_dt( dt_exec, BLIS_GEMM_UKR, cntx );
+	gemm_ukr_ft gemm_ukr = bli_cntx_get_l3_vir_ukr_dt( dt_exec, BLIS_GEMM_UKR, cntx );
 
 	// Query the params field from the obj_t. If it is non-NULL, grab the ukr
 	// field of the params struct. If that function pointer is non-NULL, use it
 	// as our microkernel instead of the default microkernel queried from the
 	// cntx above.
 	const gemm_ker_params_t* params = bli_obj_ker_params( c );
-	gemm_ukr_vft user_ukr = params ? params->ukr : NULL;
+	gemm_ukr_ft user_ukr = params ? params->ukr : NULL;
 	if ( user_ukr ) gemm_ukr = user_ukr;
 
 	// Temporary C buffer for edge cases. Note that the strides of this

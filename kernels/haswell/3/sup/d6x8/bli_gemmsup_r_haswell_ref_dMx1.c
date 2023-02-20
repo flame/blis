@@ -99,15 +99,21 @@ void PASTEMAC(ch,opname) \
              dim_t      m, \
              dim_t      n, \
              dim_t      k, \
-       const ctype*     alpha, \
-       const ctype*     a, inc_t rs_a, inc_t cs_a, \
-       const ctype*     b, inc_t rs_b, inc_t cs_b, \
-       const ctype*     beta, \
-             ctype*     c, inc_t rs_c, inc_t cs_c, \
+       const void*      alpha0, \
+       const void*      a0, inc_t rs_a, inc_t cs_a, \
+       const void*      b0, inc_t rs_b, inc_t cs_b, \
+       const void*      beta0, \
+             void*      c0, inc_t rs_c, inc_t cs_c, \
              auxinfo_t* data, \
        const cntx_t*    cntx \
      ) \
 { \
+	const ctype* alpha = alpha0; \
+	const ctype* a     = a0; \
+	const ctype* b     = b0; \
+	const ctype* beta  = beta0; \
+	      ctype* c     = c0; \
+\
 	for ( dim_t i = 0; i < mdim; ++i ) \
 	{ \
 		      ctype* ci = &c[ i*rs_c ]; \

@@ -32,57 +32,38 @@
 
 */
 
+#ifndef BLIS_L1V_KER_FT_H
+#define BLIS_L1V_KER_FT_H
+
 
 //
-// Define template prototypes for level-1m kernels.
+// -- Level-1v kernel function types -------------------------------------------
 //
 
-// Note: Instead of defining function prototype macro templates and then
-// instantiating those macros to define the individual function prototypes,
-// we simply alias the official operations' prototypes as defined in
-// bli_l1m_ker_prot.h.
+#undef  GENTDEF
+#define GENTDEF( opname ) \
+\
+typedef void (*PASTECH(opname,_ker_ft)) \
+     ( \
+       PASTECH(opname,_params), \
+       BLIS_CNTX_PARAM  \
+     );
 
-// native packm kernels
+GENTDEF( addv )
+GENTDEF( amaxv )
+GENTDEF( axpbyv )
+GENTDEF( axpyv )
+GENTDEF( copyv )
+GENTDEF( dotv )
+GENTDEF( dotxv )
+GENTDEF( invertv )
+GENTDEF( invscalv )
+GENTDEF( scalv )
+GENTDEF( scal2v )
+GENTDEF( setv )
+GENTDEF( subv )
+GENTDEF( swapv )
+GENTDEF( xpbyv )
 
-#undef  GENTPROT
-#define GENTPROT PACKM_KER_PROT
-
-INSERT_GENTPROT_BASIC0( packm_mrxk_ker_name )
-INSERT_GENTPROT_BASIC0( packm_nrxk_ker_name )
-
-
-// native unpackm kernels
-
-#undef  GENTPROT
-#define GENTPROT UNPACKM_KER_PROT
-
-INSERT_GENTPROT_BASIC0( unpackm_mrxk_ker_name )
-INSERT_GENTPROT_BASIC0( unpackm_nrxk_ker_name )
-
-
-// 1e/1r packm kernels
-
-#undef  GENTPROT
-#define GENTPROT PACKM_KER_PROT
-
-INSERT_GENTPROT_BASIC0( packm_mrxk_1er_ker_name )
-INSERT_GENTPROT_BASIC0( packm_nrxk_1er_ker_name )
-
-
-// packm kernels for diagonal blocks
-
-#undef  GENTPROT
-#define GENTPROT PACKM_DIAG_KER_PROT
-
-INSERT_GENTPROT_BASIC0( packm_mrxmr_diag_ker_name )
-INSERT_GENTPROT_BASIC0( packm_nrxnr_diag_ker_name )
-
-
-// 1e/1r packm kernels for diagonal blocks
-
-#undef  GENTPROT
-#define GENTPROT PACKM_DIAG_KER_PROT
-
-INSERT_GENTPROT_BASIC0( packm_mrxmr_diag_1er_ker_name )
-INSERT_GENTPROT_BASIC0( packm_nrxnr_diag_1er_ker_name )
+#endif
 
