@@ -51,21 +51,21 @@ void bli_ddotxaxpyf_penryn_int
              conj_t  conjx,
              dim_t   m,
              dim_t   b_n,
-       const double* alpha,
-       const double* a, inc_t inca, inc_t lda,
-       const double* w, inc_t incw,
-       const double* x, inc_t incx,
-       const double* beta,
-             double* y, inc_t incy,
-             double* z, inc_t incz,
+       const void*   alpha,
+       const void*   a, inc_t inca, inc_t lda,
+       const void*   w, inc_t incw,
+       const void*   x, inc_t incx,
+       const void*   beta,
+             void*   y, inc_t incy,
+             void*   z, inc_t incz,
        const cntx_t* cntx
      )
 {
 	const double*  restrict alpha_cast = alpha;
-	const double*  restrict beta_cast  = beta;
 	const double*  restrict a_cast     = a;
 	const double*  restrict w_cast     = w;
 	const double*  restrict x_cast     = x;
+	const double*  restrict beta_cast  = beta;
 	      double*  restrict y_cast     = y;
 	      double*  restrict z_cast     = z;
 

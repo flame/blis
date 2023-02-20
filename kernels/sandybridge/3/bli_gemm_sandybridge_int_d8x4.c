@@ -36,29 +36,25 @@
 #include <immintrin.h>
 #include "blis.h"
 
-
-#if 0
-void bli_sgemm_sandybridge_int_8x8
-     (
-     )
-{
-}
-#endif
-
 void bli_dgemm_sandybridge_int_8x4
      (
              dim_t      m,
              dim_t      n,
              dim_t      k,
-       const double*    alpha,
-       const double*    a,
-       const double*    b,
-       const double*    beta,
-             double*    c, inc_t rs_c0, inc_t cs_c0,
+       const void*      alpha0,
+       const void*      a0,
+       const void*      b0,
+       const void*      beta0,
+             void*      c0, inc_t rs_c0, inc_t cs_c0,
              auxinfo_t* data,
        const cntx_t*    cntx
      )
 {
+	const double* alpha = alpha0;
+	const double* a     = a0;
+	const double* b     = b0;
+	const double* beta  = beta0;
+	      double* c     = c0;
 
 	//const void* a_next = bli_auxinfo_next_a( data );
 	const void* b_next = bli_auxinfo_next_b( data );
@@ -479,24 +475,4 @@ void bli_dgemm_sandybridge_int_8x4
 
 	GEMM_UKR_FLUSH_CT( d );
 }
-
-
-
-#if 0
-void bli_cgemm_sandybridge_int_8x4
-     (
-     )
-{
-}
-#endif
-
-
-
-#if 0
-void bli_zgemm_sandybridge_int_4x4
-     (
-     )
-{
-}
-#endif
 

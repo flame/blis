@@ -49,11 +49,11 @@ void bli_ddotaxpyv_penryn_int
              conj_t  conjx,
              conj_t  conjy,
              dim_t   n,
-       const double* alpha,
-       const double* x, inc_t incx,
-       const double* y, inc_t incy,
-             double* rho,
-             double* z, inc_t incz,
+       const void*   alpha,
+       const void*   x, inc_t incx,
+       const void*   y, inc_t incy,
+             void*   rho,
+             void*   z, inc_t incz,
        const cntx_t* cntx
      )
 {

@@ -117,11 +117,11 @@ void bli_dgemmsup_rv_armv8a_asm_6x6m
              dim_t      m0,
              dim_t      n0,
              dim_t      k0,
-       const double*    alpha,
-       const double*    a, inc_t rs_a0, inc_t cs_a0,
-       const double*    b, inc_t rs_b0, inc_t cs_b0,
-       const double*    beta,
-             double*    c, inc_t rs_c0, inc_t cs_c0,
+       const void*      alpha,
+       const void*      a, inc_t rs_a0, inc_t cs_a0,
+       const void*      b, inc_t rs_b0, inc_t cs_b0,
+       const void*      beta,
+             void*      c, inc_t rs_c0, inc_t cs_c0,
              auxinfo_t* data,
        const cntx_t*    cntx
      )
@@ -462,15 +462,15 @@ LABEL(END_EXEC)
 
 consider_edge_cases:
   // Forward address.
-  a = a + m_iter * ps_a;
-  c = c + m_iter * 6 * rs_c;
+  a = ( double* )a + m_iter * ps_a;
+  c = ( double* )c + m_iter * 6 * rs_c;
   auxinfo_t data_d6x4mn = *data;
   bli_auxinfo_set_ps_b( 4 * cs_b0, &data_d6x4mn );
   bli_dgemmsup_rv_armv8a_int_6x4mn
   (
     conja, conjb, m_left, 6, k0,
-      alpha, a, rs_a0, cs_a0, b, rs_b0, cs_b0,
-      beta, c, rs_c0, cs_c0, &data_d6x4mn, cntx
+    alpha, a, rs_a0, cs_a0, b, rs_b0, cs_b0,
+    beta, c, rs_c0, cs_c0, &data_d6x4mn, cntx
   );
 
 }

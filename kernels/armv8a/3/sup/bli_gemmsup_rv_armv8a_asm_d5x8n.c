@@ -127,11 +127,11 @@ void bli_dgemmsup_rv_armv8a_asm_5x8n
              dim_t      m0,
              dim_t      n0,
              dim_t      k0,
-       const double*    alpha,
-       const double*    a, inc_t rs_a0, inc_t cs_a0,
-       const double*    b, inc_t rs_b0, inc_t cs_b0,
-       const double*    beta,
-             double*    c, inc_t rs_c0, inc_t cs_c0,
+       const void*      alpha,
+       const void*      a, inc_t rs_a0, inc_t cs_a0,
+       const void*      b, inc_t rs_b0, inc_t cs_b0,
+       const void*      beta,
+             void*      c, inc_t rs_c0, inc_t cs_c0,
              auxinfo_t* data,
        const cntx_t*    cntx
      )
@@ -461,8 +461,8 @@ LABEL(END_EXEC)
 
 consider_edge_cases:
   // Forward address.
-  b = b + n_iter * ps_b;
-  c = c + n_iter * 8 * cs_c;
+  b = ( double* )b + n_iter * ps_b;
+  c = ( double* )c + n_iter * 8 * cs_c;
   if ( n_left )
   {
     // Set panel stride to unpacked mode.
