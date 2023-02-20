@@ -86,13 +86,13 @@ void bli_ddotv_penryn_int
 	{
 		use_ref = TRUE;
 	}
-	else if ( bli_is_unaligned_to( ( siz_t )x, 16 ) ||
-	          bli_is_unaligned_to( ( siz_t )y, 16 ) )
+	else if ( bli_is_unaligned_to( ( siz_t )x_cast, 16 ) ||
+	          bli_is_unaligned_to( ( siz_t )y_cast, 16 ) )
 	{
 		use_ref = TRUE;
 
-		if ( bli_is_unaligned_to( ( siz_t )x, 16 ) &&
-		     bli_is_unaligned_to( ( siz_t )y, 16 ) )
+		if ( bli_is_unaligned_to( ( siz_t )x_cast, 16 ) &&
+		     bli_is_unaligned_to( ( siz_t )y_cast, 16 ) )
 		{
 			use_ref = FALSE;
 			n_pre = 1;

@@ -65,8 +65,8 @@ void bli_sgemm_armv7a_int_4x4
 
     GEMM_UKR_SETUP_CT( s, 4, 4, false );
 
-	void* a_next = bli_auxinfo_next_a( data );
-	void* b_next = bli_auxinfo_next_b( data );
+	const void* a_next = bli_auxinfo_next_a( data );
+	const void* b_next = bli_auxinfo_next_b( data );
 
 	float32x4_t alphav;
 	alphav = vmovq_n_f32( *alpha );
@@ -252,20 +252,20 @@ void bli_dgemm_armv7a_int_4x4
              dim_t      m,
              dim_t      n,
              dim_t      k,
-       const void*      alpha0,
-       const void*      a0,
-       const void*      b0,
-       const void*      beta0,
-             void*      c0, inc_t rs_c0, inc_t cs_c0,
+       const void*      alpha_,
+       const void*      a_,
+       const void*      b_,
+       const void*      beta_,
+             void*      c_, inc_t rs_c0, inc_t cs_c0,
              auxinfo_t* data,
        const cntx_t*    cntx
      )
 {
-	const double* alpha = alpha0;
-	const double* a     = a0;
-	const double* b     = b0;
-	const double* beta  = beta0;
-	      double* c     = c0;
+	const double* alpha = alpha_;
+	const double* a     = a_;
+	const double* b     = b_;
+	const double* beta  = beta_;
+	      double* c     = c_;
 
 	// Typecast local copies of integers in case dim_t and inc_t are a
 	// different size than is expected by load instructions.
