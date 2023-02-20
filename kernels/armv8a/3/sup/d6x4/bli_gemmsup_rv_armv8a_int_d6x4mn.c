@@ -64,11 +64,11 @@ void bli_dgemmsup_rv_armv8a_int_6x4mn
              dim_t      m0,
              dim_t      n0,
              dim_t      k0,
-       const double*    alpha,
-       const double*    a0, inc_t rs_a, inc_t cs_a,
-       const double*    b0, inc_t rs_b, inc_t cs_b,
-       const double*    beta,
-             double*    c0, inc_t rs_c, inc_t cs_c,
+       const void*      alpha,
+       const void*      a0, inc_t rs_a, inc_t cs_a,
+       const void*      b0, inc_t rs_b, inc_t cs_b,
+       const void*      beta,
+             void*      c0, inc_t rs_c, inc_t cs_c,
              auxinfo_t* data,
        const cntx_t*    cntx
      )
@@ -477,8 +477,8 @@ void bli_dgemmsup_rv_armv8a_int_6x4mn
       c_in += 4 * cs_c;
     }
 
-    a0 += ps_a;
-    c0 += 6 * rs_c;
+    a0 = ( double* )a0 + ps_a;
+    c0 = ( double* )c0 + 6 * rs_c;
   }
 }
 
