@@ -148,9 +148,9 @@ void bli_dgemmsup_rv_armv8a_asm_6x8n
     assert( m0 <= 9 );
 
     // Manual separation.
-    dgemmsup_ker_ft ker_fp1 = NULL;
-    dgemmsup_ker_ft ker_fp2 = NULL;
-    dim_t           mr1, mr2;
+    gemmsup_ker_ft ker_fp1 = NULL;
+    gemmsup_ker_ft ker_fp2 = NULL;
+    dim_t          mr1, mr2;
     
     if ( m0 == 9 )
     {

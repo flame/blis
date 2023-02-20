@@ -57,7 +57,6 @@ void bli_ddotv_penryn_int
 	const double*  restrict x_cast   = x0;
 	const double*  restrict y_cast   = y0;
 	      double*  restrict rho_cast = rho0;
-	      dim_t             i;
 
 	      dim_t             n_pre;
 	      dim_t             n_run;
@@ -102,16 +101,16 @@ void bli_ddotv_penryn_int
 	// Call the reference implementation if needed.
 	if ( use_ref == TRUE )
 	{
-		ddotv_ker_ft f = bli_cntx_get_ukr_dt( BLIS_DOUBLE, BLIS_DOTV_KER, cntx );
+		dotv_ker_ft f = bli_cntx_get_ukr_dt( BLIS_DOUBLE, BLIS_DOTV_KER, cntx );
 
 		f
 		(
 		  conjx,
 		  conjy,
 		  n,
-		  x, incx,
-		  y, incy,
-		  rho,
+		  x0, incx,
+		  y0, incy,
+		  rho0,
 		  cntx
 		);
 		return;
@@ -138,7 +137,7 @@ void bli_ddotv_penryn_int
 
 	rho1v.v = _mm_setzero_pd();
 
-	for ( i = 0; i < n_run; ++i )
+	for ( dim_t i = 0; i < n_run; ++i )
 	{
 		x1v.v = _mm_load_pd( ( double* )x1 );
 		y1v.v = _mm_load_pd( ( double* )y1 );
@@ -155,7 +154,7 @@ void bli_ddotv_penryn_int
 
 	if ( n_left > 0 )
 	{
-		for ( i = 0; i < n_left; ++i )
+		for ( dim_t i = 0; i < n_left; ++i )
 		{
 			x1c = *x1;
 			y1c = *y1;

@@ -128,9 +128,8 @@ void bli_ddotxf_penryn_int
 	// Call the reference implementation if needed.
 	if ( use_ref == TRUE )
 	{
-		dotxf_ker_ft f = bli_cntx_get_ukr_dt( BLIS_DOUBLE, BLIS_DOTXF_KER, cntx );
-
 		#if 0
+		dotxf_ker_ft f = bli_cntx_get_ukr_dt( BLIS_DOUBLE, BLIS_DOTXF_KER, cntx );
 		f
 		( conjat,
 		  conjx,

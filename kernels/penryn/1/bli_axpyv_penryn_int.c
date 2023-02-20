@@ -99,15 +99,15 @@ void bli_daxpyv_penryn_int
 	// Call the reference implementation if needed.
 	if ( use_ref == TRUE )
 	{
-		daxpyv_ker_ft f = bli_cntx_get_ukr_dt( BLIS_DOUBLE, BLIS_AXPYV_KER, cntx );
+		axpyv_ker_ft f = bli_cntx_get_ukr_dt( BLIS_DOUBLE, BLIS_AXPYV_KER, cntx );
 
 		f
 		(
 		  conjx,
 		  n,
-		  alpha,
-		  x, incx,
-		  y, incy,
+		  alpha0,
+		  x0, incx,
+		  y0, incy,
 		  cntx
 		);
 		return;
@@ -171,7 +171,7 @@ void bli_daxpyv_penryn_int
 
 	if ( n_left > 0 )
 	{
-		for ( i = 0; i < n_left; ++i )
+		for ( dim_t i = 0; i < n_left; ++i )
 		{
 			x1c = *x1;
 

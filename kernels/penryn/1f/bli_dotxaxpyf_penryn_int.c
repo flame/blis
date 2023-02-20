@@ -142,8 +142,8 @@ void bli_ddotxaxpyf_penryn_int
 
 	if ( use_ref == TRUE )
 	{
-		dotxaxpyf_ker_ft f = bli_cntx_get_ukr_dt( BLIS_DOUBLE, BLIS_DOTXAXPYF_KER, cntx );
 		#if 0
+		dotxaxpyf_ker_ft f = bli_cntx_get_ukr_dt( BLIS_DOUBLE, BLIS_DOTXAXPYF_KER, cntx );
 		f
 		(
 		  conjat,
