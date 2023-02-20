@@ -118,9 +118,9 @@
 REALNAME:
     #include "rviv_save_registers.h"
 
+    vsetvli s0, zero, VTYPE
     csrr s0, vlenb
 	FZERO(fzero)
-    vsetvli zero, zero, VTYPE, m1, ta, ma
 
     // Set up pointers
     add C01_ptr, C00_ptr, cs_c

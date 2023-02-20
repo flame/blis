@@ -69,8 +69,9 @@ void bli_dgemm_rviv_4vx4
 
     GEMM_UKR_SETUP_CT( d, mr, nr, false );
 
+    // Assumes rs_c == 1.
     bli_dgemm_rviv_asm_4vx4( k, alpha, a, b, beta, c,
-							 rs_c * get_vlenb(), cs_c * sizeof(double) );
+                             rs_c * get_vlenb(), cs_c * sizeof(double) );
 
     GEMM_UKR_FLUSH_CT( d );
 }
