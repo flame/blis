@@ -87,7 +87,7 @@ void bli_dgemmsup_rv_armv8a_int_6x4mn
   dim_t k;
   uint64_t ps_a   = bli_auxinfo_ps_a( data );
   uint64_t ps_b   = bli_auxinfo_ps_b( data );
-  uint64_t b_iszr = ( *beta == 0.0 );
+  uint64_t b_iszr = ( *(( double* )beta) == 0.0 );
   assert( cs_b == 1 );
 
   // Registers used to store a 6x4 block of C.

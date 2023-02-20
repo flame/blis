@@ -94,7 +94,7 @@ void bli_dgemmsup_rd_armv8a_int_3x4
 
   uint64_t k_mker = k0 / 2;
   uint64_t k_left = k0 % 2;
-  uint64_t b_iszr = ( *beta == 0.0 );
+  uint64_t b_iszr = ( *(( double* )beta) == 0.0 );
 
   assert( cs_a == 1 );
   assert( rs_b == 1 );

@@ -63,13 +63,13 @@ void bli_dpackm_armsve256_int_8xk
     const int64_t lda   = lda_;
     const int64_t ldp   = ldp_;
 
-    double* restrict alpha1     = a;
-    double* restrict alpha1_4   = alpha1 + 4 * inca;
-    double* restrict pi1        = p;
-    const   svbool_t all_active = svptrue_b64();
-    svfloat64_t      z_a0;
-    svfloat64_t      z_a4;
-    svuint64_t       z_index;
+    const double* restrict alpha1     = a;
+    const double* restrict alpha1_4   = alpha1 + 4 * inca;
+          double* restrict pi1        = p;
+    const svbool_t         all_active = svptrue_b64();
+    svfloat64_t            z_a0;
+    svfloat64_t            z_a4;
+    svuint64_t             z_index;
 
     // creating index for gather/scatter
     //   with each element as: 0, 1*inca, 2*inca, 3*inca
