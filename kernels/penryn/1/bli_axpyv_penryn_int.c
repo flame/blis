@@ -45,35 +45,33 @@ typedef union
 
 void bli_daxpyv_penryn_int
      (
-       conj_t           conjx,
-       dim_t            n,
-       double* restrict alpha,
-       double* restrict x, inc_t incx,
-       double* restrict y, inc_t incy,
-       cntx_t*          cntx
+             conj_t  conjx,
+             dim_t   n,
+       const double* alpha,
+       const double* x, inc_t incx,
+             double* y, inc_t incy,
+       const cntx_t* cntx
      )
 {
-	double*  restrict alpha_cast = alpha;
-	double*  restrict x_cast = x;
-	double*  restrict y_cast = y;
-	dim_t             i;
+	const double*  restrict alpha_cast = alpha;
+	const double*  restrict x_cast = x;
+	      double*  restrict y_cast = y;
+	      dim_t             i;
 
-	const dim_t       n_elem_per_reg = 2;
-	const dim_t       n_iter_unroll  = 4;
+	const dim_t             n_elem_per_reg = 2;
+	const dim_t             n_iter_unroll  = 4;
 
-	dim_t             n_pre;
-	dim_t             n_run;
-	dim_t             n_left;
+	      dim_t             n_pre;
+	      dim_t             n_run;
+	      dim_t             n_left;
 
-	double*  restrict x1;
-	double*  restrict y1;
-	double            alpha1c, x1c;
+	      double            alpha1c, x1c;
 
-	v2df_t            alpha1v;
-	v2df_t            x1v, x2v, x3v, x4v;
-	v2df_t            y1v, y2v, y3v, y4v;
+	      v2df_t            alpha1v;
+	      v2df_t            x1v, x2v, x3v, x4v;
+	      v2df_t            y1v, y2v, y3v, y4v;
 
-	bool              use_ref = FALSE;
+	      bool              use_ref = FALSE;
 
 
 	if ( bli_zero_dim1( n ) ) return;
@@ -122,8 +120,8 @@ void bli_daxpyv_penryn_int
 
 	alpha1c = *alpha_cast;
 
-	x1 = x_cast;
-	y1 = y_cast;
+	const double* restrict x1 = x_cast;
+	      double* restrict y1 = y_cast;
 
 	if ( n_pre == 1 )
 	{

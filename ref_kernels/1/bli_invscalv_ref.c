@@ -39,11 +39,11 @@
 \
 void PASTEMAC3(ch,opname,arch,suf) \
      ( \
-       conj_t           conjalpha, \
-       dim_t            n, \
-       ctype*  restrict alpha, \
-       ctype*  restrict x, inc_t incx, \
-       cntx_t*          cntx  \
+             conj_t  conjalpha, \
+             dim_t   n, \
+       const ctype*  alpha, \
+             ctype*  x, inc_t incx, \
+       const cntx_t* cntx  \
      ) \
 { \
 	if ( bli_zero_dim1( n ) ) return; \

@@ -43,14 +43,15 @@
 
 #define GEMM_UKR_SETUP_CT_PRE(ch,mr,nr,row_major,alignment) \
 \
-	PASTEMAC(ch,ctype)* restrict _beta   = beta; \
-	PASTEMAC(ch,ctype)* restrict _c      = c; \
-	const inc_t                  _rs_c   = rs_c; \
-	const inc_t                  _cs_c   = cs_c; \
-	PASTEMAC(ch,ctype)           _ct[ BLIS_STACK_BUF_MAX_SIZE / sizeof( PASTEMAC(ch,ctype) ) ] \
-	                                  __attribute__((aligned(alignment))); \
-	const inc_t                  _rs_ct  = row_major ? nr :  1; \
-	const inc_t                  _cs_ct  = row_major ?  1 : mr;
+	const PASTEMAC(ch,ctype)* restrict _beta   = beta; \
+	      PASTEMAC(ch,ctype)* restrict _c      = c; \
+	const inc_t                        _rs_c   = rs_c; \
+	const inc_t                        _cs_c   = cs_c; \
+	      PASTEMAC(ch,ctype)           _ct[ BLIS_STACK_BUF_MAX_SIZE \
+	                                        / sizeof( PASTEMAC(ch,ctype) ) \
+	                                      ] __attribute__((aligned(alignment))); \
+	const inc_t                        _rs_ct  = row_major ? nr :  1; \
+	const inc_t                        _cs_ct  = row_major ?  1 : mr;
 
 #define GEMM_UKR_SETUP_CT_POST(ch) \
 \
@@ -134,13 +135,14 @@
 
 #define GEMMTRSM_UKR_SETUP_CT_PRE(ch,mr,nr,row_major,alignment) \
 \
-	PASTEMAC(ch,ctype)* restrict _c      = c11; \
-	const inc_t                  _rs_c   = rs_c; \
-	const inc_t                  _cs_c   = cs_c; \
-	PASTEMAC(ch,ctype)           _ct[ BLIS_STACK_BUF_MAX_SIZE / sizeof( PASTEMAC(ch,ctype) ) ] \
-	                                  __attribute__((aligned(alignment))); \
-	const inc_t                  _rs_ct  = row_major ? nr :  1; \
-	const inc_t                  _cs_ct  = row_major ?  1 : mr;
+	      PASTEMAC(ch,ctype)* restrict _c      = c11; \
+	const inc_t                        _rs_c   = rs_c; \
+	const inc_t                        _cs_c   = cs_c; \
+	      PASTEMAC(ch,ctype)           _ct[ BLIS_STACK_BUF_MAX_SIZE \
+	                                        / sizeof( PASTEMAC(ch,ctype) ) \
+	                                      ] __attribute__((aligned(alignment))); \
+	const inc_t                        _rs_ct  = row_major ? nr :  1; \
+	const inc_t                        _cs_ct  = row_major ?  1 : mr;
 
 #define GEMMTRSM_UKR_SETUP_CT_POST(ch) \
 \

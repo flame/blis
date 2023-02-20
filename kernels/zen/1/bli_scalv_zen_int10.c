@@ -57,11 +57,11 @@ typedef union
 
 void bli_sscalv_zen_int10
      (
-       conj_t           conjalpha,
-       dim_t            n,
-       float*  restrict alpha,
-       float*  restrict x, inc_t incx,
-       cntx_t*          cntx
+             conj_t  conjalpha,
+             dim_t   n,
+       const float*  alpha,
+             float*  x, inc_t incx,
+       const cntx_t* cntx
      )
 {
 	const dim_t      n_elem_per_reg = 8;
@@ -251,11 +251,11 @@ void bli_sscalv_zen_int10
 
 void bli_dscalv_zen_int10
      (
-       conj_t           conjalpha,
-       dim_t            n,
-       double* restrict alpha,
-       double* restrict x, inc_t incx,
-       cntx_t*          cntx
+             conj_t  conjalpha,
+             dim_t   n,
+       const double* alpha,
+             double* x, inc_t incx,
+       const cntx_t* cntx
      )
 {
 	const dim_t      n_elem_per_reg = 4;
@@ -450,11 +450,11 @@ void bli_dscalv_zen_int10
 
 void bli_cscalv_zen_int10
      (
-       conj_t             conjalpha,
-       dim_t              n,
-       scomplex* restrict alpha,
-       scomplex* restrict x, inc_t incx,
-       cntx_t*   restrict cntx
+             conj_t  conjalpha,
+             dim_t   n,
+       const scomplex* alpha,
+             scomplex* x, inc_t incx,
+       const cntx_t* cntx
      )
 {
 	const num_t dt = BLIS_SCOMPLEX;

@@ -56,16 +56,16 @@ typedef union
 
 void bli_sdotxf_zen_int_8
      (
-       conj_t           conjat,
-       conj_t           conjx,
-       dim_t            m,
-       dim_t            b_n,
-       float*  restrict alpha,
-       float*  restrict a, inc_t inca, inc_t lda,
-       float*  restrict x, inc_t incx,
-       float*  restrict beta,
-       float*  restrict y, inc_t incy,
-       cntx_t*          cntx
+             conj_t  conjat,
+             conj_t  conjx,
+             dim_t   m,
+             dim_t   b_n,
+       const float*  alpha,
+       const float*  a, inc_t inca, inc_t lda,
+       const float*  x, inc_t incx,
+       const float*  beta,
+             float*  y, inc_t incy,
+       const cntx_t* cntx
      )
 {
 	const dim_t fuse_fac       = 8;
@@ -99,9 +99,9 @@ void bli_sdotxf_zen_int_8
 
 		for ( dim_t i = 0; i < b_n; ++i )
 		{
-			float* a1   = a + (0  )*inca + (i  )*lda;
-			float* x1   = x + (0  )*incx;
-			float* psi1 = y + (i  )*incy;
+			const float* restrict a1   = a + (0  )*inca + (i  )*lda;
+			const float* restrict x1   = x + (0  )*incx;
+			      float* restrict psi1 = y + (i  )*incy;
 
 			f
 			(
@@ -147,15 +147,15 @@ void bli_sdotxf_zen_int_8
 		dim_t m_viter = ( m ) / ( n_elem_per_reg * n_iter_unroll );
 
 		// Set up pointers for x and the b_n columns of A (rows of A^T).
-		float* restrict x0 = x;
-		float* restrict a0 = a + 0*lda;
-		float* restrict a1 = a + 1*lda;
-		float* restrict a2 = a + 2*lda;
-		float* restrict a3 = a + 3*lda;
-		float* restrict a4 = a + 4*lda;
-		float* restrict a5 = a + 5*lda;
-		float* restrict a6 = a + 6*lda;
-		float* restrict a7 = a + 7*lda;
+		const float* restrict x0 = x;
+		const float* restrict a0 = a + 0*lda;
+		const float* restrict a1 = a + 1*lda;
+		const float* restrict a2 = a + 2*lda;
+		const float* restrict a3 = a + 3*lda;
+		const float* restrict a4 = a + 4*lda;
+		const float* restrict a5 = a + 5*lda;
+		const float* restrict a6 = a + 6*lda;
+		const float* restrict a7 = a + 7*lda;
 
 		// Initialize b_n rho vector accumulators to zero.
 		v8sf_t rho0v; rho0v.v = _mm256_setzero_ps();
@@ -268,8 +268,8 @@ void bli_sdotxf_zen_int_8
 		dim_t m_viter = ( m ) / ( n_iter_unroll );
 
 		// Initialize pointers for x and A.
-		float* restrict x0 = x;
-		float* restrict a0 = a;
+		const float* restrict x0 = x;
+		const float* restrict a0 = a;
 
 		// Initialize rho vector accumulators to zero.
 		v8sf_t rho0v; rho0v.v = _mm256_setzero_ps();
@@ -332,15 +332,15 @@ void bli_sdotxf_zen_int_8
 	// Scalar edge case.
 	{
 		// Initialize pointers for x and the b_n columns of A (rows of A^T).
-		float* restrict x0 = x;
-		float* restrict a0 = a + 0*lda;
-		float* restrict a1 = a + 1*lda;
-		float* restrict a2 = a + 2*lda;
-		float* restrict a3 = a + 3*lda;
-		float* restrict a4 = a + 4*lda;
-		float* restrict a5 = a + 5*lda;
-		float* restrict a6 = a + 6*lda;
-		float* restrict a7 = a + 7*lda;
+		const float* restrict x0 = x;
+		const float* restrict a0 = a + 0*lda;
+		const float* restrict a1 = a + 1*lda;
+		const float* restrict a2 = a + 2*lda;
+		const float* restrict a3 = a + 3*lda;
+		const float* restrict a4 = a + 4*lda;
+		const float* restrict a5 = a + 5*lda;
+		const float* restrict a6 = a + 6*lda;
+		const float* restrict a7 = a + 7*lda;
 
 		// If there are leftover iterations, perform them with scalar code.
 		for ( dim_t i = 0; i < m ; ++i )
@@ -446,20 +446,20 @@ void bli_sdotxf_zen_int_8
 
 void bli_ddotxf_zen_int_8
      (
-       conj_t           conjat,
-       conj_t           conjx,
-       dim_t            m,
-       dim_t            b_n,
-       double* restrict alpha,
-       double* restrict a, inc_t inca, inc_t lda,
-       double* restrict x, inc_t incx,
-       double* restrict beta,
-       double* restrict y, inc_t incy,
-       cntx_t*          cntx
+             conj_t  conjat,
+             conj_t  conjx,
+             dim_t   m,
+             dim_t   b_n,
+       const double* alpha,
+       const double* a, inc_t inca, inc_t lda,
+       const double* x, inc_t incx,
+       const double* beta,
+             double* y, inc_t incy,
+       const cntx_t* cntx
      )
 {
-	const dim_t      fuse_fac       = 8;
-	const dim_t      n_elem_per_reg = 4;
+	const dim_t fuse_fac       = 8;
+	const dim_t n_elem_per_reg = 4;
 
 	// If the b_n dimension is zero, y is empty and there is no computation.
 	if ( bli_zero_dim1( b_n ) ) return;
@@ -489,9 +489,9 @@ void bli_ddotxf_zen_int_8
 
 		for ( dim_t i = 0; i < b_n; ++i )
 		{
-			double* a1   = a + (0  )*inca + (i  )*lda;
-			double* x1   = x + (0  )*incx;
-			double* psi1 = y + (i  )*incy;
+			const double* restrict a1   = a + (0  )*inca + (i  )*lda;
+			const double* restrict x1   = x + (0  )*incx;
+			      double* restrict psi1 = y + (i  )*incy;
 
 			f
 			(
@@ -537,15 +537,15 @@ void bli_ddotxf_zen_int_8
 		dim_t m_viter = ( m ) / ( n_elem_per_reg * n_iter_unroll );
 
 		// Set up pointers for x and the b_n columns of A (rows of A^T).
-		double* restrict x0 = x;
-		double* restrict a0 = a + 0*lda;
-		double* restrict a1 = a + 1*lda;
-		double* restrict a2 = a + 2*lda;
-		double* restrict a3 = a + 3*lda;
-		double* restrict a4 = a + 4*lda;
-		double* restrict a5 = a + 5*lda;
-		double* restrict a6 = a + 6*lda;
-		double* restrict a7 = a + 7*lda;
+		const double* restrict x0 = x;
+		const double* restrict a0 = a + 0*lda;
+		const double* restrict a1 = a + 1*lda;
+		const double* restrict a2 = a + 2*lda;
+		const double* restrict a3 = a + 3*lda;
+		const double* restrict a4 = a + 4*lda;
+		const double* restrict a5 = a + 5*lda;
+		const double* restrict a6 = a + 6*lda;
+		const double* restrict a7 = a + 7*lda;
 
 		// Initialize b_n rho vector accumulators to zero.
 		v4df_t rho0v; rho0v.v = _mm256_setzero_pd();
@@ -643,8 +643,8 @@ void bli_ddotxf_zen_int_8
 		dim_t m_viter = ( m ) / ( n_reg_per_row * n_iter_unroll );
 
 		// Initialize pointers for x and A.
-		double* restrict x0 = x;
-		double* restrict a0 = a;
+		const double* restrict x0 = x;
+		const double* restrict a0 = a;
 
 		// Initialize rho vector accumulators to zero.
 		v4df_t rho0v; rho0v.v = _mm256_setzero_pd();
@@ -713,15 +713,15 @@ void bli_ddotxf_zen_int_8
 	// Scalar edge case.
 	{
 		// Initialize pointers for x and the b_n columns of A (rows of A^T).
-		double* restrict x0 = x;
-		double* restrict a0 = a + 0*lda;
-		double* restrict a1 = a + 1*lda;
-		double* restrict a2 = a + 2*lda;
-		double* restrict a3 = a + 3*lda;
-		double* restrict a4 = a + 4*lda;
-		double* restrict a5 = a + 5*lda;
-		double* restrict a6 = a + 6*lda;
-		double* restrict a7 = a + 7*lda;
+		const double* restrict x0 = x;
+		const double* restrict a0 = a + 0*lda;
+		const double* restrict a1 = a + 1*lda;
+		const double* restrict a2 = a + 2*lda;
+		const double* restrict a3 = a + 3*lda;
+		const double* restrict a4 = a + 4*lda;
+		const double* restrict a5 = a + 5*lda;
+		const double* restrict a6 = a + 6*lda;
+		const double* restrict a7 = a + 7*lda;
 
 		// If there are leftover iterations, perform them with scalar code.
 		for ( dim_t i = 0; i < m ; ++i )

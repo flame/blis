@@ -58,16 +58,16 @@
 
 void bli_sbgemm_power10_mma_8x16
     (
-        dim_t               m,
-        dim_t               n,
-        dim_t               k,
-        float*     restrict alpha,
-        bfloat16*  restrict a,
-        bfloat16*  restrict b,
-        float*     restrict beta,
-        float*     restrict c, inc_t rs_c0, inc_t cs_c0,
-        auxinfo_t*          data,
-        cntx_t*             cntx
+              dim_t      m,
+              dim_t      n,
+              dim_t      k,
+        const float*     alpha,
+        const bfloat16*  a,
+        const bfloat16*  b,
+        const float*     beta,
+              float*     c, inc_t rs_c0, inc_t cs_c0,
+              auxinfo_t* data,
+        const cntx_t*    cntx
     )
 {
 
@@ -75,10 +75,11 @@ void bli_sbgemm_power10_mma_8x16
     uint64_t k_left = (k-1)%4;
 
     uint64_t rs_c   = rs_c0;
+    //uint64_t cs_c   = cs_c0;
 
-    bfloat16* restrict A0 = a;
-    bfloat16* restrict B0 = b;
-    float* restrict C0 = c;
+    const bfloat16* restrict A0 = a;
+    const bfloat16* restrict B0 = b;
+          float*    restrict C0 = c;
 
     float alpha_= *alpha,
           beta_ = *beta;

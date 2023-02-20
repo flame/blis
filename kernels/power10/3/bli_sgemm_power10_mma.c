@@ -55,16 +55,16 @@
 
 void bli_sgemm_power10_mma_8x16
     (
-        dim_t               m,
-        dim_t               n,
-        dim_t               k,
-        float*     restrict alpha,
-        float*     restrict a,
-        float*     restrict b,
-        float*     restrict beta,
-        float*     restrict c, inc_t rs_c0, inc_t cs_c,
-        auxinfo_t*          data,
-        cntx_t*             cntx
+              dim_t      m,
+              dim_t      n,
+              dim_t      k,
+        const float*     alpha,
+        const float*     a,
+        const float*     b,
+        const float*     beta,
+              float*     c, inc_t rs_c0, inc_t cs_c0,
+              auxinfo_t* data,
+        const cntx_t*    cntx
     )
 {
     // Typecast local copies of integers in case dim_t and inc_t are a
@@ -73,11 +73,12 @@ void bli_sgemm_power10_mma_8x16
     uint64_t k_left = k % 4;
 
     uint64_t rs_c   = rs_c0;
+    uint64_t cs_c   = cs_c0;
 
     GEMM_UKR_SETUP_CT( s, 8, 16, true );
 
     fv4sf_t result[4];
-      fv4sf_t *rowC;
+    fv4sf_t *rowC;
 
     // accumulators that will hold the matrix product
     __vector_quad acc0, acc1, acc2, acc3,
@@ -93,9 +94,9 @@ void bli_sgemm_power10_mma_8x16
     __builtin_mma_xxsetaccz(&acc6);
     __builtin_mma_xxsetaccz(&acc7);
 
-    float* restrict A0 = a;
-    float* restrict B0 = b;
-    float* restrict C0 = c;
+    const float* restrict A0 = a;
+    const float* restrict B0 = b;
+          float* restrict C0 = c;
 
     float alpha_ = *alpha,
           beta_  = *beta;

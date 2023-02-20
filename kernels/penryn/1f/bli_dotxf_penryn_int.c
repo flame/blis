@@ -45,44 +45,39 @@ typedef union
 
 void bli_ddotxf_penryn_int
      (
-       conj_t           conjat,
-       conj_t           conjx,
-       dim_t            m,
-       dim_t            b_n,
-       double* restrict alpha,
-       double* restrict a, inc_t inca, inc_t lda,
-       double* restrict x, inc_t incx,
-       double* restrict beta,
-       double* restrict y, inc_t incy,
-       cntx_t*          cntx
+             conj_t  conjat,
+             conj_t  conjx,
+             dim_t   m,
+             dim_t   b_n,
+       const double* alpha,
+       const double* a, inc_t inca, inc_t lda,
+       const double* x, inc_t incx,
+       const double* beta,
+             double* y, inc_t incy,
+       const cntx_t* cntx
      )
 {
-	double*  restrict alpha_cast = alpha;
-	double*  restrict beta_cast = beta;
-	double*  restrict a_cast = a;
-	double*  restrict x_cast = x;
-	double*  restrict y_cast = y;
-	dim_t             i;
+	const double*  restrict alpha_cast = alpha;
+	const double*  restrict beta_cast = beta;
+	const double*  restrict a_cast = a;
+	const double*  restrict x_cast = x;
+	      double*  restrict y_cast = y;
+	      dim_t             i;
 
-	const dim_t       n_elem_per_reg = 2;
-	const dim_t       n_iter_unroll  = 4;
+	const dim_t             n_elem_per_reg = 2;
+	const dim_t             n_iter_unroll  = 4;
 
-	dim_t             m_pre;
-	dim_t             m_run;
-	dim_t             m_left;
+	      dim_t             m_pre;
+	      dim_t             m_run;
+	      dim_t             m_left;
 
-	double*  restrict x0;
-	double*  restrict x1;
-	double*  restrict x2;
-	double*  restrict x3;
-	double*  restrict y0;
-	double            rho0, rho1, rho2, rho3;
-	double            x0c, x1c, x2c, x3c, y0c;
+	      double            rho0, rho1, rho2, rho3;
+	      double            x0c, x1c, x2c, x3c, y0c;
 
-	v2df_t            rho0v, rho1v, rho2v, rho3v;
-	v2df_t            x0v, x1v, x2v, x3v, y0v, betav, alphav;
+	      v2df_t            rho0v, rho1v, rho2v, rho3v;
+	      v2df_t            x0v, x1v, x2v, x3v, y0v, betav, alphav;
 
-	bool              use_ref = FALSE;
+	      bool              use_ref = FALSE;
 
 
 	if ( bli_zero_dim1( b_n ) ) return;
@@ -103,19 +98,19 @@ void bli_ddotxf_penryn_int
 		return;
 	}
 
-    m_pre = 0;
+	m_pre = 0;
 
-    // If there is anything that would interfere with our use of aligned
-    // vector loads/stores, call the reference implementation.
+	// If there is anything that would interfere with our use of aligned
+	// vector loads/stores, call the reference implementation.
 	if ( b_n < bli_cntx_get_blksz_def_dt( BLIS_DOUBLE, BLIS_DF, cntx ) )
 	{
 		use_ref = TRUE;
 	}
-    else if ( inca != 1 || incx != 1 || incy != 1 ||
+	else if ( inca != 1 || incx != 1 || incy != 1 ||
 	          bli_is_unaligned_to( ( siz_t )(lda*sizeof(double)), 16 ) )
-    {
-        use_ref = TRUE;
-    }
+	{
+		use_ref = TRUE;
+	}
 	else if ( bli_is_unaligned_to( ( siz_t )a, 16 ) ||
 	          bli_is_unaligned_to( ( siz_t )x, 16 ) ||
 	          bli_is_unaligned_to( ( siz_t )y, 16 ) )
@@ -155,11 +150,11 @@ void bli_ddotxf_penryn_int
 	m_run       = ( m - m_pre ) / ( n_elem_per_reg * n_iter_unroll );
 	m_left      = ( m - m_pre ) % ( n_elem_per_reg * n_iter_unroll );
 
-	x0 = a_cast;
-	x1 = a_cast +   lda;
-	x2 = a_cast + 2*lda;
-	x3 = a_cast + 3*lda;
-	y0 = x_cast;
+	const double* restrict x0 = a_cast;
+	const double* restrict x1 = a_cast +   lda;
+	const double* restrict x2 = a_cast + 2*lda;
+	const double* restrict x3 = a_cast + 3*lda;
+	const double* restrict y0 = x_cast;
 
 	PASTEMAC(d,set0s)( rho0 );
 	PASTEMAC(d,set0s)( rho1 );

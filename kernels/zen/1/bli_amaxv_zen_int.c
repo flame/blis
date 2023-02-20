@@ -101,14 +101,14 @@ typedef union
 
 void bli_samaxv_zen_int
      (
-       dim_t            n,
-       float*  restrict x, inc_t incx,
-       dim_t*  restrict i_max,
-       cntx_t*          cntx
+             dim_t   n,
+       const float*  x, inc_t incx,
+             dim_t*  i_max,
+       const cntx_t* cntx
      )
 {
-	float*  minus_one = PASTEMAC(s,m1);
-	dim_t*  zero_i    = PASTEMAC(i,0);
+	const float* restrict minus_one = PASTEMAC(s,m1);
+	const dim_t* restrict zero_i    = PASTEMAC(i,0);
 
 	float   chi1_r;
 	//float   chi1_i;
@@ -139,7 +139,7 @@ void bli_samaxv_zen_int
 	{
 		for ( i = 0; i < n; ++i )
 		{
-			float* chi1 = x + (i  )*incx;
+			const float* restrict chi1 = x + (i  )*incx;
 
 			/* Get the real and imaginary components of chi1. */
 			chi1_r = *chi1;
@@ -229,7 +229,7 @@ void bli_samaxv_zen_int
 
 		for ( i = n - n_left; i < n; i++ )
 		{
-			float* chi1 = x;
+			const float* restrict chi1 = x;
 
 			/* Get the real and imaginary components of chi1. */
 			chi1_r = *chi1;
@@ -266,14 +266,14 @@ void bli_samaxv_zen_int
 
 void bli_damaxv_zen_int
      (
-       dim_t            n,
-       double* restrict x, inc_t incx,
-       dim_t*  restrict i_max,
-       cntx_t*          cntx
+             dim_t   n,
+       const double* x, inc_t incx,
+             dim_t*  i_max,
+       const cntx_t* cntx
      )
 {
-	double* minus_one = PASTEMAC(d,m1);
-	dim_t*  zero_i    = PASTEMAC(i,0);
+	const double* restrict minus_one = PASTEMAC(d,m1);
+	const dim_t*  restrict zero_i    = PASTEMAC(i,0);
 
 	double  chi1_r;
 	//double  chi1_i;
@@ -304,7 +304,7 @@ void bli_damaxv_zen_int
 	{
 		for ( i = 0; i < n; ++i )
 		{
-			double* chi1 = x + (i  )*incx;
+			const double* restrict chi1 = x + (i  )*incx;
 
 			/* Get the real and imaginary components of chi1. */
 			chi1_r = *chi1;
@@ -386,7 +386,7 @@ void bli_damaxv_zen_int
 
 		for ( i = n - n_left; i < n; i++ )
 		{
-			double* chi1 = x;
+			const double* restrict chi1 = x;
 
 			/* Get the real and imaginary components of chi1. */
 			chi1_r = *chi1;

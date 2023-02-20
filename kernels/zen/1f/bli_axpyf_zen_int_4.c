@@ -38,15 +38,15 @@
 
 void bli_caxpyf_zen_int_4
      (
-       conj_t           conja,
-       conj_t           conjx,
-       dim_t            m,
-       dim_t            b_n,
-       scomplex* restrict alpha,
-       scomplex* restrict a, inc_t inca, inc_t lda,
-       scomplex* restrict x, inc_t incx,
-       scomplex* restrict y, inc_t incy,
-       cntx_t* restrict cntx
+             conj_t    conja,
+             conj_t    conjx,
+             dim_t     m,
+             dim_t     b_n,
+       const scomplex* alpha,
+       const scomplex* a, inc_t inca, inc_t lda,
+       const scomplex* x, inc_t incx,
+             scomplex* y, inc_t incy,
+       const cntx_t*   cntx
      )
 {
     inc_t fuse_fac = 4;
@@ -85,10 +85,10 @@ void bli_caxpyf_zen_int_4
 
         for ( i = 0; i < b_n; ++i )
         {
-            scomplex* a1   = a + (0  )*inca + (i  )*lda;
-            scomplex* chi1 = x + (i  )*incx;
-            scomplex* y1   = y + (0  )*incy;
-            scomplex  alpha_chi1;
+            const scomplex* restrict a1   = a + (0  )*inca + (i  )*lda;
+            const scomplex* restrict chi1 = x + (i  )*incx;
+                  scomplex* restrict y1   = y + (0  )*incy;
+                  scomplex           alpha_chi1;
 
             bli_ccopycjs( conjx, *chi1, alpha_chi1 );
             bli_cscals( *alpha, alpha_chi1 );
@@ -118,10 +118,10 @@ void bli_caxpyf_zen_int_4
     }
     else
     {
-        scomplex *pchi0 = x + 0*incx ;
-        scomplex *pchi1 = x + 1*incx ;
-        scomplex *pchi2 = x + 2*incx ;
-        scomplex *pchi3 = x + 3*incx ;
+        const scomplex* restrict pchi0 = x + 0*incx ;
+        const scomplex* restrict pchi1 = x + 1*incx ;
+        const scomplex* restrict pchi2 = x + 2*incx ;
+        const scomplex* restrict pchi3 = x + 3*incx ;
 
         bli_ccopycjs( conjx, *pchi0, chi0 );
         bli_ccopycjs( conjx, *pchi1, chi1 );
@@ -217,7 +217,7 @@ void bli_caxpyf_zen_int_4
         for ( i = 0; (i + 0) < n2 ; ++i )
         {
 
-	    scomplex       y0c = *(scomplex*)y0;
+            scomplex       y0c = *(scomplex*)y0;
 
             const scomplex a0c = *(scomplex*)ap[0];
             const scomplex a1c = *(scomplex*)ap[1];

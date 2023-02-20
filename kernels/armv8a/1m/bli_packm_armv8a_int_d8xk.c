@@ -49,15 +49,15 @@
 
 void bli_dpackm_armv8a_int_8xk
      (
-       conj_t              conja,
-       pack_t              schema,
-       dim_t               cdim0,
-       dim_t               k0,
-       dim_t               k0_max,
-       double*    restrict kappa,
-       double*    restrict a, inc_t inca0, inc_t lda0,
-       double*    restrict p,              inc_t ldp0,
-       cntx_t*             cntx
+             conj_t  conja,
+             pack_t  schema,
+             dim_t   cdim0,
+             dim_t   k0,
+             dim_t   k0_max,
+       const double* kappa,
+       const double* a, inc_t inca0, inc_t lda0,
+             double* p,              inc_t ldp0,
+       const cntx_t* cntx
      )
 {
   // This is the panel dimension assumed by the packm kernel.
@@ -67,8 +67,9 @@ void bli_dpackm_armv8a_int_8xk
   // different size than is expected by load instructions.
   uint64_t       k_iter = k0 / 2;
   uint64_t       k_left = k0 % 2;
-  double*        a_loc  = a;
-  double*        p_loc  = p;
+
+  const double*  a_loc  = a;
+        double*  p_loc  = p;
 
   // NOTE: For the purposes of the comments in this packm kernel, we
   // interpret inca and lda as rs_a and cs_a, respectively, and similarly

@@ -45,58 +45,52 @@ typedef union
 
 void bli_ddotxaxpyf_penryn_int
      (
-       conj_t           conjat,
-       conj_t           conja,
-       conj_t           conjw,
-       conj_t           conjx,
-       dim_t            m,
-       dim_t            b_n,
-       double* restrict alpha,
-       double* restrict a, inc_t inca, inc_t lda,
-       double* restrict w, inc_t incw,
-       double* restrict x, inc_t incx,
-       double* restrict beta,
-       double* restrict y, inc_t incy,
-       double* restrict z, inc_t incz,
-       cntx_t*          cntx
+             conj_t  conjat,
+             conj_t  conja,
+             conj_t  conjw,
+             conj_t  conjx,
+             dim_t   m,
+             dim_t   b_n,
+       const double* alpha,
+       const double* a, inc_t inca, inc_t lda,
+       const double* w, inc_t incw,
+       const double* x, inc_t incx,
+       const double* beta,
+             double* y, inc_t incy,
+             double* z, inc_t incz,
+       const cntx_t* cntx
      )
 {
-	double*  restrict alpha_cast = alpha;
-	double*  restrict beta_cast  = beta;
-	double*  restrict a_cast     = a;
-	double*  restrict w_cast     = w;
-	double*  restrict x_cast     = x;
-	double*  restrict y_cast     = y;
-	double*  restrict z_cast     = z;
-	dim_t             i;
+	const double*  restrict alpha_cast = alpha;
+	const double*  restrict beta_cast  = beta;
+	const double*  restrict a_cast     = a;
+	const double*  restrict w_cast     = w;
+	const double*  restrict x_cast     = x;
+	      double*  restrict y_cast     = y;
+	      double*  restrict z_cast     = z;
+	      dim_t             i;
 
-	const dim_t       n_elem_per_reg = 2;
-	const dim_t       n_iter_unroll  = 2;
+	const dim_t             n_elem_per_reg = 2;
+	const dim_t             n_iter_unroll  = 2;
 
-	dim_t             m_pre;
-	dim_t             m_run;
-	dim_t             m_left;
+	      dim_t             m_pre;
+	      dim_t             m_run;
+	      dim_t             m_left;
 
-	double*  restrict a0;
-	double*  restrict a1;
-	double*  restrict a2;
-	double*  restrict a3;
-	double*  restrict w1;
-	double*  restrict z1;
-	double            rho0, rho1, rho2, rho3;
-	double            chi0, chi1, chi2, chi3;
-	double            a0c, a1c, a2c, a3c, w1c, z1c;
+	      double            rho0, rho1, rho2, rho3;
+	      double            chi0, chi1, chi2, chi3;
+	      double            a0c, a1c, a2c, a3c, w1c, z1c;
 
-	v2df_t            rho0v, rho1v, rho2v, rho3v;
-	v2df_t            chi0v, chi1v, chi2v, chi3v;
-	//v2df_t            a0v, a1v, a2v, a3v, w1v, z1v;
-	v2df_t            a00v, a01v, a02v, a03v;
-	v2df_t            a10v, a11v, a12v, a13v;
-	v2df_t            w1v, z1v;
-	v2df_t            w2v, z2v;
-	v2df_t            psi0v, psi1v, betav, alphav;
+	      v2df_t            rho0v, rho1v, rho2v, rho3v;
+	      v2df_t            chi0v, chi1v, chi2v, chi3v;
+	      //v2df_t            a0v, a1v, a2v, a3v, w1v, z1v;
+	      v2df_t            a00v, a01v, a02v, a03v;
+	      v2df_t            a10v, a11v, a12v, a13v;
+	      v2df_t            w1v, z1v;
+	      v2df_t            w2v, z2v;
+	      v2df_t            psi0v, psi1v, betav, alphav;
 
-	bool              use_ref = FALSE;
+	      bool              use_ref = FALSE;
 
 
 	if ( bli_zero_dim1( b_n ) ) return;
@@ -117,19 +111,19 @@ void bli_ddotxaxpyf_penryn_int
 		return;
 	}
 
-    m_pre = 0;
+	m_pre = 0;
 
-    // If there is anything that would interfere with our use of aligned
-    // vector loads/stores, call the reference implementation.
+	// If there is anything that would interfere with our use of aligned
+	// vector loads/stores, call the reference implementation.
 	if ( b_n < bli_cntx_get_blksz_def_dt( BLIS_DOUBLE, BLIS_XF, cntx ) )
 	{
 		use_ref = TRUE;
 	}
-    else if ( inca != 1 || incw != 1 || incx != 1 || incy != 1 || incz != 1 ||
+	else if ( inca != 1 || incw != 1 || incx != 1 || incy != 1 || incz != 1 ||
 	          bli_is_unaligned_to( ( siz_t )(lda*sizeof(double)), 16 ) )
-    {
-        use_ref = TRUE;
-    }
+	{
+		use_ref = TRUE;
+	}
 	else if ( bli_is_unaligned_to( ( siz_t )a, 16 ) ||
 	          bli_is_unaligned_to( ( siz_t )w, 16 ) ||
 	          bli_is_unaligned_to( ( siz_t )z, 16 ) ||
@@ -174,12 +168,12 @@ void bli_ddotxaxpyf_penryn_int
 	m_run       = ( m - m_pre ) / ( n_elem_per_reg * n_iter_unroll );
 	m_left      = ( m - m_pre ) % ( n_elem_per_reg * n_iter_unroll );
 
-	a0 = a_cast + 0*lda;
-	a1 = a_cast + 1*lda;
-	a2 = a_cast + 2*lda;
-	a3 = a_cast + 3*lda;
-	w1 = w_cast;
-	z1 = z_cast;
+	const double* restrict a0 = a_cast + 0*lda;
+	const double* restrict a1 = a_cast + 1*lda;
+	const double* restrict a2 = a_cast + 2*lda;
+	const double* restrict a3 = a_cast + 3*lda;
+	const double* restrict w1 = w_cast;
+	      double* restrict z1 = z_cast;
 
 	chi0 = *(x_cast + 0*incx);
 	chi1 = *(x_cast + 1*incx);

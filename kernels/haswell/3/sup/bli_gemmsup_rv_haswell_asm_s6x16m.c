@@ -83,18 +83,18 @@ GEMMSUP_KER_PROT( float,    s, gemmsup_r_haswell_ref )
 
 void bli_sgemmsup_rv_haswell_asm_6x16m
      (
-       conj_t              conja,
-       conj_t              conjb,
-       dim_t               m0,
-       dim_t               n0,
-       dim_t               k0,
-       float*     restrict alpha,
-       float*     restrict a, inc_t rs_a0, inc_t cs_a0,
-       float*     restrict b, inc_t rs_b0, inc_t cs_b0,
-       float*     restrict beta,
-       float*     restrict c, inc_t rs_c0, inc_t cs_c0,
-       auxinfo_t*          data,
-       cntx_t*             cntx
+             conj_t     conja,
+             conj_t     conjb,
+             dim_t      m0,
+             dim_t      n0,
+             dim_t      k0,
+       const float*     alpha,
+       const float*     a, inc_t rs_a0, inc_t cs_a0,
+       const float*     b, inc_t rs_b0, inc_t cs_b0,
+       const float*     beta,
+             float*     c, inc_t rs_c0, inc_t cs_c0,
+             auxinfo_t* data,
+       const cntx_t*    cntx
      )
 {
 	uint64_t n_left = n0 % 16;
@@ -103,9 +103,9 @@ void bli_sgemmsup_rv_haswell_asm_6x16m
 	// dispatch other 6x?m kernels, as needed.
 	if ( n_left )
 	{
-		float*  restrict cij = c;
-		float*  restrict bj  = b;
-		float*  restrict ai  = a;
+		      float* cij = c;
+		const float* bj  = b;
+		const float* ai  = a;
 
 		if ( 12 <= n_left )
 		{
@@ -200,8 +200,8 @@ void bli_sgemmsup_rv_haswell_asm_6x16m
 				dim_t m_iter = ( m0 + mr - 1 ) / mr;
 				dim_t m_left =   m0            % mr;
 
-				float*  restrict ai_ii  = ai;
-				float*  restrict cij_ii = cij;
+				const float* ai_ii  = ai;
+				      float* cij_ii = cij;
 
 				for ( dim_t ii = 0; ii < m_iter; ii += 1 )
 				{
@@ -1038,14 +1038,14 @@ void bli_sgemmsup_rv_haswell_asm_6x16m
 	// Handle edge cases in the m dimension, if they exist.
 	if ( m_left )
 	{
-		const dim_t      nr_cur = 16;
-		const dim_t      i_edge = m0 - ( dim_t )m_left;
+		const dim_t   nr_cur = 16;
+		const dim_t   i_edge = m0 - ( dim_t )m_left;
 
-		float* restrict cij = c + i_edge*rs_c;
-		//float* restrict ai  = a + i_edge*rs_a;
-		//float* restrict ai  = a + ( i_edge / 6 ) * ps_a;
-		float* restrict ai  = a + m_iter * ps_a;
-		float* restrict bj  = b;
+		      float* cij = c + i_edge*rs_c;
+		//const float* ai  = a + i_edge*rs_a;
+		//const float* ai  = a + ( i_edge / 6 ) * ps_a;
+		const float* ai  = a + m_iter * ps_a;
+		const float* bj  = b;
 
 #if 0
 		// We add special handling for slightly inflated MR blocksizes
@@ -1119,18 +1119,18 @@ void bli_sgemmsup_rv_haswell_asm_6x16m
 
 void bli_sgemmsup_rv_haswell_asm_6x12m
      (
-       conj_t              conja,
-       conj_t              conjb,
-       dim_t               m0,
-       dim_t               n0,
-       dim_t               k0,
-       float*     restrict alpha,
-       float*     restrict a, inc_t rs_a0, inc_t cs_a0,
-       float*     restrict b, inc_t rs_b0, inc_t cs_b0,
-       float*     restrict beta,
-       float*     restrict c, inc_t rs_c0, inc_t cs_c0,
-       auxinfo_t*          data,
-       cntx_t*             cntx
+             conj_t     conja,
+             conj_t     conjb,
+             dim_t      m0,
+             dim_t      n0,
+             dim_t      k0,
+       const float*     alpha,
+       const float*     a, inc_t rs_a0, inc_t cs_a0,
+       const float*     b, inc_t rs_b0, inc_t cs_b0,
+       const float*     beta,
+             float*     c, inc_t rs_c0, inc_t cs_c0,
+             auxinfo_t* data,
+       const cntx_t*    cntx
      )
 {
 	//void*    a_next = bli_auxinfo_next_a( data );
@@ -1905,14 +1905,14 @@ void bli_sgemmsup_rv_haswell_asm_6x12m
 	// Handle edge cases in the m dimension, if they exist.
 	if ( m_left )
 	{
-		const dim_t      nr_cur = 12;
-		const dim_t      i_edge = m0 - ( dim_t )m_left;
+		const dim_t   nr_cur = 12;
+		const dim_t   i_edge = m0 - ( dim_t )m_left;
 
-		float* restrict cij = c + i_edge*rs_c;
-		//float* restrict ai  = a + i_edge*rs_a;
-		//float* restrict ai  = a + ( i_edge / 6 ) * ps_a;
-		float* restrict ai  = a + m_iter * ps_a;
-		float* restrict bj  = b;
+		      float* cij = c + i_edge*rs_c;
+		//const float* ai  = a + i_edge*rs_a;
+		//const float* ai  = a + ( i_edge / 6 ) * ps_a;
+		const float* ai  = a + m_iter * ps_a;
+		const float* bj  = b;
 
 #if 0
 		// We add special handling for slightly inflated MR blocksizes
@@ -1986,18 +1986,18 @@ void bli_sgemmsup_rv_haswell_asm_6x12m
 
 void bli_sgemmsup_rv_haswell_asm_6x8m
      (
-       conj_t              conja,
-       conj_t              conjb,
-       dim_t               m0,
-       dim_t               n0,
-       dim_t               k0,
-       float*     restrict alpha,
-       float*     restrict a, inc_t rs_a0, inc_t cs_a0,
-       float*     restrict b, inc_t rs_b0, inc_t cs_b0,
-       float*     restrict beta,
-       float*     restrict c, inc_t rs_c0, inc_t cs_c0,
-       auxinfo_t*          data,
-       cntx_t*             cntx
+             conj_t     conja,
+             conj_t     conjb,
+             dim_t      m0,
+             dim_t      n0,
+             dim_t      k0,
+       const float*     alpha,
+       const float*     a, inc_t rs_a0, inc_t cs_a0,
+       const float*     b, inc_t rs_b0, inc_t cs_b0,
+       const float*     beta,
+             float*     c, inc_t rs_c0, inc_t cs_c0,
+             auxinfo_t* data,
+       const cntx_t*    cntx
      )
 {
 	//void*    a_next = bli_auxinfo_next_a( data );
@@ -2618,14 +2618,14 @@ void bli_sgemmsup_rv_haswell_asm_6x8m
 	// Handle edge cases in the m dimension, if they exist.
 	if ( m_left )
 	{
-		const dim_t      nr_cur = 8;
-		const dim_t      i_edge = m0 - ( dim_t )m_left;
+		const dim_t   nr_cur = 8;
+		const dim_t   i_edge = m0 - ( dim_t )m_left;
 
-		float* restrict cij = c + i_edge*rs_c;
-		//float* restrict ai  = a + i_edge*rs_a;
-		//float* restrict ai  = a + ( i_edge / 6 ) * ps_a;
-		float* restrict ai  = a + m_iter * ps_a;
-		float* restrict bj  = b;
+		      float* cij = c + i_edge*rs_c;
+		//const float* ai  = a + i_edge*rs_a;
+		//const float* ai  = a + ( i_edge / 6 ) * ps_a;
+		const float* ai  = a + m_iter * ps_a;
+		const float* bj  = b;
 
 #if 0
 		// We add special handling for slightly inflated MR blocksizes
@@ -2699,18 +2699,18 @@ void bli_sgemmsup_rv_haswell_asm_6x8m
 
 void bli_sgemmsup_rv_haswell_asm_6x6m
      (
-       conj_t              conja,
-       conj_t              conjb,
-       dim_t               m0,
-       dim_t               n0,
-       dim_t               k0,
-       float*     restrict alpha,
-       float*     restrict a, inc_t rs_a0, inc_t cs_a0,
-       float*     restrict b, inc_t rs_b0, inc_t cs_b0,
-       float*     restrict beta,
-       float*     restrict c, inc_t rs_c0, inc_t cs_c0,
-       auxinfo_t*          data,
-       cntx_t*             cntx
+             conj_t     conja,
+             conj_t     conjb,
+             dim_t      m0,
+             dim_t      n0,
+             dim_t      k0,
+       const float*     alpha,
+       const float*     a, inc_t rs_a0, inc_t cs_a0,
+       const float*     b, inc_t rs_b0, inc_t cs_b0,
+       const float*     beta,
+             float*     c, inc_t rs_c0, inc_t cs_c0,
+             auxinfo_t* data,
+       const cntx_t*    cntx
      )
 {
 	//void*    a_next = bli_auxinfo_next_a( data );
@@ -3364,14 +3364,14 @@ void bli_sgemmsup_rv_haswell_asm_6x6m
 	// Handle edge cases in the m dimension, if they exist.
 	if ( m_left )
 	{
-		const dim_t      nr_cur = 6;
-		const dim_t      i_edge = m0 - ( dim_t )m_left;
+		const dim_t   nr_cur = 6;
+		const dim_t   i_edge = m0 - ( dim_t )m_left;
 
-		float* restrict cij = c + i_edge*rs_c;
-		//float* restrict ai  = a + i_edge*rs_a;
-		//float* restrict ai  = a + ( i_edge / 6 ) * ps_a;
-		float* restrict ai  = a + m_iter * ps_a;
-		float* restrict bj  = b;
+		      float* cij = c + i_edge*rs_c;
+		//const float* ai  = a + i_edge*rs_a;
+		//const float* ai  = a + ( i_edge / 6 ) * ps_a;
+		const float* ai  = a + m_iter * ps_a;
+		const float* bj  = b;
 
 #if 0
 		// We add special handling for slightly inflated MR blocksizes
@@ -3445,18 +3445,18 @@ void bli_sgemmsup_rv_haswell_asm_6x6m
 
 void bli_sgemmsup_rv_haswell_asm_6x4m
      (
-       conj_t              conja,
-       conj_t              conjb,
-       dim_t               m0,
-       dim_t               n0,
-       dim_t               k0,
-       float*     restrict alpha,
-       float*     restrict a, inc_t rs_a0, inc_t cs_a0,
-       float*     restrict b, inc_t rs_b0, inc_t cs_b0,
-       float*     restrict beta,
-       float*     restrict c, inc_t rs_c0, inc_t cs_c0,
-       auxinfo_t*          data,
-       cntx_t*             cntx
+             conj_t     conja,
+             conj_t     conjb,
+             dim_t      m0,
+             dim_t      n0,
+             dim_t      k0,
+       const float*     alpha,
+       const float*     a, inc_t rs_a0, inc_t cs_a0,
+       const float*     b, inc_t rs_b0, inc_t cs_b0,
+       const float*     beta,
+             float*     c, inc_t rs_c0, inc_t cs_c0,
+             auxinfo_t* data,
+       const cntx_t*    cntx
      )
 {
 	//void*    a_next = bli_auxinfo_next_a( data );
@@ -4033,14 +4033,14 @@ void bli_sgemmsup_rv_haswell_asm_6x4m
 	// Handle edge cases in the m dimension, if they exist.
 	if ( m_left )
 	{
-		const dim_t      nr_cur = 4;
-		const dim_t      i_edge = m0 - ( dim_t )m_left;
+		const dim_t   nr_cur = 4;
+		const dim_t   i_edge = m0 - ( dim_t )m_left;
 
-		float* restrict cij = c + i_edge*rs_c;
-		//float* restrict ai  = a + i_edge*rs_a;
-		//float* restrict ai  = a + ( i_edge / 6 ) * ps_a;
-		float* restrict ai  = a + m_iter * ps_a;
-		float* restrict bj  = b;
+		      float* cij = c + i_edge*rs_c;
+		//const float* ai  = a + i_edge*rs_a;
+		//const float* ai  = a + ( i_edge / 6 ) * ps_a;
+		const float* ai  = a + m_iter * ps_a;
+		const float* bj  = b;
 
 #if 0
 		// We add special handling for slightly inflated MR blocksizes
@@ -4114,18 +4114,18 @@ void bli_sgemmsup_rv_haswell_asm_6x4m
 
 void bli_sgemmsup_rv_haswell_asm_6x2m
      (
-       conj_t              conja,
-       conj_t              conjb,
-       dim_t               m0,
-       dim_t               n0,
-       dim_t               k0,
-       float*     restrict alpha,
-       float*     restrict a, inc_t rs_a0, inc_t cs_a0,
-       float*     restrict b, inc_t rs_b0, inc_t cs_b0,
-       float*     restrict beta,
-       float*     restrict c, inc_t rs_c0, inc_t cs_c0,
-       auxinfo_t*          data,
-       cntx_t*             cntx
+             conj_t     conja,
+             conj_t     conjb,
+             dim_t      m0,
+             dim_t      n0,
+             dim_t      k0,
+       const float*     alpha,
+       const float*     a, inc_t rs_a0, inc_t cs_a0,
+       const float*     b, inc_t rs_b0, inc_t cs_b0,
+       const float*     beta,
+             float*     c, inc_t rs_c0, inc_t cs_c0,
+             auxinfo_t* data,
+       const cntx_t*    cntx
      )
 {
 	//void*    a_next = bli_auxinfo_next_a( data );
@@ -4673,14 +4673,14 @@ void bli_sgemmsup_rv_haswell_asm_6x2m
 	// Handle edge cases in the m dimension, if they exist.
 	if ( m_left )
 	{
-		const dim_t      nr_cur = 2;
-		const dim_t      i_edge = m0 - ( dim_t )m_left;
+		const dim_t   nr_cur = 2;
+		const dim_t   i_edge = m0 - ( dim_t )m_left;
 
-		float* restrict cij = c + i_edge*rs_c;
-		//float* restrict ai  = a + i_edge*rs_a;
-		//float* restrict ai  = a + ( i_edge / 6 ) * ps_a;
-		float* restrict ai  = a + m_iter * ps_a;
-		float* restrict bj  = b;
+		      float* cij = c + i_edge*rs_c;
+		//const float* ai  = a + i_edge*rs_a;
+		//const float* ai  = a + ( i_edge / 6 ) * ps_a;
+		const float* ai  = a + m_iter * ps_a;
+		const float* bj  = b;
 
 #if 0
 		// We add special handling for slightly inflated MR blocksizes

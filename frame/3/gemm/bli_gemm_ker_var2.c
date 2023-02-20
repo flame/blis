@@ -37,28 +37,28 @@
 
 typedef void (*xpbys_mxn_vft)
     (
-      dim_t m,
-      dim_t n,
-      void* x, inc_t rs_x, inc_t cs_x,
-      void* b,
-      void* y, inc_t rs_y, inc_t cs_y
+            dim_t m,
+            dim_t n,
+      const void* x, inc_t rs_x, inc_t cs_x,
+      const void* b,
+            void* y, inc_t rs_y, inc_t cs_y
     );
 
-#undef GENTFUNC2
+#undef  GENTFUNC2
 #define GENTFUNC2(ctypex,ctypey,chx,chy,op) \
 \
 BLIS_INLINE void PASTEMAC2(chx,chy,op) \
     ( \
-      dim_t m, \
-      dim_t n, \
-      void* x, inc_t rs_x, inc_t cs_x, \
-      void* b, \
-      void* y, inc_t rs_y, inc_t cs_y \
+            dim_t m, \
+            dim_t n, \
+      const void* x, inc_t rs_x, inc_t cs_x, \
+      const void* b, \
+            void* y, inc_t rs_y, inc_t cs_y \
     ) \
 { \
-	ctypex* restrict x_cast = x; \
-	ctypey* restrict b_cast = b; \
-	ctypey* restrict y_cast = y; \
+	const ctypex* restrict x_cast = x; \
+	const ctypey* restrict b_cast = b; \
+	      ctypey* restrict y_cast = y; \
 \
 	PASTEMAC3(chx,chy,chy,xpbys_mxn) \
 	( \

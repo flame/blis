@@ -57,12 +57,12 @@ typedef union
 
 void bli_saxpyv_zen_int
      (
-       conj_t           conjx,
-       dim_t            n,
-       float*  restrict alpha,
-       float*  restrict x, inc_t incx,
-       float*  restrict y, inc_t incy,
-       cntx_t*          cntx
+             conj_t  conjx,
+             dim_t   n,
+       const float*  alpha,
+       const float*  x, inc_t incx,
+             float*  y, inc_t incy,
+       const cntx_t* cntx
      )
 {
 	const dim_t      n_elem_per_reg = 8;
@@ -71,9 +71,6 @@ void bli_saxpyv_zen_int
 	dim_t            i;
 	dim_t            n_viter;
 	dim_t            n_left;
-
-	float*  restrict x0;
-	float*  restrict y0;
 
 	v8sf_t           alphav;
 	v8sf_t           x0v, x1v, x2v, x3v;
@@ -97,8 +94,8 @@ void bli_saxpyv_zen_int
 	}
 
 	// Initialize local pointers.
-	x0 = x;
-	y0 = y;
+	const float* restrict x0 = x;
+	      float* restrict y0 = y;
 
 	// Broadcast the alpha scalar to all elements of a vector register.
 	alphav.v = _mm256_broadcast_ss( alpha );
@@ -161,12 +158,12 @@ void bli_saxpyv_zen_int
 
 void bli_daxpyv_zen_int
      (
-       conj_t           conjx,
-       dim_t            n,
-       double* restrict alpha,
-       double* restrict x, inc_t incx,
-       double* restrict y, inc_t incy,
-       cntx_t*          cntx
+             conj_t  conjx,
+             dim_t   n,
+       const double* alpha,
+       const double* x, inc_t incx,
+             double* y, inc_t incy,
+       const cntx_t* cntx
      )
 {
 	const dim_t       n_elem_per_reg = 4;
@@ -175,9 +172,6 @@ void bli_daxpyv_zen_int
 	dim_t             i;
 	dim_t             n_viter;
 	dim_t             n_left;
-
-	double*  restrict x0;
-	double*  restrict y0;
 
 	v4df_t            alphav;
 	v4df_t            x0v, x1v, x2v, x3v;
@@ -201,8 +195,8 @@ void bli_daxpyv_zen_int
 	}
 
 	// Initialize local pointers.
-	x0 = x;
-	y0 = y;
+	const double* restrict x0 = x;
+	      double* restrict y0 = y;
 
 	// Broadcast the alpha scalar to all elements of a vector register.
 	alphav.v = _mm256_broadcast_sd( alpha );

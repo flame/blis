@@ -93,38 +93,38 @@ GEMMSUP_KER_PROT( float,    s, gemmsup_r_haswell_ref )
 \
 void PASTEMAC(ch,opname) \
      ( \
-       conj_t              conja, \
-       conj_t              conjb, \
-       dim_t               m, \
-       dim_t               n, \
-       dim_t               k, \
-       ctype*     restrict alpha, \
-       ctype*     restrict a, inc_t rs_a, inc_t cs_a, \
-       ctype*     restrict b, inc_t rs_b, inc_t cs_b, \
-       ctype*     restrict beta, \
-       ctype*     restrict c, inc_t rs_c, inc_t cs_c, \
-       auxinfo_t*          data, \
-       cntx_t*             cntx \
+             conj_t     conja, \
+             conj_t     conjb, \
+             dim_t      m, \
+             dim_t      n, \
+             dim_t      k, \
+       const ctype*     alpha, \
+       const ctype*     a, inc_t rs_a, inc_t cs_a, \
+       const ctype*     b, inc_t rs_b, inc_t cs_b, \
+       const ctype*     beta, \
+             ctype*     c, inc_t rs_c, inc_t cs_c, \
+             auxinfo_t* data, \
+       const cntx_t*    cntx \
      ) \
 { \
 	for ( dim_t i = 0; i < mdim; ++i ) \
 	{ \
-		ctype* restrict ci = &c[ i*rs_c ]; \
-		ctype* restrict ai = &a[ i*rs_a ]; \
+		      ctype* ci = &c[ i*rs_c ]; \
+		const ctype* ai = &a[ i*rs_a ]; \
 \
 		/* for ( dim_t j = 0; j < 1; ++j ) */ \
 		{ \
-			ctype* restrict cij = ci /*[ j*cs_c ]*/ ; \
-			ctype* restrict bj  = b  /*[ j*cs_b ]*/ ; \
-			ctype           ab; \
+			      ctype* cij = ci /*[ j*cs_c ]*/ ; \
+			const ctype* bj  = b  /*[ j*cs_b ]*/ ; \
+			ctype        ab; \
 \
 			PASTEMAC(ch,set0s)( ab ); \
 \
 			/* Perform a dot product to update the (i,j) element of c. */ \
 			for ( dim_t l = 0; l < k; ++l ) \
 			{ \
-				ctype* restrict aij = &ai[ l*cs_a ]; \
-				ctype* restrict bij = &bj[ l*rs_b ]; \
+				const ctype* aij = &ai[ l*cs_a ]; \
+				const ctype* bij = &bj[ l*rs_b ]; \
 \
 				PASTEMAC(ch,dots)( *aij, *bij, ab ); \
 			} \
@@ -165,29 +165,29 @@ GENTFUNC( float,  s, gemmsup_r_haswell_ref_1x1, 1 )
 \
 void PASTEMAC(ch,opname) \
      ( \
-       conj_t              conja, \
-       conj_t              conjb, \
-       dim_t               m, \
-       dim_t               n, \
-       dim_t               k, \
-       ctype*     restrict alpha, \
-       ctype*     restrict a, inc_t rs_a, inc_t cs_a, \
-       ctype*     restrict b, inc_t rs_b, inc_t cs_b, \
-       ctype*     restrict beta, \
-       ctype*     restrict c, inc_t rs_c, inc_t cs_c, \
-       auxinfo_t*          data, \
-       cntx_t*             cntx \
+             conj_t     conja, \
+             conj_t     conjb, \
+             dim_t      m, \
+             dim_t      n, \
+             dim_t      k, \
+       const ctype*     alpha, \
+       const ctype*     a, inc_t rs_a, inc_t cs_a, \
+       const ctype*     b, inc_t rs_b, inc_t cs_b, \
+       const ctype*     beta, \
+             ctype*     c, inc_t rs_c, inc_t cs_c, \
+             auxinfo_t* data, \
+       const cntx_t*    cntx \
      ) \
 { \
 	for ( dim_t i = 0; i < m; ++i ) \
 	{ \
-		ctype* restrict ci = &c[ i*rs_c ]; \
-		ctype* restrict ai = &a[ i*rs_a ]; \
+		      ctype* ci = &c[ i*rs_c ]; \
+		const ctype* ai = &a[ i*rs_a ]; \
 \
 		for ( dim_t j = 0; j < n; ++j ) \
 		{ \
-			ctype* restrict cij = &ci[ j*cs_c ]; \
-			ctype* restrict bj  = &b [ j*cs_b ]; \
+			      ctype* cij = &ci[ j*cs_c ]; \
+			const ctype* bj  = &b [ j*cs_b ]; \
 			ctype           ab; \
 \
 			PASTEMAC(ch,set0s)( ab ); \
@@ -195,8 +195,8 @@ void PASTEMAC(ch,opname) \
 			/* Perform a dot product to update the (i,j) element of c. */ \
 			for ( dim_t l = 0; l < k; ++l ) \
 			{ \
-				ctype* restrict aij = &ai[ l*cs_a ]; \
-				ctype* restrict bij = &bj[ l*rs_b ]; \
+				const ctype* aij = &ai[ l*cs_a ]; \
+				const ctype* bij = &bj[ l*rs_b ]; \
 \
 				PASTEMAC(ch,dots)( *aij, *bij, ab ); \
 			} \

@@ -44,15 +44,15 @@
 
 void bli_dpackm_armsve256_int_8xk
      (
-       conj_t           conja,
-       pack_t           schema,
-       dim_t            cdim_,
-       dim_t            n_,
-       dim_t            n_max_,
-       double* restrict kappa,
-       double* restrict a, inc_t inca_, inc_t lda_,
-       double* restrict p,              inc_t ldp_,
-       cntx_t*          cntx
+             conj_t  conja,
+             pack_t  schema,
+             dim_t   cdim_,
+             dim_t   n_,
+             dim_t   n_max_,
+       const double* kappa,
+       const double* a, inc_t inca_, inc_t lda_,
+             double* p,              inc_t ldp_,
+       const cntx_t* cntx
      )
 {
     const int64_t cdim  = cdim_;

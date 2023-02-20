@@ -61,15 +61,15 @@ typedef union
 
 void bli_saxpyf_zen_int_5
      (
-       conj_t           conja,
-       conj_t           conjx,
-       dim_t            m,
-       dim_t            b_n,
-       float* restrict alpha,
-       float* restrict a, inc_t inca, inc_t lda,
-       float* restrict x, inc_t incx,
-       float* restrict y, inc_t incy,
-       cntx_t* restrict cntx
+             conj_t  conja,
+             conj_t  conjx,
+             dim_t   m,
+             dim_t   b_n,
+       const float*  alpha,
+       const float*  a, inc_t inca, inc_t lda,
+       const float*  x, inc_t incx,
+             float*  y, inc_t incy,
+       const cntx_t* cntx
      )
 {
     const dim_t      fuse_fac       = 5;
@@ -78,14 +78,6 @@ void bli_saxpyf_zen_int_5
     const dim_t      n_iter_unroll  = 2;
 
     dim_t            i;
-
-    float* restrict a0;
-    float* restrict a1;
-    float* restrict a2;
-    float* restrict a3;
-    float* restrict a4;
-
-    float* restrict y0;
 
     v8sf_t           chi0v, chi1v, chi2v, chi3v;
     v8sf_t           chi4v;
@@ -114,10 +106,10 @@ void bli_saxpyf_zen_int_5
 
         for ( i = 0; i < b_n; ++i )
         {
-            float* a1   = a + (0  )*inca + (i  )*lda;
-            float* chi1 = x + (i  )*incx;
-            float* y1   = y + (0  )*incy;
-            float  alpha_chi1;
+            const float* restrict a1   = a + (0  )*inca + (i  )*lda;
+            const float* restrict chi1 = x + (i  )*incx;
+                  float* restrict y1   = y + (0  )*incy;
+                  float           alpha_chi1;
 
             bli_scopycjs( conjx, *chi1, alpha_chi1 );
             bli_sscals( *alpha, alpha_chi1 );
@@ -138,12 +130,12 @@ void bli_saxpyf_zen_int_5
 
     // At this point, we know that b_n is exactly equal to the fusing factor.
 
-    a0   = a + 0*lda;
-    a1   = a + 1*lda;
-    a2   = a + 2*lda;
-    a3   = a + 3*lda;
-    a4   = a + 4*lda;
-    y0   = y;
+    const float* restrict a0   = a + 0*lda;
+    const float* restrict a1   = a + 1*lda;
+    const float* restrict a2   = a + 2*lda;
+    const float* restrict a3   = a + 3*lda;
+    const float* restrict a4   = a + 4*lda;
+          float*          y0   = y;
 
     chi0 = *( x + 0*incx );
     chi1 = *( x + 1*incx );
@@ -313,15 +305,15 @@ void bli_saxpyf_zen_int_5
 
 void bli_daxpyf_zen_int_5
      (
-       conj_t           conja,
-       conj_t           conjx,
-       dim_t            m,
-       dim_t            b_n,
-       double* restrict alpha,
-       double* restrict a, inc_t inca, inc_t lda,
-       double* restrict x, inc_t incx,
-       double* restrict y, inc_t incy,
-       cntx_t* restrict cntx
+             conj_t  conja,
+             conj_t  conjx,
+             dim_t   m,
+             dim_t   b_n,
+       const double* alpha,
+       const double* a, inc_t inca, inc_t lda,
+       const double* x, inc_t incx,
+             double* y, inc_t incy,
+       const cntx_t* cntx
      )
 {
     const dim_t      fuse_fac       = 5;
@@ -330,14 +322,6 @@ void bli_daxpyf_zen_int_5
     const dim_t      n_iter_unroll  = 2;
 
     dim_t            i;
-
-    double* restrict a0;
-    double* restrict a1;
-    double* restrict a2;
-    double* restrict a3;
-    double* restrict a4;
-
-    double* restrict y0;
 
     v4df_t           chi0v, chi1v, chi2v, chi3v;
     v4df_t           chi4v;
@@ -366,10 +350,10 @@ void bli_daxpyf_zen_int_5
 
         for ( i = 0; i < b_n; ++i )
         {
-            double* a1   = a + (0  )*inca + (i  )*lda;
-            double* chi1 = x + (i  )*incx;
-            double* y1   = y + (0  )*incy;
-            double  alpha_chi1;
+            const double* restrict a1   = a + (0  )*inca + (i  )*lda;
+            const double* restrict chi1 = x + (i  )*incx;
+                  double* restrict y1   = y + (0  )*incy;
+                  double           alpha_chi1;
 
             bli_dcopycjs( conjx, *chi1, alpha_chi1 );
             bli_dscals( *alpha, alpha_chi1 );
@@ -390,12 +374,12 @@ void bli_daxpyf_zen_int_5
 
     // At this point, we know that b_n is exactly equal to the fusing factor.
 
-    a0   = a + 0*lda;
-    a1   = a + 1*lda;
-    a2   = a + 2*lda;
-    a3   = a + 3*lda;
-    a4   = a + 4*lda;
-    y0   = y;
+    const double* restrict a0   = a + 0*lda;
+    const double* restrict a1   = a + 1*lda;
+    const double* restrict a2   = a + 2*lda;
+    const double* restrict a3   = a + 3*lda;
+    const double* restrict a4   = a + 4*lda;
+          double* restrict y0   = y;
 
     chi0 = *( x + 0*incx );
     chi1 = *( x + 1*incx );
@@ -564,15 +548,15 @@ void bli_daxpyf_zen_int_5
 
 void bli_daxpyf_zen_int_16x2
      (
-       conj_t           conja,
-       conj_t           conjx,
-       dim_t            m,
-       dim_t            b_n,
-       double* restrict alpha,
-       double* restrict a, inc_t inca, inc_t lda,
-       double* restrict x, inc_t incx,
-       double* restrict y, inc_t incy,
-       cntx_t* restrict cntx
+             conj_t  conja,
+             conj_t  conjx,
+             dim_t   m,
+             dim_t   b_n,
+       const double* alpha,
+       const double* a, inc_t inca, inc_t lda,
+       const double* x, inc_t incx,
+             double* y, inc_t incy,
+       const cntx_t* cntx
      )
 {
     const dim_t      fuse_fac       = 2;
@@ -581,11 +565,6 @@ void bli_daxpyf_zen_int_16x2
     const dim_t      n_iter_unroll  = 4;
 
     dim_t            i;
-
-    double* restrict a0;
-    double* restrict a1;
-
-    double* restrict y0;
 
     v4df_t           chi0v, chi1v;
 
@@ -604,6 +583,7 @@ void bli_daxpyf_zen_int_16x2
     v2df_t           a40v, a41v;
 
     v2df_t           y4v; 
+
     // If either dimension is zero, or if alpha is zero, return early.
     if ( bli_zero_dim2( m, b_n ) || bli_deq0( *alpha ) ) return;
 
@@ -615,10 +595,10 @@ void bli_daxpyf_zen_int_16x2
 
         for ( i = 0; i < b_n; ++i )
         {
-            double* a1   = a + (0  )*inca + (i  )*lda;
-            double* chi1 = x + (i  )*incx;
-            double* y1   = y + (0  )*incy;
-            double  alpha_chi1;
+            const double* restrict a1   = a + (0  )*inca + (i  )*lda;
+            const double* restrict chi1 = x + (i  )*incx;
+                  double* restrict y1   = y + (0  )*incy;
+                  double           alpha_chi1;
 
             bli_dcopycjs( conjx, *chi1, alpha_chi1 );
             bli_dscals( *alpha, alpha_chi1 );
@@ -639,10 +619,10 @@ void bli_daxpyf_zen_int_16x2
 
     // At this point, we know that b_n is exactly equal to the fusing factor.
 
-    a0   = a + 0*lda;
-    a1   = a + 1*lda;
+    const double* restrict a0   = a + 0*lda;
+    const double* restrict a1   = a + 1*lda;
 
-    y0   = y;
+          double* restrict y0   = y;
 
     chi0 = *( x + 0*incx );
     chi1 = *( x + 1*incx );
@@ -849,15 +829,15 @@ void bli_daxpyf_zen_int_16x2
 
 void bli_daxpyf_zen_int_16x4
      (
-       conj_t           conja,
-       conj_t           conjx,
-       dim_t            m,
-       dim_t            b_n,
-       double* restrict alpha,
-       double* restrict a, inc_t inca, inc_t lda,
-       double* restrict x, inc_t incx,
-       double* restrict y, inc_t incy,
-       cntx_t* restrict cntx
+             conj_t  conja,
+             conj_t  conjx,
+             dim_t   m,
+             dim_t   b_n,
+       const double* alpha,
+       const double* a, inc_t inca, inc_t lda,
+       const double* x, inc_t incx,
+             double* y, inc_t incy,
+       const cntx_t* cntx
      )
 {
     const dim_t      fuse_fac       = 4;
@@ -866,13 +846,6 @@ void bli_daxpyf_zen_int_16x4
     const dim_t      n_iter_unroll  = 4;
 
     dim_t            i;
-
-    double* restrict a0;
-    double* restrict a1;
-    double* restrict a2;
-    double* restrict a3;
-
-    double* restrict y0;
 
     v4df_t           chi0v, chi1v, chi2v, chi3v;
 
@@ -905,10 +878,10 @@ void bli_daxpyf_zen_int_16x4
 
         for ( i = 0; i < b_n; ++i )
         {
-            double* a1   = a + (0  )*inca + (i  )*lda;
-            double* chi1 = x + (i  )*incx;
-            double* y1   = y + (0  )*incy;
-            double  alpha_chi1;
+            const double* restrict a1   = a + (0  )*inca + (i  )*lda;
+            const double* restrict chi1 = x + (i  )*incx;
+                  double* restrict y1   = y + (0  )*incy;
+                  double           alpha_chi1;
 
             bli_dcopycjs( conjx, *chi1, alpha_chi1 );
             bli_dscals( *alpha, alpha_chi1 );
@@ -929,12 +902,12 @@ void bli_daxpyf_zen_int_16x4
 
     // At this point, we know that b_n is exactly equal to the fusing factor.
 
-    a0   = a + 0*lda;
-    a1   = a + 1*lda;
-    a2   = a + 2*lda;
-    a3   = a + 3*lda;
+    const double* restrict a0   = a + 0*lda;
+    const double* restrict a1   = a + 1*lda;
+    const double* restrict a2   = a + 2*lda;
+    const double* restrict a3   = a + 3*lda;
 
-    y0   = y;
+          double* restrict y0   = y;
 
     chi0 = *( x + 0*incx );
     chi1 = *( x + 1*incx );
@@ -985,7 +958,7 @@ void bli_daxpyf_zen_int_16x4
             a23v.v = _mm256_loadu_pd( a3 + 2*n_elem_per_reg );
             a33v.v = _mm256_loadu_pd( a3 + 3*n_elem_per_reg );
 
-        // perform : y += alpha * x;
+            // perform : y += alpha * x;
             y0v.v = _mm256_fmadd_pd( a00v.v, chi0v.v, y0v.v );
             y1v.v = _mm256_fmadd_pd( a10v.v, chi0v.v, y1v.v );
             y2v.v = _mm256_fmadd_pd( a20v.v, chi0v.v, y2v.v );
@@ -1149,7 +1122,7 @@ void bli_daxpyf_zen_int_16x4
         for ( ; (i + 1) < m; i += 2)
         {
 
-	    // Load the input values.
+            // Load the input values.
             y4v.v  = _mm_loadu_pd( y0 + 0*n_elem_per_reg );
 
             a40v.v = _mm_loadu_pd( a0 + 0*n_elem_per_reg );
@@ -1227,7 +1200,7 @@ void bli_daxpyf_zen_int_16x4
             a2 += inca;
             a3 += inca;
 
-	    y0 += incy;
+            y0 += incy;
         }
 
     }

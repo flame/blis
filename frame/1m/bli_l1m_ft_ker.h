@@ -49,24 +49,24 @@
 \
 typedef void (*PASTECH3(ch,opname,_ker,tsuf)) \
      ( \
-       struc_t         strucc, \
-       diag_t          diagc, \
-       uplo_t          uploc, \
-       conj_t          conjc, \
-       pack_t          schema, \
-       bool            invdiag, \
-       dim_t           panel_dim, \
-       dim_t           panel_len, \
-       dim_t           panel_dim_max, \
-       dim_t           panel_len_max, \
-       dim_t           panel_dim_off, \
-       dim_t           panel_len_off, \
-       ctype* restrict kappa, \
-       ctype* restrict c, inc_t incc, inc_t ldc, \
-       ctype* restrict p,             inc_t ldp, \
-                          inc_t is_p, \
-       cntx_t*         cntx, \
-       void*           params \
+             struc_t strucc, \
+             diag_t  diagc, \
+             uplo_t  uploc, \
+             conj_t  conjc, \
+             pack_t  schema, \
+             bool    invdiag, \
+             dim_t   panel_dim, \
+             dim_t   panel_len, \
+             dim_t   panel_dim_max, \
+             dim_t   panel_len_max, \
+             dim_t   panel_dim_off, \
+             dim_t   panel_len_off, \
+       const ctype*  kappa, \
+       const ctype*  c, inc_t incc, inc_t ldc, \
+             ctype*  p,             inc_t ldp, \
+                        inc_t is_p, \
+       const cntx_t* cntx, \
+       const void*   params \
      );
 
 INSERT_GENTDEF( packm )
@@ -82,15 +82,15 @@ INSERT_GENTDEF( packm )
 \
 typedef void (*PASTECH3(ch,opname,_ker,tsuf)) \
      ( \
-       conj_t           conja, \
-       pack_t           schema, \
-       dim_t            cdim, \
-       dim_t            n, \
-       dim_t            n_max, \
-       ctype*  restrict kappa, \
-       ctype*  restrict a, inc_t inca, inc_t lda, \
-       ctype*  restrict p,             inc_t ldp, \
-       cntx_t*          cntx  \
+             conj_t  conja, \
+             pack_t  schema, \
+             dim_t   cdim, \
+             dim_t   n, \
+             dim_t   n_max, \
+       const ctype*  kappa, \
+       const ctype*  a, inc_t inca, inc_t lda, \
+             ctype*  p,             inc_t ldp, \
+       const cntx_t* cntx  \
      );
 
 INSERT_GENTDEF( packm_cxk )
@@ -102,14 +102,14 @@ INSERT_GENTDEF( packm_cxk )
 \
 typedef void (*PASTECH3(ch,opname,_ker,tsuf)) \
      ( \
-       conj_t           conja, \
-       pack_t           schema, \
-       dim_t            cdim, \
-       dim_t            n, \
-       ctype*  restrict kappa, \
-       ctype*  restrict p,             inc_t ldp, \
-       ctype*  restrict a, inc_t inca, inc_t lda, \
-       cntx_t*          cntx \
+             conj_t  conja, \
+             pack_t  schema, \
+             dim_t   cdim, \
+             dim_t   n, \
+       const ctype*  kappa, \
+       const ctype*  p,             inc_t ldp, \
+             ctype*  a, inc_t inca, inc_t lda, \
+       const cntx_t* cntx  \
      );
 
 INSERT_GENTDEF( unpackm_cxk )
@@ -121,18 +121,18 @@ INSERT_GENTDEF( unpackm_cxk )
 \
 typedef void (*PASTECH3(ch,opname,_ker,tsuf)) \
      ( \
-       struc_t          struca, \
-       diag_t           diaga, \
-       uplo_t           uploa, \
-       conj_t           conja, \
-       pack_t           schema, \
-       bool             invdiag, \
-       dim_t            cdim, \
-       dim_t            n_max, \
-       ctype*  restrict kappa, \
-       ctype*  restrict a, inc_t inca, inc_t lda, \
-       ctype*  restrict p,             inc_t ldp, \
-       cntx_t*          cntx \
+             struc_t struca, \
+             diag_t  diaga, \
+             uplo_t  uploa, \
+             conj_t  conja, \
+             pack_t  schema, \
+             bool    invdiag, \
+             dim_t   cdim, \
+             dim_t   n_max, \
+       const ctype*  kappa, \
+       const ctype*  a, inc_t inca, inc_t lda, \
+             ctype*  p,             inc_t ldp, \
+       const cntx_t* cntx \
      );
 
 INSERT_GENTDEF( packm_cxc_diag )

@@ -36,22 +36,23 @@
 // Define template prototypes for level-3 micro-kernels.
 //
 
-#define GEMM_UKR_PROT( ctype, ch, opname ) GEMM_UKR_PROT2(ctype, ctype, ch, opname)
+#define GEMM_UKR_PROT( ctype, ch, opname ) \
+        GEMM_UKR_PROT2( ctype, ctype, ch, opname )
 
 #define GEMM_UKR_PROT2( ctype_in, ctype_out, ch, opname ) \
 \
 void PASTEMAC(ch,opname) \
      ( \
-       dim_t               m, \
-       dim_t               n, \
-       dim_t               k, \
-       ctype_out* restrict alpha, \
-       ctype_in*  restrict a, \
-       ctype_in*  restrict b, \
-       ctype_out* restrict beta, \
-       ctype_out* restrict c, inc_t rs_c, inc_t cs_c, \
-       auxinfo_t*          data, \
-       cntx_t*             cntx  \
+             dim_t      m, \
+             dim_t      n, \
+             dim_t      k, \
+       const ctype_out* alpha, \
+       const ctype_in*  a, \
+       const ctype_in*  b, \
+       const ctype_out* beta, \
+             ctype_out* c, inc_t rs_c, inc_t cs_c, \
+             auxinfo_t* data, \
+       const cntx_t*    cntx  \
      );
 
 
@@ -59,17 +60,17 @@ void PASTEMAC(ch,opname) \
 \
 void PASTEMAC(ch,opname) \
      ( \
-       dim_t               m, \
-       dim_t               n, \
-       dim_t               k, \
-       ctype*     restrict alpha, \
-       ctype*     restrict a1x, \
-       ctype*     restrict a11, \
-       ctype*     restrict bx1, \
-       ctype*     restrict b11, \
-       ctype*     restrict c11, inc_t rs_c, inc_t cs_c, \
-       auxinfo_t*          data, \
-       cntx_t*             cntx  \
+             dim_t      m, \
+             dim_t      n, \
+             dim_t      k, \
+       const ctype*     alpha, \
+       const ctype*     a1x, \
+       const ctype*     a11, \
+       const ctype*     bx1, \
+             ctype*     b11, \
+             ctype*     c11, inc_t rs_c, inc_t cs_c, \
+             auxinfo_t* data, \
+       const cntx_t*    cntx  \
      );
 
 
@@ -77,10 +78,10 @@ void PASTEMAC(ch,opname) \
 \
 void PASTEMAC(ch,opname) \
      ( \
-       ctype*     restrict a, \
-       ctype*     restrict b, \
-       ctype*     restrict c, inc_t rs_c, inc_t cs_c, \
-       auxinfo_t*          data, \
-       cntx_t*             cntx  \
+       const ctype*     a, \
+             ctype*     b, \
+             ctype*     c, inc_t rs_c, inc_t cs_c, \
+             auxinfo_t* data, \
+       const cntx_t*    cntx  \
      );
 

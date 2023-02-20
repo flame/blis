@@ -56,13 +56,13 @@ typedef union
 
 void bli_sdotv_zen_int
      (
-       conj_t           conjx,
-       conj_t           conjy,
-       dim_t            n,
-       float*  restrict x, inc_t incx,
-       float*  restrict y, inc_t incy,
-       float*  restrict rho,
-       cntx_t*          cntx
+             conj_t  conjx,
+             conj_t  conjy,
+             dim_t   n,
+       const float*  x, inc_t incx,
+       const float*  y, inc_t incy,
+             float*  rho,
+       const cntx_t* cntx
      )
 {
 	const dim_t      n_elem_per_reg = 8;
@@ -72,8 +72,6 @@ void bli_sdotv_zen_int
 	dim_t            n_viter;
 	dim_t            n_left;
 
-	float*  restrict x0;
-	float*  restrict y0;
 	float            rho0;
 
 	v8sf_t           rho0v, rho1v, rho2v, rho3v;
@@ -104,8 +102,8 @@ void bli_sdotv_zen_int
 	}
 
 	// Initialize local pointers.
-	x0 = x;
-	y0 = y;
+	const float* restrict x0 = x;
+	const float* restrict y0 = y;
 
 	// Initialize the local scalar rho1 to zero.
 	PASTEMAC(s,set0s)( rho0 );
@@ -178,13 +176,13 @@ void bli_sdotv_zen_int
 
 void bli_ddotv_zen_int
      (
-       conj_t           conjx,
-       conj_t           conjy,
-       dim_t            n,
-       double* restrict x, inc_t incx,
-       double* restrict y, inc_t incy,
-       double* restrict rho,
-       cntx_t*          cntx
+             conj_t  conjx,
+             conj_t  conjy,
+             dim_t   n,
+       const double* x, inc_t incx,
+       const double* y, inc_t incy,
+             double* rho,
+       const cntx_t* cntx
      )
 {
 	const dim_t      n_elem_per_reg = 4;
@@ -194,8 +192,6 @@ void bli_ddotv_zen_int
 	dim_t            n_viter;
 	dim_t            n_left;
 
-	double* restrict x0;
-	double* restrict y0;
 	double           rho0;
 
 	v4df_t           rho0v, rho1v, rho2v, rho3v;
@@ -226,8 +222,8 @@ void bli_ddotv_zen_int
 	}
 
 	// Initialize local pointers.
-	x0 = x;
-	y0 = y;
+	const double* restrict x0 = x;
+	const double* restrict y0 = y;
 
 	// Initialize the local scalar rho1 to zero.
 	PASTEMAC(d,set0s)( rho0 );

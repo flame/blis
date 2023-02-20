@@ -56,18 +56,15 @@ typedef union
 
 void bli_sswapv_zen_int8
      (
-       dim_t            n,
-       float*  restrict x, inc_t incx,
-       float*  restrict y, inc_t incy,
-       cntx_t*          cntx
+             dim_t   n,
+             float*  x, inc_t incx,
+             float*  y, inc_t incy,
+       const cntx_t* cntx
      )
 {
 
 	const dim_t     n_elem_per_reg = 8;
 	dim_t           i = 0;
-
-	float* restrict x0;
-	float* restrict y0;
 
 	__m256          xv[8];
 	__m256          yv[8];
@@ -75,8 +72,8 @@ void bli_sswapv_zen_int8
 	// If the vector dimension is zero, return early.
 	if ( bli_zero_dim1( n ) ) return;
 
-	x0 = x;
-	y0 = y;
+	float* restrict x0 = x;
+	float* restrict y0 = y;
 
 	if ( incx == 1 && incy == 1 )
 	{
@@ -202,17 +199,14 @@ void bli_sswapv_zen_int8
 
 void bli_dswapv_zen_int8
      (
-       dim_t            n,
-       double* restrict x, inc_t incx,
-       double* restrict y, inc_t incy,
-       cntx_t*          cntx
+             dim_t   n,
+             double* x, inc_t incx,
+             double* y, inc_t incy,
+       const cntx_t* cntx
      )
 {
 	const dim_t      n_elem_per_reg = 4;
 	dim_t            i = 0;
-
-	double* restrict x0;
-	double* restrict y0;
 
 	__m256d          xv[8];
 	__m256d          yv[8];
@@ -220,8 +214,8 @@ void bli_dswapv_zen_int8
 	// If the vector dimension is zero, return early.
 	if ( bli_zero_dim1( n ) ) return;
 
-	x0 = x;
-	y0 = y;
+	double* restrict x0 = x;
+	double* restrict y0 = y;
 
 	if ( incx == 1 && incy == 1 )
 	{

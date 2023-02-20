@@ -37,15 +37,15 @@
 
 void bli_daxpyf_bgq_int
      (
-       conj_t           conja,
-       conj_t           conjx,
-       dim_t            m,
-       dim_t            b_n,
-       double* restrict alpha,
-       double* restrict a, inc_t inca, inc_t lda,
-       double* restrict x, inc_t incx,
-       double* restrict y, inc_t incy,
-       cntx_t*          cntx
+             conj_t  conja,
+             conj_t  conjx,
+             dim_t   m,
+             dim_t   b_n,
+       const double* alpha,
+       const double* a, inc_t inca, inc_t lda,
+       const double* x, inc_t incx,
+             double* y, inc_t incy,
+       const cntx_t* cntx
      )
 {
 	const dim_t fusefac = 8;
@@ -70,15 +70,15 @@ void bli_daxpyf_bgq_int
 	dim_t m_run       =  m / 4;
 	dim_t m_left      =  m % 4;
 
-	double * a0   = a + 0*lda;
-	double * a1   = a + 1*lda;
-	double * a2   = a + 2*lda;
-	double * a3   = a + 3*lda;
-	double * a4   = a + 4*lda;
-	double * a5   = a + 5*lda;
-	double * a6   = a + 6*lda;
-	double * a7   = a + 7*lda;
-	double * y0   = y;
+	const double* a0   = a + 0*lda;
+	const double* a1   = a + 1*lda;
+	const double* a2   = a + 2*lda;
+	const double* a3   = a + 3*lda;
+	const double* a4   = a + 4*lda;
+	const double* a5   = a + 5*lda;
+	const double* a6   = a + 6*lda;
+	const double* a7   = a + 7*lda;
+	      double* y0   = y;
 
 	double chi0 = *(x + 0*incx);
 	double chi1 = *(x + 1*incx);

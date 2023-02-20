@@ -43,15 +43,15 @@ PACKM_KER_PROT( dcomplex, z, packm_4xk_haswell_ref )
 
 void bli_zpackm_haswell_asm_4xk
      (
-       conj_t              conja,
-       pack_t              schema,
-       dim_t               cdim0,
-       dim_t               k0,
-       dim_t               k0_max,
-       dcomplex*  restrict kappa,
-       dcomplex*  restrict a, inc_t inca0, inc_t lda0,
-       dcomplex*  restrict p,              inc_t ldp0,
-       cntx_t*             cntx
+             conj_t    conja,
+             pack_t    schema,
+             dim_t     cdim0,
+             dim_t     k0,
+             dim_t     k0_max,
+       const dcomplex* kappa,
+       const dcomplex* a, inc_t inca0, inc_t lda0,
+             dcomplex* p,              inc_t ldp0,
+       const cntx_t*   cntx
      )
 {
 #if 0

@@ -47,15 +47,15 @@
 \
 typedef void (*PASTECH3(ch,opname,_ker,tsuf)) \
      ( \
-       conj_t          conjx, \
-       conj_t          conjy, \
-       dim_t           n, \
-       ctype* restrict alpha1, \
-       ctype* restrict alpha2, \
-       ctype* restrict x, inc_t incx, \
-       ctype* restrict y, inc_t incy, \
-       ctype* restrict z, inc_t incz, \
-       cntx_t*         cntx  \
+             conj_t  conjx, \
+             conj_t  conjy, \
+             dim_t   n, \
+       const ctype*  alphax, \
+       const ctype*  alphay, \
+       const ctype*  x, inc_t incx, \
+       const ctype*  y, inc_t incy, \
+             ctype*  z, inc_t incz, \
+       const cntx_t* cntx  \
      );
 
 INSERT_GENTDEF( axpy2v )
@@ -67,15 +67,15 @@ INSERT_GENTDEF( axpy2v )
 \
 typedef void (*PASTECH3(ch,opname,_ker,tsuf)) \
      ( \
-       conj_t          conja, \
-       conj_t          conjx, \
-       dim_t           m, \
-       dim_t           b_n, \
-       ctype* restrict alpha, \
-       ctype* restrict a, inc_t inca, inc_t lda, \
-       ctype* restrict x, inc_t incx, \
-       ctype* restrict y, inc_t incy, \
-       cntx_t*         cntx  \
+             conj_t  conja, \
+             conj_t  conjx, \
+             dim_t   m, \
+             dim_t   b_n, \
+       const ctype*  alpha, \
+       const ctype*  a, inc_t inca, inc_t lda, \
+       const ctype*  x, inc_t incx, \
+             ctype*  y, inc_t incy, \
+       const cntx_t* cntx  \
      );
 
 INSERT_GENTDEF( axpyf )
@@ -87,40 +87,19 @@ INSERT_GENTDEF( axpyf )
 \
 typedef void (*PASTECH3(ch,opname,_ker,tsuf)) \
      ( \
-       conj_t          conjxt, \
-       conj_t          conjx, \
-       conj_t          conjy, \
-       dim_t           m, \
-       ctype* restrict alpha, \
-       ctype* restrict x, inc_t incx, \
-       ctype* restrict y, inc_t incy, \
-       ctype* restrict rho, \
-       ctype* restrict z, inc_t incz, \
-       cntx_t*         cntx  \
+             conj_t  conjxt, \
+             conj_t  conjx, \
+             conj_t  conjy, \
+             dim_t   m, \
+       const ctype*  alpha, \
+       const ctype*  x, inc_t incx, \
+       const ctype*  y, inc_t incy, \
+             ctype*  rho, \
+             ctype*  z, inc_t incz, \
+       const cntx_t* cntx  \
      );
 
 INSERT_GENTDEF( dotaxpyv )
-
-// dotxf
-
-#undef  GENTDEF
-#define GENTDEF( ctype, ch, opname, tsuf ) \
-\
-typedef void (*PASTECH3(ch,opname,_ker,tsuf)) \
-     ( \
-       conj_t          conjat, \
-       conj_t          conjx, \
-       dim_t           m, \
-       dim_t           b_n, \
-       ctype* restrict alpha, \
-       ctype* restrict a, inc_t inca, inc_t lda, \
-       ctype* restrict x, inc_t incx, \
-       ctype* restrict beta, \
-       ctype* restrict y, inc_t incy, \
-       cntx_t*         cntx  \
-     );
-
-INSERT_GENTDEF( dotxf )
 
 // dotxaxpyf
 
@@ -129,23 +108,44 @@ INSERT_GENTDEF( dotxf )
 \
 typedef void (*PASTECH3(ch,opname,_ker,tsuf)) \
      ( \
-       conj_t          conjat, \
-       conj_t          conja, \
-       conj_t          conjw, \
-       conj_t          conjx, \
-       dim_t           m, \
-       dim_t           b_n, \
-       ctype* restrict alpha, \
-       ctype* restrict a, inc_t inca, inc_t lda, \
-       ctype* restrict w, inc_t incw, \
-       ctype* restrict x, inc_t incx, \
-       ctype* restrict beta, \
-       ctype* restrict y, inc_t incy, \
-       ctype* restrict z, inc_t incz, \
-       cntx_t*         cntx  \
+             conj_t  conjat, \
+             conj_t  conja, \
+             conj_t  conjw, \
+             conj_t  conjx, \
+             dim_t   m, \
+             dim_t   b_n, \
+       const ctype*  alpha, \
+       const ctype*  a, inc_t inca, inc_t lda, \
+       const ctype*  w, inc_t incw, \
+       const ctype*  x, inc_t incx, \
+       const ctype*  beta, \
+             ctype*  y, inc_t incy, \
+             ctype*  z, inc_t incz, \
+       const cntx_t* cntx  \
      );
 
 INSERT_GENTDEF( dotxaxpyf )
+
+// dotxf
+
+#undef  GENTDEF
+#define GENTDEF( ctype, ch, opname, tsuf ) \
+\
+typedef void (*PASTECH3(ch,opname,_ker,tsuf)) \
+     ( \
+             conj_t  conjat, \
+             conj_t  conjx, \
+             dim_t   m, \
+             dim_t   b_n, \
+       const ctype*  alpha, \
+       const ctype*  a, inc_t inca, inc_t lda, \
+       const ctype*  x, inc_t incx, \
+       const ctype*  beta, \
+             ctype*  y, inc_t incy, \
+       const cntx_t* cntx  \
+     );
+
+INSERT_GENTDEF( dotxf )
 
 
 

@@ -40,16 +40,16 @@
 \
 void PASTEMAC3(ch,opname,arch,suf) \
      ( \
-       conj_t           conjat, \
-       conj_t           conjx, \
-       dim_t            m, \
-       dim_t            b_n, \
-       ctype*  restrict alpha, \
-       ctype*  restrict a, inc_t inca, inc_t lda, \
-       ctype*  restrict x, inc_t incx, \
-       ctype*  restrict beta, \
-       ctype*  restrict y, inc_t incy, \
-       cntx_t*          cntx  \
+             conj_t  conjat, \
+             conj_t  conjx, \
+             dim_t   m, \
+             dim_t   b_n, \
+       const ctype*  alpha, \
+       const ctype*  a, inc_t inca, inc_t lda, \
+       const ctype*  x, inc_t incx, \
+       const ctype*  beta, \
+             ctype*  y, inc_t incy, \
+       const cntx_t* cntx  \
      ) \
 { \
 	if ( inca == 1 && incx == 1 && incy == 1 && b_n == ff ) \
@@ -117,9 +117,9 @@ void PASTEMAC3(ch,opname,arch,suf) \
 \
 		for ( dim_t i = 0; i < b_n; ++i ) \
 		{ \
-			ctype* restrict a1   = a + (0  )*inca + (i  )*lda; \
-			ctype* restrict x1   = x + (0  )*incx; \
-			ctype* restrict psi1 = y + (i  )*incy; \
+			const ctype* restrict a1   = a + (0  )*inca + (i  )*lda; \
+			const ctype* restrict x1   = x + (0  )*incx; \
+			      ctype* restrict psi1 = y + (i  )*incy; \
 \
 			kfp_dv \
 			( \

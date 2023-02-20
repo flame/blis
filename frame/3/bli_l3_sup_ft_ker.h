@@ -47,18 +47,18 @@
 \
 typedef void (*PASTECH3(ch,opname,_ker,tsuf)) \
      ( \
-       conj_t              conja, \
-       conj_t              conjb, \
-       dim_t               m, \
-       dim_t               n, \
-       dim_t               k, \
-       ctype*     restrict alpha, \
-       ctype*     restrict a, inc_t rs_a, inc_t cs_a, \
-       ctype*     restrict b, inc_t rs_b, inc_t cs_b, \
-       ctype*     restrict beta, \
-       ctype*     restrict c, inc_t rs_c, inc_t cs_c, \
-       auxinfo_t*          data, \
-       cntx_t*             cntx  \
+             conj_t     conja, \
+             conj_t     conjb, \
+             dim_t      m, \
+             dim_t      n, \
+             dim_t      k, \
+       const ctype*     alpha, \
+       const ctype*     a, inc_t rs_a, inc_t cs_a, \
+       const ctype*     b, inc_t rs_b, inc_t cs_b, \
+       const ctype*     beta, \
+             ctype*     c, inc_t rs_c, inc_t cs_c, \
+             auxinfo_t* data, \
+       const cntx_t*    cntx  \
      );
 
 INSERT_GENTDEF( gemmsup )

@@ -56,15 +56,15 @@ typedef union
 
 void bli_sdotxv_zen_int
      (
-       conj_t           conjx,
-       conj_t           conjy,
-       dim_t            n,
-       float*  restrict alpha,
-       float*  restrict x, inc_t incx,
-       float*  restrict y, inc_t incy,
-       float*  restrict beta,
-       float*  restrict rho,
-       cntx_t*          cntx
+             conj_t  conjx,
+             conj_t  conjy,
+             dim_t   n,
+       const float*  alpha,
+       const float*  x, inc_t incx,
+       const float*  y, inc_t incy,
+       const float*  beta,
+             float*  rho,
+       const cntx_t* cntx
      )
 {
 	const dim_t      n_elem_per_reg = 8;
@@ -74,8 +74,6 @@ void bli_sdotxv_zen_int
 	dim_t            n_viter;
 	dim_t            n_left;
 
-	float*  restrict x0;
-	float*  restrict y0;
 	float            rho0;
 
 	v8sf_t           rho0v, rho1v, rho2v, rho3v;
@@ -113,8 +111,8 @@ void bli_sdotxv_zen_int
 	}
 
 	// Initialize local pointers.
-	x0 = x;
-	y0 = y;
+	const float* restrict x0 = x;
+	const float* restrict y0 = y;
 
 	// Initialize the unrolled iterations' rho vectors to zero.
 	rho0v.v = _mm256_setzero_ps();
@@ -184,15 +182,15 @@ void bli_sdotxv_zen_int
 
 void bli_ddotxv_zen_int
      (
-       conj_t           conjx,
-       conj_t           conjy,
-       dim_t            n,
-       double* restrict alpha,
-       double* restrict x, inc_t incx,
-       double* restrict y, inc_t incy,
-       double* restrict beta,
-       double* restrict rho,
-       cntx_t*          cntx
+             conj_t  conjx,
+             conj_t  conjy,
+             dim_t   n,
+       const double* alpha,
+       const double* x, inc_t incx,
+       const double* y, inc_t incy,
+       const double* beta,
+             double* rho,
+       const cntx_t* cntx
      )
 {
 	const dim_t      n_elem_per_reg = 4;
@@ -202,8 +200,6 @@ void bli_ddotxv_zen_int
 	dim_t            n_viter;
 	dim_t            n_left;
 
-	double* restrict x0;
-	double* restrict y0;
 	double           rho0;
 
 	v4df_t           rho0v, rho1v, rho2v, rho3v;
@@ -241,8 +237,8 @@ void bli_ddotxv_zen_int
 	}
 
 	// Initialize local pointers.
-	x0 = x;
-	y0 = y;
+	const double* restrict x0 = x;
+	const double* restrict y0 = y;
 
 	// Initialize the unrolled iterations' rho vectors to zero.
 	rho0v.v = _mm256_setzero_pd();

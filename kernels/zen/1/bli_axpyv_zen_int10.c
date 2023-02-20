@@ -57,20 +57,17 @@ typedef union
 
 void bli_saxpyv_zen_int10
      (
-       conj_t           conjx,
-       dim_t            n,
-       float*  restrict alpha,
-       float*  restrict x, inc_t incx,
-       float*  restrict y, inc_t incy,
-       cntx_t*          cntx
+             conj_t  conjx,
+             dim_t   n,
+       const float*  alpha,
+       const float*  x, inc_t incx,
+             float*  y, inc_t incy,
+       const cntx_t* cntx
      )
 {
 	const dim_t      n_elem_per_reg = 8;
 
 	dim_t            i;
-
-	float*  restrict x0;
-	float*  restrict y0;
 
 	__m256           alphav;
 	__m256           xv[10];
@@ -81,8 +78,8 @@ void bli_saxpyv_zen_int10
 	if ( bli_zero_dim1( n ) || PASTEMAC(s,eq0)( *alpha ) ) return;
 
 	// Initialize local pointers.
-	x0 = x;
-	y0 = y;
+	const float* restrict x0 = x;
+	      float* restrict y0 = y;
 
 	if ( incx == 1 && incy == 1 )
 	{
@@ -263,20 +260,17 @@ void bli_saxpyv_zen_int10
 
 void bli_daxpyv_zen_int10
      (
-       conj_t           conjx,
-       dim_t            n,
-       double* restrict alpha,
-       double* restrict x, inc_t incx,
-       double* restrict y, inc_t incy,
-       cntx_t*          cntx
+             conj_t  conjx,
+             dim_t   n,
+       const double* alpha,
+       const double* x, inc_t incx,
+             double* y, inc_t incy,
+       const cntx_t* cntx
      )
 {
 	const dim_t      n_elem_per_reg = 4;
 
 	dim_t            i;
-
-	double* restrict x0 = x;
-	double* restrict y0 = y;
 
 	__m256d          alphav;
 	__m256d          xv[10];
@@ -287,8 +281,8 @@ void bli_daxpyv_zen_int10
 	if ( bli_zero_dim1( n ) || PASTEMAC(d,eq0)( *alpha ) ) return;
 
 	// Initialize local pointers.
-	x0 = x;
-	y0 = y;
+	const double* restrict x0 = x;
+	      double* restrict y0 = y;
 
 	if ( incx == 1 && incy == 1 )
 	{
