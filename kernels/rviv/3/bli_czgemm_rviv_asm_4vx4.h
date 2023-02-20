@@ -162,11 +162,6 @@ REALNAME:
     add C12_ptr, C02_ptr, rs_c
     add C13_ptr, C03_ptr, rs_c
 
-    add A10_ptr, A00_ptr, s0
-    slli s0, s0, 1      // length of a column of A in bytes
-    add A01_ptr, A00_ptr, s0
-    add A11_ptr, A10_ptr, s0
-
     // Zero-initialize accumulators
     vxor.vv AB00_re, AB00_re, AB00_re
     vxor.vv AB00_im, AB00_im, AB00_im
@@ -187,6 +182,11 @@ REALNAME:
 
     // Handle k == 0
     beqz loop_counter, MULTIPLYBETA
+
+    add A10_ptr, A00_ptr, s0
+    slli s0, s0, 1      // length of a column of A in bytes
+    add A01_ptr, A00_ptr, s0
+    add A11_ptr, A10_ptr, s0
 
     li tmp, 3
     ble loop_counter, tmp, TAIL_UNROLL_2
@@ -598,8 +598,6 @@ TAIL_UNROLL_1: // loop_counter <= 1
 MULTIPLYALPHA:
     FLOAD ALPHA_re, 0*REALSIZE(a1)
     FLOAD ALPHA_im, 1*REALSIZE(a1)
-    FLOAD BETA_re,  0*REALSIZE(a4)
-    FLOAD BETA_im,  1*REALSIZE(a4)
 
     FEQ tmp, ALPHA_im, fzero
     bne tmp, zero, ALPHAREAL
@@ -662,6 +660,8 @@ ALPHAREAL:
     vfmul.vf AB13_im, AB13_im, ALPHA_re
 
 MULTIPLYBETA:
+    FLOAD BETA_re,  0*REALSIZE(a4)
+    FLOAD BETA_im,  1*REALSIZE(a4)
     FEQ tmp, BETA_im, fzero
     bne tmp, zero, BETAREAL
 

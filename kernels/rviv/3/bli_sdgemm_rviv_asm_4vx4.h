@@ -131,12 +131,6 @@ REALNAME:
     add C12_ptr, C02_ptr, rs_c
     add C13_ptr, C03_ptr, rs_c
 
-    add A1_ptr, A0_ptr, s0
-    add A2_ptr, A1_ptr, s0
-    add A3_ptr, A2_ptr, s0
-
-    slli s0, s0, 2 // length of a column of A in bytes
-
     // Zero-initialize accumulators
     vxor.vv AB00, AB00, AB00
     vxor.vv AB01, AB01, AB01
@@ -157,6 +151,12 @@ REALNAME:
 
 	// Handle k == 0
 	beqz loop_counter, MULTIPLYBETA
+
+    add A1_ptr, A0_ptr, s0
+    add A2_ptr, A1_ptr, s0
+    add A3_ptr, A2_ptr, s0
+
+    slli s0, s0, 2 // length of a column of A in bytes
 
     li tmp, 1
     ble loop_counter, tmp, TAIL
@@ -294,7 +294,6 @@ TAIL:
 
 MULTIPLYALPHA:
     FLOAD ALPHA, (a1)
-    FLOAD BETA,  (a4)
 
     // Multiply with alpha
     vfmul.vf AB00, AB00, ALPHA
@@ -318,6 +317,7 @@ MULTIPLYALPHA:
     vfmul.vf AB33, AB33, ALPHA
 
 MULTIPLYBETA:
+    FLOAD BETA,  (a4)
     FEQ tmp, BETA, fzero
     beq tmp, zero, BETANOTZERO
 
