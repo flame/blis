@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2022, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2022-2023, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -87,6 +87,7 @@ void PASTEF77S(ch,blasname) \
 	   bli_finalize_auto(); \
 }\
 \
+IF_BLIS_ENABLE_BLAS(\
 void PASTEF77(ch,blasname) \
      ( \
        const f77_int* n, \
@@ -95,9 +96,8 @@ void PASTEF77(ch,blasname) \
      ) \
 { \
   PASTEF77S(ch,blasname)( n, x, incx, y, incy ); \
-}
-
-#ifdef BLIS_ENABLE_BLAS
+} \
+)
 
 void scopy_blis_impl
 (
@@ -193,6 +193,7 @@ void scopy_blis_impl
 	/* Finalize BLIS. */
 //    bli_finalize_auto();
 }
+#ifdef BLIS_ENABLE_BLAS
 void scopy_
 (
 	const f77_int* n,
@@ -202,7 +203,7 @@ void scopy_
 {
   scopy_blis_impl( n, x, incx, y, incy );
 }
-
+#endif
 void dcopy_blis_impl
 (
 	const f77_int* n,
@@ -298,6 +299,7 @@ void dcopy_blis_impl
 	/* Finalize BLIS. */
 //    bli_finalize_auto();
 }
+#ifdef BLIS_ENABLE_BLAS
 void dcopy_
 (
 	const f77_int* n,
@@ -307,6 +309,6 @@ void dcopy_
 {
   dcopy_blis_impl( n, x, incx, y, incy );
 }
+#endif
 INSERT_GENTFUNC_BLAS_CZ(copy, copyv)
 
-#endif

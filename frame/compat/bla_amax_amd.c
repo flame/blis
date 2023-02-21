@@ -97,6 +97,7 @@ f77_int PASTEF772S(i,chx,blasname) \
     return f77_index; \
 }\
 \
+IF_BLIS_ENABLE_BLAS(\
 f77_int PASTEF772(i,chx,blasname) \
      ( \
        const f77_int* n, \
@@ -104,9 +105,8 @@ f77_int PASTEF772(i,chx,blasname) \
      ) \
 { \
   return PASTEF772S(i,chx,blasname)( n, x, incx );\
-}
-
-#ifdef BLIS_ENABLE_BLAS
+} \
+)
 
 f77_int isamax_blis_impl
      (
@@ -206,6 +206,7 @@ f77_int isamax_blis_impl
 
     return f77_index;
 }
+#ifdef BLIS_ENABLE_BLAS
 f77_int isamax_
      (
        const f77_int* n,
@@ -214,7 +215,7 @@ f77_int isamax_
 {
   return isamax_blis_impl( n, x, incx ); 
 }
-
+#endif
 f77_int idamax_blis_impl
      (
        const f77_int* n,
@@ -340,7 +341,7 @@ f77_int idamax_blis_impl
     AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
     return f77_index;
 }
-
+#ifdef BLIS_ENABLE_BLAS
 f77_int idamax_
      (
        const f77_int* n,
@@ -349,7 +350,6 @@ f77_int idamax_
 {
   return idamax_blis_impl( n, x, incx ); 
 }
-
+#endif
 INSERT_GENTFUNC_BLAS_CZ( amax, amaxv )
 
-#endif

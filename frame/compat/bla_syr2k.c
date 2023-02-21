@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin.
-   Copyright (C) 2019 - 2022, Advanced Micro Devices, Inc.All Rights Reserved.
+   Copyright (C) 2019-2023, Advanced Micro Devices, Inc.All Rights Reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -140,6 +140,7 @@ void PASTEF77S(ch,blasname) \
 	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1) \
 	bli_finalize_auto(); \
 } \
+IF_BLIS_ENABLE_BLAS(\
 void PASTEF77(ch,blasname) \
      ( \
        const f77_char* uploc, \
@@ -154,7 +155,8 @@ void PASTEF77(ch,blasname) \
      ) \
 { \
 	PASTEF77S(ch,blasname) ( uploc, transa, m, k, alpha, a, lda, b, ldb, beta, c, ldc ); \
- } \
+} \
+)
 
 #else
 
@@ -278,6 +280,7 @@ void PASTEF77S(ch,blasname) \
 	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1) \
 	bli_finalize_auto(); \
 } \
+IF_BLIS_ENABLE_BLAS(\
 void PASTEF77(ch,blasname) \
      ( \
        const f77_char* uploc, \
@@ -293,10 +296,9 @@ void PASTEF77(ch,blasname) \
 { \
 	PASTEF77S(ch,blasname) ( uploc, transa, m, k, alpha, a, lda, b, ldb, beta, c, ldc ); \
 } \
+)
 
 #endif
 
-#ifdef BLIS_ENABLE_BLAS
 INSERT_GENTFUNC_BLAS( syr2k, syr2k )
-#endif
 

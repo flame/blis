@@ -3076,13 +3076,6 @@ main()
 		echo "${script_name}: compiler appears to not support #pragma omp simd."
 		enable_pragma_omp_simd_01=0
 	fi
-	if [ "x${enable_blas}" = "xyes" ]; then
-		echo "${script_name}: the BLAS compatibility layer is enabled."
-		enable_blas_01=1
-	else
-		echo "${script_name}: the BLAS compatibility layer is disabled."
-		enable_blas_01=0
-	fi
 	if [ "x${enable_cblas}" = "xyes" ]; then
 		echo "${script_name}: the CBLAS compatibility layer is enabled."
 		enable_cblas_01=1
@@ -3091,6 +3084,13 @@ main()
 	else
 		echo "${script_name}: the CBLAS compatibility layer is disabled."
 		enable_cblas_01=0
+	fi
+	if [ "x${enable_blas}" = "xyes" ]; then
+		echo "${script_name}: the BLAS compatibility layer is enabled."
+		enable_blas_01=1
+	else
+		echo "${script_name}: the BLAS compatibility layer is disabled."
+		enable_blas_01=0
 	fi
 	if [ "x${enable_mixed_dt}" = "xyes" ]; then
 		echo "${script_name}: mixed datatype support is enabled."

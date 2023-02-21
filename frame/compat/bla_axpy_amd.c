@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2020 - 2022, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2020-2023, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -85,6 +85,7 @@ void PASTEF77S(ch,blasname) \
      bli_finalize_auto();  \
 }\
 \
+IF_BLIS_ENABLE_BLAS(\
 void PASTEF77(ch,blasname) \
      ( \
        const f77_int* n, \
@@ -94,10 +95,10 @@ void PASTEF77(ch,blasname) \
      ) \
 { \
   PASTEF77S(ch,blasname)( n, alpha, x, incx, y, incy ) ; \
-}
+} \
+)
 
 
-#ifdef BLIS_ENABLE_BLAS
 
 void saxpy_blis_impl
 (
@@ -190,6 +191,8 @@ void saxpy_blis_impl
   //    bli_finalize_auto();
   AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
 }
+
+#ifdef BLIS_ENABLE_BLAS
 void saxpy_
 (
  const f77_int* n,
@@ -200,6 +203,7 @@ void saxpy_
 {
   saxpy_blis_impl( n, alpha, x, incx, y, incy ) ; 
 }
+#endif
 
 void daxpy_blis_impl
 (
@@ -411,6 +415,8 @@ void daxpy_blis_impl
   /* Finalize BLIS. */
   //    bli_finalize_auto();
 }
+
+#ifdef BLIS_ENABLE_BLAS
 void daxpy_
 (
  const f77_int* n,
@@ -421,7 +427,7 @@ void daxpy_
 {
   daxpy_blis_impl( n, alpha, x, incx, y, incy ) ; 
 }
-
+#endif
 void caxpy_blis_impl
 (
  const f77_int* n,
@@ -513,6 +519,7 @@ void caxpy_blis_impl
   /* Finalize BLIS. */
   //    bli_finalize_auto();
 }
+#ifdef BLIS_ENABLE_BLAS
 void caxpy_
 (
  const f77_int* n,
@@ -523,6 +530,7 @@ void caxpy_
 {
   caxpy_blis_impl( n, alpha, x, incx, y, incy ) ; 
 }
+#endif
 void zaxpy_blis_impl
 (
  const f77_int* n,
@@ -615,6 +623,7 @@ void zaxpy_blis_impl
   /* Finalize BLIS. */
   //    bli_finalize_auto();
 }
+#ifdef BLIS_ENABLE_BLAS
 void zaxpy_
 (
  const f77_int* n,

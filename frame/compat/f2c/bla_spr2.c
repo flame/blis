@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2020 - 2022, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2020-2023, Advanced Micro Devices, Inc. All rights reserved.
    
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -35,8 +35,6 @@
 
 #include "blis.h"
 
-#ifdef BLIS_ENABLE_BLAS
-
 /* dspr2.f -- translated by f2c (version 19991025).
    You must link the resulting object file with the libraries:
 	-lf2c -lm   (in that order)
@@ -52,9 +50,9 @@ int PASTEF77S(d,spr2)(const bla_character *uplo, const bla_integer *n, const bla
     bla_integer info;
     bla_double temp1, temp2;
     bla_integer i__, j, k;
-    //extern bla_logical PASTEF770(lsame)(bla_character *, bla_character *, ftnlen, ftnlen);
+    //extern bla_logical PASTE_LSAME(bla_character *, bla_character *, ftnlen, ftnlen);
     bla_integer kk, ix, iy, jx = 0, jy = 0, kx = 0, ky = 0;
-    //extern /* Subroutine */ int PASTEF770(xerbla)(bla_character *, bla_integer *, ftnlen);
+    //extern /* Subroutine */ int PASTE_XERBLA(bla_character *, bla_integer *, ftnlen);
 
 /*     .. Scalar Arguments .. */
 /*     .. Array Arguments .. */
@@ -160,7 +158,7 @@ int PASTEF77S(d,spr2)(const bla_character *uplo, const bla_integer *n, const bla
 
     /* Function Body */
     info = 0;
-    if (! PASTEF770(lsame)(uplo, "U", (ftnlen)1, (ftnlen)1) && ! PASTEF770(lsame)(uplo, "L", (
+    if (! PASTE_LSAME(uplo, "U", (ftnlen)1, (ftnlen)1) && ! PASTE_LSAME(uplo, "L", (
 	    ftnlen)1, (ftnlen)1)) {
 	info = 1;
     } else if (*n < 0) {
@@ -171,7 +169,7 @@ int PASTEF77S(d,spr2)(const bla_character *uplo, const bla_integer *n, const bla
 	info = 7;
     }
     if (info != 0) {
-	PASTEF770(xerbla)("DSPR2 ", &info, (ftnlen)6);
+	PASTE_XERBLA("DSPR2 ", &info, (ftnlen)6);
 	return 0;
     }
 
@@ -203,7 +201,7 @@ int PASTEF77S(d,spr2)(const bla_character *uplo, const bla_integer *n, const bla
 /*     are accessed sequentially with one pass through AP. */
 
     kk = 1;
-    if (PASTEF770(lsame)(uplo, "U", (ftnlen)1, (ftnlen)1)) {
+    if (PASTE_LSAME(uplo, "U", (ftnlen)1, (ftnlen)1)) {
 
 /*        Form  A  when upper triangle is stored in AP. */
 
@@ -312,9 +310,9 @@ int PASTEF77S(s,spr2)(const bla_character *uplo, const bla_integer *n, const bla
     bla_integer info;
     bla_real temp1, temp2;
     bla_integer i__, j, k;
-    //extern bla_logical PASTEF770(lsame)(bla_character *, bla_character *, ftnlen, ftnlen);
+    //extern bla_logical PASTE_LSAME(bla_character *, bla_character *, ftnlen, ftnlen);
     bla_integer kk, ix, iy, jx = 0, jy = 0, kx = 0, ky = 0;
-    //extern /* Subroutine */ int PASTEF770(xerbla)(bla_character *, bla_integer *, ftnlen);
+    //extern /* Subroutine */ int PASTE_XERBLA(bla_character *, bla_integer *, ftnlen);
 
 /*     .. Scalar Arguments .. */
 /*     .. Array Arguments .. */
@@ -420,7 +418,7 @@ int PASTEF77S(s,spr2)(const bla_character *uplo, const bla_integer *n, const bla
 
     /* Function Body */
     info = 0;
-    if (! PASTEF770(lsame)(uplo, "U", (ftnlen)1, (ftnlen)1) && ! PASTEF770(lsame)(uplo, "L", (
+    if (! PASTE_LSAME(uplo, "U", (ftnlen)1, (ftnlen)1) && ! PASTE_LSAME(uplo, "L", (
 	    ftnlen)1, (ftnlen)1)) {
 	info = 1;
     } else if (*n < 0) {
@@ -431,7 +429,7 @@ int PASTEF77S(s,spr2)(const bla_character *uplo, const bla_integer *n, const bla
 	info = 7;
     }
     if (info != 0) {
-	PASTEF770(xerbla)("SSPR2 ", &info, (ftnlen)6);
+	PASTE_XERBLA("SSPR2 ", &info, (ftnlen)6);
 	return 0;
     }
 
@@ -463,7 +461,7 @@ int PASTEF77S(s,spr2)(const bla_character *uplo, const bla_integer *n, const bla
 /*     are accessed sequentially with one pass through AP. */
 
     kk = 1;
-    if (PASTEF770(lsame)(uplo, "U", (ftnlen)1, (ftnlen)1)) {
+    if (PASTE_LSAME(uplo, "U", (ftnlen)1, (ftnlen)1)) {
 
 /*        Form  A  when upper triangle is stored in AP. */
 
@@ -556,6 +554,8 @@ int PASTEF77S(s,spr2)(const bla_character *uplo, const bla_integer *n, const bla
 /*     End of SSPR2 . */
 
 } /* sspr2_ */
+
+#ifdef BLIS_ENABLE_BLAS
 
 int PASTEF77(d,spr2)(const bla_character *uplo, const bla_integer *n, const bla_double *alpha, const bla_double *x, const bla_integer *incx, const bla_double *y, const bla_integer *incy, bla_double *ap)
 {

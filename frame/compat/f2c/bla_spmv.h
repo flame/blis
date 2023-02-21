@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2020 - 2022, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2020-2023, Advanced Micro Devices, Inc. All rights reserved.
    
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -37,7 +37,8 @@
 
 BLIS_EXPORT_BLAS int PASTEF77(d,spmv)(const bla_character *uplo, const bla_integer *n, const bla_double *alpha, const bla_double *ap, const bla_double *x, const bla_integer *incx, const bla_double *beta, bla_double *y, const bla_integer *incy);
 BLIS_EXPORT_BLAS int PASTEF77(s,spmv)(const bla_character *uplo, const bla_integer *n, const bla_real *alpha, const bla_real *ap, const bla_real *x, const bla_integer *incx, const bla_real *beta, bla_real *y, const bla_integer *incy);
-BLIS_EXPORT_BLAS int PASTEF77S(d,spmv)(const bla_character *uplo, const bla_integer *n, const bla_double *alpha, const bla_double *ap, const bla_double *x, const bla_integer *incx, const bla_double *beta, bla_double *y, const bla_integer *incy);
-BLIS_EXPORT_BLAS int PASTEF77S(s,spmv)(const bla_character *uplo, const bla_integer *n, const bla_real *alpha, const bla_real *ap, const bla_real *x, const bla_integer *incx, const bla_real *beta, bla_real *y, const bla_integer *incy);
 
 #endif
+
+BLIS_EXPORT_BLAS int PASTEF77S(d,spmv)(const bla_character *uplo, const bla_integer *n, const bla_double *alpha, const bla_double *ap, const bla_double *x, const bla_integer *incx, const bla_double *beta, bla_double *y, const bla_integer *incy);
+BLIS_EXPORT_BLAS int PASTEF77S(s,spmv)(const bla_character *uplo, const bla_integer *n, const bla_real *alpha, const bla_real *ap, const bla_real *x, const bla_integer *incx, const bla_real *beta, bla_real *y, const bla_integer *incy);

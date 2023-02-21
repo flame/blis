@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2022, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2022-2023, Advanced Micro Devices, Inc. All rights reserved.
    
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -39,7 +39,10 @@ BLIS_EXPORT_BLAS int PASTEF77(s,rotg)(bla_real *sa, bla_real *sb, bla_real *c__,
 BLIS_EXPORT_BLAS int PASTEF77(d,rotg)(bla_double *da, bla_double *db, bla_double *c__, bla_double *s);
 BLIS_EXPORT_BLAS int PASTEF77(c,rotg)(bla_scomplex *ca, bla_scomplex *cb, bla_real *c__, bla_scomplex *s);
 BLIS_EXPORT_BLAS int PASTEF77(z,rotg)(bla_dcomplex *ca, bla_dcomplex *cb, bla_double *c__, bla_dcomplex *s);
-BLIS_EXPORT_BLAS int PASTEF77S(s,rotg)(bla_real *sa, bla_real *sb, bla_real *c__, bla_real *s);
-BLIS_EXPORT_BLAS int PASTEF77S(d,rotg)(bla_double *da, bla_double *db, bla_double *c__, bla_double *s);
 
 #endif
+
+BLIS_EXPORT_BLAS int PASTEF77S(s,rotg)(bla_real *sa, bla_real *sb, bla_real *c__, bla_real *s);
+BLIS_EXPORT_BLAS int PASTEF77S(d,rotg)(bla_double *da, bla_double *db, bla_double *c__, bla_double *s);
+BLIS_EXPORT_BLAS int PASTEF77S(c,rotg)(bla_scomplex *ca, bla_scomplex *cb, bla_real *c__, bla_scomplex *s);
+BLIS_EXPORT_BLAS int PASTEF77S(z,rotg)(bla_dcomplex *ca, bla_dcomplex *cb, bla_double *c__, bla_dcomplex *s);

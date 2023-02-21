@@ -1,6 +1,6 @@
 /*
 
-   Copyright (C) 2020, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2020-2023, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -27,6 +27,8 @@
    OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 */
+
+#ifdef BLIS_ENABLE_CBLAS
 
 #ifndef CBLAS_H
 #define CBLAS_H
@@ -706,3 +708,5 @@ BLIS_EXPORT_BLAS f77_int cblas_izamin(f77_int N, const void   *X, f77_int incX);
 }
 #endif
 #endif
+
+#endif // BLIS_ENABLE_CBLAS

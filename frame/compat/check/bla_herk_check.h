@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2023, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -32,8 +33,6 @@
 
 */
 
-#ifdef BLIS_ENABLE_BLAS
-
 #define bla_herk_check( dt_str, op_str, uploa, transa, m, k, lda, ldc ) \
 { \
 	f77_int info = 0; \
@@ -41,10 +40,10 @@
 	f77_int lower, upper; \
 	f77_int nrowa; \
 \
-	nota  = PASTEF770(lsame)( transa, "N", (ftnlen)1, (ftnlen)1 ); \
-	conja = PASTEF770(lsame)( transa, "C", (ftnlen)1, (ftnlen)1 ); \
-	lower = PASTEF770(lsame)( uploc,  "L", (ftnlen)1, (ftnlen)1 ); \
-	upper = PASTEF770(lsame)( uploc,  "U", (ftnlen)1, (ftnlen)1 ); \
+	nota  = PASTE_LSAME( transa, "N", (ftnlen)1, (ftnlen)1 ); \
+	conja = PASTE_LSAME( transa, "C", (ftnlen)1, (ftnlen)1 ); \
+	lower = PASTE_LSAME( uploc,  "L", (ftnlen)1, (ftnlen)1 ); \
+	upper = PASTE_LSAME( uploc,  "U", (ftnlen)1, (ftnlen)1 ); \
 \
 	if ( nota ) { nrowa = *m; } \
 	else        { nrowa = *k; } \
@@ -70,10 +69,8 @@
 \
 		bli_string_mkupper( func_str ); \
 \
-		PASTEF770(xerbla)( func_str, &info, (ftnlen)6 ); \
+		PASTE_XERBLA( func_str, &info, (ftnlen)6 ); \
 \
 		return; \
 	} \
 }
-
-#endif

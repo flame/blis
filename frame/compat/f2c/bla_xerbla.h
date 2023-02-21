@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2023, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -31,6 +32,8 @@
    OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 */
+
+BLIS_EXPORT_BLAS int xerbla_blis_impl(const bla_character *srname, const bla_integer *info, ftnlen srname_len);
 
 #ifdef BLIS_ENABLE_BLAS
 

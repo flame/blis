@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2020, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2020-2023, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -33,14 +33,6 @@
 
 */
 
-// If the CBLAS compatibility layer was enabled while the BLAS layer
-// was not enabled, we must enable it here.
-#ifdef BLIS_ENABLE_CBLAS
-#ifndef BLIS_ENABLE_BLAS
-#define BLIS_ENABLE_BLAS
-#endif
-#endif // BLIS_ENABLE_CBLAS
-
 // By default, if the BLAS compatibility layer is enabled, we define
 // (include) all of the BLAS prototypes. However, if the user is
 // #including "blis.h" and also #including another header that also
@@ -51,6 +43,11 @@
 #else
 #undef  BLIS_ENABLE_BLAS_DEFS
 #endif
+
+// Hack to always enable this, as disabling it is broken in UTA BLIS
+// as well as here.
+#define BLIS_ENABLE_BLAS_DEFS
+
 
 // Skip prototyping all of the BLAS if the BLAS test drivers are being
 // compiled.
@@ -63,6 +60,9 @@
 #ifdef BLIS_DISABLE_BLAS_DEFS
 #undef BLIS_ENABLE_BLAS_DEFS
 #endif
+
+
+
 
 // Begin including all BLAS prototypes.
 #ifdef BLIS_ENABLE_BLAS_DEFS
@@ -217,4 +217,4 @@
 #include "f77_amin_sub.h"
 
 
-#endif // BLIS_ENABLE_BLAS
+#endif // BLIS_ENABLE_BLAS_DEFS

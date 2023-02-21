@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2020 - 2022, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2020-2023, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -141,6 +141,7 @@ void PASTEF77S(ch,blasname) \
     bli_finalize_auto(); \
 }\
 \
+IF_BLIS_ENABLE_BLAS(\
 void PASTEF77(ch,blasname) \
      ( \
        const f77_char* transa, \
@@ -155,8 +156,7 @@ void PASTEF77(ch,blasname) \
 { \
   PASTEF77S(ch,blasname) \
   ( transa, m, n, alpha, a, lda, x, incx, beta, y, incy ); \
-}
+} \
+)
 
-#ifdef BLIS_ENABLE_BLAS
 INSERT_GENTFUNC_BLAS( gemv, gemv )
-#endif

@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2020, Advanced Micro Devices, Inc.
+   Copyright (C) 2020-2023, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -44,7 +44,7 @@
 #undef  GENTFUNC
 #define GENTFUNC( ftype, ch, blasname, blisname ) \
 \
-void PASTEF77(ch,blasname) \
+void PASTEF77S(ch,blasname) \
      ( \
        const f77_char* transa_array, \
        const f77_char* transb_array, \
@@ -134,14 +134,36 @@ void PASTEF77(ch,blasname) \
     } \
 \
     bli_finalize_auto(); \
-}
+} \
+IF_BLIS_ENABLE_BLAS(\
+void PASTEF77(ch,blasname) \
+     ( \
+       const f77_char* transa_array, \
+       const f77_char* transb_array, \
+       const f77_int*  m_array, \
+       const f77_int*  n_array, \
+       const f77_int*  k_array, \
+       const ftype*    alpha_array, \
+       const ftype**   a_array, const f77_int* lda_array, \
+       const ftype**   b_array, const f77_int* ldb_array, \
+       const ftype*    beta_array, \
+             ftype**   c_array, const f77_int* ldc_array, \
+       const f77_int*  group_count, \
+       const f77_int*  group_size \
+     ) \
+{ \
+	PASTEF77S(ch,blasname)( transa_array, transb_array, m_array, n_array, k_array, \
+				alpha_array, a_array, lda_array, b_array, ldb_array, beta_array, \
+				c_array, ldc_array, group_count, group_size ); \
+} \
+)
 
 #else
 
 #undef  GENTFUNC
 #define GENTFUNC( ftype, ch, blasname, blisname ) \
 \
-void PASTEF77(ch,blasname) \
+void PASTEF77S(ch,blasname) \
      ( \
        const f77_char* transa_array, \
        const f77_char* transb_array, \
@@ -246,11 +268,31 @@ void PASTEF77(ch,blasname) \
 \
     /* Finalize BLIS. */  \
     bli_finalize_auto(); \
-}
+} \
+IF_BLIS_ENABLE_BLAS(\
+void PASTEF77(ch,blasname) \
+     ( \
+       const f77_char* transa_array, \
+       const f77_char* transb_array, \
+       const f77_int*  m_array, \
+       const f77_int*  n_array, \
+       const f77_int*  k_array, \
+       const ftype*    alpha_array, \
+       const ftype**   a_array, const f77_int* lda_array, \
+       const ftype**   b_array, const f77_int* ldb_array, \
+       const ftype*    beta_array, \
+             ftype**   c_array, const f77_int* ldc_array, \
+       const f77_int*  group_count, \
+       const f77_int*  group_size \
+     ) \
+{ \
+	PASTEF77S(ch,blasname)( transa_array, transb_array, m_array, n_array, k_array, \
+				alpha_array, a_array, lda_array, b_array, ldb_array, beta_array, \
+				c_array, ldc_array, group_count, group_size ); \
+} \
+)
 
 #endif
 
-#ifdef BLIS_ENABLE_BLAS
 INSERT_GENTFUNC_BLAS( gemm_batch, gemm )
-#endif
 

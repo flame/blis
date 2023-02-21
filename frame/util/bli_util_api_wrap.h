@@ -32,6 +32,8 @@
 
 */
 
+#ifdef BLIS_ENABLE_BLAS
+
 // file define different formats of BLAS APIs- uppercase with
 // and without underscore, lowercase without underscore.
 
@@ -1280,6 +1282,9 @@ BLIS_EXPORT_BLIS void ZTRSM_(const char   *side, const char   *uplo, const char 
 
 
 // Miscellaneous APIs
+
+#ifdef BLIS_ENABLE_CBLAS
+
 BLIS_EXPORT_BLIS void CDOTCSUB( const f77_int* n,  const scomplex* x, const f77_int* incx,  const scomplex* y,  const f77_int* incy,  scomplex* rval);
 
 BLIS_EXPORT_BLIS void cdotcsub( const f77_int* n,  const scomplex* x, const f77_int* incx,  const scomplex* y,  const f77_int* incy,  scomplex* rval);
@@ -1470,6 +1475,7 @@ BLIS_EXPORT_BLIS void dsdotsub( const f77_int* n,  const float* x,  const f77_in
 
 BLIS_EXPORT_BLIS void DSDOTSUB_( const f77_int* n,  const float* x,  const f77_int* incx,  const float* y,  const f77_int* incy,  double* dot);
 
+#endif // BLIS_ENABLE_CBLAS
 
 
 BLIS_EXPORT_BLIS f77_int LSAME(const char   *ca, const char   *cb, const f77_int a, const f77_int b);
@@ -1617,6 +1623,7 @@ BLIS_EXPORT_BLIS void zgemmt( const f77_char* uploc,  const f77_char* transa,  c
 BLIS_EXPORT_BLIS void ZGEMMT_( const f77_char* uploc,  const f77_char* transa,  const f77_char* transb,  const f77_int* n,  const f77_int* k,  const  dcomplex* alpha,  const dcomplex* a,  const f77_int* lda,  const dcomplex* b,  const f77_int* ldb,  const dcomplex* beta,  dcomplex* c,  const f77_int* ldc);
 
 
+//#ifdef BLIS_ENABLE_CBLAS
 
 BLIS_EXPORT_BLIS void CIMATCOPY(f77_char* trans,  f77_int* rows,  f77_int* cols,  const scomplex* alpha, scomplex* aptr,  f77_int* lda,  f77_int* ldb);
 
@@ -1736,6 +1743,9 @@ BLIS_EXPORT_BLIS void zomatcopy(f77_char* trans,  f77_int* rows,  f77_int* cols,
 
 BLIS_EXPORT_BLIS void ZOMATCOPY_(f77_char* trans,  f77_int* rows,  f77_int* cols,  const dcomplex* alpha,  const dcomplex* aptr,  f77_int* lda,  dcomplex* bptr,  f77_int* ldb);
 
+//#endif // BLIS_ENABLE_CBLAS
 
 #endif
 #endif
+
+#endif // BLIS_ENABLE_BLAS

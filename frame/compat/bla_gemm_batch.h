@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2020, Advanced Micro Devices, Inc. 
+   Copyright (C) 2020-2023, Advanced Micro Devices, Inc. 
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -39,7 +39,24 @@
 #undef  GENTPROT
 #define GENTPROT( ftype, ch, blasname ) \
 \
+IF_BLIS_ENABLE_BLAS(\
 BLIS_EXPORT_BLAS void PASTEF77(ch,blasname) \
+     ( \
+       const f77_char* transa_array, \
+       const f77_char* transb_array, \
+       const f77_int*  m_array, \
+       const f77_int*  n_array, \
+       const f77_int*  k_array, \
+       const ftype*    alpha_array, \
+       const ftype**   a_array, const f77_int* lda_array, \
+       const ftype**   b_array, const f77_int* ldb_array, \
+       const ftype*    beta_array, \
+             ftype**   c_array, const f77_int* ldc_array, \
+       const f77_int*  group_count, \
+       const f77_int*  group_size \
+     );\
+)\
+BLIS_EXPORT_BLAS void PASTEF77S(ch,blasname) \
      ( \
        const f77_char* transa_array, \
        const f77_char* transb_array, \
@@ -55,7 +72,5 @@ BLIS_EXPORT_BLAS void PASTEF77(ch,blasname) \
        const f77_int*  group_size \
      );
 
-#ifdef BLIS_ENABLE_BLAS
 INSERT_GENTPROT_BLAS( gemm_batch )
-#endif
 

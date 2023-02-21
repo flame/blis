@@ -4,8 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2020, Advanced Micro Devices, Inc. All rights reserved.
-   Copyright (C) 2022, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2020-2023, Advanced Micro Devices, Inc. All rights reserved.
    
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -91,6 +90,7 @@ f77_int PASTEF772S(i,chx,blasname) \
     return f77_index; \
 }\
 \
+IF_BLIS_ENABLE_BLAS(\
 f77_int PASTEF772(i,chx,blasname) \
      ( \
        const f77_int* n, \
@@ -98,8 +98,7 @@ f77_int PASTEF772(i,chx,blasname) \
      ) \
 { \
   return PASTEF772S(i,chx,blasname)( n, x, incx );\
-}
+} \
+)
 
-#ifdef BLIS_ENABLE_BLAS
-    INSERT_GENTFUNC_BLAS( amin, aminv )
-#endif
+INSERT_GENTFUNC_BLAS( amin, aminv )

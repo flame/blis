@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2019 - 2023, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2019-2023, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -132,12 +132,13 @@ void PASTEF77S(ch,blasname) \
       NULL  \
     ); \
 \
-    AOCL_DTL_LOG_GEMM_STATS(AOCL_DTL_LEVEL_TRACE_1, *m, *n, *k);
+    AOCL_DTL_LOG_GEMM_STATS(AOCL_DTL_LEVEL_TRACE_1, *m, *n, *k);\
     AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1) \
     /* Finalize BLIS. */                 \
     bli_finalize_auto(); \
 } \
 \
+IF_BLIS_ENABLE_BLAS(\
 void PASTEF77(ch,blasname) \
      ( \
        const f77_char* transa, \
@@ -152,9 +153,9 @@ void PASTEF77(ch,blasname) \
          ftype*    c, const f77_int* ldc  \
      ) \
 { \
-\
     PASTEF77S(ch,blasname) ( transa, transb, m, n, k, alpha, a, lda, b, ldb, beta, c, ldc ); \
 } \
+)
 
 #else
 
@@ -338,6 +339,7 @@ void PASTEF77S(ch,blasname) \
     bli_finalize_auto(); \
 } \
 \
+IF_BLIS_ENABLE_BLAS(\
 void PASTEF77(ch,blasname) \
      ( \
        const f77_char* transa, \
@@ -352,13 +354,12 @@ void PASTEF77(ch,blasname) \
          ftype*    c, const f77_int* ldc  \
      ) \
 { \
-\
     PASTEF77S(ch,blasname) ( transa, transb, m, n, k, alpha, a, lda, b, ldb, beta, c, ldc ); \
 } \
+)
 
 #endif
 
-#ifdef BLIS_ENABLE_BLAS
 void dgemm_blis_impl
 (
     const f77_char* transa,
@@ -694,7 +695,7 @@ void dgemm_blis_impl
     /* Finalize BLIS. */
     bli_finalize_auto();
 } // end of dgemm_
-
+#ifdef BLIS_ENABLE_BLAS
 void dgemm_
 (
     const f77_char* transa,
@@ -711,7 +712,7 @@ void dgemm_
 {
     dgemm_blis_impl(transa, transb, m, n, k, alpha, a, lda, b, ldb, beta, c, ldc);
 }
-
+#endif
 void zgemm_blis_impl
      (
        const f77_char* transa,
@@ -932,7 +933,7 @@ void zgemm_blis_impl
     /* Finalize BLIS. */
     bli_finalize_auto();
 }// end of zgemm_
-
+#ifdef BLIS_ENABLE_BLAS
 void zgemm_
      (
        const f77_char* transa,
@@ -949,7 +950,7 @@ void zgemm_
 {
     zgemm_blis_impl(transa, transb, m, n, k, alpha, a, lda, b, ldb, beta, c, ldc);
 }
-
+#endif
 INSERT_GENTFUNC_BLAS_SC( gemm, gemm )
 
 void dzgemm_blis_impl
@@ -1054,7 +1055,7 @@ void dzgemm_blis_impl
     /* Finalize BLIS. */
     bli_finalize_auto();
 }// end of dzgemm_
-
+#ifdef BLIS_ENABLE_BLAS
 void dzgemm_
      (
        const f77_char* transa,

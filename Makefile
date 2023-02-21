@@ -5,7 +5,7 @@
 #  libraries.
 #
 #  Copyright (C) 2014, The University of Texas at Austin
-#  Copyright (C) 2022, Advanced Micro Devices, Inc. All rights reserved.
+#  Copyright (C) 2022-2023, Advanced Micro Devices, Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -273,9 +273,11 @@ BASE_OBJ_CBLAS_PATH := $(BASE_OBJ_FRAME_PATH)/compat/cblas
 ifeq ($(MK_ENABLE_CBLAS),no)
 MK_BLIS_OBJS        := $(filter-out $(BASE_OBJ_CBLAS_PATH)/%.o, $(MK_BLIS_OBJS) )
 endif
-ifeq ($(MK_ENABLE_BLAS),no)
-MK_BLIS_OBJS        := $(filter-out $(BASE_OBJ_BLAS_PATH)/%.o,  $(MK_BLIS_OBJS) )
-endif
+# Include bla_ files so that we get the *_blis_impl interfaces. Actual BLAS
+# interfaces will not be included from these files when MK_ENABLE_BLAS is no.
+##ifeq ($(MK_ENABLE_BLAS),no)
+##MK_BLIS_OBJS        := $(filter-out $(BASE_OBJ_BLAS_PATH)/%.o,  $(MK_BLIS_OBJS) )
+##endif
 
 
 

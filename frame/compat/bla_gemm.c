@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2019 - 2022, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2019-2023, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -132,11 +132,12 @@ void PASTEF77S(ch,blasname) \
 	  NULL  \
 	); \
 \
-	AOCL_DTL_LOG_GEMM_STATS(AOCL_DTL_LEVEL_TRACE_1, *m, *n, *k);
+	AOCL_DTL_LOG_GEMM_STATS(AOCL_DTL_LEVEL_TRACE_1, *m, *n, *k);\
 	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1) \
 	/* Finalize BLIS. */				 \
 	bli_finalize_auto(); \
 } \
+IF_BLIS_ENABLE_BLAS(\
 void PASTEF77(ch,blasname) \
      ( \
        const f77_char* transa, \
@@ -153,6 +154,7 @@ void PASTEF77(ch,blasname) \
 { \
 	PASTEF77S(ch,blasname) ( transa, transb, m, n, k, alpha, a, lda, b, ldb, beta, c, ldc ); \
 } \
+)
 
 #else
 
@@ -335,6 +337,7 @@ void PASTEF77S(ch,blasname) \
 	/* Finalize BLIS. */				 \
 	bli_finalize_auto(); \
 } \
+IF_BLIS_ENABLE_BLAS(\
 void PASTEF77(ch,blasname) \
      ( \
        const f77_char* transa, \
@@ -349,9 +352,9 @@ void PASTEF77(ch,blasname) \
 	     ftype*    c, const f77_int* ldc  \
      ) \
 { \
-    PASTEF77S(ch,blasname) ( transa, transb, m, n, k, alpha, a, lda, b, ldb, beta, c, ldc ); \
+	PASTEF77S(ch,blasname) ( transa, transb, m, n, k, alpha, a, lda, b, ldb, beta, c, ldc ); \
 } \
-
+)
 #endif
 
 #ifdef BLIS_ENABLE_BLAS

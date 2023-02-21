@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2023, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -34,8 +35,6 @@
 
 #include "blis.h"
 
-#ifdef BLIS_ENABLE_BLAS
-
 /* xerbla.f -- translated by f2c (version 19991025).
    You must link the resulting object file with the libraries:
 	-lf2c -lm   (in that order)
@@ -43,7 +42,7 @@
 
 /* Table of constant values */
 
-/* Subroutine */ int PASTEF770(xerbla)(const bla_character *srname, const bla_integer *info, ftnlen srname_len)
+/* Subroutine */ int xerbla_blis_impl(const bla_character *srname, const bla_integer *info, ftnlen srname_len)
 {
 /*  -- LAPACK auxiliary routine (preliminary version) -- */
 /*     Univ. of Tennessee, Univ. of California Berkeley, NAG Ltd., */
@@ -85,7 +84,14 @@
 /*     End of XERBLA */
 
     return 0;
-} /* xerbla */
+} /* xerbla_blis_impl */
 
+
+#ifdef BLIS_ENABLE_BLAS
+/* Subroutine */ int PASTEF770(xerbla)(const bla_character *srname, const bla_integer *info, ftnlen srname_len)
+{
+    xerbla_blis_impl(srname, info, srname_len);
+    return 0;
+} /* xerbla */
 #endif
 

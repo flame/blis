@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2023, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -38,3 +39,6 @@ BLIS_EXPORT_BLAS bla_real   PASTEF77(s,cabs1)(bla_scomplex *z);
 BLIS_EXPORT_BLAS bla_double PASTEF77(d,cabs1)(bla_dcomplex *z);
 
 #endif
+
+BLIS_EXPORT_BLAS bla_real   PASTEF77S(s,cabs1)(bla_scomplex *z);
+BLIS_EXPORT_BLAS bla_double PASTEF77S(d,cabs1)(bla_dcomplex *z);

@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2020-2022, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2020-2023, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -91,6 +91,7 @@ void PASTEF772S(chx,cha,blasname) \
 	/* Finalize BLIS. */ \
 	bli_finalize_auto(); \
 }\
+IF_BLIS_ENABLE_BLAS(\
 void PASTEF772(chx,cha,blasname) \
      ( \
        const f77_int* n, \
@@ -99,9 +100,8 @@ void PASTEF772(chx,cha,blasname) \
      ) \
 { \
   PASTEF772S(chx,cha,blasname)( n, alpha, x, incx ); \
-}
-
-#ifdef BLIS_ENABLE_BLAS
+} \
+)
 
 void sscal_blis_impl
      (
@@ -182,6 +182,7 @@ void sscal_blis_impl
 //    bli_finalize_auto();
     AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1)
 }
+#ifdef BLIS_ENABLE_BLAS
 void sscal_
      (
        const f77_int* n,
@@ -191,7 +192,7 @@ void sscal_
 {
   sscal_blis_impl( n, alpha, x, incx );
 }
-
+#endif
 void dscal_blis_impl
      (
        const f77_int* n,
@@ -385,6 +386,7 @@ void dscal_blis_impl
 //    bli_finalize_auto();
     AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1)
 }
+#ifdef BLIS_ENABLE_BLAS
 void dscal_
      (
        const f77_int* n,
@@ -394,7 +396,7 @@ void dscal_
 {
   dscal_blis_impl( n, alpha, x, incx );
 }
-
+#endif
 void zdscal_blis_impl
      (
        const f77_int* n,
@@ -593,7 +595,7 @@ void zdscal_blis_impl
 
     AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1)
 }
-
+#ifdef BLIS_ENABLE_BLAS
 void zdscal_
      (
        const f77_int* n,
@@ -603,7 +605,7 @@ void zdscal_
 {
     zdscal_blis_impl( n, alpha, x, incx );
 }
-
+#endif
 
 void zscal_blis_impl
      (
@@ -705,7 +707,7 @@ void zscal_blis_impl
 
   AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1)
 }
-
+#ifdef BLIS_ENABLE_BLAS
 void zscal_
      (
        const f77_int* n,
@@ -715,7 +717,7 @@ void zscal_
 {
     zscal_blis_impl(n, alpha, x, incx);
 }
+#endif
 
 INSERT_GENTFUNCSCAL_BLAS_C( scal, scalv )
 
-#endif

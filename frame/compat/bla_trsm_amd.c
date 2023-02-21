@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2019 - 2023, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2019-2023, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -131,6 +131,7 @@ void PASTEF77S(ch,blasname) \
     /* Finalize BLIS. */ \
     bli_finalize_auto(); \
 } \
+IF_BLIS_ENABLE_BLAS(\
 void PASTEF77(ch,blasname) \
      ( \
        const f77_char* side, \
@@ -145,8 +146,8 @@ void PASTEF77(ch,blasname) \
      ) \
 { \
     PASTEF77S(ch,blasname) ( side, uploa, transa, diaga, m, n, alpha, a, lda, b, ldb ); \
- } \
-
+} \
+)
 #else
 
 #undef  GENTFUNC
@@ -427,7 +428,6 @@ void PASTEF77(ch,blasname) \
 
 #endif
 
-#ifdef BLIS_ENABLE_BLAS
 
 void strsm_blis_impl
 (
@@ -700,6 +700,7 @@ void strsm_blis_impl
     /* Finalize BLIS. */
     bli_finalize_auto();
 }
+#ifdef BLIS_ENABLE_BLAS
 void strsm_
 (
     const f77_char* side,
@@ -715,7 +716,7 @@ void strsm_
 {
     strsm_blis_impl ( side, uploa, transa, diaga, m, n, alpha, a, lda, b, ldb );
 }
-
+#endif
 void dtrsm_blis_impl
 (
     const f77_char* side,
@@ -1032,6 +1033,7 @@ void dtrsm_blis_impl
     /* Finalize BLIS. */
     bli_finalize_auto();
 }
+#ifdef BLIS_ENABLE_BLAS
 void dtrsm_
 (
     const f77_char* side,
@@ -1047,7 +1049,7 @@ void dtrsm_
 {
     dtrsm_blis_impl ( side, uploa, transa, diaga, m, n, alpha, a, lda, b, ldb );
 }
-
+#endif
 
 void ztrsm_blis_impl
 (
@@ -1383,6 +1385,7 @@ void ztrsm_blis_impl
     /* Finalize BLIS. */
     bli_finalize_auto();
 }
+#ifdef BLIS_ENABLE_BLAS
 void ztrsm_
 (
     const f77_char* side,
@@ -1398,7 +1401,7 @@ void ztrsm_
 {
     ztrsm_blis_impl ( side, uploa, transa, diaga, m, n, alpha, a, lda, b, ldb );
 }
-
+#endif
 
 void ctrsm_blis_impl
 (
@@ -1732,6 +1735,7 @@ void ctrsm_blis_impl
     /* Finalize BLIS. */
     bli_finalize_auto();
 }
+#ifdef BLIS_ENABLE_BLAS
 void ctrsm_
 (
     const f77_char* side,

@@ -132,6 +132,16 @@
 #endif
 #endif
 
+// If the CBLAS compatibility layer was enabled while the BLAS layer
+// was not enabled, we must enable the BLAS layer here. Also undefine
+// BLIS_DISABLE_BLAS to ensure consistency.
+#ifdef BLIS_ENABLE_CBLAS
+#ifndef BLIS_ENABLE_BLAS
+#define BLIS_ENABLE_BLAS
+#endif
+#undef BLIS_DISABLE_BLAS
+#endif // BLIS_ENABLE_CBLAS
+
 #ifndef BLIS_ENABLE_MIXED_DT
 #ifndef BLIS_DISABLE_MIXED_DT
 #if @enable_mixed_dt@

@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2018-2022, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2018-2023, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -89,6 +89,7 @@ ftype PASTEF772S(ch,blasname,chc) \
     return rho; \
 }\
 \
+IF_BLIS_ENABLE_BLAS(\
 ftype PASTEF772(ch,blasname,chc) \
      ( \
        const f77_int* n, \
@@ -97,12 +98,11 @@ ftype PASTEF772(ch,blasname,chc) \
      ) \
 { \
   return PASTEF772S(ch,blasname,chc)( n, x, incx, y, incy );\
-}
+} \
+)
 
-#ifdef BLIS_ENABLE_BLAS
 INSERT_GENTFUNCDOTR_BLAS( dot, dotv )
 
-#ifdef BLIS_ENABLE_BLAS
 #ifdef BLIS_DISABLE_COMPLEX_RETURN_INTEL
 INSERT_GENTFUNCDOTC_BLAS( dot, dotv )
 #else
@@ -158,6 +158,7 @@ void PASTEF772S(ch,blasname,chc) \
         *rhop = rho; \
 }\
 \
+IF_BLIS_ENABLE_BLAS(\
 void PASTEF772(ch,blasname,chc) \
      ( \
        ftype*         rhop, \
@@ -167,11 +168,11 @@ void PASTEF772(ch,blasname,chc) \
      ) \
 { \
   PASTEF772S(ch,blasname,chc)( rhop, n, x, incx, y, incy );\
-}
+} \
+)
 
 INSERT_GENTFUNCDOTC_BLAS( dot, dotv )
 #endif // BLIS_DISABLE_COMPLEX_RETURN_INTEL
-#endif // BLIS_ENABLE_BLAS
 
 
 // -- "Black sheep" dot product function definitions --
@@ -197,6 +198,7 @@ float PASTEF77S(sd,sdot)
              )
            );
 }
+#ifdef BLIS_ENABLE_BLAS
 float PASTEF77(sd,sdot)
      (
        const f77_int* n,
@@ -207,6 +209,7 @@ float PASTEF77(sd,sdot)
 {
   return PASTEF77S(sd,sdot)( n, sb, x, incx, y, incy );
 }
+#endif // BLIS_ENABLE_BLAS
 
 // Input vectors stored in single precision, computed in double precision,
 // with result returned in double precision.
@@ -254,6 +257,7 @@ double PASTEF77S(d,sdot)
 
     return rho;
 }
+#ifdef BLIS_ENABLE_BLAS
 double PASTEF77(d,sdot)
      (
        const f77_int* n,
@@ -263,5 +267,4 @@ double PASTEF77(d,sdot)
 {
   return PASTEF77S(d,sdot)( n, x, incx, y, incy );
 }
-
 #endif // BLIS_ENABLE_BLAS

@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2020, Advanced Micro Devices, Inc.
+   Copyright (C) 2020-2023, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -32,8 +32,6 @@
 
 */
 
-#ifdef BLIS_ENABLE_BLAS
-
 #define bla_gemmt_check( dt_str, op_str, uploc, transa, transb, n, k, lda, ldb, ldc ) \
 { \
 	f77_int info = 0; \
@@ -43,15 +41,15 @@
 	f77_int lower, upper; \
 	f77_int nrowa, nrowb; \
 \
-	nota  = PASTEF770(lsame)( transa, "N", (ftnlen)1, (ftnlen)1 ); \
-	notb  = PASTEF770(lsame)( transb, "N", (ftnlen)1, (ftnlen)1 ); \
-	conja = PASTEF770(lsame)( transa, "C", (ftnlen)1, (ftnlen)1 ); \
-	conjb = PASTEF770(lsame)( transb, "C", (ftnlen)1, (ftnlen)1 ); \
-	ta    = PASTEF770(lsame)( transa, "T", (ftnlen)1, (ftnlen)1 ); \
-	tb    = PASTEF770(lsame)( transb, "T", (ftnlen)1, (ftnlen)1 ); \
+	nota  = PASTE_LSAME( transa, "N", (ftnlen)1, (ftnlen)1 ); \
+	notb  = PASTE_LSAME( transb, "N", (ftnlen)1, (ftnlen)1 ); \
+	conja = PASTE_LSAME( transa, "C", (ftnlen)1, (ftnlen)1 ); \
+	conjb = PASTE_LSAME( transb, "C", (ftnlen)1, (ftnlen)1 ); \
+	ta    = PASTE_LSAME( transa, "T", (ftnlen)1, (ftnlen)1 ); \
+	tb    = PASTE_LSAME( transb, "T", (ftnlen)1, (ftnlen)1 ); \
 \
-	lower = PASTEF770(lsame)( uploc,  "L", (ftnlen)1, (ftnlen)1 ); \
-	upper = PASTEF770(lsame)( uploc,  "U", (ftnlen)1, (ftnlen)1 ); \
+	lower = PASTE_LSAME( uploc,  "L", (ftnlen)1, (ftnlen)1 ); \
+	upper = PASTE_LSAME( uploc,  "U", (ftnlen)1, (ftnlen)1 ); \
 \
 	if ( nota ) { nrowa = *n; } \
 	else        { nrowa = *k; } \
@@ -83,10 +81,8 @@
 \
 		bli_string_mkupper( func_str ); \
 \
-		PASTEF770(xerbla)( func_str, &info, (ftnlen)6 ); \
+		PASTE_XERBLA( func_str, &info, (ftnlen)6 ); \
 \
 		return; \
 	} \
 }
-
-#endif

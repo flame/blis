@@ -32,6 +32,8 @@
 
 */
 
+BLIS_EXPORT_BLAS int xerbla_array_blis_impl(const bla_character *srname, const bla_integer srname_len, const bla_integer *info);
+
 #ifdef BLIS_ENABLE_BLAS
 
 BLIS_EXPORT_BLAS int PASTEF770(xerbla_array)(const bla_character *srname, const bla_integer srname_len, const bla_integer *info);

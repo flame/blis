@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2020-22, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2020-2023, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -82,6 +82,7 @@ void PASTEF77S(ch,blasname) \
     bli_finalize_auto(); \
 } \
 \
+IF_BLIS_ENABLE_BLAS(\
 void PASTEF77(ch,blasname) \
 	( \
 		const f77_int* n, \
@@ -90,8 +91,8 @@ void PASTEF77(ch,blasname) \
 		) \
 { \
    PASTEF77S(ch,blasname)( n, x, incx, y, incy ); \
-}
-#ifdef BLIS_ENABLE_BLAS
+}\
+)
 
 void sswap_blis_impl
      (
@@ -181,7 +182,7 @@ void sswap_blis_impl
 //    bli_finalize_auto();
     AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1)
 }
-
+#ifdef BLIS_ENABLE_BLAS
 void sswap_
      (
        const f77_int* n,
@@ -191,7 +192,7 @@ void sswap_
 {
     sswap_blis_impl( n, x, incx, y, incy );
 }
- 
+#endif 
 void dswap_blis_impl
      (
        const f77_int* n,
@@ -280,7 +281,7 @@ void dswap_blis_impl
 //    bli_finalize_auto();
     AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1)
 }
-
+#ifdef BLIS_ENABLE_BLAS
 void dswap_
      (
        const f77_int* n,
@@ -290,7 +291,7 @@ void dswap_
 {
     dswap_blis_impl( n, x, incx, y, incy ); 
 }
+#endif
 
 INSERT_GENTFUNC_BLAS_CZ( swap, swapv )
 
-#endif

@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2022, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2022-2023, Advanced Micro Devices, Inc. All rights reserved.
    
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -34,8 +34,6 @@
 */
 
 #include "blis.h"
-
-#ifdef BLIS_ENABLE_BLAS
 
 /* srot.f -- translated by f2c (version 19991025).
    You must link the resulting object file with the libraries:
@@ -175,22 +173,13 @@ L20:
     return 0;
 } /* drot_ */
 
-int PASTEF77(s,rot)(const bla_integer *n, bla_real *sx, const bla_integer *incx, bla_real *sy, const bla_integer *incy, const bla_real *c__, const bla_real *s)
-{
-  return PASTEF77S(s,rot)( n, sx, incx, sy, incy, c__, s );
-}
-
-int PASTEF77(d,rot)(const bla_integer *n, bla_double *dx, const bla_integer *incx, bla_double *dy, const bla_integer *incy, const bla_double *c__, const bla_double *s)
-{
-  return PASTEF77S(d,rot)( n, dx, incx, dy, incy, c__, s );
-}
 
 /* csrot.f -- translated by f2c (version 19991025).
    You must link the resulting object file with the libraries:
 	-lf2c -lm   (in that order)
 */
 
-/* Subroutine */ int PASTEF77(cs,rot)(const bla_integer *n, bla_scomplex *cx, const bla_integer *incx, bla_scomplex *cy, const bla_integer *incy, const bla_real *c__, const bla_real *s)
+/* Subroutine */ int PASTEF77S(cs,rot)(const bla_integer *n, bla_scomplex *cx, const bla_integer *incx, bla_scomplex *cy, const bla_integer *incy, const bla_real *c__, const bla_real *s)
 {
     /* System generated locals */
     bla_integer i__1, i__2, i__3, i__4;
@@ -283,7 +272,7 @@ L20:
 	-lf2c -lm   (in that order)
 */
 
-/* Subroutine */ int PASTEF77(zd,rot)(const bla_integer *n, bla_dcomplex *zx, const bla_integer *incx, bla_dcomplex *zy, const bla_integer *incy, const bla_double *c__, const bla_double *s)
+/* Subroutine */ int PASTEF77S(zd,rot)(const bla_integer *n, bla_dcomplex *zx, const bla_integer *incx, bla_dcomplex *zy, const bla_integer *incy, const bla_double *c__, const bla_double *s)
 {
     /* System generated locals */
     bla_integer i__1, i__2, i__3, i__4;
@@ -370,6 +359,28 @@ L20:
     }
     return 0;
 } /* zdrot_ */
+
+#ifdef BLIS_ENABLE_BLAS
+
+int PASTEF77(s,rot)(const bla_integer *n, bla_real *sx, const bla_integer *incx, bla_real *sy, const bla_integer *incy, const bla_real *c__, const bla_real *s)
+{
+  return PASTEF77S(s,rot)( n, sx, incx, sy, incy, c__, s );
+}
+
+int PASTEF77(d,rot)(const bla_integer *n, bla_double *dx, const bla_integer *incx, bla_double *dy, const bla_integer *incy, const bla_double *c__, const bla_double *s)
+{
+  return PASTEF77S(d,rot)( n, dx, incx, dy, incy, c__, s );
+}
+
+int PASTEF77(cs,rot)(const bla_integer *n, bla_scomplex *cx, const bla_integer *incx, bla_scomplex *cy, const bla_integer *incy, const bla_real *c__, const bla_real *s)
+{
+  return PASTEF77S(cs,rot)(n, cx, incx, cy, incy, c__, s);
+}
+
+int PASTEF77(zd,rot)(const bla_integer *n, bla_dcomplex *zx, const bla_integer *incx, bla_dcomplex *zy, const bla_integer *incy, const bla_double *c__, const bla_double *s)
+{
+  return PASTEF77S(zd,rot)(n, zx, incx, zy, incy, c__, s);
+}
 
 #endif
 

@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2018-2022, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2018-2023, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -88,6 +88,7 @@ ftype PASTEF772S(ch,blasname,chc) \
     return rho; \
 }\
 \
+IF_BLIS_ENABLE_BLAS(\
 ftype PASTEF772(ch,blasname,chc) \
      ( \
        const f77_int* n, \
@@ -96,9 +97,9 @@ ftype PASTEF772(ch,blasname,chc) \
      ) \
 { \
   return PASTEF772S(ch,blasname,chc)( n, x, incx, y, incy );\
-}
+} \
+)
 
-#ifdef BLIS_ENABLE_BLAS
 float sdot_blis_impl
      (
        const f77_int* n,
@@ -199,7 +200,7 @@ float sdot_blis_impl
     AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
     return rho;
 }
-
+#ifdef BLIS_ENABLE_BLAS
 float sdot_
      (
        const f77_int* n,
@@ -209,7 +210,7 @@ float sdot_
 {
   return sdot_blis_impl( n, x, incx, y, incy );
 }
-
+#endif
 double ddot_blis_impl
      (
        const f77_int* n,
@@ -468,6 +469,7 @@ double ddot_blis_impl
     AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
     return rho;
 }
+#ifdef BLIS_ENABLE_BLAS
 double ddot_
      (
        const f77_int* n,
@@ -477,6 +479,7 @@ double ddot_
 {
   return ddot_blis_impl( n, x, incx, y, incy );
 }
+#endif
 
 #ifdef BLIS_DISABLE_COMPLEX_RETURN_INTEL
 scomplex cdotu_blis_impl
@@ -579,6 +582,7 @@ scomplex cdotu_blis_impl
     AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
     return rho;
 }
+#ifdef BLIS_ENABLE_BLAS
 scomplex cdotu_
      (
        const f77_int* n,
@@ -588,7 +592,7 @@ scomplex cdotu_
 {
   return cdotu_blis_impl( n, x, incx, y, incy );
 }
-
+#endif
 dcomplex zdotu_blis_impl
      (
        const f77_int* n,
@@ -692,6 +696,7 @@ dcomplex zdotu_blis_impl
 
     return rho;
 }
+#ifdef BLIS_ENABLE_BLAS
 dcomplex zdotu_
      (
        const f77_int* n,
@@ -701,7 +706,7 @@ dcomplex zdotu_
 {
   return zdotu_blis_impl( n, x, incx, y, incy );
 }
-
+#endif
 scomplex cdotc_blis_impl
      (
        const f77_int* n,
@@ -804,6 +809,7 @@ scomplex cdotc_blis_impl
 
     return rho;
 }
+#ifdef BLIS_ENABLE_BLAS
 scomplex cdotc_
      (
        const f77_int* n,
@@ -813,7 +819,7 @@ scomplex cdotc_
 {
   return cdotc_blis_impl( n, x, incx, y, incy );
 }
-
+#endif
 dcomplex zdotc_blis_impl
      (
        const f77_int* n,
@@ -909,10 +915,6 @@ dcomplex zdotc_blis_impl
         );
     }
 
-
-
-
-
     /* Finalize BLIS. */
 //  bli_finalize_auto();
 
@@ -920,6 +922,7 @@ dcomplex zdotc_blis_impl
 
     return rho;
 }
+#ifdef BLIS_ENABLE_BLAS
 dcomplex zdotc_
      (
        const f77_int* n,
@@ -929,6 +932,8 @@ dcomplex zdotc_
 {
   return zdotc_blis_impl( n, x, incx, y, incy );
 }
+#endif
+
 #else // BLIS_DISABLE_COMPLEX_RETURN_INTEL
 // For the "intel" complex return type, use a hidden parameter to return the result
 #undef  GENTFUNCDOT
@@ -982,6 +987,7 @@ void PASTEF772S(ch,blasname,chc) \
         *rhop = rho; \
 }\
 \
+IF_BLIS_ENABLE_BLAS(\
 void PASTEF772(ch,blasname,chc) \
      ( \
        ftype*         rhop, \
@@ -991,12 +997,11 @@ void PASTEF772(ch,blasname,chc) \
      ) \
 { \
   PASTEF772S(ch,blasname,chc)( rhop, n, x, incx, y, incy );\
-}
+} \
+)
 
 INSERT_GENTFUNCDOTC_BLAS( dot, dotv )
 #endif // BLIS_DISABLE_COMPLEX_RETURN_INTEL
-
-
 
 // -- "Black sheep" dot product function definitions --
 
@@ -1021,6 +1026,7 @@ float PASTEF77S(sd,sdot)
              )
            );
 }
+#ifdef BLIS_ENABLE_BLAS
 float PASTEF77(sd,sdot)
      (
        const f77_int* n,
@@ -1031,6 +1037,7 @@ float PASTEF77(sd,sdot)
 {
   return PASTEF77S(sd,sdot)( n,sb, x, incx, y, incy );
 }
+#endif
 
 // Input vectors stored in single precision, computed in double precision,
 // with result returned in double precision.
@@ -1078,6 +1085,8 @@ double PASTEF77S(d,sdot)
 
     return rho;
 }
+
+#ifdef BLIS_ENABLE_BLAS
 double PASTEF77(d,sdot)
      (
        const f77_int* n,
@@ -1087,5 +1096,4 @@ double PASTEF77(d,sdot)
 {
   return PASTEF77S(d,sdot)( n, x, incx, y, incy );
 }
-
-#endif
+#endif // BLIS_ENABLE_BLAS

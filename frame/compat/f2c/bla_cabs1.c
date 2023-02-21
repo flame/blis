@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2020, Advanced Micro Devices, Inc.
+   Copyright (C) 2020-2023, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -35,14 +35,12 @@
 
 #include "blis.h"
 
-#ifdef BLIS_ENABLE_BLAS
-
 /* scabs1.f -- translated by f2c (version 19991025).
    You must link the resulting object file with the libraries:
 	-lf2c -lm   (in that order)
 */
 
-/* Subroutine */ bla_real PASTEF77(s,cabs1)(bla_scomplex *z)
+/* Subroutine */ bla_real PASTEF77S(s,cabs1)(bla_scomplex *z)
 {
    if ( bli_creal(*z) == 0.0f && bli_cimag(*z) == 0.0f )
    {
@@ -62,7 +60,7 @@
 	-lf2c -lm   (in that order)
 */
 
-/* Subroutine */ bla_double PASTEF77(d,cabs1)(bla_dcomplex *z)
+/* Subroutine */ bla_double PASTEF77S(d,cabs1)(bla_dcomplex *z)
 {
    if ( bli_creal(*z) == 0.0 && bli_cimag(*z) == 0.0 )
    {
@@ -77,6 +75,18 @@
    }
 
 } /* dcabs1_ */
+
+
+#ifdef BLIS_ENABLE_BLAS
+
+/* Subroutine */ bla_real PASTEF77(s,cabs1)(bla_scomplex *z)
+{
+  return PASTEF77S(s,cabs1)(z);
+}
+/* Subroutine */ bla_double PASTEF77(d,cabs1)(bla_dcomplex *z)
+{
+  return PASTEF77S(d,cabs1)(z);
+}
 
 #endif
 

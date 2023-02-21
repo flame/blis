@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2023, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -32,15 +33,13 @@
 
 */
 
-#ifdef BLIS_ENABLE_BLAS
-
 #define bla_her_check( dt_str, op_str, uploa, m, incx, lda ) \
 { \
 	f77_int info = 0; \
 	f77_int lower, upper; \
 \
-	lower = PASTEF770(lsame)( uploa, "L", (ftnlen)1, (ftnlen)1 ); \
-	upper = PASTEF770(lsame)( uploa, "U", (ftnlen)1, (ftnlen)1 ); \
+	lower = PASTE_LSAME( uploa, "L", (ftnlen)1, (ftnlen)1 ); \
+	upper = PASTE_LSAME( uploa, "U", (ftnlen)1, (ftnlen)1 ); \
 \
 	if      ( !lower && !upper ) \
 		info = 1; \
@@ -59,10 +58,8 @@
 \
 		bli_string_mkupper( func_str ); \
 \
-		PASTEF770(xerbla)( func_str, &info, (ftnlen)6 ); \
+		PASTE_XERBLA( func_str, &info, (ftnlen)6 ); \
 \
 		return; \
 	} \
 }
-
-#endif
