@@ -61,7 +61,6 @@ void bli_sgemmsup_rd_zen_asm_5x64_avx512
     uint64_t k_left1  = k_left32 % 8;
 
     uint64_t m_iter = m0 / 6;
-    uint64_t m_left = m0 % 6;
 
     uint64_t rs_a   = rs_a0;
     uint64_t cs_a   = cs_a0;
@@ -487,7 +486,6 @@ void bli_sgemmsup_rd_zen_asm_4x64_avx512
     uint64_t k_left1  = k_left32 % 8;
 
     uint64_t m_iter = m0 / 6;
-    uint64_t m_left = m0 % 6;
 
     uint64_t rs_a   = rs_a0;
     uint64_t cs_a   = cs_a0;
@@ -888,7 +886,6 @@ void bli_sgemmsup_rd_zen_asm_3x64_avx512
     uint64_t k_left1  = k_left32 % 8;
 
     uint64_t m_iter = m0 / 6;
-    uint64_t m_left = m0 % 6;
 
     uint64_t rs_a   = rs_a0;
     uint64_t cs_a   = cs_a0;
@@ -1987,7 +1984,6 @@ void bli_sgemmsup_rd_zen_asm_5x48_avx512
     uint64_t k_left1  = k_left32 % 8;
 
     uint64_t m_iter = m0 / 6;
-    uint64_t m_left = m0 % 6;
 
     uint64_t rs_a   = rs_a0;
     uint64_t cs_a   = cs_a0;
@@ -2406,7 +2402,6 @@ void bli_sgemmsup_rd_zen_asm_4x48_avx512
     uint64_t k_left1  = k_left32 % 8;
 
     uint64_t m_iter = m0 / 6;
-    uint64_t m_left = m0 % 6;
 
     uint64_t rs_a   = rs_a0;
     uint64_t cs_a   = cs_a0;
@@ -2814,7 +2809,6 @@ void bli_sgemmsup_rd_zen_asm_3x48_avx512
     uint64_t k_left1  = k_left32 % 8;
 
     uint64_t m_iter = m0 / 6;
-    uint64_t m_left = m0 % 6;
 
     uint64_t rs_a   = rs_a0;
     uint64_t cs_a   = cs_a0;
@@ -3913,7 +3907,6 @@ void bli_sgemmsup_rd_zen_asm_5x32_avx512
     uint64_t k_left1  = k_left32 % 8;
 
     uint64_t m_iter = m0 / 6;
-    uint64_t m_left = m0 % 6;
 
     uint64_t rs_a   = rs_a0;
     uint64_t cs_a   = cs_a0;
@@ -4331,7 +4324,6 @@ void bli_sgemmsup_rd_zen_asm_4x32_avx512
     uint64_t k_left1  = k_left32 % 8;
 
     uint64_t m_iter = m0 / 6;
-    uint64_t m_left = m0 % 6;
 
     uint64_t rs_a   = rs_a0;
     uint64_t cs_a   = cs_a0;
@@ -4738,7 +4730,6 @@ void bli_sgemmsup_rd_zen_asm_3x32_avx512
     uint64_t k_left1  = k_left32 % 8;
 
     uint64_t m_iter = m0 / 6;
-    uint64_t m_left = m0 % 6;
 
     uint64_t rs_a   = rs_a0;
     uint64_t cs_a   = cs_a0;

@@ -41,12 +41,12 @@
 
 /*
    rrr:
-     --------        ------        --------      
-     --------        ------        --------      
-     --------   +=   ------ ...    --------      
-     --------        ------        --------      
-     --------        ------            :         
-     --------        ------            :         
+     --------        ------        --------  
+     --------        ------        --------  
+     --------   +=   ------ ...    --------  
+     --------        ------        --------  
+     --------        ------            : 
+     --------        ------            : 
    Assumptions:
    - B is row-stored;
    - A is row-stored;
@@ -126,7 +126,8 @@ void bli_sgemmsup_rv_zen_asm_6x64n_avx512
         }
     }
 
-    uint64_t k_iter = k0;
+    uint64_t k_iter = k0 / 4;
+    uint64_t k_left = k0 % 4;
 
     uint64_t n_iter = n0 / 64;
     uint64_t n_left = n0 % 64;
@@ -160,7 +161,7 @@ void bli_sgemmsup_rv_zen_asm_6x64n_avx512
     mov( var( n_iter ), r11 )       // load n_iter
 
     label( .N_LOOP_ITER )
-    
+
     mov( var( rs_c ), rdi )         // load rs_c
     lea( mem( , rdi, 4 ), rdi )     // rs_c *= sizeof(float)
 
@@ -170,14 +171,124 @@ void bli_sgemmsup_rv_zen_asm_6x64n_avx512
     mov( var( bbuf ), rbx )         // load address of b
     mov( var( cbuf ), rcx )         // load address of c
 
-    mov( var( k_iter ), rsi )       // load k_iter
-    test( rsi, rsi )
-
     mov( var( alpha ), rdx )        // load address of alpha
     vbroadcastss( ( rdx ), zmm7 )
 
+    mov( var( k_iter ), rsi )       // load k_iter
+    test( rsi, rsi )
+    je( .CONSID_K_LEFT )
+
     // The k-loop iterates over 4 rows of B, and broadcasts of each row of A.
     label( .K_LOOP_ITER )
+    // ITER 0
+    // Load 4 rows from B matrix.
+    vmovups(     ( rbx ), zmm0 )
+    vmovups( 0x40( rbx ), zmm1 )
+    vmovups( 0x80( rbx ), zmm2 )
+    vmovups( 0xc0( rbx ), zmm3 )
+
+    // Broadcast 6 elements from a row of A & do VFMA with rows of B.
+    vbroadcastss( ( rax ), zmm4 )
+    VFMA4( 4, 8, 9, 10, 11 )
+    vbroadcastss( mem( rax, r8, 1 ), zmm5 )
+    VFMA4( 5, 12, 13, 14, 15 )
+    vbroadcastss( mem( rax, r8, 2 ), zmm6 )
+    VFMA4( 6, 16, 17, 18, 19 )
+    vbroadcastss( mem( rax, r13, 1 ), zmm4 )
+    VFMA4( 4, 20, 21, 22, 23 )
+    vbroadcastss( mem( rax, r8, 4 ), zmm5 )
+    VFMA4( 5, 24, 25, 26, 27 )
+    vbroadcastss( mem( rax, r15, 1 ), zmm6 )
+    VFMA4( 6, 28, 29, 30, 31 )
+
+    add(  r9, rbx )
+    add( r10, rax )
+
+    // ITER 1
+    // Load 4 rows from B matrix.
+    vmovups(     ( rbx ), zmm0 )
+    vmovups( 0x40( rbx ), zmm1 )
+    vmovups( 0x80( rbx ), zmm2 )
+    vmovups( 0xc0( rbx ), zmm3 )
+
+    // Broadcast 6 elements from a row of A & do VFMA with rows of B.
+    vbroadcastss( ( rax ), zmm4 )
+    VFMA4( 4, 8, 9, 10, 11 )
+    vbroadcastss( mem( rax, r8, 1 ), zmm5 )
+    VFMA4( 5, 12, 13, 14, 15 )
+    vbroadcastss( mem( rax, r8, 2 ), zmm6 )
+    VFMA4( 6, 16, 17, 18, 19 )
+    vbroadcastss( mem( rax, r13, 1 ), zmm4 )
+    VFMA4( 4, 20, 21, 22, 23 )
+    vbroadcastss( mem( rax, r8, 4 ), zmm5 )
+    VFMA4( 5, 24, 25, 26, 27 )
+    vbroadcastss( mem( rax, r15, 1 ), zmm6 )
+    VFMA4( 6, 28, 29, 30, 31 )
+
+    add(  r9, rbx )
+    add( r10, rax )
+
+    // ITER 2
+    // Load 4 rows from B matrix.
+    vmovups(     ( rbx ), zmm0 )
+    vmovups( 0x40( rbx ), zmm1 )
+    vmovups( 0x80( rbx ), zmm2 )
+    vmovups( 0xc0( rbx ), zmm3 )
+
+    // Broadcast 6 elements from a row of A & do VFMA with rows of B.
+    vbroadcastss( ( rax ), zmm4 )
+    VFMA4( 4, 8, 9, 10, 11 )
+    vbroadcastss( mem( rax, r8, 1 ), zmm5 )
+    VFMA4( 5, 12, 13, 14, 15 )
+    vbroadcastss( mem( rax, r8, 2 ), zmm6 )
+    VFMA4( 6, 16, 17, 18, 19 )
+    vbroadcastss( mem( rax, r13, 1 ), zmm4 )
+    VFMA4( 4, 20, 21, 22, 23 )
+    vbroadcastss( mem( rax, r8, 4 ), zmm5 )
+    VFMA4( 5, 24, 25, 26, 27 )
+    vbroadcastss( mem( rax, r15, 1 ), zmm6 )
+    VFMA4( 6, 28, 29, 30, 31 )
+
+    add(  r9, rbx )
+    add( r10, rax )
+
+    // ITER 3
+    // Load 4 rows from B matrix.
+    vmovups(     ( rbx ), zmm0 )
+    vmovups( 0x40( rbx ), zmm1 )
+    vmovups( 0x80( rbx ), zmm2 )
+    vmovups( 0xc0( rbx ), zmm3 )
+
+    // Broadcast 6 elements from a row of A & do VFMA with rows of B.
+    vbroadcastss( ( rax ), zmm4 )
+    VFMA4( 4, 8, 9, 10, 11 )
+    vbroadcastss( mem( rax, r8, 1 ), zmm5 )
+    VFMA4( 5, 12, 13, 14, 15 )
+    vbroadcastss( mem( rax, r8, 2 ), zmm6 )
+    VFMA4( 6, 16, 17, 18, 19 )
+    vbroadcastss( mem( rax, r13, 1 ), zmm4 )
+    VFMA4( 4, 20, 21, 22, 23 )
+    vbroadcastss( mem( rax, r8, 4 ), zmm5 )
+    VFMA4( 5, 24, 25, 26, 27 )
+    vbroadcastss( mem( rax, r15, 1 ), zmm6 )
+    VFMA4( 6, 28, 29, 30, 31 )
+
+    add(  r9, rbx )
+    add( r10, rax )
+
+    dec( rsi )
+    jne( .K_LOOP_ITER )     // if rsi != 0, repeat k-loop
+
+
+    label( .CONSID_K_LEFT )
+
+    mov( var( k_left ), rsi )       // i = k_left;
+    test( rsi, rsi )                // check i via logical AND.
+    je( .SPOSTACCUM )               // if i == 0, we're done; jump to end.
+                                    // else, we prepare to enter k_left loop.
+
+
+    label( .K_LEFT_LOOP )
 
     // Load 4 rows from B matrix.
     vmovups(     ( rbx ), zmm0 )
@@ -198,11 +309,14 @@ void bli_sgemmsup_rv_zen_asm_6x64n_avx512
     VFMA4( 5, 24, 25, 26, 27 )
     vbroadcastss( mem( rax, r15, 1 ), zmm6 )
     VFMA4( 6, 28, 29, 30, 31 )
-    
+
     add(  r9, rbx )
     add( r10, rax )
     dec( rsi )
-    jne( .K_LOOP_ITER )     // if rsi != 0, repeat k-loop
+    jne( .K_LEFT_LOOP )     // if rsi != 0, repeat k-loop
+
+
+    label( .SPOSTACCUM )
 
     // Scaling A * B with alpha.
     ALPHA_SCALE4( 7,  8,  9, 10, 11 )
@@ -211,7 +325,7 @@ void bli_sgemmsup_rv_zen_asm_6x64n_avx512
     ALPHA_SCALE4( 7, 20, 21, 22, 23 )
     ALPHA_SCALE4( 7, 24, 25, 26, 27 )
     ALPHA_SCALE4( 7, 28, 29, 30, 31 )
-    
+
     mov( var( beta ), rdx )         // load address of beta
     vbroadcastss( ( rdx ), zmm4 )
 
@@ -304,7 +418,7 @@ void bli_sgemmsup_rv_zen_asm_6x64n_avx512
     mov( var( cs_c ), rdi )             // load rs_c
     lea( mem( , rdi, 4 ), rdi )         // rs_c *= sizeof(float)
     lea( mem( rdi, rdi, 2 ), r12 )
-    
+
     TRANSPOSE_4X16_BZ(  8, 12, 16, 20 )
     lea( mem( rcx, r12, 4 ), rcx )
     TRANSPOSE_4X16_BZ(  9, 13, 17, 21 )
@@ -352,6 +466,7 @@ void bli_sgemmsup_rv_zen_asm_6x64n_avx512
     : // output operands (none)
     : // input operands
       [k_iter] "m" (k_iter),
+      [k_left] "m" (k_left),
       [a]      "m" (a),
       [rs_a]   "m" (rs_a),
       [cs_a]   "m" (cs_a),
@@ -390,7 +505,6 @@ void bli_sgemmsup_rv_zen_asm_6x64n_avx512
         const dim_t j_edge = n0 - ( dim_t )n_left;
 
         uint64_t ps_b   = bli_auxinfo_ps_b( data );
-        uint64_t ps_b4  = ps_b * sizeof( float );
 
         float* restrict cij = c + j_edge*cs_c;
         float* restrict bj  = b + n_iter * ps_b;
@@ -508,20 +622,20 @@ void bli_sgemmsup_rv_zen_asm_6x64n_avx512
             else
             {
                 const dim_t mr = 6;
-            
+
                 // Since A is packed into row panels, we must use a loop over
                 // gemv.
                 dim_t m_iter = ( m0 + mr - 1 ) / mr;
                 dim_t m_left =   m0            % mr;
-            
+
                 float* restrict ai_ii  = ai;
                 float* restrict cij_ii = cij;
-            
+
                 for ( dim_t ii = 0; ii < m_iter; ii += 1 )
                 {
                     dim_t mr_cur = ( bli_is_not_edge_f( ii, m_iter, m_left )
                                      ? mr : m_left );
-                    
+
                     bli_sgemv_ex 
                     (
                       BLIS_NO_TRANSPOSE, conjb, mr_cur, k0,
@@ -530,7 +644,7 @@ void bli_sgemmsup_rv_zen_asm_6x64n_avx512
                     );
                     cij_ii += mr_cur*rs_c0;
                     ai_ii  += ps_a0;
-                }     
+                } 
             }
             n_left -= nr_cur;
         }
@@ -553,7 +667,8 @@ void bli_sgemmsup_rv_zen_asm_5x64n_avx512
        cntx_t*    restrict cntx
      )
 {
-    uint64_t k_iter = k0;
+    uint64_t k_iter = k0 / 4;
+    uint64_t k_left = k0 % 4;
 
     uint64_t n_iter = n0 / 64;
     uint64_t n_left = n0 % 64;
@@ -587,7 +702,7 @@ void bli_sgemmsup_rv_zen_asm_5x64n_avx512
     mov( var( n_iter ), r11 )       // load n_iter
 
     label( .N_LOOP_ITER )
-    
+
     mov( var( rs_c ), rdi )         // load rs_c
     lea( mem( , rdi, 4 ), rdi )     // rs_c *= sizeof(float)
 
@@ -597,14 +712,117 @@ void bli_sgemmsup_rv_zen_asm_5x64n_avx512
     mov( var( bbuf ), rbx )         // load address of b
     mov( var( cbuf ), rcx )         // load address of c
 
-    mov( var( k_iter ), rsi )       // load k_iter
-    test( rsi, rsi )
-
     mov( var( alpha ), rdx )        // load address of alpha
     vbroadcastss( ( rdx ), zmm7 )
 
+    mov( var( k_iter ), rsi )       // load k_iter
+    test( rsi, rsi )
+    je( .CONSID_K_LEFT )
+
+
     // The k-loop iterates over 4 rows of B, and broadcasts of each row of A.
     label( .K_LOOP_ITER )
+    // ITER 0
+    // Load 4 rows from B matrix.
+    vmovups(     ( rbx ), zmm0 )
+    vmovups( 0x40( rbx ), zmm1 )
+    vmovups( 0x80( rbx ), zmm2 )
+    vmovups( 0xc0( rbx ), zmm3 )
+
+    // Broadcast 5 elements from a row of A & do VFMA with rows of B.
+    vbroadcastss( ( rax ), zmm4 )
+    VFMA4( 4, 8, 9, 10, 11 )
+    vbroadcastss( mem( rax, r8, 1 ), zmm5 )
+    VFMA4( 5, 12, 13, 14, 15 )
+    vbroadcastss( mem( rax, r8, 2 ), zmm6 )
+    VFMA4( 6, 16, 17, 18, 19 )
+    vbroadcastss( mem( rax, r13, 1 ), zmm4 )
+    VFMA4( 4, 20, 21, 22, 23 )
+    vbroadcastss( mem( rax, r8, 4 ), zmm5 )
+    VFMA4( 5, 24, 25, 26, 27 )
+  
+    add( r9, rbx )
+    add( r10, rax )
+
+    // ITER 1
+    // Load 4 rows from B matrix.
+    vmovups(     ( rbx ), zmm0 )
+    vmovups( 0x40( rbx ), zmm1 )
+    vmovups( 0x80( rbx ), zmm2 )
+    vmovups( 0xc0( rbx ), zmm3 )
+
+    // Broadcast 5 elements from a row of A & do VFMA with rows of B.
+    vbroadcastss( ( rax ), zmm4 )
+    VFMA4( 4, 8, 9, 10, 11 )
+    vbroadcastss( mem( rax, r8, 1 ), zmm5 )
+    VFMA4( 5, 12, 13, 14, 15 )
+    vbroadcastss( mem( rax, r8, 2 ), zmm6 )
+    VFMA4( 6, 16, 17, 18, 19 )
+    vbroadcastss( mem( rax, r13, 1 ), zmm4 )
+    VFMA4( 4, 20, 21, 22, 23 )
+    vbroadcastss( mem( rax, r8, 4 ), zmm5 )
+    VFMA4( 5, 24, 25, 26, 27 )
+  
+    add( r9, rbx )
+    add( r10, rax )
+
+    // ITER 2
+    // Load 4 rows from B matrix.
+    vmovups(     ( rbx ), zmm0 )
+    vmovups( 0x40( rbx ), zmm1 )
+    vmovups( 0x80( rbx ), zmm2 )
+    vmovups( 0xc0( rbx ), zmm3 )
+
+    // Broadcast 5 elements from a row of A & do VFMA with rows of B.
+    vbroadcastss( ( rax ), zmm4 )
+    VFMA4( 4, 8, 9, 10, 11 )
+    vbroadcastss( mem( rax, r8, 1 ), zmm5 )
+    VFMA4( 5, 12, 13, 14, 15 )
+    vbroadcastss( mem( rax, r8, 2 ), zmm6 )
+    VFMA4( 6, 16, 17, 18, 19 )
+    vbroadcastss( mem( rax, r13, 1 ), zmm4 )
+    VFMA4( 4, 20, 21, 22, 23 )
+    vbroadcastss( mem( rax, r8, 4 ), zmm5 )
+    VFMA4( 5, 24, 25, 26, 27 )
+  
+    add( r9, rbx )
+    add( r10, rax )
+
+    // ITER 3
+    // Load 4 rows from B matrix.
+    vmovups(     ( rbx ), zmm0 )
+    vmovups( 0x40( rbx ), zmm1 )
+    vmovups( 0x80( rbx ), zmm2 )
+    vmovups( 0xc0( rbx ), zmm3 )
+
+    // Broadcast 5 elements from a row of A & do VFMA with rows of B.
+    vbroadcastss( ( rax ), zmm4 )
+    VFMA4( 4, 8, 9, 10, 11 )
+    vbroadcastss( mem( rax, r8, 1 ), zmm5 )
+    VFMA4( 5, 12, 13, 14, 15 )
+    vbroadcastss( mem( rax, r8, 2 ), zmm6 )
+    VFMA4( 6, 16, 17, 18, 19 )
+    vbroadcastss( mem( rax, r13, 1 ), zmm4 )
+    VFMA4( 4, 20, 21, 22, 23 )
+    vbroadcastss( mem( rax, r8, 4 ), zmm5 )
+    VFMA4( 5, 24, 25, 26, 27 )
+  
+    add( r9, rbx )
+    add( r10, rax )
+
+    dec( rsi )
+    jne( .K_LOOP_ITER )
+
+
+    label( .CONSID_K_LEFT )
+
+    mov( var( k_left ), rsi )       // i = k_left;
+    test( rsi, rsi )                // check i via logical AND.
+    je( .SPOSTACCUM )               // if i == 0, we're done; jump to end.
+                                    // else, we prepare to enter k_left loop.
+
+
+    label( .K_LEFT_LOOP )
 
     // Load 4 rows from B matrix.
     vmovups(     ( rbx ), zmm0 )
@@ -627,7 +845,10 @@ void bli_sgemmsup_rv_zen_asm_5x64n_avx512
     add( r9, rbx )
     add( r10, rax )
     dec( rsi )
-    jne( .K_LOOP_ITER )
+    jne( .K_LEFT_LOOP )
+
+
+    label( .SPOSTACCUM )
 
     // Scaling A * B with alpha.
     ALPHA_SCALE4( 7,  8,  9, 10, 11 )
@@ -635,7 +856,7 @@ void bli_sgemmsup_rv_zen_asm_5x64n_avx512
     ALPHA_SCALE4( 7, 16, 17, 18, 19 )
     ALPHA_SCALE4( 7, 20, 21, 22, 23 )
     ALPHA_SCALE4( 7, 24, 25, 26, 27 )
-    
+
     mov( var( beta ), rdx )         // load address of beta
     vbroadcastss( ( rdx ), zmm4 )
 
@@ -654,7 +875,7 @@ void bli_sgemmsup_rv_zen_asm_5x64n_avx512
     UPDATE_C4( 4, 16, 17, 18, 19 )
     UPDATE_C4( 4, 20, 21, 22, 23 )
     UPDATE_C4( 4, 24, 25, 26, 27 )
-    
+
     jmp( .SDONE )               // jump to the end
 
 
@@ -729,7 +950,7 @@ void bli_sgemmsup_rv_zen_asm_5x64n_avx512
     mov( var( cs_c ), rdi )             // load rs_c
     lea( mem( , rdi, 4 ), rdi )         // rs_c *= sizeof(float)
     lea( mem( rdi, rdi, 2 ), r12 )
-    
+
     TRANSPOSE_4X16_BZ(  8, 12, 16, 20 )
     lea( mem( rcx, r12, 4 ), rcx )
     TRANSPOSE_4X16_BZ(  9, 13, 17, 21 )
@@ -780,6 +1001,7 @@ void bli_sgemmsup_rv_zen_asm_5x64n_avx512
     : // output operands (none)
     : // input operands
       [k_iter] "m" (k_iter),
+      [k_left] "m" (k_left),
       [a]      "m" (a),
       [rs_a]   "m" (rs_a),
       [cs_a]   "m" (cs_a),
@@ -818,7 +1040,6 @@ void bli_sgemmsup_rv_zen_asm_5x64n_avx512
         const dim_t j_edge = n0 - ( dim_t )n_left;
 
         uint64_t ps_b   = bli_auxinfo_ps_b( data );
-        uint64_t ps_b4  = ps_b * sizeof( float );
 
         float* restrict cij = c + j_edge*cs_c;
         float* restrict bj  = b + n_iter * ps_b;
@@ -936,20 +1157,20 @@ void bli_sgemmsup_rv_zen_asm_5x64n_avx512
             else
             {
                 const dim_t mr = 5;
-            
+
                 // Since A is packed into row panels, we must use a loop over
                 // gemv.
                 dim_t m_iter = ( m0 + mr - 1 ) / mr;
                 dim_t m_left =   m0            % mr;
-            
+
                 float* restrict ai_ii  = ai;
                 float* restrict cij_ii = cij;
-            
+
                 for ( dim_t ii = 0; ii < m_iter; ii += 1 )
                 {
                     dim_t mr_cur = ( bli_is_not_edge_f( ii, m_iter, m_left )
                                      ? mr : m_left );
-                    
+
                     bli_sgemv_ex 
                     (
                       BLIS_NO_TRANSPOSE, conjb, mr_cur, k0,
@@ -958,7 +1179,7 @@ void bli_sgemmsup_rv_zen_asm_5x64n_avx512
                     );
                     cij_ii += mr_cur*rs_c0;
                     ai_ii  += ps_a0;
-                }     
+                } 
             }
             n_left -= nr_cur;
         }
@@ -981,7 +1202,8 @@ void bli_sgemmsup_rv_zen_asm_4x64n_avx512
        cntx_t*    restrict cntx
      )
 {
-    uint64_t k_iter = k0;
+    uint64_t k_iter = k0 / 4;
+    uint64_t k_left = k0 % 4;
 
     uint64_t n_iter = n0 / 64;
     uint64_t n_left = n0 % 64;
@@ -1015,7 +1237,7 @@ void bli_sgemmsup_rv_zen_asm_4x64n_avx512
     mov( var( n_iter ), r11 )       // load n_iter
 
     label( .N_LOOP_ITER )
-    
+
     mov( var( rs_c ), rdi )         // load rs_c
     lea( mem( , rdi, 4 ), rdi )     // rs_c *= sizeof(float)
 
@@ -1025,14 +1247,108 @@ void bli_sgemmsup_rv_zen_asm_4x64n_avx512
     mov( var( bbuf ), rbx )         // load address of b
     mov( var( cbuf ), rcx )         // load address of c
 
-    mov( var( k_iter ), rsi )       // load k_iter
-    test( rsi, rsi )
-
     mov( var( alpha ), rdx )        // load address of alpha
     vbroadcastss( ( rdx ), zmm7 )
 
+    mov( var( k_iter ), rsi )       // load k_iter
+    test( rsi, rsi )
+    je( .CONSID_K_LEFT )
+
     // The k-loop iterates over 4 rows of B, and broadcasts of each row of A.
     label( .K_LOOP_ITER )
+    // ITER 0
+    // Load 4 rows from B matrix.
+    vmovups(     ( rbx ), zmm0 )
+    vmovups( 0x40( rbx ), zmm1 )
+    vmovups( 0x80( rbx ), zmm2 )
+    vmovups( 0xc0( rbx ), zmm3 )
+
+    // Broadcast 4 elements from a row of A & do VFMA with rows of B.
+    vbroadcastss( ( rax ), zmm4 )
+    VFMA4( 4, 8, 9, 10, 11 )
+    vbroadcastss( mem( rax, r8, 1 ), zmm5 )
+    VFMA4( 5, 12, 13, 14, 15 )
+    vbroadcastss( mem( rax, r8, 2 ), zmm6 )
+    VFMA4( 6, 16, 17, 18, 19 )
+    vbroadcastss( mem( rax, r13, 1 ), zmm4 )
+    VFMA4( 4, 20, 21, 22, 23 )
+
+    add(  r9, rbx )
+    add( r10, rax )
+
+    // ITER 1
+    // Load 4 rows from B matrix.
+    vmovups(     ( rbx ), zmm0 )
+    vmovups( 0x40( rbx ), zmm1 )
+    vmovups( 0x80( rbx ), zmm2 )
+    vmovups( 0xc0( rbx ), zmm3 )
+
+    // Broadcast 4 elements from a row of A & do VFMA with rows of B.
+    vbroadcastss( ( rax ), zmm4 )
+    VFMA4( 4, 8, 9, 10, 11 )
+    vbroadcastss( mem( rax, r8, 1 ), zmm5 )
+    VFMA4( 5, 12, 13, 14, 15 )
+    vbroadcastss( mem( rax, r8, 2 ), zmm6 )
+    VFMA4( 6, 16, 17, 18, 19 )
+    vbroadcastss( mem( rax, r13, 1 ), zmm4 )
+    VFMA4( 4, 20, 21, 22, 23 )
+
+    add(  r9, rbx )
+    add( r10, rax )
+
+    // ITER 2
+    // Load 4 rows from B matrix.
+    vmovups(     ( rbx ), zmm0 )
+    vmovups( 0x40( rbx ), zmm1 )
+    vmovups( 0x80( rbx ), zmm2 )
+    vmovups( 0xc0( rbx ), zmm3 )
+
+    // Broadcast 4 elements from a row of A & do VFMA with rows of B.
+    vbroadcastss( ( rax ), zmm4 )
+    VFMA4( 4, 8, 9, 10, 11 )
+    vbroadcastss( mem( rax, r8, 1 ), zmm5 )
+    VFMA4( 5, 12, 13, 14, 15 )
+    vbroadcastss( mem( rax, r8, 2 ), zmm6 )
+    VFMA4( 6, 16, 17, 18, 19 )
+    vbroadcastss( mem( rax, r13, 1 ), zmm4 )
+    VFMA4( 4, 20, 21, 22, 23 )
+
+    add(  r9, rbx )
+    add( r10, rax )
+
+    // ITER 3
+    // Load 4 rows from B matrix.
+    vmovups(     ( rbx ), zmm0 )
+    vmovups( 0x40( rbx ), zmm1 )
+    vmovups( 0x80( rbx ), zmm2 )
+    vmovups( 0xc0( rbx ), zmm3 )
+
+    // Broadcast 4 elements from a row of A & do VFMA with rows of B.
+    vbroadcastss( ( rax ), zmm4 )
+    VFMA4( 4, 8, 9, 10, 11 )
+    vbroadcastss( mem( rax, r8, 1 ), zmm5 )
+    VFMA4( 5, 12, 13, 14, 15 )
+    vbroadcastss( mem( rax, r8, 2 ), zmm6 )
+    VFMA4( 6, 16, 17, 18, 19 )
+    vbroadcastss( mem( rax, r13, 1 ), zmm4 )
+    VFMA4( 4, 20, 21, 22, 23 )
+
+    add(  r9, rbx )
+    add( r10, rax )
+
+    dec( rsi )
+    jne( .K_LOOP_ITER )     // if rsi != 0, repeat k-loop
+
+
+    label( .CONSID_K_LEFT )
+
+    mov( var( k_left ), rsi )       // i = k_left;
+    test( rsi, rsi )                // check i via logical AND.
+    je( .SPOSTACCUM )               // if i == 0, we're done; jump to end.
+                                    // else, we prepare to enter k_left loop.
+
+
+    label( .K_LEFT_LOOP )
 
     // Load 4 rows from B matrix.
     vmovups(     ( rbx ), zmm0 )
@@ -1049,18 +1365,21 @@ void bli_sgemmsup_rv_zen_asm_4x64n_avx512
     VFMA4( 6, 16, 17, 18, 19 )
     vbroadcastss( mem( rax, r13, 1 ), zmm4 )
     VFMA4( 4, 20, 21, 22, 23 )
-    
+
     add(  r9, rbx )
     add( r10, rax )
     dec( rsi )
-    jne( .K_LOOP_ITER )     // if rsi != 0, repeat k-loop
+    jne( .K_LEFT_LOOP )     // if rsi != 0, repeat k-loop
+
+
+    label( .SPOSTACCUM )
 
     // Scaling A * B with alpha.
     ALPHA_SCALE4( 7,  8,  9, 10, 11 )
     ALPHA_SCALE4( 7, 12, 13, 14, 15 )
     ALPHA_SCALE4( 7, 16, 17, 18, 19 )
     ALPHA_SCALE4( 7, 20, 21, 22, 23 )
-    
+
     mov( var( beta ), rdx )         // load address of beta
     vbroadcastss( ( rdx ), zmm4 )
 
@@ -1138,7 +1457,7 @@ void bli_sgemmsup_rv_zen_asm_4x64n_avx512
     mov( var( cs_c ), rdi )             // load rs_c
     lea( mem( , rdi, 4 ), rdi )         // rs_c *= sizeof(float)
     lea( mem( rdi, rdi, 2 ), r12 )
-    
+
     TRANSPOSE_4X16_BZ(  8, 12, 16, 20 )
     lea( mem( rcx, r12, 4 ), rcx )
     TRANSPOSE_4X16_BZ(  9, 13, 17, 21 )
@@ -1175,6 +1494,7 @@ void bli_sgemmsup_rv_zen_asm_4x64n_avx512
     : // output operands (none)
     : // input operands
       [k_iter] "m" (k_iter),
+      [k_left] "m" (k_left),
       [a]      "m" (a),
       [rs_a]   "m" (rs_a),
       [cs_a]   "m" (cs_a),
@@ -1213,7 +1533,6 @@ void bli_sgemmsup_rv_zen_asm_4x64n_avx512
         const dim_t j_edge = n0 - ( dim_t )n_left;
 
         uint64_t ps_b   = bli_auxinfo_ps_b( data );
-        uint64_t ps_b4  = ps_b * sizeof( float );
 
         float* restrict cij = c + j_edge*cs_c;
         float* restrict bj  = b + n_iter * ps_b;
@@ -1331,20 +1650,20 @@ void bli_sgemmsup_rv_zen_asm_4x64n_avx512
             else
             {
                 const dim_t mr = 4;
-            
+
                 // Since A is packed into row panels, we must use a loop over
                 // gemv.
                 dim_t m_iter = ( m0 + mr - 1 ) / mr;
                 dim_t m_left =   m0            % mr;
-            
+
                 float* restrict ai_ii  = ai;
                 float* restrict cij_ii = cij;
-            
+
                 for ( dim_t ii = 0; ii < m_iter; ii += 1 )
                 {
                     dim_t mr_cur = ( bli_is_not_edge_f( ii, m_iter, m_left )
                                      ? mr : m_left );
-                    
+
                     bli_sgemv_ex 
                     (
                       BLIS_NO_TRANSPOSE, conjb, mr_cur, k0,
@@ -1353,7 +1672,7 @@ void bli_sgemmsup_rv_zen_asm_4x64n_avx512
                     );
                     cij_ii += mr_cur*rs_c0;
                     ai_ii  += ps_a0;
-                }     
+                } 
             }
             n_left -= nr_cur;
         }
@@ -1376,7 +1695,8 @@ void bli_sgemmsup_rv_zen_asm_3x64n_avx512
        cntx_t*    restrict cntx
      )
 {
-    uint64_t k_iter = k0;
+    uint64_t k_iter = k0 / 4;
+    uint64_t k_left = k0 % 4;
 
     uint64_t n_iter = n0 / 64;
     uint64_t n_left = n0 % 64;
@@ -1410,7 +1730,7 @@ void bli_sgemmsup_rv_zen_asm_3x64n_avx512
     mov( var( n_iter ), r11 )       // load n_iter
 
     label( .N_LOOP_ITER )
-    
+
     mov( var( rs_c ), rdi )         // load rs_c
     lea( mem( , rdi, 4 ), rdi )     // rs_c *= sizeof(float)
 
@@ -1420,14 +1740,100 @@ void bli_sgemmsup_rv_zen_asm_3x64n_avx512
     mov( var( bbuf ), rbx )         // load address of b
     mov( var( cbuf ), rcx )         // load address of c
 
-    mov( var( k_iter ), rsi )       // load k_iter
-    test( rsi, rsi )
-
     mov( var( alpha ), rdx )        // load address of alpha
     vbroadcastss( ( rdx ), zmm7 )
 
+    mov( var( k_iter ), rsi )       // load k_iter
+    test( rsi, rsi )
+    je( .CONSID_K_LEFT )
+
     // The k-loop iterates over 4 rows of B, and broadcasts of each row of A.
     label( .K_LOOP_ITER )
+    // ITER 0
+    // Load 4 rows from B matrix.
+    vmovups(     ( rbx ), zmm0 )
+    vmovups( 0x40( rbx ), zmm1 )
+    vmovups( 0x80( rbx ), zmm2 )
+    vmovups( 0xc0( rbx ), zmm3 )
+
+    // Broadcast 3 elements from a row of A & do VFMA with rows of B.
+    vbroadcastss( ( rax ), zmm4 )
+    VFMA4( 4, 8, 9, 10, 11 )
+    vbroadcastss( mem( rax, r8, 1 ), zmm5 )
+    VFMA4( 5, 12, 13, 14, 15 )
+    vbroadcastss( mem( rax, r8, 2 ), zmm6 )
+    VFMA4( 6, 16, 17, 18, 19 )
+
+    add(  r9, rbx )
+    add( r10, rax )
+
+    // ITER 1
+    // Load 4 rows from B matrix.
+    vmovups(     ( rbx ), zmm0 )
+    vmovups( 0x40( rbx ), zmm1 )
+    vmovups( 0x80( rbx ), zmm2 )
+    vmovups( 0xc0( rbx ), zmm3 )
+
+    // Broadcast 3 elements from a row of A & do VFMA with rows of B.
+    vbroadcastss( ( rax ), zmm4 )
+    VFMA4( 4, 8, 9, 10, 11 )
+    vbroadcastss( mem( rax, r8, 1 ), zmm5 )
+    VFMA4( 5, 12, 13, 14, 15 )
+    vbroadcastss( mem( rax, r8, 2 ), zmm6 )
+    VFMA4( 6, 16, 17, 18, 19 )
+
+    add(  r9, rbx )
+    add( r10, rax )
+
+    // ITER 2
+    // Load 4 rows from B matrix.
+    vmovups(     ( rbx ), zmm0 )
+    vmovups( 0x40( rbx ), zmm1 )
+    vmovups( 0x80( rbx ), zmm2 )
+    vmovups( 0xc0( rbx ), zmm3 )
+
+    // Broadcast 3 elements from a row of A & do VFMA with rows of B.
+    vbroadcastss( ( rax ), zmm4 )
+    VFMA4( 4, 8, 9, 10, 11 )
+    vbroadcastss( mem( rax, r8, 1 ), zmm5 )
+    VFMA4( 5, 12, 13, 14, 15 )
+    vbroadcastss( mem( rax, r8, 2 ), zmm6 )
+    VFMA4( 6, 16, 17, 18, 19 )
+
+    add(  r9, rbx )
+    add( r10, rax )
+
+    // ITER 3
+    // Load 4 rows from B matrix.
+    vmovups(     ( rbx ), zmm0 )
+    vmovups( 0x40( rbx ), zmm1 )
+    vmovups( 0x80( rbx ), zmm2 )
+    vmovups( 0xc0( rbx ), zmm3 )
+
+    // Broadcast 3 elements from a row of A & do VFMA with rows of B.
+    vbroadcastss( ( rax ), zmm4 )
+    VFMA4( 4, 8, 9, 10, 11 )
+    vbroadcastss( mem( rax, r8, 1 ), zmm5 )
+    VFMA4( 5, 12, 13, 14, 15 )
+    vbroadcastss( mem( rax, r8, 2 ), zmm6 )
+    VFMA4( 6, 16, 17, 18, 19 )
+
+    add(  r9, rbx )
+    add( r10, rax )
+
+    dec( rsi )
+    jne( .K_LOOP_ITER )     // if rsi != 0, repeat k-loop
+
+
+    label( .CONSID_K_LEFT )
+
+    mov( var( k_left ), rsi )       // i = k_left;
+    test( rsi, rsi )                // check i via logical AND.
+    je( .SPOSTACCUM )               // if i == 0, we're done; jump to end.
+                                    // else, we prepare to enter k_left loop.
+
+
+    label( .K_LEFT_LOOP )
 
     // Load 4 rows from B matrix.
     vmovups(     ( rbx ), zmm0 )
@@ -1442,17 +1848,20 @@ void bli_sgemmsup_rv_zen_asm_3x64n_avx512
     VFMA4( 5, 12, 13, 14, 15 )
     vbroadcastss( mem( rax, r8, 2 ), zmm6 )
     VFMA4( 6, 16, 17, 18, 19 )
-    
+
     add(  r9, rbx )
     add( r10, rax )
     dec( rsi )
-    jne( .K_LOOP_ITER )     // if rsi != 0, repeat k-loop
+    jne( .K_LEFT_LOOP )     // if rsi != 0, repeat k-loop
+
+
+    label( .SPOSTACCUM )
 
     // Scaling A * B with alpha.
     ALPHA_SCALE4( 7,  8,  9, 10, 11 )
     ALPHA_SCALE4( 7, 12, 13, 14, 15 )
     ALPHA_SCALE4( 7, 16, 17, 18, 19 )
-    
+
     mov( var( beta ), rdx )         // load address of beta
     vbroadcastss( ( rdx ), zmm4 )
 
@@ -1474,7 +1883,7 @@ void bli_sgemmsup_rv_zen_asm_3x64n_avx512
 
 
     label( .SCOLSTORED )
-    
+
     /* Transposing 2x16 tiles to 16x2 tiles */
     mov( var( cbuf ), rcx )             // load address of c
     mov( var( cs_c ), rdi )             // load rs_c
@@ -1497,7 +1906,7 @@ void bli_sgemmsup_rv_zen_asm_3x64n_avx512
     mov( var( cs_c ), rdi )                // load rs_c
     lea( mem( , rdi, 4 ), rdi )            // rs_c *= sizeof(float)
     lea( mem( rdi, rdi, 2 ), r12 )
-    
+
     UPDATE_C_1X16( 16 )
     UPDATE_C_1X16( 17 )
     UPDATE_C_1X16( 18 )
@@ -1545,7 +1954,7 @@ void bli_sgemmsup_rv_zen_asm_3x64n_avx512
     mov( var( cs_c ), rdi )               // load rs_c
     lea( mem( , rdi, 4 ), rdi )           // rs_c *= sizeof(float)
     lea( mem( rdi, rdi, 2 ), r12 )
-    
+
     UPDATE_C_1X16_BZ( 16 )
     UPDATE_C_1X16_BZ( 17 )
     UPDATE_C_1X16_BZ( 18 )
@@ -1579,6 +1988,7 @@ void bli_sgemmsup_rv_zen_asm_3x64n_avx512
     : // output operands (none)
     : // input operands
       [k_iter] "m" (k_iter),
+      [k_left] "m" (k_left),
       [a]      "m" (a),
       [rs_a]   "m" (rs_a),
       [cs_a]   "m" (cs_a),
@@ -1617,7 +2027,6 @@ void bli_sgemmsup_rv_zen_asm_3x64n_avx512
         const dim_t j_edge = n0 - ( dim_t )n_left;
 
         uint64_t ps_b   = bli_auxinfo_ps_b( data );
-        uint64_t ps_b4  = ps_b * sizeof( float );
 
         float* restrict cij = c + j_edge*cs_c;
         float* restrict bj  = b + n_iter * ps_b;
@@ -1735,20 +2144,20 @@ void bli_sgemmsup_rv_zen_asm_3x64n_avx512
             else
             {
                 const dim_t mr = 3;
-            
+
                 // Since A is packed into row panels, we must use a loop over
                 // gemv.
                 dim_t m_iter = ( m0 + mr - 1 ) / mr;
                 dim_t m_left =   m0            % mr;
-            
+
                 float* restrict ai_ii  = ai;
                 float* restrict cij_ii = cij;
-            
+
                 for ( dim_t ii = 0; ii < m_iter; ii += 1 )
                 {
                     dim_t mr_cur = ( bli_is_not_edge_f( ii, m_iter, m_left )
                                      ? mr : m_left );
-                    
+
                     bli_sgemv_ex 
                     (
                       BLIS_NO_TRANSPOSE, conjb, mr_cur, k0,
@@ -1757,7 +2166,7 @@ void bli_sgemmsup_rv_zen_asm_3x64n_avx512
                     );
                     cij_ii += mr_cur*rs_c0;
                     ai_ii  += ps_a0;
-                }     
+                } 
             }
             n_left -= nr_cur;
         }
@@ -1780,7 +2189,8 @@ void bli_sgemmsup_rv_zen_asm_2x64n_avx512
        cntx_t*    restrict cntx
      )
 {
-    uint64_t k_iter = k0;
+    uint64_t k_iter = k0 / 4;
+    uint64_t k_left = k0 % 4;
 
     uint64_t n_iter = n0 / 64;
     uint64_t n_left = n0 % 64;
@@ -1814,7 +2224,7 @@ void bli_sgemmsup_rv_zen_asm_2x64n_avx512
     mov( var( n_iter ), r11 )       // load n_iter
 
     label( .N_LOOP_ITER )
-    
+
     mov( var( rs_c ), rdi )         // load rs_c
     lea( mem( , rdi, 4 ), rdi )     // rs_c *= sizeof(float)
 
@@ -1824,14 +2234,92 @@ void bli_sgemmsup_rv_zen_asm_2x64n_avx512
     mov( var( bbuf ), rbx )         // load address of b
     mov( var( cbuf ), rcx )         // load address of c
 
-    mov( var( k_iter ), rsi )       // load k_iter
-    test( rsi, rsi )
-
     mov( var( alpha ), rdx )        // load address of alpha
     vbroadcastss( ( rdx ), zmm7 )
 
+    mov( var( k_iter ), rsi )       // load k_iter
+    test( rsi, rsi )
+    je( .CONSID_K_LEFT )
+
     // The k-loop iterates over 4 rows of B, and broadcasts of each row of A.
     label( .K_LOOP_ITER )
+    // ITER 0
+    // Load 4 rows from B matrix.
+    vmovups(     ( rbx ), zmm0 )
+    vmovups( 0x40( rbx ), zmm1 )
+    vmovups( 0x80( rbx ), zmm2 )
+    vmovups( 0xc0( rbx ), zmm3 )
+
+    // Broadcast 3 elements from a row of A & do VFMA with rows of B.
+    vbroadcastss( ( rax ), zmm4 )
+    VFMA4( 4, 8, 9, 10, 11 )
+    vbroadcastss( mem( rax, r8, 1 ), zmm5 )
+    VFMA4( 5, 12, 13, 14, 15 )
+
+    add(  r9, rbx )
+    add( r10, rax )
+
+    // ITER 1
+    // Load 4 rows from B matrix.
+    vmovups(     ( rbx ), zmm0 )
+    vmovups( 0x40( rbx ), zmm1 )
+    vmovups( 0x80( rbx ), zmm2 )
+    vmovups( 0xc0( rbx ), zmm3 )
+
+    // Broadcast 3 elements from a row of A & do VFMA with rows of B.
+    vbroadcastss( ( rax ), zmm4 )
+    VFMA4( 4, 8, 9, 10, 11 )
+    vbroadcastss( mem( rax, r8, 1 ), zmm5 )
+    VFMA4( 5, 12, 13, 14, 15 )
+
+    add(  r9, rbx )
+    add( r10, rax )
+
+    // ITER 2
+    // Load 4 rows from B matrix.
+    vmovups(     ( rbx ), zmm0 )
+    vmovups( 0x40( rbx ), zmm1 )
+    vmovups( 0x80( rbx ), zmm2 )
+    vmovups( 0xc0( rbx ), zmm3 )
+
+    // Broadcast 3 elements from a row of A & do VFMA with rows of B.
+    vbroadcastss( ( rax ), zmm4 )
+    VFMA4( 4, 8, 9, 10, 11 )
+    vbroadcastss( mem( rax, r8, 1 ), zmm5 )
+    VFMA4( 5, 12, 13, 14, 15 )
+
+    add(  r9, rbx )
+    add( r10, rax )
+
+    // ITER 3
+    // Load 4 rows from B matrix.
+    vmovups(     ( rbx ), zmm0 )
+    vmovups( 0x40( rbx ), zmm1 )
+    vmovups( 0x80( rbx ), zmm2 )
+    vmovups( 0xc0( rbx ), zmm3 )
+
+    // Broadcast 3 elements from a row of A & do VFMA with rows of B.
+    vbroadcastss( ( rax ), zmm4 )
+    VFMA4( 4, 8, 9, 10, 11 )
+    vbroadcastss( mem( rax, r8, 1 ), zmm5 )
+    VFMA4( 5, 12, 13, 14, 15 )
+
+    add(  r9, rbx )
+    add( r10, rax )
+
+    dec( rsi )
+    jne( .K_LOOP_ITER )     // if rsi != 0, repeat k-loop
+
+
+    label( .CONSID_K_LEFT )
+
+    mov( var( k_left ), rsi )       // i = k_left;
+    test( rsi, rsi )                // check i via logical AND.
+    je( .SPOSTACCUM )               // if i == 0, we're done; jump to end.
+                                    // else, we prepare to enter k_left loop.
+
+
+    label( .K_LEFT_LOOP )
 
     // Load 4 rows from B matrix.
     vmovups(     ( rbx ), zmm0 )
@@ -1848,12 +2336,15 @@ void bli_sgemmsup_rv_zen_asm_2x64n_avx512
     add(  r9, rbx )
     add( r10, rax )
     dec( rsi )
-    jne( .K_LOOP_ITER )     // if rsi != 0, repeat k-loop
+    jne( .K_LEFT_LOOP )     // if rsi != 0, repeat k-loop
+
+
+    label( .SPOSTACCUM )
 
     // Scaling A * B with alpha.
     ALPHA_SCALE4( 7,  8,  9, 10, 11 )
     ALPHA_SCALE4( 7, 12, 13, 14, 15 )
-    
+
     mov( var( beta ), rdx )         // load address of beta
     vbroadcastss( ( rdx ), zmm4 )
 
@@ -1874,7 +2365,7 @@ void bli_sgemmsup_rv_zen_asm_2x64n_avx512
 
 
     label( .SCOLSTORED )
-    
+
     /* Transposing 2x16 tiles to 16x2 tiles */
     mov( var( cbuf ), rcx )             // load address of c
     mov( var( cs_c ), rdi )             // load rs_c
@@ -1950,6 +2441,7 @@ void bli_sgemmsup_rv_zen_asm_2x64n_avx512
     : // output operands (none)
     : // input operands
       [k_iter] "m" (k_iter),
+      [k_left] "m" (k_left),
       [a]      "m" (a),
       [rs_a]   "m" (rs_a),
       [cs_a]   "m" (cs_a),
@@ -1988,7 +2480,6 @@ void bli_sgemmsup_rv_zen_asm_2x64n_avx512
         const dim_t j_edge = n0 - ( dim_t )n_left;
 
         uint64_t ps_b   = bli_auxinfo_ps_b( data );
-        uint64_t ps_b4  = ps_b * sizeof( float );
 
         float* restrict cij = c + j_edge*cs_c;
         float* restrict bj  = b + n_iter * ps_b;
@@ -2106,20 +2597,20 @@ void bli_sgemmsup_rv_zen_asm_2x64n_avx512
             else
             {
                 const dim_t mr = 2;
-            
+
                 // Since A is packed into row panels, we must use a loop over
                 // gemv.
                 dim_t m_iter = ( m0 + mr - 1 ) / mr;
                 dim_t m_left =   m0            % mr;
-            
+
                 float* restrict ai_ii  = ai;
                 float* restrict cij_ii = cij;
-            
+
                 for ( dim_t ii = 0; ii < m_iter; ii += 1 )
                 {
                     dim_t mr_cur = ( bli_is_not_edge_f( ii, m_iter, m_left )
                                      ? mr : m_left );
-                    
+
                     bli_sgemv_ex 
                     (
                       BLIS_NO_TRANSPOSE, conjb, mr_cur, k0,
@@ -2128,7 +2619,7 @@ void bli_sgemmsup_rv_zen_asm_2x64n_avx512
                     );
                     cij_ii += mr_cur*rs_c0;
                     ai_ii  += ps_a0;
-                }     
+                } 
             }
             n_left -= nr_cur;
         }
@@ -2151,7 +2642,8 @@ void bli_sgemmsup_rv_zen_asm_1x64n_avx512
        cntx_t*    restrict cntx
      )
 {
-    uint64_t k_iter = k0;
+    uint64_t k_iter = k0 / 4;
+    uint64_t k_left = k0 % 4;
 
     uint64_t n_iter = n0 / 64;
     uint64_t n_left = n0 % 64;
@@ -2185,7 +2677,7 @@ void bli_sgemmsup_rv_zen_asm_1x64n_avx512
     mov( var( n_iter ), r11 )       // load n_iter
 
     label( .N_LOOP_ITER )
-    
+
     mov( var( rs_c ), rdi )         // load rs_c
     lea( mem( , rdi, 4 ), rdi )     // rs_c *= sizeof(float)
 
@@ -2195,14 +2687,84 @@ void bli_sgemmsup_rv_zen_asm_1x64n_avx512
     mov( var( bbuf ), rbx )         // load address of b
     mov( var( cbuf ), rcx )         // load address of c
 
-    mov( var( k_iter ), rsi )       // load k_iter
-    test( rsi, rsi )
-
     mov( var( alpha ), rdx )        // load address of alpha
     vbroadcastss( ( rdx ), zmm7 )
 
+    mov( var( k_iter ), rsi )       // load k_iter
+    test( rsi, rsi )
+    je( .CONSID_K_LEFT )
+
     // The k-loop iterates over 4 rows of B, and broadcasts of each row of A.
     label( .K_LOOP_ITER )
+    // ITER 0
+    // Load 4 rows from B matrix.
+    vmovups(     ( rbx ), zmm0 )
+    vmovups( 0x40( rbx ), zmm1 )
+    vmovups( 0x80( rbx ), zmm2 )
+    vmovups( 0xc0( rbx ), zmm3 )
+
+    // Broadcast 3 elements from a row of A & do VFMA with rows of B.
+    vbroadcastss( ( rax ), zmm4 )
+    VFMA4( 4, 8, 9, 10, 11 )
+
+    add(  r9, rbx )
+    add( r10, rax )
+
+    // ITER 1
+    // Load 4 rows from B matrix.
+    vmovups(     ( rbx ), zmm0 )
+    vmovups( 0x40( rbx ), zmm1 )
+    vmovups( 0x80( rbx ), zmm2 )
+    vmovups( 0xc0( rbx ), zmm3 )
+
+    // Broadcast 3 elements from a row of A & do VFMA with rows of B.
+    vbroadcastss( ( rax ), zmm4 )
+    VFMA4( 4, 8, 9, 10, 11 )
+
+    add(  r9, rbx )
+    add( r10, rax )
+
+    // ITER 2
+    // Load 4 rows from B matrix.
+    vmovups(     ( rbx ), zmm0 )
+    vmovups( 0x40( rbx ), zmm1 )
+    vmovups( 0x80( rbx ), zmm2 )
+    vmovups( 0xc0( rbx ), zmm3 )
+
+    // Broadcast 3 elements from a row of A & do VFMA with rows of B.
+    vbroadcastss( ( rax ), zmm4 )
+    VFMA4( 4, 8, 9, 10, 11 )
+
+    add(  r9, rbx )
+    add( r10, rax )
+
+    // ITER 3
+    // Load 4 rows from B matrix.
+    vmovups(     ( rbx ), zmm0 )
+    vmovups( 0x40( rbx ), zmm1 )
+    vmovups( 0x80( rbx ), zmm2 )
+    vmovups( 0xc0( rbx ), zmm3 )
+
+    // Broadcast 3 elements from a row of A & do VFMA with rows of B.
+    vbroadcastss( ( rax ), zmm4 )
+    VFMA4( 4, 8, 9, 10, 11 )
+
+    add(  r9, rbx )
+    add( r10, rax )
+
+    dec( rsi )
+    jne( .K_LOOP_ITER )     // if rsi != 0, repeat k-loop
+
+
+    label( .CONSID_K_LEFT )
+
+    mov( var( k_left ), rsi )       // i = k_left;
+    test( rsi, rsi )                // check i via logical AND.
+    je( .SPOSTACCUM )               // if i == 0, we're done; jump to end.
+                                    // else, we prepare to enter k_left loop.
+
+
+    label( .K_LEFT_LOOP )
 
     // Load 4 rows from B matrix.
     vmovups(     ( rbx ), zmm0 )
@@ -2213,15 +2775,18 @@ void bli_sgemmsup_rv_zen_asm_1x64n_avx512
     // Broadcast 3 elements from a row of A & do VFMA with rows of B.
     vbroadcastss( ( rax ), zmm4 )
     VFMA4( 4, 8, 9, 10, 11 )
-    
+
     add(  r9, rbx )
     add( r10, rax )
     dec( rsi )
-    jne( .K_LOOP_ITER )     // if rsi != 0, repeat k-loop
+    jne( .K_LEFT_LOOP )     // if rsi != 0, repeat k-loop
+
+
+    label( .SPOSTACCUM )
 
     // Scaling A * B with alpha.
     ALPHA_SCALE4( 7,  8,  9, 10, 11 )
-    
+
     mov( var( beta ), rdx )         // load address of beta
     vbroadcastss( ( rdx ), zmm4 )
 
@@ -2241,7 +2806,7 @@ void bli_sgemmsup_rv_zen_asm_1x64n_avx512
 
 
     label( .SCOLSTORED )
-    
+
     /* Transposing 1x16 tiles to 16x1 tiles */
     mov( var( cbuf ), rcx )             // load address of c
     mov( var( cs_c ), rdi )             // load rs_c
@@ -2276,7 +2841,7 @@ void bli_sgemmsup_rv_zen_asm_1x64n_avx512
     mov( var( cs_c ), rdi )             // load rs_c
     lea( mem( , rdi, 4 ), rdi )         // rs_c *= sizeof(float)
     lea( mem( rdi, rdi, 2 ), r12 )
-    
+
     UPDATE_C_1X16_BZ(  8 )
     UPDATE_C_1X16_BZ(  9 )
     UPDATE_C_1X16_BZ( 10 )
@@ -2310,6 +2875,7 @@ void bli_sgemmsup_rv_zen_asm_1x64n_avx512
     : // output operands (none)
     : // input operands
       [k_iter] "m" (k_iter),
+      [k_left] "m" (k_left),
       [a]      "m" (a),
       [rs_a]   "m" (rs_a),
       [cs_a]   "m" (cs_a),
@@ -2348,7 +2914,6 @@ void bli_sgemmsup_rv_zen_asm_1x64n_avx512
         const dim_t j_edge = n0 - ( dim_t )n_left;
 
         uint64_t ps_b   = bli_auxinfo_ps_b( data );
-        uint64_t ps_b4  = ps_b * sizeof( float );
 
         float* restrict cij = c + j_edge*cs_c;
         float* restrict bj  = b + n_iter * ps_b;
@@ -2466,20 +3031,20 @@ void bli_sgemmsup_rv_zen_asm_1x64n_avx512
             else
             {
                 const dim_t mr = 2;
-            
+
                 // Since A is packed into row panels, we must use a loop over
                 // gemv.
                 dim_t m_iter = ( m0 + mr - 1 ) / mr;
                 dim_t m_left =   m0            % mr;
-            
+
                 float* restrict ai_ii  = ai;
                 float* restrict cij_ii = cij;
-            
+
                 for ( dim_t ii = 0; ii < m_iter; ii += 1 )
                 {
                     dim_t mr_cur = ( bli_is_not_edge_f( ii, m_iter, m_left )
                                      ? mr : m_left );
-                    
+
                     bli_sgemv_ex 
                     (
                       BLIS_NO_TRANSPOSE, conjb, mr_cur, k0,
@@ -2488,7 +3053,7 @@ void bli_sgemmsup_rv_zen_asm_1x64n_avx512
                     );
                     cij_ii += mr_cur*rs_c0;
                     ai_ii  += ps_a0;
-                }     
+                } 
             }
             n_left -= nr_cur;
         }
