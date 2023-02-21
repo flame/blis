@@ -1,29 +1,12 @@
 ##Copyright (C) 2022, Advanced Micro Devices, Inc. All rights reserved.##
 
-cmake_minimum_required(VERSION 3.10.0)
+cmake_minimum_required(VERSION 3.14.0)
 set(CMAKE_CXX_COMPILER ${CXX_COMPILER})
+set(CMAKE_CXX_STANDARD 17)
 
-project(Blis_GtestSuite)
-
-include(FetchContent)
-FetchContent_Declare(
-  googletest
-  GIT_REPOSITORY https://github.com/google/googletest.git
-  GIT_TAG        release-1.12.1
-)
-#set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
-set(BUILD_GMOCK OFF CACHE BOOL "" FORCE)
-set(BUILD_GTEST ON CACHE BOOL "" FORCE)
-FetchContent_MakeAvailable(googletest)
-include(GoogleTest)
+project(BLIS_GtestSuite)
 
 enable_testing()
-
-# Temporarily disable for Windows
-# Set the path to the BLIS installation.
-if(WIN32)
-    message(FATAL_ERROR "GTestSuite has been temporarily disabled on Windows.")
-endif()
 
 # Set the path to the BLIS installation.
 if(NOT(BLIS_PATH))
@@ -43,13 +26,7 @@ set(BLIS_LINKING_TYPE "static" CACHE STRING "Linking to a static BLIS library")
 # Set the possible values of BLIS linking type for cmake-gui
 set_property(CACHE BLIS_LINKING_TYPE PROPERTY STRINGS "static" "shared")
 
-if(BLIS_LINKING_TYPE STREQUAL "shared")
-    message(FATAL_ERROR "Using shared BLIS library is currently disabled.")
-endif()
-
-option(ENABLE_VALGRIND "Run tests using valgrind" OFF)
-
-option(ENABLE_ASAN "Run tests using Address Sanitizer" OFF)
+option(ENABLE_ASAN "Run tests using Address Sanatizer" OFF)
 
 # Set variable if the platform is Linux based.
 if(UNIX AND NOT APPLE)
@@ -61,19 +38,82 @@ if(APPLE)
     message(FATAL_ERROR "Build system does not support Apple platform.")
 endif()
 
-# Set the include paths.
-set(INC_PATH ${CMAKE_CURRENT_SOURCE_DIR}/inc)
+# Use INT_SIZE to set the int type used for testing.
+set(INT_SIZE "32" CACHE STRING "Library used to compute reference results.")
+# Set the possible values of reference CBLAS for cmake-gui
+set_property(CACHE INT_SIZE PROPERTY STRINGS "32" "64")
+if( NOT ((INT_SIZE STREQUAL "32") OR (INT_SIZE STREQUAL "64")) )
+    message(FATAL_ERROR "INT_SIZE option ${INT_SIZE} is not supported. Must be 32 or 64.")
+endif()
+
+# Use REF_BLAS to set the library that will be used for reference results.
+set(REF_CBLAS CACHE STRING "Library used to compute reference results.")
+# Set the possible values of reference CBLAS for cmake-gui
+set_property(CACHE REF_CBLAS PROPERTY STRINGS "OpenBLAS" "Netlib" "MKL")
+
+
+if(REF_LIB)
+    message( "Setting REF_LIB to ${REF_LIB}")
+else()
+    if(REF_CBLAS STREQUAL "OpenBLAS")
+        if(NOT(OPENBLAS_PATH))
+            message(FATAL_ERROR "Need to provide an OpenBLAS installation path \
+            during CMake invokation when OpenBLAS is used for reference results. Please use
+            $ cmake .. -DOPENBLAS_PATH=/home/username/openblas_installation")
+        endif()
+        set(REF_LIB ${OPENBLAS_PATH}/libopenblas.so)
+    elseif(REF_CBLAS STREQUAL "Netlib")
+        if(NOT(NETLIB_PATH))
+            message(FATAL_ERROR "Need to provide a Netlib installation path \
+            during CMake invokation when Netlib is used for reference results. Please use
+            $ cmake .. -DNETLIB_PATH=/home/username/netlib_installation")
+        endif()
+        set(REF_LIB ${NETLIB_PATH}/libcblas.so)
+    elseif(REF_CBLAS STREQUAL "MKL")
+        set(MKL_PATH $ENV{MKLROOT}/lib/intel64
+                CACHE STRING "The path to MKL.")
+        if(INT_SIZE STREQUAL "32")
+            set(REF_LIB ${MKL_PATH}/libmkl_intel_lp64.so)
+        else()
+            set(REF_LIB ${MKL_PATH}/libmkl_intel_ilp64.so)
+        endif()
+        set(MKL_CORE_PATH ${MKL_PATH}/libmkl_core.so)
+        set(MKL_GNU_THREAD_PATH ${MKL_PATH}/libmkl_gnu_thread.so)
+    else()
+        message(FATAL_ERROR "Need to set up a reference library. Please use on of the following options \
+                during CMake invokation: -DREF_CBLAS=Netlib or -DREF_CBLAS=OpenBLAS or -DREF_CBLAS=MKL")
+    endif()
+endif()
+
+# Use TEST_INTERFACE to set which interface, supported by BLIS is meant to be tested.
+set(TEST_INTERFACE "BLAS" CACHE STRING "Interface that is being tested.")
+# Set the possible values of interfaces for cmake-gui
+set_property(CACHE TEST_INTERFACE PROPERTY STRINGS "BLAS" "CBLAS" "BLIS_TYPED")
+if( NOT ((TEST_INTERFACE STREQUAL "BLAS") OR (TEST_INTERFACE STREQUAL "CBLAS") OR (TEST_INTERFACE STREQUAL "BLIS_TYPED")) )
+    message(FATAL_ERROR "TEST_INTERFACE option ${TEST_INTERFACE} is not supported. Please use on of the following options \
+            during CMake invokation: -DTEST_INTERFACE=BLAS or -DTEST_INTERFACE=CBLAS or -DTEST_INTERFACE=BLIS_TYPED")
+endif()
+
+# Use ELEMENT_TYPE to set whether the elements of any matrix/vector tested are integers or floating point values.
+set(ELEMENT_TYPE "f" CACHE STRING "Type of elements of matrices/vectors")
+# Set the possible values of element types for cmake-gui
+set_property(CACHE ELEMENT_TYPE PROPERTY STRINGS "f" "i")
+if( NOT ((ELEMENT_TYPE STREQUAL "f") OR (ELEMENT_TYPE STREQUAL "i")) )
+    message(FATAL_ERROR "ELEMENT_TYPE option ${ELEMENT_TYPE} is not supported. Please use on of the following options \
+            during CMake invokation: -DELEMENT_TYPE=f or -DELEMENT_TYPE=i")
+endif()
+
+# Set common libraries.
+set(COMMON_LIBS pthread m dl)
 
 # Set compiler options and BLIS library for Linux.
 if(LINUX)
     # Add compiler definition.
-    add_compile_options(-g -Wall -Wno-unused-function -Wfatal-errors -fPIC)
-    if(ENABLE_VALGRIND)
-        add_definitions(-D__GTEST_VALGRIND_TEST__)
-    endif()
-    
+    add_compile_options(-g -Wall -Wno-unused-function -Wfatal-errors -fPIC )
+
     if(ENABLE_ASAN)
-       add_compile_options(-fsanitize=address -static-libsan)
+       add_compile_options(-fsanitize=address)
+       add_definitions(-DENABLE_ASAN)
     endif()
 
     # Set GNU OpenMP library as the default option
@@ -113,148 +153,5 @@ if(WIN32)
     endif()
 endif()
 
-# Since this is an out-of-source build we need to copy the input files in the correct destination.
-file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/input.general
-          ${CMAKE_CURRENT_SOURCE_DIR}/alphabeta.dat
-          ${CMAKE_CURRENT_SOURCE_DIR}/input.operations
-     DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
-
-add_executable(gtest_libblis
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/gtest_suite.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/gtest_pthread.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/blis_api.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/blis_inpfile.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/blis_utils_int.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/blis_utils.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/test_process.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/ref_addv.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/ref_amaxv.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/ref_axpbyv.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/ref_axpyv.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/ref_copyv.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/ref_dotv.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/ref_dotxv.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/ref_normfv.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/ref_scalv.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/ref_scal2v.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/ref_subv.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/ref_xpbyv.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/ref_addm.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/ref_axpym.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/ref_copym.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/ref_normfm.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/ref_scalm.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/ref_scal2m.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/ref_subm.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/ref_xpbym.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/ref_axpy2v.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/ref_dotaxpyv.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/ref_axpyf.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/ref_dotxf.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/ref_dotxaxpyf.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/ref_gemv.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/ref_ger.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/ref_hemv.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/ref_her.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/ref_her2.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/ref_symv.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/ref_syr.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/ref_syr2.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/ref_trmv.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/ref_trsv.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/ref_gemm.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/ref_gemmt.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/ref_hemm.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/ref_herk.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/ref_her2k.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/ref_symm.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/ref_syrk.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/ref_syr2k.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/ref_trmm.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/ref_trmm3.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/ref_trsm.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/test_randv.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/test_randm.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/test_addv.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/test_amaxv.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/test_axpbyv.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/test_axpyv.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/test_copyv.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/test_dotv.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/test_dotxv.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/test_normfv.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/test_scalv.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/test_scal2v.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/test_setv.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/test_subv.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/test_xpbyv.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/test_addm.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/test_axpym.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/test_copym.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/test_normfm.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/test_scalm.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/test_scal2m.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/test_setm.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/test_subm.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/test_xpbym.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/test_axpy2v.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/test_dotaxpyv.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/test_axpyf.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/test_dotxf.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/test_dotxaxpyf.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/test_gemv.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/test_ger.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/test_hemv.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/test_her.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/test_her2.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/test_symv.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/test_syr.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/test_syr2.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/test_trmv.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/test_trsv.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/test_gemm.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/test_gemmt.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/test_hemm.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/test_herk.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/test_her2k.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/test_symm.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/test_syrk.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/test_syr2k.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/test_trmm.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/test_trmm3.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/test_trsm.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/lpgemm_utils.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/test_gemm_u8s8s32os32.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/test_gemm_u8s8s32os8.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/test_gemm_f32f32f32of32.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/test_gemm_u8s8s16os16.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/test_gemm_u8s8s16os8.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/test_gemm_bf16bf16f32of32.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/test_gemm_bf16bf16f32obf16.cpp
-)
-
-target_include_directories(gtest_libblis PUBLIC ${INC_PATH} ${BLIS_INCLUDE})
-target_link_libraries(gtest_libblis gtest gtest_main ${Blis_LIBRARY} pthread)
-
-if(ENABLE_ASAN)
-    target_link_libraries( gtest_libblis -fsanitize=address)
-endif()
-
-# Linking appropriate threading library.
-if(ENABLE_THREADING STREQUAL "openmp")
-    if(LINUX)
-        if(OpenMP_LIBRARY STREQUAL "GNU")
-            target_link_libraries(gtest_libblis -fopenmp)
-        else()
-            target_link_libraries(gtest_libblis iomp5)
-        endif()
-    endif()
-endif()
-
-add_test(
-    NAME gtest_libblis
-    COMMAND gtest_libblis
-)
-
-#gtest_discover_tests(gtest_libblis)
+add_subdirectory(testinghelpers)
+add_subdirectory(testsuite)
