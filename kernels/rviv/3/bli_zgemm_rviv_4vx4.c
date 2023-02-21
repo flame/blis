@@ -36,27 +36,27 @@
 
 void bli_zgemm_rviv_asm_4vx4
     (
-      intptr_t               k,
-      dcomplex*     restrict alpha,
-      dcomplex*     restrict a,
-      dcomplex*     restrict b,
-      dcomplex*     restrict beta,
-      dcomplex*     restrict c, intptr_t rs_c, intptr_t cs_c
+             intptr_t   k,
+       const dcomplex*  alpha,
+       const dcomplex*  a,
+       const dcomplex*  b,
+       const dcomplex*  beta,
+             dcomplex*  c, intptr_t rs_c, intptr_t cs_c
     );
 
 
 void bli_zgemm_rviv_4vx4
      (
-       dim_t               m,
-       dim_t               n,
-       dim_t               k,
-       dcomplex*  restrict alpha,
-       dcomplex*  restrict a,
-       dcomplex*  restrict b,
-       dcomplex*  restrict beta,
-       dcomplex*  restrict c, inc_t rs_c, inc_t cs_c,
-       auxinfo_t*          data,
-       cntx_t*             cntx
+             dim_t      m,
+             dim_t      n,
+             dim_t      k,
+       const dcomplex*  alpha,
+       const dcomplex*  a,
+       const dcomplex*  b,
+       const dcomplex*  beta,
+             dcomplex*  c, inc_t rs_c, inc_t cs_c,
+             auxinfo_t* data,
+       const cntx_t*    cntx
      )
 {
     // The assembly kernels always take native machine-sized integer arguments.

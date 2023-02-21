@@ -36,26 +36,26 @@
 
 void bli_dgemm_rviv_asm_4vx4
     (
-      intptr_t             k,
-      double*     restrict alpha,
-      double*     restrict a,
-      double*     restrict b,
-      double*     restrict beta,
-      double*     restrict c, intptr_t rs_c, intptr_t cs_c
+             intptr_t   k,
+       const double*    alpha,
+       const double*    a,
+       const double*    b,
+       const double*    beta,
+             double*    c, intptr_t rs_c, intptr_t cs_c
     );
 
 void bli_dgemm_rviv_4vx4
      (
-       dim_t               m,
-       dim_t               n,
-       dim_t               k,
-       double*    restrict alpha,
-       double*    restrict a,
-       double*    restrict b,
-       double*    restrict beta,
-       double*    restrict c, inc_t rs_c, inc_t cs_c,
-       auxinfo_t*          data,
-       cntx_t*             cntx
+             dim_t      m,
+             dim_t      n,
+             dim_t      k,
+       const double*    alpha,
+       const double*    a,
+       const double*    b,
+       const double*    beta,
+             double*    c, inc_t rs_c, inc_t cs_c,
+             auxinfo_t* data,
+       const cntx_t*    cntx
      )
 {
     // The assembly kernels always take native machine-sized integer arguments.
