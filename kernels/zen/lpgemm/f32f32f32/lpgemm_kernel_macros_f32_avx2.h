@@ -32,6 +32,36 @@
 
 */
 
+#ifndef LPGEMM_F32_SGEMM_AVX2_KERN_MACROS_H
+#define LPGEMM_F32_SGEMM_AVX2_KERN_MACROS_H
+
+#include "../gelu_avx2.h"
+#include "../math_utils_avx2.h"
+
+/* ReLU scale (Parametric ReLU):  f(x) = x, when x > 0 and f(x) = a*x when x <= 0 */
+#define RELU_SCALE_OP_F32S_AVX2(reg, scale, zreg, scratch2) \
+     scratch2 = _mm256_min_ps( reg, zreg ); /* <0 elems*/\
+     reg = _mm256_max_ps( reg, zreg ); /* >=0 elems*/\
+     scratch2 = _mm256_mul_ps( scratch2, scale ); /*scale <0 elems*/\
+     reg = _mm256_or_ps( reg, scratch2 ); \
+
+/* ReLU scale (Parametric ReLU):  f(x) = x, when x > 0 and f(x) = a*x when x <= 0 */
+#define RELU_SCALE_OP_F32S_SSE(reg, scale, zreg, scratch2) \
+     scratch2 = _mm_min_ps( reg, zreg ); /* <0 elems*/\
+     reg = _mm_max_ps( reg, zreg ); /* >=0 elems*/\
+     scratch2 = _mm_mul_ps( scratch2, scale ); /*scale <0 elems*/\
+     reg = _mm_or_ps( reg, scratch2 ); \
+
+/* GeLU (x) = 0.5* x * (1 + tanh ( 0.797884 * ( x + ( 0.044715 * x^3 ) ) ) )  */
+#define GELU_TANH_F32S_AVX2(reg, r, r2, x, z, dn, x_tanh, q) \
+\
+	GELU_TANH_F32_AVX2_DEF(reg, r, r2, x, z, dn, x_tanh, q); \
+
+/* GeLU (x) = 0.5* x * (1 + tanh ( 0.797884 * ( x + ( 0.044715 * x^3 ) ) ) )  */
+#define GELU_TANH_F32S_SSE(reg, r, r2, x, z, dn, x_tanh, q) \
+\
+	GELU_TANH_F32_SSE_DEF(reg, r, r2, x, z, dn, x_tanh, q); \
+
 //Zero-out the given YMM accumulator registers
 #define ZERO_ACC_YMM_4_REG(ymm0,ymm1,ymm2,ymm3) \
       ymm0 = _mm256_setzero_ps(); \
@@ -61,25 +91,23 @@
       xmm3 = _mm_mul_ps(xmm3,alpha);
  
 /*Load C, Multiply with beta and add with A*B and store*/
-#define F32_C_STORE_BNZ_8(cbuf,rs_c,ymm0,beta,ymm2) \
+#define F32_C_BNZ_8(cbuf,rs_c,ymm0,beta,ymm2) \
       ymm0 = _mm256_load_ps(cbuf); \
       ymm2 = _mm256_fmadd_ps(ymm0, beta, ymm2); \
-      _mm256_storeu_ps(cbuf, ymm2);
 
 /*Load C, Multiply with beta and add with A*B and store*/
-#define F32_C_STORE_BNZ_4(cbuf,rs_c,xmm0,beta,xmm2) \
+#define F32_C_BNZ_4(cbuf,rs_c,xmm0,beta,xmm2) \
       xmm0 = _mm_load_ps(cbuf); \
       xmm2 = _mm_fmadd_ps(xmm0, beta, xmm2); \
-      _mm_storeu_ps(cbuf, xmm2);
 
 /*Load C, Multiply with beta and add with A*B and store*/
-#define F32_C_STORE_BNZ_2(cbuf,rs_c,xmm0,beta,xmm2) \
-      xmm0 = _mm_load_sd((const double*)cbuf); \
+#define F32_C_BNZ_2(cbuf,rs_c,xmm0,beta,xmm2) \
+      xmm0 = ( __m128 )_mm_load_sd((const double*)cbuf); \
       xmm2 = _mm_fmadd_ps(xmm0, beta, xmm2); \
-      _mm_store_sd((double*)cbuf, xmm2);
 
 /*Load C, Multiply with beta and add with A*B and store*/
-#define F32_C_STORE_BNZ_1(cbuf,rs_c,xmm0,beta,xmm2) \
+#define F32_C_BNZ_1(cbuf,rs_c,xmm0,beta,xmm2) \
       xmm0 = _mm_load_ss(cbuf); \
       xmm2 = _mm_fmadd_ps(xmm0, beta, xmm2); \
-      _mm_store_ss(cbuf, xmm2);
+
+#endif //LPGEMM_F32_SGEMM_AVX2_KERN_MACROS_H

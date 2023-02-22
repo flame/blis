@@ -77,4 +77,33 @@
     z = _mm256_mul_ps (z, _mm256_set1_ps(-1)); \
     x_tanh = (_mm256_xor_ps (_mm256_and_ps (x_tanh, (__m256)(_mm256_set1_epi32(sign))), z)) ;
 
+//Trignometric EXP and TANH functions for SSE
+
+#define POLY_EVAL_6_SSE(r, r2, z) \
+    r2 = _mm_mul_ps (r, r); \
+    z = _mm_fmadd_ps (r2, _mm_fmadd_ps (r, _mm_set1_ps(c4), _mm_set1_ps(c3)), _mm_fmadd_ps (r, _mm_set1_ps(c2), _mm_set1_ps(c1))); \
+    r2 = _mm_mul_ps (r2, r2); \
+    r = _mm_fmadd_ps (r2, _mm_fmadd_ps (r, _mm_set1_ps(c6), _mm_set1_ps(c5)), z); \
+
+#define EXPF_SSE(x, r, r2, z, dn, q) \
+    z = _mm_mul_ps (x, _mm_set1_ps(TBL_LN2));	\
+	  dn = _mm_add_ps (z , _mm_set1_ps(EXPF_HUGE));  \
+    r = _mm_sub_ps (z , _mm_sub_ps (dn , _mm_set1_ps(EXPF_HUGE)));  \
+\
+    POLY_EVAL_6_SSE (r, r2, z); \
+\
+    q = _mm_add_epi32((__m128i) (r), _mm_sllv_epi32 ((__m128i)dn, _mm_set1_epi32 (23)) ); \
+    q =  (__m128i)_mm_blendv_ps ((__m128)q, _mm_set1_ps(inf), _mm_cmp_ps (_mm_set1_ps(88.0), x, 1)); \
+    q =  (__m128i)_mm_blendv_ps ((__m128)q, _mm_set1_ps(0.0), _mm_cmp_ps (x, _mm_set1_ps(-88.0), 1));
+
+#define TANHF_SSE(x_tanh, r, r2, x, z, dn, q) \
+    x = _mm_mul_ps (_mm_andnot_ps(_mm_set1_ps(-0.0f), x_tanh), _mm_set1_ps(-2) ); \
+\
+    EXPF_SSE(x, r, r2, z, dn, q); \
+\
+    z =  _mm_add_ps ((__m128)q, _mm_set1_ps(-1)); \
+    z = _mm_div_ps (z, _mm_add_ps (z, _mm_set1_ps(2))); \
+    z = _mm_mul_ps (z, _mm_set1_ps(-1)); \
+    x_tanh = (_mm_xor_ps (_mm_and_ps (x_tanh, (__m128)(_mm_set1_epi32(sign))), z)) ;
+
 #endif // AOCL_LPGEMM_MATH_UTILS_AVX2_H

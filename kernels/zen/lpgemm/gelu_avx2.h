@@ -49,4 +49,19 @@
 	x_tanh = _mm256_mul_ps (x_tanh, reg); \
 	reg = _mm256_mul_ps (x_tanh, _mm256_set1_ps (0.5));
 
+#define GELU_TANH_F32_SSE_DEF(reg, r, r2, x, z, dn, x_tanh, q) \
+/* GeLU (x) = 0.5* x * (1 + tanh ( 0.797884 * ( x + ( 0.044715 * x^3 ) ) ) )  */ \
+\
+	r2 = _mm_mul_ps (reg, reg); \
+	r2 = _mm_mul_ps (r2, reg); \
+	x_tanh = _mm_fmadd_ps (_mm_set1_ps (0.044715), r2, reg); \
+	x_tanh = _mm_mul_ps (x_tanh, _mm_set1_ps (0.797884)); \
+\
+	/*x_tanh = tanhf(x_tanh) */  \
+	TANHF_SSE(x_tanh, r, r2, x, z, dn, q); \
+\
+	x_tanh = _mm_add_ps (x_tanh, _mm_set1_ps (1)); \
+	x_tanh = _mm_mul_ps (x_tanh, reg); \
+	reg = _mm_mul_ps (x_tanh, _mm_set1_ps (0.5));
+
 #endif // AOCL_LPGEMM_GELU_DEF_AVX2_H

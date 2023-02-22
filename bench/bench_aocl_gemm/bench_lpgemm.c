@@ -1213,7 +1213,7 @@ int main( int argc, char** argv )
 				(
 				  fin, fout, stor_order, op_t,
 				  m, n, k, stride_a, stride_b, stride_c,
-				  NULL
+				  post_ops_str_dest
 				);
 			}
 			else if ((op_type_char == 's') || (op_type_char == 'S'))

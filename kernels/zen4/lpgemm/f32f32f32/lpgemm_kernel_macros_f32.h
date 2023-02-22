@@ -32,6 +32,25 @@
 
 */
 
+#ifndef LPGEMM_F32_SGEMM_KERN_MACROS_H
+#define LPGEMM_F32_SGEMM_KERN_MACROS_H
+
+#include "../gelu_avx512.h"
+#include "../math_utils_avx512.h"
+
+/* ReLU scale (Parametric ReLU):  f(x) = x, when x > 0 and f(x) = a*x when x <= 0 */
+#define RELU_SCALE_OP_F32S_AVX512(reg) \
+	/* Generate indenx of elements <= 0.*/ \
+	relu_cmp_mask = _mm512_cmple_ps_mask( reg, zmm1 ); \
+ \
+	/* Apply scaling on for <= 0 elements.*/ \
+	reg = _mm512_mask_mul_ps( reg, relu_cmp_mask, reg, zmm2 ); \
+
+/* GeLU (x) = 0.5* x * (1 + tanh ( 0.797884 * ( x + ( 0.044715 * x^3 ) ) ) )  */
+#define GELU_TANH_F32S_AVX512(reg, r, r2, x, z, dn, x_tanh, q) \
+\
+	GELU_TANH_F32_AVX512_DEF(reg, r, r2, x, z, dn, x_tanh, q); \
+
 //Zero-out the given ZMM accumulator registers
 #define ZERO_ACC_ZMM_4_REG(zmm0,zmm1,zmm2,zmm3) \
       zmm0 = _mm512_setzero_ps(); \
@@ -39,62 +58,12 @@
       zmm2 = _mm512_setzero_ps(); \
       zmm3 = _mm512_setzero_ps();
 
-//Zero-out the given YMM accumulator registers
-#define ZERO_ACC_YMM_4_REG(ymm0,ymm1,ymm2,ymm3) \
-      ymm0 = _mm256_setzero_ps(); \
-      ymm1 = _mm256_setzero_ps(); \
-      ymm2 = _mm256_setzero_ps(); \
-      ymm3 = _mm256_setzero_ps();
-
-//Zero-out the given XMM accumulator registers
-#define ZERO_ACC_XMM_4_REG(xmm0,xmm1,xmm2,xmm3) \
-      xmm0 = _mm_setzero_ps(); \
-      xmm1 = _mm_setzero_ps(); \
-      xmm2 = _mm_setzero_ps(); \
-      xmm3 = _mm_setzero_ps();
-
 /*Multiply alpha with accumulator registers and store back*/
 #define ALPHA_MUL_ACC_ZMM_4_REG(zmm0,zmm1,zmm2,zmm3,alpha) \
       zmm0 = _mm512_mul_ps(zmm0,alpha); \
       zmm1 = _mm512_mul_ps(zmm1,alpha); \
       zmm2 = _mm512_mul_ps(zmm2,alpha); \
       zmm3 = _mm512_mul_ps(zmm3,alpha);
-      
-/*Multiply alpha with accumulator registers and store back*/
-#define ALPHA_MUL_ACC_YMM_4_REG(ymm0,ymm1,ymm2,ymm3,alpha) \
-      ymm0 = _mm256_mul_ps(ymm0,alpha); \
-      ymm1 = _mm256_mul_ps(ymm1,alpha); \
-      ymm2 = _mm256_mul_ps(ymm2,alpha); \
-      ymm3 = _mm256_mul_ps(ymm3,alpha);
-
-/*Multiply alpha with accumulator registers and store back*/
-#define ALPHA_MUL_ACC_XMM_4_REG(xmm0,xmm1,xmm2,xmm3,alpha) \
-      xmm0 = _mm_mul_ps(xmm0,alpha); \
-      xmm1 = _mm_mul_ps(xmm1,alpha); \
-      xmm2 = _mm_mul_ps(xmm2,alpha); \
-      xmm3 = _mm_mul_ps(xmm3,alpha);
-      
-/*Load C, Multiply with beta and add with A*B and store*/
-#define F32_C_STORE_BNZ_8(cbuf,rs_c,ymm0,beta,ymm2) \
-      ymm0 = _mm256_load_ps(cbuf); \
-      ymm2 = _mm256_fmadd_ps(ymm0, beta, ymm2); \
-      _mm256_storeu_ps(cbuf, ymm2);
-
-/*Load C, Multiply with beta and add with A*B and store*/
-#define F32_C_STORE_BNZ_4(cbuf,rs_c,xmm0,beta,xmm2) \
-      xmm0 = _mm_load_ps(cbuf); \
-      xmm2 = _mm_fmadd_ps(xmm0, beta, xmm2); \
-      _mm_storeu_ps(cbuf, xmm2);     
-
-/*Load C, Multiply with beta and add with A*B and store*/
-#define F32_C_STORE_BNZ_2(cbuf,rs_c,xmm0,beta,xmm2) \
-      xmm0 = _mm_load_sd((const double*)cbuf); \
-      xmm2 = _mm_fmadd_ps(xmm0, beta, xmm2); \
-      _mm_store_sd((double*)cbuf, xmm2);
-
-/*Load C, Multiply with beta and add with A*B and store*/
-#define F32_C_STORE_BNZ_1(cbuf,rs_c,xmm0,beta,xmm2) \
-      xmm0 = _mm_load_ss(cbuf); \
-      xmm2 = _mm_fmadd_ps(xmm0, beta, xmm2); \
-      _mm_store_ss(cbuf, xmm2);
+ 
+#endif //LPGEMM_F32_SGEMM_KERN_MACROS_H
 

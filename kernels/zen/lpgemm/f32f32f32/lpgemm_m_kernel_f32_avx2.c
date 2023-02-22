@@ -44,6 +44,14 @@
 
 LPGEMM_MAIN_KERN(float,float,float,f32f32f32of32_6x16m)
 {
+    static void* post_ops_labels[] =
+            {
+              &&POST_OPS_6x16F_DISABLE,
+              &&POST_OPS_BIAS_6x16F,
+              &&POST_OPS_RELU_6x16F,
+              &&POST_OPS_RELU_SCALE_6x16F,
+              &&POST_OPS_GELU_6x16F,
+            };
     uint64_t n_left = n0 % NR;  //n0 is expected to be n0<=NR
 
     // First check whether this is a edge case in the n dimension.
@@ -69,6 +77,7 @@ LPGEMM_MAIN_KERN(float,float,float,f32f32f32of32_6x16m)
             );
 
             cij += nr_cur*cs_c; bj += nr_cur*cs_b; n_left -= nr_cur;
+			post_ops_attr.post_op_c_j += 8;
         }
   
         if ( 4 <= n_left )
@@ -85,6 +94,7 @@ LPGEMM_MAIN_KERN(float,float,float,f32f32f32of32_6x16m)
               post_ops_list, post_ops_attr
             );
             cij += nr_cur*cs_c; bj += nr_cur*cs_b; n_left -= nr_cur;
+			post_ops_attr.post_op_c_j += 4;
         }
         
         if ( 2 <= n_left )
@@ -101,6 +111,7 @@ LPGEMM_MAIN_KERN(float,float,float,f32f32f32of32_6x16m)
               post_ops_list, post_ops_attr
             );
             cij += nr_cur*cs_c; bj += nr_cur*cs_b; n_left -= nr_cur;
+			post_ops_attr.post_op_c_j += 2;
         }
         
         if ( 1 == n_left )
@@ -142,7 +153,7 @@ LPGEMM_MAIN_KERN(float,float,float,f32f32f32of32_6x16m)
       ZERO_ACC_YMM_4_REG(ymm8,  ymm9,  ymm10, ymm11);
       ZERO_ACC_YMM_4_REG(ymm12, ymm13, ymm14, ymm15);
 
-      float *abuf, *bbuf, *cbuf;
+      float *abuf, *bbuf, *cbuf, *_cbuf;
 
       abuf = (float *)a + m * ps_a; // Move to next MRxKC in MCxKC (where MC>=MR)
       bbuf = (float *)b;  //Same KCxNR panel is used across MCxKC block 
@@ -194,52 +205,293 @@ LPGEMM_MAIN_KERN(float,float,float,f32f32f32of32_6x16m)
       ALPHA_MUL_ACC_YMM_4_REG(ymm8,ymm9,ymm10,ymm11,ymm0)
       ALPHA_MUL_ACC_YMM_4_REG(ymm12,ymm13,ymm14,ymm15,ymm0)
 
-      //store output when beta=0
-      if(beta == 0.0)
+      if ( beta != 0.0 )
       {
-        _mm256_storeu_ps(cbuf, ymm4); 
-        _mm256_storeu_ps(cbuf + 8, ymm5);
-        cbuf += rs_c;
-        _mm256_storeu_ps(cbuf, ymm6); 
-        _mm256_storeu_ps(cbuf + 8, ymm7);
-        cbuf += rs_c;
-        _mm256_storeu_ps(cbuf, ymm8); 
-        _mm256_storeu_ps(cbuf + 8, ymm9);
-        cbuf += rs_c;
-        _mm256_storeu_ps(cbuf, ymm10); 
-        _mm256_storeu_ps(cbuf + 8, ymm11);
-        cbuf += rs_c;
-        _mm256_storeu_ps(cbuf, ymm12); 
-        _mm256_storeu_ps(cbuf + 8, ymm13);
-        cbuf += rs_c;
-        _mm256_storeu_ps(cbuf, ymm14); 
-        _mm256_storeu_ps(cbuf + 8, ymm15);    
-        //cbuf += rs_c;
-      }else
-      {
+        _cbuf = cbuf;
         //load c and multiply with beta and 
         //add to accumulator and store back
         ymm3 = _mm256_broadcast_ss(&(beta));
 
-        F32_C_STORE_BNZ_8(cbuf,rs_c,ymm0,ymm3,ymm4)
-        F32_C_STORE_BNZ_8(cbuf+8,rs_c,ymm1,ymm3,ymm5)
-        cbuf += rs_c;
-        F32_C_STORE_BNZ_8(cbuf,rs_c,ymm0,ymm3,ymm6)
-        F32_C_STORE_BNZ_8(cbuf+8,rs_c,ymm1,ymm3,ymm7)
-        cbuf += rs_c;
-        F32_C_STORE_BNZ_8(cbuf,rs_c,ymm0,ymm3,ymm8)
-        F32_C_STORE_BNZ_8(cbuf+8,rs_c,ymm1,ymm3,ymm9)
-        cbuf += rs_c;
-        F32_C_STORE_BNZ_8(cbuf,rs_c,ymm0,ymm3,ymm10)
-        F32_C_STORE_BNZ_8(cbuf+8,rs_c,ymm1,ymm3,ymm11)
-        cbuf += rs_c;
-        F32_C_STORE_BNZ_8(cbuf,rs_c,ymm0,ymm3,ymm12)
-        F32_C_STORE_BNZ_8(cbuf+8,rs_c,ymm1,ymm3,ymm13)
-        cbuf += rs_c;
-        F32_C_STORE_BNZ_8(cbuf,rs_c,ymm0,ymm3,ymm14)
-        F32_C_STORE_BNZ_8(cbuf+8,rs_c,ymm1,ymm3,ymm15)
-        //cbuf += rs_c;
-      }//betazero
+        F32_C_BNZ_8(_cbuf,rs_c,ymm0,ymm3,ymm4)
+        F32_C_BNZ_8(_cbuf+8,rs_c,ymm1,ymm3,ymm5)
+        _cbuf += rs_c;
+        F32_C_BNZ_8(_cbuf,rs_c,ymm0,ymm3,ymm6)
+        F32_C_BNZ_8(_cbuf+8,rs_c,ymm1,ymm3,ymm7)
+        _cbuf += rs_c;
+        F32_C_BNZ_8(_cbuf,rs_c,ymm0,ymm3,ymm8)
+        F32_C_BNZ_8(_cbuf+8,rs_c,ymm1,ymm3,ymm9)
+        _cbuf += rs_c;
+        F32_C_BNZ_8(_cbuf,rs_c,ymm0,ymm3,ymm10)
+        F32_C_BNZ_8(_cbuf+8,rs_c,ymm1,ymm3,ymm11)
+        _cbuf += rs_c;
+        F32_C_BNZ_8(_cbuf,rs_c,ymm0,ymm3,ymm12)
+        F32_C_BNZ_8(_cbuf+8,rs_c,ymm1,ymm3,ymm13)
+        _cbuf += rs_c;
+        F32_C_BNZ_8(_cbuf,rs_c,ymm0,ymm3,ymm14)
+        F32_C_BNZ_8(_cbuf+8,rs_c,ymm1,ymm3,ymm15)
+      }
+
+      // Post Ops
+      lpgemm_post_op* post_ops_list_temp = post_ops_list;
+      POST_OP_LABEL_LASTK_SAFE_JUMP
+
+POST_OPS_BIAS_6x16F:
+      {
+        if ( ( *( char* )post_ops_list_temp->op_args2 == 'r' ) ||
+             ( *( char* )post_ops_list_temp->op_args2 == 'R' ) )
+        {
+          ymm0 = _mm256_loadu_ps( ( float* )post_ops_list_temp->op_args1 +
+              post_ops_attr.post_op_c_j + ( 0 * 8 ) );
+          ymm1 = _mm256_loadu_ps( ( float* )post_ops_list_temp->op_args1 +
+              post_ops_attr.post_op_c_j + ( 1 * 8 ) );
+
+          // c[0,0-7]
+          ymm4 = _mm256_add_ps( ymm4, ymm0 );
+
+          // c[0,8-15]
+          ymm5 = _mm256_add_ps( ymm5, ymm1 );
+
+          // c[1,0-7]
+          ymm6 = _mm256_add_ps( ymm6, ymm0 );
+
+          // c[1,8-15]
+          ymm7 = _mm256_add_ps( ymm7, ymm1 );
+
+          // c[2,0-7]
+          ymm8 = _mm256_add_ps( ymm8, ymm0 );
+
+          // c[2,8-15]
+          ymm9 = _mm256_add_ps( ymm9, ymm1 );
+
+          // c[3,0-7]
+          ymm10 = _mm256_add_ps( ymm10, ymm0 );
+
+          // c[3,8-15]
+          ymm11 = _mm256_add_ps( ymm11, ymm1 );
+
+          // c[4,0-7]
+          ymm12 = _mm256_add_ps( ymm12, ymm0 );
+
+          // c[4,8-15]
+          ymm13 = _mm256_add_ps( ymm13, ymm1 );
+
+          // c[5,0-7]
+          ymm14 = _mm256_add_ps( ymm14, ymm0 );
+
+          // c[5,8-15]
+          ymm15 = _mm256_add_ps( ymm15, ymm1 );
+        }
+        else
+        {
+          // If original output was columns major, then by the time
+          // kernel sees it, the matrix would be accessed as if it were
+          // transposed. Due to this the bias array will be accessed by
+          // the ic index, and each bias element corresponds to an
+          // entire row of the transposed output array, instead of an
+          // entire column.
+          ymm0 = _mm256_broadcast_ss( ( float* )post_ops_list_temp->op_args1 +
+              post_ops_attr.post_op_c_i + 0 );
+          ymm1 = _mm256_broadcast_ss( ( float* )post_ops_list_temp->op_args1 +
+              post_ops_attr.post_op_c_i + 1 );
+          ymm2 = _mm256_broadcast_ss( ( float* )post_ops_list_temp->op_args1 +
+              post_ops_attr.post_op_c_i + 2 );
+          ymm3 = _mm256_broadcast_ss( ( float* )post_ops_list_temp->op_args1 +
+              post_ops_attr.post_op_c_i + 3 );
+
+          // c[0,0-7]
+          ymm4 = _mm256_add_ps( ymm4, ymm0 );
+
+          // c[0,8-15]
+          ymm5 = _mm256_add_ps( ymm5, ymm0 );
+
+          // c[1,0-7]
+          ymm6 = _mm256_add_ps( ymm6, ymm1 );
+
+          // c[1,8-15]
+          ymm7 = _mm256_add_ps( ymm7, ymm1 );
+
+          // c[2,0-7]
+          ymm8 = _mm256_add_ps( ymm8, ymm2 );
+
+          // c[2,8-15]
+          ymm9 = _mm256_add_ps( ymm9, ymm2 );
+
+          // c[3,0-7]
+          ymm10 = _mm256_add_ps( ymm10, ymm3 );
+
+          // c[3,8-15]
+          ymm11 = _mm256_add_ps( ymm11, ymm3 );
+
+          ymm0 = _mm256_broadcast_ss( ( float* )post_ops_list_temp->op_args1 +
+              post_ops_attr.post_op_c_i + 4 );
+          ymm1 = _mm256_broadcast_ss( ( float* )post_ops_list_temp->op_args1 +
+              post_ops_attr.post_op_c_i + 5 );
+
+          // c[4,0-7]
+          ymm12 = _mm256_add_ps( ymm12, ymm0 );
+
+          // c[4,8-15]
+          ymm13 = _mm256_add_ps( ymm13, ymm0 );
+
+          // c[5,0-7]
+          ymm14 = _mm256_add_ps( ymm14, ymm1 );
+
+          // c[5,8-15]
+          ymm15 = _mm256_add_ps( ymm15, ymm1 );
+        }
+        POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+      }
+POST_OPS_RELU_6x16F:
+      {
+        ymm0 = _mm256_setzero_ps();
+
+        // c[0,0-7]
+        ymm4 = _mm256_max_ps( ymm4, ymm0 );
+
+        // c[0,8-15]
+        ymm5 = _mm256_max_ps( ymm5, ymm0 );
+
+        // c[1,0-7]
+        ymm6 = _mm256_max_ps( ymm6, ymm0 );
+
+        // c[1,8-15]
+        ymm7 = _mm256_max_ps( ymm7, ymm0 );
+
+        // c[2,0-7]
+        ymm8 = _mm256_max_ps( ymm8, ymm0 );
+
+        // c[2,8-15]
+        ymm9 = _mm256_max_ps( ymm9, ymm0 );
+
+        // c[3,0-7]
+        ymm10 = _mm256_max_ps( ymm10, ymm0 );
+
+        // c[3,8-15]
+        ymm11 = _mm256_max_ps( ymm11, ymm0 );
+
+        // c[4,0-7]
+        ymm12 = _mm256_max_ps( ymm12, ymm0 );
+
+        // c[4,8-15]
+        ymm13 = _mm256_max_ps( ymm13, ymm0 );
+
+        // c[5,0-7]
+        ymm14 = _mm256_max_ps( ymm14, ymm0 );
+
+        // c[5,8-15]
+        ymm15 = _mm256_max_ps( ymm15, ymm0 );
+
+        POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+      }
+POST_OPS_RELU_SCALE_6x16F:
+      {
+        ymm0 =
+          _mm256_broadcast_ss( ( float* )post_ops_list_temp->op_args2 );
+        ymm1 = _mm256_setzero_ps();
+
+        // c[0,0-7]
+        RELU_SCALE_OP_F32S_AVX2(ymm4, ymm0, ymm1, ymm2)
+
+        // c[0,8-15]
+        RELU_SCALE_OP_F32S_AVX2(ymm5, ymm0, ymm1, ymm2)
+
+        // c[1,0-7]
+        RELU_SCALE_OP_F32S_AVX2(ymm6, ymm0, ymm1, ymm2)
+
+        // c[1,8-15]
+        RELU_SCALE_OP_F32S_AVX2(ymm7, ymm0, ymm1, ymm2)
+
+        // c[2,0-7]
+        RELU_SCALE_OP_F32S_AVX2(ymm8, ymm0, ymm1, ymm2)
+
+        // c[2,8-15]
+        RELU_SCALE_OP_F32S_AVX2(ymm9, ymm0, ymm1, ymm2)
+
+        // c[3,0-7]
+        RELU_SCALE_OP_F32S_AVX2(ymm10, ymm0, ymm1, ymm2)
+
+        // c[3,8-15]
+        RELU_SCALE_OP_F32S_AVX2(ymm11, ymm0, ymm1, ymm2)
+
+        // c[4,0-7]
+        RELU_SCALE_OP_F32S_AVX2(ymm12, ymm0, ymm1, ymm2)
+
+        // c[4,8-15]
+        RELU_SCALE_OP_F32S_AVX2(ymm13, ymm0, ymm1, ymm2)
+
+        // c[5,0-7]
+        RELU_SCALE_OP_F32S_AVX2(ymm14, ymm0, ymm1, ymm2)
+
+        // c[5,8-15]
+        RELU_SCALE_OP_F32S_AVX2(ymm15, ymm0, ymm1, ymm2)
+
+        POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+      }
+POST_OPS_GELU_6x16F:
+      {
+        __m256 dn, x_tanh;
+        __m256i q;
+
+        // c[0,0-7]
+        GELU_TANH_F32S_AVX2(ymm4, ymm0, ymm1, ymm2, ymm3, dn, x_tanh, q)
+
+        // c[0,8-15]
+        GELU_TANH_F32S_AVX2(ymm5, ymm0, ymm1, ymm2, ymm3, dn, x_tanh, q)
+
+        // c[1,0-7]
+        GELU_TANH_F32S_AVX2(ymm6, ymm0, ymm1, ymm2, ymm3, dn, x_tanh, q)
+
+        // c[1,8-15]
+        GELU_TANH_F32S_AVX2(ymm7, ymm0, ymm1, ymm2, ymm3, dn, x_tanh, q)
+
+        // c[2,0-7]
+        GELU_TANH_F32S_AVX2(ymm8, ymm0, ymm1, ymm2, ymm3, dn, x_tanh, q)
+
+        // c[2,8-15]
+        GELU_TANH_F32S_AVX2(ymm9, ymm0, ymm1, ymm2, ymm3, dn, x_tanh, q)
+
+        // c[3,0-7]
+        GELU_TANH_F32S_AVX2(ymm10, ymm0, ymm1, ymm2, ymm3, dn, x_tanh, q)
+
+        // c[3,8-15]
+        GELU_TANH_F32S_AVX2(ymm11, ymm0, ymm1, ymm2, ymm3, dn, x_tanh, q)
+
+        // c[4,0-7]
+        GELU_TANH_F32S_AVX2(ymm12, ymm0, ymm1, ymm2, ymm3, dn, x_tanh, q)
+
+        // c[4,8-15]
+        GELU_TANH_F32S_AVX2(ymm13, ymm0, ymm1, ymm2, ymm3, dn, x_tanh, q)
+
+        // c[5,0-7]
+        GELU_TANH_F32S_AVX2(ymm14, ymm0, ymm1, ymm2, ymm3, dn, x_tanh, q)
+
+        // c[5,8-15]
+        GELU_TANH_F32S_AVX2(ymm15, ymm0, ymm1, ymm2, ymm3, dn, x_tanh, q)
+
+        POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+      }
+POST_OPS_6x16F_DISABLE:
+      ;
+
+      _mm256_storeu_ps(cbuf, ymm4); 
+      _mm256_storeu_ps(cbuf + 8, ymm5);
+      cbuf += rs_c;
+      _mm256_storeu_ps(cbuf, ymm6); 
+      _mm256_storeu_ps(cbuf + 8, ymm7);
+      cbuf += rs_c;
+      _mm256_storeu_ps(cbuf, ymm8); 
+      _mm256_storeu_ps(cbuf + 8, ymm9);
+      cbuf += rs_c;
+      _mm256_storeu_ps(cbuf, ymm10); 
+      _mm256_storeu_ps(cbuf + 8, ymm11);
+      cbuf += rs_c;
+      _mm256_storeu_ps(cbuf, ymm12); 
+      _mm256_storeu_ps(cbuf + 8, ymm13);
+      cbuf += rs_c;
+      _mm256_storeu_ps(cbuf, ymm14); 
+      _mm256_storeu_ps(cbuf + 8, ymm15);
+
+      post_ops_attr.post_op_c_i += MR;
     }//mloop
 
     consider_edge_cases:
@@ -280,6 +532,14 @@ LPGEMM_MAIN_KERN(float,float,float,f32f32f32of32_6x16m)
 
 LPGEMM_N_FRINGE_KERN(float,float,float,f32f32f32of32_6x8m)
 {
+    static void* post_ops_labels[] =
+            {
+              &&POST_OPS_6x8F_DISABLE,
+              &&POST_OPS_BIAS_6x8F,
+              &&POST_OPS_RELU_6x8F,
+              &&POST_OPS_RELU_SCALE_6x8F,
+              &&POST_OPS_GELU_6x8F,
+            };
 
     // Typecast local copies of integers in case dim_t and inc_t are a
     // different size than is expected by load instructions.
@@ -291,7 +551,7 @@ LPGEMM_N_FRINGE_KERN(float,float,float,f32f32f32of32_6x8m)
     if ( m_iter == 0 ){    goto consider_edge_cases; }
 
     /*Declare the registers*/
-    __m256 ymm0, ymm2, ymm3;
+    __m256 ymm0, ymm1, ymm2, ymm3;
     __m256 ymm4, ymm6, ymm8, ymm10;
     __m256 ymm12, ymm13, ymm14, ymm15;
     
@@ -302,7 +562,7 @@ LPGEMM_N_FRINGE_KERN(float,float,float,f32f32f32of32_6x8m)
       ZERO_ACC_YMM_4_REG(ymm4, ymm6, ymm8, ymm10);
       ZERO_ACC_YMM_4_REG(ymm12, ymm13, ymm14, ymm15);
       
-      float *abuf, *bbuf, *cbuf;
+      float *abuf, *bbuf, *cbuf, *_cbuf;
 
       abuf = (float *)a + m * ps_a; // Move to next MRxKC in MCxKC (where MC>=MR)
       bbuf = (float *)b;  //Same KCxNR panel is used across MCxKC block 
@@ -346,40 +606,189 @@ LPGEMM_N_FRINGE_KERN(float,float,float,f32f32f32of32_6x8m)
       ALPHA_MUL_ACC_YMM_4_REG(ymm4,ymm6,ymm8,ymm10,ymm0)
       ALPHA_MUL_ACC_YMM_4_REG(ymm12,ymm13,ymm14,ymm15,ymm0)
 
-      //store output when beta=0
-      if(beta == 0.0)
+      if ( beta != 0.0 )
       {
-        _mm256_storeu_ps(cbuf, ymm4); 
-        cbuf += rs_c;
-        _mm256_storeu_ps(cbuf, ymm6); 
-        cbuf += rs_c;
-        _mm256_storeu_ps(cbuf, ymm8); 
-        cbuf += rs_c;
-        _mm256_storeu_ps(cbuf, ymm10); 
-        cbuf += rs_c;
-        _mm256_storeu_ps(cbuf, ymm12); 
-        cbuf += rs_c;
-        _mm256_storeu_ps(cbuf, ymm14); 
-        //cbuf += rs_c;
-      }else
-      {
+        _cbuf = cbuf;
         //load c and multiply with beta and 
         //add to accumulator and store back
         ymm3 = _mm256_broadcast_ss(&(beta));
 
-        F32_C_STORE_BNZ_8(cbuf,rs_c,ymm0,ymm3,ymm4)
-        cbuf += rs_c;
-        F32_C_STORE_BNZ_8(cbuf,rs_c,ymm0,ymm3,ymm6)
-        cbuf += rs_c;
-        F32_C_STORE_BNZ_8(cbuf,rs_c,ymm0,ymm3,ymm8)
-        cbuf += rs_c;
-        F32_C_STORE_BNZ_8(cbuf,rs_c,ymm0,ymm3,ymm10)
-        cbuf += rs_c;
-        F32_C_STORE_BNZ_8(cbuf,rs_c,ymm0,ymm3,ymm12)
-        cbuf += rs_c;
-        F32_C_STORE_BNZ_8(cbuf,rs_c,ymm0,ymm3,ymm14)
-        //cbuf += rs_c;
-      }//betazero
+        F32_C_BNZ_8(_cbuf,rs_c,ymm0,ymm3,ymm4)
+        _cbuf += rs_c;
+        F32_C_BNZ_8(_cbuf,rs_c,ymm0,ymm3,ymm6)
+        _cbuf += rs_c;
+        F32_C_BNZ_8(_cbuf,rs_c,ymm0,ymm3,ymm8)
+        _cbuf += rs_c;
+        F32_C_BNZ_8(_cbuf,rs_c,ymm0,ymm3,ymm10)
+        _cbuf += rs_c;
+        F32_C_BNZ_8(_cbuf,rs_c,ymm0,ymm3,ymm12)
+        _cbuf += rs_c;
+        F32_C_BNZ_8(_cbuf,rs_c,ymm0,ymm3,ymm14)
+      }
+
+      // Post Ops
+      lpgemm_post_op* post_ops_list_temp = post_ops_list;
+      POST_OP_LABEL_LASTK_SAFE_JUMP
+
+POST_OPS_BIAS_6x8F:
+      {
+        if ( ( *( char* )post_ops_list_temp->op_args2 == 'r' ) ||
+             ( *( char* )post_ops_list_temp->op_args2 == 'R' ) )
+        {
+          ymm0 = _mm256_loadu_ps( ( float* )post_ops_list_temp->op_args1 +
+              post_ops_attr.post_op_c_j + ( 0 * 8 ) );
+
+          // c[0,0-7]
+          ymm4 = _mm256_add_ps( ymm4, ymm0 );
+
+          // c[1,0-7]
+          ymm6 = _mm256_add_ps( ymm6, ymm0 );
+
+          // c[2,0-7]
+          ymm8 = _mm256_add_ps( ymm8, ymm0 );
+
+          // c[3,0-7]
+          ymm10 = _mm256_add_ps( ymm10, ymm0 );
+
+          // c[4,0-7]
+          ymm12 = _mm256_add_ps( ymm12, ymm0 );
+
+          // c[5,0-7]
+          ymm14 = _mm256_add_ps( ymm14, ymm0 );
+        }
+        else
+        {
+          // If original output was columns major, then by the time
+          // kernel sees it, the matrix would be accessed as if it were
+          // transposed. Due to this the bias array will be accessed by
+          // the ic index, and each bias element corresponds to an
+          // entire row of the transposed output array, instead of an
+          // entire column.
+          ymm0 = _mm256_broadcast_ss( ( float* )post_ops_list_temp->op_args1 +
+              post_ops_attr.post_op_c_i + 0 );
+          ymm1 = _mm256_broadcast_ss( ( float* )post_ops_list_temp->op_args1 +
+              post_ops_attr.post_op_c_i + 1 );
+          ymm2 = _mm256_broadcast_ss( ( float* )post_ops_list_temp->op_args1 +
+              post_ops_attr.post_op_c_i + 2 );
+          ymm3 = _mm256_broadcast_ss( ( float* )post_ops_list_temp->op_args1 +
+              post_ops_attr.post_op_c_i + 3 );
+
+          // c[0,0-7]
+          ymm4 = _mm256_add_ps( ymm4, ymm0 );
+
+          // c[1,0-7]
+          ymm6 = _mm256_add_ps( ymm6, ymm1 );
+
+          // c[2,0-7]
+          ymm8 = _mm256_add_ps( ymm8, ymm2 );
+
+          // c[3,0-7]
+          ymm10 = _mm256_add_ps( ymm10, ymm3 );
+
+          ymm0 = _mm256_broadcast_ss( ( float* )post_ops_list_temp->op_args1 +
+              post_ops_attr.post_op_c_i + 4 );
+          ymm1 = _mm256_broadcast_ss( ( float* )post_ops_list_temp->op_args1 +
+              post_ops_attr.post_op_c_i + 5 );
+
+          // c[4,0-7]
+          ymm12 = _mm256_add_ps( ymm12, ymm0 );
+
+          // c[5,0-7]
+          ymm14 = _mm256_add_ps( ymm14, ymm1 );
+        }
+        POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+      }
+POST_OPS_RELU_6x8F:
+      {
+        ymm0 = _mm256_setzero_ps();
+
+        // c[0,0-7]
+        ymm4 = _mm256_max_ps( ymm4, ymm0 );
+
+        // c[1,0-7]
+        ymm6 = _mm256_max_ps( ymm6, ymm0 );
+
+        // c[2,0-7]
+        ymm8 = _mm256_max_ps( ymm8, ymm0 );
+
+        // c[3,0-7]
+        ymm10 = _mm256_max_ps( ymm10, ymm0 );
+
+        // c[4,0-7]
+        ymm12 = _mm256_max_ps( ymm12, ymm0 );
+
+        // c[5,0-7]
+        ymm14 = _mm256_max_ps( ymm14, ymm0 );
+
+        POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+      }
+POST_OPS_RELU_SCALE_6x8F:
+      {
+        ymm0 =
+          _mm256_broadcast_ss( ( float* )post_ops_list_temp->op_args2 );
+        ymm1 = _mm256_setzero_ps();
+
+        // c[0,0-7]
+        RELU_SCALE_OP_F32S_AVX2(ymm4, ymm0, ymm1, ymm2)
+
+        // c[1,0-7]
+        RELU_SCALE_OP_F32S_AVX2(ymm6, ymm0, ymm1, ymm2)
+
+        // c[2,0-7]
+        RELU_SCALE_OP_F32S_AVX2(ymm8, ymm0, ymm1, ymm2)
+
+        // c[3,0-7]
+        RELU_SCALE_OP_F32S_AVX2(ymm10, ymm0, ymm1, ymm2)
+
+        // c[4,0-7]
+        RELU_SCALE_OP_F32S_AVX2(ymm12, ymm0, ymm1, ymm2)
+
+        // c[5,0-7]
+        RELU_SCALE_OP_F32S_AVX2(ymm14, ymm0, ymm1, ymm2)
+
+        POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+      }
+POST_OPS_GELU_6x8F:
+      {
+        __m256 dn, x_tanh;
+        __m256i q;
+
+        // c[0,0-7]
+        GELU_TANH_F32S_AVX2(ymm4, ymm0, ymm1, ymm2, ymm3, dn, x_tanh, q)
+
+        // c[1,0-7]
+        GELU_TANH_F32S_AVX2(ymm6, ymm0, ymm1, ymm2, ymm3, dn, x_tanh, q)
+
+        // c[2,0-7]
+        GELU_TANH_F32S_AVX2(ymm8, ymm0, ymm1, ymm2, ymm3, dn, x_tanh, q)
+
+        // c[3,0-7]
+        GELU_TANH_F32S_AVX2(ymm10, ymm0, ymm1, ymm2, ymm3, dn, x_tanh, q)
+
+        // c[4,0-7]
+        GELU_TANH_F32S_AVX2(ymm12, ymm0, ymm1, ymm2, ymm3, dn, x_tanh, q)
+
+        // c[5,0-7]
+        GELU_TANH_F32S_AVX2(ymm14, ymm0, ymm1, ymm2, ymm3, dn, x_tanh, q)
+
+        POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+      }
+POST_OPS_6x8F_DISABLE:
+      ;
+
+      _mm256_storeu_ps(cbuf, ymm4); 
+      cbuf += rs_c;
+      _mm256_storeu_ps(cbuf, ymm6); 
+      cbuf += rs_c;
+      _mm256_storeu_ps(cbuf, ymm8); 
+      cbuf += rs_c;
+      _mm256_storeu_ps(cbuf, ymm10); 
+      cbuf += rs_c;
+      _mm256_storeu_ps(cbuf, ymm12); 
+      cbuf += rs_c;
+      _mm256_storeu_ps(cbuf, ymm14); 
+
+      post_ops_attr.post_op_c_i += MR;
     }//mloop
 
     consider_edge_cases:
@@ -420,6 +829,14 @@ LPGEMM_N_FRINGE_KERN(float,float,float,f32f32f32of32_6x8m)
 
 LPGEMM_N_FRINGE_KERN(float,float,float,f32f32f32of32_6x4m)
 {
+    static void* post_ops_labels[] =
+            {
+              &&POST_OPS_6x4F_DISABLE,
+              &&POST_OPS_BIAS_6x4F,
+              &&POST_OPS_RELU_6x4F,
+              &&POST_OPS_RELU_SCALE_6x4F,
+              &&POST_OPS_GELU_6x4F,
+            };
     // Typecast local copies of integers in case dim_t and inc_t are a
     // different size than is expected by load instructions.
     uint64_t k_iter = (uint64_t)k0;
@@ -441,7 +858,7 @@ LPGEMM_N_FRINGE_KERN(float,float,float,f32f32f32of32_6x4m)
       ZERO_ACC_XMM_4_REG(xmm4,xmm5,xmm6,xmm7) 
       ZERO_ACC_XMM_4_REG(xmm8,xmm9,xmm0,xmm1) 
       
-      float *abuf, *bbuf, *cbuf;
+      float *abuf, *bbuf, *cbuf, *_cbuf;
 
       abuf = (float *)a + m * ps_a; // Move to next MRxKC in MCxKC (where MC>=MR)
       bbuf = (float *)b;  //Same KCxNR panel is used across MCxKC block 
@@ -483,40 +900,189 @@ LPGEMM_N_FRINGE_KERN(float,float,float,f32f32f32of32_6x4m)
       ALPHA_MUL_ACC_XMM_4_REG(xmm4,xmm5,xmm6,xmm7,xmm0) 
       ALPHA_MUL_ACC_XMM_4_REG(xmm8,xmm9,xmm2,xmm3,xmm0)
 
-      //store output when beta=0
-      if(beta == 0.0)
+      if ( beta != 0.0 )
       {
-        _mm_storeu_ps(cbuf, xmm4);
-        cbuf += rs_c;
-        _mm_storeu_ps(cbuf, xmm5);
-        cbuf += rs_c;
-        _mm_storeu_ps(cbuf, xmm6);
-        cbuf += rs_c;
-        _mm_storeu_ps(cbuf, xmm7);
-        cbuf += rs_c;
-        _mm_storeu_ps(cbuf, xmm8);
-        cbuf += rs_c;
-        _mm_storeu_ps(cbuf, xmm9);
-        //cbuf += rs_c;
-      }else
-      {
+        _cbuf = cbuf;
         //load c and multiply with beta and 
         //add to accumulator and store back
         xmm3 = _mm_broadcast_ss(&(beta));
 
-        F32_C_STORE_BNZ_4(cbuf,rs_c,xmm1,xmm3,xmm4)
-        cbuf += rs_c;
-        F32_C_STORE_BNZ_4(cbuf,rs_c,xmm1,xmm3,xmm5)
-        cbuf += rs_c;
-        F32_C_STORE_BNZ_4(cbuf,rs_c,xmm1,xmm3,xmm6)
-        cbuf += rs_c;
-        F32_C_STORE_BNZ_4(cbuf,rs_c,xmm1,xmm3,xmm7)
-        cbuf += rs_c;
-        F32_C_STORE_BNZ_4(cbuf,rs_c,xmm1,xmm3,xmm8)
-        cbuf += rs_c;
-        F32_C_STORE_BNZ_4(cbuf,rs_c,xmm1,xmm3,xmm9)
-        //cbuf += rs_c;
-      }//betazero
+        F32_C_BNZ_4(_cbuf,rs_c,xmm1,xmm3,xmm4)
+        _cbuf += rs_c;
+        F32_C_BNZ_4(_cbuf,rs_c,xmm1,xmm3,xmm5)
+        _cbuf += rs_c;
+        F32_C_BNZ_4(_cbuf,rs_c,xmm1,xmm3,xmm6)
+        _cbuf += rs_c;
+        F32_C_BNZ_4(_cbuf,rs_c,xmm1,xmm3,xmm7)
+        _cbuf += rs_c;
+        F32_C_BNZ_4(_cbuf,rs_c,xmm1,xmm3,xmm8)
+        _cbuf += rs_c;
+        F32_C_BNZ_4(_cbuf,rs_c,xmm1,xmm3,xmm9)
+      }
+
+      // Post Ops
+      lpgemm_post_op* post_ops_list_temp = post_ops_list;
+      POST_OP_LABEL_LASTK_SAFE_JUMP
+
+POST_OPS_BIAS_6x4F:
+      {
+        if ( ( *( char* )post_ops_list_temp->op_args2 == 'r' ) ||
+             ( *( char* )post_ops_list_temp->op_args2 == 'R' ) )
+        {
+          xmm0 = _mm_loadu_ps( ( float* )post_ops_list_temp->op_args1 +
+              post_ops_attr.post_op_c_j + ( 0 * 8 ) );
+
+          // c[0,0-3]
+          xmm4 = _mm_add_ps( xmm4, xmm0 );
+
+          // c[1,0-3]
+          xmm5 = _mm_add_ps( xmm5, xmm0 );
+
+          // c[2,0-3]
+          xmm6 = _mm_add_ps( xmm6, xmm0 );
+
+          // c[3,0-3]
+          xmm7 = _mm_add_ps( xmm7, xmm0 );
+
+          // c[4,0-3]
+          xmm8 = _mm_add_ps( xmm8, xmm0 );
+
+          // c[5,0-3]
+          xmm9 = _mm_add_ps( xmm9, xmm0 );
+        }
+        else
+        {
+          // If original output was columns major, then by the time
+          // kernel sees it, the matrix would be accessed as if it were
+          // transposed. Due to this the bias array will be accessed by
+          // the ic index, and each bias element corresponds to an
+          // entire row of the transposed output array, instead of an
+          // entire column.
+          xmm0 = _mm_broadcast_ss( ( float* )post_ops_list_temp->op_args1 +
+              post_ops_attr.post_op_c_i + 0 );
+          xmm1 = _mm_broadcast_ss( ( float* )post_ops_list_temp->op_args1 +
+              post_ops_attr.post_op_c_i + 1 );
+          xmm2 = _mm_broadcast_ss( ( float* )post_ops_list_temp->op_args1 +
+              post_ops_attr.post_op_c_i + 2 );
+          xmm3 = _mm_broadcast_ss( ( float* )post_ops_list_temp->op_args1 +
+              post_ops_attr.post_op_c_i + 3 );
+
+          // c[0,0-3]
+          xmm4 = _mm_add_ps( xmm4, xmm0 );
+
+          // c[1,0-3]
+          xmm5 = _mm_add_ps( xmm5, xmm1 );
+
+          // c[2,0-3]
+          xmm6 = _mm_add_ps( xmm6, xmm2 );
+
+          // c[3,0-3]
+          xmm7 = _mm_add_ps( xmm7, xmm3 );
+
+          xmm0 = _mm_broadcast_ss( ( float* )post_ops_list_temp->op_args1 +
+              post_ops_attr.post_op_c_i + 4 );
+          xmm1 = _mm_broadcast_ss( ( float* )post_ops_list_temp->op_args1 +
+              post_ops_attr.post_op_c_i + 5 );
+
+          // c[4,0-3]
+          xmm8 = _mm_add_ps( xmm8, xmm0 );
+
+          // c[5,0-3]
+          xmm9 = _mm_add_ps( xmm9, xmm1 );
+        }
+        POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+      }
+POST_OPS_RELU_6x4F:
+      {
+        xmm0 = _mm_setzero_ps();
+
+        // c[0,0-3]
+        xmm4 = _mm_max_ps( xmm4, xmm0 );
+
+        // c[1,0-3]
+        xmm5 = _mm_max_ps( xmm5, xmm0 );
+
+        // c[2,0-3]
+        xmm6 = _mm_max_ps( xmm6, xmm0 );
+
+        // c[3,0-3]
+        xmm7 = _mm_max_ps( xmm7, xmm0 );
+
+        // c[4,0-3]
+        xmm8 = _mm_max_ps( xmm8, xmm0 );
+
+        // c[5,0-3]
+        xmm9 = _mm_max_ps( xmm9, xmm0 );
+
+        POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+      }
+POST_OPS_RELU_SCALE_6x4F:
+      {
+        xmm0 =
+          _mm_broadcast_ss( ( float* )post_ops_list_temp->op_args2 );
+        xmm1 = _mm_setzero_ps();
+
+        // c[0,0-3]
+        RELU_SCALE_OP_F32S_SSE(xmm4, xmm0, xmm1, xmm2)
+
+        // c[1,0-3]
+        RELU_SCALE_OP_F32S_SSE(xmm5, xmm0, xmm1, xmm2)
+
+        // c[2,0-3]
+        RELU_SCALE_OP_F32S_SSE(xmm6, xmm0, xmm1, xmm2)
+
+        // c[3,0-3]
+        RELU_SCALE_OP_F32S_SSE(xmm7, xmm0, xmm1, xmm2)
+
+        // c[4,0-3]
+        RELU_SCALE_OP_F32S_SSE(xmm8, xmm0, xmm1, xmm2)
+
+        // c[5,0-3]
+        RELU_SCALE_OP_F32S_SSE(xmm9, xmm0, xmm1, xmm2)
+
+        POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+      }
+POST_OPS_GELU_6x4F:
+      {
+        __m128 dn, x_tanh;
+        __m128i q;
+
+        // c[0,0-3]
+        GELU_TANH_F32S_SSE(xmm4, xmm0, xmm1, xmm2, xmm3, dn, x_tanh, q)
+
+        // c[1,0-3]
+        GELU_TANH_F32S_SSE(xmm5, xmm0, xmm1, xmm2, xmm3, dn, x_tanh, q)
+
+        // c[2,0-3]
+        GELU_TANH_F32S_SSE(xmm6, xmm0, xmm1, xmm2, xmm3, dn, x_tanh, q)
+
+        // c[3,0-3]
+        GELU_TANH_F32S_SSE(xmm7, xmm0, xmm1, xmm2, xmm3, dn, x_tanh, q)
+
+        // c[4,0-3]
+        GELU_TANH_F32S_SSE(xmm8, xmm0, xmm1, xmm2, xmm3, dn, x_tanh, q)
+
+        // c[5,0-3]
+        GELU_TANH_F32S_SSE(xmm9, xmm0, xmm1, xmm2, xmm3, dn, x_tanh, q)
+
+        POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+      }
+POST_OPS_6x4F_DISABLE:
+      ;
+
+      _mm_storeu_ps(cbuf, xmm4);
+      cbuf += rs_c;
+      _mm_storeu_ps(cbuf, xmm5);
+      cbuf += rs_c;
+      _mm_storeu_ps(cbuf, xmm6);
+      cbuf += rs_c;
+      _mm_storeu_ps(cbuf, xmm7);
+      cbuf += rs_c;
+      _mm_storeu_ps(cbuf, xmm8);
+      cbuf += rs_c;
+      _mm_storeu_ps(cbuf, xmm9);
+
+      post_ops_attr.post_op_c_i += MR;
     }//mloop
 
     consider_edge_cases:
@@ -557,6 +1123,14 @@ LPGEMM_N_FRINGE_KERN(float,float,float,f32f32f32of32_6x4m)
 
 LPGEMM_N_FRINGE_KERN(float,float,float,f32f32f32of32_6x2m)
 {
+    static void* post_ops_labels[] =
+            {
+              &&POST_OPS_6x2F_DISABLE,
+              &&POST_OPS_BIAS_6x2F,
+              &&POST_OPS_RELU_6x2F,
+              &&POST_OPS_RELU_SCALE_6x2F,
+              &&POST_OPS_GELU_6x2F,
+            };
     // Typecast local copies of integers in case dim_t and inc_t are a
     // different size than is expected by load instructions.
     uint64_t k_iter = (uint64_t)k0;
@@ -578,7 +1152,7 @@ LPGEMM_N_FRINGE_KERN(float,float,float,f32f32f32of32_6x2m)
       ZERO_ACC_XMM_4_REG(xmm4,xmm5,xmm6,xmm7) 
       ZERO_ACC_XMM_4_REG(xmm8,xmm9,xmm0,xmm1) 
       
-      float *abuf, *bbuf, *cbuf;
+      float *abuf, *bbuf, *cbuf, *_cbuf;
 
       abuf = (float *)a + m * ps_a; // Move to next MRxKC in MCxKC (where MC>=MR)
       bbuf = (float *)b;  //Same KCxNR panel is used across MCxKC block 
@@ -595,7 +1169,7 @@ LPGEMM_N_FRINGE_KERN(float,float,float,f32f32f32of32_6x2m)
       for(dim_t k = 0; k < k_iter; k++)
       {
         /*Load 2 elements from row0 of B*/
-        xmm0 = _mm_load_sd((const double*) bbuf );
+        xmm0 = ( __m128 )_mm_load_sd((const double*) bbuf );
         bbuf += rs_b;  //move b pointer to next row
 
         xmm1 = _mm_broadcast_ss((abuf + 0*rs_a)); //broadcast c0r0
@@ -620,40 +1194,189 @@ LPGEMM_N_FRINGE_KERN(float,float,float,f32f32f32of32_6x2m)
       ALPHA_MUL_ACC_XMM_4_REG(xmm4,xmm5,xmm6,xmm7,xmm0) 
       ALPHA_MUL_ACC_XMM_4_REG(xmm8,xmm9,xmm2,xmm3,xmm0)
 
-      //store output when beta=0
-      if(beta == 0.0)
+      if ( beta != 0.0 )
       {
-        _mm_store_sd((double*)cbuf, xmm4);
-        cbuf += rs_c;
-        _mm_store_sd((double*)cbuf, xmm5);
-        cbuf += rs_c;
-        _mm_store_sd((double*)cbuf, xmm6);
-        cbuf += rs_c;
-        _mm_store_sd((double*)cbuf, xmm7);
-        cbuf += rs_c;
-        _mm_store_sd((double*)cbuf, xmm8);
-        cbuf += rs_c;
-        _mm_store_sd((double*)cbuf, xmm9);
-        //cbuf += rs_c;
-      }else
-      {
+        _cbuf = cbuf;
         //load c and multiply with beta and 
         //add to accumulator and store back
         xmm3 = _mm_broadcast_ss(&(beta));
 
-        F32_C_STORE_BNZ_2(cbuf,rs_c,xmm1,xmm3,xmm4)
-        cbuf += rs_c;
-        F32_C_STORE_BNZ_2(cbuf,rs_c,xmm1,xmm3,xmm5)
-        cbuf += rs_c;
-        F32_C_STORE_BNZ_2(cbuf,rs_c,xmm1,xmm3,xmm6)
-        cbuf += rs_c;
-        F32_C_STORE_BNZ_2(cbuf,rs_c,xmm1,xmm3,xmm7)
-        cbuf += rs_c;
-        F32_C_STORE_BNZ_2(cbuf,rs_c,xmm1,xmm3,xmm8)
-        cbuf += rs_c;
-        F32_C_STORE_BNZ_2(cbuf,rs_c,xmm1,xmm3,xmm9)
-        //cbuf += rs_c;
-      }//betazero
+        F32_C_BNZ_2(_cbuf,rs_c,xmm1,xmm3,xmm4)
+        _cbuf += rs_c;
+        F32_C_BNZ_2(_cbuf,rs_c,xmm1,xmm3,xmm5)
+        _cbuf += rs_c;
+        F32_C_BNZ_2(_cbuf,rs_c,xmm1,xmm3,xmm6)
+        _cbuf += rs_c;
+        F32_C_BNZ_2(_cbuf,rs_c,xmm1,xmm3,xmm7)
+        _cbuf += rs_c;
+        F32_C_BNZ_2(_cbuf,rs_c,xmm1,xmm3,xmm8)
+        _cbuf += rs_c;
+        F32_C_BNZ_2(_cbuf,rs_c,xmm1,xmm3,xmm9)
+      }
+
+      // Post Ops
+      lpgemm_post_op* post_ops_list_temp = post_ops_list;
+      POST_OP_LABEL_LASTK_SAFE_JUMP
+
+POST_OPS_BIAS_6x2F:
+      {
+        if ( ( *( char* )post_ops_list_temp->op_args2 == 'r' ) ||
+             ( *( char* )post_ops_list_temp->op_args2 == 'R' ) )
+        {
+          xmm0 = _mm_loadu_ps( ( float* )post_ops_list_temp->op_args1 +
+              post_ops_attr.post_op_c_j + ( 0 * 8 ) );
+
+          // c[0,0-3]
+          xmm4 = _mm_add_ps( xmm4, xmm0 );
+
+          // c[1,0-3]
+          xmm5 = _mm_add_ps( xmm5, xmm0 );
+
+          // c[2,0-3]
+          xmm6 = _mm_add_ps( xmm6, xmm0 );
+
+          // c[3,0-3]
+          xmm7 = _mm_add_ps( xmm7, xmm0 );
+
+          // c[4,0-3]
+          xmm8 = _mm_add_ps( xmm8, xmm0 );
+
+          // c[5,0-3]
+          xmm9 = _mm_add_ps( xmm9, xmm0 );
+        }
+        else
+        {
+          // If original output was columns major, then by the time
+          // kernel sees it, the matrix would be accessed as if it were
+          // transposed. Due to this the bias array will be accessed by
+          // the ic index, and each bias element corresponds to an
+          // entire row of the transposed output array, instead of an
+          // entire column.
+          xmm0 = _mm_broadcast_ss( ( float* )post_ops_list_temp->op_args1 +
+              post_ops_attr.post_op_c_i + 0 );
+          xmm1 = _mm_broadcast_ss( ( float* )post_ops_list_temp->op_args1 +
+              post_ops_attr.post_op_c_i + 1 );
+          xmm2 = _mm_broadcast_ss( ( float* )post_ops_list_temp->op_args1 +
+              post_ops_attr.post_op_c_i + 2 );
+          xmm3 = _mm_broadcast_ss( ( float* )post_ops_list_temp->op_args1 +
+              post_ops_attr.post_op_c_i + 3 );
+
+          // c[0,0-3]
+          xmm4 = _mm_add_ps( xmm4, xmm0 );
+
+          // c[1,0-3]
+          xmm5 = _mm_add_ps( xmm5, xmm1 );
+
+          // c[2,0-3]
+          xmm6 = _mm_add_ps( xmm6, xmm2 );
+
+          // c[3,0-3]
+          xmm7 = _mm_add_ps( xmm7, xmm3 );
+
+          xmm0 = _mm_broadcast_ss( ( float* )post_ops_list_temp->op_args1 +
+              post_ops_attr.post_op_c_i + 4 );
+          xmm1 = _mm_broadcast_ss( ( float* )post_ops_list_temp->op_args1 +
+              post_ops_attr.post_op_c_i + 5 );
+
+          // c[4,0-3]
+          xmm8 = _mm_add_ps( xmm8, xmm0 );
+
+          // c[5,0-3]
+          xmm9 = _mm_add_ps( xmm9, xmm1 );
+        }
+        POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+      }
+POST_OPS_RELU_6x2F:
+      {
+        xmm0 = _mm_setzero_ps();
+
+        // c[0,0-3]
+        xmm4 = _mm_max_ps( xmm4, xmm0 );
+
+        // c[1,0-3]
+        xmm5 = _mm_max_ps( xmm5, xmm0 );
+
+        // c[2,0-3]
+        xmm6 = _mm_max_ps( xmm6, xmm0 );
+
+        // c[3,0-3]
+        xmm7 = _mm_max_ps( xmm7, xmm0 );
+
+        // c[4,0-3]
+        xmm8 = _mm_max_ps( xmm8, xmm0 );
+
+        // c[5,0-3]
+        xmm9 = _mm_max_ps( xmm9, xmm0 );
+
+        POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+      }
+POST_OPS_RELU_SCALE_6x2F:
+      {
+        xmm0 =
+          _mm_broadcast_ss( ( float* )post_ops_list_temp->op_args2 );
+        xmm1 = _mm_setzero_ps();
+
+        // c[0,0-3]
+        RELU_SCALE_OP_F32S_SSE(xmm4, xmm0, xmm1, xmm2)
+
+        // c[1,0-3]
+        RELU_SCALE_OP_F32S_SSE(xmm5, xmm0, xmm1, xmm2)
+
+        // c[2,0-3]
+        RELU_SCALE_OP_F32S_SSE(xmm6, xmm0, xmm1, xmm2)
+
+        // c[3,0-3]
+        RELU_SCALE_OP_F32S_SSE(xmm7, xmm0, xmm1, xmm2)
+
+        // c[4,0-3]
+        RELU_SCALE_OP_F32S_SSE(xmm8, xmm0, xmm1, xmm2)
+
+        // c[5,0-3]
+        RELU_SCALE_OP_F32S_SSE(xmm9, xmm0, xmm1, xmm2)
+
+        POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+      }
+POST_OPS_GELU_6x2F:
+      {
+        __m128 dn, x_tanh;
+        __m128i q;
+
+        // c[0,0-3]
+        GELU_TANH_F32S_SSE(xmm4, xmm0, xmm1, xmm2, xmm3, dn, x_tanh, q)
+
+        // c[1,0-3]
+        GELU_TANH_F32S_SSE(xmm5, xmm0, xmm1, xmm2, xmm3, dn, x_tanh, q)
+
+        // c[2,0-3]
+        GELU_TANH_F32S_SSE(xmm6, xmm0, xmm1, xmm2, xmm3, dn, x_tanh, q)
+
+        // c[3,0-3]
+        GELU_TANH_F32S_SSE(xmm7, xmm0, xmm1, xmm2, xmm3, dn, x_tanh, q)
+
+        // c[4,0-3]
+        GELU_TANH_F32S_SSE(xmm8, xmm0, xmm1, xmm2, xmm3, dn, x_tanh, q)
+
+        // c[5,0-3]
+        GELU_TANH_F32S_SSE(xmm9, xmm0, xmm1, xmm2, xmm3, dn, x_tanh, q)
+
+        POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+      }
+POST_OPS_6x2F_DISABLE:
+      ;
+
+      _mm_store_sd((double*)cbuf, ( __m128d )xmm4);
+      cbuf += rs_c;
+      _mm_store_sd((double*)cbuf, ( __m128d )xmm5);
+      cbuf += rs_c;
+      _mm_store_sd((double*)cbuf, ( __m128d )xmm6);
+      cbuf += rs_c;
+      _mm_store_sd((double*)cbuf, ( __m128d )xmm7);
+      cbuf += rs_c;
+      _mm_store_sd((double*)cbuf, ( __m128d )xmm8);
+      cbuf += rs_c;
+      _mm_store_sd((double*)cbuf, ( __m128d )xmm9);
+
+      post_ops_attr.post_op_c_i += MR;
     }//mloop
 
     consider_edge_cases:
@@ -694,6 +1417,14 @@ LPGEMM_N_FRINGE_KERN(float,float,float,f32f32f32of32_6x2m)
 
 LPGEMM_N_FRINGE_KERN(float,float,float,f32f32f32of32_6x1m)
 {
+    static void* post_ops_labels[] =
+            {
+              &&POST_OPS_6x1F_DISABLE,
+              &&POST_OPS_BIAS_6x1F,
+              &&POST_OPS_RELU_6x1F,
+              &&POST_OPS_RELU_SCALE_6x1F,
+              &&POST_OPS_GELU_6x1F,
+            };
     // Typecast local copies of integers in case dim_t and inc_t are a
     // different size than is expected by load instructions.
     uint64_t k_iter = (uint64_t)k0;
@@ -715,7 +1446,7 @@ LPGEMM_N_FRINGE_KERN(float,float,float,f32f32f32of32_6x1m)
       ZERO_ACC_XMM_4_REG(xmm4,xmm5,xmm6,xmm7) 
       ZERO_ACC_XMM_4_REG(xmm8,xmm9,xmm0,xmm1) 
       
-      float *abuf, *bbuf, *cbuf;
+      float *abuf, *bbuf, *cbuf, *_cbuf;
 
       abuf = (float *)a + m * ps_a; // Move to next MRxKC in MCxKC (where MC>=MR)
       bbuf = (float *)b;  //Same KCxNR panel is used across MCxKC block 
@@ -757,40 +1488,189 @@ LPGEMM_N_FRINGE_KERN(float,float,float,f32f32f32of32_6x1m)
       ALPHA_MUL_ACC_XMM_4_REG(xmm4,xmm5,xmm6,xmm7,xmm0) 
       ALPHA_MUL_ACC_XMM_4_REG(xmm8,xmm9,xmm2,xmm3,xmm0)
 
-      //store output when beta=0
-      if(beta == 0.0)
+      if ( beta != 0.0 )
       {
-        _mm_store_ss(cbuf, xmm4);
-        cbuf += rs_c;
-        _mm_store_ss(cbuf, xmm5);
-        cbuf += rs_c;
-        _mm_store_ss(cbuf, xmm6);
-        cbuf += rs_c;
-        _mm_store_ss(cbuf, xmm7);
-        cbuf += rs_c;
-        _mm_store_ss(cbuf, xmm8);
-        cbuf += rs_c;
-        _mm_store_ss(cbuf, xmm9);
-        //cbuf += rs_c;
-      }else
-      {
+        _cbuf = cbuf;
         //load c and multiply with beta and 
         //add to accumulator and store back
         xmm3 = _mm_broadcast_ss(&(beta));
 
-        F32_C_STORE_BNZ_1(cbuf,rs_c,xmm1,xmm3,xmm4)
-        cbuf += rs_c;
-        F32_C_STORE_BNZ_1(cbuf,rs_c,xmm1,xmm3,xmm5)
-        cbuf += rs_c;
-        F32_C_STORE_BNZ_1(cbuf,rs_c,xmm1,xmm3,xmm6)
-        cbuf += rs_c;
-        F32_C_STORE_BNZ_1(cbuf,rs_c,xmm1,xmm3,xmm7)
-        cbuf += rs_c;
-        F32_C_STORE_BNZ_1(cbuf,rs_c,xmm1,xmm3,xmm8)
-        cbuf += rs_c;
-        F32_C_STORE_BNZ_1(cbuf,rs_c,xmm1,xmm3,xmm9)
-        //cbuf += rs_c;
-      }//betazero
+        F32_C_BNZ_1(_cbuf,rs_c,xmm1,xmm3,xmm4)
+        _cbuf += rs_c;
+        F32_C_BNZ_1(_cbuf,rs_c,xmm1,xmm3,xmm5)
+        _cbuf += rs_c;
+        F32_C_BNZ_1(_cbuf,rs_c,xmm1,xmm3,xmm6)
+        _cbuf += rs_c;
+        F32_C_BNZ_1(_cbuf,rs_c,xmm1,xmm3,xmm7)
+        _cbuf += rs_c;
+        F32_C_BNZ_1(_cbuf,rs_c,xmm1,xmm3,xmm8)
+        _cbuf += rs_c;
+        F32_C_BNZ_1(_cbuf,rs_c,xmm1,xmm3,xmm9)
+      }
+
+      // Post Ops
+      lpgemm_post_op* post_ops_list_temp = post_ops_list;
+      POST_OP_LABEL_LASTK_SAFE_JUMP
+
+POST_OPS_BIAS_6x1F:
+      {
+        if ( ( *( char* )post_ops_list_temp->op_args2 == 'r' ) ||
+             ( *( char* )post_ops_list_temp->op_args2 == 'R' ) )
+        {
+          xmm0 = _mm_loadu_ps( ( float* )post_ops_list_temp->op_args1 +
+              post_ops_attr.post_op_c_j + ( 0 * 8 ) );
+
+          // c[0,0-3]
+          xmm4 = _mm_add_ps( xmm4, xmm0 );
+
+          // c[1,0-3]
+          xmm5 = _mm_add_ps( xmm5, xmm0 );
+
+          // c[2,0-3]
+          xmm6 = _mm_add_ps( xmm6, xmm0 );
+
+          // c[3,0-3]
+          xmm7 = _mm_add_ps( xmm7, xmm0 );
+
+          // c[4,0-3]
+          xmm8 = _mm_add_ps( xmm8, xmm0 );
+
+          // c[5,0-3]
+          xmm9 = _mm_add_ps( xmm9, xmm0 );
+        }
+        else
+        {
+          // If original output was columns major, then by the time
+          // kernel sees it, the matrix would be accessed as if it were
+          // transposed. Due to this the bias array will be accessed by
+          // the ic index, and each bias element corresponds to an
+          // entire row of the transposed output array, instead of an
+          // entire column.
+          xmm0 = _mm_broadcast_ss( ( float* )post_ops_list_temp->op_args1 +
+              post_ops_attr.post_op_c_i + 0 );
+          xmm1 = _mm_broadcast_ss( ( float* )post_ops_list_temp->op_args1 +
+              post_ops_attr.post_op_c_i + 1 );
+          xmm2 = _mm_broadcast_ss( ( float* )post_ops_list_temp->op_args1 +
+              post_ops_attr.post_op_c_i + 2 );
+          xmm3 = _mm_broadcast_ss( ( float* )post_ops_list_temp->op_args1 +
+              post_ops_attr.post_op_c_i + 3 );
+
+          // c[0,0-3]
+          xmm4 = _mm_add_ps( xmm4, xmm0 );
+
+          // c[1,0-3]
+          xmm5 = _mm_add_ps( xmm5, xmm1 );
+
+          // c[2,0-3]
+          xmm6 = _mm_add_ps( xmm6, xmm2 );
+
+          // c[3,0-3]
+          xmm7 = _mm_add_ps( xmm7, xmm3 );
+
+          xmm0 = _mm_broadcast_ss( ( float* )post_ops_list_temp->op_args1 +
+              post_ops_attr.post_op_c_i + 4 );
+          xmm1 = _mm_broadcast_ss( ( float* )post_ops_list_temp->op_args1 +
+              post_ops_attr.post_op_c_i + 5 );
+
+          // c[4,0-3]
+          xmm8 = _mm_add_ps( xmm8, xmm0 );
+
+          // c[5,0-3]
+          xmm9 = _mm_add_ps( xmm9, xmm1 );
+        }
+        POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+      }
+POST_OPS_RELU_6x1F:
+      {
+        xmm0 = _mm_setzero_ps();
+
+        // c[0,0-3]
+        xmm4 = _mm_max_ps( xmm4, xmm0 );
+
+        // c[1,0-3]
+        xmm5 = _mm_max_ps( xmm5, xmm0 );
+
+        // c[2,0-3]
+        xmm6 = _mm_max_ps( xmm6, xmm0 );
+
+        // c[3,0-3]
+        xmm7 = _mm_max_ps( xmm7, xmm0 );
+
+        // c[4,0-3]
+        xmm8 = _mm_max_ps( xmm8, xmm0 );
+
+        // c[5,0-3]
+        xmm9 = _mm_max_ps( xmm9, xmm0 );
+
+        POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+      }
+POST_OPS_RELU_SCALE_6x1F:
+      {
+        xmm0 =
+          _mm_broadcast_ss( ( float* )post_ops_list_temp->op_args2 );
+        xmm1 = _mm_setzero_ps();
+
+        // c[0,0-3]
+        RELU_SCALE_OP_F32S_SSE(xmm4, xmm0, xmm1, xmm2)
+
+        // c[1,0-3]
+        RELU_SCALE_OP_F32S_SSE(xmm5, xmm0, xmm1, xmm2)
+
+        // c[2,0-3]
+        RELU_SCALE_OP_F32S_SSE(xmm6, xmm0, xmm1, xmm2)
+
+        // c[3,0-3]
+        RELU_SCALE_OP_F32S_SSE(xmm7, xmm0, xmm1, xmm2)
+
+        // c[4,0-3]
+        RELU_SCALE_OP_F32S_SSE(xmm8, xmm0, xmm1, xmm2)
+
+        // c[5,0-3]
+        RELU_SCALE_OP_F32S_SSE(xmm9, xmm0, xmm1, xmm2)
+
+        POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+      }
+POST_OPS_GELU_6x1F:
+      {
+        __m128 dn, x_tanh;
+        __m128i q;
+
+        // c[0,0-3]
+        GELU_TANH_F32S_SSE(xmm4, xmm0, xmm1, xmm2, xmm3, dn, x_tanh, q)
+
+        // c[1,0-3]
+        GELU_TANH_F32S_SSE(xmm5, xmm0, xmm1, xmm2, xmm3, dn, x_tanh, q)
+
+        // c[2,0-3]
+        GELU_TANH_F32S_SSE(xmm6, xmm0, xmm1, xmm2, xmm3, dn, x_tanh, q)
+
+        // c[3,0-3]
+        GELU_TANH_F32S_SSE(xmm7, xmm0, xmm1, xmm2, xmm3, dn, x_tanh, q)
+
+        // c[4,0-3]
+        GELU_TANH_F32S_SSE(xmm8, xmm0, xmm1, xmm2, xmm3, dn, x_tanh, q)
+
+        // c[5,0-3]
+        GELU_TANH_F32S_SSE(xmm9, xmm0, xmm1, xmm2, xmm3, dn, x_tanh, q)
+
+        POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+      }
+POST_OPS_6x1F_DISABLE:
+      ;
+
+      _mm_store_ss(cbuf, xmm4);
+      cbuf += rs_c;
+      _mm_store_ss(cbuf, xmm5);
+      cbuf += rs_c;
+      _mm_store_ss(cbuf, xmm6);
+      cbuf += rs_c;
+      _mm_store_ss(cbuf, xmm7);
+      cbuf += rs_c;
+      _mm_store_ss(cbuf, xmm8);
+      cbuf += rs_c;
+      _mm_store_ss(cbuf, xmm9);
+
+      post_ops_attr.post_op_c_i += MR;
     }//mloop
 
     consider_edge_cases:
