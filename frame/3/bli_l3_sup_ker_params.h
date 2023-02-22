@@ -35,7 +35,6 @@
 #ifndef BLIS_L3_SUP_KER_PARAMS_H
 #define BLIS_L3_SUP_KER_PARAMS_H
 
-// -- sup kernels --
 
 #define gemmsup_params \
 \
@@ -49,6 +48,7 @@
        const void*  b, inc_t rs_b, inc_t cs_b, \
        const void*  beta, \
              void*  c, inc_t rs_c, inc_t cs_c
+
 
 #endif
 

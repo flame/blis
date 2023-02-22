@@ -35,7 +35,6 @@
 #ifndef BLIS_L3_UKR_PARAMS_H
 #define BLIS_L3_UKR_PARAMS_H
 
-// -- conventional kernels --
 
 #define gemm_params \
 \
@@ -66,20 +65,6 @@
              void*  b, \
              void*  c, inc_t rs_c, inc_t cs_c
 
-// -- sup kernels --
-
-#define gemmsup_params \
-\
-             conj_t conja, \
-             conj_t conjb, \
-             dim_t  m, \
-             dim_t  n, \
-             dim_t  k, \
-       const void*  alpha, \
-       const void*  a, inc_t rs_a, inc_t cs_a, \
-       const void*  b, inc_t rs_b, inc_t cs_b, \
-       const void*  beta, \
-             void*  c, inc_t rs_c, inc_t cs_c
 
 #endif
 

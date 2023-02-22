@@ -32,6 +32,9 @@
 
 */
 
+#ifndef BLIS_L3_SUP_KER_PROT_H
+#define BLIS_L3_SUP_KER_PROT_H
+
 //
 // Define template prototypes for level-3 kernels on small/unpacked matrices.
 //
@@ -47,4 +50,7 @@ void PASTEMAC(ch,funcname) \
      );
 
 #define GEMMSUP_KER_PROT( ctype, ch, fn )  SUPTPROT( ctype, ch, fn, gemmsup );
+
+
+#endif
 

@@ -32,6 +32,8 @@
 
 */
 
+#ifndef BLIS_L1F_KER_PROT_H
+#define BLIS_L1F_KER_PROT_H
 
 //
 // Define template prototypes for level-1f kernels.
@@ -51,4 +53,7 @@ void PASTEMAC(ch,funcname) \
 #define DOTAXPYV_KER_PROT(  ctype, ch, fn )  L1FTPROT( ctype, ch, fn, dotaxpyv );
 #define DOTXAXPYF_KER_PROT( ctype, ch, fn )  L1FTPROT( ctype, ch, fn, dotxaxpyf );
 #define DOTXF_KER_PROT(     ctype, ch, fn )  L1FTPROT( ctype, ch, fn, dotxf );
+
+
+#endif
 

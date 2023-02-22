@@ -32,6 +32,8 @@
 
 */
 
+#ifndef BLIS_L1M_KER_PROT_H
+#define BLIS_L1M_KER_PROT_H
 
 //
 // Define template prototypes for level-1m kernels.
@@ -49,3 +51,7 @@ void PASTEMAC(ch,funcname) \
 #define PACKM_KER_PROT(      ctype, ch, fn )  L1MTPROT( ctype, ch, fn, packm_cxk );
 #define UNPACKM_KER_PROT(    ctype, ch, fn )  L1MTPROT( ctype, ch, fn, unpackm_cxk );
 #define PACKM_DIAG_KER_PROT( ctype, ch, fn )  L1MTPROT( ctype, ch, fn, packm_cxc_diag );
+
+
+#endif
+

@@ -32,6 +32,8 @@
 
 */
 
+#ifndef BLIS_L1V_KER_PROT_H
+#define BLIS_L1V_KER_PROT_H
 
 //
 // Define template prototypes for level-1v kernels.
@@ -61,4 +63,7 @@ void PASTEMAC(ch,funcname) \
 #define SUBV_KER_PROT(     ctype, ch, fn )  L1VTPROT( ctype, ch, fn, subv );
 #define SWAPV_KER_PROT(    ctype, ch, fn )  L1VTPROT( ctype, ch, fn, swapv );
 #define XPBYV_KER_PROT(    ctype, ch, fn )  L1VTPROT( ctype, ch, fn, xpbyv );
+
+
+#endif
 

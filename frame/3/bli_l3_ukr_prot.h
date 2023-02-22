@@ -32,6 +32,9 @@
 
 */
 
+#ifndef BLIS_L3_UKR_PROT_H
+#define BLIS_L3_UKR_PROT_H
+
 //
 // Define template prototypes for level-3 micro-kernels.
 //
@@ -49,4 +52,7 @@ void PASTEMAC(ch,funcname) \
 #define GEMM_UKR_PROT(     ctype, ch, fn )  L3TPROT( ctype, ch, fn, gemm );
 #define GEMMTRSM_UKR_PROT( ctype, ch, fn )  L3TPROT( ctype, ch, fn, gemmtrsm );
 #define TRSM_UKR_PROT(     ctype, ch, fn )  L3TPROT( ctype, ch, fn, trsm );
+
+
+#endif
 
