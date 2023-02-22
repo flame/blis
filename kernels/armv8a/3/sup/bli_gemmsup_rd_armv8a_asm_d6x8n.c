@@ -110,11 +110,11 @@ void bli_dgemmsup_rd_armv8a_inline_4x8n
              dim_t      m0,
              dim_t      n0,
              dim_t      k0,
-       const double*    alpha,
-       const double*    a, inc_t rs_a0, inc_t cs_a0,
-       const double*    b, inc_t rs_b0, inc_t cs_b0,
-       const double*    beta,
-             double*    c, inc_t rs_c0, inc_t cs_c0,
+       const void*      alpha,
+       const void*      a, inc_t rs_a0, inc_t cs_a0,
+       const void*      b, inc_t rs_b0, inc_t cs_b0,
+       const void*      beta,
+             void*      c, inc_t rs_c0, inc_t cs_c0,
              auxinfo_t* data,
        const cntx_t*    cntx
      )
@@ -137,8 +137,8 @@ void bli_dgemmsup_rd_armv8a_inline_4x8n
       alpha, a + 2 * rs_a0, rs_a0, cs_a0, b, rs_b0, cs_b0,
       beta, c + 2 * rs_c0, rs_c0, cs_c0, data, cntx
     );
-    b += 8 * cs_b0;
-    c += 8 * cs_c0;
+    b = ( double* )b + 8 * cs_b0;
+    c = ( double* )c + 8 * cs_c0;
   }
 }
 
@@ -150,11 +150,11 @@ void bli_dgemmsup_rd_armv8a_inline_3x8n
              dim_t      m0,
              dim_t      n0,
              dim_t      k0,
-       const double*    alpha,
-       const double*    a, inc_t rs_a0, inc_t cs_a0,
-       const double*    b, inc_t rs_b0, inc_t cs_b0,
-       const double*    beta,
-             double*    c, inc_t rs_c0, inc_t cs_c0,
+       const void*      alpha,
+       const void*      a, inc_t rs_a0, inc_t cs_a0,
+       const void*      b, inc_t rs_b0, inc_t cs_b0,
+       const void*      beta,
+             void*      c, inc_t rs_c0, inc_t cs_c0,
              auxinfo_t* data,
        const cntx_t*    cntx
      )
@@ -169,8 +169,8 @@ void bli_dgemmsup_rd_armv8a_inline_3x8n
       alpha, a, rs_a0, cs_a0, b, rs_b0, cs_b0,
       beta, c, rs_c0, cs_c0, data, cntx
     );
-    b += 4 * cs_b0;
-    c += 4 * cs_c0;
+    b = ( double* )b + 4 * cs_b0;
+    c = ( double* )c + 4 * cs_c0;
   }
   if ( n0 > 0 )
   {
@@ -191,11 +191,11 @@ void bli_dgemmsup_rd_armv8a_inline_rx8n
              dim_t      m0,
              dim_t      n0,
              dim_t      k0,
-       const double*    alpha,
-       const double*    a, inc_t rs_a0, inc_t cs_a0,
-       const double*    b, inc_t rs_b0, inc_t cs_b0,
-       const double*    beta,
-             double*    c, inc_t rs_c0, inc_t cs_c0,
+       const void*      alpha,
+       const void*      a, inc_t rs_a0, inc_t cs_a0,
+       const void*      b, inc_t rs_b0, inc_t cs_b0,
+       const void*      beta,
+             void*      c, inc_t rs_c0, inc_t cs_c0,
              auxinfo_t* data,
        const cntx_t*    cntx
      )
@@ -211,8 +211,8 @@ void bli_dgemmsup_rd_armv8a_inline_rx8n
       alpha, a, rs_a0, cs_a0, b, rs_b0, cs_b0,
       beta, c, rs_c0, cs_c0, data, cntx
     );
-    b += 8 * cs_b0;
-    c += 8 * cs_c0;
+    b = ( double* )b + 8 * cs_b0;
+    c = ( double* )c + 8 * cs_c0;
   }
 }
 
@@ -224,11 +224,11 @@ void bli_dgemmsup_rd_armv8a_asm_6x8n
              dim_t      m0,
              dim_t      n0,
              dim_t      k0,
-       const double*    alpha,
-       const double*    a, inc_t rs_a0, inc_t cs_a0,
-       const double*    b, inc_t rs_b0, inc_t cs_b0,
-       const double*    beta,
-             double*    c, inc_t rs_c0, inc_t cs_c0,
+       const void*      alpha,
+       const void*      a, inc_t rs_a0, inc_t cs_a0,
+       const void*      b, inc_t rs_b0, inc_t cs_b0,
+       const void*      beta,
+             void*      c, inc_t rs_c0, inc_t cs_c0,
              auxinfo_t* data,
        const cntx_t*    cntx
      )
@@ -238,9 +238,9 @@ void bli_dgemmsup_rd_armv8a_asm_6x8n
     assert( m0 <= 9 );
 
     // Manual separation.
-    dgemmsup_ker_ft ker_fp1 = NULL;
-    dgemmsup_ker_ft ker_fp2 = NULL;
-    dim_t           mr1, mr2;
+    gemmsup_ker_ft ker_fp1 = NULL;
+    gemmsup_ker_ft ker_fp2 = NULL;
+    dim_t          mr1, mr2;
 
     switch ( m0 )
     {
@@ -270,8 +270,8 @@ void bli_dgemmsup_rd_armv8a_asm_6x8n
       alpha, a, rs_a0, cs_a0, b, rs_b0, cs_b0,
       beta, c, rs_c0, cs_c0, data, cntx
     );
-    a += mr1 * rs_a0;
-    c += mr1 * rs_c0;
+    a = ( double* )a + mr1 * rs_a0;
+    c = ( double* )c + mr1 * rs_c0;
     if ( ker_fp2 )
       ker_fp2
       (
@@ -596,8 +596,8 @@ consider_edge_cases:
   // TODO: Implement optimized kernel for this.
   //
   // Forward address.
-  b = b + n_iter * 4 * cs_b;
-  c = c + n_iter * 4 * cs_c;
+  b = ( double* )b + n_iter * 4 * cs_b;
+  c = ( double* )c + n_iter * 4 * cs_c;
   if ( n_left >= 3 )
   {
     bli_dgemmsup_rd_armv8a_asm_6x3
@@ -606,8 +606,8 @@ consider_edge_cases:
       alpha, a, rs_a0, cs_a0, b, rs_b0, cs_b0,
       beta, c, rs_c0, cs_c0, data, cntx
     );
-    b = b + 3 * cs_b;
-    c = c + 3 * cs_c;
+    b = ( double* )b + 3 * cs_b;
+    c = ( double* )c + 3 * cs_c;
     n_left -= 3;
   }
 
@@ -622,8 +622,8 @@ consider_edge_cases:
       alpha, a, rs_a0, cs_a0, b, rs_b0, cs_b0,
       beta, c, rs_c0, cs_c0, data, cntx
     );
-    a = a + 3 * rs_a;
-    c = c + 3 * rs_c;
+    a = ( double* )a + 3 * rs_a;
+    c = ( double* )c + 3 * rs_c;
 
     bli_dgemmsup_rd_armv8a_int_3x4
     (

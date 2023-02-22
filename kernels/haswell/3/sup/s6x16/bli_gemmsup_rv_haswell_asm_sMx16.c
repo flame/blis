@@ -83,7 +83,7 @@ GEMMSUP_KER_PROT( float,    s, gemmsup_r_haswell_ref )
 // Define parameters and variables for edge case kernel map.
 #define NUM_MR 4
 #define NUM_NR 6
-#define FUNCPTR_T sgemmsup_ker_ft
+#define FUNCPTR_T gemmsup_ker_ft
 
 static dim_t mrs[NUM_MR] = { 6, 4, 2, 1 };
 static dim_t nrs[NUM_NR] = { 16, 12, 8, 4, 2, 1 };
@@ -103,11 +103,11 @@ void bli_sgemmsup_rv_haswell_asm_6x16
              dim_t      m0,
              dim_t      n0,
              dim_t      k0,
-       const float*     alpha,
-       const float*     a, inc_t rs_a0, inc_t cs_a0,
-       const float*     b, inc_t rs_b0, inc_t cs_b0,
-       const float*     beta,
-             float*     c, inc_t rs_c0, inc_t cs_c0,
+       const void*      alpha,
+       const void*      a, inc_t rs_a0, inc_t cs_a0,
+       const void*      b, inc_t rs_b0, inc_t cs_b0,
+       const void*      beta,
+             void*      c, inc_t rs_c0, inc_t cs_c0,
              auxinfo_t* data,
        const cntx_t*    cntx
      )
@@ -927,11 +927,11 @@ void bli_sgemmsup_rv_haswell_asm_5x16
              dim_t      m0,
              dim_t      n0,
              dim_t      k0,
-       const float*     alpha,
-       const float*     a, inc_t rs_a0, inc_t cs_a0,
-       const float*     b, inc_t rs_b0, inc_t cs_b0,
-       const float*     beta,
-             float*     c, inc_t rs_c0, inc_t cs_c0,
+       const void*      alpha,
+       const void*      a, inc_t rs_a0, inc_t cs_a0,
+       const void*      b, inc_t rs_b0, inc_t cs_b0,
+       const void*      beta,
+             void*      c, inc_t rs_c0, inc_t cs_c0,
              auxinfo_t* data,
        const cntx_t*    cntx
      )
@@ -1683,11 +1683,11 @@ void bli_sgemmsup_rv_haswell_asm_4x16
              dim_t      m0,
              dim_t      n0,
              dim_t      k0,
-       const float*     alpha,
-       const float*     a, inc_t rs_a0, inc_t cs_a0,
-       const float*     b, inc_t rs_b0, inc_t cs_b0,
-       const float*     beta,
-             float*     c, inc_t rs_c0, inc_t cs_c0,
+       const void*      alpha,
+       const void*      a, inc_t rs_a0, inc_t cs_a0,
+       const void*      b, inc_t rs_b0, inc_t cs_b0,
+       const void*      beta,
+             void*      c, inc_t rs_c0, inc_t cs_c0,
              auxinfo_t* data,
        const cntx_t*    cntx
      )
@@ -2268,11 +2268,11 @@ void bli_sgemmsup_rv_haswell_asm_3x16
              dim_t      m0,
              dim_t      n0,
              dim_t      k0,
-       const float*     alpha,
-       const float*     a, inc_t rs_a0, inc_t cs_a0,
-       const float*     b, inc_t rs_b0, inc_t cs_b0,
-       const float*     beta,
-             float*     c, inc_t rs_c0, inc_t cs_c0,
+       const void*      alpha,
+       const void*      a, inc_t rs_a0, inc_t cs_a0,
+       const void*      b, inc_t rs_b0, inc_t cs_b0,
+       const void*      beta,
+             void*      c, inc_t rs_c0, inc_t cs_c0,
              auxinfo_t* data,
        const cntx_t*    cntx
      )
@@ -2909,11 +2909,11 @@ void bli_sgemmsup_rv_haswell_asm_2x16
              dim_t      m0,
              dim_t      n0,
              dim_t      k0,
-       const float*     alpha,
-       const float*     a, inc_t rs_a0, inc_t cs_a0,
-       const float*     b, inc_t rs_b0, inc_t cs_b0,
-       const float*     beta,
-             float*     c, inc_t rs_c0, inc_t cs_c0,
+       const void*      alpha,
+       const void*      a, inc_t rs_a0, inc_t cs_a0,
+       const void*      b, inc_t rs_b0, inc_t cs_b0,
+       const void*      beta,
+             void*      c, inc_t rs_c0, inc_t cs_c0,
              auxinfo_t* data,
        const cntx_t*    cntx
      )
@@ -3378,11 +3378,11 @@ void bli_sgemmsup_rv_haswell_asm_1x16
              dim_t      m0,
              dim_t      n0,
              dim_t      k0,
-       const float*     alpha,
-       const float*     a, inc_t rs_a0, inc_t cs_a0,
-       const float*     b, inc_t rs_b0, inc_t cs_b0,
-       const float*     beta,
-             float*     c, inc_t rs_c0, inc_t cs_c0,
+       const void*      alpha,
+       const void*      a, inc_t rs_a0, inc_t cs_a0,
+       const void*      b, inc_t rs_b0, inc_t cs_b0,
+       const void*      beta,
+             void*      c, inc_t rs_c0, inc_t cs_c0,
              auxinfo_t* data,
        const cntx_t*    cntx
      )

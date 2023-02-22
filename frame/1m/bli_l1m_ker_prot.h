@@ -32,63 +32,26 @@
 
 */
 
+#ifndef BLIS_L1M_KER_PROT_H
+#define BLIS_L1M_KER_PROT_H
 
 //
 // Define template prototypes for level-1m kernels.
 //
 
-// packm kernels
-
-#define PACKM_KER_PROT( ctype, ch, varname ) \
+#undef  L1MTPROT
+#define L1MTPROT( ctype, ch, funcname, opname ) \
 \
-void PASTEMAC(ch,varname) \
+void PASTEMAC(ch,funcname) \
      ( \
-             conj_t  conja, \
-             pack_t  schema, \
-             dim_t   cdim, \
-             dim_t   n, \
-             dim_t   n_max, \
-       const ctype*  kappa, \
-       const ctype*  a, inc_t inca, inc_t lda, \
-             ctype*  p,             inc_t ldp, \
-       const cntx_t* cntx  \
+       PASTECH(opname,_params), \
+       BLIS_CNTX_PARAM  \
      );
 
-
-// unpackm kernels
-
-#define UNPACKM_KER_PROT( ctype, ch, varname ) \
-\
-void PASTEMAC(ch,varname) \
-     ( \
-             conj_t  conja, \
-             pack_t  schema, \
-             dim_t   cdim, \
-             dim_t   n, \
-       const ctype*  kappa, \
-       const ctype*  p,             inc_t ldp, \
-             ctype*  a, inc_t inca, inc_t lda, \
-       const cntx_t* cntx  \
-     );
+#define PACKM_KER_PROT(      ctype, ch, fn )  L1MTPROT( ctype, ch, fn, packm_cxk );
+#define UNPACKM_KER_PROT(    ctype, ch, fn )  L1MTPROT( ctype, ch, fn, unpackm_cxk );
+#define PACKM_DIAG_KER_PROT( ctype, ch, fn )  L1MTPROT( ctype, ch, fn, packm_cxc_diag );
 
 
-// packm kernels for diagonal blocks
-
-#define PACKM_DIAG_KER_PROT( ctype, ch, varname ) \
-\
-void PASTEMAC(ch,varname) \
-     ( \
-             struc_t struca, \
-             diag_t  diaga, \
-             uplo_t  uploa, \
-             conj_t  conja, \
-             pack_t  schema, \
-             bool    invdiag, \
-             dim_t   cdim, \
-             dim_t   n_max, \
-       const ctype*  kappa, \
-       const ctype*  a, inc_t inca, inc_t lda, \
-             ctype*  p,             inc_t ldp, \
-       const cntx_t* cntx \
-     );
+#endif
 

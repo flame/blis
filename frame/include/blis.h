@@ -97,6 +97,13 @@ extern "C" {
 
 // -- BLIS architecture/kernel definitions --
 
+#include "bli_pre_ker_params.h"
+#include "bli_l1v_ker_params.h"
+#include "bli_l1f_ker_params.h"
+#include "bli_l1m_ker_params.h"
+#include "bli_l3_ukr_params.h"
+#include "bli_l3_sup_ker_params.h"
+
 #include "bli_l1v_ker_prot.h"
 #include "bli_l1f_ker_prot.h"
 #include "bli_l1m_ker_prot.h"

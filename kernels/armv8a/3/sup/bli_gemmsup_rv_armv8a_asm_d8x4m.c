@@ -105,11 +105,11 @@ void bli_dgemmsup_rv_armv8a_asm_8x4m
              dim_t      m0,
              dim_t      n0,
              dim_t      k0,
-       const double*    alpha,
-       const double*    a, inc_t rs_a0, inc_t cs_a0,
-       const double*    b, inc_t rs_b0, inc_t cs_b0,
-       const double*    beta,
-             double*    c, inc_t rs_c0, inc_t cs_c0,
+       const void*      alpha,
+       const void*      a, inc_t rs_a0, inc_t cs_a0,
+       const void*      b, inc_t rs_b0, inc_t cs_b0,
+       const void*      beta,
+             void*      c, inc_t rs_c0, inc_t cs_c0,
              auxinfo_t* data,
        const cntx_t*    cntx
      )
@@ -394,8 +394,8 @@ LABEL(END_EXEC)
   );
 
 consider_edge_cases:
-  a = a + m_iter * ps_a;
-  c = c + m_iter * 8 * rs_c;
+  a = ( double* )a + m_iter * ps_a;
+  c = ( double* )c + m_iter * 8 * rs_c;
   // Edge case is within 1 millikernel loop of THIS kernel.
   // Regarding the 6x?m kernel, the panel stride should be always local.
   auxinfo_t data_6xkm = *data;

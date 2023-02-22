@@ -32,25 +32,26 @@
 
 */
 
+#ifndef BLIS_L3_SUP_KER_FT_H
+#define BLIS_L3_SUP_KER_FT_H
+
+
 //
-// Define template prototypes for level-3 kernels on small/unpacked matrices.
+// -- Level-3 small/unpacked kernel function types -----------------------------
 //
 
-// Note: Instead of defining function prototype macro templates and then
-// instantiating those macros to define the individual function prototypes,
-// we simply alias the official operations' prototypes as defined in
-// bli_l3_ker_prot.h.
+#undef  GENTDEF
+#define GENTDEF( opname ) \
+\
+typedef void (*PASTECH(opname,_ker_ft)) \
+     ( \
+       PASTECH(opname,_params), \
+       BLIS_AUXINFO_PARAM, \
+       BLIS_CNTX_PARAM  \
+     );
 
-#undef  GENTPROT
-#define GENTPROT GEMMSUP_KER_PROT
+GENTDEF( gemmsup )
 
-INSERT_GENTPROT_BASIC0( gemmsup_rv_ukr_name )
-INSERT_GENTPROT_BASIC0( gemmsup_rg_ukr_name )
-INSERT_GENTPROT_BASIC0( gemmsup_cv_ukr_name )
-INSERT_GENTPROT_BASIC0( gemmsup_cg_ukr_name )
 
-INSERT_GENTPROT_BASIC0( gemmsup_rd_ukr_name )
-INSERT_GENTPROT_BASIC0( gemmsup_cd_ukr_name )
-
-INSERT_GENTPROT_BASIC0( gemmsup_gx_ukr_name )
+#endif
 

@@ -67,11 +67,11 @@ void bli_dgemmsup_rd_haswell_asm_6x8
              dim_t      m0,
              dim_t      n0,
              dim_t      k0,
-       const double*    alpha,
-       const double*    a, inc_t rs_a0, inc_t cs_a0,
-       const double*    b, inc_t rs_b0, inc_t cs_b0,
-       const double*    beta,
-             double*    c, inc_t rs_c0, inc_t cs_c0,
+       const void*      alpha,
+       const void*      a, inc_t rs_a0, inc_t cs_a0,
+       const void*      b, inc_t rs_b0, inc_t cs_b0,
+       const void*      beta,
+             void*      c, inc_t rs_c0, inc_t cs_c0,
              auxinfo_t* data,
        const cntx_t*    cntx
      )
@@ -82,9 +82,9 @@ void bli_dgemmsup_rd_haswell_asm_6x8
 	// dispatch other 6x?m kernels, as needed.
 	if ( n_left )
 	{
-		      double* cij = c;
-		const double* bj  = b;
-		const double* ai  = a;
+		      double* cij = ( double* )c;
+		const double* bj  = ( double* )b;
+		const double* ai  = ( double* )a;
 
 		if ( 4 <= n_left )
 		{
@@ -691,9 +691,9 @@ void bli_dgemmsup_rd_haswell_asm_6x8
 		const dim_t   nr_cur = 8;
 		const dim_t   i_edge = m0 - ( dim_t )m_left;
 
-		      double* cij = c + i_edge*rs_c;
-		const double* bj  = b;
-		const double* ai  = a + i_edge*rs_a;
+		      double* cij = ( double* )c + i_edge*rs_c;
+		const double* bj  = ( double* )b;
+		const double* ai  = ( double* )a + i_edge*rs_a;
 
 		if ( 2 == m_left )
 		{
@@ -730,11 +730,11 @@ void bli_dgemmsup_rd_haswell_asm_2x8
              dim_t      m0,
              dim_t      n0,
              dim_t      k0,
-       const double*    alpha,
-       const double*    a, inc_t rs_a0, inc_t cs_a0,
-       const double*    b, inc_t rs_b0, inc_t cs_b0,
-       const double*    beta,
-             double*    c, inc_t rs_c0, inc_t cs_c0,
+       const void*      alpha,
+       const void*      a, inc_t rs_a0, inc_t cs_a0,
+       const void*      b, inc_t rs_b0, inc_t cs_b0,
+       const void*      beta,
+             void*      c, inc_t rs_c0, inc_t cs_c0,
              auxinfo_t* data,
        const cntx_t*    cntx
      )
@@ -1204,11 +1204,11 @@ void bli_dgemmsup_rd_haswell_asm_1x8
              dim_t      m0,
              dim_t      n0,
              dim_t      k0,
-       const double*    alpha,
-       const double*    a, inc_t rs_a0, inc_t cs_a0,
-       const double*    b, inc_t rs_b0, inc_t cs_b0,
-       const double*    beta,
-             double*    c, inc_t rs_c0, inc_t cs_c0,
+       const void*      alpha,
+       const void*      a, inc_t rs_a0, inc_t cs_a0,
+       const void*      b, inc_t rs_b0, inc_t cs_b0,
+       const void*      beta,
+             void*      c, inc_t rs_c0, inc_t cs_c0,
              auxinfo_t* data,
        const cntx_t*    cntx
      )

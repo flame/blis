@@ -117,11 +117,11 @@ void bli_dgemmsup_rd_armv8a_inline_3x4m
              dim_t      m0,
              dim_t      n0,
              dim_t      k0,
-       const double*    alpha,
-       const double*    a, inc_t rs_a0, inc_t cs_a0,
-       const double*    b, inc_t rs_b0, inc_t cs_b0,
-       const double*    beta,
-             double*    c, inc_t rs_c0, inc_t cs_c0,
+       const void*      alpha,
+       const void*      a, inc_t rs_a0, inc_t cs_a0,
+       const void*      b, inc_t rs_b0, inc_t cs_b0,
+       const void*      beta,
+             void*      c, inc_t rs_c0, inc_t cs_c0,
              auxinfo_t* data,
        const cntx_t*    cntx
      )
@@ -136,8 +136,8 @@ void bli_dgemmsup_rd_armv8a_inline_3x4m
       alpha, a, rs_a0, cs_a0, b, rs_b0, cs_b0,
       beta, c, rs_c0, cs_c0, data, cntx
     );
-    a += 3 * rs_a0;
-    c += 3 * rs_c0;
+    a = ( double* )a + 3 * rs_a0;
+    c = ( double* )c + 3 * rs_c0;
   }
 
   if ( m0 > 0 )
@@ -159,11 +159,11 @@ void bli_dgemmsup_rd_armv8a_inline_3xcm
              dim_t      m0,
              dim_t      n0,
              dim_t      k0,
-       const double*    alpha,
-       const double*    a, inc_t rs_a0, inc_t cs_a0,
-       const double*    b, inc_t rs_b0, inc_t cs_b0,
-       const double*    beta,
-             double*    c, inc_t rs_c0, inc_t cs_c0,
+       const void*      alpha,
+       const void*      a, inc_t rs_a0, inc_t cs_a0,
+       const void*      b, inc_t rs_b0, inc_t cs_b0,
+       const void*      beta,
+             void*      c, inc_t rs_c0, inc_t cs_c0,
              auxinfo_t* data,
        const cntx_t*    cntx
      )
@@ -179,8 +179,8 @@ void bli_dgemmsup_rd_armv8a_inline_3xcm
       beta, c, rs_c0, cs_c0, data, cntx
     );
 
-    a += 3 * rs_a0;
-    c += 3 * rs_c0;
+    a = ( double* )a + 3 * rs_a0;
+    c = ( double* )c + 3 * rs_c0;
   }
 }
 
@@ -192,11 +192,11 @@ void bli_dgemmsup_rd_armv8a_asm_6x8m
              dim_t      m0,
              dim_t      n0,
              dim_t      k0,
-       const double*    alpha,
-       const double*    a, inc_t rs_a0, inc_t cs_a0,
-       const double*    b, inc_t rs_b0, inc_t cs_b0,
-       const double*    beta,
-             double*    c, inc_t rs_c0, inc_t cs_c0,
+       const void*      alpha,
+       const void*      a, inc_t rs_a0, inc_t cs_a0,
+       const void*      b, inc_t rs_b0, inc_t cs_b0,
+       const void*      beta,
+             void*      c, inc_t rs_c0, inc_t cs_c0,
              auxinfo_t* data,
        const cntx_t*    cntx
      )
@@ -206,10 +206,10 @@ void bli_dgemmsup_rd_armv8a_asm_6x8m
     assert( n0 <= 13 );
 
     // Manual separation.
-    dgemmsup_ker_ft ker_fp1 = NULL;
-    dgemmsup_ker_ft ker_fp2 = NULL;
-    dgemmsup_ker_ft ker_fp3 = NULL;
-    dim_t           nr1, nr2, nr3;
+    gemmsup_ker_ft ker_fp1 = NULL;
+    gemmsup_ker_ft ker_fp2 = NULL;
+    gemmsup_ker_ft ker_fp3 = NULL;
+    dim_t          nr1, nr2, nr3;
 
     switch ( n0 )
     {
@@ -250,8 +250,8 @@ void bli_dgemmsup_rd_armv8a_asm_6x8m
       alpha, a, rs_a0, cs_a0, b, rs_b0, cs_b0,
       beta, c, rs_c0, cs_c0, data, cntx
     );
-    b += nr1 * cs_b0;
-    c += nr1 * cs_c0;
+    b = ( double* )b + nr1 * cs_b0;
+    c = ( double* )c + nr1 * cs_c0;
     if ( ker_fp2 )
     {
       ker_fp2
@@ -260,8 +260,8 @@ void bli_dgemmsup_rd_armv8a_asm_6x8m
         alpha, a, rs_a0, cs_a0, b, rs_b0, cs_b0,
         beta, c, rs_c0, cs_c0, data, cntx
       );
-      b += nr2 * cs_b0;
-      c += nr2 * cs_c0;
+      b = ( double* )b + nr2 * cs_b0;
+      c = ( double* )c + nr2 * cs_c0;
     }
     if ( ker_fp3 )
       ker_fp3
@@ -582,8 +582,8 @@ consider_edge_cases:
   // TODO: Implement optimized kernel for this.
   //
   // Forward address.
-  a = a + m_iter * 3 * rs_a;
-  c = c + m_iter * 3 * rs_c;
+  a = ( double* )a + m_iter * 3 * rs_a;
+  c = ( double* )c + m_iter * 3 * rs_c;
   for ( ; m_left > 0; m_left -= 2 )
   {
     dim_t m_loc = ( m_left < 2 ) ? m_left : 2;
@@ -594,8 +594,8 @@ consider_edge_cases:
       alpha, a, rs_a0, cs_a0, b, rs_b0, cs_b0,
       beta, c, rs_c0, cs_c0, data, cntx
     );
-    a += 2 * rs_a0;
-    c += 2 * rs_c0;
+    a = ( double* )a + 2 * rs_a0;
+    c = ( double* )c + 2 * rs_c0;
   }
 }
 

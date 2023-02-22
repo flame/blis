@@ -44,11 +44,13 @@
 void PASTEMAC3(ch,opname,arch,suf) \
      ( \
              dim_t   n, \
-       const ctype*  x, inc_t incx, \
+       const void*   x0, inc_t incx, \
              dim_t*  index, \
        const cntx_t* cntx  \
      ) \
 { \
+	const ctype*   x         = x0; \
+\
 	const ctype_r* minus_one = PASTEMAC(chr,m1); \
 	const dim_t*   zero_i    = PASTEMAC(i,0); \
 \

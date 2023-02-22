@@ -113,9 +113,9 @@ void bli_dpackm_knl_asm_8xk
              dim_t   cdim_,
              dim_t   n_,
              dim_t   n_max_,
-       const double* kappa_,
-       const double* a_, inc_t inca_, inc_t lda_,
-             double* p_,              inc_t ldp_,
+       const void*   kappa_,
+       const void*   a_, inc_t inca_, inc_t lda_,
+             void*   p_,              inc_t ldp_,
        const cntx_t* cntx
      )
 {
@@ -330,7 +330,7 @@ void bli_dpackm_knl_asm_8xk
 			const dim_t      i      = cdim;
 			const dim_t      m_edge = mnr - i;
 			const dim_t      n_edge = n_max;
-			double* restrict p_edge = p + (i  )*1;
+			double* restrict p_edge = ( double* )p + (i  )*1;
 
 			bli_dset0s_mxn
 			(
@@ -346,7 +346,7 @@ void bli_dpackm_knl_asm_8xk
 		const dim_t      j      = n;
 		const dim_t      m_edge = mnr;
 		const dim_t      n_edge = n_max - j;
-		double* restrict p_edge = p + (j  )*ldp;
+		double* restrict p_edge = ( double* )p + (j  )*ldp;
 
 		bli_dset0s_mxn
 		(
@@ -364,9 +364,9 @@ void bli_dpackm_knl_asm_24xk
              dim_t   cdim_,
              dim_t   n_,
              dim_t   n_max_,
-       const double* kappa_,
-       const double* a_, inc_t inca_, inc_t lda_,
-             double* p_,              inc_t ldp_,
+       const void*   kappa_,
+       const void*   a_, inc_t inca_, inc_t lda_,
+             void*   p_,              inc_t ldp_,
        const cntx_t* cntx
      )
 {
@@ -634,7 +634,7 @@ void bli_dpackm_knl_asm_24xk
 			const dim_t      i      = cdim;
 			const dim_t      m_edge = mnr - i;
 			const dim_t      n_edge = n_max;
-			double* restrict p_edge = p + (i  )*1;
+			double* restrict p_edge = ( double* )p + (i  )*1;
 
 			bli_dset0s_mxn
 			(
@@ -650,7 +650,7 @@ void bli_dpackm_knl_asm_24xk
 		const dim_t      j      = n;
 		const dim_t      m_edge = mnr;
 		const dim_t      n_edge = n_max - j;
-		double* restrict p_edge = p + (j  )*ldp;
+		double* restrict p_edge = ( double* )p + (j  )*ldp;
 
 		bli_dset0s_mxn
 		(

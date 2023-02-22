@@ -45,16 +45,23 @@ void PASTEMAC3(ch,opname,arch,suf) \
              dim_t      m, \
              dim_t      n, \
              dim_t      k, \
-       const ctype*     alpha, \
-       const ctype*     a1x, \
-       const ctype*     a11, \
-       const ctype*     bx1, \
-             ctype*     b11, \
-             ctype*     c11, inc_t rs_c, inc_t cs_c, \
+       const void*      alpha0, \
+       const void*      a1x0, \
+       const void*      a110, \
+       const void*      bx10, \
+             void*      b110, \
+             void*      c110, inc_t rs_c, inc_t cs_c, \
              auxinfo_t* data, \
        const cntx_t*    cntx  \
      ) \
 { \
+	const ctype* alpha = alpha0; \
+	const ctype* a1x   = a1x0; \
+	const ctype* a11   = a110; \
+	const ctype* bx1   = bx10; \
+	      ctype* b11   = b110; \
+	      ctype* c11   = c110; \
+\
 	const num_t dt     = PASTEMAC(ch,type); \
 \
 	const dim_t mr     = bli_cntx_get_blksz_def_dt( dt, BLIS_MR, cntx ); \
@@ -71,10 +78,8 @@ printf( "bli_gemmtrsm_ref(): k nr = %d %d\n", (int)k, (int)nr ); \
 \
 	const ctype* minus_one = PASTEMAC(ch,m1); \
 \
-	PASTECH(ch,gemm_ukr_ft) \
-	            gemm_ukr = bli_cntx_get_ukr_dt( dt, BLIS_GEMM_UKR, cntx ); \
-	PASTECH(ch,trsm_ukr_ft) \
-	            trsm_ukr = bli_cntx_get_ukr_dt( dt, trsmkerid, cntx ); \
+	gemm_ukr_ft gemm_ukr = bli_cntx_get_ukr_dt( dt, BLIS_GEMM_UKR, cntx ); \
+	trsm_ukr_ft trsm_ukr = bli_cntx_get_ukr_dt( dt, trsmkerid, cntx ); \
 \
 /*
 PASTEMAC(d,fprintm)( stdout, "gemmtrsm_ukr: b01", k, nr, \

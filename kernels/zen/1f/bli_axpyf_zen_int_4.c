@@ -38,17 +38,22 @@
 
 void bli_caxpyf_zen_int_4
      (
-             conj_t    conja,
-             conj_t    conjx,
-             dim_t     m,
-             dim_t     b_n,
-       const scomplex* alpha,
-       const scomplex* a, inc_t inca, inc_t lda,
-       const scomplex* x, inc_t incx,
-             scomplex* y, inc_t incy,
-       const cntx_t*   cntx
+             conj_t  conja,
+             conj_t  conjx,
+             dim_t   m,
+             dim_t   b_n,
+       const void*   alpha0,
+       const void*   a0, inc_t inca, inc_t lda,
+       const void*   x0, inc_t incx,
+             void*   y0, inc_t incy,
+       const cntx_t* cntx
      )
 {
+	const scomplex* restrict alpha = alpha0;
+	const scomplex* restrict a     = a0;
+	const scomplex* restrict x     = x0;
+	      scomplex* restrict y     = y0;
+
     inc_t fuse_fac = 4;
     inc_t i;
 
@@ -58,7 +63,7 @@ void bli_caxpyf_zen_int_4
     __m256 ymm12, ymm13;
 
     float* ap[4];
-    float* y0 = (float*)y;
+    float* yp = (float*)y;
 
     scomplex            chi0;
     scomplex            chi1;
@@ -72,6 +77,7 @@ void bli_caxpyf_zen_int_4
     {
         setPlusOne = -1;
     }
+
     // If either dimension is zero, or if alpha is zero, return early.
     if ( bli_zero_dim2( m, b_n ) || bli_ceq0( *alpha ) ) return;
 
@@ -79,9 +85,9 @@ void bli_caxpyf_zen_int_4
     // operation as a loop over axpyv.
     if ( b_n != fuse_fac )
     {
-	if ( cntx == NULL ) cntx = ( cntx_t* )bli_gks_query_cntx();
+        if ( cntx == NULL ) cntx = ( cntx_t* )bli_gks_query_cntx();
 
-        caxpyv_ker_ft f = bli_cntx_get_ukr_dt( BLIS_SCOMPLEX, BLIS_AXPYV_KER, cntx );
+        axpyv_ker_ft f = bli_cntx_get_ukr_dt( BLIS_SCOMPLEX, BLIS_AXPYV_KER, cntx );
 
         for ( i = 0; i < b_n; ++i )
         {
@@ -186,7 +192,7 @@ void bli_caxpyf_zen_int_4
             ymm13 = _mm256_fmadd_ps(ymm10, ymm7, ymm13);
 
 	    //load Y vector
-            ymm10 = _mm256_loadu_ps(y0 + 0);
+            ymm10 = _mm256_loadu_ps(yp + 0);
 
             if(bli_is_noconj(conja))
             {
@@ -203,9 +209,9 @@ void bli_caxpyf_zen_int_4
 
             ymm12 = _mm256_add_ps(ymm8, ymm10);
 
-            _mm256_storeu_ps((float*)(y0), ymm12);
+            _mm256_storeu_ps((float*)(yp), ymm12);
 
-            y0 += 8;
+            yp += 8;
             ap[0] += 8;
             ap[1] += 8;
             ap[2] += 8;
@@ -217,7 +223,7 @@ void bli_caxpyf_zen_int_4
         for ( i = 0; (i + 0) < n2 ; ++i )
         {
 
-            scomplex       y0c = *(scomplex*)y0;
+            scomplex       y0c = *(scomplex*)yp;
 
             const scomplex a0c = *(scomplex*)ap[0];
             const scomplex a1c = *(scomplex*)ap[1];
@@ -234,13 +240,13 @@ void bli_caxpyf_zen_int_4
             y0c.imag += chi2.imag * a2c.real + chi2.real * a2c.imag * setPlusOne;
             y0c.imag += chi3.imag * a3c.real + chi3.real * a3c.imag * setPlusOne;
 
-            *(scomplex*)y0 = y0c;
+            *(scomplex*)yp = y0c;
 
             ap[0] += 2;
             ap[1] += 2;
             ap[2] += 2;
             ap[3] += 2;
-            y0 += 2;
+            yp += 2;
         }
     //PASTEMAC(c,fprintm)(stdout, "Y after A*x in axpyf",m, 1, (scomplex*)y, 1, 1, "%4.1f", "");
 
@@ -249,7 +255,7 @@ void bli_caxpyf_zen_int_4
     {
         for (i = 0 ; (i + 0) < m ; ++i )
         {
-            scomplex       y0c = *(scomplex*)y0;
+            scomplex       y0c = *(scomplex*)yp;
             const scomplex a0c = *(scomplex*)ap[0];
             const scomplex a1c = *(scomplex*)ap[1];
             const scomplex a2c = *(scomplex*)ap[2];
@@ -265,13 +271,13 @@ void bli_caxpyf_zen_int_4
             y0c.imag += chi2.imag * a2c.real + chi2.real * a2c.imag * setPlusOne;
             y0c.imag += chi3.imag * a3c.real + chi3.real * a3c.imag * setPlusOne;
 
-            *(scomplex*)y0 = y0c;
+            *(scomplex*)yp = y0c;
 
             ap[0] += inca;
             ap[1] += inca;
             ap[2] += inca;
             ap[3] += inca;
-            y0 += incy;
+            yp += incy;
         }
     }
 }

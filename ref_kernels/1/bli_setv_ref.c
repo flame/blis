@@ -41,12 +41,15 @@ void PASTEMAC3(ch,opname,arch,suf) \
      ( \
              conj_t  conjalpha, \
              dim_t   n, \
-       const ctype*  alpha, \
-             ctype*  x, inc_t incx, \
+       const void*   alpha0, \
+             void*   x0, inc_t incx, \
        const cntx_t* cntx  \
      ) \
 { \
 	if ( bli_zero_dim1( n ) ) return; \
+\
+	const ctype* alpha = alpha0; \
+	      ctype* x     = x0; \
 \
 	if ( PASTEMAC(ch,eq0)( *alpha ) ) \
 	{ \

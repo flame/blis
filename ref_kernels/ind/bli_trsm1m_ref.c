@@ -40,13 +40,17 @@
 \
 void PASTEMAC3(ch,opname,arch,suf) \
      ( \
-       const ctype*     a, \
-             ctype*     b, \
-             ctype*     c, inc_t rs_c, inc_t cs_c, \
+       const void*      a0, \
+             void*      b0, \
+             void*      c0, inc_t rs_c, inc_t cs_c, \
              auxinfo_t* data, \
        const cntx_t*    cntx  \
      ) \
 { \
+	const ctype*      a      = a0; \
+	      ctype*      b      = b0; \
+	      ctype*      c      = c0; \
+\
 	const num_t       dt     = PASTEMAC(ch,type); \
 	const num_t       dt_r   = PASTEMAC(chr,type); \
 \
@@ -254,13 +258,17 @@ INSERT_GENTFUNCCO_BASIC3( trsm1m_l, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX, invscalri
 \
 void PASTEMAC3(ch,opname,arch,suf) \
      ( \
-       const ctype*     a, \
-             ctype*     b, \
-             ctype*     c, inc_t rs_c, inc_t cs_c, \
+       const void*      a0, \
+             void*      b0, \
+             void*      c0, inc_t rs_c, inc_t cs_c, \
              auxinfo_t* data, \
        const cntx_t*    cntx  \
      ) \
 { \
+	const ctype*      a      = a0; \
+	      ctype*      b      = b0; \
+	      ctype*      c      = c0; \
+\
 	const num_t       dt     = PASTEMAC(ch,type); \
 	const num_t       dt_r   = PASTEMAC(chr,type); \
 \

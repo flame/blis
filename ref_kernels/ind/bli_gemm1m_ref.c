@@ -42,20 +42,25 @@ void PASTEMAC3(ch,opname,arch,suf) \
              dim_t      m, \
              dim_t      n, \
              dim_t      k, \
-       const ctype*     alpha, \
-       const ctype*     a, \
-       const ctype*     b, \
-       const ctype*     beta, \
-             ctype*     c, inc_t rs_c, inc_t cs_c, \
+       const void*      alpha0, \
+       const void*      a0, \
+       const void*      b0, \
+       const void*      beta0, \
+             void*      c0, inc_t rs_c, inc_t cs_c, \
              auxinfo_t* data, \
        const cntx_t*    cntx  \
      ) \
 { \
+	const ctype*      alpha     = alpha0; \
+	const ctype*      a         = a0; \
+	const ctype*      b         = b0; \
+	const ctype*      beta      = beta0; \
+	      ctype*      c         = c0; \
+\
 	const num_t       dt        = PASTEMAC(ch,type); \
 	const num_t       dt_r      = PASTEMAC(chr,type); \
 \
-	PASTECH(chr,gemm_ukr_ft) \
-	                  rgemm_ukr = bli_cntx_get_ukr_dt( dt_r, BLIS_GEMM_UKR, cntx ); \
+	      gemm_ukr_ft rgemm_ukr = bli_cntx_get_ukr_dt( dt_r, BLIS_GEMM_UKR, cntx ); \
 	const bool        col_pref  = bli_cntx_ukr_prefers_cols_dt( dt_r, BLIS_GEMM_UKR, cntx ); \
 	const bool        row_pref  = !col_pref; \
 \

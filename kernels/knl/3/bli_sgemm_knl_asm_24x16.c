@@ -185,11 +185,11 @@ void bli_sgemm_knl_asm_24x16
              dim_t      m,
              dim_t      n,
              dim_t      k_,
-       const float*     alpha,
-       const float*     a,
-       const float*     b,
-       const float*     beta,
-             float*     c, inc_t rs_c_, inc_t cs_c_,
+       const void*      alpha,
+       const void*      a,
+       const void*      b,
+       const void*      beta,
+             void*      c, inc_t rs_c_, inc_t cs_c_,
              auxinfo_t* data,
        const cntx_t*    cntx
      )

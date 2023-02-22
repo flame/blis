@@ -60,9 +60,9 @@ void PASTEMAC3(ch,opname,arch,suf) \
              pack_t  schema, \
              dim_t   cdim, \
              dim_t   n, \
-       const ctype*  kappa, \
-       const ctype*  p,             inc_t ldp, \
-             ctype*  a, inc_t inca, inc_t lda, \
+       const void*   kappa, \
+       const void*   p,             inc_t ldp, \
+             void*   a, inc_t inca, inc_t lda, \
        const cntx_t* cntx  \
      ) \
 { \

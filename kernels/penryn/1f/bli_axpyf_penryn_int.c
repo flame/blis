@@ -49,18 +49,17 @@ void bli_daxpyf_penryn_int
              conj_t  conjx,
              dim_t   m,
              dim_t   b_n,
-       const double* alpha,
-       const double* a, inc_t inca, inc_t lda,
-       const double* x, inc_t incx,
-             double* y, inc_t incy,
+       const void*   alpha,
+       const void*   a, inc_t inca, inc_t lda,
+       const void*   x, inc_t incx,
+             void*   y, inc_t incy,
        const cntx_t* cntx
      )
 {
 	const double*  restrict alpha_cast = alpha;
-	const double*  restrict a_cast = a;
-	const double*  restrict x_cast = x;
-	      double*  restrict y_cast = y;
-	      dim_t             i;
+	const double*  restrict a_cast     = a;
+	const double*  restrict x_cast     = x;
+	      double*  restrict y_cast     = y;
 
 	const dim_t             n_elem_per_reg = 2;
 	const dim_t             n_iter_unroll  = 2;
@@ -110,7 +109,8 @@ void bli_daxpyf_penryn_int
 	// Call the reference implementation if needed.
 	if ( use_ref == TRUE )
 	{
-		daxpyf_ker_ft f = bli_cntx_get_ukr_dt( BLIS_DOUBLE, BLIS_AXPYF_KER, cntx );
+		#if 0
+		axpyf_ker_ft f = bli_cntx_get_ukr_dt( BLIS_DOUBLE, BLIS_AXPYF_KER, cntx );
 
 		f
 		(
@@ -124,6 +124,8 @@ void bli_daxpyf_penryn_int
 		  y_cast, incy,
 		  cntx
 		);
+		#endif
+		bli_abort();
 		return;
 	}
 
@@ -171,7 +173,7 @@ void bli_daxpyf_penryn_int
 	chi2v.v = _mm_loaddup_pd( ( double* )&chi2 );
 	chi3v.v = _mm_loaddup_pd( ( double* )&chi3 );
 
-	for ( i = 0; i < m_run; ++i )
+	for ( dim_t i = 0; i < m_run; ++i )
 	{
 		y0v.v = _mm_load_pd( ( double* )(y0 + 0*n_elem_per_reg) );
 
@@ -216,7 +218,7 @@ void bli_daxpyf_penryn_int
 
 	if ( m_left > 0 )
 	{
-		for ( i = 0; i < m_left; ++i )
+		for ( dim_t i = 0; i < m_left; ++i )
 		{
 			a0c = *a0;
 			a1c = *a1;

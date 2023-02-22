@@ -59,15 +59,21 @@ void bli_dgemm_bgq_int_8x8
              dim_t      m,
              dim_t      n,
              dim_t      k,
-       const double*    alpha,
-       const double*    a,
-       const double*    b,
-       const double*    beta,
-             double*    c, inc_t rs_c, inc_t cs_c,
+       const void*      alpha0,
+       const void*      a0,
+       const void*      b0,
+       const void*      beta0,
+             void*      c0, inc_t rs_c, inc_t cs_c,
              auxinfo_t* data,
        const cntx_t*    cntx
      )
 {
+	const double* alpha = alpha0;
+	const double* a     = a0;
+	const double* b     = b0;
+	const double* beta  = beta0;
+	      double* c     = c0;
+
     GEMM_UKR_SETUP_CT_ANY( d, 8, 8, false );
 
     //Registers for storing C.
@@ -223,15 +229,21 @@ void bli_zgemm_bgq_int_4x4
              dim_t      m,
              dim_t      n,
              dim_t      k,
-       const dcomplex*  alpha,
-       const dcomplex*  a,
-       const dcomplex*  b,
-       const dcomplex*  beta,
-             dcomplex*  c, inc_t rs_c, inc_t cs_c,
+       const void*      alpha0,
+       const void*      a0,
+       const void*      b0,
+       const void*      beta0,
+             void*      c0, inc_t rs_c, inc_t cs_c,
              auxinfo_t* data,
        const cntx_t*    cntx
      )
 {
+	const dcomplex* alpha = alpha0;
+	const dcomplex* a     = a0;
+	const dcomplex* b     = b0;
+	const dcomplex* beta  = beta0;
+	      dcomplex* c     = c0;
+
     GEMM_UKR_SETUP_CT_ANY( z, 4, 4, false );
 
     const double* a_d = ( double* )a;

@@ -48,11 +48,11 @@ void bli_zgemm_armsve_asm_2vx10_unindexed
              dim_t      m, \
              dim_t      n, \
              dim_t      k, \
-       const dcomplex*  alpha, \
-       const dcomplex*  a, \
-       const dcomplex*  b, \
-       const dcomplex*  beta, \
-             dcomplex*  c, inc_t rs_c0, inc_t cs_c0, \
+       const void*      alpha, \
+       const void*      a, \
+       const void*      b, \
+       const void*      beta, \
+             void*      c, inc_t rs_c0, inc_t cs_c0, \
              auxinfo_t* data, \
        const cntx_t*    cntx  \
      )

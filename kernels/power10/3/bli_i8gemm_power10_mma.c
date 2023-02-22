@@ -60,11 +60,16 @@ void bli_i8gemm_power10_mma_8x16
               dim_t      m,
               dim_t      n,
               dim_t      k,
-        const int32_t*   alpha,
-        const int8_t*    a,
-        const int8_t*    b,
-        const int32_t*   beta,
-              int32_t*   c, inc_t rs_c0, inc_t cs_c0,
+        //const int32_t*   alpha,
+        //const int8_t*    a,
+        //const int8_t*    b,
+        //const int32_t*   beta,
+        //      int32_t*   c, inc_t rs_c0, inc_t cs_c0,
+        const void*      alpha,
+        const void*      a,
+        const void*      b,
+        const void*      beta,
+              void*      c, inc_t rs_c0, inc_t cs_c0,
               auxinfo_t* data,
         const cntx_t*    cntx
     )
@@ -79,8 +84,8 @@ void bli_i8gemm_power10_mma_8x16
     const int8_t* restrict B0 = b;
           int*    restrict C0 = c;
 
-    int alpha_ = *alpha,
-        beta_ = *beta;
+    int alpha_ = *((int32_t*)alpha),
+        beta_  = *((int32_t*)beta);
 
     iv4sf_t result[4];
     iv4sf_t *rowC;

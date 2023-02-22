@@ -60,11 +60,16 @@ void bli_i16gemm_power10_mma_8x16
               dim_t      m,
               dim_t      n,
               dim_t      k,
-        const int32_t*   alpha,
-        const short*     a,
-        const short*     b,
-        const int32_t*   beta,
-              int32_t*   c, inc_t rs_c0, inc_t cs_c0,
+        //const int32_t*   alpha,
+        //const short*     a,
+        //const short*     b,
+        //const int32_t*   beta,
+        //      int32_t*   c, inc_t rs_c0, inc_t cs_c0,
+        const void*      alpha,
+        const void*      a,
+        const void*      b,
+        const void*      beta,
+              void*      c, inc_t rs_c0, inc_t cs_c0,
               auxinfo_t* data,
         const cntx_t*    cntx
     )
@@ -80,8 +85,8 @@ void bli_i16gemm_power10_mma_8x16
     const short* restrict B0 = b;
           int*   restrict C0 = c;
 
-    int alpha_ = *alpha,
-        beta_ = *beta;
+    int alpha_ = *((int32_t*)alpha),
+        beta_  = *((int32_t*)beta);
 
     iv4sf_t result[4];
     iv4sf_t *rowC;
@@ -90,8 +95,8 @@ void bli_i16gemm_power10_mma_8x16
     __vector_quad acc0, acc1, acc2, acc3,
                   acc4, acc5, acc6, acc7;
 
-    vec_t *ca = (vec_t *) A0;
-    vec_t *rb = (vec_t *) B0;
+    vec_t *ca = (vec_t*) A0;
+    vec_t *rb = (vec_t*) B0;
 
     __builtin_mma_xvi16ger2 (&acc0, ca[0], rb[0]);
     __builtin_mma_xvi16ger2 (&acc1, ca[0], rb[1]);

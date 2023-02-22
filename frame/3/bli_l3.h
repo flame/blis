@@ -43,8 +43,7 @@
 #include "bli_l3_packab.h"
 
 // Define function types.
-//#include "bli_l3_ft_ex.h"
-#include "bli_l3_ft_ukr.h"
+#include "bli_l3_ukr_ft.h"
 #include "bli_l3_oft.h"
 #include "bli_l3_oft_var.h"
 
@@ -63,7 +62,7 @@
 
 // Define function types for small/unpacked handlers/kernels.
 #include "bli_l3_sup_oft.h"
-#include "bli_l3_sup_ft_ker.h"
+#include "bli_l3_sup_ker_ft.h"
 
 // Define static edge case logic for use in small/unpacked kernels.
 //#include "bli_l3_sup_edge.h"

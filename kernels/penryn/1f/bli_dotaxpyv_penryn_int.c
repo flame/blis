@@ -49,11 +49,11 @@ void bli_ddotaxpyv_penryn_int
              conj_t  conjx,
              conj_t  conjy,
              dim_t   n,
-       const double* alpha,
-       const double* x, inc_t incx,
-       const double* y, inc_t incy,
-             double* rho,
-             double* z, inc_t incz,
+       const void*   alpha,
+       const void*   x, inc_t incx,
+       const void*   y, inc_t incy,
+             void*   rho,
+             void*   z, inc_t incz,
        const cntx_t* cntx
      )
 {
@@ -109,7 +109,8 @@ void bli_ddotaxpyv_penryn_int
 	// Call the reference implementation if needed.
 	if ( use_ref == TRUE )
 	{
-		ddotaxpyv_ker_ft f = bli_cntx_get_ukr_dt( BLIS_DOUBLE, BLIS_DOTAXPYV_KER, cntx );
+		#if 0
+		dotaxpyv_ker_ft f = bli_cntx_get_ukr_dt( BLIS_DOUBLE, BLIS_DOTAXPYV_KER, cntx );
 
 		f
 		(
@@ -124,6 +125,8 @@ void bli_ddotaxpyv_penryn_int
 		  z, incz,
 		  cntx
 		);
+		#endif
+		bli_abort();
 		return;
 	}
 

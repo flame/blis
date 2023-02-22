@@ -90,7 +90,7 @@ void bli_trmm_ru_ker_var2b
 
 	// Query the context for the micro-kernel address and cast it to its
 	// function pointer type.
-	gemm_ukr_vft gemm_ukr = bli_cntx_get_l3_vir_ukr_dt( dt, BLIS_GEMM_UKR, cntx );
+	gemm_ukr_ft gemm_ukr = bli_cntx_get_l3_vir_ukr_dt( dt, BLIS_GEMM_UKR, cntx );
 
 	const void* one        = bli_obj_buffer_for_const( dt, &BLIS_ONE );
 	const char* a_cast     = buf_a;

@@ -93,15 +93,18 @@ void bli_sgemm_bulldozer_asm_8x8_fma4
              dim_t      m,
              dim_t      n,
              dim_t      k,
-       const float*     alpha,
-       const float*     a,
-       const float*     b,
-       const float*     beta,
-             float*     c, inc_t rs_c0, inc_t cs_c0,
+       const void*      alpha,
+       const void*      a,
+       const void*      b,
+       const void*      beta,
+             void*      c, inc_t rs_c0, inc_t cs_c0,
              auxinfo_t* data,
        const cntx_t*    cntx
      )
 {
+	//const void* a_next = bli_auxinfo_next_a( data );
+	//const void* b_next = bli_auxinfo_next_b( data );
+
 	// Typecast local copies of integers in case dim_t and inc_t are a
 	// different size than is expected by load instructions.
 	uint64_t k_iter = k / 4;
@@ -585,15 +588,18 @@ void bli_dgemm_bulldozer_asm_4x6_fma4
              dim_t      m,
              dim_t      n,
              dim_t      k,
-       const double*    alpha,
-       const double*    a,
-       const double*    b,
-       const double*    beta,
-             double*    c, inc_t rs_c0, inc_t cs_c0,
+       const void*      alpha,
+       const void*      a,
+       const void*      b,
+       const void*      beta,
+             void*      c, inc_t rs_c0, inc_t cs_c0,
              auxinfo_t* data,
        const cntx_t*    cntx
      )
 {
+	//const void* a_next = bli_auxinfo_next_a( data );
+	//const void* b_next = bli_auxinfo_next_b( data );
+
 	// Typecast local copies of integers in case dim_t and inc_t are a
 	// different size than is expected by load instructions.
 	uint64_t k_iter = k / 12;
@@ -805,11 +811,11 @@ void bli_cgemm_bulldozer_asm_8x4_fma4
              dim_t      m,
              dim_t      n,
              dim_t      k,
-       const scomplex*  alpha,
-       const scomplex*  a,
-       const scomplex*  b,
-       const scomplex*  beta,
-             scomplex*  c, inc_t rs_c0, inc_t cs_c0,
+       const void*      alpha,
+       const void*      a,
+       const void*      b,
+       const void*      beta,
+             void*      c, inc_t rs_c0, inc_t cs_c0,
              auxinfo_t* data,
        const cntx_t*    cntx
      )
@@ -1329,11 +1335,11 @@ void bli_zgemm_bulldozer_asm_4x4_fma4
              dim_t      m,
              dim_t      n,
              dim_t      k,
-       const dcomplex*  alpha,
-       const dcomplex*  a,
-       const dcomplex*  b,
-       const dcomplex*  beta,
-             dcomplex*  c, inc_t rs_c0, inc_t cs_c0,
+       const void*      alpha,
+       const void*      a,
+       const void*      b,
+       const void*      beta,
+             void*      c, inc_t rs_c0, inc_t cs_c0,
              auxinfo_t* data,
        const cntx_t*    cntx
      )

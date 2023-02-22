@@ -48,16 +48,15 @@ void bli_ddotv_penryn_int
              conj_t  conjx,
              conj_t  conjy,
              dim_t   n,
-       const double* x, inc_t incx,
-       const double* y, inc_t incy,
-             double* rho,
+       const void*   x0, inc_t incx,
+       const void*   y0, inc_t incy,
+             void*   rho0,
        const cntx_t* cntx
      )
 {
-	const double*  restrict x_cast   = x;
-	const double*  restrict y_cast   = y;
-	      double*  restrict rho_cast = rho;
-	      dim_t             i;
+	const double*  restrict x_cast   = x0;
+	const double*  restrict y_cast   = y0;
+	      double*  restrict rho_cast = rho0;
 
 	      dim_t             n_pre;
 	      dim_t             n_run;
@@ -86,13 +85,13 @@ void bli_ddotv_penryn_int
 	{
 		use_ref = TRUE;
 	}
-	else if ( bli_is_unaligned_to( ( siz_t )x, 16 ) ||
-	          bli_is_unaligned_to( ( siz_t )y, 16 ) )
+	else if ( bli_is_unaligned_to( ( siz_t )x_cast, 16 ) ||
+	          bli_is_unaligned_to( ( siz_t )y_cast, 16 ) )
 	{
 		use_ref = TRUE;
 
-		if ( bli_is_unaligned_to( ( siz_t )x, 16 ) &&
-		     bli_is_unaligned_to( ( siz_t )y, 16 ) )
+		if ( bli_is_unaligned_to( ( siz_t )x_cast, 16 ) &&
+		     bli_is_unaligned_to( ( siz_t )y_cast, 16 ) )
 		{
 			use_ref = FALSE;
 			n_pre = 1;
@@ -102,16 +101,16 @@ void bli_ddotv_penryn_int
 	// Call the reference implementation if needed.
 	if ( use_ref == TRUE )
 	{
-		ddotv_ker_ft f = bli_cntx_get_ukr_dt( BLIS_DOUBLE, BLIS_DOTV_KER, cntx );
+		dotv_ker_ft f = bli_cntx_get_ukr_dt( BLIS_DOUBLE, BLIS_DOTV_KER, cntx );
 
 		f
 		(
 		  conjx,
 		  conjy,
 		  n,
-		  x, incx,
-		  y, incy,
-		  rho,
+		  x0, incx,
+		  y0, incy,
+		  rho0,
 		  cntx
 		);
 		return;
@@ -138,7 +137,7 @@ void bli_ddotv_penryn_int
 
 	rho1v.v = _mm_setzero_pd();
 
-	for ( i = 0; i < n_run; ++i )
+	for ( dim_t i = 0; i < n_run; ++i )
 	{
 		x1v.v = _mm_load_pd( ( double* )x1 );
 		y1v.v = _mm_load_pd( ( double* )y1 );
@@ -155,7 +154,7 @@ void bli_ddotv_penryn_int
 
 	if ( n_left > 0 )
 	{
-		for ( i = 0; i < n_left; ++i )
+		for ( dim_t i = 0; i < n_left; ++i )
 		{
 			x1c = *x1;
 			y1c = *y1;

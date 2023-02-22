@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2023, The University of Texas at Austin
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -32,31 +32,14 @@
 
 */
 
-//
-// Define template prototypes for level-3 micro-kernels.
-//
+#ifndef BLIS_PRE_KER_PARAMS_H
+#define BLIS_PRE_KER_PARAMS_H
 
-// Note: Instead of defining function prototype macro templates and then
-// instantiating those macros to define the individual function prototypes,
-// we simply alias the official operations' prototypes as defined in
-// bli_l3_ukr_prot.h.
+// These macros are used in bli_*_ker_prot.h and bli_*_ker_ft.h to make it
+// easy to update them in the future, if needed.
 
-#undef  GENTPROT
-#define GENTPROT GEMM_UKR_PROT
-
-INSERT_GENTPROT_BASIC0( gemm_ukr_name )
+#define BLIS_AUXINFO_PARAM        auxinfo_t* data
+#define BLIS_CNTX_PARAM     const cntx_t*    cntx
 
 
-#undef  GENTPROT
-#define GENTPROT GEMMTRSM_UKR_PROT
-
-INSERT_GENTPROT_BASIC0( gemmtrsm_l_ukr_name )
-INSERT_GENTPROT_BASIC0( gemmtrsm_u_ukr_name )
-
-
-#undef  GENTPROT
-#define GENTPROT TRSM_UKR_PROT
-
-INSERT_GENTPROT_BASIC0( trsm_l_ukr_name )
-INSERT_GENTPROT_BASIC0( trsm_u_ukr_name )
-
+#endif

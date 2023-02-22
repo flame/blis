@@ -41,24 +41,24 @@
 \
 void PASTEMAC2(chc,chp,varname) \
      ( \
-       struc_t           strucc, \
-       diag_t            diagc, \
-       uplo_t            uploc, \
-       conj_t            conjc, \
-       pack_t            schema, \
-       bool              invdiag, \
-       dim_t             panel_dim, \
-       dim_t             panel_len, \
-       dim_t             panel_dim_max, \
-       dim_t             panel_len_max, \
-       dim_t             panel_dim_off, \
-       dim_t             panel_len_off, \
-       ctype_p* restrict kappa, \
-       ctype_c* restrict c, inc_t incc, inc_t ldc, \
-       ctype_p* restrict p,             inc_t ldp, \
-                            inc_t is_p, \
-       cntx_t*           cntx, \
-       void*             params \
+       struc_t  strucc, \
+       diag_t   diagc, \
+       uplo_t   uploc, \
+       conj_t   conjc, \
+       pack_t   schema, \
+       bool     invdiag, \
+       dim_t    panel_dim, \
+       dim_t    panel_len, \
+       dim_t    panel_dim_max, \
+       dim_t    panel_len_max, \
+       dim_t    panel_dim_off, \
+       dim_t    panel_len_off, \
+       ctype_p* kappa, \
+       ctype_c* c, inc_t incc, inc_t ldc, \
+       ctype_p* p,             inc_t ldp, \
+                   inc_t is_p, \
+       void*    params, \
+       cntx_t*  cntx  \
      ) \
 { \
 	if ( bli_is_nat_packed( schema ) ) \
@@ -288,12 +288,12 @@ INSERT_GENTFUNC2_MIXDP0( packm_struc_cxk_md )
 \
 void PASTEMAC2(cha,chp,opname) \
      ( \
-       conj_t            conja, \
-       dim_t             m, \
-       dim_t             n, \
-       ctype_p* restrict kappa, \
-       ctype_a* restrict a, inc_t inca, inc_t lda, \
-       ctype_p* restrict p,             inc_t ldp  \
+       conj_t   conja, \
+       dim_t    m, \
+       dim_t    n, \
+       ctype_p* kappa, \
+       ctype_a* a, inc_t inca, inc_t lda, \
+       ctype_p* p,             inc_t ldp  \
      ) \
 { \
 	const inc_t                    inca2    = 2 * inca; \

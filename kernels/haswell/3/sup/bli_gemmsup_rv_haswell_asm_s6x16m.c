@@ -88,11 +88,11 @@ void bli_sgemmsup_rv_haswell_asm_6x16m
              dim_t      m0,
              dim_t      n0,
              dim_t      k0,
-       const float*     alpha,
-       const float*     a, inc_t rs_a0, inc_t cs_a0,
-       const float*     b, inc_t rs_b0, inc_t cs_b0,
-       const float*     beta,
-             float*     c, inc_t rs_c0, inc_t cs_c0,
+       const void*      alpha,
+       const void*      a, inc_t rs_a0, inc_t cs_a0,
+       const void*      b, inc_t rs_b0, inc_t cs_b0,
+       const void*      beta,
+             void*      c, inc_t rs_c0, inc_t cs_c0,
              auxinfo_t* data,
        const cntx_t*    cntx
      )
@@ -103,9 +103,9 @@ void bli_sgemmsup_rv_haswell_asm_6x16m
 	// dispatch other 6x?m kernels, as needed.
 	if ( n_left )
 	{
-		      float* cij = c;
-		const float* bj  = b;
-		const float* ai  = a;
+		      float* cij = ( float* )c;
+		const float* bj  = ( float* )b;
+		const float* ai  = ( float* )a;
 
 		if ( 12 <= n_left )
 		{
@@ -1041,19 +1041,19 @@ void bli_sgemmsup_rv_haswell_asm_6x16m
 		const dim_t   nr_cur = 16;
 		const dim_t   i_edge = m0 - ( dim_t )m_left;
 
-		      float* cij = c + i_edge*rs_c;
-		//const float* ai  = a + i_edge*rs_a;
-		//const float* ai  = a + ( i_edge / 6 ) * ps_a;
-		const float* ai  = a + m_iter * ps_a;
-		const float* bj  = b;
+		      float* cij = ( float* )c + i_edge*rs_c;
+		//const float* ai  = ( float* )a + i_edge*rs_a;
+		//const float* ai  = ( float* )a + ( i_edge / 6 ) * ps_a;
+		const float* ai  = ( float* )a + m_iter * ps_a;
+		const float* bj  = ( float* )b;
 
 #if 0
 		// We add special handling for slightly inflated MR blocksizes
 		// at edge cases, up to a maximum of 9.
 		if ( 6 < m_left )
 		{
-			sgemmsup_ker_ft ker_fp1 = NULL;
-			sgemmsup_ker_ft ker_fp2 = NULL;
+			gemmsup_ker_ft  ker_fp1 = NULL;
+			gemmsup_ker_ft  ker_fp2 = NULL;
 			dim_t           mr1, mr2;
 
 			if ( m_left == 7 )
@@ -1094,7 +1094,7 @@ void bli_sgemmsup_rv_haswell_asm_6x16m
 		}
 #endif
 
-		sgemmsup_ker_ft ker_fps[6] =
+		gemmsup_ker_ft  ker_fps[6] =
 		{
 		  NULL,
 		  bli_sgemmsup_rv_haswell_asm_1x16,
@@ -1104,7 +1104,7 @@ void bli_sgemmsup_rv_haswell_asm_6x16m
 		  bli_sgemmsup_rv_haswell_asm_5x16
 		};
 
-		sgemmsup_ker_ft ker_fp = ker_fps[ m_left ];
+		gemmsup_ker_ft  ker_fp = ker_fps[ m_left ];
 
 		ker_fp
 		(
@@ -1124,11 +1124,11 @@ void bli_sgemmsup_rv_haswell_asm_6x12m
              dim_t      m0,
              dim_t      n0,
              dim_t      k0,
-       const float*     alpha,
-       const float*     a, inc_t rs_a0, inc_t cs_a0,
-       const float*     b, inc_t rs_b0, inc_t cs_b0,
-       const float*     beta,
-             float*     c, inc_t rs_c0, inc_t cs_c0,
+       const void*      alpha,
+       const void*      a, inc_t rs_a0, inc_t cs_a0,
+       const void*      b, inc_t rs_b0, inc_t cs_b0,
+       const void*      beta,
+             void*      c, inc_t rs_c0, inc_t cs_c0,
              auxinfo_t* data,
        const cntx_t*    cntx
      )
@@ -1908,19 +1908,19 @@ void bli_sgemmsup_rv_haswell_asm_6x12m
 		const dim_t   nr_cur = 12;
 		const dim_t   i_edge = m0 - ( dim_t )m_left;
 
-		      float* cij = c + i_edge*rs_c;
-		//const float* ai  = a + i_edge*rs_a;
-		//const float* ai  = a + ( i_edge / 6 ) * ps_a;
-		const float* ai  = a + m_iter * ps_a;
-		const float* bj  = b;
+		      float* cij = ( float* )c + i_edge*rs_c;
+		//const float* ai  = ( float* )a + i_edge*rs_a;
+		//const float* ai  = ( float* )a + ( i_edge / 6 ) * ps_a;
+		const float* ai  = ( float* )a + m_iter * ps_a;
+		const float* bj  = ( float* )b;
 
 #if 0
 		// We add special handling for slightly inflated MR blocksizes
 		// at edge cases, up to a maximum of 9.
 		if ( 6 < m_left )
 		{
-			sgemmsup_ker_ft ker_fp1 = NULL;
-			sgemmsup_ker_ft ker_fp2 = NULL;
+			gemmsup_ker_ft  ker_fp1 = NULL;
+			gemmsup_ker_ft  ker_fp2 = NULL;
 			dim_t           mr1, mr2;
 
 			if ( m_left == 7 )
@@ -1961,7 +1961,7 @@ void bli_sgemmsup_rv_haswell_asm_6x12m
 		}
 #endif
 
-		sgemmsup_ker_ft ker_fps[6] =
+		gemmsup_ker_ft  ker_fps[6] =
 		{
 		  NULL,
 		  bli_sgemmsup_rv_haswell_asm_1x12,
@@ -1971,7 +1971,7 @@ void bli_sgemmsup_rv_haswell_asm_6x12m
 		  bli_sgemmsup_rv_haswell_asm_5x12
 		};
 
-		sgemmsup_ker_ft ker_fp = ker_fps[ m_left ];
+		gemmsup_ker_ft  ker_fp = ker_fps[ m_left ];
 
 		ker_fp
 		(
@@ -1991,11 +1991,11 @@ void bli_sgemmsup_rv_haswell_asm_6x8m
              dim_t      m0,
              dim_t      n0,
              dim_t      k0,
-       const float*     alpha,
-       const float*     a, inc_t rs_a0, inc_t cs_a0,
-       const float*     b, inc_t rs_b0, inc_t cs_b0,
-       const float*     beta,
-             float*     c, inc_t rs_c0, inc_t cs_c0,
+       const void*      alpha,
+       const void*      a, inc_t rs_a0, inc_t cs_a0,
+       const void*      b, inc_t rs_b0, inc_t cs_b0,
+       const void*      beta,
+             void*      c, inc_t rs_c0, inc_t cs_c0,
              auxinfo_t* data,
        const cntx_t*    cntx
      )
@@ -2621,19 +2621,19 @@ void bli_sgemmsup_rv_haswell_asm_6x8m
 		const dim_t   nr_cur = 8;
 		const dim_t   i_edge = m0 - ( dim_t )m_left;
 
-		      float* cij = c + i_edge*rs_c;
-		//const float* ai  = a + i_edge*rs_a;
-		//const float* ai  = a + ( i_edge / 6 ) * ps_a;
-		const float* ai  = a + m_iter * ps_a;
-		const float* bj  = b;
+		      float* cij = ( float* )c + i_edge*rs_c;
+		//const float* ai  = ( float* )a + i_edge*rs_a;
+		//const float* ai  = ( float* )a + ( i_edge / 6 ) * ps_a;
+		const float* ai  = ( float* )a + m_iter * ps_a;
+		const float* bj  = ( float* )b;
 
 #if 0
 		// We add special handling for slightly inflated MR blocksizes
 		// at edge cases, up to a maximum of 9.
 		if ( 6 < m_left )
 		{
-			sgemmsup_ker_ft ker_fp1 = NULL;
-			sgemmsup_ker_ft ker_fp2 = NULL;
+			gemmsup_ker_ft  ker_fp1 = NULL;
+			gemmsup_ker_ft  ker_fp2 = NULL;
 			dim_t           mr1, mr2;
 
 			if ( m_left == 7 )
@@ -2674,7 +2674,7 @@ void bli_sgemmsup_rv_haswell_asm_6x8m
 		}
 #endif
 
-		sgemmsup_ker_ft ker_fps[6] =
+		gemmsup_ker_ft  ker_fps[6] =
 		{
 		  NULL,
 		  bli_sgemmsup_rv_haswell_asm_1x8,
@@ -2684,7 +2684,7 @@ void bli_sgemmsup_rv_haswell_asm_6x8m
 		  bli_sgemmsup_rv_haswell_asm_5x8
 		};
 
-		sgemmsup_ker_ft ker_fp = ker_fps[ m_left ];
+		gemmsup_ker_ft  ker_fp = ker_fps[ m_left ];
 
 		ker_fp
 		(
@@ -2704,11 +2704,11 @@ void bli_sgemmsup_rv_haswell_asm_6x6m
              dim_t      m0,
              dim_t      n0,
              dim_t      k0,
-       const float*     alpha,
-       const float*     a, inc_t rs_a0, inc_t cs_a0,
-       const float*     b, inc_t rs_b0, inc_t cs_b0,
-       const float*     beta,
-             float*     c, inc_t rs_c0, inc_t cs_c0,
+       const void*      alpha,
+       const void*      a, inc_t rs_a0, inc_t cs_a0,
+       const void*      b, inc_t rs_b0, inc_t cs_b0,
+       const void*      beta,
+             void*      c, inc_t rs_c0, inc_t cs_c0,
              auxinfo_t* data,
        const cntx_t*    cntx
      )
@@ -3367,19 +3367,19 @@ void bli_sgemmsup_rv_haswell_asm_6x6m
 		const dim_t   nr_cur = 6;
 		const dim_t   i_edge = m0 - ( dim_t )m_left;
 
-		      float* cij = c + i_edge*rs_c;
-		//const float* ai  = a + i_edge*rs_a;
-		//const float* ai  = a + ( i_edge / 6 ) * ps_a;
-		const float* ai  = a + m_iter * ps_a;
-		const float* bj  = b;
+		      float* cij = ( float* )c + i_edge*rs_c;
+		//const float* ai  = ( float* )a + i_edge*rs_a;
+		//const float* ai  = ( float* )a + ( i_edge / 6 ) * ps_a;
+		const float* ai  = ( float* )a + m_iter * ps_a;
+		const float* bj  = ( float* )b;
 
 #if 0
 		// We add special handling for slightly inflated MR blocksizes
 		// at edge cases, up to a maximum of 9.
 		if ( 6 < m_left )
 		{
-			sgemmsup_ker_ft ker_fp1 = NULL;
-			sgemmsup_ker_ft ker_fp2 = NULL;
+			gemmsup_ker_ft  ker_fp1 = NULL;
+			gemmsup_ker_ft  ker_fp2 = NULL;
 			dim_t           mr1, mr2;
 
 			if ( m_left == 7 )
@@ -3420,7 +3420,7 @@ void bli_sgemmsup_rv_haswell_asm_6x6m
 		}
 #endif
 
-		sgemmsup_ker_ft ker_fps[6] =
+		gemmsup_ker_ft  ker_fps[6] =
 		{
 		  NULL,
 		  bli_sgemmsup_rv_haswell_asm_1x6,
@@ -3430,7 +3430,7 @@ void bli_sgemmsup_rv_haswell_asm_6x6m
 		  bli_sgemmsup_rv_haswell_asm_5x6
 		};
 
-		sgemmsup_ker_ft ker_fp = ker_fps[ m_left ];
+		gemmsup_ker_ft  ker_fp = ker_fps[ m_left ];
 
 		ker_fp
 		(
@@ -3450,11 +3450,11 @@ void bli_sgemmsup_rv_haswell_asm_6x4m
              dim_t      m0,
              dim_t      n0,
              dim_t      k0,
-       const float*     alpha,
-       const float*     a, inc_t rs_a0, inc_t cs_a0,
-       const float*     b, inc_t rs_b0, inc_t cs_b0,
-       const float*     beta,
-             float*     c, inc_t rs_c0, inc_t cs_c0,
+       const void*      alpha,
+       const void*      a, inc_t rs_a0, inc_t cs_a0,
+       const void*      b, inc_t rs_b0, inc_t cs_b0,
+       const void*      beta,
+             void*      c, inc_t rs_c0, inc_t cs_c0,
              auxinfo_t* data,
        const cntx_t*    cntx
      )
@@ -4036,19 +4036,19 @@ void bli_sgemmsup_rv_haswell_asm_6x4m
 		const dim_t   nr_cur = 4;
 		const dim_t   i_edge = m0 - ( dim_t )m_left;
 
-		      float* cij = c + i_edge*rs_c;
-		//const float* ai  = a + i_edge*rs_a;
-		//const float* ai  = a + ( i_edge / 6 ) * ps_a;
-		const float* ai  = a + m_iter * ps_a;
-		const float* bj  = b;
+		      float* cij = ( float* )c + i_edge*rs_c;
+		//const float* ai  = ( float* )a + i_edge*rs_a;
+		//const float* ai  = ( float* )a + ( i_edge / 6 ) * ps_a;
+		const float* ai  = ( float* )a + m_iter * ps_a;
+		const float* bj  = ( float* )b;
 
 #if 0
 		// We add special handling for slightly inflated MR blocksizes
 		// at edge cases, up to a maximum of 9.
 		if ( 6 < m_left )
 		{
-			sgemmsup_ker_ft ker_fp1 = NULL;
-			sgemmsup_ker_ft ker_fp2 = NULL;
+			gemmsup_ker_ft  ker_fp1 = NULL;
+			gemmsup_ker_ft  ker_fp2 = NULL;
 			dim_t           mr1, mr2;
 
 			if ( m_left == 7 )
@@ -4089,7 +4089,7 @@ void bli_sgemmsup_rv_haswell_asm_6x4m
 		}
 #endif
 
-		sgemmsup_ker_ft ker_fps[6] =
+		gemmsup_ker_ft  ker_fps[6] =
 		{
 		  NULL,
 		  bli_sgemmsup_rv_haswell_asm_1x4,
@@ -4099,7 +4099,7 @@ void bli_sgemmsup_rv_haswell_asm_6x4m
 		  bli_sgemmsup_rv_haswell_asm_5x4
 		};
 
-		sgemmsup_ker_ft ker_fp = ker_fps[ m_left ];
+		gemmsup_ker_ft  ker_fp = ker_fps[ m_left ];
 
 		ker_fp
 		(
@@ -4119,11 +4119,11 @@ void bli_sgemmsup_rv_haswell_asm_6x2m
              dim_t      m0,
              dim_t      n0,
              dim_t      k0,
-       const float*     alpha,
-       const float*     a, inc_t rs_a0, inc_t cs_a0,
-       const float*     b, inc_t rs_b0, inc_t cs_b0,
-       const float*     beta,
-             float*     c, inc_t rs_c0, inc_t cs_c0,
+       const void*      alpha,
+       const void*      a, inc_t rs_a0, inc_t cs_a0,
+       const void*      b, inc_t rs_b0, inc_t cs_b0,
+       const void*      beta,
+             void*      c, inc_t rs_c0, inc_t cs_c0,
              auxinfo_t* data,
        const cntx_t*    cntx
      )
@@ -4676,19 +4676,19 @@ void bli_sgemmsup_rv_haswell_asm_6x2m
 		const dim_t   nr_cur = 2;
 		const dim_t   i_edge = m0 - ( dim_t )m_left;
 
-		      float* cij = c + i_edge*rs_c;
-		//const float* ai  = a + i_edge*rs_a;
-		//const float* ai  = a + ( i_edge / 6 ) * ps_a;
-		const float* ai  = a + m_iter * ps_a;
-		const float* bj  = b;
+		      float* cij = ( float* )c + i_edge*rs_c;
+		//const float* ai  = ( float* )a + i_edge*rs_a;
+		//const float* ai  = ( float* )a + ( i_edge / 6 ) * ps_a;
+		const float* ai  = ( float* )a + m_iter * ps_a;
+		const float* bj  = ( float* )b;
 
 #if 0
 		// We add special handling for slightly inflated MR blocksizes
 		// at edge cases, up to a maximum of 9.
 		if ( 6 < m_left )
 		{
-			sgemmsup_ker_ft ker_fp1 = NULL;
-			sgemmsup_ker_ft ker_fp2 = NULL;
+			gemmsup_ker_ft  ker_fp1 = NULL;
+			gemmsup_ker_ft  ker_fp2 = NULL;
 			dim_t           mr1, mr2;
 
 			if ( m_left == 7 )
@@ -4729,7 +4729,7 @@ void bli_sgemmsup_rv_haswell_asm_6x2m
 		}
 #endif
 
-		sgemmsup_ker_ft ker_fps[6] =
+		gemmsup_ker_ft  ker_fps[6] =
 		{
 		  NULL,
 		  bli_sgemmsup_rv_haswell_asm_1x2,
@@ -4739,7 +4739,7 @@ void bli_sgemmsup_rv_haswell_asm_6x2m
 		  bli_sgemmsup_rv_haswell_asm_5x2
 		};
 
-		sgemmsup_ker_ft ker_fp = ker_fps[ m_left ];
+		gemmsup_ker_ft  ker_fp = ker_fps[ m_left ];
 
 		ker_fp
 		(

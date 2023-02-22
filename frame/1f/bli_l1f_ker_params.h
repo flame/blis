@@ -32,122 +32,71 @@
 
 */
 
-#ifndef BLIS_L1F_FT_KER_H
-#define BLIS_L1F_FT_KER_H
+#ifndef BLIS_L1F_KER_PARAMS_H
+#define BLIS_L1F_KER_PARAMS_H
 
 
-//
-// -- Level-1f kernel function types -------------------------------------------
-//
-
-// axpy2v
-
-#undef  GENTDEF
-#define GENTDEF( ctype, ch, opname, tsuf ) \
+#define axpy2v_params \
 \
-typedef void (*PASTECH3(ch,opname,_ker,tsuf)) \
-     ( \
              conj_t  conjx, \
              conj_t  conjy, \
              dim_t   n, \
-       const ctype*  alphax, \
-       const ctype*  alphay, \
-       const ctype*  x, inc_t incx, \
-       const ctype*  y, inc_t incy, \
-             ctype*  z, inc_t incz, \
-       const cntx_t* cntx  \
-     );
+       const void*   alphax, \
+       const void*   alphay, \
+       const void*   x, inc_t incx, \
+       const void*   y, inc_t incy, \
+             void*   z, inc_t incz
 
-INSERT_GENTDEF( axpy2v )
-
-// axpyf
-
-#undef  GENTDEF
-#define GENTDEF( ctype, ch, opname, tsuf ) \
+#define axpyf_params \
 \
-typedef void (*PASTECH3(ch,opname,_ker,tsuf)) \
-     ( \
              conj_t  conja, \
              conj_t  conjx, \
              dim_t   m, \
              dim_t   b_n, \
-       const ctype*  alpha, \
-       const ctype*  a, inc_t inca, inc_t lda, \
-       const ctype*  x, inc_t incx, \
-             ctype*  y, inc_t incy, \
-       const cntx_t* cntx  \
-     );
+       const void*   alpha, \
+       const void*   a, inc_t inca, inc_t lda, \
+       const void*   x, inc_t incx, \
+             void*   y, inc_t incy
 
-INSERT_GENTDEF( axpyf )
-
-// dotaxpyv
-
-#undef  GENTDEF
-#define GENTDEF( ctype, ch, opname, tsuf ) \
+#define dotaxpyv_params \
 \
-typedef void (*PASTECH3(ch,opname,_ker,tsuf)) \
-     ( \
              conj_t  conjxt, \
              conj_t  conjx, \
              conj_t  conjy, \
              dim_t   m, \
-       const ctype*  alpha, \
-       const ctype*  x, inc_t incx, \
-       const ctype*  y, inc_t incy, \
-             ctype*  rho, \
-             ctype*  z, inc_t incz, \
-       const cntx_t* cntx  \
-     );
+       const void*   alpha, \
+       const void*   x, inc_t incx, \
+       const void*   y, inc_t incy, \
+             void*   rho, \
+             void*   z, inc_t incz
 
-INSERT_GENTDEF( dotaxpyv )
-
-// dotxaxpyf
-
-#undef  GENTDEF
-#define GENTDEF( ctype, ch, opname, tsuf ) \
+#define dotxaxpyf_params \
 \
-typedef void (*PASTECH3(ch,opname,_ker,tsuf)) \
-     ( \
              conj_t  conjat, \
              conj_t  conja, \
              conj_t  conjw, \
              conj_t  conjx, \
              dim_t   m, \
              dim_t   b_n, \
-       const ctype*  alpha, \
-       const ctype*  a, inc_t inca, inc_t lda, \
-       const ctype*  w, inc_t incw, \
-       const ctype*  x, inc_t incx, \
-       const ctype*  beta, \
-             ctype*  y, inc_t incy, \
-             ctype*  z, inc_t incz, \
-       const cntx_t* cntx  \
-     );
+       const void*   alpha, \
+       const void*   a, inc_t inca, inc_t lda, \
+       const void*   w, inc_t incw, \
+       const void*   x, inc_t incx, \
+       const void*   beta, \
+             void*   y, inc_t incy, \
+             void*   z, inc_t incz
 
-INSERT_GENTDEF( dotxaxpyf )
-
-// dotxf
-
-#undef  GENTDEF
-#define GENTDEF( ctype, ch, opname, tsuf ) \
+#define dotxf_params \
 \
-typedef void (*PASTECH3(ch,opname,_ker,tsuf)) \
-     ( \
              conj_t  conjat, \
              conj_t  conjx, \
              dim_t   m, \
              dim_t   b_n, \
-       const ctype*  alpha, \
-       const ctype*  a, inc_t inca, inc_t lda, \
-       const ctype*  x, inc_t incx, \
-       const ctype*  beta, \
-             ctype*  y, inc_t incy, \
-       const cntx_t* cntx  \
-     );
-
-INSERT_GENTDEF( dotxf )
-
-
+       const void*   alpha, \
+       const void*   a, inc_t inca, inc_t lda, \
+       const void*   x, inc_t incx, \
+       const void*   beta, \
+             void*   y, inc_t incy
 
 #endif
 

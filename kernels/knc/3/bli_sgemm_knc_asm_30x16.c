@@ -259,19 +259,20 @@ void bli_sgemm_knc_asm_30x16
              dim_t      m,
              dim_t      n,
              dim_t      k,
-       const float*     alpha,
-       const float*     a,
-       const float*     b,
-       const float*     beta,
-             float*     c, inc_t rs_c, inc_t cs_c,
+       const void*      alpha,
+       const void*      a,
+       const void*      b,
+       const void*      beta,
+             void*      c, inc_t rs_c, inc_t cs_c,
+             auxinfo_t* data,
              auxinfo_t* data,
        const cntx_t*    cntx
      )
 {
-    float * a_next = bli_auxinfo_next_a( data );
-    float * b_next = bli_auxinfo_next_b( data );
+    float* a_next = bli_auxinfo_next_a( data );
+    float* b_next = bli_auxinfo_next_b( data );
 
-    int * offsetPtr = &offsets[0];
+    int* offsetPtr = &offsets[0];
 
     uint64_t k64 = k;
 

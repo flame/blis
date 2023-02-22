@@ -48,9 +48,9 @@ void bli_zpackm_haswell_asm_4xk
              dim_t     cdim0,
              dim_t     k0,
              dim_t     k0_max,
-       const dcomplex* kappa,
-       const dcomplex* a, inc_t inca0, inc_t lda0,
-             dcomplex* p,              inc_t ldp0,
+       const void*     kappa,
+       const void*     a, inc_t inca0, inc_t lda0,
+             void*     p,              inc_t ldp0,
        const cntx_t*   cntx
      )
 {
@@ -99,7 +99,7 @@ void bli_zpackm_haswell_asm_4xk
 
 	// NOTE: If/when this kernel ever supports scaling by kappa within the
 	// assembly region, this constraint should be lifted.
-	const bool     unitk  = bli_zeq1( *kappa );
+	const bool     unitk  = bli_zeq1( *(( dcomplex* )kappa) );
 
 
 	// -------------------------------------------------------------------------
@@ -380,7 +380,7 @@ void bli_zpackm_haswell_asm_4xk
 			const dim_t        i      = cdim0;
 			const dim_t        m_edge = mnr - cdim0;
 			const dim_t        n_edge = k0_max;
-			dcomplex* restrict p_edge = p + (i  )*1;
+			dcomplex* restrict p_edge = ( dcomplex* )p + (i  )*1;
 
 			bli_zset0s_mxn
 			(
@@ -398,7 +398,7 @@ void bli_zpackm_haswell_asm_4xk
 		const dim_t        j      = k0;
 		const dim_t        m_edge = mnr;
 		const dim_t        n_edge = k0_max - k0;
-		dcomplex* restrict p_edge = p + (j  )*ldp;
+		dcomplex* restrict p_edge = ( dcomplex* )p + (j  )*ldp;
 
 		bli_zset0s_mxn
 		(

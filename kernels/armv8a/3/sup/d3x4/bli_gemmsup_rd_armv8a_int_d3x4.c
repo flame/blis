@@ -64,11 +64,11 @@ void bli_dgemmsup_rd_armv8a_int_3x4
              dim_t      m0,
              dim_t      n0,
              dim_t      k0,
-       const double*    alpha,
-       const double*    a, inc_t rs_a, inc_t cs_a,
-       const double*    b, inc_t rs_b, inc_t cs_b,
-       const double*    beta,
-             double*    c, inc_t rs_c, inc_t cs_c,
+       const void*      alpha,
+       const void*      a, inc_t rs_a, inc_t cs_a,
+       const void*      b, inc_t rs_b, inc_t cs_b,
+       const void*      beta,
+             void*      c, inc_t rs_c, inc_t cs_c,
              auxinfo_t* data,
        const cntx_t*    cntx
      )
@@ -94,7 +94,7 @@ void bli_dgemmsup_rd_armv8a_int_3x4
 
   uint64_t k_mker = k0 / 2;
   uint64_t k_left = k0 % 2;
-  uint64_t b_iszr = ( *beta == 0.0 );
+  uint64_t b_iszr = ( *(( double* )beta) == 0.0 );
 
   assert( cs_a == 1 );
   assert( rs_b == 1 );

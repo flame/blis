@@ -54,9 +54,9 @@ void bli_spackm_armv8a_int_12xk
              dim_t   cdim0,
              dim_t   k0,
              dim_t   k0_max,
-       const float*  kappa,
-       const float*  a, inc_t inca0, inc_t lda0,
-             float*  p,              inc_t ldp0,
+       const void*   kappa,
+       const void*   a, inc_t inca0, inc_t lda0,
+             void*   p,              inc_t ldp0,
        const cntx_t* cntx
      )
 {
@@ -87,7 +87,7 @@ void bli_spackm_armv8a_int_12xk
 
   // NOTE: If/when this kernel ever supports scaling by kappa within the
   // assembly region, this constraint should be lifted.
-  const bool     unitk  = bli_seq1( *kappa );
+  const bool     unitk  = bli_seq1( *(( float* )kappa) );
 
 
   // -------------------------------------------------------------------------
@@ -405,7 +405,7 @@ void bli_spackm_armv8a_int_12xk
       const dim_t     i      = cdim0;
       const dim_t     m_edge = mnr - cdim0;
       const dim_t     n_edge = k0_max;
-      float* restrict p_edge = p + (i  )*1;
+      float* restrict p_edge = ( float* )p + (i  )*1;
 
       bli_sset0s_mxn
       (
@@ -423,7 +423,7 @@ void bli_spackm_armv8a_int_12xk
     const dim_t     j      = k0;
     const dim_t     m_edge = mnr;
     const dim_t     n_edge = k0_max - k0;
-    float* restrict p_edge = p + (j  )*ldp;
+    float* restrict p_edge = ( float* )p + (j  )*ldp;
 
     bli_sset0s_mxn
     (

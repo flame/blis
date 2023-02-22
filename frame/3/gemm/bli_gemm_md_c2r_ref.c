@@ -44,11 +44,11 @@ void PASTEMAC2(ch,opname,suf) \
              dim_t      m, \
              dim_t      n, \
              dim_t      k, \
-       const ctype*     alpha, \
-       const ctype*     a, \
-       const ctype*     b, \
-       const ctype*     beta, \
-             ctype*     c, inc_t rs_c, inc_t cs_c, \
+       const void*      alpha, \
+       const void*      a, \
+       const void*      b, \
+       const void*      beta, \
+             void*      c, inc_t rs_c, inc_t cs_c, \
              auxinfo_t* data, \
        const cntx_t*    cntx  \
      ) \
@@ -56,8 +56,7 @@ void PASTEMAC2(ch,opname,suf) \
 	const num_t       dt        = PASTEMAC(ch,type); \
 	const num_t       dt_r      = PASTEMAC(chr,type); \
 \
-	PASTECH(chr,gemm_ukr_ft) \
-	                  rgemm_ukr = bli_cntx_get_ukr_dt( dt_r, BLIS_GEMM_UKR, cntx ); \
+	      gemm_ukr_ft rgemm_ukr = bli_cntx_get_ukr_dt( dt_r, BLIS_GEMM_UKR, cntx ); \
 	const bool        col_pref  = bli_cntx_ukr_prefers_cols_dt( dt_r, BLIS_GEMM_UKR, cntx ); \
 	const bool        row_pref  = !col_pref; \
 \
@@ -79,11 +78,11 @@ void PASTEMAC2(ch,opname,suf) \
 \
 	const ctype_r*    zero_r    = PASTEMAC(chr,0); \
 \
-	const ctype_r*    alpha_r   = &PASTEMAC(ch,real)( *alpha ); \
-	   /* ctype_r*    alpha_i   = &PASTEMAC(ch,imag)( *alpha ); */ \
+	const ctype_r*    alpha_r   = &PASTEMAC(ch,real)( *(( ctype* )alpha) ); \
+	   /* ctype_r*    alpha_i   = &PASTEMAC(ch,imag)( *(( ctype* )alpha) ); */ \
 \
-	const ctype_r*    beta_r    = &PASTEMAC(ch,real)( *beta ); \
-	const ctype_r*    beta_i    = &PASTEMAC(ch,imag)( *beta ); \
+	const ctype_r*    beta_r    = &PASTEMAC(ch,real)( *(( ctype* )beta) ); \
+	const ctype_r*    beta_i    = &PASTEMAC(ch,imag)( *(( ctype* )beta) ); \
 \
 	      bool        using_ct; \
 \
@@ -166,22 +165,28 @@ PASTEMAC(chr,fprintm)( stdout, "gemm_ukr: c before", mr, nr, \
 		); \
 \
 		/* Accumulate the final result in ct back to c. */ \
-		if ( PASTEMAC(ch,eq1)( *beta ) ) \
+		if ( PASTEMAC(ch,eq1)( *(( ctype* )beta) ) ) \
 		{ \
 			for ( dim_t j = 0; j < n; ++j ) \
 			for ( dim_t i = 0; i < m; ++i ) \
 			{ \
-				PASTEMAC(ch,adds)( *(ct + i*rs_ct + j*cs_ct), \
-				                   *(c  + i*rs_c  + j*cs_c ) ); \
+				PASTEMAC(ch,adds) \
+				( \
+				  *(          ct + i*rs_ct + j*cs_ct), \
+				  *(( ctype* )c  + i*rs_c  + j*cs_c )  \
+				); \
 			} \
 		} \
-		else if ( PASTEMAC(ch,eq0)( *beta ) ) \
+		else if ( PASTEMAC(ch,eq0)( *(( ctype* )beta )) ) \
 		{ \
 			for ( dim_t j = 0; j < n; ++j ) \
 			for ( dim_t i = 0; i < m; ++i ) \
 			{ \
-				PASTEMAC(ch,copys)( *(ct + i*rs_ct + j*cs_ct), \
-				                    *(c  + i*rs_c  + j*cs_c ) ); \
+				PASTEMAC(ch,copys) \
+				( \
+				  *(          ct + i*rs_ct + j*cs_ct), \
+				  *(( ctype* )c  + i*rs_c  + j*cs_c )  \
+				); \
 			} \
 		} \
 		else \
@@ -189,9 +194,12 @@ PASTEMAC(chr,fprintm)( stdout, "gemm_ukr: c before", mr, nr, \
 			for ( dim_t j = 0; j < n; ++j ) \
 			for ( dim_t i = 0; i < m; ++i ) \
 			{ \
-				PASTEMAC(ch,xpbys)( *(ct + i*rs_ct + j*cs_ct), \
-				                    *beta, \
-				                    *(c  + i*rs_c  + j*cs_c ) ); \
+				PASTEMAC(ch,xpbys) \
+				( \
+				  *(          ct + i*rs_ct + j*cs_ct), \
+				  *(( ctype* )beta                  ), \
+				  *(( ctype* )c  + i*rs_c  + j*cs_c )  \
+				); \
 			} \
 		} \
 	} \

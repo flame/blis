@@ -39,13 +39,17 @@ void bli_ddotv_bgq_int
              conj_t  conjx,
              conj_t  conjy,
              dim_t   n,
-       const double* x, inc_t incx,
-       const double* y, inc_t incy,
-             double* rho,
+       const void*   x0, inc_t incx,
+       const void*   y0, inc_t incy,
+             void*   rho0,
        const cntx_t* cntx
      )
 {
-	bool   use_ref = FALSE;
+	const double* x   = x0;
+	const double* y   = y0;
+	const double* rho = rho0;
+
+	bool use_ref = FALSE;
 
 	// If the vector lengths are zero, set rho to zero and return.
 	if ( bli_zero_dim1( n ) ) {

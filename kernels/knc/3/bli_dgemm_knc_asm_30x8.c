@@ -259,19 +259,19 @@ void bli_dgemm_knc_asm_30x8
              dim_t      m,
              dim_t      n,
              dim_t      k,
-       const double*    alpha,
-       const double*    a,
-       const double*    b,
-       const double*    beta,
-             double*    c, inc_t rs_c, inc_t cs_c,
+       const void*      alpha,
+       const void*      a,
+       const void*      b,
+       const void*      beta,
+             void*      c, inc_t rs_c, inc_t cs_c,
              auxinfo_t* data,
        const cntx_t*    cntx
      )
 {
-    double * a_next = bli_auxinfo_next_a( data );
-    double * b_next = bli_auxinfo_next_b( data );
+    double* a_next = bli_auxinfo_next_a( data );
+    double* b_next = bli_auxinfo_next_b( data );
 
-    int * offsetPtr = &offsets[0];
+    int* offsetPtr = &offsets[0];
 
     uint64_t k64 = k;
 
