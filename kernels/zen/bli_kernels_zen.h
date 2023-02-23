@@ -96,7 +96,10 @@ COPYV_KER_PROT( float,      s, copyv_zen_int )
 COPYV_KER_PROT( double,     d, copyv_zen_int )
 COPYV_KER_PROT( dcomplex,   z, copyv_zen_int )
 
-//
+// scal2v (intrinsics)
+SCAL2V_KER_PROT(dcomplex, z, scal2v_zen_int)
+
+// setv (intrinsics)
 SETV_KER_PROT(float,    s, setv_zen_int)
 SETV_KER_PROT(double,   d, setv_zen_int)
 
