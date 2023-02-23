@@ -73,7 +73,7 @@ void PASTEMAC3(ch,opname,arch,suf) \
 		); \
 		return; \
 	} \
-	else if ( PASTEMAC(ch,eq0)( *alpha ) ) \
+	else if ( PASTEMAC(ch,eq1)( *alpha ) ) \
 	{ \
 		/* If alpha is one, use copyv. */ \
 \
@@ -83,7 +83,7 @@ void PASTEMAC3(ch,opname,arch,suf) \
 \
 		copyv_p \
 		( \
-		  BLIS_NO_CONJUGATE, \
+		  conjx, \
 		  n, \
 		  x0, incx, \
 		  y0, incy, \
