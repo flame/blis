@@ -1353,7 +1353,7 @@ BLIS_INLINE void bli_obj_init_full_shallow_copy_of( obj_t* a, obj_t* b )
 	b->ker_params  = a->ker_params;
 }
 
-BLIS_INLINE void bli_obj_init_subpart_from( obj_t* a, obj_t* b )
+BLIS_INLINE void bli_obj_init_subpart_from( const obj_t* a, obj_t* b )
 {
 	b->root        = a->root;
 
