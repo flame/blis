@@ -47,7 +47,8 @@ LPGEMM_M_FRINGE_KERN(float,float,float,f32f32f32of32_5x16)
               &&POST_OPS_BIAS_5x16F,
               &&POST_OPS_RELU_5x16F,
               &&POST_OPS_RELU_SCALE_5x16F,
-              &&POST_OPS_GELU_5x16F,
+              &&POST_OPS_GELU_TANH_5x16F,
+              &&POST_OPS_GELU_ERF_5x16F,
             };
     // Typecast local copies of integers in case dim_t and inc_t are a
     // different size than is expected by load instructions.
@@ -305,7 +306,7 @@ POST_OPS_RELU_SCALE_5x16F:
 
       POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
     }
-POST_OPS_GELU_5x16F:
+POST_OPS_GELU_TANH_5x16F:
     {
       __m256 dn, x_tanh;
       __m256i q;
@@ -342,6 +343,40 @@ POST_OPS_GELU_5x16F:
 
       POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
     }
+POST_OPS_GELU_ERF_5x16F:
+    {
+      // c[0,0-7]
+      GELU_ERF_F32S_AVX2(ymm4, ymm0, ymm1, ymm2)
+
+      // c[0,8-15]
+      GELU_ERF_F32S_AVX2(ymm5, ymm0, ymm1, ymm2)
+
+      // c[1,0-7]
+      GELU_ERF_F32S_AVX2(ymm6, ymm0, ymm1, ymm2)
+
+      // c[1,8-15]
+      GELU_ERF_F32S_AVX2(ymm7, ymm0, ymm1, ymm2)
+
+      // c[2,0-7]
+      GELU_ERF_F32S_AVX2(ymm8, ymm0, ymm1, ymm2)
+
+      // c[2,8-15]
+      GELU_ERF_F32S_AVX2(ymm9, ymm0, ymm1, ymm2)
+
+      // c[3,0-7]
+      GELU_ERF_F32S_AVX2(ymm10, ymm0, ymm1, ymm2)
+
+      // c[3,8-15]
+      GELU_ERF_F32S_AVX2(ymm11, ymm0, ymm1, ymm2)
+
+      // c[4,0-7]
+      GELU_ERF_F32S_AVX2(ymm12, ymm0, ymm1, ymm2)
+
+      // c[4,8-15]
+      GELU_ERF_F32S_AVX2(ymm13, ymm0, ymm1, ymm2)
+
+      POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+    }
 POST_OPS_5x16F_DISABLE:
     ;
 
@@ -369,7 +404,8 @@ LPGEMM_M_FRINGE_KERN(float,float,float,f32f32f32of32_4x16)
               &&POST_OPS_BIAS_4x16F,
               &&POST_OPS_RELU_4x16F,
               &&POST_OPS_RELU_SCALE_4x16F,
-              &&POST_OPS_GELU_4x16F,
+              &&POST_OPS_GELU_TANH_4x16F,
+              &&POST_OPS_GELU_ERF_4x16F,
             };
     // Typecast local copies of integers in case dim_t and inc_t are a
     // different size than is expected by load instructions.
@@ -423,7 +459,8 @@ LPGEMM_M_FRINGE_KERN(float,float,float,f32f32f32of32_4x16)
 
     ymm0 = _mm256_broadcast_ss(&(alpha));
     ALPHA_MUL_ACC_YMM_4_REG(ymm4,ymm5,ymm6,ymm7,ymm0)
-    ALPHA_MUL_ACC_YMM_4_REG(ymm8,ymm9,ymm10,ymm11,ymm0)
+    ALPHA_MUL_ACC_YMM_4_REG(ymm8,ymm9,ymm10,ymm11,ymm0)
+
 
     if ( beta != 0.0 )
     {
@@ -588,7 +625,7 @@ POST_OPS_RELU_SCALE_4x16F:
 
       POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
     }
-POST_OPS_GELU_4x16F:
+POST_OPS_GELU_TANH_4x16F:
     {
       __m256 dn, x_tanh;
       __m256i q;
@@ -619,6 +656,34 @@ POST_OPS_GELU_4x16F:
 
       POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
     }
+POST_OPS_GELU_ERF_4x16F:
+    {
+      // c[0,0-7]
+      GELU_ERF_F32S_AVX2(ymm4, ymm0, ymm1, ymm2)
+
+      // c[0,8-15]
+      GELU_ERF_F32S_AVX2(ymm5, ymm0, ymm1, ymm2)
+
+      // c[1,0-7]
+      GELU_ERF_F32S_AVX2(ymm6, ymm0, ymm1, ymm2)
+
+      // c[1,8-15]
+      GELU_ERF_F32S_AVX2(ymm7, ymm0, ymm1, ymm2)
+
+      // c[2,0-7]
+      GELU_ERF_F32S_AVX2(ymm8, ymm0, ymm1, ymm2)
+
+      // c[2,8-15]
+      GELU_ERF_F32S_AVX2(ymm9, ymm0, ymm1, ymm2)
+
+      // c[3,0-7]
+      GELU_ERF_F32S_AVX2(ymm10, ymm0, ymm1, ymm2)
+
+      // c[3,8-15]
+      GELU_ERF_F32S_AVX2(ymm11, ymm0, ymm1, ymm2)
+
+      POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+    }
 POST_OPS_4x16F_DISABLE:
     ;
 
@@ -643,7 +708,8 @@ LPGEMM_M_FRINGE_KERN(float,float,float,f32f32f32of32_3x16)
               &&POST_OPS_BIAS_3x16F,
               &&POST_OPS_RELU_3x16F,
               &&POST_OPS_RELU_SCALE_3x16F,
-              &&POST_OPS_GELU_3x16F,
+              &&POST_OPS_GELU_TANH_3x16F,
+              &&POST_OPS_GELU_ERF_3x16F,
             };
     // Typecast local copies of integers in case dim_t and inc_t are a
     // different size than is expected by load instructions.
@@ -693,7 +759,8 @@ LPGEMM_M_FRINGE_KERN(float,float,float,f32f32f32of32_3x16)
 
     ymm0 = _mm256_broadcast_ss(&(alpha));
     ALPHA_MUL_ACC_YMM_4_REG(ymm4,ymm5,ymm6,ymm7,ymm0)
-    ALPHA_MUL_ACC_YMM_4_REG(ymm8,ymm9,ymm2,ymm3,ymm0)
+    ALPHA_MUL_ACC_YMM_4_REG(ymm8,ymm9,ymm2,ymm3,ymm0)
+
 
     if ( beta != 0.0 )
     {
@@ -829,7 +896,7 @@ POST_OPS_RELU_SCALE_3x16F:
 
       POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
     }
-POST_OPS_GELU_3x16F:
+POST_OPS_GELU_TANH_3x16F:
     {
       __m256 dn, x_tanh;
       __m256i q;
@@ -854,6 +921,28 @@ POST_OPS_GELU_3x16F:
 
       POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
     }
+POST_OPS_GELU_ERF_3x16F:
+    {
+      // c[0,0-7]
+      GELU_ERF_F32S_AVX2(ymm4, ymm0, ymm1, ymm2)
+
+      // c[0,8-15]
+      GELU_ERF_F32S_AVX2(ymm5, ymm0, ymm1, ymm2)
+
+      // c[1,0-7]
+      GELU_ERF_F32S_AVX2(ymm6, ymm0, ymm1, ymm2)
+
+      // c[1,8-15]
+      GELU_ERF_F32S_AVX2(ymm7, ymm0, ymm1, ymm2)
+
+      // c[2,0-7]
+      GELU_ERF_F32S_AVX2(ymm8, ymm0, ymm1, ymm2)
+
+      // c[2,8-15]
+      GELU_ERF_F32S_AVX2(ymm9, ymm0, ymm1, ymm2)
+
+      POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+    }
 POST_OPS_3x16F_DISABLE:
     ;
 
@@ -875,7 +964,8 @@ LPGEMM_M_FRINGE_KERN(float,float,float,f32f32f32of32_2x16)
               &&POST_OPS_BIAS_2x16F,
               &&POST_OPS_RELU_2x16F,
               &&POST_OPS_RELU_SCALE_2x16F,
-              &&POST_OPS_GELU_2x16F,
+              &&POST_OPS_GELU_TANH_2x16F,
+              &&POST_OPS_GELU_ERF_2x16F,
             };
     // Typecast local copies of integers in case dim_t and inc_t are a
     // different size than is expected by load instructions.
@@ -916,7 +1006,8 @@ LPGEMM_M_FRINGE_KERN(float,float,float,f32f32f32of32_2x16)
     }//kloop
 
     ymm0 = _mm256_broadcast_ss(&(alpha));
-    ALPHA_MUL_ACC_YMM_4_REG(ymm4,ymm5,ymm6,ymm7,ymm0)
+    ALPHA_MUL_ACC_YMM_4_REG(ymm4,ymm5,ymm6,ymm7,ymm0)
+
 
     if ( beta != 0.0 )
     {
@@ -1023,7 +1114,7 @@ POST_OPS_RELU_SCALE_2x16F:
 
       POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
     }
-POST_OPS_GELU_2x16F:
+POST_OPS_GELU_TANH_2x16F:
     {
       __m256 dn, x_tanh;
       __m256i q;
@@ -1039,6 +1130,22 @@ POST_OPS_GELU_2x16F:
 
       // c[1,8-15]
       GELU_TANH_F32S_AVX2(ymm7, ymm0, ymm1, ymm2, ymm3, dn, x_tanh, q)
+
+      POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+    }
+POST_OPS_GELU_ERF_2x16F:
+    {
+      // c[0,0-7]
+      GELU_ERF_F32S_AVX2(ymm4, ymm0, ymm1, ymm2)
+
+      // c[0,8-15]
+      GELU_ERF_F32S_AVX2(ymm5, ymm0, ymm1, ymm2)
+
+      // c[1,0-7]
+      GELU_ERF_F32S_AVX2(ymm6, ymm0, ymm1, ymm2)
+
+      // c[1,8-15]
+      GELU_ERF_F32S_AVX2(ymm7, ymm0, ymm1, ymm2)
 
       POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
     }
@@ -1060,7 +1167,8 @@ LPGEMM_M_FRINGE_KERN(float,float,float,f32f32f32of32_1x16)
               &&POST_OPS_BIAS_1x16F,
               &&POST_OPS_RELU_1x16F,
               &&POST_OPS_RELU_SCALE_1x16F,
-              &&POST_OPS_GELU_1x16F,
+              &&POST_OPS_GELU_TANH_1x16F,
+              &&POST_OPS_GELU_ERF_1x16F,
             };
     // Typecast local copies of integers in case dim_t and inc_t are a
     // different size than is expected by load instructions.
@@ -1098,7 +1206,8 @@ LPGEMM_M_FRINGE_KERN(float,float,float,f32f32f32of32_1x16)
 
     ymm0 = _mm256_broadcast_ss(&(alpha));
     ymm4 = _mm256_mul_ps(ymm4,ymm0);
-    ymm5 = _mm256_mul_ps(ymm5,ymm0);
+    ymm5 = _mm256_mul_ps(ymm5,ymm0);
+
 
     if ( beta != 0.0 )
     {
@@ -1175,7 +1284,7 @@ POST_OPS_RELU_SCALE_1x16F:
 
       POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
     }
-POST_OPS_GELU_1x16F:
+POST_OPS_GELU_TANH_1x16F:
     {
       __m256 dn, x_tanh;
       __m256i q;
@@ -1185,6 +1294,16 @@ POST_OPS_GELU_1x16F:
 
       // c[0,8-15]
       GELU_TANH_F32S_AVX2(ymm5, ymm0, ymm1, ymm2, ymm3, dn, x_tanh, q)
+
+      POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+    }
+POST_OPS_GELU_ERF_1x16F:
+    {
+      // c[0,0-7]
+      GELU_ERF_F32S_AVX2(ymm4, ymm0, ymm1, ymm2)
+
+      // c[0,8-15]
+      GELU_ERF_F32S_AVX2(ymm5, ymm0, ymm1, ymm2)
 
       POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
     }
@@ -1203,7 +1322,8 @@ LPGEMM_M_FRINGE_KERN(float,float,float,f32f32f32of32_5x8)
               &&POST_OPS_BIAS_5x8F,
               &&POST_OPS_RELU_5x8F,
               &&POST_OPS_RELU_SCALE_5x8F,
-              &&POST_OPS_GELU_5x8F,
+              &&POST_OPS_GELU_TANH_5x8F,
+              &&POST_OPS_GELU_ERF_5x8F,
             };
     // Typecast local copies of integers in case dim_t and inc_t are a
     // different size than is expected by load instructions.
@@ -1256,7 +1376,8 @@ LPGEMM_M_FRINGE_KERN(float,float,float,f32f32f32of32_5x8)
 
     ymm0 = _mm256_broadcast_ss(&(alpha));
     ALPHA_MUL_ACC_YMM_4_REG(ymm4,ymm6,ymm8,ymm10,ymm0)
-    ymm12 = _mm256_mul_ps(ymm12,ymm0);
+    ymm12 = _mm256_mul_ps(ymm12,ymm0);
+
 
     if ( beta != 0.0 )
     {
@@ -1384,7 +1505,7 @@ POST_OPS_RELU_SCALE_5x8F:
 
       POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
     }
-POST_OPS_GELU_5x8F:
+POST_OPS_GELU_TANH_5x8F:
     {
       __m256 dn, x_tanh;
       __m256i q;
@@ -1403,6 +1524,25 @@ POST_OPS_GELU_5x8F:
 
       // c[4,0-7]
       GELU_TANH_F32S_AVX2(ymm12, ymm0, ymm1, ymm2, ymm3, dn, x_tanh, q)
+
+      POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+    }
+POST_OPS_GELU_ERF_5x8F:
+    {
+      // c[0,0-7]
+      GELU_ERF_F32S_AVX2(ymm4, ymm0, ymm1, ymm2)
+
+      // c[1,0-7]
+      GELU_ERF_F32S_AVX2(ymm6, ymm0, ymm1, ymm2)
+
+      // c[2,0-7]
+      GELU_ERF_F32S_AVX2(ymm8, ymm0, ymm1, ymm2)
+
+      // c[3,0-7]
+      GELU_ERF_F32S_AVX2(ymm10, ymm0, ymm1, ymm2)
+
+      // c[4,0-7]
+      GELU_ERF_F32S_AVX2(ymm12, ymm0, ymm1, ymm2)
 
       POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
     }
@@ -1428,7 +1568,8 @@ LPGEMM_M_FRINGE_KERN(float,float,float,f32f32f32of32_4x8)
               &&POST_OPS_BIAS_4x8F,
               &&POST_OPS_RELU_4x8F,
               &&POST_OPS_RELU_SCALE_4x8F,
-              &&POST_OPS_GELU_4x8F,
+              &&POST_OPS_GELU_TANH_4x8F,
+              &&POST_OPS_GELU_ERF_4x8F,
             };
     // Typecast local copies of integers in case dim_t and inc_t are a
     // different size than is expected by load instructions.
@@ -1474,7 +1615,8 @@ LPGEMM_M_FRINGE_KERN(float,float,float,f32f32f32of32_4x8)
     }//kloop
 
     ymm0 = _mm256_broadcast_ss(&(alpha));
-    ALPHA_MUL_ACC_YMM_4_REG(ymm4,ymm6,ymm8,ymm10,ymm0)
+    ALPHA_MUL_ACC_YMM_4_REG(ymm4,ymm6,ymm8,ymm10,ymm0)
+
 
     if ( beta != 0.0 )
     {
@@ -1585,7 +1727,7 @@ POST_OPS_RELU_SCALE_4x8F:
 
       POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
     }
-POST_OPS_GELU_4x8F:
+POST_OPS_GELU_TANH_4x8F:
     {
       __m256 dn, x_tanh;
       __m256i q;
@@ -1601,6 +1743,22 @@ POST_OPS_GELU_4x8F:
 
       // c[3,0-7]
       GELU_TANH_F32S_AVX2(ymm10, ymm0, ymm1, ymm2, ymm3, dn, x_tanh, q)
+
+      POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+    }
+POST_OPS_GELU_ERF_4x8F:
+    {
+      // c[0,0-7]
+      GELU_ERF_F32S_AVX2(ymm4, ymm0, ymm1, ymm2)
+
+      // c[1,0-7]
+      GELU_ERF_F32S_AVX2(ymm6, ymm0, ymm1, ymm2)
+
+      // c[2,0-7]
+      GELU_ERF_F32S_AVX2(ymm8, ymm0, ymm1, ymm2)
+
+      // c[3,0-7]
+      GELU_ERF_F32S_AVX2(ymm10, ymm0, ymm1, ymm2)
 
       POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
     }
@@ -1624,7 +1782,8 @@ LPGEMM_M_FRINGE_KERN(float,float,float,f32f32f32of32_3x8)
               &&POST_OPS_BIAS_3x8F,
               &&POST_OPS_RELU_3x8F,
               &&POST_OPS_RELU_SCALE_3x8F,
-              &&POST_OPS_GELU_3x8F,
+              &&POST_OPS_GELU_TANH_3x8F,
+              &&POST_OPS_GELU_ERF_3x8F,
             };
     // Typecast local copies of integers in case dim_t and inc_t are a
     // different size than is expected by load instructions.
@@ -1762,7 +1921,7 @@ POST_OPS_RELU_SCALE_3x8F:
 
       POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
     }
-POST_OPS_GELU_3x8F:
+POST_OPS_GELU_TANH_3x8F:
     {
       __m256 dn, x_tanh;
       __m256i q;
@@ -1775,6 +1934,19 @@ POST_OPS_GELU_3x8F:
 
       // c[2,0-7]
       GELU_TANH_F32S_AVX2(ymm8, ymm0, ymm1, ymm2, ymm3, dn, x_tanh, q)
+
+      POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+    }
+POST_OPS_GELU_ERF_3x8F:
+    {
+      // c[0,0-7]
+      GELU_ERF_F32S_AVX2(ymm4, ymm0, ymm1, ymm2)
+
+      // c[1,0-7]
+      GELU_ERF_F32S_AVX2(ymm6, ymm0, ymm1, ymm2)
+
+      // c[2,0-7]
+      GELU_ERF_F32S_AVX2(ymm8, ymm0, ymm1, ymm2)
 
       POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
     }
@@ -1796,7 +1968,8 @@ LPGEMM_M_FRINGE_KERN(float,float,float,f32f32f32of32_2x8)
               &&POST_OPS_BIAS_2x8F,
               &&POST_OPS_RELU_2x8F,
               &&POST_OPS_RELU_SCALE_2x8F,
-              &&POST_OPS_GELU_2x8F,
+              &&POST_OPS_GELU_TANH_2x8F,
+              &&POST_OPS_GELU_ERF_2x8F,
             };
     // Typecast local copies of integers in case dim_t and inc_t are a
     // different size than is expected by load instructions.
@@ -1835,7 +2008,8 @@ LPGEMM_M_FRINGE_KERN(float,float,float,f32f32f32of32_2x8)
 
     ymm0 = _mm256_broadcast_ss(&(alpha));
     ymm4 = _mm256_mul_ps(ymm4,ymm0);
-    ymm6 = _mm256_mul_ps(ymm6,ymm0);
+    ymm6 = _mm256_mul_ps(ymm6,ymm0);
+
 
     if ( beta != 0.0 )
     {
@@ -1914,7 +2088,7 @@ POST_OPS_RELU_SCALE_2x8F:
 
       POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
     }
-POST_OPS_GELU_2x8F:
+POST_OPS_GELU_TANH_2x8F:
     {
       __m256 dn, x_tanh;
       __m256i q;
@@ -1924,6 +2098,16 @@ POST_OPS_GELU_2x8F:
 
       // c[1,0-7]
       GELU_TANH_F32S_AVX2(ymm6, ymm0, ymm1, ymm2, ymm3, dn, x_tanh, q)
+
+      POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+    }
+POST_OPS_GELU_ERF_2x8F:
+    {
+      // c[0,0-7]
+      GELU_ERF_F32S_AVX2(ymm4, ymm0, ymm1, ymm2)
+
+      // c[1,0-7]
+      GELU_ERF_F32S_AVX2(ymm6, ymm0, ymm1, ymm2)
 
       POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
     }
@@ -1943,7 +2127,8 @@ LPGEMM_M_FRINGE_KERN(float,float,float,f32f32f32of32_1x8)
               &&POST_OPS_BIAS_1x8F,
               &&POST_OPS_RELU_1x8F,
               &&POST_OPS_RELU_SCALE_1x8F,
-              &&POST_OPS_GELU_1x8F,
+              &&POST_OPS_GELU_TANH_1x8F,
+              &&POST_OPS_GELU_ERF_1x8F,
             };
     // Typecast local copies of integers in case dim_t and inc_t are a
     // different size than is expected by load instructions.
@@ -1976,7 +2161,8 @@ LPGEMM_M_FRINGE_KERN(float,float,float,f32f32f32of32_1x8)
     }//kloop
 
     ymm0 = _mm256_broadcast_ss(&(alpha));
-    ymm4 = _mm256_mul_ps(ymm4,ymm0);
+    ymm4 = _mm256_mul_ps(ymm4,ymm0);
+
 
     if ( beta != 0.0 )
     {
@@ -2037,13 +2223,20 @@ POST_OPS_RELU_SCALE_1x8F:
 
       POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
     }
-POST_OPS_GELU_1x8F:
+POST_OPS_GELU_TANH_1x8F:
     {
       __m256 dn, x_tanh;
       __m256i q;
 
       // c[0,0-7]
       GELU_TANH_F32S_AVX2(ymm4, ymm0, ymm1, ymm2, ymm3, dn, x_tanh, q)
+
+      POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+    }
+POST_OPS_GELU_ERF_1x8F:
+    {
+      // c[0,0-7]
+      GELU_ERF_F32S_AVX2(ymm4, ymm0, ymm1, ymm2)
 
       POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
     }
@@ -2061,7 +2254,8 @@ LPGEMM_M_FRINGE_KERN(float,float,float,f32f32f32of32_5x4)
               &&POST_OPS_BIAS_5x4F,
               &&POST_OPS_RELU_5x4F,
               &&POST_OPS_RELU_SCALE_5x4F,
-              &&POST_OPS_GELU_5x4F,
+              &&POST_OPS_GELU_TANH_5x4F,
+              &&POST_OPS_GELU_ERF_5x4F,
             };
     // Typecast local copies of integers in case dim_t and inc_t are a
     // different size than is expected by load instructions.
@@ -2112,7 +2306,8 @@ LPGEMM_M_FRINGE_KERN(float,float,float,f32f32f32of32_5x4)
 
     xmm0 = _mm_broadcast_ss(&(alpha));
     ALPHA_MUL_ACC_XMM_4_REG(xmm4,xmm5,xmm6,xmm7,xmm0) 
-    ALPHA_MUL_ACC_XMM_4_REG(xmm8,xmm9,xmm2,xmm3,xmm0)
+    ALPHA_MUL_ACC_XMM_4_REG(xmm8,xmm9,xmm2,xmm3,xmm0)
+
 
     if ( beta != 0.0 )
     {
@@ -2240,7 +2435,7 @@ POST_OPS_RELU_SCALE_5x4F:
 
       POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
     }
-POST_OPS_GELU_5x4F:
+POST_OPS_GELU_TANH_5x4F:
     {
       __m128 dn, x_tanh;
       __m128i q;
@@ -2259,6 +2454,25 @@ POST_OPS_GELU_5x4F:
 
       // c[4,0-3]
       GELU_TANH_F32S_SSE(xmm8, xmm0, xmm1, xmm2, xmm3, dn, x_tanh, q)
+
+      POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+    }
+POST_OPS_GELU_ERF_5x4F:
+    {
+      // c[0,0-3]
+      GELU_ERF_F32S_SSE(xmm4, xmm0, xmm1, xmm2)
+
+      // c[1,0-3]
+      GELU_ERF_F32S_SSE(xmm5, xmm0, xmm1, xmm2)
+
+      // c[2,0-3]
+      GELU_ERF_F32S_SSE(xmm6, xmm0, xmm1, xmm2)
+
+      // c[3,0-3]
+      GELU_ERF_F32S_SSE(xmm7, xmm0, xmm1, xmm2)
+
+      // c[4,0-3]
+      GELU_ERF_F32S_SSE(xmm8, xmm0, xmm1, xmm2)
 
       POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
     }
@@ -2284,7 +2498,8 @@ LPGEMM_M_FRINGE_KERN(float,float,float,f32f32f32of32_4x4)
               &&POST_OPS_BIAS_4x4F,
               &&POST_OPS_RELU_4x4F,
               &&POST_OPS_RELU_SCALE_4x4F,
-              &&POST_OPS_GELU_4x4F,
+              &&POST_OPS_GELU_TANH_4x4F,
+              &&POST_OPS_GELU_ERF_4x4F,
             };
     // Typecast local copies of integers in case dim_t and inc_t are a
     // different size than is expected by load instructions.
@@ -2329,7 +2544,8 @@ LPGEMM_M_FRINGE_KERN(float,float,float,f32f32f32of32_4x4)
     }//kloop
 
     xmm0 = _mm_broadcast_ss(&(alpha));
-    ALPHA_MUL_ACC_XMM_4_REG(xmm4,xmm5,xmm6,xmm7,xmm0)
+    ALPHA_MUL_ACC_XMM_4_REG(xmm4,xmm5,xmm6,xmm7,xmm0)
+
 
     if ( beta != 0.0 )
     {
@@ -2440,7 +2656,7 @@ POST_OPS_RELU_SCALE_4x4F:
 
       POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
     }
-POST_OPS_GELU_4x4F:
+POST_OPS_GELU_TANH_4x4F:
     {
       __m128 dn, x_tanh;
       __m128i q;
@@ -2456,6 +2672,22 @@ POST_OPS_GELU_4x4F:
 
       // c[3,0-3]
       GELU_TANH_F32S_SSE(xmm7, xmm0, xmm1, xmm2, xmm3, dn, x_tanh, q)
+
+      POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+    }
+POST_OPS_GELU_ERF_4x4F:
+    {
+      // c[0,0-3]
+      GELU_ERF_F32S_SSE(xmm4, xmm0, xmm1, xmm2)
+
+      // c[1,0-3]
+      GELU_ERF_F32S_SSE(xmm5, xmm0, xmm1, xmm2)
+
+      // c[2,0-3]
+      GELU_ERF_F32S_SSE(xmm6, xmm0, xmm1, xmm2)
+
+      // c[3,0-3]
+      GELU_ERF_F32S_SSE(xmm7, xmm0, xmm1, xmm2)
 
       POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
     }
@@ -2479,7 +2711,8 @@ LPGEMM_M_FRINGE_KERN(float,float,float,f32f32f32of32_3x4)
               &&POST_OPS_BIAS_3x4F,
               &&POST_OPS_RELU_3x4F,
               &&POST_OPS_RELU_SCALE_3x4F,
-              &&POST_OPS_GELU_3x4F,
+              &&POST_OPS_GELU_TANH_3x4F,
+              &&POST_OPS_GELU_ERF_3x4F,
             };
     // Typecast local copies of integers in case dim_t and inc_t are a
     // different size than is expected by load instructions.
@@ -2518,7 +2751,8 @@ LPGEMM_M_FRINGE_KERN(float,float,float,f32f32f32of32_3x4)
     }//kloop
 
     xmm0 = _mm_broadcast_ss(&(alpha));
-    ALPHA_MUL_ACC_XMM_4_REG(xmm4,xmm5,xmm6,xmm7,xmm0)
+    ALPHA_MUL_ACC_XMM_4_REG(xmm4,xmm5,xmm6,xmm7,xmm0)
+
 
     if ( beta != 0.0 )
     {
@@ -2613,7 +2847,7 @@ POST_OPS_RELU_SCALE_3x4F:
 
       POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
     }
-POST_OPS_GELU_3x4F:
+POST_OPS_GELU_TANH_3x4F:
     {
       __m128 dn, x_tanh;
       __m128i q;
@@ -2626,6 +2860,19 @@ POST_OPS_GELU_3x4F:
 
       // c[2,0-3]
       GELU_TANH_F32S_SSE(xmm6, xmm0, xmm1, xmm2, xmm3, dn, x_tanh, q)
+
+      POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+    }
+POST_OPS_GELU_ERF_3x4F:
+    {
+      // c[0,0-3]
+      GELU_ERF_F32S_SSE(xmm4, xmm0, xmm1, xmm2)
+
+      // c[1,0-3]
+      GELU_ERF_F32S_SSE(xmm5, xmm0, xmm1, xmm2)
+
+      // c[2,0-3]
+      GELU_ERF_F32S_SSE(xmm6, xmm0, xmm1, xmm2)
 
       POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
     }
@@ -2647,7 +2894,8 @@ LPGEMM_M_FRINGE_KERN(float,float,float,f32f32f32of32_2x4)
               &&POST_OPS_BIAS_2x4F,
               &&POST_OPS_RELU_2x4F,
               &&POST_OPS_RELU_SCALE_2x4F,
-              &&POST_OPS_GELU_2x4F,
+              &&POST_OPS_GELU_TANH_2x4F,
+              &&POST_OPS_GELU_ERF_2x4F,
             };
     // Typecast local copies of integers in case dim_t and inc_t are a
     // different size than is expected by load instructions.
@@ -2685,7 +2933,8 @@ LPGEMM_M_FRINGE_KERN(float,float,float,f32f32f32of32_2x4)
 
     xmm0 = _mm_broadcast_ss(&(alpha));
     xmm4 = _mm_mul_ps(xmm4,xmm0);
-    xmm5 = _mm_mul_ps(xmm5,xmm0);
+    xmm5 = _mm_mul_ps(xmm5,xmm0);
+
 
     if ( beta != 0.0 )
     {
@@ -2764,7 +3013,7 @@ POST_OPS_RELU_SCALE_2x4F:
 
       POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
     }
-POST_OPS_GELU_2x4F:
+POST_OPS_GELU_TANH_2x4F:
     {
       __m128 dn, x_tanh;
       __m128i q;
@@ -2774,6 +3023,16 @@ POST_OPS_GELU_2x4F:
 
       // c[1,0-3]
       GELU_TANH_F32S_SSE(xmm5, xmm0, xmm1, xmm2, xmm3, dn, x_tanh, q)
+
+      POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+    }
+POST_OPS_GELU_ERF_2x4F:
+    {
+      // c[0,0-3]
+      GELU_ERF_F32S_SSE(xmm4, xmm0, xmm1, xmm2)
+
+      // c[1,0-3]
+      GELU_ERF_F32S_SSE(xmm5, xmm0, xmm1, xmm2)
 
       POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
     }
@@ -2793,7 +3052,8 @@ LPGEMM_M_FRINGE_KERN(float,float,float,f32f32f32of32_1x4)
               &&POST_OPS_BIAS_1x4F,
               &&POST_OPS_RELU_1x4F,
               &&POST_OPS_RELU_SCALE_1x4F,
-              &&POST_OPS_GELU_1x4F,
+              &&POST_OPS_GELU_TANH_1x4F,
+              &&POST_OPS_GELU_ERF_1x4F,
             };
     // Typecast local copies of integers in case dim_t and inc_t are a
     // different size than is expected by load instructions.
@@ -2823,7 +3083,8 @@ LPGEMM_M_FRINGE_KERN(float,float,float,f32f32f32of32_1x4)
     }//kloop
 
     xmm0 = _mm_broadcast_ss(&(alpha));
-    xmm4 = _mm_mul_ps(xmm4,xmm0);
+    xmm4 = _mm_mul_ps(xmm4,xmm0);
+
 
     if ( beta != 0.0 )
     {
@@ -2884,13 +3145,20 @@ POST_OPS_RELU_SCALE_1x4F:
 
       POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
     }
-POST_OPS_GELU_1x4F:
+POST_OPS_GELU_TANH_1x4F:
     {
       __m128 dn, x_tanh;
       __m128i q;
 
       // c[0,0-3]
       GELU_TANH_F32S_SSE(xmm4, xmm0, xmm1, xmm2, xmm3, dn, x_tanh, q)
+
+      POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+    }
+POST_OPS_GELU_ERF_1x4F:
+    {
+      // c[0,0-3]
+      GELU_ERF_F32S_SSE(xmm4, xmm0, xmm1, xmm2)
 
       POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
     }
@@ -2908,7 +3176,8 @@ LPGEMM_M_FRINGE_KERN(float,float,float,f32f32f32of32_5x2)
               &&POST_OPS_BIAS_5x2F,
               &&POST_OPS_RELU_5x2F,
               &&POST_OPS_RELU_SCALE_5x2F,
-              &&POST_OPS_GELU_5x2F,
+              &&POST_OPS_GELU_TANH_5x2F,
+              &&POST_OPS_GELU_ERF_5x2F,
             };
     // Typecast local copies of integers in case dim_t and inc_t are a
     // different size than is expected by load instructions.
@@ -2959,7 +3228,8 @@ LPGEMM_M_FRINGE_KERN(float,float,float,f32f32f32of32_5x2)
 
     xmm0 = _mm_broadcast_ss(&(alpha));
     ALPHA_MUL_ACC_XMM_4_REG(xmm4,xmm5,xmm6,xmm7,xmm0) 
-    ALPHA_MUL_ACC_XMM_4_REG(xmm8,xmm9,xmm2,xmm3,xmm0)
+    ALPHA_MUL_ACC_XMM_4_REG(xmm8,xmm9,xmm2,xmm3,xmm0)
+
 
     if ( beta != 0.0 )
     {
@@ -3087,7 +3357,7 @@ POST_OPS_RELU_SCALE_5x2F:
 
       POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
     }
-POST_OPS_GELU_5x2F:
+POST_OPS_GELU_TANH_5x2F:
     {
       __m128 dn, x_tanh;
       __m128i q;
@@ -3106,6 +3376,25 @@ POST_OPS_GELU_5x2F:
 
       // c[4,0-3]
       GELU_TANH_F32S_SSE(xmm8, xmm0, xmm1, xmm2, xmm3, dn, x_tanh, q)
+
+      POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+    }
+POST_OPS_GELU_ERF_5x2F:
+    {
+      // c[0,0-3]
+      GELU_ERF_F32S_SSE(xmm4, xmm0, xmm1, xmm2)
+
+      // c[1,0-3]
+      GELU_ERF_F32S_SSE(xmm5, xmm0, xmm1, xmm2)
+
+      // c[2,0-3]
+      GELU_ERF_F32S_SSE(xmm6, xmm0, xmm1, xmm2)
+
+      // c[3,0-3]
+      GELU_ERF_F32S_SSE(xmm7, xmm0, xmm1, xmm2)
+
+      // c[4,0-3]
+      GELU_ERF_F32S_SSE(xmm8, xmm0, xmm1, xmm2)
 
       POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
     }
@@ -3131,7 +3420,8 @@ LPGEMM_M_FRINGE_KERN(float,float,float,f32f32f32of32_4x2)
               &&POST_OPS_BIAS_4x2F,
               &&POST_OPS_RELU_4x2F,
               &&POST_OPS_RELU_SCALE_4x2F,
-              &&POST_OPS_GELU_4x2F,
+              &&POST_OPS_GELU_TANH_4x2F,
+              &&POST_OPS_GELU_ERF_4x2F,
             };
     // Typecast local copies of integers in case dim_t and inc_t are a
     // different size than is expected by load instructions.
@@ -3176,7 +3466,8 @@ LPGEMM_M_FRINGE_KERN(float,float,float,f32f32f32of32_4x2)
     }//kloop
 
     xmm0 = _mm_broadcast_ss(&(alpha));
-    ALPHA_MUL_ACC_XMM_4_REG(xmm4,xmm5,xmm6,xmm7,xmm0)
+    ALPHA_MUL_ACC_XMM_4_REG(xmm4,xmm5,xmm6,xmm7,xmm0)
+
 
     if ( beta != 0.0 )
     {
@@ -3287,7 +3578,7 @@ POST_OPS_RELU_SCALE_4x2F:
 
       POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
     }
-POST_OPS_GELU_4x2F:
+POST_OPS_GELU_TANH_4x2F:
     {
       __m128 dn, x_tanh;
       __m128i q;
@@ -3303,6 +3594,22 @@ POST_OPS_GELU_4x2F:
 
       // c[3,0-3]
       GELU_TANH_F32S_SSE(xmm7, xmm0, xmm1, xmm2, xmm3, dn, x_tanh, q)
+
+      POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+    }
+POST_OPS_GELU_ERF_4x2F:
+    {
+      // c[0,0-3]
+      GELU_ERF_F32S_SSE(xmm4, xmm0, xmm1, xmm2)
+
+      // c[1,0-3]
+      GELU_ERF_F32S_SSE(xmm5, xmm0, xmm1, xmm2)
+
+      // c[2,0-3]
+      GELU_ERF_F32S_SSE(xmm6, xmm0, xmm1, xmm2)
+
+      // c[3,0-3]
+      GELU_ERF_F32S_SSE(xmm7, xmm0, xmm1, xmm2)
 
       POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
     }
@@ -3326,7 +3633,8 @@ LPGEMM_M_FRINGE_KERN(float,float,float,f32f32f32of32_3x2)
               &&POST_OPS_BIAS_3x2F,
               &&POST_OPS_RELU_3x2F,
               &&POST_OPS_RELU_SCALE_3x2F,
-              &&POST_OPS_GELU_3x2F,
+              &&POST_OPS_GELU_TANH_3x2F,
+              &&POST_OPS_GELU_ERF_3x2F,
             };
     // Typecast local copies of integers in case dim_t and inc_t are a
     // different size than is expected by load instructions.
@@ -3365,7 +3673,8 @@ LPGEMM_M_FRINGE_KERN(float,float,float,f32f32f32of32_3x2)
     }//kloop
 
     xmm0 = _mm_broadcast_ss(&(alpha));
-    ALPHA_MUL_ACC_XMM_4_REG(xmm4,xmm5,xmm6,xmm7,xmm0)
+    ALPHA_MUL_ACC_XMM_4_REG(xmm4,xmm5,xmm6,xmm7,xmm0)
+
 
     if ( beta != 0.0 )
     {
@@ -3460,7 +3769,7 @@ POST_OPS_RELU_SCALE_3x2F:
 
       POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
     }
-POST_OPS_GELU_3x2F:
+POST_OPS_GELU_TANH_3x2F:
     {
       __m128 dn, x_tanh;
       __m128i q;
@@ -3473,6 +3782,19 @@ POST_OPS_GELU_3x2F:
 
       // c[2,0-3]
       GELU_TANH_F32S_SSE(xmm6, xmm0, xmm1, xmm2, xmm3, dn, x_tanh, q)
+
+      POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+    }
+POST_OPS_GELU_ERF_3x2F:
+    {
+      // c[0,0-3]
+      GELU_ERF_F32S_SSE(xmm4, xmm0, xmm1, xmm2)
+
+      // c[1,0-3]
+      GELU_ERF_F32S_SSE(xmm5, xmm0, xmm1, xmm2)
+
+      // c[2,0-3]
+      GELU_ERF_F32S_SSE(xmm6, xmm0, xmm1, xmm2)
 
       POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
     }
@@ -3494,7 +3816,8 @@ LPGEMM_M_FRINGE_KERN(float,float,float,f32f32f32of32_2x2)
               &&POST_OPS_BIAS_2x2F,
               &&POST_OPS_RELU_2x2F,
               &&POST_OPS_RELU_SCALE_2x2F,
-              &&POST_OPS_GELU_2x2F,
+              &&POST_OPS_GELU_TANH_2x2F,
+              &&POST_OPS_GELU_ERF_2x2F,
             };
     // Typecast local copies of integers in case dim_t and inc_t are a
     // different size than is expected by load instructions.
@@ -3532,7 +3855,8 @@ LPGEMM_M_FRINGE_KERN(float,float,float,f32f32f32of32_2x2)
 
     xmm0 = _mm_broadcast_ss(&(alpha));
     xmm4 = _mm_mul_ps(xmm4,xmm0);
-    xmm5 = _mm_mul_ps(xmm5,xmm0);
+    xmm5 = _mm_mul_ps(xmm5,xmm0);
+
 
     if ( beta != 0.0 )
     {
@@ -3611,7 +3935,7 @@ POST_OPS_RELU_SCALE_2x2F:
 
       POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
     }
-POST_OPS_GELU_2x2F:
+POST_OPS_GELU_TANH_2x2F:
     {
       __m128 dn, x_tanh;
       __m128i q;
@@ -3621,6 +3945,16 @@ POST_OPS_GELU_2x2F:
 
       // c[1,0-3]
       GELU_TANH_F32S_SSE(xmm5, xmm0, xmm1, xmm2, xmm3, dn, x_tanh, q)
+
+      POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+    }
+POST_OPS_GELU_ERF_2x2F:
+    {
+      // c[0,0-3]
+      GELU_ERF_F32S_SSE(xmm4, xmm0, xmm1, xmm2)
+
+      // c[1,0-3]
+      GELU_ERF_F32S_SSE(xmm5, xmm0, xmm1, xmm2)
 
       POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
     }
@@ -3640,7 +3974,8 @@ LPGEMM_M_FRINGE_KERN(float,float,float,f32f32f32of32_1x2)
               &&POST_OPS_BIAS_1x2F,
               &&POST_OPS_RELU_1x2F,
               &&POST_OPS_RELU_SCALE_1x2F,
-              &&POST_OPS_GELU_1x2F,
+              &&POST_OPS_GELU_TANH_1x2F,
+              &&POST_OPS_GELU_ERF_1x2F,
             };
     // Typecast local copies of integers in case dim_t and inc_t are a
     // different size than is expected by load instructions.
@@ -3670,7 +4005,8 @@ LPGEMM_M_FRINGE_KERN(float,float,float,f32f32f32of32_1x2)
     }//kloop
 
     xmm0 = _mm_broadcast_ss(&(alpha));
-    xmm4 = _mm_mul_ps(xmm4,xmm0);
+    xmm4 = _mm_mul_ps(xmm4,xmm0);
+
 
     if ( beta != 0.0 )
     {
@@ -3731,13 +4067,20 @@ POST_OPS_RELU_SCALE_1x2F:
 
       POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
     }
-POST_OPS_GELU_1x2F:
+POST_OPS_GELU_TANH_1x2F:
     {
       __m128 dn, x_tanh;
       __m128i q;
 
       // c[0,0-3]
       GELU_TANH_F32S_SSE(xmm4, xmm0, xmm1, xmm2, xmm3, dn, x_tanh, q)
+
+      POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+    }
+POST_OPS_GELU_ERF_1x2F:
+    {
+      // c[0,0-3]
+      GELU_ERF_F32S_SSE(xmm4, xmm0, xmm1, xmm2)
 
       POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
     }
@@ -3755,7 +4098,8 @@ LPGEMM_M_FRINGE_KERN(float,float,float,f32f32f32of32_5x1)
               &&POST_OPS_BIAS_5x1F,
               &&POST_OPS_RELU_5x1F,
               &&POST_OPS_RELU_SCALE_5x1F,
-              &&POST_OPS_GELU_5x1F,
+              &&POST_OPS_GELU_TANH_5x1F,
+              &&POST_OPS_GELU_ERF_5x1F,
             };
     // Typecast local copies of integers in case dim_t and inc_t are a
     // different size than is expected by load instructions.
@@ -3806,7 +4150,8 @@ LPGEMM_M_FRINGE_KERN(float,float,float,f32f32f32of32_5x1)
 
     xmm0 = _mm_broadcast_ss(&(alpha));
     ALPHA_MUL_ACC_XMM_4_REG(xmm4,xmm5,xmm6,xmm7,xmm0) 
-    ALPHA_MUL_ACC_XMM_4_REG(xmm8,xmm9,xmm2,xmm3,xmm0)
+    ALPHA_MUL_ACC_XMM_4_REG(xmm8,xmm9,xmm2,xmm3,xmm0)
+
 
     if ( beta != 0.0 )
     {
@@ -3934,7 +4279,7 @@ POST_OPS_RELU_SCALE_5x1F:
 
       POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
     }
-POST_OPS_GELU_5x1F:
+POST_OPS_GELU_TANH_5x1F:
     {
       __m128 dn, x_tanh;
       __m128i q;
@@ -3953,6 +4298,25 @@ POST_OPS_GELU_5x1F:
 
       // c[4,0-3]
       GELU_TANH_F32S_SSE(xmm8, xmm0, xmm1, xmm2, xmm3, dn, x_tanh, q)
+
+      POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+    }
+POST_OPS_GELU_ERF_5x1F:
+    {
+      // c[0,0-3]
+      GELU_ERF_F32S_SSE(xmm4, xmm0, xmm1, xmm2)
+
+      // c[1,0-3]
+      GELU_ERF_F32S_SSE(xmm5, xmm0, xmm1, xmm2)
+
+      // c[2,0-3]
+      GELU_ERF_F32S_SSE(xmm6, xmm0, xmm1, xmm2)
+
+      // c[3,0-3]
+      GELU_ERF_F32S_SSE(xmm7, xmm0, xmm1, xmm2)
+
+      // c[4,0-3]
+      GELU_ERF_F32S_SSE(xmm8, xmm0, xmm1, xmm2)
 
       POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
     }
@@ -3978,7 +4342,8 @@ LPGEMM_M_FRINGE_KERN(float,float,float,f32f32f32of32_4x1)
               &&POST_OPS_BIAS_4x1F,
               &&POST_OPS_RELU_4x1F,
               &&POST_OPS_RELU_SCALE_4x1F,
-              &&POST_OPS_GELU_4x1F,
+              &&POST_OPS_GELU_TANH_4x1F,
+              &&POST_OPS_GELU_ERF_4x1F,
             };
     // Typecast local copies of integers in case dim_t and inc_t are a
     // different size than is expected by load instructions.
@@ -4023,7 +4388,8 @@ LPGEMM_M_FRINGE_KERN(float,float,float,f32f32f32of32_4x1)
     }//kloop
 
     xmm0 = _mm_broadcast_ss(&(alpha));
-    ALPHA_MUL_ACC_XMM_4_REG(xmm4,xmm5,xmm6,xmm7,xmm0)
+    ALPHA_MUL_ACC_XMM_4_REG(xmm4,xmm5,xmm6,xmm7,xmm0)
+
 
     if ( beta != 0.0 )
     {
@@ -4134,7 +4500,7 @@ POST_OPS_RELU_SCALE_4x1F:
 
       POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
     }
-POST_OPS_GELU_4x1F:
+POST_OPS_GELU_TANH_4x1F:
     {
       __m128 dn, x_tanh;
       __m128i q;
@@ -4150,6 +4516,22 @@ POST_OPS_GELU_4x1F:
 
       // c[3,0-3]
       GELU_TANH_F32S_SSE(xmm7, xmm0, xmm1, xmm2, xmm3, dn, x_tanh, q)
+
+      POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+    }
+POST_OPS_GELU_ERF_4x1F:
+    {
+      // c[0,0-3]
+      GELU_ERF_F32S_SSE(xmm4, xmm0, xmm1, xmm2)
+
+      // c[1,0-3]
+      GELU_ERF_F32S_SSE(xmm5, xmm0, xmm1, xmm2)
+
+      // c[2,0-3]
+      GELU_ERF_F32S_SSE(xmm6, xmm0, xmm1, xmm2)
+
+      // c[3,0-3]
+      GELU_ERF_F32S_SSE(xmm7, xmm0, xmm1, xmm2)
 
       POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
     }
@@ -4173,7 +4555,8 @@ LPGEMM_M_FRINGE_KERN(float,float,float,f32f32f32of32_3x1)
               &&POST_OPS_BIAS_3x1F,
               &&POST_OPS_RELU_3x1F,
               &&POST_OPS_RELU_SCALE_3x1F,
-              &&POST_OPS_GELU_3x1F,
+              &&POST_OPS_GELU_TANH_3x1F,
+              &&POST_OPS_GELU_ERF_3x1F,
             };
     // Typecast local copies of integers in case dim_t and inc_t are a
     // different size than is expected by load instructions.
@@ -4212,7 +4595,8 @@ LPGEMM_M_FRINGE_KERN(float,float,float,f32f32f32of32_3x1)
     }//kloop
 
     xmm0 = _mm_broadcast_ss(&(alpha));
-    ALPHA_MUL_ACC_XMM_4_REG(xmm4,xmm5,xmm6,xmm7,xmm0)
+    ALPHA_MUL_ACC_XMM_4_REG(xmm4,xmm5,xmm6,xmm7,xmm0)
+
 
     if ( beta != 0.0 )
     {
@@ -4307,7 +4691,7 @@ POST_OPS_RELU_SCALE_3x1F:
 
       POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
     }
-POST_OPS_GELU_3x1F:
+POST_OPS_GELU_TANH_3x1F:
     {
       __m128 dn, x_tanh;
       __m128i q;
@@ -4320,6 +4704,19 @@ POST_OPS_GELU_3x1F:
 
       // c[2,0-3]
       GELU_TANH_F32S_SSE(xmm6, xmm0, xmm1, xmm2, xmm3, dn, x_tanh, q)
+
+      POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+    }
+POST_OPS_GELU_ERF_3x1F:
+    {
+      // c[0,0-3]
+      GELU_ERF_F32S_SSE(xmm4, xmm0, xmm1, xmm2)
+
+      // c[1,0-3]
+      GELU_ERF_F32S_SSE(xmm5, xmm0, xmm1, xmm2)
+
+      // c[2,0-3]
+      GELU_ERF_F32S_SSE(xmm6, xmm0, xmm1, xmm2)
 
       POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
     }
@@ -4341,7 +4738,8 @@ LPGEMM_M_FRINGE_KERN(float,float,float,f32f32f32of32_2x1)
               &&POST_OPS_BIAS_2x1F,
               &&POST_OPS_RELU_2x1F,
               &&POST_OPS_RELU_SCALE_2x1F,
-              &&POST_OPS_GELU_2x1F,
+              &&POST_OPS_GELU_TANH_2x1F,
+              &&POST_OPS_GELU_ERF_2x1F,
             };
     // Typecast local copies of integers in case dim_t and inc_t are a
     // different size than is expected by load instructions.
@@ -4379,7 +4777,8 @@ LPGEMM_M_FRINGE_KERN(float,float,float,f32f32f32of32_2x1)
 
     xmm0 = _mm_broadcast_ss(&(alpha));
     xmm4 = _mm_mul_ps(xmm4,xmm0);
-    xmm5 = _mm_mul_ps(xmm5,xmm0);
+    xmm5 = _mm_mul_ps(xmm5,xmm0);
+
 
     if ( beta != 0.0 )
     {
@@ -4458,7 +4857,7 @@ POST_OPS_RELU_SCALE_2x1F:
 
       POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
     }
-POST_OPS_GELU_2x1F:
+POST_OPS_GELU_TANH_2x1F:
     {
       __m128 dn, x_tanh;
       __m128i q;
@@ -4468,6 +4867,16 @@ POST_OPS_GELU_2x1F:
 
       // c[1,0-3]
       GELU_TANH_F32S_SSE(xmm5, xmm0, xmm1, xmm2, xmm3, dn, x_tanh, q)
+
+      POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+    }
+POST_OPS_GELU_ERF_2x1F:
+    {
+      // c[0,0-3]
+      GELU_ERF_F32S_SSE(xmm4, xmm0, xmm1, xmm2)
+
+      // c[1,0-3]
+      GELU_ERF_F32S_SSE(xmm5, xmm0, xmm1, xmm2)
 
       POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
     }
@@ -4487,7 +4896,8 @@ LPGEMM_M_FRINGE_KERN(float,float,float,f32f32f32of32_1x1)
               &&POST_OPS_BIAS_1x1F,
               &&POST_OPS_RELU_1x1F,
               &&POST_OPS_RELU_SCALE_1x1F,
-              &&POST_OPS_GELU_1x1F,
+              &&POST_OPS_GELU_TANH_1x1F,
+              &&POST_OPS_GELU_ERF_1x1F,
             };
     // Typecast local copies of integers in case dim_t and inc_t are a
     // different size than is expected by load instructions.
@@ -4517,7 +4927,8 @@ LPGEMM_M_FRINGE_KERN(float,float,float,f32f32f32of32_1x1)
     }//kloop
 
     xmm0 = _mm_broadcast_ss(&(alpha));
-    xmm4 = _mm_mul_ps(xmm4,xmm0);
+    xmm4 = _mm_mul_ps(xmm4,xmm0);
+
 
     if ( beta != 0.0 )
     {
@@ -4578,13 +4989,20 @@ POST_OPS_RELU_SCALE_1x1F:
 
       POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
     }
-POST_OPS_GELU_1x1F:
+POST_OPS_GELU_TANH_1x1F:
     {
       __m128 dn, x_tanh;
       __m128i q;
 
       // c[0,0-3]
       GELU_TANH_F32S_SSE(xmm4, xmm0, xmm1, xmm2, xmm3, dn, x_tanh, q)
+
+      POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+    }
+POST_OPS_GELU_ERF_1x1F:
+    {
+      // c[0,0-3]
+      GELU_ERF_F32S_SSE(xmm4, xmm0, xmm1, xmm2)
 
       POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
     }

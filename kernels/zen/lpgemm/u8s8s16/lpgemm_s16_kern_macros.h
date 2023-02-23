@@ -445,4 +445,18 @@
 	reg = _mm256_packs_epi32(_mm256_cvtps_epi32(y1), _mm256_cvtps_epi32(y2));\
 	reg = _mm256_permute4x64_epi64(reg, 0XD8);\
 
+
+/* ERF GeLU (x) = 0.5* x * (1 + erf (x * 0.707107 ))  */
+#define GELU_ERF_S16_AVX2(reg, y1, y2, r, x, x_erf) \
+\
+	y1 = _mm256_cvtepi32_ps( _mm256_cvtepi16_epi32(_mm256_extractf128_si256(reg, 0)) ); \
+	y2 = _mm256_cvtepi32_ps( _mm256_cvtepi16_epi32(_mm256_extractf128_si256(reg, 1)) ); \
+\
+	GELU_ERF_F32_AVX2_DEF(y1, r, x, x_erf); \
+\
+	GELU_ERF_F32_AVX2_DEF(y2, r, x, x_erf); \
+\
+	reg = _mm256_packs_epi32(_mm256_cvtps_epi32(y1), _mm256_cvtps_epi32(y2));\
+	reg = _mm256_permute4x64_epi64(reg, 0XD8);\
+
 #endif //LPGEMM_S16_KERN_MACROS_H

@@ -144,7 +144,7 @@
 	  ) \
 	) \
 
-/* GeLU (x) = 0.5* x * (1 + tanh ( 0.797884 * ( x + ( 0.044715 * x^3 ) ) ) )  */ 
+/* TANH GeLU (x) = 0.5* x * (1 + tanh ( 0.797884 * ( x + ( 0.044715 * x^3 ) ) ) )  */ 
 #define GELU_TANH_S32_AVX512(reg, y, r, r2, x, z, dn, x_tanh, q) \
 \
 	y = _mm512_cvtepi32_ps( reg ); \
@@ -153,4 +153,13 @@
 \
 	reg = _mm512_cvtps_epi32 (y); \
 
+/* ERF GeLU (x) = 0.5* x * (1 + erf (x * 0.707107 ))  */
+#define GELU_ERF_S32_AVX512(reg, y, r, x, x_erf) \
+\
+	y = _mm512_cvtepi32_ps( reg ); \
+\
+	GELU_ERF_F32_AVX512_DEF(y, r, x, x_erf); \
+\
+	reg = _mm512_cvtps_epi32 (y); \
+	
 #endif // LPGEMM_S32_KERN_MACROS_H

@@ -46,10 +46,15 @@
 	/* Apply scaling on for <= 0 elements.*/ \
 	reg = _mm512_mask_mul_ps( reg, relu_cmp_mask, reg, zmm2 ); \
 
-/* GeLU (x) = 0.5* x * (1 + tanh ( 0.797884 * ( x + ( 0.044715 * x^3 ) ) ) )  */
+/* TANH GeLU (x) = 0.5* x * (1 + tanh ( 0.797884 * ( x + ( 0.044715 * x^3 ) ) ) )  */
 #define GELU_TANH_F32S_AVX512(reg, r, r2, x, z, dn, x_tanh, q) \
 \
 	GELU_TANH_F32_AVX512_DEF(reg, r, r2, x, z, dn, x_tanh, q); \
+
+/* ERF GeLU (x) = 0.5* x * (1 + erf (x * 0.707107 ))  */
+#define GELU_ERF_F32S_AVX512(reg, r, x, x_erf) \
+\
+	GELU_ERF_F32_AVX512_DEF(reg, r, x, x_erf); \
 
 //Zero-out the given ZMM accumulator registers
 #define ZERO_ACC_ZMM_4_REG(zmm0,zmm1,zmm2,zmm3) \

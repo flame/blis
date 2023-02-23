@@ -111,8 +111,11 @@ void lpgemm_translate_to_post_ops_list
 							case PRELU:
 									tmp_code = POST_OPS_RELU_SCALE;
 									break;
-							case GELU:
-									tmp_code = POST_OPS_GELU;
+							case GELU_TANH:
+									tmp_code = POST_OPS_GELU_TANH;
+									break;
+							case GELU_ERF:
+									tmp_code = POST_OPS_GELU_ERF;
 									break;
 							default:
 									break;

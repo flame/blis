@@ -421,37 +421,69 @@ inline float mat_mul_accuracy_check_accum_bf16bf16f32obf16
 	return temp_accum;
 }
 
-#define GEN_GELU_POSTOP_INT(ACCUM_type,BLAS_SFX) \
-inline ACCUM_type GELU_post_op_ ## BLAS_SFX \
+#define GEN_GELU_TANH_POSTOP_INT(ACCUM_type,BLAS_SFX) \
+inline ACCUM_type GELU_TANH_post_op_ ## BLAS_SFX \
      (\
        ACCUM_type temp_accum \
      )\
 {\
-	float gelu_ref = 0.5 *(double)temp_accum * (1 + tanh( 0.797884 * ( (double)temp_accum + \
-					( 0.044715 * ((double)temp_accum * (double)temp_accum * (double)temp_accum ) ) ) ) ); \
-	temp_accum = round (gelu_ref); \
+	float gelu_reference = 0.5 *(double)temp_accum * (1 + tanh( 0.797884 * ( (double)temp_accum + \
+					( 0.044715 * ((double)temp_accum * (double)temp_accum * \
+					(double)temp_accum ) ) ) ) ); \
+	temp_accum = round (gelu_reference); \
 	return temp_accum; \
 }\
 
-GEN_GELU_POSTOP_INT(int16_t,u8s8s16os8)
-GEN_GELU_POSTOP_INT(int16_t,u8s8s16os16)
-GEN_GELU_POSTOP_INT(int32_t,u8s8s32os8)
-GEN_GELU_POSTOP_INT(int32_t,u8s8s32os32)
+GEN_GELU_TANH_POSTOP_INT(int16_t,u8s8s16os8)
+GEN_GELU_TANH_POSTOP_INT(int16_t,u8s8s16os16)
+GEN_GELU_TANH_POSTOP_INT(int32_t,u8s8s32os8)
+GEN_GELU_TANH_POSTOP_INT(int32_t,u8s8s32os32)
 
-#define GEN_GELU_POSTOP_FLOAT(BLAS_SFX) \
-inline float GELU_post_op_ ## BLAS_SFX \
+#define GEN_GELU_TANH_POSTOP_FLOAT(BLAS_SFX) \
+inline float GELU_TANH_post_op_ ## BLAS_SFX \
      (\
        float temp_accum \
      )\
 {\
 	temp_accum = 0.5 *(double)temp_accum * (1 + tanh( 0.797884 * ( (double)temp_accum + \
-	              ( 0.044715 * ((double)temp_accum * (double)temp_accum * (double)temp_accum ) ) ) ) ); \
+	              ( 0.044715 * ((double)temp_accum * (double)temp_accum * \
+				  (double)temp_accum ) ) ) ) ); \
 	return temp_accum; \
 }\
 
-GEN_GELU_POSTOP_FLOAT(f32f32f32of32)
-GEN_GELU_POSTOP_FLOAT(bf16bf16f32of32)
-GEN_GELU_POSTOP_FLOAT(bf16bf16f32obf16)
+GEN_GELU_TANH_POSTOP_FLOAT(f32f32f32of32)
+GEN_GELU_TANH_POSTOP_FLOAT(bf16bf16f32of32)
+GEN_GELU_TANH_POSTOP_FLOAT(bf16bf16f32obf16)
+
+#define GEN_GELU_ERF_POSTOP_INT(ACCUM_type,BLAS_SFX) \
+inline ACCUM_type GELU_ERF_post_op_ ## BLAS_SFX \
+     (\
+       ACCUM_type temp_accum \
+     )\
+{\
+	float gelu_reference = 0.5 *(double)temp_accum * (1 + erff( (double)temp_accum * 0.707107 )); \
+	temp_accum = round (gelu_reference); \
+	return temp_accum; \
+}\
+
+GEN_GELU_ERF_POSTOP_INT(int16_t,u8s8s16os8)
+GEN_GELU_ERF_POSTOP_INT(int16_t,u8s8s16os16)
+GEN_GELU_ERF_POSTOP_INT(int32_t,u8s8s32os8)
+GEN_GELU_ERF_POSTOP_INT(int32_t,u8s8s32os32)
+
+#define GEN_GELU_ERF_POSTOP_FLOAT(BLAS_SFX) \
+inline float GELU_ERF_post_op_ ## BLAS_SFX \
+     (\
+       float temp_accum \
+     )\
+{\
+	temp_accum = 0.5 *(double)temp_accum * (1 + erff( (double)temp_accum * 0.707107 )); \
+	return temp_accum; \
+}\
+
+GEN_GELU_ERF_POSTOP_FLOAT(f32f32f32of32)
+GEN_GELU_ERF_POSTOP_FLOAT(bf16bf16f32of32)
+GEN_GELU_ERF_POSTOP_FLOAT(bf16bf16f32obf16)
 
 #define GEN_MAT_MUL_ACC_CHK_DRV_FUNC(A_type,B_type,C_type,ACCUM_type,SCALE_type,BLAS_SFX,BLAS_DOWNSCALE_SFX) \
 void mat_mul_accuracy_check_driver_ ## BLAS_SFX \
@@ -524,9 +556,13 @@ void mat_mul_accuracy_check_driver_ ## BLAS_SFX \
 								( temp_accum * \
 								*( ( ACCUM_type* ) post_op->eltwise.algo.alpha ) ); \
 						} \
-						else if ( post_op->eltwise.algo.algo_type == GELU ) /* GeLU*/ \
+						else if ( post_op->eltwise.algo.algo_type == GELU_TANH ) /* TANH GeLU*/ \
 						{ \
-							temp_accum = GEN_FUNC_NAME(GELU_post_op_,BLAS_SFX) (temp_accum);\
+							temp_accum = GEN_FUNC_NAME(GELU_TANH_post_op_,BLAS_SFX) (temp_accum);\
+						} \
+						else if ( post_op->eltwise.algo.algo_type == GELU_ERF ) /* ERF GeLU*/ \
+						{ \
+							temp_accum = GEN_FUNC_NAME(GELU_ERF_post_op_,BLAS_SFX) (temp_accum);\
 						} \
 						else \
 						{ \
@@ -544,9 +580,13 @@ void mat_mul_accuracy_check_driver_ ## BLAS_SFX \
 									temp_accum : \
 									( temp_accum * *( ( ACCUM_type* ) post_op->eltwise.algo.alpha ) ); \
 						} \
-						else if ( post_op->eltwise.algo.algo_type == GELU ) /* GeLU*/ \
+						else if ( post_op->eltwise.algo.algo_type == GELU_TANH ) /* GeLU*/ \
 						{ \
-							temp_accum = GEN_FUNC_NAME(GELU_post_op_,BLAS_SFX) (temp_accum);\
+							temp_accum = GEN_FUNC_NAME(GELU_TANH_post_op_,BLAS_SFX) (temp_accum);\
+						} \
+						else if ( post_op->eltwise.algo.algo_type == GELU_ERF ) /* ERF GeLU*/ \
+						{ \
+							temp_accum = GEN_FUNC_NAME(GELU_ERF_post_op_,BLAS_SFX) (temp_accum);\
 						} \
 						else \
 						{ \
@@ -637,7 +677,8 @@ aocl_post_op* lpgemm_create_post_ops_struct_ ## BLAS_SFX \
 	{ \
 		char* ops_tok = strtok(post_ops_str, ", " ); \
 		bool is_param_relu = FALSE; \
-		bool is_gelu = FALSE; \
+		bool is_gelu_tanh = FALSE; \
+		bool is_gelu_erf = FALSE; \
 		while ( ops_tok ) \
 		{ \
 			if ( strcmp( ops_tok, "bias") == 0 ) \
@@ -653,10 +694,15 @@ aocl_post_op* lpgemm_create_post_ops_struct_ ## BLAS_SFX \
 				post_ops->seq_vector[cur_op_index] = ELTWISE; \
 				is_param_relu = TRUE; \
 			} \
-			else if ( strcmp( ops_tok, "gelu") == 0 ) \
+			else if ( strcmp( ops_tok, "gelu_tanh") == 0 ) \
 			{ \
 				post_ops->seq_vector[cur_op_index] = ELTWISE; \
-				is_gelu = TRUE; \
+				is_gelu_tanh = TRUE; \
+			} \
+			else if ( strcmp( ops_tok, "gelu_erf") == 0 ) \
+			{ \
+				post_ops->seq_vector[cur_op_index] = ELTWISE; \
+				is_gelu_erf = TRUE; \
 			} \
 			ops_tok = strtok( NULL, ", " ); \
 			cur_op_index++; \
@@ -682,9 +728,13 @@ aocl_post_op* lpgemm_create_post_ops_struct_ ## BLAS_SFX \
 			*( ( C_type* ) post_ops->eltwise.algo.alpha ) = ( C_type )6; \
 			post_ops->eltwise.algo.algo_type = PRELU; \
 		} \
-		if ( is_gelu == TRUE ) \
+		if ( is_gelu_tanh == TRUE ) \
 		{ \
-			post_ops->eltwise.algo.algo_type = GELU; \
+			post_ops->eltwise.algo.algo_type = GELU_TANH; \
+		} \
+		if ( is_gelu_erf == TRUE ) \
+		{ \
+			post_ops->eltwise.algo.algo_type = GELU_ERF; \
 		} \
 		post_ops->eltwise.algo.beta = NULL; \
 	} \

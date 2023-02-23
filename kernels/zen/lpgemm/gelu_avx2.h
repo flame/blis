@@ -34,8 +34,8 @@
 #ifndef AOCL_LPGEMM_GELU_DEF_AVX2_H
 #define AOCL_LPGEMM_GELU_DEF_AVX2_H
 
+/* TANH GeLU (x) = 0.5* x * (1 + tanh ( 0.797884 * ( x + ( 0.044715 * x^3 ) ) ) )  */
 #define GELU_TANH_F32_AVX2_DEF(reg, r, r2, x, z, dn, x_tanh, q) \
-/* GeLU (x) = 0.5* x * (1 + tanh ( 0.797884 * ( x + ( 0.044715 * x^3 ) ) ) )  */ \
 \
 	r2 = _mm256_mul_ps (reg, reg); \
 	r2 = _mm256_mul_ps (r2, reg); \
@@ -49,8 +49,8 @@
 	x_tanh = _mm256_mul_ps (x_tanh, reg); \
 	reg = _mm256_mul_ps (x_tanh, _mm256_set1_ps (0.5));
 
+/* TANH GeLU (x) = 0.5* x * (1 + tanh ( 0.797884 * ( x + ( 0.044715 * x^3 ) ) ) )  */
 #define GELU_TANH_F32_SSE_DEF(reg, r, r2, x, z, dn, x_tanh, q) \
-/* GeLU (x) = 0.5* x * (1 + tanh ( 0.797884 * ( x + ( 0.044715 * x^3 ) ) ) )  */ \
 \
 	r2 = _mm_mul_ps (reg, reg); \
 	r2 = _mm_mul_ps (r2, reg); \
@@ -63,5 +63,29 @@
 	x_tanh = _mm_add_ps (x_tanh, _mm_set1_ps (1)); \
 	x_tanh = _mm_mul_ps (x_tanh, reg); \
 	reg = _mm_mul_ps (x_tanh, _mm_set1_ps (0.5));
+
+/* ERF GeLU (x) = 0.5* x * (1 + erf (x * 0.707107 ))  */
+#define GELU_ERF_F32_AVX2_DEF(reg, r, x, x_erf) \
+\
+  x_erf = _mm256_mul_ps (reg, _mm256_set1_ps (0.707107)); \
+\
+  /*x_erf = erf(x_erf) */  \
+  ERF_AVX2(x_erf, r, x); \
+\
+  x_erf = _mm256_add_ps (x_erf, _mm256_set1_ps (1)); \
+  x_erf = _mm256_mul_ps (x_erf, reg); \
+  reg = _mm256_mul_ps (x_erf, _mm256_set1_ps (0.5));
+
+/* ERF GeLU (x) = 0.5* x * (1 + erf (x * 0.707107 ))  */
+#define GELU_ERF_F32_SSE_DEF(reg, r, x, x_erf) \
+\
+  x_erf = _mm_mul_ps (reg, _mm_set1_ps (0.707107)); \
+\
+  /*x_erf = erf(x_erf) */  \
+  ERF_SSE(x_erf, r, x); \
+\
+  x_erf = _mm_add_ps (x_erf, _mm_set1_ps (1)); \
+  x_erf = _mm_mul_ps (x_erf, reg); \
+  reg = _mm_mul_ps (x_erf, _mm_set1_ps (0.5));
 
 #endif // AOCL_LPGEMM_GELU_DEF_AVX2_H

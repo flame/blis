@@ -69,9 +69,14 @@
 	  buf0, ( n0_rem * sizeof( bfloat16 ) ) \
 	); \
 
-/* GeLU (x) = 0.5* x * (1 + tanh ( 0.797884 * ( x + ( 0.044715 * x^3 ) ) ) )  */
+/* TANH GeLU (x) = 0.5* x * (1 + tanh ( 0.797884 * ( x + ( 0.044715 * x^3 ) ) ) )  */
 #define GELU_TANH_F32_AVX512(reg, r, r2, x, z, dn, x_tanh, q) \
 \
 	GELU_TANH_F32_AVX512_DEF(reg, r, r2, x, z, dn, x_tanh, q); \
+
+/* ERF GeLU (x) = 0.5* x * (1 + erf (x * 0.707107 ))  */
+#define GELU_ERF_F32_AVX512(reg, r, x, x_erf) \
+\
+	GELU_ERF_F32_AVX512_DEF(reg, r, x, x_erf); \
 
 #endif // LPGEMM_F32_KERN_MACROS_H

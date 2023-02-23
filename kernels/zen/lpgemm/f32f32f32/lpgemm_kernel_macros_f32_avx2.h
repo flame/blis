@@ -52,15 +52,25 @@
      scratch2 = _mm_mul_ps( scratch2, scale ); /*scale <0 elems*/\
      reg = _mm_or_ps( reg, scratch2 ); \
 
-/* GeLU (x) = 0.5* x * (1 + tanh ( 0.797884 * ( x + ( 0.044715 * x^3 ) ) ) )  */
+/* TANH GeLU (x) = 0.5* x * (1 + tanh ( 0.797884 * ( x + ( 0.044715 * x^3 ) ) ) )  */
 #define GELU_TANH_F32S_AVX2(reg, r, r2, x, z, dn, x_tanh, q) \
 \
 	GELU_TANH_F32_AVX2_DEF(reg, r, r2, x, z, dn, x_tanh, q); \
 
-/* GeLU (x) = 0.5* x * (1 + tanh ( 0.797884 * ( x + ( 0.044715 * x^3 ) ) ) )  */
+/* TANH GeLU (x) = 0.5* x * (1 + tanh ( 0.797884 * ( x + ( 0.044715 * x^3 ) ) ) )  */
 #define GELU_TANH_F32S_SSE(reg, r, r2, x, z, dn, x_tanh, q) \
 \
 	GELU_TANH_F32_SSE_DEF(reg, r, r2, x, z, dn, x_tanh, q); \
+
+/* ERF GeLU (x) = 0.5* x * (1 + erf (x * 0.707107 ))  */
+#define GELU_ERF_F32S_AVX2(reg, r, x, x_erf) \
+\
+	GELU_ERF_F32_AVX2_DEF(reg, r, x, x_erf); \
+
+/* ERF GeLU (x) = 0.5* x * (1 + erf (x * 0.707107 ))  */
+#define GELU_ERF_F32S_SSE(reg, r, x, x_erf) \
+\
+	GELU_ERF_F32_SSE_DEF(reg, r, x, x_erf); \
 
 //Zero-out the given YMM accumulator registers
 #define ZERO_ACC_YMM_4_REG(ymm0,ymm1,ymm2,ymm3) \

@@ -49,7 +49,8 @@ LPGEMM_MN_LT_NR0_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_5xlt16)
 						  &&POST_OPS_BIAS_5xLT16,
 						  &&POST_OPS_RELU_5xLT16,
 						  &&POST_OPS_RELU_SCALE_5xLT16,
-						  &&POST_OPS_GELU_5xLT16,
+						  &&POST_OPS_GELU_TANH_5xLT16,
+						  &&POST_OPS_GELU_ERF_5xLT16,
 						  &&POST_OPS_DOWNSCALE_5xLT16
 						};
 	dim_t k_full_pieces = k0 / 2;
@@ -76,7 +77,7 @@ LPGEMM_MN_LT_NR0_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_5xlt16)
 	__m512 c_float_1p0 = _mm512_setzero_ps();
 
 	__m512 c_float_2p0 = _mm512_setzero_ps();
-		
+
 	__m512 c_float_3p0 = _mm512_setzero_ps();
 
 	__m512 c_float_4p0 = _mm512_setzero_ps();
@@ -91,28 +92,28 @@ LPGEMM_MN_LT_NR0_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_5xlt16)
 		// Perform column direction mat-mul with k = 2.
 		// c[0,0-15] = a[0,kr:kr+2]*b[kr:kr+2,0-15]
 		c_float_0p0 = _mm512_dpbf16_ps( c_float_0p0, a_bf16_0, b0 );
-			
+
 		// Broadcast a[1,kr:kr+2].
 		a_bf16_0 = (__m512bh)_mm512_set1_epi32( *( int32_t* )( a + ( rs_a * 1 ) + ( cs_a * kr ) ) );
 
 		// Perform column direction mat-mul with k = 2.
 		// c[1,0-15] = a[1,kr:kr+2]*b[kr:kr+2,0-15]
 		c_float_1p0 = _mm512_dpbf16_ps( c_float_1p0, a_bf16_0, b0 );
-			
+
 		// Broadcast a[2,kr:kr+2].
 		a_bf16_0 = (__m512bh)_mm512_set1_epi32( *( int32_t* )( a + ( rs_a * 2 ) + ( cs_a * kr ) ) );
 
 		// Perform column direction mat-mul with k = 2.
 		// c[2,0-15] = a[2,kr:kr+2]*b[kr:kr+2,0-15]
 		c_float_2p0 = _mm512_dpbf16_ps( c_float_2p0, a_bf16_0, b0 );
-			
+
 		// Broadcast a[3,kr:kr+2].
 		a_bf16_0 = (__m512bh)_mm512_set1_epi32( *( int32_t* )( a + ( rs_a * 3 ) + ( cs_a * kr ) ) );
 
 		// Perform column direction mat-mul with k = 2.
 		// c[3,0-15] = a[3,kr:kr+2]*b[kr:kr+2,0-15]
 		c_float_3p0 = _mm512_dpbf16_ps( c_float_3p0, a_bf16_0, b0 );
-			
+
 		// Broadcast a[4,kr:kr+2].
 		a_bf16_0 = (__m512bh)_mm512_set1_epi32( *( int32_t* )( a + ( rs_a * 4 ) + ( cs_a * kr ) ) );
 
@@ -120,7 +121,7 @@ LPGEMM_MN_LT_NR0_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_5xlt16)
 		// c[4,0-15] = a[4,kr:kr+2]*b[kr:kr+2,0-15]
 		c_float_4p0 = _mm512_dpbf16_ps( c_float_4p0, a_bf16_0, b0 );
 	}
-	// Handle k remainder.        
+	// Handle k remainder.
 	if ( k_partial_pieces > 0 )
 	{
 		b0 = (__m512bh)_mm512_loadu_epi16( b + ( rs_b * k_full_pieces ) + ( cs_b * 0 ) );
@@ -132,7 +133,7 @@ LPGEMM_MN_LT_NR0_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_5xlt16)
 		// Perform column direction mat-mul with k = 2.
 		// c[0,0-15] = a[0,kr:kr+2]*b[kr:kr+2,0-15]
 		c_float_0p0 = _mm512_dpbf16_ps( c_float_0p0, a_bf16_0, b0 );
-			
+
 		// Broadcast a[1,kr:kr+2].
 		memcpy( &a_kfringe_buf, ( a + ( rs_a * 1 ) + ( cs_a * k_full_pieces ) ), ( k_partial_pieces * sizeof( bfloat16 ) ) );
 		a_bf16_0 = (__m512bh)_mm512_set1_epi32( a_kfringe_buf );
@@ -140,7 +141,7 @@ LPGEMM_MN_LT_NR0_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_5xlt16)
 		// Perform column direction mat-mul with k = 2.
 		// c[1,0-15] = a[1,kr:kr+2]*b[kr:kr+2,0-15]
 		c_float_1p0 = _mm512_dpbf16_ps( c_float_1p0, a_bf16_0, b0 );
-			
+
 		// Broadcast a[2,kr:kr+2].
 		memcpy( &a_kfringe_buf, ( a + ( rs_a * 2 ) + ( cs_a * k_full_pieces ) ), ( k_partial_pieces * sizeof( bfloat16 ) ) );
 		a_bf16_0 = (__m512bh)_mm512_set1_epi32( a_kfringe_buf );
@@ -148,7 +149,7 @@ LPGEMM_MN_LT_NR0_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_5xlt16)
 		// Perform column direction mat-mul with k = 2.
 		// c[2,0-15] = a[2,kr:kr+2]*b[kr:kr+2,0-15]
 		c_float_2p0 = _mm512_dpbf16_ps( c_float_2p0, a_bf16_0, b0 );
-			
+
 		// Broadcast a[3,kr:kr+2].
 		memcpy( &a_kfringe_buf, ( a + ( rs_a * 3 ) + ( cs_a * k_full_pieces ) ), ( k_partial_pieces * sizeof( bfloat16 ) ) );
 		a_bf16_0 = (__m512bh)_mm512_set1_epi32( a_kfringe_buf );
@@ -156,7 +157,7 @@ LPGEMM_MN_LT_NR0_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_5xlt16)
 		// Perform column direction mat-mul with k = 2.
 		// c[3,0-15] = a[3,kr:kr+2]*b[kr:kr+2,0-15]
 		c_float_3p0 = _mm512_dpbf16_ps( c_float_3p0, a_bf16_0, b0 );
-			
+
 		// Broadcast a[4,kr:kr+2].
 		memcpy( &a_kfringe_buf, ( a + ( rs_a * 4 ) + ( cs_a * k_full_pieces ) ), ( k_partial_pieces * sizeof( bfloat16 ) ) );
 		a_bf16_0 = (__m512bh)_mm512_set1_epi32( a_kfringe_buf );
@@ -165,7 +166,7 @@ LPGEMM_MN_LT_NR0_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_5xlt16)
 		// c[4,0-15] = a[4,kr:kr+2]*b[kr:kr+2,0-15]
 		c_float_4p0 = _mm512_dpbf16_ps( c_float_4p0, a_bf16_0, b0 );
 	}
-        
+
 	// Load alpha and beta
 	__m512 selector1 = _mm512_set1_ps( alpha );
 	__m512 selector2 = _mm512_set1_ps( beta );
@@ -174,13 +175,13 @@ LPGEMM_MN_LT_NR0_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_5xlt16)
 	c_float_0p0 = _mm512_mul_ps( selector1, c_float_0p0 );
 
 	c_float_1p0 = _mm512_mul_ps( selector1, c_float_1p0 );
-	
+
 	c_float_2p0 = _mm512_mul_ps( selector1, c_float_2p0 );
-	
+
 	c_float_3p0 = _mm512_mul_ps( selector1, c_float_3p0 );
-	
+
 	c_float_4p0 = _mm512_mul_ps( selector1, c_float_4p0 );
-		
+
 	// Scale C by beta.
 	if ( beta != 0 )
 	{
@@ -189,7 +190,7 @@ LPGEMM_MN_LT_NR0_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_5xlt16)
 		memcpy( buf2, ( c + ( rs_c * 2 ) ), ( n0_rem * sizeof( float ) ) );
 		memcpy( buf3, ( c + ( rs_c * 3 ) ), ( n0_rem * sizeof( float ) ) );
 		memcpy( buf4, ( c + ( rs_c * 4 ) ), ( n0_rem * sizeof( float ) ) );
-		
+
 		// c[0,0-15]
 		selector1 = _mm512_loadu_ps( buf0 );
 		selector1 = _mm512_mul_ps( selector2, selector1 );
@@ -324,7 +325,7 @@ POST_OPS_RELU_SCALE_5xLT16:
 
 			POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 		}
-POST_OPS_GELU_5xLT16:
+POST_OPS_GELU_TANH_5xLT16:
 		{
 			__m512 dn, z, x, r2, r, x_tanh;
 			__m512i q;
@@ -343,6 +344,27 @@ POST_OPS_GELU_5xLT16:
 
 			// c[4, 0-15]
 			GELU_TANH_F32_AVX512(c_float_4p0, r, r2, x, z, dn, x_tanh, q)
+
+			POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+		}
+POST_OPS_GELU_ERF_5xLT16:
+		{
+			__m512 x, r, x_erf;
+
+			// c[0, 0-15]
+			GELU_ERF_F32_AVX512(c_float_0p0, r, x, x_erf)
+
+			// c[1, 0-15]
+			GELU_ERF_F32_AVX512(c_float_1p0, r, x, x_erf)
+
+			// c[2, 0-15]
+			GELU_ERF_F32_AVX512(c_float_2p0, r, x, x_erf)
+
+			// c[3, 0-15]
+			GELU_ERF_F32_AVX512(c_float_3p0, r, x, x_erf)
+
+			// c[4, 0-15]
+			GELU_ERF_F32_AVX512(c_float_4p0, r, x, x_erf)
 
 			POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 		}
@@ -365,10 +387,10 @@ POST_OPS_DOWNSCALE_5xLT16:
 		CVT_F32_BF16_LT16(c_float_4p0,4,0);
 
 		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
-	}		
+	}
 POST_OPS_5xLT16_DISABLE:
 		;
-		
+
 	// Store the results.
 	// c[0,0-15]
 	_mm512_storeu_ps( buf0, c_float_0p0 );
@@ -400,7 +422,7 @@ POST_OPS_5xLT16_DISABLE:
 
 	// c[4,0-15]
 	memcpy( c + ( rs_c * 4 ) + ( 0*16 ), buf4, ( n0_rem * sizeof( float ) ) );
-	
+
 }
 
 // 4xlt16 bf16 fringe kernel
@@ -412,7 +434,8 @@ LPGEMM_MN_LT_NR0_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_4xlt16)
 						  &&POST_OPS_BIAS_4xLT16,
 						  &&POST_OPS_RELU_4xLT16,
 						  &&POST_OPS_RELU_SCALE_4xLT16,
-						  &&POST_OPS_GELU_4xLT16,
+						  &&POST_OPS_GELU_TANH_4xLT16,
+						  &&POST_OPS_GELU_ERF_4xLT16,
 						  &&POST_OPS_DOWNSCALE_4xLT16
 						};
 	dim_t k_full_pieces = k0 / 2;
@@ -432,14 +455,13 @@ LPGEMM_MN_LT_NR0_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_4xlt16)
 	float buf2[16];
 	float buf3[16];
 
-	
 	// Registers to use for accumulating C.
 	__m512 c_float_0p0 = _mm512_setzero_ps();
 
 	__m512 c_float_1p0 = _mm512_setzero_ps();
 
 	__m512 c_float_2p0 = _mm512_setzero_ps();
-	
+
 	__m512 c_float_3p0 = _mm512_setzero_ps();
 
 	for ( dim_t kr = 0; kr < k_full_pieces; kr += 1 )
@@ -452,21 +474,21 @@ LPGEMM_MN_LT_NR0_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_4xlt16)
 		// Perform column direction mat-mul with k = 2.
 		// c[0,0-15] = a[0,kr:kr+2]*b[kr:kr+2,0-15]
 		c_float_0p0 = _mm512_dpbf16_ps( c_float_0p0, a_bf16_0, b0 );
-		
+
 		// Broadcast a[1,kr:kr+2].
 		a_bf16_0 = (__m512bh)_mm512_set1_epi32( *( int32_t* )( a + ( rs_a * 1 ) + ( cs_a * kr ) ) );
 
 		// Perform column direction mat-mul with k = 2.
 		// c[1,0-15] = a[1,kr:kr+2]*b[kr:kr+2,0-15]
 		c_float_1p0 = _mm512_dpbf16_ps( c_float_1p0, a_bf16_0, b0 );
-		
+
 		// Broadcast a[2,kr:kr+2].
 		a_bf16_0 = (__m512bh)_mm512_set1_epi32( *( int32_t* )( a + ( rs_a * 2 ) + ( cs_a * kr ) ) );
 
 		// Perform column direction mat-mul with k = 2.
 		// c[2,0-15] = a[2,kr:kr+2]*b[kr:kr+2,0-15]
 		c_float_2p0 = _mm512_dpbf16_ps( c_float_2p0, a_bf16_0, b0 );
-		
+
 		// Broadcast a[3,kr:kr+2].
 		a_bf16_0 = (__m512bh)_mm512_set1_epi32( *( int32_t* )( a + ( rs_a * 3 ) + ( cs_a * kr ) ) );
 
@@ -475,7 +497,7 @@ LPGEMM_MN_LT_NR0_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_4xlt16)
 		c_float_3p0 = _mm512_dpbf16_ps( c_float_3p0, a_bf16_0, b0 );
 	}
 	// Handle k remainder.
-	
+
 	if ( k_partial_pieces > 0 )
 	{
 		b0 = (__m512bh)_mm512_loadu_epi16( b + ( rs_b * k_full_pieces ) + ( cs_b * 0 ) );
@@ -487,7 +509,7 @@ LPGEMM_MN_LT_NR0_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_4xlt16)
 		// Perform column direction mat-mul with k = 2.
 		// c[0,0-15] = a[0,kr:kr+2]*b[kr:kr+2,0-15]
 		c_float_0p0 = _mm512_dpbf16_ps( c_float_0p0, a_bf16_0, b0 );
-		
+
 		// Broadcast a[1,kr:kr+2].
 		memcpy( &a_kfringe_buf, ( a + ( rs_a * 1 ) + ( cs_a * k_full_pieces ) ), ( k_partial_pieces * sizeof( bfloat16 ) ) );
 		a_bf16_0 = (__m512bh)_mm512_set1_epi32( a_kfringe_buf );
@@ -495,7 +517,7 @@ LPGEMM_MN_LT_NR0_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_4xlt16)
 		// Perform column direction mat-mul with k = 2.
 		// c[1,0-15] = a[1,kr:kr+2]*b[kr:kr+2,0-15]
 		c_float_1p0 = _mm512_dpbf16_ps( c_float_1p0, a_bf16_0, b0 );
-		
+
 		// Broadcast a[2,kr:kr+2].
 		memcpy( &a_kfringe_buf, ( a + ( rs_a * 2 ) + ( cs_a * k_full_pieces ) ), ( k_partial_pieces * sizeof( bfloat16 ) ) );
 		a_bf16_0 = (__m512bh)_mm512_set1_epi32( a_kfringe_buf );
@@ -503,7 +525,7 @@ LPGEMM_MN_LT_NR0_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_4xlt16)
 		// Perform column direction mat-mul with k = 2.
 		// c[2,0-15] = a[2,kr:kr+2]*b[kr:kr+2,0-15]
 		c_float_2p0 = _mm512_dpbf16_ps( c_float_2p0, a_bf16_0, b0 );
-		
+
 		// Broadcast a[3,kr:kr+2].
 		memcpy( &a_kfringe_buf, ( a + ( rs_a * 3 ) + ( cs_a * k_full_pieces ) ), ( k_partial_pieces * sizeof( bfloat16 ) ) );
 		a_bf16_0 = (__m512bh)_mm512_set1_epi32( a_kfringe_buf );
@@ -521,11 +543,11 @@ LPGEMM_MN_LT_NR0_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_4xlt16)
 	c_float_0p0 = _mm512_mul_ps( selector1, c_float_0p0 );
 
 	c_float_1p0 = _mm512_mul_ps( selector1, c_float_1p0 );
-	
+
 	c_float_2p0 = _mm512_mul_ps( selector1, c_float_2p0 );
-	
+
 	c_float_3p0 = _mm512_mul_ps( selector1, c_float_3p0 );
-		
+
 	// Scale C by beta.
 	if ( beta != 0 )
 	{
@@ -533,7 +555,7 @@ LPGEMM_MN_LT_NR0_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_4xlt16)
 		memcpy( buf1, ( c + ( rs_c * 1 ) ), ( n0_rem * sizeof( float ) ) );
 		memcpy( buf2, ( c + ( rs_c * 2 ) ), ( n0_rem * sizeof( float ) ) );
 		memcpy( buf3, ( c + ( rs_c * 3 ) ), ( n0_rem * sizeof( float ) ) );
-		
+
 		// c[0,0-15]
 		selector1 = _mm512_loadu_ps( buf0 );
 		selector1 = _mm512_mul_ps( selector2, selector1 );
@@ -648,7 +670,7 @@ POST_OPS_RELU_SCALE_4xLT16:
 
 			POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 		}
-POST_OPS_GELU_4xLT16:
+POST_OPS_GELU_TANH_4xLT16:
 		{
 			__m512 dn, z, x, r2, r, x_tanh;
 			__m512i q;
@@ -664,6 +686,24 @@ POST_OPS_GELU_4xLT16:
 
 			// c[3, 0-15]
 			GELU_TANH_F32_AVX512(c_float_3p0, r, r2, x, z, dn, x_tanh, q)
+
+			POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+		}
+POST_OPS_GELU_ERF_4xLT16:
+		{
+			__m512 x, r, x_erf;
+
+			// c[0, 0-15]
+			GELU_ERF_F32_AVX512(c_float_0p0, r, x, x_erf)
+
+			// c[1, 0-15]
+			GELU_ERF_F32_AVX512(c_float_1p0, r, x, x_erf)
+
+			// c[2, 0-15]
+			GELU_ERF_F32_AVX512(c_float_2p0, r, x, x_erf)
+
+			// c[3, 0-15]
+			GELU_ERF_F32_AVX512(c_float_3p0, r, x, x_erf)
 
 			POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 		}
@@ -683,7 +723,7 @@ POST_OPS_DOWNSCALE_4xLT16:
 		CVT_F32_BF16_LT16(c_float_3p0,3,0);
 
 		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
-	}		
+	}
 POST_OPS_4xLT16_DISABLE:
 		;
 
@@ -712,7 +752,7 @@ POST_OPS_4xLT16_DISABLE:
 
 	// c[3,0-15]
 	memcpy( c + ( rs_c * 3 ) + ( 0*16 ), buf3, ( n0_rem * sizeof( float ) ) );
-	
+
 }
 
 // 3xlt16 bf16 fringe kernel
@@ -724,7 +764,8 @@ LPGEMM_MN_LT_NR0_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_3xlt16)
 						  &&POST_OPS_BIAS_3xLT16,
 						  &&POST_OPS_RELU_3xLT16,
 						  &&POST_OPS_RELU_SCALE_3xLT16,
-						  &&POST_OPS_GELU_3xLT16,
+						  &&POST_OPS_GELU_TANH_3xLT16,
+						  &&POST_OPS_GELU_ERF_3xLT16,
 						  &&POST_OPS_DOWNSCALE_3xLT16
 						};
 	dim_t k_full_pieces = k0 / 2;
@@ -743,7 +784,6 @@ LPGEMM_MN_LT_NR0_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_3xlt16)
 	float buf1[16];
 	float buf2[16];
 
-	
 	// Registers to use for accumulating C.
 	__m512 c_float_0p0 = _mm512_setzero_ps();
 
@@ -761,14 +801,14 @@ LPGEMM_MN_LT_NR0_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_3xlt16)
 		// Perform column direction mat-mul with k = 2.
 		// c[0,0-15] = a[0,kr:kr+2]*b[kr:kr+2,0-15]
 		c_float_0p0 = _mm512_dpbf16_ps( c_float_0p0, a_bf16_0, b0 );
-		
+
 		// Broadcast a[1,kr:kr+2].
 		a_bf16_0 = (__m512bh)_mm512_set1_epi32( *( int32_t* )( a + ( rs_a * 1 ) + ( cs_a * kr ) ) );
 
 		// Perform column direction mat-mul with k = 2.
 		// c[1,0-15] = a[1,kr:kr+2]*b[kr:kr+2,0-15]
 		c_float_1p0 = _mm512_dpbf16_ps( c_float_1p0, a_bf16_0, b0 );
-		
+
 		// Broadcast a[2,kr:kr+2].
 		a_bf16_0 = (__m512bh)_mm512_set1_epi32( *( int32_t* )( a + ( rs_a * 2 ) + ( cs_a * kr ) ) );
 
@@ -776,7 +816,7 @@ LPGEMM_MN_LT_NR0_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_3xlt16)
 		// c[2,0-15] = a[2,kr:kr+2]*b[kr:kr+2,0-15]
 		c_float_2p0 = _mm512_dpbf16_ps( c_float_2p0, a_bf16_0, b0 );
 	}
-	// Handle k remainder.		
+	// Handle k remainder.
 	if ( k_partial_pieces > 0 )
 	{
 		b0 = (__m512bh)_mm512_loadu_epi16( b + ( rs_b * k_full_pieces ) + ( cs_b * 0 ) );
@@ -788,7 +828,7 @@ LPGEMM_MN_LT_NR0_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_3xlt16)
 		// Perform column direction mat-mul with k = 2.
 		// c[0,0-15] = a[0,kr:kr+2]*b[kr:kr+2,0-15]
 		c_float_0p0 = _mm512_dpbf16_ps( c_float_0p0, a_bf16_0, b0 );
-		
+
 		// Broadcast a[1,kr:kr+2].
 		memcpy( &a_kfringe_buf, ( a + ( rs_a * 1 ) + ( cs_a * k_full_pieces ) ), ( k_partial_pieces * sizeof( bfloat16 ) ) );
 		a_bf16_0 = (__m512bh)_mm512_set1_epi32( a_kfringe_buf );
@@ -796,7 +836,7 @@ LPGEMM_MN_LT_NR0_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_3xlt16)
 		// Perform column direction mat-mul with k = 2.
 		// c[1,0-15] = a[1,kr:kr+2]*b[kr:kr+2,0-15]
 		c_float_1p0 = _mm512_dpbf16_ps( c_float_1p0, a_bf16_0, b0 );
-		
+
 		// Broadcast a[2,kr:kr+2].
 		memcpy( &a_kfringe_buf, ( a + ( rs_a * 2 ) + ( cs_a * k_full_pieces ) ), ( k_partial_pieces * sizeof( bfloat16 ) ) );
 		a_bf16_0 = (__m512bh)_mm512_set1_epi32( a_kfringe_buf );
@@ -805,7 +845,7 @@ LPGEMM_MN_LT_NR0_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_3xlt16)
 		// c[2,0-15] = a[2,kr:kr+2]*b[kr:kr+2,0-15]
 		c_float_2p0 = _mm512_dpbf16_ps( c_float_2p0, a_bf16_0, b0 );
 	}
-	
+
 	// Load alpha and beta
 	__m512 selector1 = _mm512_set1_ps( alpha );
 	__m512 selector2 = _mm512_set1_ps( beta );
@@ -814,16 +854,16 @@ LPGEMM_MN_LT_NR0_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_3xlt16)
 	c_float_0p0 = _mm512_mul_ps( selector1, c_float_0p0 );
 
 	c_float_1p0 = _mm512_mul_ps( selector1, c_float_1p0 );
-	
+
 	c_float_2p0 = _mm512_mul_ps( selector1, c_float_2p0 );
-	
+
 	// Scale C by beta.
 	if ( beta != 0 )
 	{
 		memcpy( buf0, ( c + ( rs_c * 0 ) ), ( n0_rem * sizeof( float ) ) );
 		memcpy( buf1, ( c + ( rs_c * 1 ) ), ( n0_rem * sizeof( float ) ) );
 		memcpy( buf2, ( c + ( rs_c * 2 ) ), ( n0_rem * sizeof( float) ) );
-		
+
 		// c[0,0-15]
 		selector1 = _mm512_loadu_ps( buf0 );
 		selector1 = _mm512_mul_ps( selector2, selector1 );
@@ -918,7 +958,7 @@ POST_OPS_RELU_SCALE_3xLT16:
 
 			POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 		}
-POST_OPS_GELU_3xLT16:
+POST_OPS_GELU_TANH_3xLT16:
 		{
 			__m512 dn, z, x, r2, r, x_tanh;
 			__m512i q;
@@ -931,6 +971,21 @@ POST_OPS_GELU_3xLT16:
 
 			// c[2, 0-15]
 			GELU_TANH_F32_AVX512(c_float_2p0, r, r2, x, z, dn, x_tanh, q)
+
+			POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+		}
+POST_OPS_GELU_ERF_3xLT16:
+		{
+			__m512 x, r, x_erf;
+
+			// c[0, 0-15]
+			GELU_ERF_F32_AVX512(c_float_0p0, r, x, x_erf)
+
+			// c[1, 0-15]
+			GELU_ERF_F32_AVX512(c_float_1p0, r, x, x_erf)
+
+			// c[2, 0-15]
+			GELU_ERF_F32_AVX512(c_float_2p0, r, x, x_erf)
 
 			POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 		}
@@ -947,10 +1002,10 @@ POST_OPS_DOWNSCALE_3xLT16:
 		CVT_F32_BF16_LT16(c_float_2p0,2,0);
 
 		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
-	}		
+	}
 POST_OPS_3xLT16_DISABLE:
 		;
-	
+
 	// Store the results.
 	// c[0,0-15]
 	_mm512_storeu_ps( buf0, c_float_0p0 );
@@ -970,7 +1025,7 @@ POST_OPS_3xLT16_DISABLE:
 
 	// c[2,0-15]
 	memcpy( c + ( rs_c * 2 ) + ( 0*16 ), buf2, ( n0_rem * sizeof( float ) ) );
-	
+
 }
 
 // 2xlt16 bf16 fringe kernel
@@ -982,7 +1037,8 @@ LPGEMM_MN_LT_NR0_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_2xlt16)
 						  &&POST_OPS_BIAS_2xLT16,
 						  &&POST_OPS_RELU_2xLT16,
 						  &&POST_OPS_RELU_SCALE_2xLT16,
-						  &&POST_OPS_GELU_2xLT16,
+						  &&POST_OPS_GELU_TANH_2xLT16,
+						  &&POST_OPS_GELU_ERF_2xLT16,
 						  &&POST_OPS_DOWNSCALE_2xLT16
 						};
 	dim_t k_full_pieces = k0 / 2;
@@ -1000,7 +1056,6 @@ LPGEMM_MN_LT_NR0_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_2xlt16)
 	float buf0[16];
 	float buf1[16];
 
-	
 	// Registers to use for accumulating C.
 	__m512 c_float_0p0 = _mm512_setzero_ps();
 
@@ -1016,7 +1071,7 @@ LPGEMM_MN_LT_NR0_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_2xlt16)
 		// Perform column direction mat-mul with k = 2.
 		// c[0,0-15] = a[0,kr:kr+2]*b[kr:kr+2,0-15]
 		c_float_0p0 = _mm512_dpbf16_ps( c_float_0p0, a_bf16_0, b0 );
-		
+
 		// Broadcast a[1,kr:kr+2].
 		a_bf16_0 = (__m512bh)_mm512_set1_epi32( *( int32_t* )( a + ( rs_a * 1 ) + ( cs_a * kr ) ) );
 
@@ -1024,7 +1079,7 @@ LPGEMM_MN_LT_NR0_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_2xlt16)
 		// c[1,0-15] = a[1,kr:kr+2]*b[kr:kr+2,0-15]
 		c_float_1p0 = _mm512_dpbf16_ps( c_float_1p0, a_bf16_0, b0 );
 	}
-	// Handle k remainder.		
+	// Handle k remainder.
 	if ( k_partial_pieces > 0 )
 	{
 		b0 = (__m512bh)_mm512_loadu_epi16( b + ( rs_b * k_full_pieces ) + ( cs_b * 0 ) );
@@ -1036,7 +1091,7 @@ LPGEMM_MN_LT_NR0_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_2xlt16)
 		// Perform column direction mat-mul with k = 2.
 		// c[0,0-15] = a[0,kr:kr+2]*b[kr:kr+2,0-15]
 		c_float_0p0 = _mm512_dpbf16_ps( c_float_0p0, a_bf16_0, b0 );
-		
+
 		// Broadcast a[1,kr:kr+2].
 		memcpy( &a_kfringe_buf, ( a + ( rs_a * 1 ) + ( cs_a * k_full_pieces ) ), ( k_partial_pieces * sizeof( bfloat16 ) ) );
 		a_bf16_0 = (__m512bh)_mm512_set1_epi32( a_kfringe_buf );
@@ -1045,7 +1100,7 @@ LPGEMM_MN_LT_NR0_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_2xlt16)
 		// c[1,0-15] = a[1,kr:kr+2]*b[kr:kr+2,0-15]
 		c_float_1p0 = _mm512_dpbf16_ps( c_float_1p0, a_bf16_0, b0 );
 	}
-	
+
 	// Load alpha and beta
 	__m512 selector1 = _mm512_set1_ps( alpha );
 	__m512 selector2 = _mm512_set1_ps( beta );
@@ -1054,13 +1109,13 @@ LPGEMM_MN_LT_NR0_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_2xlt16)
 	c_float_0p0 = _mm512_mul_ps( selector1, c_float_0p0 );
 
 	c_float_1p0 = _mm512_mul_ps( selector1, c_float_1p0 );
-	
+
 	// Scale C by beta.
 	if ( beta != 0 )
 	{
 		memcpy( buf0, ( c + ( rs_c * 0 ) ), ( n0_rem * sizeof( float ) ) );
 		memcpy( buf1, ( c + ( rs_c * 1 ) ), ( n0_rem * sizeof( float) ) );
-		
+
 		// c[0,0-15]
 		selector1 = _mm512_loadu_ps( buf0 );
 		selector1 = _mm512_mul_ps( selector2, selector1 );
@@ -1135,7 +1190,7 @@ POST_OPS_RELU_SCALE_2xLT16:
 
 			POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 		}
-POST_OPS_GELU_2xLT16:
+POST_OPS_GELU_TANH_2xLT16:
 		{
 			__m512 dn, z, x, r2, r, x_tanh;
 			__m512i q;
@@ -1148,7 +1203,19 @@ POST_OPS_GELU_2xLT16:
 
 			POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 		}
-		
+POST_OPS_GELU_ERF_2xLT16:
+		{
+			__m512 x, r, x_erf;
+
+			// c[0, 0-15]
+			GELU_ERF_F32_AVX512(c_float_0p0, r, x, x_erf)
+
+			// c[1, 0-15]
+			GELU_ERF_F32_AVX512(c_float_1p0, r, x, x_erf)
+
+			POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+		}
+
 POST_OPS_DOWNSCALE_2xLT16:
 	{
 		// c[0, 0-15]
@@ -1158,10 +1225,10 @@ POST_OPS_DOWNSCALE_2xLT16:
 		CVT_F32_BF16_LT16(c_float_1p0,1,0);
 
 		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
-	}		
+	}
 POST_OPS_2xLT16_DISABLE:
 		;
-	
+
 	// Store the results.
 	// c[0,0-15]
 	_mm512_storeu_ps( buf0, c_float_0p0 );
@@ -1175,7 +1242,7 @@ POST_OPS_2xLT16_DISABLE:
 
 	// c[1,0-15]
 	memcpy( c + ( rs_c * 1 ) + ( 0*16 ), buf1, ( n0_rem * sizeof( float ) ) );
-	
+
 }
 
 // 1xlt16 bf16 fringe kernel
@@ -1187,7 +1254,8 @@ LPGEMM_MN_LT_NR0_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_1xlt16)
 						  &&POST_OPS_BIAS_1xLT16,
 						  &&POST_OPS_RELU_1xLT16,
 						  &&POST_OPS_RELU_SCALE_1xLT16,
-						  &&POST_OPS_GELU_1xLT16,
+						  &&POST_OPS_GELU_TANH_1xLT16,
+						  &&POST_OPS_GELU_ERF_1xLT16,
 						  &&POST_OPS_DOWNSCALE_1xLT16
 						};
 	dim_t k_full_pieces = k0 / 2;
@@ -1204,7 +1272,6 @@ LPGEMM_MN_LT_NR0_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_1xlt16)
 	// For corner cases.
 	float buf0[16];
 
-	
 	// Registers to use for accumulating C.
 	__m512 c_float_0p0 = _mm512_setzero_ps();
 
@@ -1219,7 +1286,7 @@ LPGEMM_MN_LT_NR0_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_1xlt16)
 		// c[0,0-15] = a[0,kr:kr+2]*b[kr:kr+2,0-15]
 		c_float_0p0 = _mm512_dpbf16_ps( c_float_0p0, a_bf16_0, b0 );
 	}
-	// Handle k remainder.		
+	// Handle k remainder.
 	if ( k_partial_pieces > 0 )
 	{
 		b0 = (__m512bh)_mm512_loadu_epi16( b + ( rs_b * k_full_pieces ) + ( cs_b * 0 ) );
@@ -1232,19 +1299,19 @@ LPGEMM_MN_LT_NR0_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_1xlt16)
 		// c[0,0-15] = a[0,kr:kr+2]*b[kr:kr+2,0-15]
 		c_float_0p0 = _mm512_dpbf16_ps( c_float_0p0, a_bf16_0, b0 );
 	}
-	
+
 	// Load alpha and beta
 	__m512 selector1 = _mm512_set1_ps( alpha );
 	__m512 selector2 = _mm512_set1_ps( beta );
 
 	// Scale by alpha
 	c_float_0p0 = _mm512_mul_ps( selector1, c_float_0p0 );
-	
+
 	// Scale C by beta.
 	if ( beta != 0 )
 	{
 		memcpy( buf0, ( c + ( rs_c * 0 ) ), ( n0_rem * sizeof( float ) ) );
-		
+
 		// c[0,0-15]
 		selector1 = _mm512_loadu_ps( buf0 );
 		selector1 = _mm512_mul_ps( selector2, selector1 );
@@ -1299,13 +1366,22 @@ POST_OPS_RELU_SCALE_1xLT16:
 
 			POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 		}
-POST_OPS_GELU_1xLT16:
+POST_OPS_GELU_TANH_1xLT16:
 		{
 			__m512 dn, z, x, r2, r, x_tanh;
 			__m512i q;
 
 			// c[0, 0-15]
 			GELU_TANH_F32_AVX512(c_float_0p0, r, r2, x, z, dn, x_tanh, q)
+
+			POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+		}
+POST_OPS_GELU_ERF_1xLT16:
+		{
+			__m512 x, r, x_erf;
+
+			// c[0, 0-15]
+			GELU_ERF_F32_AVX512(c_float_0p0, r, x, x_erf)
 
 			POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 		}
@@ -1316,10 +1392,10 @@ POST_OPS_DOWNSCALE_1xLT16:
 		CVT_F32_BF16_LT16(c_float_0p0,0,0);
 
 		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
-	}		
+	}
 POST_OPS_1xLT16_DISABLE:
 		;
-	
+
 	// Store the results.
 	// c[0,0-15]
 	_mm512_storeu_ps( buf0, c_float_0p0 );
@@ -1327,7 +1403,7 @@ POST_OPS_1xLT16_DISABLE:
 	// Memcpy partial parts.
 	// c[0,0-15]
 	memcpy( c + ( rs_c * 0 ) + ( 0*16 ), buf0, ( n0_rem * sizeof( float ) ) );
-	
+
 }
 
 // 5x16 bf16 kernel
@@ -1339,7 +1415,8 @@ LPGEMM_MN_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_5x16)
 						  &&POST_OPS_BIAS_5x16,
 						  &&POST_OPS_RELU_5x16,
 						  &&POST_OPS_RELU_SCALE_5x16,
-						  &&POST_OPS_GELU_5x16,
+						  &&POST_OPS_GELU_TANH_5x16,
+						  &&POST_OPS_GELU_ERF_5x16,
 						  &&POST_OPS_DOWNSCALE_5x16
 						};
 	dim_t k_full_pieces = k0 / 2;
@@ -1359,7 +1436,7 @@ LPGEMM_MN_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_5x16)
 	__m512 c_float_1p0 = _mm512_setzero_ps();
 
 	__m512 c_float_2p0 = _mm512_setzero_ps();
-	
+
 	__m512 c_float_3p0 = _mm512_setzero_ps();
 
 	__m512 c_float_4p0 = _mm512_setzero_ps();
@@ -1374,28 +1451,28 @@ LPGEMM_MN_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_5x16)
 		// Perform column direction mat-mul with k = 2.
 		// c[0,0-15] = a[0,kr:kr+2]*b[kr:kr+2,0-15]
 		c_float_0p0 = _mm512_dpbf16_ps( c_float_0p0, a_bf16_0, b0 );
-		
+
 		// Broadcast a[1,kr:kr+2].
 		a_bf16_0 = (__m512bh)_mm512_set1_epi32( *( int32_t* )( a + ( rs_a * 1 ) + ( cs_a * kr ) ) );
 
 		// Perform column direction mat-mul with k = 2.
 		// c[1,0-15] = a[1,kr:kr+2]*b[kr:kr+2,0-15]
 		c_float_1p0 = _mm512_dpbf16_ps( c_float_1p0, a_bf16_0, b0 );
-		
+
 		// Broadcast a[2,kr:kr+2].
 		a_bf16_0 = (__m512bh)_mm512_set1_epi32( *( int32_t* )( a + ( rs_a * 2 ) + ( cs_a * kr ) ) );
 
 		// Perform column direction mat-mul with k = 2.
 		// c[2,0-15] = a[2,kr:kr+2]*b[kr:kr+2,0-15]
 		c_float_2p0 = _mm512_dpbf16_ps( c_float_2p0, a_bf16_0, b0 );
-		
+
 		// Broadcast a[3,kr:kr+2].
 		a_bf16_0 = (__m512bh)_mm512_set1_epi32( *( int32_t* )( a + ( rs_a * 3 ) + ( cs_a * kr ) ) );
 
 		// Perform column direction mat-mul with k = 2.
 		// c[3,0-15] = a[3,kr:kr+2]*b[kr:kr+2,0-15]
 		c_float_3p0 = _mm512_dpbf16_ps( c_float_3p0, a_bf16_0, b0 );
-		
+
 		// Broadcast a[4,kr:kr+2].
 		a_bf16_0 = (__m512bh)_mm512_set1_epi32( *( int32_t* )( a + ( rs_a * 4 ) + ( cs_a * kr ) ) );
 
@@ -1403,7 +1480,7 @@ LPGEMM_MN_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_5x16)
 		// c[4,0-15] = a[4,kr:kr+2]*b[kr:kr+2,0-15]
 		c_float_4p0 = _mm512_dpbf16_ps( c_float_4p0, a_bf16_0, b0 );
 	}
-	// Handle k remainder.	
+	// Handle k remainder.
 	if ( k_partial_pieces > 0 )
 	{
 		b0 = (__m512bh)_mm512_loadu_epi16( b + ( rs_b * k_full_pieces ) + ( cs_b * 0 ) );
@@ -1415,7 +1492,7 @@ LPGEMM_MN_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_5x16)
 		// Perform column direction mat-mul with k = 2.
 		// c[0,0-15] = a[0,kr:kr+2]*b[kr:kr+2,0-15]
 		c_float_0p0 = _mm512_dpbf16_ps( c_float_0p0, a_bf16_0, b0 );
-		
+
 		// Broadcast a[1,kr:kr+2].
 		memcpy( &a_kfringe_buf, ( a + ( rs_a * 1 ) + ( cs_a * k_full_pieces ) ), ( k_partial_pieces * sizeof( bfloat16 ) ) );
 		a_bf16_0 = (__m512bh)_mm512_set1_epi32( a_kfringe_buf );
@@ -1423,7 +1500,7 @@ LPGEMM_MN_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_5x16)
 		// Perform column direction mat-mul with k = 2.
 		// c[1,0-15] = a[1,kr:kr+2]*b[kr:kr+2,0-15]
 		c_float_1p0 = _mm512_dpbf16_ps( c_float_1p0, a_bf16_0, b0 );
-		
+
 		// Broadcast a[2,kr:kr+2].
 		memcpy( &a_kfringe_buf, ( a + ( rs_a * 2 ) + ( cs_a * k_full_pieces ) ), ( k_partial_pieces * sizeof( bfloat16 ) ) );
 		a_bf16_0 = (__m512bh)_mm512_set1_epi32( a_kfringe_buf );
@@ -1431,7 +1508,7 @@ LPGEMM_MN_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_5x16)
 		// Perform column direction mat-mul with k = 2.
 		// c[2,0-15] = a[2,kr:kr+2]*b[kr:kr+2,0-15]
 		c_float_2p0 = _mm512_dpbf16_ps( c_float_2p0, a_bf16_0, b0 );
-		
+
 		// Broadcast a[3,kr:kr+2].
 		memcpy( &a_kfringe_buf, ( a + ( rs_a * 3 ) + ( cs_a * k_full_pieces ) ), ( k_partial_pieces * sizeof( bfloat16 ) ) );
 		a_bf16_0 = (__m512bh)_mm512_set1_epi32( a_kfringe_buf );
@@ -1439,7 +1516,7 @@ LPGEMM_MN_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_5x16)
 		// Perform column direction mat-mul with k = 2.
 		// c[3,0-15] = a[3,kr:kr+2]*b[kr:kr+2,0-15]
 		c_float_3p0 = _mm512_dpbf16_ps( c_float_3p0, a_bf16_0, b0 );
-		
+
 		// Broadcast a[4,kr:kr+2].
 		memcpy( &a_kfringe_buf, ( a + ( rs_a * 4 ) + ( cs_a * k_full_pieces ) ), ( k_partial_pieces * sizeof( bfloat16 ) ) );
 		a_bf16_0 = (__m512bh)_mm512_set1_epi32( a_kfringe_buf );
@@ -1448,7 +1525,7 @@ LPGEMM_MN_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_5x16)
 		// c[4,0-15] = a[4,kr:kr+2]*b[kr:kr+2,0-15]
 		c_float_4p0 = _mm512_dpbf16_ps( c_float_4p0, a_bf16_0, b0 );
 	}
-	
+
 	// Load alpha and beta
 	__m512 selector1 = _mm512_set1_ps( alpha );
 	__m512 selector2 = _mm512_set1_ps( beta );
@@ -1457,11 +1534,11 @@ LPGEMM_MN_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_5x16)
 	c_float_0p0 = _mm512_mul_ps( selector1, c_float_0p0 );
 
 	c_float_1p0 = _mm512_mul_ps( selector1, c_float_1p0 );
-	
+
 	c_float_2p0 = _mm512_mul_ps( selector1, c_float_2p0 );
-	
+
 	c_float_3p0 = _mm512_mul_ps( selector1, c_float_3p0 );
-	
+
 	c_float_4p0 = _mm512_mul_ps( selector1, c_float_4p0 );
 
 	// Scale C by beta.
@@ -1601,7 +1678,7 @@ POST_OPS_RELU_SCALE_5x16:
 
 		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 	}
-POST_OPS_GELU_5x16:
+POST_OPS_GELU_TANH_5x16:
 	{
 		__m512 dn, z, x, r2, r, x_tanh;
 		__m512i q;
@@ -1620,6 +1697,27 @@ POST_OPS_GELU_5x16:
 
 		// c[4, 0-15]
 		GELU_TANH_F32_AVX512(c_float_4p0, r, r2, x, z, dn, x_tanh, q)
+
+		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+	}
+POST_OPS_GELU_ERF_5x16:
+	{
+		__m512 x, r, x_erf;
+
+		// c[0, 0-15]
+		GELU_ERF_F32_AVX512(c_float_0p0, r, x, x_erf)
+
+		// c[1, 0-15]
+		GELU_ERF_F32_AVX512(c_float_1p0, r, x, x_erf)
+
+		// c[2, 0-15]
+		GELU_ERF_F32_AVX512(c_float_2p0, r, x, x_erf)
+
+		// c[3, 0-15]
+		GELU_ERF_F32_AVX512(c_float_3p0, r, x, x_erf)
+
+		// c[4, 0-15]
+		GELU_ERF_F32_AVX512(c_float_4p0, r, x, x_erf)
 
 		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 	}
@@ -1642,10 +1740,10 @@ POST_OPS_DOWNSCALE_5x16:
 		CVT_F32_BF16(c_float_4p0,4,0);
 
 		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
-	}	
+	}
 POST_OPS_5x16_DISABLE:
 	;
-	
+
 	// Store the results.
 	// c[0,0-15]
 	_mm512_storeu_ps( c + ( rs_c * 0 ) + ( 0*16 ), c_float_0p0 );
@@ -1672,7 +1770,8 @@ LPGEMM_MN_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_4x16)
 						  &&POST_OPS_BIAS_4x16,
 						  &&POST_OPS_RELU_4x16,
 						  &&POST_OPS_RELU_SCALE_4x16,
-						  &&POST_OPS_GELU_4x16,
+						  &&POST_OPS_GELU_TANH_4x16,
+						  &&POST_OPS_GELU_ERF_4x16,
 						  &&POST_OPS_DOWNSCALE_4x16
 						};
 	dim_t k_full_pieces = k0 / 2;
@@ -1692,7 +1791,7 @@ LPGEMM_MN_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_4x16)
 	__m512 c_float_1p0 = _mm512_setzero_ps();
 
 	__m512 c_float_2p0 = _mm512_setzero_ps();
-	
+
 	__m512 c_float_3p0 = _mm512_setzero_ps();
 
 	for ( dim_t kr = 0; kr < k_full_pieces; kr += 1 )
@@ -1705,21 +1804,21 @@ LPGEMM_MN_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_4x16)
 		// Perform column direction mat-mul with k = 2.
 		// c[0,0-15] = a[0,kr:kr+2]*b[kr:kr+2,0-15]
 		c_float_0p0 = _mm512_dpbf16_ps( c_float_0p0, a_bf16_0, b0 );
-		
+
 		// Broadcast a[1,kr:kr+2].
 		a_bf16_0 = (__m512bh)_mm512_set1_epi32( *( int32_t* )( a + ( rs_a * 1 ) + ( cs_a * kr ) ) );
 
 		// Perform column direction mat-mul with k = 2.
 		// c[1,0-15] = a[1,kr:kr+2]*b[kr:kr+2,0-15]
 		c_float_1p0 = _mm512_dpbf16_ps( c_float_1p0, a_bf16_0, b0 );
-		
+
 		// Broadcast a[2,kr:kr+2].
 		a_bf16_0 = (__m512bh)_mm512_set1_epi32( *( int32_t* )( a + ( rs_a * 2 ) + ( cs_a * kr ) ) );
 
 		// Perform column direction mat-mul with k = 2.
 		// c[2,0-15] = a[2,kr:kr+2]*b[kr:kr+2,0-15]
 		c_float_2p0 = _mm512_dpbf16_ps( c_float_2p0, a_bf16_0, b0 );
-		
+
 		// Broadcast a[3,kr:kr+2].
 		a_bf16_0 = (__m512bh)_mm512_set1_epi32( *( int32_t* )( a + ( rs_a * 3 ) + ( cs_a * kr ) ) );
 
@@ -1727,7 +1826,7 @@ LPGEMM_MN_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_4x16)
 		// c[3,0-15] = a[3,kr:kr+2]*b[kr:kr+2,0-15]
 		c_float_3p0 = _mm512_dpbf16_ps( c_float_3p0, a_bf16_0, b0 );
 	}
-	// Handle k remainder.	
+	// Handle k remainder.
 	if ( k_partial_pieces > 0 )
 	{
 		b0 = (__m512bh)_mm512_loadu_epi16( b + ( rs_b * k_full_pieces ) + ( cs_b * 0 ) );
@@ -1739,7 +1838,7 @@ LPGEMM_MN_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_4x16)
 		// Perform column direction mat-mul with k = 2.
 		// c[0,0-15] = a[0,kr:kr+2]*b[kr:kr+2,0-15]
 		c_float_0p0 = _mm512_dpbf16_ps( c_float_0p0, a_bf16_0, b0 );
-		
+
 		// Broadcast a[1,kr:kr+2].
 		memcpy( &a_kfringe_buf, ( a + ( rs_a * 1 ) + ( cs_a * k_full_pieces ) ), ( k_partial_pieces * sizeof( bfloat16 ) ) );
 		a_bf16_0 = (__m512bh)_mm512_set1_epi32( a_kfringe_buf );
@@ -1747,7 +1846,7 @@ LPGEMM_MN_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_4x16)
 		// Perform column direction mat-mul with k = 2.
 		// c[1,0-15] = a[1,kr:kr+2]*b[kr:kr+2,0-15]
 		c_float_1p0 = _mm512_dpbf16_ps( c_float_1p0, a_bf16_0, b0 );
-		
+
 		// Broadcast a[2,kr:kr+2].
 		memcpy( &a_kfringe_buf, ( a + ( rs_a * 2 ) + ( cs_a * k_full_pieces ) ), ( k_partial_pieces * sizeof( bfloat16 ) ) );
 		a_bf16_0 = (__m512bh)_mm512_set1_epi32( a_kfringe_buf );
@@ -1755,7 +1854,7 @@ LPGEMM_MN_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_4x16)
 		// Perform column direction mat-mul with k = 2.
 		// c[2,0-15] = a[2,kr:kr+2]*b[kr:kr+2,0-15]
 		c_float_2p0 = _mm512_dpbf16_ps( c_float_2p0, a_bf16_0, b0 );
-		
+
 		// Broadcast a[3,kr:kr+2].
 		memcpy( &a_kfringe_buf, ( a + ( rs_a * 3 ) + ( cs_a * k_full_pieces ) ), ( k_partial_pieces * sizeof( bfloat16 ) ) );
 		a_bf16_0 = (__m512bh)_mm512_set1_epi32( a_kfringe_buf );
@@ -1764,7 +1863,7 @@ LPGEMM_MN_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_4x16)
 		// c[3,0-15] = a[3,kr:kr+2]*b[kr:kr+2,0-15]
 		c_float_3p0 = _mm512_dpbf16_ps( c_float_3p0, a_bf16_0, b0 );
 	}
-	
+
 	// Load alpha and beta
 	__m512 selector1 = _mm512_set1_ps( alpha );
 	__m512 selector2 = _mm512_set1_ps( beta );
@@ -1773,9 +1872,9 @@ LPGEMM_MN_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_4x16)
 	c_float_0p0 = _mm512_mul_ps( selector1, c_float_0p0 );
 
 	c_float_1p0 = _mm512_mul_ps( selector1, c_float_1p0 );
-	
+
 	c_float_2p0 = _mm512_mul_ps( selector1, c_float_2p0 );
-	
+
 	c_float_3p0 = _mm512_mul_ps( selector1, c_float_3p0 );
 
 	// Scale C by beta.
@@ -1895,7 +1994,7 @@ POST_OPS_RELU_SCALE_4x16:
 
 		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 	}
-POST_OPS_GELU_4x16:
+POST_OPS_GELU_TANH_4x16:
 	{
 		__m512 dn, z, x, r2, r, x_tanh;
 		__m512i q;
@@ -1913,7 +2012,26 @@ POST_OPS_GELU_4x16:
 		GELU_TANH_F32_AVX512(c_float_3p0, r, r2, x, z, dn, x_tanh, q)
 
 		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
-	}	
+	}
+POST_OPS_GELU_ERF_4x16:
+	{
+		__m512 x, r, x_erf;
+
+		// c[0, 0-15]
+		GELU_ERF_F32_AVX512(c_float_0p0, r, x, x_erf)
+
+		// c[1, 0-15]
+		GELU_ERF_F32_AVX512(c_float_1p0, r, x, x_erf)
+
+		// c[2, 0-15]
+		GELU_ERF_F32_AVX512(c_float_2p0, r, x, x_erf)
+
+		// c[3, 0-15]
+		GELU_ERF_F32_AVX512(c_float_3p0, r, x, x_erf)
+
+		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+	}
+
 POST_OPS_DOWNSCALE_4x16:
 	{
 		// c[0, 0-15]
@@ -1929,10 +2047,10 @@ POST_OPS_DOWNSCALE_4x16:
 		CVT_F32_BF16(c_float_3p0,3,0);
 
 		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
-	}	
+	}
 POST_OPS_4x16_DISABLE:
 	;
-	
+
 	// Store the results.
 	// c[0,0-15]
 	_mm512_storeu_ps( c + ( rs_c * 0 ) + ( 0*16 ), c_float_0p0 );
@@ -1956,7 +2074,8 @@ LPGEMM_MN_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_3x16)
 						  &&POST_OPS_BIAS_3x16,
 						  &&POST_OPS_RELU_3x16,
 						  &&POST_OPS_RELU_SCALE_3x16,
-						  &&POST_OPS_GELU_3x16,
+						  &&POST_OPS_GELU_TANH_3x16,
+						  &&POST_OPS_GELU_ERF_3x16,
 						  &&POST_OPS_DOWNSCALE_3x16
 						};
 	dim_t k_full_pieces = k0 / 2;
@@ -1987,14 +2106,14 @@ LPGEMM_MN_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_3x16)
 		// Perform column direction mat-mul with k = 2.
 		// c[0,0-15] = a[0,kr:kr+2]*b[kr:kr+2,0-15]
 		c_float_0p0 = _mm512_dpbf16_ps( c_float_0p0, a_bf16_0, b0 );
-		
+
 		// Broadcast a[1,kr:kr+2].
 		a_bf16_0 = (__m512bh)_mm512_set1_epi32( *( int32_t* )( a + ( rs_a * 1 ) + ( cs_a * kr ) ) );
 
 		// Perform column direction mat-mul with k = 2.
 		// c[1,0-15] = a[1,kr:kr+2]*b[kr:kr+2,0-15]
 		c_float_1p0 = _mm512_dpbf16_ps( c_float_1p0, a_bf16_0, b0 );
-		
+
 		// Broadcast a[2,kr:kr+2].
 		a_bf16_0 = (__m512bh)_mm512_set1_epi32( *( int32_t* )( a + ( rs_a * 2 ) + ( cs_a * kr ) ) );
 
@@ -2002,7 +2121,7 @@ LPGEMM_MN_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_3x16)
 		// c[2,0-15] = a[2,kr:kr+2]*b[kr:kr+2,0-15]
 		c_float_2p0 = _mm512_dpbf16_ps( c_float_2p0, a_bf16_0, b0 );
 	}
-	// Handle k remainder.	
+	// Handle k remainder.
 	if ( k_partial_pieces > 0 )
 	{
 		b0 = (__m512bh)_mm512_loadu_epi16( b + ( rs_b * k_full_pieces ) + ( cs_b * 0 ) );
@@ -2014,7 +2133,7 @@ LPGEMM_MN_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_3x16)
 		// Perform column direction mat-mul with k = 2.
 		// c[0,0-15] = a[0,kr:kr+2]*b[kr:kr+2,0-15]
 		c_float_0p0 = _mm512_dpbf16_ps( c_float_0p0, a_bf16_0, b0 );
-		
+
 		// Broadcast a[1,kr:kr+2].
 		memcpy( &a_kfringe_buf, ( a + ( rs_a * 1 ) + ( cs_a * k_full_pieces ) ), ( k_partial_pieces * sizeof( bfloat16 ) ) );
 		a_bf16_0 = (__m512bh)_mm512_set1_epi32( a_kfringe_buf );
@@ -2022,7 +2141,7 @@ LPGEMM_MN_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_3x16)
 		// Perform column direction mat-mul with k = 2.
 		// c[1,0-15] = a[1,kr:kr+2]*b[kr:kr+2,0-15]
 		c_float_1p0 = _mm512_dpbf16_ps( c_float_1p0, a_bf16_0, b0 );
-		
+
 		// Broadcast a[2,kr:kr+2].
 		memcpy( &a_kfringe_buf, ( a + ( rs_a * 2 ) + ( cs_a * k_full_pieces ) ), ( k_partial_pieces * sizeof( bfloat16 ) ) );
 		a_bf16_0 = (__m512bh)_mm512_set1_epi32( a_kfringe_buf );
@@ -2031,7 +2150,7 @@ LPGEMM_MN_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_3x16)
 		// c[2,0-15] = a[2,kr:kr+2]*b[kr:kr+2,0-15]
 		c_float_2p0 = _mm512_dpbf16_ps( c_float_2p0, a_bf16_0, b0 );
 	}
-	
+
 	// Load alpha and beta
 	__m512 selector1 = _mm512_set1_ps( alpha );
 	__m512 selector2 = _mm512_set1_ps( beta );
@@ -2040,7 +2159,7 @@ LPGEMM_MN_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_3x16)
 	c_float_0p0 = _mm512_mul_ps( selector1, c_float_0p0 );
 
 	c_float_1p0 = _mm512_mul_ps( selector1, c_float_1p0 );
-	
+
 	c_float_2p0 = _mm512_mul_ps( selector1, c_float_2p0 );
 
 	// Scale C by beta.
@@ -2140,7 +2259,7 @@ POST_OPS_RELU_SCALE_3x16:
 
 		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 	}
-POST_OPS_GELU_3x16:
+POST_OPS_GELU_TANH_3x16:
 	{
 		__m512 dn, z, x, r2, r, x_tanh;
 		__m512i q;
@@ -2155,7 +2274,22 @@ POST_OPS_GELU_3x16:
 		GELU_TANH_F32_AVX512(c_float_2p0, r, r2, x, z, dn, x_tanh, q)
 
 		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
-	}	
+	}
+POST_OPS_GELU_ERF_3x16:
+	{
+		__m512 x, r, x_erf;
+
+		// c[0, 0-15]
+		GELU_ERF_F32_AVX512(c_float_0p0, r, x, x_erf)
+
+		// c[1, 0-15]
+		GELU_ERF_F32_AVX512(c_float_1p0, r, x, x_erf)
+
+		// c[2, 0-15]
+		GELU_ERF_F32_AVX512(c_float_2p0, r, x, x_erf)
+
+		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+	}
 
 POST_OPS_DOWNSCALE_3x16:
 	{
@@ -2169,10 +2303,9 @@ POST_OPS_DOWNSCALE_3x16:
 		CVT_F32_BF16(c_float_2p0,2,0);
 
 		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
-	}	
+	}
 POST_OPS_3x16_DISABLE:
 	;
-
 
 	// Store the results.
 	// c[0,0-15]
@@ -2194,7 +2327,8 @@ LPGEMM_MN_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_2x16)
 						  &&POST_OPS_BIAS_2x16,
 						  &&POST_OPS_RELU_2x16,
 						  &&POST_OPS_RELU_SCALE_2x16,
-						  &&POST_OPS_GELU_2x16,
+						  &&POST_OPS_GELU_TANH_2x16,
+						  &&POST_OPS_GELU_ERF_2x16,
 						  &&POST_OPS_DOWNSCALE_2x16
 						};
 	dim_t k_full_pieces = k0 / 2;
@@ -2223,7 +2357,7 @@ LPGEMM_MN_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_2x16)
 		// Perform column direction mat-mul with k = 2.
 		// c[0,0-15] = a[0,kr:kr+2]*b[kr:kr+2,0-15]
 		c_float_0p0 = _mm512_dpbf16_ps( c_float_0p0, a_bf16_0, b0 );
-		
+
 		// Broadcast a[1,kr:kr+2].
 		a_bf16_0 = (__m512bh)_mm512_set1_epi32( *( int32_t* )( a + ( rs_a * 1 ) + ( cs_a * kr ) ) );
 
@@ -2231,7 +2365,7 @@ LPGEMM_MN_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_2x16)
 		// c[1,0-15] = a[1,kr:kr+2]*b[kr:kr+2,0-15]
 		c_float_1p0 = _mm512_dpbf16_ps( c_float_1p0, a_bf16_0, b0 );
 	}
-	// Handle k remainder.	
+	// Handle k remainder.
 	if ( k_partial_pieces > 0 )
 	{
 		b0 = (__m512bh)_mm512_loadu_epi16( b + ( rs_b * k_full_pieces ) + ( cs_b * 0 ) );
@@ -2243,7 +2377,7 @@ LPGEMM_MN_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_2x16)
 		// Perform column direction mat-mul with k = 2.
 		// c[0,0-15] = a[0,kr:kr+2]*b[kr:kr+2,0-15]
 		c_float_0p0 = _mm512_dpbf16_ps( c_float_0p0, a_bf16_0, b0 );
-		
+
 		// Broadcast a[1,kr:kr+2].
 		memcpy( &a_kfringe_buf, ( a + ( rs_a * 1 ) + ( cs_a * k_full_pieces ) ), ( k_partial_pieces * sizeof( bfloat16 ) ) );
 		a_bf16_0 = (__m512bh)_mm512_set1_epi32( a_kfringe_buf );
@@ -2252,7 +2386,7 @@ LPGEMM_MN_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_2x16)
 		// c[1,0-15] = a[1,kr:kr+2]*b[kr:kr+2,0-15]
 		c_float_1p0 = _mm512_dpbf16_ps( c_float_1p0, a_bf16_0, b0 );
 	}
-	
+
 	// Load alpha and beta
 	__m512 selector1 = _mm512_set1_ps( alpha );
 	__m512 selector2 = _mm512_set1_ps( beta );
@@ -2339,7 +2473,7 @@ POST_OPS_RELU_SCALE_2x16:
 
 		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 	}
-POST_OPS_GELU_2x16:
+POST_OPS_GELU_TANH_2x16:
 	{
 		__m512 dn, z, x, r2, r, x_tanh;
 		__m512i q;
@@ -2349,6 +2483,18 @@ POST_OPS_GELU_2x16:
 
 		// c[1, 0-15]
 		GELU_TANH_F32_AVX512(c_float_1p0, r, r2, x, z, dn, x_tanh, q)
+
+		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+	}
+POST_OPS_GELU_ERF_2x16:
+	{
+		__m512 x, r, x_erf;
+
+		// c[0, 0-15]
+		GELU_ERF_F32_AVX512(c_float_0p0, r, x, x_erf)
+
+		// c[1, 0-15]
+		GELU_ERF_F32_AVX512(c_float_1p0, r, x, x_erf)
 
 		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 	}
@@ -2362,10 +2508,10 @@ POST_OPS_DOWNSCALE_2x16:
 		CVT_F32_BF16(c_float_1p0,1,0);
 
 		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
-	}	
+	}
 POST_OPS_2x16_DISABLE:
 	;
-	
+
 	// Store the results.
 	// c[0,0-15]
 	_mm512_storeu_ps( c + ( rs_c * 0 ) + ( 0*16 ), c_float_0p0 );
@@ -2383,7 +2529,8 @@ LPGEMM_MN_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_1x16)
 						  &&POST_OPS_BIAS_1x16,
 						  &&POST_OPS_RELU_1x16,
 						  &&POST_OPS_RELU_SCALE_1x16,
-						  &&POST_OPS_GELU_1x16,
+						  &&POST_OPS_GELU_TANH_1x16,
+						  &&POST_OPS_GELU_ERF_1x16,
 						  &&POST_OPS_DOWNSCALE_1x16
 						};
 	dim_t k_full_pieces = k0 / 2;
@@ -2411,7 +2558,7 @@ LPGEMM_MN_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_1x16)
 		// c[0,0-15] = a[0,kr:kr+2]*b[kr:kr+2,0-15]
 		c_float_0p0 = _mm512_dpbf16_ps( c_float_0p0, a_bf16_0, b0 );
 	}
-	// Handle k remainder.	
+	// Handle k remainder.
 	if ( k_partial_pieces > 0 )
 	{
 		b0 = (__m512bh)_mm512_loadu_epi16( b + ( rs_b * k_full_pieces ) + ( cs_b * 0 ) );
@@ -2424,7 +2571,7 @@ LPGEMM_MN_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_1x16)
 		// c[0,0-15] = a[0,kr:kr+2]*b[kr:kr+2,0-15]
 		c_float_0p0 = _mm512_dpbf16_ps( c_float_0p0, a_bf16_0, b0 );
 	}
-    
+
 	// Load alpha and beta
 	__m512 selector1 = _mm512_set1_ps( alpha );
 	__m512 selector2 = _mm512_set1_ps( beta );
@@ -2489,13 +2636,22 @@ POST_OPS_RELU_SCALE_1x16:
 
 		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 	}
-POST_OPS_GELU_1x16:
+POST_OPS_GELU_TANH_1x16:
 	{
 		__m512 dn, z, x, r2, r, x_tanh;
 		__m512i q;
 
 		// c[0, 0-15]
 		GELU_TANH_F32_AVX512(c_float_0p0, r, r2, x, z, dn, x_tanh, q)
+
+		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+	}
+POST_OPS_GELU_ERF_1x16:
+	{
+		__m512 x, r, x_erf;
+
+		// c[0, 0-15]
+		GELU_ERF_F32_AVX512(c_float_0p0, r, x, x_erf)
 
 		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 	}
@@ -2506,10 +2662,10 @@ POST_OPS_DOWNSCALE_1x16:
 		CVT_F32_BF16(c_float_0p0,0,0);
 
 		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
-	}	
+	}
 POST_OPS_1x16_DISABLE:
 	;
-	
+
 	// Store the results.
 	// c[0,0-15]
 	_mm512_storeu_ps( c + ( rs_c * 0 ) + ( 0*16 ), c_float_0p0 );
@@ -2524,7 +2680,8 @@ LPGEMM_MN_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_5x32)
 						  &&POST_OPS_BIAS_5x32,
 						  &&POST_OPS_RELU_5x32,
 						  &&POST_OPS_RELU_SCALE_5x32,
-						  &&POST_OPS_GELU_5x32,
+						  &&POST_OPS_GELU_TANH_5x32,
+						  &&POST_OPS_GELU_ERF_5x32,
 						  &&POST_OPS_DOWNSCALE_5x32
 						};
 	dim_t k_full_pieces = k0 / 2;
@@ -2548,7 +2705,7 @@ LPGEMM_MN_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_5x32)
 
 	__m512 c_float_2p0 = _mm512_setzero_ps();
 	__m512 c_float_2p1 = _mm512_setzero_ps();
-	
+
 	__m512 c_float_3p0 = _mm512_setzero_ps();
 	__m512 c_float_3p1 = _mm512_setzero_ps();
 
@@ -2567,7 +2724,7 @@ LPGEMM_MN_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_5x32)
 		// c[0,0-31] = a[0,kr:kr+2]*b[kr:kr+2,0-31]
 		c_float_0p0 = _mm512_dpbf16_ps( c_float_0p0, a_bf16_0, b0 );
 		c_float_0p1 = _mm512_dpbf16_ps( c_float_0p1, a_bf16_0, b1 );
-		
+
 		// Broadcast a[1,kr:kr+2].
 		a_bf16_0 = (__m512bh)_mm512_set1_epi32( *( int32_t* )( a + ( rs_a * 1 ) + ( cs_a * kr ) ) );
 
@@ -2575,7 +2732,7 @@ LPGEMM_MN_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_5x32)
 		// c[1,0-31] = a[1,kr:kr+2]*b[kr:kr+2,0-31]
 		c_float_1p0 = _mm512_dpbf16_ps( c_float_1p0, a_bf16_0, b0 );
 		c_float_1p1 = _mm512_dpbf16_ps( c_float_1p1, a_bf16_0, b1 );
-		
+
 		// Broadcast a[2,kr:kr+2].
 		a_bf16_0 = (__m512bh)_mm512_set1_epi32( *( int32_t* )( a + ( rs_a * 2 ) + ( cs_a * kr ) ) );
 
@@ -2583,7 +2740,7 @@ LPGEMM_MN_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_5x32)
 		// c[2,0-31] = a[2,kr:kr+2]*b[kr:kr+2,0-31]
 		c_float_2p0 = _mm512_dpbf16_ps( c_float_2p0, a_bf16_0, b0 );
 		c_float_2p1 = _mm512_dpbf16_ps( c_float_2p1, a_bf16_0, b1 );
-		
+
 		// Broadcast a[3,kr:kr+2].
 		a_bf16_0 = (__m512bh)_mm512_set1_epi32( *( int32_t* )( a + ( rs_a * 3 ) + ( cs_a * kr ) ) );
 
@@ -2591,7 +2748,7 @@ LPGEMM_MN_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_5x32)
 		// c[3,0-31] = a[3,kr:kr+2]*b[kr:kr+2,0-31]
 		c_float_3p0 = _mm512_dpbf16_ps( c_float_3p0, a_bf16_0, b0 );
 		c_float_3p1 = _mm512_dpbf16_ps( c_float_3p1, a_bf16_0, b1 );
-		
+
 		// Broadcast a[4,kr:kr+2].
 		a_bf16_0 = (__m512bh)_mm512_set1_epi32( *( int32_t* )( a + ( rs_a * 4 ) + ( cs_a * kr ) ) );
 
@@ -2599,7 +2756,7 @@ LPGEMM_MN_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_5x32)
 		// c[4,0-31] = a[4,kr:kr+2]*b[kr:kr+2,0-31]
 		c_float_4p0 = _mm512_dpbf16_ps( c_float_4p0, a_bf16_0, b0 );
 		c_float_4p1 = _mm512_dpbf16_ps( c_float_4p1, a_bf16_0, b1 );
-	}	
+	}
 	// Handle k remainder.
 	if ( k_partial_pieces > 0 )
 	{
@@ -2614,7 +2771,7 @@ LPGEMM_MN_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_5x32)
 		// c[0,0-31] = a[0,kr:kr+2]*b[kr:kr+2,0-31]
 		c_float_0p0 = _mm512_dpbf16_ps( c_float_0p0, a_bf16_0, b0 );
 		c_float_0p1 = _mm512_dpbf16_ps( c_float_0p1, a_bf16_0, b1 );
-		
+
 		// Broadcast a[1,kr:kr+2].
 		memcpy( &a_kfringe_buf, ( a + ( rs_a * 1 ) + ( cs_a * k_full_pieces ) ), ( k_partial_pieces * sizeof( bfloat16 ) ) );
 		a_bf16_0 = (__m512bh)_mm512_set1_epi32( a_kfringe_buf );
@@ -2623,7 +2780,7 @@ LPGEMM_MN_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_5x32)
 		// c[1,0-31] = a[1,kr:kr+2]*b[kr:kr+2,0-31]
 		c_float_1p0 = _mm512_dpbf16_ps( c_float_1p0, a_bf16_0, b0 );
 		c_float_1p1 = _mm512_dpbf16_ps( c_float_1p1, a_bf16_0, b1 );
-		
+
 		// Broadcast a[2,kr:kr+2].
 		memcpy( &a_kfringe_buf, ( a + ( rs_a * 2 ) + ( cs_a * k_full_pieces ) ), ( k_partial_pieces * sizeof( bfloat16 ) ) );
 		a_bf16_0 = (__m512bh)_mm512_set1_epi32( a_kfringe_buf );
@@ -2632,7 +2789,7 @@ LPGEMM_MN_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_5x32)
 		// c[2,0-31] = a[2,kr:kr+2]*b[kr:kr+2,0-31]
 		c_float_2p0 = _mm512_dpbf16_ps( c_float_2p0, a_bf16_0, b0 );
 		c_float_2p1 = _mm512_dpbf16_ps( c_float_2p1, a_bf16_0, b1 );
-		
+
 		// Broadcast a[3,kr:kr+2].
 		memcpy( &a_kfringe_buf, ( a + ( rs_a * 3 ) + ( cs_a * k_full_pieces ) ), ( k_partial_pieces * sizeof( bfloat16 ) ) );
 		a_bf16_0 = (__m512bh)_mm512_set1_epi32( a_kfringe_buf );
@@ -2641,7 +2798,7 @@ LPGEMM_MN_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_5x32)
 		// c[3,0-31] = a[3,kr:kr+2]*b[kr:kr+2,0-31]
 		c_float_3p0 = _mm512_dpbf16_ps( c_float_3p0, a_bf16_0, b0 );
 		c_float_3p1 = _mm512_dpbf16_ps( c_float_3p1, a_bf16_0, b1 );
-		
+
 		// Broadcast a[4,kr:kr+2].
 		memcpy( &a_kfringe_buf, ( a + ( rs_a * 4 ) + ( cs_a * k_full_pieces ) ), ( k_partial_pieces * sizeof( bfloat16 ) ) );
 		a_bf16_0 = (__m512bh)_mm512_set1_epi32( a_kfringe_buf );
@@ -2651,7 +2808,7 @@ LPGEMM_MN_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_5x32)
 		c_float_4p0 = _mm512_dpbf16_ps( c_float_4p0, a_bf16_0, b0 );
 		c_float_4p1 = _mm512_dpbf16_ps( c_float_4p1, a_bf16_0, b1 );
 	}
-	
+
 	// Load alpha and beta
 	__m512 selector1 = _mm512_set1_ps( alpha );
 	__m512 selector2 = _mm512_set1_ps( beta );
@@ -2662,13 +2819,13 @@ LPGEMM_MN_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_5x32)
 
 	c_float_1p0 = _mm512_mul_ps( selector1, c_float_1p0 );
 	c_float_1p1 = _mm512_mul_ps( selector1, c_float_1p1 );
-	
+
 	c_float_2p0 = _mm512_mul_ps( selector1, c_float_2p0 );
 	c_float_2p1 = _mm512_mul_ps( selector1, c_float_2p1 );
-	
+
 	c_float_3p0 = _mm512_mul_ps( selector1, c_float_3p0 );
 	c_float_3p1 = _mm512_mul_ps( selector1, c_float_3p1 );
-	
+
 	c_float_4p0 = _mm512_mul_ps( selector1, c_float_4p0 );
 	c_float_4p1 = _mm512_mul_ps( selector1, c_float_4p1 );
 
@@ -2897,7 +3054,7 @@ POST_OPS_RELU_SCALE_5x32:
 
 		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 	}
-POST_OPS_GELU_5x32:
+POST_OPS_GELU_TANH_5x32:
 	{
 		__m512 dn, z, x, r2, r, x_tanh;
 		__m512i q;
@@ -2931,6 +3088,42 @@ POST_OPS_GELU_5x32:
 
 		// c[4, 16-31]
 		GELU_TANH_F32_AVX512(c_float_4p1, r, r2, x, z, dn, x_tanh, q)
+
+		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+	}
+POST_OPS_GELU_ERF_5x32:
+	{
+		__m512 x, r, x_erf;
+
+		// c[0, 0-15]
+		GELU_ERF_F32_AVX512(c_float_0p0, r, x, x_erf)
+
+		// c[0, 16-31]
+		GELU_ERF_F32_AVX512(c_float_0p1, r, x, x_erf)
+
+		// c[1, 0-15]
+		GELU_ERF_F32_AVX512(c_float_1p0, r, x, x_erf)
+
+		// c[1, 16-31]
+		GELU_ERF_F32_AVX512(c_float_1p1, r, x, x_erf)
+
+		// c[2, 0-15]
+		GELU_ERF_F32_AVX512(c_float_2p0, r, x, x_erf)
+
+		// c[2, 16-31]
+		GELU_ERF_F32_AVX512(c_float_2p1, r, x, x_erf)
+
+		// c[3, 0-15]
+		GELU_ERF_F32_AVX512(c_float_3p0, r, x, x_erf)
+
+		// c[3, 16-31]
+		GELU_ERF_F32_AVX512(c_float_3p1, r, x, x_erf)
+
+		// c[4, 0-15]
+		GELU_ERF_F32_AVX512(c_float_4p0, r, x, x_erf)
+
+		// c[4, 16-31]
+		GELU_ERF_F32_AVX512(c_float_4p1, r, x, x_erf)
 
 		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 	}
@@ -2968,10 +3161,10 @@ POST_OPS_DOWNSCALE_5x32:
 		CVT_F32_BF16(c_float_4p1,4,1);
 
 		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
-	}	
+	}
 POST_OPS_5x32_DISABLE:
 	;
-	
+
 	// Store the results.
 	// c[0,0-15]
 	_mm512_storeu_ps( c + ( rs_c * 0 ) + ( 0*16 ), c_float_0p0 );
@@ -3013,7 +3206,8 @@ LPGEMM_MN_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_4x32)
 						  &&POST_OPS_BIAS_4x32,
 						  &&POST_OPS_RELU_4x32,
 						  &&POST_OPS_RELU_SCALE_4x32,
-						  &&POST_OPS_GELU_4x32,
+						  &&POST_OPS_GELU_TANH_4x32,
+						  &&POST_OPS_GELU_ERF_4x32,
 						  &&POST_OPS_DOWNSCALE_4x32
 						};
 	dim_t k_full_pieces = k0 / 2;
@@ -3037,7 +3231,7 @@ LPGEMM_MN_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_4x32)
 
 	__m512 c_float_2p0 = _mm512_setzero_ps();
 	__m512 c_float_2p1 = _mm512_setzero_ps();
-	
+
 	__m512 c_float_3p0 = _mm512_setzero_ps();
 	__m512 c_float_3p1 = _mm512_setzero_ps();
 
@@ -3053,7 +3247,7 @@ LPGEMM_MN_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_4x32)
 		// c[0,0-31] = a[0,kr:kr+2]*b[kr:kr+2,0-31]
 		c_float_0p0 = _mm512_dpbf16_ps( c_float_0p0, a_bf16_0, b0 );
 		c_float_0p1 = _mm512_dpbf16_ps( c_float_0p1, a_bf16_0, b1 );
-		
+
 		// Broadcast a[1,kr:kr+2].
 		a_bf16_0 = (__m512bh)_mm512_set1_epi32( *( int32_t* )( a + ( rs_a * 1 ) + ( cs_a * kr ) ) );
 
@@ -3061,7 +3255,7 @@ LPGEMM_MN_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_4x32)
 		// c[1,0-31] = a[1,kr:kr+2]*b[kr:kr+2,0-31]
 		c_float_1p0 = _mm512_dpbf16_ps( c_float_1p0, a_bf16_0, b0 );
 		c_float_1p1 = _mm512_dpbf16_ps( c_float_1p1, a_bf16_0, b1 );
-		
+
 		// Broadcast a[2,kr:kr+2].
 		a_bf16_0 = (__m512bh)_mm512_set1_epi32( *( int32_t* )( a + ( rs_a * 2 ) + ( cs_a * kr ) ) );
 
@@ -3069,7 +3263,7 @@ LPGEMM_MN_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_4x32)
 		// c[2,0-31] = a[2,kr:kr+2]*b[kr:kr+2,0-31]
 		c_float_2p0 = _mm512_dpbf16_ps( c_float_2p0, a_bf16_0, b0 );
 		c_float_2p1 = _mm512_dpbf16_ps( c_float_2p1, a_bf16_0, b1 );
-		
+
 		// Broadcast a[3,kr:kr+2].
 		a_bf16_0 = (__m512bh)_mm512_set1_epi32( *( int32_t* )( a + ( rs_a * 3 ) + ( cs_a * kr ) ) );
 
@@ -3092,7 +3286,7 @@ LPGEMM_MN_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_4x32)
 		// c[0,0-31] = a[0,kr:kr+2]*b[kr:kr+2,0-31]
 		c_float_0p0 = _mm512_dpbf16_ps( c_float_0p0, a_bf16_0, b0 );
 		c_float_0p1 = _mm512_dpbf16_ps( c_float_0p1, a_bf16_0, b1 );
-		
+
 		// Broadcast a[1,kr:kr+2].
 		memcpy( &a_kfringe_buf, ( a + ( rs_a * 1 ) + ( cs_a * k_full_pieces ) ), ( k_partial_pieces * sizeof( bfloat16 ) ) );
 		a_bf16_0 = (__m512bh)_mm512_set1_epi32( a_kfringe_buf );
@@ -3101,7 +3295,7 @@ LPGEMM_MN_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_4x32)
 		// c[1,0-31] = a[1,kr:kr+2]*b[kr:kr+2,0-31]
 		c_float_1p0 = _mm512_dpbf16_ps( c_float_1p0, a_bf16_0, b0 );
 		c_float_1p1 = _mm512_dpbf16_ps( c_float_1p1, a_bf16_0, b1 );
-		
+
 		// Broadcast a[2,kr:kr+2].
 		memcpy( &a_kfringe_buf, ( a + ( rs_a * 2 ) + ( cs_a * k_full_pieces ) ), ( k_partial_pieces * sizeof( bfloat16 ) ) );
 		a_bf16_0 = (__m512bh)_mm512_set1_epi32( a_kfringe_buf );
@@ -3110,7 +3304,7 @@ LPGEMM_MN_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_4x32)
 		// c[2,0-31] = a[2,kr:kr+2]*b[kr:kr+2,0-31]
 		c_float_2p0 = _mm512_dpbf16_ps( c_float_2p0, a_bf16_0, b0 );
 		c_float_2p1 = _mm512_dpbf16_ps( c_float_2p1, a_bf16_0, b1 );
-		
+
 		// Broadcast a[3,kr:kr+2].
 		memcpy( &a_kfringe_buf, ( a + ( rs_a * 3 ) + ( cs_a * k_full_pieces ) ), ( k_partial_pieces * sizeof( bfloat16 ) ) );
 		a_bf16_0 = (__m512bh)_mm512_set1_epi32( a_kfringe_buf );
@@ -3120,7 +3314,7 @@ LPGEMM_MN_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_4x32)
 		c_float_3p0 = _mm512_dpbf16_ps( c_float_3p0, a_bf16_0, b0 );
 		c_float_3p1 = _mm512_dpbf16_ps( c_float_3p1, a_bf16_0, b1 );
 	}
-	
+
 	// Load alpha and beta
 	__m512 selector1 = _mm512_set1_ps( alpha );
 	__m512 selector2 = _mm512_set1_ps( beta );
@@ -3131,10 +3325,10 @@ LPGEMM_MN_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_4x32)
 
 	c_float_1p0 = _mm512_mul_ps( selector1, c_float_1p0 );
 	c_float_1p1 = _mm512_mul_ps( selector1, c_float_1p1 );
-	
+
 	c_float_2p0 = _mm512_mul_ps( selector1, c_float_2p0 );
 	c_float_2p1 = _mm512_mul_ps( selector1, c_float_2p1 );
-	
+
 	c_float_3p0 = _mm512_mul_ps( selector1, c_float_3p0 );
 	c_float_3p1 = _mm512_mul_ps( selector1, c_float_3p1 );
 
@@ -3326,7 +3520,7 @@ POST_OPS_RELU_SCALE_4x32:
 
 		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 	}
-POST_OPS_GELU_4x32:
+POST_OPS_GELU_TANH_4x32:
 	{
 		__m512 dn, z, x, r2, r, x_tanh;
 		__m512i q;
@@ -3354,6 +3548,36 @@ POST_OPS_GELU_4x32:
 
 		// c[3, 16-31]
 		GELU_TANH_F32_AVX512(c_float_3p1, r, r2, x, z, dn, x_tanh, q)
+
+		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+	}
+POST_OPS_GELU_ERF_4x32:
+	{
+		__m512 x, r, x_erf;
+
+		// c[0, 0-15]
+		GELU_ERF_F32_AVX512(c_float_0p0, r, x, x_erf)
+
+		// c[0, 16-31]
+		GELU_ERF_F32_AVX512(c_float_0p1, r, x, x_erf)
+
+		// c[1, 0-15]
+		GELU_ERF_F32_AVX512(c_float_1p0, r, x, x_erf)
+
+		// c[1, 16-31]
+		GELU_ERF_F32_AVX512(c_float_1p1, r, x, x_erf)
+
+		// c[2, 0-15]
+		GELU_ERF_F32_AVX512(c_float_2p0, r, x, x_erf)
+
+		// c[2, 16-31]
+		GELU_ERF_F32_AVX512(c_float_2p1, r, x, x_erf)
+
+		// c[3, 0-15]
+		GELU_ERF_F32_AVX512(c_float_3p0, r, x, x_erf)
+
+		// c[3, 16-31]
+		GELU_ERF_F32_AVX512(c_float_3p1, r, x, x_erf)
 
 		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 	}
@@ -3385,10 +3609,10 @@ POST_OPS_DOWNSCALE_4x32:
 		CVT_F32_BF16(c_float_3p1,3,1);
 
 		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
-	}	
+	}
 POST_OPS_4x32_DISABLE:
 	;
-	
+
 	// Store the results.
 	// c[0,0-15]
 	_mm512_storeu_ps( c + ( rs_c * 0 ) + ( 0*16 ), c_float_0p0 );
@@ -3424,7 +3648,8 @@ LPGEMM_MN_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_3x32)
 						  &&POST_OPS_BIAS_3x32,
 						  &&POST_OPS_RELU_3x32,
 						  &&POST_OPS_RELU_SCALE_3x32,
-						  &&POST_OPS_GELU_3x32,
+						  &&POST_OPS_GELU_TANH_3x32,
+						  &&POST_OPS_GELU_ERF_3x32,
 						  &&POST_OPS_DOWNSCALE_3x32
 						};
 	dim_t k_full_pieces = k0 / 2;
@@ -3461,7 +3686,7 @@ LPGEMM_MN_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_3x32)
 		// c[0,0-31] = a[0,kr:kr+2]*b[kr:kr+2,0-31]
 		c_float_0p0 = _mm512_dpbf16_ps( c_float_0p0, a_bf16_0, b0 );
 		c_float_0p1 = _mm512_dpbf16_ps( c_float_0p1, a_bf16_0, b1 );
-		
+
 		// Broadcast a[1,kr:kr+2].
 		a_bf16_0 = (__m512bh)_mm512_set1_epi32( *( int32_t* )( a + ( rs_a * 1 ) + ( cs_a * kr ) ) );
 
@@ -3469,7 +3694,7 @@ LPGEMM_MN_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_3x32)
 		// c[1,0-31] = a[1,kr:kr+2]*b[kr:kr+2,0-31]
 		c_float_1p0 = _mm512_dpbf16_ps( c_float_1p0, a_bf16_0, b0 );
 		c_float_1p1 = _mm512_dpbf16_ps( c_float_1p1, a_bf16_0, b1 );
-		
+
 		// Broadcast a[2,kr:kr+2].
 		a_bf16_0 = (__m512bh)_mm512_set1_epi32( *( int32_t* )( a + ( rs_a * 2 ) + ( cs_a * kr ) ) );
 
@@ -3478,7 +3703,7 @@ LPGEMM_MN_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_3x32)
 		c_float_2p0 = _mm512_dpbf16_ps( c_float_2p0, a_bf16_0, b0 );
 		c_float_2p1 = _mm512_dpbf16_ps( c_float_2p1, a_bf16_0, b1 );
 	}
-	// Handle k remainder.	
+	// Handle k remainder.
 	if ( k_partial_pieces > 0 )
 	{
 		b0 = (__m512bh)_mm512_loadu_epi16( b + ( rs_b * k_full_pieces ) + ( cs_b * 0 ) );
@@ -3492,7 +3717,7 @@ LPGEMM_MN_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_3x32)
 		// c[0,0-31] = a[0,kr:kr+2]*b[kr:kr+2,0-31]
 		c_float_0p0 = _mm512_dpbf16_ps( c_float_0p0, a_bf16_0, b0 );
 		c_float_0p1 = _mm512_dpbf16_ps( c_float_0p1, a_bf16_0, b1 );
-		
+
 		// Broadcast a[1,kr:kr+2].
 		memcpy( &a_kfringe_buf, ( a + ( rs_a * 1 ) + ( cs_a * k_full_pieces ) ), ( k_partial_pieces * sizeof( bfloat16 ) ) );
 		a_bf16_0 = (__m512bh)_mm512_set1_epi32( a_kfringe_buf );
@@ -3501,7 +3726,7 @@ LPGEMM_MN_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_3x32)
 		// c[1,0-31] = a[1,kr:kr+2]*b[kr:kr+2,0-31]
 		c_float_1p0 = _mm512_dpbf16_ps( c_float_1p0, a_bf16_0, b0 );
 		c_float_1p1 = _mm512_dpbf16_ps( c_float_1p1, a_bf16_0, b1 );
-		
+
 		// Broadcast a[2,kr:kr+2].
 		memcpy( &a_kfringe_buf, ( a + ( rs_a * 2 ) + ( cs_a * k_full_pieces ) ), ( k_partial_pieces * sizeof( bfloat16 ) ) );
 		a_bf16_0 = (__m512bh)_mm512_set1_epi32( a_kfringe_buf );
@@ -3511,7 +3736,7 @@ LPGEMM_MN_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_3x32)
 		c_float_2p0 = _mm512_dpbf16_ps( c_float_2p0, a_bf16_0, b0 );
 		c_float_2p1 = _mm512_dpbf16_ps( c_float_2p1, a_bf16_0, b1 );
 	}
-	
+
 	// Load alpha and beta
 	__m512 selector1 = _mm512_set1_ps( alpha );
 	__m512 selector2 = _mm512_set1_ps( beta );
@@ -3522,7 +3747,7 @@ LPGEMM_MN_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_3x32)
 
 	c_float_1p0 = _mm512_mul_ps( selector1, c_float_1p0 );
 	c_float_1p1 = _mm512_mul_ps( selector1, c_float_1p1 );
-	
+
 	c_float_2p0 = _mm512_mul_ps( selector1, c_float_2p0 );
 	c_float_2p1 = _mm512_mul_ps( selector1, c_float_2p1 );
 
@@ -3677,7 +3902,7 @@ POST_OPS_RELU_SCALE_3x32:
 
 		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 	}
-POST_OPS_GELU_3x32:
+POST_OPS_GELU_TANH_3x32:
 	{
 		__m512 dn, z, x, r2, r, x_tanh;
 		__m512i q;
@@ -3702,7 +3927,31 @@ POST_OPS_GELU_3x32:
 
 		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 	}
-		
+POST_OPS_GELU_ERF_3x32:
+	{
+		__m512 x, r, x_erf;
+
+		// c[0, 0-15]
+		GELU_ERF_F32_AVX512(c_float_0p0, r, x, x_erf)
+
+		// c[0, 16-31]
+		GELU_ERF_F32_AVX512(c_float_0p1, r, x, x_erf)
+
+		// c[1, 0-15]
+		GELU_ERF_F32_AVX512(c_float_1p0, r, x, x_erf)
+
+		// c[1, 16-31]
+		GELU_ERF_F32_AVX512(c_float_1p1, r, x, x_erf)
+
+		// c[2, 0-15]
+		GELU_ERF_F32_AVX512(c_float_2p0, r, x, x_erf)
+
+		// c[2, 16-31]
+		GELU_ERF_F32_AVX512(c_float_2p1, r, x, x_erf)
+
+		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+	}
+
 POST_OPS_DOWNSCALE_3x32:
 	{
 		// c[0, 0-15]
@@ -3724,10 +3973,10 @@ POST_OPS_DOWNSCALE_3x32:
 		CVT_F32_BF16(c_float_2p1,2,1);
 
 		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
-	}	
+	}
 POST_OPS_3x32_DISABLE:
 	;
-	
+
 	// Store the results.
 	// c[0,0-15]
 	_mm512_storeu_ps( c + ( rs_c * 0 ) + ( 0*16 ), c_float_0p0 );
@@ -3757,7 +4006,8 @@ LPGEMM_MN_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_2x32)
 						  &&POST_OPS_BIAS_2x32,
 						  &&POST_OPS_RELU_2x32,
 						  &&POST_OPS_RELU_SCALE_2x32,
-						  &&POST_OPS_GELU_2x32,
+						  &&POST_OPS_GELU_TANH_2x32,
+						  &&POST_OPS_GELU_ERF_2x32,
 						  &&POST_OPS_DOWNSCALE_2x32
 						};
 	dim_t k_full_pieces = k0 / 2;
@@ -3791,7 +4041,7 @@ LPGEMM_MN_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_2x32)
 		// c[0,0-31] = a[0,kr:kr+2]*b[kr:kr+2,0-31]
 		c_float_0p0 = _mm512_dpbf16_ps( c_float_0p0, a_bf16_0, b0 );
 		c_float_0p1 = _mm512_dpbf16_ps( c_float_0p1, a_bf16_0, b1 );
-		
+
 		// Broadcast a[1,kr:kr+2].
 		a_bf16_0 = (__m512bh)_mm512_set1_epi32( *( int32_t* )( a + ( rs_a * 1 ) + ( cs_a * kr ) ) );
 
@@ -3800,7 +4050,7 @@ LPGEMM_MN_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_2x32)
 		c_float_1p0 = _mm512_dpbf16_ps( c_float_1p0, a_bf16_0, b0 );
 		c_float_1p1 = _mm512_dpbf16_ps( c_float_1p1, a_bf16_0, b1 );
 	}
-	// Handle k remainder.	
+	// Handle k remainder.
 	if ( k_partial_pieces > 0 )
 	{
 		b0 = (__m512bh)_mm512_loadu_epi16( b + ( rs_b * k_full_pieces ) + ( cs_b * 0 ) );
@@ -3814,7 +4064,7 @@ LPGEMM_MN_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_2x32)
 		// c[0,0-31] = a[0,kr:kr+2]*b[kr:kr+2,0-31]
 		c_float_0p0 = _mm512_dpbf16_ps( c_float_0p0, a_bf16_0, b0 );
 		c_float_0p1 = _mm512_dpbf16_ps( c_float_0p1, a_bf16_0, b1 );
-		
+
 		// Broadcast a[1,kr:kr+2].
 		memcpy( &a_kfringe_buf, ( a + ( rs_a * 1 ) + ( cs_a * k_full_pieces ) ), ( k_partial_pieces * sizeof( bfloat16 ) ) );
 		a_bf16_0 = (__m512bh)_mm512_set1_epi32( a_kfringe_buf );
@@ -3824,7 +4074,7 @@ LPGEMM_MN_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_2x32)
 		c_float_1p0 = _mm512_dpbf16_ps( c_float_1p0, a_bf16_0, b0 );
 		c_float_1p1 = _mm512_dpbf16_ps( c_float_1p1, a_bf16_0, b1 );
 	}
-	
+
 	// Load alpha and beta
 	__m512 selector1 = _mm512_set1_ps( alpha );
 	__m512 selector2 = _mm512_set1_ps( beta );
@@ -3950,7 +4200,7 @@ POST_OPS_RELU_SCALE_2x32:
 
 		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 	}
-POST_OPS_GELU_2x32:
+POST_OPS_GELU_TANH_2x32:
 	{
 		__m512 dn, z, x, r2, r, x_tanh;
 		__m512i q;
@@ -3966,6 +4216,24 @@ POST_OPS_GELU_2x32:
 
 		// c[1, 16-31]
 		GELU_TANH_F32_AVX512(c_float_1p1, r, r2, x, z, dn, x_tanh, q)
+
+		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+	}
+POST_OPS_GELU_ERF_2x32:
+	{
+		__m512 x, r, x_erf;
+
+		// c[0, 0-15]
+		GELU_ERF_F32_AVX512(c_float_0p0, r, x, x_erf)
+
+		// c[0, 16-31]
+		GELU_ERF_F32_AVX512(c_float_0p1, r, x, x_erf)
+
+		// c[1, 0-15]
+		GELU_ERF_F32_AVX512(c_float_1p0, r, x, x_erf)
+
+		// c[1, 16-31]
+		GELU_ERF_F32_AVX512(c_float_1p1, r, x, x_erf)
 
 		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 	}
@@ -3985,10 +4253,10 @@ POST_OPS_DOWNSCALE_2x32:
 		CVT_F32_BF16(c_float_1p1,1,1);
 
 		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
-	}	
+	}
 POST_OPS_2x32_DISABLE:
 	;
-	
+
 	// Store the results.
 	// c[0,0-15]
 	_mm512_storeu_ps( c + ( rs_c * 0 ) + ( 0*16 ), c_float_0p0 );
@@ -4012,7 +4280,8 @@ LPGEMM_MN_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_1x32)
 						  &&POST_OPS_BIAS_1x32,
 						  &&POST_OPS_RELU_1x32,
 						  &&POST_OPS_RELU_SCALE_1x32,
-						  &&POST_OPS_GELU_1x32,
+						  &&POST_OPS_GELU_TANH_1x32,
+						  &&POST_OPS_GELU_ERF_1x32,
 						  &&POST_OPS_DOWNSCALE_1x32
 						};
 	dim_t k_full_pieces = k0 / 2;
@@ -4059,7 +4328,7 @@ LPGEMM_MN_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_1x32)
 		c_float_0p0 = _mm512_dpbf16_ps( c_float_0p0, a_bf16_0, b0 );
 		c_float_0p1 = _mm512_dpbf16_ps( c_float_0p1, a_bf16_0, b1 );
 	}
-	
+
 	// Load alpha and beta
 	__m512 selector1 = _mm512_set1_ps( alpha );
 	__m512 selector2 = _mm512_set1_ps( beta );
@@ -4145,7 +4414,7 @@ POST_OPS_RELU_SCALE_1x32:
 
 		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 	}
-POST_OPS_GELU_1x32:
+POST_OPS_GELU_TANH_1x32:
 	{
 		__m512 dn, z, x, r2, r, x_tanh;
 		__m512i q;
@@ -4155,6 +4424,18 @@ POST_OPS_GELU_1x32:
 
 		// c[0, 16-31]
 		GELU_TANH_F32_AVX512(c_float_0p1, r, r2, x, z, dn, x_tanh, q)
+
+		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+	}
+POST_OPS_GELU_ERF_1x32:
+	{
+		__m512 x, r, x_erf;
+
+		// c[0, 0-15]
+		GELU_ERF_F32_AVX512(c_float_0p0, r, x, x_erf)
+
+		// c[0, 16-31]
+		GELU_ERF_F32_AVX512(c_float_0p1, r, x, x_erf)
 
 		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 	}
@@ -4168,10 +4449,10 @@ POST_OPS_DOWNSCALE_1x32:
 		CVT_F32_BF16(c_float_0p1,0,1);
 
 		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
-	}	
+	}
 POST_OPS_1x32_DISABLE:
 	;
-	
+
 	// Store the results.
 	// c[0,0-15]
 	_mm512_storeu_ps( c + ( rs_c * 0 ) + ( 0*16 ), c_float_0p0 );
@@ -4189,7 +4470,8 @@ LPGEMM_MN_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_5x48)
 						  &&POST_OPS_BIAS_5x48,
 						  &&POST_OPS_RELU_5x48,
 						  &&POST_OPS_RELU_SCALE_5x48,
-						  &&POST_OPS_GELU_5x48,
+						  &&POST_OPS_GELU_TANH_5x48,
+						  &&POST_OPS_GELU_ERF_5x48,
 						  &&POST_OPS_DOWNSCALE_5x48
 						};
 	dim_t k_full_pieces = k0 / 2;
@@ -4217,7 +4499,7 @@ LPGEMM_MN_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_5x48)
 	__m512 c_float_2p0 = _mm512_setzero_ps();
 	__m512 c_float_2p1 = _mm512_setzero_ps();
 	__m512 c_float_2p2 = _mm512_setzero_ps();
-	
+
 	__m512 c_float_3p0 = _mm512_setzero_ps();
 	__m512 c_float_3p1 = _mm512_setzero_ps();
 	__m512 c_float_3p2 = _mm512_setzero_ps();
@@ -4240,7 +4522,7 @@ LPGEMM_MN_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_5x48)
 		c_float_0p0 = _mm512_dpbf16_ps( c_float_0p0, a_bf16_0, b0 );
 		c_float_0p1 = _mm512_dpbf16_ps( c_float_0p1, a_bf16_0, b1 );
 		c_float_0p2 = _mm512_dpbf16_ps( c_float_0p2, a_bf16_0, b2 );
-		
+
 		// Broadcast a[1,kr:kr+2].
 		a_bf16_0 = (__m512bh)_mm512_set1_epi32( *( int32_t* )( a + ( rs_a * 1 ) + ( cs_a * kr ) ) );
 
@@ -4249,7 +4531,7 @@ LPGEMM_MN_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_5x48)
 		c_float_1p0 = _mm512_dpbf16_ps( c_float_1p0, a_bf16_0, b0 );
 		c_float_1p1 = _mm512_dpbf16_ps( c_float_1p1, a_bf16_0, b1 );
 		c_float_1p2 = _mm512_dpbf16_ps( c_float_1p2, a_bf16_0, b2 );
-		
+
 		// Broadcast a[2,kr:kr+2].
 		a_bf16_0 = (__m512bh)_mm512_set1_epi32( *( int32_t* )( a + ( rs_a * 2 ) + ( cs_a * kr ) ) );
 
@@ -4258,7 +4540,7 @@ LPGEMM_MN_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_5x48)
 		c_float_2p0 = _mm512_dpbf16_ps( c_float_2p0, a_bf16_0, b0 );
 		c_float_2p1 = _mm512_dpbf16_ps( c_float_2p1, a_bf16_0, b1 );
 		c_float_2p2 = _mm512_dpbf16_ps( c_float_2p2, a_bf16_0, b2 );
-		
+
 		// Broadcast a[3,kr:kr+2].
 		a_bf16_0 = (__m512bh)_mm512_set1_epi32( *( int32_t* )( a + ( rs_a * 3 ) + ( cs_a * kr ) ) );
 
@@ -4267,7 +4549,7 @@ LPGEMM_MN_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_5x48)
 		c_float_3p0 = _mm512_dpbf16_ps( c_float_3p0, a_bf16_0, b0 );
 		c_float_3p1 = _mm512_dpbf16_ps( c_float_3p1, a_bf16_0, b1 );
 		c_float_3p2 = _mm512_dpbf16_ps( c_float_3p2, a_bf16_0, b2 );
-		
+
 		// Broadcast a[4,kr:kr+2].
 		a_bf16_0 = (__m512bh)_mm512_set1_epi32( *( int32_t* )( a + ( rs_a * 4 ) + ( cs_a * kr ) ) );
 
@@ -4293,7 +4575,7 @@ LPGEMM_MN_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_5x48)
 		c_float_0p0 = _mm512_dpbf16_ps( c_float_0p0, a_bf16_0, b0 );
 		c_float_0p1 = _mm512_dpbf16_ps( c_float_0p1, a_bf16_0, b1 );
 		c_float_0p2 = _mm512_dpbf16_ps( c_float_0p2, a_bf16_0, b2 );
-		
+
 		// Broadcast a[1,kr:kr+2].
 		memcpy( &a_kfringe_buf, ( a + ( rs_a * 1 ) + ( cs_a * k_full_pieces ) ), ( k_partial_pieces * sizeof( bfloat16 ) ) );
 		a_bf16_0 = (__m512bh)_mm512_set1_epi32( a_kfringe_buf );
@@ -4303,7 +4585,7 @@ LPGEMM_MN_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_5x48)
 		c_float_1p0 = _mm512_dpbf16_ps( c_float_1p0, a_bf16_0, b0 );
 		c_float_1p1 = _mm512_dpbf16_ps( c_float_1p1, a_bf16_0, b1 );
 		c_float_1p2 = _mm512_dpbf16_ps( c_float_1p2, a_bf16_0, b2 );
-		
+
 		// Broadcast a[2,kr:kr+2].
 		memcpy( &a_kfringe_buf, ( a + ( rs_a * 2 ) + ( cs_a * k_full_pieces ) ), ( k_partial_pieces * sizeof( bfloat16 ) ) );
 		a_bf16_0 = (__m512bh)_mm512_set1_epi32( a_kfringe_buf );
@@ -4313,7 +4595,7 @@ LPGEMM_MN_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_5x48)
 		c_float_2p0 = _mm512_dpbf16_ps( c_float_2p0, a_bf16_0, b0 );
 		c_float_2p1 = _mm512_dpbf16_ps( c_float_2p1, a_bf16_0, b1 );
 		c_float_2p2 = _mm512_dpbf16_ps( c_float_2p2, a_bf16_0, b2 );
-		
+
 		// Broadcast a[3,kr:kr+2].
 		memcpy( &a_kfringe_buf, ( a + ( rs_a * 3 ) + ( cs_a * k_full_pieces ) ), ( k_partial_pieces * sizeof( bfloat16 ) ) );
 		a_bf16_0 = (__m512bh)_mm512_set1_epi32( a_kfringe_buf );
@@ -4323,7 +4605,7 @@ LPGEMM_MN_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_5x48)
 		c_float_3p0 = _mm512_dpbf16_ps( c_float_3p0, a_bf16_0, b0 );
 		c_float_3p1 = _mm512_dpbf16_ps( c_float_3p1, a_bf16_0, b1 );
 		c_float_3p2 = _mm512_dpbf16_ps( c_float_3p2, a_bf16_0, b2 );
-		
+
 		// Broadcast a[4,kr:kr+2].
 		memcpy( &a_kfringe_buf, ( a + ( rs_a * 4 ) + ( cs_a * k_full_pieces ) ), ( k_partial_pieces * sizeof( bfloat16 ) ) );
 		a_bf16_0 = (__m512bh)_mm512_set1_epi32( a_kfringe_buf );
@@ -4334,7 +4616,7 @@ LPGEMM_MN_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_5x48)
 		c_float_4p1 = _mm512_dpbf16_ps( c_float_4p1, a_bf16_0, b1 );
 		c_float_4p2 = _mm512_dpbf16_ps( c_float_4p2, a_bf16_0, b2 );
 	}
-    
+
 	// Load alpha and beta
 	__m512 selector1 = _mm512_set1_ps( alpha );
 	__m512 selector2 = _mm512_set1_ps( beta );
@@ -4347,15 +4629,15 @@ LPGEMM_MN_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_5x48)
 	c_float_1p0 = _mm512_mul_ps( selector1, c_float_1p0 );
 	c_float_1p1 = _mm512_mul_ps( selector1, c_float_1p1 );
 	c_float_1p2 = _mm512_mul_ps( selector1, c_float_1p2 );
-	
+
 	c_float_2p0 = _mm512_mul_ps( selector1, c_float_2p0 );
 	c_float_2p1 = _mm512_mul_ps( selector1, c_float_2p1 );
 	c_float_2p2 = _mm512_mul_ps( selector1, c_float_2p2 );
-	
+
 	c_float_3p0 = _mm512_mul_ps( selector1, c_float_3p0 );
 	c_float_3p1 = _mm512_mul_ps( selector1, c_float_3p1 );
 	c_float_3p2 = _mm512_mul_ps( selector1, c_float_3p2 );
-	
+
 	c_float_4p0 = _mm512_mul_ps( selector1, c_float_4p0 );
 	c_float_4p1 = _mm512_mul_ps( selector1, c_float_4p1 );
 	c_float_4p2 = _mm512_mul_ps( selector1, c_float_4p2 );
@@ -4675,7 +4957,7 @@ POST_OPS_RELU_SCALE_5x48:
 
 		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 	}
-POST_OPS_GELU_5x48:
+POST_OPS_GELU_TANH_5x48:
 	{
 		__m512 dn, z, x, r2, r, x_tanh;
 		__m512i q;
@@ -4724,6 +5006,57 @@ POST_OPS_GELU_5x48:
 
 		// c[4, 32-47]
 		GELU_TANH_F32_AVX512(c_float_4p2, r, r2, x, z, dn, x_tanh, q)
+
+		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+	}
+POST_OPS_GELU_ERF_5x48:
+	{
+		__m512 x, r, x_erf;
+
+		// c[0, 0-15]
+		GELU_ERF_F32_AVX512(c_float_0p0, r, x, x_erf)
+
+		// c[0, 16-31]
+		GELU_ERF_F32_AVX512(c_float_0p1, r, x, x_erf)
+
+		// c[0, 32-47]
+		GELU_ERF_F32_AVX512(c_float_0p2, r, x, x_erf)
+
+		// c[1, 0-15]
+		GELU_ERF_F32_AVX512(c_float_1p0, r, x, x_erf)
+
+		// c[1, 16-31]
+		GELU_ERF_F32_AVX512(c_float_1p1, r, x, x_erf)
+
+		// c[1, 32-47]
+		GELU_ERF_F32_AVX512(c_float_1p2, r, x, x_erf)
+
+		// c[2, 0-15]
+		GELU_ERF_F32_AVX512(c_float_2p0, r, x, x_erf)
+
+		// c[2, 16-31]
+		GELU_ERF_F32_AVX512(c_float_2p1, r, x, x_erf)
+
+		// c[2, 32-47]
+		GELU_ERF_F32_AVX512(c_float_2p2, r, x, x_erf)
+
+		// c[3, 0-15]
+		GELU_ERF_F32_AVX512(c_float_3p0, r, x, x_erf)
+
+		// c[3, 16-31]
+		GELU_ERF_F32_AVX512(c_float_3p1, r, x, x_erf)
+
+		// c[3, 32-47]
+		GELU_ERF_F32_AVX512(c_float_3p2, r, x, x_erf)
+
+		// c[4, 0-15]
+		GELU_ERF_F32_AVX512(c_float_4p0, r, x, x_erf)
+
+		// c[4, 16-31]
+		GELU_ERF_F32_AVX512(c_float_4p1, r, x, x_erf)
+
+		// c[4, 32-47]
+		GELU_ERF_F32_AVX512(c_float_4p2, r, x, x_erf)
 
 		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 	}
@@ -4776,10 +5109,10 @@ POST_OPS_DOWNSCALE_5x48:
 		CVT_F32_BF16(c_float_4p2,4,2);
 
 		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
-	}	
+	}
 POST_OPS_5x48_DISABLE:
 	;
-	
+
 	// Store the results.
 	// c[0,0-15]
 	_mm512_storeu_ps( c + ( rs_c * 0 ) + ( 0*16 ), c_float_0p0 );
@@ -4836,7 +5169,8 @@ LPGEMM_MN_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_4x48)
 						  &&POST_OPS_BIAS_4x48,
 						  &&POST_OPS_RELU_4x48,
 						  &&POST_OPS_RELU_SCALE_4x48,
-						  &&POST_OPS_GELU_4x48,
+						  &&POST_OPS_GELU_TANH_4x48,
+						  &&POST_OPS_GELU_ERF_4x48,
 						  &&POST_OPS_DOWNSCALE_4x48
 						};
 	dim_t k_full_pieces = k0 / 2;
@@ -4864,7 +5198,7 @@ LPGEMM_MN_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_4x48)
 	__m512 c_float_2p0 = _mm512_setzero_ps();
 	__m512 c_float_2p1 = _mm512_setzero_ps();
 	__m512 c_float_2p2 = _mm512_setzero_ps();
-	
+
 	__m512 c_float_3p0 = _mm512_setzero_ps();
 	__m512 c_float_3p1 = _mm512_setzero_ps();
 	__m512 c_float_3p2 = _mm512_setzero_ps();
@@ -4883,7 +5217,7 @@ LPGEMM_MN_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_4x48)
 		c_float_0p0 = _mm512_dpbf16_ps( c_float_0p0, a_bf16_0, b0 );
 		c_float_0p1 = _mm512_dpbf16_ps( c_float_0p1, a_bf16_0, b1 );
 		c_float_0p2 = _mm512_dpbf16_ps( c_float_0p2, a_bf16_0, b2 );
-		
+
 		// Broadcast a[1,kr:kr+2].
 		a_bf16_0 = (__m512bh)_mm512_set1_epi32( *( int32_t* )( a + ( rs_a * 1 ) + ( cs_a * kr ) ) );
 
@@ -4892,7 +5226,7 @@ LPGEMM_MN_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_4x48)
 		c_float_1p0 = _mm512_dpbf16_ps( c_float_1p0, a_bf16_0, b0 );
 		c_float_1p1 = _mm512_dpbf16_ps( c_float_1p1, a_bf16_0, b1 );
 		c_float_1p2 = _mm512_dpbf16_ps( c_float_1p2, a_bf16_0, b2 );
-		
+
 		// Broadcast a[2,kr:kr+2].
 		a_bf16_0 = (__m512bh)_mm512_set1_epi32( *( int32_t* )( a + ( rs_a * 2 ) + ( cs_a * kr ) ) );
 
@@ -4901,7 +5235,7 @@ LPGEMM_MN_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_4x48)
 		c_float_2p0 = _mm512_dpbf16_ps( c_float_2p0, a_bf16_0, b0 );
 		c_float_2p1 = _mm512_dpbf16_ps( c_float_2p1, a_bf16_0, b1 );
 		c_float_2p2 = _mm512_dpbf16_ps( c_float_2p2, a_bf16_0, b2 );
-		
+
 		// Broadcast a[3,kr:kr+2].
 		a_bf16_0 = (__m512bh)_mm512_set1_epi32( *( int32_t* )( a + ( rs_a * 3 ) + ( cs_a * kr ) ) );
 
@@ -4911,7 +5245,7 @@ LPGEMM_MN_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_4x48)
 		c_float_3p1 = _mm512_dpbf16_ps( c_float_3p1, a_bf16_0, b1 );
 		c_float_3p2 = _mm512_dpbf16_ps( c_float_3p2, a_bf16_0, b2 );
 	}
-	// Handle k remainder.	
+	// Handle k remainder.
 	if ( k_partial_pieces > 0 )
 	{
 		b0 = (__m512bh)_mm512_loadu_epi16( b + ( rs_b * k_full_pieces ) + ( cs_b * 0 ) );
@@ -4927,7 +5261,7 @@ LPGEMM_MN_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_4x48)
 		c_float_0p0 = _mm512_dpbf16_ps( c_float_0p0, a_bf16_0, b0 );
 		c_float_0p1 = _mm512_dpbf16_ps( c_float_0p1, a_bf16_0, b1 );
 		c_float_0p2 = _mm512_dpbf16_ps( c_float_0p2, a_bf16_0, b2 );
-		
+
 		// Broadcast a[1,kr:kr+2].
 		memcpy( &a_kfringe_buf, ( a + ( rs_a * 1 ) + ( cs_a * k_full_pieces ) ), ( k_partial_pieces * sizeof( bfloat16 ) ) );
 		a_bf16_0 = (__m512bh)_mm512_set1_epi32( a_kfringe_buf );
@@ -4937,7 +5271,7 @@ LPGEMM_MN_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_4x48)
 		c_float_1p0 = _mm512_dpbf16_ps( c_float_1p0, a_bf16_0, b0 );
 		c_float_1p1 = _mm512_dpbf16_ps( c_float_1p1, a_bf16_0, b1 );
 		c_float_1p2 = _mm512_dpbf16_ps( c_float_1p2, a_bf16_0, b2 );
-		
+
 		// Broadcast a[2,kr:kr+2].
 		memcpy( &a_kfringe_buf, ( a + ( rs_a * 2 ) + ( cs_a * k_full_pieces ) ), ( k_partial_pieces * sizeof( bfloat16 ) ) );
 		a_bf16_0 = (__m512bh)_mm512_set1_epi32( a_kfringe_buf );
@@ -4947,7 +5281,7 @@ LPGEMM_MN_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_4x48)
 		c_float_2p0 = _mm512_dpbf16_ps( c_float_2p0, a_bf16_0, b0 );
 		c_float_2p1 = _mm512_dpbf16_ps( c_float_2p1, a_bf16_0, b1 );
 		c_float_2p2 = _mm512_dpbf16_ps( c_float_2p2, a_bf16_0, b2 );
-		
+
 		// Broadcast a[3,kr:kr+2].
 		memcpy( &a_kfringe_buf, ( a + ( rs_a * 3 ) + ( cs_a * k_full_pieces ) ), ( k_partial_pieces * sizeof( bfloat16 ) ) );
 		a_bf16_0 = (__m512bh)_mm512_set1_epi32( a_kfringe_buf );
@@ -4958,7 +5292,7 @@ LPGEMM_MN_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_4x48)
 		c_float_3p1 = _mm512_dpbf16_ps( c_float_3p1, a_bf16_0, b1 );
 		c_float_3p2 = _mm512_dpbf16_ps( c_float_3p2, a_bf16_0, b2 );
 	}
-	
+
 	// Load alpha and beta
 	__m512 selector1 = _mm512_set1_ps( alpha );
 	__m512 selector2 = _mm512_set1_ps( beta );
@@ -4971,11 +5305,11 @@ LPGEMM_MN_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_4x48)
 	c_float_1p0 = _mm512_mul_ps( selector1, c_float_1p0 );
 	c_float_1p1 = _mm512_mul_ps( selector1, c_float_1p1 );
 	c_float_1p2 = _mm512_mul_ps( selector1, c_float_1p2 );
-	
+
 	c_float_2p0 = _mm512_mul_ps( selector1, c_float_2p0 );
 	c_float_2p1 = _mm512_mul_ps( selector1, c_float_2p1 );
 	c_float_2p2 = _mm512_mul_ps( selector1, c_float_2p2 );
-	
+
 	c_float_3p0 = _mm512_mul_ps( selector1, c_float_3p0 );
 	c_float_3p1 = _mm512_mul_ps( selector1, c_float_3p1 );
 	c_float_3p2 = _mm512_mul_ps( selector1, c_float_3p2 );
@@ -5241,7 +5575,7 @@ POST_OPS_RELU_SCALE_4x48:
 
 		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 	}
-POST_OPS_GELU_4x48:
+POST_OPS_GELU_TANH_4x48:
 	{
 		__m512 dn, z, x, r2, r, x_tanh;
 		__m512i q;
@@ -5281,6 +5615,48 @@ POST_OPS_GELU_4x48:
 
 		// c[3, 32-47]
 		GELU_TANH_F32_AVX512(c_float_3p2, r, r2, x, z, dn, x_tanh, q)
+
+		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+	}
+POST_OPS_GELU_ERF_4x48:
+	{
+		__m512 x, r, x_erf;
+
+		// c[0, 0-15]
+		GELU_ERF_F32_AVX512(c_float_0p0, r, x, x_erf)
+
+		// c[0, 16-31]
+		GELU_ERF_F32_AVX512(c_float_0p1, r, x, x_erf)
+
+		// c[0, 32-47]
+		GELU_ERF_F32_AVX512(c_float_0p2, r, x, x_erf)
+
+		// c[1, 0-15]
+		GELU_ERF_F32_AVX512(c_float_1p0, r, x, x_erf)
+
+		// c[1, 16-31]
+		GELU_ERF_F32_AVX512(c_float_1p1, r, x, x_erf)
+
+		// c[1, 32-47]
+		GELU_ERF_F32_AVX512(c_float_1p2, r, x, x_erf)
+
+		// c[2, 0-15]
+		GELU_ERF_F32_AVX512(c_float_2p0, r, x, x_erf)
+
+		// c[2, 16-31]
+		GELU_ERF_F32_AVX512(c_float_2p1, r, x, x_erf)
+
+		// c[2, 32-47]
+		GELU_ERF_F32_AVX512(c_float_2p2, r, x, x_erf)
+
+		// c[3, 0-15]
+		GELU_ERF_F32_AVX512(c_float_3p0, r, x, x_erf)
+
+		// c[3, 16-31]
+		GELU_ERF_F32_AVX512(c_float_3p1, r, x, x_erf)
+
+		// c[3, 32-47]
+		GELU_ERF_F32_AVX512(c_float_3p2, r, x, x_erf)
 
 		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 	}
@@ -5324,10 +5700,10 @@ POST_OPS_DOWNSCALE_4x48:
 		CVT_F32_BF16(c_float_3p2,3,2);
 
 		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
-	}	
+	}
 POST_OPS_4x48_DISABLE:
 	;
-	
+
 	// Store the results.
 	// c[0,0-15]
 	_mm512_storeu_ps( c + ( rs_c * 0 ) + ( 0*16 ), c_float_0p0 );
@@ -5375,7 +5751,8 @@ LPGEMM_MN_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_3x48)
 						  &&POST_OPS_BIAS_3x48,
 						  &&POST_OPS_RELU_3x48,
 						  &&POST_OPS_RELU_SCALE_3x48,
-						  &&POST_OPS_GELU_3x48,
+						  &&POST_OPS_GELU_TANH_3x48,
+						  &&POST_OPS_GELU_ERF_3x48,
 						  &&POST_OPS_DOWNSCALE_3x48
 						};
 	dim_t k_full_pieces = k0 / 2;
@@ -5418,7 +5795,7 @@ LPGEMM_MN_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_3x48)
 		c_float_0p0 = _mm512_dpbf16_ps( c_float_0p0, a_bf16_0, b0 );
 		c_float_0p1 = _mm512_dpbf16_ps( c_float_0p1, a_bf16_0, b1 );
 		c_float_0p2 = _mm512_dpbf16_ps( c_float_0p2, a_bf16_0, b2 );
-		
+
 		// Broadcast a[1,kr:kr+2].
 		a_bf16_0 = (__m512bh)_mm512_set1_epi32( *( int32_t* )( a + ( rs_a * 1 ) + ( cs_a * kr ) ) );
 
@@ -5427,7 +5804,7 @@ LPGEMM_MN_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_3x48)
 		c_float_1p0 = _mm512_dpbf16_ps( c_float_1p0, a_bf16_0, b0 );
 		c_float_1p1 = _mm512_dpbf16_ps( c_float_1p1, a_bf16_0, b1 );
 		c_float_1p2 = _mm512_dpbf16_ps( c_float_1p2, a_bf16_0, b2 );
-		
+
 		// Broadcast a[2,kr:kr+2].
 		a_bf16_0 = (__m512bh)_mm512_set1_epi32( *( int32_t* )( a + ( rs_a * 2 ) + ( cs_a * kr ) ) );
 
@@ -5453,7 +5830,7 @@ LPGEMM_MN_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_3x48)
 		c_float_0p0 = _mm512_dpbf16_ps( c_float_0p0, a_bf16_0, b0 );
 		c_float_0p1 = _mm512_dpbf16_ps( c_float_0p1, a_bf16_0, b1 );
 		c_float_0p2 = _mm512_dpbf16_ps( c_float_0p2, a_bf16_0, b2 );
-		
+
 		// Broadcast a[1,kr:kr+2].
 		memcpy( &a_kfringe_buf, ( a + ( rs_a * 1 ) + ( cs_a * k_full_pieces ) ), ( k_partial_pieces * sizeof( bfloat16 ) ) );
 		a_bf16_0 = (__m512bh)_mm512_set1_epi32( a_kfringe_buf );
@@ -5463,7 +5840,7 @@ LPGEMM_MN_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_3x48)
 		c_float_1p0 = _mm512_dpbf16_ps( c_float_1p0, a_bf16_0, b0 );
 		c_float_1p1 = _mm512_dpbf16_ps( c_float_1p1, a_bf16_0, b1 );
 		c_float_1p2 = _mm512_dpbf16_ps( c_float_1p2, a_bf16_0, b2 );
-		
+
 		// Broadcast a[2,kr:kr+2].
 		memcpy( &a_kfringe_buf, ( a + ( rs_a * 2 ) + ( cs_a * k_full_pieces ) ), ( k_partial_pieces * sizeof( bfloat16 ) ) );
 		a_bf16_0 = (__m512bh)_mm512_set1_epi32( a_kfringe_buf );
@@ -5487,7 +5864,7 @@ LPGEMM_MN_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_3x48)
 	c_float_1p0 = _mm512_mul_ps( selector1, c_float_1p0 );
 	c_float_1p1 = _mm512_mul_ps( selector1, c_float_1p1 );
 	c_float_1p2 = _mm512_mul_ps( selector1, c_float_1p2 );
-	
+
 	c_float_2p0 = _mm512_mul_ps( selector1, c_float_2p0 );
 	c_float_2p1 = _mm512_mul_ps( selector1, c_float_2p1 );
 	c_float_2p2 = _mm512_mul_ps( selector1, c_float_2p2 );
@@ -5699,7 +6076,7 @@ POST_OPS_RELU_SCALE_3x48:
 
 		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 	}
-POST_OPS_GELU_3x48:
+POST_OPS_GELU_TANH_3x48:
 	{
 		__m512 dn, z, x, r2, r, x_tanh;
 		__m512i q;
@@ -5730,6 +6107,39 @@ POST_OPS_GELU_3x48:
 
 		// c[2, 32-47]
 		GELU_TANH_F32_AVX512(c_float_2p2, r, r2, x, z, dn, x_tanh, q)
+
+		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+	}
+POST_OPS_GELU_ERF_3x48:
+	{
+		__m512 x, r, x_erf;
+
+		// c[0, 0-15]
+		GELU_ERF_F32_AVX512(c_float_0p0, r, x, x_erf)
+
+		// c[0, 16-31]
+		GELU_ERF_F32_AVX512(c_float_0p1, r, x, x_erf)
+
+		// c[0, 32-47]
+		GELU_ERF_F32_AVX512(c_float_0p2, r, x, x_erf)
+
+		// c[1, 0-15]
+		GELU_ERF_F32_AVX512(c_float_1p0, r, x, x_erf)
+
+		// c[1, 16-31]
+		GELU_ERF_F32_AVX512(c_float_1p1, r, x, x_erf)
+
+		// c[1, 32-47]
+		GELU_ERF_F32_AVX512(c_float_1p2, r, x, x_erf)
+
+		// c[2, 0-15]
+		GELU_ERF_F32_AVX512(c_float_2p0, r, x, x_erf)
+
+		// c[2, 16-31]
+		GELU_ERF_F32_AVX512(c_float_2p1, r, x, x_erf)
+
+		// c[2, 32-47]
+		GELU_ERF_F32_AVX512(c_float_2p2, r, x, x_erf)
 
 		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 	}
@@ -5764,10 +6174,10 @@ POST_OPS_DOWNSCALE_3x48:
 		CVT_F32_BF16(c_float_2p2,2,2);
 
 		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
-	}	
+	}
 POST_OPS_3x48_DISABLE:
 	;
-	
+
 	// Store the results.
 	// c[0,0-15]
 	_mm512_storeu_ps( c + ( rs_c * 0 ) + ( 0*16 ), c_float_0p0 );
@@ -5806,7 +6216,8 @@ LPGEMM_MN_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_2x48)
 						  &&POST_OPS_BIAS_2x48,
 						  &&POST_OPS_RELU_2x48,
 						  &&POST_OPS_RELU_SCALE_2x48,
-						  &&POST_OPS_GELU_2x48,
+						  &&POST_OPS_GELU_TANH_2x48,
+						  &&POST_OPS_GELU_ERF_2x48,
 						  &&POST_OPS_DOWNSCALE_2x48
 						};
 	dim_t k_full_pieces = k0 / 2;
@@ -5845,7 +6256,7 @@ LPGEMM_MN_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_2x48)
 		c_float_0p0 = _mm512_dpbf16_ps( c_float_0p0, a_bf16_0, b0 );
 		c_float_0p1 = _mm512_dpbf16_ps( c_float_0p1, a_bf16_0, b1 );
 		c_float_0p2 = _mm512_dpbf16_ps( c_float_0p2, a_bf16_0, b2 );
-		
+
 		// Broadcast a[1,kr:kr+2].
 		a_bf16_0 = (__m512bh)_mm512_set1_epi32( *( int32_t* )( a + ( rs_a * 1 ) + ( cs_a * kr ) ) );
 
@@ -5855,7 +6266,7 @@ LPGEMM_MN_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_2x48)
 		c_float_1p1 = _mm512_dpbf16_ps( c_float_1p1, a_bf16_0, b1 );
 		c_float_1p2 = _mm512_dpbf16_ps( c_float_1p2, a_bf16_0, b2 );
 	}
-	// Handle k remainder.	
+	// Handle k remainder.
 	if ( k_partial_pieces > 0 )
 	{
 		b0 = (__m512bh)_mm512_loadu_epi16( b + ( rs_b * k_full_pieces ) + ( cs_b * 0 ) );
@@ -5871,7 +6282,7 @@ LPGEMM_MN_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_2x48)
 		c_float_0p0 = _mm512_dpbf16_ps( c_float_0p0, a_bf16_0, b0 );
 		c_float_0p1 = _mm512_dpbf16_ps( c_float_0p1, a_bf16_0, b1 );
 		c_float_0p2 = _mm512_dpbf16_ps( c_float_0p2, a_bf16_0, b2 );
-		
+
 		// Broadcast a[1,kr:kr+2].
 		memcpy( &a_kfringe_buf, ( a + ( rs_a * 1 ) + ( cs_a * k_full_pieces ) ), ( k_partial_pieces * sizeof( bfloat16 ) ) );
 		a_bf16_0 = (__m512bh)_mm512_set1_epi32( a_kfringe_buf );
@@ -5882,7 +6293,7 @@ LPGEMM_MN_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_2x48)
 		c_float_1p1 = _mm512_dpbf16_ps( c_float_1p1, a_bf16_0, b1 );
 		c_float_1p2 = _mm512_dpbf16_ps( c_float_1p2, a_bf16_0, b2 );
 	}
-	
+
 	// Load alpha and beta
 	__m512 selector1 = _mm512_set1_ps( alpha );
 	__m512 selector2 = _mm512_set1_ps( beta );
@@ -6049,7 +6460,7 @@ POST_OPS_RELU_SCALE_2x48:
 
 		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 	}
-POST_OPS_GELU_2x48:
+POST_OPS_GELU_TANH_2x48:
 	{
 		__m512 dn, z, x, r2, r, x_tanh;
 		__m512i q;
@@ -6071,6 +6482,30 @@ POST_OPS_GELU_2x48:
 
 		// c[1, 32-47]
 		GELU_TANH_F32_AVX512(c_float_1p2, r, r2, x, z, dn, x_tanh, q)
+
+		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+	}
+POST_OPS_GELU_ERF_2x48:
+	{
+		__m512 x, r, x_erf;
+
+		// c[0, 0-15]
+		GELU_ERF_F32_AVX512(c_float_0p0, r, x, x_erf)
+
+		// c[0, 16-31]
+		GELU_ERF_F32_AVX512(c_float_0p1, r, x, x_erf)
+
+		// c[0, 32-47]
+		GELU_ERF_F32_AVX512(c_float_0p2, r, x, x_erf)
+
+		// c[1, 0-15]
+		GELU_ERF_F32_AVX512(c_float_1p0, r, x, x_erf)
+
+		// c[1, 16-31]
+		GELU_ERF_F32_AVX512(c_float_1p1, r, x, x_erf)
+
+		// c[1, 32-47]
+		GELU_ERF_F32_AVX512(c_float_1p2, r, x, x_erf)
 
 		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 	}
@@ -6096,10 +6531,10 @@ POST_OPS_DOWNSCALE_2x48:
 		CVT_F32_BF16(c_float_1p2,1,2);
 
 		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
-	}	
+	}
 POST_OPS_2x48_DISABLE:
 	;
-	
+
 	// Store the results.
 	// c[0,0-15]
 	_mm512_storeu_ps( c + ( rs_c * 0 ) + ( 0*16 ), c_float_0p0 );
@@ -6129,7 +6564,8 @@ LPGEMM_MN_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_1x48)
 						  &&POST_OPS_BIAS_1x48,
 						  &&POST_OPS_RELU_1x48,
 						  &&POST_OPS_RELU_SCALE_1x48,
-						  &&POST_OPS_GELU_1x48,
+						  &&POST_OPS_GELU_TANH_1x48,
+						  &&POST_OPS_GELU_ERF_1x48,
 						  &&POST_OPS_DOWNSCALE_1x48
 						};
 	dim_t k_full_pieces = k0 / 2;
@@ -6182,7 +6618,7 @@ LPGEMM_MN_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_1x48)
 		c_float_0p1 = _mm512_dpbf16_ps( c_float_0p1, a_bf16_0, b1 );
 		c_float_0p2 = _mm512_dpbf16_ps( c_float_0p2, a_bf16_0, b2 );
 	}
-    
+
 	// Load alpha and beta
 	__m512 selector1 = _mm512_set1_ps( alpha );
 	__m512 selector2 = _mm512_set1_ps( beta );
@@ -6291,7 +6727,7 @@ POST_OPS_RELU_SCALE_1x48:
 
 		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 	}
-POST_OPS_GELU_1x48:
+POST_OPS_GELU_TANH_1x48:
 	{
 		__m512 dn, z, x, r2, r, x_tanh;
 		__m512i q;
@@ -6307,7 +6743,22 @@ POST_OPS_GELU_1x48:
 
 		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 	}
-		
+POST_OPS_GELU_ERF_1x48:
+	{
+		__m512 x, r, x_erf;
+
+		// c[0, 0-15]
+		GELU_ERF_F32_AVX512(c_float_0p0, r, x, x_erf)
+
+		// c[0, 16-31]
+		GELU_ERF_F32_AVX512(c_float_0p1, r, x, x_erf)
+
+		// c[0, 32-47]
+		GELU_ERF_F32_AVX512(c_float_0p2, r, x, x_erf)
+
+		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+	}
+
 POST_OPS_DOWNSCALE_1x48:
 	{
 		// c[0, 0-15]
@@ -6320,10 +6771,10 @@ POST_OPS_DOWNSCALE_1x48:
 		CVT_F32_BF16(c_float_0p2,0,2);
 
 		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
-	}	
+	}
 POST_OPS_1x48_DISABLE:
 	;
-	
+
 	// Store the results.
 	// c[0,0-15]
 	_mm512_storeu_ps( c + ( rs_c * 0 ) + ( 0*16 ), c_float_0p0 );
