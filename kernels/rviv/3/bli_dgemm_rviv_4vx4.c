@@ -37,11 +37,11 @@
 void bli_dgemm_rviv_asm_4vx4
     (
              intptr_t   k,
-       const double*    alpha,
-       const double*    a,
-       const double*    b,
-       const double*    beta,
-             double*    c, intptr_t rs_c, intptr_t cs_c
+       const void*      alpha,
+       const void*      a,
+       const void*      b,
+       const void*      beta,
+             void*      c, intptr_t rs_c, intptr_t cs_c
     );
 
 void bli_dgemm_rviv_4vx4
@@ -49,11 +49,11 @@ void bli_dgemm_rviv_4vx4
              dim_t      m,
              dim_t      n,
              dim_t      k,
-       const double*    alpha,
-       const double*    a,
-       const double*    b,
-       const double*    beta,
-             double*    c, inc_t rs_c, inc_t cs_c,
+       const void*      alpha,
+       const void*      a,
+       const void*      b,
+       const void*      beta,
+             void*      c, inc_t rs_c, inc_t cs_c,
              auxinfo_t* data,
        const cntx_t*    cntx
      )
