@@ -1230,14 +1230,25 @@ auto_detect()
 	# NOTE: -D_GNU_SOURCE is needed to enable POSIX extensions to
 	# pthreads (i.e., barriers).
 
-	cmd="${cc} ${config_defines} \
+	cmd="${cc} \
 	      -DBLIS_CONFIGURETIME_CPUID \
 	      ${c_hdr_paths} \
 	      -std=c99 -D_GNU_SOURCE \
-	      ${cflags} \
-	      ${c_src_filepaths} \
-	      ${ldflags} \
-	      -o ${autodetect_x}"
+	      ${cflags}"
+
+    # Special case for RISC-V, whose architecture can be detected with
+    # preprocessor macros alone. This avoids having to run RISC-V binaries
+    # on a cross-compiler host. Returns "generic" if RISC-V not detected.
+    riscv_config=$(${cmd} -E "${dist_path}/frame/base/bli_riscv_cpuid.h" |
+                       grep '^[^#]')
+    if [[ $riscv_config != *generic* ]]; then
+        echo "${riscv_config}"
+        return
+    fi
+
+    # Finish command for building executable
+    cmd="${cmd} ${config_defines} ${c_src_filepaths} ${ldflags} \
+         -o ${autodetect_x}"
 
 	if [ "${debug_auto_detect}" == "no" ]; then
 
