@@ -137,6 +137,8 @@ void bli_zscal2v_zen_int
         /* If alpha is zero, use setv. */
         dcomplex *zero = PASTEMAC(z, 0);
 
+        if(cntx == NULL) cntx = bli_gks_query_cntx();
+
         /* Query the context for the kernel function pointer. */
         const num_t dt = PASTEMAC(z, type);
 
