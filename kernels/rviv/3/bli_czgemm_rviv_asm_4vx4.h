@@ -181,7 +181,7 @@ REALNAME:
     vxor.vv AB13_im, AB13_im, AB13_im
 
     // Handle k == 0
-    beqz loop_counter, .LMULTIPLYBETA
+    beqz loop_counter, MULTIPLYBETA
 
     add A10_ptr, A00_ptr, s0
     slli s0, s0, 1      // length of a column of A in bytes
@@ -189,7 +189,7 @@ REALNAME:
     add A11_ptr, A10_ptr, s0
 
     li tmp, 3
-    ble loop_counter, tmp, .LTAIL_UNROLL_2
+    ble loop_counter, tmp, TAIL_UNROLL_2
 
     // Preload A and B
     // Load and deinterleave A(:,l)
@@ -210,7 +210,7 @@ REALNAME:
     VLE A01_re, (A01_ptr)
     VLE A11_re, (A11_ptr)
 
-.LLOOP_UNROLL_4: // loop_counter >= 4
+LOOP_UNROLL_4: // loop_counter >= 4
     addi loop_counter, loop_counter, -4
 
     vfmacc.vf  AB00_re, B00_re, A00_re   // AB(:,0) += A(:,l) * B(l,0)
@@ -410,7 +410,7 @@ REALNAME:
     vfmacc.vf  AB13_im, B13_im, A11_re
 
     li tmp, 3
-    ble loop_counter, tmp, .LTAIL_UNROLL_2
+    ble loop_counter, tmp, TAIL_UNROLL_2
 
     // Load A and B for the next iteration
     VLE A00_re, (A00_ptr)
@@ -427,11 +427,11 @@ REALNAME:
     FLOAD B03_re, 6*REALSIZE(B_row_ptr)
     FLOAD B03_im, 7*REALSIZE(B_row_ptr)
 
-    j .LLOOP_UNROLL_4
+    j LOOP_UNROLL_4
 
-.LTAIL_UNROLL_2: // loop_counter <= 3
+TAIL_UNROLL_2: // loop_counter <= 3
     li tmp, 1
-    ble loop_counter, tmp, .LTAIL_UNROLL_1
+    ble loop_counter, tmp, TAIL_UNROLL_1
 
     addi loop_counter, loop_counter, -2
 
@@ -535,15 +535,15 @@ REALNAME:
     vfmacc.vf  AB13_im, B13_re, A11_im
     vfmacc.vf  AB13_im, B13_im, A11_re
 
-    beqz loop_counter, .LMULTIPLYALPHA
+    beqz loop_counter, MULTIPLYALPHA
 
     // Advance pointers
     add A00_ptr, A01_ptr, s0
     add A10_ptr, A11_ptr, s0
     addi B_row_ptr, B_row_ptr, 16*REALSIZE
 
-.LTAIL_UNROLL_1: // loop_counter <= 1
-    beqz loop_counter, .LMULTIPLYALPHA
+TAIL_UNROLL_1: // loop_counter <= 1
+    beqz loop_counter, MULTIPLYALPHA
 
     // Load and deinterleave A(:,l)
     VLE A00_re, (A00_ptr)
@@ -595,12 +595,12 @@ REALNAME:
     vfmacc.vf  AB13_im, B03_re, A10_im
     vfmacc.vf  AB13_im, B03_im, A10_re
 
-.LMULTIPLYALPHA:
+MULTIPLYALPHA:
     FLOAD ALPHA_re, 0*REALSIZE(a1)
     FLOAD ALPHA_im, 1*REALSIZE(a1)
 
     FEQ tmp, ALPHA_im, fzero
-    bne tmp, zero, .LALPHAREAL
+    bne tmp, zero, ALPHAREAL
 
     // [AB00, ..., AB03] * alpha
     vfmul.vf  tmp0_re, AB00_im, ALPHA_im
@@ -638,9 +638,9 @@ REALNAME:
     vfmadd.vf AB12_im, ALPHA_re, tmp2_im
     vfmadd.vf AB13_im, ALPHA_re, tmp3_im
 
-    j .LMULTIPLYBETA
+    j MULTIPLYBETA
 
-.LALPHAREAL:
+ALPHAREAL:
     vfmul.vf AB00_re, AB00_re, ALPHA_re
     vfmul.vf AB00_im, AB00_im, ALPHA_re
     vfmul.vf AB01_re, AB01_re, ALPHA_re
@@ -659,11 +659,11 @@ REALNAME:
     vfmul.vf AB13_re, AB13_re, ALPHA_re
     vfmul.vf AB13_im, AB13_im, ALPHA_re
 
-.LMULTIPLYBETA:
+MULTIPLYBETA:
     FLOAD BETA_re,  0*REALSIZE(a4)
     FLOAD BETA_im,  1*REALSIZE(a4)
     FEQ tmp, BETA_im, fzero
-    bne tmp, zero, .LBETAREAL
+    bne tmp, zero, BETAREAL
 
     // Load and deinterleave C(0:VLEN-1, 0:1)
     VLE C0_re, (C00_ptr)
@@ -733,11 +733,11 @@ REALNAME:
     vfmacc.vf   AB13_im, BETA_im, C3_re
     VSE AB13_re, (C13_ptr)
 
-    j .LEND
+    j END
 
-.LBETAREAL:
+BETAREAL:
     FEQ tmp, BETA_re, fzero
-    bne tmp, zero, .LBETAZERO
+    bne tmp, zero, BETAZERO
 
     // Load and deinterleave C(0:VLEN-1, 0:3)
     VLE C0_re, (C00_ptr)
@@ -783,9 +783,9 @@ REALNAME:
     VSE AB12_re, (C12_ptr)
     VSE AB13_re, (C13_ptr)
 
-    j .LEND
+    j END
 
-.LBETAZERO:
+BETAZERO:
     VSE AB00_re, (C00_ptr)
     VSE AB01_re, (C01_ptr)
     VSE AB02_re, (C02_ptr)
@@ -796,6 +796,6 @@ REALNAME:
     VSE AB12_re, (C12_ptr)
     VSE AB13_re, (C13_ptr)
 
-.LEND:
+END:
     #include "rviv_restore_registers.h"
     ret

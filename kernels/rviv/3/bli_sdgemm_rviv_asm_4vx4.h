@@ -172,7 +172,7 @@ REALNAME:
     vxor.vv AB33, AB33, AB33
 
     // Handle k == 0
-    beqz loop_counter, .LMULTIPLYBETA
+    beqz loop_counter, MULTIPLYBETA
 
     // Set up pointers to rows of A
     add A10_ptr, A00_ptr, s0
@@ -182,7 +182,7 @@ REALNAME:
     slli s0, s0, 2 // length of a column of A in bytes
 
     li tmp, 3
-    ble loop_counter, tmp, .LTAIL_UNROLL_2
+    ble loop_counter, tmp, TAIL_UNROLL_2
 
     // Preload A and B
     // Load A(:,l)
@@ -203,7 +203,7 @@ REALNAME:
     add A21_ptr, A20_ptr, s0
     add A31_ptr, A30_ptr, s0
 
-.LLOOP_UNROLL_4:
+LOOP_UNROLL_4:
     addi loop_counter, loop_counter, -4
 
     vfmacc.vf AB00, B00, A00   // AB(0,:) += A(0,0) * B(0,:)
@@ -343,7 +343,7 @@ REALNAME:
     vfmacc.vf AB33, B13, A31
 
     li tmp, 3
-    ble loop_counter, tmp, .LTAIL_UNROLL_2
+    ble loop_counter, tmp, TAIL_UNROLL_2
 
     // Load A and B for the next iteration
     // Load B(l,0:3)
@@ -364,11 +364,11 @@ REALNAME:
     add A21_ptr, A20_ptr, s0
     add A31_ptr, A30_ptr, s0
 
-    j .LLOOP_UNROLL_4
+    j LOOP_UNROLL_4
 
-.LTAIL_UNROLL_2: // loop_counter <= 3
+TAIL_UNROLL_2: // loop_counter <= 3
     li tmp, 1
-    ble loop_counter, tmp, .LTAIL_UNROLL_1
+    ble loop_counter, tmp, TAIL_UNROLL_1
 
     addi loop_counter, loop_counter, -2
 
@@ -452,10 +452,10 @@ REALNAME:
     vfmacc.vf AB33, B13, A31
 
     li tmp, 1
-    ble loop_counter, tmp, .LTAIL_UNROLL_1
+    ble loop_counter, tmp, TAIL_UNROLL_1
 
-.LTAIL_UNROLL_1: // loop_counter <= 1
-    beqz loop_counter, .LMULTIPLYALPHA
+TAIL_UNROLL_1: // loop_counter <= 1
+    beqz loop_counter, MULTIPLYALPHA
 
     // Load row of B
     FLOAD B00, 0*DATASIZE(B_row_ptr)
@@ -489,7 +489,7 @@ REALNAME:
     vfmacc.vf AB32, B02, A30
     vfmacc.vf AB33, B03, A30
 
-.LMULTIPLYALPHA:
+MULTIPLYALPHA:
     FLOAD ALPHA, (a1)
 
     // Multiply with alpha
@@ -513,12 +513,12 @@ REALNAME:
     vfmul.vf AB32, AB32, ALPHA
     vfmul.vf AB33, AB33, ALPHA
 
-.LMULTIPLYBETA:
+MULTIPLYBETA:
     FLOAD BETA,  (a4)
     FEQ tmp, BETA, fzero
-    beq tmp, zero, .LBETANOTZERO
+    beq tmp, zero, BETANOTZERO
 
-.LBETAZERO:
+BETAZERO:
     VSE AB00, (C00_ptr)
     VSE AB01, (C01_ptr)
     VSE AB02, (C02_ptr)
@@ -549,9 +549,9 @@ REALNAME:
     VSE AB32, (C12_ptr)
     VSE AB33, (C13_ptr)
 
-    j .LEND
+    j END
 
-.LBETANOTZERO:
+BETANOTZERO:
     VLE C00, (C00_ptr)  // Load C(0:VLEN-1, 0:3)
     VLE C01, (C01_ptr)
     VLE C02, (C02_ptr)
@@ -622,6 +622,6 @@ REALNAME:
     VSE AB32, (C12_ptr)
     VSE AB33, (C13_ptr)
 
-.LEND:
+END:
     #include "rviv_restore_registers.h"
     ret
