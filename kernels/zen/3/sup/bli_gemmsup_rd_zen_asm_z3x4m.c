@@ -133,8 +133,7 @@ void bli_zgemmsup_rd_zen_asm_3x4m
     if( alpha->imag == 0.0 ) // If alpha is real
     {
       if( alpha->real == 1.0 ) alpha_mul_type = BLIS_MUL_ONE;
-      if( alpha->real == -1.0 )  alpha_mul_type = BLIS_MUL_MINUS_ONE;
-      if( alpha->real == 0.0 ) alpha_mul_type = BLIS_MUL_ZERO;
+      else if( alpha->real == -1.0 )  alpha_mul_type = BLIS_MUL_MINUS_ONE;
     }
 
     if( beta->imag == 0.0 ) // If beta is real
@@ -163,7 +162,7 @@ void bli_zgemmsup_rd_zen_asm_3x4m
     mov(imm(0), r15)               // jj = 0
     label(.ZLOOP3X4J)              // LOOP OVER jj = [ 0 1 ... ]
     mov(var(a), r14)               // r14 = addr of a
-    mov(var(b), rdx)               // rdx = addr of b
+    mov(var(b), r11)               // r11 = addr of b
     mov(var(c), r12)               // r12 = addr of c
 
     lea(mem(, r15, 1), rsi)
@@ -172,13 +171,13 @@ void bli_zgemmsup_rd_zen_asm_3x4m
 
     lea(mem(, r15, 1), rsi)
     imul(r10, rsi)                 // rsi = 16*jj
-    lea(mem(rdx, rsi, 1), rdx)    // r12 += cs_b*jj
+    lea(mem(r11, rsi, 1), r11)    // r12 += cs_b*jj
 
     mov(var(m_iter), r9)           // ii = m_iter
     label(.ZLOOP3X4I)              // LOOP OVER ii
     vzeroall()                      // Reset all ymm registers
     mov(r12, rcx)                  // rcx = c_iijj;
-    mov(rdx, rbx)                  // rbx = b_jj;
+    mov(r11, rbx)                  // rbx = b_jj;
     mov(r14, rax)                  // rax = a_ii;
 
     mov(var(k_iter8), rsi)        // i = k_iter8;
@@ -196,7 +195,7 @@ void bli_zgemmsup_rd_zen_asm_3x4m
       Compute another set of point wise pdt in ymm7-ymm9 and ymm13-ymm15.
 
       Cumulative sum of these registers will give the real and imaginary parts
-      of the result of dot product. 
+      of the result of dot product.
     */
 
     // ---------------------------------- Iteration 0
@@ -453,11 +452,11 @@ void bli_zgemmsup_rd_zen_asm_3x4m
     vsubpd(ymm5, ymm0, ymm5)      // ymm5 = -ymm5
     vsubpd(ymm6, ymm0, ymm6)      // ymm6 = -ymm6
 
-    jmp(.ALPHA_REAL_ONE)
+    jmp(.BETA_SCALING)
 
     label(.ALPHA_NOT_MINUS1)
     cmp(imm(2), al) // Checking for BLIS_MUL_DEFAULT
-    jne(.ALPHA_REAL_ONE)
+    jne(.BETA_SCALING)
     mov(var(alpha), rax)
     vbroadcastsd(mem(rax), ymm0)    // ymm0 = real(alpha)
     vbroadcastsd(mem(rax, 8), ymm1) // ymm1 = imag(alpha)
@@ -478,11 +477,11 @@ void bli_zgemmsup_rd_zen_asm_3x4m
     vmulpd(ymm1, ymm12, ymm12)
     vaddsubpd(ymm12, ymm6, ymm6)
 
-    label(.ALPHA_REAL_ONE)
+    label(.BETA_SCALING)
     // Scaling with beta
     mov(var(beta_mul_type), al)
     cmp(imm(0), al) // Checking if beta = 0.0
-    je(.BETAZERO)
+    je(.BETA_ZERO)
     cmp(imm(2), al) // Checking for BLIS_MUL_DEFAULT
     je(.BETA_NOT_REAL_ONE)
     cmp(imm(0xFF), al)
@@ -555,7 +554,7 @@ void bli_zgemmsup_rd_zen_asm_3x4m
 
     jmp(.ZDONE)
 
-    label(.BETAZERO)
+    label(.BETA_ZERO)
 
     //Storing in C
     vmovupd(ymm4, mem(rcx))
@@ -565,8 +564,6 @@ void bli_zgemmsup_rd_zen_asm_3x4m
     add(rdi, rcx)
 
     vmovupd(ymm6, mem(rcx))
-
-    jmp(.ZDONE)
 
     label(.ZDONE)
     lea(mem(r12, rdi, 2), r12)
@@ -603,7 +600,7 @@ void bli_zgemmsup_rd_zen_asm_3x4m
       [rs_c]   "m" (rs_c)
     : // register clobber list
       "rax", "rbx", "rdx", "rcx", "rsi", "rdi",
-      "r8", "r9", "r10", "r12", "r14", "r15",
+      "r8", "r9", "r10", "r12", "r14", "r15", "r11",
       "xmm0", "xmm1", "xmm2", "xmm3",
       "xmm4", "xmm5", "xmm6", "xmm7",
       "xmm8", "xmm9", "xmm10", "xmm11",
@@ -679,6 +676,9 @@ void bli_zgemmsup_rd_zen_asm_3x2m
 
     if ( m_iter == 0 ) goto consider_edge_cases;
 
+    // Checking whether generic/special case handling is required for beta scaling
+    char beta_mul_type = (beta->real == 0.0 && beta->imag == 0.0)? BLIS_MUL_ZERO : BLIS_MUL_DEFAULT;
+
     //-----------------------------------------------------------//
     // Inline assembly implementation
 
@@ -696,14 +696,14 @@ void bli_zgemmsup_rd_zen_asm_3x2m
     lea(mem(, rdi, 2), rdi)       // rdi = sizeof(dcomplex)*rs_c
 
     mov(var(a), r14)               // r14 = addr of a
-    mov(var(b), rdx)               // rdx = addr of b
+    mov(var(b), r11)               // r11 = addr of b
     mov(var(c), r12)               // r12 = addr of c
 
     mov(var(m_iter), r9)           // ii = m_iter
     label(.ZLOOP3X4I)              // LOOP OVER ii
     vzeroall()                      // Reset all ymm registers
     mov(r12, rcx)                  // rcx = c_iijj;
-    mov(rdx, rbx)                  // rbx = b_jj;
+    mov(r11, rbx)                  // rbx = b_jj;
     mov(r14, rax)                  // rax = a_ii;
 
     mov(var(k_iter8), rsi)        // i = k_iter8;
@@ -978,6 +978,9 @@ void bli_zgemmsup_rd_zen_asm_3x2m
     vaddsubpd(ymm12, ymm6, ymm6)
 
     // Scaling with beta
+    mov(var(beta_mul_type), al)
+    cmp(imm(0), al) // Checking if beta = 0.0
+    je(.BETA_ZERO)
     mov(var(beta), rbx)
     vbroadcastsd(mem(rbx), ymm1)    // ymm1 = real(beta)
     vbroadcastsd(mem(rbx, 8), ymm2) // ymm2 = imag(beta)
@@ -1008,6 +1011,21 @@ void bli_zgemmsup_rd_zen_asm_3x2m
     vaddpd(ymm0,ymm6,ymm0)
     vmovupd(ymm0, mem(rcx))
 
+    jmp(.ZDONE)
+
+    label(.BETA_ZERO)
+
+    //Storing in C
+    vmovupd(ymm4, mem(rcx))
+    add(rdi, rcx)
+
+    vmovupd(ymm5, mem(rcx))
+    add(rdi, rcx)
+
+    vmovupd(ymm6, mem(rcx))
+
+    label(.ZDONE)
+
     lea(mem(r12, rdi, 2), r12)
     lea(mem(r12, rdi, 1), r12)    // c_ii = r12 += 3*rs_c
 
@@ -1021,6 +1039,7 @@ void bli_zgemmsup_rd_zen_asm_3x2m
     end_asm(
     : // output operands (none)
     : // input operands
+      [beta_mul_type] "m" (beta_mul_type),
       [m_iter] "m" (m_iter),
       [k_iter8] "m" (k_iter8),
       [k_left8] "m" (k_left8),
@@ -1036,7 +1055,7 @@ void bli_zgemmsup_rd_zen_asm_3x2m
       [rs_c]   "m" (rs_c)
     : // register clobber list
       "rax", "rbx", "rdx", "rcx", "rsi", "rdi",
-      "r8", "r9", "r10", "r12", "r14", "r15",
+      "r8", "r9", "r10", "r12", "r14", "r15", "r11",
       "xmm0", "xmm1", "xmm2", "xmm3",
       "xmm4", "xmm5", "xmm6", "xmm7",
       "xmm8", "xmm9", "xmm10", "xmm11",
