@@ -6,7 +6,7 @@
 
    Copyright (C) 2014, The University of Texas at Austin
    Copyright (C) 2016, Hewlett Packard Enterprise Development LP
-   Copyright (C) 2020 - 22, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2020 - 23, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -623,6 +623,49 @@ BLIS_INLINE bool bli_cntx_l3_vir_ukr_dislikes_storage_of_md( obj_t* obj, num_t d
 }
 
 // -----------------------------------------------------------------------------
+
+
+BLIS_INLINE bool bli_cntx_l3_sup_ker_prefers_rows_dt( num_t dt, stor3_t stor_id, cntx_t* cntx )
+{
+	const bool prefs = bli_cntx_get_l3_sup_ker_prefs_dt( dt, stor_id, cntx );
+
+	// A ukernel preference of TRUE means the ukernel prefers row storage.
+	return ( bool )
+	       ( prefs == TRUE );
+}
+
+BLIS_INLINE bool bli_cntx_l3_sup_ker_prefers_cols_dt( num_t dt, stor3_t stor_id, cntx_t* cntx )
+{
+	const bool prefs = bli_cntx_get_l3_sup_ker_prefs_dt( dt, stor_id, cntx );
+
+	// A ukernel preference of FALSE means the ukernel prefers column storage.
+	return ( bool )
+	       ( prefs == FALSE );
+}
+
+BLIS_INLINE bool bli_cntx_l3_sup_ker_prefers_storage_of( obj_t* obj, stor3_t stor_id, cntx_t* cntx )
+{
+	const num_t dt    = bli_obj_dt( obj );
+	const bool  ukr_prefers_rows
+	                  = bli_cntx_l3_sup_ker_prefers_rows_dt( dt, stor_id, cntx );
+	const bool  ukr_prefers_cols
+	                  = bli_cntx_l3_sup_ker_prefers_cols_dt( dt, stor_id, cntx );
+	bool        r_val = FALSE;
+
+	if      ( bli_obj_is_row_stored( obj ) && ukr_prefers_rows ) r_val = TRUE;
+	else if ( bli_obj_is_col_stored( obj ) && ukr_prefers_cols ) r_val = TRUE;
+
+	return r_val;
+}
+
+BLIS_INLINE bool bli_cntx_l3_sup_ker_dislikes_storage_of( obj_t* obj, stor3_t stor_id, cntx_t* cntx )
+{
+	return ( bool )
+	       !bli_cntx_l3_sup_ker_prefers_storage_of( obj, stor_id, cntx );
+}
+
+// -----------------------------------------------------------------------------
+
 BLIS_INLINE bool bli_cntx_l3_sup_thresh_is_met( obj_t* a, obj_t* b, obj_t* c, cntx_t* cntx )
 {
 	num_t dt = bli_obj_dt( c );
@@ -630,7 +673,12 @@ BLIS_INLINE bool bli_cntx_l3_sup_thresh_is_met( obj_t* a, obj_t* b, obj_t* c, cn
 
 	dim_t m, n;
 
-	if(bli_cntx_l3_vir_ukr_dislikes_storage_of(c, BLIS_GEMM_UKR, cntx ) )
+	const stor3_t stor_id = bli_obj_stor3_from_strides( c, a, b );
+
+	// The SUP kernel storage preference should be used to determine
+	// m and n. This ensures right thresholds are check even if native
+	// kernel storage preference is different.
+	if ( bli_cntx_l3_sup_ker_dislikes_storage_of( c, stor_id, cntx ) )
 	{
 		m = bli_obj_width(c);
 		n = bli_obj_length(c);
@@ -672,54 +720,6 @@ BLIS_INLINE bool bli_cntx_l3_sup_thresh_is_met( obj_t* a, obj_t* b, obj_t* c, cn
 
 	return FALSE;
 }
-
-// -----------------------------------------------------------------------------
-
-
-BLIS_INLINE bool bli_cntx_l3_sup_ker_prefers_rows_dt( num_t dt, stor3_t stor_id, cntx_t* cntx )
-{
-	const bool prefs = bli_cntx_get_l3_sup_ker_prefs_dt( dt, stor_id, cntx );
-
-	// A ukernel preference of TRUE means the ukernel prefers row storage.
-	return ( bool )
-	       ( prefs == TRUE );
-}
-
-BLIS_INLINE bool bli_cntx_l3_sup_ker_prefers_cols_dt( num_t dt, stor3_t stor_id, cntx_t* cntx )
-{
-	const bool prefs = bli_cntx_get_l3_sup_ker_prefs_dt( dt, stor_id, cntx );
-
-	// A ukernel preference of FALSE means the ukernel prefers column storage.
-	return ( bool )
-	       ( prefs == FALSE );
-}
-
-#if 0
-// NOTE: These static functions aren't needed yet.
-
-BLIS_INLINE bool bli_cntx_l3_sup_ker_prefers_storage_of( obj_t* obj, stor3_t stor_id, cntx_t* cntx )
-{
-	const num_t dt    = bli_obj_dt( obj );
-	const bool  ukr_prefers_rows
-	                  = bli_cntx_l3_sup_ker_prefers_rows_dt( dt, stor_id, cntx );
-	const bool  ukr_prefers_cols
-	                  = bli_cntx_l3_sup_ker_prefers_cols_dt( dt, stor_id, cntx );
-	bool        r_val = FALSE;
-
-	if      ( bli_obj_is_row_stored( obj ) && ukr_prefers_rows ) r_val = TRUE;
-	else if ( bli_obj_is_col_stored( obj ) && ukr_prefers_cols ) r_val = TRUE;
-
-	return r_val;
-}
-
-BLIS_INLINE bool bli_cntx_l3_sup_ker_dislikes_storage_of( obj_t* obj, stor3_t stor_id, cntx_t* cntx )
-{
-	return ( bool )
-	       !bli_cntx_l3_sup_ker_prefers_storage_of( obj, stor_id, cntx );
-}
-#endif
-
-// -----------------------------------------------------------------------------
 
 //
 // -- cntx_t modification (complex) --------------------------------------------
