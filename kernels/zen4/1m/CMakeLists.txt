@@ -5,4 +5,6 @@ target_sources("${PROJECT_NAME}"
      ${CMAKE_CURRENT_SOURCE_DIR}/bli_packm_zen4_asm_d16xk.c
      ${CMAKE_CURRENT_SOURCE_DIR}/bli_packm_zen4_asm_d24xk.c
      ${CMAKE_CURRENT_SOURCE_DIR}/bli_packm_zen4_asm_d32xk.c
+     ${CMAKE_CURRENT_SOURCE_DIR}/bli_packm_zen4_asm_z12xk.c
+     ${CMAKE_CURRENT_SOURCE_DIR}/bli_packm_zen4_asm_z4xk.c
  )

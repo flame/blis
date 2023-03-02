@@ -48,6 +48,8 @@ PACKM_KER_PROT( double,   d, packm_zen4_asm_16xk )
 PACKM_KER_PROT( double,   d, packm_zen4_asm_24xk )
 PACKM_KER_PROT( double,   d, packm_zen4_asm_32xk )
 PACKM_KER_PROT( double,   d, packm_32xk_zen4_ref )
+PACKM_KER_PROT( dcomplex, z, packm_zen4_asm_12xk )
+PACKM_KER_PROT( dcomplex, z, packm_zen4_asm_4xk )
 
 // native dgemm kernel
 GEMM_UKR_PROT( double,   d, gemm_zen4_asm_32x6 )
