@@ -172,7 +172,7 @@ void PASTEMAC(ch,varname) \
 	   temporary buffer are set so that they match the storage of the
 	   original C matrix. For example, if C is column-stored, ct will be
 	   column-stored as well. */ \
-	ctype           ct[ BLIS_STACK_BUF_MAX_SIZE \
+	ctype           ct[ 65536 \
 	                    / sizeof( ctype ) ] \
 	                    __attribute__((aligned(BLIS_STACK_BUF_ALIGN_SIZE))); \
 \
