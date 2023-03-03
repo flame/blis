@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2021 - 2022, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2021 - 2023, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -142,14 +142,7 @@ void bli_snorm2fv_unb_var1_avx2
             // Pack vector x with non-unit stride to a temp buffer x_buf with unit stride.
             for ( dim_t x_index = 0; x_index < n; x_index++ )
             {
-                if ( incx > 0 )
-                {
-                    *( x_buf + x_index ) = *( x + ( x_index * incx ) );
-                }
-                else
-                {
-                    *( x_buf + x_index ) =  *( x + ( - ( n - x_index - 1 ) * incx ) );
-                }
+                *( x_buf + x_index ) = *( x + ( x_index * incx ) );
             }
         }
     }
@@ -1103,14 +1096,7 @@ void bli_scnorm2fv_unb_var1_avx2
             // Pack vector x with non-unit stride to a temp buffer x_buf with unit stride.
             for ( dim_t x_index = 0; x_index < n; x_index++ )
             {
-                if ( incx > 0 )
-                {
-                    *( x_buf + x_index ) = *( x + ( x_index * incx ) );
-                }
-                else
-                {
-                    *( x_buf + x_index ) =  *( x + ( - ( n - x_index - 1 ) * incx ) );
-                }
+                *( x_buf + x_index ) = *( x + ( x_index * incx ) );
             }
         }
     }
@@ -2118,14 +2104,7 @@ void bli_dnorm2fv_unb_var1_avx2
             // Pack vector x with non-unit stride to a temp buffer x_buf with unit stride.
             for ( dim_t x_index = 0; x_index < n; x_index++ )
             {
-                if ( incx > 0 )
-                {
-                    *( x_buf + x_index ) = *( x + ( x_index * incx ) );
-                }
-                else
-                {
-                    *( x_buf + x_index ) =  *( x + ( - ( n - x_index - 1 ) * incx ) );
-                }
+                *( x_buf + x_index ) = *( x + ( x_index * incx ) );
             }
         }
     }
@@ -2599,14 +2578,7 @@ void bli_dznorm2fv_unb_var1_avx2
             // Pack vector x with non-unit stride to a temp buffer x_buf with unit stride.
             for ( dim_t x_index = 0; x_index < n; x_index++ )
             {
-                if ( incx > 0 )
-                {
-                    *( x_buf + x_index ) = *( x + ( x_index * incx ) );
-                }
-                else
-                {
-                    *( x_buf + x_index ) =  *( x + ( - ( n - x_index - 1 ) * incx ) );
-                }
+                *( x_buf + x_index ) = *( x + ( x_index * incx ) );
             }
         }
     }
