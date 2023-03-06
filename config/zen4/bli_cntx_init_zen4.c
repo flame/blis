@@ -104,7 +104,7 @@ void bli_cntx_init_zen4( cntx_t* cntx )
       BLIS_PACKM_6XK_KER,  BLIS_FLOAT,    bli_spackm_haswell_asm_6xk,
       BLIS_PACKM_16XK_KER, BLIS_FLOAT,    bli_spackm_haswell_asm_16xk,
       BLIS_PACKM_6XK_KER,  BLIS_DOUBLE,   bli_dpackm_haswell_asm_6xk,
-      BLIS_PACKM_8XK_KER,  BLIS_DOUBLE,   bli_dpackm_haswell_asm_8xk,
+      BLIS_PACKM_8XK_KER,  BLIS_DOUBLE,   bli_dpackm_zen4_asm_8xk,
       BLIS_PACKM_24XK_KER, BLIS_DOUBLE,   bli_dpackm_zen4_asm_24xk,
       BLIS_PACKM_32XK_KER, BLIS_DOUBLE,   bli_dpackm_zen4_asm_32xk,
       BLIS_PACKM_3XK_KER,  BLIS_SCOMPLEX, bli_cpackm_haswell_asm_3xk,

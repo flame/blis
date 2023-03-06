@@ -2,6 +2,7 @@
 
 target_sources("${PROJECT_NAME}" 
      PRIVATE
+     ${CMAKE_CURRENT_SOURCE_DIR}/bli_packm_zen4_asm_d8xk.c
      ${CMAKE_CURRENT_SOURCE_DIR}/bli_packm_zen4_asm_d16xk.c
      ${CMAKE_CURRENT_SOURCE_DIR}/bli_packm_zen4_asm_d24xk.c
      ${CMAKE_CURRENT_SOURCE_DIR}/bli_packm_zen4_asm_d32xk.c

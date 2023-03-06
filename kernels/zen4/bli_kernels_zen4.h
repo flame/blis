@@ -45,6 +45,7 @@ GEMMTRSM_UKR_PROT( double,   d, gemmtrsm_u_zen4_asm_8x24)
 
 //packing kernels
 PACKM_KER_PROT( double,   d, packm_zen4_asm_16xk )
+PACKM_KER_PROT( double,   d, packm_zen4_asm_8xk )
 PACKM_KER_PROT( double,   d, packm_zen4_asm_24xk )
 PACKM_KER_PROT( double,   d, packm_zen4_asm_32xk )
 PACKM_KER_PROT( double,   d, packm_32xk_zen4_ref )
