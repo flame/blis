@@ -416,8 +416,6 @@ err_t bli_trsm_small_AVX512
      )
 {
   err_t err;
-  dim_t m = bli_obj_length(b);
-  dim_t n = bli_obj_width(b);
 
   bool uplo = bli_obj_is_upper(a);
   bool transa = bli_obj_has_trans(a);
@@ -427,10 +425,6 @@ err_t bli_trsm_small_AVX512
   {
   case BLIS_DOUBLE:
   {
-    if ((!is_parallel) && (m > 1200 || n > 1200))
-    {
-      return BLIS_NOT_YET_IMPLEMENTED;
-    }
     break;
   }
   case BLIS_FLOAT:
@@ -490,7 +484,8 @@ err_t bli_trsm_small_mt_AVX512
        obj_t*   a,
        obj_t*   b,
        cntx_t*  cntx,
-       cntl_t*  cntl
+       cntl_t*  cntl,
+       bool     is_parallel
      )
 {
   gint_t m = bli_obj_length(b); // number of rows of matrix b
@@ -531,8 +526,6 @@ err_t bli_trsm_small_mt_AVX512
   if (n_threads < 0)
     n_threads = 1;
 
-  bool is_parallel = bli_thread_get_is_parallel();
-
   err_t status = BLIS_SUCCESS;
   _Pragma("omp parallel num_threads(n_threads)")
   {
@@ -546,7 +539,7 @@ err_t bli_trsm_small_mt_AVX512
     {
       if(tid == 0)
       {
-        bli_trsm_small
+        bli_trsm_small_AVX512
             (
               side,
               alpha,
@@ -618,8 +611,11 @@ err_t bli_trsm_small_mt_AVX512
                 is_parallel
               );
       // To capture the error populated from any of the threads
-      _Pragma("omp critical")
-      status = (status != BLIS_NOT_YET_IMPLEMENTED) ? status_l : status;
+      if ( status_l != BLIS_SUCCESS )
+      {
+        _Pragma("omp critical")
+          status = (status != BLIS_NOT_YET_IMPLEMENTED) ? status_l : status;
+      }
     }
   }
 

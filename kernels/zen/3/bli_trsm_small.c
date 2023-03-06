@@ -5264,9 +5264,6 @@ err_t bli_trsm_small
    {
         case BLIS_DOUBLE:
         {
-            if((!is_parallel) && (m > 1000 || n > 1000)) {
-                return BLIS_NOT_YET_IMPLEMENTED;
-            }
             break;
         }
         case BLIS_FLOAT:
@@ -5345,7 +5342,8 @@ err_t bli_trsm_small_mt
     obj_t*  a,
     obj_t*  b,
     cntx_t* cntx,
-    cntl_t* cntl
+    cntl_t* cntl,
+    bool    is_parallel
 )
 {
     gint_t m = bli_obj_length( b ); // number of rows of matrix b
@@ -5390,73 +5388,97 @@ err_t bli_trsm_small_mt
 
     if (n_threads < 0 ) n_threads = 1;
 
-    bool is_parallel = bli_thread_get_is_parallel();
-
     err_t status = BLIS_SUCCESS;
     _Pragma( "omp parallel num_threads(n_threads)" )
     {
         // Query the thread's id from OpenMP.
         const dim_t tid = omp_get_thread_num();
+        const dim_t nt_real = omp_get_num_threads();
 
-        obj_t      b_t;
-        dim_t start; // Each thread start Index
-        dim_t end;   // Each thread end Index
-        thrinfo_t thread;
-
-        thread.n_way    = n_threads;
-        thread.work_id  = tid;
-        thread.ocomm_id = tid;
-
-
-        // Compute start and end indexes of matrix partitioning for each thread
-        if ( bli_is_right( side ) )
+        if(nt_real != n_threads)
         {
-            bli_thread_range_sub (  &thread,
+            if(tid == 0)
+            {
+                bli_trsm_small
+                (
+                  side,
+                  alpha,
+                  a,
+                  b,
+                  cntx,
+                  cntl,
+                  is_parallel
+                );
+            }
+        }
+        else
+        {
+            obj_t     b_t;
+            dim_t     start; // Each thread start Index
+            dim_t     end;   // Each thread end Index
+            thrinfo_t thread;
+
+            thread.n_way    = n_threads;
+            thread.work_id  = tid;
+            thread.ocomm_id = tid;
+
+
+            // Compute start and end indexes of matrix partitioning for each thread
+            if ( bli_is_right( side ) )
+            {
+                bli_thread_range_sub 
+                (  
+                  &thread,
                   m,
                   d_mr,// Need to decide based on type
                   FALSE,
                   &start,
                   &end
-                   );
-            // For each thread acquire matrix block on which they operate
-            // Data-based parallelism
+                );
+                // For each thread acquire matrix block on which they operate
+                // Data-based parallelism
 
-            bli_acquire_mpart_mdim(BLIS_FWD, BLIS_SUBPART1, start, end-start, b, &b_t);
+                bli_acquire_mpart_mdim(BLIS_FWD, BLIS_SUBPART1, start, end-start, b, &b_t);
+            }
+            else
+            {
+                bli_thread_range_sub
+                ( 
+                  &thread,
+                  n,
+                  d_nr,// Need to decide based on type
+                  FALSE,
+                  &start,
+                  &end
+                );
+                // For each thread acquire matrix block on which they operate
+                // Data-based parallelism
+
+                bli_acquire_mpart_ndim(BLIS_FWD, BLIS_SUBPART1, start, end-start, b, &b_t);
+            }
+
+            // Parallelism is only across m-dimension/n-dimension - therefore matrix a is common to
+            // all threads
+            err_t status_l = BLIS_SUCCESS;
+
+            status_l = bli_trsm_small
+                        (
+                          side,
+                          alpha,
+                          a,
+                          &b_t,
+                          NULL,
+                          NULL,
+                          is_parallel
+                        );
+	        // To capture the error populated from any of the threads
+            if ( status_l != BLIS_SUCCESS )
+            {
+                _Pragma("omp critical")
+                status = (status != BLIS_NOT_YET_IMPLEMENTED) ? status_l : status;
+            }
         }
-        else
-        {
-            bli_thread_range_sub (  &thread,
-                   n,
-                   d_nr,// Need to decide based on type
-                   FALSE,
-                   &start,
-                   &end
-                    );
-            // For each thread acquire matrix block on which they operate
-            // Data-based parallelism
-
-            bli_acquire_mpart_ndim(BLIS_FWD, BLIS_SUBPART1, start, end-start, b, &b_t);
-        }
-
-        // Parallelism is only across m-dimension/n-dimension - therefore matrix a is common to
-        // all threads
-        err_t status_l = BLIS_SUCCESS;
-
-        status_l = bli_trsm_small
-                   (
-		     side,
-                     alpha,
-                     a,
-                     &b_t,
-                     NULL,
-                     NULL,
-                     is_parallel
-                   );
-	// To capture the error populated from any of the threads
-        _Pragma( "omp critical" )
-	status = (status != BLIS_NOT_YET_IMPLEMENTED)?status_l:status;
     }
-
     return status;
 }// End of function
 #endif

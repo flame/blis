@@ -941,80 +941,112 @@ void dtrsm_blis_impl
     bli_obj_set_struc( struca, &ao );
 
 #ifdef BLIS_ENABLE_SMALL_MATRIX_TRSM
+
     // This function is invoked on all architectures including ‘generic’.
     // Non-AVX platforms will use the kernels derived from the context.
     if (bli_cpuid_is_avx_supported() == TRUE)
     {
-        /* bli_dtrsm_small is performing better existing native
-         * implementations for [m,n]<=1000 for single thread.
-         * In case of multithread when [m,n]<=128 single thread implementation
-         * is doing better than native multithread */
+        // typedef for trsm small kernel function pointer
+        typedef err_t (*dtrsm_small_ker_ft)
+            (
+              side_t   side,
+              obj_t*   alpha,
+              obj_t*   a,
+              obj_t*   b,
+              cntx_t*  cntx,
+              cntl_t*  cntl,
+              bool     is_parallel
+            );
+        err_t status = BLIS_NOT_YET_IMPLEMENTED;
+        
+        // trsm small kernel function pointer definition
+        dtrsm_small_ker_ft ker_ft = NULL;
+
+        // Query the architecture ID
+        arch_t id = bli_arch_query_id();
+
+        // dimensions of triangular matrix
+        // for left variants, dim_a is m0,
+        // for right variants, dim_a is n0
+        dim_t dim_a = n0;
+        if (blis_side == BLIS_LEFT)
+            dim_a = m0;
+
+        // size of output matrix(B)
+        dim_t size_b = m0*n0;
+
+        /* bli_dtrsm_small is performing better than existing native
+         * implementations for dim_a<1500 and m0*n0<5e6 for single thread.
+         * In case of multithread when [m+n]<320 single thread implementation
+         * is doing better than small multithread and native multithread */
         bool is_parallel = bli_thread_get_is_parallel();
-        if ((!is_parallel && m0<=1000 && n0<=1000) ||
+        if ((!is_parallel && ((dim_a < 1500) && (size_b < 5e6)) ) ||
             (is_parallel && (m0+n0)<320))
         {
-            err_t status;
-
-            // Query the architecture ID
-            arch_t id = bli_arch_query_id();
             switch(id)
             {
                 case BLIS_ARCH_ZEN4:
 #if defined(BLIS_KERNELS_ZEN4)
                     // check if variant is RUN[N/U] or RLT[N/U]
                     // this is a temporary fix, will be removed when all variants are added
-
-                    // for n < 200 avx2 kernels are performing better, but if
-                    // n is a multiple of 8 then there will be no fringe case for avx512,
-                    // in such cases avx512 kernels will perform better.
                     if( (blis_side == BLIS_RIGHT) && 
                       ((n0 > 300) && (m0 > 50)))
                     {
-                        status = bli_trsm_small_AVX512(
-                            blis_side,
-                            &alphao,
-                            &ao,
-                            &bo,
-                            NULL,
-                            NULL,
-                            is_parallel);
+                        ker_ft = bli_trsm_small_AVX512;
                     }
                     else
                     {
-                        status = bli_trsm_small(
-                            blis_side,
-                            &alphao,
-                            &ao,
-                            &bo,
-                            NULL,
-                            NULL,
-                            is_parallel);
+                        ker_ft = bli_trsm_small;
                     }
                     break;
-#endif
-
+#endif // BLIS_KERNELS_ZEN4
                 case BLIS_ARCH_ZEN:
                 case BLIS_ARCH_ZEN2:
                 case BLIS_ARCH_ZEN3:
-                    status = bli_trsm_small(
-                        blis_side,
-                        &alphao,
-                        &ao,
-                        &bo,
-                        NULL,
-                        NULL,
-                        is_parallel);
-                    break;
                 default:
-                    status = BLIS_NOT_YET_IMPLEMENTED;
+                    ker_ft = bli_trsm_small;
+                    break;
             }
-            if (status == BLIS_SUCCESS)
+        }
+
+#ifdef BLIS_ENABLE_OPENMP
+        if( (ker_ft == NULL) && (is_parallel) &&
+          ((dim_a < 2500) && (size_b < 5e6)) )
+        {
+            switch(id)
             {
-                AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO);
-                /* Finalize BLIS. */
-                bli_finalize_auto();
-                return;
+                case BLIS_ARCH_ZEN4:
+#if defined(BLIS_KERNELS_ZEN4)
+                    if( (blis_side == BLIS_RIGHT) )
+                    {
+                        ker_ft = bli_trsm_small_mt_AVX512;
+                    }
+                    else
+                    {
+                        ker_ft = bli_trsm_small_mt;
+                    }
+                    break;
+#endif// BLIS_KERNELS_ZEN4
+                case BLIS_ARCH_ZEN:
+                case BLIS_ARCH_ZEN2:
+                case BLIS_ARCH_ZEN3:
+                default:
+                    ker_ft = bli_trsm_small_mt;
+                    break;
             }
+        }
+
+#endif// BLIS_ENABLE_OPENMP
+        if(ker_ft)
+        {
+            status = ker_ft(blis_side, &alphao, &ao, &bo, NULL, NULL, is_parallel);
+        }
+        if (status == BLIS_SUCCESS)
+        {
+            AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO);
+            /* Finalize BLIS. */
+            bli_finalize_auto();
+            return;
         }
     } // bli_cpuid_is_avx_supported
 #endif// END of BLIS_ENABLE_SMALL_MATRIX_TRSM

@@ -110,8 +110,12 @@ GEMMSUP_KER_PROT( float,   s, gemmsup_rd_zen_asm_3x32_avx512 )
 GEMMSUP_KER_PROT( float,   s, gemmsup_rd_zen_asm_2x32_avx512 )
 GEMMSUP_KER_PROT( float,   s, gemmsup_rd_zen_asm_1x32_avx512 )
 
-TRSMSUP_PROT(trsm_small_AVX512)
-TRSMSUP_KER_PROT( d, trsm_small_AutXB_AlXB_AVX512 )
-TRSMSUP_KER_PROT( d, trsm_small_XAltB_XAuB_AVX512 )
-TRSMSUP_KER_PROT( d, trsm_small_XAutB_XAlB_AVX512 )
-TRSMSUP_KER_PROT( d, trsm_small_AltXB_AuXB_AVX512 )
+TRSMSMALL_PROT(trsm_small_AVX512)
+TRSMSMALL_KER_PROT( d, trsm_small_AutXB_AlXB_AVX512 )
+TRSMSMALL_KER_PROT( d, trsm_small_XAltB_XAuB_AVX512 )
+TRSMSMALL_KER_PROT( d, trsm_small_XAutB_XAlB_AVX512 )
+TRSMSMALL_KER_PROT( d, trsm_small_AltXB_AuXB_AVX512 )
+
+#ifdef BLIS_ENABLE_OPENMP
+TRSMSMALL_PROT(trsm_small_mt_AVX512)
+#endif

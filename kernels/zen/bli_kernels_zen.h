@@ -345,7 +345,8 @@ err_t bli_trsm_small_mt
        obj_t*  a,
        obj_t*  b,
        cntx_t* cntx,
-       cntl_t* cntl
+       cntl_t* cntl,
+      bool     is_parallel
      );
 
 void bli_multi_sgemv_4x2

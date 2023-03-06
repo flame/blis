@@ -56,7 +56,7 @@ void PASTEMAC(ch,opname) \
 
 
 
-#define TRSMSUP_PROT( opname ) \
+#define TRSMSMALL_PROT( opname ) \
 \
 err_t PASTEMAC0(opname) \
      ( \
@@ -69,7 +69,7 @@ err_t PASTEMAC0(opname) \
        bool     is_parallel \
      );
 
-#define TRSMSUP_KER_PROT( ch, opname ) \
+#define TRSMSMALL_KER_PROT( ch, opname ) \
 \
 BLIS_INLINE err_t PASTEMAC(ch,opname) \
      ( \
