@@ -44,7 +44,7 @@
 	PASTEMAC(ch,ctype)* restrict _c      = c; \
 	const inc_t                  _rs_c   = rs_c; \
 	const inc_t                  _cs_c   = cs_c; \
-	PASTEMAC(ch,ctype)           _ct[ BLIS_STACK_BUF_MAX_SIZE / sizeof( PASTEMAC(ch,ctype) ) ] \
+	PASTEMAC(ch,ctype)           _ct[ 6 * 8 ] \
 	                                  __attribute__((aligned(BLIS_STACK_BUF_ALIGN_SIZE))); \
 	const inc_t                  _rs_ct  = row_major ? nr :  1; \
 	const inc_t                  _cs_ct  = row_major ?  1 : mr;
