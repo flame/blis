@@ -49,7 +49,8 @@ AOCL_GEMM_MATMUL(uint8_t,int8_t,int8_t,int16_t,u8s8s16os8)
 	// Check if avx ISA is supported, lpgemm u8s8s16os16 matmul only works with it.
 	if ( bli_cpuid_is_avx_supported() == FALSE )
 	{
-		printf(" AVX2 ISA not supported by processor, cannot perform lpgemm.\n");
+		bli_print_msg(" AVX2 ISA not supported by processor, "
+				"cannot perform u8s8s16 gemm.", __FILE__, __LINE__ );
 		return; // Error.
 	}
 

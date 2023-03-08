@@ -75,6 +75,7 @@ GCC_VERSION := $(strip $(shell $(CC) -dumpversion | cut -d. -f1))
 # gcc 9.0 or later:
 ifeq ($(shell test $(GCC_VERSION) -ge 9; echo $$?),0)
 CKVECFLAGS     += -march=znver2
+CKOPTFLAGS     += -fno-tree-partial-pre -fno-tree-pre -fno-tree-loop-vectorize -fno-gcse
 else
 # If gcc is older than 9.1.0 but at least 6.1.0, then we can use -march=znver1
 # as the fallback option.

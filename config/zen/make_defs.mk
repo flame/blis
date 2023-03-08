@@ -62,6 +62,10 @@ endif
 CKOPTFLAGS     := $(COPTFLAGS) -fomit-frame-pointer
 ifeq ($(CC_VENDOR),gcc)
 CKVECFLAGS += -march=znver1
+GCC_VERSION := $(strip $(shell $(CC) -dumpversion | cut -d. -f1))
+ifeq ($(shell test $(GCC_VERSION) -ge 9; echo $$?),0)
+CKOPTFLAGS += -fno-tree-partial-pre -fno-tree-pre -fno-tree-loop-vectorize -fno-gcse
+endif # GCC 9
 endif
 
 

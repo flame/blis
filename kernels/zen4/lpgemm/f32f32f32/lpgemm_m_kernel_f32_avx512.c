@@ -209,6 +209,8 @@ LPGEMM_MAIN_KERN(float,float,float,f32f32f32of32_avx512_6x64m)
       ZERO_ACC_ZMM_4_REG(zmm24, zmm25, zmm26, zmm27);
       ZERO_ACC_ZMM_4_REG(zmm28, zmm29, zmm30, zmm31);
 
+      _mm256_zeroupper();
+
       float *abuf, *bbuf, *cbuf, *_cbuf;
 
       abuf = (float *)a + m * ps_a; // Move to next MRxKC in MCxKC (where MC>=MR)
@@ -975,6 +977,8 @@ LPGEMM_N_FRINGE_KERN(float,float,float,f32f32f32of32_avx512_6x48m)
       ZERO_ACC_ZMM_4_REG(zmm24, zmm25, zmm26, zmm28);
       ZERO_ACC_ZMM_4_REG(zmm29, zmm30, zmm31, zmm2);
 
+      _mm256_zeroupper();
+
       float *abuf, *bbuf, *cbuf, *_cbuf;
 
       abuf = (float *)a + m * ps_a; // Move to next MRxKC in MCxKC (where MC>=MR)
@@ -1599,6 +1603,8 @@ LPGEMM_N_FRINGE_KERN(float,float,float,f32f32f32of32_avx512_6x32m)
       ZERO_ACC_ZMM_4_REG(zmm8, zmm9, zmm12, zmm13);
       ZERO_ACC_ZMM_4_REG(zmm16, zmm17, zmm20, zmm21);
       ZERO_ACC_ZMM_4_REG(zmm24, zmm25, zmm28, zmm29);
+
+      _mm256_zeroupper();
 
       float *abuf, *bbuf, *cbuf, *_cbuf;
 

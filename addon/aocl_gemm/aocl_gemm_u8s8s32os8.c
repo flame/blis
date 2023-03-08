@@ -49,7 +49,8 @@ AOCL_GEMM_MATMUL(uint8_t,int8_t,int8_t,int32_t,u8s8s32os8)
 	// Check if avx512_vnni ISA is supported, lpgemm matmul only works with it.
 	if ( bli_cpuid_is_avx512vnni_supported() == FALSE )
 	{
-		printf(" AVX512_VNNI ISA not supported by processor, cannot perform lpgemm.\n");
+		bli_print_msg(" AVX512_VNNI ISA not supported by processor, "
+				"cannot perform u8s8s32 gemm.", __FILE__, __LINE__ );
 		return; // Error.
 	}
 

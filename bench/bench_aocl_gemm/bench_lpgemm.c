@@ -1158,7 +1158,8 @@ int main( int argc, char** argv )
 
 	if ( post_ops_str != NULL )
 	{
-		post_ops_str_dest = strdup( post_ops_str );
+		post_ops_str_dest = ( char* )malloc( strlen( post_ops_str) * sizeof( char ) );
+		strcpy( post_ops_str_dest, post_ops_str );
 	}
 
 	if ( bench_mode == 'p' )

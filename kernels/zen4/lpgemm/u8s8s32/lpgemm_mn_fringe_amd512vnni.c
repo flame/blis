@@ -167,16 +167,19 @@ LPGEMM_MN_LT_NR0_FRINGE_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_5xlt16)
 		__m512i selector1 = _mm512_set1_epi32( alpha );
 		__m512i selector2 = _mm512_set1_epi32( beta );
 
-		// Scale by alpha
-		c_int32_0p0 = _mm512_mullo_epi32( selector1, c_int32_0p0 );
+		if ( alpha != 1 )
+		{
+			// Scale by alpha
+			c_int32_0p0 = _mm512_mullo_epi32( selector1, c_int32_0p0 );
 
-		c_int32_1p0 = _mm512_mullo_epi32( selector1, c_int32_1p0 );
+			c_int32_1p0 = _mm512_mullo_epi32( selector1, c_int32_1p0 );
 
-		c_int32_2p0 = _mm512_mullo_epi32( selector1, c_int32_2p0 );
+			c_int32_2p0 = _mm512_mullo_epi32( selector1, c_int32_2p0 );
 
-		c_int32_3p0 = _mm512_mullo_epi32( selector1, c_int32_3p0 );
+			c_int32_3p0 = _mm512_mullo_epi32( selector1, c_int32_3p0 );
 
-		c_int32_4p0 = _mm512_mullo_epi32( selector1, c_int32_4p0 );
+			c_int32_4p0 = _mm512_mullo_epi32( selector1, c_int32_4p0 );
+		}
 
 		// Scale C by beta.
 		if ( beta != 0 )
@@ -561,14 +564,17 @@ LPGEMM_MN_LT_NR0_FRINGE_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_4xlt16)
 		__m512i selector1 = _mm512_set1_epi32( alpha );
 		__m512i selector2 = _mm512_set1_epi32( beta );
 
-		// Scale by alpha
-		c_int32_0p0 = _mm512_mullo_epi32( selector1, c_int32_0p0 );
+		if ( alpha != 1 )
+		{
+			// Scale by alpha
+			c_int32_0p0 = _mm512_mullo_epi32( selector1, c_int32_0p0 );
 
-		c_int32_1p0 = _mm512_mullo_epi32( selector1, c_int32_1p0 );
+			c_int32_1p0 = _mm512_mullo_epi32( selector1, c_int32_1p0 );
 
-		c_int32_2p0 = _mm512_mullo_epi32( selector1, c_int32_2p0 );
+			c_int32_2p0 = _mm512_mullo_epi32( selector1, c_int32_2p0 );
 
-		c_int32_3p0 = _mm512_mullo_epi32( selector1, c_int32_3p0 );
+			c_int32_3p0 = _mm512_mullo_epi32( selector1, c_int32_3p0 );
+		}
 
 
 		// Scale C by beta.
@@ -902,12 +908,15 @@ LPGEMM_MN_LT_NR0_FRINGE_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_3xlt16)
 		__m512i selector1 = _mm512_set1_epi32( alpha );
 		__m512i selector2 = _mm512_set1_epi32( beta );
 
-		// Scale by alpha
-		c_int32_0p0 = _mm512_mullo_epi32( selector1, c_int32_0p0 );
+		if ( alpha != 1 )
+		{
+			// Scale by alpha
+			c_int32_0p0 = _mm512_mullo_epi32( selector1, c_int32_0p0 );
 
-		c_int32_1p0 = _mm512_mullo_epi32( selector1, c_int32_1p0 );
+			c_int32_1p0 = _mm512_mullo_epi32( selector1, c_int32_1p0 );
 
-		c_int32_2p0 = _mm512_mullo_epi32( selector1, c_int32_2p0 );
+			c_int32_2p0 = _mm512_mullo_epi32( selector1, c_int32_2p0 );
+		}
 
 		// Scale C by beta.
 		if ( beta != 0 )
@@ -1188,10 +1197,13 @@ LPGEMM_MN_LT_NR0_FRINGE_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_2xlt16)
 		__m512i selector1 = _mm512_set1_epi32( alpha );
 		__m512i selector2 = _mm512_set1_epi32( beta );
 
-		// Scale by alpha
-		c_int32_0p0 = _mm512_mullo_epi32( selector1, c_int32_0p0 );
+		if ( alpha != 1 )
+		{
+			// Scale by alpha
+			c_int32_0p0 = _mm512_mullo_epi32( selector1, c_int32_0p0 );
 
-		c_int32_1p0 = _mm512_mullo_epi32( selector1, c_int32_1p0 );
+			c_int32_1p0 = _mm512_mullo_epi32( selector1, c_int32_1p0 );
+		}
 
 		// Scale C by beta.
 		if ( beta != 0 )
@@ -1420,8 +1432,11 @@ LPGEMM_MN_LT_NR0_FRINGE_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_1xlt16)
 		__m512i selector1 = _mm512_set1_epi32( alpha );
 		__m512i selector2 = _mm512_set1_epi32( beta );
 
-		// Scale by alpha
-		c_int32_0p0 = _mm512_mullo_epi32( selector1, c_int32_0p0 );
+		if ( alpha != 1 )
+		{
+			// Scale by alpha
+			c_int32_0p0 = _mm512_mullo_epi32( selector1, c_int32_0p0 );
+		}
 
 		// Scale C by beta.
 		if ( beta != 0 )
@@ -1680,16 +1695,19 @@ LPGEMM_MN_FRINGE_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_5x16)
 	__m512i selector1 = _mm512_set1_epi32( alpha );
 	__m512i selector2 = _mm512_set1_epi32( beta );
 
-	// Scale by alpha
-	c_int32_0p0 = _mm512_mullo_epi32( selector1, c_int32_0p0 );
+	if ( alpha != 1 )
+	{
+		// Scale by alpha
+		c_int32_0p0 = _mm512_mullo_epi32( selector1, c_int32_0p0 );
 
-	c_int32_1p0 = _mm512_mullo_epi32( selector1, c_int32_1p0 );
+		c_int32_1p0 = _mm512_mullo_epi32( selector1, c_int32_1p0 );
 
-	c_int32_2p0 = _mm512_mullo_epi32( selector1, c_int32_2p0 );
+		c_int32_2p0 = _mm512_mullo_epi32( selector1, c_int32_2p0 );
 
-	c_int32_3p0 = _mm512_mullo_epi32( selector1, c_int32_3p0 );
+		c_int32_3p0 = _mm512_mullo_epi32( selector1, c_int32_3p0 );
 
-	c_int32_4p0 = _mm512_mullo_epi32( selector1, c_int32_4p0 );
+		c_int32_4p0 = _mm512_mullo_epi32( selector1, c_int32_4p0 );
+	}
 
 	// Scale C by beta.
 	if ( beta != 0 )
@@ -2017,14 +2035,17 @@ LPGEMM_MN_FRINGE_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_4x16)
 	__m512i selector1 = _mm512_set1_epi32( alpha );
 	__m512i selector2 = _mm512_set1_epi32( beta );
 
-	// Scale by alpha
-	c_int32_0p0 = _mm512_mullo_epi32( selector1, c_int32_0p0 );
+	if ( alpha != 1 )
+	{
+		// Scale by alpha
+		c_int32_0p0 = _mm512_mullo_epi32( selector1, c_int32_0p0 );
 
-	c_int32_1p0 = _mm512_mullo_epi32( selector1, c_int32_1p0 );
+		c_int32_1p0 = _mm512_mullo_epi32( selector1, c_int32_1p0 );
 
-	c_int32_2p0 = _mm512_mullo_epi32( selector1, c_int32_2p0 );
+		c_int32_2p0 = _mm512_mullo_epi32( selector1, c_int32_2p0 );
 
-	c_int32_3p0 = _mm512_mullo_epi32( selector1, c_int32_3p0 );
+		c_int32_3p0 = _mm512_mullo_epi32( selector1, c_int32_3p0 );
+	}
 
 	// Scale C by beta.
 	if ( beta != 0 )
@@ -2305,12 +2326,15 @@ LPGEMM_MN_FRINGE_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_3x16)
 	__m512i selector1 = _mm512_set1_epi32( alpha );
 	__m512i selector2 = _mm512_set1_epi32( beta );
 
-	// Scale by alpha
-	c_int32_0p0 = _mm512_mullo_epi32( selector1, c_int32_0p0 );
+	if ( alpha != 1 )
+	{
+		// Scale by alpha
+		c_int32_0p0 = _mm512_mullo_epi32( selector1, c_int32_0p0 );
 
-	c_int32_1p0 = _mm512_mullo_epi32( selector1, c_int32_1p0 );
+		c_int32_1p0 = _mm512_mullo_epi32( selector1, c_int32_1p0 );
 
-	c_int32_2p0 = _mm512_mullo_epi32( selector1, c_int32_2p0 );
+		c_int32_2p0 = _mm512_mullo_epi32( selector1, c_int32_2p0 );
+	}
 
 	// Scale C by beta.
 	if ( beta != 0 )
@@ -2544,10 +2568,13 @@ LPGEMM_MN_FRINGE_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_2x16)
 	__m512i selector1 = _mm512_set1_epi32( alpha );
 	__m512i selector2 = _mm512_set1_epi32( beta );
 
-	// Scale by alpha
-	c_int32_0p0 = _mm512_mullo_epi32( selector1, c_int32_0p0 );
+	if ( alpha != 1 )
+	{
+		// Scale by alpha
+		c_int32_0p0 = _mm512_mullo_epi32( selector1, c_int32_0p0 );
 
-	c_int32_1p0 = _mm512_mullo_epi32( selector1, c_int32_1p0 );
+		c_int32_1p0 = _mm512_mullo_epi32( selector1, c_int32_1p0 );
+	}
 
 	// Scale C by beta.
 	if ( beta != 0 )
@@ -2734,8 +2761,11 @@ LPGEMM_MN_FRINGE_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_1x16)
 	__m512i selector1 = _mm512_set1_epi32( alpha );
 	__m512i selector2 = _mm512_set1_epi32( beta );
 
-	// Scale by alpha
-	c_int32_0p0 = _mm512_mullo_epi32( selector1, c_int32_0p0 );
+	if ( alpha != 1 )
+	{
+		// Scale by alpha
+		c_int32_0p0 = _mm512_mullo_epi32( selector1, c_int32_0p0 );
+	}
 
 	// Scale C by beta.
 	if ( beta != 0 )
@@ -2984,21 +3014,24 @@ LPGEMM_MN_FRINGE_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_5x32)
 	__m512i selector1 = _mm512_set1_epi32( alpha );
 	__m512i selector2 = _mm512_set1_epi32( beta );
 
-	// Scale by alpha
-	c_int32_0p0 = _mm512_mullo_epi32( selector1, c_int32_0p0 );
-	c_int32_0p1 = _mm512_mullo_epi32( selector1, c_int32_0p1 );
+	if ( alpha != 1 )
+	{
+		// Scale by alpha
+		c_int32_0p0 = _mm512_mullo_epi32( selector1, c_int32_0p0 );
+		c_int32_0p1 = _mm512_mullo_epi32( selector1, c_int32_0p1 );
 
-	c_int32_1p0 = _mm512_mullo_epi32( selector1, c_int32_1p0 );
-	c_int32_1p1 = _mm512_mullo_epi32( selector1, c_int32_1p1 );
+		c_int32_1p0 = _mm512_mullo_epi32( selector1, c_int32_1p0 );
+		c_int32_1p1 = _mm512_mullo_epi32( selector1, c_int32_1p1 );
 
-	c_int32_2p0 = _mm512_mullo_epi32( selector1, c_int32_2p0 );
-	c_int32_2p1 = _mm512_mullo_epi32( selector1, c_int32_2p1 );
+		c_int32_2p0 = _mm512_mullo_epi32( selector1, c_int32_2p0 );
+		c_int32_2p1 = _mm512_mullo_epi32( selector1, c_int32_2p1 );
 
-	c_int32_3p0 = _mm512_mullo_epi32( selector1, c_int32_3p0 );
-	c_int32_3p1 = _mm512_mullo_epi32( selector1, c_int32_3p1 );
+		c_int32_3p0 = _mm512_mullo_epi32( selector1, c_int32_3p0 );
+		c_int32_3p1 = _mm512_mullo_epi32( selector1, c_int32_3p1 );
 
-	c_int32_4p0 = _mm512_mullo_epi32( selector1, c_int32_4p0 );
-	c_int32_4p1 = _mm512_mullo_epi32( selector1, c_int32_4p1 );
+		c_int32_4p0 = _mm512_mullo_epi32( selector1, c_int32_4p0 );
+		c_int32_4p1 = _mm512_mullo_epi32( selector1, c_int32_4p1 );
+	}
 
 	// Scale C by beta.
 	if ( beta != 0 )
@@ -3473,18 +3506,21 @@ LPGEMM_MN_FRINGE_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_4x32)
 	__m512i selector1 = _mm512_set1_epi32( alpha );
 	__m512i selector2 = _mm512_set1_epi32( beta );
 
-	// Scale by alpha
-	c_int32_0p0 = _mm512_mullo_epi32( selector1, c_int32_0p0 );
-	c_int32_0p1 = _mm512_mullo_epi32( selector1, c_int32_0p1 );
+	if ( alpha != 1 )
+	{
+		// Scale by alpha
+		c_int32_0p0 = _mm512_mullo_epi32( selector1, c_int32_0p0 );
+		c_int32_0p1 = _mm512_mullo_epi32( selector1, c_int32_0p1 );
 
-	c_int32_1p0 = _mm512_mullo_epi32( selector1, c_int32_1p0 );
-	c_int32_1p1 = _mm512_mullo_epi32( selector1, c_int32_1p1 );
+		c_int32_1p0 = _mm512_mullo_epi32( selector1, c_int32_1p0 );
+		c_int32_1p1 = _mm512_mullo_epi32( selector1, c_int32_1p1 );
 
-	c_int32_2p0 = _mm512_mullo_epi32( selector1, c_int32_2p0 );
-	c_int32_2p1 = _mm512_mullo_epi32( selector1, c_int32_2p1 );
+		c_int32_2p0 = _mm512_mullo_epi32( selector1, c_int32_2p0 );
+		c_int32_2p1 = _mm512_mullo_epi32( selector1, c_int32_2p1 );
 
-	c_int32_3p0 = _mm512_mullo_epi32( selector1, c_int32_3p0 );
-	c_int32_3p1 = _mm512_mullo_epi32( selector1, c_int32_3p1 );
+		c_int32_3p0 = _mm512_mullo_epi32( selector1, c_int32_3p0 );
+		c_int32_3p1 = _mm512_mullo_epi32( selector1, c_int32_3p1 );
+	}
 
 	// Scale C by beta.
 	if ( beta != 0 )
@@ -3885,15 +3921,18 @@ LPGEMM_MN_FRINGE_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_3x32)
 	__m512i selector1 = _mm512_set1_epi32( alpha );
 	__m512i selector2 = _mm512_set1_epi32( beta );
 
-	// Scale by alpha
-	c_int32_0p0 = _mm512_mullo_epi32( selector1, c_int32_0p0 );
-	c_int32_0p1 = _mm512_mullo_epi32( selector1, c_int32_0p1 );
+	if ( alpha != 1 )
+	{
+		// Scale by alpha
+		c_int32_0p0 = _mm512_mullo_epi32( selector1, c_int32_0p0 );
+		c_int32_0p1 = _mm512_mullo_epi32( selector1, c_int32_0p1 );
 
-	c_int32_1p0 = _mm512_mullo_epi32( selector1, c_int32_1p0 );
-	c_int32_1p1 = _mm512_mullo_epi32( selector1, c_int32_1p1 );
+		c_int32_1p0 = _mm512_mullo_epi32( selector1, c_int32_1p0 );
+		c_int32_1p1 = _mm512_mullo_epi32( selector1, c_int32_1p1 );
 
-	c_int32_2p0 = _mm512_mullo_epi32( selector1, c_int32_2p0 );
-	c_int32_2p1 = _mm512_mullo_epi32( selector1, c_int32_2p1 );
+		c_int32_2p0 = _mm512_mullo_epi32( selector1, c_int32_2p0 );
+		c_int32_2p1 = _mm512_mullo_epi32( selector1, c_int32_2p1 );
+	}
 
 	// Scale C by beta.
 	if ( beta != 0 )
@@ -4220,12 +4259,15 @@ LPGEMM_MN_FRINGE_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_2x32)
 	__m512i selector1 = _mm512_set1_epi32( alpha );
 	__m512i selector2 = _mm512_set1_epi32( beta );
 
-	// Scale by alpha
-	c_int32_0p0 = _mm512_mullo_epi32( selector1, c_int32_0p0 );
-	c_int32_0p1 = _mm512_mullo_epi32( selector1, c_int32_0p1 );
+	if ( alpha != 1 )
+	{
+		// Scale by alpha
+		c_int32_0p0 = _mm512_mullo_epi32( selector1, c_int32_0p0 );
+		c_int32_0p1 = _mm512_mullo_epi32( selector1, c_int32_0p1 );
 
-	c_int32_1p0 = _mm512_mullo_epi32( selector1, c_int32_1p0 );
-	c_int32_1p1 = _mm512_mullo_epi32( selector1, c_int32_1p1 );
+		c_int32_1p0 = _mm512_mullo_epi32( selector1, c_int32_1p0 );
+		c_int32_1p1 = _mm512_mullo_epi32( selector1, c_int32_1p1 );
+	}
 
 	// Scale C by beta.
 	if ( beta != 0 )
@@ -4478,9 +4520,12 @@ LPGEMM_MN_FRINGE_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_1x32)
 	__m512i selector1 = _mm512_set1_epi32( alpha );
 	__m512i selector2 = _mm512_set1_epi32( beta );
 
-	// Scale by alpha
-	c_int32_0p0 = _mm512_mullo_epi32( selector1, c_int32_0p0 );
-	c_int32_0p1 = _mm512_mullo_epi32( selector1, c_int32_0p1 );
+	if ( alpha != 1 )
+	{
+		// Scale by alpha
+		c_int32_0p0 = _mm512_mullo_epi32( selector1, c_int32_0p0 );
+		c_int32_0p1 = _mm512_mullo_epi32( selector1, c_int32_0p1 );
+	}
 
 	// Scale C by beta.
 	if ( beta != 0 )
@@ -4777,26 +4822,29 @@ LPGEMM_MN_FRINGE_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_5x48)
 	__m512i selector1 = _mm512_set1_epi32( alpha );
 	__m512i selector2 = _mm512_set1_epi32( beta );
 
-	// Scale by alpha
-	c_int32_0p0 = _mm512_mullo_epi32( selector1, c_int32_0p0 );
-	c_int32_0p1 = _mm512_mullo_epi32( selector1, c_int32_0p1 );
-	c_int32_0p2 = _mm512_mullo_epi32( selector1, c_int32_0p2 );
+	if ( alpha != 1 )
+	{
+		// Scale by alpha
+		c_int32_0p0 = _mm512_mullo_epi32( selector1, c_int32_0p0 );
+		c_int32_0p1 = _mm512_mullo_epi32( selector1, c_int32_0p1 );
+		c_int32_0p2 = _mm512_mullo_epi32( selector1, c_int32_0p2 );
 
-	c_int32_1p0 = _mm512_mullo_epi32( selector1, c_int32_1p0 );
-	c_int32_1p1 = _mm512_mullo_epi32( selector1, c_int32_1p1 );
-	c_int32_1p2 = _mm512_mullo_epi32( selector1, c_int32_1p2 );
+		c_int32_1p0 = _mm512_mullo_epi32( selector1, c_int32_1p0 );
+		c_int32_1p1 = _mm512_mullo_epi32( selector1, c_int32_1p1 );
+		c_int32_1p2 = _mm512_mullo_epi32( selector1, c_int32_1p2 );
 
-	c_int32_2p0 = _mm512_mullo_epi32( selector1, c_int32_2p0 );
-	c_int32_2p1 = _mm512_mullo_epi32( selector1, c_int32_2p1 );
-	c_int32_2p2 = _mm512_mullo_epi32( selector1, c_int32_2p2 );
+		c_int32_2p0 = _mm512_mullo_epi32( selector1, c_int32_2p0 );
+		c_int32_2p1 = _mm512_mullo_epi32( selector1, c_int32_2p1 );
+		c_int32_2p2 = _mm512_mullo_epi32( selector1, c_int32_2p2 );
 
-	c_int32_3p0 = _mm512_mullo_epi32( selector1, c_int32_3p0 );
-	c_int32_3p1 = _mm512_mullo_epi32( selector1, c_int32_3p1 );
-	c_int32_3p2 = _mm512_mullo_epi32( selector1, c_int32_3p2 );
+		c_int32_3p0 = _mm512_mullo_epi32( selector1, c_int32_3p0 );
+		c_int32_3p1 = _mm512_mullo_epi32( selector1, c_int32_3p1 );
+		c_int32_3p2 = _mm512_mullo_epi32( selector1, c_int32_3p2 );
 
-	c_int32_4p0 = _mm512_mullo_epi32( selector1, c_int32_4p0 );
-	c_int32_4p1 = _mm512_mullo_epi32( selector1, c_int32_4p1 );
-	c_int32_4p2 = _mm512_mullo_epi32( selector1, c_int32_4p2 );
+		c_int32_4p0 = _mm512_mullo_epi32( selector1, c_int32_4p0 );
+		c_int32_4p1 = _mm512_mullo_epi32( selector1, c_int32_4p1 );
+		c_int32_4p2 = _mm512_mullo_epi32( selector1, c_int32_4p2 );
+	}
 
 	// Scale C by beta.
 	if ( beta != 0 )
@@ -5412,22 +5460,25 @@ LPGEMM_MN_FRINGE_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_4x48)
 	__m512i selector1 = _mm512_set1_epi32( alpha );
 	__m512i selector2 = _mm512_set1_epi32( beta );
 
-	// Scale by alpha
-	c_int32_0p0 = _mm512_mullo_epi32( selector1, c_int32_0p0 );
-	c_int32_0p1 = _mm512_mullo_epi32( selector1, c_int32_0p1 );
-	c_int32_0p2 = _mm512_mullo_epi32( selector1, c_int32_0p2 );
+	if ( alpha != 1 )
+	{
+		// Scale by alpha
+		c_int32_0p0 = _mm512_mullo_epi32( selector1, c_int32_0p0 );
+		c_int32_0p1 = _mm512_mullo_epi32( selector1, c_int32_0p1 );
+		c_int32_0p2 = _mm512_mullo_epi32( selector1, c_int32_0p2 );
 
-	c_int32_1p0 = _mm512_mullo_epi32( selector1, c_int32_1p0 );
-	c_int32_1p1 = _mm512_mullo_epi32( selector1, c_int32_1p1 );
-	c_int32_1p2 = _mm512_mullo_epi32( selector1, c_int32_1p2 );
+		c_int32_1p0 = _mm512_mullo_epi32( selector1, c_int32_1p0 );
+		c_int32_1p1 = _mm512_mullo_epi32( selector1, c_int32_1p1 );
+		c_int32_1p2 = _mm512_mullo_epi32( selector1, c_int32_1p2 );
 
-	c_int32_2p0 = _mm512_mullo_epi32( selector1, c_int32_2p0 );
-	c_int32_2p1 = _mm512_mullo_epi32( selector1, c_int32_2p1 );
-	c_int32_2p2 = _mm512_mullo_epi32( selector1, c_int32_2p2 );
+		c_int32_2p0 = _mm512_mullo_epi32( selector1, c_int32_2p0 );
+		c_int32_2p1 = _mm512_mullo_epi32( selector1, c_int32_2p1 );
+		c_int32_2p2 = _mm512_mullo_epi32( selector1, c_int32_2p2 );
 
-	c_int32_3p0 = _mm512_mullo_epi32( selector1, c_int32_3p0 );
-	c_int32_3p1 = _mm512_mullo_epi32( selector1, c_int32_3p1 );
-	c_int32_3p2 = _mm512_mullo_epi32( selector1, c_int32_3p2 );
+		c_int32_3p0 = _mm512_mullo_epi32( selector1, c_int32_3p0 );
+		c_int32_3p1 = _mm512_mullo_epi32( selector1, c_int32_3p1 );
+		c_int32_3p2 = _mm512_mullo_epi32( selector1, c_int32_3p2 );
+	}
 
 	// Scale C by beta.
 	if ( beta != 0 )
@@ -5942,18 +5993,21 @@ LPGEMM_MN_FRINGE_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_3x48)
 	__m512i selector1 = _mm512_set1_epi32( alpha );
 	__m512i selector2 = _mm512_set1_epi32( beta );
 
-	// Scale by alpha
-	c_int32_0p0 = _mm512_mullo_epi32( selector1, c_int32_0p0 );
-	c_int32_0p1 = _mm512_mullo_epi32( selector1, c_int32_0p1 );
-	c_int32_0p2 = _mm512_mullo_epi32( selector1, c_int32_0p2 );
+	if ( alpha != 1 )
+	{
+		// Scale by alpha
+		c_int32_0p0 = _mm512_mullo_epi32( selector1, c_int32_0p0 );
+		c_int32_0p1 = _mm512_mullo_epi32( selector1, c_int32_0p1 );
+		c_int32_0p2 = _mm512_mullo_epi32( selector1, c_int32_0p2 );
 
-	c_int32_1p0 = _mm512_mullo_epi32( selector1, c_int32_1p0 );
-	c_int32_1p1 = _mm512_mullo_epi32( selector1, c_int32_1p1 );
-	c_int32_1p2 = _mm512_mullo_epi32( selector1, c_int32_1p2 );
+		c_int32_1p0 = _mm512_mullo_epi32( selector1, c_int32_1p0 );
+		c_int32_1p1 = _mm512_mullo_epi32( selector1, c_int32_1p1 );
+		c_int32_1p2 = _mm512_mullo_epi32( selector1, c_int32_1p2 );
 
-	c_int32_2p0 = _mm512_mullo_epi32( selector1, c_int32_2p0 );
-	c_int32_2p1 = _mm512_mullo_epi32( selector1, c_int32_2p1 );
-	c_int32_2p2 = _mm512_mullo_epi32( selector1, c_int32_2p2 );
+		c_int32_2p0 = _mm512_mullo_epi32( selector1, c_int32_2p0 );
+		c_int32_2p1 = _mm512_mullo_epi32( selector1, c_int32_2p1 );
+		c_int32_2p2 = _mm512_mullo_epi32( selector1, c_int32_2p2 );
+	}
 
 	// Scale C by beta.
 	if ( beta != 0 )
@@ -6367,14 +6421,17 @@ LPGEMM_MN_FRINGE_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_2x48)
 	__m512i selector1 = _mm512_set1_epi32( alpha );
 	__m512i selector2 = _mm512_set1_epi32( beta );
 
-	// Scale by alpha
-	c_int32_0p0 = _mm512_mullo_epi32( selector1, c_int32_0p0 );
-	c_int32_0p1 = _mm512_mullo_epi32( selector1, c_int32_0p1 );
-	c_int32_0p2 = _mm512_mullo_epi32( selector1, c_int32_0p2 );
+	if ( alpha != 1 )
+	{
+		// Scale by alpha
+		c_int32_0p0 = _mm512_mullo_epi32( selector1, c_int32_0p0 );
+		c_int32_0p1 = _mm512_mullo_epi32( selector1, c_int32_0p1 );
+		c_int32_0p2 = _mm512_mullo_epi32( selector1, c_int32_0p2 );
 
-	c_int32_1p0 = _mm512_mullo_epi32( selector1, c_int32_1p0 );
-	c_int32_1p1 = _mm512_mullo_epi32( selector1, c_int32_1p1 );
-	c_int32_1p2 = _mm512_mullo_epi32( selector1, c_int32_1p2 );
+		c_int32_1p0 = _mm512_mullo_epi32( selector1, c_int32_1p0 );
+		c_int32_1p1 = _mm512_mullo_epi32( selector1, c_int32_1p1 );
+		c_int32_1p2 = _mm512_mullo_epi32( selector1, c_int32_1p2 );
+	}
 
 	// Scale C by beta.
 	if ( beta != 0 )
@@ -6687,10 +6744,13 @@ LPGEMM_MN_FRINGE_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_1x48)
 	__m512i selector1 = _mm512_set1_epi32( alpha );
 	__m512i selector2 = _mm512_set1_epi32( beta );
 
-	// Scale by alpha
-	c_int32_0p0 = _mm512_mullo_epi32( selector1, c_int32_0p0 );
-	c_int32_0p1 = _mm512_mullo_epi32( selector1, c_int32_0p1 );
-	c_int32_0p2 = _mm512_mullo_epi32( selector1, c_int32_0p2 );
+	if ( alpha != 1 )
+	{
+		// Scale by alpha
+		c_int32_0p0 = _mm512_mullo_epi32( selector1, c_int32_0p0 );
+		c_int32_0p1 = _mm512_mullo_epi32( selector1, c_int32_0p1 );
+		c_int32_0p2 = _mm512_mullo_epi32( selector1, c_int32_0p2 );
+	}
 
 	// Scale C by beta.
 	if ( beta != 0 )

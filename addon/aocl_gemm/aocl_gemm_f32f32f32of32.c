@@ -49,7 +49,8 @@ AOCL_GEMM_MATMUL(float,float,float,float,f32f32f32of32)
 	// Check if avx ISA is supported, lpgemm fp32 matmul only works with it.
 	if ( bli_cpuid_is_avx_supported() == FALSE )
 	{
-		printf(" AVX2 ISA not supported by processor, cannot perform lpgemm.\n");
+		bli_print_msg(" AVX2 ISA not supported by processor, "
+				"cannot perform f32f32f32 gemm.", __FILE__, __LINE__ );
 		return; // Error.
 	}
 

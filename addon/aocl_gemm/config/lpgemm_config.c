@@ -56,6 +56,12 @@ static void _lpgemm_cntx_init_func_map()
 	// will be valid even in case none of the zen optimized kernels are
 	// available. This scenario could happen if the addon was built using
 	// a different arch config (eg: skx).
+
+	global_cntx_t_list[U8S8S16OS16].kern_fun_ptr = NULL;
+	global_cntx_t_list[U8S8S32OS32].kern_fun_ptr = NULL;
+	global_cntx_t_list[F32F32F32OF32].kern_fun_ptr = NULL;
+	global_cntx_t_list[BF16BF16F32OF32].kern_fun_ptr = NULL;
+
 	// Kernel dispatch object factory.
 	if ( bli_cpuid_is_avx512_bf16_supported() == TRUE )
 	{
@@ -80,6 +86,15 @@ static void _lpgemm_cntx_init_func_map()
 		LPGEMM_PACKA_FUNC_MAP_AVX2
 		LPGEMM_PACKB_FUNC_MAP_AVX2
 #endif
+	}
+	// If built with a config not supporting zen3/zen4/amdzen, error out
+	// since reference kernels are not available.
+	if ( global_cntx_t_list[F32F32F32OF32].kern_fun_ptr == NULL )
+	{
+		bli_print_msg( "AOCL_GEMM is not compiled using correct Zen config."
+				" Compile using zen3/zen4/amdzen config.",
+				__FILE__, __LINE__ );
+		bli_abort();
 	}
 
 #undef PBMACRO
