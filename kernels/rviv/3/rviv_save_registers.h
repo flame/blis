@@ -33,9 +33,25 @@
 
 */
 
-    addi sp,sp,-64
+// 128-bit RISC-V is assumed to support the __riscv_xlen test macro
+#if __riscv_xlen == 128  // false if !defined(__riscv_xlen)
 
-#if RISCV_SIZE == 64
+    addi sp, sp, -128
+    sq s7, 112(sp)
+    sq s6,  96(sp)
+    sq s5,  80(sp)
+    sq s4,  64(sp)
+    sq s3,  48(sp)
+    sq s2,  32(sp)
+    sq s1,  16(sp)
+    sq s0,   0(sp)
+
+// 64-bit RISC-V can be indicated by either __riscv_xlen == 64 or
+// RISCV_SIZE == 64, to support toolchains which do not currently
+// support __riscv_xlen. If a macro is undefined, it is considered 0.
+#elif __riscv_xlen == 64 || RISCV_SIZE == 64
+
+    addi sp, sp, -64
     sd s7, 56(sp)
     sd s6, 48(sp)
     sd s5, 40(sp)
@@ -44,13 +60,18 @@
     sd s2, 16(sp)
     sd s1,  8(sp)
     sd s0,  0(sp)
+
 #else
-    sw s7, 56(sp)
-    sw s6, 48(sp)
-    sw s5, 40(sp)
-    sw s4, 32(sp)
-    sw s3, 24(sp)
-    sw s2, 16(sp)
-    sw s1,  8(sp)
+// else 32-bit RISC-V is assumed
+
+    addi sp, sp, -32
+    sw s7, 28(sp)
+    sw s6, 24(sp)
+    sw s5, 20(sp)
+    sw s4, 16(sp)
+    sw s3, 12(sp)
+    sw s2,  8(sp)
+    sw s1,  4(sp)
     sw s0,  0(sp)
+
 #endif
