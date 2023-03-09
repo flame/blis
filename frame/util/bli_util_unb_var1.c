@@ -1341,79 +1341,115 @@ void PASTEMAC(ch,varname) \
        rntm_t*  rntm  \
      ) \
 { \
-    const ctype_r zero_r = *PASTEMAC(chr,0); \
-    const ctype_r one_r  = *PASTEMAC(chr,1); \
+	ctype_r zero_r = *PASTEMAC(chr,0); \
+	ctype_r one_r  = *PASTEMAC(chr,1); \
 \
-    ctype*        chi1; \
-    ctype_r       chi1_r; \
-    ctype_r       chi1_i; \
-    ctype_r       scale_r; \
-    ctype_r       sumsq_r; \
-    ctype_r       abs_chi1_r; \
-    dim_t         i; \
+	ctype*  chi1; \
+	ctype_r chi1_r; \
+	ctype_r chi1_i; \
+	ctype_r scale_r; \
+	ctype_r sumsq_r; \
+	ctype_r abs_chi1_r; \
+	ctype_r abs_chi1_i; \
+	dim_t   i; \
 \
-    /* NOTE: This function attempts to mimic the algorithm for computing
-       the Frobenius norm in netlib LAPACK's ?lassq(). */ \
+	/* NOTE: This function attempts to mimic the algorithm for computing
+	   the Frobenius norm in netlib LAPACK's ?lassq(). */ \
 \
-    /* Copy scale and sumsq to local variables. */ \
-    PASTEMAC(chr,copys)( *scale, scale_r ); \
-    PASTEMAC(chr,copys)( *sumsq, sumsq_r ); \
+	/* Copy scale and sumsq to local variables. */ \
+	PASTEMAC(chr,copys)( *scale, scale_r ); \
+	PASTEMAC(chr,copys)( *sumsq, sumsq_r ); \
 \
-    chi1 = x; \
+	chi1 = x; \
 \
-    for ( i = 0; i < n; ++i ) \
-    { \
-        /* Get the real and imaginary components of chi1. */ \
-        PASTEMAC2(ch,chr,gets)( *chi1, chi1_r, chi1_i ); \
+	for ( i = 0; i < n; ++i ) \
+	{ \
+		/* Get the real and imaginary components of chi1. */ \
+		PASTEMAC2(ch,chr,gets)( *chi1, chi1_r, chi1_i ); \
 \
-        abs_chi1_r = bli_fabs( chi1_r ); \
+		abs_chi1_r = bli_fabs( chi1_r ); \
+		abs_chi1_i = bli_fabs( chi1_i ); \
 \
-        /* Accumulate real component into sumsq, adjusting scale if
-           needed. */ \
-        if ( abs_chi1_r > zero_r || bli_isnan( abs_chi1_r) ) \
-        { \
-            if ( scale_r < abs_chi1_r ) \
-            { \
-                sumsq_r = one_r + \
-                          sumsq_r * ( scale_r / abs_chi1_r ) * \
-                                    ( scale_r / abs_chi1_r );  \
+		if ( bli_isnan( abs_chi1_r ) ) \
+		{ \
+			sumsq_r = abs_chi1_r; \
+			scale_r = one_r; \
+		} \
 \
-                PASTEMAC(chr,copys)( abs_chi1_r, scale_r ); \
-            } \
-            else \
-            { \
-                sumsq_r = sumsq_r + ( abs_chi1_r / scale_r ) * \
-                                    ( abs_chi1_r / scale_r );  \
-            } \
-        } \
+		if ( bli_isnan( abs_chi1_i ) ) \
+		{ \
+			sumsq_r = abs_chi1_i; \
+			scale_r = one_r; \
+		} \
 \
-        abs_chi1_r = bli_fabs( chi1_i ); \
+		if ( bli_isnan( sumsq_r ) ) \
+		{ \
+			chi1 += incx; \
+			continue; \
+		} \
 \
-        /* Accumulate imaginary component into sumsq, adjusting scale if
-           needed. */ \
-        if ( abs_chi1_r > zero_r || bli_isnan( abs_chi1_r) ) \
-        { \
-            if ( scale_r < abs_chi1_r ) \
-            { \
-                sumsq_r = one_r + \
-                          sumsq_r * ( scale_r / abs_chi1_r ) * \
-                                    ( scale_r / abs_chi1_r );  \
+		if ( bli_isinf( abs_chi1_r ) ) \
+		{ \
+			sumsq_r = abs_chi1_r; \
+			scale_r = one_r; \
+		} \
 \
-                PASTEMAC(chr,copys)( abs_chi1_r, scale_r ); \
-            } \
-            else \
-            { \
-                sumsq_r = sumsq_r + ( abs_chi1_r / scale_r ) * \
-                                    ( abs_chi1_r / scale_r );  \
-            } \
-        } \
+		if ( bli_isinf( abs_chi1_i ) ) \
+		{ \
+			sumsq_r = abs_chi1_i; \
+			scale_r = one_r; \
+		} \
 \
-        chi1 += incx; \
-    } \
+		if ( bli_isinf( sumsq_r ) ) \
+		{ \
+			chi1 += incx; \
+			continue; \
+		} \
 \
-    /* Store final values of scale and sumsq to output variables. */ \
-    PASTEMAC(chr,copys)( scale_r, *scale ); \
-    PASTEMAC(chr,copys)( sumsq_r, *sumsq ); \
+		/* Accumulate real component into sumsq, adjusting scale if
+		   needed. */ \
+		if ( abs_chi1_r > zero_r ) \
+		{ \
+			if ( scale_r < abs_chi1_r ) \
+			{ \
+				sumsq_r = one_r + \
+				          sumsq_r * ( scale_r / abs_chi1_r ) * \
+				                    ( scale_r / abs_chi1_r );  \
+\
+				PASTEMAC(chr,copys)( abs_chi1_r, scale_r ); \
+			} \
+			else \
+			{ \
+				sumsq_r = sumsq_r + ( abs_chi1_r / scale_r ) * \
+				                    ( abs_chi1_r / scale_r );  \
+			} \
+		} \
+\
+		/* Accumulate imaginary component into sumsq, adjusting scale if
+		   needed. */ \
+		if ( abs_chi1_i > zero_r ) \
+		{ \
+			if ( scale_r < abs_chi1_i ) \
+			{ \
+				sumsq_r = one_r + \
+				          sumsq_r * ( scale_r / abs_chi1_i ) * \
+				                    ( scale_r / abs_chi1_i );  \
+\
+				PASTEMAC(chr,copys)( abs_chi1_i, scale_r ); \
+			} \
+			else \
+			{ \
+				sumsq_r = sumsq_r + ( abs_chi1_i / scale_r ) * \
+				                    ( abs_chi1_i / scale_r );  \
+			} \
+		} \
+\
+		chi1 += incx; \
+	} \
+\
+	/* Store final values of scale and sumsq to output variables. */ \
+	PASTEMAC(chr,copys)( scale_r, *scale ); \
+	PASTEMAC(chr,copys)( sumsq_r, *sumsq ); \
 }
 
 INSERT_GENTFUNCR_BASIC0( sumsqv_unb_var1 )
