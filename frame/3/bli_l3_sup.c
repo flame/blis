@@ -118,13 +118,6 @@ err_t bli_gemmsup
 
     if((bli_arch_query_id() == BLIS_ARCH_ZEN4) && (bli_obj_dt(a) == BLIS_DOUBLE))
     {
-        // This check will be removed once transpose and store of C matrix inside
-        // the kernel is supported.
-        if((stor_id == BLIS_RCC || stor_id == BLIS_CRR || stor_id == BLIS_RRC))
-        {
-            AOCL_DTL_TRACE_EXIT_ERR(AOCL_DTL_LEVEL_TRACE_2, "SUP - Unsuppported storage type for dgemm.");
-            return BLIS_FAILURE;
-        }
         // override the existing blocksizes with 24x8 specific ones.
         // This can be removed when we use same blocksizes and function pointers
         // for all level-3 SUP routines.

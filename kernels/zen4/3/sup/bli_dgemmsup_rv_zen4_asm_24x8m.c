@@ -37,10 +37,158 @@
 #include "bli_x86_asm_macros.h"
 #define TAIL_NITER 3
 
+/**
+ * Shuffle 2 double-precision elements selected by imm8 from S1 and S2,
+ * and store the results in D1
+ * S1 : 1  9 3 11 5 13 7 15
+ * S2 : 2 10 4 12 6 14 8 16
+ * D1 : 1  9  5  13  2  10  6  14
+ * D2 : 3 11  7  15  4  12  8  16
+*/
+#define SHUFFLE_DATA(S1, S2, D1, D2, S3, S4, D3, D4) \
+\
+    VSHUFF64X2(IMM(0x88), ZMM(S1), ZMM(S2), ZMM(D1)) \
+    VSHUFF64X2(IMM(0xDD), ZMM(S1), ZMM(S2), ZMM(D2)) \
+    VSHUFF64X2(IMM(0x88), ZMM(S3), ZMM(S4), ZMM(D3)) \
+    VSHUFF64X2(IMM(0xDD), ZMM(S3), ZMM(S4), ZMM(D4)) \
+
+/**
+ * Unpacks and interleave low half and high half of each
+ * 128-bit lane in S1 and S2 and store into D1 and D2
+ * respectively.
+ * S1 : 1  2  3  4  5  6  7  8
+ * S2 : 9 10 11 12 13 14 15 16
+ * D1 : 1  9 3 11 5 13 7 15
+ * D2 : 2 10 4 12 6 14 8 16
+*/
+#define UNPACK_LO_HIGH(S1, S2, D1, D2, S3, S4, D3, D4) \
+\
+    vunpcklpd( zmm(S1),  zmm(S2),  zmm(D1)) \
+    vunpckhpd( zmm(S1),  zmm(S2),  zmm(D2)) \
+    vunpcklpd( zmm(S3),  zmm(S4),  zmm(D3)) \
+    vunpckhpd( zmm(S3),  zmm(S4),  zmm(D4))
+
+/**
+ * Loads elements from C row, Scales it with Beta
+ * and adds FMA result to it.
+ * Stores back the C row.
+*/
+#define UPDATE_C \
+\
+    vfmadd231pd( mem(rcx),zmm31,zmm0 )   /*Scale by Beta and add it to fma result*/ \
+    vmovupd( zmm0, (rcx) )            /*Stores back to C*/\
+\
+    vfmadd231pd( mem(rcx, rsi, 1),zmm31,zmm4 ) \
+    vmovupd( zmm4, (rcx, rsi, 1) )\
+\
+    vfmadd231pd( mem(rcx, rsi, 2),zmm31,zmm2 ) \
+    vmovupd( zmm2, (rcx, rsi, 2) )\
+\
+    vfmadd231pd( mem(rcx, r12, 1),zmm31,zmm6 ) \
+    vmovupd( zmm6, (rcx, r12, 1) )\
+\
+    vfmadd231pd( mem(rcx, rsi, 4),zmm31,zmm1 ) \
+    vmovupd( zmm1, (rcx, rsi, 4) )\
+\
+    vfmadd231pd( mem(rcx, r13, 1),zmm31,zmm5 ) \
+    vmovupd( zmm5, (rcx, r13, 1) )\
+\
+    vfmadd231pd( mem(rcx, r12, 2),zmm31,zmm3 ) \
+    vmovupd( zmm3, (rcx, r12, 2) )\
+\
+    vfmadd231pd( mem(rcx, rdx, 1),zmm31,zmm8 ) \
+    vmovupd( zmm8, (rcx, rdx, 1) )\
+    add(r14, rcx)
+
+
+/**
+ * stores FMA result to C.
+*/
+#define UPDATE_C_BZ \
+\
+    vmovupd( zmm0, (rcx) )            /*Stores back to C*/ \
+\
+    vmovupd( zmm4, (rcx, rsi, 1) ) \
+\
+    vmovupd( zmm2, (rcx, rsi, 2) ) \
+\
+    vmovupd( zmm6, (rcx, r12, 1) ) \
+\
+    vmovupd( zmm1, (rcx, rsi, 4) ) \
+\
+    vmovupd( zmm5, (rcx, r13, 1) ) \
+\
+    vmovupd( zmm3, (rcx, r12, 2) ) \
+\
+    vmovupd( zmm8, (rcx, rdx, 1) ) \
+    add(r14, rcx)
+
+/**
+ * Loads elements from C row only if correspondnig bits in
+ * mask register is set, Scales it with Beta and adds FMA result to it
+ * Stores back the C row.
+*/
+#define UPDATE_MASKED_C \
+\
+    vmovupd( mem(rcx), zmm30 MASK_(k(2)) MASK_(z) ) \
+    vfmadd231pd( zmm31,zmm30,zmm0 ) \
+\
+    vmovupd( mem(rcx, rsi, 1, 0), zmm10 MASK_(k(2)) MASK_(z) ) \
+    vfmadd231pd( zmm31,zmm10,zmm4 ) \
+\
+    vmovupd( mem(rcx, rsi, 2, 0), zmm12 MASK_(k(2)) MASK_(z) ) \
+    vfmadd231pd( zmm31,zmm12,zmm2 ) \
+\
+    vmovupd( mem(rcx, r12, 1, 0), zmm16 MASK_(k(2)) MASK_(z) ) \
+    vfmadd231pd( zmm31,zmm16,zmm6 ) \
+\
+    vmovupd( mem(rcx, rsi, 4, 0), zmm14 MASK_(k(2)) MASK_(z) ) \
+    vfmadd231pd( zmm31,zmm14,zmm1 ) \
+\
+    vmovupd( mem(rcx, r13, 1, 0), zmm18 MASK_(k(2)) MASK_(z) ) \
+    vfmadd231pd( zmm31,zmm18,zmm5 ) \
+\
+    vmovupd( mem(rcx, r12, 2, 0), zmm10 MASK_(k(2)) MASK_(z) ) \
+    vfmadd231pd( zmm31,zmm10,zmm3 ) \
+\
+    vmovupd( mem(rcx, rdx, 1, 0), zmm12 MASK_(k(2)) MASK_(z) ) \
+    vfmadd231pd( zmm31,zmm12,zmm8 ) \
+\
+    vmovupd( zmm0, (rcx) MASK_(k(2)))            /*Stores back to C*/\
+    vmovupd( zmm4, (rcx, rsi, 1) MASK_(k(2)))\
+    vmovupd( zmm2, (rcx, rsi, 2) MASK_(k(2)))\
+    vmovupd( zmm6, (rcx, r12, 1) MASK_(k(2)))\
+    vmovupd( zmm1, (rcx, rsi, 4) MASK_(k(2)))\
+    vmovupd( zmm5, (rcx, r13, 1) MASK_(k(2)))\
+    vmovupd( zmm3, (rcx, r12, 2) MASK_(k(2)))\
+    vmovupd( zmm8, (rcx, rdx, 1) MASK_(k(2)))\
+    add(r14, rcx)
+
+/**
+ * mask register is set, stores FMA result to C.
+*/
+#define UPDATE_MASKED_C_BZ \
+\
+    vmovupd( zmm0, mem(rcx) MASK_(k(2))) \
+\
+    vmovupd( zmm4, mem(rcx, rsi, 1) MASK_(k(2))) \
+\
+    vmovupd( zmm2, mem(rcx, rsi, 2) MASK_(k(2)) ) \
+\
+    vmovupd( zmm6, mem(rcx, r12, 1) MASK_(k(2)) ) \
+\
+    vmovupd( zmm1, mem(rcx, rsi, 4) MASK_(k(2))) \
+\
+    vmovupd( zmm5, mem(rcx, r13, 1) MASK_(k(2))) \
+\
+    vmovupd( zmm3, mem(rcx, r12, 2) MASK_(k(2))) \
+\
+    vmovupd( zmm8, mem(rcx, rdx, 1) MASK_(k(2))) \
+    add(r14, rcx)
+
 /* These kernels Assume that A matrix needs to be in col-major order
  * B matrix can be col/row-major
- * C matrix can be col/row-major though support for row-major order will
- * be added by a separate commit.
+ * C matrix can be col/row-major
  * Prefetch for C is done assuming that C is col-stored.
  * Prefetch of B is done assuming that the matrix is col-stored.
  * Prefetch for B and C matrices when row-stored is yet to be added.
@@ -1489,8 +1637,49 @@ void bli_dgemmsup_rv_zen4_asm_24x8m
         jmp(.DDONE)                                           // jump to end.
 
         label(.DROWSTORED)
+        // r12 = 3*rs_c
+        lea(mem(rsi,  rsi,  2), r12)
+        // r13 = 5*rs_c
+        lea(mem(r12, rsi,  2), r13)
+        // rdx = 7*rs_c
+        lea(mem(r12, rsi,  4), rdx)
+        lea(mem(   , rsi, 8), r14)
+        UNPACK_LO_HIGH(8, 6, 0, 1, 12, 10, 2, 3)
+        SHUFFLE_DATA(2, 0, 4, 5, 3, 1, 30, 31)
 
-        // yet to be implemented
+        UNPACK_LO_HIGH(16, 14, 0, 1, 20, 18, 2, 3)
+        SHUFFLE_DATA(2, 0, 6, 8, 3, 1, 10, 12)
+
+        SHUFFLE_DATA(6, 4, 0, 1, 8, 5, 2, 3)
+        SHUFFLE_DATA(10, 30, 4, 5, 12, 31, 6, 8)
+
+        vbroadcastsd(mem(rax), zmm31)
+        UPDATE_C
+        //First 8x8 tile updated
+
+        UNPACK_LO_HIGH(9, 7, 0, 1, 13, 11, 2, 3)
+        SHUFFLE_DATA(2, 0, 4, 5, 3, 1, 7, 9)
+
+        UNPACK_LO_HIGH(17, 15, 0, 1, 21, 19, 2, 3)
+        SHUFFLE_DATA(2, 0, 6, 8, 3, 1, 10, 12)
+
+        SHUFFLE_DATA(6, 4, 0, 1, 8, 5, 2, 3)
+        SHUFFLE_DATA(10, 7, 4, 5, 12, 9, 6, 8)
+
+        UPDATE_C
+        //Second 8x8 tile updated
+
+        UNPACK_LO_HIGH(29, 28, 0, 1, 27, 26, 2, 3)
+        SHUFFLE_DATA(2, 0, 4, 5, 3, 1, 7, 9)
+
+        UNPACK_LO_HIGH(25, 24, 0, 1, 23, 22, 2, 3)
+        SHUFFLE_DATA(2, 0, 6, 8, 3, 1, 10, 12)
+
+        SHUFFLE_DATA(6, 4, 0, 1, 8, 5, 2, 3)
+        SHUFFLE_DATA(10, 7, 4, 5, 12, 9, 6, 8)
+
+        UPDATE_C
+        //Third 8x8 tile updated
         jmp(.DDONE)                                          // jump to end.
 
 
@@ -1528,8 +1717,48 @@ void bli_dgemmsup_rv_zen4_asm_24x8m
 
 
         label(.DROWSTORBZ)
+        // r12 = 3*rs_c
+        lea(mem(rsi,  rsi,  2), r12)
+        // r13 = 5*rs_c
+        lea(mem(r12, rsi,  2), r13)
+        // rdx = 7*rs_c
+        lea(mem(r12, rsi,  4), rdx)
+        lea(mem(   , rsi, 8), r14)
+        UNPACK_LO_HIGH(8, 6, 0, 1, 12, 10, 2, 3)
+        SHUFFLE_DATA(2, 0, 4, 5, 3, 1, 30, 31)
 
-        // yet to be implemented
+        UNPACK_LO_HIGH(16, 14, 0, 1, 20, 18, 2, 3)
+        SHUFFLE_DATA(2, 0, 6, 8, 3, 1, 10, 12)
+
+        SHUFFLE_DATA(6, 4, 0, 1, 8, 5, 2, 3)
+        SHUFFLE_DATA(10, 30, 4, 5, 12, 31, 6, 8)
+
+        UPDATE_C_BZ
+        //First 8x8 tile updated
+
+        UNPACK_LO_HIGH(9, 7, 0, 1, 13, 11, 2, 3)
+        SHUFFLE_DATA(2, 0, 4, 5, 3, 1, 7, 9)
+
+        UNPACK_LO_HIGH(17, 15, 0, 1, 21, 19, 2, 3)
+        SHUFFLE_DATA(2, 0, 6, 8, 3, 1, 10, 12)
+
+        SHUFFLE_DATA(6, 4, 0, 1, 8, 5, 2, 3)
+        SHUFFLE_DATA(10, 7, 4, 5, 12, 9, 6, 8)
+
+        UPDATE_C_BZ
+        //Second 8x8 tile updated
+
+        UNPACK_LO_HIGH(29, 28, 0, 1, 27, 26, 2, 3)
+        SHUFFLE_DATA(2, 0, 4, 5, 3, 1, 7, 9)
+
+        UNPACK_LO_HIGH(25, 24, 0, 1, 23, 22, 2, 3)
+        SHUFFLE_DATA(2, 0, 6, 8, 3, 1, 10, 12)
+
+        SHUFFLE_DATA(6, 4, 0, 1, 8, 5, 2, 3)
+        SHUFFLE_DATA(10, 7, 4, 5, 12, 9, 6, 8)
+
+        UPDATE_C_BZ
+        //Third 8x8 tile updated
         label(.DDONE)
 
 
@@ -1644,6 +1873,8 @@ void bli_dgemmsup_rv_zen4_asm_24x7m
     uint64_t k_iter = (uint64_t)k0 / 8;
     uint64_t k_left = (uint64_t)k0 % 8;
 
+    uint8_t mask = (0xff >> (0x8 - (n0 & 7))); // calculate mask based on n_left
+
     if ( m_iter == 0 ) goto consider_edge_cases;
 
     /* For one iteration of this loop, a block of MRxNR is computed
@@ -1659,6 +1890,8 @@ void bli_dgemmsup_rv_zen4_asm_24x7m
         // -------------------------------------------------------------------------
         begin_asm()
 
+        mov(var(mask), rdx)             // load mask
+        kmovw(edx, k(2))                // move mask to k2 register
         mov(var(a), rax)                // load address of a
         mov(var(cs_a), r10)             // load cs_a
         mov(var(b), rbx)                // load address of b
@@ -2901,8 +3134,49 @@ void bli_dgemmsup_rv_zen4_asm_24x7m
         jmp(.DDONE)                                           // jump to end.
 
         label(.DROWSTORED)
+        // r12 = 3*rs_c
+        lea(mem(rsi,  rsi,  2), r12)
+        // r13 = 5*rs_c
+        lea(mem(r12, rsi,  2), r13)
+        // rdx = 7*rs_c
+        lea(mem(r12, rsi,  4), rdx)
+        lea(mem(   , rsi, 8), r14)
+        UNPACK_LO_HIGH(8, 6, 0, 1, 12, 10, 2, 3)
+        SHUFFLE_DATA(2, 0, 4, 5, 3, 1, 30, 31)
 
-        // yet to be implemented
+        UNPACK_LO_HIGH(16, 14, 0, 1, 20, 18, 2, 3)
+        SHUFFLE_DATA(2, 0, 6, 8, 3, 1, 10, 12)
+
+        SHUFFLE_DATA(6, 4, 0, 1, 8, 5, 2, 3)
+        SHUFFLE_DATA(10, 30, 4, 5, 12, 31, 6, 8)
+
+        vbroadcastsd(mem(rax), zmm31)
+        UPDATE_MASKED_C
+        //First 8x7 tile updated
+
+        UNPACK_LO_HIGH(9, 7, 0, 1, 13, 11, 2, 3)
+        SHUFFLE_DATA(2, 0, 4, 5, 3, 1, 7, 9)
+
+        UNPACK_LO_HIGH(17, 15, 0, 1, 21, 19, 2, 3)
+        SHUFFLE_DATA(2, 0, 6, 8, 3, 1, 10, 12)
+
+        SHUFFLE_DATA(6, 4, 0, 1, 8, 5, 2, 3)
+        SHUFFLE_DATA(10, 7, 4, 5, 12, 9, 6, 8)
+
+        UPDATE_MASKED_C
+        //Second 8x7 tile updated
+
+        UNPACK_LO_HIGH(29, 28, 0, 1, 27, 26, 2, 3)
+        SHUFFLE_DATA(2, 0, 4, 5, 3, 1, 7, 9)
+
+        UNPACK_LO_HIGH(25, 24, 0, 1, 23, 22, 2, 3)
+        SHUFFLE_DATA(2, 0, 6, 8, 3, 1, 10, 12)
+
+        SHUFFLE_DATA(6, 4, 0, 1, 8, 5, 2, 3)
+        SHUFFLE_DATA(10, 7, 4, 5, 12, 9, 6, 8)
+
+        UPDATE_MASKED_C
+        //Third 8x7 tile updated
         jmp(.DDONE)                                          // jump to end.
 
 
@@ -2937,8 +3211,48 @@ void bli_dgemmsup_rv_zen4_asm_24x7m
 
 
         label(.DROWSTORBZ)
+        // r12 = 3*rs_c
+        lea(mem(rsi,  rsi, 2), r12)
+        // r13 = 5*rs_c
+        lea(mem(r12, rsi,  2), r13)
+        // rdx = 7*rs_c
+        lea(mem(r12, rsi,  4), rdx)
+        lea(mem(   , rsi,  8), r14)
+        UNPACK_LO_HIGH(8, 6, 0, 1, 12, 10, 2, 3)
+        SHUFFLE_DATA(2, 0, 4, 5, 3, 1, 30, 31)
 
-        // yet to be implemented
+        UNPACK_LO_HIGH(16, 14, 0, 1, 20, 18, 2, 3)
+        SHUFFLE_DATA(2, 0, 6, 8, 3, 1, 10, 12)
+
+        SHUFFLE_DATA(6, 4, 0, 1, 8, 5, 2, 3)
+        SHUFFLE_DATA(10, 30, 4, 5, 12, 31, 6, 8)
+
+        UPDATE_MASKED_C_BZ
+        //First 8x7 tile updated
+
+        UNPACK_LO_HIGH(9, 7, 0, 1, 13, 11, 2, 3)
+        SHUFFLE_DATA(2, 0, 4, 5, 3, 1, 7, 9)
+
+        UNPACK_LO_HIGH(17, 15, 0, 1, 21, 19, 2, 3)
+        SHUFFLE_DATA(2, 0, 6, 8, 3, 1, 10, 12)
+
+        SHUFFLE_DATA(6, 4, 0, 1, 8, 5, 2, 3)
+        SHUFFLE_DATA(10, 7, 4, 5, 12, 9, 6, 8)
+
+        UPDATE_MASKED_C_BZ
+        //Second 8x7 tile updated
+
+        UNPACK_LO_HIGH(29, 28, 0, 1, 27, 26, 2, 3)
+        SHUFFLE_DATA(2, 0, 4, 5, 3, 1, 7, 9)
+
+        UNPACK_LO_HIGH(25, 24, 0, 1, 23, 22, 2, 3)
+        SHUFFLE_DATA(2, 0, 6, 8, 3, 1, 10, 12)
+
+        SHUFFLE_DATA(6, 4, 0, 1, 8, 5, 2, 3)
+        SHUFFLE_DATA(10, 7, 4, 5, 12, 9, 6, 8)
+
+        UPDATE_MASKED_C_BZ
+        //Third 8x7 tile updated
         label(.DDONE)
 
 
@@ -2962,7 +3276,8 @@ void bli_dgemmsup_rv_zen4_asm_24x7m
             [rs_c]   "m" (rs_c),
             [cs_c]   "m" (cs_c),
             [n0]     "m" (n0),
-            [m0]     "m" (m0)
+            [m0]     "m" (m0),
+            [mask]   "m" (mask)
           : // register clobber list
             "rax", "rbx", "rcx", "rdx", "rsi", "rdi",
             "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15",
@@ -3053,6 +3368,8 @@ void bli_dgemmsup_rv_zen4_asm_24x6m
     uint64_t k_iter = (uint64_t)k0 / 8;
     uint64_t k_left = (uint64_t)k0 % 8;
 
+    uint8_t mask = (0xff >> (0x8 - (n0 & 7))); // calculate mask based on n_left
+
     if ( m_iter == 0 ) goto consider_edge_cases;
 
     /* For one iteration of this loop, a block of MRxNR is computed
@@ -3068,6 +3385,8 @@ void bli_dgemmsup_rv_zen4_asm_24x6m
         // -------------------------------------------------------------------------
         begin_asm()
 
+        mov(var(mask), rdx)             // load mask
+        kmovw(edx, k(2))                // move mask to k2 register
         mov(var(a), rax)                // load address of a
         mov(var(cs_a), r10)             // load cs_a
         mov(var(b), rbx)                // load address of b
@@ -4195,8 +4514,52 @@ void bli_dgemmsup_rv_zen4_asm_24x6m
         jmp(.DDONE)                                           // jump to end.
 
         label(.DROWSTORED)
+        // r12 = 3*rs_c
+        lea(mem(rsi,  rsi,  2), r12)
+        // r13 = 5*rs_c
+        lea(mem(r12, rsi,  2), r13)
+        // rdx = 7*rs_c
+        lea(mem(r12, rsi,  4), rdx)
+        lea(mem(   , rsi, 8), r14)
+        UNPACK_LO_HIGH(8, 6, 0, 1, 12, 10, 2, 3)
+        SHUFFLE_DATA(2, 0, 4, 5, 3, 1, 30, 31)
 
-        // yet to be implemented
+        vunpcklpd(zmm16, zmm14, zmm0)
+        vunpckhpd(zmm16, zmm14, zmm1)
+        SHUFFLE_DATA(2, 0, 6, 8, 3, 1, 10, 12)
+
+        SHUFFLE_DATA(6, 4, 0, 1, 8, 5, 2, 3)
+        SHUFFLE_DATA(10, 30, 4, 5, 12, 31, 6, 8)
+
+        vbroadcastsd(mem(rax), zmm31)
+        UPDATE_MASKED_C
+        //First 8x6 tile updated
+
+        UNPACK_LO_HIGH(9, 7, 0, 1, 13, 11, 2, 3)
+        SHUFFLE_DATA(2, 0, 4, 5, 3, 1, 7, 9)
+
+        vunpcklpd(zmm17, zmm15, zmm0)
+        vunpckhpd(zmm17, zmm15, zmm1)
+        SHUFFLE_DATA(2, 0, 6, 8, 3, 1, 10, 12)
+
+        SHUFFLE_DATA(6, 4, 0, 1, 8, 5, 2, 3)
+        SHUFFLE_DATA(10, 7, 4, 5, 12, 9, 6, 8)
+
+        UPDATE_MASKED_C
+        //Second 8x6 tile updated
+
+        UNPACK_LO_HIGH(29, 28, 0, 1, 27, 26, 2, 3)
+        SHUFFLE_DATA(2, 0, 4, 5, 3, 1, 7, 9)
+
+        vunpcklpd(zmm25, zmm24, zmm0)
+        vunpckhpd(zmm25, zmm24, zmm1)
+        SHUFFLE_DATA(2, 0, 6, 8, 3, 1, 10, 12)
+
+        SHUFFLE_DATA(6, 4, 0, 1, 8, 5, 2, 3)
+        SHUFFLE_DATA(10, 7, 4, 5, 12, 9, 6, 8)
+
+        UPDATE_MASKED_C
+        //Third 8x6 tile updated
         jmp(.DDONE)                                          // jump to end.
 
 
@@ -4228,8 +4591,51 @@ void bli_dgemmsup_rv_zen4_asm_24x6m
 
 
         label(.DROWSTORBZ)
+        // r12 = 3*rs_c
+        lea(mem(rsi,  rsi,  2), r12)
+        // r13 = 5*rs_c
+        lea(mem(r12, rsi,  2), r13)
+        // rdx = 7*rs_c
+        lea(mem(r12, rsi,  4), rdx)
+        lea(mem(   , rsi, 8), r14)
+        UNPACK_LO_HIGH(8, 6, 0, 1, 12, 10, 2, 3)
+        SHUFFLE_DATA(2, 0, 4, 5, 3, 1, 30, 31)
 
-        // yet to be implemented
+        vunpcklpd(zmm16, zmm14, zmm0)
+        vunpckhpd(zmm16, zmm14, zmm1)
+        SHUFFLE_DATA(2, 0, 6, 8, 3, 1, 10, 12)
+
+        SHUFFLE_DATA(6, 4, 0, 1, 8, 5, 2, 3)
+        SHUFFLE_DATA(10, 30, 4, 5, 12, 31, 6, 8)
+
+        UPDATE_MASKED_C_BZ
+        //First 8x6 tile updated
+
+        UNPACK_LO_HIGH(9, 7, 0, 1, 13, 11, 2, 3)
+        SHUFFLE_DATA(2, 0, 4, 5, 3, 1, 7, 9)
+
+        vunpcklpd(zmm17, zmm15, zmm0)
+        vunpckhpd(zmm17, zmm15, zmm1)
+        SHUFFLE_DATA(2, 0, 6, 8, 3, 1, 10, 12)
+
+        SHUFFLE_DATA(6, 4, 0, 1, 8, 5, 2, 3)
+        SHUFFLE_DATA(10, 7, 4, 5, 12, 9, 6, 8)
+
+        UPDATE_MASKED_C_BZ
+        //Second 8x6 tile updated
+
+        UNPACK_LO_HIGH(29, 28, 0, 1, 27, 26, 2, 3)
+        SHUFFLE_DATA(2, 0, 4, 5, 3, 1, 7, 9)
+
+        vunpcklpd(zmm25, zmm24, zmm0)
+        vunpckhpd(zmm25, zmm24, zmm1)
+        SHUFFLE_DATA(2, 0, 6, 8, 3, 1, 10, 12)
+
+        SHUFFLE_DATA(6, 4, 0, 1, 8, 5, 2, 3)
+        SHUFFLE_DATA(10, 7, 4, 5, 12, 9, 6, 8)
+
+        UPDATE_MASKED_C_BZ
+        //Third 8x6 tile updated
         label(.DDONE)
 
 
@@ -4253,7 +4659,8 @@ void bli_dgemmsup_rv_zen4_asm_24x6m
             [rs_c]   "m" (rs_c),
             [cs_c]   "m" (cs_c),
             [n0]     "m" (n0),
-            [m0]     "m" (m0)
+            [m0]     "m" (m0),
+            [mask]   "m" (mask)
           : // register clobber list
             "rax", "rbx", "rcx", "rdx", "rsi", "rdi",
             "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15",
@@ -4344,6 +4751,8 @@ void bli_dgemmsup_rv_zen4_asm_24x5m
     uint64_t k_iter = (uint64_t)k0 / 8;
     uint64_t k_left = (uint64_t)k0 % 8;
 
+    uint8_t mask = (0xff >> (0x8 - (n0 & 7))); // calculate mask based on n_left
+
     if ( m_iter == 0 ) goto consider_edge_cases;
 
     /* For one iteration of this loop, a block of MRxNR is computed
@@ -4359,6 +4768,8 @@ void bli_dgemmsup_rv_zen4_asm_24x5m
         // -------------------------------------------------------------------------
         begin_asm()
 
+        mov(var(mask), rdx)             // load mask
+        kmovw(edx, k(2))                // move mask to k2 register
         mov(var(a), rax)                // load address of a
         mov(var(cs_a), r10)             // load cs_a
         mov(var(b), rbx)                // load address of b
@@ -5371,8 +5782,52 @@ void bli_dgemmsup_rv_zen4_asm_24x5m
         jmp(.DDONE)                                           // jump to end.
 
         label(.DROWSTORED)
+        // r12 = 3*rs_c
+        lea(mem(rsi,  rsi,  2), r12)
+        // r13 = 5*rs_c
+        lea(mem(r12, rsi,  2), r13)
+        // rdx = 7*rs_c
+        lea(mem(r12, rsi,  4), rdx)
+        lea(mem(   , rsi, 8), r14)
+        UNPACK_LO_HIGH(8, 6, 0, 1, 12, 10, 2, 3)
+        SHUFFLE_DATA(2, 0, 4, 5, 3, 1, 30, 31)
 
-        // yet to be implemented
+        vunpcklpd(zmm16, zmm14, zmm0)
+        vunpckhpd(zmm16, zmm14, zmm1)
+        SHUFFLE_DATA(2, 0, 6, 8, 3, 1, 10, 12)
+
+        SHUFFLE_DATA(6, 4, 0, 1, 8, 5, 2, 3)
+        SHUFFLE_DATA(10, 30, 4, 5, 12, 31, 6, 8)
+
+        vbroadcastsd(mem(rax), zmm31)
+        UPDATE_MASKED_C
+        //First 8x5 tile updated
+
+        UNPACK_LO_HIGH(9, 7, 0, 1, 13, 11, 2, 3)
+        SHUFFLE_DATA(2, 0, 4, 5, 3, 1, 7, 9)
+
+        vunpcklpd(zmm17, zmm15, zmm0)
+        vunpckhpd(zmm17, zmm15, zmm1)
+        SHUFFLE_DATA(2, 0, 6, 8, 3, 1, 10, 12)
+
+        SHUFFLE_DATA(6, 4, 0, 1, 8, 5, 2, 3)
+        SHUFFLE_DATA(10, 7, 4, 5, 12, 9, 6, 8)
+
+        UPDATE_MASKED_C
+        //Second 8x5 tile updated
+
+        UNPACK_LO_HIGH(29, 28, 0, 1, 27, 26, 2, 3)
+        SHUFFLE_DATA(2, 0, 4, 5, 3, 1, 7, 9)
+
+        vunpcklpd(zmm25, zmm24, zmm0)
+        vunpckhpd(zmm25, zmm24, zmm1)
+        SHUFFLE_DATA(2, 0, 6, 8, 3, 1, 10, 12)
+
+        SHUFFLE_DATA(6, 4, 0, 1, 8, 5, 2, 3)
+        SHUFFLE_DATA(10, 7, 4, 5, 12, 9, 6, 8)
+
+        UPDATE_MASKED_C
+        //Third 8x5 tile updated
         jmp(.DDONE)                                          // jump to end.
 
 
@@ -5401,8 +5856,52 @@ void bli_dgemmsup_rv_zen4_asm_24x5m
 
 
         label(.DROWSTORBZ)
+        // r12 = 3*rs_c
+        lea(mem(rsi,  rsi,  2), r12)
+        // r13 = 5*rs_c
+        lea(mem(r12, rsi,  2), r13)
+        // rdx = 7*rs_c
+        lea(mem(r12, rsi,  4), rdx)
+        lea(mem(   , rsi, 8), r14)
+        UNPACK_LO_HIGH(8, 6, 0, 1, 12, 10, 2, 3)
+        SHUFFLE_DATA(2, 0, 4, 5, 3, 1, 30, 31)
 
-        // yet to be implemented
+        vunpcklpd(zmm16, zmm14, zmm0)
+        vunpckhpd(zmm16, zmm14, zmm1)
+        SHUFFLE_DATA(2, 0, 6, 8, 3, 1, 10, 12)
+
+        SHUFFLE_DATA(6, 4, 0, 1, 8, 5, 2, 3)
+        SHUFFLE_DATA(10, 30, 4, 5, 12, 31, 6, 8)
+
+        vbroadcastsd(mem(rax), zmm31)
+        UPDATE_MASKED_C_BZ
+        //First 8x5 tile updated
+
+        UNPACK_LO_HIGH(9, 7, 0, 1, 13, 11, 2, 3)
+        SHUFFLE_DATA(2, 0, 4, 5, 3, 1, 7, 9)
+
+        vunpcklpd(zmm17, zmm15, zmm0)
+        vunpckhpd(zmm17, zmm15, zmm1)
+        SHUFFLE_DATA(2, 0, 6, 8, 3, 1, 10, 12)
+
+        SHUFFLE_DATA(6, 4, 0, 1, 8, 5, 2, 3)
+        SHUFFLE_DATA(10, 7, 4, 5, 12, 9, 6, 8)
+
+        UPDATE_MASKED_C_BZ
+        //Second 8x5 tile updated
+
+        UNPACK_LO_HIGH(29, 28, 0, 1, 27, 26, 2, 3)
+        SHUFFLE_DATA(2, 0, 4, 5, 3, 1, 7, 9)
+
+        vunpcklpd(zmm25, zmm24, zmm0)
+        vunpckhpd(zmm25, zmm24, zmm1)
+        SHUFFLE_DATA(2, 0, 6, 8, 3, 1, 10, 12)
+
+        SHUFFLE_DATA(6, 4, 0, 1, 8, 5, 2, 3)
+        SHUFFLE_DATA(10, 7, 4, 5, 12, 9, 6, 8)
+
+        UPDATE_MASKED_C_BZ
+        //Third 8x5 tile updated
         label(.DDONE)
 
 
@@ -5426,7 +5925,8 @@ void bli_dgemmsup_rv_zen4_asm_24x5m
             [rs_c]   "m" (rs_c),
             [cs_c]   "m" (cs_c),
             [n0]     "m" (n0),
-            [m0]     "m" (m0)
+            [m0]     "m" (m0),
+            [mask]   "m" (mask)
           : // register clobber list
             "rax", "rbx", "rcx", "rdx", "rsi", "rdi",
             "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15",
@@ -5517,6 +6017,8 @@ void bli_dgemmsup_rv_zen4_asm_24x4m
     uint64_t k_iter = (uint64_t)k0 / 8;
     uint64_t k_left = (uint64_t)k0 % 8;
 
+    uint8_t mask = (0xff >> (0x8 - (n0 & 7))); // calculate mask based on n_left
+
     if ( m_iter == 0 ) goto consider_edge_cases;
 
     /* For one iteration of this loop, a block of MRxNR is computed
@@ -5532,6 +6034,8 @@ void bli_dgemmsup_rv_zen4_asm_24x4m
         // -------------------------------------------------------------------------
         begin_asm()
 
+        mov(var(mask), rdx)             // load mask
+        kmovw(edx, k(2))                // move mask to k2 register
         mov(var(a), rax)                // load address of a
         mov(var(cs_a), r10)             // load cs_a
         mov(var(b), rbx)                // load address of b
@@ -6394,8 +6898,46 @@ void bli_dgemmsup_rv_zen4_asm_24x4m
         jmp(.DDONE)                                           // jump to end.
 
         label(.DROWSTORED)
+        // r12 = 3*rs_c
+        lea(mem(rsi,  rsi,  2), r12)
+        // r13 = 5*rs_c
+        lea(mem(r12, rsi,  2), r13)
+        // rdx = 7*rs_c
+        lea(mem(r12, rsi,  4), rdx)
+        lea(mem(   , rsi, 8), r14)
+        UNPACK_LO_HIGH(8, 6, 0, 1, 12, 10, 2, 3)
+        SHUFFLE_DATA(2, 0, 4, 5, 3, 1, 30, 31)
 
-        // yet to be implemented
+        SHUFFLE_DATA(2, 0, 6, 8, 3, 1, 10, 12)
+
+        SHUFFLE_DATA(6, 4, 0, 1, 8, 5, 2, 3)
+        SHUFFLE_DATA(10, 30, 4, 5, 12, 31, 6, 8)
+
+        vbroadcastsd(mem(rax), zmm31)
+        UPDATE_MASKED_C
+        //First 8x4 tile updated
+
+        UNPACK_LO_HIGH(9, 7, 0, 1, 13, 11, 2, 3)
+        SHUFFLE_DATA(2, 0, 4, 5, 3, 1, 7, 9)
+
+        SHUFFLE_DATA(2, 0, 6, 8, 3, 1, 10, 12)
+
+        SHUFFLE_DATA(6, 4, 0, 1, 8, 5, 2, 3)
+        SHUFFLE_DATA(10, 7, 4, 5, 12, 9, 6, 8)
+
+        UPDATE_MASKED_C
+        //Second 8x4 tile updated
+
+        UNPACK_LO_HIGH(29, 28, 0, 1, 27, 26, 2, 3)
+        SHUFFLE_DATA(2, 0, 4, 5, 3, 1, 7, 9)
+
+        SHUFFLE_DATA(2, 0, 6, 8, 3, 1, 10, 12)
+
+        SHUFFLE_DATA(6, 4, 0, 1, 8, 5, 2, 3)
+        SHUFFLE_DATA(10, 7, 4, 5, 12, 9, 6, 8)
+
+        UPDATE_MASKED_C
+        //Third 8x4 tile updated
         jmp(.DDONE)                                          // jump to end.
 
 
@@ -6421,8 +6963,45 @@ void bli_dgemmsup_rv_zen4_asm_24x4m
 
 
         label(.DROWSTORBZ)
+        // r12 = 3*rs_c
+        lea(mem(rsi,  rsi,  2), r12)
+        // r13 = 5*rs_c
+        lea(mem(r12, rsi,  2), r13)
+        // rdx = 7*rs_c
+        lea(mem(r12, rsi,  4), rdx)
+        lea(mem(   , rsi, 8), r14)
+        UNPACK_LO_HIGH(8, 6, 0, 1, 12, 10, 2, 3)
+        SHUFFLE_DATA(2, 0, 4, 5, 3, 1, 30, 31)
 
-        // yet to be implemented
+        SHUFFLE_DATA(2, 0, 6, 8, 3, 1, 10, 12)
+
+        SHUFFLE_DATA(6, 4, 0, 1, 8, 5, 2, 3)
+        SHUFFLE_DATA(10, 30, 4, 5, 12, 31, 6, 8)
+
+        UPDATE_MASKED_C_BZ
+        //First 8x5 tile updated
+
+        UNPACK_LO_HIGH(9, 7, 0, 1, 13, 11, 2, 3)
+        SHUFFLE_DATA(2, 0, 4, 5, 3, 1, 7, 9)
+
+        SHUFFLE_DATA(2, 0, 6, 8, 3, 1, 10, 12)
+
+        SHUFFLE_DATA(6, 4, 0, 1, 8, 5, 2, 3)
+        SHUFFLE_DATA(10, 7, 4, 5, 12, 9, 6, 8)
+
+        UPDATE_MASKED_C_BZ
+        //Second 8x5 tile updated
+
+        UNPACK_LO_HIGH(29, 28, 0, 1, 27, 26, 2, 3)
+        SHUFFLE_DATA(2, 0, 4, 5, 3, 1, 7, 9)
+
+        SHUFFLE_DATA(2, 0, 6, 8, 3, 1, 10, 12)
+
+        SHUFFLE_DATA(6, 4, 0, 1, 8, 5, 2, 3)
+        SHUFFLE_DATA(10, 7, 4, 5, 12, 9, 6, 8)
+
+        UPDATE_MASKED_C_BZ
+        //Third 8x5 tile updated
         label(.DDONE)
 
 
@@ -6446,7 +7025,8 @@ void bli_dgemmsup_rv_zen4_asm_24x4m
             [rs_c]   "m" (rs_c),
             [cs_c]   "m" (cs_c),
             [n0]     "m" (n0),
-            [m0]     "m" (m0)
+            [m0]     "m" (m0),
+            [mask]   "m" (mask)
           : // register clobber list
             "rax", "rbx", "rcx", "rdx", "rsi", "rdi",
             "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15",
@@ -6537,6 +7117,8 @@ void bli_dgemmsup_rv_zen4_asm_24x3m
     uint64_t k_iter = (uint64_t)k0 / 8;
     uint64_t k_left = (uint64_t)k0 % 8;
 
+    uint8_t mask = (0xff >> (0x8 - (n0 & 7))); // calculate mask based on n_left
+
     if ( m_iter == 0 ) goto consider_edge_cases;
 
     /* For one iteration of this loop, a block of MRxNR is computed
@@ -6552,6 +7134,8 @@ void bli_dgemmsup_rv_zen4_asm_24x3m
         // -------------------------------------------------------------------------
         begin_asm()
 
+        mov(var(mask), rdx)             // load mask
+        kmovw(edx, k(2))                // move mask to k2 register
         mov(var(a), rax)                // load address of a
         mov(var(cs_a), r10)             // load cs_a
         mov(var(b), rbx)                // load address of b
@@ -7297,8 +7881,46 @@ void bli_dgemmsup_rv_zen4_asm_24x3m
         jmp(.DDONE)                                           // jump to end.
 
         label(.DROWSTORED)
+        // r12 = 3*rs_c
+        lea(mem(rsi,  rsi,  2), r12)
+        // r13 = 5*rs_c
+        lea(mem(r12, rsi,  2), r13)
+        // rdx = 7*rs_c
+        lea(mem(r12, rsi,  4), rdx)
+        lea(mem(   , rsi, 8), r14)
+        UNPACK_LO_HIGH(8, 6, 0, 1, 12, 10, 2, 3)
+        SHUFFLE_DATA(2, 0, 4, 5, 3, 1, 30, 31)
 
-        // yet to be implemented
+        SHUFFLE_DATA(2, 0, 6, 8, 3, 1, 10, 12)
+
+        SHUFFLE_DATA(6, 4, 0, 1, 8, 5, 2, 3)
+        SHUFFLE_DATA(10, 30, 4, 5, 12, 31, 6, 8)
+
+        vbroadcastsd(mem(rax), zmm31)
+        UPDATE_MASKED_C
+        //First 8x3 tile updated
+
+        UNPACK_LO_HIGH(9, 7, 0, 1, 13, 11, 2, 3)
+        SHUFFLE_DATA(2, 0, 4, 5, 3, 1, 7, 9)
+
+        SHUFFLE_DATA(2, 0, 6, 8, 3, 1, 10, 12)
+
+        SHUFFLE_DATA(6, 4, 0, 1, 8, 5, 2, 3)
+        SHUFFLE_DATA(10, 7, 4, 5, 12, 9, 6, 8)
+
+        UPDATE_MASKED_C
+        //Second 8x3 tile updated
+
+        UNPACK_LO_HIGH(29, 28, 0, 1, 27, 26, 2, 3)
+        SHUFFLE_DATA(2, 0, 4, 5, 3, 1, 7, 9)
+
+        SHUFFLE_DATA(2, 0, 6, 8, 3, 1, 10, 12)
+
+        SHUFFLE_DATA(6, 4, 0, 1, 8, 5, 2, 3)
+        SHUFFLE_DATA(10, 7, 4, 5, 12, 9, 6, 8)
+
+        UPDATE_MASKED_C
+        //Third 8x3 tile updated
         jmp(.DDONE)                                          // jump to end.
 
 
@@ -7321,8 +7943,46 @@ void bli_dgemmsup_rv_zen4_asm_24x3m
 
 
         label(.DROWSTORBZ)
+        // r12 = 3*rs_c
+        lea(mem(rsi,  rsi,  2), r12)
+        // r13 = 5*rs_c
+        lea(mem(r12, rsi,  2), r13)
+        // rdx = 7*rs_c
+        lea(mem(r12, rsi,  4), rdx)
+        lea(mem(   , rsi, 8), r14)
+        UNPACK_LO_HIGH(8, 6, 0, 1, 12, 10, 2, 3)
+        SHUFFLE_DATA(2, 0, 4, 5, 3, 1, 30, 31)
 
-        // yet to be implemented
+        SHUFFLE_DATA(2, 0, 6, 8, 3, 1, 10, 12)
+
+        SHUFFLE_DATA(6, 4, 0, 1, 8, 5, 2, 3)
+        SHUFFLE_DATA(10, 30, 4, 5, 12, 31, 6, 8)
+
+        vbroadcastsd(mem(rax), zmm31)
+        UPDATE_MASKED_C_BZ
+        //First 8x3 tile updated
+
+        UNPACK_LO_HIGH(9, 7, 0, 1, 13, 11, 2, 3)
+        SHUFFLE_DATA(2, 0, 4, 5, 3, 1, 7, 9)
+
+        SHUFFLE_DATA(2, 0, 6, 8, 3, 1, 10, 12)
+
+        SHUFFLE_DATA(6, 4, 0, 1, 8, 5, 2, 3)
+        SHUFFLE_DATA(10, 7, 4, 5, 12, 9, 6, 8)
+
+        UPDATE_MASKED_C_BZ
+        //Second 8x3 tile updated
+
+        UNPACK_LO_HIGH(29, 28, 0, 1, 27, 26, 2, 3)
+        SHUFFLE_DATA(2, 0, 4, 5, 3, 1, 7, 9)
+
+        SHUFFLE_DATA(2, 0, 6, 8, 3, 1, 10, 12)
+
+        SHUFFLE_DATA(6, 4, 0, 1, 8, 5, 2, 3)
+        SHUFFLE_DATA(10, 7, 4, 5, 12, 9, 6, 8)
+
+        UPDATE_MASKED_C_BZ
+        //Third 8x3 tile updated
         label(.DDONE)
 
 
@@ -7346,7 +8006,8 @@ void bli_dgemmsup_rv_zen4_asm_24x3m
             [rs_c]   "m" (rs_c),
             [cs_c]   "m" (cs_c),
             [n0]     "m" (n0),
-            [m0]     "m" (m0)
+            [m0]     "m" (m0),
+            [mask]   "m" (mask)
           : // register clobber list
             "rax", "rbx", "rcx", "rdx", "rsi", "rdi",
             "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15",
@@ -7437,6 +8098,8 @@ void bli_dgemmsup_rv_zen4_asm_24x2m
     uint64_t k_iter = (uint64_t)k0 / 8;
     uint64_t k_left = (uint64_t)k0 % 8;
 
+    uint8_t mask = (0xff >> (0x8 - (n0 & 7))); // calculate mask based on n_left
+
     if ( m_iter == 0 ) goto consider_edge_cases;
 
     /* For one iteration of this loop, a block of MRxNR is computed
@@ -7452,6 +8115,8 @@ void bli_dgemmsup_rv_zen4_asm_24x2m
         // -------------------------------------------------------------------------
         begin_asm()
 
+        mov(var(mask), rdx)             // load mask
+        kmovw(edx, k(2))                // move mask to k2 register
         mov(var(a), rax)                // load address of a
         mov(var(cs_a), r10)             // load cs_a
         mov(var(b), rbx)                // load address of b
@@ -8082,8 +8747,47 @@ void bli_dgemmsup_rv_zen4_asm_24x2m
         jmp(.DDONE)                                           // jump to end.
 
         label(.DROWSTORED)
+        // r12 = 3*rs_c
+        lea(mem(rsi,  rsi,  2), r12)
+        // r13 = 5*rs_c
+        lea(mem(r12, rsi,  2), r13)
+        // rdx = 7*rs_c
+        lea(mem(r12, rsi,  4), rdx)
+        lea(mem(   , rsi, 8), r14)
+        vunpcklpd( zmm8,  zmm6,  zmm0)
+        vunpckhpd( zmm8,  zmm6,  zmm1)
+        SHUFFLE_DATA(2, 0, 4, 5, 3, 1, 30, 31)
 
-        // yet to be implemented
+        SHUFFLE_DATA(2, 0, 6, 8, 3, 1, 10, 12)
+
+        SHUFFLE_DATA(6, 4, 0, 1, 8, 5, 2, 3)
+        SHUFFLE_DATA(10, 30, 4, 5, 12, 31, 6, 8)
+
+        vbroadcastsd(mem(rax), zmm31)
+        UPDATE_MASKED_C
+        //First 8x2 tile updated
+
+        vunpcklpd( zmm9,  zmm7,  zmm0)
+        vunpckhpd( zmm9,  zmm7,  zmm1)
+        SHUFFLE_DATA(2, 0, 4, 5, 3, 1, 7, 9)
+        SHUFFLE_DATA(2, 0, 6, 8, 3, 1, 10, 12)
+
+        SHUFFLE_DATA(6, 4, 0, 1, 8, 5, 2, 3)
+        SHUFFLE_DATA(10, 7, 4, 5, 12, 9, 6, 8)
+
+        UPDATE_MASKED_C
+        //Second 8x2 tile updated
+
+        vunpcklpd( zmm29,  zmm28,  zmm0)
+        vunpckhpd( zmm29,  zmm28,  zmm1)
+        SHUFFLE_DATA(2, 0, 4, 5, 3, 1, 7, 9)
+        SHUFFLE_DATA(2, 0, 6, 8, 3, 1, 10, 12)
+
+        SHUFFLE_DATA(6, 4, 0, 1, 8, 5, 2, 3)
+        SHUFFLE_DATA(10, 7, 4, 5, 12, 9, 6, 8)
+
+        UPDATE_MASKED_C
+        //Third 8x2 tile updated
         jmp(.DDONE)                                          // jump to end.
 
 
@@ -8103,8 +8807,48 @@ void bli_dgemmsup_rv_zen4_asm_24x2m
 
 
         label(.DROWSTORBZ)
+        // r12 = 3*rs_c
+        lea(mem(rsi,  rsi,  2), r12)
+        // r13 = 5*rs_c
+        lea(mem(r12, rsi,  2), r13)
+        // rdx = 7*rs_c
+        lea(mem(r12, rsi,  4), rdx)
+        lea(mem(   , rsi, 8), r14)
+        vunpcklpd( zmm8,  zmm6,  zmm0)
+        vunpckhpd( zmm8,  zmm6,  zmm1)
+        SHUFFLE_DATA(2, 0, 4, 5, 3, 1, 30, 31)
 
-        // yet to be implemented
+        SHUFFLE_DATA(2, 0, 6, 8, 3, 1, 10, 12)
+
+        SHUFFLE_DATA(6, 4, 0, 1, 8, 5, 2, 3)
+        SHUFFLE_DATA(10, 30, 4, 5, 12, 31, 6, 8)
+
+        UPDATE_MASKED_C_BZ
+        //First 8x2 tile updated
+
+        vunpcklpd( zmm9,  zmm7,  zmm0)
+        vunpckhpd( zmm9,  zmm7,  zmm1)
+        SHUFFLE_DATA(2, 0, 4, 5, 3, 1, 7, 9)
+
+        SHUFFLE_DATA(2, 0, 6, 8, 3, 1, 10, 12)
+
+        SHUFFLE_DATA(6, 4, 0, 1, 8, 5, 2, 3)
+        SHUFFLE_DATA(10, 7, 4, 5, 12, 9, 6, 8)
+
+        UPDATE_MASKED_C_BZ
+        //Second 8x2 tile updated
+
+        vunpcklpd( zmm29,  zmm28,  zmm0)
+        vunpckhpd( zmm29,  zmm28,  zmm1)
+        SHUFFLE_DATA(2, 0, 4, 5, 3, 1, 7, 9)
+
+        SHUFFLE_DATA(2, 0, 6, 8, 3, 1, 10, 12)
+
+        SHUFFLE_DATA(6, 4, 0, 1, 8, 5, 2, 3)
+        SHUFFLE_DATA(10, 7, 4, 5, 12, 9, 6, 8)
+
+        UPDATE_MASKED_C_BZ
+        //Third 8x2 tile updated
         label(.DDONE)
 
 
@@ -8128,7 +8872,8 @@ void bli_dgemmsup_rv_zen4_asm_24x2m
             [rs_c]   "m" (rs_c),
             [cs_c]   "m" (cs_c),
             [n0]     "m" (n0),
-            [m0]     "m" (m0)
+            [m0]     "m" (m0),
+            [mask]   "m" (mask)
           : // register clobber list
             "rax", "rbx", "rcx", "rdx", "rsi", "rdi",
             "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15",
@@ -8219,6 +8964,8 @@ void bli_dgemmsup_rv_zen4_asm_24x1m
     uint64_t k_iter = (uint64_t)k0 / 8;
     uint64_t k_left = (uint64_t)k0 % 8;
 
+    uint8_t mask = (0xff >> (0x8 - (n0 & 7))); // calculate mask based on n_left
+
     if ( m_iter == 0 ) goto consider_edge_cases;
 
     /* For one iteration of this loop, a block of MRxNR is computed
@@ -8234,6 +8981,8 @@ void bli_dgemmsup_rv_zen4_asm_24x1m
         // -------------------------------------------------------------------------
         begin_asm()
 
+        mov(var(mask), rdx)             // load mask
+        kmovw(edx, k(2))                // move mask to k2 register
         mov(var(a), rax)                // load address of a
         mov(var(cs_a), r10)             // load cs_a
         mov(var(b), rbx)                // load address of b
@@ -8749,8 +9498,49 @@ void bli_dgemmsup_rv_zen4_asm_24x1m
         jmp(.DDONE)                                           // jump to end.
 
         label(.DROWSTORED)
+        // r12 = 3*rs_c
+        lea(mem(rsi,  rsi,  2), r12)
+        // r13 = 5*rs_c
+        lea(mem(r12, rsi,  2), r13)
+        // rdx = 7*rs_c
+        lea(mem(r12, rsi,  4), rdx)
+        lea(mem(   , rsi, 8), r14)
+        vunpcklpd( zmm8,  zmm6,  zmm0)
+        vunpckhpd( zmm8,  zmm6,  zmm1)
+        SHUFFLE_DATA(2, 0, 4, 5, 3, 1, 30, 31)
 
-        // yet to be implemented
+        SHUFFLE_DATA(2, 0, 6, 8, 3, 1, 10, 12)
+
+        SHUFFLE_DATA(6, 4, 0, 1, 8, 5, 2, 3)
+        SHUFFLE_DATA(10, 30, 4, 5, 12, 31, 6, 8)
+
+        vbroadcastsd(mem(rax), zmm31)
+        UPDATE_MASKED_C
+        //First 8x1 tile updated
+
+        vunpcklpd( zmm9,  zmm7,  zmm0)
+        vunpckhpd( zmm9,  zmm7,  zmm1)
+        SHUFFLE_DATA(2, 0, 4, 5, 3, 1, 7, 9)
+
+        SHUFFLE_DATA(2, 0, 6, 8, 3, 1, 10, 12)
+
+        SHUFFLE_DATA(6, 4, 0, 1, 8, 5, 2, 3)
+        SHUFFLE_DATA(10, 7, 4, 5, 12, 9, 6, 8)
+
+        UPDATE_MASKED_C
+        //Second 8x1 tile updated
+
+        vunpcklpd( zmm29,  zmm28,  zmm0)
+        vunpckhpd( zmm29,  zmm28,  zmm1)
+        SHUFFLE_DATA(2, 0, 4, 5, 3, 1, 7, 9)
+
+        SHUFFLE_DATA(2, 0, 6, 8, 3, 1, 10, 12)
+
+        SHUFFLE_DATA(6, 4, 0, 1, 8, 5, 2, 3)
+        SHUFFLE_DATA(10, 7, 4, 5, 12, 9, 6, 8)
+
+        UPDATE_MASKED_C
+        //Third 8x1 tile updated
         jmp(.DDONE)                                          // jump to end.
 
 
@@ -8767,8 +9557,48 @@ void bli_dgemmsup_rv_zen4_asm_24x1m
 
 
         label(.DROWSTORBZ)
+        // r12 = 3*rs_c
+        lea(mem(rsi,  rsi,  2), r12)
+        // r13 = 5*rs_c
+        lea(mem(r12, rsi,  2), r13)
+        // rdx = 7*rs_c
+        lea(mem(r12, rsi,  4), rdx)
+        lea(mem(   , rsi, 8), r14)
+        vunpcklpd( zmm8,  zmm6,  zmm0)
+        vunpckhpd( zmm8,  zmm6,  zmm1)
+        SHUFFLE_DATA(2, 0, 4, 5, 3, 1, 30, 31)
 
-        // yet to be implemented
+        SHUFFLE_DATA(2, 0, 6, 8, 3, 1, 10, 12)
+
+        SHUFFLE_DATA(6, 4, 0, 1, 8, 5, 2, 3)
+        SHUFFLE_DATA(10, 30, 4, 5, 12, 31, 6, 8)
+
+        UPDATE_MASKED_C_BZ
+        //First 8x1 tile updated
+
+        vunpcklpd( zmm9,  zmm7,  zmm0)
+        vunpckhpd( zmm9,  zmm7,  zmm1)
+        SHUFFLE_DATA(2, 0, 4, 5, 3, 1, 7, 9)
+
+        SHUFFLE_DATA(2, 0, 6, 8, 3, 1, 10, 12)
+
+        SHUFFLE_DATA(6, 4, 0, 1, 8, 5, 2, 3)
+        SHUFFLE_DATA(10, 7, 4, 5, 12, 9, 6, 8)
+
+        UPDATE_MASKED_C_BZ
+        //Second 8x1 tile updated
+
+        vunpcklpd( zmm29,  zmm28,  zmm0)
+        vunpckhpd( zmm29,  zmm28,  zmm1)
+        SHUFFLE_DATA(2, 0, 4, 5, 3, 1, 7, 9)
+
+        SHUFFLE_DATA(2, 0, 6, 8, 3, 1, 10, 12)
+
+        SHUFFLE_DATA(6, 4, 0, 1, 8, 5, 2, 3)
+        SHUFFLE_DATA(10, 7, 4, 5, 12, 9, 6, 8)
+
+        UPDATE_MASKED_C_BZ
+        //Third 8x1 tile updated
         label(.DDONE)
 
 
@@ -8792,7 +9622,8 @@ void bli_dgemmsup_rv_zen4_asm_24x1m
             [rs_c]   "m" (rs_c),
             [cs_c]   "m" (cs_c),
             [n0]     "m" (n0),
-            [m0]     "m" (m0)
+            [m0]     "m" (m0),
+            [mask]   "m" (mask)
           : // register clobber list
             "rax", "rbx", "rcx", "rdx", "rsi", "rdi",
             "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15",

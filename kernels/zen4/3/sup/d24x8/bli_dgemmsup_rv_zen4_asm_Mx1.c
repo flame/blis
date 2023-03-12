@@ -38,10 +38,355 @@
 #include "bli_x86_asm_macros.h"
 #define TAIL_NITER 3
 
+/**
+ * Shuffle 2 double-precision elements selected by imm8 from S1 and S2,
+ * and store the results in D1.
+ * S1 : 1  9 3 11 5 13 7 15
+ * S2 : 2 10 4 12 6 14 8 16
+ * D1 : 1  9  5  13  2  10  6  14
+ * D2 : 3 11  7  15  4  12  8  16
+*/
+#define SHUFFLE_DATA(S1, S2, D1, D2, S3, S4, D3, D4) \
+\
+    VSHUFF64X2(IMM(0x88), ZMM(S1), ZMM(S2), ZMM(D1)) \
+    VSHUFF64X2(IMM(0xDD), ZMM(S1), ZMM(S2), ZMM(D2)) \
+    VSHUFF64X2(IMM(0x88), ZMM(S3), ZMM(S4), ZMM(D3)) \
+    VSHUFF64X2(IMM(0xDD), ZMM(S3), ZMM(S4), ZMM(D4)) \
+
+/**
+ * Unpacks and interleave low half and high half of each
+ * 128-bit lane in S1 and S2 and store into D1 and D2
+ * respectively.
+ * S1 : 1  2  3  4  5  6  7  8
+ * S2 : 9 10 11 12 13 14 15 16
+ * D1 : 1  9 3 11 5 13 7 15
+ * D2 : 2 10 4 12 6 14 8 16
+*/
+#define UNPACK_LO_HIGH(S1, S2, D1, D2, S3, S4, D3, D4) \
+\
+    vunpcklpd( zmm(S1),  zmm(S2),  zmm(D1)) \
+    vunpckhpd( zmm(S1),  zmm(S2),  zmm(D2)) \
+    vunpcklpd( zmm(S3),  zmm(S4),  zmm(D3)) \
+    vunpckhpd( zmm(S3),  zmm(S4),  zmm(D4))
+
+/**
+ * mask register is set, stores the fma result back to C
+*/
+#define UPDATE_MASKED_C_8_BZ \
+    vmovupd( zmm0, mem(rcx) MASK_(k(3))) \
+\
+    vmovupd( zmm4, mem(rcx, rsi, 1) MASK_(k(3))) \
+\
+    vmovupd( zmm2, mem(rcx, rsi, 2) MASK_(k(3)) ) \
+\
+    vmovupd( zmm6, mem(rcx, r12, 1) MASK_(k(3)) ) \
+\
+    vmovupd( zmm1, mem(rcx, rsi, 4) MASK_(k(3))) \
+\
+    vmovupd( zmm5, mem(rcx, r13, 1) MASK_(k(3))) \
+\
+    vmovupd( zmm3, mem(rcx, r12, 2) MASK_(k(3))) \
+\
+    vmovupd( zmm8, mem(rcx, rdx, 1) MASK_(k(3))) \
+    add(r14, rcx)
+
+/**
+ * mask register is set, stores the fma result back to C
+*/
+#define UPDATE_MASKED_C_7_BZ \
+    vmovupd( zmm0, mem(rcx) MASK_(k(3))) \
+\
+    vmovupd( zmm4, mem(rcx, rsi, 1) MASK_(k(3))) \
+\
+    vmovupd( zmm2, mem(rcx, rsi, 2) MASK_(k(3)) ) \
+\
+    vmovupd( zmm6, mem(rcx, r12, 1) MASK_(k(3)) ) \
+\
+    vmovupd( zmm1, mem(rcx, rsi, 4) MASK_(k(3))) \
+\
+    vmovupd( zmm5, mem(rcx, r13, 1) MASK_(k(3))) \
+\
+    vmovupd( zmm3, mem(rcx, r12, 2) MASK_(k(3)))
+
+/**
+ * mask register is set, stores the fma result back to C
+*/
+#define UPDATE_MASKED_C_6_BZ \
+    vmovupd( zmm0, mem(rcx) MASK_(k(3))) \
+\
+    vmovupd( zmm4, mem(rcx, rsi, 1) MASK_(k(3))) \
+\
+    vmovupd( zmm2, mem(rcx, rsi, 2) MASK_(k(3)) ) \
+\
+    vmovupd( zmm6, mem(rcx, r12, 1) MASK_(k(3)) ) \
+\
+    vmovupd( zmm1, mem(rcx, rsi, 4) MASK_(k(3))) \
+\
+    vmovupd( zmm5, mem(rcx, r13, 1) MASK_(k(3)))
+
+/**
+ * mask register is set, stores the fma result back to C
+*/
+#define UPDATE_MASKED_C_5_BZ \
+    vmovupd( zmm0, mem(rcx) MASK_(k(3))) \
+\
+    vmovupd( zmm4, mem(rcx, rsi, 1) MASK_(k(3))) \
+\
+    vmovupd( zmm2, mem(rcx, rsi, 2) MASK_(k(3)) ) \
+\
+    vmovupd( zmm6, mem(rcx, r12, 1) MASK_(k(3)) ) \
+\
+    vmovupd( zmm1, mem(rcx, rsi, 4) MASK_(k(3)))
+
+/**
+ * mask register is set, stores the fma result back to C
+*/
+#define UPDATE_MASKED_C_4_BZ \
+    vmovupd( zmm0, mem(rcx) MASK_(k(3))) \
+\
+    vmovupd( zmm4, mem(rcx, rsi, 1) MASK_(k(3))) \
+\
+    vmovupd( zmm2, mem(rcx, rsi, 2) MASK_(k(3)) ) \
+\
+    vmovupd( zmm6, mem(rcx, r12, 1) MASK_(k(3)) )
+
+/**
+ * mask register is set, stores the fma result back to C
+*/
+#define UPDATE_MASKED_C_3_BZ \
+    vmovupd( zmm0, mem(rcx) MASK_(k(3))) \
+\
+    vmovupd( zmm4, mem(rcx, rsi, 1) MASK_(k(3))) \
+\
+    vmovupd( zmm2, mem(rcx, rsi, 2) MASK_(k(3)) )
+
+/**
+ * mask register is set, stores the fma result back to C
+*/
+#define UPDATE_MASKED_C_2_BZ \
+    vmovupd( zmm0, mem(rcx) MASK_(k(3))) \
+\
+    vmovupd( zmm4, mem(rcx, rsi, 1) MASK_(k(3)))
+
+/**
+ * mask register is set, stores the fma result back to C
+*/
+#define UPDATE_MASKED_C_1_BZ \
+\
+    vmovupd( zmm0, mem(rcx) MASK_(k(3)))
+
+/**
+ * Loads elements from C row only if correspondnig bits in
+ * mask register is set, Scales it with Beta and adds FMA result to it.
+ * Stores back the C row.
+*/
+#define UPDATE_MASKED_C_8 \
+\
+    vmovupd( mem(rcx), zmm30 MASK_(k(3)) MASK_(z) ) \
+    vfmadd231pd( zmm31,zmm30,zmm0 ) \
+\
+    vmovupd( mem(rcx, rsi, 1, 0), zmm10 MASK_(k(3)) MASK_(z) ) \
+    vfmadd231pd( zmm31,zmm10,zmm4 ) \
+\
+    vmovupd( mem(rcx, rsi, 2, 0), zmm12 MASK_(k(3)) MASK_(z) ) \
+    vfmadd231pd( zmm31,zmm12,zmm2 ) \
+\
+    vmovupd( mem(rcx, r12, 1, 0), zmm16 MASK_(k(3)) MASK_(z) ) \
+    vfmadd231pd( zmm31,zmm16,zmm6 ) \
+\
+    vmovupd( mem(rcx, rsi, 4, 0), zmm14 MASK_(k(3)) MASK_(z) ) \
+    vfmadd231pd( zmm31,zmm14,zmm1 ) \
+\
+    vmovupd( mem(rcx, r13, 1, 0), zmm18 MASK_(k(3)) MASK_(z) ) \
+    vfmadd231pd( zmm31,zmm18,zmm5 ) \
+\
+    vmovupd( mem(rcx, r12, 2, 0), zmm10 MASK_(k(3)) MASK_(z) ) \
+    vfmadd231pd( zmm31,zmm10,zmm3 ) \
+\
+    vmovupd( mem(rcx, rdx, 1, 0), zmm12 MASK_(k(3)) MASK_(z) ) \
+    vfmadd231pd( zmm31,zmm12,zmm8 ) \
+\
+    vmovupd( zmm0, (rcx) MASK_(k(3)))            /*Stores back to C*/\
+    vmovupd( zmm4, (rcx, rsi, 1) MASK_(k(3)))\
+    vmovupd( zmm2, (rcx, rsi, 2) MASK_(k(3)))\
+    vmovupd( zmm6, (rcx, r12, 1) MASK_(k(3)))\
+    vmovupd( zmm1, (rcx, rsi, 4) MASK_(k(3)))\
+    vmovupd( zmm5, (rcx, r13, 1) MASK_(k(3)))\
+    vmovupd( zmm3, (rcx, r12, 2) MASK_(k(3)))\
+    vmovupd( zmm8, (rcx, rdx, 1) MASK_(k(3)))\
+    add(r14, rcx)
+
+/**
+ * Loads elements from C row only if correspondnig bits in
+ * mask register is set, Scales it with Beta and adds FMA result to it.
+ * Stores back the C row.
+*/
+#define UPDATE_MASKED_C_7 \
+\
+    vmovupd( mem(rcx), zmm30 MASK_(k(3)) MASK_(z) ) \
+    vfmadd231pd( zmm31,zmm30,zmm0 ) \
+\
+    vmovupd( mem(rcx, rsi, 1, 0), zmm10 MASK_(k(3)) MASK_(z) ) \
+    vfmadd231pd( zmm31,zmm10,zmm4 ) \
+\
+    vmovupd( mem(rcx, rsi, 2, 0), zmm12 MASK_(k(3)) MASK_(z) ) \
+    vfmadd231pd( zmm31,zmm12,zmm2 ) \
+\
+    vmovupd( mem(rcx, r12, 1, 0), zmm16 MASK_(k(3)) MASK_(z) ) \
+    vfmadd231pd( zmm31,zmm16,zmm6 ) \
+\
+    vmovupd( mem(rcx, rsi, 4, 0), zmm14 MASK_(k(3)) MASK_(z) ) \
+    vfmadd231pd( zmm31,zmm14,zmm1 ) \
+\
+    vmovupd( mem(rcx, r13, 1, 0), zmm18 MASK_(k(3)) MASK_(z) ) \
+    vfmadd231pd( zmm31,zmm18,zmm5 ) \
+\
+    vmovupd( mem(rcx, r12, 2, 0), zmm10 MASK_(k(3)) MASK_(z) ) \
+    vfmadd231pd( zmm31,zmm10,zmm3 ) \
+\
+    vmovupd( zmm0, (rcx) MASK_(k(3)))            /*Stores back to C*/\
+    vmovupd( zmm4, (rcx, rsi, 1) MASK_(k(3)))\
+    vmovupd( zmm2, (rcx, rsi, 2) MASK_(k(3)))\
+    vmovupd( zmm6, (rcx, r12, 1) MASK_(k(3)))\
+    vmovupd( zmm1, (rcx, rsi, 4) MASK_(k(3)))\
+    vmovupd( zmm5, (rcx, r13, 1) MASK_(k(3)))\
+    vmovupd( zmm3, (rcx, r12, 2) MASK_(k(3)))
+
+/**
+ * Loads elements from C row only if correspondnig bits in
+ * mask register is set, Scales it with Beta and adds FMA result to it.
+ * Stores back the C row.
+*/
+#define UPDATE_MASKED_C_6 \
+\
+    vmovupd( mem(rcx), zmm30 MASK_(k(3)) MASK_(z) ) \
+    vfmadd231pd( zmm31,zmm30,zmm0 ) \
+\
+    vmovupd( mem(rcx, rsi, 1, 0), zmm10 MASK_(k(3)) MASK_(z) ) \
+    vfmadd231pd( zmm31,zmm10,zmm4 ) \
+\
+    vmovupd( mem(rcx, rsi, 2, 0), zmm12 MASK_(k(3)) MASK_(z) ) \
+    vfmadd231pd( zmm31,zmm12,zmm2 ) \
+\
+    vmovupd( mem(rcx, r12, 1, 0), zmm16 MASK_(k(3)) MASK_(z) ) \
+    vfmadd231pd( zmm31,zmm16,zmm6 ) \
+\
+    vmovupd( mem(rcx, rsi, 4, 0), zmm14 MASK_(k(3)) MASK_(z) ) \
+    vfmadd231pd( zmm31,zmm14,zmm1 ) \
+\
+    vmovupd( mem(rcx, r13, 1, 0), zmm18 MASK_(k(3)) MASK_(z) ) \
+    vfmadd231pd( zmm31,zmm18,zmm5 ) \
+\
+    vmovupd( zmm0, (rcx) MASK_(k(3)))            /*Stores back to C*/\
+    vmovupd( zmm4, (rcx, rsi, 1) MASK_(k(3)))\
+    vmovupd( zmm2, (rcx, rsi, 2) MASK_(k(3)))\
+    vmovupd( zmm6, (rcx, r12, 1) MASK_(k(3)))\
+    vmovupd( zmm1, (rcx, rsi, 4) MASK_(k(3)))\
+    vmovupd( zmm5, (rcx, r13, 1) MASK_(k(3)))
+
+/**
+ * Loads elements from C row only if correspondnig bits in
+ * mask register is set, Scales it with Beta and adds FMA result to it.
+ * Stores back the C row.
+*/
+#define UPDATE_MASKED_C_5 \
+\
+    vmovupd( mem(rcx), zmm30 MASK_(k(3)) MASK_(z) ) \
+    vfmadd231pd( zmm31,zmm30,zmm0 ) \
+\
+    vmovupd( mem(rcx, rsi, 1, 0), zmm10 MASK_(k(3)) MASK_(z) ) \
+    vfmadd231pd( zmm31,zmm10,zmm4 ) \
+\
+    vmovupd( mem(rcx, rsi, 2, 0), zmm12 MASK_(k(3)) MASK_(z) ) \
+    vfmadd231pd( zmm31,zmm12,zmm2 ) \
+\
+    vmovupd( mem(rcx, r12, 1, 0), zmm16 MASK_(k(3)) MASK_(z) ) \
+    vfmadd231pd( zmm31,zmm16,zmm6 ) \
+\
+    vmovupd( mem(rcx, rsi, 4, 0), zmm14 MASK_(k(3)) MASK_(z) ) \
+    vfmadd231pd( zmm31,zmm14,zmm1 ) \
+\
+    vmovupd( zmm0, (rcx) MASK_(k(3)))            /*Stores back to C*/\
+    vmovupd( zmm4, (rcx, rsi, 1) MASK_(k(3)))\
+    vmovupd( zmm2, (rcx, rsi, 2) MASK_(k(3)))\
+    vmovupd( zmm6, (rcx, r12, 1) MASK_(k(3)))\
+    vmovupd( zmm1, (rcx, rsi, 4) MASK_(k(3)))
+
+/**
+ * Loads elements from C row only if correspondnig bits in
+ * mask register is set, Scales it with Beta and adds FMA result to it.
+ * Stores back the C row.
+*/
+#define UPDATE_MASKED_C_4 \
+\
+    vmovupd( mem(rcx), zmm30 MASK_(k(3)) MASK_(z) ) \
+    vfmadd231pd( zmm31,zmm30,zmm0 ) \
+\
+    vmovupd( mem(rcx, rsi, 1, 0), zmm10 MASK_(k(3)) MASK_(z) ) \
+    vfmadd231pd( zmm31,zmm10,zmm4 ) \
+\
+    vmovupd( mem(rcx, rsi, 2, 0), zmm12 MASK_(k(3)) MASK_(z) ) \
+    vfmadd231pd( zmm31,zmm12,zmm2 ) \
+\
+    vmovupd( mem(rcx, r12, 1, 0), zmm16 MASK_(k(3)) MASK_(z) ) \
+    vfmadd231pd( zmm31,zmm16,zmm6 ) \
+\
+    vmovupd( zmm0, (rcx) MASK_(k(3)))            /*Stores back to C*/\
+    vmovupd( zmm4, (rcx, rsi, 1) MASK_(k(3)))\
+    vmovupd( zmm2, (rcx, rsi, 2) MASK_(k(3)))\
+    vmovupd( zmm6, (rcx, r12, 1) MASK_(k(3)))
+
+/**
+ * Loads elements from C row only if correspondnig bits in
+ * mask register is set, Scales it with Beta and adds FMA result to it.
+ * Stores back the C row.
+*/
+#define UPDATE_MASKED_C_3 \
+\
+    vmovupd( mem(rcx), zmm30 MASK_(k(3)) MASK_(z) ) \
+    vfmadd231pd( zmm31,zmm30,zmm0 ) \
+\
+    vmovupd( mem(rcx, rsi, 1, 0), zmm10 MASK_(k(3)) MASK_(z) ) \
+    vfmadd231pd( zmm31,zmm10,zmm4 ) \
+\
+    vmovupd( mem(rcx, rsi, 2, 0), zmm12 MASK_(k(3)) MASK_(z) ) \
+    vfmadd231pd( zmm31,zmm12,zmm2 ) \
+\
+    vmovupd( zmm0, (rcx) MASK_(k(3)))            /*Stores back to C*/\
+    vmovupd( zmm4, (rcx, rsi, 1) MASK_(k(3)))\
+    vmovupd( zmm2, (rcx, rsi, 2) MASK_(k(3)))
+
+/**
+ * Loads elements from C row only if correspondnig bits in
+ * mask register is set, Scales it with Beta and adds FMA result to it.
+ * Stores back the C row.
+*/
+#define UPDATE_MASKED_C_2 \
+\
+    vmovupd( mem(rcx), zmm30 MASK_(k(3)) MASK_(z) ) \
+    vfmadd231pd( zmm31,zmm30,zmm0 ) \
+\
+    vmovupd( mem(rcx, rsi, 1, 0), zmm10 MASK_(k(3)) MASK_(z) ) \
+    vfmadd231pd( zmm31,zmm10,zmm4 ) \
+\
+    vmovupd( zmm0, (rcx) MASK_(k(3)))            /*Stores back to C*/\
+    vmovupd( zmm4, (rcx, rsi, 1) MASK_(k(3)))
+
+/**
+ * Loads elements from C row only if correspondnig bits in
+ * mask register is set, Scales it with Beta and adds FMA result to it.
+ * Stores back the C row.
+*/
+#define UPDATE_MASKED_C_1 \
+\
+    vmovupd( mem(rcx), zmm30 MASK_(k(3)) MASK_(z) ) \
+    vfmadd231pd( zmm31,zmm30,zmm0 ) \
+\
+    vmovupd( zmm0, (rcx) MASK_(k(3)))            /*Stores back to C*/
+
 /* These kernels Assume that A matrix needs to be in col-major order
  * B matrix can be col/row-major
- * C matrix can be col/row-major though support for row-major order will
- * be added by a separate commit.
+ * C matrix can be col/row-major
  * Prefetch for C is done assuming that C is col-stored.
  * Prefetch of B is done assuming that the matrix is col-stored.
  * Prefetch for B and C matrices when row-stored is yet to be added.
@@ -93,6 +438,10 @@ void bli_dgemmsup_rv_zen4_asm_24x1
     // So, mask becomes 0xff(11111111)
     if (mask == 0) mask = 0xff;
 
+    uint8_t mask_n0 = 0xff >> (0x8 - (n0 & 7)); // calculate mask based on n_left
+    // For special cases where n_left = 8, all 8 elements have to be loaded/stored
+    // So, mask becomes 0xff(11111111)
+    if (mask_n0 == 0) mask_n0 = 0xff;
         // -------------------------------------------------------------------------
     begin_asm()
 
@@ -105,6 +454,8 @@ void bli_dgemmsup_rv_zen4_asm_24x1
     mov(var(cs_c), rdi)             // load cs_c
     mov(var(mask), rdx)             // load mask
     kmovw(edx, k(2))                // move mask to k2 register
+    mov(var(mask_n0), rdx)          // load mask
+    kmovw(edx, k(3))                // move mask to k3 register
     lea(mem(, r8, 8), r8)           // rs_b *= sizeof(double)
     lea(mem(, r9, 8), r9)           // cs_b *= sizeof(double)
     lea(mem(, r10, 8), r10)         // cs_a *= sizeof(double)
@@ -489,8 +840,102 @@ void bli_dgemmsup_rv_zen4_asm_24x1
     jmp(.DDONE)                                           // jump to end.
 
     label(.DROWSTORED)
+    // r12 = 3*rs_c
+    lea(mem(rsi,  rsi,  2), r12)
+    // r13 = 5*rs_c
+    lea(mem(r12, rsi,  2), r13)
+    // rdx = 7*rs_c
+    lea(mem(r12, rsi,  4), rdx)
+    lea(mem(   , rsi, 8), r14)
+    vunpcklpd( zmm8,  zmm6,  zmm0)
+    vunpckhpd( zmm8,  zmm6,  zmm1)
+    SHUFFLE_DATA(2, 0, 4, 5, 3, 1, 30, 31)
 
-    // yet to be implemented
+    SHUFFLE_DATA(2, 0, 6, 8, 3, 1, 10, 12)
+
+    SHUFFLE_DATA(6, 4, 0, 1, 8, 5, 2, 3)
+    SHUFFLE_DATA(10, 30, 4, 5, 12, 31, 6, 8)
+
+    vbroadcastsd(mem(rax), zmm31)
+    UPDATE_MASKED_C_8
+    //First 8x1 tile updated
+
+    vunpcklpd( zmm9,  zmm7,  zmm0)
+    vunpckhpd( zmm9,  zmm7,  zmm1)
+    SHUFFLE_DATA(2, 0, 4, 5, 3, 1, 7, 9)
+
+    SHUFFLE_DATA(2, 0, 6, 8, 3, 1, 10, 12)
+
+    SHUFFLE_DATA(6, 4, 0, 1, 8, 5, 2, 3)
+    SHUFFLE_DATA(10, 7, 4, 5, 12, 9, 6, 8)
+
+    UPDATE_MASKED_C_8
+    //Second 8x1 tile updated
+
+    vunpcklpd( zmm29,  zmm28,  zmm0)
+    vunpckhpd( zmm29,  zmm28,  zmm1)
+    SHUFFLE_DATA(2, 0, 4, 5, 3, 1, 7, 9)
+
+    SHUFFLE_DATA(2, 0, 6, 8, 3, 1, 10, 12)
+
+    SHUFFLE_DATA(6, 4, 0, 1, 8, 5, 2, 3)
+    SHUFFLE_DATA(10, 7, 4, 5, 12, 9, 6, 8)
+
+    mov(var(m0), rdi)
+    sub(imm(16), rdi)
+    cmp(imm(8), rdi)
+    JZ(.UPDATE8)
+    cmp(imm(7), rdi)
+    JZ(.UPDATE7)
+    cmp(imm(6), rdi)
+    JZ(.UPDATE6)
+    cmp(imm(5), rdi)
+    JZ(.UPDATE5)
+    cmp(imm(4), rdi)
+    JZ(.UPDATE4)
+    cmp(imm(3), rdi)
+    JZ(.UPDATE3)
+    cmp(imm(2), rdi)
+    JZ(.UPDATE2)
+    cmp(imm(1), rdi)
+    JZ(.UPDATE1)
+    cmp(imm(0), rdi)
+    JZ(.UPDATE0)
+
+    LABEL(.UPDATE8)
+    UPDATE_MASKED_C_8
+    jmp(.DDONE)
+
+    LABEL(.UPDATE7)
+    UPDATE_MASKED_C_7
+    jmp(.DDONE)
+
+    LABEL(.UPDATE6)
+    UPDATE_MASKED_C_6
+    jmp(.DDONE)                                              // jump to end.
+
+    LABEL(.UPDATE5)
+    UPDATE_MASKED_C_5
+    jmp(.DDONE)                                              // jump to end.
+
+    LABEL(.UPDATE4)
+    UPDATE_MASKED_C_4
+    jmp(.DDONE)                                              // jump to end.
+
+    LABEL(.UPDATE3)
+    UPDATE_MASKED_C_3
+    jmp(.DDONE)                                              // jump to end.
+
+    LABEL(.UPDATE2)
+    UPDATE_MASKED_C_2
+    jmp(.DDONE)                                              // jump to end.
+
+    LABEL(.UPDATE1)
+    UPDATE_MASKED_C_1
+    jmp(.DDONE)                                              // jump to end.
+
+    LABEL(.UPDATE0)
+    //Third 8x1 tile updated
     jmp(.DDONE)                                          // jump to end.
 
 
@@ -507,8 +952,100 @@ void bli_dgemmsup_rv_zen4_asm_24x1
 
 
     label(.DROWSTORBZ)
+    // r12 = 3*rs_c
+    lea(mem(rsi,  rsi,  2), r12)
+    // r13 = 5*rs_c
+    lea(mem(r12, rsi,  2), r13)
+    // rdx = 7*rs_c
+    lea(mem(r12, rsi,  4), rdx)
+    lea(mem(   , rsi, 8), r14)
+    vunpcklpd( zmm8,  zmm6,  zmm0)
+    vunpckhpd( zmm8,  zmm6,  zmm1)
+    SHUFFLE_DATA(2, 0, 4, 5, 3, 1, 30, 31)
 
-    // yet to be implemented
+    SHUFFLE_DATA(2, 0, 6, 8, 3, 1, 10, 12)
+
+    SHUFFLE_DATA(6, 4, 0, 1, 8, 5, 2, 3)
+    SHUFFLE_DATA(10, 30, 4, 5, 12, 31, 6, 8)
+
+    UPDATE_MASKED_C_8_BZ
+    //First 8x1 tile updated
+
+    vunpcklpd( zmm9,  zmm7,  zmm0)
+    vunpckhpd( zmm9,  zmm7,  zmm1)
+    SHUFFLE_DATA(2, 0, 4, 5, 3, 1, 7, 9)
+
+    SHUFFLE_DATA(2, 0, 6, 8, 3, 1, 10, 12)
+
+    SHUFFLE_DATA(6, 4, 0, 1, 8, 5, 2, 3)
+    SHUFFLE_DATA(10, 7, 4, 5, 12, 9, 6, 8)
+
+    UPDATE_MASKED_C_8_BZ
+    //Second 8x1 tile updated
+
+    vunpcklpd( zmm29,  zmm28,  zmm0)
+    vunpckhpd( zmm29,  zmm28,  zmm1)
+    SHUFFLE_DATA(2, 0, 4, 5, 3, 1, 7, 9)
+
+    SHUFFLE_DATA(2, 0, 6, 8, 3, 1, 10, 12)
+
+    SHUFFLE_DATA(6, 4, 0, 1, 8, 5, 2, 3)
+    SHUFFLE_DATA(10, 7, 4, 5, 12, 9, 6, 8)
+
+    mov(var(m0), rdi)
+    sub(imm(16), rdi)
+    cmp(imm(8), rdi)
+    JZ(.UPDATE8BZ)
+    cmp(imm(7), rdi)
+    JZ(.UPDATE7BZ)
+    cmp(imm(6), rdi)
+    JZ(.UPDATE6BZ)
+    cmp(imm(5), rdi)
+    JZ(.UPDATE5BZ)
+    cmp(imm(4), rdi)
+    JZ(.UPDATE4BZ)
+    cmp(imm(3), rdi)
+    JZ(.UPDATE3BZ)
+    cmp(imm(2), rdi)
+    JZ(.UPDATE2BZ)
+    cmp(imm(1), rdi)
+    JZ(.UPDATE1BZ)
+    cmp(imm(0), rdi)
+    JZ(.UPDATE0BZ)
+
+    LABEL(.UPDATE8BZ)
+    UPDATE_MASKED_C_8_BZ
+    jmp(.DDONE)
+
+    LABEL(.UPDATE7BZ)
+    UPDATE_MASKED_C_7_BZ
+    jmp(.DDONE)
+
+    LABEL(.UPDATE6BZ)
+    UPDATE_MASKED_C_6_BZ
+    jmp(.DDONE)                                              // jump to end.
+
+    LABEL(.UPDATE5BZ)
+    UPDATE_MASKED_C_5_BZ
+    jmp(.DDONE)                                              // jump to end.
+
+    LABEL(.UPDATE4BZ)
+    UPDATE_MASKED_C_4_BZ
+    jmp(.DDONE)                                              // jump to end.
+
+    LABEL(.UPDATE3BZ)
+    UPDATE_MASKED_C_3_BZ
+    jmp(.DDONE)                                              // jump to end.
+
+    LABEL(.UPDATE2BZ)
+    UPDATE_MASKED_C_2_BZ
+    jmp(.DDONE)                                              // jump to end.
+
+    LABEL(.UPDATE1BZ)
+    UPDATE_MASKED_C_1_BZ
+    jmp(.DDONE)                                              // jump to end.
+
+    LABEL(.UPDATE0BZ)
     label(.DDONE)
 
 
@@ -533,7 +1070,8 @@ void bli_dgemmsup_rv_zen4_asm_24x1
         [cs_c]   "m" (cs_c),
         [n0]     "m" (n0),
         [m0]     "m" (m0),
-        [mask]   "m" (mask)
+        [mask]   "m" (mask),
+        [mask_n0]   "m" (mask_n0)
       : // register clobber list
         "rax", "rbx", "rcx", "rdx", "rsi", "rdi",
         "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15",
@@ -594,6 +1132,11 @@ void bli_dgemmsup_rv_zen4_asm_16x1
     // So, mask becomes 0xff(11111111)
     if (mask == 0) mask = 0xff;
 
+    uint8_t mask_n0 = 0xff >> (0x8 - (n0 & 7)); // calculate mask based on n_left
+    // For special cases where n_left = 8, all 8 elements have to be loaded/stored
+    // So, mask becomes 0xff(11111111)
+    if (mask_n0 == 0) mask_n0 = 0xff;
+
         // -------------------------------------------------------------------------
     begin_asm()
 
@@ -606,6 +1149,8 @@ void bli_dgemmsup_rv_zen4_asm_16x1
     mov(var(cs_c), rdi)             // load cs_c
     mov(var(mask), rdx)             // load mask
     kmovw(edx, k(2))                // move mask to k2 register
+    mov(var(mask_n0), rdx)          // load mask
+    kmovw(edx, k(3))                // move mask to k3 register
     lea(mem(, r8, 8), r8)           // rs_b *= sizeof(double)
     lea(mem(, r9, 8), r9)           // cs_b *= sizeof(double)
     lea(mem(, r10, 8), r10)         // cs_a *= sizeof(double)
@@ -934,8 +1479,90 @@ void bli_dgemmsup_rv_zen4_asm_16x1
     jmp(.DDONE)                                           // jump to end.
 
     label(.DROWSTORED)
+    // r12 = 3*rs_c
+    lea(mem(rsi,  rsi,  2), r12)
+    // r13 = 5*rs_c
+    lea(mem(r12, rsi,  2), r13)
+    // rdx = 7*rs_c
+    lea(mem(r12, rsi,  4), rdx)
+    lea(mem(   , rsi, 8), r14)
+    vunpcklpd( zmm8,  zmm6,  zmm0)
+    vunpckhpd( zmm8,  zmm6,  zmm1)
+    SHUFFLE_DATA(2, 0, 4, 5, 3, 1, 30, 31)
 
-    // yet to be implemented
+    SHUFFLE_DATA(2, 0, 6, 8, 3, 1, 10, 12)
+
+    SHUFFLE_DATA(6, 4, 0, 1, 8, 5, 2, 3)
+    SHUFFLE_DATA(10, 30, 4, 5, 12, 31, 6, 8)
+
+    vbroadcastsd(mem(rax), zmm31)
+    UPDATE_MASKED_C_8
+    //First 8x1 tile updated
+
+    vunpcklpd( zmm9,  zmm7,  zmm0)
+    vunpckhpd( zmm9,  zmm7,  zmm1)
+    SHUFFLE_DATA(2, 0, 4, 5, 3, 1, 7, 9)
+
+    SHUFFLE_DATA(2, 0, 6, 8, 3, 1, 10, 12)
+
+    SHUFFLE_DATA(6, 4, 0, 1, 8, 5, 2, 3)
+    SHUFFLE_DATA(10, 7, 4, 5, 12, 9, 6, 8)
+
+    mov(var(m0), rdi)
+    sub(imm(8), rdi)
+    cmp(imm(8), rdi)
+    JZ(.UPDATE8)
+    cmp(imm(7), rdi)
+    JZ(.UPDATE7)
+    cmp(imm(6), rdi)
+    JZ(.UPDATE6)
+    cmp(imm(5), rdi)
+    JZ(.UPDATE5)
+    cmp(imm(4), rdi)
+    JZ(.UPDATE4)
+    cmp(imm(3), rdi)
+    JZ(.UPDATE3)
+    cmp(imm(2), rdi)
+    JZ(.UPDATE2)
+    cmp(imm(1), rdi)
+    JZ(.UPDATE1)
+    cmp(imm(0), rdi)
+    JZ(.UPDATE0)
+
+    LABEL(.UPDATE8)
+    UPDATE_MASKED_C_8
+    jmp(.DDONE)
+
+    LABEL(.UPDATE7)
+    UPDATE_MASKED_C_7
+    jmp(.DDONE)
+
+    LABEL(.UPDATE6)
+    UPDATE_MASKED_C_6
+    jmp(.DDONE)                                              // jump to end.
+
+    LABEL(.UPDATE5)
+    UPDATE_MASKED_C_5
+    jmp(.DDONE)                                              // jump to end.
+
+    LABEL(.UPDATE4)
+    UPDATE_MASKED_C_4
+    jmp(.DDONE)                                              // jump to end.
+
+    LABEL(.UPDATE3)
+    UPDATE_MASKED_C_3
+    jmp(.DDONE)                                              // jump to end.
+
+    LABEL(.UPDATE2)
+    UPDATE_MASKED_C_2
+    jmp(.DDONE)                                              // jump to end.
+
+    LABEL(.UPDATE1)
+    UPDATE_MASKED_C_1
+    jmp(.DDONE)                                              // jump to end.
+
+    LABEL(.UPDATE0)
+    //8x1 tile updated
     jmp(.DDONE)                                          // jump to end.
 
 
@@ -951,8 +1578,88 @@ void bli_dgemmsup_rv_zen4_asm_16x1
 
 
     label(.DROWSTORBZ)
+    // r12 = 3*rs_c
+    lea(mem(rsi,  rsi,  2), r12)
+    // r13 = 5*rs_c
+    lea(mem(r12, rsi,  2), r13)
+    // rdx = 7*rs_c
+    lea(mem(r12, rsi,  4), rdx)
+    lea(mem(   , rsi, 8), r14)
+    vunpcklpd( zmm8,  zmm6,  zmm0)
+    vunpckhpd( zmm8,  zmm6,  zmm1)
+    SHUFFLE_DATA(2, 0, 4, 5, 3, 1, 30, 31)
 
-    // yet to be implemented
+    SHUFFLE_DATA(2, 0, 6, 8, 3, 1, 10, 12)
+
+    SHUFFLE_DATA(6, 4, 0, 1, 8, 5, 2, 3)
+    SHUFFLE_DATA(10, 30, 4, 5, 12, 31, 6, 8)
+
+    UPDATE_MASKED_C_8_BZ
+    //First 8x1 tile updated
+
+    vunpcklpd( zmm9,  zmm7,  zmm0)
+    vunpckhpd( zmm9,  zmm7,  zmm1)
+    SHUFFLE_DATA(2, 0, 4, 5, 3, 1, 7, 9)
+
+    SHUFFLE_DATA(2, 0, 6, 8, 3, 1, 10, 12)
+
+    SHUFFLE_DATA(6, 4, 0, 1, 8, 5, 2, 3)
+    SHUFFLE_DATA(10, 7, 4, 5, 12, 9, 6, 8)
+
+    mov(var(m0), rdi)
+    sub(imm(8), rdi)
+    cmp(imm(8), rdi)
+    JZ(.UPDATE8BZ)
+    cmp(imm(7), rdi)
+    JZ(.UPDATE7BZ)
+    cmp(imm(6), rdi)
+    JZ(.UPDATE6BZ)
+    cmp(imm(5), rdi)
+    JZ(.UPDATE5BZ)
+    cmp(imm(4), rdi)
+    JZ(.UPDATE4BZ)
+    cmp(imm(3), rdi)
+    JZ(.UPDATE3BZ)
+    cmp(imm(2), rdi)
+    JZ(.UPDATE2BZ)
+    cmp(imm(1), rdi)
+    JZ(.UPDATE1BZ)
+    cmp(imm(0), rdi)
+    JZ(.UPDATE0BZ)
+
+    LABEL(.UPDATE8BZ)
+    UPDATE_MASKED_C_8_BZ
+    jmp(.DDONE)
+
+    LABEL(.UPDATE7BZ)
+    UPDATE_MASKED_C_7_BZ
+    jmp(.DDONE)
+
+    LABEL(.UPDATE6BZ)
+    UPDATE_MASKED_C_6_BZ
+    jmp(.DDONE)                                              // jump to end.
+
+    LABEL(.UPDATE5BZ)
+    UPDATE_MASKED_C_5_BZ
+    jmp(.DDONE)                                              // jump to end.
+
+    LABEL(.UPDATE4BZ)
+    UPDATE_MASKED_C_4_BZ
+    jmp(.DDONE)                                              // jump to end.
+
+    LABEL(.UPDATE3BZ)
+    UPDATE_MASKED_C_3_BZ
+    jmp(.DDONE)                                              // jump to end.
+
+    LABEL(.UPDATE2BZ)
+    UPDATE_MASKED_C_2_BZ
+    jmp(.DDONE)                                              // jump to end.
+
+    LABEL(.UPDATE1BZ)
+    UPDATE_MASKED_C_1_BZ
+    jmp(.DDONE)                                              // jump to end.
+
+    LABEL(.UPDATE0BZ)
     label(.DDONE)
 
 
@@ -977,7 +1684,8 @@ void bli_dgemmsup_rv_zen4_asm_16x1
         [cs_c]   "m" (cs_c),
         [n0]     "m" (n0),
         [m0]     "m" (m0),
-        [mask]   "m" (mask)
+        [mask]   "m" (mask),
+        [mask_n0] "m" (mask_n0)
       : // register clobber list
         "rax", "rbx", "rcx", "rdx", "rsi", "rdi",
         "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15",
@@ -1038,6 +1746,11 @@ void bli_dgemmsup_rv_zen4_asm_8x1
     // So, mask becomes 0xff(11111111)
     if (mask == 0) mask = 0xff;
 
+    uint8_t mask_n0 = 0xff >> (0x8 - (n0 & 7)); // calculate mask based on n_left
+    // For special cases where n_left = 8, all 8 elements have to be loaded/stored
+    // So, mask becomes 0xff(11111111)
+    if (mask_n0 == 0) mask_n0 = 0xff;
+
         // -------------------------------------------------------------------------
     begin_asm()
 
@@ -1050,6 +1763,8 @@ void bli_dgemmsup_rv_zen4_asm_8x1
     mov(var(cs_c), rdi)             // load cs_c
     mov(var(mask), rdx)             // load mask
     kmovw(edx, k(2))                // move mask to k2 register
+    mov(var(mask_n0), rdx)          // load mask
+    kmovw(edx, k(3))                // move mask to k3 register
     lea(mem(, r8, 8), r8)           // rs_b *= sizeof(double)
     lea(mem(, r9, 8), r9)           // cs_b *= sizeof(double)
     lea(mem(, r10, 8), r10)         // cs_a *= sizeof(double)
@@ -1322,8 +2037,78 @@ void bli_dgemmsup_rv_zen4_asm_8x1
     jmp(.DDONE)                                           // jump to end.
 
     label(.DROWSTORED)
+    // r12 = 3*rs_c
+    lea(mem(rsi,  rsi,  2), r12)
+    // r13 = 5*rs_c
+    lea(mem(r12, rsi,  2), r13)
+    // rdx = 7*rs_c
+    lea(mem(r12, rsi,  4), rdx)
+    lea(mem(   , rsi, 8), r14)
+    vunpcklpd( zmm8,  zmm6,  zmm0)
+    vunpckhpd( zmm8,  zmm6,  zmm1)
+    SHUFFLE_DATA(2, 0, 4, 5, 3, 1, 30, 31)
 
-    // yet to be implemented
+    SHUFFLE_DATA(2, 0, 6, 8, 3, 1, 10, 12)
+
+    SHUFFLE_DATA(6, 4, 0, 1, 8, 5, 2, 3)
+    SHUFFLE_DATA(10, 30, 4, 5, 12, 31, 6, 8)
+
+    vbroadcastsd(mem(rax), zmm31)
+
+    mov(var(m0), rdi)
+    cmp(imm(8), rdi)
+    JZ(.UPDATE8)
+    cmp(imm(7), rdi)
+    JZ(.UPDATE7)
+    cmp(imm(6), rdi)
+    JZ(.UPDATE6)
+    cmp(imm(5), rdi)
+    JZ(.UPDATE5)
+    cmp(imm(4), rdi)
+    JZ(.UPDATE4)
+    cmp(imm(3), rdi)
+    JZ(.UPDATE3)
+    cmp(imm(2), rdi)
+    JZ(.UPDATE2)
+    cmp(imm(1), rdi)
+    JZ(.UPDATE1)
+    cmp(imm(0), rdi)
+    JZ(.UPDATE0)
+
+    LABEL(.UPDATE8)
+    UPDATE_MASKED_C_8
+    jmp(.DDONE)
+
+    LABEL(.UPDATE7)
+    UPDATE_MASKED_C_7
+    jmp(.DDONE)
+
+    LABEL(.UPDATE6)
+    UPDATE_MASKED_C_6
+    jmp(.DDONE)                                              // jump to end.
+
+    LABEL(.UPDATE5)
+    UPDATE_MASKED_C_5
+    jmp(.DDONE)                                              // jump to end.
+
+    LABEL(.UPDATE4)
+    UPDATE_MASKED_C_4
+    jmp(.DDONE)                                              // jump to end.
+
+    LABEL(.UPDATE3)
+    UPDATE_MASKED_C_3
+    jmp(.DDONE)                                              // jump to end.
+
+    LABEL(.UPDATE2)
+    UPDATE_MASKED_C_2
+    jmp(.DDONE)                                              // jump to end.
+
+    LABEL(.UPDATE1)
+    UPDATE_MASKED_C_1
+    jmp(.DDONE)                                              // jump to end.
+
+    LABEL(.UPDATE0)
+    //8x1 tile updated
     jmp(.DDONE)                                          // jump to end.
 
 
@@ -1338,8 +2123,75 @@ void bli_dgemmsup_rv_zen4_asm_8x1
 
 
     label(.DROWSTORBZ)
+    // r12 = 3*rs_c
+    lea(mem(rsi,  rsi,  2), r12)
+    // r13 = 5*rs_c
+    lea(mem(r12, rsi,  2), r13)
+    // rdx = 7*rs_c
+    lea(mem(r12, rsi,  4), rdx)
+    lea(mem(   , rsi, 8), r14)
+    vunpcklpd( zmm8,  zmm6,  zmm0)
+    vunpckhpd( zmm8,  zmm6,  zmm1)
+    SHUFFLE_DATA(2, 0, 4, 5, 3, 1, 30, 31)
 
-    // yet to be implemented
+    SHUFFLE_DATA(2, 0, 6, 8, 3, 1, 10, 12)
+
+    SHUFFLE_DATA(6, 4, 0, 1, 8, 5, 2, 3)
+    SHUFFLE_DATA(10, 30, 4, 5, 12, 31, 6, 8)
+
+    mov(var(m0), rdi)
+    cmp(imm(8), rdi)
+    JZ(.UPDATE8BZ)
+    cmp(imm(7), rdi)
+    JZ(.UPDATE7BZ)
+    cmp(imm(6), rdi)
+    JZ(.UPDATE6BZ)
+    cmp(imm(5), rdi)
+    JZ(.UPDATE5BZ)
+    cmp(imm(4), rdi)
+    JZ(.UPDATE4BZ)
+    cmp(imm(3), rdi)
+    JZ(.UPDATE3BZ)
+    cmp(imm(2), rdi)
+    JZ(.UPDATE2BZ)
+    cmp(imm(1), rdi)
+    JZ(.UPDATE1BZ)
+    cmp(imm(0), rdi)
+    JZ(.UPDATE0BZ)
+
+    LABEL(.UPDATE8BZ)
+    UPDATE_MASKED_C_8_BZ
+    jmp(.DDONE)
+
+    LABEL(.UPDATE7BZ)
+    UPDATE_MASKED_C_7_BZ
+    jmp(.DDONE)
+
+    LABEL(.UPDATE6BZ)
+    UPDATE_MASKED_C_6_BZ
+    jmp(.DDONE)                                              // jump to end.
+
+    LABEL(.UPDATE5BZ)
+    UPDATE_MASKED_C_5_BZ
+    jmp(.DDONE)                                              // jump to end.
+
+    LABEL(.UPDATE4BZ)
+    UPDATE_MASKED_C_4_BZ
+    jmp(.DDONE)                                              // jump to end.
+
+    LABEL(.UPDATE3BZ)
+    UPDATE_MASKED_C_3_BZ
+    jmp(.DDONE)                                              // jump to end.
+
+    LABEL(.UPDATE2BZ)
+    UPDATE_MASKED_C_2_BZ
+    jmp(.DDONE)                                              // jump to end.
+
+    LABEL(.UPDATE1BZ)
+    UPDATE_MASKED_C_1_BZ
+    jmp(.DDONE)                                              // jump to end.
+
+    LABEL(.UPDATE0BZ)
     label(.DDONE)
 
 
@@ -1364,7 +2216,8 @@ void bli_dgemmsup_rv_zen4_asm_8x1
         [cs_c]   "m" (cs_c),
         [n0]     "m" (n0),
         [m0]     "m" (m0),
-        [mask]   "m" (mask)
+        [mask]   "m" (mask),
+        [mask_n0]   "m" (mask_n0)
       : // register clobber list
         "rax", "rbx", "rcx", "rdx", "rsi", "rdi",
         "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15",
