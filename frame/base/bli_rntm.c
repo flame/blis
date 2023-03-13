@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2021 - 2022, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2021 - 2023, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -575,78 +575,647 @@ void bli_nthreads_optimum(
 		dim_t n = bli_obj_width(c);
 		dim_t k = bli_obj_width_after_trans(a);
 
-		if( k >= 128)
+		if(bli_arch_query_id() == BLIS_ARCH_ZEN4)
 		{
-			if(n <= 15)
+			if(n < m)
 			{
-				if(m < 128) 	 n_threads_ideal = 8;
-				else if(m < 256) n_threads_ideal = 16;
-				else if(m < 512) n_threads_ideal = 32;
-				else 			 n_threads_ideal = 64;
-			}else if (n <= 64)
+				if(k <= 32)
+				{
+					if( m <= 1000 )
+					{
+						n_threads_ideal = 8;
+					}
+					else if( m <= 10000)
+					{
+						if( n <= 500 )
+						{
+							n_threads_ideal = 16;
+						}
+						else if( n <= 1000 )
+						{
+							n_threads_ideal = 64;
+						}
+						else
+						{
+							n_threads_ideal = 96;
+						}
+					}
+					else
+					{
+						n_threads_ideal = 96;
+					}
+				}
+				else if(k <= 64)
+				{
+					if( (m <= 100) || (m <= 500 && n <= 100))
+					{
+						n_threads_ideal = 8;
+					}
+					else if(m <= 500)
+					{
+						n_threads_ideal = 16;
+					}
+					else if(m <= 1000)
+					{
+						if(n <= 50)
+						{
+							n_threads_ideal = 8;
+						}
+						else if(n <= 250)
+						{
+							n_threads_ideal = 16;
+						}
+						else
+						{
+							n_threads_ideal = 24;
+						}
+					}
+					else if(m <= 10000)
+					{
+						if(n <= 500)
+						{
+							n_threads_ideal = 24;
+						}
+						else if(n <= 1000)
+						{
+							n_threads_ideal = 64;
+						}
+					}
+					else if( m <= 20000 && n <= 500)
+					{
+						n_threads_ideal = 96;
+					}
+					else if( m <= 30000)
+					{
+						if(n <= 1000)
+						{
+							n_threads_ideal = 144;
+						}
+						else
+						{
+							n_threads_ideal = 192;
+						}
+					}
+					else if( m <= 40000 && n <= 1000)
+					{
+						n_threads_ideal = 168;
+					}
+					else
+					{
+						n_threads_ideal = 192;
+					}
+				}
+				else if(k <= 128)
+				{
+					if( (m <= 100) || (m <= 500 && n <= 50))
+					{
+						n_threads_ideal = 8;
+					}
+					else if(m <= 500)
+					{
+						if(n <= 100)
+						{
+							n_threads_ideal = 16;
+						}
+						else
+						{
+							n_threads_ideal = 24;
+						}
+					}
+					else if( m <= 1000 )
+					{
+						if(n <= 200)
+						{
+							n_threads_ideal = 24;
+						}
+						else
+						{
+							n_threads_ideal = 48;
+						}
+					}
+					else if( m <= 10000 )
+					{
+						if(n <= 50)
+						{
+							n_threads_ideal = 32;
+						}
+						else if(n <= 500)
+						{
+							n_threads_ideal = 48;
+						}
+						else if(n <= 750)
+						{
+							n_threads_ideal = 96;
+						}
+						else if(n <= 1000)
+						{
+							n_threads_ideal = 128;
+						}
+						else if(n <= 5000)
+						{
+							n_threads_ideal = 144;
+						}
+						else
+						{
+							n_threads_ideal = 192;
+						}
+					}
+					else if( m <= 30000 )
+					{
+						if(n <= 1000)
+						{
+							n_threads_ideal = 168;
+						}
+						else
+						{
+							n_threads_ideal = 192;
+						}
+					}
+					else if( m <= 40000 )
+					{
+						if(n <= 600)
+						{
+							n_threads_ideal = 144;
+						}
+						else if(n <= 1000)
+						{
+							n_threads_ideal = 168;
+						}
+						else
+						{
+							n_threads_ideal = 192;
+						}
+					}
+					else
+					{
+						n_threads_ideal = 192;
+					}
+				}
+				else
+				{
+					if( m <= 100 )
+					{
+						n_threads_ideal = 8;
+					}
+					else if( m <= 500 )
+					{
+						if( n <= 50 )
+						{
+							n_threads_ideal = 16;
+						}
+						else if( n <= 200 )
+						{
+							n_threads_ideal = 32;
+						}
+						else
+						{
+							n_threads_ideal = 48;
+						}
+					}
+					else if( m <= 1000 )
+					{
+						if(n <= 100 )
+						{
+							n_threads_ideal = 32;
+						}
+						else
+						{
+							n_threads_ideal = 48;
+						}
+					}
+					else if( m <= 10000 )
+					{
+						if(n <= 200 )
+						{
+							n_threads_ideal = 48;
+						}
+						else if( n <= 500 )
+						{
+							n_threads_ideal = 96;
+						}
+						else if( n <= 600 )
+						{
+							n_threads_ideal = 144;
+						}
+						else
+						{
+							n_threads_ideal = 192;
+						}
+					}
+					else if( m <= 20000 && n <= 750 )
+					{
+						n_threads_ideal = 168;
+					}
+					else
+					{
+						n_threads_ideal = 192;
+					}
+				}
+			}
+			else if(m < n)
 			{
-				if(m < 128) 	 n_threads_ideal = 16;
-				else if(m < 256) n_threads_ideal = 32;
-				else 			 n_threads_ideal = 64;
-			}else{
-				if(m < 256) n_threads_ideal = 32;
-				else 		n_threads_ideal = 64;
-            }
+				if(k <= 32)
+				{
+					if( n <= 1000 )
+					{
+						n_threads_ideal = 8;
+					}
+					else if( n <= 10000 )
+					{
+						if( m <= 500 )
+						{
+							n_threads_ideal = 16;
+						}
+						else if( m <= 1000 )
+						{
+							n_threads_ideal = 32;
+						}
+						else
+						{
+							n_threads_ideal = 96;
+						}
+					}
+					else
+					{
+						n_threads_ideal = 96;
+					}
+				}
+				else if(k <= 64)
+				{
+					if( (n <= 100) || (n <= 500 && m <= 100) )
+					{
+						n_threads_ideal = 8;
+					}
+					else if(n <= 500)
+					{
+						n_threads_ideal = 16;
+					}
+					else if( n <= 1000 )
+					{
+						if( m <= 200)
+						{
+							n_threads_ideal = 16;
+						}
+						else
+						{
+							n_threads_ideal = 32;
+						}
+					}
+					else if( n <= 10000 )
+					{
+						if( m <= 100)
+						{
+							n_threads_ideal = 32;
+						}
+						else if( m <= 500)
+						{
+							n_threads_ideal = 48;
+						}
+						else if( m <= 1000)
+						{
+							n_threads_ideal = 96;
+						}
+						else if(m <= 2500)
+						{
+							n_threads_ideal = 128;
+						}
+						else
+						{
+							n_threads_ideal = 192;
+						}
+					}
+					else if( n <= 20000 )
+					{
+						if( m < 1000 )
+						{
+							n_threads_ideal = 128;
+						}
+						else if( m < 2500 )
+						{
+							n_threads_ideal = 144;
+						}
+						else
+						{
+							n_threads_ideal = 192;
+						}
+					}
+					else if( n <= 30000)
+					{
+						if( m < 1000 )
+						{
+							n_threads_ideal = 168;
+						}
+						else
+						{
+							n_threads_ideal = 192;
+						}
+					}
+					else if( n <= 40000 )
+					{
+						if(m < 600)
+						{
+							n_threads_ideal = 144;
+						}
+						else if(m < 750)
+						{
+							n_threads_ideal = 168;
+						}
+						else
+						{
+							n_threads_ideal = 192;
+						}
+					}
+					else
+					{
+						n_threads_ideal = 192;
+					}
+				}
+				else if(k <= 128)
+				{
+					if( (n <= 100) || (n <= 500 && m <= 50) )
+					{
+						n_threads_ideal = 8;
+					}
+					else if(n <= 500 )
+					{
+						if( m <= 100)
+						{
+							n_threads_ideal = 16;
+						}
+						else
+						{
+							n_threads_ideal = 32;
+						}
+					}
+					else if( n <= 1000 )
+					{
+						if( m <= 50)
+						{
+							n_threads_ideal = 16;
+						}
+						else
+						{
+							n_threads_ideal = 32;
+						}
+					}
+					else if( n <= 10000 )
+					{
+						if(m <= 100 )
+						{
+							n_threads_ideal = 32;
+						}
+						else if(m <= 200 )
+						{
+							n_threads_ideal = 64;
+						}
+						else if(m <= 500 )
+						{
+							n_threads_ideal = 72;
+						}
+						else if(m < 1000 )
+						{
+							n_threads_ideal = 96;
+						}
+						else if(m < 2500 )
+						{
+							n_threads_ideal = 168;
+						}
+						else
+						{
+							n_threads_ideal = 192;
+						}
+					}
+					else if( n <= 20000 )
+					{
+						if(m <= 500 )
+						{
+							n_threads_ideal = 96;
+						}
+						else if(m < 1000 )
+						{
+							n_threads_ideal = 128;
+						}
+						else if(m < 2500 )
+						{
+							n_threads_ideal = 144;
+						}
+						else
+						{
+							n_threads_ideal = 192;
+						}
+					}
+					else if( n <= 30000 )
+					{
+						if(m <= 500 )
+						{
+							n_threads_ideal = 96;
+						}
+						else if(m < 750 )
+						{
+							n_threads_ideal = 128;
+						}
+						else if(m < 1000 )
+						{
+							n_threads_ideal = 168;
+						}
+						else
+						{
+							n_threads_ideal = 192;
+						}
+					}
+					else if( n <= 40000 )
+					{
+						if(m < 500 )
+						{
+							n_threads_ideal = 128;
+						}
+						else if(m < 600 )
+						{
+							n_threads_ideal = 144;
+						}
+						else if(m < 750 )
+						{
+							n_threads_ideal = 168;
+						}
+						else
+						{
+							n_threads_ideal = 192;
+						}
+					}
+					else
+					{
+						n_threads_ideal = 192;
+					}
+				}
+				else
+				{
+					if(n <= 100)
+					{
+						n_threads_ideal = 8;
+					}
+					else if( n <= 500 )
+					{
+						if( m <= 100)
+						{
+							n_threads_ideal = 16;
+						}
+						else
+						{
+							n_threads_ideal = 32;
+						}
+					}
+					else if( n <= 1000 )
+					{
+						if( m <= 100)
+						{
+							n_threads_ideal = 32;
+						}
+						else
+						{
+							n_threads_ideal = 48;
+						}
+					}
+					else if( n <= 10000 )
+					{
+						if( m <= 50)
+						{
+							n_threads_ideal = 48;
+						}
+						else if(m <= 100)
+						{
+							n_threads_ideal = 64;
+						}
+						else if(m < 750)
+						{
+							n_threads_ideal = 96;
+						}
+						else
+						{
+							n_threads_ideal = 192;
+						}
+					}
+					else
+					{
+						n_threads_ideal = 192;
+					}
+				}
+			}
+			else if(m == n)
+			{
+				if(k <= 32)
+				{
+					if( m <= 20 )        n_threads_ideal = 1;
+					else if( m <= 40 )   n_threads_ideal = 4;
+					else if( m <= 800 )  n_threads_ideal = 8;
+					else if( m <= 1000 ) n_threads_ideal = 16;
+					else if( m <= 5000 ) n_threads_ideal = 64;
+					else                 n_threads_ideal = 96;
+				}
+				else if(k <= 64)
+				{
+					if(m <= 150) n_threads_ideal = 8;
+					else if(m <= 1000) n_threads_ideal = 16;
+					else if( m <= 2500) n_threads_ideal = 96;
+					else if( m <= 5000) n_threads_ideal = 128;
+					else if( m <= 6000) n_threads_ideal = 128;
+					else n_threads_ideal = 192;
+				}
+				else if( k <= 128)
+				{
+					if( m <= 100) n_threads_ideal = 8;
+					else if(m <= 500) n_threads_ideal = 32;
+					else if( m <= 1000) n_threads_ideal = 64;
+					else if( m <= 5000) n_threads_ideal = 144;
+					else n_threads_ideal = 192;
+				}
+				else
+				{
+					if( m <= 100) n_threads_ideal = 8;
+					else if( m <= 250 ) n_threads_ideal = 32;
+					else if( m <= 500 ) n_threads_ideal = 48;
+					else if( m <= 1000) n_threads_ideal = 96;
+					else n_threads_ideal = 192;
+				}
+			}
 		}
 		else
 		{
-			if(m > 10000)
+			if( k >= 128)
 			{
-				// current logic is only limiting threads to
-				// less or equal to 64 - limits performance.
-				// To deal with larger matrix sizes we need to use
-				// large number of threads to improve performance
-				// Need to derive this upperTH - and
-				// if matrix -sizes are larger and user wants
-				// to use higher number of threads - that should be allowed.
-
-				// if (n > UpperTH) n_threads_ideal = n_threads;
-				if (n > 200 )	    n_threads_ideal = 64;
-				else if ( n > 120 ) n_threads_ideal = 32;
-				else if ( n > 40  ) n_threads_ideal = 16;
-				else if ( n > 10  ) n_threads_ideal = 8;
-				else 				n_threads_ideal = 4;
-			}
-			else if( m > 1000)
-			{
-				if (n <= 10) 		  n_threads_ideal = 4;
-				else if ( n <= 512 )  n_threads_ideal = 8;
-				else if ( n <= 1024 ) n_threads_ideal = 16;
-				else if ( n <= 2048 ) n_threads_ideal = 32;
-				else 				  n_threads_ideal = 64;
-			}
-			else if(m > 210)
-			{
-				if(n < 10)  	   n_threads_ideal = 4;
-				else if(n <= 512)  n_threads_ideal = 8;
-				else if(n <= 1024) n_threads_ideal = 16;
-				else if(n <= 2048) n_threads_ideal = 32;
-				else 			   n_threads_ideal = 64;
-			}
-			else if(m > 150)
-			{
-				if(n < 10)  	   n_threads_ideal = 2;
-				else if(n <= 512)  n_threads_ideal = 8;
-				else if(n <= 1024) n_threads_ideal = 16;
-				else if(n <= 2048) n_threads_ideal = 32;
-				else 			   n_threads_ideal = 64;
-			}
-			else if( ( m < 34) && (k < 68) && ( n < 34))
-			{
-				n_threads_ideal = 1;
+				if(n <= 15)
+				{
+					if(m < 128) 	 n_threads_ideal = 8;
+					else if(m < 256) n_threads_ideal = 16;
+					else if(m < 512) n_threads_ideal = 32;
+					else 			 n_threads_ideal = 64;
+				}
+				else if (n <= 64)
+				{
+					if(m < 128) 	 n_threads_ideal = 16;
+					else if(m < 256) n_threads_ideal = 32;
+					else 			 n_threads_ideal = 64;
+				}
+				else
+				{
+					if(m < 256) n_threads_ideal = 32;
+					else 		n_threads_ideal = 64;
+				}
 			}
 			else
-			{	//(m<150 && k<128)
-				if(n < 20) n_threads_ideal = 1;
-				if(n < 64) n_threads_ideal = 4;
-				else	   n_threads_ideal = 8;
+			{
+				if(m > 10000)
+				{
+					// current logic is only limiting threads to
+					// less or equal to 64 - limits performance.
+					// To deal with larger matrix sizes we need to use
+					// large number of threads to improve performance
+					// Need to derive this upperTH - and
+					// if matrix -sizes are larger and user wants
+					// to use higher number of threads - that should be allowed.
+
+					// if (n > UpperTH) n_threads_ideal = n_threads;
+					if (n > 200 )	    n_threads_ideal = 64;
+					else if ( n > 120 ) n_threads_ideal = 32;
+					else if ( n > 40  ) n_threads_ideal = 16;
+					else if ( n > 10  ) n_threads_ideal = 8;
+					else 				n_threads_ideal = 4;
+				}
+				else if( m > 1000)
+				{
+					if (n <= 10) 		  n_threads_ideal = 4;
+					else if ( n <= 512 )  n_threads_ideal = 8;
+					else if ( n <= 1024 ) n_threads_ideal = 16;
+					else if ( n <= 2048 ) n_threads_ideal = 32;
+					else 				  n_threads_ideal = 64;
+				}
+				else if(m > 210)
+				{
+					if(n < 10)  	   n_threads_ideal = 4;
+					else if(n <= 512)  n_threads_ideal = 8;
+					else if(n <= 1024) n_threads_ideal = 16;
+					else if(n <= 2048) n_threads_ideal = 32;
+					else 			   n_threads_ideal = 64;
+				}
+				else if(m > 150)
+				{
+					if(n < 10)  	   n_threads_ideal = 2;
+					else if(n <= 512)  n_threads_ideal = 8;
+					else if(n <= 1024) n_threads_ideal = 16;
+					else if(n <= 2048) n_threads_ideal = 32;
+					else 			   n_threads_ideal = 64;
+				}
+				else if( ( m < 34) && (k < 68) && ( n < 34))
+				{
+					n_threads_ideal = 1;
+				}
+				else
+				{	//(m<150 && k<128)
+					if(n < 20) n_threads_ideal = 1;
+					if(n < 64) n_threads_ideal = 4;
+					else	   n_threads_ideal = 8;
+				}
 			}
-		  }
+		}
 	}
 	else if( family == BLIS_GEMM && bli_obj_is_dcomplex(c))
 	{
