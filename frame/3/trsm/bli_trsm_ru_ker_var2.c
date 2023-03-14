@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2018 - 2022, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2018 - 2023, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -193,9 +193,11 @@ void PASTEMAC(ch,varname) \
 	 *
 	 * We need to revisit this when TRSM AVX-512 kernels are implemented.
 	 */ \
+	bool      col_pref    = bli_cntx_l3_vir_ukr_prefers_cols_dt( dt, BLIS_GEMM_UKR, cntx ); \
 	if (bli_arch_query_id() == BLIS_ARCH_ZEN4 && ((dt == BLIS_FLOAT) || (dt == BLIS_DOUBLE)) ) \
 	{ \
 		gemm_ukr = bli_cntx_get_l3_vir_ukr_dt( dt, BLIS_GEMM_FOR_TRSM_UKR, cntx ); \
+		col_pref = bli_cntx_l3_vir_ukr_prefers_cols_dt( dt, BLIS_GEMM_FOR_TRSM_UKR, cntx ); \
 	} \
 \
 	/* Temporary C buffer for edge cases. Note that the strides of this
@@ -205,7 +207,6 @@ void PASTEMAC(ch,varname) \
 	ctype           ct[ BLIS_STACK_BUF_MAX_SIZE \
 	                    / sizeof( ctype ) ] \
 	                    __attribute__((aligned(BLIS_STACK_BUF_ALIGN_SIZE))); \
-	const bool      col_pref    = bli_cntx_l3_vir_ukr_prefers_cols_dt( dt, BLIS_GEMM_UKR, cntx ); \
 	const inc_t     rs_ct       = ( col_pref ? 1 : NR ); \
 	const inc_t     cs_ct       = ( col_pref ? MR : 1 ); \
 \

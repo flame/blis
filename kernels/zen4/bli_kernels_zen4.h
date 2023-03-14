@@ -40,6 +40,8 @@ AMAXV_KER_PROT( double,   d, amaxv_zen_int_avx512 )
 
 GEMMTRSM_UKR_PROT( double,   d, gemmtrsm_l_zen_asm_16x14)
 GEMMTRSM_UKR_PROT( double,   d, gemmtrsm_u_zen_asm_16x14)
+GEMMTRSM_UKR_PROT( double,   d, gemmtrsm_l_zen4_asm_8x24)
+GEMMTRSM_UKR_PROT( double,   d, gemmtrsm_u_zen4_asm_8x24)
 
 //packing kernels
 PACKM_KER_PROT( double,   d, packm_zen4_asm_16xk )
@@ -49,6 +51,7 @@ PACKM_KER_PROT( double,   d, packm_32xk_zen4_ref )
 
 // native dgemm kernel
 GEMM_UKR_PROT( double,   d, gemm_zen4_asm_32x6 )
+GEMM_UKR_PROT( double,   d, gemm_zen4_asm_8x24 )
 
 //sgemm rv sup
 GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen_asm_6x64m_avx512 )
