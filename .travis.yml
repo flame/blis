@@ -11,7 +11,7 @@ matrix:
   # full testsuite (all tests + mixed datatype (gemm_nn only) + salt + SDE + OOT)
   - os: linux
     compiler: gcc
-    env: OOT=1 TEST=ALL SDE=1 THR="none" CONF="x86_64" \
+    env: OOT=1 TEST=ALL SDE=1 THR="none" CONF="x86_64"\
       PACKAGES="gcc-9 binutils"
   # openmp build
   - os: linux
@@ -71,6 +71,20 @@ matrix:
       CC=aarch64-linux-gnu-gcc-10 CXX=aarch64-linux-gnu-g++-10 \
       PACKAGES="gcc-10-aarch64-linux-gnu g++-10-aarch64-linux-gnu libc6-dev-arm64-cross qemu-system-arm qemu-user" \
       TESTSUITE_WRAPPER="qemu-aarch64 -L /usr/aarch64-linux-gnu/"
+  - os: linux
+    compiler: riscv64-unknown-linux-gcc
+    env: OOT=0 TEST=FAST SDE=0 THR="none" BLD="--disable-shared" CONF="rv64iv"\
+      CC=riscv64-unknown-linux-gnu-gcc \
+      # The RISC-V targets require the qemu version available in jammy or newer. When
+      # CI is upgraded, the packages should be activated and do_script.sh cleaned up.
+      #PACKAGES="qemu-user qemu-user-binfmt" \
+      LDFLAGS=-static
+  - os: linux
+    compiler: riscv32-unknown-linux-gcc
+    env: OOT=0 TEST=FAST SDE=0 THR="none" BLD="--disable-shared" CONF="rv32iv"\
+      CC=riscv32-unknown-linux-gnu-gcc \
+      #PACKAGES="qemu-user qemu-user-binfmt" \
+      LDFLAGS=-static
 install:
 - if [ "$CC" = "gcc"  ] && [ "$TRAVIS_OS_NAME" = "linux" ]; then export CC="gcc-9"; fi
 - if [ -n "$PACKAGES" ] && [ "$TRAVIS_OS_NAME" = "linux" ]; then sudo apt-get install -y $PACKAGES; fi
@@ -79,13 +93,27 @@ script:
 - pwd
 - if [ $OOT -eq 1 ]; then export DIST_PATH=`pwd`; mkdir ../oot; cd ../oot; chmod -R a-w $DIST_PATH; fi
 - pwd
-- $DIST_PATH/configure -p `pwd`/../install -t $THR CC=$CC $CONF
+- >
+    if [ "$CONF" = "rv64iv" ]; then
+      $DIST_PATH/travis/do_riscv.sh "$CONF";
+      export CC=$DIST_PATH/../toolchain/riscv/bin/riscv64-unknown-linux-gnu-gcc;
+      export CXX=$DIST_PATH/../toolchain/riscv/bin/riscv64-unknown-linux-gnu-g++;
+      export TESTSUITE_WRAPPER="$DIST_PATH/../toolchain/qemu-riscv64 -cpu rv64,vext_spec=v1.0,v=true,vlen=128 -B 0x100000";
+    fi
+- >
+    if [ "$CONF" = "rv32iv" ]; then
+      $DIST_PATH/travis/do_riscv.sh "$CONF";
+      export CC=$DIST_PATH/../toolchain/riscv/bin/riscv32-unknown-linux-gnu-gcc;
+      export CXX=$DIST_PATH/../toolchain/riscv/bin/riscv32-unknown-linux-gnu-g++;
+      export TESTSUITE_WRAPPER="$DIST_PATH/../toolchain/qemu-riscv32 -cpu rv32,vext_spec=v1.0,v=true,vlen=128 -B 0x100000";
+    fi
+- $DIST_PATH/configure -p `pwd`/../install -t $THR $BLD CC=$CC $CONF
 - pwd
 - ls -l
 - $CC --version
 - make -j 2
 - make install
-- $DIST_PATH/travis/cxx/cxx-test.sh $DIST_PATH $(ls -1 include)
+- if [ "$BLD" = "" ]; then $DIST_PATH/travis/cxx/cxx-test.sh $DIST_PATH $(ls -1 include); fi
 # Qemu SVE is failing sgemmt in some cases. Skip as this issue is not observed on real chip (A64fx).
 - if [ "$CONF" = "armsve" ]; then sed -i 's/.*\<gemmt\>.*/0/' $DIST_PATH/testsuite/input.operations.fast; fi
 - if [ "$TEST" != "0" ]; then travis_wait 30 $DIST_PATH/travis/do_testsuite.sh; fi
