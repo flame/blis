@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2023, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -361,6 +362,70 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 	/* Obtain a valid context from the gks if necessary. */ \
 	if ( cntx == NULL ) cntx = bli_gks_query_cntx(); \
 \
+	/* Invoke setm function if alpha is zero. */ \
+	if ( PASTEMAC(ch,eq0)(*alpha)) \
+	{ \
+		PASTEMAC2(ch,setm,_unb_var1) \
+		( \
+		  conjalpha, \
+		  diagoffx, \
+		  diagx, \
+		  uplox, \
+		  m, \
+		  n, \
+		  alpha, \
+		  x, rs_x, cs_x, \
+		  cntx, \
+		  rntm  \
+		); \
+	} \
+	else \
+	{ \
+		/* Invoke the helper variant, which loops over the appropriate kernel
+		to implement the current operation. */ \
+		PASTEMAC2(ch,opname,_unb_var1) \
+		( \
+		conjalpha, \
+		diagoffx, \
+		diagx, \
+		uplox, \
+		m, \
+		n, \
+		alpha, \
+		x, rs_x, cs_x, \
+		cntx, \
+		rntm  \
+		); \
+	} \
+}
+
+INSERT_GENTFUNC_BASIC0( scalm )
+
+#undef  GENTFUNC
+#define GENTFUNC( ctype, ch, opname ) \
+\
+void PASTEMAC2(ch,opname,EX_SUF) \
+     ( \
+       conj_t  conjalpha, \
+       doff_t  diagoffx, \
+       diag_t  diagx, \
+       uplo_t  uplox, \
+       dim_t   m, \
+       dim_t   n, \
+       ctype*  alpha, \
+       ctype*  x, inc_t rs_x, inc_t cs_x  \
+       BLIS_TAPI_EX_PARAMS  \
+     ) \
+{ \
+	bli_init_once(); \
+\
+	BLIS_TAPI_EX_DECLS \
+\
+	if ( bli_zero_dim2( m, n ) ) return; \
+\
+	/* Obtain a valid context from the gks if necessary. */ \
+	if ( cntx == NULL ) cntx = bli_gks_query_cntx(); \
+\
 	/* Invoke the helper variant, which loops over the appropriate kernel
 	   to implement the current operation. */ \
 	PASTEMAC2(ch,opname,_unb_var1) \
@@ -378,7 +443,6 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 	); \
 }
 
-INSERT_GENTFUNC_BASIC0( scalm )
 INSERT_GENTFUNC_BASIC0( setm )
 
 
