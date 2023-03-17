@@ -43,6 +43,8 @@
 
 void bli_sgemm_opt_8x4
      (
+       dim_t               m,
+       dim_t               n,
        dim_t               k,
        float*     restrict alpha,
        float*     restrict a,
@@ -55,6 +57,8 @@ void bli_sgemm_opt_8x4
 
 void bli_dgemm_opt_8x4
      (
+       dim_t               m,
+       dim_t               n,
        dim_t               k,
        double*    restrict alpha,
        double*    restrict a,
@@ -67,6 +71,8 @@ void bli_dgemm_opt_8x4
 
 void bli_cgemm_opt_8x4
      (
+       dim_t               m,
+       dim_t               n,
        dim_t               k,
        scomplex*  restrict alpha,
        scomplex*  restrict a,
@@ -79,6 +85,8 @@ void bli_cgemm_opt_8x4
 
 void bli_zgemm_opt_8x4
      (
+       dim_t               m,
+       dim_t               n,
        dim_t               k,
        dcomplex*  restrict alpha,
        dcomplex*  restrict a,

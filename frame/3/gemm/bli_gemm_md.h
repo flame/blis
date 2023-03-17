@@ -154,7 +154,7 @@ BLIS_INLINE void bli_gemm_md_ker_var2_recast
        num_t* dt_comp,
        num_t  dt_a,
        num_t  dt_b,
-       num_t  dt_c,
+       num_t* dt_c,
        dim_t* m,
        dim_t* n,
        dim_t* k,
@@ -164,7 +164,7 @@ BLIS_INLINE void bli_gemm_md_ker_var2_recast
        inc_t* rs_c, inc_t* cs_c
      )
 {
-	if      ( bli_is_real( dt_c )    &&
+	if      ( bli_is_real( *dt_c )    &&
 	          bli_is_complex( dt_a ) &&
 	          bli_is_complex( dt_b ) )
 	{
@@ -177,7 +177,7 @@ BLIS_INLINE void bli_gemm_md_ker_var2_recast
 		*ps_a *= 2;
 		*ps_b *= 2;
 	}
-	else if ( bli_is_complex( dt_c ) &&
+	else if ( bli_is_complex( *dt_c ) &&
 	          bli_is_real( dt_a )    &&
 	          bli_is_complex( dt_b ) )
 	{
@@ -197,6 +197,7 @@ BLIS_INLINE void bli_gemm_md_ker_var2_recast
 			// to the real virtual microkernel slots of the context) instead of
 			// the complex macrokernel and c2r virtual microkernel.
 			*dt_comp = bli_dt_proj_to_real( *dt_comp );
+			*dt_c = bli_dt_proj_to_real( *dt_c );
 			*n *= 2;
 			*pd_b *= 2; *ps_b *= 2;
 			*rs_c *= 2;
@@ -211,7 +212,7 @@ BLIS_INLINE void bli_gemm_md_ker_var2_recast
 			*ps_a /= 2;
 		}
 	}
-	else if ( bli_is_complex( dt_c ) &&
+	else if ( bli_is_complex( *dt_c ) &&
 	          bli_is_complex( dt_a ) &&
 	          bli_is_real( dt_b ) )
 	{
@@ -231,6 +232,7 @@ BLIS_INLINE void bli_gemm_md_ker_var2_recast
 			// to the real virtual microkernel slots of the context) instead of
 			// the complex macrokernel and c2r virtual microkernel.
 			*dt_comp = bli_dt_proj_to_real( *dt_comp );
+			*dt_c = bli_dt_proj_to_real( *dt_c );
 			*m *= 2;
 			*pd_a *= 2; *ps_a *= 2;
 			*cs_c *= 2;
@@ -273,55 +275,4 @@ BLIS_INLINE void bli_gemm_md_ker_var2_recast
 	}
 #endif
 }
-
-// -----------------------------------------------------------------------------
-
-//
-// Prototype object-based interfaces.
-//
-
-#undef  GENPROT
-#define GENPROT( opname ) \
-\
-void PASTEMAC0(opname) \
-     ( \
-       obj_t*  a, \
-       obj_t*  b, \
-       obj_t*  c, \
-       cntx_t* cntx, \
-       rntm_t* rntm, \
-       cntl_t* cntl, \
-       thrinfo_t* thread  \
-     );
-
-GENPROT( gemm_ker_var2_md )
-
-//
-// Prototype BLAS-like interfaces with void pointer operands.
-//
-
-#undef  GENTPROT2
-#define GENTPROT2( ctype_c, ctype_e, chc, che, varname ) \
-\
-void PASTEMAC2(chc,che,varname) \
-     ( \
-       pack_t  schema_a, \
-       pack_t  schema_b, \
-       dim_t   m, \
-       dim_t   n, \
-       dim_t   k, \
-       void*   alpha, \
-       void*   a, inc_t cs_a, inc_t is_a, \
-                  dim_t pd_a, inc_t ps_a, \
-       void*   b, inc_t rs_b, inc_t is_b, \
-                  dim_t pd_b, inc_t ps_b, \
-       void*   beta, \
-       void*   c, inc_t rs_c, inc_t cs_c, \
-       cntx_t* cntx, \
-       rntm_t* rntm, \
-       thrinfo_t* thread  \
-     );
-
-INSERT_GENTPROT2_BASIC0( gemm_ker_var2_md )
-INSERT_GENTPROT2_MIXDP0( gemm_ker_var2_md )
 

@@ -153,6 +153,8 @@ void PASTEMAC3(ch,opname,arch,suf) \
 	   upper: bt = -1.0 * a12 * b21; */ \
 	rgemm_ukr \
 	( \
+	  mr_r, \
+	  nr_r, \
 	  k2, \
 	  minus_one_r, \
 	  a1x_r, \

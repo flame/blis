@@ -188,7 +188,6 @@ void PASTEMAC(ch,varname) \
 	const inc_t     rs_ct       = ( col_pref ? 1 : NR ); \
 	const inc_t     cs_ct       = ( col_pref ? MR : 1 ); \
 \
-	ctype* restrict zero        = PASTEMAC(ch,0); \
 	ctype* restrict minus_one   = PASTEMAC(ch,m1); \
 	ctype* restrict a_cast      = a; \
 	ctype* restrict b_cast      = b; \
@@ -492,43 +491,20 @@ void PASTEMAC(ch,varname) \
 				bli_auxinfo_set_next_a( b2, &aux ); \
 				bli_auxinfo_set_next_b( a2, &aux ); \
 \
-				/* Handle interior and edge cases separately. */ \
-				if ( m_cur == MR && n_cur == NR ) \
-				{ \
-					/* Invoke the gemm micro-kernel. */ \
-					gemm_ukr \
-					( \
-					  k, \
-					  minus_one, \
-					  b1, \
-					  a1, \
-					  alpha2_cast, \
-					  c11, cs_c, rs_c, \
-					  &aux, \
-					  cntx  \
-					); \
-				} \
-				else \
-				{ \
-					/* Invoke the gemm micro-kernel. */ \
-					gemm_ukr \
-					( \
-					  k, \
-					  minus_one, \
-					  b1, \
-					  a1, \
-					  zero, \
-					  ct, cs_ct, rs_ct, \
-					  &aux, \
-					  cntx  \
-					); \
-\
-					/* Add the result to the edge of C. */ \
-					PASTEMAC(ch,xpbys_mxn)( m_cur, n_cur, \
-					                        ct,  rs_ct, cs_ct, \
-					                        alpha2_cast, \
-					                        c11, rs_c,  cs_c ); \
-				} \
+				/* Invoke the gemm micro-kernel. */ \
+				gemm_ukr \
+				( \
+				  m_cur, \
+				  n_cur, \
+				  k, \
+				  minus_one, \
+				  b1, \
+				  a1, \
+				  alpha2_cast, \
+				  c11, cs_c, rs_c, \
+				  &aux, \
+				  cntx  \
+				); \
 				} \
 \
 				a1  += rstep_a; \

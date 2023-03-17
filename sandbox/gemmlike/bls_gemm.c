@@ -192,9 +192,7 @@ void bls_gemm_int
 	// In this function, we choose the gemm implementation that is executed
 	// on each thread.
 
-#if 1
-	// Call the block-panel algorithm that calls the kernel directly, which
-	// exposes edge-case handling.
+	// Call the block-panel algorithm.
 	bls_gemm_bp_var1
 	(
 	  alpha,
@@ -206,21 +204,6 @@ void bls_gemm_int
 	  rntm,
 	  thread
 	);
-#else
-	// Call the block-panel algorithm that calls the kernel indirectly via a
-	// wrapper function, which hides edge-case handling.
-	bls_gemm_bp_var2
-	(
-	  alpha,
-	  a,
-	  b,
-	  beta,
-	  c,
-	  cntx,
-	  rntm,
-	  thread
-	);
-#endif
 }
 
 //

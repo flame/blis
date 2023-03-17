@@ -182,6 +182,8 @@ static int32_t offsets[32] __attribute__((aligned(64))) =
 //#define LOOPMON
 void bli_sgemm_knl_asm_24x16
      (
+       dim_t               m,
+       dim_t               n,
        dim_t               k_,
        float*     restrict alpha,
        float*     restrict a,
@@ -198,10 +200,12 @@ void bli_sgemm_knl_asm_24x16
     const double * a_next = bli_auxinfo_next_a( data );
     const double * b_next = bli_auxinfo_next_b( data );
 
-    const int32_t * offsetPtr = &offsets[0];
-    const int64_t k = k_;
-    const int64_t rs_c = rs_c_;
-    const int64_t cs_c = cs_c_;
+    int32_t * offsetPtr = &offsets[0];
+    int64_t k = k_;
+    int64_t rs_c = rs_c_;
+    int64_t cs_c = cs_c_;
+
+    GEMM_UKR_SETUP_CT( s, 24, 16, true );
 
 #ifdef MONITORS
     int toph, topl, both, botl, midl, midh, mid2l, mid2h;
@@ -562,10 +566,7 @@ void bli_sgemm_knl_asm_24x16
     // Check if C is row stride. If not, jump to the slow scattered update
     MOV(RAX, VAR(rs_c))
     LEA(RAX, MEM(,RAX,4))
-    MOV(RBX, VAR(cs_c))
     LEA(RDI, MEM(RAX,RAX,2))
-    CMP(RBX, IMM(1))
-    JNE(SCATTEREDUPDATE)
 
     VMOVD(EDX, XMM(1))
     SAL(EDX) //shift out sign bit
@@ -588,74 +589,6 @@ void bli_sgemm_knl_asm_24x16
     UPDATE_C_BZ_FOUR_ROWS(20,21,22,23)
     UPDATE_C_BZ_FOUR_ROWS(24,25,26,27)
     UPDATE_C_BZ_FOUR_ROWS(28,29,30,31)
-
-    JMP(END)
-
-    LABEL(SCATTEREDUPDATE)
-
-    MOV(RDI, VAR(offsetPtr))
-    VMOVAPS(ZMM(2), MEM(RDI))
-    /* Note that this ignores the upper 32 bits in cs_c */
-    VPBROADCASTD(ZMM(3), EBX)
-    VPMULLD(ZMM(2), ZMM(3), ZMM(2))
-
-    VMOVD(EDX, XMM(1))
-    SAL(EDX) //shift out sign bit
-    JZ(SCATTERBZ)
-
-    UPDATE_C_ROW_SCATTERED( 8)
-    UPDATE_C_ROW_SCATTERED( 9)
-    UPDATE_C_ROW_SCATTERED(10)
-    UPDATE_C_ROW_SCATTERED(11)
-    UPDATE_C_ROW_SCATTERED(12)
-    UPDATE_C_ROW_SCATTERED(13)
-    UPDATE_C_ROW_SCATTERED(14)
-    UPDATE_C_ROW_SCATTERED(15)
-    UPDATE_C_ROW_SCATTERED(16)
-    UPDATE_C_ROW_SCATTERED(17)
-    UPDATE_C_ROW_SCATTERED(18)
-    UPDATE_C_ROW_SCATTERED(19)
-    UPDATE_C_ROW_SCATTERED(20)
-    UPDATE_C_ROW_SCATTERED(21)
-    UPDATE_C_ROW_SCATTERED(22)
-    UPDATE_C_ROW_SCATTERED(23)
-    UPDATE_C_ROW_SCATTERED(24)
-    UPDATE_C_ROW_SCATTERED(25)
-    UPDATE_C_ROW_SCATTERED(26)
-    UPDATE_C_ROW_SCATTERED(27)
-    UPDATE_C_ROW_SCATTERED(28)
-    UPDATE_C_ROW_SCATTERED(29)
-    UPDATE_C_ROW_SCATTERED(30)
-    UPDATE_C_ROW_SCATTERED(31)
-
-    JMP(END)
-
-    LABEL(SCATTERBZ)
-
-    UPDATE_C_BZ_ROW_SCATTERED( 8)
-    UPDATE_C_BZ_ROW_SCATTERED( 9)
-    UPDATE_C_BZ_ROW_SCATTERED(10)
-    UPDATE_C_BZ_ROW_SCATTERED(11)
-    UPDATE_C_BZ_ROW_SCATTERED(12)
-    UPDATE_C_BZ_ROW_SCATTERED(13)
-    UPDATE_C_BZ_ROW_SCATTERED(14)
-    UPDATE_C_BZ_ROW_SCATTERED(15)
-    UPDATE_C_BZ_ROW_SCATTERED(16)
-    UPDATE_C_BZ_ROW_SCATTERED(17)
-    UPDATE_C_BZ_ROW_SCATTERED(18)
-    UPDATE_C_BZ_ROW_SCATTERED(19)
-    UPDATE_C_BZ_ROW_SCATTERED(20)
-    UPDATE_C_BZ_ROW_SCATTERED(21)
-    UPDATE_C_BZ_ROW_SCATTERED(22)
-    UPDATE_C_BZ_ROW_SCATTERED(23)
-    UPDATE_C_BZ_ROW_SCATTERED(24)
-    UPDATE_C_BZ_ROW_SCATTERED(25)
-    UPDATE_C_BZ_ROW_SCATTERED(26)
-    UPDATE_C_BZ_ROW_SCATTERED(27)
-    UPDATE_C_BZ_ROW_SCATTERED(28)
-    UPDATE_C_BZ_ROW_SCATTERED(29)
-    UPDATE_C_BZ_ROW_SCATTERED(30)
-    UPDATE_C_BZ_ROW_SCATTERED(31)
 
     LABEL(END)
 
@@ -697,6 +630,8 @@ void bli_sgemm_knl_asm_24x16
       "zmm22", "zmm23", "zmm24", "zmm25", "zmm26", "zmm27", "zmm28", "zmm29",
       "zmm30", "zmm31", "memory"
     )
+
+    GEMM_UKR_FLUSH_CT( s );
 
 #ifdef LOOPMON
     printf("looptime = \t%d\n", bloopl - tloopl);

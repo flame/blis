@@ -45,5 +45,11 @@
 
 #define BLIS_FORCE_ROLL_PACKM_REF_KERNEL
 
+// Temporary microtile of for each supported datatype:
+// - s: 8 * 12 * sizeof(float)
+// - d: 6 * 8  * sizeof(double)
+// Thus, 384 bytes should be sufficient.
+#define BLIS_STACK_BUF_MAX_SIZE        384
+
 // Empirical best choices for TRMM
 #define BLIS_DISABLE_TRMM_RIGHT_IF_JC_GT_1_ELSE_DISABLE_LEFT_IF_DP

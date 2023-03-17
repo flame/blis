@@ -38,7 +38,8 @@ cntl_t* bli_gemm_cntl_create
        rntm_t* rntm,
        opid_t  family,
        pack_t  schema_a,
-       pack_t  schema_b
+       pack_t  schema_b,
+       void_fp ker
      );
 
 // -----------------------------------------------------------------------------
@@ -48,7 +49,8 @@ cntl_t* bli_gemmbp_cntl_create
        rntm_t* rntm,
        opid_t  family,
        pack_t  schema_a,
-       pack_t  schema_b
+       pack_t  schema_b,
+       void_fp ker
      );
 
 #if 0

@@ -74,6 +74,8 @@ void bli_zgemmtrsm_u_template_noopt
 */
 	const num_t        dt        = BLIS_DCOMPLEX;
 
+	const inc_t        mr        = bli_cntx_get_blksz_def_dt( dt, BLIS_MR, cntx );
+	const inc_t        nr        = bli_cntx_get_blksz_def_dt( dt, BLIS_NR, cntx );
 	const inc_t        packnr    = bli_cntx_get_blksz_max_dt( dt, BLIS_NR, cntx );
 
 	const inc_t        rs_b      = packnr;
@@ -84,10 +86,12 @@ void bli_zgemmtrsm_u_template_noopt
 	/* b11 = alpha * b11 - a12 * b21; */
 	bli_zgemm_template_noopt
 	(
+	  mr,
+	  nr,
 	  k,
 	  minus_one,
-	  a12,
-	  b21,
+	  a10,
+	  b01,
 	  alpha,
 	  b11, rs_b, cs_b,
 	  data
