@@ -49,6 +49,12 @@
 	dim_t part4_rem = ( size ) % 4; \
 	dim_t frin_offset = 0; \
 
+#define MEMCPY_S32_LT16_REINIT(size) \
+	part8 = ( size ) >> 3; \
+	part4 = ( ( size ) - ( part8 << 3 ) ) >> 2; \
+	part4_rem = ( size ) % 4; \
+	frin_offset = 0; \
+
 // Copy for size < 4 for uint8 elements.
 #define MEMCPY_S32GM_LT4_UINT8(dst_,src_,size) \
 	{ \

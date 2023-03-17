@@ -69,7 +69,7 @@ void reorderb_nr64_s8s8s32o32
 	n_threads = ( n_threads > 0 ) ? n_threads : 1;
 
 	int32_t* pack_b_column_sum = ( int32_t* ) ( b_reorder->storage.aligned_buffer + ( sizeof( int8_t ) * n_updated * k_updated ));
-	for (int idx = 0; idx < n_updated; idx++ )
+	for ( dim_t idx = 0; idx < n_updated; idx++ )
 	{
 		*( pack_b_column_sum + idx ) =  0;
 	}

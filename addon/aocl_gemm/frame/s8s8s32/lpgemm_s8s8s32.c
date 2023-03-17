@@ -269,7 +269,7 @@ LPGEMM_5LOOP(int8_t,int8_t,int32_t,s8s8s32o32)
 				{
 					if ( pc == 0 )
 					{
-						for (int idx = jc_packb_start; idx < jc_packb_end; idx++ )
+						for (dim_t idx = jc_packb_start; idx < jc_packb_end; idx++ )
 						{
 							*( pack_b_column_sum + idx ) =  0;
 						}

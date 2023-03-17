@@ -41,18 +41,19 @@
 #include "lpgemm_s32_memcpy_macros.h"
 
 // 6x64 int8o32 kernel
+__attribute__((aligned(64)))
 LPGEMM_MAIN_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_6x64)
 {
 	static void* post_ops_labels[] =
-						{
-						  &&POST_OPS_6x64_DISABLE,
-						  &&POST_OPS_BIAS_6x64,
-						  &&POST_OPS_RELU_6x64,
-						  &&POST_OPS_RELU_SCALE_6x64,
-						  &&POST_OPS_GELU_TANH_6x64,
-						  &&POST_OPS_GELU_ERF_6x64,
-						  &&POST_OPS_DOWNSCALE_6x64
-						};
+				{
+				  &&POST_OPS_6x64_DISABLE,
+				  &&POST_OPS_BIAS_6x64,
+				  &&POST_OPS_RELU_6x64,
+				  &&POST_OPS_RELU_SCALE_6x64,
+				  &&POST_OPS_GELU_TANH_6x64,
+				  &&POST_OPS_GELU_ERF_6x64,
+				  &&POST_OPS_DOWNSCALE_6x64
+				};
 
 	dim_t MR = 6;
 	dim_t NR = 64;
@@ -104,7 +105,7 @@ LPGEMM_MAIN_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_6x64)
 		}
 		else if ( n0_32 == 1 )
 		{
-			lpgemm_rowvar_u8s8s32o32_6x32
+			lpgemm_rowvar_u8s8s32o32_9x32
 			(
 			  m0, k0,
 			  a, rs_a, cs_a, ps_a,
@@ -120,7 +121,7 @@ LPGEMM_MAIN_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_6x64)
 		}
 		else if ( n0_16 == 1 )
 		{
-			lpgemm_rowvar_u8s8s32o32_6x16
+			lpgemm_rowvar_u8s8s32o32_12x16
 			(
 			  m0, k0,
 			  a, rs_a, cs_a, ps_a,
@@ -137,7 +138,7 @@ LPGEMM_MAIN_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_6x64)
 
 		if ( n0_rem > 0 )
 		{
-			lpgemm_rowvar_u8s8s32o32_6xlt16
+			lpgemm_rowvar_u8s8s32o32_12xlt16
 			(
 			  m0, k0,
 			  a, rs_a, cs_a, ps_a,
@@ -162,9 +163,14 @@ LPGEMM_MAIN_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_6x64)
 	// A matrix storage.
 	__m512i a_int32_0;
 	__m512i a_int32_1;
+	__m512i a_int32_2;
+	__m512i a_int32_3;
 
 	for ( dim_t ir = 0; ir < m_full_pieces_loop_limit; ir += MR )
 	{
+		_mm_prefetch( b, _MM_HINT_T0 );
+		_mm_prefetch( a + ( MR * ps_a ) + ( 0 * 16 ), _MM_HINT_T1 );
+
 		// Registers to use for accumulating C.
 		__m512i c_int32_0p0 = _mm512_setzero_epi32();
 		__m512i c_int32_0p1 = _mm512_setzero_epi32();
@@ -215,13 +221,18 @@ LPGEMM_MAIN_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_6x64)
 			b2 = _mm512_loadu_epi8( b + ( rs_b * kr ) + ( cs_b * 2 ) );
 			b3 = _mm512_loadu_epi8( b + ( rs_b * kr ) + ( cs_b * 3 ) );
 
-			// Perform column direction mat-mul with k = 4.
-			// c[0,0-63] = a[0,kr:kr+4]*b[kr:kr+4,0-63]
-			c_int32_0p0 = _mm512_dpbusd_epi32( c_int32_0p0, a_int32_0, b0 );
-
 			// Broadcast a[1,kr:kr+4].
 			a_int32_1 = _mm512_set1_epi32( *( uint32_t* )( a + ( rs_a * 1 ) + ( cs_a * kr ) ) );
 
+			// Broadcast a[2,kr:kr+4].
+			a_int32_2 = _mm512_set1_epi32( *( uint32_t* )( a + ( rs_a * 2 ) + ( cs_a * kr ) ) );
+
+			// Broadcast a[3,kr:kr+4].
+			a_int32_3 = _mm512_set1_epi32( *( uint32_t* )( a + ( rs_a * 3 ) + ( cs_a * kr ) ) );
+
+			// Perform column direction mat-mul with k = 4.
+			// c[0,0-63] = a[0,kr:kr+4]*b[kr:kr+4,0-63]
+			c_int32_0p0 = _mm512_dpbusd_epi32( c_int32_0p0, a_int32_0, b0 );
 			c_int32_0p1 = _mm512_dpbusd_epi32( c_int32_0p1, a_int32_0, b1 );
 			c_int32_0p2 = _mm512_dpbusd_epi32( c_int32_0p2, a_int32_0, b2 );
 			c_int32_0p3 = _mm512_dpbusd_epi32( c_int32_0p3, a_int32_0, b3 );
@@ -229,43 +240,33 @@ LPGEMM_MAIN_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_6x64)
 			// Perform column direction mat-mul with k = 4.
 			// c[1,0-63] = a[1,kr:kr+4]*b[kr:kr+4,0-63]
 			c_int32_1p0 = _mm512_dpbusd_epi32( c_int32_1p0, a_int32_1, b0 );
-
-			// Broadcast a[2,kr:kr+4].
-			a_int32_0 = _mm512_set1_epi32( *( uint32_t* )( a + ( rs_a * 2 ) + ( cs_a * kr ) ) );
-
 			c_int32_1p1 = _mm512_dpbusd_epi32( c_int32_1p1, a_int32_1, b1 );
 			c_int32_1p2 = _mm512_dpbusd_epi32( c_int32_1p2, a_int32_1, b2 );
 			c_int32_1p3 = _mm512_dpbusd_epi32( c_int32_1p3, a_int32_1, b3 );
 
 			// Perform column direction mat-mul with k = 4.
 			// c[2,0-63] = a[2,kr:kr+4]*b[kr:kr+4,0-63]
-			c_int32_2p0 = _mm512_dpbusd_epi32( c_int32_2p0, a_int32_0, b0 );
-
-			// Broadcast a[3,kr:kr+4].
-			a_int32_1 = _mm512_set1_epi32( *( uint32_t* )( a + ( rs_a * 3 ) + ( cs_a * kr ) ) );
-
-			c_int32_2p1 = _mm512_dpbusd_epi32( c_int32_2p1, a_int32_0, b1 );
-			c_int32_2p2 = _mm512_dpbusd_epi32( c_int32_2p2, a_int32_0, b2 );
-			c_int32_2p3 = _mm512_dpbusd_epi32( c_int32_2p3, a_int32_0, b3 );
-
-			// Perform column direction mat-mul with k = 4.
-			// c[3,0-63] = a[3,kr:kr+4]*b[kr:kr+4,0-63]
-			c_int32_3p0 = _mm512_dpbusd_epi32( c_int32_3p0, a_int32_1, b0 );
+			c_int32_2p0 = _mm512_dpbusd_epi32( c_int32_2p0, a_int32_2, b0 );
+			c_int32_2p1 = _mm512_dpbusd_epi32( c_int32_2p1, a_int32_2, b1 );
+			c_int32_2p2 = _mm512_dpbusd_epi32( c_int32_2p2, a_int32_2, b2 );
+			c_int32_2p3 = _mm512_dpbusd_epi32( c_int32_2p3, a_int32_2, b3 );
 
 			// Broadcast a[4,kr:kr+4].
 			a_int32_0 = _mm512_set1_epi32( *( uint32_t* )( a + ( rs_a * 4 ) + ( cs_a * kr ) ) );
 
-			c_int32_3p1 = _mm512_dpbusd_epi32( c_int32_3p1, a_int32_1, b1 );
-			c_int32_3p2 = _mm512_dpbusd_epi32( c_int32_3p2, a_int32_1, b2 );
-			c_int32_3p3 = _mm512_dpbusd_epi32( c_int32_3p3, a_int32_1, b3 );
+			// Broadcast a[5,kr:kr+4].
+			a_int32_1 = _mm512_set1_epi32( *( uint32_t* )( a + ( rs_a * 5 ) + ( cs_a * kr ) ) );
+
+			// Perform column direction mat-mul with k = 4.
+			// c[3,0-63] = a[3,kr:kr+4]*b[kr:kr+4,0-63]
+			c_int32_3p0 = _mm512_dpbusd_epi32( c_int32_3p0, a_int32_3, b0 );
+			c_int32_3p1 = _mm512_dpbusd_epi32( c_int32_3p1, a_int32_3, b1 );
+			c_int32_3p2 = _mm512_dpbusd_epi32( c_int32_3p2, a_int32_3, b2 );
+			c_int32_3p3 = _mm512_dpbusd_epi32( c_int32_3p3, a_int32_3, b3 );
 
 			// Perform column direction mat-mul with k = 4.
 			// c[4,0-63] = a[4,kr:kr+4]*b[kr:kr+4,0-63]
 			c_int32_4p0 = _mm512_dpbusd_epi32( c_int32_4p0, a_int32_0, b0 );
-
-			// Broadcast a[5,kr:kr+4].
-			a_int32_1 = _mm512_set1_epi32( *( uint32_t* )( a + ( rs_a * 5 ) + ( cs_a * kr ) ) );
-
 			c_int32_4p1 = _mm512_dpbusd_epi32( c_int32_4p1, a_int32_0, b1 );
 			c_int32_4p2 = _mm512_dpbusd_epi32( c_int32_4p2, a_int32_0, b2 );
 			c_int32_4p3 = _mm512_dpbusd_epi32( c_int32_4p3, a_int32_0, b3 );
@@ -323,7 +324,7 @@ LPGEMM_MAIN_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_6x64)
 			  ( a + ( rs_a * 2 ) + ( cs_a * k_full_pieces ) ),
 			  ( k_partial_pieces * sizeof( uint8_t ) )
 			);
-			a_int32_0 = _mm512_set1_epi32( a_kfringe_buf );
+			a_int32_2 = _mm512_set1_epi32( a_kfringe_buf );
 
 			c_int32_1p1 = _mm512_dpbusd_epi32( c_int32_1p1, a_int32_1, b1 );
 			c_int32_1p2 = _mm512_dpbusd_epi32( c_int32_1p2, a_int32_1, b2 );
@@ -331,7 +332,7 @@ LPGEMM_MAIN_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_6x64)
 
 			// Perform column direction mat-mul with k = 4.
 			// c[2,0-63] = a[2,kr:kr+4]*b[kr:kr+4,0-63]
-			c_int32_2p0 = _mm512_dpbusd_epi32( c_int32_2p0, a_int32_0, b0 );
+			c_int32_2p0 = _mm512_dpbusd_epi32( c_int32_2p0, a_int32_2, b0 );
 
 			// Broadcast a[3,kr:kr+4].
 			MEMCPY_S32GM_LT4_UINT8
@@ -340,15 +341,15 @@ LPGEMM_MAIN_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_6x64)
 			  ( a + ( rs_a * 3 ) + ( cs_a * k_full_pieces ) ),
 			  ( k_partial_pieces * sizeof( uint8_t ) )
 			);
-			a_int32_1 = _mm512_set1_epi32( a_kfringe_buf );
+			a_int32_3 = _mm512_set1_epi32( a_kfringe_buf );
 
-			c_int32_2p1 = _mm512_dpbusd_epi32( c_int32_2p1, a_int32_0, b1 );
-			c_int32_2p2 = _mm512_dpbusd_epi32( c_int32_2p2, a_int32_0, b2 );
-			c_int32_2p3 = _mm512_dpbusd_epi32( c_int32_2p3, a_int32_0, b3 );
+			c_int32_2p1 = _mm512_dpbusd_epi32( c_int32_2p1, a_int32_2, b1 );
+			c_int32_2p2 = _mm512_dpbusd_epi32( c_int32_2p2, a_int32_2, b2 );
+			c_int32_2p3 = _mm512_dpbusd_epi32( c_int32_2p3, a_int32_2, b3 );
 
 			// Perform column direction mat-mul with k = 4.
 			// c[3,0-63] = a[3,kr:kr+4]*b[kr:kr+4,0-63]
-			c_int32_3p0 = _mm512_dpbusd_epi32( c_int32_3p0, a_int32_1, b0 );
+			c_int32_3p0 = _mm512_dpbusd_epi32( c_int32_3p0, a_int32_3, b0 );
 
 			// Broadcast a[4,kr:kr+4].
 			MEMCPY_S32GM_LT4_UINT8
@@ -359,9 +360,9 @@ LPGEMM_MAIN_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_6x64)
 			);
 			a_int32_0 = _mm512_set1_epi32( a_kfringe_buf );
 
-			c_int32_3p1 = _mm512_dpbusd_epi32( c_int32_3p1, a_int32_1, b1 );
-			c_int32_3p2 = _mm512_dpbusd_epi32( c_int32_3p2, a_int32_1, b2 );
-			c_int32_3p3 = _mm512_dpbusd_epi32( c_int32_3p3, a_int32_1, b3 );
+			c_int32_3p1 = _mm512_dpbusd_epi32( c_int32_3p1, a_int32_3, b1 );
+			c_int32_3p2 = _mm512_dpbusd_epi32( c_int32_3p2, a_int32_3, b2 );
+			c_int32_3p3 = _mm512_dpbusd_epi32( c_int32_3p3, a_int32_3, b3 );
 
 			// Perform column direction mat-mul with k = 4.
 			// c[4,0-63] = a[4,kr:kr+4]*b[kr:kr+4,0-63]
@@ -729,79 +730,35 @@ POST_OPS_RELU_SCALE_6x64:
 POST_OPS_GELU_TANH_6x64:
 		{
 			__m512 dn, z, x, r2, r, y, x_tanh;
-			__m512i q;
 
-			// c[0, 0-15]
-			GELU_TANH_S32_AVX512(c_int32_0p0, y, r, r2, x, z, dn, x_tanh, q)
+			// Pack the output registers into an array and apply gelu
+			// on the array in a loop. Helps avoid lot intruction
+			// duplication and thus potentially bad code gen.
+			int32_t temp_buf[384] __attribute__((aligned(64)));
+			dim_t temp_buf_4elem_len = 384 / 16;
 
-			// c[0, 16-31]
-			GELU_TANH_S32_AVX512(c_int32_0p1, y, r, r2, x, z, dn, x_tanh, q)
+			S32_GELU_LOAD1R_4C(temp_buf,0,16,c_int32_0)
+			S32_GELU_LOAD1R_4C(temp_buf,4,16,c_int32_1)
+			S32_GELU_LOAD1R_4C(temp_buf,8,16,c_int32_2)
+			S32_GELU_LOAD1R_4C(temp_buf,12,16,c_int32_3)
+			S32_GELU_LOAD1R_4C(temp_buf,16,16,c_int32_4)
+			S32_GELU_LOAD1R_4C(temp_buf,20,16,c_int32_5)
 
-			// c[0, 32-47]
-			GELU_TANH_S32_AVX512(c_int32_0p2, y, r, r2, x, z, dn, x_tanh, q)
+			for ( dim_t gelu_id = 0; gelu_id < temp_buf_4elem_len; ++gelu_id )
+			{
+				c_int32_0p0 = _mm512_loadu_epi32( temp_buf + ( gelu_id * 16 ) );
 
-			// c[0, 48-63]
-			GELU_TANH_S32_AVX512(c_int32_0p3, y, r, r2, x, z, dn, x_tanh, q)
+				GELU_TANH_S32_AVX512(c_int32_0p0, y, r, r2, x, z, dn, x_tanh, selector1)
 
-			// c[1, 0-15]
-			GELU_TANH_S32_AVX512(c_int32_1p0, y, r, r2, x, z, dn, x_tanh, q)
+				_mm512_storeu_epi32( temp_buf + ( gelu_id * 16 ), c_int32_0p0 );
+			}
 
-			// c[1, 16-31]
-			GELU_TANH_S32_AVX512(c_int32_1p1, y, r, r2, x, z, dn, x_tanh, q)
-
-			// c[1, 32-47]
-			GELU_TANH_S32_AVX512(c_int32_1p2, y, r, r2, x, z, dn, x_tanh, q)
-
-			// c[1, 48-63]
-			GELU_TANH_S32_AVX512(c_int32_1p3, y, r, r2, x, z, dn, x_tanh, q)
-
-			// c[2, 0-15]
-			GELU_TANH_S32_AVX512(c_int32_2p0, y, r, r2, x, z, dn, x_tanh, q)
-
-			// c[2, 16-31]
-			GELU_TANH_S32_AVX512(c_int32_2p1, y, r, r2, x, z, dn, x_tanh, q)
-
-			// c[2, 32-47]
-			GELU_TANH_S32_AVX512(c_int32_2p2, y, r, r2, x, z, dn, x_tanh, q)
-
-			// c[2, 48-63]
-			GELU_TANH_S32_AVX512(c_int32_2p3, y, r, r2, x, z, dn, x_tanh, q)
-
-			// c[3, 0-15]
-			GELU_TANH_S32_AVX512(c_int32_3p0, y, r, r2, x, z, dn, x_tanh, q)
-
-			// c[3, 16-31]
-			GELU_TANH_S32_AVX512(c_int32_3p1, y, r, r2, x, z, dn, x_tanh, q)
-
-			// c[3, 32-47]
-			GELU_TANH_S32_AVX512(c_int32_3p2, y, r, r2, x, z, dn, x_tanh, q)
-
-			// c[3, 48-63]
-			GELU_TANH_S32_AVX512(c_int32_3p3, y, r, r2, x, z, dn, x_tanh, q)
-
-			// c[4, 0-15]
-			GELU_TANH_S32_AVX512(c_int32_4p0, y, r, r2, x, z, dn, x_tanh, q)
-
-			// c[4, 16-31]
-			GELU_TANH_S32_AVX512(c_int32_4p1, y, r, r2, x, z, dn, x_tanh, q)
-
-			// c[4, 32-47]
-			GELU_TANH_S32_AVX512(c_int32_4p2, y, r, r2, x, z, dn, x_tanh, q)
-
-			// c[4, 48-63]
-			GELU_TANH_S32_AVX512(c_int32_4p3, y, r, r2, x, z, dn, x_tanh, q)
-
-			// c[5, 0-15]
-			GELU_TANH_S32_AVX512(c_int32_5p0, y, r, r2, x, z, dn, x_tanh, q)
-
-			// c[5, 16-31]
-			GELU_TANH_S32_AVX512(c_int32_5p1, y, r, r2, x, z, dn, x_tanh, q)
-
-			// c[5, 32-47]
-			GELU_TANH_S32_AVX512(c_int32_5p2, y, r, r2, x, z, dn, x_tanh, q)
-
-			// c[5, 48-63]
-			GELU_TANH_S32_AVX512(c_int32_5p3, y, r, r2, x, z, dn, x_tanh, q)
+			S32_GELU_STORE1R_4C(temp_buf,0,16,c_int32_0)
+			S32_GELU_STORE1R_4C(temp_buf,4,16,c_int32_1)
+			S32_GELU_STORE1R_4C(temp_buf,8,16,c_int32_2)
+			S32_GELU_STORE1R_4C(temp_buf,12,16,c_int32_3)
+			S32_GELU_STORE1R_4C(temp_buf,16,16,c_int32_4)
+			S32_GELU_STORE1R_4C(temp_buf,20,16,c_int32_5)
 
 			POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 		}
@@ -809,81 +766,36 @@ POST_OPS_GELU_ERF_6x64:
 		{
 			__m512 x, r, y, x_erf;
 
-			// c[0, 0-15]
-			GELU_ERF_S32_AVX512(c_int32_0p0, y, r, x, x_erf)
+			// Pack the output registers into an array and apply gelu
+			// on the array in a loop. Helps avoid lot intruction
+			// duplication and thus potentially bad code gen.
+			int32_t temp_buf[384] __attribute__((aligned(64)));
+			dim_t temp_buf_4elem_len = 384 / 16;
+			S32_GELU_LOAD1R_4C(temp_buf,0,16,c_int32_0)
+			S32_GELU_LOAD1R_4C(temp_buf,4,16,c_int32_1)
+			S32_GELU_LOAD1R_4C(temp_buf,8,16,c_int32_2)
+			S32_GELU_LOAD1R_4C(temp_buf,12,16,c_int32_3)
+			S32_GELU_LOAD1R_4C(temp_buf,16,16,c_int32_4)
+			S32_GELU_LOAD1R_4C(temp_buf,20,16,c_int32_5)
 
-			// c[0, 16-31]
-			GELU_ERF_S32_AVX512(c_int32_0p1, y, r, x, x_erf)
+			for ( dim_t gelu_id = 0; gelu_id < temp_buf_4elem_len; ++gelu_id )
+			{
+				c_int32_0p0 = _mm512_loadu_epi32( temp_buf + ( gelu_id * 16 ) );
 
-			// c[0, 32-47]
-			GELU_ERF_S32_AVX512(c_int32_0p2, y, r, x, x_erf)
+				GELU_ERF_S32_AVX512(c_int32_0p0, y, r, x, x_erf)
 
-			// c[0, 48-63]
-			GELU_ERF_S32_AVX512(c_int32_0p3, y, r, x, x_erf)
+				_mm512_storeu_epi32( temp_buf + ( gelu_id * 16 ), c_int32_0p0 );
+			}
 
-			// c[1, 0-15]
-			GELU_ERF_S32_AVX512(c_int32_1p0, y, r, x, x_erf)
-
-			// c[1, 16-31]
-			GELU_ERF_S32_AVX512(c_int32_1p1, y, r, x, x_erf)
-
-			// c[1, 32-47]
-			GELU_ERF_S32_AVX512(c_int32_1p2, y, r, x, x_erf)
-
-			// c[1, 48-63]
-			GELU_ERF_S32_AVX512(c_int32_1p3, y, r, x, x_erf)
-
-			// c[2, 0-15]
-			GELU_ERF_S32_AVX512(c_int32_2p0, y, r, x, x_erf)
-
-			// c[2, 16-31]
-			GELU_ERF_S32_AVX512(c_int32_2p1, y, r, x, x_erf)
-
-			// c[2, 32-47]
-			GELU_ERF_S32_AVX512(c_int32_2p2, y, r, x, x_erf)
-
-			// c[2, 48-63]
-			GELU_ERF_S32_AVX512(c_int32_2p3, y, r, x, x_erf)
-
-			// c[3, 0-15]
-			GELU_ERF_S32_AVX512(c_int32_3p0, y, r, x, x_erf)
-
-			// c[3, 16-31]
-			GELU_ERF_S32_AVX512(c_int32_3p1, y, r, x, x_erf)
-
-			// c[3, 32-47]
-			GELU_ERF_S32_AVX512(c_int32_3p2, y, r, x, x_erf)
-
-			// c[3, 48-63]
-			GELU_ERF_S32_AVX512(c_int32_3p3, y, r, x, x_erf)
-
-			// c[4, 0-15]
-			GELU_ERF_S32_AVX512(c_int32_4p0, y, r, x, x_erf)
-
-			// c[4, 16-31]
-			GELU_ERF_S32_AVX512(c_int32_4p1, y, r, x, x_erf)
-
-			// c[4, 32-47]
-			GELU_ERF_S32_AVX512(c_int32_4p2, y, r, x, x_erf)
-
-			// c[4, 48-63]
-			GELU_ERF_S32_AVX512(c_int32_4p3, y, r, x, x_erf)
-
-			// c[5, 0-15]
-			GELU_ERF_S32_AVX512(c_int32_5p0, y, r, x, x_erf)
-
-			// c[5, 16-31]
-			GELU_ERF_S32_AVX512(c_int32_5p1, y, r, x, x_erf)
-
-			// c[5, 32-47]
-			GELU_ERF_S32_AVX512(c_int32_5p2, y, r, x, x_erf)
-
-			// c[5, 48-63]
-			GELU_ERF_S32_AVX512(c_int32_5p3, y, r, x, x_erf)
+			S32_GELU_STORE1R_4C(temp_buf,0,16,c_int32_0)
+			S32_GELU_STORE1R_4C(temp_buf,4,16,c_int32_1)
+			S32_GELU_STORE1R_4C(temp_buf,8,16,c_int32_2)
+			S32_GELU_STORE1R_4C(temp_buf,12,16,c_int32_3)
+			S32_GELU_STORE1R_4C(temp_buf,16,16,c_int32_4)
+			S32_GELU_STORE1R_4C(temp_buf,20,16,c_int32_5)
 
 			POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 		}
-
 POST_OPS_DOWNSCALE_6x64:
 		{
 			selector1 =

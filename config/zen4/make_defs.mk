@@ -116,12 +116,14 @@ ifeq ($(CC_VENDOR),clang)
 
 # for version 4x we will enable znver4
 ifeq ($(strip $(shell $(CC) -v |&head -1 |grep -c 'AOCC_4')),1)
-CKVECFLAGS += -march=znver4 -mavx512f -mavx512dq -mavx512bw -mavx512vl -mavx512bf16 -mfpmath=sse
+CKVECFLAGS += -march=znver4 -mavx512f -mavx512dq -mavx512bw -mavx512vl -mavx512bf16 -mfpmath=sse -falign-loops=64
+
 CRVECFLAGS += -march=znver4
 else
 # for version 3x we will enable znver3
 ifeq ($(strip $(shell $(CC) -v |&head -1 |grep -c 'AOCC_3')),1)
-CKVECFLAGS += -march=znver3 -mavx512f -mavx512dq -mavx512bw -mavx512vl -mavx512vnni -mavx512bf16 -mfpmath=sse
+CKVECFLAGS += -march=znver3 -mavx512f -mavx512dq -mavx512bw -mavx512vl -mavx512vnni -mavx512bf16 -mfpmath=sse -falign-loops=64
+
 CRVECFLAGS += -march=znver3
 else
 # for version 2x we will enable znver2

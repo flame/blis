@@ -151,7 +151,7 @@
 \
 	GELU_TANH_F32_AVX512_DEF(y, r, r2, x, z, dn, x_tanh, q); \
 \
-	reg = _mm512_cvtps_epi32 (y); \
+	reg = _mm512_cvtps_epi32( y ); \
 
 /* ERF GeLU (x) = 0.5* x * (1 + erf (x * 0.707107 ))  */
 #define GELU_ERF_S32_AVX512(reg, y, r, x, x_erf) \
@@ -160,6 +160,44 @@
 \
 	GELU_ERF_F32_AVX512_DEF(y, r, x, x_erf); \
 \
-	reg = _mm512_cvtps_epi32 (y); \
-	
+	reg = _mm512_cvtps_epi32( y ); \
+
+// Load helper macros.
+#define S32_GELU_LOAD1R_1C(temp_buf,offset,stride,reg_base) \
+	_mm512_storeu_epi32( ( temp_buf ) + ( ( 0 + offset ) * ( stride ) ), reg_base ## p0); \
+
+#define S32_GELU_LOAD1R_2C(temp_buf,offset,stride,reg_base) \
+	_mm512_storeu_epi32( ( temp_buf ) + ( ( 0 + offset ) * ( stride ) ), reg_base ## p0); \
+	_mm512_storeu_epi32( ( temp_buf ) + ( ( 1 + offset ) * ( stride ) ), reg_base ## p1); \
+
+#define S32_GELU_LOAD1R_3C(temp_buf,offset,stride,reg_base) \
+	_mm512_storeu_epi32( ( temp_buf ) + ( ( 0 + offset ) * ( stride ) ), reg_base ## p0); \
+	_mm512_storeu_epi32( ( temp_buf ) + ( ( 1 + offset ) * ( stride ) ), reg_base ## p1); \
+	_mm512_storeu_epi32( ( temp_buf ) + ( ( 2 + offset ) * ( stride ) ), reg_base ## p2); \
+
+#define S32_GELU_LOAD1R_4C(temp_buf,offset,stride,reg_base) \
+	_mm512_storeu_epi32( ( temp_buf ) + ( ( 0 + offset ) * ( stride ) ), reg_base ## p0); \
+	_mm512_storeu_epi32( ( temp_buf ) + ( ( 1 + offset ) * ( stride ) ), reg_base ## p1); \
+	_mm512_storeu_epi32( ( temp_buf ) + ( ( 2 + offset ) * ( stride ) ), reg_base ## p2); \
+	_mm512_storeu_epi32( ( temp_buf ) + ( ( 3 + offset ) * ( stride ) ), reg_base ## p3); \
+
+// Store helper macros.
+#define S32_GELU_STORE1R_1C(temp_buf,offset,stride,reg_base) \
+	reg_base ## p0 = _mm512_loadu_epi32( ( temp_buf ) + ( ( 0 + offset ) * ( stride ) ) ); \
+
+#define S32_GELU_STORE1R_2C(temp_buf,offset,stride,reg_base) \
+	reg_base ## p0 = _mm512_loadu_epi32( ( temp_buf ) + ( ( 0 + offset ) * ( stride ) ) ); \
+	reg_base ## p1 = _mm512_loadu_epi32( ( temp_buf ) + ( ( 1 + offset ) * ( stride ) ) ); \
+
+#define S32_GELU_STORE1R_3C(temp_buf,offset,stride,reg_base) \
+	reg_base ## p0 = _mm512_loadu_epi32( ( temp_buf ) + ( ( 0 + offset ) * ( stride ) ) ); \
+	reg_base ## p1 = _mm512_loadu_epi32( ( temp_buf ) + ( ( 1 + offset ) * ( stride ) ) ); \
+	reg_base ## p2 = _mm512_loadu_epi32( ( temp_buf ) + ( ( 2 + offset ) * ( stride ) ) ); \
+
+#define S32_GELU_STORE1R_4C(temp_buf,offset,stride,reg_base) \
+	reg_base ## p0 = _mm512_loadu_epi32( ( temp_buf ) + ( ( 0 + offset ) * ( stride ) ) ); \
+	reg_base ## p1 = _mm512_loadu_epi32( ( temp_buf ) + ( ( 1 + offset ) * ( stride ) ) ); \
+	reg_base ## p2 = _mm512_loadu_epi32( ( temp_buf ) + ( ( 2 + offset ) * ( stride ) ) ); \
+	reg_base ## p3 = _mm512_loadu_epi32( ( temp_buf ) + ( ( 3 + offset ) * ( stride ) ) ); \
+
 #endif // LPGEMM_S32_KERN_MACROS_H
