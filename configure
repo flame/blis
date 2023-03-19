@@ -43,7 +43,7 @@ print_usage()
 	# Use the version string in the 'version' file since we don't have
 	# the patched version string yet.
 	if [ -z "${version}" ]; then
-		version=$(cat "${version_filepath}")
+		version=$(<"${version_filepath}")
 	fi
 
 	# Echo usage info.
@@ -917,13 +917,13 @@ build_kconfig_registry()
 
 	familyname="$1"
 
-	#clist=${config_registry[${familyname}]}
+	#clist="${config_registry[${familyname}]}"
 	clist=$(query_array "config_registry" "${familyname}")
 
 	for config in ${clist}; do
 
 		# Look up the kernels for the current sub-configuration.
-		#kernels=${kernel_registry[${config}]}
+		#kernels="${kernel_registry[${config}]}"
 		kernels=$(query_array "kernel_registry" "${config}")
 
 		for kernel in ${kernels}; do
@@ -932,7 +932,7 @@ build_kconfig_registry()
 			# kernel.
 
 			# Query the current sub-configs for the current ${kernel}.
-			#cur_configs=${kconfig_registry[${kernel}]}
+			#cur_configs="${kconfig_registry[${kernel}]}"
 			cur_configs=$(query_array "kconfig_registry" "${kernel}")
 
 			# Add the current sub-configuration to the list of sub-configs
@@ -1210,7 +1210,7 @@ auto_detect()
 	# Create #defines for all of the BLIS_CONFIG_ macros in bli_cpuid.c.
 	bli_cpuid_c_filepath=$(find "${dist_path}/frame" -name "bli_cpuid.c")
 	config_defines=$(grep BLIS_CONFIG_ "${bli_cpuid_c_filepath}" \
-					 | sed -e 's/#ifdef /-D/g')
+					 | sed -Ee 's/#ifdef[[:space:]]+/-D/g')
 
 	# Set the linker flags. We typically need pthreads (or BLIS's homerolled
 	# equiavlent) because it is needed for parts of bli_arch.c unrelated to
@@ -2088,7 +2088,7 @@ set_default_version()
 
 		# Pull in whatever error message was generated, if any, and delete
 		# the file.
-		git_error=$(cat "${gd_stderr}")
+		git_error=$(<"${gd_stderr}")
 
 		# Remove the stderr file.
 		rm -f "${gd_stderr}"
@@ -2100,7 +2100,7 @@ set_default_version()
 			echo "${script_name}: using string from unmodified version file."
 
 			# Use what's in the version file as-is.
-			version=$(cat "${version_file}")
+			version=$(<"${version_file}")
 		else
 
 			echo "${script_name}: got back ${git_describe_str}."
@@ -2121,7 +2121,7 @@ set_default_version()
 		echo "${script_name}: could not find '${gitdir}' directory; using unmodified version file."
 
 		# Use what's in the version file as-is.
-		version=$(cat "${version_file}")
+		version=$(<"${version_file}")
 	fi
 }
 
@@ -2474,25 +2474,25 @@ main()
 
 	# The installation exec_prefix, assigned its default value, and a flag to
 	# track whether or not it was given by the user.
-    # shellcheck disable=2016
+	# shellcheck disable=2016
 	exec_prefix='${prefix}'
 	exec_prefix_flag=''
 
 	# The installation libdir, assigned its default value, and a flag to
 	# track whether or not it was given by the user.
-    # shellcheck disable=2016
+	# shellcheck disable=2016
 	libdir='${exec_prefix}/lib'
 	libdir_flag=''
 
 	# The installation includedir, assigned its default value, and a flag to
 	# track whether or not it was given by the user.
-    # shellcheck disable=2016
+	# shellcheck disable=2016
 	includedir='${prefix}/include'
 	includedir_flag=''
 
 	# The installation sharedir, assigned its default value, and a flag to
 	# track whether or not it was given by the user.
-    # shellcheck disable=2016
+	# shellcheck disable=2016
 	sharedir='${prefix}/share'
 	sharedir_flag=''
 
@@ -3761,7 +3761,7 @@ main()
 	enable_jrir_rr_01=0
 	enable_jrir_slab_01=0
 	enable_jrir_tlb_01=0
-	if   [[ ${thread_part_jrir} = xrr ]]; then
+	if   [[ ${thread_part_jrir} = rr ]]; then
 		echo "${script_name}: requesting round-robin (rr) work partitioning in jr and/or ir loops."
 		enable_jrir_rr_01=1
 	elif [[ ${thread_part_jrir} = slab ]]; then
@@ -4133,7 +4133,7 @@ main()
 	# Begin substituting information into the config_mk_in file, outputting
 	# to config_mk_out.
 	echo "${script_name}: creating ${config_mk_out_path} from ${config_mk_in_path}"
-	sed                                                           \
+	sed <"${config_mk_in_path}" >"${config_mk_out_path}"          \
 	-e "s/@version@/${version_esc}/g"                             \
 	-e "s/@so_version_major@/${so_version_major}/g"               \
 	-e "s/@so_version_minorbuild@/${so_version_minorbuild}/g"     \
@@ -4185,8 +4185,7 @@ main()
 	-e "s/@enable_memkind@/${enable_memkind}/g"                   \
 	-e "s/@pragma_omp_simd@/${pragma_omp_simd}/g"                 \
 	-e "s/@addon_list@/${addon_list}/g"                           \
-	-e "s/@sandbox@/${sandbox}/g"                                 \
-	< "${config_mk_in_path}" > "${config_mk_out_path}"
+	-e "s/@sandbox@/${sandbox}/g"
 
 	# -- Instantiate bli_config.h file from template ---------------------------
 
@@ -4196,12 +4195,11 @@ main()
 	# intuitively, which was used when constructing ${config_name_define},
 	# ${config_list_defines}, and ${kernel_list_defines}.
 	echo "${script_name}: creating ${bli_config_h_out_path} from ${bli_config_h_in_path}"
-	perl -p                                                              \
+	<"${bli_config_h_in_path}" perl -p                                   \
 	-e "s/\@config_name_define\@/${config_name_define}/g;"               \
 	-e "s/\@config_list_defines\@/${config_list_defines}/g;"             \
 	-e "s/\@kernel_list_defines\@/${kernel_list_defines}/g;"             \
-	"${bli_config_h_in_path}" |                                          \
-	sed                                                                  \
+	| sed >"${bli_config_h_out_path}"                                    \
 	-e "s/@version@/${version_esc}/g"                                    \
 	-e "s/@enable_system@/${enable_system_01}/g"                         \
 	-e "s/@enable_openmp@/${enable_openmp_01}/g"                         \
@@ -4228,8 +4226,7 @@ main()
 	-e "s/@enable_pragma_omp_simd@/${enable_pragma_omp_simd_01}/g"       \
 	-e "s/@enable_sandbox@/${enable_sandbox_01}/g"                       \
 	-e "s/@enable_shared@/${enable_shared_01}/g"                         \
-	-e "s/@complex_return_intel@/${complex_return_intel01}/g"            \
-	> "${bli_config_h_out_path}"
+	-e "s/@complex_return_intel@/${complex_return_intel01}/g"
 
 	# -- Instantiate bli_addon.h file from template ----------------------------
 
@@ -4398,7 +4395,7 @@ main()
 
 	create_makefile_fragment() {
 		echo "${script_name}: creating makefile fragments in $3"
-		"${gen_make_frags_sh}"                       \
+		"${gen_make_frags_sh}"                           \
 			-h -r -v0                                \
 			-o "${script_name}"                      \
 			-p "$1" "$2" "$3"                        \
