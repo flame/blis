@@ -111,6 +111,24 @@ void PASTEF77S(ch,blasname) \
     rs_b = 1; \
     cs_b = *ldb; \
 \
+	/* If alpha is zero, set B to zero and return early */ \
+	if( PASTEMAC(ch,eq0)( *alpha ) ) \
+	{ \
+		PASTEMAC2(ch,setm,_ex)( BLIS_NO_CONJUGATE, \
+								0, \
+								BLIS_NONUNIT_DIAG, \
+								BLIS_DENSE, \
+								m0, n0, \
+								(ftype*) alpha, \
+								(ftype*) b, rs_b, cs_b, \
+								NULL, NULL \
+							  ); \
+		 AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1) \
+		/* Finalize BLIS. */ \
+		bli_finalize_auto(); \
+		return; \
+	} \
+\
     /* Call BLIS interface. */ \
     PASTEMAC2(ch,blisname,BLIS_TAPI_EX_SUF) \
     ( \
@@ -220,6 +238,24 @@ void PASTEF77S(ch,blasname) \
     const inc_t rs_b = 1; \
     const inc_t cs_b = *ldb; \
     const num_t dt = PASTEMAC(ch,type); \
+\
+	/* If alpha is zero, set B to zero and return early */ \
+	if( PASTEMAC(ch,eq0)( *alpha ) ) \
+	{ \
+		PASTEMAC2(ch,setm,_ex)( BLIS_NO_CONJUGATE, \
+								0, \
+								BLIS_NONUNIT_DIAG, \
+								BLIS_DENSE, \
+								m0, n0, \
+								(ftype*) alpha, \
+								(ftype*) b, rs_b, cs_b, \
+								NULL, NULL \
+							  ); \
+		AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1) \
+		/* Finalize BLIS. */ \
+		bli_finalize_auto(); \
+		return; \
+	} \
 \
     /* ----------------------------------------------------------- */ \
     /*    TRSM API: AX = B, where X = B                            */ \
@@ -497,6 +533,24 @@ void strsm_blis_impl
     const inc_t rs_b = 1;
     const inc_t cs_b = *ldb;
     const num_t dt = BLIS_FLOAT;
+
+	/* If alpha is zero, set B to zero and return early */
+	if( PASTEMAC(s,eq0)( *alpha ) )
+	{
+		PASTEMAC2(s,setm,_ex)( BLIS_NO_CONJUGATE,
+								0,
+								BLIS_NONUNIT_DIAG,
+								BLIS_DENSE,
+								m0, n0,
+								(float*) alpha,
+								(float*) b, rs_b, cs_b,
+								NULL, NULL
+							  );
+		AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1)
+		/* Finalize BLIS. */
+		bli_finalize_auto();
+		return;
+	}
 
     if( n0 == 1 )
     {
@@ -785,6 +839,24 @@ void dtrsm_blis_impl
     const inc_t rs_b = 1;
     const inc_t cs_b = *ldb;
     const num_t dt = BLIS_DOUBLE;
+
+	/* If alpha is zero, set B to zero and return early */
+	if( PASTEMAC(d,eq0)( *alpha ) )
+	{
+		PASTEMAC2(d,setm,_ex)( BLIS_NO_CONJUGATE,
+								0,
+								BLIS_NONUNIT_DIAG,
+								BLIS_DENSE,
+								m0, n0,
+								(double*) alpha,
+								(double*) b, rs_b, cs_b,
+								NULL, NULL
+							  );
+		AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1)
+		/* Finalize BLIS. */
+		bli_finalize_auto();
+		return;
+	}
 
     if( n0 == 1 )
     {
@@ -1152,6 +1224,23 @@ void ztrsm_blis_impl
     const inc_t cs_b = *ldb;
     const num_t dt = BLIS_DCOMPLEX;
 
+	/* If alpha is zero, set B to zero and return early */
+	if( PASTEMAC(z,eq0)( *alpha ) )
+	{
+		PASTEMAC2(z,setm,_ex)( BLIS_NO_CONJUGATE,
+								0,
+								BLIS_NONUNIT_DIAG,
+								BLIS_DENSE,
+								m0, n0,
+								(dcomplex*) alpha,
+								(dcomplex*) b, rs_b, cs_b,
+								NULL, NULL
+							  );
+		AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1)
+		/* Finalize BLIS. */
+		bli_finalize_auto();
+		return;
+	}
 
     if( n0 == 1 )
     {
@@ -1504,6 +1593,23 @@ void ctrsm_blis_impl
     const inc_t cs_b = *ldb;
     const num_t dt = BLIS_SCOMPLEX;
 
+	/* If alpha is zero, set B to zero and return early */
+	if( PASTEMAC(c,eq0)( *alpha ) )
+	{
+		PASTEMAC2(c,setm,_ex)( BLIS_NO_CONJUGATE,
+								0,
+								BLIS_NONUNIT_DIAG,
+								BLIS_DENSE,
+								m0, n0,
+								(scomplex*) alpha,
+								(scomplex*) b, rs_b, cs_b,
+								NULL, NULL
+							  );
+		AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1)
+		/* Finalize BLIS. */
+		bli_finalize_auto();
+		return;
+	}
 
     if( n0 == 1 )
     {

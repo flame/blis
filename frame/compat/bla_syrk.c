@@ -115,6 +115,25 @@ void PASTEF77S(ch,blasname) \
 	rs_c = 1; \
 	cs_c = *ldc; \
 \
+	/* If alpha is zero, scale C by beta and return early */ \
+	if( PASTEMAC(ch,eq0)( *alpha ) ) \
+	{ \
+		PASTEMAC2(ch,scalm,_ex)( BLIS_NO_CONJUGATE, \
+								  0, \
+								  BLIS_NONUNIT_DIAG, \
+								  blis_uploc, \
+								  m0, \
+								  m0, \
+								  (ftype*) beta, \
+								  (ftype*) c, rs_c, cs_c, \
+								  NULL, NULL \
+								); \
+		/* Finalize BLIS. */ \
+		AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1) \
+		bli_finalize_auto(); \
+		return; \
+	} \
+\
 	/* Call BLIS interface. */ \
 	PASTEMAC2(ch,blisname,BLIS_TAPI_EX_SUF) \
 	( \
@@ -223,6 +242,25 @@ void PASTEF77S(ch,blasname) \
 	const inc_t cs_a = *lda; \
 	const inc_t rs_c = 1; \
 	const inc_t cs_c = *ldc; \
+\
+	/* If alpha is zero, scale C by beta and return early */ \
+	if( PASTEMAC(ch,eq0)( *alpha ) ) \
+	{ \
+		PASTEMAC2(ch,scalm,_ex)( BLIS_NO_CONJUGATE, \
+								  0, \
+								  BLIS_NONUNIT_DIAG, \
+								  blis_uploc, \
+								  m0, \
+								  m0, \
+								  (ftype*) beta, \
+								  (ftype*) c, rs_c, cs_c, \
+								  NULL, NULL \
+								); \
+		/* Finalize BLIS. */ \
+		AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1) \
+		bli_finalize_auto(); \
+		return; \
+	} \
 \
 	const num_t   dt     = PASTEMAC(ch,type); \
 \

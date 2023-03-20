@@ -117,6 +117,36 @@ void PASTEF77S(ch,blasname) \
 	rs_c = 1; \
 	cs_c = *ldc; \
 \
+	/* If alpha is zero, scale C by beta and return early */ \
+	if( PASTEMAC(ch,eq0)( *alpha ) ) \
+	{ \
+		ftype beta_complex; \
+		beta_complex.real = *beta; \
+		beta_complex.imag = 0.0; \
+		PASTEMAC2(ch,scalm,_ex)( BLIS_NO_CONJUGATE, \
+								  0, \
+								  BLIS_NONUNIT_DIAG, \
+								  blis_uploc, \
+								  m0, \
+								  m0, \
+								  (ftype*) &beta_complex, \
+								  (ftype*) c, rs_c, cs_c, \
+								  NULL, NULL \
+								); \
+		/* The Hermitian rank-k product was computed as Re(alpha)*A*A', even for the
+		   diagonal elements. Mathematically, the imaginary components of
+		   diagonal elements of a Hermitian rank-k product should always be
+		   zero. However, in practice, they sometimes accumulate meaningless
+		   non-zero values. To prevent this, we explicitly set those values
+		   to zero before returning.
+		*/ \
+		PASTEMAC2(ch,setid,_ex)( 0, m0, m0, (void*)alpha, c, rs_c, cs_c, NULL, NULL ); \
+		AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1) \
+		/* Finalize BLIS. */ \
+		bli_finalize_auto(); \
+		return; \
+	} \
+\
 	/* Call BLIS interface. */ \
 	PASTEMAC2(ch,blisname,BLIS_TAPI_EX_SUF) \
 	( \
@@ -229,6 +259,36 @@ void PASTEF77S(ch,blasname) \
 	const inc_t cs_b = *ldb; \
 	const inc_t rs_c = 1; \
 	const inc_t cs_c = *ldc; \
+\
+	/* If alpha is zero, scale C by beta and return early */ \
+	if( PASTEMAC(ch,eq0)( *alpha ) ) \
+	{ \
+		ftype beta_complex; \
+		beta_complex.real = *beta; \
+		beta_complex.imag = 0.0; \
+		PASTEMAC2(ch,scalm,_ex)( BLIS_NO_CONJUGATE, \
+								  0, \
+								  BLIS_NONUNIT_DIAG, \
+								  blis_uploc, \
+								  m0, \
+								  m0, \
+								  (ftype*) &beta_complex, \
+								  (ftype*) c, rs_c, cs_c, \
+								  NULL, NULL \
+								); \
+		/* The Hermitian rank-k product was computed as Re(alpha)*A*A', even for the
+		   diagonal elements. Mathematically, the imaginary components of
+		   diagonal elements of a Hermitian rank-k product should always be
+		   zero. However, in practice, they sometimes accumulate meaningless
+		   non-zero values. To prevent this, we explicitly set those values
+		   to zero before returning.
+		*/ \
+		PASTEMAC2(ch,setid,_ex)( 0, m0, m0, (void*)alpha, c, rs_c, cs_c, NULL, NULL ); \
+		AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1) \
+		/* Finalize BLIS. */ \
+		bli_finalize_auto(); \
+		return; \
+	} \
 \
 	const num_t   dt_r   = PASTEMAC(chr,type); \
 	const num_t   dt     = PASTEMAC(ch,type); \
