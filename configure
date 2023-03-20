@@ -763,7 +763,7 @@ read_registry_file()
 
 				if [ "${mem}" != "${mems_mem}" ]; then
 
-					#clist=${config_registry[$config]}
+					#clist="${config_registry[$config]}"
 					clisttmp=$(query_array "config_registry" "${config}")
 
 					# Replace the current config with its constituent config set,
@@ -833,7 +833,7 @@ read_registry_file()
 			#for ker in ${!kr_var}; do
 			for ker in ${klist}; do
 
-				#kers_ker=${kernel_registry[${ker}]}
+				#kers_ker="${kernel_registry[${ker}]}"
 				kers_ker=$(query_array "kernel_registry" "${ker}")
 
 				# If kers_ker is empty string, then ker was not found as a key
@@ -854,7 +854,7 @@ read_registry_file()
 				# set it needs.
 				if [ "${ker}" != "${kers_ker}" ]; then
 
-					#klisttmp=${kernel_registry[$config]}
+					#klisttmp="${kernel_registry[$config]}"
 					klisttmp=$(query_array "kernel_registry" "${config}")
 
 					# Replace the current config with its requisite kernels,
@@ -1210,7 +1210,7 @@ auto_detect()
 	# Create #defines for all of the BLIS_CONFIG_ macros in bli_cpuid.c.
 	bli_cpuid_c_filepath=$(find "${dist_path}/frame" -name "bli_cpuid.c")
 	config_defines=$(grep BLIS_CONFIG_ "${bli_cpuid_c_filepath}" \
-					 | sed -Ee 's/#ifdef[[:space:]]+/-D/g')
+					| sed -Ee 's/#ifdef[[:space:]]+/-D/g')
 
 	# Set the linker flags. We typically need pthreads (or BLIS's homerolled
 	# equiavlent) because it is needed for parts of bli_arch.c unrelated to
