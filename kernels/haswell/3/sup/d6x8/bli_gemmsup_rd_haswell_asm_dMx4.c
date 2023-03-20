@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2022, Advanced Micro Devices, Inc.
+   Copyright (C) 2022 - 2023, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -171,7 +171,6 @@ void bli_dgemmsup_rd_haswell_asm_6x4
 	prefetch(0, mem(rcx, rdi, 1, 3*8)) // prefetch c + 1*rs_c
 	prefetch(0, mem(rcx, rdi, 2, 3*8)) // prefetch c + 2*rs_c
 #endif
-	lea(mem(r8,  r8,  4), rbp)         // rbp = 5*rs_a
 
 
 
@@ -583,7 +582,7 @@ void bli_dgemmsup_rd_haswell_asm_6x4
       [a_next] "m" (a_next),
       [b_next] "m" (b_next)*/
 	: // register clobber list
-	  "rax", "rbx", "rcx", "rdx", "rsi", "rdi", "rbp",
+	  "rax", "rbx", "rcx", "rdx", "rsi", "rdi",
 	  "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15",
 	  "xmm0", "xmm1", "xmm2", "xmm3",
 	  "xmm4", "xmm5", "xmm6", "xmm7",

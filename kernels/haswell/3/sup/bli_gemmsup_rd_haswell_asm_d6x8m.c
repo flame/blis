@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2022, Advanced Micro Devices, Inc.
+   Copyright (C) 2022 - 2023, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -986,14 +986,13 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_0x0_U
 	vmovapd( ymm4, ymm14)
 	vmovapd( ymm4, ymm15)
 
-	lea(mem(r12), rcx)                 // rcx = c_iijj;
 	lea(mem(r14), rax)                 // rax = a_ii;
 	lea(mem(rdx), rbx)                 // rbx = b_jj;
 
-	prefetch(0, mem(rcx,         3*8)) // prefetch c + 0*rs_c
-	prefetch(0, mem(rcx, rdi, 1, 3*8)) // prefetch c + 1*rs_c
-	prefetch(0, mem(rcx, rdi, 2, 3*8)) // prefetch c + 2*rs_c
-	lea(mem(r8,  r8,  4), rbp)         // rbp = 5*rs_a
+	prefetch(0, mem(r12,         3*8)) // prefetch c + 0*rs_c
+	prefetch(0, mem(r12, rdi, 1, 3*8)) // prefetch c + 1*rs_c
+	prefetch(0, mem(r12, rdi, 2, 3*8)) // prefetch c + 2*rs_c
+	lea(mem(r8,  r8,  4), rcx)         // rcx = 5*rs_a
 
 	mov(var(k_iter16), rsi)            // i = k_iter16;
 	test(rsi, rsi)                     // check i via logical AND.
@@ -1004,14 +1003,14 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_0x0_U
 	// ---------------------------------- iteration 0
 	prefetch(0, mem(rax, r10, 1, 0*8)) // prefetch rax + 3*rs_a
 	prefetch(0, mem(rax, r8,  4, 0*8)) // prefetch rax + 4*rs_a
-	prefetch(0, mem(rax, rbp, 1, 0*8)) // prefetch rax + 5*rs_a
+	prefetch(0, mem(rax, rcx, 1, 0*8)) // prefetch rax + 5*rs_a
 	SUBITER_K4_3x4(rax, rbx)
 	// ---------------------------------- iteration 1
 	SUBITER_K4_3x4(rax, rbx)
 	// ---------------------------------- iteration 2
 	prefetch(0, mem(rax, r10, 1, 0*8)) // prefetch rax + 3*rs_a
 	prefetch(0, mem(rax, r8,  4, 0*8)) // prefetch rax + 4*rs_a
-	prefetch(0, mem(rax, rbp, 1, 0*8)) // prefetch rax + 5*rs_a
+	prefetch(0, mem(rax, rcx, 1, 0*8)) // prefetch rax + 5*rs_a
 	SUBITER_K4_3x4(rax, rbx)
 	// ---------------------------------- iteration 3
 	SUBITER_K4_3x4(rax, rbx)
@@ -1029,7 +1028,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_0x0_U
 
 	prefetch(0, mem(rax, r10, 1, 0*8)) // prefetch rax + 3*rs_a
 	prefetch(0, mem(rax, r8,  4, 0*8)) // prefetch rax + 4*rs_a
-	prefetch(0, mem(rax, rbp, 1, 0*8)) // prefetch rax + 5*rs_a
+	prefetch(0, mem(rax, rcx, 1, 0*8)) // prefetch rax + 5*rs_a
 
 	SUBITER_K4_3x4(rax, rbx)
 
@@ -1089,6 +1088,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_0x0_U
 	                                   // xmm6[2] = sum(ymm12); xmm6[3] = sum(ymm15)
 	mov(var(alpha), rax)               // load address of alpha
 	mov(var(beta), rbx)                // load address of beta
+	lea(mem(r12), rcx)                 // rcx = c_iijj;
 	vbroadcastsd(mem(rax), ymm0)       // load alpha and duplicate
 	vbroadcastsd(mem(rbx), ymm3)       // load beta and duplicate
 
@@ -1154,7 +1154,6 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_0x0_U
 	prefetch(0, mem(rcx,         3*8)) // prefetch c + 0*rs_c
 	prefetch(0, mem(rcx, rdi, 1, 3*8)) // prefetch c + 1*rs_c
 	prefetch(0, mem(rcx, rdi, 2, 3*8)) // prefetch c + 2*rs_c
-	lea(mem(r8,  r8,  4), rbp)         // rbp = 5*rs_a
 
 	mov(var(k_iter16), rsi)            // i = k_iter16;
 	test(rsi, rsi)                     // check i via logical AND.
@@ -1279,14 +1278,13 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_0x0_U
 	vmovapd( ymm4, ymm14)
 	vmovapd( ymm4, ymm15)
 
-	lea(mem(r12), rcx)                 // rcx = c_iijj;
 	lea(mem(r14), rax)                 // rax = a_ii;
 	lea(mem(rdx), rbx)                 // rbx = b_jj;
 
-	prefetch(0, mem(rcx,         3*8)) // prefetch c + 0*rs_c
-	prefetch(0, mem(rcx, rdi, 1, 3*8)) // prefetch c + 1*rs_c
-	prefetch(0, mem(rcx, rdi, 2, 3*8)) // prefetch c + 2*rs_c
-	lea(mem(r8,  r8,  4), rbp)         // rbp = 5*rs_a
+	prefetch(0, mem(r12,         3*8)) // prefetch c + 0*rs_c
+	prefetch(0, mem(r12, rdi, 1, 3*8)) // prefetch c + 1*rs_c
+	prefetch(0, mem(r12, rdi, 2, 3*8)) // prefetch c + 2*rs_c
+	lea(mem(r8,  r8,  4), rcx)         // rcx = 5*rs_a
 
 	mov(var(k_iter16), rsi)            // i = k_iter16;
 	test(rsi, rsi)                     // check i via logical AND.
@@ -1296,14 +1294,14 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_0x0_U
 	// ---------------------------------- iteration 0
 	prefetch(0, mem(rax, r10, 1, 0*8)) // prefetch rax + 3*rs_a
 	prefetch(0, mem(rax, r8,  4, 0*8)) // prefetch rax + 4*rs_a
-	prefetch(0, mem(rax, rbp, 1, 0*8)) // prefetch rax + 5*rs_a
+	prefetch(0, mem(rax, rcx, 1, 0*8)) // prefetch rax + 5*rs_a
 	SUBITER_K4_3x4(rax, rbx)
 	// ---------------------------------- iteration 1
 	SUBITER_K4_3x4(rax, rbx)
 	// ---------------------------------- iteration 2
 	prefetch(0, mem(rax, r10, 1, 0*8)) // prefetch rax + 3*rs_a
 	prefetch(0, mem(rax, r8,  4, 0*8)) // prefetch rax + 4*rs_a
-	prefetch(0, mem(rax, rbp, 1, 0*8)) // prefetch rax + 5*rs_a
+	prefetch(0, mem(rax, rcx, 1, 0*8)) // prefetch rax + 5*rs_a
 	SUBITER_K4_3x4(rax, rbx)
 	// ---------------------------------- iteration 3
 	SUBITER_K4_3x4(rax, rbx)
@@ -1323,7 +1321,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_0x0_U
 
 	prefetch(0, mem(rax, r10, 1, 0*8)) // prefetch rax + 3*rs_a
 	prefetch(0, mem(rax, r8,  4, 0*8)) // prefetch rax + 4*rs_a
-	prefetch(0, mem(rax, rbp, 1, 0*8)) // prefetch rax + 5*rs_a
+	prefetch(0, mem(rax, rcx, 1, 0*8)) // prefetch rax + 5*rs_a
 	SUBITER_K4_3x4(rax, rbx)
 
 	dec(rsi)                           // i -= 1;
@@ -1387,6 +1385,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_0x0_U
 
 	mov(var(alpha), rax)               // load address of alpha
 	mov(var(beta), rbx)                // load address of beta
+	lea(mem(r12), rcx)                 // rcx = c_iijj;
 	vbroadcastsd(mem(rax), ymm0)       // load alpha and duplicate
 	vbroadcastsd(mem(rbx), ymm3)       // load beta and duplicate
 
@@ -1449,14 +1448,13 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_0x0_U
 	vmovapd( ymm4, ymm14)
 	vmovapd( ymm4, ymm15)
 
-	lea(mem(r12), rcx)                 // rcx = c_iijj;
 	lea(mem(r14), rax)                 // rax = a_ii;
 	lea(mem(rdx), rbx)                 // rbx = b_jj;
 
-	prefetch(0, mem(rcx,         3*8)) // prefetch c + 0*rs_c
-	prefetch(0, mem(rcx, rdi, 1, 3*8)) // prefetch c + 1*rs_c
-	prefetch(0, mem(rcx, rdi, 2, 3*8)) // prefetch c + 2*rs_c
-	lea(mem(r8,  r8,  4), rbp)         // rbp = 5*rs_a
+	prefetch(0, mem(r12,         3*8)) // prefetch c + 0*rs_c
+	prefetch(0, mem(r12, rdi, 1, 3*8)) // prefetch c + 1*rs_c
+	prefetch(0, mem(r12, rdi, 2, 3*8)) // prefetch c + 2*rs_c
+	lea(mem(r8,  r8,  4), rcx)         // rcx = 5*rs_a
 
 	mov(var(k_iter16), rsi)            // i = k_iter16;
 	test(rsi, rsi)                     // check i via logical AND.
@@ -1467,14 +1465,14 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_0x0_U
 	// ---------------------------------- iteration 0
 	prefetch(0, mem(rax, r10, 1, 0*8)) // prefetch rax + 3*rs_a
 	prefetch(0, mem(rax, r8,  4, 0*8)) // prefetch rax + 4*rs_a
-	prefetch(0, mem(rax, rbp, 1, 0*8)) // prefetch rax + 5*rs_a
+	prefetch(0, mem(rax, rcx, 1, 0*8)) // prefetch rax + 5*rs_a
 	SUBITER_K4_3x4(rax, rbx)
 	// ---------------------------------- iteration 1
 	SUBITER_K4_3x4(rax, rbx)
 	// ---------------------------------- iteration 2
 	prefetch(0, mem(rax, r10, 1, 0*8)) // prefetch rax + 3*rs_a
 	prefetch(0, mem(rax, r8,  4, 0*8)) // prefetch rax + 4*rs_a
-	prefetch(0, mem(rax, rbp, 1, 0*8)) // prefetch rax + 5*rs_a
+	prefetch(0, mem(rax, rcx, 1, 0*8)) // prefetch rax + 5*rs_a
 	SUBITER_K4_3x4(rax, rbx)
 	// ---------------------------------- iteration 3
 	SUBITER_K4_3x4(rax, rbx)
@@ -1493,7 +1491,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_0x0_U
 
 	prefetch(0, mem(rax, r10, 1, 0*8)) // prefetch rax + 3*rs_a
 	prefetch(0, mem(rax, r8,  4, 0*8)) // prefetch rax + 4*rs_a
-	prefetch(0, mem(rax, rbp, 1, 0*8)) // prefetch rax + 5*rs_a
+	prefetch(0, mem(rax, rcx, 1, 0*8)) // prefetch rax + 5*rs_a
 
 	SUBITER_K4_3x4(rax, rbx)
 
@@ -1564,6 +1562,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_0x0_U
 
 	mov(var(alpha), rax)               // load address of alpha
 	mov(var(beta), rbx)                // load address of beta
+	lea(mem(r12), rcx)                 // rcx = c_iijj;
 	vbroadcastsd(mem(rax), ymm0)       // load alpha and duplicate
 	vbroadcastsd(mem(rbx), ymm3)       // load beta and duplicate
 
@@ -1635,7 +1634,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_0x0_U
       [a_next] "m" (a_next),
       [b_next] "m" (b_next)*/
 	: // register clobber list
-	  "rax", "rbx", "rcx", "rdx", "rsi", "rdi", "rbp",
+	  "rax", "rbx", "rcx", "rdx", "rsi", "rdi",
 	  "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15",
 	  "xmm0", "xmm1", "xmm2", "xmm3",
 	  "xmm4", "xmm5", "xmm6", "xmm7",
@@ -1744,15 +1743,14 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_6x0_U
 	vmovapd( ymm4, ymm14)
 	vmovapd( ymm4, ymm15)
 
-	lea(mem(r12), rcx)                 // rcx = c_iijj;
 	lea(mem(r14), rax)                 // rax = a_ii;
 	lea(mem(rdx), rbx)                 // rbx = b_jj;
 
 
-	prefetch(0, mem(rcx,         3*8)) // prefetch c + 0*rs_c
-	prefetch(0, mem(rcx, rdi, 1, 3*8)) // prefetch c + 1*rs_c
-	prefetch(0, mem(rcx, rdi, 2, 3*8)) // prefetch c + 2*rs_c
-	lea(mem(r8,  r8,  4), rbp)         // rbp = 5*rs_a
+	prefetch(0, mem(r12,         3*8)) // prefetch c + 0*rs_c
+	prefetch(0, mem(r12, rdi, 1, 3*8)) // prefetch c + 1*rs_c
+	prefetch(0, mem(r12, rdi, 2, 3*8)) // prefetch c + 2*rs_c
+	lea(mem(r8,  r8,  4), rcx)         // rcx = 5*rs_a
 
 	mov(var(k_iter16), rsi)            // i = k_iter16;
 	test(rsi, rsi)                     // check i via logical AND.
@@ -1763,14 +1761,14 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_6x0_U
 	// ---------------------------------- iteration 0
 	prefetch(0, mem(rax, r10, 1, 0*8)) // prefetch rax + 3*rs_a
 	prefetch(0, mem(rax, r8,  4, 0*8)) // prefetch rax + 4*rs_a
-	prefetch(0, mem(rax, rbp, 1, 0*8)) // prefetch rax + 5*rs_a
+	prefetch(0, mem(rax, rcx, 1, 0*8)) // prefetch rax + 5*rs_a
 	SUBITER_K4_2x4(rax, rbx)
 	// ---------------------------------- iteration 1
 	SUBITER_K4_2x4(rax, rbx)
 	// ---------------------------------- iteration 2
 	prefetch(0, mem(rax, r10, 1, 0*8)) // prefetch rax + 3*rs_a
 	prefetch(0, mem(rax, r8,  4, 0*8)) // prefetch rax + 4*rs_a
-	prefetch(0, mem(rax, rbp, 1, 0*8)) // prefetch rax + 5*rs_a
+	prefetch(0, mem(rax, rcx, 1, 0*8)) // prefetch rax + 5*rs_a
 	SUBITER_K4_2x4(rax, rbx)
 	// ---------------------------------- iteration 3
 	SUBITER_K4_2x4(rax, rbx)
@@ -1789,7 +1787,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_6x0_U
 
 	prefetch(0, mem(rax, r10, 1, 0*8)) // prefetch rax + 3*rs_a
 	prefetch(0, mem(rax, r8,  4, 0*8)) // prefetch rax + 4*rs_a
-	prefetch(0, mem(rax, rbp, 1, 0*8)) // prefetch rax + 5*rs_a
+	prefetch(0, mem(rax, rcx, 1, 0*8)) // prefetch rax + 5*rs_a
 	SUBITER_K4_2x4(rax, rbx)
 
 	dec(rsi)                           // i -= 1;
@@ -1859,6 +1857,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_6x0_U
 
 	mov(var(alpha), rax)               // load address of alpha
 	mov(var(beta), rbx)                // load address of beta
+	lea(mem(r12), rcx)                 // rcx = c_iijj;
 	vbroadcastsd(mem(rax), ymm0)       // load alpha and duplicate
 	vbroadcastsd(mem(rbx), ymm3)       // load beta and duplicate
 
@@ -1927,7 +1926,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_6x0_U
       [a_next] "m" (a_next),
       [b_next] "m" (b_next)*/
 	: // register clobber list
-	  "rax", "rbx", "rcx", "rdx", "rsi", "rdi", "rbp",
+	  "rax", "rbx", "rcx", "rdx", "rsi", "rdi",
 	  "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15",
 	  "xmm0", "xmm1", "xmm2", "xmm3",
 	  "xmm4", "xmm5", "xmm6", "xmm7",
@@ -2043,15 +2042,14 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_0x0_combined_U
 	vmovapd( ymm4, ymm14)
 	vmovapd( ymm4, ymm15)
 
-	lea(mem(r12), rcx)                 // rcx = c_iijj;
 	lea(mem(r14), rax)                 // rax = a_ii;
 	lea(mem(rdx), rbx)                 // rbx = b_jj;
 
 
-	prefetch(0, mem(rcx,         3*8)) // prefetch c + 0*rs_c
-	prefetch(0, mem(rcx, rdi, 1, 3*8)) // prefetch c + 1*rs_c
-	prefetch(0, mem(rcx, rdi, 2, 3*8)) // prefetch c + 2*rs_c
-	lea(mem(r8,  r8,  4), rbp)         // rbp = 5*rs_a
+	prefetch(0, mem(r12,         3*8)) // prefetch c + 0*rs_c
+	prefetch(0, mem(r12, rdi, 1, 3*8)) // prefetch c + 1*rs_c
+	prefetch(0, mem(r12, rdi, 2, 3*8)) // prefetch c + 2*rs_c
+	lea(mem(r8,  r8,  4), rcx)         // rcx = 5*rs_a
 
 	mov(var(k_iter16), rsi)            // i = k_iter16;
 	test(rsi, rsi)                     // check i via logical AND.
@@ -2064,14 +2062,14 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_0x0_combined_U
 
 	prefetch(0, mem(rax, r10, 1, 0*8)) // prefetch rax + 3*rs_a
 	prefetch(0, mem(rax, r8,  4, 0*8)) // prefetch rax + 4*rs_a
-	prefetch(0, mem(rax, rbp, 1, 0*8)) // prefetch rax + 5*rs_a
+	prefetch(0, mem(rax, rcx, 1, 0*8)) // prefetch rax + 5*rs_a
 	SUBITER_K4_3x4(rax, rbx)
 	// ---------------------------------- iteration 1
 	SUBITER_K4_3x4(rax, rbx)
 	// ---------------------------------- iteration 2
 	prefetch(0, mem(rax, r10, 1, 0*8)) // prefetch rax + 3*rs_a
 	prefetch(0, mem(rax, r8,  4, 0*8)) // prefetch rax + 4*rs_a
-	prefetch(0, mem(rax, rbp, 1, 0*8)) // prefetch rax + 5*rs_a
+	prefetch(0, mem(rax, rcx, 1, 0*8)) // prefetch rax + 5*rs_a
 	SUBITER_K4_3x4(rax, rbx)
 	// ---------------------------------- iteration 3
 	SUBITER_K4_3x4(rax, rbx)
@@ -2091,7 +2089,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_0x0_combined_U
 
 	prefetch(0, mem(rax, r10, 1, 0*8)) // prefetch rax + 3*rs_a
 	prefetch(0, mem(rax, r8,  4, 0*8)) // prefetch rax + 4*rs_a
-	prefetch(0, mem(rax, rbp, 1, 0*8)) // prefetch rax + 5*rs_a
+	prefetch(0, mem(rax, rcx, 1, 0*8)) // prefetch rax + 5*rs_a
 	SUBITER_K4_3x4(rax, rbx)
 
 	dec(rsi)                           // i -= 1;
@@ -2160,6 +2158,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_0x0_combined_U
 
 	mov(var(alpha), rax)               // load address of alpha
 	mov(var(beta), rbx)                // load address of beta
+	lea(mem(r12), rcx)                 // rcx = c_iijj;
 	vbroadcastsd(mem(rax), ymm0)       // load alpha and duplicate
 	vbroadcastsd(mem(rbx), ymm3)       // load beta and duplicate
 
@@ -2242,7 +2241,6 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_0x0_combined_U
 	prefetch(0, mem(rcx,         3*8)) // prefetch c + 0*rs_c
 	prefetch(0, mem(rcx, rdi, 1, 3*8)) // prefetch c + 1*rs_c
 	prefetch(0, mem(rcx, rdi, 2, 3*8)) // prefetch c + 2*rs_c
-	lea(mem(r8,  r8,  4), rbp)         // rbp = 5*rs_a
 
 	mov(var(k_iter16), rsi)            // i = k_iter16;
 	test(rsi, rsi)                     // check i via logical AND.
@@ -2386,15 +2384,14 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_0x0_combined_U
 	vmovapd( ymm4, ymm14)
 	vmovapd( ymm4, ymm15)
 
-	lea(mem(r12), rcx)                 // rcx = c_iijj;
 	lea(mem(r14), rax)                 // rax = a_ii;
 	lea(mem(rdx), rbx)                 // rbx = b_jj;
 
 
-	prefetch(0, mem(rcx,         3*8)) // prefetch c + 0*rs_c
-	prefetch(0, mem(rcx, rdi, 1, 3*8)) // prefetch c + 1*rs_c
-	prefetch(0, mem(rcx, rdi, 2, 3*8)) // prefetch c + 2*rs_c
-	lea(mem(r8,  r8,  4), rbp)         // rbp = 5*rs_a
+	prefetch(0, mem(r12,         3*8)) // prefetch c + 0*rs_c
+	prefetch(0, mem(r12, rdi, 1, 3*8)) // prefetch c + 1*rs_c
+	prefetch(0, mem(r12, rdi, 2, 3*8)) // prefetch c + 2*rs_c
+	lea(mem(r8,  r8,  4), rcx)         // rcx = 5*rs_a
 
 	mov(var(k_iter16), rsi)            // i = k_iter16;
 	test(rsi, rsi)                     // check i via logical AND.
@@ -2406,14 +2403,14 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_0x0_combined_U
 	// ---------------------------------- iteration 0
 	prefetch(0, mem(rax, r10, 1, 0*8)) // prefetch rax + 3*rs_a
 	prefetch(0, mem(rax, r8,  4, 0*8)) // prefetch rax + 4*rs_a
-	prefetch(0, mem(rax, rbp, 1, 0*8)) // prefetch rax + 5*rs_a
+	prefetch(0, mem(rax, rcx, 1, 0*8)) // prefetch rax + 5*rs_a
 	SUBITER_K4_3x4(rax, rbx)
 	// ---------------------------------- iteration 1
 	SUBITER_K4_3x4(rax, rbx)
 	// ---------------------------------- iteration 2
 	prefetch(0, mem(rax, r10, 1, 0*8)) // prefetch rax + 3*rs_a
 	prefetch(0, mem(rax, r8,  4, 0*8)) // prefetch rax + 4*rs_a
-	prefetch(0, mem(rax, rbp, 1, 0*8)) // prefetch rax + 5*rs_a
+	prefetch(0, mem(rax, rcx, 1, 0*8)) // prefetch rax + 5*rs_a
 	SUBITER_K4_3x4(rax, rbx)
 	// ---------------------------------- iteration 3
 	SUBITER_K4_3x4(rax, rbx)
@@ -2433,7 +2430,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_0x0_combined_U
 
 	prefetch(0, mem(rax, r10, 1, 0*8)) // prefetch rax + 3*rs_a
 	prefetch(0, mem(rax, r8,  4, 0*8)) // prefetch rax + 4*rs_a
-	prefetch(0, mem(rax, rbp, 1, 0*8)) // prefetch rax + 5*rs_a
+	prefetch(0, mem(rax, rcx, 1, 0*8)) // prefetch rax + 5*rs_a
 	SUBITER_K4_3x4(rax, rbx)
 
 	dec(rsi)                           // i -= 1;
@@ -2502,6 +2499,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_0x0_combined_U
 
 	mov(var(alpha), rax)               // load address of alpha
 	mov(var(beta), rbx)                // load address of beta
+	lea(mem(r12), rcx)                 // rcx = c_iijj;
 	vbroadcastsd(mem(rax), ymm0)       // load alpha and duplicate
 	vbroadcastsd(mem(rbx), ymm3)       // load beta and duplicate
 
@@ -2568,15 +2566,14 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_0x0_combined_U
 	vmovapd( ymm4, ymm14)
 	vmovapd( ymm4, ymm15)
 
-	lea(mem(r12), rcx)                 // rcx = c_iijj;
 	lea(mem(r14), rax)                 // rax = a_ii;
 	lea(mem(rdx), rbx)                 // rbx = b_jj;
 
 
-	prefetch(0, mem(rcx,         3*8)) // prefetch c + 0*rs_c
-	prefetch(0, mem(rcx, rdi, 1, 3*8)) // prefetch c + 1*rs_c
-	prefetch(0, mem(rcx, rdi, 2, 3*8)) // prefetch c + 2*rs_c
-	lea(mem(r8,  r8,  4), rbp)         // rbp = 5*rs_a
+	prefetch(0, mem(r12,         3*8)) // prefetch c + 0*rs_c
+	prefetch(0, mem(r12, rdi, 1, 3*8)) // prefetch c + 1*rs_c
+	prefetch(0, mem(r12, rdi, 2, 3*8)) // prefetch c + 2*rs_c
+	lea(mem(r8,  r8,  4), rcx)         // rcx = 5*rs_a
 
 	mov(var(k_iter16), rsi)            // i = k_iter16;
 	test(rsi, rsi)                     // check i via logical AND.
@@ -2589,7 +2586,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_0x0_combined_U
 
 	prefetch(0, mem(rax, r10, 1, 0*8)) // prefetch rax + 3*rs_a
 	prefetch(0, mem(rax, r8,  4, 0*8)) // prefetch rax + 4*rs_a
-	prefetch(0, mem(rax, rbp, 1, 0*8)) // prefetch rax + 5*rs_a
+	prefetch(0, mem(rax, rcx, 1, 0*8)) // prefetch rax + 5*rs_a
 
 	vmovupd(mem(rax       ), ymm0)
 	vmovupd(mem(rax, r8, 1), ymm1)
@@ -2649,7 +2646,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_0x0_combined_U
 
 	prefetch(0, mem(rax, r10, 1, 0*8)) // prefetch rax + 3*rs_a
 	prefetch(0, mem(rax, r8,  4, 0*8)) // prefetch rax + 4*rs_a
-	prefetch(0, mem(rax, rbp, 1, 0*8)) // prefetch rax + 5*rs_a
+	prefetch(0, mem(rax, rcx, 1, 0*8)) // prefetch rax + 5*rs_a
 
 	vmovupd(mem(rax       ), ymm0)
 	vmovupd(mem(rax, r8, 1), ymm1)
@@ -2720,7 +2717,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_0x0_combined_U
 
 	prefetch(0, mem(rax, r10, 1, 0*8)) // prefetch rax + 3*rs_a
 	prefetch(0, mem(rax, r8,  4, 0*8)) // prefetch rax + 4*rs_a
-	prefetch(0, mem(rax, rbp, 1, 0*8)) // prefetch rax + 5*rs_a
+	prefetch(0, mem(rax, rcx, 1, 0*8)) // prefetch rax + 5*rs_a
 
 	vmovupd(mem(rax       ), ymm0)
 	vmovupd(mem(rax, r8, 1), ymm1)
@@ -2839,6 +2836,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_0x0_combined_U
 
 	mov(var(alpha), rax)               // load address of alpha
 	mov(var(beta), rbx)                // load address of beta
+	lea(mem(r12), rcx)                 // rcx = c_iijj;
 	vbroadcastsd(mem(rax), ymm0)       // load alpha and duplicate
 	vbroadcastsd(mem(rbx), ymm3)       // load beta and duplicate
 
@@ -2910,7 +2908,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_0x0_combined_U
       [a_next] "m" (a_next),
       [b_next] "m" (b_next)*/
 	: // register clobber list
-	  "rax", "rbx", "rcx", "rdx", "rsi", "rdi", "rbp",
+	  "rax", "rbx", "rcx", "rdx", "rsi", "rdi",
 	  "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15",
 	  "xmm0", "xmm1", "xmm2", "xmm3",
 	  "xmm4", "xmm5", "xmm6", "xmm7",
@@ -3000,15 +2998,14 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_0x0_combined_U
 	vmovapd( ymm4, ymm14)
 	vmovapd( ymm4, ymm15)
 
-	lea(mem(r12), rcx)                 // rcx = c_iijj;
 	lea(mem(r14), rax)                 // rax = a_ii;
 	lea(mem(rdx), rbx)                 // rbx = b_jj;
 
 
-	prefetch(0, mem(rcx,         3*8)) // prefetch c + 0*rs_c
-	prefetch(0, mem(rcx, rdi, 1, 3*8)) // prefetch c + 1*rs_c
-	prefetch(0, mem(rcx, rdi, 2, 3*8)) // prefetch c + 2*rs_c
-	lea(mem(r8,  r8,  4), rbp)         // rbp = 5*rs_a
+	prefetch(0, mem(r12,         3*8)) // prefetch c + 0*rs_c
+	prefetch(0, mem(r12, rdi, 1, 3*8)) // prefetch c + 1*rs_c
+	prefetch(0, mem(r12, rdi, 2, 3*8)) // prefetch c + 2*rs_c
+	lea(mem(r8,  r8,  4), rcx)         // rcx = 5*rs_a
 
 	mov(var(k_iter16), rsi)            // i = k_iter16;
 	test(rsi, rsi)                     // check i via logical AND.
@@ -3021,7 +3018,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_0x0_combined_U
 
 	prefetch(0, mem(rax, r10, 1, 0*8)) // prefetch rax + 3*rs_a
 	prefetch(0, mem(rax, r8,  4, 0*8)) // prefetch rax + 4*rs_a
-	prefetch(0, mem(rax, rbp, 1, 0*8)) // prefetch rax + 5*rs_a
+	prefetch(0, mem(rax, rcx, 1, 0*8)) // prefetch rax + 5*rs_a
 
 	vmovupd(mem(rax       ), ymm0)
 	vmovupd(mem(rax, r8, 1), ymm1)
@@ -3071,7 +3068,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_0x0_combined_U
 
 	prefetch(0, mem(rax, r10, 1, 0*8)) // prefetch rax + 3*rs_a
 	prefetch(0, mem(rax, r8,  4, 0*8)) // prefetch rax + 4*rs_a
-	prefetch(0, mem(rax, rbp, 1, 0*8)) // prefetch rax + 5*rs_a
+	prefetch(0, mem(rax, rcx, 1, 0*8)) // prefetch rax + 5*rs_a
 
 	vmovupd(mem(rax       ), ymm0)
 	vmovupd(mem(rax, r8, 1), ymm1)
@@ -3132,7 +3129,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_0x0_combined_U
 
 	prefetch(0, mem(rax, r10, 1, 0*8)) // prefetch rax + 3*rs_a
 	prefetch(0, mem(rax, r8,  4, 0*8)) // prefetch rax + 4*rs_a
-	prefetch(0, mem(rax, rbp, 1, 0*8)) // prefetch rax + 5*rs_a
+	prefetch(0, mem(rax, rcx, 1, 0*8)) // prefetch rax + 5*rs_a
 
 	vmovupd(mem(rax       ), ymm0)
 	vmovupd(mem(rax, r8, 1), ymm1)
@@ -3241,6 +3238,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_0x0_combined_U
 
 	mov(var(alpha), rax)               // load address of alpha
 	mov(var(beta), rbx)                // load address of beta
+	lea(mem(r12), rcx)                 // rcx = c_iijj;
 	vbroadcastsd(mem(rax), ymm0)       // load alpha and duplicate
 	vbroadcastsd(mem(rbx), ymm3)       // load beta and duplicate
 
@@ -3309,7 +3307,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_0x0_combined_U
       [a_next] "m" (a_next),
       [b_next] "m" (b_next)*/
 	: // register clobber list
-	  "rax", "rbx", "rcx", "rdx", "rsi", "rdi", "rbp",
+	  "rax", "rbx", "rcx", "rdx", "rsi", "rdi",
 	  "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15",
 	  "xmm0", "xmm1", "xmm2", "xmm3",
 	  "xmm4", "xmm5", "xmm6", "xmm7",
@@ -3419,15 +3417,14 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_6x8_U
 	vmovapd( ymm4, ymm14)
 	vmovapd( ymm4, ymm15)
 
-	lea(mem(r12), rcx)                 // rcx = c_iijj;
 	lea(mem(r14), rax)                 // rax = a_ii;
 	lea(mem(rdx), rbx)                 // rbx = b_jj;
 
 
-	prefetch(0, mem(rcx,         3*8)) // prefetch c + 0*rs_c
-	prefetch(0, mem(rcx, rdi, 1, 3*8)) // prefetch c + 1*rs_c
-	prefetch(0, mem(rcx, rdi, 2, 3*8)) // prefetch c + 2*rs_c
-	lea(mem(r8,  r8,  4), rbp)         // rbp = 5*rs_a
+	prefetch(0, mem(r12,         3*8)) // prefetch c + 0*rs_c
+	prefetch(0, mem(r12, rdi, 1, 3*8)) // prefetch c + 1*rs_c
+	prefetch(0, mem(r12, rdi, 2, 3*8)) // prefetch c + 2*rs_c
+	lea(mem(r8,  r8,  4), rcx)         // rcx = 5*rs_a
 
 	mov(var(k_iter16), rsi)            // i = k_iter16;
 	test(rsi, rsi)                     // check i via logical AND.
@@ -3439,14 +3436,14 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_6x8_U
 	// ---------------------------------- iteration 0
 	prefetch(0, mem(rax, r10, 1, 0*8)) // prefetch rax + 3*rs_a
 	prefetch(0, mem(rax, r8,  4, 0*8)) // prefetch rax + 4*rs_a
-	prefetch(0, mem(rax, rbp, 1, 0*8)) // prefetch rax + 5*rs_a
+	prefetch(0, mem(rax, rcx, 1, 0*8)) // prefetch rax + 5*rs_a
 	SUBITER_K4_3x4(rax, rbx)
 	// ---------------------------------- iteration 1
 	SUBITER_K4_3x4(rax, rbx)
 	// ---------------------------------- iteration 2
 	prefetch(0, mem(rax, r10, 1, 0*8)) // prefetch rax + 3*rs_a
 	prefetch(0, mem(rax, r8,  4, 0*8)) // prefetch rax + 4*rs_a
-	prefetch(0, mem(rax, rbp, 1, 0*8)) // prefetch rax + 5*rs_a
+	prefetch(0, mem(rax, rcx, 1, 0*8)) // prefetch rax + 5*rs_a
 	SUBITER_K4_3x4(rax, rbx)
 	// ---------------------------------- iteration 3
 	SUBITER_K4_3x4(rax, rbx)
@@ -3466,7 +3463,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_6x8_U
 
 	prefetch(0, mem(rax, r10, 1, 0*8)) // prefetch rax + 3*rs_a
 	prefetch(0, mem(rax, r8,  4, 0*8)) // prefetch rax + 4*rs_a
-	prefetch(0, mem(rax, rbp, 1, 0*8)) // prefetch rax + 5*rs_a
+	prefetch(0, mem(rax, rcx, 1, 0*8)) // prefetch rax + 5*rs_a
 	SUBITER_K4_3x4(rax, rbx)
 
 	dec(rsi)                           // i -= 1;
@@ -3535,6 +3532,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_6x8_U
 
 	mov(var(alpha), rax)               // load address of alpha
 	mov(var(beta), rbx)                // load address of beta
+	lea(mem(r12), rcx)                 // rcx = c_iijj;
 	vbroadcastsd(mem(rax), ymm0)       // load alpha and duplicate
 	vbroadcastsd(mem(rbx), ymm3)       // load beta and duplicate
 
@@ -3601,15 +3599,14 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_6x8_U
 	vmovapd( ymm4, ymm14)
 	vmovapd( ymm4, ymm15)
 
-	lea(mem(r12), rcx)                 // rcx = c_iijj;
 	lea(mem(r14), rax)                 // rax = a_ii;
 	lea(mem(rdx), rbx)                 // rbx = b_jj;
 
 
-	prefetch(0, mem(rcx,         3*8)) // prefetch c + 0*rs_c
-	prefetch(0, mem(rcx, rdi, 1, 3*8)) // prefetch c + 1*rs_c
-	prefetch(0, mem(rcx, rdi, 2, 3*8)) // prefetch c + 2*rs_c
-	lea(mem(r8,  r8,  4), rbp)         // rbp = 5*rs_a
+	prefetch(0, mem(r12,         3*8)) // prefetch c + 0*rs_c
+	prefetch(0, mem(r12, rdi, 1, 3*8)) // prefetch c + 1*rs_c
+	prefetch(0, mem(r12, rdi, 2, 3*8)) // prefetch c + 2*rs_c
+	lea(mem(r8,  r8,  4), rcx)         // rcx = 5*rs_a
 
 	mov(var(k_iter16), rsi)            // i = k_iter16;
 	test(rsi, rsi)                     // check i via logical AND.
@@ -3622,7 +3619,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_6x8_U
 
 	prefetch(0, mem(rax, r10, 1, 0*8)) // prefetch rax + 3*rs_a
 	prefetch(0, mem(rax, r8,  4, 0*8)) // prefetch rax + 4*rs_a
-	prefetch(0, mem(rax, rbp, 1, 0*8)) // prefetch rax + 5*rs_a
+	prefetch(0, mem(rax, rcx, 1, 0*8)) // prefetch rax + 5*rs_a
 	SUBITER_K4_3x4(rax, rbx)
 
 	// ---------------------------------- iteration 1
@@ -3632,7 +3629,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_6x8_U
 
 	prefetch(0, mem(rax, r10, 1, 0*8)) // prefetch rax + 3*rs_a
 	prefetch(0, mem(rax, r8,  4, 0*8)) // prefetch rax + 4*rs_a
-	prefetch(0, mem(rax, rbp, 1, 0*8)) // prefetch rax + 5*rs_a
+	prefetch(0, mem(rax, rcx, 1, 0*8)) // prefetch rax + 5*rs_a
 	SUBITER_K4_3x4(rax, rbx)
 
 	// ---------------------------------- iteration 3
@@ -3653,7 +3650,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_6x8_U
 
 	prefetch(0, mem(rax, r10, 1, 0*8)) // prefetch rax + 3*rs_a
 	prefetch(0, mem(rax, r8,  4, 0*8)) // prefetch rax + 4*rs_a
-	prefetch(0, mem(rax, rbp, 1, 0*8)) // prefetch rax + 5*rs_a
+	prefetch(0, mem(rax, rcx, 1, 0*8)) // prefetch rax + 5*rs_a
 	SUBITER_K4_3x4(rax, rbx)
 
 	dec(rsi)                           // i -= 1;
@@ -3722,6 +3719,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_6x8_U
 
 	mov(var(alpha), rax)               // load address of alpha
 	mov(var(beta), rbx)                // load address of beta
+	lea(mem(r12), rcx)                 // rcx = c_iijj;
 	vbroadcastsd(mem(rax), ymm0)       // load alpha and duplicate
 	vbroadcastsd(mem(rbx), ymm3)       // load beta and duplicate
 
@@ -3812,15 +3810,14 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_6x8_U
 	vmovapd( ymm4, ymm14)
 	vmovapd( ymm4, ymm15)
 
-	lea(mem(r12), rcx)                 // rcx = c_iijj;
 	lea(mem(r14), rax)                 // rax = a_ii;
 	lea(mem(rdx), rbx)                 // rbx = b_jj;
 
 
-	prefetch(0, mem(rcx,         3*8)) // prefetch c + 0*rs_c
-	prefetch(0, mem(rcx, rdi, 1, 3*8)) // prefetch c + 1*rs_c
-	prefetch(0, mem(rcx, rdi, 2, 3*8)) // prefetch c + 2*rs_c
-	lea(mem(r8,  r8,  4), rbp)         // rbp = 5*rs_a
+	prefetch(0, mem(r12,         3*8)) // prefetch c + 0*rs_c
+	prefetch(0, mem(r12, rdi, 1, 3*8)) // prefetch c + 1*rs_c
+	prefetch(0, mem(r12, rdi, 2, 3*8)) // prefetch c + 2*rs_c
+	lea(mem(r8,  r8,  4), rcx)         // rcx = 5*rs_a
 
 	mov(var(k_iter16), rsi)            // i = k_iter16;
 	test(rsi, rsi)                     // check i via logical AND.
@@ -3833,7 +3830,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_6x8_U
 
 	prefetch(0, mem(rax, r10, 1, 0*8)) // prefetch rax + 3*rs_a
 	prefetch(0, mem(rax, r8,  4, 0*8)) // prefetch rax + 4*rs_a
-	prefetch(0, mem(rax, rbp, 1, 0*8)) // prefetch rax + 5*rs_a
+	prefetch(0, mem(rax, rcx, 1, 0*8)) // prefetch rax + 5*rs_a
 	SUBITER_K4_3x4(rax, rbx)
 
 	// ---------------------------------- iteration 1
@@ -3844,7 +3841,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_6x8_U
 
 	prefetch(0, mem(rax, r10, 1, 0*8)) // prefetch rax + 3*rs_a
 	prefetch(0, mem(rax, r8,  4, 0*8)) // prefetch rax + 4*rs_a
-	prefetch(0, mem(rax, rbp, 1, 0*8)) // prefetch rax + 5*rs_a
+	prefetch(0, mem(rax, rcx, 1, 0*8)) // prefetch rax + 5*rs_a
 	SUBITER_K4_3x4(rax, rbx)
 
 	// ---------------------------------- iteration 3
@@ -3866,7 +3863,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_6x8_U
 
 	prefetch(0, mem(rax, r10, 1, 0*8)) // prefetch rax + 3*rs_a
 	prefetch(0, mem(rax, r8,  4, 0*8)) // prefetch rax + 4*rs_a
-	prefetch(0, mem(rax, rbp, 1, 0*8)) // prefetch rax + 5*rs_a
+	prefetch(0, mem(rax, rcx, 1, 0*8)) // prefetch rax + 5*rs_a
 	SUBITER_K4_3x4(rax, rbx)
 
 	dec(rsi)                           // i -= 1;
@@ -3936,6 +3933,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_6x8_U
 
 	mov(var(alpha), rax)               // load address of alpha
 	mov(var(beta), rbx)                // load address of beta
+	lea(mem(r12), rcx)                 // rcx = c_iijj;
 	vbroadcastsd(mem(rax), ymm0)       // load alpha and duplicate
 	vbroadcastsd(mem(rbx), ymm3)       // load beta and duplicate
 
@@ -4002,15 +4000,14 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_6x8_U
 	vmovapd( ymm4, ymm14)
 	vmovapd( ymm4, ymm15)
 
-	lea(mem(r12), rcx)                 // rcx = c_iijj;
 	lea(mem(r14), rax)                 // rax = a_ii;
 	lea(mem(rdx), rbx)                 // rbx = b_jj;
 
 
-	prefetch(0, mem(rcx,         3*8)) // prefetch c + 0*rs_c
-	prefetch(0, mem(rcx, rdi, 1, 3*8)) // prefetch c + 1*rs_c
-	prefetch(0, mem(rcx, rdi, 2, 3*8)) // prefetch c + 2*rs_c
-	lea(mem(r8,  r8,  4), rbp)         // rbp = 5*rs_a
+	prefetch(0, mem(r12,         3*8)) // prefetch c + 0*rs_c
+	prefetch(0, mem(r12, rdi, 1, 3*8)) // prefetch c + 1*rs_c
+	prefetch(0, mem(r12, rdi, 2, 3*8)) // prefetch c + 2*rs_c
+	lea(mem(r8,  r8,  4), rcx)         // rcx = 5*rs_a
 
 	mov(var(k_iter16), rsi)            // i = k_iter16;
 	test(rsi, rsi)                     // check i via logical AND.
@@ -4023,7 +4020,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_6x8_U
 
 	prefetch(0, mem(rax, r10, 1, 0*8)) // prefetch rax + 3*rs_a
 	prefetch(0, mem(rax, r8,  4, 0*8)) // prefetch rax + 4*rs_a
-	prefetch(0, mem(rax, rbp, 1, 0*8)) // prefetch rax + 5*rs_a
+	prefetch(0, mem(rax, rcx, 1, 0*8)) // prefetch rax + 5*rs_a
 	SUBITER_K4_3x4(rax, rbx)
 
 	// ---------------------------------- iteration 1
@@ -4034,7 +4031,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_6x8_U
 
 	prefetch(0, mem(rax, r10, 1, 0*8)) // prefetch rax + 3*rs_a
 	prefetch(0, mem(rax, r8,  4, 0*8)) // prefetch rax + 4*rs_a
-	prefetch(0, mem(rax, rbp, 1, 0*8)) // prefetch rax + 5*rs_a
+	prefetch(0, mem(rax, rcx, 1, 0*8)) // prefetch rax + 5*rs_a
 	SUBITER_K4_3x4(rax, rbx)
 
 	// ---------------------------------- iteration 3
@@ -4056,7 +4053,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_6x8_U
 
 	prefetch(0, mem(rax, r10, 1, 0*8)) // prefetch rax + 3*rs_a
 	prefetch(0, mem(rax, r8,  4, 0*8)) // prefetch rax + 4*rs_a
-	prefetch(0, mem(rax, rbp, 1, 0*8)) // prefetch rax + 5*rs_a
+	prefetch(0, mem(rax, rcx, 1, 0*8)) // prefetch rax + 5*rs_a
 	SUBITER_K4_3x4(rax, rbx)
 
 	dec(rsi)                           // i -= 1;
@@ -4126,6 +4123,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_6x8_U
 
 	mov(var(alpha), rax)               // load address of alpha
 	mov(var(beta), rbx)                // load address of beta
+	lea(mem(r12), rcx)                 // rcx = c_iijj;
 	vbroadcastsd(mem(rax), ymm0)       // load alpha and duplicate
 	vbroadcastsd(mem(rbx), ymm3)       // load beta and duplicate
 
@@ -4193,7 +4191,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_6x8_U
       [a_next] "m" (a_next),
       [b_next] "m" (b_next)*/
 	: // register clobber list
-	  "rax", "rbx", "rcx", "rdx", "rsi", "rdi", "rbp",
+	  "rax", "rbx", "rcx", "rdx", "rsi", "rdi",
 	  "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15",
 	  "xmm0", "xmm1", "xmm2", "xmm3",
 	  "xmm4", "xmm5", "xmm6", "xmm7",
@@ -4303,15 +4301,14 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_12x8_U
 	vmovapd( ymm4, ymm14)
 	vmovapd( ymm4, ymm15)
 
-	lea(mem(r12), rcx)                 // rcx = c_iijj;
 	lea(mem(r14), rax)                 // rax = a_ii;
 	lea(mem(rdx), rbx)                 // rbx = b_jj;
 
 
-	prefetch(0, mem(rcx,         3*8)) // prefetch c + 0*rs_c
-	prefetch(0, mem(rcx, rdi, 1, 3*8)) // prefetch c + 1*rs_c
-	prefetch(0, mem(rcx, rdi, 2, 3*8)) // prefetch c + 2*rs_c
-	lea(mem(r8,  r8,  4), rbp)         // rbp = 5*rs_a
+	prefetch(0, mem(r12,         3*8)) // prefetch c + 0*rs_c
+	prefetch(0, mem(r12, rdi, 1, 3*8)) // prefetch c + 1*rs_c
+	prefetch(0, mem(r12, rdi, 2, 3*8)) // prefetch c + 2*rs_c
+	lea(mem(r8,  r8,  4), rcx)         // rcx = 5*rs_a
 
 	mov(var(k_iter16), rsi)            // i = k_iter16;
 	test(rsi, rsi)                     // check i via logical AND.
@@ -4324,7 +4321,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_12x8_U
 
 	prefetch(0, mem(rax, r10, 1, 0*8)) // prefetch rax + 3*rs_a
 	prefetch(0, mem(rax, r8,  4, 0*8)) // prefetch rax + 4*rs_a
-	prefetch(0, mem(rax, rbp, 1, 0*8)) // prefetch rax + 5*rs_a
+	prefetch(0, mem(rax, rcx, 1, 0*8)) // prefetch rax + 5*rs_a
 	SUBITER_K4_3x4(rax, rbx)
 
 	// ---------------------------------- iteration 1
@@ -4334,7 +4331,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_12x8_U
 
 	prefetch(0, mem(rax, r10, 1, 0*8)) // prefetch rax + 3*rs_a
 	prefetch(0, mem(rax, r8,  4, 0*8)) // prefetch rax + 4*rs_a
-	prefetch(0, mem(rax, rbp, 1, 0*8)) // prefetch rax + 5*rs_a
+	prefetch(0, mem(rax, rcx, 1, 0*8)) // prefetch rax + 5*rs_a
 	SUBITER_K4_3x4(rax, rbx)
 
 	// ---------------------------------- iteration 3
@@ -4355,7 +4352,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_12x8_U
 
 	prefetch(0, mem(rax, r10, 1, 0*8)) // prefetch rax + 3*rs_a
 	prefetch(0, mem(rax, r8,  4, 0*8)) // prefetch rax + 4*rs_a
-	prefetch(0, mem(rax, rbp, 1, 0*8)) // prefetch rax + 5*rs_a
+	prefetch(0, mem(rax, rcx, 1, 0*8)) // prefetch rax + 5*rs_a
 	SUBITER_K4_3x4(rax, rbx)
 
 	dec(rsi)                           // i -= 1;
@@ -4424,6 +4421,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_12x8_U
 
 	mov(var(alpha), rax)               // load address of alpha
 	mov(var(beta), rbx)                // load address of beta
+	lea(mem(r12), rcx)                 // rcx = c_iijj;
 	vbroadcastsd(mem(rax), ymm0)       // load alpha and duplicate
 	vbroadcastsd(mem(rbx), ymm3)       // load beta and duplicate
 
@@ -4498,15 +4496,14 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_12x8_U
 	vmovapd( ymm4, ymm14)
 	vmovapd( ymm4, ymm15)
 
-	lea(mem(r12), rcx)                 // rcx = c_iijj;
 	lea(mem(r14), rax)                 // rax = a_ii;
 	lea(mem(rdx), rbx)                 // rbx = b_jj;
 
 
-	prefetch(0, mem(rcx,         3*8)) // prefetch c + 0*rs_c
-	prefetch(0, mem(rcx, rdi, 1, 3*8)) // prefetch c + 1*rs_c
-	prefetch(0, mem(rcx, rdi, 2, 3*8)) // prefetch c + 2*rs_c
-	lea(mem(r8,  r8,  4), rbp)         // rbp = 5*rs_a
+	prefetch(0, mem(r12,         3*8)) // prefetch c + 0*rs_c
+	prefetch(0, mem(r12, rdi, 1, 3*8)) // prefetch c + 1*rs_c
+	prefetch(0, mem(r12, rdi, 2, 3*8)) // prefetch c + 2*rs_c
+	lea(mem(r8,  r8,  4), rcx)         // rcx = 5*rs_a
 
 	mov(var(k_iter16), rsi)            // i = k_iter16;
 	test(rsi, rsi)                     // check i via logical AND.
@@ -4519,7 +4516,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_12x8_U
 
 	prefetch(0, mem(rax, r10, 1, 0*8)) // prefetch rax + 3*rs_a
 	prefetch(0, mem(rax, r8,  4, 0*8)) // prefetch rax + 4*rs_a
-	prefetch(0, mem(rax, rbp, 1, 0*8)) // prefetch rax + 5*rs_a
+	prefetch(0, mem(rax, rcx, 1, 0*8)) // prefetch rax + 5*rs_a
 	SUBITER_K4_1x4(rax, rbx)
 
 	// ---------------------------------- iteration 1
@@ -4529,7 +4526,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_12x8_U
 
 	prefetch(0, mem(rax, r10, 1, 0*8)) // prefetch rax + 3*rs_a
 	prefetch(0, mem(rax, r8,  4, 0*8)) // prefetch rax + 4*rs_a
-	prefetch(0, mem(rax, rbp, 1, 0*8)) // prefetch rax + 5*rs_a
+	prefetch(0, mem(rax, rcx, 1, 0*8)) // prefetch rax + 5*rs_a
 	SUBITER_K4_1x4(rax, rbx)
 
 	// ---------------------------------- iteration 3
@@ -4550,7 +4547,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_12x8_U
 
 	prefetch(0, mem(rax, r10, 1, 0*8)) // prefetch rax + 3*rs_a
 	prefetch(0, mem(rax, r8,  4, 0*8)) // prefetch rax + 4*rs_a
-	prefetch(0, mem(rax, rbp, 1, 0*8)) // prefetch rax + 5*rs_a
+	prefetch(0, mem(rax, rcx, 1, 0*8)) // prefetch rax + 5*rs_a
 	SUBITER_K4_1x4(rax, rbx)
 
 	dec(rsi)                           // i -= 1;
@@ -4593,6 +4590,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_12x8_U
 
 	mov(var(alpha), rax)               // load address of alpha
 	mov(var(beta), rbx)                // load address of beta
+	lea(mem(r12), rcx)                 // rcx = c_iijj;
 	vbroadcastsd(mem(rax), ymm0)       // load alpha and duplicate
 	vbroadcastsd(mem(rbx), ymm3)       // load beta and duplicate
 
@@ -4646,7 +4644,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_12x8_U
       [a_next] "m" (a_next),
       [b_next] "m" (b_next)*/
 	: // register clobber list
-	  "rax", "rbx", "rcx", "rdx", "rsi", "rdi", "rbp",
+	  "rax", "rbx", "rcx", "rdx", "rsi", "rdi",
 	  "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15",
 	  "xmm0", "xmm1", "xmm2", "xmm3",
 	  "xmm4", "xmm5", "xmm6", "xmm7",
@@ -4757,15 +4755,14 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_12x16_U
 	vmovapd( ymm4, ymm14)
 	vmovapd( ymm4, ymm15)
 
-	lea(mem(r12), rcx)                 // rcx = c_iijj;
 	lea(mem(r14), rax)                 // rax = a_ii;
 	lea(mem(rdx), rbx)                 // rbx = b_jj;
 
 
-	prefetch(0, mem(rcx,         3*8)) // prefetch c + 0*rs_c
-	prefetch(0, mem(rcx, rdi, 1, 3*8)) // prefetch c + 1*rs_c
-	prefetch(0, mem(rcx, rdi, 2, 3*8)) // prefetch c + 2*rs_c
-	lea(mem(r8,  r8,  4), rbp)         // rbp = 5*rs_a
+	prefetch(0, mem(r12,         3*8)) // prefetch c + 0*rs_c
+	prefetch(0, mem(r12, rdi, 1, 3*8)) // prefetch c + 1*rs_c
+	prefetch(0, mem(r12, rdi, 2, 3*8)) // prefetch c + 2*rs_c
+	lea(mem(r8,  r8,  4), rcx)         // rcx = 5*rs_a
 
 	mov(var(k_iter16), rsi)            // i = k_iter16;
 	test(rsi, rsi)                     // check i via logical AND.
@@ -4778,7 +4775,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_12x16_U
 
 	prefetch(0, mem(rax, r10, 1, 0*8)) // prefetch rax + 3*rs_a
 	prefetch(0, mem(rax, r8,  4, 0*8)) // prefetch rax + 4*rs_a
-	prefetch(0, mem(rax, rbp, 1, 0*8)) // prefetch rax + 5*rs_a
+	prefetch(0, mem(rax, rcx, 1, 0*8)) // prefetch rax + 5*rs_a
 	SUBITER_K4_3x4(rax, rbx)
 
 	// ---------------------------------- iteration 1
@@ -4788,7 +4785,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_12x16_U
 
 	prefetch(0, mem(rax, r10, 1, 0*8)) // prefetch rax + 3*rs_a
 	prefetch(0, mem(rax, r8,  4, 0*8)) // prefetch rax + 4*rs_a
-	prefetch(0, mem(rax, rbp, 1, 0*8)) // prefetch rax + 5*rs_a
+	prefetch(0, mem(rax, rcx, 1, 0*8)) // prefetch rax + 5*rs_a
 	SUBITER_K4_3x4(rax, rbx)
 
 	// ---------------------------------- iteration 3
@@ -4809,7 +4806,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_12x16_U
 
 	prefetch(0, mem(rax, r10, 1, 0*8)) // prefetch rax + 3*rs_a
 	prefetch(0, mem(rax, r8,  4, 0*8)) // prefetch rax + 4*rs_a
-	prefetch(0, mem(rax, rbp, 1, 0*8)) // prefetch rax + 5*rs_a
+	prefetch(0, mem(rax, rcx, 1, 0*8)) // prefetch rax + 5*rs_a
 	SUBITER_K4_3x4(rax, rbx)
 
 	dec(rsi)                           // i -= 1;
@@ -4878,6 +4875,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_12x16_U
 
 	mov(var(alpha), rax)               // load address of alpha
 	mov(var(beta), rbx)                // load address of beta
+	lea(mem(r12), rcx)                 // rcx = c_iijj;
 	vbroadcastsd(mem(rax), ymm0)       // load alpha and duplicate
 	vbroadcastsd(mem(rbx), ymm3)       // load beta and duplicate
 
@@ -4944,15 +4942,14 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_12x16_U
 	vmovapd( ymm4, ymm14)
 	vmovapd( ymm4, ymm15)
 
-	lea(mem(r12), rcx)                 // rcx = c_iijj;
 	lea(mem(r14), rax)                 // rax = a_ii;
 	lea(mem(rdx), rbx)                 // rbx = b_jj;
 
 
-	prefetch(0, mem(rcx,         3*8)) // prefetch c + 0*rs_c
-	prefetch(0, mem(rcx, rdi, 1, 3*8)) // prefetch c + 1*rs_c
-	prefetch(0, mem(rcx, rdi, 2, 3*8)) // prefetch c + 2*rs_c
-	lea(mem(r8,  r8,  4), rbp)         // rbp = 5*rs_a
+	prefetch(0, mem(r12,         3*8)) // prefetch c + 0*rs_c
+	prefetch(0, mem(r12, rdi, 1, 3*8)) // prefetch c + 1*rs_c
+	prefetch(0, mem(r12, rdi, 2, 3*8)) // prefetch c + 2*rs_c
+	lea(mem(r8,  r8,  4), rcx)         // rcx = 5*rs_a
 
 	mov(var(k_iter16), rsi)            // i = k_iter16;
 	test(rsi, rsi)                     // check i via logical AND.
@@ -4965,7 +4962,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_12x16_U
 
 	prefetch(0, mem(rax, r10, 1, 0*8)) // prefetch rax + 3*rs_a
 	prefetch(0, mem(rax, r8,  4, 0*8)) // prefetch rax + 4*rs_a
-	prefetch(0, mem(rax, rbp, 1, 0*8)) // prefetch rax + 5*rs_a
+	prefetch(0, mem(rax, rcx, 1, 0*8)) // prefetch rax + 5*rs_a
 	SUBITER_K4_3x4(rax, rbx)
 
 	// ---------------------------------- iteration 1
@@ -4975,7 +4972,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_12x16_U
 
 	prefetch(0, mem(rax, r10, 1, 0*8)) // prefetch rax + 3*rs_a
 	prefetch(0, mem(rax, r8,  4, 0*8)) // prefetch rax + 4*rs_a
-	prefetch(0, mem(rax, rbp, 1, 0*8)) // prefetch rax + 5*rs_a
+	prefetch(0, mem(rax, rcx, 1, 0*8)) // prefetch rax + 5*rs_a
 	SUBITER_K4_3x4(rax, rbx)
 
 	// ---------------------------------- iteration 3
@@ -4996,7 +4993,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_12x16_U
 
 	prefetch(0, mem(rax, r10, 1, 0*8)) // prefetch rax + 3*rs_a
 	prefetch(0, mem(rax, r8,  4, 0*8)) // prefetch rax + 4*rs_a
-	prefetch(0, mem(rax, rbp, 1, 0*8)) // prefetch rax + 5*rs_a
+	prefetch(0, mem(rax, rcx, 1, 0*8)) // prefetch rax + 5*rs_a
 	SUBITER_K4_3x4(rax, rbx)
 
 	dec(rsi)                           // i -= 1;
@@ -5065,6 +5062,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_12x16_U
 
 	mov(var(alpha), rax)               // load address of alpha
 	mov(var(beta), rbx)                // load address of beta
+	lea(mem(r12), rcx)                 // rcx = c_iijj;
 	vbroadcastsd(mem(rax), ymm0)       // load alpha and duplicate
 	vbroadcastsd(mem(rbx), ymm3)       // load beta and duplicate
 
@@ -5151,15 +5149,14 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_12x16_U
 	vmovapd( ymm4, ymm14)
 	vmovapd( ymm4, ymm15)
 
-	lea(mem(r12), rcx)                 // rcx = c_iijj;
 	lea(mem(r14), rax)                 // rax = a_ii;
 	lea(mem(rdx), rbx)                 // rbx = b_jj;
 
 
-	prefetch(0, mem(rcx,         3*8)) // prefetch c + 0*rs_c
-	prefetch(0, mem(rcx, rdi, 1, 3*8)) // prefetch c + 1*rs_c
-	prefetch(0, mem(rcx, rdi, 2, 3*8)) // prefetch c + 2*rs_c
-	lea(mem(r8,  r8,  4), rbp)         // rbp = 5*rs_a
+	prefetch(0, mem(r12,         3*8)) // prefetch c + 0*rs_c
+	prefetch(0, mem(r12, rdi, 1, 3*8)) // prefetch c + 1*rs_c
+	prefetch(0, mem(r12, rdi, 2, 3*8)) // prefetch c + 2*rs_c
+	lea(mem(r8,  r8,  4), rcx)         // rcx = 5*rs_a
 
 	mov(var(k_iter16), rsi)            // i = k_iter16;
 	test(rsi, rsi)                     // check i via logical AND.
@@ -5172,7 +5169,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_12x16_U
 
 	prefetch(0, mem(rax, r10, 1, 0*8)) // prefetch rax + 3*rs_a
 	prefetch(0, mem(rax, r8,  4, 0*8)) // prefetch rax + 4*rs_a
-	prefetch(0, mem(rax, rbp, 1, 0*8)) // prefetch rax + 5*rs_a
+	prefetch(0, mem(rax, rcx, 1, 0*8)) // prefetch rax + 5*rs_a
 	SUBITER_K4_3x4(rax, rbx)
 
 	// ---------------------------------- iteration 1
@@ -5182,7 +5179,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_12x16_U
 
 	prefetch(0, mem(rax, r10, 1, 0*8)) // prefetch rax + 3*rs_a
 	prefetch(0, mem(rax, r8,  4, 0*8)) // prefetch rax + 4*rs_a
-	prefetch(0, mem(rax, rbp, 1, 0*8)) // prefetch rax + 5*rs_a
+	prefetch(0, mem(rax, rcx, 1, 0*8)) // prefetch rax + 5*rs_a
 	SUBITER_K4_3x4(rax, rbx)
 
 	// ---------------------------------- iteration 3
@@ -5203,7 +5200,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_12x16_U
 
 	prefetch(0, mem(rax, r10, 1, 0*8)) // prefetch rax + 3*rs_a
 	prefetch(0, mem(rax, r8,  4, 0*8)) // prefetch rax + 4*rs_a
-	prefetch(0, mem(rax, rbp, 1, 0*8)) // prefetch rax + 5*rs_a
+	prefetch(0, mem(rax, rcx, 1, 0*8)) // prefetch rax + 5*rs_a
 	SUBITER_K4_3x4(rax, rbx)
 
 	dec(rsi)                           // i -= 1;
@@ -5272,6 +5269,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_12x16_U
 
 	mov(var(alpha), rax)               // load address of alpha
 	mov(var(beta), rbx)                // load address of beta
+	lea(mem(r12), rcx)                 // rcx = c_iijj;
 	vbroadcastsd(mem(rax), ymm0)       // load alpha and duplicate
 	vbroadcastsd(mem(rbx), ymm3)       // load beta and duplicate
 
@@ -5338,15 +5336,14 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_12x16_U
 	vmovapd( ymm4, ymm14)
 	vmovapd( ymm4, ymm15)
 
-	lea(mem(r12), rcx)                 // rcx = c_iijj;
 	lea(mem(r14), rax)                 // rax = a_ii;
 	lea(mem(rdx), rbx)                 // rbx = b_jj;
 
 
-	prefetch(0, mem(rcx,         3*8)) // prefetch c + 0*rs_c
-	prefetch(0, mem(rcx, rdi, 1, 3*8)) // prefetch c + 1*rs_c
-	prefetch(0, mem(rcx, rdi, 2, 3*8)) // prefetch c + 2*rs_c
-	lea(mem(r8,  r8,  4), rbp)         // rbp = 5*rs_a
+	prefetch(0, mem(r12,         3*8)) // prefetch c + 0*rs_c
+	prefetch(0, mem(r12, rdi, 1, 3*8)) // prefetch c + 1*rs_c
+	prefetch(0, mem(r12, rdi, 2, 3*8)) // prefetch c + 2*rs_c
+	lea(mem(r8,  r8,  4), rcx)         // rcx = 5*rs_a
 
 	mov(var(k_iter16), rsi)            // i = k_iter16;
 	test(rsi, rsi)                     // check i via logical AND.
@@ -5359,7 +5356,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_12x16_U
 
 	prefetch(0, mem(rax, r10, 1, 0*8)) // prefetch rax + 3*rs_a
 	prefetch(0, mem(rax, r8,  4, 0*8)) // prefetch rax + 4*rs_a
-	prefetch(0, mem(rax, rbp, 1, 0*8)) // prefetch rax + 5*rs_a
+	prefetch(0, mem(rax, rcx, 1, 0*8)) // prefetch rax + 5*rs_a
 	SUBITER_K4_3x4(rax, rbx)
 
 	// ---------------------------------- iteration 1
@@ -5369,7 +5366,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_12x16_U
 
 	prefetch(0, mem(rax, r10, 1, 0*8)) // prefetch rax + 3*rs_a
 	prefetch(0, mem(rax, r8,  4, 0*8)) // prefetch rax + 4*rs_a
-	prefetch(0, mem(rax, rbp, 1, 0*8)) // prefetch rax + 5*rs_a
+	prefetch(0, mem(rax, rcx, 1, 0*8)) // prefetch rax + 5*rs_a
 	SUBITER_K4_3x4(rax, rbx)
 
 	// ---------------------------------- iteration 3
@@ -5390,7 +5387,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_12x16_U
 
 	prefetch(0, mem(rax, r10, 1, 0*8)) // prefetch rax + 3*rs_a
 	prefetch(0, mem(rax, r8,  4, 0*8)) // prefetch rax + 4*rs_a
-	prefetch(0, mem(rax, rbp, 1, 0*8)) // prefetch rax + 5*rs_a
+	prefetch(0, mem(rax, rcx, 1, 0*8)) // prefetch rax + 5*rs_a
 	SUBITER_K4_3x4(rax, rbx)
 
 	dec(rsi)                           // i -= 1;
@@ -5459,6 +5456,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_12x16_U
 
 	mov(var(alpha), rax)               // load address of alpha
 	mov(var(beta), rbx)                // load address of beta
+	lea(mem(r12), rcx)                 // rcx = c_iijj;
 	vbroadcastsd(mem(rax), ymm0)       // load alpha and duplicate
 	vbroadcastsd(mem(rbx), ymm3)       // load beta and duplicate
 
@@ -5526,7 +5524,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_12x16_U
       [a_next] "m" (a_next),
       [b_next] "m" (b_next)*/
 	: // register clobber list
-	  "rax", "rbx", "rcx", "rdx", "rsi", "rdi", "rbp",
+	  "rax", "rbx", "rcx", "rdx", "rsi", "rdi",
 	  "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15",
 	  "xmm0", "xmm1", "xmm2", "xmm3",
 	  "xmm4", "xmm5", "xmm6", "xmm7",
@@ -5635,15 +5633,14 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_18x16_U
 	vmovapd( ymm4, ymm14)
 	vmovapd( ymm4, ymm15)
 
-	lea(mem(r12), rcx)                 // rcx = c_iijj;
 	lea(mem(r14), rax)                 // rax = a_ii;
 	lea(mem(rdx), rbx)                 // rbx = b_jj;
 
 
-	prefetch(0, mem(rcx,         3*8)) // prefetch c + 0*rs_c
-	prefetch(0, mem(rcx, rdi, 1, 3*8)) // prefetch c + 1*rs_c
-	prefetch(0, mem(rcx, rdi, 2, 3*8)) // prefetch c + 2*rs_c
-	lea(mem(r8,  r8,  4), rbp)         // rbp = 5*rs_a
+	prefetch(0, mem(r12,         3*8)) // prefetch c + 0*rs_c
+	prefetch(0, mem(r12, rdi, 1, 3*8)) // prefetch c + 1*rs_c
+	prefetch(0, mem(r12, rdi, 2, 3*8)) // prefetch c + 2*rs_c
+	lea(mem(r8,  r8,  4), rcx)         // rcx = 5*rs_a
 
 	mov(var(k_iter16), rsi)            // i = k_iter16;
 	test(rsi, rsi)                     // check i via logical AND.
@@ -5656,7 +5653,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_18x16_U
 
 	prefetch(0, mem(rax, r10, 1, 0*8)) // prefetch rax + 3*rs_a
 	prefetch(0, mem(rax, r8,  4, 0*8)) // prefetch rax + 4*rs_a
-	prefetch(0, mem(rax, rbp, 1, 0*8)) // prefetch rax + 5*rs_a
+	prefetch(0, mem(rax, rcx, 1, 0*8)) // prefetch rax + 5*rs_a
 	SUBITER_K4_2x4(rax, rbx)
 
 	// ---------------------------------- iteration 1
@@ -5666,7 +5663,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_18x16_U
 
 	prefetch(0, mem(rax, r10, 1, 0*8)) // prefetch rax + 3*rs_a
 	prefetch(0, mem(rax, r8,  4, 0*8)) // prefetch rax + 4*rs_a
-	prefetch(0, mem(rax, rbp, 1, 0*8)) // prefetch rax + 5*rs_a
+	prefetch(0, mem(rax, rcx, 1, 0*8)) // prefetch rax + 5*rs_a
 	SUBITER_K4_2x4(rax, rbx)
 
 	// ---------------------------------- iteration 3
@@ -5687,7 +5684,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_18x16_U
 
 	prefetch(0, mem(rax, r10, 1, 0*8)) // prefetch rax + 3*rs_a
 	prefetch(0, mem(rax, r8,  4, 0*8)) // prefetch rax + 4*rs_a
-	prefetch(0, mem(rax, rbp, 1, 0*8)) // prefetch rax + 5*rs_a
+	prefetch(0, mem(rax, rcx, 1, 0*8)) // prefetch rax + 5*rs_a
 	SUBITER_K4_2x4(rax, rbx)
 
 	dec(rsi)                           // i -= 1;
@@ -5756,6 +5753,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_18x16_U
 
 	mov(var(alpha), rax)               // load address of alpha
 	mov(var(beta), rbx)                // load address of beta
+	lea(mem(r12), rcx)                 // rcx = c_iijj;
 	vbroadcastsd(mem(rax), ymm0)       // load alpha and duplicate
 	vbroadcastsd(mem(rbx), ymm3)       // load beta and duplicate
 
@@ -5830,15 +5828,14 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_18x16_U
 	vmovapd( ymm4, ymm14)
 	vmovapd( ymm4, ymm15)
 
-	lea(mem(r12), rcx)                 // rcx = c_iijj;
 	lea(mem(r14), rax)                 // rax = a_ii;
 	lea(mem(rdx), rbx)                 // rbx = b_jj;
 
 
-	prefetch(0, mem(rcx,         3*8)) // prefetch c + 0*rs_c
-	prefetch(0, mem(rcx, rdi, 1, 3*8)) // prefetch c + 1*rs_c
-	prefetch(0, mem(rcx, rdi, 2, 3*8)) // prefetch c + 2*rs_c
-	lea(mem(r8,  r8,  4), rbp)         // rbp = 5*rs_a
+	prefetch(0, mem(r12,         3*8)) // prefetch c + 0*rs_c
+	prefetch(0, mem(r12, rdi, 1, 3*8)) // prefetch c + 1*rs_c
+	prefetch(0, mem(r12, rdi, 2, 3*8)) // prefetch c + 2*rs_c
+	lea(mem(r8,  r8,  4), rcx)         // rcx = 5*rs_a
 
 	mov(var(k_iter16), rsi)            // i = k_iter16;
 	test(rsi, rsi)                     // check i via logical AND.
@@ -5851,7 +5848,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_18x16_U
 
 	prefetch(0, mem(rax, r10, 1, 0*8)) // prefetch rax + 3*rs_a
 	prefetch(0, mem(rax, r8,  4, 0*8)) // prefetch rax + 4*rs_a
-	prefetch(0, mem(rax, rbp, 1, 0*8)) // prefetch rax + 5*rs_a
+	prefetch(0, mem(rax, rcx, 1, 0*8)) // prefetch rax + 5*rs_a
 	SUBITER_K4_3x4(rax, rbx)
 
 	// ---------------------------------- iteration 1
@@ -5861,7 +5858,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_18x16_U
 
 	prefetch(0, mem(rax, r10, 1, 0*8)) // prefetch rax + 3*rs_a
 	prefetch(0, mem(rax, r8,  4, 0*8)) // prefetch rax + 4*rs_a
-	prefetch(0, mem(rax, rbp, 1, 0*8)) // prefetch rax + 5*rs_a
+	prefetch(0, mem(rax, rcx, 1, 0*8)) // prefetch rax + 5*rs_a
 	SUBITER_K4_3x4(rax, rbx)
 
 	// ---------------------------------- iteration 3
@@ -5882,7 +5879,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_18x16_U
 
 	prefetch(0, mem(rax, r10, 1, 0*8)) // prefetch rax + 3*rs_a
 	prefetch(0, mem(rax, r8,  4, 0*8)) // prefetch rax + 4*rs_a
-	prefetch(0, mem(rax, rbp, 1, 0*8)) // prefetch rax + 5*rs_a
+	prefetch(0, mem(rax, rcx, 1, 0*8)) // prefetch rax + 5*rs_a
 	SUBITER_K4_3x4(rax, rbx)
 
 	dec(rsi)                           // i -= 1;
@@ -5952,6 +5949,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_18x16_U
 
 	mov(var(alpha), rax)               // load address of alpha
 	mov(var(beta), rbx)                // load address of beta
+	lea(mem(r12), rcx)                 // rcx = c_iijj;
 	vbroadcastsd(mem(rax), ymm0)       // load alpha and duplicate
 	vbroadcastsd(mem(rbx), ymm3)       // load beta and duplicate
 
@@ -6018,15 +6016,14 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_18x16_U
 	vmovapd( ymm4, ymm14)
 	vmovapd( ymm4, ymm15)
 
-	lea(mem(r12), rcx)                 // rcx = c_iijj;
 	lea(mem(r14), rax)                 // rax = a_ii;
 	lea(mem(rdx), rbx)                 // rbx = b_jj;
 
 
-	prefetch(0, mem(rcx,         3*8)) // prefetch c + 0*rs_c
-	prefetch(0, mem(rcx, rdi, 1, 3*8)) // prefetch c + 1*rs_c
-	prefetch(0, mem(rcx, rdi, 2, 3*8)) // prefetch c + 2*rs_c
-	lea(mem(r8,  r8,  4), rbp)         // rbp = 5*rs_a
+	prefetch(0, mem(r12,         3*8)) // prefetch c + 0*rs_c
+	prefetch(0, mem(r12, rdi, 1, 3*8)) // prefetch c + 1*rs_c
+	prefetch(0, mem(r12, rdi, 2, 3*8)) // prefetch c + 2*rs_c
+	lea(mem(r8,  r8,  4), rcx)         // rcx = 5*rs_a
 
 	mov(var(k_iter16), rsi)            // i = k_iter16;
 	test(rsi, rsi)                     // check i via logical AND.
@@ -6039,7 +6036,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_18x16_U
 
 	prefetch(0, mem(rax, r10, 1, 0*8)) // prefetch rax + 3*rs_a
 	prefetch(0, mem(rax, r8,  4, 0*8)) // prefetch rax + 4*rs_a
-	prefetch(0, mem(rax, rbp, 1, 0*8)) // prefetch rax + 5*rs_a
+	prefetch(0, mem(rax, rcx, 1, 0*8)) // prefetch rax + 5*rs_a
 	SUBITER_K4_3x4(rax, rbx)
 
 	// ---------------------------------- iteration 1
@@ -6049,7 +6046,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_18x16_U
 
 	prefetch(0, mem(rax, r10, 1, 0*8)) // prefetch rax + 3*rs_a
 	prefetch(0, mem(rax, r8,  4, 0*8)) // prefetch rax + 4*rs_a
-	prefetch(0, mem(rax, rbp, 1, 0*8)) // prefetch rax + 5*rs_a
+	prefetch(0, mem(rax, rcx, 1, 0*8)) // prefetch rax + 5*rs_a
 	SUBITER_K4_3x4(rax, rbx)
 
 	// ---------------------------------- iteration 3
@@ -6070,7 +6067,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_18x16_U
 
 	prefetch(0, mem(rax, r10, 1, 0*8)) // prefetch rax + 3*rs_a
 	prefetch(0, mem(rax, r8,  4, 0*8)) // prefetch rax + 4*rs_a
-	prefetch(0, mem(rax, rbp, 1, 0*8)) // prefetch rax + 5*rs_a
+	prefetch(0, mem(rax, rcx, 1, 0*8)) // prefetch rax + 5*rs_a
 	SUBITER_K4_3x4(rax, rbx)
 
 	dec(rsi)                           // i -= 1;
@@ -6139,6 +6136,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_18x16_U
 
 	mov(var(alpha), rax)               // load address of alpha
 	mov(var(beta), rbx)                // load address of beta
+	lea(mem(r12), rcx)                 // rcx = c_iijj;
 	vbroadcastsd(mem(rax), ymm0)       // load alpha and duplicate
 	vbroadcastsd(mem(rbx), ymm3)       // load beta and duplicate
 
@@ -6214,7 +6212,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_18x16_U
       [a_next] "m" (a_next),
       [b_next] "m" (b_next)*/
 	: // register clobber list
-	  "rax", "rbx", "rcx", "rdx", "rsi", "rdi", "rbp",
+	  "rax", "rbx", "rcx", "rdx", "rsi", "rdi",
 	  "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15",
 	  "xmm0", "xmm1", "xmm2", "xmm3",
 	  "xmm4", "xmm5", "xmm6", "xmm7",
@@ -6324,15 +6322,14 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_0x0_L
 	vmovapd( ymm4, ymm14)
 	vmovapd( ymm4, ymm15)
 
-	lea(mem(r12), rcx)                 // rcx = c_iijj;
 	lea(mem(r14), rax)                 // rax = a_ii;
 	lea(mem(rdx), rbx)                 // rbx = b_jj;
 
 
-	prefetch(0, mem(rcx,         3*8)) // prefetch c + 0*rs_c
-	prefetch(0, mem(rcx, rdi, 1, 3*8)) // prefetch c + 1*rs_c
-	prefetch(0, mem(rcx, rdi, 2, 3*8)) // prefetch c + 2*rs_c
-	lea(mem(r8,  r8,  4), rbp)         // rbp = 5*rs_a
+	prefetch(0, mem(r12,         3*8)) // prefetch c + 0*rs_c
+	prefetch(0, mem(r12, rdi, 1, 3*8)) // prefetch c + 1*rs_c
+	prefetch(0, mem(r12, rdi, 2, 3*8)) // prefetch c + 2*rs_c
+	lea(mem(r8,  r8,  4), rcx)         // rcx = 5*rs_a
 
 	mov(var(k_iter16), rsi)            // i = k_iter16;
 	test(rsi, rsi)                     // check i via logical AND.
@@ -6345,7 +6342,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_0x0_L
 
 	prefetch(0, mem(rax, r10, 1, 0*8)) // prefetch rax + 3*rs_a
 	prefetch(0, mem(rax, r8,  4, 0*8)) // prefetch rax + 4*rs_a
-	prefetch(0, mem(rax, rbp, 1, 0*8)) // prefetch rax + 5*rs_a
+	prefetch(0, mem(rax, rcx, 1, 0*8)) // prefetch rax + 5*rs_a
 	SUBITER_K4_3x4(rax, rbx)
 
 	// ---------------------------------- iteration 1
@@ -6355,7 +6352,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_0x0_L
 
 	prefetch(0, mem(rax, r10, 1, 0*8)) // prefetch rax + 3*rs_a
 	prefetch(0, mem(rax, r8,  4, 0*8)) // prefetch rax + 4*rs_a
-	prefetch(0, mem(rax, rbp, 1, 0*8)) // prefetch rax + 5*rs_a
+	prefetch(0, mem(rax, rcx, 1, 0*8)) // prefetch rax + 5*rs_a
 	SUBITER_K4_3x4(rax, rbx)
 
 	// ---------------------------------- iteration 3
@@ -6376,7 +6373,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_0x0_L
 
 	prefetch(0, mem(rax, r10, 1, 0*8)) // prefetch rax + 3*rs_a
 	prefetch(0, mem(rax, r8,  4, 0*8)) // prefetch rax + 4*rs_a
-	prefetch(0, mem(rax, rbp, 1, 0*8)) // prefetch rax + 5*rs_a
+	prefetch(0, mem(rax, rcx, 1, 0*8)) // prefetch rax + 5*rs_a
 	SUBITER_K4_3x4(rax, rbx)
 
 	dec(rsi)                           // i -= 1;
@@ -6446,6 +6443,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_0x0_L
 
 	mov(var(alpha), rax)               // load address of alpha
 	mov(var(beta), rbx)                // load address of beta
+	lea(mem(r12), rcx)                 // rcx = c_iijj;
 	vbroadcastsd(mem(rax), ymm0)       // load alpha and duplicate
 	vbroadcastsd(mem(rbx), ymm3)       // load beta and duplicate
 
@@ -6516,15 +6514,14 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_0x0_L
 	vmovapd( ymm4, ymm14)
 	vmovapd( ymm4, ymm15)
 
-	lea(mem(r12), rcx)                 // rcx = c_iijj;
 	lea(mem(r14), rax)                 // rax = a_ii;
 	lea(mem(rdx), rbx)                 // rbx = b_jj;
 
 
-	prefetch(0, mem(rcx,         3*8)) // prefetch c + 0*rs_c
-	prefetch(0, mem(rcx, rdi, 1, 3*8)) // prefetch c + 1*rs_c
-	prefetch(0, mem(rcx, rdi, 2, 3*8)) // prefetch c + 2*rs_c
-	lea(mem(r8,  r8,  4), rbp)         // rbp = 5*rs_a
+	prefetch(0, mem(r12,         3*8)) // prefetch c + 0*rs_c
+	prefetch(0, mem(r12, rdi, 1, 3*8)) // prefetch c + 1*rs_c
+	prefetch(0, mem(r12, rdi, 2, 3*8)) // prefetch c + 2*rs_c
+	lea(mem(r8,  r8,  4), rcx)         // rcx = 5*rs_a
 
 	mov(var(k_iter16), rsi)            // i = k_iter16;
 	test(rsi, rsi)                     // check i via logical AND.
@@ -6537,7 +6534,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_0x0_L
 
 	prefetch(0, mem(rax, r10, 1, 0*8)) // prefetch rax + 3*rs_a
 	prefetch(0, mem(rax, r8,  4, 0*8)) // prefetch rax + 4*rs_a
-	prefetch(0, mem(rax, rbp, 1, 0*8)) // prefetch rax + 5*rs_a
+	prefetch(0, mem(rax, rcx, 1, 0*8)) // prefetch rax + 5*rs_a
 	SUBITER_K4_3x4(rax, rbx)
 
 	// ---------------------------------- iteration 1
@@ -6547,7 +6544,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_0x0_L
 
 	prefetch(0, mem(rax, r10, 1, 0*8)) // prefetch rax + 3*rs_a
 	prefetch(0, mem(rax, r8,  4, 0*8)) // prefetch rax + 4*rs_a
-	prefetch(0, mem(rax, rbp, 1, 0*8)) // prefetch rax + 5*rs_a
+	prefetch(0, mem(rax, rcx, 1, 0*8)) // prefetch rax + 5*rs_a
 	SUBITER_K4_3x4(rax, rbx)
 
 	// ---------------------------------- iteration 3
@@ -6568,7 +6565,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_0x0_L
 
 	prefetch(0, mem(rax, r10, 1, 0*8)) // prefetch rax + 3*rs_a
 	prefetch(0, mem(rax, r8,  4, 0*8)) // prefetch rax + 4*rs_a
-	prefetch(0, mem(rax, rbp, 1, 0*8)) // prefetch rax + 5*rs_a
+	prefetch(0, mem(rax, rcx, 1, 0*8)) // prefetch rax + 5*rs_a
 	SUBITER_K4_3x4(rax, rbx)
 
 	dec(rsi)                           // i -= 1;
@@ -6637,6 +6634,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_0x0_L
 
 	mov(var(alpha), rax)               // load address of alpha
 	mov(var(beta), rbx)                // load address of beta
+	lea(mem(r12), rcx)                 // rcx = c_iijj;
 	vbroadcastsd(mem(rax), ymm0)       // load alpha and duplicate
 	vbroadcastsd(mem(rbx), ymm3)       // load beta and duplicate
 
@@ -6728,14 +6726,13 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_0x0_L
 	vmovapd( ymm4, ymm14)
 	vmovapd( ymm4, ymm15)
 
-	lea(mem(r12), rcx)                 // rcx = c_iijj;
 	lea(mem(r14), rax)                 // rax = a_ii;
 	lea(mem(rdx), rbx)                 // rbx = b_jj;
 
-	prefetch(0, mem(rcx,         3*8)) // prefetch c + 0*rs_c
-	prefetch(0, mem(rcx, rdi, 1, 3*8)) // prefetch c + 1*rs_c
-	prefetch(0, mem(rcx, rdi, 2, 3*8)) // prefetch c + 2*rs_c
-	lea(mem(r8,  r8,  4), rbp)         // rbp = 5*rs_a
+	prefetch(0, mem(r12,         3*8)) // prefetch c + 0*rs_c
+	prefetch(0, mem(r12, rdi, 1, 3*8)) // prefetch c + 1*rs_c
+	prefetch(0, mem(r12, rdi, 2, 3*8)) // prefetch c + 2*rs_c
+	lea(mem(r8,  r8,  4), rcx)         // rcx = 5*rs_a
 
 	mov(var(k_iter16), rsi)            // i = k_iter16;
 	test(rsi, rsi)                     // check i via logical AND.
@@ -6748,7 +6745,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_0x0_L
 
 	prefetch(0, mem(rax, r10, 1, 0*8)) // prefetch rax + 3*rs_a
 	prefetch(0, mem(rax, r8,  4, 0*8)) // prefetch rax + 4*rs_a
-	prefetch(0, mem(rax, rbp, 1, 0*8)) // prefetch rax + 5*rs_a
+	prefetch(0, mem(rax, rcx, 1, 0*8)) // prefetch rax + 5*rs_a
 
 	vmovupd(mem(rax, r8, 1), ymm1)
 	vmovupd(mem(rax, r8, 2), ymm2)
@@ -6797,7 +6794,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_0x0_L
 
 	prefetch(0, mem(rax, r10, 1, 0*8)) // prefetch rax + 3*rs_a
 	prefetch(0, mem(rax, r8,  4, 0*8)) // prefetch rax + 4*rs_a
-	prefetch(0, mem(rax, rbp, 1, 0*8)) // prefetch rax + 5*rs_a
+	prefetch(0, mem(rax, rcx, 1, 0*8)) // prefetch rax + 5*rs_a
 
 	vmovupd(mem(rax, r8, 1), ymm1)
 	vmovupd(mem(rax, r8, 2), ymm2)
@@ -6857,7 +6854,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_0x0_L
 
 	prefetch(0, mem(rax, r10, 1, 0*8)) // prefetch rax + 3*rs_a
 	prefetch(0, mem(rax, r8,  4, 0*8)) // prefetch rax + 4*rs_a
-	prefetch(0, mem(rax, rbp, 1, 0*8)) // prefetch rax + 5*rs_a
+	prefetch(0, mem(rax, rcx, 1, 0*8)) // prefetch rax + 5*rs_a
 
 	vmovupd(mem(rax, r8, 1), ymm1)
 	vmovupd(mem(rax, r8, 2), ymm2)
@@ -6953,6 +6950,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_0x0_L
 
 	mov(var(alpha), rax)               // load address of alpha
 	mov(var(beta), rbx)                // load address of beta
+	lea(mem(r12), rcx)                 // rcx = c_iijj;
 	vbroadcastsd(mem(rax), ymm0)       // load alpha and duplicate
 	vbroadcastsd(mem(rbx), ymm3)       // load beta and duplicate
 
@@ -7016,7 +7014,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_0x0_L
       [a_next] "m" (a_next),
       [b_next] "m" (b_next)*/
 	: // register clobber list
-	  "rax", "rbx", "rcx", "rdx", "rsi", "rdi", "rbp",
+	  "rax", "rbx", "rcx", "rdx", "rsi", "rdi",
 	  "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15",
 	  "xmm0", "xmm1", "xmm2", "xmm3",
 	  "xmm4", "xmm5", "xmm6", "xmm7",
@@ -7127,15 +7125,14 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_6x0_L
 	vmovapd( ymm4, ymm14)
 	vmovapd( ymm4, ymm15)
 
-	lea(mem(r12), rcx)                 // rcx = c_iijj;
 	lea(mem(r14), rax)                 // rax = a_ii;
 	lea(mem(rdx), rbx)                 // rbx = b_jj;
 
 
-	prefetch(0, mem(rcx,         3*8)) // prefetch c + 0*rs_c
-	prefetch(0, mem(rcx, rdi, 1, 3*8)) // prefetch c + 1*rs_c
-	prefetch(0, mem(rcx, rdi, 2, 3*8)) // prefetch c + 2*rs_c
-	lea(mem(r8,  r8,  4), rbp)         // rbp = 5*rs_a
+	prefetch(0, mem(r12,         3*8)) // prefetch c + 0*rs_c
+	prefetch(0, mem(r12, rdi, 1, 3*8)) // prefetch c + 1*rs_c
+	prefetch(0, mem(r12, rdi, 2, 3*8)) // prefetch c + 2*rs_c
+	lea(mem(r8,  r8,  4), rcx)         // rcx = 5*rs_a
 
 	mov(var(k_iter16), rsi)            // i = k_iter16;
 	test(rsi, rsi)                     // check i via logical AND.
@@ -7148,7 +7145,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_6x0_L
 
 	prefetch(0, mem(rax, r10, 1, 0*8)) // prefetch rax + 3*rs_a
 	prefetch(0, mem(rax, r8,  4, 0*8)) // prefetch rax + 4*rs_a
-	prefetch(0, mem(rax, rbp, 1, 0*8)) // prefetch rax + 5*rs_a
+	prefetch(0, mem(rax, rcx, 1, 0*8)) // prefetch rax + 5*rs_a
 	SUBITER_K4_3x4(rax, rbx)
 
 	// ---------------------------------- iteration 1
@@ -7158,7 +7155,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_6x0_L
 
 	prefetch(0, mem(rax, r10, 1, 0*8)) // prefetch rax + 3*rs_a
 	prefetch(0, mem(rax, r8,  4, 0*8)) // prefetch rax + 4*rs_a
-	prefetch(0, mem(rax, rbp, 1, 0*8)) // prefetch rax + 5*rs_a
+	prefetch(0, mem(rax, rcx, 1, 0*8)) // prefetch rax + 5*rs_a
 	SUBITER_K4_3x4(rax, rbx)
 
 	// ---------------------------------- iteration 3
@@ -7179,7 +7176,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_6x0_L
 
 	prefetch(0, mem(rax, r10, 1, 0*8)) // prefetch rax + 3*rs_a
 	prefetch(0, mem(rax, r8,  4, 0*8)) // prefetch rax + 4*rs_a
-	prefetch(0, mem(rax, rbp, 1, 0*8)) // prefetch rax + 5*rs_a
+	prefetch(0, mem(rax, rcx, 1, 0*8)) // prefetch rax + 5*rs_a
 	SUBITER_K4_3x4(rax, rbx)
 
 	dec(rsi)                           // i -= 1;
@@ -7248,6 +7245,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_6x0_L
 
 	mov(var(alpha), rax)               // load address of alpha
 	mov(var(beta), rbx)                // load address of beta
+	lea(mem(r12), rcx)                 // rcx = c_iijj;
 	vbroadcastsd(mem(rax), ymm0)       // load alpha and duplicate
 	vbroadcastsd(mem(rbx), ymm3)       // load beta and duplicate
 
@@ -7314,15 +7312,14 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_6x0_L
 	vmovapd( ymm4, ymm14)
 	vmovapd( ymm4, ymm15)
 
-	lea(mem(r12), rcx)                 // rcx = c_iijj;
 	lea(mem(r14), rax)                 // rax = a_ii;
 	lea(mem(rdx), rbx)                 // rbx = b_jj;
 
 
-	prefetch(0, mem(rcx,         3*8)) // prefetch c + 0*rs_c
-	prefetch(0, mem(rcx, rdi, 1, 3*8)) // prefetch c + 1*rs_c
-	prefetch(0, mem(rcx, rdi, 2, 3*8)) // prefetch c + 2*rs_c
-	lea(mem(r8,  r8,  4), rbp)         // rbp = 5*rs_a
+	prefetch(0, mem(r12,         3*8)) // prefetch c + 0*rs_c
+	prefetch(0, mem(r12, rdi, 1, 3*8)) // prefetch c + 1*rs_c
+	prefetch(0, mem(r12, rdi, 2, 3*8)) // prefetch c + 2*rs_c
+	lea(mem(r8,  r8,  4), rcx)         // rcx = 5*rs_a
 
 	mov(var(k_iter16), rsi)            // i = k_iter16;
 	test(rsi, rsi)                     // check i via logical AND.
@@ -7335,7 +7332,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_6x0_L
 
 	prefetch(0, mem(rax, r10, 1, 0*8)) // prefetch rax + 3*rs_a
 	prefetch(0, mem(rax, r8,  4, 0*8)) // prefetch rax + 4*rs_a
-	prefetch(0, mem(rax, rbp, 1, 0*8)) // prefetch rax + 5*rs_a
+	prefetch(0, mem(rax, rcx, 1, 0*8)) // prefetch rax + 5*rs_a
 	SUBITER_K4_3x4(rax, rbx)
 
 	// ---------------------------------- iteration 1
@@ -7345,7 +7342,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_6x0_L
 
 	prefetch(0, mem(rax, r10, 1, 0*8)) // prefetch rax + 3*rs_a
 	prefetch(0, mem(rax, r8,  4, 0*8)) // prefetch rax + 4*rs_a
-	prefetch(0, mem(rax, rbp, 1, 0*8)) // prefetch rax + 5*rs_a
+	prefetch(0, mem(rax, rcx, 1, 0*8)) // prefetch rax + 5*rs_a
 	SUBITER_K4_3x4(rax, rbx)
 
 	// ---------------------------------- iteration 3
@@ -7366,7 +7363,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_6x0_L
 
 	prefetch(0, mem(rax, r10, 1, 0*8)) // prefetch rax + 3*rs_a
 	prefetch(0, mem(rax, r8,  4, 0*8)) // prefetch rax + 4*rs_a
-	prefetch(0, mem(rax, rbp, 1, 0*8)) // prefetch rax + 5*rs_a
+	prefetch(0, mem(rax, rcx, 1, 0*8)) // prefetch rax + 5*rs_a
 	SUBITER_K4_3x4(rax, rbx)
 
 	dec(rsi)                           // i -= 1;
@@ -7435,6 +7432,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_6x0_L
 
 	mov(var(alpha), rax)               // load address of alpha
 	mov(var(beta), rbx)                // load address of beta
+	lea(mem(r12), rcx)                 // rcx = c_iijj;
 	vbroadcastsd(mem(rax), ymm0)       // load alpha and duplicate
 	vbroadcastsd(mem(rbx), ymm3)       // load beta and duplicate
 
@@ -7517,15 +7515,14 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_6x0_L
 	vmovapd( ymm4, ymm14)
 	vmovapd( ymm4, ymm15)
 
-	lea(mem(r12), rcx)                 // rcx = c_iijj;
 	lea(mem(r14), rax)                 // rax = a_ii;
 	lea(mem(rdx), rbx)                 // rbx = b_jj;
 
 
-	prefetch(0, mem(rcx,         3*8)) // prefetch c + 0*rs_c
-	prefetch(0, mem(rcx, rdi, 1, 3*8)) // prefetch c + 1*rs_c
-	prefetch(0, mem(rcx, rdi, 2, 3*8)) // prefetch c + 2*rs_c
-	lea(mem(r8,  r8,  4), rbp)         // rbp = 5*rs_a
+	prefetch(0, mem(r12,         3*8)) // prefetch c + 0*rs_c
+	prefetch(0, mem(r12, rdi, 1, 3*8)) // prefetch c + 1*rs_c
+	prefetch(0, mem(r12, rdi, 2, 3*8)) // prefetch c + 2*rs_c
+	lea(mem(r8,  r8,  4), rcx)         // rcx = 5*rs_a
 
 	mov(var(k_iter16), rsi)            // i = k_iter16;
 	test(rsi, rsi)                     // check i via logical AND.
@@ -7538,7 +7535,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_6x0_L
 
 	prefetch(0, mem(rax, r10, 1, 0*8)) // prefetch rax + 3*rs_a
 	prefetch(0, mem(rax, r8,  4, 0*8)) // prefetch rax + 4*rs_a
-	prefetch(0, mem(rax, rbp, 1, 0*8)) // prefetch rax + 5*rs_a
+	prefetch(0, mem(rax, rcx, 1, 0*8)) // prefetch rax + 5*rs_a
 	SUBITER_K4_3x4(rax, rbx)
 
 	// ---------------------------------- iteration 1
@@ -7548,7 +7545,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_6x0_L
 
 	prefetch(0, mem(rax, r10, 1, 0*8)) // prefetch rax + 3*rs_a
 	prefetch(0, mem(rax, r8,  4, 0*8)) // prefetch rax + 4*rs_a
-	prefetch(0, mem(rax, rbp, 1, 0*8)) // prefetch rax + 5*rs_a
+	prefetch(0, mem(rax, rcx, 1, 0*8)) // prefetch rax + 5*rs_a
 	SUBITER_K4_3x4(rax, rbx)
 
 	// ---------------------------------- iteration 3
@@ -7569,7 +7566,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_6x0_L
 
 	prefetch(0, mem(rax, r10, 1, 0*8)) // prefetch rax + 3*rs_a
 	prefetch(0, mem(rax, r8,  4, 0*8)) // prefetch rax + 4*rs_a
-	prefetch(0, mem(rax, rbp, 1, 0*8)) // prefetch rax + 5*rs_a
+	prefetch(0, mem(rax, rcx, 1, 0*8)) // prefetch rax + 5*rs_a
 	SUBITER_K4_3x4(rax, rbx)
 
 	dec(rsi)                           // i -= 1;
@@ -7638,6 +7635,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_6x0_L
 
 	mov(var(alpha), rax)               // load address of alpha
 	mov(var(beta), rbx)                // load address of beta
+	lea(mem(r12), rcx)                 // rcx = c_iijj;
 	vbroadcastsd(mem(rax), ymm0)       // load alpha and duplicate
 	vbroadcastsd(mem(rbx), ymm3)       // load beta and duplicate
 
@@ -7708,15 +7706,14 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_6x0_L
 	vmovapd( ymm4, ymm14)
 	vmovapd( ymm4, ymm15)
 
-	lea(mem(r12), rcx)                 // rcx = c_iijj;
 	lea(mem(r14), rax)                 // rax = a_ii;
 	lea(mem(rdx), rbx)                 // rbx = b_jj;
 
 
-	prefetch(0, mem(rcx,         3*8)) // prefetch c + 0*rs_c
-	prefetch(0, mem(rcx, rdi, 1, 3*8)) // prefetch c + 1*rs_c
-	prefetch(0, mem(rcx, rdi, 2, 3*8)) // prefetch c + 2*rs_c
-	lea(mem(r8,  r8,  4), rbp)         // rbp = 5*rs_a
+	prefetch(0, mem(r12,         3*8)) // prefetch c + 0*rs_c
+	prefetch(0, mem(r12, rdi, 1, 3*8)) // prefetch c + 1*rs_c
+	prefetch(0, mem(r12, rdi, 2, 3*8)) // prefetch c + 2*rs_c
+	lea(mem(r8,  r8,  4), rcx)         // rcx = 5*rs_a
 
 	mov(var(k_iter16), rsi)            // i = k_iter16;
 	test(rsi, rsi)                     // check i via logical AND.
@@ -7729,7 +7726,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_6x0_L
 
 	prefetch(0, mem(rax, r10, 1, 0*8)) // prefetch rax + 3*rs_a
 	prefetch(0, mem(rax, r8,  4, 0*8)) // prefetch rax + 4*rs_a
-	prefetch(0, mem(rax, rbp, 1, 0*8)) // prefetch rax + 5*rs_a
+	prefetch(0, mem(rax, rcx, 1, 0*8)) // prefetch rax + 5*rs_a
 	SUBITER_K4_3x4(rax, rbx)
 
 	// ---------------------------------- iteration 1
@@ -7739,7 +7736,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_6x0_L
 
 	prefetch(0, mem(rax, r10, 1, 0*8)) // prefetch rax + 3*rs_a
 	prefetch(0, mem(rax, r8,  4, 0*8)) // prefetch rax + 4*rs_a
-	prefetch(0, mem(rax, rbp, 1, 0*8)) // prefetch rax + 5*rs_a
+	prefetch(0, mem(rax, rcx, 1, 0*8)) // prefetch rax + 5*rs_a
 	SUBITER_K4_3x4(rax, rbx)
 
 	// ---------------------------------- iteration 3
@@ -7760,7 +7757,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_6x0_L
 
 	prefetch(0, mem(rax, r10, 1, 0*8)) // prefetch rax + 3*rs_a
 	prefetch(0, mem(rax, r8,  4, 0*8)) // prefetch rax + 4*rs_a
-	prefetch(0, mem(rax, rbp, 1, 0*8)) // prefetch rax + 5*rs_a
+	prefetch(0, mem(rax, rcx, 1, 0*8)) // prefetch rax + 5*rs_a
 	SUBITER_K4_3x4(rax, rbx)
 
 	dec(rsi)                           // i -= 1;
@@ -7829,6 +7826,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_6x0_L
 
 	mov(var(alpha), rax)               // load address of alpha
 	mov(var(beta), rbx)                // load address of beta
+	lea(mem(r12), rcx)                 // rcx = c_iijj;
 	vbroadcastsd(mem(rax), ymm0)       // load alpha and duplicate
 	vbroadcastsd(mem(rbx), ymm3)       // load beta and duplicate
 
@@ -7896,7 +7894,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_6x0_L
       [a_next] "m" (a_next),
       [b_next] "m" (b_next)*/
 	: // register clobber list
-	  "rax", "rbx", "rcx", "rdx", "rsi", "rdi", "rbp",
+	  "rax", "rbx", "rcx", "rdx", "rsi", "rdi",
 	  "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15",
 	  "xmm0", "xmm1", "xmm2", "xmm3",
 	  "xmm4", "xmm5", "xmm6", "xmm7",
@@ -8006,15 +8004,14 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_6x8_L
 	vmovapd( ymm4, ymm14)
 	vmovapd( ymm4, ymm15)
 
-	lea(mem(r12), rcx)                 // rcx = c_iijj;
 	lea(mem(r14), rax)                 // rax = a_ii;
 	lea(mem(rdx), rbx)                 // rbx = b_jj;
 
 
-	prefetch(0, mem(rcx,         3*8)) // prefetch c + 0*rs_c
-	prefetch(0, mem(rcx, rdi, 1, 3*8)) // prefetch c + 1*rs_c
-	prefetch(0, mem(rcx, rdi, 2, 3*8)) // prefetch c + 2*rs_c
-	lea(mem(r8,  r8,  4), rbp)         // rbp = 5*rs_a
+	prefetch(0, mem(r12,         3*8)) // prefetch c + 0*rs_c
+	prefetch(0, mem(r12, rdi, 1, 3*8)) // prefetch c + 1*rs_c
+	prefetch(0, mem(r12, rdi, 2, 3*8)) // prefetch c + 2*rs_c
+	lea(mem(r8,  r8,  4), rcx)         // rcx = 5*rs_a
 
 	mov(var(k_iter16), rsi)            // i = k_iter16;
 	test(rsi, rsi)                     // check i via logical AND.
@@ -8027,7 +8024,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_6x8_L
 
 	prefetch(0, mem(rax, r10, 1, 0*8)) // prefetch rax + 3*rs_a
 	prefetch(0, mem(rax, r8,  4, 0*8)) // prefetch rax + 4*rs_a
-	prefetch(0, mem(rax, rbp, 1, 0*8)) // prefetch rax + 5*rs_a
+	prefetch(0, mem(rax, rcx, 1, 0*8)) // prefetch rax + 5*rs_a
 	vmovupd(mem(rax, r8, 2), ymm2)
 	add(imm(4*8), rax)                 // a += 4*cs_a = 4*8;
 
@@ -8065,7 +8062,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_6x8_L
 
 	prefetch(0, mem(rax, r10, 1, 0*8)) // prefetch rax + 3*rs_a
 	prefetch(0, mem(rax, r8,  4, 0*8)) // prefetch rax + 4*rs_a
-	prefetch(0, mem(rax, rbp, 1, 0*8)) // prefetch rax + 5*rs_a
+	prefetch(0, mem(rax, rcx, 1, 0*8)) // prefetch rax + 5*rs_a
 	vmovupd(mem(rax, r8, 2), ymm2)
 	add(imm(4*8), rax)                 // a += 4*cs_a = 4*8;
 
@@ -8114,7 +8111,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_6x8_L
 
 	prefetch(0, mem(rax, r10, 1, 0*8)) // prefetch rax + 3*rs_a
 	prefetch(0, mem(rax, r8,  4, 0*8)) // prefetch rax + 4*rs_a
-	prefetch(0, mem(rax, rbp, 1, 0*8)) // prefetch rax + 5*rs_a
+	prefetch(0, mem(rax, rcx, 1, 0*8)) // prefetch rax + 5*rs_a
 	vmovupd(mem(rax, r8, 2), ymm2)
 	add(imm(4*8), rax)                 // a += 4*cs_a = 4*8;
 
@@ -8187,6 +8184,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_6x8_L
 
 	mov(var(alpha), rax)               // load address of alpha
 	mov(var(beta), rbx)                // load address of beta
+	lea(mem(r12), rcx)                 // rcx = c_iijj;
 	vbroadcastsd(mem(rax), ymm0)       // load alpha and duplicate
 	vbroadcastsd(mem(rbx), ymm3)       // load beta and duplicate
 
@@ -8241,15 +8239,14 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_6x8_L
 	vmovapd( ymm4, ymm14)
 	vmovapd( ymm4, ymm15)
 
-	lea(mem(r12), rcx)                 // rcx = c_iijj;
 	lea(mem(r14), rax)                 // rax = a_ii;
 	lea(mem(rdx), rbx)                 // rbx = b_jj;
 
 
-	prefetch(0, mem(rcx,         3*8)) // prefetch c + 0*rs_c
-	prefetch(0, mem(rcx, rdi, 1, 3*8)) // prefetch c + 1*rs_c
-	prefetch(0, mem(rcx, rdi, 2, 3*8)) // prefetch c + 2*rs_c
-	lea(mem(r8,  r8,  4), rbp)         // rbp = 5*rs_a
+	prefetch(0, mem(r12,         3*8)) // prefetch c + 0*rs_c
+	prefetch(0, mem(r12, rdi, 1, 3*8)) // prefetch c + 1*rs_c
+	prefetch(0, mem(r12, rdi, 2, 3*8)) // prefetch c + 2*rs_c
+	lea(mem(r8,  r8,  4), rcx)         // rcx = 5*rs_a
 
 	mov(var(k_iter16), rsi)            // i = k_iter16;
 	test(rsi, rsi)                     // check i via logical AND.
@@ -8262,7 +8259,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_6x8_L
 
 	prefetch(0, mem(rax, r10, 1, 0*8)) // prefetch rax + 3*rs_a
 	prefetch(0, mem(rax, r8,  4, 0*8)) // prefetch rax + 4*rs_a
-	prefetch(0, mem(rax, rbp, 1, 0*8)) // prefetch rax + 5*rs_a
+	prefetch(0, mem(rax, rcx, 1, 0*8)) // prefetch rax + 5*rs_a
 	SUBITER_K4_3x4(rax, rbx)
 
 	// ---------------------------------- iteration 1
@@ -8272,7 +8269,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_6x8_L
 
 	prefetch(0, mem(rax, r10, 1, 0*8)) // prefetch rax + 3*rs_a
 	prefetch(0, mem(rax, r8,  4, 0*8)) // prefetch rax + 4*rs_a
-	prefetch(0, mem(rax, rbp, 1, 0*8)) // prefetch rax + 5*rs_a
+	prefetch(0, mem(rax, rcx, 1, 0*8)) // prefetch rax + 5*rs_a
 	SUBITER_K4_3x4(rax, rbx)
 
 	// ---------------------------------- iteration 3
@@ -8293,7 +8290,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_6x8_L
 
 	prefetch(0, mem(rax, r10, 1, 0*8)) // prefetch rax + 3*rs_a
 	prefetch(0, mem(rax, r8,  4, 0*8)) // prefetch rax + 4*rs_a
-	prefetch(0, mem(rax, rbp, 1, 0*8)) // prefetch rax + 5*rs_a
+	prefetch(0, mem(rax, rcx, 1, 0*8)) // prefetch rax + 5*rs_a
 	SUBITER_K4_3x4(rax, rbx)
 
 	dec(rsi)                           // i -= 1;
@@ -8362,6 +8359,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_6x8_L
 
 	mov(var(alpha), rax)               // load address of alpha
 	mov(var(beta), rbx)                // load address of beta
+	lea(mem(r12), rcx)                 // rcx = c_iijj;
 	vbroadcastsd(mem(rax), ymm0)       // load alpha and duplicate
 	vbroadcastsd(mem(rbx), ymm3)       // load beta and duplicate
 
@@ -8433,7 +8431,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_6x8_L
       [a_next] "m" (a_next),
       [b_next] "m" (b_next)*/
 	: // register clobber list
-	  "rax", "rbx", "rcx", "rdx", "rsi", "rdi", "rbp",
+	  "rax", "rbx", "rcx", "rdx", "rsi", "rdi",
 	  "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15",
 	  "xmm0", "xmm1", "xmm2", "xmm3",
 	  "xmm4", "xmm5", "xmm6", "xmm7",
@@ -8543,15 +8541,14 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_12x8_L
 	vmovapd( ymm4, ymm14)
 	vmovapd( ymm4, ymm15)
 
-	lea(mem(r12), rcx)                 // rcx = c_iijj;
 	lea(mem(r14), rax)                 // rax = a_ii;
 	lea(mem(rdx), rbx)                 // rbx = b_jj;
 
 
-	prefetch(0, mem(rcx,         3*8)) // prefetch c + 0*rs_c
-	prefetch(0, mem(rcx, rdi, 1, 3*8)) // prefetch c + 1*rs_c
-	prefetch(0, mem(rcx, rdi, 2, 3*8)) // prefetch c + 2*rs_c
-	lea(mem(r8,  r8,  4), rbp)         // rbp = 5*rs_a
+	prefetch(0, mem(r12,         3*8)) // prefetch c + 0*rs_c
+	prefetch(0, mem(r12, rdi, 1, 3*8)) // prefetch c + 1*rs_c
+	prefetch(0, mem(r12, rdi, 2, 3*8)) // prefetch c + 2*rs_c
+	lea(mem(r8,  r8,  4), rcx)         // rcx = 5*rs_a
 
 	mov(var(k_iter16), rsi)            // i = k_iter16;
 	test(rsi, rsi)                     // check i via logical AND.
@@ -8564,7 +8561,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_12x8_L
 
 	prefetch(0, mem(rax, r10, 1, 0*8)) // prefetch rax + 3*rs_a
 	prefetch(0, mem(rax, r8,  4, 0*8)) // prefetch rax + 4*rs_a
-	prefetch(0, mem(rax, rbp, 1, 0*8)) // prefetch rax + 5*rs_a
+	prefetch(0, mem(rax, rcx, 1, 0*8)) // prefetch rax + 5*rs_a
 	SUBITER_K4_3x4(rax, rbx)
 
 	// ---------------------------------- iteration 1
@@ -8574,7 +8571,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_12x8_L
 
 	prefetch(0, mem(rax, r10, 1, 0*8)) // prefetch rax + 3*rs_a
 	prefetch(0, mem(rax, r8,  4, 0*8)) // prefetch rax + 4*rs_a
-	prefetch(0, mem(rax, rbp, 1, 0*8)) // prefetch rax + 5*rs_a
+	prefetch(0, mem(rax, rcx, 1, 0*8)) // prefetch rax + 5*rs_a
 	SUBITER_K4_3x4(rax, rbx)
 
 	// ---------------------------------- iteration 3
@@ -8595,7 +8592,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_12x8_L
 
 	prefetch(0, mem(rax, r10, 1, 0*8)) // prefetch rax + 3*rs_a
 	prefetch(0, mem(rax, r8,  4, 0*8)) // prefetch rax + 4*rs_a
-	prefetch(0, mem(rax, rbp, 1, 0*8)) // prefetch rax + 5*rs_a
+	prefetch(0, mem(rax, rcx, 1, 0*8)) // prefetch rax + 5*rs_a
 	SUBITER_K4_3x4(rax, rbx)
 
 	dec(rsi)                           // i -= 1;
@@ -8664,6 +8661,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_12x8_L
 
 	mov(var(alpha), rax)               // load address of alpha
 	mov(var(beta), rbx)                // load address of beta
+	lea(mem(r12), rcx)                 // rcx = c_iijj;
 	vbroadcastsd(mem(rax), ymm0)       // load alpha and duplicate
 	vbroadcastsd(mem(rbx), ymm3)       // load beta and duplicate
 
@@ -8729,14 +8727,13 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_12x8_L
 	vmovapd( ymm4, ymm14)
 	vmovapd( ymm4, ymm15)
 
-	lea(mem(r12), rcx)                 // rcx = c_iijj;
 	lea(mem(r14), rax)                 // rax = a_ii;
 	lea(mem(rdx), rbx)                 // rbx = b_jj;
 
-	prefetch(0, mem(rcx,         3*8)) // prefetch c + 0*rs_c
-	prefetch(0, mem(rcx, rdi, 1, 3*8)) // prefetch c + 1*rs_c
-	prefetch(0, mem(rcx, rdi, 2, 3*8)) // prefetch c + 2*rs_c
-	lea(mem(r8,  r8,  4), rbp)         // rbp = 5*rs_a
+	prefetch(0, mem(r12,         3*8)) // prefetch c + 0*rs_c
+	prefetch(0, mem(r12, rdi, 1, 3*8)) // prefetch c + 1*rs_c
+	prefetch(0, mem(r12, rdi, 2, 3*8)) // prefetch c + 2*rs_c
+	lea(mem(r8,  r8,  4), rcx)         // rcx = 5*rs_a
 
 	mov(var(k_iter16), rsi)            // i = k_iter16;
 	test(rsi, rsi)                     // check i via logical AND.
@@ -8749,7 +8746,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_12x8_L
 
 	prefetch(0, mem(rax, r10, 1, 0*8)) // prefetch rax + 3*rs_a
 	prefetch(0, mem(rax, r8,  4, 0*8)) // prefetch rax + 4*rs_a
-	prefetch(0, mem(rax, rbp, 1, 0*8)) // prefetch rax + 5*rs_a
+	prefetch(0, mem(rax, rcx, 1, 0*8)) // prefetch rax + 5*rs_a
 	SUBITER_K4_3x4(rax, rbx)
 
 	// ---------------------------------- iteration 1
@@ -8759,7 +8756,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_12x8_L
 
 	prefetch(0, mem(rax, r10, 1, 0*8)) // prefetch rax + 3*rs_a
 	prefetch(0, mem(rax, r8,  4, 0*8)) // prefetch rax + 4*rs_a
-	prefetch(0, mem(rax, rbp, 1, 0*8)) // prefetch rax + 5*rs_a
+	prefetch(0, mem(rax, rcx, 1, 0*8)) // prefetch rax + 5*rs_a
 	SUBITER_K4_3x4(rax, rbx)
 
 	// ---------------------------------- iteration 3
@@ -8780,7 +8777,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_12x8_L
 
 	prefetch(0, mem(rax, r10, 1, 0*8)) // prefetch rax + 3*rs_a
 	prefetch(0, mem(rax, r8,  4, 0*8)) // prefetch rax + 4*rs_a
-	prefetch(0, mem(rax, rbp, 1, 0*8)) // prefetch rax + 5*rs_a
+	prefetch(0, mem(rax, rcx, 1, 0*8)) // prefetch rax + 5*rs_a
 	SUBITER_K4_3x4(rax, rbx)
 
 	dec(rsi)                           // i -= 1;
@@ -8848,6 +8845,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_12x8_L
 
 	mov(var(alpha), rax)               // load address of alpha
 	mov(var(beta), rbx)                // load address of beta
+	lea(mem(r12), rcx)                 // rcx = c_iijj;
 	vbroadcastsd(mem(rax), ymm0)       // load alpha and duplicate
 	vbroadcastsd(mem(rbx), ymm3)       // load beta and duplicate
 
@@ -8926,14 +8924,13 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_12x8_L
 	vmovapd( ymm4, ymm14)
 	vmovapd( ymm4, ymm15)
 
-	lea(mem(r12), rcx)                 // rcx = c_iijj;
 	lea(mem(r14), rax)                 // rax = a_ii;
 	lea(mem(rdx), rbx)                 // rbx = b_jj;
 
-	prefetch(0, mem(rcx,         3*8)) // prefetch c + 0*rs_c
-	prefetch(0, mem(rcx, rdi, 1, 3*8)) // prefetch c + 1*rs_c
-	prefetch(0, mem(rcx, rdi, 2, 3*8)) // prefetch c + 2*rs_c
-	lea(mem(r8,  r8,  4), rbp)         // rbp = 5*rs_a
+	prefetch(0, mem(r12,         3*8)) // prefetch c + 0*rs_c
+	prefetch(0, mem(r12, rdi, 1, 3*8)) // prefetch c + 1*rs_c
+	prefetch(0, mem(r12, rdi, 2, 3*8)) // prefetch c + 2*rs_c
+	lea(mem(r8,  r8,  4), rcx)         // rcx = 5*rs_a
 
 	mov(var(k_iter16), rsi)            // i = k_iter16;
 	test(rsi, rsi)                     // check i via logical AND.
@@ -8946,7 +8943,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_12x8_L
 
 	prefetch(0, mem(rax, r10, 1, 0*8)) // prefetch rax + 3*rs_a
 	prefetch(0, mem(rax, r8,  4, 0*8)) // prefetch rax + 4*rs_a
-	prefetch(0, mem(rax, rbp, 1, 0*8)) // prefetch rax + 5*rs_a
+	prefetch(0, mem(rax, rcx, 1, 0*8)) // prefetch rax + 5*rs_a
 	SUBITER_K4_3x4(rax, rbx)
 
 	// ---------------------------------- iteration 1
@@ -8956,7 +8953,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_12x8_L
 
 	prefetch(0, mem(rax, r10, 1, 0*8)) // prefetch rax + 3*rs_a
 	prefetch(0, mem(rax, r8,  4, 0*8)) // prefetch rax + 4*rs_a
-	prefetch(0, mem(rax, rbp, 1, 0*8)) // prefetch rax + 5*rs_a
+	prefetch(0, mem(rax, rcx, 1, 0*8)) // prefetch rax + 5*rs_a
 	SUBITER_K4_3x4(rax, rbx)
 
 	// ---------------------------------- iteration 3
@@ -8977,7 +8974,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_12x8_L
 
 	prefetch(0, mem(rax, r10, 1, 0*8)) // prefetch rax + 3*rs_a
 	prefetch(0, mem(rax, r8,  4, 0*8)) // prefetch rax + 4*rs_a
-	prefetch(0, mem(rax, rbp, 1, 0*8)) // prefetch rax + 5*rs_a
+	prefetch(0, mem(rax, rcx, 1, 0*8)) // prefetch rax + 5*rs_a
 	SUBITER_K4_3x4(rax, rbx)
 
 	dec(rsi)                           // i -= 1;
@@ -9046,6 +9043,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_12x8_L
 
 	mov(var(alpha), rax)               // load address of alpha
 	mov(var(beta), rbx)                // load address of beta
+	lea(mem(r12), rcx)                 // rcx = c_iijj;
 	vbroadcastsd(mem(rax), ymm0)       // load alpha and duplicate
 	vbroadcastsd(mem(rbx), ymm3)       // load beta and duplicate
 
@@ -9113,14 +9111,13 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_12x8_L
 	vmovapd( ymm4, ymm14)
 	vmovapd( ymm4, ymm15)
 
-	lea(mem(r12), rcx)                 // rcx = c_iijj;
 	lea(mem(r14), rax)                 // rax = a_ii;
 	lea(mem(rdx), rbx)                 // rbx = b_jj;
 
-	prefetch(0, mem(rcx,         3*8)) // prefetch c + 0*rs_c
-	prefetch(0, mem(rcx, rdi, 1, 3*8)) // prefetch c + 1*rs_c
-	prefetch(0, mem(rcx, rdi, 2, 3*8)) // prefetch c + 2*rs_c
-	lea(mem(r8,  r8,  4), rbp)         // rbp = 5*rs_a
+	prefetch(0, mem(r12,         3*8)) // prefetch c + 0*rs_c
+	prefetch(0, mem(r12, rdi, 1, 3*8)) // prefetch c + 1*rs_c
+	prefetch(0, mem(r12, rdi, 2, 3*8)) // prefetch c + 2*rs_c
+	lea(mem(r8,  r8,  4), rcx)         // rcx = 5*rs_a
 
 	mov(var(k_iter16), rsi)            // i = k_iter16;
 	test(rsi, rsi)                     // check i via logical AND.
@@ -9133,7 +9130,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_12x8_L
 
 	prefetch(0, mem(rax, r10, 1, 0*8)) // prefetch rax + 3*rs_a
 	prefetch(0, mem(rax, r8,  4, 0*8)) // prefetch rax + 4*rs_a
-	prefetch(0, mem(rax, rbp, 1, 0*8)) // prefetch rax + 5*rs_a
+	prefetch(0, mem(rax, rcx, 1, 0*8)) // prefetch rax + 5*rs_a
 
 	SUBITER_K4_3x4(rax, rbx)
 	// ---------------------------------- iteration 1
@@ -9142,7 +9139,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_12x8_L
 
 	prefetch(0, mem(rax, r10, 1, 0*8)) // prefetch rax + 3*rs_a
 	prefetch(0, mem(rax, r8,  4, 0*8)) // prefetch rax + 4*rs_a
-	prefetch(0, mem(rax, rbp, 1, 0*8)) // prefetch rax + 5*rs_a
+	prefetch(0, mem(rax, rcx, 1, 0*8)) // prefetch rax + 5*rs_a
 
 	SUBITER_K4_3x4(rax, rbx)
 	// ---------------------------------- iteration 3
@@ -9163,7 +9160,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_12x8_L
 
 	prefetch(0, mem(rax, r10, 1, 0*8)) // prefetch rax + 3*rs_a
 	prefetch(0, mem(rax, r8,  4, 0*8)) // prefetch rax + 4*rs_a
-	prefetch(0, mem(rax, rbp, 1, 0*8)) // prefetch rax + 5*rs_a
+	prefetch(0, mem(rax, rcx, 1, 0*8)) // prefetch rax + 5*rs_a
 
 	SUBITER_K4_3x4(rax, rbx)
 
@@ -9233,6 +9230,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_12x8_L
 
 	mov(var(alpha), rax)               // load address of alpha
 	mov(var(beta), rbx)                // load address of beta
+	lea(mem(r12), rcx)                 // rcx = c_iijj;
 	vbroadcastsd(mem(rax), ymm0)       // load alpha and duplicate
 	vbroadcastsd(mem(rbx), ymm3)       // load beta and duplicate
 
@@ -9299,7 +9297,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_12x8_L
       [a_next] "m" (a_next),
       [b_next] "m" (b_next)*/
 	: // register clobber list
-	  "rax", "rbx", "rcx", "rdx", "rsi", "rdi", "rbp",
+	  "rax", "rbx", "rcx", "rdx", "rsi", "rdi",
 	  "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15",
 	  "xmm0", "xmm1", "xmm2", "xmm3",
 	  "xmm4", "xmm5", "xmm6", "xmm7",
@@ -9419,14 +9417,13 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_12x16_L
 	vmovapd( ymm4, ymm14)
 	vmovapd( ymm4, ymm15)
 
-	lea(mem(r12), rcx)                 // rcx = c_iijj;
 	lea(mem(r14), rax)                 // rax = a_ii;
 	lea(mem(rdx), rbx)                 // rbx = b_jj;
 
-	prefetch(0, mem(rcx,         3*8)) // prefetch c + 0*rs_c
-	prefetch(0, mem(rcx, rdi, 1, 3*8)) // prefetch c + 1*rs_c
-	prefetch(0, mem(rcx, rdi, 2, 3*8)) // prefetch c + 2*rs_c
-	lea(mem(r8,  r8,  4), rbp)         // rbp = 5*rs_a
+	prefetch(0, mem(r12,         3*8)) // prefetch c + 0*rs_c
+	prefetch(0, mem(r12, rdi, 1, 3*8)) // prefetch c + 1*rs_c
+	prefetch(0, mem(r12, rdi, 2, 3*8)) // prefetch c + 2*rs_c
+	lea(mem(r8,  r8,  4), rcx)         // rcx = 5*rs_a
 
 	mov(var(k_iter16), rsi)            // i = k_iter16;
 	test(rsi, rsi)                     // check i via logical AND.
@@ -9439,7 +9436,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_12x16_L
 
 	prefetch(0, mem(rax, r10, 1, 0*8)) // prefetch rax + 3*rs_a
 	prefetch(0, mem(rax, r8,  4, 0*8)) // prefetch rax + 4*rs_a
-	prefetch(0, mem(rax, rbp, 1, 0*8)) // prefetch rax + 5*rs_a
+	prefetch(0, mem(rax, rcx, 1, 0*8)) // prefetch rax + 5*rs_a
 
 	vmovupd(mem(rax, r8, 1), ymm1)
 	vmovupd(mem(rax, r8, 2), ymm2)
@@ -9489,7 +9486,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_12x16_L
 
 	prefetch(0, mem(rax, r10, 1, 0*8)) // prefetch rax + 3*rs_a
 	prefetch(0, mem(rax, r8,  4, 0*8)) // prefetch rax + 4*rs_a
-	prefetch(0, mem(rax, rbp, 1, 0*8)) // prefetch rax + 5*rs_a
+	prefetch(0, mem(rax, rcx, 1, 0*8)) // prefetch rax + 5*rs_a
 
 	vmovupd(mem(rax, r8, 1), ymm1)
 	vmovupd(mem(rax, r8, 2), ymm2)
@@ -9549,7 +9546,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_12x16_L
 
 	prefetch(0, mem(rax, r10, 1, 0*8)) // prefetch rax + 3*rs_a
 	prefetch(0, mem(rax, r8,  4, 0*8)) // prefetch rax + 4*rs_a
-	prefetch(0, mem(rax, rbp, 1, 0*8)) // prefetch rax + 5*rs_a
+	prefetch(0, mem(rax, rcx, 1, 0*8)) // prefetch rax + 5*rs_a
 
 	vmovupd(mem(rax, r8, 1), ymm1)
 	vmovupd(mem(rax, r8, 2), ymm2)
@@ -9645,6 +9642,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_12x16_L
 
 	mov(var(alpha), rax)               // load address of alpha
 	mov(var(beta), rbx)                // load address of beta
+	lea(mem(r12), rcx)                 // rcx = c_iijj;
 	vbroadcastsd(mem(rax), ymm0)       // load alpha and duplicate
 	vbroadcastsd(mem(rbx), ymm3)       // load beta and duplicate
 
@@ -9707,7 +9705,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_12x16_L
       [a_next] "m" (a_next),
       [b_next] "m" (b_next)*/
 	: // register clobber list
-	  "rax", "rbx", "rcx", "rdx", "rsi", "rdi", "rbp",
+	  "rax", "rbx", "rcx", "rdx", "rsi", "rdi",
 	  "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15",
 	  "xmm0", "xmm1", "xmm2", "xmm3",
 	  "xmm4", "xmm5", "xmm6", "xmm7",
@@ -9833,14 +9831,13 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_16x12_combined_L
 	vmovapd( ymm4, ymm14)
 	vmovapd( ymm4, ymm15)
 
-	lea(mem(r12), rcx)                 // rcx = c_iijj;
 	lea(mem(r14), rax)                 // rax = a_ii;
 	lea(mem(rdx), rbx)                 // rbx = b_jj;
 
-	prefetch(0, mem(rcx,         3*8)) // prefetch c + 0*rs_c
-	prefetch(0, mem(rcx, rdi, 1, 3*8)) // prefetch c + 1*rs_c
-	prefetch(0, mem(rcx, rdi, 2, 3*8)) // prefetch c + 2*rs_c
-	lea(mem(r8,  r8,  4), rbp)         // rbp = 5*rs_a
+	prefetch(0, mem(r12,         3*8)) // prefetch c + 0*rs_c
+	prefetch(0, mem(r12, rdi, 1, 3*8)) // prefetch c + 1*rs_c
+	prefetch(0, mem(r12, rdi, 2, 3*8)) // prefetch c + 2*rs_c
+	lea(mem(r8,  r8,  4), rcx)         // rcx = 5*rs_a
 
 	mov(var(k_iter16), rsi)            // i = k_iter16;
 	test(rsi, rsi)                     // check i via logical AND.
@@ -9853,7 +9850,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_16x12_combined_L
 
 	prefetch(0, mem(rax, r10, 1, 0*8)) // prefetch rax + 3*rs_a
 	prefetch(0, mem(rax, r8,  4, 0*8)) // prefetch rax + 4*rs_a
-	prefetch(0, mem(rax, rbp, 1, 0*8)) // prefetch rax + 5*rs_a
+	prefetch(0, mem(rax, rcx, 1, 0*8)) // prefetch rax + 5*rs_a
 
 	vmovupd(mem(rax, r8, 1), ymm1)
 	vmovupd(mem(rax, r8, 2), ymm2)
@@ -9903,7 +9900,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_16x12_combined_L
 
 	prefetch(0, mem(rax, r10, 1, 0*8)) // prefetch rax + 3*rs_a
 	prefetch(0, mem(rax, r8,  4, 0*8)) // prefetch rax + 4*rs_a
-	prefetch(0, mem(rax, rbp, 1, 0*8)) // prefetch rax + 5*rs_a
+	prefetch(0, mem(rax, rcx, 1, 0*8)) // prefetch rax + 5*rs_a
 
 	vmovupd(mem(rax, r8, 1), ymm1)
 	vmovupd(mem(rax, r8, 2), ymm2)
@@ -9964,7 +9961,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_16x12_combined_L
 
 	prefetch(0, mem(rax, r10, 1, 0*8)) // prefetch rax + 3*rs_a
 	prefetch(0, mem(rax, r8,  4, 0*8)) // prefetch rax + 4*rs_a
-	prefetch(0, mem(rax, rbp, 1, 0*8)) // prefetch rax + 5*rs_a
+	prefetch(0, mem(rax, rcx, 1, 0*8)) // prefetch rax + 5*rs_a
 
 	vmovupd(mem(rax, r8, 1), ymm1)
 	vmovupd(mem(rax, r8, 2), ymm2)
@@ -10060,6 +10057,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_16x12_combined_L
 
 	mov(var(alpha), rax)               // load address of alpha
 	mov(var(beta), rbx)                // load address of beta
+	lea(mem(r12), rcx)                 // rcx = c_iijj;
 	vbroadcastsd(mem(rax), ymm0)       // load alpha and duplicate
 	vbroadcastsd(mem(rbx), ymm3)       // load beta and duplicate
 
@@ -10121,7 +10119,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_16x12_combined_L
       [a_next] "m" (a_next),
       [b_next] "m" (b_next)*/
 	: // register clobber list
-	  "rax", "rbx", "rcx", "rdx", "rsi", "rdi", "rbp",
+	  "rax", "rbx", "rcx", "rdx", "rsi", "rdi",
 	  "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15",
 	  "xmm0", "xmm1", "xmm2", "xmm3",
 	  "xmm4", "xmm5", "xmm6", "xmm7",
@@ -10176,14 +10174,13 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_16x12_combined_L
 	vmovapd( ymm4, ymm14)
 	vmovapd( ymm4, ymm15)
 
-	lea(mem(r12), rcx)                 // rcx = c_iijj;
 	lea(mem(r14), rax)                 // rax = a_ii;
 	lea(mem(rdx), rbx)                 // rbx = b_jj;
 
-	prefetch(0, mem(rcx,         3*8)) // prefetch c + 0*rs_c
-	prefetch(0, mem(rcx, rdi, 1, 3*8)) // prefetch c + 1*rs_c
-	prefetch(0, mem(rcx, rdi, 2, 3*8)) // prefetch c + 2*rs_c
-	lea(mem(r8,  r8,  4), rbp)         // rbp = 5*rs_a
+	prefetch(0, mem(r12,         3*8)) // prefetch c + 0*rs_c
+	prefetch(0, mem(r12, rdi, 1, 3*8)) // prefetch c + 1*rs_c
+	prefetch(0, mem(r12, rdi, 2, 3*8)) // prefetch c + 2*rs_c
+	lea(mem(r8,  r8,  4), rcx)         // rcx = 5*rs_a
 
 	mov(var(k_iter16), rsi)            // i = k_iter16;
 	test(rsi, rsi)                     // check i via logical AND.
@@ -10196,7 +10193,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_16x12_combined_L
 
 	prefetch(0, mem(rax, r10, 1, 0*8)) // prefetch rax + 3*rs_a
 	prefetch(0, mem(rax, r8,  4, 0*8)) // prefetch rax + 4*rs_a
-	prefetch(0, mem(rax, rbp, 1, 0*8)) // prefetch rax + 5*rs_a
+	prefetch(0, mem(rax, rcx, 1, 0*8)) // prefetch rax + 5*rs_a
 
 	vmovupd(mem(rax       ), ymm0)
 	vmovupd(mem(rax, r8, 1), ymm1)
@@ -10256,7 +10253,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_16x12_combined_L
 
 	prefetch(0, mem(rax, r10, 1, 0*8)) // prefetch rax + 3*rs_a
 	prefetch(0, mem(rax, r8,  4, 0*8)) // prefetch rax + 4*rs_a
-	prefetch(0, mem(rax, rbp, 1, 0*8)) // prefetch rax + 5*rs_a
+	prefetch(0, mem(rax, rcx, 1, 0*8)) // prefetch rax + 5*rs_a
 
 	vmovupd(mem(rax       ), ymm0)
 	vmovupd(mem(rax, r8, 1), ymm1)
@@ -10327,7 +10324,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_16x12_combined_L
 
 	prefetch(0, mem(rax, r10, 1, 0*8)) // prefetch rax + 3*rs_a
 	prefetch(0, mem(rax, r8,  4, 0*8)) // prefetch rax + 4*rs_a
-	prefetch(0, mem(rax, rbp, 1, 0*8)) // prefetch rax + 5*rs_a
+	prefetch(0, mem(rax, rcx, 1, 0*8)) // prefetch rax + 5*rs_a
 
 	vmovupd(mem(rax       ), ymm0)
 	vmovupd(mem(rax, r8, 1), ymm1)
@@ -10445,6 +10442,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_16x12_combined_L
 
 	mov(var(alpha), rax)               // load address of alpha
 	mov(var(beta), rbx)                // load address of beta
+	lea(mem(r12), rcx)                 // rcx = c_iijj;
 	vbroadcastsd(mem(rax), ymm0)       // load alpha and duplicate
 	vbroadcastsd(mem(rbx), ymm3)       // load beta and duplicate
 
@@ -10512,14 +10510,13 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_16x12_combined_L
 	vmovapd( ymm4, ymm14)
 	vmovapd( ymm4, ymm15)
 
-	lea(mem(r12), rcx)                 // rcx = c_iijj;
 	lea(mem(r14), rax)                 // rax = a_ii;
 	lea(mem(rdx), rbx)                 // rbx = b_jj;
 
-	prefetch(0, mem(rcx,         3*8)) // prefetch c + 0*rs_c
-	prefetch(0, mem(rcx, rdi, 1, 3*8)) // prefetch c + 1*rs_c
-	prefetch(0, mem(rcx, rdi, 2, 3*8)) // prefetch c + 2*rs_c
-	lea(mem(r8,  r8,  4), rbp)         // rbp = 5*rs_a
+	prefetch(0, mem(r12,         3*8)) // prefetch c + 0*rs_c
+	prefetch(0, mem(r12, rdi, 1, 3*8)) // prefetch c + 1*rs_c
+	prefetch(0, mem(r12, rdi, 2, 3*8)) // prefetch c + 2*rs_c
+	lea(mem(r8,  r8,  4), rcx)         // rcx = 5*rs_a
 
 	mov(var(k_iter16), rsi)            // i = k_iter16;
 	test(rsi, rsi)                     // check i via logical AND.
@@ -10532,7 +10529,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_16x12_combined_L
 
 	prefetch(0, mem(rax, r10, 1, 0*8)) // prefetch rax + 3*rs_a
 	prefetch(0, mem(rax, r8,  4, 0*8)) // prefetch rax + 4*rs_a
-	prefetch(0, mem(rax, rbp, 1, 0*8)) // prefetch rax + 5*rs_a
+	prefetch(0, mem(rax, rcx, 1, 0*8)) // prefetch rax + 5*rs_a
 
 	vmovupd(mem(rax       ), ymm0)
 	vmovupd(mem(rax, r8, 1), ymm1)
@@ -10592,7 +10589,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_16x12_combined_L
 
 	prefetch(0, mem(rax, r10, 1, 0*8)) // prefetch rax + 3*rs_a
 	prefetch(0, mem(rax, r8,  4, 0*8)) // prefetch rax + 4*rs_a
-	prefetch(0, mem(rax, rbp, 1, 0*8)) // prefetch rax + 5*rs_a
+	prefetch(0, mem(rax, rcx, 1, 0*8)) // prefetch rax + 5*rs_a
 
 	vmovupd(mem(rax       ), ymm0)
 	vmovupd(mem(rax, r8, 1), ymm1)
@@ -10663,7 +10660,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_16x12_combined_L
 
 	prefetch(0, mem(rax, r10, 1, 0*8)) // prefetch rax + 3*rs_a
 	prefetch(0, mem(rax, r8,  4, 0*8)) // prefetch rax + 4*rs_a
-	prefetch(0, mem(rax, rbp, 1, 0*8)) // prefetch rax + 5*rs_a
+	prefetch(0, mem(rax, rcx, 1, 0*8)) // prefetch rax + 5*rs_a
 
 	vmovupd(mem(rax       ), ymm0)
 	vmovupd(mem(rax, r8, 1), ymm1)
@@ -10780,6 +10777,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_16x12_combined_L
 
 	mov(var(alpha), rax)               // load address of alpha
 	mov(var(beta), rbx)                // load address of beta
+	lea(mem(r12), rcx)                 // rcx = c_iijj;
 	vbroadcastsd(mem(rax), ymm0)       // load alpha and duplicate
 	vbroadcastsd(mem(rbx), ymm3)       // load beta and duplicate
 
@@ -10858,14 +10856,13 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_16x12_combined_L
 	vmovapd( ymm4, ymm14)
 	vmovapd( ymm4, ymm15)
 
-	lea(mem(r12), rcx)                 // rcx = c_iijj;
 	lea(mem(r14), rax)                 // rax = a_ii;
 	lea(mem(rdx), rbx)                 // rbx = b_jj;
 
-	prefetch(0, mem(rcx,         3*8)) // prefetch c + 0*rs_c
-	prefetch(0, mem(rcx, rdi, 1, 3*8)) // prefetch c + 1*rs_c
-	prefetch(0, mem(rcx, rdi, 2, 3*8)) // prefetch c + 2*rs_c
-	lea(mem(r8,  r8,  4), rbp)         // rbp = 5*rs_a
+	prefetch(0, mem(r12,         3*8)) // prefetch c + 0*rs_c
+	prefetch(0, mem(r12, rdi, 1, 3*8)) // prefetch c + 1*rs_c
+	prefetch(0, mem(r12, rdi, 2, 3*8)) // prefetch c + 2*rs_c
+	lea(mem(r8,  r8,  4), rcx)         // rcx = 5*rs_a
 
 	mov(var(k_iter16), rsi)            // i = k_iter16;
 	test(rsi, rsi)                     // check i via logical AND.
@@ -10878,7 +10875,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_16x12_combined_L
 
 	prefetch(0, mem(rax, r10, 1, 0*8)) // prefetch rax + 3*rs_a
 	prefetch(0, mem(rax, r8,  4, 0*8)) // prefetch rax + 4*rs_a
-	prefetch(0, mem(rax, rbp, 1, 0*8)) // prefetch rax + 5*rs_a
+	prefetch(0, mem(rax, rcx, 1, 0*8)) // prefetch rax + 5*rs_a
 
 	vmovupd(mem(rax       ), ymm0)
 	vmovupd(mem(rax, r8, 1), ymm1)
@@ -10922,7 +10919,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_16x12_combined_L
 
 	prefetch(0, mem(rax, r10, 1, 0*8)) // prefetch rax + 3*rs_a
 	prefetch(0, mem(rax, r8,  4, 0*8)) // prefetch rax + 4*rs_a
-	prefetch(0, mem(rax, rbp, 1, 0*8)) // prefetch rax + 5*rs_a
+	prefetch(0, mem(rax, rcx, 1, 0*8)) // prefetch rax + 5*rs_a
 
 	vmovupd(mem(rax       ), ymm0)
 	vmovupd(mem(rax, r8, 1), ymm1)
@@ -10977,7 +10974,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_16x12_combined_L
 
 	prefetch(0, mem(rax, r10, 1, 0*8)) // prefetch rax + 3*rs_a
 	prefetch(0, mem(rax, r8,  4, 0*8)) // prefetch rax + 4*rs_a
-	prefetch(0, mem(rax, rbp, 1, 0*8)) // prefetch rax + 5*rs_a
+	prefetch(0, mem(rax, rcx, 1, 0*8)) // prefetch rax + 5*rs_a
 
 	vmovupd(mem(rax, r8, 2), ymm2)
 	add(imm(4*8), rax)                 // a += 4*cs_a = 4*8;
@@ -11050,6 +11047,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_16x12_combined_L
 
 	mov(var(alpha), rax)               // load address of alpha
 	mov(var(beta), rbx)                // load address of beta
+	lea(mem(r12), rcx)                 // rcx = c_iijj;
 	vbroadcastsd(mem(rax), ymm0)       // load alpha and duplicate
 	vbroadcastsd(mem(rbx), ymm3)       // load beta and duplicate
 
@@ -11101,14 +11099,13 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_16x12_combined_L
 	vmovapd( ymm4, ymm14)
 	vmovapd( ymm4, ymm15)
 
-	lea(mem(r12), rcx)                 // rcx = c_iijj;
 	lea(mem(r14), rax)                 // rax = a_ii;
 	lea(mem(rdx), rbx)                 // rbx = b_jj;
 
-	prefetch(0, mem(rcx,         3*8)) // prefetch c + 0*rs_c
-	prefetch(0, mem(rcx, rdi, 1, 3*8)) // prefetch c + 1*rs_c
-	prefetch(0, mem(rcx, rdi, 2, 3*8)) // prefetch c + 2*rs_c
-	lea(mem(r8,  r8,  4), rbp)         // rbp = 5*rs_a
+	prefetch(0, mem(r12,         3*8)) // prefetch c + 0*rs_c
+	prefetch(0, mem(r12, rdi, 1, 3*8)) // prefetch c + 1*rs_c
+	prefetch(0, mem(r12, rdi, 2, 3*8)) // prefetch c + 2*rs_c
+	lea(mem(r8,  r8,  4), rcx)         // rcx = 5*rs_a
 
 	mov(var(k_iter16), rsi)            // i = k_iter16;
 	test(rsi, rsi)                     // check i via logical AND.
@@ -11121,7 +11118,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_16x12_combined_L
 
 	prefetch(0, mem(rax, r10, 1, 0*8)) // prefetch rax + 3*rs_a
 	prefetch(0, mem(rax, r8,  4, 0*8)) // prefetch rax + 4*rs_a
-	prefetch(0, mem(rax, rbp, 1, 0*8)) // prefetch rax + 5*rs_a
+	prefetch(0, mem(rax, rcx, 1, 0*8)) // prefetch rax + 5*rs_a
 
 	vmovupd(mem(rax       ), ymm0)
 	vmovupd(mem(rax, r8, 1), ymm1)
@@ -11181,7 +11178,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_16x12_combined_L
 
 	prefetch(0, mem(rax, r10, 1, 0*8)) // prefetch rax + 3*rs_a
 	prefetch(0, mem(rax, r8,  4, 0*8)) // prefetch rax + 4*rs_a
-	prefetch(0, mem(rax, rbp, 1, 0*8)) // prefetch rax + 5*rs_a
+	prefetch(0, mem(rax, rcx, 1, 0*8)) // prefetch rax + 5*rs_a
 
 	vmovupd(mem(rax       ), ymm0)
 	vmovupd(mem(rax, r8, 1), ymm1)
@@ -11252,7 +11249,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_16x12_combined_L
 
 	prefetch(0, mem(rax, r10, 1, 0*8)) // prefetch rax + 3*rs_a
 	prefetch(0, mem(rax, r8,  4, 0*8)) // prefetch rax + 4*rs_a
-	prefetch(0, mem(rax, rbp, 1, 0*8)) // prefetch rax + 5*rs_a
+	prefetch(0, mem(rax, rcx, 1, 0*8)) // prefetch rax + 5*rs_a
 
 	vmovupd(mem(rax       ), ymm0)
 	vmovupd(mem(rax, r8, 1), ymm1)
@@ -11370,6 +11367,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_16x12_combined_L
 
 	mov(var(alpha), rax)               // load address of alpha
 	mov(var(beta), rbx)                // load address of beta
+	lea(mem(r12), rcx)                 // rcx = c_iijj;
 	vbroadcastsd(mem(rax), ymm0)       // load alpha and duplicate
 	vbroadcastsd(mem(rbx), ymm3)       // load beta and duplicate
 
@@ -11438,7 +11436,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_16x12_combined_L
       [a_next] "m" (a_next),
       [b_next] "m" (b_next)*/
 	: // register clobber list
-	  "rax", "rbx", "rcx", "rdx", "rsi", "rdi", "rbp",
+	  "rax", "rbx", "rcx", "rdx", "rsi", "rdi",
 	  "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15",
 	  "xmm0", "xmm1", "xmm2", "xmm3",
 	  "xmm4", "xmm5", "xmm6", "xmm7",
@@ -11549,14 +11547,13 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_18x16_L
 	vmovapd( ymm4, ymm14)
 	vmovapd( ymm4, ymm15)
 
-	lea(mem(r12), rcx)                 // rcx = c_iijj;
 	lea(mem(r14), rax)                 // rax = a_ii;
 	lea(mem(rdx), rbx)                 // rbx = b_jj;
 
-	prefetch(0, mem(rcx,         3*8)) // prefetch c + 0*rs_c
-	prefetch(0, mem(rcx, rdi, 1, 3*8)) // prefetch c + 1*rs_c
-	prefetch(0, mem(rcx, rdi, 2, 3*8)) // prefetch c + 2*rs_c
-	lea(mem(r8,  r8,  4), rbp)         // rbp = 5*rs_a
+	prefetch(0, mem(r12,         3*8)) // prefetch c + 0*rs_c
+	prefetch(0, mem(r12, rdi, 1, 3*8)) // prefetch c + 1*rs_c
+	prefetch(0, mem(r12, rdi, 2, 3*8)) // prefetch c + 2*rs_c
+	lea(mem(r8,  r8,  4), rcx)         // rcx = 5*rs_a
 
 	mov(var(k_iter16), rsi)            // i = k_iter16;
 	test(rsi, rsi)                     // check i via logical AND.
@@ -11569,7 +11566,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_18x16_L
 
 	prefetch(0, mem(rax, r10, 1, 0*8)) // prefetch rax + 3*rs_a
 	prefetch(0, mem(rax, r8,  4, 0*8)) // prefetch rax + 4*rs_a
-	prefetch(0, mem(rax, rbp, 1, 0*8)) // prefetch rax + 5*rs_a
+	prefetch(0, mem(rax, rcx, 1, 0*8)) // prefetch rax + 5*rs_a
 
 	vmovupd(mem(rax       ), ymm0)
 	vmovupd(mem(rax, r8, 1), ymm1)
@@ -11629,7 +11626,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_18x16_L
 
 	prefetch(0, mem(rax, r10, 1, 0*8)) // prefetch rax + 3*rs_a
 	prefetch(0, mem(rax, r8,  4, 0*8)) // prefetch rax + 4*rs_a
-	prefetch(0, mem(rax, rbp, 1, 0*8)) // prefetch rax + 5*rs_a
+	prefetch(0, mem(rax, rcx, 1, 0*8)) // prefetch rax + 5*rs_a
 
 	vmovupd(mem(rax       ), ymm0)
 	vmovupd(mem(rax, r8, 1), ymm1)
@@ -11700,7 +11697,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_18x16_L
 
 	prefetch(0, mem(rax, r10, 1, 0*8)) // prefetch rax + 3*rs_a
 	prefetch(0, mem(rax, r8,  4, 0*8)) // prefetch rax + 4*rs_a
-	prefetch(0, mem(rax, rbp, 1, 0*8)) // prefetch rax + 5*rs_a
+	prefetch(0, mem(rax, rcx, 1, 0*8)) // prefetch rax + 5*rs_a
 
 	vmovupd(mem(rax       ), ymm0)
 	vmovupd(mem(rax, r8, 1), ymm1)
@@ -11818,6 +11815,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_18x16_L
 
 	mov(var(alpha), rax)               // load address of alpha
 	mov(var(beta), rbx)                // load address of beta
+	lea(mem(r12), rcx)                 // rcx = c_iijj;
 	vbroadcastsd(mem(rax), ymm0)       // load alpha and duplicate
 	vbroadcastsd(mem(rbx), ymm3)       // load beta and duplicate
 
@@ -11885,14 +11883,13 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_18x16_L
 	vmovapd( ymm4, ymm14)
 	vmovapd( ymm4, ymm15)
 
-	lea(mem(r12), rcx)                 // rcx = c_iijj;
 	lea(mem(r14), rax)                 // rax = a_ii;
 	lea(mem(rdx), rbx)                 // rbx = b_jj;
 
-	prefetch(0, mem(rcx,         3*8)) // prefetch c + 0*rs_c
-	prefetch(0, mem(rcx, rdi, 1, 3*8)) // prefetch c + 1*rs_c
-	prefetch(0, mem(rcx, rdi, 2, 3*8)) // prefetch c + 2*rs_c
-	lea(mem(r8,  r8,  4), rbp)         // rbp = 5*rs_a
+	prefetch(0, mem(r12,         3*8)) // prefetch c + 0*rs_c
+	prefetch(0, mem(r12, rdi, 1, 3*8)) // prefetch c + 1*rs_c
+	prefetch(0, mem(r12, rdi, 2, 3*8)) // prefetch c + 2*rs_c
+	lea(mem(r8,  r8,  4), rcx)         // rcx = 5*rs_a
 
 	mov(var(k_iter16), rsi)            // i = k_iter16;
 	test(rsi, rsi)                     // check i via logical AND.
@@ -11905,7 +11902,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_18x16_L
 
 	prefetch(0, mem(rax, r10, 1, 0*8)) // prefetch rax + 3*rs_a
 	prefetch(0, mem(rax, r8,  4, 0*8)) // prefetch rax + 4*rs_a
-	prefetch(0, mem(rax, rbp, 1, 0*8)) // prefetch rax + 5*rs_a
+	prefetch(0, mem(rax, rcx, 1, 0*8)) // prefetch rax + 5*rs_a
 
 	vmovupd(mem(rax       ), ymm0)
 	vmovupd(mem(rax, r8, 1), ymm1)
@@ -11965,7 +11962,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_18x16_L
 
 	prefetch(0, mem(rax, r10, 1, 0*8)) // prefetch rax + 3*rs_a
 	prefetch(0, mem(rax, r8,  4, 0*8)) // prefetch rax + 4*rs_a
-	prefetch(0, mem(rax, rbp, 1, 0*8)) // prefetch rax + 5*rs_a
+	prefetch(0, mem(rax, rcx, 1, 0*8)) // prefetch rax + 5*rs_a
 
 	vmovupd(mem(rax       ), ymm0)
 	vmovupd(mem(rax, r8, 1), ymm1)
@@ -12036,7 +12033,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_18x16_L
 
 	prefetch(0, mem(rax, r10, 1, 0*8)) // prefetch rax + 3*rs_a
 	prefetch(0, mem(rax, r8,  4, 0*8)) // prefetch rax + 4*rs_a
-	prefetch(0, mem(rax, rbp, 1, 0*8)) // prefetch rax + 5*rs_a
+	prefetch(0, mem(rax, rcx, 1, 0*8)) // prefetch rax + 5*rs_a
 
 	vmovupd(mem(rax       ), ymm0)
 	vmovupd(mem(rax, r8, 1), ymm1)
@@ -12154,6 +12151,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_18x16_L
 
 	mov(var(alpha), rax)               // load address of alpha
 	mov(var(beta), rbx)                // load address of beta
+	lea(mem(r12), rcx)                 // rcx = c_iijj;
 	vbroadcastsd(mem(rax), ymm0)       // load alpha and duplicate
 	vbroadcastsd(mem(rbx), ymm3)       // load beta and duplicate
 
@@ -12233,15 +12231,14 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_18x16_L
 	vmovapd( ymm4, ymm14)
 	vmovapd( ymm4, ymm15)
 
-	lea(mem(r12), rcx)                 // rcx = c_iijj;
 	lea(mem(r14), rax)                 // rax = a_ii;
 	lea(mem(rdx), rbx)                 // rbx = b_jj;
 
 
-	prefetch(0, mem(rcx,         3*8)) // prefetch c + 0*rs_c
-	prefetch(0, mem(rcx, rdi, 1, 3*8)) // prefetch c + 1*rs_c
-	prefetch(0, mem(rcx, rdi, 2, 3*8)) // prefetch c + 2*rs_c
-	lea(mem(r8,  r8,  4), rbp)         // rbp = 5*rs_a
+	prefetch(0, mem(r12,         3*8)) // prefetch c + 0*rs_c
+	prefetch(0, mem(r12, rdi, 1, 3*8)) // prefetch c + 1*rs_c
+	prefetch(0, mem(r12, rdi, 2, 3*8)) // prefetch c + 2*rs_c
+	lea(mem(r8,  r8,  4), rcx)         // rcx = 5*rs_a
 
 	mov(var(k_iter16), rsi)            // i = k_iter16;
 	test(rsi, rsi)                     // check i via logical AND.
@@ -12254,7 +12251,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_18x16_L
 
 	prefetch(0, mem(rax, r10, 1, 0*8)) // prefetch rax + 3*rs_a
 	prefetch(0, mem(rax, r8,  4, 0*8)) // prefetch rax + 4*rs_a
-	prefetch(0, mem(rax, rbp, 1, 0*8)) // prefetch rax + 5*rs_a
+	prefetch(0, mem(rax, rcx, 1, 0*8)) // prefetch rax + 5*rs_a
 
 	vmovupd(mem(rax       ), ymm0)
 	vmovupd(mem(rax, r8, 1), ymm1)
@@ -12298,7 +12295,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_18x16_L
 
 	prefetch(0, mem(rax, r10, 1, 0*8)) // prefetch rax + 3*rs_a
 	prefetch(0, mem(rax, r8,  4, 0*8)) // prefetch rax + 4*rs_a
-	prefetch(0, mem(rax, rbp, 1, 0*8)) // prefetch rax + 5*rs_a
+	prefetch(0, mem(rax, rcx, 1, 0*8)) // prefetch rax + 5*rs_a
 
 	vmovupd(mem(rax       ), ymm0)
 	vmovupd(mem(rax, r8, 1), ymm1)
@@ -12353,7 +12350,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_18x16_L
 
 	prefetch(0, mem(rax, r10, 1, 0*8)) // prefetch rax + 3*rs_a
 	prefetch(0, mem(rax, r8,  4, 0*8)) // prefetch rax + 4*rs_a
-	prefetch(0, mem(rax, rbp, 1, 0*8)) // prefetch rax + 5*rs_a
+	prefetch(0, mem(rax, rcx, 1, 0*8)) // prefetch rax + 5*rs_a
 
 	vmovupd(mem(rax, r8, 2), ymm2)
 	add(imm(4*8), rax)                 // a += 4*cs_a = 4*8;
@@ -12436,6 +12433,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_18x16_L
 
 	mov(var(alpha), rax)               // load address of alpha
 	mov(var(beta), rbx)                // load address of beta
+	lea(mem(r12), rcx)                 // rcx = c_iijj;
 	vbroadcastsd(mem(rax), ymm0)       // load alpha and duplicate
 	vbroadcastsd(mem(rbx), ymm3)       // load beta and duplicate
 
@@ -12488,14 +12486,13 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_18x16_L
 	vmovapd( ymm4, ymm14)
 	vmovapd( ymm4, ymm15)
 
-	lea(mem(r12), rcx)                 // rcx = c_iijj;
 	lea(mem(r14), rax)                 // rax = a_ii;
 	lea(mem(rdx), rbx)                 // rbx = b_jj;
 
-	prefetch(0, mem(rcx,         3*8)) // prefetch c + 0*rs_c
-	prefetch(0, mem(rcx, rdi, 1, 3*8)) // prefetch c + 1*rs_c
-	prefetch(0, mem(rcx, rdi, 2, 3*8)) // prefetch c + 2*rs_c
-	lea(mem(r8,  r8,  4), rbp)         // rbp = 5*rs_a
+	prefetch(0, mem(r12,         3*8)) // prefetch c + 0*rs_c
+	prefetch(0, mem(r12, rdi, 1, 3*8)) // prefetch c + 1*rs_c
+	prefetch(0, mem(r12, rdi, 2, 3*8)) // prefetch c + 2*rs_c
+	lea(mem(r8,  r8,  4), rcx)         // rcx = 5*rs_a
 
 	mov(var(k_iter16), rsi)            // i = k_iter16;
 	test(rsi, rsi)                     // check i via logical AND.
@@ -12508,7 +12505,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_18x16_L
 
 	prefetch(0, mem(rax, r10, 1, 0*8)) // prefetch rax + 3*rs_a
 	prefetch(0, mem(rax, r8,  4, 0*8)) // prefetch rax + 4*rs_a
-	prefetch(0, mem(rax, rbp, 1, 0*8)) // prefetch rax + 5*rs_a
+	prefetch(0, mem(rax, rcx, 1, 0*8)) // prefetch rax + 5*rs_a
 
 	vmovupd(mem(rax       ), ymm0)
 	vmovupd(mem(rax, r8, 1), ymm1)
@@ -12568,7 +12565,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_18x16_L
 
 	prefetch(0, mem(rax, r10, 1, 0*8)) // prefetch rax + 3*rs_a
 	prefetch(0, mem(rax, r8,  4, 0*8)) // prefetch rax + 4*rs_a
-	prefetch(0, mem(rax, rbp, 1, 0*8)) // prefetch rax + 5*rs_a
+	prefetch(0, mem(rax, rcx, 1, 0*8)) // prefetch rax + 5*rs_a
 
 	vmovupd(mem(rax       ), ymm0)
 	vmovupd(mem(rax, r8, 1), ymm1)
@@ -12639,7 +12636,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_18x16_L
 
 	prefetch(0, mem(rax, r10, 1, 0*8)) // prefetch rax + 3*rs_a
 	prefetch(0, mem(rax, r8,  4, 0*8)) // prefetch rax + 4*rs_a
-	prefetch(0, mem(rax, rbp, 1, 0*8)) // prefetch rax + 5*rs_a
+	prefetch(0, mem(rax, rcx, 1, 0*8)) // prefetch rax + 5*rs_a
 
 	vmovupd(mem(rax       ), ymm0)
 	vmovupd(mem(rax, r8, 1), ymm1)
@@ -12756,6 +12753,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_18x16_L
 
 	mov(var(alpha), rax)               // load address of alpha
 	mov(var(beta), rbx)                // load address of beta
+	lea(mem(r12), rcx)                 // rcx = c_iijj;
 	vbroadcastsd(mem(rax), ymm0)       // load alpha and duplicate
 	vbroadcastsd(mem(rbx), ymm3)       // load beta and duplicate
 
@@ -12824,7 +12822,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m_18x16_L
       [a_next] "m" (a_next),
       [b_next] "m" (b_next)*/
 	: // register clobber list
-	  "rax", "rbx", "rcx", "rdx", "rsi", "rdi", "rbp",
+	  "rax", "rbx", "rcx", "rdx", "rsi", "rdi",
 	  "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15",
 	  "xmm0", "xmm1", "xmm2", "xmm3",
 	  "xmm4", "xmm5", "xmm6", "xmm7",
@@ -13979,7 +13977,7 @@ void bli_dgemmsup_rd_haswell_asm_6x2m
       [a_next] "m" (a_next),
       [b_next] "m" (b_next)*/
 	: // register clobber list
-	  "rax", "rbx", "rcx", "rdx", "rsi", "rdi", "rbp",
+	  "rax", "rbx", "rcx", "rdx", "rsi", "rdi",
 	  "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15",
 	  "xmm0", "xmm1", "xmm2", "xmm3",
 	  "xmm4", "xmm5", "xmm6", "xmm7",
