@@ -1210,7 +1210,7 @@ auto_detect()
 	# Create #defines for all of the BLIS_CONFIG_ macros in bli_cpuid.c.
 	bli_cpuid_c_filepath=$(find "${dist_path}/frame" -name "bli_cpuid.c")
 	config_defines=$(grep BLIS_CONFIG_ "${bli_cpuid_c_filepath}" \
-					| sed -Ee 's/#ifdef[[:space:]]+/-D/g')
+	                 | sed -Ee 's/#ifdef[[:space:]]+/-D/g')
 
 	# Set the linker flags. We typically need pthreads (or BLIS's homerolled
 	# equiavlent) because it is needed for parts of bli_arch.c unrelated to
@@ -1416,7 +1416,7 @@ get_binutils_version()
 	# The last part ({ read first rest ; echo $first ; }) is a workaround
 	# to OS X's egrep only returning the first match.
 	bu_version=$(echo "${bu_string}" | grep -oE '[0-9]+\.[0-9]+\.?[0-9]*' |
-		{ read -r first rest ; echo "${first}"; })
+	             { read -r first rest ; echo "${first}"; })
 
 	# Parse the version number into its major, minor, and revision
 	# components.
@@ -1521,8 +1521,8 @@ get_compiler_version()
 	# The last part ({ read first rest ; echo $first ; }) is a workaround
 	# to OS X's egrep only returning the first match.
 	cc_vendor=$(echo "${vendor_string}" |
-					grep -oE 'icc|gcc|clang|emcc|pnacl|IBM|oneAPI|crosstool-NG|GCC' |
-					{ read -r first rest ; echo "${first}"; })
+	            grep -oE 'icc|gcc|clang|emcc|pnacl|IBM|oneAPI|crosstool-NG|GCC' |
+	            { read -r first rest ; echo "${first}"; })
 
 	# AOCC version strings contain both "clang" and "AOCC" substrings, and
 	# so we have perform a follow-up check to make sure cc_vendor gets set
@@ -3997,7 +3997,7 @@ main()
 			# The last part ({ read first rest ; echo $first ; }) is a workaround
 			# to OS X's egrep only returning the first match.
 			fc_vendor=$(echo "${vendor_string}" | grep -oE 'IFORT|GNU' |
-							{ read -r first rest ; echo "${first}"; })
+			            { read -r first rest ; echo "${first}"; })
 
 			if [[ ${fc_vendor} = IFORT ]]; then
 				complex_return='intel'
@@ -4412,43 +4412,43 @@ main()
 	# configurations and create fragments there as well.)
 	if [[ ${clist_contains_cname} = false ]]; then
 		create_makefile_fragment CONFIG "${config_dirpath}/${config_name}" \
-		   "${obj_config_dirpath}/${config_name}"
+		                         "${obj_config_dirpath}/${config_name}"
 	fi
 
 	# Generate makefile fragments for each of the sub-configurations present
 	# in the configuration list.
 	for conf in ${config_list}; do
 		create_makefile_fragment CONFIG "${config_dirpath}/${conf}" \
-		   "${obj_config_dirpath}/${conf}"
+		                         "${obj_config_dirpath}/${conf}"
 	done
 
 	# Generate makefile fragments for each of the kernel sets required by
 	# the configuration list (in the kernel list).
 	for kern in ${kernel_list}; do
 		create_makefile_fragment KERNELS "${kernels_dirpath}/${kern}" \
-		   "${obj_kernels_dirpath}/${kern}"
+		                         "${obj_kernels_dirpath}/${kern}"
 	done
 
 	# Generate makefile fragments in the reference kernels directory.
 	create_makefile_fragment REFKERN "${refkern_dirpath}" \
-		   "${obj_refkern_dirpath}"
+	                         "${obj_refkern_dirpath}"
 
 	# Generate makefile fragments in the framework directory.
 	create_makefile_fragment FRAME "${frame_dirpath}" \
-		   "${obj_frame_dirpath}"
+	                         "${obj_frame_dirpath}"
 
 	# Generate makefile fragments in the addon sub-directory.
 	if [[ -n ${addon_flag} ]]; then
 		for addon in ${addon_list}; do
 			create_makefile_fragment ADDON "${addon_dirpath}/${addon}" \
-				"${obj_addon_dirpath}/${addon}"
+			                         "${obj_addon_dirpath}/${addon}"
 		done
 	fi
 
 	# Generate makefile fragments in the sandbox sub-directory.
 	if [[ -n ${sandbox_flag} ]]; then
-	   create_makefile_fragment SANDBOX "${sandbox_dirpath}/${sandbox}" \
-				 "${obj_sandbox_dirpath}/${sandbox}"
+		create_makefile_fragment SANDBOX "${sandbox_dirpath}/${sandbox}" \
+		                         "${obj_sandbox_dirpath}/${sandbox}"
 	fi
 
 
