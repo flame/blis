@@ -48,7 +48,8 @@ THIS_CONFIG    := rv32i
 CPPROCFLAGS    := -DRISCV_SIZE=32
 # Atomic instructions must be enabled either via hardware
 # (-march=rv32ia) or by linking against libatomic
-CMISCFLAGS     := -march=rv32i -mabi=ilp32
+CMISCFLAGS     := -march=$(shell $(CC) -E frame/base/bli_riscv_detect_arch.h \
+							| grep '^[^#]') -mabi=ilp32
 CPICFLAGS      :=
 CWARNFLAGS     := -Wall -Wno-unused-function -Wfatal-errors
 
