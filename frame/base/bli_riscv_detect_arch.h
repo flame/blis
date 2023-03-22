@@ -133,8 +133,8 @@
 #define CAT2(a,b) a##b
 #define CAT(a,b) CAT2(a,b)
 
-#if __riscv_arch_test &&__riscv_i && __riscv_m && __riscv_a && \
-    __riscv_f && __riscv_d && !__riscv_e
+#if __riscv_arch_test && ( __riscv_i && __riscv_m && __riscv_a && \
+						   __riscv_f && __riscv_d && !__riscv_e)
 
 CAT(rv, CAT(__riscv_xlen, CAT(g, CAT(RISCV_C, CAT(RISCV_P, RISCV_V)))))
 
