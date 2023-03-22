@@ -35,6 +35,10 @@
 
 /* Construct a RISC-V architecture string based on available features. */
 
+#if __riscv
+
+#if __riscv_arch_test
+
 #if __riscv_i
 #define RISCV_I i
 #else
@@ -89,10 +93,48 @@
 #define RISCV_V
 #endif
 
+#else /* __riscv_arch_test */
+
+/* We assume I and E are exclusive when __riscv_arch_test isn't defined */
+#if __riscv_32e
+#define RISCV_I
+#define RISCV_E e
+#else
+#define RISCV_I i
+#define RISCV_E
+#endif
+
+#if __riscv_flen >= 32
+#define RISCV_F f
+#else
+#define RISCV_F
+#endif
+
+#if __riscv_flen >= 64
+#define RISCV_D d
+#else
+#define RISCV_D
+#endif
+
+/* Cannot test for M, A, C, P if __riscv_arch_test isn't defined */
+#define RISCV_M
+#define RISCV_A
+#define RISCV_C
+#define RISCV_P
+
+#if __riscv_vector
+#define RISCV_V v
+#else
+#define RISCV_V
+#endif
+
+#endif /* __riscv_arch_test */
+
 #define CAT2(a,b) a##b
 #define CAT(a,b) CAT2(a,b)
 
-#if __riscv_i && __riscv_m && __riscv_a && __riscv_f && __riscv_d && !__riscv_e
+#if __riscv_arch_test &&__riscv_i && __riscv_m && __riscv_a && \
+    __riscv_f && __riscv_d && !__riscv_e
 
 CAT(rv, CAT(__riscv_xlen, CAT(g, CAT(RISCV_C, CAT(RISCV_P, RISCV_V)))))
 
@@ -102,3 +144,5 @@ CAT(rv, CAT(__riscv_xlen, CAT(RISCV_I, CAT(RISCV_E, CAT(RISCV_M, CAT(RISCV_A,
 CAT(RISCV_F, CAT(RISCV_D, CAT(RISCV_C, CAT(RISCV_P, RISCV_V))))))))))
 
 #endif
+
+#endif /* __riscv */
