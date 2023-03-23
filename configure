@@ -32,6 +32,7 @@
 #  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 #
+# shellcheck disable=2001,2249,2034,2154,2181,2312,2250,2292
 
 #
 # -- Helper functions ----------------------------------------------------------
@@ -42,11 +43,11 @@ print_usage()
 	# Use the version string in the 'version' file since we don't have
 	# the patched version string yet.
 	if [ -z "${version}" ]; then
-		version=$(cat "${version_filepath}")
+		version=$(<"${version_filepath}")
 	fi
 
 	# Echo usage info.
- 	cat <<EOF
+	cat <<EOF
 
  ${script_name} (BLIS ${version})
 
@@ -562,7 +563,7 @@ pass_config_kernel_registries()
 
 		# We've stripped out leading whitespace and trailing comments. If
 		# the line is now empty, then we can skip it altogether.
-		if [ "x${curline}" = "x" ]; then
+		if [[ -z ${curline} ]]; then
 			continue;
 		fi
 
@@ -572,12 +573,13 @@ pass_config_kernel_registries()
 
 		# If we encounter a slash, it means the name of the configuration
 		# and the kernel set needed by that configuration are different.
-		if [[ "${list}" == *[/]* ]]; then
+		if [[ ${list} = */* ]]; then
 
 			#echo "Slash found."
 			klist=""
 			clist=""
-			for item in "${list}"; do
+
+			for item in ${list}; do
 
 				# The sub-configuration name is always the first sub-word in
 				# the slash-separated compound word.
@@ -590,7 +592,7 @@ pass_config_kernel_registries()
 
 				# Replace the slashes with spaces to transform the string
 				# into a space-separated list of kernel names.
-				kernels=$(echo -e ${kernels} | sed -e "s/\// /g")
+				kernels=$(echo -e "${kernels}" | sed -e "s/\// /g")
 
 				clist="${clist} ${config}"
 				klist="${klist} ${kernels}"
@@ -615,7 +617,7 @@ pass_config_kernel_registries()
 		#   to their respective registries, as appropriate.
 
 		# Handle singleton and umbrella configuration entries separately.
-		if [ $(is_singleton_family "${cname}" "${clist}") == "true" ]; then
+		if [[ $(is_singleton_family "${cname}" "${clist}") == "true" ]]; then
 
 			# Singleton configurations/families.
 			# Note: for singleton families, clist contains one item, which
@@ -625,7 +627,7 @@ pass_config_kernel_registries()
 			# Only consider updating the indirect blacklist (pass 0) or
 			# committing clist and klist to the registries (pass 1) if the
 			# configuration name (cname) is not blacklisted.
-			if [ $(is_in_list "${cname}" "${all_blist}") == "false" ]; then
+			if [[ $(is_in_list "${cname}" "${all_blist}") == "false" ]]; then
 
 				if [ "${passnum}" == "0" ]; then
 					# Even if the cname isn't blacklisted, one of the requisite
@@ -637,7 +639,7 @@ pass_config_kernel_registries()
 					# system architecture.) Thus, we add cname to the indirect
 					# blacklist.
 					for item in ${klist}; do
-						if [ $(is_in_list "${item}" "${config_blist}") == "true" ]; then
+						if [[ $(is_in_list "${item}" "${config_blist}") == "true" ]]; then
 							indirect_blist="${indirect_blist} ${cname}"
 							break
 						fi
@@ -664,7 +666,7 @@ pass_config_kernel_registries()
 
 			# First we check cname, which should generally not be blacklisted
 			# for umbrella families, but we check anyway just to be safe.
-			if [ $(is_in_list "${cname}" "${all_blist}") == "false" ]; then
+			if [[ $(is_in_list "${cname}" "${all_blist}") == "false" ]]; then
 
 				if [ "${passnum}" == "1" ]; then
 
@@ -673,7 +675,7 @@ pass_config_kernel_registries()
 					# omit it from clist and klist.
 					for item in ${clist}; do
 
-						if [ $(is_in_list "${item}" "${all_blist}") == "true" ]; then
+						if [[ $(is_in_list "${item}" "${all_blist}") == "true" ]]; then
 							clist=$(remove_from_list "${item}" "${clist}")
 							klist=$(remove_from_list "${item}" "${klist}")
 						fi
@@ -695,7 +697,7 @@ pass_config_kernel_registries()
 
 	if [ "${passnum}" == "0" ]; then
 		# Assign the final indirect blacklist (with whitespace removed).
-		indirect_blist="$(canonicalize_ws ${indirect_blist})"
+		indirect_blist=$(canonicalize_ws "${indirect_blist}")
 	fi
 }
 
@@ -736,11 +738,11 @@ read_registry_file()
 
 			config=${cr_var##config_registry_}
 
-			clist=$(query_array "config_registry" ${config})
+			clist=$(query_array "config_registry" "${config}")
 
 			# The entries that define singleton families should never need
 			# any substitution.
-			if [ $(is_singleton_family "${config}" "${clist}") == "true" ]; then
+			if [[ $(is_singleton_family "${config}" "${clist}") == "true" ]]; then
 				continue
 			fi
 
@@ -749,7 +751,7 @@ read_registry_file()
 			for mem in ${clist}; do
 
 				#mems_mem="${config_registry[${mem}]}"
-				mems_mem=$(query_array "config_registry" ${mem})
+				mems_mem=$(query_array "config_registry" "${mem}")
 
 				# If mems_mem is empty string, then mem was not found as a key
 				# in the config list associative array. In that case, we continue
@@ -762,7 +764,7 @@ read_registry_file()
 				if [ "${mem}" != "${mems_mem}" ]; then
 
 					#clist="${config_registry[$config]}"
-					clisttmp=$(query_array "config_registry" ${config})
+					clisttmp=$(query_array "config_registry" "${config}")
 
 					# Replace the current config with its constituent config set,
 					# canonicalize whitespace, and then remove duplicate config
@@ -789,7 +791,7 @@ read_registry_file()
 					# but only if the config (mem) value is NOT present
 					# in the list of sub-configs. If it is present, then further
 					# substitution may not necessarily be needed this round.
-					if [ $(is_in_list "${mem}" "${mems_mem}") == "false" ]; then
+					if [[ $(is_in_list "${mem}" "${mems_mem}") == "false" ]]; then
 						iterate_again="1"
 					fi
 				fi
@@ -814,7 +816,7 @@ read_registry_file()
 
 			config=${kr_var##kernel_registry_}
 
-			klist=$(query_array "kernel_registry" ${config})
+			klist=$(query_array "kernel_registry" "${config}")
 
 			# The entries that define singleton families should never need
 			# any substitution. In the kernel registry, we know it's a
@@ -822,7 +824,7 @@ read_registry_file()
 			# (This is slightly different than the same test in the config
 			# registry, where we test that clist is one word and that
 			# clist == cname.)
-			if [ $(is_in_list "${config}" "${klist}") == "true" ]; then
+			if [[ $(is_in_list "${config}" "${klist}") == "true" ]]; then
 				#echo "debug: '${config}' not found in '${klist}'; skipping."
 				continue
 			fi
@@ -832,7 +834,7 @@ read_registry_file()
 			for ker in ${klist}; do
 
 				#kers_ker="${kernel_registry[${ker}]}"
-				kers_ker=$(query_array "kernel_registry" ${ker})
+				kers_ker=$(query_array "kernel_registry" "${ker}")
 
 				# If kers_ker is empty string, then ker was not found as a key
 				# in the kernel registry. While not common, this can happen
@@ -853,7 +855,7 @@ read_registry_file()
 				if [ "${ker}" != "${kers_ker}" ]; then
 
 					#klisttmp="${kernel_registry[$config]}"
-					klisttmp=$(query_array "kernel_registry" ${config})
+					klisttmp=$(query_array "kernel_registry" "${config}")
 
 					# Replace the current config with its requisite kernels,
 					# canonicalize whitespace, and then remove duplicate kernel
@@ -880,7 +882,7 @@ read_registry_file()
 					# unless we just substituted using a singleton family
 					# definition, in which case we don't necessarily need to
 					# iterate further this round.
-					if [ $(is_in_list "${ker}" "${kers_ker}") == "false" ]; then
+					if [[ $(is_in_list "${ker}" "${kers_ker}") == "false" ]]; then
 						iterate_again="1"
 					fi
 				fi
@@ -916,13 +918,13 @@ build_kconfig_registry()
 	familyname="$1"
 
 	#clist="${config_registry[${familyname}]}"
-	clist=$(query_array "config_registry" ${familyname})
+	clist=$(query_array "config_registry" "${familyname}")
 
 	for config in ${clist}; do
 
 		# Look up the kernels for the current sub-configuration.
 		#kernels="${kernel_registry[${config}]}"
-		kernels=$(query_array "kernel_registry" ${config})
+		kernels=$(query_array "kernel_registry" "${config}")
 
 		for kernel in ${kernels}; do
 
@@ -931,7 +933,7 @@ build_kconfig_registry()
 
 			# Query the current sub-configs for the current ${kernel}.
 			#cur_configs="${kconfig_registry[${kernel}]}"
-			cur_configs=$(query_array "kconfig_registry" ${kernel})
+			cur_configs=$(query_array "kconfig_registry" "${kernel}")
 
 			# Add the current sub-configuration to the list of sub-configs
 			# we just queried.
@@ -995,7 +997,7 @@ is_singleton_family()
 
 	rval="false"
 
-	if [ $(is_singleton "${memberlist}") ]; then
+	if [[ -n $(is_singleton "${memberlist}") ]]; then
 
 		if [ "${memberlist}" == "${familyname}" ]; then
 			rval="true"
@@ -1016,7 +1018,7 @@ remove_from_list()
 	for item in ${list}; do
 
 		# Filter out any list item that matches any of the strike words.
-		if [ $(is_in_list "${item}" "${strike_words}") == "false" ]; then
+		if [[ $(is_in_list "${item}" "${strike_words}") == "false" ]]; then
 			flist="${flist} ${item}"
 		fi
 	done
@@ -1171,7 +1173,7 @@ auto_detect()
 		filename=${pair#*:}
 		rootdir=${pair%:*}
 
-		filepath=$(find ${dist_path}/${rootdir} -name "${filename}")
+		filepath=$(find "${dist_path}/${rootdir}" -name "${filename}")
 		c_src_filepaths="${c_src_filepaths} ${filepath}"
 	done
 
@@ -1197,7 +1199,7 @@ auto_detect()
 		filename=${pair#*:}
 		rootdir=${pair%:*}
 
-		filepath=$(find ${dist_path}/${rootdir} -name "${filename}")
+		filepath=$(find "${dist_path}/${rootdir}" -name "${filename}")
 		path=${filepath%/*}
 		c_hdr_paths="${c_hdr_paths} -I${path}"
 	done
@@ -1206,9 +1208,9 @@ auto_detect()
 	autodetect_x="auto-detect.x"
 
 	# Create #defines for all of the BLIS_CONFIG_ macros in bli_cpuid.c.
-	bli_cpuid_c_filepath=$(find ${dist_path}/frame -name "bli_cpuid.c")
-	config_defines=$(grep BLIS_CONFIG_ ${bli_cpuid_c_filepath} \
-	                 | sed -e 's/#ifdef /-D/g')
+	bli_cpuid_c_filepath=$(find "${dist_path}/frame" -name "bli_cpuid.c")
+	config_defines=$(grep BLIS_CONFIG_ "${bli_cpuid_c_filepath}" \
+	                 | sed -Ee 's/#ifdef[[:space:]]+/-D/g')
 
 	# Set the linker flags. We typically need pthreads (or BLIS's homerolled
 	# equiavlent) because it is needed for parts of bli_arch.c unrelated to
@@ -1240,6 +1242,7 @@ auto_detect()
 	if [ "${debug_auto_detect}" == "no" ]; then
 
 		# Execute the compilation command.
+		# shellcheck disable=2086
 		eval ${cmd}
 
 	else
@@ -1252,10 +1255,10 @@ auto_detect()
 	fi
 
 	# Run the auto-detect program.
-	detected_config=$(./${autodetect_x})
+	detected_config=$("./${autodetect_x}")
 
 	# Remove the executable file.
-	rm -f ./${autodetect_x}
+	rm -f "./${autodetect_x}"
 
 	# Return the detected sub-configuration name.
 	echo "${detected_config}"
@@ -1267,7 +1270,7 @@ has_libmemkind()
 
 	# Path to libmemkind detection source file.
 	main_c="libmemkind_detect.c"
-	main_c_filepath=$(find ${dist_path}/build -name "${main_c}")
+	main_c_filepath=$(find "${dist_path}/build" -name "${main_c}")
 
 	# Add libmemkind to LDFLAGS.
 	LDFLAGS_mk="${LDFLAGS} -lmemkind"
@@ -1277,7 +1280,8 @@ has_libmemkind()
 
 	# Attempt to compile a simple main() program that contains a call
 	# to hbw_malloc() and that links to libmemkind.
-	${found_cc} -o ${binname} ${main_c_filepath} ${LDFLAGS_mk} 2> /dev/null
+	# shellcheck disable=2086
+	"${found_cc}" -o "${binname}" "${main_c_filepath}" ${LDFLAGS_mk} 2> /dev/null
 
 	# Depending on the return code from the compile step above, we set
 	# enable_memkind accordingly.
@@ -1288,7 +1292,7 @@ has_libmemkind()
 	fi
 
 	# Remove the executable generated above.
-	rm -f ./${binname}
+	rm -f "./${binname}"
 
 	echo "${rval}"
 }
@@ -1299,15 +1303,15 @@ has_pragma_omp_simd()
 
 	# Path to omp-simd detection source file.
 	main_c="omp_simd_detect.c"
-	main_c_filepath=$(find ${dist_path}/build -name "${main_c}")
+	main_c_filepath=$(find "${dist_path}/build" -name "${main_c}")
 
 	# Binary executable filename.
 	binname="omp_simd-detect.x"
 
 	# Attempt to compile a simple main() program that contains a
 	# #pragma omp simd.
-	${found_cc} -std=c99 -O3 -march=native -fopenmp-simd \
-	            -o ${binname} ${main_c_filepath} 2> /dev/null
+	"${found_cc}" -std=c99 -O3 -march=native -fopenmp-simd \
+	            -o "${binname}" "${main_c_filepath}" 2> /dev/null
 
 	# Depending on the return code from the compile step above, we set
 	# enable_memkind accordingly.
@@ -1318,7 +1322,7 @@ has_pragma_omp_simd()
 	fi
 
 	# Remove the executable generated above.
-	rm -f ./${binname}
+	rm -f "./${binname}"
 
 	echo "${rval}"
 }
@@ -1337,7 +1341,7 @@ blacklistcc_add()
 {
 	# Check whether we've already blacklisted the given sub-config so
 	# we don't output redundant messages.
-	if [ $(is_in_list "$1" "${config_blist}") == "false" ]; then
+	if [[ $(is_in_list "$1" "${config_blist}") == "false" ]]; then
 
 		echowarn "${cc_vendor} ${cc_version} does not support '$1'; adding to blacklist."
 		config_blist="${config_blist} $1"
@@ -1348,7 +1352,7 @@ blacklistbu_add()
 {
 	# Check whether we've already blacklisted the given sub-config so
 	# we don't output redundant messages.
-	if [ $(is_in_list "$1" "${config_blist}") == "false" ]; then
+	if [[ $(is_in_list "$1" "${config_blist}") == "false" ]]; then
 
 		echowarn "assembler ('as' ${bu_version}) does not support '$1'; adding to blacklist."
 		config_blist="${config_blist} $1"
@@ -1359,7 +1363,7 @@ blacklistos_add()
 {
 	# Check whether we've already blacklisted the given sub-config so
 	# we don't output redundant messages.
-	if [ $(is_in_list "$1" "${config_blist}") == "false" ]; then
+	if [[ $(is_in_list "$1" "${config_blist}") == "false" ]]; then
 
 		echowarn "The operating system does not support building '$1'; adding to blacklist."
 		config_blist="${config_blist} $1"
@@ -1411,7 +1415,8 @@ get_binutils_version()
 	# Query the binutils version number.
 	# The last part ({ read first rest ; echo $first ; }) is a workaround
 	# to OS X's egrep only returning the first match.
-	bu_version=$(echo "${bu_string}" | egrep -o '[0-9]+\.[0-9]+\.?[0-9]*' | { read first rest ; echo ${first} ; })
+	bu_version=$(echo "${bu_string}" | grep -oE '[0-9]+\.[0-9]+\.?[0-9]*' |
+	             { read -r first rest ; echo "${first}"; })
 
 	# Parse the version number into its major, minor, and revision
 	# components.
@@ -1477,20 +1482,20 @@ check_python()
 	#
 
 	# Python 1.x is unsupported.
-	if [ ${python_major} -eq 1 ]; then
+	if [[ ${python_major} -eq 1 ]]; then
 		echoerr_unsupportedpython
 	fi
 
 	# Python 2.6.x or older is unsupported.
-	if [ ${python_major} -eq 2 ]; then
-		if [ ${python_minor} -lt 7 ]; then
+	if [[ ${python_major} -eq 2 ]]; then
+		if [[ ${python_minor} -lt 7 ]]; then
 			echoerr_unsupportedpython
 		fi
 	fi
 
 	# Python 3.3.x or older is unsupported.
-	if [ ${python_major} -eq 3 ]; then
-		if [ ${python_minor} -lt 4 ]; then
+	if [[ ${python_major} -eq 3 ]]; then
+		if [[ ${python_minor} -lt 4 ]]; then
 			echoerr_unsupportedpython
 		fi
 	fi
@@ -1515,19 +1520,19 @@ get_compiler_version()
 	# isolate the version number.
 	# The last part ({ read first rest ; echo $first ; }) is a workaround
 	# to OS X's egrep only returning the first match.
-	cc_vendor=$(echo "${vendor_string}" | egrep -o 'icc|gcc|clang|emcc|pnacl|IBM|oneAPI|crosstool-NG|GCC' | { read first rest ; echo $first ; })
+	cc_vendor=$(echo "${vendor_string}" |
+	            grep -oE 'icc|gcc|clang|emcc|pnacl|IBM|oneAPI|crosstool-NG|GCC' |
+	            { read -r first rest ; echo "${first}"; })
 
 	# AOCC version strings contain both "clang" and "AOCC" substrings, and
 	# so we have perform a follow-up check to make sure cc_vendor gets set
 	# correctly.
-	aocc_grep=$(echo "${vendor_string}" | grep 'AOCC')
-	if [ -n "${aocc_grep}" ]; then
+	if [[ ${vendor_string} = *AOCC* ]]; then
 		cc_vendor="aocc"
 	fi
 
 	# Detect armclang, which doesn't have a nice, unambiguous, one-word tag
-	armclang_grep=$(echo "${vendor_string}" | grep 'Arm C/C++/Fortran Compiler')
-	if [ -n "${armclang_grep}" ]; then
+	if [[ ${vendor_string} = *'Arm C/C++/Fortran Compiler'* ]]; then
 		cc_vendor="armclang"
 	fi
 
@@ -1541,8 +1546,7 @@ get_compiler_version()
 		# Treat compilers built by crosstool-NG (for eg: conda) as gcc.
 		cc_vendor="gcc"
 	fi
-	if [ "${cc_vendor}" = "icc" -o \
-	     "${cc_vendor}" = "gcc" ]; then
+	if [[ ${cc_vendor} = icc || ${cc_vendor} = gcc ]]; then
 
 		cc_version=$(${cc} -dumpversion)
 
@@ -1551,18 +1555,16 @@ get_compiler_version()
 		# Treat armclang as regular clang.
 		cc_vendor="clang"
 		cc_version=$(echo "${vendor_string}" \
-		             | egrep -o 'based on LLVM [0-9]+\.[0-9]+\.?[0-9]*' \
-		             | egrep -o               '[0-9]+\.[0-9]+\.?[0-9]*')
+		             | grep -oE 'based on LLVM [0-9]+\.[0-9]+\.?[0-9]*' \
+		             | grep -oE               '[0-9]+\.[0-9]+\.?[0-9]*')
 
 	elif [ "${cc_vendor}" = "clang" ]; then
 
 		cc_version=$(echo "${vendor_string}" \
-		             | egrep -o '(clang|LLVM) version [0-9]+\.[0-9]+\.?[0-9]*' \
-		             | egrep -o                      '[0-9]+\.[0-9]+\.?[0-9]*')
+		             | grep -oE '(clang|LLVM) version [0-9]+\.[0-9]+\.?[0-9]*' \
+		             | grep -oE                      '[0-9]+\.[0-9]+\.?[0-9]*')
 
 	elif [ "${cc_vendor}" = "aocc" ]; then
-
-		aocc_ver21=$(echo "${vendor_string}" | grep 'AOCC.LLVM.2')
 
 		# Versions 2.0 and 2.1 had different version string formats from
 		# 2.2 and later, so we have to handle them separately.
@@ -1573,15 +1575,15 @@ get_compiler_version()
 		# AMD clang version 11.0.0 (CLANG: AOCC_2.3.0-Build#85 2020_11_10) (based on LLVM Mirror.Version.11.0.0)
 		# AMD clang version 12.0.0 (CLANG: AOCC_3.0.0-Build#2 2020_11_05) (based on LLVM Mirror.Version.12.0.0)
 
-		if [ -n "${aocc_ver21}" ]; then
+		if [[ ${vendor_string} = *AOCC.LLVM.2* ]]; then
 
 			# Grep for the AOCC.LLVM.x.y.z substring first, and then isolate the
 			# version number. Also, the string may contain multiple instances of
 			# the version number, so only use the first occurrence.
 			cc_version=$(echo "${vendor_string}" \
-			             | egrep -o 'AOCC.LLVM.[0-9]+\.[0-9]+\.?[0-9]*' \
-			             | egrep -o           '[0-9]+\.[0-9]+\.?[0-9]*' \
-			             | { read first rest ; echo $first ; })
+			             | grep -oE 'AOCC.LLVM.[0-9]+\.[0-9]+\.?[0-9]*' \
+			             | grep -oE           '[0-9]+\.[0-9]+\.?[0-9]*' \
+			             | { read -r first rest ; echo "${first}"; })
 		else
 
 			# Grep for the AOCC_x.y.z substring first, and then isolate the
@@ -1590,9 +1592,9 @@ get_compiler_version()
 			# take only the first occurrence as a future-oriented safety
 			# measure.
 			cc_version=$(echo "${vendor_string}" \
-			             | egrep -o 'AOCC_[0-9]+\.[0-9]+\.?[0-9]*' \
-			             | egrep -o      '[0-9]+\.[0-9]+\.?[0-9]*' \
-			             | { read first rest ; echo $first ; })
+			             | grep -oE 'AOCC_[0-9]+\.[0-9]+\.?[0-9]*' \
+			             | grep -oE      '[0-9]+\.[0-9]+\.?[0-9]*' \
+			             | { read -r first rest ; echo "${first}"; })
 		fi
 
 	elif [ "${cc_vendor}" = "oneAPI" ]; then
@@ -1600,14 +1602,14 @@ get_compiler_version()
 		# Treat Intel oneAPI's clang as clang, not icc.
 		cc_vendor="clang"
 		cc_version=$(echo "${vendor_string}" \
-		             | egrep -o '[0-9]+\.[0-9]+\.[0-9]+\.?[0-9]*' \
-		             | { read first rest ; echo ${first} ; })
+		             | grep -oE '[0-9]+\.[0-9]+\.[0-9]+\.?[0-9]*' \
+		             | { read -r first rest ; echo "${first}"; })
 
 	else
 
 		cc_version=$(echo "${vendor_string}" \
-		             | egrep -o '[0-9]+\.[0-9]+\.?[0-9]*' \
-		             | { read first rest ; echo ${first} ; })
+		             | grep -oE '[0-9]+\.[0-9]+\.?[0-9]*' \
+		             | { read -r first rest ; echo "${first}"; })
 	fi
 
 	# Parse the version number into its major, minor, and revision
@@ -1622,7 +1624,7 @@ get_compiler_version()
 	# always output the major, minor, and revision numbers. Thus, if we're
 	# using gcc and its version is 7 or later, we re-query and re-parse the
 	# version string.
-	if [ "${cc_vendor}" = "gcc" -a ${cc_major} -ge 7 ]; then
+	if [[ ${cc_vendor} = "gcc" && ${cc_major} -ge 7 ]]; then
 
 		# Re-query the version number using -dumpfullversion.
 		cc_version=$(${cc} -dumpfullversion)
@@ -1689,25 +1691,25 @@ check_compiler()
 	# Fixme: check on a64fx, neoverse, and others
 
 	# gcc
-	if [ "x${cc_vendor}" = "xgcc" ]; then
+	if [[ ${cc_vendor} = gcc ]]; then
 
-		if [ ${cc_major} -lt 4 ]; then
+		if [[ ${cc_major} -lt 4 ]]; then
 			echoerr_unsupportedcc
 		fi
-		if [ ${cc_major} -eq 4 ]; then
+		if [[ ${cc_major} -eq 4 ]]; then
 			blacklistcc_add "knl"
-			if [ ${cc_minor} -lt 7 ]; then
+			if [[ ${cc_minor} -lt 7 ]]; then
 				echoerr_unsupportedcc
 			fi
-			if [ ${cc_minor} -lt 9 ]; then
+			if [[ ${cc_minor} -lt 9 ]]; then
 				blacklistcc_add "excavator"
 				blacklistcc_add "zen"
 			fi
 		fi
-		if [ ${cc_major} -lt 5 ]; then
+		if [[ ${cc_major} -lt 5 ]]; then
 			blacklistcc_add "knl"
 		fi
-		if [ ${cc_major} -lt 6 ]; then
+		if [[ ${cc_major} -lt 6 ]]; then
 			# Normally, zen would be blacklisted for gcc prior to 6.0.
 			# However, we have a workaround in place in the zen
 			# configuration's make_defs.mk file that starts with bdver4
@@ -1718,72 +1720,72 @@ check_compiler()
 			# gcc 5.x may support POWER9 but it is unverified.
 			blacklistcc_add "power9"
 		fi
-		if [ ${cc_major} -lt 10 ]; then
+		if [[ ${cc_major} -lt 10 ]]; then
 			blacklistcc_add "armsve"
 		fi
 	fi
 
 	# icc
-	if [ "x${cc_vendor}" = "xicc" ]; then
+	if [[ ${cc_vendor} = icc ]]; then
 
-		if [ ${cc_major} -lt 15 ]; then
+		if [[ ${cc_major} -lt 15 ]]; then
 			echoerr_unsupportedcc
 		fi
-		if [ ${cc_major} -eq 15 ]; then
-			if [ ${cc_revision} -lt 1 ]; then
+		if [[ ${cc_major} -eq 15 ]]; then
+			if [[ ${cc_revision} -lt 1 ]]; then
 				blacklistcc_add "skx"
 			fi
 		fi
-		if [ ${cc_major} -eq 18 ]; then
+		if [[ ${cc_major} -eq 18 ]]; then
 			echo "${script_name}: ${cc} ${cc_version} is known to cause erroneous results. See https://github.com/flame/blis/issues/371 for details."
 			blacklistcc_add "knl"
 			blacklistcc_add "skx"
 		fi
-		if [ ${cc_major} -ge 19 ]; then
+		if [[ ${cc_major} -ge 19 ]]; then
 			echo "${script_name}: ${cc} ${cc_version} is known to cause erroneous results. See https://github.com/flame/blis/issues/371 for details."
 			echoerr_unsupportedcc
 		fi
 	fi
 
 	# clang
-	if [ "x${cc_vendor}" = "xclang" ]; then
-		if [ "$(echo ${vendor_string} | grep -o Apple)" = "Apple" ]; then
-			if [ ${cc_major} -lt 5 ]; then
+	if [[ ${cc_vendor} = clang ]]; then
+		if [[ ${vendor_string} = *Apple* ]]; then
+			if [[ ${cc_major} -lt 5 ]]; then
 				echoerr_unsupportedcc
 			fi
 			# See https://en.wikipedia.org/wiki/Xcode#Toolchain_versions
-			if [ ${cc_major} -eq 5 ]; then
+			if [[ ${cc_major} -eq 5 ]]; then
 				# Apple clang 5.0 is clang 3.4svn
 				blacklistcc_add "excavator"
 				blacklistcc_add "zen"
 			fi
-			if [ ${cc_major} -lt 7 ]; then
+			if [[ ${cc_major} -lt 7 ]]; then
 				blacklistcc_add "knl"
 				blacklistcc_add "skx"
 			fi
 		else
-			if [ ${cc_major} -lt 3 ]; then
+			if [[ ${cc_major} -lt 3 ]]; then
 				echoerr_unsupportedcc
 			fi
-			if [ ${cc_major} -eq 3 ]; then
-				if [ ${cc_minor} -lt 3 ]; then
+			if [[ ${cc_major} -eq 3 ]]; then
+				if [[ ${cc_minor} -lt 3 ]]; then
 					echoerr_unsupportedcc
 				fi
-				if [ ${cc_minor} -lt 5 ]; then
+				if [[ ${cc_minor} -lt 5 ]]; then
 					blacklistcc_add "excavator"
 					blacklistcc_add "zen"
 				fi
-				if [ ${cc_minor} -lt 9 ]; then
+				if [[ ${cc_minor} -lt 9 ]]; then
 					blacklistcc_add "knl"
 					blacklistcc_add "skx"
 				fi
 			fi
-			if [ ${cc_major} -lt 4 ]; then
+			if [[ ${cc_major} -lt 4 ]]; then
 				# See comment above regarding zen support.
 				#blacklistcc_add "zen"
 				: # explicit no-op since bash can't handle empty loop bodies.
 			fi
-			if [ ${cc_major} -lt 11 ]; then
+			if [[ ${cc_major} -lt 11 ]]; then
 				blacklistcc_add "armsve"
 			fi
 		fi
@@ -1871,24 +1873,24 @@ check_compiler_version_ranges()
 	echo "${script_name}: checking ${cc} ${cc_version} against known consequential version ranges."
 
 	# gcc
-	if [ "x${cc_vendor}" = "xgcc" ]; then
+	if [[ ${cc_vendor} = gcc ]]; then
 
 		# Check for gcc < 4.9.0 (ie: 4.8.5 or older).
-		if [ ${cc_major} -eq 4 ]; then
-			if [ ${cc_minor} -lt 9 ]; then
+		if [[ ${cc_major} -eq 4 ]]; then
+			if [[ ${cc_minor} -lt 9 ]]; then
 				echo "${script_name}: note: found ${cc} version older than 4.9.0."
 				gcc_older_than_4_9_0='yes'
 			fi
 		fi
 
 		# Check for gcc < 6.1.0 (ie: 5.5 or older).
-		if [ ${cc_major} -lt 6 ]; then
+		if [[ ${cc_major} -lt 6 ]]; then
 			echo "${script_name}: note: found ${cc} version older than 6.1."
 			gcc_older_than_6_1_0='yes'
 		fi
 
 		# Check for gcc < 9.1.0 (ie: 8.3 or older).
-		if [ ${cc_major} -lt 9 ]; then
+		if [[ ${cc_major} -lt 9 ]]; then
 			echo "${script_name}: note: found ${cc} version older than 9.1."
 			gcc_older_than_9_1_0='yes'
 		fi
@@ -1901,37 +1903,37 @@ check_compiler_version_ranges()
 	fi
 
 	# icc
-	if [ "x${cc_vendor}" = "xicc" ]; then
+	if [[ ${cc_vendor} = icc ]]; then
 		:
 	fi
 
 	# clang
-	if [ "x${cc_vendor}" = "xclang" ]; then
+	if [[ ${cc_vendor} = clang ]]; then
 
 		# Check for clang < 9.0.0.
-		if [ ${cc_major} -lt 9 ]; then
+		if [[ ${cc_major} -lt 9 ]]; then
 			echo "${script_name}: note: found ${cc} version older than 9.0."
 			clang_older_than_9_0_0='yes'
 		fi
 
 		# Check for clang < 12.0.0.
-		if [ ${cc_major} -lt 12 ]; then
+		if [[ ${cc_major} -lt 12 ]]; then
 			echo "${script_name}: note: found ${cc} version older than 12.0."
 			clang_older_than_12_0_0='yes'
 		fi
 	fi
 
 	# aocc
-	if [ "x${cc_vendor}" = "xaocc" ]; then
+	if [[ ${cc_vendor} = aocc ]]; then
 
 		# Check for aocc < 2.0.0.
-		if [ ${cc_major} -lt 2 ]; then
+		if [[ ${cc_major} -lt 2 ]]; then
 			echo "${script_name}: note: found ${cc} version older than 2.0."
 			aocc_older_than_2_0_0='yes'
 		fi
 
 		# Check for aocc < 3.0.0.
-		if [ ${cc_major} -lt 3 ]; then
+		if [[ ${cc_major} -lt 3 ]]; then
 			echo "${script_name}: note: found ${cc} version older than 3.0."
 			aocc_older_than_3_0_0='yes'
 		fi
@@ -1955,30 +1957,30 @@ check_assembler()
 	#
 	# Check support for FMA4 (amd: bulldozer).
 	#
-	asm_fp=$(find ${asm_dir} -name "fma4.s")
+	asm_fp=$(find "${asm_dir}" -name "fma4.s")
 	knows_fma4=$(try_assemble "${cc}" "${cflags}" "${asm_fp}")
 
-	if [ "x${knows_fma4}" == "xno" ]; then
+	if [[ ${knows_fma4} = no ]]; then
 		blacklistbu_add "bulldozer"
 	fi
 
 	#
 	# Check support for AVX (intel: sandybridge+, amd: piledriver+).
 	#
-	asm_fp=$(find ${asm_dir} -name "avx.s")
+	asm_fp=$(find "${asm_dir}" -name "avx.s")
 	knows_avx=$(try_assemble "${cc}" "${cflags}" "${asm_fp}")
 
-	if [ "x${knows_avx}" == "xno" ]; then
+	if [[ ${knows_avx} = no ]]; then
 		blacklistbu_add "sandybridge"
 	fi
 
 	#
 	# Check support for FMA3 (intel: haswell+, amd: piledriver+).
 	#
-	asm_fp=$(find ${asm_dir} -name "fma3.s")
+	asm_fp=$(find "${asm_dir}" -name "fma3.s")
 	knows_fma3=$(try_assemble "${cc}" "${cflags}" "${asm_fp}")
 
-	if [ "x${knows_fma3}" == "xno" ]; then
+	if [[ ${knows_fma3} = no ]]; then
 		blacklistbu_add "haswell"
 		blacklistbu_add "piledriver"
 		blacklistbu_add "steamroller"
@@ -1995,10 +1997,10 @@ check_assembler()
 		cflags="-march=knl"
 	fi
 
-	asm_fp=$(find ${asm_dir} -name "avx512f.s")
+	asm_fp=$(find "${asm_dir}" -name "avx512f.s")
 	knows_avx512f=$(try_assemble "${cc}" "${cflags}" "${asm_fp}")
 
-	if [ "x${knows_avx512f}" == "xno" ]; then
+	if [[ ${knows_avx512f} = no ]]; then
 		blacklistbu_add "knl"
 		blacklistbu_add "skx"
 	fi
@@ -2012,10 +2014,10 @@ check_assembler()
 		cflags="-march=skylake-avx512"
 	fi
 
-	asm_fp=$(find ${asm_dir} -name "avx512dq.s")
+	asm_fp=$(find "${asm_dir}" -name "avx512dq.s")
 	knows_avx512dq=$(try_assemble "${cc}" "${cflags}" "${asm_fp}")
 
-	if [ "x${knows_avx512dq}" == "xno" ]; then
+	if [[ ${knows_avx512dq} = no ]]; then
 		blacklistbu_add "skx"
 	fi
 }
@@ -2042,7 +2044,8 @@ try_assemble()
 	asm_bin="${asm_base}.o"
 
 	# Try to assemble the file.
-	${cc} ${cflags} -c ${asm_src} -o ${asm_bin} > /dev/null 2>&1
+	# shellcheck disable=2086
+	"${cc}" ${cflags} -c "${asm_src}" -o "${asm_bin}" > /dev/null 2>&1
 
 	if [ "$?" == 0 ]; then
 		rval='yes'
@@ -2081,14 +2084,14 @@ set_default_version()
 		# followed by a number signifying how many commits have transpired
 		# since the tag, followed by a 'g' and a shortened hash tab. Capture
 		# stderr to a file.
-		git_describe_str=$(git -C ${dist_path} describe --tags 2> ${gd_stderr})
+		git_describe_str=$(git -C "${dist_path}" describe --tags 2> "${gd_stderr}")
 
 		# Pull in whatever error message was generated, if any, and delete
 		# the file.
-		git_error=$(cat ${gd_stderr})
+		git_error=$(<"${gd_stderr}")
 
 		# Remove the stderr file.
-		rm -f ${gd_stderr}
+		rm -f "${gd_stderr}"
 
 		# If git returned an error, don't do anything.
 		if [ -n "${git_error}" ]; then
@@ -2097,13 +2100,13 @@ set_default_version()
 			echo "${script_name}: using string from unmodified version file."
 
 			# Use what's in the version file as-is.
-			version=$(cat "${version_file}")
+			version=$(<"${version_file}")
 		else
 
 			echo "${script_name}: got back ${git_describe_str}."
 
 			# Strip off the commit hash label.
-			new_version_str=$(echo ${git_describe_str} | cut -d- -f-2)
+			new_version_str=$(echo "${git_describe_str}" | cut -d- -f-2)
 
 			echo "${script_name}: truncating to ${new_version_str}."
 
@@ -2118,7 +2121,7 @@ set_default_version()
 		echo "${script_name}: could not find '${gitdir}' directory; using unmodified version file."
 
 		# Use what's in the version file as-is.
-		version=$(cat "${version_file}")
+		version=$(<"${version_file}")
 	fi
 }
 
@@ -2270,8 +2273,7 @@ get_tool_checkflags()
 		# If we are on Darwin/OSX/BSD or something else, we sometimes skip flag
 		# checks. (Note that when the list of flags to check is empty, we end
 		# up testing for the existence of the tool instead.)
-		if   [ "${env_str}" = "AR" -o \
-		       "${env_str}" = "RANLIB" ]; then
+		if   [[ ${env_str} = AR || ${env_str} = RANLIB ]]; then
 
 			# AR, RANLIB may not respond to the normal flags on Darwin/OSX/BSD,
 			# so all we can really do is check for their existence.
@@ -2312,7 +2314,7 @@ check_tool()
 		for opt in ${the_flags}; do
 
 			# See if the tool responds to the current flag.
-			${tool} ${opt} > /dev/null 2>&1
+			"${tool}" "${opt}" > /dev/null 2>&1
 
 			# If the tool responded to the flag with a nominal error code of
 			# 0, we found one that works and set rval accoringly.
@@ -2327,7 +2329,7 @@ check_tool()
 		# request to instead check for the existence of the tool.
 
 		# Use 'which' to determine if the tool exists.
-		toolpath="$(which ${tool} 2> /dev/null)"
+		toolpath="$(command -v "${tool}" 2> /dev/null)"
 
 		# If the tool doesn't exist, we set rval accordingly.
 		if [ -n "${toolpath}" ]; then
@@ -2359,7 +2361,7 @@ main()
 	# The path to the script. We need this to find the top-level directory
 	# of the source distribution in the event that the user has chosen to
 	# build elsewhere.
-	dist_path=${0%/${script_name}}
+	dist_path=${0%"/${script_name}"}
 
 	# The path to the directory in which we are building. We do this to
 	# make explicit that we distinguish between the top-level directory
@@ -2472,21 +2474,25 @@ main()
 
 	# The installation exec_prefix, assigned its default value, and a flag to
 	# track whether or not it was given by the user.
+	# shellcheck disable=2016
 	exec_prefix='${prefix}'
 	exec_prefix_flag=''
 
 	# The installation libdir, assigned its default value, and a flag to
 	# track whether or not it was given by the user.
+	# shellcheck disable=2016
 	libdir='${exec_prefix}/lib'
 	libdir_flag=''
 
 	# The installation includedir, assigned its default value, and a flag to
 	# track whether or not it was given by the user.
+	# shellcheck disable=2016
 	includedir='${prefix}/include'
 	includedir_flag=''
 
 	# The installation sharedir, assigned its default value, and a flag to
 	# track whether or not it was given by the user.
+	# shellcheck disable=2016
 	sharedir='${prefix}/share'
 	sharedir_flag=''
 
@@ -2583,7 +2589,7 @@ main()
 	# -- Command line option/argument parsing ----------------------------------
 
 	found=true
-	while $found = true; do
+	while [[ $found = true ]]; do
 
 		# Process our command line options.
 		unset OPTIND
@@ -2869,17 +2875,16 @@ main()
 					;;
 			esac
 		done
-		shift $(($OPTIND - 1))
+		shift $((OPTIND - 1))
 
 		# Parse environment variables
 		found=false
 		while [ $# -gt 0 ]; do
 			case $1 in
 				*=*)
-					var=`expr "$1" : '\([^=]*\)='`
-					value=`expr "$1" : '[^=]*=\(.*\)'`
-					eval $var=\$value
-					export $var
+					var=$(expr "$1" : '\([^=]*\)=')
+					value=$(expr "$1" : '[^=]*=\(.*\)')
+					eval "export $var=\$value"
 					shift
 					found=true
 					;;
@@ -2914,6 +2919,7 @@ main()
 
 	# Select a python interpreter from the default list, or from PYTHON if it
 	# refers to a valid binary.
+	# shellcheck disable=2153
 	select_tool_w_env "${python_search_list}" "${PYTHON}" "PYTHON" \
 	                  "python interpreter" "yes" found_python
 
@@ -2935,11 +2941,11 @@ main()
 	                  "C compiler" "yes" found_cc
 
 	# Also check the compiler to see if we are (cross-)compiling for Windows
-	if ${found_cc} -dM -E - < /dev/null 2> /dev/null | grep -q _WIN32; then
+	if "${found_cc}" -dM -E - < /dev/null 2> /dev/null | grep -q _WIN32; then
 		is_win=yes
 	fi
 	is_msvc=no
-	if ${found_cc} -dM -E - < /dev/null 2> /dev/null | grep -q _MSC_VER; then
+	if "${found_cc}" -dM -E - < /dev/null 2> /dev/null | grep -q _MSC_VER; then
 		is_msvc=yes
 	fi
 
@@ -3043,7 +3049,7 @@ main()
 	# Read the registered configuration names and lists into associative
 	# arrays.
 	echo -n "${script_name}: reading configuration registry..."
-	read_registry_file ${registry_filepath}
+	read_registry_file "${registry_filepath}"
 	echo "done."
 
 	# Report if additional configurations needed to be blacklisted.
@@ -3068,7 +3074,7 @@ main()
 	echo "${script_name}: starting configuration of BLIS ${version}."
 
 	# Check if the user requested a custom version string.
-	if [ "x${force_version}" = "xno" ]; then
+	if [[ ${force_version} = no ]]; then
 		echo "${script_name}: configuring with official version string."
 	else
 		echo "${script_name}: configuring with custom version string '${force_version}'."
@@ -3079,11 +3085,11 @@ main()
 	# -- Acquire the shared library (.so) versions -----------------------------
 
 	# The first line of the 'so_version' file contains the .so major version.
-	so_version_major=$(cat ${so_version_filepath} | sed -n "1p")
+	so_version_major=$(sed -n "1p" < "${so_version_filepath}")
 
 	# The second line contains the minor and build .so version numbers
 	# (separated by a '.').
-	so_version_minorbuild=$(cat ${so_version_filepath} | sed -n "2p")
+	so_version_minorbuild=$(sed -n "2p" < "${so_version_filepath}")
 
 	echo "${script_name}: found shared library .so version '${so_version_major}.${so_version_minorbuild}'."
 	echo "${script_name}:   .so major version: ${so_version_major}"
@@ -3124,7 +3130,7 @@ main()
 
 	fi
 
-	if [ $1 = "auto" ]; then
+	if [[ $1 = auto ]]; then
 
 		echo "${script_name}: automatic configuration requested."
 
@@ -3168,8 +3174,8 @@ main()
 	# and kernels associated with that name.
 	#config_list=${config_registry[${config_name}]}
 	#kernel_list=${kernel_registry[${config_name}]}
-	config_list=$(query_array "config_registry" ${config_name})
-	kernel_list=$(query_array "kernel_registry" ${config_name})
+	config_list=$(query_array "config_registry" "${config_name}")
+	kernel_list=$(query_array "kernel_registry" "${config_name}")
 
 	# Use the config_registry and kernel_registry to build a kconfig_registry
 	# for the selected config_name.
@@ -3222,13 +3228,14 @@ main()
 
 	# We use a sorted version of kernel_list so that it ends up matching the
 	# display order of the kconfig_registry above.
+	# shellcheck disable=2086
 	kernel_list_sort=$(echo ${kernel_list} | xargs -n1 | sort -u)
 
 	kconfig_map=""
 	for kernel in ${kernel_list_sort}; do
 
 		#configs="${kconfig_registry[$kernel]}"
-		configs=$(query_array "kconfig_registry" ${kernel})
+		configs=$(query_array "kconfig_registry" "${kernel}")
 
 		has_one_kernel=$(is_singleton "${configs}")
 		contains_kernel=$(is_in_list "${kernel}" "${configs}")
@@ -3273,7 +3280,7 @@ main()
 
 		# NOTE: This branch should never execute when using auto-detection,
 		# but we have it here just in case.
-		if [ $1 = "auto" ]; then
+		if [[ $1 = auto ]]; then
 
 			echo "${script_name}: 'auto-detected configuration '${config_name}' is NOT registered!"
 			echo "${script_name}: "
@@ -3290,7 +3297,7 @@ main()
 			# subconfig implied by config_name is blacklisted. Thus, we cannot
 			# proceed.
 
-			if [ $(is_in_list "${config_name}" "${config_blist}") == "true" ]; then
+			if [[ $(is_in_list "${config_name}" "${config_blist}") = true ]]; then
 
 				echo "${script_name}: 'user-specified configuration '${config_name}' is blacklisted!"
 				echo "${script_name}: "
@@ -3333,7 +3340,7 @@ main()
 
 		# First confirm that the current configuration is registered.
 		#this_clist=${config_registry[${conf}]}
-		this_clist=$(query_array "config_registry" ${conf})
+		this_clist=$(query_array "config_registry" "${conf}")
 
 		# If the config_list associated with conf is empty, then it was
 		# never entered into the config_registry to begin with. Thus,
@@ -3430,11 +3437,11 @@ main()
 
 	# Echo the installation directories that we settled on.
 	echo "${script_name}: final installation directories:"
-	echo "${script_name}:   prefix:      "${prefix}
-	echo "${script_name}:   exec_prefix: "${exec_prefix}
-	echo "${script_name}:   libdir:      "${libdir}
-	echo "${script_name}:   includedir:  "${includedir}
-	echo "${script_name}:   sharedir:    "${sharedir}
+	echo "${script_name}:   prefix:      $(eval echo "${prefix}")"
+	echo "${script_name}:   exec_prefix: $(eval echo "${exec_prefix}")"
+	echo "${script_name}:   libdir:      $(eval echo "$(eval echo "${libdir}")")"
+	echo "${script_name}:   includedir:  $(eval echo "${includedir}")"
+	echo "${script_name}:   sharedir:    $(eval echo "${sharedir}")"
 	echo "${script_name}: NOTE: the variables above can be overridden when running make."
 
 	# Check if CFLAGS is non-empty.
@@ -3458,24 +3465,24 @@ main()
 	fi
 
 	# Check if the verbose make flag was specified.
-	if [ "x${enable_verbose}" = "xyes" ]; then
+	if [[ ${enable_verbose} = yes ]]; then
 		echo "${script_name}: enabling verbose make output. (disable with 'make V=0'.)"
 	else
 		echo "${script_name}: disabling verbose make output. (enable with 'make V=1'.)"
 	fi
 
 	# Check if the ARG_MAX hack was requested.
-	if [ "x${enable_arg_max_hack}" = "xyes" ]; then
+	if [[ ${enable_arg_max_hack} = yes ]]; then
 		echo "${script_name}: enabling ARG_MAX hack."
 	else
 		echo "${script_name}: disabling ARG_MAX hack."
 	fi
 
 	# Check if the debug flag was specified.
-	if [ -n "${debug_flag}" ]; then
-		if [ "x${debug_type}" = "xopt" ]; then
+	if [[ -n ${debug_flag} ]]; then
+		if [[ ${debug_type} = opt ]]; then
 			echo "${script_name}: enabling debug symbols with optimizations."
-		elif [ "x${debug_type}" = "xsde" ]; then
+		elif [[ ${debug_type} = sde ]]; then
 			debug_type='sde'
 			echo "${script_name}: enabling SDE processor emulation."
 		else
@@ -3490,7 +3497,7 @@ main()
 	fi
 
 	# Check if the AddressSanitizer flag was specified.
-	if [ "x${enable_asan}" = "xyes" ]; then
+	if [[ ${enable_asan} = yes ]]; then
 		echo "${script_name}: enabling AddressSanitizer support (except for optimized kernels)."
 	else
 		enable_asan='no'
@@ -3498,13 +3505,13 @@ main()
 	fi
 
 	# Check if the static lib flag was specified.
-	if   [ "x${enable_static}" = "xyes" -a "x${enable_shared}" = "xyes" ]; then
+	if   [[ ${enable_static} = yes && ${enable_shared} = yes ]]; then
 		echo "${script_name}: building BLIS as both static and shared libraries."
 		enable_shared_01=1
-	elif [ "x${enable_static}" = "xno"  -a "x${enable_shared}" = "xyes" ]; then
+	elif [[ ${enable_static} = no && ${enable_shared} = yes ]]; then
 		echo "${script_name}: building BLIS as a shared library (static library disabled)."
 		enable_shared_01=1
-	elif [ "x${enable_static}" = "xyes" -a "x${enable_shared}" = "xno"  ]; then
+	elif [[ ${enable_static} = yes && ${enable_shared} = no ]]; then
 		echo "${script_name}: building BLIS as a static library (shared library disabled)."
 		enable_shared_01=0
 	else
@@ -3514,14 +3521,14 @@ main()
 	fi
 
 	# Check if the "export shared" flag was specified.
-	if [ "x${export_shared}" = "xall" ]; then
-		if [ "x${enable_shared}" = "xyes" ]; then
+	if [[ ${export_shared} = all ]]; then
+		if [[ ${enable_shared} = yes ]]; then
 			echo "${script_name}: exporting all symbols within shared library."
 		else
 			echo "${script_name}: ignoring request to export all symbols within shared library."
 		fi
-	elif [ "x${export_shared}" = "xpublic" ]; then
-		if [ "x${enable_shared}" = "xyes" ]; then
+	elif [[ ${export_shared} = public ]]; then
+		if [[ ${enable_shared} = yes ]]; then
 			echo "${script_name}: exporting only public symbols within shared library."
 		fi
 	else
@@ -3531,7 +3538,7 @@ main()
 	fi
 
 	# Check if we are building with or without operating system support.
-	if [ "x${enable_system}" = "xyes" ]; then
+	if [[ ${enable_system} = yes ]]; then
 		echo "${script_name}: enabling operating system support."
 		enable_system_01=1
 	else
@@ -3569,29 +3576,29 @@ main()
 	# the strings in the same order as they originally appeared.
 	for word in ${threading_model_list}; do
 
-		if [ "x${word}" = "xsingle" ] ||
-		   [ "x${word}" = "xnone"   ] ||
-		   [ "x${word}" = "xoff"    ] ||
-		   [ "x${word}" = "xno"     ]; then
+		if [[ ${word} = single ]] ||
+		   [[ ${word} = none   ]] ||
+		   [[ ${word} = off    ]] ||
+		   [[ ${word} = no     ]]; then
 
 			parsed_tm="${parsed_tm} single"
 
-		elif [ "x${word}" = "xopenmp" ] ||
-			 [ "x${word}" = "xomp"    ]; then
+		elif [[ ${word} = openmp ]] ||
+			 [[ ${word} = omp    ]]; then
 
 			parsed_tm="${parsed_tm} openmp"
 
-		elif [ "x${word}" = "xpthreads" ] ||
-			 [ "x${word}" = "xpthread"  ] ||
-			 [ "x${word}" = "xposix"    ]; then
+		elif [[ ${word} = pthreads ]] ||
+			 [[ ${word} = pthread  ]] ||
+			 [[ ${word} = posix    ]]; then
 
 			parsed_tm="${parsed_tm} pthreads"
 
-		elif [ "x${word}" = "xhpx" ]; then
+		elif [[ ${word} = hpx ]]; then
 
 			parsed_tm="${parsed_tm} hpx"
 
-		elif [ "x${word}" = "xauto" ]; then
+		elif [[ ${word} = auto ]]; then
 
 			parsed_tm="${parsed_tm} auto"
 
@@ -3665,25 +3672,25 @@ main()
 	# forward.
 	for word in ${parsed_tm}; do
 
-		if [ "x${word}" = "xsingle" ]; then
+		if [[ ${word} = single ]]; then
 
 			echo "${script_name}: enabling support for single-threading."
 			enable_single='yes'
 			enable_single_01=1
 
-		elif [ "x${word}" = "xopenmp" ]; then
+		elif [[ ${word} = openmp ]]; then
 
 			echo "${script_name}: enabling support for threading via OpenMP."
 			enable_openmp='yes'
 			enable_openmp_01=1
 
-		elif [ "x${word}" = "xpthreads" ]; then
+		elif [[ ${word} = pthreads ]]; then
 
 			echo "${script_name}: enabling support for threading via pthreads."
 			enable_pthreads='yes'
 			enable_pthreads_01=1
 
-		elif [ "x${word}" = "xhpx" ]; then
+		elif [[ ${word} = hpx ]]; then
 
 			echo "${script_name}: enabling support for threading via HPX."
 			enable_hpx='yes'
@@ -3695,28 +3702,28 @@ main()
 
 	# Define boolean variables that can easily be interpreted with #ifdef
 	# directives.
-	if [ "x${first_tm}" = "xsingle" ]; then
+	if [[ ${first_tm} = single ]]; then
 
 		enable_single_as_def_01=1
 		enable_openmp_as_def_01=0
 		enable_pthreads_as_def_01=0
 		enable_hpx_as_def_01=0
 
-	elif [ "x${first_tm}" = "xopenmp" ]; then
+	elif [[ ${first_tm} = openmp ]]; then
 
 		enable_single_as_def_01=0
 		enable_openmp_as_def_01=1
 		enable_pthreads_as_def_01=0
 		enable_hpx_as_def_01=0
 
-	elif [ "x${first_tm}" = "xpthreads" ]; then
+	elif [[ ${first_tm} = pthreads ]]; then
 
 		enable_single_as_def_01=0
 		enable_openmp_as_def_01=0
 		enable_pthreads_as_def_01=1
 		enable_hpx_as_def_01=0
 
-	elif [ "x${first_tm}" = "xhpx" ]; then
+	elif [[ ${first_tm} = hpx ]]; then
 
 		enable_single_as_def_01=0
 		enable_openmp_as_def_01=0
@@ -3728,17 +3735,17 @@ main()
 	# If OpenMP, pthreads, or HPX was enabled, given that single-threaded mode is
 	# also always enabled, remind the user which one will serve as the default
 	# (that is, absent any explicit choice at runtime).
-	if [ "x${enable_openmp}"   = "xyes" ] ||
-	   [ "x${enable_pthreads}" = "xyes" ] ||
-	   [ "x${enable_hpx}"      = "xyes" ]; then
+	if [[ ${enable_openmp}   = yes ]] ||
+	   [[ ${enable_pthreads} = yes ]] ||
+	   [[ ${enable_hpx}      = yes ]]; then
 
-		if   [ "x${first_tm}"   = "xsingle" ]; then
+		if   [[ ${first_tm}   = single ]]; then
 			echo "${script_name}: threading will default to single-threaded."
-		elif [ "x${first_tm}"   = "xopenmp" ]; then
+		elif [[ ${first_tm}   = openmp ]]; then
 			echo "${script_name}: threading will default to OpenMP."
-		elif [ "x${first_tm}"   = "xpthreads" ]; then
+		elif [[ ${first_tm}   = pthreads ]]; then
 			echo "${script_name}: threading will default to pthreads."
-		elif [ "x${first_tm}"   = "xhpx" ]; then
+		elif [[ ${first_tm}   = hpx ]]; then
 			echo "${script_name}: threading will default to HPX."
 		fi
 	fi
@@ -3754,13 +3761,13 @@ main()
 	enable_jrir_rr_01=0
 	enable_jrir_slab_01=0
 	enable_jrir_tlb_01=0
-	if   [ "x${thread_part_jrir}" = "xrr" ]; then
+	if   [[ ${thread_part_jrir} = rr ]]; then
 		echo "${script_name}: requesting round-robin (rr) work partitioning in jr and/or ir loops."
 		enable_jrir_rr_01=1
-	elif [ "x${thread_part_jrir}" = "xslab" ]; then
+	elif [[ ${thread_part_jrir} = slab ]]; then
 		echo "${script_name}: requesting slab work partitioning in jr and/or ir loops."
 		enable_jrir_slab_01=1
-	elif [ "x${thread_part_jrir}" = "xtlb" ]; then
+	elif [[ ${thread_part_jrir} = tlb ]]; then
 		echo "${script_name}: requesting tile-level load balancing (tlb) in unified jr+ir loop."
 		enable_jrir_tlb_01=1
 	else
@@ -3769,29 +3776,29 @@ main()
 	fi
 
 	# Convert 'yes' and 'no' flags to booleans.
-	if [ "x${enable_pba_pools}" = "xyes" ]; then
+	if [[ ${enable_pba_pools} = yes ]]; then
 		echo "${script_name}: internal memory pools for packing blocks are enabled."
 		enable_pba_pools_01=1
 	else
 		echo "${script_name}: internal memory pools for packing blocks are disabled."
 		enable_pba_pools_01=0
 	fi
-	if [ "x${enable_sba_pools}" = "xyes" ]; then
+	if [[ ${enable_sba_pools} = yes ]]; then
 		echo "${script_name}: internal memory pools for small blocks are enabled."
 		enable_sba_pools_01=1
 	else
 		echo "${script_name}: internal memory pools for small blocks are disabled."
 		enable_sba_pools_01=0
 	fi
-	if [ "x${enable_mem_tracing}" = "xyes" ]; then
+	if [[ ${enable_mem_tracing} = yes ]]; then
 		echo "${script_name}: memory tracing output is enabled."
 		enable_mem_tracing_01=1
 	else
 		echo "${script_name}: memory tracing output is disabled."
 		enable_mem_tracing_01=0
 	fi
-	if [ "x${has_memkind}" = "xyes" ]; then
-		if [ "x${enable_memkind}" = "x" ]; then
+	if [[ ${has_memkind} = yes ]]; then
+		if [[ -z ${enable_memkind} ]]; then
 			# If no explicit option was given for libmemkind one way or the other,
 			# we use the value returned previously by has_libmemkind(), in this
 			# case "yes", to determine the default.
@@ -3799,7 +3806,7 @@ main()
 			enable_memkind="yes"
 			enable_memkind_01=1
 		else
-			if [ "x${enable_memkind}" = "xyes" ]; then
+			if [[ ${enable_memkind} = yes ]]; then
 				echo "${script_name}: received explicit request to enable libmemkind."
 				enable_memkind="yes"
 				enable_memkind_01=1
@@ -3811,27 +3818,27 @@ main()
 		fi
 	else
 		echo "${script_name}: libmemkind not found; disabling."
-		if [ "x${enable_memkind}" = "xyes" ]; then
+		if [[ ${enable_memkind} = yes ]]; then
 			echo "${script_name}: cannot honor explicit request to enable libmemkind."
 		fi
 		enable_memkind="no"
 		enable_memkind_01=0
 	fi
-	if [ "x${pragma_omp_simd}" = "xyes" ]; then
+	if [[ ${pragma_omp_simd} = yes ]]; then
 		echo "${script_name}: compiler appears to support #pragma omp simd."
 		enable_pragma_omp_simd_01=1
 	else
 		echo "${script_name}: compiler appears to not support #pragma omp simd."
 		enable_pragma_omp_simd_01=0
 	fi
-	if [ "x${enable_blas}" = "xyes" ]; then
+	if [[ ${enable_blas} = yes ]]; then
 		echo "${script_name}: the BLAS compatibility layer is enabled."
 		enable_blas_01=1
 	else
 		echo "${script_name}: the BLAS compatibility layer is disabled."
 		enable_blas_01=0
 	fi
-	if [ "x${enable_cblas}" = "xyes" ]; then
+	if [[ ${enable_cblas} = yes ]]; then
 		echo "${script_name}: the CBLAS compatibility layer is enabled."
 		enable_cblas_01=1
 		# Force BLAS layer when CBLAS is enabled
@@ -3840,10 +3847,10 @@ main()
 		echo "${script_name}: the CBLAS compatibility layer is disabled."
 		enable_cblas_01=0
 	fi
-	if [ "x${enable_mixed_dt}" = "xyes" ]; then
+	if [[ ${enable_mixed_dt} = yes ]]; then
 		echo "${script_name}: mixed datatype support is enabled."
 
-		if [ "x${enable_mixed_dt_extra_mem}" = "xyes" ]; then
+		if [[ ${enable_mixed_dt_extra_mem} = yes ]]; then
 			echo "${script_name}: mixed datatype optimizations requiring extra memory are enabled."
 			enable_mixed_dt_extra_mem_01=1
 		else
@@ -3858,14 +3865,14 @@ main()
 		enable_mixed_dt_extra_mem_01=0
 		enable_mixed_dt_01=0
 	fi
-	if [ "x${enable_sup_handling}" = "xyes" ]; then
+	if [[ ${enable_sup_handling} = yes ]]; then
 		echo "${script_name}: sup (skinny/unpacked) matrix handling is enabled."
 		enable_sup_handling_01=1
 	else
 		echo "${script_name}: sup (skinny/unpacked) matrix handling is disabled."
 		enable_sup_handling_01=0
 	fi
-	if [ "x${enable_trsm_preinversion}" = "xyes" ]; then
+	if [[ ${enable_trsm_preinversion} = yes ]]; then
 		echo "${script_name}: trsm diagonal element pre-inversion is enabled."
 		enable_trsm_preinversion_01=1
 	else
@@ -3874,16 +3881,16 @@ main()
 	fi
 
 	# Report integer sizes.
-	if [ "x${int_type_size}" = "x32" ]; then
+	if [[ ${int_type_size} = 32 ]]; then
 		echo "${script_name}: the BLIS API integer size is 32-bit."
-	elif [ "x${int_type_size}" = "x64" ]; then
+	elif [[ ${int_type_size} = 64 ]]; then
 		echo "${script_name}: the BLIS API integer size is 64-bit."
 	else
 		echo "${script_name}: the BLIS API integer size is automatically determined."
 	fi
-	if [ "x${blas_int_type_size}" = "x32" ]; then
+	if [[ ${blas_int_type_size} = 32 ]]; then
 		echo "${script_name}: the BLAS/CBLAS API integer size is 32-bit."
-	elif [ "x${blas_int_type_size}" = "x64" ]; then
+	elif [[ ${blas_int_type_size} = 64 ]]; then
 		echo "${script_name}: the BLAS/CBLAS API integer size is 64-bit."
 	else
 		echo "${script_name}: the BLAS/CBLAS API integer size is automatically determined."
@@ -3891,23 +3898,21 @@ main()
 
 	# Disallow the simultaneous use of 64-bit integers in the BLAS and
 	# 32-bit integers in BLIS.
-	if [ "x${blas_int_type_size}" = "x64" -a "x${int_type_size}" = "x32" ]; then
+	if [[ ${blas_int_type_size} = 64 && ${int_type_size} = 32 ]]; then
 		echo "${script_name}: *** To avoid the possibility of truncation, we do not allow use of 64-bit integers in the BLAS API with 32-bit integers in BLIS. Please use a different configuration of integers."
 		exit 1
 	fi
 
 	# Check whether we should use AMD-customized versions of certain framework
 	# files.
-	if [ "x${enable_amd_frame_tweaks}" = "xyes" ]; then
+	if [[ ${enable_amd_frame_tweaks} = yes ]]; then
 
 		echo "${script_name}: AMD-specific framework files will be considered."
 		echo "${script_name}:   checking eligibility of target configuration."
 
 		# Make sure we are targeting either one of the zen subconfigs or the
 		# amd64 umbrella family.
-		uconf=$(echo ${config_name} | grep -c 'zen\|amd64')
-
-		if [[ $uconf == 0 ]]; then
+		if [[ ${config_name} != *zen* && ${config_name} != *amd64* ]]; then
 			echo "${script_name}:   target configuration '${config_name}' is not eligible."
 			echo "${script_name}:   disabling AMD-specific framework files."
 			enable_amd_frame_tweaks='no'
@@ -3971,7 +3976,7 @@ main()
 	fi
 
 	# Check the method used for returning complex numbers.
-	if [ "x${complex_return}" = "xdefault" ]; then
+	if [[ ${complex_return} = default ]]; then
 
 		# If we prevoiusly found a Fortran compiler, let's query it to see what
 		# kind of complex return type it uses (gnu or intel). The 'gnu' style
@@ -3986,16 +3991,17 @@ main()
 			# clutter.
 			# NOTE: This maybe should use merged stdout/stderr rather than only
 			# stdout. But it works for now.
-			vendor_string="$(${FC} --version 2>/dev/null)"
+			vendor_string="$(${FC} --version 2>/dev/null || :)"
 
 			# Query the compiler "vendor" (ie: the compiler's simple name).
 			# The last part ({ read first rest ; echo $first ; }) is a workaround
 			# to OS X's egrep only returning the first match.
-			fc_vendor=$(echo "${vendor_string}" | egrep -o 'IFORT|GNU' | { read first rest ; echo $first ; })
+			fc_vendor=$(echo "${vendor_string}" | grep -oE 'IFORT|GNU' |
+			            { read -r first rest ; echo "${first}"; })
 
-			if [ "x${fc_vendor}" = "xIFORT" ]; then
+			if [[ ${fc_vendor} = IFORT ]]; then
 				complex_return='intel'
-			elif [ "x${fc_vendor}" = "xGNU" ]; then
+			elif [[ ${fc_vendor} = GNU ]]; then
 				complex_return='gnu'
 			else
 				echo "${script_name}: unable to determine Fortran compiler vendor!"
@@ -4006,9 +4012,9 @@ main()
 		fi
 	fi
 
-	if [ "x${complex_return}" = "xgnu"  ]; then
+	if [[ ${complex_return} = gnu ]]; then
 		complex_return_intel01='0'
-	elif [ "x${complex_return}" = "xintel" ]; then
+	elif [[ ${complex_return} = intel ]]; then
 		complex_return_intel01='1'
 	else
 		echo "${script_name}: unknown complex return type \"${complex_return}\"! Cannot continue."
@@ -4059,7 +4065,7 @@ main()
 	version_esc=$(echo "${version}" | sed 's/\//\\\//g')
 
 	# Create a #define for the configuration family (config_name).
-	uconf=$(echo ${config_name} | tr '[:lower:]' '[:upper:]')
+	uconf=$(echo "${config_name}" | tr '[:lower:]' '[:upper:]')
 	config_name_define="#define BLIS_FAMILY_${uconf}\n"
 
 	# Create a list of #defines, one for each configuration in config_list.
@@ -4067,7 +4073,7 @@ main()
 	for conf in ${config_list}; do
 
 		# Convert the current config name to uppercase.
-		uconf=$(echo ${conf} | tr '[:lower:]' '[:upper:]')
+		uconf=$(echo "${conf}" | tr '[:lower:]' '[:upper:]')
 
 		# Create a #define and add it to the running list.
 		config_define="BLIS_CONFIG_${uconf}"
@@ -4079,7 +4085,7 @@ main()
 	for kern in ${kernel_list}; do
 
 		# Convert the current config name to uppercase.
-		uconf=$(echo ${kern} | tr '[:lower:]' '[:upper:]')
+		uconf=$(echo "${kern}" | tr '[:lower:]' '[:upper:]')
 
 		# Create a #define and add it to the running list.
 		kernel_define="BLIS_KERNELS_${uconf}"
@@ -4127,60 +4133,59 @@ main()
 	# Begin substituting information into the config_mk_in file, outputting
 	# to config_mk_out.
 	echo "${script_name}: creating ${config_mk_out_path} from ${config_mk_in_path}"
-	cat "${config_mk_in_path}" \
-		| sed -e "s/@version@/${version_esc}/g" \
-		| sed -e "s/@so_version_major@/${so_version_major}/g" \
-		| sed -e "s/@so_version_minorbuild@/${so_version_minorbuild}/g" \
-		| sed -e "s/@config_name@/${config_name}/g" \
-		| sed -e "s/@config_list@/${config_list}/g" \
-		| sed -e "s/@kernel_list@/${kernel_list}/g" \
-		| sed -e "s/@kconfig_map@/${kconfig_map}/g" \
-		| sed -e "s/@os_name@/${os_name_esc}/g" \
-		| sed -e "s/@is_win@/${is_win}/g" \
-		| sed -e "s/@is_msvc@/${is_msvc}/g" \
-		| sed -e "s/@dist_path@/${dist_path_esc}/g" \
-		| sed -e "s/@CC_VENDOR@/${cc_vendor}/g" \
-		| sed -e "s/@gcc_older_than_4_9_0@/${gcc_older_than_4_9_0}/g" \
-		| sed -e "s/@gcc_older_than_6_1_0@/${gcc_older_than_6_1_0}/g" \
-		| sed -e "s/@gcc_older_than_9_1_0@/${gcc_older_than_9_1_0}/g" \
-		| sed -e "s/@gcc_older_than_10_3_0@/${gcc_older_than_10_3_0}/g" \
-		| sed -e "s/@clang_older_than_9_0_0@/${clang_older_than_9_0_0}/g" \
-		| sed -e "s/@clang_older_than_12_0_0@/${clang_older_than_12_0_0}/g" \
-		| sed -e "s/@aocc_older_than_2_0_0@/${aocc_older_than_2_0_0}/g" \
-		| sed -e "s/@aocc_older_than_3_0_0@/${aocc_older_than_3_0_0}/g" \
-		| sed -e "s/@CC@/${cc_esc}/g" \
-		| sed -e "s/@CXX@/${cxx_esc}/g" \
-		| sed -e "s/@AR@/${ar_esc}/g" \
-		| sed -e "s/@RANLIB@/${ranlib_esc}/g" \
-		| sed -e "s/@PYTHON@/${python_esc}/g" \
-		| sed -e "s/@libpthread@/${libpthread_esc}/g" \
-		| sed -e "s/@cflags_preset@/${cflags_preset_esc}/g" \
-		| sed -e "s/@ldflags_preset@/${ldflags_preset_esc}/g" \
-		| sed -e "s/@enable_asan@/${enable_asan}/g" \
-		| sed -e "s/@debug_type@/${debug_type}/g" \
-		| sed -e "s/@enable_debug@/${enable_debug}/g" \
-		| sed -e "s/@enable_system@/${enable_system}/g" \
-		| sed -e "s/@threading_model@/${threading_model}/g" \
-		| sed -e "s/@prefix@/${prefix_esc}/g" \
-		| sed -e "s/@exec_prefix@/${exec_prefix_esc}/g" \
-		| sed -e "s/@libdir@/${libdir_esc}/g" \
-		| sed -e "s/@includedir@/${includedir_esc}/g" \
-		| sed -e "s/@sharedir@/${sharedir_esc}/g" \
-		| sed -e "s/@enable_verbose@/${enable_verbose}/g" \
-		| sed -e "s/@configured_oot@/${configured_oot}/g" \
-		| sed -e "s/@enable_arg_max_hack@/${enable_arg_max_hack}/g" \
-		| sed -e "s/@enable_static@/${enable_static}/g" \
-		| sed -e "s/@enable_shared@/${enable_shared}/g" \
-		| sed -e "s/@enable_rpath@/${enable_rpath}/g" \
-		| sed -e "s/@export_shared@/${export_shared}/g" \
-		| sed -e "s/@enable_blas@/${enable_blas}/g" \
-		| sed -e "s/@enable_cblas@/${enable_cblas}/g" \
-		| sed -e "s/@enable_amd_frame_tweaks@/${enable_amd_frame_tweaks}/g" \
-		| sed -e "s/@enable_memkind@/${enable_memkind}/g" \
-		| sed -e "s/@pragma_omp_simd@/${pragma_omp_simd}/g" \
-		| sed -e "s/@addon_list@/${addon_list}/g" \
-		| sed -e "s/@sandbox@/${sandbox}/g" \
-		> "${config_mk_out_path}"
+	sed <"${config_mk_in_path}" >"${config_mk_out_path}"          \
+	-e "s/@version@/${version_esc}/g"                             \
+	-e "s/@so_version_major@/${so_version_major}/g"               \
+	-e "s/@so_version_minorbuild@/${so_version_minorbuild}/g"     \
+	-e "s/@config_name@/${config_name}/g"                         \
+	-e "s/@config_list@/${config_list}/g"                         \
+	-e "s/@kernel_list@/${kernel_list}/g"                         \
+	-e "s/@kconfig_map@/${kconfig_map}/g"                         \
+	-e "s/@os_name@/${os_name_esc}/g"                             \
+	-e "s/@is_win@/${is_win}/g"                                   \
+	-e "s/@is_msvc@/${is_msvc}/g"                                 \
+	-e "s/@dist_path@/${dist_path_esc}/g"                         \
+	-e "s/@CC_VENDOR@/${cc_vendor}/g"                             \
+	-e "s/@gcc_older_than_4_9_0@/${gcc_older_than_4_9_0}/g"       \
+	-e "s/@gcc_older_than_6_1_0@/${gcc_older_than_6_1_0}/g"       \
+	-e "s/@gcc_older_than_9_1_0@/${gcc_older_than_9_1_0}/g"       \
+	-e "s/@gcc_older_than_10_3_0@/${gcc_older_than_10_3_0}/g"     \
+	-e "s/@clang_older_than_9_0_0@/${clang_older_than_9_0_0}/g"   \
+	-e "s/@clang_older_than_12_0_0@/${clang_older_than_12_0_0}/g" \
+	-e "s/@aocc_older_than_2_0_0@/${aocc_older_than_2_0_0}/g"     \
+	-e "s/@aocc_older_than_3_0_0@/${aocc_older_than_3_0_0}/g"     \
+	-e "s/@CC@/${cc_esc}/g"                                       \
+	-e "s/@CXX@/${cxx_esc}/g"                                     \
+	-e "s/@AR@/${ar_esc}/g"                                       \
+	-e "s/@RANLIB@/${ranlib_esc}/g"                               \
+	-e "s/@PYTHON@/${python_esc}/g"                               \
+	-e "s/@libpthread@/${libpthread_esc}/g"                       \
+	-e "s/@cflags_preset@/${cflags_preset_esc}/g"                 \
+	-e "s/@ldflags_preset@/${ldflags_preset_esc}/g"               \
+	-e "s/@enable_asan@/${enable_asan}/g"                         \
+	-e "s/@debug_type@/${debug_type}/g"                           \
+	-e "s/@enable_debug@/${enable_debug}/g"                       \
+	-e "s/@enable_system@/${enable_system}/g"                     \
+	-e "s/@threading_model@/${threading_model}/g"                 \
+	-e "s/@prefix@/${prefix_esc}/g"                               \
+	-e "s/@exec_prefix@/${exec_prefix_esc}/g"                     \
+	-e "s/@libdir@/${libdir_esc}/g"                               \
+	-e "s/@includedir@/${includedir_esc}/g"                       \
+	-e "s/@sharedir@/${sharedir_esc}/g"                           \
+	-e "s/@enable_verbose@/${enable_verbose}/g"                   \
+	-e "s/@configured_oot@/${configured_oot}/g"                   \
+	-e "s/@enable_arg_max_hack@/${enable_arg_max_hack}/g"         \
+	-e "s/@enable_static@/${enable_static}/g"                     \
+	-e "s/@enable_shared@/${enable_shared}/g"                     \
+	-e "s/@enable_rpath@/${enable_rpath}/g"                       \
+	-e "s/@export_shared@/${export_shared}/g"                     \
+	-e "s/@enable_blas@/${enable_blas}/g"                         \
+	-e "s/@enable_cblas@/${enable_cblas}/g"                       \
+	-e "s/@enable_amd_frame_tweaks@/${enable_amd_frame_tweaks}/g" \
+	-e "s/@enable_memkind@/${enable_memkind}/g"                   \
+	-e "s/@pragma_omp_simd@/${pragma_omp_simd}/g"                 \
+	-e "s/@addon_list@/${addon_list}/g"                           \
+	-e "s/@sandbox@/${sandbox}/g"
 
 	# -- Instantiate bli_config.h file from template ---------------------------
 
@@ -4190,38 +4195,38 @@ main()
 	# intuitively, which was used when constructing ${config_name_define},
 	# ${config_list_defines}, and ${kernel_list_defines}.
 	echo "${script_name}: creating ${bli_config_h_out_path} from ${bli_config_h_in_path}"
-	cat "${bli_config_h_in_path}" \
-		| perl -pe "s/\@config_name_define\@/${config_name_define}/g" \
-		| perl -pe "s/\@config_list_defines\@/${config_list_defines}/g" \
-		| perl -pe "s/\@kernel_list_defines\@/${kernel_list_defines}/g" \
-		| sed   -e "s/@version@/${version_esc}/g" \
-		| sed   -e "s/@enable_system@/${enable_system_01}/g" \
-		| sed   -e "s/@enable_openmp@/${enable_openmp_01}/g" \
-		| sed   -e "s/@enable_openmp_as_def@/${enable_openmp_as_def_01}/g" \
-		| sed   -e "s/@enable_pthreads@/${enable_pthreads_01}/g" \
-		| sed   -e "s/@enable_pthreads_as_def@/${enable_pthreads_as_def_01}/g" \
-		| sed   -e "s/@enable_hpx@/${enable_hpx_01}/g" \
-		| sed   -e "s/@enable_hpx_as_def@/${enable_hpx_as_def_01}/g" \
-		| sed   -e "s/@enable_jrir_rr@/${enable_jrir_rr_01}/g" \
-		| sed   -e "s/@enable_jrir_slab@/${enable_jrir_slab_01}/g" \
-		| sed   -e "s/@enable_jrir_tlb@/${enable_jrir_tlb_01}/g" \
-		| sed   -e "s/@enable_pba_pools@/${enable_pba_pools_01}/g" \
-		| sed   -e "s/@enable_sba_pools@/${enable_sba_pools_01}/g" \
-		| sed   -e "s/@enable_mem_tracing@/${enable_mem_tracing_01}/g" \
-		| sed   -e "s/@int_type_size@/${int_type_size}/g" \
-		| sed   -e "s/@blas_int_type_size@/${blas_int_type_size}/g" \
-		| sed   -e "s/@enable_blas@/${enable_blas_01}/g" \
-		| sed   -e "s/@enable_cblas@/${enable_cblas_01}/g" \
-		| sed   -e "s/@enable_mixed_dt@/${enable_mixed_dt_01}/g" \
-		| sed   -e "s/@enable_mixed_dt_extra_mem@/${enable_mixed_dt_extra_mem_01}/g" \
-		| sed   -e "s/@enable_sup_handling@/${enable_sup_handling_01}/g" \
-		| sed   -e "s/@enable_memkind@/${enable_memkind_01}/g" \
-		| sed   -e "s/@enable_trsm_preinversion@/${enable_trsm_preinversion_01}/g" \
-		| sed   -e "s/@enable_pragma_omp_simd@/${enable_pragma_omp_simd_01}/g" \
-		| sed   -e "s/@enable_sandbox@/${enable_sandbox_01}/g" \
-		| sed   -e "s/@enable_shared@/${enable_shared_01}/g" \
-		| sed   -e "s/@complex_return_intel@/${complex_return_intel01}/g" \
-		> "${bli_config_h_out_path}"
+	<"${bli_config_h_in_path}" perl -p                                   \
+	-e "s/\@config_name_define\@/${config_name_define}/g;"               \
+	-e "s/\@config_list_defines\@/${config_list_defines}/g;"             \
+	-e "s/\@kernel_list_defines\@/${kernel_list_defines}/g;"             \
+	| sed >"${bli_config_h_out_path}"                                    \
+	-e "s/@version@/${version_esc}/g"                                    \
+	-e "s/@enable_system@/${enable_system_01}/g"                         \
+	-e "s/@enable_openmp@/${enable_openmp_01}/g"                         \
+	-e "s/@enable_openmp_as_def@/${enable_openmp_as_def_01}/g"           \
+	-e "s/@enable_pthreads@/${enable_pthreads_01}/g"                     \
+	-e "s/@enable_pthreads_as_def@/${enable_pthreads_as_def_01}/g"       \
+	-e "s/@enable_hpx@/${enable_hpx_01}/g"                               \
+	-e "s/@enable_hpx_as_def@/${enable_hpx_as_def_01}/g"                 \
+	-e "s/@enable_jrir_rr@/${enable_jrir_rr_01}/g"                       \
+	-e "s/@enable_jrir_slab@/${enable_jrir_slab_01}/g"                   \
+	-e "s/@enable_jrir_tlb@/${enable_jrir_tlb_01}/g"                     \
+	-e "s/@enable_pba_pools@/${enable_pba_pools_01}/g"                   \
+	-e "s/@enable_sba_pools@/${enable_sba_pools_01}/g"                   \
+	-e "s/@enable_mem_tracing@/${enable_mem_tracing_01}/g"               \
+	-e "s/@int_type_size@/${int_type_size}/g"                            \
+	-e "s/@blas_int_type_size@/${blas_int_type_size}/g"                  \
+	-e "s/@enable_blas@/${enable_blas_01}/g"                             \
+	-e "s/@enable_cblas@/${enable_cblas_01}/g"                           \
+	-e "s/@enable_mixed_dt@/${enable_mixed_dt_01}/g"                     \
+	-e "s/@enable_mixed_dt_extra_mem@/${enable_mixed_dt_extra_mem_01}/g" \
+	-e "s/@enable_sup_handling@/${enable_sup_handling_01}/g"             \
+	-e "s/@enable_memkind@/${enable_memkind_01}/g"                       \
+	-e "s/@enable_trsm_preinversion@/${enable_trsm_preinversion_01}/g"   \
+	-e "s/@enable_pragma_omp_simd@/${enable_pragma_omp_simd_01}/g"       \
+	-e "s/@enable_sandbox@/${enable_sandbox_01}/g"                       \
+	-e "s/@enable_shared@/${enable_shared_01}/g"                         \
+	-e "s/@complex_return_intel@/${complex_return_intel01}/g"
 
 	# -- Instantiate bli_addon.h file from template ----------------------------
 
@@ -4230,10 +4235,8 @@ main()
 	# of sed used on OS X is old and does not handle the '\n' character
 	# intuitively, which was used when constructing ${addon_list_includes}.
 	echo "${script_name}: creating ${bli_addon_h_out_path} from ${bli_addon_h_in_path}"
-	cat "${bli_addon_h_in_path}" \
-		| perl -pe "s/\@addon_list_includes\@/${addon_list_includes}/g" \
-		| sed   -e "s/@enable_addons@/${enable_addons_01}/g" \
-		> "${bli_addon_h_out_path}"
+	perl -pe "s/\@addon_list_includes\@/${addon_list_includes}/g" "${bli_addon_h_in_path}" \
+	| sed -e "s/@enable_addons@/${enable_addons_01}/g" > "${bli_addon_h_out_path}"
 
 	# -- Create top-level object directories -----------------------------------
 
@@ -4241,40 +4244,40 @@ main()
 	base_obj_dirpath="${obj_dirpath}/${config_name}"
 
 	echo "${script_name}: creating ${base_obj_dirpath}"
-	mkdir -p ${base_obj_dirpath}
+	mkdir -p "${base_obj_dirpath}"
 
 
 	obj_config_dirpath="${base_obj_dirpath}/${config_dir}"
 
-	mkdir -p ${obj_config_dirpath}
+	mkdir -p "${obj_config_dirpath}"
 	for conf in ${config_list}; do
 		echo "${script_name}: creating ${obj_config_dirpath}/${conf}"
-		mkdir -p ${obj_config_dirpath}/${conf}
+		mkdir -p "${obj_config_dirpath}/${conf}"
 	done
 
 
 	obj_kernels_dirpath="${base_obj_dirpath}/${kernels_dir}"
 
-	mkdir -p ${obj_kernels_dirpath}
+	mkdir -p "${obj_kernels_dirpath}"
 	for kern in ${kernel_list}; do
 		echo "${script_name}: creating ${obj_kernels_dirpath}/${kern}"
-		mkdir -p ${obj_kernels_dirpath}/${kern}
+		mkdir -p "${obj_kernels_dirpath}/${kern}"
 	done
 
 
 	obj_refkern_dirpath="${base_obj_dirpath}/${refkern_dir}"
 
-	mkdir -p ${obj_refkern_dirpath}
+	mkdir -p "${obj_refkern_dirpath}"
 	for conf in ${config_list}; do
 		echo "${script_name}: creating ${obj_refkern_dirpath}/${conf}"
-		mkdir -p ${obj_refkern_dirpath}/${conf}
+		mkdir -p "${obj_refkern_dirpath}/${conf}"
 	done
 
 
 	obj_frame_dirpath="${base_obj_dirpath}/${frame_dir}"
 
 	echo "${script_name}: creating ${obj_frame_dirpath}"
-	mkdir -p ${obj_frame_dirpath}
+	mkdir -p "${obj_frame_dirpath}"
 
 
 	if [ -n "${addon_flag}" ]; then
@@ -4283,7 +4286,7 @@ main()
 
 		for addon in ${addon_list}; do
 			echo "${script_name}: creating ${obj_addon_dirpath}/${addon}"
-			mkdir -p ${obj_addon_dirpath}/${addon}
+			mkdir -p "${obj_addon_dirpath}/${addon}"
 		done
 	fi
 
@@ -4293,34 +4296,34 @@ main()
 		obj_sandbox_dirpath="${base_obj_dirpath}/${sandbox_dir}"
 
 		echo "${script_name}: creating ${obj_sandbox_dirpath}/${sandbox}"
-		mkdir -p ${obj_sandbox_dirpath}/${sandbox}
+		mkdir -p "${obj_sandbox_dirpath}/${sandbox}"
 	fi
 
 
 	obj_blastest_dirpath="${base_obj_dirpath}/${blastest_dir}"
 
 	echo "${script_name}: creating ${obj_blastest_dirpath}"
-	mkdir -p ${obj_blastest_dirpath}
+	mkdir -p "${obj_blastest_dirpath}"
 
 
 	obj_testsuite_dirpath="${base_obj_dirpath}/${testsuite_dir}"
 
 	echo "${script_name}: creating ${obj_testsuite_dirpath}"
-	mkdir -p ${obj_testsuite_dirpath}
+	mkdir -p "${obj_testsuite_dirpath}"
 
 
 	# Create lib directory (if it does not already exist).
 	base_lib_dirpath="${lib_dirpath}/${config_name}"
 
 	echo "${script_name}: creating ${base_lib_dirpath}"
-	mkdir -p ${base_lib_dirpath}
+	mkdir -p "${base_lib_dirpath}"
 
 
 	# Create include directory (if it does not already exist).
 	base_include_dirpath="${include_dirpath}/${config_name}"
 
 	echo "${script_name}: creating ${base_include_dirpath}"
-	mkdir -p ${base_include_dirpath}
+	mkdir -p "${base_include_dirpath}"
 
 
 	# -- Mirror source directory hierarchies to object directories -------------
@@ -4332,7 +4335,7 @@ main()
 	for conf in ${config_list_plus_name}; do
 
 		echo "${script_name}: mirroring ${config_dirpath}/${conf} to ${obj_config_dirpath}/${conf}"
-		${mirror_tree_sh} "${config_dirpath}/${conf}" "${obj_config_dirpath}/${conf}"
+		"${mirror_tree_sh}" "${config_dirpath}/${conf}" "${obj_config_dirpath}/${conf}"
 	done
 
 	# Mirror optimized kernels source tree to its object sub-directory.
@@ -4357,38 +4360,49 @@ main()
 
 	# Mirror reference kernel source tree to its object sub-directory.
 	echo "${script_name}: mirroring ${refkern_dirpath} to ${obj_refkern_dirpath}"
-	${mirror_tree_sh} ${refkern_dirpath} ${obj_refkern_dirpath}
+	"${mirror_tree_sh}" "${refkern_dirpath}" "${obj_refkern_dirpath}"
 
 	# Mirror reference kernels source tree to its object sub-directory.
 	for conf in ${config_list}; do
 
 		echo "${script_name}: mirroring ${refkern_dirpath} to ${obj_refkern_dirpath}/${conf}"
-		${mirror_tree_sh} "${refkern_dirpath}" "${obj_refkern_dirpath}/${conf}"
+		"${mirror_tree_sh}" "${refkern_dirpath}" "${obj_refkern_dirpath}/${conf}"
 	done
 
 	# Mirror framework source tree to its object sub-directory.
 	echo "${script_name}: mirroring ${frame_dirpath} to ${obj_frame_dirpath}"
-	${mirror_tree_sh} ${frame_dirpath} ${obj_frame_dirpath}
+	"${mirror_tree_sh}" "${frame_dirpath}" "${obj_frame_dirpath}"
 
 	# Mirror the chosen addon source tree to its object sub-directory.
-	if [ -n "${addon_flag}" ]; then
+	if [[ -n ${addon_flag} ]]; then
 
 		for addon in ${addon_list}; do
 
 			echo "${script_name}: mirroring ${addon_dirpath}/${addon} to ${obj_addon_dirpath}/${addon}"
-			${mirror_tree_sh} "${addon_dirpath}/${addon}" "${obj_addon_dirpath}/${addon}"
+			"${mirror_tree_sh}" "${addon_dirpath}/${addon}" "${obj_addon_dirpath}/${addon}"
 		done
 	fi
 
 	# Mirror the chosen sandbox source tree to its object sub-directory.
-	if [ -n "${sandbox_flag}" ]; then
+	if [[ -n ${sandbox_flag} ]]; then
 
 		echo "${script_name}: mirroring ${sandbox_dirpath}/${sandbox} to ${obj_sandbox_dirpath}/${sandbox}"
-		${mirror_tree_sh} "${sandbox_dirpath}/${sandbox}" "${obj_sandbox_dirpath}/${sandbox}"
+		"${mirror_tree_sh}" "${sandbox_dirpath}/${sandbox}" "${obj_sandbox_dirpath}/${sandbox}"
 	fi
 
 
 	# -- Generate makefile fragements ------------------------------------------
+
+	create_makefile_fragment() {
+		echo "${script_name}: creating makefile fragments in $3"
+		"${gen_make_frags_sh}"                           \
+			-h -r -v0                                \
+			-o "${script_name}"                      \
+			-p "$1" "$2" "$3"                        \
+			"${gen_make_frags_dirpath}/fragment.mk"  \
+			"${gen_make_frags_dirpath}/suffix_list"  \
+			"${gen_make_frags_dirpath}/ignore_list"
+	}
 
 	clist_contains_cname=$(is_in_list "${config_name}" "${config_list}")
 
@@ -4396,108 +4410,45 @@ main()
 	# if config_name is an umbrella family), generate makefiles in that
 	# directory. (In the next step, we will loop over the actual sub-
 	# configurations and create fragments there as well.)
-	if [ "${clist_contains_cname}" == "false" ]; then
-
-		echo "${script_name}: creating makefile fragments in ${obj_config_dirpath}/${config_name}"
-		${gen_make_frags_sh} \
-				 -h -r -v0 \
-				 -o ${script_name} \
-				 -p 'CONFIG' \
-				 ${config_dirpath}/${config_name} \
-				 ${obj_config_dirpath}/${config_name} \
-				 ${gen_make_frags_dirpath}/fragment.mk \
-				 ${gen_make_frags_dirpath}/suffix_list \
-				 ${gen_make_frags_dirpath}/ignore_list
+	if [[ ${clist_contains_cname} = false ]]; then
+		create_makefile_fragment CONFIG "${config_dirpath}/${config_name}" \
+		                         "${obj_config_dirpath}/${config_name}"
 	fi
 
 	# Generate makefile fragments for each of the sub-configurations present
 	# in the configuration list.
 	for conf in ${config_list}; do
-
-		echo "${script_name}: creating makefile fragments in ${obj_config_dirpath}/${conf}"
-		${gen_make_frags_sh} \
-				 -h -r -v0 \
-				 -o ${script_name} \
-				 -p 'CONFIG' \
-				 ${config_dirpath}/${conf} \
-				 ${obj_config_dirpath}/${conf} \
-				 ${gen_make_frags_dirpath}/fragment.mk \
-				 ${gen_make_frags_dirpath}/suffix_list \
-				 ${gen_make_frags_dirpath}/ignore_list
+		create_makefile_fragment CONFIG "${config_dirpath}/${conf}" \
+		                         "${obj_config_dirpath}/${conf}"
 	done
 
 	# Generate makefile fragments for each of the kernel sets required by
 	# the configuration list (in the kernel list).
 	for kern in ${kernel_list}; do
-
-		echo "${script_name}: creating makefile fragments in ${obj_kernels_dirpath}/${kern}"
-		${gen_make_frags_sh} \
-				 -h -r -v0 \
-				 -o ${script_name} \
-				 -p 'KERNELS' \
-				 ${kernels_dirpath}/${kern} \
-				 ${obj_kernels_dirpath}/${kern} \
-				 ${gen_make_frags_dirpath}/fragment.mk \
-				 ${gen_make_frags_dirpath}/suffix_list \
-				 ${gen_make_frags_dirpath}/ignore_list
+		create_makefile_fragment KERNELS "${kernels_dirpath}/${kern}" \
+		                         "${obj_kernels_dirpath}/${kern}"
 	done
 
 	# Generate makefile fragments in the reference kernels directory.
-	echo "${script_name}: creating makefile fragments in ${obj_refkern_dirpath}"
-	${gen_make_frags_sh} \
-			 -h -r -v0 \
-			 -o ${script_name} \
-			 -p 'REFKERN' \
-			 ${refkern_dirpath} \
-			 ${obj_refkern_dirpath} \
-			 ${gen_make_frags_dirpath}/fragment.mk \
-			 ${gen_make_frags_dirpath}/suffix_list \
-			 ${gen_make_frags_dirpath}/ignore_list
+	create_makefile_fragment REFKERN "${refkern_dirpath}" \
+	                         "${obj_refkern_dirpath}"
 
 	# Generate makefile fragments in the framework directory.
-	echo "${script_name}: creating makefile fragments in ${obj_frame_dirpath}"
-	${gen_make_frags_sh} \
-			 -h -r -v0 \
-			 -o ${script_name} \
-			 -p 'FRAME' \
-			 ${frame_dirpath} \
-			 ${obj_frame_dirpath} \
-			 ${gen_make_frags_dirpath}/fragment.mk \
-			 ${gen_make_frags_dirpath}/suffix_list \
-			 ${gen_make_frags_dirpath}/ignore_list
+	create_makefile_fragment FRAME "${frame_dirpath}" \
+	                         "${obj_frame_dirpath}"
 
 	# Generate makefile fragments in the addon sub-directory.
-	if [ -n "${addon_flag}" ]; then
-
+	if [[ -n ${addon_flag} ]]; then
 		for addon in ${addon_list}; do
-
-			echo "${script_name}: creating makefile fragments in ${obj_addon_dirpath}/${addon}"
-			${gen_make_frags_sh} \
-					 -h -r -v0 \
-					 -o ${script_name} \
-					 -p 'ADDON' \
-					 ${addon_dirpath}/${addon} \
-					 ${obj_addon_dirpath}/${addon} \
-					 ${gen_make_frags_dirpath}/fragment.mk \
-					 ${gen_make_frags_dirpath}/suffix_list \
-					 ${gen_make_frags_dirpath}/ignore_list
+			create_makefile_fragment ADDON "${addon_dirpath}/${addon}" \
+			                         "${obj_addon_dirpath}/${addon}"
 		done
 	fi
 
-
 	# Generate makefile fragments in the sandbox sub-directory.
-	if [ -n "${sandbox_flag}" ]; then
-
-		echo "${script_name}: creating makefile fragments in ${obj_sandbox_dirpath}/${sandbox}"
-		${gen_make_frags_sh} \
-				 -h -r -v0 \
-				 -o ${script_name} \
-				 -p 'SANDBOX' \
-				 ${sandbox_dirpath}/${sandbox} \
-				 ${obj_sandbox_dirpath}/${sandbox} \
-				 ${gen_make_frags_dirpath}/fragment.mk \
-				 ${gen_make_frags_dirpath}/suffix_list \
-				 ${gen_make_frags_dirpath}/ignore_list
+	if [[ -n ${sandbox_flag} ]]; then
+		create_makefile_fragment SANDBOX "${sandbox_dirpath}/${sandbox}" \
+		                         "${obj_sandbox_dirpath}/${sandbox}"
 	fi
 
 
@@ -4505,75 +4456,23 @@ main()
 
 	# Under some circumstances, we need to create some symbolic links to
 	# properly handle out-of-tree builds.
-	if [ "${configured_oot}" = "yes" ]; then
-
-		# If 'Makefile' symlink does not already exist in the current
-		# directory, create a symbolic link to it. If one does exist, we
-		# use -f to force creation of a new link.
-		if [ ! -e "./Makefile" ]; then
-
-			echo "${script_name}: creating symbolic link to Makefile."
-			ln -s "${dist_path}/Makefile"
-
-		elif [ -h "./Makefile" ]; then
-			echo "${script_name}: symbolic link to Makefile already exists; forcing creation of new link."
-			ln -sf "${dist_path}/Makefile"
-		else
-			echo "${script_name}: Non-symbolic link file or directory 'Makefile' blocks creation of symlink."
-			echo "${script_name}: *** Please remove this entity and re-run configure."
-			exit 1
-		fi
-
-		# If 'blis.pc.in' symlink does not already exist in the current
-		# directory, create a symbolic link to it. If one does exist, we
-		# use -f to force creation of a new link.
-		if [ ! -e "./blis.pc.in" ]; then
-
-			echo "${script_name}: creating symbolic link to blis.pc.in."
-			ln -s "${dist_path}/blis.pc.in"
-
-		elif [ -h "./blis.pc.in" ]; then
-			echo "${script_name}: symbolic link to blis.pc.in already exists; forcing creation of new link."
-			ln -sf "${dist_path}/blis.pc.in"
-		else
-			echo "${script_name}: Non-symbolic link file or directory 'blis.pc.in' blocks creation of symlink."
-			echo "${script_name}: *** Please remove this entity and re-run configure."
-			exit 1
-		fi
-
-		# If 'common.mk' symlink does not already exist in the current
-		# directory, create a symbolic link to it. If one does exist, we
-		# use -f to force creation of a new link.
-		if [ ! -e "./common.mk" ]; then
-
-			echo "${script_name}: creating symbolic link to common.mk."
-			ln -s "${dist_path}/common.mk"
-
-		elif [ -h "./common.mk" ]; then
-			echo "${script_name}: symbolic link to common.mk already exists; forcing creation of new link."
-			ln -sf "${dist_path}/common.mk"
-		else
-			echo "${script_name}: Non-symbolic link file or directory 'common.mk' blocks creation of symlink."
-			echo "${script_name}: *** Please remove this entity and re-run configure."
-			exit 1
-		fi
-
-		# If 'config' symlink does not already exist in the current
-		# directory, create a symbolic link to it. If one does exist, we
-		# use -f to force creation of a new link.
-		if [ ! -e "./config" ]; then
-
-			echo "${script_name}: creating symbolic link to 'config' directory."
-			ln -s "${dist_path}/config"
-
-		elif [ -h "./config" ]; then
-			echo "${script_name}: symbolic link to 'config' directory already exists; forcing creation of new link."
-			ln -sf "${dist_path}/config"
-		else
-			echo "${script_name}: Non-symbolic link file or directory 'config' blocks creation of symlink."
-			echo "${script_name}: *** Please remove this entity and re-run configure."
-			exit 1
-		fi
+	if [[ ${configured_oot} = yes ]]; then
+		for file in Makefile blis.pc.in common.mk config; do
+			# If symlink does not already exist in the current
+			# directory, create a symbolic link to it. If one does exist, we
+			# use -f to force creation of a new link.
+			if [[ ! -e ${file} ]]; then
+				echo "${script_name}: creating symbolic link to ${file}."
+				ln -s "${dist_path}/${file}" .
+			elif [[ -h ${file} ]]; then
+				echo "${script_name}: symbolic link to ${file} already exists; forcing creation of new link."
+				ln -sf "${dist_path}/${file}" .
+			else
+				echo "${script_name}: Non-symbolic link file or directory '${file}' blocks creation of symlink."
+				echo "${script_name}: *** Please remove this entity and re-run configure."
+				exit 1
+			fi
+		done
 
 		echo "${script_name}: configured to build outside of source distribution."
 	else
@@ -4601,4 +4500,3 @@ main()
 
 # The script's main entry point, passing all parameters given.
 main "$@"
-
