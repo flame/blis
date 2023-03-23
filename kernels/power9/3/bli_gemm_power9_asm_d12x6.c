@@ -37,7 +37,9 @@
 
 void bli_dgemm_power9_asm_12x6
      (
-       dim_t               k0,
+       dim_t               m,
+       dim_t               n,
+       dim_t               k,
        double*    restrict alpha,
        double*    restrict a,
        double*    restrict b,
@@ -50,117 +52,91 @@ void bli_dgemm_power9_asm_12x6
 	// Typecast local copies of integers in case dim_t and inc_t are a
 	// different size than is expected by load instructions.
 
-	uint64_t k_iter = k0 / 16;
-	uint64_t k_left = k0 % 16;
+	uint64_t k_iter = k / 16;
+	uint64_t k_left = k % 16;
 
-  uint64_t rs_c   = rs_c0;
+	uint64_t rs_c   = rs_c0;
 	uint64_t cs_c   = cs_c0;
 
+	GEMM_UKR_SETUP_CT( d, 12, 6, false );
+
 	__asm__ volatile
-  	(
-  "                                               \n\t"
-  "ld               %%r7,  %2                     \n\t" // load ptr of A
-  "ld               %%r8,  %3                     \n\t" // load ptr of B
-  "ld               %%r16, %6                     \n\t" // load ptr of C
-  "                                               \n\t"
-  "ld               %%r28, %4                     \n\t" // load ptr for alpha
-  "ld               %%r29, %5                     \n\t" // load ptr for beta
-  "                                               \n\t"
-  "ld               %%r11, %0                     \n\t" // load k_iter
-  "ld               %%r12, %1                     \n\t" // load k_left
-  "                                               \n\t"
-  "ld               %%r10, %8                     \n\t" // load cs_c
-  "slwi             %%r10, %%r10, 3               \n\t" // mul by size of elem
-  "                                               \n\t"
-  "ld               %%r9,  %7                     \n\t" // load rs_c
-  "slwi             %%r9,  %%r9, 3                \n\t" // mul by size of elem
-  "                                               \n\t"
-  "ld               %%r26,  0(%%r29)              \n\t" // load val of beta
-  "                                               \n\t"
-  "lxvdsx           %%vs62, 0, %%r28              \n\t" // splat alpha
-  "lxvdsx           %%vs63, 0, %%r29              \n\t" // splat beta
-  "                                               \n\t"
-  "add              %%r17, %%r16, %%r10           \n\t" // addr of col 1 of C
-  "add              %%r18, %%r17, %%r10           \n\t" //         col 2 of C
-  "add              %%r19, %%r18, %%r10           \n\t" //         col 3 of C
-  "add              %%r20, %%r19, %%r10           \n\t" //         col 4 of C
-  "add              %%r21, %%r20, %%r10           \n\t" //         col 5 of C
-  "                                               \n\t"
-  DZERO_OUT_VREG                                         
-  "                                               \n\t"
-  DPRELOAD											                          
-  "                                               \n\t"
-  "addi             %%r8, %%r8, 96                \n\t" // move to next col/row of A/B
-  "addi             %%r7, %%r7, 96                \n\t"
-  "                                               \n\t"
-  DPREFETCH
-  "                                               \n\t"
-  "cmpwi                  %%r11, 0                \n\t" // if k_iter == 0,
-  "beq                    DCONSIDERKLEFT          \n\t" // then jmp to k_left
-  "mtctr            %%r11                         \n\t" // else, do k_iter loop
-  "                                               \n\t"  
-  "DLOOPKITER:                                    \n\t" // k_iter loop
-  "                                               \n\t"
-  A_B_PRODUCT_16									                      // compute A*B 
-  "                                               \n\t"
-  "bdnz             DLOOPKITER                    \n\t"
-  "                                               \n\t"
-  "DCONSIDERKLEFT:                                \n\t"
-  "                                               \n\t"
-  "cmpwi                  %%r12, 0                \n\t" // if k_left == 0,
-  "beq                    DPOSTACCUM              \n\t" // then jmp to post accum
-  "mtctr            %%r12                         \n\t" // else, do k_left loop
-  "                                               \n\t"
-  "DLOOPKLEFT:                                    \n\t" // k_left loop 
-  "                                               \n\t"
-  A_B_PRODUCT_1
-  "                                               \n\t"
-  "bdnz             DLOOPKLEFT                    \n\t" 
-  "                                               \n\t"
-  "DPOSTACCUM:                                    \n\t" 
-  "                                               \n\t"
-  DSCALE_ALPHA											                    
-  "                                               \n\t"
-  "cmpdi                  %%r26, 0                \n\t" // if beta == 0,
-  "beq                    DBETAZERO               \n\t" // then jmp to BZ
-  "                                               \n\t"
-  "cmpwi                  %%r9, 8                 \n\t" // if rs_c == 8
-  "beq              DCOLSTOREDBNZ                 \n\t" // then jmp to col store 
-  "                                               \n\t"
-  "DGENSTOREDBNZ:                                 \n\t" // BNZ gen stored case 
-  "                                               \n\t"
-  DGEN_LOAD_OFS_C                                       
-  "                                              	\n\t"
-  DGEN_SCALE_BETA
-  "                                               \n\t"
-  "b                DGENSTORED                    \n\t"
-  "                                               \n\t"
-  "DCOLSTOREDBNZ:                                 \n\t" // BNZ col stored case
-  "                                               \n\t"
-  DCOL_SCALE_BETA                                       
-  "                                               \n\t"
-  "b                DCOLSTORED                    \n\t"
-  "                                               \n\t"
-  "DBETAZERO:                                     \n\t" // BZ case
-  "                                               \n\t" 
-  "cmpwi                  %%r9, 8                 \n\t" // if rs_c == 8,
-  "beq              DCOLSTORED                    \n\t" // C is col stored
-  "                                               \n\t"
-  "DGENSTORED:                                    \n\t" // BZ gen stored case
-  "                                               \n\t"
-  DGEN_LOAD_OFS_C                                       
-  "                                               \n\t"
-  DGEN_STORE                                            
-  "                                               \n\t"
-  "b               DDONE                          \n\t"
-  "                                               \n\t"
-  "DCOLSTORED:                                    \n\t" // BZ col stored case
-  "                                               \n\t"
-  DCOL_STORE
-  "                                               \n\t"
-  "DDONE:                                         \n\t"  
-  "                                               \n\t"
-  : // output operands (none)
+	(
+	"                                               \n\t"
+	"ld               %%r7,  %2                     \n\t" // load ptr of A
+	"ld               %%r8,  %3                     \n\t" // load ptr of B
+	"ld               %%r16, %6                     \n\t" // load ptr of C
+	"                                               \n\t"
+	"ld               %%r28, %4                     \n\t" // load ptr for alpha
+	"ld               %%r29, %5                     \n\t" // load ptr for beta
+	"                                               \n\t"
+	"ld               %%r11, %0                     \n\t" // load k_iter
+	"ld               %%r12, %1                     \n\t" // load k_left
+	"                                               \n\t"
+	"ld               %%r10, %8                     \n\t" // load cs_c
+	"slwi             %%r10, %%r10, 3               \n\t" // mul by size of elem
+	"                                               \n\t"
+	"ld               %%r9,  %7                     \n\t" // load rs_c
+	"slwi             %%r9,  %%r9, 3                \n\t" // mul by size of elem
+	"                                               \n\t"
+	"ld               %%r26,  0(%%r29)              \n\t" // load val of beta
+	"                                               \n\t"
+	"lxvdsx           %%vs62, 0, %%r28              \n\t" // splat alpha
+	"lxvdsx           %%vs63, 0, %%r29              \n\t" // splat beta
+	"                                               \n\t"
+	"add              %%r17, %%r16, %%r10           \n\t" // addr of col 1 of C
+	"add              %%r18, %%r17, %%r10           \n\t" //         col 2 of C
+	"add              %%r19, %%r18, %%r10           \n\t" //         col 3 of C
+	"add              %%r20, %%r19, %%r10           \n\t" //         col 4 of C
+	"add              %%r21, %%r20, %%r10           \n\t" //         col 5 of C
+	"                                               \n\t"
+	DZERO_OUT_VREG
+	"                                               \n\t"
+	DPRELOAD
+	"                                               \n\t"
+	"addi             %%r8, %%r8, 96                \n\t" // move to next col/row of A/B
+	"addi             %%r7, %%r7, 96                \n\t"
+	"                                               \n\t"
+	DPREFETCH
+	"                                               \n\t"
+	"cmpwi                  %%r11, 0                \n\t" // if k_iter == 0,
+	"beq                    DCONSIDERKLEFT          \n\t" // then jmp to k_left
+	"mtctr            %%r11                         \n\t" // else, do k_iter loop
+	"                                               \n\t"
+	"DLOOPKITER:                                    \n\t" // k_iter loop
+	"                                               \n\t"
+	A_B_PRODUCT_16                                        // compute A*B
+	"                                               \n\t"
+	"bdnz             DLOOPKITER                    \n\t"
+	"                                               \n\t"
+	"DCONSIDERKLEFT:                                \n\t"
+	"                                               \n\t"
+	"cmpwi                  %%r12, 0                \n\t" // if k_left == 0,
+	"beq                    DPOSTACCUM              \n\t" // then jmp to post accum
+	"mtctr            %%r12                         \n\t" // else, do k_left loop
+	"                                               \n\t"
+	"DLOOPKLEFT:                                    \n\t" // k_left loop
+	"                                               \n\t"
+	A_B_PRODUCT_1
+	"                                               \n\t"
+	"bdnz             DLOOPKLEFT                    \n\t"
+	"                                               \n\t"
+	"DPOSTACCUM:                                    \n\t"
+	"                                               \n\t"
+	DSCALE_ALPHA
+	"                                               \n\t"
+	"cmpdi                  %%r26, 0                \n\t" // if beta == 0,
+	"beq                    DBETAZERO               \n\t" // then jmp to BZ
+	"                                               \n\t"
+	DCOL_SCALE_BETA
+	"                                               \n\t"
+	"DBETAZERO:                                     \n\t" // BZ case
+	"                                               \n\t"
+	DCOL_STORE
+	"                                               \n\t"
+	"DDONE:                                         \n\t"
+	"                                               \n\t"
+	: // output operands (none)
 	: // input operands
 	  "m" (k_iter), // 0
 	  "m" (k_left), // 1
@@ -174,28 +150,30 @@ void bli_dgemm_power9_asm_12x6
 	  "m" (b_next), // 9
 	  "m" (a_next)*/  // 10
 	: // register clobber list
-  /* unclobberable regs: r2, r3, r4, r5, r6, r13, r14, r15, r30, r31 */
-  "r0", "r7",  "r8",  "r9",
-  "r10", "r11", "r12", "r16", "r17", "r18", "r19", 
-  "r20", "r21", "r22", "r23", "r24", "r25", "r26", "r27", "r28", "r29" 
+	/* unclobberable regs: r2, r3, r4, r5, r6, r13, r14, r15, r30, r31 */
+	"r0", "r7",  "r8",  "r9",
+	"r10", "r11", "r12", "r16", "r17", "r18", "r19",
+	"r20", "r21", "r22", "r23", "r24", "r25", "r26", "r27", "r28", "r29"
 
-  #if XLC
-  ,"f0", "f1", "f2", "f3", "f4", "f5", "f6", "f7", "f8", "f9"
-  , "f10", "f11", "f12", "f13", "f14", "f15", "f16", "f17", "f18", "f19"
-  , "f20" ,"f21", "f22", "f23", "f24", "f25", "f26", "f27", "f28", "f29"
-  , "f30" ,"f31"
-  , "v0", "v1", "v2", "v3", "v4", "v5", "v6", "v7", "v8", "v9"
-  , "v10", "v11", "v12", "v13", "v14", "v15", "v16", "v17", "v18", "v19"
-  , "v20", "v21", "v22", "v23", "v24", "v25", "v26", "v27", "v28", "v29"
-  , "v30", "v31"
-  #else
-  , "vs0", "vs1", "vs2", "vs3", "vs4", "vs5", "vs6", "vs7", "vs8", "vs9"
-  , "vs10", "vs11", "vs12", "vs13", "vs14", "vs15", "vs16", "vs17", "vs18", "vs19"
-  , "vs20", "vs21", "vs22", "vs23", "vs24", "vs25", "vs26", "vs27", "vs28", "vs29"
-  , "vs30", "vs31", "vs32", "vs33", "vs34", "vs35", "vs36", "vs37", "vs38", "vs39"
-  , "vs40", "vs41", "vs42", "vs43", "vs44", "vs45", "vs46", "vs47", "vs48", "vs49"
-  , "vs50", "vs51", "vs52", "vs53"
-  #endif
+	#if XLC
+	,"f0", "f1", "f2", "f3", "f4", "f5", "f6", "f7", "f8", "f9"
+	, "f10", "f11", "f12", "f13", "f14", "f15", "f16", "f17", "f18", "f19"
+	, "f20" ,"f21", "f22", "f23", "f24", "f25", "f26", "f27", "f28", "f29"
+	, "f30" ,"f31"
+	, "v0", "v1", "v2", "v3", "v4", "v5", "v6", "v7", "v8", "v9"
+	, "v10", "v11", "v12", "v13", "v14", "v15", "v16", "v17", "v18", "v19"
+	, "v20", "v21", "v22", "v23", "v24", "v25", "v26", "v27", "v28", "v29"
+	, "v30", "v31"
+	#else
+	, "vs0", "vs1", "vs2", "vs3", "vs4", "vs5", "vs6", "vs7", "vs8", "vs9"
+	, "vs10", "vs11", "vs12", "vs13", "vs14", "vs15", "vs16", "vs17", "vs18", "vs19"
+	, "vs20", "vs21", "vs22", "vs23", "vs24", "vs25", "vs26", "vs27", "vs28", "vs29"
+	, "vs30", "vs31", "vs32", "vs33", "vs34", "vs35", "vs36", "vs37", "vs38", "vs39"
+	, "vs40", "vs41", "vs42", "vs43", "vs44", "vs45", "vs46", "vs47", "vs48", "vs49"
+	, "vs50", "vs51", "vs52", "vs53"
+	#endif
 
-  );
+	);
+
+	GEMM_UKR_FLUSH_CT( d );
 }

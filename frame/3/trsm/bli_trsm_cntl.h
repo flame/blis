@@ -38,21 +38,24 @@ cntl_t* bli_trsm_cntl_create
        rntm_t* rntm,
        side_t  side,
        pack_t  schema_a,
-       pack_t  schema_b
+       pack_t  schema_b,
+       void_fp ker
      );
 
 cntl_t* bli_trsm_l_cntl_create
      (
        rntm_t* rntm,
        pack_t  schema_a,
-       pack_t  schema_b
+       pack_t  schema_b,
+       void_fp ker
      );
 
 cntl_t* bli_trsm_r_cntl_create
      (
        rntm_t* rntm,
        pack_t  schema_a,
-       pack_t  schema_b
+       pack_t  schema_b,
+       void_fp ker
      );
 
 void bli_trsm_cntl_free

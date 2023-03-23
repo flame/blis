@@ -42,7 +42,7 @@
         __builtin_mma_xvf32gerpp (&acc4, ca[1], rb[0]); \
         __builtin_mma_xvf32gerpp (&acc5, ca[1], rb[1]); \
         __builtin_mma_xvf32gerpp (&acc6, ca[1], rb[2]); \
-        __builtin_mma_xvf32gerpp (&acc7, ca[1], rb[3]); 
+        __builtin_mma_xvf32gerpp (&acc7, ca[1], rb[3]);
 
 #define S_INCREMENT \
         A0+=8; \
@@ -51,16 +51,18 @@
 #define S_AB_PRODUCT \
         LOAD_VECTORS \
         S_INCREMENT \
-        S_ACCUMULATE 
+        S_ACCUMULATE
 
 void bli_sgemm_power10_mma_8x16
     (
-        dim_t               k0,
+        dim_t               m,
+        dim_t               n,
+        dim_t               k,
         float*     restrict alpha,
         float*     restrict a,
         float*     restrict b,
         float*     restrict beta,
-        float*     restrict c, inc_t rs_c0, inc_t cs_c0,
+        float*     restrict c, inc_t rs_c0, inc_t cs_c,
         auxinfo_t* restrict data,
         cntx_t*    restrict cntx
     )
@@ -68,16 +70,18 @@ void bli_sgemm_power10_mma_8x16
     // Typecast local copies of integers in case dim_t and inc_t are a
     // different size than is expected by load instructions.
     // (1 is subtracted from k0 because 1 iteration of the k loop is pulled out)
-    uint64_t k_iter = (k0-1) / 4;
-    uint64_t k_left = (k0-1) % 4;
-    
+    uint64_t k_iter = (k-1) / 4;
+    uint64_t k_left = (k-1) % 4;
+
     uint64_t rs_c   = rs_c0;
+
+    GEMM_UKR_SETUP_CT( s, 8, 16, true );
 
     fv4sf_t result[4];
       fv4sf_t *rowC;
 
     // accumulators that will hold the matrix product
-    __vector_quad acc0, acc1, acc2, acc3, 
+    __vector_quad acc0, acc1, acc2, acc3,
                   acc4, acc5, acc6, acc7;
 
     float* restrict A0 = a;
@@ -111,7 +115,7 @@ void bli_sgemm_power10_mma_8x16
         S_AB_PRODUCT
         S_AB_PRODUCT
     }
-    
+
     // edge loop
     for (int k = 0; k<k_left; k++)
     {
@@ -141,4 +145,6 @@ void bli_sgemm_power10_mma_8x16
         SAVE_ACC_bz(fv4sf_t, &acc6, rs_c,  8+4*rs_c);
         SAVE_ACC_bz(fv4sf_t, &acc7, rs_c, 12+4*rs_c);
     }
+
+    GEMM_UKR_FLUSH_CT( s );
 }
