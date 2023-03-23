@@ -32,7 +32,7 @@
 
 */
 
-#ifdef BLIS_ENABLE_BLAS
+#if 1
 
 //
 // Prototype BLAS-to-BLIS interfaces.

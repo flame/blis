@@ -32,7 +32,7 @@
 
 */
 
-#ifdef BLIS_ENABLE_BLAS
+#if 1
 
 #ifdef LAPACK_ILP64
 long PASTEF770(lsame)(const char *ca, const char *cb, long ca_len, long cb_len);

@@ -32,7 +32,7 @@
 
 */
 
-#ifdef BLIS_ENABLE_BLAS
+#if 1
 
 double bla_r_sign(const bla_real *a, const bla_real *b);
 
