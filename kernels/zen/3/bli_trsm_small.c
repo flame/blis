@@ -35,6 +35,7 @@
 #include "blis.h"
 #ifdef BLIS_ENABLE_SMALL_MATRIX_TRSM
 #include "immintrin.h"
+#include "bli_trsm_small_ref.h"
 
 #define BLIS_ENABLE_PREFETCH_IN_TRSM_SMALL
 
@@ -107,18 +108,6 @@ BLIS_INLINE  err_t bli_dtrsm_small_XAltB_XAuB
     cntl_t* cntl
 );
 
-//AX = B; A is lower triangular; transpose;
-//double precision; non-unit diagonal
-BLIS_INLINE err_t dtrsm_AltXB_ref
-(
-    double *A,
-    double *B,
-    dim_t M,
-    dim_t N,
-    dim_t lda,
-    dim_t ldb,
-    bool is_unitdiag
-);
 /*
  * ZTRSM kernel declaration
  */
@@ -255,41 +244,6 @@ BLIS_INLINE  err_t bli_strsm_small_XAltB_XAuB
 */
 //A'X = B;  A is upper triangular; transpose;
 //non-unitDiagonal double precision
-BLIS_INLINE err_t dtrsm_AutXB_ref
-(
-    double *A,
-    double *B,
-    dim_t M,
-    dim_t N,
-    dim_t lda,
-    dim_t ldb,
-    bool unitDiagonal
-)
-{
-    dim_t i, j, k;
-    for (k = 0; k < M; k++)
-    {
-        double lkk_inv = 1.0;
-        if(!unitDiagonal) lkk_inv = DIAG_ELE_INV_OPS(lkk_inv,A[k+k*lda]);
-        for (j = 0; j < N; j++)
-        {
-            B[k + j*ldb] = DIAG_ELE_EVAL_OPS(B[k + j*ldb] , lkk_inv);
-            for (i = k+1; i < M; i++)
-            {
-                B[i + j*ldb] -= A[i*lda + k] * B[k + j*ldb];
-            }
-        }
-    }// k -loop
-    return BLIS_SUCCESS;
-}// end of function
-
-/*
- * Reference implementations
- * ToDo: We can combine all these reference implementation
-         into a macro
-*/
-//A'X = B;  A is upper triangular; transpose;
-//non-unitDiagonal double precision
 BLIS_INLINE err_t strsm_AutXB_ref
 (
     float *A,
@@ -318,37 +272,6 @@ BLIS_INLINE err_t strsm_AutXB_ref
     return BLIS_SUCCESS;
 }// end of function
 
-/* TRSM scalar code for the case AX = alpha * B
- * A is upper-triangular, non-unit-diagonal
- * Dimensions:  A: mxm   X: mxn B:mxn
- */
-BLIS_INLINE err_t dtrsm_AuXB_ref
-(
-    double *A,
-    double *B,
-    dim_t M,
-    dim_t N,
-    dim_t lda,
-    dim_t ldb,
-    bool is_unitdiag
-)
-{
-    dim_t i, j, k;
-    for (k = M-1; k >= 0; k--)
-    {
-        double lkk_inv = 1.0;
-        if(!is_unitdiag) lkk_inv = DIAG_ELE_INV_OPS(lkk_inv,A[k+k*lda]);
-        for (j = N -1; j >= 0; j--)
-        {
-            B[k + j*ldb] = DIAG_ELE_EVAL_OPS(B[k + j*ldb],lkk_inv);
-            for (i = k-1; i >=0; i--)
-            {
-                B[i + j*ldb] -= A[i + k*lda] * B[k + j*ldb];
-            }
-        }
-    }// k -loop
-    return BLIS_SUCCESS;
-}// end of function
 
 /* TRSM scalar code for the case AX = alpha * B
  * A is upper-triangular, non-unit-diagonal
@@ -382,37 +305,6 @@ BLIS_INLINE err_t strsm_AuXB_ref
     return BLIS_SUCCESS;
 }// end of function
 
-/* TRSM scalar code for the case AX = alpha * B
- * A is lower-triangular, non-unit-diagonal, no transpose
- * Dimensions:  A: mxm   X: mxn B:mxn
- */
-BLIS_INLINE err_t dtrsm_AlXB_ref
-(
-    double *A,
-    double *B,
-    dim_t M,
-    dim_t N,
-    dim_t lda,
-    dim_t ldb,
-    bool is_unitdiag
-)
-{
-    dim_t i, j, k;
-    for (k = 0; k < M; k++)
-    {
-        double lkk_inv = 1.0;
-        if(!is_unitdiag) lkk_inv = DIAG_ELE_INV_OPS(lkk_inv,A[k+k*lda]);
-        for (j = 0; j < N; j++)
-        {
-            B[k + j*ldb] = DIAG_ELE_EVAL_OPS(B[k + j*ldb],lkk_inv);
-            for (i = k+1; i < M; i++)
-            {
-                B[i + j*ldb] -= A[i + k*lda] * B[k + j*ldb];
-            }
-        }
-    }// k -loop
-    return BLIS_SUCCESS;
-}// end of function
 
 /* TRSM scalar code for the case AX = alpha * B
  * A is lower-triangular, non-unit-diagonal, no transpose
@@ -440,38 +332,6 @@ BLIS_INLINE err_t strsm_AlXB_ref
             for (i = k+1; i < M; i++)
             {
                 B[i + j*ldb] -= A[i + k*lda] * B[k + j*ldb];
-            }
-        }
-    }// k -loop
-    return BLIS_SUCCESS;
-}// end of function
-
-/* TRSM scalar code for the case AX = alpha * B
- * A is lower-triangular, non-unit-diagonal, transpose
- * Dimensions:  A: mxm   X: mxn B:mxn
- */
-BLIS_INLINE err_t dtrsm_AltXB_ref
-(
-    double *A,
-    double *B,
-    dim_t M,
-    dim_t N,
-    dim_t lda,
-    dim_t ldb,
-    bool is_unitdiag
-)
-{
-    dim_t i, j, k;
-    for (k = M-1; k >= 0; k--)
-    {
-        double lkk_inv = 1.0;
-        if(!is_unitdiag) lkk_inv = DIAG_ELE_INV_OPS(lkk_inv,A[k+k*lda]);
-        for (j = N -1; j >= 0; j--)
-        {
-            B[k + j*ldb] = DIAG_ELE_EVAL_OPS(B[k + j*ldb],lkk_inv);
-            for (i = k-1; i >=0; i--)
-            {
-                B[i + j*ldb] -= A[i*lda + k] * B[k + j*ldb];
             }
         }
     }// k -loop

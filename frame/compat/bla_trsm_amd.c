@@ -1059,10 +1059,9 @@ void dtrsm_blis_impl
             {
                 case BLIS_ARCH_ZEN4:
 #if defined(BLIS_KERNELS_ZEN4)
-                    // check if variant is RUN[N/U] or RLT[N/U]
                     // this is a temporary fix, will be removed when all variants are added
-                    if( (blis_side == BLIS_RIGHT) && 
-                      ((n0 > 300) && (m0 > 50)))
+                    if( ((blis_side == BLIS_RIGHT) && ((n0 > 300) && (m0 > 50))) || 
+                        ((blis_side == BLIS_LEFT && ( (blis_uploa == BLIS_LOWER && blis_transa == BLIS_NO_TRANSPOSE) || (blis_uploa == BLIS_UPPER && blis_transa == BLIS_TRANSPOSE) ) ) && ((n0 != 30 && n0 !=60 ) && (m0 > 50))) )
                     {
                         ker_ft = bli_trsm_small_AVX512;
                     }
@@ -1089,13 +1088,13 @@ void dtrsm_blis_impl
             {
                 case BLIS_ARCH_ZEN4:
 #if defined(BLIS_KERNELS_ZEN4)
-                    if( blis_side == BLIS_RIGHT )
+                    if ( (blis_side == BLIS_LEFT && ( (blis_uploa == BLIS_LOWER && blis_transa == BLIS_TRANSPOSE) || (blis_uploa == BLIS_UPPER && blis_transa == BLIS_NO_TRANSPOSE) ) ))
                     {
-                        ker_ft = bli_trsm_small_mt_AVX512;
+                        ker_ft = bli_trsm_small_mt;
                     }
                     else
                     {
-                        ker_ft = bli_trsm_small_mt;
+                        ker_ft = bli_trsm_small_mt_AVX512;
                     }
                     break;
 #endif// BLIS_KERNELS_ZEN4
