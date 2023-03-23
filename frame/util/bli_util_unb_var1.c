@@ -318,11 +318,6 @@ void bli_cnormfv_unb_var1
         rntm_t*  rntm
     )
 {
-    // Early return if n<=0 or incx=0.
-    if ( ( n <= 0) || ( incx == 0 ) )
-    {
-        return;
-    }
     if ( bli_cpuid_is_avx_supported() == TRUE )
     {
         bli_scnorm2fv_unb_var1_avx2( n, x, incx, norm, cntx );
@@ -554,11 +549,6 @@ void bli_snormfv_unb_var1
     if ( n == 1 )
     {
         *norm = bli_fabs(*x);
-        return;
-    }
-    // Early return if n<=0 or incx=0.
-    else if ( ( n <= 0) || ( incx == 0 ) )
-    {
         return;
     }
     /* Disable AVX2 codepath.

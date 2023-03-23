@@ -2055,13 +2055,6 @@ void bli_dnorm2fv_unb_var1_avx2
     dim_t n_remainder = 0;
     double  *x_buf = x;
 
-    // Early return if n<=0 or incx=0
-    if ( ( n <= 0) || ( incx == 0 ) )
-    {
-        AOCL_DTL_TRACE_EXIT( AOCL_DTL_LEVEL_TRACE_3 );
-        return;
-    }
-
     // Memory pool declarations for packing vector X.
     // Initialize mem pool buffer to NULL and size to 0.
     // "buf" and "size" fields are assigned once memory
@@ -2528,13 +2521,6 @@ void bli_dznorm2fv_unb_var1_avx2
     dim_t i = 0;
     dim_t n_remainder = 0;
     dcomplex  *x_buf = x;
-
-    // Early return if n<=0 or incx=0
-    if ( ( n <= 0) || ( incx == 0 ) )
-    {
-        AOCL_DTL_TRACE_EXIT( AOCL_DTL_LEVEL_TRACE_3 );
-        return;
-    }
 
     // Memory pool declarations for packing vector X.
     // Initialize mem pool buffer to NULL and size to 0.
