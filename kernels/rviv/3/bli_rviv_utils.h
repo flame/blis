@@ -37,10 +37,10 @@
 
 static inline uintptr_t get_vlenb(void)
 {
-    uintptr_t vlenb = 0;
-    __asm__ volatile (
-       " csrr %0, vlenb"    // vector length in bytes
-      : "=r" (vlenb)
-    );
-    return vlenb;
+	uintptr_t vlenb = 0;
+	__asm__ volatile (
+	   " csrr %0, vlenb"    // vector length in bytes
+	  : "=r" (vlenb)
+	);
+	return vlenb;
 }

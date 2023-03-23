@@ -33,9 +33,9 @@
 
 */
 
-    .text
-    .align      2
-    .global     REALNAME
+	.text
+	.align      2
+	.global     REALNAME
 
 // void REALNAME(intptr_t k, void* alpha, void* a, void* b,
 //               void* beta, void* c, intptr_t rs_c, intptr_t cs_c)
@@ -146,656 +146,656 @@
 #define cs_c  a7
 
 REALNAME:
-    #include "rviv_save_registers.h"
+	#include "rviv_save_registers.h"
 
-    vsetvli s0, zero, VTYPE
-    csrr s0, vlenb
-    slli s0, s0, 1
-    FZERO(fzero)
+	vsetvli s0, zero, VTYPE
+	csrr s0, vlenb
+	slli s0, s0, 1
+	FZERO(fzero)
 
-    // Set up pointers
-    add C01_ptr, C00_ptr, cs_c
-    add C02_ptr, C01_ptr, cs_c
-    add C03_ptr, C02_ptr, cs_c
-    add C10_ptr, C00_ptr, rs_c
-    add C11_ptr, C01_ptr, rs_c
-    add C12_ptr, C02_ptr, rs_c
-    add C13_ptr, C03_ptr, rs_c
+	// Set up pointers
+	add C01_ptr, C00_ptr, cs_c
+	add C02_ptr, C01_ptr, cs_c
+	add C03_ptr, C02_ptr, cs_c
+	add C10_ptr, C00_ptr, rs_c
+	add C11_ptr, C01_ptr, rs_c
+	add C12_ptr, C02_ptr, rs_c
+	add C13_ptr, C03_ptr, rs_c
 
-    // Zero-initialize accumulators
-    vxor.vv AB00_re, AB00_re, AB00_re
-    vxor.vv AB00_im, AB00_im, AB00_im
-    vxor.vv AB01_re, AB01_re, AB01_re
-    vxor.vv AB01_im, AB01_im, AB01_im
-    vxor.vv AB02_re, AB02_re, AB02_re
-    vxor.vv AB02_im, AB02_im, AB02_im
-    vxor.vv AB03_re, AB03_re, AB03_re
-    vxor.vv AB03_im, AB03_im, AB03_im
-    vxor.vv AB10_re, AB10_re, AB10_re
-    vxor.vv AB10_im, AB10_im, AB10_im
-    vxor.vv AB11_re, AB11_re, AB11_re
-    vxor.vv AB11_im, AB11_im, AB11_im
-    vxor.vv AB12_re, AB12_re, AB12_re
-    vxor.vv AB12_im, AB12_im, AB12_im
-    vxor.vv AB13_re, AB13_re, AB13_re
-    vxor.vv AB13_im, AB13_im, AB13_im
+	// Zero-initialize accumulators
+	vxor.vv AB00_re, AB00_re, AB00_re
+	vxor.vv AB00_im, AB00_im, AB00_im
+	vxor.vv AB01_re, AB01_re, AB01_re
+	vxor.vv AB01_im, AB01_im, AB01_im
+	vxor.vv AB02_re, AB02_re, AB02_re
+	vxor.vv AB02_im, AB02_im, AB02_im
+	vxor.vv AB03_re, AB03_re, AB03_re
+	vxor.vv AB03_im, AB03_im, AB03_im
+	vxor.vv AB10_re, AB10_re, AB10_re
+	vxor.vv AB10_im, AB10_im, AB10_im
+	vxor.vv AB11_re, AB11_re, AB11_re
+	vxor.vv AB11_im, AB11_im, AB11_im
+	vxor.vv AB12_re, AB12_re, AB12_re
+	vxor.vv AB12_im, AB12_im, AB12_im
+	vxor.vv AB13_re, AB13_re, AB13_re
+	vxor.vv AB13_im, AB13_im, AB13_im
 
-    // Handle k == 0
-    beqz loop_counter, MULTIPLYBETA
+	// Handle k == 0
+	beqz loop_counter, MULTIPLYBETA
 
-    add A10_ptr, A00_ptr, s0
-    slli s0, s0, 1      // length of a column of A in bytes
-    add A01_ptr, A00_ptr, s0
-    add A11_ptr, A10_ptr, s0
+	add A10_ptr, A00_ptr, s0
+	slli s0, s0, 1      // length of a column of A in bytes
+	add A01_ptr, A00_ptr, s0
+	add A11_ptr, A10_ptr, s0
 
-    li tmp, 3
-    ble loop_counter, tmp, TAIL_UNROLL_2
+	li tmp, 3
+	ble loop_counter, tmp, TAIL_UNROLL_2
 
-    // Preload A and B
-    // Load and deinterleave A(:,l)
-    VLE A00_re, (A00_ptr)
-    VLE A10_re, (A10_ptr)
+	// Preload A and B
+	// Load and deinterleave A(:,l)
+	VLE A00_re, (A00_ptr)
+	VLE A10_re, (A10_ptr)
 
-    // Load B(l,0:3)
-    FLOAD B00_re, 0*REALSIZE(B_row_ptr)
-    FLOAD B00_im, 1*REALSIZE(B_row_ptr)
-    FLOAD B01_re, 2*REALSIZE(B_row_ptr)
-    FLOAD B01_im, 3*REALSIZE(B_row_ptr)
-    FLOAD B02_re, 4*REALSIZE(B_row_ptr)
-    FLOAD B02_im, 5*REALSIZE(B_row_ptr)
-    FLOAD B03_re, 6*REALSIZE(B_row_ptr)
-    FLOAD B03_im, 7*REALSIZE(B_row_ptr)
+	// Load B(l,0:3)
+	FLOAD B00_re, 0*REALSIZE(B_row_ptr)
+	FLOAD B00_im, 1*REALSIZE(B_row_ptr)
+	FLOAD B01_re, 2*REALSIZE(B_row_ptr)
+	FLOAD B01_im, 3*REALSIZE(B_row_ptr)
+	FLOAD B02_re, 4*REALSIZE(B_row_ptr)
+	FLOAD B02_im, 5*REALSIZE(B_row_ptr)
+	FLOAD B03_re, 6*REALSIZE(B_row_ptr)
+	FLOAD B03_im, 7*REALSIZE(B_row_ptr)
 
-    // Load and deinterleave A(:,l+1)
-    VLE A01_re, (A01_ptr)
-    VLE A11_re, (A11_ptr)
+	// Load and deinterleave A(:,l+1)
+	VLE A01_re, (A01_ptr)
+	VLE A11_re, (A11_ptr)
 
 LOOP_UNROLL_4: // loop_counter >= 4
-    addi loop_counter, loop_counter, -4
+	addi loop_counter, loop_counter, -4
 
-    vfmacc.vf  AB00_re, B00_re, A00_re   // AB(:,0) += A(:,l) * B(l,0)
-    vfnmsac.vf AB00_re, B00_im, A00_im
-    vfmacc.vf  AB00_im, B00_re, A00_im
-    vfmacc.vf  AB00_im, B00_im, A00_re
-    vfmacc.vf  AB10_re, B00_re, A10_re
-    vfnmsac.vf AB10_re, B00_im, A10_im
-    vfmacc.vf  AB10_im, B00_re, A10_im
-    vfmacc.vf  AB10_im, B00_im, A10_re
+	vfmacc.vf  AB00_re, B00_re, A00_re   // AB(:,0) += A(:,l) * B(l,0)
+	vfnmsac.vf AB00_re, B00_im, A00_im
+	vfmacc.vf  AB00_im, B00_re, A00_im
+	vfmacc.vf  AB00_im, B00_im, A00_re
+	vfmacc.vf  AB10_re, B00_re, A10_re
+	vfnmsac.vf AB10_re, B00_im, A10_im
+	vfmacc.vf  AB10_im, B00_re, A10_im
+	vfmacc.vf  AB10_im, B00_im, A10_re
 
-    vfmacc.vf  AB01_re, B01_re, A00_re   // AB(:,1) += A(:,l) * B(l,1)
-    vfnmsac.vf AB01_re, B01_im, A00_im
-    vfmacc.vf  AB01_im, B01_re, A00_im
-    vfmacc.vf  AB01_im, B01_im, A00_re
-    vfmacc.vf  AB11_re, B01_re, A10_re
-    vfnmsac.vf AB11_re, B01_im, A10_im
-    vfmacc.vf  AB11_im, B01_re, A10_im
-    vfmacc.vf  AB11_im, B01_im, A10_re
+	vfmacc.vf  AB01_re, B01_re, A00_re   // AB(:,1) += A(:,l) * B(l,1)
+	vfnmsac.vf AB01_re, B01_im, A00_im
+	vfmacc.vf  AB01_im, B01_re, A00_im
+	vfmacc.vf  AB01_im, B01_im, A00_re
+	vfmacc.vf  AB11_re, B01_re, A10_re
+	vfnmsac.vf AB11_re, B01_im, A10_im
+	vfmacc.vf  AB11_im, B01_re, A10_im
+	vfmacc.vf  AB11_im, B01_im, A10_re
 
-    // Point to A(:,l+2), A(:,l+3)
-    add A00_ptr, A01_ptr, s0
-    add A10_ptr, A11_ptr, s0
-    add A01_ptr, A00_ptr, s0
-    add A11_ptr, A10_ptr, s0
+	// Point to A(:,l+2), A(:,l+3)
+	add A00_ptr, A01_ptr, s0
+	add A10_ptr, A11_ptr, s0
+	add A01_ptr, A00_ptr, s0
+	add A11_ptr, A10_ptr, s0
 
-    // Load B(l+1,0:3)
-    FLOAD B10_re,  8*REALSIZE(B_row_ptr)
-    FLOAD B10_im,  9*REALSIZE(B_row_ptr)
-    FLOAD B11_re, 10*REALSIZE(B_row_ptr)
-    FLOAD B11_im, 11*REALSIZE(B_row_ptr)
-    FLOAD B12_re, 12*REALSIZE(B_row_ptr)
-    FLOAD B12_im, 13*REALSIZE(B_row_ptr)
-    FLOAD B13_re, 14*REALSIZE(B_row_ptr)
-    FLOAD B13_im, 15*REALSIZE(B_row_ptr)
-    addi B_row_ptr, B_row_ptr, 16*REALSIZE
+	// Load B(l+1,0:3)
+	FLOAD B10_re,  8*REALSIZE(B_row_ptr)
+	FLOAD B10_im,  9*REALSIZE(B_row_ptr)
+	FLOAD B11_re, 10*REALSIZE(B_row_ptr)
+	FLOAD B11_im, 11*REALSIZE(B_row_ptr)
+	FLOAD B12_re, 12*REALSIZE(B_row_ptr)
+	FLOAD B12_im, 13*REALSIZE(B_row_ptr)
+	FLOAD B13_re, 14*REALSIZE(B_row_ptr)
+	FLOAD B13_im, 15*REALSIZE(B_row_ptr)
+	addi B_row_ptr, B_row_ptr, 16*REALSIZE
 
-    vfmacc.vf  AB00_re, B10_re, A01_re   // AB(:,0) += A(:,l+1) * B(l+1,0)
-    vfnmsac.vf AB00_re, B10_im, A01_im
-    vfmacc.vf  AB00_im, B10_re, A01_im
-    vfmacc.vf  AB00_im, B10_im, A01_re
-    vfmacc.vf  AB10_re, B10_re, A11_re
-    vfnmsac.vf AB10_re, B10_im, A11_im
-    vfmacc.vf  AB10_im, B10_re, A11_im
-    vfmacc.vf  AB10_im, B10_im, A11_re
+	vfmacc.vf  AB00_re, B10_re, A01_re   // AB(:,0) += A(:,l+1) * B(l+1,0)
+	vfnmsac.vf AB00_re, B10_im, A01_im
+	vfmacc.vf  AB00_im, B10_re, A01_im
+	vfmacc.vf  AB00_im, B10_im, A01_re
+	vfmacc.vf  AB10_re, B10_re, A11_re
+	vfnmsac.vf AB10_re, B10_im, A11_im
+	vfmacc.vf  AB10_im, B10_re, A11_im
+	vfmacc.vf  AB10_im, B10_im, A11_re
 
-    vfmacc.vf  AB02_re, B02_re, A00_re   // AB(:,2) += A(:,l) * B(l,2)
-    vfnmsac.vf AB02_re, B02_im, A00_im
-    vfmacc.vf  AB02_im, B02_re, A00_im
-    vfmacc.vf  AB02_im, B02_im, A00_re
-    vfmacc.vf  AB12_re, B02_re, A10_re
-    vfnmsac.vf AB12_re, B02_im, A10_im
-    vfmacc.vf  AB12_im, B02_re, A10_im
-    vfmacc.vf  AB12_im, B02_im, A10_re
+	vfmacc.vf  AB02_re, B02_re, A00_re   // AB(:,2) += A(:,l) * B(l,2)
+	vfnmsac.vf AB02_re, B02_im, A00_im
+	vfmacc.vf  AB02_im, B02_re, A00_im
+	vfmacc.vf  AB02_im, B02_im, A00_re
+	vfmacc.vf  AB12_re, B02_re, A10_re
+	vfnmsac.vf AB12_re, B02_im, A10_im
+	vfmacc.vf  AB12_im, B02_re, A10_im
+	vfmacc.vf  AB12_im, B02_im, A10_re
 
-    vfmacc.vf  AB03_re, B03_re, A00_re   // AB(:,3) += A(:,l) * B(l,3)
-    vfnmsac.vf AB03_re, B03_im, A00_im
-    vfmacc.vf  AB03_im, B03_re, A00_im
-    vfmacc.vf  AB03_im, B03_im, A00_re
-    vfmacc.vf  AB13_re, B03_re, A10_re
-    vfnmsac.vf AB13_re, B03_im, A10_im
-    vfmacc.vf  AB13_im, B03_re, A10_im
-    vfmacc.vf  AB13_im, B03_im, A10_re
+	vfmacc.vf  AB03_re, B03_re, A00_re   // AB(:,3) += A(:,l) * B(l,3)
+	vfnmsac.vf AB03_re, B03_im, A00_im
+	vfmacc.vf  AB03_im, B03_re, A00_im
+	vfmacc.vf  AB03_im, B03_im, A00_re
+	vfmacc.vf  AB13_re, B03_re, A10_re
+	vfnmsac.vf AB13_re, B03_im, A10_im
+	vfmacc.vf  AB13_im, B03_re, A10_im
+	vfmacc.vf  AB13_im, B03_im, A10_re
 
-    // Load and deinterleave A(:,l+2)
-    VLE A00_re, (A00_ptr)
-    VLE A10_re, (A10_ptr)
+	// Load and deinterleave A(:,l+2)
+	VLE A00_re, (A00_ptr)
+	VLE A10_re, (A10_ptr)
 
-    // Load B(l+2, 0:3)
-    FLOAD B00_re, 0*REALSIZE(B_row_ptr)
-    FLOAD B00_im, 1*REALSIZE(B_row_ptr)
-    FLOAD B01_re, 2*REALSIZE(B_row_ptr)
-    FLOAD B01_im, 3*REALSIZE(B_row_ptr)
-    FLOAD B02_re, 4*REALSIZE(B_row_ptr)
-    FLOAD B02_im, 5*REALSIZE(B_row_ptr)
-    FLOAD B03_re, 6*REALSIZE(B_row_ptr)
-    FLOAD B03_im, 7*REALSIZE(B_row_ptr)
+	// Load B(l+2, 0:3)
+	FLOAD B00_re, 0*REALSIZE(B_row_ptr)
+	FLOAD B00_im, 1*REALSIZE(B_row_ptr)
+	FLOAD B01_re, 2*REALSIZE(B_row_ptr)
+	FLOAD B01_im, 3*REALSIZE(B_row_ptr)
+	FLOAD B02_re, 4*REALSIZE(B_row_ptr)
+	FLOAD B02_im, 5*REALSIZE(B_row_ptr)
+	FLOAD B03_re, 6*REALSIZE(B_row_ptr)
+	FLOAD B03_im, 7*REALSIZE(B_row_ptr)
 
-    vfmacc.vf  AB01_re, B11_re, A01_re   // AB(:,1) += A(:,l+1) * B(l+1,1)
-    vfnmsac.vf AB01_re, B11_im, A01_im
-    vfmacc.vf  AB01_im, B11_re, A01_im
-    vfmacc.vf  AB01_im, B11_im, A01_re
-    vfmacc.vf  AB11_re, B11_re, A11_re
-    vfnmsac.vf AB11_re, B11_im, A11_im
-    vfmacc.vf  AB11_im, B11_re, A11_im
-    vfmacc.vf  AB11_im, B11_im, A11_re
+	vfmacc.vf  AB01_re, B11_re, A01_re   // AB(:,1) += A(:,l+1) * B(l+1,1)
+	vfnmsac.vf AB01_re, B11_im, A01_im
+	vfmacc.vf  AB01_im, B11_re, A01_im
+	vfmacc.vf  AB01_im, B11_im, A01_re
+	vfmacc.vf  AB11_re, B11_re, A11_re
+	vfnmsac.vf AB11_re, B11_im, A11_im
+	vfmacc.vf  AB11_im, B11_re, A11_im
+	vfmacc.vf  AB11_im, B11_im, A11_re
 
-    vfmacc.vf  AB02_re, B12_re, A01_re   // AB(:,2) += A(:,l+1) * B(l+1,2)
-    vfnmsac.vf AB02_re, B12_im, A01_im
-    vfmacc.vf  AB02_im, B12_re, A01_im
-    vfmacc.vf  AB02_im, B12_im, A01_re
-    vfmacc.vf  AB12_re, B12_re, A11_re
-    vfnmsac.vf AB12_re, B12_im, A11_im
-    vfmacc.vf  AB12_im, B12_re, A11_im
-    vfmacc.vf  AB12_im, B12_im, A11_re
+	vfmacc.vf  AB02_re, B12_re, A01_re   // AB(:,2) += A(:,l+1) * B(l+1,2)
+	vfnmsac.vf AB02_re, B12_im, A01_im
+	vfmacc.vf  AB02_im, B12_re, A01_im
+	vfmacc.vf  AB02_im, B12_im, A01_re
+	vfmacc.vf  AB12_re, B12_re, A11_re
+	vfnmsac.vf AB12_re, B12_im, A11_im
+	vfmacc.vf  AB12_im, B12_re, A11_im
+	vfmacc.vf  AB12_im, B12_im, A11_re
 
-    vfmacc.vf  AB03_re, B13_re, A01_re   // AB(:,3) += A(:,l+1) * B(l+1,3)
-    vfnmsac.vf AB03_re, B13_im, A01_im
-    vfmacc.vf  AB03_im, B13_re, A01_im
-    vfmacc.vf  AB03_im, B13_im, A01_re
-    vfmacc.vf  AB13_re, B13_re, A11_re
-    vfnmsac.vf AB13_re, B13_im, A11_im
-    vfmacc.vf  AB13_im, B13_re, A11_im
-    vfmacc.vf  AB13_im, B13_im, A11_re
+	vfmacc.vf  AB03_re, B13_re, A01_re   // AB(:,3) += A(:,l+1) * B(l+1,3)
+	vfnmsac.vf AB03_re, B13_im, A01_im
+	vfmacc.vf  AB03_im, B13_re, A01_im
+	vfmacc.vf  AB03_im, B13_im, A01_re
+	vfmacc.vf  AB13_re, B13_re, A11_re
+	vfnmsac.vf AB13_re, B13_im, A11_im
+	vfmacc.vf  AB13_im, B13_re, A11_im
+	vfmacc.vf  AB13_im, B13_im, A11_re
 
-    // Load and deinterleave A(:,l+3)
-    VLE A01_re, (A01_ptr)
-    VLE A11_re, (A11_ptr)
+	// Load and deinterleave A(:,l+3)
+	VLE A01_re, (A01_ptr)
+	VLE A11_re, (A11_ptr)
 
-    // Point to A(:,l+2), A(:,l+3)
-    add A00_ptr, A01_ptr, s0
-    add A10_ptr, A11_ptr, s0
-    add A01_ptr, A00_ptr, s0
-    add A11_ptr, A10_ptr, s0
+	// Point to A(:,l+2), A(:,l+3)
+	add A00_ptr, A01_ptr, s0
+	add A10_ptr, A11_ptr, s0
+	add A01_ptr, A00_ptr, s0
+	add A11_ptr, A10_ptr, s0
 
-    // Load B(l+3, 0:3)
-    FLOAD B10_re,  8*REALSIZE(B_row_ptr)
-    FLOAD B10_im,  9*REALSIZE(B_row_ptr)
-    FLOAD B11_re, 10*REALSIZE(B_row_ptr)
-    FLOAD B11_im, 11*REALSIZE(B_row_ptr)
-    FLOAD B12_re, 12*REALSIZE(B_row_ptr)
-    FLOAD B12_im, 13*REALSIZE(B_row_ptr)
-    FLOAD B13_re, 14*REALSIZE(B_row_ptr)
-    FLOAD B13_im, 15*REALSIZE(B_row_ptr)
-    addi B_row_ptr, B_row_ptr, 16*REALSIZE
+	// Load B(l+3, 0:3)
+	FLOAD B10_re,  8*REALSIZE(B_row_ptr)
+	FLOAD B10_im,  9*REALSIZE(B_row_ptr)
+	FLOAD B11_re, 10*REALSIZE(B_row_ptr)
+	FLOAD B11_im, 11*REALSIZE(B_row_ptr)
+	FLOAD B12_re, 12*REALSIZE(B_row_ptr)
+	FLOAD B12_im, 13*REALSIZE(B_row_ptr)
+	FLOAD B13_re, 14*REALSIZE(B_row_ptr)
+	FLOAD B13_im, 15*REALSIZE(B_row_ptr)
+	addi B_row_ptr, B_row_ptr, 16*REALSIZE
 
-    vfmacc.vf  AB00_re, B00_re, A00_re   // AB(:,0) += A(:,l+2) * B(l+2,0)
-    vfnmsac.vf AB00_re, B00_im, A00_im
-    vfmacc.vf  AB00_im, B00_re, A00_im
-    vfmacc.vf  AB00_im, B00_im, A00_re
-    vfmacc.vf  AB10_re, B00_re, A10_re
-    vfnmsac.vf AB10_re, B00_im, A10_im
-    vfmacc.vf  AB10_im, B00_re, A10_im
-    vfmacc.vf  AB10_im, B00_im, A10_re
+	vfmacc.vf  AB00_re, B00_re, A00_re   // AB(:,0) += A(:,l+2) * B(l+2,0)
+	vfnmsac.vf AB00_re, B00_im, A00_im
+	vfmacc.vf  AB00_im, B00_re, A00_im
+	vfmacc.vf  AB00_im, B00_im, A00_re
+	vfmacc.vf  AB10_re, B00_re, A10_re
+	vfnmsac.vf AB10_re, B00_im, A10_im
+	vfmacc.vf  AB10_im, B00_re, A10_im
+	vfmacc.vf  AB10_im, B00_im, A10_re
 
-    vfmacc.vf  AB00_re, B10_re, A01_re   // AB(:,0) += A(:,l+3) * B(l+3,0)
-    vfnmsac.vf AB00_re, B10_im, A01_im
-    vfmacc.vf  AB00_im, B10_re, A01_im
-    vfmacc.vf  AB00_im, B10_im, A01_re
-    vfmacc.vf  AB10_re, B10_re, A11_re
-    vfnmsac.vf AB10_re, B10_im, A11_im
-    vfmacc.vf  AB10_im, B10_re, A11_im
-    vfmacc.vf  AB10_im, B10_im, A11_re
+	vfmacc.vf  AB00_re, B10_re, A01_re   // AB(:,0) += A(:,l+3) * B(l+3,0)
+	vfnmsac.vf AB00_re, B10_im, A01_im
+	vfmacc.vf  AB00_im, B10_re, A01_im
+	vfmacc.vf  AB00_im, B10_im, A01_re
+	vfmacc.vf  AB10_re, B10_re, A11_re
+	vfnmsac.vf AB10_re, B10_im, A11_im
+	vfmacc.vf  AB10_im, B10_re, A11_im
+	vfmacc.vf  AB10_im, B10_im, A11_re
 
-    vfmacc.vf  AB01_re, B01_re, A00_re   // AB(:,1) += A(:,l+2) * B(l+2,1)
-    vfnmsac.vf AB01_re, B01_im, A00_im
-    vfmacc.vf  AB01_im, B01_re, A00_im
-    vfmacc.vf  AB01_im, B01_im, A00_re
-    vfmacc.vf  AB11_re, B01_re, A10_re
-    vfnmsac.vf AB11_re, B01_im, A10_im
-    vfmacc.vf  AB11_im, B01_re, A10_im
-    vfmacc.vf  AB11_im, B01_im, A10_re
+	vfmacc.vf  AB01_re, B01_re, A00_re   // AB(:,1) += A(:,l+2) * B(l+2,1)
+	vfnmsac.vf AB01_re, B01_im, A00_im
+	vfmacc.vf  AB01_im, B01_re, A00_im
+	vfmacc.vf  AB01_im, B01_im, A00_re
+	vfmacc.vf  AB11_re, B01_re, A10_re
+	vfnmsac.vf AB11_re, B01_im, A10_im
+	vfmacc.vf  AB11_im, B01_re, A10_im
+	vfmacc.vf  AB11_im, B01_im, A10_re
 
-    vfmacc.vf  AB01_re, B11_re, A01_re   // AB(:,1) += A(:,l+3) * B(l+3,1)
-    vfnmsac.vf AB01_re, B11_im, A01_im
-    vfmacc.vf  AB01_im, B11_re, A01_im
-    vfmacc.vf  AB01_im, B11_im, A01_re
-    vfmacc.vf  AB11_re, B11_re, A11_re
-    vfnmsac.vf AB11_re, B11_im, A11_im
-    vfmacc.vf  AB11_im, B11_re, A11_im
-    vfmacc.vf  AB11_im, B11_im, A11_re
+	vfmacc.vf  AB01_re, B11_re, A01_re   // AB(:,1) += A(:,l+3) * B(l+3,1)
+	vfnmsac.vf AB01_re, B11_im, A01_im
+	vfmacc.vf  AB01_im, B11_re, A01_im
+	vfmacc.vf  AB01_im, B11_im, A01_re
+	vfmacc.vf  AB11_re, B11_re, A11_re
+	vfnmsac.vf AB11_re, B11_im, A11_im
+	vfmacc.vf  AB11_im, B11_re, A11_im
+	vfmacc.vf  AB11_im, B11_im, A11_re
 
-    vfmacc.vf  AB02_re, B02_re, A00_re   // AB(:,2) += A(:,l+2) * B(l+2,2)
-    vfnmsac.vf AB02_re, B02_im, A00_im
-    vfmacc.vf  AB02_im, B02_re, A00_im
-    vfmacc.vf  AB02_im, B02_im, A00_re
-    vfmacc.vf  AB12_re, B02_re, A10_re
-    vfnmsac.vf AB12_re, B02_im, A10_im
-    vfmacc.vf  AB12_im, B02_re, A10_im
-    vfmacc.vf  AB12_im, B02_im, A10_re
+	vfmacc.vf  AB02_re, B02_re, A00_re   // AB(:,2) += A(:,l+2) * B(l+2,2)
+	vfnmsac.vf AB02_re, B02_im, A00_im
+	vfmacc.vf  AB02_im, B02_re, A00_im
+	vfmacc.vf  AB02_im, B02_im, A00_re
+	vfmacc.vf  AB12_re, B02_re, A10_re
+	vfnmsac.vf AB12_re, B02_im, A10_im
+	vfmacc.vf  AB12_im, B02_re, A10_im
+	vfmacc.vf  AB12_im, B02_im, A10_re
 
-    vfmacc.vf  AB02_re, B12_re, A01_re   // AB(:,2) += A(:,l+3) * B(l+3,2)
-    vfnmsac.vf AB02_re, B12_im, A01_im
-    vfmacc.vf  AB02_im, B12_re, A01_im
-    vfmacc.vf  AB02_im, B12_im, A01_re
-    vfmacc.vf  AB12_re, B12_re, A11_re
-    vfnmsac.vf AB12_re, B12_im, A11_im
-    vfmacc.vf  AB12_im, B12_re, A11_im
-    vfmacc.vf  AB12_im, B12_im, A11_re
+	vfmacc.vf  AB02_re, B12_re, A01_re   // AB(:,2) += A(:,l+3) * B(l+3,2)
+	vfnmsac.vf AB02_re, B12_im, A01_im
+	vfmacc.vf  AB02_im, B12_re, A01_im
+	vfmacc.vf  AB02_im, B12_im, A01_re
+	vfmacc.vf  AB12_re, B12_re, A11_re
+	vfnmsac.vf AB12_re, B12_im, A11_im
+	vfmacc.vf  AB12_im, B12_re, A11_im
+	vfmacc.vf  AB12_im, B12_im, A11_re
 
-    vfmacc.vf  AB03_re, B03_re, A00_re   // AB(:,3) += A(:,l+2) * B(l+2,3)
-    vfnmsac.vf AB03_re, B03_im, A00_im
-    vfmacc.vf  AB03_im, B03_re, A00_im
-    vfmacc.vf  AB03_im, B03_im, A00_re
-    vfmacc.vf  AB13_re, B03_re, A10_re
-    vfnmsac.vf AB13_re, B03_im, A10_im
-    vfmacc.vf  AB13_im, B03_re, A10_im
-    vfmacc.vf  AB13_im, B03_im, A10_re
+	vfmacc.vf  AB03_re, B03_re, A00_re   // AB(:,3) += A(:,l+2) * B(l+2,3)
+	vfnmsac.vf AB03_re, B03_im, A00_im
+	vfmacc.vf  AB03_im, B03_re, A00_im
+	vfmacc.vf  AB03_im, B03_im, A00_re
+	vfmacc.vf  AB13_re, B03_re, A10_re
+	vfnmsac.vf AB13_re, B03_im, A10_im
+	vfmacc.vf  AB13_im, B03_re, A10_im
+	vfmacc.vf  AB13_im, B03_im, A10_re
 
-    vfmacc.vf  AB03_re, B13_re, A01_re   // AB(:,3) += A(:,l+3) * B(l+3,3)
-    vfnmsac.vf AB03_re, B13_im, A01_im
-    vfmacc.vf  AB03_im, B13_re, A01_im
-    vfmacc.vf  AB03_im, B13_im, A01_re
-    vfmacc.vf  AB13_re, B13_re, A11_re
-    vfnmsac.vf AB13_re, B13_im, A11_im
-    vfmacc.vf  AB13_im, B13_re, A11_im
-    vfmacc.vf  AB13_im, B13_im, A11_re
+	vfmacc.vf  AB03_re, B13_re, A01_re   // AB(:,3) += A(:,l+3) * B(l+3,3)
+	vfnmsac.vf AB03_re, B13_im, A01_im
+	vfmacc.vf  AB03_im, B13_re, A01_im
+	vfmacc.vf  AB03_im, B13_im, A01_re
+	vfmacc.vf  AB13_re, B13_re, A11_re
+	vfnmsac.vf AB13_re, B13_im, A11_im
+	vfmacc.vf  AB13_im, B13_re, A11_im
+	vfmacc.vf  AB13_im, B13_im, A11_re
 
-    li tmp, 3
-    ble loop_counter, tmp, TAIL_UNROLL_2
+	li tmp, 3
+	ble loop_counter, tmp, TAIL_UNROLL_2
 
-    // Load A and B for the next iteration
-    VLE A00_re, (A00_ptr)
-    VLE A10_re, (A10_ptr)
-    VLE A01_re, (A01_ptr)
-    VLE A11_re, (A11_ptr)
+	// Load A and B for the next iteration
+	VLE A00_re, (A00_ptr)
+	VLE A10_re, (A10_ptr)
+	VLE A01_re, (A01_ptr)
+	VLE A11_re, (A11_ptr)
 
-    FLOAD B00_re, 0*REALSIZE(B_row_ptr)
-    FLOAD B00_im, 1*REALSIZE(B_row_ptr)
-    FLOAD B01_re, 2*REALSIZE(B_row_ptr)
-    FLOAD B01_im, 3*REALSIZE(B_row_ptr)
-    FLOAD B02_re, 4*REALSIZE(B_row_ptr)
-    FLOAD B02_im, 5*REALSIZE(B_row_ptr)
-    FLOAD B03_re, 6*REALSIZE(B_row_ptr)
-    FLOAD B03_im, 7*REALSIZE(B_row_ptr)
+	FLOAD B00_re, 0*REALSIZE(B_row_ptr)
+	FLOAD B00_im, 1*REALSIZE(B_row_ptr)
+	FLOAD B01_re, 2*REALSIZE(B_row_ptr)
+	FLOAD B01_im, 3*REALSIZE(B_row_ptr)
+	FLOAD B02_re, 4*REALSIZE(B_row_ptr)
+	FLOAD B02_im, 5*REALSIZE(B_row_ptr)
+	FLOAD B03_re, 6*REALSIZE(B_row_ptr)
+	FLOAD B03_im, 7*REALSIZE(B_row_ptr)
 
-    j LOOP_UNROLL_4
+	j LOOP_UNROLL_4
 
 TAIL_UNROLL_2: // loop_counter <= 3
-    li tmp, 1
-    ble loop_counter, tmp, TAIL_UNROLL_1
+	li tmp, 1
+	ble loop_counter, tmp, TAIL_UNROLL_1
 
-    addi loop_counter, loop_counter, -2
+	addi loop_counter, loop_counter, -2
 
-    // Load and deinterleave A(:,l)
-    VLE A00_re, (A00_ptr)
-    VLE A10_re, (A10_ptr)
+	// Load and deinterleave A(:,l)
+	VLE A00_re, (A00_ptr)
+	VLE A10_re, (A10_ptr)
 
-    // Load B(l, 0:3)
-    FLOAD B00_re, 0*REALSIZE(B_row_ptr)
-    FLOAD B00_im, 1*REALSIZE(B_row_ptr)
-    FLOAD B01_re, 2*REALSIZE(B_row_ptr)
-    FLOAD B01_im, 3*REALSIZE(B_row_ptr)
-    FLOAD B02_re, 4*REALSIZE(B_row_ptr)
-    FLOAD B02_im, 5*REALSIZE(B_row_ptr)
-    FLOAD B03_re, 6*REALSIZE(B_row_ptr)
-    FLOAD B03_im, 7*REALSIZE(B_row_ptr)
+	// Load B(l, 0:3)
+	FLOAD B00_re, 0*REALSIZE(B_row_ptr)
+	FLOAD B00_im, 1*REALSIZE(B_row_ptr)
+	FLOAD B01_re, 2*REALSIZE(B_row_ptr)
+	FLOAD B01_im, 3*REALSIZE(B_row_ptr)
+	FLOAD B02_re, 4*REALSIZE(B_row_ptr)
+	FLOAD B02_im, 5*REALSIZE(B_row_ptr)
+	FLOAD B03_re, 6*REALSIZE(B_row_ptr)
+	FLOAD B03_im, 7*REALSIZE(B_row_ptr)
 
-    vfmacc.vf  AB00_re, B00_re, A00_re   // AB(:,0) += A(:,l) * B(l,0)
-    vfnmsac.vf AB00_re, B00_im, A00_im
-    vfmacc.vf  AB00_im, B00_re, A00_im
-    vfmacc.vf  AB00_im, B00_im, A00_re
-    vfmacc.vf  AB10_re, B00_re, A10_re
-    vfnmsac.vf AB10_re, B00_im, A10_im
-    vfmacc.vf  AB10_im, B00_re, A10_im
-    vfmacc.vf  AB10_im, B00_im, A10_re
+	vfmacc.vf  AB00_re, B00_re, A00_re   // AB(:,0) += A(:,l) * B(l,0)
+	vfnmsac.vf AB00_re, B00_im, A00_im
+	vfmacc.vf  AB00_im, B00_re, A00_im
+	vfmacc.vf  AB00_im, B00_im, A00_re
+	vfmacc.vf  AB10_re, B00_re, A10_re
+	vfnmsac.vf AB10_re, B00_im, A10_im
+	vfmacc.vf  AB10_im, B00_re, A10_im
+	vfmacc.vf  AB10_im, B00_im, A10_re
 
-    vfmacc.vf  AB01_re, B01_re, A00_re   // AB(:,1) += A(:,l) * B(l,1)
-    vfnmsac.vf AB01_re, B01_im, A00_im
-    vfmacc.vf  AB01_im, B01_re, A00_im
-    vfmacc.vf  AB01_im, B01_im, A00_re
-    vfmacc.vf  AB11_re, B01_re, A10_re
-    vfnmsac.vf AB11_re, B01_im, A10_im
-    vfmacc.vf  AB11_im, B01_re, A10_im
-    vfmacc.vf  AB11_im, B01_im, A10_re
+	vfmacc.vf  AB01_re, B01_re, A00_re   // AB(:,1) += A(:,l) * B(l,1)
+	vfnmsac.vf AB01_re, B01_im, A00_im
+	vfmacc.vf  AB01_im, B01_re, A00_im
+	vfmacc.vf  AB01_im, B01_im, A00_re
+	vfmacc.vf  AB11_re, B01_re, A10_re
+	vfnmsac.vf AB11_re, B01_im, A10_im
+	vfmacc.vf  AB11_im, B01_re, A10_im
+	vfmacc.vf  AB11_im, B01_im, A10_re
 
-    // Load and deinterleave A(:,l+1)
-    VLE A01_re, (A01_ptr)
-    VLE A11_re, (A11_ptr)
+	// Load and deinterleave A(:,l+1)
+	VLE A01_re, (A01_ptr)
+	VLE A11_re, (A11_ptr)
 
-    // Load B(l+1, 0:3)
-    FLOAD B10_re,  8*REALSIZE(B_row_ptr)
-    FLOAD B10_im,  9*REALSIZE(B_row_ptr)
-    FLOAD B11_re, 10*REALSIZE(B_row_ptr)
-    FLOAD B11_im, 11*REALSIZE(B_row_ptr)
-    FLOAD B12_re, 12*REALSIZE(B_row_ptr)
-    FLOAD B12_im, 13*REALSIZE(B_row_ptr)
-    FLOAD B13_re, 14*REALSIZE(B_row_ptr)
-    FLOAD B13_im, 15*REALSIZE(B_row_ptr)
+	// Load B(l+1, 0:3)
+	FLOAD B10_re,  8*REALSIZE(B_row_ptr)
+	FLOAD B10_im,  9*REALSIZE(B_row_ptr)
+	FLOAD B11_re, 10*REALSIZE(B_row_ptr)
+	FLOAD B11_im, 11*REALSIZE(B_row_ptr)
+	FLOAD B12_re, 12*REALSIZE(B_row_ptr)
+	FLOAD B12_im, 13*REALSIZE(B_row_ptr)
+	FLOAD B13_re, 14*REALSIZE(B_row_ptr)
+	FLOAD B13_im, 15*REALSIZE(B_row_ptr)
 
-    vfmacc.vf  AB00_re, B10_re, A01_re   // AB(:,0) += A(:,l+1) * B(l+1,0)
-    vfnmsac.vf AB00_re, B10_im, A01_im
-    vfmacc.vf  AB00_im, B10_re, A01_im
-    vfmacc.vf  AB00_im, B10_im, A01_re
-    vfmacc.vf  AB10_re, B10_re, A11_re
-    vfnmsac.vf AB10_re, B10_im, A11_im
-    vfmacc.vf  AB10_im, B10_re, A11_im
-    vfmacc.vf  AB10_im, B10_im, A11_re
+	vfmacc.vf  AB00_re, B10_re, A01_re   // AB(:,0) += A(:,l+1) * B(l+1,0)
+	vfnmsac.vf AB00_re, B10_im, A01_im
+	vfmacc.vf  AB00_im, B10_re, A01_im
+	vfmacc.vf  AB00_im, B10_im, A01_re
+	vfmacc.vf  AB10_re, B10_re, A11_re
+	vfnmsac.vf AB10_re, B10_im, A11_im
+	vfmacc.vf  AB10_im, B10_re, A11_im
+	vfmacc.vf  AB10_im, B10_im, A11_re
 
-    vfmacc.vf  AB01_re, B11_re, A01_re   // AB(:,1) += A(:,l+1) * B(l+1,1)
-    vfnmsac.vf AB01_re, B11_im, A01_im
-    vfmacc.vf  AB01_im, B11_re, A01_im
-    vfmacc.vf  AB01_im, B11_im, A01_re
-    vfmacc.vf  AB11_re, B11_re, A11_re
-    vfnmsac.vf AB11_re, B11_im, A11_im
-    vfmacc.vf  AB11_im, B11_re, A11_im
-    vfmacc.vf  AB11_im, B11_im, A11_re
+	vfmacc.vf  AB01_re, B11_re, A01_re   // AB(:,1) += A(:,l+1) * B(l+1,1)
+	vfnmsac.vf AB01_re, B11_im, A01_im
+	vfmacc.vf  AB01_im, B11_re, A01_im
+	vfmacc.vf  AB01_im, B11_im, A01_re
+	vfmacc.vf  AB11_re, B11_re, A11_re
+	vfnmsac.vf AB11_re, B11_im, A11_im
+	vfmacc.vf  AB11_im, B11_re, A11_im
+	vfmacc.vf  AB11_im, B11_im, A11_re
 
-    vfmacc.vf  AB02_re, B02_re, A00_re   // AB(:,2) += A(:,l) * B(l,2)
-    vfnmsac.vf AB02_re, B02_im, A00_im
-    vfmacc.vf  AB02_im, B02_re, A00_im
-    vfmacc.vf  AB02_im, B02_im, A00_re
-    vfmacc.vf  AB12_re, B02_re, A10_re
-    vfnmsac.vf AB12_re, B02_im, A10_im
-    vfmacc.vf  AB12_im, B02_re, A10_im
-    vfmacc.vf  AB12_im, B02_im, A10_re
+	vfmacc.vf  AB02_re, B02_re, A00_re   // AB(:,2) += A(:,l) * B(l,2)
+	vfnmsac.vf AB02_re, B02_im, A00_im
+	vfmacc.vf  AB02_im, B02_re, A00_im
+	vfmacc.vf  AB02_im, B02_im, A00_re
+	vfmacc.vf  AB12_re, B02_re, A10_re
+	vfnmsac.vf AB12_re, B02_im, A10_im
+	vfmacc.vf  AB12_im, B02_re, A10_im
+	vfmacc.vf  AB12_im, B02_im, A10_re
 
-    vfmacc.vf  AB03_re, B03_re, A00_re   // AB(:,3) += A(:,l) * B(l,3)
-    vfnmsac.vf AB03_re, B03_im, A00_im
-    vfmacc.vf  AB03_im, B03_re, A00_im
-    vfmacc.vf  AB03_im, B03_im, A00_re
-    vfmacc.vf  AB13_re, B03_re, A10_re
-    vfnmsac.vf AB13_re, B03_im, A10_im
-    vfmacc.vf  AB13_im, B03_re, A10_im
-    vfmacc.vf  AB13_im, B03_im, A10_re
+	vfmacc.vf  AB03_re, B03_re, A00_re   // AB(:,3) += A(:,l) * B(l,3)
+	vfnmsac.vf AB03_re, B03_im, A00_im
+	vfmacc.vf  AB03_im, B03_re, A00_im
+	vfmacc.vf  AB03_im, B03_im, A00_re
+	vfmacc.vf  AB13_re, B03_re, A10_re
+	vfnmsac.vf AB13_re, B03_im, A10_im
+	vfmacc.vf  AB13_im, B03_re, A10_im
+	vfmacc.vf  AB13_im, B03_im, A10_re
 
-    vfmacc.vf  AB02_re, B12_re, A01_re   // AB(:,2) += A(:,l+1) * B(l+1,2)
-    vfnmsac.vf AB02_re, B12_im, A01_im
-    vfmacc.vf  AB02_im, B12_re, A01_im
-    vfmacc.vf  AB02_im, B12_im, A01_re
-    vfmacc.vf  AB12_re, B12_re, A11_re
-    vfnmsac.vf AB12_re, B12_im, A11_im
-    vfmacc.vf  AB12_im, B12_re, A11_im
-    vfmacc.vf  AB12_im, B12_im, A11_re
+	vfmacc.vf  AB02_re, B12_re, A01_re   // AB(:,2) += A(:,l+1) * B(l+1,2)
+	vfnmsac.vf AB02_re, B12_im, A01_im
+	vfmacc.vf  AB02_im, B12_re, A01_im
+	vfmacc.vf  AB02_im, B12_im, A01_re
+	vfmacc.vf  AB12_re, B12_re, A11_re
+	vfnmsac.vf AB12_re, B12_im, A11_im
+	vfmacc.vf  AB12_im, B12_re, A11_im
+	vfmacc.vf  AB12_im, B12_im, A11_re
 
-    vfmacc.vf  AB03_re, B13_re, A01_re   // AB(:,3) += A(:,l+1) * B(l+1,3)
-    vfnmsac.vf AB03_re, B13_im, A01_im
-    vfmacc.vf  AB03_im, B13_re, A01_im
-    vfmacc.vf  AB03_im, B13_im, A01_re
-    vfmacc.vf  AB13_re, B13_re, A11_re
-    vfnmsac.vf AB13_re, B13_im, A11_im
-    vfmacc.vf  AB13_im, B13_re, A11_im
-    vfmacc.vf  AB13_im, B13_im, A11_re
+	vfmacc.vf  AB03_re, B13_re, A01_re   // AB(:,3) += A(:,l+1) * B(l+1,3)
+	vfnmsac.vf AB03_re, B13_im, A01_im
+	vfmacc.vf  AB03_im, B13_re, A01_im
+	vfmacc.vf  AB03_im, B13_im, A01_re
+	vfmacc.vf  AB13_re, B13_re, A11_re
+	vfnmsac.vf AB13_re, B13_im, A11_im
+	vfmacc.vf  AB13_im, B13_re, A11_im
+	vfmacc.vf  AB13_im, B13_im, A11_re
 
-    beqz loop_counter, MULTIPLYALPHA
+	beqz loop_counter, MULTIPLYALPHA
 
-    // Advance pointers
-    add A00_ptr, A01_ptr, s0
-    add A10_ptr, A11_ptr, s0
-    addi B_row_ptr, B_row_ptr, 16*REALSIZE
+	// Advance pointers
+	add A00_ptr, A01_ptr, s0
+	add A10_ptr, A11_ptr, s0
+	addi B_row_ptr, B_row_ptr, 16*REALSIZE
 
 TAIL_UNROLL_1: // loop_counter <= 1
-    beqz loop_counter, MULTIPLYALPHA
+	beqz loop_counter, MULTIPLYALPHA
 
-    // Load and deinterleave A(:,l)
-    VLE A00_re, (A00_ptr)
-    VLE A10_re, (A10_ptr)
+	// Load and deinterleave A(:,l)
+	VLE A00_re, (A00_ptr)
+	VLE A10_re, (A10_ptr)
 
-    // Load B(l,0:3)
-    FLOAD B00_re, 0*REALSIZE(B_row_ptr)
-    FLOAD B00_im, 1*REALSIZE(B_row_ptr)
-    FLOAD B01_re, 2*REALSIZE(B_row_ptr)
-    FLOAD B01_im, 3*REALSIZE(B_row_ptr)
-    FLOAD B02_re, 4*REALSIZE(B_row_ptr)
-    FLOAD B02_im, 5*REALSIZE(B_row_ptr)
-    FLOAD B03_re, 6*REALSIZE(B_row_ptr)
-    FLOAD B03_im, 7*REALSIZE(B_row_ptr)
+	// Load B(l,0:3)
+	FLOAD B00_re, 0*REALSIZE(B_row_ptr)
+	FLOAD B00_im, 1*REALSIZE(B_row_ptr)
+	FLOAD B01_re, 2*REALSIZE(B_row_ptr)
+	FLOAD B01_im, 3*REALSIZE(B_row_ptr)
+	FLOAD B02_re, 4*REALSIZE(B_row_ptr)
+	FLOAD B02_im, 5*REALSIZE(B_row_ptr)
+	FLOAD B03_re, 6*REALSIZE(B_row_ptr)
+	FLOAD B03_im, 7*REALSIZE(B_row_ptr)
 
-    vfmacc.vf  AB00_re, B00_re, A00_re   // AB(:,0) += A(:,l) * B(l,0)
-    vfnmsac.vf AB00_re, B00_im, A00_im
-    vfmacc.vf  AB00_im, B00_re, A00_im
-    vfmacc.vf  AB00_im, B00_im, A00_re
-    vfmacc.vf  AB10_re, B00_re, A10_re
-    vfnmsac.vf AB10_re, B00_im, A10_im
-    vfmacc.vf  AB10_im, B00_re, A10_im
-    vfmacc.vf  AB10_im, B00_im, A10_re
+	vfmacc.vf  AB00_re, B00_re, A00_re   // AB(:,0) += A(:,l) * B(l,0)
+	vfnmsac.vf AB00_re, B00_im, A00_im
+	vfmacc.vf  AB00_im, B00_re, A00_im
+	vfmacc.vf  AB00_im, B00_im, A00_re
+	vfmacc.vf  AB10_re, B00_re, A10_re
+	vfnmsac.vf AB10_re, B00_im, A10_im
+	vfmacc.vf  AB10_im, B00_re, A10_im
+	vfmacc.vf  AB10_im, B00_im, A10_re
 
-    vfmacc.vf  AB01_re, B01_re, A00_re   // AB(:,1) += A(:,l) * B(l,1)
-    vfnmsac.vf AB01_re, B01_im, A00_im
-    vfmacc.vf  AB01_im, B01_re, A00_im
-    vfmacc.vf  AB01_im, B01_im, A00_re
-    vfmacc.vf  AB11_re, B01_re, A10_re
-    vfnmsac.vf AB11_re, B01_im, A10_im
-    vfmacc.vf  AB11_im, B01_re, A10_im
-    vfmacc.vf  AB11_im, B01_im, A10_re
+	vfmacc.vf  AB01_re, B01_re, A00_re   // AB(:,1) += A(:,l) * B(l,1)
+	vfnmsac.vf AB01_re, B01_im, A00_im
+	vfmacc.vf  AB01_im, B01_re, A00_im
+	vfmacc.vf  AB01_im, B01_im, A00_re
+	vfmacc.vf  AB11_re, B01_re, A10_re
+	vfnmsac.vf AB11_re, B01_im, A10_im
+	vfmacc.vf  AB11_im, B01_re, A10_im
+	vfmacc.vf  AB11_im, B01_im, A10_re
 
-    vfmacc.vf  AB02_re, B02_re, A00_re   // AB(:,2) += A(:,l) * B(l,2)
-    vfnmsac.vf AB02_re, B02_im, A00_im
-    vfmacc.vf  AB02_im, B02_re, A00_im
-    vfmacc.vf  AB02_im, B02_im, A00_re
-    vfmacc.vf  AB12_re, B02_re, A10_re
-    vfnmsac.vf AB12_re, B02_im, A10_im
-    vfmacc.vf  AB12_im, B02_re, A10_im
-    vfmacc.vf  AB12_im, B02_im, A10_re
+	vfmacc.vf  AB02_re, B02_re, A00_re   // AB(:,2) += A(:,l) * B(l,2)
+	vfnmsac.vf AB02_re, B02_im, A00_im
+	vfmacc.vf  AB02_im, B02_re, A00_im
+	vfmacc.vf  AB02_im, B02_im, A00_re
+	vfmacc.vf  AB12_re, B02_re, A10_re
+	vfnmsac.vf AB12_re, B02_im, A10_im
+	vfmacc.vf  AB12_im, B02_re, A10_im
+	vfmacc.vf  AB12_im, B02_im, A10_re
 
-    vfmacc.vf  AB03_re, B03_re, A00_re   // AB(:,3) += A(:,l) * B(l,3)
-    vfnmsac.vf AB03_re, B03_im, A00_im
-    vfmacc.vf  AB03_im, B03_re, A00_im
-    vfmacc.vf  AB03_im, B03_im, A00_re
-    vfmacc.vf  AB13_re, B03_re, A10_re
-    vfnmsac.vf AB13_re, B03_im, A10_im
-    vfmacc.vf  AB13_im, B03_re, A10_im
-    vfmacc.vf  AB13_im, B03_im, A10_re
+	vfmacc.vf  AB03_re, B03_re, A00_re   // AB(:,3) += A(:,l) * B(l,3)
+	vfnmsac.vf AB03_re, B03_im, A00_im
+	vfmacc.vf  AB03_im, B03_re, A00_im
+	vfmacc.vf  AB03_im, B03_im, A00_re
+	vfmacc.vf  AB13_re, B03_re, A10_re
+	vfnmsac.vf AB13_re, B03_im, A10_im
+	vfmacc.vf  AB13_im, B03_re, A10_im
+	vfmacc.vf  AB13_im, B03_im, A10_re
 
 MULTIPLYALPHA:
-    FLOAD ALPHA_re, 0*REALSIZE(a1)
-    FLOAD ALPHA_im, 1*REALSIZE(a1)
+	FLOAD ALPHA_re, 0*REALSIZE(a1)
+	FLOAD ALPHA_im, 1*REALSIZE(a1)
 
-    FEQ tmp, ALPHA_im, fzero
-    bne tmp, zero, ALPHAREAL
+	FEQ tmp, ALPHA_im, fzero
+	bne tmp, zero, ALPHAREAL
 
-    // [AB00, ..., AB03] * alpha
-    vfmul.vf  tmp0_re, AB00_im, ALPHA_im
-    vfmul.vf  tmp0_im, AB00_re, ALPHA_im
-    vfmul.vf  tmp1_re, AB01_im, ALPHA_im
-    vfmul.vf  tmp1_im, AB01_re, ALPHA_im
-    vfmul.vf  tmp2_re, AB02_im, ALPHA_im
-    vfmul.vf  tmp2_im, AB02_re, ALPHA_im
-    vfmul.vf  tmp3_re, AB03_im, ALPHA_im
-    vfmul.vf  tmp3_im, AB03_re, ALPHA_im
-    vfmsub.vf AB00_re, ALPHA_re, tmp0_re
-    vfmsub.vf AB01_re, ALPHA_re, tmp1_re
-    vfmsub.vf AB02_re, ALPHA_re, tmp2_re
-    vfmsub.vf AB03_re, ALPHA_re, tmp3_re
-    vfmadd.vf AB00_im, ALPHA_re, tmp0_im
-    vfmadd.vf AB01_im, ALPHA_re, tmp1_im
-    vfmadd.vf AB02_im, ALPHA_re, tmp2_im
-    vfmadd.vf AB03_im, ALPHA_re, tmp3_im
+	// [AB00, ..., AB03] * alpha
+	vfmul.vf  tmp0_re, AB00_im, ALPHA_im
+	vfmul.vf  tmp0_im, AB00_re, ALPHA_im
+	vfmul.vf  tmp1_re, AB01_im, ALPHA_im
+	vfmul.vf  tmp1_im, AB01_re, ALPHA_im
+	vfmul.vf  tmp2_re, AB02_im, ALPHA_im
+	vfmul.vf  tmp2_im, AB02_re, ALPHA_im
+	vfmul.vf  tmp3_re, AB03_im, ALPHA_im
+	vfmul.vf  tmp3_im, AB03_re, ALPHA_im
+	vfmsub.vf AB00_re, ALPHA_re, tmp0_re
+	vfmsub.vf AB01_re, ALPHA_re, tmp1_re
+	vfmsub.vf AB02_re, ALPHA_re, tmp2_re
+	vfmsub.vf AB03_re, ALPHA_re, tmp3_re
+	vfmadd.vf AB00_im, ALPHA_re, tmp0_im
+	vfmadd.vf AB01_im, ALPHA_re, tmp1_im
+	vfmadd.vf AB02_im, ALPHA_re, tmp2_im
+	vfmadd.vf AB03_im, ALPHA_re, tmp3_im
 
-    // [AB10, ..., AB13] * alpha
-    vfmul.vf  tmp0_re, AB10_im, ALPHA_im
-    vfmul.vf  tmp0_im, AB10_re, ALPHA_im
-    vfmul.vf  tmp1_re, AB11_im, ALPHA_im
-    vfmul.vf  tmp1_im, AB11_re, ALPHA_im
-    vfmul.vf  tmp2_re, AB12_im, ALPHA_im
-    vfmul.vf  tmp2_im, AB12_re, ALPHA_im
-    vfmul.vf  tmp3_re, AB13_im, ALPHA_im
-    vfmul.vf  tmp3_im, AB13_re, ALPHA_im
-    vfmsub.vf AB10_re, ALPHA_re, tmp0_re
-    vfmsub.vf AB11_re, ALPHA_re, tmp1_re
-    vfmsub.vf AB12_re, ALPHA_re, tmp2_re
-    vfmsub.vf AB13_re, ALPHA_re, tmp3_re
-    vfmadd.vf AB10_im, ALPHA_re, tmp0_im
-    vfmadd.vf AB11_im, ALPHA_re, tmp1_im
-    vfmadd.vf AB12_im, ALPHA_re, tmp2_im
-    vfmadd.vf AB13_im, ALPHA_re, tmp3_im
+	// [AB10, ..., AB13] * alpha
+	vfmul.vf  tmp0_re, AB10_im, ALPHA_im
+	vfmul.vf  tmp0_im, AB10_re, ALPHA_im
+	vfmul.vf  tmp1_re, AB11_im, ALPHA_im
+	vfmul.vf  tmp1_im, AB11_re, ALPHA_im
+	vfmul.vf  tmp2_re, AB12_im, ALPHA_im
+	vfmul.vf  tmp2_im, AB12_re, ALPHA_im
+	vfmul.vf  tmp3_re, AB13_im, ALPHA_im
+	vfmul.vf  tmp3_im, AB13_re, ALPHA_im
+	vfmsub.vf AB10_re, ALPHA_re, tmp0_re
+	vfmsub.vf AB11_re, ALPHA_re, tmp1_re
+	vfmsub.vf AB12_re, ALPHA_re, tmp2_re
+	vfmsub.vf AB13_re, ALPHA_re, tmp3_re
+	vfmadd.vf AB10_im, ALPHA_re, tmp0_im
+	vfmadd.vf AB11_im, ALPHA_re, tmp1_im
+	vfmadd.vf AB12_im, ALPHA_re, tmp2_im
+	vfmadd.vf AB13_im, ALPHA_re, tmp3_im
 
-    j MULTIPLYBETA
+	j MULTIPLYBETA
 
 ALPHAREAL:
-    vfmul.vf AB00_re, AB00_re, ALPHA_re
-    vfmul.vf AB00_im, AB00_im, ALPHA_re
-    vfmul.vf AB01_re, AB01_re, ALPHA_re
-    vfmul.vf AB01_im, AB01_im, ALPHA_re
-    vfmul.vf AB02_re, AB02_re, ALPHA_re
-    vfmul.vf AB02_im, AB02_im, ALPHA_re
-    vfmul.vf AB03_re, AB03_re, ALPHA_re
-    vfmul.vf AB03_im, AB03_im, ALPHA_re
+	vfmul.vf AB00_re, AB00_re, ALPHA_re
+	vfmul.vf AB00_im, AB00_im, ALPHA_re
+	vfmul.vf AB01_re, AB01_re, ALPHA_re
+	vfmul.vf AB01_im, AB01_im, ALPHA_re
+	vfmul.vf AB02_re, AB02_re, ALPHA_re
+	vfmul.vf AB02_im, AB02_im, ALPHA_re
+	vfmul.vf AB03_re, AB03_re, ALPHA_re
+	vfmul.vf AB03_im, AB03_im, ALPHA_re
 
-    vfmul.vf AB10_re, AB10_re, ALPHA_re
-    vfmul.vf AB10_im, AB10_im, ALPHA_re
-    vfmul.vf AB11_re, AB11_re, ALPHA_re
-    vfmul.vf AB11_im, AB11_im, ALPHA_re
-    vfmul.vf AB12_re, AB12_re, ALPHA_re
-    vfmul.vf AB12_im, AB12_im, ALPHA_re
-    vfmul.vf AB13_re, AB13_re, ALPHA_re
-    vfmul.vf AB13_im, AB13_im, ALPHA_re
+	vfmul.vf AB10_re, AB10_re, ALPHA_re
+	vfmul.vf AB10_im, AB10_im, ALPHA_re
+	vfmul.vf AB11_re, AB11_re, ALPHA_re
+	vfmul.vf AB11_im, AB11_im, ALPHA_re
+	vfmul.vf AB12_re, AB12_re, ALPHA_re
+	vfmul.vf AB12_im, AB12_im, ALPHA_re
+	vfmul.vf AB13_re, AB13_re, ALPHA_re
+	vfmul.vf AB13_im, AB13_im, ALPHA_re
 
 MULTIPLYBETA:
-    FLOAD BETA_re,  0*REALSIZE(a4)
-    FLOAD BETA_im,  1*REALSIZE(a4)
-    FEQ tmp, BETA_im, fzero
-    bne tmp, zero, BETAREAL
+	FLOAD BETA_re,  0*REALSIZE(a4)
+	FLOAD BETA_im,  1*REALSIZE(a4)
+	FEQ tmp, BETA_im, fzero
+	bne tmp, zero, BETAREAL
 
-    // Load and deinterleave C(0:VLEN-1, 0:1)
-    VLE C0_re, (C00_ptr)
-    VLE C1_re, (C01_ptr)
+	// Load and deinterleave C(0:VLEN-1, 0:1)
+	VLE C0_re, (C00_ptr)
+	VLE C1_re, (C01_ptr)
 
-    // Load and deinterleave C(0:VLEN-1, 2:3)
-    VLE C2_re, (C02_ptr)
-    VLE C3_re, (C03_ptr)
+	// Load and deinterleave C(0:VLEN-1, 2:3)
+	VLE C2_re, (C02_ptr)
+	VLE C3_re, (C03_ptr)
 
-    // C(0:VLEN-1,0:1) * beta + AB(0:VLEN-1,0:1)
-    vfmacc.vf   AB00_re, BETA_re, C0_re
-    vfnmsac.vf  AB00_re, BETA_im, C0_im
-    vfmacc.vf   AB00_im, BETA_re, C0_im
-    vfmacc.vf   AB00_im, BETA_im, C0_re
-    VSE AB00_re, (C00_ptr)
+	// C(0:VLEN-1,0:1) * beta + AB(0:VLEN-1,0:1)
+	vfmacc.vf   AB00_re, BETA_re, C0_re
+	vfnmsac.vf  AB00_re, BETA_im, C0_im
+	vfmacc.vf   AB00_im, BETA_re, C0_im
+	vfmacc.vf   AB00_im, BETA_im, C0_re
+	VSE AB00_re, (C00_ptr)
 
-    vfmacc.vf   AB01_re, BETA_re, C1_re
-    vfnmsac.vf  AB01_re, BETA_im, C1_im
-    vfmacc.vf   AB01_im, BETA_re, C1_im
-    vfmacc.vf   AB01_im, BETA_im, C1_re
-    VSE AB01_re, (C01_ptr)
+	vfmacc.vf   AB01_re, BETA_re, C1_re
+	vfnmsac.vf  AB01_re, BETA_im, C1_im
+	vfmacc.vf   AB01_im, BETA_re, C1_im
+	vfmacc.vf   AB01_im, BETA_im, C1_re
+	VSE AB01_re, (C01_ptr)
 
-    // C(0:VLEN-1,2:3) * beta + AB(0:VLEN-1,2:3)
-    vfmacc.vf   AB02_re, BETA_re, C2_re
-    vfnmsac.vf  AB02_re, BETA_im, C2_im
-    vfmacc.vf   AB02_im, BETA_re, C2_im
-    vfmacc.vf   AB02_im, BETA_im, C2_re
-    VSE AB02_re, (C02_ptr)
+	// C(0:VLEN-1,2:3) * beta + AB(0:VLEN-1,2:3)
+	vfmacc.vf   AB02_re, BETA_re, C2_re
+	vfnmsac.vf  AB02_re, BETA_im, C2_im
+	vfmacc.vf   AB02_im, BETA_re, C2_im
+	vfmacc.vf   AB02_im, BETA_im, C2_re
+	VSE AB02_re, (C02_ptr)
 
-    vfmacc.vf   AB03_re, BETA_re, C3_re
-    vfnmsac.vf  AB03_re, BETA_im, C3_im
-    vfmacc.vf   AB03_im, BETA_re, C3_im
-    vfmacc.vf   AB03_im, BETA_im, C3_re
-    VSE AB03_re, (C03_ptr)
+	vfmacc.vf   AB03_re, BETA_re, C3_re
+	vfnmsac.vf  AB03_re, BETA_im, C3_im
+	vfmacc.vf   AB03_im, BETA_re, C3_im
+	vfmacc.vf   AB03_im, BETA_im, C3_re
+	VSE AB03_re, (C03_ptr)
 
-    // Load and deinterleave C(VLEN:2*VLEN-1, 0:1)
-    VLE C0_re, (C10_ptr)
-    VLE C1_re, (C11_ptr)
+	// Load and deinterleave C(VLEN:2*VLEN-1, 0:1)
+	VLE C0_re, (C10_ptr)
+	VLE C1_re, (C11_ptr)
 
-    // Load and deinterleave C(VLEN:2*VLEN-1, 2:3)
-    VLE C2_re, (C12_ptr)
-    VLE C3_re, (C13_ptr)
+	// Load and deinterleave C(VLEN:2*VLEN-1, 2:3)
+	VLE C2_re, (C12_ptr)
+	VLE C3_re, (C13_ptr)
 
-    // C(VLEN:2*VLEN-1,0:1) * beta + AB(VLEN:2*VLEN-1,0:1)
-    vfmacc.vf   AB10_re, BETA_re, C0_re
-    vfnmsac.vf  AB10_re, BETA_im, C0_im
-    vfmacc.vf   AB10_im, BETA_re, C0_im
-    vfmacc.vf   AB10_im, BETA_im, C0_re
-    VSE AB10_re, (C10_ptr)
+	// C(VLEN:2*VLEN-1,0:1) * beta + AB(VLEN:2*VLEN-1,0:1)
+	vfmacc.vf   AB10_re, BETA_re, C0_re
+	vfnmsac.vf  AB10_re, BETA_im, C0_im
+	vfmacc.vf   AB10_im, BETA_re, C0_im
+	vfmacc.vf   AB10_im, BETA_im, C0_re
+	VSE AB10_re, (C10_ptr)
 
-    vfmacc.vf   AB11_re, BETA_re, C1_re
-    vfnmsac.vf  AB11_re, BETA_im, C1_im
-    vfmacc.vf   AB11_im, BETA_re, C1_im
-    vfmacc.vf   AB11_im, BETA_im, C1_re
-    VSE AB11_re, (C11_ptr)
+	vfmacc.vf   AB11_re, BETA_re, C1_re
+	vfnmsac.vf  AB11_re, BETA_im, C1_im
+	vfmacc.vf   AB11_im, BETA_re, C1_im
+	vfmacc.vf   AB11_im, BETA_im, C1_re
+	VSE AB11_re, (C11_ptr)
 
-    // C(VLEN:2*VLEN-1,2:3) * beta + AB(VLEN:2*VLEN-1,2:3)
-    vfmacc.vf   AB12_re, BETA_re, C2_re
-    vfnmsac.vf  AB12_re, BETA_im, C2_im
-    vfmacc.vf   AB12_im, BETA_re, C2_im
-    vfmacc.vf   AB12_im, BETA_im, C2_re
-    VSE AB12_re, (C12_ptr)
+	// C(VLEN:2*VLEN-1,2:3) * beta + AB(VLEN:2*VLEN-1,2:3)
+	vfmacc.vf   AB12_re, BETA_re, C2_re
+	vfnmsac.vf  AB12_re, BETA_im, C2_im
+	vfmacc.vf   AB12_im, BETA_re, C2_im
+	vfmacc.vf   AB12_im, BETA_im, C2_re
+	VSE AB12_re, (C12_ptr)
 
-    vfmacc.vf   AB13_re, BETA_re, C3_re
-    vfnmsac.vf  AB13_re, BETA_im, C3_im
-    vfmacc.vf   AB13_im, BETA_re, C3_im
-    vfmacc.vf   AB13_im, BETA_im, C3_re
-    VSE AB13_re, (C13_ptr)
+	vfmacc.vf   AB13_re, BETA_re, C3_re
+	vfnmsac.vf  AB13_re, BETA_im, C3_im
+	vfmacc.vf   AB13_im, BETA_re, C3_im
+	vfmacc.vf   AB13_im, BETA_im, C3_re
+	VSE AB13_re, (C13_ptr)
 
-    j END
+	j END
 
 BETAREAL:
-    FEQ tmp, BETA_re, fzero
-    bne tmp, zero, BETAZERO
+	FEQ tmp, BETA_re, fzero
+	bne tmp, zero, BETAZERO
 
-    // Load and deinterleave C(0:VLEN-1, 0:3)
-    VLE C0_re, (C00_ptr)
-    VLE C1_re, (C01_ptr)
-    VLE C2_re, (C02_ptr)
-    VLE C3_re, (C03_ptr)
+	// Load and deinterleave C(0:VLEN-1, 0:3)
+	VLE C0_re, (C00_ptr)
+	VLE C1_re, (C01_ptr)
+	VLE C2_re, (C02_ptr)
+	VLE C3_re, (C03_ptr)
 
-    // C(0:VLEN-1,0:3) * beta + AB(0:VLEN-1,0:3)
-    vfmacc.vf   AB00_re, BETA_re, C0_re
-    vfmacc.vf   AB00_im, BETA_re, C0_im
-    vfmacc.vf   AB01_re, BETA_re, C1_re
-    vfmacc.vf   AB01_im, BETA_re, C1_im
+	// C(0:VLEN-1,0:3) * beta + AB(0:VLEN-1,0:3)
+	vfmacc.vf   AB00_re, BETA_re, C0_re
+	vfmacc.vf   AB00_im, BETA_re, C0_im
+	vfmacc.vf   AB01_re, BETA_re, C1_re
+	vfmacc.vf   AB01_im, BETA_re, C1_im
 
-    vfmacc.vf   AB02_re, BETA_re, C2_re
-    vfmacc.vf   AB02_im, BETA_re, C2_im
-    vfmacc.vf   AB03_re, BETA_re, C3_re
-    vfmacc.vf   AB03_im, BETA_re, C3_im
+	vfmacc.vf   AB02_re, BETA_re, C2_re
+	vfmacc.vf   AB02_im, BETA_re, C2_im
+	vfmacc.vf   AB03_re, BETA_re, C3_re
+	vfmacc.vf   AB03_im, BETA_re, C3_im
 
-    VSE AB00_re, (C00_ptr)
-    VSE AB01_re, (C01_ptr)
-    VSE AB02_re, (C02_ptr)
-    VSE AB03_re, (C03_ptr)
+	VSE AB00_re, (C00_ptr)
+	VSE AB01_re, (C01_ptr)
+	VSE AB02_re, (C02_ptr)
+	VSE AB03_re, (C03_ptr)
 
-    // Load and deinterleave C(VLEN:2*VLEN-1, 0:3)
-    VLE C0_re, (C10_ptr)
-    VLE C1_re, (C11_ptr)
-    VLE C2_re, (C12_ptr)
-    VLE C3_re, (C13_ptr)
+	// Load and deinterleave C(VLEN:2*VLEN-1, 0:3)
+	VLE C0_re, (C10_ptr)
+	VLE C1_re, (C11_ptr)
+	VLE C2_re, (C12_ptr)
+	VLE C3_re, (C13_ptr)
 
-    // C(VLEN:2*VLEN-1,0:3) * beta + AB(VLEN:2*VLEN-1,0:3)
-    vfmacc.vf   AB10_re, BETA_re, C0_re
-    vfmacc.vf   AB10_im, BETA_re, C0_im
-    vfmacc.vf   AB11_re, BETA_re, C1_re
-    vfmacc.vf   AB11_im, BETA_re, C1_im
+	// C(VLEN:2*VLEN-1,0:3) * beta + AB(VLEN:2*VLEN-1,0:3)
+	vfmacc.vf   AB10_re, BETA_re, C0_re
+	vfmacc.vf   AB10_im, BETA_re, C0_im
+	vfmacc.vf   AB11_re, BETA_re, C1_re
+	vfmacc.vf   AB11_im, BETA_re, C1_im
 
-    vfmacc.vf   AB12_re, BETA_re, C2_re
-    vfmacc.vf   AB12_im, BETA_re, C2_im
-    vfmacc.vf   AB13_re, BETA_re, C3_re
-    vfmacc.vf   AB13_im, BETA_re, C3_im
+	vfmacc.vf   AB12_re, BETA_re, C2_re
+	vfmacc.vf   AB12_im, BETA_re, C2_im
+	vfmacc.vf   AB13_re, BETA_re, C3_re
+	vfmacc.vf   AB13_im, BETA_re, C3_im
 
-    VSE AB10_re, (C10_ptr)
-    VSE AB11_re, (C11_ptr)
-    VSE AB12_re, (C12_ptr)
-    VSE AB13_re, (C13_ptr)
+	VSE AB10_re, (C10_ptr)
+	VSE AB11_re, (C11_ptr)
+	VSE AB12_re, (C12_ptr)
+	VSE AB13_re, (C13_ptr)
 
-    j END
+	j END
 
 BETAZERO:
-    VSE AB00_re, (C00_ptr)
-    VSE AB01_re, (C01_ptr)
-    VSE AB02_re, (C02_ptr)
-    VSE AB03_re, (C03_ptr)
+	VSE AB00_re, (C00_ptr)
+	VSE AB01_re, (C01_ptr)
+	VSE AB02_re, (C02_ptr)
+	VSE AB03_re, (C03_ptr)
 
-    VSE AB10_re, (C10_ptr)
-    VSE AB11_re, (C11_ptr)
-    VSE AB12_re, (C12_ptr)
-    VSE AB13_re, (C13_ptr)
+	VSE AB10_re, (C10_ptr)
+	VSE AB11_re, (C11_ptr)
+	VSE AB12_re, (C12_ptr)
+	VSE AB13_re, (C13_ptr)
 
 END:
-    #include "rviv_restore_registers.h"
-    ret
+	#include "rviv_restore_registers.h"
+	ret

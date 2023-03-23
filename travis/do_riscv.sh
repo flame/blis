@@ -8,15 +8,15 @@ TAG=2023.02.25
 # The prebuilt toolchains only support hardfloat, so we only
 # test these for now.
 case $1 in
-  "rv32iv")
-  TARBALL=riscv32-glibc-ubuntu-20.04-nightly-${TAG}-nightly.tar.gz
-  ;;
-  "rv64iv")
-  TARBALL=riscv64-glibc-ubuntu-20.04-nightly-${TAG}-nightly.tar.gz
-  ;;
-  *)
-  exit 1
-  ;;
+	"rv32iv")
+	TARBALL=riscv32-glibc-ubuntu-20.04-nightly-${TAG}-nightly.tar.gz
+	;;
+	"rv64iv")
+	TARBALL=riscv64-glibc-ubuntu-20.04-nightly-${TAG}-nightly.tar.gz
+	;;
+	*)
+	exit 1
+	;;
 esac
 
 TOOLCHAIN_PATH=$DIST_PATH/../toolchain

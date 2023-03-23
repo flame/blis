@@ -59,22 +59,22 @@ void bli_sgemm_rviv_4vx4
        const cntx_t*    cntx
      )
 {
-    // The assembly kernels always take native machine-sized integer arguments.
-    // dim_t and inc_t are normally defined as being machine-sized. If larger, assert.
-    bli_static_assert( sizeof(dim_t) <= sizeof(intptr_t) &&
-                       sizeof(inc_t) <= sizeof(intptr_t) );
+	// The assembly kernels always take native machine-sized integer arguments.
+	// dim_t and inc_t are normally defined as being machine-sized. If larger, assert.
+	bli_static_assert( sizeof(dim_t) <= sizeof(intptr_t) &&
+	                   sizeof(inc_t) <= sizeof(intptr_t) );
 
-    // Extract vector-length dependent mr, nr that are fixed at configure time.
-    const inc_t mr = bli_cntx_get_blksz_def_dt( BLIS_FLOAT, BLIS_MR, cntx );
-    const inc_t nr = 4;
+	// Extract vector-length dependent mr, nr that are fixed at configure time.
+	const inc_t mr = bli_cntx_get_blksz_def_dt( BLIS_FLOAT, BLIS_MR, cntx );
+	const inc_t nr = 4;
 
-    GEMM_UKR_SETUP_CT( s, mr, nr, false );
+	GEMM_UKR_SETUP_CT( s, mr, nr, false );
 
-    // The kernel assumes rs_c == 1, and the context should not deviate from it.
-    assert( rs_c == 1 );
+	// The kernel assumes rs_c == 1, and the context should not deviate from it.
+	assert( rs_c == 1 );
 
-    bli_sgemm_rviv_asm_4vx4( k, alpha, a, b, beta, c,
-                             get_vlenb(), cs_c * sizeof(float) );
+	bli_sgemm_rviv_asm_4vx4( k, alpha, a, b, beta, c,
+	                         get_vlenb(), cs_c * sizeof(float) );
 
-    GEMM_UKR_FLUSH_CT( s );
+	GEMM_UKR_FLUSH_CT( s );
 }

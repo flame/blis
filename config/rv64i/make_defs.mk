@@ -36,7 +36,7 @@
 # Declare the name of the current configuration and add it to the
 # running list of configurations included by common.mk.
 THIS_CONFIG    := rv64i
-#CONFIGS_INCL	+= $(THIS_CONFIG)
+#CONFIGS_INCL   += $(THIS_CONFIG)
 
 #
 # --- Determine the C compiler and related flags ---
