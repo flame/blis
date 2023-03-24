@@ -69,6 +69,8 @@ typedef struct lpgemm_post_op_attr_t
 	void* buf_downscale;
 	bool is_first_k;
 	bool is_last_k;
+	dim_t b_sum_offset;
+	int32_t* b_col_sum_vec;
 } lpgemm_post_op_attr;
 
 void lpgemm_translate_to_post_ops_list

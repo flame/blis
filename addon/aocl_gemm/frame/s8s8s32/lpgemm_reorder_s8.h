@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2022-2023, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2023, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -32,42 +32,26 @@
 
 */
 
-#ifndef LPGEMM_5LOOP_INTF_H
-#define LPGEMM_5LOOP_INTF_H
+#ifndef LPGEMM_REORDER_H_S8
+#define LPGEMM_REORDER_H_S8
 
 #include "lpgemm_types.h"
-#include "lpgemm_post_ops.h"
-#include "aocl_bf16_type.h"
 
-#define LPGEMM_5LOOP(A_type,B_type,C_type,LP_SFX) \
-void lpgemm_rowvar_ ## LP_SFX \
-     ( \
-       const dim_t           m, \
-       const dim_t           n, \
-       const dim_t           k, \
-       const A_type*         a, \
-       const dim_t           rs_a, \
-       const dim_t           cs_a, \
-       const AOCL_MEMORY_TAG mtag_a, \
-       const B_type*         b, \
-       const dim_t           rs_b, \
-       const dim_t           cs_b, \
-       const AOCL_MEMORY_TAG mtag_b, \
-       C_type*               c, \
-       const dim_t           rs_c, \
-       const dim_t           cs_c, \
-       const C_type          alpha, \
-       const C_type          beta, \
-       rntm_t*               rntm, \
-       lpgemm_thrinfo_t*     thread, \
-       lpgemm_cntx_t*        lcntx, \
-       lpgemm_post_op*       post_op_list, \
-       bool                  c_downscale \
-     ) \
+void reorderb_nr64_s8s8s32o32
+     (
+       lpgemm_obj_t*  b,
+       lpgemm_obj_t*  b_reorder,
+       rntm_t*        rntm,
+       lpgemm_cntx_t* lcntx
+     );
 
-LPGEMM_5LOOP(uint8_t,int8_t,int32_t,u8s8s32o32);
-LPGEMM_5LOOP(uint8_t,int8_t,int16_t,u8s8s16o16);
-LPGEMM_5LOOP(float,float,float,f32f32f32of32);
-LPGEMM_5LOOP(bfloat16,bfloat16,float,bf16bf16f32of32);
-LPGEMM_5LOOP(int8_t,int8_t,int32_t,s8s8s32o32);
-#endif // LPGEMM_5LOOP_INTF_H
+void reordera_mr6_s8s8s32o32
+     (
+       lpgemm_obj_t*  a,
+       lpgemm_obj_t*  a_reorder,
+       rntm_t*        rntm,
+       lpgemm_cntx_t* lcntx
+     );
+
+#endif //LPGEMM_REORDER_H_S8
+

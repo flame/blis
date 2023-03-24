@@ -33,7 +33,7 @@ void fill_array_ ## ctype ( void* arr, dim_t size ) \
 	ctype* temp_arr = ( ctype* ) arr; \
 	for ( dim_t i = 0; i < size; ++i ) \
 	{ \
-		temp_arr[i] = ( ctype )( i % 10 ); \
+		temp_arr[i] = ( ctype )( 1/*i % 10*/ ); \
 	} \
 } \
 
@@ -181,6 +181,8 @@ GEN_BLIS_MAT_MUL_FUNC(uint8_t,int8_t,int8_t,int32_t,u8s8s32os8)
 GEN_BLIS_MAT_MUL_FUNC(bfloat16,bfloat16,float,float,bf16bf16f32of32)
 GEN_BLIS_MAT_MUL_FUNC(bfloat16,bfloat16,bfloat16,float,bf16bf16f32obf16)
 GEN_BLIS_MAT_MUL_FUNC(float,float,float,float,f32f32f32of32)
+GEN_BLIS_MAT_MUL_FUNC(int8_t,int8_t,int32_t,int32_t,s8s8s32os32)
+GEN_BLIS_MAT_MUL_FUNC(int8_t,int8_t,int8_t,int32_t,s8s8s32os8)
 
 double get_gflops
      (
@@ -272,6 +274,8 @@ GEN_MAT_MUL_BENCH_DRV_FUNC(uint8_t,int8_t,int8_t,int32_t,u8s8s32os8)
 GEN_MAT_MUL_BENCH_DRV_FUNC(bfloat16,bfloat16,float,float,bf16bf16f32of32)
 GEN_MAT_MUL_BENCH_DRV_FUNC(bfloat16,bfloat16,bfloat16,float,bf16bf16f32obf16)
 GEN_MAT_MUL_BENCH_DRV_FUNC(float,float,float,float,f32f32f32of32)
+GEN_MAT_MUL_BENCH_DRV_FUNC(int8_t,int8_t,int32_t,int32_t,s8s8s32os32)
+GEN_MAT_MUL_BENCH_DRV_FUNC(int8_t,int8_t,int8_t,int32_t,s8s8s32os8)
 
 int max (int a, int b)
 {
@@ -299,6 +303,7 @@ inline C_type mat_mul_accuracy_check_downscale_ ## BLAS_DOWNSCALE_SFX \
 
 GEN_MAT_MUL_ACC_CHK_DOWNSCALE(int8_t,int16_t,float,u8s8s16os8)
 GEN_MAT_MUL_ACC_CHK_DOWNSCALE(int8_t,int32_t,float,u8s8s32os8)
+GEN_MAT_MUL_ACC_CHK_DOWNSCALE(int8_t,int32_t,float,s8s8s32os8)
 
 inline bfloat16 mat_mul_accuracy_check_downscale_bf16bf16f32obf16
      (
@@ -348,6 +353,8 @@ GEN_MAT_MUL_ACC_CHK_ACCUM(uint8_t,int8_t,int16_t,int16_t,u8s8s16os16)
 GEN_MAT_MUL_ACC_CHK_ACCUM(uint8_t,int8_t,int8_t,int32_t,u8s8s32os8)
 GEN_MAT_MUL_ACC_CHK_ACCUM(uint8_t,int8_t,int32_t,int32_t,u8s8s32os32)
 GEN_MAT_MUL_ACC_CHK_ACCUM(float,float,float,float,f32f32f32of32)
+GEN_MAT_MUL_ACC_CHK_ACCUM(int8_t,int8_t,int8_t,int32_t,s8s8s32os8)
+GEN_MAT_MUL_ACC_CHK_ACCUM(int8_t,int8_t,int32_t,int32_t,s8s8s32os32)
 
 inline float bf16_to_float
      (
@@ -438,6 +445,8 @@ GEN_GELU_TANH_POSTOP_INT(int16_t,u8s8s16os8)
 GEN_GELU_TANH_POSTOP_INT(int16_t,u8s8s16os16)
 GEN_GELU_TANH_POSTOP_INT(int32_t,u8s8s32os8)
 GEN_GELU_TANH_POSTOP_INT(int32_t,u8s8s32os32)
+GEN_GELU_TANH_POSTOP_INT(int32_t,s8s8s32os8)
+GEN_GELU_TANH_POSTOP_INT(int32_t,s8s8s32os32)
 
 #define GEN_GELU_TANH_POSTOP_FLOAT(BLAS_SFX) \
 inline float GELU_TANH_post_op_ ## BLAS_SFX \
@@ -470,6 +479,8 @@ GEN_GELU_ERF_POSTOP_INT(int16_t,u8s8s16os8)
 GEN_GELU_ERF_POSTOP_INT(int16_t,u8s8s16os16)
 GEN_GELU_ERF_POSTOP_INT(int32_t,u8s8s32os8)
 GEN_GELU_ERF_POSTOP_INT(int32_t,u8s8s32os32)
+GEN_GELU_ERF_POSTOP_INT(int32_t,s8s8s32os8)
+GEN_GELU_ERF_POSTOP_INT(int32_t,s8s8s32os32)
 
 #define GEN_GELU_ERF_POSTOP_FLOAT(BLAS_SFX) \
 inline float GELU_ERF_post_op_ ## BLAS_SFX \
@@ -634,6 +645,8 @@ GEN_MAT_MUL_ACC_CHK_DRV_FUNC(uint8_t,int8_t,int8_t,int32_t,float,u8s8s32os8,u8s8
 GEN_MAT_MUL_ACC_CHK_DRV_FUNC(bfloat16,bfloat16,float,float,float,bf16bf16f32of32,bf16bf16f32obf16)
 GEN_MAT_MUL_ACC_CHK_DRV_FUNC(bfloat16,bfloat16,bfloat16,float,float,bf16bf16f32obf16,bf16bf16f32obf16)
 GEN_MAT_MUL_ACC_CHK_DRV_FUNC(float,float,float,float,float,f32f32f32of32,bf16bf16f32obf16)
+GEN_MAT_MUL_ACC_CHK_DRV_FUNC(int8_t,int8_t,int32_t,int32_t,float,s8s8s32os32,s8s8s32os8)
+GEN_MAT_MUL_ACC_CHK_DRV_FUNC(int8_t,int8_t,int8_t,int32_t,float,s8s8s32os8,s8s8s32os8)
 
 /* Only supports bias followed by RELU and vice versa for now.*/ \
 #define GEN_MAT_MUL_POST_OPS_CREATOR(C_type,DSCALE_type,BLAS_SFX) \
@@ -777,6 +790,7 @@ GEN_MAT_MUL_POST_OPS_CREATOR(int16_t,float,u8s8s16os16)
 GEN_MAT_MUL_POST_OPS_CREATOR(int32_t,float,u8s8s32os32)
 GEN_MAT_MUL_POST_OPS_CREATOR(float,float,bf16bf16f32of32)
 GEN_MAT_MUL_POST_OPS_CREATOR(float,float,f32f32f32of32)
+GEN_MAT_MUL_POST_OPS_CREATOR(int32_t,float,s8s8s32os32)
 
 void lpgemm_destroy_post_ops_struct( aocl_post_op* post_ops )
 {
@@ -949,6 +963,8 @@ GEN_MAT_MUL_BENCH_MAIN_FUNC(uint8_t,int8_t,int8_t,u8s8s16os8,u8s8s16os16)
 GEN_MAT_MUL_BENCH_MAIN_FUNC(uint8_t,int8_t,int32_t,u8s8s32os32,u8s8s32os32)
 GEN_MAT_MUL_BENCH_MAIN_FUNC(uint8_t,int8_t,int8_t,u8s8s32os8,u8s8s32os32)
 GEN_MAT_MUL_BENCH_MAIN_FUNC(float,float,float,f32f32f32of32,f32f32f32of32)
+GEN_MAT_MUL_BENCH_MAIN_FUNC(int8_t,int8_t,int32_t,s8s8s32os32,s8s8s32os32)
+GEN_MAT_MUL_BENCH_MAIN_FUNC(int8_t,int8_t,int8_t,s8s8s32os8,s8s8s32os32)
 
 #define GEN_MAT_MUL_BENCH_MAIN_FUNC_BF16(C_type, BLAS_SFX) \
 void mat_mul_bench_main_ ## BLAS_SFX \
@@ -1048,7 +1064,7 @@ void mat_mul_bench_main_ ## BLAS_SFX \
 		bfloat16* b_reorder = ( bfloat16* ) bli_malloc_user( b_reorder_buf_siz_req ); \
 			aocl_reorder_bf16bf16f32of32( 'B', b, b_reorder, k, n, stride_b ); \
  \
-		GEN_FUNC_NAME(mat_mul_bench_driver_,BLAS_SFX) \
+ 		GEN_FUNC_NAME(mat_mul_bench_driver_,BLAS_SFX) \
 		( \
 		  stor_order, op_t, n_repeats, m, n, k, \
 		  alpha, \
@@ -1288,7 +1304,7 @@ int main( int argc, char** argv )
 					);
 				}
 			}
-			if ((op_type_char == 'b') || (op_type_char == 'B'))
+			else if ((op_type_char == 'b') || (op_type_char == 'B'))
 			{
 				if ( global_dscale_out == 'n' )
 				{
@@ -1306,6 +1322,27 @@ int main( int argc, char** argv )
 						fin, fout, stor_order, op_t,
 						m, n, k, stride_a, stride_b, stride_c,
 						post_ops_str_dest
+					);
+				}
+			}
+			else if ( ( op_type_char == 'u' ) || ( op_type_char == 'U' ) )
+			{
+				if ( global_dscale_out == 'n' )
+				{
+					GEN_FUNC_NAME(mat_mul_bench_main_,s8s8s32os32)
+					(
+					  fin, fout, stor_order, op_t,
+					  m, n, k, stride_a, stride_b, stride_c,
+					  post_ops_str_dest
+					);
+				}
+				else
+				{
+					GEN_FUNC_NAME(mat_mul_bench_main_,s8s8s32os8)
+					(
+					  fin, fout, stor_order, op_t,
+					  m, n, k, stride_a, stride_b, stride_c,
+					  post_ops_str_dest
 					);
 				}
 			}

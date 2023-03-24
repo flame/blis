@@ -45,5 +45,7 @@
 #include "lpgemm_packb_s16.h"
 #include "lpgemm_packa.h"
 #include "lpgemm_packb.h"
+#include "lpgemm_packa_s8.h"
+#include "lpgemm_packb_s8.h"
 
 #endif // BLIS_ADDON_LPGEMM

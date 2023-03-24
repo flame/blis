@@ -41,6 +41,8 @@
 #include "lpgemm_packb_s16.h"
 #include "lpgemm_packa.h"
 #include "lpgemm_packb.h"
+#include "lpgemm_packa_s8.h"
+#include "lpgemm_packb_s8.h"
 
 static lpgemm_cntx_t global_cntx_t_list[AOCL_OPERATION_TYPE_LEN]; //Only one op type supported now.
 
