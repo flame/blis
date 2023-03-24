@@ -134,7 +134,7 @@
 #define RISCV_C
 #endif
 
-#define RISV_P
+#define RISCV_P
 
 #if __riscv_vector
 #define RISCV_V v
