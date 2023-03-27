@@ -32,6 +32,7 @@
 
 */
 
+#if 1
 
 //
 // Prototype BLAS-to-BLIS interfaces.
@@ -51,5 +52,7 @@ BLIS_EXPORT_BLAS void PASTEF772(chxy,blasname,chc) \
 
 #ifdef BLIS_ENABLE_BLAS
 INSERT_GENTPROTDOT_BLAS( ger )
+#endif
+
 #endif
 

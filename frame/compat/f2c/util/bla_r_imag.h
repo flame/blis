@@ -32,7 +32,7 @@
 
 */
 
-#ifdef BLIS_ENABLE_BLAS
+#if 1
 
 bla_real bla_r_imag(const bla_scomplex *z);
 
