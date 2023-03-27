@@ -1,4 +1,7 @@
 #include <iostream>
+#ifdef REF_IS_MKL
+#include <omp.h>
+#endif
 #include "common/refCBLAS.h"
 
 namespace testinghelpers {
@@ -7,6 +10,8 @@ refCBLAS::refCBLAS() {
     if (!refCBLASModule)
     {
 #ifdef REF_IS_MKL
+        // Dummy call to force linker, link OpenMP library if MKL is used.
+        omp_get_num_threads();
         MKLCoreModule = dlopen(MKL_CORE, RTLD_GLOBAL | RTLD_LAZY);
         MKLGNUThreadModule = dlopen(MKL_GNU_THREAD, RTLD_GLOBAL | RTLD_LAZY);
 #endif
