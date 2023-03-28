@@ -46,8 +46,7 @@ THIS_CONFIG    := rv64i
 # general-purpose/configuration-agnostic flags in common.mk. You
 # may specify additional flags here as needed.
 CPPROCFLAGS    := -DRISCV_SIZE=64
-CMISCFLAGS     := -march=$(shell $(CC) -E frame/base/bli_riscv_detect_arch.h \
-							| grep '^[^#]') -mabi=lp64
+CMISCFLAGS     := -march=$(shell $(CC) -E frame/base/bli_riscv_detect_arch.h | grep '^[^#]') -mabi=lp64
 CPICFLAGS      :=
 CWARNFLAGS     := -Wall -Wno-unused-function -Wfatal-errors
 
