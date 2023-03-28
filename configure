@@ -199,6 +199,16 @@ print_usage()
                  library. When disabled, this option also forces the use
                  of --disable-threading.
 
+   --enable-tls, --disable-tls
+
+                 Enable thread-local storage (TLS) for static variables
+                 in BLIS. The default state is enabled. However, like with
+                 --disable-system, there may be rare situations, such as
+                 when --disable-system is appropriate, where thread-local
+                 storage is unsupported by the compiler. In those cases,
+                 disabling TLS may be a suitable workaround. When disabled,
+                 this option also forces the use of --disable-threading.
+
    --disable-pba-pools, --enable-pba-pools
    --disable-sba-pools, --enable-sba-pools
 
@@ -2512,6 +2522,9 @@ main()
 	# The system flag.
 	enable_system='yes'
 
+	# The thread-local storage flag.
+	enable_tls='yes'
+
 	# The threading flag.
 	threading_model='off'
 
@@ -2690,6 +2703,13 @@ main()
 							;;
 						disable-system)
 							enable_system='no'
+							;;
+
+						enable-tls)
+							enable_tls='yes'
+							;;
+						disable-tls)
+							enable_tls='no'
 							;;
 
 						enable-threading=*)
@@ -3543,8 +3563,21 @@ main()
 		enable_system_01=1
 	else
 		echo "${script_name}: disabling operating system support."
-		echo "${script_name}: WARNING: all threading will be disabled!"
+		echo "${script_name}: WARNING: disabling OS support forcibly disables all threading!"
 		enable_system_01=0
+
+		# Force threading to be disabled.
+		threading_model='off'
+	fi
+
+	# Check if we are building with or without thread-local storage support.
+	if [[ ${enable_tls} = yes ]]; then
+		echo "${script_name}: enabling thread-local storage (TLS) support."
+		enable_tls_01=1
+	else
+		echo "${script_name}: disabling thread-local storage (TLS) support."
+		echo "${script_name}: WARNING: disabling thread-local storage forcibly disables all threading!"
+		enable_tls_01=0
 
 		# Force threading to be disabled.
 		threading_model='off'
@@ -4202,6 +4235,7 @@ main()
 	| sed >"${bli_config_h_out_path}"                                    \
 	-e "s/@version@/${version_esc}/g"                                    \
 	-e "s/@enable_system@/${enable_system_01}/g"                         \
+	-e "s/@enable_tls@/${enable_tls_01}/g"                               \
 	-e "s/@enable_openmp@/${enable_openmp_01}/g"                         \
 	-e "s/@enable_openmp_as_def@/${enable_openmp_as_def_01}/g"           \
 	-e "s/@enable_pthreads@/${enable_pthreads_01}/g"                     \
