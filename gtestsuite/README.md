@@ -143,11 +143,11 @@ You can also find more details in [CMake Documentation](https://cmake.org/cmake/
 As we mentioned earlier, all cpp files of each API directory are compiled into one executable. This executable can be run separately which can be very useful while developing or debugging.
 ### To run all addv tests use:
 ```console
-$ ./test.level1.addv
+$ ./testsuite.level1.addv
 ```
 ### To run a more specific tests, say the snrm2 tests of nrm2, use:
 ```console
-$ ./test.util.nrm2 --gtest_filter="*snrm2*"
+$ ./testuite.util.nrm2 --gtest_filter="*snrm2*"
 ```
 ## Running tests using Valgrind
 We can run any executable using valgrind as usual. For example, use the following command

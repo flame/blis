@@ -167,6 +167,45 @@ gtint_t get_leading_dimension(char storage, char trans, gtint_t m, gtint_t n, gt
     return lda;
 }
 
+/**
+ * If T is real, returns NaN.
+ * If T is complex, returns {NaN, 0.0}
+*/
+template<typename T>
+T getNaN()
+{
+    using RT = typename testinghelpers::type_info<T>::real_type;
+    if constexpr (testinghelpers::type_info<T>::is_real)
+        return std::numeric_limits<RT>::quiet_NaN();
+    else
+        return T{std::numeric_limits<RT>::quiet_NaN(), 0};
+}
+template float getNaN<float>();
+template double getNaN<double>();
+template scomplex getNaN<scomplex>();
+template dcomplex getNaN<dcomplex>();
+
+/**
+ * If T is real, returns inf.
+ * If T is complex, returns {inf, 0.0}
+*/
+template<typename T>
+T getInf()
+{
+    using RT = typename testinghelpers::type_info<T>::real_type;
+    if constexpr (testinghelpers::type_info<T>::is_real)
+        return std::numeric_limits<RT>::infinity();
+    else
+        return T{std::numeric_limits<RT>::infinity(), 0};
+}
+template float getInf<float>();
+template double getInf<double>();
+template scomplex getInf<scomplex>();
+template dcomplex getInf<dcomplex>();
+
+
+
+
 bool chktrans( char trns )
 {
     return (!(trns=='n'));

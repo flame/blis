@@ -80,6 +80,20 @@ gtint_t matsize(char storage, char trans, gtint_t m, gtint_t n, gtint_t ldm );
 gtint_t get_leading_dimension(char storage, char trans, gtint_t m, gtint_t n, gtint_t inc);
 
 /**
+ * If T is real, returns NaN.
+ * If T is complex, returns {NaN, 0.0}
+*/
+template<typename T>
+T getNaN();
+
+/**
+ * If T is real, returns inf.
+ * If T is complex, returns {inf, 0.0}
+*/
+template<typename T>
+T getInf();
+
+/**
  * @brief Returns the conjugate of a scalar x.
  *
  * @tparam T float, double, scomplex, dcomplex

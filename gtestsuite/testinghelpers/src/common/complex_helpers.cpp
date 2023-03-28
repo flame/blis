@@ -31,18 +31,20 @@
    OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 */
-
+#include <complex>
 #include "common/complex_helpers.h"
 
 namespace std {
     // Overload std::abs to work with scomplex and dcomplex.
     float abs(const scomplex x)
     {
-        return sqrt(x.real*x.real + x.imag*x.imag);
+        std::complex<float> y{x.real, x.imag};
+        return std::abs(y);
     }
     double abs(const dcomplex x)
     {
-        return sqrt(x.real*x.real + x.imag*x.imag);
+        std::complex<double> y{x.real, x.imag};
+        return std::abs(y);
     }
     // Overload the stream operator to be able to print scomplex in error messages.
     ostream& operator<<(ostream& os, const scomplex& x)
