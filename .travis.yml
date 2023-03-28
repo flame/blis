@@ -110,7 +110,7 @@ script:
 - ls -l
 - $CC --version
 - $CC -v
-- make -j 2
+- make -j 2 V=1
 - make install
 - if [ "$BLD" = "" ]; then $DIST_PATH/travis/cxx/cxx-test.sh $DIST_PATH $(ls -1 include); fi
 # Qemu SVE is failing sgemmt in some cases. Skip as this issue is not observed
