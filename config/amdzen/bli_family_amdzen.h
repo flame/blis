@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2021-2022, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2021-2023, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -71,6 +71,8 @@
  * bli_zen4_restore_default_blkszs() before exiting TRSM Path
  */
 BLIS_EXPORT_BLIS void bli_zen4_override_trsm_blkszs (cntx_t* cntx);
+
+BLIS_EXPORT_BLIS void bli_zen4_override_gemm_blkszs (cntx_t* cntx);
 
 /*
  * Restore the block sizes to default values needed for zen4 context.
