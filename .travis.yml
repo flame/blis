@@ -80,13 +80,13 @@ script:
 - pwd
 - if [ $OOT -eq 1 ]; then export DIST_PATH=`pwd`; mkdir ../oot; cd ../oot; chmod -R a-w $DIST_PATH; fi
 - pwd
-- $DIST_PATH/configure -p `pwd`/../install -t $THR $BLD CC=$CC $CONF
+- $DIST_PATH/configure -p `pwd`/../install -t $THR CC=$CC $CONF
 - pwd
 - ls -l
 - $CC --version
 - make -j 2
 - make install
-- if [ "$BLD" = "" ]; then $DIST_PATH/travis/cxx/cxx-test.sh $DIST_PATH $(ls -1 include); fi
+- $DIST_PATH/travis/cxx/cxx-test.sh $DIST_PATH $(ls -1 include)
 # Qemu SVE is failing sgemmt in some cases. Skip as this issue is not observed
 # on real chip (A64fx).
 - if [ "$CONF" = "armsve" ]; then sed -i 's/.*\<gemmt\>.*/0/' $DIST_PATH/testsuite/input.operations.fast; fi
