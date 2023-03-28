@@ -50,7 +50,8 @@ CPPROCFLAGS    := -DRISCV_SIZE=32
 # (-march=rv32iav) or by linking against libatomic
 #CMISCFLAGS     := -march=$(shell $(CC) -E frame/base/bli_riscv_detect_arch.h \
 #                                 | grep '^[^\#]') -mabi=ilp32d
-CMISCFLAGS     := -march=rv32iv -mabi=ilp32d
+#CMISCFLAGS     := -march=rv32iv -mabi=ilp32d
+CMISCFLAGS     := -mabi=ilp32d
 CPICFLAGS      :=
 CWARNFLAGS     := -Wall -Wno-unused-function -Wfatal-errors
 
