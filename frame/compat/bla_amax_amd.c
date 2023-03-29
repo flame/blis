@@ -291,7 +291,7 @@ f77_int idamax_blis_impl
         incx0 = ( inc_t )(*incx);
     }
 
-    cntx_t* cntx;
+    cntx_t* cntx = NULL;
 
     // Query the architecture ID
     arch_t id = bli_arch_query_id();
@@ -325,7 +325,7 @@ f77_int idamax_blis_impl
       n0,
       x0, incx0,
       &bli_index,
-      NULL
+      cntx
     );
 
     /*

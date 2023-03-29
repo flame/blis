@@ -666,7 +666,7 @@ void zscal_blis_impl
   // Definition of function pointer
   zscalv_ker_ft scalv_fun_ptr;
 
-  cntx_t* cntx;
+  cntx_t* cntx = NULL;
 
   // Query the architecture ID
   arch_t id = bli_arch_query_id();
@@ -700,9 +700,9 @@ void zscal_blis_impl
   (
     BLIS_NO_CONJUGATE,
     n0,
-    alpha,
+    (dcomplex*) alpha,
     x0, incx0,
-    NULL
+    cntx
   );
 
   AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1)
