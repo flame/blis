@@ -3576,11 +3576,7 @@ main()
 		enable_tls_01=1
 	else
 		echo "${script_name}: disabling thread-local storage (TLS) support."
-		echo "${script_name}: WARNING: disabling thread-local storage forcibly disables all threading!"
 		enable_tls_01=0
-
-		# Force threading to be disabled.
-		threading_model='off'
 	fi
 
 	# Check the threading model flag and standardize its value, if needed.
