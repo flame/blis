@@ -87,7 +87,8 @@
 #define RISCV_P
 #endif
 
-#if __riscv_v
+/* FORCE_RISCV_VECTOR is a Clang workaround */
+#if __riscv_v || FORCE_RISCV_VECTOR
 #define RISCV_V v
 #else
 #define RISCV_V
@@ -136,7 +137,8 @@
 
 #define RISCV_P
 
-#if __riscv_vector
+/* FORCE_RISCV_VECTOR is a Clang workaround */
+#if __riscv_vector || FORCE_RISCV_VECTOR
 #define RISCV_V v
 #else
 #define RISCV_V

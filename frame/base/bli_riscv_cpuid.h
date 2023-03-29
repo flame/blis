@@ -42,8 +42,8 @@
    macros, it will fall back on generic, so the BLIS configure script may need
    the RISC-V configuration to be explicitly specified. */
 
-// false if !defined(riscv_i) || !defined(__riscv_xlen)
-#if __riscv_i && __riscv_xlen == 64
+// false if !defined(__riscv) || !defined(__riscv_xlen)
+#if __riscv && __riscv_xlen == 64
 
 #if __riscv_vector // false if !defined(__riscv_vector)
 rv64iv
@@ -51,8 +51,8 @@ rv64iv
 rv64i
 #endif
 
-// false if !defined(riscv_i) || !defined(__riscv_xlen)
-#elif __riscv_i && __riscv_xlen == 32
+// false if !defined(__riscv) || !defined(__riscv_xlen) || __riscv_e32 != 0
+#elif __riscv && __riscv_xlen == 32 && !__riscv_e32
 
 #if __riscv_vector // false if !defined(__riscv_vector)
 rv32iv

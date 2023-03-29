@@ -148,7 +148,7 @@
 REALNAME:
 	#include "rviv_save_registers.h"
 
-	vsetvli s0, zero, VTYPE
+	vsetvli s0, zero, VTYPE, m1, ta, ma
 	csrr s0, vlenb
 	slli s0, s0, 1
 	FZERO(fzero)
