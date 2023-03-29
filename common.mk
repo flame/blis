@@ -734,15 +734,12 @@ $(foreach c, $(CONFIG_LIST_FAM), $(eval $(call append-var-for,CWARNFLAGS,$(c))))
 
 ifeq ($(MK_ENABLE_SHARED),yes)
 
-# Emit position-independent code for dynamic linking.
-ifeq ($(IS_MSVC),yes)
-# Note: Don't use any fPIC flags for Windows builds since all code is position-
+# Note: Avoid -fPIC flags for Windows builds since all code is position-
 # independent.
+ifeq ($(IS_MSVC),yes)
 CPICFLAGS :=
-else
-CPICFLAGS := -fPIC
 endif
-$(foreach c, $(CONFIG_LIST_FAM), $(eval $(call append-var-for,CPICFLAGS,$(c))))
+$(foreach c, $(CONFIG_LIST_FAM), $(eval $(call store-var-for,CPICFLAGS,$(c))))
 
 # --- Symbol exporting flags (shared libraries only) ---
 
