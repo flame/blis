@@ -206,8 +206,11 @@ print_usage()
                  --disable-system, there may be rare situations, such as
                  when --disable-system is appropriate, where thread-local
                  storage is unsupported by the compiler. In those cases,
-                 disabling TLS may be a suitable workaround. When disabled,
-                 this option also forces the use of --disable-threading.
+                 disabling TLS may be a suitable workaround.
+		         WARNING: DISABLING TLS IS DANGEROUS AND MAY CAUSE RACE
+                 CONDITIONS! Please try combining --disable-tls with
+                 --disable-threading if you suspect any correctness or
+                 deadlock issues.
 
    --disable-pba-pools, --enable-pba-pools
    --disable-sba-pools, --enable-sba-pools
@@ -3576,6 +3579,9 @@ main()
 		enable_tls_01=1
 	else
 		echo "${script_name}: disabling thread-local storage (TLS) support."
+		echo "${script_name}: WARNING: THIS IS DANGEROUS! Disabling TLS may cause race conditions!"
+		echo "${script_name}: WARNING: Please try --disable-threading if you suspect any correctness"
+		echo "${script_name}: WARNING: or deadlock issues."
 		enable_tls_01=0
 	fi
 
