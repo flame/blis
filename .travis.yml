@@ -72,13 +72,13 @@ matrix:
       CC=aarch64-linux-gnu-gcc-10 CXX=aarch64-linux-gnu-g++-10 \
       PACKAGES="gcc-10-aarch64-linux-gnu g++-10-aarch64-linux-gnu libc6-dev-arm64-cross qemu-system-arm qemu-user" \
       TESTSUITE_WRAPPER="qemu-aarch64 -L /usr/aarch64-linux-gnu/"
+  # The RISC-V targets require the qemu version available in jammy or newer.
+  # When CI is upgraded, the packages should be activated and do_script.sh
+  # cleaned up.
   - os: linux
     compiler: riscv64-unknown-linux-gcc
     env: OOT=0 TEST=FAST SDE=0 THR="none" BLD="--disable-shared" CONF="rv64iv"\
       CC=riscv64-unknown-linux-gnu-gcc \
-      # The RISC-V targets require the qemu version available in jammy or newer.
-      # When CI is upgraded, the packages should be activated and do_script.sh
-      # cleaned up.
       #PACKAGES="qemu-user qemu-user-binfmt" \
       LDFLAGS=-static
   - os: linux
