@@ -731,9 +731,6 @@ $(foreach c, $(CONFIG_LIST_FAM), $(eval $(call append-var-for,CWARNFLAGS,$(c))))
 
 # --- Position-independent code flags (shared libraries only) ---
 
-
-ifeq ($(MK_ENABLE_SHARED),yes)
-
 # Note: Avoid -fPIC flags for Windows builds since all code is position-
 # independent.
 ifeq ($(IS_MSVC),yes)
@@ -742,6 +739,8 @@ endif
 $(foreach c, $(CONFIG_LIST_FAM), $(eval $(call store-var-for,CPICFLAGS,$(c))))
 
 # --- Symbol exporting flags (shared libraries only) ---
+
+ifeq ($(MK_ENABLE_SHARED),yes)
 
 # NOTE: These flags are only applied when building BLIS and not used by
 # applications that import BLIS compilation flags via the
