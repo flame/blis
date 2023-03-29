@@ -16,6 +16,9 @@ arm64:          armsve firestorm thunderx2 cortexa57 cortexa53 generic
 arm32:          cortexa15 cortexa9 generic
 power:          power10 power9 generic
 
+# SiFive architectures
+sifive_x280:        sifive_x280
+
 # Intel architectures.
 skx:         skx/skx/haswell/zen
 knl:         knl/knl/haswell/zen

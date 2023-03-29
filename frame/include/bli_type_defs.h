@@ -928,6 +928,9 @@ typedef enum
 	// NOTE: The C language standard guarantees that the first enum value
 	// starts at 0.
 
+	// SiFive
+	BLIS_ARCH_SIFIVE_X280,
+
 	// Intel
 	BLIS_ARCH_SKX,
 	BLIS_ARCH_KNL,
