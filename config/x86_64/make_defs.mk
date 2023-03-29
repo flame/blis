@@ -47,7 +47,7 @@ THIS_CONFIG    := x86_64
 # may specify additional flags here as needed.
 CPPROCFLAGS    :=
 CMISCFLAGS     :=
-CPICFLAGS      :=
+CPICFLAGS      := -fPIC
 CWARNFLAGS     :=
 
 ifneq ($(DEBUG_TYPE),off)
