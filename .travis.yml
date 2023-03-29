@@ -77,13 +77,13 @@ matrix:
   # cleaned up.
   - os: linux
     compiler: riscv64-unknown-linux-gcc
-    env: OOT=0 TEST=FAST SDE=0 THR="none" BLD="--disable-shared" CONF="rv64iv"\
+    env: OOT=0 TEST=FAST SDE=0 THR="none" BLD="--disable-shared" CONF="rv64iv" \
       CC=riscv64-unknown-linux-gnu-gcc \
       #PACKAGES="qemu-user qemu-user-binfmt" \
       LDFLAGS=-static
   - os: linux
     compiler: riscv32-unknown-linux-gcc
-    env: OOT=0 TEST=FAST SDE=0 THR="none" BLD="--disable-shared" CONF="rv32iv"\
+    env: OOT=0 TEST=FAST SDE=0 THR="none" BLD="--disable-shared" CONF="rv32iv" \
       CC=riscv32-unknown-linux-gnu-gcc \
       #PACKAGES="qemu-user qemu-user-binfmt" \
       LDFLAGS=-static
@@ -95,24 +95,23 @@ script:
 - pwd
 - if [ $OOT -eq 1 ]; then export DIST_PATH=`pwd`; mkdir ../oot; cd ../oot; chmod -R a-w $DIST_PATH; fi
 - pwd
-- >
-    if [ "$CONF" = "rv64iv" ]; then
-      $DIST_PATH/travis/do_riscv.sh "$CONF";
-      export CC=$DIST_PATH/../toolchain/riscv/bin/riscv64-unknown-linux-gnu-gcc;
-      export CXX=$DIST_PATH/../toolchain/riscv/bin/riscv64-unknown-linux-gnu-g++;
-      export TESTSUITE_WRAPPER="$DIST_PATH/../toolchain/qemu-riscv64 -cpu rv64,vext_spec=v1.0,v=true,vlen=128 -B 0x100000";
-    fi
-- >
-    if [ "$CONF" = "rv32iv" ]; then
-      $DIST_PATH/travis/do_riscv.sh "$CONF";
-      export CC=$DIST_PATH/../toolchain/riscv/bin/riscv32-unknown-linux-gnu-gcc;
-      export CXX=$DIST_PATH/../toolchain/riscv/bin/riscv32-unknown-linux-gnu-g++;
-      export TESTSUITE_WRAPPER="$DIST_PATH/../toolchain/qemu-riscv32 -cpu rv32,vext_spec=v1.0,v=true,vlen=128 -B 0x100000";
-    fi
+- if [ "$CONF" = "rv64iv" ]; then
+    $DIST_PATH/travis/do_riscv.sh "$CONF";
+    export CC=$DIST_PATH/../toolchain/riscv/bin/riscv64-unknown-linux-gnu-gcc;
+    export CXX=$DIST_PATH/../toolchain/riscv/bin/riscv64-unknown-linux-gnu-g++;
+    export TESTSUITE_WRAPPER="$DIST_PATH/../toolchain/qemu-riscv64 -cpu rv64,vext_spec=v1.0,v=true,vlen=128 -B 0x100000";
+  fi
+- if [ "$CONF" = "rv32iv" ]; then
+    $DIST_PATH/travis/do_riscv.sh "$CONF";
+    export CC=$DIST_PATH/../toolchain/riscv/bin/riscv32-unknown-linux-gnu-gcc;
+    export CXX=$DIST_PATH/../toolchain/riscv/bin/riscv32-unknown-linux-gnu-g++;
+    export TESTSUITE_WRAPPER="$DIST_PATH/../toolchain/qemu-riscv32 -cpu rv32,vext_spec=v1.0,v=true,vlen=128 -B 0x100000";
+  fi
 - $DIST_PATH/configure -p `pwd`/../install -t $THR $BLD CC=$CC $CONF
 - pwd
 - ls -l
 - $CC --version
+- $CC -v
 - make -j 2
 - make install
 - if [ "$BLD" = "" ]; then $DIST_PATH/travis/cxx/cxx-test.sh $DIST_PATH $(ls -1 include); fi
