@@ -79,13 +79,11 @@ matrix:
     compiler: riscv64-unknown-linux-gcc
     env: OOT=0 TEST=FAST SDE=0 THR="none" BLD="--disable-shared" CONF="rv64iv" \
       CC=riscv64-unknown-linux-gnu-gcc \
-      #PACKAGES="qemu-user qemu-user-binfmt" \
       LDFLAGS=-static
   - os: linux
     compiler: riscv32-unknown-linux-gcc
     env: OOT=0 TEST=FAST SDE=0 THR="none" BLD="--disable-shared" CONF="rv32iv" \
       CC=riscv32-unknown-linux-gnu-gcc \
-      #PACKAGES="qemu-user qemu-user-binfmt" \
       LDFLAGS=-static
 install:
 - if [ "$CC" = "gcc"  ] && [ "$TRAVIS_OS_NAME" = "linux" ]; then export CC="gcc-9"; fi
