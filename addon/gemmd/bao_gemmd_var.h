@@ -54,7 +54,6 @@ void PASTECH(bao_,opname) \
      );
 
 GENPROT( gemmd_bp_var1 )
-GENPROT( gemmd_bp_var2 )
 
 
 //
@@ -87,12 +86,6 @@ GENTPROT( float,    s, gemmd_bp_var1 )
 GENTPROT( double,   d, gemmd_bp_var1 )
 GENTPROT( scomplex, c, gemmd_bp_var1 )
 GENTPROT( dcomplex, z, gemmd_bp_var1 )
-
-//INSERT_GENTPROT_BASIC0( gemmd_bp_var2 )
-GENTPROT( float,    s, gemmd_bp_var2 )
-GENTPROT( double,   d, gemmd_bp_var2 )
-GENTPROT( scomplex, c, gemmd_bp_var2 )
-GENTPROT( dcomplex, z, gemmd_bp_var2 )
 
 
 //

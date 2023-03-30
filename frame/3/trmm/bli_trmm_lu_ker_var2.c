@@ -175,12 +175,8 @@ void PASTEMAC(ch,varname) \
 	ctype           ct[ BLIS_STACK_BUF_MAX_SIZE \
 	                    / sizeof( ctype ) ] \
 	                    __attribute__((aligned(BLIS_STACK_BUF_ALIGN_SIZE))); \
-	const bool      col_pref    = bli_cntx_l3_vir_ukr_prefers_cols_dt( dt, BLIS_GEMM_UKR, cntx ); \
-	const inc_t     rs_ct       = ( col_pref ? 1 : NR ); \
-	const inc_t     cs_ct       = ( col_pref ? MR : 1 ); \
 \
 	ctype* restrict one        = PASTEMAC(ch,1); \
-	ctype* restrict zero       = PASTEMAC(ch,0); \
 	ctype* restrict a_cast     = a; \
 	ctype* restrict b_cast     = b; \
 	ctype* restrict c_cast     = c; \
@@ -262,10 +258,6 @@ void PASTEMAC(ch,varname) \
 		m = -diagoffa + k; \
 	} \
 \
-	/* Clear the temporary C buffer in case it has any infs or NaNs. */ \
-	PASTEMAC(ch,set0s_mxn)( MR, NR, \
-	                        ct, rs_ct, cs_ct ); \
-\
 	/* Compute number of primary and leftover components of the m and n
 	   dimensions. */ \
 	n_iter = n / NR; \
@@ -297,6 +289,8 @@ void PASTEMAC(ch,varname) \
 \
 	/* Save the imaginary stride of B to the auxinfo_t object. */ \
 	bli_auxinfo_set_is_b( istep_b, &aux ); \
+\
+	bli_auxinfo_set_ct( ct, &aux ); \
 \
 	/* The 'thread' argument points to the thrinfo_t node for the 2nd (jr)
 	   loop around the microkernel. Here we query the thrinfo_t node for the
@@ -386,47 +380,20 @@ void PASTEMAC(ch,varname) \
 				bli_auxinfo_set_next_a( a2, &aux ); \
 				bli_auxinfo_set_next_b( b2, &aux ); \
 \
-				/* Handle interior and edge cases separately. */ \
-				if ( m_cur == MR && n_cur == NR ) \
-				{ \
-					/* Invoke the gemm micro-kernel. */ \
-					gemm_ukr \
-					( \
-					  k_a1112, \
-					  alpha_cast, \
-					  a1, \
-					  b1_i, \
-					  beta_cast, \
-					  c11, rs_c, cs_c, \
-					  &aux, \
-					  cntx  \
-					); \
-				} \
-				else \
-				{ \
-					/* Copy edge elements of C to the temporary buffer. */ \
-					PASTEMAC(ch,copys_mxn)( m_cur, n_cur, \
-					                        c11, rs_c,  cs_c, \
-					                        ct,  rs_ct, cs_ct ); \
-\
-					/* Invoke the gemm micro-kernel. */ \
-					gemm_ukr \
-					( \
-					  k_a1112, \
-					  alpha_cast, \
-					  a1, \
-					  b1_i, \
-					  beta_cast, \
-					  ct, rs_ct, cs_ct, \
-					  &aux, \
-					  cntx  \
-					); \
-\
-					/* Copy the result to the edge of C. */ \
-					PASTEMAC(ch,copys_mxn)( m_cur, n_cur, \
-					                        ct,  rs_ct, cs_ct, \
-					                        c11, rs_c,  cs_c ); \
-				} \
+				/* Invoke the gemm micro-kernel. */ \
+				gemm_ukr \
+				( \
+				  m_cur, \
+				  n_cur, \
+				  k_a1112, \
+				  alpha_cast, \
+				  a1, \
+				  b1_i, \
+				  beta_cast, \
+				  c11, rs_c, cs_c, \
+				  &aux, \
+				  cntx  \
+				); \
 				/*}*/ \
 \
 				a1 += ps_a_cur; \
@@ -453,42 +420,20 @@ void PASTEMAC(ch,varname) \
 				bli_auxinfo_set_next_a( a2, &aux ); \
 				bli_auxinfo_set_next_b( b2, &aux ); \
 \
-				/* Handle interior and edge cases separately. */ \
-				if ( m_cur == MR && n_cur == NR ) \
-				{ \
-					/* Invoke the gemm micro-kernel. */ \
-					gemm_ukr \
-					( \
-					  k, \
-					  alpha_cast, \
-					  a1, \
-					  b1, \
-					  one, \
-					  c11, rs_c, cs_c, \
-					  &aux, \
-					  cntx  \
-					); \
-				} \
-				else \
-				{ \
-					/* Invoke the gemm micro-kernel. */ \
-					gemm_ukr \
-					( \
-					  k, \
-					  alpha_cast, \
-					  a1, \
-					  b1, \
-					  zero, \
-					  ct, rs_ct, cs_ct, \
-					  &aux, \
-					  cntx  \
-					); \
-\
-					/* Add the result to the edge of C. */ \
-					PASTEMAC(ch,adds_mxn)( m_cur, n_cur, \
-					                       ct,  rs_ct, cs_ct, \
-					                       c11, rs_c,  cs_c ); \
-				} \
+				/* Invoke the gemm micro-kernel. */ \
+				gemm_ukr \
+				( \
+				  m_cur, \
+				  n_cur, \
+				  k, \
+				  alpha_cast, \
+				  a1, \
+				  b1, \
+				  one, \
+				  c11, rs_c, cs_c, \
+				  &aux, \
+				  cntx  \
+				); \
 				/*}*/ \
 \
 				a1 += rstep_a; \

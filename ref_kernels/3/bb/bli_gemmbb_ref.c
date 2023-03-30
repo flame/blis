@@ -42,6 +42,8 @@
 \
 void PASTEMAC3(ch,opname,arch,suf) \
      ( \
+       dim_t               m, \
+       dim_t               n, \
        dim_t               k, \
        ctype*     restrict alpha, \
        ctype*     restrict a, \
@@ -59,9 +61,6 @@ void PASTEMAC3(ch,opname,arch,suf) \
 \
 	const inc_t     packmr = bli_cntx_get_blksz_max_dt( dt, BLIS_MR, cntx ); \
 	const inc_t     packnr = bli_cntx_get_blksz_max_dt( dt, BLIS_NR, cntx ); \
-\
-	const dim_t     m      = mr; \
-	const dim_t     n      = nr; \
 \
 	const inc_t     cs_a   = packmr; \
 \

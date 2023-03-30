@@ -42,9 +42,13 @@
 // 2vx10 microkernels.
 #include "armsve_asm_2vx10.h"
 
+#include "arm_sve.h"
+
 void bli_sgemm_armsve_asm_2vx10_unindexed
      (
-       dim_t               k0,
+       dim_t               m,
+       dim_t               n,
+       dim_t               k,
        float*     restrict alpha,
        float*     restrict a,
        float*     restrict b,
@@ -59,10 +63,13 @@ void bli_sgemm_armsve_asm_2vx10_unindexed
 
   // Typecast local copies of integers in case dim_t and inc_t are a
   // different size than is expected by load instructions.
-  uint64_t k_mker = k0 / 4;
-  uint64_t k_left = k0 % 4;
+  uint64_t k_mker = k / 4;
+  uint64_t k_left = k % 4;
   uint64_t rs_c   = rs_c0;
   uint64_t cs_c   = cs_c0;
+
+  uint64_t mr = 2*svcntw();
+  GEMM_UKR_SETUP_CT( s, mr, 10, false );
 
   __asm__ volatile (
 " ldr             x0, %[a]                        \n\t"
@@ -310,5 +317,7 @@ GEMM_C_STORE_UKER_G(z10,z12,z14,z16,z18,z11,z13,z15,z17,z19,z30,p0,p0,x5,x7,x8,x
   "z24","z25","z26","z27",
   "z28","z29","z30","z31"
    );
+
+   GEMM_UKR_FLUSH_CT( s );
 }
 
