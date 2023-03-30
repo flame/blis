@@ -32,5 +32,5 @@ tar -xf $TARBALL
 # The qemu version installed via packages (qemu-user qemu-user-binfmt)
 # is sufficient.
 TARBALL_QEMU=qemu-riscv-2023.02.25-ubuntu-20.04.tar.gz
-wget https://people.cs.umu.se/angies/${TARBALL_QEMU}
+wget https://github.com/flame/ci-utils/raw/master/riscv/${TARBALL_QEMU}
 tar -xf $TARBALL_QEMU
