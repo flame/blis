@@ -155,8 +155,8 @@ void sscal_blis_impl
     }
 
     // This function is invoked on all architectures including ‘generic’.
-    // Non-AVX platforms will use the kernels derived from the context.
-    if (bli_cpuid_is_avx_supported() == TRUE) {
+    // Non-AVX2+FMA3 platforms will use the kernels derived from the context.
+    if (bli_cpuid_is_avx2fma3_supported() == TRUE) {
 	    bli_sscalv_zen_int10
 		    (
 		     BLIS_NO_CONJUGATE,
@@ -246,8 +246,8 @@ void dscal_blis_impl
     }
 
     // This function is invoked on all architectures including ‘generic’.
-    // Non-AVX platforms will use the kernels derived from the context.
-    if (bli_cpuid_is_avx_supported() == TRUE){
+    // Non-AVX2+FMA3 platforms will use the kernels derived from the context.
+    if (bli_cpuid_is_avx2fma3_supported() == TRUE){
 #ifdef BLIS_ENABLE_OPENMP
         // For sizes less than 10000, optimal number of threads is 1, but
         // due to the overhead of calling omp functions it is being done outside
@@ -448,8 +448,8 @@ void zdscal_blis_impl
     }
 
     // This function is invoked on all architectures including ‘generic’.
-    // Non-AVX platforms will use the kernels derived from the context.
-    if ( bli_cpuid_is_avx_supported() == TRUE )
+    // Non-AVX2+FMA3 platforms will use the kernels derived from the context.
+    if ( bli_cpuid_is_avx2fma3_supported() == TRUE )
     {
 #ifdef BLIS_ENABLE_OPENMP
         // For sizes less than 10000, optimal number of threads is 1, but

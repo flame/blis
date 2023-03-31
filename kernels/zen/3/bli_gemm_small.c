@@ -105,8 +105,8 @@ err_t bli_gemm_small
     return BLIS_NOT_YET_IMPLEMENTED;
 #else
     // This function is invoked on all architectures including ‘generic’.
-    // Non-AVX platforms will use the kernels derived from the context.
-    if (bli_cpuid_is_avx_supported() == FALSE)
+    // Non-AVX2+FMA3 platforms will use the kernels derived from the context.
+    if (bli_cpuid_is_avx2fma3_supported() == FALSE)
     {
         return BLIS_NOT_YET_IMPLEMENTED;
     }
@@ -1767,7 +1767,7 @@ err_t bli_dgemm_small
      )
 {
     AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_INFO);
-    if (bli_cpuid_is_avx_supported() == FALSE)
+    if (bli_cpuid_is_avx2fma3_supported() == FALSE)
     {
         return BLIS_NOT_YET_IMPLEMENTED;
     }
@@ -4275,7 +4275,7 @@ err_t bli_dgemm_small_At
 {
 
     AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_INFO);
-    if (bli_cpuid_is_avx_supported() == FALSE)
+    if (bli_cpuid_is_avx2fma3_supported() == FALSE)
     {
         return BLIS_NOT_YET_IMPLEMENTED;
     }
@@ -5768,7 +5768,7 @@ err_t bli_zgemm_small
      )
 {
     AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_INFO);
-    if (bli_cpuid_is_avx_supported() == FALSE)
+    if (bli_cpuid_is_avx2fma3_supported() == FALSE)
     {
         return BLIS_NOT_YET_IMPLEMENTED;
     }
@@ -9718,7 +9718,7 @@ err_t bli_zgemm_small_At
      )
 {
     AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_INFO);
-    if (bli_cpuid_is_avx_supported() == FALSE)
+    if (bli_cpuid_is_avx2fma3_supported() == FALSE)
     {
         return BLIS_NOT_YET_IMPLEMENTED;
     }

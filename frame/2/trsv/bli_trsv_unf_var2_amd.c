@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2019 - 2022, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2019-2023, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -298,8 +298,8 @@ void bli_dtrsv_unf_var2
     PASTECH(d,axpyf_ker_ft) kfp_af;
 
     // This function is invoked on all architectures including ‘generic’.
-    // Non-AVX platforms will use the kernels derived from the context.
-    if (bli_cpuid_is_avx_supported() == TRUE) {
+    // Non-AVX2+FMA3 platforms will use the kernels derived from the context.
+    if (bli_cpuid_is_avx2fma3_supported() == TRUE) {
 	    kfp_af = bli_daxpyf_zen_int_16x4;
 	    b_fuse = 4;
     }
@@ -497,8 +497,8 @@ void bli_strsv_unf_var2
     PASTECH(s, axpyf_ker_ft) kfp_af;
 
     // This function is invoked on all architectures including ‘generic’.
-    // Non-AVX platforms will use the kernels derived from the context.
-    if (bli_cpuid_is_avx_supported() == TRUE) {
+    // Non-AVX2+FMA3 platforms will use the kernels derived from the context.
+    if (bli_cpuid_is_avx2fma3_supported() == TRUE) {
 	    kfp_af = bli_saxpyf_zen_int_5;
 	    b_fuse = 5;
     }
@@ -696,8 +696,8 @@ void bli_ztrsv_unf_var2
     PASTECH(z, axpyf_ker_ft) kfp_af;
 
     // This function is invoked on all architectures including ‘generic’.
-    // Non-AVX platforms will use the kernels derived from the context.
-    if (bli_cpuid_is_avx_supported() == TRUE) {
+    // Non-AVX2+FMA3 platforms will use the kernels derived from the context.
+    if (bli_cpuid_is_avx2fma3_supported() == TRUE) {
 	    kfp_af = bli_zaxpyf_zen_int_5;
 	    b_fuse = 5;
     }
@@ -894,8 +894,8 @@ void bli_ctrsv_unf_var2
     PASTECH(c, axpyf_ker_ft) kfp_af;
 
     // This function is invoked on all architectures including ‘generic’.
-    // Non-AVX platforms will use the kernels derived from the context.
-    if (bli_cpuid_is_avx_supported() == TRUE) {
+    // Non-AVX2+FMA3 platforms will use the kernels derived from the context.
+    if (bli_cpuid_is_avx2fma3_supported() == TRUE) {
 	    kfp_af = bli_caxpyf_zen_int_5;
 	    b_fuse = 5;
     }

@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2020 - 22, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2020-2023, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -144,8 +144,8 @@ void bli_dgemv_unf_var1
     conja = bli_extract_conj(transa);
 
     // This function is invoked on all architectures including ‘generic’.
-    // Non-AVX platforms will use the kernels derived from the context.
-    if (bli_cpuid_is_avx_supported() == FALSE)
+    // Non-AVX2+FMA3 platforms will use the kernels derived from the context.
+    if (bli_cpuid_is_avx2fma3_supported() == FALSE)
     {
         if ( cntx == NULL ) cntx = bli_gks_query_cntx();
         const num_t dt = PASTEMAC(d,type);
@@ -461,8 +461,8 @@ void bli_sgemv_unf_var1
     conja = bli_extract_conj( transa );
 
     // This function is invoked on all architectures including ‘generic’.
-    // Non-AVX platforms will use the kernels derived from the context.
-    if (bli_cpuid_is_avx_supported() == FALSE)
+    // Non-AVX2+FMA3 platforms will use the kernels derived from the context.
+    if (bli_cpuid_is_avx2fma3_supported() == FALSE)
     {
         if ( cntx == NULL ) cntx = bli_gks_query_cntx();
         const num_t dt = PASTEMAC(s,type);

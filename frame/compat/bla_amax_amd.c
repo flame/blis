@@ -168,8 +168,8 @@ f77_int isamax_blis_impl
     }
 
     // This function is invoked on all architectures including ‘generic’.
-    // Non-AVX platforms will use the kernels derived from the context.
-    if (bli_cpuid_is_avx_supported() == TRUE)
+    // Non-AVX2+FMA3 platforms will use the kernels derived from the context.
+    if (bli_cpuid_is_avx2fma3_supported() == TRUE)
     {
         cntx_t* cntx = bli_gks_query_cntx();
         samaxv_ker_ft f = bli_cntx_get_l1v_ker_dt(BLIS_FLOAT, BLIS_AMAXV_KER, cntx );

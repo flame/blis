@@ -318,7 +318,7 @@ void bli_cnormfv_unb_var1
         rntm_t*  rntm
     )
 {
-    if ( bli_cpuid_is_avx_supported() == TRUE )
+    if ( bli_cpuid_is_avx2fma3_supported() == TRUE )
     {
         bli_scnorm2fv_unb_var1_avx2( n, x, incx, norm, cntx );
     }
@@ -366,7 +366,7 @@ void bli_znormfv_unb_var1
         rntm_t*  rntm
     )
 {
-   if ( bli_cpuid_is_avx_supported() == TRUE )
+   if ( bli_cpuid_is_avx2fma3_supported() == TRUE )
    {
         bli_dznorm2fv_unb_var1_avx2( n, x, incx, norm, cntx );
    }
@@ -552,7 +552,7 @@ void bli_snormfv_unb_var1
         return;
     }
     /* Disable AVX2 codepath.
-    if( bli_cpuid_is_avx_supported() == TRUE )
+    if( bli_cpuid_is_avx2fma3_supported() == TRUE )
     {
         bli_snorm2fv_unb_var1_avx2( n, x, incx, norm, cntx );
     }
@@ -599,7 +599,7 @@ void bli_dnormfv_unb_var1
         rntm_t*  rntm
     )
 {
-   if( bli_cpuid_is_avx_supported() == TRUE )
+   if( bli_cpuid_is_avx2fma3_supported() == TRUE )
    {
         bli_dnorm2fv_unb_var1_avx2( n, x, incx, norm, cntx );
    }

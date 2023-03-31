@@ -46,8 +46,8 @@ AOCL_GEMM_GET_REORDER_BUF_SIZE(u8s8s16os16)
 		return 0; // Error.
 	}
 
-	// Check if avx ISA is supported, lpgemm u8s8s16os16 matmul only works with it.
-	if ( bli_cpuid_is_avx_supported() == FALSE )
+	// Check if AVX2 ISA is supported, lpgemm u8s8s16os16 matmul only works with it.
+	if ( bli_cpuid_is_avx2fma3_supported() == FALSE )
 	{
 		bli_print_msg(" AVX2 ISA not supported by processor, "
 				"cannot perform u8s8s16 gemm.", __FILE__, __LINE__ );
@@ -91,8 +91,8 @@ AOCL_GEMM_REORDER(int8_t,u8s8s16os16)
 		return; // Error.
 	}
 
-	// Check if avx ISA is supported, lpgemm u8s8s16os16 matmul only works with it.
-	if ( bli_cpuid_is_avx_supported() == FALSE )
+	// Check if AVX2 ISA is supported, lpgemm u8s8s16os16 matmul only works with it.
+	if ( bli_cpuid_is_avx2fma3_supported() == FALSE )
 	{
 		bli_print_msg(" AVX2 ISA not supported by processor, "
 				"cannot perform u8s8s16 gemm.", __FILE__, __LINE__ );

@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2022, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2022-2023, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -44,8 +44,8 @@ AOCL_GEMM_GET_REORDER_BUF_SIZE(f32f32f32of32)
 		return 0; // Error.
 	}
 
-	// Check if avx ISA is supported, lpgemm fp32 matmul only works with it.
-	if ( bli_cpuid_is_avx_supported() == FALSE )
+	// Check if AVX2 ISA is supported, lpgemm fp32 matmul only works with it.
+	if ( bli_cpuid_is_avx2fma3_supported() == FALSE )
 	{
 		bli_print_msg(" AVX2 ISA not supported by processor, "
 				"cannot perform f32f32f32 gemm.", __FILE__, __LINE__ );
@@ -90,8 +90,8 @@ AOCL_GEMM_REORDER(float,f32f32f32of32)
 		return; // Error.
 	}
 
-	// Check if avx ISA is supported, lpgemm fp32 matmul only works with it.
-	if ( bli_cpuid_is_avx_supported() == FALSE )
+	// Check if AVX2 ISA is supported, lpgemm fp32 matmul only works with it.
+	if ( bli_cpuid_is_avx2fma3_supported() == FALSE )
 	{
 		bli_print_msg(" AVX2 ISA not supported by processor, "
 				"cannot perform f32f32f32 gemm.", __FILE__, __LINE__ );

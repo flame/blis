@@ -156,8 +156,8 @@ void sswap_blis_impl
     }
 
     // This function is invoked on all architectures including ‘generic’.
-    // Non-AVX platforms will use the kernels derived from the context.
-    if (bli_cpuid_is_avx_supported() == TRUE) {
+    // Non-AVX2+FMA3 platforms will use the kernels derived from the context.
+    if (bli_cpuid_is_avx2fma3_supported() == TRUE) {
         /* Call BLIS kernel */
 	    bli_sswapv_zen_int8
 		    (
@@ -256,8 +256,8 @@ void dswap_blis_impl
 
 
     // This function is invoked on all architectures including ‘generic’.
-    // Non-AVX platforms will use the kernels derived from the context.
-    if (bli_cpuid_is_avx_supported() == TRUE) {
+    // Non-AVX2+FMA3 platforms will use the kernels derived from the context.
+    if (bli_cpuid_is_avx2fma3_supported() == TRUE) {
 	    bli_dswapv_zen_int8
 		    (
 		     n0,

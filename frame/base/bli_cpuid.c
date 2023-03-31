@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2018-2022, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2018-2023, Advanced Micro Devices, Inc. All rights reserved.
    Copyright (C) 2019, Dave Love, University of Manchester
 
    Redistribution and use in source and binary forms, with or without
@@ -276,19 +276,20 @@ bool bli_cpuid_is_zen4
      )
 {
 	// Check for expected CPU features.
-	const uint32_t expected =   FEATURE_SSE3     |
-                                FEATURE_SSSE3    |
-                                FEATURE_SSE41    |
-                                FEATURE_SSE42    |
-                                FEATURE_AVX      |
-                                FEATURE_AVX2     |
-                                FEATURE_FMA3     |
-                                FEATURE_AVX512F  |
-                                FEATURE_AVX512DQ |
-                                FEATURE_AVX512CD |
-                                FEATURE_AVX512BW |
-                                FEATURE_AVX512VL |
-                                FEATURE_AVX512VNNI;
+	const uint32_t expected = FEATURE_SSE3       |
+	                          FEATURE_SSSE3      |
+	                          FEATURE_SSE41      |
+	                          FEATURE_SSE42      |
+	                          FEATURE_AVX        |
+	                          FEATURE_FMA3       |
+	                          FEATURE_AVX2       |
+	                          FEATURE_AVX512F    |
+	                          FEATURE_AVX512DQ   |
+	                          FEATURE_AVX512CD   |
+	                          FEATURE_AVX512BW   |
+	                          FEATURE_AVX512VL   |
+	                          FEATURE_AVX512VNNI |
+	                          FEATURE_AVX512BF16;
 
 	if ( !bli_cpuid_has_features( features, expected ) ) return FALSE;
 
@@ -510,11 +511,11 @@ bool bli_cpuid_is_bulldozer
 // On subsequent calls the cached value is returned. This is achieved using 
 // pthread_once mechanism since this information does not change once the library
 // is loaded.
-static bool is_avx_supported = FALSE;
+static bool is_avx2fma3_supported = FALSE;
 
 
 // Determine if the CPU has support for AVX.
-void bli_cpuid_check_avx_support( void )
+void bli_cpuid_check_avx2fma3_support( void )
 {
 	uint32_t family, model, features;
 
@@ -529,30 +530,30 @@ void bli_cpuid_check_avx_support( void )
 
 	if ( !bli_cpuid_has_features( features, expected ) ) 
 	{
-		is_avx_supported = FALSE;
+		is_avx2fma3_supported = FALSE;
 	}
 	else 
 	{
-		is_avx_supported = TRUE;
+		is_avx2fma3_supported = TRUE;
 	}
 }
 
-static bli_pthread_once_t once_check_avx_support = BLIS_PTHREAD_ONCE_INIT;
+static bli_pthread_once_t once_check_avx2fma3_support = BLIS_PTHREAD_ONCE_INIT;
 
 // Ensure that actual support determincation happens only once
-void bli_cpuid_check_avx_support_once( void )
+void bli_cpuid_check_avx2fma3_support_once( void )
 {
 #ifndef BLIS_CONFIGURETIME_CPUID
-	bli_pthread_once( &once_check_avx_support,  bli_cpuid_check_avx_support );
+	bli_pthread_once( &once_check_avx2fma3_support,  bli_cpuid_check_avx2fma3_support );
 #endif
 }
 
 // API to check if AVX is supported or not on the current platform.
-bool bli_cpuid_is_avx_supported( void )
+bool bli_cpuid_is_avx2fma3_supported( void )
 {
-	bli_cpuid_check_avx_support_once();
+	bli_cpuid_check_avx2fma3_support_once();
 
-	return is_avx_supported;
+	return is_avx2fma3_supported;
 }
 
 
@@ -598,7 +599,7 @@ void bli_cpuid_check_avx512vnni_support( void )
 static bool is_avx512bf16_supported = FALSE;
 
 // Determine if the CPU has support for AVX512_BF16.
-void bli_cpuid_check_avx512_bf16_support( void )
+void bli_cpuid_check_avx512bf16_support( void )
 {
 	uint32_t family, model, features;
 
@@ -629,7 +630,7 @@ void bli_cpuid_check_avx512_bf16_support( void )
 }
 
 static bli_pthread_once_t once_check_avx512vnni_support = BLIS_PTHREAD_ONCE_INIT;
-static bli_pthread_once_t once_check_avx512_bf16_support = BLIS_PTHREAD_ONCE_INIT;
+static bli_pthread_once_t once_check_avx512bf16_support = BLIS_PTHREAD_ONCE_INIT;
 
 // Ensure that actual support determination happens only once
 void bli_cpuid_check_avx512vnni_support_once( void )
@@ -640,10 +641,10 @@ void bli_cpuid_check_avx512vnni_support_once( void )
 }
 
 // Ensure that actual support determination happens only once to avoid performance hit
-void bli_cpuid_check_avx512_bf16_support_once( void )
+void bli_cpuid_check_avx512bf16_support_once( void )
 {
 #ifndef BLIS_CONFIGURETIME_CPUID
-	bli_pthread_once( &once_check_avx512_bf16_support,  bli_cpuid_check_avx512_bf16_support );
+	bli_pthread_once( &once_check_avx512bf16_support,  bli_cpuid_check_avx512bf16_support );
 #endif
 }
 
@@ -656,9 +657,9 @@ bool bli_cpuid_is_avx512vnni_supported( void )
 }
 
 // API to check if AVX512_bf16 is supported or not on the current platform.
-bool bli_cpuid_is_avx512_bf16_supported( void )
+bool bli_cpuid_is_avx512bf16_supported( void )
 {
-	bli_cpuid_check_avx512_bf16_support_once();
+	bli_cpuid_check_avx512bf16_support_once();
 
 	return is_avx512bf16_supported;
 }

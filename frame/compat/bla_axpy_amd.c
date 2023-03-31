@@ -159,8 +159,8 @@ void saxpy_blis_impl
     }
 
   // This function is invoked on all architectures including ‘generic’.
-  // Non-AVX platforms will use the kernels derived from the context.
-  if (bli_cpuid_is_avx_supported() == TRUE)
+  // Non-AVX2+FMA3 platforms will use the kernels derived from the context.
+  if (bli_cpuid_is_avx2fma3_supported() == TRUE)
   {
       bli_saxpyv_zen_int10
       (
@@ -264,8 +264,8 @@ void daxpy_blis_impl
     }
 
   // This function is invoked on all architectures including ‘generic’.
-  // Non-AVX platforms will use the kernels derived from the context.
-  if (bli_cpuid_is_avx_supported() == TRUE)
+  // Non-AVX2+FMA3 platforms will use the kernels derived from the context.
+  if (bli_cpuid_is_avx2fma3_supported() == TRUE)
   {
 #ifdef BLIS_ENABLE_OPENMP
         // For sizes less than 100, optimal number of threads is 1, but
@@ -396,7 +396,7 @@ void daxpy_blis_impl
 
 #endif //BLIS_ENABLE_OPENMP
   }
-  else //if (bli_cpuid_is_avx_supported() == TRUE)
+  else //if (bli_cpuid_is_avx2fma3_supported() == TRUE)
   {
       PASTEMAC2(d,axpyv,BLIS_TAPI_EX_SUF)
       (
@@ -409,7 +409,7 @@ void daxpy_blis_impl
         NULL
       );
 
-  } // if (bli_cpuid_is_avx_supported() == TRUE)
+  } // if (bli_cpuid_is_avx2fma3_supported() == TRUE)
 
   AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
   /* Finalize BLIS. */
@@ -487,8 +487,8 @@ void caxpy_blis_impl
     }
 
   // This function is invoked on all architectures including ‘generic’.
-  // Non-AVX platforms will use the kernels derived from the context.
-  if (bli_cpuid_is_avx_supported() == TRUE)
+  // Non-AVX2+FMA3 platforms will use the kernels derived from the context.
+  if (bli_cpuid_is_avx2fma3_supported() == TRUE)
   {
       bli_caxpyv_zen_int5
       (
@@ -591,8 +591,8 @@ void zaxpy_blis_impl
     }
 
   // This function is invoked on all architectures including ‘generic’.
-  // Non-AVX platforms will use the kernels derived from the context.
-  if (bli_cpuid_is_avx_supported() == TRUE)
+  // Non-AVX2+FMA3 platforms will use the kernels derived from the context.
+  if (bli_cpuid_is_avx2fma3_supported() == TRUE)
   {
       bli_zaxpyv_zen_int5
       (

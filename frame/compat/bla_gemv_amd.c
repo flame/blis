@@ -284,8 +284,8 @@ void dgemv_blis_impl
     cs_a = *lda;
 
     // This function is invoked on all architectures including ‘generic’.
-    // Non-AVX platforms will use the kernels derived from the context.
-    if (bli_cpuid_is_avx_supported() == FALSE)
+    // Non-AVX2+FMA3 platforms will use the kernels derived from the context.
+    if (bli_cpuid_is_avx2fma3_supported() == FALSE)
     {
         /* Call BLIS interface. */
         PASTEMAC2(d,gemv,BLIS_TAPI_EX_SUF)
@@ -483,8 +483,8 @@ void sgemv_blis_impl
     cs_a = *lda;
 
     // This function is invoked on all architectures including ‘generic’.
-    // Non-AVX platforms will use the kernels derived from the context.
-    if (bli_cpuid_is_avx_supported() == FALSE)
+    // Non-AVX2+FMA3 platforms will use the kernels derived from the context.
+    if (bli_cpuid_is_avx2fma3_supported() == FALSE)
     {
       /* Call BLIS interface. */
       PASTEMAC2(s,gemv,BLIS_TAPI_EX_SUF)
@@ -673,7 +673,7 @@ void cgemv_blis_impl
     {
         conj_t conja = bli_extract_conj(blis_transa);
         scomplex rho;
-        if (bli_cpuid_is_avx_supported() == TRUE)
+        if (bli_cpuid_is_avx2fma3_supported() == TRUE)
         {
             bli_cdotv_zen_int5
             (
@@ -722,7 +722,7 @@ void cgemv_blis_impl
         return;
     }
 
-    if (bli_cpuid_is_avx_supported() == FALSE)
+    if (bli_cpuid_is_avx2fma3_supported() == FALSE)
     {
         /* Call BLIS interface. */
         PASTEMAC2(c,gemv,BLIS_TAPI_EX_SUF)
@@ -912,7 +912,7 @@ void zgemv_blis_impl
         conj_t conja = bli_extract_conj(blis_transa);
         dcomplex rho;
 
-        if (bli_cpuid_is_avx_supported() == TRUE)
+        if (bli_cpuid_is_avx2fma3_supported() == TRUE)
         {
             bli_zdotv_zen_int5
             (
@@ -961,7 +961,7 @@ void zgemv_blis_impl
         return;
     }
 
-    if (bli_cpuid_is_avx_supported() == FALSE)
+    if (bli_cpuid_is_avx2fma3_supported() == FALSE)
     {
         /* Call BLIS interface. */
         PASTEMAC2(z,gemv,BLIS_TAPI_EX_SUF)

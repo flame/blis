@@ -513,8 +513,8 @@ void dgemm_blis_impl
     const inc_t cs_c = *ldc;
 
     // This function is invoked on all architectures including ‘generic’.
-    // Non-AVX platforms will use the kernels derived from the context.
-    if (bli_cpuid_is_avx_supported() == FALSE)
+    // Non-AVX2+FMA3 platforms will use the kernels derived from the context.
+    if (bli_cpuid_is_avx2fma3_supported() == FALSE)
     {
         // This code is duplicated below, however we don't want to move it out of
         // this IF block as it will affect the performance on Zen architetures

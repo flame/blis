@@ -47,7 +47,7 @@ AOCL_GEMM_GET_REORDER_BUF_SIZE(bf16bf16f32of32)
 	}
 
 	// Check if avx512_bf16 ISA is supported, lpgemm matmul only works with it.
-	if ( bli_cpuid_is_avx512_bf16_supported() == FALSE )
+	if ( bli_cpuid_is_avx512bf16_supported() == FALSE )
 	{
 		bli_print_msg(" AVX512_BF16 ISA not supported by processor, "
 				"cannot perform bf16bf16f32 gemm.", __FILE__, __LINE__ );
@@ -92,7 +92,7 @@ AOCL_GEMM_REORDER(bfloat16, bf16bf16f32of32)
 	}
 
 	// Check if avx512_bf16 ISA is supported, lpgemm matmul only works with it.
-	if ( bli_cpuid_is_avx512_bf16_supported() == FALSE )
+	if ( bli_cpuid_is_avx512bf16_supported() == FALSE )
 	{
 		bli_print_msg(" AVX512_BF16 ISA not supported by processor, "
 				"cannot perform bf16bf16f32 gemm.", __FILE__, __LINE__ );

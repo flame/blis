@@ -707,8 +707,8 @@ void strsm_blis_impl
 
 #ifdef BLIS_ENABLE_SMALL_MATRIX_TRSM
     // This function is invoked on all architectures including ‘generic’.
-    // Non-AVX platforms will use the kernels derived from the context.
-    if (bli_cpuid_is_avx_supported() == TRUE)
+    // Non-AVX2+FMA3 platforms will use the kernels derived from the context.
+    if (bli_cpuid_is_avx2fma3_supported() == TRUE)
     {
 	    /* bli_strsm_small is performing better existing native
 	     * implementations for [m,n]<=1000 for single thread.
@@ -1015,8 +1015,8 @@ void dtrsm_blis_impl
 #ifdef BLIS_ENABLE_SMALL_MATRIX_TRSM
 
     // This function is invoked on all architectures including ‘generic’.
-    // Non-AVX platforms will use the kernels derived from the context.
-    if (bli_cpuid_is_avx_supported() == TRUE)
+    // Non-AVX2+FMA3 platforms will use the kernels derived from the context.
+    if (bli_cpuid_is_avx2fma3_supported() == TRUE)
     {
         // typedef for trsm small kernel function pointer
         typedef err_t (*dtrsm_small_ker_ft)
@@ -1120,7 +1120,7 @@ void dtrsm_blis_impl
             bli_finalize_auto();
             return;
         }
-    } // bli_cpuid_is_avx_supported
+    } // bli_cpuid_is_avx2fma3_supported
 #endif// END of BLIS_ENABLE_SMALL_MATRIX_TRSM
 
     bli_trsmnat
@@ -1458,8 +1458,8 @@ void ztrsm_blis_impl
 
 #ifdef BLIS_ENABLE_SMALL_MATRIX_TRSM
     // This function is invoked on all architectures including ‘generic’.
-    // Non-AVX platforms will use the kernels derived from the context.
-    if (bli_cpuid_is_avx_supported() == TRUE)
+    // Non-AVX2+FMA3 platforms will use the kernels derived from the context.
+    if (bli_cpuid_is_avx2fma3_supported() == TRUE)
     {
         /* bli_ztrsm_small is performing better existing native
         * implementations for [m,n]<=1000 for single thread.
@@ -1489,7 +1489,7 @@ void ztrsm_blis_impl
                 return;
             }
         }
-    } // bli_cpuid_is_avx_supported
+    } // bli_cpuid_is_avx2fma3_supported
 #endif// END of BLIS_ENABLE_SMALL_MATRIX_TRSM
 
     bli_trsmnat
@@ -1826,8 +1826,8 @@ void ctrsm_blis_impl
 
 #ifdef BLIS_ENABLE_SMALL_MATRIX_TRSM
     // This function is invoked on all architectures including ‘generic’.
-    // Non-AVX platforms will use the kernels derived from the context.
-    if (bli_cpuid_is_avx_supported() == TRUE)
+    // Non-AVX2+FMA3 platforms will use the kernels derived from the context.
+    if (bli_cpuid_is_avx2fma3_supported() == TRUE)
     {
         /* bli_ztrsm_small is performing better existing native
         * implementations for [m,n]<=1000 for single thread.
@@ -1856,7 +1856,7 @@ void ctrsm_blis_impl
                 return;
             }
         }
-    } // bli_cpuid_is_avx_supported
+    } // bli_cpuid_is_avx2fma3_supported
 #endif
 
     bli_trsmnat

@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2021-2022, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2021-2023, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -473,7 +473,7 @@ void bli_ddotxaxpyf_zen_int_8
 	/* A is m x n.                  */
 	/* y = beta * y + alpha * A^T w; */
 	/* z =        z + alpha * A   x; */
-	if ( ( bli_cpuid_is_avx_supported() == TRUE ) && 
+	if ( ( bli_cpuid_is_avx2fma3_supported() == TRUE ) &&
 	     (inca == 1) && (incw == 1) && (incx == 1)
 	     && (incy == 1) && (incz == 1) && (b_n == 8) )
 	{
@@ -775,7 +775,7 @@ void bli_zdotxaxpyf_zen_int_8
 	//
 	// y = beta * y + alpha * A^T w;
 	// z =        z + alpha * A   x;
-	if ( ( bli_cpuid_is_avx_supported() == TRUE ) &&
+	if ( ( bli_cpuid_is_avx2fma3_supported() == TRUE ) &&
 	     ( inca == 1 ) && ( incw == 1 ) && ( incx == 1 )
 	     && ( incy == 1 ) && ( incz == 1 ) && ( b_n == 4 ) )
 	{
@@ -1182,7 +1182,7 @@ void bli_cdotxaxpyf_zen_int_8
 	//
 	// y = beta * y + alpha * A^T w;
 	// z =        z + alpha * A   x;
-	if ( ( bli_cpuid_is_avx_supported() == TRUE ) &&
+	if ( ( bli_cpuid_is_avx2fma3_supported() == TRUE ) &&
 	     ( inca == 1 ) && ( incw == 1 ) && ( incx == 1 )
 	     && ( incy == 1 ) && ( incz == 1 ) && ( b_n == 4 ) )
 	{

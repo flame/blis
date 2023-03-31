@@ -163,8 +163,8 @@ void scopy_blis_impl
 	}
 
 	// This function is invoked on all architectures including ‘generic’.
-	// Non-AVX platforms will use the kernels derived from the context.
-	if (bli_cpuid_is_avx_supported() == TRUE)
+	// Non-AVX2+FMA3 platforms will use the kernels derived from the context.
+	if (bli_cpuid_is_avx2fma3_supported() == TRUE)
 	{
 		/* Call BLIS kernel */
 		bli_scopyv_zen_int
@@ -268,8 +268,8 @@ void dcopy_blis_impl
 	}
 
 	// This function is invoked on all architectures including ‘generic’.
-	// Non-AVX platforms will use the kernels derived from the context.
-	if (bli_cpuid_is_avx_supported() == TRUE)
+	// Non-AVX2+FMA3 platforms will use the kernels derived from the context.
+	if (bli_cpuid_is_avx2fma3_supported() == TRUE)
 	{
 		/* Call BLIS kernel */
 		bli_dcopyv_zen_int

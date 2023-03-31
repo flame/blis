@@ -65,7 +65,7 @@ static void _lpgemm_cntx_init_func_map()
 	global_cntx_t_list[BF16BF16F32OF32].kern_fun_ptr = NULL;
 
 	// Kernel dispatch object factory.
-	if ( bli_cpuid_is_avx512_bf16_supported() == TRUE )
+	if ( bli_cpuid_is_avx512bf16_supported() == TRUE )
 	{
 #ifdef BLIS_KERNELS_ZEN4
 		LPGEMM_KERN_FUNC_MAP_AVX512_VNNI_BF16
@@ -81,7 +81,7 @@ static void _lpgemm_cntx_init_func_map()
 		LPGEMM_PACKB_FUNC_MAP_AVX512_VNNI
 #endif
 	}
-	else if ( bli_cpuid_is_avx_supported() == TRUE )
+	else if ( bli_cpuid_is_avx2fma3_supported() == TRUE )
 	{
 #ifdef BLIS_KERNELS_ZEN3
 		LPGEMM_KERN_FUNC_MAP_AVX2
@@ -151,7 +151,7 @@ static void _lpgemm_cntx_init_blksz_map()
 	{
 		LPGEMM_BLKSZ_MAP_ZEN4
 	}
-	else if ( bli_cpuid_is_avx_supported() == TRUE )
+	else if ( bli_cpuid_is_avx2fma3_supported() == TRUE )
 	{
 		LPGEMM_BLKSZ_MAP_ZEN
 	}

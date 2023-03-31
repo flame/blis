@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2018 - 2019, Advanced Micro Devices, Inc.
+   Copyright (C) 2018-2023, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -885,7 +885,7 @@ err_t bli_check_valid_arch_id( arch_t id )
 {
 	err_t e_val = BLIS_SUCCESS;
 
-	if ( ( gint_t )id < 0 || BLIS_NUM_ARCHS <= ( gint_t )id )
+	if ( ( gint_t )id <= 0 || BLIS_NUM_ARCHS <= ( gint_t )id )
 		e_val = BLIS_INVALID_ARCH_ID;
 
 	return e_val;

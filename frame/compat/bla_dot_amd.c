@@ -164,8 +164,8 @@ float sdot_blis_impl
     }
 
     // This function is invoked on all architectures including ‘generic’.
-    // Non-AVX platforms will use the kernels derived from the context.
-    if (bli_cpuid_is_avx_supported() == TRUE)
+    // Non-AVX2+FMA3 platforms will use the kernels derived from the context.
+    if (bli_cpuid_is_avx2fma3_supported() == TRUE)
     {
         /* Call BLIS kernel. */
         bli_sdotv_zen_int10
@@ -275,8 +275,8 @@ double ddot_blis_impl
     }
 
     // This function is invoked on all architectures including ‘generic’.
-    // Non-AVX platforms will use the kernels derived from the context.
-    if (bli_cpuid_is_avx_supported() == TRUE)
+    // Non-AVX2+FMA3 platforms will use the kernels derived from the context.
+    if (bli_cpuid_is_avx2fma3_supported() == TRUE)
     {
         /* Call BLIS kernel. */
 #ifdef BLIS_ENABLE_OPENMP
@@ -546,8 +546,8 @@ scomplex cdotu_blis_impl
     }
 
     // This function is invoked on all architectures including ‘generic’.
-    // Non-AVX platforms will use the kernels derived from the context.
-    if (bli_cpuid_is_avx_supported() == TRUE)
+    // Non-AVX2+FMA3 platforms will use the kernels derived from the context.
+    if (bli_cpuid_is_avx2fma3_supported() == TRUE)
     {
         /* Call BLIS kernel. */
         bli_cdotv_zen_int5
@@ -658,8 +658,8 @@ dcomplex zdotu_blis_impl
     }
 
     // This function is invoked on all architectures including ‘generic’.
-    // Non-AVX platforms will use the kernels derived from the context.
-    if (bli_cpuid_is_avx_supported() == TRUE)
+    // Non-AVX2+FMA3 platforms will use the kernels derived from the context.
+    if (bli_cpuid_is_avx2fma3_supported() == TRUE)
     {
         /* Call BLIS kernel. */
         bli_zdotv_zen_int5
@@ -772,8 +772,8 @@ scomplex cdotc_blis_impl
     }
 
     // This function is invoked on all architectures including ‘generic’.
-    // Non-AVX platforms will use the kernels derived from the context.
-    if (bli_cpuid_is_avx_supported() == TRUE)
+    // Non-AVX2+FMA3 platforms will use the kernels derived from the context.
+    if (bli_cpuid_is_avx2fma3_supported() == TRUE)
     {
         /* Call BLIS kernel. */
         bli_cdotv_zen_int5
@@ -884,8 +884,8 @@ dcomplex zdotc_blis_impl
     }
 
     // This function is invoked on all architectures including ‘generic’.
-    // Non-AVX platforms will use the kernels derived from the context.
-    if (bli_cpuid_is_avx_supported() == TRUE)
+    // Non-AVX2+FMA3 platforms will use the kernels derived from the context.
+    if (bli_cpuid_is_avx2fma3_supported() == TRUE)
     {
         /* Call BLIS kernel. */
         bli_zdotv_zen_int5

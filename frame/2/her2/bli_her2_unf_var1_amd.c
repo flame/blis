@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2022, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2022-2023, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -252,7 +252,7 @@ void bli_dher2_unf_var1
 	if ( cntx == NULL ) cntx = bli_gks_query_cntx();
 	kfp_2v = bli_cntx_get_l1f_ker_dt( dt, BLIS_AXPY2V_KER, cntx );
 
-	if ( (bli_cpuid_is_avx_supported() == TRUE)
+	if ( (bli_cpuid_is_avx2fma3_supported() == TRUE)
 	   && (incx == 1)
 	   && (incy == 1)
 	   && (rs_ct == 1))
