@@ -295,7 +295,7 @@ void bli_dtrsv_unf_var1
 
     PASTECH(d,dotxf_ker_ft) kfp_df;
 
-    // This function is invoked on all architectures including ‘generic’.
+    // This function is invoked on all architectures including 'generic'.
     // Non-AVX2+FMA3 platforms will use the kernels derived from the context.
     if (bli_cpuid_is_avx2fma3_supported() == TRUE) {
 	    kfp_df = bli_ddotxf_zen_int_8;
@@ -496,7 +496,7 @@ void bli_strsv_unf_var1
 
     PASTECH(s,dotxf_ker_ft) kfp_df;
 
-    // This function is invoked on all architectures including ‘generic’.
+    // This function is invoked on all architectures including 'generic'.
     // Non-AVX2+FMA3 platforms will use the kernels derived from the context.
     if (bli_cpuid_is_avx2fma3_supported() == TRUE) {
 	    kfp_df = bli_sdotxf_zen_int_8;

@@ -706,7 +706,7 @@ void strsm_blis_impl
     bli_obj_set_struc( struca, &ao );
 
 #ifdef BLIS_ENABLE_SMALL_MATRIX_TRSM
-    // This function is invoked on all architectures including ‘generic’.
+    // This function is invoked on all architectures including 'generic'.
     // Non-AVX2+FMA3 platforms will use the kernels derived from the context.
     if (bli_cpuid_is_avx2fma3_supported() == TRUE)
     {
@@ -1014,7 +1014,7 @@ void dtrsm_blis_impl
 
 #ifdef BLIS_ENABLE_SMALL_MATRIX_TRSM
 
-    // This function is invoked on all architectures including ‘generic’.
+    // This function is invoked on all architectures including 'generic'.
     // Non-AVX2+FMA3 platforms will use the kernels derived from the context.
     if (bli_cpuid_is_avx2fma3_supported() == TRUE)
     {
@@ -1449,7 +1449,7 @@ void ztrsm_blis_impl
     bli_obj_set_struc( struca, &ao );
 
 #ifdef BLIS_ENABLE_SMALL_MATRIX_TRSM
-    // This function is invoked on all architectures including ‘generic’.
+    // This function is invoked on all architectures including 'generic'.
     // Non-AVX2+FMA3 platforms will use the kernels derived from the context.
     if (bli_cpuid_is_avx2fma3_supported() == TRUE)
     {
@@ -1817,7 +1817,7 @@ void ctrsm_blis_impl
     bli_obj_set_struc( struca, &ao );
 
 #ifdef BLIS_ENABLE_SMALL_MATRIX_TRSM
-    // This function is invoked on all architectures including ‘generic’.
+    // This function is invoked on all architectures including 'generic'.
     // Non-AVX2+FMA3 platforms will use the kernels derived from the context.
     if (bli_cpuid_is_avx2fma3_supported() == TRUE)
     {

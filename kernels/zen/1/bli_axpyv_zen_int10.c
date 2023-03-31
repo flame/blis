@@ -307,9 +307,10 @@ void bli_saxpyv_zen_int10
 
         // Issue vzeroupper instruction to clear upper lanes of ymm registers.
         // This avoids a performance penalty caused by false dependencies when
-        // transitioning from from AVX to SSE instructions (which may occur
-        // as soon as the n_left cleanup loop below if BLIS is compiled with
+        // transitioning from AVX to SSE instructions (which may occur as soon
+        // as the n_left cleanup loop below if BLIS is compiled with
         // -mfpmath=sse).
+
         _mm256_zeroupper();
 
         for ( ; (i + 0) < n; i += 1 )
@@ -583,8 +584,8 @@ void bli_daxpyv_zen_int10
 
         // Issue vzeroupper instruction to clear upper lanes of ymm registers.
         // This avoids a performance penalty caused by false dependencies when
-        // transitioning from from AVX to SSE instructions (which may occur
-        // as soon as the n_left cleanup loop below if BLIS is compiled with
+        // transitioning from AVX to SSE instructions (which may occur as soon
+        // as the n_left cleanup loop below if BLIS is compiled with
         // -mfpmath=sse).
         _mm256_zeroupper();
 
@@ -638,8 +639,8 @@ void bli_caxpyv_zen_int5
     float alphaR, alphaI;
 
     //scomplex alpha => aR + aI i
-    __m256           alphaRv;            // for braodcast vector aR (real part of alpha)
-    __m256           alphaIv;            // for braodcast vector aI (imaginary part of alpha)
+    __m256           alphaRv;            // for broadcast vector aR (real part of alpha)
+    __m256           alphaIv;            // for broadcast vector aI (imaginary part of alpha)
     __m256           xv[10];
     __m256           xShufv[10];
     __m256           yv[10];
@@ -837,8 +838,8 @@ void bli_caxpyv_zen_int5
 
         // Issue vzeroupper instruction to clear upper lanes of ymm registers.
         // This avoids a performance penalty caused by false dependencies when
-        // transitioning from from AVX to SSE instructions (which may occur
-        // as soon as the n_left cleanup loop below if BLIS is compiled with
+        // transitioning from AVX to SSE instructions (which may occur as soon
+        // as the n_left cleanup loop below if BLIS is compiled with
         // -mfpmath=sse).
         _mm256_zeroupper();
 
@@ -947,8 +948,8 @@ void bli_zaxpyv_zen_int5
     {
         const dim_t n_elem_per_reg = 4;
 
-        __m256d alphaRv; // for braodcast vector aR (real part of alpha)
-        __m256d alphaIv; // for braodcast vector aI (imaginary part of alpha)
+        __m256d alphaRv; // for broadcast vector aR (real part of alpha)
+        __m256d alphaIv; // for broadcast vector aI (imaginary part of alpha)
         __m256d xv[7]; // Holds the X vector elements
         __m256d xShufv[5]; // Holds the permuted X vector elements
         __m256d yv[7]; // Holds the y vector elements
@@ -1258,8 +1259,8 @@ void bli_zaxpyv_zen_int5
 
         // Issue vzeroupper instruction to clear upper lanes of ymm registers.
         // This avoids a performance penalty caused by false dependencies when
-        // transitioning from from AVX to SSE instructions (which may occur
-        // as soon as the n_left cleanup loop below if BLIS is compiled with
+        // transitioning from AVX to SSE instructions (which may occur as soon
+        // as the n_left cleanup loop below if BLIS is compiled with
         // -mfpmath=sse).
         _mm256_zeroupper();
     }

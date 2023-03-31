@@ -154,7 +154,7 @@ void bli_trsm_front
 	// not impact the global cntx object.
 	cntx_t cntx_trsm = *cntx;
 
-	// A sort of hack for communicating the desired pach schemas for A and B
+	// A sort of hack for communicating the desired pack schemas for A and B
 	// to bli_trsm_cntl_create() (via bli_l3_thread_decorator() and
 	// bli_l3_cntl_create_if()). This allows us to access the schemas from
 	// the control tree, which hopefully reduces some confusion, particularly
@@ -165,11 +165,11 @@ void bli_trsm_front
 		/* Zen4 TRSM Fixme:
 		 *
 		 * On Zen4 we want to use AVX-512 kernels for GEMM and AVX2 kernels 
-		 * for TRSM (Till we implemente TRSM AVX-512 kernels)
+		 * for TRSM (Till we implement TRSM AVX-512 kernels)
 		 * 
 		 * The AVX2 kernels use different block sizes then AVX512 kernels
 		 * Here we override the default block sizes in the context with AVX2 
-		 * specific block size used in  GEMMTRSM kernerls.
+		 * specific block size used in GEMMTRSM kernerls.
 		 * 
 		 * We need to revisit this when TRSM AVX-512 kernels are implemented.
 		 */
@@ -182,7 +182,7 @@ void bli_trsm_front
 		bli_obj_set_pack_schema( BLIS_PACKED_ROW_PANELS, &a_local );
 		bli_obj_set_pack_schema( BLIS_PACKED_COL_PANELS, &b_local );
 	}
-	else // if ( bli_cntx_method( cntx ) != BLIS_NAT )
+	else // if ( bli_cntx_method( cntx_trsm ) != BLIS_NAT )
 	{
 		pack_t schema_a = bli_cntx_schema_a_block( &cntx_trsm );
 		pack_t schema_b = bli_cntx_schema_b_panel( &cntx_trsm );

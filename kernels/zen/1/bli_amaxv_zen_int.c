@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2016 - 2023, Advanced Micro Devices, Inc.
+   Copyright (C) 2016-2023, Advanced Micro Devices, Inc. All rights reserved.
    Copyright (C) 2018, The University of Texas at Austin	
 
    Redistribution and use in source and binary forms, with or without
@@ -255,8 +255,8 @@ void bli_samaxv_zen_int
 
 	// Issue vzeroupper instruction to clear upper lanes of ymm registers.
 	// This avoids a performance penalty caused by false dependencies when
-	// transitioning from from AVX to SSE instructions (which may occur
-	// later, especially if BLIS is compiled with -mfpmath=sse).
+	// transitioning from AVX to SSE instructions (which may occur later,
+	// especially if BLIS is compiled with -mfpmath=sse).
 	_mm256_zeroupper();
 
 	/* Store final index to output variable. */
@@ -743,8 +743,8 @@ static void bli_vec_search_double
 		/*
 			Issue vzeroupper instruction to clear upper lanes of ymm registers.
 			This avoids a performance penalty caused by false dependencies when
-			transitioning from from AVX to SSE instructions (which may occur
-			as soon as the n_left cleanup loop below if BLIS is compiled with
+			transitioning from AVX to SSE instructions (which may occur as soon
+			as the n_left cleanup loop below if BLIS is compiled with
 			-mfpmath=sse).
 		*/
 		_mm256_zeroupper();

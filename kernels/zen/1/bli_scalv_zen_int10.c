@@ -791,8 +791,8 @@ void bli_zdscalv_zen_int10
 
 		// Issue vzeroupper instruction to clear upper lanes of ymm registers.
 		// This avoids a performance penalty caused by false dependencies when
-		// transitioning from from AVX to SSE instructions (which may occur
-		// as soon as the n_left cleanup loop below if BLIS is compiled with
+		// transitioning from AVX to SSE instructions (which may occur as soon
+		// as the n_left cleanup loop below if BLIS is compiled with
 		// -mfpmath=sse).
 		_mm256_zeroupper();
 	}
@@ -968,8 +968,8 @@ void bli_zscalv_zen_int
 
 	// Issue vzeroupper instruction to clear upper lanes of ymm registers.
 	// This avoids a performance penalty caused by false dependencies when
-	// transitioning from from AVX to SSE instructions (which may occur
-	// later, especially if BLIS is compiled with -mfpmath=sse).
+	// transitioning from AVX to SSE instructions (which may occur later,
+	// especially if BLIS is compiled with -mfpmath=sse).
 	_mm256_zeroupper();
 
 	/* In double complex data type the computation of

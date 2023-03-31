@@ -1891,7 +1891,7 @@ Possible microkernel types (ie: the return values for `bli_info_get_*_ukr_impl_s
 
 ### Operation implementation type query
 
-The following routines allow the caller to obtain a string that identifies the implementation (`ind_t`) that is currently active (ie: implemented and enabled) for each level-3 operation. Possible implementation types are listed in the section above covering [microkernel implemenation query](BLISTypedAPI.md#microkernel-implementation-type-query).
+The following routines allow the caller to obtain a string that identifies the implementation (`ind_t`) that is currently active (ie: implemented and enabled) for each level-3 operation. Possible implementation types are listed in the section above covering [microkernel implementation query](BLISTypedAPI.md#microkernel-implementation-type-query).
 ```c
 char* bli_info_get_gemm_impl_string( num_t dt );
 char* bli_info_get_hemm_impl_string( num_t dt );

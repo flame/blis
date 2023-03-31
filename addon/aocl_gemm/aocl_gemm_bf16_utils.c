@@ -69,8 +69,8 @@ AOCL_GEMM_GET_REORDER_BUF_SIZE(bf16bf16f32of32)
 	}
 
 	// Extra space since packing does width in multiples of 16. The bf16
-	// instruction can be used as long as atleast one zmm register can be fully
-	// loaded; and since k_dim needs to be atleast 2, having n_dim atleast 16
+	// instruction can be used as long as at least one zmm register can be fully
+	// loaded; and since k_dim needs to be at least 2, having n_dim at least 16
 	// should give 2x16=32 elements, enough for 1 zmm register.The padding is
 	// not rounded to NR (=64), since that would result in memory wastage.
 	dim_t n_reorder = make_multiple_of_n( n, 16 );

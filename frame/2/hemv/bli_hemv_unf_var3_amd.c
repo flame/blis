@@ -312,7 +312,7 @@ void bli_dhemv_unf_var3
 
 	PASTECH(d,dotxaxpyf_ker_ft) kfp_dotxaxpyf_ker;
 
-    // This function is invoked on all architectures including ‘generic’.
+    // This function is invoked on all architectures including 'generic'.
     // Non-AVX2+FMA3 platforms will use the kernels derived from the context.
     if (bli_cpuid_is_avx2fma3_supported() == TRUE)
 	{

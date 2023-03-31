@@ -283,7 +283,7 @@ void dgemv_blis_impl
     rs_a = 1;
     cs_a = *lda;
 
-    // This function is invoked on all architectures including ‘generic’.
+    // This function is invoked on all architectures including 'generic'.
     // Non-AVX2+FMA3 platforms will use the kernels derived from the context.
     if (bli_cpuid_is_avx2fma3_supported() == FALSE)
     {
@@ -482,7 +482,7 @@ void sgemv_blis_impl
     rs_a = 1;
     cs_a = *lda;
 
-    // This function is invoked on all architectures including ‘generic’.
+    // This function is invoked on all architectures including 'generic'.
     // Non-AVX2+FMA3 platforms will use the kernels derived from the context.
     if (bli_cpuid_is_avx2fma3_supported() == FALSE)
     {

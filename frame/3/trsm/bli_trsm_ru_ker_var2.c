@@ -183,7 +183,7 @@ void PASTEMAC(ch,varname) \
 	/* Zen4 TRSM Fixme:
 	 *
 	 * On Zen4 we want to use AVX-512 kernels for GEMM and AVX2 kernels
-	 * for TRSM (Till we implemente TRSM AVX-512 kernels)
+	 * for TRSM (Till we implement TRSM AVX-512 kernels)
 	 *
 	 * The AVX2 kernels for TRSM are enabled in the context, but they
 	 * are compatible with only AVX2 version of GEMM kernels.

@@ -393,7 +393,7 @@ void bli_gks_register_cntx
 
 	// At this point, we know the pointer to the array of cntx_t* is NULL and
 	// needs to be allocated. Allocate the memory and initialize it to
-	// zeros/NULL, storing the address of the alloacted memory at the element
+	// zeros/NULL, storing the address of the allocated memory at the element
 	// for the current architecture id.
 	gks[ id ] = bli_calloc_intl( sizeof( cntx_t* ) * BLIS_NUM_IND_METHODS );
 

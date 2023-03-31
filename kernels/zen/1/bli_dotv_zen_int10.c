@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2016 - 2020, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2016-2023, Advanced Micro Devices, Inc. All rights reserved.
    Copyright (C) 2018, The University of Texas at Austin
 
    Redistribution and use in source and binary forms, with or without
@@ -222,8 +222,8 @@ void bli_sdotv_zen_int10
 
 		// Issue vzeroupper instruction to clear upper lanes of ymm registers.
 		// This avoids a performance penalty caused by false dependencies when
-		// transitioning from from AVX to SSE instructions (which may occur
-		// later, especially if BLIS is compiled with -mfpmath=sse).
+		// transitioning from AVX to SSE instructions (which may occur later,
+		// especially if BLIS is compiled with -mfpmath=sse).
 		_mm256_zeroupper();
 	}
 	else
@@ -434,8 +434,8 @@ void bli_ddotv_zen_int10
 
 		// Issue vzeroupper instruction to clear upper lanes of ymm registers.
 		// This avoids a performance penalty caused by false dependencies when
-		// transitioning from from AVX to SSE instructions (which may occur
-		// later, especially if BLIS is compiled with -mfpmath=sse).
+		// transitioning from AVX to SSE instructions (which may occur later,
+		// especially if BLIS is compiled with -mfpmath=sse).
 		_mm256_zeroupper();
 	}
 	else
@@ -711,8 +711,8 @@ void bli_cdotv_zen_int5
         }
         // Issue vzeroupper instruction to clear upper lanes of ymm registers.
         // This avoids a performance penalty caused by false dependencies when
-        // transitioning from from AVX to SSE instructions (which may occur
-        // later, especially if BLIS is compiled with -mfpmath=sse).
+        // transitioning from AVX to SSE instructions (which may occur later,
+        // especially if BLIS is compiled with -mfpmath=sse).
         _mm256_zeroupper();
     }
     else
@@ -1000,8 +1000,8 @@ void bli_zdotv_zen_int5
 
         // Issue vzeroupper instruction to clear upper lanes of ymm registers.
         // This avoids a performance penalty caused by false dependencies when
-        // transitioning from from AVX to SSE instructions (which may occur
-        // later, especially if BLIS is compiled with -mfpmath=sse).
+        // transitioning from AVX to SSE instructions (which may occur later,
+        // especially if BLIS is compiled with -mfpmath=sse).
         _mm256_zeroupper();
     }
     else

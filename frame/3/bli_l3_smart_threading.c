@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2022, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2022-2023, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -149,7 +149,7 @@ err_t bli_gemm_smart_threading_sup
 {
 	err_t ret_val = BLIS_FAILURE;
 
-	// Sanity check, max available threads should be atleast 4 for the
+	// Sanity check, max available threads should be at least 4 for the
 	// smart threading/factorization to be meaningful. For nt < 4 the
 	// default ic,jc factorization holds good.
 	if ( ( m <= 1 ) || ( n <= 1 ) ||  ( k <= 1 ) || ( max_available_nt < 4 ) )

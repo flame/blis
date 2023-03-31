@@ -104,7 +104,7 @@ err_t bli_gemm_small
     AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_7);
     return BLIS_NOT_YET_IMPLEMENTED;
 #else
-    // This function is invoked on all architectures including ‘generic’.
+    // This function is invoked on all architectures including 'generic'.
     // Non-AVX2+FMA3 platforms will use the kernels derived from the context.
     if (bli_cpuid_is_avx2fma3_supported() == FALSE)
     {
@@ -360,8 +360,8 @@ static err_t bli_sgemm_small
 
             // This is the part of the pack and compute optimization.
             // During the first column iteration, we store the accessed A matrix into
-            // contiguous static memory. This helps to keep te A matrix in Cache and
-            // aviods the TLB misses.
+            // contiguous static memory. This helps to keep the A matrix in Cache and
+            // avoids the TLB misses.
             if (required_packing_A)
             {
                 col_idx = 0;
@@ -1748,7 +1748,7 @@ static err_t bli_sgemm_small
     {
         AOCL_DTL_TRACE_EXIT_ERR(
             AOCL_DTL_LEVEL_INFO,
-            "Invalid dimesions for small gemm."
+            "Invalid dimensions for small gemm."
             );
         return BLIS_NONCONFORMAL_DIMENSIONS;
     }
@@ -1776,7 +1776,7 @@ err_t bli_dgemm_small
     gint_t K = bli_obj_width( a );  // number of columns of OP(A), will be updated if OP(A) is Transpose(A) .
     gint_t L = M * N;
 
-    /* if (N<3) //Implemenation assumes that N is atleast 3. VK */
+    /* if (N<3) //Implementation assumes that N is at least 3. VK */
     /*  { */
     /*      AOCL_DTL_TRACE_EXIT_ERR( */
     /*          AOCL_DTL_LEVEL_INFO, */
@@ -1908,8 +1908,8 @@ err_t bli_dgemm_small
 
             // This is the part of the pack and compute optimization.
             // During the first column iteration, we store the accessed A matrix into
-            // contiguous static memory. This helps to keep te A matrix in Cache and
-            // aviods the TLB misses.
+            // contiguous static memory. This helps to keep the A matrix in Cache and
+            // avoids the TLB misses.
             if (required_packing_A)
             {
                 col_idx = 0;
@@ -3339,7 +3339,7 @@ err_t bli_dgemm_small
     {
         AOCL_DTL_TRACE_EXIT_ERR(
             AOCL_DTL_LEVEL_INFO,
-            "Invalid dimesions for small gemm."
+            "Invalid dimensions for small gemm."
             );
         return BLIS_NONCONFORMAL_DIMENSIONS;
     }
@@ -3816,7 +3816,7 @@ static err_t bli_sgemm_small_atbn
     {
         AOCL_DTL_TRACE_EXIT_ERR(
             AOCL_DTL_LEVEL_INFO,
-            "Invalid dimesions for small gemm."
+            "Invalid dimensions for small gemm."
             );
         return BLIS_NONCONFORMAL_DIMENSIONS;
     }
@@ -4256,7 +4256,7 @@ static err_t bli_dgemm_small_atbn
     {
         AOCL_DTL_TRACE_EXIT_ERR(
             AOCL_DTL_LEVEL_INFO,
-            "Invalid dimesions for small gemm."
+            "Invalid dimensions for small gemm."
             );
         return BLIS_NONCONFORMAL_DIMENSIONS;
     }
@@ -4284,7 +4284,7 @@ err_t bli_dgemm_small_At
     gint_t K = bli_obj_width_after_trans( a );  // number of columns of OP(A), will be updated if OP(A) is Transpose(A) .
 
 
-    if (N<3) //Implemenation assumes that N is atleast 3.
+    if (N<3) //Implementation assumes that N is at least 3.
     {
         AOCL_DTL_TRACE_EXIT_ERR(
             AOCL_DTL_LEVEL_INFO,
@@ -5718,7 +5718,7 @@ err_t bli_dgemm_small_At
     {
         AOCL_DTL_TRACE_EXIT_ERR(
             AOCL_DTL_LEVEL_INFO,
-            "Invalid dimesions for dgemm_small_At."
+            "Invalid dimensions for dgemm_small_At."
             );
         return BLIS_NONCONFORMAL_DIMENSIONS;
     }
@@ -5907,8 +5907,8 @@ err_t bli_zgemm_small
             /**
              * This is the part of the pack and compute optimization.
              * During the first column iteration, we store the accessed A
-             * matrix into contiguous static memory. This helps to keep te A
-             * matrix in Cache and aviods the TLB misses.
+             * matrix into contiguous static memory. This helps to keep the A
+             * matrix in Cache and avoids the TLB misses.
              */
             if (required_packing_A)
             {
@@ -9704,7 +9704,7 @@ err_t bli_zgemm_small
     {
         AOCL_DTL_TRACE_EXIT_ERR(
                 AOCL_DTL_LEVEL_INFO,
-                "Invalid dimesions for small gemm."
+                "Invalid dimensions for small gemm."
                 );
         return BLIS_NONCONFORMAL_DIMENSIONS;
     }
@@ -9733,7 +9733,7 @@ err_t bli_zgemm_small_At
     gint_t N = bli_obj_width( c );  // number of columns of Matrix C
     gint_t K = bli_obj_width_after_trans( a );  // number of columns of OP(A)
 
-    if (N<3) //Implemenation assumes that N is atleast 3.
+    if (N<3) //Implementation assumes that N is at least 3.
     {
         AOCL_DTL_TRACE_EXIT_ERR(
                 AOCL_DTL_LEVEL_INFO,
@@ -13406,7 +13406,7 @@ err_t bli_zgemm_small_At
     {
         AOCL_DTL_TRACE_EXIT_ERR(
                 AOCL_DTL_LEVEL_INFO,
-                "Invalid dimesions for dgemm_small_At."
+                "Invalid dimensions for dgemm_small_At."
                 );
         return BLIS_NONCONFORMAL_DIMENSIONS;
     }

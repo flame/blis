@@ -803,7 +803,7 @@ void bli_gemm_md_zgemm
 	}
 
 	{
-		// A sort of hack for communicating the desired pach schemas for A and B
+		// A sort of hack for communicating the desired pack schemas for A and B
 		// to bli_gemm_cntl_create() (via bli_l3_thread_decorator() and
 		// bli_l3_cntl_create_if()). This allows us to access the schemas from
 		// the control tree, which hopefully reduces some confusion, particularly

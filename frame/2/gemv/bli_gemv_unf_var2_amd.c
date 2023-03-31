@@ -177,7 +177,7 @@ void bli_dgemv_unf_var2
 
     conja = bli_extract_conj( transa );
 
-    // This function is invoked on all architectures including ‘generic’.
+    // This function is invoked on all architectures including 'generic'.
     // Non-AVX2+FMA3 platforms will use the kernels derived from the context.
     if (bli_cpuid_is_avx2fma3_supported() == FALSE)
     {
@@ -247,7 +247,7 @@ void bli_dgemv_unf_var2
 
     /* If beta is zero, use setv. Otherwise, scale by beta. */
         /* y = beta * y; */
-    /* beta=0 case is hadled by scalv internally */
+    /* beta=0 case is handled by scalv internally */
 
     bli_dscalv_zen_int10
     (
@@ -448,7 +448,7 @@ void bli_sgemv_unf_var2
 
     conja = bli_extract_conj( transa );
 
-    // This function is invoked on all architectures including ‘generic’.
+    // This function is invoked on all architectures including 'generic'.
     // Non-AVX2+FMA3 platforms will use the kernels derived from the context.
     if (bli_cpuid_is_avx2fma3_supported() == FALSE)
     {
@@ -516,7 +516,7 @@ void bli_sgemv_unf_var2
 
     /* If beta is zero, use setv. Otherwise, scale by beta. */
         /* y = beta * y; */
-    /* beta=0 case is hadled by scalv internally */
+    /* beta=0 case is handled by scalv internally */
     bli_sscalv_zen_int10
     (
       BLIS_NO_CONJUGATE,
@@ -835,7 +835,7 @@ void bli_cgemv_unf_var2
 
     /* If beta is zero, use setv. Otherwise, scale by beta. */
         /* y = beta * y; */
-    /* beta=0 case is hadled by scalv internally */
+    /* beta=0 case is handled by scalv internally */
     /*bli_cscalv_zen_int10
     (
       BLIS_NO_CONJUGATE,
@@ -846,7 +846,7 @@ void bli_cgemv_unf_var2
       cntx
     );*/
 
-    // This function is invoked on all architectures including ‘generic’.
+    // This function is invoked on all architectures including 'generic'.
     // Non-AVX2+FMA3 platforms will use the kernels derived from the context.
     if (bli_cpuid_is_avx2fma3_supported() == FALSE)
     {

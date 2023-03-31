@@ -297,7 +297,7 @@ void bli_dtrsv_unf_var2
 
     PASTECH(d,axpyf_ker_ft) kfp_af;
 
-    // This function is invoked on all architectures including ‘generic’.
+    // This function is invoked on all architectures including 'generic'.
     // Non-AVX2+FMA3 platforms will use the kernels derived from the context.
     if (bli_cpuid_is_avx2fma3_supported() == TRUE) {
 	    kfp_af = bli_daxpyf_zen_int_16x4;
@@ -496,7 +496,7 @@ void bli_strsv_unf_var2
 
     PASTECH(s, axpyf_ker_ft) kfp_af;
 
-    // This function is invoked on all architectures including ‘generic’.
+    // This function is invoked on all architectures including 'generic'.
     // Non-AVX2+FMA3 platforms will use the kernels derived from the context.
     if (bli_cpuid_is_avx2fma3_supported() == TRUE) {
 	    kfp_af = bli_saxpyf_zen_int_5;
@@ -695,7 +695,7 @@ void bli_ztrsv_unf_var2
 
     PASTECH(z, axpyf_ker_ft) kfp_af;
 
-    // This function is invoked on all architectures including ‘generic’.
+    // This function is invoked on all architectures including 'generic'.
     // Non-AVX2+FMA3 platforms will use the kernels derived from the context.
     if (bli_cpuid_is_avx2fma3_supported() == TRUE) {
 	    kfp_af = bli_zaxpyf_zen_int_5;
@@ -893,7 +893,7 @@ void bli_ctrsv_unf_var2
 
     PASTECH(c, axpyf_ker_ft) kfp_af;
 
-    // This function is invoked on all architectures including ‘generic’.
+    // This function is invoked on all architectures including 'generic'.
     // Non-AVX2+FMA3 platforms will use the kernels derived from the context.
     if (bli_cpuid_is_avx2fma3_supported() == TRUE) {
 	    kfp_af = bli_caxpyf_zen_int_5;

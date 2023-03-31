@@ -69,8 +69,8 @@ AOCL_GEMM_GET_REORDER_BUF_SIZE(u8s8s16os16)
 	}
 
 	// Extra space since packing does width in multiples of 16. The vpmaddubsw
-	// instruction can be used as long as atleast one ymm register can be fully
-	// loaded; and since k_dim needs to be at least 2, having n_dim atleast 16
+	// instruction can be used as long as at least one ymm register can be fully
+	// loaded; and since k_dim needs to be at least 2, having n_dim at least 16
 	// should give 2x16=32 elements, enough for 1 ymm register.The padding is
 	// not rounded to NR (=16), since that would result in memory wastage.
 	dim_t n_reorder = make_multiple_of_n(n, 16);
