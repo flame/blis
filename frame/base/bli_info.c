@@ -103,10 +103,10 @@ gint_t bli_info_get_enable_sba_pools( void )
 }
 gint_t bli_info_get_enable_threading( void )
 {
-	if ( bli_info_get_enable_openmp() ||
+	if ( bli_info_get_enable_openmp()   ||
 	     bli_info_get_enable_pthreads() ||
 	     bli_info_get_enable_hpx() ) return 1;
-	else                                  return 0;
+	else                             return 0;
 }
 gint_t bli_info_get_enable_openmp( void )
 {
@@ -175,6 +175,14 @@ gint_t bli_info_get_thread_jrir_rr( void )
 gint_t bli_info_get_thread_jrir_tlb( void )
 {
 #ifdef BLIS_ENABLE_JRIR_TLB
+	return 1;
+#else
+	return 0;
+#endif
+}
+gint_t bli_info_get_enable_tls( void )
+{
+#ifdef BLIS_ENABLE_TLS
 	return 1;
 #else
 	return 0;
