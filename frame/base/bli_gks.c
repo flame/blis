@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2018-2021, Advanced Micro Devices, Inc.
+   Copyright (C) 2018-2023, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -53,6 +53,16 @@ typedef void (*ref_cntx_init_ft)( cntx_t* cntx );
 typedef void (*ind_cntx_init_ft)( ind_t method, num_t dt, cntx_t* cntx );
 
 // -----------------------------------------------------------------------------
+
+// A pthread_once_t variable is a pthread structure used in pthread_once().
+// pthread_once() is guaranteed to execute exactly once among all threads that
+// pass in this control object.
+static bli_pthread_once_t gks_once_init = BLIS_PTHREAD_ONCE_INIT;
+
+void bli_gks_init_once( void )
+{
+	bli_pthread_once( &gks_once_init, bli_gks_init );
+}
 
 void bli_gks_init( void )
 {

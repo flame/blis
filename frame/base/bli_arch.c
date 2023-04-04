@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2018-2022, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2018-2023, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -107,6 +107,10 @@ void bli_arch_set_id( void )
 			err_t e_val = bli_check_valid_arch_id( req_id );
 			bli_check_error_code( e_val );
 		}
+
+		// In BLAS1 and BLAS2 routines, bli_init_auto() may not have been
+		// called, so ensure cntx has been initialized here.
+		bli_gks_init_once();
 
 		// At this point, we know that req_id is in the valid range, but we
 		// don't yet know if it refers to a context that was actually

@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2018 - 2022, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2018-2023, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -85,7 +85,7 @@ void bli_init_apis( void )
 	/* Initialize DTL Library with trace level set by the user */
 	AOCL_DTL_INITIALIZE(AOCL_DTL_TRACE_LEVEL);
 	// Initialize various sub-APIs.
-	bli_gks_init();
+	bli_gks_init_once();
 	bli_ind_init();
 	bli_thread_init();
 	bli_pack_init();
