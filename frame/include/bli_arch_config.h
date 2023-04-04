@@ -41,12 +41,6 @@
 // -- Context initialization prototypes ----------------------------------------
 //
 
-// -- SiFive architectures --
-
-#ifdef BLIS_CONFIG_SIFIVE_X280
-CNTX_INIT_PROTS( sifive_x280 )
-#endif
-
 // -- Intel64 architectures --
 
 #ifdef BLIS_CONFIG_SKX
@@ -162,6 +156,12 @@ CNTX_INIT_PROTS( rv32iv )
 CNTX_INIT_PROTS( rv64iv )
 #endif
 
+// -- SiFive architectures --
+
+#ifdef BLIS_CONFIG_SIFIVE_X280
+CNTX_INIT_PROTS( sifive_x280 )
+#endif
+
 // -- Generic --
 
 #ifdef BLIS_CONFIG_GENERIC
@@ -172,12 +172,6 @@ CNTX_INIT_PROTS( generic )
 //
 // -- Architecture family-specific headers -------------------------------------
 //
-
-// -- SiFive families --
-
-#ifdef BLIS_FAMILY_SIFIVE_X280
-#include "bli_family_sifive_x280.h"
-#endif
 
 // -- x86_64 families --
 
@@ -307,6 +301,12 @@ CNTX_INIT_PROTS( generic )
 #include "bli_family_bgq.h"
 #endif
 
+// -- SiFive families --
+
+#ifdef BLIS_FAMILY_SIFIVE_X280
+#include "bli_family_sifive_x280.h"
+#endif
+
 // -- Generic --
 
 #ifdef BLIS_FAMILY_GENERIC
@@ -317,11 +317,6 @@ CNTX_INIT_PROTS( generic )
 //
 // -- kernel set prototypes ----------------------------------------------------
 //
-
-// -- SiFive RISC-V architectures --
-#ifdef BLIS_KERNELS_SIFIVE_X280
-#include "bli_kernels_sifive_x280.h"
-#endif
 
 // -- Intel64 architectures --
 #ifdef BLIS_KERNELS_SKX
@@ -392,6 +387,12 @@ CNTX_INIT_PROTS( generic )
 
 #ifdef BLIS_KERNELS_BGQ
 #include "bli_kernels_bgq.h"
+#endif
+
+// -- SiFive RISC-V architectures --
+
+#ifdef BLIS_KERNELS_SIFIVE_X280
+#include "bli_kernels_sifive_x280.h"
 #endif
 
 // -- RISC-V --
