@@ -185,3 +185,14 @@ endif()
 
 add_subdirectory(testinghelpers)
 add_subdirectory(testsuite)
+
+add_custom_target(distclean
+    COMMAND ${CMAKE_MAKE_PROGRAM} clean
+    COMMAND rm ${CMAKE_BINARY_DIR}/*.txt
+    COMMAND rm ${CMAKE_BINARY_DIR}/*.cmake
+    COMMAND rm ${CMAKE_BINARY_DIR}/Makefile
+    COMMAND rm -rf ${CMAKE_BINARY_DIR}/CMakeFiles
+    COMMAND rm -rf ${CMAKE_BINARY_DIR}/bin
+    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+    COMMENT "Remove cmake_generated files and executables"
+)

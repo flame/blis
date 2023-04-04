@@ -1,5 +1,5 @@
 # Dependencies
-* GoogleTest is used as the tool for testing. The library is fetched and build at configuration time. No installation necessary. 
+* GoogleTest is used as the tool for testing. The library is fetched and build at configuration time. No installation necessary.
 * An installation location for BLIS needs to be passed in as an argument during cmake invocation.
 * A path to a reference library needs to be passed during cmake invocation. Currently, MKL, OpenBLAS and Netlib are supported.
 
@@ -72,9 +72,9 @@ There are multiple configuration options to chose from when invoking CMake. Thos
 * For multithreaded BLIS that uses OpenMP, use `-DENABLE_THREADING=openmp`. [**Default**]
     * In addition, to use Intel OpenMP runtime, use `-DOpenMP_LIBRARY=Intel`.
     * For GNU OpenMP runtime, use `-DOpenMP_LIBRARY=GNU`. [**Default**]
-## BLIS Linking Type (Linux Only) 
+## BLIS Linking Type (Linux Only)
 * To link static BLIS, use `-DBLIS_LINKING_TYPE=static`. [**Default**]
-* To link shared BLIS, use `-DBLIS_LINKING_TYPE=shared`. 
+* To link shared BLIS, use `-DBLIS_LINKING_TYPE=shared`.
 ## Address Sanitizer
 * To build using address sanitizer, configure using `-DENABLE_ASAN=ON`. [**OFF by default**]
 * An installation to BLIS which was build with ASAN flags needs to be provided.
@@ -124,12 +124,12 @@ The above command will run all tests using 3 threads.
 ```console
 $ ctest -R level1
 ```
-The above command will run only the level1 tests. 
+The above command will run only the level1 tests.
 ### To run tests of a specific API use:
 ```console
 $ ctest -R gemm
 ```
-The above command will run only the gemm tests. 
+The above command will run only the gemm tests.
 ## Other CTest options
 There are several other options that can be used when running CTest.
 One good example is using --test-load which is particularly helpful when the code is being tested is parallel and the option of running tests in parallel (e.g., `-j12`) has been used as well.
@@ -140,7 +140,7 @@ ctest --help
 You can also find more details in [CMake Documentation](https://cmake.org/cmake/help/latest/manual/ctest.1.html).
 
 ## Using the Executables
-As we mentioned earlier, all cpp files of each API directory are compiled into one executable. This executable can be run separately which can be very useful while developing or debugging. 
+As we mentioned earlier, all cpp files of each API directory are compiled into one executable. This executable can be run separately which can be very useful while developing or debugging.
 ### To run all addv tests use:
 ```console
 $ ./test.level1.addv
@@ -154,30 +154,36 @@ We can run any executable using valgrind as usual. For example, use the followin
 ```console
 $ OMP_NUM_THREADS=1 valgrind ./testsuite.level3.gemm
 ```
+
+## Clean cmake generated files
+```console
+$ make distclean
+```
+
 ## Other GoogleTest options
 A list of useful options:
 ### Test Selection
 --gtest_list_tests
       List the names of all tests instead of running them. The name of
-      TEST(Foo, Bar) is "Foo.Bar".  
+      TEST(Foo, Bar) is "Foo.Bar".
 --gtest_filter=POSITIVE_PATTERNS[-NEGATIVE_PATTERNS]
       Run only the tests whose name matches one of the positive patterns but
       none of the negative patterns. '?' matches any single character; '*'
-      matches any substring; ':' separates two patterns. 
+      matches any substring; ':' separates two patterns.
 
 ### Test Execution
 --gtest_repeat=[COUNT]
-      Run the tests repeatedly; use a negative count to repeat forever. 
+      Run the tests repeatedly; use a negative count to repeat forever.
 
-### Test Output  
+### Test Output
 --gtest_brief=1
-      Only print test failures.  
+      Only print test failures.
 --gtest_output=(json|xml)[:DIRECTORY_PATH/|:FILE_PATH]
       Generate a JSON or XML report in the given directory or with the given
-      file name. FILE_PATH defaults to test_detail.xml. 
+      file name. FILE_PATH defaults to test_detail.xml.
 ### Assertion Behavior
 --gtest_break_on_failure
-      Turn assertion failures into debugger break-points.  
+      Turn assertion failures into debugger break-points.
 --gtest_throw_on_failure
       Turn assertion failures into C++ exceptions for use by an external
       test framework.
@@ -190,7 +196,7 @@ There are several other options that can be used when running an executable whic
 # How to Add New Tests
 There are two ways to add new tests.
 ### Modify an existing cpp file
-* Add any of the GoogleTest testing API, e.g., `TEST()` in any of the existing cpp files. 
+* Add any of the GoogleTest testing API, e.g., `TEST()` in any of the existing cpp files.
 * Rebuild.
 * Rerun.
 
