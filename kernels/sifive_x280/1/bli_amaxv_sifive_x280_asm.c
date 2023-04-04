@@ -85,8 +85,7 @@ void bli_samaxv_sifive_x280_asm(dim_t n, const void * restrict x_, inc_t incx,
             __asm__("vadd.vx v24, v24, %0" : : "r"(offset));
             __asm__("vmerge.vvm v16, v16, v24, v0");
         }
-        inc_t tmp = vl * incx;
-        __asm__("add %0, %0, %1" : "+r"(x) : "r"(tmp));
+        __asm__("add %0, %0, %1" : "+r"(x) : "r"(vl * incx));
         offset += vl;
         avl -= vl;
     }
@@ -147,8 +146,7 @@ void bli_damaxv_sifive_x280_asm(dim_t n, const void * restrict x_, inc_t incx,
             __asm__("vadd.vx v24, v24, %0" : : "r"(offset));
             __asm__("vmerge.vvm v16, v16, v24, v0");
         }
-        inc_t tmp = vl * incx;
-        __asm__("add %0, %0, %1" : "+r"(x) : "r"(tmp));
+        __asm__("add %0, %0, %1" : "+r"(x) : "r"(vl * incx));
         offset += vl;
         avl -= vl;
     }
@@ -214,8 +212,7 @@ void bli_camaxv_sifive_x280_asm(dim_t n, const void * restrict x_, inc_t incx,
             __asm__("vadd.vx v24, v24, %0" : : "r"(offset));
             __asm__("vmerge.vvm v16, v16, v24, v0");
         }
-        inc_t tmp = vl * incx;
-        __asm__("add %0, %0, %1" : "+r"(x) : "r"(tmp));
+        __asm__("add %0, %0, %1" : "+r"(x) : "r"(vl * incx));
         offset += vl;
         avl -= vl;
     }
@@ -278,8 +275,7 @@ void bli_zamaxv_sifive_x280_asm(dim_t n, const void * restrict x_, inc_t incx,
             __asm__("vadd.vx v24, v24, %0" : : "r"(offset));
             __asm__("vmerge.vvm v16, v16, v24, v0");
         }
-        inc_t tmp = vl * incx;
-        __asm__("add %0, %0, %1" : "+r"(x) : "r"(tmp));
+        __asm__("add %0, %0, %1" : "+r"(x) : "r"(vl * incx));
         offset += vl;
         avl -= vl;
     }

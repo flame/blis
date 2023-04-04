@@ -49,6 +49,8 @@ void bli_sswapv_sifive_x280_asm(dim_t n, void * restrict x_, inc_t incx, void * 
     (void)cntx;
     float* restrict x = x_;
     float* restrict y = y_;
+    if (n <= 0)
+        return;
 
     incx *= FLT_SIZE;
     incy *= FLT_SIZE;
@@ -76,10 +78,8 @@ void bli_sswapv_sifive_x280_asm(dim_t n, void * restrict x_, inc_t incx, void * 
         else
             __asm__(VSSE "v0, (%0), %1" : : "r"(y), "r"(incy));
 
-        inc_t tmp1 = vl * incx;
-        inc_t tmp2 = vl * incy;
-        __asm__("add %0, %0, %1" : "+r"(x) : "r"(tmp1));
-        __asm__("add %0, %0, %1" : "+r"(y) : "r"(tmp2));
+        __asm__("add %0, %0, %1" : "+r"(x) : "r"(vl * incx));
+        __asm__("add %0, %0, %1" : "+r"(y) : "r"(vl * incy));
         avl -= vl;
     }
     return;
@@ -102,6 +102,8 @@ void bli_dswapv_sifive_x280_asm(dim_t n, void * restrict x_, inc_t incx,
     (void)cntx;
     double* restrict x = x_;
     double* restrict y = y_;
+    if (n <= 0)
+        return;
 
     incx *= FLT_SIZE;
     incy *= FLT_SIZE;
@@ -129,10 +131,8 @@ void bli_dswapv_sifive_x280_asm(dim_t n, void * restrict x_, inc_t incx,
         else
             __asm__(VSSE "v0, (%0), %1" : : "r"(y), "r"(incy));
 
-        inc_t tmp1 = vl * incx;
-        inc_t tmp2 = vl * incy;
-        __asm__("add %0, %0, %1" : "+r"(x) : "r"(tmp1));
-        __asm__("add %0, %0, %1" : "+r"(y) : "r"(tmp2));
+        __asm__("add %0, %0, %1" : "+r"(x) : "r"(vl * incx));
+        __asm__("add %0, %0, %1" : "+r"(y) : "r"(vl * incy));
         avl -= vl;
     }
     return;
@@ -155,6 +155,8 @@ void bli_cswapv_sifive_x280_asm(dim_t n, void * restrict x_, inc_t incx,
     (void)cntx;
     scomplex* restrict x = x_;
     scomplex* restrict y = y_;
+    if (n <= 0)
+        return;
 
     incx *= 2 * FLT_SIZE;
     incy *= 2 * FLT_SIZE;
@@ -182,10 +184,8 @@ void bli_cswapv_sifive_x280_asm(dim_t n, void * restrict x_, inc_t incx,
         else
             __asm__(VSSE "v0, (%0), %1" : : "r"(y), "r"(incy));
 
-        inc_t tmp1 = vl * incx;
-        inc_t tmp2 = vl * incy;
-        __asm__("add %0, %0, %1" : "+r"(x) : "r"(tmp1));
-        __asm__("add %0, %0, %1" : "+r"(y) : "r"(tmp2));
+        __asm__("add %0, %0, %1" : "+r"(x) : "r"(vl * incx));
+        __asm__("add %0, %0, %1" : "+r"(y) : "r"(vl * incy));
         avl -= vl;
     }
     return;
@@ -208,6 +208,8 @@ void bli_zswapv_sifive_x280_asm(dim_t n, void * restrict x_, inc_t incx,
     (void)cntx;
     dcomplex* restrict x = x_;
     dcomplex* restrict y = y_;
+    if (n <= 0)
+        return;
 
     incx *= 2 * FLT_SIZE;
     incy *= 2 * FLT_SIZE;
@@ -235,10 +237,8 @@ void bli_zswapv_sifive_x280_asm(dim_t n, void * restrict x_, inc_t incx,
         else
             __asm__(VSSSEG2 "v0, (%0), %1" : : "r"(y), "r"(incy));
 
-        inc_t tmp1 = vl * incx;
-        inc_t tmp2 = vl * incy;
-        __asm__("add %0, %0, %1" : "+r"(x) : "r"(tmp1));
-        __asm__("add %0, %0, %1" : "+r"(y) : "r"(tmp2));
+        __asm__("add %0, %0, %1" : "+r"(x) : "r"(vl * incx));
+        __asm__("add %0, %0, %1" : "+r"(y) : "r"(vl * incy));
         avl -= vl;
     }
     return;

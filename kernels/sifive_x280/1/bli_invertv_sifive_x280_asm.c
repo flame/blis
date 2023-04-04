@@ -49,6 +49,8 @@ void bli_sinvertv_sifive_x280_asm(dim_t n, void * restrict x_, inc_t incx,
                            const cntx_t *cntx) {
     (void)cntx;
     float* restrict x = x_;
+    if (n <= 0)
+        return;
 
     float one = 1.f;
     __asm__(FLT_LOAD "f0, (%0)" : : "r"(&one));
@@ -68,8 +70,7 @@ void bli_sinvertv_sifive_x280_asm(dim_t n, void * restrict x_, inc_t incx,
             __asm__("vfrdiv.vf v0, v0, f0");
             __asm__(VSSE "v0, (%0), %1" : : "r"(x), "r"(incx));
         }
-        inc_t tmp1 = vl * incx;
-        __asm__("add %0, %0, %1" : "+r"(x) : "r"(tmp1));
+        __asm__("add %0, %0, %1" : "+r"(x) : "r"(vl * incx));
         avl -= vl;
     }
     return;
@@ -93,6 +94,8 @@ void bli_dinvertv_sifive_x280_asm(dim_t n, void * restrict x_, inc_t incx,
                            const cntx_t *cntx) {
     (void)cntx;
     double* restrict x = x_;
+    if (n <= 0)
+        return;
 
     double one = 1.;
     __asm__(FLT_LOAD "f0, (%0)" : : "r"(&one));
@@ -112,8 +115,7 @@ void bli_dinvertv_sifive_x280_asm(dim_t n, void * restrict x_, inc_t incx,
             __asm__("vfrdiv.vf v0, v0, f0");
             __asm__(VSSE "v0, (%0), %1" : : "r"(x), "r"(incx));
         }
-        inc_t tmp1 = vl * incx;
-        __asm__("add %0, %0, %1" : "+r"(x) : "r"(tmp1));
+        __asm__("add %0, %0, %1" : "+r"(x) : "r"(vl * incx));
         avl -= vl;
     }
     return;
@@ -136,6 +138,8 @@ void bli_cinvertv_sifive_x280_asm(dim_t n, void * restrict x_, inc_t incx,
                            const cntx_t *cntx) {
     (void)cntx;
     scomplex* restrict x = x_;
+    if (n <= 0)
+        return;
 
     incx *= 2 * FLT_SIZE;
     size_t avl = n;
@@ -161,8 +165,7 @@ void bli_cinvertv_sifive_x280_asm(dim_t n, void * restrict x_, inc_t incx,
             __asm__("vfdiv.vv v4, v4, v8");
             __asm__(VSSSEG2 "v0, (%0), %1" : : "r"(x), "r"(incx));
         }
-        inc_t tmp1 = vl * incx;
-        __asm__("add %0, %0, %1" : "+r"(x) : "r"(tmp1));
+        __asm__("add %0, %0, %1" : "+r"(x) : "r"(vl * incx));
         avl -= vl;
     }
     return;
@@ -184,6 +187,8 @@ void bli_zinvertv_sifive_x280_asm(dim_t n, void * restrict x_, inc_t incx,
                            const cntx_t *cntx) {
     (void)cntx;
     dcomplex* restrict x = x_;
+    if (n <= 0)
+        return;
 
     incx *= 2 * FLT_SIZE;
     size_t avl = n;
@@ -209,8 +214,7 @@ void bli_zinvertv_sifive_x280_asm(dim_t n, void * restrict x_, inc_t incx,
             __asm__("vfdiv.vv v4, v4, v8");
             __asm__(VSSSEG2 "v0, (%0), %1" : : "r"(x), "r"(incx));
         }
-        inc_t tmp1 = vl * incx;
-        __asm__("add %0, %0, %1" : "+r"(x) : "r"(tmp1));
+        __asm__("add %0, %0, %1" : "+r"(x) : "r"(vl * incx));
         avl -= vl;
     }
     return;

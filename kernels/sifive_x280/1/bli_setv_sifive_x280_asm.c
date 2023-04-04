@@ -49,6 +49,8 @@ void bli_ssetv_sifive_x280_asm(conj_t conjalpha, dim_t n, const void * restrict 
     (void)cntx;
     const float* restrict alpha = alpha_;
     float* restrict x = x_;
+    if (n <= 0)
+        return;
 
     __asm__ volatile("vsetvli zero, %0, e%1, m8, ta, ma"
                      :
@@ -66,8 +68,7 @@ void bli_ssetv_sifive_x280_asm(conj_t conjalpha, dim_t n, const void * restrict 
             __asm__(VSE "v0, (%0)" : : "r"(x));
         else
             __asm__(VSSE "v0, (%0), %1" : : "r"(x), "r"(incx));
-        inc_t tmp1 = vl * incx;
-        __asm__("add %0, %0, %1" : "+r"(x) : "r"(tmp1));
+        __asm__("add %0, %0, %1" : "+r"(x) : "r"(vl * incx));
         avl -= vl;
     }
     return;
@@ -89,6 +90,8 @@ void bli_dsetv_sifive_x280_asm(conj_t conjalpha, dim_t n, const void * restrict 
     (void)cntx;
     const double* restrict alpha = alpha_;
     double* restrict x = x_;
+    if (n <= 0)
+        return;
 
     __asm__ volatile("vsetvli zero, %0, e%1, m8, ta, ma"
                      :
@@ -106,8 +109,7 @@ void bli_dsetv_sifive_x280_asm(conj_t conjalpha, dim_t n, const void * restrict 
             __asm__(VSE "v0, (%0)" : : "r"(x));
         else
             __asm__(VSSE "v0, (%0), %1" : : "r"(x), "r"(incx));
-        inc_t tmp1 = vl * incx;
-        __asm__("add %0, %0, %1" : "+r"(x) : "r"(tmp1));
+        __asm__("add %0, %0, %1" : "+r"(x) : "r"(vl * incx));
         avl -= vl;
     }
     return;
@@ -128,6 +130,8 @@ void bli_csetv_sifive_x280_asm(conj_t conjalpha, dim_t n, const void * restrict 
     (void)cntx;
     const scomplex* restrict alpha = alpha_;
     scomplex* restrict x = x_;
+    if (n <= 0)
+        return;
 
     __asm__ volatile("vsetvli zero, %0, e%1, m4, ta, ma"
                      :
@@ -149,42 +153,10 @@ void bli_csetv_sifive_x280_asm(conj_t conjalpha, dim_t n, const void * restrict 
             __asm__(VSSEG2 "v0, (%0)" : : "r"(x));
         else
             __asm__(VSSSEG2 "v0, (%0), %1" : : "r"(x), "r"(incx));
-        inc_t tmp1 = vl * incx;
-        __asm__("add %0, %0, %1" : "+r"(x) : "r"(tmp1));
+        __asm__("add %0, %0, %1" : "+r"(x) : "r"(vl * incx));
         avl -= vl;
     }
     return;
-
-    /*(void) cntx;
-    // See comment in ccopyv.
-    // We probably won't have to worry about this once the vlseg2/vsseg2
-    performance bug is fixed.
-    __asm__ volatile("vsetvli t0, zero, e%0, m4, ta, ma" : : "i"(8 * 2 *
-    FLT_SIZE));
-    __asm__(VLSE "v4, (%0), zero" : : "r"(alpha));
-    incx *= 2 * FLT_SIZE;
-    if (conjalpha == BLIS_CONJUGATE) {
-      uint64_t mask = 0xAAAAAAAAAAAAAAAA;
-      __asm__("vsetivli zero, 1, e64, m1, ta, ma");
-      __asm__("vle64.v v0, (%0)" : : "r"(&mask));
-      __asm__ volatile("vsetvli t0, zero, e%0, m4, ta, ma" : : "i"(8 *
-    FLT_SIZE));
-      __asm__("vfneg.v v4, v4, v0.t");
-    }
-
-    size_t avl = n;
-    while (avl) {
-      size_t vl;
-      __asm__ volatile("vsetvli %0, %1, e%2, m4, ta, ma" : "=r"(vl) : "r"(avl),
-    "i"(8 * 2 * FLT_SIZE)); if (incx == 2 * FLT_SIZE)
-        __asm__(VSE "v4, (%0)" : : "r"(x));
-      else
-        __asm__(VSSE "v4, (%0), %1" : : "r"(x), "r"(incx));
-      inc_t tmp1 = vl * incx;
-      __asm__("add %0, %0, %1" : "+r"(x) : "r"(tmp1));
-      avl -= vl;
-    }
-    return;*/
 }
 
 #undef FLT_SIZE
@@ -202,6 +174,8 @@ void bli_zsetv_sifive_x280_asm(conj_t conjalpha, dim_t n, const void * restrict 
     (void)cntx;
     const dcomplex* restrict alpha = alpha_;
     dcomplex* restrict x = x_;
+    if (n <= 0)
+        return;
 
     __asm__ volatile("vsetvli zero, %0, e%1, m4, ta, ma"
                      :
@@ -223,8 +197,7 @@ void bli_zsetv_sifive_x280_asm(conj_t conjalpha, dim_t n, const void * restrict 
             __asm__(VSSEG2 "v0, (%0)" : : "r"(x));
         else
             __asm__(VSSSEG2 "v0, (%0), %1" : : "r"(x), "r"(incx));
-        inc_t tmp1 = vl * incx;
-        __asm__("add %0, %0, %1" : "+r"(x) : "r"(tmp1));
+        __asm__("add %0, %0, %1" : "+r"(x) : "r"(vl * incx));
         avl -= vl;
     }
     return;

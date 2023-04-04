@@ -53,6 +53,8 @@ void bli_sinvscalv_sifive_x280_asm(conj_t conjalpha, dim_t n, const void * restr
     (void)cntx;
     const float* restrict alpha = alpha_;
     float* restrict x = x_;
+    if (n <= 0 || *alpha == 0.f || *alpha == 1.f)
+        return;
 
     float one = 1.f;
     __asm__(FLT_LOAD "f0, (%0)" : : "r"(&one));
@@ -74,8 +76,7 @@ void bli_sinvscalv_sifive_x280_asm(conj_t conjalpha, dim_t n, const void * restr
             __asm__("vfmul.vf v0, v0, f0");
             __asm__(VSSE "v0, (%0), %1" : : "r"(x), "r"(incx));
         }
-        inc_t tmp1 = vl * incx;
-        __asm__("add %0, %0, %1" : "+r"(x) : "r"(tmp1));
+        __asm__("add %0, %0, %1" : "+r"(x) : "r"(vl * incx));
         avl -= vl;
     }
     return;
@@ -104,6 +105,8 @@ void bli_dinvscalv_sifive_x280_asm(conj_t conjalpha, dim_t n, const void * restr
     (void)cntx;
     const double* restrict alpha = alpha_;
     double* restrict x = x_;
+    if (n <= 0 || *alpha == 0. || *alpha == 1.)
+        return;
 
     double one = 1.;
     __asm__(FLT_LOAD "f0, (%0)" : : "r"(&one));
@@ -125,8 +128,7 @@ void bli_dinvscalv_sifive_x280_asm(conj_t conjalpha, dim_t n, const void * restr
             __asm__("vfmul.vf v0, v0, f0");
             __asm__(VSSE "v0, (%0), %1" : : "r"(x), "r"(incx));
         }
-        inc_t tmp1 = vl * incx;
-        __asm__("add %0, %0, %1" : "+r"(x) : "r"(tmp1));
+        __asm__("add %0, %0, %1" : "+r"(x) : "r"(vl * incx));
         avl -= vl;
     }
     return;
@@ -157,6 +159,8 @@ void bli_cinvscalv_sifive_x280_asm(conj_t conjalpha, dim_t n, const void * restr
     (void)cntx;
     const scomplex* restrict alpha = alpha_;
     scomplex* restrict x = x_;
+    if (n <= 0 || (alpha->real == 0.f && alpha->imag == 0.f) || (alpha->real == 1.f && alpha->imag == 0.f))
+        return;
 
     __asm__(FLT_LOAD "f0, (%0)" : : "r"(alpha));
     __asm__(FLT_LOAD "f1, %1(%0)" : : "r"(alpha), "I"(FLT_SIZE));
@@ -188,8 +192,7 @@ void bli_cinvscalv_sifive_x280_asm(conj_t conjalpha, dim_t n, const void * restr
             __asm__("vfmacc.vf v12, f1, v0");
             __asm__(VSSSEG2 "v8, (%0), %1" : : "r"(x), "r"(incx));
         }
-        inc_t tmp1 = vl * incx;
-        __asm__("add %0, %0, %1" : "+r"(x) : "r"(tmp1));
+        __asm__("add %0, %0, %1" : "+r"(x) : "r"(vl * incx));
         avl -= vl;
     }
     return;
@@ -223,6 +226,8 @@ void bli_zinvscalv_sifive_x280_asm(conj_t conjalpha, dim_t n, const void * restr
     (void)cntx;
     const dcomplex* restrict alpha = alpha_;
     dcomplex* restrict x = x_;
+    if (n <= 0 || (alpha->real == 0. && alpha->imag == 0.) || (alpha->real == 1. && alpha->imag == 0.))
+        return;
 
     __asm__(FLT_LOAD "f0, (%0)" : : "r"(alpha));
     __asm__(FLT_LOAD "f1, %1(%0)" : : "r"(alpha), "I"(FLT_SIZE));
@@ -254,8 +259,7 @@ void bli_zinvscalv_sifive_x280_asm(conj_t conjalpha, dim_t n, const void * restr
             __asm__("vfmacc.vf v12, f1, v0");
             __asm__(VSSSEG2 "v8, (%0), %1" : : "r"(x), "r"(incx));
         }
-        inc_t tmp1 = vl * incx;
-        __asm__("add %0, %0, %1" : "+r"(x) : "r"(tmp1));
+        __asm__("add %0, %0, %1" : "+r"(x) : "r"(vl * incx));
         avl -= vl;
     }
     return;
