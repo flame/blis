@@ -718,7 +718,7 @@ void bli_zgemv_unf_var2
         beta,
         y, incy,
         y_buf, buf_incy,
-        NULL
+        cntx
       );
 
       /*
@@ -737,7 +737,7 @@ void bli_zgemv_unf_var2
       n_elem,
       beta,
       y_buf, buf_incy,
-      NULL
+      cntx
     );
   }
 
@@ -783,7 +783,7 @@ void bli_zgemv_unf_var2
       n_elem,
       y_buf, buf_incy,
       y, incy,
-      NULL
+      cntx
     );
 
 #ifdef BLIS_ENABLE_MEM_TRACING
