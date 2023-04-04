@@ -49,6 +49,11 @@
 
 // The arch_t id for the currently running hardware. We initialize to -1,
 // which will be overwritten upon calling bli_arch_set_id().
+static arch_t actual_arch_id = -1;
+
+// The arch_t id for the currently running hardware, or the arch the user
+// specifies to use. We initialize to -1, which will be overwritten upon
+// calling bli_arch_set_id().
 static arch_t id = -1;
 
 arch_t bli_arch_query_id( void )
@@ -80,6 +85,9 @@ void bli_arch_set_id( void )
 	// requested that we echo the result of the subconfiguration selection.
 	bool do_logging = bli_env_get_var( "BLIS_ARCH_DEBUG", 0 );
 	bli_arch_set_logging( do_logging );
+
+	// Get actual hardware id.
+	actual_arch_id = bli_cpuid_query_id();
 
 	// DISABLE_BLIS_ARCH_TYPE and BLIS_CONFIGURETIME_CPUID seem similar but
 	// have different use cases:
@@ -117,6 +125,7 @@ void bli_arch_set_id( void )
 		// initialized. Query the address of an internal context data structure
 		// corresponding to req_id. This pointer will be NULL if the associated
 		// subconfig is not available.
+
 		cntx_t** req_cntx = bli_gks_lookup_id( req_id );
 
 		// This function checks the context pointer and aborts with a useful
@@ -142,11 +151,11 @@ void bli_arch_set_id( void )
 		// Architecture families.
 		#if defined BLIS_FAMILY_INTEL64      || \
 		    defined BLIS_FAMILY_AMDZEN       || \
-			defined BLIS_FAMILY_AMD64_LEGACY || \
+		    defined BLIS_FAMILY_AMD64_LEGACY || \
 		    defined BLIS_FAMILY_X86_64       || \
 		    defined BLIS_FAMILY_ARM64        || \
 		    defined BLIS_FAMILY_ARM32
-		id = bli_cpuid_query_id();
+		id = actual_arch_id;
 		#endif
 
 		// Intel microarchitectures.

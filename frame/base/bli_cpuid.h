@@ -62,6 +62,7 @@ bool bli_cpuid_is_penryn( uint32_t family, uint32_t model, uint32_t features );
 
 // AMD
 bool bli_cpuid_is_zen4( uint32_t family, uint32_t model, uint32_t features );
+bool bli_cpuid_is_avx512_fallback( uint32_t family, uint32_t model, uint32_t features );
 bool bli_cpuid_is_zen3( uint32_t family, uint32_t model, uint32_t features );
 bool bli_cpuid_is_zen2( uint32_t family, uint32_t model, uint32_t features );
 bool bli_cpuid_is_zen( uint32_t family, uint32_t model, uint32_t features );
@@ -133,9 +134,16 @@ BLIS_INLINE bool bli_cpuid_has_features( uint32_t have, uint32_t want )
 
 void get_cpu_name( char *cpu_name );
 int  vpu_count( void );
+
 bool bli_cpuid_is_avx2fma3_supported(void);
+bool bli_cpuid_is_avx512_supported(void);
 bool bli_cpuid_is_avx512vnni_supported(void);
 bool bli_cpuid_is_avx512bf16_supported(void);
+
+void bli_cpuid_check_avx2fma3_support( uint32_t family, uint32_t model, uint32_t features );
+void bli_cpuid_check_avx512_support( uint32_t family, uint32_t model, uint32_t features );
+void bli_cpuid_check_avx512vnni_support( uint32_t family, uint32_t model, uint32_t features );
+void bli_cpuid_check_avx512bf16_support( uint32_t family, uint32_t model, uint32_t features );
 
 enum
 {
