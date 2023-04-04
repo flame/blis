@@ -1,6 +1,6 @@
 #
 #
-#  BLIS    
+#  BLIS
 #  An object-based framework for developing high-performance BLAS-like
 #  libraries.
 #
@@ -49,10 +49,11 @@ THIS_CONFIG    := sifive_x280
 CMISCFLAGS_SIFIVE := -mcmodel=medany -march=rv64gcv_zba_zbb_zvl512b -mabi=lp64d
 CPPROCFLAGS    :=
 CMISCFLAGS     := $(CMISCFLAGS_SIFIVE) -fdata-sections -ffunction-sections \
-  -fdiagnostics-color=always -fno-rtti -fno-exceptions -std=gnu++17 
+                  -fdiagnostics-color=always -fno-rtti -fno-exceptions \
+                  -std=gnu++17
 CPICFLAGS      := -fPIC
-CWARNFLAGS     := -Wall -Wextra -Wno-unused-function \
-  -Wno-unused-parameter -Wno-sign-compare -Wno-unused-variable
+CWARNFLAGS     := -Wall -Wextra -Wno-unused-function -Wno-unused-parameter \
+                  -Wno-sign-compare -Wno-unused-variable
 
 ifneq ($(DEBUG_TYPE),off)
 CDBGFLAGS      := -g
@@ -66,7 +67,7 @@ endif
 
 # Flags specific to optimized kernels.
 CKOPTFLAGS     := $(COPTFLAGS)
-CKVECFLAGS     := 
+CKVECFLAGS     :=
 
 # Flags specific to reference kernels.
 CROPTFLAGS     := $(CKOPTFLAGS)

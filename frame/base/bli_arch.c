@@ -180,11 +180,6 @@ arch_t bli_arch_query_id_impl( void )
 		id = bli_cpuid_query_id();
 		#endif
 
-                // SiFive microarchitectures.
-                #ifdef BLIS_FAMILY_SIFIVE_X280
-                id = BLIS_ARCH_SIFIVE_X280;
-                #endif
-
 		// Intel microarchitectures.
 		#ifdef BLIS_FAMILY_SKX
 		id = BLIS_ARCH_SKX;
@@ -291,6 +286,11 @@ arch_t bli_arch_query_id_impl( void )
 		id = BLIS_ARCH_RV64IV;
 		#endif
 
+		// SiFive microarchitectures.
+		#ifdef BLIS_FAMILY_SIFIVE_X280
+		id = BLIS_ARCH_SIFIVE_X280;
+		#endif
+
 		// Generic microarchitecture.
 		#ifdef BLIS_FAMILY_GENERIC
 		id = BLIS_ARCH_GENERIC;
@@ -317,8 +317,6 @@ arch_t bli_arch_query_id_impl( void )
 // enum value given to the corresponding BLIS_ARCH_ value.
 static const char* config_name[ BLIS_NUM_ARCHS ] =
 {
-    "sifive_x280",
-
     "skx",
     "knl",
     "knc",
@@ -357,6 +355,8 @@ static const char* config_name[ BLIS_NUM_ARCHS ] =
     "rv64i",
     "rv32iv",
     "rv64iv",
+
+    "sifive_x280",
 
     "generic"
 };
