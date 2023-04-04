@@ -50,6 +50,8 @@ void bli_scopyv_sifive_x280_asm(conj_t conjx, dim_t n, const void * restrict x_,
     (void)cntx;
     const float* restrict x = x_;
     float* restrict y = y_;
+    if (n <= 0)
+        return;
 
     incx *= FLT_SIZE;
     incy *= FLT_SIZE;
@@ -69,10 +71,8 @@ void bli_scopyv_sifive_x280_asm(conj_t conjx, dim_t n, const void * restrict x_,
         else
             __asm__(VSSE "v0, (%0), %1" : : "r"(y), "r"(incy));
 
-        inc_t tmp1 = vl * incx;
-        inc_t tmp2 = vl * incy;
-        __asm__("add %0, %0, %1" : "+r"(x) : "r"(tmp1));
-        __asm__("add %0, %0, %1" : "+r"(y) : "r"(tmp2));
+        __asm__("add %0, %0, %1" : "+r"(x) : "r"(vl * incx));
+        __asm__("add %0, %0, %1" : "+r"(y) : "r"(vl * incy));
         avl -= vl;
     }
     return;
@@ -93,8 +93,11 @@ void bli_scopyv_sifive_x280_asm(conj_t conjx, dim_t n, const void * restrict x_,
 void bli_dcopyv_sifive_x280_asm(conj_t conjx, dim_t n, const void * restrict x_, inc_t incx,
                      void * restrict y_, inc_t incy, const cntx_t *cntx) {
     (void)conjx;
+    (void)cntx;
     const double* restrict x = x_;
     double* restrict y = y_;
+    if (n <= 0)
+        return;
 
     incx *= FLT_SIZE;
     incy *= FLT_SIZE;
@@ -114,10 +117,8 @@ void bli_dcopyv_sifive_x280_asm(conj_t conjx, dim_t n, const void * restrict x_,
         else
             __asm__(VSSE "v0, (%0), %1" : : "r"(y), "r"(incy));
 
-        inc_t tmp1 = vl * incx;
-        inc_t tmp2 = vl * incy;
-        __asm__("add %0, %0, %1" : "+r"(x) : "r"(tmp1));
-        __asm__("add %0, %0, %1" : "+r"(y) : "r"(tmp2));
+        __asm__("add %0, %0, %1" : "+r"(x) : "r"(vl * incx));
+        __asm__("add %0, %0, %1" : "+r"(y) : "r"(vl * incy));
         avl -= vl;
     }
     return;
@@ -144,6 +145,8 @@ void bli_ccopyv_sifive_x280_asm(conj_t conjx, dim_t n, const void * restrict x_,
     (void)cntx;
     const scomplex* restrict x = x_;
     scomplex* restrict y = y_;
+    if (n <= 0)
+        return;
 
     incx *= 2 * FLT_SIZE;
     incy *= 2 * FLT_SIZE;
@@ -164,10 +167,8 @@ void bli_ccopyv_sifive_x280_asm(conj_t conjx, dim_t n, const void * restrict x_,
             else
                 __asm__(VSSE "v0, (%0), %1" : : "r"(y), "r"(incy));
 
-            inc_t tmp1 = vl * incx;
-            inc_t tmp2 = vl * incy;
-            __asm__("add %0, %0, %1" : "+r"(x) : "r"(tmp1));
-            __asm__("add %0, %0, %1" : "+r"(y) : "r"(tmp2));
+            __asm__("add %0, %0, %1" : "+r"(x) : "r"(vl * incx));
+            __asm__("add %0, %0, %1" : "+r"(y) : "r"(vl * incy));
             avl -= vl;
         }
     } else {
@@ -189,50 +190,10 @@ void bli_ccopyv_sifive_x280_asm(conj_t conjx, dim_t n, const void * restrict x_,
             else
                 __asm__(VSSSEG2 "v0, (%0), %1" : : "r"(y), "r"(incy));
 
-            inc_t tmp1 = vl * incx;
-            inc_t tmp2 = vl * incy;
-            __asm__("add %0, %0, %1" : "+r"(x) : "r"(tmp1));
-            __asm__("add %0, %0, %1" : "+r"(y) : "r"(tmp2));
+            __asm__("add %0, %0, %1" : "+r"(x) : "r"(vl * incx));
+            __asm__("add %0, %0, %1" : "+r"(y) : "r"(vl * incy));
             avl -= vl;
         }
-        /*
-        // After some benchmarks, it looks like using vl(s)e and vs(s)e with
-        masked
-        // instructions for conjugation is faster than using segment loads and
-        stores.
-        // We'll use the segment load/store version for now, but I'd like to
-        leave this
-        // code here (but commented out) for possible future use.
-        size_t avl = n;
-        // 0xA = 0b1010
-        // this masks off the real parts, so only the imaginary parts are
-        negated
-        // this mask is large enough only for vl <= 64
-        uint64_t mask[1] = {0xAAAAAAAAAAAAAAAA};
-        __asm__("vsetivli zero, 1, e64, m1, ta, ma");
-        __asm__("vle64.v v0, (%0)" : : "r"(mask));
-        while (avl) {
-          size_t vl;
-          __asm__ volatile("vsetvli %0, %1, e64, m4, ta, ma" : "=r"(vl) :
-        "r"(avl)); if (incx == 8)
-            __asm__("vle64.v v4, (%0)" : : "r"(x));
-          else
-            __asm__("vlse64.v v4, (%0), %1" : : "r"(x), "r"(incx));
-          // set vl = VLMAX
-          __asm__ volatile("vsetvli t0, zero, e32, m4, ta, ma");
-          __asm__("vfneg.v v4, v4, v0.t");
-          __asm__ volatile ("vsetvli zero, %0, e64, m4, ta, ma" : : "r"(avl));
-          if (incy == 8)
-            __asm__("vse64.v v4, (%0)" : : "r"(y));
-          else
-            __asm__("vsse64.v v4, (%0), %1" : : "r"(y), "r"(incy));
-          inc_t tmp1 = vl * incx;
-          inc_t tmp2 = vl * incy;
-          __asm__("add %0, %0, %1" : "+r"(x) : "r"(tmp1));
-          __asm__("add %0, %0, %1" : "+r"(y) : "r"(tmp2));
-          avl -= vl;
-        }
-        */
     }
     return;
 }
@@ -263,6 +224,8 @@ void bli_zcopyv_sifive_x280_asm(conj_t conjx, dim_t n, const void * restrict x_,
     (void)cntx;
     const dcomplex* restrict x = x_;
     dcomplex* restrict y = y_;
+    if (n <= 0)
+        return;
 
     incx *= 2 * FLT_SIZE;
     incy *= 2 * FLT_SIZE;
@@ -300,10 +263,8 @@ void bli_zcopyv_sifive_x280_asm(conj_t conjx, dim_t n, const void * restrict x_,
             else
                 __asm__(VSSSEG2 "v0, (%0), %1" : : "r"(y), "r"(incy));
 
-            inc_t tmp1 = vl * incx;
-            inc_t tmp2 = vl * incy;
-            __asm__("add %0, %0, %1" : "+r"(x) : "r"(tmp1));
-            __asm__("add %0, %0, %1" : "+r"(y) : "r"(tmp2));
+            __asm__("add %0, %0, %1" : "+r"(x) : "r"(vl * incx));
+            __asm__("add %0, %0, %1" : "+r"(y) : "r"(vl * incy));
             avl -= vl;
         }
     }
