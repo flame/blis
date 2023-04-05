@@ -32,7 +32,6 @@
 
 */
 
-#include <x86intrin.h>
 #include "blis.h"
 
 #define BLIS_ASM_SYNTAX_ATT

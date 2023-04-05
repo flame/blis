@@ -368,6 +368,7 @@ if(${TARGET_ARCH} STREQUAL zen4 OR
   set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/kernels/zen4/1m/bli_packm_zen4_asm_z4xk.c       PROPERTIES COMPILE_FLAGS /arch:AVX512)
   set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/kernels/zen4/1m/bli_packm_zen4_asm_z12xk.c      PROPERTIES COMPILE_FLAGS /arch:AVX512)
   set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/kernels/zen4/1m/bli_packm_zen4_asm_d8xk.c       PROPERTIES COMPILE_FLAGS /arch:AVX512)
+  set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/kernels/zen4/1m/bli_packm_zen4_asm_d24xk.c      PROPERTIES COMPILE_FLAGS /arch:AVX512)
 endif()
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /W0 ")
