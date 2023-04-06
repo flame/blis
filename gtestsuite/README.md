@@ -206,3 +206,101 @@ There are two ways to add new tests.
 * Rebuild.
 * Rerun.
 
+# Wrong Input Testing
+When testing for wrong input parameter values, then the code is meant to return early and the data of vectors and/or matrices should not be accessed. Therefore, the values of the elements of vectors and/or matrices are not important and thus we follow the methodolody of typed-testing. Since there are no error codes returned by the APIs, we write the tests doing the following:
+* check return value to be as expected. For example, in nrm2, the default returned value is 0. For gemm, C should not be modified so we check against a copy of C, before calling into gemm. Note that for APIs where there is pure output (e.g., norm from nrm2), since the default initialization of scalars is zero, it's a better practice to initialize the output to a nonzero value prior calling the API. That way we can ensure that the returned value was modified correctly by the function and it's not using the default value.
+* since the checks are expected to be done before any computation, use nullptr as inputs for the other F.P. data. For example, in nrm2, pass nullptr as x and in gemm, pass nullptr as A and B. If those get accessed, then the code would crush so that would show bugs.
+
+Currently, we have the following behaviour in the different interfaces:
+* BLIS-typed prints and aborts.
+* BLAS prints and returns.
+* CBLAS prints and exits.
+For that reason, we currently test only for BLAS APIs, so ensure to add the #ifdef's as appropriate. Note that printing seems to be inconsistent. 
+
+A test program would be looking like the following:
+```cpp
+#include <gtest/gtest.h>
+#include "common/testing_helpers.h"
+#include "gemm.h"
+#include "inc/check_error.h"
+#include "common/wrong_inputs_helpers.h"
+
+/**
+ * Testing invalid/incorrect input parameters.
+ * 
+ * storage : 'c', 'r', note BLAS is 'c' only.
+ * transa, transb : 'n', 't', 'c'
+ * m, n, k >= 0
+ * lda, ldb, ldc >= max(m/n/k, 1)
+*/
+template <typename T>
+class gemm_IIT : public ::testing::Test {};
+typedef ::testing::Types<float, double, scomplex, dcomplex> TypeParam;
+TYPED_TEST_SUITE(gemm_IIT, TypeParam);
+
+// Adding namespace to get default parameters from testinghelpers/common/wrong_input_helpers.h.
+using namespace testinghelpers::IIT;
+
+#ifdef TEST_BLAS
+TYPED_TEST(gemm_IIT, wrong_transa)
+{
+  using T = TypeParam;
+  // Create a vector with some default value.
+  std::vector<T> c(M*N, T{2.0});
+  // Copy so that we check that the elements of C are not modified.
+  std::vector<T> c_ref(c);
+  // Call BLIS gemm with a wrong value for transa.
+  gemm<T>( STORAGE, 'k', TRANS, M, N, K, nullptr, nullptr, LDA,
+                              nullptr, LDB, nullptr, c.data(), LDC );
+  // Use bitwise comparison (no threshold).
+  computediff<T>( STORAGE, M, N, c.data(), c_ref.data(), LDC);
+}
+#endif
+```
+
+# A short explanation on how lda increments for matrices work
+Say we have an m-by-n matrix A, which is stored in column major order. Then to access the elements we go through the matrix column by column. In this case, to store the full matrix in an array we need to store m * n elements and to access an element A(i,j), we need to know the size of the column, which is in this case m. Now let's assume that the matrix A is part of a bigger k-by-n matrix B. In this case, A is part of an array with k * n and to access an element A(i,j), we need to know the size of the column of B, which is in this case k. The leading dimension shows to us how many elements we need to go through, to be able to access the next column of a matrix. So, the requirement is to have lda >= max(1, m).
+
+     __________________                         __________________
+A = | |  |             |                  B =  | |  |             |
+    | |  |             |                       | |  |             |
+  m | |  |             |                    k  | |  |             |
+    | |  V             |                       | |  V             |
+    | |                |                       | |                |
+    | |  a             |                       | |  a             |
+    |_V________________|                       |_|________________|
+            n                                  | |      n         |
+                                               | |                |
+                                               | |                |
+                                               |_V________________|
+
+For an m-by-n matrix A, stored in row major order, we traverse the matrix row by row. We need to store full matrix A into an array of size m * n (as before) but now we use the number of columns to move to the next row as we iterate through the elements, which is n. Similarly to above, if A is part of a bigger matrix B of size m-by-l, in order to access an element A(i,j), we need to know the number of columns, l. In this case, the leading dimension shows to us how many elements we need to go through while traversing the matrix to access the next row of A. So, the requirement in this case is lda >= max(1, n).
+     __________________                         _________________________
+A = |                  |                  B =  |                  |      |
+    |                  |                       |                  |      |
+  m |                  |                    m  |                  |      |
+    |                  |                       |                  |      |
+    | -------------->  |                       |  ---------------------> |
+    | ---> a           |                       |  ---> a          |      |
+    |__________________|                       |__________________|______|
+            n                                               l
+
+Since in generic testing we generate tests for matrices with arbitrary sizes m and n and we need to check for column-major and row-major order in a generic way, using a fixed value for lda is not trivial. Consider the case where m and n take values from ::testing::Values(30, 40), and storage takes values from ::testing::Values('c','r').
+Then, we generate the following test combinations:
+1. m = 30, n = 30, storage = 'c'
+2. m = 30, n = 30, storage = 'r'
+3. m = 40, n = 40, storage = 'c'
+4. m = 40, n = 40, storage = 'r'
+5. m = 30, n = 40, storage = 'c'
+6. m = 30, n = 40, storage = 'r'
+7. m = 40, n = 30, storage = 'c'
+8. m = 40, n = 30, storage = 'r'
+
+If we want to test for different lda combinations as well, especially for the case where m != n, this would cause a problem as follows:
+If lda = 30, for the cases 3, 4, 7, 8 above, lda < max(1, m), so the requirement is not satisfied. Another issue is that lda depends on the storage type and on whether we test for non transpose, transpose or conjugate transpose matrices.
+
+To overcome this issue and generate tests which fullfill the requirements for the correct value of the leading dimension of a matrix we use **lda increments** and do the lda computation as follows:
+* Depending on the parameters storage and trans, compute lda = max(1, k), where k is m or n, depending on the requirements. 
+* Add the lda_inc parameter: lda += lda_inc
+
+To test an m-by-n matrix A (column-major), stored in an array a, use lda_inc = 0 as a parameter to the test generator. To test for the case where A is a submatrix of k-by-n matrix B, use lda_inc = k-m.
