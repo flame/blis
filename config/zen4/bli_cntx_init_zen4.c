@@ -90,7 +90,9 @@ void bli_cntx_init_zen4( cntx_t* cntx )
     // Update the context with architecture specific threshold functions
     bli_cntx_set_l3_thresh_funcs
     (
-      2,
+      3,
+      // GEMM
+      BLIS_GEMM, bli_cntx_gemmsup_thresh_is_met_zen4,
       // GEMMT
       BLIS_GEMMT, bli_cntx_gemmtsup_thresh_is_met_zen,
       // SYRK
@@ -216,8 +218,8 @@ void bli_cntx_init_zen4( cntx_t* cntx )
     // -------------------------------------------------------------------------
 
     // Initialize sup thresholds with architecture-appropriate values. s d c z
-    bli_blksz_init_easy( &thresh[ BLIS_MT ],   512,  256,   380,   110 );
-    bli_blksz_init_easy( &thresh[ BLIS_NT ],   200,  256,   256,   128 );
+    bli_blksz_init_easy( &thresh[ BLIS_MT ],   512,  1000,   380,   110 );
+    bli_blksz_init_easy( &thresh[ BLIS_NT ],   200,  1000,   256,   128 );
     bli_blksz_init_easy( &thresh[ BLIS_KT ],   240,  220,   220,   110 );
 
     // Initialize the context with the sup thresholds.

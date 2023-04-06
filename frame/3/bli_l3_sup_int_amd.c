@@ -134,10 +134,12 @@ err_t bli_gemmsup_int
 		  }
 	  }
 
+#if defined(BLIS_FAMILY_ZEN3) || defined(BLIS_FAMILY_AMDZEN)
+
 	  //Enable packing of B matrix for double data type when dims at per
 	  //thread level are above caches and enable packing of A when transA
 	  //(RRC or CRC storage ids) to avoid rd kernels
-	  if(bli_is_double(dt))
+	  if(bli_is_double(dt) && (bli_arch_query_id() == BLIS_ARCH_ZEN3))
 	  {
 		  dim_t m_pt = (m/bli_rntm_ways_for( BLIS_MC, rntm ));
 		  dim_t n_pt = (n/bli_rntm_ways_for( BLIS_NC, rntm ));
@@ -153,7 +155,7 @@ err_t bli_gemmsup_int
 			  }
 		  }
 	  }
-
+#endif
 	  // Using the 1n kernel (B broadcast) gave better performance for sgemm
 	  // in single-thread scenario, given the number of n panels are
 	  // sufficiently larger than m panels.
@@ -210,10 +212,12 @@ err_t bli_gemmsup_int
 		  }
 	  }
 
+#if defined(BLIS_FAMILY_ZEN3) || defined(BLIS_FAMILY_AMDZEN)
+
 	  //Enable packing of B matrix for double data type when dims at per
 	  //thread level are above caches and enable packing of A when transA
 	  //(RRC or CRC storage ids) to avoid rd kernels
-	  if(bli_is_double(dt))
+	  if(bli_is_double(dt) && (bli_arch_query_id() == BLIS_ARCH_ZEN3))
 	  {
 		  dim_t m_pt = (m/bli_rntm_ways_for( BLIS_NC, rntm ));
 		  dim_t n_pt = (n/bli_rntm_ways_for( BLIS_MC, rntm ));
@@ -229,7 +233,7 @@ err_t bli_gemmsup_int
 			  }
 		  }
 	  }
-
+#endif
 	  if ( bli_is_float( dt ) && ( n_threads == 1 ) && ( use_pb == TRUE ) )
 	  {
 		bli_gemmsup_ref_var1n( BLIS_TRANSPOSE,

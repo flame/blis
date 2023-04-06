@@ -3,5 +3,5 @@
 add_subdirectory(1)
 add_subdirectory(1m)
 add_subdirectory(3)
-
+add_subdirectory(aocl_smart)
 
