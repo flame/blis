@@ -49,6 +49,7 @@ LPGEMM_MAIN_KERN(uint8_t,int8_t,int16_t,u8s8s16o16_6x32)
 			&&POST_OPS_RELU_SCALE_6x32,
 			&&POST_OPS_GELU_TANH_6x32,
 			&&POST_OPS_GELU_ERF_6x32,
+			&&POST_OPS_CLIP_6x32,
 			&&POST_OPS_DOWNSCALE_6x32
 		};
 
@@ -645,6 +646,49 @@ POST_OPS_GELU_ERF_6x32:
 
 			// c[5,16-31]
 			GELU_ERF_S16_AVX2(c_int16_5p1, y1, y2, r, x, x_erf)
+
+			POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+		}
+POST_OPS_CLIP_6x32:
+		{
+			__m256i min = _mm256_set1_epi16( *( int16_t* )post_ops_list_temp->op_args2 );
+			__m256i max = _mm256_set1_epi16( *( int16_t* )post_ops_list_temp->op_args3 );
+
+			// c[0,0-15]
+			CLIP_S16_AVX2(c_int16_0p0, min, max)
+
+			// c[0,16-31]
+			CLIP_S16_AVX2(c_int16_0p1, min, max)
+
+			// c[1,0-15]
+			CLIP_S16_AVX2(c_int16_1p0, min, max)
+
+			// c[1,16-31]
+			CLIP_S16_AVX2(c_int16_1p1, min, max)
+
+			// c[2,0-15]
+			CLIP_S16_AVX2(c_int16_2p0, min, max)
+
+			// c[2,16-31]
+			CLIP_S16_AVX2(c_int16_2p1, min, max)
+
+			// c[3,0-15]
+			CLIP_S16_AVX2(c_int16_3p0, min, max)
+
+			// c[3,16-31]
+			CLIP_S16_AVX2(c_int16_3p1, min, max)
+
+			// c[4,0-15]
+			CLIP_S16_AVX2(c_int16_4p0, min, max)
+
+			// c[4,16-31]
+			CLIP_S16_AVX2(c_int16_4p1, min, max)
+
+			// c[5,0-15]
+			CLIP_S16_AVX2(c_int16_5p0, min, max)
+
+			// c[5,16-31]
+			CLIP_S16_AVX2(c_int16_5p1, min, max)
 
 			POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 		}

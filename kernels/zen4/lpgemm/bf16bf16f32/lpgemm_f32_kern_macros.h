@@ -79,4 +79,8 @@
 \
 	GELU_ERF_F32_AVX512_DEF(reg, r, x, x_erf); \
 
+#define CLIP_F32_AVX512(reg, min, max) \
+\
+	reg = _mm512_min_ps( _mm512_max_ps( reg, min ), max ); \
+
 #endif // LPGEMM_F32_KERN_MACROS_H

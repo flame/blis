@@ -454,7 +454,7 @@ inline float GELU_TANH_post_op_ ## BLAS_SFX \
        float temp_accum \
      )\
 {\
-	temp_accum = 0.5 *(double)temp_accum * (1 + tanh( 0.797884 * ( (double)temp_accum + \
+	temp_accum = 0.5 *(double)temp_accum * (1 + tanhf( 0.797884 * ( (double)temp_accum + \
 	              ( 0.044715 * ((double)temp_accum * (double)temp_accum * \
 				  (double)temp_accum ) ) ) ) ); \
 	return temp_accum; \
@@ -575,6 +575,11 @@ void mat_mul_accuracy_check_driver_ ## BLAS_SFX \
 						{ \
 							temp_accum = GEN_FUNC_NAME(GELU_ERF_post_op_,BLAS_SFX) (temp_accum);\
 						} \
+						else if ( post_op->eltwise.algo.algo_type == CLIP ) /* CLIP*/ \
+						{ \
+							temp_accum = min ( max ( temp_accum, *( ( ACCUM_type* ) \
+							post_op->eltwise.algo.alpha ) ), *( ( ACCUM_type* ) post_op->eltwise.algo.beta) ); \
+						} \
 						else \
 						{ \
 							temp_accum = ( temp_accum > 0 ) ? temp_accum : 0 ; \
@@ -598,6 +603,11 @@ void mat_mul_accuracy_check_driver_ ## BLAS_SFX \
 						else if ( post_op->eltwise.algo.algo_type == GELU_ERF ) /* ERF GeLU*/ \
 						{ \
 							temp_accum = GEN_FUNC_NAME(GELU_ERF_post_op_,BLAS_SFX) (temp_accum);\
+						} \
+						else if ( post_op->eltwise.algo.algo_type == CLIP ) /* CLIP*/ \
+						{ \
+							temp_accum = min ( max ( temp_accum, *( ( ACCUM_type* ) \
+							post_op->eltwise.algo.alpha ) ), *( ( ACCUM_type* ) post_op->eltwise.algo.beta) ); \
 						} \
 						else \
 						{ \
@@ -692,6 +702,7 @@ aocl_post_op* lpgemm_create_post_ops_struct_ ## BLAS_SFX \
 		bool is_param_relu = FALSE; \
 		bool is_gelu_tanh = FALSE; \
 		bool is_gelu_erf = FALSE; \
+		bool is_clip = FALSE; \
 		while ( ops_tok ) \
 		{ \
 			if ( strcmp( ops_tok, "bias") == 0 ) \
@@ -717,6 +728,11 @@ aocl_post_op* lpgemm_create_post_ops_struct_ ## BLAS_SFX \
 				post_ops->seq_vector[cur_op_index] = ELTWISE; \
 				is_gelu_erf = TRUE; \
 			} \
+			else if ( strcmp( ops_tok, "clip") == 0 ) \
+			{ \
+				post_ops->seq_vector[cur_op_index] = ELTWISE; \
+				is_clip = TRUE; \
+			} \
 			ops_tok = strtok( NULL, ", " ); \
 			cur_op_index++; \
 		} \
@@ -734,6 +750,7 @@ aocl_post_op* lpgemm_create_post_ops_struct_ ## BLAS_SFX \
 		post_ops->eltwise.is_power_of_2 = FALSE; \
 		post_ops->eltwise.scale_factor = NULL; \
 		post_ops->eltwise.algo.alpha = NULL; \
+		post_ops->eltwise.algo.beta = NULL; \
 		post_ops->eltwise.algo.algo_type = RELU; \
 		if ( is_param_relu == TRUE ) \
 		{ \
@@ -741,15 +758,22 @@ aocl_post_op* lpgemm_create_post_ops_struct_ ## BLAS_SFX \
 			*( ( C_type* ) post_ops->eltwise.algo.alpha ) = ( C_type )6; \
 			post_ops->eltwise.algo.algo_type = PRELU; \
 		} \
-		if ( is_gelu_tanh == TRUE ) \
+		else if ( is_gelu_tanh == TRUE ) \
 		{ \
 			post_ops->eltwise.algo.algo_type = GELU_TANH; \
 		} \
-		if ( is_gelu_erf == TRUE ) \
+		else if ( is_gelu_erf == TRUE ) \
 		{ \
 			post_ops->eltwise.algo.algo_type = GELU_ERF; \
 		} \
-		post_ops->eltwise.algo.beta = NULL; \
+		else if ( is_clip == TRUE ) \
+		{ \
+			post_ops->eltwise.algo.alpha = malloc( sizeof( C_type ) ); \
+			post_ops->eltwise.algo.beta = malloc( sizeof( C_type ) ); \
+			*( ( C_type* ) post_ops->eltwise.algo.alpha ) = ( C_type ) ( -64 ); \
+			*( ( C_type* ) post_ops->eltwise.algo.beta ) = ( C_type ) ( 3 ); \
+			post_ops->eltwise.algo.algo_type = CLIP; \
+		} \
 	} \
  \
 	if ( global_dscale_out == 'y' ) \

@@ -49,6 +49,7 @@ LPGEMM_M_FRINGE_KERN(float,float,float,f32f32f32of32_avx512_5x64)
               &&POST_OPS_RELU_SCALE_5x64F,
               &&POST_OPS_GELU_TANH_5x64F,
               &&POST_OPS_GELU_ERF_5x64F,
+              &&POST_OPS_CLIP_5x64F
             };
     // Typecast local copies of integers in case dim_t and inc_t are a
     // different size than is expected by load instructions.
@@ -621,6 +622,73 @@ POST_OPS_GELU_ERF_5x64F:
 
       POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
     }
+POST_OPS_CLIP_5x64F:
+    {
+      zmm0 = _mm512_set1_ps( *( float* )post_ops_list_temp->op_args2 );
+      zmm1 = _mm512_set1_ps( *( float* )post_ops_list_temp->op_args3 );
+
+      // c[0, 0-15]
+      CLIP_F32S_AVX512(zmm8, zmm0, zmm1)
+
+      // c[0, 16-31]
+      CLIP_F32S_AVX512(zmm9, zmm0, zmm1)
+
+      // c[0, 32-47]
+      CLIP_F32S_AVX512(zmm10, zmm0, zmm1)
+
+      // c[0, 48-63]
+      CLIP_F32S_AVX512(zmm11, zmm0, zmm1)
+
+      // c[1, 0-15]
+      CLIP_F32S_AVX512(zmm12, zmm0, zmm1)
+
+      // c[1, 16-31]
+      CLIP_F32S_AVX512(zmm13, zmm0, zmm1)
+
+      // c[1, 32-47]
+      CLIP_F32S_AVX512(zmm14, zmm0, zmm1)
+
+      // c[1, 48-63]
+      CLIP_F32S_AVX512(zmm15, zmm0, zmm1)
+
+      // c[2, 0-15]
+      CLIP_F32S_AVX512(zmm16, zmm0, zmm1)
+
+      // c[2, 16-31]
+      CLIP_F32S_AVX512(zmm17, zmm0, zmm1)
+
+      // c[2, 32-47]
+      CLIP_F32S_AVX512(zmm18, zmm0, zmm1)
+
+      // c[2, 48-63]
+      CLIP_F32S_AVX512(zmm19, zmm0, zmm1)
+
+      // c[3, 0-15]
+      CLIP_F32S_AVX512(zmm20, zmm0, zmm1)
+
+      // c[3, 16-31]
+      CLIP_F32S_AVX512(zmm21, zmm0, zmm1)
+
+      // c[3, 32-47]
+      CLIP_F32S_AVX512(zmm22, zmm0, zmm1)
+
+      // c[3, 48-63]
+      CLIP_F32S_AVX512(zmm23, zmm0, zmm1)
+
+      // c[4, 0-15]
+      CLIP_F32S_AVX512(zmm24, zmm0, zmm1)
+
+      // c[4, 16-31]
+      CLIP_F32S_AVX512(zmm25, zmm0, zmm1)
+
+      // c[4, 32-47]
+      CLIP_F32S_AVX512(zmm26, zmm0, zmm1)
+
+      // c[4, 48-63]
+      CLIP_F32S_AVX512(zmm27, zmm0, zmm1)
+
+      POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+    }
 POST_OPS_5x64F_DISABLE:
     ;
 
@@ -660,6 +728,7 @@ LPGEMM_M_FRINGE_KERN(float,float,float,f32f32f32of32_avx512_4x64)
               &&POST_OPS_RELU_SCALE_4x64F,
               &&POST_OPS_GELU_TANH_4x64F,
               &&POST_OPS_GELU_ERF_4x64F,
+              &&POST_OPS_CLIP_4x64F
             };
     // Typecast local copies of integers in case dim_t and inc_t are a
     // different size than is expected by load instructions.
@@ -1136,6 +1205,61 @@ POST_OPS_GELU_ERF_4x64F:
 
       POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
     }
+POST_OPS_CLIP_4x64F:
+    {
+      zmm0 = _mm512_set1_ps( *( float* )post_ops_list_temp->op_args2 );
+      zmm1 = _mm512_set1_ps( *( float* )post_ops_list_temp->op_args3 );
+
+      // c[0, 0-15]
+      CLIP_F32S_AVX512(zmm8, zmm0, zmm1)
+
+      // c[0, 16-31]
+      CLIP_F32S_AVX512(zmm9, zmm0, zmm1)
+
+      // c[0, 32-47]
+      CLIP_F32S_AVX512(zmm10, zmm0, zmm1)
+
+      // c[0, 48-63]
+      CLIP_F32S_AVX512(zmm11, zmm0, zmm1)
+
+      // c[1, 0-15]
+      CLIP_F32S_AVX512(zmm12, zmm0, zmm1)
+
+      // c[1, 16-31]
+      CLIP_F32S_AVX512(zmm13, zmm0, zmm1)
+
+      // c[1, 32-47]
+      CLIP_F32S_AVX512(zmm14, zmm0, zmm1)
+
+      // c[1, 48-63]
+      CLIP_F32S_AVX512(zmm15, zmm0, zmm1)
+
+      // c[2, 0-15]
+      CLIP_F32S_AVX512(zmm16, zmm0, zmm1)
+
+      // c[2, 16-31]
+      CLIP_F32S_AVX512(zmm17, zmm0, zmm1)
+
+      // c[2, 32-47]
+      CLIP_F32S_AVX512(zmm18, zmm0, zmm1)
+
+      // c[2, 48-63]
+      CLIP_F32S_AVX512(zmm19, zmm0, zmm1)
+
+      // c[3, 0-15]
+      CLIP_F32S_AVX512(zmm20, zmm0, zmm1)
+
+      // c[3, 16-31]
+      CLIP_F32S_AVX512(zmm21, zmm0, zmm1)
+
+      // c[3, 32-47]
+      CLIP_F32S_AVX512(zmm22, zmm0, zmm1)
+
+      // c[3, 48-63]
+      CLIP_F32S_AVX512(zmm23, zmm0, zmm1)
+
+      POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+    }
 POST_OPS_4x64F_DISABLE:
     ;
 
@@ -1170,6 +1294,7 @@ LPGEMM_M_FRINGE_KERN(float,float,float,f32f32f32of32_avx512_3x64)
               &&POST_OPS_RELU_SCALE_3x64F,
               &&POST_OPS_GELU_TANH_3x64F,
               &&POST_OPS_GELU_ERF_3x64F,
+              &&POST_OPS_CLIP_3x64F
             };
     // Typecast local copies of integers in case dim_t and inc_t are a
     // different size than is expected by load instructions.
@@ -1552,6 +1677,49 @@ POST_OPS_GELU_ERF_3x64F:
 
       POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
     }
+POST_OPS_CLIP_3x64F:
+    {
+      zmm0 = _mm512_set1_ps( *( float* )post_ops_list_temp->op_args2 );
+      zmm1 = _mm512_set1_ps( *( float* )post_ops_list_temp->op_args3 );
+
+      // c[0, 0-15]
+      CLIP_F32S_AVX512(zmm8, zmm0, zmm1)
+
+      // c[0, 16-31]
+      CLIP_F32S_AVX512(zmm9, zmm0, zmm1)
+
+      // c[0, 32-47]
+      CLIP_F32S_AVX512(zmm10, zmm0, zmm1)
+
+      // c[0, 48-63]
+      CLIP_F32S_AVX512(zmm11, zmm0, zmm1)
+
+      // c[1, 0-15]
+      CLIP_F32S_AVX512(zmm12, zmm0, zmm1)
+
+      // c[1, 16-31]
+      CLIP_F32S_AVX512(zmm13, zmm0, zmm1)
+
+      // c[1, 32-47]
+      CLIP_F32S_AVX512(zmm14, zmm0, zmm1)
+
+      // c[1, 48-63]
+      CLIP_F32S_AVX512(zmm15, zmm0, zmm1)
+
+      // c[2, 0-15]
+      CLIP_F32S_AVX512(zmm16, zmm0, zmm1)
+
+      // c[2, 16-31]
+      CLIP_F32S_AVX512(zmm17, zmm0, zmm1)
+
+      // c[2, 32-47]
+      CLIP_F32S_AVX512(zmm18, zmm0, zmm1)
+
+      // c[2, 48-63]
+      CLIP_F32S_AVX512(zmm19, zmm0, zmm1)
+
+      POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+    }
 POST_OPS_3x64F_DISABLE:
     ;
 
@@ -1581,6 +1749,7 @@ LPGEMM_M_FRINGE_KERN(float,float,float,f32f32f32of32_avx512_2x64)
               &&POST_OPS_RELU_SCALE_2x64F,
               &&POST_OPS_GELU_TANH_2x64F,
               &&POST_OPS_GELU_ERF_2x64F,
+              &&POST_OPS_CLIP_2x64F
             };
     // Typecast local copies of integers in case dim_t and inc_t are a
     // different size than is expected by load instructions.
@@ -1868,6 +2037,37 @@ POST_OPS_GELU_ERF_2x64F:
 
       POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
     }
+POST_OPS_CLIP_2x64F:
+    {
+      zmm0 = _mm512_set1_ps( *( float* )post_ops_list_temp->op_args2 );
+      zmm1 = _mm512_set1_ps( *( float* )post_ops_list_temp->op_args3 );
+
+      // c[0, 0-15]
+      CLIP_F32S_AVX512(zmm8, zmm0, zmm1)
+
+      // c[0, 16-31]
+      CLIP_F32S_AVX512(zmm9, zmm0, zmm1)
+
+      // c[0, 32-47]
+      CLIP_F32S_AVX512(zmm10, zmm0, zmm1)
+
+      // c[0, 48-63]
+      CLIP_F32S_AVX512(zmm11, zmm0, zmm1)
+
+      // c[1, 0-15]
+      CLIP_F32S_AVX512(zmm12, zmm0, zmm1)
+
+      // c[1, 16-31]
+      CLIP_F32S_AVX512(zmm13, zmm0, zmm1)
+
+      // c[1, 32-47]
+      CLIP_F32S_AVX512(zmm14, zmm0, zmm1)
+
+      // c[1, 48-63]
+      CLIP_F32S_AVX512(zmm15, zmm0, zmm1)
+
+      POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+    }
 POST_OPS_2x64F_DISABLE:
     ;
 
@@ -1892,6 +2092,7 @@ LPGEMM_M_FRINGE_KERN(float,float,float,f32f32f32of32_avx512_1x64)
               &&POST_OPS_RELU_SCALE_1x64F,
               &&POST_OPS_GELU_TANH_1x64F,
               &&POST_OPS_GELU_ERF_1x64F,
+              &&POST_OPS_CLIP_1x64F
             };
     // Typecast local copies of integers in case dim_t and inc_t are a
     // different size than is expected by load instructions.
@@ -2084,6 +2285,25 @@ POST_OPS_GELU_ERF_1x64F:
 
       POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
     }
+POST_OPS_CLIP_1x64F:
+    {
+      zmm0 = _mm512_set1_ps( *( float* )post_ops_list_temp->op_args2 );
+      zmm1 = _mm512_set1_ps( *( float* )post_ops_list_temp->op_args3 );
+
+      // c[0, 0-15]
+      CLIP_F32S_AVX512(zmm8, zmm0, zmm1)
+
+      // c[0, 16-31]
+      CLIP_F32S_AVX512(zmm9, zmm0, zmm1)
+
+      // c[0, 32-47]
+      CLIP_F32S_AVX512(zmm10, zmm0, zmm1)
+
+      // c[0, 48-63]
+      CLIP_F32S_AVX512(zmm11, zmm0, zmm1)
+
+      POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+    }
 POST_OPS_1x64F_DISABLE:
     ;
 
@@ -2102,7 +2322,8 @@ LPGEMM_M_FRINGE_KERN(float,float,float,f32f32f32of32_avx512_5x48)
               &&POST_OPS_RELU_5x48F,
               &&POST_OPS_RELU_SCALE_5x48F,
               &&POST_OPS_GELU_TANH_5x48F,
-              &&POST_OPS_GELU_ERF_5x48F,	
+              &&POST_OPS_GELU_ERF_5x48F,
+              &&POST_OPS_CLIP_5x48F
             };
     // Typecast local copies of integers in case dim_t and inc_t are a
     // different size than is expected by load instructions.
@@ -2564,6 +2785,58 @@ POST_OPS_GELU_ERF_5x48F:
 
       POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
     }
+POST_OPS_CLIP_5x48F:
+    {
+      zmm0 = _mm512_set1_ps( *( float* )post_ops_list_temp->op_args2 );
+      zmm1 = _mm512_set1_ps( *( float* )post_ops_list_temp->op_args3 );
+
+      // c[0, 0-15]
+      CLIP_F32S_AVX512(zmm8, zmm0, zmm1)
+
+      // c[0, 16-31]
+      CLIP_F32S_AVX512(zmm9, zmm0, zmm1)
+
+      // c[0, 32-47]
+      CLIP_F32S_AVX512(zmm10, zmm0, zmm1)
+
+      // c[1, 0-15]
+      CLIP_F32S_AVX512(zmm12, zmm0, zmm1)
+
+      // c[1, 16-31]
+      CLIP_F32S_AVX512(zmm13, zmm0, zmm1)
+
+      // c[1, 32-47]
+      CLIP_F32S_AVX512(zmm14, zmm0, zmm1)
+
+      // c[2, 0-15]
+      CLIP_F32S_AVX512(zmm16, zmm0, zmm1)
+
+      // c[2, 16-31]
+      CLIP_F32S_AVX512(zmm17, zmm0, zmm1)
+
+      // c[2, 32-47]
+      CLIP_F32S_AVX512(zmm18, zmm0, zmm1)
+
+      // c[3, 0-15]
+      CLIP_F32S_AVX512(zmm20, zmm0, zmm1)
+
+      // c[3, 16-31]
+      CLIP_F32S_AVX512(zmm21, zmm0, zmm1)
+
+      // c[3, 32-47]
+      CLIP_F32S_AVX512(zmm22, zmm0, zmm1)
+
+      // c[4, 0-15]
+      CLIP_F32S_AVX512(zmm24, zmm0, zmm1)
+
+      // c[4, 16-31]
+      CLIP_F32S_AVX512(zmm25, zmm0, zmm1)
+
+      // c[4, 32-47]
+      CLIP_F32S_AVX512(zmm26, zmm0, zmm1)
+
+      POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+    }
 POST_OPS_5x48F_DISABLE:
     ;
 
@@ -2598,6 +2871,7 @@ LPGEMM_M_FRINGE_KERN(float,float,float,f32f32f32of32_avx512_4x48)
               &&POST_OPS_RELU_SCALE_4x48F,
               &&POST_OPS_GELU_TANH_4x48F,
               &&POST_OPS_GELU_ERF_4x48F,
+              &&POST_OPS_CLIP_4x48F
             };
     // Typecast local copies of integers in case dim_t and inc_t are a
     // different size than is expected by load instructions.
@@ -2985,6 +3259,49 @@ POST_OPS_GELU_ERF_4x48F:
 
       POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
     }
+POST_OPS_CLIP_4x48F:
+    {
+      zmm0 = _mm512_set1_ps( *( float* )post_ops_list_temp->op_args2 );
+      zmm1 = _mm512_set1_ps( *( float* )post_ops_list_temp->op_args3 );
+
+      // c[0, 0-15]
+      CLIP_F32S_AVX512(zmm8, zmm0, zmm1)
+
+      // c[0, 16-31]
+      CLIP_F32S_AVX512(zmm9, zmm0, zmm1)
+
+      // c[0, 32-47]
+      CLIP_F32S_AVX512(zmm10, zmm0, zmm1)
+
+      // c[1, 0-15]
+      CLIP_F32S_AVX512(zmm12, zmm0, zmm1)
+
+      // c[1, 16-31]
+      CLIP_F32S_AVX512(zmm13, zmm0, zmm1)
+
+      // c[1, 32-47]
+      CLIP_F32S_AVX512(zmm14, zmm0, zmm1)
+
+      // c[2, 0-15]
+      CLIP_F32S_AVX512(zmm16, zmm0, zmm1)
+
+      // c[2, 16-31]
+      CLIP_F32S_AVX512(zmm17, zmm0, zmm1)
+
+      // c[2, 32-47]
+      CLIP_F32S_AVX512(zmm18, zmm0, zmm1)
+
+      // c[3, 0-15]
+      CLIP_F32S_AVX512(zmm20, zmm0, zmm1)
+
+      // c[3, 16-31]
+      CLIP_F32S_AVX512(zmm21, zmm0, zmm1)
+
+      // c[3, 32-47]
+      CLIP_F32S_AVX512(zmm22, zmm0, zmm1)
+
+      POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+    }
 POST_OPS_4x48F_DISABLE:
     ;
 
@@ -3015,6 +3332,7 @@ LPGEMM_M_FRINGE_KERN(float,float,float,f32f32f32of32_avx512_3x48)
               &&POST_OPS_RELU_SCALE_3x48F,
               &&POST_OPS_GELU_TANH_3x48F,
               &&POST_OPS_GELU_ERF_3x48F,
+              &&POST_OPS_CLIP_3x48F
             };
     // Typecast local copies of integers in case dim_t and inc_t are a
     // different size than is expected by load instructions.
@@ -3330,6 +3648,40 @@ POST_OPS_GELU_ERF_3x48F:
 
       POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
     }
+POST_OPS_CLIP_3x48F:
+    {
+      zmm0 = _mm512_set1_ps( *( float* )post_ops_list_temp->op_args2 );
+      zmm1 = _mm512_set1_ps( *( float* )post_ops_list_temp->op_args3 );
+
+      // c[0, 0-15]
+      CLIP_F32S_AVX512(zmm8, zmm0, zmm1)
+
+      // c[0, 16-31]
+      CLIP_F32S_AVX512(zmm9, zmm0, zmm1)
+
+      // c[0, 32-47]
+      CLIP_F32S_AVX512(zmm10, zmm0, zmm1)
+
+      // c[1, 0-15]
+      CLIP_F32S_AVX512(zmm12, zmm0, zmm1)
+
+      // c[1, 16-31]
+      CLIP_F32S_AVX512(zmm13, zmm0, zmm1)
+
+      // c[1, 32-47]
+      CLIP_F32S_AVX512(zmm14, zmm0, zmm1)
+
+      // c[2, 0-15]
+      CLIP_F32S_AVX512(zmm16, zmm0, zmm1)
+
+      // c[2, 16-31]
+      CLIP_F32S_AVX512(zmm17, zmm0, zmm1)
+
+      // c[2, 32-47]
+      CLIP_F32S_AVX512(zmm18, zmm0, zmm1)
+
+      POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+    }
 POST_OPS_3x48F_DISABLE:
     ;
 
@@ -3356,6 +3708,7 @@ LPGEMM_M_FRINGE_KERN(float,float,float,f32f32f32of32_avx512_2x48)
               &&POST_OPS_RELU_SCALE_2x48F,
               &&POST_OPS_GELU_TANH_2x48F,
               &&POST_OPS_GELU_ERF_2x48F,
+              &&POST_OPS_CLIP_2x48F
             };
     // Typecast local copies of integers in case dim_t and inc_t are a
     // different size than is expected by load instructions.
@@ -3597,6 +3950,31 @@ POST_OPS_GELU_ERF_2x48F:
 
       POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
     }
+POST_OPS_CLIP_2x48F:
+    {
+      zmm0 = _mm512_set1_ps( *( float* )post_ops_list_temp->op_args2 );
+      zmm1 = _mm512_set1_ps( *( float* )post_ops_list_temp->op_args3 );
+
+      // c[0, 0-15]
+      CLIP_F32S_AVX512(zmm8, zmm0, zmm1)
+
+      // c[0, 16-31]
+      CLIP_F32S_AVX512(zmm9, zmm0, zmm1)
+
+      // c[0, 32-47]
+      CLIP_F32S_AVX512(zmm10, zmm0, zmm1)
+
+      // c[1, 0-15]
+      CLIP_F32S_AVX512(zmm12, zmm0, zmm1)
+
+      // c[1, 16-31]
+      CLIP_F32S_AVX512(zmm13, zmm0, zmm1)
+
+      // c[1, 32-47]
+      CLIP_F32S_AVX512(zmm14, zmm0, zmm1)
+
+      POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+    }
 POST_OPS_2x48F_DISABLE:
     ;
 
@@ -3619,6 +3997,7 @@ LPGEMM_M_FRINGE_KERN(float,float,float,f32f32f32of32_avx512_1x48)
               &&POST_OPS_RELU_SCALE_1x48F,
               &&POST_OPS_GELU_TANH_1x48F,
               &&POST_OPS_GELU_ERF_1x48F,
+              &&POST_OPS_CLIP_1x48F
             };
     // Typecast local copies of integers in case dim_t and inc_t are a
     // different size than is expected by load instructions.
@@ -3785,6 +4164,22 @@ POST_OPS_GELU_ERF_1x48F:
 
       POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
     }
+POST_OPS_CLIP_1x48F:
+    {
+      zmm0 = _mm512_set1_ps( *( float* )post_ops_list_temp->op_args2 );
+      zmm1 = _mm512_set1_ps( *( float* )post_ops_list_temp->op_args3 );
+
+      // c[0, 0-15]
+      CLIP_F32S_AVX512(zmm8, zmm0, zmm1)
+
+      // c[0, 16-31]
+      CLIP_F32S_AVX512(zmm9, zmm0, zmm1)
+
+      // c[0, 32-47]
+      CLIP_F32S_AVX512(zmm10, zmm0, zmm1)
+
+      POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+    }
 POST_OPS_1x48F_DISABLE:
     ;
 
@@ -3803,6 +4198,7 @@ LPGEMM_M_FRINGE_KERN(float,float,float,f32f32f32of32_avx512_5x32)
               &&POST_OPS_RELU_SCALE_5x32F,
               &&POST_OPS_GELU_TANH_5x32F,
               &&POST_OPS_GELU_ERF_5x32F,
+              &&POST_OPS_CLIP_5x32F
             };
     // Typecast local copies of integers in case dim_t and inc_t are a
     // different size than is expected by load instructions.
@@ -4147,6 +4543,43 @@ POST_OPS_GELU_ERF_5x32F:
 
       POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
     }
+POST_OPS_CLIP_5x32F:
+    {
+      zmm0 = _mm512_set1_ps( *( float* )post_ops_list_temp->op_args2 );
+      zmm1 = _mm512_set1_ps( *( float* )post_ops_list_temp->op_args3 );
+
+      // c[0, 0-15]
+      CLIP_F32S_AVX512(zmm8, zmm0, zmm1)
+
+      // c[0, 16-31]
+      CLIP_F32S_AVX512(zmm9, zmm0, zmm1)
+
+      // c[1, 0-15]
+      CLIP_F32S_AVX512(zmm12, zmm0, zmm1)
+
+      // c[1, 16-31]
+      CLIP_F32S_AVX512(zmm13, zmm0, zmm1)
+
+      // c[2, 0-15]
+      CLIP_F32S_AVX512(zmm16, zmm0, zmm1)
+
+      // c[2, 16-31]
+      CLIP_F32S_AVX512(zmm17, zmm0, zmm1)
+
+      // c[3, 0-15]
+      CLIP_F32S_AVX512(zmm20, zmm0, zmm1)
+
+      // c[3, 16-31]
+      CLIP_F32S_AVX512(zmm21, zmm0, zmm1)
+
+      // c[4, 0-15]
+      CLIP_F32S_AVX512(zmm24, zmm0, zmm1)
+
+      // c[4, 16-31]
+      CLIP_F32S_AVX512(zmm25, zmm0, zmm1)
+
+      POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+    }
 POST_OPS_5x32F_DISABLE:
     ;
 
@@ -4176,6 +4609,7 @@ LPGEMM_M_FRINGE_KERN(float,float,float,f32f32f32of32_avx512_4x32)
               &&POST_OPS_RELU_SCALE_4x32F,
               &&POST_OPS_GELU_TANH_4x32F,
               &&POST_OPS_GELU_ERF_4x32F,
+              &&POST_OPS_CLIP_4x32F
             };
     // Typecast local copies of integers in case dim_t and inc_t are a
     // different size than is expected by load instructions.
@@ -4467,6 +4901,37 @@ POST_OPS_GELU_ERF_4x32F:
 
       POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
     }
+POST_OPS_CLIP_4x32F:
+    {
+      zmm0 = _mm512_set1_ps( *( float* )post_ops_list_temp->op_args2 );
+      zmm1 = _mm512_set1_ps( *( float* )post_ops_list_temp->op_args3 );
+
+      // c[0, 0-15]
+      CLIP_F32S_AVX512(zmm8, zmm0, zmm1)
+
+      // c[0, 16-31]
+      CLIP_F32S_AVX512(zmm9, zmm0, zmm1)
+
+      // c[1, 0-15]
+      CLIP_F32S_AVX512(zmm12, zmm0, zmm1)
+
+      // c[1, 16-31]
+      CLIP_F32S_AVX512(zmm13, zmm0, zmm1)
+
+      // c[2, 0-15]
+      CLIP_F32S_AVX512(zmm16, zmm0, zmm1)
+
+      // c[2, 16-31]
+      CLIP_F32S_AVX512(zmm17, zmm0, zmm1)
+
+      // c[3, 0-15]
+      CLIP_F32S_AVX512(zmm20, zmm0, zmm1)
+
+      // c[3, 16-31]
+      CLIP_F32S_AVX512(zmm21, zmm0, zmm1)
+
+      POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+    }
 POST_OPS_4x32F_DISABLE:
     ;
 
@@ -4493,6 +4958,7 @@ LPGEMM_M_FRINGE_KERN(float,float,float,f32f32f32of32_avx512_3x32)
               &&POST_OPS_RELU_SCALE_3x32F,
               &&POST_OPS_GELU_TANH_3x32F,
               &&POST_OPS_GELU_ERF_3x32F,
+              &&POST_OPS_CLIP_3x32F
             };
     // Typecast local copies of integers in case dim_t and inc_t are a
     // different size than is expected by load instructions.
@@ -4736,6 +5202,31 @@ POST_OPS_GELU_ERF_3x32F:
 
       POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
     }
+POST_OPS_CLIP_3x32F:
+    {
+      zmm0 = _mm512_set1_ps( *( float* )post_ops_list_temp->op_args2 );
+      zmm1 = _mm512_set1_ps( *( float* )post_ops_list_temp->op_args3 );
+
+      // c[0, 0-15]
+      CLIP_F32S_AVX512(zmm8, zmm0, zmm1)
+
+      // c[0, 16-31]
+      CLIP_F32S_AVX512(zmm9, zmm0, zmm1)
+
+      // c[1, 0-15]
+      CLIP_F32S_AVX512(zmm12, zmm0, zmm1)
+
+      // c[1, 16-31]
+      CLIP_F32S_AVX512(zmm13, zmm0, zmm1)
+
+      // c[2, 0-15]
+      CLIP_F32S_AVX512(zmm16, zmm0, zmm1)
+
+      // c[2, 16-31]
+      CLIP_F32S_AVX512(zmm17, zmm0, zmm1)
+
+      POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+    }
 POST_OPS_3x32F_DISABLE:
     ;
 
@@ -4759,6 +5250,7 @@ LPGEMM_M_FRINGE_KERN(float,float,float,f32f32f32of32_avx512_2x32)
               &&POST_OPS_RELU_SCALE_2x32F,
               &&POST_OPS_GELU_TANH_2x32F,
               &&POST_OPS_GELU_ERF_2x32F,
+              &&POST_OPS_CLIP_2x32F
             };
     // Typecast local copies of integers in case dim_t and inc_t are a
     // different size than is expected by load instructions.
@@ -4949,6 +5441,25 @@ POST_OPS_GELU_ERF_2x32F:
 
       POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
     }
+POST_OPS_CLIP_2x32F:
+    {
+      zmm0 = _mm512_set1_ps( *( float* )post_ops_list_temp->op_args2 );
+      zmm1 = _mm512_set1_ps( *( float* )post_ops_list_temp->op_args3 );
+
+      // c[0, 0-15]
+      CLIP_F32S_AVX512(zmm8, zmm0, zmm1)
+
+      // c[0, 16-31]
+      CLIP_F32S_AVX512(zmm9, zmm0, zmm1)
+
+      // c[1, 0-15]
+      CLIP_F32S_AVX512(zmm12, zmm0, zmm1)
+
+      // c[1, 16-31]
+      CLIP_F32S_AVX512(zmm13, zmm0, zmm1)
+
+      POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+    }
 POST_OPS_2x32F_DISABLE:
     ;
 
@@ -4969,6 +5480,7 @@ LPGEMM_M_FRINGE_KERN(float,float,float,f32f32f32of32_avx512_1x32)
               &&POST_OPS_RELU_SCALE_1x32F,
               &&POST_OPS_GELU_TANH_1x32F,
               &&POST_OPS_GELU_ERF_1x32F,
+              &&POST_OPS_CLIP_1x32F
             };
     // Typecast local copies of integers in case dim_t and inc_t are a
     // different size than is expected by load instructions.
@@ -5105,6 +5617,19 @@ POST_OPS_GELU_ERF_1x32F:
 
       // c[0, 16-31]
       GELU_ERF_F32S_AVX512(zmm9, zmm0, zmm1, zmm2)
+
+      POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+    }
+POST_OPS_CLIP_1x32F:
+    {
+      zmm0 = _mm512_set1_ps( *( float* )post_ops_list_temp->op_args2 );
+      zmm1 = _mm512_set1_ps( *( float* )post_ops_list_temp->op_args3 );
+
+      // c[0, 0-15]
+      CLIP_F32S_AVX512(zmm8, zmm0, zmm1)
+
+      // c[0, 16-31]
+      CLIP_F32S_AVX512(zmm9, zmm0, zmm1)
 
       POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
     }

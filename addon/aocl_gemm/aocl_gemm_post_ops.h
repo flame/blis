@@ -43,6 +43,7 @@ typedef enum
 	PRELU = 1,
 	GELU_TANH = 2,
 	GELU_ERF = 3,
+	CLIP = 4,
 } AOCL_ELT_ALGO_TYPE;
 
 typedef enum

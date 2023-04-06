@@ -51,6 +51,7 @@ LPGEMM_M_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_5x64)
 						  &&POST_OPS_RELU_SCALE_5x64,
 						  &&POST_OPS_GELU_TANH_5x64,
 						  &&POST_OPS_GELU_ERF_5x64,
+						  &&POST_OPS_CLIP_5x64,
 						  &&POST_OPS_DOWNSCALE_5x64
 						};
 	dim_t k_full_pieces = k0 / 2;
@@ -823,6 +824,73 @@ POST_OPS_GELU_ERF_5x64:
 
 		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 	}
+POST_OPS_CLIP_5x64:
+	{
+		__m512 min = _mm512_set1_ps( *( float* )post_ops_list_temp->op_args2 );
+		__m512 max = _mm512_set1_ps( *( float* )post_ops_list_temp->op_args3 );
+
+		// c[0, 0-15]
+		CLIP_F32_AVX512(c_float_0p0, min, max)
+
+		// c[0, 16-31]
+		CLIP_F32_AVX512(c_float_0p1, min, max)
+
+		// c[0, 32-47]
+		CLIP_F32_AVX512(c_float_0p2, min, max)
+
+		// c[0, 48-63]
+		CLIP_F32_AVX512(c_float_0p3, min, max)
+
+		// c[1, 0-15]
+		CLIP_F32_AVX512(c_float_1p0, min, max)
+
+		// c[1, 16-31]
+		CLIP_F32_AVX512(c_float_1p1, min, max)
+
+		// c[1, 32-47]
+		CLIP_F32_AVX512(c_float_1p2, min, max)
+
+		// c[1, 48-63]
+		CLIP_F32_AVX512(c_float_1p3, min, max)
+
+		// c[2, 0-15]
+		CLIP_F32_AVX512(c_float_2p0, min, max)
+
+		// c[2, 16-31]
+		CLIP_F32_AVX512(c_float_2p1, min, max)
+
+		// c[2, 32-47]
+		CLIP_F32_AVX512(c_float_2p2, min, max)
+
+		// c[2, 48-63]
+		CLIP_F32_AVX512(c_float_2p3, min, max)
+
+		// c[3, 0-15]
+		CLIP_F32_AVX512(c_float_3p0, min, max)
+
+		// c[3, 16-31]
+		CLIP_F32_AVX512(c_float_3p1, min, max)
+
+		// c[3, 32-47]
+		CLIP_F32_AVX512(c_float_3p2, min, max)
+
+		// c[3, 48-63]
+		CLIP_F32_AVX512(c_float_3p3, min, max)
+
+		// c[4, 0-15]
+		CLIP_F32_AVX512(c_float_4p0, min, max)
+
+		// c[4, 16-31]
+		CLIP_F32_AVX512(c_float_4p1, min, max)
+
+		// c[4, 32-47]
+		CLIP_F32_AVX512(c_float_4p2, min, max)
+
+		// c[4, 48-63]
+		CLIP_F32_AVX512(c_float_4p3, min, max)
+
+		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+	}
 
 POST_OPS_DOWNSCALE_5x64:
 	{
@@ -964,6 +1032,7 @@ LPGEMM_M_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_4x64)
 						  &&POST_OPS_RELU_SCALE_4x64,
 						  &&POST_OPS_GELU_TANH_4x64,
 						  &&POST_OPS_GELU_ERF_4x64,
+						  &&POST_OPS_CLIP_4x64,
 						  &&POST_OPS_DOWNSCALE_4x64
 						};
 	dim_t k_full_pieces = k0 / 2;
@@ -1604,6 +1673,61 @@ POST_OPS_GELU_ERF_4x64:
 
 		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 	}
+POST_OPS_CLIP_4x64:
+	{
+		__m512 min = _mm512_set1_ps( *( float* )post_ops_list_temp->op_args2 );
+		__m512 max = _mm512_set1_ps( *( float* )post_ops_list_temp->op_args3 );
+
+		// c[0, 0-15]
+		CLIP_F32_AVX512(c_float_0p0, min, max)
+
+		// c[0, 16-31]
+		CLIP_F32_AVX512(c_float_0p1, min, max)
+
+		// c[0, 32-47]
+		CLIP_F32_AVX512(c_float_0p2, min, max)
+
+		// c[0, 48-63]
+		CLIP_F32_AVX512(c_float_0p3, min, max)
+
+		// c[1, 0-15]
+		CLIP_F32_AVX512(c_float_1p0, min, max)
+
+		// c[1, 16-31]
+		CLIP_F32_AVX512(c_float_1p1, min, max)
+
+		// c[1, 32-47]
+		CLIP_F32_AVX512(c_float_1p2, min, max)
+
+		// c[1, 48-63]
+		CLIP_F32_AVX512(c_float_1p3, min, max)
+
+		// c[2, 0-15]
+		CLIP_F32_AVX512(c_float_2p0, min, max)
+
+		// c[2, 16-31]
+		CLIP_F32_AVX512(c_float_2p1, min, max)
+
+		// c[2, 32-47]
+		CLIP_F32_AVX512(c_float_2p2, min, max)
+
+		// c[2, 48-63]
+		CLIP_F32_AVX512(c_float_2p3, min, max)
+
+		// c[3, 0-15]
+		CLIP_F32_AVX512(c_float_3p0, min, max)
+
+		// c[3, 16-31]
+		CLIP_F32_AVX512(c_float_3p1, min, max)
+
+		// c[3, 32-47]
+		CLIP_F32_AVX512(c_float_3p2, min, max)
+
+		// c[3, 48-63]
+		CLIP_F32_AVX512(c_float_3p3, min, max)
+
+		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+	}
 
 POST_OPS_DOWNSCALE_4x64:
 	{
@@ -1722,6 +1846,7 @@ LPGEMM_M_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_3x64)
 						  &&POST_OPS_RELU_SCALE_3x64,
 						  &&POST_OPS_GELU_TANH_3x64,
 						  &&POST_OPS_GELU_ERF_3x64,
+						  &&POST_OPS_CLIP_3x64,
 						  &&POST_OPS_DOWNSCALE_3x64
 						};
 	dim_t k_full_pieces = k0 / 2;
@@ -2229,6 +2354,49 @@ POST_OPS_GELU_ERF_3x64:
 
 		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 	}
+POST_OPS_CLIP_3x64:
+	{
+		__m512 min = _mm512_set1_ps( *( float* )post_ops_list_temp->op_args2 );
+		__m512 max = _mm512_set1_ps( *( float* )post_ops_list_temp->op_args3 );
+
+		// c[0, 0-15]
+		CLIP_F32_AVX512(c_float_0p0, min, max)
+
+		// c[0, 16-31]
+		CLIP_F32_AVX512(c_float_0p1, min, max)
+
+		// c[0, 32-47]
+		CLIP_F32_AVX512(c_float_0p2, min, max)
+
+		// c[0, 48-63]
+		CLIP_F32_AVX512(c_float_0p3, min, max)
+
+		// c[1, 0-15]
+		CLIP_F32_AVX512(c_float_1p0, min, max)
+
+		// c[1, 16-31]
+		CLIP_F32_AVX512(c_float_1p1, min, max)
+
+		// c[1, 32-47]
+		CLIP_F32_AVX512(c_float_1p2, min, max)
+
+		// c[1, 48-63]
+		CLIP_F32_AVX512(c_float_1p3, min, max)
+
+		// c[2, 0-15]
+		CLIP_F32_AVX512(c_float_2p0, min, max)
+
+		// c[2, 16-31]
+		CLIP_F32_AVX512(c_float_2p1, min, max)
+
+		// c[2, 32-47]
+		CLIP_F32_AVX512(c_float_2p2, min, max)
+
+		// c[2, 48-63]
+		CLIP_F32_AVX512(c_float_2p3, min, max)
+
+		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+	}
 
 POST_OPS_DOWNSCALE_3x64:
 	{
@@ -2322,6 +2490,7 @@ LPGEMM_M_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_2x64)
 						  &&POST_OPS_RELU_SCALE_2x64,
 						  &&POST_OPS_GELU_TANH_2x64,
 						  &&POST_OPS_GELU_ERF_2x64,
+						  &&POST_OPS_CLIP_2x64,
 						  &&POST_OPS_DOWNSCALE_2x64
 						};
 	dim_t k_full_pieces = k0 / 2;
@@ -2695,8 +2864,39 @@ POST_OPS_GELU_ERF_2x64:
 
 		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 	}
+POST_OPS_CLIP_2x64:
+	{
+		__m512 min = _mm512_set1_ps( *( float* )post_ops_list_temp->op_args2 );
+		__m512 max = _mm512_set1_ps( *( float* )post_ops_list_temp->op_args3 );
 
-	POST_OPS_DOWNSCALE_2x64:
+		// c[0, 0-15]
+		CLIP_F32_AVX512(c_float_0p0, min, max)
+
+		// c[0, 16-31]
+		CLIP_F32_AVX512(c_float_0p1, min, max)
+
+		// c[0, 32-47]
+		CLIP_F32_AVX512(c_float_0p2, min, max)
+
+		// c[0, 48-63]
+		CLIP_F32_AVX512(c_float_0p3, min, max)
+
+		// c[1, 0-15]
+		CLIP_F32_AVX512(c_float_1p0, min, max)
+
+		// c[1, 16-31]
+		CLIP_F32_AVX512(c_float_1p1, min, max)
+
+		// c[1, 32-47]
+		CLIP_F32_AVX512(c_float_1p2, min, max)
+
+		// c[1, 48-63]
+		CLIP_F32_AVX512(c_float_1p3, min, max)
+
+		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+	}
+
+POST_OPS_DOWNSCALE_2x64:
 	{
 		// c[0, 0-15]
 		CVT_F32_BF16(c_float_0p0,0,0);
@@ -2764,6 +2964,7 @@ LPGEMM_M_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_1x64)
 						  &&POST_OPS_RELU_SCALE_1x64,
 						  &&POST_OPS_GELU_TANH_1x64,
 						  &&POST_OPS_GELU_ERF_1x64,
+						  &&POST_OPS_CLIP_1x64,
 						  &&POST_OPS_DOWNSCALE_1x64
 						};
 	dim_t k_full_pieces = k0 / 2;
@@ -2992,6 +3193,25 @@ POST_OPS_GELU_ERF_1x64:
 
 		// c[0, 48-63]
 		GELU_ERF_F32_AVX512(c_float_0p3, r, x, x_erf)
+
+		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+	}
+POST_OPS_CLIP_1x64:
+	{
+		__m512 min = _mm512_set1_ps( *( float* )post_ops_list_temp->op_args2 );
+		__m512 max = _mm512_set1_ps( *( float* )post_ops_list_temp->op_args3 );
+
+		// c[0, 0-15]
+		CLIP_F32_AVX512(c_float_0p0, min, max)
+
+		// c[0, 16-31]
+		CLIP_F32_AVX512(c_float_0p1, min, max)
+
+		// c[0, 32-47]
+		CLIP_F32_AVX512(c_float_0p2, min, max)
+
+		// c[0, 48-63]
+		CLIP_F32_AVX512(c_float_0p3, min, max)
 
 		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 	}

@@ -72,6 +72,14 @@
 \
 	GELU_ERF_F32_SSE_DEF(reg, r, x, x_erf); \
 
+#define CLIP_F32S_AVX2(reg, min, max) \
+\
+	reg = _mm256_min_ps( _mm256_max_ps( reg, min ), max ); \
+
+#define CLIP_F32S_SSE(reg, min, max) \
+\
+	reg = _mm_min_ps( _mm_max_ps( reg, min ), max ); \
+
 //Zero-out the given YMM accumulator registers
 #define ZERO_ACC_YMM_4_REG(ymm0,ymm1,ymm2,ymm3) \
       ymm0 = _mm256_setzero_ps(); \

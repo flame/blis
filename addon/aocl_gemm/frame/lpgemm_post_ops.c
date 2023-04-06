@@ -117,6 +117,9 @@ void lpgemm_translate_to_post_ops_list
 							case GELU_ERF:
 									tmp_code = POST_OPS_GELU_ERF;
 									break;
+							case CLIP:
+									tmp_code = POST_OPS_CLIP;
+									break;
 							default:
 									break;
 						}

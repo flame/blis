@@ -52,7 +52,8 @@ LPGEMM_N_FRINGE_KERN(uint8_t,int8_t,int16_t,u8s8s16o16_6x16)
 			&&POST_OPS_RELU_6x16,
 			&&POST_OPS_RELU_SCALE_6x16,
 			&&POST_OPS_GELU_TANH_6x16,
-			&&POST_OPS_GELU_ERF_6x16,	
+			&&POST_OPS_GELU_ERF_6x16,
+			&&POST_OPS_CLIP_6x16,
 			&&POST_OPS_DOWNSCALE_6x16
 		};
 
@@ -399,6 +400,31 @@ POST_OPS_GELU_ERF_6x16:
 
 			POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 		}
+POST_OPS_CLIP_6x16:
+		{
+			__m256i min = _mm256_set1_epi16( *( int16_t* )post_ops_list_temp->op_args2 );
+			__m256i max = _mm256_set1_epi16( *( int16_t* )post_ops_list_temp->op_args3 );
+
+			// c[0,0-15]
+			CLIP_S16_AVX2(c_int16_0p0, min, max)
+
+			// c[1,0-15]
+			CLIP_S16_AVX2(c_int16_1p0, min, max)
+
+			// c[2,0-15]
+			CLIP_S16_AVX2(c_int16_2p0, min, max)
+
+			// c[3,0-15]
+			CLIP_S16_AVX2(c_int16_3p0, min, max)
+
+			// c[4,0-15]
+			CLIP_S16_AVX2(c_int16_4p0, min, max)
+
+			// c[5,0-15]
+			CLIP_S16_AVX2(c_int16_5p0, min, max)
+
+			POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+		}
 
 POST_OPS_DOWNSCALE_6x16:
 		{
@@ -520,6 +546,7 @@ LPGEMM_N_LT_NR0_FRINGE_KERN(uint8_t,int8_t,int16_t,u8s8s16o16_6xlt16)
 			&&POST_OPS_RELU_SCALE_6xlt16,
 			&&POST_OPS_GELU_TANH_6xlt16,
 			&&POST_OPS_GELU_ERF_6xlt16,
+			&&POST_OPS_CLIP_6xlt16,
 			&&POST_OPS_DOWNSCALE_6xlt16
 		};
 
@@ -879,6 +906,31 @@ POST_OPS_GELU_ERF_6xlt16:
 
 			// c[5,0-15]
 			GELU_ERF_S16_AVX2(c_int16_5p0, y1, y2, r, x, x_erf)
+
+			POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+		}
+POST_OPS_CLIP_6xlt16:
+		{
+			__m256i min = _mm256_set1_epi16( *( int16_t* )post_ops_list_temp->op_args2 );
+			__m256i max = _mm256_set1_epi16( *( int16_t* )post_ops_list_temp->op_args3 );
+
+			// c[0,0-15]
+			CLIP_S16_AVX2(c_int16_0p0, min, max)
+
+			// c[1,0-15]
+			CLIP_S16_AVX2(c_int16_1p0, min, max)
+
+			// c[2,0-15]
+			CLIP_S16_AVX2(c_int16_2p0, min, max)
+
+			// c[3,0-15]
+			CLIP_S16_AVX2(c_int16_3p0, min, max)
+
+			// c[4,0-15]
+			CLIP_S16_AVX2(c_int16_4p0, min, max)
+
+			// c[5,0-15]
+			CLIP_S16_AVX2(c_int16_5p0, min, max)
 
 			POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 		}

@@ -459,4 +459,8 @@
 	reg = _mm256_packs_epi32(_mm256_cvtps_epi32(y1), _mm256_cvtps_epi32(y2));\
 	reg = _mm256_permute4x64_epi64(reg, 0XD8);\
 
+#define CLIP_S16_AVX2(reg, min, max) \
+\
+	reg = _mm256_min_epi16( _mm256_max_epi16( reg, min ), max ); \
+
 #endif //LPGEMM_S16_KERN_MACROS_H

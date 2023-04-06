@@ -52,6 +52,7 @@ LPGEMM_MAIN_KERN(float,float,float,f32f32f32of32_6x16m)
               &&POST_OPS_RELU_SCALE_6x16F,
               &&POST_OPS_GELU_TANH_6x16F,
               &&POST_OPS_GELU_ERF_6x16F,
+              &&POST_OPS_CLIP_6x16F
             };
     uint64_t n_left = n0 % NR;  //n0 is expected to be n0<=NR
 
@@ -511,6 +512,49 @@ POST_OPS_GELU_ERF_6x16F:
 
         POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
       }
+POST_OPS_CLIP_6x16F:
+      {
+        ymm0 = _mm256_set1_ps( *( float* )post_ops_list_temp->op_args2 );
+        ymm1 = _mm256_set1_ps( *( float* )post_ops_list_temp->op_args3 );
+
+        // c[0,0-7]
+        CLIP_F32S_AVX2(ymm4, ymm0, ymm1)
+
+        // c[0,8-15]
+        CLIP_F32S_AVX2(ymm5, ymm0, ymm1)
+
+        // c[1,0-7]
+        CLIP_F32S_AVX2(ymm6, ymm0, ymm1)
+
+        // c[1,8-15]
+        CLIP_F32S_AVX2(ymm7, ymm0, ymm1)
+
+        // c[2,0-7]
+        CLIP_F32S_AVX2(ymm8, ymm0, ymm1)
+
+        // c[2,8-15]
+        CLIP_F32S_AVX2(ymm9, ymm0, ymm1)
+
+        // c[3,0-7]
+        CLIP_F32S_AVX2(ymm10, ymm0, ymm1)
+
+        // c[3,8-15]
+        CLIP_F32S_AVX2(ymm11, ymm0, ymm1)
+
+        // c[4,0-7]
+        CLIP_F32S_AVX2(ymm12, ymm0, ymm1)
+
+        // c[4,8-15]
+        CLIP_F32S_AVX2(ymm13, ymm0, ymm1)
+
+        // c[5,0-7]
+        CLIP_F32S_AVX2(ymm14, ymm0, ymm1)
+
+        // c[5,8-15]
+        CLIP_F32S_AVX2(ymm15, ymm0, ymm1)
+
+        POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+      }
 POST_OPS_6x16F_DISABLE:
       ;
 
@@ -581,6 +625,7 @@ LPGEMM_N_FRINGE_KERN(float,float,float,f32f32f32of32_6x8m)
               &&POST_OPS_RELU_SCALE_6x8F,
               &&POST_OPS_GELU_TANH_6x8F,
               &&POST_OPS_GELU_ERF_6x8F,
+              &&POST_OPS_CLIP_6x8F
             };
 
     // Typecast local copies of integers in case dim_t and inc_t are a
@@ -837,6 +882,31 @@ POST_OPS_GELU_ERF_6x8F:
 
         POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
       }
+POST_OPS_CLIP_6x8F:
+      {
+        ymm0 = _mm256_set1_ps( *( float* )post_ops_list_temp->op_args2 );
+        ymm1 = _mm256_set1_ps( *( float* )post_ops_list_temp->op_args3 );
+
+        // c[0,0-7]
+        CLIP_F32S_AVX2(ymm4, ymm0, ymm1)
+
+        // c[1,0-7]
+        CLIP_F32S_AVX2(ymm6, ymm0, ymm1)
+
+        // c[2,0-7]
+        CLIP_F32S_AVX2(ymm8, ymm0, ymm1)
+
+        // c[3,0-7]
+        CLIP_F32S_AVX2(ymm10, ymm0, ymm1)
+
+        // c[4,0-7]
+        CLIP_F32S_AVX2(ymm12, ymm0, ymm1)
+
+        // c[5,0-7]
+        CLIP_F32S_AVX2(ymm14, ymm0, ymm1)
+
+        POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+      }
 POST_OPS_6x8F_DISABLE:
       ;
 
@@ -901,6 +971,7 @@ LPGEMM_N_FRINGE_KERN(float,float,float,f32f32f32of32_6x4m)
               &&POST_OPS_RELU_SCALE_6x4F,
               &&POST_OPS_GELU_TANH_6x4F,
               &&POST_OPS_GELU_ERF_6x4F,
+              &&POST_OPS_CLIP_6x4F
             };
     // Typecast local copies of integers in case dim_t and inc_t are a
     // different size than is expected by load instructions.
@@ -1154,6 +1225,31 @@ POST_OPS_GELU_ERF_6x4F:
 
         POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
       }
+POST_OPS_CLIP_6x4F:
+      {
+        xmm0 = _mm_set1_ps( *( float* )post_ops_list_temp->op_args2 );
+        xmm1 = _mm_set1_ps( *( float* )post_ops_list_temp->op_args3 );
+
+        // c[0,0-3]
+        CLIP_F32S_SSE(xmm4, xmm0, xmm1)
+
+        // c[1,0-3]
+        CLIP_F32S_SSE(xmm5, xmm0, xmm1)
+
+        // c[2,0-3]
+        CLIP_F32S_SSE(xmm6, xmm0, xmm1)
+
+        // c[3,0-3]
+        CLIP_F32S_SSE(xmm7, xmm0, xmm1)
+
+        // c[4,0-3]
+        CLIP_F32S_SSE(xmm8, xmm0, xmm1)
+
+        // c[5,0-3]
+        CLIP_F32S_SSE(xmm9, xmm0, xmm1)
+
+        POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+      }
 POST_OPS_6x4F_DISABLE:
       ;
 
@@ -1218,6 +1314,7 @@ LPGEMM_N_FRINGE_KERN(float,float,float,f32f32f32of32_6x2m)
               &&POST_OPS_RELU_SCALE_6x2F,
               &&POST_OPS_GELU_TANH_6x2F,
               &&POST_OPS_GELU_ERF_6x2F,
+              &&POST_OPS_CLIP_6x2F
             };
     // Typecast local copies of integers in case dim_t and inc_t are a
     // different size than is expected by load instructions.
@@ -1471,6 +1568,31 @@ POST_OPS_GELU_ERF_6x2F:
 
         POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
       }
+POST_OPS_CLIP_6x2F:
+      {
+        xmm0 = _mm_set1_ps( *( float* )post_ops_list_temp->op_args2 );
+        xmm1 = _mm_set1_ps( *( float* )post_ops_list_temp->op_args3 );
+
+        // c[0,0-3]
+        CLIP_F32S_SSE(xmm4, xmm0, xmm1)
+
+        // c[1,0-3]
+        CLIP_F32S_SSE(xmm5, xmm0, xmm1)
+
+        // c[2,0-3]
+        CLIP_F32S_SSE(xmm6, xmm0, xmm1)
+
+        // c[3,0-3]
+        CLIP_F32S_SSE(xmm7, xmm0, xmm1)
+
+        // c[4,0-3]
+        CLIP_F32S_SSE(xmm8, xmm0, xmm1)
+
+        // c[5,0-3]
+        CLIP_F32S_SSE(xmm9, xmm0, xmm1)
+
+        POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+      }
 POST_OPS_6x2F_DISABLE:
       ;
 
@@ -1535,6 +1657,7 @@ LPGEMM_N_FRINGE_KERN(float,float,float,f32f32f32of32_6x1m)
               &&POST_OPS_RELU_SCALE_6x1F,
               &&POST_OPS_GELU_TANH_6x1F,
               &&POST_OPS_GELU_ERF_6x1F,
+              &&POST_OPS_CLIP_6x1F
             };
     // Typecast local copies of integers in case dim_t and inc_t are a
     // different size than is expected by load instructions.
@@ -1785,6 +1908,31 @@ POST_OPS_GELU_ERF_6x1F:
 
         // c[5,0-3]
         GELU_ERF_F32S_SSE(xmm9, xmm0, xmm1, xmm2)
+
+        POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+      }
+POST_OPS_CLIP_6x1F:
+      {
+        xmm0 = _mm_set1_ps( *( float* )post_ops_list_temp->op_args2 );
+        xmm1 = _mm_set1_ps( *( float* )post_ops_list_temp->op_args3 );
+
+        // c[0,0-3]
+        CLIP_F32S_SSE(xmm4, xmm0, xmm1)
+
+        // c[1,0-3]
+        CLIP_F32S_SSE(xmm5, xmm0, xmm1)
+
+        // c[2,0-3]
+        CLIP_F32S_SSE(xmm6, xmm0, xmm1)
+
+        // c[3,0-3]
+        CLIP_F32S_SSE(xmm7, xmm0, xmm1)
+
+        // c[4,0-3]
+        CLIP_F32S_SSE(xmm8, xmm0, xmm1)
+
+        // c[5,0-3]
+        CLIP_F32S_SSE(xmm9, xmm0, xmm1)
 
         POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
       }

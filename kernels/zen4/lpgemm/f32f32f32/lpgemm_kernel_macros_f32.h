@@ -56,6 +56,10 @@
 \
 	GELU_ERF_F32_AVX512_DEF(reg, r, x, x_erf); \
 
+#define CLIP_F32S_AVX512(reg, min, max) \
+\
+	reg = _mm512_min_ps( _mm512_max_ps( reg, min ), max ); \
+
 //Zero-out the given ZMM accumulator registers
 #define ZERO_ACC_ZMM_4_REG(zmm0,zmm1,zmm2,zmm3) \
       zmm0 = _mm512_setzero_ps(); \
