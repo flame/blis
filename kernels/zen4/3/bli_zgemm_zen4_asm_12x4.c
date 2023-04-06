@@ -612,7 +612,7 @@ void bli_zgemm_zen4_asm_12x4(
   uint64_t alpha_mul_type = BLIS_MUL_DEFAULT;
   uint64_t beta_mul_type = BLIS_MUL_DEFAULT;
 
-  if ((alpha->imag == 0.0))
+  if (alpha->imag == 0.0)
   {
     if (alpha->real == 1.0)
       alpha_mul_type = BLIS_MUL_ONE;

@@ -330,9 +330,9 @@ void PASTEMAC2(cha,chp,opname) \
 	PASTEMAC(chp,ctyper)* restrict kappa_r  = ( PASTEMAC(chp,ctyper)* )kappa; \
 	PASTEMAC(chp,ctyper)* restrict kappa_i  = ( PASTEMAC(chp,ctyper)* )kappa + 1; \
 	PASTEMAC(cha,ctyper)* restrict alpha1_r = ( PASTEMAC(cha,ctyper)* )a; \
-	PASTEMAC(cha,ctyper)* restrict alpha1_i = ( PASTEMAC(cha,ctyper)* )a + 1; \
+	PASTEMAC(cha,ctyper)* restrict __attribute__ ((unused)) alpha1_i = ( PASTEMAC(cha,ctyper)* )a + 1; \
 	PASTEMAC(chp,ctyper)* restrict pi1_r    = ( PASTEMAC(chp,ctyper)* )p; \
-	PASTEMAC(chp,ctyper)* restrict pi1_i    = ( PASTEMAC(chp,ctyper)* )p + ldp; \
+	PASTEMAC(chp,ctyper)* restrict __attribute__ ((unused)) pi1_i    = ( PASTEMAC(chp,ctyper)* )p + ldp; \
 \
 	( void )kappa_i; \
 \
@@ -454,9 +454,9 @@ void PASTEMAC2(cha,chp,opname) \
 	const inc_t       lda1      = lda; \
 	const inc_t       ldp1      = ldp; \
 \
-	ctype_a* restrict alpha1_ri = ( ctype_a* )a; \
-	ctype_p* restrict pi1_ri    = ( ctype_p* )p; \
-	ctype_p* restrict pi1_ir    = ( ctype_p* )p + ldp1/2; \
+	ctype_a* restrict __attribute__ ((unused)) alpha1_ri = ( ctype_a* )a; \
+	ctype_p* restrict __attribute__ ((unused)) pi1_ri    = ( ctype_p* )p; \
+	ctype_p* restrict __attribute__ ((unused)) pi1_ir    = ( ctype_p* )p + ldp1/2; \
 \
 	( void )inca1; \
 \

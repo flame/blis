@@ -1089,7 +1089,7 @@ void dtrsm_blis_impl
             {
                 case BLIS_ARCH_ZEN4:
 #if defined(BLIS_KERNELS_ZEN4)
-                    if( (blis_side == BLIS_RIGHT) )
+                    if( blis_side == BLIS_RIGHT )
                     {
                         ker_ft = bli_trsm_small_mt_AVX512;
                     }

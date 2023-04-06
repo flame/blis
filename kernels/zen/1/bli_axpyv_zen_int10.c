@@ -939,7 +939,6 @@ void bli_zaxpyv_zen_int5
     // Initialize local pointers.
     double* x0 = (double*)x;
     double* y0 = (double*)y;
-    double* alpha0 = (double*)alpha;
 
     double alphaR = alpha->real;
     double alphaI = alpha->imag;

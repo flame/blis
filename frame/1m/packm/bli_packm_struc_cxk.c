@@ -497,7 +497,7 @@ void PASTEMAC(ch,varname) \
 			   corresponding elements in c11 were not already zero. */ \
 			if ( bli_is_hermitian( strucc ) ) \
 			{ \
-				ctype* restrict pi11 = p11; \
+				ctype* restrict __attribute__ ((unused)) pi11 = p11; \
 \
 				for ( i = 0; i < p11_m; ++i ) \
 				{ \

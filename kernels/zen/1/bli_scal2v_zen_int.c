@@ -175,8 +175,6 @@ void bli_zscal2v_zen_int
     dcomplex *x0 = x;
     dcomplex *y0 = y;
 
-    dcomplex alpha_conj;
-
     double real = (*alpha).real;
     double imag = (*alpha).imag;
 
