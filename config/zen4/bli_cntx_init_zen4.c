@@ -254,14 +254,14 @@ void bli_cntx_init_zen4( cntx_t* cntx )
       BLIS_CRC, BLIS_DOUBLE, bli_dgemmsup_rd_haswell_asm_6x8n, TRUE,
       BLIS_CCR, BLIS_DOUBLE, bli_dgemmsup_rv_haswell_asm_6x8n, TRUE,
       BLIS_CCC, BLIS_DOUBLE, bli_dgemmsup_rv_haswell_asm_6x8n, TRUE,
-      BLIS_RRR, BLIS_FLOAT, bli_sgemmsup_rv_zen_asm_6x64m_avx512, TRUE,
-      BLIS_RRC, BLIS_FLOAT, bli_sgemmsup_rd_zen_asm_6x64m_avx512, TRUE,
-      BLIS_RCR, BLIS_FLOAT, bli_sgemmsup_rv_zen_asm_6x64m_avx512, TRUE,
-      BLIS_RCC, BLIS_FLOAT, bli_sgemmsup_rv_zen_asm_6x64n_avx512, TRUE,
-      BLIS_CRR, BLIS_FLOAT, bli_sgemmsup_rv_zen_asm_6x64m_avx512, TRUE,
-      BLIS_CRC, BLIS_FLOAT, bli_sgemmsup_rd_zen_asm_6x64n_avx512, TRUE,
-      BLIS_CCR, BLIS_FLOAT, bli_sgemmsup_rv_zen_asm_6x64n_avx512, TRUE,
-      BLIS_CCC, BLIS_FLOAT, bli_sgemmsup_rv_zen_asm_6x64n_avx512, TRUE,
+      BLIS_RRR, BLIS_FLOAT, bli_sgemmsup_rv_zen_asm_6x16m, TRUE,
+      BLIS_RRC, BLIS_FLOAT, bli_sgemmsup_rd_zen_asm_6x16m, TRUE,
+      BLIS_RCR, BLIS_FLOAT, bli_sgemmsup_rv_zen_asm_6x16m, TRUE,
+      BLIS_RCC, BLIS_FLOAT, bli_sgemmsup_rv_zen_asm_6x16n, TRUE,
+      BLIS_CRR, BLIS_FLOAT, bli_sgemmsup_rv_zen_asm_6x16m, TRUE,
+      BLIS_CRC, BLIS_FLOAT, bli_sgemmsup_rd_zen_asm_6x16n, TRUE,
+      BLIS_CCR, BLIS_FLOAT, bli_sgemmsup_rv_zen_asm_6x16n, TRUE,
+      BLIS_CCC, BLIS_FLOAT, bli_sgemmsup_rv_zen_asm_6x16n, TRUE,
       BLIS_RRR, BLIS_SCOMPLEX, bli_cgemmsup_rv_zen_asm_3x8m, TRUE,
       BLIS_RCR, BLIS_SCOMPLEX, bli_cgemmsup_rv_zen_asm_3x8m, TRUE,
       BLIS_CRR, BLIS_SCOMPLEX, bli_cgemmsup_rv_zen_asm_3x8m, TRUE,
@@ -283,11 +283,11 @@ void bli_cntx_init_zen4( cntx_t* cntx )
     // values.
     //                                           s      d      c      z
     bli_blksz_init     ( &blkszs[ BLIS_MR ],    6,     6,     3,      12,
-                                                6,     9,     3,      12    );
-    bli_blksz_init_easy( &blkszs[ BLIS_NR ],    64,    8,     8,      4    );
-    bli_blksz_init_easy( &blkszs[ BLIS_MC ],    192,   72,    72,     48   );
+                                                9,     9,     3,      12    );
+    bli_blksz_init_easy( &blkszs[ BLIS_NR ],    16,    8,     8,      4    );
+    bli_blksz_init_easy( &blkszs[ BLIS_MC ],    144,   72,    72,     48   );
     bli_blksz_init_easy( &blkszs[ BLIS_KC ],    512,   256,   128,    64   );
-    bli_blksz_init_easy( &blkszs[ BLIS_NC ],    8064,  4080,  2040,   1020 );
+    bli_blksz_init_easy( &blkszs[ BLIS_NC ],    8160,  4080,  2040,   1020 );
 
     // Update the context with the current architecture's register and cache
     // blocksizes for small/unpacked level-3 problems.
@@ -340,20 +340,22 @@ void bli_zen4_override_trsm_blkszs (cntx_t* cntx)
 }
 
 
-// Since gemmt/syrk SUP requires block sizes to be 6x8,
+// Since gemmt/syrk SUP requires block sizes to be 6x8 for double
+// and 6x16 for float,
 // We use this function to override blocksizes and kernel functions
-// with AVX-512 ones for DGEMM only.
+// with AVX-512 ones for S/DGEMM only.
 // This function needs to be removed once checks are added around
 // 6x8-specific gemmt code.
 void bli_zen4_override_gemm_blkszs (cntx_t* cntx)
 {
     blksz_t blkszs[ BLIS_NUM_BLKSZS ];
 
-    bli_blksz_init     ( &blkszs[ BLIS_MR ],    6,     24,     3,      3,
-                                                9,     9,     3,      3    );
-    bli_blksz_init_easy( &blkszs[ BLIS_NR ],    16,    8,     8,      4    );
+    bli_blksz_init     ( &blkszs[ BLIS_MR ],    6,     24,    3,      3,
+                                                6,     9,     3,      3    );
+    bli_blksz_init_easy( &blkszs[ BLIS_NR ],    64,    8,     8,      4    );
     bli_blksz_init_easy( &blkszs[ BLIS_KC ],    512,   480,   128,    64   );
-    bli_blksz_init_easy( &blkszs[ BLIS_MC ],    144,   144,    72,     36   );
+    bli_blksz_init_easy( &blkszs[ BLIS_MC ],    192,   144,   72,     36   );
+    bli_blksz_init_easy( &blkszs[ BLIS_NC ],    8064,  4080,  2040,   1020 );
 
     // Update the context with the current architecture's register and cache
     // blocksizes (and multiples) for native execution.
@@ -370,7 +372,15 @@ void bli_zen4_override_gemm_blkszs (cntx_t* cntx)
 
     bli_cntx_set_l3_sup_kers
     (
-      8,
+      16,
+      BLIS_RRR, BLIS_FLOAT, bli_sgemmsup_rv_zen_asm_6x64m_avx512, TRUE,
+      BLIS_RRC, BLIS_FLOAT, bli_sgemmsup_rd_zen_asm_6x64m_avx512, TRUE,
+      BLIS_RCR, BLIS_FLOAT, bli_sgemmsup_rv_zen_asm_6x64m_avx512, TRUE,
+      BLIS_RCC, BLIS_FLOAT, bli_sgemmsup_rv_zen_asm_6x64n_avx512, TRUE,
+      BLIS_CRR, BLIS_FLOAT, bli_sgemmsup_rv_zen_asm_6x64m_avx512, TRUE,
+      BLIS_CRC, BLIS_FLOAT, bli_sgemmsup_rd_zen_asm_6x64n_avx512, TRUE,
+      BLIS_CCR, BLIS_FLOAT, bli_sgemmsup_rv_zen_asm_6x64n_avx512, TRUE,
+      BLIS_CCC, BLIS_FLOAT, bli_sgemmsup_rv_zen_asm_6x64n_avx512, TRUE,
       BLIS_RRR, BLIS_DOUBLE, bli_dgemmsup_rv_zen4_asm_24x8m, FALSE,
       BLIS_RRC, BLIS_DOUBLE, bli_dgemmsup_rv_zen4_asm_24x8m, FALSE,
       BLIS_RCR, BLIS_DOUBLE, bli_dgemmsup_rv_zen4_asm_24x8m, FALSE,

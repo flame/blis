@@ -139,6 +139,11 @@ err_t bli_gemmsup
                 bli_rntm_set_pack_a(1, rntm);//packa
             }
         }
+        else if ( bli_obj_dt( a ) == BLIS_FLOAT )
+        {
+            // override the existing blocksizes with 6x64 specific ones.
+            bli_zen4_override_gemm_blkszs(&cntx_gemm);
+        }
         else ;
     }
 
