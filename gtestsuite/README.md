@@ -77,7 +77,18 @@ There are multiple configuration options to chose from when invoking CMake. Thos
 * To link shared BLIS, use `-DBLIS_LINKING_TYPE=shared`.
 ## Address Sanitizer
 * To build using address sanitizer, configure using `-DENABLE_ASAN=ON`. [**OFF by default**]
-* An installation to BLIS which was build with ASAN flags needs to be provided.
+* An installation to BLIS which was build with ASAN flags[CFLAGS="-O0 -g -fsanitize=address"] needs to be provided.
+## Code Coverage[Only GCC Compiler]
+* BLIS : Configure BLIS Library with code coverage flags[CFLAGS="-O0 -fprofile-arcs -ftest-coverage"], compile and install.
+* Gtestsuite : To build for code coverage, configure cmake with `-DENABLE_COVERAGE=ON`. [**OFF by default**] and then compile and run the executable.
+* CodeCoverage : in gtestsuite folder, run the below mentioned steps or bash script - to generate html LCOV-code coverage report.
+                 Run the bash script : bash codecov.sh <blis_obj_path> <out_dir_name>
+                                      or
+                 Steps to generate html LCOV-code coverage report.
+                 1. lcov --capture --directory <obj_path> --output-file <out_dir>.info
+                 2. lcov --remove <out_dir>.info -o <out_dir_fir>.info '/usr/*' '/*/_deps/*'
+                 3. genhtml <out_dir_fir>.info --output-directory <out_dir>
+                 4. In <out_dir>, open index.html file
 ## BLIS Library Interface to be Tested
 * To build the testsuite using BLAS interface, configure using `-DTEST_INTERFACE=BLAS`. [**Default**]
 * To build the testsuite using CBLAS interface, configure using `-DTEST_INTERFACE=CBLAS`.
@@ -215,7 +226,7 @@ Currently, we have the following behaviour in the different interfaces:
 * BLIS-typed prints and aborts.
 * BLAS prints and returns.
 * CBLAS prints and exits.
-For that reason, we currently test only for BLAS APIs, so ensure to add the #ifdef's as appropriate. Note that printing seems to be inconsistent. 
+For that reason, we currently test only for BLAS APIs, so ensure to add the #ifdef's as appropriate. Note that printing seems to be inconsistent.
 
 A test program would be looking like the following:
 ```cpp
@@ -227,7 +238,7 @@ A test program would be looking like the following:
 
 /**
  * Testing invalid/incorrect input parameters.
- * 
+ *
  * storage : 'c', 'r', note BLAS is 'c' only.
  * transa, transb : 'n', 't', 'c'
  * m, n, k >= 0
@@ -300,7 +311,7 @@ If we want to test for different lda combinations as well, especially for the ca
 If lda = 30, for the cases 3, 4, 7, 8 above, lda < max(1, m), so the requirement is not satisfied. Another issue is that lda depends on the storage type and on whether we test for non transpose, transpose or conjugate transpose matrices.
 
 To overcome this issue and generate tests which fullfill the requirements for the correct value of the leading dimension of a matrix we use **lda increments** and do the lda computation as follows:
-* Depending on the parameters storage and trans, compute lda = max(1, k), where k is m or n, depending on the requirements. 
+* Depending on the parameters storage and trans, compute lda = max(1, k), where k is m or n, depending on the requirements.
 * Add the lda_inc parameter: lda += lda_inc
 
 To test an m-by-n matrix A (column-major), stored in an array a, use lda_inc = 0 as a parameter to the test generator. To test for the case where A is a submatrix of k-by-n matrix B, use lda_inc = k-m.

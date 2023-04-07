@@ -58,6 +58,8 @@ set_property(CACHE BLIS_LINKING_TYPE PROPERTY STRINGS "static" "shared")
 
 option(ENABLE_ASAN "Run tests using Address Sanatizer" OFF)
 
+option(ENABLE_COVERAGE "Run tests for Code Coderage" OFF)
+
 # Set variable if the platform is Linux based.
 if(UNIX AND NOT APPLE)
     set(LINUX TRUE)
@@ -144,6 +146,10 @@ if(LINUX)
     if(ENABLE_ASAN)
        add_compile_options(-fsanitize=address)
        add_definitions(-DENABLE_ASAN)
+    endif()
+
+    if(ENABLE_COVERAGE)
+        set(CMAKE_CXX_FLAGS "-O0 --coverage")
     endif()
 
     # Set GNU OpenMP library as the default option
