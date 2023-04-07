@@ -38,14 +38,14 @@
 
 // Helper macros for edge-case handling within gemm microkernels.
 
-#define GEMM_UKR_SETUP_CT_PRE(ch,mr,nr,row_major) \
+#define GEMM_UKR_SETUP_CT_PRE(ch,mr,nr,row_major,alignment) \
 \
 	PASTEMAC(ch,ctype)* restrict _beta   = beta; \
 	PASTEMAC(ch,ctype)* restrict _c      = c; \
 	const inc_t                  _rs_c   = rs_c; \
 	const inc_t                  _cs_c   = cs_c; \
 	PASTEMAC(ch,ctype)           _ct[ BLIS_STACK_BUF_MAX_SIZE / sizeof( PASTEMAC(ch,ctype) ) ] \
-	                                  __attribute__((aligned(BLIS_STACK_BUF_ALIGN_SIZE))); \
+	                                  __attribute__((aligned(alignment))); \
 	const inc_t                  _rs_ct  = row_major ? nr :  1; \
 	const inc_t                  _cs_ct  = row_major ?  1 : mr;
 
@@ -64,27 +64,27 @@
 
 #define GEMM_UKR_SETUP_CT(ch,mr,nr,row_major) \
 \
-	GEMM_UKR_SETUP_CT_PRE(ch,mr,nr,row_major); \
+	GEMM_UKR_SETUP_CT_PRE(ch,mr,nr,row_major,1); \
 	const bool _use_ct = ( row_major ? cs_c != 1 : rs_c != 1 ) || \
 	                     m != mr || n != nr; \
 	GEMM_UKR_SETUP_CT_POST(ch);
 
 #define GEMM_UKR_SETUP_CT_AMBI(ch,mr,nr,row_major) \
 \
-	GEMM_UKR_SETUP_CT_PRE(ch,mr,nr,row_major); \
+	GEMM_UKR_SETUP_CT_PRE(ch,mr,nr,row_major,1); \
 	const bool _use_ct = ( cs_c != 1 && rs_c != 1 ) || \
 	                     m != mr || n != nr; \
 	GEMM_UKR_SETUP_CT_POST(ch);
 
 #define GEMM_UKR_SETUP_CT_ANY(ch,mr,nr,row_major) \
 \
-	GEMM_UKR_SETUP_CT_PRE(ch,mr,nr,row_major); \
+	GEMM_UKR_SETUP_CT_PRE(ch,mr,nr,row_major,1); \
 	const bool _use_ct = m != mr || n != nr; \
 	GEMM_UKR_SETUP_CT_POST(ch);
 
 #define GEMM_UKR_SETUP_CT_ALIGNED(ch,mr,nr,row_major,alignment) \
 \
-	GEMM_UKR_SETUP_CT_PRE(ch,mr,nr,row_major); \
+	GEMM_UKR_SETUP_CT_PRE(ch,mr,nr,row_major,alignment); \
 	const bool _use_ct = ( row_major ? cs_c != 1 : rs_c != 1 ) || \
 	                     m != mr || n != nr || \
 	                     ( (uintptr_t)_c % alignment ) || \

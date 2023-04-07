@@ -31,6 +31,7 @@
    OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 */
+#include "./3/bli_armsve_utils.h"
 
 GEMM_UKR_PROT( double,   d, gemm_armsve256_asm_8x8 )
 GEMM_UKR_PROT( double,   d, gemm_armsve_asm_2vx10_unindexed )

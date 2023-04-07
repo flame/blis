@@ -42,7 +42,6 @@
 // 2vx7 microkernels.
 #include "armsve_asm_2vx7cmplx.h"
 
-#include "arm_sve.h"
 
 void bli_zgemm_armsve_asm_2vx7_unindexed
      (
@@ -69,7 +68,7 @@ void bli_zgemm_armsve_asm_2vx7_unindexed
   uint64_t cs_c   = cs_c0;
   uint64_t info   = 0;
 
-  uint64_t mr = svcntd();
+  uint64_t mr = bli_vl_bytes_armsve() * 2 / 16;
   GEMM_UKR_SETUP_CT( z, mr, 7, false );
 
   __asm__ volatile (

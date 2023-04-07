@@ -35,7 +35,7 @@
 */
 #include "blis.h"
 
-dim_t bli_vl_bits_armsve(void)
+dim_t bli_vl_bytes_armsve(void)
 { \
     uint64_t vl = 0;
     __asm__ (
@@ -43,7 +43,7 @@ dim_t bli_vl_bits_armsve(void)
       " incb x0        \n\t"
       " mov  %[vl], x0 \n\t"
     : [vl] "=r" (vl)
-    : 
+    :
     : "x0"
      );
     return vl;
@@ -64,7 +64,7 @@ void PASTEMAC(ch, _blksz_armsve) (dim_t *m_r_, dim_t *n_r_, \
     dim_t N_L3 = bli_env_get_var("BLIS_SVE_N_L3", N_L3_SVE_DEFAULT); \
     dim_t C_L3 = bli_env_get_var("BLIS_SVE_C_L3", C_L3_SVE_DEFAULT); \
 \
-    dim_t vl_b = bli_vl_bits_armsve(); \
+    dim_t vl_b = bli_vl_bytes_armsve(); \
     dim_t vl = vl_b / S_Data; \
     dim_t m_r = 2 * vl; \
     dim_t n_r = 10; \

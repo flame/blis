@@ -33,7 +33,6 @@
 */
 
 #include "blis.h"
-#include "bli_armsve_config_utils.h"
 
 void bli_cntx_init_armsve( cntx_t* cntx )
 {
