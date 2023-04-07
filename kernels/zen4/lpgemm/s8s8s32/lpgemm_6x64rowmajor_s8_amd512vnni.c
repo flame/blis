@@ -64,8 +64,6 @@ LPGEMM_MAIN_KERN(int8_t,int8_t,int32_t,s8s8s32os32_6x64)
 	dim_t k_full_pieces = k0 / 4;
 	dim_t k_partial_pieces = k0 % 4;
 
-	int32_t a_kfringe_buf = 0;
-
 	if ( n0 < NR )
 	{
 		dim_t n0_rem = n0 % 16;
@@ -304,16 +302,18 @@ LPGEMM_MAIN_KERN(int8_t,int8_t,int32_t,s8s8s32os32_6x64)
 		// Handle k remainder.
 		if ( k_partial_pieces > 0 )
 		{
+			__m128i a_kfringe_buf;
+			__mmask16 load_mask = _cvtu32_mask16( 0xFFFF >> ( 16 - k_partial_pieces ) );
+
 			b0 = _mm512_loadu_epi8( b + ( rs_b * k_full_pieces ) + ( cs_b * 0 ) );
 
 			// Broadcast a[0,kr:kr+4].
-			MEMCPY_S32GM_LT4_UINT8
+			a_kfringe_buf = _mm_maskz_loadu_epi8
 			(
-			  &a_kfringe_buf,
-			  ( a + ( rs_a * 0 ) + ( cs_a * k_full_pieces ) ),
-			  ( k_partial_pieces * sizeof( int8_t ) )
+			  load_mask,
+			  ( a + ( rs_a * 0 ) + ( cs_a * k_full_pieces ) )
 			);
-			a_int32_0 = _mm512_set1_epi32( a_kfringe_buf );
+			a_int32_0 = _mm512_broadcastd_epi32( a_kfringe_buf );
 
 			//convert signed int8 to uint8 for VNNI
 			a_int32_0 = _mm512_add_epi8( a_int32_0, vec_uint8 );
@@ -327,13 +327,12 @@ LPGEMM_MAIN_KERN(int8_t,int8_t,int32_t,s8s8s32os32_6x64)
 			c_int32_0p0 = _mm512_dpbusd_epi32( c_int32_0p0, a_int32_0, b0 );
 
 			// Broadcast a[1,kr:kr+4].
-			MEMCPY_S32GM_LT4_UINT8
+			a_kfringe_buf = _mm_maskz_loadu_epi8
 			(
-			  &a_kfringe_buf,
-			  ( a + ( rs_a * 1 ) + ( cs_a * k_full_pieces ) ),
-			  ( k_partial_pieces * sizeof( int8_t ) )
+			  load_mask,
+			  ( a + ( rs_a * 1 ) + ( cs_a * k_full_pieces ) )
 			);
-			a_int32_1 = _mm512_set1_epi32( a_kfringe_buf );
+			a_int32_1 = _mm512_broadcastd_epi32( a_kfringe_buf );
 
 			//convert signed int8 to uint8 for VNNI
 			a_int32_1 = _mm512_add_epi8 (a_int32_1, vec_uint8);
@@ -347,13 +346,12 @@ LPGEMM_MAIN_KERN(int8_t,int8_t,int32_t,s8s8s32os32_6x64)
 			c_int32_1p0 = _mm512_dpbusd_epi32( c_int32_1p0, a_int32_1, b0 );
 
 			// Broadcast a[2,kr:kr+4].
-			MEMCPY_S32GM_LT4_UINT8
+			a_kfringe_buf = _mm_maskz_loadu_epi8
 			(
-			  &a_kfringe_buf,
-			  ( a + ( rs_a * 2 ) + ( cs_a * k_full_pieces ) ),
-			  ( k_partial_pieces * sizeof( int8_t ) )
+			  load_mask,
+			  ( a + ( rs_a * 2 ) + ( cs_a * k_full_pieces ) )
 			);
-			a_int32_0 = _mm512_set1_epi32( a_kfringe_buf );
+			a_int32_0 = _mm512_broadcastd_epi32( a_kfringe_buf );
 
 			//convert signed int8 to uint8 for VNNI
 			a_int32_0 = _mm512_add_epi8( a_int32_0, vec_uint8 );
@@ -367,13 +365,12 @@ LPGEMM_MAIN_KERN(int8_t,int8_t,int32_t,s8s8s32os32_6x64)
 			c_int32_2p0 = _mm512_dpbusd_epi32( c_int32_2p0, a_int32_0, b0 );
 
 			// Broadcast a[3,kr:kr+4].
-			MEMCPY_S32GM_LT4_UINT8
+			a_kfringe_buf = _mm_maskz_loadu_epi8
 			(
-			  &a_kfringe_buf,
-			  ( a + ( rs_a * 3 ) + ( cs_a * k_full_pieces ) ),
-			  ( k_partial_pieces * sizeof( int8_t ) )
+			  load_mask,
+			  ( a + ( rs_a * 3 ) + ( cs_a * k_full_pieces ) )
 			);
-			a_int32_1 = _mm512_set1_epi32( a_kfringe_buf );
+			a_int32_1 = _mm512_broadcastd_epi32( a_kfringe_buf );
 
 			//convert signed int8 to uint8 for VNNI
 			a_int32_1 = _mm512_add_epi8 (a_int32_1, vec_uint8);
@@ -387,13 +384,12 @@ LPGEMM_MAIN_KERN(int8_t,int8_t,int32_t,s8s8s32os32_6x64)
 			c_int32_3p0 = _mm512_dpbusd_epi32( c_int32_3p0, a_int32_1, b0 );
 
 			// Broadcast a[4,kr:kr+4].
-			MEMCPY_S32GM_LT4_UINT8
+			a_kfringe_buf = _mm_maskz_loadu_epi8
 			(
-			  &a_kfringe_buf,
-			  ( a + ( rs_a * 4 ) + ( cs_a * k_full_pieces ) ),
-			  ( k_partial_pieces * sizeof( int8_t ) )
+			  load_mask,
+			  ( a + ( rs_a * 4 ) + ( cs_a * k_full_pieces ) )
 			);
-			a_int32_0 = _mm512_set1_epi32( a_kfringe_buf );
+			a_int32_0 = _mm512_broadcastd_epi32( a_kfringe_buf );
 
 			//convert signed int8 to uint8 for VNNI
 			a_int32_0 = _mm512_add_epi8( a_int32_0, vec_uint8 );
@@ -407,13 +403,12 @@ LPGEMM_MAIN_KERN(int8_t,int8_t,int32_t,s8s8s32os32_6x64)
 			c_int32_4p0 = _mm512_dpbusd_epi32( c_int32_4p0, a_int32_0, b0 );
 
 			// Broadcast a[5,kr:kr+4].
-			MEMCPY_S32GM_LT4_UINT8
+			a_kfringe_buf = _mm_maskz_loadu_epi8
 			(
-			  &a_kfringe_buf,
-			  ( a + ( rs_a * 5 ) + ( cs_a * k_full_pieces ) ),
-			  ( k_partial_pieces * sizeof( int8_t ) )
+			  load_mask,
+			  ( a + ( rs_a * 5 ) + ( cs_a * k_full_pieces ) )
 			);
-			a_int32_1 = _mm512_set1_epi32( a_kfringe_buf );
+			a_int32_1 = _mm512_broadcastd_epi32( a_kfringe_buf );
 
 			//convert signed int8 to uint8 for VNNI
 			a_int32_1 = _mm512_add_epi8 (a_int32_1, vec_uint8);

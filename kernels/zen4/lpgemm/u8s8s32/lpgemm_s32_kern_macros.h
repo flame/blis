@@ -95,9 +95,28 @@
 	scratch1 = _mm512_loadu_epi32( buf_ ); \
 	S32_BETA_FMA(reg,scratch1,scratch2) \
 
+// Default n < 16 mask load beta macro
+#define S32_S32_BETA_OP_NLT16F_MASK(lmask,reg,m_ir,m_ind,n_ind,scratch1,scratch2) \
+	scratch1 = _mm512_maskz_loadu_epi32( lmask, c + ( rs_c * ( m_ir + m_ind ) ) + ( n_ind * 16 ) ); \
+	S32_BETA_FMA(reg,scratch1,scratch2) \
+
 // Downscale n < 16 beta macro
 #define S8_S32_BETA_OP_NLT16F(reg,buf_,scratch1,scratch2) \
 	scratch1 = _mm512_cvtepi8_epi32( _mm_loadu_epi8( ( int8_t* )buf_ ) ); \
+	S32_BETA_FMA(reg,scratch1,scratch2) \
+
+// Downscale n < 16 mask load beta macro
+#define S8_S32_BETA_OP_NLT16F_MASK(lmask,reg,m_ind,n_ind,scratch1,scratch2) \
+	scratch1 = _mm512_cvtepi8_epi32 \
+	( \
+	  _mm_maskz_loadu_epi8 \
+	  ( \
+	    lmask, \
+	    ( int8_t* )post_ops_attr.buf_downscale + \
+	    ( post_ops_attr.rs_c_downscale * ( post_ops_attr.post_op_c_i + m_ind ) ) + \
+	    post_ops_attr.post_op_c_j + ( n_ind * 16 ) \
+	  ) \
+	); \
 	S32_BETA_FMA(reg,scratch1,scratch2) \
 
 // ReLU scale (Parametric ReLU):  f(x) = x, when x > 0 and f(x) = a*x when x <= 0

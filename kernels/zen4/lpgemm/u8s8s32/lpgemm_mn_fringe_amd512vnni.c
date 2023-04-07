@@ -57,15 +57,6 @@ LPGEMM_MN_LT_NR0_FRINGE_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_5xlt16)
 	dim_t k_full_pieces = k0 / 4;
 	dim_t k_partial_pieces = k0 % 4;
 
-	uint32_t a_kfringe_buf = 0;
-
-	// For corner cases.
-	int32_t buf0[16];
-	int32_t buf1[16];
-	int32_t buf2[16];
-	int32_t buf3[16];
-	int32_t buf4[16];
-
 	{
 		// Registers to use for accumulating C.
 		__m512i c_int32_0p0 = _mm512_setzero_epi32();
@@ -120,43 +111,66 @@ LPGEMM_MN_LT_NR0_FRINGE_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_5xlt16)
 		// Handle k remainder.
 		if ( k_partial_pieces > 0 )
 		{
+			__m128i a_kfringe_buf;
+			__mmask16 load_mask = _cvtu32_mask16( 0xFFFF >> ( 16 - k_partial_pieces ) );
+
 			__m512i b0 = _mm512_loadu_epi8( b + ( rs_b * k_full_pieces ) + ( cs_b * 0 ) );
 
 			// Broadcast a[0,kr:kr+4].
-			MEMCPY_S32GM_LT4_UINT8( &a_kfringe_buf, ( a + ( rs_a * 0 ) + ( cs_a * k_full_pieces ) ), ( k_partial_pieces ) );
-			__m512i a_int32_0 = _mm512_set1_epi32( a_kfringe_buf );
+			a_kfringe_buf = _mm_maskz_loadu_epi8
+			(
+			  load_mask,
+			  ( a + ( rs_a * 0 ) + ( cs_a * k_full_pieces ) )
+			);
+			__m512i a_int32_0 = _mm512_broadcastd_epi32( a_kfringe_buf );
 
 			// Perform column direction mat-mul with k = 4.
 			// c[0,0-15] = a[0,kr:kr+4]*b[kr:kr+4,0-15]
 			c_int32_0p0 = _mm512_dpbusd_epi32( c_int32_0p0, a_int32_0, b0 );
 
 			// Broadcast a[1,kr:kr+4].
-			MEMCPY_S32GM_LT4_UINT8( &a_kfringe_buf, ( a + ( rs_a * 1 ) + ( cs_a * k_full_pieces ) ), ( k_partial_pieces ) );
-			a_int32_0 = _mm512_set1_epi32( a_kfringe_buf );
+			a_kfringe_buf = _mm_maskz_loadu_epi8
+			(
+			  load_mask,
+			  ( a + ( rs_a * 1 ) + ( cs_a * k_full_pieces ) )
+			);
+			a_int32_0 = _mm512_broadcastd_epi32( a_kfringe_buf );
 
 			// Perform column direction mat-mul with k = 4.
 			// c[1,0-15] = a[1,kr:kr+4]*b[kr:kr+4,0-15]
 			c_int32_1p0 = _mm512_dpbusd_epi32( c_int32_1p0, a_int32_0, b0 );
 
 			// Broadcast a[2,kr:kr+4].
-			MEMCPY_S32GM_LT4_UINT8( &a_kfringe_buf, ( a + ( rs_a * 2 ) + ( cs_a * k_full_pieces ) ), ( k_partial_pieces ) );
-			a_int32_0 = _mm512_set1_epi32( a_kfringe_buf );
+			a_kfringe_buf = _mm_maskz_loadu_epi8
+			(
+			  load_mask,
+			  ( a + ( rs_a * 2 ) + ( cs_a * k_full_pieces ) )
+			);
+			a_int32_0 = _mm512_broadcastd_epi32( a_kfringe_buf );
 
 			// Perform column direction mat-mul with k = 4.
 			// c[2,0-15] = a[2,kr:kr+4]*b[kr:kr+4,0-15]
 			c_int32_2p0 = _mm512_dpbusd_epi32( c_int32_2p0, a_int32_0, b0 );
 
 			// Broadcast a[3,kr:kr+4].
-			MEMCPY_S32GM_LT4_UINT8( &a_kfringe_buf, ( a + ( rs_a * 3 ) + ( cs_a * k_full_pieces ) ), ( k_partial_pieces ) );
-			a_int32_0 = _mm512_set1_epi32( a_kfringe_buf );
+			a_kfringe_buf = _mm_maskz_loadu_epi8
+			(
+			  load_mask,
+			  ( a + ( rs_a * 3 ) + ( cs_a * k_full_pieces ) )
+			);
+			a_int32_0 = _mm512_broadcastd_epi32( a_kfringe_buf );
 
 			// Perform column direction mat-mul with k = 4.
 			// c[3,0-15] = a[3,kr:kr+4]*b[kr:kr+4,0-15]
 			c_int32_3p0 = _mm512_dpbusd_epi32( c_int32_3p0, a_int32_0, b0 );
 
 			// Broadcast a[4,kr:kr+4].
-			MEMCPY_S32GM_LT4_UINT8( &a_kfringe_buf, ( a + ( rs_a * 4 ) + ( cs_a * k_full_pieces ) ), ( k_partial_pieces ) );
-			a_int32_0 = _mm512_set1_epi32( a_kfringe_buf );
+			a_kfringe_buf = _mm_maskz_loadu_epi8
+			(
+			  load_mask,
+			  ( a + ( rs_a * 4 ) + ( cs_a * k_full_pieces ) )
+			);
+			a_int32_0 = _mm512_broadcastd_epi32( a_kfringe_buf );
 
 			// Perform column direction mat-mul with k = 4.
 			// c[4,0-15] = a[4,kr:kr+4]*b[kr:kr+4,0-15]
@@ -187,67 +201,51 @@ LPGEMM_MN_LT_NR0_FRINGE_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_5xlt16)
 			if ( ( post_ops_attr.buf_downscale != NULL ) &&
 				 ( post_ops_attr.is_first_k == TRUE ) )
 			{
-				MEMCPY_S32_LT16_INIT(n0_rem);
-
-				int8_t* _p0 = ( ( int8_t* )post_ops_attr.buf_downscale ) + \
-					( post_ops_attr.rs_c_downscale * \
-					( post_ops_attr.post_op_c_i + 0 ) ) + post_ops_attr.post_op_c_j;
-				int8_t* _p1 = ( ( int8_t* )post_ops_attr.buf_downscale ) + \
-					( post_ops_attr.rs_c_downscale * \
-					( post_ops_attr.post_op_c_i + 1 ) ) + post_ops_attr.post_op_c_j;
-				int8_t* _p2 = ( ( int8_t* )post_ops_attr.buf_downscale ) + \
-					( post_ops_attr.rs_c_downscale * \
-					( post_ops_attr.post_op_c_i + 2 ) ) + post_ops_attr.post_op_c_j;
-				int8_t* _p3 = ( ( int8_t* )post_ops_attr.buf_downscale ) + \
-					( post_ops_attr.rs_c_downscale * \
-					( post_ops_attr.post_op_c_i + 3 ) ) + post_ops_attr.post_op_c_j;
-				int8_t* _p4 = ( ( int8_t* )post_ops_attr.buf_downscale ) + \
-					( post_ops_attr.rs_c_downscale * \
-					( post_ops_attr.post_op_c_i + 4 ) ) + post_ops_attr.post_op_c_j;
-
-				MEMCPY_S32_LT16_INT8(5,int64_t,int32_t,int16_t,int8_t,buf,_p);
+				__mmask16 load_mask = _cvtu32_mask16( 0xFFFF >> ( 16 - n0_rem ) );
 
 				// c[0,0-15]
-				S8_S32_BETA_OP_NLT16F(c_int32_0p0,buf0,selector1,selector2);
+				S8_S32_BETA_OP_NLT16F_MASK( load_mask, c_int32_0p0, 0, 0, \
+								selector1, selector2 );
 
 				// c[1,0-15]
-				S8_S32_BETA_OP_NLT16F(c_int32_1p0,buf1,selector1,selector2);
+				S8_S32_BETA_OP_NLT16F_MASK( load_mask, c_int32_1p0, 1, 0, \
+								selector1, selector2 );
 
 				// c[2,0-15]
-				S8_S32_BETA_OP_NLT16F(c_int32_2p0,buf2,selector1,selector2);
+				S8_S32_BETA_OP_NLT16F_MASK( load_mask, c_int32_2p0, 2, 0, \
+								selector1, selector2 );
 
 				// c[3,0-15]
-				S8_S32_BETA_OP_NLT16F(c_int32_3p0,buf3,selector1,selector2);
+				S8_S32_BETA_OP_NLT16F_MASK( load_mask, c_int32_3p0, 3, 0, \
+								selector1, selector2 );
 
 				// c[4,0-15]
-				S8_S32_BETA_OP_NLT16F(c_int32_4p0,buf4,selector1,selector2);
+				S8_S32_BETA_OP_NLT16F_MASK( load_mask, c_int32_4p0, 4, 0, \
+								selector1, selector2 );
 			}
 			else
 			{
-				MEMCPY_S32_LT16_INIT(n0_rem);
-
-				int32_t* _c0 = c + ( rs_c * 0 );
-				int32_t* _c1 = c + ( rs_c * 1 );
-				int32_t* _c2 = c + ( rs_c * 2 );
-				int32_t* _c3 = c + ( rs_c * 3 );
-				int32_t* _c4 = c + ( rs_c * 4 );
-
-				MEMCPY_S32_LT16_INT32(5,int64_t,int32_t,buf,_c);
+				__mmask16 load_mask = _cvtu32_mask16( 0xFFFF >> ( 16 - n0_rem ) );
 
 				// c[0,0-15]
-				S32_S32_BETA_OP_NLT16F(c_int32_0p0,buf0,selector1,selector2);
+				S32_S32_BETA_OP_NLT16F_MASK(load_mask, c_int32_0p0, 0, 0, 0, \
+								selector1, selector2);
 
 				// c[1,0-15]
-				S32_S32_BETA_OP_NLT16F(c_int32_1p0,buf1,selector1,selector2);
+				S32_S32_BETA_OP_NLT16F_MASK(load_mask, c_int32_1p0, 0, 1, 0, \
+								selector1, selector2);
 
 				// c[2,0-15]
-				S32_S32_BETA_OP_NLT16F(c_int32_2p0,buf2,selector1,selector2);
+				S32_S32_BETA_OP_NLT16F_MASK(load_mask, c_int32_2p0, 0, 2, 0, \
+								selector1, selector2);
 
 				// c[3,0-15]
-				S32_S32_BETA_OP_NLT16F(c_int32_3p0,buf3,selector1,selector2);
+				S32_S32_BETA_OP_NLT16F_MASK(load_mask, c_int32_3p0, 0, 3, 0, \
+								selector1, selector2);
 
 				// c[4,0-15]
-				S32_S32_BETA_OP_NLT16F(c_int32_4p0,buf4,selector1,selector2);
+				S32_S32_BETA_OP_NLT16F_MASK(load_mask, c_int32_4p0, 0, 4, 0, \
+								selector1, selector2);
 			}
 		}
 
@@ -256,9 +254,13 @@ LPGEMM_MN_LT_NR0_FRINGE_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_5xlt16)
 		POST_OP_LABEL_LASTK_SAFE_JUMP
 POST_OPS_BIAS_5xLT16:
 		{
-			memcpy( buf0, ( ( int32_t* )post_ops_list_temp->op_args1 +
-						post_ops_attr.post_op_c_j ), ( n0_rem * sizeof( int32_t ) ) );
-			selector1 = _mm512_loadu_epi32( buf0 );
+			__mmask16 load_mask = _cvtu32_mask16( 0xFFFF >> ( 16 - n0_rem ) );
+			selector1 = _mm512_maskz_loadu_epi32
+			(
+			  load_mask,
+			  ( ( int32_t* )post_ops_list_temp->op_args1 +
+				post_ops_attr.post_op_c_j )
+			);
 
 			// c[0,0-15]
 			c_int32_0p0 = _mm512_add_epi32( selector1, c_int32_0p0 );
@@ -370,13 +372,13 @@ POST_OPS_GELU_ERF_5xLT16:
 POST_OPS_DOWNSCALE_5xLT16:
 		{
 			// Typecast without data modification, safe operation.
-			float* _buf0 = ( float* )buf0;
-			float* _p0 = ( ( float* )post_ops_list_temp->scale_factor + \
-							post_ops_attr.post_op_c_j );
-			MEMCPY_S32_LT16_INIT(n0_rem);
-			MEMCPY_S32_LT16_FLOAT(1,double,float,_buf,_p);
-
-			selector1 = _mm512_loadu_epi32( buf0 );
+			__mmask16 load_mask = _cvtu32_mask16( 0xFFFF >> ( 16 - n0_rem ) );
+			selector1 = _mm512_maskz_loadu_epi32
+			(
+			  load_mask,
+			  ( ( float* )post_ops_list_temp->scale_factor +
+				post_ops_attr.post_op_c_j )
+			);
 
 			// c[0, 0-15]
 			CVT_MULRND_CVT32_LT16(c_int32_0p0,selector1);
@@ -401,57 +403,43 @@ POST_OPS_5xLT16_DISABLE:
 		// Store the results.
 		if ( ( post_ops_attr.buf_downscale != NULL ) && ( post_ops_attr.is_last_k == TRUE ) )
 		{
-			// Generate a mask16 of all 1's.
-			selector1 = _mm512_setzero_epi32();
-			selector2 = _mm512_set1_epi32( 10 );
-			__mmask16 mask_all1 = _mm512_cmplt_epi32_mask( selector1, selector2 );
+			__mmask16 mask_all1 = _cvtu32_mask16( 0xFFFF >> ( 16 - n0_rem ) );
 
-			_mm512_mask_cvtsepi32_storeu_epi8( ( int8_t* )buf0, mask_all1, c_int32_0p0 );
-			_mm512_mask_cvtsepi32_storeu_epi8( ( int8_t* )buf1, mask_all1, c_int32_1p0 );
-			_mm512_mask_cvtsepi32_storeu_epi8( ( int8_t* )buf2, mask_all1, c_int32_2p0 );
-			_mm512_mask_cvtsepi32_storeu_epi8( ( int8_t* )buf3, mask_all1, c_int32_3p0 );
-			_mm512_mask_cvtsepi32_storeu_epi8( ( int8_t* )buf4, mask_all1, c_int32_4p0 );
+			// Store the results in downscaled type (int8 instead of int32).
+			// c[0,0-15]
+			CVT_STORE_S32_S8(c_int32_0p0,0,0);
 
-			MEMCPY_S32_LT16_INIT(n0_rem);
+			// c[1,0-15]
+			CVT_STORE_S32_S8(c_int32_1p0,1,0);
 
-			_mm256_zeroupper();
+			// c[2,0-15]
+			CVT_STORE_S32_S8(c_int32_2p0,2,0);
 
-			int8_t* _p0 = ( ( int8_t* )post_ops_attr.buf_downscale ) + \
-				( post_ops_attr.rs_c_downscale * \
-				( post_ops_attr.post_op_c_i + 0 ) ) + post_ops_attr.post_op_c_j;
-			int8_t* _p1 = ( ( int8_t* )post_ops_attr.buf_downscale ) + \
-				( post_ops_attr.rs_c_downscale * \
-				( post_ops_attr.post_op_c_i + 1 ) ) + post_ops_attr.post_op_c_j;
-			int8_t* _p2 = ( ( int8_t* )post_ops_attr.buf_downscale ) + \
-				( post_ops_attr.rs_c_downscale * \
-				( post_ops_attr.post_op_c_i + 2 ) ) + post_ops_attr.post_op_c_j;
-			int8_t* _p3 = ( ( int8_t* )post_ops_attr.buf_downscale ) + \
-				( post_ops_attr.rs_c_downscale * \
-				( post_ops_attr.post_op_c_i + 3 ) ) + post_ops_attr.post_op_c_j;
-			int8_t* _p4 = ( ( int8_t* )post_ops_attr.buf_downscale ) + \
-				( post_ops_attr.rs_c_downscale * \
-				( post_ops_attr.post_op_c_i + 4 ) ) + post_ops_attr.post_op_c_j;
+			// c[3,0-15]
+			CVT_STORE_S32_S8(c_int32_3p0,3,0);
 
-			MEMCPY_S32_LT16_INT8(5,int64_t,int32_t,int16_t,int8_t,_p,buf) ;
+			// c[4,0-15]
+			CVT_STORE_S32_S8(c_int32_4p0,4,0);
 		}
 		else
 		{
-			_mm512_storeu_epi32( buf0, c_int32_0p0 );
-			_mm512_storeu_epi32( buf1, c_int32_1p0 );
-			_mm512_storeu_epi32( buf2, c_int32_2p0 );
-			_mm512_storeu_epi32( buf3, c_int32_3p0 );
-			_mm512_storeu_epi32( buf4, c_int32_4p0 );
+			__mmask16 load_mask = _cvtu32_mask16( 0xFFFF >> ( 16 - n0_rem ) );
 
-			MEMCPY_S32_LT16_INIT(n0_rem);
+			// Store the results.
+			// c[0,0-15]
+			_mm512_mask_storeu_epi32( c + ( rs_c * 0 ), load_mask, c_int32_0p0 );
 
-			_mm256_zeroupper();
-			int32_t* _c0 = c + ( rs_c * 0 );
-			int32_t* _c1 = c + ( rs_c * 1 );
-			int32_t* _c2 = c + ( rs_c * 2 );
-			int32_t* _c3 = c + ( rs_c * 3 );
-			int32_t* _c4 = c + ( rs_c * 4 );
+			// c[1,0-15]
+			_mm512_mask_storeu_epi32( c + ( rs_c * 1 ), load_mask, c_int32_1p0 );
 
-			MEMCPY_S32_LT16_INT32(5,int64_t,int32_t,_c,buf);
+			// c[2,0-15]
+			_mm512_mask_storeu_epi32( c + ( rs_c * 2 ), load_mask, c_int32_2p0 );
+
+			// c[3,0-15]
+			_mm512_mask_storeu_epi32( c + ( rs_c * 3 ), load_mask, c_int32_3p0 );
+
+			// c[4,0-15]
+			_mm512_mask_storeu_epi32( c + ( rs_c * 4 ), load_mask, c_int32_4p0 );
 		}
 	}
 }
@@ -471,14 +459,6 @@ LPGEMM_MN_LT_NR0_FRINGE_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_4xlt16)
 						};
 	dim_t k_full_pieces = k0 / 4;
 	dim_t k_partial_pieces = k0 % 4;
-
-	uint32_t a_kfringe_buf = 0;
-
-	// For corner cases.
-	int32_t buf0[16];
-	int32_t buf1[16];
-	int32_t buf2[16];
-	int32_t buf3[16];
 
 	{
 		// Registers to use for accumulating C.
@@ -525,35 +505,54 @@ LPGEMM_MN_LT_NR0_FRINGE_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_4xlt16)
 		// Handle k remainder.
 		if ( k_partial_pieces > 0 )
 		{
+			__m128i a_kfringe_buf;
+			__mmask16 load_mask = _cvtu32_mask16( 0xFFFF >> ( 16 - k_partial_pieces ) );
+
 			__m512i b0 = _mm512_loadu_epi8( b + ( rs_b * k_full_pieces ) + ( cs_b * 0 ) );
 
 			// Broadcast a[0,kr:kr+4].
-			MEMCPY_S32GM_LT4_UINT8( &a_kfringe_buf, ( a + ( rs_a * 0 ) + ( cs_a * k_full_pieces ) ), ( k_partial_pieces ) );
-			__m512i a_int32_0 = _mm512_set1_epi32( a_kfringe_buf );
+			a_kfringe_buf = _mm_maskz_loadu_epi8
+			(
+			  load_mask,
+			  ( a + ( rs_a * 0 ) + ( cs_a * k_full_pieces ) )
+			);
+			__m512i a_int32_0 = _mm512_broadcastd_epi32( a_kfringe_buf );
 
 			// Perform column direction mat-mul with k = 4.
 			// c[0,0-15] = a[0,kr:kr+4]*b[kr:kr+4,0-15]
 			c_int32_0p0 = _mm512_dpbusd_epi32( c_int32_0p0, a_int32_0, b0 );
 
 			// Broadcast a[1,kr:kr+4].
-			MEMCPY_S32GM_LT4_UINT8( &a_kfringe_buf, ( a + ( rs_a * 1 ) + ( cs_a * k_full_pieces ) ), ( k_partial_pieces ) );
-			a_int32_0 = _mm512_set1_epi32( a_kfringe_buf );
+			a_kfringe_buf = _mm_maskz_loadu_epi8
+			(
+			  load_mask,
+			  ( a + ( rs_a * 1 ) + ( cs_a * k_full_pieces ) )
+			);
+			a_int32_0 = _mm512_broadcastd_epi32( a_kfringe_buf );
 
 			// Perform column direction mat-mul with k = 4.
 			// c[1,0-15] = a[1,kr:kr+4]*b[kr:kr+4,0-15]
 			c_int32_1p0 = _mm512_dpbusd_epi32( c_int32_1p0, a_int32_0, b0 );
 
 			// Broadcast a[2,kr:kr+4].
-			MEMCPY_S32GM_LT4_UINT8( &a_kfringe_buf, ( a + ( rs_a * 2 ) + ( cs_a * k_full_pieces ) ), ( k_partial_pieces ) );
-			a_int32_0 = _mm512_set1_epi32( a_kfringe_buf );
+			a_kfringe_buf = _mm_maskz_loadu_epi8
+			(
+			  load_mask,
+			  ( a + ( rs_a * 2 ) + ( cs_a * k_full_pieces ) )
+			);
+			a_int32_0 = _mm512_broadcastd_epi32( a_kfringe_buf );
 
 			// Perform column direction mat-mul with k = 4.
 			// c[2,0-15] = a[2,kr:kr+4]*b[kr:kr+4,0-15]
 			c_int32_2p0 = _mm512_dpbusd_epi32( c_int32_2p0, a_int32_0, b0 );
 
 			// Broadcast a[3,kr:kr+4].
-			MEMCPY_S32GM_LT4_UINT8( &a_kfringe_buf, ( a + ( rs_a * 3 ) + ( cs_a * k_full_pieces ) ), ( k_partial_pieces ) );
-			a_int32_0 = _mm512_set1_epi32( a_kfringe_buf );
+			a_kfringe_buf = _mm_maskz_loadu_epi8
+			(
+			  load_mask,
+			  ( a + ( rs_a * 3 ) + ( cs_a * k_full_pieces ) )
+			);
+			a_int32_0 = _mm512_broadcastd_epi32( a_kfringe_buf );
 
 			// Perform column direction mat-mul with k = 4.
 			// c[3,0-15] = a[3,kr:kr+4]*b[kr:kr+4,0-15]
@@ -576,64 +575,49 @@ LPGEMM_MN_LT_NR0_FRINGE_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_4xlt16)
 			c_int32_3p0 = _mm512_mullo_epi32( selector1, c_int32_3p0 );
 		}
 
-
 		// Scale C by beta.
 		if ( beta != 0 )
 		{
 			if ( ( post_ops_attr.buf_downscale != NULL ) &&
 				 ( post_ops_attr.is_first_k == TRUE ) )
 			{
-				MEMCPY_S32_LT16_INIT(n0_rem);
-
-				int8_t* _p0 = ( ( int8_t* )post_ops_attr.buf_downscale ) + \
-					( post_ops_attr.rs_c_downscale * \
-					( post_ops_attr.post_op_c_i + 0 ) ) + post_ops_attr.post_op_c_j;
-				int8_t* _p1 = ( ( int8_t* )post_ops_attr.buf_downscale ) + \
-					( post_ops_attr.rs_c_downscale * \
-					( post_ops_attr.post_op_c_i + 1 ) ) + post_ops_attr.post_op_c_j;
-				int8_t* _p2 = ( ( int8_t* )post_ops_attr.buf_downscale ) + \
-					( post_ops_attr.rs_c_downscale * \
-					( post_ops_attr.post_op_c_i + 2 ) ) + post_ops_attr.post_op_c_j;
-				int8_t* _p3 = ( ( int8_t* )post_ops_attr.buf_downscale ) + \
-					( post_ops_attr.rs_c_downscale * \
-					( post_ops_attr.post_op_c_i + 3 ) ) + post_ops_attr.post_op_c_j;
-
-				MEMCPY_S32_LT16_INT8(4,int64_t,int32_t,int16_t,int8_t,buf,_p);
+				__mmask16 load_mask = _cvtu32_mask16( 0xFFFF >> ( 16 - n0_rem ) );
 
 				// c[0,0-15]
-				S8_S32_BETA_OP_NLT16F(c_int32_0p0,buf0,selector1,selector2);
+				S8_S32_BETA_OP_NLT16F_MASK( load_mask, c_int32_0p0, 0, 0, \
+								selector1, selector2 );
 
 				// c[1,0-15]
-				S8_S32_BETA_OP_NLT16F(c_int32_1p0,buf1,selector1,selector2);
+				S8_S32_BETA_OP_NLT16F_MASK( load_mask, c_int32_1p0, 1, 0, \
+								selector1, selector2 );
 
 				// c[2,0-15]
-				S8_S32_BETA_OP_NLT16F(c_int32_2p0,buf2,selector1,selector2);
+				S8_S32_BETA_OP_NLT16F_MASK( load_mask, c_int32_2p0, 2, 0, \
+								selector1, selector2 );
 
 				// c[3,0-15]
-				S8_S32_BETA_OP_NLT16F(c_int32_3p0,buf3,selector1,selector2);
+				S8_S32_BETA_OP_NLT16F_MASK( load_mask, c_int32_3p0, 3, 0, \
+								selector1, selector2 );
 			}
 			else
 			{
-				MEMCPY_S32_LT16_INIT(n0_rem);
-
-				int32_t* _c0 = c + ( rs_c * 0 );
-				int32_t* _c1 = c + ( rs_c * 1 );
-				int32_t* _c2 = c + ( rs_c * 2 );
-				int32_t* _c3 = c + ( rs_c * 3 );
-
-				MEMCPY_S32_LT16_INT32(4,int64_t,int32_t,buf,_c);
+				__mmask16 load_mask = _cvtu32_mask16( 0xFFFF >> ( 16 - n0_rem ) );
 
 				// c[0,0-15]
-				S32_S32_BETA_OP_NLT16F(c_int32_0p0,buf0,selector1,selector2);
+				S32_S32_BETA_OP_NLT16F_MASK(load_mask, c_int32_0p0, 0, 0, 0, \
+								selector1, selector2);
 
 				// c[1,0-15]
-				S32_S32_BETA_OP_NLT16F(c_int32_1p0,buf1,selector1,selector2);
+				S32_S32_BETA_OP_NLT16F_MASK(load_mask, c_int32_1p0, 0, 1, 0, \
+								selector1, selector2);
 
 				// c[2,0-15]
-				S32_S32_BETA_OP_NLT16F(c_int32_2p0,buf2,selector1,selector2);
+				S32_S32_BETA_OP_NLT16F_MASK(load_mask, c_int32_2p0, 0, 2, 0, \
+								selector1, selector2);
 
 				// c[3,0-15]
-				S32_S32_BETA_OP_NLT16F(c_int32_3p0,buf3,selector1,selector2);
+				S32_S32_BETA_OP_NLT16F_MASK(load_mask, c_int32_3p0, 0, 3, 0, \
+								selector1, selector2);
 			}
 		}
 
@@ -642,9 +626,13 @@ LPGEMM_MN_LT_NR0_FRINGE_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_4xlt16)
 		POST_OP_LABEL_LASTK_SAFE_JUMP
 POST_OPS_BIAS_4xLT16:
 		{
-			memcpy( buf0, ( ( int32_t* )post_ops_list_temp->op_args1 +
-						post_ops_attr.post_op_c_j ), ( n0_rem * sizeof( int32_t ) ) );
-			selector1 = _mm512_loadu_epi32( buf0 );
+			__mmask16 load_mask = _cvtu32_mask16( 0xFFFF >> ( 16 - n0_rem ) );
+			selector1 = _mm512_maskz_loadu_epi32
+			(
+			  load_mask,
+			  ( ( int32_t* )post_ops_list_temp->op_args1 +
+				post_ops_attr.post_op_c_j )
+			);
 
 			// c[0,0-15]
 			c_int32_0p0 = _mm512_add_epi32( selector1, c_int32_0p0 );
@@ -741,13 +729,13 @@ POST_OPS_GELU_ERF_4xLT16:
 POST_OPS_DOWNSCALE_4xLT16:
 		{
 			// Typecast without data modification, safe operation.
-			float* _buf0 = ( float* )buf0;
-			float* _p0 = ( ( float* )post_ops_list_temp->scale_factor + \
-							post_ops_attr.post_op_c_j );
-			MEMCPY_S32_LT16_INIT(n0_rem);
-			MEMCPY_S32_LT16_FLOAT(1,double,float,_buf,_p);
-
-			selector1 = _mm512_loadu_epi32( buf0 );
+			__mmask16 load_mask = _cvtu32_mask16( 0xFFFF >> ( 16 - n0_rem ) );
+			selector1 = _mm512_maskz_loadu_epi32
+			(
+			  load_mask,
+			  ( ( float* )post_ops_list_temp->scale_factor +
+				post_ops_attr.post_op_c_j )
+			);
 
 			// c[0, 0-15]
 			CVT_MULRND_CVT32_LT16(c_int32_0p0,selector1);
@@ -769,51 +757,37 @@ POST_OPS_4xLT16_DISABLE:
 		// Store the results.
 		if ( ( post_ops_attr.buf_downscale != NULL ) && ( post_ops_attr.is_last_k == TRUE ) )
 		{
-			// Generate a mask16 of all 1's.
-			selector1 = _mm512_setzero_epi32();
-			selector2 = _mm512_set1_epi32( 10 );
-			__mmask16 mask_all1 = _mm512_cmplt_epi32_mask( selector1, selector2 );
+			__mmask16 mask_all1 = _cvtu32_mask16( 0xFFFF >> ( 16 - n0_rem ) );
 
-			_mm512_mask_cvtsepi32_storeu_epi8( ( int8_t* )buf0, mask_all1, c_int32_0p0 );
-			_mm512_mask_cvtsepi32_storeu_epi8( ( int8_t* )buf1, mask_all1, c_int32_1p0 );
-			_mm512_mask_cvtsepi32_storeu_epi8( ( int8_t* )buf2, mask_all1, c_int32_2p0 );
-			_mm512_mask_cvtsepi32_storeu_epi8( ( int8_t* )buf3, mask_all1, c_int32_3p0 );
+			// Store the results in downscaled type (int8 instead of int32).
+			// c[0,0-15]
+			CVT_STORE_S32_S8(c_int32_0p0,0,0);
 
-			MEMCPY_S32_LT16_INIT(n0_rem);
+			// c[1,0-15]
+			CVT_STORE_S32_S8(c_int32_1p0,1,0);
 
-			_mm256_zeroupper();
+			// c[2,0-15]
+			CVT_STORE_S32_S8(c_int32_2p0,2,0);
 
-			int8_t* _p0 = ( ( int8_t* )post_ops_attr.buf_downscale ) + \
-				( post_ops_attr.rs_c_downscale * \
-				( post_ops_attr.post_op_c_i + 0 ) ) + post_ops_attr.post_op_c_j;
-			int8_t* _p1 = ( ( int8_t* )post_ops_attr.buf_downscale ) + \
-				( post_ops_attr.rs_c_downscale * \
-				( post_ops_attr.post_op_c_i + 1 ) ) + post_ops_attr.post_op_c_j;
-			int8_t* _p2 = ( ( int8_t* )post_ops_attr.buf_downscale ) + \
-				( post_ops_attr.rs_c_downscale * \
-				( post_ops_attr.post_op_c_i + 2 ) ) + post_ops_attr.post_op_c_j;
-			int8_t* _p3 = ( ( int8_t* )post_ops_attr.buf_downscale ) + \
-				( post_ops_attr.rs_c_downscale * \
-				( post_ops_attr.post_op_c_i + 3 ) ) + post_ops_attr.post_op_c_j;
-
-			MEMCPY_S32_LT16_INT8(4,int64_t,int32_t,int16_t,int8_t,_p,buf) ;
+			// c[3,0-15]
+			CVT_STORE_S32_S8(c_int32_3p0,3,0);
 		}
 		else
 		{
-			_mm512_storeu_epi32( buf0, c_int32_0p0 );
-			_mm512_storeu_epi32( buf1, c_int32_1p0 );
-			_mm512_storeu_epi32( buf2, c_int32_2p0 );
-			_mm512_storeu_epi32( buf3, c_int32_3p0 );
+			__mmask16 load_mask = _cvtu32_mask16( 0xFFFF >> ( 16 - n0_rem ) );
 
-			MEMCPY_S32_LT16_INIT(n0_rem);
+			// Store the results.
+			// c[0,0-15]
+			_mm512_mask_storeu_epi32( c + ( rs_c * 0 ), load_mask, c_int32_0p0 );
 
-			_mm256_zeroupper();
-			int32_t* _c0 = c + ( rs_c * 0 );
-			int32_t* _c1 = c + ( rs_c * 1 );
-			int32_t* _c2 = c + ( rs_c * 2 );
-			int32_t* _c3 = c + ( rs_c * 3 );
+			// c[1,0-15]
+			_mm512_mask_storeu_epi32( c + ( rs_c * 1 ), load_mask, c_int32_1p0 );
 
-			MEMCPY_S32_LT16_INT32(4,int64_t,int32_t,_c,buf);
+			// c[2,0-15]
+			_mm512_mask_storeu_epi32( c + ( rs_c * 2 ), load_mask, c_int32_2p0 );
+
+			// c[3,0-15]
+			_mm512_mask_storeu_epi32( c + ( rs_c * 3 ), load_mask, c_int32_3p0 );
 		}
 	}
 }
@@ -833,13 +807,6 @@ LPGEMM_MN_LT_NR0_FRINGE_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_3xlt16)
 						};
 	dim_t k_full_pieces = k0 / 4;
 	dim_t k_partial_pieces = k0 % 4;
-
-	uint32_t a_kfringe_buf = 0;
-
-	// For corner cases.
-	int32_t buf0[16];
-	int32_t buf1[16];
-	int32_t buf2[16];
 
 	{
 		// Registers to use for accumulating C.
@@ -877,27 +844,42 @@ LPGEMM_MN_LT_NR0_FRINGE_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_3xlt16)
 		// Handle k remainder.
 		if ( k_partial_pieces > 0 )
 		{
+			__m128i a_kfringe_buf;
+			__mmask16 load_mask = _cvtu32_mask16( 0xFFFF >> ( 16 - k_partial_pieces ) );
+
 			__m512i b0 = _mm512_loadu_epi8( b + ( rs_b * k_full_pieces ) + ( cs_b * 0 ) );
 
 			// Broadcast a[0,kr:kr+4].
-			MEMCPY_S32GM_LT4_UINT8( &a_kfringe_buf, ( a + ( rs_a * 0 ) + ( cs_a * k_full_pieces ) ), ( k_partial_pieces ) );
-			__m512i a_int32_0 = _mm512_set1_epi32( a_kfringe_buf );
+			a_kfringe_buf = _mm_maskz_loadu_epi8
+			(
+			  load_mask,
+			  ( a + ( rs_a * 0 ) + ( cs_a * k_full_pieces ) )
+			);
+			__m512i a_int32_0 = _mm512_broadcastd_epi32( a_kfringe_buf );
 
 			// Perform column direction mat-mul with k = 4.
 			// c[0,0-15] = a[0,kr:kr+4]*b[kr:kr+4,0-15]
 			c_int32_0p0 = _mm512_dpbusd_epi32( c_int32_0p0, a_int32_0, b0 );
 
 			// Broadcast a[1,kr:kr+4].
-			MEMCPY_S32GM_LT4_UINT8( &a_kfringe_buf, ( a + ( rs_a * 1 ) + ( cs_a * k_full_pieces ) ), ( k_partial_pieces ) );
-			a_int32_0 = _mm512_set1_epi32( a_kfringe_buf );
+			a_kfringe_buf = _mm_maskz_loadu_epi8
+			(
+			  load_mask,
+			  ( a + ( rs_a * 1 ) + ( cs_a * k_full_pieces ) )
+			);
+			a_int32_0 = _mm512_broadcastd_epi32( a_kfringe_buf );
 
 			// Perform column direction mat-mul with k = 4.
 			// c[1,0-15] = a[1,kr:kr+4]*b[kr:kr+4,0-15]
 			c_int32_1p0 = _mm512_dpbusd_epi32( c_int32_1p0, a_int32_0, b0 );
 
 			// Broadcast a[2,kr:kr+4].
-			MEMCPY_S32GM_LT4_UINT8( &a_kfringe_buf, ( a + ( rs_a * 2 ) + ( cs_a * k_full_pieces ) ), ( k_partial_pieces ) );
-			a_int32_0 = _mm512_set1_epi32( a_kfringe_buf );
+			a_kfringe_buf = _mm_maskz_loadu_epi8
+			(
+			  load_mask,
+			  ( a + ( rs_a * 2 ) + ( cs_a * k_full_pieces ) )
+			);
+			a_int32_0 = _mm512_broadcastd_epi32( a_kfringe_buf );
 
 			// Perform column direction mat-mul with k = 4.
 			// c[2,0-15] = a[2,kr:kr+4]*b[kr:kr+4,0-15]
@@ -924,47 +906,35 @@ LPGEMM_MN_LT_NR0_FRINGE_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_3xlt16)
 			if ( ( post_ops_attr.buf_downscale != NULL ) &&
 				 ( post_ops_attr.is_first_k == TRUE ) )
 			{
-				MEMCPY_S32_LT16_INIT(n0_rem);
-
-				int8_t* _p0 = ( ( int8_t* )post_ops_attr.buf_downscale ) + \
-					( post_ops_attr.rs_c_downscale * \
-					( post_ops_attr.post_op_c_i + 0 ) ) + post_ops_attr.post_op_c_j;
-				int8_t* _p1 = ( ( int8_t* )post_ops_attr.buf_downscale ) + \
-					( post_ops_attr.rs_c_downscale * \
-					( post_ops_attr.post_op_c_i + 1 ) ) + post_ops_attr.post_op_c_j;
-				int8_t* _p2 = ( ( int8_t* )post_ops_attr.buf_downscale ) + \
-					( post_ops_attr.rs_c_downscale * \
-					( post_ops_attr.post_op_c_i + 2 ) ) + post_ops_attr.post_op_c_j;
-
-				MEMCPY_S32_LT16_INT8(3,int64_t,int32_t,int16_t,int8_t,buf,_p);
+				__mmask16 load_mask = _cvtu32_mask16( 0xFFFF >> ( 16 - n0_rem ) );
 
 				// c[0,0-15]
-				S8_S32_BETA_OP_NLT16F(c_int32_0p0,buf0,selector1,selector2);
+				S8_S32_BETA_OP_NLT16F_MASK( load_mask, c_int32_0p0, 0, 0, \
+								selector1, selector2 );
 
 				// c[1,0-15]
-				S8_S32_BETA_OP_NLT16F(c_int32_1p0,buf1,selector1,selector2);
+				S8_S32_BETA_OP_NLT16F_MASK( load_mask, c_int32_1p0, 1, 0, \
+								selector1, selector2 );
 
 				// c[2,0-15]
-				S8_S32_BETA_OP_NLT16F(c_int32_2p0,buf2,selector1,selector2);
+				S8_S32_BETA_OP_NLT16F_MASK( load_mask, c_int32_2p0, 2, 0, \
+								selector1, selector2 );
 			}
 			else
 			{
-				MEMCPY_S32_LT16_INIT(n0_rem);
-
-				int32_t* _c0 = c + ( rs_c * 0 );
-				int32_t* _c1 = c + ( rs_c * 1 );
-				int32_t* _c2 = c + ( rs_c * 2 );
-
-				MEMCPY_S32_LT16_INT32(3,int64_t,int32_t,buf,_c);
+				__mmask16 load_mask = _cvtu32_mask16( 0xFFFF >> ( 16 - n0_rem ) );
 
 				// c[0,0-15]
-				S32_S32_BETA_OP_NLT16F(c_int32_0p0,buf0,selector1,selector2);
+				S32_S32_BETA_OP_NLT16F_MASK(load_mask, c_int32_0p0, 0, 0, 0, \
+								selector1, selector2);
 
 				// c[1,0-15]
-				S32_S32_BETA_OP_NLT16F(c_int32_1p0,buf1,selector1,selector2);
+				S32_S32_BETA_OP_NLT16F_MASK(load_mask, c_int32_1p0, 0, 1, 0, \
+								selector1, selector2);
 
 				// c[2,0-15]
-				S32_S32_BETA_OP_NLT16F(c_int32_2p0,buf2,selector1,selector2);
+				S32_S32_BETA_OP_NLT16F_MASK(load_mask, c_int32_2p0, 0, 2, 0, \
+								selector1, selector2);
 			}
 		}
 
@@ -973,9 +943,13 @@ LPGEMM_MN_LT_NR0_FRINGE_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_3xlt16)
 		POST_OP_LABEL_LASTK_SAFE_JUMP
 POST_OPS_BIAS_3xLT16:
 		{
-			memcpy( buf0, ( ( int32_t* )post_ops_list_temp->op_args1 +
-						post_ops_attr.post_op_c_j ), ( n0_rem * sizeof( int32_t ) ) );
-			selector1 = _mm512_loadu_epi32( buf0 );
+			__mmask16 load_mask = _cvtu32_mask16( 0xFFFF >> ( 16 - n0_rem ) );
+			selector1 = _mm512_maskz_loadu_epi32
+			(
+			  load_mask,
+			  ( ( int32_t* )post_ops_list_temp->op_args1 +
+				post_ops_attr.post_op_c_j )
+			);
 
 			// c[0,0-15]
 			c_int32_0p0 = _mm512_add_epi32( selector1, c_int32_0p0 );
@@ -1057,13 +1031,13 @@ POST_OPS_GELU_ERF_3xLT16:
 POST_OPS_DOWNSCALE_3xLT16:
 		{
 			// Typecast without data modification, safe operation.
-			float* _buf0 = ( float* )buf0;
-			float* _p0 = ( ( float* )post_ops_list_temp->scale_factor + \
-							post_ops_attr.post_op_c_j );
-			MEMCPY_S32_LT16_INIT(n0_rem);
-			MEMCPY_S32_LT16_FLOAT(1,double,float,_buf,_p);
-
-			selector1 = _mm512_loadu_epi32( buf0 );
+			__mmask16 load_mask = _cvtu32_mask16( 0xFFFF >> ( 16 - n0_rem ) );
+			selector1 = _mm512_maskz_loadu_epi32
+			(
+			  load_mask,
+			  ( ( float* )post_ops_list_temp->scale_factor +
+				post_ops_attr.post_op_c_j )
+			);
 
 			// c[0, 0-15]
 			CVT_MULRND_CVT32_LT16(c_int32_0p0,selector1);
@@ -1082,45 +1056,31 @@ POST_OPS_3xLT16_DISABLE:
 		// Store the results.
 		if ( ( post_ops_attr.buf_downscale != NULL ) && ( post_ops_attr.is_last_k == TRUE ) )
 		{
-			// Generate a mask16 of all 1's.
-			selector1 = _mm512_setzero_epi32();
-			selector2 = _mm512_set1_epi32( 10 );
-			__mmask16 mask_all1 = _mm512_cmplt_epi32_mask( selector1, selector2 );
+			__mmask16 mask_all1 = _cvtu32_mask16( 0xFFFF >> ( 16 - n0_rem ) );
 
-			_mm512_mask_cvtsepi32_storeu_epi8( ( int8_t* )buf0, mask_all1, c_int32_0p0 );
-			_mm512_mask_cvtsepi32_storeu_epi8( ( int8_t* )buf1, mask_all1, c_int32_1p0 );
-			_mm512_mask_cvtsepi32_storeu_epi8( ( int8_t* )buf2, mask_all1, c_int32_2p0 );
+			// Store the results in downscaled type (int8 instead of int32).
+			// c[0,0-15]
+			CVT_STORE_S32_S8(c_int32_0p0,0,0);
 
-			MEMCPY_S32_LT16_INIT(n0_rem);
+			// c[1,0-15]
+			CVT_STORE_S32_S8(c_int32_1p0,1,0);
 
-			_mm256_zeroupper();
-
-			int8_t* _p0 = ( ( int8_t* )post_ops_attr.buf_downscale ) + \
-				( post_ops_attr.rs_c_downscale * \
-				( post_ops_attr.post_op_c_i + 0 ) ) + post_ops_attr.post_op_c_j;
-			int8_t* _p1 = ( ( int8_t* )post_ops_attr.buf_downscale ) + \
-				( post_ops_attr.rs_c_downscale * \
-				( post_ops_attr.post_op_c_i + 1 ) ) + post_ops_attr.post_op_c_j;
-			int8_t* _p2 = ( ( int8_t* )post_ops_attr.buf_downscale ) + \
-				( post_ops_attr.rs_c_downscale * \
-				( post_ops_attr.post_op_c_i + 2 ) ) + post_ops_attr.post_op_c_j;
-
-			MEMCPY_S32_LT16_INT8(3,int64_t,int32_t,int16_t,int8_t,_p,buf) ;
+			// c[2,0-15]
+			CVT_STORE_S32_S8(c_int32_2p0,2,0);
 		}
 		else
 		{
-			_mm512_storeu_epi32( buf0, c_int32_0p0 );
-			_mm512_storeu_epi32( buf1, c_int32_1p0 );
-			_mm512_storeu_epi32( buf2, c_int32_2p0 );
+			__mmask16 load_mask = _cvtu32_mask16( 0xFFFF >> ( 16 - n0_rem ) );
 
-			MEMCPY_S32_LT16_INIT(n0_rem);
+			// Store the results.
+			// c[0,0-15]
+			_mm512_mask_storeu_epi32( c + ( rs_c * 0 ), load_mask, c_int32_0p0 );
 
-			_mm256_zeroupper();
-			int32_t* _c0 = c + ( rs_c * 0 );
-			int32_t* _c1 = c + ( rs_c * 1 );
-			int32_t* _c2 = c + ( rs_c * 2 );
+			// c[1,0-15]
+			_mm512_mask_storeu_epi32( c + ( rs_c * 1 ), load_mask, c_int32_1p0 );
 
-			MEMCPY_S32_LT16_INT32(3,int64_t,int32_t,_c,buf);
+			// c[2,0-15]
+			_mm512_mask_storeu_epi32( c + ( rs_c * 2 ), load_mask, c_int32_2p0 );
 		}
 	}
 }
@@ -1140,12 +1100,6 @@ LPGEMM_MN_LT_NR0_FRINGE_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_2xlt16)
 						};
 	dim_t k_full_pieces = k0 / 4;
 	dim_t k_partial_pieces = k0 % 4;
-
-	uint32_t a_kfringe_buf = 0;
-
-	// For corner cases.
-	int32_t buf0[16];
-	int32_t buf1[16];
 
 	{
 		// Registers to use for accumulating C.
@@ -1174,19 +1128,30 @@ LPGEMM_MN_LT_NR0_FRINGE_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_2xlt16)
 		// Handle k remainder.
 		if ( k_partial_pieces > 0 )
 		{
+			__m128i a_kfringe_buf;
+			__mmask16 load_mask = _cvtu32_mask16( 0xFFFF >> ( 16 - k_partial_pieces ) );
+
 			__m512i b0 = _mm512_loadu_epi8( b + ( rs_b * k_full_pieces ) + ( cs_b * 0 ) );
 
 			// Broadcast a[0,kr:kr+4].
-			MEMCPY_S32GM_LT4_UINT8( &a_kfringe_buf, ( a + ( rs_a * 0 ) + ( cs_a * k_full_pieces ) ), ( k_partial_pieces ) );
-			__m512i a_int32_0 = _mm512_set1_epi32( a_kfringe_buf );
+			a_kfringe_buf = _mm_maskz_loadu_epi8
+			(
+			  load_mask,
+			  ( a + ( rs_a * 0 ) + ( cs_a * k_full_pieces ) )
+			);
+			__m512i a_int32_0 = _mm512_broadcastd_epi32( a_kfringe_buf );
 
 			// Perform column direction mat-mul with k = 4.
 			// c[0,0-15] = a[0,kr:kr+4]*b[kr:kr+4,0-15]
 			c_int32_0p0 = _mm512_dpbusd_epi32( c_int32_0p0, a_int32_0, b0 );
 
 			// Broadcast a[1,kr:kr+4].
-			MEMCPY_S32GM_LT4_UINT8( &a_kfringe_buf, ( a + ( rs_a * 1 ) + ( cs_a * k_full_pieces ) ), ( k_partial_pieces ) );
-			a_int32_0 = _mm512_set1_epi32( a_kfringe_buf );
+			a_kfringe_buf = _mm_maskz_loadu_epi8
+			(
+			  load_mask,
+			  ( a + ( rs_a * 1 ) + ( cs_a * k_full_pieces ) )
+			);
+			a_int32_0 = _mm512_broadcastd_epi32( a_kfringe_buf );
 
 			// Perform column direction mat-mul with k = 4.
 			// c[1,0-15] = a[1,kr:kr+4]*b[kr:kr+4,0-15]
@@ -1211,37 +1176,27 @@ LPGEMM_MN_LT_NR0_FRINGE_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_2xlt16)
 			if ( ( post_ops_attr.buf_downscale != NULL ) &&
 				 ( post_ops_attr.is_first_k == TRUE ) )
 			{
-				MEMCPY_S32_LT16_INIT(n0_rem);
-
-				int8_t* _p0 = ( ( int8_t* )post_ops_attr.buf_downscale ) + \
-					( post_ops_attr.rs_c_downscale * \
-					( post_ops_attr.post_op_c_i + 0 ) ) + post_ops_attr.post_op_c_j;
-				int8_t* _p1 = ( ( int8_t* )post_ops_attr.buf_downscale ) + \
-					( post_ops_attr.rs_c_downscale * \
-					( post_ops_attr.post_op_c_i + 1 ) ) + post_ops_attr.post_op_c_j;
-
-				MEMCPY_S32_LT16_INT8(2,int64_t,int32_t,int16_t,int8_t,buf,_p);
+				__mmask16 load_mask = _cvtu32_mask16( 0xFFFF >> ( 16 - n0_rem ) );
 
 				// c[0,0-15]
-				S8_S32_BETA_OP_NLT16F(c_int32_0p0,buf0,selector1,selector2);
+				S8_S32_BETA_OP_NLT16F_MASK( load_mask, c_int32_0p0, 0, 0, \
+								selector1, selector2 );
 
 				// c[1,0-15]
-				S8_S32_BETA_OP_NLT16F(c_int32_1p0,buf1,selector1,selector2);
+				S8_S32_BETA_OP_NLT16F_MASK( load_mask, c_int32_1p0, 1, 0, \
+								selector1, selector2 );
 			}
 			else
 			{
-				MEMCPY_S32_LT16_INIT(n0_rem);
-
-				int32_t* _c0 = c + ( rs_c * 0 );
-				int32_t* _c1 = c + ( rs_c * 1 );
-
-				MEMCPY_S32_LT16_INT32(2,int64_t,int32_t,buf,_c);
+				__mmask16 load_mask = _cvtu32_mask16( 0xFFFF >> ( 16 - n0_rem ) );
 
 				// c[0,0-15]
-				S32_S32_BETA_OP_NLT16F(c_int32_0p0,buf0,selector1,selector2);
+				S32_S32_BETA_OP_NLT16F_MASK(load_mask, c_int32_0p0, 0, 0, 0, \
+								selector1, selector2);
 
 				// c[1,0-15]
-				S32_S32_BETA_OP_NLT16F(c_int32_1p0,buf1,selector1,selector2);
+				S32_S32_BETA_OP_NLT16F_MASK(load_mask, c_int32_1p0, 0, 1, 0, \
+								selector1, selector2);
 			}
 		}
 
@@ -1250,9 +1205,13 @@ LPGEMM_MN_LT_NR0_FRINGE_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_2xlt16)
 		POST_OP_LABEL_LASTK_SAFE_JUMP
 POST_OPS_BIAS_2xLT16:
 		{
-			memcpy( buf0, ( ( int32_t* )post_ops_list_temp->op_args1 +
-						post_ops_attr.post_op_c_j ), ( n0_rem * sizeof( int32_t ) ) );
-			selector1 = _mm512_loadu_epi32( buf0 );
+			__mmask16 load_mask = _cvtu32_mask16( 0xFFFF >> ( 16 - n0_rem ) );
+			selector1 = _mm512_maskz_loadu_epi32
+			(
+			  load_mask,
+			  ( ( int32_t* )post_ops_list_temp->op_args1 +
+				post_ops_attr.post_op_c_j )
+			);
 
 			// c[0,0-15]
 			c_int32_0p0 = _mm512_add_epi32( selector1, c_int32_0p0 );
@@ -1319,13 +1278,13 @@ POST_OPS_GELU_ERF_2xLT16:
 POST_OPS_DOWNSCALE_2xLT16:
 		{
 			// Typecast without data modification, safe operation.
-			float* _buf0 = ( float* )buf0;
-			float* _p0 = ( ( float* )post_ops_list_temp->scale_factor + \
-							post_ops_attr.post_op_c_j );
-			MEMCPY_S32_LT16_INIT(n0_rem);
-			MEMCPY_S32_LT16_FLOAT(1,double,float,_buf,_p);
-
-			selector1 = _mm512_loadu_epi32( buf0 );
+			__mmask16 load_mask = _cvtu32_mask16( 0xFFFF >> ( 16 - n0_rem ) );
+			selector1 = _mm512_maskz_loadu_epi32
+			(
+			  load_mask,
+			  ( ( float* )post_ops_list_temp->scale_factor +
+				post_ops_attr.post_op_c_j )
+			);
 
 			// c[0, 0-15]
 			CVT_MULRND_CVT32_LT16(c_int32_0p0,selector1);
@@ -1341,39 +1300,25 @@ POST_OPS_2xLT16_DISABLE:
 		// Store the results.
 		if ( ( post_ops_attr.buf_downscale != NULL ) && ( post_ops_attr.is_last_k == TRUE ) )
 		{
-			// Generate a mask16 of all 1's.
-			selector1 = _mm512_setzero_epi32();
-			selector2 = _mm512_set1_epi32( 10 );
-			__mmask16 mask_all1 = _mm512_cmplt_epi32_mask( selector1, selector2 );
+			__mmask16 mask_all1 = _cvtu32_mask16( 0xFFFF >> ( 16 - n0_rem ) );
 
-			_mm512_mask_cvtsepi32_storeu_epi8( ( int8_t* )buf0, mask_all1, c_int32_0p0 );
-			_mm512_mask_cvtsepi32_storeu_epi8( ( int8_t* )buf1, mask_all1, c_int32_1p0 );
+			// Store the results in downscaled type (int8 instead of int32).
+			// c[0,0-15]
+			CVT_STORE_S32_S8(c_int32_0p0,0,0);
 
-			MEMCPY_S32_LT16_INIT(n0_rem);
-
-			_mm256_zeroupper();
-
-			int8_t* _p0 = ( ( int8_t* )post_ops_attr.buf_downscale ) + \
-				( post_ops_attr.rs_c_downscale * \
-				( post_ops_attr.post_op_c_i + 0 ) ) + post_ops_attr.post_op_c_j;
-			int8_t* _p1 = ( ( int8_t* )post_ops_attr.buf_downscale ) + \
-				( post_ops_attr.rs_c_downscale * \
-				( post_ops_attr.post_op_c_i + 1 ) ) + post_ops_attr.post_op_c_j;
-
-			MEMCPY_S32_LT16_INT8(2,int64_t,int32_t,int16_t,int8_t,_p,buf) ;
+			// c[1,0-15]
+			CVT_STORE_S32_S8(c_int32_1p0,1,0);
 		}
 		else
 		{
-			_mm512_storeu_epi32( buf0, c_int32_0p0 );
-			_mm512_storeu_epi32( buf1, c_int32_1p0 );
+			__mmask16 load_mask = _cvtu32_mask16( 0xFFFF >> ( 16 - n0_rem ) );
 
-			MEMCPY_S32_LT16_INIT(n0_rem);
+			// Store the results.
+			// c[0,0-15]
+			_mm512_mask_storeu_epi32( c + ( rs_c * 0 ), load_mask, c_int32_0p0 );
 
-			_mm256_zeroupper();
-			int32_t* _c0 = c + ( rs_c * 0 );
-			int32_t* _c1 = c + ( rs_c * 1 );
-
-			MEMCPY_S32_LT16_INT32(2,int64_t,int32_t,_c,buf);
+			// c[1,0-15]
+			_mm512_mask_storeu_epi32( c + ( rs_c * 1 ), load_mask, c_int32_1p0 );
 		}
 	}
 }
@@ -1394,11 +1339,6 @@ LPGEMM_MN_LT_NR0_FRINGE_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_1xlt16)
 	dim_t k_full_pieces = k0 / 4;
 	dim_t k_partial_pieces = k0 % 4;
 
-	uint32_t a_kfringe_buf = 0;
-
-	// For corner cases.
-	int32_t buf0[16];
-
 	{
 		// Registers to use for accumulating C.
 		__m512i c_int32_0p0 = _mm512_setzero_epi32();
@@ -1417,11 +1357,18 @@ LPGEMM_MN_LT_NR0_FRINGE_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_1xlt16)
 		// Handle k remainder.
 		if ( k_partial_pieces > 0 )
 		{
+			__m128i a_kfringe_buf;
+			__mmask16 load_mask = _cvtu32_mask16( 0xFFFF >> ( 16 - k_partial_pieces ) );
+
 			__m512i b0 = _mm512_loadu_epi8( b + ( rs_b * k_full_pieces ) + ( cs_b * 0 ) );
 
 			// Broadcast a[0,kr:kr+4].
-			MEMCPY_S32GM_LT4_UINT8( &a_kfringe_buf, ( a + ( rs_a * 0 ) + ( cs_a * k_full_pieces ) ), ( k_partial_pieces ) );
-			__m512i a_int32_0 = _mm512_set1_epi32( a_kfringe_buf );
+			a_kfringe_buf = _mm_maskz_loadu_epi8
+			(
+			  load_mask,
+			  ( a + ( rs_a * 0 ) + ( cs_a * k_full_pieces ) )
+			);
+			__m512i a_int32_0 = _mm512_broadcastd_epi32( a_kfringe_buf );
 
 			// Perform column direction mat-mul with k = 4.
 			// c[0,0-15] = a[0,kr:kr+4]*b[kr:kr+4,0-15]
@@ -1444,27 +1391,19 @@ LPGEMM_MN_LT_NR0_FRINGE_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_1xlt16)
 			if ( ( post_ops_attr.buf_downscale != NULL ) &&
 				 ( post_ops_attr.is_first_k == TRUE ) )
 			{
-				MEMCPY_S32_LT16_INIT(n0_rem);
-
-				int8_t* _p0 = ( ( int8_t* )post_ops_attr.buf_downscale ) + \
-					( post_ops_attr.rs_c_downscale * \
-					( post_ops_attr.post_op_c_i + 0 ) ) + post_ops_attr.post_op_c_j;
-
-				MEMCPY_S32_LT16_INT8(1,int64_t,int32_t,int16_t,int8_t,buf,_p);
+				__mmask16 load_mask = _cvtu32_mask16( 0xFFFF >> ( 16 - n0_rem ) );
 
 				// c[0,0-15]
-				S8_S32_BETA_OP_NLT16F(c_int32_0p0,buf0,selector1,selector2);
+				S8_S32_BETA_OP_NLT16F_MASK( load_mask, c_int32_0p0, 0, 0, \
+								selector1, selector2 );
 			}
 			else
 			{
-				MEMCPY_S32_LT16_INIT(n0_rem);
-
-				int32_t* _c0 = c + ( rs_c * 0 );
-
-				MEMCPY_S32_LT16_INT32(1,int64_t,int32_t,buf,_c);
+				__mmask16 load_mask = _cvtu32_mask16( 0xFFFF >> ( 16 - n0_rem ) );
 
 				// c[0,0-15]
-				S32_S32_BETA_OP_NLT16F(c_int32_0p0,buf0,selector1,selector2);
+				S32_S32_BETA_OP_NLT16F_MASK(load_mask, c_int32_0p0, 0, 0, 0, \
+								selector1, selector2);
 			}
 		}
 
@@ -1473,9 +1412,13 @@ LPGEMM_MN_LT_NR0_FRINGE_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_1xlt16)
 		POST_OP_LABEL_LASTK_SAFE_JUMP
 POST_OPS_BIAS_1xLT16:
 		{
-			memcpy( buf0, ( ( int32_t* )post_ops_list_temp->op_args1 +
-						post_ops_attr.post_op_c_j ), ( n0_rem * sizeof( int32_t ) ) );
-			selector1 = _mm512_loadu_epi32( buf0 );
+			__mmask16 load_mask = _cvtu32_mask16( 0xFFFF >> ( 16 - n0_rem ) );
+			selector1 = _mm512_maskz_loadu_epi32
+			(
+			  load_mask,
+			  ( ( int32_t* )post_ops_list_temp->op_args1 +
+				post_ops_attr.post_op_c_j )
+			);
 
 			// c[0,0-15]
 			c_int32_0p0 = _mm512_add_epi32( selector1, c_int32_0p0 );
@@ -1527,13 +1470,13 @@ POST_OPS_GELU_ERF_1xLT16:
 POST_OPS_DOWNSCALE_1xLT16:
 		{
 			// Typecast without data modification, safe operation.
-			float* _buf0 = ( float* )buf0;
-			float* _p0 = ( ( float* )post_ops_list_temp->scale_factor + \
-							post_ops_attr.post_op_c_j );
-			MEMCPY_S32_LT16_INIT(n0_rem);
-			MEMCPY_S32_LT16_FLOAT(1,double,float,_buf,_p);
-
-			selector1 = _mm512_loadu_epi32( buf0 );
+			__mmask16 load_mask = _cvtu32_mask16( 0xFFFF >> ( 16 - n0_rem ) );
+			selector1 = _mm512_maskz_loadu_epi32
+			(
+			  load_mask,
+			  ( ( float* )post_ops_list_temp->scale_factor +
+				post_ops_attr.post_op_c_j )
+			);
 
 			// c[0, 0-15]
 			CVT_MULRND_CVT32_LT16(c_int32_0p0,selector1);
@@ -1546,33 +1489,19 @@ POST_OPS_1xLT16_DISABLE:
 		// Store the results.
 		if ( ( post_ops_attr.buf_downscale != NULL ) && ( post_ops_attr.is_last_k == TRUE ) )
 		{
-			// Generate a mask16 of all 1's.
-			selector1 = _mm512_setzero_epi32();
-			selector2 = _mm512_set1_epi32( 10 );
-			__mmask16 mask_all1 = _mm512_cmplt_epi32_mask( selector1, selector2 );
+			__mmask16 mask_all1 = _cvtu32_mask16( 0xFFFF >> ( 16 - n0_rem ) );
 
-			_mm512_mask_cvtsepi32_storeu_epi8( ( int8_t* )buf0, mask_all1, c_int32_0p0 );
-
-			MEMCPY_S32_LT16_INIT(n0_rem);
-
-			_mm256_zeroupper();
-
-			int8_t* _p0 = ( ( int8_t* )post_ops_attr.buf_downscale ) + \
-				( post_ops_attr.rs_c_downscale * \
-				( post_ops_attr.post_op_c_i + 0 ) ) + post_ops_attr.post_op_c_j;
-
-			MEMCPY_S32_LT16_INT8(1,int64_t,int32_t,int16_t,int8_t,_p,buf) ;
+			// Store the results in downscaled type (int8 instead of int32).
+			// c[0,0-15]
+			CVT_STORE_S32_S8(c_int32_0p0,0,0);
 		}
 		else
 		{
-			_mm512_storeu_epi32( buf0, c_int32_0p0 );
+			__mmask16 load_mask = _cvtu32_mask16( 0xFFFF >> ( 16 - n0_rem ) );
 
-			MEMCPY_S32_LT16_INIT(n0_rem);
-
-			_mm256_zeroupper();
-			int32_t* _c0 = c + ( rs_c * 0 );
-
-			MEMCPY_S32_LT16_INT32(1,int64_t,int32_t,_c,buf);
+			// Store the results.
+			// c[0,0-15]
+			_mm512_mask_storeu_epi32( c + ( rs_c * 0 ), load_mask, c_int32_0p0 );
 		}
 	}
 }
@@ -1592,8 +1521,6 @@ LPGEMM_MN_FRINGE_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_5x16)
 						};
 	dim_t k_full_pieces = k0 / 4;
 	dim_t k_partial_pieces = k0 % 4;
-
-	uint32_t a_kfringe_buf = 0;
 
 	// Registers to use for accumulating C.
 	__m512i c_int32_0p0 = _mm512_setzero_epi32();
@@ -1648,43 +1575,66 @@ LPGEMM_MN_FRINGE_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_5x16)
 	// Handle k remainder.
 	if ( k_partial_pieces > 0 )
 	{
+		__m128i a_kfringe_buf;
+		__mmask16 load_mask = _cvtu32_mask16( 0xFFFF >> ( 16 - k_partial_pieces ) );
+
 		__m512i b0 = _mm512_loadu_epi8( b + ( rs_b * k_full_pieces ) + ( cs_b * 0 ) );
 
 		// Broadcast a[0,kr:kr+4].
-		MEMCPY_S32GM_LT4_UINT8( &a_kfringe_buf, ( a + ( rs_a * 0 ) + ( cs_a * k_full_pieces ) ), ( k_partial_pieces ) );
-		__m512i a_int32_0 = _mm512_set1_epi32( a_kfringe_buf );
+		a_kfringe_buf = _mm_maskz_loadu_epi8
+		(
+		  load_mask,
+		  ( a + ( rs_a * 0 ) + ( cs_a * k_full_pieces ) )
+		);
+		__m512i a_int32_0 = _mm512_broadcastd_epi32( a_kfringe_buf );
 
 		// Perform column direction mat-mul with k = 4.
 		// c[0,0-15] = a[0,kr:kr+4]*b[kr:kr+4,0-15]
 		c_int32_0p0 = _mm512_dpbusd_epi32( c_int32_0p0, a_int32_0, b0 );
 
 		// Broadcast a[1,kr:kr+4].
-		MEMCPY_S32GM_LT4_UINT8( &a_kfringe_buf, ( a + ( rs_a * 1 ) + ( cs_a * k_full_pieces ) ), ( k_partial_pieces ) );
-		a_int32_0 = _mm512_set1_epi32( a_kfringe_buf );
+		a_kfringe_buf = _mm_maskz_loadu_epi8
+		(
+		  load_mask,
+		  ( a + ( rs_a * 1 ) + ( cs_a * k_full_pieces ) )
+		);
+		a_int32_0 = _mm512_broadcastd_epi32( a_kfringe_buf );
 
 		// Perform column direction mat-mul with k = 4.
 		// c[1,0-15] = a[1,kr:kr+4]*b[kr:kr+4,0-15]
 		c_int32_1p0 = _mm512_dpbusd_epi32( c_int32_1p0, a_int32_0, b0 );
 
 		// Broadcast a[2,kr:kr+4].
-		MEMCPY_S32GM_LT4_UINT8( &a_kfringe_buf, ( a + ( rs_a * 2 ) + ( cs_a * k_full_pieces ) ), ( k_partial_pieces ) );
-		a_int32_0 = _mm512_set1_epi32( a_kfringe_buf );
+		a_kfringe_buf = _mm_maskz_loadu_epi8
+		(
+		  load_mask,
+		  ( a + ( rs_a * 2 ) + ( cs_a * k_full_pieces ) )
+		);
+		a_int32_0 = _mm512_broadcastd_epi32( a_kfringe_buf );
 
 		// Perform column direction mat-mul with k = 4.
 		// c[2,0-15] = a[2,kr:kr+4]*b[kr:kr+4,0-15]
 		c_int32_2p0 = _mm512_dpbusd_epi32( c_int32_2p0, a_int32_0, b0 );
 
 		// Broadcast a[3,kr:kr+4].
-		MEMCPY_S32GM_LT4_UINT8( &a_kfringe_buf, ( a + ( rs_a * 3 ) + ( cs_a * k_full_pieces ) ), ( k_partial_pieces ) );
-		a_int32_0 = _mm512_set1_epi32( a_kfringe_buf );
+		a_kfringe_buf = _mm_maskz_loadu_epi8
+		(
+		  load_mask,
+		  ( a + ( rs_a * 3 ) + ( cs_a * k_full_pieces ) )
+		);
+		a_int32_0 = _mm512_broadcastd_epi32( a_kfringe_buf );
 
 		// Perform column direction mat-mul with k = 4.
 		// c[3,0-15] = a[3,kr:kr+4]*b[kr:kr+4,0-15]
 		c_int32_3p0 = _mm512_dpbusd_epi32( c_int32_3p0, a_int32_0, b0 );
 
 		// Broadcast a[4,kr:kr+4].
-		MEMCPY_S32GM_LT4_UINT8( &a_kfringe_buf, ( a + ( rs_a * 4 ) + ( cs_a * k_full_pieces ) ), ( k_partial_pieces ) );
-		a_int32_0 = _mm512_set1_epi32( a_kfringe_buf );
+		a_kfringe_buf = _mm_maskz_loadu_epi8
+		(
+		  load_mask,
+		  ( a + ( rs_a * 4 ) + ( cs_a * k_full_pieces ) )
+		);
+		a_int32_0 = _mm512_broadcastd_epi32( a_kfringe_buf );
 
 		// Perform column direction mat-mul with k = 4.
 		// c[4,0-15] = a[4,kr:kr+4]*b[kr:kr+4,0-15]
@@ -1950,8 +1900,6 @@ LPGEMM_MN_FRINGE_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_4x16)
 	dim_t k_full_pieces = k0 / 4;
 	dim_t k_partial_pieces = k0 % 4;
 
-	uint32_t a_kfringe_buf = 0;
-
 	// Registers to use for accumulating C.
 	__m512i c_int32_0p0 = _mm512_setzero_epi32();
 
@@ -1996,35 +1944,54 @@ LPGEMM_MN_FRINGE_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_4x16)
 	// Handle k remainder.
 	if ( k_partial_pieces > 0 )
 	{
+		__m128i a_kfringe_buf;
+		__mmask16 load_mask = _cvtu32_mask16( 0xFFFF >> ( 16 - k_partial_pieces ) );
+
 		__m512i b0 = _mm512_loadu_epi8( b + ( rs_b * k_full_pieces ) + ( cs_b * 0 ) );
 
 		// Broadcast a[0,kr:kr+4].
-		MEMCPY_S32GM_LT4_UINT8( &a_kfringe_buf, ( a + ( rs_a * 0 ) + ( cs_a * k_full_pieces ) ), ( k_partial_pieces ) );
-		__m512i a_int32_0 = _mm512_set1_epi32( a_kfringe_buf );
+		a_kfringe_buf = _mm_maskz_loadu_epi8
+		(
+		  load_mask,
+		  ( a + ( rs_a * 0 ) + ( cs_a * k_full_pieces ) )
+		);
+		__m512i a_int32_0 = _mm512_broadcastd_epi32( a_kfringe_buf );
 
 		// Perform column direction mat-mul with k = 4.
 		// c[0,0-15] = a[0,kr:kr+4]*b[kr:kr+4,0-15]
 		c_int32_0p0 = _mm512_dpbusd_epi32( c_int32_0p0, a_int32_0, b0 );
 
 		// Broadcast a[1,kr:kr+4].
-		MEMCPY_S32GM_LT4_UINT8( &a_kfringe_buf, ( a + ( rs_a * 1 ) + ( cs_a * k_full_pieces ) ), ( k_partial_pieces ) );
-		a_int32_0 = _mm512_set1_epi32( a_kfringe_buf );
+		a_kfringe_buf = _mm_maskz_loadu_epi8
+		(
+		  load_mask,
+		  ( a + ( rs_a * 1 ) + ( cs_a * k_full_pieces ) )
+		);
+		a_int32_0 = _mm512_broadcastd_epi32( a_kfringe_buf );
 
 		// Perform column direction mat-mul with k = 4.
 		// c[1,0-15] = a[1,kr:kr+4]*b[kr:kr+4,0-15]
 		c_int32_1p0 = _mm512_dpbusd_epi32( c_int32_1p0, a_int32_0, b0 );
 
 		// Broadcast a[2,kr:kr+4].
-		MEMCPY_S32GM_LT4_UINT8( &a_kfringe_buf, ( a + ( rs_a * 2 ) + ( cs_a * k_full_pieces ) ), ( k_partial_pieces ) );
-		a_int32_0 = _mm512_set1_epi32( a_kfringe_buf );
+		a_kfringe_buf = _mm_maskz_loadu_epi8
+		(
+		  load_mask,
+		  ( a + ( rs_a * 2 ) + ( cs_a * k_full_pieces ) )
+		);
+		a_int32_0 = _mm512_broadcastd_epi32( a_kfringe_buf );
 
 		// Perform column direction mat-mul with k = 4.
 		// c[2,0-15] = a[2,kr:kr+4]*b[kr:kr+4,0-15]
 		c_int32_2p0 = _mm512_dpbusd_epi32( c_int32_2p0, a_int32_0, b0 );
 
 		// Broadcast a[3,kr:kr+4].
-		MEMCPY_S32GM_LT4_UINT8( &a_kfringe_buf, ( a + ( rs_a * 3 ) + ( cs_a * k_full_pieces ) ), ( k_partial_pieces ) );
-		a_int32_0 = _mm512_set1_epi32( a_kfringe_buf );
+		a_kfringe_buf = _mm_maskz_loadu_epi8
+		(
+		  load_mask,
+		  ( a + ( rs_a * 3 ) + ( cs_a * k_full_pieces ) )
+		);
+		a_int32_0 = _mm512_broadcastd_epi32( a_kfringe_buf );
 
 		// Perform column direction mat-mul with k = 4.
 		// c[3,0-15] = a[3,kr:kr+4]*b[kr:kr+4,0-15]
@@ -2258,8 +2225,6 @@ LPGEMM_MN_FRINGE_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_3x16)
 	dim_t k_full_pieces = k0 / 4;
 	dim_t k_partial_pieces = k0 % 4;
 
-	uint32_t a_kfringe_buf = 0;
-
 	// Registers to use for accumulating C.
 	__m512i c_int32_0p0 = _mm512_setzero_epi32();
 
@@ -2295,27 +2260,42 @@ LPGEMM_MN_FRINGE_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_3x16)
 	// Handle k remainder.
 	if ( k_partial_pieces > 0 )
 	{
+		__m128i a_kfringe_buf;
+		__mmask16 load_mask = _cvtu32_mask16( 0xFFFF >> ( 16 - k_partial_pieces ) );
+
 		__m512i b0 = _mm512_loadu_epi8( b + ( rs_b * k_full_pieces ) + ( cs_b * 0 ) );
 
 		// Broadcast a[0,kr:kr+4].
-		MEMCPY_S32GM_LT4_UINT8( &a_kfringe_buf, ( a + ( rs_a * 0 ) + ( cs_a * k_full_pieces ) ), ( k_partial_pieces ) );
-		__m512i a_int32_0 = _mm512_set1_epi32( a_kfringe_buf );
+		a_kfringe_buf = _mm_maskz_loadu_epi8
+		(
+		  load_mask,
+		  ( a + ( rs_a * 0 ) + ( cs_a * k_full_pieces ) )
+		);
+		__m512i a_int32_0 = _mm512_broadcastd_epi32( a_kfringe_buf );
 
 		// Perform column direction mat-mul with k = 4.
 		// c[0,0-15] = a[0,kr:kr+4]*b[kr:kr+4,0-15]
 		c_int32_0p0 = _mm512_dpbusd_epi32( c_int32_0p0, a_int32_0, b0 );
 
 		// Broadcast a[1,kr:kr+4].
-		MEMCPY_S32GM_LT4_UINT8( &a_kfringe_buf, ( a + ( rs_a * 1 ) + ( cs_a * k_full_pieces ) ), ( k_partial_pieces ) );
-		a_int32_0 = _mm512_set1_epi32( a_kfringe_buf );
+		a_kfringe_buf = _mm_maskz_loadu_epi8
+		(
+		  load_mask,
+		  ( a + ( rs_a * 1 ) + ( cs_a * k_full_pieces ) )
+		);
+		a_int32_0 = _mm512_broadcastd_epi32( a_kfringe_buf );
 
 		// Perform column direction mat-mul with k = 4.
 		// c[1,0-15] = a[1,kr:kr+4]*b[kr:kr+4,0-15]
 		c_int32_1p0 = _mm512_dpbusd_epi32( c_int32_1p0, a_int32_0, b0 );
 
 		// Broadcast a[2,kr:kr+4].
-		MEMCPY_S32GM_LT4_UINT8( &a_kfringe_buf, ( a + ( rs_a * 2 ) + ( cs_a * k_full_pieces ) ), ( k_partial_pieces ) );
-		a_int32_0 = _mm512_set1_epi32( a_kfringe_buf );
+		a_kfringe_buf = _mm_maskz_loadu_epi8
+		(
+		  load_mask,
+		  ( a + ( rs_a * 2 ) + ( cs_a * k_full_pieces ) )
+		);
+		a_int32_0 = _mm512_broadcastd_epi32( a_kfringe_buf );
 
 		// Perform column direction mat-mul with k = 4.
 		// c[2,0-15] = a[2,kr:kr+4]*b[kr:kr+4,0-15]
@@ -2517,8 +2497,6 @@ LPGEMM_MN_FRINGE_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_2x16)
 	dim_t k_full_pieces = k0 / 4;
 	dim_t k_partial_pieces = k0 % 4;
 
-	uint32_t a_kfringe_buf = 0;
-
 	// Registers to use for accumulating C.
 	__m512i c_int32_0p0 = _mm512_setzero_epi32();
 
@@ -2545,19 +2523,30 @@ LPGEMM_MN_FRINGE_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_2x16)
 	// Handle k remainder.
 	if ( k_partial_pieces > 0 )
 	{
+		__m128i a_kfringe_buf;
+		__mmask16 load_mask = _cvtu32_mask16( 0xFFFF >> ( 16 - k_partial_pieces ) );
+
 		__m512i b0 = _mm512_loadu_epi8( b + ( rs_b * k_full_pieces ) + ( cs_b * 0 ) );
 
 		// Broadcast a[0,kr:kr+4].
-		MEMCPY_S32GM_LT4_UINT8( &a_kfringe_buf, ( a + ( rs_a * 0 ) + ( cs_a * k_full_pieces ) ), ( k_partial_pieces ) );
-		__m512i a_int32_0 = _mm512_set1_epi32( a_kfringe_buf );
+		a_kfringe_buf = _mm_maskz_loadu_epi8
+		(
+		  load_mask,
+		  ( a + ( rs_a * 0 ) + ( cs_a * k_full_pieces ) )
+		);
+		__m512i a_int32_0 = _mm512_broadcastd_epi32( a_kfringe_buf );
 
 		// Perform column direction mat-mul with k = 4.
 		// c[0,0-15] = a[0,kr:kr+4]*b[kr:kr+4,0-15]
 		c_int32_0p0 = _mm512_dpbusd_epi32( c_int32_0p0, a_int32_0, b0 );
 
 		// Broadcast a[1,kr:kr+4].
-		MEMCPY_S32GM_LT4_UINT8( &a_kfringe_buf, ( a + ( rs_a * 1 ) + ( cs_a * k_full_pieces ) ), ( k_partial_pieces ) );
-		a_int32_0 = _mm512_set1_epi32( a_kfringe_buf );
+		a_kfringe_buf = _mm_maskz_loadu_epi8
+		(
+		  load_mask,
+		  ( a + ( rs_a * 1 ) + ( cs_a * k_full_pieces ) )
+		);
+		a_int32_0 = _mm512_broadcastd_epi32( a_kfringe_buf );
 
 		// Perform column direction mat-mul with k = 4.
 		// c[1,0-15] = a[1,kr:kr+4]*b[kr:kr+4,0-15]
@@ -2727,8 +2716,6 @@ LPGEMM_MN_FRINGE_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_1x16)
 	dim_t k_full_pieces = k0 / 4;
 	dim_t k_partial_pieces = k0 % 4;
 
-	uint32_t a_kfringe_buf = 0;
-
 	// Registers to use for accumulating C.
 	__m512i c_int32_0p0 = _mm512_setzero_epi32();
 
@@ -2746,11 +2733,18 @@ LPGEMM_MN_FRINGE_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_1x16)
 	// Handle k remainder.
 	if ( k_partial_pieces > 0 )
 	{
+		__m128i a_kfringe_buf;
+		__mmask16 load_mask = _cvtu32_mask16( 0xFFFF >> ( 16 - k_partial_pieces ) );
+
 		__m512i b0 = _mm512_loadu_epi8( b + ( rs_b * k_full_pieces ) + ( cs_b * 0 ) );
 
 		// Broadcast a[0,kr:kr+4].
-		MEMCPY_S32GM_LT4_UINT8( &a_kfringe_buf, ( a + ( rs_a * 0 ) + ( cs_a * k_full_pieces ) ), ( k_partial_pieces ) );
-		__m512i a_int32_0 = _mm512_set1_epi32( a_kfringe_buf );
+		a_kfringe_buf = _mm_maskz_loadu_epi8
+		(
+		  load_mask,
+		  ( a + ( rs_a * 0 ) + ( cs_a * k_full_pieces ) )
+		);
+		__m512i a_int32_0 = _mm512_broadcastd_epi32( a_kfringe_buf );
 
 		// Perform column direction mat-mul with k = 4.
 		// c[0,0-15] = a[0,kr:kr+4]*b[kr:kr+4,0-15]
@@ -2888,8 +2882,6 @@ LPGEMM_MN_FRINGE_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_5x32)
 	dim_t k_full_pieces = k0 / 4;
 	dim_t k_partial_pieces = k0 % 4;
 
-	uint32_t a_kfringe_buf = 0;
-
 	// B matrix storage.
 	__m512i b0;
 	__m512i b1;
@@ -2961,12 +2953,19 @@ LPGEMM_MN_FRINGE_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_5x32)
 	// Handle k remainder.
 	if ( k_partial_pieces > 0 )
 	{
+		__m128i a_kfringe_buf;
+		__mmask16 load_mask = _cvtu32_mask16( 0xFFFF >> ( 16 - k_partial_pieces ) );
+
 		b0 = _mm512_loadu_epi8( b + ( rs_b * k_full_pieces ) + ( cs_b * 0 ) );
 		b1 = _mm512_loadu_epi8( b + ( rs_b * k_full_pieces ) + ( cs_b * 1 ) );
 
 		// Broadcast a[0,kr:kr+4].
-		MEMCPY_S32GM_LT4_UINT8( &a_kfringe_buf, ( a + ( rs_a * 0 ) + ( cs_a * k_full_pieces ) ), ( k_partial_pieces ) );
-		a_int32_0 = _mm512_set1_epi32( a_kfringe_buf );
+		a_kfringe_buf = _mm_maskz_loadu_epi8
+		(
+		  load_mask,
+		  ( a + ( rs_a * 0 ) + ( cs_a * k_full_pieces ) )
+		);
+		a_int32_0 = _mm512_broadcastd_epi32( a_kfringe_buf );
 
 		// Perform column direction mat-mul with k = 4.
 		// c[0,0-31] = a[0,kr:kr+4]*b[kr:kr+4,0-31]
@@ -2974,8 +2973,12 @@ LPGEMM_MN_FRINGE_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_5x32)
 		c_int32_0p1 = _mm512_dpbusd_epi32( c_int32_0p1, a_int32_0, b1 );
 
 		// Broadcast a[1,kr:kr+4].
-		MEMCPY_S32GM_LT4_UINT8( &a_kfringe_buf, ( a + ( rs_a * 1 ) + ( cs_a * k_full_pieces ) ), ( k_partial_pieces ) );
-		a_int32_0 = _mm512_set1_epi32( a_kfringe_buf );
+		a_kfringe_buf = _mm_maskz_loadu_epi8
+		(
+		  load_mask,
+		  ( a + ( rs_a * 1 ) + ( cs_a * k_full_pieces ) )
+		);
+		a_int32_0 = _mm512_broadcastd_epi32( a_kfringe_buf );
 
 		// Perform column direction mat-mul with k = 4.
 		// c[1,0-31] = a[1,kr:kr+4]*b[kr:kr+4,0-31]
@@ -2983,8 +2986,12 @@ LPGEMM_MN_FRINGE_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_5x32)
 		c_int32_1p1 = _mm512_dpbusd_epi32( c_int32_1p1, a_int32_0, b1 );
 
 		// Broadcast a[2,kr:kr+4].
-		MEMCPY_S32GM_LT4_UINT8( &a_kfringe_buf, ( a + ( rs_a * 2 ) + ( cs_a * k_full_pieces ) ), ( k_partial_pieces ) );
-		a_int32_0 = _mm512_set1_epi32( a_kfringe_buf );
+		a_kfringe_buf = _mm_maskz_loadu_epi8
+		(
+		  load_mask,
+		  ( a + ( rs_a * 2 ) + ( cs_a * k_full_pieces ) )
+		);
+		a_int32_0 = _mm512_broadcastd_epi32( a_kfringe_buf );
 
 		// Perform column direction mat-mul with k = 4.
 		// c[2,0-31] = a[2,kr:kr+4]*b[kr:kr+4,0-31]
@@ -2992,8 +2999,12 @@ LPGEMM_MN_FRINGE_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_5x32)
 		c_int32_2p1 = _mm512_dpbusd_epi32( c_int32_2p1, a_int32_0, b1 );
 
 		// Broadcast a[3,kr:kr+4].
-		MEMCPY_S32GM_LT4_UINT8( &a_kfringe_buf, ( a + ( rs_a * 3 ) + ( cs_a * k_full_pieces ) ), ( k_partial_pieces ) );
-		a_int32_0 = _mm512_set1_epi32( a_kfringe_buf );
+		a_kfringe_buf = _mm_maskz_loadu_epi8
+		(
+		  load_mask,
+		  ( a + ( rs_a * 3 ) + ( cs_a * k_full_pieces ) )
+		);
+		a_int32_0 = _mm512_broadcastd_epi32( a_kfringe_buf );
 
 		// Perform column direction mat-mul with k = 4.
 		// c[3,0-31] = a[3,kr:kr+4]*b[kr:kr+4,0-31]
@@ -3001,8 +3012,12 @@ LPGEMM_MN_FRINGE_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_5x32)
 		c_int32_3p1 = _mm512_dpbusd_epi32( c_int32_3p1, a_int32_0, b1 );
 
 		// Broadcast a[4,kr:kr+4].
-		MEMCPY_S32GM_LT4_UINT8( &a_kfringe_buf, ( a + ( rs_a * 4 ) + ( cs_a * k_full_pieces ) ), ( k_partial_pieces ) );
-		a_int32_0 = _mm512_set1_epi32( a_kfringe_buf );
+		a_kfringe_buf = _mm_maskz_loadu_epi8
+		(
+		  load_mask,
+		  ( a + ( rs_a * 4 ) + ( cs_a * k_full_pieces ) )
+		);
+		a_int32_0 = _mm512_broadcastd_epi32( a_kfringe_buf );
 
 		// Perform column direction mat-mul with k = 4.
 		// c[4,0-31] = a[4,kr:kr+4]*b[kr:kr+4,0-31]
@@ -3400,8 +3415,6 @@ LPGEMM_MN_FRINGE_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_4x32)
 	dim_t k_full_pieces = k0 / 4;
 	dim_t k_partial_pieces = k0 % 4;
 
-	uint32_t a_kfringe_buf = 0;
-
 	// B matrix storage.
 	__m512i b0;
 	__m512i b1;
@@ -3462,12 +3475,19 @@ LPGEMM_MN_FRINGE_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_4x32)
 	// Handle k remainder.
 	if ( k_partial_pieces > 0 )
 	{
+		__m128i a_kfringe_buf;
+		__mmask16 load_mask = _cvtu32_mask16( 0xFFFF >> ( 16 - k_partial_pieces ) );
+
 		b0 = _mm512_loadu_epi8( b + ( rs_b * k_full_pieces ) + ( cs_b * 0 ) );
 		b1 = _mm512_loadu_epi8( b + ( rs_b * k_full_pieces ) + ( cs_b * 1 ) );
 
 		// Broadcast a[0,kr:kr+4].
-		MEMCPY_S32GM_LT4_UINT8( &a_kfringe_buf, ( a + ( rs_a * 0 ) + ( cs_a * k_full_pieces ) ), ( k_partial_pieces ) );
-		a_int32_0 = _mm512_set1_epi32( a_kfringe_buf );
+		a_kfringe_buf = _mm_maskz_loadu_epi8
+		(
+		  load_mask,
+		  ( a + ( rs_a * 0 ) + ( cs_a * k_full_pieces ) )
+		);
+		a_int32_0 = _mm512_broadcastd_epi32( a_kfringe_buf );
 
 		// Perform column direction mat-mul with k = 4.
 		// c[0,0-31] = a[0,kr:kr+4]*b[kr:kr+4,0-31]
@@ -3475,8 +3495,12 @@ LPGEMM_MN_FRINGE_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_4x32)
 		c_int32_0p1 = _mm512_dpbusd_epi32( c_int32_0p1, a_int32_0, b1 );
 
 		// Broadcast a[1,kr:kr+4].
-		MEMCPY_S32GM_LT4_UINT8( &a_kfringe_buf, ( a + ( rs_a * 1 ) + ( cs_a * k_full_pieces ) ), ( k_partial_pieces ) );
-		a_int32_0 = _mm512_set1_epi32( a_kfringe_buf );
+		a_kfringe_buf = _mm_maskz_loadu_epi8
+		(
+		  load_mask,
+		  ( a + ( rs_a * 1 ) + ( cs_a * k_full_pieces ) )
+		);
+		a_int32_0 = _mm512_broadcastd_epi32( a_kfringe_buf );
 
 		// Perform column direction mat-mul with k = 4.
 		// c[1,0-31] = a[1,kr:kr+4]*b[kr:kr+4,0-31]
@@ -3484,8 +3508,12 @@ LPGEMM_MN_FRINGE_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_4x32)
 		c_int32_1p1 = _mm512_dpbusd_epi32( c_int32_1p1, a_int32_0, b1 );
 
 		// Broadcast a[2,kr:kr+4].
-		MEMCPY_S32GM_LT4_UINT8( &a_kfringe_buf, ( a + ( rs_a * 2 ) + ( cs_a * k_full_pieces ) ), ( k_partial_pieces ) );
-		a_int32_0 = _mm512_set1_epi32( a_kfringe_buf );
+		a_kfringe_buf = _mm_maskz_loadu_epi8
+		(
+		  load_mask,
+		  ( a + ( rs_a * 2 ) + ( cs_a * k_full_pieces ) )
+		);
+		a_int32_0 = _mm512_broadcastd_epi32( a_kfringe_buf );
 
 		// Perform column direction mat-mul with k = 4.
 		// c[2,0-31] = a[2,kr:kr+4]*b[kr:kr+4,0-31]
@@ -3493,8 +3521,12 @@ LPGEMM_MN_FRINGE_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_4x32)
 		c_int32_2p1 = _mm512_dpbusd_epi32( c_int32_2p1, a_int32_0, b1 );
 
 		// Broadcast a[3,kr:kr+4].
-		MEMCPY_S32GM_LT4_UINT8( &a_kfringe_buf, ( a + ( rs_a * 3 ) + ( cs_a * k_full_pieces ) ), ( k_partial_pieces ) );
-		a_int32_0 = _mm512_set1_epi32( a_kfringe_buf );
+		a_kfringe_buf = _mm_maskz_loadu_epi8
+		(
+		  load_mask,
+		  ( a + ( rs_a * 3 ) + ( cs_a * k_full_pieces ) )
+		);
+		a_int32_0 = _mm512_broadcastd_epi32( a_kfringe_buf );
 
 		// Perform column direction mat-mul with k = 4.
 		// c[3,0-31] = a[3,kr:kr+4]*b[kr:kr+4,0-31]
@@ -3835,8 +3867,6 @@ LPGEMM_MN_FRINGE_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_3x32)
 	dim_t k_full_pieces = k0 / 4;
 	dim_t k_partial_pieces = k0 % 4;
 
-	uint32_t a_kfringe_buf = 0;
-
 	// B matrix storage.
 	__m512i b0;
 	__m512i b1;
@@ -3886,12 +3916,19 @@ LPGEMM_MN_FRINGE_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_3x32)
 	// Handle k remainder.
 	if ( k_partial_pieces > 0 )
 	{
+		__m128i a_kfringe_buf;
+		__mmask16 load_mask = _cvtu32_mask16( 0xFFFF >> ( 16 - k_partial_pieces ) );
+
 		b0 = _mm512_loadu_epi8( b + ( rs_b * k_full_pieces ) + ( cs_b * 0 ) );
 		b1 = _mm512_loadu_epi8( b + ( rs_b * k_full_pieces ) + ( cs_b * 1 ) );
 
 		// Broadcast a[0,kr:kr+4].
-		MEMCPY_S32GM_LT4_UINT8( &a_kfringe_buf, ( a + ( rs_a * 0 ) + ( cs_a * k_full_pieces ) ), ( k_partial_pieces ) );
-		a_int32_0 = _mm512_set1_epi32( a_kfringe_buf );
+		a_kfringe_buf = _mm_maskz_loadu_epi8
+		(
+		  load_mask,
+		  ( a + ( rs_a * 0 ) + ( cs_a * k_full_pieces ) )
+		);
+		a_int32_0 = _mm512_broadcastd_epi32( a_kfringe_buf );
 
 		// Perform column direction mat-mul with k = 4.
 		// c[0,0-31] = a[0,kr:kr+4]*b[kr:kr+4,0-31]
@@ -3899,8 +3936,12 @@ LPGEMM_MN_FRINGE_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_3x32)
 		c_int32_0p1 = _mm512_dpbusd_epi32( c_int32_0p1, a_int32_0, b1 );
 
 		// Broadcast a[1,kr:kr+4].
-		MEMCPY_S32GM_LT4_UINT8( &a_kfringe_buf, ( a + ( rs_a * 1 ) + ( cs_a * k_full_pieces ) ), ( k_partial_pieces ) );
-		a_int32_0 = _mm512_set1_epi32( a_kfringe_buf );
+		a_kfringe_buf = _mm_maskz_loadu_epi8
+		(
+		  load_mask,
+		  ( a + ( rs_a * 1 ) + ( cs_a * k_full_pieces ) )
+		);
+		a_int32_0 = _mm512_broadcastd_epi32( a_kfringe_buf );
 
 		// Perform column direction mat-mul with k = 4.
 		// c[1,0-31] = a[1,kr:kr+4]*b[kr:kr+4,0-31]
@@ -3908,8 +3949,12 @@ LPGEMM_MN_FRINGE_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_3x32)
 		c_int32_1p1 = _mm512_dpbusd_epi32( c_int32_1p1, a_int32_0, b1 );
 
 		// Broadcast a[2,kr:kr+4].
-		MEMCPY_S32GM_LT4_UINT8( &a_kfringe_buf, ( a + ( rs_a * 2 ) + ( cs_a * k_full_pieces ) ), ( k_partial_pieces ) );
-		a_int32_0 = _mm512_set1_epi32( a_kfringe_buf );
+		a_kfringe_buf = _mm_maskz_loadu_epi8
+		(
+		  load_mask,
+		  ( a + ( rs_a * 2 ) + ( cs_a * k_full_pieces ) )
+		);
+		a_int32_0 = _mm512_broadcastd_epi32( a_kfringe_buf );
 
 		// Perform column direction mat-mul with k = 4.
 		// c[2,0-31] = a[2,kr:kr+4]*b[kr:kr+4,0-31]
@@ -4193,8 +4238,6 @@ LPGEMM_MN_FRINGE_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_2x32)
 	dim_t k_full_pieces = k0 / 4;
 	dim_t k_partial_pieces = k0 % 4;
 
-	uint32_t a_kfringe_buf = 0;
-
 	// B matrix storage.
 	__m512i b0;
 	__m512i b1;
@@ -4233,12 +4276,19 @@ LPGEMM_MN_FRINGE_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_2x32)
 	// Handle k remainder.
 	if ( k_partial_pieces > 0 )
 	{
+		__m128i a_kfringe_buf;
+		__mmask16 load_mask = _cvtu32_mask16( 0xFFFF >> ( 16 - k_partial_pieces ) );
+
 		b0 = _mm512_loadu_epi8( b + ( rs_b * k_full_pieces ) + ( cs_b * 0 ) );
 		b1 = _mm512_loadu_epi8( b + ( rs_b * k_full_pieces ) + ( cs_b * 1 ) );
 
 		// Broadcast a[0,kr:kr+4].
-		MEMCPY_S32GM_LT4_UINT8( &a_kfringe_buf, ( a + ( rs_a * 0 ) + ( cs_a * k_full_pieces ) ), ( k_partial_pieces ) );
-		a_int32_0 = _mm512_set1_epi32( a_kfringe_buf );
+		a_kfringe_buf = _mm_maskz_loadu_epi8
+		(
+		  load_mask,
+		  ( a + ( rs_a * 0 ) + ( cs_a * k_full_pieces ) )
+		);
+		a_int32_0 = _mm512_broadcastd_epi32( a_kfringe_buf );
 
 		// Perform column direction mat-mul with k = 4.
 		// c[0,0-31] = a[0,kr:kr+4]*b[kr:kr+4,0-31]
@@ -4246,8 +4296,12 @@ LPGEMM_MN_FRINGE_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_2x32)
 		c_int32_0p1 = _mm512_dpbusd_epi32( c_int32_0p1, a_int32_0, b1 );
 
 		// Broadcast a[1,kr:kr+4].
-		MEMCPY_S32GM_LT4_UINT8( &a_kfringe_buf, ( a + ( rs_a * 1 ) + ( cs_a * k_full_pieces ) ), ( k_partial_pieces ) );
-		a_int32_0 = _mm512_set1_epi32( a_kfringe_buf );
+		a_kfringe_buf = _mm_maskz_loadu_epi8
+		(
+		  load_mask,
+		  ( a + ( rs_a * 1 ) + ( cs_a * k_full_pieces ) )
+		);
+		a_int32_0 = _mm512_broadcastd_epi32( a_kfringe_buf );
 
 		// Perform column direction mat-mul with k = 4.
 		// c[1,0-31] = a[1,kr:kr+4]*b[kr:kr+4,0-31]
@@ -4474,8 +4528,6 @@ LPGEMM_MN_FRINGE_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_1x32)
 	dim_t k_full_pieces = k0 / 4;
 	dim_t k_partial_pieces = k0 % 4;
 
-	uint32_t a_kfringe_buf = 0;
-
 	// B matrix storage.
 	__m512i b0;
 	__m512i b1;
@@ -4503,12 +4555,19 @@ LPGEMM_MN_FRINGE_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_1x32)
 	// Handle k remainder.
 	if ( k_partial_pieces > 0 )
 	{
+		__m128i a_kfringe_buf;
+		__mmask16 load_mask = _cvtu32_mask16( 0xFFFF >> ( 16 - k_partial_pieces ) );
+
 		b0 = _mm512_loadu_epi8( b + ( rs_b * k_full_pieces ) + ( cs_b * 0 ) );
 		b1 = _mm512_loadu_epi8( b + ( rs_b * k_full_pieces ) + ( cs_b * 1 ) );
 
 		// Broadcast a[0,kr:kr+4].
-		MEMCPY_S32GM_LT4_UINT8( &a_kfringe_buf, ( a + ( rs_a * 0 ) + ( cs_a * k_full_pieces ) ), ( k_partial_pieces ) );
-		a_int32_0 = _mm512_set1_epi32( a_kfringe_buf );
+		a_kfringe_buf = _mm_maskz_loadu_epi8
+		(
+		  load_mask,
+		  ( a + ( rs_a * 0 ) + ( cs_a * k_full_pieces ) )
+		);
+		a_int32_0 = _mm512_broadcastd_epi32( a_kfringe_buf );
 
 		// Perform column direction mat-mul with k = 4.
 		// c[0,0-31] = a[0,kr:kr+4]*b[kr:kr+4,0-31]
@@ -4678,8 +4737,6 @@ LPGEMM_MN_FRINGE_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_5x48)
 	dim_t k_full_pieces = k0 / 4;
 	dim_t k_partial_pieces = k0 % 4;
 
-	uint32_t a_kfringe_buf = 0;
-
 	// B matrix storage.
 	__m512i b0;
 	__m512i b1;
@@ -4763,13 +4820,20 @@ LPGEMM_MN_FRINGE_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_5x48)
 	// Handle k remainder.
 	if ( k_partial_pieces > 0 )
 	{
+		__m128i a_kfringe_buf;
+		__mmask16 load_mask = _cvtu32_mask16( 0xFFFF >> ( 16 - k_partial_pieces ) );
+
 		b0 = _mm512_loadu_epi8( b + ( rs_b * k_full_pieces ) + ( cs_b * 0 ) );
 		b1 = _mm512_loadu_epi8( b + ( rs_b * k_full_pieces ) + ( cs_b * 1 ) );
 		b2 = _mm512_loadu_epi8( b + ( rs_b * k_full_pieces ) + ( cs_b * 2 ) );
 
 		// Broadcast a[0,kr:kr+4].
-		MEMCPY_S32GM_LT4_UINT8( &a_kfringe_buf, ( a + ( rs_a * 0 ) + ( cs_a * k_full_pieces ) ), ( k_partial_pieces ) );
-		a_int32_0 = _mm512_set1_epi32( a_kfringe_buf );
+		a_kfringe_buf = _mm_maskz_loadu_epi8
+		(
+		  load_mask,
+		  ( a + ( rs_a * 0 ) + ( cs_a * k_full_pieces ) )
+		);
+		a_int32_0 = _mm512_broadcastd_epi32( a_kfringe_buf );
 
 		// Perform column direction mat-mul with k = 4.
 		// c[0,0-47] = a[0,kr:kr+4]*b[kr:kr+4,0-47]
@@ -4778,8 +4842,12 @@ LPGEMM_MN_FRINGE_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_5x48)
 		c_int32_0p2 = _mm512_dpbusd_epi32( c_int32_0p2, a_int32_0, b2 );
 
 		// Broadcast a[1,kr:kr+4].
-		MEMCPY_S32GM_LT4_UINT8( &a_kfringe_buf, ( a + ( rs_a * 1 ) + ( cs_a * k_full_pieces ) ), ( k_partial_pieces ) );
-		a_int32_0 = _mm512_set1_epi32( a_kfringe_buf );
+		a_kfringe_buf = _mm_maskz_loadu_epi8
+		(
+		  load_mask,
+		  ( a + ( rs_a * 1 ) + ( cs_a * k_full_pieces ) )
+		);
+		a_int32_0 = _mm512_broadcastd_epi32( a_kfringe_buf );
 
 		// Perform column direction mat-mul with k = 4.
 		// c[1,0-47] = a[1,kr:kr+4]*b[kr:kr+4,0-47]
@@ -4788,8 +4856,12 @@ LPGEMM_MN_FRINGE_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_5x48)
 		c_int32_1p2 = _mm512_dpbusd_epi32( c_int32_1p2, a_int32_0, b2 );
 
 		// Broadcast a[2,kr:kr+4].
-		MEMCPY_S32GM_LT4_UINT8( &a_kfringe_buf, ( a + ( rs_a * 2 ) + ( cs_a * k_full_pieces ) ), ( k_partial_pieces ) );
-		a_int32_0 = _mm512_set1_epi32( a_kfringe_buf );
+		a_kfringe_buf = _mm_maskz_loadu_epi8
+		(
+		  load_mask,
+		  ( a + ( rs_a * 2 ) + ( cs_a * k_full_pieces ) )
+		);
+		a_int32_0 = _mm512_broadcastd_epi32( a_kfringe_buf );
 
 		// Perform column direction mat-mul with k = 4.
 		// c[2,0-47] = a[2,kr:kr+4]*b[kr:kr+4,0-47]
@@ -4798,8 +4870,12 @@ LPGEMM_MN_FRINGE_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_5x48)
 		c_int32_2p2 = _mm512_dpbusd_epi32( c_int32_2p2, a_int32_0, b2 );
 
 		// Broadcast a[3,kr:kr+4].
-		MEMCPY_S32GM_LT4_UINT8( &a_kfringe_buf, ( a + ( rs_a * 3 ) + ( cs_a * k_full_pieces ) ), ( k_partial_pieces ) );
-		a_int32_0 = _mm512_set1_epi32( a_kfringe_buf );
+		a_kfringe_buf = _mm_maskz_loadu_epi8
+		(
+		  load_mask,
+		  ( a + ( rs_a * 3 ) + ( cs_a * k_full_pieces ) )
+		);
+		a_int32_0 = _mm512_broadcastd_epi32( a_kfringe_buf );
 
 		// Perform column direction mat-mul with k = 4.
 		// c[3,0-47] = a[3,kr:kr+4]*b[kr:kr+4,0-47]
@@ -4808,8 +4884,12 @@ LPGEMM_MN_FRINGE_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_5x48)
 		c_int32_3p2 = _mm512_dpbusd_epi32( c_int32_3p2, a_int32_0, b2 );
 
 		// Broadcast a[4,kr:kr+4].
-		MEMCPY_S32GM_LT4_UINT8( &a_kfringe_buf, ( a + ( rs_a * 4 ) + ( cs_a * k_full_pieces ) ), ( k_partial_pieces ) );
-		a_int32_0 = _mm512_set1_epi32( a_kfringe_buf );
+		a_kfringe_buf = _mm_maskz_loadu_epi8
+		(
+		  load_mask,
+		  ( a + ( rs_a * 4 ) + ( cs_a * k_full_pieces ) )
+		);
+		a_int32_0 = _mm512_broadcastd_epi32( a_kfringe_buf );
 
 		// Perform column direction mat-mul with k = 4.
 		// c[4,0-47] = a[4,kr:kr+4]*b[kr:kr+4,0-47]
@@ -5339,8 +5419,6 @@ LPGEMM_MN_FRINGE_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_4x48)
 	dim_t k_full_pieces = k0 / 4;
 	dim_t k_partial_pieces = k0 % 4;
 
-	uint32_t a_kfringe_buf = 0;
-
 	// B matrix storage.
 	__m512i b0;
 	__m512i b1;
@@ -5411,13 +5489,20 @@ LPGEMM_MN_FRINGE_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_4x48)
 	// Handle k remainder.
 	if ( k_partial_pieces > 0 )
 	{
+		__m128i a_kfringe_buf;
+		__mmask16 load_mask = _cvtu32_mask16( 0xFFFF >> ( 16 - k_partial_pieces ) );
+
 		b0 = _mm512_loadu_epi8( b + ( rs_b * k_full_pieces ) + ( cs_b * 0 ) );
 		b1 = _mm512_loadu_epi8( b + ( rs_b * k_full_pieces ) + ( cs_b * 1 ) );
 		b2 = _mm512_loadu_epi8( b + ( rs_b * k_full_pieces ) + ( cs_b * 2 ) );
 
 		// Broadcast a[0,kr:kr+4].
-		MEMCPY_S32GM_LT4_UINT8( &a_kfringe_buf, ( a + ( rs_a * 0 ) + ( cs_a * k_full_pieces ) ), ( k_partial_pieces ) );
-		a_int32_0 = _mm512_set1_epi32( a_kfringe_buf );
+		a_kfringe_buf = _mm_maskz_loadu_epi8
+		(
+		  load_mask,
+		  ( a + ( rs_a * 0 ) + ( cs_a * k_full_pieces ) )
+		);
+		a_int32_0 = _mm512_broadcastd_epi32( a_kfringe_buf );
 
 		// Perform column direction mat-mul with k = 4.
 		// c[0,0-47] = a[0,kr:kr+4]*b[kr:kr+4,0-47]
@@ -5426,8 +5511,12 @@ LPGEMM_MN_FRINGE_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_4x48)
 		c_int32_0p2 = _mm512_dpbusd_epi32( c_int32_0p2, a_int32_0, b2 );
 
 		// Broadcast a[1,kr:kr+4].
-		MEMCPY_S32GM_LT4_UINT8( &a_kfringe_buf, ( a + ( rs_a * 1 ) + ( cs_a * k_full_pieces ) ), ( k_partial_pieces ) );
-		a_int32_0 = _mm512_set1_epi32( a_kfringe_buf );
+		a_kfringe_buf = _mm_maskz_loadu_epi8
+		(
+		  load_mask,
+		  ( a + ( rs_a * 1 ) + ( cs_a * k_full_pieces ) )
+		);
+		a_int32_0 = _mm512_broadcastd_epi32( a_kfringe_buf );
 
 		// Perform column direction mat-mul with k = 4.
 		// c[1,0-47] = a[1,kr:kr+4]*b[kr:kr+4,0-47]
@@ -5436,8 +5525,12 @@ LPGEMM_MN_FRINGE_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_4x48)
 		c_int32_1p2 = _mm512_dpbusd_epi32( c_int32_1p2, a_int32_0, b2 );
 
 		// Broadcast a[2,kr:kr+4].
-		MEMCPY_S32GM_LT4_UINT8( &a_kfringe_buf, ( a + ( rs_a * 2 ) + ( cs_a * k_full_pieces ) ), ( k_partial_pieces ) );
-		a_int32_0 = _mm512_set1_epi32( a_kfringe_buf );
+		a_kfringe_buf = _mm_maskz_loadu_epi8
+		(
+		  load_mask,
+		  ( a + ( rs_a * 2 ) + ( cs_a * k_full_pieces ) )
+		);
+		a_int32_0 = _mm512_broadcastd_epi32( a_kfringe_buf );
 
 		// Perform column direction mat-mul with k = 4.
 		// c[2,0-47] = a[2,kr:kr+4]*b[kr:kr+4,0-47]
@@ -5446,8 +5539,12 @@ LPGEMM_MN_FRINGE_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_4x48)
 		c_int32_2p2 = _mm512_dpbusd_epi32( c_int32_2p2, a_int32_0, b2 );
 
 		// Broadcast a[3,kr:kr+4].
-		MEMCPY_S32GM_LT4_UINT8( &a_kfringe_buf, ( a + ( rs_a * 3 ) + ( cs_a * k_full_pieces ) ), ( k_partial_pieces ) );
-		a_int32_0 = _mm512_set1_epi32( a_kfringe_buf );
+		a_kfringe_buf = _mm_maskz_loadu_epi8
+		(
+		  load_mask,
+		  ( a + ( rs_a * 3 ) + ( cs_a * k_full_pieces ) )
+		);
+		a_int32_0 = _mm512_broadcastd_epi32( a_kfringe_buf );
 
 		// Perform column direction mat-mul with k = 4.
 		// c[3,0-47] = a[3,kr:kr+4]*b[kr:kr+4,0-47]
@@ -5895,8 +5992,6 @@ LPGEMM_MN_FRINGE_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_3x48)
 	dim_t k_full_pieces = k0 / 4;
 	dim_t k_partial_pieces = k0 % 4;
 
-	uint32_t a_kfringe_buf = 0;
-
 	// B matrix storage.
 	__m512i b0;
 	__m512i b1;
@@ -5954,13 +6049,20 @@ LPGEMM_MN_FRINGE_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_3x48)
 	// Handle k remainder.
 	if ( k_partial_pieces > 0 )
 	{
+		__m128i a_kfringe_buf;
+		__mmask16 load_mask = _cvtu32_mask16( 0xFFFF >> ( 16 - k_partial_pieces ) );
+
 		b0 = _mm512_loadu_epi8( b + ( rs_b * k_full_pieces ) + ( cs_b * 0 ) );
 		b1 = _mm512_loadu_epi8( b + ( rs_b * k_full_pieces ) + ( cs_b * 1 ) );
 		b2 = _mm512_loadu_epi8( b + ( rs_b * k_full_pieces ) + ( cs_b * 2 ) );
 
 		// Broadcast a[0,kr:kr+4].
-		MEMCPY_S32GM_LT4_UINT8( &a_kfringe_buf, ( a + ( rs_a * 0 ) + ( cs_a * k_full_pieces ) ), ( k_partial_pieces ) );
-		a_int32_0 = _mm512_set1_epi32( a_kfringe_buf );
+		a_kfringe_buf = _mm_maskz_loadu_epi8
+		(
+		  load_mask,
+		  ( a + ( rs_a * 0 ) + ( cs_a * k_full_pieces ) )
+		);
+		a_int32_0 = _mm512_broadcastd_epi32( a_kfringe_buf );
 
 		// Perform column direction mat-mul with k = 4.
 		// c[0,0-47] = a[0,kr:kr+4]*b[kr:kr+4,0-47]
@@ -5969,8 +6071,12 @@ LPGEMM_MN_FRINGE_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_3x48)
 		c_int32_0p2 = _mm512_dpbusd_epi32( c_int32_0p2, a_int32_0, b2 );
 
 		// Broadcast a[1,kr:kr+4].
-		MEMCPY_S32GM_LT4_UINT8( &a_kfringe_buf, ( a + ( rs_a * 1 ) + ( cs_a * k_full_pieces ) ), ( k_partial_pieces ) );
-		a_int32_0 = _mm512_set1_epi32( a_kfringe_buf );
+		a_kfringe_buf = _mm_maskz_loadu_epi8
+		(
+		  load_mask,
+		  ( a + ( rs_a * 1 ) + ( cs_a * k_full_pieces ) )
+		);
+		a_int32_0 = _mm512_broadcastd_epi32( a_kfringe_buf );
 
 		// Perform column direction mat-mul with k = 4.
 		// c[1,0-47] = a[1,kr:kr+4]*b[kr:kr+4,0-47]
@@ -5979,8 +6085,12 @@ LPGEMM_MN_FRINGE_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_3x48)
 		c_int32_1p2 = _mm512_dpbusd_epi32( c_int32_1p2, a_int32_0, b2 );
 
 		// Broadcast a[2,kr:kr+4].
-		MEMCPY_S32GM_LT4_UINT8( &a_kfringe_buf, ( a + ( rs_a * 2 ) + ( cs_a * k_full_pieces ) ), ( k_partial_pieces ) );
-		a_int32_0 = _mm512_set1_epi32( a_kfringe_buf );
+		a_kfringe_buf = _mm_maskz_loadu_epi8
+		(
+		  load_mask,
+		  ( a + ( rs_a * 2 ) + ( cs_a * k_full_pieces ) )
+		);
+		a_int32_0 = _mm512_broadcastd_epi32( a_kfringe_buf );
 
 		// Perform column direction mat-mul with k = 4.
 		// c[2,0-47] = a[2,kr:kr+4]*b[kr:kr+4,0-47]
@@ -6346,8 +6456,6 @@ LPGEMM_MN_FRINGE_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_2x48)
 	dim_t k_full_pieces = k0 / 4;
 	dim_t k_partial_pieces = k0 % 4;
 
-	uint32_t a_kfringe_buf = 0;
-
 	// B matrix storage.
 	__m512i b0;
 	__m512i b1;
@@ -6392,13 +6500,20 @@ LPGEMM_MN_FRINGE_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_2x48)
 	// Handle k remainder.
 	if ( k_partial_pieces > 0 )
 	{
+		__m128i a_kfringe_buf;
+		__mmask16 load_mask = _cvtu32_mask16( 0xFFFF >> ( 16 - k_partial_pieces ) );
+
 		b0 = _mm512_loadu_epi8( b + ( rs_b * k_full_pieces ) + ( cs_b * 0 ) );
 		b1 = _mm512_loadu_epi8( b + ( rs_b * k_full_pieces ) + ( cs_b * 1 ) );
 		b2 = _mm512_loadu_epi8( b + ( rs_b * k_full_pieces ) + ( cs_b * 2 ) );
 
 		// Broadcast a[0,kr:kr+4].
-		MEMCPY_S32GM_LT4_UINT8( &a_kfringe_buf, ( a + ( rs_a * 0 ) + ( cs_a * k_full_pieces ) ), ( k_partial_pieces ) );
-		a_int32_0 = _mm512_set1_epi32( a_kfringe_buf );
+		a_kfringe_buf = _mm_maskz_loadu_epi8
+		(
+		  load_mask,
+		  ( a + ( rs_a * 0 ) + ( cs_a * k_full_pieces ) )
+		);
+		a_int32_0 = _mm512_broadcastd_epi32( a_kfringe_buf );
 
 		// Perform column direction mat-mul with k = 4.
 		// c[0,0-47] = a[0,kr:kr+4]*b[kr:kr+4,0-47]
@@ -6407,8 +6522,12 @@ LPGEMM_MN_FRINGE_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_2x48)
 		c_int32_0p2 = _mm512_dpbusd_epi32( c_int32_0p2, a_int32_0, b2 );
 
 		// Broadcast a[1,kr:kr+4].
-		MEMCPY_S32GM_LT4_UINT8( &a_kfringe_buf, ( a + ( rs_a * 1 ) + ( cs_a * k_full_pieces ) ), ( k_partial_pieces ) );
-		a_int32_0 = _mm512_set1_epi32( a_kfringe_buf );
+		a_kfringe_buf = _mm_maskz_loadu_epi8
+		(
+		  load_mask,
+		  ( a + ( rs_a * 1 ) + ( cs_a * k_full_pieces ) )
+		);
+		a_int32_0 = _mm512_broadcastd_epi32( a_kfringe_buf );
 
 		// Perform column direction mat-mul with k = 4.
 		// c[1,0-47] = a[1,kr:kr+4]*b[kr:kr+4,0-47]
@@ -6692,8 +6811,6 @@ LPGEMM_MN_FRINGE_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_1x48)
 	dim_t k_full_pieces = k0 / 4;
 	dim_t k_partial_pieces = k0 % 4;
 
-	uint32_t a_kfringe_buf = 0;
-
 	// B matrix storage.
 	__m512i b0;
 	__m512i b1;
@@ -6725,13 +6842,20 @@ LPGEMM_MN_FRINGE_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_1x48)
 	// Handle k remainder.
 	if ( k_partial_pieces > 0 )
 	{
+		__m128i a_kfringe_buf;
+		__mmask16 load_mask = _cvtu32_mask16( 0xFFFF >> ( 16 - k_partial_pieces ) );
+
 		b0 = _mm512_loadu_epi8( b + ( rs_b * k_full_pieces ) + ( cs_b * 0 ) );
 		b1 = _mm512_loadu_epi8( b + ( rs_b * k_full_pieces ) + ( cs_b * 1 ) );
 		b2 = _mm512_loadu_epi8( b + ( rs_b * k_full_pieces ) + ( cs_b * 2 ) );
 
 		// Broadcast a[0,kr:kr+4].
-		MEMCPY_S32GM_LT4_UINT8( &a_kfringe_buf, ( a + ( rs_a * 0 ) + ( cs_a * k_full_pieces ) ), ( k_partial_pieces ) );
-		a_int32_0 = _mm512_set1_epi32( a_kfringe_buf );
+		a_kfringe_buf = _mm_maskz_loadu_epi8
+		(
+		  load_mask,
+		  ( a + ( rs_a * 0 ) + ( cs_a * k_full_pieces ) )
+		);
+		a_int32_0 = _mm512_broadcastd_epi32( a_kfringe_buf );
 
 		// Perform column direction mat-mul with k = 4.
 		// c[0,0-47] = a[0,kr:kr+4]*b[kr:kr+4,0-47]

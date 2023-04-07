@@ -55,8 +55,8 @@ LPGEMM_MAIN_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_6x64)
 				  &&POST_OPS_DOWNSCALE_6x64
 				};
 
-	dim_t MR = 6;
-	dim_t NR = 64;
+	const dim_t MR = 6;
+	const dim_t NR = 64;
 
 	dim_t m_full_pieces = m0 / MR;
 	dim_t m_full_pieces_loop_limit = m_full_pieces * MR;
@@ -64,8 +64,6 @@ LPGEMM_MAIN_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_6x64)
 
 	dim_t k_full_pieces = k0 / 4;
 	dim_t k_partial_pieces = k0 % 4;
-
-	uint32_t a_kfringe_buf = 0;
 
 	if ( n0 < NR )
 	{
@@ -166,6 +164,7 @@ LPGEMM_MAIN_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_6x64)
 	__m512i a_int32_2;
 	__m512i a_int32_3;
 
+	_mm_prefetch( a, _MM_HINT_T0 );
 	for ( dim_t ir = 0; ir < m_full_pieces_loop_limit; ir += MR )
 	{
 		_mm_prefetch( b, _MM_HINT_T0 );
@@ -215,20 +214,20 @@ LPGEMM_MAIN_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_6x64)
 			b0 = _mm512_loadu_epi8( b + ( rs_b * kr ) + ( cs_b * 0 ) );
 
 			// Broadcast a[0,kr:kr+4].
-			a_int32_0 = _mm512_set1_epi32( *( uint32_t* )( a + ( rs_a * 0 ) + ( cs_a * kr ) ) );
+			a_int32_0 = _mm512_set1_epi32
+					(
+					  *( uint32_t* )( a + ( rs_a * 0 ) + ( cs_a * kr ) )
+					);
 
 			b1 = _mm512_loadu_epi8( b + ( rs_b * kr ) + ( cs_b * 1 ) );
 			b2 = _mm512_loadu_epi8( b + ( rs_b * kr ) + ( cs_b * 2 ) );
 			b3 = _mm512_loadu_epi8( b + ( rs_b * kr ) + ( cs_b * 3 ) );
 
 			// Broadcast a[1,kr:kr+4].
-			a_int32_1 = _mm512_set1_epi32( *( uint32_t* )( a + ( rs_a * 1 ) + ( cs_a * kr ) ) );
-
-			// Broadcast a[2,kr:kr+4].
-			a_int32_2 = _mm512_set1_epi32( *( uint32_t* )( a + ( rs_a * 2 ) + ( cs_a * kr ) ) );
-
-			// Broadcast a[3,kr:kr+4].
-			a_int32_3 = _mm512_set1_epi32( *( uint32_t* )( a + ( rs_a * 3 ) + ( cs_a * kr ) ) );
+			a_int32_1 = _mm512_set1_epi32
+					(
+					  *( uint32_t* )( a + ( rs_a * 1 ) + ( cs_a * kr ) )
+					);
 
 			// Perform column direction mat-mul with k = 4.
 			// c[0,0-63] = a[0,kr:kr+4]*b[kr:kr+4,0-63]
@@ -237,12 +236,24 @@ LPGEMM_MAIN_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_6x64)
 			c_int32_0p2 = _mm512_dpbusd_epi32( c_int32_0p2, a_int32_0, b2 );
 			c_int32_0p3 = _mm512_dpbusd_epi32( c_int32_0p3, a_int32_0, b3 );
 
+			// Broadcast a[2,kr:kr+4].
+			a_int32_2 = _mm512_set1_epi32
+					(
+					  *( uint32_t* )( a + ( rs_a * 2 ) + ( cs_a * kr ) )
+					);
+
 			// Perform column direction mat-mul with k = 4.
 			// c[1,0-63] = a[1,kr:kr+4]*b[kr:kr+4,0-63]
 			c_int32_1p0 = _mm512_dpbusd_epi32( c_int32_1p0, a_int32_1, b0 );
 			c_int32_1p1 = _mm512_dpbusd_epi32( c_int32_1p1, a_int32_1, b1 );
 			c_int32_1p2 = _mm512_dpbusd_epi32( c_int32_1p2, a_int32_1, b2 );
 			c_int32_1p3 = _mm512_dpbusd_epi32( c_int32_1p3, a_int32_1, b3 );
+
+			// Broadcast a[3,kr:kr+4].
+			a_int32_3 = _mm512_set1_epi32
+					(
+					  *( uint32_t* )( a + ( rs_a * 3 ) + ( cs_a * kr ) )
+					);
 
 			// Perform column direction mat-mul with k = 4.
 			// c[2,0-63] = a[2,kr:kr+4]*b[kr:kr+4,0-63]
@@ -252,10 +263,10 @@ LPGEMM_MAIN_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_6x64)
 			c_int32_2p3 = _mm512_dpbusd_epi32( c_int32_2p3, a_int32_2, b3 );
 
 			// Broadcast a[4,kr:kr+4].
-			a_int32_0 = _mm512_set1_epi32( *( uint32_t* )( a + ( rs_a * 4 ) + ( cs_a * kr ) ) );
-
-			// Broadcast a[5,kr:kr+4].
-			a_int32_1 = _mm512_set1_epi32( *( uint32_t* )( a + ( rs_a * 5 ) + ( cs_a * kr ) ) );
+			a_int32_0 = _mm512_set1_epi32
+					(
+					  *( uint32_t* )( a + ( rs_a * 4 ) + ( cs_a * kr ) )
+					);
 
 			// Perform column direction mat-mul with k = 4.
 			// c[3,0-63] = a[3,kr:kr+4]*b[kr:kr+4,0-63]
@@ -263,6 +274,12 @@ LPGEMM_MAIN_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_6x64)
 			c_int32_3p1 = _mm512_dpbusd_epi32( c_int32_3p1, a_int32_3, b1 );
 			c_int32_3p2 = _mm512_dpbusd_epi32( c_int32_3p2, a_int32_3, b2 );
 			c_int32_3p3 = _mm512_dpbusd_epi32( c_int32_3p3, a_int32_3, b3 );
+
+			// Broadcast a[5,kr:kr+4].
+			a_int32_1 = _mm512_set1_epi32
+					(
+					  *( uint32_t* )( a + ( rs_a * 5 ) + ( cs_a * kr ) )
+					);
 
 			// Perform column direction mat-mul with k = 4.
 			// c[4,0-63] = a[4,kr:kr+4]*b[kr:kr+4,0-63]
@@ -281,16 +298,18 @@ LPGEMM_MAIN_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_6x64)
 		// Handle k remainder.
 		if ( k_partial_pieces > 0 )
 		{
+			__m128i a_kfringe_buf;
+			__mmask16 load_mask = _cvtu32_mask16( 0xFFFF >> ( 16 - k_partial_pieces ) );
+
 			b0 = _mm512_loadu_epi8( b + ( rs_b * k_full_pieces ) + ( cs_b * 0 ) );
 
 			// Broadcast a[0,kr:kr+4].
-			MEMCPY_S32GM_LT4_UINT8
+			a_kfringe_buf = _mm_maskz_loadu_epi8
 			(
-			  &a_kfringe_buf,
-			  ( a + ( rs_a * 0 ) + ( cs_a * k_full_pieces ) ),
-			  ( k_partial_pieces * sizeof( uint8_t ) )
+			  load_mask,
+			  ( a + ( rs_a * 0 ) + ( cs_a * k_full_pieces ) )
 			);
-			a_int32_0 = _mm512_set1_epi32( a_kfringe_buf );
+			a_int32_0 = _mm512_broadcastd_epi32( a_kfringe_buf );
 
 			b1 = _mm512_loadu_epi8( b + ( rs_b * k_full_pieces ) + ( cs_b * 1 ) );
 			b2 = _mm512_loadu_epi8( b + ( rs_b * k_full_pieces ) + ( cs_b * 2 ) );
@@ -301,13 +320,12 @@ LPGEMM_MAIN_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_6x64)
 			c_int32_0p0 = _mm512_dpbusd_epi32( c_int32_0p0, a_int32_0, b0 );
 
 			// Broadcast a[1,kr:kr+4].
-			MEMCPY_S32GM_LT4_UINT8
+			a_kfringe_buf = _mm_maskz_loadu_epi8
 			(
-			  &a_kfringe_buf,
-			  ( a + ( rs_a * 1 ) + ( cs_a * k_full_pieces ) ),
-			  ( k_partial_pieces * sizeof( uint8_t ) )
+			  load_mask,
+			  ( a + ( rs_a * 1 ) + ( cs_a * k_full_pieces ) )
 			);
-			a_int32_1 = _mm512_set1_epi32( a_kfringe_buf );
+			a_int32_1 = _mm512_broadcastd_epi32( a_kfringe_buf );
 
 			c_int32_0p1 = _mm512_dpbusd_epi32( c_int32_0p1, a_int32_0, b1 );
 			c_int32_0p2 = _mm512_dpbusd_epi32( c_int32_0p2, a_int32_0, b2 );
@@ -318,13 +336,12 @@ LPGEMM_MAIN_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_6x64)
 			c_int32_1p0 = _mm512_dpbusd_epi32( c_int32_1p0, a_int32_1, b0 );
 
 			// Broadcast a[2,kr:kr+4].
-			MEMCPY_S32GM_LT4_UINT8
+			a_kfringe_buf = _mm_maskz_loadu_epi8
 			(
-			  &a_kfringe_buf,
-			  ( a + ( rs_a * 2 ) + ( cs_a * k_full_pieces ) ),
-			  ( k_partial_pieces * sizeof( uint8_t ) )
+			  load_mask,
+			  ( a + ( rs_a * 2 ) + ( cs_a * k_full_pieces ) )
 			);
-			a_int32_2 = _mm512_set1_epi32( a_kfringe_buf );
+			a_int32_2 = _mm512_broadcastd_epi32( a_kfringe_buf );
 
 			c_int32_1p1 = _mm512_dpbusd_epi32( c_int32_1p1, a_int32_1, b1 );
 			c_int32_1p2 = _mm512_dpbusd_epi32( c_int32_1p2, a_int32_1, b2 );
@@ -335,13 +352,12 @@ LPGEMM_MAIN_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_6x64)
 			c_int32_2p0 = _mm512_dpbusd_epi32( c_int32_2p0, a_int32_2, b0 );
 
 			// Broadcast a[3,kr:kr+4].
-			MEMCPY_S32GM_LT4_UINT8
+			a_kfringe_buf = _mm_maskz_loadu_epi8
 			(
-			  &a_kfringe_buf,
-			  ( a + ( rs_a * 3 ) + ( cs_a * k_full_pieces ) ),
-			  ( k_partial_pieces * sizeof( uint8_t ) )
+			  load_mask,
+			  ( a + ( rs_a * 3 ) + ( cs_a * k_full_pieces ) )
 			);
-			a_int32_3 = _mm512_set1_epi32( a_kfringe_buf );
+			a_int32_3 = _mm512_broadcastd_epi32( a_kfringe_buf );
 
 			c_int32_2p1 = _mm512_dpbusd_epi32( c_int32_2p1, a_int32_2, b1 );
 			c_int32_2p2 = _mm512_dpbusd_epi32( c_int32_2p2, a_int32_2, b2 );
@@ -352,13 +368,12 @@ LPGEMM_MAIN_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_6x64)
 			c_int32_3p0 = _mm512_dpbusd_epi32( c_int32_3p0, a_int32_3, b0 );
 
 			// Broadcast a[4,kr:kr+4].
-			MEMCPY_S32GM_LT4_UINT8
+			a_kfringe_buf = _mm_maskz_loadu_epi8
 			(
-			  &a_kfringe_buf,
-			  ( a + ( rs_a * 4 ) + ( cs_a * k_full_pieces ) ),
-			  ( k_partial_pieces * sizeof( uint8_t ) )
+			  load_mask,
+			  ( a + ( rs_a * 4 ) + ( cs_a * k_full_pieces ) )
 			);
-			a_int32_0 = _mm512_set1_epi32( a_kfringe_buf );
+			a_int32_0 = _mm512_broadcastd_epi32( a_kfringe_buf );
 
 			c_int32_3p1 = _mm512_dpbusd_epi32( c_int32_3p1, a_int32_3, b1 );
 			c_int32_3p2 = _mm512_dpbusd_epi32( c_int32_3p2, a_int32_3, b2 );
@@ -369,13 +384,12 @@ LPGEMM_MAIN_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_6x64)
 			c_int32_4p0 = _mm512_dpbusd_epi32( c_int32_4p0, a_int32_0, b0 );
 
 			// Broadcast a[5,kr:kr+4].
-			MEMCPY_S32GM_LT4_UINT8
+			a_kfringe_buf = _mm_maskz_loadu_epi8
 			(
-			  &a_kfringe_buf,
-			  ( a + ( rs_a * 5 ) + ( cs_a * k_full_pieces ) ),
-			  ( k_partial_pieces * sizeof( uint8_t ) )
+			  load_mask,
+			  ( a + ( rs_a * 5 ) + ( cs_a * k_full_pieces ) )
 			);
-			a_int32_1 = _mm512_set1_epi32( a_kfringe_buf );
+			a_int32_1 = _mm512_broadcastd_epi32( a_kfringe_buf );
 
 			c_int32_4p1 = _mm512_dpbusd_epi32( c_int32_4p1, a_int32_0, b1 );
 			c_int32_4p2 = _mm512_dpbusd_epi32( c_int32_4p2, a_int32_0, b2 );
