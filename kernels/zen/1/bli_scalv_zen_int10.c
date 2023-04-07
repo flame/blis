@@ -582,7 +582,7 @@ void bli_zdscalv_zen_int10
      (
        conj_t           conjalpha,
        dim_t            n,
-       double* restrict alpha,
+       dcomplex* restrict alpha,
        dcomplex* restrict x, inc_t incx,
        cntx_t* restrict cntx
      )
@@ -591,14 +591,21 @@ void bli_zdscalv_zen_int10
 	const dim_t n_elem_per_reg = 4;    // number of elements per register
 
 	double* restrict x0 = (double*) x;
-	const double alphac = *alpha;
+
+	/*
+		This kernel only performs the computation
+		when alpha is double from the BLAS layer
+		alpha is passed as double complex to adhere
+		to function pointer definition in BLIS
+	*/
+	const double alphac = (*alpha).real;
 
 	if ( incx == 1 )
 	{
 		__m256d alphav;
 		__m256d xv[15];
 
-		alphav = _mm256_broadcast_sd( alpha );
+		alphav = _mm256_broadcast_sd( &alphac );
 
 		for ( ; ( i + 29 ) < n; i += 30 )
 		{

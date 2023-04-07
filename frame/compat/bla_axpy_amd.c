@@ -259,24 +259,31 @@ void daxpy_blis_impl
  double*   y, const f77_int* incy
  )
 {
-  dim_t  n0;
-  double* x0;
-  double* y0;
-  inc_t  incx0;
-  inc_t  incy0;
+    dim_t  n_elem;
+    double* x0;
+    double* y0;
+    inc_t  incx0;
+    inc_t  incy0;
 
-  AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1)
-  AOCL_DTL_LOG_AXPY_INPUTS(AOCL_DTL_LEVEL_TRACE_1, 'D', *n, (double*)alpha, *incx, *incy)
-  /* Initialize BLIS. */
-  //    bli_init_auto();
+    AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1)
+    AOCL_DTL_LOG_AXPY_INPUTS(AOCL_DTL_LEVEL_TRACE_1, 'D', *n, (double*)alpha, *incx, *incy)
+    /* Initialize BLIS. */
+    // bli_init_auto();
 
-  /* Convert/typecast negative values of n to zero. */
-  if ( *n < 0 ) n0 = ( dim_t )0;
-  else              n0 = ( dim_t )(*n);
+    /* Convert/typecast negative values of n to zero. */
+    if ( *n < 0 ) n_elem = ( dim_t )0;
+    else          n_elem = ( dim_t )(*n);
 
-  /* If the input increments are negative, adjust the pointers so we can
-     use positive increments instead. */
-  if ( *incx < 0 )
+    // BLAS exception to return early when n <= 0 or alpha is 0.0
+    if(*n <= 0 || bli_deq0(*alpha))
+    {
+      AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
+      return;
+    }
+
+    /* If the input increments are negative, adjust the pointers so we can
+      use positive increments instead. */
+    if ( *incx < 0 )
     {
       /* The semantics of negative stride in BLAS are that the vector
          operand be traversed in reverse order. (Another way to think
@@ -290,176 +297,131 @@ void daxpy_blis_impl
          BLIS, if this backwards traversal is desired, the caller *must*
          pass in the address to the (n-1)th (i.e., the bottom-most or
          right-most) element along with a negative stride. */
-      x0    = ((double*)x) + (n0-1)*(-*incx);
+      x0    = ( (double*)x ) + ( n_elem - 1 ) * ( - (*incx) );
       incx0 = ( inc_t )(*incx);
     }
-  else
+    else
     {
       x0    = ((double*)x);
       incx0 = ( inc_t )(*incx);
     }
-  if ( *incy < 0 )
+    if ( *incy < 0 )
     {
-      y0    = ((double*)y) + (n0-1)*(-*incy);
+      y0    = ( (double*) y ) + ( n_elem - 1 )*( - (*incy) );
       incy0 = ( inc_t )(*incy);
     }
-  else
+    else
     {
       y0    = ((double*)y);
       incy0 = ( inc_t )(*incy);
     }
 
-  // This function is invoked on all architectures including ‘generic’.
-  // Non-AVX2+FMA3 platforms will use the kernels derived from the context.
-  if (bli_cpuid_is_avx2fma3_supported() == TRUE)
-  {
+    // Definition of function pointer
+    daxpyv_ker_ft axpyv_ker_ptr;
+
+    cntx_t *cntx = NULL;
+
+    // Query the architecture ID
+    arch_t arch_id_local = bli_arch_query_id();
+
+    // Pick the kernel based on the architecture ID
+    switch (arch_id_local)
+    {
+      case BLIS_ARCH_ZEN4:
+      case BLIS_ARCH_ZEN:
+      case BLIS_ARCH_ZEN2:
+      case BLIS_ARCH_ZEN3:
+
+          // AVX2 Kernel
+          axpyv_ker_ptr = bli_daxpyv_zen_int10;
+          break;
+
+      default:
+
+          // Query the context
+          cntx = bli_gks_query_cntx();
+
+          // Query the function pointer using the context
+          axpyv_ker_ptr = bli_cntx_get_l1v_ker_dt(BLIS_DOUBLE, BLIS_AXPYV_KER, cntx);
+    }
+
 #ifdef BLIS_ENABLE_OPENMP
-        // For sizes less than 100, optimal number of threads is 1, but
-        // due to the overhead of calling omp functions it is being done outside
-        // by directly calling daxpyv so as to get maximum performance.
-        if ( n0 <= 100 )
-        {
-		bli_daxpyv_zen_int10
-		  (
-			BLIS_NO_CONJUGATE,
-			n0,
-			(double*)alpha,
-			x0, incx0,
-			y0, incy0,
-			NULL
-		  );
-	}
-	else
-	{
-		rntm_t rntm_local;
-		bli_rntm_init_from_global( &rntm_local );
-            	dim_t nt = bli_rntm_num_threads( &rntm_local );
-            	if (nt <= 0)
-            	{
-                	// nt is less than one if BLIS manual setting of parallelism
-                	// has been used. Parallelism here will be product of values.
-                	dim_t jc, pc, ic, jr, ir;
-	        	jc = bli_rntm_jc_ways( &rntm_local );
-	        	pc = bli_rntm_pc_ways( &rntm_local );
-	        	ic = bli_rntm_ic_ways( &rntm_local );
-	        	jr = bli_rntm_jr_ways( &rntm_local );
-	        	ir = bli_rntm_ir_ways( &rntm_local );
-                	nt = jc*pc*ic*jr*ir;
-		}
-#ifdef AOCL_DYNAMIC
-            dim_t nt_ideal;
+    /*
+      Initializing the number of thread to one
+      to avoid compiler warnings
+    */
+    dim_t nt = 1;
 
-	    // Below tuning is based on Empirical Data collected on Genoa.
-	    // On Milan, perf. vs number of threads is similar, but boundaries might vary slightly.
+    /*
+      For the given problem size and architecture, the function
+      returns the optimum number of threads with AOCL dynamic enabled
+      else it returns the number of threads requested by the user.
+    */
+    bli_nthreads_l1
+    (
+      BLIS_AXPYV_KER,
+      BLIS_DOUBLE,
+      BLIS_DOUBLE,
+      arch_id_local,
+      n_elem,
+      &nt
+    );
 
-            if      ( n0 <= 10000 ) nt_ideal = 2;
-            else if ( n0 <= 250000 ) nt_ideal = 8;
-            else if ( n0 <= 750000 ) nt_ideal = 16;
-            else if ( n0 <= 2000000 ) nt_ideal = 32;
-            else                    nt_ideal = nt;
-
-            nt = bli_min( nt_ideal, nt );
+    if (nt == 1)
+    {
 #endif
-            dim_t n_elem_per_thrd = n0 / nt;
-            dim_t n_elem_rem = n0 % nt;
-	    _Pragma( "omp parallel num_threads(nt)" )
-            {
-                // Getting the actual number of threads that are spawned.
-                dim_t nt_real = omp_get_num_threads();
-                dim_t t_id = omp_get_thread_num();
-                // The actual number of threads spawned might be different
-                // from the predicted number of threads for which this parallel
-                // region is being generated. Thus, in such a case we are
-                // falling back to the Single-Threaded call.
-                if ( nt_real != nt )
-                {
-                    // More than one thread can still be spawned but since we
-                    // are falling back to the ST call, we are
-                    // calling the kernel from thread 0 only.
-                    if ( t_id == 0 )
-                    {
-			    bli_daxpyv_zen_int10
-				    (
-					BLIS_NO_CONJUGATE,
-					n0,
-					(double*)alpha,
-					x0, incx0,
-					y0, incy0,
-					NULL
-				  );
-                    }
-                }
-                else
-                {
-                    // The following conditions handle the optimal distribution of
-                    // load among the threads.
-                    // Say we have n0 = 50 & nt = 4.
-                    // So we get 12 ( n0 / nt ) elements per thread along with 2
-                    // remaining elements. Each of these remaining elements is given
-                    // to the last threads, respectively.
-                    // So, t0, t1, t2 and t3 gets 12, 12, 13 and 13 elements,
-                    // respectively.
-                    dim_t npt, offsetx0, offsety0;
-                    if ( t_id < ( nt - n_elem_rem ) )
-                    {
-                        npt = n_elem_per_thrd;
-			// Stride can be non-unit for both x and y vectors.
-                        offsetx0 = t_id * npt * incx0;
-			offsety0 = t_id * npt * incy0;
-                    }
-                    else
-                    {
-                        npt = n_elem_per_thrd + 1;
-			// Stride can be non-unit for both x and y vectors.
-                        offsetx0 = ( ( t_id * n_elem_per_thrd ) +
-                                  ( t_id - ( nt - n_elem_rem ) ) ) * incx0;
-			offsety0 = ( ( t_id * n_elem_per_thrd ) +
-                                  ( t_id - ( nt - n_elem_rem ) ) ) * incy0;
-                    }
-		    bli_daxpyv_zen_int10
-		    (
-			BLIS_NO_CONJUGATE,
-			npt,
-			(double*)alpha,
-			x0 + offsetx0, incx0,
-			y0 + offsety0, incy0,
-			NULL
-		    );
-                }
-            }
-	}
-#else //BLIS_ENABLE_OPENMP
+        axpyv_ker_ptr
+        (
+          BLIS_NO_CONJUGATE,
+          n_elem,
+          (double *)alpha,
+          x0, incx0,
+          y0, incy0,
+          cntx
+        );
 
-			bli_daxpyv_zen_int10
-			  (
-				BLIS_NO_CONJUGATE,
-				n0,
-				(double*)alpha,
-				x0, incx0,
-				y0, incy0,
-				NULL
-			  );
+        AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1)
 
-#endif //BLIS_ENABLE_OPENMP
-  }
-  else //if (bli_cpuid_is_avx2fma3_supported() == TRUE)
-  {
-      PASTEMAC2(d,axpyv,BLIS_TAPI_EX_SUF)
-      (
-        BLIS_NO_CONJUGATE,
-        n0,
-        (double*)alpha,
-        x0, incx0,
-        y0, incy0,
-        NULL,
-        NULL
-      );
+        return;
+#ifdef BLIS_ENABLE_OPENMP
+    }
 
-  } // if (bli_cpuid_is_avx2fma3_supported() == TRUE)
+    _Pragma("omp parallel num_threads(nt)")
+    {
+        dim_t start, length;
 
-  AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
-  /* Finalize BLIS. */
-  //    bli_finalize_auto();
+        // Get the thread ID
+        dim_t thread_id = omp_get_thread_num();
+
+        // Calculate the compute range for the current thread
+        bli_thread_vector_partition
+        (
+          n_elem,
+          nt,
+          &start, &length,
+          thread_id
+        );
+
+        // Adjust the local pointer for computation
+        double *x_thread_local = x0 + (start * incx0);
+        double *y_thread_local = y0 + (start * incy0);
+
+        // Invoke the function based on the kernel function pointer
+        axpyv_ker_ptr
+        (
+          BLIS_NO_CONJUGATE,
+          length,
+          (double *)alpha,
+          x_thread_local, incx0,
+          y_thread_local, incy0,
+          cntx
+        );
+    }
+#endif // BLIS_ENABLE_OPENMP
+
+    AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
+    /* Finalize BLIS. */
+    // bli_finalize_auto();
 }
 
 #ifdef BLIS_ENABLE_BLAS

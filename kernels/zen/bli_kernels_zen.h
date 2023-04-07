@@ -84,8 +84,9 @@ SCALV_KER_PROT( double,   d, scalv_zen_int )
 SCALV_KER_PROT( dcomplex, z, scalv_zen_int )
 
 // scalv (intrinsics unrolled x10)
-SCALV_KER_PROT( float,    s, scalv_zen_int10 )
-SCALV_KER_PROT( double,   d, scalv_zen_int10 )
+SCALV_KER_PROT( float,      s, scalv_zen_int10 )
+SCALV_KER_PROT( double,     d, scalv_zen_int10 )
+SCALV_KER_PROT( dcomplex,   z, dscalv_zen_int10 )
 
 // swapv (intrinsics)
 SWAPV_KER_PROT(float,   s, swapv_zen_int8 )
@@ -424,13 +425,4 @@ void bli_dznorm2fv_unb_var1_avx2
        dcomplex*   x, inc_t incx,
        double* norm,
        cntx_t*  cntx
-     );
-
-void bli_zdscalv_zen_int10
-     (
-       conj_t           conjalpha,
-       dim_t            n,
-       double* restrict alpha,
-       dcomplex* restrict x, inc_t incx,
-       cntx_t* restrict cntx
      );

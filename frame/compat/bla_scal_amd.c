@@ -248,7 +248,7 @@ void dscal_blis_impl
 {
     AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1)
     AOCL_DTL_LOG_SCAL_INPUTS(AOCL_DTL_LEVEL_TRACE_1, 'D', (void *)alpha, *n, *incx );
-    dim_t  n0;
+    dim_t  n_elem;
     double* x0;
     inc_t  incx0;
 
@@ -256,12 +256,17 @@ void dscal_blis_impl
     //bli_init_auto();
 
     /* Convert typecast negative values of n to zero. */
-    if ( *n < 0 ) n0 = ( dim_t )0;
-    else          n0 = ( dim_t )(*n);
+    if ( *n < 0 ) n_elem = ( dim_t )0;
+    else          n_elem = ( dim_t )(*n);
 
-    if (*n == 0 || alpha == NULL) {
-        AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
-        return;
+    /*
+      Return early when n <= 0 or incx <= 0 or alpha == 1.0 - BLAS exception
+      Return early when alpha pointer is NULL - BLIS exception
+    */
+    if (*n <= 0 || alpha == NULL || bli_deq1(*alpha) || incx <= 0)
+    {
+      AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
+      return;
     }
 
     /* If the input increments are negative, adjust the pointers so we can
@@ -281,7 +286,7 @@ void dscal_blis_impl
         pass in the address to the (n-1)th (i.e., the bottom-most or
         right-most) element along with a negative stride. */
 
-        x0    = (x) + (n0-1)*(-*incx);
+        x0    = (x) + (n_elem-1)*(-*incx);
         incx0 = ( inc_t )(*incx);
 
     }
@@ -291,145 +296,113 @@ void dscal_blis_impl
         incx0 = ( inc_t )(*incx);
     }
 
-    // This function is invoked on all architectures including ‘generic’.
-    // Non-AVX2+FMA3 platforms will use the kernels derived from the context.
-    if (bli_cpuid_is_avx2fma3_supported() == TRUE){
+     // Definition of function pointer
+    dscalv_ker_ft scalv_ker_ptr;
+
+    cntx_t *cntx = NULL;
+
+    // Query the architecture ID
+    arch_t arch_id_local = bli_arch_query_id();
+
+    // Pick the kernel based on the architecture ID
+    switch (arch_id_local)
+    {
+      case BLIS_ARCH_ZEN4:
+      case BLIS_ARCH_ZEN:
+      case BLIS_ARCH_ZEN2:
+      case BLIS_ARCH_ZEN3:
+
+          // AVX2 Kernel
+          scalv_ker_ptr = bli_dscalv_zen_int10;
+          break;
+
+      default:
+
+          // Query the context
+          cntx = bli_gks_query_cntx();
+
+          // Query the function pointer using the context
+          scalv_ker_ptr = bli_cntx_get_l1v_ker_dt(BLIS_DOUBLE, BLIS_SCALV_KER, cntx);
+    }
+
 #ifdef BLIS_ENABLE_OPENMP
-        // For sizes less than 10000, optimal number of threads is 1, but
-        // due to the overhead of calling omp functions it is being done outside
-        // by directly calling dscalv so as to get maximum performance.
-        if ( n0 <= 10000 )
-        {
-            bli_dscalv_zen_int10
-            (
-              BLIS_NO_CONJUGATE,
-              n0,
-              (double*) alpha,
-              x0, incx0,
-              NULL
-            );
-        }
-        else
-        {
-            rntm_t rntm_local;
-            bli_rntm_init_from_global( &rntm_local );
-            dim_t nt = bli_rntm_num_threads( &rntm_local );
+    /*
+      Initializing the number of thread to one
+      to avoid compiler warnings
+    */
+    dim_t nt = 1;
 
-            if (nt<=0)
-            {
-                // nt is less than one if BLIS manual setting of parallelism
-                // has been used. Parallelism here will be product of values.
-                dim_t jc, pc, ic, jr, ir;
-	        jc = bli_rntm_jc_ways( &rntm_local );
-	        pc = bli_rntm_pc_ways( &rntm_local );
-	        ic = bli_rntm_ic_ways( &rntm_local );
-	        jr = bli_rntm_jr_ways( &rntm_local );
-	        ir = bli_rntm_ir_ways( &rntm_local );
-                nt = jc*pc*ic*jr*ir;
-            }
+    /*
+      For the given problem size and architecture, the function
+      returns the optimum number of threads with AOCL dynamic enabled
+      else it returns the number of threads requested by the user.
+    */
+    bli_nthreads_l1
+    (
+      BLIS_SCALV_KER,
+      BLIS_DOUBLE,
+      BLIS_DOUBLE,
+      arch_id_local,
+      n_elem,
+      &nt
+    );
 
-#ifdef AOCL_DYNAMIC
-            dim_t nt_ideal;
-
-            if      ( n0 <= 20000 ) nt_ideal = 2;
-            else if ( n0 <= 50000 ) nt_ideal = 4;
-            else                    nt_ideal = 8;
-
-            nt = bli_min( nt_ideal, nt );
+    /*
+      If the number of optimum threads is 1, the OpenMP overhead
+      is avoided by calling the function directly
+    */
+    if (nt == 1)
+    {
 #endif
-
-            dim_t n_elem_per_thrd = n0 / nt;
-            dim_t n_elem_rem = n0 % nt;
-
-            _Pragma( "omp parallel num_threads(nt)" )
-            {
-                // Getting the actual number of threads that are spawned.
-                dim_t nt_real = omp_get_num_threads();
-                dim_t t_id = omp_get_thread_num();
-
-                // The actual number of threads spawned might be different
-                // from the predicted number of threads for which this parallel
-                // region is being generated. Thus, in such a case we are
-                // falling back to the Single-Threaded call.
-                if ( nt_real != nt )
-                {
-                    // More than one thread can still be spawned but since we
-                    // are falling back to the ST call, we are
-                    // calling the kernel from thread 0 only.
-                    if ( t_id == 0 )
-                    {
-                        bli_dscalv_zen_int10
-                        (
-                          BLIS_NO_CONJUGATE,
-                          n0,
-                          (double*) alpha,
-                          x0, incx0,
-                          NULL
-                        );
-                    }
-                }
-                else
-                {
-                    // The following conditions handle the optimal distribution of
-                    // load among the threads.
-                    // Say we have n0 = 50 & nt = 4.
-                    // So we get 12 ( n0 / nt ) elements per thread along with 2
-                    // remaining elements. Each of these remaining elements is given
-                    // to the last threads, respectively.
-                    // So, t0, t1, t2 and t3 gets 12, 12, 13 and 13 elements,
-                    // respectively.
-                    dim_t npt, offset;
-
-                    if ( t_id < ( nt - n_elem_rem ) )
-                    {
-                        npt = n_elem_per_thrd;
-                        offset = t_id * npt * incx0;
-                    }
-                    else
-                    {
-                        npt = n_elem_per_thrd + 1;
-                        offset = ( ( t_id * n_elem_per_thrd ) +
-                                  ( t_id - ( nt - n_elem_rem ) ) ) * incx0;
-                    }
-
-                    bli_dscalv_zen_int10
-                    (
-                      BLIS_NO_CONJUGATE,
-                      npt,
-                      (double*) alpha,
-                      x0 + offset, incx0,
-                      NULL
-                    );
-                }
-            }
-        }
-#else
-        // Default call to dscalv for single-threaded work
-        bli_dscalv_zen_int10
+        scalv_ker_ptr
         (
           BLIS_NO_CONJUGATE,
-          n0,
-          (double*) alpha,
+          n_elem,
+          (double *)alpha,
           x0, incx0,
-          NULL
+          cntx
         );
-#endif
-    }
-    else
-    {
-        PASTEMAC2(d,scalv,BLIS_TAPI_EX_SUF) \
-          ( \
-            BLIS_NO_CONJUGATE,\
-            n0, \
-            (double *)alpha,\
-            x0, incx0,\
-            NULL, \
-            NULL  \
-          );\
+
+        AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1)
+
+        return;
+#ifdef BLIS_ENABLE_OPENMP
     }
 
+    _Pragma("omp parallel num_threads(nt)")
+    {
+        dim_t start, length;
+
+        // Get the thread ID
+        dim_t thread_id = omp_get_thread_num();
+
+        // Calculate the compute range for the current thread
+        bli_thread_vector_partition
+        (
+          n_elem,
+          nt,
+          &start, &length,
+          thread_id
+        );
+
+        // Adjust the local pointer for computation
+        double *x_thread_local = x0 + (start * incx0);
+
+        // Invoke the function based on the kernel function pointer
+        scalv_ker_ptr
+        (
+          BLIS_NO_CONJUGATE,
+          length,
+          (double *)alpha,
+          x_thread_local, incx0,
+          cntx
+        );
+    }
+#endif
+
+
     /* Finalize BLIS. */
-//    bli_finalize_auto();
+    // bli_finalize_auto();
     AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1)
 }
 #ifdef BLIS_ENABLE_BLAS
@@ -452,17 +425,22 @@ void zdscal_blis_impl
 {
     AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1)
     AOCL_DTL_LOG_SCAL_INPUTS(AOCL_DTL_LEVEL_TRACE_1, 'Z', (void *) alpha, *n, *incx );
-    dim_t  n0;
+    dim_t  n_elem;
     dcomplex* x0;
     inc_t  incx0;
     /* Initialize BLIS. */
     //bli_init_auto();
 
     /* Convert/typecast negative values of n to zero. */
-    if ( *n < 0 ) n0 = ( dim_t )0;
-    else          n0 = ( dim_t )(*n);
+    if ( *n < 0 ) n_elem = ( dim_t )0;
+    else          n_elem = ( dim_t )(*n);
 
-    if (*n == 0 || alpha == NULL) {
+    /*
+      Return early when n <= 0 or incx <= 0 or alpha == 1.0 - BLAS exception
+      Return early when alpha pointer is NULL - BLIS exception
+    */
+    if (*n <= 0 || alpha == NULL || bli_deq1(*alpha) || incx <= 0)
+    {
       AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
       return;
     }
@@ -484,7 +462,7 @@ void zdscal_blis_impl
         pass in the address to the (n-1)th (i.e., the bottom-most or
         right-most) element along with a negative stride. */
 
-        x0    = (x) + (n0-1)*(-*incx);
+        x0    = (x) + (n_elem-1)*(-*incx);
         incx0 = ( inc_t )(*incx);
     }
     else
@@ -493,151 +471,114 @@ void zdscal_blis_impl
         incx0 = ( inc_t )(*incx);
     }
 
-    // This function is invoked on all architectures including ‘generic’.
-    // Non-AVX2+FMA3 platforms will use the kernels derived from the context.
-    if ( bli_cpuid_is_avx2fma3_supported() == TRUE )
+    dcomplex  alpha_cast;
+    alpha_cast.real = *alpha;
+    alpha_cast.imag = 0.0;
+
+    // Definition of function pointer
+    zscalv_ker_ft scalv_ker_ptr;
+
+    cntx_t *cntx = NULL;
+
+    // Query the architecture ID
+    arch_t arch_id_local = bli_arch_query_id();
+
+    // Pick the kernel based on the architecture ID
+    switch (arch_id_local)
     {
+      case BLIS_ARCH_ZEN4:
+      case BLIS_ARCH_ZEN:
+      case BLIS_ARCH_ZEN2:
+      case BLIS_ARCH_ZEN3:
+
+          // AVX2 Kernel
+          scalv_ker_ptr = bli_zdscalv_zen_int10;
+          break;
+
+      default:
+
+          // Query the context
+          cntx = bli_gks_query_cntx();
+
+          // Query the function pointer using the context
+          scalv_ker_ptr = bli_cntx_get_l1v_ker_dt(BLIS_DCOMPLEX, BLIS_SCALV_KER, cntx);
+    }
+
 #ifdef BLIS_ENABLE_OPENMP
-        // For sizes less than 10000, optimal number of threads is 1, but
-        // due to the overhead of calling omp functions it is being done outside
-        // by directly calling dscalv so as to get maximum performance.
-        if ( n0 <= 10000 )
-        {
-            bli_zdscalv_zen_int10
-            (
-              BLIS_NO_CONJUGATE,
-              n0,
-              (double*) alpha,
-              x0, incx0,
-              NULL
-            );
-        }
-        else
-        {
-            rntm_t rntm_local;
-            bli_rntm_init_from_global( &rntm_local );
-            dim_t nt = bli_rntm_num_threads( &rntm_local );
 
-            if (nt<=0)
-            {
-                // nt is less than one if BLIS manual setting of parallelism
-                // has been used. Parallelism here will be product of values.
-                dim_t jc, pc, ic, jr, ir;
-	        jc = bli_rntm_jc_ways( &rntm_local );
-	        pc = bli_rntm_pc_ways( &rntm_local );
-	        ic = bli_rntm_ic_ways( &rntm_local );
-	        jr = bli_rntm_jr_ways( &rntm_local );
-	        ir = bli_rntm_ir_ways( &rntm_local );
-                nt = jc*pc*ic*jr*ir;
-            }
+    /*
+      Initializing the number of thread to one
+      to avoid compiler warnings
+    */
+    dim_t nt = 1;
 
-#ifdef AOCL_DYNAMIC
-            dim_t nt_ideal;
+    /*
+      For the given problem size and architecture, the function
+      returns the optimum number of threads with AOCL dynamic enabled
+      else it returns the number of threads requested by the user.
+    */
+    bli_nthreads_l1
+    (
+      BLIS_SCALV_KER,
+      BLIS_DCOMPLEX,
+      BLIS_DOUBLE,
+      arch_id_local,
+      n_elem,
+      &nt
+    );
 
-            if      ( n0 <= 20000 )   nt_ideal = 4;
-            else if ( n0 <= 1000000 ) nt_ideal = 8;
-            else if ( n0 <= 2500000 ) nt_ideal = 12;
-            else if ( n0 <= 5000000 ) nt_ideal = 32;
-            else                      nt_ideal = 64;
-
-            nt = bli_min( nt_ideal, nt );
+    /*
+      If the number of optimum threads is 1, the OpenMP overhead
+      is avoided by calling the function directly
+    */
+    if (nt == 1)
+    {
 #endif
-            dim_t n_elem_per_thread = n0 / nt;
-            dim_t n_elem_rem = n0 % nt;
-
-            _Pragma( "omp parallel num_threads(nt)" )
-            {
-                // Getting the actual number of threads that are spawned.
-                dim_t nt_real = omp_get_num_threads();
-                dim_t t_id = omp_get_thread_num();
-
-                // The actual number of threads spawned might be different
-                // from the predicted number of threads for which this parallel
-                // region is being generated. Thus, in such a case we are
-                // falling back to the Single-Threaded call.
-                if ( nt_real != nt )
-                {
-                    // More than one thread can still be spawned but since we
-                    // are falling back to the ST call, we are
-                    // calling the kernel from thread 0 only.
-                    if ( t_id == 0 )
-                    {
-                        bli_zdscalv_zen_int10
-                        (
-                          BLIS_NO_CONJUGATE,
-                          n0,
-                          (double*) alpha,
-                          x0, incx0,
-                          NULL
-                        );
-                    }
-                }
-                else
-                {
-                    // The following conditions handle the optimal distribution of
-                    // load among the threads.
-                    // Say we have n0 = 50 & nt = 4.
-                    // So we get 12 ( n0 / nt ) elements per thread along with 2
-                    // remaining elements. Each of these remaining elements is given
-                    // to the last threads, respectively.
-                    // So, t0, t1, t2 and t3 gets 12, 12, 13 and 13 elements,
-                    // respectively.
-                    dim_t npt, offset;
-
-                    if ( t_id < ( nt - n_elem_rem ) )
-                    {
-                        npt = n_elem_per_thread;
-                        offset = t_id * npt * incx0;
-                    }
-                    else
-                    {
-                        npt = n_elem_per_thread + 1;
-                        offset = ( ( t_id * n_elem_per_thread ) +
-                                  ( t_id - ( nt - n_elem_rem ) ) ) * incx0;
-                    }
-
-                    bli_zdscalv_zen_int10
-                    (
-                      BLIS_NO_CONJUGATE,
-                      npt,
-                      (double *) alpha,
-                      x0 + offset, incx0,
-                      NULL
-                    );
-                }
-            }
-        }
-#else
-        // Default call to zdscalv for single-threaded work
-        bli_zdscalv_zen_int10
+        scalv_ker_ptr
         (
           BLIS_NO_CONJUGATE,
-          n0,
-          (double *) alpha,
+          n_elem,
+          (dcomplex *)alpha,
           x0, incx0,
-          NULL
+          cntx
         );
-#endif
-    }
-    else
-    {
-        // Sub-optimal implementation for zdscal
-        // by casting alpha to the double complex domain and
-        // calling the zscal
-        dcomplex  alpha_cast;
-        PASTEMAC2(d,z,copys)( *alpha, alpha_cast );
 
-        /* Call BLIS interface. */ \
-        PASTEMAC2(z,scalv,BLIS_TAPI_EX_SUF) \
-        ( \
-          BLIS_NO_CONJUGATE, \
-          n0, \
-          &alpha_cast, \
-          x0, incx0, \
-          NULL, \
-          NULL  \
-        ); \
+        AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1)
+
+        return;
+#ifdef BLIS_ENABLE_OPENMP
     }
+
+    _Pragma("omp parallel num_threads(nt)")
+    {
+        dim_t start, length;
+
+        // Get the thread ID
+        dim_t thread_id = omp_get_thread_num();
+
+        // Calculate the compute range for the current thread
+        bli_thread_vector_partition
+        (
+          n_elem,
+          nt,
+          &start, &length,
+          thread_id
+        );
+
+        // Adjust the local pointer for computation
+        dcomplex *x_thread_local = x0 + (start * incx0);
+
+        // Invoke the function based on the kernel function pointer
+        scalv_ker_ptr
+        (
+          BLIS_NO_CONJUGATE,
+          length,
+          (dcomplex *)&alpha_cast,
+          x_thread_local, incx0,
+          cntx
+        );
+    }
+#endif
 
     AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1)
 }

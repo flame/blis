@@ -259,7 +259,7 @@ double ddot_blis_impl
 {
     AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1);
     AOCL_DTL_LOG_DOTV_INPUTS(AOCL_DTL_LEVEL_TRACE_1, 'D', *n, *incx, *incy);
-    dim_t  n0;
+    dim_t  n_elem;
     double* x0;
     double* y0;
     inc_t  incx0;
@@ -270,8 +270,15 @@ double ddot_blis_impl
 //  bli_init_auto();
 
     /* Convert/typecast negative values of n to zero. */
-    if ( *n < 0 ) n0 = ( dim_t )0;
-    else              n0 = ( dim_t )(*n);
+    if ( *n < 0 ) n_elem = ( dim_t )0;
+    else          n_elem = ( dim_t )(*n);
+
+    // BLAS Exception: Return early when n <= 0.
+    if(n_elem <= 0)
+    {
+        AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1)
+        return 0.0;
+    }
 
     /* If the input increments are negative, adjust the pointers so we can
        use positive increments instead. */
@@ -291,7 +298,7 @@ double ddot_blis_impl
         pass in the address to the (n-1)th (i.e., the bottom-most or
         right-most) element along with a negative stride. */
 
-        x0    = ((double*)x) + (n0-1)*(-*incx);
+        x0    = ((double*)x) + (n_elem-1)*(-*incx);
         incx0 = ( inc_t )(*incx);
 
     }
@@ -303,7 +310,7 @@ double ddot_blis_impl
 
     if ( *incy < 0 )
     {
-        y0    = ((double*)y) + (n0-1)*(-*incy);
+        y0    = ((double*)y) + (n_elem-1)*(-*incy);
         incy0 = ( inc_t )(*incy);
 
     }
@@ -313,198 +320,188 @@ double ddot_blis_impl
         incy0 = ( inc_t )(*incy);
     }
 
-    // This function is invoked on all architectures including ‘generic’.
-    // Non-AVX2+FMA3 platforms will use the kernels derived from the context.
-    if (bli_cpuid_is_avx2fma3_supported() == TRUE)
+     // Definition of function pointer
+    ddotv_ker_ft dotv_ker_ptr;
+
+    cntx_t *cntx = NULL;
+
+    // Query the architecture ID
+    arch_t arch_id_local = bli_arch_query_id();
+
+    // Pick the kernel based on the architecture ID
+    switch (arch_id_local)
     {
-        /* Call BLIS kernel. */
+      case BLIS_ARCH_ZEN4:
+      case BLIS_ARCH_ZEN:
+      case BLIS_ARCH_ZEN2:
+      case BLIS_ARCH_ZEN3:
+
+          // AVX2 Kernel
+          dotv_ker_ptr = bli_ddotv_zen_int10;
+          break;
+
+      default:
+
+          // Query the context
+          cntx = bli_gks_query_cntx();
+
+          // Query the function pointer using the context
+          dotv_ker_ptr = bli_cntx_get_l1v_ker_dt(BLIS_DOUBLE, BLIS_DOTV_KER, cntx);
+    }
+
 #ifdef BLIS_ENABLE_OPENMP
-        // For sizes less than or equal to 2500, optimal number of threads is 1,
-        // but due to the overhead of calling omp functions it is being done
-        // outside by directly calling ddotv so as to get maximum performance.
-        if ( n0 <= 2500 )
-        {
-            bli_ddotv_zen_int10
-            (
-                BLIS_NO_CONJUGATE,
-                BLIS_NO_CONJUGATE,
-                n0,
-                x0, incx0,
-                y0, incy0,
-                &rho,
-                NULL
-            );
-        }
-        else
-        {
-            rntm_t rntm;
-            double* rho_temp = NULL;
-            dim_t nt, n0_per_thread, n0_rem, nt_pred;
-            dim_t i;
-            rho = 0;
-            // Initialize a local runtime with global settings.
-            bli_rntm_init_from_global(&rntm);
+    /*
+      Initializing the number of thread to one
+      to avoid compiler warnings
+    */
+    dim_t nt = 1;
 
-            // Query the total number of threads from the rntm_t object.
-            nt = bli_rntm_num_threads(&rntm);
+    /*
+      For the given problem size and architecture, the function
+      returns the optimum number of threads with AOCL dynamic enabled
+      else it returns the number of threads requested by the user.
+    */
+    bli_nthreads_l1
+    (
+      BLIS_DOTV_KER,
+      BLIS_DOUBLE,
+      BLIS_DOUBLE,
+      arch_id_local,
+      n_elem,
+      &nt
+    );
 
-            if (nt<=0)
-            {
-                // nt is less than one if BLIS manual setting of parallelism
-                // has been used. Parallelism here will be product of values.
-                dim_t jc, pc, ic, jr, ir;
-	        jc = bli_rntm_jc_ways( &rntm );
-	        pc = bli_rntm_pc_ways( &rntm );
-	        ic = bli_rntm_ic_ways( &rntm );
-	        jr = bli_rntm_jr_ways( &rntm );
-	        ir = bli_rntm_ir_ways( &rntm );
-                nt = jc*pc*ic*jr*ir;
-            }
-
-            mem_t local_mem_buf = { 0 };
-
-            bli_membrk_rntm_set_membrk(&rntm);
-            siz_t buffer_size = bli_pool_block_size(bli_membrk_pool(
-                bli_packbuf_index(BLIS_BITVAL_BUFFER_FOR_A_BLOCK),
-                bli_rntm_membrk(&rntm)));
-
-            if ( (nt * sizeof(double)) > buffer_size )
-                return BLIS_NOT_YET_IMPLEMENTED;
-
-            bli_membrk_acquire_m(&rntm,
-                buffer_size,
-                BLIS_BITVAL_BUFFER_FOR_A_BLOCK,
-                &local_mem_buf);
-            if ( FALSE == bli_mem_is_alloc(&local_mem_buf) )
-                return BLIS_NULL_POINTER;
-            rho_temp = bli_mem_buffer(&local_mem_buf);
-            if ( NULL == rho_temp ) return BLIS_NULL_POINTER;
-
-            // Initializing rho_temp array to 0
-            for ( i = 0; i < nt; i++ )
-            {
-                rho_temp[i] = 0;
-            }
-
-#ifdef AOCL_DYNAMIC
-            // Calculate the optimal number of threads required
-            // based on input dimension. These conditions are taken
-            // after cheking the performance for range of dimensions
-            // and number of threads
-            if ( n0 <= 5000 ) nt_pred = 4;
-            else if ( n0 <= 15000 ) nt_pred = 8;
-            else if ( n0 <= 40000 ) nt_pred = 16;
-            else if ( n0 <= 200000 ) nt_pred = 32;
-            else nt_pred = nt;
-            nt = bli_min(nt_pred, nt);
+    /*
+      If the number of optimum threads is 1, the OpenMP overhead
+      is avoided by calling the function directly
+    */
+    if (nt == 1)
+    {
 #endif
-            // Calculating the input sizes per thread
-            n0_per_thread = n0 / nt;
-            n0_rem = n0 % nt;
-
-            _Pragma( "omp parallel num_threads(nt)" )
-            {
-                // Getting the actual number of threads that are spawned.
-                dim_t nt_real = omp_get_num_threads();
-                dim_t t_id = omp_get_thread_num();
-
-                // The actual number of threads spawned might be different
-                // from the predicted number of threads for which this parallel
-                // region is being generated. Thus, in such a case we are
-                // falling back to the Single-Threaded call.
-                if ( nt_real != nt )
-                {
-                    // More than one thread can still be spawned but since we
-                    // are falling back to the ST call, we are
-                    // calling the kernel from thread 0 only.
-                    if ( t_id == 0 )
-                    {
-                        bli_ddotv_zen_int10
-                        (
-                          BLIS_NO_CONJUGATE,
-                          BLIS_NO_CONJUGATE,
-                          n0,
-                          x0, incx0,
-                          y0, incy0,
-                          rho_temp,
-                          NULL
-                        );
-                    }
-                }
-                else
-                {
-                    // The following conditions handle the optimal distribution
-                    // of load among the threads.
-                    // Say we have n0 = 50 & nt = 4.
-                    // So we get 12 ( n0 / nt ) elements per thread along with 2
-                    // remaining elements. Each of these remaining elements is
-                    // given to the last threads, respectively.
-                    // So, t0, t1, t2 and t3 gets 12, 12, 13 and 13 elements,
-                    // respectively.
-                    dim_t npt, offset;
-                    if ( t_id < ( nt - n0_rem ) )
-                    {
-                        npt = n0_per_thread;
-                        offset = t_id * npt;
-                    }
-                    else
-                    {
-                        npt = n0_per_thread + 1;
-                        offset = ( ( t_id * n0_per_thread ) +
-                                ( t_id - ( nt - n0_rem ) ) );
-                    }
-                    bli_ddotv_zen_int10
-                    (
-                      BLIS_NO_CONJUGATE,
-                      BLIS_NO_CONJUGATE,
-                      npt,
-                      x0 + ( offset * incx0 ), incx0,
-                      y0 + ( offset * incy0 ), incy0,
-                      rho_temp + t_id,
-                      NULL
-                    );
-                }
-            }
-
-            // Accumulating the nt thread outputs to rho
-            for ( i = 0; i < nt; i++ )
-                rho += rho_temp[i];
-
-            // Releasing the allocated memory
-            bli_membrk_release(&rntm, &local_mem_buf);
-        }
-#else
-        // Default call to ddotv for single-threaded work
-        bli_ddotv_zen_int10
+        dotv_ker_ptr
         (
-            BLIS_NO_CONJUGATE,
-            BLIS_NO_CONJUGATE,
-            n0,
-            x0, incx0,
-            y0, incy0,
-            &rho,
-            NULL
+          BLIS_NO_CONJUGATE,
+          BLIS_NO_CONJUGATE,
+          n_elem,
+          x0, incx0,
+          y0, incy0,
+          &rho,
+          cntx
         );
+
+        AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1)
+
+        return rho;
+#ifdef BLIS_ENABLE_OPENMP
+    }
+
+    /*
+      Here we know that more than one thread needs to be spawned.
+
+      In such a case, each thread will need its own rho value to
+      do the accumulation. These temporary rho's will be accumulated
+      in the end.
+    */
+    rntm_t rntm;
+    mem_t mem_buf_rho;
+    double *rho_temp = NULL;
+    rho = 0.0;
+
+    /*
+      Initialize mem pool buffer to NULL and size to 0
+      "buf" and "size" fields are assigned once memory
+      is allocated from the pool in bli_membrk_acquire_m().
+      This will ensure bli_mem_is_alloc() will be passed on
+      an allocated memory if created or a NULL .
+    */
+    mem_buf_rho.pblk.buf = NULL;
+    mem_buf_rho.pblk.block_size = 0;
+    mem_buf_rho.buf_type = 0;
+    mem_buf_rho.size = 0;
+    mem_buf_rho.pool = NULL;
+
+    /*
+        In order to get the buffer from pool via rntm access to
+        memory broker is needed.Following are initializations
+        for rntm
+    */
+    bli_rntm_init_from_global(&rntm);
+    bli_rntm_set_num_threads_only(1, &rntm);
+    bli_membrk_rntm_set_membrk(&rntm);
+
+    // Calculate the size required for rho buffer.
+    size_t buffer_size = nt * sizeof(double);
+
+#ifdef BLIS_ENABLE_MEM_TRACING
+    printf("bli_ddotv_unf_var1(): get mem pool block\n");
 #endif
+
+    /*
+      Acquire a buffer (nt * size(double)) from the memory broker
+      and save the associated mem_t entry to mem_buf_rho.
+    */
+    bli_membrk_acquire_m(&rntm,
+                         buffer_size,
+                         BLIS_BITVAL_BUFFER_FOR_A_BLOCK,
+                         &mem_buf_rho);
+
+    /* Continue if rho buffer memory is allocated*/
+    if ((bli_mem_is_alloc(&mem_buf_rho)))
+    {
+        rho_temp = bli_mem_buffer(&mem_buf_rho);
     }
     else
     {
-        /* Call BLIS interface. */
-        PASTEMAC2(d,dotv,BLIS_TAPI_EX_SUF)
+        nt = 1;
+        rho_temp = &rho;
+    }
+
+    _Pragma("omp parallel num_threads(nt)")
+    {
+        dim_t start, length;
+
+        // Get the thread ID
+        dim_t thread_id = omp_get_thread_num();
+
+        // Calculate the compute range for the current thread
+        bli_thread_vector_partition
         (
-        BLIS_NO_CONJUGATE,
-        BLIS_NO_CONJUGATE,
-        n0,
-        x0, incx0,
-        y0, incy0,
-        &rho,
-        NULL,
-        NULL
+          n_elem,
+          nt,
+          &start, &length,
+          thread_id
+        );
+
+        // Adjust the local pointer for computation
+        double *x_thread_local = x0 + (start * incx0);
+        double *y_thread_local = y0 + (start * incy0);
+
+        // Invoke the function based on the kernel function pointer
+        dotv_ker_ptr
+        (
+          BLIS_NO_CONJUGATE,
+          BLIS_NO_CONJUGATE,
+          length,
+          x_thread_local, incx0,
+          y_thread_local, incy0,
+          rho_temp + thread_id,
+          cntx
         );
     }
 
+    // Accumulating the nt thread outputs to rho
+    for ( dim_t i = 0; i < nt; i++ )
+        rho += rho_temp[i];
+
+    // Releasing the allocated memory if it was allocated
+    if( bli_mem_is_alloc(&mem_buf_rho))
+    {
+        bli_membrk_release(&rntm, &mem_buf_rho);
+    }
+#endif
+
     /* Finalize BLIS. */
-//  bli_finalize_auto();
+    //  bli_finalize_auto();
     AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
     return rho;
 }

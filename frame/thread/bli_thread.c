@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2018 - 22, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2018 - 23, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -2010,3 +2010,89 @@ void bli_thread_update_rntm_from_env
 #endif
 }
 
+/*
+	Functionality:
+	--------------
+	This function calculated the amount of work the calling thread is supposed
+	to perform on a vector.
+
+	Function signature
+	-------------------
+
+	This function takes the following input:
+
+	* n_elem - Number of element in the vector
+	* t_count - Number of threads in the group
+	* start - Vector start index (where the thread should start its processing)
+	* compute_len - Size of the chunk it needs to process
+	* thread_id - ID of the thread
+
+	Exception
+	----------
+
+	None
+*/
+void bli_thread_vector_partition
+     (
+       dim_t 	n_elem,
+       dim_t	t_count,
+       dim_t* 	start,
+       dim_t* 	compute_len,
+       dim_t 	thread_id
+     )
+{
+	dim_t thread_min_work = n_elem / t_count;
+	dim_t remainder_work = n_elem % t_count;
+
+	// In this case the length of the vector will be remainder_work
+	if (thread_min_work == 0)
+	{
+		/*
+			Threads with ID less than the length of the vector will
+			perform of the compute while the other threads will be idle
+		*/
+		if (thread_id < remainder_work)
+		{
+			  *start = thread_id;
+			  *compute_len = 1;
+		}
+		else
+		{
+			  *start = 0;
+			  *compute_len = 0;
+		}
+	}
+	else
+	{
+		if ( remainder_work == 0 )
+		{
+			*start = thread_min_work * thread_id;
+			*compute_len = thread_min_work;
+		}
+		else
+		{
+			/*
+				Scenario
+				--------
+
+				10 elements, 4 threads
+
+				Thread 0 - start = 0, compute_len = 2
+				Thread 1 - start = 2, compute_len = 2
+				Thread 2 - start = 4, compute_len = 3
+				Thread 3 - start = 7, compute_len = 3
+			*/
+			if (thread_id < thread_min_work)
+			{
+				*start = thread_min_work * thread_id;
+				*compute_len = thread_min_work;
+			}
+			else
+			{
+				*start = (thread_min_work * thread_id) +
+							(thread_id - (t_count - remainder_work));
+				*compute_len = thread_min_work + 1;
+			}
+		}
+	}
+}

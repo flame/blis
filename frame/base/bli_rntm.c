@@ -1563,4 +1563,437 @@ err_t bli_smart_threading_sup
 	}
 	return ret_val;
 }
+
+/*
+	Functionality:
+	--------------
+	This function decides the AOCL dynamic logic for L1 dscalv API based on the
+	architecture ID and size of the input variable.
+
+	Function signature
+	-------------------
+
+	This function takes the following input:
+
+	* 'arch_id' - Architecture ID of the system (copy of BLIS global arch id)
+	* 'n_elem' - Number of elements in the vector
+	* 'nt_ideal' - Ideal number of threads
+
+	The function has been made static to restrict its scope.
+
+	Exception
+	----------
+
+	1. For non-Zen architectures, return -1. The expectation is that this is handled
+	   in the higher layer
+*/
+static void aocl_dscalv_dynamic
+     (
+       arch_t arch_id,
+       dim_t  n_elem,
+       dim_t* nt_ideal
+     )
+{
+
+	/*
+		Pick the AOCL dynamic logic based on the
+		architecture ID
+	*/
+	switch (arch_id)
+	{
+		case BLIS_ARCH_ZEN4:
+		case BLIS_ARCH_ZEN:
+		case BLIS_ARCH_ZEN2:
+		case BLIS_ARCH_ZEN3:
+
+			if ( n_elem <= 10000 )
+				*nt_ideal = 1;
+			else if (n_elem <= 20000)
+				*nt_ideal = 2;
+			else if (n_elem <= 50000)
+				*nt_ideal = 4;
+			else
+				*nt_ideal = 8;
+
+			break;
+
+		default:
+			/*
+				Without this default condition, compiler will throw
+				a warning saying other conditions are not handled
+			*/
+
+			/*
+				For other architectures, AOCL dynamic does not make any change
+			*/
+			*nt_ideal = -1;
+	}
+}
+
+/*
+	Functionality:
+	--------------
+	This function decides the AOCL dynamic logic for L1 zdscalv API based on the
+	architecture ID and size of the input variable.
+
+	Function signature
+	-------------------
+
+	This function takes the following input:
+
+	* 'arch_id' - Architecture ID of the system (copy of BLIS global arch id)
+	* 'n_elem' - Number of elements in the vector
+	* 'nt_ideal' - Ideal number of threads
+
+	The function has been made static to restrict its scope.
+
+	Exception
+	----------
+
+	1. For non-Zen architectures, return -1. The expectation is that this is handled
+	   in the higher layer
+*/
+static void aocl_zdscalv_dynamic
+     (
+       arch_t arch_id,
+       dim_t  n_elem,
+       dim_t* nt_ideal
+     )
+{
+
+	/*
+		Pick the AOCL dynamic logic based on the
+		architecture ID
+	*/
+	switch (arch_id)
+	{
+		case BLIS_ARCH_ZEN4:
+		case BLIS_ARCH_ZEN:
+		case BLIS_ARCH_ZEN2:
+		case BLIS_ARCH_ZEN3:
+
+			if ( n_elem <= 10000)
+				*nt_ideal = 1;
+			else if (n_elem <= 20000)
+				*nt_ideal = 4;
+			else if (n_elem <= 1000000)
+				*nt_ideal = 8;
+			else if (n_elem <= 2500000)
+				*nt_ideal = 12;
+			else if (n_elem <= 5000000)
+				*nt_ideal = 32;
+			else
+				*nt_ideal = 64;
+
+		default:
+			/*
+				Without this default condition, compiler will throw
+				a warning saying other conditions are not handled
+			*/
+
+			/*
+				For other architectures, AOCL dynamic does not make any change
+			*/
+			*nt_ideal = -1;
+	}
+}
+
+/*
+	Functionality:
+	--------------
+	This function decides the AOCL dynamic logic for L1 daxpyv API based on the
+	architecture ID and size of the input variable.
+
+	Function signature
+	-------------------
+
+	This function takes the following input:
+
+	* 'arch_id' - Architecture ID of the system (copy of BLIS global arch id)
+	* 'n_elem' - Number of elements in the vector
+	* 'nt_ideal' - Ideal number of threads
+
+	The function has been made static to restrict its scope.
+
+	Exception
+	----------
+
+	1. For non-Zen architectures, return -1. The expectation is that this is handled
+	   in the higher layer
+*/
+static void aocl_daxpyv_dynamic
+     (
+       arch_t arch_id,
+       dim_t  n_elem,
+       dim_t* nt_ideal
+     )
+{
+	/*
+		Pick the AOCL dynamic logic based on the
+		architecture ID
+	*/
+	switch (arch_id)
+	{
+		case BLIS_ARCH_ZEN4:
+		case BLIS_ARCH_ZEN:
+		case BLIS_ARCH_ZEN2:
+		case BLIS_ARCH_ZEN3:
+
+			if ( n_elem <= 100 )
+				*nt_ideal = 1;
+			else if (n_elem <= 10000)
+				*nt_ideal = 2;
+			else if (n_elem <= 250000)
+				*nt_ideal = 8;
+			else if (n_elem <= 750000)
+				*nt_ideal = 16;
+			else if (n_elem <= 2000000)
+				*nt_ideal = 32;
+			else
+				// For sizes in this range, AOCL dynamic does not make any change
+				*nt_ideal = -1;
+
+			break;
+
+		default:
+			/*
+				Without this default condition, compiler will throw
+				a warning saying other conditions are not handled
+			*/
+
+			/*
+				For other architectures, AOCL dynamic does not make any change
+			*/
+			*nt_ideal = -1;
+	}
+}
+
+/*
+	Functionality:
+	--------------
+	This function decides the AOCL dynamic logic for L1 ddotv API based on the
+	architecture ID and size of the input variable.
+
+	Function signature
+	-------------------
+
+	This function takes the following input:
+
+	* 'arch_id' - Architecture ID of the system (copy of BLIS global arch id)
+	* 'n_elem' - Number of elements in the vector
+	* 'nt_ideal' - Ideal number of threads
+
+	The function has been made static to restrict its scope.
+
+	Exception
+	----------
+
+	1. For non-Zen architectures, return -1. The expectation is that this is handled
+	   in the higher layer
+*/
+static void aocl_ddotv_dynamic
+     (
+       arch_t arch_id,
+       dim_t  n_elem,
+       dim_t* nt_ideal
+     )
+{
+	/*
+		Pick the AOCL dynamic logic based on the
+		architecture ID
+	*/
+	switch (arch_id)
+	{
+		case BLIS_ARCH_ZEN4:
+		case BLIS_ARCH_ZEN:
+		case BLIS_ARCH_ZEN2:
+		case BLIS_ARCH_ZEN3:
+
+			if ( n_elem <= 2500 )
+				*nt_ideal = 1;
+			else if (n_elem <= 5000)
+				*nt_ideal = 4;
+			else if (n_elem <= 15000)
+				*nt_ideal = 8;
+			else if (n_elem <= 40000)
+				*nt_ideal = 16;
+			else if (n_elem <= 200000)
+				*nt_ideal = 32;
+			else
+				// For sizes in this range, AOCL dynamic does not make any change
+				*nt_ideal = -1;
+
+			break;
+
+		default:
+			/*
+				Without this default condition, compiler will throw
+				a warning saying other conditions are not handled
+			*/
+
+			/*
+				For other architectures, AOCL dynamic does not make any change
+			*/
+			*nt_ideal = -1;
+	}
+}
+
 #endif // AOCL_DYNAMIC
+
+/*
+	Functionality:
+	--------------
+
+	This function does the following:
+	1. Reads the number of threads requested by the user from the rntm variable
+	2. Acts as the gateway to the AOCL dynamic logic if AOCL dynamic is enabled
+	   and alters the count of the number of threads accordingly
+
+	Function signature
+	-------------------
+
+	This function takes the following input:
+
+	* 'ker_id' - ID of kernel invoking this function
+	* 'datatype_a' - Datatype 1 of kernel
+	* 'datatype_b' - Datatype 2 of kernel
+	* 'arch_id' - Architecture ID of the system (copy of BLIS global arch id)
+	* 'n_elem' - Number of elements in the vector
+	* 'nt_ideal' - Ideal number of threads
+
+	Exception
+	----------
+
+	None
+*/
+void bli_nthreads_l1
+     (
+       l1vkr_t  ker_id,
+       num_t    data_type_a,
+       num_t    data_type_b,
+       arch_t   arch_id,
+       dim_t    n_elem,
+       dim_t*   nt_ideal
+     )
+{
+#ifdef AOCL_DYNAMIC
+	/*
+		This code sections dispatches the AOCL dynamic logic kernel for
+		L1 APIs based on the kernel ID and the data type.
+	*/
+	// Function pointer to AOCL Dynamic logic kernel
+	void (*aocl_dynamic_func_l1)(arch_t, dim_t, dim_t* ) = NULL;
+
+	// Pick the aocl dynamic thread decision kernel based on the kernel ID
+	switch (ker_id)
+	{
+		case BLIS_SCALV_KER:
+
+			/*
+				When input data types do not match the call is from mixed precision
+			*/
+			if (data_type_a != data_type_b)
+			{
+				// Function for ZDSCALV
+				aocl_dynamic_func_l1 = aocl_zdscalv_dynamic;
+			}
+			else
+			{
+				// Function for DSCALV
+				aocl_dynamic_func_l1 = aocl_dscalv_dynamic;
+			}
+
+			break;
+
+		case BLIS_AXPYV_KER:
+
+			// Function for DAXPYV
+			aocl_dynamic_func_l1 = aocl_daxpyv_dynamic;
+
+			break;
+
+		case BLIS_DOTV_KER:
+
+			// Function for DDOTV
+			aocl_dynamic_func_l1 = aocl_ddotv_dynamic;
+
+			break;
+
+		default:
+			/*
+				For kernels that do no have AOCL dynamic logic,
+				use the number of threads requested by the user.
+			*/
+			*nt_ideal = -1;
+	}
+
+	/*
+		For APIs that do not have AOCL dynamic
+		logic, aocl_dynamic_func_l1 will be NULL.
+	*/
+	if( aocl_dynamic_func_l1 != NULL)
+	{
+		// Call the AOCL dynamic logic kernel
+		aocl_dynamic_func_l1
+		(
+			arch_id,
+			n_elem,
+			nt_ideal
+		);
+
+		if (*nt_ideal == 1)
+		{
+			// Return early when the number of threads is 1
+			return;
+		}
+	}
+
+#endif
+	// Initialized to avoid compiler warning
+	rntm_t rntm_local;
+
+	// Initialize a local runtime with global settings.
+	bli_rntm_init_from_global(&rntm_local);
+
+	// Query the total number of threads from the rntm_t object.
+	dim_t nt_rntm = bli_rntm_num_threads(&rntm_local);
+
+	if (nt_rntm <= 0)
+	{
+		// nt is less than one if BLIS manual setting of parallelism
+		// has been used. Parallelism here will be product of values.
+		nt_rntm = bli_rntm_calc_num_threads(&rntm_local);
+	}
+
+#ifdef AOCL_DYNAMIC
+
+	// Calculate the actual number of threads that will be spawned
+	if (*nt_ideal != -1)
+	{
+		// The if block is executed for all Zen architectures
+		*nt_ideal = bli_min(nt_rntm, *nt_ideal);
+	}
+	else
+	{
+		/*
+			For non-Zen architectures and very large sizes,
+			spawn the actual number of threads requested
+		*/
+		*nt_ideal = nt_rntm;
+	}
+
+	/*
+	  When the number of element to be processed is less
+	  than the number of threads spawn n_elem number of threads.
+	*/
+	if (n_elem < *nt_ideal)
+	{
+		*nt_ideal = n_elem;
+	}
+#else
+
+	// Calculate the actual number of threads that will be spawned
+	*nt_ideal = nt_rntm;
+
+#endif
+}
