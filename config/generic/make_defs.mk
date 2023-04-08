@@ -70,6 +70,7 @@ CKVECFLAGS     :=
 else
 ifeq ($(CC_VENDOR),clang)
 CKVECFLAGS     :=
+else
 ifeq ($(CC_VENDOR),nvc)
 CKVECFLAGS     :=
 else
