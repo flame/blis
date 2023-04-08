@@ -56,17 +56,22 @@ typedef union
 
 void bli_saxpyf_zen_int_8
      (
-       conj_t           conja,
-       conj_t           conjx,
-       dim_t            m,
-       dim_t            b_n,
-       float*  restrict alpha,
-       float*  restrict a, inc_t inca, inc_t lda,
-       float*  restrict x, inc_t incx,
-       float*  restrict y, inc_t incy,
-       cntx_t*          cntx
+             conj_t  conja,
+             conj_t  conjx,
+             dim_t   m,
+             dim_t   b_n,
+       const void*   alpha0,
+       const void*   a0, inc_t inca, inc_t lda,
+       const void*   x0, inc_t incx,
+             void*   y0, inc_t incy,
+       const cntx_t* cntx
      )
 {
+	const float* restrict alpha = alpha0;
+	const float* restrict a     = a0;
+	const float* restrict x     = x0;
+	      float* restrict y     = y0;
+
 	const dim_t      fuse_fac       = 8;
 
 	const dim_t      n_elem_per_reg = 8;
@@ -75,17 +80,6 @@ void bli_saxpyf_zen_int_8
 	dim_t            i;
 	dim_t            m_viter;
 	dim_t            m_left;
-
-	float*  restrict a0;
-	float*  restrict a1;
-	float*  restrict a2;
-	float*  restrict a3;
-	float*  restrict a4;
-	float*  restrict a5;
-	float*  restrict a6;
-	float*  restrict a7;
-
-	float*  restrict y0;
 
 	v8sf_t           chi0v, chi1v, chi2v, chi3v;
 	v8sf_t           chi4v, chi5v, chi6v, chi7v;
@@ -104,14 +98,14 @@ void bli_saxpyf_zen_int_8
 	// operation as a loop over axpyv.
 	if ( b_n != fuse_fac )
 	{
-		saxpyv_ker_ft f = bli_cntx_get_ukr_dt( BLIS_FLOAT, BLIS_AXPYV_KER, cntx );
+		axpyv_ker_ft f = bli_cntx_get_ukr_dt( BLIS_FLOAT, BLIS_AXPYV_KER, cntx );
 
 		for ( i = 0; i < b_n; ++i )
 		{
-			float* a1   = a + (0  )*inca + (i  )*lda;
-			float* chi1 = x + (i  )*incx;
-			float* y1   = y + (0  )*incy;
-			float  alpha_chi1;
+			const float* restrict a1   = a + (0  )*inca + (i  )*lda;
+			const float* restrict chi1 = x + (i  )*incx;
+			      float* restrict y1   = y + (0  )*incy;
+			      float           alpha_chi1;
 
 			PASTEMAC(s,copycjs)( conjx, *chi1, alpha_chi1 );
 			PASTEMAC(s,scals)( *alpha, alpha_chi1 );
@@ -146,15 +140,15 @@ void bli_saxpyf_zen_int_8
 		m_left  = m;
 	}
 
-	a0   = a + 0*lda;
-	a1   = a + 1*lda;
-	a2   = a + 2*lda;
-	a3   = a + 3*lda;
-	a4   = a + 4*lda;
-	a5   = a + 5*lda;
-	a6   = a + 6*lda;
-	a7   = a + 7*lda;
-	y0   = y;
+	const float* restrict ap0   = a + 0*lda;
+	const float* restrict ap1   = a + 1*lda;
+	const float* restrict ap2   = a + 2*lda;
+	const float* restrict ap3   = a + 3*lda;
+	const float* restrict ap4   = a + 4*lda;
+	const float* restrict ap5   = a + 5*lda;
+	const float* restrict ap6   = a + 6*lda;
+	const float* restrict ap7   = a + 7*lda;
+	      float* restrict yp0   = y;
 
 	chi0 = *( x + 0*incx );
 	chi1 = *( x + 1*incx );
@@ -190,15 +184,15 @@ void bli_saxpyf_zen_int_8
 	for ( i = 0; i < m_viter; ++i )
 	{
 		// Load the input values.
-		y0v.v = _mm256_loadu_ps( y0 + 0*n_elem_per_reg );
-		a0v.v = _mm256_loadu_ps( a0 + 0*n_elem_per_reg );
-		a1v.v = _mm256_loadu_ps( a1 + 0*n_elem_per_reg );
-		a2v.v = _mm256_loadu_ps( a2 + 0*n_elem_per_reg );
-		a3v.v = _mm256_loadu_ps( a3 + 0*n_elem_per_reg );
-		a4v.v = _mm256_loadu_ps( a4 + 0*n_elem_per_reg );
-		a5v.v = _mm256_loadu_ps( a5 + 0*n_elem_per_reg );
-		a6v.v = _mm256_loadu_ps( a6 + 0*n_elem_per_reg );
-		a7v.v = _mm256_loadu_ps( a7 + 0*n_elem_per_reg );
+		y0v.v = _mm256_loadu_ps( yp0 + 0*n_elem_per_reg );
+		a0v.v = _mm256_loadu_ps( ap0 + 0*n_elem_per_reg );
+		a1v.v = _mm256_loadu_ps( ap1 + 0*n_elem_per_reg );
+		a2v.v = _mm256_loadu_ps( ap2 + 0*n_elem_per_reg );
+		a3v.v = _mm256_loadu_ps( ap3 + 0*n_elem_per_reg );
+		a4v.v = _mm256_loadu_ps( ap4 + 0*n_elem_per_reg );
+		a5v.v = _mm256_loadu_ps( ap5 + 0*n_elem_per_reg );
+		a6v.v = _mm256_loadu_ps( ap6 + 0*n_elem_per_reg );
+		a7v.v = _mm256_loadu_ps( ap7 + 0*n_elem_per_reg );
 
 		// perform : y += alpha * x;
 		y0v.v = _mm256_fmadd_ps( a0v.v, chi0v.v, y0v.v );
@@ -211,32 +205,32 @@ void bli_saxpyf_zen_int_8
 		y0v.v = _mm256_fmadd_ps( a7v.v, chi7v.v, y0v.v );
 
 		// Store the output.
-		_mm256_storeu_ps( (y0 + 0*n_elem_per_reg), y0v.v );
+		_mm256_storeu_ps( (yp0 + 0*n_elem_per_reg), y0v.v );
 
-		y0 += n_elem_per_reg;
-		a0 += n_elem_per_reg;
-		a1 += n_elem_per_reg;
-		a2 += n_elem_per_reg;
-		a3 += n_elem_per_reg;
-		a4 += n_elem_per_reg;
-		a5 += n_elem_per_reg;
-		a6 += n_elem_per_reg;
-		a7 += n_elem_per_reg;
+		yp0 += n_elem_per_reg;
+		ap0 += n_elem_per_reg;
+		ap1 += n_elem_per_reg;
+		ap2 += n_elem_per_reg;
+		ap3 += n_elem_per_reg;
+		ap4 += n_elem_per_reg;
+		ap5 += n_elem_per_reg;
+		ap6 += n_elem_per_reg;
+		ap7 += n_elem_per_reg;
 	}
 
 	// If there are leftover iterations, perform them with scalar code.
 	for ( i = 0; i < m_left ; ++i )
 	{
-		float       y0c = *y0;
+		float       y0c = *yp0;
 
-		const float a0c = *a0;
-		const float a1c = *a1;
-		const float a2c = *a2;
-		const float a3c = *a3;
-		const float a4c = *a4;
-		const float a5c = *a5;
-		const float a6c = *a6;
-		const float a7c = *a7;
+		const float a0c = *ap0;
+		const float a1c = *ap1;
+		const float a2c = *ap2;
+		const float a3c = *ap3;
+		const float a4c = *ap4;
+		const float a5c = *ap5;
+		const float a6c = *ap6;
+		const float a7c = *ap7;
 
 		y0c += chi0 * a0c;
 		y0c += chi1 * a1c;
@@ -247,17 +241,17 @@ void bli_saxpyf_zen_int_8
 		y0c += chi6 * a6c;
 		y0c += chi7 * a7c;
 
-		*y0 = y0c;
+		*yp0 = y0c;
 
-		a0 += inca;
-		a1 += inca;
-		a2 += inca;
-		a3 += inca;
-		a4 += inca;
-		a5 += inca;
-		a6 += inca;
-		a7 += inca;
-		y0 += incy;
+		ap0 += inca;
+		ap1 += inca;
+		ap2 += inca;
+		ap3 += inca;
+		ap4 += inca;
+		ap5 += inca;
+		ap6 += inca;
+		ap7 += inca;
+		yp0 += incy;
 	}
 }
 
@@ -265,17 +259,22 @@ void bli_saxpyf_zen_int_8
 
 void bli_daxpyf_zen_int_8
      (
-       conj_t           conja,
-       conj_t           conjx,
-       dim_t            m,
-       dim_t            b_n,
-       double* restrict alpha,
-       double* restrict a, inc_t inca, inc_t lda,
-       double* restrict x, inc_t incx,
-       double* restrict y, inc_t incy,
-       cntx_t*          cntx
+             conj_t  conja,
+             conj_t  conjx,
+             dim_t   m,
+             dim_t   b_n,
+       const void*   alpha0,
+       const void*   a0, inc_t inca, inc_t lda,
+       const void*   x0, inc_t incx,
+             void*   y0, inc_t incy,
+       const cntx_t* cntx
      )
 {
+	const double* restrict alpha = alpha0;
+	const double* restrict a     = a0;
+	const double* restrict x     = x0;
+	      double* restrict y     = y0;
+
 	const dim_t      fuse_fac       = 8;
 
 	const dim_t      n_elem_per_reg = 4;
@@ -284,17 +283,6 @@ void bli_daxpyf_zen_int_8
 	dim_t            i;
 	dim_t            m_viter;
 	dim_t            m_left;
-
-	double* restrict a0;
-	double* restrict a1;
-	double* restrict a2;
-	double* restrict a3;
-	double* restrict a4;
-	double* restrict a5;
-	double* restrict a6;
-	double* restrict a7;
-
-	double* restrict y0;
 
 	v4df_t           chi0v, chi1v, chi2v, chi3v;
 	v4df_t           chi4v, chi5v, chi6v, chi7v;
@@ -313,14 +301,14 @@ void bli_daxpyf_zen_int_8
 	// operation as a loop over axpyv.
 	if ( b_n != fuse_fac )
 	{
-		daxpyv_ker_ft f = bli_cntx_get_ukr_dt( BLIS_DOUBLE, BLIS_AXPYV_KER, cntx );
+		axpyv_ker_ft f = bli_cntx_get_ukr_dt( BLIS_DOUBLE, BLIS_AXPYV_KER, cntx );
 
 		for ( i = 0; i < b_n; ++i )
 		{
-			double* a1   = a + (0  )*inca + (i  )*lda;
-			double* chi1 = x + (i  )*incx;
-			double* y1   = y + (0  )*incy;
-			double  alpha_chi1;
+			const double* restrict a1   = a + (0  )*inca + (i  )*lda;
+			const double* restrict chi1 = x + (i  )*incx;
+			      double* restrict y1   = y + (0  )*incy;
+			      double           alpha_chi1;
 
 			PASTEMAC(d,copycjs)( conjx, *chi1, alpha_chi1 );
 			PASTEMAC(d,scals)( *alpha, alpha_chi1 );
@@ -355,15 +343,15 @@ void bli_daxpyf_zen_int_8
 		m_left  = m;
 	}
 
-	a0   = a + 0*lda;
-	a1   = a + 1*lda;
-	a2   = a + 2*lda;
-	a3   = a + 3*lda;
-	a4   = a + 4*lda;
-	a5   = a + 5*lda;
-	a6   = a + 6*lda;
-	a7   = a + 7*lda;
-	y0   = y;
+	const double* restrict ap0   = a + 0*lda;
+	const double* restrict ap1   = a + 1*lda;
+	const double* restrict ap2   = a + 2*lda;
+	const double* restrict ap3   = a + 3*lda;
+	const double* restrict ap4   = a + 4*lda;
+	const double* restrict ap5   = a + 5*lda;
+	const double* restrict ap6   = a + 6*lda;
+	const double* restrict ap7   = a + 7*lda;
+	      double* restrict yp0   = y;
 
 	chi0 = *( x + 0*incx );
 	chi1 = *( x + 1*incx );
@@ -399,15 +387,15 @@ void bli_daxpyf_zen_int_8
 	for ( i = 0; i < m_viter; ++i )
 	{
 		// Load the input values.
-		y0v.v = _mm256_loadu_pd( y0 + 0*n_elem_per_reg );
-		a0v.v = _mm256_loadu_pd( a0 + 0*n_elem_per_reg );
-		a1v.v = _mm256_loadu_pd( a1 + 0*n_elem_per_reg );
-		a2v.v = _mm256_loadu_pd( a2 + 0*n_elem_per_reg );
-		a3v.v = _mm256_loadu_pd( a3 + 0*n_elem_per_reg );
-		a4v.v = _mm256_loadu_pd( a4 + 0*n_elem_per_reg );
-		a5v.v = _mm256_loadu_pd( a5 + 0*n_elem_per_reg );
-		a6v.v = _mm256_loadu_pd( a6 + 0*n_elem_per_reg );
-		a7v.v = _mm256_loadu_pd( a7 + 0*n_elem_per_reg );
+		y0v.v = _mm256_loadu_pd( yp0 + 0*n_elem_per_reg );
+		a0v.v = _mm256_loadu_pd( ap0 + 0*n_elem_per_reg );
+		a1v.v = _mm256_loadu_pd( ap1 + 0*n_elem_per_reg );
+		a2v.v = _mm256_loadu_pd( ap2 + 0*n_elem_per_reg );
+		a3v.v = _mm256_loadu_pd( ap3 + 0*n_elem_per_reg );
+		a4v.v = _mm256_loadu_pd( ap4 + 0*n_elem_per_reg );
+		a5v.v = _mm256_loadu_pd( ap5 + 0*n_elem_per_reg );
+		a6v.v = _mm256_loadu_pd( ap6 + 0*n_elem_per_reg );
+		a7v.v = _mm256_loadu_pd( ap7 + 0*n_elem_per_reg );
 
 		// perform : y += alpha * x;
 		y0v.v = _mm256_fmadd_pd( a0v.v, chi0v.v, y0v.v );
@@ -420,32 +408,32 @@ void bli_daxpyf_zen_int_8
 		y0v.v = _mm256_fmadd_pd( a7v.v, chi7v.v, y0v.v );
 
 		// Store the output.
-		_mm256_storeu_pd( (y0 + 0*n_elem_per_reg), y0v.v );
+		_mm256_storeu_pd( (yp0 + 0*n_elem_per_reg), y0v.v );
 
-		y0 += n_elem_per_reg;
-		a0 += n_elem_per_reg;
-		a1 += n_elem_per_reg;
-		a2 += n_elem_per_reg;
-		a3 += n_elem_per_reg;
-		a4 += n_elem_per_reg;
-		a5 += n_elem_per_reg;
-		a6 += n_elem_per_reg;
-		a7 += n_elem_per_reg;
+		yp0 += n_elem_per_reg;
+		ap0 += n_elem_per_reg;
+		ap1 += n_elem_per_reg;
+		ap2 += n_elem_per_reg;
+		ap3 += n_elem_per_reg;
+		ap4 += n_elem_per_reg;
+		ap5 += n_elem_per_reg;
+		ap6 += n_elem_per_reg;
+		ap7 += n_elem_per_reg;
 	}
 
 	// If there are leftover iterations, perform them with scalar code.
 	for ( i = 0; i < m_left ; ++i )
 	{
-		double       y0c = *y0;
+		double       y0c = *yp0;
 
-		const double a0c = *a0;
-		const double a1c = *a1;
-		const double a2c = *a2;
-		const double a3c = *a3;
-		const double a4c = *a4;
-		const double a5c = *a5;
-		const double a6c = *a6;
-		const double a7c = *a7;
+		const double a0c = *ap0;
+		const double a1c = *ap1;
+		const double a2c = *ap2;
+		const double a3c = *ap3;
+		const double a4c = *ap4;
+		const double a5c = *ap5;
+		const double a6c = *ap6;
+		const double a7c = *ap7;
 
 		y0c += chi0 * a0c;
 		y0c += chi1 * a1c;
@@ -456,17 +444,17 @@ void bli_daxpyf_zen_int_8
 		y0c += chi6 * a6c;
 		y0c += chi7 * a7c;
 
-		*y0 = y0c;
+		*yp0 = y0c;
 
-		a0 += inca;
-		a1 += inca;
-		a2 += inca;
-		a3 += inca;
-		a4 += inca;
-		a5 += inca;
-		a6 += inca;
-		a7 += inca;
-		y0 += incy;
+		ap0 += inca;
+		ap1 += inca;
+		ap2 += inca;
+		ap3 += inca;
+		ap4 += inca;
+		ap5 += inca;
+		ap6 += inca;
+		ap7 += inca;
+		yp0 += incy;
 	}
 }
 

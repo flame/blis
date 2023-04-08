@@ -39,14 +39,17 @@
 \
 void PASTEMAC3(ch,opname,arch,suf) \
      ( \
-       conj_t           conjalpha, \
-       dim_t            n, \
-       ctype*  restrict alpha, \
-       ctype*  restrict x, inc_t incx, \
-       cntx_t*          cntx  \
+             conj_t  conjalpha, \
+             dim_t   n, \
+       const void*   alpha0, \
+             void*   x0, inc_t incx, \
+       const cntx_t* cntx  \
      ) \
 { \
 	if ( bli_zero_dim1( n ) ) return; \
+\
+	const ctype* alpha = alpha0; \
+	      ctype* x     = x0; \
 \
 	/* If alpha is one, return. */ \
 	if ( PASTEMAC(ch,eq1)( *alpha ) ) return; \

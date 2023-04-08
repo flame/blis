@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2023, The University of Texas at Austin
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -32,42 +32,14 @@
 
 */
 
+#ifndef BLIS_PRE_KER_PARAMS_H
+#define BLIS_PRE_KER_PARAMS_H
 
-//
-// Define template prototypes for level-1f kernels.
-//
+// These macros are used in bli_*_ker_prot.h and bli_*_ker_ft.h to make it
+// easy to update them in the future, if needed.
 
-// Note: Instead of defining function prototype macro templates and then
-// instantiating those macros to define the individual function prototypes,
-// we simply alias the official operations' prototypes as defined in
-// bli_l1f_ker_prot.h.
-
-#undef  GENTPROT
-#define GENTPROT AXPY2V_KER_PROT
-
-INSERT_GENTPROT_BASIC0( axpy2v_ker_name )
+#define BLIS_AUXINFO_PARAM        auxinfo_t* data
+#define BLIS_CNTX_PARAM     const cntx_t*    cntx
 
 
-#undef  GENTPROT
-#define GENTPROT AXPYF_KER_PROT
-
-INSERT_GENTPROT_BASIC0( axpyf_ker_name )
-
-
-#undef  GENTPROT
-#define GENTPROT DOTAXPYV_KER_PROT
-
-INSERT_GENTPROT_BASIC0( dotaxpyv_ker_name )
-
-
-#undef  GENTPROT
-#define GENTPROT DOTXAXPYF_KER_PROT
-
-INSERT_GENTPROT_BASIC0( dotxaxpyf_ker_name )
-
-
-#undef  GENTPROT
-#define GENTPROT DOTXF_KER_PROT
-
-INSERT_GENTPROT_BASIC0( dotxf_ker_name )
-
+#endif

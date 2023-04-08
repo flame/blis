@@ -32,25 +32,25 @@
 
 */
 
+#ifndef BLIS_L3_SUP_KER_PROT_H
+#define BLIS_L3_SUP_KER_PROT_H
+
 //
 // Define template prototypes for level-3 kernels on small/unpacked matrices.
 //
 
-#define GEMMSUP_KER_PROT( ctype, ch, opname ) \
+#undef  SUPTPROT
+#define SUPTPROT( ctype, ch, funcname, opname ) \
 \
-void PASTEMAC(ch,opname) \
+void PASTEMAC(ch,funcname) \
      ( \
-       conj_t              conja, \
-       conj_t              conjb, \
-       dim_t               m, \
-       dim_t               n, \
-       dim_t               k, \
-       ctype*     restrict alpha, \
-       ctype*     restrict a, inc_t rs_a, inc_t cs_a, \
-       ctype*     restrict b, inc_t rs_b, inc_t cs_b, \
-       ctype*     restrict beta, \
-       ctype*     restrict c, inc_t rs_c, inc_t cs_c, \
-       auxinfo_t*          data, \
-       cntx_t*             cntx  \
+       PASTECH(opname,_params), \
+       BLIS_AUXINFO_PARAM, \
+       BLIS_CNTX_PARAM  \
      );
+
+#define GEMMSUP_KER_PROT( ctype, ch, fn )  SUPTPROT( ctype, ch, fn, gemmsup );
+
+
+#endif
 

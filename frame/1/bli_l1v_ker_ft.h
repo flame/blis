@@ -32,75 +32,38 @@
 
 */
 
-#ifndef BLIS_L3_FT_UKR_H
-#define BLIS_L3_FT_UKR_H
+#ifndef BLIS_L1V_KER_FT_H
+#define BLIS_L1V_KER_FT_H
 
 
 //
-// -- Level-3 micro-kernel function types --------------------------------------
+// -- Level-1v kernel function types -------------------------------------------
 //
 
-// gemm
-
 #undef  GENTDEF
-#define GENTDEF( ctype, ch, opname, tsuf ) \
+#define GENTDEF( opname ) \
 \
-typedef void (*PASTECH3(ch,opname,_ukr,tsuf)) \
+typedef void (*PASTECH(opname,_ker_ft)) \
      ( \
-       dim_t               m, \
-       dim_t               n, \
-       dim_t               k, \
-       ctype*     restrict alpha, \
-       ctype*     restrict a, \
-       ctype*     restrict b, \
-       ctype*     restrict beta, \
-       ctype*     restrict c, inc_t rs_c, inc_t cs_c, \
-       auxinfo_t*          data, \
-       cntx_t*             cntx  \
+       PASTECH(opname,_params), \
+       BLIS_CNTX_PARAM  \
      );
 
-INSERT_GENTDEF( gemm )
-
-
-// gemmtrsm_[lu]
-
-#undef  GENTDEF
-#define GENTDEF( ctype, ch, opname, tsuf ) \
-\
-typedef void (*PASTECH3(ch,opname,_ukr,tsuf)) \
-     ( \
-       dim_t               m, \
-       dim_t               n, \
-       dim_t               k, \
-       ctype*     restrict alpha, \
-       ctype*     restrict a1x, \
-       ctype*     restrict a11, \
-       ctype*     restrict bx1, \
-       ctype*     restrict b11, \
-       ctype*     restrict c11, inc_t rs_c, inc_t cs_c, \
-       auxinfo_t*          data, \
-       cntx_t*             cntx  \
-     );
-
-INSERT_GENTDEF( gemmtrsm )
-
-
-// trsm_[lu]
-
-#undef  GENTDEF
-#define GENTDEF( ctype, ch, opname, tsuf ) \
-\
-typedef void (*PASTECH3(ch,opname,_ukr,tsuf)) \
-     ( \
-       ctype*     restrict a, \
-       ctype*     restrict b, \
-       ctype*     restrict c, inc_t rs_c, inc_t cs_c, \
-       auxinfo_t*          data, \
-       cntx_t*             cntx  \
-     );
-
-INSERT_GENTDEF( trsm )
-
+GENTDEF( addv )
+GENTDEF( amaxv )
+GENTDEF( axpbyv )
+GENTDEF( axpyv )
+GENTDEF( copyv )
+GENTDEF( dotv )
+GENTDEF( dotxv )
+GENTDEF( invertv )
+GENTDEF( invscalv )
+GENTDEF( scalv )
+GENTDEF( scal2v )
+GENTDEF( setv )
+GENTDEF( subv )
+GENTDEF( swapv )
+GENTDEF( xpbyv )
 
 #endif
 

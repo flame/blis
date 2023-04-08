@@ -256,22 +256,23 @@ int offsets[16] __attribute__((aligned(0x1000))) = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9
 //#define LOOPMON
 void bli_sgemm_knc_asm_30x16
      (
-       dim_t               m,
-       dim_t               n,
-       dim_t               k,
-       float*     restrict alpha,
-       float*     restrict a,
-       float*     restrict b,
-       float*     restrict beta,
-       float*     restrict c, inc_t rs_c, inc_t cs_c,
-       auxinfo_t*          data,
-       cntx_t*             cntx
+             dim_t      m,
+             dim_t      n,
+             dim_t      k,
+       const void*      alpha,
+       const void*      a,
+       const void*      b,
+       const void*      beta,
+             void*      c, inc_t rs_c, inc_t cs_c,
+             auxinfo_t* data,
+             auxinfo_t* data,
+       const cntx_t*    cntx
      )
 {
-    float * a_next = bli_auxinfo_next_a( data );
-    float * b_next = bli_auxinfo_next_b( data );
+    float* a_next = bli_auxinfo_next_a( data );
+    float* b_next = bli_auxinfo_next_b( data );
 
-    int * offsetPtr = &offsets[0];
+    int* offsetPtr = &offsets[0];
 
     uint64_t k64 = k;
 

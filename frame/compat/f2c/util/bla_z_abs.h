@@ -32,7 +32,7 @@
 
 */
 
-#ifdef BLIS_ENABLE_BLAS
+#if 1
 
 double bla_z_abs(const bla_dcomplex *z);
 

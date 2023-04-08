@@ -36,14 +36,18 @@
 
 void bli_daxpyv_bgq_int
      (
-       conj_t           conjx,
-       dim_t            n,
-       double* restrict alpha,
-       double* restrict x, inc_t incx,
-       double* restrict y, inc_t incy,
-       cntx_t*          cntx
+             conj_t  conjx,
+             dim_t   n,
+       const void*   alpha0,
+       const void*   x0, inc_t incx,
+             void*   y0, inc_t incy,
+       const cntx_t* cntx
      )
 {
+	const double* alpha = alpha0;
+	const double* x     = x0;
+	const double* y     = y0;
+
 	if ( bli_zero_dim1( n ) ) return;
 
 	// If there is anything that would interfere with our use of aligned

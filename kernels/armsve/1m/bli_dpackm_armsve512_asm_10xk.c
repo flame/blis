@@ -43,15 +43,15 @@
 
 void bli_dpackm_armsve512_asm_10xk
      (
-       conj_t           conja,
-       pack_t           schema,
-       dim_t            cdim_,
-       dim_t            n_,
-       dim_t            n_max_,
-       double* restrict kappa,
-       double* restrict a, inc_t inca_, inc_t lda_,
-       double* restrict p,              inc_t ldp_,
-       cntx_t*          cntx
+             conj_t  conja,
+             pack_t  schema,
+             dim_t   cdim_,
+             dim_t   n_,
+             dim_t   n_max_,
+       const void*   kappa,
+       const void*   a, inc_t inca_, inc_t lda_,
+             void*   p,              inc_t ldp_,
+       const cntx_t* cntx
      )
 {
     const int64_t cdim  = cdim_;
@@ -62,7 +62,7 @@ void bli_dpackm_armsve512_asm_10xk
     const int64_t lda   = lda_;
     const int64_t ldp   = ldp_;
     const bool    gs    = inca != 1 && lda != 1;
-    const bool    unitk = bli_deq1( *kappa );
+    const bool    unitk = bli_deq1( *(( double* )kappa) );
 
 #ifdef _A64FX
     {
@@ -337,7 +337,7 @@ void bli_dpackm_armsve512_asm_10xk
             const dim_t      i      = cdim;
             const dim_t      m_edge = mnr - i;
             const dim_t      n_edge = n_max;
-            double* restrict p_edge = p + (i  )*1;
+            double* restrict p_edge = ( double* )p + (i  )*1;
 
             bli_dset0s_mxn
             (
@@ -353,7 +353,7 @@ void bli_dpackm_armsve512_asm_10xk
         const dim_t      j      = n;
         const dim_t      m_edge = mnr;
         const dim_t      n_edge = n_max - j;
-        double* restrict p_edge = p + (j  )*ldp;
+        double* restrict p_edge = ( double* )p + (j  )*ldp;
 
         bli_dset0s_mxn
         (

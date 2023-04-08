@@ -32,7 +32,7 @@
 
 */
 
-#ifdef BLIS_ENABLE_BLAS
+#if 1
 
 BLIS_EXPORT_BLAS int PASTEF77(d,spmv)(const bla_character *uplo, const bla_integer *n, const bla_double *alpha, const bla_double *ap, const bla_double *x, const bla_integer *incx, const bla_double *beta, bla_double *y, const bla_integer *incy);
 BLIS_EXPORT_BLAS int PASTEF77(s,spmv)(const bla_character *uplo, const bla_integer *n, const bla_real *alpha, const bla_real *ap, const bla_real *x, const bla_integer *incx, const bla_real *beta, bla_real *y, const bla_integer *incy);

@@ -84,10 +84,8 @@ void PASTEMAC(ch,varname) \
 	/* If alpha == 0, then we are done. */ \
 	if ( PASTEMAC(ch,eq0)( *alpha ) ) return; \
 \
-	/*PASTECH(ch,axpyf_ker_ft) kfp_af;*/ \
-\
 	/* Query the context for the kernel function pointer and fusing factor. */ \
-	/*kfp_af = bli_cntx_get_l1f_ker_dt( dt, BLIS_AXPYF_KER, cntx );*/ \
+	/*axpyf_ker_ft kfp_af = bli_cntx_get_l1f_ker_dt( dt, BLIS_AXPYF_KER, cntx );*/ \
 	/*b_fuse = bli_cntx_get_blksz_def_dt( dt, BLIS_AF, cntx );*/ \
 	b_fuse = fusefac; \
 \

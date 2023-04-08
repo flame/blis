@@ -37,35 +37,36 @@
 
 typedef void (*xpbys_mxn_u_vft)
     (
-      doff_t diagoff,
-      dim_t  m,
-      dim_t  n,
-      void*  x, inc_t rs_x, inc_t cs_x,
-      void*  b,
-      void*  y, inc_t rs_y, inc_t cs_y
+            doff_t diagoff,
+            dim_t  m,
+            dim_t  n,
+      const void*  x, inc_t rs_x, inc_t cs_x,
+      const void*  b,
+            void*  y, inc_t rs_y, inc_t cs_y
     );
 
-#undef GENTFUNC
+#undef  GENTFUNC
 #define GENTFUNC(ctype,ch,op) \
 \
 BLIS_INLINE void PASTEMAC(ch,op) \
     ( \
-      doff_t diagoff, \
-      dim_t  m, \
-      dim_t  n, \
-      void*  x, inc_t rs_x, inc_t cs_x, \
-      void*  b, \
-      void*  y, inc_t rs_y, inc_t cs_y \
+            doff_t diagoff, \
+            dim_t  m, \
+            dim_t  n, \
+      const void*  x, inc_t rs_x, inc_t cs_x, \
+      const void*  b, \
+            void*  y, inc_t rs_y, inc_t cs_y \
     ) \
 { \
-	ctype* restrict x_cast = x; \
-	ctype* restrict b_cast = b; \
-	ctype* restrict y_cast = y; \
+	const ctype* restrict x_cast = x; \
+	const ctype* restrict b_cast = b; \
+	      ctype* restrict y_cast = y; \
 \
 	PASTEMAC3(ch,ch,ch,xpbys_mxn_u) \
 	( \
 	  diagoff, \
-	  m, n, \
+	  m, \
+	  n, \
 	  x_cast, rs_x, cs_x, \
 	  b_cast, \
 	  y_cast, rs_y,  cs_y \
@@ -76,6 +77,7 @@ INSERT_GENTFUNC_BASIC0(xpbys_mxn_u_fn);
 
 static xpbys_mxn_u_vft GENARRAY(xpbys_mxn_u, xpbys_mxn_u_fn);
 
+// -----------------------------------------------------------------------------
 
 void bli_gemmt_u_ker_var2
      (
@@ -133,7 +135,7 @@ void bli_gemmt_u_ker_var2
 
 	// Query the context for the micro-kernel address and cast it to its
 	// function pointer type.
-	gemm_ukr_vft    gemm_ukr        = bli_cntx_get_l3_vir_ukr_dt( dt_exec, BLIS_GEMM_UKR, cntx );
+	gemm_ukr_ft     gemm_ukr        = bli_cntx_get_l3_vir_ukr_dt( dt_exec, BLIS_GEMM_UKR, cntx );
 	xpbys_mxn_u_vft xpbys_mxn_u_ukr = xpbys_mxn_u[ dt_exec ];
 
 	// Temporary C buffer for edge cases. Note that the strides of this

@@ -34,6 +34,7 @@
 
 #include "blis.h"
 
+
 #define UNPACKM_BODY( ctype, ch, pragma, cdim, inca, op ) \
 \
 do \
@@ -49,28 +50,29 @@ do \
 	} \
 } while(0)
 
+
 #undef  GENTFUNC
 #define GENTFUNC( ctype, ch, opname, mnr0, bb0, arch, suf ) \
 \
 void PASTEMAC3(ch,opname,arch,suf) \
      ( \
-       conj_t           conja, \
-       pack_t           schema, \
-       dim_t            cdim, \
-       dim_t            n, \
-       ctype*  restrict kappa, \
-       ctype*  restrict p,             inc_t ldp, \
-       ctype*  restrict a, inc_t inca, inc_t lda, \
-       cntx_t*          cntx \
+             conj_t  conja, \
+             pack_t  schema, \
+             dim_t   cdim, \
+             dim_t   n, \
+       const void*   kappa, \
+       const void*   p,             inc_t ldp, \
+             void*   a, inc_t inca, inc_t lda, \
+       const cntx_t* cntx  \
      ) \
 { \
 	const dim_t     mnr        = PASTECH2(mnr0, _, ch); \
     /* It's not clear if unpack needs to care about BB storage... */ \
 	const dim_t     dfac       = PASTECH2(bb0, _, ch); \
 \
-	ctype* restrict kappa_cast = kappa; \
-	ctype* restrict alpha1     = a; \
-	ctype* restrict pi1        = p; \
+	const ctype* restrict kappa_cast = kappa; \
+	const ctype* restrict pi1        = p; \
+	      ctype* restrict alpha1     = a; \
 \
 	if ( cdim == mnr && mnr != -1 ) \
 	{ \

@@ -72,7 +72,7 @@ void PASTEMAC0(opname) \
 \
 	/* Query a type-specific function pointer, except one that uses
 	   void* for function arguments instead of typed pointers. */ \
-	PASTECH2(tname,_ukr,_vft) f = \
+	PASTECH(tname,_ukr_ft) f = \
 	PASTEMAC(opname,_qfp)( dt ); \
 \
 	f \
@@ -137,7 +137,7 @@ void PASTEMAC0(opname) \
 	{ \
 		/* Query a type-specific function pointer, except one that uses
 		   void* for function arguments instead of typed pointers. */ \
-		PASTECH2(tname,_ukr,_vft) f = \
+		PASTECH(tname,_ukr_ft) f = \
 		PASTEMAC(opnamel,_qfp)( dt ); \
 \
 		f \
@@ -159,7 +159,7 @@ void PASTEMAC0(opname) \
 	{ \
 		/* Query a type-specific function pointer, except one that uses
 		   void* for function arguments instead of typed pointers. */ \
-		PASTECH2(tname,_ukr,_vft) f = \
+		PASTECH(tname,_ukr_ft) f = \
 		PASTEMAC(opnameu,_qfp)( dt ); \
 \
 		f \
@@ -216,7 +216,7 @@ void PASTEMAC0(opname) \
 	{ \
 		/* Query a type-specific function pointer, except one that uses
 		   void* for function arguments instead of typed pointers. */ \
-		PASTECH2(tname,_ukr,_vft) f = \
+		PASTECH(tname,_ukr_ft) f = \
 		PASTEMAC(opnamel,_qfp)( dt ); \
 \
 		f \
@@ -232,7 +232,7 @@ void PASTEMAC0(opname) \
 	{ \
 		/* Query a type-specific function pointer, except one that uses
 		   void* for function arguments instead of typed pointers. */ \
-		PASTECH2(tname,_ukr,_vft) f = \
+		PASTECH(tname,_ukr_ft) f = \
 		PASTEMAC(opnameu,_qfp)( dt ); \
 \
 		f \

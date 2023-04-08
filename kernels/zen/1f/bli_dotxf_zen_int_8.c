@@ -56,18 +56,24 @@ typedef union
 
 void bli_sdotxf_zen_int_8
      (
-       conj_t           conjat,
-       conj_t           conjx,
-       dim_t            m,
-       dim_t            b_n,
-       float*  restrict alpha,
-       float*  restrict a, inc_t inca, inc_t lda,
-       float*  restrict x, inc_t incx,
-       float*  restrict beta,
-       float*  restrict y, inc_t incy,
-       cntx_t*          cntx
+             conj_t  conjat,
+             conj_t  conjx,
+             dim_t   m,
+             dim_t   b_n,
+       const void*   alpha0,
+       const void*   a0, inc_t inca, inc_t lda,
+       const void*   x0, inc_t incx,
+       const void*   beta0,
+             void*   y0, inc_t incy,
+       const cntx_t* cntx
      )
 {
+	const float* restrict alpha = alpha0;
+	const float* restrict a     = a0;
+	const float* restrict x     = x0;
+	const float* restrict beta  = beta0;
+	      float* restrict y     = y0;
+
 	const dim_t fuse_fac       = 8;
 	const dim_t n_elem_per_reg = 8;
 
@@ -78,7 +84,7 @@ void bli_sdotxf_zen_int_8
 	// simplifies to updating y.
 	if ( bli_zero_dim1( m ) || PASTEMAC(s,eq0)( *alpha ) )
 	{
-		sscalv_ker_ft f = bli_cntx_get_ukr_dt( BLIS_FLOAT, BLIS_SCALV_KER, cntx );
+		scalv_ker_ft f = bli_cntx_get_ukr_dt( BLIS_FLOAT, BLIS_SCALV_KER, cntx );
 
 		f
 		(
@@ -95,13 +101,13 @@ void bli_sdotxf_zen_int_8
 	// operation as a loop over dotxv.
 	if ( b_n != fuse_fac )
 	{
-		sdotxv_ker_ft f = bli_cntx_get_ukr_dt( BLIS_FLOAT, BLIS_DOTXV_KER, cntx );
+		dotxv_ker_ft f = bli_cntx_get_ukr_dt( BLIS_FLOAT, BLIS_DOTXV_KER, cntx );
 
 		for ( dim_t i = 0; i < b_n; ++i )
 		{
-			float* a1   = a + (0  )*inca + (i  )*lda;
-			float* x1   = x + (0  )*incx;
-			float* psi1 = y + (i  )*incy;
+			const float* restrict a1   = a + (0  )*inca + (i  )*lda;
+			const float* restrict x1   = x + (0  )*incx;
+			      float* restrict psi1 = y + (i  )*incy;
 
 			f
 			(
@@ -147,15 +153,15 @@ void bli_sdotxf_zen_int_8
 		dim_t m_viter = ( m ) / ( n_elem_per_reg * n_iter_unroll );
 
 		// Set up pointers for x and the b_n columns of A (rows of A^T).
-		float* restrict x0 = x;
-		float* restrict a0 = a + 0*lda;
-		float* restrict a1 = a + 1*lda;
-		float* restrict a2 = a + 2*lda;
-		float* restrict a3 = a + 3*lda;
-		float* restrict a4 = a + 4*lda;
-		float* restrict a5 = a + 5*lda;
-		float* restrict a6 = a + 6*lda;
-		float* restrict a7 = a + 7*lda;
+		const float* restrict xp0 = x;
+		const float* restrict ap0 = a + 0*lda;
+		const float* restrict ap1 = a + 1*lda;
+		const float* restrict ap2 = a + 2*lda;
+		const float* restrict ap3 = a + 3*lda;
+		const float* restrict ap4 = a + 4*lda;
+		const float* restrict ap5 = a + 5*lda;
+		const float* restrict ap6 = a + 6*lda;
+		const float* restrict ap7 = a + 7*lda;
 
 		// Initialize b_n rho vector accumulators to zero.
 		v8sf_t rho0v; rho0v.v = _mm256_setzero_ps();
@@ -175,16 +181,16 @@ void bli_sdotxf_zen_int_8
 		for ( dim_t i = 0; i < m_viter; ++i )
 		{
 			// Load the input values.
-			x0v.v = _mm256_loadu_ps( x0 + 0*n_elem_per_reg );
+			x0v.v = _mm256_loadu_ps( xp0 + 0*n_elem_per_reg );
 
-			a0v.v = _mm256_loadu_ps( a0 + 0*n_elem_per_reg );
-			a1v.v = _mm256_loadu_ps( a1 + 0*n_elem_per_reg );
-			a2v.v = _mm256_loadu_ps( a2 + 0*n_elem_per_reg );
-			a3v.v = _mm256_loadu_ps( a3 + 0*n_elem_per_reg );
-			a4v.v = _mm256_loadu_ps( a4 + 0*n_elem_per_reg );
-			a5v.v = _mm256_loadu_ps( a5 + 0*n_elem_per_reg );
-			a6v.v = _mm256_loadu_ps( a6 + 0*n_elem_per_reg );
-			a7v.v = _mm256_loadu_ps( a7 + 0*n_elem_per_reg );
+			a0v.v = _mm256_loadu_ps( ap0 + 0*n_elem_per_reg );
+			a1v.v = _mm256_loadu_ps( ap1 + 0*n_elem_per_reg );
+			a2v.v = _mm256_loadu_ps( ap2 + 0*n_elem_per_reg );
+			a3v.v = _mm256_loadu_ps( ap3 + 0*n_elem_per_reg );
+			a4v.v = _mm256_loadu_ps( ap4 + 0*n_elem_per_reg );
+			a5v.v = _mm256_loadu_ps( ap5 + 0*n_elem_per_reg );
+			a6v.v = _mm256_loadu_ps( ap6 + 0*n_elem_per_reg );
+			a7v.v = _mm256_loadu_ps( ap7 + 0*n_elem_per_reg );
 
 			// perform: rho?v += a?v * x0v;
 			rho0v.v = _mm256_fmadd_ps( a0v.v, x0v.v, rho0v.v );
@@ -196,15 +202,15 @@ void bli_sdotxf_zen_int_8
 			rho6v.v = _mm256_fmadd_ps( a6v.v, x0v.v, rho6v.v );
 			rho7v.v = _mm256_fmadd_ps( a7v.v, x0v.v, rho7v.v );
 
-			x0 += n_elem_per_reg * n_iter_unroll;
-			a0 += n_elem_per_reg * n_iter_unroll;
-			a1 += n_elem_per_reg * n_iter_unroll;
-			a2 += n_elem_per_reg * n_iter_unroll;
-			a3 += n_elem_per_reg * n_iter_unroll;
-			a4 += n_elem_per_reg * n_iter_unroll;
-			a5 += n_elem_per_reg * n_iter_unroll;
-			a6 += n_elem_per_reg * n_iter_unroll;
-			a7 += n_elem_per_reg * n_iter_unroll;
+			xp0 += n_elem_per_reg * n_iter_unroll;
+			ap0 += n_elem_per_reg * n_iter_unroll;
+			ap1 += n_elem_per_reg * n_iter_unroll;
+			ap2 += n_elem_per_reg * n_iter_unroll;
+			ap3 += n_elem_per_reg * n_iter_unroll;
+			ap4 += n_elem_per_reg * n_iter_unroll;
+			ap5 += n_elem_per_reg * n_iter_unroll;
+			ap6 += n_elem_per_reg * n_iter_unroll;
+			ap7 += n_elem_per_reg * n_iter_unroll;
 		}
 
 #if 0
@@ -268,8 +274,8 @@ void bli_sdotxf_zen_int_8
 		dim_t m_viter = ( m ) / ( n_iter_unroll );
 
 		// Initialize pointers for x and A.
-		float* restrict x0 = x;
-		float* restrict a0 = a;
+		const float* restrict xp0 = x;
+		const float* restrict ap0 = a;
 
 		// Initialize rho vector accumulators to zero.
 		v8sf_t rho0v; rho0v.v = _mm256_setzero_ps();
@@ -283,15 +289,15 @@ void bli_sdotxf_zen_int_8
 		for ( dim_t i = 0; i < m_viter; ++i )
 		{
 			// Load the input values.
-			a0v.v = _mm256_loadu_ps( a0 + 0*inca );
-			a1v.v = _mm256_loadu_ps( a0 + 1*inca );
-			a2v.v = _mm256_loadu_ps( a0 + 2*inca );
-			a3v.v = _mm256_loadu_ps( a0 + 3*inca );
+			a0v.v = _mm256_loadu_ps( ap0 + 0*inca );
+			a1v.v = _mm256_loadu_ps( ap0 + 1*inca );
+			a2v.v = _mm256_loadu_ps( ap0 + 2*inca );
+			a3v.v = _mm256_loadu_ps( ap0 + 3*inca );
 
-			x0v.v = _mm256_broadcast_ss( x0 + 0*incx );
-			x1v.v = _mm256_broadcast_ss( x0 + 1*incx );
-			x2v.v = _mm256_broadcast_ss( x0 + 2*incx );
-			x3v.v = _mm256_broadcast_ss( x0 + 3*incx );
+			x0v.v = _mm256_broadcast_ss( xp0 + 0*incx );
+			x1v.v = _mm256_broadcast_ss( xp0 + 1*incx );
+			x2v.v = _mm256_broadcast_ss( xp0 + 2*incx );
+			x3v.v = _mm256_broadcast_ss( xp0 + 3*incx );
 
 			// perform : rho?v += a?v * x?v;
 			rho0v.v = _mm256_fmadd_ps( a0v.v, x0v.v, rho0v.v );
@@ -299,8 +305,8 @@ void bli_sdotxf_zen_int_8
 			rho2v.v = _mm256_fmadd_ps( a2v.v, x2v.v, rho2v.v );
 			rho3v.v = _mm256_fmadd_ps( a3v.v, x3v.v, rho3v.v );
 
-			x0 += incx * n_iter_unroll;
-			a0 += inca * n_iter_unroll;
+			xp0 += incx * n_iter_unroll;
+			ap0 += inca * n_iter_unroll;
 		}
 
 		// Combine the 8 accumulators into one vector register.
@@ -332,29 +338,29 @@ void bli_sdotxf_zen_int_8
 	// Scalar edge case.
 	{
 		// Initialize pointers for x and the b_n columns of A (rows of A^T).
-		float* restrict x0 = x;
-		float* restrict a0 = a + 0*lda;
-		float* restrict a1 = a + 1*lda;
-		float* restrict a2 = a + 2*lda;
-		float* restrict a3 = a + 3*lda;
-		float* restrict a4 = a + 4*lda;
-		float* restrict a5 = a + 5*lda;
-		float* restrict a6 = a + 6*lda;
-		float* restrict a7 = a + 7*lda;
+		const float* restrict xp0 = x;
+		const float* restrict ap0 = a + 0*lda;
+		const float* restrict ap1 = a + 1*lda;
+		const float* restrict ap2 = a + 2*lda;
+		const float* restrict ap3 = a + 3*lda;
+		const float* restrict ap4 = a + 4*lda;
+		const float* restrict ap5 = a + 5*lda;
+		const float* restrict ap6 = a + 6*lda;
+		const float* restrict ap7 = a + 7*lda;
 
 		// If there are leftover iterations, perform them with scalar code.
 		for ( dim_t i = 0; i < m ; ++i )
 		{
-			const float x0c = *x0;
+			const float x0c = *xp0;
 
-			const float a0c = *a0;
-			const float a1c = *a1;
-			const float a2c = *a2;
-			const float a3c = *a3;
-			const float a4c = *a4;
-			const float a5c = *a5;
-			const float a6c = *a6;
-			const float a7c = *a7;
+			const float a0c = *ap0;
+			const float a1c = *ap1;
+			const float a2c = *ap2;
+			const float a3c = *ap3;
+			const float a4c = *ap4;
+			const float a5c = *ap5;
+			const float a6c = *ap6;
+			const float a7c = *ap7;
 
 			rho0 += a0c * x0c;
 			rho1 += a1c * x0c;
@@ -365,15 +371,15 @@ void bli_sdotxf_zen_int_8
 			rho6 += a6c * x0c;
 			rho7 += a7c * x0c;
 
-			x0 += incx;
-			a0 += inca;
-			a1 += inca;
-			a2 += inca;
-			a3 += inca;
-			a4 += inca;
-			a5 += inca;
-			a6 += inca;
-			a7 += inca;
+			xp0 += incx;
+			ap0 += inca;
+			ap1 += inca;
+			ap2 += inca;
+			ap3 += inca;
+			ap4 += inca;
+			ap5 += inca;
+			ap6 += inca;
+			ap7 += inca;
 		}
 	}
 
@@ -446,20 +452,26 @@ void bli_sdotxf_zen_int_8
 
 void bli_ddotxf_zen_int_8
      (
-       conj_t           conjat,
-       conj_t           conjx,
-       dim_t            m,
-       dim_t            b_n,
-       double* restrict alpha,
-       double* restrict a, inc_t inca, inc_t lda,
-       double* restrict x, inc_t incx,
-       double* restrict beta,
-       double* restrict y, inc_t incy,
-       cntx_t*          cntx
+             conj_t  conjat,
+             conj_t  conjx,
+             dim_t   m,
+             dim_t   b_n,
+       const void*   alpha0,
+       const void*   a0, inc_t inca, inc_t lda,
+       const void*   x0, inc_t incx,
+       const void*   beta0,
+             void*   y0, inc_t incy,
+       const cntx_t* cntx
      )
 {
-	const dim_t      fuse_fac       = 8;
-	const dim_t      n_elem_per_reg = 4;
+	const double* restrict alpha = alpha0;
+	const double* restrict a     = a0;
+	const double* restrict x     = x0;
+	const double* restrict beta  = beta0;
+	      double* restrict y     = y0;
+
+	const dim_t fuse_fac       = 8;
+	const dim_t n_elem_per_reg = 4;
 
 	// If the b_n dimension is zero, y is empty and there is no computation.
 	if ( bli_zero_dim1( b_n ) ) return;
@@ -468,7 +480,7 @@ void bli_ddotxf_zen_int_8
 	// simplifies to updating y.
 	if ( bli_zero_dim1( m ) || PASTEMAC(d,eq0)( *alpha ) )
 	{
-		dscalv_ker_ft f = bli_cntx_get_ukr_dt( BLIS_DOUBLE, BLIS_SCALV_KER, cntx );
+		scalv_ker_ft f = bli_cntx_get_ukr_dt( BLIS_DOUBLE, BLIS_SCALV_KER, cntx );
 
 		f
 		(
@@ -485,13 +497,13 @@ void bli_ddotxf_zen_int_8
 	// operation as a loop over dotxv.
 	if ( b_n != fuse_fac )
 	{
-		ddotxv_ker_ft f = bli_cntx_get_ukr_dt( BLIS_DOUBLE, BLIS_DOTXV_KER, cntx );
+		dotxv_ker_ft f = bli_cntx_get_ukr_dt( BLIS_DOUBLE, BLIS_DOTXV_KER, cntx );
 
 		for ( dim_t i = 0; i < b_n; ++i )
 		{
-			double* a1   = a + (0  )*inca + (i  )*lda;
-			double* x1   = x + (0  )*incx;
-			double* psi1 = y + (i  )*incy;
+			const double* restrict a1   = a + (0  )*inca + (i  )*lda;
+			const double* restrict x1   = x + (0  )*incx;
+			      double* restrict psi1 = y + (i  )*incy;
 
 			f
 			(
@@ -537,15 +549,15 @@ void bli_ddotxf_zen_int_8
 		dim_t m_viter = ( m ) / ( n_elem_per_reg * n_iter_unroll );
 
 		// Set up pointers for x and the b_n columns of A (rows of A^T).
-		double* restrict x0 = x;
-		double* restrict a0 = a + 0*lda;
-		double* restrict a1 = a + 1*lda;
-		double* restrict a2 = a + 2*lda;
-		double* restrict a3 = a + 3*lda;
-		double* restrict a4 = a + 4*lda;
-		double* restrict a5 = a + 5*lda;
-		double* restrict a6 = a + 6*lda;
-		double* restrict a7 = a + 7*lda;
+		const double* restrict xp0 = x;
+		const double* restrict ap0 = a + 0*lda;
+		const double* restrict ap1 = a + 1*lda;
+		const double* restrict ap2 = a + 2*lda;
+		const double* restrict ap3 = a + 3*lda;
+		const double* restrict ap4 = a + 4*lda;
+		const double* restrict ap5 = a + 5*lda;
+		const double* restrict ap6 = a + 6*lda;
+		const double* restrict ap7 = a + 7*lda;
 
 		// Initialize b_n rho vector accumulators to zero.
 		v4df_t rho0v; rho0v.v = _mm256_setzero_pd();
@@ -565,16 +577,16 @@ void bli_ddotxf_zen_int_8
 		for ( dim_t i = 0; i < m_viter; ++i )
 		{
 			// Load the input values.
-			x0v.v = _mm256_loadu_pd( x0 + 0*n_elem_per_reg );
+			x0v.v = _mm256_loadu_pd( xp0 + 0*n_elem_per_reg );
 
-			a0v.v = _mm256_loadu_pd( a0 + 0*n_elem_per_reg );
-			a1v.v = _mm256_loadu_pd( a1 + 0*n_elem_per_reg );
-			a2v.v = _mm256_loadu_pd( a2 + 0*n_elem_per_reg );
-			a3v.v = _mm256_loadu_pd( a3 + 0*n_elem_per_reg );
-			a4v.v = _mm256_loadu_pd( a4 + 0*n_elem_per_reg );
-			a5v.v = _mm256_loadu_pd( a5 + 0*n_elem_per_reg );
-			a6v.v = _mm256_loadu_pd( a6 + 0*n_elem_per_reg );
-			a7v.v = _mm256_loadu_pd( a7 + 0*n_elem_per_reg );
+			a0v.v = _mm256_loadu_pd( ap0 + 0*n_elem_per_reg );
+			a1v.v = _mm256_loadu_pd( ap1 + 0*n_elem_per_reg );
+			a2v.v = _mm256_loadu_pd( ap2 + 0*n_elem_per_reg );
+			a3v.v = _mm256_loadu_pd( ap3 + 0*n_elem_per_reg );
+			a4v.v = _mm256_loadu_pd( ap4 + 0*n_elem_per_reg );
+			a5v.v = _mm256_loadu_pd( ap5 + 0*n_elem_per_reg );
+			a6v.v = _mm256_loadu_pd( ap6 + 0*n_elem_per_reg );
+			a7v.v = _mm256_loadu_pd( ap7 + 0*n_elem_per_reg );
 
 			// perform: rho?v += a?v * x0v;
 			rho0v.v = _mm256_fmadd_pd( a0v.v, x0v.v, rho0v.v );
@@ -586,15 +598,15 @@ void bli_ddotxf_zen_int_8
 			rho6v.v = _mm256_fmadd_pd( a6v.v, x0v.v, rho6v.v );
 			rho7v.v = _mm256_fmadd_pd( a7v.v, x0v.v, rho7v.v );
 
-			x0 += n_elem_per_reg * n_iter_unroll;
-			a0 += n_elem_per_reg * n_iter_unroll;
-			a1 += n_elem_per_reg * n_iter_unroll;
-			a2 += n_elem_per_reg * n_iter_unroll;
-			a3 += n_elem_per_reg * n_iter_unroll;
-			a4 += n_elem_per_reg * n_iter_unroll;
-			a5 += n_elem_per_reg * n_iter_unroll;
-			a6 += n_elem_per_reg * n_iter_unroll;
-			a7 += n_elem_per_reg * n_iter_unroll;
+			xp0 += n_elem_per_reg * n_iter_unroll;
+			ap0 += n_elem_per_reg * n_iter_unroll;
+			ap1 += n_elem_per_reg * n_iter_unroll;
+			ap2 += n_elem_per_reg * n_iter_unroll;
+			ap3 += n_elem_per_reg * n_iter_unroll;
+			ap4 += n_elem_per_reg * n_iter_unroll;
+			ap5 += n_elem_per_reg * n_iter_unroll;
+			ap6 += n_elem_per_reg * n_iter_unroll;
+			ap7 += n_elem_per_reg * n_iter_unroll;
 		}
 
 #if 0
@@ -643,8 +655,8 @@ void bli_ddotxf_zen_int_8
 		dim_t m_viter = ( m ) / ( n_reg_per_row * n_iter_unroll );
 
 		// Initialize pointers for x and A.
-		double* restrict x0 = x;
-		double* restrict a0 = a;
+		const double* restrict xp0 = x;
+		const double* restrict ap0 = a;
 
 		// Initialize rho vector accumulators to zero.
 		v4df_t rho0v; rho0v.v = _mm256_setzero_pd();
@@ -660,16 +672,16 @@ void bli_ddotxf_zen_int_8
 		for ( dim_t i = 0; i < m_viter; ++i )
 		{
 			// Load the input values.
-			a0v.v = _mm256_loadu_pd( a0 + 0*inca + 0*n_elem_per_reg );
-			a1v.v = _mm256_loadu_pd( a0 + 0*inca + 1*n_elem_per_reg );
-			a2v.v = _mm256_loadu_pd( a0 + 1*inca + 0*n_elem_per_reg );
-			a3v.v = _mm256_loadu_pd( a0 + 1*inca + 1*n_elem_per_reg );
-			a4v.v = _mm256_loadu_pd( a0 + 2*inca + 0*n_elem_per_reg );
-			a5v.v = _mm256_loadu_pd( a0 + 2*inca + 1*n_elem_per_reg );
+			a0v.v = _mm256_loadu_pd( ap0 + 0*inca + 0*n_elem_per_reg );
+			a1v.v = _mm256_loadu_pd( ap0 + 0*inca + 1*n_elem_per_reg );
+			a2v.v = _mm256_loadu_pd( ap0 + 1*inca + 0*n_elem_per_reg );
+			a3v.v = _mm256_loadu_pd( ap0 + 1*inca + 1*n_elem_per_reg );
+			a4v.v = _mm256_loadu_pd( ap0 + 2*inca + 0*n_elem_per_reg );
+			a5v.v = _mm256_loadu_pd( ap0 + 2*inca + 1*n_elem_per_reg );
 
-			x0v.v = _mm256_broadcast_sd( x0 + 0*incx );
-			x1v.v = _mm256_broadcast_sd( x0 + 1*incx );
-			x2v.v = _mm256_broadcast_sd( x0 + 2*incx );
+			x0v.v = _mm256_broadcast_sd( xp0 + 0*incx );
+			x1v.v = _mm256_broadcast_sd( xp0 + 1*incx );
+			x2v.v = _mm256_broadcast_sd( xp0 + 2*incx );
 
 			// perform : rho?v += a?v * x?v;
 			rho0v.v = _mm256_fmadd_pd( a0v.v, x0v.v, rho0v.v );
@@ -679,8 +691,8 @@ void bli_ddotxf_zen_int_8
 			rho4v.v = _mm256_fmadd_pd( a4v.v, x2v.v, rho4v.v );
 			rho5v.v = _mm256_fmadd_pd( a5v.v, x2v.v, rho5v.v );
 
-			x0 += incx * n_iter_unroll;
-			a0 += inca * n_iter_unroll;
+			xp0 += incx * n_iter_unroll;
+			ap0 += inca * n_iter_unroll;
 		}
 
 		// Combine the 8 accumulators into one vector register.
@@ -713,29 +725,29 @@ void bli_ddotxf_zen_int_8
 	// Scalar edge case.
 	{
 		// Initialize pointers for x and the b_n columns of A (rows of A^T).
-		double* restrict x0 = x;
-		double* restrict a0 = a + 0*lda;
-		double* restrict a1 = a + 1*lda;
-		double* restrict a2 = a + 2*lda;
-		double* restrict a3 = a + 3*lda;
-		double* restrict a4 = a + 4*lda;
-		double* restrict a5 = a + 5*lda;
-		double* restrict a6 = a + 6*lda;
-		double* restrict a7 = a + 7*lda;
+		const double* restrict xp0 = x;
+		const double* restrict ap0 = a + 0*lda;
+		const double* restrict ap1 = a + 1*lda;
+		const double* restrict ap2 = a + 2*lda;
+		const double* restrict ap3 = a + 3*lda;
+		const double* restrict ap4 = a + 4*lda;
+		const double* restrict ap5 = a + 5*lda;
+		const double* restrict ap6 = a + 6*lda;
+		const double* restrict ap7 = a + 7*lda;
 
 		// If there are leftover iterations, perform them with scalar code.
 		for ( dim_t i = 0; i < m ; ++i )
 		{
-			const double x0c = *x0;
+			const double x0c = *xp0;
 
-			const double a0c = *a0;
-			const double a1c = *a1;
-			const double a2c = *a2;
-			const double a3c = *a3;
-			const double a4c = *a4;
-			const double a5c = *a5;
-			const double a6c = *a6;
-			const double a7c = *a7;
+			const double a0c = *ap0;
+			const double a1c = *ap1;
+			const double a2c = *ap2;
+			const double a3c = *ap3;
+			const double a4c = *ap4;
+			const double a5c = *ap5;
+			const double a6c = *ap6;
+			const double a7c = *ap7;
 
 			rho0 += a0c * x0c;
 			rho1 += a1c * x0c;
@@ -746,15 +758,15 @@ void bli_ddotxf_zen_int_8
 			rho6 += a6c * x0c;
 			rho7 += a7c * x0c;
 
-			x0 += incx;
-			a0 += inca;
-			a1 += inca;
-			a2 += inca;
-			a3 += inca;
-			a4 += inca;
-			a5 += inca;
-			a6 += inca;
-			a7 += inca;
+			xp0 += incx;
+			ap0 += inca;
+			ap1 += inca;
+			ap2 += inca;
+			ap3 += inca;
+			ap4 += inca;
+			ap5 += inca;
+			ap6 += inca;
+			ap7 += inca;
 		}
 	}
 

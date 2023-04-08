@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2019, Advanced Micro Devices, Inc.
+   Copyright (C) 2014, The University of Texas at Austin
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -32,25 +32,23 @@
 
 */
 
-//
-// Define template prototypes for level-3 kernels on small/unpacked matrices.
-//
+#ifndef BLIS_L3_SUP_KER_PARAMS_H
+#define BLIS_L3_SUP_KER_PARAMS_H
 
-// Note: Instead of defining function prototype macro templates and then
-// instantiating those macros to define the individual function prototypes,
-// we simply alias the official operations' prototypes as defined in
-// bli_l3_ker_prot.h.
 
-#undef  GENTPROT
-#define GENTPROT GEMMSUP_KER_PROT
+#define gemmsup_params \
+\
+             conj_t conja, \
+             conj_t conjb, \
+             dim_t  m, \
+             dim_t  n, \
+             dim_t  k, \
+       const void*  alpha, \
+       const void*  a, inc_t rs_a, inc_t cs_a, \
+       const void*  b, inc_t rs_b, inc_t cs_b, \
+       const void*  beta, \
+             void*  c, inc_t rs_c, inc_t cs_c
 
-INSERT_GENTPROT_BASIC0( gemmsup_rv_ukr_name )
-INSERT_GENTPROT_BASIC0( gemmsup_rg_ukr_name )
-INSERT_GENTPROT_BASIC0( gemmsup_cv_ukr_name )
-INSERT_GENTPROT_BASIC0( gemmsup_cg_ukr_name )
 
-INSERT_GENTPROT_BASIC0( gemmsup_rd_ukr_name )
-INSERT_GENTPROT_BASIC0( gemmsup_cd_ukr_name )
-
-INSERT_GENTPROT_BASIC0( gemmsup_gx_ukr_name )
+#endif
 

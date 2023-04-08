@@ -55,6 +55,7 @@ void PASTEMAC(ch,varname) \
        ctype*  c, inc_t incc, inc_t ldc, \
        ctype*  p,             inc_t ldp, \
                   inc_t is_p, \
+       void*   params, \
        cntx_t* cntx  \
      ) \
 { \
@@ -79,8 +80,8 @@ void PASTEMAC(ch,varname) \
 		                                         : BLIS_PACKM_MRXMR_DIAG_1ER_KER; \
 	} \
 \
-	PASTECH2(ch,cxk_kername,_ker_ft) f_cxk = bli_cntx_get_ukr_dt( dt, cxk_ker_id, cntx ); \
-	PASTECH2(ch,cxc_kername,_ker_ft) f_cxc = bli_cntx_get_ukr_dt( dt, cxc_ker_id, cntx ); \
+	PASTECH(cxk_kername,_ker_ft) f_cxk = bli_cntx_get_ukr_dt( dt, cxk_ker_id, cntx ); \
+	PASTECH(cxc_kername,_ker_ft) f_cxc = bli_cntx_get_ukr_dt( dt, cxc_ker_id, cntx ); \
 \
 	/* For general matrices, pack and return early */ \
 	if ( bli_is_general( strucc ) ) \

@@ -32,7 +32,7 @@
 
 */
 
-#ifdef BLIS_ENABLE_BLAS
+#if 1
 
 double bla_f__cabs(double real, double imag);
 

@@ -32,7 +32,7 @@
 
 */
 
-#ifdef BLIS_ENABLE_BLAS
+#if 1
 
 #define bla_ger_check( dt_str, op_str, conj_str, m, n, incx, incy, lda ) \
 { \
