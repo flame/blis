@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2022-2023, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2023, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -32,22 +32,30 @@
 
 */
 
-#ifndef BLIS_ADDON_LPGEMM
-#define BLIS_ADDON_LPGEMM
+#ifndef BLIS_LPGEMM_UTILS_KERN_H
+#define BLIS_LPGEMM_UTILS_KERN_H
 
-#include "aocl_gemm_post_ops.h"
-#include "aocl_gemm_interface_apis.h"
-#include "aocl_util_interface_apis.h"
-#include "aocl_bf16_type.h"
-#include "lpgemm_config.h"
-#include "lpgemm_post_ops.h"
-#include "lpgemm_kernels.h"
-#include "lpgemm_utils_kernels.h"
-#include "lpgemm_packb_bf16.h"
-#include "lpgemm_packb_s16.h"
-#include "lpgemm_packa.h"
-#include "lpgemm_packb.h"
-#include "lpgemm_packa_s8.h"
-#include "lpgemm_packb_s8.h"
+typedef void (*lpgemm_util_l1_op_f32_kernel_t)
+     (
+       const dim_t n,
+       float*     x,
+       const inc_t incx
+     );
 
-#endif // BLIS_ADDON_LPGEMM
+#define LPGEMM_UTIL_L1_OP_KERNEL(V_type,OP_type) \
+void lpgemm_util_ ## OP_type ## _kernel \
+     ( \
+       const dim_t n, \
+       V_type*     x, \
+       const inc_t incx \
+     ) \
+
+// AVX512
+LPGEMM_UTIL_L1_OP_KERNEL(float,f32_gelu_tanh_avx512);
+LPGEMM_UTIL_L1_OP_KERNEL(float,f32_gelu_erf_avx512);
+
+// AVX2
+LPGEMM_UTIL_L1_OP_KERNEL(float,f32_gelu_tanh_avx2);
+LPGEMM_UTIL_L1_OP_KERNEL(float,f32_gelu_erf_avx2);
+
+#endif //BLIS_LPGEMM_UTILS_KERN_H

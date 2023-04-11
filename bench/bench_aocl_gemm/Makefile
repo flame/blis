@@ -106,7 +106,8 @@ CFLAGS         += -I$(TEST_SRC_PATH)
 all: blis
 
 blis: \
-       bench_lpgemm_blis.x
+       bench_lpgemm_blis.x \
+       bench_lpgemm_utils_blis.x
 
 
 # --Object file rules --

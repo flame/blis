@@ -64,6 +64,10 @@
 	PBMACRO(BF16BF16F32OF32, packb_nr64_bf16bf16f32of32) \
 	PBMACRO(S8S8S32OS32, packb_nr64_s8s8s32os32) \
 
+#define LPGEMM_UTIL_KERN_FUNC_MAP_AVX512_VNNI_BF16 \
+	UMACRO(F32_GELU_TANH, lpgemm_util_f32_gelu_tanh_avx512_kernel) \
+	UMACRO(F32_GELU_ERF, lpgemm_util_f32_gelu_erf_avx512_kernel) \
+
 // Icelake
 #define LPGEMM_KERN_FUNC_MAP_AVX512_VNNI \
 	KMACRO(U8S8S16OS16, lpgemm_rowvar_u8s8s16o16_6x32) \
@@ -83,6 +87,10 @@
 	PBMACRO(U8S8S32OS32, packb_nr64_u8s8s32o32) \
 	PBMACRO(BF16BF16F32OF32, packb_nr64_bf16bf16f32of32) \
 	PBMACRO(S8S8S32OS32, packb_nr64_s8s8s32os32) \
+
+#define LPGEMM_UTIL_KERN_FUNC_MAP_AVX512_VNNI \
+	UMACRO(F32_GELU_TANH, lpgemm_util_f32_gelu_tanh_avx512_kernel) \
+	UMACRO(F32_GELU_ERF, lpgemm_util_f32_gelu_erf_avx512_kernel) \
 
 // Skylake
 #define LPGEMM_KERN_FUNC_MAP_AVX512 \
@@ -104,6 +112,10 @@
 	PBMACRO(BF16BF16F32OF32, packb_nr64_bf16bf16f32of32) \
 	PBMACRO(S8S8S32OS32, packb_nr64_s8s8s32os32) \
 
+#define LPGEMM_UTIL_KERN_FUNC_MAP_AVX512 \
+	UMACRO(F32_GELU_TANH, lpgemm_util_f32_gelu_tanh_avx512_kernel) \
+	UMACRO(F32_GELU_ERF, lpgemm_util_f32_gelu_erf_avx512_kernel) \
+
 // Milan, Haswell
 #define LPGEMM_KERN_FUNC_MAP_AVX2 \
 	KMACRO(U8S8S16OS16, lpgemm_rowvar_u8s8s16o16_6x32) \
@@ -123,5 +135,9 @@
 	PBMACRO(U8S8S32OS32, NULL) \
 	PBMACRO(BF16BF16F32OF32, NULL) \
 	PBMACRO(S8S8S32OS32, NULL) \
+
+#define LPGEMM_UTIL_KERN_FUNC_MAP_AVX2 \
+	UMACRO(F32_GELU_TANH, lpgemm_util_f32_gelu_tanh_avx2_kernel) \
+	UMACRO(F32_GELU_ERF, lpgemm_util_f32_gelu_erf_avx2_kernel) \
 
 #endif //LPGEMM_FUNC_MAP_H

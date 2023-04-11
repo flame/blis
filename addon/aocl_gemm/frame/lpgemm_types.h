@@ -51,8 +51,14 @@ typedef enum
 	BF16BF16F32OF32 = 3, // bf16 - A, bf16 - B, float - C
 	S8S8S32OS32 = 4 // int8_t - A, int8_t - B, int32_t - C
 } AOCL_OPERATION_TYPE;
-
 #define AOCL_OPERATION_TYPE_LEN 5
+
+typedef enum
+{
+	F32_GELU_TANH = 0,
+	F32_GELU_ERF = 1
+} AOCL_UTIL_OPERATION_TYPE;
+#define AOCL_UTIL_OPERATION_TYPE_LEN 2
 
 typedef enum
 {
@@ -119,6 +125,11 @@ typedef struct
 	void_fp packb_fun_ptr;
 	lpgemm_pack_strides_t pack_s;
 } lpgemm_cntx_t;
+
+typedef struct
+{
+	void_fp kern_fun_ptr;
+} lpgemm_util_cntx_t;
 
 typedef struct
 {

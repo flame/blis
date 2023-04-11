@@ -44,9 +44,42 @@
 #include "lpgemm_packa_s8.h"
 #include "lpgemm_packb_s8.h"
 
-static lpgemm_cntx_t global_cntx_t_list[AOCL_OPERATION_TYPE_LEN]; //Only one op type supported now.
+static lpgemm_cntx_t global_cntx_t_list[AOCL_OPERATION_TYPE_LEN] \
+					__attribute__((aligned(64))); //Only one op type supported now.
+static lpgemm_util_cntx_t global_util_cntx_t_list[AOCL_UTIL_OPERATION_TYPE_LEN] \
+					__attribute__((aligned(64))); //Only post-ops like utils.
 
 static bli_pthread_once_t once_check_lpgemm_func_map_init = BLIS_PTHREAD_ONCE_INIT;
+
+static void _lpgemm_util_cntx_init_func_map()
+{
+#define UMACRO(ID,FUNC_PTR) global_util_cntx_t_list[ID].kern_fun_ptr = FUNC_PTR;
+
+	global_util_cntx_t_list[F32_GELU_TANH].kern_fun_ptr = NULL;
+	global_util_cntx_t_list[F32_GELU_ERF].kern_fun_ptr = NULL;
+
+	// Kernel dispatch object factory.
+	if ( bli_cpuid_is_avx512bf16_supported() == TRUE )
+	{
+#ifdef BLIS_KERNELS_ZEN4
+		LPGEMM_UTIL_KERN_FUNC_MAP_AVX512_VNNI_BF16
+#endif
+	}
+	else if ( bli_cpuid_is_avx512vnni_supported() == TRUE )
+	{
+#ifdef BLIS_KERNELS_ZEN4
+		LPGEMM_UTIL_KERN_FUNC_MAP_AVX512_VNNI
+#endif
+	}
+	else if ( bli_cpuid_is_avx2fma3_supported() == TRUE )
+	{
+#ifdef BLIS_KERNELS_ZEN3
+		LPGEMM_UTIL_KERN_FUNC_MAP_AVX2
+#endif
+	}
+
+#undef UMACRO
+}
 
 static void _lpgemm_cntx_init_func_map()
 {
@@ -167,6 +200,7 @@ static void lpgemm_cntx_init_map()
 {
 	_lpgemm_cntx_init_func_map();
 	_lpgemm_cntx_init_blksz_map();
+	_lpgemm_util_cntx_init_func_map();
 }
 
 // Sets default block sizes for lpgemm. Currently only u8s8s32 supported.
@@ -182,6 +216,11 @@ void aocl_lpgemm_init_global_cntx()
 lpgemm_cntx_t* lpgemm_get_global_cntx_obj( AOCL_OPERATION_TYPE op )
 {
 	return &global_cntx_t_list[op];
+}
+
+lpgemm_util_cntx_t* lpgemm_util_get_global_cntx_obj( AOCL_UTIL_OPERATION_TYPE op )
+{
+	return &global_util_cntx_t_list[op];
 }
 
 dim_t lpgemm_get_block_size_MC_global_cntx( AOCL_OPERATION_TYPE op_type )
