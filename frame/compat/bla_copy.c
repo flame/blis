@@ -96,7 +96,7 @@ void PASTEF77(ch,blasname) \
      ) \
 { \
   PASTEF77S(ch,blasname)( n, x, incx, y, incy ); \
-}
+} \
 )
 
 INSERT_GENTFUNC_BLAS(copy, copyv)

@@ -318,41 +318,47 @@ void bli_cnormfv_unb_var1
         rntm_t*  rntm
     )
 {
-    if ( bli_cpuid_is_avx2fma3_supported() == TRUE )
+    arch_t id = bli_arch_query_id();
+    switch (id)
     {
-        bli_scnorm2fv_unb_var1_avx2( n, x, incx, norm, cntx );
-    }
-    else
-    {
-        float* zero       = bli_s0;
-        float* one        = bli_s1;
-        float  scale;
-        float  sumsq;
-        float  sqrt_sumsq;
+        case BLIS_ARCH_ZEN4:
+        case BLIS_ARCH_ZEN3:
+        case BLIS_ARCH_ZEN2:
+        case BLIS_ARCH_ZEN:
+#ifdef BLIS_KERNELS_ZEN
+            bli_scnorm2fv_unb_var1_avx2( n, x, incx, norm, cntx );
+            break;
+#endif
+        default:;
+            float* zero       = bli_s0;
+            float* one        = bli_s1;
+            float  scale;
+            float  sumsq;
+            float  sqrt_sumsq;
 
-        // Initialize scale and sumsq to begin the summation.
-        bli_scopys( *zero, scale );
-        bli_scopys( *one,  sumsq );
+            // Initialize scale and sumsq to begin the summation.
+            bli_scopys( *zero, scale );
+            bli_scopys( *one,  sumsq );
 
-        // Compute the sum of the squares of the vector.
+            // Compute the sum of the squares of the vector.
 
-        bli_csumsqv_unb_var1
-        (
-            n,
-            x,
-            incx,
-            &scale,
-            &sumsq,
-            cntx,
-            rntm
-        );
+            bli_csumsqv_unb_var1
+            (
+                n,
+                x,
+                incx,
+                &scale,
+                &sumsq,
+                cntx,
+                rntm
+            );
 
-        // Compute: norm = scale * sqrt( sumsq )
-        bli_ssqrt2s( sumsq, sqrt_sumsq );
-        bli_sscals( scale, sqrt_sumsq );
+            // Compute: norm = scale * sqrt( sumsq )
+            bli_ssqrt2s( sumsq, sqrt_sumsq );
+            bli_sscals( scale, sqrt_sumsq );
 
-        // Store the final value to the output variable.
-        bli_scopys( sqrt_sumsq, *norm );
+            // Store the final value to the output variable.
+            bli_scopys( sqrt_sumsq, *norm );
     }
 }
 
@@ -366,42 +372,48 @@ void bli_znormfv_unb_var1
         rntm_t*  rntm
     )
 {
-   if ( bli_cpuid_is_avx2fma3_supported() == TRUE )
-   {
-        bli_dznorm2fv_unb_var1_avx2( n, x, incx, norm, cntx );
-   }
-   else
-   {
-        double* zero       = bli_d0;
-        double* one        = bli_d1;
-        double  scale;
-        double  sumsq;
-        double  sqrt_sumsq;
+    arch_t id = bli_arch_query_id();
+    switch (id)
+    {
+        case BLIS_ARCH_ZEN4:
+        case BLIS_ARCH_ZEN3:
+        case BLIS_ARCH_ZEN2:
+        case BLIS_ARCH_ZEN:
+#ifdef BLIS_KERNELS_ZEN
+            bli_dznorm2fv_unb_var1_avx2( n, x, incx, norm, cntx );
+            break;
+#endif
+        default:;
+            double* zero       = bli_d0;
+            double* one        = bli_d1;
+            double  scale;
+            double  sumsq;
+            double  sqrt_sumsq;
 
-        // Initialize scale and sumsq to begin the summation.
-        bli_dcopys( *zero, scale );
-        bli_dcopys( *one,  sumsq );
+            // Initialize scale and sumsq to begin the summation.
+            bli_dcopys( *zero, scale );
+            bli_dcopys( *one,  sumsq );
 
-        // Compute the sum of the squares of the vector.
+            // Compute the sum of the squares of the vector.
 
-        bli_zsumsqv_unb_var1
-        (
-            n,
-            x,
-            incx,
-            &scale,
-            &sumsq,
-            cntx,
-            rntm
-        );
+            bli_zsumsqv_unb_var1
+            (
+                n,
+                x,
+                incx,
+                &scale,
+                &sumsq,
+                cntx,
+                rntm
+            );
 
-        // Compute: norm = scale * sqrt( sumsq )
-        bli_dsqrt2s( sumsq, sqrt_sumsq );
-        bli_dscals( scale, sqrt_sumsq );
+            // Compute: norm = scale * sqrt( sumsq )
+            bli_dsqrt2s( sumsq, sqrt_sumsq );
+            bli_dscals( scale, sqrt_sumsq );
 
-        // Store the final value to the output variable.
-        bli_dcopys( sqrt_sumsq, *norm );
-   }
+            // Store the final value to the output variable.
+            bli_dcopys( sqrt_sumsq, *norm );
+    }
 }
 
 #undef  GENTFUNCR
@@ -599,41 +611,47 @@ void bli_dnormfv_unb_var1
         rntm_t*  rntm
     )
 {
-   if( bli_cpuid_is_avx2fma3_supported() == TRUE )
-   {
-        bli_dnorm2fv_unb_var1_avx2( n, x, incx, norm, cntx );
-   }
-   else
-   {
-        double* zero       = bli_d0;
-        double* one        = bli_d1;
-        double  scale;
-        double  sumsq;
-        double  sqrt_sumsq;
+    arch_t id = bli_arch_query_id();
+    switch (id)
+    {
+        case BLIS_ARCH_ZEN4:
+        case BLIS_ARCH_ZEN3:
+        case BLIS_ARCH_ZEN2:
+        case BLIS_ARCH_ZEN:
+#ifdef BLIS_KERNELS_ZEN
+            bli_dnorm2fv_unb_var1_avx2( n, x, incx, norm, cntx );
+            break;
+#endif
+        default:;
+            double* zero       = bli_d0;
+            double* one        = bli_d1;
+            double  scale;
+            double  sumsq;
+            double  sqrt_sumsq;
 
-        // Initialize scale and sumsq to begin the summation.
-        bli_ddcopys( *zero, scale );
-        bli_ddcopys( *one,  sumsq );
+            // Initialize scale and sumsq to begin the summation.
+            bli_ddcopys( *zero, scale );
+            bli_ddcopys( *one,  sumsq );
 
-        // Compute the sum of the squares of the vector.
-        bli_dsumsqv_unb_var1 
-        (
-            n,
-            x,
-            incx,
-            &scale,
-            &sumsq,
-            cntx,
-            rntm
-        );
+            // Compute the sum of the squares of the vector.
+            bli_dsumsqv_unb_var1 
+            (
+                n,
+                x,
+                incx,
+                &scale,
+                &sumsq,
+                cntx,
+                rntm
+            );
 
-        // Compute: norm = scale * sqrt( sumsq )
-        bli_dsqrt2s( sumsq, sqrt_sumsq );
-        bli_dscals( scale, sqrt_sumsq );
+            // Compute: norm = scale * sqrt( sumsq )
+            bli_dsqrt2s( sumsq, sqrt_sumsq );
+            bli_dscals( scale, sqrt_sumsq );
 
-        // Store the final value to the output variable.
-        bli_dcopys( sqrt_sumsq, *norm );
-   }
+            // Store the final value to the output variable.
+            bli_dcopys( sqrt_sumsq, *norm );
+    }
 }
 
 #undef  GENTFUNCR

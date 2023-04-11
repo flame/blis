@@ -75,6 +75,9 @@ typedef void (*gemmt_ker_ft)
        cntx_t*    restrict cntx
      );
 
+// these kernels are compiled as part of haswell config
+// use them only when BLIS_KERNELS_HASWELL is defined
+#ifdef BLIS_KERNELS_HASWELL
 //Look-up table for Gemmt Upper Variant Kernels
 gemmt_ker_ft ker_fpus[14] =
 	{
@@ -94,23 +97,27 @@ gemmt_ker_ft ker_fpus[14] =
 		bli_dgemmsup_rd_haswell_asm_6x8m_0x0_combined_U};
 
 //Look-up table for Gemmt Lower Variant Kernels
-gemmt_ker_ft ker_fpls[14] =
-{
-	bli_dgemmsup_rv_haswell_asm_6x8m_0x0_L,
-	bli_dgemmsup_rv_haswell_asm_6x8m_6x0_L,
-	bli_dgemmsup_rv_haswell_asm_6x8m_6x8_L,
-	bli_dgemmsup_rv_haswell_asm_6x8m_12x8_L,
-	bli_dgemmsup_rv_haswell_asm_6x8m_12x16_L,
-	bli_dgemmsup_rv_haswell_asm_6x8m_18x16_L,
-	bli_dgemmsup_rv_haswell_asm_6x8m_16x12_combined_L,
-	bli_dgemmsup_rd_haswell_asm_6x8m_0x0_L,
-	bli_dgemmsup_rd_haswell_asm_6x8m_6x0_L,
-	bli_dgemmsup_rd_haswell_asm_6x8m_6x8_L,
-	bli_dgemmsup_rd_haswell_asm_6x8m_12x8_L,
-	bli_dgemmsup_rd_haswell_asm_6x8m_12x16_L,
-	bli_dgemmsup_rd_haswell_asm_6x8m_18x16_L,
-	bli_dgemmsup_rd_haswell_asm_6x8m_16x12_combined_L
-};
+gemmt_ker_ft ker_fpls[14] = 
+	{
+		bli_dgemmsup_rv_haswell_asm_6x8m_0x0_L,
+		bli_dgemmsup_rv_haswell_asm_6x8m_6x0_L,
+		bli_dgemmsup_rv_haswell_asm_6x8m_6x8_L,
+		bli_dgemmsup_rv_haswell_asm_6x8m_12x8_L,
+		bli_dgemmsup_rv_haswell_asm_6x8m_12x16_L,
+		bli_dgemmsup_rv_haswell_asm_6x8m_18x16_L,
+		bli_dgemmsup_rv_haswell_asm_6x8m_16x12_combined_L,
+		bli_dgemmsup_rd_haswell_asm_6x8m_0x0_L,
+		bli_dgemmsup_rd_haswell_asm_6x8m_6x0_L,
+		bli_dgemmsup_rd_haswell_asm_6x8m_6x8_L,
+		bli_dgemmsup_rd_haswell_asm_6x8m_12x8_L,
+		bli_dgemmsup_rd_haswell_asm_6x8m_12x16_L,
+		bli_dgemmsup_rd_haswell_asm_6x8m_18x16_L,
+		bli_dgemmsup_rd_haswell_asm_6x8m_16x12_combined_L
+	};
+#else
+gemmt_ker_ft ker_fpls[1];
+gemmt_ker_ft ker_fpus[1];
+#endif
 
 //
 // -- var1n --------------------------------------------------------------------
@@ -1922,7 +1929,9 @@ void PASTEMACT(ch,opname,uplo,varname) \
 \
 						/* Check if m, n indices are multiple of MR and NR respectively
 						   and current block is a complete 6x8 block */ \
-						bool idx_supported = ((m_off_24 % MR) == 0) && ((n_off_24 % NR) == 0) && (mr_cur == MR) && (nr_cur == NR); \
+						bool idx_supported = ((m_off_24 % MR) == 0) && ((n_off_24 % NR) == 0)\
+						&& (MR == 6) && (NR == 8) \
+						&& (bli_cpuid_is_avx2fma3_supported() == TRUE) && (mr_cur == MR) && (nr_cur == NR); \
 \
 						/* m_idx and n_idx would be equal only if the current block is
 						   a diagonal block */\
@@ -2600,7 +2609,9 @@ void PASTEMACT(ch,opname,uplo,varname) \
 \
 						/* Check if m, n indices are multiple of MR and NR respectively
 						   and current block is a complete 6x8 block */ \
-						bool idx_supported = ((m_off_24 % MR) == 0) && ((n_off_24 % NR) == 0) && (mr_cur==MR) && (nr_cur==NR); \
+						bool idx_supported = ((m_off_24 % MR) == 0) && ((n_off_24 % NR) == 0)\
+						&& (MR == 6) && (NR == 8) \
+						&& (bli_cpuid_is_avx2fma3_supported() == TRUE) && (mr_cur==MR) && (nr_cur==NR); \
 \
 						/* m_idx and n_idx would be equal only if the current block is
 						   a diagonal block */\
