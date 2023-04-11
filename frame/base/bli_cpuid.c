@@ -75,6 +75,13 @@ static bool is_avx512_supported = FALSE;
 static bool is_avx512vnni_supported = FALSE;
 static bool is_avx512bf16_supported = FALSE;
 
+// Variables to store the cache sizes (in KB). L3 size is shared by all
+// logical processors in the package (i.e. per socket).
+static uint32_t bli_l1d_cache_size = -1;
+static uint32_t bli_l1i_cache_size = -1;
+static uint32_t bli_l2_cache_size = -1;
+static uint32_t bli_l3_cache_size = -1;
+
 arch_t bli_cpuid_query_id( void )
 {
 	uint32_t vendor, family, model, features;
@@ -91,6 +98,10 @@ arch_t bli_cpuid_query_id( void )
 		bli_cpuid_check_avx512_support( family, model, features );
 		bli_cpuid_check_avx512vnni_support( family, model, features );
 		bli_cpuid_check_avx512bf16_support( family, model, features );
+
+		// Find out cache sizes and set in static variables.
+		// Currently only enabled for VENDOR_AMD.
+		bli_cpuid_check_cache( vendor );
 	}
 
 #if 0
@@ -103,6 +114,12 @@ arch_t bli_cpuid_query_id( void )
 	printf( "AVX512 F/DQ/CD/BW/VL = %d\n", is_avx512_supported );
 	printf( "AVX512 VNNI          = %d\n", is_avx512vnni_supported );
 	printf( "AVX512 BF16          = %d\n", is_avx512bf16_supported );
+
+	printf( "Cache Information:\n" );
+	printf( "L1I size = %u KB\n",bli_l1i_cache_size );
+	printf( "L1D size = %u KB\n",bli_l1d_cache_size );
+	printf( "L2  size = %u KB\n",bli_l2_cache_size );
+	printf( "L3  size = %u KB\n",bli_l3_cache_size );
 #endif
 
 	if ( vendor == VENDOR_INTEL )
@@ -197,6 +214,47 @@ arch_t bli_cpuid_query_id( void )
 	}
 
 	return BLIS_ARCH_GENERIC;
+}
+
+model_t bli_cpuid_query_model_id( arch_t arch_id )
+{
+	// Set default for architectures where separate models haven't been defined.
+	model_t cpuid_model = BLIS_MODEL_DEFAULT;
+
+#ifdef BLIS_CONFIG_ZEN4
+	if (arch_id == BLIS_ARCH_ZEN4)
+	{
+		// Call the CPUID instruction and parse its results into a family id,
+		// model id, and a feature bit field. The return value encodes the
+		// vendor.
+
+		uint32_t __attribute__ ((unused)) vendor;
+		uint32_t family, model, features;
+
+		vendor = bli_cpuid_query( &family, &model, &features );
+
+		// Check CPU model.
+		cpuid_model = bli_cpuid_get_zen4_cpuid_model( family, model, features );
+	}
+#endif
+#ifdef BLIS_CONFIG_ZEN3
+	if (arch_id == BLIS_ARCH_ZEN3)
+	{
+		// Call the CPUID instruction and parse its results into a family id,
+		// model id, and a feature bit field. The return value encodes the
+		// vendor.
+
+		uint32_t __attribute__ ((unused)) vendor;
+		uint32_t family, model, features;
+
+		vendor = bli_cpuid_query( &family, &model, &features );
+
+		// Check CPU model.
+		cpuid_model = bli_cpuid_get_zen3_cpuid_model( family, model, features );
+	}
+#endif
+
+	return cpuid_model;
 }
 
 // -----------------------------------------------------------------------------
@@ -344,6 +402,26 @@ bool bli_cpuid_is_zen4
 
 	return TRUE;
 }
+model_t bli_cpuid_get_zen4_cpuid_model
+    (
+       uint32_t family,
+       uint32_t model,
+       uint32_t features
+    )
+{
+	// Look at model of CPU and set cpuid_model appropriately.
+	// For Zen4, the default is Genoa.
+	model_t cpuid_model = BLIS_MODEL_GENOA;
+
+	if ( family == 0x19 )
+	{
+		if ( 0xA0 <= model && model <= 0xAf ) // Bergamo
+		{
+			cpuid_model = BLIS_MODEL_BERGAMO;
+		}
+	}
+	return cpuid_model;
+}
 
 bool bli_cpuid_is_zen3
      (
@@ -378,6 +456,30 @@ bool bli_cpuid_is_zen3
 	if ( !is_arch ) return FALSE;
 
 	return TRUE;
+}
+model_t bli_cpuid_get_zen3_cpuid_model
+    (
+       uint32_t family,
+       uint32_t model,
+       uint32_t features
+    )
+{
+	// Look at model of CPU and set cpuid_model appropriately.
+	// For Zen3, the default is Milan.
+	model_t cpuid_model = BLIS_MODEL_MILAN;
+
+	if ( family == 0x19 )
+	{
+		if ( model <= 0x0f ) // EPYC and ThreadRipper
+		{
+			uint32_t l3_cache_size = bli_cpuid_query_l3_cache_size();
+			if ( l3_cache_size == 786432 )
+			{
+				cpuid_model = BLIS_MODEL_MILAN_X;
+			}
+		}
+	}
+	return cpuid_model;
 }
 
 bool bli_cpuid_is_zen2
@@ -703,6 +805,30 @@ bool bli_cpuid_is_avx512bf16_supported( void )
 	return is_avx512bf16_supported;
 }
 
+uint32_t bli_cpuid_query_l1d_cache_size( void )
+{
+	bli_cpuid_query_id_once();
+	return bli_l1d_cache_size;
+}
+
+uint32_t bli_cpuid_query_l1i_cache_size( void )
+{
+	bli_cpuid_query_id_once();
+	return bli_l1i_cache_size;
+}
+
+uint32_t bli_cpuid_query_l2_cache_size( void )
+{
+	bli_cpuid_query_id_once();
+	return bli_l2_cache_size;
+}
+
+uint32_t bli_cpuid_query_l3_cache_size( void )
+{
+	bli_cpuid_query_id_once();
+	return bli_l3_cache_size;
+}
+
 #elif defined(__aarch64__) || defined(__arm__) || defined(_M_ARM)
 
 arch_t bli_cpuid_query_id( void )
@@ -855,7 +981,7 @@ bool bli_cpuid_is_cortexa9
 
    Copyright (C) 2017, The University of Texas at Austin
    Copyright (C) 2017, Devin Matthews
-   Copyright (C) 2018 - 2019, Advanced Micro Devices, Inc.
+   Copyright (C) 2018-2023, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -1168,6 +1294,22 @@ uint32_t bli_cpuid_query
 		return VENDOR_INTEL;
 	else
 		return VENDOR_UNKNOWN;
+}
+
+void bli_cpuid_check_cache( uint32_t vendor )
+{
+        if ( vendor == VENDOR_AMD )
+	{
+		uint32_t eax, ebx, ecx, edx;
+
+		__cpuid( 0x80000005, eax, ebx, ecx, edx );
+		bli_l1d_cache_size = (ecx >> 24) & 0xFF;
+		bli_l1i_cache_size = (edx >> 24) & 0xFF;
+
+		__cpuid( 0x80000006, eax, ebx, ecx, edx );
+		bli_l2_cache_size = (ecx >> 16) & 0xFFFF;
+		bli_l3_cache_size = ((edx >> 18) & 0x3FFF) * 512;
+	}
 }
 
 void get_cpu_name( char *cpu_name )

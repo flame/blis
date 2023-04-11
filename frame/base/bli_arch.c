@@ -47,33 +47,65 @@
 
 // -----------------------------------------------------------------------------
 
-// The arch_t id for the currently running hardware. We initialize to -1,
-// which will be overwritten upon calling bli_arch_set_id().
+// The arch and model ids for the currently running hardware. We initialize
+// to -1, which will be overwritten upon calling bli_arch_set_id().
 static arch_t actual_arch_id = -1;
+static model_t actual_model_id = -1;
 
-// The arch_t id for the currently running hardware, or the arch the user
-// specifies to use. We initialize to -1, which will be overwritten upon
-// calling bli_arch_set_id().
-static arch_t id = -1;
+// The arch and model ids for the currently running hardware, or the values
+// the user specifies to use. We initialize to -1, which will be overwritten
+// upon calling bli_arch_set_id().
+static arch_t arch_id = -1;
+static model_t model_id = -1;
+
+// Variable used to communicate if user has set '__blis_arch_type_name' between
+// bli_arch_set_id() and bli_arch_check_id()
+static dim_t __attribute__ ((unused)) req_id = -1;
 
 arch_t bli_arch_query_id( void )
 {
 	bli_arch_set_id_once();
+	bli_arch_check_id_once();
 
 	// Simply return the id that was previously cached.
-	return id;
+	return arch_id;
+}
+
+model_t bli_model_query_id( void )
+{
+	bli_arch_set_id_once();
+	bli_arch_check_id_once();
+
+	// Simply return the model_id that was previously cached.
+	return model_id;
+}
+
+model_t bli_init_model_query_id( void )
+{
+	bli_arch_set_id_once();
+
+	// Simply return the model_id that was previously cached.
+	return model_id;
 }
 
 // -----------------------------------------------------------------------------
 
 // A pthread structure used in pthread_once(). pthread_once() is guaranteed to
 // execute exactly once among all threads that pass in this control object.
-static bli_pthread_once_t once_id = BLIS_PTHREAD_ONCE_INIT;
+static bli_pthread_once_t once_id_init = BLIS_PTHREAD_ONCE_INIT;
+static bli_pthread_once_t once_id_check = BLIS_PTHREAD_ONCE_INIT;
 
 void bli_arch_set_id_once( void )
 {
 #ifndef BLIS_CONFIGURETIME_CPUID
-	bli_pthread_once( &once_id, bli_arch_set_id );
+	bli_pthread_once( &once_id_init, bli_arch_set_id );
+#endif
+}
+
+void bli_arch_check_id_once( void )
+{
+#ifndef BLIS_CONFIGURETIME_CPUID
+	bli_pthread_once( &once_id_check, bli_arch_check_id );
 #endif
 }
 
@@ -86,8 +118,9 @@ void bli_arch_set_id( void )
 	bool do_logging = bli_env_get_var( "BLIS_ARCH_DEBUG", 0 );
 	bli_arch_set_logging( do_logging );
 
-	// Get actual hardware id.
+	// Get actual hardware arch and model ids.
 	actual_arch_id = bli_cpuid_query_id();
+	actual_model_id = bli_cpuid_query_model_id( actual_arch_id );
 
 	// DISABLE_BLIS_ARCH_TYPE and BLIS_CONFIGURETIME_CPUID seem similar but
 	// have different use cases:
@@ -101,7 +134,7 @@ void bli_arch_set_id( void )
 	// defined to be) to see if the user requested that we use a specific
 	// subconfiguration. "__blis_arch_type_name" will be defined by the
 	// configure command in bli_config.h, with the default name of BLIS_ARCH_TYPE
-	dim_t req_id = bli_env_get_var_arch_type( __blis_arch_type_name, -1 );
+	req_id = bli_env_get_var_arch_type( __blis_arch_type_name, -1 );
 
 #ifndef BLIS_CONFIGURETIME_CPUID
 	if ( req_id != -1 )
@@ -109,36 +142,18 @@ void bli_arch_set_id( void )
 		// BLIS_ARCH_TYPE was set. Cautiously check whether its value is usable.
 
 		// If req_id was set to an invalid arch_t value (ie: outside the range
-		// [0,BLIS_NUM_ARCHS-1]), output an error message and abort.
+		// [1,BLIS_NUM_ARCHS-1]), output an error message and abort.
 		if ( bli_error_checking_is_enabled() )
 		{
 			err_t e_val = bli_check_valid_arch_id( req_id );
 			bli_check_error_code( e_val );
 		}
 
-		// In BLAS1 and BLAS2 routines, bli_init_auto() may not have been
-		// called, so ensure cntx has been initialized here.
-		bli_gks_init_once();
+		// Check again context actually initialized deferred to
+		// bli_arch_check_id() called later.
 
-		// At this point, we know that req_id is in the valid range, but we
-		// don't yet know if it refers to a context that was actually
-		// initialized. Query the address of an internal context data structure
-		// corresponding to req_id. This pointer will be NULL if the associated
-		// subconfig is not available.
-
-		cntx_t** req_cntx = bli_gks_lookup_id( req_id );
-
-		// This function checks the context pointer and aborts with a useful
-		// error message if the pointer is found to be NULL.
-		if ( bli_error_checking_is_enabled() )
-		{
-			err_t e_val = bli_check_initialized_gks_cntx( req_cntx );
-			bli_check_error_code( e_val );
-		}
-
-		// Finally, we can be confident that req_id (1) is in range and (2)
-		// refers to a context that has been initialized.
-		id = req_id;
+		// For now, we can only be confident that req_id is in range.
+		arch_id = req_id;
 	}
 	else
 #endif
@@ -155,97 +170,206 @@ void bli_arch_set_id( void )
 		    defined BLIS_FAMILY_X86_64       || \
 		    defined BLIS_FAMILY_ARM64        || \
 		    defined BLIS_FAMILY_ARM32
-		id = actual_arch_id;
+		arch_id = actual_arch_id;
 		#endif
 
 		// Intel microarchitectures.
 		#ifdef BLIS_FAMILY_SKX
-		id = BLIS_ARCH_SKX;
+		arch_id = BLIS_ARCH_SKX;
 		#endif
 		#ifdef BLIS_FAMILY_KNL
-		id = BLIS_ARCH_KNL;
+		arch_id = BLIS_ARCH_KNL;
 		#endif
 		#ifdef BLIS_FAMILY_KNC
-		id = BLIS_ARCH_KNC;
+		arch_id = BLIS_ARCH_KNC;
 		#endif
 		#ifdef BLIS_FAMILY_HASWELL
-		id = BLIS_ARCH_HASWELL;
+		arch_id = BLIS_ARCH_HASWELL;
 		#endif
 		#ifdef BLIS_FAMILY_SANDYBRIDGE
-		id = BLIS_ARCH_SANDYBRIDGE;
+		arch_id = BLIS_ARCH_SANDYBRIDGE;
 		#endif
 		#ifdef BLIS_FAMILY_PENRYN
-		id = BLIS_ARCH_PENRYN;
+		arch_id = BLIS_ARCH_PENRYN;
 		#endif
 
 		// AMD microarchitectures.
 		#ifdef BLIS_FAMILY_ZEN4
-		id = BLIS_ARCH_ZEN4;
+		arch_id = BLIS_ARCH_ZEN4;
 		#endif
 		#ifdef BLIS_FAMILY_ZEN3
-		id = BLIS_ARCH_ZEN3;
+		arch_id = BLIS_ARCH_ZEN3;
 		#endif
 		#ifdef BLIS_FAMILY_ZEN2
-		id = BLIS_ARCH_ZEN2;
+		arch_id = BLIS_ARCH_ZEN2;
 		#endif
 		#ifdef BLIS_FAMILY_ZEN
-		id = BLIS_ARCH_ZEN;
+		arch_id = BLIS_ARCH_ZEN;
 		#endif
 		#ifdef BLIS_FAMILY_EXCAVATOR
-		id = BLIS_ARCH_EXCAVATOR;
+		arch_id = BLIS_ARCH_EXCAVATOR;
 		#endif
 		#ifdef BLIS_FAMILY_STEAMROLLER
-		id = BLIS_ARCH_STEAMROLLER;
+		arch_id = BLIS_ARCH_STEAMROLLER;
 		#endif
 		#ifdef BLIS_FAMILY_PILEDRIVER
-		id = BLIS_ARCH_PILEDRIVER;
+		arch_id = BLIS_ARCH_PILEDRIVER;
 		#endif
 		#ifdef BLIS_FAMILY_BULLDOZER
-		id = BLIS_ARCH_BULLDOZER;
+		arch_id = BLIS_ARCH_BULLDOZER;
 		#endif
 
 		// ARM microarchitectures.
 		#ifdef BLIS_FAMILY_THUNDERX2
-		id = BLIS_ARCH_THUNDERX2;
+		arch_id = BLIS_ARCH_THUNDERX2;
 		#endif
 		#ifdef BLIS_FAMILY_CORTEXA57
-		id = BLIS_ARCH_CORTEXA57;
+		arch_id = BLIS_ARCH_CORTEXA57;
 		#endif
 		#ifdef BLIS_FAMILY_CORTEXA53
-		id = BLIS_ARCH_CORTEXA53;
+		arch_id = BLIS_ARCH_CORTEXA53;
 		#endif
 		#ifdef BLIS_FAMILY_CORTEXA15
-		id = BLIS_ARCH_CORTEXA15;
+		arch_id = BLIS_ARCH_CORTEXA15;
 		#endif
 		#ifdef BLIS_FAMILY_CORTEXA9
-		id = BLIS_ARCH_CORTEXA9;
+		arch_id = BLIS_ARCH_CORTEXA9;
 		#endif
 
 		// IBM microarchitectures.
 		#ifdef BLIS_FAMILY_POWER10
-		id = BLIS_ARCH_POWER10;
+		arch_id = BLIS_ARCH_POWER10;
 		#endif
 		#ifdef BLIS_FAMILY_POWER9
-		id = BLIS_ARCH_POWER9;
+		arch_id = BLIS_ARCH_POWER9;
 		#endif
 		#ifdef BLIS_FAMILY_POWER7
-		id = BLIS_ARCH_POWER7;
+		arch_id = BLIS_ARCH_POWER7;
 		#endif
 		#ifdef BLIS_FAMILY_BGQ
-		id = BLIS_ARCH_BGQ;
+		arch_id = BLIS_ARCH_BGQ;
 		#endif
 
 		// Generic microarchitecture.
 		#ifdef BLIS_FAMILY_GENERIC
-		id = BLIS_ARCH_GENERIC;
+		arch_id = BLIS_ARCH_GENERIC;
 		#endif
 	}
 
-	if ( bli_arch_get_logging() )
-		fprintf( stderr, "libblis: selecting sub-configuration '%s'.\n",
-				 bli_arch_string( id ) );
 
-	//printf( "blis_arch_query_id(): id = %u\n", id );
+#ifndef DISABLE_BLIS_MODEL_TYPE
+	// Check the environment variable (that "__blis_model_type_name" is
+	// defined to be) to see if the user requested that we use a specific
+	// subconfiguration. "__blis_model_type_name" will be defined by the
+	// configure command in bli_config.h, with the default name of BLIS_MODEL_TYPE
+	dim_t req_model = bli_env_get_var_model_type( __blis_model_type_name, -1 );
+
+#ifndef BLIS_CONFIGURETIME_CPUID
+	if ( req_model != -1 )
+	{
+		// BLIS_MODEL_TYPE was set. Cautiously check whether its value is usable.
+		// Assume here that arch_id is valid.
+
+		// If req_model was set to an invalid model_t value (ie: both outside
+		// the range appropriate for the given architecture and not default),
+		// set to default value and continue.
+		if ( bli_error_checking_is_enabled() )
+		{
+			err_t e_val = bli_check_valid_model_id( arch_id, req_model );
+			if (e_val != BLIS_SUCCESS)
+			{
+				req_model = BLIS_MODEL_DEFAULT;
+				e_val = BLIS_SUCCESS;
+			}
+			bli_check_error_code( e_val );
+		}
+
+		// We can now be confident that req_model is in range for the
+		// selected architecture, or it has been reset to be default.
+		model_id = req_model;
+	}
+	else
+#endif
+
+#endif
+	{
+		// BLIS_MODEL_TYPE was unset. Proceed with normal subconfiguration
+		// selection behavior, based on value of architecture id selected
+		// above. Unlike for arch_id, we cannot simply use actual_model_id
+		// here, as we need to choose model_id based on the arch_id we are
+		// using, which could be different to actual_arch_id.
+
+		model_id = bli_cpuid_query_model_id( arch_id );
+	}
+
+	//printf( "blis_arch_query_id(): arch_id, model_id = %u, %u\n", arch_id, model_id );
+	//exit(1);
+}
+
+void bli_arch_check_id( void )
+{
+	bli_arch_set_id_once();
+
+	// Check arch value against configured options. Only needed
+	// if user has set it. This function will also do the
+	// logging of chosen arch and model (if desired).
+
+	// DISABLE_BLIS_ARCH_TYPE and BLIS_CONFIGURETIME_CPUID seem similar but
+	// have different use cases:
+	// * BLIS_CONFIGURETIME_CPUID is used by the "configure auto" option to
+	//   select a single code path, and affects other parts of the code.
+	// * DISABLE_BLIS_ARCH_TYPE disables user selection of code path here in
+	//   builds with multiple code paths.
+
+#ifndef DISABLE_BLIS_ARCH_TYPE
+
+#ifndef BLIS_CONFIGURETIME_CPUID
+	if ( req_id != -1 )
+	{
+		// BLIS_ARCH_TYPE was set. Cautiously check whether its value is usable.
+
+		// In BLAS1 and BLAS2 routines, bli_init_auto() may not have been
+		// called, so ensure cntx has been initialized here.
+		bli_gks_init_once();
+
+		// At this point, we know that req_id is in the valid range, but we
+		// don't yet know if it refers to a context that was actually
+		// initialized. Query the address of an internal context data structure
+		// corresponding to req_id. This pointer will be NULL if the associated
+		// subconfig is not available.
+		cntx_t** req_cntx = bli_gks_lookup_id( req_id );
+
+		// This function checks the context pointer and aborts with a useful
+		// error message if the pointer is found to be NULL.
+		if ( bli_error_checking_is_enabled() )
+		{
+			err_t e_val = bli_check_initialized_gks_cntx( req_cntx );
+			bli_check_error_code( e_val );
+		}
+
+		// Finally, we can be confident that req_id (1) is in range and (2)
+		// refers to a context that has been initialized.
+		arch_id = req_id;
+	}
+#endif
+
+#endif
+
+	if ( bli_arch_get_logging() )
+        {
+		if ( model_id == BLIS_MODEL_DEFAULT )
+		{
+			fprintf( stderr, "libblis: selecting sub-configuration '%s'.\n",
+				 bli_arch_string( arch_id ) );
+		}
+		else
+		{
+			fprintf( stderr, "libblis: selecting sub-configuration '%s', model '%s'.\n",
+				 bli_arch_string( arch_id ), bli_model_string( model_id ) );
+		}
+        }
+
+	//printf( "blis_arch_check_id(): arch_id, model_id = %u, %u\n", arch_id, model_id );
 	//exit(1);
 }
 
@@ -296,6 +420,33 @@ static char* config_name[ BLIS_NUM_ARCHS ] =
 char* bli_arch_string( arch_t id )
 {
 	return config_name[ id ];
+}
+
+// NOTE: This string array must be kept up-to-date with the model_t
+// enumeration that is typedef'ed in bli_type_defs.h. That is, the
+// index order of each string should correspond to the implied/assigned
+// enum value given to the corresponding BLIS_model_ value.
+// This must also be kept up-to-date with the bli_env_get_var_model_type()
+// function in bli_env.c
+static char* model_name[ BLIS_NUM_MODELS ] =
+{
+    "error",
+
+    "default",
+
+    "Genoa",
+    "Bergamo",
+    "Genoa-X",
+
+    "Milan",
+    "Milan-X",
+
+    "default"
+};
+
+char* bli_model_string( model_t id )
+{
+	return model_name[ id ];
 }
 
 // -----------------------------------------------------------------------------

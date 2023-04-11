@@ -39,7 +39,7 @@
  * Converted it to macro as this list is used at multiple places in this file.
  */
 
-#define BLI_CNTX_DEFAULT_BLKSZ_LIST(blkszs) \
+#define BLI_CNTX_DEFAULT_BLKSZ_LIST_GENOA(blkszs) \
     /*                                           s      d      c      z */  \
     bli_blksz_init_easy( &blkszs[ BLIS_MR ],    32,    32,     3,    12 );  \
     bli_blksz_init_easy( &blkszs[ BLIS_NR ],    12,     6,     8,     4 );  \
@@ -47,6 +47,19 @@
     bli_blksz_init     ( &blkszs[ BLIS_KC ],   480,   512,   256,   512,    \
                                                480,   320,   256,   160 );  \
     bli_blksz_init_easy( &blkszs[ BLIS_NC ],  6144,  4002,  4080,  2004 );  \
+                                                                            \
+    bli_blksz_init_easy( &blkszs[ BLIS_AF ],     8,     8,    -1,    -1 );  \
+    bli_blksz_init_easy( &blkszs[ BLIS_DF ],     8,     8,    -1,    -1 );  \
+
+
+#define BLI_CNTX_DEFAULT_BLKSZ_LIST_BERGAMO(blkszs) \
+    /*                                           s      d      c      z */  \
+    bli_blksz_init_easy( &blkszs[ BLIS_MR ],    32,    32,     3,    12 );  \
+    bli_blksz_init_easy( &blkszs[ BLIS_NR ],    12,     6,     8,     4 );  \
+    bli_blksz_init_easy( &blkszs[ BLIS_MC ],   512,    64,   144,    60 );  \
+    bli_blksz_init     ( &blkszs[ BLIS_KC ],   480,   512,   256,   512,    \
+                                               480,   320,   256,   160 );  \
+    bli_blksz_init_easy( &blkszs[ BLIS_NC ],  6144,  3600,  4080,  2004 );  \
                                                                             \
     bli_blksz_init_easy( &blkszs[ BLIS_AF ],     8,     8,    -1,    -1 );  \
     bli_blksz_init_easy( &blkszs[ BLIS_DF ],     8,     8,    -1,    -1 );  \
@@ -197,7 +210,14 @@ void bli_cntx_init_zen4( cntx_t* cntx )
     // These are reference block sizes and may be overridden based on
     // number of threads used at runtime.
 
-    BLI_CNTX_DEFAULT_BLKSZ_LIST(blkszs);
+    if ( bli_init_model_query_id() == BLIS_MODEL_BERGAMO )
+    {
+        BLI_CNTX_DEFAULT_BLKSZ_LIST_BERGAMO(blkszs);
+    }
+    else // BLIS_MODEL_DEFAULT choice, also currently used for BLIS_MODEL_GENOA and BLIS_MODEL_GENOA_X
+    {
+        BLI_CNTX_DEFAULT_BLKSZ_LIST_GENOA(blkszs);
+    }
 
     // Update the context with the current architecture's register and cache
     // blocksizes (and multiples) for native execution.
@@ -411,7 +431,14 @@ void bli_zen4_restore_default_blkszs (cntx_t* cntx)
 {
     blksz_t blkszs[ BLIS_NUM_BLKSZS ];
 
-    BLI_CNTX_DEFAULT_BLKSZ_LIST(blkszs);
+    if ( bli_init_model_query_id() == BLIS_MODEL_BERGAMO )
+    {
+        BLI_CNTX_DEFAULT_BLKSZ_LIST_BERGAMO(blkszs);
+    }
+    else // BLIS_MODEL_DEFAULT choice, also currently used for BLIS_MODEL_GENOA and BLIS_MODEL_GENOA_X
+    {
+        BLI_CNTX_DEFAULT_BLKSZ_LIST_GENOA(blkszs);
+    }
 
     // Update the context with the current architecture's register and cache
     // blocksizes (and multiples) for native execution.

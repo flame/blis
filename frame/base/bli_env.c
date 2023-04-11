@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2018-2022, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2018-2023, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -205,6 +205,84 @@ gint_t bli_env_get_var_arch_type( const char* env, gint_t fallback )
 			else if (strcmp(str, "generic") == 0)
 			{
 				r_val = BLIS_ARCH_GENERIC;
+			}
+
+			// No else case means we return r_val=0, i.e. this behaves
+			// the same as generic bli_env_get_var().
+		}
+	}
+	else
+	{
+		// If there was an error, use the "fallback" as the return value.
+		r_val = fallback;
+	}
+
+	return r_val;
+}
+
+gint_t bli_env_get_var_model_type( const char* env, gint_t fallback )
+{
+	gint_t r_val;
+	char*  str;
+	int i, size;
+
+	// Query the environment variable and store the result in str.
+	str = getenv( env );
+
+	// Set the return value based on the string obtained from getenv().
+	if ( str != NULL )
+	{
+		// If there was no error, convert the string to an integer and
+		// prepare to return that integer.
+		r_val = ( gint_t )strtol( str, NULL, 10 );
+
+		if (r_val == 0)
+		{
+			// Could be deliberately 0 (meaning an ERROR)
+			// or a non-numeric value. We still allow direct
+			// specification of integer value to select code
+			// path. Non-zero integer values bypass this code
+			// block and are handled as before. Here we look
+			// for known meaningful names, and return 0 if
+			// we cannot find a match. This code MUST be kept
+			// in synch with arch_t enumeration in
+			// bli_type_defs.h and array config_name in bli_arch.c
+
+			// convert string to lowercase
+			size = strlen(str);
+			for (i=0;i<=size;i++)
+			{
+				str[i] = tolower(str[i]);
+			}
+			// AMD
+			if (strcmp(str, "genoa") == 0)
+			{
+				r_val = BLIS_MODEL_GENOA;
+			}
+			else if (strcmp(str, "bergamo") == 0)
+			{
+				r_val = BLIS_MODEL_BERGAMO;
+			}
+			else if ((strcmp(str, "genoa_x") == 0) ||
+			         (strcmp(str, "genoa-x") == 0) ||
+			         (strcmp(str, "genoax") == 0))
+			{
+				r_val = BLIS_MODEL_GENOA_X;
+			}
+			else if (strcmp(str, "milan") == 0)
+			{
+				r_val = BLIS_MODEL_MILAN;
+			}
+			else if ((strcmp(str, "milan_x") == 0) ||
+			         (strcmp(str, "milan-x") == 0) ||
+			         (strcmp(str, "milanx") == 0))
+			{
+				r_val = BLIS_MODEL_MILAN_X;
+			}
+			// Default (all architectures)
+			else if (strcmp(str, "default") == 0)
+			{
+				r_val = BLIS_MODEL_DEFAULT;
 			}
 
 			// No else case means we return r_val=0, i.e. this behaves

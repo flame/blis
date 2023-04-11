@@ -891,6 +891,38 @@ err_t bli_check_valid_arch_id( arch_t id )
 	return e_val;
 }
 
+
+err_t bli_check_valid_model_id( arch_t arch_id, model_t model_id )
+{
+	// We have to check model_id is OK for the specific arch_id.
+	// Model ranges are specified in bli_type_defs.h
+	err_t e_val = BLIS_INVALID_MODEL_ID;
+
+	if ( arch_id == BLIS_ARCH_ZEN4 )
+	{
+		if ( ( gint_t )model_id >= BLIS_MODEL_GENOA &&
+		     ( gint_t )model_id <= BLIS_MODEL_GENOA_X )
+		{
+			e_val = BLIS_SUCCESS;
+		}
+	}
+	if ( arch_id == BLIS_ARCH_ZEN3 )
+	{
+		if ( ( gint_t )model_id >= BLIS_MODEL_MILAN &&
+		     ( gint_t )model_id <= BLIS_MODEL_MILAN_X )
+		{
+			e_val = BLIS_SUCCESS;
+		}
+	}
+	// model = default is OK for all microarchitectures.
+	if ( model_id == BLIS_MODEL_DEFAULT )
+	{
+		e_val = BLIS_SUCCESS;
+	}
+
+	return e_val;
+}
+
 err_t bli_check_initialized_gks_cntx( cntx_t** cntx )
 {
 	err_t e_val = BLIS_SUCCESS;

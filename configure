@@ -355,16 +355,21 @@ print_usage()
 	echo " "
 	echo "   --enable-blis-arch-type, --disable-blis-arch-type"
 	echo " "
-	echo "                 Disable (Enabled by default) support for BLIS_ARCH_TYPE"
-	echo "                 environment variable, which allows user to select"
-	echo "                 architecture-specific code path at runtime."
+	echo "                 Disable (Enabled by default) support for BLIS_ARCH_TYPE and BLIS_MODEL_TYPE"
+	echo "                 environment variables, which allows user to select"
+	echo "                 architecture specific code path and optimizations at runtime."
 	echo "                 If disabled, in builds with multiple code paths, BLIS"
-	echo "                 will still select path automatically."
+	echo "                 will still select path and optimizations automatically."
 	echo " "
 	echo "   --rename-blis-arch-type=STRING"
 	echo " "
-	echo "                 Change environment variable used to select architecture-specific"
+	echo "                 Change environment variable used to select architecture specific"
 	echo "                 code path from BLIS_ARCH_TYPE to STRING"
+	echo " "
+	echo "   --rename-blis-model-type=STRING"
+	echo " "
+	echo "                 Change environment variable used to select architecture model specific"
+	echo "                 optimizations from BLIS_MODEL_TYPE to STRING"
 	echo " "
 	echo "   -q, --quiet   Suppress informational output. By default, configure"
 	echo "                 is verbose. (NOTE: -q is not yet implemented)"
@@ -1163,6 +1168,7 @@ auto_detect()
 	cmd="${cc} ${config_defines} \
 	      -DBLIS_CONFIGURETIME_CPUID \
 	      -D__blis_arch_type_name=${double_quote_open}${rename_blis_arch_type}${double_quote_close} \
+	      -D__blis_model_type_name=${double_quote_open}${rename_blis_model_type}${double_quote_close} \
 	      ${c_hdr_paths} \
 	      -std=c99 -D_GNU_SOURCE \
 	      ${cflags} \
@@ -2043,6 +2049,7 @@ main()
 	complex_return='default'
 	disable_blis_arch_type='no'
 	rename_blis_arch_type='BLIS_ARCH_TYPE'
+	rename_blis_model_type='BLIS_MODEL_TYPE'
 
 	# The addon flag and names.
 	addon_flag=''
@@ -2280,6 +2287,9 @@ main()
 							;;
 						rename-blis-arch-type=*)
 							rename_blis_arch_type=${OPTARG#*=}
+							;;
+						rename-blis-model-type=*)
+							rename_blis_model_type=${OPTARG#*=}
 							;;
 						*)
 							print_usage
@@ -3257,7 +3267,7 @@ main()
 	fi
 
 	if [ "x${disable_blis_arch_type}" = "xyes"  ]; then
-		echo "${script_name}: user selection of code path using BLIS_ARCH_TYPE env var is disabled."
+		echo "${script_name}: user selection of code path using BLIS_ARCH_TYPE and BLIS_MODEL_TYPE env vars is disabled."
 		disable_blis_arch_type_01='1'
 	else
 		disable_blis_arch_type_01='0'
@@ -3266,6 +3276,10 @@ main()
 	# Check if the user requested a custom env var name to replace BLIS_ARCH_TYPE.
 	if [ "x${rename_blis_arch_type}" != "xBLIS_ARCH_TYPE" ]; then
 		echo "${script_name}: configuring with BLIS_ARCH_TYPE env var renamed to '${rename_blis_arch_type}'."
+	fi
+	# Check if the user requested a custom env var name to replace BLIS_MODEL_TYPE.
+	if [ "x${rename_blis_model_type}" != "xBLIS_MODEL_TYPE" ]; then
+		echo "${script_name}: configuring with BLIS_MODEL_TYPE env var renamed to '${rename_blis_model_type}'."
 	fi
 
 	echo "${script_name}: configuring complex return type as \"${complex_return}\"."
@@ -3482,6 +3496,7 @@ main()
 		| sed   -e "s/@complex_return_intel@/${complex_return_intel01}/g" \
 		| sed   -e "s/@disable_blis_arch_type@/${disable_blis_arch_type_01}/g" \
 		| sed   -e "s/@rename_blis_arch_type@/${rename_blis_arch_type}/g" \
+		| sed   -e "s/@rename_blis_model_type@/${rename_blis_model_type}/g" \
 		> "${bli_config_h_out_path}"
 
 	# -- Instantiate bli_addon.h file from template ----------------------------

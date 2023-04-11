@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2018 - 2019, Advanced Micro Devices, Inc.
+   Copyright (C) 2018-2023, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -103,8 +103,9 @@ static char bli_error_string[BLIS_MAX_NUM_ERR_MSGS][BLIS_MAX_ERR_MSG_LENGTH] =
 
 	[-BLIS_EXPECTED_OBJECT_ALIAS]                = "Expected object to be alias.",
 
-	[-BLIS_INVALID_ARCH_ID]                      = "Invalid architecture id value.",
-	[-BLIS_UNINITIALIZED_GKS_CNTX]               = "Accessed uninitialized context in gks; BLIS_ARCH_TYPE is probably set to an invalid architecture id.",
+	[-BLIS_INVALID_ARCH_ID]                      = "Invalid architecture id value (env var "__blis_arch_type_name").",
+	[-BLIS_INVALID_MODEL_ID]                     = "Invalid architecture model id value (env var "__blis_model_type_name").",
+	[-BLIS_UNINITIALIZED_GKS_CNTX]               = "Accessed uninitialized context in gks; "__blis_arch_type_name" or "__blis_model_type_name" is probably set to an invalid architecture id.",
 
 	[-BLIS_MC_DEF_NONMULTIPLE_OF_MR]             = "Default MC is non-multiple of MR for one or more datatypes.",
 	[-BLIS_MC_MAX_NONMULTIPLE_OF_MR]             = "Maximum MC is non-multiple of MR for one or more datatypes.",

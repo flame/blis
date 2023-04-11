@@ -53,6 +53,13 @@
 
 arch_t bli_cpuid_query_id( void );
 
+model_t bli_cpuid_query_model_id( arch_t id );
+
+uint32_t bli_cpuid_query_l1d_cache_size( void );
+uint32_t bli_cpuid_query_l1i_cache_size( void );
+uint32_t bli_cpuid_query_l2_cache_size( void );
+uint32_t bli_cpuid_query_l3_cache_size( void );
+
 // Intel
 bool bli_cpuid_is_skx( uint32_t family, uint32_t model, uint32_t features );
 bool bli_cpuid_is_knl( uint32_t family, uint32_t model, uint32_t features );
@@ -71,6 +78,9 @@ bool bli_cpuid_is_steamroller( uint32_t family, uint32_t model, uint32_t feature
 bool bli_cpuid_is_piledriver( uint32_t family, uint32_t model, uint32_t features );
 bool bli_cpuid_is_bulldozer( uint32_t family, uint32_t model, uint32_t features );
 
+model_t bli_cpuid_get_zen4_cpuid_model( uint32_t family, uint32_t model, uint32_t features );
+model_t bli_cpuid_get_zen3_cpuid_model( uint32_t family, uint32_t model, uint32_t features );
+
 // ARM
 bool bli_cpuid_is_thunderx2( uint32_t model, uint32_t part, uint32_t features );
 bool bli_cpuid_is_cortexa57( uint32_t model, uint32_t part, uint32_t features );
@@ -79,6 +89,8 @@ bool bli_cpuid_is_cortexa15( uint32_t model, uint32_t part, uint32_t features );
 bool bli_cpuid_is_cortexa9( uint32_t model, uint32_t part, uint32_t features );
 
 uint32_t bli_cpuid_query( uint32_t* family, uint32_t* model, uint32_t* features );
+
+void bli_cpuid_check_cache( uint32_t vendor );
 
 // -----------------------------------------------------------------------------
 

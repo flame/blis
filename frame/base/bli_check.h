@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2018 - 2019, Advanced Micro Devices, Inc.
+   Copyright (C) 2018-2023, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -110,6 +110,7 @@ err_t bli_check_alignment_is_mult_of_ptr_size( size_t align_size );
 err_t bli_check_object_alias_of( obj_t* a, obj_t* b );
 
 err_t bli_check_valid_arch_id( arch_t id );
+err_t bli_check_valid_model_id( arch_t arch_id, model_t model_id );
 err_t bli_check_initialized_gks_cntx( cntx_t** cntx );
 
 err_t bli_check_valid_mc_mod_mult( blksz_t* mc, blksz_t* mr );
