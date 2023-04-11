@@ -90,10 +90,10 @@ INSTANTIATE_TEST_SUITE_P(
         snrm2Test,
         ::testing::Combine(
             ::testing::Range(gtint_t(10), gtint_t(101), 10),                 // m size of vector takes values from 10 to 100 with step size of 10.
-            ::testing::Values(gtint_t(1), gtint_t(2)                    
-#ifndef TEST_BLIS_TYPED                    
-            ,gtint_t(-1), gtint_t(-2)                    
-#endif                    
+            ::testing::Values(gtint_t(1), gtint_t(2)
+#ifndef TEST_BLIS_TYPED
+            ,gtint_t(-1), gtint_t(-2)
+#endif
         ),                                                                   // stride size for x
             ::testing::Values('i')                                           // i : integer, f : float  datatype type tested
         ),

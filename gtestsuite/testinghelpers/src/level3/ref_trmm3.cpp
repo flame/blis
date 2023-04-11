@@ -98,7 +98,7 @@ void ref_trmm3( char storage, char side, char uploa, char trnsa, char diaga,
     if( transa ) {
       upper   = !upper;
     }
-    
+
     gtint_t mn;
     if( lside )  mn = M;
     else         mn = N;

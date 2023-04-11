@@ -41,29 +41,29 @@
  * This file includes the functionality used to determine correctness of the results.
  * We compare the results component-wise, meaning that for two scalars, we compare the scalars,
  * and for two vectors or matrices we compare each element of the vector or matrix respectively.
- * 
+ *
  * We have two separate cases:
  * 1) it's meaningful to have NaNs and/or Infs at the results,
  *    because we are testing the correct propagation of those values.
  *    In this case the results could be either extreme values, or f.p. values,
  *    and we need to be able to compare all of those following the rules below:
- *    - if there are NaNs/Infs, check if both reference and blis solution has 
+ *    - if there are NaNs/Infs, check if both reference and blis solution has
  *      NaN/Inf accordingly. Remember that for Infs we need to check the sign as well.
  *    - if there are no NaNs/Infs, either do the bitwise comparison (if that's desired),
- *      or call into getError() function. getError() will check if reference is less 
- *      than one, in which case will compute the absolute error, otherwise compute the 
+ *      or call into getError() function. getError() will check if reference is less
+ *      than one, in which case will compute the absolute error, otherwise compute the
  *      relative error.
  *    - for complex numbers, we need to check for all possible combinations of NaN/Inf/FP
  *      for real and imaginary parts. So that will be a combination of the two steps above.
  * 2) it's not meaningful to check for NaNs and Infs and we expect only FP values in the
  *    results. In this case, we either do a bitwise comparison or call into getError() directly.
- * 
- * Note that all operations with a NaN/Inf will lead to either comparison with a NaN, or 
+ *
+ * Note that all operations with a NaN/Inf will lead to either comparison with a NaN, or
  * inf < thresh, which always return false; so NumericalComparisonFPOnly() will return failure.
- * So, for the case where we do not expect NaN/Infs, we want to fail if NaN and Infs are 
- * present so that we do not have tests passing when it doesn't make sense to do so. 
+ * So, for the case where we do not expect NaN/Infs, we want to fail if NaN and Infs are
+ * present so that we do not have tests passing when it doesn't make sense to do so.
  * For an example of such case, think of a triangular solver with zeros on the diagonal.
- *     
+ *
 */
 
 // Enum used to do the correct printing depending on what we aim to compare.
@@ -113,12 +113,12 @@ testing::AssertionResult NumericalComparisonFPOnly(const char* blis_sol_char,
                                              const T ref_sol,
                                              const ComparisonHelper comp_helper,
                                              const std::string error_message)
-{ 
+{
     if (comp_helper.binary_comparison)
     {
         if (blis_sol == ref_sol) return testing::AssertionSuccess();
         return testing::AssertionFailure() << error_message;
-    } 
+    }
     else {
         double error = testinghelpers::getError(blis_sol,ref_sol);
         if (error < comp_helper.threshold) return testing::AssertionSuccess();
@@ -170,7 +170,7 @@ testing::AssertionResult NumericalComparisonNaN(const char* blis_sol_char,
                                              const ComparisonHelper comp_helper,
                                              const ComplexPart complex_part,
                                              const std::string error_message)
-{ 
+{
     // Assign values to intermediate variables as if we are comparing the real part.
     RT ref_sol_1 = ref_sol.real, ref_sol_2 = ref_sol.imag, blis_sol_1 = blis_sol.real, blis_sol_2 = blis_sol.imag;
     // if we are comparing based on the imaginary part update the values.
@@ -200,7 +200,7 @@ testing::AssertionResult NumericalComparisonInf(const char* blis_sol_char,
                                              const ComparisonHelper comp_helper,
                                              const ComplexPart complex_part,
                                              const std::string error_message)
-{ 
+{
     // Assign values to intermediate variables as if we are comparing the real part.
     RT ref_sol_1 = ref_sol.real, ref_sol_2 = ref_sol.imag, blis_sol_1 = blis_sol.real, blis_sol_2 = blis_sol.imag;
     // if we are comparing based on the imaginary part update the values.
@@ -253,7 +253,7 @@ testing::AssertionResult NumericalComparison(const char* blis_sol_char,
         if constexpr (testinghelpers::type_info<T>::is_real)
             return NumericalComparisonRealNaNInf<T>(blis_sol_char, ref_sol_char, comp_helper_char, blis_sol, ref_sol, comp_helper, error_message);
         // If it's complex we need to check real and imaginary parts.
-        else 
+        else
         {
             // Check if any of the real parts is NaN, and if so, call into NaN comparator.
             if ((std::isnan(ref_sol.real)) || (std::isnan(blis_sol.real)))
@@ -279,7 +279,7 @@ testing::AssertionResult NumericalComparison(const char* blis_sol_char,
                 ComplexPart complex_part = IMAGINARY;
                 return NumericalComparisonInf<T>(blis_sol_char, ref_sol_char, comp_helper_char, blis_sol, ref_sol, comp_helper, complex_part, error_message);
             }
-            // If neither reference nor BLIS sol is NaN or Inf, or if NaN/Inf checks are not necessary, 
+            // If neither reference nor BLIS sol is NaN or Inf, or if NaN/Inf checks are not necessary,
             // do simple comparison, based on relative or absolute error.
             else
                 return NumericalComparisonFPOnly<T>(blis_sol_char, ref_sol_char, comp_helper_char, blis_sol, ref_sol, comp_helper, error_message);
@@ -300,7 +300,7 @@ void computediff( T blis_sol, T ref_sol, bool nan_inf_check = false )
     comp_helper.binary_comparison = true;
     comp_helper.nan_inf_check = nan_inf_check;
 
-    EXPECT_PRED_FORMAT3(NumericalComparison<T>, blis_sol, ref_sol, comp_helper);
+    ASSERT_PRED_FORMAT3(NumericalComparison<T>, blis_sol, ref_sol, comp_helper);
 }
 
 /**
@@ -310,7 +310,7 @@ template <typename T>
 void computediff( T blis_sol, T ref_sol, double thresh, bool nan_inf_check = false )
 {
     ComparisonHelper comp_helper(SCALAR, thresh);
-    EXPECT_PRED_FORMAT3(NumericalComparison<T>, blis_sol, ref_sol, comp_helper);
+    ASSERT_PRED_FORMAT3(NumericalComparison<T>, blis_sol, ref_sol, comp_helper);
 }
 
 /**
@@ -329,14 +329,14 @@ void computediff( gtint_t n, T *blis_sol, T *ref_sol, gtint_t inc, bool nan_inf_
     for (gtint_t i = 0; i < n; i++)
     {
         comp_helper.i = i;
-        EXPECT_PRED_FORMAT3(NumericalComparison<T>, blis_sol[i*abs_inc], ref_sol[i*abs_inc], comp_helper) << "inc = " << inc;
+        ASSERT_PRED_FORMAT3(NumericalComparison<T>, blis_sol[i*abs_inc], ref_sol[i*abs_inc], comp_helper) << "inc = " << inc;
         // Go through elements that are part of the array that should not have been modified by the
         // call to a BLIS API. Use the bitwise comparison for this case.
         if (i < n-1)
         {
             for (gtint_t j = 1; j < abs_inc; j++)
             {
-                EXPECT_PRED_FORMAT3(NumericalComparison<T>, blis_sol[i*abs_inc + j], ref_sol[i*abs_inc + j], comp_helper) << "inc = " << inc << " This element is expected to not be modified.";
+                ASSERT_PRED_FORMAT3(NumericalComparison<T>, blis_sol[i*abs_inc + j], ref_sol[i*abs_inc + j], comp_helper) << "inc = " << inc << " This element is expected to not be modified.";
             }
         }
     }
@@ -357,7 +357,7 @@ void computediff( gtint_t n, T *blis_sol, T *ref_sol, gtint_t inc, double thresh
     for (gtint_t i = 0; i < n; i++)
     {
         comp_helper.i = i;
-        EXPECT_PRED_FORMAT3(NumericalComparison<T>, blis_sol[i*abs_inc], ref_sol[i*abs_inc], comp_helper) << "inc = " << inc;
+        ASSERT_PRED_FORMAT3(NumericalComparison<T>, blis_sol[i*abs_inc], ref_sol[i*abs_inc], comp_helper) << "inc = " << inc;
         // Go through elements that are part of the array that should not have been modified by the
         // call to a BLIS API. Use the bitwise comparison for this case.
         if (i < n-1)
@@ -365,7 +365,7 @@ void computediff( gtint_t n, T *blis_sol, T *ref_sol, gtint_t inc, double thresh
             for (gtint_t j = 1; j < abs_inc; j++)
             {
                 comp_helper.binary_comparison = true;
-                EXPECT_PRED_FORMAT3(NumericalComparison<T>, blis_sol[i*abs_inc + j], ref_sol[i*abs_inc + j], comp_helper) << "inc = " << inc << " This element is expected to not be modified.";
+                ASSERT_PRED_FORMAT3(NumericalComparison<T>, blis_sol[i*abs_inc + j], ref_sol[i*abs_inc + j], comp_helper) << "inc = " << inc << " This element is expected to not be modified.";
             }
             comp_helper.binary_comparison = false;
         }
@@ -393,7 +393,7 @@ void computediff(char storage, gtint_t m, gtint_t n, T *blis_sol, T *ref_sol, gt
             {
                 comp_helper.i = i;
                 comp_helper.j = j;
-                EXPECT_PRED_FORMAT3(NumericalComparison<T>, blis_sol[i + j*ld], ref_sol[i + j*ld], comp_helper);
+                ASSERT_PRED_FORMAT3(NumericalComparison<T>, blis_sol[i + j*ld], ref_sol[i + j*ld], comp_helper);
             }
             // Now iterate through the rest of elements in memory space that are not part of the matrix,
             // so we use binary comparison to verify that are exactly the same as the reference.
@@ -401,7 +401,7 @@ void computediff(char storage, gtint_t m, gtint_t n, T *blis_sol, T *ref_sol, gt
             // elements are expected to identical.
             for (i = m; i < ld; i++)
             {
-                EXPECT_PRED_FORMAT3(NumericalComparison<T>, blis_sol[i + j*ld], ref_sol[i + j*ld], comp_helper) << "This element is expected to not be modified.";
+                ASSERT_PRED_FORMAT3(NumericalComparison<T>, blis_sol[i + j*ld], ref_sol[i + j*ld], comp_helper) << "This element is expected to not be modified.";
             }
         }
     }
@@ -416,7 +416,7 @@ void computediff(char storage, gtint_t m, gtint_t n, T *blis_sol, T *ref_sol, gt
             {
                 comp_helper.i = i;
                 comp_helper.j = j;
-                EXPECT_PRED_FORMAT3(NumericalComparison<T>, blis_sol[i*ld + j], ref_sol[i*ld + j], comp_helper);
+                ASSERT_PRED_FORMAT3(NumericalComparison<T>, blis_sol[i*ld + j], ref_sol[i*ld + j], comp_helper);
             }
             // Now iterate through the rest of elements in memory space that are not part of the matrix,
             // so we use binary comparison to verify that are exactly the same as the reference.
@@ -424,7 +424,7 @@ void computediff(char storage, gtint_t m, gtint_t n, T *blis_sol, T *ref_sol, gt
             // elements are expected to identical.
             for (j = n; j < ld; j++)
             {
-                EXPECT_PRED_FORMAT3(NumericalComparison<T>, blis_sol[i*ld + j], ref_sol[i*ld + j], comp_helper) << "This element is expected to not be modified.";
+                ASSERT_PRED_FORMAT3(NumericalComparison<T>, blis_sol[i*ld + j], ref_sol[i*ld + j], comp_helper) << "This element is expected to not be modified.";
             }
         }
     }
@@ -451,7 +451,7 @@ void computediff(char storage, gtint_t m, gtint_t n, T *blis_sol, T *ref_sol, gt
             {
                 comp_helper.i = i;
                 comp_helper.j = j;
-                EXPECT_PRED_FORMAT3(NumericalComparison<T>, blis_sol[i + j*ld], ref_sol[i + j*ld], comp_helper);
+                ASSERT_PRED_FORMAT3(NumericalComparison<T>, blis_sol[i + j*ld], ref_sol[i + j*ld], comp_helper);
             }
             // Now iterate through the rest of elements in memory space that are not part of the matrix,
             // so we use binary comparison to verify that are exactly the same as the reference.
@@ -460,7 +460,7 @@ void computediff(char storage, gtint_t m, gtint_t n, T *blis_sol, T *ref_sol, gt
             comp_helper.binary_comparison = true;
             for (i = m; i < ld; i++)
             {
-                EXPECT_PRED_FORMAT3(NumericalComparison<T>, blis_sol[i + j*ld], ref_sol[i + j*ld], comp_helper) << "This element is expected to not be modified.";
+                ASSERT_PRED_FORMAT3(NumericalComparison<T>, blis_sol[i + j*ld], ref_sol[i + j*ld], comp_helper) << "This element is expected to not be modified.";
             }
             // Disable binary comparison before we go through the next column.
             comp_helper.binary_comparison = false;
@@ -477,7 +477,7 @@ void computediff(char storage, gtint_t m, gtint_t n, T *blis_sol, T *ref_sol, gt
             {
                 comp_helper.i = i;
                 comp_helper.j = j;
-                EXPECT_PRED_FORMAT3(NumericalComparison<T>, blis_sol[i*ld + j], ref_sol[i*ld + j], comp_helper);
+                ASSERT_PRED_FORMAT3(NumericalComparison<T>, blis_sol[i*ld + j], ref_sol[i*ld + j], comp_helper);
             }
             // Now iterate through the rest of elements in memory space that are not part of the matrix,
             // so we use binary comparison to verify that are exactly the same as the reference.
@@ -486,7 +486,7 @@ void computediff(char storage, gtint_t m, gtint_t n, T *blis_sol, T *ref_sol, gt
             comp_helper.binary_comparison = true;
             for (j = n; j < ld; j++)
             {
-                EXPECT_PRED_FORMAT3(NumericalComparison<T>, blis_sol[i*ld + j], ref_sol[i*ld + j], comp_helper) << "This element is expected to not be modified.";
+                ASSERT_PRED_FORMAT3(NumericalComparison<T>, blis_sol[i*ld + j], ref_sol[i*ld + j], comp_helper) << "This element is expected to not be modified.";
             }
             // Disable binary comparison before we go through the next column.
             comp_helper.binary_comparison = false;

@@ -48,7 +48,7 @@ void test_setv( char conjalpha, gtint_t n, T alpha, gtint_t incx ) {
     //        Initialize vectors with random numbers.
     //----------------------------------------------------------
     std::vector<T> x( testinghelpers::buff_dim(n, incx), T{-1} );
-    
+
     //----------------------------------------------------------
     //    Call reference implementation to get ref results.
     //----------------------------------------------------------

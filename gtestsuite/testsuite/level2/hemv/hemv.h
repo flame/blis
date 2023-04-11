@@ -75,16 +75,10 @@ static void cblas_hemv( char storage, char uploa, gtint_t n, T* alpha,
     T* ap, gtint_t lda, T* xp, gtint_t incx, T* beta, T* yp, gtint_t incy )
 {
     enum CBLAS_ORDER cblas_order;
-    if( storage == 'c' || storage == 'C' )
-        cblas_order = CblasColMajor;
-    else
-        cblas_order = CblasRowMajor;
-
     enum CBLAS_UPLO cblas_uplo;
-    if( (uploa == 'u') || (uploa == 'U') )
-        cblas_uplo = CblasUpper;
-    else
-        cblas_uplo = CblasLower;
+
+    testinghelpers::char_to_cblas_order( storage, &cblas_order );
+    testinghelpers::char_to_cblas_uplo( uploa, &cblas_uplo );
 
     if constexpr (std::is_same<T, scomplex>::value)
         cblas_chemv( cblas_order, cblas_uplo, n, alpha, ap, lda, xp, incx, beta, yp, incy );
@@ -113,7 +107,7 @@ static void typed_hemv( char storage, char uplo, char conj_a, char conj_x,
     /* a = n x n   */
     if( (storage == 'c') || (storage == 'C') )
         csa = lda ;
-    else
+    else if( (storage == 'r') || (storage == 'R') )
         rsa = lda ;
 
     if constexpr (std::is_same<T, scomplex>::value)

@@ -39,7 +39,7 @@
 
 /**
  * @brief Performs the operation:
- *             y := y + alpha * x 
+ *             y := y + alpha * x
  *          or y := y + alpha * conj(x) BLIS_TYPED only
  * @param[in] conjx denotes if x or conj(x) will be used for this operation (BLIS API specific)
  * @param[in] n vector length of x and y

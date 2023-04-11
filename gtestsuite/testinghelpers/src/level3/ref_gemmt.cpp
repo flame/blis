@@ -115,50 +115,15 @@ void ref_gemmt (
     T* cp, gtint_t ldc
 )
 {
-    gtint_t sma = testinghelpers::matsize( storage, trnsa, n, k, lda );
-    gtint_t smb = testinghelpers::matsize( storage, trnsb, k, n, ldb );
-
     enum CBLAS_ORDER cblas_order;
-    if( (storage == 'c') || (storage == 'C') )
-        cblas_order = CblasColMajor;
-    else
-        cblas_order = CblasRowMajor;
-
     enum CBLAS_TRANSPOSE cblas_transa;
-    if( trnsa == 't' )
-        cblas_transa = CblasTrans;
-    else if( trnsa == 'c' )
-        cblas_transa = CblasConjTrans;
-    else
-        cblas_transa = CblasNoTrans;
-
     enum CBLAS_TRANSPOSE cblas_transb;
-    if( trnsb == 't' )
-        cblas_transb = CblasTrans;
-    else if( trnsb == 'c' )
-        cblas_transb = CblasConjTrans;
-    else
-        cblas_transb = CblasNoTrans;
-
     enum CBLAS_UPLO cblas_uplo;
-    if( (uplo == 'u') || (uplo == 'U') )
-        cblas_uplo = CblasUpper;
-    else
-        cblas_uplo = CblasLower;
 
-    std::vector<T> A( sma );
-    memcpy(A.data(), ap, (sma*sizeof(T)));
-
-    std::vector<T> B( smb );
-    memcpy(B.data(), bp, (smb*sizeof(T)));
-
-    if( trnsa == 'h' ) {
-        testinghelpers::conj<T>( storage, A.data(), n, k, lda );
-    }
-
-    if( trnsb == 'h' ) {
-        testinghelpers::conj<T>( storage, B.data(), k, n, ldb );
-    }
+    char_to_cblas_order( storage, &cblas_order );
+    char_to_cblas_trans( trnsa, &cblas_transa );
+    char_to_cblas_trans( trnsb, &cblas_transb );
+    char_to_cblas_uplo( uplo, &cblas_uplo );
 
     using scalar_t = std::conditional_t<testinghelpers::type_info<T>::is_complex, T&, T>;
     typedef void (*Fptr_ref_cblas_gemmt)( const CBLAS_ORDER, const CBLAS_UPLO, const CBLAS_TRANSPOSE, const CBLAS_TRANSPOSE,
@@ -193,7 +158,7 @@ void ref_gemmt (
     }
 
     ref_cblas_gemmt( cblas_order, cblas_uplo, cblas_transa, cblas_transb,
-                  n, k, alpha, A.data(), lda, B.data(), ldb, beta, cp, ldc );
+                              n, k, alpha, ap, lda, bp, ldb, beta, cp, ldc );
 }
 #endif
 // Explicit template instantiations

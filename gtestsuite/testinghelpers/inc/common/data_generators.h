@@ -86,4 +86,10 @@ std::vector<T> get_random_matrix(int from, int to, char storage, char uplo, gtin
 template<typename T>
 std::vector<T> get_random_vector(int from, int to, gtint_t n, gtint_t incx, char datatype);
 
+template<typename T>
+std::vector<T> get_vector( gtint_t n, gtint_t incx, T value );
+
+template<typename T>
+std::vector<T> get_matrix( char storage, char trans, gtint_t m, gtint_t n, gtint_t lda, T value );
+
 } //end of namespace testinghelpers

@@ -86,24 +86,12 @@ static void cblas_syr2k(char storage, char uplo, char transa,
     T* bp, gtint_t ldb, T* beta, T* cp, gtint_t ldc)
 {
     enum CBLAS_ORDER cblas_order;
-    if( storage == 'c' || storage == 'C' )
-        cblas_order = CblasColMajor;
-    else
-        cblas_order = CblasRowMajor;
-
     enum CBLAS_UPLO cblas_uplo;
-    if( (uplo == 'u') || (uplo == 'U') )
-        cblas_uplo = CblasUpper;
-    else
-        cblas_uplo = CblasLower;
-
     enum CBLAS_TRANSPOSE cblas_transa;
-    if( transa == 't' )
-        cblas_transa = CblasTrans;
-    else if( transa == 'c' )
-        cblas_transa = CblasConjTrans;
-    else
-        cblas_transa = CblasNoTrans;
+
+    testinghelpers::char_to_cblas_order( storage, &cblas_order );
+    testinghelpers::char_to_cblas_uplo( uplo, &cblas_uplo );
+    testinghelpers::char_to_cblas_trans( transa, &cblas_transa );
 
     if constexpr (std::is_same<T, float>::value)
         cblas_ssyr2k( cblas_order, cblas_uplo, cblas_transa, m, k, *alpha, ap, lda, bp, ldb, *beta, cp, ldc );
@@ -139,7 +127,8 @@ static void typed_syr2k(char storage, char uplo, char trnsa, char trnsb,
         csa = lda ;
         csb = ldb ;
         csc = ldc ;
-    } else {
+    }
+    else if( (storage == 'r') || (storage == 'R') ) {
         rsa = lda ;
         rsb = ldb ;
         rsc = ldc ;

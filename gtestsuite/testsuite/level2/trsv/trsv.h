@@ -75,30 +75,14 @@ static void cblas_trsv( char storage, char uploa, char transa, char diaga,
 {
 
     enum CBLAS_ORDER cblas_order;
-    if( storage == 'c' || storage == 'C' )
-        cblas_order = CblasColMajor;
-    else
-        cblas_order = CblasRowMajor;
-
     enum CBLAS_UPLO cblas_uploa;
-    if( (uploa == 'u') || (uploa == 'U') )
-        cblas_uploa = CblasUpper;
-    else
-        cblas_uploa = CblasLower;
-
     enum CBLAS_TRANSPOSE cblas_transa;
-    if( transa == 't' )
-        cblas_transa = CblasTrans;
-    else if( transa == 'c' )
-        cblas_transa = CblasConjTrans;
-    else
-        cblas_transa = CblasNoTrans;
-
     enum CBLAS_DIAG cblas_diaga;
-    if( (diaga == 'u') || (diaga == 'U') )
-        cblas_diaga = CblasUnit;
-    else
-        cblas_diaga = CblasNonUnit;
+
+    testinghelpers::char_to_cblas_order( storage, &cblas_order );
+    testinghelpers::char_to_cblas_uplo( uploa, &cblas_uploa );
+    testinghelpers::char_to_cblas_trans( transa, &cblas_transa );
+    testinghelpers::char_to_cblas_diag( diaga, &cblas_diaga );
 
     if constexpr (std::is_same<T, float>::value)
         cblas_strsv( cblas_order, cblas_uploa, cblas_transa, cblas_diaga, n, ap, lda, xp, incx );
@@ -130,7 +114,7 @@ static void typed_trsv( char storage, char uplo, char trans, char diag,
     /* a = n x n   */
     if( (storage == 'c') || (storage == 'C') )
         csa = lda ;
-    else
+    else if( (storage == 'r') || (storage == 'R') )
         rsa = lda ;
 
     if constexpr (std::is_same<T, float>::value)

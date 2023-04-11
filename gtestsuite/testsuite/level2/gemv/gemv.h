@@ -41,9 +41,9 @@
  * @brief Performs the operation:
  *   y := alpha*A*x + beta*y,   or   y := alpha*A**T*x + beta*y,   or
  *   y := alpha*A**H*x + beta*y,
- * 
+ *
  * or y := beta * y + alpha * transa(A) * conjx(x) (BLIS_TYPED only)
- * 
+ *
  * @param[in]     transa specifies the form of op( A ) to be used in
                          the matrix multiplication
  * @param[in]     conjx  specifies the form of xp to be used in
@@ -81,18 +81,10 @@ static void cblas_gemv( char storage, char trans, gtint_t m, gtint_t n, T* alpha
     T* ap, gtint_t lda,  T* xp, gtint_t incx, T* beta, T* yp, gtint_t incy )
 {
     enum CBLAS_ORDER cblas_order;
-    if( storage == 'c' || storage == 'C' )
-        cblas_order = CblasColMajor;
-    else
-        cblas_order = CblasRowMajor;
-
     enum CBLAS_TRANSPOSE cblas_trans;
-    if( trans == 't' )
-        cblas_trans = CblasTrans;
-    else if( trans == 'c' )
-        cblas_trans = CblasConjTrans;
-    else
-        cblas_trans = CblasNoTrans;
+
+    testinghelpers::char_to_cblas_order( storage, &cblas_order );
+    testinghelpers::char_to_cblas_trans( trans, &cblas_trans );
 
     if constexpr (std::is_same<T, float>::value)
         cblas_sgemv( cblas_order, cblas_trans, m, n, *alpha, ap, lda, xp, incx, *beta, yp, incy );
@@ -124,7 +116,7 @@ static void typed_gemv(char storage, char trans, char conj_x,
     /* a = m x n   */
     if( (storage == 'c') || (storage == 'C') )
         csa = lda ;
-    else
+    else if( (storage == 'r') || (storage == 'R') )
         rsa = lda ;
 
     if constexpr (std::is_same<T, float>::value)

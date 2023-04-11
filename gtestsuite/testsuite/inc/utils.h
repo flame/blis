@@ -40,10 +40,10 @@
 
 /*
  * ==========================================================================
- * MKHERM 
- * Make an m x m matrix A explicitly Hermitian by copying the conjugate 
+ * MKHERM
+ * Make an m x m matrix A explicitly Hermitian by copying the conjugate
  * of the triangle specified by uploa to the opposite triangle. Imaginary
- * components of diagonal elements are explicitly set to zero. 
+ * components of diagonal elements are explicitly set to zero.
  * It is assumed that the diagonal offset of A is zero.
  * ==========================================================================
  */
@@ -78,9 +78,9 @@ static void mkherm( char storage, char uplo, gtint_t n, T* ap, gtint_t lda )
 
 /*
  * ==========================================================================
- * MKSYMM 
- * Make an m x m matrix A explicitly symmetric by copying the triangle 
- * specified by uploa to the opposite triangle. 
+ * MKSYMM
+ * Make an m x m matrix A explicitly symmetric by copying the triangle
+ * specified by uploa to the opposite triangle.
  * It is assumed that the diagonal offset of A is zero.
  * ==========================================================================
  */
@@ -116,9 +116,9 @@ static void mksymm( char storage, char uplo, gtint_t n, T* ap, gtint_t lda )
 
 /*
  * ==========================================================================
- * MKTRIM 
- * Make an m x m matrix A explicitly triangular by preserving the triangle 
- * specified by uploa and zeroing the elements in the opposite triangle. 
+ * MKTRIM
+ * Make an m x m matrix A explicitly triangular by preserving the triangle
+ * specified by uploa and zeroing the elements in the opposite triangle.
  * It is assumed that the diagonal offset of A is zero
  * ==========================================================================
  */
@@ -150,3 +150,62 @@ static void mktrim( char storage, char uplo, gtint_t n, T* ap, gtint_t lda )
 
         throw std::runtime_error("Error in utils.h: Invalid typename in mktrim().");
 }
+
+template<typename T>
+static void print( T x, const char *spec ) {
+    if constexpr (testinghelpers::type_info<T>::is_real)
+        printf(spec, x);
+    else {
+        printf( spec, x.real );
+        if(x.imag < 0)    printf( " -" );
+        else              printf( " +" );
+        printf( spec, abs(x.imag) );
+        printf( " " );
+    }
+}
+
+template<typename T>
+void printmat( const char *mat, char storage, gtint_t m, gtint_t n, T *a, gtint_t ld, const char *spec )
+{
+    dim_t i, j;
+    dim_t rs,cs;
+    rs=cs=1;
+    T val;
+    if( (storage == 'c') || (storage == 'C') )
+        cs = ld ;
+    else
+        rs = ld ;
+
+    std::cout <<"matrix : " <<  mat <<  std::endl;
+
+    for ( i = 0; i < m; i++ )
+    {
+        for ( j = 0; j < n; j++ )
+        {
+            val = a[i*rs + j*cs];
+            print<T>(val,spec);
+            printf( " " );
+        }
+        printf( "\n" );
+    }
+    printf( "\n" );
+}
+
+template<typename T>
+void printvec( const char *vec, gtint_t n, T *x, gtint_t incx, const char *spec )
+{
+    dim_t i, idx;
+    T val;
+
+    std::cout <<"vector : " <<  vec <<  std::endl;
+
+    for ( i = 0; i < n; i++ )
+    {
+        idx = (incx > 0) ? (i * incx) : ( - ( n - i - 1 ) * incx );
+        val = x[idx];
+        print<T>(val,spec);
+        printf( " " );
+    }
+    printf( "\n\n" );
+}
+

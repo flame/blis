@@ -54,26 +54,12 @@ void ref_gemm(char storage, char trnsa, char trnsb, gtint_t m, gtint_t n, gtint_
     T alpha, T* ap, gtint_t lda, T* bp, gtint_t ldb, T beta,  T* cp, gtint_t ldc)
 {
     enum CBLAS_ORDER cblas_order;
-    if( (storage == 'c') || (storage == 'C') )
-        cblas_order = CblasColMajor;
-    else
-        cblas_order = CblasRowMajor;
-
     enum CBLAS_TRANSPOSE cblas_transa;
-    if( trnsa == 't' )
-        cblas_transa = CblasTrans;
-    else if( trnsa == 'c' )
-        cblas_transa = CblasConjTrans;
-    else
-        cblas_transa = CblasNoTrans;
-
     enum CBLAS_TRANSPOSE cblas_transb;
-    if( trnsb == 't' )
-        cblas_transb = CblasTrans;
-    else if( trnsb == 'c' )
-        cblas_transb = CblasConjTrans;
-    else
-        cblas_transb = CblasNoTrans;
+
+    char_to_cblas_order( storage, &cblas_order );
+    char_to_cblas_trans( trnsa, &cblas_transa );
+    char_to_cblas_trans( trnsb, &cblas_transb );
 
     if( trnsa == 'h' ) {
         throw std::invalid_argument("Error in file src/level3/ref_gemm.cpp:"

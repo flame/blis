@@ -57,14 +57,14 @@ static void test_dotxv( gtint_t n, char conjx, char conjy, T alpha,
     //----------------------------------------------------------
     // Create a copy of y so that we can check reference results.
     std::vector<T> y_ref(y);
-    T rho_ref; 
+    T rho_ref;
     testinghelpers::initone(rho_ref);
     testinghelpers::ref_dotxv<T>(conjx, conjy, n, alpha, x.data(), incx, y.data(), incy, beta, &rho_ref);
 
     //----------------------------------------------------------
     //                  Call BLIS function.
     //----------------------------------------------------------
-    T rho; 
+    T rho;
     testinghelpers::initone(rho);
     dotxv(conjx, conjy, n, &alpha, x.data(), incx, y.data(), incy, &beta, &rho);
 

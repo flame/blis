@@ -92,22 +92,12 @@ static void cblas_symm(char storage, char side, char uplo,
     T* bp, gtint_t ldb, T* beta, T* cp, gtint_t ldc)
 {
     enum CBLAS_ORDER cblas_order;
-    if( storage == 'c' || storage == 'C' )
-        cblas_order = CblasColMajor;
-    else
-        cblas_order = CblasRowMajor;
-
     enum CBLAS_SIDE cblas_side;
-    if( (side == 'l') || (side == 'L') )
-        cblas_side = CblasLeft;
-    else
-        cblas_side = CblasRight;
-
     enum CBLAS_UPLO cblas_uplo;
-    if( (uplo == 'u') || (uplo == 'U') )
-        cblas_uplo = CblasUpper;
-    else
-        cblas_uplo = CblasLower;
+
+    testinghelpers::char_to_cblas_order( storage, &cblas_order );
+    testinghelpers::char_to_cblas_side( side, &cblas_side );
+    testinghelpers::char_to_cblas_uplo( uplo, &cblas_uplo );
 
     if constexpr (std::is_same<T, float>::value)
         cblas_ssymm( cblas_order, cblas_side, cblas_uplo, m, n, *alpha, ap, lda, bp, ldb, *beta, cp, ldc );
@@ -146,7 +136,8 @@ static void typed_symm(char storage, char side, char uplo, char conj_a, char trn
         csa = lda ;
         csb = ldb ;
         csc = ldc ;
-    } else {
+    }
+    else if( (storage == 'r') || (storage == 'R') ) {
         rsa = lda ;
         rsb = ldb ;
         rsc = ldc ;

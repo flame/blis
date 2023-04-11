@@ -46,7 +46,7 @@ template<typename T>
 static void test_dotv( char conjx, char conjy, gtint_t n, gtint_t incx,
     gtint_t incy, double thresh, char datatype )
 {
-    
+
 
     //----------------------------------------------------------
     //        Initialize vectors with random numbers.

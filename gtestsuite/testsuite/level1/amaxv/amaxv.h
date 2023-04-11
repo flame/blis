@@ -42,7 +42,7 @@
  * @param[in] n vector length of x and y
  * @param[in] x pointer which points to the first element of x
  * @param[in] incx increment of x
- * 
+ *
  * If n < 1 or incx <= 0, return 0.
  */
 
@@ -61,7 +61,7 @@ static gtint_t amaxv_(gtint_t n, T* x, gtint_t incx) {
     else
       throw std::runtime_error("Error in testsuite/level1/amaxv.h: Invalid typename in amaxv_().");
 
-    // Since we are comparing against CBLAS which is 0-based and BLAS is 1-based, 
+    // Since we are comparing against CBLAS which is 0-based and BLAS is 1-based,
     // we need to use -1 here.
     return (idx-1);
 }

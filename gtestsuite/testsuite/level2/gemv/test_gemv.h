@@ -62,18 +62,17 @@ void test_gemv( char storage, char trnsa, char conjx, gtint_t m, gtint_t n,
 
     // Create a copy of c so that we can check reference results.
     std::vector<T> y_ref(y);
+    //----------------------------------------------------------
+    //                  Call BLIS function
+    //----------------------------------------------------------
+    gemv( storage, trnsa, conjx, m, n, &alpha, a.data(), lda,
+                         x.data(), incx, &beta, y.data(), incy );
 
     //----------------------------------------------------------
     //                  Call reference implementation.
     //----------------------------------------------------------
     testinghelpers::ref_gemv( storage, trnsa, conjx, m, n, alpha, a.data(),
                          lda, x.data(), incx, beta, y_ref.data(), incy );
-
-    //----------------------------------------------------------
-    //                  Call BLIS function
-    //----------------------------------------------------------
-    gemv( storage, trnsa, conjx, m, n, &alpha, a.data(), lda,
-                         x.data(), incx, &beta, y.data(), incy );
 
     //----------------------------------------------------------
     //              check component-wise error.

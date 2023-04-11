@@ -54,10 +54,7 @@ void ref_ger( char storage, char conjx, char conjy, gtint_t m, gtint_t n,
     bool cfy = chkconj( conjy );
 
     enum CBLAS_ORDER cblas_order;
-    if( (storage == 'c') || (storage == 'C') )
-        cblas_order = CblasColMajor;
-    else
-        cblas_order = CblasRowMajor;
+    char_to_cblas_order( storage, &cblas_order );
 
     std::vector<T> X( buff_dim(m, incx) );
     memcpy(X.data(), xp, (buff_dim(m, incx)*sizeof(T)));

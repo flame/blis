@@ -53,30 +53,14 @@ void ref_trsv( char storage, char uploa, char transa, char diaga,
     gtint_t n, T *alpha, T *ap, gtint_t lda, T *xp, gtint_t incx )
 {
     enum CBLAS_ORDER cblas_order;
-    if( (storage == 'c') || (storage == 'C') )
-        cblas_order = CblasColMajor;
-    else
-        cblas_order = CblasRowMajor;
-
     enum CBLAS_UPLO cblas_uploa;
-    if( (uploa == 'u') || (uploa == 'U') )
-        cblas_uploa = CblasUpper;
-    else
-        cblas_uploa = CblasLower;
-
     enum CBLAS_TRANSPOSE cblas_trans;
-    if( transa == 't' )
-        cblas_trans = CblasTrans;
-    else if( transa == 'c' )
-        cblas_trans = CblasConjTrans;
-    else
-        cblas_trans = CblasNoTrans;
-
     enum CBLAS_DIAG cblas_diaga;
-    if( (diaga == 'u') || (diaga == 'U') )
-        cblas_diaga = CblasUnit;
-    else
-        cblas_diaga = CblasNonUnit;
+
+    char_to_cblas_order( storage, &cblas_order );
+    char_to_cblas_uplo( uploa, &cblas_uploa );
+    char_to_cblas_trans( transa, &cblas_trans );
+    char_to_cblas_diag( diaga, &cblas_diaga );
 
     alphax<T>( n, *alpha, xp, incx );
 

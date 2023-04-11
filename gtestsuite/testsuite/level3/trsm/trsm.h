@@ -84,36 +84,16 @@ static void cblas_trsm( char storage, char side, char uploa, char transa,
     T* bp, gtint_t ldb )
 {
     enum CBLAS_ORDER cblas_order;
-    if( storage == 'c' || storage == 'C' )
-        cblas_order = CblasColMajor;
-    else
-        cblas_order = CblasRowMajor;
-
     enum CBLAS_SIDE cblas_side;
-    if( (side == 'l') || (side == 'L') )
-        cblas_side = CblasLeft;
-    else
-        cblas_side = CblasRight;
-
     enum CBLAS_UPLO cblas_uploa;
-    if( (uploa == 'u') || (uploa == 'U') )
-        cblas_uploa = CblasUpper;
-    else
-        cblas_uploa = CblasLower;
-
     enum CBLAS_TRANSPOSE cblas_transa;
-    if( transa == 't' )
-        cblas_transa = CblasTrans;
-    else if( transa == 'c' )
-        cblas_transa = CblasConjTrans;
-    else
-        cblas_transa = CblasNoTrans;
-
     enum CBLAS_DIAG cblas_diaga;
-    if( (diaga == 'u') || (diaga == 'U') )
-        cblas_diaga = CblasUnit;
-    else
-        cblas_diaga = CblasNonUnit;
+
+    testinghelpers::char_to_cblas_order( storage, &cblas_order );
+    testinghelpers::char_to_cblas_side( side, &cblas_side );
+    testinghelpers::char_to_cblas_uplo( uploa, &cblas_uploa );
+    testinghelpers::char_to_cblas_trans( transa, &cblas_transa );
+    testinghelpers::char_to_cblas_diag( diaga, &cblas_diaga );
 
     if constexpr (std::is_same<T, float>::value)
         cblas_strsm( cblas_order, cblas_side, cblas_uploa, cblas_transa, cblas_diaga, m, n, *alpha, ap, lda, bp, ldb );
@@ -152,7 +132,8 @@ static void typed_trsm( char storage, char side, char uplo, char trans,
     if( (storage == 'c') || (storage == 'C') ) {
         csa = lda ;
         csb = ldb ;
-    } else {
+    }
+    else if( (storage == 'r') || (storage == 'R') ) {
         rsa = lda ;
         rsb = ldb ;
     }

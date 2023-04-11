@@ -87,26 +87,12 @@ static void cblas_gemm(char storage, char transa, char transb,
     T* bp, gtint_t ldb, T* beta, T* cp, gtint_t ldc)
 {
     enum CBLAS_ORDER cblas_order;
-    if( storage == 'c' || storage == 'C' )
-        cblas_order = CblasColMajor;
-    else
-        cblas_order = CblasRowMajor;
-
     enum CBLAS_TRANSPOSE cblas_transa;
-    if( transa == 't' )
-        cblas_transa = CblasTrans;
-    else if( transa == 'c' )
-        cblas_transa = CblasConjTrans;
-    else
-        cblas_transa = CblasNoTrans;
-
     enum CBLAS_TRANSPOSE cblas_transb;
-    if( transb == 't' )
-        cblas_transb = CblasTrans;
-    else if( transb == 'c' )
-        cblas_transb = CblasConjTrans;
-    else
-        cblas_transb = CblasNoTrans;
+
+    testinghelpers::char_to_cblas_order( storage, &cblas_order );
+    testinghelpers::char_to_cblas_trans( transa, &cblas_transa );
+    testinghelpers::char_to_cblas_trans( transb, &cblas_transb );
 
     if constexpr (std::is_same<T, float>::value)
         cblas_sgemm( cblas_order, cblas_transa, cblas_transb, m, n, k, *alpha, ap, lda, bp, ldb, *beta, cp, ldc );
@@ -142,7 +128,8 @@ static void typed_gemm(char storage, char trnsa, char trnsb,
         csa = lda ;
         csb = ldb ;
         csc = ldc ;
-    } else {
+    }
+    else if( (storage == 'r') || (storage == 'R') ) {
         rsa = lda ;
         rsb = ldb ;
         rsc = ldc ;

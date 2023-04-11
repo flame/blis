@@ -81,24 +81,12 @@ static void cblas_syrk(char storage, char uplo, char trnsa,
     T* beta, T* cp, gtint_t ldc)
 {
     enum CBLAS_ORDER cblas_order;
-    if( storage == 'c' || storage == 'C' )
-        cblas_order = CblasColMajor;
-    else
-        cblas_order = CblasRowMajor;
-
     enum CBLAS_UPLO cblas_uplo;
-    if( (uplo == 'u') || (uplo == 'U') )
-        cblas_uplo = CblasUpper;
-    else
-        cblas_uplo = CblasLower;
-
     enum CBLAS_TRANSPOSE cblas_transa;
-    if( trnsa == 't' )
-        cblas_transa = CblasTrans;
-    else if( trnsa == 'c' )
-        cblas_transa = CblasConjTrans;
-    else
-        cblas_transa = CblasNoTrans;
+
+    testinghelpers::char_to_cblas_order( storage, &cblas_order );
+    testinghelpers::char_to_cblas_uplo( uplo, &cblas_uplo );
+    testinghelpers::char_to_cblas_trans( trnsa, &cblas_transa );
 
     if constexpr (std::is_same<T, float>::value)
         cblas_ssyrk( cblas_order, cblas_uplo, cblas_transa, m, k, *alpha, ap, lda, *beta, cp, ldc );
@@ -131,7 +119,8 @@ static void typed_syrk(char storage, char uplo, char trnsa,
     if( (storage == 'c') || (storage == 'C') ) {
         csa = lda ;
         csc = ldc ;
-    } else {
+    }
+    else if( (storage == 'r') || (storage == 'R') ) {
         rsa = lda ;
         rsc = ldc ;
     }

@@ -61,55 +61,62 @@ void char_to_blis_trans( char trans, trans_t* blis_trans )
                     "while in BLIS_typed this would be 'h'. "
                     "To implement this option, please modify ref_*.cpp to use the correct matrix.");
     }
-    else
-    {
-        throw std::invalid_argument("Error in file src/common/testing_basics.cpp in function char_to_blis_trans():"
-                    "Invalid input.");
-    }
 }
 
 void char_to_blis_conj( char conj, conj_t* blis_conj )
 {
     if      ( conj == 'n' || conj == 'N' ) *blis_conj = BLIS_NO_CONJUGATE;
     else if ( conj == 'c' || conj == 'C' ) *blis_conj = BLIS_CONJUGATE;
-    else
-    {
-        throw std::invalid_argument("Error in file src/common/testing_basics.cpp in function char_to_blis_conj():"
-                    "Invalid input.");
-    }
 }
 
 void char_to_blis_side( char side, side_t* blis_side )
 {
     if      ( side == 'l' || side == 'L' ) *blis_side = BLIS_LEFT;
     else if ( side == 'r' || side == 'R' ) *blis_side = BLIS_RIGHT;
-    else
-    {
-        throw std::invalid_argument("Error in file src/common/testing_basics.cpp in function char_to_blis_side():"
-                    "Invalid input.");
-    }
 }
 
 void char_to_blis_uplo( char uplo, uplo_t* blis_uplo )
 {
     if      ( uplo == 'l' || uplo == 'L' ) *blis_uplo = BLIS_LOWER;
     else if ( uplo == 'u' || uplo == 'U' ) *blis_uplo = BLIS_UPPER;
-    else
-    {
-        throw std::invalid_argument("Error in file src/common/testing_basics.cpp in function char_to_blis_uplo():"
-                    "Invalid input.");
-    }
 }
 
 void char_to_blis_diag( char diag, diag_t* blis_diag )
 {
     if      ( diag == 'n' || diag == 'N' ) *blis_diag = BLIS_NONUNIT_DIAG;
     else if ( diag == 'u' || diag == 'U' ) *blis_diag = BLIS_UNIT_DIAG;
-    else
-    {
-        throw std::invalid_argument("Error in file src/common/testing_basics.cpp in function char_to_blis_diag():"
-                    "Invalid input.");
-    }
+}
+
+void char_to_cblas_order( char order, CBLAS_ORDER *cblas_order )
+{
+    if      ( order == 'c' || order == 'C' ) *cblas_order = CblasColMajor;
+    else if ( order == 'r' || order == 'R' ) *cblas_order = CblasRowMajor;
+
+}
+
+void char_to_cblas_trans( char trans, CBLAS_TRANSPOSE *cblas_trans )
+{
+    if      ( trans == 'n' || trans == 'N' ) *cblas_trans = CBLAS_TRANSPOSE::CblasNoTrans;
+    else if ( trans == 't' || trans == 'T' ) *cblas_trans = CBLAS_TRANSPOSE::CblasTrans;
+    else if ( trans == 'c' || trans == 'C' ) *cblas_trans = CBLAS_TRANSPOSE::CblasConjTrans;
+}
+
+void char_to_cblas_uplo( char uplo, CBLAS_UPLO *cblas_uplo )
+{
+    if      ( uplo == 'l' || uplo == 'L' ) *cblas_uplo = CblasLower;
+    else if ( uplo == 'u' || uplo == 'U' ) *cblas_uplo = CblasUpper;
+}
+
+void char_to_cblas_diag( char diag, CBLAS_DIAG *cblas_diag )
+{
+    if      ( diag == 'n' || diag == 'N' ) *cblas_diag = CblasNonUnit;
+    else if ( diag == 'u' || diag == 'U' ) *cblas_diag = CblasUnit;
+}
+
+void char_to_cblas_side( char side, CBLAS_SIDE *cblas_side )
+{
+    if      ( side == 'l' || side == 'L' ) *cblas_side = CblasLeft;
+    else if ( side == 'r' || side == 'R' ) *cblas_side = CblasRight;
 }
 
 /**
@@ -119,11 +126,11 @@ void char_to_blis_diag( char diag, diag_t* blis_diag )
  * @param incx increment
  * @return gtint_t dimension of the buffer that stored a vector with length n and increment incx
  */
-gtint_t buff_dim(gtint_t n, gtint_t incx) {
+gtint_t buff_dim( gtint_t n, gtint_t incx ) {
     return (n*std::abs(incx) - (std::abs(incx)-1));
 }
 
-gtint_t matsize(char storage, char trans, gtint_t m, gtint_t n, gtint_t ldm )
+gtint_t matsize( char storage, char trans, gtint_t m, gtint_t n, gtint_t ldm )
 {
     gtint_t km;
     if( (storage == 'c') || (storage == 'C') ) {
@@ -147,7 +154,7 @@ gtint_t matsize(char storage, char trans, gtint_t m, gtint_t n, gtint_t ldm )
  * @param n       specifies the number of columns of given matrix.
  * @param inc     specifies the increment of the leading dimension.
 */
-gtint_t get_leading_dimension(char storage, char trans, gtint_t m, gtint_t n, gtint_t inc)
+gtint_t get_leading_dimension( char storage, char trans, gtint_t m, gtint_t n, gtint_t inc )
 {
     gtint_t lda;
     if( (storage == 'c') || (storage == 'C') ) //column-major order
@@ -202,7 +209,6 @@ template float getInf<float>();
 template double getInf<double>();
 template scomplex getInf<scomplex>();
 template dcomplex getInf<dcomplex>();
-
 
 
 
@@ -286,16 +292,16 @@ bool chksideright( char mside )
 }
 
 void swap_dims_with_trans( char trans,
-                                          gtint_t  m,  gtint_t  n,  gtint_t  rs,  gtint_t  cs,
-                                          gtint_t* mt, gtint_t* nt, gtint_t* rst, gtint_t* cst )
+                           gtint_t  m,  gtint_t  n,  gtint_t  rs,  gtint_t  cs,
+                           gtint_t* mt, gtint_t* nt, gtint_t* rst, gtint_t* cst )
 {
     if ( chktrans( trans ) ) { *mt = n; *nt = m; *rst = cs; *cst = rs; }
     else                     { *mt = m; *nt = n; *rst = rs; *cst = cs; }
 }
 
 void swap_strides_with_trans( char trans,
-                                     gtint_t  rs,  gtint_t  cs,
-                                     gtint_t* rst, gtint_t* cst )
+                              gtint_t  rs,  gtint_t  cs,
+                              gtint_t* rst, gtint_t* cst )
 {
     if ( chktrans( trans ) ) {*rst = cs; *cst = rs; }
     else                     {*rst = rs; *cst = cs; }

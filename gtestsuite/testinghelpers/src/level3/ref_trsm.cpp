@@ -54,36 +54,16 @@ void ref_trsm( char storage, char side, char uploa, char transa, char diaga,
     gtint_t m, gtint_t n, T alpha, T *ap, gtint_t lda, T *bp, gtint_t ldb )
 {
     enum CBLAS_ORDER cblas_order;
-    if( storage == 'c' || storage == 'C' )
-        cblas_order = CblasColMajor;
-    else
-        cblas_order = CblasRowMajor;
-
     enum CBLAS_SIDE cblas_side;
-    if( (side == 'l') || (side == 'L') )
-        cblas_side = CblasLeft;
-    else
-        cblas_side = CblasRight;
-
     enum CBLAS_UPLO cblas_uploa;
-    if( (uploa == 'u') || (uploa == 'U') )
-        cblas_uploa = CblasUpper;
-    else
-        cblas_uploa = CblasLower;
-
     enum CBLAS_TRANSPOSE cblas_transa;
-    if( transa == 't' )
-        cblas_transa = CblasTrans;
-    else if( transa == 'c' )
-        cblas_transa = CblasConjTrans;
-    else
-        cblas_transa = CblasNoTrans;
-
     enum CBLAS_DIAG cblas_diaga;
-    if( (diaga == 'u') || (diaga == 'U') )
-        cblas_diaga = CblasUnit;
-    else
-        cblas_diaga = CblasNonUnit;
+
+    char_to_cblas_order( storage, &cblas_order );
+    char_to_cblas_side( side, &cblas_side );
+    char_to_cblas_uplo( uploa, &cblas_uploa );
+    char_to_cblas_trans( transa, &cblas_transa );
+    char_to_cblas_diag( diaga, &cblas_diaga );
 
     using scalar_t = std::conditional_t<testinghelpers::type_info<T>::is_complex, T&, T>;
     typedef void (*Fptr_ref_cblas_trsm)( const CBLAS_ORDER, const CBLAS_SIDE, const CBLAS_UPLO,

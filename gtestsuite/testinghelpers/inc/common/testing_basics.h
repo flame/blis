@@ -36,6 +36,7 @@
 
 #include <stdio.h>
 #include <iostream>
+#include "cblas.h"
 #include "common/type_info.h"
 
 namespace testinghelpers {
@@ -45,6 +46,12 @@ void char_to_blis_conj( char conj, conj_t* blis_conj );
 void char_to_blis_side( char side, side_t* blis_side );
 void char_to_blis_uplo( char uplo, uplo_t* blis_uplo );
 void char_to_blis_diag( char diag, diag_t* blis_diag );
+
+void char_to_cblas_order( char order, CBLAS_ORDER* cblas_order );
+void char_to_cblas_trans( char trans, CBLAS_TRANSPOSE* cblas_trans );
+void char_to_cblas_uplo( char uplo, CBLAS_UPLO* cblas_uplo );
+void char_to_cblas_diag( char diag, CBLAS_DIAG* cblas_diag );
+void char_to_cblas_side( char side, CBLAS_SIDE* cblas_side );
 
 /**
  * @brief Returns the size of a buffer which has strides.

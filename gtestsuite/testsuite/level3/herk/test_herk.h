@@ -64,15 +64,17 @@ void test_herk( char storage, char uplo, char transa,
     // Create a copy of c so that we can check reference results.
     std::vector<T> c_ref(c);
     //----------------------------------------------------------
-    //                  Call reference implementation.
-    //----------------------------------------------------------
-    testinghelpers::ref_herk<T>( storage, uplo, transa, m, k, alpha,
-               a.data(), lda, beta, c_ref.data(), ldc );
-    //----------------------------------------------------------
     //                  Call BLIS function
     //----------------------------------------------------------
     herk<T>( storage, uplo, transa, m, k, &alpha, a.data(), lda,
                 &beta, c.data(), ldc );
+
+    //----------------------------------------------------------
+    //                  Call reference implementation.
+    //----------------------------------------------------------
+    testinghelpers::ref_herk<T>( storage, uplo, transa, m, k, alpha,
+               a.data(), lda, beta, c_ref.data(), ldc );
+
     //----------------------------------------------------------
     //              check component-wise error.
     //----------------------------------------------------------

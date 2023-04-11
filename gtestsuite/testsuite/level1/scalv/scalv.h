@@ -39,7 +39,7 @@
 
 /**
  * @brief Performs the operation:
- *             y := alpha * y 
+ *             y := alpha * y
  *          or y := conj(alpha) * y (for BLIS interface only)
  * @param[in] conjalpha denotes if alpha or conj(alpha) will be used for this operation
  * @param[in] n vector length of x and y

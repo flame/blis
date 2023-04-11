@@ -68,16 +68,10 @@ static void cblas_syr( char storage, char uploa, gtint_t n, T* alpha,
                             T* xp, gtint_t incx, T* ap, gtint_t lda )
 {
     enum CBLAS_ORDER cblas_order;
-    if( storage == 'c' || storage == 'C' )
-        cblas_order = CblasColMajor;
-    else
-        cblas_order = CblasRowMajor;
-
     enum CBLAS_UPLO cblas_uplo;
-    if( (uploa == 'u') || (uploa == 'U') )
-        cblas_uplo = CblasUpper;
-    else
-        cblas_uplo = CblasLower;
+
+    testinghelpers::char_to_cblas_order( storage, &cblas_order );
+    testinghelpers::char_to_cblas_uplo( uploa, &cblas_uplo );
 
     if constexpr (std::is_same<T, float>::value)
         cblas_ssyr( cblas_order, cblas_uplo, n, *alpha, xp, incx, ap, lda );
@@ -104,7 +98,7 @@ static void typed_syr( char storage, char uplo, char conj_x, gtint_t n,
     /* a = n x n   */
     if( (storage == 'c') || (storage == 'C') )
         csa = lda ;
-    else
+    else if( (storage == 'r') || (storage == 'R') )
         rsa = lda ;
 
     if constexpr (std::is_same<T, float>::value)

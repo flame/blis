@@ -85,10 +85,7 @@ static void cblas_ger( char storage, char conjy, gtint_t m, gtint_t n,
     T* alpha, T* xp, gtint_t incx,T* yp, gtint_t incy, T* ap, gtint_t lda )
 {
     enum CBLAS_ORDER cblas_order;
-    if( storage == 'c' || storage == 'C' )
-        cblas_order = CblasColMajor;
-    else
-        cblas_order = CblasRowMajor;
+    testinghelpers::char_to_cblas_order( storage, &cblas_order );
 
     if constexpr (std::is_same<T, float>::value)
         cblas_sger( cblas_order, m, n, *alpha, xp, incx, yp, incy, ap, lda );
@@ -127,7 +124,7 @@ static void typed_ger(char storage, char conj_x, char conj_y, gtint_t m, gtint_t
     /* a = m x n   */
     if( (storage == 'c') || (storage == 'C') )
         csa = lda ;
-    else
+    else if( (storage == 'r') || (storage == 'R') )
         rsa = lda ;
 
     if constexpr (std::is_same<T, float>::value)

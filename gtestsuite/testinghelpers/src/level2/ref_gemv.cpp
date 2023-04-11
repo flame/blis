@@ -54,22 +54,10 @@ void ref_gemv( char storage, char trans, char conjx, gtint_t m, gtint_t n, T alp
     bool cfx = chkconj( conjx );
 
     enum CBLAS_ORDER cblas_order;
-    if( (storage == 'c') || (storage == 'C') )
-        cblas_order = CblasColMajor;
-    else
-        cblas_order = CblasRowMajor;
-
     enum CBLAS_TRANSPOSE cblas_trans;
-    if( trans == 't' )
-        cblas_trans = CblasTrans;
-    else if( trans == 'c' )
-        cblas_trans = CblasConjTrans;
-    else
-        cblas_trans = CblasNoTrans;
 
-    if( trans == 'h' ) {
-        conj<T>(storage, ap, m, n, lda );
-    }
+    char_to_cblas_order( storage, &cblas_order );
+    char_to_cblas_trans( trans, &cblas_trans );
 
     if( cfx ) {
         conj<T>( xp, lenx, incx );

@@ -49,24 +49,12 @@ void ref_her2k(
     T* cp, gtint_t ldc
 ) {
     enum CBLAS_ORDER cblas_order;
-    if( (storage == 'c') || (storage == 'C') )
-        cblas_order = CblasColMajor;
-    else
-        cblas_order = CblasRowMajor;
-
     enum CBLAS_UPLO cblas_uplo;
-    if( (uplo == 'u') || (uplo == 'U') )
-        cblas_uplo = CblasUpper;
-    else
-        cblas_uplo = CblasLower;
-
     enum CBLAS_TRANSPOSE cblas_transa;
-    if( transa == 't' )
-        cblas_transa = CblasTrans;
-    else if( transa == 'c' )
-        cblas_transa = CblasConjTrans;
-    else
-        cblas_transa = CblasNoTrans;
+
+    char_to_cblas_order( storage, &cblas_order );
+    char_to_cblas_uplo( uplo, &cblas_uplo );
+    char_to_cblas_trans( transa, &cblas_transa );
 
     typedef void (*Fptr_ref_cblas_her2k)( const CBLAS_ORDER, const CBLAS_UPLO, const CBLAS_TRANSPOSE,
                     const f77_int, const f77_int, const T*, const T*, f77_int,

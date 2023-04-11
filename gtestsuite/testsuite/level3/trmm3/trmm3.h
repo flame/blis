@@ -94,7 +94,8 @@ static void typed_trmm3( char storage, char side, char uplo, char trnsa,
         csa = lda ;
         csb = ldb ;
         csc = ldc ;
-    } else {
+    }
+    else if( (storage == 'r') || (storage == 'R') ) {
         rsa = lda ;
         rsb = ldb ;
         rsc = ldc ;

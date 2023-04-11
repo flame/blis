@@ -62,14 +62,14 @@ bool operator== (const dcomplex x, const dcomplex y);
 bool operator!= (const scomplex x, const scomplex y);
 bool operator!= (const dcomplex x, const dcomplex y);
 
-// Since we may only specialise template functions and classes 
-// in the std namespace for custom types, and std::to_string is not 
+// Since we may only specialise template functions and classes
+// in the std namespace for custom types, and std::to_string is not
 // a template function, we put to_string into our namespace.
 namespace testinghelpers {
-template<typename T>    
+template<typename T>
 std::string to_string(const T& x) {
     if constexpr (testinghelpers::type_info<T>::is_complex)
-    {   
+    {
         std::string ss = "(" + std::to_string(x.real) + ", " + std::to_string(x.imag) + ")";
         return ss;
     }

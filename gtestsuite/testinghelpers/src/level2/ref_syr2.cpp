@@ -52,16 +52,10 @@ void ref_syr2( char storage, char uploa, char conjx, char conjy, gtint_t n,
    T alpha, T *xp, gtint_t incx, T *yp, gtint_t incy, T *ap, gtint_t lda )
 {
     enum CBLAS_ORDER cblas_order;
-    if( (storage == 'c') || (storage == 'C') )
-        cblas_order = CblasColMajor;
-    else
-        cblas_order = CblasRowMajor;
-
     enum CBLAS_UPLO cblas_uploa;
-    if( (uploa == 'u') || (uploa == 'U') )
-        cblas_uploa = CblasUpper;
-    else
-        cblas_uploa = CblasLower;
+
+    char_to_cblas_order( storage, &cblas_order );
+    char_to_cblas_uplo( uploa, &cblas_uploa );
 
     typedef void (*Fptr_ref_cblas_syr2)( const CBLAS_ORDER, const CBLAS_UPLO, const f77_int,
                 const T, const T*, f77_int, const T*, f77_int, T*, f77_int);
