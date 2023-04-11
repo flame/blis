@@ -170,5 +170,7 @@ BLIS_INLINE void bli_toggle_bool( bool* b )
 #define BLIS_VA_END  (-1)
 
 
-#endif
+// Static assertion compatible with any version of C/C++
+#define bli_static_assert(cond) while(0){struct s {int STATIC_ASSERT_FAILED : !!(cond);};}
 
+#endif
