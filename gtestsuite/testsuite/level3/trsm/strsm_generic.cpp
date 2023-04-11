@@ -80,7 +80,7 @@ TEST_P(strsmTest, RandomData) {
     char datatype   = std::get<10>(GetParam());
 
     // Set the threshold for the errors:
-    double thresh = 15*n*m*testinghelpers::getEpsilon<T>();
+    double thresh = std::max(m, n)*testinghelpers::getEpsilon<T>();
 
     //----------------------------------------------------------
     //     Call test body using these parameters

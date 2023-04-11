@@ -54,9 +54,17 @@ void test_trsm( char storage, char side, char uploa, char transa,
     //----------------------------------------------------------
     //        Initialize matrics with random values.
     //----------------------------------------------------------
-    std::vector<T> a = testinghelpers::get_random_matrix<T>(2, 18, storage, transa, mn, mn, lda, datatype);
-    std::vector<T> b = testinghelpers::get_random_matrix<T>(5, 12, storage, 'n', m, n, ldb, datatype);
+    gtint_t lower = (diaga = 'n')||(diaga = 'N') ? 3 : 0;
+    gtint_t upper = (diaga = 'n')||(diaga = 'N') ? 10 : 1;
+    std::vector<T> a = testinghelpers::get_random_matrix<T>(lower, upper, storage, transa, mn, mn, lda, datatype);
+    std::vector<T> b = testinghelpers::get_random_matrix<T>(3, 10, storage, 'n', m, n, ldb, datatype);
 
+    // Making A diagonally dominant so that the condition number is good and
+    // the algorithm doesn't diverge.
+    for (gtint_t i=0; i<mn; i++)
+    {
+        a[i+i*lda] = T{float(mn)}*a[i+i*lda];
+    }
     // Create a copy of v so that we can check reference results.
     std::vector<T> b_ref(b);
 

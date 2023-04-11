@@ -80,7 +80,7 @@ TEST_P(ctrsmTest, RandomData) {
     char datatype   = std::get<10>(GetParam());
 
     // Set the threshold for the errors:
-    double thresh = 15*n*m*testinghelpers::getEpsilon<T>();
+    double thresh = std::max(m, n)*testinghelpers::getEpsilon<T>();
 
     //----------------------------------------------------------
     //     Call test body using these parameters
@@ -139,8 +139,8 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values('u','l'),                                      // uplo  u:upper, l:lower
             ::testing::Values('n','c','t'),                                  // transa
             ::testing::Values('n','u'),                                      // diaga , n=nonunit u=unit
-            ::testing::Range(gtint_t(10), gtint_t(11), 10),                  // m
-            ::testing::Range(gtint_t(10), gtint_t(11), 10),                  // n
+            ::testing::Range(gtint_t(10), gtint_t(31), 10),                  // m
+            ::testing::Range(gtint_t(10), gtint_t(31), 10),                  // n
             ::testing::Values(scomplex{2.0,-1.0}),                           // alpha
             ::testing::Values(gtint_t(0), gtint_t(3)),                       // increment to the leading dim of a
             ::testing::Values(gtint_t(0), gtint_t(4)),                       // increment to the leading dim of b
