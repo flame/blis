@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2022, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2022-2023, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -47,7 +47,9 @@ BLIS_EXPORT_BLIS void AOCL_BLIS_set_progress(AOCL_progress_callback func);
 
 // Private interfaces for internal use
 
-extern AOCL_progress_callback AOCL_progress_ptr;
+// AOCL_progress_ptr can be updated by any of the thread outside blis
+// hence volatile keyword is being used to warn compiler not optimise
+extern volatile AOCL_progress_callback AOCL_progress_ptr;
 
 extern BLIS_TLS_TYPE dim_t tls_aoclprogress_counter;
 extern BLIS_TLS_TYPE dim_t tls_aoclprogress_last_update;
@@ -56,19 +58,5 @@ extern BLIS_TLS_TYPE dim_t tls_aoclprogress_last_update;
 // Progress update will be sent only after these many 
 // elements are processed in the current thread.
 #define AOCL_PROGRESS_FREQUENCY 1e+9
-
-#define MAX_API_NAME_LEN 20
-
-// Macro to send update using datatype character and the api name
-#define AOCL_PROGRESS_DT(dt, api, progress, tid, nt) \
-        char buf[MAX_API_NAME_LEN]; \
-        snprintf(buf, MAX_API_NAME_LEN, "%c%s", dt, api); \
-        (*AOCL_progress_ptr) (buf, strlen(buf), progress, tid, nt); \
-
-// Macro to send update using api name alone.
-#define AOCL_PROGRESS_NAME(api, progress, tid, nt) \
-        char buf[MAX_API_NAME_LEN]; \
-        snprintf(buf, MAX_API_NAME_LEN, "%s", dt, api); \
-        (*AOCL_progress_ptr) (buf, strlen(buf), progress, tid, nt); \
 
 #endif // BLI_UTIL_PROGRESS_H

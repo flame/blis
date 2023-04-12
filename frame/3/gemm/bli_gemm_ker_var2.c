@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2018 - 2022, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2018 - 2023, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -408,18 +408,18 @@ void PASTEMAC(ch,varname) \
 	} \
 \
 /* Send progress update if the user has enabled it */ \
-if(AOCL_progress_ptr) { \
+AOCL_progress_callback AOCL_progress_local_ptr = AOCL_progress_ptr; \
+if (AOCL_progress_local_ptr) { \
 	/* Running total for current thread */ \
 	tls_aoclprogress_counter += m * n * k; \
 	/* Send the update only if enough number of elements are processes */ \
 	if ((tls_aoclprogress_counter - tls_aoclprogress_last_update)  >= AOCL_PROGRESS_FREQUENCY) \
 	{ \
 		tls_aoclprogress_last_update = tls_aoclprogress_counter; \
-		AOCL_PROGRESS_DT(*MKSTR(ch), \
-						"gemm", \
-						tls_aoclprogress_counter, \
-						AOCL_gettid(), \
-						bli_rntm_num_threads(rntm)); \
+		(*AOCL_progress_local_ptr)(MKSTR(ch) "gemm", sizeof(MKSTR(ch) "gemm"), \
+								   tls_aoclprogress_counter, \
+								   AOCL_gettid(), \
+								   bli_rntm_num_threads(rntm)); \
 	}\
 } \
  \

@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2018 - 2022, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2018 - 2023, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -56,6 +56,7 @@ void bli_trsm_xx_ker_var2
 	dim_t        side;
 	dim_t        uplo;
 	trsm_var_oft f;
+	AOCL_progress_callback AOCL_progress_local_ptr = AOCL_progress_ptr;
 
 	// Set two bools: one based on the implied side parameter (the structure
 	// of the root object) and one based on the uplo field of the triangular
@@ -88,10 +89,9 @@ void bli_trsm_xx_ker_var2
 	  thread
 	);
 
-	// Send progress update if enabled
-	if (AOCL_progress_ptr)
+	/* Send progress update if the user has enabled it */
+	if (AOCL_progress_local_ptr)
 	{
-
 		// Get the size of block processed in
 		// this iteration, add it to the accumulated
 		// total and send the update.
@@ -100,13 +100,14 @@ void bli_trsm_xx_ker_var2
 		dim_t k = bli_obj_width(a);
 
 		num_t dt = bli_obj_dt(c);
-		char dt_c;
+		char *dt_api = NULL;
+		dim_t dt_api_len = 5;
 
 		// Running total for current thread.
 		tls_aoclprogress_counter += m * n * k;
 
 		// Send the update only if number of elements processes so far
-		// has exceeded the freqency of reporting. 
+		// has exceeded the freqency of reporting.
 		if ((tls_aoclprogress_counter - tls_aoclprogress_last_update) >=
 			 AOCL_PROGRESS_FREQUENCY)
 		{
@@ -117,26 +118,26 @@ void bli_trsm_xx_ker_var2
 			switch (dt)
 			{
 			case BLIS_FLOAT:
-				dt_c = 's';
+				dt_api = "strsm";
 				break;
 			case BLIS_DOUBLE:
-				dt_c = 'd';
+				dt_api = "dtrsm";
 				break;
 			case BLIS_SCOMPLEX:
-				dt_c = 'c';
+				dt_api = "ctrsm";
 				break;
 			case BLIS_DCOMPLEX:
-				dt_c = 'z';
+				dt_api = "ztrsm";
 				break;
 			default:
-				dt_c = ' ';
+				dt_api = " trsm";
 			}
 
-			AOCL_PROGRESS_DT(dt_c,
-			                 "trsm",
-			                 tls_aoclprogress_counter,
-			                 AOCL_gettid(),
-			                 bli_rntm_num_threads(rntm));
+			(*AOCL_progress_local_ptr)(dt_api,
+			                           dt_api_len,
+			                           tls_aoclprogress_counter,
+			                           AOCL_gettid(),
+			                           bli_rntm_num_threads(rntm));
 		}
 	}
 
