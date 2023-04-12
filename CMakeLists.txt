@@ -202,18 +202,23 @@ endif ()
 
 if (ENABLE_BLAS)
     add_definitions(-DBLIS_ENABLE_BLAS)
+    set(BLIS_ENABLE_BLAS TRUE)
 else ()
     add_definitions(-DBLIS_DISABLE_BLAS)
+    set(BLIS_ENABLE_BLAS FALSE)
 endif ()
 
 if (ENABLE_CBLAS)
     add_definitions(-DBLIS_ENABLE_CBLAS)
+    set(BLIS_ENABLE_CBLAS TRUE)
     if (NOT ENABLE_BLAS)
         # Force BLAS layer when CBLAS is enabled
         add_definitions(-DBLIS_ENABLE_BLAS)
+        set(BLIS_ENABLE_BLAS TRUE)
     endif ()
 else ()
     add_definitions(-DBLIS_DISABLE_CBLAS)
+    set(BLIS_ENABLE_CBLAS FALSE)
 endif ()
 
 if (ENABLE_BLASTEST)
