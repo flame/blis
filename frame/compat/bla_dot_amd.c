@@ -35,6 +35,18 @@
 
 #include "blis.h"
 
+/*
+  Early return conditions
+  ------------------------
+
+  1. When n <= 0 where n is the length of the vector passed
+
+  NaN propagation expectation
+  --------------------------
+
+  1. Always propagate
+*/
+
 //
 // Define BLAS-to-BLIS interfaces.
 //
@@ -117,11 +129,20 @@ float sdot_blis_impl
     float  rho;
 
     /* Initialize BLIS. */
-//  bli_init_auto();
+    //  bli_init_auto();
 
-    /* Convert/typecast negative values of n to zero. */
-    if ( *n < 0 ) n0 = ( dim_t )0;
-    else              n0 = ( dim_t )(*n);
+    // If the vector dimension is less than or equal to zero, return.
+    if (*n <= 0)
+    {
+      rho = 0.0f;
+
+      AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
+      return rho;
+    }
+    else
+    {
+      n0 = ( dim_t )(*n);
+    }
 
     /* If the input increments are negative, adjust the pointers so we can
        use positive increments instead. */
@@ -163,40 +184,58 @@ float sdot_blis_impl
         incy0 = ( inc_t )(*incy);
     }
 
-    // This function is invoked on all architectures including ‘generic’.
-    // Non-AVX2+FMA3 platforms will use the kernels derived from the context.
-    if (bli_cpuid_is_avx2fma3_supported() == TRUE)
+    cntx_t *cntx = NULL;
+
+    // Query the architecture ID
+    arch_t arch_id = bli_arch_query_id();
+
+    /*
+      Function pointer declaration for the function
+      that will be used by this API
+    */
+    sdotv_ker_ft dotv_ker_ptr; // SDOTV
+
+    // Pick the kernel based on the architecture ID
+    switch (arch_id)
     {
-        /* Call BLIS kernel. */
-        bli_sdotv_zen_int10
-        (
-        BLIS_NO_CONJUGATE,
-        BLIS_NO_CONJUGATE,
-        n0,
-        x0, incx0,
-        y0, incy0,
-        &rho,
-        NULL
-        );
-    }
-    else
-    {
-        /* Call BLIS interface. */
-        PASTEMAC2(s,dotv,BLIS_TAPI_EX_SUF)
-        (
-        BLIS_NO_CONJUGATE,
-        BLIS_NO_CONJUGATE,
-        n0,
-        x0, incx0,
-        y0, incy0,
-        &rho,
-        NULL,
-        NULL
-        );
+        case BLIS_ARCH_ZEN4:
+#if defined(BLIS_KERNELS_ZEN4)
+
+            // AVX-512 Kernel
+            dotv_ker_ptr = bli_sdotv_zen_int_avx512;
+
+        break;
+#endif
+        case BLIS_ARCH_ZEN:
+        case BLIS_ARCH_ZEN2:
+        case BLIS_ARCH_ZEN3:
+
+            // AVX-2 Kernel
+            dotv_ker_ptr = bli_sdotv_zen_int10;
+
+            break;
+        default:
+
+            // For non-Zen architectures, query the context
+            cntx = bli_gks_query_cntx();
+
+            // Query the context for the kernel function pointers for sdotv
+            dotv_ker_ptr = bli_cntx_get_l1v_ker_dt(BLIS_FLOAT, BLIS_DOTV_KER, cntx);
     }
 
+    dotv_ker_ptr
+    (
+      BLIS_NO_CONJUGATE,
+      BLIS_NO_CONJUGATE,
+      n0,
+      x0, incx0,
+      y0, incy0,
+      &rho,
+      cntx
+    );
+
     /* Finalize BLIS. */
-//  bli_finalize_auto();
+    //  bli_finalize_auto();
     AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
     return rho;
 }
