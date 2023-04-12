@@ -49,7 +49,7 @@ CPPROCFLAGS    := -DRISCV_SIZE=32
 # Atomic instructions must be enabled either via hardware
 # (-march=rv32iav) or by linking against libatomic
 CMISCFLAGS     := -march=$(shell $(CC) -DFORCE_RISCV_VECTOR -E frame/base/bli_riscv_detect_arch.h | grep '^[^\#]') -mabi=ilp32d
-CPICFLAGS      :=
+CPICFLAGS      := -fPIC
 CWARNFLAGS     := -Wall -Wno-unused-function -Wfatal-errors
 
 # In case the A extension is not available

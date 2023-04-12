@@ -47,7 +47,7 @@ THIS_CONFIG    := rv64iv
 # may specify additional flags here as needed.
 CPPROCFLAGS    := -DRISCV_SIZE=64
 CMISCFLAGS     := -march=$(shell $(CC) -DFORCE_RISCV_VECTOR -E frame/base/bli_riscv_detect_arch.h | grep '^[^\#]') -mabi=lp64d
-CPICFLAGS      :=
+CPICFLAGS      := -fPIC
 CWARNFLAGS     := -Wall -Wno-unused-function -Wfatal-errors
 
 # In case the A extension is not available
