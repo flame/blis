@@ -309,7 +309,8 @@ void computediff( T blis_sol, T ref_sol, bool nan_inf_check = false )
 template <typename T>
 void computediff( T blis_sol, T ref_sol, double thresh, bool nan_inf_check = false )
 {
-    ComparisonHelper comp_helper(SCALAR, thresh);
+    ComparisonHelper comp_helper(SCALAR, thresh);    
+    comp_helper.nan_inf_check = nan_inf_check;
     ASSERT_PRED_FORMAT3(NumericalComparison<T>, blis_sol, ref_sol, comp_helper);
 }
 

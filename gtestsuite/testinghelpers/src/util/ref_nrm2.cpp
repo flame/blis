@@ -46,10 +46,10 @@
 
 namespace testinghelpers {
 
-template <typename T, typename Treal>
-Treal ref_nrm2(gtint_t n, T* x, gtint_t incx) {
+template <typename T, typename RT>
+RT ref_nrm2(gtint_t n, T* x, gtint_t incx) {
 
-  typedef Treal (*Fptr_ref_cblas_nrm2)( f77_int, const T *, f77_int );
+  typedef RT (*Fptr_ref_cblas_nrm2)( f77_int, const T *, f77_int );
   Fptr_ref_cblas_nrm2 ref_cblas_nrm2;
 
   // Call C function

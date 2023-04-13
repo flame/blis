@@ -38,17 +38,24 @@
 #include "common/testing_helpers.h"
 
 /**
- * @brief Overload bli_*normfv() functions using typed_nrm2.
- *        Will be used in testing and especially in TYPED_TESTs.
- *        Computes the Euclidean norm of x.
+ * @brief Computes the Euclidean norm of x.
+ * 
+ * Euclidean norm of a vector x is defined as nrm2 = sqrt(x'*x).
+ * In case a vector element is NaN, nrm2 must be NaN.
+ * In case a vector element is inf, and there is no element which is NaN, nrm2 must be inf.
+ * If n <= 0, nrm2 returns zero.
+ * If incx = 0, nrm2 returns sqrt(n*abs(x[0])**2).
+ * 
  * @param[in] n vector length
  * @param[in] x pointer which points to the first element of x
  * @param[in] incx increment of x
  * @return the Euclidean norm of x
+ * 
+ * 
  */
 
-template<typename T, typename Treal>
-static Treal nrm2_(gtint_t n, T* x, gtint_t incx){
+template<typename T, typename RT = typename testinghelpers::type_info<T>::real_type>
+static RT nrm2_(gtint_t n, T* x, gtint_t incx){
     if constexpr (std::is_same<T, float>::value)
         return snrm2_( &n, x, &incx );
     else if constexpr (std::is_same<T, double>::value)
@@ -61,8 +68,8 @@ static Treal nrm2_(gtint_t n, T* x, gtint_t incx){
       throw std::runtime_error("Error in testsuite/level1/nrm2.h: Invalid typename in nrm2_().");
 }
 
-template<typename T, typename Treal>
-static Treal cblas_nrm2(gtint_t n, T* x, gtint_t incx){
+template<typename T, typename RT = typename testinghelpers::type_info<T>::real_type>
+static RT cblas_nrm2(gtint_t n, T* x, gtint_t incx){
     if constexpr (std::is_same<T, float>::value)
         return cblas_snrm2( n, x, incx );
     else if constexpr (std::is_same<T, double>::value)
@@ -75,9 +82,9 @@ static Treal cblas_nrm2(gtint_t n, T* x, gtint_t incx){
       throw std::runtime_error("Error in testsuite/level1/nrm2.h: Invalid typename in cblas_nrm2().");
 }
 
-template<typename T, typename Treal>
-static Treal typed_nrm2(gtint_t n, T* x, gtint_t incx){
-    Treal nrm;
+template<typename T, typename RT = typename testinghelpers::type_info<T>::real_type>
+static RT typed_nrm2(gtint_t n, T* x, gtint_t incx){
+    RT nrm;
     if constexpr (std::is_same<T, float>::value)
         bli_snormfv(n, x, incx, &nrm);
     else if constexpr (std::is_same<T, double>::value)
@@ -91,15 +98,15 @@ static Treal typed_nrm2(gtint_t n, T* x, gtint_t incx){
     return nrm;
 }
 
-template<typename T, typename Treal>
-static Treal nrm2(gtint_t n, T* x, gtint_t incx)
+template<typename T, typename RT = typename testinghelpers::type_info<T>::real_type>
+static RT nrm2(gtint_t n, T* x, gtint_t incx)
 {
 #ifdef TEST_BLAS
-    return nrm2_<T, Treal>(n, x, incx);
+    return nrm2_<T>(n, x, incx);
 #elif TEST_CBLAS
-    return cblas_nrm2<T, Treal>(n, x, incx);
+    return cblas_nrm2<T>(n, x, incx);
 #elif TEST_BLIS_TYPED
-    return typed_nrm2<T, Treal>(n, x, incx);
+    return typed_nrm2<T>(n, x, incx);
 #else
     throw std::runtime_error("Error in testsuite/level1/axpyv.h: No interfaces are set to be tested.");
 #endif

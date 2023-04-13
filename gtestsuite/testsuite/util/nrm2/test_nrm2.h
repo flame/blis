@@ -35,33 +35,82 @@
 #pragma once
 
 #include "nrm2.h"
+#include <limits>
 #include "util/ref_nrm2.h"
 #include "inc/check_error.h"
 
+// Used for generic tests with random values in x.
 template<typename T>
 void test_nrm2( gtint_t n, gtint_t incx, double thresh )
 {
+    // Get real type from T.
+    using RT = typename testinghelpers::type_info<T>::real_type;
     //----------------------------------------------------------
     //        Initialize vectors with random numbers.
     //----------------------------------------------------------
-    //std::vector<T> x( testinghelpers::buff_dim( n, incx ) );
-    //testinghelpers::datagenerators::randomgenerators( -10, 10, n, incx, x.data() );
     std::vector<T> x = testinghelpers::get_random_vector<T>( -10, -10, n, incx );
     
     //----------------------------------------------------------
     //    Call reference implementation to get ref results.
     //----------------------------------------------------------
-    // Create a copy of y so that we can check reference results.
-    using real = typename testinghelpers::type_info<T>::real_type;
-    real norm_ref = testinghelpers::ref_nrm2<T, real>( n, x.data(), incx );
+    RT norm_ref = testinghelpers::ref_nrm2<T>( n, x.data(), incx );
 
     //----------------------------------------------------------
     //                  Call BLIS function.
     //----------------------------------------------------------
-    real norm = nrm2<T, real>( n, x.data(), incx );
+    RT norm = nrm2<T>(n, x.data(), incx);
 
     //----------------------------------------------------------
     //              Compute error.
     //----------------------------------------------------------
-    computediff<real>( norm, norm_ref, thresh );
+    computediff<RT>( norm, norm_ref, thresh );
+}
+
+// Test body used for extreme value testing, where we want to test
+// cases where two extreme values are present.
+// i is the index with corresponding extreme value iexval.
+// j is the index with corresponding extreme value jexval.
+template<typename T>
+void test_nrm2( gtint_t n, gtint_t incx, gtint_t i, T iexval, gtint_t j = 0, T jexval = T{1.0})
+{
+    // Get real type from T.
+    using RT = typename testinghelpers::type_info<T>::real_type;
+    //----------------------------------------------------------
+    //        Initialize vectors with random numbers.
+    //----------------------------------------------------------
+    std::vector<T> x = testinghelpers::get_random_vector<T>(-10, 10, n, incx, ELEMENT_TYPE);
+    // Initialize ith element of vector x to iexval.
+    x[i*incx] = iexval;
+    // Initialize jth element of vector x to jexval.
+    x[j*incx] = jexval;
+    //----------------------------------------------------------
+    //    Call reference implementation to get ref results.
+    //----------------------------------------------------------
+    RT norm_ref = testinghelpers::ref_nrm2<T>( n, x.data(), incx );
+
+    //----------------------------------------------------------
+    //                  Call BLIS function.
+    //----------------------------------------------------------
+    RT norm = nrm2<T>(n, x.data(), incx);
+
+    //----------------------------------------------------------
+    //              Compute error.
+    //----------------------------------------------------------
+    // Compare using NaN/Inf checks.
+    computediff<RT>( norm, norm_ref, true );
+}
+
+// Helper function that returns a string with the correct NaN/Inf printing
+// so that we can print the test names correctly from using parametrized testing.
+template<typename T>
+std::string getValueString(T exval)
+{
+  std::string exval_str;
+  if(std::isnan(exval))
+    exval_str = "nan";
+  else if(std::isinf(exval))
+    exval_str = (exval > 0) ? "inf" : "minus_inf";
+  else
+    exval_str = ( exval > 0) ? std::to_string(int(exval)) : "minus_" + std::to_string(int(std::abs(exval)));
+  return exval_str;
 }

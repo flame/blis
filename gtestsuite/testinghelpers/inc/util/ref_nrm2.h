@@ -46,7 +46,7 @@
 
 namespace testinghelpers {
 
-template <typename Tf, typename T>
-T ref_nrm2(gtint_t n, Tf* x, gtint_t incx);
+template <typename T, typename RT = typename testinghelpers::type_info<T>::real_type>
+RT ref_nrm2(gtint_t n, T* x, gtint_t incx);
 
 } //end of namespace testinghelpers

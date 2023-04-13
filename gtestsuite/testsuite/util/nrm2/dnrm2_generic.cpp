@@ -80,15 +80,34 @@ public:
     }
 };
 
-// Black box testing.
+/**
+ * dnrm2 implementation is composed by two parts:
+ * - vectorized path for n>4
+ *      - for-loop for multiples of 8 (F8)
+ *      - for-loop for multiples of 4 (F4)
+ * - scalar path for n<=4 (S)
+*/
 INSTANTIATE_TEST_SUITE_P(
-        Blackbox,
+        AT,
         dnrm2Test,
         ::testing::Combine(
-            ::testing::Range(gtint_t(10), gtint_t(101), 10),                 // m size of vector takes values from 10 to 100 with step size of 10.
-            ::testing::Values(gtint_t(1), gtint_t(2)
+            // m size of vector
+            ::testing::Values(gtint_t(1),  // trivial case n=1
+                              gtint_t(3),  // will only go through S
+                              gtint_t(8),  // 1*8 - will only go through F8
+                              gtint_t(24), // 3*8 - will go through F8
+                              gtint_t(34), // 4*8 + 2 - will go through F8 & S
+                              gtint_t(52), // 6*8 + 4 - will go through F8 & F4
+                              gtint_t(71), // 8*8 + 4 + 3 - will go through F8 & F4 & S
+                              gtint_t(89), // a few bigger numbers
+                              gtint_t(122),
+                              gtint_t(185),
+                              gtint_t(217)
+            ),
+            // stride size for x
+            ::testing::Values(gtint_t(1), gtint_t(4)
 #ifndef TEST_BLIS_TYPED
-            ,gtint_t(-1), gtint_t(-2)
+            , gtint_t(-1), gtint_t(-5)
 #endif
         )                                                                    // stride size for x
         ),

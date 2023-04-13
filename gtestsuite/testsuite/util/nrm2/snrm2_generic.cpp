@@ -80,15 +80,38 @@ public:
     }
 };
 
-// Black box testing.
+/**
+ * Note: snrm2 scalar ONLY implementation is used, but we write the test 
+ * using values that worked for the vectorized path for the future.
+ * 
+ * scnrm2 implementation is composed by two parts:
+ * - vectorized path for n>=64
+ *      - for-loop for multiples of 32 (F32)
+ *      - for-loop for multiples of 24 (F24)
+ *      - for-loop for multiples of 16 (F16)
+ * - scalar path for n<64 (S)
+*/
 INSTANTIATE_TEST_SUITE_P(
-        Blackbox,
+        AT,
         snrm2Test,
         ::testing::Combine(
-            ::testing::Range(gtint_t(10), gtint_t(101), 10),                 // m size of vector takes values from 10 to 100 with step size of 10.
-            ::testing::Values(gtint_t(1), gtint_t(2)
+            // m size of vector
+            ::testing::Values(gtint_t(1),  // trivial case n=1
+                              gtint_t(35), // will only go through S
+                              gtint_t(64), // 2*32 - will only go through F32
+                              gtint_t(76), // 2*32 + 12 - will go through F32 & S
+                              gtint_t(80), // 2*32 + 16 - will go through F32 & F16
+                              gtint_t(85), // 2*32 + 16 + 5 - will go through F32 & F16 & S
+                              gtint_t(88), // 2*32 + 24 - will go through F32 & F24
+                              gtint_t(91), // 2*32 + 24 + 3 - will go through F32 & F24 & S
+                              gtint_t(124), // a few bigger numbers
+                              gtint_t(167),
+                              gtint_t(259)
+            ),
+            // stride size for x
+            ::testing::Values(gtint_t(1), gtint_t(3)
 #ifndef TEST_BLIS_TYPED
-            ,gtint_t(-1), gtint_t(-2)
+            , gtint_t(-1), gtint_t(-5)
 #endif
         )                                                                    // stride size for x
         ),
