@@ -35,6 +35,19 @@
 
 #include "blis.h"
 
+/*
+  Early return conditions
+  ------------------------
+
+  1. When n <= 0 where n is the length of the vector passed
+  2. When alpha == 0 where alpha is the scalar value by which the vector is
+     to be scaled
+
+  NaN propagation expectation
+  --------------------------
+
+  1. When alpha == NaN - Propogate the NaN to the vector
+*/
 
 //
 // Define BLAS-to-BLIS interfaces.
@@ -108,88 +121,121 @@ void saxpy_blis_impl
  float*   y, const f77_int* incy
  )
 {
-  AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1)
-  AOCL_DTL_LOG_AXPY_INPUTS(AOCL_DTL_LEVEL_TRACE_1, 'S', *n, (float*)alpha, *incx, *incy)
-  dim_t  n0;
-  float* x0;
-  float* y0;
-  inc_t  incx0;
-  inc_t  incy0;
+    AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1)
+    AOCL_DTL_LOG_AXPY_INPUTS(AOCL_DTL_LEVEL_TRACE_1, 'S', *n, (float *)alpha, *incx, *incy)
 
-  /* Initialize BLIS. */
-  //    bli_init_auto();
+    /*
+      BLAS exception: If the vector dimension is zero, or if alpha is zero, return early.
+    */
+    if ((*n) <= 0 || PASTEMAC(s, eq0)(*alpha))
+    {
+      AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
 
-  /* Convert/typecast negative values of n to zero. */
-  if ( *n < 0 ) n0 = ( dim_t )0;
-  else              n0 = ( dim_t )(*n);
+      return;
+    }
 
-  /* If the input increments are negative, adjust the pointers so we can
-     use positive increments instead. */
-  if ( *incx < 0 )
+    dim_t n_elem;
+    float *x0;
+    float *y0;
+    inc_t incx0;
+    inc_t incy0;
+
+    /* Initialize BLIS. */
+    //    bli_init_auto();
+
+    /* Convert/typecast negative values of n to zero. */
+    if (*n < 0)
+      n_elem = (dim_t)0;
+    else
+      n_elem = (dim_t)(*n);
+
+    /*
+      If the input increments are negative, adjust the pointers so we can
+      use positive increments instead.
+    */
+    if (*incx < 0)
     {
       /* The semantics of negative stride in BLAS are that the vector
-         operand be traversed in reverse order. (Another way to think
-         of this is that negative strides effectively reverse the order
-         of the vector, but without any explicit data movements.) This
-         is also how BLIS interprets negative strides. The differences
-         is that with BLAS, the caller *always* passes in the 0th (i.e.,
-         top-most or left-most) element of the vector, even when the
-         stride is negative. By contrast, in BLIS, negative strides are
-         used *relative* to the vector address as it is given. Thus, in
-         BLIS, if this backwards traversal is desired, the caller *must*
-         pass in the address to the (n-1)th (i.e., the bottom-most or
-         right-most) element along with a negative stride. */
-      x0    = ((float*)x) + (n0-1)*(-*incx);
-      incx0 = ( inc_t )(*incx);
+        operand be traversed in reverse order. (Another way to think
+        of this is that negative strides effectively reverse the order
+        of the vector, but without any explicit data movements.) This
+        is also how BLIS interprets negative strides. The differences
+        is that with BLAS, the caller *always* passes in the 0th (i.e.,
+        top-most or left-most) element of the vector, even when the
+        stride is negative. By contrast, in BLIS, negative strides are
+        used *relative* to the vector address as it is given. Thus, in
+        BLIS, if this backwards traversal is desired, the caller *must*
+        pass in the address to the (n-1)th (i.e., the bottom-most or
+        right-most) element along with a negative stride. */
+
+      x0 = ((float *)x) + (n_elem - 1) * (-*incx);
+      incx0 = (inc_t)(*incx);
     }
-  else
+    else
     {
       x0    = ((float*)x);
       incx0 = ( inc_t )(*incx);
     }
-  if ( *incy < 0 )
+    if ( *incy < 0 )
     {
-      y0    = ((float*)y) + (n0-1)*(-*incy);
+      y0    = ((float*)y) + (n_elem-1)*(-*incy);
       incy0 = ( inc_t )(*incy);
     }
-  else
+    else
     {
       y0    = ((float*)y);
       incy0 = ( inc_t )(*incy);
     }
 
-  // This function is invoked on all architectures including ‘generic’.
-  // Non-AVX2+FMA3 platforms will use the kernels derived from the context.
-  if (bli_cpuid_is_avx2fma3_supported() == TRUE)
-  {
-      bli_saxpyv_zen_int10
-      (
-        BLIS_NO_CONJUGATE,
-        n0,
-        (float*)alpha,
-        x0, incx0,
-        y0, incy0,
-        NULL
-      );
+    cntx_t *cntx = NULL;
 
-  }
-  else
-  {
-      PASTEMAC2(s,axpyv,BLIS_TAPI_EX_SUF)
-      (
-        BLIS_NO_CONJUGATE,
-        n0,
-        (float*)alpha,
-        x0, incx0,
-        y0, incy0,
-        NULL,
-        NULL
-      );
+    // Query the architecture ID
+    arch_t id = bli_arch_query_id();
 
-  }
-  /* Finalize BLIS. */
-  //    bli_finalize_auto();
-  AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
+    /*
+      Function pointer declaration for the function
+      that will be used by this API
+    */
+    saxpyv_ker_ft axpyv_ker_ptr; // DAXPYV
+
+    // Pick the kernel based on the architecture ID
+    switch (id)
+    {
+      case BLIS_ARCH_ZEN4:
+#if defined(BLIS_KERNELS_ZEN4)
+        axpyv_ker_ptr = bli_saxpyv_zen_int_avx512;
+
+        break;
+#endif
+      case BLIS_ARCH_ZEN:
+      case BLIS_ARCH_ZEN2:
+      case BLIS_ARCH_ZEN3:
+        axpyv_ker_ptr = bli_saxpyv_zen_int10;
+
+        break;
+      default:
+
+        // For non-Zen architectures, query the context
+        cntx = bli_gks_query_cntx();
+
+        // Query the context for the kernel function pointers for saxpyv
+        axpyv_ker_ptr = bli_cntx_get_l1v_ker_dt(BLIS_FLOAT, BLIS_AXPYV_KER, cntx);
+    }
+
+    // Call the function based on the function pointer assigned above
+    axpyv_ker_ptr
+    (
+      BLIS_NO_CONJUGATE,
+      n_elem,
+      (float *)alpha,
+      x0, incx0,
+      y0, incy0,
+      cntx
+    );
+
+    /* Finalize BLIS. */
+    //    bli_finalize_auto();
+    AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
 }
 
 #ifdef BLIS_ENABLE_BLAS

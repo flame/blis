@@ -151,8 +151,8 @@ void bli_cntx_init_zen4( cntx_t* cntx )
       BLIS_AXPBYV_KER, BLIS_DCOMPLEX, bli_zaxpbyv_zen_int,
 
       // axpyv
-      BLIS_AXPYV_KER,  BLIS_FLOAT,  bli_saxpyv_zen_int10,
-      BLIS_AXPYV_KER,  BLIS_DOUBLE, bli_daxpyv_zen_int10,
+      BLIS_AXPYV_KER,  BLIS_FLOAT,    bli_saxpyv_zen_int_avx512,
+      BLIS_AXPYV_KER,  BLIS_DOUBLE,   bli_daxpyv_zen_int_avx512,
       BLIS_AXPYV_KER,  BLIS_SCOMPLEX, bli_caxpyv_zen_int5,
       BLIS_AXPYV_KER,  BLIS_DCOMPLEX, bli_zaxpyv_zen_int5,
 

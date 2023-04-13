@@ -46,6 +46,10 @@ SCALV_KER_PROT( double,  d, scalv_zen_int_avx512 )
 DOTV_KER_PROT( float,    s, dotv_zen_int_avx512 )
 DOTV_KER_PROT( double,   d, dotv_zen_int_avx512 )
 
+// axpyv (intrinsics)
+AXPYV_KER_PROT( float,    s, axpyv_zen_int_avx512 )
+AXPYV_KER_PROT( double,   d, axpyv_zen_int_avx512 )
+
 GEMMTRSM_UKR_PROT( double,   d, gemmtrsm_l_zen_asm_16x14)
 GEMMTRSM_UKR_PROT( double,   d, gemmtrsm_u_zen_asm_16x14)
 GEMMTRSM_UKR_PROT( double,   d, gemmtrsm_l_zen4_asm_8x24)

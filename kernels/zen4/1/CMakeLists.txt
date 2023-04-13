@@ -5,4 +5,5 @@ target_sources("${PROJECT_NAME}"
     ${CMAKE_CURRENT_SOURCE_DIR}/bli_amaxv_zen_int_avx512.c
     ${CMAKE_CURRENT_SOURCE_DIR}/bli_scalv_zen_int_avx512.c
     ${CMAKE_CURRENT_SOURCE_DIR}/bli_dotv_zen_int_avx512.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/bli_axpyv_zen_int_avx512.c
     )
