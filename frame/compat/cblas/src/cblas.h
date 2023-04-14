@@ -490,12 +490,57 @@ void BLIS_EXPORT_BLAS cblas_strsm(enum CBLAS_ORDER Order, enum CBLAS_SIDE Side,
                  enum CBLAS_DIAG Diag, f77_int M, f77_int N,
                  float alpha, const float *A, f77_int lda,
                  float *B, f77_int ldb);
+/** \addtogroup APIS BLIS Extension API
+ *  @{
+ */
+
+/** \addtogroup INTERFACE CBLAS INTERFACE
+ * \ingroup BLIS Extension API
+ *  @{
+ */
+
+
+/**
+* sgemmt computes scalar-matrix-matrix product with general matrices. It adds the result to the upper or lower part of scalar-matrix product.
+* It accesses and updates a triangular part of the square result matrix.
+* The operation is defined as
+* C := alpha*Mat(A) * Mat(B) + beta*C,
+* where:
+* Mat(X) is one of Mat(X) = X, or Mat(X) = \f$X^T\f$, or Mat(X) = \f$X^H\f$,
+* alpha and beta are scalars,
+* A, B and C are matrices:
+* Mat(A) is an nxk matrix,
+* Mat(B) is a kxn matrix,
+* C is an nxn upper or lower triangular matrix.
+*
+* @param[in] Order Storage scheme of matrices. CblasRowMajor or CblasColMajor
+* @param[in] Uplo Specifies whether the upper or lower triangular part of the array c is used. CblasUpper or CblasLower
+* @param[in] TransA Specifies the form of Mat(A) used in the matrix multiplication:
+* if transa = CblasNoTrans, then Mat(A) = A;
+* if transa = CblasTrans, then Mat(A) =\f$A^T\f$;
+* if transa = CblasConjTrans, then Mat(A) = \f$A^H\f$.
+* @param[in] TransB Specifies the form of Mat(B) used in the matrix multiplication:
+* if transb = CblasNoTrans, then Mat(B) = B;
+* if transb = CblasTrans, then Mat(B) = \f$B^T\f$;
+* if transb = CblasConjTrans, then Mat(B) = \f$B^H\f$.
+* @param[in] N Specifies the order of the matrix C.
+* @param[in] K Specifies the number of columns of the matrix Mat(A) and the number of rows of the matrix Mat(B).
+* @param[in] alpha Specifies the scalar alpha.
+* @param[in] A  The array is float matrix A.
+* @param[in] lda Specifies the leading dimension of a
+* @param[in] B The array is float matrix B.
+* @param[in] ldb Specifies the leading dimension of b
+* @param[in] beta Specifies the scalar beta.
+* @param[in,out] C The array is float matrix C.
+* @param[in] ldc Specifies the leading dimension of c
+* @return None
+*/
 void BLIS_EXPORT_BLAS cblas_sgemmt(enum CBLAS_ORDER Order, enum CBLAS_UPLO Uplo,
          enum CBLAS_TRANSPOSE TransA, enum CBLAS_TRANSPOSE TransB,
          f77_int N, f77_int K, float alpha, const float *A,
                  f77_int lda, const float *B, f77_int ldb,
                  float beta, float *C, f77_int ldc);
-
+/** @}*/
 void BLIS_EXPORT_BLAS cblas_dgemm(enum CBLAS_ORDER Order, enum CBLAS_TRANSPOSE TransA,
                  enum CBLAS_TRANSPOSE TransB, f77_int M, f77_int N,
                  f77_int K, double alpha, const double *A,
@@ -525,12 +570,51 @@ void BLIS_EXPORT_BLAS cblas_dtrsm(enum CBLAS_ORDER Order, enum CBLAS_SIDE Side,
                  enum CBLAS_DIAG Diag, f77_int M, f77_int N,
                  double alpha, const double *A, f77_int lda,
                  double *B, f77_int ldb);
+/** \addtogroup INTERFACE CBLAS INTERFACE
+ *  @{
+ */
+
+/**
+* dgemmt computes scalar-matrix-matrix product with general matrices. It adds the result to the upper or lower part of scalar-matrix product.
+* It accesses and updates a triangular part of the square result matrix.
+* The operation is defined as
+* C := alpha*Mat(A) * Mat(B) + beta*C,
+* where:
+* Mat(X) is one of Mat(X) = X, or Mat(X) = \f$X^T\f$, or Mat(X) = \f$X^H\f$,
+* alpha and beta are scalars,
+* A, B and C are matrices:
+* Mat(A) is an nxk matrix,
+* Mat(B) is a kxn matrix,
+* C is an nxn upper or lower triangular matrix.
+*
+* @param[in] Order Storage scheme of matrices. CblasRowMajor or CblasColMajor
+* @param[in] Uplo Specifies whether the upper or lower triangular part of the array c is used. CblasUpper or CblasLower
+* @param[in] TransA Specifies the form of Mat(A) used in the matrix multiplication:
+* if transa = CblasNoTrans, then Mat(A) = A;
+* if transa = CblasTrans, then Mat(A) =\f$A^T\f$;
+* if transa = CblasConjTrans, then Mat(A) = \f$A^H\f$.
+* @param[in] TransB Specifies the form of Mat(B) used in the matrix multiplication:
+* if transb = CblasNoTrans, then Mat(B) = B;
+* if transb = CblasTrans, then Mat(B) = \f$B^T\f$;
+* if transb = CblasConjTrans, then Mat(B) = \f$B^H\f$.
+* @param[in] N Specifies the order of the matrix C.
+* @param[in] K Specifies the number of columns of the matrix Mat(A) and the number of rows of the matrix Mat(B).
+* @param[in] alpha Specifies the scalar alpha.
+* @param[in] A  The array is float matrix A.
+* @param[in] lda Specifies the leading dimension of a
+* @param[in] B The array is float matrix B.
+* @param[in] ldb Specifies the leading dimension of b
+* @param[in] beta Specifies the scalar beta.
+* @param[in,out] C The array is float matrix C.
+* @param[in] ldc Specifies the leading dimension of c
+* @return None
+*/
 void BLIS_EXPORT_BLAS cblas_dgemmt(enum CBLAS_ORDER Order, enum CBLAS_UPLO Uplo,
          enum CBLAS_TRANSPOSE TransA, enum CBLAS_TRANSPOSE TransB,
          f77_int N, f77_int K, double alpha, const double *A,
                  f77_int lda, const double *B, f77_int ldb,
                  double beta, double *C, f77_int ldc);
-
+/** @}*/
 void BLIS_EXPORT_BLAS cblas_cgemm(enum CBLAS_ORDER Order, enum CBLAS_TRANSPOSE TransA,
                  enum CBLAS_TRANSPOSE TransB, f77_int M, f77_int N,
                  f77_int K, const void *alpha, const void *A,
@@ -560,12 +644,51 @@ void BLIS_EXPORT_BLAS cblas_ctrsm(enum CBLAS_ORDER Order, enum CBLAS_SIDE Side,
                  enum CBLAS_DIAG Diag, f77_int M, f77_int N,
                  const void *alpha, const void *A, f77_int lda,
                  void *B, f77_int ldb);
+/** \addtogroup INTERFACE CBLAS INTERFACE
+ *  @{
+ */
+
+/**
+* cgemmt computes scalar-matrix-matrix product with general matrices. It adds the result to the upper or lower part of scalar-matrix product.
+* It accesses and updates a triangular part of the square result matrix.
+* The operation is defined as
+* C := alpha*Mat(A) * Mat(B) + beta*C,
+* where:
+* Mat(X) is one of Mat(X) = X, or Mat(X) = \f$X^T\f$, or Mat(X) = \f$X^H\f$,
+* alpha and beta are scalars,
+* A, B and C are matrices:
+* Mat(A) is an nxk matrix,
+* Mat(B) is a kxn matrix,
+* C is an nxn upper or lower triangular matrix.
+*
+* @param[in] Order Storage scheme of matrices. CblasRowMajor or CblasColMajor
+* @param[in] Uplo Specifies whether the upper or lower triangular part of the array c is used. CblasUpper or CblasLower
+* @param[in] TransA Specifies the form of Mat(A) used in the matrix multiplication:
+* if transa = CblasNoTrans, then Mat(A) = A;
+* if transa = CblasTrans, then Mat(A) =\f$A^T\f$;
+* if transa = CblasConjTrans, then Mat(A) = \f$A^H\f$.
+* @param[in] TransB Specifies the form of Mat(B) used in the matrix multiplication:
+* if transb = CblasNoTrans, then Mat(B) = B;
+* if transb = CblasTrans, then Mat(B) = \f$B^T\f$;
+* if transb = CblasConjTrans, then Mat(B) = \f$B^H\f$.
+* @param[in] N Specifies the order of the matrix C.
+* @param[in] K Specifies the number of columns of the matrix Mat(A) and the number of rows of the matrix Mat(B).
+* @param[in] alpha Specifies the scalar alpha.
+* @param[in] A  The array is float matrix A.
+* @param[in] lda Specifies the leading dimension of a
+* @param[in] B The array is float matrix B.
+* @param[in] ldb Specifies the leading dimension of b
+* @param[in] beta Specifies the scalar beta.
+* @param[in,out] C The array is float matrix C.
+* @param[in] ldc Specifies the leading dimension of c
+* @return None
+*/
 void BLIS_EXPORT_BLAS cblas_cgemmt(enum CBLAS_ORDER Order, enum CBLAS_UPLO Uplo,
          enum CBLAS_TRANSPOSE TransA, enum CBLAS_TRANSPOSE TransB,
          f77_int N, f77_int K, const void *alpha, const void *A,
                  f77_int lda, const void *B, f77_int ldb,
                  const void *beta, void *C, f77_int ldc);
-
+/** @}*/
 void BLIS_EXPORT_BLAS cblas_zgemm(enum CBLAS_ORDER Order, enum CBLAS_TRANSPOSE TransA,
                  enum CBLAS_TRANSPOSE TransB, f77_int M, f77_int N,
                  f77_int K, const void *alpha, const void *A,
@@ -595,12 +718,51 @@ void BLIS_EXPORT_BLAS cblas_ztrsm(enum CBLAS_ORDER Order, enum CBLAS_SIDE Side,
                  enum CBLAS_DIAG Diag, f77_int M, f77_int N,
                  const void *alpha, const void *A, f77_int lda,
                  void *B, f77_int ldb);
+/** \addtogroup INTERFACE CBLAS INTERFACE
+ *  @{
+ */
+
+/**
+* zgemmt computes scalar-matrix-matrix product with general matrices. It adds the result to the upper or lower part of scalar-matrix product.
+* It accesses and updates a triangular part of the square result matrix.
+* The operation is defined as
+* C := alpha*Mat(A) * Mat(B) + beta*C,
+* where:
+* Mat(X) is one of Mat(X) = X, or Mat(X) = \f$X^T\f$, or Mat(X) = \f$X^H\f$,
+* alpha and beta are scalars,
+* A, B and C are matrices:
+* Mat(A) is an nxk matrix,
+* Mat(B) is a kxn matrix,
+* C is an nxn upper or lower triangular matrix.
+*
+* @param[in] Order Storage scheme of matrices. CblasRowMajor or CblasColMajor
+* @param[in] Uplo Specifies whether the upper or lower triangular part of the array c is used. CblasUpper or CblasLower
+* @param[in] TransA Specifies the form of Mat(A) used in the matrix multiplication:
+* if transa = CblasNoTrans, then Mat(A) = A;
+* if transa = CblasTrans, then Mat(A) =\f$A^T\f$;
+* if transa = CblasConjTrans, then Mat(A) = \f$A^H\f$.
+* @param[in] TransB Specifies the form of Mat(B) used in the matrix multiplication:
+* if transb = CblasNoTrans, then Mat(B) = B;
+* if transb = CblasTrans, then Mat(B) = \f$B^T\f$;
+* if transb = CblasConjTrans, then Mat(B) = \f$B^H\f$.
+* @param[in] N Specifies the order of the matrix C.
+* @param[in] K Specifies the number of columns of the matrix Mat(A) and the number of rows of the matrix Mat(B).
+* @param[in] alpha Specifies the scalar alpha.
+* @param[in] A  The array is float matrix A.
+* @param[in] lda Specifies the leading dimension of a
+* @param[in] B The array is float matrix B.
+* @param[in] ldb Specifies the leading dimension of b
+* @param[in] beta Specifies the scalar beta.
+* @param[in,out] C The array is float matrix C.
+* @param[in] ldc Specifies the leading dimension of c
+* @return None
+*/
 void BLIS_EXPORT_BLAS cblas_zgemmt(enum CBLAS_ORDER Order, enum CBLAS_UPLO Uplo,
          enum CBLAS_TRANSPOSE TransA, enum CBLAS_TRANSPOSE TransB,
          f77_int N, f77_int K, const void *alpha, const void *A,
                  f77_int lda, const void *B, f77_int ldb,
                  const void *beta, void *C, f77_int ldc);
-
+/** @}*/
 
 /*
  * Routines with prefixes C and Z only
@@ -654,6 +816,40 @@ BLIS_EXPORT_BLAS double  cblas_dcabs1( const void *z);
  */
 
 // -- Batch APIs -------
+/** \addtogroup INTERFACE CBLAS INTERFACE
+ *  @{
+ */
+
+/**
+ * cblas_sgemm_batch interface resembles the GEMM interface.
+ * Arguments are arrays of pointers to matrices and parameters.
+ * It batches multiple independent small GEMM operations of fixed or variable sizes into a group
+ * and then spawn multiple threads for different GEMM instances within the group.
+ *
+ * @param[in] Order Storage scheme of matrices. CblasRowMajor or CblasColMajor
+ * @param[in] TransA_array Array of pointers, dimension (group_count), specifies the form of Mat( A ) to be used in the matrix multiplication as follows:
+ *                     Mat( A ) = A
+ *                     Mat( A ) = \f$A^T\f$
+ *                     Mat( A ) = \f$A^H\f$
+ * @param[in] TransB_array Array of pointers, dimension (group_count), specifies the form of Mat( B ) to be used in the matrix multiplication as follows:
+ *                     Mat( B ) = B
+ *                     Mat( B ) = \f$B^T\f$
+ *                     Mat( B ) = \f$B^H\f$
+ * @param[in] M_array Array of pointers, dimension (group_count), each is a number of rows of matrices A and of matrices C.
+ * @param[in] N_array Array of pointers, dimension (group_count), each is a number of columns of matrices B and of matrices C.
+ * @param[in] K_array Array of pointers, dimension (group_count), each is a number of columns of matrices A and number of rows of matrices B.
+ * @param[in] alpha_array Array of pointers, dimension (group_count) each is a scalar alpha for each GEMM.
+ * @param[in] A Array of pointers, dimension (group_count), Each is a matrix A of float datatype.
+ * @param[in] lda_array Array of pointers, dimension (group_count), each f77_int lda_array specifies the first dimension of matrix A.
+ * @param[in] B Array of pointers, dimension (group_count), Each is a matrix B of float datatype.
+ * @param[in] ldb_array Array of pointers, dimension (group_count), each f77_int ldb_array specifies the first dimension of matrix B.
+ * @param[in] beta_array Array of pointers, dimension (group_count) each is a scalar beta for each GEMM.
+ * @param[in,out] C Array of pointers, dimension (group_count), Each is a matrix C of float datatype.
+ * @param[in] ldc_array Array of pointers, dimension (group_count), each f77_int ldc_array specifies the first dimension of matrix C.
+ * @param[in] group_count group_count specifies total number of groups. Usually it is used for having batch of variable size GEMM. Where each group batches GEMMs of some fixed size.
+ * @param[in] group_size Array of pointer, each is number of GEMM to be performed per group(batch).
+ * @return None
+ */
 void BLIS_EXPORT_BLAS cblas_sgemm_batch(enum CBLAS_ORDER Order,
                  enum CBLAS_TRANSPOSE *TransA_array,
                  enum CBLAS_TRANSPOSE *TransB_array,
@@ -662,6 +858,37 @@ void BLIS_EXPORT_BLAS cblas_sgemm_batch(enum CBLAS_ORDER Order,
                  f77_int *lda_array, const float **B, f77_int *ldb_array,
                  const float *beta_array, float **C, f77_int *ldc_array,
                  f77_int group_count, f77_int *group_size);
+
+/**
+ * cblas_dgemm_batch interface resembles the GEMM interface.
+ * Arguments are arrays of pointers to matrices and parameters.
+ * It batches multiple independent small GEMM operations of fixed or variable sizes into a group
+ * and then spawn multiple threads for different GEMM instances within the group.
+ *
+ * @param[in] Order Storage scheme of matrices. CblasRowMajor or CblasColMajor
+ * @param[in] TransA_array Array of pointers, dimension (group_count), specifies the form of Mat( A ) to be used in the matrix multiplication as follows:
+ *                     Mat( A ) = A
+ *                     Mat( A ) = \f$A^T\f$
+ *                     Mat( A ) = \f$A^H\f$
+ * @param[in] TransB_array Array of pointers, dimension (group_count), specifies the form of Mat( B ) to be used in the matrix multiplication as follows:
+ *                     Mat( B ) = B
+ *                     Mat( B ) = \f$B^T\f$
+ *                     Mat( B ) = \f$B^H\f$
+ * @param[in] M_array Array of pointers, dimension (group_count), each is a number of rows of matrices A and of matrices C.
+ * @param[in] N_array Array of pointers, dimension (group_count), each is a number of columns of matrices B and of matrices C.
+ * @param[in] K_array Array of pointers, dimension (group_count), each is a number of columns of matrices A and number of rows of matrices B.
+ * @param[in] alpha_array Array of pointers, dimension (group_count) each is a scalar alpha for each GEMM.
+ * @param[in] A Array of pointers, dimension (group_count), Each is a matrix A of double datatype.
+ * @param[in] lda_array Array of pointers, dimension (group_count), each f77_int lda_array specifies the first dimension of matrix A.
+ * @param[in] B Array of pointers, dimension (group_count), Each is a matrix B of double datatype.
+ * @param[in] ldb_array Array of pointers, dimension (group_count), each f77_int ldb_array specifies the first dimension of matrix B.
+ * @param[in] beta_array Array of pointers, dimension (group_count) each is a scalar beta for each GEMM.
+ * @param[in,out] C Array of pointers, dimension (group_count), Each is a matrix C of double datatype.
+ * @param[in] ldc_array Array of pointers, dimension (group_count), each f77_int ldc_array specifies the first dimension of matrix C.
+ * @param[in] group_count group_count specifies total number of groups. Usually it is used for having batch of variable size GEMM. Where each group batches GEMMs of some fixed size.
+ * @param[in] group_size Array of pointer, each is number of GEMM to be performed per group(batch).
+ * @return None
+ */
 void BLIS_EXPORT_BLAS cblas_dgemm_batch(enum CBLAS_ORDER Order,
                  enum CBLAS_TRANSPOSE *TransA_array,
                  enum CBLAS_TRANSPOSE *TransB_array,
@@ -671,6 +898,38 @@ void BLIS_EXPORT_BLAS cblas_dgemm_batch(enum CBLAS_ORDER Order,
                  const double **B, f77_int *ldb_array,
                  const double *beta_array, double **C, f77_int *ldc_array,
                  f77_int group_count, f77_int *group_size);
+
+/**
+ * cblas_cgemm_batch interface resembles the GEMM interface.
+ * Arguments are arrays of pointers to matrices and parameters.
+ * It batches multiple independent small GEMM operations of fixed or variable sizes into a group
+ * and then spawn multiple threads for different GEMM instances within the group.
+ *
+ * @param[in] Order Storage scheme of matrices. CblasRowMajor or CblasColMajor
+ * @param[in] TransA_array Array of pointers, dimension (group_count), specifies the form of Mat( A ) to be used in the matrix multiplication as follows:
+ *                     Mat( A ) = A
+ *                     Mat( A ) = \f$A^T\f$
+ *                     Mat( A ) = \f$A^H\f$
+ * @param[in] TransB_array Array of pointers, dimension (group_count), specifies the form of Mat( B ) to be used in the matrix multiplication as follows:
+ *                     Mat( B ) = B
+ *                     Mat( B ) = \f$B^T\f$
+ *                     Mat( B ) = \f$B^H\f$
+ * @param[in] M_array Array of pointers, dimension (group_count), each is a number of rows of matrices A and of matrices C.
+ * @param[in] N_array Array of pointers, dimension (group_count), each is a number of columns of matrices B and of matrices C.
+ * @param[in] K_array Array of pointers, dimension (group_count), each is a number of columns of matrices A and number of rows of matrices B.
+ * @param[in] alpha_array Array of pointers, dimension (group_count) each is a scalar alpha for each GEMM.
+ * @param[in] A Array of pointers, dimension (group_count), Each is a matrix A of scomplex datatype.
+ * @param[in] lda_array Array of pointers, dimension (group_count), each f77_int lda_array specifies the first dimension of matrix A.
+ * @param[in] B Array of pointers, dimension (group_count), Each is a matrix B of scomplex datatype.
+ * @param[in] ldb_array Array of pointers, dimension (group_count), each f77_int ldb_array specifies the first dimension of matrix B.
+ * @param[in] beta_array Array of pointers, dimension (group_count) each is a scalar beta for each GEMM.
+ * @param[in,out] C Array of pointers, dimension (group_count), Each is a matrix C of scomplex datatype.
+ * @param[in] ldc_array Array of pointers, dimension (group_count), each f77_int ldc_array specifies the first dimension of matrix C.
+ * @param[in] group_count group_count specifies total number of groups. Usually it is used for having batch of variable size GEMM. Where each group batches GEMMs of some fixed size.
+ * @param[in] group_size Array of pointer, each is number of GEMM to be performed per group(batch).
+ * @return None
+ */
+
 void BLIS_EXPORT_BLAS cblas_cgemm_batch(enum CBLAS_ORDER Order,
                  enum CBLAS_TRANSPOSE *TransA_array,
                  enum CBLAS_TRANSPOSE *TransB_array,
@@ -679,6 +938,37 @@ void BLIS_EXPORT_BLAS cblas_cgemm_batch(enum CBLAS_ORDER Order,
                  f77_int *lda_array, const void **B, f77_int *ldb_array,
                  const void *beta_array, void **C, f77_int *ldc_array,
                  f77_int group_count, f77_int *group_size);
+
+ /**
+ * cblas_zgemm_batch interface resembles the GEMM interface.
+ * Arguments are arrays of pointers to matrices and parameters.
+ * It batches multiple independent small GEMM operations of fixed or variable sizes into a group
+ * and then spawn multiple threads for different GEMM instances within the group.
+ *
+ * @param[in] Order Storage scheme of matrices. CblasRowMajor or CblasColMajor
+ * @param[in] TransA_array Array of pointers, dimension (group_count), specifies the form of Mat( A ) to be used in the matrix multiplication as follows:
+ *                     Mat( A ) = A
+ *                     Mat( A ) = \f$A^T\f$
+ *                     Mat( A ) = \f$A^H\f$
+ * @param[in] TransB_array Array of pointers, dimension (group_count), specifies the form of Mat( B ) to be used in the matrix multiplication as follows:
+ *                     Mat( B ) = B
+ *                     Mat( B ) = \f$B^T\f$
+ *                     Mat( B ) = \f$B^H\f$
+ * @param[in] M_array Array of pointers, dimension (group_count), each is a number of rows of matrices A and of matrices C.
+ * @param[in] N_array Array of pointers, dimension (group_count), each is a number of columns of matrices B and of matrices C.
+ * @param[in] K_array Array of pointers, dimension (group_count), each is a number of columns of matrices A and number of rows of matrices B.
+ * @param[in] alpha_array Array of pointers, dimension (group_count) each is a scalar alpha for each GEMM.
+ * @param[in] A Array of pointers, dimension (group_count), Each is a matrix A of dcomplex datatype.
+ * @param[in] lda_array Array of pointers, dimension (group_count), each f77_int lda_array specifies the first dimension of matrix A.
+ * @param[in] B Array of pointers, dimension (group_count), Each is a matrix B of dcomplex datatype.
+ * @param[in] ldb_array Array of pointers, dimension (group_count), each f77_int ldb_array specifies the first dimension of matrix B.
+ * @param[in] beta_array Array of pointers, dimension (group_count) each is a scalar beta for each GEMM.
+ * @param[in,out] C Array of pointers, dimension (group_count), Each is a matrix C of dcomplex datatype.
+ * @param[in] ldc_array Array of pointers, dimension (group_count), each f77_int ldc_array specifies the first dimension of matrix C.
+ * @param[in] group_count group_count specifies total number of groups. Usually it is used for having batch of variable size GEMM. Where each group batches GEMMs of some fixed size.
+ * @param[in] group_size Array of pointer, each is number of GEMM to be performed per group(batch).
+ * @return None
+ */
 void BLIS_EXPORT_BLAS cblas_zgemm_batch(enum CBLAS_ORDER Order,
                  enum CBLAS_TRANSPOSE *TransA_array,
                  enum CBLAS_TRANSPOSE *TransB_array,
@@ -687,6 +977,7 @@ void BLIS_EXPORT_BLAS cblas_zgemm_batch(enum CBLAS_ORDER Order,
                  f77_int *lda_array, const void **B, f77_int *ldb_array,
                  const void *beta_array, void **C, f77_int *ldc_array,
                  f77_int group_count, f77_int *group_size);
+/** @}*/
 void BLIS_EXPORT_BLAS cblas_cgemm3m(enum CBLAS_ORDER Order, enum CBLAS_TRANSPOSE TransA,
                  enum CBLAS_TRANSPOSE TransB, f77_int M, f77_int N,
                  f77_int K, const void *alpha, const void *A,
