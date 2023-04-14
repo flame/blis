@@ -73,7 +73,7 @@ void PASTEMAC(ch,varname) \
 	ctype   conjx_chi11; \
 	ctype   alpha_chi11; \
 	ctype   alpha11_temp; \
-	dim_t   i, k, j; \
+	siz_t   i, k, j; \
 	dim_t   b_fuse, f; \
 	dim_t   n_ahead; \
 	dim_t   f_ahead, f_behind; \

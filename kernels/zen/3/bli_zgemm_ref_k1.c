@@ -155,6 +155,9 @@ void bli_zgemm_ref_k1_nn
     __m256d ymm12, ymm13, ymm14, ymm15;
     __m128d xmm5;
 
+    //gcc12 throws a unitialized warning,
+    //To avoid that these variable are set to zero.
+    ymm0 = _mm256_setzero_pd();
     /* Form C = alpha*A*B + beta*c */
     // Main loop along N dimension
     for(dim_t j = 0;j < (n-Z_NR+1);j=j+Z_NR)

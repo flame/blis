@@ -71,6 +71,12 @@ void bli_dgemm_ref_k1_nn
     __m256d ymm12, ymm13, ymm14, ymm15;
     __m128d xmm5;
 
+    //gcc12 throws a unitialized warning,
+    //To avoid that these variable are set to zero.
+    ymm0 = _mm256_setzero_pd();
+    ymm1 = _mm256_setzero_pd();
+    ymm2 = _mm256_setzero_pd();
+
     /* Form C = alpha*A*B + beta*c */
     for(dim_t j = 0;j < (n-D_NR+1);j=j+D_NR)
     {

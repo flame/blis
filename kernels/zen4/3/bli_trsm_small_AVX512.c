@@ -2066,6 +2066,10 @@ BLIS_INLINE err_t bli_dtrsm_small_XAltB_XAuB_AVX512
   __m256d ymm22, ymm23, ymm24, ymm25, ymm26, ymm27, ymm28, ymm29, ymm30, ymm31;
   __m128d xmm5, xmm0;
 
+  //gcc12 throws a unitialized warning,
+  //To avoid that these variable are sect to zero.
+  ymm0 = _mm256_setzero_pd();
+  xmm5 = _mm_setzero_pd();
   /*
     Performs solving TRSM for 8 rows at a time from  0 to n/8 in steps of d_nr
     a. Load and pack A (a01 block), the size of packing 8x8 to 8x(n-8)
@@ -4390,6 +4394,13 @@ BLIS_INLINE err_t bli_dtrsm_small_XAutB_XAlB_AVX512
   __m256d ymm12, ymm13, ymm14, ymm15, ymm16, ymm17, ymm18, ymm19, ymm20, ymm21;
   __m256d ymm22, ymm23, ymm24, ymm25, ymm26, ymm27, ymm28, ymm29, ymm30, ymm31;
   __m128d xmm5, xmm0;
+
+  //gcc12 throws a unitialized warning,
+  //To avoid that these variable are set to zero.
+  xmm5 = _mm_setzero_pd();
+  ymm0 = _mm256_setzero_pd();
+  ymm6 = _mm256_setzero_pd();
+
 
   /*
     Performs solving TRSM for 8 rows at a time from  0 to n/8 in steps of d_nr
@@ -7299,6 +7310,17 @@ BLIS_INLINE err_t bli_dtrsm_small_AutXB_AlXB_AVX512
   __m128d xmm5;
   xmm5 = _mm_setzero_pd();
 
+  //gcc12 throws a unitialized warning,
+  //To avoid that these variable are set to zero.
+  ymm0 = _mm256_setzero_pd();
+  ymm1 = _mm256_setzero_pd();
+  ymm2 = _mm256_setzero_pd();
+  ymm3 = _mm256_setzero_pd();
+  ymm4 = _mm256_setzero_pd();
+  ymm5 = _mm256_setzero_pd();
+  ymm6 = _mm256_setzero_pd();
+  ymm7 = _mm256_setzero_pd();
+
   /*
         Performs solving TRSM for 8 columns at a time from 0 to m/8 in steps of d_mr
         a. Load, transpose, Pack A (a10 block), the size of packing 8x6 to 8x (m-8)
@@ -9255,6 +9277,16 @@ BLIS_INLINE err_t bli_dtrsm_small_AltXB_AuXB_AVX512
   __m256d ymm12, ymm13, ymm14, ymm15, ymm16;
   __m128d xmm5;
 
+  //gcc12 throws a unitialized warning,
+  //To avoid that these variable are set to zero.
+  ymm0 = _mm256_setzero_pd();
+  ymm1 = _mm256_setzero_pd();
+  ymm2 = _mm256_setzero_pd();
+  ymm3 = _mm256_setzero_pd();
+  ymm4 = _mm256_setzero_pd();
+  ymm5 = _mm256_setzero_pd();
+  ymm6 = _mm256_setzero_pd();
+  ymm7 = _mm256_setzero_pd();
 
   /*
         Performs solving TRSM for 8 columns at a time from 0 to m/d_mr in steps of d_mr

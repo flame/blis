@@ -5804,6 +5804,10 @@ err_t bli_zgemm_small
         __m256d ymm16, ymm17, ymm18, ymm19, ymm20, ymm21;
         __m256d ymm0, ymm1, ymm2, ymm3;
 
+        //gcc12 throws a unitialized warning,
+        //To avoid that these variable are se to zero.
+        ymm0 = _mm256_setzero_pd();
+
         gint_t n_remainder; // If the N is non multiple of 3.(N%3)
         gint_t m_remainder; // If the M is non multiple of 4.(M%4)
 
@@ -9775,6 +9779,10 @@ err_t bli_zgemm_small_At
         __m256d ymm12, ymm13, ymm14, ymm15;
         __m256d ymm16, ymm17, ymm18, ymm19, ymm20, ymm21;
         __m256d ymm0, ymm1, ymm2, ymm3;
+
+        //gcc12 throws a unitialized warning,
+        //To avoid that these variable are set to zero.
+        ymm0 = _mm256_setzero_pd();
 
         gint_t n_remainder; // If the N is non multiple of 3.(N%3)
         gint_t m_remainder; // If the M is non multiple of 16.(M%16)
