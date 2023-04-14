@@ -485,10 +485,10 @@ template std::vector<double> testinghelpers::get_random_vector(int, int, gtint_t
 template std::vector<scomplex> testinghelpers::get_random_vector(int, int, gtint_t, gtint_t, char);
 template std::vector<dcomplex> testinghelpers::get_random_vector(int, int, gtint_t, gtint_t, char);
 
-template std::vector<float> testinghelpers::get_vector(int, gtint_t, float);
-template std::vector<double> testinghelpers::get_vector(int, gtint_t, double);
-template std::vector<scomplex> testinghelpers::get_vector(int, gtint_t, scomplex);
-template std::vector<dcomplex> testinghelpers::get_vector(int, gtint_t, dcomplex);
+template std::vector<float> testinghelpers::get_vector(gtint_t, gtint_t, float);
+template std::vector<double> testinghelpers::get_vector(gtint_t, gtint_t, double);
+template std::vector<scomplex> testinghelpers::get_vector(gtint_t, gtint_t, scomplex);
+template std::vector<dcomplex> testinghelpers::get_vector(gtint_t, gtint_t, dcomplex);
 
 template std::vector<float> testinghelpers::get_matrix( char, char, gtint_t, gtint_t, gtint_t, float );
 template std::vector<double> testinghelpers::get_matrix( char, char, gtint_t, gtint_t, gtint_t, double );

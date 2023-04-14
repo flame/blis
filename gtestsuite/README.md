@@ -75,6 +75,9 @@ There are multiple configuration options to chose from when invoking CMake. Thos
 ## BLIS Linking Type (Linux Only)
 * To link static BLIS, use `-DBLIS_LINKING_TYPE=static`. [**Default**]
 * To link shared BLIS, use `-DBLIS_LINKING_TYPE=shared`.
+## Integer Size
+* For testing a 32-bit integer BLIS library, use `-DINT_SIZE=32`. [**Default**"]
+* For testing a 64-bit integer BLIS library, use `-DINT_SIZE=64`.
 ## Address Sanitizer
 * To build using address sanitizer, configure using `-DENABLE_ASAN=ON`. [**OFF by default**]
 * An installation to BLIS which was build with ASAN flags[CFLAGS="-O0 -g -fsanitize=address"] needs to be provided.
