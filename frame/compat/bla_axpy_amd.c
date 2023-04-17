@@ -328,6 +328,11 @@ void daxpy_blis_impl
     switch (arch_id_local)
     {
       case BLIS_ARCH_ZEN4:
+#if defined(BLIS_KERNELS_ZEN4)
+        axpyv_ker_ptr = bli_daxpyv_zen_int_avx512;
+
+        break;
+#endif
       case BLIS_ARCH_ZEN:
       case BLIS_ARCH_ZEN2:
       case BLIS_ARCH_ZEN3:

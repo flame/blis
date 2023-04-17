@@ -263,14 +263,16 @@ void dscal_blis_impl
       Return early when n <= 0 or incx <= 0 or alpha == 1.0 - BLAS exception
       Return early when alpha pointer is NULL - BLIS exception
     */
-    if (*n <= 0 || alpha == NULL || bli_deq1(*alpha) || incx <= 0)
+    if ((*n) <= 0 || alpha == NULL || bli_deq1(*alpha) || (*incx) <= 0)
     {
-      AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
-      return;
+        AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
+        return;
     }
 
     /* If the input increments are negative, adjust the pointers so we can
-       use positive increments instead. */
+       use positive increments instead.
+       * This check is redundant and can be safely removed
+       */
     if ( *incx < 0 )
     {
         /* The semantics of negative stride in BLAS are that the vector
@@ -308,6 +310,11 @@ void dscal_blis_impl
     switch (arch_id_local)
     {
       case BLIS_ARCH_ZEN4:
+#if defined(BLIS_KERNELS_ZEN4)
+        scalv_ker_ptr = bli_dscalv_zen_int_avx512;
+
+        break;
+#endif
       case BLIS_ARCH_ZEN:
       case BLIS_ARCH_ZEN2:
       case BLIS_ARCH_ZEN3:

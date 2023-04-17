@@ -266,18 +266,15 @@ double ddot_blis_impl
     inc_t  incy0;
     double  rho = 0.0;
 
-    /* Initialize BLIS. */
-//  bli_init_auto();
-
-    /* Convert/typecast negative values of n to zero. */
-    if ( *n < 0 ) n_elem = ( dim_t )0;
-    else          n_elem = ( dim_t )(*n);
-
     // BLAS Exception: Return early when n <= 0.
-    if(n_elem <= 0)
+    if((*n) <= 0)
     {
         AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1)
         return 0.0;
+    }
+    else
+    {
+        n_elem = ( dim_t )(*n);
     }
 
     /* If the input increments are negative, adjust the pointers so we can
@@ -332,6 +329,12 @@ double ddot_blis_impl
     switch (arch_id_local)
     {
       case BLIS_ARCH_ZEN4:
+#if defined(BLIS_KERNELS_ZEN4)
+
+        // AVX-512 Kernel
+        dotv_ker_ptr = bli_ddotv_zen_int_avx512;
+        break;
+#endif
       case BLIS_ARCH_ZEN:
       case BLIS_ARCH_ZEN2:
       case BLIS_ARCH_ZEN3:
