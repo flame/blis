@@ -545,7 +545,7 @@ void zdscal_blis_impl
         (
           BLIS_NO_CONJUGATE,
           n_elem,
-          (dcomplex *)alpha,
+          (dcomplex *)&alpha_cast,
           x0, incx0,
           cntx
         );
