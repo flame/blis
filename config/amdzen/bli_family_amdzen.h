@@ -72,7 +72,7 @@
  */
 BLIS_EXPORT_BLIS void bli_zen4_override_trsm_blkszs (cntx_t* cntx);
 
-BLIS_EXPORT_BLIS void bli_zen4_override_gemm_blkszs (cntx_t* cntx);
+BLIS_EXPORT_BLIS void bli_zen4_override_gemmt_blkszs (cntx_t* cntx);
 
 /*
  * Restore the block sizes to default values needed for zen4 context.

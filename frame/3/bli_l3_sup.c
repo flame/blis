@@ -101,13 +101,6 @@ err_t bli_gemmsup
     // that function assumes the context pointer is valid.
     if ( cntx == NULL ) cntx = bli_gks_query_cntx();
 
-    // Creating a local copy of cntx inorder to store overrided blocksizes
-    // and kernel fucntion pointers.
-    // This can be removed when we use same blocksizes and function pointers
-    // for all level-3 SUP routines.
-    cntx_t cntx_gemm = *cntx;
-
-
     // Initialize a local runtime with global settings if necessary. Note
     // that in the case that a runtime is passed in, we make a local copy.
     rntm_t rntm_l;
@@ -118,20 +111,7 @@ err_t bli_gemmsup
 
     if((bli_arch_query_id() == BLIS_ARCH_ZEN4))
     {
-        if( bli_obj_dt(a) == BLIS_DOUBLE )
-        {
-            // override the existing blocksizes with 24x8 specific ones.
-            // This can be removed when we use same blocksizes and function pointers
-            // for all level-3 SUP routines.
-            bli_zen4_override_gemm_blkszs(&cntx_gemm);
-
-            // Pack A to avoid RD kernels.
-            if((stor_id == BLIS_CRC || stor_id == BLIS_RRC))
-            {
-                bli_rntm_set_pack_a(1, rntm);//packa
-            }
-        }
-        else if( bli_obj_dt(a) == BLIS_DCOMPLEX )
+        if(( bli_obj_dt(a) == BLIS_DOUBLE ) || ( bli_obj_dt(a) == BLIS_DCOMPLEX))
         {
             // Pack A to avoid RD kernels.
             if((stor_id == BLIS_CRC || stor_id == BLIS_RRC))
@@ -139,14 +119,7 @@ err_t bli_gemmsup
                 bli_rntm_set_pack_a(1, rntm);//packa
             }
         }
-        else if ( bli_obj_dt( a ) == BLIS_FLOAT )
-        {
-            // override the existing blocksizes with 6x64 specific ones.
-            bli_zen4_override_gemm_blkszs(&cntx_gemm);
-        }
-        else ;
     }
-
 #endif
 
 #ifdef AOCL_DYNAMIC
@@ -201,7 +174,7 @@ err_t bli_gemmsup
       b,
       beta,
       c,
-      &cntx_gemm,
+      cntx,
       rntm
     );
 
@@ -277,6 +250,8 @@ err_t bli_gemmtsup
     // that function assumes the context pointer is valid.
     if ( cntx == NULL ) cntx = bli_gks_query_cntx();
 
+    cntx_t cntx_gemmt = *cntx;
+
     thresh_func_ft func_fp;
 
     func_fp = bli_cntx_get_l3_thresh_func(BLIS_GEMMT, cntx);
@@ -293,6 +268,19 @@ err_t bli_gemmtsup
     if ( rntm == NULL ) { bli_rntm_init_from_global( &rntm_l ); rntm = &rntm_l; }
     else                { rntm_l = *rntm;                       rntm = &rntm_l; }
 
+#if defined(BLIS_FAMILY_ZEN4) || defined(BLIS_FAMILY_AMDZEN)
+
+    if((bli_arch_query_id() == BLIS_ARCH_ZEN4))
+    {
+        if( bli_obj_dt(a) != BLIS_SCOMPLEX )
+        {
+            // override the existing blocksizes with AVX-2 specific ones.
+            // Since gemmt has a triangular matrix as output, near-to-square
+            // shaped kernel perform better than skewed/rectangular shaped kernel.
+            bli_zen4_override_gemmt_blkszs(&cntx_gemmt);
+        }
+    }
+#endif
 #ifdef AOCL_DYNAMIC
 	// If dynamic-threading is enabled, calculate optimum number
 	// of threads and update in rntm
@@ -334,7 +322,7 @@ printf( "dims: %d %d %d (threshs: %d %d %d)\n",
       b,
       beta,
       c,
-      cntx,
+      &cntx_gemmt,
       rntm
     );
 
@@ -410,6 +398,8 @@ err_t bli_syrksup
     // that function assumes the context pointer is valid.
     if ( cntx == NULL ) cntx = bli_gks_query_cntx();
 
+    cntx_t cntx_syrk = *cntx;
+
     thresh_func_ft func_fp = bli_cntx_get_l3_thresh_func(BLIS_SYRK, cntx);
     if( !func_fp( a, &at_local, c, cntx))
     {
@@ -422,6 +412,20 @@ err_t bli_syrksup
     rntm_t rntm_l;
     if ( rntm == NULL ) { bli_rntm_init_from_global( &rntm_l ); rntm = &rntm_l; }
     else                { rntm_l = *rntm;                       rntm = &rntm_l; }
+
+#if defined(BLIS_FAMILY_ZEN4) || defined(BLIS_FAMILY_AMDZEN)
+
+    if((bli_arch_query_id() == BLIS_ARCH_ZEN4))
+    {
+        if( bli_obj_dt(a) != BLIS_SCOMPLEX )
+        {
+            // override the existing blocksizes with AVX-2 specific ones.
+            // Since gemmt has a triangular matrix as output, near-to-square
+            // shaped kernel perform better than skewed/rectangular shaped kernel.
+            bli_zen4_override_gemmt_blkszs(&cntx_syrk);
+        }
+    }
+#endif
 
 #ifdef AOCL_DYNAMIC // Will change this name later to BLIS_SMART_THREAD
   // If dynamic-threading is enabled, calculate optimum
@@ -463,7 +467,7 @@ printf( "dims: %d %d %d (threshs: %d %d %d)\n",
       &at_local,
       beta,
       c,
-      cntx,
+      &cntx_syrk,
       rntm
     );
 
