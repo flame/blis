@@ -2082,16 +2082,18 @@ void bli_thread_vector_partition
 				Thread 2 - start = 4, compute_len = 3
 				Thread 3 - start = 7, compute_len = 3
 			*/
-			if (thread_id < thread_min_work)
+			dim_t additional_work = t_count - remainder_work;
+
+			if (thread_id >= additional_work)
 			{
-				*start = thread_min_work * thread_id;
-				*compute_len = thread_min_work;
+				*start = (thread_min_work * thread_id) +
+						 (thread_id - (t_count - remainder_work));
+				*compute_len = thread_min_work + 1;
 			}
 			else
 			{
-				*start = (thread_min_work * thread_id) +
-							(thread_id - (t_count - remainder_work));
-				*compute_len = thread_min_work + 1;
+				*start = thread_min_work * thread_id;
+				*compute_len = thread_min_work;
 			}
 		}
 	}
