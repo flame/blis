@@ -58,6 +58,7 @@ LPGEMM_N_LT_NR0_FRINGE_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_12xlt16)
 				  &&POST_OPS_RELU_SCALE_12xLT16,
 				  &&POST_OPS_GELU_TANH_12xLT16,
 				  &&POST_OPS_GELU_ERF_12xLT16,
+				  &&POST_OPS_CLIP_12xLT16,
 				  &&POST_OPS_DOWNSCALE_12xLT16
 				};
 	dim_t MR = 12;
@@ -728,6 +729,49 @@ POST_OPS_GELU_ERF_12xLT16:
 
 			POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 		}
+POST_OPS_CLIP_12xLT16:
+		{
+			__m512i min = _mm512_set1_epi32( *( int32_t* )post_ops_list_temp->op_args2 );
+			__m512i max = _mm512_set1_epi32( *( int32_t* )post_ops_list_temp->op_args3 );
+
+			// c[0, 0-15]
+			CLIP_S32_AVX512(c_int32_0p0, min, max)
+
+			// c[1, 0-15]
+			CLIP_S32_AVX512(c_int32_1p0, min, max)
+
+			// c[2, 0-15]
+			CLIP_S32_AVX512(c_int32_2p0, min, max)
+
+			// c[3, 0-15]
+			CLIP_S32_AVX512(c_int32_3p0, min, max)
+
+			// c[4, 0-15]
+			CLIP_S32_AVX512(c_int32_4p0, min, max)
+
+			// c[5, 0-15]
+			CLIP_S32_AVX512(c_int32_5p0, min, max)
+
+			// c[6, 0-15]
+			CLIP_S32_AVX512(c_int32_6p0, min, max)
+
+			// c[7, 0-15]
+			CLIP_S32_AVX512(c_int32_7p0, min, max)
+
+			// c[8, 0-15]
+			CLIP_S32_AVX512(c_int32_8p0, min, max)
+
+			// c[9, 0-15]
+			CLIP_S32_AVX512(c_int32_9p0, min, max)
+
+			// c[10, 0-15]
+			CLIP_S32_AVX512(c_int32_10p0, min, max)
+
+			// c[11, 0-15]
+			CLIP_S32_AVX512(c_int32_11p0, min, max)
+
+			POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+		}
 
 POST_OPS_DOWNSCALE_12xLT16:
 		{
@@ -932,6 +976,7 @@ LPGEMM_N_FRINGE_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_12x16)
 				  &&POST_OPS_RELU_SCALE_12x16,
 				  &&POST_OPS_GELU_TANH_12x16,
 				  &&POST_OPS_GELU_ERF_12x16,
+				  &&POST_OPS_CLIP_12x16,
 				  &&POST_OPS_DOWNSCALE_12x16
 				};
 	dim_t MR = 12;
@@ -1570,6 +1615,49 @@ POST_OPS_GELU_ERF_12x16:
 
 			POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 		}
+POST_OPS_CLIP_12x16:
+		{
+			__m512i min = _mm512_set1_epi32( *( int32_t* )post_ops_list_temp->op_args2 );
+			__m512i max = _mm512_set1_epi32( *( int32_t* )post_ops_list_temp->op_args3 );
+
+			// c[0, 0-15]
+			CLIP_S32_AVX512(c_int32_0p0, min, max)
+
+			// c[1, 0-15]
+			CLIP_S32_AVX512(c_int32_1p0, min, max)
+
+			// c[2, 0-15]
+			CLIP_S32_AVX512(c_int32_2p0, min, max)
+
+			// c[3, 0-15]
+			CLIP_S32_AVX512(c_int32_3p0, min, max)
+
+			// c[4, 0-15]
+			CLIP_S32_AVX512(c_int32_4p0, min, max)
+
+			// c[5, 0-15]
+			CLIP_S32_AVX512(c_int32_5p0, min, max)
+
+			// c[6, 0-15]
+			CLIP_S32_AVX512(c_int32_6p0, min, max)
+
+			// c[7, 0-15]
+			CLIP_S32_AVX512(c_int32_7p0, min, max)
+
+			// c[8, 0-15]
+			CLIP_S32_AVX512(c_int32_8p0, min, max)
+
+			// c[9, 0-15]
+			CLIP_S32_AVX512(c_int32_9p0, min, max)
+
+			// c[10, 0-15]
+			CLIP_S32_AVX512(c_int32_10p0, min, max)
+
+			// c[11, 0-15]
+			CLIP_S32_AVX512(c_int32_11p0, min, max)
+
+			POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+		}
 
 POST_OPS_DOWNSCALE_12x16:
 	{
@@ -1732,6 +1820,7 @@ LPGEMM_N_FRINGE_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_9x32)
 				  &&POST_OPS_RELU_SCALE_9x32,
 				  &&POST_OPS_GELU_TANH_9x32,
 				  &&POST_OPS_GELU_ERF_9x32,
+				  &&POST_OPS_CLIP_9x32,
 				  &&POST_OPS_DOWNSCALE_9x32
 				};
 	dim_t MR = 9;
@@ -2410,6 +2499,68 @@ POST_OPS_GELU_ERF_9x32:
 
 			POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 		}
+POST_OPS_CLIP_9x32:
+		{
+			__m512i min = _mm512_set1_epi32( *( int32_t* )post_ops_list_temp->op_args2 );
+			__m512i max = _mm512_set1_epi32( *( int32_t* )post_ops_list_temp->op_args3 );
+
+			// c[0, 0-15]
+			CLIP_S32_AVX512(c_int32_0p0, min, max)
+
+			// c[0, 16-31]
+			CLIP_S32_AVX512(c_int32_0p1, min, max)
+
+			// c[1, 0-15]
+			CLIP_S32_AVX512(c_int32_1p0, min, max)
+
+			// c[1, 16-31]
+			CLIP_S32_AVX512(c_int32_1p1, min, max)
+
+			// c[2, 0-15]
+			CLIP_S32_AVX512(c_int32_2p0, min, max)
+
+			// c[2, 16-31]
+			CLIP_S32_AVX512(c_int32_2p1, min, max)
+
+			// c[3, 0-15]
+			CLIP_S32_AVX512(c_int32_3p0, min, max)
+
+			// c[3, 16-31]
+			CLIP_S32_AVX512(c_int32_3p1, min, max)
+
+			// c[4, 0-15]
+			CLIP_S32_AVX512(c_int32_4p0, min, max)
+
+			// c[4, 16-31]
+			CLIP_S32_AVX512(c_int32_4p1, min, max)
+
+			// c[5, 0-15]
+			CLIP_S32_AVX512(c_int32_5p0, min, max)
+
+			// c[5, 16-31]
+			CLIP_S32_AVX512(c_int32_5p1, min, max)
+
+			// c[6, 0-15]
+			CLIP_S32_AVX512(c_int32_6p0, min, max)
+
+			// c[6, 16-31]
+			CLIP_S32_AVX512(c_int32_6p1, min, max)
+
+			// c[7, 0-15]
+			CLIP_S32_AVX512(c_int32_7p0, min, max)
+
+			// c[7, 16-31]
+			CLIP_S32_AVX512(c_int32_7p1, min, max)
+
+			// c[8, 0-15]
+			CLIP_S32_AVX512(c_int32_8p0, min, max)
+
+			// c[8, 16-31]
+			CLIP_S32_AVX512(c_int32_8p1, min, max)
+
+			POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+		}
+
 POST_OPS_DOWNSCALE_9x32:
 	{
 		selector1 =

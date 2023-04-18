@@ -181,6 +181,10 @@
 \
 	reg = _mm512_cvtps_epi32( y ); \
 
+#define CLIP_S32_AVX512(reg, min, max) \
+\
+	reg = _mm512_min_epi32( _mm512_max_epi32( reg, min ), max ); \
+
 // Load helper macros.
 #define S32_GELU_LOAD1R_1C(temp_buf,offset,stride,reg_base) \
 	_mm512_storeu_epi32( ( temp_buf ) + ( ( 0 + offset ) * ( stride ) ), reg_base ## p0); \
