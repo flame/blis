@@ -61,6 +61,21 @@ char global_dscale_out = 'n';
 
 #define GEN_FUNC_NAME(prototype,ctype) prototype ## ctype
 
+inline void float_to_bf16( float* float_value, bfloat16* bf16_val )
+{
+	/*Set offset 2 to copy most significant 2 bytes of float
+	to convert float values to bf16 values*/
+	memcpy( ( bf16_val ), (char *)( float_value ) + 2, sizeof ( bfloat16 ) );
+}
+
+inline void convert_float_arr_to_bf16( float* array, bfloat16* array_bf16, int size )
+{
+	for (int i=0; i< size; i++)
+	{
+		float_to_bf16( ( array + i ), ( array_bf16 + i ) );
+	}
+}
+
 #define GEN_FILL_ARRAY_FUNC(ctype) \
 void fill_array_ ## ctype ( void* arr, dim_t size ) \
 { \
@@ -76,20 +91,15 @@ GEN_FILL_ARRAY_FUNC(int8_t)
 GEN_FILL_ARRAY_FUNC(int16_t)
 GEN_FILL_ARRAY_FUNC(float)
 GEN_FILL_ARRAY_FUNC(int32_t)
-GEN_FILL_ARRAY_FUNC(bfloat16)
 
-inline void float_to_bf16( float* float_value, bfloat16* bf16_val )
+void fill_array_bfloat16( void* arr, dim_t size )
 {
-	/*Set offset 2 to copy most significant 2 bytes of float
-	to convert float values to bf16 values*/
-	memcpy( ( bf16_val ), (char *)( float_value ) + 2, sizeof ( bfloat16 ) );
-}
-
-inline void convert_float_arr_to_bf16( float* array, bfloat16* array_bf16, int size )
-{
-	for (int i=0; i< size; i++)
+	float* c_float = ( float* ) bli_malloc_user( sizeof( float ) * size );
+	fill_array_float( c_float, size );
+	convert_float_arr_to_bf16( c_float, arr, size );
+	if ( c_float != NULL )
 	{
-		float_to_bf16( ( array + i ), ( array_bf16 + i ) );
+		bli_free_user( c_float );
 	}
 }
 
@@ -273,7 +283,7 @@ void mat_mul_bench_driver_ ## BLAS_SFX \
 	{ \
 		if ( bench_mode == 'a' ) \
 		{ \
-			memset( ( void* ) c, 0, sizeof( C_type ) * m * n ); \
+			GEN_FUNC_NAME(fill_array_,C_type)( c, ( m * n ) ); \
 		} \
  \
 		struct timespec tstart={0,0}, tend={0,0}; \
@@ -916,6 +926,15 @@ void mat_mul_bench_main_ ## BLAS_SFX \
 	C_type* c_ref = ( C_type* ) bli_malloc_user( sizeof( C_type ) * m * n ); \
 	memset( ( void* ) c_ref, 0, sizeof( C_type ) * m * n ); \
  \
+	GEN_FUNC_NAME(fill_array_,A_type)( a, ( m * k ) ); \
+	GEN_FUNC_NAME(fill_array_,B_type)( b, ( k * n ) ); \
+ \
+	if ( bench_mode == 'a' ) \
+	{ \
+		GEN_FUNC_NAME(fill_array_,C_type)( c, ( m * n ) ); \
+		GEN_FUNC_NAME(fill_array_,C_type)( c_ref, ( m * n ) ); \
+	} \
+ \
 	C_type alpha; \
 	C_type beta; \
 	if ( bench_mode == 'p' ) \
@@ -928,9 +947,6 @@ void mat_mul_bench_main_ ## BLAS_SFX \
 		alpha = 2; \
 		beta = 9; \
 	} \
- \
-	GEN_FUNC_NAME(fill_array_,A_type)( a, ( m * k ) ); \
-	GEN_FUNC_NAME(fill_array_,B_type)( b, ( k * n ) ); \
  \
 	aocl_post_op* post_op = NULL; \
 	if ( ( post_ops_str != NULL ) || ( global_dscale_out == 'y' ) ) \
@@ -1074,6 +1090,12 @@ void mat_mul_bench_main_ ## BLAS_SFX \
  \
 	C_type* c_ref = ( C_type* ) bli_malloc_user( sizeof( C_type ) * m * n ); \
 	memset( ( void* ) c_ref, 0, sizeof( C_type ) * m * n ); \
+ \
+	if ( bench_mode == 'a' ) \
+	{ \
+		GEN_FUNC_NAME(fill_array_,C_type)( c, ( m * n ) ); \
+		GEN_FUNC_NAME(fill_array_,C_type)( c_ref, ( m * n ) ); \
+	} \
  \
 	float alpha; \
 	float beta; \

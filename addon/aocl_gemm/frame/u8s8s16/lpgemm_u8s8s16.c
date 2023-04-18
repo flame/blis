@@ -106,10 +106,21 @@ LPGEMM_5LOOP(uint8_t,int8_t,int16_t,u8s8s16o16)
 	// Making multiple of 2 to suit k in vpmaddubsw
 	dim_t k_updated = make_multiple_of_n( k, 2 );
 
-	// Is required to decide whether to apply post ops or not.
+	// To decide whether to apply post ops or not.
 	bool is_last_k = FALSE;
 
+	// To decide whether to use original s8 C or temp buffer for beta scale.
+	bool is_first_k = FALSE;
+
 	lpgemm_post_op_attr post_ops_attr;
+	if ( c_downscale == TRUE )
+	{
+		post_ops_attr.buf_downscale = c;
+	}
+	else
+	{
+		post_ops_attr.buf_downscale = NULL;
+	}
 
 	// Generate thrinfo objects for jc and ic loops from lpgemm_thrinfo_t.
 	thrinfo_t thread_jc;
@@ -161,27 +172,6 @@ LPGEMM_5LOOP(uint8_t,int8_t,int16_t,u8s8s16o16)
 
 			c_use_jc = ( int16_t* )temp_scal_c_buffer_u8s8s16o16;
 
-			if ( beta != 0 )
-			{
-				dim_t i_temp = 0;
-				dim_t j_temp = 0;
-				// Upscale out C to temporary C matrix.
-				for ( dim_t i_dscale = ic_start; i_dscale < ic_end; ++i_dscale )
-				{
-					j_temp = 0;
-					for ( dim_t j_dscale = jc; j_dscale < ( jc + nc0 ); ++j_dscale )
-					{
-						*( temp_scal_c_buffer_u8s8s16o16 +
-								( nc0 * i_temp ) + j_temp ) =
-								( int16_t )( *( ( ( int8_t* )c ) +
-								( rs_c * i_dscale ) + j_dscale ) );
-
-						j_temp++;
-					}
-					i_temp++;
-				}
-			}
-
 			// The temp c buffer stride is modified as opposed to original C matrix.
 			rs_c_use = nc0;
 		}
@@ -191,7 +181,12 @@ LPGEMM_5LOOP(uint8_t,int8_t,int16_t,u8s8s16o16)
 			int16_t beta0 = (pc == 0) ? beta : 1;
 			dim_t kc0 = bli_min((k - pc), KC);
 
+			// No parallelization in k dim, k always starts at 0.
+			is_first_k = ( pc == 0 ) ? ( TRUE ) : ( FALSE );
+			post_ops_attr.is_first_k = is_first_k;
+
 			is_last_k = ( ( pc + KC ) >= k ) ? ( TRUE ) : ( FALSE );
+			post_ops_attr.is_last_k = is_last_k;
 
 			// kc0 needs to be a multiple of 2 so that it can be
 			// used with vpmaddubsw instruction. Padding is added in
@@ -324,7 +319,6 @@ LPGEMM_5LOOP(uint8_t,int8_t,int16_t,u8s8s16o16)
 					post_ops_attr.post_op_c_i = ic;
 					post_ops_attr.post_op_c_j = ( jc + jr );
 					post_ops_attr.rs_c_downscale = rs_c_downscale;
-					post_ops_attr.is_last_k = is_last_k;
 
 					// Calls for reorder B
 					( ( lpgemm_rowvar_s16 )lcntx->kern_fun_ptr )

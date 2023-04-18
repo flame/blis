@@ -318,111 +318,110 @@ LPGEMM_MAIN_KERN(uint8_t,int8_t,int16_t,u8s8s16o16_6x32)
 		__m256i alphav = _mm256_set1_epi16(alpha);
 		__m256i betav = _mm256_set1_epi16(beta);
 
-		// Scale by alpha
-		c_int16_0p0 = _mm256_mullo_epi16(alphav, c_int16_0p0);
-		c_int16_0p1 = _mm256_mullo_epi16(alphav, c_int16_0p1);
+		if ( alpha != 1 )
+		{
+			// Scale by alpha
+			c_int16_0p0 = _mm256_mullo_epi16(alphav, c_int16_0p0);
+			c_int16_0p1 = _mm256_mullo_epi16(alphav, c_int16_0p1);
 
-		c_int16_1p0 = _mm256_mullo_epi16(alphav, c_int16_1p0);
-		c_int16_1p1 = _mm256_mullo_epi16(alphav, c_int16_1p1);
+			c_int16_1p0 = _mm256_mullo_epi16(alphav, c_int16_1p0);
+			c_int16_1p1 = _mm256_mullo_epi16(alphav, c_int16_1p1);
 
-		c_int16_2p0 = _mm256_mullo_epi16(alphav, c_int16_2p0);
-		c_int16_2p1 = _mm256_mullo_epi16(alphav, c_int16_2p1);
+			c_int16_2p0 = _mm256_mullo_epi16(alphav, c_int16_2p0);
+			c_int16_2p1 = _mm256_mullo_epi16(alphav, c_int16_2p1);
 
-		c_int16_3p0 = _mm256_mullo_epi16(alphav, c_int16_3p0);
-		c_int16_3p1 = _mm256_mullo_epi16(alphav, c_int16_3p1);
+			c_int16_3p0 = _mm256_mullo_epi16(alphav, c_int16_3p0);
+			c_int16_3p1 = _mm256_mullo_epi16(alphav, c_int16_3p1);
 
-		c_int16_4p0 = _mm256_mullo_epi16(alphav, c_int16_4p0);
-		c_int16_4p1 = _mm256_mullo_epi16(alphav, c_int16_4p1);
+			c_int16_4p0 = _mm256_mullo_epi16(alphav, c_int16_4p0);
+			c_int16_4p1 = _mm256_mullo_epi16(alphav, c_int16_4p1);
 
-		c_int16_5p0 = _mm256_mullo_epi16(alphav, c_int16_5p0);
-		c_int16_5p1 = _mm256_mullo_epi16(alphav, c_int16_5p1);
+			c_int16_5p0 = _mm256_mullo_epi16(alphav, c_int16_5p0);
+			c_int16_5p1 = _mm256_mullo_epi16(alphav, c_int16_5p1);
+		}
 
 		// Scale C by beta.
 		if (beta != 0)
 		{
-			// c[0,0-15]
-			__m256i selector1 =
-				_mm256_loadu_si256((__m256i const *)
-					(c + (rs_c * (ir + 0)) + (0 * 16)));
-			selector1 = _mm256_mullo_epi16(betav, selector1);
-			c_int16_0p0 = _mm256_add_epi16(selector1, c_int16_0p0);
+			// For the downscaled api (C-s8), the output C matrix values
+			// needs to be upscaled to s16 to be used for beta scale.
+			if ( ( post_ops_attr.buf_downscale != NULL ) &&
+				 ( post_ops_attr.is_first_k == TRUE ) )
+			{
+				// c[0,0-15]
+				S8_S16_BETA_OP(c_int16_0p0,ir,0,0,alphav,betav)
 
-			// c[0, 16-31]
-			selector1 =
-				_mm256_loadu_si256((__m256i const *)
-					(c + (rs_c * (ir + 0)) + (1 * 16)));
-			selector1 = _mm256_mullo_epi16(betav, selector1);
-			c_int16_0p1 = _mm256_add_epi16(selector1, c_int16_0p1);
+				// c[0, 16-31]
+				S8_S16_BETA_OP(c_int16_0p1,ir,0,1,alphav,betav)
 
-			// c[1,0-15]
-			selector1 =
-				_mm256_loadu_si256((__m256i const *)
-					(c + (rs_c * (ir + 1)) + (0 * 16)));
-			selector1 = _mm256_mullo_epi16(betav, selector1);
-			c_int16_1p0 = _mm256_add_epi16(selector1, c_int16_1p0);
+				// c[1,0-15]
+				S8_S16_BETA_OP(c_int16_1p0,ir,1,0,alphav,betav)
 
-			// c[1,16-31]
-			selector1 =
-				_mm256_loadu_si256((__m256i const *)
-					(c + (rs_c * (ir + 1)) + (1 * 16)));
-			selector1 = _mm256_mullo_epi16(betav, selector1);
-			c_int16_1p1 = _mm256_add_epi16(selector1, c_int16_1p1);
+				// c[1,16-31]
+				S8_S16_BETA_OP(c_int16_1p1,ir,1,1,alphav,betav)
 
-			// c[2,0-15]
-			selector1 =
-				_mm256_loadu_si256((__m256i const *)
-					(c + (rs_c * (ir + 2)) + (0 * 16)));
-			selector1 = _mm256_mullo_epi16(betav, selector1);
-			c_int16_2p0 = _mm256_add_epi16(selector1, c_int16_2p0);
+				// c[2,0-15]
+				S8_S16_BETA_OP(c_int16_2p0,ir,2,0,alphav,betav)
 
-			// c[2,16-31]
-			selector1 =
-				_mm256_loadu_si256((__m256i const *)
-					(c + (rs_c * (ir + 2)) + (1 * 16)));
-			selector1 = _mm256_mullo_epi16(betav, selector1);
-			c_int16_2p1 = _mm256_add_epi16(selector1, c_int16_2p1);
+				// c[2,16-31]
+				S8_S16_BETA_OP(c_int16_2p1,ir,2,1,alphav,betav)
 
-			// c[3,0-15]
-			selector1 =
-				_mm256_loadu_si256((__m256i const *)
-					(c + (rs_c * (ir + 3)) + (0 * 16)));
-			selector1 = _mm256_mullo_epi16(betav, selector1);
-			c_int16_3p0 = _mm256_add_epi16(selector1, c_int16_3p0);
+				// c[3,0-15]
+				S8_S16_BETA_OP(c_int16_3p0,ir,3,0,alphav,betav)
 
-			// c[3,16-31]
-			selector1 =
-				_mm256_loadu_si256((__m256i const *)
-					(c + (rs_c * (ir + 3)) + (1 * 16)));
-			selector1 = _mm256_mullo_epi16(betav, selector1);
-			c_int16_3p1 = _mm256_add_epi16(selector1, c_int16_3p1);
+				// c[3,16-31]
+				S8_S16_BETA_OP(c_int16_3p1,ir,3,1,alphav,betav)
 
-			// c[4,0-15]
-			selector1 =
-				_mm256_loadu_si256((__m256i const *)
-					(c + (rs_c * (ir + 4)) + (0 * 16)));
-			selector1 = _mm256_mullo_epi16(betav, selector1);
-			c_int16_4p0 = _mm256_add_epi16(selector1, c_int16_4p0);
+				// c[4,0-15]
+				S8_S16_BETA_OP(c_int16_4p0,ir,4,0,alphav,betav)
 
-			// c[4,16-31]
-			selector1 =
-				_mm256_loadu_si256((__m256i const *)
-					(c + (rs_c * (ir + 4)) + (1 * 16)));
-			selector1 = _mm256_mullo_epi16(betav, selector1);
-			c_int16_4p1 = _mm256_add_epi16(selector1, c_int16_4p1);
+				// c[4,16-31]
+				S8_S16_BETA_OP(c_int16_4p1,ir,4,1,alphav,betav)
 
-			// c[5,0-15]
-			selector1 =
-				_mm256_loadu_si256((__m256i const *)
-					(c + (rs_c * (ir + 5)) + (0 * 16)));
-			selector1 = _mm256_mullo_epi16(betav, selector1);
-			c_int16_5p0 = _mm256_add_epi16(selector1, c_int16_5p0);
+				// c[5,0-15]
+				S8_S16_BETA_OP(c_int16_5p0,ir,5,0,alphav,betav)
 
-			// c[5,16-31]
-			selector1 =
-				_mm256_loadu_si256((__m256i const *)
-					(c + (rs_c * (ir + 5)) + (1 * 16)));
-			selector1 = _mm256_mullo_epi16(betav, selector1);
-			c_int16_5p1 = _mm256_add_epi16(selector1, c_int16_5p1);
+				// c[5,16-31]
+				S8_S16_BETA_OP(c_int16_5p1,ir,5,1,alphav,betav)
+			}
+			else
+			{
+				// c[0,0-15]
+				S16_S16_BETA_OP(c_int16_0p0,ir,0,0,alphav,betav)
+
+				// c[0, 16-31]
+				S16_S16_BETA_OP(c_int16_0p1,ir,0,1,alphav,betav)
+
+				// c[1,0-15]
+				S16_S16_BETA_OP(c_int16_1p0,ir,1,0,alphav,betav)
+
+				// c[1,16-31]
+				S16_S16_BETA_OP(c_int16_1p1,ir,1,1,alphav,betav)
+
+				// c[2,0-15]
+				S16_S16_BETA_OP(c_int16_2p0,ir,2,0,alphav,betav)
+
+				// c[2,16-31]
+				S16_S16_BETA_OP(c_int16_2p1,ir,2,1,alphav,betav)
+
+				// c[3,0-15]
+				S16_S16_BETA_OP(c_int16_3p0,ir,3,0,alphav,betav)
+
+				// c[3,16-31]
+				S16_S16_BETA_OP(c_int16_3p1,ir,3,1,alphav,betav)
+
+				// c[4,0-15]
+				S16_S16_BETA_OP(c_int16_4p0,ir,4,0,alphav,betav)
+
+				// c[4,16-31]
+				S16_S16_BETA_OP(c_int16_4p1,ir,4,1,alphav,betav)
+
+				// c[5,0-15]
+				S16_S16_BETA_OP(c_int16_5p0,ir,5,0,alphav,betav)
+
+				// c[5,16-31]
+				S16_S16_BETA_OP(c_int16_5p1,ir,5,1,alphav,betav)
+			}
 		}
 
 		// Post Ops
@@ -700,7 +699,6 @@ POST_OPS_DOWNSCALE_6x32:
 			__m256 temp_float[2];
 			__m256 scale_1, scale_2;
 			__m256 res_1, res_2;
-			__m256i store_reg;
 
 			/* Load the scale vector values into the register*/
 			scale_1 =
@@ -712,59 +710,101 @@ POST_OPS_DOWNSCALE_6x32:
 				(float *)post_ops_list_temp->scale_factor +
 				post_ops_attr.post_op_c_j + (1 * 8));
 
-			BLI_MM256_S16_DOWNSCALE(c_int16_0p0, c_int16_0p1, 0);
+			// Scale first 16 columns of the 6 rows.
+			CVT_MULRND_CVT16(c_int16_0p0, scale_1, scale_2)
+			CVT_MULRND_CVT16(c_int16_1p0, scale_1, scale_2)
+			CVT_MULRND_CVT16(c_int16_2p0, scale_1, scale_2)
+			CVT_MULRND_CVT16(c_int16_3p0, scale_1, scale_2)
+			CVT_MULRND_CVT16(c_int16_4p0, scale_1, scale_2)
+			CVT_MULRND_CVT16(c_int16_5p0, scale_1, scale_2)
 
-			BLI_MM256_S16_DOWNSCALE(c_int16_1p0, c_int16_1p1, 1);
+			scale_1 =
+				_mm256_loadu_ps(
+				(float *)post_ops_list_temp->scale_factor +
+				post_ops_attr.post_op_c_j + (2 * 8));
+			scale_2 =
+				_mm256_loadu_ps(
+				(float *)post_ops_list_temp->scale_factor +
+				post_ops_attr.post_op_c_j + (3 * 8));
 
-			BLI_MM256_S16_DOWNSCALE(c_int16_2p0, c_int16_2p1, 2);
-
-			BLI_MM256_S16_DOWNSCALE(c_int16_3p0, c_int16_3p1, 3);
-
-			BLI_MM256_S16_DOWNSCALE(c_int16_4p0, c_int16_4p1, 4);
-
-			BLI_MM256_S16_DOWNSCALE(c_int16_5p0, c_int16_5p1, 5);
+			// Scale next 16 columns of the 6 rows.
+			CVT_MULRND_CVT16(c_int16_0p1, scale_1, scale_2)
+			CVT_MULRND_CVT16(c_int16_1p1, scale_1, scale_2)
+			CVT_MULRND_CVT16(c_int16_2p1, scale_1, scale_2)
+			CVT_MULRND_CVT16(c_int16_3p1, scale_1, scale_2)
+			CVT_MULRND_CVT16(c_int16_4p1, scale_1, scale_2)
+			CVT_MULRND_CVT16(c_int16_5p1, scale_1, scale_2)
 
 			POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 		}
 POST_OPS_6x32_DISABLE:
 		;
 
-		// Store the results.
-		// c[0,0-15]
-		_mm256_storeu_si256( (__m256i *)(c + ( rs_c * ( ir + 0 ) ) + ( 0*16 )), c_int16_0p0 );
+		// Case where the output C matrix is s8 (downscaled) and this is the
+		// final write for a given block within C.
+		if ( ( post_ops_attr.buf_downscale != NULL ) &&
+			 ( post_ops_attr.is_last_k == TRUE ) )
+		{
+			// Store the results in downscaled type (int8 instead of int32).
+			// c[0,0-31]
+			CVT_STORE_S16_S8(c_int16_0p0, c_int16_0p1, 0, 0);
 
-		// c[0, 16-31]
-		_mm256_storeu_si256( (__m256i *)(c + ( rs_c * ( ir + 0 ) ) + ( 1*16 )), c_int16_0p1 );
+			// c[1,0-31]
+			CVT_STORE_S16_S8(c_int16_1p0, c_int16_1p1, 1, 0);
 
-		// c[1,0-15]
-		_mm256_storeu_si256( (__m256i *)(c + ( rs_c * ( ir + 1 ) ) + ( 0*16 )), c_int16_1p0 );
+			// c[2,0-31]
+			CVT_STORE_S16_S8(c_int16_2p0, c_int16_2p1, 2, 0);
 
-		// c[1,16-31]
-		_mm256_storeu_si256( (__m256i *)(c + ( rs_c * ( ir + 1 ) ) + ( 1*16 )), c_int16_1p1 );
+			// c[3,0-31]
+			CVT_STORE_S16_S8(c_int16_3p0, c_int16_3p1, 3, 0);
 
-		// c[2,0-15]
-		_mm256_storeu_si256( (__m256i *)(c + ( rs_c * ( ir + 2 ) ) + ( 0*16 )), c_int16_2p0 );
+			// c[4,0-31]
+			CVT_STORE_S16_S8(c_int16_4p0, c_int16_4p1, 4, 0);
 
-		// c[2,16-31]
-		_mm256_storeu_si256( (__m256i *)(c + ( rs_c * ( ir + 2 ) ) + ( 1*16 )), c_int16_2p1 );
+			// c[5,0-31]
+			CVT_STORE_S16_S8(c_int16_5p0, c_int16_5p1, 5, 0);
+		}
+		// Case where the output C matrix is s16 or is the temp buffer used to
+		// store intermediate s16 accumulated values for downscaled (C-s8) api.
+		else
+		{
+			// Store the results.
+			// c[0,0-15]
+			_mm256_storeu_si256( (__m256i *)(c + ( rs_c * ( ir + 0 ) ) + ( 0*16 )), c_int16_0p0 );
 
-		// c[3,0-15]
-		_mm256_storeu_si256( (__m256i *)(c + ( rs_c * ( ir + 3 ) ) + ( 0*16 )), c_int16_3p0 );
+			// c[0, 16-31]
+			_mm256_storeu_si256( (__m256i *)(c + ( rs_c * ( ir + 0 ) ) + ( 1*16 )), c_int16_0p1 );
 
-		// c[3,16-31]
-		_mm256_storeu_si256( (__m256i *)(c + ( rs_c * ( ir + 3 ) ) + ( 1*16 )), c_int16_3p1 );
+			// c[1,0-15]
+			_mm256_storeu_si256( (__m256i *)(c + ( rs_c * ( ir + 1 ) ) + ( 0*16 )), c_int16_1p0 );
 
-		// c[4,0-15]
-		_mm256_storeu_si256( (__m256i *)(c + ( rs_c * ( ir + 4 ) ) + ( 0*16 )), c_int16_4p0 );
+			// c[1,16-31]
+			_mm256_storeu_si256( (__m256i *)(c + ( rs_c * ( ir + 1 ) ) + ( 1*16 )), c_int16_1p1 );
 
-		// c[4,16-31]
-		_mm256_storeu_si256( (__m256i *)(c + ( rs_c * ( ir + 4 ) ) + ( 1*16 )), c_int16_4p1 );
+			// c[2,0-15]
+			_mm256_storeu_si256( (__m256i *)(c + ( rs_c * ( ir + 2 ) ) + ( 0*16 )), c_int16_2p0 );
 
-		// c[5,0-15]
-		_mm256_storeu_si256( (__m256i *)(c + ( rs_c * ( ir + 5 ) ) + ( 0*16 )), c_int16_5p0 );
+			// c[2,16-31]
+			_mm256_storeu_si256( (__m256i *)(c + ( rs_c * ( ir + 2 ) ) + ( 1*16 )), c_int16_2p1 );
 
-		// c[5,16-31]
-		_mm256_storeu_si256( (__m256i *)(c + ( rs_c * ( ir + 5 ) ) + ( 1*16 )), c_int16_5p1 );
+			// c[3,0-15]
+			_mm256_storeu_si256( (__m256i *)(c + ( rs_c * ( ir + 3 ) ) + ( 0*16 )), c_int16_3p0 );
+
+			// c[3,16-31]
+			_mm256_storeu_si256( (__m256i *)(c + ( rs_c * ( ir + 3 ) ) + ( 1*16 )), c_int16_3p1 );
+
+			// c[4,0-15]
+			_mm256_storeu_si256( (__m256i *)(c + ( rs_c * ( ir + 4 ) ) + ( 0*16 )), c_int16_4p0 );
+
+			// c[4,16-31]
+			_mm256_storeu_si256( (__m256i *)(c + ( rs_c * ( ir + 4 ) ) + ( 1*16 )), c_int16_4p1 );
+
+			// c[5,0-15]
+			_mm256_storeu_si256( (__m256i *)(c + ( rs_c * ( ir + 5 ) ) + ( 0*16 )), c_int16_5p0 );
+
+			// c[5,16-31]
+			_mm256_storeu_si256( (__m256i *)(c + ( rs_c * ( ir + 5 ) ) + ( 1*16 )), c_int16_5p1 );
+		}
 		
 		a = a + ( MR * ps_a );
 		post_ops_attr.post_op_c_i += MR;

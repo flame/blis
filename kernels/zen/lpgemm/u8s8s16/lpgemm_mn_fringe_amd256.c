@@ -172,37 +172,52 @@ LPGEMM_MN_FRINGE_KERN(uint8_t,int8_t,int16_t,u8s8s16o16_4x16)
 	__m256i selector1 = _mm256_set1_epi16(alpha);
 	__m256i selector2 = _mm256_set1_epi16(beta);
 
-	// Scale by alpha
-	c_int16_0p0 = _mm256_mullo_epi16(selector1, c_int16_0p0);
+	if ( alpha != 1 )
+	{
+		// Scale by alpha
+		c_int16_0p0 = _mm256_mullo_epi16(selector1, c_int16_0p0);
 
-	c_int16_1p0 = _mm256_mullo_epi16(selector1, c_int16_1p0);
+		c_int16_1p0 = _mm256_mullo_epi16(selector1, c_int16_1p0);
 
-	c_int16_2p0 = _mm256_mullo_epi16(selector1, c_int16_2p0);
+		c_int16_2p0 = _mm256_mullo_epi16(selector1, c_int16_2p0);
 
-	c_int16_3p0 = _mm256_mullo_epi16(selector1, c_int16_3p0);
+		c_int16_3p0 = _mm256_mullo_epi16(selector1, c_int16_3p0);
+	}
 
 	// Scale C by beta.
 	if (beta != 0)
 	{
-		// c[0,0-15]
-		selector1 = _mm256_loadu_si256((__m256i const *)(c + (rs_c * 0) + (0 * 16)));
-		selector1 = _mm256_mullo_epi16(selector2, selector1);
-		c_int16_0p0 = _mm256_add_epi16(selector1, c_int16_0p0);
+		// For the downscaled api (C-s8), the output C matrix values
+		// needs to be upscaled to s16 to be used for beta scale.
+		if ( ( post_ops_attr.buf_downscale != NULL ) &&
+			 ( post_ops_attr.is_first_k == TRUE ) )
+		{
+			// c[0,0-15]
+			S8_S16_BETA_OP(c_int16_0p0,0,0,0,selector1,selector2)
 
-		// c[1,0-15]
-		selector1 = _mm256_loadu_si256((__m256i const *)(c + (rs_c * 1) + (0 * 16)));
-		selector1 = _mm256_mullo_epi16(selector2, selector1);
-		c_int16_1p0 = _mm256_add_epi16(selector1, c_int16_1p0);
+			// c[1,0-15]
+			S8_S16_BETA_OP(c_int16_1p0,0,1,0,selector1,selector2)
 
-		// c[2,0-15]
-		selector1 = _mm256_loadu_si256((__m256i const *)(c + (rs_c * 2) + (0 * 16)));
-		selector1 = _mm256_mullo_epi16(selector2, selector1);
-		c_int16_2p0 = _mm256_add_epi16(selector1, c_int16_2p0);
+			// c[2,0-15]
+			S8_S16_BETA_OP(c_int16_2p0,0,2,0,selector1,selector2)
 
-		// c[3,0-15]
-		selector1 = _mm256_loadu_si256((__m256i const *)(c + (rs_c * 3) + (0 * 16)));
-		selector1 = _mm256_mullo_epi16(selector2, selector1);
-		c_int16_3p0 = _mm256_add_epi16(selector1, c_int16_3p0);
+			// c[3,0-15]
+			S8_S16_BETA_OP(c_int16_3p0,0,3,0,selector1,selector2)
+		}
+		else
+		{
+			// c[0,0-15]
+			S16_S16_BETA_OP(c_int16_0p0,0,0,0,selector1,selector2)
+
+			// c[1,0-15]
+			S16_S16_BETA_OP(c_int16_1p0,0,1,0,selector1,selector2)
+
+			// c[2,0-15]
+			S16_S16_BETA_OP(c_int16_2p0,0,2,0,selector1,selector2)
+
+			// c[3,0-15]
+			S16_S16_BETA_OP(c_int16_3p0,0,3,0,selector1,selector2)
+		}
 	}
 
 	// Post Ops
@@ -329,7 +344,6 @@ POST_OPS_DOWNSCALE_4x16:
 		__m256 temp_float[2];
 		__m256 scale_1, scale_2;
 		__m256 res_1, res_2;
-		__m256i store_reg;
 
 		/* Load the scale vector values into the register*/
 		scale_1 =
@@ -341,27 +355,48 @@ POST_OPS_DOWNSCALE_4x16:
 			(float *)post_ops_list_temp->scale_factor +
 			post_ops_attr.post_op_c_j + (1 * 8));
 
-		BLI_MM256_S16_DOWNSCALE2(c_int16_0p0, c_int16_1p0, 0, 1);
-
-		BLI_MM256_S16_DOWNSCALE2(c_int16_2p0, c_int16_3p0, 2, 3);
+		// Scale first 16 columns of the 4 rows.
+		CVT_MULRND_CVT16(c_int16_0p0, scale_1, scale_2)
+		CVT_MULRND_CVT16(c_int16_1p0, scale_1, scale_2)
+		CVT_MULRND_CVT16(c_int16_2p0, scale_1, scale_2)
+		CVT_MULRND_CVT16(c_int16_3p0, scale_1, scale_2)
 
 		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 	}
 POST_OPS_4x16_DISABLE:
 	;
 
-	// Store the results.
-	// c[0,0-15]
-	_mm256_storeu_si256((__m256i *)(c + (rs_c * 0) + (0 * 16)), c_int16_0p0);
+	// Case where the output C matrix is s8 (downscaled) and this is the
+	// final write for a given block within C.
+	if ( ( post_ops_attr.buf_downscale != NULL ) &&
+		 ( post_ops_attr.is_last_k == TRUE ) )
+	{
+		// Store the results in downscaled type (int8 instead of int32).
+		__m128i temp[2];
 
-	// c[1,0-15]
-	_mm256_storeu_si256((__m256i *)(c + (rs_c * 1) + (0 * 16)), c_int16_1p0);
+		// c[0-1,0-15]
+		CVT_STORE_S16_S8_2ROW(c_int16_0p0, c_int16_1p0, 0, 1, 0);
 
-	// c[2,0-15]
-	_mm256_storeu_si256((__m256i *)(c + (rs_c * 2) + (0 * 16)), c_int16_2p0);
+		// c[2-3,0-15]
+		CVT_STORE_S16_S8_2ROW(c_int16_2p0, c_int16_3p0, 2, 3, 0);
+	}
+	// Case where the output C matrix is s16 or is the temp buffer used to
+	// store intermediate s16 accumulated values for downscaled (C-s8) api.
+	else
+	{
+		// Store the results.
+		// c[0,0-15]
+		_mm256_storeu_si256( (__m256i *)(c + ( rs_c * 0 ) + ( 0 * 16 ) ), c_int16_0p0 );
 
-	// c[3,0-15]
-	_mm256_storeu_si256((__m256i *)(c + (rs_c * 3) + (0 * 16)), c_int16_3p0);
+		// c[1,0-15]
+		_mm256_storeu_si256( (__m256i *)(c + ( rs_c * 1 ) + ( 0 * 16 ) ), c_int16_1p0 );
+
+		// c[2,0-15]
+		_mm256_storeu_si256( (__m256i *)(c + ( rs_c * 2 ) + ( 0 * 16 ) ), c_int16_2p0 );
+
+		// c[3,0-15]
+		_mm256_storeu_si256( (__m256i *)(c + ( rs_c * 3 ) + ( 0 * 16 ) ), c_int16_3p0 );
+	}
 }
 
 // 4x16 int8o16 kernel
@@ -505,42 +540,66 @@ LPGEMM_MN_LT_NR0_FRINGE_KERN(uint8_t,int8_t,int16_t,u8s8s16o16_4xlt16)
 	__m256i selector1 = _mm256_set1_epi16(alpha);
 	__m256i selector2 = _mm256_set1_epi16(beta);
 
-	// Scale by alpha
-	c_int16_0p0 = _mm256_mullo_epi16(selector1, c_int16_0p0);
+	if ( alpha != 1 )
+	{
+		// Scale by alpha
+		c_int16_0p0 = _mm256_mullo_epi16(selector1, c_int16_0p0);
 
-	c_int16_1p0 = _mm256_mullo_epi16(selector1, c_int16_1p0);
+		c_int16_1p0 = _mm256_mullo_epi16(selector1, c_int16_1p0);
 
-	c_int16_2p0 = _mm256_mullo_epi16(selector1, c_int16_2p0);
+		c_int16_2p0 = _mm256_mullo_epi16(selector1, c_int16_2p0);
 
-	c_int16_3p0 = _mm256_mullo_epi16(selector1, c_int16_3p0);
+		c_int16_3p0 = _mm256_mullo_epi16(selector1, c_int16_3p0);
+	}
 
 	// Scale C by beta.
 	if (beta != 0)
 	{
-		memcpy(buf0, (c + (rs_c * 0)), (n0_rem * sizeof(int16_t)));
-		memcpy(buf1, (c + (rs_c * 1)), (n0_rem * sizeof(int16_t)));
-		memcpy(buf2, (c + (rs_c * 2)), (n0_rem * sizeof(int16_t)));
-		memcpy(buf3, (c + (rs_c * 3)), (n0_rem * sizeof(int16_t)));
+		// For the downscaled api (C-s8), the output C matrix values
+		// needs to be upscaled to s16 to be used for beta scale.
+		if ( ( post_ops_attr.buf_downscale != NULL ) &&
+			 ( post_ops_attr.is_first_k == TRUE ) )
+		{
+			dim_t n0_rem_dscale_bytes = n0_rem * sizeof( int8_t );
 
-		// c[0,0-15]
-		selector1 = _mm256_loadu_si256((__m256i const *)buf0);
-		selector1 = _mm256_mullo_epi16(selector2, selector1);
-		c_int16_0p0 = _mm256_add_epi16(selector1, c_int16_0p0);
+			S8_S16_BETA_NLT16_MEMCP_UTIL(buf0, 0, n0_rem_dscale_bytes);
+			S8_S16_BETA_NLT16_MEMCP_UTIL(buf1, 1, n0_rem_dscale_bytes);
+			S8_S16_BETA_NLT16_MEMCP_UTIL(buf2, 2, n0_rem_dscale_bytes);
+			S8_S16_BETA_NLT16_MEMCP_UTIL(buf3, 3, n0_rem_dscale_bytes);
 
-		// c[1,0-15]
-		selector1 = _mm256_loadu_si256((__m256i const *)buf1);
-		selector1 = _mm256_mullo_epi16(selector2, selector1);
-		c_int16_1p0 = _mm256_add_epi16(selector1, c_int16_1p0);
+			// c[0,0-15]
+			S8_S16_BETA_OP_NLT16(c_int16_0p0,buf0,selector1,selector2)
 
-		// c[2,0-15]
-		selector1 = _mm256_loadu_si256((__m256i const *)buf2);
-		selector1 = _mm256_mullo_epi16(selector2, selector1);
-		c_int16_2p0 = _mm256_add_epi16(selector1, c_int16_2p0);
+			// c[1,0-15]
+			S8_S16_BETA_OP_NLT16(c_int16_1p0,buf1,selector1,selector2)
 
-		// c[3,0-15]
-		selector1 = _mm256_loadu_si256((__m256i const *)buf3);
-		selector1 = _mm256_mullo_epi16(selector2, selector1);
-		c_int16_3p0 = _mm256_add_epi16(selector1, c_int16_3p0);
+			// c[2,0-15]
+			S8_S16_BETA_OP_NLT16(c_int16_2p0,buf2,selector1,selector2)
+
+			// c[3,0-15]
+			S8_S16_BETA_OP_NLT16(c_int16_3p0,buf3,selector1,selector2)
+		}
+		else
+		{
+			dim_t n0_rem_bytes = n0_rem * sizeof( int16_t );
+
+			memcpy( buf0, ( c + ( rs_c * 0 ) ), n0_rem_bytes );
+			memcpy( buf1, ( c + ( rs_c * 1 ) ), n0_rem_bytes );
+			memcpy( buf2, ( c + ( rs_c * 2 ) ), n0_rem_bytes );
+			memcpy( buf3, ( c + ( rs_c * 3 ) ), n0_rem_bytes );
+
+			// c[0,0-15]
+			S16_S16_BETA_OP_NLT16(c_int16_0p0,buf0,selector1,selector2)
+
+			// c[1,0-15]
+			S16_S16_BETA_OP_NLT16(c_int16_1p0,buf1,selector1,selector2)
+
+			// c[2,0-15]
+			S16_S16_BETA_OP_NLT16(c_int16_2p0,buf2,selector1,selector2)
+
+			// c[3,0-15]
+			S16_S16_BETA_OP_NLT16(c_int16_3p0,buf3,selector1,selector2)
+		}
 	}
 
 	// Post Ops
@@ -669,10 +728,8 @@ POST_OPS_DOWNSCALE_4xlt16:
 		__m256 temp_float[2];
 		__m256 scale_1, scale_2;
 		__m256 res_1, res_2;
-		__m256i store_reg;
 
 		float float_buf[16];
-		int8_t store_buf[16];
 
 		memcpy( float_buf, ( ( float* )post_ops_list_temp->scale_factor +
 				post_ops_attr.post_op_c_j ), ( n0_rem * sizeof( float ) ) );
@@ -681,37 +738,68 @@ POST_OPS_DOWNSCALE_4xlt16:
 		scale_1 = _mm256_loadu_ps(float_buf + (0 * 8));
 		scale_2 = _mm256_loadu_ps(float_buf + (1 * 8));
 
-		BLI_MM256_S16_DOWNSCALE2_LT16(c_int16_0p0, c_int16_1p0, 0, 1)
-
-		BLI_MM256_S16_DOWNSCALE2_LT16(c_int16_2p0, c_int16_3p0, 2, 3)
+		// Scale first 16 columns of the 6 rows.
+		CVT_MULRND_CVT16(c_int16_0p0, scale_1, scale_2)
+		CVT_MULRND_CVT16(c_int16_1p0, scale_1, scale_2)
+		CVT_MULRND_CVT16(c_int16_2p0, scale_1, scale_2)
+		CVT_MULRND_CVT16(c_int16_3p0, scale_1, scale_2)
 
 		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 	}
 POST_OPS_4xlt16_DISABLE:
 	;
 
-	// c[0,0-15]
-	_mm256_storeu_si256((__m256i_u *)buf0, c_int16_0p0);
+	// Case where the output C matrix is s8 (downscaled) and this is the
+	// final write for a given block within C.
+	if ( ( post_ops_attr.buf_downscale != NULL ) &&
+		 ( post_ops_attr.is_last_k == TRUE ) )
+	{
+		// Store the results in downscaled type (int8 instead of int32).
+		__m128i temp[2];
 
-	// c[1,0-15]
-	_mm256_storeu_si256((__m256i_u *)buf1, c_int16_1p0);
+		// c[0-1,0-15]
+		CVT_STORE_S16_S8_2ROW_NLT16(c_int16_0p0, c_int16_1p0, buf0, buf1);
 
-	// c[2,0-15]
-	_mm256_storeu_si256((__m256i_u *)buf2, c_int16_2p0);
+		// c[2-3,0-15]
+		CVT_STORE_S16_S8_2ROW_NLT16(c_int16_2p0, c_int16_3p0, buf2, buf3);
 
-	// c[3,0-15]
-	_mm256_storeu_si256((__m256i_u *)buf3, c_int16_3p0);
+		dim_t n0_rem_dscale_bytes = n0_rem * sizeof( int8_t );
 
-	memcpy(c + (rs_c * 0) + (0 * 16), buf0, (n0_rem * sizeof(int16_t)));
+		CVT_STORE_S16_S8_NLT16_MEMCP_UTIL(buf0, 0, n0_rem_dscale_bytes);
+		CVT_STORE_S16_S8_NLT16_MEMCP_UTIL(buf1, 1, n0_rem_dscale_bytes);
+		CVT_STORE_S16_S8_NLT16_MEMCP_UTIL(buf2, 2, n0_rem_dscale_bytes);
+		CVT_STORE_S16_S8_NLT16_MEMCP_UTIL(buf3, 3, n0_rem_dscale_bytes);
+	}
+	// Case where the output C matrix is s16 or is the temp buffer used to
+	// store intermediate s16 accumulated values for downscaled (C-s8) api.
+	else
+	{
+		// Store the results.
+		// c[0,0-15]
+		_mm256_storeu_si256( ( __m256i* )buf0, c_int16_0p0 );
 
-	// c[1,0-15]
-	memcpy(c + (rs_c * +1) + (0 * 16), buf1, (n0_rem * sizeof(int16_t)));
+		// c[1,0-15]
+		_mm256_storeu_si256( ( __m256i* )buf1, c_int16_1p0 );
 
-	// c[2,0-15]
-	memcpy(c + (rs_c * +2) + (0 * 16), buf2, (n0_rem * sizeof(int16_t)));
+		// c[2,0-15]
+		_mm256_storeu_si256( ( __m256i* )buf2, c_int16_2p0 );
 
-	// c[3,0-15]
-	memcpy(c + (rs_c * +3) + (0 * 16), buf3, (n0_rem * sizeof(int16_t)));
+		// c[3,0-15]
+		_mm256_storeu_si256( ( __m256i* )buf3, c_int16_3p0 );
+
+		dim_t n0_rem_bytes = n0_rem * sizeof( int16_t );
+
+		memcpy( c + ( rs_c * 0 ) + ( 0 * 16 ), buf0, n0_rem_bytes );
+
+		// c[1,0-15]
+		memcpy( c + ( rs_c * 1 ) + ( 0 * 16 ), buf1, n0_rem_bytes );
+
+		// c[2,0-15]
+		memcpy( c + ( rs_c * 2 ) + ( 0 * 16 ), buf2, n0_rem_bytes );
+
+		// c[3,0-15]
+		memcpy( c + ( rs_c * 3 ) + ( 0 * 16 ), buf3, n0_rem_bytes );
+	}
 }
 
 // 2x16 int8o16 kernel
@@ -805,23 +893,36 @@ LPGEMM_MN_FRINGE_KERN(uint8_t,int8_t,int16_t,u8s8s16o16_2x16)
 	__m256i selector1 = _mm256_set1_epi16(alpha);
 	__m256i selector2 = _mm256_set1_epi16(beta);
 
-	// Scale by alpha
-	c_int16_0p0 = _mm256_mullo_epi16(selector1, c_int16_0p0);
+	if ( alpha != 1 )
+	{
+		// Scale by alpha
+		c_int16_0p0 = _mm256_mullo_epi16(selector1, c_int16_0p0);
 
-	c_int16_1p0 = _mm256_mullo_epi16(selector1, c_int16_1p0);
+		c_int16_1p0 = _mm256_mullo_epi16(selector1, c_int16_1p0);
+	}
 
 	// Scale C by beta.
 	if (beta != 0)
 	{
-		// c[0,0-15]
-		selector1 = _mm256_loadu_si256((__m256i const *)(c + (rs_c * 0) + (0 * 16)));
-		selector1 = _mm256_mullo_epi16(selector2, selector1);
-		c_int16_0p0 = _mm256_add_epi16(selector1, c_int16_0p0);
+		// For the downscaled api (C-s8), the output C matrix values
+		// needs to be upscaled to s16 to be used for beta scale.
+		if ( ( post_ops_attr.buf_downscale != NULL ) &&
+			 ( post_ops_attr.is_first_k == TRUE ) )
+		{
+			// c[0,0-15]
+			S8_S16_BETA_OP(c_int16_0p0,0,0,0,selector1,selector2)
 
-		// c[1,0-15]
-		selector1 = _mm256_loadu_si256((__m256i const *)(c + (rs_c * 1) + (0 * 16)));
-		selector1 = _mm256_mullo_epi16(selector2, selector1);
-		c_int16_1p0 = _mm256_add_epi16(selector1, c_int16_1p0);
+			// c[1,0-15]
+			S8_S16_BETA_OP(c_int16_1p0,0,1,0,selector1,selector2)
+		}
+		else
+		{
+			// c[0,0-15]
+			S16_S16_BETA_OP(c_int16_0p0,0,0,0,selector1,selector2)
+
+			// c[1,0-15]
+			S16_S16_BETA_OP(c_int16_1p0,0,1,0,selector1,selector2)
+		}
 	}
 
 	// Post Ops
@@ -912,7 +1013,6 @@ POST_OPS_DOWNSCALE_2x16:
 		__m256 temp_float[2];
 		__m256 scale_1, scale_2;
 		__m256 res_1, res_2;
-		__m256i store_reg;
 
 		/* Load the scale vector values into the register*/
 		scale_1 =
@@ -924,19 +1024,37 @@ POST_OPS_DOWNSCALE_2x16:
 			(float *)post_ops_list_temp->scale_factor +
 			post_ops_attr.post_op_c_j + (1 * 8));
 
-		BLI_MM256_S16_DOWNSCALE2(c_int16_0p0, c_int16_1p0, 0, 1);
+		// Scale first 16 columns of the 2 rows.
+		CVT_MULRND_CVT16(c_int16_0p0, scale_1, scale_2)
+		CVT_MULRND_CVT16(c_int16_1p0, scale_1, scale_2)
 
 		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 	}
 POST_OPS_2x16_DISABLE:
 	;
 
-	// Store the results.
-	// c[0,0-15]
-	_mm256_storeu_si256((__m256i *)(c + (rs_c * 0) + (0 * 16)), c_int16_0p0);
+	// Case where the output C matrix is s8 (downscaled) and this is the
+	// final write for a given block within C.
+	if ( ( post_ops_attr.buf_downscale != NULL ) &&
+		 ( post_ops_attr.is_last_k == TRUE ) )
+	{
+		// Store the results in downscaled type (int8 instead of int32).
+		__m128i temp[2];
 
-	// c[1,0-15]
-	_mm256_storeu_si256((__m256i *)(c + (rs_c * 1) + (0 * 16)), c_int16_1p0);
+		// c[0-1,0-15]
+		CVT_STORE_S16_S8_2ROW(c_int16_0p0, c_int16_1p0, 0, 1, 0);
+	}
+	// Case where the output C matrix is s16 or is the temp buffer used to
+	// store intermediate s16 accumulated values for downscaled (C-s8) api.
+	else
+	{
+		// Store the results.
+		// c[0,0-15]
+		_mm256_storeu_si256( (__m256i *)(c + ( rs_c * 0 ) + ( 0 * 16 ) ), c_int16_0p0 );
+
+		// c[1,0-15]
+		_mm256_storeu_si256( (__m256i *)(c + ( rs_c * 1 ) + ( 0 * 16 ) ), c_int16_1p0 );
+	}
 }
 
 // 2xlt16 int8o16 kernel
@@ -1033,26 +1151,46 @@ LPGEMM_MN_LT_NR0_FRINGE_KERN(uint8_t,int8_t,int16_t,u8s8s16o16_2xlt16)
 	__m256i selector1 = _mm256_set1_epi16(alpha);
 	__m256i selector2 = _mm256_set1_epi16(beta);
 
-	// Scale by alpha
-	c_int16_0p0 = _mm256_mullo_epi16(selector1, c_int16_0p0);
+	if ( alpha != 1 )
+	{
+		// Scale by alpha
+		c_int16_0p0 = _mm256_mullo_epi16(selector1, c_int16_0p0);
 
-	c_int16_1p0 = _mm256_mullo_epi16(selector1, c_int16_1p0);
+		c_int16_1p0 = _mm256_mullo_epi16(selector1, c_int16_1p0);
+	}
 
 	// Scale C by beta.
 	if (beta != 0)
 	{
-		memcpy(buf0, (c + (rs_c * 0)), (n0_rem * sizeof(int16_t)));
-		memcpy(buf1, (c + (rs_c * 1)), (n0_rem * sizeof(int16_t)));
+		// For the downscaled api (C-s8), the output C matrix values
+		// needs to be upscaled to s16 to be used for beta scale.
+		if ( ( post_ops_attr.buf_downscale != NULL ) &&
+			 ( post_ops_attr.is_first_k == TRUE ) )
+		{
+			dim_t n0_rem_dscale_bytes = n0_rem * sizeof( int8_t );
 
-		// c[0,0-15]
-		selector1 = _mm256_loadu_si256((__m256i const *)buf0);
-		selector1 = _mm256_mullo_epi16(selector2, selector1);
-		c_int16_0p0 = _mm256_add_epi16(selector1, c_int16_0p0);
+			S8_S16_BETA_NLT16_MEMCP_UTIL(buf0, 0, n0_rem_dscale_bytes);
+			S8_S16_BETA_NLT16_MEMCP_UTIL(buf1, 1, n0_rem_dscale_bytes);
 
-		// c[1,0-15]
-		selector1 = _mm256_loadu_si256((__m256i const *)buf1);
-		selector1 = _mm256_mullo_epi16(selector2, selector1);
-		c_int16_1p0 = _mm256_add_epi16(selector1, c_int16_1p0);
+			// c[0,0-15]
+			S8_S16_BETA_OP_NLT16(c_int16_0p0,buf0,selector1,selector2)
+
+			// c[1,0-15]
+			S8_S16_BETA_OP_NLT16(c_int16_1p0,buf1,selector1,selector2)
+		}
+		else
+		{
+			dim_t n0_rem_bytes = n0_rem * sizeof( int16_t );
+
+			memcpy( buf0, ( c + ( rs_c * 0 ) ), n0_rem_bytes );
+			memcpy( buf1, ( c + ( rs_c * 1 ) ), n0_rem_bytes );
+
+			// c[0,0-15]
+			S16_S16_BETA_OP_NLT16(c_int16_0p0,buf0,selector1,selector2)
+
+			// c[1,0-15]
+			S16_S16_BETA_OP_NLT16(c_int16_1p0,buf1,selector1,selector2)
+		}
 	}
 
 	// Post Ops
@@ -1145,10 +1283,8 @@ POST_OPS_DOWNSCALE_2xlt16:
 		__m256 temp_float[2];
 		__m256 scale_1, scale_2;
 		__m256 res_1, res_2;
-		__m256i store_reg;
 
 		float float_buf[16];
-		int8_t store_buf[16];
 
 		memcpy( float_buf, ( ( float* )post_ops_list_temp->scale_factor +
 				post_ops_attr.post_op_c_j ), ( n0_rem * sizeof( float ) ) );
@@ -1157,24 +1293,49 @@ POST_OPS_DOWNSCALE_2xlt16:
 		scale_1 = _mm256_loadu_ps(float_buf + (0 * 8));
 		scale_2 = _mm256_loadu_ps(float_buf + (1 * 8));
 
-		BLI_MM256_S16_DOWNSCALE2_LT16(c_int16_0p0, c_int16_1p0, 0, 1)
+		// Scale first 16 columns of the 6 rows.
+		CVT_MULRND_CVT16(c_int16_0p0, scale_1, scale_2)
+		CVT_MULRND_CVT16(c_int16_1p0, scale_1, scale_2)
 
 		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 	}
 POST_OPS_2xlt16_DISABLE:
 	;
 
-	// c[0,0-15]
-	_mm256_storeu_si256((__m256i_u *)buf0, c_int16_0p0);
+	// Case where the output C matrix is s8 (downscaled) and this is the
+	// final write for a given block within C.
+	if ( ( post_ops_attr.buf_downscale != NULL ) &&
+		 ( post_ops_attr.is_last_k == TRUE ) )
+	{
+		// Store the results in downscaled type (int8 instead of int32).
+		__m128i temp[2];
 
-	// c[1,0-15]
-	_mm256_storeu_si256((__m256i_u *)buf1, c_int16_1p0);
+		// c[0-1,0-15]
+		CVT_STORE_S16_S8_2ROW_NLT16(c_int16_0p0, c_int16_1p0, buf0, buf1);
 
-	// c[0,0-15]
-	memcpy(c + (rs_c * 0) + (0 * 16), buf0, (n0_rem * sizeof(int16_t)));
+		dim_t n0_rem_dscale_bytes = n0_rem * sizeof( int8_t );
 
-	// c[1,0-15]
-	memcpy(c + (rs_c * 1) + (0 * 16), buf1, (n0_rem * sizeof(int16_t)));
+		CVT_STORE_S16_S8_NLT16_MEMCP_UTIL(buf0, 0, n0_rem_dscale_bytes);
+		CVT_STORE_S16_S8_NLT16_MEMCP_UTIL(buf1, 1, n0_rem_dscale_bytes);
+	}
+	// Case where the output C matrix is s16 or is the temp buffer used to
+	// store intermediate s16 accumulated values for downscaled (C-s8) api.
+	else
+	{
+		// Store the results.
+		// c[0,0-15]
+		_mm256_storeu_si256( ( __m256i* )buf0, c_int16_0p0 );
+
+		// c[1,0-15]
+		_mm256_storeu_si256( ( __m256i* )buf1, c_int16_1p0 );
+
+		dim_t n0_rem_bytes = n0_rem * sizeof( int16_t );
+
+		memcpy( c + ( rs_c * 0 ) + ( 0 * 16 ), buf0, n0_rem_bytes );
+
+		// c[1,0-15]
+		memcpy( c + ( rs_c * 1 ) + ( 0 * 16 ), buf1, n0_rem_bytes );
+	}
 }
 
 // 1x16 int8o16 kernel
@@ -1246,16 +1407,28 @@ LPGEMM_MN_FRINGE_KERN(uint8_t,int8_t,int16_t,u8s8s16o16_1x16)
 	__m256i selector1 = _mm256_set1_epi16(alpha);
 	__m256i selector2 = _mm256_set1_epi16(beta);
 
-	// Scale by alpha
-	c_int16_0p0 = _mm256_mullo_epi16(selector1, c_int16_0p0);
+	if ( alpha != 1 )
+	{
+		// Scale by alpha
+		c_int16_0p0 = _mm256_mullo_epi16(selector1, c_int16_0p0);
+	}
 
 	// Scale C by beta.
 	if (beta != 0)
 	{
-		// c[0,0-15]
-		selector1 = _mm256_loadu_si256((__m256i const *)(c + (rs_c * 0) + (0 * 16)));
-		selector1 = _mm256_mullo_epi16(selector2, selector1);
-		c_int16_0p0 = _mm256_add_epi16(selector1, c_int16_0p0);
+		// For the downscaled api (C-s8), the output C matrix values
+		// needs to be upscaled to s16 to be used for beta scale.
+		if ( ( post_ops_attr.buf_downscale != NULL ) &&
+			 ( post_ops_attr.is_first_k == TRUE ) )
+		{
+			// c[0,0-15]
+			S8_S16_BETA_OP(c_int16_0p0,0,0,0,selector1,selector2)
+		}
+		else
+		{
+			// c[0,0-15]
+			S16_S16_BETA_OP(c_int16_0p0,0,0,0,selector1,selector2)
+		}
 	}
 
 	// Post Ops
@@ -1324,11 +1497,10 @@ POST_OPS_CLIP_1x16:
 POST_OPS_DOWNSCALE_1x16:
 	{
 		__m128i temp[2];
-		__m256i temp_32[2], zero_reg;
+		__m256i temp_32[2];
 		__m256 temp_float[2];
 		__m256 scale_1, scale_2;
 		__m256 res_1, res_2;
-		__m256i store_reg;
 
 		/* Load the scale vector values into the register*/
 		scale_1 =
@@ -1340,18 +1512,34 @@ POST_OPS_DOWNSCALE_1x16:
 			(float *)post_ops_list_temp->scale_factor +
 			post_ops_attr.post_op_c_j + (1 * 8));
 
-		zero_reg = _mm256_setzero_si256();
-
-		BLI_MM256_S16_DOWNSCALE2_EDGE(c_int16_0p0, 0)
+		// Scale first 16 columns of the 2 rows.
+		CVT_MULRND_CVT16(c_int16_0p0, scale_1, scale_2)
 
 		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 	}
 POST_OPS_1x16_DISABLE:
 	;
 
-	// Store the results.
-	// c[0,0-15]
-	_mm256_storeu_si256( (__m256i *)(c + ( rs_c *  0 ) + ( 0*16 )), c_int16_0p0 );
+	// Case where the output C matrix is s8 (downscaled) and this is the
+	// final write for a given block within C.
+	if ( ( post_ops_attr.buf_downscale != NULL ) &&
+		 ( post_ops_attr.is_last_k == TRUE ) )
+	{
+		// Store the results in downscaled type (int8 instead of int32).
+		__m128i temp[2];
+		__m256i zero_reg = _mm256_setzero_si256();
+
+		// c[0-1,0-15]
+		CVT_STORE_S16_S8_1ROW(c_int16_0p0, zero_reg, 0, 0);
+	}
+	// Case where the output C matrix is s16 or is the temp buffer used to
+	// store intermediate s16 accumulated values for downscaled (C-s8) api.
+	else
+	{
+		// Store the results.
+		// c[0,0-15]
+		_mm256_storeu_si256( (__m256i *)(c + ( rs_c * 0 ) + ( 0 * 16 ) ), c_int16_0p0 );
+	}
 }
 
 // 1xlt16 int8o16 kernel
@@ -1425,18 +1613,36 @@ LPGEMM_MN_LT_NR0_FRINGE_KERN(uint8_t,int8_t,int16_t,u8s8s16o16_1xlt16)
 	__m256i selector1 = _mm256_set1_epi16(alpha);
 	__m256i selector2 = _mm256_set1_epi16(beta);
 
-	// Scale by alpha
-	c_int16_0p0 = _mm256_mullo_epi16(selector1, c_int16_0p0);
+	if ( alpha != 1 )
+	{
+		// Scale by alpha
+		c_int16_0p0 = _mm256_mullo_epi16(selector1, c_int16_0p0);
+	}
 
 	// Scale C by beta.
 	if (beta != 0)
 	{
-		memcpy(buf0, (c + (rs_c * 0)), (n0_rem * sizeof(int16_t)));
+		// For the downscaled api (C-s8), the output C matrix values
+		// needs to be upscaled to s16 to be used for beta scale.
+		if ( ( post_ops_attr.buf_downscale != NULL ) &&
+			 ( post_ops_attr.is_first_k == TRUE ) )
+		{
+			dim_t n0_rem_dscale_bytes = n0_rem * sizeof( int8_t );
 
-		// c[0,0-15]
-		selector1 = _mm256_loadu_si256((__m256i const *)buf0);
-		selector1 = _mm256_mullo_epi16(selector2, selector1);
-		c_int16_0p0 = _mm256_add_epi16(selector1, c_int16_0p0);
+			S8_S16_BETA_NLT16_MEMCP_UTIL(buf0, 0, n0_rem_dscale_bytes);
+
+			// c[0,0-15]
+			S8_S16_BETA_OP_NLT16(c_int16_0p0,buf0,selector1,selector2)
+		}
+		else
+		{
+			dim_t n0_rem_bytes = n0_rem * sizeof( int16_t );
+
+			memcpy( buf0, ( c + ( rs_c * 0 ) ), n0_rem_bytes );
+
+			// c[0,0-15]
+			S16_S16_BETA_OP_NLT16(c_int16_0p0,buf0,selector1,selector2)
+		}
 	}
 
 	// Post Ops
@@ -1507,14 +1713,12 @@ POST_OPS_CLIP_1xlt16:
 POST_OPS_DOWNSCALE_1xlt16:
 	{
 		__m128i temp[2];
-		__m256i temp_32[2], zero_reg;
+		__m256i temp_32[2];
 		__m256 temp_float[2];
 		__m256 scale_1, scale_2;
 		__m256 res_1, res_2;
-		__m256i store_reg;
 
 		float float_buf[16];
-		int8_t store_buf[16];
 
 		memcpy( float_buf, ( ( float* )post_ops_list_temp->scale_factor +
 				post_ops_attr.post_op_c_j ), ( n0_rem * sizeof( float ) ) );
@@ -1523,16 +1727,41 @@ POST_OPS_DOWNSCALE_1xlt16:
 		scale_1 = _mm256_loadu_ps(float_buf + (0 * 8));
 		scale_2 = _mm256_loadu_ps(float_buf + (1 * 8));
 
-		zero_reg = _mm256_setzero_si256();
+		// Scale first 16 columns of the 2 rows.
+		CVT_MULRND_CVT16(c_int16_0p0, scale_1, scale_2)
 
-		BLI_MM256_S16_DOWNSCALE2_EDGE_LT16(c_int16_0p0, 0)
+		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 	}
 POST_OPS_1xlt16_DISABLE:
 	;
 
-	// c[0,0-15]
-	_mm256_storeu_si256((__m256i_u *)buf0, c_int16_0p0);
+	// Case where the output C matrix is s8 (downscaled) and this is the
+	// final write for a given block within C.
+	if ( ( post_ops_attr.buf_downscale != NULL ) &&
+		 ( post_ops_attr.is_last_k == TRUE ) )
+	{
+		// Store the results in downscaled type (int8 instead of int32).
+		__m128i temp[2];
+		__m256i zero_reg = _mm256_setzero_si256();
 
-	memcpy(c + (rs_c * 0) + (0 * 16), buf0, (n0_rem * sizeof(int16_t)));
+		// c[0-1,0-15]
+		CVT_STORE_S16_S8_1ROW_NLT16(c_int16_0p0, zero_reg, buf0);
+
+		dim_t n0_rem_dscale_bytes = n0_rem * sizeof( int8_t );
+
+		CVT_STORE_S16_S8_NLT16_MEMCP_UTIL(buf0, 0, n0_rem_dscale_bytes);
+	}
+	// Case where the output C matrix is s16 or is the temp buffer used to
+	// store intermediate s16 accumulated values for downscaled (C-s8) api.
+	else
+	{
+		// Store the results.
+		// c[0,0-15]
+		_mm256_storeu_si256( ( __m256i* )buf0, c_int16_0p0 );
+
+		dim_t n0_rem_bytes = n0_rem * sizeof( int16_t );
+
+		memcpy( c + ( rs_c * 0 ) + ( 0 * 16 ), buf0, n0_rem_bytes );
+	}
 }
 #endif
