@@ -83,6 +83,7 @@ void lpgemm_translate_to_post_ops_list
 		return; //Error, seq length exceeds max post ops permitted.
 	}
 
+	dim_t e_i = 0; //Multiple eltwise supported.
 	for ( dim_t i = 0; i < post_op_unparsed->seq_length; ++i )
 	{
 		// Dispatcher code
@@ -103,7 +104,7 @@ void lpgemm_translate_to_post_ops_list
 					{
 						LPGEMM_POST_OP_CODE tmp_code = POST_OPS_DISABLE;
 						// Eltwise algo dispatcher.
-						switch ( post_op_unparsed->eltwise.algo.algo_type )
+						switch ( ( post_op_unparsed->eltwise + e_i )->algo.algo_type )
 						{
 							case RELU:
 									tmp_code = POST_OPS_RELU;
@@ -127,11 +128,12 @@ void lpgemm_translate_to_post_ops_list
 						(
 						  ( post_op_list + i ), tmp_code,
 						  NULL,
-						  post_op_unparsed->eltwise.algo.alpha,
-						  post_op_unparsed->eltwise.algo.beta,
-						  post_op_unparsed->eltwise.scale_factor,
-						  post_op_unparsed->eltwise.is_power_of_2
+						  ( post_op_unparsed->eltwise + e_i )->algo.alpha,
+						  ( post_op_unparsed->eltwise + e_i )->algo.beta,
+						  ( post_op_unparsed->eltwise + e_i )->scale_factor,
+						  ( post_op_unparsed->eltwise + e_i )->is_power_of_2
 						);
+						e_i += 1;
 					}
 					break;
 			case BIAS:

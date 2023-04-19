@@ -56,6 +56,8 @@ int32_t global_n_repeat = 0;
 
 char global_dscale_out = 'n';
 
+dim_t num_eltwise = 0; // To keep track of eltwise operations.
+
 #define _XSTR(str) #str
 #define XSTR(str) _XSTR(str)
 
@@ -594,85 +596,72 @@ void mat_mul_accuracy_check_driver_ ## BLAS_SFX \
 \
 			if ( post_op != NULL ) \
 			{ \
-				/* Apply bias followed by relu. */ \
-				if ( post_op->seq_vector[0] == BIAS ) \
+				dim_t ele_i = 0; \
+				for ( dim_t op_id = 0; op_id < post_op->seq_length; ++op_id ) \
 				{ \
-					if ( post_op->seq_length >= 1 ) \
+					if ( post_op->seq_vector[op_id] == BIAS ) \
 					{ \
 						temp_accum += ( *( ( ACCUM_type* )post_op->bias.bias + j ) ); \
 					} \
-					if ( ( post_op->seq_length > 1 ) && \
-						 ( post_op->seq_vector[1] == ELTWISE ) ) \
+					else if ( post_op->seq_vector[op_id] == ELTWISE ) \
 					{ \
-						if ( post_op->eltwise.algo.algo_type == PRELU ) /* PReLU*/ \
+						if ( ( post_op->eltwise + ele_i )->algo.algo_type == \
+								PRELU ) /* PReLU*/ \
 						{ \
 							temp_accum = ( temp_accum > 0 ) ? \
 								temp_accum : \
 								( temp_accum * \
-								*( ( ACCUM_type* ) post_op->eltwise.algo.alpha ) ); \
+								*( ( ACCUM_type* ) ( post_op->eltwise + ele_i )->algo.alpha ) ); \
+							ele_i += 1; \
 						} \
-						else if ( post_op->eltwise.algo.algo_type == GELU_TANH ) /* TANH GeLU*/ \
+						else if ( ( post_op->eltwise + ele_i )->algo.algo_type == \
+								GELU_TANH ) /* TANH GeLU*/ \
 						{ \
 							temp_accum = GEN_FUNC_NAME(GELU_TANH_post_op_,BLAS_SFX) (temp_accum);\
+							ele_i += 1; \
 						} \
-						else if ( post_op->eltwise.algo.algo_type == GELU_ERF ) /* ERF GeLU*/ \
+						else if ( ( post_op->eltwise + ele_i )->algo.algo_type == \
+								GELU_ERF ) /* ERF GeLU*/ \
 						{ \
 							temp_accum = GEN_FUNC_NAME(GELU_ERF_post_op_,BLAS_SFX) (temp_accum);\
+							ele_i += 1; \
 						} \
-						else if ( post_op->eltwise.algo.algo_type == CLIP ) /* CLIP*/ \
-						{ \
-							temp_accum = min ( max ( temp_accum, *( ( ACCUM_type* ) \
-							post_op->eltwise.algo.alpha ) ), *( ( ACCUM_type* ) post_op->eltwise.algo.beta) ); \
-						} \
-						else \
+						else if ( ( post_op->eltwise + ele_i )->algo.algo_type == \
+								RELU ) /* ReLU*/ \
 						{ \
 							temp_accum = ( temp_accum > 0 ) ? temp_accum : 0 ; \
+							ele_i += 1; \
 						} \
-					} \
-				} \
-				else if ( post_op->seq_vector[0] == ELTWISE ) \
-				{ \
-					if ( post_op->seq_length >= 1 ) \
-					{ \
-						if ( post_op->eltwise.algo.algo_type == PRELU ) /* PReLU*/ \
+						else if ( ( post_op->eltwise + ele_i )->algo.algo_type == \
+								CLIP ) /* CLIP*/ \
 						{ \
-							temp_accum = ( temp_accum > 0 ) ? \
-									temp_accum : \
-									( temp_accum * *( ( ACCUM_type* ) post_op->eltwise.algo.alpha ) ); \
-						} \
-						else if ( post_op->eltwise.algo.algo_type == GELU_TANH ) /* GeLU*/ \
-						{ \
-							temp_accum = GEN_FUNC_NAME(GELU_TANH_post_op_,BLAS_SFX) (temp_accum);\
-						} \
-						else if ( post_op->eltwise.algo.algo_type == GELU_ERF ) /* ERF GeLU*/ \
-						{ \
-							temp_accum = GEN_FUNC_NAME(GELU_ERF_post_op_,BLAS_SFX) (temp_accum);\
-						} \
-						else if ( post_op->eltwise.algo.algo_type == CLIP ) /* CLIP*/ \
-						{ \
-							temp_accum = min ( max ( temp_accum, *( ( ACCUM_type* ) \
-							post_op->eltwise.algo.alpha ) ), *( ( ACCUM_type* ) post_op->eltwise.algo.beta) ); \
+							temp_accum = \
+								min \
+								( \
+								  max \
+								  ( \
+									temp_accum, \
+									*( ( ACCUM_type* ) \
+									   ( post_op->eltwise + ele_i )->algo.alpha ) \
+								  ), \
+								  *( ( ACCUM_type* ) \
+									 ( post_op->eltwise + ele_i )->algo.beta) \
+								); \
+							ele_i += 1; \
 						} \
 						else \
-						{ \
-							temp_accum = ( temp_accum > 0 ) ? temp_accum : 0 ; \
-						} \
+						{} \
 					} \
-					if ( ( post_op->seq_length > 1 ) && ( post_op->seq_vector[1] == BIAS ) ) \
+					else if ( post_op->seq_vector[op_id] == SCALE ) \
 					{ \
-						temp_accum += ( *( ( ACCUM_type* )post_op->bias.bias + j ) ); \
+						temp_accum = GEN_FUNC_NAME(mat_mul_accuracy_check_downscale_,BLAS_DOWNSCALE_SFX) \
+							(temp_accum, out_temp_accum, post_op, j); \
 					} \
+					else \
+					{} \
 				} \
 			} \
-			if ( global_dscale_out == 'y' ) \
-			{ \
-				out_temp_accum = GEN_FUNC_NAME(mat_mul_accuracy_check_downscale_,BLAS_DOWNSCALE_SFX) \
-				        (temp_accum, out_temp_accum, post_op, j); \
-			} \
-			else \
-			{ \
-				out_temp_accum = ( C_type )temp_accum; \
-			} \
+			out_temp_accum = ( C_type )temp_accum; \
  \
 			if ( *( c + ( rs_c * i ) + ( cs_c * j ) ) != out_temp_accum ) \
 			{ \
@@ -719,8 +708,8 @@ aocl_post_op* lpgemm_create_post_ops_struct_ ## BLAS_SFX \
 		return NULL; \
 	} \
  \
-	/* Only supporting 3 post ops at max for now.*/ \
-	dim_t max_post_ops_seq_length = 3; \
+	/* Only supporting 5 post ops at max for now.*/ \
+	dim_t max_post_ops_seq_length = 5; \
 	post_ops->seq_vector = ( AOCL_POST_OP_TYPE* ) \
 							malloc \
 							( \
@@ -737,48 +726,79 @@ aocl_post_op* lpgemm_create_post_ops_struct_ ## BLAS_SFX \
 	/* Parse post ops list.*/ \
 	dim_t cur_op_index = 0; \
 	/* Ensure the buffers that use NULL check in deinit code is properly set to NULL.*/ \
-	post_ops->eltwise.algo.alpha = NULL; \
+	post_ops->eltwise = NULL; \
 	post_ops->bias.bias = NULL; \
 	post_ops->sum.scale_factor = NULL; \
 	if ( post_ops_str != NULL ) \
 	{ \
 		char* ops_tok = strtok(post_ops_str, ", " ); \
+		bool is_relu = FALSE; \
 		bool is_param_relu = FALSE; \
 		bool is_gelu_tanh = FALSE; \
 		bool is_gelu_erf = FALSE; \
 		bool is_clip = FALSE; \
+		dim_t activator_idx = 0; \
+		dim_t clip_idx = 0; \
+ \
+		/* Ensure only one activator is used as an eltwise post-op.*/ \
+		bool is_activator_set = FALSE; \
+		num_eltwise = 0; \
 		while ( ops_tok ) \
 		{ \
 			if ( strcmp( ops_tok, "bias") == 0 ) \
 			{ \
 				post_ops->seq_vector[cur_op_index] = BIAS; \
+				cur_op_index++; \
 			} \
-			else if ( strcmp( ops_tok, "relu") == 0 ) \
+			else if ( ( strcmp( ops_tok, "relu") == 0 ) && \
+					  ( is_activator_set == FALSE ) ) \
 			{ \
 				post_ops->seq_vector[cur_op_index] = ELTWISE; \
+				is_relu = TRUE; \
+				is_activator_set = TRUE; \
+				num_eltwise += 1; \
+				activator_idx = cur_op_index; \
+				cur_op_index++; \
 			} \
-			else if ( strcmp( ops_tok, "prelu") == 0 ) \
+			else if ( ( strcmp( ops_tok, "prelu") == 0 ) && \
+					  ( is_activator_set == FALSE ) ) \
 			{ \
 				post_ops->seq_vector[cur_op_index] = ELTWISE; \
 				is_param_relu = TRUE; \
+				is_activator_set = TRUE; \
+				num_eltwise += 1; \
+				activator_idx = cur_op_index; \
+				cur_op_index++; \
 			} \
-			else if ( strcmp( ops_tok, "gelu_tanh") == 0 ) \
+			else if ( ( strcmp( ops_tok, "gelu_tanh") == 0 ) && \
+					  ( is_activator_set == FALSE ) ) \
 			{ \
 				post_ops->seq_vector[cur_op_index] = ELTWISE; \
 				is_gelu_tanh = TRUE; \
+				is_activator_set = TRUE; \
+				num_eltwise += 1; \
+				activator_idx = cur_op_index; \
+				cur_op_index++; \
 			} \
-			else if ( strcmp( ops_tok, "gelu_erf") == 0 ) \
+			else if ( ( strcmp( ops_tok, "gelu_erf") == 0 ) && \
+					  ( is_activator_set == FALSE ) ) \
 			{ \
 				post_ops->seq_vector[cur_op_index] = ELTWISE; \
 				is_gelu_erf = TRUE; \
+				is_activator_set = TRUE; \
+				num_eltwise += 1; \
+				activator_idx = cur_op_index; \
+				cur_op_index++; \
 			} \
 			else if ( strcmp( ops_tok, "clip") == 0 ) \
 			{ \
 				post_ops->seq_vector[cur_op_index] = ELTWISE; \
 				is_clip = TRUE; \
+				num_eltwise += 1; \
+				clip_idx = cur_op_index; \
+				cur_op_index++; \
 			} \
 			ops_tok = strtok( NULL, ", " ); \
-			cur_op_index++; \
 		} \
  \
 		/* Allocate bias buffer, return early if alloc fails.*/ \
@@ -791,32 +811,79 @@ aocl_post_op* lpgemm_create_post_ops_struct_ ## BLAS_SFX \
 		} \
 		GEN_FUNC_NAME(fill_array_post_ops_,C_type)( post_ops->bias.bias, n ); \
  \
-		post_ops->eltwise.is_power_of_2 = FALSE; \
-		post_ops->eltwise.scale_factor = NULL; \
-		post_ops->eltwise.algo.alpha = NULL; \
-		post_ops->eltwise.algo.beta = NULL; \
-		post_ops->eltwise.algo.algo_type = RELU; \
-		if ( is_param_relu == TRUE ) \
+		post_ops->eltwise = malloc( num_eltwise * sizeof( aocl_post_op_eltwise ) ); \
+		if ( post_ops->eltwise == NULL ) \
 		{ \
-			post_ops->eltwise.algo.alpha = malloc( sizeof( C_type ) ); \
-			*( ( C_type* ) post_ops->eltwise.algo.alpha ) = ( C_type )6; \
-			post_ops->eltwise.algo.algo_type = PRELU; \
+			free( post_ops->bias.bias ); \
+			free( post_ops->seq_vector ); \
+			free( post_ops ); \
+			return NULL; \
+		} \
+ \
+		if ( num_eltwise > 0 ) \
+		{ \
+			if ( num_eltwise > 1 ) \
+			{ \
+				if ( activator_idx < clip_idx ) \
+				{ \
+					activator_idx = 0; \
+					clip_idx = 1; \
+				} \
+				else \
+				{ \
+					activator_idx = 1; \
+					clip_idx = 0; \
+				} \
+			} \
+			else \
+			{ \
+			   activator_idx = 0; \
+			   clip_idx = 0; \
+			} \
+		} \
+		/* Only one of relu,prelu,gelu_tanh,gelu_erf allowed as an activator.*/ \
+		if ( is_relu == TRUE ) \
+		{ \
+			( post_ops->eltwise + activator_idx )->is_power_of_2 = FALSE; \
+			( post_ops->eltwise + activator_idx )->scale_factor = NULL; \
+			( post_ops->eltwise + activator_idx )->algo.alpha = NULL; \
+			( post_ops->eltwise + activator_idx )->algo.beta = NULL; \
+			( post_ops->eltwise + activator_idx )->algo.algo_type = RELU; \
+		} \
+		else if ( is_param_relu == TRUE ) \
+		{ \
+			( post_ops->eltwise + activator_idx )->is_power_of_2 = FALSE; \
+			( post_ops->eltwise + activator_idx )->scale_factor = NULL; \
+			( post_ops->eltwise + activator_idx )->algo.beta = NULL; \
+			( post_ops->eltwise + activator_idx )->algo.alpha = malloc( sizeof( C_type ) ); \
+			*( ( C_type* ) ( post_ops->eltwise + activator_idx )->algo.alpha ) = ( C_type )6; \
+			( post_ops->eltwise + activator_idx )->algo.algo_type = PRELU; \
 		} \
 		else if ( is_gelu_tanh == TRUE ) \
 		{ \
-			post_ops->eltwise.algo.algo_type = GELU_TANH; \
+			( post_ops->eltwise + activator_idx )->is_power_of_2 = FALSE; \
+			( post_ops->eltwise + activator_idx )->scale_factor = NULL; \
+			( post_ops->eltwise + activator_idx )->algo.alpha = NULL; \
+			( post_ops->eltwise + activator_idx )->algo.beta = NULL; \
+			( post_ops->eltwise + activator_idx )->algo.algo_type = GELU_TANH; \
 		} \
 		else if ( is_gelu_erf == TRUE ) \
 		{ \
-			post_ops->eltwise.algo.algo_type = GELU_ERF; \
+			( post_ops->eltwise + activator_idx )->is_power_of_2 = FALSE; \
+			( post_ops->eltwise + activator_idx )->scale_factor = NULL; \
+			( post_ops->eltwise + activator_idx )->algo.alpha = NULL; \
+			( post_ops->eltwise + activator_idx )->algo.beta = NULL; \
+			( post_ops->eltwise + activator_idx )->algo.algo_type = GELU_ERF; \
 		} \
-		else if ( is_clip == TRUE ) \
+		if ( is_clip == TRUE ) \
 		{ \
-			post_ops->eltwise.algo.alpha = malloc( sizeof( C_type ) ); \
-			post_ops->eltwise.algo.beta = malloc( sizeof( C_type ) ); \
-			*( ( C_type* ) post_ops->eltwise.algo.alpha ) = ( C_type ) ( -64 ); \
-			*( ( C_type* ) post_ops->eltwise.algo.beta ) = ( C_type ) ( 3 ); \
-			post_ops->eltwise.algo.algo_type = CLIP; \
+			( post_ops->eltwise + clip_idx )->is_power_of_2 = FALSE; \
+			( post_ops->eltwise + clip_idx )->scale_factor = NULL; \
+			( post_ops->eltwise + clip_idx )->algo.alpha = malloc( sizeof( C_type ) ); \
+			( post_ops->eltwise + clip_idx )->algo.beta = malloc( sizeof( C_type ) ); \
+			*( ( C_type* ) ( post_ops->eltwise + clip_idx )->algo.alpha ) = ( C_type ) ( -64 ); \
+			*( ( C_type* ) ( post_ops->eltwise + clip_idx )->algo.beta ) = ( C_type ) ( 3 ); \
+			( post_ops->eltwise + clip_idx )->algo.algo_type = CLIP; \
 		} \
 	} \
  \
@@ -835,6 +902,7 @@ aocl_post_op* lpgemm_create_post_ops_struct_ ## BLAS_SFX \
 			post_ops->sum.scale_factor = malloc( n * sizeof( DSCALE_type ) ); \
 			if ( post_ops->sum.scale_factor == NULL ) \
 			{ \
+				free ( post_ops->eltwise ); \
 				free ( post_ops->bias.bias ); \
 				free( post_ops->seq_vector ); \
 				free( post_ops ); \
@@ -867,9 +935,20 @@ void lpgemm_destroy_post_ops_struct( aocl_post_op* post_ops )
 		return;
 	}
 
-	if ( post_ops->eltwise.algo.alpha != NULL )
+	if ( post_ops->eltwise != NULL )
 	{
-		free( post_ops->eltwise.algo.alpha );
+		for ( dim_t i = 0; i < num_eltwise; ++i )
+		{
+			if ( ( post_ops->eltwise + i )->algo.alpha != NULL )
+			{
+				free( ( post_ops->eltwise + i )->algo.alpha );
+			}
+			if ( ( post_ops->eltwise + i )->algo.beta != NULL )
+			{
+				free( ( post_ops->eltwise + i )->algo.beta );
+			}
+		}
+		free( post_ops->eltwise );
 	}
 	if ( post_ops->sum.scale_factor != NULL )
 	{
@@ -1156,7 +1235,7 @@ void mat_mul_bench_main_ ## BLAS_SFX \
 		); \
 	} \
  \
-if ( bench_mode == 'a' ) \
+	if ( bench_mode == 'a' ) \
 	{ \
 		printf(" Running accuracy check.\n"); \
 		GEN_FUNC_NAME(mat_mul_accuracy_check_driver_,BLAS_SFX) \
@@ -1208,16 +1287,36 @@ int main( int argc, char** argv )
 	FILE* fin  = NULL;
 	if ( argc < 5 )
 	{
-		printf( "Usage: ./bench_lpgemm -i input.txt -m mode < -n 1000 -o op1,op2.. >" \
-						"\nMode is either a or p. a is used for accuracy test, " \
-						"whereas p is used for performance benchmarking." \
-						"\nn_repeats can be set optionally using -n arg." \
-						"\nPost ops can be executed optionaly by providing a " \
-						"coma separated list of ops after -o arg.\nCurrently " \
-						"bias and relu/prelu is supported and can be specified " \
-			 			"as a single post op or combination of the same. eg: -o bias,relu ; -o prelu." \
-						"\nDownscaled version of an API can be enabled by using -d arg. " \
-						"downscale is used to enable- u8s8s32os8, u8s8s16os8 or bf16bf16f32obf16 \n" );
+		printf
+		(
+		  "Usage: ./bench_lpgemm -i input.txt -m mode < -n 100 -o op1,op2 >\n" \
+		  "--Mode is either a or p.\n" \
+		  "\ta is used for accuracy testing.\n" \
+		  "\tp is used for performance benchmarking.\n" \
+		  "--n_repeats can be set optionally using -n arg.\n" \
+		  "--Post ops can be executed optionaly by providing a coma separated\n" \
+		  "  list of post-ops after -o arg. Following post-ops are supported:\n" \
+		  "    1. bias\n" \
+		  "    2. 4 activators\n" \
+		  "      a. relu\n" \
+		  "      b. prelu\n" \
+		  "      c. gelu_tanh\n" \
+		  "      d. gelu_erf\n" \
+		  "    3.clip\n" \
+		  "  Atleast one post-op needs to be specified if the -o arg is used.\n" \
+		  "  eg: -o gelu_tanh; -o bias,relu ; -o clip,prelu,bias.\n" \
+		  "  It is to be noted only one activator can be used at a time.\n" \
+		  "  If more than one activator is used, only the first activator is\n" \
+		  "  applied and the other activators are ignored.\n" \
+		  "--Downscaled version of an API is enabled by using -d arg.\n" \
+		  "  Downscaled api's are used to enable quantization workflows.\n" \
+		  "  Following downscaled api's are supported:\n" \
+		  "    1. u8s8s32os32 -d = u8s8s32os8.\n" \
+		  "    2. u8s8s16os16 -d = u8s8s16os8.\n" \
+		  "    3. bf16bf16f32obf32 -d = bf16bf16f32obf16.\n" \
+		  "    4. s8s8s32os32 -d = s8s8s32os8.\n" \
+		  "    5. s8s8s16os16 -d = s8s8s16os8.\n" \
+		);
 		exit( 1 );
 	}
 
@@ -1254,7 +1353,8 @@ int main( int argc, char** argv )
 
 	if ( post_ops_str != NULL )
 	{
-		post_ops_str_dest = ( char* )malloc( strlen( post_ops_str) * sizeof( char ) );
+		post_ops_str_dest = ( char* )malloc \
+				( ( strlen( post_ops_str) + 1 )* sizeof( char ) );
 		strcpy( post_ops_str_dest, post_ops_str );
 	}
 

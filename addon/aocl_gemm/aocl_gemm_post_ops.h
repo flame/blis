@@ -84,7 +84,7 @@ typedef struct
 typedef struct
 {
 	aocl_post_op_sum sum;
-	aocl_post_op_eltwise eltwise;
+	aocl_post_op_eltwise* eltwise; //Multiple eltwise allowed.
 	aocl_post_op_bias bias;
 
 	// eg: seq_length = 2
