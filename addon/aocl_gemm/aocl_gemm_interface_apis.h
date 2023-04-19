@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2022, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2022-2023, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -52,6 +52,7 @@ AOCL_GEMM_GET_REORDER_BUF_SIZE(u8s8s32os32);
 AOCL_GEMM_GET_REORDER_BUF_SIZE(u8s8s16os16);
 AOCL_GEMM_GET_REORDER_BUF_SIZE(bf16bf16f32of32);
 AOCL_GEMM_GET_REORDER_BUF_SIZE(s8s8s32os32);
+AOCL_GEMM_GET_REORDER_BUF_SIZE(s8s8s16os16);
 
 // Performs reordering of input matrix. Reordering is the process of packing
 // the entire matrix upfront, so that the benefits of packed matrix is obtained
@@ -72,6 +73,7 @@ AOCL_GEMM_REORDER(int8_t,u8s8s32os32);
 AOCL_GEMM_REORDER(int8_t,u8s8s16os16);
 AOCL_GEMM_REORDER(bfloat16,bf16bf16f32of32);
 AOCL_GEMM_REORDER(int8_t,s8s8s32os32);
+AOCL_GEMM_REORDER(int8_t,s8s8s16os16);
 
 // Only supports matrices in row major format. This api can perform gemm with
 // both normal as well as reordered B matrix as opposesd to sgemm (only
@@ -107,5 +109,7 @@ AOCL_GEMM_MATMUL(uint8_t,int8_t,int8_t,int16_t,u8s8s16os8);
 AOCL_GEMM_MATMUL(bfloat16,bfloat16,bfloat16,float,bf16bf16f32obf16);
 AOCL_GEMM_MATMUL(int8_t,int8_t,int32_t,int32_t,s8s8s32os32);
 AOCL_GEMM_MATMUL(int8_t,int8_t,int8_t,int32_t,s8s8s32os8);
+AOCL_GEMM_MATMUL(int8_t,int8_t,int16_t,int16_t,s8s8s16os16);
+AOCL_GEMM_MATMUL(int8_t,int8_t,int8_t,int16_t,s8s8s16os8);
 
 #endif // AOCL_GEMM_INTERFACE_H

@@ -72,6 +72,7 @@ typedef struct lpgemm_post_op_attr_t
 	bool is_last_k;
 	dim_t b_sum_offset;
 	int32_t* b_col_sum_vec;
+	int16_t* b_col_sum_vec_s16;
 } lpgemm_post_op_attr;
 
 void lpgemm_translate_to_post_ops_list

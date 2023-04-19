@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2022-2023, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2023, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -31,24 +31,17 @@
    OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 */
+#ifndef LPGEMM_REORDER_S8S16_H
+#define LPGEMM_REORDER_S8S16_H
 
-#ifndef BLIS_ADDON_LPGEMM
-#define BLIS_ADDON_LPGEMM
+#include "lpgemm_types.h"
 
-#include "aocl_gemm_post_ops.h"
-#include "aocl_gemm_interface_apis.h"
-#include "aocl_util_interface_apis.h"
-#include "aocl_bf16_type.h"
-#include "lpgemm_config.h"
-#include "lpgemm_post_ops.h"
-#include "lpgemm_kernels.h"
-#include "lpgemm_utils_kernels.h"
-#include "lpgemm_packb_bf16.h"
-#include "lpgemm_packb_s16.h"
-#include "lpgemm_packa.h"
-#include "lpgemm_packb.h"
-#include "lpgemm_packa_s8.h"
-#include "lpgemm_packb_s8.h"
-#include "lpgemm_packb_s8s16.h"
+void aocl_reorderb_nr32_s8s8s16o16
+     (
+       lpgemm_obj_t*  b,
+       lpgemm_obj_t*  b_reorder,
+       rntm_t*        rntm,
+       lpgemm_cntx_t* lcntx
+     );
 
-#endif // BLIS_ADDON_LPGEMM
+#endif // LPGEMM_REORDER_S8S16_H

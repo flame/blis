@@ -70,4 +70,5 @@ LPGEMM_5LOOP(uint8_t,int8_t,int16_t,u8s8s16o16);
 LPGEMM_5LOOP(float,float,float,f32f32f32of32);
 LPGEMM_5LOOP(bfloat16,bfloat16,float,bf16bf16f32of32);
 LPGEMM_5LOOP(int8_t,int8_t,int32_t,s8s8s32o32);
+LPGEMM_5LOOP(int8_t,int8_t,int16_t,s8s8s16o16);
 #endif // LPGEMM_5LOOP_INTF_H
