@@ -56,9 +56,10 @@ typedef enum
 typedef enum
 {
 	F32_GELU_TANH = 0,
-	F32_GELU_ERF = 1
+	F32_GELU_ERF = 1,
+	F32_SOFTMAX = 2
 } AOCL_UTIL_OPERATION_TYPE;
-#define AOCL_UTIL_OPERATION_TYPE_LEN 2
+#define AOCL_UTIL_OPERATION_TYPE_LEN 3
 
 typedef enum
 {

@@ -1,3 +1,8 @@
+f32_softmax 1 1
+f32_softmax 2 1
+f32_softmax 4 1
+f32_softmax 21 1
+f32_softmax 64 1
 f32_gelu_tanh 1 1
 f32_gelu_tanh 2 1
 f32_gelu_tanh 8 1

@@ -87,3 +87,28 @@ AOCL_UTIL_L1_OP(float,gelu_erf_f32)
 	lpgemm_util_cntx_t* lutil_cntx_g = lpgemm_util_get_global_cntx_obj( F32_GELU_ERF );
 	( ( lpgemm_util_l1_op_f32_kernel_t )lutil_cntx_g->kern_fun_ptr )( n, x, incx );
 }
+
+AOCL_UTIL_L1_OP(float,softmax_f32)
+{
+	// Check if AVX2 ISA is supported, lpgemm u8s8s16os16 matmul only works with it.
+	if ( bli_cpuid_is_avx2fma3_supported() == FALSE )
+	{
+		bli_print_msg(" AVX2 ISA not supported by processor, AOCL GEMM "
+					"utility l1 operations not supported.", __FILE__, __LINE__ );
+		return; // Error.
+	}
+
+	/* Initialize BLIS. */
+	bli_init_auto();
+
+	// Set MC, NC, KC, NR, MR.
+	aocl_lpgemm_init_global_cntx();
+
+	if ( ( n <= 0 ) || ( x == NULL ) || ( incx <= 0 ) )
+	{
+		return; // Error.
+	}
+
+	lpgemm_util_cntx_t* lutil_cntx_g = lpgemm_util_get_global_cntx_obj( F32_SOFTMAX );
+	( ( lpgemm_util_l1_op_f32_kernel_t )lutil_cntx_g->kern_fun_ptr )( n, x, incx );
+}

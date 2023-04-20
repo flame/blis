@@ -67,6 +67,7 @@
 #define LPGEMM_UTIL_KERN_FUNC_MAP_AVX512_VNNI_BF16 \
 	UMACRO(F32_GELU_TANH, lpgemm_util_f32_gelu_tanh_avx512_kernel) \
 	UMACRO(F32_GELU_ERF, lpgemm_util_f32_gelu_erf_avx512_kernel) \
+	UMACRO(F32_SOFTMAX, lpgemm_util_f32_softmax_avx512_kernel) \
 
 // Icelake
 #define LPGEMM_KERN_FUNC_MAP_AVX512_VNNI \
@@ -91,6 +92,7 @@
 #define LPGEMM_UTIL_KERN_FUNC_MAP_AVX512_VNNI \
 	UMACRO(F32_GELU_TANH, lpgemm_util_f32_gelu_tanh_avx512_kernel) \
 	UMACRO(F32_GELU_ERF, lpgemm_util_f32_gelu_erf_avx512_kernel) \
+	UMACRO(F32_SOFTMAX, lpgemm_util_f32_softmax_avx512_kernel) \
 
 // Skylake
 #define LPGEMM_KERN_FUNC_MAP_AVX512 \
@@ -115,6 +117,7 @@
 #define LPGEMM_UTIL_KERN_FUNC_MAP_AVX512 \
 	UMACRO(F32_GELU_TANH, lpgemm_util_f32_gelu_tanh_avx512_kernel) \
 	UMACRO(F32_GELU_ERF, lpgemm_util_f32_gelu_erf_avx512_kernel) \
+	UMACRO(F32_SOFTMAX, lpgemm_util_f32_softmax_avx512_kernel) \
 
 // Milan, Haswell
 #define LPGEMM_KERN_FUNC_MAP_AVX2 \
@@ -139,5 +142,6 @@
 #define LPGEMM_UTIL_KERN_FUNC_MAP_AVX2 \
 	UMACRO(F32_GELU_TANH, lpgemm_util_f32_gelu_tanh_avx2_kernel) \
 	UMACRO(F32_GELU_ERF, lpgemm_util_f32_gelu_erf_avx2_kernel) \
+	UMACRO(F32_SOFTMAX, lpgemm_util_f32_softmax_avx2_kernel) \
 
 #endif //LPGEMM_FUNC_MAP_H

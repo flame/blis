@@ -119,6 +119,44 @@ void gelu_bench_driver_ ## GELU_SFX \
 GEN_GELU_BENCH_DRV_FN(float,gelu_tanh_f32)
 GEN_GELU_BENCH_DRV_FN(float,gelu_erf_f32)
 
+#define GEN_SOFTMAX_BENCH_DRV_FN(V_type,SOFTMAX_SFX) \
+void softmax_bench_driver_ ## SOFTMAX_SFX \
+     ( \
+       int32_t n_repeats, \
+       dim_t   n, \
+       V_type* x, \
+       inc_t   incx \
+     ) \
+{ \
+	double min_time_diff = DBL_MAX; \
+	for ( int32_t nr = 0; nr < n_repeats; ++nr ) \
+	{ \
+		struct timespec tstart={0,0}, tend={0,0}; \
+		clock_gettime(CLOCK_MONOTONIC, &tstart); \
+ \
+		if ( bench_mode == 'a' ) \
+		{ \
+			GEN_FUNC_NAME(fill_array_,V_type)( x, ( n * incx) ); \
+		} \
+ \
+		GEN_FUNC_NAME(aocl_,SOFTMAX_SFX) \
+		( \
+		  n, x, incx \
+		); \
+ \
+		clock_gettime(CLOCK_MONOTONIC, &tend); \
+ \
+		double diff = \
+			( ( double ) tend.tv_sec + ( 1.0e-9 * tend.tv_nsec ) ) - \
+			( ( double ) tstart.tv_sec + ( 1.0e-9 * tstart.tv_nsec ) ); \
+		min_time_diff = ( diff < min_time_diff ) ? diff : min_time_diff; \
+	} \
+ \
+	print_result( XSTR(SOFTMAX_SFX), n_repeats, n, incx, min_time_diff); \
+} \
+
+GEN_SOFTMAX_BENCH_DRV_FN(float,softmax_f32)
+
 inline float gelu_tanh_f32
      (
        float temp_accum
@@ -172,6 +210,43 @@ cleanup_acc: \
 GEN_GELU_ACC_CHK_FN(float,gelu_tanh_f32)
 GEN_GELU_ACC_CHK_FN(float,gelu_erf_f32)
 
+#define GEN_SOFTMAX_ACC_CHK_FN(V_type,SOFTMAX_SFX) \
+void softmax_acc_check_ ## SOFTMAX_SFX \
+     ( \
+       FILE*   fout, \
+       dim_t n, \
+       V_type* x, \
+       V_type* ref_x, \
+       inc_t incx \
+     ) \
+{ \
+	double exp_sum = 0.0; \
+	for ( dim_t idx = 0; idx < ( n * incx ); idx += incx )\
+	{ \
+		exp_sum += ( double )expf( *(ref_x + idx ) ); \
+	} \
+	for ( dim_t idx = 0; idx < ( n * incx ); idx += incx ) \
+	{ \
+		V_type temp_acc = ( V_type )( ( ( double )*( ref_x + idx ) ) / exp_sum ); \
+		if ( temp_acc != *( x + idx ) ) \
+		{ \
+			if ( fout ) \
+			{ \
+				fprintf( fout, "%s Failure input n: %ld, incx: %ld, idx: %ld \n", \
+								XSTR(SOFTMAX_SFX), n, incx, ( idx / incx ) ); \
+				fflush( fout ); \
+			} \
+			printf("%s failure, n: %ld, incx: %ld, idx: %ld, ref: %.10f, calc: %.10f\n", \
+						XSTR(SOFTMAX_SFX), n, incx, ( idx / incx ), temp_acc, *(x + idx)); \
+			goto cleanup_acc; \
+		} \
+	} \
+cleanup_acc: \
+	return; \
+} \
+
+GEN_SOFTMAX_ACC_CHK_FN(float,softmax_f32)
+
 #define GEN_GELU_BENCH_MAIN_FN(V_type,GELU_SFX) \
 void gelu_bench_main_ ## GELU_SFX \
     ( \
@@ -202,6 +277,36 @@ void gelu_bench_main_ ## GELU_SFX \
 
 GEN_GELU_BENCH_MAIN_FN(float,gelu_tanh_f32)
 GEN_GELU_BENCH_MAIN_FN(float,gelu_erf_f32)
+
+#define GEN_SOFTMAX_BENCH_MAIN_FN(V_type,SOFTMAX_SFX) \
+void softmax_bench_main_ ## SOFTMAX_SFX \
+    ( \
+       FILE*   fout, \
+       dim_t n, \
+       inc_t incx \
+     ) \
+{ \
+	int32_t n_repeats = 1000; \
+	if ( global_n_repeat > 0 ) \
+	{ \
+		n_repeats = global_n_repeat; \
+	} \
+ \
+	V_type* x = ( V_type* ) bli_malloc_user( sizeof( V_type ) * n * incx ); \
+	GEN_FUNC_NAME(fill_array_,V_type)( x, ( n * incx ) ); \
+ \
+	V_type* ref_x = ( V_type* ) bli_malloc_user( sizeof( V_type ) * n * incx ); \
+	GEN_FUNC_NAME(fill_array_,V_type)( ref_x, ( n * incx ) ); \
+ \
+	GEN_FUNC_NAME(softmax_bench_driver_,SOFTMAX_SFX)(n_repeats,n,x,incx); \
+ \
+	if ( bench_mode == 'a' ) \
+	{ \
+		GEN_FUNC_NAME(softmax_acc_check_,SOFTMAX_SFX)(fout,n,x,ref_x,incx); \
+	} \
+} \
+
+GEN_SOFTMAX_BENCH_MAIN_FN(float,softmax_f32)
 
 int main( int argc, char** argv )
 {
@@ -276,6 +381,10 @@ int main( int argc, char** argv )
 		else if ( strcmp( l1_op_type, "f32_gelu_erf" ) == 0 )
 		{
 			gelu_bench_main_gelu_erf_f32( fout, n, incx );
+		}
+		else if ( strcmp( l1_op_type, "f32_softmax" ) == 0 )
+		{
+			softmax_bench_main_softmax_f32( fout, n, incx );
 		}
 	}
 

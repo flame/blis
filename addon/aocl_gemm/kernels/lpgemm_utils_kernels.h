@@ -53,9 +53,11 @@ void lpgemm_util_ ## OP_type ## _kernel \
 // AVX512
 LPGEMM_UTIL_L1_OP_KERNEL(float,f32_gelu_tanh_avx512);
 LPGEMM_UTIL_L1_OP_KERNEL(float,f32_gelu_erf_avx512);
+LPGEMM_UTIL_L1_OP_KERNEL(float,f32_softmax_avx512);
 
 // AVX2
 LPGEMM_UTIL_L1_OP_KERNEL(float,f32_gelu_tanh_avx2);
 LPGEMM_UTIL_L1_OP_KERNEL(float,f32_gelu_erf_avx2);
+LPGEMM_UTIL_L1_OP_KERNEL(float,f32_softmax_avx2);
 
 #endif //BLIS_LPGEMM_UTILS_KERN_H

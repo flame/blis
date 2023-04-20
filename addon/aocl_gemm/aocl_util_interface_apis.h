@@ -45,5 +45,6 @@ BLIS_EXPORT_ADDON void aocl_ ## OP_type \
 
 AOCL_UTIL_L1_OP(float,gelu_tanh_f32);
 AOCL_UTIL_L1_OP(float,gelu_erf_f32);
+AOCL_UTIL_L1_OP(float,softmax_f32);
 
 #endif //AOCL_UTIL_INTERFACE_H
