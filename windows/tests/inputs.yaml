@@ -1,11 +1,11 @@
-# Copyright (C) 2020, Advanced Micro Devices, Inc. All Rights Reserved
-
-checkblis: [input.general, input.operations]
-
-checkblis-fast: [input.general.fast, input.operations.fast]
-
-checkblis-md: [input.general.mixed, input.operations.mixed]
-
-checkblis-salt: [input.general.salt, input.operations.salt]
-
+# Copyright (C) 2020, Advanced Micro Devices, Inc. All Rights Reserved
+
+checkblis: [input.general, input.operations]
+
+checkblis-fast: [input.general.fast, input.operations.fast]
+
+checkblis-md: [input.general.mixed, input.operations.mixed]
+
+checkblis-salt: [input.general.salt, input.operations.salt]
+
 check: ['cblat1.exe', 'dblat1.exe', 'sblat1.exe', 'zblat1.exe', 'cblat2.exe < ../../blastest/input/cblat2.in', 'dblat2.exe < ../../blastest/input/dblat2.in', 'sblat2.exe < ../../blastest/input/sblat2.in', 'zblat2.exe < ../../blastest/input/zblat2.in', 'cblat3.exe < ../../blastest/input/cblat3.in', 'dblat3.exe < ../../blastest/input/dblat3.in', 'sblat3.exe < ../../blastest/input/sblat3.in', 'zblat3.exe < ../../blastest/input/zblat3.in']
