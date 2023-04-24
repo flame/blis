@@ -37,7 +37,6 @@
 #include "trmm.h"
 #include "level3/ref_trmm.h"
 #include "inc/check_error.h"
-#include "inc/utils.h"
 #include <stdexcept>
 #include <algorithm>
 
@@ -59,7 +58,7 @@ void test_trmm( char storage, char side, char uploa, char transa, char diaga,
     // Create a copy of v so that we can check reference results.
     std::vector<T> b_ref(b);
 
-    mktrim<T>( storage, uploa, mn, a.data(), lda );
+    testinghelpers::make_triangular<T>( storage, uploa, mn, a.data(), lda );
     //----------------------------------------------------------
     //                  Call BLIS function
     //----------------------------------------------------------

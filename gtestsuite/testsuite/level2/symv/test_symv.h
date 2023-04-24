@@ -37,7 +37,6 @@
 #include "symv.h"
 #include "level2/ref_symv.h"
 #include "inc/check_error.h"
-#include "inc/utils.h"
 #include <stdexcept>
 #include <algorithm>
 
@@ -55,8 +54,8 @@ void test_symv( char storage, char uploa, char conja, char conjx, gtint_t n,
     std::vector<T> x = testinghelpers::get_random_vector<T>( -3, 3, n, incx );
     std::vector<T> y = testinghelpers::get_random_vector<T>( -2, 5, n, incy );
 
-    mksymm<T>( storage, uploa, n, a.data(), lda );
-    mktrim<T>( storage, uploa, n, a.data(), lda );
+    testinghelpers::make_symm<T>( storage, uploa, n, a.data(), lda );
+    testinghelpers::make_triangular<T>( storage, uploa, n, a.data(), lda );
 
     // Create a copy of c so that we can check reference results.
     std::vector<T> y_ref(y);

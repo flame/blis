@@ -34,6 +34,7 @@
 
 #include "common/testing_basics.h"
 #include "common/type_info.h"
+#include "common/complex_helpers.h"
 
 namespace testinghelpers {
 
@@ -91,7 +92,6 @@ void char_to_cblas_order( char order, CBLAS_ORDER *cblas_order )
 {
     if      ( order == 'c' || order == 'C' ) *cblas_order = CblasColMajor;
     else if ( order == 'r' || order == 'R' ) *cblas_order = CblasRowMajor;
-
 }
 
 void char_to_cblas_trans( char trans, CBLAS_TRANSPOSE *cblas_trans )
@@ -160,16 +160,16 @@ gtint_t get_leading_dimension( char storage, char trans, gtint_t m, gtint_t n, g
     if( (storage == 'c') || (storage == 'C') ) //column-major order
     {
         if ((trans == 'n')||(trans == 'N'))
-            lda = std::max(gtint_t(1),m) + inc;
+            lda = (std::max)(gtint_t(1),m) + inc;
         else
-            lda = std::max(gtint_t(1),n) + inc;
+            lda = (std::max)(gtint_t(1),n) + inc;
     }
     else //row-major order
     {
         if ((trans == 'n')||(trans == 'N'))
-            lda = std::max(gtint_t(1),n) + inc;
+            lda = (std::max)(gtint_t(1),n) + inc;
         else
-            lda = std::max(gtint_t(1),m) + inc;
+            lda = (std::max)(gtint_t(1),m) + inc;
     }
     return lda;
 }
@@ -249,14 +249,14 @@ bool chkconj( char conjx )
         ( ( conj & BLIS_CONJ_BIT ) == BLIS_BITVAL_CONJ );
 }
 
-bool chkupper( char uplo )
+bool is_upper_triangular( char uplo )
 {
     uplo_t uploa;
     char_to_blis_uplo( uplo, &uploa );
     return ( bool ) ( uploa == BLIS_UPPER );
 }
 
-bool chklower( char uplo )
+bool is_lower_triangular( char uplo )
 {
     uplo_t uploa;
     char_to_blis_uplo( uplo, &uploa );
@@ -325,5 +325,293 @@ void set_dim_with_side( char side, gtint_t m, gtint_t n, gtint_t* dim )
     if ( chksideleft( side ) ) *dim = m;
     else                       *dim = n;
 }
+
+template<typename T>
+static void set_imag_zero(T &x){
+        x = {x.real, 0.0};
+}
+
+/**
+ * ==========================================================================
+ * MKHERM
+ * Make an n x n matrix A explicitly Hermitian by copying the conjugate
+ * of the triangle specified by uploa to the opposite triangle. Imaginary
+ * components of diagonal elements are explicitly set to zero.
+ * It is assumed that the diagonal offset of A is zero.
+ * ==========================================================================
+ */
+template<typename T>
+void make_herm( char storage, char uplo, gtint_t n, T* a, gtint_t ld )
+{
+    gtint_t rs,cs;
+    rs=cs=1;
+    /* a = n x n   */
+    if( (storage == 'c') || (storage == 'C') )
+        cs = ld ;
+    else
+        rs = ld ;
+
+    bool uploa = testinghelpers::is_upper_triangular( uplo );
+
+    if( uploa ) {
+        gtint_t i, j;
+        for ( j = 0; j < ( n-1) ; j++ )
+        {
+            for ( i = (j+1) ; i < n ; i++ )
+            {
+                a[i*rs + j*cs] = testinghelpers::conj<T>(a[i*cs + j*rs]);
+            }
+        }
+    }
+    else
+    {
+        gtint_t i, j;
+        for ( j = 1; j <  n ; j++ )
+        {
+            for ( i = 0 ; i < j  ; i++ )
+            {
+                a[i*rs + j*cs] = testinghelpers::conj<T>(a[i*cs + j*rs]);
+            }
+        }
+    }
+    if constexpr (testinghelpers::type_info<T>::is_complex) {
+        gtint_t i;
+        for ( i = 0; i < n ; i++ )
+        {
+            set_imag_zero<T>(a[i*rs + i*cs]);
+        }
+    }
+}
+template void make_herm<float>( char, char, gtint_t, float *, gtint_t );
+template void make_herm<double>( char, char, gtint_t, double *, gtint_t );
+template void make_herm<scomplex>( char, char, gtint_t, scomplex *, gtint_t );
+template void make_herm<dcomplex>( char, char, gtint_t, dcomplex *, gtint_t );
+
+/**
+ * ==========================================================================
+ * MKSYMM
+ * Make an n x n matrix A explicitly symmetric by copying the triangle
+ * specified by uploa to the opposite triangle.
+ * It is assumed that the diagonal offset of A is zero.
+ * ==========================================================================
+ */
+template<typename T>
+void make_symm( char storage, char uplo, gtint_t n, T* a, gtint_t ld )
+{
+    gtint_t rs,cs;
+    rs=cs=1;
+    /* a = n x n   */
+    if( (storage == 'c') || (storage == 'C') )
+        cs = ld ;
+    else
+        rs = ld ;
+
+    bool uploa = testinghelpers::is_upper_triangular( uplo );
+
+   /* Toggle uplo so that it refers to the unstored triangle. */
+    if( uploa ) {
+        gtint_t i, j;
+        for ( j = 0; j < ( n-1) ; j++ )
+        {
+            for ( i = (j+1) ; i < n ; i++ )
+            {
+                a[i*rs + j*cs] = a[i*cs + j*rs];
+            }
+        }
+    }
+    else
+    {
+        gtint_t i, j;
+        for ( j = 1; j <  n ; j++ )
+        {
+            for ( i = 0 ; i < j  ; i++ )
+            {
+                a[i*rs + j*cs] = a[i*cs + j*rs];
+            }
+        }
+    }
+}
+template void make_symm<float>( char, char, gtint_t, float *, gtint_t );
+template void make_symm<double>( char, char, gtint_t, double *, gtint_t );
+template void make_symm<scomplex>( char, char, gtint_t, scomplex *, gtint_t );
+template void make_symm<dcomplex>( char, char, gtint_t, dcomplex *, gtint_t );
+
+/**
+ * ==========================================================================
+ * MKTRIM
+ * Make an n x n matrix A explicitly triangular by preserving the triangle
+ * specified by uploa and zeroing the elements in the opposite triangle.
+ * It is assumed that the diagonal offset of A is zero
+ * ==========================================================================
+ */
+template<typename T>
+void make_triangular( char storage, char uplo, gtint_t n, T* a, gtint_t ld )
+{
+    gtint_t rs,cs;
+    rs=cs=1;
+    /* a = n x n   */
+    if( (storage == 'c') || (storage == 'C') )
+        cs = ld ;
+    else
+        rs = ld ;
+
+    if ( n < 0 )
+        return;
+
+    bool uploa = testinghelpers::is_upper_triangular( uplo );
+    T zero;
+    testinghelpers::initzero<T>(zero);
+
+   /* Toggle uplo so that it refers to the unstored triangle. */
+    if( !uploa ) {
+        gtint_t i, j;
+        for ( j = 1; j <  n ; j++ )
+        {
+            for ( i = 0 ; i < j  ; i++ )
+            {
+                a[i*rs + j*cs] = zero;
+            }
+        }
+    }
+    else
+    {
+        gtint_t i, j;
+        for ( j = 0; j < ( n-1) ; j++ )
+        {
+            for ( i = (j+1) ; i < n ; i++ )
+            {
+                a[i*rs + j*cs] = zero;
+            }
+        }
+    }
+}
+template void make_triangular<float>( char, char, gtint_t, float *, gtint_t );
+template void make_triangular<double>( char, char, gtint_t, double *, gtint_t );
+template void make_triangular<scomplex>( char, char, gtint_t, scomplex *, gtint_t );
+template void make_triangular<dcomplex>( char, char, gtint_t, dcomplex *, gtint_t );
+
+/**
+ * ==========================================================================
+ * MKDIAG
+ * Make an m x n matrix A, which adds a scalar value to 
+ * every element along an arbitrary diagonal of a matrix.
+ * It is assumed that the diagonal offset of A is zero
+ * ==========================================================================
+ */
+template<typename T>
+void make_diag( char storage, gtint_t m, gtint_t n, T alpha, T *a, gtint_t ld )
+{
+    gtint_t rs,cs;
+    rs=cs=1;
+
+    if( (storage == 'c') || (storage == 'C') )
+        cs = ld ;
+    else
+        rs = ld ;
+
+    /* a = mn x mn   */
+    gtint_t mn   = (std::min)( n , m );
+
+    gtint_t i;
+    gtint_t inca = rs + cs ;
+    T *ap        = a;
+    gtint_t ia   = 0;
+    for ( i = 0; i < mn; i++ )
+    {
+        ap[ia] = (alpha + ap[ia]);
+        ia = ia + inca;
+    }
+}
+template void make_diag<float>( char, gtint_t, gtint_t, float, float *, gtint_t );
+template void make_diag<double>( char, gtint_t, gtint_t, double, double *, gtint_t );
+template void make_diag<scomplex>( char, gtint_t, gtint_t, scomplex, scomplex *, gtint_t );
+template void make_diag<dcomplex>( char, gtint_t, gtint_t, dcomplex, dcomplex *, gtint_t );
+
+/**
+ * print scalar value
+ * @param[in] x    specifies the value.
+ * @param[in] spec specifies the format specifer.
+ */
+template<typename T>
+void print_scalar( T x, const char *spec ) {
+    if constexpr (testinghelpers::type_info<T>::is_real)
+        printf(spec, x);
+    else {
+        printf( spec, x.real );
+        if(x.imag < 0)    printf( "-" );
+        else              printf( "+" );
+        printf( spec, abs(x.imag) );
+        printf( " " );
+    }
+}
+template void print_scalar<float>( float x, const char * );
+template void print_scalar<double>( double x, const char * );
+template void print_scalar<scomplex>( scomplex x, const char * );
+template void print_scalar<dcomplex>( dcomplex x, const char * );
+
+/**
+ * print vector of length  n
+ * @param[in] n    specifies the length of the given vector.
+ * @param[in] a    specifies pointer which points to the first element of a.
+ * @param[in] incx specifies storage spacing between elements of a.
+ * @param[in] spec specifies the format specifer.
+ */
+template<typename T>
+void print_vector( gtint_t n, T *x, gtint_t incx, const char *spec )
+{
+    gtint_t i, idx;
+    T val;
+
+    for ( i = 0; i < n; i++ )
+    {
+        idx = (incx > 0) ? (i * incx) : ( - ( n - i - 1 ) * incx );
+        val = x[idx];
+        print_scalar<T>(val,spec);
+        printf( " " );
+    }
+    printf( "\n\n" );
+}
+template void print_vector<float>( gtint_t, float *, gtint_t, const char * );
+template void print_vector<double>( gtint_t, double *, gtint_t, const char * );
+template void print_vector<scomplex>( gtint_t, scomplex *, gtint_t, const char * );
+template void print_vector<dcomplex>( gtint_t, dcomplex *, gtint_t, const char * );
+
+/**
+ * print matrix of size m x n
+ * @param[in] storage specifies the storage format of matrix in memory.
+ * @param[in] m       specifies the number of rows of given matrix.
+ * @param[in] n       specifies the number of columns of given matrix.
+ * @param[in] a       specifies pointer which points to the first element of a.
+ * @param[in] ld      specifies leading dimension for a given matrix.
+ * @param[in] spec    specifies the format specifer.
+ */
+template<typename T>
+void print_matrix( char storage, gtint_t m, gtint_t n, T *a, gtint_t ld, const char *spec )
+{
+    gtint_t rs,cs;
+    rs=cs=1;
+    T val;
+    if( (storage == 'c') || (storage == 'C') )
+        cs = ld ;
+    else
+        rs = ld ;
+
+    gtint_t i, j;
+    for ( i = 0; i < m; i++ )
+    {
+        for ( j = 0; j < n; j++ )
+        {
+            val = a[i*rs + j*cs];
+            print_scalar<T>(val,spec);
+            printf( " " );
+        }
+        printf( "\n" );
+    }
+    printf( "\n" );
+}
+template void print_matrix<float>( char, gtint_t, gtint_t, float *, gtint_t, const char * );
+template void print_matrix<double>( char, gtint_t, gtint_t, double *, gtint_t, const char * );
+template void print_matrix<scomplex>( char, gtint_t, gtint_t, scomplex *, gtint_t, const char * );
+template void print_matrix<dcomplex>( char, gtint_t, gtint_t, dcomplex *, gtint_t, const char * );
 
 } //end of namespace testinghelpers

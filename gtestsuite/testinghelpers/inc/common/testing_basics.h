@@ -195,8 +195,8 @@ bool chkconj( char trans );
  * @param uplo specifies whether matrix is upper or lower triangular stored in memory.
  * @return boolean of the triangular form of the matrix.
  */
-bool chkupper( char uplo );
-bool chklower( char uplo );
+bool is_upper_triangular( char uplo );
+bool is_lower_triangular( char uplo );
 
 /**
  * @brief Returns the boolean form of a matrix unit/non-unit diagonal form.
@@ -274,5 +274,101 @@ void set_dims( char trans, gtint_t m, gtint_t n, gtint_t* mt, gtint_t* nt );
  * @param dim     pointer to the dimension based on side.
  */
 void set_dim_with_side( char side, gtint_t m, gtint_t n, gtint_t* dim );
+
+/**
+ * ==========================================================================
+ * MKHERM
+ * Make an n x n matrix A explicitly Hermitian by copying the conjugate
+ * of the triangle specified by uploa to the opposite triangle. Imaginary
+ * components of diagonal elements are explicitly set to zero.
+ * It is assumed that the diagonal offset of A is zero.
+ * ==========================================================================
+ * @param[in] storage specifies the storage format of matrix in memory.
+ * @param[in] uplo    specifies upper or lower triangular part of A is used.
+ * @param[in] n       specifies the number of rows & columns of square matrix.
+ * @param[in] a       specifies pointer which points to the first element of a.
+ * @param[in] ld      specifies leading dimension for a given matrix.
+ */
+template<typename T>
+void make_herm( char storage, char uplo, gtint_t n, T* a, gtint_t ld );
+
+/**
+ * ==========================================================================
+ * MKSYMM
+ * Make an n x n matrix A explicitly symmetric by copying the triangle
+ * specified by uploa to the opposite triangle.
+ * It is assumed that the diagonal offset of A is zero.
+ * ==========================================================================
+ * @param[in] storage specifies the storage format of matrix in memory.
+ * @param[in] uplo    specifies upper or lower triangular part of A is used.
+ * @param[in] n       specifies the number of rows & columns of square matrix.
+ * @param[in] a       specifies pointer which points to the first element of a.
+ * @param[in] ld      specifies leading dimension for a given matrix.
+ */
+template<typename T>
+void make_symm( char storage, char uplo, gtint_t n, T* a, gtint_t ld );
+
+/**
+ * ==========================================================================
+ * MKTRIM
+ * Make an n x n matrix A explicitly triangular by preserving the triangle
+ * specified by uploa and zeroing the elements in the opposite triangle.
+ * It is assumed that the diagonal offset of A is zero
+ * ==========================================================================
+ * @param[in] storage specifies the storage format of matrix in memory.
+ * @param[in] uplo    specifies upper or lower triangular part of A is used.
+ * @param[in] n       specifies the number of rows & columns of square matrix.
+ * @param[in] a       specifies pointer which points to the first element of a.
+ * @param[in] ld      specifies leading dimension for a given matrix.
+ */
+template<typename T>
+void make_triangular( char storage, char uplo, gtint_t n, T* a, gtint_t ld );
+
+/**
+ * ==========================================================================
+ * MKDIAG
+ * Make an m x n matrix A, which adds a scalar value to 
+ * every element along an arbitrary diagonal of a matrix.
+ * It is assumed that the diagonal offset of A is zero
+ * ==========================================================================
+ * @param[in] storage specifies the storage format of matrix in memory.
+ * @param[in] m       specifies the number of rows of a given matrix.
+ * @param[in] n       specifies the number of columns of a given matrix.
+ * @param[in] alpha   specifies the value to set diagonal elements.
+ * @param[in] a       specifies pointer which points to the first element of a.
+ * @param[in] ld      specifies leading dimension for a given matrix.
+ */
+template<typename T>
+void make_diag( char storage, gtint_t m, gtint_t n, T alpha, T *a, gtint_t ld );
+
+/**
+ * print scalar value
+ * @param[in] x    specifies the value.
+ * @param[in] spec specifies the format specifer.
+ */
+template<typename T>
+void print_scalar( T x, const char *spec );
+
+/**
+ * print vector of length  n
+ * @param[in] n    specifies the length of the given vector.
+ * @param[in] a    specifies pointer which points to the first element of a.
+ * @param[in] incx specifies storage spacing between elements of a.
+ * @param[in] spec specifies the format specifer.
+ */
+template<typename T>
+void print_vector( const char *vec, gtint_t n, T *x, gtint_t incx, const char *spec );
+
+/**
+ * print matrix of size m x n
+ * @param[in] storage specifies the storage format of matrix in memory.
+ * @param[in] m       specifies the number of rows of given matrix.
+ * @param[in] n       specifies the number of columns of given matrix.
+ * @param[in] a       specifies pointer which points to the first element of a.
+ * @param[in] ld      specifies leading dimension for a given matrix.
+ * @param[in] spec    specifies the format specifer.
+ */
+template<typename T>
+void print_matrix( const char *mat, char storage, gtint_t m, gtint_t n, T *a, gtint_t ld, const char *spec );
 
 } //end of namespace testinghelpers

@@ -64,7 +64,7 @@ void ref_trmm3( char storage, char side, char uploa, char trnsa, char diaga,
 
     //*     Test the input parameters.
     bool lside  = ( testinghelpers::chksideleft( side ) );
-    bool upper  = ( testinghelpers::chkupper( uploa ) );
+    bool upper  = ( testinghelpers::is_upper_triangular( uploa ) );
     bool unitdg = ( testinghelpers::chkunitdiag( diaga ) );
     bool transa = ( testinghelpers::chktrans( trnsa ) );
     bool transb = ( testinghelpers::chktrans( trnsb ) );

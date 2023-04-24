@@ -37,7 +37,6 @@
 #include "trsv.h"
 #include "level2/ref_trsv.h"
 #include "inc/check_error.h"
-#include "inc/utils.h"
 #include <stdexcept>
 #include <algorithm>
 
@@ -54,7 +53,7 @@ void test_trsv( char storage, char uploa, char transa, char diaga, gtint_t n,
     std::vector<T> a = testinghelpers::get_random_matrix<T>( 1, 5, storage, transa, n, n, lda );
     std::vector<T> x = testinghelpers::get_random_vector<T>( 1, 3, n, incx );
 
-    mktrim<T>( storage, uploa, n, a.data(), lda );
+    testinghelpers::make_triangular<T>( storage, uploa, n, a.data(), lda );
 
     // Create a copy of c so that we can check reference results.
     std::vector<T> x_ref(x);
