@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2019 - 2023, Advanced Micro Devices, Inc.All rights reserved.
+   Copyright (C) 2023, Advanced Micro Devices, Inc.All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -313,6 +313,7 @@ void bli_zpackm_zen4_asm_12xk
           "zmm0", "zmm1", "zmm2", "zmm3",
           "zmm4", "zmm5", "zmm6", "zmm7",
           "zmm8", "zmm9", "zmm10", "zmm11",
+          "zmm12", "zmm13", "zmm14", "zmm15",
           "memory"
         )
     }

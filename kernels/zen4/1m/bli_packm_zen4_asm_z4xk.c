@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2019 - 2023, Advanced Micro Devices, Inc.All rights reserved.
+   Copyright (C) 2023, Advanced Micro Devices, Inc.All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -50,8 +50,8 @@
 /* ZMM6 = Ar8 Ai8 Ar10 Ai10 Ar12 Ai12 Ar14 Ai14      */
 /* ZMM7 = Ar9 Ai9 Ar11 Ai11 Ar13 Ai13 Ar15 Ai15      */
 /* Output R0 = Ar0 Ai0 Ar4 Ai4 Ar8 Ai8 Ar12 Ai12      */
-/* Output R2 = Ar1 Ai1 Ar5 Ai5 Ar9 Ai9 Ar13 Ai13      */
-/* Output R1 = Ar2 Ai2 Ar6 Ai6 Ar10 Ai10 Ar14 Ai14    */
+/* Output R1 = Ar1 Ai1 Ar5 Ai5 Ar9 Ai9 Ar13 Ai13      */
+/* Output R2 = Ar2 Ai2 Ar6 Ai6 Ar10 Ai10 Ar14 Ai14    */
 /* Output R3 = Ar3 Ai3 Ar7 Ai7 Ar11 Ai11 Ar15 Ai15    */
 /******************************************************/
 #define TRANSPOSE(R0, R1, R2, R3) \
@@ -247,6 +247,7 @@ void bli_zpackm_zen4_asm_4xk
           "r8", "r10", "r12", "r13", "r14",
           "xmm0", "xmm1", "xmm2", "xmm3",
           "zmm0", "zmm1", "zmm2", "zmm3",
+          "zmm4", "zmm5", "zmm6", "zmm7",
           "memory"
         )
     }
