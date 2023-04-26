@@ -398,11 +398,17 @@ void daxpy_blis_impl
         // Get the thread ID
         dim_t thread_id = omp_get_thread_num();
 
-        // Calculate the compute range for the current thread
+        // Get the actual number of threads spawned
+        dim_t nt_use = omp_get_num_threads();
+
+        /*
+          Calculate the compute range for the current thread
+          based on the actual number of threads spawned
+        */
         bli_thread_vector_partition
         (
           n_elem,
-          nt,
+          nt_use,
           &start, &length,
           thread_id
         );
