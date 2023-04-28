@@ -347,7 +347,7 @@ SET(ENABLE_SIMD_FLAGS "AVX2" CACHE STRING "Set compiler SIMD flags")
 SET_PROPERTY(CACHE ENABLE_SIMD_FLAGS PROPERTY STRINGS none SSE2 AVX AVX2)
 
 if(${ENABLE_SIMD_FLAGS} MATCHES "AVX2")
-  add_definitions(/arch:AVX2)
+  #add_definitions(/arch:AVX2)
 elseif(${ENABLE_SIMD_FLAGS} MATCHES "AVX")
   add_definitions(/arch:AVX)
 elseif(${ENABLE_SIMD_FLAGS} MATCHES "SSE2")
@@ -642,7 +642,12 @@ add_definitions(-DBLIS_VERSION_STRING="AOCL-BLIS ${BLIS_VERSION_STRING} Build ${
 if(BUILD_SHARED_LIBS)
     add_library("${PROJECT_NAME}" SHARED ${CMAKE_SOURCE_DIR}/bli_config.h
                          ${CMAKE_SOURCE_DIR}/include/${TARGET_ARCH}/blis.h
-                         ${headers})
+                         ${headers} 
+                         $<TARGET_OBJECTS:zen_1>
+                         $<TARGET_OBJECTS:zen_1f>
+                         $<TARGET_OBJECTS:zen_2>
+                         $<TARGET_OBJECTS:zen_3>
+                         $<TARGET_OBJECTS:zen_3_sup>)
     if(ENABLE_OPENMP)
         target_link_libraries("${PROJECT_NAME}" PRIVATE OpenMP::OpenMP_CXX)
     endif()
@@ -652,7 +657,12 @@ endif()
 if(NOT BUILD_SHARED_LIBS)
     add_library("${PROJECT_NAME}" STATIC ${CMAKE_SOURCE_DIR}/bli_config.h
                          ${CMAKE_SOURCE_DIR}/include/${TARGET_ARCH}/blis.h
-                         ${headers})
+                         ${headers} 
+                         $<TARGET_OBJECTS:zen_1>
+                         $<TARGET_OBJECTS:zen_1f>
+                         $<TARGET_OBJECTS:zen_2>
+                         $<TARGET_OBJECTS:zen_3>
+                         $<TARGET_OBJECTS:zen_3_sup>)
     if(ENABLE_OPENMP)
         set_target_properties("${PROJECT_NAME}" PROPERTIES LINKER_LANGUAGE C OUTPUT_NAME "${LIB_NAME}" STATIC_LIBRARY_OPTIONS "${OpenMP_libomp_LIBRARY}")
     else()
