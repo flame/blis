@@ -452,6 +452,19 @@ double ddot_blis_impl
     if ((bli_mem_is_alloc(&mem_buf_rho)))
     {
         rho_temp = bli_mem_buffer(&mem_buf_rho);
+
+        /*
+          This is done to handle cases when the
+          number of threads launched is not equal
+          to the number of threads requested. In
+          such cases, the garbage value in the created
+          buffer will not be overwritten by valid values.
+
+          This will ensure that garbage value will
+          not get accumulated with the final result.
+        */
+        for (dim_t i = 0; i < nt; i++)
+          rho_temp[i] = 0.0;
     }
     else
     {
