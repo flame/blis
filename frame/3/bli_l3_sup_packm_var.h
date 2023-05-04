@@ -56,7 +56,7 @@ void PASTEMAC(ch,varname) \
        thrinfo_t* thread  \
      );
 
-INSERT_GENTPROT_BASIC0( packm_sup_var1 )
+INSERT_GENTPROT_BASIC( packm_sup_var1 )
 
 #undef  GENTPROT
 #define GENTPROT( ctype, ch, varname ) \
@@ -74,5 +74,5 @@ void PASTEMAC(ch,varname) \
        thrinfo_t* thread  \
      );
 
-INSERT_GENTPROT_BASIC0( packm_sup_var2 )
+INSERT_GENTPROT_BASIC( packm_sup_var2 )
 

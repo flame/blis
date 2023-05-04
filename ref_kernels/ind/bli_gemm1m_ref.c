@@ -34,10 +34,10 @@
 
 #include "blis.h"
 
-#undef  GENTFUNCCO
-#define GENTFUNCCO( ctype, ctype_r, ch, chr, opname, arch, suf ) \
+#undef  GENTFUNCRO
+#define GENTFUNCRO( ctype_r, ctype, chr, ch, opname, arch, suf ) \
 \
-void PASTEMAC3(ch,opname,arch,suf) \
+void PASTEMAC3(chr,opname,arch,suf) \
      ( \
        dim_t               m, \
        dim_t               n, \
@@ -47,50 +47,53 @@ void PASTEMAC3(ch,opname,arch,suf) \
        ctype*     restrict b, \
        ctype*     restrict beta, \
        ctype*     restrict c, inc_t rs_c, inc_t cs_c, \
-       auxinfo_t*          data, \
+       auxinfo_t*          auxinfo, \
        cntx_t*             cntx  \
      ) \
 { \
-	const num_t       dt        = PASTEMAC(ch,type); \
-	const num_t       dt_r      = PASTEMAC(chr,type); \
+	const cntl_t*      params    = bli_auxinfo_params( auxinfo ); \
 \
-	gemm_ukr_vft      rgemm_ukr = bli_cntx_get_ukr_dt( dt_r, BLIS_GEMM_UKR, cntx ); \
-	const bool        row_pref  = bli_cntx_ukr_prefers_rows_dt( dt_r, BLIS_GEMM_UKR, cntx ); \
+	const gemm_ukr_vft rgemm_ukr = bli_gemm_var_cntl_real_ukr( params ); \
+	const bool         row_pref  = bli_gemm_var_cntl_row_pref( params ); \
+	const void*        params_r  = bli_gemm_var_cntl_real_params( params ); \
 \
-	const dim_t       mr        = bli_cntx_get_blksz_def_dt( dt, BLIS_MR, cntx ); \
-	const dim_t       nr        = bli_cntx_get_blksz_def_dt( dt, BLIS_NR, cntx ); \
+	const dim_t        mr        = bli_gemm_var_cntl_mr( params ); \
+	const dim_t        nr        = bli_gemm_var_cntl_nr( params ); \
 \
-	const dim_t       mr_r      = bli_cntx_get_blksz_def_dt( dt_r, BLIS_MR, cntx ); \
-	const dim_t       nr_r      = bli_cntx_get_blksz_def_dt( dt_r, BLIS_NR, cntx ); \
+	const dim_t        mr_r      = row_pref ? mr : 2 * mr; \
+	const dim_t        nr_r      = row_pref ? 2 * nr : nr; \
 \
 	/* Convert the micro-tile dimensions from being in units of complex elements to
 	   be in units of real elements. */ \
-	const dim_t       m_r        = row_pref ? m : 2 * m; \
-	const dim_t       n_r        = row_pref ? 2 * n : n; \
-	const dim_t       k_r        = 2 * k; \
+	const dim_t        m_r        = row_pref ? m : 2 * m; \
+	const dim_t        n_r        = row_pref ? 2 * n : n; \
+	const dim_t        k_r        = 2 * k; \
 \
-	ctype             ct[ BLIS_STACK_BUF_MAX_SIZE \
-	                      / sizeof( ctype_r ) ] \
-	                      __attribute__((aligned(BLIS_STACK_BUF_ALIGN_SIZE))); \
-	inc_t             rs_ct; \
-	inc_t             cs_ct; \
+	ctype              ct[ BLIS_STACK_BUF_MAX_SIZE \
+	                       / sizeof( ctype ) ] \
+	                       __attribute__((aligned(BLIS_STACK_BUF_ALIGN_SIZE))); \
+	inc_t              rs_ct; \
+	inc_t              cs_ct; \
 \
-	ctype_r* restrict a_r       = ( ctype_r* )a; \
+	ctype_r* restrict  a_r       = ( ctype_r* )a; \
 \
-	ctype_r* restrict b_r       = ( ctype_r* )b; \
+	ctype_r* restrict  b_r       = ( ctype_r* )b; \
 \
-	ctype_r* restrict one_r     = PASTEMAC(chr,1); \
-	ctype_r* restrict zero_r    = PASTEMAC(chr,0); \
+	ctype_r* restrict  one_r     = PASTEMAC(chr,1); \
+	ctype_r* restrict  zero_r    = PASTEMAC(chr,0); \
 \
-	ctype_r* restrict alpha_r   = &PASTEMAC(ch,real)( *alpha ); \
-	ctype_r* restrict alpha_i   = &PASTEMAC(ch,imag)( *alpha ); \
+	ctype_r* restrict  alpha_r   = &PASTEMAC(ch,real)( *alpha ); \
+	ctype_r* restrict  alpha_i   = &PASTEMAC(ch,imag)( *alpha ); \
 \
-	ctype_r* restrict beta_r    = &PASTEMAC(ch,real)( *beta ); \
-	ctype_r* restrict beta_i    = &PASTEMAC(ch,imag)( *beta ); \
+	ctype_r* restrict  beta_r    = &PASTEMAC(ch,real)( *beta ); \
+	ctype_r* restrict  beta_i    = &PASTEMAC(ch,imag)( *beta ); \
 \
-	ctype_r*          c_use; \
-	inc_t             rs_c_use; \
-	inc_t             cs_c_use; \
+	ctype_r*           c_use; \
+	inc_t              rs_c_use; \
+	inc_t              cs_c_use; \
+\
+	auxinfo_t auxinfo_r = *auxinfo; \
+    bli_auxinfo_set_params( params_r, &auxinfo_r ); \
 \
 \
 	if ( !PASTEMAC(chr,eq0)( *alpha_i ) || \
@@ -133,7 +136,7 @@ void PASTEMAC3(ch,opname,arch,suf) \
 		  b_r, \
 		  zero_r, \
 		  c_use, rs_c_use, cs_c_use, \
-		  data, \
+		  &auxinfo_r, \
 		  cntx  \
 		); \
 \
@@ -178,11 +181,11 @@ void PASTEMAC3(ch,opname,arch,suf) \
 		  b_r, \
 		  beta_r, \
 		  c_use, rs_c_use, cs_c_use, \
-		  data, \
+		  &auxinfo_r, \
 		  cntx  \
 		); \
 	} \
 }
 
-INSERT_GENTFUNCCO_BASIC2( gemm1m, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX )
+INSERT_GENTFUNCRO( gemm1m, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX )
 

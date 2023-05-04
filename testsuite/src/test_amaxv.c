@@ -182,7 +182,7 @@ void libblis_test_amaxv_experiment
 	// Randomize x.
 	libblis_test_vobj_randomize( params, FALSE, &x );
 
-	// Repeat the experiment n_repeats times and record results. 
+	// Repeat the experiment n_repeats times and record results.
 	for ( i = 0; i < n_repeats; ++i )
 	{
 		time = bli_clock();
@@ -300,7 +300,7 @@ void PASTEMAC(ch,opname) \
        dim_t* restrict index  \
      ); \
 
-INSERT_GENTPROT_BASIC0( amaxv_test )
+INSERT_GENTPROT_BASIC( amaxv_test )
 
 
 //
@@ -459,5 +459,5 @@ void PASTEMAC(ch,varname) \
 	PASTEMAC(i,copys)( index_l, *index ); \
 }
 
-INSERT_GENTFUNCR_BASIC0( amaxv_test )
+INSERT_GENTFUNCR_BASIC( amaxv_test )
 

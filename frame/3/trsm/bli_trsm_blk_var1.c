@@ -81,8 +81,8 @@ void bli_trsm_blk_var1
 	for ( dim_t i = my_start; i < my_end; i += b_alg )
 	{
 		b_alg = bli_determine_blocksize( direct, i, my_end,
-		                                 bli_part_cntl_b_alg( cntl ),
-		                                 bli_part_cntl_b_max( cntl ) );
+		                                 bli_part_cntl_blksz_alg( cntl ),
+		                                 bli_part_cntl_blksz_max( cntl ) );
 
 		// Acquire partitions for A1 and C1.
 		obj_t a11_1, c1_1;
@@ -139,7 +139,7 @@ void bli_trsm_blk_var1
 	bli_thread_range_mdim
 	(
 	  direct,
-      bli_part_cntl_b_mult( cntl ),
+      bli_part_cntl_blksz_mult( cntl ),
       bli_part_cntl_use_weighted( cntl ),
       thread, &ax1, b, &cx1,
 	  &my_start, &my_end
@@ -154,8 +154,8 @@ void bli_trsm_blk_var1
 	{
 		// Determine the current algorithmic blocksize.
 		b_alg = bli_determine_blocksize( direct, i, my_end,
-		                                 bli_part_cntl_b_alg( cntl ),
-		                                 bli_part_cntl_b_max( cntl ) );
+		                                 bli_part_cntl_blksz_alg( cntl ),
+		                                 bli_part_cntl_blksz_max( cntl ) );
 
 		// Acquire partitions for A1 and C1.
 		obj_t a11, c1;

@@ -76,10 +76,6 @@
 #define gemmtrsm1m_l_ukr_name  GENARNAME(gemmtrsm1m_l)
 #undef  gemmtrsm1m_u_ukr_name
 #define gemmtrsm1m_u_ukr_name  GENARNAME(gemmtrsm1m_u)
-#undef  trsm1m_l_ukr_name
-#define trsm1m_l_ukr_name      GENARNAME(trsm1m_l)
-#undef  trsm1m_u_ukr_name
-#define trsm1m_u_ukr_name      GENARNAME(trsm1m_u)
 
 // Instantiate prototypes for above functions via the virtual micro-kernel API
 // template.
@@ -194,25 +190,31 @@
 
 // -- Macros to help concisely instantiate bli_func_init() ---------------------
 
+#define gen_func_init_ro( func_p, opname ) \
+do { \
+	bli_func_init( func_p, PASTEMAC(s,opname), PASTEMAC(d,opname), \
+	                       NULL,               NULL ); \
+} while (0)
+
 #define gen_func_init_co( func_p, opname ) \
-{ \
+do { \
 	bli_func_init( func_p, NULL,               NULL, \
 	                       PASTEMAC(c,opname), PASTEMAC(z,opname) ); \
-}
+} while (0)
 
 #define gen_func_init( func_p, opname ) \
-{ \
+do { \
 	bli_func_init( func_p, PASTEMAC(s,opname), PASTEMAC(d,opname), \
 	                       PASTEMAC(c,opname), PASTEMAC(z,opname) ); \
-}
+} while (0)
 
 #define gen_sup_func_init( func0_p, func1_p, opname ) \
-{ \
+do { \
 	bli_func_init( func0_p, PASTEMAC(s,opname), PASTEMAC(d,opname), \
 	                        PASTEMAC(c,opname), PASTEMAC(z,opname) ); \
 	bli_func_init( func1_p, PASTEMAC(s,opname), PASTEMAC(d,opname), \
 	                        PASTEMAC(c,opname), PASTEMAC(z,opname) ); \
-}
+} while (0)
 
 // -- Helper function for 1m ---------------------------------------------------
 
@@ -331,6 +333,10 @@ void GENBARNAME(cntx_init)
 	gen_func_init( &funcs[ BLIS_GEMMTRSM_U_UKR ], gemmtrsm_u_ukr_name );
 	gen_func_init( &funcs[ BLIS_TRSM_L_UKR ],     trsm_l_ukr_name     );
 	gen_func_init( &funcs[ BLIS_TRSM_U_UKR ],     trsm_u_ukr_name     );
+
+	gen_func_init_ro( &funcs[ BLIS_GEMM1M_UKR ],       gemm1m_ukr_name       );
+	gen_func_init_ro( &funcs[ BLIS_GEMMTRSM1M_L_UKR ], gemmtrsm1m_l_ukr_name );
+	gen_func_init_ro( &funcs[ BLIS_GEMMTRSM1M_U_UKR ], gemmtrsm1m_u_ukr_name );
 
 	//                                                           s      d      c      z
 	bli_mbool_init( &mbools[ BLIS_GEMM_UKR_ROW_PREF ],        TRUE,  TRUE,  TRUE,  TRUE );
@@ -459,11 +465,9 @@ void GENBAINAME(cntx_init)
 
 	if ( method == BLIS_1M )
 	{
-		gen_func_init_co( &funcs[ BLIS_GEMM_VIR_UKR ],       gemm1m_ukr_name       );
-		gen_func_init_co( &funcs[ BLIS_GEMMTRSM_L_VIR_UKR ], gemmtrsm1m_l_ukr_name );
-		gen_func_init_co( &funcs[ BLIS_GEMMTRSM_U_VIR_UKR ], gemmtrsm1m_u_ukr_name );
-		gen_func_init_co( &funcs[ BLIS_TRSM_L_VIR_UKR ],     trsm1m_l_ukr_name     );
-		gen_func_init_co( &funcs[ BLIS_TRSM_U_VIR_UKR ],     trsm1m_u_ukr_name     );
+		//gen_func_init_ro( &funcs[ BLIS_GEMM_VIR_UKR ],       gemm1m_ukr_name       );
+		//gen_func_init_ro( &funcs[ BLIS_GEMMTRSM_L_VIR_UKR ], gemmtrsm1m_l_ukr_name );
+		//gen_func_init_ro( &funcs[ BLIS_GEMMTRSM_U_VIR_UKR ], gemmtrsm1m_u_ukr_name );
 	}
 	else // if ( method == BLIS_NAT )
 	{

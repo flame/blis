@@ -172,7 +172,7 @@ void libblis_test_randm_experiment
 	// Create the test objects.
 	libblis_test_mobj_create( params, datatype, BLIS_NO_TRANSPOSE, x_store, m, n, &x );
 
-	// Repeat the experiment n_repeats times and record results. 
+	// Repeat the experiment n_repeats times and record results.
 	for ( i = 0; i < n_repeats; ++i )
 	{
 		time = bli_clock();
@@ -245,7 +245,7 @@ void libblis_test_randm_check
 	bli_obj_scalar_init_detached( dt_real, &sum );
 
 	bli_absumm( x, &sum );
-	
+
 	if ( bli_is_float( dt_real ) )
 	{
 		float*  sum_x = bli_obj_buffer_at_off( &sum );
@@ -341,5 +341,5 @@ void PASTEMAC(ch,varname)( \
 	PASTEMAC2(chr,chr,copys)( sum, *sum_x_cast ); \
 }
 
-INSERT_GENTFUNCR_BASIC0( absumm )
+INSERT_GENTFUNCR_BASIC( absumm )
 

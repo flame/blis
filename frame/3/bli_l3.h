@@ -47,9 +47,7 @@
 #include "bli_l3_oft_var.h"
 
 #include "bli_l3_int.h"
-#include "bli_l3_blocksize.h"
 #include "bli_l3_prune.h"
-#include "bli_l3_schema.h"
 
 // Prototype object APIs (basic and expert).
 #include "bli_l3_oapi.h"

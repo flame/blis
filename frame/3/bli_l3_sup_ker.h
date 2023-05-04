@@ -44,13 +44,13 @@
 #undef  GENTPROT
 #define GENTPROT GEMMSUP_KER_PROT
 
-INSERT_GENTPROT_BASIC0( gemmsup_rv_ukr_name )
-INSERT_GENTPROT_BASIC0( gemmsup_rg_ukr_name )
-INSERT_GENTPROT_BASIC0( gemmsup_cv_ukr_name )
-INSERT_GENTPROT_BASIC0( gemmsup_cg_ukr_name )
+INSERT_GENTPROT_BASIC( gemmsup_rv_ukr_name )
+INSERT_GENTPROT_BASIC( gemmsup_rg_ukr_name )
+INSERT_GENTPROT_BASIC( gemmsup_cv_ukr_name )
+INSERT_GENTPROT_BASIC( gemmsup_cg_ukr_name )
 
-INSERT_GENTPROT_BASIC0( gemmsup_rd_ukr_name )
-INSERT_GENTPROT_BASIC0( gemmsup_cd_ukr_name )
+INSERT_GENTPROT_BASIC( gemmsup_rd_ukr_name )
+INSERT_GENTPROT_BASIC( gemmsup_cd_ukr_name )
 
-INSERT_GENTPROT_BASIC0( gemmsup_gx_ukr_name )
+INSERT_GENTPROT_BASIC( gemmsup_gx_ukr_name )
 

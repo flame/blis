@@ -45,29 +45,29 @@
 #undef  GENTPROT
 #define GENTPROT AXPY2V_KER_PROT
 
-INSERT_GENTPROT_BASIC0( axpy2v_ker_name )
+INSERT_GENTPROT_BASIC( axpy2v_ker_name )
 
 
 #undef  GENTPROT
 #define GENTPROT AXPYF_KER_PROT
 
-INSERT_GENTPROT_BASIC0( axpyf_ker_name )
+INSERT_GENTPROT_BASIC( axpyf_ker_name )
 
 
 #undef  GENTPROT
 #define GENTPROT DOTAXPYV_KER_PROT
 
-INSERT_GENTPROT_BASIC0( dotaxpyv_ker_name )
+INSERT_GENTPROT_BASIC( dotaxpyv_ker_name )
 
 
 #undef  GENTPROT
 #define GENTPROT DOTXAXPYF_KER_PROT
 
-INSERT_GENTPROT_BASIC0( dotxaxpyf_ker_name )
+INSERT_GENTPROT_BASIC( dotxaxpyf_ker_name )
 
 
 #undef  GENTPROT
 #define GENTPROT DOTXF_KER_PROT
 
-INSERT_GENTPROT_BASIC0( dotxf_ker_name )
+INSERT_GENTPROT_BASIC( dotxf_ker_name )
 

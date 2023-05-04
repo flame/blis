@@ -114,9 +114,9 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 	); \
 }
 
-INSERT_GENTFUNC_BASIC2( addd,  addv,  BLIS_ADDV_KER )
-INSERT_GENTFUNC_BASIC2( copyd, copyv, BLIS_COPYV_KER )
-INSERT_GENTFUNC_BASIC2( subd,  subv,  BLIS_SUBV_KER )
+INSERT_GENTFUNC_BASIC( addd,  addv,  BLIS_ADDV_KER )
+INSERT_GENTFUNC_BASIC( copyd, copyv, BLIS_COPYV_KER )
+INSERT_GENTFUNC_BASIC( subd,  subv,  BLIS_SUBV_KER )
 
 
 #undef  GENTFUNC
@@ -195,8 +195,8 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 	); \
 }
 
-INSERT_GENTFUNC_BASIC2( axpyd,  axpyv,  BLIS_AXPYV_KER )
-INSERT_GENTFUNC_BASIC2( scal2d, scal2v, BLIS_SCAL2V_KER )
+INSERT_GENTFUNC_BASIC( axpyd,  axpyv,  BLIS_AXPYV_KER )
+INSERT_GENTFUNC_BASIC( scal2d, scal2v, BLIS_SCAL2V_KER )
 
 
 #undef  GENTFUNC
@@ -252,7 +252,7 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 	); \
 }
 
-INSERT_GENTFUNC_BASIC2( invertd, invertv, BLIS_INVERTV_KER )
+INSERT_GENTFUNC_BASIC( invertd, invertv, BLIS_INVERTV_KER )
 
 
 #undef  GENTFUNC
@@ -312,9 +312,9 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 	); \
 }
 
-INSERT_GENTFUNC_BASIC2( invscald, invscalv, BLIS_INVSCALV_KER )
-INSERT_GENTFUNC_BASIC2( scald, scalv, BLIS_SCALV_KER )
-INSERT_GENTFUNC_BASIC2( setd,  setv,  BLIS_SETV_KER )
+INSERT_GENTFUNC_BASIC( invscald, invscalv, BLIS_INVSCALV_KER )
+INSERT_GENTFUNC_BASIC( scald, scalv, BLIS_SCALV_KER )
+INSERT_GENTFUNC_BASIC( setd,  setv,  BLIS_SETV_KER )
 
 
 #undef  GENTFUNCR
@@ -390,7 +390,7 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 	); \
 }
 
-INSERT_GENTFUNCR_BASIC2( setid, setv, BLIS_SETV_KER )
+INSERT_GENTFUNCR_BASIC( setid, setv, BLIS_SETV_KER )
 
 
 #undef  GENTFUNC
@@ -449,7 +449,7 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 	); \
 }
 
-INSERT_GENTFUNC_BASIC2( shiftd, addv, BLIS_ADDV_KER )
+INSERT_GENTFUNC_BASIC( shiftd, addv, BLIS_ADDV_KER )
 
 
 #undef  GENTFUNC
@@ -528,7 +528,7 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 	); \
 }
 
-INSERT_GENTFUNC_BASIC2( xpbyd,  xpbyv,  BLIS_XPBYV_KER )
+INSERT_GENTFUNC_BASIC( xpbyd,  xpbyv,  BLIS_XPBYV_KER )
 
 
 #endif

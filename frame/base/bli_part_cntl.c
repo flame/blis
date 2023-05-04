@@ -38,25 +38,31 @@
 void bli_part_cntl_init_node
      (
        void_fp      var_func,
+       num_t        b_dt,
        dim_t        b_alg,
        dim_t        b_max,
+       dim_t        b_scale,
        dim_t        b_mult,
+       dim_t        b_mult_scale,
        dir_t        direct,
        bool         use_weighted,
        part_cntl_t* cntl
      )
 {
 	// Initialize the part_cntl_t struct.
+	cntl->b_dt         = b_dt;
 	cntl->b_alg        = b_alg;
 	cntl->b_max        = b_max;
+	cntl->b_scale      = b_scale;
 	cntl->b_mult       = b_mult;
-    cntl->direct       = direct;
-    cntl->use_weighted = use_weighted;
+	cntl->b_mult_scale = b_mult_scale;
+	cntl->direct       = direct;
+	cntl->use_weighted = use_weighted;
 
 	bli_cntl_init_node
 	(
 	  var_func,
-      &cntl->cntl
+	  &cntl->cntl
 	);
 }
 

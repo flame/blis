@@ -46,22 +46,26 @@ void bli_packm_cntl_init_node
 {
 	// Initialize the packm_cntl_t struct.
 	cntl->var    = var;
-    cntl->params = params;
+	cntl->params = params;
 
 	bli_cntl_init_node
 	(
 	  var_func,
-      &cntl->cntl
+	  &cntl->cntl
 	);
 }
 
 void bli_packm_def_cntl_init_node
      (
        void_fp           var_func,
-       num_t             dt_a,
-       num_t             dt_p,
+       num_t             dt_orig,
+       num_t             dt_pack,
+       num_t             dt_bmult,
+       packm_ker_vft     ukr,
        dim_t             bmult_m_def,
        dim_t             bmult_m_pack,
+       dim_t             bmult_m_bcast,
+       dim_t             bmult_m_scale,
        dim_t             bmult_n_def,
        bool              does_invert_diag,
        bool              rev_iter_if_upper,
@@ -71,28 +75,29 @@ void bli_packm_def_cntl_init_node
        packm_def_cntl_t* cntl
      )
 {
-    static packm_ker_vft GENARRAY(packm_struc_cxk,packm_struc_cxk);
-    static packm_ker_vft GENARRAY2_ALL(packm_struc_cxk_md,packm_struc_cxk_md);
-
 	// Initialize the packm_def_cntl_t struct.
-	cntl->ukr               = dt_a == dt_p ? packm_struc_cxk[ dt_a ]
-                                           : packm_struc_cxk_md[ dt_a ][ dt_p ];
+	cntl->ukr               = ukr;
+	cntl->dt_orig           = dt_orig;
+	cntl->dt_pack           = dt_pack;
+	cntl->dt_bmult          = dt_bmult;
 	cntl->bmult_m_def       = bmult_m_def;
 	cntl->bmult_m_pack      = bmult_m_pack;
+	cntl->bmult_m_bcast     = bmult_m_bcast;
+	cntl->bmult_m_scale     = bmult_m_scale;
 	cntl->bmult_n_def       = bmult_n_def;
 	cntl->does_invert_diag  = does_invert_diag;
 	cntl->rev_iter_if_upper = rev_iter_if_upper;
 	cntl->rev_iter_if_lower = rev_iter_if_lower;
 	cntl->pack_schema       = pack_schema;
 	cntl->pack_buf_type     = pack_buf_type;
-    cntl->params            = NULL;
+	cntl->params            = NULL;
 
 	bli_packm_cntl_init_node
 	(
 	  var_func,
-      bli_packm_blk_var1,
-      NULL,
-      &cntl->cntl
+	  bli_packm_blk_var1,
+	  NULL,
+	  &cntl->cntl
 	);
 }
 

@@ -69,8 +69,8 @@ BLIS_INLINE void PASTEMAC2(chx,chy,op) \
 	); \
 }
 
-INSERT_GENTFUNC2_BASIC0(xpbys_mxn_fn);
-INSERT_GENTFUNC2_MIXDP0(xpbys_mxn_fn);
+INSERT_GENTFUNC2_BASIC(xpbys_mxn_fn);
+INSERT_GENTFUNC2_MIXDP(xpbys_mxn_fn);
 
 static xpbys_mxn_vft GENARRAY2_ALL(xpbys_mxn, xpbys_mxn_fn);
 
@@ -130,27 +130,6 @@ void bli_gemm_ker_var2
 	const char* alpha_cast = bli_obj_internal_scalar_buffer( &scalar_b );
 	const char* beta_cast  = bli_obj_internal_scalar_buffer( c );
 
-#if 0
-	// Under certain conditions, we can avoid the overhead of calling the 1m
-	// virtual microkernel by having the real-domain macrokernel execute with
-	// the real-domain microkernel. (See the function definition for details.)
-	if ( bli_cntx_method( cntx ) == BLIS_1M )
-	{
-		bli_gemm_ind_recast_1m_params
-		(
-		  &dt_exec,
-		  &dt_c,
-		  schema_a,
-		  c,
-		  &m, &n, &k,
-		  &pd_a, &ps_a,
-		  &pd_b, &ps_b,
-		  &rs_c, &cs_c,
-		  cntx
-		);
-	}
-#endif
-
 #ifdef BLIS_ENABLE_GEMM_MD
 	// Tweak parameters in select mixed domain cases (rcc, crc, ccr).
 	if ( bli_cntx_method( cntx ) == BLIS_NAT )
@@ -179,8 +158,8 @@ void bli_gemm_ker_var2
 
 	// Query the context for the micro-kernel address and cast it to its
 	// function pointer type.
-	gemm_ukr_vft gemm_ukr = bli_gemm_var_cntl_ukr( cntl );
-    const void*  params   = bli_gemm_var_cntl_params( cntl );
+	gemm_ukr_vft gemm_ukr     = bli_gemm_var_cntl_ukr( cntl );
+	const void*  params       = bli_gemm_var_cntl_params( cntl );
 
 	// Temporary C buffer for edge cases. Note that the strides of this
 	// temporary buffer are set so that they match the storage of the

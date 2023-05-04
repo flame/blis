@@ -138,7 +138,7 @@ void PASTEMAC(ch,opname) \
 	( void )chi_i; \
 }
 
-INSERT_GENTFUNCR_BASIC0( absqsc )
+INSERT_GENTFUNCR_BASIC( absqsc )
 
 
 #undef  GENTFUNCR
@@ -156,7 +156,7 @@ void PASTEMAC(ch,opname) \
 	PASTEMAC2(ch,chr,abval2s)( *chi, *norm ); \
 }
 
-INSERT_GENTFUNCR_BASIC0( normfsc )
+INSERT_GENTFUNCR_BASIC( normfsc )
 
 
 #undef  GENTFUNC
@@ -174,7 +174,7 @@ void PASTEMAC(ch,opname) \
 	PASTEMAC(ch,sqrt2s)( *chi, *psi ); \
 }
 
-INSERT_GENTFUNC_BASIC0( sqrtsc )
+INSERT_GENTFUNC_BASIC( sqrtsc )
 
 
 #undef  GENTFUNCR
@@ -193,7 +193,7 @@ void PASTEMAC(ch,opname) \
 	PASTEMAC2(chr,ch,sqrt2s)( chi_r, *psi ); \
 }
 
-INSERT_GENTFUNCR_BASIC0( sqrtrsc )
+INSERT_GENTFUNCR_BASIC( sqrtrsc )
 
 
 #undef  GENTFUNC
@@ -211,7 +211,7 @@ void PASTEMAC(ch,opname) \
 	PASTEMAC2(ch,d,gets)( *chi, *zeta_r, *zeta_i ); \
 }
 
-INSERT_GENTFUNC_BASIC0( getsc )
+INSERT_GENTFUNC_BASIC( getsc )
 
 
 #undef  GENTFUNC
@@ -229,7 +229,7 @@ void PASTEMAC(ch,opname) \
 	PASTEMAC2(d,ch,sets)( zeta_r, zeta_i, *chi ); \
 }
 
-INSERT_GENTFUNC_BASIC0( setsc )
+INSERT_GENTFUNC_BASIC( setsc )
 
 
 #undef  GENTFUNCR
@@ -247,7 +247,7 @@ void PASTEMAC(ch,opname) \
 	PASTEMAC2(ch,chr,gets)( *chi, *zeta_r, *zeta_i ); \
 }
 
-INSERT_GENTFUNCR_BASIC0( unzipsc )
+INSERT_GENTFUNCR_BASIC( unzipsc )
 
 
 #undef  GENTFUNCR
@@ -265,7 +265,7 @@ void PASTEMAC(ch,opname) \
 	PASTEMAC2(chr,ch,sets)( *zeta_r, *zeta_i, *chi ); \
 }
 
-INSERT_GENTFUNCR_BASIC0( zipsc )
+INSERT_GENTFUNCR_BASIC( zipsc )
 
 // -----------------------------------------------------------------------------
 

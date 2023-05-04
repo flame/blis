@@ -102,7 +102,7 @@ BLIS_INLINE void PASTEMAC(ch,opname) \
 	} \
 }
 
-INSERT_GENTFUNCRO_BASIC0( scal2bbs_mxn )
+INSERT_GENTFUNCRO_BASIC( scal2bbs_mxn )
 
 
 #undef  GENTFUNCCO
@@ -199,6 +199,6 @@ BLIS_INLINE void PASTEMAC(ch,opname) \
 	} \
 }
 
-INSERT_GENTFUNCCO_BASIC0( scal2bbs_mxn )
+INSERT_GENTFUNCCO( scal2bbs_mxn )
 
 #endif

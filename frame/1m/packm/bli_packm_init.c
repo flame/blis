@@ -35,12 +35,11 @@
 
 #include "blis.h"
 
-bool bli_packm_init
+siz_t bli_packm_init
      (
        const obj_t*  c,
              obj_t*  p,
-       const cntl_t* cntl,
-             thrinfo_t* thread
+       const cntl_t* cntl
      )
 {
 	bli_init_once();
@@ -65,7 +64,7 @@ bool bli_packm_init
 
 	// Extract various fields from the control tree.
 	pack_t  schema       = bli_packm_def_cntl_pack_schema( cntl );
-	num_t   dt_tar       = bli_obj_target_dt( c );
+	num_t   dt_tar       = bli_packm_def_cntl_target_dt( cntl );
 	num_t   dt_scalar    = bli_obj_scalar_dt( c );
 	dim_t   bmult_m_def  = bli_packm_def_cntl_bmult_m_def( cntl );
 	dim_t   bmult_m_pack = bli_packm_def_cntl_bmult_m_pack( cntl );
@@ -167,17 +166,6 @@ bool bli_packm_init
 
 	// Compute the size of the packed buffer.
 	siz_t size_p = ps_p * ( m_p_pad / m_panel ) * elem_size_p;
-
-	// If the requested size is zero, then we don't need to do any allocation.
-	if ( size_p == 0 )
-		return false;
-
-	// Update the buffer address in p to point to the buffer associated
-	// with the mem_t entry acquired from the memory broker (now cached in
-	// the control tree node).
-	void* buffer = bli_packm_alloc( size_p, cntl, thread );
-	bli_obj_set_buffer( buffer, p );
-
-	return true;
+	return size_p;
 }
 

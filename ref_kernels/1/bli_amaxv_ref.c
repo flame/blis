@@ -141,5 +141,5 @@ void PASTEMAC3(ch,opname,arch,suf) \
 	PASTEMAC(i,copys)( i_max_l, *i_max ); \
 }
 
-INSERT_GENTFUNCR_BASIC2( amaxv, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX )
+INSERT_GENTFUNCR_BASIC( amaxv, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX )
 

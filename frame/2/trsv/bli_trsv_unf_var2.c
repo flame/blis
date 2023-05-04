@@ -224,5 +224,5 @@ void PASTEMAC(ch,varname) \
 	} \
 }
 
-INSERT_GENTFUNC_BASIC0( trsv_unf_var2 )
+INSERT_GENTFUNC_BASIC( trsv_unf_var2 )
 

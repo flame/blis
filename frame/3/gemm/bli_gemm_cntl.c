@@ -36,238 +36,319 @@
 #include "blis.h"
 
 
+static packm_ker_vft GENARRAY(packm_struc_cxk,packm_struc_cxk);
+static packm_ker_vft GENARRAY2_ALL(packm_struc_cxk_md,packm_struc_cxk_md);
+
 void bli_gemm_var_cntl_init_node
      (
        void_fp          var_func,
+       num_t            dt_comp,
+       num_t            dt_out,
        gemm_ukr_vft     ukr,
+       gemm_ukr_vft     real_ukr,
        bool             row_pref,
+       dim_t            mr,
+       dim_t            nr,
+       dim_t            mr_scale,
+       dim_t            nr_scale,
        gemm_var_cntl_t* cntl
      )
 {
 	// Initialize the gemm_var_cntl_t struct.
+	cntl->dt_comp  = dt_comp;
+	cntl->dt_out   = dt_out;
 	cntl->ukr      = ukr;
-    cntl->row_pref = row_pref;
+	cntl->real_ukr = real_ukr;
+	cntl->row_pref = row_pref;
+	cntl->mr       = mr;
+	cntl->nr       = nr;
+	cntl->mr_scale = mr_scale;
+	cntl->nr_scale = nr_scale;
 
 	bli_cntl_init_node
 	(
 	  var_func,
-      &cntl->cntl
+	  &cntl->cntl
 	);
 }
 
 void bli_gemm_cntl_init
      (
+             ind_t        im,
              opid_t       family,
        const obj_t*       a,
        const obj_t*       b,
        const obj_t*       c,
-             pack_t       schema_a,
-             pack_t       schema_b,
        const cntx_t*      cntx,
              gemm_cntl_t* cntl
      )
 {
-	void_fp macro_kernel_fp = NULL;
+	const bool   trmm_r    = family == BLIS_TRMM && bli_obj_is_triangular( b );
+	const bool   a_lo_tri  = bli_obj_is_triangular( a ) && bli_obj_is_lower( a );
+	const bool   b_up_tri  = bli_obj_is_triangular( b ) && bli_obj_is_upper( b );
 
+	const prec_t comp_prec = bli_obj_comp_prec( c );
+	const num_t  dt_a      = bli_obj_dt( a );
+	const num_t  dt_b      = bli_obj_dt( b );
+	const num_t  dt_c      = bli_obj_dt( c );
+	const num_t  dt_ap     = bli_dt_domain( dt_a ) | comp_prec;
+	const num_t  dt_bp     = bli_dt_domain( dt_b ) | comp_prec;
+	const num_t  dt_comp   = ( im == BLIS_1M ? BLIS_REAL : bli_dt_domain( dt_c ) ) | comp_prec;
+
+	void_fp macro_kernel_fp = family == BLIS_GEMM ||
+	                          family == BLIS_HEMM ||
+							  family == BLIS_SYMM ? bli_gemm_ker_var2 :
 #ifdef BLIS_ENABLE_JRIR_TLB
-
-	if ( family == BLIS_GEMMT )
-    {
-        macro_kernel_fp = bli_obj_is_lower( c ) ? bli_gemmt_l_ker_var2b : bli_gemmt_u_ker_var2b;
-    }
-	else if ( family == BLIS_TRMM ||
-	          family == BLIS_TRMM3 )
-    {
-        macro_kernel_fp = bli_obj_is_triangular( a )
-            ? bli_obj_is_lower( a ) ? bli_trmm_ll_ker_var2b : bli_trmm_lu_ker_var2b
-            : bli_obj_is_lower( b ) ? bli_trmm_rl_ker_var2b : bli_trmm_ru_ker_var2b;
-    }
-	else
-    {
-        macro_kernel_fp = bli_gemm_ker_var2;
-    }
-
+	                          family == BLIS_GEMMT ?
+	                             bli_obj_is_lower( c ) ? bli_gemmt_l_ker_var2b : bli_gemmt_u_ker_var2b :
+	                          family == BLIS_TRMM ||
+	                          family == BLIS_TRMM3 ?
+	                              bli_obj_is_triangular( a ) ?
+	                                 bli_obj_is_lower( a ) ? bli_trmm_ll_ker_var2b : bli_trmm_lu_ker_var2b :
+	                                 bli_obj_is_lower( b ) ? bli_trmm_rl_ker_var2b : bli_trmm_ru_ker_var2b :
+	                          NULL; // Should never happen
 #else
-
-	if ( family == BLIS_GEMMT )
-    {
-        macro_kernel_fp = bli_obj_is_lower( c ) ? bli_gemmt_l_ker_var2 : bli_gemmt_u_ker_var2;
-    }
-	else if ( family == BLIS_TRMM ||
-	          family == BLIS_TRMM3 )
-    {
-        macro_kernel_fp = bli_obj_is_triangular( a )
-            ? bli_obj_is_lower( a ) ? bli_trmm_ll_ker_var2 : bli_trmm_lu_ker_var2
-            : bli_obj_is_lower( b ) ? bli_trmm_rl_ker_var2 : bli_trmm_ru_ker_var2;
-    }
-	else
-    {
-        macro_kernel_fp = bli_gemm_ker_var2;
-    }
-
+	                          family == BLIS_GEMMT ?
+	                             bli_obj_is_lower( c ) ? bli_gemmt_l_ker_var2 : bli_gemmt_u_ker_var2 :
+	                          family == BLIS_TRMM ||
+	                          family == BLIS_TRMM3 ?
+	                              bli_obj_is_triangular( a ) ?
+	                                 bli_obj_is_lower( a ) ? bli_trmm_ll_ker_var2 : bli_trmm_lu_ker_var2 :
+	                                 bli_obj_is_lower( b ) ? bli_trmm_rl_ker_var2 : bli_trmm_ru_ker_var2 :
+	                          NULL; // Should never happen
 #endif
+	gemm_ukr_vft  gemm_ukr      = bli_cntx_get_ukr_dt( dt_comp, BLIS_GEMM_UKR, cntx );
+	gemm_ukr_vft  real_gemm_ukr = NULL;
+	bool          row_pref      = bli_cntx_get_ukr_prefs_dt( dt_comp, BLIS_GEMM_UKR_ROW_PREF, cntx );
+	pack_t        schema_a      = BLIS_PACKED_ROW_PANELS;
+	pack_t        schema_b      = BLIS_PACKED_COL_PANELS;
+	packm_ker_vft packm_a_ukr   = dt_a == dt_ap ? packm_struc_cxk[ dt_a ]
+	                                            : packm_struc_cxk_md[ dt_a ][ dt_ap ];
+	packm_ker_vft packm_b_ukr   = dt_b == dt_bp ? packm_struc_cxk[ dt_b ]
+	                                            : packm_struc_cxk_md[ dt_b ][ dt_bp ];
+	dim_t         mr_def        = bli_cntx_get_blksz_def_dt( dt_comp, BLIS_MR, cntx );
+	dim_t         mr_pack       = bli_cntx_get_blksz_max_dt( dt_comp, BLIS_MR, cntx );
+	dim_t         mr_bcast      = bli_cntx_get_blksz_max_dt( dt_comp, BLIS_BBM, cntx );
+	dim_t         mr_scale      = 1;
+	dim_t         nr_def        = bli_cntx_get_blksz_def_dt( dt_comp, BLIS_NR, cntx );
+	dim_t         nr_pack       = bli_cntx_get_blksz_max_dt( dt_comp, BLIS_NR, cntx );
+	dim_t         nr_bcast      = bli_cntx_get_blksz_max_dt( dt_comp, BLIS_BBN, cntx );
+	dim_t         nr_scale      = 1;
+	dim_t         kr_def        = bli_cntx_get_blksz_def_dt( dt_comp, BLIS_KR, cntx );
+	dim_t         mc_def        = bli_cntx_get_blksz_def_dt( dt_comp, BLIS_MC, cntx );
+	dim_t         mc_max        = bli_cntx_get_blksz_max_dt( dt_comp, BLIS_MC, cntx );
+	dim_t         mc_scale      = 1;
+	dim_t         nc_def        = bli_cntx_get_blksz_def_dt( dt_comp, BLIS_NC, cntx );
+	dim_t         nc_max        = bli_cntx_get_blksz_max_dt( dt_comp, BLIS_NC, cntx );
+	dim_t         nc_scale      = 1;
+	dim_t         kc_def        = bli_cntx_get_blksz_def_dt( dt_comp, BLIS_KC, cntx );
+	dim_t         kc_max        = bli_cntx_get_blksz_max_dt( dt_comp, BLIS_KC, cntx );
+	dim_t         kc_scale      = 1;
 
-    const num_t        dt_a         = bli_obj_dt( a );
-    const num_t        dt_b         = bli_obj_dt( b );
-    const num_t        dt_ap        = bli_obj_target_dt( a );
-    const num_t        dt_bp        = bli_obj_target_dt( b );
-    const num_t        dt_exec      = bli_obj_exec_dt( c );
+	if ( im == BLIS_1M )
+	{
+		if ( ! row_pref )
+		{
+			schema_a = BLIS_PACKED_ROW_PANELS_1E;
+			schema_b = BLIS_PACKED_COL_PANELS_1R;
+			mr_scale = 2;
+			mc_scale = 2;
+		}
+		else
+		{
+			schema_a = BLIS_PACKED_ROW_PANELS_1R;
+			schema_b = BLIS_PACKED_COL_PANELS_1E;
+			nr_scale = 2;
+			nc_scale = 2;
+		}
 
-	const gemm_ukr_vft gemm_ukr     = bli_cntx_get_ukr_dt( dt_exec, BLIS_GEMM_VIR_UKR, cntx );
-    const bool         row_pref     = bli_cntx_get_ukr_prefs_dt( dt_exec, BLIS_GEMM_UKR_ROW_PREF, cntx );
+		kc_scale = 2;
+		real_gemm_ukr = gemm_ukr;
+		gemm_ukr = bli_cntx_get_ukr_dt( dt_comp, BLIS_GEMM1M_UKR, cntx );
+	}
 
-    const bool         a_lo_tri     = bli_obj_is_triangular( a ) && bli_obj_is_lower( a );
-    const bool         b_up_tri     = bli_obj_is_triangular( b ) && bli_obj_is_upper( b );
-    const bool         trmm_r       = family == BLIS_TRMM && bli_obj_is_triangular( b );
+#if 0
+#ifdef BLIS_ENABLE_GEMM_MD
+	cntx_t cntx_local;
 
-    const dim_t        ic_alg       = bli_cntx_get_blksz_def_dt( dt_exec, BLIS_MC, cntx );
-    const dim_t        ic_max       = bli_cntx_get_blksz_max_dt( dt_exec, BLIS_MC, cntx );
-    const dim_t        ic_mult      = bli_cntx_get_blksz_def_dt( dt_exec, BLIS_MR, cntx );
-    const dir_t        ic_dir       = a_lo_tri ? BLIS_BWD : BLIS_FWD;
-    const dim_t        pc_alg       = bli_cntx_get_blksz_def_dt( dt_exec, BLIS_KC, cntx );
-    const dim_t        pc_max       = bli_cntx_get_blksz_max_dt( dt_exec, BLIS_KC, cntx );
-    const dim_t        pc_mult      = bli_cntx_get_blksz_def_dt( dt_exec, BLIS_KR, cntx );
-    const dir_t        pc_dir       = a_lo_tri || b_up_tri ? BLIS_BWD : BLIS_FWD;
-    const dim_t        jc_alg       = bli_cntx_get_blksz_def_dt( dt_exec, BLIS_NC, cntx );
-    const dim_t        jc_max       = bli_cntx_get_blksz_max_dt( dt_exec, BLIS_NC, cntx );
-    const dim_t        jc_mult      = bli_cntx_get_blksz_def_dt( dt_exec, BLIS_NR, cntx );
-    const dir_t        jc_dir       = b_up_tri ? BLIS_BWD : BLIS_FWD;
-
-    const dim_t        bmult_m_def  = bli_cntx_get_blksz_def_dt(   dt_ap, BLIS_MR, cntx );
-    const dim_t        bmult_m_pack = bli_cntx_get_blksz_max_dt(   dt_ap, BLIS_MR, cntx );
-    const dim_t        bmult_n_def  = bli_cntx_get_blksz_def_dt(   dt_bp, BLIS_NR, cntx );
-    const dim_t        bmult_n_pack = bli_cntx_get_blksz_max_dt(   dt_bp, BLIS_NR, cntx );
-    const dim_t        bmult_k_def  = bli_cntx_get_blksz_def_dt( dt_exec, BLIS_KR, cntx );
+	// If any of the storage datatypes differ, or if the computation precision
+	// differs from the storage precision of C, utilize the mixed datatype
+	// code path.
+	// NOTE: If we ever want to support the caller setting the computation
+	// domain explicitly, we will need to check the computation dt against the
+	// storage dt of C (instead of the computation precision against the
+	// storage precision of C).
+	if ( bli_obj_dt( &c_local ) != bli_obj_dt( &a_local ) ||
+	     bli_obj_dt( &c_local ) != bli_obj_dt( &b_local ) ||
+	     bli_obj_comp_prec( &c_local ) != bli_obj_prec( &c_local ) )
+	{
+		// Handle mixed datatype cases in bli_gemm_md(), which may modify
+		// the objects or the context. (If the context is modified, cntx
+		// is adjusted to point to cntx_local.)
+		bli_gemm_md( &a_local, &b_local, beta, &c_local, &schema_a, &schema_b, &cntx_local, &cntx );
+	}
+#endif
+#endif
 
 	// Create two nodes for the macro-kernel.
 	bli_cntl_init_node
 	(
 	  NULL,         // variant function pointer not used
-      &cntl->ir_loop
+	  &cntl->ir_loop
 	);
 
 	bli_gemm_var_cntl_init_node
 	(
 	  macro_kernel_fp,
-      gemm_ukr,
-      row_pref,
-      &cntl->ker
+	  dt_comp,
+	  dt_c,
+	  gemm_ukr,
+	  real_gemm_ukr,
+	  row_pref,
+	  mr_def / mr_scale,
+	  nr_def / nr_scale,
+	  mr_scale,
+	  nr_scale,
+	  &cntl->ker
 	);
-    bli_cntl_attach_sub_node
-    (
-      BLIS_THREAD_NR,
-      ( cntl_t* )&cntl->ir_loop,
-      ( cntl_t* )&cntl->ker
-    );
+	bli_cntl_attach_sub_node
+	(
+	  BLIS_THREAD_NR,
+	  ( cntl_t* )&cntl->ir_loop,
+	  ( cntl_t* )&cntl->ker
+	);
+
+	// Give the gemm kernel control tree node to the
+	// virtual microkernel as the parameters, so that e.g.
+	// the 1m virtual microkernel can look up the real-domain
+	// micro-kernel and its parameters.
+	bli_gemm_var_cntl_set_params( &cntl->ker, ( cntl_t* )&cntl->ker );
 
 	// Create a node for packing matrix A.
 	bli_packm_def_cntl_init_node
 	(
 	  bli_l3_packa, // pack the left-hand operand
-      dt_a,
-      dt_ap,
-	  bmult_m_def,
-	  bmult_m_pack,
-	  bmult_k_def,
-	  FALSE,        // do NOT invert diagonal
-	  FALSE,        // reverse iteration if upper?
-	  FALSE,        // reverse iteration if lower?
-	  schema_a,     // normally BLIS_PACKED_ROW_PANELS
+	  dt_a,
+	  dt_ap,
+	  dt_comp,
+	  packm_a_ukr,
+	  mr_def / mr_scale,
+	  mr_pack,
+	  mr_bcast,
+	  mr_scale,
+	  kr_def,
+	  FALSE,
+	  FALSE,
+	  FALSE,
+	  schema_a,
 	  BLIS_BUFFER_FOR_A_BLOCK,
-      &cntl->pack_a
+	  &cntl->pack_a
 	);
-    bli_cntl_attach_sub_node
-    (
-      BLIS_THREAD_NONE,
-      ( cntl_t* )&cntl->ker,
-      ( cntl_t* )&cntl->pack_a
-    );
+	bli_cntl_attach_sub_node
+	(
+	  BLIS_THREAD_NONE,
+	  ( cntl_t* )&cntl->ker,
+	  ( cntl_t* )&cntl->pack_a
+	);
 
 	// Create a node for partitioning the m dimension by MC.
 	bli_part_cntl_init_node
 	(
 	  bli_gemm_blk_var1,
-      ic_alg,
-      ic_max,
-      ic_mult,
-      ic_dir,
-      bli_obj_is_triangular( a ) || bli_obj_is_upper_or_lower( c ),
-      &cntl->part_ic
+	  dt_comp,
+	  mc_def / mc_scale,
+	  mc_max / mc_scale,
+	  mc_scale,
+	  mr_def / mr_scale,
+	  mr_scale,
+	  a_lo_tri ? BLIS_BWD : BLIS_FWD,
+	  bli_obj_is_triangular( a ) || bli_obj_is_upper_or_lower( c ),
+	  &cntl->part_ic
 	);
-    bli_cntl_attach_sub_node
-    (
-      trmm_r ? BLIS_THREAD_MC | BLIS_THREAD_NC : BLIS_THREAD_MC,
-      ( cntl_t* )&cntl->pack_a,
-      ( cntl_t* )&cntl->part_ic
-    );
+	bli_cntl_attach_sub_node
+	(
+	  trmm_r ? BLIS_THREAD_MC | BLIS_THREAD_NC : BLIS_THREAD_MC,
+	  ( cntl_t* )&cntl->pack_a,
+	  ( cntl_t* )&cntl->part_ic
+	);
 
 	// Create a node for packing matrix B.
 	bli_packm_def_cntl_init_node
 	(
 	  bli_l3_packb, // pack the right-hand operand
-      dt_b,
-      dt_bp,
-	  bmult_n_def,
-	  bmult_n_pack,
-	  bmult_k_def,
-	  FALSE,        // do NOT invert diagonal
-	  FALSE,        // reverse iteration if upper?
-	  FALSE,        // reverse iteration if lower?
-	  schema_b,     // normally BLIS_PACKED_COL_PANELS
+	  dt_b,
+	  dt_bp,
+	  dt_comp,
+	  packm_b_ukr,
+	  nr_def / nr_scale,
+	  nr_pack,
+	  nr_bcast,
+	  nr_scale,
+	  kr_def,
+	  FALSE,
+	  FALSE,
+	  FALSE,
+	  schema_b,
 	  BLIS_BUFFER_FOR_B_PANEL,
-      &cntl->pack_b
+	  &cntl->pack_b
 	);
-    bli_cntl_attach_sub_node
-    (
-      BLIS_THREAD_NONE,
-      ( cntl_t* )&cntl->part_ic,
-      ( cntl_t* )&cntl->pack_b
-    );
+	bli_cntl_attach_sub_node
+	(
+	  BLIS_THREAD_NONE,
+	  ( cntl_t* )&cntl->part_ic,
+	  ( cntl_t* )&cntl->pack_b
+	);
 
 	// Create a node for partitioning the k dimension by KC.
 	bli_part_cntl_init_node
 	(
 	  bli_gemm_blk_var3,
-      pc_alg,
-      pc_max,
-      pc_mult,
-      pc_dir,
-      FALSE,
-      &cntl->part_pc
+	  dt_comp,
+	  kc_def / kc_scale,
+	  kc_max / kc_scale,
+	  kc_scale,
+	  kr_def,
+	  1,
+	  a_lo_tri || b_up_tri ? BLIS_BWD : BLIS_FWD,
+	  FALSE,
+	  &cntl->part_pc
 	);
-    bli_cntl_attach_sub_node
-    (
-      BLIS_THREAD_KC,
-      ( cntl_t* )&cntl->pack_b,
-      ( cntl_t* )&cntl->part_pc
-    );
+	bli_cntl_attach_sub_node
+	(
+	  BLIS_THREAD_KC,
+	  ( cntl_t* )&cntl->pack_b,
+	  ( cntl_t* )&cntl->part_pc
+	);
 
 	// Create a node for partitioning the n dimension by NC.
 	bli_part_cntl_init_node
 	(
 	  bli_gemm_blk_var2,
-      jc_alg,
-      jc_max,
-      jc_mult,
-      jc_dir,
-      bli_obj_is_triangular( b ) || bli_obj_is_upper_or_lower( c ),
-      &cntl->part_jc
+	  dt_comp,
+	  nc_def / nc_scale,
+	  nc_max / nc_scale,
+	  nc_scale,
+	  nr_def / nr_scale,
+	  nr_scale,
+	  b_up_tri ? BLIS_BWD : BLIS_FWD,
+	  bli_obj_is_triangular( b ) || bli_obj_is_upper_or_lower( c ),
+	  &cntl->part_jc
 	);
-    bli_cntl_attach_sub_node
-    (
-      trmm_r ? BLIS_THREAD_NONE : BLIS_THREAD_NC,
-      ( cntl_t* )&cntl->part_pc,
-      ( cntl_t* )&cntl->part_jc
-    );
+	bli_cntl_attach_sub_node
+	(
+	  trmm_r ? BLIS_THREAD_NONE : BLIS_THREAD_NC,
+	  ( cntl_t* )&cntl->part_pc,
+	  ( cntl_t* )&cntl->part_jc
+	);
 
-    bli_gemm_cntl_finalize
-    (
-      family,
-      a,
-      b,
-      c,
-      cntl
-    );
+	bli_gemm_cntl_finalize
+	(
+	  family,
+	  a,
+	  b,
+	  c,
+	  cntl
+	);
 }
 
 void bli_gemm_cntl_finalize
@@ -279,48 +360,38 @@ void bli_gemm_cntl_finalize
              gemm_cntl_t* cntl
      )
 {
-    ( void )c;
+	( void )c;
 
-          dim_t ic_alg  = bli_part_cntl_b_alg( ( cntl_t* )&cntl->part_ic );
-          dim_t ic_max  = bli_part_cntl_b_max( ( cntl_t* )&cntl->part_ic );
-    const dim_t ic_mult = bli_part_cntl_b_mult( ( cntl_t* )&cntl->part_ic );
-          dim_t pc_alg  = bli_part_cntl_b_alg( ( cntl_t* )&cntl->part_pc );
-          dim_t pc_max  = bli_part_cntl_b_max( ( cntl_t* )&cntl->part_pc );
-          dim_t jc_alg  = bli_part_cntl_b_alg( ( cntl_t* )&cntl->part_jc );
-          dim_t jc_max  = bli_part_cntl_b_max( ( cntl_t* )&cntl->part_jc );
-    const dim_t jc_mult = bli_part_cntl_b_mult( ( cntl_t* )&cntl->part_jc );
+	const dim_t ic_mult = bli_part_cntl_blksz_mult( ( cntl_t* )&cntl->part_ic );
+	const dim_t jc_mult = bli_part_cntl_blksz_mult( ( cntl_t* )&cntl->part_jc );
 
-    //
-    // Ensure that:
-    //
-    // 1. KC is a multiple of MR (NR) if A (B) is triangular, hermitian, or symmetric.
-    //    KC is always rounded up.
-    //
-    // 2. MC and NR are multiples of MR and NR, respectively. MC and NC are always
-    //    rounded down.
-    //
+	//
+	// Ensure that:
+	//
+	// 1. KC is a multiple of MR (NR) if A (B) is triangular, hermitian, or symmetric.
+	//    KC is always rounded up.
+	//
+	// 2. MC and NR are multiples of MR and NR, respectively. MC and NC are always
+	//    rounded down.
+	//
 
-    bli_l3_adjust_kc
-    (
-      family,
-      a,
-      b,
-      &pc_alg,
-      &pc_max,
-      ic_mult,
-      jc_mult
-    );
+	// Nudge the default and maximum kc blocksizes up to the nearest
+	// multiple of MR if A is Hermitian, symmetric, or triangular or
+	// NR if B is Hermitian, symmetric, or triangular. If neither case
+	// applies, then we leave the blocksizes unchanged. For trsm we
+	// always use MR (rather than sometimes using NR) because even
+	// when the triangle is on the right, packing of that matrix uses
+	// MR, since only left-side trsm micro-kernels are supported.
+	if ( !bli_obj_root_is_general( a ) || family == BLIS_TRSM )
+	{
+		bli_part_cntl_align_blksz_to_mult( ic_mult, true, ( cntl_t* )&cntl->part_pc );
+	}
+	else if ( !bli_obj_root_is_general( b ) )
+	{
+		bli_part_cntl_align_blksz_to_mult( jc_mult, true, ( cntl_t* )&cntl->part_pc );
+	}
 
-    ic_alg = bli_align_dim_to_mult( ic_alg, ic_mult, false );
-    ic_max = bli_align_dim_to_mult( ic_max, ic_mult, false );
-    jc_alg = bli_align_dim_to_mult( jc_alg, jc_mult, false );
-    jc_max = bli_align_dim_to_mult( jc_max, jc_mult, false );
-
-    bli_part_cntl_set_b_alg( ic_alg, ( cntl_t* )&cntl->part_ic );
-    bli_part_cntl_set_b_max( ic_max, ( cntl_t* )&cntl->part_ic );
-    bli_part_cntl_set_b_alg( pc_alg, ( cntl_t* )&cntl->part_pc );
-    bli_part_cntl_set_b_max( pc_max, ( cntl_t* )&cntl->part_pc );
-    bli_part_cntl_set_b_alg( jc_alg, ( cntl_t* )&cntl->part_jc );
-    bli_part_cntl_set_b_max( jc_max, ( cntl_t* )&cntl->part_jc );
+	bli_part_cntl_align_blksz( false, ( cntl_t* )&cntl->part_ic );
+	bli_part_cntl_align_blksz( false, ( cntl_t* )&cntl->part_jc );
 }
 

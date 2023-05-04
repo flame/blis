@@ -54,5 +54,5 @@ BLIS_EXPORT_BLIS void PASTEMAC(chv,opname) \
        void*     v     \
      );
 
-INSERT_GENTPROTR_BASIC0( machval )
+INSERT_GENTPROTR_BASIC( machval )
 

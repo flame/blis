@@ -178,7 +178,7 @@ void PASTECH2(bls_,ch,varname) \
 	} \
 }
 
-//INSERT_GENTFUNC_BASIC0( packm_var3 )
+//INSERT_GENTFUNC_BASIC( packm_var3 )
 GENTFUNC( float,    s, packm_var3 )
 GENTFUNC( double,   d, packm_var3 )
 GENTFUNC( scomplex, c, packm_var3 )

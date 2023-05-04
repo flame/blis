@@ -49,7 +49,7 @@ err_t bli_l3_return_early_if_trivial
 {
 	// If C has a zero dimension, return early.
 	if ( bli_obj_has_zero_dim( c ) )
-        return BLIS_SUCCESS;
+		return BLIS_SUCCESS;
 
 	// If alpha is zero, or if A or B has a zero dimension, scale C by beta
 	// and return early.
@@ -61,7 +61,7 @@ err_t bli_l3_return_early_if_trivial
 		return BLIS_SUCCESS;
 	}
 
-    return BLIS_FAILURE;
+	return BLIS_FAILURE;
 }
 
 void bli_l3_attach_scalars
@@ -116,8 +116,8 @@ void PASTEMAC(gemm,BLIS_OAPI_EX_SUF)
 		bli_gemm_check( alpha, a, b, beta, c, cntx );
 
 	// Check for zero dimensions, alpha == 0, or other conditions which
-    // mean that we don't actually have to perform a full l3 operation.
-	if ( bli_l3_return_early_if_trivial( alpha, a, b, beta, c ) == BLIS_SUCCESS)
+	// mean that we don't actually have to perform a full l3 operation.
+	if ( bli_l3_return_early_if_trivial( alpha, a, b, beta, c ) == BLIS_SUCCESS )
 		return;
 
 	// Execute the small/unpacked oapi handler. If it finds that the problem
@@ -125,8 +125,8 @@ void PASTEMAC(gemm,BLIS_OAPI_EX_SUF)
 	// other reason decides not to use the small/unpacked implementation,
 	// the function returns with BLIS_FAILURE, which causes execution to
 	// proceed towards the conventional implementation.
-	if ( bli_gemmsup( alpha, a, b, beta, c, cntx, rntm ) == BLIS_SUCCESS )
-		return;
+	//if ( bli_gemmsup( alpha, a, b, beta, c, cntx, rntm ) == BLIS_SUCCESS )
+	//	return;
 
 	// Default to using native execution.
 	num_t dt = bli_obj_dt( c );
@@ -150,7 +150,7 @@ void PASTEMAC(gemm,BLIS_OAPI_EX_SUF)
 
 	// If necessary, obtain a valid context from the gks using the induced
 	// method id determined above.
-	if ( cntx == NULL ) cntx = bli_gks_query_ind_cntx( im );
+	if ( cntx == NULL ) cntx = bli_gks_query_cntx();
 
 #if 0
 #ifdef BLIS_ENABLE_SMALL_MATRIX
@@ -186,128 +186,17 @@ void PASTEMAC(gemm,BLIS_OAPI_EX_SUF)
 		bli_obj_induce_trans( &c_local );
 	}
 
-	// Set the pack schemas.
-	pack_t schema_a;
-	pack_t schema_b;
-	bli_l3_set_schemas( bli_obj_dt( &c_local ), &schema_a, &schema_b, cntx );
-
-#ifdef BLIS_ENABLE_GEMM_MD
-	cntx_t cntx_local;
-
-	// If any of the storage datatypes differ, or if the computation precision
-	// differs from the storage precision of C, utilize the mixed datatype
-	// code path.
-	// NOTE: If we ever want to support the caller setting the computation
-	// domain explicitly, we will need to check the computation dt against the
-	// storage dt of C (instead of the computation precision against the
-	// storage precision of C).
-	if ( bli_obj_dt( &c_local ) != bli_obj_dt( &a_local ) ||
-	     bli_obj_dt( &c_local ) != bli_obj_dt( &b_local ) ||
-	     bli_obj_comp_prec( &c_local ) != bli_obj_prec( &c_local ) )
-	{
-		// Handle mixed datatype cases in bli_gemm_md(), which may modify
-		// the objects or the context. (If the context is modified, cntx
-		// is adjusted to point to cntx_local.)
-		bli_gemm_md( &a_local, &b_local, beta, &c_local, &schema_a, &schema_b, &cntx_local, &cntx );
-	}
-#endif
-
-    bli_l3_attach_scalars( alpha, &a_local, &b_local, beta, &c_local );
-
-	obj_t* cp = &c_local;
-
-#ifdef BLIS_ENABLE_GEMM_MD
-#ifdef BLIS_ENABLE_GEMM_MD_EXTRA_MEM
-	// If any of the following conditions are met, create a temporary matrix
-	// conformal to C into which we will accumulate the matrix product:
-	// - the storage precision of C differs from the computation precision;
-	// - the domains are mixed as crr;
-	// - the storage format of C does not match the preferred orientation
-	//   of the ccr or crc cases.
-	// Then, after the computation is complete, this matrix will be copied
-	// or accumulated back to C.
-	const bool is_ccr_mismatch =
-	             ( bli_gemm_md_is_ccr( &a_local, &b_local, &c_local ) &&
-                   !bli_obj_is_col_stored( &c_local ) );
-	const bool is_crc_mismatch =
-	             ( bli_gemm_md_is_crc( &a_local, &b_local, &c_local ) &&
-                   !bli_obj_is_row_stored( &c_local ) );
-
-	obj_t ct;
-	bool  use_ct = FALSE;
-
-	// FGVZ: Consider adding another guard here that only creates and uses a
-	// temporary matrix for accumulation if k < c * kc, where c is some small
-	// constant like 2. And don't forget to use the same conditional for the
-	// castm() and free() at the end.
-	if (
-	     bli_obj_prec( &c_local ) != bli_obj_comp_prec( &c_local ) ||
-	     bli_gemm_md_is_crr( &a_local, &b_local, &c_local ) ||
-	     is_ccr_mismatch ||
-	     is_crc_mismatch
-	   )
-	{
-		use_ct = TRUE;
-	}
-
-	// If we need a temporary matrix conformal to C for whatever reason,
-	// we create it and prepare to use it now.
-	if ( use_ct )
-	{
-		const dim_t m     = bli_obj_length( &c_local );
-		const dim_t n     = bli_obj_width( &c_local );
-		      inc_t rs    = bli_obj_row_stride( &c_local );
-		      inc_t cs    = bli_obj_col_stride( &c_local );
-
-		      num_t dt_ct = bli_obj_domain( &c_local ) |
-		                    bli_obj_comp_prec( &c_local );
-
-		// When performing the crr case, accumulate to a contiguously-stored
-		// real matrix so we do not have to repeatedly update C with general
-		// stride.
-		if ( bli_gemm_md_is_crr( &a_local, &b_local, &c_local ) )
-			dt_ct = BLIS_REAL | bli_obj_comp_prec( &c_local );
-
-		// When performing the mismatched ccr or crc cases, now is the time
-		// to specify the appropriate storage so the gemm_md_c2r_ref() virtual
-		// microkernel can output directly to C (instead of using a temporary
-		// microtile).
-		if      ( is_ccr_mismatch ) { rs = 1; cs = m; }
-		else if ( is_crc_mismatch ) { rs = n; cs = 1; }
-
-		bli_obj_create( dt_ct, m, n, rs, cs, &ct );
-
-		const num_t dt_exec = bli_obj_exec_dt( &c_local );
-		const num_t dt_comp = bli_obj_comp_dt( &c_local );
-
-		bli_obj_set_target_dt( dt_ct, &ct );
-		bli_obj_set_exec_dt( dt_exec, &ct );
-		bli_obj_set_comp_dt( dt_comp, &ct );
-
-		// A naive approach would cast C to the comptuation datatype,
-		// compute with beta, and then cast the result back to the
-		// user-provided output matrix. However, we employ a different
-		// approach that halves the number of memops on C (or its
-		// typecast temporary) by writing the A*B product directly to
-		// temporary storage, and then using xpbym to scale the
-		// output matrix by beta and accumulate/cast the A*B product.
-		//bli_castm( &c_local, &ct );
-		bli_obj_scalar_attach( BLIS_NO_CONJUGATE, &BLIS_ZERO, &ct );
-		cp = &ct;
-	}
-#endif
-#endif
+	bli_l3_attach_scalars( alpha, &a_local, &b_local, beta, &c_local );
 
 	gemm_cntl_t cntl;
 	bli_gemm_cntl_init
 	(
+	  im,
 	  BLIS_GEMM,
 	  &a_local,
 	  &b_local,
-	  cp,
-	  schema_a,
-	  schema_b,
-      cntx,
+	  &c_local,
+	  cntx,
 	  &cntl
 	);
 
@@ -316,23 +205,11 @@ void PASTEMAC(gemm,BLIS_OAPI_EX_SUF)
 	(
 	  &a_local,
 	  &b_local,
-	  cp,
+	  &c_local,
 	  cntx,
 	  ( cntl_t* )&cntl,
 	  rntm
 	);
-
-#ifdef BLIS_ENABLE_GEMM_MD
-#ifdef BLIS_ENABLE_GEMM_MD_EXTRA_MEM
-	// If we created a temporary matrix conformal to C for whatever reason,
-	// we copy/accumulate the result back to C and then release the object.
-	if ( use_ct )
-	{
-		bli_xpbym( &ct, beta, &c_local );
-		bli_obj_free( &ct );
-	}
-#endif
-#endif
 }
 
 
@@ -354,8 +231,8 @@ void PASTEMAC(gemmt,BLIS_OAPI_EX_SUF)
 		bli_gemmt_check( alpha, a, b, beta, c, cntx );
 
 	// Check for zero dimensions, alpha == 0, or other conditions which
-    // mean that we don't actually have to perform a full l3 operation.
-	if ( bli_l3_return_early_if_trivial( alpha, a, b, beta, c ) == BLIS_SUCCESS)
+	// mean that we don't actually have to perform a full l3 operation.
+	if ( bli_l3_return_early_if_trivial( alpha, a, b, beta, c ) == BLIS_SUCCESS )
 		return;
 
 	// Default to using native execution.
@@ -377,7 +254,7 @@ void PASTEMAC(gemmt,BLIS_OAPI_EX_SUF)
 
 	// If necessary, obtain a valid context from the gks using the induced
 	// method id determined above.
-	if ( cntx == NULL ) cntx = bli_gks_query_ind_cntx( im );
+	if ( cntx == NULL ) cntx = bli_gks_query_cntx();
 
 	// Alias A, B, and C in case we need to apply transformations.
 	obj_t a_local;
@@ -400,22 +277,17 @@ void PASTEMAC(gemmt,BLIS_OAPI_EX_SUF)
 		bli_obj_induce_trans( &c_local );
 	}
 
-	// Set the pack schemas.
-	pack_t schema_a;
-	pack_t schema_b;
-	bli_l3_set_schemas( bli_obj_dt( &c_local ), &schema_a, &schema_b, cntx );
 	bli_l3_attach_scalars( alpha, &a_local, &b_local, beta, &c_local );
 
 	gemm_cntl_t cntl;
 	bli_gemm_cntl_init
 	(
+	  im,
 	  BLIS_GEMMT,
 	  &a_local,
 	  &b_local,
 	  &c_local,
-	  schema_a,
-	  schema_b,
-      cntx,
+	  cntx,
 	  &cntl
 	);
 
@@ -571,8 +443,8 @@ void PASTEMAC(hemm,BLIS_OAPI_EX_SUF)
 		bli_hemm_check( side, alpha, a, b, beta, c, cntx );
 
 	// Check for zero dimensions, alpha == 0, or other conditions which
-    // mean that we don't actually have to perform a full l3 operation.
-	if ( bli_l3_return_early_if_trivial( alpha, a, b, beta, c ) == BLIS_SUCCESS)
+	// mean that we don't actually have to perform a full l3 operation.
+	if ( bli_l3_return_early_if_trivial( alpha, a, b, beta, c ) == BLIS_SUCCESS )
 		return;
 
 	// Default to using native execution.
@@ -594,7 +466,7 @@ void PASTEMAC(hemm,BLIS_OAPI_EX_SUF)
 
 	// If necessary, obtain a valid context from the gks using the induced
 	// method id determined above.
-	if ( cntx == NULL ) cntx = bli_gks_query_ind_cntx( im );
+	if ( cntx == NULL ) cntx = bli_gks_query_cntx();
 
 	// Alias A, B, and C in case we need to apply transformations.
 	obj_t a_local;
@@ -665,22 +537,17 @@ void PASTEMAC(hemm,BLIS_OAPI_EX_SUF)
 	}
 #endif
 
-	// Set the pack schemas.
-	pack_t schema_a;
-	pack_t schema_b;
-	bli_l3_set_schemas( bli_obj_dt( &c_local ), &schema_a, &schema_b, cntx );
-    bli_l3_attach_scalars( alpha, &a_local, &b_local, beta, &c_local );
+	bli_l3_attach_scalars( alpha, &a_local, &b_local, beta, &c_local );
 
 	gemm_cntl_t cntl;
 	bli_gemm_cntl_init
 	(
+	  im,
 	  BLIS_HEMM,
 	  &a_local,
 	  &b_local,
 	  &c_local,
-	  schema_a,
-	  schema_b,
-      cntx,
+	  cntx,
 	  &cntl
 	);
 
@@ -716,8 +583,8 @@ void PASTEMAC(symm,BLIS_OAPI_EX_SUF)
 		bli_symm_check( side, alpha, a, b, beta, c, cntx );
 
 	// Check for zero dimensions, alpha == 0, or other conditions which
-    // mean that we don't actually have to perform a full l3 operation.
-	if ( bli_l3_return_early_if_trivial( alpha, a, b, beta, c ) == BLIS_SUCCESS)
+	// mean that we don't actually have to perform a full l3 operation.
+	if ( bli_l3_return_early_if_trivial( alpha, a, b, beta, c ) == BLIS_SUCCESS )
 		return;
 
 	// Default to using native execution.
@@ -739,7 +606,7 @@ void PASTEMAC(symm,BLIS_OAPI_EX_SUF)
 
 	// If necessary, obtain a valid context from the gks using the induced
 	// method id determined above.
-	if ( cntx == NULL ) cntx = bli_gks_query_ind_cntx( im );
+	if ( cntx == NULL ) cntx = bli_gks_query_cntx();
 
 	// Alias A, B, and C in case we need to apply transformations.
 	obj_t a_local;
@@ -809,22 +676,17 @@ void PASTEMAC(symm,BLIS_OAPI_EX_SUF)
 	}
 #endif
 
-	// Set the pack schemas.
-	pack_t schema_a;
-	pack_t schema_b;
-	bli_l3_set_schemas( bli_obj_dt( &c_local ), &schema_a, &schema_b, cntx );
-    bli_l3_attach_scalars( alpha, &a_local, &b_local, beta, &c_local );
+	bli_l3_attach_scalars( alpha, &a_local, &b_local, beta, &c_local );
 
 	gemm_cntl_t cntl;
 	bli_gemm_cntl_init
 	(
+	  im,
 	  BLIS_SYMM,
 	  &a_local,
 	  &b_local,
 	  &c_local,
-	  schema_a,
-	  schema_b,
-      cntx,
+	  cntx,
 	  &cntl
 	);
 
@@ -860,8 +722,8 @@ void PASTEMAC(trmm3,BLIS_OAPI_EX_SUF)
 		bli_trmm3_check( side, alpha, a, b, beta, c, cntx );
 
 	// Check for zero dimensions, alpha == 0, or other conditions which
-    // mean that we don't actually have to perform a full l3 operation.
-	if ( bli_l3_return_early_if_trivial( alpha, a, b, beta, c ) == BLIS_SUCCESS)
+	// mean that we don't actually have to perform a full l3 operation.
+	if ( bli_l3_return_early_if_trivial( alpha, a, b, beta, c ) == BLIS_SUCCESS )
 		return;
 
 	// Default to using native execution.
@@ -883,7 +745,7 @@ void PASTEMAC(trmm3,BLIS_OAPI_EX_SUF)
 
 	// If necessary, obtain a valid context from the gks using the induced
 	// method id determined above.
-	if ( cntx == NULL ) cntx = bli_gks_query_ind_cntx( im );
+	if ( cntx == NULL ) cntx = bli_gks_query_cntx();
 
 	// Alias A, B, and C so we can tweak the objects if necessary.
 	obj_t a_local;
@@ -964,22 +826,17 @@ void PASTEMAC(trmm3,BLIS_OAPI_EX_SUF)
 
 #endif
 
-	// Set the pack schemas.
-	pack_t schema_a;
-	pack_t schema_b;
-	bli_l3_set_schemas( bli_obj_dt( &c_local ), &schema_a, &schema_b, cntx );
-    bli_l3_attach_scalars( alpha, &a_local, &b_local, beta, &c_local );
+	bli_l3_attach_scalars( alpha, &a_local, &b_local, beta, &c_local );
 
 	gemm_cntl_t cntl;
 	bli_gemm_cntl_init
 	(
+	  im,
 	  BLIS_TRMM3,
 	  &a_local,
 	  &b_local,
 	  &c_local,
-	  schema_a,
-	  schema_b,
-      cntx,
+	  cntx,
 	  &cntl
 	);
 
@@ -1013,8 +870,8 @@ void PASTEMAC(trmm,BLIS_OAPI_EX_SUF)
 		bli_trmm_check( side, alpha, a, b, cntx );
 
 	// Check for zero dimensions, alpha == 0, or other conditions which
-    // mean that we don't actually have to perform a full l3 operation.
-	if ( bli_l3_return_early_if_trivial( alpha, a, b, &BLIS_ZERO, b ) == BLIS_SUCCESS)
+	// mean that we don't actually have to perform a full l3 operation.
+	if ( bli_l3_return_early_if_trivial( alpha, a, b, &BLIS_ZERO, b ) == BLIS_SUCCESS )
 		return;
 
 	// Default to using native execution.
@@ -1035,7 +892,7 @@ void PASTEMAC(trmm,BLIS_OAPI_EX_SUF)
 
 	// If necessary, obtain a valid context from the gks using the induced
 	// method id determined above.
-	if ( cntx == NULL ) cntx = bli_gks_query_ind_cntx( im );
+	if ( cntx == NULL ) cntx = bli_gks_query_cntx();
 
 	// Alias A and B so we can tweak the objects if necessary.
 	obj_t a_local;
@@ -1125,22 +982,17 @@ void PASTEMAC(trmm,BLIS_OAPI_EX_SUF)
 
 #endif
 
-	// Set the pack schemas.
-	pack_t schema_a;
-	pack_t schema_b;
-	bli_l3_set_schemas( bli_obj_dt( &c_local ), &schema_a, &schema_b, cntx );
-    bli_l3_attach_scalars( alpha, &a_local, &b_local, &BLIS_ZERO, &c_local );
+	bli_l3_attach_scalars( alpha, &a_local, &b_local, &BLIS_ZERO, &c_local );
 
 	gemm_cntl_t cntl;
 	bli_gemm_cntl_init
 	(
+	  im,
 	  BLIS_TRMM,
 	  &a_local,
 	  &b_local,
 	  &c_local,
-	  schema_a,
-	  schema_b,
-      cntx,
+	  cntx,
 	  &cntl
 	);
 
@@ -1175,7 +1027,7 @@ void PASTEMAC(trsm,BLIS_OAPI_EX_SUF)
 
 	// Check for zero dimensions, alpha == 0, or other conditions which
     // mean that we don't actually have to perform a full l3 operation.
-	if ( bli_l3_return_early_if_trivial( alpha, a, b, &BLIS_ZERO, b ) == BLIS_SUCCESS)
+	if ( bli_l3_return_early_if_trivial( alpha, a, b, &BLIS_ZERO, b ) == BLIS_SUCCESS )
 		return;
 
 	// Default to using native execution.
@@ -1260,22 +1112,17 @@ void PASTEMAC(trsm,BLIS_OAPI_EX_SUF)
 
 #endif
 
-	// Set the pack schemas.
-	pack_t schema_a;
-	pack_t schema_b;
-	bli_l3_set_schemas( bli_obj_dt( &c_local ), &schema_a, &schema_b, cntx );
-    bli_l3_attach_scalars( alpha, &a_local, &b_local, alpha, &c_local );
+	bli_l3_attach_scalars( alpha, &a_local, &b_local, alpha, &c_local );
 
-    trsm_cntl_t cntl;
+	trsm_cntl_t cntl;
 	bli_trsm_cntl_init
 	(
+	  im,
 	  &a_local,
 	  &b_local,
 	  &c_local,
-	  schema_a,
-	  schema_b,
-      cntx,
-      &cntl
+	  cntx,
+	  &cntl
 	);
 
 	// Invoke the internal back-end.

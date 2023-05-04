@@ -78,7 +78,7 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 	); \
 }
 
-INSERT_GENTFUNCR_BASIC0( asumv )
+INSERT_GENTFUNCR_BASIC( asumv )
 
 
 #undef  GENTFUNC
@@ -114,9 +114,9 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 	); \
 }
 
-INSERT_GENTFUNC_BASIC0( mkherm )
-INSERT_GENTFUNC_BASIC0( mksymm )
-INSERT_GENTFUNC_BASIC0( mktrim )
+INSERT_GENTFUNC_BASIC( mkherm )
+INSERT_GENTFUNC_BASIC( mksymm )
+INSERT_GENTFUNC_BASIC( mktrim )
 
 
 #undef  GENTFUNCR
@@ -157,9 +157,9 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 	); \
 }
 
-INSERT_GENTFUNCR_BASIC0( norm1v )
-INSERT_GENTFUNCR_BASIC0( normfv )
-INSERT_GENTFUNCR_BASIC0( normiv )
+INSERT_GENTFUNCR_BASIC( norm1v )
+INSERT_GENTFUNCR_BASIC( normfv )
+INSERT_GENTFUNCR_BASIC( normiv )
 
 
 #undef  GENTFUNCR
@@ -208,9 +208,9 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 	); \
 }
 
-INSERT_GENTFUNCR_BASIC0( norm1m )
-INSERT_GENTFUNCR_BASIC0( normfm )
-INSERT_GENTFUNCR_BASIC0( normim )
+INSERT_GENTFUNCR_BASIC( norm1m )
+INSERT_GENTFUNCR_BASIC( normfm )
+INSERT_GENTFUNCR_BASIC( normim )
 
 
 #undef  GENTFUNCR
@@ -265,8 +265,8 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 	} \
 }
 
-INSERT_GENTFUNCR_BASIC0( randv )
-INSERT_GENTFUNCR_BASIC0( randnv )
+INSERT_GENTFUNCR_BASIC( randv )
+INSERT_GENTFUNCR_BASIC( randnv )
 
 
 #undef  GENTFUNCR
@@ -331,8 +331,8 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 	} \
 }
 
-INSERT_GENTFUNCR_BASIC0( randm )
-INSERT_GENTFUNCR_BASIC0( randnm )
+INSERT_GENTFUNCR_BASIC( randm )
+INSERT_GENTFUNCR_BASIC( randnm )
 
 
 #undef  GENTFUNCR
@@ -370,7 +370,7 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 	); \
 }
 
-INSERT_GENTFUNCR_BASIC0( sumsqv )
+INSERT_GENTFUNCR_BASIC( sumsqv )
 
 // -----------------------------------------------------------------------------
 
@@ -398,7 +398,7 @@ void PASTEMAC(ch,opname) \
 	*is_eq = PASTEMAC(ch,eq)( chi_conj, *psi ); \
 }
 
-INSERT_GENTFUNC_BASIC0( eqsc )
+INSERT_GENTFUNC_BASIC( eqsc )
 
 
 #undef  GENTFUNC
@@ -430,7 +430,7 @@ void PASTEMAC(ch,opname) \
 	); \
 }
 
-INSERT_GENTFUNC_BASIC0( eqv )
+INSERT_GENTFUNC_BASIC( eqv )
 
 
 #undef  GENTFUNC
@@ -472,7 +472,7 @@ void PASTEMAC(ch,opname) \
 	); \
 }
 
-INSERT_GENTFUNC_BASIC0( eqm )
+INSERT_GENTFUNC_BASIC( eqm )
 
 
 #undef  GENTFUNC

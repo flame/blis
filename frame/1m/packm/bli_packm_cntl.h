@@ -38,25 +38,9 @@ struct packm_cntl_s
 {
 	cntl_t        cntl; // cntl field must be present and come first.
 	packm_var_oft var;
-    const void*   params;
+	const void*   params;
 };
 typedef struct packm_cntl_s packm_cntl_t;
-
-struct packm_def_cntl_s
-{
-	packm_cntl_t  cntl; // cntl field must be present and come first.
-    packm_ker_vft ukr;
-    dim_t         bmult_m_def;
-    dim_t         bmult_m_pack;
-    dim_t         bmult_n_def;
-	bool          does_invert_diag;
-	bool          rev_iter_if_upper;
-	bool          rev_iter_if_lower;
-	pack_t        pack_schema;
-	packbuf_t     pack_buf_type;
-    const void*   params;
-};
-typedef struct packm_def_cntl_s packm_def_cntl_t;
 
 // -----------------------------------------------------------------------------
 
@@ -70,6 +54,43 @@ BLIS_INLINE const void* bli_packm_cntl_variant_params( const cntl_t* cntl )
 	return ( ( const packm_cntl_t* ) cntl )->params;
 }
 
+// -----------------------------------------------------------------------------
+
+BLIS_INLINE void bli_packm_cntl_set_variant( packm_var_oft var, cntl_t* cntl )
+{
+	( ( packm_cntl_t* ) cntl )->var = var;
+}
+
+BLIS_INLINE void bli_packm_cntl_set_variant_params( const void* params, cntl_t* cntl )
+{
+	( ( packm_cntl_t* ) cntl )->params = params;
+}
+
+// -----------------------------------------------------------------------------
+
+struct packm_def_cntl_s
+{
+	packm_cntl_t  cntl; // cntl field must be present and come first.
+	num_t         dt_orig;
+	num_t         dt_pack;
+	num_t         dt_bmult;
+	packm_ker_vft ukr;
+	dim_t         bmult_m_def;
+	dim_t         bmult_m_pack;
+	dim_t         bmult_m_bcast;
+	dim_t         bmult_m_scale;
+	dim_t         bmult_n_def;
+	bool          does_invert_diag;
+	bool          rev_iter_if_upper;
+	bool          rev_iter_if_lower;
+	pack_t        pack_schema;
+	packbuf_t     pack_buf_type;
+	const void*   params;
+};
+typedef struct packm_def_cntl_s packm_def_cntl_t;
+
+// -----------------------------------------------------------------------------
+
 BLIS_INLINE dim_t bli_packm_def_cntl_bmult_m_def( const cntl_t* cntl )
 {
 	return ( ( const packm_def_cntl_t* ) cntl )->bmult_m_def;
@@ -80,6 +101,11 @@ BLIS_INLINE dim_t bli_packm_def_cntl_bmult_m_pack( const cntl_t* cntl )
 	return ( ( const packm_def_cntl_t* ) cntl )->bmult_m_pack;
 }
 
+BLIS_INLINE dim_t bli_packm_def_cntl_bmult_m_bcast( const cntl_t* cntl )
+{
+	return ( ( const packm_def_cntl_t* ) cntl )->bmult_m_bcast;
+}
+
 BLIS_INLINE dim_t bli_packm_def_cntl_bmult_n_def( const cntl_t* cntl )
 {
 	return ( ( const packm_def_cntl_t* ) cntl )->bmult_n_def;
@@ -87,7 +113,7 @@ BLIS_INLINE dim_t bli_packm_def_cntl_bmult_n_def( const cntl_t* cntl )
 
 BLIS_INLINE bool bli_packm_def_cntl_does_invert_diag( const cntl_t* cntl )
 {
-	 return ( ( const packm_def_cntl_t* ) cntl )->does_invert_diag;
+	return ( ( const packm_def_cntl_t* ) cntl )->does_invert_diag;
 }
 
 BLIS_INLINE bool bli_packm_def_cntl_rev_iter_if_upper( const cntl_t* cntl )
@@ -105,6 +131,11 @@ BLIS_INLINE pack_t bli_packm_def_cntl_pack_schema( const cntl_t* cntl )
 	return ( ( const packm_def_cntl_t* ) cntl )->pack_schema;
 }
 
+BLIS_INLINE num_t bli_packm_def_cntl_target_dt( const cntl_t* cntl )
+{
+	return ( ( const packm_def_cntl_t* ) cntl )->dt_pack;
+}
+
 BLIS_INLINE packbuf_t bli_packm_def_cntl_pack_buf_type( const cntl_t* cntl )
 {
 	return ( ( const packm_def_cntl_t* ) cntl )->pack_buf_type;
@@ -112,39 +143,36 @@ BLIS_INLINE packbuf_t bli_packm_def_cntl_pack_buf_type( const cntl_t* cntl )
 
 BLIS_INLINE packm_ker_vft bli_packm_def_cntl_ukr( const cntl_t* cntl )
 {
-    return ( ( const packm_def_cntl_t* ) cntl )->ukr;
+	return ( ( const packm_def_cntl_t* ) cntl )->ukr;
 }
 
 BLIS_INLINE const void* bli_packm_def_cntl_ukr_params( const cntl_t* cntl )
 {
-    return ( ( const packm_def_cntl_t* ) cntl )->params;
+	return ( ( const packm_def_cntl_t* ) cntl )->params;
 }
 
 // -----------------------------------------------------------------------------
 
-BLIS_INLINE void bli_packm_cntl_set_variant( packm_var_oft var, cntl_t* cntl )
+BLIS_INLINE void bli_packm_def_cntl_set_bmult_m( const blksz_t* bmult_m, cntl_t* cntl_ )
 {
-	( ( packm_cntl_t* ) cntl )->var = var;
+	packm_def_cntl_t* cntl = ( packm_def_cntl_t* )cntl_;
+	num_t dt = cntl->dt_bmult;
+	cntl->bmult_m_def = bli_blksz_get_def( dt, bmult_m ) / cntl->bmult_m_scale;
+	cntl->bmult_m_pack = bli_blksz_get_max( dt, bmult_m );
 }
 
-BLIS_INLINE void bli_packm_cntl_set_variant_params( const void* params, cntl_t* cntl )
+BLIS_INLINE void bli_packm_def_cntl_set_bmult_m_bcast( const blksz_t* bmult_m_bcast, cntl_t* cntl_ )
 {
-	( ( packm_cntl_t* ) cntl )->params = params;
+	packm_def_cntl_t* cntl = ( packm_def_cntl_t* )cntl_;
+	num_t dt = cntl->dt_bmult;
+	cntl->bmult_m_bcast = bli_blksz_get_def( dt, bmult_m_bcast );
 }
 
-BLIS_INLINE void bli_packm_def_cntl_set_bmult_m_def( dim_t bmult_m_def, cntl_t* cntl )
+BLIS_INLINE void bli_packm_def_cntl_set_bmult_n( const blksz_t* bmult_n, cntl_t* cntl_ )
 {
-	( ( packm_def_cntl_t* ) cntl )->bmult_m_def = bmult_m_def;
-}
-
-BLIS_INLINE void bli_packm_def_cntl_set_bmult_m_pack( dim_t bmult_m_pack, cntl_t* cntl )
-{
-	( ( packm_def_cntl_t* ) cntl )->bmult_m_pack = bmult_m_pack;
-}
-
-BLIS_INLINE void bli_packm_def_cntl_set_bmult_n_def( dim_t bmult_n_def, cntl_t* cntl )
-{
-	( ( packm_def_cntl_t* ) cntl )->bmult_n_def = bmult_n_def;
+	packm_def_cntl_t* cntl = ( packm_def_cntl_t* )cntl_;
+	num_t dt = cntl->dt_bmult;
+	cntl->bmult_n_def = bli_blksz_get_def( dt, bmult_n );
 }
 
 BLIS_INLINE void bli_packm_def_cntl_set_does_invert_diag( bool does_invert_diag, cntl_t* cntl )
@@ -172,14 +200,28 @@ BLIS_INLINE void bli_packm_def_cntl_set_pack_buf_type( packbuf_t pack_buf_type, 
 	( ( packm_def_cntl_t* ) cntl )->pack_buf_type = pack_buf_type;
 }
 
-BLIS_INLINE void bli_packm_def_cntl_set_ukr( packm_ker_vft ukr, cntl_t* cntl )
+BLIS_INLINE void bli_packm_def_cntl_set_ukr( const func2_t* ukr, cntl_t* cntl_ )
 {
-    ( ( packm_def_cntl_t* ) cntl )->ukr = ukr;
+	packm_def_cntl_t* cntl = ( packm_def_cntl_t* )cntl_;
+	num_t dt_orig = cntl->dt_orig;
+	num_t dt_pack = cntl->dt_pack;
+	cntl->ukr = ( packm_ker_vft )bli_func2_get_dt( dt_orig, dt_pack, ukr );
+}
+
+BLIS_INLINE err_t bli_packm_def_cntl_set_ukr_simple( const func_t* ukr, cntl_t* cntl_ )
+{
+	packm_def_cntl_t* cntl = ( packm_def_cntl_t* )cntl_;
+	num_t dt_orig = cntl->dt_orig;
+	num_t dt_pack = cntl->dt_pack;
+	if ( dt_orig != dt_pack )
+		return BLIS_INCONSISTENT_DATATYPES;
+	cntl->ukr = ( packm_ker_vft )bli_func_get_dt( dt_orig, ukr );
+	return BLIS_SUCCESS;
 }
 
 BLIS_INLINE void bli_packm_def_cntl_set_ukr_params( const void* params, cntl_t* cntl )
 {
-    ( ( packm_def_cntl_t* ) cntl )->params = params;
+	( ( packm_def_cntl_t* ) cntl )->params = params;
 }
 
 // -----------------------------------------------------------------------------
@@ -195,10 +237,14 @@ void bli_packm_cntl_init_node
 void bli_packm_def_cntl_init_node
      (
        void_fp           var_func,
-       num_t             dt_a,
-       num_t             dt_p,
+       num_t             dt_orig,
+       num_t             dt_pack,
+       num_t             dt_bmult,
+       packm_ker_vft     ukr,
        dim_t             bmult_m_def,
        dim_t             bmult_m_pack,
+       dim_t             bmult_m_bcast,
+       dim_t             bmult_m_scale,
        dim_t             bmult_n_def,
        bool              does_invert_diag,
        bool              rev_iter_if_upper,

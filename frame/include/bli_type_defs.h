@@ -687,6 +687,11 @@ typedef enum
 	BLIS_TRSM_L_UKR,
 	BLIS_TRSM_U_UKR,
 
+	// l3 1m kernels
+	BLIS_GEMM1M_UKR,
+	BLIS_GEMMTRSM1M_L_UKR,
+	BLIS_GEMMTRSM1M_U_UKR,
+
 	// l3 virtual kernels
 	BLIS_GEMM_VIR_UKR,
 	BLIS_GEMMTRSM_L_VIR_UKR,
@@ -1114,6 +1119,13 @@ typedef struct func_s
 	void_fp ptr[BLIS_NUM_FP_TYPES];
 
 } func_t;
+
+typedef struct func2_s
+{
+	// Kernel function address.
+	void_fp ptr[BLIS_NUM_FP_TYPES][BLIS_NUM_FP_TYPES];
+
+} func2_t;
 
 
 // -- Multi-boolean object type --

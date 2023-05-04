@@ -398,7 +398,7 @@ PASTEMAC(ch,fprintm)( stdout, "gemmsup_ref_var2: c ", mr_cur, nr_cur, c_ir, rs_c
 */ \
 }
 
-INSERT_GENTFUNC_BASIC0( gemmsup_ref_var2 )
+INSERT_GENTFUNC_BASIC( gemmsup_ref_var2 )
 
 
 //
@@ -729,7 +729,7 @@ PASTEMAC(ch,fprintm)( stdout, "gemmsup_ref_var2: c ", mr_cur, nr_cur, c_ir, rs_c
 */ \
 }
 
-INSERT_GENTFUNC_BASIC0( gemmsup_ref_var1 )
+INSERT_GENTFUNC_BASIC( gemmsup_ref_var1 )
 #endif
 
 

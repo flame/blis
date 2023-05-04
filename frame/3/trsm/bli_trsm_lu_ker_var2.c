@@ -96,6 +96,7 @@ void bli_trsm_lu_ker_var2
 	// Cast the micro-kernel address to its function pointer type.
 	gemmtrsm_ukr_vft gemmtrsm_ukr = bli_trsm_var_cntl_gemmtrsm_ukr( cntl );
 	gemm_ukr_vft     gemm_ukr     = bli_trsm_var_cntl_gemm_ukr( cntl );
+	const void*      params       = bli_trsm_var_cntl_params( cntl );
 
 	const void* minus_one   = bli_obj_buffer_for_const( dt, &BLIS_MINUS_ONE );
 	const char* a_cast      = buf_a;
@@ -188,6 +189,10 @@ void bli_trsm_lu_ker_var2
 	// Save the pack schemas of A and B to the auxinfo_t object.
 	bli_auxinfo_set_schema_a( schema_a, &aux );
 	bli_auxinfo_set_schema_b( schema_b, &aux );
+
+	// Save the virtual microkernel address and the params.
+	bli_auxinfo_set_ukr( gemm_ukr, &aux );
+	bli_auxinfo_set_params( params, &aux );
 
 	// We don't bother querying the thrinfo_t node for the 1st loop because
 	// we can't parallelize that loop in trsm due to the inter-iteration

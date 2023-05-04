@@ -45,89 +45,89 @@
 #undef  GENTPROT
 #define GENTPROT ADDV_KER_PROT
 
-INSERT_GENTPROT_BASIC0( addv_ker_name )
+INSERT_GENTPROT_BASIC( addv_ker_name )
 
 
 #undef  GENTPROT
 #define GENTPROT AMAXV_KER_PROT
 
-INSERT_GENTPROT_BASIC0( amaxv_ker_name )
+INSERT_GENTPROT_BASIC( amaxv_ker_name )
 
 
 #undef  GENTPROT
 #define GENTPROT AXPBYV_KER_PROT
 
-INSERT_GENTPROT_BASIC0( axpbyv_ker_name )
+INSERT_GENTPROT_BASIC( axpbyv_ker_name )
 
 
 #undef  GENTPROT
 #define GENTPROT AXPYV_KER_PROT
 
-INSERT_GENTPROT_BASIC0( axpyv_ker_name )
+INSERT_GENTPROT_BASIC( axpyv_ker_name )
 
 
 #undef  GENTPROT
 #define GENTPROT COPYV_KER_PROT
 
-INSERT_GENTPROT_BASIC0( copyv_ker_name )
+INSERT_GENTPROT_BASIC( copyv_ker_name )
 
 
 #undef  GENTPROT
 #define GENTPROT DOTV_KER_PROT
 
-INSERT_GENTPROT_BASIC0( dotv_ker_name )
+INSERT_GENTPROT_BASIC( dotv_ker_name )
 
 
 #undef  GENTPROT
 #define GENTPROT DOTXV_KER_PROT
 
-INSERT_GENTPROT_BASIC0( dotxv_ker_name )
+INSERT_GENTPROT_BASIC( dotxv_ker_name )
 
 
 #undef  GENTPROT
 #define GENTPROT INVERTV_KER_PROT
 
-INSERT_GENTPROT_BASIC0( invertv_ker_name )
+INSERT_GENTPROT_BASIC( invertv_ker_name )
 
 
 #undef  GENTPROT
 #define GENTPROT INVSCALV_KER_PROT
 
-INSERT_GENTPROT_BASIC0( invscalv_ker_name )
+INSERT_GENTPROT_BASIC( invscalv_ker_name )
 
 
 #undef  GENTPROT
 #define GENTPROT SCALV_KER_PROT
 
-INSERT_GENTPROT_BASIC0( scalv_ker_name )
+INSERT_GENTPROT_BASIC( scalv_ker_name )
 
 
 #undef  GENTPROT
 #define GENTPROT SCAL2V_KER_PROT
 
-INSERT_GENTPROT_BASIC0( scal2v_ker_name )
+INSERT_GENTPROT_BASIC( scal2v_ker_name )
 
 
 #undef  GENTPROT
 #define GENTPROT SETV_KER_PROT
 
-INSERT_GENTPROT_BASIC0( setv_ker_name )
+INSERT_GENTPROT_BASIC( setv_ker_name )
 
 
 #undef  GENTPROT
 #define GENTPROT SUBV_KER_PROT
 
-INSERT_GENTPROT_BASIC0( subv_ker_name )
+INSERT_GENTPROT_BASIC( subv_ker_name )
 
 
 #undef  GENTPROT
 #define GENTPROT SWAPV_KER_PROT
 
-INSERT_GENTPROT_BASIC0( swapv_ker_name )
+INSERT_GENTPROT_BASIC( swapv_ker_name )
 
 
 #undef  GENTPROT
 #define GENTPROT XPBYV_KER_PROT
 
-INSERT_GENTPROT_BASIC0( xpbyv_ker_name )
+INSERT_GENTPROT_BASIC( xpbyv_ker_name )
 

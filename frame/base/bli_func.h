@@ -45,6 +45,16 @@ BLIS_INLINE void_fp bli_func_get_dt
 	return func->ptr[ dt ];
 }
 
+BLIS_INLINE void_fp bli_func2_get_dt
+     (
+             num_t    dt1,
+             num_t    dt2,
+       const func2_t* func
+     )
+{
+	return func->ptr[ dt1 ][ dt2 ];
+}
+
 // func_t modification
 
 BLIS_INLINE void bli_func_set_dt
@@ -55,6 +65,17 @@ BLIS_INLINE void bli_func_set_dt
      )
 {
 	func->ptr[ dt ] = fp;
+}
+
+BLIS_INLINE void bli_func2_set_dt
+     (
+       void_fp  fp,
+       num_t    dt1,
+       num_t    dt2,
+       func2_t* func
+     )
+{
+	func->ptr[ dt1 ][ dt2 ] = fp;
 }
 
 BLIS_INLINE void bli_func_copy_dt
@@ -94,9 +115,38 @@ void bli_func_init_null
 
 void bli_func_free( func_t* f );
 
+func2_t* bli_func2_create
+     (
+       void_fp ptr_ss, void_fp ptr_sd, void_fp ptr_sc, void_fp ptr_sz,
+       void_fp ptr_ds, void_fp ptr_dd, void_fp ptr_dc, void_fp ptr_dz,
+       void_fp ptr_cs, void_fp ptr_cd, void_fp ptr_cc, void_fp ptr_cz,
+       void_fp ptr_zs, void_fp ptr_zd, void_fp ptr_zc, void_fp ptr_zz
+     );
+
+void bli_func2_init
+     (
+       func2_t* f,
+       void_fp ptr_ss, void_fp ptr_sd, void_fp ptr_sc, void_fp ptr_sz,
+       void_fp ptr_ds, void_fp ptr_dd, void_fp ptr_dc, void_fp ptr_dz,
+       void_fp ptr_cs, void_fp ptr_cd, void_fp ptr_cc, void_fp ptr_cz,
+       void_fp ptr_zs, void_fp ptr_zd, void_fp ptr_zc, void_fp ptr_zz
+     );
+
+void bli_func2_init_null
+     (
+       func2_t* f
+     );
+
+void bli_func2_free( func2_t* f );
+
 // -----------------------------------------------------------------------------
 
 bool bli_func_is_null_dt(       num_t   dt,
                           const func_t* f );
 bool bli_func_is_null( const func_t* f );
+
+bool bli_func2_is_null_dt(       num_t    dt1,
+                                 num_t    dt2,
+                           const func2_t* f );
+bool bli_func2_is_null( const func2_t* f );
 

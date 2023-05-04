@@ -101,6 +101,7 @@ void bli_trsm_rl_ker_var2
 	// variety (since those are the only trsm ukernels that exist).
 	gemmtrsm_ukr_vft gemmtrsm_ukr = bli_trsm_var_cntl_gemmtrsm_ukr( cntl );
 	gemm_ukr_vft     gemm_ukr     = bli_trsm_var_cntl_gemm_ukr( cntl );
+	const void*      params       = bli_trsm_var_cntl_params( cntl );
 
 	const void* minus_one   = bli_obj_buffer_for_const( dt, &BLIS_MINUS_ONE );
 	const char* a_cast      = buf_a;
@@ -213,6 +214,10 @@ void bli_trsm_rl_ker_var2
 	// "A" matrix is actually contained within B.
 	bli_auxinfo_set_schema_a( schema_b, &aux );
 	bli_auxinfo_set_schema_b( schema_a, &aux );
+
+	// Save the virtual microkernel address and the params.
+	bli_auxinfo_set_ukr( gemm_ukr, &aux );
+	bli_auxinfo_set_params( params, &aux );
 
 	const char* b1 = b_cast;
 	      char* c1 = c_cast;

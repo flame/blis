@@ -124,5 +124,5 @@ void PASTEMAC(ch,varname) \
 	} \
 }
 
-INSERT_GENTFUNC_BASIC0( gemv_unb_var2 )
+INSERT_GENTFUNC_BASIC( gemv_unb_var2 )
 

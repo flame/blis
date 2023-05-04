@@ -56,8 +56,8 @@ void PASTEMAC2(chc,chp,varname) \
        const void*   params \
      );
 
-INSERT_GENTPROT2_BASIC0( packm_struc_cxk_md )
-INSERT_GENTPROT2_MIXDP0( packm_struc_cxk_md )
+INSERT_GENTPROT2_BASIC( packm_struc_cxk_md )
+INSERT_GENTPROT2_MIXDP( packm_struc_cxk_md )
 
 
 #undef  GENTPROT2
@@ -73,9 +73,9 @@ void PASTEMAC2(cha,chp,opname) \
        ctype_p* restrict p,             inc_t ldp  \
      );
 
-INSERT_GENTPROT2_BASIC0( packm_cxk_1e_md )
-INSERT_GENTPROT2_MIXDP0( packm_cxk_1e_md )
+INSERT_GENTPROT2_BASIC( packm_cxk_1e_md )
+INSERT_GENTPROT2_MIXDP( packm_cxk_1e_md )
 
-INSERT_GENTPROT2_BASIC0( packm_cxk_1r_md )
-INSERT_GENTPROT2_MIXDP0( packm_cxk_1r_md )
+INSERT_GENTPROT2_BASIC( packm_cxk_1r_md )
+INSERT_GENTPROT2_MIXDP( packm_cxk_1r_md )
 

@@ -48,7 +48,7 @@ BLIS_EXPORT_BLIS void PASTEMAC2(ch,opname,EX_SUF) \
        BLIS_TAPI_EX_PARAMS  \
      );
 
-INSERT_GENTPROTR_BASIC0( asumv )
+INSERT_GENTPROTR_BASIC( asumv )
 
 
 #undef  GENTPROT
@@ -62,9 +62,9 @@ BLIS_EXPORT_BLIS void PASTEMAC2(ch,opname,EX_SUF) \
        BLIS_TAPI_EX_PARAMS  \
      );
 
-INSERT_GENTPROT_BASIC0( mkherm )
-INSERT_GENTPROT_BASIC0( mksymm )
-INSERT_GENTPROT_BASIC0( mktrim )
+INSERT_GENTPROT_BASIC( mkherm )
+INSERT_GENTPROT_BASIC( mksymm )
+INSERT_GENTPROT_BASIC( mktrim )
 
 
 #undef  GENTPROTR
@@ -78,9 +78,9 @@ BLIS_EXPORT_BLIS void PASTEMAC2(ch,opname,EX_SUF) \
        BLIS_TAPI_EX_PARAMS  \
      );
 
-INSERT_GENTPROTR_BASIC0( norm1v )
-INSERT_GENTPROTR_BASIC0( normfv )
-INSERT_GENTPROTR_BASIC0( normiv )
+INSERT_GENTPROTR_BASIC( norm1v )
+INSERT_GENTPROTR_BASIC( normfv )
+INSERT_GENTPROTR_BASIC( normiv )
 
 
 #undef  GENTPROTR
@@ -98,9 +98,9 @@ BLIS_EXPORT_BLIS void PASTEMAC2(ch,opname,EX_SUF) \
        BLIS_TAPI_EX_PARAMS  \
      );
 
-INSERT_GENTPROTR_BASIC0( norm1m )
-INSERT_GENTPROTR_BASIC0( normfm )
-INSERT_GENTPROTR_BASIC0( normim )
+INSERT_GENTPROTR_BASIC( norm1m )
+INSERT_GENTPROTR_BASIC( normfm )
+INSERT_GENTPROTR_BASIC( normim )
 
 
 #undef  GENTPROT
@@ -113,8 +113,8 @@ BLIS_EXPORT_BLIS void PASTEMAC2(ch,opname,EX_SUF) \
        BLIS_TAPI_EX_PARAMS  \
      );
 
-INSERT_GENTPROT_BASIC0( randv )
-INSERT_GENTPROT_BASIC0( randnv )
+INSERT_GENTPROT_BASIC( randv )
+INSERT_GENTPROT_BASIC( randnv )
 
 
 #undef  GENTPROT
@@ -130,8 +130,8 @@ BLIS_EXPORT_BLIS void PASTEMAC2(ch,opname,EX_SUF) \
        BLIS_TAPI_EX_PARAMS  \
      );
 
-INSERT_GENTPROT_BASIC0( randm )
-INSERT_GENTPROT_BASIC0( randnm )
+INSERT_GENTPROT_BASIC( randm )
+INSERT_GENTPROT_BASIC( randnm )
 
 
 #undef  GENTPROTR
@@ -146,7 +146,7 @@ BLIS_EXPORT_BLIS void PASTEMAC2(ch,opname,EX_SUF) \
        BLIS_TAPI_EX_PARAMS  \
      );
 
-INSERT_GENTPROTR_BASIC0( sumsqv )
+INSERT_GENTPROTR_BASIC( sumsqv )
 
 // -----------------------------------------------------------------------------
 
@@ -165,7 +165,7 @@ BLIS_EXPORT_BLIS void PASTEMAC(ch,opname) \
              bool*  is_eq  \
      );
 
-INSERT_GENTPROT_BASIC0( eqsc )
+INSERT_GENTPROT_BASIC( eqsc )
 
 
 #undef  GENTPROT
@@ -180,7 +180,7 @@ BLIS_EXPORT_BLIS void PASTEMAC(ch,opname) \
               bool*  is_eq  \
       );
 
-INSERT_GENTPROT_BASIC0( eqv )
+INSERT_GENTPROT_BASIC( eqv )
 
 
 #undef  GENTPROT
@@ -199,7 +199,7 @@ BLIS_EXPORT_BLIS void PASTEMAC(ch,opname) \
              bool*   is_eq  \
      );
 
-INSERT_GENTPROT_BASIC0( eqm )
+INSERT_GENTPROT_BASIC( eqm )
 
 
 #undef  GENTPROT
@@ -212,10 +212,10 @@ BLIS_EXPORT_BLIS void PASTEMAC(ch,opname) \
              bool*  is  \
      );
 
-INSERT_GENTPROT_BASIC0( ltsc )
-INSERT_GENTPROT_BASIC0( ltesc )
-INSERT_GENTPROT_BASIC0( gtsc )
-INSERT_GENTPROT_BASIC0( gtesc )
+INSERT_GENTPROT_BASIC( ltsc )
+INSERT_GENTPROT_BASIC( ltesc )
+INSERT_GENTPROT_BASIC( gtsc )
+INSERT_GENTPROT_BASIC( gtesc )
 
 
 #undef  GENTPROT
@@ -230,7 +230,7 @@ BLIS_EXPORT_BLIS void PASTEMAC(ch,opname) \
        const char* s2  \
      );
 
-INSERT_GENTPROT_BASIC0_I( printv )
+INSERT_GENTPROT_BASIC_I( printv )
 
 
 #undef  GENTPROT
@@ -246,7 +246,7 @@ BLIS_EXPORT_BLIS void PASTEMAC(ch,opname) \
        const char* s2  \
      );
 
-INSERT_GENTPROT_BASIC0_I( printm )
+INSERT_GENTPROT_BASIC_I( printm )
 
 #endif // #ifdef BLIS_TAPI_BASIC
 

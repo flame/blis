@@ -56,5 +56,5 @@ void PASTEMAC(ch,varname) \
        const void*   params  \
      );
 
-INSERT_GENTPROT_BASIC0( packm_struc_cxk )
+INSERT_GENTPROT_BASIC( packm_struc_cxk )
 

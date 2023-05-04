@@ -54,8 +54,16 @@ void bli_packm_blk_var1
 	// Every thread initializes p and determines the size of memory block
 	// needed (which gets embedded into the otherwise "blank" mem_t entry
 	// in the control tree node). Return early if no packing is required.
-	if ( !bli_packm_init( c, p, cntl, thread ) )
+	// If the requested size is zero, then we don't need to do any allocation.
+	siz_t size_p = bli_packm_init( c, p, cntl );
+	if ( size_p == 0 )
 		return;
+
+	// Update the buffer address in p to point to the buffer associated
+	// with the mem_t entry acquired from the memory broker (now cached in
+	// the control tree node).
+	void* buffer = bli_packm_alloc( size_p, cntl, thread );
+	bli_obj_set_buffer( buffer, p );
 
 	// Check parameters.
 	if ( bli_error_checking_is_enabled() )
@@ -95,7 +103,7 @@ void bli_packm_blk_var1
 
 	// Query the datatype-specific function pointer from the control tree.
 	packm_ker_vft packm_ker_cast = bli_packm_def_cntl_ukr( cntl );
-    const void*   params         = bli_packm_def_cntl_ukr_params( cntl );
+	const void*   params         = bli_packm_def_cntl_ukr_params( cntl );
 
 	// Compute the total number of iterations we'll need.
 	dim_t n_iter = iter_dim / panel_dim_max + ( iter_dim % panel_dim_max ? 1 : 0 );

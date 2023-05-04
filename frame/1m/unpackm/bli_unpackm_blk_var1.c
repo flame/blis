@@ -287,5 +287,5 @@ void PASTEMAC(ch,varname) \
 \
 }
 
-INSERT_GENTFUNC_BASIC0( unpackm_blk_var1 )
+INSERT_GENTFUNC_BASIC( unpackm_blk_var1 )
 

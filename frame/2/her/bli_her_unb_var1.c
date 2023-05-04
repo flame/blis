@@ -145,5 +145,5 @@ void PASTEMAC(ch,varname) \
 	} \
 }
 
-INSERT_GENTFUNC_BASIC0( her_unb_var1 )
+INSERT_GENTFUNC_BASIC( her_unb_var1 )
 

@@ -53,7 +53,7 @@ BLIS_EXPORT_BLIS void PASTEMAC2(ch,opname,EX_SUF) \
        BLIS_TAPI_EX_PARAMS  \
      );
 
-INSERT_GENTPROT_BASIC0( axpy2v )
+INSERT_GENTPROT_BASIC( axpy2v )
 
 
 #undef  GENTPROT
@@ -72,7 +72,7 @@ BLIS_EXPORT_BLIS void PASTEMAC2(ch,opname,EX_SUF) \
        BLIS_TAPI_EX_PARAMS  \
      );
 
-INSERT_GENTPROT_BASIC0( axpyf )
+INSERT_GENTPROT_BASIC( axpyf )
 
 
 #undef  GENTPROT
@@ -92,7 +92,7 @@ BLIS_EXPORT_BLIS void PASTEMAC2(ch,opname,EX_SUF) \
        BLIS_TAPI_EX_PARAMS  \
      );
 
-INSERT_GENTPROT_BASIC0( dotaxpyv )
+INSERT_GENTPROT_BASIC( dotaxpyv )
 
 
 #undef  GENTPROT
@@ -116,7 +116,7 @@ BLIS_EXPORT_BLIS void PASTEMAC2(ch,opname,EX_SUF) \
        BLIS_TAPI_EX_PARAMS  \
      );
 
-INSERT_GENTPROT_BASIC0( dotxaxpyf )
+INSERT_GENTPROT_BASIC( dotxaxpyf )
 
 
 #undef  GENTPROT
@@ -136,5 +136,5 @@ BLIS_EXPORT_BLIS void PASTEMAC2(ch,opname,EX_SUF) \
        BLIS_TAPI_EX_PARAMS  \
      );
 
-INSERT_GENTPROT_BASIC0( dotxf )
+INSERT_GENTPROT_BASIC( dotxf )
 

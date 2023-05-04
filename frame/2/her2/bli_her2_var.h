@@ -87,11 +87,11 @@ void PASTEMAC(ch,varname) \
        cntx_t* cntx  \
      );
 
-INSERT_GENTPROT_BASIC0( her2_unb_var1 )
-INSERT_GENTPROT_BASIC0( her2_unb_var2 )
-INSERT_GENTPROT_BASIC0( her2_unb_var3 )
-INSERT_GENTPROT_BASIC0( her2_unb_var4 )
+INSERT_GENTPROT_BASIC( her2_unb_var1 )
+INSERT_GENTPROT_BASIC( her2_unb_var2 )
+INSERT_GENTPROT_BASIC( her2_unb_var3 )
+INSERT_GENTPROT_BASIC( her2_unb_var4 )
 
-INSERT_GENTPROT_BASIC0( her2_unf_var1 )
-INSERT_GENTPROT_BASIC0( her2_unf_var4 )
+INSERT_GENTPROT_BASIC( her2_unf_var1 )
+INSERT_GENTPROT_BASIC( her2_unf_var4 )
 

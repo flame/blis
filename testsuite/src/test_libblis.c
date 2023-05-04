@@ -2675,6 +2675,8 @@ void libblis_test_mobj_create( test_params_t* params, num_t dt, trans_t trans, c
 
 thrinfo_t* libblis_test_pobj_create( bszid_t bmult_id_m, bszid_t bmult_id_n, invdiag_t inv_diag, pack_t pack_schema, packbuf_t pack_buf, obj_t* a, obj_t* p, cntx_t* cntx )
 {
+	static packm_ker_vft GENARRAY(packm_struc_cxk,packm_struc_cxk);
+
 	bool does_inv_diag;
 	if ( inv_diag == BLIS_NO_INVERT_DIAG ) does_inv_diag = FALSE;
 	else                                   does_inv_diag = TRUE;
@@ -2682,24 +2684,28 @@ thrinfo_t* libblis_test_pobj_create( bszid_t bmult_id_m, bszid_t bmult_id_n, inv
 	rntm_t rntm;
 	bli_rntm_init( &rntm );
 
-    num_t dt = bli_obj_dt( a );
+	num_t dt = bli_obj_dt( a );
 
 	// Create a control tree node for the packing operation.
-    packm_def_cntl_t cntl;
+	packm_def_cntl_t cntl;
 	bli_packm_def_cntl_init_node
 	(
 	  NULL, // func ptr is not referenced b/c we don't call via l3 _int().
-      dt,
-      dt,
+	  dt,
+	  dt,
+	  dt,
+	  packm_struc_cxk[ dt ],
 	  bli_cntx_get_blksz_def_dt( dt, bmult_id_m, cntx ),
 	  bli_cntx_get_blksz_max_dt( dt, bmult_id_m, cntx ),
+	  1,
+	  1,
 	  bli_cntx_get_blksz_def_dt( dt, bmult_id_n, cntx ),
 	  does_inv_diag,
 	  FALSE,
 	  FALSE,
 	  pack_schema,
 	  pack_buf,
-      &cntl
+	  &cntl
 	);
 
 	thrinfo_t* thread = bli_l3_thrinfo_create( 0, &BLIS_SINGLE_COMM, NULL, &rntm, ( cntl_t* )&cntl );

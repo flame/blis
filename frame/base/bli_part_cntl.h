@@ -37,27 +37,30 @@
 struct part_cntl_s
 {
 	cntl_t cntl; // cntl field must be present and come first.
+	num_t  b_dt;
 	dim_t  b_alg;
 	dim_t  b_max;
+	dim_t  b_scale;
 	dim_t  b_mult;
-    dir_t  direct;
-    bool   use_weighted;
+	dim_t  b_mult_scale;
+	dir_t  direct;
+	bool   use_weighted;
 };
 typedef struct part_cntl_s part_cntl_t;
 
 // -----------------------------------------------------------------------------
 
-BLIS_INLINE dim_t bli_part_cntl_b_alg( const cntl_t* cntl )
+BLIS_INLINE dim_t bli_part_cntl_blksz_alg( const cntl_t* cntl )
 {
 	return ( ( const part_cntl_t* )cntl )->b_alg;
 }
 
-BLIS_INLINE dim_t bli_part_cntl_b_max( const cntl_t* cntl )
+BLIS_INLINE dim_t bli_part_cntl_blksz_max( const cntl_t* cntl )
 {
 	return ( ( const part_cntl_t* )cntl )->b_max;
 }
 
-BLIS_INLINE dim_t bli_part_cntl_b_mult( const cntl_t* cntl )
+BLIS_INLINE dim_t bli_part_cntl_blksz_mult( const cntl_t* cntl )
 {
 	return ( ( const part_cntl_t* )cntl )->b_mult;
 }
@@ -74,29 +77,41 @@ BLIS_INLINE bool bli_part_cntl_use_weighted( const cntl_t* cntl )
 
 // -----------------------------------------------------------------------------
 
-BLIS_INLINE void bli_part_cntl_set_b_alg( dim_t b_alg, const cntl_t* cntl )
+BLIS_INLINE void bli_part_cntl_set_blksz( const blksz_t* blksz, cntl_t* cntl_ )
 {
-	( ( part_cntl_t* )cntl )->b_alg = b_alg;
+	part_cntl_t* cntl = ( part_cntl_t* )cntl_;
+	num_t dt = cntl->b_dt;
+	cntl->b_alg = bli_blksz_get_def( dt, blksz ) / cntl->b_scale;
+	cntl->b_max = bli_blksz_get_max( dt, blksz ) / cntl->b_scale;
 }
 
-BLIS_INLINE void bli_part_cntl_set_b_max( dim_t b_max, const cntl_t* cntl )
+BLIS_INLINE void bli_part_cntl_set_blksz_mult( const blksz_t* blksz, cntl_t* cntl_ )
 {
-	( ( part_cntl_t* )cntl )->b_max = b_max;
+	part_cntl_t* cntl = ( part_cntl_t* )cntl_;
+	num_t dt = cntl->b_dt;
+	cntl->b_mult = bli_blksz_get_def( dt, blksz ) / cntl->b_mult_scale;
 }
 
-BLIS_INLINE void bli_part_cntl_set_b_mult( dim_t b_mult, const cntl_t* cntl )
-{
-	( ( part_cntl_t* )cntl )->b_mult = b_mult;
-}
-
-BLIS_INLINE void bli_part_cntl_set_direct( dir_t direct, const cntl_t* cntl )
+BLIS_INLINE void bli_part_cntl_set_direct( dir_t direct, cntl_t* cntl )
 {
 	( ( part_cntl_t* )cntl )->direct = direct;
 }
 
-BLIS_INLINE void bli_part_cntl_set_use_weighted( bool use_weighted, const cntl_t* cntl )
+BLIS_INLINE void bli_part_cntl_set_use_weighted( bool use_weighted, cntl_t* cntl )
 {
 	( ( part_cntl_t* )cntl )->use_weighted = use_weighted;
+}
+
+BLIS_INLINE void bli_part_cntl_align_blksz_to_mult( dim_t mult, bool round_up, cntl_t* cntl_ )
+{
+	part_cntl_t* cntl = ( part_cntl_t* )cntl_;
+	cntl->b_alg = bli_align_dim_to_mult( cntl->b_alg, mult, round_up );
+	cntl->b_max = bli_align_dim_to_mult( cntl->b_max, mult, round_up );
+}
+
+BLIS_INLINE void bli_part_cntl_align_blksz( bool round_up, cntl_t* cntl )
+{
+	bli_part_cntl_align_blksz_to_mult( ( ( part_cntl_t* )cntl )->b_mult, round_up, cntl );
 }
 
 // -----------------------------------------------------------------------------
@@ -104,9 +119,12 @@ BLIS_INLINE void bli_part_cntl_set_use_weighted( bool use_weighted, const cntl_t
 void bli_part_cntl_init_node
      (
        void_fp      var_func,
+       num_t        b_dt,
        dim_t        b_alg,
        dim_t        b_max,
+       dim_t        b_scale,
        dim_t        b_mult,
+       dim_t        b_mult_scale,
        dir_t        direct,
        bool         use_weighted,
        part_cntl_t* cntl

@@ -72,7 +72,7 @@ BLIS_INLINE void PASTEMAC(ch,op) \
 	); \
 }
 
-INSERT_GENTFUNC_BASIC0(xpbys_mxn_u_fn);
+INSERT_GENTFUNC_BASIC(xpbys_mxn_u_fn);
 
 static xpbys_mxn_u_vft GENARRAY(xpbys_mxn_u, xpbys_mxn_u_fn);
 
@@ -134,6 +134,7 @@ void bli_gemmt_u_ker_var2
 	// Query the context for the micro-kernel address and cast it to its
 	// function pointer type.
 	gemm_ukr_vft    gemm_ukr        = bli_gemm_var_cntl_ukr( cntl );
+	const void*     params          = bli_gemm_var_cntl_params( cntl );
 	xpbys_mxn_u_vft xpbys_mxn_u_ukr = xpbys_mxn_u[ dt_exec ];
 
 	// Temporary C buffer for edge cases. Note that the strides of this
@@ -223,6 +224,10 @@ void bli_gemmt_u_ker_var2
 	// Save the imaginary stride of A and B to the auxinfo_t object.
 	bli_auxinfo_set_is_a( is_a, &aux );
 	bli_auxinfo_set_is_b( is_b, &aux );
+
+	// Save the virtual microkernel address and the params.
+	bli_auxinfo_set_ukr( gemm_ukr, &aux );
+	bli_auxinfo_set_params( params, &aux );
 
 	// The 'thread' argument points to the thrinfo_t node for the 2nd (jr)
 	// loop around the microkernel. Here we query the thrinfo_t node for the
