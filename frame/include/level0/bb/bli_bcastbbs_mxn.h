@@ -69,6 +69,6 @@ BLIS_INLINE void PASTEMAC(ch,opname) \
 	} \
 }
 
-INSERT_GENTFUNC_BASIC0( bcastbbs_mxn )
+INSERT_GENTFUNC_BASIC( bcastbbs_mxn )
 
 #endif

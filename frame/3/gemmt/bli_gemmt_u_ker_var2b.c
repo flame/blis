@@ -73,7 +73,7 @@ BLIS_INLINE void PASTEMAC(ch,op) \
 	); \
 }
 
-INSERT_GENTFUNC_BASIC0(xpbys_mxn_u_fn);
+INSERT_GENTFUNC_BASIC(xpbys_mxn_u_fn);
 
 static xpbys_mxn_u_vft GENARRAY(xpbys_mxn_u, xpbys_mxn_u_fn);
 

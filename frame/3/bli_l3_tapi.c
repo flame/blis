@@ -72,7 +72,7 @@ void PASTEMAC(ch,opname) \
 	); \
 }
 
-INSERT_GENTFUNC_BASIC0( gemm )
+INSERT_GENTFUNC_BASIC( gemm )
 
 
 #undef  GENTFUNC
@@ -110,7 +110,7 @@ void PASTEMAC(ch,opname) \
 	); \
 }
 
-INSERT_GENTFUNC_BASIC0( gemmt )
+INSERT_GENTFUNC_BASIC( gemmt )
 
 
 #undef  GENTFUNC
@@ -185,7 +185,7 @@ void PASTEMAC(ch,opname) \
 	); \
 }
 
-INSERT_GENTFUNCR_BASIC0( herk )
+INSERT_GENTFUNCR_BASIC( herk )
 
 
 #undef  GENTFUNCR
@@ -223,7 +223,7 @@ void PASTEMAC(ch,opname) \
 	); \
 }
 
-INSERT_GENTFUNCR_BASIC0( her2k )
+INSERT_GENTFUNCR_BASIC( her2k )
 
 
 #undef  GENTFUNC
@@ -257,7 +257,7 @@ void PASTEMAC(ch,opname) \
 	); \
 }
 
-INSERT_GENTFUNC_BASIC0( syrk )
+INSERT_GENTFUNC_BASIC( syrk )
 
 
 #undef  GENTFUNC
@@ -295,7 +295,7 @@ void PASTEMAC(ch,opname) \
 	); \
 }
 
-INSERT_GENTFUNC_BASIC0( syr2k )
+INSERT_GENTFUNC_BASIC( syr2k )
 
 
 #undef  GENTFUNC
@@ -337,7 +337,7 @@ void PASTEMAC(ch,opname) \
 	); \
 }
 
-INSERT_GENTFUNC_BASIC0( trmm3 )
+INSERT_GENTFUNC_BASIC( trmm3 )
 
 
 #undef  GENTFUNC
@@ -373,6 +373,6 @@ void PASTEMAC(ch,opname) \
 	); \
 }
 
-INSERT_GENTFUNC_BASIC0( trmm )
-INSERT_GENTFUNC_BASIC0( trsm )
+INSERT_GENTFUNC_BASIC( trmm )
+INSERT_GENTFUNC_BASIC( trsm )
 

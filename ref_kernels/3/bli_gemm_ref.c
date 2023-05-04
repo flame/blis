@@ -139,7 +139,7 @@ static void PASTEMAC3(ch,opname,arch,suf) \
 	} \
 }
 
-INSERT_GENTFUNC_BASIC2( gemm_gen, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX )
+INSERT_GENTFUNC_BASIC( gemm_gen, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX )
 
 // An implementation that attempts to facilitate emission of vectorized
 // instructions via constant loop bounds + #pragma omp simd directives.
@@ -297,6 +297,6 @@ void PASTEMAC3(ch,opname,arch,suf) \
 	} \
 }
 
-INSERT_GENTFUNC_BASIC2( gemm, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX )
+INSERT_GENTFUNC_BASIC( gemm, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX )
 
 

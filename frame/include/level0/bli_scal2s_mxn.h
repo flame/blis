@@ -84,6 +84,6 @@ BLIS_INLINE void PASTEMAC(ch,opname) \
 	} \
 }
 
-INSERT_GENTFUNC_BASIC0( scal2s_mxn )
+INSERT_GENTFUNC_BASIC( scal2s_mxn )
 
 #endif

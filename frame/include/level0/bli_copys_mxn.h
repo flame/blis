@@ -100,7 +100,7 @@ BLIS_INLINE void PASTEMAC(ch,opname) \
 	PASTEMAC2(ch,ch,opname)( m, n, x, rs_x, cs_x, y, rs_y, cs_y ); \
 }
 
-INSERT_GENTFUNC_BASIC0( copys_mxn )
+INSERT_GENTFUNC_BASIC( copys_mxn )
 
 
 

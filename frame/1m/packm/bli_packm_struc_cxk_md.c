@@ -277,8 +277,8 @@ void PASTEMAC2(chc,chp,varname) \
 */ \
 }
 
-INSERT_GENTFUNC2_BASIC0( packm_struc_cxk_md )
-INSERT_GENTFUNC2_MIXDP0( packm_struc_cxk_md )
+INSERT_GENTFUNC2_BASIC( packm_struc_cxk_md )
+INSERT_GENTFUNC2_MIX_DP( packm_struc_cxk_md )
 
 
 // -----------------------------------------------------------------------------
@@ -403,8 +403,8 @@ void PASTEMAC2(cha,chp,opname) \
 	} \
 }
 
-INSERT_GENTFUNC2_BASIC0( packm_cxk_1r_md )
-INSERT_GENTFUNC2_MIXDP0( packm_cxk_1r_md )
+INSERT_GENTFUNC2_BASIC( packm_cxk_1r_md )
+INSERT_GENTFUNC2_MIX_DP( packm_cxk_1r_md )
 
 // -----------------------------------------------------------------------------
 
@@ -517,7 +517,7 @@ void PASTEMAC2(cha,chp,opname) \
 	} \
 }
 
-INSERT_GENTFUNC2_BASIC0( packm_cxk_1e_md )
-INSERT_GENTFUNC2_MIXDP0( packm_cxk_1e_md )
+INSERT_GENTFUNC2_BASIC( packm_cxk_1e_md )
+INSERT_GENTFUNC2_MIX_DP( packm_cxk_1e_md )
 
 #endif

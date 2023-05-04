@@ -81,7 +81,7 @@ void PASTEMAC(ch,varname) \
 	PASTEMAC(chr,copys)( absum, *asum ); \
 }
 
-INSERT_GENTFUNCR_BASIC0( asumv_unb_var1 )
+INSERT_GENTFUNCR_BASIC( asumv_unb_var1 )
 
 
 #undef  GENTFUNCR
@@ -137,7 +137,7 @@ void PASTEMAC(ch,varname) \
 	); \
 }
 
-INSERT_GENTFUNCR_BASIC0( mkherm_unb_var1 )
+INSERT_GENTFUNCR_BASIC( mkherm_unb_var1 )
 
 
 #undef  GENTFUNC
@@ -179,7 +179,7 @@ void PASTEMAC(ch,varname) \
 	); \
 }
 
-INSERT_GENTFUNC_BASIC0( mksymm_unb_var1 )
+INSERT_GENTFUNC_BASIC( mksymm_unb_var1 )
 
 
 #undef  GENTFUNC
@@ -224,7 +224,7 @@ void PASTEMAC(ch,varname) \
 	); \
 }
 
-INSERT_GENTFUNC_BASIC0( mktrim_unb_var1 )
+INSERT_GENTFUNC_BASIC( mktrim_unb_var1 )
 
 
 #undef  GENTFUNCR
@@ -262,7 +262,7 @@ void PASTEMAC(ch,varname) \
 	PASTEMAC(chr,copys)( absum, *norm ); \
 }
 
-INSERT_GENTFUNCR_BASIC0( norm1v_unb_var1 )
+INSERT_GENTFUNCR_BASIC( norm1v_unb_var1 )
 
 
 #undef  GENTFUNCR
@@ -485,7 +485,7 @@ void PASTEMAC(ch,varname) \
 	PASTEMAC(chr,copys)( abs_chi1_max, *norm ); \
 }
 
-INSERT_GENTFUNCR_BASIC0( normiv_unb_var1 )
+INSERT_GENTFUNCR_BASIC( normiv_unb_var1 )
 
 
 
@@ -1170,7 +1170,7 @@ void PASTEMAC(ch,varname) \
 	PASTEMAC(chr,copys)( sumsq_r, *sumsq ); \
 }
 
-INSERT_GENTFUNCR_BASIC0( sumsqv_unb_var1 )
+INSERT_GENTFUNCR_BASIC( sumsqv_unb_var1 )
 
 // -----------------------------------------------------------------------------
 
@@ -1202,7 +1202,7 @@ bool PASTEMAC(ch,opname) \
 	return TRUE; \
 }
 
-INSERT_GENTFUNC_BASIC0( eqv_unb_var1 )
+INSERT_GENTFUNC_BASIC( eqv_unb_var1 )
 
 
 #undef  GENTFUNC
@@ -1326,7 +1326,7 @@ bool PASTEMAC(ch,opname) \
 	return TRUE; \
 }
 
-INSERT_GENTFUNC_BASIC0( eqm_unb_var1 )
+INSERT_GENTFUNC_BASIC( eqm_unb_var1 )
 
 
 #undef  GENTFUNC
@@ -1361,7 +1361,7 @@ void PASTEMAC(ch,opname) \
 	fprintf( file, "%s\n", s2 ); \
 }
 
-INSERT_GENTFUNC_BASIC0_I( fprintv )
+INSERT_GENTFUNC_BASIC_I( fprintv )
 
 
 #undef  GENTFUNC
@@ -1401,5 +1401,5 @@ void PASTEMAC(ch,opname) \
 	fflush( file ); \
 }
 
-INSERT_GENTFUNC_BASIC0_I( fprintm )
+INSERT_GENTFUNC_BASIC_I( fprintm )
 

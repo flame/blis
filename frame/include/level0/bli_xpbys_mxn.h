@@ -120,7 +120,7 @@ BLIS_INLINE void PASTEMAC(ch,opname) \
     PASTEMAC3(ch,ch,ch,opname)( m, n, x, rs_x, cs_x, beta, y, rs_y, cs_y ); \
 }
 
-INSERT_GENTFUNC_BASIC0( xpbys_mxn )
+INSERT_GENTFUNC_BASIC( xpbys_mxn )
 
 
 

@@ -50,8 +50,8 @@
 // Define a prototype-inserting template that uses an arbitrary prototype-
 // generating macro.
 
-#undef  INSERT_PROTMAC_BASIC0
-#define INSERT_PROTMAC_BASIC0( protmac, kername ) \
+#undef  INSERT_PROTMAC_BASIC
+#define INSERT_PROTMAC_BASIC( protmac, kername ) \
 \
 protmac( float,    s, kername ) \
 protmac( double,   d, kername ) \
@@ -72,11 +72,11 @@ protmac( dcomplex, z, kername )
 // Instantiate prototypes for above functions using the pre-defined level-3
 // microkernel prototype-generating macros.
 
-INSERT_PROTMAC_BASIC0( GEMM_UKR_PROT,     gemm_ukr_name )
-INSERT_PROTMAC_BASIC0( GEMMTRSM_UKR_PROT, gemmtrsm_l_ukr_name )
-INSERT_PROTMAC_BASIC0( GEMMTRSM_UKR_PROT, gemmtrsm_u_ukr_name )
-INSERT_PROTMAC_BASIC0( TRSM_UKR_PROT,     trsm_l_ukr_name )
-INSERT_PROTMAC_BASIC0( TRSM_UKR_PROT,     trsm_u_ukr_name )
+INSERT_PROTMAC_BASIC( GEMM_UKR_PROT,     gemm_ukr_name )
+INSERT_PROTMAC_BASIC( GEMMTRSM_UKR_PROT, gemmtrsm_l_ukr_name )
+INSERT_PROTMAC_BASIC( GEMMTRSM_UKR_PROT, gemmtrsm_u_ukr_name )
+INSERT_PROTMAC_BASIC( TRSM_UKR_PROT,     trsm_l_ukr_name )
+INSERT_PROTMAC_BASIC( TRSM_UKR_PROT,     trsm_u_ukr_name )
 
 
 // -- Level-3 virtual micro-kernel prototype redefinitions ---------------------
@@ -96,11 +96,11 @@ INSERT_PROTMAC_BASIC0( TRSM_UKR_PROT,     trsm_u_ukr_name )
 
 // -- 1m --
 
-INSERT_PROTMAC_BASIC0( GEMM_UKR_PROT,     gemm1m_ukr_name )
-INSERT_PROTMAC_BASIC0( GEMMTRSM_UKR_PROT, gemmtrsm1m_l_ukr_name )
-INSERT_PROTMAC_BASIC0( GEMMTRSM_UKR_PROT, gemmtrsm1m_u_ukr_name )
-INSERT_PROTMAC_BASIC0( TRSM_UKR_PROT,     trsm1m_l_ukr_name )
-INSERT_PROTMAC_BASIC0( TRSM_UKR_PROT,     trsm1m_u_ukr_name )
+INSERT_PROTMAC_BASIC( GEMM_UKR_PROT,     gemm1m_ukr_name )
+INSERT_PROTMAC_BASIC( GEMMTRSM_UKR_PROT, gemmtrsm1m_l_ukr_name )
+INSERT_PROTMAC_BASIC( GEMMTRSM_UKR_PROT, gemmtrsm1m_u_ukr_name )
+INSERT_PROTMAC_BASIC( TRSM_UKR_PROT,     trsm1m_l_ukr_name )
+INSERT_PROTMAC_BASIC( TRSM_UKR_PROT,     trsm1m_u_ukr_name )
 
 
 // -- Level-3 small/unpacked micro-kernel prototype definitions ----------------
@@ -116,11 +116,11 @@ INSERT_PROTMAC_BASIC0( TRSM_UKR_PROT,     trsm1m_u_ukr_name )
 // Instantiate prototypes for above functions using the pre-defined gemmsup
 // kernel prototype-generating macros.
 
-INSERT_PROTMAC_BASIC0( GEMMSUP_KER_PROT, gemmsup_rv_ukr_name )
-INSERT_PROTMAC_BASIC0( GEMMSUP_KER_PROT, gemmsup_rg_ukr_name )
-INSERT_PROTMAC_BASIC0( GEMMSUP_KER_PROT, gemmsup_cv_ukr_name )
-INSERT_PROTMAC_BASIC0( GEMMSUP_KER_PROT, gemmsup_cg_ukr_name )
-INSERT_PROTMAC_BASIC0( GEMMSUP_KER_PROT, gemmsup_gx_ukr_name )
+INSERT_PROTMAC_BASIC( GEMMSUP_KER_PROT, gemmsup_rv_ukr_name )
+INSERT_PROTMAC_BASIC( GEMMSUP_KER_PROT, gemmsup_rg_ukr_name )
+INSERT_PROTMAC_BASIC( GEMMSUP_KER_PROT, gemmsup_cv_ukr_name )
+INSERT_PROTMAC_BASIC( GEMMSUP_KER_PROT, gemmsup_cg_ukr_name )
+INSERT_PROTMAC_BASIC( GEMMSUP_KER_PROT, gemmsup_gx_ukr_name )
 
 
 // -- Level-1m (packm/unpackm) kernel prototype redefinitions ------------------
@@ -141,16 +141,16 @@ INSERT_PROTMAC_BASIC0( GEMMSUP_KER_PROT, gemmsup_gx_ukr_name )
 // Instantiate prototypes for above functions using the pre-defined packm
 // kernel prototype-generating macros.
 
-INSERT_PROTMAC_BASIC0( PACKM_KER_PROT,      packm_mrxk_ker_name )
-INSERT_PROTMAC_BASIC0( PACKM_KER_PROT,      packm_nrxk_ker_name )
-INSERT_PROTMAC_BASIC0( PACKM_KER_PROT,      packm_mrxk_1er_ker_name )
-INSERT_PROTMAC_BASIC0( PACKM_KER_PROT,      packm_nrxk_1er_ker_name )
-INSERT_PROTMAC_BASIC0( PACKM_DIAG_KER_PROT, packm_mrxmr_diag_ker_name )
-INSERT_PROTMAC_BASIC0( PACKM_DIAG_KER_PROT, packm_nrxnr_diag_ker_name )
-INSERT_PROTMAC_BASIC0( PACKM_DIAG_KER_PROT, packm_mrxmr_diag_1er_ker_name )
-INSERT_PROTMAC_BASIC0( PACKM_DIAG_KER_PROT, packm_nrxnr_diag_1er_ker_name )
-INSERT_PROTMAC_BASIC0( UNPACKM_KER_PROT,    unpackm_mrxk_ker_name )
-INSERT_PROTMAC_BASIC0( UNPACKM_KER_PROT,    unpackm_nrxk_ker_name )
+INSERT_PROTMAC_BASIC( PACKM_KER_PROT,      packm_mrxk_ker_name )
+INSERT_PROTMAC_BASIC( PACKM_KER_PROT,      packm_nrxk_ker_name )
+INSERT_PROTMAC_BASIC( PACKM_KER_PROT,      packm_mrxk_1er_ker_name )
+INSERT_PROTMAC_BASIC( PACKM_KER_PROT,      packm_nrxk_1er_ker_name )
+INSERT_PROTMAC_BASIC( PACKM_DIAG_KER_PROT, packm_mrxmr_diag_ker_name )
+INSERT_PROTMAC_BASIC( PACKM_DIAG_KER_PROT, packm_nrxnr_diag_ker_name )
+INSERT_PROTMAC_BASIC( PACKM_DIAG_KER_PROT, packm_mrxmr_diag_1er_ker_name )
+INSERT_PROTMAC_BASIC( PACKM_DIAG_KER_PROT, packm_nrxnr_diag_1er_ker_name )
+INSERT_PROTMAC_BASIC( UNPACKM_KER_PROT,    unpackm_mrxk_ker_name )
+INSERT_PROTMAC_BASIC( UNPACKM_KER_PROT,    unpackm_nrxk_ker_name )
 
 
 // -- Level-1f kernel prototype redefinitions ----------------------------------
@@ -166,11 +166,11 @@ INSERT_PROTMAC_BASIC0( UNPACKM_KER_PROT,    unpackm_nrxk_ker_name )
 // Instantiate prototypes for above functions using the pre-defined level-1f
 // kernel prototype-generating macros.
 
-INSERT_PROTMAC_BASIC0( AXPY2V_KER_PROT,     axpy2v_ker_name )
-INSERT_PROTMAC_BASIC0( AXPYF_KER_PROT,      axpyf_ker_name )
-INSERT_PROTMAC_BASIC0( DOTAXPYV_KER_PROT,   dotaxpyv_ker_name )
-INSERT_PROTMAC_BASIC0( DOTXAXPYF_KER_PROT,  dotxaxpyf_ker_name )
-INSERT_PROTMAC_BASIC0( DOTXF_KER_PROT,      dotxf_ker_name )
+INSERT_PROTMAC_BASIC( AXPY2V_KER_PROT,     axpy2v_ker_name )
+INSERT_PROTMAC_BASIC( AXPYF_KER_PROT,      axpyf_ker_name )
+INSERT_PROTMAC_BASIC( DOTAXPYV_KER_PROT,   dotaxpyv_ker_name )
+INSERT_PROTMAC_BASIC( DOTXAXPYF_KER_PROT,  dotxaxpyf_ker_name )
+INSERT_PROTMAC_BASIC( DOTXF_KER_PROT,      dotxf_ker_name )
 
 
 // -- Level-1v kernel prototype redefinitions ----------------------------------
@@ -196,21 +196,21 @@ INSERT_PROTMAC_BASIC0( DOTXF_KER_PROT,      dotxf_ker_name )
 // Instantiate prototypes for above functions using the pre-defined level-1v
 // kernel prototype-generating macros.
 
-INSERT_PROTMAC_BASIC0( ADDV_KER_PROT,     addv_ker_name )
-INSERT_PROTMAC_BASIC0( AMAXV_KER_PROT,    amaxv_ker_name )
-INSERT_PROTMAC_BASIC0( AXPBYV_KER_PROT,   axpbyv_ker_name )
-INSERT_PROTMAC_BASIC0( AXPYV_KER_PROT,    axpyv_ker_name )
-INSERT_PROTMAC_BASIC0( COPYV_KER_PROT,    copyv_ker_name )
-INSERT_PROTMAC_BASIC0( DOTV_KER_PROT,     dotv_ker_name )
-INSERT_PROTMAC_BASIC0( DOTXV_KER_PROT,    dotxv_ker_name )
-INSERT_PROTMAC_BASIC0( INVERTV_KER_PROT,  invertv_ker_name )
-INSERT_PROTMAC_BASIC0( INVSCALV_KER_PROT, invscalv_ker_name )
-INSERT_PROTMAC_BASIC0( SCALV_KER_PROT,    scalv_ker_name )
-INSERT_PROTMAC_BASIC0( SCAL2V_KER_PROT,   scal2v_ker_name )
-INSERT_PROTMAC_BASIC0( SETV_KER_PROT,     setv_ker_name )
-INSERT_PROTMAC_BASIC0( SUBV_KER_PROT,     subv_ker_name )
-INSERT_PROTMAC_BASIC0( SWAPV_KER_PROT,    swapv_ker_name )
-INSERT_PROTMAC_BASIC0( XPBYV_KER_PROT,    xpbyv_ker_name )
+INSERT_PROTMAC_BASIC( ADDV_KER_PROT,     addv_ker_name )
+INSERT_PROTMAC_BASIC( AMAXV_KER_PROT,    amaxv_ker_name )
+INSERT_PROTMAC_BASIC( AXPBYV_KER_PROT,   axpbyv_ker_name )
+INSERT_PROTMAC_BASIC( AXPYV_KER_PROT,    axpyv_ker_name )
+INSERT_PROTMAC_BASIC( COPYV_KER_PROT,    copyv_ker_name )
+INSERT_PROTMAC_BASIC( DOTV_KER_PROT,     dotv_ker_name )
+INSERT_PROTMAC_BASIC( DOTXV_KER_PROT,    dotxv_ker_name )
+INSERT_PROTMAC_BASIC( INVERTV_KER_PROT,  invertv_ker_name )
+INSERT_PROTMAC_BASIC( INVSCALV_KER_PROT, invscalv_ker_name )
+INSERT_PROTMAC_BASIC( SCALV_KER_PROT,    scalv_ker_name )
+INSERT_PROTMAC_BASIC( SCAL2V_KER_PROT,   scal2v_ker_name )
+INSERT_PROTMAC_BASIC( SETV_KER_PROT,     setv_ker_name )
+INSERT_PROTMAC_BASIC( SUBV_KER_PROT,     subv_ker_name )
+INSERT_PROTMAC_BASIC( SWAPV_KER_PROT,    swapv_ker_name )
+INSERT_PROTMAC_BASIC( XPBYV_KER_PROT,    xpbyv_ker_name )
 
 
 

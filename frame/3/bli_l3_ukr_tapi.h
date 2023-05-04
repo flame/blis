@@ -54,7 +54,7 @@ void PASTEMAC(ch,opname) \
        const cntx_t*    cntx  \
      );
 
-INSERT_GENTPROT_BASIC0( gemm_ukernel )
+INSERT_GENTPROT_BASIC( gemm_ukernel )
 
 
 #undef  GENTPROT
@@ -75,8 +75,8 @@ void PASTEMAC(ch,opname) \
        const cntx_t*    cntx  \
      );
 
-INSERT_GENTPROT_BASIC0( gemmtrsm_l_ukernel )
-INSERT_GENTPROT_BASIC0( gemmtrsm_u_ukernel )
+INSERT_GENTPROT_BASIC( gemmtrsm_l_ukernel )
+INSERT_GENTPROT_BASIC( gemmtrsm_u_ukernel )
 
 
 #undef  GENTPROT
@@ -91,6 +91,6 @@ void PASTEMAC(ch,opname) \
        const cntx_t*    cntx  \
      );
 
-INSERT_GENTPROT_BASIC0( trsm_l_ukernel )
-INSERT_GENTPROT_BASIC0( trsm_u_ukernel )
+INSERT_GENTPROT_BASIC( trsm_l_ukernel )
+INSERT_GENTPROT_BASIC( trsm_u_ukernel )
 

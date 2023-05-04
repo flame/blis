@@ -77,7 +77,7 @@ void PASTECH2(bls_,ch,varname) \
        thrinfo_t* restrict thread  \
      );
 
-//INSERT_GENTPROT_BASIC0( gemm_bp_var1 )
+//INSERT_GENTPROT_BASIC( gemm_bp_var1 )
 GENTPROT( float,    s, gemm_bp_var1 )
 GENTPROT( double,   d, gemm_bp_var1 )
 GENTPROT( scomplex, c, gemm_bp_var1 )
@@ -107,7 +107,7 @@ void PASTECH2(bls_,ch,varname) \
        cntx_t*    restrict cntx  \
      );
 
-//INSERT_GENTPROT_BASIC0( gemm_kernel )
+//INSERT_GENTPROT_BASIC( gemm_kernel )
 GENTPROT( float,    s, gemm_kernel )
 GENTPROT( double,   d, gemm_kernel )
 GENTPROT( scomplex, c, gemm_kernel )

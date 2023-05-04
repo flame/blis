@@ -55,7 +55,7 @@ BLIS_EXPORT_BLIS void PASTEMAC(ch,opname) \
              ctype*  c, inc_t rs_c, inc_t cs_c  \
      );
 
-INSERT_GENTPROT_BASIC0( gemm )
+INSERT_GENTPROT_BASIC( gemm )
 
 #undef  GENTPROT
 #define GENTPROT( ctype, ch, opname ) \
@@ -75,8 +75,8 @@ BLIS_EXPORT_BLIS void PASTEMAC(ch,opname) \
              ctype*  c, inc_t rs_c, inc_t cs_c  \
      );
 
-INSERT_GENTPROT_BASIC0( hemm )
-INSERT_GENTPROT_BASIC0( symm )
+INSERT_GENTPROT_BASIC( hemm )
+INSERT_GENTPROT_BASIC( symm )
 
 
 #undef  GENTPROTR
@@ -94,7 +94,7 @@ BLIS_EXPORT_BLIS void PASTEMAC(ch,opname) \
              ctype*   c, inc_t rs_c, inc_t cs_c  \
      );
 
-INSERT_GENTPROTR_BASIC0( herk )
+INSERT_GENTPROTR_BASIC( herk )
 
 
 #undef  GENTPROTR
@@ -114,7 +114,7 @@ BLIS_EXPORT_BLIS void PASTEMAC(ch,opname) \
              ctype*   c, inc_t rs_c, inc_t cs_c  \
      );
 
-INSERT_GENTPROTR_BASIC0( her2k )
+INSERT_GENTPROTR_BASIC( her2k )
 
 
 #undef  GENTPROT
@@ -132,7 +132,7 @@ BLIS_EXPORT_BLIS void PASTEMAC(ch,opname) \
              ctype*  c, inc_t rs_c, inc_t cs_c  \
      );
 
-INSERT_GENTPROT_BASIC0( syrk )
+INSERT_GENTPROT_BASIC( syrk )
 
 
 #undef  GENTPROT
@@ -152,8 +152,8 @@ BLIS_EXPORT_BLIS void PASTEMAC(ch,opname) \
              ctype*  c, inc_t rs_c, inc_t cs_c  \
      );
 
-INSERT_GENTPROT_BASIC0( gemmt )
-INSERT_GENTPROT_BASIC0( syr2k )
+INSERT_GENTPROT_BASIC( gemmt )
+INSERT_GENTPROT_BASIC( syr2k )
 
 
 #undef  GENTPROT
@@ -175,7 +175,7 @@ BLIS_EXPORT_BLIS void PASTEMAC(ch,opname) \
              ctype*  c, inc_t rs_c, inc_t cs_c  \
      );
 
-INSERT_GENTPROT_BASIC0( trmm3 )
+INSERT_GENTPROT_BASIC( trmm3 )
 
 
 #undef  GENTPROT
@@ -194,6 +194,6 @@ BLIS_EXPORT_BLIS void PASTEMAC(ch,opname) \
              ctype*  b, inc_t rs_b, inc_t cs_b  \
      );
 
-INSERT_GENTPROT_BASIC0( trmm )
-INSERT_GENTPROT_BASIC0( trsm )
+INSERT_GENTPROT_BASIC( trmm )
+INSERT_GENTPROT_BASIC( trsm )
 

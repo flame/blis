@@ -120,7 +120,7 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 	); \
 }
 
-INSERT_GENTFUNC_BASIC3( gemv, gemv, gemv_unf_var1, gemv_unf_var2 )
+INSERT_GENTFUNC_BASIC( gemv, gemv, gemv_unf_var1, gemv_unf_var2 )
 
 
 #undef  GENTFUNC
@@ -172,7 +172,7 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 	); \
 }
 
-INSERT_GENTFUNC_BASIC3( ger, ger, ger_unb_var1, ger_unb_var2 )
+INSERT_GENTFUNC_BASIC( ger, ger, ger_unb_var1, ger_unb_var2 )
 
 
 #undef  GENTFUNC
@@ -248,8 +248,8 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 	); \
 }
 
-INSERT_GENTFUNC_BASIC4( hemv, hemv, BLIS_CONJUGATE,    hemv_unf_var1, hemv_unf_var3 )
-INSERT_GENTFUNC_BASIC4( symv, hemv, BLIS_NO_CONJUGATE, hemv_unf_var1, hemv_unf_var3 )
+INSERT_GENTFUNC_BASIC( hemv, hemv, BLIS_CONJUGATE,    hemv_unf_var1, hemv_unf_var3 )
+INSERT_GENTFUNC_BASIC( symv, hemv, BLIS_NO_CONJUGATE, hemv_unf_var1, hemv_unf_var3 )
 
 
 #undef  GENTFUNCR
@@ -313,7 +313,7 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 	); \
 }
 
-INSERT_GENTFUNCR_BASIC4( her, her, BLIS_CONJUGATE, her_unb_var1, her_unb_var2 )
+INSERT_GENTFUNCR_BASIC( her, her, BLIS_CONJUGATE, her_unb_var1, her_unb_var2 )
 
 
 #undef  GENTFUNC
@@ -370,7 +370,7 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 	); \
 }
 
-INSERT_GENTFUNC_BASIC4( syr, her, BLIS_NO_CONJUGATE, her_unb_var1, her_unb_var2 )
+INSERT_GENTFUNC_BASIC( syr, her, BLIS_NO_CONJUGATE, her_unb_var1, her_unb_var2 )
 
 
 #undef  GENTFUNC
@@ -431,8 +431,8 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 	); \
 }
 
-INSERT_GENTFUNC_BASIC4( her2, her2, BLIS_CONJUGATE,    her2_unf_var1, her2_unf_var4 )
-INSERT_GENTFUNC_BASIC4( syr2, her2, BLIS_NO_CONJUGATE, her2_unf_var1, her2_unf_var4 )
+INSERT_GENTFUNC_BASIC( her2, her2, BLIS_CONJUGATE,    her2_unf_var1, her2_unf_var4 )
+INSERT_GENTFUNC_BASIC( syr2, her2, BLIS_NO_CONJUGATE, her2_unf_var1, her2_unf_var4 )
 
 
 #undef  GENTFUNC
@@ -505,8 +505,8 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 	); \
 }
 
-INSERT_GENTFUNC_BASIC3( trmv, trmv, trmv_unf_var1, trmv_unf_var2 )
-INSERT_GENTFUNC_BASIC3( trsv, trmv, trsv_unf_var1, trsv_unf_var2 )
+INSERT_GENTFUNC_BASIC( trmv, trmv, trmv_unf_var1, trmv_unf_var2 )
+INSERT_GENTFUNC_BASIC( trsv, trmv, trsv_unf_var1, trsv_unf_var2 )
 
 
 #endif
