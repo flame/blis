@@ -895,7 +895,7 @@ err_t bli_check_valid_arch_id( arch_t id )
 	return e_val;
 }
 
-err_t bli_check_initialized_gks_cntx( const cntx_t* const * cntx )
+err_t bli_check_initialized_gks_cntx( const cntx_t* cntx )
 {
 	err_t e_val = BLIS_SUCCESS;
 

@@ -76,24 +76,91 @@ void bli_gemm_cntl_init
      (
              ind_t        im,
              opid_t       family,
-       const obj_t*       a,
-       const obj_t*       b,
-       const obj_t*       c,
+       const obj_t*       alpha,
+             obj_t*       a,
+             obj_t*       b,
+       const obj_t*       beta,
+             obj_t*       c,
        const cntx_t*      cntx,
              gemm_cntl_t* cntl
      )
 {
-	const bool   trmm_r    = family == BLIS_TRMM && bli_obj_is_triangular( b );
-	const bool   a_lo_tri  = bli_obj_is_triangular( a ) && bli_obj_is_lower( a );
-	const bool   b_up_tri  = bli_obj_is_triangular( b ) && bli_obj_is_upper( b );
+	const prec_t        comp_prec     = bli_obj_comp_prec( c );
+	const num_t         dt_c          = bli_obj_dt( c );
+	const num_t         dt_comp       = ( im == BLIS_1M ? BLIS_REAL : bli_dt_domain( dt_c ) ) | comp_prec;
+	      gemm_ukr_vft  gemm_ukr      = bli_cntx_get_ukr_dt( dt_comp, BLIS_GEMM_UKR, cntx );
+	      gemm_ukr_vft  real_gemm_ukr = NULL;
+	const bool          row_pref      = bli_cntx_get_ukr_prefs_dt( dt_comp, BLIS_GEMM_UKR_ROW_PREF, cntx );
 
-	const prec_t comp_prec = bli_obj_comp_prec( c );
-	const num_t  dt_a      = bli_obj_dt( a );
-	const num_t  dt_b      = bli_obj_dt( b );
-	const num_t  dt_c      = bli_obj_dt( c );
-	const num_t  dt_ap     = bli_dt_domain( dt_a ) | comp_prec;
-	const num_t  dt_bp     = bli_dt_domain( dt_b ) | comp_prec;
-	const num_t  dt_comp   = ( im == BLIS_1M ? BLIS_REAL : bli_dt_domain( dt_c ) ) | comp_prec;
+	// An optimization: If C is stored by rows and the micro-kernel prefers
+	// contiguous columns, or if C is stored by columns and the micro-kernel
+	// prefers contiguous rows, transpose the entire operation to allow the
+	// micro-kernel to access elements of C in its preferred manner.
+	bool needs_swap = (   row_pref && bli_obj_is_col_tilted( c ) ) ||
+	                  ( ! row_pref && bli_obj_is_row_tilted( c ) );
+
+	// NOTE: This case casts right-side symm/hemm/trmm/trmm3 in terms of left side.
+	// This may be necessary when the current subconfiguration uses a gemm microkernel
+	// that assumes that the packing kernel will have already duplicated
+	// (broadcast) element of B in the packed copy of B. Supporting
+	// duplication within the logic that packs micropanels from symmetric
+	// matrices is ugly, but technically supported. This can
+	// lead to the microkernel being executed on an output matrix with the
+	// microkernel's general stride IO case (unless the microkernel supports
+	// both both row and column IO cases as well). As a
+	// consequence, those subconfigurations need a way to force the symmetric
+	// matrix to be on the left (and thus the general matrix to the on the
+	// right). So our solution is that in those cases, the subconfigurations
+	// simply #define BLIS_DISABLE_{SYMM,HEMM,TRMM,TRMM3}_RIGHT.
+
+	// If A is being multiplied from the right, transpose all operands
+	// so that we can perform the computation as if A were being multiplied
+	// from the left.
+#ifdef BLIS_DISABLE_SYMM_RIGHT
+	if ( family == BLIS_SYMM )
+		needs_swap = bli_obj_is_symmetric( b );
+#endif
+#ifdef BLIS_DISABLE_HEMM_RIGHT
+	if ( family == BLIS_HEMM )
+		needs_swap = bli_obj_is_hermitian( b );
+#endif
+#ifdef BLIS_DISABLE_TRMM_RIGHT
+	if ( family == BLIS_TRMM )
+		needs_swap = bli_obj_is_triangular( b );
+#endif
+#ifdef BLIS_DISABLE_TRMM3_RIGHT
+	if ( family == BLIS_TRMM3 )
+		needs_swap = bli_obj_is_triangular( b );
+#endif
+
+	// Swap the A and B operands if required. This transforms the operation
+	// C = alpha A B + beta C into C^T = alpha B^T A^T + beta C^T.
+	if ( needs_swap )
+	{
+		bli_obj_swap( a, b );
+
+		bli_obj_induce_trans( a );
+		bli_obj_induce_trans( b );
+		bli_obj_induce_trans( c );
+	}
+
+	// If alpha is non-unit, typecast and apply it to the scalar attached
+	// to B, unless it happens to be triangular.
+	if ( bli_obj_root_is_triangular( b ) )
+	{
+		if ( !bli_obj_equals( alpha, &BLIS_ONE ) )
+			bli_obj_scalar_apply_scalar( alpha, a );
+	}
+	else // if ( bli_obj_root_is_triangular( b ) )
+	{
+		if ( !bli_obj_equals( alpha, &BLIS_ONE ) )
+			bli_obj_scalar_apply_scalar( alpha, b );
+	}
+
+	// If beta is non-unit, typecast and apply it to the scalar attached
+	// to C.
+	if ( !bli_obj_equals( beta, &BLIS_ONE ) )
+		bli_obj_scalar_apply_scalar( beta, c );
 
 	void_fp macro_kernel_fp = family == BLIS_GEMM ||
 	                          family == BLIS_HEMM ||
@@ -117,33 +184,38 @@ void bli_gemm_cntl_init
 	                                 bli_obj_is_lower( b ) ? bli_trmm_rl_ker_var2 : bli_trmm_ru_ker_var2 :
 	                          NULL; // Should never happen
 #endif
-	gemm_ukr_vft  gemm_ukr      = bli_cntx_get_ukr_dt( dt_comp, BLIS_GEMM_UKR, cntx );
-	gemm_ukr_vft  real_gemm_ukr = NULL;
-	bool          row_pref      = bli_cntx_get_ukr_prefs_dt( dt_comp, BLIS_GEMM_UKR_ROW_PREF, cntx );
-	pack_t        schema_a      = BLIS_PACKED_ROW_PANELS;
-	pack_t        schema_b      = BLIS_PACKED_COL_PANELS;
-	packm_ker_vft packm_a_ukr   = dt_a == dt_ap ? packm_struc_cxk[ dt_a ]
-	                                            : packm_struc_cxk_md[ dt_a ][ dt_ap ];
-	packm_ker_vft packm_b_ukr   = dt_b == dt_bp ? packm_struc_cxk[ dt_b ]
-	                                            : packm_struc_cxk_md[ dt_b ][ dt_bp ];
-	dim_t         mr_def        = bli_cntx_get_blksz_def_dt( dt_comp, BLIS_MR, cntx );
-	dim_t         mr_pack       = bli_cntx_get_blksz_max_dt( dt_comp, BLIS_MR, cntx );
-	dim_t         mr_bcast      = bli_cntx_get_blksz_max_dt( dt_comp, BLIS_BBM, cntx );
-	dim_t         mr_scale      = 1;
-	dim_t         nr_def        = bli_cntx_get_blksz_def_dt( dt_comp, BLIS_NR, cntx );
-	dim_t         nr_pack       = bli_cntx_get_blksz_max_dt( dt_comp, BLIS_NR, cntx );
-	dim_t         nr_bcast      = bli_cntx_get_blksz_max_dt( dt_comp, BLIS_BBN, cntx );
-	dim_t         nr_scale      = 1;
-	dim_t         kr_def        = bli_cntx_get_blksz_def_dt( dt_comp, BLIS_KR, cntx );
-	dim_t         mc_def        = bli_cntx_get_blksz_def_dt( dt_comp, BLIS_MC, cntx );
-	dim_t         mc_max        = bli_cntx_get_blksz_max_dt( dt_comp, BLIS_MC, cntx );
-	dim_t         mc_scale      = 1;
-	dim_t         nc_def        = bli_cntx_get_blksz_def_dt( dt_comp, BLIS_NC, cntx );
-	dim_t         nc_max        = bli_cntx_get_blksz_max_dt( dt_comp, BLIS_NC, cntx );
-	dim_t         nc_scale      = 1;
-	dim_t         kc_def        = bli_cntx_get_blksz_def_dt( dt_comp, BLIS_KC, cntx );
-	dim_t         kc_max        = bli_cntx_get_blksz_max_dt( dt_comp, BLIS_KC, cntx );
-	dim_t         kc_scale      = 1;
+
+	const num_t         dt_a          = bli_obj_dt( a );
+	const num_t         dt_b          = bli_obj_dt( b );
+	const num_t         dt_ap         = bli_dt_domain( dt_a ) | comp_prec;
+	const num_t         dt_bp         = bli_dt_domain( dt_b ) | comp_prec;
+	const bool          trmm_r        = family == BLIS_TRMM && bli_obj_is_triangular( b );
+	const bool          a_lo_tri      = bli_obj_is_triangular( a ) && bli_obj_is_lower( a );
+	const bool          b_up_tri      = bli_obj_is_triangular( b ) && bli_obj_is_upper( b );
+	      pack_t        schema_a      = BLIS_PACKED_ROW_PANELS;
+	      pack_t        schema_b      = BLIS_PACKED_COL_PANELS;
+	const packm_ker_vft packm_a_ukr   = dt_a == dt_ap ? packm_struc_cxk[ dt_a ]
+	                                                  : packm_struc_cxk_md[ dt_a ][ dt_ap ];
+	const packm_ker_vft packm_b_ukr   = dt_b == dt_bp ? packm_struc_cxk[ dt_b ]
+	                                                  : packm_struc_cxk_md[ dt_b ][ dt_bp ];
+	const dim_t         mr_def        = bli_cntx_get_blksz_def_dt( dt_comp, BLIS_MR, cntx );
+	const dim_t         mr_pack       = bli_cntx_get_blksz_max_dt( dt_comp, BLIS_MR, cntx );
+	const dim_t         mr_bcast      = bli_cntx_get_blksz_max_dt( dt_comp, BLIS_BBM, cntx );
+	      dim_t         mr_scale      = 1;
+	const dim_t         nr_def        = bli_cntx_get_blksz_def_dt( dt_comp, BLIS_NR, cntx );
+	const dim_t         nr_pack       = bli_cntx_get_blksz_max_dt( dt_comp, BLIS_NR, cntx );
+	const dim_t         nr_bcast      = bli_cntx_get_blksz_max_dt( dt_comp, BLIS_BBN, cntx );
+	      dim_t         nr_scale      = 1;
+	const dim_t         kr_def        = bli_cntx_get_blksz_def_dt( dt_comp, BLIS_KR, cntx );
+	const dim_t         mc_def        = bli_cntx_get_blksz_def_dt( dt_comp, BLIS_MC, cntx );
+	const dim_t         mc_max        = bli_cntx_get_blksz_max_dt( dt_comp, BLIS_MC, cntx );
+	      dim_t         mc_scale      = 1;
+	const dim_t         nc_def        = bli_cntx_get_blksz_def_dt( dt_comp, BLIS_NC, cntx );
+	const dim_t         nc_max        = bli_cntx_get_blksz_max_dt( dt_comp, BLIS_NC, cntx );
+	      dim_t         nc_scale      = 1;
+	const dim_t         kc_def        = bli_cntx_get_blksz_def_dt( dt_comp, BLIS_KC, cntx );
+	const dim_t         kc_max        = bli_cntx_get_blksz_max_dt( dt_comp, BLIS_KC, cntx );
+	      dim_t         kc_scale      = 1;
 
 	if ( im == BLIS_1M )
 	{

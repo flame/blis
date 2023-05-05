@@ -44,9 +44,9 @@ static const char* bli_ind_impl_str[BLIS_NUM_IND_METHODS] =
 
 void bli_ind_init( void )
 {
-	// NOTE: We intentionally call bli_gks_query_nat_cntx_noinit() in order
+	// NOTE: We intentionally call bli_gks_query_cntx_noinit() in order
 	// to avoid the internal call to bli_init_once().
-	const cntx_t* cntx = bli_gks_query_nat_cntx_noinit();
+	const cntx_t* cntx = bli_gks_query_cntx_noinit();
 
 	// For each precision, enable the default induced method (1m) if both of
 	// the following conditions are met:

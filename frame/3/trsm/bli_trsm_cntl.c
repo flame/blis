@@ -86,26 +86,30 @@ void bli_trsm_var_cntl_init_node
 void bli_trsm_cntl_init
      (
              ind_t        im,
-       const obj_t*       a,
-       const obj_t*       b,
-       const obj_t*       c,
+       const obj_t*       alpha,
+             obj_t*       a,
+             obj_t*       b,
+       const obj_t*       beta,
+             obj_t*       c,
        const cntx_t*      cntx,
              trsm_cntl_t* cntl
      )
 {
 	if ( bli_obj_is_triangular( a ) )
-		bli_trsm_l_cntl_init( im, a, b, c, cntx, cntl );
+		bli_trsm_l_cntl_init( im, alpha, a, b, beta, c, cntx, cntl );
 	else
 		bli_check_error_code(BLIS_NOT_YET_IMPLEMENTED);
-		//bli_trsm_r_cntl_init( im, a, b, c, cntx, cntl );
+		//bli_trsm_r_cntl_init( im, alpha, a, b, beta, c, cntx, cntl );
 }
 
 void bli_trsm_l_cntl_init
      (
              ind_t        im,
-       const obj_t*       a,
-       const obj_t*       b,
-       const obj_t*       c,
+       const obj_t*       alpha,
+             obj_t*       a,
+             obj_t*       b,
+       const obj_t*       beta,
+             obj_t*       c,
        const cntx_t*      cntx,
              trsm_cntl_t* cntl
      )
@@ -175,6 +179,24 @@ void bli_trsm_l_cntl_init
 		    ? bli_cntx_get_ukr_dt( dt_comp, BLIS_GEMMTRSM1M_L_UKR, cntx )
 		    : bli_cntx_get_ukr_dt( dt_comp, BLIS_GEMMTRSM1M_U_UKR, cntx );
 	}
+
+	// If alpha is non-unit, typecast and apply it to the scalar attached
+	// to B, unless it happens to be triangular.
+	if ( bli_obj_root_is_triangular( b ) )
+	{
+		if ( !bli_obj_equals( alpha, &BLIS_ONE ) )
+			bli_obj_scalar_apply_scalar( alpha, a );
+	}
+	else // if ( bli_obj_root_is_triangular( b ) )
+	{
+		if ( !bli_obj_equals( alpha, &BLIS_ONE ) )
+			bli_obj_scalar_apply_scalar( alpha, b );
+	}
+
+	// If beta is non-unit, typecast and apply it to the scalar attached
+	// to C.
+	if ( !bli_obj_equals( beta, &BLIS_ONE ) )
+		bli_obj_scalar_apply_scalar( beta, c );
 
 	//
 	// Create nodes for packing A and the macro-kernel (gemm branch).
@@ -427,9 +449,11 @@ void bli_trsm_l_cntl_init
 void bli_trsm_r_cntl_init
      (
              ind_t        im,
-       const obj_t*       a,
-       const obj_t*       b,
-       const obj_t*       c,
+       const obj_t*       alpha,
+             obj_t*       a,
+             obj_t*       b,
+       const obj_t*       beta,
+             obj_t*       c,
        const cntx_t*      cntx,
              trsm_cntl_t* cntl
      )
@@ -442,9 +466,9 @@ void bli_trsm_r_cntl_init
 
 	const void_fp          macro_kernel_p = bli_obj_is_lower( b ) ? bli_trsm_rl_ker_var2 : bli_trsm_ru_ker_var2;
 	const gemmtrsm_ukr_vft gemmtrsm_ukr   = bli_obj_is_lower( b )
-	    ? bli_cntx_get_ukr_dt( dt_exec, BLIS_GEMMTRSM_L_VIR_UKR, cntx )
-	    : bli_cntx_get_ukr_dt( dt_exec, BLIS_GEMMTRSM_U_VIR_UKR, cntx );
-	const gemm_ukr_vft     gemm_ukr       = bli_cntx_get_ukr_dt( dt_exec, BLIS_GEMM_VIR_UKR, cntx );
+	    ? bli_cntx_get_ukr_dt( dt_exec, BLIS_GEMMTRSM_L_UKR, cntx )
+	    : bli_cntx_get_ukr_dt( dt_exec, BLIS_GEMMTRSM_U_UKR, cntx );
+	const gemm_ukr_vft     gemm_ukr       = bli_cntx_get_ukr_dt( dt_exec, BLIS_GEMM_UKR, cntx );
 
 	const dir_t            direct         = bli_obj_is_lower( b ) ? BLIS_BWD : BLIS_FWD;
 	const dim_t            ic_alg         = bli_cntx_get_blksz_def_dt( dt_exec, BLIS_MC, cntx );

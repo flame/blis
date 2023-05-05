@@ -758,10 +758,7 @@ void libblis_test_output_params_struct( FILE* os, test_params_t* params )
 	int     i;
 	//char   int_type_size_str[8];
 	gint_t  int_type_size;
-	ind_t   im;
 	cntx_t* cntx;
-	cntx_t* cntx_c;
-	cntx_t* cntx_z;
 
 #ifndef BLIS_ENABLE_GEMM_MD
 	// Notify the user if mixed domain or mixed precision was requested.
@@ -1035,7 +1032,7 @@ void libblis_test_output_params_struct( FILE* os, test_params_t* params )
 	libblis_test_fprintf_c( os, "\n" );
 
 	// Query a native context.
-	cntx = ( cntx_t* )bli_gks_query_nat_cntx();
+	cntx = ( cntx_t* )bli_gks_query_cntx();
 
 	libblis_test_fprintf_c( os, "level-3 blocksizes             s       d       c       z \n" );
 	libblis_test_fprintf_c( os, "  mc                     %7d %7d %7d %7d\n",
@@ -1148,84 +1145,6 @@ void libblis_test_output_params_struct( FILE* os, test_params_t* params )
 	                        ( int )bli_cntx_ukr_prefers_rows_dt( BLIS_DCOMPLEX, BLIS_TRSM_U_UKR, cntx ) );
 	libblis_test_fprintf_c( os, "\n" );
 	libblis_test_fprintf_c( os, "\n" );
-
-	libblis_test_fprintf_c( os, "--- BLIS induced implementation info ---\n" );
-	libblis_test_fprintf_c( os, "\n" );
-
-	for ( im = 0; im < BLIS_NAT; ++im )
-	{
-	if ( params->ind_enable[ im ] == 0 ) continue;
-
-	bli_ind_oper_enable_only( BLIS_GEMM, im, BLIS_SCOMPLEX );
-	bli_ind_oper_enable_only( BLIS_GEMM, im, BLIS_DCOMPLEX );
-
-	//libblis_test_fprintf_c( os, "                               c       z \n" );
-	libblis_test_fprintf_c( os, "                                               c       z \n" );
-	libblis_test_fprintf_c( os, "complex implementation                   %7s %7s\n",
-	                        bli_ind_oper_get_avail_impl_string( BLIS_GEMM, BLIS_SCOMPLEX ),
-	                        bli_ind_oper_get_avail_impl_string( BLIS_GEMM, BLIS_DCOMPLEX ) );
-	libblis_test_fprintf_c( os, "\n" );
-
-	// Query a native context. NOTE: Now that we've removed the dt argument from
-	// bli_gks_query_ind_cntx(), we can consolidate cntx_c and cntx_z; there is
-	// no need to query two contexts since they are the same.
-	cntx_c = ( cntx_t* )bli_gks_query_ind_cntx( im );
-	cntx_z = ( cntx_t* )bli_gks_query_ind_cntx( im );
-
-	libblis_test_fprintf_c( os, "level-3 blocksizes                             c       z \n" );
-	libblis_test_fprintf_c( os, "  mc                                     %7d %7d\n",
-	                        ( int )bli_cntx_get_blksz_def_dt( BLIS_SCOMPLEX, BLIS_MC, cntx_c ),
-	                        ( int )bli_cntx_get_blksz_def_dt( BLIS_DCOMPLEX, BLIS_MC, cntx_z ) );
-	libblis_test_fprintf_c( os, "  kc                                     %7d %7d\n",
-	                        ( int )bli_cntx_get_blksz_def_dt( BLIS_SCOMPLEX, BLIS_KC, cntx_c ),
-	                        ( int )bli_cntx_get_blksz_def_dt( BLIS_DCOMPLEX, BLIS_KC, cntx_z ) );
-	libblis_test_fprintf_c( os, "  nc                                     %7d %7d\n",
-	                        ( int )bli_cntx_get_blksz_def_dt( BLIS_SCOMPLEX, BLIS_NC, cntx_c ),
-	                        ( int )bli_cntx_get_blksz_def_dt( BLIS_DCOMPLEX, BLIS_NC, cntx_z ) );
-	libblis_test_fprintf_c( os, "\n" );
-	libblis_test_fprintf_c( os, "  mc maximum                             %7d %7d\n",
-	                        ( int )bli_cntx_get_blksz_max_dt( BLIS_SCOMPLEX, BLIS_MC, cntx_c ),
-	                        ( int )bli_cntx_get_blksz_max_dt( BLIS_DCOMPLEX, BLIS_MC, cntx_z ) );
-	libblis_test_fprintf_c( os, "  kc maximum                             %7d %7d\n",
-	                        ( int )bli_cntx_get_blksz_max_dt( BLIS_SCOMPLEX, BLIS_KC, cntx_c ),
-	                        ( int )bli_cntx_get_blksz_max_dt( BLIS_DCOMPLEX, BLIS_KC, cntx_z ) );
-	libblis_test_fprintf_c( os, "  nc maximum                             %7d %7d\n",
-	                        ( int )bli_cntx_get_blksz_max_dt( BLIS_SCOMPLEX, BLIS_NC, cntx_c ),
-	                        ( int )bli_cntx_get_blksz_max_dt( BLIS_DCOMPLEX, BLIS_NC, cntx_z ) );
-	libblis_test_fprintf_c( os, "\n" );
-	libblis_test_fprintf_c( os, "  mr                                     %7d %7d\n",
-	                        ( int )bli_cntx_get_blksz_def_dt( BLIS_SCOMPLEX, BLIS_MR, cntx_c ),
-	                        ( int )bli_cntx_get_blksz_def_dt( BLIS_DCOMPLEX, BLIS_MR, cntx_z ) );
-	libblis_test_fprintf_c( os, "  nr                                     %7d %7d\n",
-	                        ( int )bli_cntx_get_blksz_def_dt( BLIS_SCOMPLEX, BLIS_NR, cntx_c ),
-	                        ( int )bli_cntx_get_blksz_def_dt( BLIS_DCOMPLEX, BLIS_NR, cntx_z ) );
-	libblis_test_fprintf_c( os, "\n" );
-	libblis_test_fprintf_c( os, "  mr packdim                             %7d %7d\n",
-	                        ( int )bli_cntx_get_blksz_max_dt( BLIS_SCOMPLEX, BLIS_MR, cntx_c ),
-	                        ( int )bli_cntx_get_blksz_max_dt( BLIS_DCOMPLEX, BLIS_MR, cntx_z ) );
-	libblis_test_fprintf_c( os, "  nr packdim                             %7d %7d\n",
-	                        ( int )bli_cntx_get_blksz_max_dt( BLIS_SCOMPLEX, BLIS_NR, cntx_c ),
-	                        ( int )bli_cntx_get_blksz_max_dt( BLIS_DCOMPLEX, BLIS_NR, cntx_z ) );
-	libblis_test_fprintf_c( os, "\n" );
-	libblis_test_fprintf_c( os, "micro-kernel types                             c       z\n" );
-	libblis_test_fprintf_c( os, "  gemm                                   %7s %7s\n",
-	                        bli_info_get_gemm_ukr_impl_string( im, BLIS_SCOMPLEX ),
-	                        bli_info_get_gemm_ukr_impl_string( im, BLIS_DCOMPLEX ) );
-	libblis_test_fprintf_c( os, "  gemmtrsm_l                             %7s %7s\n",
-	                        bli_info_get_gemmtrsm_l_ukr_impl_string( im, BLIS_SCOMPLEX ),
-	                        bli_info_get_gemmtrsm_l_ukr_impl_string( im, BLIS_DCOMPLEX ) );
-	libblis_test_fprintf_c( os, "  gemmtrsm_u                             %7s %7s\n",
-	                        bli_info_get_gemmtrsm_u_ukr_impl_string( im, BLIS_SCOMPLEX ),
-	                        bli_info_get_gemmtrsm_u_ukr_impl_string( im, BLIS_DCOMPLEX ) );
-	libblis_test_fprintf_c( os, "  trsm_l                                 %7s %7s\n",
-	                        bli_info_get_trsm_l_ukr_impl_string( im, BLIS_SCOMPLEX ),
-	                        bli_info_get_trsm_l_ukr_impl_string( im, BLIS_DCOMPLEX ) );
-	libblis_test_fprintf_c( os, "  trsm_u                                 %7s %7s\n",
-	                        bli_info_get_trsm_u_ukr_impl_string( im, BLIS_SCOMPLEX ),
-	                        bli_info_get_trsm_u_ukr_impl_string( im, BLIS_DCOMPLEX ) );
-	libblis_test_fprintf_c( os, "\n" );
-
-	}
 
 	bli_ind_disable_all();
 
@@ -2251,7 +2170,6 @@ void libblis_test_op_driver
 						else if ( has_samep && has_cd_only ) { ; }
 						else { continue; }
 					}
-					else { ; }
 				}
 				else { continue; }
 

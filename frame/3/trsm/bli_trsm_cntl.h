@@ -236,9 +236,11 @@ typedef struct trsm_cntl_s trsm_cntl_t;
 BLIS_EXPORT_BLIS void bli_trsm_cntl_init
      (
              ind_t        im,
-       const obj_t*       a,
-       const obj_t*       b,
-       const obj_t*       c,
+       const obj_t*       alpha,
+             obj_t*       a,
+             obj_t*       b,
+       const obj_t*       beta,
+             obj_t*       c,
        const cntx_t*      cntx,
              trsm_cntl_t* cntl
      );
@@ -246,9 +248,11 @@ BLIS_EXPORT_BLIS void bli_trsm_cntl_init
 void bli_trsm_l_cntl_init
      (
              ind_t        im,
-       const obj_t*       a,
-       const obj_t*       b,
-       const obj_t*       c,
+       const obj_t*       alpha,
+             obj_t*       a,
+             obj_t*       b,
+       const obj_t*       beta,
+             obj_t*       c,
        const cntx_t*      cntx,
              trsm_cntl_t* cntl
      );
@@ -256,9 +260,11 @@ void bli_trsm_l_cntl_init
 void bli_trsm_r_cntl_init
      (
              ind_t        im,
-       const obj_t*       a,
-       const obj_t*       b,
-       const obj_t*       c,
+       const obj_t*       alpha,
+             obj_t*       a,
+             obj_t*       b,
+       const obj_t*       beta,
+             obj_t*       c,
        const cntx_t*      cntx,
              trsm_cntl_t* cntl
      );

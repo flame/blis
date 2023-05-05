@@ -94,7 +94,7 @@ PASTEMAC(d,fprintm)( stdout, "gemmtrsm_ukr: b11", mr, 2*nr, \
 	   circumstances where we would want the gemmtrsm_? operations to have
 	   and exercise their own IO preferences -- I'd have to think about it --
 	   but this doesn't seem to be one of them. */ \
-	const bool      col_pref = bli_cntx_ukr_prefers_cols_dt( dt, BLIS_GEMM_VIR_UKR, cntx ); \
+	const bool      col_pref = bli_cntx_ukr_prefers_cols_dt( dt, BLIS_GEMM_UKR, cntx ); \
 	const inc_t     rs_ct    = ( col_pref ? 1 : nr ); \
 	const inc_t     cs_ct    = ( col_pref ? mr : 1 ); \
 \

@@ -250,8 +250,8 @@ mddm_t bli_gemm_md_ccr
 
 	// Rather than check which complex datatype dt_comp refers to, we set
 	// the mixed-domain virtual microkernel for both types.
-    bli_cntx_set_ukr_dt( bli_cgemm_md_c2r_ref, BLIS_SCOMPLEX, BLIS_GEMM_VIR_UKR, cntx_local );
-    bli_cntx_set_ukr_dt( bli_zgemm_md_c2r_ref, BLIS_DCOMPLEX, BLIS_GEMM_VIR_UKR, cntx_local );
+    bli_cntx_set_ukr_dt( bli_cgemm_md_c2r_ref, BLIS_SCOMPLEX, BLIS_GEMM_UKR, cntx_local );
+    bli_cntx_set_ukr_dt( bli_zgemm_md_c2r_ref, BLIS_DCOMPLEX, BLIS_GEMM_UKR, cntx_local );
 
 	// Return the computation and execution domains.
 	return doms;
@@ -362,8 +362,8 @@ mddm_t bli_gemm_md_crc
 
 	// Rather than check which complex datatype dt_comp refers to, we set
 	// the mixed-domain virtual microkernel for both types.
-    bli_cntx_set_ukr_dt( bli_cgemm_md_c2r_ref, BLIS_SCOMPLEX, BLIS_GEMM_VIR_UKR, cntx_local );
-    bli_cntx_set_ukr_dt( bli_zgemm_md_c2r_ref, BLIS_DCOMPLEX, BLIS_GEMM_VIR_UKR, cntx_local );
+    bli_cntx_set_ukr_dt( bli_cgemm_md_c2r_ref, BLIS_SCOMPLEX, BLIS_GEMM_UKR, cntx_local );
+    bli_cntx_set_ukr_dt( bli_zgemm_md_c2r_ref, BLIS_DCOMPLEX, BLIS_GEMM_UKR, cntx_local );
 
 	// Return the computation and execution domains.
 	return doms;
@@ -440,23 +440,6 @@ mddm_t bli_gemm_md_rcc
     *schema_a = BLIS_PACKED_ROW_PANELS_1R;
     *schema_b = BLIS_PACKED_ROW_PANELS_1R;
 	bli_obj_toggle_conj( b );
-
-	// We also need to copy over the packm kernels from the 1m
-	// context. We query the address of that context here.
-	// NOTE: This is needed for situations where the rcc case does not
-	// involve any casting to different precisions, since currently
-	// bli_packm_blk_var1() is coded to hand off control to
-	// bli_packm_blk_var1_md() only when the storage datatype differs from
-	// the target datatype. (The packm_blk_var1_md() function has "built-in"
-	// support for packing to 1r (and 1e) schemas, whereas the
-	// packm_blk_var1() function relies on packm kernels for packing to 1r.
-	const cntx_t* cntx_1m     = bli_gks_query_ind_cntx( BLIS_1M );
-
-	const func_t* packm_1m_mr = bli_cntx_get_ukrs( BLIS_PACKM_MRXK_KER, cntx_1m );
-	const func_t* packm_1m_nr = bli_cntx_get_ukrs( BLIS_PACKM_NRXK_KER, cntx_1m );
-
-    bli_cntx_set_ukr( BLIS_PACKM_MRXK_KER, packm_1m_mr, cntx_local );
-    bli_cntx_set_ukr( BLIS_PACKM_NRXK_KER, packm_1m_nr, cntx_local );
 
 	// Return the computation and execution domains.
 	return doms;

@@ -245,28 +245,7 @@ void bli_cntx_set_ukrs( cntx_t* cntx , ... )
 		func_t* ukrs = &cntx_ukrs[ ukr_id ];
 
 		// Store the ukernel function pointer into the context.
-		// Notice that we redundantly store the native
-		// ukernel address in both the native and virtual ukernel slots
-		// in the context. This is standard practice when creating a
-		// native context. (Induced method contexts will overwrite the
-		// virtual function pointer with the address of the appropriate
-		// virtual ukernel.)
 		bli_func_set_dt( ukr_fp, ukr_dt, ukrs );
-
-		// Locate the virtual ukernel func_t pointer that corresponds to the
-		// ukernel id provided by the caller.
-		switch ( ukr_id )
-		{
-			case BLIS_GEMM_UKR:       ukrs = &cntx_ukrs[ BLIS_GEMM_VIR_UKR ]; break;
-			case BLIS_GEMMTRSM_L_UKR: ukrs = &cntx_ukrs[ BLIS_GEMMTRSM_L_VIR_UKR ]; break;
-			case BLIS_GEMMTRSM_U_UKR: ukrs = &cntx_ukrs[ BLIS_GEMMTRSM_U_VIR_UKR ]; break;
-			case BLIS_TRSM_L_UKR:     ukrs = &cntx_ukrs[ BLIS_TRSM_L_VIR_UKR ]; break;
-			case BLIS_TRSM_U_UKR:     ukrs = &cntx_ukrs[ BLIS_TRSM_U_VIR_UKR ]; break;
-			default:                  ukrs = NULL; break;
-		};
-
-		if ( ukrs )
-			bli_func_set_dt( ukr_fp, ukr_dt, ukrs );
 	}
 
 	// Shutdown variable argument environment and clean up stack.

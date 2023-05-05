@@ -110,7 +110,7 @@ err_t bli_check_alignment_is_mult_of_ptr_size( size_t align_size );
 err_t bli_check_object_alias_of( const obj_t* a, const obj_t* b );
 
 err_t bli_check_valid_arch_id( arch_t id );
-err_t bli_check_initialized_gks_cntx( const cntx_t* const * cntx );
+err_t bli_check_initialized_gks_cntx( const cntx_t* cntx );
 
 err_t bli_check_valid_mc_mod_mult( const blksz_t* mc, const blksz_t* mr );
 err_t bli_check_valid_nc_mod_mult( const blksz_t* nc, const blksz_t* nr );

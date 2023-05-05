@@ -247,7 +247,7 @@ void bli_trsm_lu_ker_var2
 			{
 				// Compute various offsets into and lengths of parts of A.
 				const dim_t off_a11 = diagoffa_i;
-				const dim_t k_a1112 = k - off_a11;;
+				const dim_t k_a1112 = k - off_a11;
 				const dim_t k_a11   = MR;
 				const dim_t k_a12   = k_a1112 - MR;
 				const dim_t off_a12 = off_a11 + k_a11;

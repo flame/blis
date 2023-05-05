@@ -194,9 +194,11 @@ BLIS_EXPORT_BLIS void bli_gemm_cntl_init
      (
              ind_t        im,
              opid_t       family,
-       const obj_t*       a,
-       const obj_t*       b,
-       const obj_t*       c,
+       const obj_t*       alpha,
+             obj_t*       a,
+             obj_t*       b,
+       const obj_t*       beta,
+             obj_t*       c,
        const cntx_t*      cntx,
              gemm_cntl_t* cntl
      );

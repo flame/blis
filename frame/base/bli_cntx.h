@@ -143,21 +143,6 @@ BLIS_INLINE void_fp bli_cntx_get_ukr_dt( num_t dt, ukr_t ukr_id, const cntx_t* c
 	return bli_func_get_dt( dt, func );
 }
 
-BLIS_INLINE void_fp bli_cntx_get_l3_vir_ukr_dt( num_t dt, ukr_t ukr_id, const cntx_t* cntx )
-{
-	switch ( ukr_id )
-	{
-		case BLIS_GEMM_UKR:       ukr_id = BLIS_GEMM_VIR_UKR; break;
-		case BLIS_TRSM_L_UKR:     ukr_id = BLIS_TRSM_L_VIR_UKR; break;
-		case BLIS_TRSM_U_UKR:     ukr_id = BLIS_TRSM_U_VIR_UKR; break;
-		case BLIS_GEMMTRSM_L_UKR: ukr_id = BLIS_GEMMTRSM_L_VIR_UKR; break;
-		case BLIS_GEMMTRSM_U_UKR: ukr_id = BLIS_GEMMTRSM_U_VIR_UKR; break;
-		default: break;
-	};
-
-	return bli_cntx_get_ukr_dt( dt, ukr_id, cntx );
-}
-
 // -----------------------------------------------------------------------------
 
 BLIS_INLINE const mbool_t* bli_cntx_get_ukr_prefs( ukr_pref_t pref_id, const cntx_t* cntx )
@@ -200,15 +185,10 @@ BLIS_INLINE bool bli_cntx_ukr_prefers_rows_dt( num_t dt, ukr_t ukr_id, const cnt
 	// Get the correct preference from the kernel ID.
 	switch ( ukr_id )
 	{
-		case BLIS_GEMM_VIR_UKR: // fallthrough
 		case BLIS_GEMM_UKR: ukr_pref_id = BLIS_GEMM_UKR_ROW_PREF; break;
-		case BLIS_TRSM_L_VIR_UKR: // fallthrough
 		case BLIS_TRSM_L_UKR: ukr_pref_id = BLIS_TRSM_L_UKR_ROW_PREF; break;
-		case BLIS_TRSM_U_VIR_UKR: // fallthrough
 		case BLIS_TRSM_U_UKR: ukr_pref_id = BLIS_TRSM_U_UKR_ROW_PREF; break;
-		case BLIS_GEMMTRSM_L_VIR_UKR: // fallthrough
 		case BLIS_GEMMTRSM_L_UKR: ukr_pref_id = BLIS_GEMMTRSM_L_UKR_ROW_PREF; break;
-		case BLIS_GEMMTRSM_U_VIR_UKR: // fallthrough
 		case BLIS_GEMMTRSM_U_UKR: ukr_pref_id = BLIS_GEMMTRSM_U_UKR_ROW_PREF; break;
 		case BLIS_GEMMSUP_RRR_UKR: ukr_pref_id = BLIS_GEMMSUP_RRR_UKR_ROW_PREF; break;
 		case BLIS_GEMMSUP_RRC_UKR: ukr_pref_id = BLIS_GEMMSUP_RRC_UKR_ROW_PREF; break;
@@ -220,21 +200,6 @@ BLIS_INLINE bool bli_cntx_ukr_prefers_rows_dt( num_t dt, ukr_t ukr_id, const cnt
 		case BLIS_GEMMSUP_CCC_UKR: ukr_pref_id = BLIS_GEMMSUP_CCC_UKR_ROW_PREF; break;
 		case BLIS_GEMMSUP_XXX_UKR: ukr_pref_id = BLIS_GEMMSUP_XXX_UKR_ROW_PREF; break;
 		default: break; // TODO: should be an error condition
-	}
-
-	// For virtual ukernels during non-native execution, use the real projection of
-	// the datatype.
-	if ( bli_cntx_method( cntx ) != BLIS_NAT )
-	{
-		switch ( ukr_id )
-		{
-			case BLIS_GEMM_VIR_UKR: // fallthrough
-			case BLIS_TRSM_L_VIR_UKR: // fallthrough
-			case BLIS_TRSM_U_VIR_UKR: // fallthrough
-			case BLIS_GEMMTRSM_L_VIR_UKR: // fallthrough
-			case BLIS_GEMMTRSM_U_VIR_UKR: dt = bli_dt_proj_to_real( dt ); break;
-			default: break;
-		}
 	}
 
 	return bli_cntx_get_ukr_prefs_dt( dt, ukr_pref_id, cntx );
@@ -319,7 +284,7 @@ BLIS_INLINE dim_t bli_cntx_get_l3_sup_blksz_def_dt( num_t dt, bszid_t bs_id, con
 		case BLIS_NC: bs_id = BLIS_NC_SUP; break;
 		case BLIS_KC: bs_id = BLIS_KC_SUP; break;
 		default: break;
-	};
+	}
 
 	return bli_cntx_get_blksz_def_dt( dt, bs_id, cntx );
 }
@@ -335,7 +300,7 @@ BLIS_INLINE dim_t bli_cntx_get_l3_sup_blksz_max_dt( num_t dt, bszid_t bs_id, con
 		case BLIS_NC: bs_id = BLIS_NC_SUP; break;
 		case BLIS_KC: bs_id = BLIS_KC_SUP; break;
 		default: break;
-	};
+	}
 
 	return bli_cntx_get_blksz_max_dt( dt, bs_id, cntx );
 }

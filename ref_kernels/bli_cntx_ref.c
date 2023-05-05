@@ -42,8 +42,6 @@
 #define GENARNAME(opname)     PASTECH2(opname,BLIS_CNAME_INFIX,BLIS_REF_SUFFIX)
 #undef  GENBARNAME            // bli_, architecture, _ref
 #define GENBARNAME(opname)    PASTEMAC2(opname,BLIS_CNAME_INFIX,BLIS_REF_SUFFIX)
-#undef  GENBAINAME            // bli_, architecture, _ind
-#define GENBAINAME(opname)    PASTEMAC2(opname,BLIS_CNAME_INFIX,BLIS_IND_SUFFIX)
 
 // -- Level-3 native micro-kernel prototype redefinitions ----------------------
 
@@ -216,15 +214,6 @@ do { \
 	                        PASTEMAC(c,opname), PASTEMAC(z,opname) ); \
 } while (0)
 
-// -- Helper function for 1m ---------------------------------------------------
-
-void GENBAINAME(cntx_init_blkszs)
-     (
-       ind_t   method,
-       num_t   dt,
-       cntx_t* cntx
-     );
-
 // -----------------------------------------------------------------------------
 
 void GENBARNAME(cntx_init)
@@ -308,24 +297,9 @@ void GENBARNAME(cntx_init)
 	);
 
 
-	// -- Set level-3 virtual micro-kernels ------------------------------------
-
-	funcs = cntx->ukrs;
-
-	// NOTE: We set the virtual micro-kernel slots to contain the addresses
-	// of the native micro-kernels. In general, the ukernels in the virtual
-	// ukernel slots are always called, and if the function called happens to
-	// be a virtual micro-kernel, it will then know to find its native ukernel
-	// (i.e., in the native ukernel slots).
-	gen_func_init( &funcs[ BLIS_GEMM_VIR_UKR ],       gemm_ukr_name       );
-	gen_func_init( &funcs[ BLIS_GEMMTRSM_L_VIR_UKR ], gemmtrsm_l_ukr_name );
-	gen_func_init( &funcs[ BLIS_GEMMTRSM_U_VIR_UKR ], gemmtrsm_u_ukr_name );
-	gen_func_init( &funcs[ BLIS_TRSM_L_VIR_UKR ],     trsm_l_ukr_name     );
-	gen_func_init( &funcs[ BLIS_TRSM_U_VIR_UKR ],     trsm_u_ukr_name     );
-
-
 	// -- Set level-3 native micro-kernels and preferences ---------------------
 
+	funcs = cntx->ukrs;
 	mbools = cntx->ukr_prefs;
 
 	gen_func_init( &funcs[ BLIS_GEMM_UKR ],       gemm_ukr_name       );
@@ -441,150 +415,5 @@ void GENBARNAME(cntx_init)
 	// -- Set miscellaneous fields ---------------------------------------------
 
 	bli_cntx_set_method( BLIS_NAT, cntx );
-}
-
-// -----------------------------------------------------------------------------
-
-void GENBAINAME(cntx_init)
-     (
-       ind_t   method,
-       cntx_t* cntx
-     )
-{
-	func_t* funcs;
-
-	// This function is designed to modify a copy of an existing native
-	// context to enable computation via an induced method for complex
-	// domain level-3 operations. It is called by bli_gks_query_ind_cntx()
-	// on a context after its contexts are set by copying from the
-	// architecture's native context.
-
-	// -- Set induced method level-3 virtual micro-kernels ---------------------
-
-	funcs = cntx->ukrs;
-
-	if ( method == BLIS_1M )
-	{
-		//gen_func_init_ro( &funcs[ BLIS_GEMM_VIR_UKR ],       gemm1m_ukr_name       );
-		//gen_func_init_ro( &funcs[ BLIS_GEMMTRSM_L_VIR_UKR ], gemmtrsm1m_l_ukr_name );
-		//gen_func_init_ro( &funcs[ BLIS_GEMMTRSM_U_VIR_UKR ], gemmtrsm1m_u_ukr_name );
-	}
-	else // if ( method == BLIS_NAT )
-	{
-		gen_func_init_co( &funcs[ BLIS_GEMM_VIR_UKR ],       gemm_ukr_name       );
-		gen_func_init_co( &funcs[ BLIS_GEMMTRSM_L_VIR_UKR ], gemmtrsm_l_ukr_name );
-		gen_func_init_co( &funcs[ BLIS_GEMMTRSM_U_VIR_UKR ], gemmtrsm_u_ukr_name );
-		gen_func_init_co( &funcs[ BLIS_TRSM_L_VIR_UKR ],     trsm_l_ukr_name     );
-		gen_func_init_co( &funcs[ BLIS_TRSM_U_VIR_UKR ],     trsm_u_ukr_name     );
-	}
-
-	// For 1m, we employ an optimization which requires that we copy the native
-	// real domain gemm ukernel function pointers to the corresponding real
-	// domain slots in the virtual gemm ukernel func_t. This optimization allows
-	// us to, under certain conditions, adjust various parameters within the gemm
-	// macrokernel so that the real-domain macrokernel (which will query and use
-	// the real-domain virtual gemm ukernel) can be called instead of calling the
-	// complex-domain macrokernel and the corresponding complex-domain virtual
-	// microkernel. The non-optimized code path would require an extra level of
-	// function call overhead, which can be avoided in most cases (i.e., when
-	// beta has a zero imaginary component and C is either row- or column-stored).
-	if ( method == BLIS_1M )
-	{
-		func_t* gemm_nat_ukrs = ( func_t* )bli_cntx_get_ukrs( BLIS_GEMM_UKR, cntx );
-		func_t* gemm_vir_ukrs = ( func_t* )bli_cntx_get_ukrs( BLIS_GEMM_VIR_UKR, cntx );
-
-		bli_func_copy_dt( BLIS_FLOAT,  gemm_nat_ukrs, BLIS_FLOAT,  gemm_vir_ukrs );
-		bli_func_copy_dt( BLIS_DOUBLE, gemm_nat_ukrs, BLIS_DOUBLE, gemm_vir_ukrs );
-	}
-
-
-	// -- Set induced method packm kernels -------------------------------------
-
-	if ( method == BLIS_1M )
-	{
-		gen_func_init_co( &funcs[ BLIS_PACKM_MRXK_KER ],  packm_mrxk_1er_ker_name );
-		gen_func_init_co( &funcs[ BLIS_PACKM_NRXK_KER ],  packm_nrxk_1er_ker_name );
-	}
-	else // if ( method == BLIS_NAT )
-	{
-		gen_func_init( &funcs[ BLIS_PACKM_MRXK_KER ],  packm_mrxk_ker_name );
-		gen_func_init( &funcs[ BLIS_PACKM_NRXK_KER ],  packm_nrxk_ker_name );
-	}
-
-	gen_func_init_co( &funcs[ BLIS_PACKM_MRXK_1ER_KER ],  packm_mrxk_1er_ker_name );
-	gen_func_init_co( &funcs[ BLIS_PACKM_NRXK_1ER_KER ],  packm_nrxk_1er_ker_name );
-
-	gen_func_init( &funcs[ BLIS_UNPACKM_MRXK_KER ],  unpackm_mrxk_ker_name );
-	gen_func_init( &funcs[ BLIS_UNPACKM_NRXK_KER ],  unpackm_nrxk_ker_name );
-
-
-	// -- Set induced method cache and register blocksizes ---------------------
-
-	// Modify the context with cache and register blocksizes (and multiples)
-	// appropriate for the current induced method.
-	if ( method == BLIS_1M )
-	{
-		//const bool is_pb = FALSE;
-
-		// Call a helper function to initialize blocksizes for each complex
-		// datatype.
-		GENBAINAME(cntx_init_blkszs)( method, BLIS_SCOMPLEX, cntx );
-		GENBAINAME(cntx_init_blkszs)( method, BLIS_DCOMPLEX, cntx );
-	}
-	else // if ( method == BLIS_NAT )
-	{
-		// No change in blocksizes needed for native execution.
-	}
-}
-
-// -----------------------------------------------------------------------------
-
-void GENBAINAME(cntx_init_blkszs)
-     (
-       ind_t   method,
-       num_t   dt,
-       cntx_t* cntx
-     )
-{
-	// Set the induced method in the context.
-	bli_cntx_set_method( method, cntx );
-
-	num_t dt_r = bli_dt_proj_to_real( dt );
-
-	// Initialize the blocksizes according to the micro-kernel preference as
-	// well as the algorithm.
-	//if ( bli_cntx_ukr_prefers_cols_dt( dt, BLIS_GEMM_UKR, cntx ) )
-	if ( ! bli_cntx_get_ukr_prefs_dt( dt_r, BLIS_GEMM_UKR_ROW_PREF, cntx ) )
-	{
-		// This branch is used for algorithm 1m_c_bp.
-
-		bli_cntx_set_ind_blkszs
-		(
-		  method, dt, cntx,
-		  BLIS_NC, 1.0, 1.0,
-		  BLIS_KC, 2.0, 2.0, // halve kc...
-		  BLIS_MC, 2.0, 2.0, // halve mc...
-		  BLIS_NR, 1.0, 1.0,
-		  BLIS_MR, 2.0, 1.0, // ...and mr (but NOT packmr)
-		  BLIS_KR, 1.0, 1.0,
-		  BLIS_VA_END
-		);
-	}
-	else // if ( bli_cntx_get_ukr_prefs_dt( dt, BLIS_GEMM_UKR_ROW_PREF, cntx ) )
-	{
-		// This branch is used for algorithm 1m_r_bp.
-
-		bli_cntx_set_ind_blkszs
-		(
-		  method, dt, cntx,
-		  BLIS_NC, 2.0, 2.0, // halve nc...
-		  BLIS_KC, 2.0, 2.0, // halve kc...
-		  BLIS_MC, 1.0, 1.0,
-		  BLIS_NR, 2.0, 1.0, // ...and nr (but NOT packnr)
-		  BLIS_MR, 1.0, 1.0,
-		  BLIS_KR, 1.0, 1.0,
-		  BLIS_VA_END
-		);
-	}
 }
 
