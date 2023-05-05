@@ -4037,7 +4037,7 @@ main()
 			# clutter.
 			# NOTE: This maybe should use merged stdout/stderr rather than only
 			# stdout. But it works for now.
-			vendor_string="$(${FC} --version 2>/dev/null || :)"
+			vendor_string="$(${found_fc} --version 2>/dev/null || :)"
 
 			# Query the compiler "vendor" (ie: the compiler's simple name).
 			# The last part ({ read first rest ; echo $first ; }) is a workaround
