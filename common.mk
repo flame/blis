@@ -728,7 +728,7 @@ endif
 
 # Disable other annoying warnings.
 ifeq ($(CC_VENDOR),clang)
-CWARNFLAGS += -Wno-maybe-uninitialized
+CWARNFLAGS +=
 else
 ifeq ($(CC_VENDOR),gcc)
 CWARNFLAGS += -Wno-maybe-uninitialized -Wno-comment
