@@ -64,9 +64,6 @@ void bli_cntx_set_blkszs( cntx_t* cntx, ... )
 	   );
 	*/
 
-	// Save the execution type into the context.
-	bli_cntx_set_method( BLIS_NAT, cntx );
-
 	// Query the context for the addresses of:
 	// - the blocksize object array
 	// - the blocksize multiple array
@@ -104,90 +101,6 @@ void bli_cntx_set_blkszs( cntx_t* cntx, ... )
 
 		// Copy the blocksize multiple id into the context.
 		cntx_bmults[ bs_id ] = bm_id;
-	}
-
-	// Shutdown variable argument environment and clean up stack.
-	va_end( args );
-}
-
-// -----------------------------------------------------------------------------
-
-void bli_cntx_set_ind_blkszs( ind_t method, num_t dt, cntx_t* cntx, ... )
-{
-	/* Example prototypes:
-
-	   void bli_gks_cntx_set_ind_blkszs
-	   (
-	     ind_t   method != BLIS_NAT,
-	     num_t   dt,
-	     cntx_t* cntx,
-	     bszid_t bs0_id, dim_t def_scalr0, dim_t max_scalr0,
-	     bszid_t bs1_id, dim_t def_scalr1, dim_t max_scalr1,
-	     bszid_t bs2_id, dim_t def_scalr2, dim_t max_scalr2,
-	     ...,
-	     BLIS_VA_END
-	   );
-
-		NOTE: This function modifies an existing context that is presumed
-		to have been initialized for native execution.
-	*/
-
-	// Project the given datatype to the real domain. This will be used later on.
-	num_t dt_real = bli_dt_proj_to_real( dt );
-
-	// Return early if called with BLIS_NAT.
-	if ( method == BLIS_NAT ) return;
-
-	// Save the execution type into the context.
-	bli_cntx_set_method( method, cntx );
-
-	// Initialize variable argument environment.
-	va_list args;
-	va_start( args, cntx );
-
-	// Process blocksizes until we get a BLIS_VA_END.
-	while ( true )
-	{
-		int bs_id0 = va_arg( args, int );
-
-		// If we find a bszid_t id of BLIS_VA_END, then we are done.
-		if ( bs_id0 == BLIS_VA_END ) break;
-
-		// Here, we query the variable argument list for:
-		// - the bszid_t of the blocksize we're about to process (already done),
-		// - the scalars we wish to apply to the real blocksizes to
-		//   come up with the induced complex blocksizes (for default
-		//   and maximum blocksizes).
-		bszid_t bs_id = ( bszid_t )bs_id0;
-		double  dsclr = ( double  )va_arg( args, double );
-		double  msclr = ( double  )va_arg( args, double );
-
-		// Query the context for the blksz_t object assoicated with the
-		// current blocksize id, and also query the object corresponding
-		// to the blocksize multiple.
-		blksz_t* cntx_blksz = ( blksz_t* )bli_cntx_get_blksz( bs_id, cntx );
-
-		// Copy the real domain value of the blksz_t object into the
-		// corresponding complex domain slot of the same object.
-		bli_blksz_copy_dt( dt_real, cntx_blksz, dt, cntx_blksz );
-
-		// If the default blocksize scalar is non-unit, we need to scale
-		// the complex domain default blocksizes.
-		if ( dsclr != 1.0 )
-		{
-			// Scale the default blocksize value corresponding to the given
-			// datatype.
-			bli_blksz_scale_def( 1, ( dim_t )dsclr, dt, cntx_blksz );
-		}
-
-		// Similarly, if the maximum blocksize scalar is non-unit, we need
-		// to scale the complex domain maximum blocksizes.
-		if ( msclr != 1.0 )
-		{
-			// Scale the maximum blocksize value corresponding to the given
-			// datatype.
-			bli_blksz_scale_max( 1, ( dim_t )msclr, dt, cntx_blksz );
-		}
 	}
 
 	// Shutdown variable argument environment and clean up stack.
@@ -411,12 +324,6 @@ void bli_cntx_print( const cntx_t* cntx )
 		        bli_mbool_get_dt( BLIS_SCOMPLEX, ukr_pref ),
 		        bli_mbool_get_dt( BLIS_DCOMPLEX, ukr_pref )
 		      );
-	}
-
-	{
-		ind_t method = bli_cntx_method( cntx );
-
-		printf( "ind method   : %lu\n", ( unsigned long )method );
 	}
 }
 

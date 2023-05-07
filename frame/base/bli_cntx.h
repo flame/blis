@@ -59,28 +59,6 @@ typedef struct cntx_s
 // -----------------------------------------------------------------------------
 
 //
-// -- cntx_t query (fields only) -----------------------------------------------
-//
-
-BLIS_INLINE ind_t bli_cntx_method( const cntx_t* cntx )
-{
-	return cntx->method;
-}
-
-// -----------------------------------------------------------------------------
-
-//
-// -- cntx_t modification (fields only) ----------------------------------------
-//
-
-BLIS_INLINE void bli_cntx_set_method( ind_t method, cntx_t* cntx )
-{
-	cntx->method = method;
-}
-
-// -----------------------------------------------------------------------------
-
-//
 // -- cntx_t query (complex) ---------------------------------------------------
 //
 
@@ -312,8 +290,6 @@ BLIS_INLINE dim_t bli_cntx_get_l3_sup_blksz_max_dt( num_t dt, bszid_t bs_id, con
 BLIS_EXPORT_BLIS void bli_cntx_clear( cntx_t* cntx );
 
 BLIS_EXPORT_BLIS void bli_cntx_set_blkszs( cntx_t* cntx, ... );
-
-BLIS_EXPORT_BLIS void bli_cntx_set_ind_blkszs( ind_t method, num_t dt, cntx_t* cntx, ... );
 
 BLIS_EXPORT_BLIS void bli_cntx_set_ukrs( cntx_t* cntx, ... );
 BLIS_EXPORT_BLIS void bli_cntx_set_ukr_prefs( cntx_t* cntx, ... );

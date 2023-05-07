@@ -410,10 +410,5 @@ void GENBARNAME(cntx_init)
 	// Set the gemm slot to the default gemm sup handler.
 	vfuncs[ BLIS_GEMM ]  = bli_gemmsup_ref;
 	vfuncs[ BLIS_GEMMT ] = bli_gemmtsup_ref;
-
-
-	// -- Set miscellaneous fields ---------------------------------------------
-
-	bli_cntx_set_method( BLIS_NAT, cntx );
 }
 

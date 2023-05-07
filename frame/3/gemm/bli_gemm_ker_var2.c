@@ -130,6 +130,7 @@ void bli_gemm_ker_var2
 	const char* alpha_cast = bli_obj_internal_scalar_buffer( &scalar_b );
 	const char* beta_cast  = bli_obj_internal_scalar_buffer( c );
 
+	/*
 #ifdef BLIS_ENABLE_GEMM_MD
 	// Tweak parameters in select mixed domain cases (rcc, crc, ccr).
 	if ( bli_cntx_method( cntx ) == BLIS_NAT )
@@ -148,6 +149,7 @@ void bli_gemm_ker_var2
 		);
 	}
 #endif
+	*/
 
 	const siz_t dt_size   = bli_dt_size( dt_exec );
 	const siz_t dt_c_size = bli_dt_size( dt_c );

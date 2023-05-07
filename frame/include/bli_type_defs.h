@@ -1424,9 +1424,6 @@ typedef struct cntx_s
 	mbool_t   ukr_prefs[ BLIS_NUM_UKR_PREFS ];
 
 	void_fp   l3_sup_handlers[ BLIS_NUM_LEVEL3_OPS ];
-
-	ind_t     method;
-
 } cntx_t;
 
 
