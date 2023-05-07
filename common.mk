@@ -719,7 +719,11 @@ CWARNFLAGS :=
 # Disable unused function warnings and stop compiling on first error for
 # all compilers that accept such options: gcc, clang, and icc.
 ifneq ($(CC_VENDOR),ibm)
+ifneq ($(CC_VENDOR),nvc)
 CWARNFLAGS += -Wall -Wno-unused-function -Wfatal-errors
+else
+CWARNFLAGS += -Wall -Wno-unused-function
+endif
 endif
 
 # Disable tautological comparision warnings in clang.
