@@ -51,7 +51,7 @@ BLIS_EXPORT_BLIS void PASTEMAC(ch,opname) \
        void*  x, inc_t incx  \
      );
 
-INSERT_GENTPROT_BASIC0( setijv )
+INSERT_GENTPROT_BASIC( setijv )
 
 // -----------------------------------------------------------------------------
 
@@ -74,5 +74,5 @@ BLIS_EXPORT_BLIS void PASTEMAC(ch,opname) \
              double* ai  \
      );
 
-INSERT_GENTPROT_BASIC0( getijv )
+INSERT_GENTPROT_BASIC( getijv )
 

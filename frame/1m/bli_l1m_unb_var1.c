@@ -148,9 +148,9 @@ void PASTEMAC(ch,opname) \
 	} \
 }
 
-INSERT_GENTFUNC_BASIC2( addm_unb_var1,  addv,  BLIS_ADDV_KER )
-INSERT_GENTFUNC_BASIC2( copym_unb_var1, copyv, BLIS_COPYV_KER )
-INSERT_GENTFUNC_BASIC2( subm_unb_var1,  subv,  BLIS_SUBV_KER )
+INSERT_GENTFUNC_BASIC( addm_unb_var1,  addv,  BLIS_ADDV_KER )
+INSERT_GENTFUNC_BASIC( copym_unb_var1, copyv, BLIS_COPYV_KER )
+INSERT_GENTFUNC_BASIC( subm_unb_var1,  subv,  BLIS_SUBV_KER )
 
 
 #undef  GENTFUNC
@@ -267,8 +267,8 @@ void PASTEMAC(ch,opname) \
 	} \
 }
 
-INSERT_GENTFUNC_BASIC2( axpym_unb_var1,  axpyv,  BLIS_AXPYV_KER )
-INSERT_GENTFUNC_BASIC2( scal2m_unb_var1, scal2v, BLIS_SCAL2V_KER )
+INSERT_GENTFUNC_BASIC( axpym_unb_var1,  axpyv,  BLIS_AXPYV_KER )
+INSERT_GENTFUNC_BASIC( scal2m_unb_var1, scal2v, BLIS_SCAL2V_KER )
 
 
 #undef  GENTFUNC
@@ -373,9 +373,9 @@ void PASTEMAC(ch,opname) \
 	} \
 }
 
-INSERT_GENTFUNC_BASIC2( invscalm_unb_var1, invscalv, BLIS_INVSCALV_KER )
-INSERT_GENTFUNC_BASIC2( scalm_unb_var1, scalv, BLIS_SCALV_KER )
-INSERT_GENTFUNC_BASIC2( setm_unb_var1,  setv,  BLIS_SETV_KER )
+INSERT_GENTFUNC_BASIC( invscalm_unb_var1, invscalv, BLIS_INVSCALV_KER )
+INSERT_GENTFUNC_BASIC( scalm_unb_var1, scalv, BLIS_SCALV_KER )
+INSERT_GENTFUNC_BASIC( setm_unb_var1,  setv,  BLIS_SETV_KER )
 
 
 #undef  GENTFUNC
@@ -492,7 +492,7 @@ void PASTEMAC(ch,opname) \
 	} \
 }
 
-INSERT_GENTFUNC_BASIC2( xpbym_unb_var1,  xpbyv,  BLIS_XPBYV_KER )
+INSERT_GENTFUNC_BASIC( xpbym_unb_var1,  xpbyv,  BLIS_XPBYV_KER )
 
 
 #undef  GENTFUNC2
@@ -612,6 +612,6 @@ void PASTEMAC2(chx,chy,opname) \
 	} \
 }
 
-INSERT_GENTFUNC2_BASIC0( xpbym_md_unb_var1 )
-INSERT_GENTFUNC2_MIXDP0( xpbym_md_unb_var1 )
+INSERT_GENTFUNC2_BASIC( xpbym_md_unb_var1 )
+INSERT_GENTFUNC2_MIX_DP( xpbym_md_unb_var1 )
 

@@ -284,7 +284,7 @@ void PASTECH2(bls_,ch,opname) \
 	); \
 }
 
-//INSERT_GENTFUNC_BASIC0( gemm )
+//INSERT_GENTFUNC_BASIC( gemm )
 GENTFUNC( float,    s, gemm )
 GENTFUNC( double,   d, gemm )
 GENTFUNC( scomplex, c, gemm )

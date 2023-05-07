@@ -50,7 +50,7 @@ void PASTECH2(bls_,ch,varname) \
        cntx_t* cntx  \
      );
 
-//INSERT_GENTPROT_BASIC0( packm_cxk )
+//INSERT_GENTPROT_BASIC( packm_cxk )
 GENTPROT( float,    s, packm_cxk )
 GENTPROT( double,   d, packm_cxk )
 GENTPROT( scomplex, c, packm_cxk )

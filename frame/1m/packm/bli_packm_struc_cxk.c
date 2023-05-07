@@ -303,5 +303,5 @@ void PASTEMAC(ch,varname) \
 	} \
 }
 
-INSERT_GENTFUNCR_BASIC2( packm_struc_cxk, packm_cxk, packm_cxc_diag )
+INSERT_GENTFUNCR_BASIC( packm_struc_cxk, packm_cxk, packm_cxc_diag )
 

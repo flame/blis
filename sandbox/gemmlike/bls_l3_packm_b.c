@@ -158,7 +158,7 @@ void PASTECH2(bls_,ch,opname) \
 	} \
 }
 
-//INSERT_GENTFUNC_BASIC0( packm_init_mem_b )
+//INSERT_GENTFUNC_BASIC( packm_init_mem_b )
 GENTFUNC( float,    s, packm_init_mem_b )
 GENTFUNC( double,   d, packm_init_mem_b )
 GENTFUNC( scomplex, c, packm_init_mem_b )
@@ -207,7 +207,7 @@ void PASTECH2(bls_,ch,opname) \
 	*p = bli_mem_buffer( mem ); \
 }
 
-//INSERT_GENTFUNC_BASIC0( packm_init_b )
+//INSERT_GENTFUNC_BASIC( packm_init_b )
 GENTFUNC( float,    s, packm_init_b )
 GENTFUNC( double,   d, packm_init_b )
 GENTFUNC( scomplex, c, packm_init_b )
@@ -283,7 +283,7 @@ void PASTECH2(bls_,ch,opname) \
 	bli_thrinfo_barrier( thread ); \
 }
 
-//INSERT_GENTFUNC_BASIC0( packm_b )
+//INSERT_GENTFUNC_BASIC( packm_b )
 GENTFUNC( float,    s, packm_b )
 GENTFUNC( double,   d, packm_b )
 GENTFUNC( scomplex, c, packm_b )

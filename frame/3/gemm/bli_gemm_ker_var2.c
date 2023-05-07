@@ -69,8 +69,8 @@ BLIS_INLINE void PASTEMAC2(chx,chy,op) \
 	); \
 }
 
-INSERT_GENTFUNC2_BASIC0(xpbys_mxn_fn);
-INSERT_GENTFUNC2_MIXDP0(xpbys_mxn_fn);
+INSERT_GENTFUNC2_BASIC(xpbys_mxn_fn);
+INSERT_GENTFUNC2_MIX_DP(xpbys_mxn_fn);
 
 static xpbys_mxn_vft GENARRAY2_ALL(xpbys_mxn, xpbys_mxn_fn);
 

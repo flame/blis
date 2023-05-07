@@ -86,8 +86,8 @@ void PASTEMAC(ch,varname) \
        thrinfo_t* thread  \
      );
 
-INSERT_GENTPROT_BASIC0( gemmsup_ref_var1 )
-INSERT_GENTPROT_BASIC0( gemmsup_ref_var2 )
+INSERT_GENTPROT_BASIC( gemmsup_ref_var1 )
+INSERT_GENTPROT_BASIC( gemmsup_ref_var2 )
 
 // -----------------------------------------------------------------------------
 
