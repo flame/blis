@@ -2267,12 +2267,6 @@ void libblis_test_op_driver
 
 				bli_ind_oper_enable_only( op->opid, indi, datatype );
 
-				if ( op->opid == BLIS_SYRK || op->opid == BLIS_SYR2K ||
-				     op->opid == BLIS_HERK || op->opid == BLIS_HER2K )
-				{
-					bli_ind_oper_enable_only( BLIS_GEMMT, indi, datatype );
-				}
-
 				// Query the implementation string associated with the
 				// current operation and datatype. If the operation is
 				// not level-3, we will always get back the native string.
@@ -2399,12 +2393,6 @@ void libblis_test_op_driver
 						// the thread executed or skipped the current experiment).
 						tdata->xc += 1;
 					}
-				}
-
-				if ( op->opid == BLIS_SYRK || op->opid == BLIS_SYR2K ||
-				     op->opid == BLIS_HERK || op->opid == BLIS_HER2K )
-				{
-					bli_l3_ind_oper_set_enable( BLIS_GEMMT, indi, datatype, false );
 				}
 			}
 
