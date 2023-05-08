@@ -201,6 +201,18 @@ void bli_l3_ind_oper_set_enable( opid_t oper, ind_t method, num_t dt, bool statu
 	if ( !bli_is_complex( dt ) ) return;
 	if ( !bli_opid_is_level3( oper ) ) return;
 
+	// BLIS currently implements herk/her2k/syrk/syr2k in terms of the user-
+	// level gemmt (expert) API, and so those operations choose to execute
+	// 1m (or not) based on the induced method enablement status of gemmt.
+	// In other words, changing the enablement status of those operations
+	// would have no effect. Therefore, we redirect queries/accesses to those
+	// operations' induced method enablement statuses to that of gemmt.
+	if ( method != BLIS_NAT && ( oper == BLIS_HERK  ||
+	                             oper == BLIS_HER2K ||
+	                             oper == BLIS_SYRK  ||
+	                             oper == BLIS_SYR2K ) )
+		oper = BLIS_GEMMT;
+
 	// Disallow changing status of native execution.
 	if ( method == BLIS_NAT ) return;
 
@@ -223,6 +235,18 @@ bool bli_l3_ind_oper_get_enable( opid_t oper, ind_t method, num_t dt )
 {
 	num_t idt = bli_ind_map_cdt_to_index( dt );
 	bool  r_val;
+
+	// BLIS currently implements herk/her2k/syrk/syr2k in terms of the user-
+	// level gemmt (expert) API, and so those operations choose to execute
+	// 1m (or not) based on the induced method enablement status of gemmt.
+	// In other words, changing the enablement status of those operations
+	// would have no effect. Therefore, we redirect queries/accesses to those
+	// operations' induced method enablement statuses to that of gemmt.
+	if ( method != BLIS_NAT && ( oper == BLIS_HERK  ||
+	                             oper == BLIS_HER2K ||
+	                             oper == BLIS_SYRK  ||
+	                             oper == BLIS_SYR2K ) )
+		oper = BLIS_GEMMT;
 
 	{
 		r_val = bli_l3_ind_oper_st[ method ][ oper ][ idt ];
