@@ -39,6 +39,14 @@
 
 #include "lpgemm_f32_kern_macros.h"
 
+#ifdef LPGEMM_BF16_NOT_SUPPORTED
+
+// BF16 ISA is not supported by gcc < 10. Use a dummy kernel here.
+LPGEMM_MAIN_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_6x64)
+{}
+
+#else
+
 // 6x64 bf16 kernel
 LPGEMM_MAIN_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_6x64)
 {
@@ -1497,4 +1505,6 @@ POST_OPS_6x64_DISABLE:
 		}
 	}
 }
+
+#endif //LPGEMM_BF16_NOT_SUPPORTED
 #endif

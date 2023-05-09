@@ -70,6 +70,17 @@ inline void float_to_bf16( float* float_value, bfloat16* bf16_val )
 	memcpy( ( bf16_val ), (char *)( float_value ) + 2, sizeof ( bfloat16 ) );
 }
 
+inline float bf16_to_float
+     (
+       bfloat16 bf16_val
+     )
+{
+	int32_t inter_temp = *( ( int16_t* ) &bf16_val );
+	inter_temp = inter_temp << 16;
+	float float_value = *( float* ) ( &inter_temp );
+	return float_value;
+}
+
 inline void convert_float_arr_to_bf16( float* array, bfloat16* array_bf16, int size )
 {
 	for (int i=0; i< size; i++)
@@ -97,7 +108,10 @@ GEN_FILL_ARRAY_FUNC(int32_t)
 void fill_array_bfloat16( void* arr, dim_t size )
 {
 	float* c_float = ( float* ) bli_malloc_user( sizeof( float ) * size );
-	fill_array_float( c_float, size );
+	for ( dim_t i = 0; i < size; ++i )
+	{
+		c_float[i] = 2.0;
+	}
 	convert_float_arr_to_bf16( c_float, arr, size );
 	if ( c_float != NULL )
 	{
@@ -337,35 +351,32 @@ int min (int a, int b)
 	return ( a < b ? a : b );
 }
 
-#define GEN_MAT_MUL_ACC_CHK_DOWNSCALE(C_type,ACCUM_type,SCALE_type,BLAS_DOWNSCALE_SFX) \
-inline C_type mat_mul_accuracy_check_downscale_ ## BLAS_DOWNSCALE_SFX \
+#define GEN_MAT_MUL_ACC_CHK_DOWNSCALE(ACCUM_type,SCALE_type,BLAS_DOWNSCALE_SFX) \
+inline ACCUM_type mat_mul_accuracy_check_downscale_ ## BLAS_DOWNSCALE_SFX \
      (\
        ACCUM_type temp_accum,\
-       C_type out_temp_accum, \
        aocl_post_op*  post_op, \
        dim_t j \
      )\
 {\
-	out_temp_accum = ( C_type ) min ( max ( nearbyintf( ( SCALE_type )temp_accum * \
+	ACCUM_type out_temp_accum = ( ACCUM_type ) min ( max ( nearbyintf( ( SCALE_type )temp_accum * \
 		( *( ( SCALE_type* )post_op->sum.scale_factor + j ) ) ), S8_MIN ), S8_MAX ) ; \
 	return 	out_temp_accum; \
 }\
 
-GEN_MAT_MUL_ACC_CHK_DOWNSCALE(int8_t,int16_t,float,u8s8s16os8)
-GEN_MAT_MUL_ACC_CHK_DOWNSCALE(int8_t,int32_t,float,u8s8s32os8)
-GEN_MAT_MUL_ACC_CHK_DOWNSCALE(int8_t,int32_t,float,s8s8s32os8)
-GEN_MAT_MUL_ACC_CHK_DOWNSCALE(int8_t,int16_t,float,s8s8s16os8)
+GEN_MAT_MUL_ACC_CHK_DOWNSCALE(int16_t,float,u8s8s16os8)
+GEN_MAT_MUL_ACC_CHK_DOWNSCALE(int32_t,float,u8s8s32os8)
+GEN_MAT_MUL_ACC_CHK_DOWNSCALE(int32_t,float,s8s8s32os8)
+GEN_MAT_MUL_ACC_CHK_DOWNSCALE(int16_t,float,s8s8s16os8)
 
-inline bfloat16 mat_mul_accuracy_check_downscale_bf16bf16f32obf16
+inline float mat_mul_accuracy_check_downscale_bf16bf16f32obf16
      (
        float temp_accum,
-       bfloat16 out_temp_accum,
        aocl_post_op*  post_op,
        dim_t j
      )
 {
-	float_to_bf16( ( &temp_accum ), ( &out_temp_accum ) );
-	return out_temp_accum;
+	return temp_accum;
 }
 
 #define GEN_MAT_MUL_ACC_CHK_ACCUM(A_type, B_type, C_type,ACCUM_type,BLAS_SFX) \
@@ -408,17 +419,6 @@ GEN_MAT_MUL_ACC_CHK_ACCUM(int8_t,int8_t,int8_t,int32_t,s8s8s32os8)
 GEN_MAT_MUL_ACC_CHK_ACCUM(int8_t,int8_t,int32_t,int32_t,s8s8s32os32)
 GEN_MAT_MUL_ACC_CHK_ACCUM(int8_t,int8_t,int8_t,int16_t,s8s8s16os8)
 GEN_MAT_MUL_ACC_CHK_ACCUM(int8_t,int8_t,int16_t,int16_t,s8s8s16os16)
-
-inline float bf16_to_float
-     (
-       bfloat16 bf16_val
-     )
-{
-	int32_t inter_temp = *( ( int16_t* ) &bf16_val );
-	inter_temp = inter_temp << 16;
-	float float_value = *( float* ) ( &inter_temp );
-	return float_value;
-}
 
 inline float mat_mul_accuracy_check_accum_bf16bf16f32of32
      (
@@ -553,6 +553,31 @@ GEN_GELU_ERF_POSTOP_FLOAT(f32f32f32of32)
 GEN_GELU_ERF_POSTOP_FLOAT(bf16bf16f32of32)
 GEN_GELU_ERF_POSTOP_FLOAT(bf16bf16f32obf16)
 
+#define GEN_MAT_MUL_GET_OUTPUT_TYPE_VALUE(C_type, ACCUM_type) \
+void mat_mul_get_output_type_val ## ACCUM_type ## C_type \
+     ( \
+       C_type* out_temp_accum, \
+       ACCUM_type* temp_accum \
+     ) \
+{ \
+	( *out_temp_accum ) = ( C_type )( *temp_accum ); \
+} \
+
+GEN_MAT_MUL_GET_OUTPUT_TYPE_VALUE(int32_t,int32_t)
+GEN_MAT_MUL_GET_OUTPUT_TYPE_VALUE(int8_t,int32_t)
+GEN_MAT_MUL_GET_OUTPUT_TYPE_VALUE(int16_t,int16_t)
+GEN_MAT_MUL_GET_OUTPUT_TYPE_VALUE(int8_t,int16_t)
+GEN_MAT_MUL_GET_OUTPUT_TYPE_VALUE(float,float)
+
+void mat_mul_get_output_type_valfloatbfloat16
+     (
+       bfloat16* out_temp_accum,
+       float* temp_accum
+     )
+{
+	float_to_bf16( temp_accum, out_temp_accum );
+}
+
 #define GEN_MAT_MUL_ACC_CHK_DRV_FUNC(A_type,B_type,C_type,ACCUM_type,SCALE_type,BLAS_SFX,BLAS_DOWNSCALE_SFX) \
 void mat_mul_accuracy_check_driver_ ## BLAS_SFX \
      ( \
@@ -666,13 +691,17 @@ void mat_mul_accuracy_check_driver_ ## BLAS_SFX \
 					else if ( post_op->seq_vector[op_id] == SCALE ) \
 					{ \
 						temp_accum = GEN_FUNC_NAME(mat_mul_accuracy_check_downscale_,BLAS_DOWNSCALE_SFX) \
-							(temp_accum, out_temp_accum, post_op, j); \
+							(temp_accum, post_op, j); \
 					} \
 					else \
 					{} \
 				} \
 			} \
-			out_temp_accum = ( C_type )temp_accum; \
+			/* Need to convert to downscaled type if required.*/ \
+			mat_mul_get_output_type_val ## ACCUM_type ## C_type \
+			( \
+			  &out_temp_accum, &temp_accum \
+			); \
  \
 			if ( *( c + ( rs_c * i ) + ( cs_c * j ) ) != out_temp_accum ) \
 			{ \

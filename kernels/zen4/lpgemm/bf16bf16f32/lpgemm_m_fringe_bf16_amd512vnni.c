@@ -40,6 +40,7 @@
 
 #include "lpgemm_f32_kern_macros.h"
 
+#ifndef LPGEMM_BF16_NOT_SUPPORTED
 // 5x64 bf16 kernel
 LPGEMM_M_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_5x64)
 {
@@ -3248,4 +3249,5 @@ POST_OPS_1x64_DISABLE:
 	// c[0,48-63]
 	_mm512_storeu_ps( c + ( rs_c * 0 ) + ( 3*16 ), c_float_0p3 );
 }
+#endif
 #endif

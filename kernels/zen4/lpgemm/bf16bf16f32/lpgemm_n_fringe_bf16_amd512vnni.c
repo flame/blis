@@ -39,6 +39,7 @@
 
 #include "lpgemm_f32_kern_macros.h"
 
+#ifndef LPGEMM_BF16_NOT_SUPPORTED
 // 6xlt16 bf16 fringe kernel
 LPGEMM_N_LT_NR0_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_6xlt16)
 {
@@ -3323,4 +3324,5 @@ POST_OPS_6x48_DISABLE:
 		}
 	}
 }
+#endif
 #endif

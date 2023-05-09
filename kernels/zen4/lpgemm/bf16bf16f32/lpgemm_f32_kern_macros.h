@@ -38,6 +38,12 @@
 #include "../gelu_avx512.h"
 #include "../math_utils_avx512.h"
 
+// Disable BF16 kernel in cases where compilers support other avx 512
+// features except BF16 ISA.
+#if defined( BLIS_GCC ) && ( __GNUC__ < 10 )
+#define LPGEMM_BF16_NOT_SUPPORTED
+#endif
+
 /* ReLU scale (Parametric ReLU):  f(x) = x, when x > 0 and f(x) = a*x when x <= 0 */
 #define RELU_SCALE_OP_F32_AVX512(reg) \
 	/* Generate indenx of elements <= 0.*/ \

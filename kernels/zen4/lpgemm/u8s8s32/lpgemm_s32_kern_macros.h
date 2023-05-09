@@ -43,7 +43,7 @@
 	reg = _mm512_add_epi32( scratch1, reg ); \
 
 #define S32_S32_BETA_OP(reg,m_ir,m_ind,n_ind,scratch1,scratch2) \
-	scratch1 = _mm512_loadu_epi32( c + ( rs_c * ( m_ir + m_ind ) ) + ( n_ind * 16 ) ); \
+	scratch1 = _mm512_loadu_si512( c + ( rs_c * ( m_ir + m_ind ) ) + ( n_ind * 16 ) ); \
 	S32_BETA_FMA(reg,scratch1,scratch2) \
 
 #define S32_S32_BETA_OP2(m_ir,m_ind,scratch1,scratch2) \
@@ -66,8 +66,9 @@
 	scratch1 = \
 	_mm512_cvtepi8_epi32 \
 	( \
-	  _mm_loadu_epi8 \
+	  _mm_maskz_loadu_epi8 \
 	  ( \
+		0xFFFF, \
 	    ( int8_t* )post_ops_attr.buf_downscale + \
 	    ( post_ops_attr.rs_c_downscale * ( post_ops_attr.post_op_c_i + m_ind ) ) + \
 	    post_ops_attr.post_op_c_j + ( n_ind * 16 ) \
@@ -92,17 +93,12 @@
 
 // Default n < 16 beta macro
 #define S32_S32_BETA_OP_NLT16F(reg,buf_,scratch1,scratch2) \
-	scratch1 = _mm512_loadu_epi32( buf_ ); \
+	scratch1 = _mm512_loadu_si512( buf_ ); \
 	S32_BETA_FMA(reg,scratch1,scratch2) \
 
 // Default n < 16 mask load beta macro
 #define S32_S32_BETA_OP_NLT16F_MASK(lmask,reg,m_ir,m_ind,n_ind,scratch1,scratch2) \
 	scratch1 = _mm512_maskz_loadu_epi32( lmask, c + ( rs_c * ( m_ir + m_ind ) ) + ( n_ind * 16 ) ); \
-	S32_BETA_FMA(reg,scratch1,scratch2) \
-
-// Downscale n < 16 beta macro
-#define S8_S32_BETA_OP_NLT16F(reg,buf_,scratch1,scratch2) \
-	scratch1 = _mm512_cvtepi8_epi32( _mm_loadu_epi8( ( int8_t* )buf_ ) ); \
 	S32_BETA_FMA(reg,scratch1,scratch2) \
 
 // Downscale n < 16 mask load beta macro
@@ -187,40 +183,40 @@
 
 // Load helper macros.
 #define S32_GELU_LOAD1R_1C(temp_buf,offset,stride,reg_base) \
-	_mm512_storeu_epi32( ( temp_buf ) + ( ( 0 + offset ) * ( stride ) ), reg_base ## p0); \
+	_mm512_storeu_si512( ( temp_buf ) + ( ( 0 + offset ) * ( stride ) ), reg_base ## p0); \
 
 #define S32_GELU_LOAD1R_2C(temp_buf,offset,stride,reg_base) \
-	_mm512_storeu_epi32( ( temp_buf ) + ( ( 0 + offset ) * ( stride ) ), reg_base ## p0); \
-	_mm512_storeu_epi32( ( temp_buf ) + ( ( 1 + offset ) * ( stride ) ), reg_base ## p1); \
+	_mm512_storeu_si512( ( temp_buf ) + ( ( 0 + offset ) * ( stride ) ), reg_base ## p0); \
+	_mm512_storeu_si512( ( temp_buf ) + ( ( 1 + offset ) * ( stride ) ), reg_base ## p1); \
 
 #define S32_GELU_LOAD1R_3C(temp_buf,offset,stride,reg_base) \
-	_mm512_storeu_epi32( ( temp_buf ) + ( ( 0 + offset ) * ( stride ) ), reg_base ## p0); \
-	_mm512_storeu_epi32( ( temp_buf ) + ( ( 1 + offset ) * ( stride ) ), reg_base ## p1); \
-	_mm512_storeu_epi32( ( temp_buf ) + ( ( 2 + offset ) * ( stride ) ), reg_base ## p2); \
+	_mm512_storeu_si512( ( temp_buf ) + ( ( 0 + offset ) * ( stride ) ), reg_base ## p0); \
+	_mm512_storeu_si512( ( temp_buf ) + ( ( 1 + offset ) * ( stride ) ), reg_base ## p1); \
+	_mm512_storeu_si512( ( temp_buf ) + ( ( 2 + offset ) * ( stride ) ), reg_base ## p2); \
 
 #define S32_GELU_LOAD1R_4C(temp_buf,offset,stride,reg_base) \
-	_mm512_storeu_epi32( ( temp_buf ) + ( ( 0 + offset ) * ( stride ) ), reg_base ## p0); \
-	_mm512_storeu_epi32( ( temp_buf ) + ( ( 1 + offset ) * ( stride ) ), reg_base ## p1); \
-	_mm512_storeu_epi32( ( temp_buf ) + ( ( 2 + offset ) * ( stride ) ), reg_base ## p2); \
-	_mm512_storeu_epi32( ( temp_buf ) + ( ( 3 + offset ) * ( stride ) ), reg_base ## p3); \
+	_mm512_storeu_si512( ( temp_buf ) + ( ( 0 + offset ) * ( stride ) ), reg_base ## p0); \
+	_mm512_storeu_si512( ( temp_buf ) + ( ( 1 + offset ) * ( stride ) ), reg_base ## p1); \
+	_mm512_storeu_si512( ( temp_buf ) + ( ( 2 + offset ) * ( stride ) ), reg_base ## p2); \
+	_mm512_storeu_si512( ( temp_buf ) + ( ( 3 + offset ) * ( stride ) ), reg_base ## p3); \
 
 // Store helper macros.
 #define S32_GELU_STORE1R_1C(temp_buf,offset,stride,reg_base) \
-	reg_base ## p0 = _mm512_loadu_epi32( ( temp_buf ) + ( ( 0 + offset ) * ( stride ) ) ); \
+	reg_base ## p0 = _mm512_loadu_si512( ( temp_buf ) + ( ( 0 + offset ) * ( stride ) ) ); \
 
 #define S32_GELU_STORE1R_2C(temp_buf,offset,stride,reg_base) \
-	reg_base ## p0 = _mm512_loadu_epi32( ( temp_buf ) + ( ( 0 + offset ) * ( stride ) ) ); \
-	reg_base ## p1 = _mm512_loadu_epi32( ( temp_buf ) + ( ( 1 + offset ) * ( stride ) ) ); \
+	reg_base ## p0 = _mm512_loadu_si512( ( temp_buf ) + ( ( 0 + offset ) * ( stride ) ) ); \
+	reg_base ## p1 = _mm512_loadu_si512( ( temp_buf ) + ( ( 1 + offset ) * ( stride ) ) ); \
 
 #define S32_GELU_STORE1R_3C(temp_buf,offset,stride,reg_base) \
-	reg_base ## p0 = _mm512_loadu_epi32( ( temp_buf ) + ( ( 0 + offset ) * ( stride ) ) ); \
-	reg_base ## p1 = _mm512_loadu_epi32( ( temp_buf ) + ( ( 1 + offset ) * ( stride ) ) ); \
-	reg_base ## p2 = _mm512_loadu_epi32( ( temp_buf ) + ( ( 2 + offset ) * ( stride ) ) ); \
+	reg_base ## p0 = _mm512_loadu_si512( ( temp_buf ) + ( ( 0 + offset ) * ( stride ) ) ); \
+	reg_base ## p1 = _mm512_loadu_si512( ( temp_buf ) + ( ( 1 + offset ) * ( stride ) ) ); \
+	reg_base ## p2 = _mm512_loadu_si512( ( temp_buf ) + ( ( 2 + offset ) * ( stride ) ) ); \
 
 #define S32_GELU_STORE1R_4C(temp_buf,offset,stride,reg_base) \
-	reg_base ## p0 = _mm512_loadu_epi32( ( temp_buf ) + ( ( 0 + offset ) * ( stride ) ) ); \
-	reg_base ## p1 = _mm512_loadu_epi32( ( temp_buf ) + ( ( 1 + offset ) * ( stride ) ) ); \
-	reg_base ## p2 = _mm512_loadu_epi32( ( temp_buf ) + ( ( 2 + offset ) * ( stride ) ) ); \
-	reg_base ## p3 = _mm512_loadu_epi32( ( temp_buf ) + ( ( 3 + offset ) * ( stride ) ) ); \
+	reg_base ## p0 = _mm512_loadu_si512( ( temp_buf ) + ( ( 0 + offset ) * ( stride ) ) ); \
+	reg_base ## p1 = _mm512_loadu_si512( ( temp_buf ) + ( ( 1 + offset ) * ( stride ) ) ); \
+	reg_base ## p2 = _mm512_loadu_si512( ( temp_buf ) + ( ( 2 + offset ) * ( stride ) ) ); \
+	reg_base ## p3 = _mm512_loadu_si512( ( temp_buf ) + ( ( 3 + offset ) * ( stride ) ) ); \
 
 #endif // LPGEMM_S32_KERN_MACROS_H

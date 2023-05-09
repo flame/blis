@@ -46,6 +46,19 @@ AOCL_GEMM_MATMUL(bfloat16,bfloat16,float,float,bf16bf16f32of32)
 	trans_t blis_transa;
 	trans_t blis_transb;
 
+	// There is this use case where lpgemm will be compiled using gcc9.4
+	// (where bf16 ISA is not supported), but deployed on a zen4+ sustem
+	// (which supports bf16 ISA). Here the bf16 kernels will be concealed
+	// and not compiled, and subsequently this api should error out and
+	// return early, even if bf16 ISA is supported by machine.
+#if defined( BLIS_GCC ) && ( __GNUC__ < 10 )
+	{
+		bli_print_msg("bf16bf16f32of32 compiled using a compiler not "
+				"supporting BF16 ISA.", __FILE__, __LINE__ );
+		return; // Error.
+	}
+#endif
+
 	// Check if avx512_vnni ISA is supported, lpgemm matmul only works with it.
 	if ( bli_cpuid_is_avx512bf16_supported() == FALSE )
 	{

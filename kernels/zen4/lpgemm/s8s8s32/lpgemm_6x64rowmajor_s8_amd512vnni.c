@@ -211,7 +211,7 @@ LPGEMM_MAIN_KERN(int8_t,int8_t,int32_t,s8s8s32os32_6x64)
 			// instructions and each load to ZMM register will have 4 elements
 			// along k direction and 16 elements across n directions, so 4x16
 			// elements to a ZMM register.
-			b0 = _mm512_loadu_epi8( b + ( rs_b * kr ) + ( cs_b * 0 ) );
+			b0 = _mm512_loadu_si512( b + ( rs_b * kr ) + ( cs_b * 0 ) );
 
 			// Broadcast a[0,kr:kr+4].
 			a_int32_0 = _mm512_set1_epi32( *( int32_t* )( a + ( rs_a * 0 ) + ( cs_a * kr ) ) );
@@ -219,9 +219,9 @@ LPGEMM_MAIN_KERN(int8_t,int8_t,int32_t,s8s8s32os32_6x64)
 			//convert signed int8 to uint8 for VNNI
 			a_int32_0 = _mm512_add_epi8( a_int32_0, vec_uint8 );
 
-			b1 = _mm512_loadu_epi8( b + ( rs_b * kr ) + ( cs_b * 1 ) );
-			b2 = _mm512_loadu_epi8( b + ( rs_b * kr ) + ( cs_b * 2 ) );
-			b3 = _mm512_loadu_epi8( b + ( rs_b * kr ) + ( cs_b * 3 ) );
+			b1 = _mm512_loadu_si512( b + ( rs_b * kr ) + ( cs_b * 1 ) );
+			b2 = _mm512_loadu_si512( b + ( rs_b * kr ) + ( cs_b * 2 ) );
+			b3 = _mm512_loadu_si512( b + ( rs_b * kr ) + ( cs_b * 3 ) );
 
 			// Perform column direction mat-mul with k = 4.
 			// c[0,0-63] = a[0,kr:kr+4]*b[kr:kr+4,0-63]
@@ -306,7 +306,7 @@ LPGEMM_MAIN_KERN(int8_t,int8_t,int32_t,s8s8s32os32_6x64)
 			__m128i a_kfringe_buf;
 			__mmask16 load_mask = _cvtu32_mask16( 0xFFFF >> ( 16 - k_partial_pieces ) );
 
-			b0 = _mm512_loadu_epi8( b + ( rs_b * k_full_pieces ) + ( cs_b * 0 ) );
+			b0 = _mm512_loadu_si512( b + ( rs_b * k_full_pieces ) + ( cs_b * 0 ) );
 
 			// Broadcast a[0,kr:kr+4].
 			a_kfringe_buf = _mm_maskz_loadu_epi8
@@ -319,9 +319,9 @@ LPGEMM_MAIN_KERN(int8_t,int8_t,int32_t,s8s8s32os32_6x64)
 			//convert signed int8 to uint8 for VNNI
 			a_int32_0 = _mm512_add_epi8( a_int32_0, vec_uint8 );
 
-			b1 = _mm512_loadu_epi8( b + ( rs_b * k_full_pieces ) + ( cs_b * 1 ) );
-			b2 = _mm512_loadu_epi8( b + ( rs_b * k_full_pieces ) + ( cs_b * 2 ) );
-			b3 = _mm512_loadu_epi8( b + ( rs_b * k_full_pieces ) + ( cs_b * 3 ) );
+			b1 = _mm512_loadu_si512( b + ( rs_b * k_full_pieces ) + ( cs_b * 1 ) );
+			b2 = _mm512_loadu_si512( b + ( rs_b * k_full_pieces ) + ( cs_b * 2 ) );
+			b3 = _mm512_loadu_si512( b + ( rs_b * k_full_pieces ) + ( cs_b * 3 ) );
 
 			// Perform column direction mat-mul with k = 4.
 			// c[0,0-63] = a[0,kr:kr+4]*b[kr:kr+4,0-63]
@@ -433,7 +433,7 @@ LPGEMM_MAIN_KERN(int8_t,int8_t,int32_t,s8s8s32os32_6x64)
 
 			int32_t* bsumptr = post_ops_attr.b_col_sum_vec + post_ops_attr.b_sum_offset;
 
-			b0 = _mm512_loadu_epi32( bsumptr );
+			b0 = _mm512_loadu_si512( bsumptr );
 
 			c_int32_0p0 = _mm512_sub_epi32( c_int32_0p0 , b0 );
 			c_int32_1p0 = _mm512_sub_epi32( c_int32_1p0 , b0 );
@@ -442,7 +442,7 @@ LPGEMM_MAIN_KERN(int8_t,int8_t,int32_t,s8s8s32os32_6x64)
 			c_int32_4p0 = _mm512_sub_epi32( c_int32_4p0 , b0 );
 			c_int32_5p0 = _mm512_sub_epi32( c_int32_5p0 , b0 );
 
-			b0 = _mm512_loadu_epi32( bsumptr + 16 );
+			b0 = _mm512_loadu_si512( bsumptr + 16 );
 
 			c_int32_0p1 = _mm512_sub_epi32( c_int32_0p1 , b0 );
 			c_int32_1p1 = _mm512_sub_epi32( c_int32_1p1 , b0 );
@@ -451,7 +451,7 @@ LPGEMM_MAIN_KERN(int8_t,int8_t,int32_t,s8s8s32os32_6x64)
 			c_int32_4p1 = _mm512_sub_epi32( c_int32_4p1 , b0 );
 			c_int32_5p1 = _mm512_sub_epi32( c_int32_5p1 , b0 );
 
-			b0 = _mm512_loadu_epi32( bsumptr + 32 );
+			b0 = _mm512_loadu_si512( bsumptr + 32 );
 
 			c_int32_0p2 = _mm512_sub_epi32( c_int32_0p2 , b0 );
 			c_int32_1p2 = _mm512_sub_epi32( c_int32_1p2 , b0 );
@@ -460,7 +460,7 @@ LPGEMM_MAIN_KERN(int8_t,int8_t,int32_t,s8s8s32os32_6x64)
 			c_int32_4p2 = _mm512_sub_epi32( c_int32_4p2 , b0 );
 			c_int32_5p2 = _mm512_sub_epi32( c_int32_5p2 , b0 );
 
-			b0 = _mm512_loadu_epi32( bsumptr + 48 );
+			b0 = _mm512_loadu_si512( bsumptr + 48 );
 
 			c_int32_0p3 = _mm512_sub_epi32( c_int32_0p3 , b0 );
 			c_int32_1p3 = _mm512_sub_epi32( c_int32_1p3 , b0 );
@@ -562,16 +562,16 @@ LPGEMM_MAIN_KERN(int8_t,int8_t,int32_t,s8s8s32os32_6x64)
 POST_OPS_BIAS_6x64:
 		{
 			selector1 =
-				_mm512_loadu_epi32( ( int32_t* )post_ops_list_temp->op_args1 +
+				_mm512_loadu_si512( ( int32_t* )post_ops_list_temp->op_args1 +
 						post_ops_attr.post_op_c_j + ( 0 * 16 ) );
 			selector2 =
-				_mm512_loadu_epi32( ( int32_t* )post_ops_list_temp->op_args1 +
+				_mm512_loadu_si512( ( int32_t* )post_ops_list_temp->op_args1 +
 						post_ops_attr.post_op_c_j + ( 1 * 16 ) );
 			a_int32_0 =
-				_mm512_loadu_epi32( ( int32_t* )post_ops_list_temp->op_args1 +
+				_mm512_loadu_si512( ( int32_t* )post_ops_list_temp->op_args1 +
 						post_ops_attr.post_op_c_j + ( 2 * 16 ) );
 			a_int32_1 =
-				_mm512_loadu_epi32( ( int32_t* )post_ops_list_temp->op_args1 +
+				_mm512_loadu_si512( ( int32_t* )post_ops_list_temp->op_args1 +
 						post_ops_attr.post_op_c_j + ( 3 * 16 ) );
 
 			// c[0,0-15]
@@ -1048,16 +1048,16 @@ POST_OPS_CLIP_6x64:
 POST_OPS_DOWNSCALE_6x64:
 		{
 			selector1 =
-				_mm512_loadu_epi32( ( float* )post_ops_list_temp->scale_factor +
+				_mm512_loadu_si512( ( float* )post_ops_list_temp->scale_factor +
 						post_ops_attr.post_op_c_j + ( 0 * 16 ) );
 			selector2 =
-				_mm512_loadu_epi32( ( float* )post_ops_list_temp->scale_factor +
+				_mm512_loadu_si512( ( float* )post_ops_list_temp->scale_factor +
 						post_ops_attr.post_op_c_j + ( 1 * 16 ) );
 			a_int32_0 =
-				_mm512_loadu_epi32( ( float* )post_ops_list_temp->scale_factor +
+				_mm512_loadu_si512( ( float* )post_ops_list_temp->scale_factor +
 						post_ops_attr.post_op_c_j + ( 2 * 16 ) );
 			a_int32_1 =
-				_mm512_loadu_epi32( ( float* )post_ops_list_temp->scale_factor +
+				_mm512_loadu_si512( ( float* )post_ops_list_temp->scale_factor +
 						post_ops_attr.post_op_c_j + ( 3 * 16 ) );
 
 			// c[0, 0-15]
@@ -1226,76 +1226,76 @@ POST_OPS_6x64_DISABLE:
 		{
 			// Store the results.
 			// c[0,0-15]
-			_mm512_storeu_epi32( c + ( rs_c * ( ir + 0 ) ) + ( 0*16 ), c_int32_0p0 );
+			_mm512_storeu_si512( c + ( rs_c * ( ir + 0 ) ) + ( 0*16 ), c_int32_0p0 );
 
 			// c[0, 16-31]
-			_mm512_storeu_epi32( c + ( rs_c * ( ir + 0 ) ) + ( 1*16 ), c_int32_0p1 );
+			_mm512_storeu_si512( c + ( rs_c * ( ir + 0 ) ) + ( 1*16 ), c_int32_0p1 );
 
 			// c[0,32-47]
-			_mm512_storeu_epi32( c + ( rs_c * ( ir + 0 ) ) + ( 2*16 ), c_int32_0p2 );
+			_mm512_storeu_si512( c + ( rs_c * ( ir + 0 ) ) + ( 2*16 ), c_int32_0p2 );
 
 			// c[0,48-63]
-			_mm512_storeu_epi32( c + ( rs_c * ( ir + 0 ) ) + ( 3*16 ), c_int32_0p3 );
+			_mm512_storeu_si512( c + ( rs_c * ( ir + 0 ) ) + ( 3*16 ), c_int32_0p3 );
 
 			// c[1,0-15]
-			_mm512_storeu_epi32( c + ( rs_c * ( ir + 1 ) ) + ( 0*16 ), c_int32_1p0 );
+			_mm512_storeu_si512( c + ( rs_c * ( ir + 1 ) ) + ( 0*16 ), c_int32_1p0 );
 
 			// c[1,16-31]
-			_mm512_storeu_epi32( c + ( rs_c * ( ir + 1 ) ) + ( 1*16 ), c_int32_1p1 );
+			_mm512_storeu_si512( c + ( rs_c * ( ir + 1 ) ) + ( 1*16 ), c_int32_1p1 );
 
 			// c[1,32-47]
-			_mm512_storeu_epi32( c + ( rs_c * ( ir + 1 ) ) + ( 2*16 ), c_int32_1p2 );
+			_mm512_storeu_si512( c + ( rs_c * ( ir + 1 ) ) + ( 2*16 ), c_int32_1p2 );
 
 			// c[1,48-63]
-			_mm512_storeu_epi32( c + ( rs_c * ( ir + 1 ) ) + ( 3*16 ), c_int32_1p3 );
+			_mm512_storeu_si512( c + ( rs_c * ( ir + 1 ) ) + ( 3*16 ), c_int32_1p3 );
 
 			// c[2,0-15]
-			_mm512_storeu_epi32( c + ( rs_c * ( ir + 2 ) ) + ( 0*16 ), c_int32_2p0 );
+			_mm512_storeu_si512( c + ( rs_c * ( ir + 2 ) ) + ( 0*16 ), c_int32_2p0 );
 
 			// c[2,16-31]
-			_mm512_storeu_epi32( c + ( rs_c * ( ir + 2 ) ) + ( 1*16 ), c_int32_2p1 );
+			_mm512_storeu_si512( c + ( rs_c * ( ir + 2 ) ) + ( 1*16 ), c_int32_2p1 );
 
 			// c[2,32-47]
-			_mm512_storeu_epi32( c + ( rs_c * ( ir + 2 ) ) + ( 2*16 ), c_int32_2p2 );
+			_mm512_storeu_si512( c + ( rs_c * ( ir + 2 ) ) + ( 2*16 ), c_int32_2p2 );
 
 			// c[2,48-63]
-			_mm512_storeu_epi32( c + ( rs_c * ( ir + 2 ) ) + ( 3*16 ), c_int32_2p3 );
+			_mm512_storeu_si512( c + ( rs_c * ( ir + 2 ) ) + ( 3*16 ), c_int32_2p3 );
 
 			// c[3,0-15]
-			_mm512_storeu_epi32( c + ( rs_c * ( ir + 3 ) ) + ( 0*16 ), c_int32_3p0 );
+			_mm512_storeu_si512( c + ( rs_c * ( ir + 3 ) ) + ( 0*16 ), c_int32_3p0 );
 
 			// c[3,16-31]
-			_mm512_storeu_epi32( c + ( rs_c * ( ir + 3 ) ) + ( 1*16 ), c_int32_3p1 );
+			_mm512_storeu_si512( c + ( rs_c * ( ir + 3 ) ) + ( 1*16 ), c_int32_3p1 );
 
 			// c[3,32-47]
-			_mm512_storeu_epi32( c + ( rs_c * ( ir + 3 ) ) + ( 2*16 ), c_int32_3p2 );
+			_mm512_storeu_si512( c + ( rs_c * ( ir + 3 ) ) + ( 2*16 ), c_int32_3p2 );
 
 			// c[3,48-63]
-			_mm512_storeu_epi32( c + ( rs_c * ( ir + 3 ) ) + ( 3*16 ), c_int32_3p3 );
+			_mm512_storeu_si512( c + ( rs_c * ( ir + 3 ) ) + ( 3*16 ), c_int32_3p3 );
 
 			// c[4,0-15]
-			_mm512_storeu_epi32( c + ( rs_c * ( ir + 4 ) ) + ( 0*16 ), c_int32_4p0 );
+			_mm512_storeu_si512( c + ( rs_c * ( ir + 4 ) ) + ( 0*16 ), c_int32_4p0 );
 
 			// c[4,16-31]
-			_mm512_storeu_epi32( c + ( rs_c * ( ir + 4 ) ) + ( 1*16 ), c_int32_4p1 );
+			_mm512_storeu_si512( c + ( rs_c * ( ir + 4 ) ) + ( 1*16 ), c_int32_4p1 );
 
 			// c[4,32-47]
-			_mm512_storeu_epi32( c + ( rs_c * ( ir + 4 ) ) + ( 2*16 ), c_int32_4p2 );
+			_mm512_storeu_si512( c + ( rs_c * ( ir + 4 ) ) + ( 2*16 ), c_int32_4p2 );
 
 			// c[4,48-63]
-			_mm512_storeu_epi32( c + ( rs_c * ( ir + 4 ) ) + ( 3*16 ), c_int32_4p3 );
+			_mm512_storeu_si512( c + ( rs_c * ( ir + 4 ) ) + ( 3*16 ), c_int32_4p3 );
 
 			// c[5,0-15]
-			_mm512_storeu_epi32( c + ( rs_c * ( ir + 5 ) ) + ( 0*16 ), c_int32_5p0 );
+			_mm512_storeu_si512( c + ( rs_c * ( ir + 5 ) ) + ( 0*16 ), c_int32_5p0 );
 
 			// c[5,16-31]
-			_mm512_storeu_epi32( c + ( rs_c * ( ir + 5 ) ) + ( 1*16 ), c_int32_5p1 );
+			_mm512_storeu_si512( c + ( rs_c * ( ir + 5 ) ) + ( 1*16 ), c_int32_5p1 );
 
 			// c[5,32-47]
-			_mm512_storeu_epi32( c + ( rs_c * ( ir + 5 ) ) + ( 2*16 ), c_int32_5p2 );
+			_mm512_storeu_si512( c + ( rs_c * ( ir + 5 ) ) + ( 2*16 ), c_int32_5p2 );
 
 			// c[5,48-63]
-			_mm512_storeu_epi32( c + ( rs_c * ( ir + 5 ) ) + ( 3*16 ), c_int32_5p3 );
+			_mm512_storeu_si512( c + ( rs_c * ( ir + 5 ) ) + ( 3*16 ), c_int32_5p3 );
 		}
 
 		a = a + ( MR * ps_a );

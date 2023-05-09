@@ -120,10 +120,10 @@ void packb_nr64_u8s8s32o32
 		for ( dim_t kr = 0; kr < k_full_pieces; kr += 4 )
 		{
 			// Rearrange for vpdpbusd, read 4 rows from B with 64 elements in each row.
-			a0 = _mm512_loadu_epi8( b + ( ldb * ( kr + 0 ) ) + jc );
-			b0 = _mm512_loadu_epi8( b + ( ldb * ( kr + 1 ) ) + jc );
-			c0 = _mm512_loadu_epi8( b + ( ldb * ( kr + 2 ) ) + jc );
-			d0 = _mm512_loadu_epi8( b + ( ldb * ( kr + 3 ) ) + jc );
+			a0 = _mm512_loadu_si512( b + ( ldb * ( kr + 0 ) ) + jc );
+			b0 = _mm512_loadu_si512( b + ( ldb * ( kr + 1 ) ) + jc );
+			c0 = _mm512_loadu_si512( b + ( ldb * ( kr + 2 ) ) + jc );
+			d0 = _mm512_loadu_si512( b + ( ldb * ( kr + 3 ) ) + jc );
 
 			a01 = _mm512_unpacklo_epi8( a0, b0 );
 			a0 = _mm512_unpackhi_epi8( a0, b0 );
@@ -147,32 +147,32 @@ void packb_nr64_u8s8s32o32
 			a0 = _mm512_permutex2var_epi64( a0, selector2_1, c0 ); // b[1]
 			c0 = _mm512_permutex2var_epi64( b0, selector2_1, d0 ); // b[3]
 
-			_mm512_storeu_epi64( pack_b_buffer_u8s8s32o32 + ( ( jc * KC_updated ) + ( ( kr + 0 ) * NR ) ), a01 );
-			_mm512_storeu_epi64( pack_b_buffer_u8s8s32o32 + ( ( jc * KC_updated ) + ( ( kr + 1 ) * NR ) ) , a0 );
-			_mm512_storeu_epi64( pack_b_buffer_u8s8s32o32 + ( ( jc * KC_updated ) + ( ( kr + 2 ) * NR ) ), c01 );
-			_mm512_storeu_epi64( pack_b_buffer_u8s8s32o32 + ( ( jc * KC_updated ) + ( ( kr + 3 ) * NR ) ), c0 );
+			_mm512_storeu_si512( pack_b_buffer_u8s8s32o32 + ( ( jc * KC_updated ) + ( ( kr + 0 ) * NR ) ), a01 );
+			_mm512_storeu_si512( pack_b_buffer_u8s8s32o32 + ( ( jc * KC_updated ) + ( ( kr + 1 ) * NR ) ) , a0 );
+			_mm512_storeu_si512( pack_b_buffer_u8s8s32o32 + ( ( jc * KC_updated ) + ( ( kr + 2 ) * NR ) ), c01 );
+			_mm512_storeu_si512( pack_b_buffer_u8s8s32o32 + ( ( jc * KC_updated ) + ( ( kr + 3 ) * NR ) ), c0 );
 		}
 		// Handle k remainder.
 		if ( k_partial_pieces > 0 )
 		{
 			if ( k_partial_pieces == 3 )
 			{
-				a0 = _mm512_loadu_epi8( b + ( ldb * ( k_full_pieces + 0 ) ) + jc );
-				b0 = _mm512_loadu_epi8( b + ( ldb * ( k_full_pieces + 1 ) ) + jc );
-				c0 = _mm512_loadu_epi8( b + ( ldb * ( k_full_pieces + 2 ) ) + jc );
+				a0 = _mm512_loadu_si512( b + ( ldb * ( k_full_pieces + 0 ) ) + jc );
+				b0 = _mm512_loadu_si512( b + ( ldb * ( k_full_pieces + 1 ) ) + jc );
+				c0 = _mm512_loadu_si512( b + ( ldb * ( k_full_pieces + 2 ) ) + jc );
 				d0 = _mm512_setzero_si512();
 
 			}
 			else if( k_partial_pieces == 2 )
 			{
-				a0 = _mm512_loadu_epi8( b + ( ldb * ( k_full_pieces + 0 ) ) + jc );
-				b0 = _mm512_loadu_epi8( b + ( ldb * ( k_full_pieces + 1 ) ) + jc );
+				a0 = _mm512_loadu_si512( b + ( ldb * ( k_full_pieces + 0 ) ) + jc );
+				b0 = _mm512_loadu_si512( b + ( ldb * ( k_full_pieces + 1 ) ) + jc );
 				c0 = _mm512_setzero_si512();
 				d0 = _mm512_setzero_si512();
 			}
 			else //k_partial_pieces == 1
 			{
-				a0 = _mm512_loadu_epi8( b + ( ldb * ( k_full_pieces + 0 ) ) + jc );
+				a0 = _mm512_loadu_si512( b + ( ldb * ( k_full_pieces + 0 ) ) + jc );
 				b0 = _mm512_setzero_si512();
 				c0 = _mm512_setzero_si512();
 				d0 = _mm512_setzero_si512();
@@ -200,10 +200,10 @@ void packb_nr64_u8s8s32o32
 			a0 = _mm512_permutex2var_epi64( a0, selector2_1, c0 ); // b[1]
 			c0 = _mm512_permutex2var_epi64( b0, selector2_1, d0 ); // b[3]
 
-			_mm512_storeu_epi64( pack_b_buffer_u8s8s32o32 + ( ( jc * KC_updated ) + ( ( k_full_pieces + 0 ) * NR ) ), a01 );
-			_mm512_storeu_epi64( pack_b_buffer_u8s8s32o32 + ( ( jc * KC_updated ) + ( ( k_full_pieces + 1 ) * NR ) ) , a0 );
-			_mm512_storeu_epi64( pack_b_buffer_u8s8s32o32 + ( ( jc * KC_updated ) + ( ( k_full_pieces + 2 ) * NR ) ), c01 );
-			_mm512_storeu_epi64( pack_b_buffer_u8s8s32o32 + ( ( jc * KC_updated ) + ( ( k_full_pieces + 3 ) * NR ) ), c0 );	
+			_mm512_storeu_si512( pack_b_buffer_u8s8s32o32 + ( ( jc * KC_updated ) + ( ( k_full_pieces + 0 ) * NR ) ), a01 );
+			_mm512_storeu_si512( pack_b_buffer_u8s8s32o32 + ( ( jc * KC_updated ) + ( ( k_full_pieces + 1 ) * NR ) ) , a0 );
+			_mm512_storeu_si512( pack_b_buffer_u8s8s32o32 + ( ( jc * KC_updated ) + ( ( k_full_pieces + 2 ) * NR ) ), c01 );
+			_mm512_storeu_si512( pack_b_buffer_u8s8s32o32 + ( ( jc * KC_updated ) + ( ( k_full_pieces + 3 ) * NR ) ), c0 );	
 		}
 	}
 	
@@ -298,10 +298,10 @@ void packb_nr48_u8s8s32o32
 	for ( dim_t kr = 0; kr < k_full_pieces; kr += 4 )
 	{
 		// Rearrange for vpdpbusd, read 4 rows from B with 32 elements in each row.
-		a0_32 = _mm256_loadu_epi8( b + ( ldb * ( kr + 0 ) ) );
-		b0_32 = _mm256_loadu_epi8( b + ( ldb * ( kr + 1 ) ) );
-		c0_32 = _mm256_loadu_epi8( b + ( ldb * ( kr + 2 ) ) );
-		d0_32 = _mm256_loadu_epi8( b + ( ldb * ( kr + 3 ) ) );
+		a0_32 = _mm256_maskz_loadu_epi8( 0xFFFFFFFF, b + ( ldb * ( kr + 0 ) ) );
+		b0_32 = _mm256_maskz_loadu_epi8( 0xFFFFFFFF, b + ( ldb * ( kr + 1 ) ) );
+		c0_32 = _mm256_maskz_loadu_epi8( 0xFFFFFFFF, b + ( ldb * ( kr + 2 ) ) );
+		d0_32 = _mm256_maskz_loadu_epi8( 0xFFFFFFFF, b + ( ldb * ( kr + 3 ) ) );
 
 		a01_32 = _mm256_unpacklo_epi8( a0_32, b0_32 );
 		a0_32 = _mm256_unpackhi_epi8( a0_32, b0_32 );
@@ -326,14 +326,14 @@ void packb_nr48_u8s8s32o32
 		b0_zmm = _mm512_inserti32x8( b0_zmm, d0_32, 0x1 );
 
 		// First 4x32 elements.
-		_mm512_storeu_epi64( pack_b_buffer_u8s8s32o32 + ( ( kr_new + 0 ) * NR ), a0_zmm );
-		_mm512_storeu_epi64( pack_b_buffer_u8s8s32o32 + ( ( kr_new + 1 ) * NR ), b0_zmm );
+		_mm512_storeu_si512( pack_b_buffer_u8s8s32o32 + ( ( kr_new + 0 ) * NR ), a0_zmm );
+		_mm512_storeu_si512( pack_b_buffer_u8s8s32o32 + ( ( kr_new + 1 ) * NR ), b0_zmm );
 
 		// Rearrange for vpdpbusd, read 4 rows from B with next 16 elements in each row.
-		a0_16 = _mm_loadu_epi8( b + ( ldb * ( kr + 0 ) ) + ( 32 ) );
-		b0_16 = _mm_loadu_epi8( b + ( ldb * ( kr + 1 ) ) + ( 32 ) );
-		c0_16 = _mm_loadu_epi8( b + ( ldb * ( kr + 2 ) ) + ( 32 ) );
-		d0_16 = _mm_loadu_epi8( b + ( ldb * ( kr + 3 ) ) + ( 32 ) );
+		a0_16 = _mm_maskz_loadu_epi8( 0xFFFF, b + ( ldb * ( kr + 0 ) ) + ( 32 ) );
+		b0_16 = _mm_maskz_loadu_epi8( 0xFFFF, b + ( ldb * ( kr + 1 ) ) + ( 32 ) );
+		c0_16 = _mm_maskz_loadu_epi8( 0xFFFF, b + ( ldb * ( kr + 2 ) ) + ( 32 ) );
+		d0_16 = _mm_maskz_loadu_epi8( 0xFFFF, b + ( ldb * ( kr + 3 ) ) + ( 32 ) );
 
 		a01_16 = _mm_unpacklo_epi8( a0_16, b0_16 );
 		a0_16 = _mm_unpackhi_epi8( a0_16, b0_16 );
@@ -352,7 +352,7 @@ void packb_nr48_u8s8s32o32
 		a0_zmm = _mm512_inserti32x4( a0_zmm, c01_16, 0x3 );
 
 		// Last 4x16 elements.
-		_mm512_storeu_epi64( pack_b_buffer_u8s8s32o32 + ( ( kr_new + 2 ) * NR ), a0_zmm );
+		_mm512_storeu_si512( pack_b_buffer_u8s8s32o32 + ( ( kr_new + 2 ) * NR ), a0_zmm );
 
 		// The 4th 16byte chunk will be ignored, since its not part of the original data,
 		// but is here due to the packing in 4 16byte chunks format.
@@ -363,37 +363,37 @@ void packb_nr48_u8s8s32o32
 	{
 		if ( k_partial_pieces == 3 )
 		{
-			a0_32 = _mm256_loadu_epi8( b + ( ldb * ( k_full_pieces + 0 ) ) );
-			b0_32 = _mm256_loadu_epi8( b + ( ldb * ( k_full_pieces + 1 ) ) );
-			c0_32 = _mm256_loadu_epi8( b + ( ldb * ( k_full_pieces + 2 ) ) );
+			a0_32 = _mm256_maskz_loadu_epi8( 0xFFFFFFFF, b + ( ldb * ( k_full_pieces + 0 ) ) );
+			b0_32 = _mm256_maskz_loadu_epi8( 0xFFFFFFFF, b + ( ldb * ( k_full_pieces + 1 ) ) );
+			c0_32 = _mm256_maskz_loadu_epi8( 0xFFFFFFFF, b + ( ldb * ( k_full_pieces + 2 ) ) );
 			d0_32 = _mm256_setzero_si256();
 
-			a0_16 = _mm_loadu_epi8( b + ( ldb * ( k_full_pieces + 0 ) ) + ( 32 ) );
-			b0_16 = _mm_loadu_epi8( b + ( ldb * ( k_full_pieces + 1 ) ) + ( 32 ) );
-			c0_16 = _mm_loadu_epi8( b + ( ldb * ( k_full_pieces + 2 ) ) + ( 32 ) );
+			a0_16 = _mm_maskz_loadu_epi8( 0xFFFF, b + ( ldb * ( k_full_pieces + 0 ) ) + ( 32 ) );
+			b0_16 = _mm_maskz_loadu_epi8( 0xFFFF, b + ( ldb * ( k_full_pieces + 1 ) ) + ( 32 ) );
+			c0_16 = _mm_maskz_loadu_epi8( 0xFFFF, b + ( ldb * ( k_full_pieces + 2 ) ) + ( 32 ) );
 			d0_16 = _mm_setzero_si128();
 
 		}
 		else if( k_partial_pieces == 2 )
 		{
-			a0_32 = _mm256_loadu_epi8( b + ( ldb * ( k_full_pieces + 0 ) ) );
-			b0_32 = _mm256_loadu_epi8( b + ( ldb * ( k_full_pieces + 1 ) ) );
+			a0_32 = _mm256_maskz_loadu_epi8( 0xFFFFFFFF, b + ( ldb * ( k_full_pieces + 0 ) ) );
+			b0_32 = _mm256_maskz_loadu_epi8( 0xFFFFFFFF, b + ( ldb * ( k_full_pieces + 1 ) ) );
 			c0_32 = _mm256_setzero_si256();
 			d0_32 = _mm256_setzero_si256();
 
-			a0_16 = _mm_loadu_epi8( b + ( ldb * ( k_full_pieces + 0 ) ) + ( 32 ) );
-			b0_16 = _mm_loadu_epi8( b + ( ldb * ( k_full_pieces + 1 ) ) + ( 32 ) );
+			a0_16 = _mm_maskz_loadu_epi8( 0xFFFF, b + ( ldb * ( k_full_pieces + 0 ) ) + ( 32 ) );
+			b0_16 = _mm_maskz_loadu_epi8( 0xFFFF, b + ( ldb * ( k_full_pieces + 1 ) ) + ( 32 ) );
 			c0_16 = _mm_setzero_si128();
 			d0_16 = _mm_setzero_si128();
 		}
 		else //k_partial_pieces == 1
 		{
-			a0_32 = _mm256_loadu_epi8( b + ( ldb * ( k_full_pieces + 0 ) ) );
+			a0_32 = _mm256_maskz_loadu_epi8( 0xFFFFFFFF, b + ( ldb * ( k_full_pieces + 0 ) ) );
 			b0_32 = _mm256_setzero_si256();
 			c0_32 = _mm256_setzero_si256();
 			d0_32 = _mm256_setzero_si256();
 
-			a0_16 = _mm_loadu_epi8( b + ( ldb * ( k_full_pieces + 0 ) ) + ( 32 ) );
+			a0_16 = _mm_maskz_loadu_epi8( 0xFFFF, b + ( ldb * ( k_full_pieces + 0 ) ) + ( 32 ) );
 			b0_16 = _mm_setzero_si128();
 			c0_16 = _mm_setzero_si128();
 			d0_16 = _mm_setzero_si128();
@@ -422,8 +422,8 @@ void packb_nr48_u8s8s32o32
 		b0_zmm = _mm512_inserti32x8( b0_zmm, d0_32, 0x1 );
 
 		// First 4x32 elements.
-		_mm512_storeu_epi64( pack_b_buffer_u8s8s32o32 + ( ( kr_new + 0 ) * NR ), a0_zmm );
-		_mm512_storeu_epi64( pack_b_buffer_u8s8s32o32 + ( ( kr_new + 1 ) * NR ), b0_zmm );
+		_mm512_storeu_si512( pack_b_buffer_u8s8s32o32 + ( ( kr_new + 0 ) * NR ), a0_zmm );
+		_mm512_storeu_si512( pack_b_buffer_u8s8s32o32 + ( ( kr_new + 1 ) * NR ), b0_zmm );
 
 		a01_16 = _mm_unpacklo_epi8( a0_16, b0_16 );
 		a0_16 = _mm_unpackhi_epi8( a0_16, b0_16 );
@@ -442,7 +442,7 @@ void packb_nr48_u8s8s32o32
 		a0_zmm = _mm512_inserti32x4( a0_zmm, c01_16, 0x3 );
 
 		// Last 4x16 elements.
-		_mm512_storeu_epi64( pack_b_buffer_u8s8s32o32 + ( ( kr_new + 2 ) * NR ), a0_zmm );
+		_mm512_storeu_si512( pack_b_buffer_u8s8s32o32 + ( ( kr_new + 2 ) * NR ), a0_zmm );
 	}
 }
 
@@ -472,10 +472,10 @@ void packb_nr32_u8s8s32o32
 	for ( dim_t kr = 0; kr < k_full_pieces; kr += 4 )
 	{
 		// Rearrange for vpdpbusd, read 4 rows from B with 32 elements in each row.
-		a0_32 = _mm256_loadu_epi8( b + ( ldb * ( kr + 0 ) ) );
-		b0_32 = _mm256_loadu_epi8( b + ( ldb * ( kr + 1 ) ) );
-		c0_32 = _mm256_loadu_epi8( b + ( ldb * ( kr + 2 ) ) );
-		d0_32 = _mm256_loadu_epi8( b + ( ldb * ( kr + 3 ) ) );
+		a0_32 = _mm256_maskz_loadu_epi8( 0xFFFFFFFF, b + ( ldb * ( kr + 0 ) ) );
+		b0_32 = _mm256_maskz_loadu_epi8( 0xFFFFFFFF, b + ( ldb * ( kr + 1 ) ) );
+		c0_32 = _mm256_maskz_loadu_epi8( 0xFFFFFFFF, b + ( ldb * ( kr + 2 ) ) );
+		d0_32 = _mm256_maskz_loadu_epi8( 0xFFFFFFFF, b + ( ldb * ( kr + 3 ) ) );
 
 		a01_32 = _mm256_unpacklo_epi8( a0_32, b0_32 );
 		a0_32 = _mm256_unpackhi_epi8( a0_32, b0_32 );
@@ -500,8 +500,8 @@ void packb_nr32_u8s8s32o32
 		b0_zmm = _mm512_inserti32x8( b0_zmm, d0_32, 0x1 );
 
 		// First 4x32 elements.
-		_mm512_storeu_epi64( pack_b_buffer_u8s8s32o32 + ( ( kr_new + 0 ) * NR ), a0_zmm );
-		_mm512_storeu_epi64( pack_b_buffer_u8s8s32o32 + ( ( kr_new + 1 ) * NR ), b0_zmm );
+		_mm512_storeu_si512( pack_b_buffer_u8s8s32o32 + ( ( kr_new + 0 ) * NR ), a0_zmm );
+		_mm512_storeu_si512( pack_b_buffer_u8s8s32o32 + ( ( kr_new + 1 ) * NR ), b0_zmm );
 
 		// The 3rd and 4th 16byte chunk will be ignored, since its not part of the original data,
 		// but is here due to the packing in 4 16byte chunks format.
@@ -512,22 +512,22 @@ void packb_nr32_u8s8s32o32
 	{
 		if ( k_partial_pieces == 3 )
 		{
-			a0_32 = _mm256_loadu_epi8( b + ( ldb * ( k_full_pieces + 0 ) ) );
-			b0_32 = _mm256_loadu_epi8( b + ( ldb * ( k_full_pieces + 1 ) ) );
-			c0_32 = _mm256_loadu_epi8( b + ( ldb * ( k_full_pieces + 2 ) ) );
+			a0_32 = _mm256_maskz_loadu_epi8( 0xFFFFFFFF, b + ( ldb * ( k_full_pieces + 0 ) ) );
+			b0_32 = _mm256_maskz_loadu_epi8( 0xFFFFFFFF, b + ( ldb * ( k_full_pieces + 1 ) ) );
+			c0_32 = _mm256_maskz_loadu_epi8( 0xFFFFFFFF, b + ( ldb * ( k_full_pieces + 2 ) ) );
 			d0_32 = _mm256_setzero_si256();
 
 		}
 		else if( k_partial_pieces == 2 )
 		{
-			a0_32 = _mm256_loadu_epi8( b + ( ldb * ( k_full_pieces + 0 ) ) );
-			b0_32 = _mm256_loadu_epi8( b + ( ldb * ( k_full_pieces + 1 ) ) );
+			a0_32 = _mm256_maskz_loadu_epi8( 0xFFFFFFFF, b + ( ldb * ( k_full_pieces + 0 ) ) );
+			b0_32 = _mm256_maskz_loadu_epi8( 0xFFFFFFFF, b + ( ldb * ( k_full_pieces + 1 ) ) );
 			c0_32 = _mm256_setzero_si256();
 			d0_32 = _mm256_setzero_si256();
 		}
 		else //k_partial_pieces == 1
 		{
-			a0_32 = _mm256_loadu_epi8( b + ( ldb * ( k_full_pieces + 0 ) ) );
+			a0_32 = _mm256_maskz_loadu_epi8( 0xFFFFFFFF, b + ( ldb * ( k_full_pieces + 0 ) ) );
 			b0_32 = _mm256_setzero_si256();
 			c0_32 = _mm256_setzero_si256();
 			d0_32 = _mm256_setzero_si256();
@@ -556,8 +556,8 @@ void packb_nr32_u8s8s32o32
 		b0_zmm = _mm512_inserti32x8( b0_zmm, d0_32, 0x1 );
 
 		// First 4x32 elements.
-		_mm512_storeu_epi64( pack_b_buffer_u8s8s32o32 + ( ( kr_new + 0 ) * NR ), a0_zmm );
-		_mm512_storeu_epi64( pack_b_buffer_u8s8s32o32 + ( ( kr_new + 1 ) * NR ), b0_zmm );
+		_mm512_storeu_si512( pack_b_buffer_u8s8s32o32 + ( ( kr_new + 0 ) * NR ), a0_zmm );
+		_mm512_storeu_si512( pack_b_buffer_u8s8s32o32 + ( ( kr_new + 1 ) * NR ), b0_zmm );
 	}
 }
 
@@ -586,10 +586,10 @@ void packb_nr16_u8s8s32o32
 	for ( dim_t kr = 0; kr < k_full_pieces; kr += 4 )
 	{
 		// Rearrange for vpdpbusd, read 4 rows from B with next 16 elements in each row.
-		a0_16 = _mm_loadu_epi8( b + ( ldb * ( kr + 0 ) ) );
-		b0_16 = _mm_loadu_epi8( b + ( ldb * ( kr + 1 ) ) );
-		c0_16 = _mm_loadu_epi8( b + ( ldb * ( kr + 2 ) ) );
-		d0_16 = _mm_loadu_epi8( b + ( ldb * ( kr + 3 ) ) );
+		a0_16 = _mm_maskz_loadu_epi8( 0xFFFF, b + ( ldb * ( kr + 0 ) ) );
+		b0_16 = _mm_maskz_loadu_epi8( 0xFFFF, b + ( ldb * ( kr + 1 ) ) );
+		c0_16 = _mm_maskz_loadu_epi8( 0xFFFF, b + ( ldb * ( kr + 2 ) ) );
+		d0_16 = _mm_maskz_loadu_epi8( 0xFFFF, b + ( ldb * ( kr + 3 ) ) );
 
 		a01_16 = _mm_unpacklo_epi8( a0_16, b0_16 );
 		a0_16 = _mm_unpackhi_epi8( a0_16, b0_16 );
@@ -608,7 +608,7 @@ void packb_nr16_u8s8s32o32
 		a0_zmm = _mm512_inserti32x4( a0_zmm, c01_16, 0x3 );
 
 		// Last 4x16 elements.
-		_mm512_storeu_epi64( pack_b_buffer_u8s8s32o32 + ( ( kr_new + 0 ) * NR ), a0_zmm );
+		_mm512_storeu_si512( pack_b_buffer_u8s8s32o32 + ( ( kr_new + 0 ) * NR ), a0_zmm );
 
 		// The 2nd, 3rd, and 4th 16byte chunk will be ignored, since its not part of the original data,
 		// but is here due to the packing in 4 16byte chunks format.
@@ -619,22 +619,22 @@ void packb_nr16_u8s8s32o32
 	{
 		if ( k_partial_pieces == 3 )
 		{
-			a0_16 = _mm_loadu_epi8( b + ( ldb * ( k_full_pieces + 0 ) ) );
-			b0_16 = _mm_loadu_epi8( b + ( ldb * ( k_full_pieces + 1 ) ) );
-			c0_16 = _mm_loadu_epi8( b + ( ldb * ( k_full_pieces + 2 ) ) );
+			a0_16 = _mm_maskz_loadu_epi8( 0xFFFF, b + ( ldb * ( k_full_pieces + 0 ) ) );
+			b0_16 = _mm_maskz_loadu_epi8( 0xFFFF, b + ( ldb * ( k_full_pieces + 1 ) ) );
+			c0_16 = _mm_maskz_loadu_epi8( 0xFFFF, b + ( ldb * ( k_full_pieces + 2 ) ) );
 			d0_16 = _mm_setzero_si128();
 
 		}
 		else if( k_partial_pieces == 2 )
 		{
-			a0_16 = _mm_loadu_epi8( b + ( ldb * ( k_full_pieces + 0 ) ) );
-			b0_16 = _mm_loadu_epi8( b + ( ldb * ( k_full_pieces + 1 ) ) );
+			a0_16 = _mm_maskz_loadu_epi8( 0xFFFF, b + ( ldb * ( k_full_pieces + 0 ) ) );
+			b0_16 = _mm_maskz_loadu_epi8( 0xFFFF, b + ( ldb * ( k_full_pieces + 1 ) ) );
 			c0_16 = _mm_setzero_si128();
 			d0_16 = _mm_setzero_si128();
 		}
 		else //k_partial_pieces == 1
 		{
-			a0_16 = _mm_loadu_epi8( b + ( ldb * ( k_full_pieces + 0 ) ) );
+			a0_16 = _mm_maskz_loadu_epi8( 0xFFFF, b + ( ldb * ( k_full_pieces + 0 ) ) );
 			b0_16 = _mm_setzero_si128();
 			c0_16 = _mm_setzero_si128();
 			d0_16 = _mm_setzero_si128();
@@ -657,7 +657,7 @@ void packb_nr16_u8s8s32o32
 		a0_zmm = _mm512_inserti32x4( a0_zmm, c01_16, 0x3 );
 
 		// Last 4x16 elements.
-		_mm512_storeu_epi64( pack_b_buffer_u8s8s32o32 + ( ( kr_new + 0 ) * NR ), a0_zmm );
+		_mm512_storeu_si512( pack_b_buffer_u8s8s32o32 + ( ( kr_new + 0 ) * NR ), a0_zmm );
 	}
 }
 
@@ -697,10 +697,10 @@ void packb_nrlt16_u8s8s32o32
 		memcpy( buf3, ( b + ( ldb * ( kr + 3 ) ) ), ( n0_partial_rem * sizeof( int8_t ) ) );
 
 		// Rearrange for vpdpbusd, read 4 rows from B with next 16 elements in each row.
-		a0_16 = _mm_loadu_epi8( buf0 );
-		b0_16 = _mm_loadu_epi8( buf1 );
-		c0_16 = _mm_loadu_epi8( buf2 );
-		d0_16 = _mm_loadu_epi8( buf3 );
+		a0_16 = _mm_maskz_loadu_epi8( 0xFFFF, buf0 );
+		b0_16 = _mm_maskz_loadu_epi8( 0xFFFF, buf1 );
+		c0_16 = _mm_maskz_loadu_epi8( 0xFFFF, buf2 );
+		d0_16 = _mm_maskz_loadu_epi8( 0xFFFF, buf3 );
 
 		a01_16 = _mm_unpacklo_epi8( a0_16, b0_16 );
 		a0_16 = _mm_unpackhi_epi8( a0_16, b0_16 );
@@ -719,7 +719,7 @@ void packb_nrlt16_u8s8s32o32
 		a0_zmm = _mm512_inserti32x4( a0_zmm, c01_16, 0x3 );
 
 		// Last 4x16 elements.
-		_mm512_storeu_epi64( pack_b_buffer_u8s8s32o32 + ( ( kr_new + 0 ) * NR ), a0_zmm );
+		_mm512_storeu_si512( pack_b_buffer_u8s8s32o32 + ( ( kr_new + 0 ) * NR ), a0_zmm );
 
 		// The 2nd, 3rd, and 4th 16byte chunk will be ignored, since its not part of the original data,
 		// but is here due to the packing in 4 16byte chunks format.
@@ -734,9 +734,9 @@ void packb_nrlt16_u8s8s32o32
 			memcpy( buf1, ( b + ( ldb * ( k_full_pieces + 1 ) ) ), ( n0_partial_rem * sizeof( int8_t ) ) );
 			memcpy( buf2, ( b + ( ldb * ( k_full_pieces + 2 ) ) ), ( n0_partial_rem * sizeof( int8_t ) ) );
 
-			a0_16 = _mm_loadu_epi8( buf0 );
-			b0_16 = _mm_loadu_epi8( buf1 );
-			c0_16 = _mm_loadu_epi8( buf2 );
+			a0_16 = _mm_maskz_loadu_epi8( 0xFFFF, buf0 );
+			b0_16 = _mm_maskz_loadu_epi8( 0xFFFF, buf1 );
+			c0_16 = _mm_maskz_loadu_epi8( 0xFFFF, buf2 );
 			d0_16 = _mm_setzero_si128();
 
 		}
@@ -745,8 +745,8 @@ void packb_nrlt16_u8s8s32o32
 			memcpy( buf0, ( b + ( ldb * ( k_full_pieces + 0 ) ) ), ( n0_partial_rem * sizeof( int8_t ) ) );
 			memcpy( buf1, ( b + ( ldb * ( k_full_pieces + 1 ) ) ), ( n0_partial_rem * sizeof( int8_t ) ) );
 
-			a0_16 = _mm_loadu_epi8( buf0 );
-			b0_16 = _mm_loadu_epi8( buf1 );
+			a0_16 = _mm_maskz_loadu_epi8( 0xFFFF, buf0 );
+			b0_16 = _mm_maskz_loadu_epi8( 0xFFFF, buf1 );
 			c0_16 = _mm_setzero_si128();
 			d0_16 = _mm_setzero_si128();
 		}
@@ -754,7 +754,7 @@ void packb_nrlt16_u8s8s32o32
 		{
 			memcpy( buf0, ( b + ( ldb * ( k_full_pieces + 0 ) ) ), ( n0_partial_rem * sizeof( int8_t ) ) );
 
-			a0_16 = _mm_loadu_epi8( buf0 );
+			a0_16 = _mm_maskz_loadu_epi8( 0xFFFF, buf0 );
 			b0_16 = _mm_setzero_si128();
 			c0_16 = _mm_setzero_si128();
 			d0_16 = _mm_setzero_si128();
@@ -777,7 +777,7 @@ void packb_nrlt16_u8s8s32o32
 		a0_zmm = _mm512_inserti32x4( a0_zmm, c01_16, 0x3 );
 
 		// Last 4x16 elements.
-		_mm512_storeu_epi64( pack_b_buffer_u8s8s32o32 + ( ( kr_new + 0 ) * NR ), a0_zmm );
+		_mm512_storeu_si512( pack_b_buffer_u8s8s32o32 + ( ( kr_new + 0 ) * NR ), a0_zmm );
 	}
 }
 #endif
