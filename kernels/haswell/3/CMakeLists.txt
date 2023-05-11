@@ -1,11 +1,13 @@
-##Copyright (C) 2020, Advanced Micro Devices, Inc. All rights reserved.##
+##Copyright (C) 2023, Advanced Micro Devices, Inc. All rights reserved.##
 
-target_sources("${PROJECT_NAME}" 
-     PRIVATE
+add_library(haswell_3
+     OBJECT
     ${CMAKE_CURRENT_SOURCE_DIR}/bli_gemm_haswell_asm_d6x8.c
     ${CMAKE_CURRENT_SOURCE_DIR}/bli_gemm_haswell_asm_d8x6.c
     ${CMAKE_CURRENT_SOURCE_DIR}/bli_gemmtrsm_l_haswell_asm_d6x8.c
     ${CMAKE_CURRENT_SOURCE_DIR}/bli_gemmtrsm_u_haswell_asm_d6x8.c
     )
+
+target_compile_options(haswell_3 PRIVATE /arch:AVX2)
 
 add_subdirectory(sup)

@@ -343,55 +343,15 @@ message(DISABLE_BLIS_ARCH_TYPE : ${DISABLE_BLIS_ARCH_TYPE})
 message(RENAME_BLIS_ARCH_TYPE : ${RENAME_BLIS_ARCH_TYPE})
 message(RENAME_BLIS_MODEL_TYPE : ${RENAME_BLIS_MODEL_TYPE})
 
-SET(ENABLE_SIMD_FLAGS "AVX2" CACHE STRING "Set compiler SIMD flags")
+SET(ENABLE_SIMD_FLAGS "none" CACHE STRING "Set compiler SIMD flags")
 SET_PROPERTY(CACHE ENABLE_SIMD_FLAGS PROPERTY STRINGS none SSE2 AVX AVX2)
 
 if(${ENABLE_SIMD_FLAGS} MATCHES "AVX2")
-  #add_definitions(/arch:AVX2)
+  add_definitions(/arch:AVX2)
 elseif(${ENABLE_SIMD_FLAGS} MATCHES "AVX")
   add_definitions(/arch:AVX)
 elseif(${ENABLE_SIMD_FLAGS} MATCHES "SSE2")
   add_definitions(/arch:SSE2)
-endif()
-
-if(${TARGET_ARCH} STREQUAL zen4 OR
-   ${TARGET_ARCH} STREQUAL amdzen)
-  set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/kernels/zen4/1/bli_amaxv_zen_int_avx512.c       PROPERTIES COMPILE_FLAGS /arch:AVX512)
-  set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/kernels/zen4/1/bli_scalv_zen_int_avx512.c       PROPERTIES COMPILE_FLAGS /arch:AVX512)
-  set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/kernels/zen4/1/bli_dotv_zen_int_avx512.c        PROPERTIES COMPILE_FLAGS /arch:AVX512)
-  set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/kernels/zen4/1/bli_axpyv_zen_int_avx512.c       PROPERTIES COMPILE_FLAGS /arch:AVX512)
-  set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/kernels/zen4/3/bli_dgemm_zen4_asm_32x6.c        PROPERTIES COMPILE_FLAGS /arch:AVX512)
-  set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/kernels/zen4/3/bli_dgemm_zen4_asm_8x24.c        PROPERTIES COMPILE_FLAGS /arch:AVX512)
-  set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/kernels/zen4/3/bli_gemmtrsm_l_zen_16x14.c       PROPERTIES COMPILE_FLAGS /arch:AVX512)
-  set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/kernels/zen4/3/bli_gemmtrsm_l_zen4_8x24.c       PROPERTIES COMPILE_FLAGS /arch:AVX512)
-  set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/kernels/zen4/3/bli_gemmtrsm_u_zen_16x14.c       PROPERTIES COMPILE_FLAGS /arch:AVX512)
-  set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/kernels/zen4/3/bli_gemmtrsm_u_zen4_8x24.c       PROPERTIES COMPILE_FLAGS /arch:AVX512)
-  set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/kernels/skx/3/bli_dgemm_skx_asm_16x14.c         PROPERTIES COMPILE_FLAGS /arch:AVX512)
-  set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/kernels/skx/3/bli_sgemm_skx_asm_32x12_l2.c      PROPERTIES COMPILE_FLAGS /arch:AVX512)
-  set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/kernels/zen4/3/bli_zgemm_zen4_asm_12x4.c         PROPERTIES COMPILE_FLAGS /arch:AVX512)
-  set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/kernels/zen4/3/bli_trsm_small_AVX512.c          PROPERTIES COMPILE_FLAGS /arch:AVX512)
-  set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/kernels/zen4/3/sup/bli_gemmsup_rd_zen_s6x64.h   PROPERTIES COMPILE_FLAGS /arch:AVX512)
-  set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/kernels/zen4/3/sup/bli_gemmsup_rd_zen_s6x64.c   PROPERTIES COMPILE_FLAGS /arch:AVX512)
-  set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/kernels/zen4/3/sup/bli_gemmsup_rd_zen_s6x64m.c  PROPERTIES COMPILE_FLAGS /arch:AVX512)
-  set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/kernels/zen4/3/sup/bli_gemmsup_rd_zen_s6x64n.c  PROPERTIES COMPILE_FLAGS /arch:AVX512)
-  set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/kernels/zen4/3/sup/bli_gemmsup_rv_zen_s6x64.h   PROPERTIES COMPILE_FLAGS /arch:AVX512)
-  set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/kernels/zen4/3/sup/bli_gemmsup_rv_zen_s6x64.c   PROPERTIES COMPILE_FLAGS /arch:AVX512)
-  set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/kernels/zen4/3/sup/bli_gemmsup_rv_zen_s6x64m.c  PROPERTIES COMPILE_FLAGS /arch:AVX512)
-  set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/kernels/zen4/3/sup/bli_gemmsup_rv_zen_s6x64n.c  PROPERTIES COMPILE_FLAGS /arch:AVX512)
-  set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/kernels/zen4/3/sup/bli_gemmsup_cv_zen_z12x4m.c  PROPERTIES COMPILE_FLAGS /arch:AVX512)
-  set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/kernels/zen4/3/sup/bli_dgemmsup_rv_zen4_asm_24x8m.c  PROPERTIES COMPILE_FLAGS /arch:AVX512)
-  set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/kernels/zen4/3/sup/d24x8/bli_dgemmsup_rv_zen4_asm_Mx1.c  PROPERTIES COMPILE_FLAGS /arch:AVX512)
-  set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/kernels/zen4/3/sup/d24x8/bli_dgemmsup_rv_zen4_asm_Mx2.c  PROPERTIES COMPILE_FLAGS /arch:AVX512)
-  set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/kernels/zen4/3/sup/d24x8/bli_dgemmsup_rv_zen4_asm_Mx3.c  PROPERTIES COMPILE_FLAGS /arch:AVX512)
-  set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/kernels/zen4/3/sup/d24x8/bli_dgemmsup_rv_zen4_asm_Mx4.c  PROPERTIES COMPILE_FLAGS /arch:AVX512)
-  set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/kernels/zen4/3/sup/d24x8/bli_dgemmsup_rv_zen4_asm_Mx5.c  PROPERTIES COMPILE_FLAGS /arch:AVX512)
-  set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/kernels/zen4/3/sup/d24x8/bli_dgemmsup_rv_zen4_asm_Mx6.c  PROPERTIES COMPILE_FLAGS /arch:AVX512)
-  set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/kernels/zen4/3/sup/d24x8/bli_dgemmsup_rv_zen4_asm_Mx7.c  PROPERTIES COMPILE_FLAGS /arch:AVX512)
-  set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/kernels/zen4/3/sup/d24x8/bli_dgemmsup_rv_zen4_asm_Mx8.c  PROPERTIES COMPILE_FLAGS /arch:AVX512)
-  set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/kernels/zen4/1m/bli_packm_zen4_asm_z4xk.c       PROPERTIES COMPILE_FLAGS /arch:AVX512)
-  set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/kernels/zen4/1m/bli_packm_zen4_asm_z12xk.c      PROPERTIES COMPILE_FLAGS /arch:AVX512)
-  set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/kernels/zen4/1m/bli_packm_zen4_asm_d8xk.c       PROPERTIES COMPILE_FLAGS /arch:AVX512)
-  set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/kernels/zen4/1m/bli_packm_zen4_asm_d24xk.c      PROPERTIES COMPILE_FLAGS /arch:AVX512)
 endif()
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /W0 ")
@@ -647,7 +607,18 @@ if(BUILD_SHARED_LIBS)
                          $<TARGET_OBJECTS:zen_1f>
                          $<TARGET_OBJECTS:zen_2>
                          $<TARGET_OBJECTS:zen_3>
-                         $<TARGET_OBJECTS:zen_3_sup>)
+                         $<TARGET_OBJECTS:zen_3_sup>
+                         $<TARGET_OBJECTS:zen4_1>
+                         $<TARGET_OBJECTS:zen4_1m>
+                         $<TARGET_OBJECTS:zen4_3>
+                         $<TARGET_OBJECTS:zen4_3sup>
+                         $<TARGET_OBJECTS:zen4_3supd24x8>
+                         $<TARGET_OBJECTS:skx_3>
+                         $<TARGET_OBJECTS:haswell_1m>
+                         $<TARGET_OBJECTS:haswell_3>
+                         $<TARGET_OBJECTS:haswell_3sup>
+                         $<TARGET_OBJECTS:haswell_3supd6x8>
+                         )
     if(ENABLE_OPENMP)
         target_link_libraries("${PROJECT_NAME}" PRIVATE OpenMP::OpenMP_CXX)
     endif()
@@ -662,7 +633,18 @@ if(NOT BUILD_SHARED_LIBS)
                          $<TARGET_OBJECTS:zen_1f>
                          $<TARGET_OBJECTS:zen_2>
                          $<TARGET_OBJECTS:zen_3>
-                         $<TARGET_OBJECTS:zen_3_sup>)
+                         $<TARGET_OBJECTS:zen_3_sup>
+                         $<TARGET_OBJECTS:zen4_1>
+                         $<TARGET_OBJECTS:zen4_1m>
+                         $<TARGET_OBJECTS:zen4_3>
+                         $<TARGET_OBJECTS:zen4_3sup>
+                         $<TARGET_OBJECTS:zen4_3supd24x8>
+                         $<TARGET_OBJECTS:skx_3>
+                         $<TARGET_OBJECTS:haswell_1m>
+                         $<TARGET_OBJECTS:haswell_3>
+                         $<TARGET_OBJECTS:haswell_3sup>
+                         $<TARGET_OBJECTS:haswell_3supd6x8>
+                         )
     if(ENABLE_OPENMP)
         set_target_properties("${PROJECT_NAME}" PROPERTIES LINKER_LANGUAGE C OUTPUT_NAME "${LIB_NAME}" STATIC_LIBRARY_OPTIONS "${OpenMP_libomp_LIBRARY}")
     else()

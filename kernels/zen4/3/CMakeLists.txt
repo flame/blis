@@ -1,7 +1,7 @@
 ##Copyright (C) 2022-23, Advanced Micro Devices, Inc. All rights reserved.##
 
-target_sources("${PROJECT_NAME}"
-     PRIVATE
+add_library(zen4_3
+     OBJECT
     ${CMAKE_CURRENT_SOURCE_DIR}/bli_gemmtrsm_l_zen_16x14.c
     ${CMAKE_CURRENT_SOURCE_DIR}/bli_gemmtrsm_u_zen_16x14.c
     ${CMAKE_CURRENT_SOURCE_DIR}/bli_gemmtrsm_l_zen4_8x24.c
@@ -11,5 +11,7 @@ target_sources("${PROJECT_NAME}"
     ${CMAKE_CURRENT_SOURCE_DIR}/bli_trsm_small_AVX512.c
     ${CMAKE_CURRENT_SOURCE_DIR}/bli_zgemm_zen4_asm_12x4.c
     )
+
+target_compile_options(zen4_3 PRIVATE /arch:AVX2 /arch:AVX512)
 
 add_subdirectory(sup)

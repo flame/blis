@@ -1,7 +1,7 @@
 ##Copyright (C) 2023, Advanced Micro Devices, Inc. All rights reserved.##
 
-target_sources("${PROJECT_NAME}"
-     PRIVATE
+add_library(zen4_3sup
+     OBJECT
      ${CMAKE_CURRENT_SOURCE_DIR}/bli_gemmsup_rd_zen_s6x64.c
      ${CMAKE_CURRENT_SOURCE_DIR}/bli_gemmsup_rd_zen_s6x64.h
      ${CMAKE_CURRENT_SOURCE_DIR}/bli_gemmsup_rd_zen_s6x64m.c
@@ -13,5 +13,6 @@ target_sources("${PROJECT_NAME}"
      ${CMAKE_CURRENT_SOURCE_DIR}/bli_dgemmsup_rv_zen4_asm_24x8m.c
      ${CMAKE_CURRENT_SOURCE_DIR}/bli_gemmsup_cv_zen4_z12x4m.c
 )
+target_compile_options(zen4_3sup PRIVATE /arch:AVX2 /arch:AVX512)
 
 add_subdirectory(d24x8)
