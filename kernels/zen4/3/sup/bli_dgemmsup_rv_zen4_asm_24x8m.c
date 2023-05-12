@@ -130,28 +130,28 @@
 */
 #define UPDATE_MASKED_C \
 \
-    vmovupd( mem(rcx), zmm30 MASK_(k(2)) MASK_(z) ) \
+    vmovupd( mem(rcx), zmm30 MASK_KZ(2) ) \
     vfmadd231pd( zmm31,zmm30,zmm0 ) \
 \
-    vmovupd( mem(rcx, rsi, 1, 0), zmm10 MASK_(k(2)) MASK_(z) ) \
+    vmovupd( mem(rcx, rsi, 1, 0), zmm10 MASK_KZ(2) ) \
     vfmadd231pd( zmm31,zmm10,zmm4 ) \
 \
-    vmovupd( mem(rcx, rsi, 2, 0), zmm12 MASK_(k(2)) MASK_(z) ) \
+    vmovupd( mem(rcx, rsi, 2, 0), zmm12 MASK_KZ(2) ) \
     vfmadd231pd( zmm31,zmm12,zmm2 ) \
 \
-    vmovupd( mem(rcx, r12, 1, 0), zmm16 MASK_(k(2)) MASK_(z) ) \
+    vmovupd( mem(rcx, r12, 1, 0), zmm16 MASK_KZ(2) ) \
     vfmadd231pd( zmm31,zmm16,zmm6 ) \
 \
-    vmovupd( mem(rcx, rsi, 4, 0), zmm14 MASK_(k(2)) MASK_(z) ) \
+    vmovupd( mem(rcx, rsi, 4, 0), zmm14 MASK_KZ(2) ) \
     vfmadd231pd( zmm31,zmm14,zmm1 ) \
 \
-    vmovupd( mem(rcx, r13, 1, 0), zmm18 MASK_(k(2)) MASK_(z) ) \
+    vmovupd( mem(rcx, r13, 1, 0), zmm18 MASK_KZ(2) ) \
     vfmadd231pd( zmm31,zmm18,zmm5 ) \
 \
-    vmovupd( mem(rcx, r12, 2, 0), zmm10 MASK_(k(2)) MASK_(z) ) \
+    vmovupd( mem(rcx, r12, 2, 0), zmm10 MASK_KZ(2) ) \
     vfmadd231pd( zmm31,zmm10,zmm3 ) \
 \
-    vmovupd( mem(rcx, rdx, 1, 0), zmm12 MASK_(k(2)) MASK_(z) ) \
+    vmovupd( mem(rcx, rdx, 1, 0), zmm12 MASK_KZ(2) ) \
     vfmadd231pd( zmm31,zmm12,zmm8 ) \
 \
     vmovupd( zmm0, (rcx) MASK_(k(2)))            /*Stores back to C*/\

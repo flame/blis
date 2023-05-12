@@ -182,28 +182,28 @@
 */
 #define UPDATE_MASKED_C_8 \
 \
-    vmovupd( mem(rcx), zmm30 MASK_(k(3)) MASK_(z) ) \
+    vmovupd( mem(rcx), zmm30 MASK_KZ(3) ) \
     vfmadd231pd( zmm31,zmm30,zmm0 ) \
 \
-    vmovupd( mem(rcx, rsi, 1, 0), zmm10 MASK_(k(3)) MASK_(z) ) \
+    vmovupd( mem(rcx, rsi, 1, 0), zmm10 MASK_KZ(3) ) \
     vfmadd231pd( zmm31,zmm10,zmm4 ) \
 \
-    vmovupd( mem(rcx, rsi, 2, 0), zmm12 MASK_(k(3)) MASK_(z) ) \
+    vmovupd( mem(rcx, rsi, 2, 0), zmm12 MASK_KZ(3) ) \
     vfmadd231pd( zmm31,zmm12,zmm2 ) \
 \
-    vmovupd( mem(rcx, r12, 1, 0), zmm16 MASK_(k(3)) MASK_(z) ) \
+    vmovupd( mem(rcx, r12, 1, 0), zmm16 MASK_KZ(3) ) \
     vfmadd231pd( zmm31,zmm16,zmm6 ) \
 \
-    vmovupd( mem(rcx, rsi, 4, 0), zmm14 MASK_(k(3)) MASK_(z) ) \
+    vmovupd( mem(rcx, rsi, 4, 0), zmm14 MASK_KZ(3) ) \
     vfmadd231pd( zmm31,zmm14,zmm1 ) \
 \
-    vmovupd( mem(rcx, r13, 1, 0), zmm18 MASK_(k(3)) MASK_(z) ) \
+    vmovupd( mem(rcx, r13, 1, 0), zmm18 MASK_KZ(3) ) \
     vfmadd231pd( zmm31,zmm18,zmm5 ) \
 \
-    vmovupd( mem(rcx, r12, 2, 0), zmm10 MASK_(k(3)) MASK_(z) ) \
+    vmovupd( mem(rcx, r12, 2, 0), zmm10 MASK_KZ(3) ) \
     vfmadd231pd( zmm31,zmm10,zmm3 ) \
 \
-    vmovupd( mem(rcx, rdx, 1, 0), zmm12 MASK_(k(3)) MASK_(z) ) \
+    vmovupd( mem(rcx, rdx, 1, 0), zmm12 MASK_KZ(3) ) \
     vfmadd231pd( zmm31,zmm12,zmm8 ) \
 \
     vmovupd( zmm0, (rcx) MASK_(k(3)))            /*Stores back to C*/\
@@ -223,25 +223,25 @@
 */
 #define UPDATE_MASKED_C_7 \
 \
-    vmovupd( mem(rcx), zmm30 MASK_(k(3)) MASK_(z) ) \
+    vmovupd( mem(rcx), zmm30 MASK_KZ(3) ) \
     vfmadd231pd( zmm31,zmm30,zmm0 ) \
 \
-    vmovupd( mem(rcx, rsi, 1, 0), zmm10 MASK_(k(3)) MASK_(z) ) \
+    vmovupd( mem(rcx, rsi, 1, 0), zmm10 MASK_KZ(3) ) \
     vfmadd231pd( zmm31,zmm10,zmm4 ) \
 \
-    vmovupd( mem(rcx, rsi, 2, 0), zmm12 MASK_(k(3)) MASK_(z) ) \
+    vmovupd( mem(rcx, rsi, 2, 0), zmm12 MASK_KZ(3) ) \
     vfmadd231pd( zmm31,zmm12,zmm2 ) \
 \
-    vmovupd( mem(rcx, r12, 1, 0), zmm16 MASK_(k(3)) MASK_(z) ) \
+    vmovupd( mem(rcx, r12, 1, 0), zmm16 MASK_KZ(3) ) \
     vfmadd231pd( zmm31,zmm16,zmm6 ) \
 \
-    vmovupd( mem(rcx, rsi, 4, 0), zmm14 MASK_(k(3)) MASK_(z) ) \
+    vmovupd( mem(rcx, rsi, 4, 0), zmm14 MASK_KZ(3) ) \
     vfmadd231pd( zmm31,zmm14,zmm1 ) \
 \
-    vmovupd( mem(rcx, r13, 1, 0), zmm18 MASK_(k(3)) MASK_(z) ) \
+    vmovupd( mem(rcx, r13, 1, 0), zmm18 MASK_KZ(3) ) \
     vfmadd231pd( zmm31,zmm18,zmm5 ) \
 \
-    vmovupd( mem(rcx, r12, 2, 0), zmm10 MASK_(k(3)) MASK_(z) ) \
+    vmovupd( mem(rcx, r12, 2, 0), zmm10 MASK_KZ(3) ) \
     vfmadd231pd( zmm31,zmm10,zmm3 ) \
 \
     vmovupd( zmm0, (rcx) MASK_(k(3)))            /*Stores back to C*/\
@@ -259,22 +259,22 @@
 */
 #define UPDATE_MASKED_C_6 \
 \
-    vmovupd( mem(rcx), zmm30 MASK_(k(3)) MASK_(z) ) \
+    vmovupd( mem(rcx), zmm30 MASK_KZ(3) ) \
     vfmadd231pd( zmm31,zmm30,zmm0 ) \
 \
-    vmovupd( mem(rcx, rsi, 1, 0), zmm10 MASK_(k(3)) MASK_(z) ) \
+    vmovupd( mem(rcx, rsi, 1, 0), zmm10 MASK_KZ(3) ) \
     vfmadd231pd( zmm31,zmm10,zmm4 ) \
 \
-    vmovupd( mem(rcx, rsi, 2, 0), zmm12 MASK_(k(3)) MASK_(z) ) \
+    vmovupd( mem(rcx, rsi, 2, 0), zmm12 MASK_KZ(3) ) \
     vfmadd231pd( zmm31,zmm12,zmm2 ) \
 \
-    vmovupd( mem(rcx, r12, 1, 0), zmm16 MASK_(k(3)) MASK_(z) ) \
+    vmovupd( mem(rcx, r12, 1, 0), zmm16 MASK_KZ(3) ) \
     vfmadd231pd( zmm31,zmm16,zmm6 ) \
 \
-    vmovupd( mem(rcx, rsi, 4, 0), zmm14 MASK_(k(3)) MASK_(z) ) \
+    vmovupd( mem(rcx, rsi, 4, 0), zmm14 MASK_KZ(3) ) \
     vfmadd231pd( zmm31,zmm14,zmm1 ) \
 \
-    vmovupd( mem(rcx, r13, 1, 0), zmm18 MASK_(k(3)) MASK_(z) ) \
+    vmovupd( mem(rcx, r13, 1, 0), zmm18 MASK_KZ(3) ) \
     vfmadd231pd( zmm31,zmm18,zmm5 ) \
 \
     vmovupd( zmm0, (rcx) MASK_(k(3)))            /*Stores back to C*/\
@@ -291,19 +291,19 @@
 */
 #define UPDATE_MASKED_C_5 \
 \
-    vmovupd( mem(rcx), zmm30 MASK_(k(3)) MASK_(z) ) \
+    vmovupd( mem(rcx), zmm30 MASK_KZ(3) ) \
     vfmadd231pd( zmm31,zmm30,zmm0 ) \
 \
-    vmovupd( mem(rcx, rsi, 1, 0), zmm10 MASK_(k(3)) MASK_(z) ) \
+    vmovupd( mem(rcx, rsi, 1, 0), zmm10 MASK_KZ(3) ) \
     vfmadd231pd( zmm31,zmm10,zmm4 ) \
 \
-    vmovupd( mem(rcx, rsi, 2, 0), zmm12 MASK_(k(3)) MASK_(z) ) \
+    vmovupd( mem(rcx, rsi, 2, 0), zmm12 MASK_KZ(3) ) \
     vfmadd231pd( zmm31,zmm12,zmm2 ) \
 \
-    vmovupd( mem(rcx, r12, 1, 0), zmm16 MASK_(k(3)) MASK_(z) ) \
+    vmovupd( mem(rcx, r12, 1, 0), zmm16 MASK_KZ(3) ) \
     vfmadd231pd( zmm31,zmm16,zmm6 ) \
 \
-    vmovupd( mem(rcx, rsi, 4, 0), zmm14 MASK_(k(3)) MASK_(z) ) \
+    vmovupd( mem(rcx, rsi, 4, 0), zmm14 MASK_KZ(3) ) \
     vfmadd231pd( zmm31,zmm14,zmm1 ) \
 \
     vmovupd( zmm0, (rcx) MASK_(k(3)))            /*Stores back to C*/\
@@ -319,16 +319,16 @@
 */
 #define UPDATE_MASKED_C_4 \
 \
-    vmovupd( mem(rcx), zmm30 MASK_(k(3)) MASK_(z) ) \
+    vmovupd( mem(rcx), zmm30 MASK_KZ(3) ) \
     vfmadd231pd( zmm31,zmm30,zmm0 ) \
 \
-    vmovupd( mem(rcx, rsi, 1, 0), zmm10 MASK_(k(3)) MASK_(z) ) \
+    vmovupd( mem(rcx, rsi, 1, 0), zmm10 MASK_KZ(3) ) \
     vfmadd231pd( zmm31,zmm10,zmm4 ) \
 \
-    vmovupd( mem(rcx, rsi, 2, 0), zmm12 MASK_(k(3)) MASK_(z) ) \
+    vmovupd( mem(rcx, rsi, 2, 0), zmm12 MASK_KZ(3) ) \
     vfmadd231pd( zmm31,zmm12,zmm2 ) \
 \
-    vmovupd( mem(rcx, r12, 1, 0), zmm16 MASK_(k(3)) MASK_(z) ) \
+    vmovupd( mem(rcx, r12, 1, 0), zmm16 MASK_KZ(3) ) \
     vfmadd231pd( zmm31,zmm16,zmm6 ) \
 \
     vmovupd( zmm0, (rcx) MASK_(k(3)))            /*Stores back to C*/\
@@ -343,13 +343,13 @@
 */
 #define UPDATE_MASKED_C_3 \
 \
-    vmovupd( mem(rcx), zmm30 MASK_(k(3)) MASK_(z) ) \
+    vmovupd( mem(rcx), zmm30 MASK_KZ(3) ) \
     vfmadd231pd( zmm31,zmm30,zmm0 ) \
 \
-    vmovupd( mem(rcx, rsi, 1, 0), zmm10 MASK_(k(3)) MASK_(z) ) \
+    vmovupd( mem(rcx, rsi, 1, 0), zmm10 MASK_KZ(3) ) \
     vfmadd231pd( zmm31,zmm10,zmm4 ) \
 \
-    vmovupd( mem(rcx, rsi, 2, 0), zmm12 MASK_(k(3)) MASK_(z) ) \
+    vmovupd( mem(rcx, rsi, 2, 0), zmm12 MASK_KZ(3) ) \
     vfmadd231pd( zmm31,zmm12,zmm2 ) \
 \
     vmovupd( zmm0, (rcx) MASK_(k(3)))            /*Stores back to C*/\
@@ -363,10 +363,10 @@
 */
 #define UPDATE_MASKED_C_2 \
 \
-    vmovupd( mem(rcx), zmm30 MASK_(k(3)) MASK_(z) ) \
+    vmovupd( mem(rcx), zmm30 MASK_KZ(3) ) \
     vfmadd231pd( zmm31,zmm30,zmm0 ) \
 \
-    vmovupd( mem(rcx, rsi, 1, 0), zmm10 MASK_(k(3)) MASK_(z) ) \
+    vmovupd( mem(rcx, rsi, 1, 0), zmm10 MASK_KZ(3) ) \
     vfmadd231pd( zmm31,zmm10,zmm4 ) \
 \
     vmovupd( zmm0, (rcx) MASK_(k(3)))            /*Stores back to C*/\
@@ -379,7 +379,7 @@
 */
 #define UPDATE_MASKED_C_1 \
 \
-    vmovupd( mem(rcx), zmm30 MASK_(k(3)) MASK_(z) ) \
+    vmovupd( mem(rcx), zmm30 MASK_KZ(3) ) \
     vfmadd231pd( zmm31,zmm30,zmm0 ) \
 \
     vmovupd( zmm0, (rcx) MASK_(k(3)))            /*Stores back to C*/
@@ -513,11 +513,11 @@ void bli_dgemmsup_rv_zen4_asm_24x7
 
         vmovupd( mem(rax),zmm0 )                           // load A
         vmovupd( 0x40(rax),zmm1 )
-        vmovupd( 0x80(rax),zmm2 MASK_(k(2)) MASK_(z) )     // Load A with mask and zero hint
+        vmovupd( 0x80(rax),zmm2 MASK_KZ(2) )     // Load A with mask and zero hint
         add( r10,rax )                                     // a += cs_a
         vmovupd( mem(rax),zmm3 )                           // load A
         vmovupd( 0x40(rax),zmm4 )
-        vmovupd( 0x80(rax),zmm5 MASK_(k(2)) MASK_(z) )     // Load A with mask and zero hint
+        vmovupd( 0x80(rax),zmm5 MASK_KZ(2) )     // Load A with mask and zero hint
         add( r10,rax )                                     // a += cs_a
         prefetch( 0,mem(r11) )                             // prefetch B
         vbroadcastsd( mem(rbx),zmm30 )
@@ -555,7 +555,7 @@ void bli_dgemmsup_rv_zen4_asm_24x7
 
         vmovupd( mem(rax),zmm0 )                           // load A
         vmovupd( 0x40(rax),zmm1 )
-        vmovupd( 0x80(rax),zmm2 MASK_(k(2)) MASK_(z) )     // Load A with mask and zero hint
+        vmovupd( 0x80(rax),zmm2 MASK_KZ(2) )     // Load A with mask and zero hint
         add( r10,rax )                                     // a += cs_a
         prefetch( 0,mem(r11,r9,1) )                             // prefetch B
         vbroadcastsd( mem(rbx),zmm30 )
@@ -593,7 +593,7 @@ void bli_dgemmsup_rv_zen4_asm_24x7
 
         vmovupd( mem(rax),zmm3 )                           // load A
         vmovupd( 0x40(rax),zmm4 )
-        vmovupd( 0x80(rax),zmm5 MASK_(k(2)) MASK_(z) )     // Load A with mask and zero hint
+        vmovupd( 0x80(rax),zmm5 MASK_KZ(2) )     // Load A with mask and zero hint
         add( r10,rax )                                     // a += cs_a
         prefetch( 0,mem(r11,r9,2) )                             // prefetch B
         vbroadcastsd( mem(rbx),zmm30 )
@@ -631,7 +631,7 @@ void bli_dgemmsup_rv_zen4_asm_24x7
 
         vmovupd( mem(rax),zmm0 )                           // load A
         vmovupd( 0x40(rax),zmm1 )
-        vmovupd( 0x80(rax),zmm2 MASK_(k(2)) MASK_(z) )     // Load A with mask and zero hint
+        vmovupd( 0x80(rax),zmm2 MASK_KZ(2) )     // Load A with mask and zero hint
         add( r10,rax )                                     // a += cs_a
         prefetch( 0,mem(r11,r13,1) )                             // prefetch B
         vbroadcastsd( mem(rbx),zmm30 )
@@ -669,7 +669,7 @@ void bli_dgemmsup_rv_zen4_asm_24x7
 
         vmovupd( mem(rax),zmm3 )                           // load A
         vmovupd( 0x40(rax),zmm4 )
-        vmovupd( 0x80(rax),zmm5 MASK_(k(2)) MASK_(z) )     // Load A with mask and zero hint
+        vmovupd( 0x80(rax),zmm5 MASK_KZ(2) )     // Load A with mask and zero hint
         add( r10,rax )                                     // a += cs_a
         prefetch( 0,mem(r15) )                             // prefetch B
         vbroadcastsd( mem(rbx),zmm30 )
@@ -707,7 +707,7 @@ void bli_dgemmsup_rv_zen4_asm_24x7
 
         vmovupd( mem(rax),zmm0 )                           // load A
         vmovupd( 0x40(rax),zmm1 )
-        vmovupd( 0x80(rax),zmm2 MASK_(k(2)) MASK_(z) )     // Load A with mask and zero hint
+        vmovupd( 0x80(rax),zmm2 MASK_KZ(2) )     // Load A with mask and zero hint
         add( r10,rax )                                     // a += cs_a
         prefetch( 0,mem(r15,r9,1) )                             // prefetch B
         vbroadcastsd( mem(rbx),zmm30 )
@@ -745,7 +745,7 @@ void bli_dgemmsup_rv_zen4_asm_24x7
 
         vmovupd( mem(rax),zmm3 )                           // load A
         vmovupd( 0x40(rax),zmm4 )
-        vmovupd( 0x80(rax),zmm5 MASK_(k(2)) MASK_(z) )     // Load A with mask and zero hint
+        vmovupd( 0x80(rax),zmm5 MASK_KZ(2) )     // Load A with mask and zero hint
         add( r10,rax )                                     // a += cs_a
         prefetch( 0,mem(r15,r9,2) )                             // prefetch B
         vbroadcastsd( mem(rbx),zmm30 )
@@ -826,11 +826,11 @@ void bli_dgemmsup_rv_zen4_asm_24x7
         prefetchw0( mem(rdx))                              // prefetch C
         vmovupd( mem(rax),zmm0 )                           // load A
         vmovupd( 0x40(rax),zmm1 )
-        vmovupd( 0x80(rax),zmm2 MASK_(k(2)) MASK_(z) )     // Load A with mask and zero hint
+        vmovupd( 0x80(rax),zmm2 MASK_KZ(2) )     // Load A with mask and zero hint
         add( r10,rax )                                     // a += cs_a
         vmovupd( mem(rax),zmm3 )                           // load A
         vmovupd( 0x40(rax),zmm4 )
-        vmovupd( 0x80(rax),zmm5 MASK_(k(2)) MASK_(z) )     // Load A with mask and zero hint
+        vmovupd( 0x80(rax),zmm5 MASK_KZ(2) )     // Load A with mask and zero hint
         add( r10,rax )                                     // a += cs_a
         prefetch( 0,mem(r11) )                             // prefetch B
         vbroadcastsd( mem(rbx),zmm30 )
@@ -868,7 +868,7 @@ void bli_dgemmsup_rv_zen4_asm_24x7
         prefetchw0( mem(rdx, 64))                          // prefetch C
         vmovupd( mem(rax),zmm0 )                           // load A
         vmovupd( 0x40(rax),zmm1 )
-        vmovupd( 0x80(rax),zmm2 MASK_(k(2)) MASK_(z) )     // Load A with mask and zero hint
+        vmovupd( 0x80(rax),zmm2 MASK_KZ(2) )     // Load A with mask and zero hint
         add( r10,rax )                                     // a += cs_a
         prefetch( 0,mem(r11,r9,1) )                             // prefetch B
         vbroadcastsd( mem(rbx),zmm30 )
@@ -906,7 +906,7 @@ void bli_dgemmsup_rv_zen4_asm_24x7
         prefetchw0( mem(rdx, 128))                        // prefetch C
         vmovupd( mem(rax),zmm3 )                           // load A
         vmovupd( 0x40(rax),zmm4 )
-        vmovupd( 0x80(rax),zmm5 MASK_(k(2)) MASK_(z) )     // Load A with mask and zero hint
+        vmovupd( 0x80(rax),zmm5 MASK_KZ(2) )     // Load A with mask and zero hint
         add( r10,rax )                                     // a += cs_a
         prefetch( 0,mem(r11,r9,2) )                             // prefetch B
         vbroadcastsd( mem(rbx),zmm30 )
@@ -943,7 +943,7 @@ void bli_dgemmsup_rv_zen4_asm_24x7
         // ---------------------------------- iteration 4
         vmovupd( mem(rax),zmm0 )                           // load A
         vmovupd( 0x40(rax),zmm1 )
-        vmovupd( 0x80(rax),zmm2 MASK_(k(2)) MASK_(z) )     // Load A with mask and zero hint
+        vmovupd( 0x80(rax),zmm2 MASK_KZ(2) )     // Load A with mask and zero hint
         add( r10,rax )                                     // a += cs_a
         prefetch( 0,mem(r11,r13,1) )                             // prefetch B
         vbroadcastsd( mem(rbx),zmm30 )
@@ -980,7 +980,7 @@ void bli_dgemmsup_rv_zen4_asm_24x7
         // ---------------------------------- iteration 5
         vmovupd( mem(rax),zmm3 )                           // load A
         vmovupd( 0x40(rax),zmm4 )
-        vmovupd( 0x80(rax),zmm5 MASK_(k(2)) MASK_(z) )     // Load A with mask and zero hint
+        vmovupd( 0x80(rax),zmm5 MASK_KZ(2) )     // Load A with mask and zero hint
         add( r10,rax )                                     // a += cs_a
         prefetch( 0,mem(r15) )                             // prefetch B
         vbroadcastsd( mem(rbx),zmm30 )
@@ -1017,7 +1017,7 @@ void bli_dgemmsup_rv_zen4_asm_24x7
         // ---------------------------------- iteration 6
         vmovupd( mem(rax),zmm0 )                           // load A
         vmovupd( 0x40(rax),zmm1 )
-        vmovupd( 0x80(rax),zmm2 MASK_(k(2)) MASK_(z) )     // Load A with mask and zero hint
+        vmovupd( 0x80(rax),zmm2 MASK_KZ(2) )     // Load A with mask and zero hint
         add( r10,rax )                                     // a += cs_a
         prefetch( 0,mem(r15,r9,1) )                             // prefetch B
         vbroadcastsd( mem(rbx),zmm30 )
@@ -1054,7 +1054,7 @@ void bli_dgemmsup_rv_zen4_asm_24x7
         // ---------------------------------- iteration 7
         vmovupd( mem(rax),zmm3 )                           // load A
         vmovupd( 0x40(rax),zmm4 )
-        vmovupd( 0x80(rax),zmm5 MASK_(k(2)) MASK_(z) )     // Load A with mask and zero hint
+        vmovupd( 0x80(rax),zmm5 MASK_KZ(2) )     // Load A with mask and zero hint
         add( r10,rax )                                     // a += cs_a
         prefetch( 0,mem(r15,r9,2) )                             // prefetch B
         vbroadcastsd( mem(rbx),zmm30 )
@@ -1133,11 +1133,11 @@ void bli_dgemmsup_rv_zen4_asm_24x7
         // ---------------------------------- iteration 1
         vmovupd( mem(rax),zmm0 )                           // load A
         vmovupd( 0x40(rax),zmm1 )
-        vmovupd( 0x80(rax),zmm2 MASK_(k(2)) MASK_(z) )     // Load A with mask and zero hint
+        vmovupd( 0x80(rax),zmm2 MASK_KZ(2) )     // Load A with mask and zero hint
         add( r10,rax )                                     // a += cs_a
         vmovupd( mem(rax),zmm3 )                           // load A
         vmovupd( 0x40(rax),zmm4 )
-        vmovupd( 0x80(rax),zmm5 MASK_(k(2)) MASK_(z) )     // Load A with mask and zero hint
+        vmovupd( 0x80(rax),zmm5 MASK_KZ(2) )     // Load A with mask and zero hint
         add( r10,rax )                                     // a += cs_a
         prefetch( 0,mem(r11) )                             // prefetch B
         vbroadcastsd( mem(rbx),zmm30 )
@@ -1174,7 +1174,7 @@ void bli_dgemmsup_rv_zen4_asm_24x7
         // ---------------------------------- iteration 2
         vmovupd( mem(rax),zmm0 )                           // load A
         vmovupd( 0x40(rax),zmm1 )
-        vmovupd( 0x80(rax),zmm2 MASK_(k(2)) MASK_(z) )     // Load A with mask and zero hint
+        vmovupd( 0x80(rax),zmm2 MASK_KZ(2) )     // Load A with mask and zero hint
         add( r10,rax )                                     // a += cs_a
         prefetch( 0,mem(r11,r9,1) )                             // prefetch B
         vbroadcastsd( mem(rbx),zmm30 )
@@ -1211,7 +1211,7 @@ void bli_dgemmsup_rv_zen4_asm_24x7
         // ---------------------------------- iteration 3
         vmovupd( mem(rax),zmm3 )                           // load A
         vmovupd( 0x40(rax),zmm4 )
-        vmovupd( 0x80(rax),zmm5 MASK_(k(2)) MASK_(z) )     // Load A with mask and zero hint
+        vmovupd( 0x80(rax),zmm5 MASK_KZ(2) )     // Load A with mask and zero hint
         add( r10,rax )                                     // a += cs_a
         prefetch( 0,mem(r11,r9,2) )                             // prefetch B
         vbroadcastsd( mem(rbx),zmm30 )
@@ -1248,7 +1248,7 @@ void bli_dgemmsup_rv_zen4_asm_24x7
         // ---------------------------------- iteration 4
         vmovupd( mem(rax),zmm0 )                           // load A
         vmovupd( 0x40(rax),zmm1 )
-        vmovupd( 0x80(rax),zmm2 MASK_(k(2)) MASK_(z) )     // Load A with mask and zero hint
+        vmovupd( 0x80(rax),zmm2 MASK_KZ(2) )     // Load A with mask and zero hint
         add( r10,rax )                                     // a += cs_a
         prefetch( 0,mem(r11,r13,1) )                             // prefetch B
         vbroadcastsd( mem(rbx),zmm30 )
@@ -1285,7 +1285,7 @@ void bli_dgemmsup_rv_zen4_asm_24x7
         // ---------------------------------- iteration 5
         vmovupd( mem(rax),zmm3 )                           // load A
         vmovupd( 0x40(rax),zmm4 )
-        vmovupd( 0x80(rax),zmm5 MASK_(k(2)) MASK_(z) )     // Load A with mask and zero hint
+        vmovupd( 0x80(rax),zmm5 MASK_KZ(2) )     // Load A with mask and zero hint
         add( r10,rax )                                     // a += cs_a
         prefetch( 0,mem(r15) )                             // prefetch B
         vbroadcastsd( mem(rbx),zmm30 )
@@ -1322,7 +1322,7 @@ void bli_dgemmsup_rv_zen4_asm_24x7
         // ---------------------------------- iteration 6
         vmovupd( mem(rax),zmm0 )                           // load A
         vmovupd( 0x40(rax),zmm1 )
-        vmovupd( 0x80(rax),zmm2 MASK_(k(2)) MASK_(z) )     // Load A with mask and zero hint
+        vmovupd( 0x80(rax),zmm2 MASK_KZ(2) )     // Load A with mask and zero hint
         add( r10,rax )                                     // a += cs_a
         prefetch( 0,mem(r15,r9,1) )                             // prefetch B
         vbroadcastsd( mem(rbx),zmm30 )
@@ -1359,7 +1359,7 @@ void bli_dgemmsup_rv_zen4_asm_24x7
         // ---------------------------------- iteration 7
         vmovupd( mem(rax),zmm3 )                           // load A
         vmovupd( 0x40(rax),zmm4 )
-        vmovupd( 0x80(rax),zmm5 MASK_(k(2)) MASK_(z) )     // Load A with mask and zero hint
+        vmovupd( 0x80(rax),zmm5 MASK_KZ(2) )     // Load A with mask and zero hint
         add( r10,rax )                                     // a += cs_a
         prefetch( 0,mem(r15,r9,2) )                             // prefetch B
         vbroadcastsd( mem(rbx),zmm30 )
@@ -1438,7 +1438,7 @@ void bli_dgemmsup_rv_zen4_asm_24x7
     label(.DLOOPKLEFT)                                     // k_left loop
         vmovupd( mem(rax),zmm0 )                           // load A
         vmovupd( 0x40(rax),zmm1 )
-        vmovupd( 0x80(rax),zmm2 MASK_(k(2)) MASK_(z) )     // Load A with mask and zero hint
+        vmovupd( 0x80(rax),zmm2 MASK_KZ(2) )     // Load A with mask and zero hint
         add( r10,rax )                                     // a += cs_a
         vbroadcastsd( mem(rbx),zmm30 )
         vbroadcastsd( mem(rbx,r9,1),zmm31 )
@@ -1525,7 +1525,7 @@ void bli_dgemmsup_rv_zen4_asm_24x7
     vmovupd( 0x40(rcx),zmm1)
     vfmadd231pd( zmm1,zmm31,zmm7)
     vmovupd( zmm7,0x40(rcx))
-    vmovupd( 0x80(rcx),zmm2 MASK_(k(2)) MASK_(z))        // Load C using mask and zero hint
+    vmovupd( 0x80(rcx),zmm2 MASK_KZ(2))        // Load C using mask and zero hint
     vfmadd231pd( zmm2,zmm31,zmm28)
     vmovupd( zmm28,0x80(rcx) MASK_(k(2)))                // store to C with mask
     vmovupd( mem(rcx,rdi,1),zmm3)
@@ -1534,7 +1534,7 @@ void bli_dgemmsup_rv_zen4_asm_24x7
     vmovupd( 0x40(rcx,rdi,1),zmm4)
     vfmadd231pd( zmm4,zmm31,zmm9)
     vmovupd( zmm9,0x40(rcx,rdi,1))
-    vmovupd( 0x80(rcx,rdi,1),zmm5 MASK_(k(2)) MASK_(z))        // Load C using mask and zero hint
+    vmovupd( 0x80(rcx,rdi,1),zmm5 MASK_KZ(2))        // Load C using mask and zero hint
     vfmadd231pd( zmm5,zmm31,zmm29)
     vmovupd( zmm29,0x80(rcx,rdi,1) MASK_(k(2)))                // store to C with mask
     vmovupd( mem(rcx,rdi,2),zmm0)
@@ -1543,7 +1543,7 @@ void bli_dgemmsup_rv_zen4_asm_24x7
     vmovupd( 0x40(rcx,rdi,2),zmm1)
     vfmadd231pd( zmm1,zmm31,zmm11)
     vmovupd( zmm11,0x40(rcx,rdi,2))
-    vmovupd( 0x80(rcx,rdi,2),zmm2 MASK_(k(2)) MASK_(z))        // Load C using mask and zero hint
+    vmovupd( 0x80(rcx,rdi,2),zmm2 MASK_KZ(2))        // Load C using mask and zero hint
     vfmadd231pd( zmm2,zmm31,zmm26)
     vmovupd( zmm26,0x80(rcx,rdi,2) MASK_(k(2)))                // store to C with mask
     vmovupd( mem(rcx,r13,1),zmm3)
@@ -1552,7 +1552,7 @@ void bli_dgemmsup_rv_zen4_asm_24x7
     vmovupd( 0x40(rcx,r13,1),zmm4)
     vfmadd231pd( zmm4,zmm31,zmm13)
     vmovupd( zmm13,0x40(rcx,r13,1))
-    vmovupd( 0x80(rcx,r13,1),zmm5 MASK_(k(2)) MASK_(z))        // Load C using mask and zero hint
+    vmovupd( 0x80(rcx,r13,1),zmm5 MASK_KZ(2))        // Load C using mask and zero hint
     vfmadd231pd( zmm5,zmm31,zmm27)
     vmovupd( zmm27,0x80(rcx,r13,1) MASK_(k(2)))                // store to C with mask
     vmovupd( mem(rdx),zmm0)
@@ -1561,7 +1561,7 @@ void bli_dgemmsup_rv_zen4_asm_24x7
     vmovupd( 0x40(rdx),zmm1)
     vfmadd231pd( zmm1,zmm31,zmm15)
     vmovupd( zmm15,0x40(rdx))
-    vmovupd( 0x80(rdx),zmm2 MASK_(k(2)) MASK_(z))        // Load C using mask and zero hint
+    vmovupd( 0x80(rdx),zmm2 MASK_KZ(2))        // Load C using mask and zero hint
     vfmadd231pd( zmm2,zmm31,zmm24)
     vmovupd( zmm24,0x80(rdx) MASK_(k(2)))                // store to C with mask
     vmovupd( mem(rdx,rdi,1),zmm3)
@@ -1570,7 +1570,7 @@ void bli_dgemmsup_rv_zen4_asm_24x7
     vmovupd( 0x40(rdx,rdi,1),zmm4)
     vfmadd231pd( zmm4,zmm31,zmm17)
     vmovupd( zmm17,0x40(rdx,rdi,1))
-    vmovupd( 0x80(rdx,rdi,1),zmm5 MASK_(k(2)) MASK_(z))        // Load C using mask and zero hint
+    vmovupd( 0x80(rdx,rdi,1),zmm5 MASK_KZ(2))        // Load C using mask and zero hint
     vfmadd231pd( zmm5,zmm31,zmm25)
     vmovupd( zmm25,0x80(rdx,rdi,1) MASK_(k(2)))                // store to C with mask
     vmovupd( mem(rdx,rdi,2),zmm0)
@@ -1579,7 +1579,7 @@ void bli_dgemmsup_rv_zen4_asm_24x7
     vmovupd( 0x40(rdx,rdi,2),zmm1)
     vfmadd231pd( zmm1,zmm31,zmm19)
     vmovupd( zmm19,0x40(rdx,rdi,2))
-    vmovupd( 0x80(rdx,rdi,2),zmm2 MASK_(k(2)) MASK_(z))        // Load C using mask and zero hint
+    vmovupd( 0x80(rdx,rdi,2),zmm2 MASK_KZ(2))        // Load C using mask and zero hint
     vfmadd231pd( zmm2,zmm31,zmm22)
     vmovupd( zmm22,0x80(rdx,rdi,2) MASK_(k(2)))                // store to C with mask
 
@@ -1959,10 +1959,10 @@ void bli_dgemmsup_rv_zen4_asm_16x7
         // ---------------------------------- iteration 1
 
         vmovupd( mem(rax),zmm0 )                           // load A
-        vmovupd( 0x40(rax),zmm1 MASK_(k(2)) MASK_(z) )     // Load A with mask and zero hint
+        vmovupd( 0x40(rax),zmm1 MASK_KZ(2) )     // Load A with mask and zero hint
         add( r10,rax )                                     // a += cs_a
         vmovupd( mem(rax),zmm3 )                           // load A
-        vmovupd( 0x40(rax),zmm4 MASK_(k(2)) MASK_(z) )     // Load A with mask and zero hint
+        vmovupd( 0x40(rax),zmm4 MASK_KZ(2) )     // Load A with mask and zero hint
         add( r10,rax )                                     // a += cs_a
         prefetch( 0,mem(r11) )                             // prefetch B
         vbroadcastsd( mem(rbx),zmm30 )
@@ -1992,7 +1992,7 @@ void bli_dgemmsup_rv_zen4_asm_16x7
         // ---------------------------------- iteration 2
 
         vmovupd( mem(rax),zmm0 )                           // load A
-        vmovupd( 0x40(rax),zmm1 MASK_(k(2)) MASK_(z) )     // Load A with mask and zero hint
+        vmovupd( 0x40(rax),zmm1 MASK_KZ(2) )     // Load A with mask and zero hint
         add( r10,rax )                                     // a += cs_a
         prefetch( 0,mem(r11,r9,1) )                             // prefetch B
         vbroadcastsd( mem(rbx),zmm30 )
@@ -2022,7 +2022,7 @@ void bli_dgemmsup_rv_zen4_asm_16x7
         // ---------------------------------- iteration 3
 
         vmovupd( mem(rax),zmm3 )                           // load A
-        vmovupd( 0x40(rax),zmm4 MASK_(k(2)) MASK_(z) )     // Load A with mask and zero hint
+        vmovupd( 0x40(rax),zmm4 MASK_KZ(2) )     // Load A with mask and zero hint
         add( r10,rax )                                     // a += cs_a
         prefetch( 0,mem(r11,r9,2) )                             // prefetch B
         vbroadcastsd( mem(rbx),zmm30 )
@@ -2052,7 +2052,7 @@ void bli_dgemmsup_rv_zen4_asm_16x7
         // ---------------------------------- iteration 4
 
         vmovupd( mem(rax),zmm0 )                           // load A
-        vmovupd( 0x40(rax),zmm1 MASK_(k(2)) MASK_(z) )     // Load A with mask and zero hint
+        vmovupd( 0x40(rax),zmm1 MASK_KZ(2) )     // Load A with mask and zero hint
         add( r10,rax )                                     // a += cs_a
         prefetch( 0,mem(r11,r13,1) )                             // prefetch B
         vbroadcastsd( mem(rbx),zmm30 )
@@ -2082,7 +2082,7 @@ void bli_dgemmsup_rv_zen4_asm_16x7
         // ---------------------------------- iteration 5
 
         vmovupd( mem(rax),zmm3 )                           // load A
-        vmovupd( 0x40(rax),zmm4 MASK_(k(2)) MASK_(z) )     // Load A with mask and zero hint
+        vmovupd( 0x40(rax),zmm4 MASK_KZ(2) )     // Load A with mask and zero hint
         add( r10,rax )                                     // a += cs_a
         prefetch( 0,mem(r15) )                             // prefetch B
         vbroadcastsd( mem(rbx),zmm30 )
@@ -2112,7 +2112,7 @@ void bli_dgemmsup_rv_zen4_asm_16x7
         // ---------------------------------- iteration 6
 
         vmovupd( mem(rax),zmm0 )                           // load A
-        vmovupd( 0x40(rax),zmm1 MASK_(k(2)) MASK_(z) )     // Load A with mask and zero hint
+        vmovupd( 0x40(rax),zmm1 MASK_KZ(2) )     // Load A with mask and zero hint
         add( r10,rax )                                     // a += cs_a
         prefetch( 0,mem(r15,r9,1) )                             // prefetch B
         vbroadcastsd( mem(rbx),zmm30 )
@@ -2142,7 +2142,7 @@ void bli_dgemmsup_rv_zen4_asm_16x7
         // ---------------------------------- iteration 7
 
         vmovupd( mem(rax),zmm3 )                           // load A
-        vmovupd( 0x40(rax),zmm4 MASK_(k(2)) MASK_(z) )     // Load A with mask and zero hint
+        vmovupd( 0x40(rax),zmm4 MASK_KZ(2) )     // Load A with mask and zero hint
         add( r10,rax )                                     // a += cs_a
         prefetch( 0,mem(r15,r9,2) )                             // prefetch B
         vbroadcastsd( mem(rbx),zmm30 )
@@ -2208,10 +2208,10 @@ void bli_dgemmsup_rv_zen4_asm_16x7
         // ---------------------------------- iteration 1
         prefetchw0( mem(rdx))                              // prefetch C
         vmovupd( mem(rax),zmm0 )                           // load A
-        vmovupd( 0x40(rax),zmm1 MASK_(k(2)) MASK_(z) )     // Load A with mask and zero hint
+        vmovupd( 0x40(rax),zmm1 MASK_KZ(2) )     // Load A with mask and zero hint
         add( r10,rax )                                     // a += cs_a
         vmovupd( mem(rax),zmm3 )                           // load A
-        vmovupd( 0x40(rax),zmm4 MASK_(k(2)) MASK_(z) )     // Load A with mask and zero hint
+        vmovupd( 0x40(rax),zmm4 MASK_KZ(2) )     // Load A with mask and zero hint
         add( r10,rax )                                     // a += cs_a
         prefetch( 0,mem(r11) )                             // prefetch B
         vbroadcastsd( mem(rbx),zmm30 )
@@ -2241,7 +2241,7 @@ void bli_dgemmsup_rv_zen4_asm_16x7
         // ---------------------------------- iteration 2
         prefetchw0( mem(rdx, 64))                          // prefetch C
         vmovupd( mem(rax),zmm0 )                           // load A
-        vmovupd( 0x40(rax),zmm1 MASK_(k(2)) MASK_(z) )     // Load A with mask and zero hint
+        vmovupd( 0x40(rax),zmm1 MASK_KZ(2) )     // Load A with mask and zero hint
         add( r10,rax )                                     // a += cs_a
         prefetch( 0,mem(r11,r9,1) )                             // prefetch B
         vbroadcastsd( mem(rbx),zmm30 )
@@ -2270,7 +2270,7 @@ void bli_dgemmsup_rv_zen4_asm_16x7
 
         // ---------------------------------- iteration 3
         vmovupd( mem(rax),zmm3 )                           // load A
-        vmovupd( 0x40(rax),zmm4 MASK_(k(2)) MASK_(z) )     // Load A with mask and zero hint
+        vmovupd( 0x40(rax),zmm4 MASK_KZ(2) )     // Load A with mask and zero hint
         add( r10,rax )                                     // a += cs_a
         prefetch( 0,mem(r11,r9,2) )                             // prefetch B
         vbroadcastsd( mem(rbx),zmm30 )
@@ -2299,7 +2299,7 @@ void bli_dgemmsup_rv_zen4_asm_16x7
 
         // ---------------------------------- iteration 4
         vmovupd( mem(rax),zmm0 )                           // load A
-        vmovupd( 0x40(rax),zmm1 MASK_(k(2)) MASK_(z) )     // Load A with mask and zero hint
+        vmovupd( 0x40(rax),zmm1 MASK_KZ(2) )     // Load A with mask and zero hint
         add( r10,rax )                                     // a += cs_a
         prefetch( 0,mem(r11,r13,1) )                             // prefetch B
         vbroadcastsd( mem(rbx),zmm30 )
@@ -2328,7 +2328,7 @@ void bli_dgemmsup_rv_zen4_asm_16x7
 
         // ---------------------------------- iteration 5
         vmovupd( mem(rax),zmm3 )                           // load A
-        vmovupd( 0x40(rax),zmm4 MASK_(k(2)) MASK_(z) )     // Load A with mask and zero hint
+        vmovupd( 0x40(rax),zmm4 MASK_KZ(2) )     // Load A with mask and zero hint
         add( r10,rax )                                     // a += cs_a
         prefetch( 0,mem(r15) )                             // prefetch B
         vbroadcastsd( mem(rbx),zmm30 )
@@ -2357,7 +2357,7 @@ void bli_dgemmsup_rv_zen4_asm_16x7
 
         // ---------------------------------- iteration 6
         vmovupd( mem(rax),zmm0 )                           // load A
-        vmovupd( 0x40(rax),zmm1 MASK_(k(2)) MASK_(z) )     // Load A with mask and zero hint
+        vmovupd( 0x40(rax),zmm1 MASK_KZ(2) )     // Load A with mask and zero hint
         add( r10,rax )                                     // a += cs_a
         prefetch( 0,mem(r15,r9,1) )                             // prefetch B
         vbroadcastsd( mem(rbx),zmm30 )
@@ -2386,7 +2386,7 @@ void bli_dgemmsup_rv_zen4_asm_16x7
 
         // ---------------------------------- iteration 7
         vmovupd( mem(rax),zmm3 )                           // load A
-        vmovupd( 0x40(rax),zmm4 MASK_(k(2)) MASK_(z) )     // Load A with mask and zero hint
+        vmovupd( 0x40(rax),zmm4 MASK_KZ(2) )     // Load A with mask and zero hint
         add( r10,rax )                                     // a += cs_a
         prefetch( 0,mem(r15,r9,2) )                             // prefetch B
         vbroadcastsd( mem(rbx),zmm30 )
@@ -2450,10 +2450,10 @@ void bli_dgemmsup_rv_zen4_asm_16x7
 
         // ---------------------------------- iteration 1
         vmovupd( mem(rax),zmm0 )                           // load A
-        vmovupd( 0x40(rax),zmm1 MASK_(k(2)) MASK_(z) )     // Load A with mask and zero hint
+        vmovupd( 0x40(rax),zmm1 MASK_KZ(2) )     // Load A with mask and zero hint
         add( r10,rax )                                     // a += cs_a
         vmovupd( mem(rax),zmm3 )                           // load A
-        vmovupd( 0x40(rax),zmm4 MASK_(k(2)) MASK_(z) )     // Load A with mask and zero hint
+        vmovupd( 0x40(rax),zmm4 MASK_KZ(2) )     // Load A with mask and zero hint
         add( r10,rax )                                     // a += cs_a
         prefetch( 0,mem(r11) )                             // prefetch B
         vbroadcastsd( mem(rbx),zmm30 )
@@ -2482,7 +2482,7 @@ void bli_dgemmsup_rv_zen4_asm_16x7
 
         // ---------------------------------- iteration 2
         vmovupd( mem(rax),zmm0 )                           // load A
-        vmovupd( 0x40(rax),zmm1 MASK_(k(2)) MASK_(z) )     // Load A with mask and zero hint
+        vmovupd( 0x40(rax),zmm1 MASK_KZ(2) )     // Load A with mask and zero hint
         add( r10,rax )                                     // a += cs_a
         prefetch( 0,mem(r11,r9,1) )                             // prefetch B
         vbroadcastsd( mem(rbx),zmm30 )
@@ -2511,7 +2511,7 @@ void bli_dgemmsup_rv_zen4_asm_16x7
 
         // ---------------------------------- iteration 3
         vmovupd( mem(rax),zmm3 )                           // load A
-        vmovupd( 0x40(rax),zmm4 MASK_(k(2)) MASK_(z) )     // Load A with mask and zero hint
+        vmovupd( 0x40(rax),zmm4 MASK_KZ(2) )     // Load A with mask and zero hint
         add( r10,rax )                                     // a += cs_a
         prefetch( 0,mem(r11,r9,2) )                             // prefetch B
         vbroadcastsd( mem(rbx),zmm30 )
@@ -2540,7 +2540,7 @@ void bli_dgemmsup_rv_zen4_asm_16x7
 
         // ---------------------------------- iteration 4
         vmovupd( mem(rax),zmm0 )                           // load A
-        vmovupd( 0x40(rax),zmm1 MASK_(k(2)) MASK_(z) )     // Load A with mask and zero hint
+        vmovupd( 0x40(rax),zmm1 MASK_KZ(2) )     // Load A with mask and zero hint
         add( r10,rax )                                     // a += cs_a
         prefetch( 0,mem(r11,r13,1) )                             // prefetch B
         vbroadcastsd( mem(rbx),zmm30 )
@@ -2569,7 +2569,7 @@ void bli_dgemmsup_rv_zen4_asm_16x7
 
         // ---------------------------------- iteration 5
         vmovupd( mem(rax),zmm3 )                           // load A
-        vmovupd( 0x40(rax),zmm4 MASK_(k(2)) MASK_(z) )     // Load A with mask and zero hint
+        vmovupd( 0x40(rax),zmm4 MASK_KZ(2) )     // Load A with mask and zero hint
         add( r10,rax )                                     // a += cs_a
         prefetch( 0,mem(r15) )                             // prefetch B
         vbroadcastsd( mem(rbx),zmm30 )
@@ -2598,7 +2598,7 @@ void bli_dgemmsup_rv_zen4_asm_16x7
 
         // ---------------------------------- iteration 6
         vmovupd( mem(rax),zmm0 )                           // load A
-        vmovupd( 0x40(rax),zmm1 MASK_(k(2)) MASK_(z) )     // Load A with mask and zero hint
+        vmovupd( 0x40(rax),zmm1 MASK_KZ(2) )     // Load A with mask and zero hint
         add( r10,rax )                                     // a += cs_a
         prefetch( 0,mem(r15,r9,1) )                             // prefetch B
         vbroadcastsd( mem(rbx),zmm30 )
@@ -2627,7 +2627,7 @@ void bli_dgemmsup_rv_zen4_asm_16x7
 
         // ---------------------------------- iteration 7
         vmovupd( mem(rax),zmm3 )                           // load A
-        vmovupd( 0x40(rax),zmm4 MASK_(k(2)) MASK_(z) )     // Load A with mask and zero hint
+        vmovupd( 0x40(rax),zmm4 MASK_KZ(2) )     // Load A with mask and zero hint
         add( r10,rax )                                     // a += cs_a
         prefetch( 0,mem(r15,r9,2) )                             // prefetch B
         vbroadcastsd( mem(rbx),zmm30 )
@@ -2691,7 +2691,7 @@ void bli_dgemmsup_rv_zen4_asm_16x7
 
     label(.DLOOPKLEFT)                                     // k_left loop
         vmovupd( mem(rax),zmm0 )                           // load A
-        vmovupd( 0x40(rax),zmm1 MASK_(k(2)) MASK_(z) )     // Load A with mask and zero hint
+        vmovupd( 0x40(rax),zmm1 MASK_KZ(2) )     // Load A with mask and zero hint
         add( r10,rax )                                     // a += cs_a
         vbroadcastsd( mem(rbx),zmm30 )
         vbroadcastsd( mem(rbx,r9,1),zmm31 )
@@ -2762,43 +2762,43 @@ void bli_dgemmsup_rv_zen4_asm_16x7
     vmovupd( mem(rcx),zmm0)
     vfmadd231pd( zmm0,zmm31,zmm6)
     vmovupd( zmm6,(rcx))
-    vmovupd( 0x40(rcx),zmm1 MASK_(k(2)) MASK_(z))        // Load C using mask and zero hint
+    vmovupd( 0x40(rcx),zmm1 MASK_KZ(2))        // Load C using mask and zero hint
     vfmadd231pd( zmm1,zmm31,zmm7)
     vmovupd( zmm7,0x40(rcx) MASK_(k(2)))                // store to C with mask
     vmovupd( mem(rcx,rdi,1),zmm3)
     vfmadd231pd( zmm3,zmm31,zmm8)
     vmovupd( zmm8,(rcx,rdi,1))
-    vmovupd( 0x40(rcx,rdi,1),zmm4 MASK_(k(2)) MASK_(z))        // Load C using mask and zero hint
+    vmovupd( 0x40(rcx,rdi,1),zmm4 MASK_KZ(2))        // Load C using mask and zero hint
     vfmadd231pd( zmm4,zmm31,zmm9)
     vmovupd( zmm9,0x40(rcx,rdi,1) MASK_(k(2)))                // store to C with mask
     vmovupd( mem(rcx,rdi,2),zmm0)
     vfmadd231pd( zmm0,zmm31,zmm10)
     vmovupd( zmm10,(rcx,rdi,2))
-    vmovupd( 0x40(rcx,rdi,2),zmm1 MASK_(k(2)) MASK_(z))        // Load C using mask and zero hint
+    vmovupd( 0x40(rcx,rdi,2),zmm1 MASK_KZ(2))        // Load C using mask and zero hint
     vfmadd231pd( zmm1,zmm31,zmm11)
     vmovupd( zmm11,0x40(rcx,rdi,2) MASK_(k(2)))                // store to C with mask
     vmovupd( mem(rcx,r13,1),zmm3)
     vfmadd231pd( zmm3,zmm31,zmm12)
     vmovupd( zmm12,(rcx,r13,1))
-    vmovupd( 0x40(rcx,r13,1),zmm4 MASK_(k(2)) MASK_(z))        // Load C using mask and zero hint
+    vmovupd( 0x40(rcx,r13,1),zmm4 MASK_KZ(2))        // Load C using mask and zero hint
     vfmadd231pd( zmm4,zmm31,zmm13)
     vmovupd( zmm13,0x40(rcx,r13,1) MASK_(k(2)))                // store to C with mask
     vmovupd( mem(rdx),zmm0)
     vfmadd231pd( zmm0,zmm31,zmm14)
     vmovupd( zmm14,(rdx))
-    vmovupd( 0x40(rdx),zmm1 MASK_(k(2)) MASK_(z))        // Load C using mask and zero hint
+    vmovupd( 0x40(rdx),zmm1 MASK_KZ(2))        // Load C using mask and zero hint
     vfmadd231pd( zmm1,zmm31,zmm15)
     vmovupd( zmm15,0x40(rdx) MASK_(k(2)))                // store to C with mask
     vmovupd( mem(rdx,rdi,1),zmm3)
     vfmadd231pd( zmm3,zmm31,zmm16)
     vmovupd( zmm16,(rdx,rdi,1))
-    vmovupd( 0x40(rdx,rdi,1),zmm4 MASK_(k(2)) MASK_(z))        // Load C using mask and zero hint
+    vmovupd( 0x40(rdx,rdi,1),zmm4 MASK_KZ(2))        // Load C using mask and zero hint
     vfmadd231pd( zmm4,zmm31,zmm17)
     vmovupd( zmm17,0x40(rdx,rdi,1) MASK_(k(2)))                // store to C with mask
     vmovupd( mem(rdx,rdi,2),zmm0)
     vfmadd231pd( zmm0,zmm31,zmm18)
     vmovupd( zmm18,(rdx,rdi,2))
-    vmovupd( 0x40(rdx,rdi,2),zmm1 MASK_(k(2)) MASK_(z))        // Load C using mask and zero hint
+    vmovupd( 0x40(rdx,rdi,2),zmm1 MASK_KZ(2))        // Load C using mask and zero hint
     vfmadd231pd( zmm1,zmm31,zmm19)
     vmovupd( zmm19,0x40(rdx,rdi,2) MASK_(k(2)))                // store to C with mask
 
@@ -3143,9 +3143,9 @@ void bli_dgemmsup_rv_zen4_asm_8x7
 
         // ---------------------------------- iteration 1
 
-        vmovupd( mem(rax),zmm0 MASK_(k(2)) MASK_(z) )                           // load A     // Load A with mask and zero hint
+        vmovupd( mem(rax),zmm0 MASK_KZ(2) )                           // load A     // Load A with mask and zero hint
         add( r10,rax )                                     // a += cs_a
-        vmovupd( mem(rax),zmm3 MASK_(k(2)) MASK_(z) )                           // load A     // Load A with mask and zero hint
+        vmovupd( mem(rax),zmm3 MASK_KZ(2) )                           // load A     // Load A with mask and zero hint
         add( r10,rax )                                     // a += cs_a
         prefetch( 0,mem(r11) )                             // prefetch B
         vbroadcastsd( mem(rbx),zmm30 )
@@ -3167,7 +3167,7 @@ void bli_dgemmsup_rv_zen4_asm_8x7
 
         // ---------------------------------- iteration 2
 
-        vmovupd( mem(rax),zmm0 MASK_(k(2)) MASK_(z) )                           // load A     // Load A with mask and zero hint
+        vmovupd( mem(rax),zmm0 MASK_KZ(2) )                           // load A     // Load A with mask and zero hint
         add( r10,rax )                                     // a += cs_a
         prefetch( 0,mem(r11,r9,1) )                             // prefetch B
         vbroadcastsd( mem(rbx),zmm30 )
@@ -3189,7 +3189,7 @@ void bli_dgemmsup_rv_zen4_asm_8x7
 
         // ---------------------------------- iteration 3
 
-        vmovupd( mem(rax),zmm3 MASK_(k(2)) MASK_(z) )                           // load A     // Load A with mask and zero hint
+        vmovupd( mem(rax),zmm3 MASK_KZ(2) )                           // load A     // Load A with mask and zero hint
         add( r10,rax )                                     // a += cs_a
         prefetch( 0,mem(r11,r9,2) )                             // prefetch B
         vbroadcastsd( mem(rbx),zmm30 )
@@ -3211,7 +3211,7 @@ void bli_dgemmsup_rv_zen4_asm_8x7
 
         // ---------------------------------- iteration 4
 
-        vmovupd( mem(rax),zmm0 MASK_(k(2)) MASK_(z) )                           // load A     // Load A with mask and zero hint
+        vmovupd( mem(rax),zmm0 MASK_KZ(2) )                           // load A     // Load A with mask and zero hint
         add( r10,rax )                                     // a += cs_a
         prefetch( 0,mem(r11,r13,1) )                             // prefetch B
         vbroadcastsd( mem(rbx),zmm30 )
@@ -3233,7 +3233,7 @@ void bli_dgemmsup_rv_zen4_asm_8x7
 
         // ---------------------------------- iteration 5
 
-        vmovupd( mem(rax),zmm3 MASK_(k(2)) MASK_(z) )                           // load A     // Load A with mask and zero hint
+        vmovupd( mem(rax),zmm3 MASK_KZ(2) )                           // load A     // Load A with mask and zero hint
         add( r10,rax )                                     // a += cs_a
         prefetch( 0,mem(r15) )                             // prefetch B
         vbroadcastsd( mem(rbx),zmm30 )
@@ -3255,7 +3255,7 @@ void bli_dgemmsup_rv_zen4_asm_8x7
 
         // ---------------------------------- iteration 6
 
-        vmovupd( mem(rax),zmm0 MASK_(k(2)) MASK_(z) )                           // load A     // Load A with mask and zero hint
+        vmovupd( mem(rax),zmm0 MASK_KZ(2) )                           // load A     // Load A with mask and zero hint
         add( r10,rax )                                     // a += cs_a
         prefetch( 0,mem(r15,r9,1) )                             // prefetch B
         vbroadcastsd( mem(rbx),zmm30 )
@@ -3277,7 +3277,7 @@ void bli_dgemmsup_rv_zen4_asm_8x7
 
         // ---------------------------------- iteration 7
 
-        vmovupd( mem(rax),zmm3 MASK_(k(2)) MASK_(z) )                           // load A     // Load A with mask and zero hint
+        vmovupd( mem(rax),zmm3 MASK_KZ(2) )                           // load A     // Load A with mask and zero hint
         add( r10,rax )                                     // a += cs_a
         prefetch( 0,mem(r15,r9,2) )                             // prefetch B
         vbroadcastsd( mem(rbx),zmm30 )
@@ -3328,9 +3328,9 @@ void bli_dgemmsup_rv_zen4_asm_8x7
 
         // ---------------------------------- iteration 1
         prefetchw0( mem(rdx))                              // prefetch C
-        vmovupd( mem(rax),zmm0 MASK_(k(2)) MASK_(z) )                           // load A     // Load A with mask and zero hint
+        vmovupd( mem(rax),zmm0 MASK_KZ(2) )                           // load A     // Load A with mask and zero hint
         add( r10,rax )                                     // a += cs_a
-        vmovupd( mem(rax),zmm3 MASK_(k(2)) MASK_(z) )                           // load A     // Load A with mask and zero hint
+        vmovupd( mem(rax),zmm3 MASK_KZ(2) )                           // load A     // Load A with mask and zero hint
         add( r10,rax )                                     // a += cs_a
         prefetch( 0,mem(r11) )                             // prefetch B
         vbroadcastsd( mem(rbx),zmm30 )
@@ -3351,7 +3351,7 @@ void bli_dgemmsup_rv_zen4_asm_8x7
         vfmadd231pd( zmm0,zmm30,zmm18 )
 
         // ---------------------------------- iteration 2
-        vmovupd( mem(rax),zmm0 MASK_(k(2)) MASK_(z) )                           // load A     // Load A with mask and zero hint
+        vmovupd( mem(rax),zmm0 MASK_KZ(2) )                           // load A     // Load A with mask and zero hint
         add( r10,rax )                                     // a += cs_a
         prefetch( 0,mem(r11,r9,1) )                             // prefetch B
         vbroadcastsd( mem(rbx),zmm30 )
@@ -3372,7 +3372,7 @@ void bli_dgemmsup_rv_zen4_asm_8x7
         vfmadd231pd( zmm3,zmm30,zmm18 )
 
         // ---------------------------------- iteration 3
-        vmovupd( mem(rax),zmm3 MASK_(k(2)) MASK_(z) )                           // load A     // Load A with mask and zero hint
+        vmovupd( mem(rax),zmm3 MASK_KZ(2) )                           // load A     // Load A with mask and zero hint
         add( r10,rax )                                     // a += cs_a
         prefetch( 0,mem(r11,r9,2) )                             // prefetch B
         vbroadcastsd( mem(rbx),zmm30 )
@@ -3393,7 +3393,7 @@ void bli_dgemmsup_rv_zen4_asm_8x7
         vfmadd231pd( zmm0,zmm30,zmm18 )
 
         // ---------------------------------- iteration 4
-        vmovupd( mem(rax),zmm0 MASK_(k(2)) MASK_(z) )                           // load A     // Load A with mask and zero hint
+        vmovupd( mem(rax),zmm0 MASK_KZ(2) )                           // load A     // Load A with mask and zero hint
         add( r10,rax )                                     // a += cs_a
         prefetch( 0,mem(r11,r13,1) )                             // prefetch B
         vbroadcastsd( mem(rbx),zmm30 )
@@ -3414,7 +3414,7 @@ void bli_dgemmsup_rv_zen4_asm_8x7
         vfmadd231pd( zmm3,zmm30,zmm18 )
 
         // ---------------------------------- iteration 5
-        vmovupd( mem(rax),zmm3 MASK_(k(2)) MASK_(z) )                           // load A     // Load A with mask and zero hint
+        vmovupd( mem(rax),zmm3 MASK_KZ(2) )                           // load A     // Load A with mask and zero hint
         add( r10,rax )                                     // a += cs_a
         prefetch( 0,mem(r15) )                             // prefetch B
         vbroadcastsd( mem(rbx),zmm30 )
@@ -3435,7 +3435,7 @@ void bli_dgemmsup_rv_zen4_asm_8x7
         vfmadd231pd( zmm0,zmm30,zmm18 )
 
         // ---------------------------------- iteration 6
-        vmovupd( mem(rax),zmm0 MASK_(k(2)) MASK_(z) )                           // load A     // Load A with mask and zero hint
+        vmovupd( mem(rax),zmm0 MASK_KZ(2) )                           // load A     // Load A with mask and zero hint
         add( r10,rax )                                     // a += cs_a
         prefetch( 0,mem(r15,r9,1) )                             // prefetch B
         vbroadcastsd( mem(rbx),zmm30 )
@@ -3456,7 +3456,7 @@ void bli_dgemmsup_rv_zen4_asm_8x7
         vfmadd231pd( zmm3,zmm30,zmm18 )
 
         // ---------------------------------- iteration 7
-        vmovupd( mem(rax),zmm3 MASK_(k(2)) MASK_(z) )                           // load A     // Load A with mask and zero hint
+        vmovupd( mem(rax),zmm3 MASK_KZ(2) )                           // load A     // Load A with mask and zero hint
         add( r10,rax )                                     // a += cs_a
         prefetch( 0,mem(r15,r9,2) )                             // prefetch B
         vbroadcastsd( mem(rbx),zmm30 )
@@ -3505,9 +3505,9 @@ void bli_dgemmsup_rv_zen4_asm_8x7
     label(.LOOP3)
 
         // ---------------------------------- iteration 1
-        vmovupd( mem(rax),zmm0 MASK_(k(2)) MASK_(z) )                           // load A     // Load A with mask and zero hint
+        vmovupd( mem(rax),zmm0 MASK_KZ(2) )                           // load A     // Load A with mask and zero hint
         add( r10,rax )                                     // a += cs_a
-        vmovupd( mem(rax),zmm3 MASK_(k(2)) MASK_(z) )                           // load A     // Load A with mask and zero hint
+        vmovupd( mem(rax),zmm3 MASK_KZ(2) )                           // load A     // Load A with mask and zero hint
         add( r10,rax )                                     // a += cs_a
         prefetch( 0,mem(r11) )                             // prefetch B
         vbroadcastsd( mem(rbx),zmm30 )
@@ -3528,7 +3528,7 @@ void bli_dgemmsup_rv_zen4_asm_8x7
         vfmadd231pd( zmm0,zmm30,zmm18 )
 
         // ---------------------------------- iteration 2
-        vmovupd( mem(rax),zmm0 MASK_(k(2)) MASK_(z) )                           // load A     // Load A with mask and zero hint
+        vmovupd( mem(rax),zmm0 MASK_KZ(2) )                           // load A     // Load A with mask and zero hint
         add( r10,rax )                                     // a += cs_a
         prefetch( 0,mem(r11,r9,1) )                             // prefetch B
         vbroadcastsd( mem(rbx),zmm30 )
@@ -3549,7 +3549,7 @@ void bli_dgemmsup_rv_zen4_asm_8x7
         vfmadd231pd( zmm3,zmm30,zmm18 )
 
         // ---------------------------------- iteration 3
-        vmovupd( mem(rax),zmm3 MASK_(k(2)) MASK_(z) )                           // load A     // Load A with mask and zero hint
+        vmovupd( mem(rax),zmm3 MASK_KZ(2) )                           // load A     // Load A with mask and zero hint
         add( r10,rax )                                     // a += cs_a
         prefetch( 0,mem(r11,r9,2) )                             // prefetch B
         vbroadcastsd( mem(rbx),zmm30 )
@@ -3570,7 +3570,7 @@ void bli_dgemmsup_rv_zen4_asm_8x7
         vfmadd231pd( zmm0,zmm30,zmm18 )
 
         // ---------------------------------- iteration 4
-        vmovupd( mem(rax),zmm0 MASK_(k(2)) MASK_(z) )                           // load A     // Load A with mask and zero hint
+        vmovupd( mem(rax),zmm0 MASK_KZ(2) )                           // load A     // Load A with mask and zero hint
         add( r10,rax )                                     // a += cs_a
         prefetch( 0,mem(r11,r13,1) )                             // prefetch B
         vbroadcastsd( mem(rbx),zmm30 )
@@ -3591,7 +3591,7 @@ void bli_dgemmsup_rv_zen4_asm_8x7
         vfmadd231pd( zmm3,zmm30,zmm18 )
 
         // ---------------------------------- iteration 5
-        vmovupd( mem(rax),zmm3 MASK_(k(2)) MASK_(z) )                           // load A     // Load A with mask and zero hint
+        vmovupd( mem(rax),zmm3 MASK_KZ(2) )                           // load A     // Load A with mask and zero hint
         add( r10,rax )                                     // a += cs_a
         prefetch( 0,mem(r15) )                             // prefetch B
         vbroadcastsd( mem(rbx),zmm30 )
@@ -3612,7 +3612,7 @@ void bli_dgemmsup_rv_zen4_asm_8x7
         vfmadd231pd( zmm0,zmm30,zmm18 )
 
         // ---------------------------------- iteration 6
-        vmovupd( mem(rax),zmm0 MASK_(k(2)) MASK_(z) )                           // load A     // Load A with mask and zero hint
+        vmovupd( mem(rax),zmm0 MASK_KZ(2) )                           // load A     // Load A with mask and zero hint
         add( r10,rax )                                     // a += cs_a
         prefetch( 0,mem(r15,r9,1) )                             // prefetch B
         vbroadcastsd( mem(rbx),zmm30 )
@@ -3633,7 +3633,7 @@ void bli_dgemmsup_rv_zen4_asm_8x7
         vfmadd231pd( zmm3,zmm30,zmm18 )
 
         // ---------------------------------- iteration 7
-        vmovupd( mem(rax),zmm3 MASK_(k(2)) MASK_(z) )                           // load A     // Load A with mask and zero hint
+        vmovupd( mem(rax),zmm3 MASK_KZ(2) )                           // load A     // Load A with mask and zero hint
         add( r10,rax )                                     // a += cs_a
         prefetch( 0,mem(r15,r9,2) )                             // prefetch B
         vbroadcastsd( mem(rbx),zmm30 )
@@ -3682,7 +3682,7 @@ void bli_dgemmsup_rv_zen4_asm_8x7
     je(.DPOSTACCUM)                                        // if i == 0, jump to post-accumulation
 
     label(.DLOOPKLEFT)                                     // k_left loop
-        vmovupd( mem(rax),zmm0 MASK_(k(2)) MASK_(z) )                           // load A     // Load A with mask and zero hint
+        vmovupd( mem(rax),zmm0 MASK_KZ(2) )                           // load A     // Load A with mask and zero hint
         add( r10,rax )                                     // a += cs_a
         vbroadcastsd( mem(rbx),zmm30 )
         vbroadcastsd( mem(rbx,r9,1),zmm31 )
@@ -3735,25 +3735,25 @@ void bli_dgemmsup_rv_zen4_asm_8x7
     jz(.DROWSTORED)                                        // jump to row storage case
 
     label(.DCOLSTORED)
-    vmovupd( mem(rcx),zmm0 MASK_(k(2)) MASK_(z))        // Load C using mask and zero hint
+    vmovupd( mem(rcx),zmm0 MASK_KZ(2))        // Load C using mask and zero hint
     vfmadd231pd( zmm0,zmm31,zmm6)
     vmovupd( zmm6,(rcx) MASK_(k(2)))                // store to C with mask
-    vmovupd( mem(rcx,rdi,1),zmm3 MASK_(k(2)) MASK_(z))        // Load C using mask and zero hint
+    vmovupd( mem(rcx,rdi,1),zmm3 MASK_KZ(2))        // Load C using mask and zero hint
     vfmadd231pd( zmm3,zmm31,zmm8)
     vmovupd( zmm8,(rcx,rdi,1) MASK_(k(2)))                // store to C with mask
-    vmovupd( mem(rcx,rdi,2),zmm0 MASK_(k(2)) MASK_(z))        // Load C using mask and zero hint
+    vmovupd( mem(rcx,rdi,2),zmm0 MASK_KZ(2))        // Load C using mask and zero hint
     vfmadd231pd( zmm0,zmm31,zmm10)
     vmovupd( zmm10,(rcx,rdi,2) MASK_(k(2)))                // store to C with mask
-    vmovupd( mem(rcx,r13,1),zmm3 MASK_(k(2)) MASK_(z))        // Load C using mask and zero hint
+    vmovupd( mem(rcx,r13,1),zmm3 MASK_KZ(2))        // Load C using mask and zero hint
     vfmadd231pd( zmm3,zmm31,zmm12)
     vmovupd( zmm12,(rcx,r13,1) MASK_(k(2)))                // store to C with mask
-    vmovupd( mem(rdx),zmm0 MASK_(k(2)) MASK_(z))        // Load C using mask and zero hint
+    vmovupd( mem(rdx),zmm0 MASK_KZ(2))        // Load C using mask and zero hint
     vfmadd231pd( zmm0,zmm31,zmm14)
     vmovupd( zmm14,(rdx) MASK_(k(2)))                // store to C with mask
-    vmovupd( mem(rdx,rdi,1),zmm3 MASK_(k(2)) MASK_(z))        // Load C using mask and zero hint
+    vmovupd( mem(rdx,rdi,1),zmm3 MASK_KZ(2))        // Load C using mask and zero hint
     vfmadd231pd( zmm3,zmm31,zmm16)
     vmovupd( zmm16,(rdx,rdi,1) MASK_(k(2)))                // store to C with mask
-    vmovupd( mem(rdx,rdi,2),zmm0 MASK_(k(2)) MASK_(z))        // Load C using mask and zero hint
+    vmovupd( mem(rdx,rdi,2),zmm0 MASK_KZ(2))        // Load C using mask and zero hint
     vfmadd231pd( zmm0,zmm31,zmm18)
     vmovupd( zmm18,(rdx,rdi,2) MASK_(k(2)))                // store to C with mask
 

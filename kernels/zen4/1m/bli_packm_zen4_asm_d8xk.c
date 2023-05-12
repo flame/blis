@@ -197,14 +197,14 @@ void bli_dpackm_zen4_asm_8xk
 
 		label(.DKLEFTROWU)                 // EDGE LOOP (k_left)
 
-		vmovupd(mem(rax,         0), zmm6 MASK_(k(2)) MASK_(z))
-		vmovupd(mem(rax,  r8, 1, 0), zmm8 MASK_(k(2)) MASK_(z))
-		vmovupd(mem(rax,  r8, 2, 0), zmm10 MASK_(k(2)) MASK_(z))
-		vmovupd(mem(rax, r12, 1, 0), zmm12 MASK_(k(2)) MASK_(z))
-		vmovupd(mem(rax,  r8, 4, 0), zmm14 MASK_(k(2)) MASK_(z))
-		vmovupd(mem(rax, rcx, 1, 0), zmm16 MASK_(k(2)) MASK_(z))
-		vmovupd(mem(rax, r12, 2, 0), zmm18 MASK_(k(2)) MASK_(z))
-		vmovupd(mem(rax, rdx, 1, 0), zmm20 MASK_(k(2)) MASK_(z))
+		vmovupd(mem(rax,         0), zmm6 MASK_KZ(2))
+		vmovupd(mem(rax,  r8, 1, 0), zmm8 MASK_KZ(2))
+		vmovupd(mem(rax,  r8, 2, 0), zmm10 MASK_KZ(2))
+		vmovupd(mem(rax, r12, 1, 0), zmm12 MASK_KZ(2))
+		vmovupd(mem(rax,  r8, 4, 0), zmm14 MASK_KZ(2))
+		vmovupd(mem(rax, rcx, 1, 0), zmm16 MASK_KZ(2))
+		vmovupd(mem(rax, r12, 2, 0), zmm18 MASK_KZ(2))
+		vmovupd(mem(rax, rdx, 1, 0), zmm20 MASK_KZ(2))
 
 		UNPACK_LO_HIGH(8, 6, 0, 1, 12, 10, 2, 3)
 		SHUFFLE_DATA(2, 0, 4, 5, 3, 1, 30, 31)
