@@ -1464,16 +1464,30 @@ get_compiler_version()
 		cc_vendor="aocc"
 	fi
 
+	# Detect armclang, which doesn't have a nice, unambiguous, one-word tag
+	armclang_grep=$(echo "${vendor_string}" | grep 'Arm C/C++/Fortran Compiler')
+	if [ -n "${armclang_grep}" ]; then
+		cc_vendor="armclang"
+	fi
+
 	# Begin parsing cc_vendor for the version string.
 
 	if [ "${cc_vendor}" = "crosstool-NG" ]; then
 	     # Treat compilers built by crosstool-NG (for eg: conda) as gcc.
-	     cc_vendor="gcc"
+		cc_vendor="gcc"
 	fi
 	if [ "${cc_vendor}" = "icc" -o \
 	     "${cc_vendor}" = "gcc" ]; then
 
 		cc_version=$(${cc} -dumpversion)
+
+	elif [ "${cc_vendor}" = "armclang" ]; then
+
+		# Treat armclang as regular clang.
+		cc_vendor="clang"
+		cc_version=$(echo "${vendor_string}" \
+		             | egrep -o 'based on LLVM [0-9]+\.[0-9]+\.?[0-9]*' \
+		             | egrep -o               '[0-9]+\.[0-9]+\.?[0-9]*')
 
 	elif [ "${cc_vendor}" = "clang" ]; then
 
