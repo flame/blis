@@ -236,6 +236,22 @@
 #define BLIS_EXPORT_ADDON BLIS_EXPORT
 
 
+// -- OVERRIDABLE (WEAK) SYMBOLS -----------------------------------------------
+
+// On Linux, functions called from a shared library can be overriden by the main
+// program simply by providing a new definition. However, macOS uses a "two-level
+// namespace" which causes calls to shared library functions to be tied to the
+// library and not overridable. As a workaround, certain symbols can be defined
+// as "weak" and are given lower preference during linking.
+#ifndef BLIS_OVERRIDABLE
+#if BLIS_OS_OSX
+#define BLIS_OVERRIDABLE __attribute__((weak))
+#else
+#define BLIS_OVERRIDABLE
+#endif
+#endif
+
+
 // -- STATIC INLINE FUNCTIONS --------------------------------------------------
 
 // C and C++ have different semantics for defining "inline" functions. In C,

@@ -1454,7 +1454,7 @@ get_compiler_version()
 	# isolate the version number.
 	# The last part ({ read first rest ; echo $first ; }) is a workaround
 	# to OS X's egrep only returning the first match.
-	cc_vendor=$(echo "${vendor_string}" | egrep -o 'icc|gcc|clang|emcc|pnacl|IBM|oneAPI|crosstool-NG' | { read first rest ; echo $first ; })
+	cc_vendor=$(echo "${vendor_string}" | egrep -o 'icc|gcc|clang|emcc|pnacl|IBM|oneAPI|crosstool-NG|GCC' | { read first rest ; echo $first ; })
 
 	# AOCC version strings contain both "clang" and "AOCC" substrings, and
 	# so we have perform a follow-up check to make sure cc_vendor gets set
@@ -1472,6 +1472,10 @@ get_compiler_version()
 
 	# Begin parsing cc_vendor for the version string.
 
+	if [ "${cc_vendor}" = "GCC" ]; then
+	     # Conda gcc sometimes has GCC (all caps) in the version string
+		cc_vendor="gcc"
+	fi
 	if [ "${cc_vendor}" = "crosstool-NG" ]; then
 	     # Treat compilers built by crosstool-NG (for eg: conda) as gcc.
 		cc_vendor="gcc"
