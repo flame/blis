@@ -39,6 +39,8 @@
 \
 void PASTEMAC3(ch,opname,arch,suf) \
      ( \
+       dim_t               m, \
+       dim_t               n, \
        dim_t               k, \
        ctype*     restrict alpha, \
        ctype*     restrict a1x, \
@@ -52,8 +54,9 @@ void PASTEMAC3(ch,opname,arch,suf) \
 { \
 	const num_t     dt     = PASTEMAC(ch,type); \
 \
-	const inc_t     mr     = bli_cntx_get_blksz_def_dt( dt, BLIS_MR, cntx ); \
-	const inc_t     nr     = bli_cntx_get_blksz_def_dt( dt, BLIS_NR, cntx ); \
+	const dim_t     mr     = bli_cntx_get_blksz_def_dt( dt, BLIS_MR, cntx ); \
+	const dim_t     nr     = bli_cntx_get_blksz_def_dt( dt, BLIS_NR, cntx ); \
+\
 	const inc_t     packnr = bli_cntx_get_blksz_max_dt( dt, BLIS_NR, cntx ); \
 \
 	const inc_t     rs_b   = packnr; \
@@ -66,12 +69,34 @@ void PASTEMAC3(ch,opname,arch,suf) \
 	PASTECH(ch,trsm_ukr_ft) \
 	              trsm_ukr = bli_cntx_get_l3_nat_ukr_dt( dt, trsmkerid, cntx ); \
 \
+	ctype           ct[ BLIS_STACK_BUF_MAX_SIZE \
+	                    / sizeof( ctype ) ] \
+	                    __attribute__((aligned(BLIS_STACK_BUF_ALIGN_SIZE))); \
+	/* FGVZ: Should we be querying the preference of BLIS_GEMMTRSM_?_UKR
+	   instead? */ \
+	const bool      col_pref    = bli_cntx_l3_vir_ukr_prefers_cols_dt( dt, BLIS_GEMM_UKR, cntx ); \
+	const inc_t     rs_ct       = ( col_pref ? 1 : nr ); \
+	const inc_t     cs_ct       = ( col_pref ? mr : 1 ); \
+\
+	const bool      use_ct      = ( m < mr || n < nr ); \
+\
+	ctype* restrict c11_use     = c11; \
+	inc_t           rs_c_use    = rs_c; \
+	inc_t           cs_c_use    = cs_c; \
+\
+	if ( use_ct ) \
+	{ \
+		c11_use  = ct; \
+		rs_c_use = rs_ct; \
+		cs_c_use = cs_ct; \
+	} \
+\
 	/* lower: b11 = alpha * b11 - a10 * b01; */ \
 	/* upper: b11 = alpha * b11 - a12 * b21; */ \
 	gemm_ukr \
 	( \
-	  mr, \
-	  nr, \
+	  m, \
+	  n, \
 	  k, \
 	  minus_one, \
 	  a1x, \
@@ -88,10 +113,20 @@ void PASTEMAC3(ch,opname,arch,suf) \
 	( \
 	  a11, \
 	  b11, \
-	  c11, rs_c, cs_c, \
+	  c11_use, rs_c_use, cs_c_use, \
 	  data, \
 	  cntx  \
 	); \
+\
+	if ( use_ct ) \
+	{ \
+		PASTEMAC(ch,copys_mxn) \
+		( \
+		  m, n, \
+		  ct,  rs_ct, cs_ct, \
+		  c11, rs_c,  cs_c  \
+		); \
+	} \
 \
 /*
 PASTEMAC(d,fprintm)( stdout, "gemmtrsm_ukr: b0111p_r after", k+3, 8, \

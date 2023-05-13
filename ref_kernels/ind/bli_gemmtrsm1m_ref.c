@@ -39,6 +39,8 @@
 \
 void PASTEMAC3(ch,opname,arch,suf) \
      ( \
+       dim_t               m, \
+       dim_t               n, \
        dim_t               k, \
        ctype*     restrict alpha, \
        ctype*     restrict a1x, \
@@ -59,7 +61,7 @@ void PASTEMAC3(ch,opname,arch,suf) \
 	PASTECH(ch,trsm_ukr_ft) \
 	                ctrsm_vir_ukr = bli_cntx_get_l3_vir_ukr_dt( dt, trsmkerid, cntx ); \
 \
-	const bool        col_pref    = bli_cntx_l3_nat_ukr_prefers_cols_dt( dt_r, BLIS_GEMM_UKR, cntx ); \
+	const bool        col_pref_r  = bli_cntx_l3_nat_ukr_prefers_cols_dt( dt_r, BLIS_GEMM_UKR, cntx ); \
 \
 	const dim_t       mr          = bli_cntx_get_blksz_def_dt( dt, BLIS_MR, cntx ); \
 	const dim_t       nr          = bli_cntx_get_blksz_def_dt( dt, BLIS_NR, cntx ); \
@@ -99,6 +101,28 @@ void PASTEMAC3(ch,opname,arch,suf) \
 	inc_t             rs_b_use; \
 	inc_t             cs_b_use; \
 \
+	ctype             ct[ BLIS_STACK_BUF_MAX_SIZE \
+	                      / sizeof( ctype ) ] \
+	                      __attribute__((aligned(BLIS_STACK_BUF_ALIGN_SIZE))); \
+	/* FGVZ: Should we be querying the preference of BLIS_GEMMTRSM_?_UKR
+	   instead? */ \
+	const bool        col_pref    = bli_cntx_l3_vir_ukr_prefers_cols_dt( dt, BLIS_GEMM_UKR, cntx ); \
+	const inc_t       rs_ct       = ( col_pref ? 1 : nr ); \
+	const inc_t       cs_ct       = ( col_pref ? mr : 1 ); \
+\
+	const bool        use_ct      = ( m < mr || n < nr ); \
+\
+	ctype* restrict   c11_use     = c11; \
+	inc_t             rs_c_use    = rs_c; \
+	inc_t             cs_c_use    = cs_c; \
+\
+	if ( use_ct ) \
+	{ \
+		c11_use  = ct; \
+		rs_c_use = rs_ct; \
+		cs_c_use = cs_ct; \
+	} \
+\
 \
 	/* Handle alphas with non-zero imaginary components. */ \
 	/* NOTE: This branch should never execute because alphas with
@@ -113,7 +137,7 @@ void PASTEMAC3(ch,opname,arch,suf) \
 	{ \
 		bli_abort(); \
 \
-/*
+		/*
 		ctype_r* restrict one_r = PASTEMAC(chr,1); \
 \
 		const inc_t ld_b = rs_b; \
@@ -125,17 +149,17 @@ void PASTEMAC3(ch,opname,arch,suf) \
 		                          b11, rs_b, cs_b, ld_b ); \
 \
 		alpha_r = *one_r; \
-*/ \
+		*/ \
 	} \
 \
 \
 	{ \
 		/* Set the strides for the temporary bt matrix based on the native
 		   real domain micro-kernel storage preferences. */ \
-		if ( col_pref ) { rs_bt   = 1;    cs_bt   = mr;     \
-		                  rs_bt_r = 1;    cs_bt_r = mr_r; } \
-		else            { rs_bt   = nr;   cs_bt   = 1;      \
-		                  rs_bt_r = nr_r; cs_bt_r = 1;    } \
+		if ( col_pref_r ) { rs_bt   = 1;    cs_bt   = mr;     \
+		                    rs_bt_r = 1;    cs_bt_r = mr_r; } \
+		else              { rs_bt   = nr;   cs_bt   = 1;      \
+		                    rs_bt_r = nr_r; cs_bt_r = 1;    } \
 \
 		b_use    = ( ctype_r* )bt; \
 		rs_b_use = rs_bt_r; \
@@ -241,10 +265,20 @@ void PASTEMAC3(ch,opname,arch,suf) \
 	( \
 	  a11, \
 	  b11, \
-	  c11, rs_c, cs_c, \
+	  c11_use, rs_c_use, cs_c_use, \
 	  data, \
 	  cntx  \
 	); \
+\
+	if ( use_ct ) \
+	{ \
+		PASTEMAC(ch,copys_mxn) \
+		( \
+		  m, n, \
+		  ct,  rs_ct, cs_ct, \
+		  c11, rs_c,  cs_c  \
+		); \
+	} \
 }
 
 INSERT_GENTFUNCCO_BASIC3( gemmtrsm1m_l, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX, BLIS_TRSM_L_UKR )
