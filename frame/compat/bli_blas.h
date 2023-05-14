@@ -113,7 +113,6 @@
 #include "bla_amax.h"
 #include "bla_asum.h"
 #include "bla_axpy.h"
-#include "bla_axpby.h"
 #include "bla_copy.h"
 #include "bla_dot.h"
 #include "bla_nrm2.h"
@@ -187,7 +186,6 @@
 #include "bla_syr2k.h"
 #include "bla_trmm.h"
 #include "bla_trsm.h"
-#include "bla_gemmt.h"
 
 #include "bla_gemm_check.h"
 #include "bla_hemm_check.h"
@@ -198,11 +196,27 @@
 #include "bla_syr2k_check.h"
 #include "bla_trmm_check.h"
 #include "bla_trsm_check.h"
+
+
+// -- BLAS extension prototypes --
+
+// unique to BLIS
+
+#include "bla_axpby.h"
+
+// level-3
+
+#include "bla_gemmt.h"
 #include "bla_gemmt_check.h"
 
-// -- Batch prototypes --
+// batch
 
 #include "bla_gemm_batch.h"
+
+// 3m
+
+#include "bla_gemm3m.h"
+#include "bla_gemm3m_check.h"
 
 
 // -- Fortran-compatible APIs to BLIS functions --

@@ -63,9 +63,6 @@ void PASTEF77(ch,blasname) \
 	trans_t blis_transa; \
 	trans_t blis_transb; \
 	dim_t   m0, n0, k0; \
-	inc_t   rs_a, cs_a; \
-	inc_t   rs_b, cs_b; \
-	inc_t   rs_c, cs_c; \
 \
 	/* Initialize BLIS. */ \
 	bli_init_auto(); \
@@ -102,12 +99,12 @@ void PASTEF77(ch,blasname) \
 		bli_convert_blas_dim1( k_array[i], k0 ); \
 \
 		/* Set the row and column strides of the matrix operands. */ \
-		rs_a = 1; \
-		cs_a = lda_array[i]; \
-		rs_b = 1; \
-		cs_b = ldb_array[i]; \
-		rs_c = 1; \
-		cs_c = ldc_array[i]; \
+		const inc_t rs_a = 1; \
+		const inc_t cs_a = lda_array[i]; \
+		const inc_t rs_b = 1; \
+		const inc_t cs_b = ldb_array[i]; \
+		const inc_t rs_c = 1; \
+		const inc_t cs_c = ldc_array[i]; \
 \
 		for ( f77_int j = 0; j < group_size[i]; j++ ) \
 		{ \

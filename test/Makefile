@@ -145,7 +145,7 @@ CFLAGS         += -I$(TEST_SRC_PATH)
 # Define the operations we will test.
 TEST_OPS := dotv axpyv axpbyv\
             gemv ger hemv her her2 trmv trsv \
-            gemm gemm_batch hemm herk her2k trmm trsm
+            gemm gemm3m gemm_batch hemm herk her2k trmm trsm
 
 # Optionally test gemmt, which some libraries might not implement.
 ifeq ($(BUILD_GEMMT),yes)

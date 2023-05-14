@@ -2,16 +2,17 @@
 #ifdef BLIS_ENABLE_CBLAS
 /*
  *
- * cblas_zgemm.c
- * This program is a C interface to zgemm.
- * Written by Keita Teranishi
- * 4/8/1998
+ * cblas_zgemm3m.c
+ *
+ * This program is a C interface to zgemm3m.
+ *
+ * Copyright (C) 2020, Advanced Micro Devices, Inc. All rights reserved.
  *
  */
 
 #include "cblas.h"
 #include "cblas_f77.h"
-void cblas_zgemm(enum CBLAS_ORDER Order, enum CBLAS_TRANSPOSE TransA,
+void cblas_zgemm3m(enum CBLAS_ORDER Order, enum CBLAS_TRANSPOSE TransA,
                  enum CBLAS_TRANSPOSE TransB, f77_int M, f77_int N,
                  f77_int K, const void *alpha, const void  *A,
                  f77_int lda, const void  *B, f77_int ldb,
@@ -41,7 +42,8 @@ void cblas_zgemm(enum CBLAS_ORDER Order, enum CBLAS_TRANSPOSE TransA,
    extern int RowMajorStrg;
    RowMajorStrg = 0;
    CBLAS_CallFromC = 1;
-
+   
+   
    if( Order == CblasColMajor )
    {
       if(TransA == CblasTrans) TA='T';
@@ -49,7 +51,7 @@ void cblas_zgemm(enum CBLAS_ORDER Order, enum CBLAS_TRANSPOSE TransA,
       else if ( TransA == CblasNoTrans )   TA='N';
       else 
       {
-         cblas_xerbla(2, "cblas_zgemm","Illegal TransA setting, %d\n", TransA);
+         cblas_xerbla(2, "cblas_zgemm3m", "Illegal TransA setting, %d\n", TransA);
          CBLAS_CallFromC = 0;
          RowMajorStrg = 0;
          return;
@@ -60,7 +62,7 @@ void cblas_zgemm(enum CBLAS_ORDER Order, enum CBLAS_TRANSPOSE TransA,
       else if ( TransB == CblasNoTrans )   TB='N';
       else 
       {
-         cblas_xerbla(3, "cblas_zgemm","Illegal TransB setting, %d\n", TransB);
+         cblas_xerbla(3, "cblas_zgemm3m", "Illegal TransB setting, %d\n", TransB);
          CBLAS_CallFromC = 0;
          RowMajorStrg = 0;
          return;
@@ -70,8 +72,7 @@ void cblas_zgemm(enum CBLAS_ORDER Order, enum CBLAS_TRANSPOSE TransA,
          F77_TA = C2F_CHAR(&TA);
          F77_TB = C2F_CHAR(&TB);
       #endif
-
-      F77_zgemm(F77_TA, F77_TB, &F77_M, &F77_N, &F77_K, (dcomplex*)alpha, (dcomplex*)A,
+      F77_zgemm3m(F77_TA, F77_TB, &F77_M, &F77_N, &F77_K, (dcomplex*)alpha, (dcomplex*)A,
                      &F77_lda, (dcomplex*)B, &F77_ldb, (dcomplex*)beta, (dcomplex*)C, &F77_ldc);
    } else if (Order == CblasRowMajor)
    {
@@ -81,7 +82,7 @@ void cblas_zgemm(enum CBLAS_ORDER Order, enum CBLAS_TRANSPOSE TransA,
       else if ( TransA == CblasNoTrans )   TB='N';
       else 
       {
-         cblas_xerbla(2, "cblas_zgemm","Illegal TransA setting, %d\n", TransA);
+         cblas_xerbla(2, "cblas_zgemm3m", "Illegal TransA setting, %d\n", TransA);
          CBLAS_CallFromC = 0;
          RowMajorStrg = 0;
          return;
@@ -91,7 +92,7 @@ void cblas_zgemm(enum CBLAS_ORDER Order, enum CBLAS_TRANSPOSE TransA,
       else if ( TransB == CblasNoTrans )   TA='N';
       else 
       {
-         cblas_xerbla(2, "cblas_zgemm","Illegal TransB setting, %d\n", TransB);
+         cblas_xerbla(2, "cblas_zgemm3m", "Illegal TransB setting, %d\n", TransB);
          CBLAS_CallFromC = 0;
          RowMajorStrg = 0;
          return;
@@ -101,10 +102,10 @@ void cblas_zgemm(enum CBLAS_ORDER Order, enum CBLAS_TRANSPOSE TransA,
          F77_TB = C2F_CHAR(&TB);
       #endif
 
-      F77_zgemm(F77_TA, F77_TB, &F77_N, &F77_M, &F77_K, (dcomplex*)alpha, (dcomplex*)B,
+      F77_zgemm3m(F77_TA, F77_TB, &F77_N, &F77_M, &F77_K, (dcomplex*)alpha, (dcomplex*)B,
                   &F77_ldb, (dcomplex*)A, &F77_lda, (dcomplex*)beta, (dcomplex*)C, &F77_ldc);
    } 
-   else cblas_xerbla(1, "cblas_zgemm", "Illegal Order setting, %d\n", Order);
+   else cblas_xerbla(1, "cblas_zgemm3m", "Illegal Order setting, %d\n", Order);
    CBLAS_CallFromC = 0;
    RowMajorStrg = 0;
    return;
