@@ -212,32 +212,35 @@ Furthermore, if a header file needs to be included, such as `my_malloc.h`, it sh
 
 _**SIMD register file.**_ BLIS allows you to specify the _maximum_ number of SIMD registers available for use by your kernels, as well as the _maximum_ size (in bytes) of those registers. These values default to:
 ```c
-#define BLIS_SIMD_NUM_REGISTERS  32
-#define BLIS_SIMD_SIZE           64
+#define BLIS_SIMD_MAX_NUM_REGISTERS  32
+#define BLIS_SIMD_MAX_SIZE           64
 ```
 These macros are used in computing the maximum amount of temporary storage (typically allocated statically, on the function stack) that will be needed to hold a single micro-tile of any datatype (and for any induced method):
 ```c
-#define BLIS_STACK_BUF_MAX_SIZE  ( BLIS_SIMD_NUM_REGISTERS * BLIS_SIMD_SIZE * 2 )
+#define BLIS_STACK_BUF_MAX_SIZE  ( BLIS_SIMD_MAX_NUM_REGISTERS * BLIS_SIMD_MAX_SIZE * 2 )
 ```
-These temporary buffers are used when handling edge cases (m % _MR_ != 0 || n % _NR_ != 0) within the level-3 macrokernels, and also in the virtual microkernels of various implementations of induced methods for complex matrix multiplication. It is **very important** that these values be set correctly; otherwise, you may experience undefined behavior as stack data is overwritten at run-time. A kernel developer may set `BLIS_SIMD_NUM_REGISTERS` and `BLIS_SIMD_SIZE`, which will indirectly affect `BLIS_STACK_BUF_MAX_SIZE`, or he may set `BLIS_STACK_BUF_MAX_SIZE` directly. Notice that the default values are already set to work with modern x86_64 systems.
+These temporary buffers are used when handling edge cases (m % _MR_ != 0 || n % _NR_ != 0) within the level-3 macrokernels, and also in the virtual microkernels of various implementations of induced methods for complex matrix multiplication. It is **very important** that these values be set correctly; otherwise, you may experience undefined behavior as stack data is overwritten at run-time. A kernel developer may set `BLIS_SIMD_MAX_NUM_REGISTERS` and `BLIS_SIMD_MAX_SIZE`, which will indirectly affect `BLIS_STACK_BUF_MAX_SIZE`, or he may set `BLIS_STACK_BUF_MAX_SIZE` directly. Notice that the default values are already set to work with modern x86_64 systems.
 
 _**Memory alignment.**_ BLIS implements memory alignment internally, rather than relying on a function such as `posix_memalign()`, and thus it can provide aligned memory even with functions that adhere to the `malloc()` and `free()` API in the standard C library.
 ```c
-#define BLIS_SIMD_ALIGN_SIZE             BLIS_SIMD_SIZE
+#define BLIS_SIMD_ALIGN_SIZE             BLIS_SIMD_MAX_SIZE
 #define BLIS_PAGE_SIZE                   4096
 
 #define BLIS_STACK_BUF_ALIGN_SIZE        BLIS_SIMD_ALIGN_SIZE
 #define BLIS_HEAP_ADDR_ALIGN_SIZE        BLIS_SIMD_ALIGN_SIZE
 #define BLIS_HEAP_STRIDE_ALIGN_SIZE      BLIS_SIMD_ALIGN_SIZE
-#define BLIS_POOL_ADDR_ALIGN_SIZE        BLIS_PAGE_SIZE
+#define BLIS_POOL_ADDR_ALIGN_SIZE_A      BLIS_PAGE_SIZE
+#define BLIS_POOL_ADDR_ALIGN_SIZE_B      BLIS_PAGE_SIZE
+#define BLIS_POOL_ADDR_ALIGN_SIZE_C      BLIS_PAGE_SIZE
+#define BLIS_POOL_ADDR_ALIGN_SIZE_GEN    BLIS_PAGE_SIZE
 ```
-The value `BLIS_STACK_BUF_ALIGN_SIZE` defines the alignment of stack memory used as temporary internal buffers, such as for output matrices to the microkernel when computing edge cases. (See [implementation notes](KernelsHowTo#implementation-notes-for-gemm) for the `gemm` microkernel for details.) This value defaults to `BLIS_SIMD_ALIGN_SIZE`, which defaults to `BLIS_SIMD_SIZE`.
+The value `BLIS_STACK_BUF_ALIGN_SIZE` defines the alignment of stack memory used as temporary internal buffers, such as for output matrices to the microkernel when computing edge cases. (See [implementation notes](KernelsHowTo#implementation-notes-for-gemm) for the `gemm` microkernel for details.) This value defaults to `BLIS_SIMD_ALIGN_SIZE`, which defaults to `BLIS_SIMD_MAX_SIZE`.
 
 The value `BLIS_HEAP_ADDR_ALIGN_SIZE` defines the alignment used when allocating memory via the `malloc()` function defined by `BLIS_MALLOC_USER`. Setting this value to `BLIS_SIMD_ALIGN_SIZE` may speed up certain level-1v and -1f kernels. 
 
 The value `BLIS_HEAP_STRIDE_ALIGN_SIZE` defines the alignment used for so-called "leading dimensions" (i.e. column strides for column-stored matrices, and row strides for row-stored matrices) when creating BLIS matrices via the object-based API (e.g. `bli_obj_create()`). While setting `BLIS_HEAP_ADDR_ALIGN_SIZE` guarantees alignment for the first column (or row), creating a matrix with certain dimension values (_m_ and _n_) may cause subsequent columns (or rows) to be misaligned. Setting this value to `BLIS_SIMD_ALIGN_SIZE` is usually desirable. Additional alignment may or may not be beneficial.
 
-The value `BLIS_POOL_ADDR_ALIGN_SIZE` defines the alignment used when allocating blocks to the memory pools used to manage internal packing buffers. Any block of memory returned by the memory allocator is guaranteed to be aligned to this value. Aligning these blocks to the virtual memory page size (usually 4096 bytes) is standard practice.
+The value `BLIS_POOL_ADDR_ALIGN_SIZE_*` define the alignments used when allocating blocks to the memory pools used to manage internal packing buffers for matrices A, B, C, and for general use. Any block of memory returned by the memory allocator is guaranteed to be aligned to this value. Aligning these blocks to the virtual memory page size (usually 4096 bytes) is standard practice.
 
 
 
@@ -635,8 +638,8 @@ Adding support for a new-subconfiguration to BLIS is similar to adding support f
    ```
    and while we're editing the file, we can make any other changes to compiler flags we wish (if any). Similarly, the `bli_family_knl.h` header file should be updated as needed. Since the number of vector registers and the vector register size on `knl` differ from the defaults, we must explicitly set them. (The role of these parameters was explained in a [previous section](ConfigurationHowTo.md#bli_family_h).) Furthermore, provided that a macro `BLIS_NO_HBWMALLOC` is not set, we use a different implementation of `malloc()` and `free()` and `#include` that implementation's header file. 
    ```c
-   #define BLIS_SIMD_NUM_REGISTERS  32
-   #define BLIS_SIMD_SIZE           64
+   #define BLIS_SIMD_MAX_NUM_REGISTERS  32
+   #define BLIS_SIMD_MAX_SIZE           64
 
    #ifdef BLIS_NO_HBWMALLOC
      #include <stdlib.h>
