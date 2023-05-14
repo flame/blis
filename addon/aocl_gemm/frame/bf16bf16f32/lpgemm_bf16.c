@@ -102,10 +102,21 @@ LPGEMM_5LOOP(bfloat16,bfloat16,float,bf16bf16f32of32)
 	dim_t k_updated = k;
 	k_updated += (k_updated & 0x1);
 
-	// Is required to decide whether to apply post ops or not.
+	// To decide whether to apply post ops or not.
 	bool is_last_k = FALSE;
 
+	// To decide whether to use original s8 C or temp buffer for beta scale.
+	bool is_first_k = FALSE;
+
 	lpgemm_post_op_attr post_ops_attr;
+	if ( c_downscale == TRUE )
+	{
+		post_ops_attr.buf_downscale = c;
+	}
+	else
+	{
+		post_ops_attr.buf_downscale = NULL;
+	}
 
 	// Generate thrinfo objects for jc and ic loops from lpgemm_thrinfo_t.
 	thrinfo_t thread_jc;
@@ -126,7 +137,7 @@ LPGEMM_5LOOP(bfloat16,bfloat16,float,bf16bf16f32of32)
 
 		dim_t jc_cur_loop = jc;
 		dim_t jc_cur_loop_rem = 0;
-		dim_t n_sub_updated;
+		dim_t n_sub_updated = 0;
 
 		if ( mtag_b == REORDERED )
 		{
@@ -145,45 +156,24 @@ LPGEMM_5LOOP(bfloat16,bfloat16,float,bf16bf16f32of32)
 		// Temp accumulaton buffer for C allocation.
 		else if ( c_downscale == TRUE )
 		{
-			mem_scale_c_size_req = sizeof( float ) * nc0 * ( ic_end - ic_start );
-
-			lpgemm_alloc_mem_panel
-			(
-			  mem_scale_c_size_req, BLIS_BUFFER_FOR_C_PANEL,
-			  &mem_scale_c, rntm
-			);
-
-			temp_scal_c_buffer_bf16 = bli_mem_buffer( &mem_scale_c );
-
-			c_use_jc = ( float* )temp_scal_c_buffer_bf16;
-
-			if ( beta != 0 )
+			// Buffer memory is only required if output needs to be
+			// persisted across iterations of the pc/KC loop.
+			// It was observed that the locks used while checking out
+			// a buffer from memory pool had an impact on performance
+			// and is better to not checkout if k <= KC.
+			if ( k > KC )
 			{
-				dim_t i_temp = 0;
-				dim_t j_temp = 0;
-				int32_t temp_conv_buf = 0;
-				// Upscale out C to temporary C matrix.
-				for ( dim_t i_dscale = ic_start; i_dscale < ic_end; ++i_dscale )
-				{
-					j_temp = 0;
-					for ( dim_t j_dscale = jc; j_dscale < ( jc + nc0 ); ++j_dscale )
-					{
-						// Implemented with the idea sizeof(float)=4.
-						temp_conv_buf = 0;
-						temp_conv_buf = *( ( int16_t* )( ( bfloat16* )c +
-										( rs_c * i_dscale ) + j_dscale ) );
+				mem_scale_c_size_req = sizeof( float ) * nc0 * ( ic_end - ic_start );
 
-						// Add 16 bits in the fractional part.
-						temp_conv_buf = temp_conv_buf << 16;
+				lpgemm_alloc_mem_panel
+				(
+			  	 mem_scale_c_size_req, BLIS_BUFFER_FOR_C_PANEL,
+			  	 &mem_scale_c, rntm
+				);
 
-						// Store the bytes in float format.
-						*( temp_scal_c_buffer_bf16 + ( nc0 * i_temp ) + j_temp )
-								= *( ( float* )( &temp_conv_buf ) );
+				temp_scal_c_buffer_bf16 = bli_mem_buffer( &mem_scale_c );
 
-						j_temp++;
-					}
-					i_temp++;
-				}
+				c_use_jc = ( float* )temp_scal_c_buffer_bf16;
 			}
 
 			// The temp c buffer stride is modified as opposed to original C matrix.
@@ -195,6 +185,13 @@ LPGEMM_5LOOP(bfloat16,bfloat16,float,bf16bf16f32of32)
 			float beta0 = ( pc == 0 ) ? beta : 1;
 			dim_t kc0 = bli_min( ( k - pc ), KC );
 
+			// No parallelization in k dim, k always starts at 0.
+			is_first_k = ( pc == 0 ) ? ( TRUE ) : ( FALSE );
+			post_ops_attr.is_first_k = is_first_k;
+
+			is_last_k = ( ( pc + KC ) >= k ) ? ( TRUE ) : ( FALSE );
+			post_ops_attr.is_last_k = is_last_k;
+
 			// kc0 needs to be a multiple of 2 so that it can be
 			// used with dpbf16_ps instruction. Padding is added in
 			// cases this condition is not satisfied, and therefore
@@ -202,8 +199,6 @@ LPGEMM_5LOOP(bfloat16,bfloat16,float,bf16bf16f32of32)
 			// needs to be updated.
 			dim_t kc0_updated = kc0;
 			kc0_updated += (kc0_updated & 0x1);
-
-			is_last_k = ( ( pc + KC ) >= k ) ? ( TRUE ) : ( FALSE );
 
 			if ( mtag_b == PACK )
 			{
@@ -330,7 +325,6 @@ LPGEMM_5LOOP(bfloat16,bfloat16,float,bf16bf16f32of32)
 					post_ops_attr.post_op_c_i = ic;
 					post_ops_attr.post_op_c_j = ( jc + jr );
 					post_ops_attr.rs_c_downscale = rs_c_downscale;
-					post_ops_attr.is_last_k = is_last_k;
 
 					// Reorder/Packed B, Reorder/Packed/Unpacked A call.
 					( ( lpgemm_rowvar_bf16 )lcntx->kern_fun_ptr )

@@ -52,28 +52,63 @@
 	/* Apply scaling on for <= 0 elements.*/ \
 	reg = _mm512_mask_mul_ps( reg, relu_cmp_mask, reg, selector2 ); \
 
-#define CVT_F32_BF16(reg,m_ind,n_ind) \
-	_mm256_storeu_epi16 \
-	( \
-	  ( bfloat16* )post_ops_list_temp->op_args3 + \
-	  ( post_ops_attr.rs_c_downscale * ( post_ops_attr.post_op_c_i + m_ind ) ) + \
-	  post_ops_attr.post_op_c_j + ( n_ind * 16 ), \
-	  (__m256i) _mm512_cvtneps_pbh( reg ) \
-	) \
+// F32 fma macro
+#define F32_BETA_FMA(reg,scratch1,scratch2) \
+	scratch1 = _mm512_mul_ps( scratch2, scratch1 ); \
+	reg = _mm512_add_ps( scratch1, reg ); \
 
-#define CVT_F32_BF16_LT16(reg,m_ind,n_ind) \
-	_mm256_storeu_epi16 \
+// Beta scale macro, scratch2=beta
+#define F32_F32_BETA_OP(reg,m_ir,m_ind,n_ind,scratch1,scratch2) \
+	scratch1 = \
+	_mm512_loadu_ps \
 	( \
-	  buf0, \
-	  (__m256i) _mm512_cvtneps_pbh( reg ) \
+	  ( c + ( rs_c * ( m_ir + m_ind ) ) + ( n_ind * 16 ) ) \
 	); \
-	memcpy \
+	F32_BETA_FMA(reg,scratch1,scratch2) \
+
+// Downscale beta scale macro, scratch2=beta
+#define BF16_F32_BETA_OP(reg,m_ir,m_ind,n_ind,scratch1,scratch2) \
+	scratch1 = \
+	_mm512_cvtpbh_ps \
 	( \
-	  ( bfloat16* )post_ops_list_temp->op_args3 + \
+	  (__m256bh)_mm256_loadu_epi16 \
+	  ( \
+	    ( ( bfloat16* )post_ops_attr.buf_downscale + \
+	    ( post_ops_attr.rs_c_downscale * ( post_ops_attr.post_op_c_i + m_ind ) ) + \
+	    post_ops_attr.post_op_c_j + ( n_ind * 16 ) )\
+	  ) \
+	); \
+	F32_BETA_FMA(reg,scratch1,scratch2) \
+
+// Default n < 16 mask load beta macro
+#define F32_F32_BETA_OP_NLT16F_MASK(lmask,reg,m_ir,m_ind,n_ind,scratch1,scratch2) \
+	scratch1 = _mm512_maskz_loadu_ps( lmask, c + ( rs_c * ( m_ir + m_ind ) ) + ( n_ind * 16 ) ); \
+	F32_BETA_FMA(reg,scratch1,scratch2) \
+
+// Downscale n < 16 mask load beta macro
+#define BF16_F32_BETA_OP_NLT16F_MASK(lmask,reg,m_ind,n_ind,scratch1,scratch2) \
+	scratch1 = _mm512_cvtpbh_ps \
+	( \
+	  (__m256bh)_mm256_maskz_loadu_epi16 \
+	  ( \
+	    lmask, \
+	    ( bfloat16* )post_ops_attr.buf_downscale + \
+	    ( post_ops_attr.rs_c_downscale * ( post_ops_attr.post_op_c_i + m_ind ) ) + \
+	    post_ops_attr.post_op_c_j + ( n_ind * 16 ) \
+	  ) \
+	); \
+	F32_BETA_FMA(reg,scratch1,scratch2) \
+
+#define MULRND_F32(reg,m_ind,n_ind) \
+
+#define CVT_STORE_F32_BF16_MASK(reg,m_ind,n_ind) \
+	_mm256_mask_storeu_epi16 \
+	( \
+	  ( bfloat16* )post_ops_attr.buf_downscale + \
 	  ( post_ops_attr.rs_c_downscale * ( post_ops_attr.post_op_c_i + m_ind ) ) + \
 	  post_ops_attr.post_op_c_j + ( n_ind * 16 ), \
-	  buf0, ( n0_rem * sizeof( bfloat16 ) ) \
-	); \
+	  mask_all1, (__m256i) _mm512_cvtneps_pbh( reg ) \
+	) \
 
 /* TANH GeLU (x) = 0.5* x * (1 + tanh ( 0.797884 * ( x + ( 0.044715 * x^3 ) ) ) )  */
 #define GELU_TANH_F32_AVX512(reg, r, r2, x, z, dn, x_tanh, q) \
