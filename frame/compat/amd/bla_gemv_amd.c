@@ -63,7 +63,7 @@ void PASTEF77(ch,blasname) \
 	inc_t   incy0; \
 \
 	/* Initialize BLIS. */ \
-	bli_init_auto(); \
+	/*bli_init_auto();*/ \
 \
 	/* Perform BLAS parameter checking. */ \
 	PASTEBLACHK(blasname) \
@@ -78,17 +78,6 @@ void PASTEF77(ch,blasname) \
 	  incy  \
 	); \
 \
-	/* Map BLAS chars to their corresponding BLIS enumerated type value. */ \
-	bli_param_map_netlib_to_blis_trans( *transa, &blis_transa ); \
-\
-	/* Convert/typecast negative values of m and n to zero. */ \
-	bli_convert_blas_dim1( *m, m0 ); \
-	bli_convert_blas_dim1( *n, n0 ); \
-\
-	/* Determine the dimensions of x and y so we can adjust the increments,
-	   if necessary.*/ \
-	bli_set_dims_with_trans( blis_transa, m0, n0, &m_y, &n_x ); \
-\
 	/* BLAS handles cases where y has no elements as well as those where x has
 	   no elements. In the case of the former, it cannot do any work since
 	   the output vector is empty; but in the latter case, BLAS has peculiar
@@ -102,41 +91,79 @@ void PASTEF77(ch,blasname) \
 	   that some BLAS unit tests actually check for this behavior. Also, it
 	   should be emphasized that BLIS, when called natively, does NOT exhibit
 	   this quirky behavior; it will scale y by beta as one would expect. */ \
-	if ( m_y > 0 && n_x == 0 ) \
+	if ( *m == 0 || *n == 0 ) \
 	{ \
 		/* Finalize BLIS. */ \
-		bli_finalize_auto(); \
+		/*bli_finalize_auto();*/ \
 \
 		return; \
 	} \
+\
+	/* Map BLAS chars to their corresponding BLIS enumerated type value. */ \
+	bli_param_map_netlib_to_blis_trans( *transa, &blis_transa ); \
+\
+	/* Convert/typecast negative values of m and n to zero. */ \
+	bli_convert_blas_dim1( *m, m0 ); \
+	bli_convert_blas_dim1( *n, n0 ); \
+\
+	/* Determine the dimensions of x and y so we can adjust the increments,
+	   if necessary.*/ \
+	bli_set_dims_with_trans( blis_transa, m0, n0, &m_y, &n_x ); \
 \
 	/* If the input increments are negative, adjust the pointers so we can
 	   use positive increments instead. */ \
 	bli_convert_blas_incv( n_x, (ftype*)x, *incx, x0, incx0 ); \
 	bli_convert_blas_incv( m_y, (ftype*)y, *incy, y0, incy0 ); \
 \
+	/* If alpha is zero, scale y by beta and return early. */ \
+	if ( PASTEMAC(ch,eq0)( *alpha ) ) \
+	{ \
+		PASTEMAC2(ch,scalv,BLIS_TAPI_EX_SUF) \
+		( \
+		  BLIS_NO_CONJUGATE, \
+		  m_y, \
+		  ( ftype* )beta, \
+		  ( ftype* )y0, incy0, \
+		  NULL, \
+		  NULL  \
+		); \
+		return; \
+	} \
+\
 	/* Set the row and column strides of A. */ \
 	const inc_t rs_a = 1; \
 	const inc_t cs_a = *lda; \
 \
-	/* Call BLIS interface. */ \
-	PASTEMAC2(ch,blisname,BLIS_TAPI_EX_SUF) \
+	/* Declare a void function pointer for the current operation. */ \
+	PASTECH2(ch,blisname,_unb_ft) f; \
+\
+	/* Choose the underlying implementation. */ \
+	if         ( bli_does_notrans( blis_transa ) )  f = PASTEMAC(ch,gemv_unf_var2); \
+	else /* if ( bli_does_trans( blis_transa ) ) */ f = PASTEMAC(ch,gemv_unf_var1); \
+\
+	/* Obtain a valid context from the gks. This is needed because these
+	   implementations of ?gemv_() skip calling gemv_ex() and instead
+	   call the unblocked fused variants directly. */ \
+	cntx_t* cntx = bli_gks_query_cntx(); \
+\
+	/* Invoke the variant chosen above, which loops over a level-1v or
+	   level-1f kernel to implement the current operation. */ \
+	f \
 	( \
 	  blis_transa, \
 	  BLIS_NO_CONJUGATE, \
 	  m0, \
 	  n0, \
 	  (ftype*)alpha, \
-	  (ftype*)a,  rs_a, cs_a, \
+	  (ftype*)a, rs_a, cs_a, \
 	  x0, incx0, \
 	  (ftype*)beta, \
 	  y0, incy0, \
-	  NULL, \
-	  NULL  \
+	  cntx  \
 	); \
 \
 	/* Finalize BLIS. */ \
-	bli_finalize_auto(); \
+	/*bli_finalize_auto();*/ \
 }
 
 #ifdef BLIS_ENABLE_BLAS

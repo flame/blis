@@ -56,7 +56,6 @@ void PASTEF772(ch,blasname,chc) \
 	ftype*  y0; \
 	inc_t   incx0; \
 	inc_t   incy0; \
-	inc_t   rs_a, cs_a; \
 \
 	/* Initialize BLIS. */ \
 	bli_init_auto(); \
@@ -84,8 +83,8 @@ void PASTEF772(ch,blasname,chc) \
 	bli_convert_blas_incv( n0, (ftype*)y, *incy, y0, incy0 ); \
 \
 	/* Set the row and column strides of A. */ \
-	rs_a = 1; \
-	cs_a = *lda; \
+	const inc_t rs_a = 1; \
+	const inc_t cs_a = *lda; \
 \
 	/* Call BLIS interface. */ \
 	PASTEMAC2(ch,blisname,BLIS_TAPI_EX_SUF) \

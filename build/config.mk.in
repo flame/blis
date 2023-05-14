@@ -5,6 +5,7 @@
 #  libraries.
 #
 #  Copyright (C) 2014, The University of Texas at Austin
+#  Copyright (C) 2022, Advanced Micro Devices, Inc.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -202,6 +203,9 @@ SANDBOX           := @sandbox@
 # The name of the pthreads library. If --disable-system was given, then this
 # variable is set to the empty value.
 LIBPTHREAD        := @libpthread@
+
+# Whether we should use AMD-customized versions of certain framework files.
+ENABLE_AMD_FRAME_TWEAKS := @enable_amd_frame_tweaks@
 
 # end of ifndef CONFIG_MK_INCLUDED conditional block
 endif

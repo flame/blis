@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2020, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2020-2022, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -49,6 +49,7 @@ void bli_cntx_init_zen3( cntx_t* cntx )
 	bli_cntx_set_l3_nat_ukrs
 	(
 	  8,
+
 	  // gemm
 	  BLIS_GEMM_UKR,       BLIS_FLOAT,    bli_sgemm_haswell_asm_6x16,       TRUE,
 	  BLIS_GEMM_UKR,       BLIS_DOUBLE,   bli_dgemm_haswell_asm_6x8,        TRUE,
@@ -62,6 +63,7 @@ void bli_cntx_init_zen3( cntx_t* cntx )
 	  // gemmtrsm_u
 	  BLIS_GEMMTRSM_U_UKR, BLIS_FLOAT,    bli_sgemmtrsm_u_haswell_asm_6x16, TRUE,
 	  BLIS_GEMMTRSM_U_UKR, BLIS_DOUBLE,   bli_dgemmtrsm_u_haswell_asm_6x8,  TRUE,
+
 	  cntx
 	);
 
@@ -96,12 +98,15 @@ void bli_cntx_init_zen3( cntx_t* cntx )
 	bli_cntx_set_l1f_kers
 	(
 	  4,
+
 	  // axpyf
 	  BLIS_AXPYF_KER,     BLIS_FLOAT,  bli_saxpyf_zen_int_5,
 	  BLIS_AXPYF_KER,     BLIS_DOUBLE, bli_daxpyf_zen_int_5,
+
 	  // dotxf
 	  BLIS_DOTXF_KER,     BLIS_FLOAT,  bli_sdotxf_zen_int_8,
 	  BLIS_DOTXF_KER,     BLIS_DOUBLE, bli_ddotxf_zen_int_8,
+
 	  cntx
 	);
 
@@ -113,8 +118,6 @@ void bli_cntx_init_zen3( cntx_t* cntx )
 	  // amaxv
 	  BLIS_AMAXV_KER,  BLIS_FLOAT,  bli_samaxv_zen_int,
 	  BLIS_AMAXV_KER,  BLIS_DOUBLE, bli_damaxv_zen_int,
-
-	  // axpyv
 
 	  // axpyv
 	  BLIS_AXPYV_KER,  BLIS_FLOAT,  bli_saxpyv_zen_int10,
