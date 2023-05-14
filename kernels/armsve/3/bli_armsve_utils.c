@@ -80,6 +80,11 @@ void PASTEMAC(ch, _blksz_armsve) (dim_t *m_r_, dim_t *n_r_, \
     dim_t n_c = C_Bc * (N_L3 * C_L3)/(k_c * S_Data); \
     n_c -= n_c % n_r; \
 \
+    /* Ensure non-zero block sizes. */ \
+    m_c = bli_max(m_c, m_r); \
+    n_c = bli_max(n_c, n_r); \
+    k_c = bli_max(k_c, 128); \
+\
     *m_r_ = m_r; \
     *n_r_ = n_r; \
     *k_c_ = k_c; \
