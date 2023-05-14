@@ -46,13 +46,13 @@
 
 void bli_gemm_ex
      (
-       obj_t*  alpha,
-       obj_t*  a,
-       obj_t*  b,
-       obj_t*  beta,
-       obj_t*  c,
-       cntx_t* cntx,
-       rntm_t* rntm 
+       const obj_t*  alpha,
+       const obj_t*  a,
+       const obj_t*  b,
+       const obj_t*  beta,
+       const obj_t*  c,
+       const cntx_t* cntx,
+             rntm_t* rntm
      )
 {
 	bli_init_once();
@@ -65,7 +65,11 @@ void bli_gemm_ex
 	// directly.
 	if ( 1 )
 	{
-		bls_gemm_ex( alpha, a, b, beta, c, cntx, rntm );
+		bls_gemm_ex
+		(
+		  ( obj_t* )alpha, ( obj_t* )a, ( obj_t* )b, ( obj_t* )beta, ( obj_t* )c,
+		  ( cntx_t* )cntx, ( rntm_t* )rntm
+		);
 		return;
 	}
 
@@ -85,7 +89,8 @@ void bli_gemm_ex
 	// Invoke the operation's front end.
 	bli_gemm_front
 	(
-	  alpha, a, b, beta, c, cntx, rntm, NULL
+	  ( obj_t* )alpha, ( obj_t* )a, ( obj_t* )b, ( obj_t* )beta, ( obj_t* )c,
+	  ( cntx_t* )cntx, ( rntm_t* )rntm, NULL
 	);
 }
 
