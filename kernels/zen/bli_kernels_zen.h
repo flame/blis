@@ -303,7 +303,7 @@ err_t bli_zgemm_small_At
       cntl_t* cntl
     );
 
-void bli_dgemm_ref_k1_nn
+void bli_dgemm_8x6_avx2_k1_nn
     (
       dim_t m,
       dim_t n,
@@ -315,7 +315,7 @@ void bli_dgemm_ref_k1_nn
       double* c, const inc_t ldc
      );
 
-void bli_zgemm_ref_k1_nn
+void bli_zgemm_4x6_avx2_k1_nn
     (
       dim_t m,
       dim_t n,
