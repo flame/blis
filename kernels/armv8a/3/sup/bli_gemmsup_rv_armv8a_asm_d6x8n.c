@@ -129,18 +129,18 @@
  */
 void bli_dgemmsup_rv_armv8a_asm_6x8n
      (
-       conj_t              conja,
-       conj_t              conjb,
-       dim_t               m0,
-       dim_t               n0,
-       dim_t               k0,
-       double*    restrict alpha,
-       double*    restrict a, inc_t rs_a0, inc_t cs_a0,
-       double*    restrict b, inc_t rs_b0, inc_t cs_b0,
-       double*    restrict beta,
-       double*    restrict c, inc_t rs_c0, inc_t cs_c0,
-       auxinfo_t*          data,
-       cntx_t*             cntx
+             conj_t     conja,
+             conj_t     conjb,
+             dim_t      m0,
+             dim_t      n0,
+             dim_t      k0,
+       const void*      alpha,
+       const void*      a, inc_t rs_a0, inc_t cs_a0,
+       const void*      b, inc_t rs_b0, inc_t cs_b0,
+       const void*      beta,
+             void*      c, inc_t rs_c0, inc_t cs_c0,
+             auxinfo_t* data,
+       const cntx_t*    cntx
      )
 {
   if ( m0 != 6 )
@@ -148,10 +148,10 @@ void bli_dgemmsup_rv_armv8a_asm_6x8n
     assert( m0 <= 9 );
 
     // Manual separation.
-    dgemmsup_ker_ft ker_fp1 = NULL;
-    dgemmsup_ker_ft ker_fp2 = NULL;
-    dim_t           mr1, mr2;
-
+    gemmsup_ker_ft ker_fp1 = NULL;
+    gemmsup_ker_ft ker_fp2 = NULL;
+    dim_t          mr1, mr2;
+    
     if ( m0 == 9 )
     {
       ker_fp1 = bli_dgemmsup_rv_armv8a_asm_5x8n; mr1 = 5;
@@ -186,14 +186,14 @@ void bli_dgemmsup_rv_armv8a_asm_6x8n
       alpha, a, rs_a0, cs_a0, b, rs_b0, cs_b0,
       beta, c, rs_c0, cs_c0, data, cntx
     );
-    a += mr1 * rs_a0;
-    c += mr1 * rs_c0;
+    a = ( double* )a + mr1 * rs_a0;
+    c = ( double* )c + mr1 * rs_c0;
     if ( ker_fp2 )
       ker_fp2
       (
-	conja, conjb, mr2, n0, k0,
-	alpha, a, rs_a0, cs_a0, b, rs_b0, cs_b0,
-	beta, c, rs_c0, cs_c0, data, cntx
+        conja, conjb, mr2, n0, k0,
+        alpha, a, rs_a0, cs_a0, b, rs_b0, cs_b0,
+        beta, c, rs_c0, cs_c0, data, cntx
       );
     return;
   }
@@ -201,8 +201,8 @@ void bli_dgemmsup_rv_armv8a_asm_6x8n
   // LLVM has very bad routing ability for inline asm.
   // Limit number of registers in case of Clang compilation.
 #ifndef __clang__
-  const void*    a_next = bli_auxinfo_next_a( data );
-  const void*    b_next = bli_auxinfo_next_b( data );
+  const void* a_next = bli_auxinfo_next_a( data );
+  const void* b_next = bli_auxinfo_next_b( data );
 #endif
   uint64_t ps_b   = bli_auxinfo_ps_b( data );
 
@@ -540,8 +540,8 @@ LABEL(END_EXEC)
 
 consider_edge_cases:
   // Forward address.
-  b = b + n_iter * ps_b;
-  c = c + n_iter * 8 * cs_c;
+  b = ( double* )b + n_iter * ps_b;
+  c = ( double* )c + n_iter * 8 * cs_c;
   if ( n_left )
   {
     // Set panel stride to unpacked mode.

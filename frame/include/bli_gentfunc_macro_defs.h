@@ -276,7 +276,7 @@ GENTFUNC2( dcomplex, scomplex, z, c, __VA_ARGS__ )
 
 // -- Mixed domain/precision (all) two-operand macro --
 
-#define INSERT_GENTFUNC2_MIXDP( ... ) \
+#define INSERT_GENTFUNC2_MIX_DP( ... ) \
 \
 GENTFUNC2( float,    double,   s, d, __VA_ARGS__ ) \
 GENTFUNC2( float,    scomplex, s, c, __VA_ARGS__ ) \
@@ -339,7 +339,7 @@ GENTFUNC2R( dcomplex, scomplex, float,    z, c, s, __VA_ARGS__ )
 
 // -- Mixed domain/precision (all) two-operand macro with real projection of second operand --
 
-#define INSERT_GENTFUNC2R_MIXDP( ... ) \
+#define INSERT_GENTFUNC2R_MIX_DP( ... ) \
 \
 GENTFUNC2R( float,    double,   double,   s, d, d, __VA_ARGS__ ) \
 GENTFUNC2R( float,    scomplex, float,    s, c, s, __VA_ARGS__ ) \

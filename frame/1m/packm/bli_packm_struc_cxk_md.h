@@ -52,12 +52,12 @@ void PASTEMAC2(chc,chp,varname) \
        const void*   kappa, \
        const void*   c, inc_t incc, inc_t ldc, \
              void*   p,             inc_t ldp, \
-       const cntx_t* cntx, \
-       const void*   params \
+       const void*   params, \
+       const cntx_t* cntx  \
      );
 
 INSERT_GENTPROT2_BASIC( packm_struc_cxk_md )
-INSERT_GENTPROT2_MIXDP( packm_struc_cxk_md )
+INSERT_GENTPROT2_MIX_DP( packm_struc_cxk_md )
 
 
 #undef  GENTPROT2
@@ -65,17 +65,17 @@ INSERT_GENTPROT2_MIXDP( packm_struc_cxk_md )
 \
 void PASTEMAC2(cha,chp,opname) \
      ( \
-       conj_t            conja, \
-       dim_t             m, \
-       dim_t             n, \
-       ctype_p* restrict kappa, \
-       ctype_a* restrict a, inc_t inca, inc_t lda, \
-       ctype_p* restrict p,             inc_t ldp  \
+             conj_t   conja, \
+             dim_t    m, \
+             dim_t    n, \
+       const ctype_p* kappa, \
+       const ctype_a* a, inc_t inca, inc_t lda, \
+             ctype_p* p,             inc_t ldp  \
      );
 
 INSERT_GENTPROT2_BASIC( packm_cxk_1e_md )
-INSERT_GENTPROT2_MIXDP( packm_cxk_1e_md )
+INSERT_GENTPROT2_MIX_DP( packm_cxk_1e_md )
 
 INSERT_GENTPROT2_BASIC( packm_cxk_1r_md )
-INSERT_GENTPROT2_MIXDP( packm_cxk_1r_md )
+INSERT_GENTPROT2_MIX_DP( packm_cxk_1r_md )
 

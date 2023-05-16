@@ -57,18 +57,21 @@ typedef union
 
 void bli_sscalv_zen_int10
      (
-       conj_t           conjalpha,
-       dim_t            n,
-       float*  restrict alpha,
-       float*  restrict x, inc_t incx,
-       cntx_t*          cntx
+             conj_t  conjalpha,
+             dim_t   n,
+       const void*   alpha0,
+             void*   x0, inc_t incx,
+       const cntx_t* cntx
      )
 {
+	const float*     alpha = alpha0;
+	      float*     x     = x0;
+
 	const dim_t      n_elem_per_reg = 8;
 
 	dim_t            i;
 
-	float*  restrict x0;
+	float*  restrict xp;
 
 	__m256           alphav;
 	__m256           xv[10];
@@ -80,11 +83,10 @@ void bli_sscalv_zen_int10
 	// If alpha is zero, use setv.
 	if ( PASTEMAC(s,eq0)( *alpha ) )
 	{
-		float* zero = bli_s0;
-
 		if ( cntx == NULL ) cntx = ( cntx_t* )bli_gks_query_cntx();
 
-		ssetv_ker_ft f = bli_cntx_get_ukr_dt( BLIS_FLOAT, BLIS_SETV_KER, cntx );
+		void*       zero = bli_s0;
+		setv_ker_ft f    = bli_cntx_get_ukr_dt( BLIS_FLOAT, BLIS_SETV_KER, cntx );
 
 		f
 		(
@@ -99,7 +101,7 @@ void bli_sscalv_zen_int10
 	}
 
 	// Initialize local pointers.
-	x0 = x;
+	xp = x;
 
 	if ( incx == 1 )
 	{
@@ -109,16 +111,16 @@ void bli_sscalv_zen_int10
 		for ( i = 0; (i + 79) < n; i += 80 )
 		{
 			// Load the input values.
-			xv[0] = _mm256_loadu_ps( x0 + 0*n_elem_per_reg );
-			xv[1] = _mm256_loadu_ps( x0 + 1*n_elem_per_reg );
-			xv[2] = _mm256_loadu_ps( x0 + 2*n_elem_per_reg );
-			xv[3] = _mm256_loadu_ps( x0 + 3*n_elem_per_reg );
-			xv[4] = _mm256_loadu_ps( x0 + 4*n_elem_per_reg );
-			xv[5] = _mm256_loadu_ps( x0 + 5*n_elem_per_reg );
-			xv[6] = _mm256_loadu_ps( x0 + 6*n_elem_per_reg );
-			xv[7] = _mm256_loadu_ps( x0 + 7*n_elem_per_reg );
-			xv[8] = _mm256_loadu_ps( x0 + 8*n_elem_per_reg );
-			xv[9] = _mm256_loadu_ps( x0 + 9*n_elem_per_reg );
+			xv[0] = _mm256_loadu_ps( xp + 0*n_elem_per_reg );
+			xv[1] = _mm256_loadu_ps( xp + 1*n_elem_per_reg );
+			xv[2] = _mm256_loadu_ps( xp + 2*n_elem_per_reg );
+			xv[3] = _mm256_loadu_ps( xp + 3*n_elem_per_reg );
+			xv[4] = _mm256_loadu_ps( xp + 4*n_elem_per_reg );
+			xv[5] = _mm256_loadu_ps( xp + 5*n_elem_per_reg );
+			xv[6] = _mm256_loadu_ps( xp + 6*n_elem_per_reg );
+			xv[7] = _mm256_loadu_ps( xp + 7*n_elem_per_reg );
+			xv[8] = _mm256_loadu_ps( xp + 8*n_elem_per_reg );
+			xv[9] = _mm256_loadu_ps( xp + 9*n_elem_per_reg );
 
 			// perform : x := alpha * x;
 			zv[0] = _mm256_mul_ps( alphav, xv[0] );
@@ -133,28 +135,28 @@ void bli_sscalv_zen_int10
 			zv[9] = _mm256_mul_ps( alphav, xv[9] );
 
 			// Store the output.
-			_mm256_storeu_ps( (x0 + 0*n_elem_per_reg), zv[0] );
-			_mm256_storeu_ps( (x0 + 1*n_elem_per_reg), zv[1] );
-			_mm256_storeu_ps( (x0 + 2*n_elem_per_reg), zv[2] );
-			_mm256_storeu_ps( (x0 + 3*n_elem_per_reg), zv[3] );
-			_mm256_storeu_ps( (x0 + 4*n_elem_per_reg), zv[4] );
-			_mm256_storeu_ps( (x0 + 5*n_elem_per_reg), zv[5] );
-			_mm256_storeu_ps( (x0 + 6*n_elem_per_reg), zv[6] );
-			_mm256_storeu_ps( (x0 + 7*n_elem_per_reg), zv[7] );
-			_mm256_storeu_ps( (x0 + 8*n_elem_per_reg), zv[8] );
-			_mm256_storeu_ps( (x0 + 9*n_elem_per_reg), zv[9] );
+			_mm256_storeu_ps( (xp + 0*n_elem_per_reg), zv[0] );
+			_mm256_storeu_ps( (xp + 1*n_elem_per_reg), zv[1] );
+			_mm256_storeu_ps( (xp + 2*n_elem_per_reg), zv[2] );
+			_mm256_storeu_ps( (xp + 3*n_elem_per_reg), zv[3] );
+			_mm256_storeu_ps( (xp + 4*n_elem_per_reg), zv[4] );
+			_mm256_storeu_ps( (xp + 5*n_elem_per_reg), zv[5] );
+			_mm256_storeu_ps( (xp + 6*n_elem_per_reg), zv[6] );
+			_mm256_storeu_ps( (xp + 7*n_elem_per_reg), zv[7] );
+			_mm256_storeu_ps( (xp + 8*n_elem_per_reg), zv[8] );
+			_mm256_storeu_ps( (xp + 9*n_elem_per_reg), zv[9] );
 
-			x0 += 10*n_elem_per_reg;
+			xp += 10*n_elem_per_reg;
 		}
 
 		for ( ; (i + 39) < n; i += 40 )
 		{
 			// Load the input values.
-			xv[0] = _mm256_loadu_ps( x0 + 0*n_elem_per_reg );
-			xv[1] = _mm256_loadu_ps( x0 + 1*n_elem_per_reg );
-			xv[2] = _mm256_loadu_ps( x0 + 2*n_elem_per_reg );
-			xv[3] = _mm256_loadu_ps( x0 + 3*n_elem_per_reg );
-			xv[4] = _mm256_loadu_ps( x0 + 4*n_elem_per_reg );
+			xv[0] = _mm256_loadu_ps( xp + 0*n_elem_per_reg );
+			xv[1] = _mm256_loadu_ps( xp + 1*n_elem_per_reg );
+			xv[2] = _mm256_loadu_ps( xp + 2*n_elem_per_reg );
+			xv[3] = _mm256_loadu_ps( xp + 3*n_elem_per_reg );
+			xv[4] = _mm256_loadu_ps( xp + 4*n_elem_per_reg );
 
 			// perform : x := alpha * x;
 			zv[0] = _mm256_mul_ps( alphav, xv[0] );
@@ -164,22 +166,22 @@ void bli_sscalv_zen_int10
 			zv[4] = _mm256_mul_ps( alphav, xv[4] );
 
 			// Store the output.
-			_mm256_storeu_ps( (x0 + 0*n_elem_per_reg), zv[0] );
-			_mm256_storeu_ps( (x0 + 1*n_elem_per_reg), zv[1] );
-			_mm256_storeu_ps( (x0 + 2*n_elem_per_reg), zv[2] );
-			_mm256_storeu_ps( (x0 + 3*n_elem_per_reg), zv[3] );
-			_mm256_storeu_ps( (x0 + 4*n_elem_per_reg), zv[4] );
+			_mm256_storeu_ps( (xp + 0*n_elem_per_reg), zv[0] );
+			_mm256_storeu_ps( (xp + 1*n_elem_per_reg), zv[1] );
+			_mm256_storeu_ps( (xp + 2*n_elem_per_reg), zv[2] );
+			_mm256_storeu_ps( (xp + 3*n_elem_per_reg), zv[3] );
+			_mm256_storeu_ps( (xp + 4*n_elem_per_reg), zv[4] );
 
-			x0 += 5*n_elem_per_reg;
+			xp += 5*n_elem_per_reg;
 		}
 
 		for ( ; (i + 31) < n; i += 32 )
 		{
 			// Load the input values.
-			xv[0] = _mm256_loadu_ps( x0 + 0*n_elem_per_reg );
-			xv[1] = _mm256_loadu_ps( x0 + 1*n_elem_per_reg );
-			xv[2] = _mm256_loadu_ps( x0 + 2*n_elem_per_reg );
-			xv[3] = _mm256_loadu_ps( x0 + 3*n_elem_per_reg );
+			xv[0] = _mm256_loadu_ps( xp + 0*n_elem_per_reg );
+			xv[1] = _mm256_loadu_ps( xp + 1*n_elem_per_reg );
+			xv[2] = _mm256_loadu_ps( xp + 2*n_elem_per_reg );
+			xv[3] = _mm256_loadu_ps( xp + 3*n_elem_per_reg );
 
 			// perform : x := alpha * x;
 			zv[0] = _mm256_mul_ps( alphav, xv[0] );
@@ -188,50 +190,50 @@ void bli_sscalv_zen_int10
 			zv[3] = _mm256_mul_ps( alphav, xv[3] );
 
 			// Store the output.
-			_mm256_storeu_ps( (x0 + 0*n_elem_per_reg), zv[0] );
-			_mm256_storeu_ps( (x0 + 1*n_elem_per_reg), zv[1] );
-			_mm256_storeu_ps( (x0 + 2*n_elem_per_reg), zv[2] );
-			_mm256_storeu_ps( (x0 + 3*n_elem_per_reg), zv[3] );
+			_mm256_storeu_ps( (xp + 0*n_elem_per_reg), zv[0] );
+			_mm256_storeu_ps( (xp + 1*n_elem_per_reg), zv[1] );
+			_mm256_storeu_ps( (xp + 2*n_elem_per_reg), zv[2] );
+			_mm256_storeu_ps( (xp + 3*n_elem_per_reg), zv[3] );
 
-			x0 += 4*n_elem_per_reg;
+			xp += 4*n_elem_per_reg;
 		}
 
 		for ( ; (i + 15) < n; i += 16 )
 		{
 			// Load the input values.
-			xv[0] = _mm256_loadu_ps( x0 + 0*n_elem_per_reg );
-			xv[1] = _mm256_loadu_ps( x0 + 1*n_elem_per_reg );
+			xv[0] = _mm256_loadu_ps( xp + 0*n_elem_per_reg );
+			xv[1] = _mm256_loadu_ps( xp + 1*n_elem_per_reg );
 
 			// perform : x := alpha * x;
 			zv[0] = _mm256_mul_ps( alphav, xv[0] );
 			zv[1] = _mm256_mul_ps( alphav, xv[1] );
 
 			// Store the output.
-			_mm256_storeu_ps( (x0 + 0*n_elem_per_reg), zv[0] );
-			_mm256_storeu_ps( (x0 + 1*n_elem_per_reg), zv[1] );
+			_mm256_storeu_ps( (xp + 0*n_elem_per_reg), zv[0] );
+			_mm256_storeu_ps( (xp + 1*n_elem_per_reg), zv[1] );
 
-			x0 += 2*n_elem_per_reg;
+			xp += 2*n_elem_per_reg;
 		}
 
 		for ( ; (i + 7) < n; i += 8 )
 		{
 			// Load the input values.
-			xv[0] = _mm256_loadu_ps( x0 + 0*n_elem_per_reg );
+			xv[0] = _mm256_loadu_ps( xp + 0*n_elem_per_reg );
 
 			// perform : x := alpha * x;
 			zv[0] = _mm256_mul_ps( alphav, xv[0] );
 
 			// Store the output.
-			_mm256_storeu_ps( (x0 + 0*n_elem_per_reg), zv[0] );
+			_mm256_storeu_ps( (xp + 0*n_elem_per_reg), zv[0] );
 
-			x0 += 1*n_elem_per_reg;
+			xp += 1*n_elem_per_reg;
 		}
 
 		for ( ; (i + 0) < n; i += 1 )
 		{
-			*x0 *= *alpha;
+			*xp *= *alpha;
 
-			x0 += 1;
+			xp += 1;
 		}
 	}
 	else
@@ -240,9 +242,9 @@ void bli_sscalv_zen_int10
 
 		for ( i = 0; i < n; ++i )
 		{
-			*x0 *= alphac;
+			*xp *= alphac;
 
-			x0 += incx;
+			xp += incx;
 		}
 	}
 }
@@ -251,18 +253,21 @@ void bli_sscalv_zen_int10
 
 void bli_dscalv_zen_int10
      (
-       conj_t           conjalpha,
-       dim_t            n,
-       double* restrict alpha,
-       double* restrict x, inc_t incx,
-       cntx_t*          cntx
+             conj_t  conjalpha,
+             dim_t   n,
+       const void*   alpha0,
+             void*   x0, inc_t incx,
+       const cntx_t* cntx
      )
 {
+	const double*    alpha = alpha0;
+	      double*    x     = x0;
+
 	const dim_t      n_elem_per_reg = 4;
 
 	dim_t            i;
 
-	double* restrict x0;
+	double* restrict xp;
 
 	__m256d          alphav;
 	__m256d          xv[10];
@@ -274,11 +279,10 @@ void bli_dscalv_zen_int10
 	// If alpha is zero, use setv.
 	if ( PASTEMAC(d,eq0)( *alpha ) )
 	{
-		double* zero = bli_d0;
-
 		if ( cntx == NULL ) cntx = ( cntx_t* )bli_gks_query_cntx();
 
-		dsetv_ker_ft f = bli_cntx_get_ukr_dt( BLIS_DOUBLE, BLIS_SETV_KER, cntx );
+		void*       zero = bli_d0;
+		setv_ker_ft f    = bli_cntx_get_ukr_dt( BLIS_DOUBLE, BLIS_SETV_KER, cntx );
 
 		f
 		(
@@ -293,7 +297,7 @@ void bli_dscalv_zen_int10
 	}
 
 	// Initialize local pointers.
-	x0 = x;
+	xp = x;
 
 	if ( incx == 1 )
 	{
@@ -303,16 +307,16 @@ void bli_dscalv_zen_int10
 		for ( i = 0; (i + 39) < n; i += 40 )
 		{
 			// Load the input values.
-			xv[0] = _mm256_loadu_pd( x0 + 0*n_elem_per_reg );
-			xv[1] = _mm256_loadu_pd( x0 + 1*n_elem_per_reg );
-			xv[2] = _mm256_loadu_pd( x0 + 2*n_elem_per_reg );
-			xv[3] = _mm256_loadu_pd( x0 + 3*n_elem_per_reg );
-			xv[4] = _mm256_loadu_pd( x0 + 4*n_elem_per_reg );
-			xv[5] = _mm256_loadu_pd( x0 + 5*n_elem_per_reg );
-			xv[6] = _mm256_loadu_pd( x0 + 6*n_elem_per_reg );
-			xv[7] = _mm256_loadu_pd( x0 + 7*n_elem_per_reg );
-			xv[8] = _mm256_loadu_pd( x0 + 8*n_elem_per_reg );
-			xv[9] = _mm256_loadu_pd( x0 + 9*n_elem_per_reg );
+			xv[0] = _mm256_loadu_pd( xp + 0*n_elem_per_reg );
+			xv[1] = _mm256_loadu_pd( xp + 1*n_elem_per_reg );
+			xv[2] = _mm256_loadu_pd( xp + 2*n_elem_per_reg );
+			xv[3] = _mm256_loadu_pd( xp + 3*n_elem_per_reg );
+			xv[4] = _mm256_loadu_pd( xp + 4*n_elem_per_reg );
+			xv[5] = _mm256_loadu_pd( xp + 5*n_elem_per_reg );
+			xv[6] = _mm256_loadu_pd( xp + 6*n_elem_per_reg );
+			xv[7] = _mm256_loadu_pd( xp + 7*n_elem_per_reg );
+			xv[8] = _mm256_loadu_pd( xp + 8*n_elem_per_reg );
+			xv[9] = _mm256_loadu_pd( xp + 9*n_elem_per_reg );
 
 			// perform : x := alpha * x;
 			zv[0] = _mm256_mul_pd( alphav, xv[0] );
@@ -327,28 +331,28 @@ void bli_dscalv_zen_int10
 			zv[9] = _mm256_mul_pd( alphav, xv[9] );
 
 			// Store the output.
-			_mm256_storeu_pd( (x0 + 0*n_elem_per_reg), zv[0] );
-			_mm256_storeu_pd( (x0 + 1*n_elem_per_reg), zv[1] );
-			_mm256_storeu_pd( (x0 + 2*n_elem_per_reg), zv[2] );
-			_mm256_storeu_pd( (x0 + 3*n_elem_per_reg), zv[3] );
-			_mm256_storeu_pd( (x0 + 4*n_elem_per_reg), zv[4] );
-			_mm256_storeu_pd( (x0 + 5*n_elem_per_reg), zv[5] );
-			_mm256_storeu_pd( (x0 + 6*n_elem_per_reg), zv[6] );
-			_mm256_storeu_pd( (x0 + 7*n_elem_per_reg), zv[7] );
-			_mm256_storeu_pd( (x0 + 8*n_elem_per_reg), zv[8] );
-			_mm256_storeu_pd( (x0 + 9*n_elem_per_reg), zv[9] );
+			_mm256_storeu_pd( (xp + 0*n_elem_per_reg), zv[0] );
+			_mm256_storeu_pd( (xp + 1*n_elem_per_reg), zv[1] );
+			_mm256_storeu_pd( (xp + 2*n_elem_per_reg), zv[2] );
+			_mm256_storeu_pd( (xp + 3*n_elem_per_reg), zv[3] );
+			_mm256_storeu_pd( (xp + 4*n_elem_per_reg), zv[4] );
+			_mm256_storeu_pd( (xp + 5*n_elem_per_reg), zv[5] );
+			_mm256_storeu_pd( (xp + 6*n_elem_per_reg), zv[6] );
+			_mm256_storeu_pd( (xp + 7*n_elem_per_reg), zv[7] );
+			_mm256_storeu_pd( (xp + 8*n_elem_per_reg), zv[8] );
+			_mm256_storeu_pd( (xp + 9*n_elem_per_reg), zv[9] );
 
-			x0 += 10*n_elem_per_reg;
+			xp += 10*n_elem_per_reg;
 		}
 
 		for ( ; (i + 19) < n; i += 20 )
 		{
 			// Load the input values.
-			xv[0] = _mm256_loadu_pd( x0 + 0*n_elem_per_reg );
-			xv[1] = _mm256_loadu_pd( x0 + 1*n_elem_per_reg );
-			xv[2] = _mm256_loadu_pd( x0 + 2*n_elem_per_reg );
-			xv[3] = _mm256_loadu_pd( x0 + 3*n_elem_per_reg );
-			xv[4] = _mm256_loadu_pd( x0 + 4*n_elem_per_reg );
+			xv[0] = _mm256_loadu_pd( xp + 0*n_elem_per_reg );
+			xv[1] = _mm256_loadu_pd( xp + 1*n_elem_per_reg );
+			xv[2] = _mm256_loadu_pd( xp + 2*n_elem_per_reg );
+			xv[3] = _mm256_loadu_pd( xp + 3*n_elem_per_reg );
+			xv[4] = _mm256_loadu_pd( xp + 4*n_elem_per_reg );
 
 			// perform : x := alpha * x;
 			zv[0] = _mm256_mul_pd( alphav, xv[0] );
@@ -358,22 +362,22 @@ void bli_dscalv_zen_int10
 			zv[4] = _mm256_mul_pd( alphav, xv[4] );
 
 			// Store the output.
-			_mm256_storeu_pd( (x0 + 0*n_elem_per_reg), zv[0] );
-			_mm256_storeu_pd( (x0 + 1*n_elem_per_reg), zv[1] );
-			_mm256_storeu_pd( (x0 + 2*n_elem_per_reg), zv[2] );
-			_mm256_storeu_pd( (x0 + 3*n_elem_per_reg), zv[3] );
-			_mm256_storeu_pd( (x0 + 4*n_elem_per_reg), zv[4] );
+			_mm256_storeu_pd( (xp + 0*n_elem_per_reg), zv[0] );
+			_mm256_storeu_pd( (xp + 1*n_elem_per_reg), zv[1] );
+			_mm256_storeu_pd( (xp + 2*n_elem_per_reg), zv[2] );
+			_mm256_storeu_pd( (xp + 3*n_elem_per_reg), zv[3] );
+			_mm256_storeu_pd( (xp + 4*n_elem_per_reg), zv[4] );
 
-			x0 += 5*n_elem_per_reg;
+			xp += 5*n_elem_per_reg;
 		}
 
 		for ( ; (i + 15) < n; i += 16 )
 		{
 			// Load the input values.
-			xv[0] = _mm256_loadu_pd( x0 + 0*n_elem_per_reg );
-			xv[1] = _mm256_loadu_pd( x0 + 1*n_elem_per_reg );
-			xv[2] = _mm256_loadu_pd( x0 + 2*n_elem_per_reg );
-			xv[3] = _mm256_loadu_pd( x0 + 3*n_elem_per_reg );
+			xv[0] = _mm256_loadu_pd( xp + 0*n_elem_per_reg );
+			xv[1] = _mm256_loadu_pd( xp + 1*n_elem_per_reg );
+			xv[2] = _mm256_loadu_pd( xp + 2*n_elem_per_reg );
+			xv[3] = _mm256_loadu_pd( xp + 3*n_elem_per_reg );
 
 			// perform : x := alpha * x;
 			zv[0] = _mm256_mul_pd( alphav, xv[0] );
@@ -382,50 +386,50 @@ void bli_dscalv_zen_int10
 			zv[3] = _mm256_mul_pd( alphav, xv[3] );
 
 			// Store the output.
-			_mm256_storeu_pd( (x0 + 0*n_elem_per_reg), zv[0] );
-			_mm256_storeu_pd( (x0 + 1*n_elem_per_reg), zv[1] );
-			_mm256_storeu_pd( (x0 + 2*n_elem_per_reg), zv[2] );
-			_mm256_storeu_pd( (x0 + 3*n_elem_per_reg), zv[3] );
+			_mm256_storeu_pd( (xp + 0*n_elem_per_reg), zv[0] );
+			_mm256_storeu_pd( (xp + 1*n_elem_per_reg), zv[1] );
+			_mm256_storeu_pd( (xp + 2*n_elem_per_reg), zv[2] );
+			_mm256_storeu_pd( (xp + 3*n_elem_per_reg), zv[3] );
 
-			x0 += 4*n_elem_per_reg;
+			xp += 4*n_elem_per_reg;
 		}
 
 		for ( ; (i + 7) < n; i += 8 )
 		{
 			// Load the input values.
-			xv[0] = _mm256_loadu_pd( x0 + 0*n_elem_per_reg );
-			xv[1] = _mm256_loadu_pd( x0 + 1*n_elem_per_reg );
+			xv[0] = _mm256_loadu_pd( xp + 0*n_elem_per_reg );
+			xv[1] = _mm256_loadu_pd( xp + 1*n_elem_per_reg );
 
 			// perform : x := alpha * x;
 			zv[0] = _mm256_mul_pd( alphav, xv[0] );
 			zv[1] = _mm256_mul_pd( alphav, xv[1] );
 
 			// Store the output.
-			_mm256_storeu_pd( (x0 + 0*n_elem_per_reg), zv[0] );
-			_mm256_storeu_pd( (x0 + 1*n_elem_per_reg), zv[1] );
+			_mm256_storeu_pd( (xp + 0*n_elem_per_reg), zv[0] );
+			_mm256_storeu_pd( (xp + 1*n_elem_per_reg), zv[1] );
 
-			x0 += 2*n_elem_per_reg;
+			xp += 2*n_elem_per_reg;
 		}
 
 		for ( ; (i + 3) < n; i += 4 )
 		{
 			// Load the input values.
-			xv[0] = _mm256_loadu_pd( x0 + 0*n_elem_per_reg );
+			xv[0] = _mm256_loadu_pd( xp + 0*n_elem_per_reg );
 
 			// perform : x := alpha * x;
 			zv[0] = _mm256_mul_pd( alphav, xv[0] );
 
 			// Store the output.
-			_mm256_storeu_pd( (x0 + 0*n_elem_per_reg), zv[0] );
+			_mm256_storeu_pd( (xp + 0*n_elem_per_reg), zv[0] );
 
-			x0 += 1*n_elem_per_reg;
+			xp += 1*n_elem_per_reg;
 		}
 
 		for ( ; (i + 0) < n; i += 1 )
 		{
-			*x0 *= *alpha;
+			*xp *= *alpha;
 
-			x0 += 1;
+			xp += 1;
 		}
 	}
 	else
@@ -434,9 +438,9 @@ void bli_dscalv_zen_int10
 
 		for ( i = 0; i < n; ++i )
 		{
-			*x0 *= alphac;
+			*xp *= alphac;
 
-			x0 += incx;
+			xp += incx;
 		}
 	}
 }
@@ -450,16 +454,14 @@ void bli_dscalv_zen_int10
 
 void bli_cscalv_zen_int10
      (
-       conj_t             conjalpha,
-       dim_t              n,
-       scomplex* restrict alpha,
-       scomplex* restrict x, inc_t incx,
-       cntx_t*   restrict cntx
+             conj_t  conjalpha,
+             dim_t   n,
+       const void*   alpha,
+             void*   x, inc_t incx,
+       const cntx_t* cntx
      )
 {
-	const num_t dt = BLIS_SCOMPLEX;
-
-	cscalv_ker_ft f = bli_cntx_get_ukr_dt( dt, BLIS_SCALV_KER, cntx );
+	scalv_ker_ft f = bli_cntx_get_ukr_dt( BLIS_SCOMPLEX, BLIS_SCALV_KER, cntx );
 
 	f
 	(

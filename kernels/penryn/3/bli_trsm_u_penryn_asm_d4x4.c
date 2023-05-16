@@ -40,11 +40,6 @@
 #if 0
 void bli_strsm_u_penryn_asm_8x4
      (
-       float*     restrict a11,
-       float*     restrict b11,
-       float*     restrict c11, inc_t rs_c0, inc_t cs_c0,
-       auxinfo_t*          data,
-       cntx_t*             cntx
      )
 {
 }
@@ -52,11 +47,11 @@ void bli_strsm_u_penryn_asm_8x4
 
 void bli_dtrsm_u_penryn_asm_4x4
      (
-       double*    restrict a11,
-       double*    restrict b11,
-       double*    restrict c11, inc_t rs_c0, inc_t cs_c0,
-       auxinfo_t*          data,
-       cntx_t*             cntx
+       const void*      a11,
+             void*      b11,
+             void*      c11, inc_t rs_c0, inc_t cs_c0,
+             auxinfo_t* data,
+       const cntx_t*    cntx
      )
 {
 	// Typecast local copies of integers in case dim_t and inc_t are a

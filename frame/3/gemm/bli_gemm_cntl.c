@@ -36,16 +36,16 @@
 #include "blis.h"
 
 
-static packm_ker_vft GENARRAY(packm_struc_cxk,packm_struc_cxk);
-static packm_ker_vft GENARRAY2_ALL(packm_struc_cxk_md,packm_struc_cxk_md);
+static packm_ker_ft GENARRAY(packm_struc_cxk,packm_struc_cxk);
+static packm_ker_ft GENARRAY2_ALL(packm_struc_cxk_md,packm_struc_cxk_md);
 
 void bli_gemm_var_cntl_init_node
      (
        void_fp          var_func,
        num_t            dt_comp,
        num_t            dt_out,
-       gemm_ukr_vft     ukr,
-       gemm_ukr_vft     real_ukr,
+       gemm_ukr_ft      ukr,
+       gemm_ukr_ft     real_ukr,
        bool             row_pref,
        dim_t            mr,
        dim_t            nr,
@@ -85,12 +85,12 @@ void bli_gemm_cntl_init
              gemm_cntl_t* cntl
      )
 {
-	const prec_t        comp_prec     = bli_obj_comp_prec( c );
-	const num_t         dt_c          = bli_obj_dt( c );
-	const num_t         dt_comp       = ( im == BLIS_1M ? BLIS_REAL : bli_dt_domain( dt_c ) ) | comp_prec;
-	      gemm_ukr_vft  gemm_ukr      = bli_cntx_get_ukr_dt( dt_comp, BLIS_GEMM_UKR, cntx );
-	      gemm_ukr_vft  real_gemm_ukr = NULL;
-	const bool          row_pref      = bli_cntx_get_ukr_prefs_dt( dt_comp, BLIS_GEMM_UKR_ROW_PREF, cntx );
+	const prec_t      comp_prec     = bli_obj_comp_prec( c );
+	const num_t       dt_c          = bli_obj_dt( c );
+	const num_t       dt_comp       = ( im == BLIS_1M ? BLIS_REAL : bli_dt_domain( dt_c ) ) | comp_prec;
+	      gemm_ukr_ft gemm_ukr      = bli_cntx_get_ukr_dt( dt_comp, BLIS_GEMM_UKR, cntx );
+	      gemm_ukr_ft real_gemm_ukr = NULL;
+	const bool        row_pref      = bli_cntx_get_ukr_prefs_dt( dt_comp, BLIS_GEMM_UKR_ROW_PREF, cntx );
 
 	// An optimization: If C is stored by rows and the micro-kernel prefers
 	// contiguous columns, or if C is stored by columns and the micro-kernel
@@ -194,9 +194,9 @@ void bli_gemm_cntl_init
 	const bool          b_up_tri      = bli_obj_is_triangular( b ) && bli_obj_is_upper( b );
 	      pack_t        schema_a      = BLIS_PACKED_ROW_PANELS;
 	      pack_t        schema_b      = BLIS_PACKED_COL_PANELS;
-	const packm_ker_vft packm_a_ukr   = dt_a == dt_ap ? packm_struc_cxk[ dt_a ]
+	const packm_ker_ft  packm_a_ukr   = dt_a == dt_ap ? packm_struc_cxk[ dt_a ]
 	                                                  : packm_struc_cxk_md[ dt_a ][ dt_ap ];
-	const packm_ker_vft packm_b_ukr   = dt_b == dt_bp ? packm_struc_cxk[ dt_b ]
+	const packm_ker_ft  packm_b_ukr   = dt_b == dt_bp ? packm_struc_cxk[ dt_b ]
 	                                                  : packm_struc_cxk_md[ dt_b ][ dt_bp ];
 	const dim_t         mr_def        = bli_cntx_get_blksz_def_dt( dt_comp, BLIS_MR, cntx );
 	const dim_t         mr_pack       = bli_cntx_get_blksz_max_dt( dt_comp, BLIS_MR, cntx );

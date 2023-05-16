@@ -42,19 +42,26 @@
 \
 void PASTEMAC3(ch,opname,arch,suf) \
      ( \
-       dim_t               m, \
-       dim_t               n, \
-       dim_t               k, \
-       ctype*     restrict alpha, \
-       ctype*     restrict a1x, \
-       ctype*     restrict a11, \
-       ctype*     restrict bx1, \
-       ctype*     restrict b11, \
-       ctype*     restrict c11, inc_t rs_c, inc_t cs_c, \
-       auxinfo_t*          data, \
-       cntx_t*             cntx  \
+             dim_t      m, \
+             dim_t      n, \
+             dim_t      k, \
+       const void*      alpha0, \
+       const void*      a1x0, \
+       const void*      a110, \
+       const void*      bx10, \
+             void*      b110, \
+             void*      c110, inc_t rs_c, inc_t cs_c, \
+             auxinfo_t* data, \
+       const cntx_t*    cntx  \
      ) \
 { \
+	const ctype* alpha = alpha0; \
+	const ctype* a1x   = a1x0; \
+	const ctype* a11   = a110; \
+	const ctype* bx1   = bx10; \
+	      ctype* b11   = b110; \
+	      ctype* c11   = c110; \
+\
 	const num_t dt     = PASTEMAC(ch,type); \
 \
 	const dim_t mr     = bli_cntx_get_blksz_def_dt( dt, BLIS_MR, cntx ); \
@@ -69,12 +76,10 @@ printf( "bli_gemmtrsm_ref(): cs_b = %d\n", (int)cs_b ); \
 printf( "bli_gemmtrsm_ref(): k nr = %d %d\n", (int)k, (int)nr ); \
 */ \
 \
-	ctype*      minus_one = PASTEMAC(ch,m1); \
+	const ctype* minus_one = PASTEMAC(ch,m1); \
 \
-	PASTECH(ch,gemm_ukr_ft) \
-	            gemm_ukr = bli_cntx_get_ukr_dt( dt, BLIS_GEMM_UKR, cntx ); \
-	PASTECH(ch,trsm_ukr_ft) \
-	            trsm_ukr = bli_cntx_get_ukr_dt( dt, trsmkerid, cntx ); \
+	gemm_ukr_ft gemm_ukr = bli_cntx_get_ukr_dt( dt, BLIS_GEMM_UKR, cntx ); \
+	trsm_ukr_ft trsm_ukr = bli_cntx_get_ukr_dt( dt, trsmkerid, cntx ); \
 \
 /*
 PASTEMAC(d,fprintm)( stdout, "gemmtrsm_ukr: b01", k, nr, \
@@ -83,7 +88,7 @@ PASTEMAC(d,fprintm)( stdout, "gemmtrsm_ukr: b11", mr, 2*nr, \
                      (double*)b11, rs_b, 1, "%5.2f", "" ); \
 */ \
 \
-	ctype           ct[ BLIS_STACK_BUF_MAX_SIZE \
+	      ctype     ct[ BLIS_STACK_BUF_MAX_SIZE \
 	                    / sizeof( ctype ) ] \
 	                    __attribute__((aligned(BLIS_STACK_BUF_ALIGN_SIZE))); \
 	/* to FGVZ: Should we be querying the preference of BLIS_GEMMTRSM_?_UKR
@@ -100,9 +105,9 @@ PASTEMAC(d,fprintm)( stdout, "gemmtrsm_ukr: b11", mr, 2*nr, \
 \
 	const bool      use_ct   = ( m < mr || n < nr ); \
 \
-	ctype* restrict c11_use  = c11; \
-	inc_t           rs_c_use = rs_c; \
-	inc_t           cs_c_use = cs_c; \
+	      ctype*    c11_use  = c11; \
+	      inc_t     rs_c_use = rs_c; \
+	      inc_t     cs_c_use = cs_c; \
 \
 	if ( use_ct ) \
 	{ \

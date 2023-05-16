@@ -54,8 +54,8 @@ void PASTEMAC(ch,varname) \
        const void*   kappa, \
        const void*   c, inc_t incc, inc_t ldc, \
              void*   p,             inc_t ldp, \
-       const cntx_t* cntx, \
-       const void*   params  \
+       const void*   params, \
+       const cntx_t* cntx  \
      ) \
 { \
 	( void )panel_dim_max; \
@@ -81,8 +81,8 @@ void PASTEMAC(ch,varname) \
 		                                         : BLIS_PACKM_MRXMR_DIAG_1ER_KER; \
 	} \
 \
-	packm_cxk_ker_vft f_cxk      = bli_cntx_get_ukr_dt( dt, cxk_ker_id, cntx ); \
-	packm_cxc_diag_ker_vft f_cxc = bli_cntx_get_ukr_dt( dt, cxc_ker_id, cntx ); \
+	PASTECH(cxk_kername,_ker_ft) f_cxk = bli_cntx_get_ukr_dt( dt, cxk_ker_id, cntx ); \
+	PASTECH(cxc_kername,_ker_ft) f_cxc = bli_cntx_get_ukr_dt( dt, cxc_ker_id, cntx ); \
 \
 	/* For general matrices, pack and return early */ \
 	if ( bli_is_general( strucc ) ) \
@@ -97,8 +97,8 @@ void PASTEMAC(ch,varname) \
 		  kappa, \
 		  c, incc, ldc, \
 		  p,       ldp, \
-		  cntx, \
-		  params  \
+		  params, \
+		  cntx  \
 		); \
 		return; \
 	} \
@@ -188,8 +188,8 @@ void PASTEMAC(ch,varname) \
 			  kappa, \
 			  c10, incc10, ldc10, \
 			  p10,         ldp, \
-			  cntx, \
-			  params  \
+			  params, \
+			  cntx  \
 			); \
 		} \
 	} \
@@ -220,8 +220,8 @@ void PASTEMAC(ch,varname) \
 		  kappa, \
 		  c11, incc11, ldc11, \
 		  p11,         ldp, \
-		  cntx, \
-		  params  \
+		  params, \
+		  cntx  \
 		); \
 	} \
 \
@@ -301,8 +301,8 @@ void PASTEMAC(ch,varname) \
 			  kappa, \
 			  c12, incc12, ldc12, \
 			  p12,         ldp, \
-			  cntx, \
-			  params  \
+			  params, \
+			  cntx  \
 			); \
 		} \
 	} \

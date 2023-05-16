@@ -160,7 +160,7 @@ void PASTEMAC2(chx,chy,opname) \
 }
 
 INSERT_GENTFUNC2_BASIC( castv )
-INSERT_GENTFUNC2_MIXDP( castv )
+INSERT_GENTFUNC2_MIX_DP( castv )
 
 // -----------------------------------------------------------------------------
 

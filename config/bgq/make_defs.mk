@@ -58,7 +58,7 @@ CMISCFLAGS     := -fopenmp
 else
 $(error xlc or bgclang is required for this configuration.)
 endif
-CPICFLAGS      :=
+CPICFLAGS      := -fPIC
 CWARNFLAGS     := -w
 
 ifneq ($(DEBUG_TYPE),off)

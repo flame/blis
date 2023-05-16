@@ -93,38 +93,44 @@ GEMMSUP_KER_PROT( float,    s, gemmsup_r_haswell_ref )
 \
 void PASTEMAC(ch,opname) \
      ( \
-       conj_t              conja, \
-       conj_t              conjb, \
-       dim_t               m, \
-       dim_t               n, \
-       dim_t               k, \
-       ctype*     restrict alpha, \
-       ctype*     restrict a, inc_t rs_a, inc_t cs_a, \
-       ctype*     restrict b, inc_t rs_b, inc_t cs_b, \
-       ctype*     restrict beta, \
-       ctype*     restrict c, inc_t rs_c, inc_t cs_c, \
-       auxinfo_t*          data, \
-       cntx_t*             cntx \
+             conj_t     conja, \
+             conj_t     conjb, \
+             dim_t      m, \
+             dim_t      n, \
+             dim_t      k, \
+       const void*      alpha0, \
+       const void*      a0, inc_t rs_a, inc_t cs_a, \
+       const void*      b0, inc_t rs_b, inc_t cs_b, \
+       const void*      beta0, \
+             void*      c0, inc_t rs_c, inc_t cs_c, \
+             auxinfo_t* data, \
+       const cntx_t*    cntx \
      ) \
 { \
+	const ctype* alpha = alpha0; \
+	const ctype* a     = a0; \
+	const ctype* b     = b0; \
+	const ctype* beta  = beta0; \
+	      ctype* c     = c0; \
+\
 	for ( dim_t i = 0; i < mdim; ++i ) \
 	{ \
-		ctype* restrict ci = &c[ i*rs_c ]; \
-		ctype* restrict ai = &a[ i*rs_a ]; \
+		      ctype* ci = &c[ i*rs_c ]; \
+		const ctype* ai = &a[ i*rs_a ]; \
 \
 		/* for ( dim_t j = 0; j < 1; ++j ) */ \
 		{ \
-			ctype* restrict cij = ci /*[ j*cs_c ]*/ ; \
-			ctype* restrict bj  = b  /*[ j*cs_b ]*/ ; \
-			ctype           ab; \
+			      ctype* cij = ci /*[ j*cs_c ]*/ ; \
+			const ctype* bj  = b  /*[ j*cs_b ]*/ ; \
+			ctype        ab; \
 \
 			PASTEMAC(ch,set0s)( ab ); \
 \
 			/* Perform a dot product to update the (i,j) element of c. */ \
 			for ( dim_t l = 0; l < k; ++l ) \
 			{ \
-				ctype* restrict aij = &ai[ l*cs_a ]; \
-				ctype* restrict bij = &bj[ l*rs_b ]; \
+				const ctype* aij = &ai[ l*cs_a ]; \
+				const ctype* bij = &bj[ l*rs_b ]; \
 \
 				PASTEMAC(ch,dots)( *aij, *bij, ab ); \
 			} \
@@ -155,70 +161,3 @@ GENTFUNC( float,  s, gemmsup_r_haswell_ref_3x1, 3 )
 GENTFUNC( float,  s, gemmsup_r_haswell_ref_2x1, 2 )
 GENTFUNC( float,  s, gemmsup_r_haswell_ref_1x1, 1 )
 
-// -----------------------------------------------------------------------------
-
-#if 0
-// Temporary definition of general-purpose sup kernel.
-
-#undef  GENTFUNC
-#define GENTFUNC( ctype, ch, opname ) \
-\
-void PASTEMAC(ch,opname) \
-     ( \
-       conj_t              conja, \
-       conj_t              conjb, \
-       dim_t               m, \
-       dim_t               n, \
-       dim_t               k, \
-       ctype*     restrict alpha, \
-       ctype*     restrict a, inc_t rs_a, inc_t cs_a, \
-       ctype*     restrict b, inc_t rs_b, inc_t cs_b, \
-       ctype*     restrict beta, \
-       ctype*     restrict c, inc_t rs_c, inc_t cs_c, \
-       auxinfo_t*          data, \
-       cntx_t*             cntx \
-     ) \
-{ \
-	for ( dim_t i = 0; i < m; ++i ) \
-	{ \
-		ctype* restrict ci = &c[ i*rs_c ]; \
-		ctype* restrict ai = &a[ i*rs_a ]; \
-\
-		for ( dim_t j = 0; j < n; ++j ) \
-		{ \
-			ctype* restrict cij = &ci[ j*cs_c ]; \
-			ctype* restrict bj  = &b [ j*cs_b ]; \
-			ctype           ab; \
-\
-			PASTEMAC(ch,set0s)( ab ); \
-\
-			/* Perform a dot product to update the (i,j) element of c. */ \
-			for ( dim_t l = 0; l < k; ++l ) \
-			{ \
-				ctype* restrict aij = &ai[ l*cs_a ]; \
-				ctype* restrict bij = &bj[ l*rs_b ]; \
-\
-				PASTEMAC(ch,dots)( *aij, *bij, ab ); \
-			} \
-\
-			/* If beta is one, add ab into c. If beta is zero, overwrite c
-			   with the result in ab. Otherwise, scale by beta and accumulate
-			   ab to c. */ \
-			if ( PASTEMAC(ch,eq1)( *beta ) ) \
-			{ \
-				PASTEMAC(ch,axpys)( *alpha, ab, *cij ); \
-			} \
-			else if ( PASTEMAC(d,eq0)( *beta ) ) \
-			{ \
-				PASTEMAC(ch,scal2s)( *alpha, ab, *cij ); \
-			} \
-			else \
-			{ \
-				PASTEMAC(ch,axpbys)( *alpha, ab, *beta, *cij ); \
-			} \
-		} \
-	} \
-}
-
-GENTFUNC( float,  s, gemmsup_r_haswell_ref )
-#endif

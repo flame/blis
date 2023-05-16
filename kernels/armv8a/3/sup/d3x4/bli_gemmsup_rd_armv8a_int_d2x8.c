@@ -59,30 +59,30 @@
  */
 void bli_dgemmsup_rd_armv8a_int_2x8
      (
-       conj_t              conja,
-       conj_t              conjb,
-       dim_t               m0,
-       dim_t               n0,
-       dim_t               k0,
-       double*    restrict alpha,
-       double*    restrict a, inc_t rs_a, inc_t cs_a,
-       double*    restrict b, inc_t rs_b, inc_t cs_b,
-       double*    restrict beta,
-       double*    restrict c, inc_t rs_c, inc_t cs_c,
-       auxinfo_t*          data,
-       cntx_t*             cntx
+             conj_t     conja,
+             conj_t     conjb,
+             dim_t      m0,
+             dim_t      n0,
+             dim_t      k0,
+       const void*      alpha,
+       const void*      a, inc_t rs_a, inc_t cs_a,
+       const void*      b, inc_t rs_b, inc_t cs_b,
+       const void*      beta,
+             void*      c, inc_t rs_c, inc_t cs_c,
+             auxinfo_t* data,
+       const cntx_t*    cntx
      )
 {
   assert( m0 <= 2 );
   assert( n0 <= 8 );
 
-  double *a_loc = a;
-  double *b_loc = b;
-  double *c_loc = c;
+  const double *a_loc = a;
+  const double *b_loc = b;
+        double *c_loc = c;
 
   uint64_t k_mker = k0 / 2;
   uint64_t k_left = k0 % 2;
-  uint64_t b_iszr = ( *beta == 0.0 );
+  uint64_t b_iszr = ( *(( double* )beta) == 0.0 );
 
   assert( cs_a == 1 );
   assert( rs_b == 1 );

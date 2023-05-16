@@ -47,7 +47,7 @@ THIS_CONFIG    := generic
 # may specify additional flags here as needed.
 CPPROCFLAGS    :=
 CMISCFLAGS     :=
-CPICFLAGS      :=
+CPICFLAGS      := -fPIC
 CWARNFLAGS     :=
 
 ifneq ($(DEBUG_TYPE),off)
@@ -71,7 +71,11 @@ else
 ifeq ($(CC_VENDOR),clang)
 CKVECFLAGS     :=
 else
-$(error gcc, icc, or clang is required for this configuration.)
+ifeq ($(CC_VENDOR),nvc)
+CKVECFLAGS     :=
+else
+$(error gcc, icc, nvc, or clang is required for this configuration.)
+endif
 endif
 endif
 endif

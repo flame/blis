@@ -47,7 +47,7 @@ THIS_CONFIG    := knc
 # may specify additional flags here as needed.
 CPPROCFLAGS    :=
 CMISCFLAGS     := -mmic -fasm-blocks
-CPICFLAGS      :=
+CPICFLAGS      := -fPIC
 CWARNFLAGS     :=
 
 ifneq ($(DEBUG_TYPE),off)

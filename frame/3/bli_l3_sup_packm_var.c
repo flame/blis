@@ -129,7 +129,7 @@ void PASTEMAC(ch,varname) \
 \
 	/* Query the context for the unpackm kernel corresponding to the current
 	   panel dimension, or kernel id. */ \
-	packm_cxk_ker_vft f = bli_cntx_get_ukr_dt( dt, ker_id, cntx ); \
+	PASTECH(packm_cxk,_ker_ft) f = bli_cntx_get_ukr_dt( dt, ker_id, cntx ); \
 \
 	/* Compute the total number of iterations we'll need. */ \
 	n_iter = iter_dim / panel_dim_max + ( iter_dim % panel_dim_max ? 1 : 0 ); \
@@ -145,8 +145,8 @@ void PASTEMAC(ch,varname) \
 \
 	/* Query the number of threads and thread ids from the current thread's
 	   packm thrinfo_t node. */ \
-	const dim_t nt  = bli_thrinfo_num_threads( thread ); \
-	const dim_t tid = bli_thrinfo_thread_id( thread ); \
+	const dim_t nt  = bli_thrinfo_n_way( thread ); \
+	const dim_t tid = bli_thrinfo_work_id( thread ); \
 \
 	/* Suppress warnings in case tid isn't used (ie: as in slab partitioning). */ \
 	( void )nt; \
@@ -189,8 +189,8 @@ void PASTEMAC(ch,varname) \
 				  kappa_cast, \
 				  c_use, vs_c, ldc, \
 				  p_use,       ldp, \
-				  cntx, \
-				  NULL  \
+				  NULL, \
+				  cntx  \
 				); \
 			} \
 \
@@ -389,8 +389,8 @@ void PASTEMAC(ch,varname) \
 \
 	/* Query the number of threads and thread ids from the current thread's
 	   packm thrinfo_t node. */ \
-	const dim_t nt  = bli_thrinfo_num_threads( thread ); \
-	const dim_t tid = bli_thrinfo_thread_id( thread ); \
+	const dim_t nt  = bli_thrinfo_n_way( thread ); \
+	const dim_t tid = bli_thrinfo_work_id( thread ); \
 \
 	/* Suppress warnings in case tid isn't used (ie: as in slab partitioning). */ \
 	( void )nt; \

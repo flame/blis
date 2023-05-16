@@ -1,6 +1,6 @@
-#!/bin/bash
 #
-#  BLIS    
+#
+#  BLIS
 #  An object-based framework for developing high-performance BLAS-like
 #  libraries.
 #
@@ -47,7 +47,7 @@ CC             := gcc
 CC_VENDOR      := gcc
 endif
 
-# Enable IEEE Standard 1003.1-2004 (POSIX.1d). 
+# Enable IEEE Standard 1003.1-2004 (POSIX.1d).
 # NOTE: This is needed to enable posix_memalign().
 CPPROCFLAGS    := -D_POSIX_C_SOURCE=200112L
 CMISCFLAGS     := -std=c99
@@ -67,13 +67,13 @@ endif
 CKOPTFLAGS     := $(COPTFLAGS)
 
 ifeq ($(CC_VENDOR),gcc)
-CKVECFLAGS     := 
+CKVECFLAGS     :=
 else
 ifeq ($(CC_VENDOR),icc)
-CKVECFLAGS     := 
+CKVECFLAGS     :=
 else
 ifeq ($(CC_VENDOR),clang)
-CKVECFLAGS     := 
+CKVECFLAGS     :=
 else
 $(error gcc, icc, or clang is required for this configuration.)
 endif
@@ -83,4 +83,3 @@ endif
 # Store all of the variables here to new variables containing the
 # configuration name.
 $(eval $(call store-make-defs,$(THIS_CONFIG)))
-

@@ -35,7 +35,7 @@
 #include "bli_l1m_check.h"
 
 // Define kernel function types.
-#include "bli_l1m_ft_ker.h"
+#include "bli_l1m_ker_ft.h"
 
 // Define object function types for variants.
 #include "bli_l1m_oft_var.h"

@@ -36,39 +36,25 @@
 #include <immintrin.h>
 #include "blis.h"
 
-
-#if 0
-void bli_sgemm_sandybridge_int_8x8
-     (
-       dim_t               m,
-       dim_t               n,
-       dim_t               k,
-       float*     restrict alpha,
-       float*     restrict a,
-       float*     restrict b,
-       float*     restrict beta,
-       float*     restrict c, inc_t rs_c0, inc_t cs_c0,
-       auxinfo_t*          data,
-       cntx_t*             cntx
-     )
-{
-}
-#endif
-
 void bli_dgemm_sandybridge_int_8x4
      (
-       dim_t               m,
-       dim_t               n,
-       dim_t               k,
-       double*    restrict alpha,
-       double*    restrict a,
-       double*    restrict b,
-       double*    restrict beta,
-       double*    restrict c, inc_t rs_c0, inc_t cs_c0,
-       auxinfo_t*          data,
-       cntx_t*             cntx
+             dim_t      m,
+             dim_t      n,
+             dim_t      k,
+       const void*      alpha0,
+       const void*      a0,
+       const void*      b0,
+       const void*      beta0,
+             void*      c0, inc_t rs_c0, inc_t cs_c0,
+             auxinfo_t* data,
+       const cntx_t*    cntx
      )
 {
+	const double* alpha = alpha0;
+	const double* a     = a0;
+	const double* b     = b0;
+	const double* beta  = beta0;
+	      double* c     = c0;
 
 	//const void* a_next = bli_auxinfo_next_a( data );
 	const void* b_next = bli_auxinfo_next_b( data );
@@ -489,44 +475,4 @@ void bli_dgemm_sandybridge_int_8x4
 
 	GEMM_UKR_FLUSH_CT( d );
 }
-
-
-
-#if 0
-void bli_cgemm_sandybridge_int_8x4
-     (
-       dim_t               m,
-       dim_t               n,
-       dim_t               k,
-       scomplex*  restrict alpha,
-       scomplex*  restrict a,
-       scomplex*  restrict b,
-       scomplex*  restrict beta,
-       scomplex*  restrict c, inc_t rs_c0, inc_t cs_c0,
-       auxinfo_t*          data,
-       cntx_t*             cntx
-     )
-{
-}
-#endif
-
-
-
-#if 0
-void bli_zgemm_sandybridge_int_4x4
-     (
-       dim_t               m,
-       dim_t               n,
-       dim_t               k,
-       dcomplex*  restrict alpha,
-       dcomplex*  restrict a,
-       dcomplex*  restrict b,
-       dcomplex*  restrict beta,
-       dcomplex*  restrict c, inc_t rs_c0, inc_t cs_c0,
-       auxinfo_t*          data,
-       cntx_t*             cntx
-     )
-{
-}
-#endif
 

@@ -83,18 +83,18 @@ GEMMSUP_KER_PROT( float,    s, gemmsup_r_haswell_ref )
 
 void bli_sgemmsup_rv_haswell_asm_6x16n
      (
-       conj_t              conja,
-       conj_t              conjb,
-       dim_t               m0,
-       dim_t               n0,
-       dim_t               k0,
-       float*     restrict alpha,
-       float*     restrict a, inc_t rs_a0, inc_t cs_a0,
-       float*     restrict b, inc_t rs_b0, inc_t cs_b0,
-       float*     restrict beta,
-       float*     restrict c, inc_t rs_c0, inc_t cs_c0,
-       auxinfo_t*          data,
-       cntx_t*             cntx
+             conj_t     conja,
+             conj_t     conjb,
+             dim_t      m0,
+             dim_t      n0,
+             dim_t      k0,
+       const void*      alpha,
+       const void*      a, inc_t rs_a0, inc_t cs_a0,
+       const void*      b, inc_t rs_b0, inc_t cs_b0,
+       const void*      beta,
+             void*      c, inc_t rs_c0, inc_t cs_c0,
+             auxinfo_t* data,
+       const cntx_t*    cntx
      )
 {
 	uint64_t m_left = m0 % 6;
@@ -103,17 +103,17 @@ void bli_sgemmsup_rv_haswell_asm_6x16n
 	// dispatch other ?x8m kernels, as needed.
 	if ( m_left )
 	{
-		float* restrict cij = c;
-		float* restrict bj  = b;
-		float* restrict ai  = a;
+		      float* cij = ( float* )c;
+		const float* bj  = ( float* )b;
+		const float* ai  = ( float* )a;
 
 #if 1
 		// We add special handling for slightly inflated MR blocksizes
 		// at edge cases, up to a maximum of 9.
 		if ( 6 < m0 )
 		{
-			sgemmsup_ker_ft ker_fp1 = NULL;
-			sgemmsup_ker_ft ker_fp2 = NULL;
+			gemmsup_ker_ft  ker_fp1 = NULL;
+			gemmsup_ker_ft  ker_fp2 = NULL;
 			dim_t           mr1, mr2;
 
 			if ( m0 == 7 )
@@ -154,7 +154,7 @@ void bli_sgemmsup_rv_haswell_asm_6x16n
 		}
 #endif
 
-		sgemmsup_ker_ft ker_fps[6] =
+		gemmsup_ker_ft  ker_fps[6] =
 		{
 		  NULL,
 		  bli_sgemmsup_rv_haswell_asm_1x16n,
@@ -164,7 +164,7 @@ void bli_sgemmsup_rv_haswell_asm_6x16n
 		  bli_sgemmsup_rv_haswell_asm_5x16n
 		};
 
-		sgemmsup_ker_ft ker_fp = ker_fps[ m_left ];
+		gemmsup_ker_ft  ker_fp = ker_fps[ m_left ];
 
 		ker_fp
 		(
@@ -993,11 +993,11 @@ void bli_sgemmsup_rv_haswell_asm_6x16n
 		const dim_t      mr_cur = 6;
 		const dim_t      j_edge = n0 - ( dim_t )n_left;
 
-		float* restrict cij = c + j_edge*cs_c;
-		float* restrict ai  = a;
-		//float* restrict bj  = b + j_edge*cs_b;
-		//float* restrict bj  = b + ( j_edge / 8 ) * ps_b;
-		float* restrict bj  = b + n_iter * ps_b;
+		      float* cij = ( float* )c + j_edge*cs_c;
+		const float* ai  = ( float* )a;
+		//const float* bj  = ( float* )b + j_edge*cs_b;
+		//const float* bj  = ( float* )b + ( j_edge / 8 ) * ps_b;
+		const float* bj  = ( float* )b + n_iter * ps_b;
 
 		if ( 12 <= n_left )
 		{
@@ -1084,18 +1084,18 @@ void bli_sgemmsup_rv_haswell_asm_6x16n
 
 void bli_sgemmsup_rv_haswell_asm_5x16n
      (
-       conj_t              conja,
-       conj_t              conjb,
-       dim_t               m0,
-       dim_t               n0,
-       dim_t               k0,
-       float*     restrict alpha,
-       float*     restrict a, inc_t rs_a0, inc_t cs_a0,
-       float*     restrict b, inc_t rs_b0, inc_t cs_b0,
-       float*     restrict beta,
-       float*     restrict c, inc_t rs_c0, inc_t cs_c0,
-       auxinfo_t*          data,
-       cntx_t*             cntx
+             conj_t     conja,
+             conj_t     conjb,
+             dim_t      m0,
+             dim_t      n0,
+             dim_t      k0,
+       const void*      alpha,
+       const void*      a, inc_t rs_a0, inc_t cs_a0,
+       const void*      b, inc_t rs_b0, inc_t cs_b0,
+       const void*      beta,
+             void*      c, inc_t rs_c0, inc_t cs_c0,
+             auxinfo_t* data,
+       const cntx_t*    cntx
      )
 {
 	//void*    a_next = bli_auxinfo_next_a( data );
@@ -1925,11 +1925,11 @@ void bli_sgemmsup_rv_haswell_asm_5x16n
 		const dim_t      mr_cur = 5;
 		const dim_t      j_edge = n0 - ( dim_t )n_left;
 
-		float* restrict cij = c + j_edge*cs_c;
-		float* restrict ai  = a;
-		//float* restrict bj  = b + j_edge*cs_b;
-		//float* restrict bj  = b + ( j_edge / 8 ) * ps_b;
-		float* restrict bj  = b + n_iter * ps_b;
+		      float* cij = ( float* )c + j_edge*cs_c;
+		const float* ai  = ( float* )a;
+		//const float* bj  = ( float* )b + j_edge*cs_b;
+		//const float* bj  = ( float* )b + ( j_edge / 8 ) * ps_b;
+		const float* bj  = ( float* )b + n_iter * ps_b;
 
 		if ( 12 <= n_left )
 		{
@@ -2016,18 +2016,18 @@ void bli_sgemmsup_rv_haswell_asm_5x16n
 
 void bli_sgemmsup_rv_haswell_asm_4x16n
      (
-       conj_t              conja,
-       conj_t              conjb,
-       dim_t               m0,
-       dim_t               n0,
-       dim_t               k0,
-       float*     restrict alpha,
-       float*     restrict a, inc_t rs_a0, inc_t cs_a0,
-       float*     restrict b, inc_t rs_b0, inc_t cs_b0,
-       float*     restrict beta,
-       float*     restrict c, inc_t rs_c0, inc_t cs_c0,
-       auxinfo_t*          data,
-       cntx_t*             cntx
+             conj_t     conja,
+             conj_t     conjb,
+             dim_t      m0,
+             dim_t      n0,
+             dim_t      k0,
+       const void*      alpha,
+       const void*      a, inc_t rs_a0, inc_t cs_a0,
+       const void*      b, inc_t rs_b0, inc_t cs_b0,
+       const void*      beta,
+             void*      c, inc_t rs_c0, inc_t cs_c0,
+             auxinfo_t* data,
+       const cntx_t*    cntx
      )
 {
 	//void*    a_next = bli_auxinfo_next_a( data );
@@ -2683,11 +2683,11 @@ void bli_sgemmsup_rv_haswell_asm_4x16n
 		const dim_t      mr_cur = 4;
 		const dim_t      j_edge = n0 - ( dim_t )n_left;
 
-		float* restrict cij = c + j_edge*cs_c;
-		float* restrict ai  = a;
-		//float* restrict bj  = b + j_edge*cs_b;
-		//float* restrict bj  = b + ( j_edge / 8 ) * ps_b;
-		float* restrict bj  = b + n_iter * ps_b;
+		      float* cij = ( float* )c + j_edge*cs_c;
+		const float* ai  = ( float* )a;
+		//const float* bj  = ( float* )b + j_edge*cs_b;
+		//const float* bj  = ( float* )b + ( j_edge / 8 ) * ps_b;
+		const float* bj  = ( float* )b + n_iter * ps_b;
 
 		if ( 12 <= n_left )
 		{
@@ -2774,18 +2774,18 @@ void bli_sgemmsup_rv_haswell_asm_4x16n
 
 void bli_sgemmsup_rv_haswell_asm_3x16n
      (
-       conj_t              conja,
-       conj_t              conjb,
-       dim_t               m0,
-       dim_t               n0,
-       dim_t               k0,
-       float*     restrict alpha,
-       float*     restrict a, inc_t rs_a0, inc_t cs_a0,
-       float*     restrict b, inc_t rs_b0, inc_t cs_b0,
-       float*     restrict beta,
-       float*     restrict c, inc_t rs_c0, inc_t cs_c0,
-       auxinfo_t*          data,
-       cntx_t*             cntx
+             conj_t     conja,
+             conj_t     conjb,
+             dim_t      m0,
+             dim_t      n0,
+             dim_t      k0,
+       const void*      alpha,
+       const void*      a, inc_t rs_a0, inc_t cs_a0,
+       const void*      b, inc_t rs_b0, inc_t cs_b0,
+       const void*      beta,
+             void*      c, inc_t rs_c0, inc_t cs_c0,
+             auxinfo_t* data,
+       const cntx_t*    cntx
      )
 {
 	//void*    a_next = bli_auxinfo_next_a( data );
@@ -3502,11 +3502,11 @@ void bli_sgemmsup_rv_haswell_asm_3x16n
 		const dim_t      mr_cur = 3;
 		const dim_t      j_edge = n0 - ( dim_t )n_left;
 
-		float* restrict cij = c + j_edge*cs_c;
-		float* restrict ai  = a;
-		//float* restrict bj  = b + j_edge*cs_b;
-		//float* restrict bj  = b + ( j_edge / 8 ) * ps_b;
-		float* restrict bj  = b + n_iter * ps_b;
+		      float* cij = ( float* )c + j_edge*cs_c;
+		const float* ai  = ( float* )a;
+		//const float* bj  = ( float* )b + j_edge*cs_b;
+		//const float* bj  = ( float* )b + ( j_edge / 8 ) * ps_b;
+		const float* bj  = ( float* )b + n_iter * ps_b;
 
 		if ( 12 <= n_left )
 		{
@@ -3593,18 +3593,18 @@ void bli_sgemmsup_rv_haswell_asm_3x16n
 
 void bli_sgemmsup_rv_haswell_asm_2x16n
      (
-       conj_t              conja,
-       conj_t              conjb,
-       dim_t               m0,
-       dim_t               n0,
-       dim_t               k0,
-       float*     restrict alpha,
-       float*     restrict a, inc_t rs_a0, inc_t cs_a0,
-       float*     restrict b, inc_t rs_b0, inc_t cs_b0,
-       float*     restrict beta,
-       float*     restrict c, inc_t rs_c0, inc_t cs_c0,
-       auxinfo_t*          data,
-       cntx_t*             cntx
+             conj_t     conja,
+             conj_t     conjb,
+             dim_t      m0,
+             dim_t      n0,
+             dim_t      k0,
+       const void*      alpha,
+       const void*      a, inc_t rs_a0, inc_t cs_a0,
+       const void*      b, inc_t rs_b0, inc_t cs_b0,
+       const void*      beta,
+             void*      c, inc_t rs_c0, inc_t cs_c0,
+             auxinfo_t* data,
+       const cntx_t*    cntx
      )
 {
 	//void*    a_next = bli_auxinfo_next_a( data );
@@ -4140,11 +4140,11 @@ void bli_sgemmsup_rv_haswell_asm_2x16n
 		const dim_t      mr_cur = 2;
 		const dim_t      j_edge = n0 - ( dim_t )n_left;
 
-		float* restrict cij = c + j_edge*cs_c;
-		float* restrict ai  = a;
-		//float* restrict bj  = b + j_edge*cs_b;
-		//float* restrict bj  = b + ( j_edge / 8 ) * ps_b;
-		float* restrict bj  = b + n_iter * ps_b;
+		      float* cij = ( float* )c + j_edge*cs_c;
+		const float* ai  = ( float* )a;
+		//const float* bj  = ( float* )b + j_edge*cs_b;
+		//const float* bj  = ( float* )b + ( j_edge / 8 ) * ps_b;
+		const float* bj  = ( float* )b + n_iter * ps_b;
 
 		if ( 12 <= n_left )
 		{
@@ -4231,18 +4231,18 @@ void bli_sgemmsup_rv_haswell_asm_2x16n
 
 void bli_sgemmsup_rv_haswell_asm_1x16n
      (
-       conj_t              conja,
-       conj_t              conjb,
-       dim_t               m0,
-       dim_t               n0,
-       dim_t               k0,
-       float*     restrict alpha,
-       float*     restrict a, inc_t rs_a0, inc_t cs_a0,
-       float*     restrict b, inc_t rs_b0, inc_t cs_b0,
-       float*     restrict beta,
-       float*     restrict c, inc_t rs_c0, inc_t cs_c0,
-       auxinfo_t*          data,
-       cntx_t*             cntx
+             conj_t     conja,
+             conj_t     conjb,
+             dim_t      m0,
+             dim_t      n0,
+             dim_t      k0,
+       const void*      alpha,
+       const void*      a, inc_t rs_a0, inc_t cs_a0,
+       const void*      b, inc_t rs_b0, inc_t cs_b0,
+       const void*      beta,
+             void*      c, inc_t rs_c0, inc_t cs_c0,
+             auxinfo_t* data,
+       const cntx_t*    cntx
      )
 {
 	//void*    a_next = bli_auxinfo_next_a( data );
@@ -4791,11 +4791,11 @@ void bli_sgemmsup_rv_haswell_asm_1x16n
 		const dim_t      mr_cur = 1;
 		const dim_t      j_edge = n0 - ( dim_t )n_left;
 
-		float* restrict cij = c + j_edge*cs_c;
-		float* restrict ai  = a;
-		//float* restrict bj  = b + j_edge*cs_b;
-		//float* restrict bj  = b + ( j_edge / 8 ) * ps_b;
-		float* restrict bj  = b + n_iter * ps_b;
+		      float* cij = ( float* )c + j_edge*cs_c;
+		const float* ai  = ( float* )a;
+		//const float* bj  = ( float* )b + j_edge*cs_b;
+		//const float* bj  = ( float* )b + ( j_edge / 8 ) * ps_b;
+		const float* bj  = ( float* )b + n_iter * ps_b;
 
 		if ( 12 <= n_left )
 		{

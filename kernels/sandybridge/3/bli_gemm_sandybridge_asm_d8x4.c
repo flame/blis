@@ -42,16 +42,16 @@
 
 void bli_sgemm_sandybridge_asm_8x8
      (
-       dim_t               m,
-       dim_t               n,
-       dim_t               k,
-       float*     restrict alpha,
-       float*     restrict a,
-       float*     restrict b,
-       float*     restrict beta,
-       float*     restrict c, inc_t rs_c0, inc_t cs_c0,
-       auxinfo_t*          data,
-       cntx_t*             cntx
+             dim_t      m,
+             dim_t      n,
+             dim_t      k,
+       const void*      alpha,
+       const void*      a,
+       const void*      b,
+       const void*      beta,
+             void*      c, inc_t rs_c0, inc_t cs_c0,
+             auxinfo_t* data,
+       const cntx_t*    cntx
      )
 {
 	//void*   a_next = bli_auxinfo_next_a( data );
@@ -534,20 +534,20 @@ void bli_sgemm_sandybridge_asm_8x8
 
 void bli_dgemm_sandybridge_asm_8x4
      (
-       dim_t               m,
-       dim_t               n,
-       dim_t               k,
-       double*    restrict alpha,
-       double*    restrict a,
-       double*    restrict b,
-       double*    restrict beta,
-       double*    restrict c, inc_t rs_c0, inc_t cs_c0,
-       auxinfo_t*          data,
-       cntx_t*             cntx
+             dim_t      m,
+             dim_t      n,
+             dim_t      k,
+       const void*      alpha,
+       const void*      a,
+       const void*      b,
+       const void*      beta,
+             void*      c, inc_t rs_c0, inc_t cs_c0,
+             auxinfo_t* data,
+       const cntx_t*    cntx
      )
 {
 	//const void*   a_next = bli_auxinfo_next_a( data );
-	const void*   b_next = bli_auxinfo_next_b( data );
+	const void* b_next = bli_auxinfo_next_b( data );
 
 	// Typecast local copies of integers in case dim_t and inc_t are a
 	// different size than is expected by load instructions.
@@ -996,20 +996,20 @@ void bli_dgemm_sandybridge_asm_8x4
 
 void bli_cgemm_sandybridge_asm_8x4
      (
-       dim_t               m,
-       dim_t               n,
-       dim_t               k,
-       scomplex*  restrict alpha,
-       scomplex*  restrict a,
-       scomplex*  restrict b,
-       scomplex*  restrict beta,
-       scomplex*  restrict c, inc_t rs_c0, inc_t cs_c0,
-       auxinfo_t*          data,
-       cntx_t*             cntx
+             dim_t      m,
+             dim_t      n,
+             dim_t      k,
+       const void*      alpha,
+       const void*      a,
+       const void*      b,
+       const void*      beta,
+             void*      c, inc_t rs_c0, inc_t cs_c0,
+             auxinfo_t* data,
+       const cntx_t*    cntx
      )
 {
 	//const void*   a_next = bli_auxinfo_next_a( data );
-	const void*   b_next = bli_auxinfo_next_b( data );
+	const void* b_next = bli_auxinfo_next_b( data );
 
 	// Typecast local copies of integers in case dim_t and inc_t are a
 	// different size than is expected by load instructions.
@@ -1699,16 +1699,16 @@ void bli_cgemm_sandybridge_asm_8x4
 
 void bli_zgemm_sandybridge_asm_4x4
      (
-       dim_t               m,
-       dim_t               n,
-       dim_t               k,
-       dcomplex*  restrict alpha,
-       dcomplex*  restrict a,
-       dcomplex*  restrict b,
-       dcomplex*  restrict beta,
-       dcomplex*  restrict c, inc_t rs_c0, inc_t cs_c0,
-       auxinfo_t*          data,
-       cntx_t*             cntx
+             dim_t      m,
+             dim_t      n,
+             dim_t      k,
+       const void*      alpha,
+       const void*      a,
+       const void*      b,
+       const void*      beta,
+             void*      c, inc_t rs_c0, inc_t cs_c0,
+             auxinfo_t* data,
+       const cntx_t*    cntx
      )
 {
 	//void*   a_next = bli_auxinfo_next_a( data );

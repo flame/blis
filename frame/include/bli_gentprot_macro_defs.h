@@ -255,7 +255,7 @@ GENTPROT2( dcomplex, scomplex, z, c, __VA_ARGS__ ) \
 
 // -- Mixed domain/precision (all) two-operand macro --
 
-#define INSERT_GENTPROT2_MIXDP( ... ) \
+#define INSERT_GENTPROT2_MIX_DP( ... ) \
 \
 GENTPROT2( float,    double,   s, d, __VA_ARGS__ ) \
 GENTPROT2( float,    scomplex, s, c, __VA_ARGS__ ) \

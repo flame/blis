@@ -35,37 +35,38 @@
 
 #include "blis.h"
 
-typedef void (*xpbys_mxn_l_vft)
+typedef void (*xpbys_mxn_l_ft)
     (
-      doff_t diagoff,
-      dim_t  m,
-      dim_t  n,
-      void*  x, inc_t rs_x, inc_t cs_x,
-      void*  b,
-      void*  y, inc_t rs_y, inc_t cs_y
+            doff_t diagoff,
+            dim_t  m,
+            dim_t  n,
+      const void*  x, inc_t rs_x, inc_t cs_x,
+      const void*  b,
+            void*  y, inc_t rs_y, inc_t cs_y
     );
 
-#undef GENTFUNC
+#undef  GENTFUNC
 #define GENTFUNC(ctype,ch,op) \
 \
 BLIS_INLINE void PASTEMAC(ch,op) \
     ( \
-      doff_t diagoff, \
-      dim_t  m, \
-      dim_t  n, \
-      void*  x, inc_t rs_x, inc_t cs_x, \
-      void*  b, \
-      void*  y, inc_t rs_y, inc_t cs_y \
+            doff_t diagoff, \
+            dim_t  m, \
+            dim_t  n, \
+      const void*  x, inc_t rs_x, inc_t cs_x, \
+      const void*  b, \
+            void*  y, inc_t rs_y, inc_t cs_y \
     ) \
 { \
-	ctype* restrict x_cast = x; \
-	ctype* restrict b_cast = b; \
-	ctype* restrict y_cast = y; \
+	const ctype* restrict x_cast = x; \
+	const ctype* restrict b_cast = b; \
+	      ctype* restrict y_cast = y; \
 \
 	PASTEMAC3(ch,ch,ch,xpbys_mxn_l) \
 	( \
 	  diagoff, \
-	  m, n, \
+	  m, \
+	  n, \
 	  x_cast, rs_x, cs_x, \
 	  b_cast, \
 	  y_cast, rs_y,  cs_y \
@@ -74,8 +75,9 @@ BLIS_INLINE void PASTEMAC(ch,op) \
 
 INSERT_GENTFUNC_BASIC(xpbys_mxn_l_fn);
 
-static xpbys_mxn_l_vft GENARRAY(xpbys_mxn_l, xpbys_mxn_l_fn);
+static xpbys_mxn_l_ft GENARRAY(xpbys_mxn_l, xpbys_mxn_l_fn);
 
+// -----------------------------------------------------------------------------
 
 void bli_gemmt_l_ker_var2
      (
@@ -133,9 +135,9 @@ void bli_gemmt_l_ker_var2
 
 	// Query the context for the micro-kernel address and cast it to its
 	// function pointer type.
-	gemm_ukr_vft    gemm_ukr        = bli_gemm_var_cntl_ukr( cntl );
-	const void*     params          = bli_gemm_var_cntl_params( cntl );
-	xpbys_mxn_l_vft xpbys_mxn_l_ukr = xpbys_mxn_l[ dt_exec ];
+	gemm_ukr_ft    gemm_ukr        = bli_gemm_var_cntl_ukr( cntl );
+	const void*    params          = bli_gemm_var_cntl_params( cntl );
+	xpbys_mxn_l_ft xpbys_mxn_l_ukr = xpbys_mxn_l[ dt_exec ];
 
 	// Temporary C buffer for edge cases. Note that the strides of this
 	// temporary buffer are set so that they match the storage of the

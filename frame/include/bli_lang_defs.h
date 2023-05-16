@@ -73,7 +73,10 @@
 // doesn't support __thread, as __GNUC__ is not quite unique to GCC.
 // But the possibility of someone using such non-main-stream compiler
 // for building BLIS is low.
-#if defined(__GNUC__) || defined(__clang__) || defined(__ICC) || defined(__IBMC__)
+#if defined(BLIS_ENABLE_TLS) && ( defined(__GNUC__)  || \
+                                  defined(__clang__) || \
+                                  defined(__ICC)     || \
+                                  defined(__IBMC__) )
   #define BLIS_THREAD_LOCAL __thread
 #else
   #define BLIS_THREAD_LOCAL

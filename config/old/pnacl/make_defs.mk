@@ -49,7 +49,7 @@ CC_VENDOR      := pnacl-clang
 # NOTE: This is needed to enable posix_memalign().
 CPPROCFLAGS    := -D_POSIX_C_SOURCE=200112L
 CMISCFLAGS     := -std=gnu11 -I$(NACL_SDK_ROOT)/include
-CPICFLAGS      := 
+CPICFLAGS      := -fPIC
 CDBGFLAGS      := -g
 CWARNFLAGS     := -Wall -Wno-unused-function -Wfatal-errors
 COPTFLAGS      := -O3

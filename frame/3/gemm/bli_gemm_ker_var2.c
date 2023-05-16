@@ -35,30 +35,30 @@
 
 #include "blis.h"
 
-typedef void (*xpbys_mxn_vft)
+typedef void (*xpbys_mxn_ft)
     (
-      dim_t m,
-      dim_t n,
-      void* x, inc_t rs_x, inc_t cs_x,
-      void* b,
-      void* y, inc_t rs_y, inc_t cs_y
+            dim_t m,
+            dim_t n,
+      const void* x, inc_t rs_x, inc_t cs_x,
+      const void* b,
+            void* y, inc_t rs_y, inc_t cs_y
     );
 
-#undef GENTFUNC2
+#undef  GENTFUNC2
 #define GENTFUNC2(ctypex,ctypey,chx,chy,op) \
 \
 BLIS_INLINE void PASTEMAC2(chx,chy,op) \
     ( \
-      dim_t m, \
-      dim_t n, \
-      void* x, inc_t rs_x, inc_t cs_x, \
-      void* b, \
-      void* y, inc_t rs_y, inc_t cs_y \
+            dim_t m, \
+            dim_t n, \
+      const void* x, inc_t rs_x, inc_t cs_x, \
+      const void* b, \
+            void* y, inc_t rs_y, inc_t cs_y \
     ) \
 { \
-	ctypex* restrict x_cast = x; \
-	ctypey* restrict b_cast = b; \
-	ctypey* restrict y_cast = y; \
+	const ctypex* restrict x_cast = x; \
+	const ctypey* restrict b_cast = b; \
+	      ctypey* restrict y_cast = y; \
 \
 	PASTEMAC3(chx,chy,chy,xpbys_mxn) \
 	( \
@@ -70,9 +70,9 @@ BLIS_INLINE void PASTEMAC2(chx,chy,op) \
 }
 
 INSERT_GENTFUNC2_BASIC(xpbys_mxn_fn);
-INSERT_GENTFUNC2_MIXDP(xpbys_mxn_fn);
+INSERT_GENTFUNC2_MIX_DP(xpbys_mxn_fn);
 
-static xpbys_mxn_vft GENARRAY2_ALL(xpbys_mxn, xpbys_mxn_fn);
+static xpbys_mxn_ft GENARRAY2_ALL(xpbys_mxn, xpbys_mxn_fn);
 
 
 void bli_gemm_ker_var2
@@ -160,8 +160,8 @@ void bli_gemm_ker_var2
 
 	// Query the context for the micro-kernel address and cast it to its
 	// function pointer type.
-	gemm_ukr_vft gemm_ukr     = bli_gemm_var_cntl_ukr( cntl );
-	const void*  params       = bli_gemm_var_cntl_params( cntl );
+	gemm_ukr_ft gemm_ukr = bli_gemm_var_cntl_ukr( cntl );
+	const void* params   = bli_gemm_var_cntl_params( cntl );
 
 	// Temporary C buffer for edge cases. Note that the strides of this
 	// temporary buffer are set so that they match the storage of the

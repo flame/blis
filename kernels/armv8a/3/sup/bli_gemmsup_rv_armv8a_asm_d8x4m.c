@@ -100,18 +100,18 @@
  */
 void bli_dgemmsup_rv_armv8a_asm_8x4m
      (
-       conj_t              conja,
-       conj_t              conjb,
-       dim_t               m0,
-       dim_t               n0,
-       dim_t               k0,
-       double*    restrict alpha,
-       double*    restrict a, inc_t rs_a0, inc_t cs_a0,
-       double*    restrict b, inc_t rs_b0, inc_t cs_b0,
-       double*    restrict beta,
-       double*    restrict c, inc_t rs_c0, inc_t cs_c0,
-       auxinfo_t*          data,
-       cntx_t*             cntx
+             conj_t     conja,
+             conj_t     conjb,
+             dim_t      m0,
+             dim_t      n0,
+             dim_t      k0,
+       const void*      alpha,
+       const void*      a, inc_t rs_a0, inc_t cs_a0,
+       const void*      b, inc_t rs_b0, inc_t cs_b0,
+       const void*      beta,
+             void*      c, inc_t rs_c0, inc_t cs_c0,
+             auxinfo_t* data,
+       const cntx_t*    cntx
      )
 {
   // Fixme: This uker has no dispatching for unalighed sizes.
@@ -119,8 +119,9 @@ void bli_dgemmsup_rv_armv8a_asm_8x4m
   //  and cannot be registered in configurations.
   assert( n0 == 4 );
 
-  const void*    a_next = bli_auxinfo_next_a( data );
-  const void*    b_next = bli_auxinfo_next_b( data );
+  const void* a_next = bli_auxinfo_next_a( data );
+  const void* b_next = bli_auxinfo_next_b( data );
+
   uint64_t ps_a   = bli_auxinfo_ps_a( data );
 
   // Typecast local copies of integers in case dim_t and inc_t are a
@@ -393,8 +394,8 @@ LABEL(END_EXEC)
   );
 
 consider_edge_cases:
-  a = a + m_iter * ps_a;
-  c = c + m_iter * 8 * rs_c;
+  a = ( double* )a + m_iter * ps_a;
+  c = ( double* )c + m_iter * 8 * rs_c;
   // Edge case is within 1 millikernel loop of THIS kernel.
   // Regarding the 6x?m kernel, the panel stride should be always local.
   auxinfo_t data_6xkm = *data;

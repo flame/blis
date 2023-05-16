@@ -101,7 +101,7 @@ get-noopt-cflags-for     = $(strip $(CFLAGS_PRESET) \
                                    $(call load-var-for,CLANGFLAGS,$(1)) \
                                    $(call load-var-for,CPPROCFLAGS,$(1)) \
                                    $(CTHREADFLAGS) \
-                                   $(CINCFLAGS) $(VERS_DEF) \
+                                   $(CINCFLAGS) \
                             )
 
 get-noopt-cxxflags-for   = $(strip $(CFLAGS_PRESET) \
@@ -113,7 +113,7 @@ get-noopt-cxxflags-for   = $(strip $(CFLAGS_PRESET) \
                                    $(call load-var-for,CPPROCFLAGS,$(1)) \
                                    $(CTHREADFLAGS) \
                                    $(CXXTHREADFLAGS) \
-                                   $(CINCFLAGS) $(VERS_DEF) \
+                                   $(CINCFLAGS) \
                             )
 
 get-refinit-cflags-for   = $(strip $(call load-var-for,COPTFLAGS,$(1)) \
@@ -534,6 +534,7 @@ GREP       := grep
 EGREP      := grep -E
 XARGS      := xargs
 INSTALL    := install -c
+DEVNULL    := /dev/null
 
 # Script for creating a monolithic header file.
 #FLATTEN_H  := $(DIST_PATH)/build/flatten-headers.sh
@@ -718,7 +719,11 @@ CWARNFLAGS :=
 # Disable unused function warnings and stop compiling on first error for
 # all compilers that accept such options: gcc, clang, and icc.
 ifneq ($(CC_VENDOR),ibm)
+ifneq ($(CC_VENDOR),nvc)
 CWARNFLAGS += -Wall -Wno-unused-function -Wfatal-errors
+else
+CWARNFLAGS += -Wall -Wno-unused-function
+endif
 endif
 
 # Disable tautological comparision warnings in clang.
@@ -739,17 +744,16 @@ $(foreach c, $(CONFIG_LIST_FAM), $(eval $(call append-var-for,CWARNFLAGS,$(c))))
 
 # --- Position-independent code flags (shared libraries only) ---
 
-# Emit position-independent code for dynamic linking.
-ifeq ($(IS_MSVC),yes)
-# Note: Don't use any fPIC flags for Windows builds since all code is position-
+# Note: Avoid -fPIC flags for Windows builds since all code is position-
 # independent.
+ifeq ($(IS_MSVC),yes)
 CPICFLAGS :=
-else
-CPICFLAGS := -fPIC
 endif
-$(foreach c, $(CONFIG_LIST_FAM), $(eval $(call append-var-for,CPICFLAGS,$(c))))
+$(foreach c, $(CONFIG_LIST_FAM), $(eval $(call store-var-for,CPICFLAGS,$(c))))
 
 # --- Symbol exporting flags (shared libraries only) ---
+
+ifeq ($(MK_ENABLE_SHARED),yes)
 
 # NOTE: These flags are only applied when building BLIS and not used by
 # applications that import BLIS compilation flags via the
@@ -820,6 +824,14 @@ else # ifeq ($(EXPORT_SHARED),public)
 BUILD_SYMFLAGS := -fvisibility=hidden
 endif
 endif
+endif
+
+else #ifeq ($(MK_ENABLE_SHARED),no)
+
+# Don't modify CPICFLAGS for the various configuration family members.
+# Don't use any special symbol export flags.
+BUILD_SYMFLAGS :=
+
 endif
 
 # --- Language flags ---
@@ -1190,7 +1202,18 @@ CBLAS_H_FLAT    := $(BASE_INC_PATH)/$(CBLAS_H)
 # files will be needed when compiling bli_cntx_ref.c with the monolithic header.
 ifeq ($(strip $(SHARE_PATH)),.)
 REF_KER_SRC     := $(DIST_PATH)/$(REFKERN_DIR)/bli_cntx_ref.c
-REF_KER_HEADERS := $(shell $(GREP) "\#include" $(REF_KER_SRC) | sed -e "s/\#include [\"<]\([a-zA-Z0-9\_\.\/\-]*\)[\">].*/\1/g" | $(GREP) -v $(BLIS_H))
+#
+# NOTE: A redirect to /dev/null has been added to the grep command below because
+# as of version 3.8, grep outputs warnings when encountering stray backslashes
+# in regular expressions [1]. Versions older than 3.8 not only do not complain,
+# but actually seem to *require* the backslash, perhaps because of the way we
+# are invoking grep via GNU make's shell command. WHEN DEBUGGING ANYTHING
+# INVOLVING THE MAKE VARIABLE BELOW, PLEASE CONSIDER TEMPORARILY REMOVING THE
+# REDIRECT TO /dev/null SO THAT YOU SEE ANY MESSAGES SENT TO STANDARD ERROR.
+#
+# [1] https://lists.gnu.org/archive/html/info-gnu/2022-09/msg00001.html
+#
+REF_KER_HEADERS := $(shell $(GREP) "\#include" $(REF_KER_SRC) 2> $(DEVNULL) | sed -e "s/\#include [\"<]\([a-zA-Z0-9\_\.\/\-]*\)[\">].*/\1/g" | $(GREP) -v $(BLIS_H))
 endif
 
 # Match each header found above with the path to that header, and then strip
@@ -1240,10 +1263,6 @@ BLIS_CONFIG_H   := ./bli_config.h
 #
 # --- Special preprocessor macro definitions -----------------------------------
 #
-
-# Define a C preprocessor macro to communicate the current version so that it
-# can be embedded into the library and queried later.
-VERS_DEF       := -DBLIS_VERSION_STRING=\"$(VERSION)\"
 
 # Define a C preprocessor flag that is *only* defined when BLIS is being
 # compiled. (In other words, an application that #includes blis.h will not

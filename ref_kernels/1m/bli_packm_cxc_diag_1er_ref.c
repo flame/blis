@@ -34,6 +34,7 @@
 
 #include "blis.h"
 
+
 #define PACKM_SET1_1E( chr, mnk ) \
 do { \
 	PASTEMAC(chr,set1s)( *(pi1_ri + (mnk*2 + 0)*dfac + d + mnk*ldp2) ); \
@@ -42,11 +43,13 @@ do { \
 	PASTEMAC(chr,set1s)( *(pi1_ir + (mnk*2 + 1)*dfac + d + mnk*ldp2) ); \
 } while (0)
 
+
 #define PACKM_SET1_1R( chr, mnk ) \
 do { \
 	PASTEMAC(chr,set1s)( *(pi1_r + mnk*dfac + d + mnk*ldp2) ); \
 	PASTEMAC(chr,set0s)( *(pi1_i + mnk*dfac + d + mnk*ldp2) ); \
 } while (0)
+
 
 #define PACKM_SCAL_1E( ch, mn, k, op ) \
 do { \
@@ -60,6 +63,7 @@ do { \
 	                                    *(pi1_ir + (mn*2 + 1)*dfac  + d + k*ldp2) ); \
 } while (0)
 
+
 #define PACKM_SCAL_1R( ch, mn, k, op ) \
 do { \
 	PASTEMAC(ch,op)( kappa_r, kappa_i, *(alpha1 + mn*inca2 + 0 + k*lda2), \
@@ -67,6 +71,7 @@ do { \
 	                                   *(pi1_r  + mn*dfac  + d + k*ldp2), \
 	                                   *(pi1_i  + mn*dfac  + d + k*ldp2) ); \
 } while (0)
+
 
 #define PACKM_DIAG_1E_BODY( ch, mn_min, mn_max, inca2_lu, lda2_lu, op ) \
 \
@@ -81,11 +86,13 @@ do \
 		PACKM_SCAL_1E( ch, mn, k, op ); \
 } while(0)
 
+
 #define PACKM_DIAG_BODY_1E_L( ch, op ) \
 	PACKM_DIAG_1E_BODY( ch, k+1, cdim, inca_l2, lda_l2, op )
 
 #define PACKM_DIAG_BODY_1E_U( ch, op ) \
 	PACKM_DIAG_1E_BODY( ch, 0, k, inca_u2, lda_u2, op )
+
 
 #define PACKM_DIAG_1R_BODY( ch, mn_min, mn_max, inca2_lu, lda2_lu, op ) \
 \
@@ -100,29 +107,32 @@ do \
 		PACKM_SCAL_1R( ch, mn, k, op ); \
 } while(0)
 
+
 #define PACKM_DIAG_BODY_1R_L( ch, op ) \
 	PACKM_DIAG_1R_BODY( ch, k+1, cdim, inca_l2, lda_l2, op )
 
 #define PACKM_DIAG_BODY_1R_U( ch, op ) \
 	PACKM_DIAG_1R_BODY( ch, 0, k, inca_u2, lda_u2, op )
 
+
 #undef  GENTFUNCCO
 #define GENTFUNCCO( ctype, ctype_r, ch, chr, opname, mnr0, bb0, arch, suf ) \
 \
 void PASTEMAC3(ch,opname,arch,suf) \
      ( \
-       struc_t          struca, \
-       diag_t           diaga, \
-       uplo_t           uploa, \
-       conj_t           conja, \
-       pack_t           schema, \
-       bool             invdiag, \
-       dim_t            cdim, \
-       dim_t            n_max, \
-       ctype*  restrict kappa, \
-       ctype*  restrict a, inc_t inca, inc_t lda, \
-       ctype*  restrict p,             inc_t ldp, \
-       cntx_t*          cntx \
+             struc_t struca, \
+             diag_t  diaga, \
+             uplo_t  uploa, \
+             conj_t  conja, \
+             pack_t  schema, \
+             bool    invdiag, \
+             dim_t   cdim, \
+             dim_t   n_max, \
+       const void*   kappa, \
+       const void*   a, inc_t inca, inc_t lda, \
+             void*   p,             inc_t ldp, \
+       const void*   params, \
+       const cntx_t* cntx \
      ) \
 { \
 	const num_t dt_r      = PASTEMAC(chr,type); \
@@ -141,9 +151,9 @@ void PASTEMAC3(ch,opname,arch,suf) \
 	const inc_t       lda2    = 2 * lda; \
 	const inc_t       ldp2    = 2 * ldp; \
 \
-	ctype_r           kappa_r = ( ( ctype_r* )kappa )[0]; \
-	ctype_r           kappa_i = ( ( ctype_r* )kappa )[1]; \
-	ctype_r* restrict alpha1  = ( ctype_r* )a; \
+	      ctype_r           kappa_r = ( ( ctype_r* )kappa )[0]; \
+	      ctype_r           kappa_i = ( ( ctype_r* )kappa )[1]; \
+	const ctype_r* restrict alpha1  = ( const ctype_r* )a; \
 \
 	if ( bli_is_1e_packed( schema ) ) \
 	{ \

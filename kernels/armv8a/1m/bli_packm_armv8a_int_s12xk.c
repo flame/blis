@@ -49,15 +49,16 @@
 
 void bli_spackm_armv8a_int_12xk
      (
-       conj_t              conja,
-       pack_t              schema,
-       dim_t               cdim0,
-       dim_t               k0,
-       dim_t               k0_max,
-       float*     restrict kappa,
-       float*     restrict a, inc_t inca0, inc_t lda0,
-       float*     restrict p,              inc_t ldp0,
-       cntx_t*             cntx
+             conj_t  conja,
+             pack_t  schema,
+             dim_t   cdim0,
+             dim_t   k0,
+             dim_t   k0_max,
+       const void*   kappa,
+       const void*   a, inc_t inca0, inc_t lda0,
+             void*   p,              inc_t ldp0,
+       const void*   params,
+       const cntx_t* cntx
      )
 {
   // This is the panel dimension assumed by the packm kernel.
@@ -67,8 +68,9 @@ void bli_spackm_armv8a_int_12xk
   // different size than is expected by load instructions.
   uint64_t       k_iter = k0 / 4;
   uint64_t       k_left = k0 % 4;
-  float*         a_loc  = a;
-  float*         p_loc  = p;
+
+  const float*   a_loc  = a;
+        float*   p_loc  = p;
 
   // NOTE: For the purposes of the comments in this packm kernel, we
   // interpret inca and lda as rs_a and cs_a, respectively, and similarly
@@ -86,7 +88,7 @@ void bli_spackm_armv8a_int_12xk
 
   // NOTE: If/when this kernel ever supports scaling by kappa within the
   // assembly region, this constraint should be lifted.
-  const bool     unitk  = bli_seq1( *kappa );
+  const bool     unitk  = bli_seq1( *(( float* )kappa) );
 
 
   // -------------------------------------------------------------------------
@@ -404,7 +406,7 @@ void bli_spackm_armv8a_int_12xk
       const dim_t     i      = cdim0;
       const dim_t     m_edge = mnr - cdim0;
       const dim_t     n_edge = k0_max;
-      float* restrict p_edge = p + (i  )*1;
+      float* restrict p_edge = ( float* )p + (i  )*1;
 
       bli_sset0s_mxn
       (
@@ -422,7 +424,7 @@ void bli_spackm_armv8a_int_12xk
     const dim_t     j      = k0;
     const dim_t     m_edge = mnr;
     const dim_t     n_edge = k0_max - k0;
-    float* restrict p_edge = p + (j  )*ldp;
+    float* restrict p_edge = ( float* )p + (j  )*ldp;
 
     bli_sset0s_mxn
     (

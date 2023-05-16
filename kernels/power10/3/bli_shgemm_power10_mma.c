@@ -58,16 +58,21 @@
 
 void bli_shgemm_power10_mma_8x16
     (
-        dim_t              m,
-        dim_t              n,
-        dim_t              k,
-        float*     restrict alpha,
-        float16*  restrict a,
-        float16*  restrict b,
-        float*     restrict beta,
-        float*     restrict c, inc_t rs_c0, inc_t cs_c0,
-        auxinfo_t*          data,
-        cntx_t*             cntx
+              dim_t      m,
+              dim_t      n,
+              dim_t      k,
+        //const float*     alpha,
+        //const float16*   a,
+        //const float16*   b,
+        //const float*     beta,
+        //      float*     c, inc_t rs_c0, inc_t cs_c0,
+        const void*      alpha,
+        const void*      a,
+        const void*      b,
+        const void*      beta,
+              void*      c, inc_t rs_c0, inc_t cs_c0,
+              auxinfo_t* data,
+        const cntx_t*    cntx
     )
 {
 
@@ -75,13 +80,14 @@ void bli_shgemm_power10_mma_8x16
     uint64_t k_left = (k-1)%4;
 
     uint64_t rs_c   = rs_c0;
+    //uint64_t cs_c   = cs_c0;
 
-    float16* restrict A0 = a;
-    float16* restrict B0 = b;
-    float* restrict C0 = c;
+    const float16* restrict A0 = a;
+    const float16* restrict B0 = b;
+          float*   restrict C0 = c;
 
-    float alpha_= *alpha,
-          beta_ = *beta;
+    float alpha_= *((float*)alpha),
+          beta_ = *((float*)beta);
 
     fv4sf_t result[4];
     fv4sf_t *rowC;

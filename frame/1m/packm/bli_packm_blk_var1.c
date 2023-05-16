@@ -102,8 +102,8 @@ void bli_packm_blk_var1
 	char*   kappa_cast     = bli_packm_scalar( &kappa_local, p );
 
 	// Query the datatype-specific function pointer from the control tree.
-	packm_ker_vft packm_ker_cast = bli_packm_def_cntl_ukr( cntl );
-	const void*   params         = bli_packm_def_cntl_ukr_params( cntl );
+	packm_ker_ft packm_ker_cast = bli_packm_def_cntl_ukr( cntl );
+	const void*  params         = bli_packm_def_cntl_ukr_params( cntl );
 
 	// Compute the total number of iterations we'll need.
 	dim_t n_iter = iter_dim / panel_dim_max + ( iter_dim % panel_dim_max ? 1 : 0 );
@@ -165,23 +165,26 @@ void bli_packm_blk_var1
 			// configure-time.
 			if ( bli_is_my_iter( it, it_start, it_end, tid, nt ) )
 			{
-				packm_ker_cast( bli_is_triangular( strucc ) ? BLIS_GENERAL : strucc,
-				                diagc,
-				                uploc,
-				                conjc,
-				                schema,
-				                invdiag,
-				                panel_dim_i,
-				                panel_len_full,
-				                panel_dim_max,
-				                panel_len_max,
-				                panel_dim_off_i,
-				                panel_len_off,
-				                kappa_cast,
-				                c_begin, incc, ldc,
-				                p_begin,       ldp,
-				                cntx,
-				                params );
+				packm_ker_cast
+				(
+				  bli_is_triangular( strucc ) ? BLIS_GENERAL : strucc,
+				  diagc,
+				  uploc,
+				  conjc,
+				  schema,
+				  invdiag,
+				  panel_dim_i,
+				  panel_len_full,
+				  panel_dim_max,
+				  panel_len_max,
+				  panel_dim_off_i,
+				  panel_len_off,
+				  kappa_cast,
+				  c_begin, incc, ldc,
+				  p_begin,       ldp,
+				  params,
+				  cntx
+				);
 			}
 
 			p_begin += ps_p*dt_p_size;
@@ -255,23 +258,26 @@ void bli_packm_blk_var1
 			// when packing micropanels of a triangular matrix.
 			if ( bli_is_my_iter_rr( it, tid, nt ) )
 			{
-				packm_ker_cast( strucc,
-				                diagc,
-				                uploc,
-				                conjc,
-				                schema,
-				                invdiag,
-				                panel_dim_i,
-				                panel_len_i,
-				                panel_dim_max,
-				                panel_len_max_i,
-				                panel_dim_off_i,
-				                panel_len_off_i,
-				                kappa_cast,
-				                c_use, incc, ldc,
-				                p_use,       ldp,
-				                cntx,
-				                params );
+				packm_ker_cast
+				(
+				  strucc,
+				  diagc,
+				  uploc,
+				  conjc,
+				  schema,
+				  invdiag,
+				  panel_dim_i,
+				  panel_len_i,
+				  panel_dim_max,
+				  panel_len_max_i,
+				  panel_dim_off_i,
+				  panel_len_off_i,
+				  kappa_cast,
+				  c_use, incc, ldc,
+				  p_use,       ldp,
+				  params,
+				  cntx
+				);
 			}
 
 			// NOTE: This value is usually LESS than ps_p because triangular
