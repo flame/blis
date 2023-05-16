@@ -8188,6 +8188,16 @@ BLIS_INLINE void ztrsm_small_pack_diag_element
     dim_t size
 )
 {
+    if ( is_unitdiag )
+    {
+        dcomplex ones = {1.0, 0.0};
+        for( dim_t i = 0; i < size; i++)
+        {
+            d11_pack[i].real = ones.real;
+            d11_pack[i].imag = ones.imag;
+        }
+        return;
+    }
 #ifdef BLIS_ENABLE_TRSM_PREINVERSION
     // If Preinversion is enabled, inverse the diaganol
     // elements from A and pack into diagonal buffer.
@@ -39478,6 +39488,16 @@ BLIS_INLINE void ctrsm_small_pack_diag_element
 	dim_t size
 )
 {
+    if ( is_unitdiag )
+    {
+        scomplex ones = {1.0, 0.0};
+        for( dim_t i = 0; i < size; i++)
+        {
+            d11_pack[i].real = ones.real;
+            d11_pack[i].imag = ones.imag;
+        }
+        return;
+    }
 #ifdef BLIS_ENABLE_TRSM_PREINVERSION
 	// If Preinversion is disabled, inverse the diaganol
 	// elements from A and pack into diagonal buffer.
