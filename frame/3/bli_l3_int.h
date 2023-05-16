@@ -44,7 +44,7 @@ BLIS_INLINE void bli_l3_int
      )
 {
 	// Extract the function pointer from the current control tree node.
-	l3_var_oft f = bli_cntl_var_func( cntl );
+	l3_var_oft f = ( l3_var_oft )bli_cntl_var_func( cntl );
 
 	// Invoke the variant.
 	f
