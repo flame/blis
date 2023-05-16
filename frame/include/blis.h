@@ -119,6 +119,7 @@ extern "C" {
 #include "bli_blksz.h"
 #include "bli_func.h"
 #include "bli_mbool.h"
+#include "bli_stack.h"
 #include "bli_cntx.h"
 #include "bli_rntm.h"
 #include "bli_gks.h"

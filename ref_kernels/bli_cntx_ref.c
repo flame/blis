@@ -221,16 +221,15 @@ void GENBARNAME(cntx_init)
        cntx_t* cntx
      )
 {
-	blksz_t  blkszs[ BLIS_NUM_BLKSZS ];
-	func_t*  funcs;
-	mbool_t* mbools;
-	dim_t    i;
-	void_fp* vfuncs;
+	blksz_t blkszs[ BLIS_NUM_BLKSZS ];
+	func_t  funcs[ BLIS_NUM_UKRS ];
+	mbool_t mbools[ BLIS_NUM_UKR_PREFS ];
+	void_fp vfuncs[ BLIS_NUM_LEVEL3_OPS ];
 
 
-	// -- Clear the context ----------------------------------------------------
+	// -- Initialize the context -----------------------------------------------
 
-	bli_cntx_clear( cntx );
+	bli_cntx_init( cntx );
 
 
 	// -- Set blocksizes -------------------------------------------------------
@@ -298,9 +297,6 @@ void GENBARNAME(cntx_init)
 
 
 	// -- Set level-3 native micro-kernels and preferences ---------------------
-
-	funcs = cntx->ukrs;
-	mbools = cntx->ukr_prefs;
 
 	gen_func_init( &funcs[ BLIS_GEMM_UKR ],       gemm_ukr_name       );
 	gen_func_init( &funcs[ BLIS_GEMMTRSM_L_UKR ], gemmtrsm_l_ukr_name );
@@ -397,12 +393,20 @@ void GENBARNAME(cntx_init)
 	gen_func_init( &funcs[ BLIS_UNPACKM_NRXK_KER ],  unpackm_nrxk_ker_name );
 
 
+	// -- Put the default kernels and their preferences into the context -------
+
+	for ( dim_t i = 0; i < BLIS_NUM_UKRS; i++ )
+		bli_cntx_set_ukr( i, &funcs[ i ], cntx );
+
+	for ( dim_t i = 0; i < BLIS_NUM_UKR_PREFS; i++ )
+		bli_cntx_set_ukr_pref( i, &mbools[ i ], cntx );
+
+
 	// -- Set level-3 small/unpacked handlers ----------------------------------
 
-	vfuncs = cntx->l3_sup_handlers;
-
 	// Initialize all of the function pointers to NULL;
-	for ( i = 0; i < BLIS_NUM_LEVEL3_OPS; ++i ) vfuncs[ i ] = NULL;
+	for ( dim_t i = 0; i < BLIS_NUM_LEVEL3_OPS; ++i )
+		vfuncs[ i ] = NULL;
 
 	// The level-3 sup handlers are oapi-based, so we only set one slot per
 	// operation.
@@ -410,5 +414,8 @@ void GENBARNAME(cntx_init)
 	// Set the gemm slot to the default gemm sup handler.
 	vfuncs[ BLIS_GEMM ]  = bli_gemmsup_ref;
 	vfuncs[ BLIS_GEMMT ] = bli_gemmtsup_ref;
+
+	for ( dim_t i = 0; i < BLIS_NUM_LEVEL3_OPS; i++ )
+		bli_cntx_set_l3_sup_handler( i, vfuncs[ i ], cntx );
 }
 

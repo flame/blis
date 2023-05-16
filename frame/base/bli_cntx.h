@@ -43,16 +43,13 @@
 /*
 typedef struct cntx_s
 {
-	blksz_t   blkszs[ BLIS_NUM_BLKSZS ];
-	bszid_t   bmults[ BLIS_NUM_BLKSZS ];
+	stck_t blkszs; // blksz_t
+	stck_t bmults; // bszid_t
 
-	func_t    ukrs[ BLIS_NUM_UKRS ];
-	mbool_t   ukr_prefs[ BLIS_NUM_UKR_PREFS ];
+	stck_t ukrs; // func_t
+	stck_t ukr_prefs; // mbool_t
 
-	void_fp   l3_sup_handlers[ BLIS_NUM_LEVEL3_OPS ];
-
-	ind_t     method;
-
+	stck_t l3_sup_handlers; // void_fp
 } cntx_t;
 */
 
@@ -64,8 +61,11 @@ typedef struct cntx_s
 
 BLIS_INLINE const blksz_t* bli_cntx_get_blksz( bszid_t bs_id, const cntx_t* cntx )
 {
-	// Return the address of the blksz_t identified by bs_id.
-	return &cntx->blkszs[ bs_id ];
+	const blksz_t* blksz;
+	err_t error = bli_stack_get( bs_id, ( void** )&blksz, &cntx->blkszs );
+	if ( error != BLIS_SUCCESS )
+		bli_check_error_code( error );
+	return blksz;
 }
 
 BLIS_INLINE dim_t bli_cntx_get_blksz_def_dt( num_t dt, bszid_t bs_id, const cntx_t* cntx )
@@ -88,7 +88,11 @@ BLIS_INLINE dim_t bli_cntx_get_blksz_max_dt( num_t dt, bszid_t bs_id, const cntx
 
 BLIS_INLINE bszid_t bli_cntx_get_bmult_id( bszid_t bs_id, const cntx_t* cntx )
 {
-	return cntx->bmults[ bs_id ];
+	const bszid_t* bsz;
+	err_t error = bli_stack_get( bs_id, ( void** )&bsz, &cntx->bmults );
+	if ( error != BLIS_SUCCESS )
+		bli_check_error_code( error );
+	return *bsz;
 }
 
 BLIS_INLINE const blksz_t* bli_cntx_get_bmult( bszid_t bs_id, const cntx_t* cntx )
@@ -111,7 +115,11 @@ BLIS_INLINE dim_t bli_cntx_get_bmult_dt( num_t dt, bszid_t bs_id, const cntx_t* 
 
 BLIS_INLINE const func_t* bli_cntx_get_ukrs( ukr_t ukr_id, const cntx_t* cntx )
 {
-	return &cntx->ukrs[ ukr_id ];
+	const func_t* ukr;
+	err_t error = bli_stack_get( ukr_id, ( void** )&ukr, &cntx->ukrs );
+	if ( error != BLIS_SUCCESS )
+		bli_check_error_code( error );
+	return ukr;
 }
 
 BLIS_INLINE void_fp bli_cntx_get_ukr_dt( num_t dt, ukr_t ukr_id, const cntx_t* cntx )
@@ -125,7 +133,11 @@ BLIS_INLINE void_fp bli_cntx_get_ukr_dt( num_t dt, ukr_t ukr_id, const cntx_t* c
 
 BLIS_INLINE const mbool_t* bli_cntx_get_ukr_prefs( ukr_pref_t pref_id, const cntx_t* cntx )
 {
-	return &cntx->ukr_prefs[ pref_id ];
+	const mbool_t* ukr_prefs;
+	err_t error = bli_stack_get( pref_id, ( void** )&ukr_prefs, &cntx->ukr_prefs );
+	if ( error != BLIS_SUCCESS )
+		bli_check_error_code( error );
+	return ukr_prefs;
 }
 
 BLIS_INLINE bool bli_cntx_get_ukr_prefs_dt( num_t dt, ukr_pref_t ukr_id, const cntx_t* cntx )
@@ -150,7 +162,11 @@ BLIS_INLINE bool bli_cntx_l3_sup_thresh_is_met( num_t dt, dim_t m, dim_t n, dim_
 
 BLIS_INLINE void_fp bli_cntx_get_l3_sup_handler( opid_t op, const cntx_t* cntx )
 {
-	return cntx->l3_sup_handlers[ op ];
+	const void_fp* l3_handler;
+	err_t error = bli_stack_get( op, ( void** )&l3_handler, &cntx->l3_sup_handlers );
+	if ( error != BLIS_SUCCESS )
+		bli_check_error_code( error );
+	return *l3_handler;
 }
 
 // -----------------------------------------------------------------------------
@@ -213,35 +229,61 @@ BLIS_INLINE bool bli_cntx_dislikes_storage_of( const obj_t* obj, ukr_t ukr_id, c
 // NOTE: The framework does not use any of the following functions. We provide
 // them in order to facilitate creating/modifying custom contexts.
 
-BLIS_INLINE void bli_cntx_set_blksz( bszid_t bs_id, blksz_t* blksz, bszid_t mult_id, cntx_t* cntx )
+BLIS_INLINE err_t bli_cntx_set_blksz( bszid_t bs_id, const blksz_t* blksz, bszid_t mult_id, cntx_t* cntx )
 {
-	cntx->blkszs[ bs_id ] = *blksz;
-	cntx->bmults[ bs_id ] = mult_id;
+	blksz_t* cntx_blksz;
+	err_t error = bli_stack_get( bs_id, ( void** )&cntx_blksz, &cntx->blkszs );
+	if ( error != BLIS_SUCCESS )
+		return error;
+
+	bszid_t* cntx_mult_id;
+	error = bli_stack_get( bs_id, ( void** )&cntx_mult_id, &cntx->bmults );
+	if ( error != BLIS_SUCCESS )
+		return error;
+
+	*cntx_blksz = *blksz;
+	*cntx_mult_id = mult_id;
+
+	return BLIS_SUCCESS;
 }
 
 BLIS_INLINE void bli_cntx_set_blksz_def_dt( num_t dt, bszid_t bs_id, dim_t bs, cntx_t* cntx )
 {
-	bli_blksz_set_def( bs, dt, &cntx->blkszs[ bs_id ] );
+	bli_blksz_set_def( bs, dt, ( blksz_t* )bli_cntx_get_blksz( bs_id, cntx ) );
 }
 
 BLIS_INLINE void bli_cntx_set_blksz_max_dt( num_t dt, bszid_t bs_id, dim_t bs, cntx_t* cntx )
 {
-	bli_blksz_set_max( bs, dt, &cntx->blkszs[ bs_id ]);
+	bli_blksz_set_max( bs, dt, ( blksz_t* )bli_cntx_get_blksz( bs_id, cntx ) );
 }
 
-BLIS_INLINE void bli_cntx_set_ukr( ukr_t ukr_id, const func_t* func, cntx_t* cntx )
+BLIS_INLINE err_t bli_cntx_set_ukr( ukr_t ukr_id, const func_t* func, cntx_t* cntx )
 {
-	cntx->ukrs[ ukr_id ] = *func;
+	*( func_t* )bli_cntx_get_ukrs( ukr_id, cntx ) = *func;
+	return BLIS_SUCCESS;
 }
 
 BLIS_INLINE void bli_cntx_set_ukr_dt( void_fp fp, num_t dt, ukr_t ker_id, cntx_t* cntx )
 {
-	bli_func_set_dt( fp, dt, &cntx->ukrs[ ker_id ] );
+	bli_func_set_dt( fp, dt, ( func_t* )bli_cntx_get_ukrs( ker_id, cntx ) );
 }
 
-BLIS_INLINE void bli_cntx_set_ukr_pref( ukr_pref_t ukr_id, mbool_t* prefs, cntx_t* cntx )
+BLIS_INLINE err_t bli_cntx_set_ukr_pref( ukr_pref_t ukr_id, const mbool_t* prefs, cntx_t* cntx )
 {
-	cntx->ukr_prefs[ ukr_id ] = *prefs;
+	*( mbool_t* )bli_cntx_get_ukr_prefs( ukr_id, cntx ) = *prefs;
+	return BLIS_SUCCESS;
+}
+
+BLIS_INLINE err_t bli_cntx_set_l3_sup_handler( opid_t opid, void_fp handler, cntx_t* cntx )
+{
+	void_fp* cntx_handler;
+	err_t error = bli_stack_get( opid, ( void** )&cntx_handler, &cntx->l3_sup_handlers );
+	if ( error != BLIS_SUCCESS )
+		return error;
+
+	*cntx_handler = handler;
+
+	return BLIS_SUCCESS;
 }
 
 BLIS_INLINE void_fp bli_cntx_get_l3_sup_ker_dt( num_t dt, stor3_t stor_id, const cntx_t* cntx )
@@ -287,7 +329,9 @@ BLIS_INLINE dim_t bli_cntx_get_l3_sup_blksz_max_dt( num_t dt, bszid_t bs_id, con
 
 // Function prototypes
 
-BLIS_EXPORT_BLIS void bli_cntx_clear( cntx_t* cntx );
+BLIS_EXPORT_BLIS err_t bli_cntx_init( cntx_t* cntx );
+
+BLIS_EXPORT_BLIS err_t bli_cntx_free( cntx_t* cntx );
 
 BLIS_EXPORT_BLIS void bli_cntx_set_blkszs( cntx_t* cntx, ... );
 
@@ -297,6 +341,12 @@ BLIS_EXPORT_BLIS void bli_cntx_set_ukr_prefs( cntx_t* cntx, ... );
 BLIS_EXPORT_BLIS void bli_cntx_print( const cntx_t* cntx );
 
 BLIS_EXPORT_BLIS void bli_cntx_set_l3_sup_handlers( cntx_t* cntx, ... );
+
+BLIS_EXPORT_BLIS err_t bli_cntx_register_blksz( siz_t* bs_id, const blksz_t* blksz, bszid_t bmult_id, cntx_t* cntx );
+
+BLIS_EXPORT_BLIS err_t bli_cntx_register_ukr( siz_t* ukr_id, const func_t* ukr, cntx_t* cntx );
+
+BLIS_EXPORT_BLIS err_t bli_cntx_register_ukr_pref( siz_t* ukr_pref_id, const mbool_t* ukr_pref, cntx_t* cntx );
 
 
 #endif

@@ -1413,17 +1413,34 @@ BLIS_INLINE void bli_obj_init_subpart_from( const obj_t* a, obj_t* b )
 }
 
 
+// -- Stack type --
+
+// NB: stack_t is already taken by <signal.h>
+typedef struct
+{
+	siz_t elem_size;
+	siz_t block_len;
+	siz_t max_blocks;
+	siz_t size;
+	siz_t capacity;
+
+	void** blocks;
+
+	bli_pthread_mutex_t lock;
+} stck_t;
+
+
 // -- Context type --
 
 typedef struct cntx_s
 {
-	blksz_t   blkszs[ BLIS_NUM_BLKSZS ];
-	bszid_t   bmults[ BLIS_NUM_BLKSZS ];
+	stck_t blkszs;
+	stck_t bmults;
 
-	func_t    ukrs[ BLIS_NUM_UKRS ];
-	mbool_t   ukr_prefs[ BLIS_NUM_UKR_PREFS ];
+	stck_t ukrs;
+	stck_t ukr_prefs;
 
-	void_fp   l3_sup_handlers[ BLIS_NUM_LEVEL3_OPS ];
+	stck_t l3_sup_handlers;
 } cntx_t;
 
 
@@ -1468,6 +1485,8 @@ typedef enum
 	BLIS_UNDEFINED_ERROR_CODE                  = ( -11),
 	BLIS_NULL_POINTER                          = ( -12),
 	BLIS_NOT_YET_IMPLEMENTED                   = ( -13),
+	BLIS_OUT_OF_BOUNDS                         = ( -14),
+	BLIS_LOCK_FAILURE                          = ( -15),
 
 	// Parameter-specific errors
 	BLIS_INVALID_SIDE                          = ( -20),
