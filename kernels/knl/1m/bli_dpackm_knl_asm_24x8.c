@@ -368,6 +368,7 @@ void bli_dpackm_knl_asm_24xk
        const void*   kappa_,
        const void*   a_, inc_t inca_, inc_t lda_,
              void*   p_,              inc_t ldp_,
+       const void*   params,
        const cntx_t* cntx
      )
 {
