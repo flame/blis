@@ -34,21 +34,24 @@
 
 #include "blis.h"
 
-#if 0
 #undef  GENTFUNC
 #define GENTFUNC( ctype, ch, opname, arch, suf ) \
 \
 void PASTEMAC3(ch,opname,arch,suf) \
      ( \
-       conj_t           conjx, \
-       dim_t            n, \
-       ctype*  restrict alpha, \
-       ctype*  restrict x, inc_t incx, \
-       ctype*  restrict y, inc_t incy, \
-       cntx_t*          cntx  \
+             conj_t  conjx, \
+             dim_t   n, \
+       const void*   alpha0, \
+       const void*   x0, inc_t incx, \
+             void*   y0, inc_t incy, \
+       const cntx_t* cntx  \
      ) \
 { \
 	if ( bli_zero_dim1( n ) ) return; \
+\
+	const ctype* alpha = alpha0; \
+	const ctype* x     = x0; \
+	      ctype* y     = y0; \
 \
 	/* If alpha is zero, return. */ \
 	if ( PASTEMAC(ch,eq0)( *alpha ) ) return; \
@@ -57,105 +60,15 @@ void PASTEMAC3(ch,opname,arch,suf) \
 	if ( PASTEMAC(ch,eq1)( *alpha ) ) \
 	{ \
 		/* Query the context for the kernel function pointer. */ \
-		const num_t             dt     = PASTEMAC(ch,type); \
-		PASTECH(ch,addv_ker_ft) addv_p = bli_cntx_get_ukr_dt( dt, BLIS_ADDV_KER, cntx ); \
+		const num_t dt     = PASTEMAC(ch,type); \
+		addv_ker_ft addv_p = bli_cntx_get_ukr_dt( dt, BLIS_ADDV_KER, cntx ); \
 \
 		addv_p \
 		( \
 		  conjx, \
 		  n, \
-		  x, incx, \
-		  y, incy, \
-		  cntx  \
-		); \
-		return; \
-	} \
-\
-	ctype* restrict chi1 = x; \
-	ctype* restrict psi1 = y; \
-\
-	if ( bli_is_conj( conjx ) ) \
-	{ \
-		if ( incx == 1 && incy == 1 ) \
-		{ \
-			PRAGMA_SIMD \
-			for ( dim_t i = 0; i < n; ++i ) \
-			{ \
-				/*PASTEMAC(ch,axpyjs)( *alpha, chi1[i], psi1[i] );*/ \
-				psi1[i] = fma( *alpha, chi1[i], psi1[i] ); \
-			} \
-		} \
-		else \
-		{ \
-			for ( dim_t i = 0; i < n; ++i ) \
-			{ \
-				PASTEMAC(ch,axpyjs)( *alpha, *chi1, *psi1 ); \
-\
-				chi1 += incx; \
-				psi1 += incy; \
-			} \
-		} \
-	} \
-	else \
-	{ \
-		if ( incx == 1 && incy == 1 ) \
-		{ \
-			PRAGMA_SIMD \
-			for ( dim_t i = 0; i < n; ++i ) \
-			{ \
-				/*PASTEMAC(ch,axpys)( *alpha, chi1[i], psi1[i] );*/ \
-				psi1[i] = fma( *alpha, chi1[i], psi1[i] ); \
-			} \
-		} \
-		else \
-		{ \
-			for ( dim_t i = 0; i < n; ++i ) \
-			{ \
-				PASTEMAC(ch,axpys)( *alpha, *chi1, *psi1 ); \
-\
-				chi1 += incx; \
-				psi1 += incy; \
-			} \
-		} \
-	} \
-}
-
-//INSERT_GENTFUNC_BASIC( axpyv, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX )
-GENTFUNC( float,    s, axpyv, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX )
-GENTFUNC( double,   d, axpyv, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX )
-#endif
-
-#undef  GENTFUNC
-#define GENTFUNC( ctype, ch, opname, arch, suf ) \
-\
-void PASTEMAC3(ch,opname,arch,suf) \
-     ( \
-       conj_t           conjx, \
-       dim_t            n, \
-       ctype*  restrict alpha, \
-       ctype*  restrict x, inc_t incx, \
-       ctype*  restrict y, inc_t incy, \
-       cntx_t*          cntx  \
-     ) \
-{ \
-	if ( bli_zero_dim1( n ) ) return; \
-\
-	/* If alpha is zero, return. */ \
-	if ( PASTEMAC(ch,eq0)( *alpha ) ) return; \
-\
-	/* If alpha is one, use addv. */ \
-	if ( PASTEMAC(ch,eq1)( *alpha ) ) \
-	{ \
-		/* Query the context for the kernel function pointer. */ \
-		const num_t             dt     = PASTEMAC(ch,type); \
-		PASTECH(ch,addv_ker_ft) addv_p = bli_cntx_get_ukr_dt( dt, BLIS_ADDV_KER, cntx ); \
-\
-		addv_p \
-		( \
-		  conjx, \
-		  n, \
-		  x, incx, \
-		  y, incy, \
+		  x0, incx, \
+		  y0, incy, \
 		  cntx  \
 		); \
 		return; \

@@ -34,6 +34,7 @@
 
 #include "blis.h"
 
+
 #define PACKM_DIAG_BODY( ctype, ch, mn_min, mn_max, inca, lda, op ) \
 \
 do \
@@ -44,29 +45,32 @@ do \
 		PASTEMAC(ch,op)( kappa_cast, *(alpha1 + mn*inca + k*lda), *(pi1 + mn*dfac + d + k*ldp) ); \
 } while(0)
 
+
 #define PACKM_DIAG_BODY_L( ctype, ch, op ) \
 	PACKM_DIAG_BODY( ctype, ch, k+1, cdim, inca_l, lda_l, op )
 
 #define PACKM_DIAG_BODY_U( ctype, ch, op ) \
 	PACKM_DIAG_BODY( ctype, ch, 0, k, inca_u, lda_u, op )
 
+
 #undef  GENTFUNC
 #define GENTFUNC( ctype, ch, opname, mnr0, bb0, arch, suf ) \
 \
 void PASTEMAC3(ch,opname,arch,suf) \
      ( \
-       struc_t          struca, \
-       diag_t           diaga, \
-       uplo_t           uploa, \
-       conj_t           conja, \
-       pack_t           schema, \
-       bool             invdiag, \
-       dim_t            cdim, \
-       dim_t            n_max, \
-       ctype*  restrict kappa, \
-       ctype*  restrict a, inc_t inca, inc_t lda, \
-       ctype*  restrict p,             inc_t ldp, \
-       cntx_t*          cntx \
+             struc_t struca, \
+             diag_t  diaga, \
+             uplo_t  uploa, \
+             conj_t  conja, \
+             pack_t  schema, \
+             bool    invdiag, \
+             dim_t   cdim, \
+             dim_t   n_max, \
+       const void*   kappa, \
+       const void*   a, inc_t inca, inc_t lda, \
+             void*   p,             inc_t ldp, \
+       const void*   params, \
+       const cntx_t* cntx  \
      ) \
 { \
 	const num_t dt        = PASTEMAC(ch,type); \
@@ -82,9 +86,9 @@ void PASTEMAC3(ch,opname,arch,suf) \
 	  p, 1, ldp  \
 	); \
 \
-	ctype           kappa_cast = *( ctype* )kappa; \
-	ctype* restrict alpha1     = a; \
-	ctype* restrict pi1        = p; \
+	      ctype           kappa_cast = *( ctype* )kappa; \
+	const ctype* restrict alpha1     = a; \
+	      ctype* restrict pi1        = p; \
 \
 	/* write the strictly lower part if it exists */ \
 	if ( bli_is_lower( uploa ) || bli_is_herm_or_symm( struca ) ) \

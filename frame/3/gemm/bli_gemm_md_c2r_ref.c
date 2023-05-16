@@ -41,60 +41,50 @@
 \
 void PASTEMAC2(ch,opname,suf) \
      ( \
-       dim_t               m, \
-       dim_t               n, \
-       dim_t               k, \
-       ctype*     restrict alpha, \
-       ctype*     restrict a, \
-       ctype*     restrict b, \
-       ctype*     restrict beta, \
-       ctype*     restrict c, inc_t rs_c, inc_t cs_c, \
-       auxinfo_t*          data, \
-       cntx_t*             cntx  \
+             dim_t      m, \
+             dim_t      n, \
+             dim_t      k, \
+       const void*      alpha, \
+       const void*      a, \
+       const void*      b, \
+       const void*      beta, \
+             void*      c, inc_t rs_c, inc_t cs_c, \
+             auxinfo_t* data, \
+       const cntx_t*    cntx  \
      ) \
 { \
 	const num_t       dt        = PASTEMAC(ch,type); \
 	const num_t       dt_r      = PASTEMAC(chr,type); \
 \
-	PASTECH(chr,gemm_ukr_ft) \
-	                  rgemm_ukr = bli_cntx_get_ukr_dt( dt_r, BLIS_GEMM_UKR, cntx ); \
+	      gemm_ukr_ft rgemm_ukr = bli_cntx_get_ukr_dt( dt_r, BLIS_GEMM_UKR, cntx ); \
 	const bool        col_pref  = bli_cntx_ukr_prefers_cols_dt( dt_r, BLIS_GEMM_UKR, cntx ); \
 	const bool        row_pref  = !col_pref; \
 \
 	const dim_t       mr        = bli_cntx_get_blksz_def_dt( dt, BLIS_MR, cntx ); \
 	const dim_t       nr        = bli_cntx_get_blksz_def_dt( dt, BLIS_NR, cntx ); \
 \
-	dim_t             mr_r      = mr; \
-	dim_t             nr_r      = nr; \
+	      dim_t       mr_r      = mr; \
+	      dim_t       nr_r      = nr; \
 \
-	ctype             ct[ BLIS_STACK_BUF_MAX_SIZE \
+	      ctype       ct[ BLIS_STACK_BUF_MAX_SIZE \
 	                      / sizeof( ctype_r ) ] \
 	                      __attribute__((aligned(BLIS_STACK_BUF_ALIGN_SIZE))); \
-	inc_t             rs_ct; \
-	inc_t             cs_ct; \
+	      inc_t       rs_ct; \
+	      inc_t       cs_ct; \
 \
-	ctype_r* restrict a_r       = ( ctype_r* )a; \
+	const ctype_r*    a_r       = ( ctype_r* )a; \
 \
-	ctype_r* restrict b_r       = ( ctype_r* )b; \
+	const ctype_r*    b_r       = ( ctype_r* )b; \
 \
-	ctype_r* restrict zero_r    = PASTEMAC(chr,0); \
+	const ctype_r*    zero_r    = PASTEMAC(chr,0); \
 \
-	ctype_r* restrict alpha_r   = &PASTEMAC(ch,real)( *alpha ); \
-/*
-	ctype_r* restrict alpha_i   = &PASTEMAC(ch,imag)( *alpha ); \
-*/ \
+	const ctype_r*    alpha_r   = &PASTEMAC(ch,real)( *(( ctype* )alpha) ); \
+	   /* ctype_r*    alpha_i   = &PASTEMAC(ch,imag)( *(( ctype* )alpha) ); */ \
 \
-	ctype_r* restrict beta_r    = &PASTEMAC(ch,real)( *beta ); \
-	ctype_r* restrict beta_i    = &PASTEMAC(ch,imag)( *beta ); \
+	const ctype_r*    beta_r    = &PASTEMAC(ch,real)( *(( ctype* )beta) ); \
+	const ctype_r*    beta_i    = &PASTEMAC(ch,imag)( *(( ctype* )beta) ); \
 \
-	dim_t             m_use; \
-	dim_t             n_use; \
-\
-	ctype_r*          c_use; \
-	inc_t             rs_c_use; \
-	inc_t             cs_c_use; \
-\
-	bool              using_ct; \
+	      bool        using_ct; \
 \
 	/* This virtual microkernel is used by ccr and crc mixed-domain cases
 	   when any of the following conditions are met:
@@ -150,9 +140,9 @@ PASTEMAC(chr,fprintm)( stdout, "gemm_ukr: c before", mr, nr, \
 		if ( col_pref ) { rs_ct = 1;  cs_ct = mr; } \
 		else            { rs_ct = nr; cs_ct = 1; } \
 \
-		c_use    = ( ctype_r* )ct; \
-		rs_c_use = rs_ct; \
-		cs_c_use = cs_ct; \
+		ctype_r* c_use    = ( ctype_r* )ct; \
+		inc_t    rs_c_use = rs_ct; \
+		inc_t    cs_c_use = cs_ct; \
 \
 		/* Convert the strides and corresponding microtile dimension from being
 		   in units of complex elements to be in units of real elements. */ \
@@ -175,22 +165,28 @@ PASTEMAC(chr,fprintm)( stdout, "gemm_ukr: c before", mr, nr, \
 		); \
 \
 		/* Accumulate the final result in ct back to c. */ \
-		if ( PASTEMAC(ch,eq1)( *beta ) ) \
+		if ( PASTEMAC(ch,eq1)( *(( ctype* )beta) ) ) \
 		{ \
 			for ( dim_t j = 0; j < n; ++j ) \
 			for ( dim_t i = 0; i < m; ++i ) \
 			{ \
-				PASTEMAC(ch,adds)( *(ct + i*rs_ct + j*cs_ct), \
-				                   *(c  + i*rs_c  + j*cs_c ) ); \
+				PASTEMAC(ch,adds) \
+				( \
+				  *(          ct + i*rs_ct + j*cs_ct), \
+				  *(( ctype* )c  + i*rs_c  + j*cs_c )  \
+				); \
 			} \
 		} \
-		else if ( PASTEMAC(ch,eq0)( *beta ) ) \
+		else if ( PASTEMAC(ch,eq0)( *(( ctype* )beta )) ) \
 		{ \
 			for ( dim_t j = 0; j < n; ++j ) \
 			for ( dim_t i = 0; i < m; ++i ) \
 			{ \
-				PASTEMAC(ch,copys)( *(ct + i*rs_ct + j*cs_ct), \
-				                    *(c  + i*rs_c  + j*cs_c ) ); \
+				PASTEMAC(ch,copys) \
+				( \
+				  *(          ct + i*rs_ct + j*cs_ct), \
+				  *(( ctype* )c  + i*rs_c  + j*cs_c )  \
+				); \
 			} \
 		} \
 		else \
@@ -198,9 +194,12 @@ PASTEMAC(chr,fprintm)( stdout, "gemm_ukr: c before", mr, nr, \
 			for ( dim_t j = 0; j < n; ++j ) \
 			for ( dim_t i = 0; i < m; ++i ) \
 			{ \
-				PASTEMAC(ch,xpbys)( *(ct + i*rs_ct + j*cs_ct), \
-				                    *beta, \
-				                    *(c  + i*rs_c  + j*cs_c ) ); \
+				PASTEMAC(ch,xpbys) \
+				( \
+				  *(          ct + i*rs_ct + j*cs_ct), \
+				  *(( ctype* )beta                  ), \
+				  *(( ctype* )c  + i*rs_c  + j*cs_c )  \
+				); \
 			} \
 		} \
 	} \
@@ -209,11 +208,12 @@ PASTEMAC(chr,fprintm)( stdout, "gemm_ukr: c before", mr, nr, \
 		/* In the typical cases, we use the real part of beta and
 		   accumulate directly into the output matrix c. */ \
 \
-		c_use    = ( ctype_r* )c; \
-		rs_c_use = rs_c; \
-		cs_c_use = cs_c; \
-		m_use    = m; \
-		n_use    = n; \
+		ctype_r* c_use    = ( ctype_r* )c; \
+		inc_t    rs_c_use = rs_c; \
+		inc_t    cs_c_use = cs_c; \
+\
+		dim_t    m_use    = m; \
+		dim_t    n_use    = n; \
 \
 		/* Convert the strides and corresponding microtile dimension from being
 		   in units of complex elements to be in units of real elements. */ \

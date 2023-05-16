@@ -112,18 +112,18 @@
 
 void bli_dgemmsup_rv_armv8a_asm_6x6m
      (
-       conj_t              conja,
-       conj_t              conjb,
-       dim_t               m0,
-       dim_t               n0,
-       dim_t               k0,
-       double*    restrict alpha,
-       double*    restrict a, inc_t rs_a0, inc_t cs_a0,
-       double*    restrict b, inc_t rs_b0, inc_t cs_b0,
-       double*    restrict beta,
-       double*    restrict c, inc_t rs_c0, inc_t cs_c0,
-       auxinfo_t*          data,
-       cntx_t*             cntx
+             conj_t     conja,
+             conj_t     conjb,
+             dim_t      m0,
+             dim_t      n0,
+             dim_t      k0,
+       const void*      alpha,
+       const void*      a, inc_t rs_a0, inc_t cs_a0,
+       const void*      b, inc_t rs_b0, inc_t cs_b0,
+       const void*      beta,
+             void*      c, inc_t rs_c0, inc_t cs_c0,
+             auxinfo_t* data,
+       const cntx_t*    cntx
      )
 {
   assert( n0 == 6 );
@@ -131,8 +131,8 @@ void bli_dgemmsup_rv_armv8a_asm_6x6m
   // LLVM has very bad routing ability for inline asm.
   // Limit number of registers in case of Clang compilation.
 #ifndef __clang__
-  const void*    a_next = bli_auxinfo_next_a( data );
-  const void*    b_next = bli_auxinfo_next_b( data );
+  const void* a_next = bli_auxinfo_next_a( data );
+  const void* b_next = bli_auxinfo_next_b( data );
 #endif
   uint64_t ps_a   = bli_auxinfo_ps_a( data );
 
@@ -462,15 +462,15 @@ LABEL(END_EXEC)
 
 consider_edge_cases:
   // Forward address.
-  a = a + m_iter * ps_a;
-  c = c + m_iter * 6 * rs_c;
+  a = ( double* )a + m_iter * ps_a;
+  c = ( double* )c + m_iter * 6 * rs_c;
   auxinfo_t data_d6x4mn = *data;
   bli_auxinfo_set_ps_b( 4 * cs_b0, &data_d6x4mn );
   bli_dgemmsup_rv_armv8a_int_6x4mn
   (
     conja, conjb, m_left, 6, k0,
-      alpha, a, rs_a0, cs_a0, b, rs_b0, cs_b0,
-      beta, c, rs_c0, cs_c0, &data_d6x4mn, cntx
+    alpha, a, rs_a0, cs_a0, b, rs_b0, cs_b0,
+    beta, c, rs_c0, cs_c0, &data_d6x4mn, cntx
   );
 
 }

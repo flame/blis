@@ -32,7 +32,7 @@
 
 */
 
-#ifdef BLIS_ENABLE_BLAS
+#if 1
 
 #define bla_gemv_check( dt_str, op_str, transa, m, n, lda, incx, incy ) \
 { \

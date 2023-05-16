@@ -34,8 +34,38 @@
 
 // -- Level-3 native micro-kernel prototype redefinitions ----------------------
 
-#undef  gemm_ukr_name
-#define gemm_ukr_name   gemm_md_c2r_ref
+#ifdef BLIS_ENABLE_GEMM_MD
 
-// Include the native micro-kernel API template.
-#include "bli_l3_ukr.h"
+#if 0
+#undef  GENTFUNCCO
+#define GENTFUNCCO( ctype, ctype_r, ch, chr, opname, suf ) \
+\
+void PASTEMAC2(ch,opname,suf) \
+     ( \
+             dim_t      m, \
+             dim_t      n, \
+             dim_t      k, \
+       const void*      alpha, \
+       const void*      a, \
+       const void*      b, \
+       const void*      beta, \
+             void*      c, inc_t rs_c, inc_t cs_c, \
+             auxinfo_t* data, \
+       const cntx_t*    cntx  \
+     )
+#endif
+
+#undef  GENTPROTCO
+#define GENTPROTCO( ctype, ctype_r, ch, chr, funcname, opname ) \
+\
+void PASTEMAC(ch,funcname) \
+     ( \
+       PASTECH(opname,_params), \
+       BLIS_AUXINFO_PARAM, \
+       BLIS_CNTX_PARAM  \
+     );
+
+INSERT_GENTPROTCO_BASIC( gemm_md_c2r_ref, gemm )
+
+
+#endif

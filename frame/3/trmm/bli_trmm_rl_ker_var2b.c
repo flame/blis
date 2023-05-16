@@ -90,8 +90,8 @@ void bli_trmm_rl_ker_var2b
 
 	// Query the context for the micro-kernel address and cast it to its
 	// function pointer type.
-	gemm_ukr_vft gemm_ukr  = bli_gemm_var_cntl_ukr( cntl );
-	const void*  params    = bli_gemm_var_cntl_params( cntl );
+	gemm_ukr_ft gemm_ukr   = bli_gemm_var_cntl_ukr( cntl );
+	const void* params     = bli_gemm_var_cntl_params( cntl );
 
 	const void* one        = bli_obj_buffer_for_const( dt, &BLIS_ONE );
 	const char* a_cast     = buf_a;

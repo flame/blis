@@ -36,17 +36,17 @@
 #include "blis.h"
 
 
-static packm_ker_vft GENARRAY(packm_struc_cxk,packm_struc_cxk);
-static packm_ker_vft GENARRAY2_ALL(packm_struc_cxk_md,packm_struc_cxk_md);
+static packm_ker_ft GENARRAY(packm_struc_cxk,packm_struc_cxk);
+static packm_ker_ft GENARRAY2_ALL(packm_struc_cxk_md,packm_struc_cxk_md);
 
 void bli_trsm_var_cntl_init_node
      (
        void_fp          var_func,
        num_t            dt_comp,
        num_t            dt_out,
-       gemmtrsm_ukr_vft gemmtrsm_ukr,
-       gemm_ukr_vft     gemm_ukr,
-       gemm_ukr_vft     real_gemm_ukr,
+       gemmtrsm_ukr_ft  gemmtrsm_ukr,
+       gemm_ukr_ft      gemm_ukr,
+       gemm_ukr_ft      real_gemm_ukr,
        bool             row_pref,
        dim_t            mr,
        dim_t            nr,
@@ -123,18 +123,18 @@ void bli_trsm_l_cntl_init
 	const num_t            dt_comp        = ( im == BLIS_1M ? BLIS_REAL : bli_dt_domain( dt_c ) ) | comp_prec;
 
 	const void_fp          macro_kernel_p = bli_obj_is_lower( a ) ? bli_trsm_ll_ker_var2 : bli_trsm_lu_ker_var2;
-	      gemmtrsm_ukr_vft gemmtrsm_ukr   = bli_obj_is_lower( a )
+	      gemmtrsm_ukr_ft  gemmtrsm_ukr   = bli_obj_is_lower( a )
 	    ? bli_cntx_get_ukr_dt( dt_comp, BLIS_GEMMTRSM_L_UKR, cntx )
 	    : bli_cntx_get_ukr_dt( dt_comp, BLIS_GEMMTRSM_U_UKR, cntx );
-	      gemm_ukr_vft     gemm_ukr       = bli_cntx_get_ukr_dt( dt_comp, BLIS_GEMM_UKR, cntx );
-	      gemm_ukr_vft     real_gemm_ukr  = NULL;
+	      gemm_ukr_ft      gemm_ukr       = bli_cntx_get_ukr_dt( dt_comp, BLIS_GEMM_UKR, cntx );
+	      gemm_ukr_ft      real_gemm_ukr  = NULL;
 	const dir_t            direct         = bli_obj_is_lower( a ) ? BLIS_FWD : BLIS_BWD;
 	const bool             row_pref       = bli_cntx_get_ukr_prefs_dt( dt_comp, BLIS_GEMM_UKR_ROW_PREF, cntx );
 	      pack_t           schema_a       = BLIS_PACKED_ROW_PANELS;
 	      pack_t           schema_b       = BLIS_PACKED_COL_PANELS;
-	const packm_ker_vft    packm_a_ukr    = dt_a == dt_ap ? packm_struc_cxk[ dt_a ]
+	const packm_ker_ft     packm_a_ukr    = dt_a == dt_ap ? packm_struc_cxk[ dt_a ]
 	                                                      : packm_struc_cxk_md[ dt_a ][ dt_ap ];
-	const packm_ker_vft    packm_b_ukr    = dt_b == dt_bp ? packm_struc_cxk[ dt_b ]
+	const packm_ker_ft     packm_b_ukr    = dt_b == dt_bp ? packm_struc_cxk[ dt_b ]
 	                                                      : packm_struc_cxk_md[ dt_b ][ dt_bp ];
 	const dim_t            mr_def         = bli_cntx_get_blksz_def_dt( dt_comp, BLIS_MR, cntx );
 	const dim_t            mr_pack        = bli_cntx_get_blksz_max_dt( dt_comp, BLIS_MR, cntx );

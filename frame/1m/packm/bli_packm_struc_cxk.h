@@ -52,8 +52,8 @@ void PASTEMAC(ch,varname) \
        const void*   kappa, \
        const void*   c, inc_t incc, inc_t ldc, \
              void*   p,             inc_t ldp, \
-       const cntx_t* cntx, \
-       const void*   params  \
+       const void*   params, \
+       const cntx_t* cntx  \
      );
 
 INSERT_GENTPROT_BASIC( packm_struc_cxk )

@@ -32,6 +32,7 @@
 
 */
 
+#if 1
 
 //
 // Prototype BLAS-to-BLIS interfaces.
@@ -47,5 +48,7 @@ BLIS_EXPORT_BLAS ftype_r PASTEF772(chr,chx,blasname) \
 
 #ifdef BLIS_ENABLE_BLAS
 INSERT_GENTPROTR2_BLAS( nrm2 )
+#endif
+
 #endif
 

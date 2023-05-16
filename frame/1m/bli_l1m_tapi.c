@@ -552,7 +552,7 @@ void PASTEMAC3(chx,chy,opname,EX_SUF) \
 }
 
 INSERT_GENTFUNC2_BASIC( xpbym_md )
-INSERT_GENTFUNC2_MIXDP( xpbym_md )
+INSERT_GENTFUNC2_MIX_DP( xpbym_md )
 
 
 #endif

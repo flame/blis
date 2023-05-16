@@ -866,6 +866,9 @@ void libblis_test_output_params_struct( FILE* os, test_params_t* params )
 	bli_rntm_set_ways_for_op( BLIS_TRSM, BLIS_RIGHT, m, n, k, &trsm_r );
     */
 
+	const bool tls_enabled = bli_info_get_enable_tls();
+	const bool thr_enabled = bli_info_get_enable_threading();
+
 	// Output some system parameters.
 	libblis_test_fprintf_c( os, "\n" );
 	libblis_test_fprintf_c( os, "--- BLIS library info -------------------------------------\n" );
@@ -914,6 +917,17 @@ void libblis_test_output_params_struct( FILE* os, test_params_t* params )
 	libblis_test_fprintf_c( os, "\n" );
 	libblis_test_fprintf_c( os, "\n" );
 	libblis_test_fprintf_c( os, "--- BLIS parallelization info ---\n" );
+	libblis_test_fprintf_c( os, "\n" );
+	libblis_test_fprintf_c( os, "thread-local storage (TLS)     %d\n", ( int )tls_enabled );
+	if ( !tls_enabled && thr_enabled )
+	{
+	libblis_test_fprintf_c( os, "\n" );
+	libblis_test_fprintf_c( os, "[WARNING] BLIS was compiled with TLS disabled. We assume you know what\n" );
+	libblis_test_fprintf_c( os, "[WARNING] you're doing! Multithreaded race conditions, correctness\n" );
+	libblis_test_fprintf_c( os, "[WARNING] issues, and deadlocks may occur. If any of these happen,\n" );
+	libblis_test_fprintf_c( os, "[WARNING] please consider reconfiguring with --disable-threading.\n" );
+
+	}
 	libblis_test_fprintf_c( os, "\n" );
 	libblis_test_fprintf_c( os, "multithreading modes           %s\n", impl_str );
 	libblis_test_fprintf_c( os, "  default mode                 %s\n", def_impl_unset_str );
@@ -2593,7 +2607,7 @@ void libblis_test_mobj_create( test_params_t* params, num_t dt, trans_t trans, c
 
 thrinfo_t* libblis_test_pobj_create( bszid_t bmult_id_m, bszid_t bmult_id_n, invdiag_t inv_diag, pack_t pack_schema, packbuf_t pack_buf, obj_t* a, obj_t* p, cntx_t* cntx )
 {
-	static packm_ker_vft GENARRAY(packm_struc_cxk,packm_struc_cxk);
+	static packm_ker_ft GENARRAY(packm_struc_cxk,packm_struc_cxk);
 
 	bool does_inv_diag;
 	if ( inv_diag == BLIS_NO_INVERT_DIAG ) does_inv_diag = FALSE;

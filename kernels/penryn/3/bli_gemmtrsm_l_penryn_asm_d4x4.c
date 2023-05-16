@@ -40,15 +40,6 @@
 #if 0
 void bli_sgemmtrsm_l_penryn_asm_8x4
      (
-       dim_t               k0,
-       float*     restrict alpha,
-       float*     restrict a10,
-       float*     restrict a11,
-       float*     restrict b01,
-       float*     restrict b11,
-       float*     restrict c11, inc_t rs_c0, inc_t cs_c0,
-       auxinfo_t*          data,
-       cntx_t*             cntx
      )
 {
 }
@@ -56,20 +47,20 @@ void bli_sgemmtrsm_l_penryn_asm_8x4
 
 void bli_dgemmtrsm_l_penryn_asm_4x4
      (
-       dim_t               m,
-       dim_t               n,
-       dim_t               k0,
-       double*    restrict alpha,
-       double*    restrict a10,
-       double*    restrict a11,
-       double*    restrict b01,
-       double*    restrict b11,
-       double*    restrict c11, inc_t rs_c0, inc_t cs_c0,
-       auxinfo_t*          data,
-       cntx_t*             cntx
+             dim_t      m,
+             dim_t      n,
+             dim_t      k0,
+       const void*      alpha,
+       const void*      a10,
+       const void*      a11,
+       const void*      b01,
+             void*      b11,
+             void*      c11, inc_t rs_c0, inc_t cs_c0,
+             auxinfo_t* data,
+       const cntx_t*    cntx
      )
 {
-	const void*   b_next  = bli_auxinfo_next_b( data );
+	const void* b_next  = bli_auxinfo_next_b( data );
 
 	// Typecast local copies of integers in case dim_t and inc_t are a
 	// different size than is expected by load instructions.

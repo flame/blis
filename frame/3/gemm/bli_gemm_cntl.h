@@ -38,29 +38,29 @@
 
 struct gemm_var_cntl_s
 {
-	cntl_t       cntl; //this field must be present and come first
-	num_t        dt_comp;
-	num_t        dt_out;
-	gemm_ukr_vft ukr;
-	gemm_ukr_vft real_ukr;
-	const void*  params;
-	const void*  real_params;
-	dim_t        mr;
-	dim_t        nr;
-	dim_t        mr_scale;
-	dim_t        nr_scale;
-	bool         row_pref;
+	cntl_t      cntl; //this field must be present and come first
+	num_t       dt_comp;
+	num_t       dt_out;
+	gemm_ukr_ft ukr;
+	gemm_ukr_ft real_ukr;
+	const void* params;
+	const void* real_params;
+	dim_t       mr;
+	dim_t       nr;
+	dim_t       mr_scale;
+	dim_t       nr_scale;
+	bool        row_pref;
 };
 typedef struct gemm_var_cntl_s gemm_var_cntl_t;
 
 // -----------------------------------------------------------------------------
 
-BLIS_INLINE gemm_ukr_vft bli_gemm_var_cntl_ukr( const cntl_t* cntl )
+BLIS_INLINE gemm_ukr_ft bli_gemm_var_cntl_ukr( const cntl_t* cntl )
 {
 	return ( ( const gemm_var_cntl_t* ) cntl )->ukr;
 }
 
-BLIS_INLINE gemm_ukr_vft bli_gemm_var_cntl_real_ukr( const cntl_t* cntl )
+BLIS_INLINE gemm_ukr_ft bli_gemm_var_cntl_real_ukr( const cntl_t* cntl )
 {
 	return ( ( const gemm_var_cntl_t* ) cntl )->real_ukr;
 }
@@ -97,7 +97,7 @@ BLIS_INLINE void bli_gemm_var_cntl_set_ukr( const func2_t* ukr, cntl_t* cntl_ )
 	gemm_var_cntl_t* cntl = ( gemm_var_cntl_t* )cntl_;
 	num_t dt_comp = cntl->dt_comp;
 	num_t dt_out = cntl->dt_out;
-	cntl->ukr = ( gemm_ukr_vft )bli_func2_get_dt( dt_comp, dt_out, ukr );
+	cntl->ukr = ( gemm_ukr_ft )bli_func2_get_dt( dt_comp, dt_out, ukr );
 }
 
 BLIS_INLINE void bli_gemm_var_cntl_set_real_ukr( const func2_t* ukr, cntl_t* cntl_ )
@@ -105,7 +105,7 @@ BLIS_INLINE void bli_gemm_var_cntl_set_real_ukr( const func2_t* ukr, cntl_t* cnt
 	gemm_var_cntl_t* cntl = ( gemm_var_cntl_t* )cntl_;
 	num_t dt_comp = cntl->dt_comp;
 	num_t dt_out = cntl->dt_out;
-	cntl->real_ukr = ( gemm_ukr_vft )bli_func2_get_dt( dt_comp, dt_out, ukr );
+	cntl->real_ukr = ( gemm_ukr_ft )bli_func2_get_dt( dt_comp, dt_out, ukr );
 }
 
 BLIS_INLINE err_t bli_gemm_var_cntl_set_ukr_simple( const func_t* ukr, cntl_t* cntl_ )
@@ -115,7 +115,7 @@ BLIS_INLINE err_t bli_gemm_var_cntl_set_ukr_simple( const func_t* ukr, cntl_t* c
 	num_t dt_out = cntl->dt_out;
 	if ( dt_comp != dt_out )
 		return BLIS_INCONSISTENT_DATATYPES;
-	cntl->ukr = ( gemm_ukr_vft )bli_func_get_dt( dt_comp, ukr );
+	cntl->ukr = ( gemm_ukr_ft )bli_func_get_dt( dt_comp, ukr );
 	return BLIS_SUCCESS;
 }
 
@@ -126,7 +126,7 @@ BLIS_INLINE err_t bli_gemm_var_cntl_set_real_ukr_simple( const func_t* ukr, cntl
 	num_t dt_out = cntl->dt_out;
 	if ( dt_comp != dt_out )
 		return BLIS_INCONSISTENT_DATATYPES;
-	cntl->real_ukr = ( gemm_ukr_vft )bli_func_get_dt( dt_comp, ukr );
+	cntl->real_ukr = ( gemm_ukr_ft )bli_func_get_dt( dt_comp, ukr );
 	return BLIS_SUCCESS;
 }
 
@@ -164,8 +164,8 @@ void bli_gemm_var_cntl_init_node
        void_fp          var_func,
        num_t            dt_comp,
        num_t            dt_out,
-       gemm_ukr_vft     ukr,
-       gemm_ukr_vft     real_ukr,
+       gemm_ukr_ft      ukr,
+       gemm_ukr_ft      real_ukr,
        bool             row_pref,
        dim_t            mr,
        dim_t            nr,
@@ -214,9 +214,9 @@ BLIS_EXPORT_BLIS void bli_gemm_cntl_finalize
 
 // -----------------------------------------------------------------------------
 
-BLIS_INLINE gemm_ukr_vft bli_gemm_cntl_ukr( gemm_cntl_t* cntl )
+BLIS_INLINE gemm_ukr_ft bli_gemm_cntl_ukr( gemm_cntl_t* cntl )
 {
-	gemm_ukr_vft real_ukr = bli_gemm_var_cntl_real_ukr( ( cntl_t* )&cntl->ker );
+	gemm_ukr_ft real_ukr = bli_gemm_var_cntl_real_ukr( ( cntl_t* )&cntl->ker );
 	return real_ukr ? real_ukr : bli_gemm_var_cntl_ukr( ( cntl_t* )&cntl->ker );
 }
 
@@ -227,7 +227,7 @@ BLIS_INLINE bool bli_gemm_cntl_row_pref( gemm_cntl_t* cntl )
 
 BLIS_INLINE const void* bli_gemm_cntl_params( gemm_cntl_t* cntl )
 {
-	gemm_ukr_vft real_ukr = bli_gemm_var_cntl_real_ukr( ( cntl_t* )&cntl->ker );
+	gemm_ukr_ft real_ukr = bli_gemm_var_cntl_real_ukr( ( cntl_t* )&cntl->ker );
 	return real_ukr ? bli_gemm_var_cntl_real_params( ( cntl_t* )&cntl->ker )
 	                : bli_gemm_var_cntl_params( ( cntl_t* )&cntl->ker );
 }
@@ -237,7 +237,7 @@ BLIS_INLINE l3_var_oft bli_gemm_cntl_var( gemm_cntl_t* cntl )
 	return ( l3_var_oft )bli_cntl_var_func( ( cntl_t* )&cntl->ker );
 }
 
-BLIS_INLINE packm_ker_vft bli_gemm_cntl_packa_ukr( gemm_cntl_t* cntl )
+BLIS_INLINE packm_ker_ft bli_gemm_cntl_packa_ukr( gemm_cntl_t* cntl )
 {
 	return bli_packm_def_cntl_ukr( ( cntl_t* )&cntl->pack_a );
 }
@@ -257,7 +257,7 @@ BLIS_INLINE packm_var_oft bli_gemm_cntl_packa_var( gemm_cntl_t* cntl )
 	return bli_packm_cntl_variant( ( cntl_t* )&cntl->pack_a );
 }
 
-BLIS_INLINE packm_ker_vft bli_gemm_cntl_packb_ukr( gemm_cntl_t* cntl )
+BLIS_INLINE packm_ker_ft bli_gemm_cntl_packb_ukr( gemm_cntl_t* cntl )
 {
 	return bli_packm_def_cntl_ukr( ( cntl_t* )&cntl->pack_b );
 }

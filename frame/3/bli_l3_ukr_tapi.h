@@ -37,20 +37,60 @@
 // Generate prototypes for level-3 micro-kernel wrappers.
 //
 
-#undef  gemm_ukr_name
-#define gemm_ukr_name       gemm_ukernel
+#undef  GENTPROT
+#define GENTPROT( ctype, ch, opname ) \
+\
+void PASTEMAC(ch,opname) \
+     ( \
+             dim_t      m, \
+             dim_t      n, \
+             dim_t      k, \
+       const ctype*     alpha, \
+       const ctype*     a, \
+       const ctype*     b, \
+       const ctype*     beta, \
+             ctype*     c, inc_t rs_c, inc_t cs_c, \
+             auxinfo_t* data, \
+       const cntx_t*    cntx  \
+     );
 
-#undef  gemmtrsm_l_ukr_name
-#define gemmtrsm_l_ukr_name gemmtrsm_l_ukernel
-#undef  gemmtrsm_u_ukr_name
-#define gemmtrsm_u_ukr_name gemmtrsm_u_ukernel
+INSERT_GENTPROT_BASIC( gemm_ukernel )
 
-#undef  trsm_l_ukr_name
-#define trsm_l_ukr_name     trsm_l_ukernel
-#undef  trsm_u_ukr_name
-#define trsm_u_ukr_name     trsm_u_ukernel
 
-// Include the level-3 micro-kernel API template.
+#undef  GENTPROT
+#define GENTPROT( ctype, ch, opname ) \
+\
+void PASTEMAC(ch,opname) \
+     ( \
+             dim_t      m, \
+             dim_t      n, \
+             dim_t      k, \
+       const ctype*     alpha, \
+       const ctype*     a1x, \
+       const ctype*     a11, \
+       const ctype*     bx1, \
+             ctype*     b11, \
+             ctype*     c11, inc_t rs_c, inc_t cs_c, \
+             auxinfo_t* data, \
+       const cntx_t*    cntx  \
+     );
 
-#include "bli_l3_ukr.h"
+INSERT_GENTPROT_BASIC( gemmtrsm_l_ukernel )
+INSERT_GENTPROT_BASIC( gemmtrsm_u_ukernel )
+
+
+#undef  GENTPROT
+#define GENTPROT( ctype, ch, opname ) \
+\
+void PASTEMAC(ch,opname) \
+     ( \
+       const ctype*     a, \
+             ctype*     b, \
+             ctype*     c, inc_t rs_c, inc_t cs_c, \
+             auxinfo_t* data, \
+       const cntx_t*    cntx  \
+     );
+
+INSERT_GENTPROT_BASIC( trsm_l_ukernel )
+INSERT_GENTPROT_BASIC( trsm_u_ukernel )
 

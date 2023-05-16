@@ -215,13 +215,14 @@ void bli_gemmsup_ref_var1n
 	const inc_t jrstep_c = rs_c * MR * dt_size;
 
 	//const inc_t jrstep_a = rs_a * MR;
+	//( void )jrstep_a;
 
 	//const inc_t irstep_c = cs_c * NR;
 	//const inc_t irstep_b = cs_b * NR;
 
 	// Query the context for the sup microkernel address and cast it to its
 	// function pointer type.
-	gemmsup_ker_vft gemmsup_ker = bli_cntx_get_l3_sup_ker_dt( dt, stor_id, cntx );
+	gemmsup_ker_ft gemmsup_ker = bli_cntx_get_l3_sup_ker_dt( dt, stor_id, cntx );
 
 	const char* a_00       = buf_a;
 	const char* b_00       = buf_b;
@@ -629,14 +630,14 @@ void bli_gemmsup_ref_var2m
 
 	// Query the context for the sup microkernel address and cast it to its
 	// function pointer type.
-	gemmsup_ker_vft gemmsup_ker = bli_cntx_get_l3_sup_ker_dt( dt, stor_id, cntx );
+	gemmsup_ker_ft gemmsup_ker = bli_cntx_get_l3_sup_ker_dt( dt, stor_id, cntx );
 
 	const char* a_00       = buf_a;
 	const char* b_00       = buf_b;
 	      char* c_00       = buf_c;
 	const void* one        = bli_obj_buffer_for_const( dt, &BLIS_ONE );
 
-	auxinfo_t       aux;
+	auxinfo_t aux;
 
 	// Determine whether we are using more than one thread.
 	const bool is_mt = ( bli_rntm_calc_num_threads( rntm ) > 1 );

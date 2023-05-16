@@ -206,7 +206,7 @@ void PASTEMAC2(cha,chb,opname) \
 }
 
 INSERT_GENTFUNC2_BASIC( castm )
-INSERT_GENTFUNC2_MIXDP( castm )
+INSERT_GENTFUNC2_MIX_DP( castm )
 
 // -----------------------------------------------------------------------------
 

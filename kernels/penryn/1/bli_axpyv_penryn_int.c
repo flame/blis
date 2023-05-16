@@ -45,35 +45,32 @@ typedef union
 
 void bli_daxpyv_penryn_int
      (
-       conj_t           conjx,
-       dim_t            n,
-       double* restrict alpha,
-       double* restrict x, inc_t incx,
-       double* restrict y, inc_t incy,
-       cntx_t*          cntx
+             conj_t  conjx,
+             dim_t   n,
+       const void*   alpha0,
+       const void*   x0, inc_t incx,
+             void*   y0, inc_t incy,
+       const cntx_t* cntx
      )
 {
-	double*  restrict alpha_cast = alpha;
-	double*  restrict x_cast = x;
-	double*  restrict y_cast = y;
-	dim_t             i;
+	const double*  restrict alpha_cast = alpha0;
+	const double*  restrict x_cast     = x0;
+	      double*  restrict y_cast     = y0;
 
-	const dim_t       n_elem_per_reg = 2;
-	const dim_t       n_iter_unroll  = 4;
+	const dim_t             n_elem_per_reg = 2;
+	const dim_t             n_iter_unroll  = 4;
 
-	dim_t             n_pre;
-	dim_t             n_run;
-	dim_t             n_left;
+	      dim_t             n_pre;
+	      dim_t             n_run;
+	      dim_t             n_left;
 
-	double*  restrict x1;
-	double*  restrict y1;
-	double            alpha1c, x1c;
+	      double            alpha1c, x1c;
 
-	v2df_t            alpha1v;
-	v2df_t            x1v, x2v, x3v, x4v;
-	v2df_t            y1v, y2v, y3v, y4v;
+	      v2df_t            alpha1v;
+	      v2df_t            x1v, x2v, x3v, x4v;
+	      v2df_t            y1v, y2v, y3v, y4v;
 
-	bool              use_ref = FALSE;
+	      bool              use_ref = FALSE;
 
 
 	if ( bli_zero_dim1( n ) ) return;
@@ -86,13 +83,13 @@ void bli_daxpyv_penryn_int
 	{
 		use_ref = TRUE;
 	}
-	else if ( bli_is_unaligned_to( ( siz_t )x, 16 ) ||
-	          bli_is_unaligned_to( ( siz_t )y, 16 ) )
+	else if ( bli_is_unaligned_to( ( siz_t )x_cast, 16 ) ||
+	          bli_is_unaligned_to( ( siz_t )y_cast, 16 ) )
 	{
 		use_ref = TRUE;
 
-		if ( bli_is_unaligned_to( ( siz_t )x, 16 ) &&
-		     bli_is_unaligned_to( ( siz_t )y, 16 ) )
+		if ( bli_is_unaligned_to( ( siz_t )x_cast, 16 ) &&
+		     bli_is_unaligned_to( ( siz_t )y_cast, 16 ) )
 		{
 			use_ref = FALSE;
 			n_pre   = 1;
@@ -102,15 +99,15 @@ void bli_daxpyv_penryn_int
 	// Call the reference implementation if needed.
 	if ( use_ref == TRUE )
 	{
-		daxpyv_ker_ft f = bli_cntx_get_ukr_dt( BLIS_DOUBLE, BLIS_AXPYV_KER, cntx );
+		axpyv_ker_ft f = bli_cntx_get_ukr_dt( BLIS_DOUBLE, BLIS_AXPYV_KER, cntx );
 
 		f
 		(
 		  conjx,
 		  n,
-		  alpha,
-		  x, incx,
-		  y, incy,
+		  alpha0,
+		  x0, incx,
+		  y0, incy,
 		  cntx
 		);
 		return;
@@ -122,8 +119,8 @@ void bli_daxpyv_penryn_int
 
 	alpha1c = *alpha_cast;
 
-	x1 = x_cast;
-	y1 = y_cast;
+	const double* restrict x1 = x_cast;
+	      double* restrict y1 = y_cast;
 
 	if ( n_pre == 1 )
 	{
@@ -137,7 +134,7 @@ void bli_daxpyv_penryn_int
 
 	alpha1v.v = _mm_loaddup_pd( ( double* )&alpha1c );
 
-	for ( i = 0; i < n_run; ++i )
+	for ( dim_t i = 0; i < n_run; ++i )
 	{
 		y1v.v = _mm_load_pd( ( double* )y1 );
 		x1v.v = _mm_load_pd( ( double* )x1 );
@@ -174,7 +171,7 @@ void bli_daxpyv_penryn_int
 
 	if ( n_left > 0 )
 	{
-		for ( i = 0; i < n_left; ++i )
+		for ( dim_t i = 0; i < n_left; ++i )
 		{
 			x1c = *x1;
 

@@ -61,7 +61,7 @@ void bli_packm_def_cntl_init_node
        num_t             dt_orig,
        num_t             dt_pack,
        num_t             dt_bmult,
-       packm_ker_vft     ukr,
+       packm_ker_ft      ukr,
        dim_t             bmult_m_def,
        dim_t             bmult_m_pack,
        dim_t             bmult_m_bcast,

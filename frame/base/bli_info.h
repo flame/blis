@@ -77,6 +77,7 @@ BLIS_EXPORT_BLIS gint_t bli_info_get_enable_hpx_as_default( void );
 BLIS_EXPORT_BLIS gint_t bli_info_get_thread_jrir_slab( void );
 BLIS_EXPORT_BLIS gint_t bli_info_get_thread_jrir_rr( void );
 BLIS_EXPORT_BLIS gint_t bli_info_get_thread_jrir_tlb( void );
+BLIS_EXPORT_BLIS gint_t bli_info_get_enable_tls( void );
 BLIS_EXPORT_BLIS gint_t bli_info_get_enable_memkind( void );
 BLIS_EXPORT_BLIS gint_t bli_info_get_enable_sandbox( void );
 

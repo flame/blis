@@ -40,12 +40,12 @@
 \
 static void PASTEMAC3(chr,opname,arch,suf) \
      ( \
-       dim_t               m, \
-       dim_t               n, \
-       ctype*     restrict a, inc_t rs_a, inc_t cs_a, \
-       ctype*     restrict b, inc_t rs_b, inc_t cs_b, \
-       ctype*     restrict c, inc_t rs_c, inc_t cs_c, \
-       pack_t              schema_b \
+             dim_t           m, \
+             dim_t           n, \
+       const ctype* restrict a, inc_t rs_a, inc_t cs_a, \
+       const ctype* restrict b, inc_t rs_b, inc_t cs_b, \
+             ctype* restrict c, inc_t rs_c, inc_t cs_c, \
+             pack_t          schema_b \
      ) \
 { \
 	const inc_t ld_a  = cs_a; \
@@ -235,12 +235,12 @@ INSERT_GENTFUNCRO( trsm1m_l, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX, invscalris )
 \
 static void PASTEMAC3(chr,opname,arch,suf) \
      ( \
-       dim_t               m, \
-       dim_t               n, \
-       ctype*     restrict a, inc_t rs_a, inc_t cs_a, \
-       ctype*     restrict b, inc_t rs_b, inc_t cs_b, \
-       ctype*     restrict c, inc_t rs_c, inc_t cs_c, \
-       pack_t              schema_b \
+             dim_t           m, \
+             dim_t           n, \
+       const ctype* restrict a, inc_t rs_a, inc_t cs_a, \
+       const ctype* restrict b, inc_t rs_b, inc_t cs_b, \
+             ctype* restrict c, inc_t rs_c, inc_t cs_c, \
+             pack_t          schema_b \
      ) \
 { \
 	const inc_t ld_a  = cs_a; \
@@ -429,61 +429,68 @@ INSERT_GENTFUNCRO( trsm1m_u, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX, invscalris )
 \
 void PASTEMAC3(chr,opname,arch,suf) \
      ( \
-       dim_t               m, \
-       dim_t               n, \
-       dim_t               k, \
-       ctype*     restrict alpha, \
-       ctype*     restrict a1x, \
-       ctype*     restrict a11, \
-       ctype*     restrict bx1, \
-       ctype*     restrict b11, \
-       ctype*     restrict c11, inc_t rs_c, inc_t cs_c, \
-       auxinfo_t*          auxinfo, \
-       cntx_t*             cntx  \
+             dim_t      m, \
+             dim_t      n, \
+             dim_t      k, \
+       const void*      alpha0, \
+       const void*      a1x0, \
+       const void*      a110, \
+       const void*      bx10, \
+             void*      b110, \
+             void*      c110, inc_t rs_c, inc_t cs_c, \
+             auxinfo_t* auxinfo, \
+       const cntx_t*    cntx  \
      ) \
 { \
-	const cntl_t*      params     = bli_auxinfo_params( auxinfo ); \
+	const ctype*      alpha       = alpha0; \
+	const ctype*      a1x         = a1x0; \
+	const ctype*      a11         = a110; \
+	const ctype*      bx1         = bx10; \
+	      ctype*      b11         = b110; \
+	      ctype*      c11         = c110; \
 \
-	const gemm_ukr_vft rgemm_ukr  = bli_trsm_var_cntl_real_gemm_ukr( params ); \
-	const bool         row_pref   = bli_trsm_var_cntl_row_pref( params ); \
-	const void*        params_r   = bli_trsm_var_cntl_real_params( params ); \
+	const cntl_t*     params     = bli_auxinfo_params( auxinfo ); \
 \
-	const dim_t        mr         = bli_trsm_var_cntl_mr( params ); \
-	const dim_t        nr         = bli_trsm_var_cntl_nr( params ); \
+	const gemm_ukr_ft rgemm_ukr  = bli_trsm_var_cntl_real_gemm_ukr( params ); \
+	const bool        row_pref   = bli_trsm_var_cntl_row_pref( params ); \
+	const void*       params_r   = bli_trsm_var_cntl_real_params( params ); \
 \
-	const dim_t        mr_r       = row_pref ? mr : 2 * mr; \
-	const dim_t        nr_r       = row_pref ? 2 * nr : nr; \
+	const dim_t       mr         = bli_trsm_var_cntl_mr( params ); \
+	const dim_t       nr         = bli_trsm_var_cntl_nr( params ); \
+\
+	const dim_t       mr_r       = row_pref ? mr : 2 * mr; \
+	const dim_t       nr_r       = row_pref ? 2 * nr : nr; \
 \
 	/* Convert the micro-tile dimensions from being in units of complex elements to
 	   be in units of real elements. */ \
-	const dim_t        k_r         = 2 * k; \
+	const dim_t       k_r         = 2 * k; \
 \
-	ctype              bt[ BLIS_STACK_BUF_MAX_SIZE \
-	                       / sizeof( ctype ) ] \
-	                       __attribute__((aligned(BLIS_STACK_BUF_ALIGN_SIZE))); \
-	inc_t              rs_bt       = row_pref ? nr : 1; \
-	inc_t              cs_bt       = row_pref ? 1 : mr; \
+	ctype             bt[ BLIS_STACK_BUF_MAX_SIZE \
+	                      / sizeof( ctype ) ] \
+	                      __attribute__((aligned(BLIS_STACK_BUF_ALIGN_SIZE))); \
+	inc_t             rs_bt       = row_pref ? nr : 1; \
+	inc_t             cs_bt       = row_pref ? 1 : mr; \
 \
-	inc_t              rs_bt_r     = row_pref ? nr_r : 1; \
-	inc_t              cs_bt_r     = row_pref ? 1 : mr_r; \
+	inc_t             rs_bt_r     = row_pref ? nr_r : 1; \
+	inc_t             cs_bt_r     = row_pref ? 1 : mr_r; \
 \
-	const pack_t       schema_b    = bli_auxinfo_schema_b( auxinfo ); \
+	const pack_t      schema_b    = bli_auxinfo_schema_b( auxinfo ); \
 \
-	ctype_r* restrict  a1x_r       = ( ctype_r* )a1x; \
+	ctype_r* restrict a1x_r       = ( ctype_r* )a1x; \
 \
-	const inc_t        rs_a        = bli_trsm_var_cntl_mr_bcast( params ); \
-	const inc_t        cs_a        = bli_trsm_var_cntl_mr_pack( params ); \
+	const inc_t       rs_a        = bli_trsm_var_cntl_mr_bcast( params ); \
+	const inc_t       cs_a        = bli_trsm_var_cntl_mr_pack( params ); \
 \
-	ctype_r* restrict  bx1_r       = ( ctype_r* )bx1; \
+	ctype_r* restrict bx1_r       = ( ctype_r* )bx1; \
 \
-	const inc_t        rs_b        = bli_trsm_var_cntl_nr_pack( params ); \
-	const inc_t        cs_b        = bli_trsm_var_cntl_nr_bcast( params ); \
+	const inc_t       rs_b        = bli_trsm_var_cntl_nr_pack( params ); \
+	const inc_t       cs_b        = bli_trsm_var_cntl_nr_bcast( params ); \
 \
-	ctype_r* restrict  zero_r      = PASTEMAC(chr,0); \
-	ctype_r* restrict  minus_one_r = PASTEMAC(chr,m1); \
+	ctype_r* restrict zero_r      = PASTEMAC(chr,0); \
+	ctype_r* restrict minus_one_r = PASTEMAC(chr,m1); \
 \
-	const ctype_r      alpha_r     = PASTEMAC(ch,real)( *alpha ); \
-	const ctype_r      alpha_i     = PASTEMAC(ch,imag)( *alpha ); ( void ) alpha_i; \
+	const ctype_r     alpha_r     = PASTEMAC(ch,real)( *alpha ); \
+	const ctype_r     alpha_i     = PASTEMAC(ch,imag)( *alpha ); ( void ) alpha_i; \
 \
 	auxinfo_t auxinfo_r = *auxinfo; \
     bli_auxinfo_set_params( params_r, &auxinfo_r ); \
@@ -527,6 +534,7 @@ void PASTEMAC3(chr,opname,arch,suf) \
 			ctype*   restrict beta11t     = bt     + i*rs_bt + j*cs_bt; \
 			ctype_r* restrict beta11t_r   = &PASTEMAC(ch,real)( *beta11t ); \
 			ctype_r* restrict beta11t_i   = &PASTEMAC(ch,imag)( *beta11t ); \
+\
 			ctype_r* restrict beta11_ri_r = b11_ri + i*rs_b2 + j*cs_b2 + 0*cs_b + d; \
 			ctype_r* restrict beta11_ri_i = b11_ri + i*rs_b2 + j*cs_b2 + 1*cs_b + d; \
 			ctype_r* restrict beta11_ir_r = b11_ir + i*rs_b2 + j*cs_b2 + 0*cs_b + d; \
@@ -563,6 +571,7 @@ void PASTEMAC3(chr,opname,arch,suf) \
 			ctype*   restrict beta11t   = bt    + i*rs_bt + j*cs_bt; \
 			ctype_r* restrict beta11t_r = &PASTEMAC(ch,real)( *beta11t ); \
 			ctype_r* restrict beta11t_i = &PASTEMAC(ch,imag)( *beta11t ); \
+\
 			ctype_r* restrict beta11_r  = b11_r + i*rs_b2 + j*cs_b2 + d; \
 			ctype_r* restrict beta11_i  = b11_i + i*rs_b2 + j*cs_b2 + d; \
 \

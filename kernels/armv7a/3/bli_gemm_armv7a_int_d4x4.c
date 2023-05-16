@@ -37,18 +37,24 @@
 
 void bli_sgemm_armv7a_int_4x4
      (
-       dim_t               m,
-       dim_t               n,
-       dim_t               k,
-       float*     restrict alpha,
-       float*     restrict a,
-       float*     restrict b,
-       float*     restrict beta,
-       float*     restrict c, inc_t rs_c0, inc_t cs_c0,
-       auxinfo_t*          data,
-       cntx_t*             cntx
+             dim_t      m,
+             dim_t      n,
+             dim_t      k,
+       const void*      alpha0,
+       const void*      a0,
+       const void*      b0,
+       const void*      beta0,
+             void*      c0, inc_t rs_c0, inc_t cs_c0,
+             auxinfo_t* data,
+       const cntx_t*    cntx
      )
 {
+	const float* alpha = alpha0;
+	const float* a     = a0;
+	const float* b     = b0;
+	const float* beta  = beta0;
+	      float* c     = c0;
+
 	// Typecast local copies of integers in case dim_t and inc_t are a
 	// different size than is expected by load instructions.
 	uint32_t k_iter = k / 4;
@@ -243,18 +249,24 @@ void bli_sgemm_armv7a_int_4x4
 
 void bli_dgemm_armv7a_int_4x4
      (
-       dim_t               m,
-       dim_t               n,
-       dim_t               k,
-       double*    restrict alpha,
-       double*    restrict a,
-       double*    restrict b,
-       double*    restrict beta,
-       double*    restrict c, inc_t rs_c0, inc_t cs_c0,
-       auxinfo_t*          data,
-       cntx_t*             cntx
+             dim_t      m,
+             dim_t      n,
+             dim_t      k,
+       const void*      alpha_,
+       const void*      a_,
+       const void*      b_,
+       const void*      beta_,
+             void*      c_, inc_t rs_c0, inc_t cs_c0,
+             auxinfo_t* data,
+       const cntx_t*    cntx
      )
 {
+	const double* alpha = alpha_;
+	const double* a     = a_;
+	const double* b     = b_;
+	const double* beta  = beta_;
+	      double* c     = c_;
+
 	// Typecast local copies of integers in case dim_t and inc_t are a
 	// different size than is expected by load instructions.
 	//uint32_t k_iter = k0 / 4;

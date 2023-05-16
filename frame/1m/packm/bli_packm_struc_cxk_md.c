@@ -56,8 +56,8 @@ void PASTEMAC2(chc,chp,varname) \
        const void*   kappa, \
        const void*   c, inc_t incc, inc_t ldc, \
              void*   p,             inc_t ldp, \
-       const cntx_t* cntx, \
-       const void*   params \
+       const void*   params, \
+       const cntx_t* cntx  \
      ) \
 { \
 	if ( bli_is_nat_packed( schema ) ) \
@@ -77,8 +77,8 @@ void PASTEMAC2(chc,chp,varname) \
 		  ( trans_t )conjc, \
 		  panel_dim, \
 		  panel_len, \
-		  ( ctype_c* )c, incc, ldc, \
-		  ( ctype_p* )p,    1, ldp  \
+		  c, incc, ldc, \
+		  p,    1, ldp  \
 		); \
 \
 		/* If panel_dim < panel_dim_max, then we zero those unused rows. */ \
@@ -112,7 +112,7 @@ void PASTEMAC2(chc,chp,varname) \
 			const dim_t       j      = panel_len; \
 			const dim_t       m_edge = panel_dim_max; \
 			const dim_t       n_edge = panel_len_max - j; \
-			ctype_p*          p_edge = ( ctype_p* )p + (j  )*ldp; \
+			ctype_p*          p_edge = p + (j  )*ldp; \
 \
 			PASTEMAC2(chp,setm,BLIS_TAPI_EX_SUF) \
 			( \
@@ -139,9 +139,9 @@ void PASTEMAC2(chc,chp,varname) \
 		  conjc, \
 		  panel_dim, \
 		  panel_len, \
-		  ( ctype_p* )kappa, \
-		  ( ctype_c* )c, incc, ldc, \
-		  ( ctype_p* )p,       ldp  \
+		  kappa, \
+		  c, incc, ldc, \
+		  p,       ldp  \
 		); \
 \
 		/* If panel_dim < panel_dim_max, then we zero those unused rows. */ \
@@ -165,7 +165,7 @@ void PASTEMAC2(chc,chp,varname) \
 			  m_edge, \
 			  n_edge, \
 			  zero, \
-			  ( ctype_p* )p, 1, ldp, ldp  \
+			  p, 1, ldp, ldp  \
 			); \
 		} \
 \
@@ -190,7 +190,7 @@ void PASTEMAC2(chc,chp,varname) \
 			  m_edge, \
 			  n_edge, \
 			  zero, \
-			  ( ctype_p* )p, 1, ldp, ldp  \
+			  p, 1, ldp, ldp  \
 			); \
 		} \
 	} \
@@ -204,9 +204,9 @@ void PASTEMAC2(chc,chp,varname) \
 		  conjc, \
 		  panel_dim, \
 		  panel_len, \
-		  ( ctype_p* )kappa, \
-		  ( ctype_c* )c, incc, ldc, \
-		  ( ctype_p* )p,       ldp  \
+		  kappa, \
+		  c, incc, ldc, \
+		  p,       ldp  \
 		); \
 \
 		/* If panel_dim < panel_dim_max, then we zero those unused rows. */ \
@@ -230,7 +230,7 @@ void PASTEMAC2(chc,chp,varname) \
 			  m_edge, \
 			  n_edge, \
 			  zero, \
-			  ( ctype_p* )p, 1, ldp, ldp  \
+			  p, 1, ldp, ldp  \
 			); \
 		} \
 \
@@ -255,7 +255,7 @@ void PASTEMAC2(chc,chp,varname) \
 			  m_edge, \
 			  n_edge, \
 			  zero, \
-			  ( ctype_p* )p, 1, ldp, ldp  \
+			  p, 1, ldp, ldp  \
 			); \
 		} \
 	} \
@@ -277,7 +277,7 @@ void PASTEMAC2(chc,chp,varname) \
 }
 
 INSERT_GENTFUNC2_BASIC( packm_struc_cxk_md )
-INSERT_GENTFUNC2_MIXDP( packm_struc_cxk_md )
+INSERT_GENTFUNC2_MIX_DP( packm_struc_cxk_md )
 
 
 // -----------------------------------------------------------------------------
@@ -287,12 +287,12 @@ INSERT_GENTFUNC2_MIXDP( packm_struc_cxk_md )
 \
 void PASTEMAC2(cha,chp,opname) \
      ( \
-       conj_t            conja, \
-       dim_t             m, \
-       dim_t             n, \
-       ctype_p* restrict kappa, \
-       ctype_a* restrict a, inc_t inca, inc_t lda, \
-       ctype_p* restrict p,             inc_t ldp  \
+             conj_t   conja, \
+             dim_t    m, \
+             dim_t    n, \
+       const ctype_p* kappa, \
+       const ctype_a* a, inc_t inca, inc_t lda, \
+             ctype_p* p,             inc_t ldp  \
      ) \
 { \
 	const inc_t                    inca2    = 2 * inca; \
@@ -403,7 +403,7 @@ void PASTEMAC2(cha,chp,opname) \
 }
 
 INSERT_GENTFUNC2_BASIC( packm_cxk_1r_md )
-INSERT_GENTFUNC2_MIXDP( packm_cxk_1r_md )
+INSERT_GENTFUNC2_MIX_DP( packm_cxk_1r_md )
 
 // -----------------------------------------------------------------------------
 
@@ -412,12 +412,12 @@ INSERT_GENTFUNC2_MIXDP( packm_cxk_1r_md )
 \
 void PASTEMAC2(cha,chp,opname) \
      ( \
-       conj_t            conja, \
-       dim_t             m, \
-       dim_t             n, \
-       ctype_p* restrict kappa, \
-       ctype_a* restrict a, inc_t inca, inc_t lda, \
-       ctype_p* restrict p,             inc_t ldp  \
+             conj_t            conja, \
+             dim_t             m, \
+             dim_t             n, \
+       const ctype_p* restrict kappa, \
+       const ctype_a* restrict a, inc_t inca, inc_t lda, \
+             ctype_p* restrict p,             inc_t ldp  \
      ) \
 { \
 	const inc_t       inca1     = inca; \
@@ -517,6 +517,6 @@ void PASTEMAC2(cha,chp,opname) \
 }
 
 INSERT_GENTFUNC2_BASIC( packm_cxk_1e_md )
-INSERT_GENTFUNC2_MIXDP( packm_cxk_1e_md )
+INSERT_GENTFUNC2_MIX_DP( packm_cxk_1e_md )
 
 #endif

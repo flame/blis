@@ -138,5 +138,5 @@ void PASTEMAC3(chx,chy,opname,_unb_var1) \
      );
 
 INSERT_GENTPROT2_BASIC( xpbym_md )
-INSERT_GENTPROT2_MIXDP( xpbym_md )
+INSERT_GENTPROT2_MIX_DP( xpbym_md )
 
