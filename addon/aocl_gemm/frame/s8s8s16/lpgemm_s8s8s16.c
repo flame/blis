@@ -163,23 +163,31 @@ LPGEMM_5LOOP(int8_t,int8_t,int16_t,s8s8s16o16)
 		// Temp accumulaton buffer for C allocation.
 		else if ( c_downscale == TRUE )
 		{
-			mem_scale_c_size_req = sizeof( int16_t ) * nc0 * ( ic_end - ic_start );
+			// Buffer memory is only required if output needs to be
+			// persisted across iterations of the pc/KC loop.
+			// It was observed that the locks used while checking out
+			// a buffer from memory pool had an impact on performance
+			// and is better to not checkout if k <= KC.
+			if ( k > KC )
+			{
+				mem_scale_c_size_req = sizeof( int16_t ) * nc0 * ( ic_end - ic_start );
 
-			lpgemm_alloc_mem_panel
-			(
-			  mem_scale_c_size_req, BLIS_BUFFER_FOR_C_PANEL,
-			  &mem_scale_c, rntm
-			);
+				lpgemm_alloc_mem_panel
+				(
+				  mem_scale_c_size_req, BLIS_BUFFER_FOR_C_PANEL,
+				  &mem_scale_c, rntm
+				);
 
-			temp_scal_c_buffer_s8s8s16o16 = bli_mem_buffer( &mem_scale_c );
+				temp_scal_c_buffer_s8s8s16o16 = bli_mem_buffer( &mem_scale_c );
 
-			c_use_jc = ( int16_t* )temp_scal_c_buffer_s8s8s16o16;
+				c_use_jc = ( int16_t* )temp_scal_c_buffer_s8s8s16o16;
+			}
 
 			// The temp c buffer stride is modified as opposed to original C matrix.
 			rs_c_use = nc0;
 		}
 
-        int16_t* pack_b_column_sum = NULL;
+		int16_t* pack_b_column_sum = NULL;
 
 		for (dim_t pc = 0; pc < k; pc += KC)
 		{
@@ -248,7 +256,7 @@ LPGEMM_5LOOP(int8_t,int8_t,int16_t,s8s8s16o16)
 					&jc_packb_start, &jc_packb_end
 				);
 
-                if ( pc == 0)
+				if ( pc == 0)
 				{
 					pack_b_column_sum = ( int16_t* )( pack_b_buffer_s8s8s16o16 + ( sizeof( int8_t ) * nc0_updated * kc0_updated ) );
 				}
@@ -259,7 +267,7 @@ LPGEMM_5LOOP(int8_t,int8_t,int16_t,s8s8s16o16)
 				if ((jc_packb_end > jc_packb_start) &&
 					(jc_packb_start < (jc + nc0)))
 				{
-                    if ( pc == 0 )
+					if ( pc == 0 )
 					{
 						for (int idx = jc_packb_start; idx < jc_packb_end; idx++ )
 						{
@@ -269,15 +277,15 @@ LPGEMM_5LOOP(int8_t,int8_t,int16_t,s8s8s16o16)
 
 					( ( packb_s16_s8 )lcntx->packb_fun_ptr )
 					(
-						pack_b_buffer_s8s8s16o16 +
-						 (jc_packb_start * kc0_updated),
-                        pack_b_column_sum + ( cs_b * jc_packb_start ), 
-						(b + (rs_b * pc) + (cs_b * jc) +
-						 (cs_b * jc_packb_start)),
-						rs_b,
-						(jc_packb_end - jc_packb_start), kc0,
-						&rs_b_use, &cs_b_use
-						);
+					  pack_b_buffer_s8s8s16o16 +
+					  (jc_packb_start * kc0_updated),
+					  pack_b_column_sum + ( cs_b * jc_packb_start ), 
+					  (b + (rs_b * pc) + (cs_b * jc) +
+					  (cs_b * jc_packb_start)),
+					  rs_b,
+					  (jc_packb_end - jc_packb_start), kc0,
+					  &rs_b_use, &cs_b_use
+					);
 				}
 				else
 				{
@@ -293,7 +301,7 @@ LPGEMM_5LOOP(int8_t,int8_t,int16_t,s8s8s16o16)
 				);
 
 				b_use = pack_b_buffer_s8s8s16o16;
-                post_ops_attr.b_col_sum_vec_s16 = pack_b_column_sum;
+				post_ops_attr.b_col_sum_vec_s16 = pack_b_column_sum;
 			}
 			else if (mtag_b == REORDERED)
 			{
@@ -307,7 +315,7 @@ LPGEMM_5LOOP(int8_t,int8_t,int16_t,s8s8s16o16)
 
 				lpgemm_get_packb_strides( lcntx, &rs_b_use, &cs_b_use );
 
-                post_ops_attr.b_col_sum_vec_s16 = ( ( int16_t* )( b + ( k_updated * n_updated ) ) ) + jc;
+				post_ops_attr.b_col_sum_vec_s16 = ( ( int16_t* )( b + ( k_updated * n_updated ) ) ) + jc;
 			}
 			else
 			{
@@ -356,7 +364,7 @@ LPGEMM_5LOOP(int8_t,int8_t,int16_t,s8s8s16o16)
 						alpha, beta0,
 					  	post_op_list, post_ops_attr
 					);
-                    post_ops_attr.b_sum_offset += NR;
+					post_ops_attr.b_sum_offset += NR;
 				}
 			}
 		}

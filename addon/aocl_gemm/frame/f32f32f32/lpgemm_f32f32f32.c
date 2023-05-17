@@ -176,7 +176,7 @@ LPGEMM_5LOOP(float,float,float,f32f32f32of32)
 
         dim_t jc_cur_loop = jc;
         dim_t jc_cur_loop_rem = 0;
-        dim_t n_sub_updated;
+        dim_t n_sub_updated = 0;
 
         if ( mtag_b == REORDERED )
         {

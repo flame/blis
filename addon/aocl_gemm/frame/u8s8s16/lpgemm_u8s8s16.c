@@ -160,17 +160,25 @@ LPGEMM_5LOOP(uint8_t,int8_t,int16_t,u8s8s16o16)
 		// Temp accumulaton buffer for C allocation.
 		else if ( c_downscale == TRUE )
 		{
-			mem_scale_c_size_req = sizeof( int16_t ) * nc0 * ( ic_end - ic_start );
+			// Buffer memory is only required if output needs to be
+			// persisted across iterations of the pc/KC loop.
+			// It was observed that the locks used while checking out
+			// a buffer from memory pool had an impact on performance
+			// and is better to not checkout if k <= KC.
+			if ( k > KC )
+			{
+				mem_scale_c_size_req = sizeof( int16_t ) * nc0 * ( ic_end - ic_start );
 
-			lpgemm_alloc_mem_panel
-			(
-			  mem_scale_c_size_req, BLIS_BUFFER_FOR_C_PANEL,
-			  &mem_scale_c, rntm
-			);
+				lpgemm_alloc_mem_panel
+				(
+				  mem_scale_c_size_req, BLIS_BUFFER_FOR_C_PANEL,
+				  &mem_scale_c, rntm
+				);
 
-			temp_scal_c_buffer_u8s8s16o16 = bli_mem_buffer( &mem_scale_c );
+				temp_scal_c_buffer_u8s8s16o16 = bli_mem_buffer( &mem_scale_c );
 
-			c_use_jc = ( int16_t* )temp_scal_c_buffer_u8s8s16o16;
+				c_use_jc = ( int16_t* )temp_scal_c_buffer_u8s8s16o16;
+			}
 
 			// The temp c buffer stride is modified as opposed to original C matrix.
 			rs_c_use = nc0;
