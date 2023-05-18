@@ -1685,6 +1685,8 @@ static void aocl_zdscalv_dynamic
 			else
 				*nt_ideal = 64;
 
+			break;
+
 		default:
 			/*
 				Without this default condition, compiler will throw
