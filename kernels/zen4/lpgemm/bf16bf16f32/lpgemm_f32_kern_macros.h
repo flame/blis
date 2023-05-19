@@ -69,15 +69,12 @@
 // Downscale beta scale macro, scratch2=beta
 #define BF16_F32_BETA_OP(reg,m_ir,m_ind,n_ind,scratch1,scratch2) \
 	scratch1 = \
-	_mm512_cvtpbh_ps \
-	( \
-	  (__m256bh)_mm256_loadu_epi16 \
+	  (__m512)( _mm512_sllv_epi32( _mm512_cvtepi16_epi32( (__m256i)_mm256_loadu_epi16 \
 	  ( \
 	    ( ( bfloat16* )post_ops_attr.buf_downscale + \
 	    ( post_ops_attr.rs_c_downscale * ( post_ops_attr.post_op_c_i + m_ind ) ) + \
 	    post_ops_attr.post_op_c_j + ( n_ind * 16 ) )\
-	  ) \
-	); \
+	  ) ), _mm512_set1_epi32 (16) ) );\
 	F32_BETA_FMA(reg,scratch1,scratch2) \
 
 // Default n < 16 mask load beta macro
@@ -87,16 +84,14 @@
 
 // Downscale n < 16 mask load beta macro
 #define BF16_F32_BETA_OP_NLT16F_MASK(lmask,reg,m_ind,n_ind,scratch1,scratch2) \
-	scratch1 = _mm512_cvtpbh_ps \
-	( \
-	  (__m256bh)_mm256_maskz_loadu_epi16 \
+	scratch1 =  \
+	  (__m512)( _mm512_sllv_epi32( _mm512_cvtepi16_epi32( (__m256i)_mm256_maskz_loadu_epi16 \
 	  ( \
 	    lmask, \
 	    ( bfloat16* )post_ops_attr.buf_downscale + \
 	    ( post_ops_attr.rs_c_downscale * ( post_ops_attr.post_op_c_i + m_ind ) ) + \
 	    post_ops_attr.post_op_c_j + ( n_ind * 16 ) \
-	  ) \
-	); \
+	  ) ), _mm512_set1_epi32 (16) ) );\
 	F32_BETA_FMA(reg,scratch1,scratch2) \
 
 #define MULRND_F32(reg,m_ind,n_ind) \
