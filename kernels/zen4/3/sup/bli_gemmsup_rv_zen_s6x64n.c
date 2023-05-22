@@ -487,6 +487,7 @@ void bli_sgemmsup_rv_zen_asm_6x64n_avx512
     : // register clobber list
       "rax", "rbx", "rcx", "rdx", "rsi", "rdi",
       "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15",
+      "xmm0", "xmm1", "xmm2", "xmm3", "xmm4",
       "zmm0", "zmm1", "zmm2", "zmm3",
       "zmm4", "zmm5", "zmm6", "zmm7", "zmm8", "zmm9", "zmm10",
       "zmm11", "zmm12", "zmm13", "zmm14", "zmm15",
@@ -1022,6 +1023,7 @@ void bli_sgemmsup_rv_zen_asm_5x64n_avx512
     : // register clobber list
       "rax", "rbx", "rcx", "rdx", "rsi", "rdi",
       "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15",
+      "xmm0", "xmm1", "xmm2", "xmm3", "xmm4", "xmm5", "xmm6", "xmm7", "xmm12",
       "zmm0", "zmm1", "zmm2", "zmm3",
       "zmm4", "zmm5", "zmm6", "zmm7", "zmm8", "zmm9", "zmm10",
       "zmm11", "zmm12", "zmm13", "zmm14", "zmm15",
@@ -1515,6 +1517,7 @@ void bli_sgemmsup_rv_zen_asm_4x64n_avx512
     : // register clobber list
       "rax", "rbx", "rcx", "rdx", "rsi", "rdi",
       "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15",
+      "xmm1", "xmm4",
       "zmm0", "zmm1", "zmm2", "zmm3",
       "zmm4", "zmm5", "zmm6", "zmm7", "zmm8", "zmm9", "zmm10",
       "zmm11", "zmm12", "zmm13", "zmm14", "zmm15",
@@ -2009,6 +2012,7 @@ void bli_sgemmsup_rv_zen_asm_3x64n_avx512
     : // register clobber list
       "rax", "rbx", "rcx", "rdx", "rsi", "rdi",
       "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15",
+      "xmm0", "xmm1", "xmm2", "xmm3", "xmm4", "xmm5", "xmm6", "xmm7", "xmm12",
       "zmm0", "zmm1", "zmm2", "zmm3",
       "zmm4", "zmm5", "zmm6", "zmm7", "zmm8", "zmm9", "zmm10",
       "zmm11", "zmm12", "zmm13", "zmm14", "zmm15",
@@ -2462,6 +2466,7 @@ void bli_sgemmsup_rv_zen_asm_2x64n_avx512
     : // register clobber list
       "rax", "rbx", "rcx", "rdx", "rsi", "rdi",
       "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15",
+      "xmm0", "xmm1", "xmm2", "xmm3", "xmm4",
       "zmm0", "zmm1", "zmm2", "zmm3",
       "zmm4", "zmm5", "zmm6", "zmm7", "zmm8", "zmm9", "zmm10",
       "zmm11", "zmm12", "zmm13", "zmm14", "zmm15",
@@ -2896,6 +2901,7 @@ void bli_sgemmsup_rv_zen_asm_1x64n_avx512
     : // register clobber list
       "rax", "rbx", "rcx", "rdx", "rsi", "rdi",
       "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15",
+      "xmm0", "xmm1", "xmm2", "xmm3", "xmm4", "xmm5", "xmm6", "xmm7", "xmm12",
       "zmm0", "zmm1", "zmm2", "zmm3",
       "zmm4", "zmm5", "zmm6", "zmm7", "zmm8", "zmm9", "zmm10",
       "zmm11", "zmm12", "zmm13", "zmm14", "zmm15",
