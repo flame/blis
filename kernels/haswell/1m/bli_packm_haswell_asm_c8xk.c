@@ -357,6 +357,8 @@ void bli_cpackm_haswell_asm_8xk
 		  "xmm4", "xmm5", "xmm6", "xmm7",
 		  "xmm8", "xmm9", "xmm10", "xmm11",
 		  "xmm12", "xmm13", "xmm14", "xmm15",
+		  "ymm0", "ymm1", "ymm2", "ymm3", "ymm4", "ymm5", "ymm6",
+		  "ymm7", "ymm10", "ymm11", "ymm12", "ymm13",
 		  "memory"
 		)
 	}
