@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2018, The University of Texas at Austin
-   Copyright (C) 2016 - 2022, Advanced Micro Devices, Inc.
+   Copyright (C) 2016 - 2023, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -296,17 +296,91 @@ void bli_daxpyf_zen_int_8
 	// If either dimension is zero, or if alpha is zero, return early.
 	if ( bli_zero_dim2( m, b_n ) || PASTEMAC(d,eq0)( *alpha ) ) return;
 
-	// If b_n is not equal to the fusing factor, then perform the entire
-	// operation as a loop over axpyv.
+	/*
+	  If b_n is not equal to the fusing factor, then perform the entire
+	  operation as axpyv or perform the operation using axpyf kernels with
+	  lower fuse factor.
+	*/
 	if ( b_n != fuse_fac )
 	{
-		daxpyv_ker_ft f = bli_cntx_get_l1v_ker_dt( BLIS_DOUBLE, BLIS_AXPYV_KER, cntx );
-
-		for ( i = 0; i < b_n; ++i )
+		if (b_n >= 5)
 		{
-			double* a1   = a + (0  )*inca + (i  )*lda;
-			double* chi1 = x + (i  )*incx;
-			double* y1   = y + (0  )*incy;
+			dim_t fuse_fac = 5;
+
+			bli_daxpyf_zen_int_5
+			(
+			  conja,
+			  conjx,
+			  m,
+			  fuse_fac,
+			  alpha,
+			  a, inca, lda,
+			  x, incx,
+			  y, incy,
+			  cntx
+			);
+
+			a = a + (fuse_fac * lda);
+			x = x + (fuse_fac * incx);
+
+			b_n -= fuse_fac;
+		}
+
+		if (b_n == 4)
+		{
+			dim_t fuse_fac = 4;
+
+			bli_daxpyf_zen_int_16x4
+			(
+			  conja,
+			  conjx,
+			  m,
+			  fuse_fac,
+			  alpha,
+			  a, inca, lda,
+			  x, incx,
+			  y, incy,
+			  cntx
+			);
+
+			a = a + (fuse_fac * lda);
+			x = x + (fuse_fac * incx);
+
+			b_n -= fuse_fac;
+		}
+
+		if (b_n >= 2)
+		{
+			dim_t fuse_fac = 2;
+
+			bli_daxpyf_zen_int_16x2
+			(
+			  conja,
+			  conjx,
+			  m, fuse_fac,
+			  alpha, a, inca, lda,
+			  x, incx,
+			  y, incy,
+			  cntx
+			);
+
+			a = a + (fuse_fac * lda);
+			x = x + (fuse_fac * incx);
+
+			b_n -= fuse_fac;
+
+		}
+
+		if (b_n == 1)
+		{
+			// Query the context if it is NULL. This will be necessary for Zen architectures
+			if (cntx == NULL) cntx = bli_gks_query_cntx();
+
+			daxpyv_ker_ft f = bli_cntx_get_l1v_ker_dt(BLIS_DOUBLE, BLIS_AXPYV_KER, cntx);
+
+			double* a1   = a;
+			double* chi1 = x;
+			double* y1   = y;
 			double  alpha_chi1;
 
 			PASTEMAC(d,copycjs)( conjx, *chi1, alpha_chi1 );
