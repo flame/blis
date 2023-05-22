@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2018, The University of Texas at Austin
-   Copyright (C) 2017 - 22, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2017 - 23, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -458,15 +458,69 @@ void bli_ddotxf_zen_int_8
 		return;
 	}
 
-	// If b_n is not equal to the fusing factor, then perform the entire
-	// operation as a loop over dotxv.
+	/*
+	  If b_n is not equal to the fusing factor, then perform the entire
+	  operation as dotxv or perform the operation using dotxf kernels with
+	  lower fuse factor.
+	*/
 	if (b_n != fuse_fac)
 	{
-		for (dim_t i = 0; i < b_n; ++i)
+		if (b_n >= 4)
 		{
-			double *a1 = a + (0) * inca + (i)*lda;
-			double *x1 = x + (0) * incx;
-			double *psi1 = y + (i)*incy;
+			dim_t fuse = 4;
+
+			bli_ddotxf_zen_int_4
+			(
+			  conjat,
+			  conjx,
+			  m,
+			  fuse,
+			  alpha,
+			  a, inca, lda,
+			  x, incx,
+			  beta,
+			  y, incy,
+			  cntx
+			);
+
+			// Increment the pointers
+			a = a + (fuse)*lda;
+			y = y + (fuse)*incy;
+
+			// Decrement to point to the remaining compute left
+			b_n -= 4;
+		}
+
+		if (b_n >= 2)
+		{
+			dim_t fuse = 2;
+
+			bli_ddotxf_zen_int_2
+			(
+			  conjat,
+			  conjx,
+			  m,
+			  fuse,
+			  alpha,
+			  a, inca, lda,
+			  x, incx,
+			  beta,
+			  y, incy,
+			  cntx
+			);
+
+			// Increment the pointers
+			a = a + (fuse)*lda;
+			y = y + (fuse)*incy;
+
+			b_n -= 2;
+		}
+
+		if (b_n == 1)
+		{
+			double *a1 = a;
+			double *x1 = x;
+			double *psi1 = y;
 
 			bli_ddotxv_zen_int(
 				conjat,
