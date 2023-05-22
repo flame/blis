@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2019-23, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2019-2023, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -572,6 +572,8 @@ void bli_dgemmsup_rv_haswell_asm_6x4
 	  "xmm4", "xmm5", "xmm6", "xmm7",
 	  "xmm8", "xmm9", "xmm10", "xmm11",
 	  "xmm12", "xmm13", "xmm14", "xmm15",
+	  "ymm0", "ymm1", "ymm2", "ymm3", "ymm4", "ymm6",
+	  "ymm8", "ymm10", "ymm12", "ymm14",
 	  "memory"
 	)
 }
@@ -1043,6 +1045,8 @@ void bli_dgemmsup_rv_haswell_asm_5x4
 	  "xmm4", "xmm5", "xmm6", "xmm7",
 	  "xmm8", "xmm9", "xmm10", "xmm11",
 	  "xmm12", "xmm13", "xmm14", "xmm15",
+	  "ymm0", "ymm1", "ymm2", "ymm3", "ymm4",
+	  "ymm6", "ymm8", "ymm10", "ymm12",
 	  "memory"
 	)
 }
@@ -1463,6 +1467,8 @@ void bli_dgemmsup_rv_haswell_asm_4x4
 	  "xmm4", "xmm5", "xmm6", "xmm7",
 	  "xmm8", "xmm9", "xmm10", "xmm11",
 	  "xmm12", "xmm13", "xmm14", "xmm15",
+	  "ymm0", "ymm1", "ymm2", "ymm3", "ymm4",
+	  "ymm6", "ymm8", "ymm10",
 	  "memory"
 	)
 }
@@ -1890,6 +1896,8 @@ void bli_dgemmsup_rv_haswell_asm_3x4
 	  "xmm4", "xmm5", "xmm6", "xmm7",
 	  "xmm8", "xmm9", "xmm10", "xmm11",
 	  "xmm12", "xmm13", "xmm14", "xmm15",
+	  "ymm0", "ymm1", "ymm2", "ymm3", "ymm4",
+	  "ymm6", "ymm8", "ymm10",
 	  "memory"
 	)
 }
@@ -2253,6 +2261,7 @@ void bli_dgemmsup_rv_haswell_asm_2x4
 	  "xmm4", "xmm5", "xmm6", "xmm7",
 	  "xmm8", "xmm9", "xmm10", "xmm11",
 	  "xmm12", "xmm13", "xmm14", "xmm15",
+	  "ymm0", "ymm1", "ymm2", "ymm3", "ymm4", "ymm6",
 	  "memory"
 	)
 }
@@ -2594,6 +2603,7 @@ void bli_dgemmsup_rv_haswell_asm_1x4
 	  "xmm4", "xmm5", "xmm6", "xmm7",
 	  "xmm8", "xmm9", "xmm10", "xmm11",
 	  "xmm12", "xmm13", "xmm14", "xmm15",
+	  "ymm0", "ymm1", "ymm2", "ymm3", "ymm4",
 	  "memory"
 	)
 }
