@@ -1083,7 +1083,7 @@ void bli_dgemmsup_rv_zen4_asm_24x1
         "zmm16", "zmm17", "zmm18", "zmm19",
         "zmm20", "zmm21", "zmm22", "zmm23", "zmm24", "zmm25", "zmm26",
         "zmm27", "zmm28", "zmm29", "zmm30", "zmm31",
-        "memory"
+        "k2", "k3", "memory"
     )
     AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_7);
 }
@@ -1699,7 +1699,7 @@ void bli_dgemmsup_rv_zen4_asm_16x1
         "zmm16", "zmm17", "zmm18", "zmm19",
         "zmm20", "zmm21", "zmm22", "zmm23", "zmm24", "zmm25", "zmm26",
         "zmm27", "zmm28", "zmm29", "zmm30", "zmm31",
-        "memory"
+        "k2", "k3", "memory"
     )
     AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_7);
 }
@@ -2233,7 +2233,7 @@ void bli_dgemmsup_rv_zen4_asm_8x1
         "zmm16", "zmm17", "zmm18", "zmm19",
         "zmm20", "zmm21", "zmm22", "zmm23", "zmm24", "zmm25", "zmm26",
         "zmm27", "zmm28", "zmm29", "zmm30", "zmm31",
-        "memory"
+        "k2", "k3", "memory"
     )
     AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_7);
 }

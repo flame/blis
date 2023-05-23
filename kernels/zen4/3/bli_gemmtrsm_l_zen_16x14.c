@@ -1666,7 +1666,7 @@ void bli_dgemmtrsm_l_zen_asm_16x14
           "zmm14", "zmm15", "zmm16", "zmm17", "zmm18", "zmm19", "zmm20", "zmm21",
           "zmm22", "zmm23", "zmm24", "zmm25", "zmm26", "zmm27", "zmm28", "zmm29",
           "zmm30", "zmm31",
-          "memory"
+          "k0", "k1", "k2", "k3", "k4", "memory"
         )
 
         AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_9);

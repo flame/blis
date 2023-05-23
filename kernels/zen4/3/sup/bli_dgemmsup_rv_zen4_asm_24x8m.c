@@ -3291,7 +3291,7 @@ void bli_dgemmsup_rv_zen4_asm_24x7m
             "zmm16", "zmm17", "zmm18", "zmm19",
             "zmm20", "zmm21", "zmm22", "zmm23", "zmm24", "zmm25", "zmm26",
             "zmm27", "zmm28", "zmm29", "zmm30", "zmm31",
-            "memory"
+            "k2", "memory"
         )
     } //mloop
 
@@ -4676,7 +4676,7 @@ void bli_dgemmsup_rv_zen4_asm_24x6m
             "zmm16", "zmm17", "zmm18", "zmm19",
             "zmm20", "zmm21", "zmm22", "zmm23", "zmm24", "zmm25", "zmm26",
             "zmm27", "zmm28", "zmm29", "zmm30", "zmm31",
-            "memory"
+            "k2", "memory"
         )
     } //mloop
 
@@ -5944,7 +5944,7 @@ void bli_dgemmsup_rv_zen4_asm_24x5m
             "zmm16", "zmm17", "zmm18", "zmm19",
             "zmm20", "zmm21", "zmm22", "zmm23", "zmm24", "zmm25", "zmm26",
             "zmm27", "zmm28", "zmm29", "zmm30", "zmm31",
-            "memory"
+            "k2", "memory"
         )
     } //mloop
 
@@ -7046,7 +7046,7 @@ void bli_dgemmsup_rv_zen4_asm_24x4m
             "zmm16", "zmm17", "zmm18", "zmm19",
             "zmm20", "zmm21", "zmm22", "zmm23", "zmm24", "zmm25", "zmm26",
             "zmm27", "zmm28", "zmm29", "zmm30", "zmm31",
-            "memory"
+            "k2", "memory"
         )
     } //mloop
 
@@ -8029,7 +8029,7 @@ void bli_dgemmsup_rv_zen4_asm_24x3m
             "zmm16", "zmm17", "zmm18", "zmm19",
             "zmm20", "zmm21", "zmm22", "zmm23", "zmm24", "zmm25", "zmm26",
             "zmm27", "zmm28", "zmm29", "zmm30", "zmm31",
-            "memory"
+            "k2", "memory"
         )
     } //mloop
 
@@ -8897,7 +8897,7 @@ void bli_dgemmsup_rv_zen4_asm_24x2m
             "zmm16", "zmm17", "zmm18", "zmm19",
             "zmm20", "zmm21", "zmm22", "zmm23", "zmm24", "zmm25", "zmm26",
             "zmm27", "zmm28", "zmm29", "zmm30", "zmm31",
-            "memory"
+            "k2", "memory"
         )
     } //mloop
 
@@ -9649,7 +9649,7 @@ void bli_dgemmsup_rv_zen4_asm_24x1m
             "zmm16", "zmm17", "zmm18", "zmm19",
             "zmm20", "zmm21", "zmm22", "zmm23", "zmm24", "zmm25", "zmm26",
             "zmm27", "zmm28", "zmm29", "zmm30", "zmm31",
-            "memory"
+            "k2", "memory"
         )
     } //mloop
 

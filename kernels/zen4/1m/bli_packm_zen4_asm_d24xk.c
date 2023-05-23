@@ -731,7 +731,7 @@ void bli_dpackm_zen4_asm_24xk
 		  "zmm4", "zmm5", "zmm6", "zmm7",
 		  "zmm8", "zmm9", "zmm10", "zmm11",
 		  "zmm12", "zmm13", "zmm14", "zmm15",
-		  "zmm16", "zmm18", "zmm20", "zmm30", "zmm31", "memory"
+		  "zmm16", "zmm18", "zmm20", "zmm30", "zmm31", "k2", "memory"
 		)
 	}
 	else // if ( cdim0 < mnr || gs || !unitk )
