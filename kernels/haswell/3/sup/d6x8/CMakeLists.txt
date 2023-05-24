@@ -14,5 +14,6 @@ ${CMAKE_CURRENT_SOURCE_DIR}/bli_gemmsup_rv_haswell_asm_dMx8.c
     )
 
 target_compile_options(haswell_3supd6x8 PRIVATE /arch:AVX2)
-
-
+if(BUILD_SHARED_LIBS)
+    target_compile_definitions(haswell_3supd6x8 PUBLIC -DBLIS_IS_BUILDING_LIBRARY)
+endif()

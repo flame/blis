@@ -13,5 +13,8 @@ add_library(zen4_3
     )
 
 target_compile_options(zen4_3 PRIVATE /arch:AVX2 /arch:AVX512)
+if(BUILD_SHARED_LIBS)
+    target_compile_definitions(zen4_3 PUBLIC -DBLIS_IS_BUILDING_LIBRARY)
+endif()
 
 add_subdirectory(sup)

@@ -14,5 +14,8 @@ add_library(zen4_3sup
      ${CMAKE_CURRENT_SOURCE_DIR}/bli_gemmsup_cv_zen4_z12x4m.c
 )
 target_compile_options(zen4_3sup PRIVATE /arch:AVX2 /arch:AVX512)
+if(BUILD_SHARED_LIBS)
+    target_compile_definitions(zen4_3sup PUBLIC -DBLIS_IS_BUILDING_LIBRARY)
+endif()
 
 add_subdirectory(d24x8)

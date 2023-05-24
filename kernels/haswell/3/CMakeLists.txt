@@ -9,5 +9,8 @@ add_library(haswell_3
     )
 
 target_compile_options(haswell_3 PRIVATE /arch:AVX2)
+if(BUILD_SHARED_LIBS)
+    target_compile_definitions(haswell_3 PUBLIC -DBLIS_IS_BUILDING_LIBRARY)
+endif()
 
 add_subdirectory(sup)

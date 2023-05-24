@@ -19,3 +19,6 @@ ${CMAKE_CURRENT_SOURCE_DIR}/bli_gemmsup_rv_zen_asm_z3x4m.c
 ${CMAKE_CURRENT_SOURCE_DIR}/bli_gemmsup_rv_zen_asm_z3x4n.c
     )
 target_compile_options(zen_3_sup PRIVATE /arch:AVX2)
+if(BUILD_SHARED_LIBS)
+    target_compile_definitions(zen_3_sup PUBLIC -DBLIS_IS_BUILDING_LIBRARY)
+endif()

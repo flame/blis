@@ -8,7 +8,9 @@ add_library(zen_2
      ${CMAKE_CURRENT_SOURCE_DIR}/bli_her_zen_int_amd.c
      )
 target_compile_options(zen_2 PRIVATE /arch:AVX2)
-
+if(BUILD_SHARED_LIBS)
+    target_compile_definitions(zen_2 PUBLIC -DBLIS_IS_BUILDING_LIBRARY)
+endif()
 # For any other TARGET_ARCH, it would fail to configure.
 # Select AMD specific sources for AMD configurations.
 #[=[if(${TARGET_ARCH} STREQUAL zen OR 

@@ -13,3 +13,6 @@ add_library(haswell_1m
  )
 
 target_compile_options(haswell_1m PRIVATE /arch:AVX2)
+if(BUILD_SHARED_LIBS)
+    target_compile_definitions(haswell_1m PUBLIC -DBLIS_IS_BUILDING_LIBRARY)
+endif()

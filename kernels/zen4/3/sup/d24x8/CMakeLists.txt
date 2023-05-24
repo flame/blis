@@ -13,3 +13,6 @@ ${CMAKE_CURRENT_SOURCE_DIR}/bli_dgemmsup_rv_zen4_asm_Mx8.c
     )
 
 target_compile_options(zen4_3supd24x8 PRIVATE /arch:AVX2 /arch:AVX512)
+if(BUILD_SHARED_LIBS)
+    target_compile_definitions(zen4_3supd24x8 PUBLIC -DBLIS_IS_BUILDING_LIBRARY)
+endif()

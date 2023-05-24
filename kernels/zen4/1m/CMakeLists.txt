@@ -11,3 +11,6 @@ add_library(zen4_1m
  )
 
 target_compile_options(zen4_1m PRIVATE  /U__PRFCHW__ /arch:AVX2 /arch:AVX512)
+if(BUILD_SHARED_LIBS)
+    target_compile_definitions(zen4_1m PUBLIC -DBLIS_IS_BUILDING_LIBRARY)
+endif()

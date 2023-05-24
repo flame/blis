@@ -19,3 +19,6 @@ add_library(zen_1
     ${CMAKE_CURRENT_SOURCE_DIR}/bli_scal2v_zen_int.c
     )
 target_compile_options(zen_1 PRIVATE /arch:AVX2)
+if(BUILD_SHARED_LIBS)
+    target_compile_definitions(zen_1 PUBLIC -DBLIS_IS_BUILDING_LIBRARY)
+endif()
