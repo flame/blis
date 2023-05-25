@@ -316,6 +316,21 @@ else()
     set(rename_blis_model_type "BLIS_MODEL_TYPE")
 endif()
 
+find_package(Doxygen)
+set(W_DIR "${CMAKE_CURRENT_SOURCE_DIR}/docs")
+if(NOT (DOXYGEN_FOUND))
+  message(STATUS "Doxygen not found please install and try again.")
+else()
+  execute_process(COMMAND doxygen Doxyfile
+      WORKING_DIRECTORY ${W_DIR}
+      COMMAND_ECHO STDOUT)
+endif()
+if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/docs/html/index.html)
+  message(STATUS "Documentation generated successfully, to view documentation open docs/html/index.html .")
+else()
+  message(STATUS "Document generation failed.")
+endif()
+
 set(CMAKE_BUILD_TYPE ${CMAKE_CONFIGURATION_TYPES})
 
 #print configurations
