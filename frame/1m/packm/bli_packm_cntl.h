@@ -226,7 +226,7 @@ BLIS_INLINE void bli_packm_def_cntl_set_ukr_params( const void* params, cntl_t* 
 
 // -----------------------------------------------------------------------------
 
-void bli_packm_cntl_init_node
+BLIS_EXPORT_BLIS void bli_packm_cntl_init_node
      (
        void_fp       var_func,
        packm_var_oft var,
@@ -234,7 +234,7 @@ void bli_packm_cntl_init_node
        packm_cntl_t* cntl
      );
 
-void bli_packm_def_cntl_init_node
+BLIS_EXPORT_BLIS void bli_packm_def_cntl_init_node
      (
        void_fp           var_func,
        num_t             dt_orig,
