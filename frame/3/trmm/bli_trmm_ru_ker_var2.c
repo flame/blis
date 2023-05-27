@@ -150,10 +150,10 @@ void bli_trmm_ru_ker_var2
 	// Compute number of primary and leftover components of the m and n
 	// dimensions.
 	const dim_t n_iter = n / NR + ( n % NR ? 1 : 0 );
-    const dim_t n_left = n % NR;
+	const dim_t n_left = n % NR;
 
-    const dim_t m_iter = m / MR + ( m % MR ? 1 : 0 );
-    const dim_t m_left = m % MR;
+	const dim_t m_iter = m / MR + ( m % MR ? 1 : 0 );
+	const dim_t m_left = m % MR;
 
 	// Determine some increments used to step through A, B, and C.
 	const inc_t rstep_a = ps_a * dt_size;

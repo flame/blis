@@ -107,7 +107,8 @@ void bli_gemm_blk_var3
 		// row-panel of C, and thus beta is applied to all of C exactly once.
 		// Thus, for neither trmm nor trmm3 should we reset the scalar on C
 		// after the first iteration.
-		if ( i == 0 && !bli_obj_is_triangular( a ) && !bli_obj_is_triangular( b ) )
+		if ( i == 0 && !bli_obj_is_triangular( a ) &&
+		               !bli_obj_is_triangular( b ) )
 		    bli_obj_scalar_reset( &cs );
 	}
 }

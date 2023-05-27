@@ -68,6 +68,7 @@ struct thrinfo_s
 	// Storage for allocated memory obtained from the packing block allocator.
 	mem_t              mem;
 
+	// Child thread info nodes.
 	struct thrinfo_s*  sub_nodes[ BLIS_MAX_SUB_NODES ];
 };
 typedef struct thrinfo_s thrinfo_t;

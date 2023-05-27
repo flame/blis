@@ -87,7 +87,9 @@ void bli_gemm_cntl_init
 {
 	const prec_t      comp_prec     = bli_obj_comp_prec( c );
 	const num_t       dt_c          = bli_obj_dt( c );
-	const num_t       dt_comp       = ( im == BLIS_1M ? BLIS_REAL : bli_dt_domain( dt_c ) ) | comp_prec;
+	const num_t       dt_comp       = ( im == BLIS_1M ? BLIS_REAL
+	                                                  : bli_dt_domain( dt_c )
+	                                  ) | comp_prec;
 	      gemm_ukr_ft gemm_ukr      = bli_cntx_get_ukr_dt( dt_comp, BLIS_GEMM_UKR, cntx );
 	      gemm_ukr_ft real_gemm_ukr = NULL;
 	const bool        row_pref      = bli_cntx_get_ukr_prefs_dt( dt_comp, BLIS_GEMM_UKR_ROW_PREF, cntx );
@@ -96,8 +98,8 @@ void bli_gemm_cntl_init
 	// contiguous columns, or if C is stored by columns and the micro-kernel
 	// prefers contiguous rows, transpose the entire operation to allow the
 	// micro-kernel to access elements of C in its preferred manner.
-	bool needs_swap = (   row_pref && bli_obj_is_col_tilted( c ) ) ||
-	                  ( ! row_pref && bli_obj_is_row_tilted( c ) );
+	bool needs_swap = (  row_pref && bli_obj_is_col_tilted( c ) ) ||
+	                  ( !row_pref && bli_obj_is_row_tilted( c ) );
 
 	// NOTE: This case casts right-side symm/hemm/trmm/trmm3 in terms of left side.
 	// This may be necessary when the current subconfiguration uses a gemm microkernel
@@ -117,20 +119,16 @@ void bli_gemm_cntl_init
 	// so that we can perform the computation as if A were being multiplied
 	// from the left.
 #ifdef BLIS_DISABLE_SYMM_RIGHT
-	if ( family == BLIS_SYMM )
-		needs_swap = bli_obj_is_symmetric( b );
+	if ( family == BLIS_SYMM ) needs_swap = bli_obj_is_symmetric( b );
 #endif
 #ifdef BLIS_DISABLE_HEMM_RIGHT
-	if ( family == BLIS_HEMM )
-		needs_swap = bli_obj_is_hermitian( b );
+	if ( family == BLIS_HEMM ) needs_swap = bli_obj_is_hermitian( b );
 #endif
 #ifdef BLIS_DISABLE_TRMM_RIGHT
-	if ( family == BLIS_TRMM )
-		needs_swap = bli_obj_is_triangular( b );
+	if ( family == BLIS_TRMM ) needs_swap = bli_obj_is_triangular( b );
 #endif
 #ifdef BLIS_DISABLE_TRMM3_RIGHT
-	if ( family == BLIS_TRMM3 )
-		needs_swap = bli_obj_is_triangular( b );
+	if ( family == BLIS_TRMM3 ) needs_swap = bli_obj_is_triangular( b );
 #endif
 
 	// Swap the A and B operands if required. This transforms the operation
@@ -162,27 +160,46 @@ void bli_gemm_cntl_init
 	if ( !bli_obj_equals( beta, &BLIS_ONE ) )
 		bli_obj_scalar_apply_scalar( beta, c );
 
-	void_fp macro_kernel_fp = family == BLIS_GEMM ||
-	                          family == BLIS_HEMM ||
-							  family == BLIS_SYMM ? bli_gemm_ker_var2 :
+	void_fp macro_kernel_fp;
+
+	// Set the macrokernel function pointer based on the operation family
+	// and struc/uplo properties.
+	if ( family == BLIS_GEMM || family == BLIS_HEMM || family == BLIS_SYMM )
+	{
+		macro_kernel_fp = bli_gemm_ker_var2;
+	}
 #ifdef BLIS_ENABLE_JRIR_TLB
-	                          family == BLIS_GEMMT ?
-	                             bli_obj_is_lower( c ) ? bli_gemmt_l_ker_var2b : bli_gemmt_u_ker_var2b :
-	                          family == BLIS_TRMM ||
-	                          family == BLIS_TRMM3 ?
-	                              bli_obj_is_triangular( a ) ?
-	                                 bli_obj_is_lower( a ) ? bli_trmm_ll_ker_var2b : bli_trmm_lu_ker_var2b :
-	                                 bli_obj_is_lower( b ) ? bli_trmm_rl_ker_var2b : bli_trmm_ru_ker_var2b :
-	                          NULL; // Should never happen
+	else if ( family == BLIS_GEMMT )
+	{
+		macro_kernel_fp = bli_obj_is_lower( c ) ? bli_gemmt_l_ker_var2b
+		                                        : bli_gemmt_u_ker_var2b;
+	}
+	else if ( family == BLIS_TRMM || family == BLIS_TRMM3 )
+	{
+		if ( bli_obj_is_triangular( a ) )
+			macro_kernel_fp = bli_obj_is_lower( a ) ? bli_trmm_ll_ker_var2b
+			                                        : bli_trmm_lu_ker_var2b;
+		else /* if ( bli_obj_is_triangular( b ) ) */
+			macro_kernel_fp = bli_obj_is_lower( b ) ? bli_trmm_rl_ker_var2b
+			                                        : bli_trmm_ru_ker_var2b;
+	}
+	else { macro_kernel_fp = NULL; bli_abort(); } // Should never execute.
 #else
-	                          family == BLIS_GEMMT ?
-	                             bli_obj_is_lower( c ) ? bli_gemmt_l_ker_var2 : bli_gemmt_u_ker_var2 :
-	                          family == BLIS_TRMM ||
-	                          family == BLIS_TRMM3 ?
-	                              bli_obj_is_triangular( a ) ?
-	                                 bli_obj_is_lower( a ) ? bli_trmm_ll_ker_var2 : bli_trmm_lu_ker_var2 :
-	                                 bli_obj_is_lower( b ) ? bli_trmm_rl_ker_var2 : bli_trmm_ru_ker_var2 :
-	                          NULL; // Should never happen
+	else if ( family == BLIS_GEMMT )
+	{
+		macro_kernel_fp = bli_obj_is_lower( c ) ? bli_gemmt_l_ker_var2
+		                                        : bli_gemmt_u_ker_var2;
+	}
+	else if ( family == BLIS_TRMM || family == BLIS_TRMM3 )
+	{
+		if ( bli_obj_is_triangular( a ) )
+			macro_kernel_fp = bli_obj_is_lower( a ) ? bli_trmm_ll_ker_var2
+			                                        : bli_trmm_lu_ker_var2;
+		else /* if ( bli_obj_is_triangular( b ) ) */
+			macro_kernel_fp = bli_obj_is_lower( b ) ? bli_trmm_rl_ker_var2
+			                                        : bli_trmm_ru_ker_var2;
+	}
+	else { macro_kernel_fp = NULL; bli_abort(); } // Should never execute.
 #endif
 
 	const num_t         dt_a          = bli_obj_dt( a );
@@ -333,13 +350,15 @@ void bli_gemm_cntl_init
 	  mc_scale,
 	  mr_def / mr_scale,
 	  mr_scale,
-	  a_lo_tri ? BLIS_BWD : BLIS_FWD,
+	  a_lo_tri ? BLIS_BWD
+	           : BLIS_FWD,
 	  bli_obj_is_triangular( a ) || bli_obj_is_upper_or_lower( c ),
 	  &cntl->part_ic
 	);
 	bli_cntl_attach_sub_node
 	(
-	  trmm_r ? BLIS_THREAD_MC | BLIS_THREAD_NC : BLIS_THREAD_MC,
+	  trmm_r ? BLIS_THREAD_MC | BLIS_THREAD_NC
+	         : BLIS_THREAD_MC,
 	  ( cntl_t* )&cntl->pack_a,
 	  ( cntl_t* )&cntl->part_ic
 	);
@@ -381,7 +400,8 @@ void bli_gemm_cntl_init
 	  kc_scale,
 	  kr_def,
 	  1,
-	  a_lo_tri || b_up_tri ? BLIS_BWD : BLIS_FWD,
+	  ( a_lo_tri || b_up_tri ) ? BLIS_BWD
+	                           : BLIS_FWD,
 	  FALSE,
 	  &cntl->part_pc
 	);
@@ -402,13 +422,15 @@ void bli_gemm_cntl_init
 	  nc_scale,
 	  nr_def / nr_scale,
 	  nr_scale,
-	  b_up_tri ? BLIS_BWD : BLIS_FWD,
+	  b_up_tri ? BLIS_BWD
+	           : BLIS_FWD,
 	  bli_obj_is_triangular( b ) || bli_obj_is_upper_or_lower( c ),
 	  &cntl->part_jc
 	);
 	bli_cntl_attach_sub_node
 	(
-	  trmm_r ? BLIS_THREAD_NONE : BLIS_THREAD_NC,
+	  trmm_r ? BLIS_THREAD_NONE
+	         : BLIS_THREAD_NC,
 	  ( cntl_t* )&cntl->part_pc,
 	  ( cntl_t* )&cntl->part_jc
 	);

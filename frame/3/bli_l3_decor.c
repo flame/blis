@@ -65,7 +65,7 @@ static void bli_l3_thread_decorator_entry( thrcomm_t* gl_comm, dim_t tid, const 
 	// control tree node.
 	thrinfo_t* thread = bli_l3_thrinfo_create( tid, gl_comm, array, rntm, cntl );
 
-  	bli_l3_int
+	bli_l3_int
 	(
 	  a,
 	  b,
@@ -95,18 +95,18 @@ void bli_l3_thread_decorator
      )
 {
 	rntm_t rntm_l;
-    if ( rntm != NULL ) rntm_l = *rntm;
-    else bli_rntm_init_from_global( &rntm_l );
+	if ( rntm != NULL ) rntm_l = *rntm;
+	else bli_rntm_init_from_global( &rntm_l );
 
 	// Set the number of ways for each loop, if needed, depending on what
 	// kind of information is already stored in the rntm_t object.
 	bli_rntm_factorize
-    (
-      bli_obj_length( c ),
-      bli_obj_width( c ),
-      bli_obj_width( a ),
-      &rntm_l
-    );
+	(
+	  bli_obj_length( c ),
+	  bli_obj_width( c ),
+	  bli_obj_width( a ),
+	  &rntm_l
+	);
 
 	// Query the threading implementation and the number of threads requested.
 	timpl_t ti = bli_rntm_thread_impl( &rntm_l );

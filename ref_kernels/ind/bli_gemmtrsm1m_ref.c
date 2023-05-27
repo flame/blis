@@ -493,7 +493,7 @@ void PASTEMAC3(chr,opname,arch,suf) \
 	const ctype_r     alpha_i     = PASTEMAC(ch,imag)( *alpha ); ( void ) alpha_i; \
 \
 	auxinfo_t auxinfo_r = *auxinfo; \
-    bli_auxinfo_set_params( params_r, &auxinfo_r ); \
+	bli_auxinfo_set_params( params_r, &auxinfo_r ); \
 \
 \
 	/* Since b11 is stored in the 1e or 1r schema, we cannot update it

@@ -193,9 +193,9 @@ mddm_t bli_gemm_md_ccr
 
 		// We must swap the pack schemas because the schemas were set before
 		// the objects were swapped.
-        pack_t tmp = *schema_a;
-        *schema_a = *schema_b;
-        *schema_b = tmp;
+		pack_t tmp = *schema_a;
+		*schema_a = *schema_b;
+		*schema_b = tmp;
 
 		return bli_gemm_md_crc( a, b, beta, c, schema_a, schema_b, cntx_local, cntx );
 	}
@@ -240,18 +240,18 @@ mddm_t bli_gemm_md_ccr
 	bli_blksz_scale_def_max( 1, 2, BLIS_SCOMPLEX, &blksz_mc );
 	bli_blksz_scale_def_max( 1, 2, BLIS_DCOMPLEX, &blksz_mc );
 
-    bli_cntx_set_blksz( BLIS_MR, &blksz_mr, BLIS_MR, cntx_local );
-    bli_cntx_set_blksz( BLIS_NR, &blksz_nr, BLIS_NR, cntx_local );
-    bli_cntx_set_blksz( BLIS_MC, &blksz_mc, BLIS_MR, cntx_local );
-    bli_cntx_set_blksz( BLIS_NC, &blksz_nc, BLIS_NR, cntx_local );
-    bli_cntx_set_blksz( BLIS_KC, &blksz_kc, BLIS_KC, cntx_local );
+	bli_cntx_set_blksz( BLIS_MR, &blksz_mr, BLIS_MR, cntx_local );
+	bli_cntx_set_blksz( BLIS_NR, &blksz_nr, BLIS_NR, cntx_local );
+	bli_cntx_set_blksz( BLIS_MC, &blksz_mc, BLIS_MR, cntx_local );
+	bli_cntx_set_blksz( BLIS_NC, &blksz_nc, BLIS_NR, cntx_local );
+	bli_cntx_set_blksz( BLIS_KC, &blksz_kc, BLIS_KC, cntx_local );
 
 	// Use the default pack schemas in the objects.
 
 	// Rather than check which complex datatype dt_comp refers to, we set
 	// the mixed-domain virtual microkernel for both types.
-    bli_cntx_set_ukr_dt( bli_cgemm_md_c2r_ref, BLIS_SCOMPLEX, BLIS_GEMM_UKR, cntx_local );
-    bli_cntx_set_ukr_dt( bli_zgemm_md_c2r_ref, BLIS_DCOMPLEX, BLIS_GEMM_UKR, cntx_local );
+	bli_cntx_set_ukr_dt( bli_cgemm_md_c2r_ref, BLIS_SCOMPLEX, BLIS_GEMM_UKR, cntx_local );
+	bli_cntx_set_ukr_dt( bli_zgemm_md_c2r_ref, BLIS_DCOMPLEX, BLIS_GEMM_UKR, cntx_local );
 
 	// Return the computation and execution domains.
 	return doms;
@@ -305,9 +305,9 @@ mddm_t bli_gemm_md_crc
 
 		// We must swap the pack schemas because the schemas were set before
 		// the objects were swapped.
-        pack_t tmp = *schema_a;
-        *schema_a = *schema_b;
-        *schema_b = tmp;
+		pack_t tmp = *schema_a;
+		*schema_a = *schema_b;
+		*schema_b = tmp;
 
 		return bli_gemm_md_ccr( a, b, beta, c, schema_a, schema_b, cntx_local, cntx );
 	}
@@ -352,18 +352,18 @@ mddm_t bli_gemm_md_crc
 	bli_blksz_scale_def_max( 1, 2, BLIS_SCOMPLEX, &blksz_nc );
 	bli_blksz_scale_def_max( 1, 2, BLIS_DCOMPLEX, &blksz_nc );
 
-    bli_cntx_set_blksz( BLIS_MR, &blksz_mr, BLIS_MR, cntx_local );
-    bli_cntx_set_blksz( BLIS_NR, &blksz_nr, BLIS_NR, cntx_local );
-    bli_cntx_set_blksz( BLIS_MC, &blksz_mc, BLIS_MR, cntx_local );
-    bli_cntx_set_blksz( BLIS_NC, &blksz_nc, BLIS_NR, cntx_local );
-    bli_cntx_set_blksz( BLIS_KC, &blksz_kc, BLIS_KC, cntx_local );
+	bli_cntx_set_blksz( BLIS_MR, &blksz_mr, BLIS_MR, cntx_local );
+	bli_cntx_set_blksz( BLIS_NR, &blksz_nr, BLIS_NR, cntx_local );
+	bli_cntx_set_blksz( BLIS_MC, &blksz_mc, BLIS_MR, cntx_local );
+	bli_cntx_set_blksz( BLIS_NC, &blksz_nc, BLIS_NR, cntx_local );
+	bli_cntx_set_blksz( BLIS_KC, &blksz_kc, BLIS_KC, cntx_local );
 
 	// Use the default pack schemas in the objects.
 
 	// Rather than check which complex datatype dt_comp refers to, we set
 	// the mixed-domain virtual microkernel for both types.
-    bli_cntx_set_ukr_dt( bli_cgemm_md_c2r_ref, BLIS_SCOMPLEX, BLIS_GEMM_UKR, cntx_local );
-    bli_cntx_set_ukr_dt( bli_zgemm_md_c2r_ref, BLIS_DCOMPLEX, BLIS_GEMM_UKR, cntx_local );
+	bli_cntx_set_ukr_dt( bli_cgemm_md_c2r_ref, BLIS_SCOMPLEX, BLIS_GEMM_UKR, cntx_local );
+	bli_cntx_set_ukr_dt( bli_zgemm_md_c2r_ref, BLIS_DCOMPLEX, BLIS_GEMM_UKR, cntx_local );
 
 	// Return the computation and execution domains.
 	return doms;
@@ -429,16 +429,16 @@ mddm_t bli_gemm_md_rcc
 	bli_blksz_scale_def_max( 1, 2, BLIS_SCOMPLEX, &blksz_kc );
 	bli_blksz_scale_def_max( 1, 2, BLIS_DCOMPLEX, &blksz_kc );
 
-    bli_cntx_set_blksz( BLIS_MR, &blksz_mr, BLIS_MR, cntx_local );
-    bli_cntx_set_blksz( BLIS_NR, &blksz_nr, BLIS_NR, cntx_local );
-    bli_cntx_set_blksz( BLIS_MC, &blksz_mc, BLIS_MR, cntx_local );
-    bli_cntx_set_blksz( BLIS_NC, &blksz_nc, BLIS_NR, cntx_local );
-    bli_cntx_set_blksz( BLIS_KC, &blksz_kc, BLIS_KC, cntx_local );
+	bli_cntx_set_blksz( BLIS_MR, &blksz_mr, BLIS_MR, cntx_local );
+	bli_cntx_set_blksz( BLIS_NR, &blksz_nr, BLIS_NR, cntx_local );
+	bli_cntx_set_blksz( BLIS_MC, &blksz_mc, BLIS_MR, cntx_local );
+	bli_cntx_set_blksz( BLIS_NC, &blksz_nc, BLIS_NR, cntx_local );
+	bli_cntx_set_blksz( BLIS_KC, &blksz_kc, BLIS_KC, cntx_local );
 
 	// Use the 1r pack schema for both A and B with the conjugation
 	// of A or B toggled (to produce ar * br - ai * bi).
-    *schema_a = BLIS_PACKED_ROW_PANELS_1R;
-    *schema_b = BLIS_PACKED_ROW_PANELS_1R;
+	*schema_a = BLIS_PACKED_ROW_PANELS_1R;
+	*schema_b = BLIS_PACKED_ROW_PANELS_1R;
 	bli_obj_toggle_conj( b );
 
 	// Return the computation and execution domains.

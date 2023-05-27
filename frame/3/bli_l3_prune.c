@@ -42,24 +42,24 @@ void bli_l3_prune_unref_mparts_m
              obj_t*  c
      )
 {
-    if ( bli_obj_is_upper_or_lower( c ) )
-    {
+	if ( bli_obj_is_upper_or_lower( c ) )
+	{
 		/* Prune any unreferenced part from the subpartition of C (that would
 		   be encountered from partitioning in the m dimension) and adjust the
 		   subpartition of A accordingly. */
 		bli_prune_unref_mparts( c, BLIS_M, a, BLIS_M );
-    }
-    else if ( bli_obj_is_triangular( a ) )
-    {
+	}
+	else if ( bli_obj_is_triangular( a ) )
+	{
 		/* Prune any unreferenced part from the subpartition of A (that would
 		   be encountered from partitioning in the m dimension) and adjust the
 		   subpartition of C accordingly. */
 		bli_prune_unref_mparts( a, BLIS_M, c, BLIS_M );
-    }
-    else
-    {
+	}
+	else
+	{
 		/* No pruning is necessary. */
-    }
+	}
 }
 
 void bli_l3_prune_unref_mparts_n
@@ -69,24 +69,24 @@ void bli_l3_prune_unref_mparts_n
              obj_t*  c
      )
 {
-    if ( bli_obj_is_upper_or_lower( c ) )
-    {
+	if ( bli_obj_is_upper_or_lower( c ) )
+	{
 		/* Prune any unreferenced part from the subpartition of C (that would
 		   be encountered from partitioning in the n dimension) and adjust the
 		   subpartition of B accordingly. */
 		bli_prune_unref_mparts( c, BLIS_N, b, BLIS_N );
-    }
-    else if ( bli_obj_is_triangular( b ) )
-    {
+	}
+	else if ( bli_obj_is_triangular( b ) )
+	{
 		/* Prune any unreferenced part from the subpartition of B (that would
 		   be encountered from partitioning in the n dimension) and adjust the
 		   subpartition of C accordingly. */
 		bli_prune_unref_mparts( b, BLIS_N, c, BLIS_N );
-    }
-    else
-    {
+	}
+	else
+	{
 		/* No pruning is necessary. */
-    }
+	}
 }
 
 void bli_l3_prune_unref_mparts_k
@@ -96,23 +96,23 @@ void bli_l3_prune_unref_mparts_k
        const obj_t*  c
      )
 {
-    if ( bli_obj_is_triangular( a ) )
-    {
+	if ( bli_obj_is_triangular( a ) )
+	{
 		/* Prune any unreferenced part from the subpartition of A (that would
 		   be encountered from partitioning in the k dimension) and adjust the
 		   subpartition of B accordingly. */
 		bli_prune_unref_mparts( a, BLIS_N, b, BLIS_M );
-    }
-    else if ( bli_obj_is_triangular( b ) )
-    {
+	}
+	else if ( bli_obj_is_triangular( b ) )
+	{
 		/* Prune any unreferenced part from the subpartition of B (that would
 		   be encountered from partitioning in the k dimension) and adjust the
 		   subpartition of A accordingly. */
 		bli_prune_unref_mparts( b, BLIS_M, a, BLIS_N );
-    }
-    else
-    {
+	}
+	else
+	{
 		/* No pruning is necessary. */
-    }
+	}
 }
 

@@ -242,7 +242,7 @@ dim_t bli_determine_blocksize
        dim_t b_max
      )
 {
-    const bool handle_edge_low = direct == BLIS_BWD;
+    const bool handle_edge_low = ( direct == BLIS_BWD );
 
 	// Compute how much of the matrix dimension is left, including the
 	// chunk that will correspond to the blocksize we are computing now.

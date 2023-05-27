@@ -69,40 +69,36 @@ void bli_l3_thrinfo_grow
        const cntl_t*     cntl
      )
 {
-    /*
-     * For leaf nodes, create one more node in the thread control tree
-     * which splits the remianing threads into single-thread teams.
-     */
-    if ( bli_cntl_is_leaf( cntl ) )
-    {
-    	dim_t      n_way      = bli_thrinfo_num_threads( thread );
-        thrinfo_t* thread_sub = bli_thrinfo_split( n_way, thread );
+	// For leaf nodes, create one more node in the thread control tree
+	// which splits the remianing threads into single-thread teams.
+	if ( bli_cntl_is_leaf( cntl ) )
+	{
+		dim_t      n_way      = bli_thrinfo_num_threads( thread );
+		thrinfo_t* thread_sub = bli_thrinfo_split( n_way, thread );
 
-    	bli_thrinfo_attach_sub_node( thread_sub, thread );
+		bli_thrinfo_attach_sub_node( thread_sub, thread );
 
-        return;
-    }
+		return;
+	}
 
-    /*
-     * Create a thread control tree sub-node for each non-NULL control tree
-     * sub-node. Note that the "ways" encoded in the control tree for
-     * each sub-node control parallelism for the parent node, not
-     * the sub-node. This is necessary because some nodes need to parallelize
-     * differently when calling different sub-nodes (e.g. the ic loop of trsm_l).
-     */
-    for ( dim_t i = 0; i < BLIS_MAX_SUB_NODES; i++ )
-    {
-        const cntl_t* sub_node = bli_cntl_sub_node( i, cntl );
-        if ( sub_node == NULL )
-            return;
+	// Create a thread control tree sub-node for each non-NULL control tree
+	// sub-node. Note that the "ways" encoded in the control tree for each
+	// sub-node control parallelism for the parent node, not the sub-node. This
+	// is necessary because some nodes need to parallelize differently when
+	// calling different sub-nodes (e.g. the ic loop of trsm_l).
+	for ( dim_t i = 0; i < BLIS_MAX_SUB_NODES; i++ )
+	{
+		const cntl_t* sub_node = bli_cntl_sub_node( i, cntl );
+		if ( sub_node == NULL )
+			return;
 
-        dim_t      ways       = bli_cntl_ways( i, cntl );
-    	dim_t      n_way      = bli_rntm_total_ways_for( ways, rntm );
-        thrinfo_t* thread_sub = bli_thrinfo_split( n_way, thread );
+		dim_t      ways       = bli_cntl_ways( i, cntl );
+		dim_t      n_way      = bli_rntm_total_ways_for( ways, rntm );
+		thrinfo_t* thread_sub = bli_thrinfo_split( n_way, thread );
 
-    	bli_thrinfo_attach_sub_node( thread_sub, thread );
-        bli_l3_thrinfo_grow( thread_sub, rntm, sub_node );
-    }
+		bli_thrinfo_attach_sub_node( thread_sub, thread );
+		bli_l3_thrinfo_grow( thread_sub, rntm, sub_node );
+	}
 }
 
 // -----------------------------------------------------------------------------
@@ -254,21 +250,21 @@ void bli_l3_thrinfo_print_gemm_paths
 
 	printf( "            jc   kc   pb   ic   pa   jr   ir\n" );
 	printf( "xx_nt:    %4ld %4ld %4ld %4ld %4ld %4ld %4ld\n",
-	( unsigned long )jc_nt,
-	( unsigned long )pc_nt,
-	( unsigned long )pb_nt,
-	( unsigned long )ic_nt,
-	( unsigned long )pa_nt,
-	( unsigned long )jr_nt,
-	( unsigned long )ir_nt );
+	        ( unsigned long )jc_nt,
+	        ( unsigned long )pc_nt,
+	        ( unsigned long )pb_nt,
+	        ( unsigned long )ic_nt,
+	        ( unsigned long )pa_nt,
+	        ( unsigned long )jr_nt,
+	        ( unsigned long )ir_nt );
 	printf( "xx_way:   %4ld %4ld %4ld %4ld %4ld %4ld %4ld\n",
-	( unsigned long )jc_way,
-	( unsigned long )pc_way,
-	( unsigned long )pb_way,
-	( unsigned long )ic_way,
-	( unsigned long )pa_way,
-	( unsigned long )jr_way,
-	( unsigned long )ir_way );
+	        ( unsigned long )jc_way,
+	        ( unsigned long )pc_way,
+	        ( unsigned long )pb_way,
+	        ( unsigned long )ic_way,
+	        ( unsigned long )pa_way,
+	        ( unsigned long )jr_way,
+	        ( unsigned long )ir_way );
 	printf( "============================================\n" );
 
 	for ( dim_t gl_id = 0; gl_id < n_threads; ++gl_id )
@@ -325,21 +321,21 @@ void bli_l3_thrinfo_print_gemm_paths
 		print_thrinfo:
 
 		printf( "comm ids: %4ld %4ld %4ld %4ld %4ld %4ld %4ld\n",
-		( long )jc_comm_id,
-		( long )pc_comm_id,
-		( long )pb_comm_id,
-		( long )ic_comm_id,
-		( long )pa_comm_id,
-		( long )jr_comm_id,
-		( long )ir_comm_id );
+		        ( long )jc_comm_id,
+		        ( long )pc_comm_id,
+		        ( long )pb_comm_id,
+		        ( long )ic_comm_id,
+		        ( long )pa_comm_id,
+		        ( long )jr_comm_id,
+		        ( long )ir_comm_id );
 		printf( "work ids: %4ld %4ld %4ld %4ld %4ld %4ld %4ld\n",
-		( long )jc_work_id,
-		( long )pc_work_id,
-		( long )pb_work_id,
-		( long )ic_work_id,
-		( long )pa_work_id,
-		( long )jr_work_id,
-		( long )ir_work_id );
+		        ( long )jc_work_id,
+		        ( long )pc_work_id,
+		        ( long )pb_work_id,
+		        ( long )ic_work_id,
+		        ( long )pa_work_id,
+		        ( long )jr_work_id,
+		        ( long )ir_work_id );
 		printf( "--------------------------------------------\n" );
 	}
 
@@ -456,21 +452,21 @@ void bli_l3_thrinfo_print_trsm_paths
 
 	printf( "            jc   kc   pb   ic     pa     jr     ir\n" );
 	printf( "xx_nt:    %4ld %4ld %4ld %4ld  %2ld|%2ld  %2ld|%2ld  %2ld|%2ld\n",
-	( long )jc_nt,
-	( long )pc_nt,
-	( long )pb_nt,
-	( long )ic_nt,
-	( long )pa_nt0, ( long )pa_nt,
-	( long )jr_nt0, ( long )jr_nt,
-	( long )ir_nt0, ( long )ir_nt );
+	        ( long )jc_nt,
+	        ( long )pc_nt,
+	        ( long )pb_nt,
+	        ( long )ic_nt,
+	        ( long )pa_nt0, ( long )pa_nt,
+	        ( long )jr_nt0, ( long )jr_nt,
+	        ( long )ir_nt0, ( long )ir_nt );
 	printf( "xx_way:   %4ld %4ld %4ld %4ld  %2ld|%2ld  %2ld|%2ld  %2ld|%2ld\n",
-    ( long )jc_way,
-	( long )pc_way,
-	( long )pb_way,
-	( long )ic_way,
-	( long )pa_way0, ( long )pa_way,
-	( long )jr_way0, ( long )jr_way,
-	( long )ir_way0, ( long )ir_way );
+	        ( long )jc_way,
+	        ( long )pc_way,
+	        ( long )pb_way,
+	        ( long )ic_way,
+	        ( long )pa_way0, ( long )pa_way,
+	        ( long )jr_way0, ( long )jr_way,
+	        ( long )ir_way0, ( long )ir_way );
 	printf( "==================================================\n" );
 
 
@@ -556,24 +552,23 @@ void bli_l3_thrinfo_print_trsm_paths
 		print_thrinfo:
 
 		printf( "comm ids: %4ld %4ld %4ld %4ld  %2ld|%2ld  %2ld|%2ld  %2ld|%2ld\n",
-		( long )jc_comm_id,
-		( long )pc_comm_id,
-		( long )pb_comm_id,
-		( long )ic_comm_id,
-		( long )pa_comm_id0, ( long )pa_comm_id,
-		( long )jr_comm_id0, ( long )jr_comm_id,
-		( long )ir_comm_id0, ( long )ir_comm_id );
+		        ( long )jc_comm_id,
+		        ( long )pc_comm_id,
+		        ( long )pb_comm_id,
+		        ( long )ic_comm_id,
+		        ( long )pa_comm_id0, ( long )pa_comm_id,
+		        ( long )jr_comm_id0, ( long )jr_comm_id,
+		        ( long )ir_comm_id0, ( long )ir_comm_id );
 		printf( "work ids: %4ld %4ld %4ld %4ld  %2ld|%2ld  %2ld|%2ld  %2ld|%2ld\n",
-		( long )jc_work_id,
-		( long )pc_work_id,
-		( long )pb_work_id,
-		( long )ic_work_id,
-		( long )pa_work_id0, ( long )pa_work_id,
-		( long )jr_work_id0, ( long )jr_work_id,
-		( long )ir_work_id0, ( long )ir_work_id );
+		        ( long )jc_work_id,
+		        ( long )pc_work_id,
+		        ( long )pb_work_id,
+		        ( long )ic_work_id,
+		        ( long )pa_work_id0, ( long )pa_work_id,
+		        ( long )jr_work_id0, ( long )jr_work_id,
+		        ( long )ir_work_id0, ( long )ir_work_id );
 		printf( "--------------------------------------------------\n" );
 	}
-
 }
 
 // -----------------------------------------------------------------------------

@@ -61,9 +61,9 @@ void bli_gemm_blk_var2
 	bli_thread_range_ndim
 	(
 	  direct,
-      bli_part_cntl_blksz_mult( cntl ),
-      bli_part_cntl_use_weighted( cntl ),
-      thread, a, &bp, &cp,
+	  bli_part_cntl_blksz_mult( cntl ),
+	  bli_part_cntl_use_weighted( cntl ),
+	  thread, a, &bp, &cp,
 	  &my_start, &my_end
 	);
 

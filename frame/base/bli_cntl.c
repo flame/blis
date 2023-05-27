@@ -56,18 +56,18 @@ void bli_cntl_attach_sub_node
        cntl_t* cntl
      )
 {
-    dim_t next = 0;
+	dim_t next = 0;
 	for ( ; next < BLIS_MAX_SUB_NODES; next++ )
 	{
 		if ( bli_cntl_sub_node( next, cntl ) == NULL )
-            break;
+			break;
 	}
 
-    if ( next == BLIS_MAX_SUB_NODES )
-        bli_abort();
+	if ( next == BLIS_MAX_SUB_NODES )
+		bli_abort();
 
-    bli_cntl_set_ways( next, ways, cntl );
-    bli_cntl_set_sub_node( next, sub_node, cntl );
+	bli_cntl_set_ways( next, ways, cntl );
+	bli_cntl_set_sub_node( next, sub_node, cntl );
 }
 
 void bli_cntl_clear_node

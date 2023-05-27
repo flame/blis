@@ -139,9 +139,9 @@ void bli_trsm_blk_var1
 	bli_thread_range_mdim
 	(
 	  direct,
-      bli_part_cntl_blksz_mult( cntl ),
-      bli_part_cntl_use_weighted( cntl ),
-      thread, &ax1, b, &cx1,
+	  bli_part_cntl_blksz_mult( cntl ),
+	  bli_part_cntl_use_weighted( cntl ),
+	  thread, &ax1, b, &cx1,
 	  &my_start, &my_end
 	);
 

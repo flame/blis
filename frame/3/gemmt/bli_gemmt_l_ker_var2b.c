@@ -263,7 +263,7 @@ void bli_gemmt_l_ker_var2b
 	dim_t j = jr_st;
 
 	// Initialize a counter to track the number of microtiles computed by the
-    // current thread.
+	// current thread.
 	dim_t ut = 0;
 
 	// Loop over the n dimension (NR columns at a time).

@@ -98,7 +98,7 @@ void PASTEMAC3(chr,opname,arch,suf) \
 	      inc_t             cs_c_use; \
 \
 	auxinfo_t auxinfo_r = *auxinfo; \
-    bli_auxinfo_set_params( params_r, &auxinfo_r ); \
+	bli_auxinfo_set_params( params_r, &auxinfo_r ); \
 \
 	if ( !PASTEMAC(chr,eq0)( *alpha_i ) || \
 	     !PASTEMAC(chr,eq0)( *beta_i ) || \

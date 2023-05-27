@@ -191,8 +191,8 @@ void PASTECH2(bls_,ch,varname) \
 \
 	/* Compute the JC loop thread range for the current thread. */ \
 	dim_t jc_start, jc_end; \
-    dim_t jc_tid = bli_thrinfo_work_id( thread_jc ); \
-    dim_t jc_nt  = bli_thrinfo_n_way( thread_jc ); \
+	dim_t jc_tid = bli_thrinfo_work_id( thread_jc ); \
+	dim_t jc_nt  = bli_thrinfo_n_way( thread_jc ); \
 	bli_thread_range_sub( jc_tid, jc_nt, n, NR, FALSE, &jc_start, &jc_end ); \
 	const dim_t n_local = jc_end - jc_start; \
 \
@@ -253,8 +253,8 @@ void PASTECH2(bls_,ch,varname) \
 \
 			/* Compute the IC loop thread range for the current thread. */ \
 			dim_t ic_start, ic_end; \
-            dim_t ic_tid = bli_thrinfo_work_id( thread_ic ); \
-            dim_t ic_nt  = bli_thrinfo_n_way( thread_ic ); \
+			dim_t ic_tid = bli_thrinfo_work_id( thread_ic ); \
+			dim_t ic_nt  = bli_thrinfo_n_way( thread_ic ); \
 			bli_thread_range_sub( ic_tid, ic_nt, m, MR, FALSE, &ic_start, &ic_end ); \
 			const dim_t m_local = ic_end - ic_start; \
 \

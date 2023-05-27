@@ -71,13 +71,13 @@ void bli_gemm_ex
 		  ( cntx_t* )cntx, ( rntm_t* )rntm
 		);
 	}
-    else
-    {
+	else
+	{
 		bli_gemm_def_ex
 		(
 		  ( obj_t* )alpha, ( obj_t* )a, ( obj_t* )b, ( obj_t* )beta, ( obj_t* )c,
 		  ( cntx_t* )cntx, ( rntm_t* )rntm
 		);
-    }
+	}
 }
 

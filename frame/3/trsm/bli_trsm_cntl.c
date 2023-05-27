@@ -120,15 +120,19 @@ void bli_trsm_l_cntl_init
 	const num_t            dt_c           = bli_obj_dt( c );
 	const num_t            dt_ap          = bli_dt_domain( dt_a ) | comp_prec;
 	const num_t            dt_bp          = bli_dt_domain( dt_b ) | comp_prec;
-	const num_t            dt_comp        = ( im == BLIS_1M ? BLIS_REAL : bli_dt_domain( dt_c ) ) | comp_prec;
+	const num_t            dt_comp        = ( im == BLIS_1M ? BLIS_REAL
+	                                                        : bli_dt_domain( dt_c )
+	                                        ) | comp_prec;
 
-	const void_fp          macro_kernel_p = bli_obj_is_lower( a ) ? bli_trsm_ll_ker_var2 : bli_trsm_lu_ker_var2;
+	const void_fp          macro_kernel_p = bli_obj_is_lower( a ) ? bli_trsm_ll_ker_var2
+	                                                              : bli_trsm_lu_ker_var2;
 	      gemmtrsm_ukr_ft  gemmtrsm_ukr   = bli_obj_is_lower( a )
-	    ? bli_cntx_get_ukr_dt( dt_comp, BLIS_GEMMTRSM_L_UKR, cntx )
-	    : bli_cntx_get_ukr_dt( dt_comp, BLIS_GEMMTRSM_U_UKR, cntx );
+	                                        ? bli_cntx_get_ukr_dt( dt_comp, BLIS_GEMMTRSM_L_UKR, cntx )
+	                                        : bli_cntx_get_ukr_dt( dt_comp, BLIS_GEMMTRSM_U_UKR, cntx );
 	      gemm_ukr_ft      gemm_ukr       = bli_cntx_get_ukr_dt( dt_comp, BLIS_GEMM_UKR, cntx );
 	      gemm_ukr_ft      real_gemm_ukr  = NULL;
-	const dir_t            direct         = bli_obj_is_lower( a ) ? BLIS_FWD : BLIS_BWD;
+	const dir_t            direct         = bli_obj_is_lower( a ) ? BLIS_FWD
+	                                                              : BLIS_BWD;
 	const bool             row_pref       = bli_cntx_get_ukr_prefs_dt( dt_comp, BLIS_GEMM_UKR_ROW_PREF, cntx );
 	      pack_t           schema_a       = BLIS_PACKED_ROW_PANELS;
 	      pack_t           schema_b       = BLIS_PACKED_COL_PANELS;
@@ -176,8 +180,8 @@ void bli_trsm_l_cntl_init
 		real_gemm_ukr = gemm_ukr;
 		gemm_ukr = bli_cntx_get_ukr_dt( dt_comp, BLIS_GEMM1M_UKR, cntx );
 		gemmtrsm_ukr = bli_obj_is_lower( a )
-		    ? bli_cntx_get_ukr_dt( dt_comp, BLIS_GEMMTRSM1M_L_UKR, cntx )
-		    : bli_cntx_get_ukr_dt( dt_comp, BLIS_GEMMTRSM1M_U_UKR, cntx );
+		               ? bli_cntx_get_ukr_dt( dt_comp, BLIS_GEMMTRSM1M_L_UKR, cntx )
+		               : bli_cntx_get_ukr_dt( dt_comp, BLIS_GEMMTRSM1M_U_UKR, cntx );
 	}
 
 	// If alpha is non-unit, typecast and apply it to the scalar attached

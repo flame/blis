@@ -39,17 +39,17 @@
 
 void bli_thrinfo_attach_sub_node( thrinfo_t* sub_node, thrinfo_t* t )
 {
-    dim_t next = 0;
-    for ( ; next < BLIS_MAX_SUB_NODES; next++ )
-    {
-        if ( bli_thrinfo_sub_node( next, t ) == NULL )
-            break;
-    }
+	dim_t next = 0;
+	for ( ; next < BLIS_MAX_SUB_NODES; next++ )
+	{
+		if ( bli_thrinfo_sub_node( next, t ) == NULL )
+			break;
+	}
 
-    if ( next == BLIS_MAX_SUB_NODES )
-        bli_abort();
+	if ( next == BLIS_MAX_SUB_NODES )
+		bli_abort();
 
-    bli_thrinfo_set_sub_node( next, sub_node, t );
+	bli_thrinfo_set_sub_node( next, sub_node, t );
 }
 
 thrinfo_t* bli_thrinfo_create_root
@@ -98,8 +98,8 @@ thrinfo_t* bli_thrinfo_create
 	bli_thrinfo_set_pba( pba, thread );
 	bli_mem_clear( bli_thrinfo_mem( thread ) );
 
-    for ( dim_t i = 0; i < BLIS_MAX_SUB_NODES; i++ )
-	    bli_thrinfo_set_sub_node( i, NULL, thread );
+	for ( dim_t i = 0; i < BLIS_MAX_SUB_NODES; i++ )
+		bli_thrinfo_set_sub_node( i, NULL, thread );
 
 	return thread;
 }
@@ -118,9 +118,9 @@ void bli_thrinfo_free
 	// Recursively free all children of the current thrinfo_t.
 	for ( dim_t i = 0; i < BLIS_MAX_SUB_NODES; i++ )
 	{
-        thrinfo_t* thrinfo_sub_node = bli_thrinfo_sub_node( i, thread );
-        if ( thrinfo_sub_node != NULL )
-		    bli_thrinfo_free( thrinfo_sub_node );
+		thrinfo_t* thrinfo_sub_node = bli_thrinfo_sub_node( i, thread );
+		if ( thrinfo_sub_node != NULL )
+			bli_thrinfo_free( thrinfo_sub_node );
 	}
 
 	// Free the communicators, but only if the current thrinfo_t struct
@@ -278,7 +278,7 @@ void bli_thrinfo_print_sub
 	        ( unsigned long )bli_thrinfo_work_id( thread ),
 	        ( unsigned long )bli_thrinfo_needs_free_comm( thread ));
 
-    for ( dim_t i = 0; i < BLIS_MAX_SUB_NODES; i++ )
-	    bli_thrinfo_print_sub( bli_thrinfo_sub_node( i, thread ), level+1 );
+	for ( dim_t i = 0; i < BLIS_MAX_SUB_NODES; i++ )
+		bli_thrinfo_print_sub( bli_thrinfo_sub_node( i, thread ), level+1 );
 }
 

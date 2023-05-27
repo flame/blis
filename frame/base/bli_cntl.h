@@ -39,12 +39,12 @@
 
 struct cntl_s
 {
-    l3_var_oft var_func;
-    struct
-    {
-        dim_t          ways;
-    	struct cntl_s* sub_node;
-    } sub_nodes[ BLIS_MAX_SUB_NODES ];
+	l3_var_oft var_func;
+	struct
+	{
+		dim_t          ways;
+		struct cntl_s* sub_node;
+	} sub_nodes[ BLIS_MAX_SUB_NODES ];
 };
 typedef struct cntl_s cntl_t;
 */

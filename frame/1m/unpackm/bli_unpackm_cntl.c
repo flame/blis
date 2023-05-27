@@ -56,7 +56,7 @@ void bli_unpackm_cntl_init_node
 	bli_cntl_init_node
 	(
 	  var_func,
-      &cntl->cntl
+	  &cntl->cntl
 	);
 }
 

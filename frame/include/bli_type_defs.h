@@ -917,7 +917,7 @@ typedef enum
 // A convenient version of the BLIS_XX block size IDs which can be used in bitfields.
 enum
 {
-    BLIS_THREAD_NONE = 0,
+	BLIS_THREAD_NONE = 0,
 	BLIS_THREAD_KR   = 1 << BLIS_KR,
 	BLIS_THREAD_MR   = 1 << BLIS_MR,
 	BLIS_THREAD_NR   = 1 << BLIS_NR,
@@ -1086,13 +1086,13 @@ typedef struct mem_s
 
 struct cntl_s
 {
-    // Actually this is a l3_var_oft, but that type hasn't been defined yet
-    void_fp var_func;
-    struct
-    {
-        dim_t          ways;
-    	struct cntl_s* sub_node;
-    } sub_nodes[ BLIS_MAX_SUB_NODES ];
+	// Actually this is a l3_var_oft, but that type hasn't been defined yet
+	void_fp var_func;
+	struct
+	{
+		dim_t          ways;
+		struct cntl_s* sub_node;
+	} sub_nodes[ BLIS_MAX_SUB_NODES ];
 };
 typedef struct cntl_s cntl_t;
 

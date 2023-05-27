@@ -720,7 +720,7 @@ siz_t bli_thread_range_mdim
              dim_t*     end
      )
 {
-    ( void )b;
+	( void )b;
 	return bli_thread_range
 	(
 	  thr,
@@ -747,7 +747,7 @@ siz_t bli_thread_range_ndim
              dim_t*     end
      )
 {
-    ( void )a;
+	( void )a;
 	return bli_thread_range
 	(
 	  thr,
@@ -787,6 +787,10 @@ siz_t bli_thread_range
 		bli_reflect_about_diag( &diagoff, &uplo, &m, &n );
 	}
 
+	// Edge cases are handled at the "low" end of the index range when
+	// moving backwards through the matrix.
+	bool handle_edge_low = ( direct == BLIS_BWD );
+
 	if ( use_weighted &&
 	     bli_obj_intersects_diag( a ) &&
 	     bli_obj_is_upper_or_lower( a ) )
@@ -799,21 +803,21 @@ siz_t bli_thread_range
 		return bli_thread_range_weighted_sub
 		(
 		  thr, diagoff, uplo, uplo, m, n, bf,
-		  direct == BLIS_BWD, start, end
+		  handle_edge_low, start, end
 		);
 	}
 	else // if unweighted, dense, or zeros
 	{
 		bli_thread_range_sub
-        (
-          bli_thrinfo_work_id( thr ),
-          bli_thrinfo_n_way( thr ),
-          n,
-          bf,
-		  direct == BLIS_BWD,
-          start,
-          end
-        );
+		(
+		  bli_thrinfo_work_id( thr ),
+		  bli_thrinfo_n_way( thr ),
+		  n,
+		  bf,
+		  handle_edge_low,
+		  start,
+		  end
+		);
 
 		return m * ( *end - *start );
 	}
