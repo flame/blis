@@ -1741,16 +1741,18 @@ static void aocl_daxpyv_dynamic
 		case BLIS_ARCH_ZEN2:
 		case BLIS_ARCH_ZEN3:
 
-			if ( n_elem <= 100 )
+			if ( n_elem <= 4000 )
 				*nt_ideal = 1;
-			else if (n_elem <= 10000)
-				*nt_ideal = 2;
-			else if (n_elem <= 250000)
+			else if (n_elem <= 11000)
+				*nt_ideal = 4;
+			else if (n_elem <= 300000)
 				*nt_ideal = 8;
 			else if (n_elem <= 750000)
 				*nt_ideal = 16;
-			else if (n_elem <= 2000000)
+			else if (n_elem <= 2600000)
 				*nt_ideal = 32;
+			else if (n_elem <= 4000000)
+				*nt_ideal = 64;
 			else
 				// For sizes in this range, AOCL dynamic does not make any change
 				*nt_ideal = -1;
