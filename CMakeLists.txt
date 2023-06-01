@@ -614,25 +614,36 @@ set(BLIS_VERSION_STRING ${BLIS_VERSION})
 string(TIMESTAMP BUILD_DATE "%Y%m%d")
 add_definitions(-DBLIS_VERSION_STRING="AOCL-BLIS ${BLIS_VERSION_STRING} Build ${BUILD_DATE}")
 
+# Set object libraries created in kernels directory to be added into BLIS library.
+set(OBJECT_LIBRARIES 
+    $<TARGET_OBJECTS:zen_1>
+    $<TARGET_OBJECTS:zen_1f>
+    $<TARGET_OBJECTS:zen_2>
+    $<TARGET_OBJECTS:zen_3>
+    $<TARGET_OBJECTS:zen_3_sup>
+    $<TARGET_OBJECTS:haswell_1m>
+    $<TARGET_OBJECTS:haswell_3>
+    $<TARGET_OBJECTS:haswell_3sup>
+    $<TARGET_OBJECTS:haswell_3supd6x8>
+)
+# Ammend the list of object libraries to include zen4 paths as appropriate.
+if(${TARGET_ARCH} STREQUAL zen4 OR 
+   ${TARGET_ARCH} STREQUAL amdzen)
+   set(OBJECT_LIBRARIES ${OBJECT_LIBRARIES}
+      $<TARGET_OBJECTS:zen4_1>
+      $<TARGET_OBJECTS:zen4_1m>
+      $<TARGET_OBJECTS:zen4_3>
+      $<TARGET_OBJECTS:zen4_3sup>
+      $<TARGET_OBJECTS:zen4_3supd24x8>
+      $<TARGET_OBJECTS:skx_3>
+   )
+endif()
+
 if(BUILD_SHARED_LIBS)
     add_library("${PROJECT_NAME}" SHARED ${CMAKE_SOURCE_DIR}/bli_config.h
                          ${CMAKE_SOURCE_DIR}/include/${TARGET_ARCH}/blis.h
                          ${headers} 
-                         $<TARGET_OBJECTS:zen_1>
-                         $<TARGET_OBJECTS:zen_1f>
-                         $<TARGET_OBJECTS:zen_2>
-                         $<TARGET_OBJECTS:zen_3>
-                         $<TARGET_OBJECTS:zen_3_sup>
-                         $<TARGET_OBJECTS:zen4_1>
-                         $<TARGET_OBJECTS:zen4_1m>
-                         $<TARGET_OBJECTS:zen4_3>
-                         $<TARGET_OBJECTS:zen4_3sup>
-                         $<TARGET_OBJECTS:zen4_3supd24x8>
-                         $<TARGET_OBJECTS:skx_3>
-                         $<TARGET_OBJECTS:haswell_1m>
-                         $<TARGET_OBJECTS:haswell_3>
-                         $<TARGET_OBJECTS:haswell_3sup>
-                         $<TARGET_OBJECTS:haswell_3supd6x8>
+                         ${OBJECT_LIBRARIES}
                          )
     if(ENABLE_OPENMP)
         target_link_libraries("${PROJECT_NAME}" PRIVATE OpenMP::OpenMP_CXX)
@@ -644,21 +655,7 @@ if(NOT BUILD_SHARED_LIBS)
     add_library("${PROJECT_NAME}" STATIC ${CMAKE_SOURCE_DIR}/bli_config.h
                          ${CMAKE_SOURCE_DIR}/include/${TARGET_ARCH}/blis.h
                          ${headers} 
-                         $<TARGET_OBJECTS:zen_1>
-                         $<TARGET_OBJECTS:zen_1f>
-                         $<TARGET_OBJECTS:zen_2>
-                         $<TARGET_OBJECTS:zen_3>
-                         $<TARGET_OBJECTS:zen_3_sup>
-                         $<TARGET_OBJECTS:zen4_1>
-                         $<TARGET_OBJECTS:zen4_1m>
-                         $<TARGET_OBJECTS:zen4_3>
-                         $<TARGET_OBJECTS:zen4_3sup>
-                         $<TARGET_OBJECTS:zen4_3supd24x8>
-                         $<TARGET_OBJECTS:skx_3>
-                         $<TARGET_OBJECTS:haswell_1m>
-                         $<TARGET_OBJECTS:haswell_3>
-                         $<TARGET_OBJECTS:haswell_3sup>
-                         $<TARGET_OBJECTS:haswell_3supd6x8>
+                         ${OBJECT_LIBRARIES}
                          )
     if(ENABLE_OPENMP)
         set_target_properties("${PROJECT_NAME}" PROPERTIES LINKER_LANGUAGE C OUTPUT_NAME "${LIB_NAME}" STATIC_LIBRARY_OPTIONS "${OpenMP_libomp_LIBRARY}")
