@@ -42,13 +42,10 @@ passmsg="All BLIS tests passed!"
 failmsg0="At least one BLIS test failed. :("
 failmsg1="Please see output.testsuite for details."
 
-rval_fail=$(grep -q 'FAILURE' $1)
-rval_exit=$(grep -q 'Exiting normally' $1)
-
 # If FAILURE was found (exit code 0), or if the termination tag was not
 # found (not exit code 0), print an error message.
-if [[ ${rval_fail} -eq 0 ||
-      ${rval_exit} -ne 0 ]]; then
+if grep -q  'FAILURE'          $1 2>/dev/null ||
+   grep -qv 'Exiting normally' $1 2>/dev/null; then
 	printf "${ansi_red}""${script_name}: ${failmsg0}""${ansi_normal}\n"
 	printf "${ansi_red}""${script_name}: ${failmsg1}""${ansi_normal}\n"
 	exit 1
