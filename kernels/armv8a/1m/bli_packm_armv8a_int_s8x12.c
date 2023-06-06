@@ -39,19 +39,24 @@
 #if defined(__clang__)
 #define PRAGMA_NOUNROLL _Pragma("nounroll")
 #define PRAGMA_UNROLL_2 _Pragma("unroll 2")
+#define PRAGMA_UNROLL_4 _Pragma("unroll 4")
 #elif defined(__GNUC__)
 #define PRAGMA_NOUNROLL _Pragma("GCC unroll 1")
 #define PRAGMA_UNROLL_2 _Pragma("GCC unroll 2")
+#define PRAGMA_UNROLL_4 _Pragma("GCC unroll 4")
 #else
 #define PRAGMA_NOUNROLL
 #define PRAGMA_UNROLL_2
+#define PRAGMA_UNROLL_4
 #endif
 
-void bli_spackm_armv8a_int_12xk
+void bli_spackm_armv8a_int_8x12
      (
              conj_t  conja,
              pack_t  schema,
              dim_t   cdim0,
+             dim_t   cdim_max,
+             dim_t   cdim_bcast,
              dim_t   k0,
              dim_t   k0_max,
        const void*   kappa,
@@ -62,7 +67,8 @@ void bli_spackm_armv8a_int_12xk
      )
 {
   // This is the panel dimension assumed by the packm kernel.
-  const dim_t    mnr    = 12;
+  const dim_t    mr     = 8;
+  const dim_t    nr     = 12;
 
   // Typecast local copies of integers in case dim_t and inc_t are a
   // different size than is expected by load instructions.
@@ -93,7 +99,234 @@ void bli_spackm_armv8a_int_12xk
 
   // -------------------------------------------------------------------------
 
-  if ( cdim0 == mnr && !gs )
+  if ( cdim0 == mr && cdim_bcast == 1 && !gs )
+  {
+    if ( unitk )
+    {
+      if ( inca == 1 )
+      {
+        // No need to use k-loops here.
+        // Simply let compiler to expand loops.
+        PRAGMA_UNROLL_4
+        for ( dim_t ik = k_iter * 4 + k_left; ik > 0; --ik )
+        {
+          float32x4_t v0 = vld1q_f32( a_loc +  0 );
+          float32x4_t v1 = vld1q_f32( a_loc +  4 );
+
+          vst1q_f32( p_loc +  0, v0 );
+          vst1q_f32( p_loc +  4, v1 );
+
+          a_loc += lda;
+          p_loc += ldp;
+        }
+      }
+      else // if ( lda == 1 )
+      {
+        float32x4_t v0  = (float32x4_t)vdupq_n_u32( 0 );
+        float32x4_t v1  = (float32x4_t)vdupq_n_u32( 0 );
+        float32x4_t v2  = (float32x4_t)vdupq_n_u32( 0 );
+        float32x4_t v3  = (float32x4_t)vdupq_n_u32( 0 );
+        float32x4_t v4  = (float32x4_t)vdupq_n_u32( 0 );
+        float32x4_t v5  = (float32x4_t)vdupq_n_u32( 0 );
+        float32x4_t v6  = (float32x4_t)vdupq_n_u32( 0 );
+        float32x4_t v7  = (float32x4_t)vdupq_n_u32( 0 );
+        float32x4_t vt0;
+        float32x4_t vt1;
+        float32x4_t vt2;
+        float32x4_t vt3;
+
+        PRAGMA_NOUNROLL
+        for ( ; k_iter > 0; --k_iter )
+        {
+          v0 = vld1q_f32( a_loc + inca * 0 );
+          v1 = vld1q_f32( a_loc + inca * 1 );
+          v2 = vld1q_f32( a_loc + inca * 2 );
+          v3 = vld1q_f32( a_loc + inca * 3 );
+          v4 = vld1q_f32( a_loc + inca * 4 );
+          v5 = vld1q_f32( a_loc + inca * 5 );
+          v6 = vld1q_f32( a_loc + inca * 6 );
+          v7 = vld1q_f32( a_loc + inca * 7 );
+
+          // In-register transpose.
+          //
+          // Column 0-3
+          vt0 = vtrn1q_f32( v0, v1 );
+          vt1 = vtrn2q_f32( v0, v1 );
+          vt2 = vtrn1q_f32( v2, v3 );
+          vt3 = vtrn2q_f32( v2, v3 );
+          v0 = (float32x4_t)vtrn1q_f64( (float64x2_t)vt0, (float64x2_t)vt2 );
+          v1 = (float32x4_t)vtrn1q_f64( (float64x2_t)vt1, (float64x2_t)vt3 );
+          v2 = (float32x4_t)vtrn2q_f64( (float64x2_t)vt0, (float64x2_t)vt2 );
+          v3 = (float32x4_t)vtrn2q_f64( (float64x2_t)vt1, (float64x2_t)vt3 );
+          // Column 4-7
+          vt0 = vtrn1q_f32( v4, v5 );
+          vt1 = vtrn2q_f32( v4, v5 );
+          vt2 = vtrn1q_f32( v6, v7 );
+          vt3 = vtrn2q_f32( v6, v7 );
+          v4 = (float32x4_t)vtrn1q_f64( (float64x2_t)vt0, (float64x2_t)vt2 );
+          v5 = (float32x4_t)vtrn1q_f64( (float64x2_t)vt1, (float64x2_t)vt3 );
+          v6 = (float32x4_t)vtrn2q_f64( (float64x2_t)vt0, (float64x2_t)vt2 );
+          v7 = (float32x4_t)vtrn2q_f64( (float64x2_t)vt1, (float64x2_t)vt3 );
+
+          vst1q_f32( p_loc + 0,  v0  );
+          vst1q_f32( p_loc + 4,  v4  );
+          p_loc += ldp;
+
+          vst1q_f32( p_loc + 0,  v1  );
+          vst1q_f32( p_loc + 4,  v5  );
+          p_loc += ldp;
+
+          vst1q_f32( p_loc + 0,  v2  );
+          vst1q_f32( p_loc + 4,  v6  );
+          p_loc += ldp;
+
+          vst1q_f32( p_loc + 0,  v3  );
+          vst1q_f32( p_loc + 4,  v7  );
+          p_loc += ldp;
+          a_loc += 4 * lda; // 4;
+        }
+        for ( ; k_left > 0; --k_left )
+        {
+          v0 = vld1q_lane_f32( a_loc + inca * 0 , v0, 0 );
+          v0 = vld1q_lane_f32( a_loc + inca * 1 , v0, 1 );
+          v0 = vld1q_lane_f32( a_loc + inca * 2 , v0, 2 );
+          v0 = vld1q_lane_f32( a_loc + inca * 3 , v0, 3 );
+          v1 = vld1q_lane_f32( a_loc + inca * 4 , v1, 0 );
+          v1 = vld1q_lane_f32( a_loc + inca * 5 , v1, 1 );
+          v1 = vld1q_lane_f32( a_loc + inca * 6 , v1, 2 );
+          v1 = vld1q_lane_f32( a_loc + inca * 7 , v1, 3 );
+
+          vst1q_f32( p_loc + 0,  v0 );
+          vst1q_f32( p_loc + 4,  v1 );
+          p_loc += ldp;
+          a_loc += lda; // 1;
+        }
+      }
+    }
+    else // if ( !unitk )
+    {
+      float32x4_t vkappa = vld1q_dup_f32( kappa );
+
+      if ( inca == 1 )
+      {
+        // No need to use k-loops here.
+        // Simply let compiler to expand loops.
+        PRAGMA_UNROLL_4
+        for ( dim_t ik = k_iter * 4 + k_left; ik > 0; --ik )
+        {
+          float32x4_t v0 = vld1q_f32( a_loc + 0 );
+          float32x4_t v1 = vld1q_f32( a_loc + 4 );
+
+          // Scale by kappa.
+          v0 = vmulq_f32( v0, vkappa );
+          v1 = vmulq_f32( v1, vkappa );
+
+          vst1q_f32( p_loc + 0, v0 );
+          vst1q_f32( p_loc + 4, v1 );
+
+          a_loc += lda;
+          p_loc += ldp;
+        }
+      }
+      else // if ( lda == 1 )
+      {
+        float32x4_t v0  = (float32x4_t)vdupq_n_u32( 0 );
+        float32x4_t v1  = (float32x4_t)vdupq_n_u32( 0 );
+        float32x4_t v2  = (float32x4_t)vdupq_n_u32( 0 );
+        float32x4_t v3  = (float32x4_t)vdupq_n_u32( 0 );
+        float32x4_t v4  = (float32x4_t)vdupq_n_u32( 0 );
+        float32x4_t v5  = (float32x4_t)vdupq_n_u32( 0 );
+        float32x4_t v6  = (float32x4_t)vdupq_n_u32( 0 );
+        float32x4_t v7  = (float32x4_t)vdupq_n_u32( 0 );
+        float32x4_t vt0;
+        float32x4_t vt1;
+        float32x4_t vt2;
+        float32x4_t vt3;
+
+        PRAGMA_NOUNROLL
+        for ( ; k_iter > 0; --k_iter )
+        {
+          v0  = vld1q_f32( a_loc + inca * 0  );
+          v1  = vld1q_f32( a_loc + inca * 1  );
+          v2  = vld1q_f32( a_loc + inca * 2  );
+          v3  = vld1q_f32( a_loc + inca * 3  );
+          v4  = vld1q_f32( a_loc + inca * 4  );
+          v5  = vld1q_f32( a_loc + inca * 5  );
+          v6  = vld1q_f32( a_loc + inca * 6  );
+          v7  = vld1q_f32( a_loc + inca * 7  );
+
+          // Scale by kappa.
+          v0  = vmulq_f32( v0,  vkappa );
+          v1  = vmulq_f32( v1,  vkappa );
+          v2  = vmulq_f32( v2,  vkappa );
+          v3  = vmulq_f32( v3,  vkappa );
+          v4  = vmulq_f32( v4,  vkappa );
+          v5  = vmulq_f32( v5,  vkappa );
+          v6  = vmulq_f32( v6,  vkappa );
+          v7  = vmulq_f32( v7,  vkappa );
+
+          // In-register transpose.
+          //
+          // Column 0-3
+          vt0 = vtrn1q_f32( v0, v1 );
+          vt1 = vtrn2q_f32( v0, v1 );
+          vt2 = vtrn1q_f32( v2, v3 );
+          vt3 = vtrn2q_f32( v2, v3 );
+          v0 = (float32x4_t)vtrn1q_f64( (float64x2_t)vt0, (float64x2_t)vt2 );
+          v1 = (float32x4_t)vtrn1q_f64( (float64x2_t)vt1, (float64x2_t)vt3 );
+          v2 = (float32x4_t)vtrn2q_f64( (float64x2_t)vt0, (float64x2_t)vt2 );
+          v3 = (float32x4_t)vtrn2q_f64( (float64x2_t)vt1, (float64x2_t)vt3 );
+          // Column 4-7
+          vt0 = vtrn1q_f32( v4, v5 );
+          vt1 = vtrn2q_f32( v4, v5 );
+          vt2 = vtrn1q_f32( v6, v7 );
+          vt3 = vtrn2q_f32( v6, v7 );
+          v4 = (float32x4_t)vtrn1q_f64( (float64x2_t)vt0, (float64x2_t)vt2 );
+          v5 = (float32x4_t)vtrn1q_f64( (float64x2_t)vt1, (float64x2_t)vt3 );
+          v6 = (float32x4_t)vtrn2q_f64( (float64x2_t)vt0, (float64x2_t)vt2 );
+          v7 = (float32x4_t)vtrn2q_f64( (float64x2_t)vt1, (float64x2_t)vt3 );
+
+          vst1q_f32( p_loc + 0,  v0  );
+          vst1q_f32( p_loc + 4,  v4  );
+          p_loc += ldp;
+
+          vst1q_f32( p_loc + 0,  v1  );
+          vst1q_f32( p_loc + 4,  v5  );
+          p_loc += ldp;
+
+          vst1q_f32( p_loc + 0,  v2  );
+          vst1q_f32( p_loc + 4,  v6  );
+          p_loc += ldp;
+
+          vst1q_f32( p_loc + 0,  v3  );
+          vst1q_f32( p_loc + 4,  v7  );
+          p_loc += ldp;
+          a_loc += 4 * lda; // 4;
+        }
+        for ( ; k_left > 0; --k_left )
+        {
+          v0 = vld1q_lane_f32( a_loc + inca * 0 , v0, 0 );
+          v0 = vld1q_lane_f32( a_loc + inca * 1 , v0, 1 );
+          v0 = vld1q_lane_f32( a_loc + inca * 2 , v0, 2 );
+          v0 = vld1q_lane_f32( a_loc + inca * 3 , v0, 3 );
+          v1 = vld1q_lane_f32( a_loc + inca * 4 , v1, 0 );
+          v1 = vld1q_lane_f32( a_loc + inca * 5 , v1, 1 );
+          v1 = vld1q_lane_f32( a_loc + inca * 6 , v1, 2 );
+          v1 = vld1q_lane_f32( a_loc + inca * 7 , v1, 3 );
+
+          // Scale by kappa.
+          v0 = vmulq_f32( v0, vkappa );
+          v1 = vmulq_f32( v1, vkappa );
+
+          vst1q_f32( p_loc + 0,  v0 );
+          vst1q_f32( p_loc + 4,  v1 );
+          p_loc += ldp;
+          a_loc += lda; // 1;
+        }
+      }
+    }
+  }
+  else if ( cdim0 == nr && cdim_bcast == 1 && !gs )
   {
     if ( unitk )
     {
@@ -382,56 +615,24 @@ void bli_spackm_armv8a_int_12xk
       }
     }
   }
-  else // if ( cdim0 < mnr || gs )
-  {
-    PASTEMAC(sscal2m,BLIS_TAPI_EX_SUF)
-    (
-      0,
-      BLIS_NONUNIT_DIAG,
-      BLIS_DENSE,
-      ( trans_t )conja,
-      cdim0,
-      k0,
-      kappa,
-      a, inca0, lda0,
-      p,     1, ldp0,
-      cntx,
-      NULL
-    );
+	else
+	{
+		bli_sscal2bbs_mxn
+		(
+		  conja,
+		  cdim0,
+		  k0,
+		  kappa,
+		  a,       inca, lda,
+		  p, cdim_bcast, ldp
+		);
+	}
 
-    if ( cdim0 < mnr )
-    {
-      // Handle zero-filling along the "long" edge of the micropanel.
-
-      const dim_t     i      = cdim0;
-      const dim_t     m_edge = mnr - cdim0;
-      const dim_t     n_edge = k0_max;
-      float* restrict p_edge = ( float* )p + (i  )*1;
-
-      bli_sset0s_mxn
-      (
-        m_edge,
-        n_edge,
-        p_edge, 1, ldp
-      );
-    }
-  }
-
-  if ( k0 < k0_max )
-  {
-    // Handle zero-filling along the "short" (far) edge of the micropanel.
-
-    const dim_t     j      = k0;
-    const dim_t     m_edge = mnr;
-    const dim_t     n_edge = k0_max - k0;
-    float* restrict p_edge = ( float* )p + (j  )*ldp;
-
-    bli_sset0s_mxn
-    (
-      m_edge,
-      n_edge,
-      p_edge, 1, ldp
-    );
-  }
+	bli_sset0s_edge
+	(
+	  cdim0*cdim_bcast, cdim_max*cdim_bcast,
+	  k0, k0_max,
+	  p, ldp
+	);
 }
 

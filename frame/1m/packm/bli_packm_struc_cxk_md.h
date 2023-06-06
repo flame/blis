@@ -49,6 +49,7 @@ void PASTEMAC2(chc,chp,varname) \
              dim_t   panel_len_max, \
              dim_t   panel_dim_off, \
              dim_t   panel_len_off, \
+             dim_t   panel_bcast, \
        const void*   kappa, \
        const void*   c, inc_t incc, inc_t ldc, \
              void*   p,             inc_t ldp, \

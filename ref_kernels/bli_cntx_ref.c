@@ -123,30 +123,20 @@ INSERT_PROTMAC_BASIC( GEMMSUP_KER_PROT, gemmsup_gx_ukr_name )
 
 // -- Construct arch-specific names for reference packm kernels --
 
-#define packm_mrxk_ker_name            GENARNAME(packm_mrxk)
-#define packm_nrxk_ker_name            GENARNAME(packm_nrxk)
-#define packm_mrxk_1er_ker_name        GENARNAME(packm_mrxk_1er)
-#define packm_nrxk_1er_ker_name        GENARNAME(packm_nrxk_1er)
-#define packm_mrxmr_diag_ker_name      GENARNAME(packm_mrxmr_diag)
-#define packm_nrxnr_diag_ker_name      GENARNAME(packm_nrxnr_diag)
-#define packm_mrxmr_diag_1er_ker_name  GENARNAME(packm_mrxmr_diag_1er)
-#define packm_nrxnr_diag_1er_ker_name  GENARNAME(packm_nrxnr_diag_1er)
-#define unpackm_mrxk_ker_name          GENARNAME(unpackm_mrxk)
-#define unpackm_nrxk_ker_name          GENARNAME(unpackm_nrxk)
+#define packm_ker_name            GENARNAME(packm)
+#define packm_1er_ker_name        GENARNAME(packm_1er)
+#define packm_diag_ker_name      GENARNAME(packm_diag)
+#define packm_diag_1er_ker_name  GENARNAME(packm_diag_1er)
+#define unpackm_ker_name          GENARNAME(unpackm)
 
 // Instantiate prototypes for above functions using the pre-defined packm
 // kernel prototype-generating macros.
 
-INSERT_PROTMAC_BASIC( PACKM_KER_PROT,      packm_mrxk_ker_name )
-INSERT_PROTMAC_BASIC( PACKM_KER_PROT,      packm_nrxk_ker_name )
-INSERT_PROTMAC_BASIC( PACKM_KER_PROT,      packm_mrxk_1er_ker_name )
-INSERT_PROTMAC_BASIC( PACKM_KER_PROT,      packm_nrxk_1er_ker_name )
-INSERT_PROTMAC_BASIC( PACKM_DIAG_KER_PROT, packm_mrxmr_diag_ker_name )
-INSERT_PROTMAC_BASIC( PACKM_DIAG_KER_PROT, packm_nrxnr_diag_ker_name )
-INSERT_PROTMAC_BASIC( PACKM_DIAG_KER_PROT, packm_mrxmr_diag_1er_ker_name )
-INSERT_PROTMAC_BASIC( PACKM_DIAG_KER_PROT, packm_nrxnr_diag_1er_ker_name )
-INSERT_PROTMAC_BASIC( UNPACKM_KER_PROT,    unpackm_mrxk_ker_name )
-INSERT_PROTMAC_BASIC( UNPACKM_KER_PROT,    unpackm_nrxk_ker_name )
+INSERT_PROTMAC_BASIC( PACKM_KER_PROT,      packm_ker_name )
+INSERT_PROTMAC_BASIC( PACKM_KER_PROT,      packm_1er_ker_name )
+INSERT_PROTMAC_BASIC( PACKM_DIAG_KER_PROT, packm_diag_ker_name )
+INSERT_PROTMAC_BASIC( PACKM_DIAG_KER_PROT, packm_diag_1er_ker_name )
+INSERT_PROTMAC_BASIC( UNPACKM_KER_PROT,    unpackm_ker_name )
 
 
 // -- Level-1f kernel prototype redefinitions ----------------------------------
@@ -401,20 +391,11 @@ void GENBARNAME(cntx_init)
 
 	// -- Set level-1m (packm/unpackm) kernels ---------------------------------
 
-	gen_func_init( &funcs[ BLIS_PACKM_MRXK_KER ],  packm_mrxk_ker_name );
-	gen_func_init( &funcs[ BLIS_PACKM_NRXK_KER ],  packm_nrxk_ker_name );
-
-	gen_func_init_co( &funcs[ BLIS_PACKM_MRXK_1ER_KER ],  packm_mrxk_1er_ker_name );
-	gen_func_init_co( &funcs[ BLIS_PACKM_NRXK_1ER_KER ],  packm_nrxk_1er_ker_name );
-
-	gen_func_init( &funcs[ BLIS_PACKM_MRXMR_DIAG_KER ],  packm_mrxmr_diag_ker_name );
-	gen_func_init( &funcs[ BLIS_PACKM_NRXNR_DIAG_KER ],  packm_nrxnr_diag_ker_name );
-
-	gen_func_init_co( &funcs[ BLIS_PACKM_MRXMR_DIAG_1ER_KER ],  packm_mrxmr_diag_1er_ker_name );
-	gen_func_init_co( &funcs[ BLIS_PACKM_NRXNR_DIAG_1ER_KER ],  packm_nrxnr_diag_1er_ker_name );
-
-	gen_func_init( &funcs[ BLIS_UNPACKM_MRXK_KER ],  unpackm_mrxk_ker_name );
-	gen_func_init( &funcs[ BLIS_UNPACKM_NRXK_KER ],  unpackm_nrxk_ker_name );
+	gen_func_init   ( &funcs[ BLIS_PACKM_KER ],           packm_ker_name );
+	gen_func_init_co( &funcs[ BLIS_PACKM_1ER_KER ],       packm_1er_ker_name );
+	gen_func_init   ( &funcs[ BLIS_PACKM_DIAG_KER ],      packm_diag_ker_name );
+	gen_func_init_co( &funcs[ BLIS_PACKM_DIAG_1ER_KER ],  packm_diag_1er_ker_name );
+	gen_func_init   ( &funcs[ BLIS_UNPACKM_KER ],         unpackm_ker_name );
 
 
 	// -- Put the default kernels and their preferences into the context -------

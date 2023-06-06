@@ -95,6 +95,7 @@ void bli_packm_blk_var1
 	inc_t   ldp            = bli_obj_col_stride( p );
 	dim_t   panel_dim_max  = bli_obj_panel_dim( p );
 	inc_t   ps_p           = bli_obj_panel_stride( p );
+	dim_t   bcast_p        = bli_packm_def_cntl_bmult_m_bcast( cntl );
 
 	doff_t  diagoffc_inc   = ( doff_t )panel_dim_max;
 
@@ -179,6 +180,7 @@ void bli_packm_blk_var1
 				  panel_len_max,
 				  panel_dim_off_i,
 				  panel_len_off,
+				  bcast_p,
 				  kappa_cast,
 				  c_begin, incc, ldc,
 				  p_begin,       ldp,
@@ -272,6 +274,7 @@ void bli_packm_blk_var1
 				  panel_len_max_i,
 				  panel_dim_off_i,
 				  panel_len_off_i,
+				  bcast_p,
 				  kappa_cast,
 				  c_use, incc, ldc,
 				  p_use,       ldp,

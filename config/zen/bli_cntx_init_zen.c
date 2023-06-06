@@ -113,14 +113,10 @@ void bli_cntx_init_zen( cntx_t* cntx )
 #endif
 
 	  // packm
-	  BLIS_PACKM_MRXK_KER, BLIS_FLOAT,    bli_spackm_haswell_asm_6xk,
-	  BLIS_PACKM_NRXK_KER, BLIS_FLOAT,    bli_spackm_haswell_asm_16xk,
-	  BLIS_PACKM_MRXK_KER, BLIS_DOUBLE,   bli_dpackm_haswell_asm_6xk,
-	  BLIS_PACKM_NRXK_KER, BLIS_DOUBLE,   bli_dpackm_haswell_asm_8xk,
-	  BLIS_PACKM_MRXK_KER, BLIS_SCOMPLEX, bli_cpackm_haswell_asm_3xk,
-	  BLIS_PACKM_NRXK_KER, BLIS_SCOMPLEX, bli_cpackm_haswell_asm_8xk,
-	  BLIS_PACKM_MRXK_KER, BLIS_DCOMPLEX, bli_zpackm_haswell_asm_3xk,
-	  BLIS_PACKM_NRXK_KER, BLIS_DCOMPLEX, bli_zpackm_haswell_asm_4xk,
+	  BLIS_PACKM_KER, BLIS_FLOAT,    bli_spackm_haswell_asm_6x16,
+	  BLIS_PACKM_KER, BLIS_DOUBLE,   bli_dpackm_haswell_asm_6x8,
+	  BLIS_PACKM_KER, BLIS_SCOMPLEX, bli_cpackm_haswell_asm_3x8,
+	  BLIS_PACKM_KER, BLIS_DCOMPLEX, bli_zpackm_haswell_asm_3x4,
 
 	  // axpyf
 	  BLIS_AXPYF_KER,  BLIS_FLOAT,  bli_saxpyf_zen_int_8,
@@ -324,7 +320,7 @@ void bli_cntx_init_zen( cntx_t* cntx )
 	bli_cntx_set_l3_sup_handlers
 	(
 	  cntx,
-	  
+
 	  BLIS_GEMM, bli_gemmsup_ref,
 	  //BLIS_GEMMT, bli_gemmtsup_ref,
 
