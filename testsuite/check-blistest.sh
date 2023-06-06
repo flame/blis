@@ -39,18 +39,31 @@ ansi_green="\033[0;32m"
 ansi_normal="\033[0m"
 
 passmsg="All BLIS tests passed!"
+exitmsg0="The BLIS testsuite failed to exit normally. :("
 failmsg0="At least one BLIS test failed. :("
 failmsg1="Please see output.testsuite for details."
 
-# If FAILURE was found (exit code 0), or if the termination tag was not
-# found (not exit code 0), print an error message.
-if grep -q  'FAILURE'          $1 2>/dev/null ||
-   grep -qv 'Exiting normally' $1 2>/dev/null; then
-	printf "${ansi_red}""${script_name}: ${failmsg0}""${ansi_normal}\n"
-	printf "${ansi_red}""${script_name}: ${failmsg1}""${ansi_normal}\n"
-	exit 1
-else
-	printf "${ansi_green}""${script_name}: ${passmsg}""${ansi_normal}\n"
-	exit 0
+# First make sure that the testsuite completed normally (e.g. did not abort()
+# or segfault).
+grep -q 'Exiting normally' $1
+
+# The testsuite did not complete if the error code from grep was *not* 0.
+if [ $? -ne 0 ]; then
+    printf "${ansi_red}""${script_name}: ${exitmsg0}""${ansi_normal}\n"
+    exit 1
 fi
+
+# If the testsuite completed normally, check for numerical failures.
+grep -q 'FAILURE' $1
+
+# A numerical failure was detected if the error code from grep was 0.
+if [ $? -eq 0 ]; then
+    printf "${ansi_red}""${script_name}: ${failmsg0}""${ansi_normal}\n"
+    printf "${ansi_red}""${script_name}: ${failmsg1}""${ansi_normal}\n"
+    exit 1
+else
+    printf "${ansi_green}""${script_name}: ${passmsg}""${ansi_normal}\n"
+    exit 0
+fi
+
 
