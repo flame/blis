@@ -92,14 +92,17 @@ int main( int argc, char** argv )
 	// Finalize libblis.
 	bli_finalize();
 
+	// Prepare to return.
+	int rval = 0;
 #ifdef BLIS_ENABLE_HPX
-	return bli_thread_finalize_hpx();
-#else
-	// Return peacefully.
-	return 0;
+	rval = bli_thread_finalize_hpx();
 #endif
-}
 
+	// Output a termination tag.
+	libblis_test_output_term_tag();
+
+	return rval;
+}
 
 #if 0
 typedef struct thread_data
@@ -1299,6 +1302,23 @@ void libblis_test_output_op_struct( FILE* os, test_op_t* op, char* op_str )
 
 	libblis_test_fprintf_c( os, "\n" );
 	libblis_test_fprintf( os, "\n" );
+}
+
+
+
+void libblis_test_output_term_tag( void )
+{
+	// Skip informational output if BLIS is running in quiet mode.
+	if ( libblis_test_quiet_mode ) return;
+
+	FILE* os = stdout;
+
+	// Output a termination tag that can be checked by scripts to confirm that
+	// the testsuite completed normally. This allows us to detect things like
+	// aborts and segfaults, which may not be detected by CI as failures.
+	libblis_test_fprintf_c( os, "\n" );
+	libblis_test_fprintf_c( os, "Exiting normally.\n" );
+	libblis_test_fprintf_c( os, "\n" );
 }
 
 
