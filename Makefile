@@ -1037,21 +1037,35 @@ endif
 
 install-share: check-env $(MK_SHARE_DIR_INST) $(PC_SHARE_DIR_INST)
 
-$(MK_SHARE_DIR_INST): $(FRAGS_TO_INSTALL) $(CONFIG_MK_FILE)
+$(MK_SHARE_DIR_INST): $(CONFIGURE_FILE) $(FRAGS_TO_INSTALL) $(CONFIG_DIR)/$(CONFIG_NAME)/$(MAKE_DEFS_FILE)
 ifeq ($(ENABLE_VERBOSE),yes)
 	$(MKDIR) $(@)
 	$(INSTALL) -m 0644 $(FRAGS_TO_INSTALL) $(@)
+	$(INSTALL) -m 0755 $(CONFIGURE_FILE) $(@)/configure-plugin
 	$(MKDIR) -p $(@)/$(CONFIG_DIR)/$(CONFIG_NAME)
 	$(INSTALL) -m 0644 $(CONFIG_DIR)/$(CONFIG_NAME)/$(MAKE_DEFS_FILE) \
 	              $(@)/$(CONFIG_DIR)/$(CONFIG_NAME)
+#	for THIS_CONFIG in $(FULL_CONFIG_LIST); do \
+#		$(MKDIR) -p $(@)/$(CONFIG_DIR)/$$THIS_CONFIG; \
+#		$(INSTALL) -m 0644 $(CONFIG_DIR)/$$THIS_CONFIG/$(MAKE_DEFS_FILE) \
+#		              $(@)/$(CONFIG_DIR)/$$THIS_CONFIG; \
+#	done
 else
 	@$(MKDIR) $(@)
 	@echo "Installing $(notdir $(FRAGS_TO_INSTALL)) into $(@)/"
 	@$(INSTALL) -m 0644 $(FRAGS_TO_INSTALL) $(@)
+	@echo "Installing $(CONFIGURE_FILE) into $(@)/configure-plugin"
+	@$(INSTALL) -m 0755 $(CONFIGURE_FILE) $(@)/configure-plugin
 	@$(MKDIR) -p $(@)/$(CONFIG_DIR)/$(CONFIG_NAME)
 	@echo "Installing $(CONFIG_DIR)/$(CONFIG_NAME)/$(MAKE_DEFS_FILE) into $(@)/$(CONFIG_DIR)/$(CONFIG_NAME)"
 	@$(INSTALL) -m 0644 $(CONFIG_DIR)/$(CONFIG_NAME)/$(MAKE_DEFS_FILE) \
 	               $(@)/$(CONFIG_DIR)/$(CONFIG_NAME)/
+#	@for THIS_CONFIG in $(FULL_CONFIG_LIST); do \
+#		echo "Installing $(CONFIG_DIR)/$$THIS_CONFIG/$(MAKE_DEFS_FILE) into $(@)/$(CONFIG_DIR)/$$THIS_CONFIG"; \
+#		$(MKDIR) -p $(@)/$(CONFIG_DIR)/$$THIS_CONFIG; \
+#		$(INSTALL) -m 0644 $(CONFIG_DIR)/$$THIS_CONFIG/$(MAKE_DEFS_FILE) \
+#		              $(@)/$(CONFIG_DIR)/$$THIS_CONFIG; \
+#	done
 endif
 
 $(PC_SHARE_DIR_INST):  $(PC_IN_FILE)

@@ -54,6 +54,7 @@ CONFIG_NAME       := @config_name@
 # sub-directory in the 'config' directory. See the 'config_registry'
 # file for the full list of registered configurations.
 CONFIG_LIST       := @config_list@
+FULL_CONFIG_LIST  := @full_config_list@
 
 # This list of kernels needed for the configurations in CONFIG_LIST.
 # Each item in this list corresponds to a sub-directory in the top-level
@@ -62,6 +63,7 @@ CONFIG_LIST       := @config_list@
 # kernel set X, and configuration W uses kernel set Q, and the CONFIG_LIST
 # might contained "X Y Z W", then the KERNEL_LIST would contain "X Z Q".
 KERNEL_LIST       := @kernel_list@
+FULL_KERNEL_LIST  := @full_kernel_list@
 
 # This list contains some number of "kernel:config" pairs, where "config"
 # specifies which configuration's compilation flags (CFLAGS) should be

@@ -1270,6 +1270,12 @@ BLIS_CONFIG_H   := ./bli_config.h
 BUILD_CPPFLAGS := -DBLIS_IS_BUILDING_LIBRARY
 
 
+#
+# --- configure file location --------------------------------------------------
+#
+
+CONFIGURE_FILE := $(DIST_PATH)/configure
+
 
 # end of ifndef COMMON_MK_INCLUDED conditional block
 endif

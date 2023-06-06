@@ -629,6 +629,10 @@ pass_config_kernel_registries()
 		# - pass 1: compare cname to the blacklists and commit clist/klist
 		#   to their respective registries, as appropriate.
 
+		# Add cname to full_config_list. Duplicates will
+		# be filtered out later.
+		full_config_list="${full_config_list} ${cname}"
+
 		# Handle singleton and umbrella configuration entries separately.
 		if [[ $(is_singleton_family "${cname}" "${clist}") == "true" ]]; then
 
@@ -636,6 +640,10 @@ pass_config_kernel_registries()
 			# Note: for singleton families, clist contains one item, which
 			# always equals cname, but klist could contain more than one
 			# item.
+
+			# Add the kernels in klist to full_kernel_list. Duplicates will
+			# be filtered out later.
+			full_kernel_list="${full_kernel_list} ${klist}"
 
 			# Only consider updating the indirect blacklist (pass 0) or
 			# committing clist and klist to the registries (pass 1) if the
@@ -712,6 +720,11 @@ pass_config_kernel_registries()
 		# Assign the final indirect blacklist (with whitespace removed).
 		indirect_blist=$(canonicalize_ws "${indirect_blist}")
 	fi
+
+	# Remove duplicates and excess whitespace from the full config and
+	# kernel lists.
+	full_config_list=$(canonicalize_ws "$(rm_duplicate_words_simple "${full_config_list}")")
+	full_kernel_list=$(canonicalize_ws "$(rm_duplicate_words_simple "${full_kernel_list}")")
 }
 
 read_registry_file()
@@ -2368,10 +2381,10 @@ check_tool()
 
 
 #
-# -- main function -------------------------------------------------------------
+# -- blis_main function -------------------------------------------------------------
 #
 
-main()
+blis_main()
 {
 	#declare -A config_registry
 	#declare -A kernel_registry
@@ -2588,9 +2601,15 @@ main()
 	# The list of sub-configurations associated with config_name.
 	config_list=''
 
+	# The list of all sub-configurations and configuration families.
+	full_config_list=''
+
 	# The list of kernel sets that will be needed by the sub-configurations
-	# in config_list..
+	# in config_list.
 	kernel_list=''
+
+	# The list of all kernel sets.
+	full_kernel_list=''
 
 	# The list of kernel:sub-configuration pairs for all kernels contained
 	# in kernel_list.
@@ -4186,6 +4205,8 @@ main()
 	-e "s/@config_name@/${config_name}/g"                         \
 	-e "s/@config_list@/${config_list}/g"                         \
 	-e "s/@kernel_list@/${kernel_list}/g"                         \
+	-e "s/@full_config_list@/${full_config_list}/g"               \
+	-e "s/@full_kernel_list@/${full_kernel_list}/g"               \
 	-e "s/@kconfig_map@/${kconfig_map}/g"                         \
 	-e "s/@os_name@/${os_name_esc}/g"                             \
 	-e "s/@is_win@/${is_win}/g"                                   \
@@ -4545,5 +4566,25 @@ main()
 }
 
 
+#
+# -- plugin_main function -------------------------------------------------------------
+#
+
+plugin_main()
+{
+	#TODO
+
+	# Exit peacefully.
+	return 0
+}
+
+
 # The script's main entry point, passing all parameters given.
-main "$@"
+case ${0##*/} in
+	configure)
+		blis_main "$@"
+		;;
+	configure-plugin)
+		plugin_main "$@"
+		;;
+esac
