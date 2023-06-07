@@ -67,6 +67,14 @@
 #endif
 
 
+// -- MEMORY SUBSYSTEM PROPERTIES ----------------------------------------------
+
+// Size of a cache line (in bytes).
+#ifndef BLIS_CACHE_LINE_SIZE
+#define BLIS_CACHE_LINE_SIZE 64
+#endif
+
+
 // -- MULTITHREADING -----------------------------------------------------------
 
 // Enable multithreading via POSIX threads.

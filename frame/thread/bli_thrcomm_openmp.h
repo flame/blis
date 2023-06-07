@@ -46,9 +46,23 @@
 struct barrier_s
 {   
 	int               arity;
-	int               count;
 	struct barrier_s* dad;
+
+	// We insert a cache line of padding here to eliminate false sharing between
+	// the fields above and fields below.
+	char   padding1[ BLIS_CACHE_LINE_SIZE ];
+
+	int               count;
+
+	// We insert a cache line of padding here to eliminate false sharing between
+	// the fields above and fields below.
+	char   padding2[ BLIS_CACHE_LINE_SIZE ];
+
 	volatile int      signal;
+
+	// We insert a cache line of padding here to eliminate false sharing between
+	// this struct and the next one.
+	char   padding3[ BLIS_CACHE_LINE_SIZE ];
 };  
 typedef struct barrier_s barrier_t;
 
@@ -64,6 +78,10 @@ struct thrcomm_s
 	void*  sent_object;
 	dim_t  n_threads;
 
+	// We insert a cache line of padding here to eliminate false sharing between
+	// the fields above and fields below.
+	char   padding1[ BLIS_CACHE_LINE_SIZE ];
+
 	// NOTE: barrier_sense was originally a gint_t-based bool_t, but upon
 	// redefining bool_t as bool we discovered that some gcc __atomic built-ins
 	// don't allow the use of bool for the variables being operated upon.
@@ -72,7 +90,16 @@ struct thrcomm_s
 	// redefining barrier_sense as a gint_t.
 	//volatile gint_t  barrier_sense;
 	gint_t barrier_sense;
+
+	// We insert a cache line of padding here to eliminate false sharing between
+	// the fields above and fields below.
+	char   padding2[ BLIS_CACHE_LINE_SIZE ];
+
 	dim_t  barrier_threads_arrived;
+
+	// We insert a cache line of padding here to eliminate false sharing between
+	// this struct and the next one.
+	char   padding3[ BLIS_CACHE_LINE_SIZE ];
 };
 #endif
 
