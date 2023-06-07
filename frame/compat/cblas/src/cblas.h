@@ -28,8 +28,6 @@
 
 */
 
-#ifdef BLIS_ENABLE_CBLAS
-
 #ifndef CBLAS_H
 #define CBLAS_H
 #include <stddef.h>
@@ -999,5 +997,3 @@ BLIS_EXPORT_BLAS f77_int cblas_izamin(f77_int N, const void   *X, f77_int incX);
 }
 #endif
 #endif
-
-#endif // BLIS_ENABLE_CBLAS

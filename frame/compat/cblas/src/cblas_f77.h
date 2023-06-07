@@ -11,8 +11,6 @@
  *
  */
 
-#ifdef BLIS_ENABLE_CBLAS
-
 #ifndef CBLAS_F77_H
 #define CBLAS_F77_H
 
@@ -394,5 +392,3 @@
 #endif
 
 #endif /*  CBLAS_F77_H */
-
-#endif // BLIS_ENABLE_CBLAS
