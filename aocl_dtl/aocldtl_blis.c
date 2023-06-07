@@ -3,7 +3,7 @@
  *
  * Description : BLIS library specific debug helpes.
  *
- * Copyright (C) 2020-2021, Advanced Micro Devices, Inc. All rights reserved.
+ * Copyright (C) 2020-2023, Advanced Micro Devices, Inc. All rights reserved.
  *
  *==================================================================*/
 
@@ -111,6 +111,25 @@ void AOCL_DTL_log_gemm_stats(int8 loglevel,
     DTL_Trace(loglevel, TRACE_TYPE_RAW, NULL, NULL, 0, buffer);
 }
 
+void AOCL_DTL_log_gemmt_stats(int8 loglevel,
+                             const f77_int n,
+                             const f77_int k)
+{
+    char buffer[256];
+
+    double flops = n * n * k;
+
+    // Execution time is in micro seconds.
+    Double execution_time = AOCL_DTL_get_time_spent();
+
+    sprintf(buffer, " nt=%ld %.3f ms %0.3f GFLOPS",
+            AOCL_get_requested_threads_count(),
+            execution_time/1000.0,
+            flops/(execution_time * 1e3));
+
+    DTL_Trace(loglevel, TRACE_TYPE_RAW, NULL, NULL, 0, buffer);
+}
+
 void AOCL_DTL_log_trsm_sizes(int8 loglevel,
                              char dt_type,
                              f77_char side,
@@ -131,15 +150,45 @@ void AOCL_DTL_log_trsm_sizes(int8 loglevel,
     double alpha_real = 0.0;
     double alpha_imag = 0.0;
 
+
     DTL_get_complex_parts(dt_type, alpha, &alpha_real, &alpha_imag);
 
     //{S, D, C, Z} side, uplo, transa, diaga, m, n, lda, ldb, alpha_real, alpha_imag
-    sprintf(buffer, "%c %c %c %c %c %ld %ld %ld %ld %lf %lf\n", dt_type,
+    sprintf(buffer, "%c %c %c %c %c %ld %ld %ld %ld %lf %lf", dt_type,
             side, uploa, transa, diaga,
             (dim_t)m, (dim_t)n, (dim_t)lda, (dim_t)ldb,
             alpha_real, alpha_imag);
 
+    AOCL_DTL_START_PERF_TIMER();
     DTL_Trace(loglevel, TRACE_TYPE_LOG, function_name, function_name, line, buffer);
+}
+
+void AOCL_DTL_log_trsm_stats(int8 loglevel,
+                             f77_char side,
+                             const f77_int m,
+                             const f77_int n)
+{
+    char buffer[256];
+
+    double flops = 0.0;
+    if (side == 'L' || side =='l')
+    {
+        flops = 1.0 * m * n * m;
+    }
+    else
+    {
+        flops = 1.0 * m * n * n;
+    }
+
+    // Execution time is in micro seconds.
+    Double execution_time = AOCL_DTL_get_time_spent();
+
+    sprintf(buffer, " nt=%ld %.3f ms %0.3f GFLOPS",
+            AOCL_get_requested_threads_count(),
+            execution_time/1000.0,
+            flops/(execution_time * 1e3));
+
+    DTL_Trace(loglevel, TRACE_TYPE_RAW, NULL, NULL, 0, buffer);
 }
 
 void AOCL_DTL_log_gemmt_sizes(int8 loglevel,
@@ -165,18 +214,20 @@ void AOCL_DTL_log_gemmt_sizes(int8 loglevel,
     double beta_real = 0.0;
     double beta_imag = 0.0;
 
+
     DTL_get_complex_parts(dt_type, alpha, &alpha_real, &alpha_imag);
     DTL_get_complex_parts(dt_type, beta, &beta_real, &beta_imag);
 
     // {S,D,C,Z} {triangC : l or u} {n k lda ldb ldc transa transb alpha_real alpha_imaginary
     // beta_real, beta_imaginary}
-    sprintf(buffer, "%c %c %ld %ld %lu %lu %lu %c %c %lf %lf %lf %lf\n",
+    sprintf(buffer, "%c %c %ld %ld %lu %lu %lu %c %c %lf %lf %lf %lf",
             dt_type, uplo, (dim_t)n, (dim_t)k,
             (dim_t)lda, (dim_t)ldb, (dim_t)ldc,
             transa, transb,
             alpha_real, alpha_imag,
             beta_real, beta_imag);
 
+    AOCL_DTL_START_PERF_TIMER();
     DTL_Trace(loglevel, TRACE_TYPE_LOG, function_name, function_name, line, buffer);
 }
 
@@ -639,10 +690,29 @@ void AOCL_DTL_log_nrm2_sizes(int8 loglevel,
 {
     char buffer[256];
     // {S, D, C, Z} {n, incx}
-    sprintf(buffer, "%c %ld %ld\n",
+    sprintf(buffer, "%c %ld %ld",
             dt_type, (dim_t)n, (dim_t)incx);
 
+    AOCL_DTL_START_PERF_TIMER();
     DTL_Trace(loglevel, TRACE_TYPE_LOG, function_name, function_name, line, buffer);
+}
+
+void AOCL_DTL_log_nrm2_stats(int8 loglevel,
+                             const f77_int n)
+{
+    char buffer[256];
+
+    double flops = 2.0 * n;
+
+    // Execution time is in micro seconds.
+    Double execution_time = AOCL_DTL_get_time_spent();
+
+    sprintf(buffer, " nt=%ld %.3f ms %0.3f GFLOPS",
+            AOCL_get_requested_threads_count(),
+            execution_time/1000.0,
+            flops/(execution_time * 1e3));
+
+    DTL_Trace(loglevel, TRACE_TYPE_RAW, NULL, NULL, 0, buffer);
 }
 
 //Level-2

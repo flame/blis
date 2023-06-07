@@ -49,7 +49,7 @@ ftype_r PASTEF772S(chr,chx,blasname) \
      ) \
 { \
 	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1) \
-	AOCL_DTL_LOG_NRM2_INPUTS(AOCL_DTL_LEVEL_TRACE_1,*MKSTR(chr),*n, *incx);\
+	AOCL_DTL_LOG_NRM2_INPUTS(AOCL_DTL_LEVEL_TRACE_1,*MKSTR(chx),*n, *incx);\
 	dim_t    n0; \
 	ftype_x* x0; \
 	inc_t    incx0; \
@@ -75,6 +75,7 @@ ftype_r PASTEF772S(chr,chx,blasname) \
 	  NULL  \
 	); \
 \
+	AOCL_DTL_LOG_NRM2_STATS(AOCL_DTL_LEVEL_TRACE_1, *n); \
 	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1) \
 	/* Finalize BLIS. */ \
 	bli_finalize_auto(); \
