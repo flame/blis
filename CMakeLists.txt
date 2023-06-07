@@ -110,6 +110,8 @@ option (ENABLE_AOCL_DYNAMIC "Enable Dynamic Multi-threading" OFF)
 option(DISABLE_BLIS_ARCH_TYPE "Disable BLIS_ARCH_TYPE and BLIS_MODEL_TYPE functionality" OFF)
 option(RENAME_BLIS_ARCH_TYPE "Rename BLIS_ARCH_TYPE env var renamed to supplied value" BLIS_ARCH_TYPE)
 option(RENAME_BLIS_MODEL_TYPE "Rename BLIS_MODEL_TYPE env var renamed to supplied value" BLIS_MODEL_TYPE)
+option(ENABLE_ASAN_TESTS "Enable Address Sanitiser tests" OFF)
+SET(ASAN_DEPENDENCY_LIB_DIR "C:/Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/Llvm/x64/lib/clang/15.0.1/lib/windows" CACHE STRING "ASAN Dependent library folder name")
 
 if (${AOCL_BLIS_FAMILY} STREQUAL "amdzen")
   set(REF_KERNEL_MIRRORING_PY "${CMAKE_SOURCE_DIR}/build/blis_ref_kernel_mirror.py")
@@ -615,6 +617,19 @@ file (STRINGS "version" BLIS_VERSION)
 set(BLIS_VERSION_STRING ${BLIS_VERSION})
 string(TIMESTAMP BUILD_DATE "%Y%m%d")
 add_definitions(-DBLIS_VERSION_STRING="AOCL-BLIS ${BLIS_VERSION_STRING} Build ${BUILD_DATE}")
+if (ENABLE_ASAN_TESTS)
+  if(ENABLE_OPENMP)
+    set(STATIC_LIB_OPTIONS "${ASAN_DEPENDENCY_LIB_DIR}/clang_rt.asan_dynamic-x86_64.lib" "${ASAN_DEPENDENCY_LIB_DIR}/clang_rt.asan_dynamic_runtime_thunk-x86_64.lib" "${OpenMP_libomp_LIBRARY}")
+  else ()
+    set(STATIC_LIB_OPTIONS "${ASAN_DEPENDENCY_LIB_DIR}/clang_rt.asan_dynamic-x86_64.lib" "${ASAN_DEPENDENCY_LIB_DIR}/clang_rt.asan_dynamic_runtime_thunk-x86_64.lib")
+  endif()
+else()
+  if(ENABLE_OPENMP)
+    set(STATIC_LIB_OPTIONS "${OpenMP_libomp_LIBRARY}")
+  else (ENABLE_OPENMP)
+    set(STATIC_LIB_OPTIONS "")
+  endif()
+endif ()
 
 # Set object libraries created in kernels directory to be added into BLIS library.
 set(OBJECT_LIBRARIES 
@@ -659,10 +674,17 @@ if(NOT BUILD_SHARED_LIBS)
                          ${headers} 
                          ${OBJECT_LIBRARIES}
                          )
-    if(ENABLE_OPENMP)
-        set_target_properties("${PROJECT_NAME}" PROPERTIES LINKER_LANGUAGE C OUTPUT_NAME "${LIB_NAME}" STATIC_LIBRARY_OPTIONS "${OpenMP_libomp_LIBRARY}")
-    else()
-    	set_target_properties("${PROJECT_NAME}" PROPERTIES LINKER_LANGUAGE C OUTPUT_NAME "${LIB_NAME}")
+    set_target_properties("${PROJECT_NAME}" PROPERTIES LINKER_LANGUAGE C OUTPUT_NAME "${LIB_NAME}" STATIC_LIBRARY_OPTIONS "${STATIC_LIB_OPTIONS}")
+endif()
+
+# Enabling the address sanitizer tests.
+if (ENABLE_ASAN_TESTS)
+    target_compile_options("${PROJECT_NAME}" PRIVATE -fsanitize=address /Od)
+    if(BUILD_SHARED_LIBS)
+    	# /MD will be used implicitly
+    	target_link_directories("${PROJECT_NAME}" PRIVATE ${ASAN_DEPENDENCY_LIB_DIR})
+    	target_link_libraries("${PROJECT_NAME}" PRIVATE clang_rt.asan_dynamic-x86_64 clang_rt.asan_dynamic_runtime_thunk-x86_64)
+    	target_link_options("${PROJECT_NAME}" PRIVATE /wholearchive:clang_rt.asan_dynamic_runtime_thunk-x86_64.lib)
     endif()
 endif()
 
