@@ -206,6 +206,8 @@ void* bli_thrcomm_bcast
 	return object;
 }
 
+#ifndef BLIS_TREE_BARRIER
+
 // Use __sync_* builtins (assumed available) if __atomic_* ones are not present.
 #ifndef __ATOMIC_RELAXED
 
@@ -214,14 +216,10 @@ void* bli_thrcomm_bcast
 #define __ATOMIC_RELEASE
 #define __ATOMIC_ACQ_REL
 
-#define __atomic_load_n(ptr, constraint) \
-    __sync_fetch_and_add(ptr, 0)
-#define __atomic_add_fetch(ptr, value, constraint) \
-    __sync_add_and_fetch(ptr, value)
-#define __atomic_fetch_add(ptr, value, constraint) \
-    __sync_fetch_and_add(ptr, value)
-#define __atomic_fetch_xor(ptr, value, constraint) \
-    __sync_fetch_and_xor(ptr, value)
+#define __atomic_load_n(    ptr,        constraint ) __sync_fetch_and_add( ptr, 0     )
+#define __atomic_add_fetch( ptr, value, constraint ) __sync_add_and_fetch( ptr, value )
+#define __atomic_fetch_add( ptr, value, constraint ) __sync_fetch_and_add( ptr, value )
+#define __atomic_fetch_xor( ptr, value, constraint ) __sync_fetch_and_xor( ptr, value )
 
 #endif
 
@@ -268,4 +266,6 @@ void bli_thrcomm_barrier_atomic( dim_t t_id, thrcomm_t* comm )
 			; // Empty loop body.
 	}
 }
+
+#endif
 

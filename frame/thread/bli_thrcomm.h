@@ -51,17 +51,17 @@ struct barrier_s
 	// the fields above and fields below.
 	char   padding1[ BLIS_CACHE_LINE_SIZE ];
 
-	int               count;
+	dim_t             count;
 
 	// We insert a cache line of padding here to eliminate false sharing between
 	// the fields above and fields below.
 	char   padding2[ BLIS_CACHE_LINE_SIZE ];
 
-	volatile int      signal;
+	gint_t            signal;
 
 	// We insert a cache line of padding here to eliminate false sharing between
 	// this struct and the next one.
-	char   padding2[ BLIS_CACHE_LINE_SIZE ];
+	char   padding3[ BLIS_CACHE_LINE_SIZE ];
 };
 typedef struct barrier_s barrier_t;
 #endif

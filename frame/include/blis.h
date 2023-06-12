@@ -80,21 +80,6 @@ extern "C" {
 #include "bli_pragma_macro_defs.h"
 
 
-// -- Threading definitions --
-
-#include "bli_thread.h"
-#include "bli_thread_range.h"
-#include "bli_thread_range_slab_rr.h"
-#include "bli_thread_range_tlb.h"
-
-#include "bli_pthread.h"
-
-
-// -- Constant definitions --
-
-#include "bli_extern_defs.h"
-
-
 // -- BLIS architecture/kernel definitions --
 
 #include "bli_pre_ker_params.h"
@@ -114,6 +99,21 @@ extern "C" {
 #include "bli_arch_config.h"
 
 #include "bli_kernel_macro_defs.h"
+
+
+// -- Threading definitions --
+
+#include "bli_thread.h"
+#include "bli_thread_range.h"
+#include "bli_thread_range_slab_rr.h"
+#include "bli_thread_range_tlb.h"
+
+#include "bli_pthread.h"
+
+
+// -- Constant definitions --
+
+#include "bli_extern_defs.h"
 
 
 // -- Base operation prototypes --
