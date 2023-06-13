@@ -56,162 +56,21 @@ static cntx_t* cached_cntx = NULL;
 
 void bli_gks_init( void )
 {
-	{
-		// Initialize the internal data structure we use to track registered
-		// contexts.
-		bli_gks_init_index();
+	// Initialize the internal data structure we use to track registered
+	// contexts.
+	bli_gks_init_index();
 
-		// Register a context for each architecture that was #define'd in
-		// bli_config.h.
+	// Register a context for each architecture that was #define'd in
+	// bli_config.h.
 
-		// -- Intel architectures ----------------------------------------------
+	#undef GENTCONF
+	#define GENTCONF( CONFIG, config ) \
+	\
+	bli_gks_register_cntx( PASTECH(BLIS_ARCH_,CONFIG), \
+	                       PASTEMAC(cntx_init_,config), \
+	                       PASTEMAC2(cntx_init_,config,_ref) );
 
-#ifdef BLIS_CONFIG_SKX
-		bli_gks_register_cntx( BLIS_ARCH_SKX,         bli_cntx_init_skx,
-		                                              bli_cntx_init_skx_ref );
-#endif
-#ifdef BLIS_CONFIG_KNL
-		bli_gks_register_cntx( BLIS_ARCH_KNL,         bli_cntx_init_knl,
-		                                              bli_cntx_init_knl_ref );
-#endif
-#ifdef BLIS_CONFIG_KNC
-		bli_gks_register_cntx( BLIS_ARCH_KNC,         bli_cntx_init_knc,
-		                                              bli_cntx_init_knc_ref );
-#endif
-#ifdef BLIS_CONFIG_HASWELL
-		bli_gks_register_cntx( BLIS_ARCH_HASWELL,     bli_cntx_init_haswell,
-		                                              bli_cntx_init_haswell_ref );
-#endif
-#ifdef BLIS_CONFIG_SANDYBRIDGE
-		bli_gks_register_cntx( BLIS_ARCH_SANDYBRIDGE, bli_cntx_init_sandybridge,
-		                                              bli_cntx_init_sandybridge_ref );
-#endif
-#ifdef BLIS_CONFIG_PENRYN
-		bli_gks_register_cntx( BLIS_ARCH_PENRYN,      bli_cntx_init_penryn,
-		                                              bli_cntx_init_penryn_ref );
-#endif
-
-		// -- AMD architectures ------------------------------------------------
-
-#ifdef BLIS_CONFIG_ZEN3
-		bli_gks_register_cntx( BLIS_ARCH_ZEN3,        bli_cntx_init_zen3,
-		                                              bli_cntx_init_zen3_ref );
-#endif
-#ifdef BLIS_CONFIG_ZEN2
-		bli_gks_register_cntx( BLIS_ARCH_ZEN2,        bli_cntx_init_zen2,
-		                                              bli_cntx_init_zen2_ref );
-#endif
-#ifdef BLIS_CONFIG_ZEN
-		bli_gks_register_cntx( BLIS_ARCH_ZEN,         bli_cntx_init_zen,
-		                                              bli_cntx_init_zen_ref );
-#endif
-#ifdef BLIS_CONFIG_EXCAVATOR
-		bli_gks_register_cntx( BLIS_ARCH_EXCAVATOR,   bli_cntx_init_excavator,
-		                                              bli_cntx_init_excavator_ref );
-#endif
-#ifdef BLIS_CONFIG_STEAMROLLER
-		bli_gks_register_cntx( BLIS_ARCH_STEAMROLLER, bli_cntx_init_steamroller,
-		                                              bli_cntx_init_steamroller_ref );
-#endif
-#ifdef BLIS_CONFIG_PILEDRIVER
-		bli_gks_register_cntx( BLIS_ARCH_PILEDRIVER,  bli_cntx_init_piledriver,
-		                                              bli_cntx_init_piledriver_ref );
-#endif
-#ifdef BLIS_CONFIG_BULLDOZER
-		bli_gks_register_cntx( BLIS_ARCH_BULLDOZER,   bli_cntx_init_bulldozer,
-		                                              bli_cntx_init_bulldozer_ref );
-#endif
-
-		// -- ARM architectures ------------------------------------------------
-
-		// -- ARM-SVE --
-#ifdef BLIS_CONFIG_ARMSVE
-		bli_gks_register_cntx( BLIS_ARCH_ARMSVE,      bli_cntx_init_armsve,
-		                                              bli_cntx_init_armsve_ref );
-#endif
-#ifdef BLIS_CONFIG_A64FX
-		bli_gks_register_cntx( BLIS_ARCH_A64FX,       bli_cntx_init_a64fx,
-		                                              bli_cntx_init_a64fx_ref );
-#endif
-
-		// -- ARM-NEON (4 pipes x 128-bit vectors) --
-#ifdef BLIS_CONFIG_FIRESTORM
-		bli_gks_register_cntx( BLIS_ARCH_FIRESTORM,   bli_cntx_init_firestorm,
-		                                              bli_cntx_init_firestorm_ref );
-#endif
-
-		// -- ARM (2 pipes x 128-bit vectors) --
-#ifdef BLIS_CONFIG_THUNDERX2
-		bli_gks_register_cntx( BLIS_ARCH_THUNDERX2,   bli_cntx_init_thunderx2,
-		                                              bli_cntx_init_thunderx2_ref );
-#endif
-#ifdef BLIS_CONFIG_CORTEXA57
-		bli_gks_register_cntx( BLIS_ARCH_CORTEXA57,   bli_cntx_init_cortexa57,
-		                                              bli_cntx_init_cortexa57_ref );
-#endif
-#ifdef BLIS_CONFIG_CORTEXA53
-		bli_gks_register_cntx( BLIS_ARCH_CORTEXA53,   bli_cntx_init_cortexa53,
-		                                              bli_cntx_init_cortexa53_ref );
-#endif
-
-		// -- ARM (older 32-bit microarchitectures) --
-#ifdef BLIS_CONFIG_CORTEXA15
-		bli_gks_register_cntx( BLIS_ARCH_CORTEXA15,   bli_cntx_init_cortexa15,
-		                                              bli_cntx_init_cortexa15_ref );
-#endif
-#ifdef BLIS_CONFIG_CORTEXA9
-		bli_gks_register_cntx( BLIS_ARCH_CORTEXA9,    bli_cntx_init_cortexa9,
-		                                              bli_cntx_init_cortexa9_ref );
-#endif
-
-		// -- IBM architectures ------------------------------------------------
-
-#ifdef BLIS_CONFIG_POWER10
-		bli_gks_register_cntx( BLIS_ARCH_POWER10,     bli_cntx_init_power10,
-		                                              bli_cntx_init_power10_ref );
-#endif
-#ifdef BLIS_CONFIG_POWER9
-		bli_gks_register_cntx( BLIS_ARCH_POWER9,      bli_cntx_init_power9,
-		                                              bli_cntx_init_power9_ref );
-#endif
-#ifdef BLIS_CONFIG_POWER7
-		bli_gks_register_cntx( BLIS_ARCH_POWER7,      bli_cntx_init_power7,
-		                                              bli_cntx_init_power7_ref );
-#endif
-#ifdef BLIS_CONFIG_BGQ
-		bli_gks_register_cntx( BLIS_ARCH_BGQ,         bli_cntx_init_bgq,
-		                                              bli_cntx_init_bgq_ref );
-#endif
-
-		// -- RISC-V architectures --------------------------------------------
-
-#ifdef BLIS_CONFIG_RV32I
-		bli_gks_register_cntx( BLIS_ARCH_RV32I,       bli_cntx_init_rv32i,
-		                                              bli_cntx_init_rv32i_ref );
-#endif
-
-#ifdef BLIS_CONFIG_RV64I
-		bli_gks_register_cntx( BLIS_ARCH_RV64I,       bli_cntx_init_rv64i,
-		                                              bli_cntx_init_rv64i_ref );
-#endif
-
-#ifdef BLIS_CONFIG_RV32IV
-		bli_gks_register_cntx( BLIS_ARCH_RV32IV,      bli_cntx_init_rv32iv,
-		                                              bli_cntx_init_rv32iv_ref );
-#endif
-
-#ifdef BLIS_CONFIG_RV64IV
-		bli_gks_register_cntx( BLIS_ARCH_RV64IV,      bli_cntx_init_rv64iv,
-		                                              bli_cntx_init_rv64iv_ref );
-#endif
-
-		// -- Generic architectures --------------------------------------------
-
-#ifdef BLIS_CONFIG_GENERIC
-		bli_gks_register_cntx( BLIS_ARCH_GENERIC,     bli_cntx_init_generic,
-		                                              bli_cntx_init_generic_ref );
-#endif
-	}
+	INSERT_GENTCONF
 
 #ifdef BLIS_ENABLE_GKS_CACHING
 	// Deep-query and cache the native and induced method contexts so they are
