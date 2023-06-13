@@ -4,7 +4,7 @@ dist: focal
 branches:
   only:
   - master
-  - dev
+  - stable
   - amd
 matrix:
   include:
