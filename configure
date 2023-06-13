@@ -4578,12 +4578,407 @@ blis_main()
 
 
 #
-# -- plugin_main function -------------------------------------------------------------
+# -- plugin functions ----------------------------------------------------------
 #
+
+print_usage_plugin()
+{
+	# Use the version string in the 'version' file since we don't have
+	# the patched version string yet.
+	if [ -z "${version}" ]; then
+		version=$(<"${version_filepath}")
+	fi
+
+	# Echo usage info.
+	cat <<EOF
+
+ ${script_name} (BLIS ${version})
+
+ Configure a BLIS plugin for compilation.
+
+ Usage:
+
+   ${script_name} [options] [env. vars.] confname
+
+ Arguments:
+
+   plugin_name   The name of the plugin which is being configured. This
+                 name will form part of the symbol name for the kernel
+                 registration function.
+
+ Options:
+
+   --enable-verbose-make, --disable-verbose-make
+
+                 Enable (disabled by default) verbose compilation output
+                 during make.
+
+   --enable-arg-max-hack --disable-arg-max-hack
+
+                 Enable (disabled by default) build system logic that
+                 will allow archiving/linking the static/shared library
+                 even if the command plus command line arguments exceeds
+                 the operating system limit (ARG_MAX).
+
+   -d DEBUG, --enable-debug[=DEBUG]
+
+                 Enable debugging symbols in the library. If argument
+                 DEBUG is given as 'opt', then optimization flags are
+                 kept in the framework, otherwise optimization is
+                 turned off.
+
+   --disable-static, --enable-static
+
+                 Disable (enabled by default) building BLIS as a static
+                 library. If the static library build is disabled, the
+                 shared library build must remain enabled.
+
+   --disable-shared, --enable-shared
+
+                 Disable (enabled by default) building BLIS as a shared
+                 library. If the shared library build is disabled, the
+                 static library build must remain enabled.
+
+   --enable-rpath, --disable-rpath
+
+                 Enable (disabled by default) setting an install_name for
+                 dynamic libraries on macOS which starts with @rpath rather
+                 than the absolute install path.
+
+   -e SYMBOLS, --export-shared[=SYMBOLS]
+
+                 Specify the subset of library symbols that are exported
+                 within a shared library. Valid values for SYMBOLS are:
+                 'public' (the default) and 'all'. By default, only
+                 functions and variables that belong to public APIs are
+                 exported in shared libraries. However, the user may
+                 instead export all symbols in BLIS, even those that were
+                 intended for internal use only. Note that the public APIs
+                 encompass all functions that almost any user would ever
+                 want to call, including the BLAS/CBLAS compatibility APIs
+                 as well as the basic and expert interfaces to the typed
+                 and object APIs that are unique to BLIS. Also note that
+                 changing this option to 'all' will have no effect in some
+                 environments, such as when compiling with clang on
+                 Windows.
+
+   --enable-asan, --disable-asan
+
+                 Enable (disabled by default) compiling and linking BLIS
+                 framework code with the AddressSanitizer (ASan) library.
+                 Optimized kernels are NOT compiled with ASan support due
+                 to limitations of register assignment in inline assembly.
+                 WARNING: ENABLING THIS OPTION WILL NEGATIVELY IMPACT
+                 PERFORMANCE. Please use only for informational/debugging
+                 purposes.
+
+   -q, --quiet   Suppress informational output.
+
+   -f, --force   Overwrite any files in the current directory which are
+                 normally copied by configure-plugin, for example 'Makefile'
+                 and 'config_registry'.
+
+   -h, --help    Output this information and quit.
+
+ Environment Variables:
+
+   CC            Specifies the C compiler to use.
+   CXX           Specifies the C++ compiler to use.
+   FC            Specifies the Fortran compiler to use.
+   AR            Specifies the static library archiver to use.
+   RANLIB        Specifies the ranlib (library indexer) executable to use.
+   CFLAGS        Specifies additional compiler flags to use (prepended).
+   LDFLAGS       Specifies additional linker flags to use (prepended).
+
+   Environment variables are traditionally set prior to running configure-plugin:
+
+     CC=gcc ./configure-plugin [options] plugin-name
+
+   However, they may also be specified as command line options, e.g.:
+
+     ./configure-plugin [options] CC=gcc plugin-name
+
+   Note that the compiler used must be compatible with the compiler used
+   to compile the BLIS library.
+
+EOF
+
+	# Exit with non-zero exit status
+	exit 1
+}
+
+get_config_var()
+{
+	echo "$(grep "^ *$1 *:=" ${sharedir}/config.mk | sed 's/'$1' *:= *//')"
+}
+
+maybe_echo()
+{
+	[ ${quiet_flag} == '0' ] && echo "$@"
+}
 
 plugin_main()
 {
-	#TODO
+	# -- Basic names and paths --
+
+	# The name of the script, stripped of any preceeding path.
+	script_name=${0##*/}
+
+	# The path to the script. We need this to find the top-level directory
+	# of the source distribution in the event that the user has chosen to
+	# build elsewhere.
+	sharedir=${0%"/${script_name}"}
+	add_config_var sharedir
+
+	# The path to the directory in which we are building. We do this to
+	# make explicit that we distinguish between the top-level directory
+	# of the distribution and the directory in which we are building.
+	cur_dirpath="."
+
+	# Path to 'mirror-tree.sh' script.
+	mirror_tree_sh="${sharedir}/mirror-tree.sh"
+
+	# Path to 'gen-make-frags.sh' script.
+	gen_make_frags_sh="${sharedir}/gen-make-frag.sh"
+
+	# The major and minor/build .so version numbers.
+	so_version_major=$(get_config_var SO_MAJOR)
+	so_version_minorbuild=$(get_config_var SO_MINORB)
+
+	# The preset value of CFLAGS and LDFLAGS (ie: compiler and linker flags
+	# to use in addition to those determined by the build system).
+	cflags_preset=$(get_config_var CFLAGS_PRESET)
+	ldflags_preset=$(get_config_var LDFLAGS_PRESET)
+	add_config_var cflags_preset
+	add_config_var ldflags_preset
+
+	# Option variables.
+	quiet_flag='0'
+	force_flag='0'
+	show_config_list='0'
+
+	# Additional flags.
+	enable_verbose=$(get_config_var ENABLE_VERBOSE)
+	enable_static=$(get_config_var MK_ENABLE_STATIC)
+	enable_shared=$(get_config_var MK_ENABLE_SHARED)
+	enable_rpath=$(get_config_var MK_ENABLE_RPATH)
+	export_shared=$(get_config_var EXPORT_SHARED)
+	add_config_var enable_verbose
+	add_config_var mk_enable_static enable_static
+	add_config_var mk_enable_shared enable_shared
+	add_config_var enable_rpath
+	add_config_var export_shared
+
+	# -- Configuration registry --
+
+	# The name of the chosen configuration (the configuration "family").
+	config_name=$(get_config_var CONFIG_NAME)
+
+	# The list of sub-configurations associated with config_name.
+	config_list=''
+
+	# The list of kernel sets that will be needed by the sub-configurations
+	# in config_list.
+	kernel_list=''
+
+	# The list of kernel:sub-configuration pairs for all kernels contained
+	# in kernel_list.
+	kconfig_map=''
+	add_config_var kconfig_map
+
+	# BLIS version.
+	version=$(get_config_var VERSION)
+
+	# The list of all sub-configurations and configuration families.
+	full_config_list=$(get_config_var FULL_CONFIG_LIST)
+
+	# The list of all kernel sets.
+	full_kernel_list=$(get_config_var FULL_KERNEL_LIST)
+
+	# -- Command line option/argument parsing ----------------------------------
+
+	found=true
+	while [[ $found = true ]]; do
+
+		# Process our command line options.
+		unset OPTIND
+		while getopts ":hcd:e:qf" opt; do
+			case $opt in
+				-)
+					case "$OPTARG" in
+
+						help)
+							print_usage_plugin
+							;;
+
+						quiet)
+							quiet_flag=1
+							;;
+
+						force)
+							force_flag=1
+							;;
+
+						enable-verbose-make)
+							enable_verbose='yes'
+							;;
+						disable-verbose-make)
+							enable_verbose='no'
+							;;
+
+						enable-static)
+							enable_static='yes'
+							;;
+						disable-static)
+							enable_static='no'
+							;;
+
+						enable-shared)
+							enable_shared='yes'
+							;;
+						disable-shared)
+							enable_shared='no'
+							;;
+
+						enable-rpath)
+							enable_rpath='yes'
+							;;
+						disable-rpath)
+							enable_rpath='no'
+							;;
+
+						export-shared=*)
+							export_shared=${OPTARG#*=}
+							;;
+
+						show-config-list)
+							show_config_list=1
+							;;
+
+						*)
+							print_usage_plugin
+							;;
+					esac;;
+				h)
+					print_usage_plugin
+					;;
+				d)
+					debug_flag=1
+					debug_type=$OPTARG
+					;;
+				e)
+					export_shared=$OPTARG
+					;;
+				q)
+					quiet_flag=1
+					;;
+				f)
+					force_flag=1
+					;;
+				c)
+					show_config_list=1
+					;;
+				\?)
+					print_usage_plugin
+					;;
+			esac
+		done
+		shift $((OPTIND - 1))
+
+		# Parse environment variables
+		found=false
+		while [ $# -gt 0 ]; do
+			case $1 in
+				*=*)
+					var=$(expr "$1" : '\([^=]*\)=')
+					value=$(expr "$1" : '[^=]*=\(.*\)')
+					eval "export $var=\$value"
+					shift
+					found=true
+					;;
+				*)
+					break
+					;;
+			esac
+		done
+	done
+
+	if [ $# != "1" ]; then   # more than one configuration argument given.
+		print_usage_plugin
+	fi
+
+	# The name of the plugin to build.
+	plugin_name="${1}"
+	add_config_var plugin_name
+
+	# -- Let's begin! --
+
+	maybe_echo "${script_name}: configuring BLIS plugin \"${plugin_name}\""
+
+	# -- Makefile --
+
+	maybe_echo -n "${script_name}: copying Makefile..."
+
+	if [ -e Makefile ] && [ ${force_flag} == '0' ]; then
+		maybe_echo "already done"
+	else
+		cp ${sharedir}/Makefile.plugin Makefile
+		maybe_echo "done"
+	fi
+
+	# -- config_registry --
+
+	maybe_echo -n "${script_name}: copying the configuration registry..."
+
+	if [ -e config_registry ] && [ ${force_flag} == '0' ]; then
+		maybe_echo "already done"
+	else
+		cp ${sharedir}/config_registry config_registry
+		maybe_echo "done"
+	fi
+
+	# -- ref_kernels directory --
+
+	maybe_echo -n "${script_name}: creating ref_kernels directory..."
+
+	if [ -e ref_kernels/plugin_cntx_ref.c ] && [ ${force_flag} == '0' ]; then
+		maybe_echo "already done"
+	else
+		mkdir -p ref_kernels
+		cp ${sharedir}/plugin/bli_plugin_init_ref.c ref_kernels
+		maybe_echo "done"
+	fi
+
+	# -- config directory --
+
+	maybe_echo "${script_name}: creating config directories:"
+
+	for config in ${full_config_list}; do
+		maybe_echo -n "${script_name}: config/${config}..."
+
+		if [ -e config/${config}/make_defs.mk ] && [ ${force_flag} == '0' ]; then
+			maybe_echo "already done"
+		else
+			mkdir -p config/${config}
+			cp ${sharedir}/config/${config}/make_defs.mk config/${config}
+			maybe_echo "done"
+		fi
+	done
+
+	# -- kernels directory --
+
+	maybe_echo "${script_name}: creating kernels directories:"
+
+	for kernels in ${full_kernel_list}; do
+		maybe_echo -n "${script_name}: kernels/${kernels}..."
+
+		if [ -e kernels/${kernels} ] && [ ${force_flag} == '0' ]; then
+			maybe_echo "already done"
+		else
+			mkdir -p kernels/${kernels}
+			maybe_echo "done"
+		fi
+	done
 
 	# Exit peacefully.
 	return 0
