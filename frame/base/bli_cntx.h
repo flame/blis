@@ -342,11 +342,11 @@ BLIS_EXPORT_BLIS void bli_cntx_print( const cntx_t* cntx );
 
 BLIS_EXPORT_BLIS void bli_cntx_set_l3_sup_handlers( cntx_t* cntx, ... );
 
-BLIS_EXPORT_BLIS err_t bli_cntx_register_blksz( siz_t* bs_id, const blksz_t* blksz, bszid_t bmult_id, cntx_t* cntx );
+err_t bli_cntx_register_blksz( siz_t* bs_id, const blksz_t* blksz, bszid_t bmult_id, cntx_t* cntx );
 
-BLIS_EXPORT_BLIS err_t bli_cntx_register_ukr( siz_t* ukr_id, const func_t* ukr, cntx_t* cntx );
+err_t bli_cntx_register_ukr( siz_t* ukr_id, const func_t* ukr, cntx_t* cntx );
 
-BLIS_EXPORT_BLIS err_t bli_cntx_register_ukr_pref( siz_t* ukr_pref_id, const mbool_t* ukr_pref, cntx_t* cntx );
+err_t bli_cntx_register_ukr_pref( siz_t* ukr_pref_id, const mbool_t* ukr_pref, cntx_t* cntx );
 
 
 #endif

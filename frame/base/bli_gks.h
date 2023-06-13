@@ -56,5 +56,11 @@ BLIS_EXPORT_BLIS kimpl_t       bli_gks_l3_ukr_impl_type( ukr_t ukr, ind_t method
 
 //char*                          bli_gks_l3_ukr_avail_impl_string( ukr_t ukr, num_t dt );
 
+BLIS_EXPORT_BLIS err_t bli_gks_register_blksz( siz_t* bs_id );
+
+BLIS_EXPORT_BLIS err_t bli_gks_register_ukr( siz_t* ukr_id );
+
+BLIS_EXPORT_BLIS err_t bli_gks_register_ukr_pref( siz_t* ukr_pref_id );
+
 #endif
 

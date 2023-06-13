@@ -437,3 +437,100 @@ kimpl_t bli_gks_l3_ukr_impl_type( ukr_t ukr, ind_t method, num_t dt )
 	}
 }
 
+//
+// -- microkernel and block size registration ----------------------------------
+//
+
+err_t bli_gks_register_blksz( siz_t* bs_id )
+{
+	siz_t id = 0;
+	siz_t next_id;
+	cntx_t* cntx;
+	err_t err;
+
+	#undef GENTCONF
+	#define GENTCONF( CONFIG, config ) \
+	\
+	cntx = ( cntx_t* )bli_gks_lookup_id( PASTECH(BLIS_ARCH_,CONFIG) ); \
+	err = bli_cntx_register_blksz( &next_id, NULL, 0, cntx ); \
+	if ( err != BLIS_SUCCESS ) \
+	{ \
+		*bs_id = 0; \
+		return err; \
+	} \
+	if ( id != 0 && id != next_id ) \
+	{ \
+		*bs_id = 0; \
+		return BLIS_INVALID_UKR_ID; \
+	} \
+	id = next_id;
+
+	INSERT_GENTCONF
+
+	*bs_id = id;
+
+	return BLIS_SUCCESS;
+}
+
+err_t bli_gks_register_ukr( siz_t* ukr_id )
+{
+	siz_t id = 0;
+	siz_t next_id;
+	cntx_t* cntx;
+	err_t err;
+
+	#undef GENTCONF
+	#define GENTCONF( CONFIG, config ) \
+	\
+	cntx = ( cntx_t* )bli_gks_lookup_id( PASTECH(BLIS_ARCH_,CONFIG) ); \
+	err = bli_cntx_register_ukr( &next_id, NULL, cntx ); \
+	if ( err != BLIS_SUCCESS ) \
+	{ \
+		*ukr_id = 0; \
+		return err; \
+	} \
+	if ( id != 0 && id != next_id ) \
+	{ \
+		*ukr_id = 0; \
+		return BLIS_INVALID_UKR_ID; \
+	} \
+	id = next_id;
+
+	INSERT_GENTCONF
+
+	*ukr_id = id;
+
+	return BLIS_SUCCESS;
+}
+
+err_t bli_gks_register_ukr_pref( siz_t* ukr_pref_id )
+{
+	siz_t id = 0;
+	siz_t next_id;
+	cntx_t* cntx;
+	err_t err;
+
+	#undef GENTCONF
+	#define GENTCONF( CONFIG, config ) \
+	\
+	cntx = ( cntx_t* )bli_gks_lookup_id( PASTECH(BLIS_ARCH_,CONFIG) ); \
+	err = bli_cntx_register_ukr_pref( &next_id, NULL, cntx ); \
+	if ( err != BLIS_SUCCESS ) \
+	{ \
+		*ukr_pref_id = 0; \
+		return err; \
+	} \
+	if ( id != 0 && id != next_id ) \
+	{ \
+		*ukr_pref_id = 0; \
+		return BLIS_INVALID_UKR_ID; \
+	} \
+	id = next_id;
+
+	INSERT_GENTCONF
+
+	*ukr_pref_id = id;
+
+	return BLIS_SUCCESS;
+}
+
