@@ -49,6 +49,11 @@
 #define BLIS_CNAME_INFIX  PASTECH(_,BLIS_CNAME)
 #endif
 
+// Add an underscore to the plugin name, if it was defined.
+#ifdef  BLIS_PNAME
+#define BLIS_PNAME_INFIX  PASTECH(_,BLIS_PNAME)
+#endif
+
 // Combine the CNAME and _ref for convenience to the code that defines
 // reference kernels.
 //#define BLIS_CNAME_REF_SUFFIX  PASTECH2(_,BLIS_CNAME,BLIS_REF_SUFFIX)
