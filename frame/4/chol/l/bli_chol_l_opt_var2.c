@@ -101,10 +101,6 @@ err_t PASTEMAC(ch,varname) \
 \
 		ctype_r* alpha11_r = &PASTEMAC(ch,real)( *alpha11 ); \
 \
-		/* Return an error code if the matrix is not Hermitian positive
-		   definite. */ \
-		if ( PASTEMAC(chr,lte0)( *alpha11_r ) ) return mn_behind + 1; \
-\
 		/* [ alpha11, 0.0 ] = alpha11 - a10 * a10'; */   \
 		PASTEMAC2(ch,dotxv,BLIS_TAPI_EX_SUF) \
 		( \
@@ -136,6 +132,10 @@ err_t PASTEMAC(ch,varname) \
 		  cntx, \
 		  rntm \
 		); \
+\
+		/* Return an error code if the matrix is not Hermitian positive
+		   definite. */ \
+		if ( PASTEMAC(chr,lte0)( *alpha11_r ) ) return mn_behind + 1; \
 \
 		/* alpha11 = sqrt( real(alpha11) ); */ \
 		PASTEMAC(chr,sqrt2s)( *alpha11_r, *alpha11_r ); \

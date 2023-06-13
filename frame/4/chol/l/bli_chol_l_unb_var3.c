@@ -65,7 +65,6 @@ err_t bli_chol_l_unb_var3
 		// is not Hermitian positive definite, and so we must return an error
 		// code.
 		bool is_lte0; bli_ltesc( &alpha11, &BLIS_ZERO, &is_lte0 );
-
 		if ( is_lte0 ) return ( mn_behind + 1 );
 
 		// [ alpha11, 0.0 ] = sqrt( real(alpha11) );

@@ -60,14 +60,6 @@ err_t bli_chol_u_unb_var2
 		                          NULL, &alpha11, &a12,
 		                          NULL, NULL,     NULL  );
 
-		// Check if alpha11 is positive. If it is positive, we may proceed
-		// with the square root. If alpha11 is not positive, then the matrix
-		// is not Hermitian positive definite, and so we must return an error
-		// code.
-		bool is_lte0; bli_ltesc( &alpha11, &BLIS_ZERO, &is_lte0 );
-
-		if ( is_lte0 ) return ( mn_behind + 1 );
-
 		// alpha11 = alpha11 - a01' * a01;
 		obj_t a01_conj;
 		bli_obj_alias_with_conj( BLIS_CONJUGATE, &a01, &a01_conj );
@@ -79,6 +71,13 @@ err_t bli_chol_u_unb_var2
 		bli_obj_set_conj( BLIS_CONJUGATE, &a01 );
 		bli_obj_set_struc( BLIS_GENERAL, &a02 );
 		bli_gemv_ex( &BLIS_MINUS_ONE, &a02, &a01, &BLIS_ONE, &a12, cntx, rntm );
+
+		// Check if alpha11 is positive. If it is positive, we may proceed
+		// with the square root. If alpha11 is not positive, then the matrix
+		// is not Hermitian positive definite, and so we must return an error
+		// code.
+		bool is_lte0; bli_ltesc( &alpha11, &BLIS_ZERO, &is_lte0 );
+		if ( is_lte0 ) return ( mn_behind + 1 );
 
 		// [ alpha11, 0.0 ] = sqrt( real(alpha11) );
 		bli_sqrtrsc( &alpha11, &alpha11 );
