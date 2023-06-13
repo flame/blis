@@ -478,6 +478,57 @@ assign_key_value()
 	printf -v "${arr}_${key}" %s "${val}"
 }
 
+fully_eval()
+{
+	local old new
+
+	old=""
+	new="$1"
+
+	while [ "x${old}" != "x${new}" ]; do
+		old="${new}"
+		new=$(eval echo "${old}")
+	done
+
+	echo "${new}"
+}
+
+add_config_var()
+{
+	local sub_var var
+
+	sub_var="$1"
+	var="${2:-${sub_var}}"
+
+	#
+	# Use the | character in the substitution command to avoid mangling variables
+	# which contain forward slashes (e.g. paths). There *shouldn't* be any variables
+	# that have | in them...
+	#
+	config_substitutions="${config_substitutions} -e \\\"s|\@${sub_var}\@|\${${var}}|g;\\\""
+}
+
+generate_config_file()
+{
+	local in_file out_file sub
+
+	in_file="$1"
+	out_file="$2"
+
+	echo "${script_name}: creating ${out_file} from ${in_file}"
+
+	#
+	# Use 'eval' to expand the variable references.
+	#
+	eval "sub=\"${config_substitutions}\""
+
+	#
+	# 'eval' also has to be used here to get the proper quoting.
+	# This 'eval' CAN NOT be combined with the one above.
+	#
+	eval "perl -p ${sub} <\"${in_file}\" >\"${out_file}\""
+}
+
 #
 # FGVZ: This commented-out function is being kept as an example how how
 # to effectively "pass by reference" in bash. That is, pass the name of
@@ -2510,27 +2561,31 @@ blis_main()
 	prefix_flag=''
 
 	# The installation exec_prefix, assigned its default value, and a flag to
-	# track whether or not it was given by the user.
+	# track whether or not it was given by the user. Double-escaping the
+	# variable is necessary because it will pass through 'eval' twice.
 	# shellcheck disable=2016
-	exec_prefix='${prefix}'
+	exec_prefix='\\\${prefix}'
 	exec_prefix_flag=''
 
 	# The installation libdir, assigned its default value, and a flag to
-	# track whether or not it was given by the user.
+	# track whether or not it was given by the user. Double-escaping the
+	# variable is necessary because it will pass through 'eval' twice.
 	# shellcheck disable=2016
-	libdir='${exec_prefix}/lib'
+	libdir='\\\${exec_prefix}/lib'
 	libdir_flag=''
 
 	# The installation includedir, assigned its default value, and a flag to
-	# track whether or not it was given by the user.
+	# track whether or not it was given by the user. Double-escaping the
+	# variable is necessary because it will pass through 'eval' twice.
 	# shellcheck disable=2016
-	includedir='${prefix}/include'
+	includedir='\\\${prefix}/include'
 	includedir_flag=''
 
 	# The installation sharedir, assigned its default value, and a flag to
-	# track whether or not it was given by the user.
+	# track whether or not it was given by the user. Double-escaping the
+	# variable is necessary because it will pass through 'eval' twice.
 	# shellcheck disable=2016
-	sharedir='${prefix}/share'
+	sharedir='\\\${prefix}/share'
 	sharedir_flag=''
 
 	# The preset value of CFLAGS and LDFLAGS (ie: compiler and linker flags
@@ -3490,11 +3545,11 @@ blis_main()
 
 	# Echo the installation directories that we settled on.
 	echo "${script_name}: final installation directories:"
-	echo "${script_name}:   prefix:      $(eval echo "${prefix}")"
-	echo "${script_name}:   exec_prefix: $(eval echo "${exec_prefix}")"
-	echo "${script_name}:   libdir:      $(eval echo "$(eval echo "${libdir}")")"
-	echo "${script_name}:   includedir:  $(eval echo "${includedir}")"
-	echo "${script_name}:   sharedir:    $(eval echo "${sharedir}")"
+	echo "${script_name}:   prefix:      $(fully_eval "${prefix}")"
+	echo "${script_name}:   exec_prefix: $(fully_eval "${exec_prefix}")"
+	echo "${script_name}:   libdir:      $(fully_eval "${libdir}")"
+	echo "${script_name}:   includedir:  $(fully_eval "${includedir}")"
+	echo "${script_name}:   sharedir:    $(fully_eval "${sharedir}")"
 	echo "${script_name}: NOTE: the variables above can be overridden when running make."
 
 	# Check if CFLAGS is non-empty.
@@ -4089,45 +4144,21 @@ blis_main()
 
 	echo "${script_name}: configuring complex return type as \"${complex_return}\"."
 
-	# Variables that may contain forward slashes, such as paths, need extra
-	# escaping when used in sed commands. We insert those extra escape
-	# characters here so that the sed commands below do the right thing.
-	os_name_esc=$(echo     "${os_name}"      | sed 's/\//\\\//g')
-	prefix_esc=$(echo      "${prefix}"       | sed 's/\//\\\//g')
-	exec_prefix_esc=$(echo "${exec_prefix}"  | sed 's/\//\\\//g')
-	libdir_esc=$(echo      "${libdir}"       | sed 's/\//\\\//g')
-	includedir_esc=$(echo  "${includedir}"   | sed 's/\//\\\//g')
-	sharedir_esc=$(echo    "${sharedir}"     | sed 's/\//\\\//g')
-	dist_path_esc=$(echo   "${dist_path}"    | sed 's/\//\\\//g')
-	cc_esc=$(echo          "${found_cc}"     | sed 's/\//\\\//g')
-	cxx_esc=$(echo         "${found_cxx}"    | sed 's/\//\\\//g')
-	ar_esc=$(echo          "${found_ar}"     | sed 's/\//\\\//g')
-	ranlib_esc=$(echo      "${found_ranlib}" | sed 's/\//\\\//g')
-	python_esc=$(echo      "${found_python}" | sed 's/\//\\\//g')
+	# Set a default value and friendlier name for LIBPTHREAD
+	libpthread="${LIBPTHREAD--lpthread}"
 
-	libpthread_esc=$(echo "${LIBPTHREAD--lpthread}" | sed 's/\//\\\//g')
-	cflags_preset_esc=$(echo "${cflags_preset}" | sed 's/\//\\\//g')
-	ldflags_preset_esc=$(echo "${ldflags_preset}" | sed 's/\//\\\//g')
-
-	# For Windows builds, clear the libpthread_esc variable so that
+	# For Windows builds, clear the libpthread variable so that
 	# no pthreads library is substituted into config.mk. (Windows builds
 	# employ an implementation of pthreads that is internal to BLIS.)
 	if [[ "$is_win" == "yes" && "$cc_vendor" == "clang" ]]; then
-		libpthread_esc=
+		libpthread=
 	fi
 
-	# We also clear the libpthread_esc variable for systemless builds
+	# We also clear the libpthread variable for systemless builds
 	# (--disable-system).
 	if [[ "$enable_system" == "no" ]]; then
-		libpthread_esc=
+		libpthread=
 	fi
-
-	# Typically, there are no slashes in the version variable. However,
-	# downstream maintainers (such as those for Debian) may create custom
-	# tags in their local clones such as "upstream/0.4.1", which obviously
-	# contain slashes. This line, and subsequent use of the escaped variable
-	# for the version string, accommodates those use cases.
-	version_esc=$(echo "${version}" | sed 's/\//\\\//g')
 
 	# Create a #define for the configuration family (config_name).
 	uconf=$(echo "${config_name}" | tr '[:lower:]' '[:upper:]')
@@ -4193,118 +4224,98 @@ blis_main()
 	fi
 
 
-	# -- Instantiate config.mk file from template ------------------------------
+	# -- Instantiate configuration files from templates ------------------------
 
-	# Begin substituting information into the config_mk_in file, outputting
-	# to config_mk_out.
-	echo "${script_name}: creating ${config_mk_out_path} from ${config_mk_in_path}"
-	sed <"${config_mk_in_path}" >"${config_mk_out_path}"          \
-	-e "s/@version@/${version_esc}/g"                             \
-	-e "s/@so_version_major@/${so_version_major}/g"               \
-	-e "s/@so_version_minorbuild@/${so_version_minorbuild}/g"     \
-	-e "s/@config_name@/${config_name}/g"                         \
-	-e "s/@config_list@/${config_list}/g"                         \
-	-e "s/@kernel_list@/${kernel_list}/g"                         \
-	-e "s/@full_config_list@/${full_config_list}/g"               \
-	-e "s/@full_kernel_list@/${full_kernel_list}/g"               \
-	-e "s/@kconfig_map@/${kconfig_map}/g"                         \
-	-e "s/@os_name@/${os_name_esc}/g"                             \
-	-e "s/@is_win@/${is_win}/g"                                   \
-	-e "s/@is_msvc@/${is_msvc}/g"                                 \
-	-e "s/@dist_path@/${dist_path_esc}/g"                         \
-	-e "s/@CC_VENDOR@/${cc_vendor}/g"                             \
-	-e "s/@gcc_older_than_4_9_0@/${gcc_older_than_4_9_0}/g"       \
-	-e "s/@gcc_older_than_6_1_0@/${gcc_older_than_6_1_0}/g"       \
-	-e "s/@gcc_older_than_9_1_0@/${gcc_older_than_9_1_0}/g"       \
-	-e "s/@gcc_older_than_10_3_0@/${gcc_older_than_10_3_0}/g"     \
-	-e "s/@clang_older_than_9_0_0@/${clang_older_than_9_0_0}/g"   \
-	-e "s/@clang_older_than_12_0_0@/${clang_older_than_12_0_0}/g" \
-	-e "s/@aocc_older_than_2_0_0@/${aocc_older_than_2_0_0}/g"     \
-	-e "s/@aocc_older_than_3_0_0@/${aocc_older_than_3_0_0}/g"     \
-	-e "s/@CC@/${cc_esc}/g"                                       \
-	-e "s/@CXX@/${cxx_esc}/g"                                     \
-	-e "s/@AR@/${ar_esc}/g"                                       \
-	-e "s/@RANLIB@/${ranlib_esc}/g"                               \
-	-e "s/@PYTHON@/${python_esc}/g"                               \
-	-e "s/@libpthread@/${libpthread_esc}/g"                       \
-	-e "s/@cflags_preset@/${cflags_preset_esc}/g"                 \
-	-e "s/@ldflags_preset@/${ldflags_preset_esc}/g"               \
-	-e "s/@enable_asan@/${enable_asan}/g"                         \
-	-e "s/@debug_type@/${debug_type}/g"                           \
-	-e "s/@enable_debug@/${enable_debug}/g"                       \
-	-e "s/@enable_system@/${enable_system}/g"                     \
-	-e "s/@threading_model@/${threading_model}/g"                 \
-	-e "s/@prefix@/${prefix_esc}/g"                               \
-	-e "s/@exec_prefix@/${exec_prefix_esc}/g"                     \
-	-e "s/@libdir@/${libdir_esc}/g"                               \
-	-e "s/@includedir@/${includedir_esc}/g"                       \
-	-e "s/@sharedir@/${sharedir_esc}/g"                           \
-	-e "s/@enable_verbose@/${enable_verbose}/g"                   \
-	-e "s/@configured_oot@/${configured_oot}/g"                   \
-	-e "s/@enable_arg_max_hack@/${enable_arg_max_hack}/g"         \
-	-e "s/@enable_static@/${enable_static}/g"                     \
-	-e "s/@enable_shared@/${enable_shared}/g"                     \
-	-e "s/@enable_rpath@/${enable_rpath}/g"                       \
-	-e "s/@export_shared@/${export_shared}/g"                     \
-	-e "s/@enable_blas@/${enable_blas}/g"                         \
-	-e "s/@enable_cblas@/${enable_cblas}/g"                       \
-	-e "s/@enable_amd_frame_tweaks@/${enable_amd_frame_tweaks}/g" \
-	-e "s/@enable_memkind@/${enable_memkind}/g"                   \
-	-e "s/@pragma_omp_simd@/${pragma_omp_simd}/g"                 \
-	-e "s/@addon_list@/${addon_list}/g"                           \
-	-e "s/@sandbox@/${sandbox}/g"
+	add_config_var version
+	add_config_var so_version_major
+	add_config_var so_version_minorbuild
+	add_config_var config_name
+	add_config_var config_list
+	add_config_var kernel_list
+	add_config_var full_config_list
+	add_config_var full_kernel_list
+	add_config_var kconfig_map
+	add_config_var os_name
+	add_config_var is_win
+	add_config_var is_msvc
+	add_config_var dist_path
+	add_config_var CC_VENDOR                 cc_vendor
+	add_config_var gcc_older_than_4_9_0
+	add_config_var gcc_older_than_6_1_0
+	add_config_var gcc_older_than_9_1_0
+	add_config_var gcc_older_than_10_3_0
+	add_config_var clang_older_than_9_0_0
+	add_config_var clang_older_than_12_0_0
+	add_config_var aocc_older_than_2_0_0
+	add_config_var aocc_older_than_3_0_0
+	add_config_var CC                        found_cc
+	add_config_var CXX                       found_cxx
+	add_config_var AR                        found_ar
+	add_config_var RANLIB                    found_ranlib
+	add_config_var PYTHON                    found_python
+	add_config_var libpthread
+	add_config_var cflags_preset
+	add_config_var ldflags_preset
+	add_config_var enable_asan
+	add_config_var debug_type
+	add_config_var enable_debug
+	add_config_var mk_enable_system          enable_system
+	add_config_var enable_system             enable_system_01
+	add_config_var threading_model
+	add_config_var prefix
+	add_config_var exec_prefix
+	add_config_var libdir
+	add_config_var includedir
+	add_config_var sharedir
+	add_config_var enable_verbose
+	add_config_var configured_oot
+	add_config_var enable_arg_max_hack
+	add_config_var mk_enable_static          enable_static
+	add_config_var mk_enable_shared          enable_shared
+	add_config_var enable_shared             enable_shared_01
+	add_config_var enable_rpath
+	add_config_var export_shared
+	add_config_var mk_enable_blas            enable_blas
+	add_config_var mk_enable_cblas           enable_cblas
+	add_config_var enable_blas               enable_blas_01
+	add_config_var enable_cblas              enable_cblas_01
+	add_config_var enable_amd_frame_tweaks
+	add_config_var mk_enable_memkind         enable_memkind
+	add_config_var enable_memkind            enable_memkind_01
+	add_config_var pragma_omp_simd
+	add_config_var addon_list
+	add_config_var sandbox
+	add_config_var config_name_define
+	add_config_var config_list_defines
+	add_config_var kernel_list_defines
+	add_config_var enable_tls                enable_tls_01
+	add_config_var enable_openmp             enable_openmp_01
+	add_config_var enable_openmp_as_def      enable_openmp_as_def_01
+	add_config_var enable_pthreads           enable_pthreads_01
+	add_config_var enable_pthreads_as_def    enable_pthreads_as_def_01
+	add_config_var enable_hpx                enable_hpx_01
+	add_config_var enable_hpx_as_def         enable_hpx_as_def_01
+	add_config_var enable_jrir_rr            enable_jrir_rr_01
+	add_config_var enable_jrir_slab          enable_jrir_slab_01
+	add_config_var enable_jrir_tlb           enable_jrir_tlb_01
+	add_config_var enable_pba_pools          enable_pba_pools_01
+	add_config_var enable_sba_pools          enable_sba_pools_01
+	add_config_var enable_mem_tracing        enable_mem_tracing_01
+	add_config_var int_type_size
+	add_config_var blas_int_type_size
+	add_config_var enable_mixed_dt           enable_mixed_dt_01
+	add_config_var enable_mixed_dt_extra_mem enable_mixed_dt_extra_mem_01
+	add_config_var enable_sup_handling       enable_sup_handling_01
+	add_config_var enable_trsm_preinversion  enable_trsm_preinversion_01
+	add_config_var enable_pragma_omp_simd    enable_pragma_omp_simd_01
+	add_config_var enable_sandbox            enable_sandbox_01
+	add_config_var complex_return_intel      complex_return_intel01
+	add_config_var addon_list_includes
+	add_config_var enable_addons             enable_addons_01
 
-	# -- Instantiate bli_config.h file from template ---------------------------
-
-	# Begin substituting information into the bli_config_h_in file, outputting
-	# to bli_config_h_out. NOTE: We use perl instead of sed because the version
-	# of sed used on OS X is old and does not handle the '\n' character
-	# intuitively, which was used when constructing ${config_name_define},
-	# ${config_list_defines}, and ${kernel_list_defines}.
-	echo "${script_name}: creating ${bli_config_h_out_path} from ${bli_config_h_in_path}"
-	<"${bli_config_h_in_path}" perl -p                                   \
-	-e "s/\@config_name_define\@/${config_name_define}/g;"               \
-	-e "s/\@config_list_defines\@/${config_list_defines}/g;"             \
-	-e "s/\@kernel_list_defines\@/${kernel_list_defines}/g;"             \
-	| sed >"${bli_config_h_out_path}"                                    \
-	-e "s/@version@/${version_esc}/g"                                    \
-	-e "s/@enable_system@/${enable_system_01}/g"                         \
-	-e "s/@enable_tls@/${enable_tls_01}/g"                               \
-	-e "s/@enable_openmp@/${enable_openmp_01}/g"                         \
-	-e "s/@enable_openmp_as_def@/${enable_openmp_as_def_01}/g"           \
-	-e "s/@enable_pthreads@/${enable_pthreads_01}/g"                     \
-	-e "s/@enable_pthreads_as_def@/${enable_pthreads_as_def_01}/g"       \
-	-e "s/@enable_hpx@/${enable_hpx_01}/g"                               \
-	-e "s/@enable_hpx_as_def@/${enable_hpx_as_def_01}/g"                 \
-	-e "s/@enable_jrir_rr@/${enable_jrir_rr_01}/g"                       \
-	-e "s/@enable_jrir_slab@/${enable_jrir_slab_01}/g"                   \
-	-e "s/@enable_jrir_tlb@/${enable_jrir_tlb_01}/g"                     \
-	-e "s/@enable_pba_pools@/${enable_pba_pools_01}/g"                   \
-	-e "s/@enable_sba_pools@/${enable_sba_pools_01}/g"                   \
-	-e "s/@enable_mem_tracing@/${enable_mem_tracing_01}/g"               \
-	-e "s/@int_type_size@/${int_type_size}/g"                            \
-	-e "s/@blas_int_type_size@/${blas_int_type_size}/g"                  \
-	-e "s/@enable_blas@/${enable_blas_01}/g"                             \
-	-e "s/@enable_cblas@/${enable_cblas_01}/g"                           \
-	-e "s/@enable_mixed_dt@/${enable_mixed_dt_01}/g"                     \
-	-e "s/@enable_mixed_dt_extra_mem@/${enable_mixed_dt_extra_mem_01}/g" \
-	-e "s/@enable_sup_handling@/${enable_sup_handling_01}/g"             \
-	-e "s/@enable_memkind@/${enable_memkind_01}/g"                       \
-	-e "s/@enable_trsm_preinversion@/${enable_trsm_preinversion_01}/g"   \
-	-e "s/@enable_pragma_omp_simd@/${enable_pragma_omp_simd_01}/g"       \
-	-e "s/@enable_sandbox@/${enable_sandbox_01}/g"                       \
-	-e "s/@enable_shared@/${enable_shared_01}/g"                         \
-	-e "s/@complex_return_intel@/${complex_return_intel01}/g"
-
-	# -- Instantiate bli_addon.h file from template ----------------------------
-
-	# Begin substituting information into the bli_addon_h_in file, outputting
-	# to bli_addon_h_out. NOTE: We use perl instead of sed because the version
-	# of sed used on OS X is old and does not handle the '\n' character
-	# intuitively, which was used when constructing ${addon_list_includes}.
-	echo "${script_name}: creating ${bli_addon_h_out_path} from ${bli_addon_h_in_path}"
-	perl -pe "s/\@addon_list_includes\@/${addon_list_includes}/g" "${bli_addon_h_in_path}" \
-	| sed -e "s/@enable_addons@/${enable_addons_01}/g" > "${bli_addon_h_out_path}"
+	generate_config_file "${config_mk_in_path}"    "${config_mk_out_path}"
+	generate_config_file "${bli_config_h_in_path}" "${bli_config_h_out_path}"
+	generate_config_file "${bli_addon_h_in_path}"  "${bli_addon_h_out_path}"
 
 	# -- Create top-level object directories -----------------------------------
 

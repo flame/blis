@@ -131,7 +131,7 @@ ENABLE_DEBUG      := @enable_debug@
 MK_ENABLE_ASAN    := @enable_asan@
 
 # Whether operating system support was requested via --enable-system.
-ENABLE_SYSTEM     := @enable_system@
+ENABLE_SYSTEM     := @mk_enable_system@
 
 # The requested threading model(s).
 THREADING_MODEL   := @threading_model@
@@ -181,8 +181,8 @@ ARG_MAX_HACK      := @enable_arg_max_hack@
 # Whether to build the static and shared libraries.
 # NOTE: The "MK_" prefix, which helps differentiate these variables from
 # their corresonding cpp macros that use the BLIS_ prefix.
-MK_ENABLE_STATIC  := @enable_static@
-MK_ENABLE_SHARED  := @enable_shared@
+MK_ENABLE_STATIC  := @mk_enable_static@
+MK_ENABLE_SHARED  := @mk_enable_shared@
 
 # Whether to use an install_name based on @rpath.
 MK_ENABLE_RPATH   := @enable_rpath@
@@ -192,11 +192,11 @@ MK_ENABLE_RPATH   := @enable_rpath@
 EXPORT_SHARED     := @export_shared@
 
 # Whether to enable either the BLAS or CBLAS compatibility layers.
-MK_ENABLE_BLAS    := @enable_blas@
-MK_ENABLE_CBLAS   := @enable_cblas@
+MK_ENABLE_BLAS    := @mk_enable_blas@
+MK_ENABLE_CBLAS   := @mk_enable_cblas@
 
 # Whether libblis will depend on libmemkind for certain memory allocations.
-MK_ENABLE_MEMKIND := @enable_memkind@
+MK_ENABLE_MEMKIND := @mk_enable_memkind@
 
 # The names of the addons to include when building BLIS. If empty, no addons
 # will be included.
