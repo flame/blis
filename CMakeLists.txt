@@ -1,6 +1,6 @@
 ##Copyright (C) 2022-2023, Advanced Micro Devices, Inc. All rights reserved.##
 
-cmake_minimum_required(VERSION 3.0.0)
+cmake_minimum_required(VERSION 3.15.0)
 
 project(AOCL-LibBlis-Win C CXX)
 
@@ -260,11 +260,13 @@ endif ()
 
 include_directories(${PROJECT_SOURCE_DIR}/external/msvc)
 add_definitions(-D_CRT_SECURE_NO_WARNINGS)
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /MD ")
-#add_definitions(-DBLIS_IS_BUILDING_LIBRARY)
-if(NOT BUILD_SHARED_LIBS)
-  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /MT ")
-add_definitions(-DBLIS_IS_BUILDING_LIBRARY)
+
+cmake_policy(SET CMP0091 NEW)
+if(BUILD_SHARED_LIBS)
+  set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
+else()
+  set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+  add_definitions(-DBLIS_IS_BUILDING_LIBRARY)
 endif()
 
 if(ENABLE_MULTITHREADING)
