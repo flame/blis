@@ -42,22 +42,21 @@
 #include <algorithm>
 
 template<typename T>
-void test_trsm( char storage, char side, char uploa, char transa,
-    char diaga, gtint_t m, gtint_t n, T alpha, gtint_t lda_inc,
-    gtint_t ldb_inc, double thresh, char datatype ) {
-
+void test_trsm( char storage, char side, char uploa, char transa, char diaga,
+    gtint_t m, gtint_t n, T alpha, gtint_t lda_inc, gtint_t ldb_inc, double thresh )
+{
     gtint_t mn;
     testinghelpers::set_dim_with_side( side, m, n, &mn );
-    gtint_t lda = testinghelpers::get_leading_dimension(storage, transa, mn, mn, lda_inc);
-    gtint_t ldb = testinghelpers::get_leading_dimension(storage, 'n', m, n, ldb_inc);
+    gtint_t lda = testinghelpers::get_leading_dimension( storage, transa, mn, mn, lda_inc );
+    gtint_t ldb = testinghelpers::get_leading_dimension( storage, 'n', m, n, ldb_inc );
 
     //----------------------------------------------------------
     //        Initialize matrics with random values.
     //----------------------------------------------------------
     gtint_t lower = (diaga = 'n')||(diaga = 'N') ? 3 : 0;
     gtint_t upper = (diaga = 'n')||(diaga = 'N') ? 10 : 1;
-    std::vector<T> a = testinghelpers::get_random_matrix<T>(lower, upper, storage, transa, mn, mn, lda, datatype);
-    std::vector<T> b = testinghelpers::get_random_matrix<T>(3, 10, storage, 'n', m, n, ldb, datatype);
+    std::vector<T> a = testinghelpers::get_random_matrix<T>( lower, upper, storage, transa, mn, mn, lda );
+    std::vector<T> b = testinghelpers::get_random_matrix<T>( 3, 10, storage, 'n', m, n, ldb );
 
     // Making A diagonally dominant so that the condition number is good and
     // the algorithm doesn't diverge.
@@ -77,7 +76,8 @@ void test_trsm( char storage, char side, char uploa, char transa,
     //----------------------------------------------------------
     //                  Call reference implementation.
     //----------------------------------------------------------
-    testinghelpers::ref_trsm( storage, side, uploa, transa, diaga, m, n, alpha, a.data(), lda, b_ref.data(), ldb );
+    testinghelpers::ref_trsm( storage, side, uploa, transa, diaga, m, n, alpha, a.data(),
+                                                                     lda, b_ref.data(), ldb );
 
     //----------------------------------------------------------
     //              check component-wise error.

@@ -45,10 +45,10 @@ class ctrsmTest :
                                                    gtint_t,
                                                    scomplex,
                                                    gtint_t,
-                                                   gtint_t,
-                                                   char>> {};
+                                                   gtint_t>> {};
 
-TEST_P(ctrsmTest, RandomData) {
+TEST_P(ctrsmTest, RandomData)
+{
     using T = scomplex;
     //----------------------------------------------------------
     // Initialize values from the parameters passed through
@@ -76,8 +76,6 @@ TEST_P(ctrsmTest, RandomData) {
     // If increments are nonnegative, the array size is bigger than the matrix size.
     gtint_t lda_inc = std::get<8>(GetParam());
     gtint_t ldb_inc = std::get<9>(GetParam());
-    // specifies the datatype for randomgenerators
-    char datatype   = std::get<10>(GetParam());
 
     // Set the threshold for the errors:
     double thresh = std::max(m, n)*testinghelpers::getEpsilon<T>();
@@ -85,13 +83,13 @@ TEST_P(ctrsmTest, RandomData) {
     //----------------------------------------------------------
     //     Call test body using these parameters
     //----------------------------------------------------------
-    test_trsm<T>( storage, side, uploa, transa, diaga, m, n, alpha, lda_inc, ldb_inc, thresh, datatype );
+    test_trsm<T>( storage, side, uploa, transa, diaga, m, n, alpha, lda_inc, ldb_inc, thresh );
 }
 
 class ctrsmTestPrint {
 public:
     std::string operator()(
-        testing::TestParamInfo<std::tuple<char, char, char, char, char, gtint_t, gtint_t, scomplex, gtint_t, gtint_t,char>> str) const {
+        testing::TestParamInfo<std::tuple<char, char, char, char, char, gtint_t, gtint_t, scomplex, gtint_t, gtint_t>> str) const {
         char sfm        = std::get<0>(str.param);
         char side       = std::get<1>(str.param);
         char uploa      = std::get<2>(str.param);
@@ -102,7 +100,6 @@ public:
         scomplex alpha  = std::get<7>(str.param);
         gtint_t lda_inc = std::get<8>(str.param);
         gtint_t ldb_inc = std::get<9>(str.param);
-        char datatype   = std::get<10>(str.param);
 #ifdef TEST_BLAS
         std::string str_name = "ctrsm_";
 #elif TEST_CBLAS
@@ -120,7 +117,6 @@ public:
         str_name = str_name + "_a" + alpha_str;
         str_name = str_name + "_" + std::to_string(lda_inc);
         str_name = str_name + "_" + std::to_string(ldb_inc);
-        str_name = str_name + "_" + datatype;
         return str_name;
     }
 };
@@ -143,8 +139,7 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Range(gtint_t(10), gtint_t(31), 10),                  // n
             ::testing::Values(scomplex{2.0,-1.0}),                           // alpha
             ::testing::Values(gtint_t(0), gtint_t(3)),                       // increment to the leading dim of a
-            ::testing::Values(gtint_t(0), gtint_t(4)),                       // increment to the leading dim of b
-            ::testing::Values(ELEMENT_TYPE)                                  // i : integer, f : float  datatype type tested
+            ::testing::Values(gtint_t(0), gtint_t(4))                        // increment to the leading dim of b
         ),
         ::ctrsmTestPrint()
     );

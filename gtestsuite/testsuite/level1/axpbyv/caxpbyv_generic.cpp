@@ -41,8 +41,7 @@ class caxpbyvGenericTest :
                                                    gtint_t,
                                                    gtint_t,
                                                    scomplex,
-                                                   scomplex,
-                                                   char>> {};
+                                                   scomplex>> {};
 // Tests using random integers as vector elements.
 TEST_P( caxpbyvGenericTest, RandomData )
 {
@@ -63,8 +62,6 @@ TEST_P( caxpbyvGenericTest, RandomData )
     T alpha = std::get<4>(GetParam());
     // beta
     T beta = std::get<5>(GetParam());
-    // specifies the datatype for randomgenerators
-    char datatype = std::get<6>(GetParam());
 
     // Set the threshold for the errors:
     double thresh = 2*testinghelpers::getEpsilon<T>();
@@ -72,7 +69,7 @@ TEST_P( caxpbyvGenericTest, RandomData )
     //----------------------------------------------------------
     //     Call generic test body using those parameters
     //----------------------------------------------------------
-    test_axpbyv<T>(conj_x, n, incx, incy, alpha, beta, thresh, datatype);
+    test_axpbyv<T>( conj_x, n, incx, incy, alpha, beta, thresh );
 }
 
 // Used to generate a test case with a sensible name.
@@ -82,14 +79,13 @@ TEST_P( caxpbyvGenericTest, RandomData )
 class caxpbyvGenericTestPrint {
 public:
     std::string operator()(
-        testing::TestParamInfo<std::tuple<char,gtint_t,gtint_t,gtint_t,scomplex,scomplex,char>> str) const {
+        testing::TestParamInfo<std::tuple<char,gtint_t,gtint_t,gtint_t,scomplex,scomplex>> str) const {
         char conj      = std::get<0>(str.param);
         gtint_t n      = std::get<1>(str.param);
         gtint_t incx   = std::get<2>(str.param);
         gtint_t incy   = std::get<3>(str.param);
         scomplex alpha = std::get<4>(str.param);
         scomplex beta  = std::get<5>(str.param);
-        char datatype  = std::get<6>(str.param);
 #ifdef TEST_BLAS
         std::string str_name = "caxpby_";
 #elif TEST_CBLAS
@@ -109,7 +105,6 @@ public:
                     beta_str = beta_str + "pi" + (( beta.imag > 0) ? std::to_string(int(beta.imag)) : ("m" + std::to_string(int(std::abs(beta.imag)))));
         str_name = str_name + "_a" + alpha_str;
         str_name = str_name + "_b" + beta_str;
-        str_name = str_name + "_" + datatype;
         return str_name;
     }
 };
@@ -128,8 +123,7 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(gtint_t(1)),                                   // stride size for x
             ::testing::Values(gtint_t(1)),                                   // stride size for y
             ::testing::Values(scomplex{2.0, -1.0}, scomplex{-2.0, 3.0}),     // alpha
-            ::testing::Values(scomplex{1.0, 2.0}),                           // beta
-            ::testing::Values(ELEMENT_TYPE)                                  // i : integer, f : float  datatype type tested
+            ::testing::Values(scomplex{1.0, 2.0})                            // beta
         ),
         ::caxpbyvGenericTestPrint()
     );
@@ -150,8 +144,7 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(gtint_t(2)),                                   // stride size for x
             ::testing::Values(gtint_t(3)),                                   // stride size for y
             ::testing::Values(scomplex{4.0, 3.1}),                           // alpha
-            ::testing::Values(scomplex{1.0, -2.0}),                          // beta
-            ::testing::Values(ELEMENT_TYPE)                                  // i : integer, f : float  datatype type tested
+            ::testing::Values(scomplex{1.0, -2.0})                           // beta
         ),
         ::caxpbyvGenericTestPrint()
     );
@@ -169,8 +162,7 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(gtint_t(-11), gtint_t(5)),                    // stride size for x
             ::testing::Values(gtint_t(-3), gtint_t(7)),                      // stride size for y
             ::testing::Values(scomplex{4.0, 3.1}),                           // alpha
-            ::testing::Values(scomplex{1.0, -2.0}),                          // beta
-            ::testing::Values(ELEMENT_TYPE)                                  // i : integer, f : float  datatype type tested
+            ::testing::Values(scomplex{1.0, -2.0})                           // beta
         ),
         ::caxpbyvGenericTestPrint()
     );

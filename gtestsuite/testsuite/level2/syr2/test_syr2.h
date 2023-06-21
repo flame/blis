@@ -43,18 +43,17 @@
 
 template<typename T>
 void test_syr2( char storage, char uploa, char conjx, char conjy, gtint_t n,
-    T alpha, gtint_t incx, gtint_t incy, gtint_t lda_inc, double thresh,
-    char datatype ) {
-
+    T alpha, gtint_t incx, gtint_t incy, gtint_t lda_inc, double thresh )
+{
     // Compute the leading dimensions for matrix size calculation.
-    gtint_t lda = testinghelpers::get_leading_dimension(storage, 'n', n, n, lda_inc);
+    gtint_t lda = testinghelpers::get_leading_dimension( storage, 'n', n, n, lda_inc );
 
     //----------------------------------------------------------
     //        Initialize matrics with random integer numbers.
     //----------------------------------------------------------
-    std::vector<T> a = testinghelpers::get_random_matrix<T>(-2, 5, storage, 'n', n, n, lda, datatype);
-    std::vector<T> x = testinghelpers::get_random_vector<T>(-3, 3, n, incx, datatype);
-    std::vector<T> y = testinghelpers::get_random_vector<T>(-3, 3, n, incy, datatype);
+    std::vector<T> a = testinghelpers::get_random_matrix<T>( -2, 5, storage, 'n', n, n, lda );
+    std::vector<T> x = testinghelpers::get_random_vector<T>( -3, 3, n, incx );
+    std::vector<T> y = testinghelpers::get_random_vector<T>( -3, 3, n, incy );
 
     mksymm<T>( storage, uploa, n, a.data(), lda );
     mktrim<T>( storage, uploa, n, a.data(), lda );

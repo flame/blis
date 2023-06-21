@@ -43,16 +43,16 @@
 
 template<typename T, typename Tr>
 void test_her( char storage, char uploa, char conjx, gtint_t n, Tr alpha,
-               gtint_t incx, gtint_t lda_inc, double thresh, char datatype ) {
-
+               gtint_t incx, gtint_t lda_inc, double thresh )
+{
     // Compute the leading dimensions of a.
-    gtint_t lda = testinghelpers::get_leading_dimension(storage, 'n', n, n, lda_inc);
+    gtint_t lda = testinghelpers::get_leading_dimension( storage, 'n', n, n, lda_inc );
 
     //----------------------------------------------------------
     //        Initialize matrics with random integer numbers.
     //----------------------------------------------------------
-    std::vector<T> a = testinghelpers::get_random_matrix<T>(-2, 5, storage, 'n', n, n, lda, datatype);
-    std::vector<T> x = testinghelpers::get_random_vector<T>(-3, 3, n, incx, datatype);
+    std::vector<T> a = testinghelpers::get_random_matrix<T>( -2, 5, storage, 'n', n, n, lda );
+    std::vector<T> x = testinghelpers::get_random_vector<T>( -3, 3, n, incx );
 
     mktrim<T>( storage, uploa, n, a.data(), lda );
 

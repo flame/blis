@@ -42,18 +42,15 @@
 
 template<typename T>
 void test_symm( char storage, char side, char uplo, char conja, char transb,
-    gtint_t m, gtint_t n,
-    gtint_t lda_inc, gtint_t ldb_inc, gtint_t ldc_inc,
-    T alpha, T beta,
-    double thresh, char datatype
-) {
-
+    gtint_t m, gtint_t n, gtint_t lda_inc, gtint_t ldb_inc, gtint_t ldc_inc,
+    T alpha, T beta, double thresh )
+{
     // Set the dimension for row/col of A, depending on the value of side.
     gtint_t k = ((side == 'l')||(side == 'L'))? m : n;
     // Compute the leading dimensions of a, b, and c.
-    gtint_t lda = testinghelpers::get_leading_dimension(storage, conja, k, k, lda_inc);
-    gtint_t ldb = testinghelpers::get_leading_dimension(storage, transb, m, n, ldb_inc);
-    gtint_t ldc = testinghelpers::get_leading_dimension(storage, 'n', m, n, ldc_inc);
+    gtint_t lda = testinghelpers::get_leading_dimension( storage, conja, k, k, lda_inc );
+    gtint_t ldb = testinghelpers::get_leading_dimension( storage, transb, m, n, ldb_inc );
+    gtint_t ldc = testinghelpers::get_leading_dimension( storage, 'n', m, n, ldc_inc );
 
     //----------------------------------------------------------
     //        Initialize matrics with random integer numbers.
@@ -61,9 +58,9 @@ void test_symm( char storage, char side, char uplo, char conja, char transb,
     // Since matrix A, stored in a, is symmetric and we only use the upper or lower
     // part in the computation of hemm and zero-out the rest to ensure
     // that code operates as expected.
-    std::vector<T> a = testinghelpers::get_random_matrix<T>(-5, 2, storage, uplo, k, lda, datatype);
-    std::vector<T> b = testinghelpers::get_random_matrix<T>(-5, 2, storage, transb, m, n, ldb, datatype);
-    std::vector<T> c = testinghelpers::get_random_matrix<T>(-3, 5, storage, 'n', m, n, ldc, datatype);
+    std::vector<T> a = testinghelpers::get_random_matrix<T>( -5, 2, storage, uplo, k, lda );
+    std::vector<T> b = testinghelpers::get_random_matrix<T>( -5, 2, storage, transb, m, n, ldb );
+    std::vector<T> c = testinghelpers::get_random_matrix<T>( -3, 5, storage, 'n', m, n, ldc );
 
     // Create a copy of c so that we can check reference results.
     std::vector<T> c_ref(c);

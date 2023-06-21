@@ -39,35 +39,32 @@ class sscalvGenericTest :
         public ::testing::TestWithParam<std::tuple<char,
                                                    gtint_t,
                                                    gtint_t,
-                                                   float,
-                                                   char>> {};
+                                                   float>> {};
 
 
 // Tests using random integers as vector elements.
 TEST_P( sscalvGenericTest, RandomData )
 {
-  using T = float;
-  //----------------------------------------------------------
-  // Initialize values from the parameters passed through
-  // test suite instantiation (INSTANTIATE_TEST_SUITE_P).
-  //----------------------------------------------------------
-  // denotes whether alpha or conj(alpha) will be used:
-  char conj_alpha = std::get<0>(GetParam());
-  // vector length:
-  gtint_t n = std::get<1>(GetParam());
-  // stride size for x:
-  gtint_t incx = std::get<2>(GetParam());
-  // alpha
-  T alpha = std::get<3>(GetParam());
-  // specifies the datatype for randomgenerators
-  char datatype = std::get<4>(GetParam());
+    using T = float;
+    //----------------------------------------------------------
+    // Initialize values from the parameters passed through
+    // test suite instantiation (INSTANTIATE_TEST_SUITE_P).
+    //----------------------------------------------------------
+    // denotes whether alpha or conj(alpha) will be used:
+    char conj_alpha = std::get<0>(GetParam());
+    // vector length:
+    gtint_t n = std::get<1>(GetParam());
+    // stride size for x:
+    gtint_t incx = std::get<2>(GetParam());
+    // alpha
+    T alpha = std::get<3>(GetParam());
 
-  // Set the threshold for the errors:
-  double thresh = testinghelpers::getEpsilon<T>();
-  //----------------------------------------------------------
-  //     Call generic test body using those parameters
-  //----------------------------------------------------------
-  test_scalv<T>(conj_alpha, n, incx, alpha, thresh, datatype);
+    // Set the threshold for the errors:
+    double thresh = testinghelpers::getEpsilon<T>();
+    //----------------------------------------------------------
+    //     Call generic test body using those parameters
+    //----------------------------------------------------------
+    test_scalv<T>( conj_alpha, n, incx, alpha, thresh );
 }
 
 // Used to generate a test case with a sensible name.
@@ -77,12 +74,11 @@ TEST_P( sscalvGenericTest, RandomData )
 class sscalvGenericTestPrint {
 public:
     std::string operator()(
-        testing::TestParamInfo<std::tuple<char, gtint_t, gtint_t, float, char>> str) const {
+        testing::TestParamInfo<std::tuple<char, gtint_t, gtint_t, float>> str) const {
         char conj = std::get<0>(str.param);
         gtint_t n = std::get<1>(str.param);
         gtint_t incx = std::get<2>(str.param);
         float alpha = std::get<3>(str.param);
-        char datatype = std::get<4>(str.param);
  #ifdef TEST_BLAS
         std::string str_name = "sscal_";
  #elif TEST_CBLAS
@@ -96,7 +92,6 @@ public:
         str_name += "_" + incx_str;
         std::string alpha_str = ( alpha > 0) ? std::to_string(int(alpha)) : "m" + std::to_string(int(std::abs(alpha)));
         str_name = str_name + "_a" + alpha_str;
-        str_name = str_name + "_" + datatype;
         return str_name;
     }
 };
@@ -109,8 +104,7 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values('n'),                                          // n: use x, not conj(x) (since it is real)
             ::testing::Range(gtint_t(10), gtint_t(101), 10),                 // m size of vector takes values from 10 to 100 with step size of 10.
             ::testing::Values(gtint_t(1)),                                   // stride size for x
-            ::testing::Values(float(3.0), float(-5.0)),                      // alpha
-            ::testing::Values(ELEMENT_TYPE)                                  // i : integer, f : float  datatype type tested
+            ::testing::Values(float(3.0), float(-5.0))                       // alpha
         ),
         ::sscalvGenericTestPrint()
     );
@@ -126,8 +120,7 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values('c'),                                          // c: use conjugate
             ::testing::Values(gtint_t(3), gtint_t(30), gtint_t(112)),        // m size of vector takes values from 10 to 100 with step size of 10.
             ::testing::Values(gtint_t(1)),                                   // stride size for x
-            ::testing::Values(float(9.0)),                                   // alpha
-            ::testing::Values(ELEMENT_TYPE)                                  // i : integer, f : float  datatype type tested
+            ::testing::Values(float(9.0))                                    // alpha
         ),
         ::sscalvGenericTestPrint()
     );
@@ -143,8 +136,7 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values('n'),                                          // n: use x
             ::testing::Values(gtint_t(3), gtint_t(30), gtint_t(112)),        // m size of vector takes values from 10 to 100 with step size of 10.
             ::testing::Values(gtint_t(2), gtint_t(11)),                      //(gtint_t(-5), gtint_t(-17)) // stride size for x
-            ::testing::Values(float(2.0)),                                   // alpha
-            ::testing::Values(ELEMENT_TYPE)                                  // i : integer, f : float  datatype type tested
+            ::testing::Values(float(2.0))                                    // alpha
         ),
         ::sscalvGenericTestPrint()
     );
@@ -161,8 +153,7 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values('n'),                                          // n: use x, c: use conj(x)
             ::testing::Range(gtint_t(10), gtint_t(31), 10),                  // m size of vector takes values from 10 to 100 with step size of 10.
             ::testing::Values(gtint_t(-2), gtint_t(-1)),                     // stride size for x
-            ::testing::Values(3),                                            // alpha
-            ::testing::Values(ELEMENT_TYPE)                                  // i : integer, f : float  datatype type tested
+            ::testing::Values(3)                                             // alpha
         ),
         ::sscalvGenericTestPrint()
     );

@@ -43,26 +43,26 @@
  */
 
 template<typename T>
-static void test_xpbyv(char conjx, gtint_t n, gtint_t incx, gtint_t incy,
-    T beta, double thresh, char datatype ) {
-
+static void test_xpbyv( char conjx, gtint_t n, gtint_t incx, gtint_t incy,
+                       T beta, double thresh )
+{
     //----------------------------------------------------------
     //        Initialize vectors with random numbers.
     //----------------------------------------------------------
-    std::vector<T> x = testinghelpers::get_random_vector<T>(-10, 10, n, incx, datatype);
-    std::vector<T> y = testinghelpers::get_random_vector<T>(-10, 10, n, incy, datatype);
+    std::vector<T> x = testinghelpers::get_random_vector<T>( -10, 10, n, incx );
+    std::vector<T> y = testinghelpers::get_random_vector<T>( -10, 10, n, incy );
 
     //----------------------------------------------------------
     //    Call reference implementation to get ref results.
     //----------------------------------------------------------
     // Create a copy of y so that we can check reference results.
     std::vector<T> y_ref(y);
-    testinghelpers::ref_xpbyv<T>(conjx, n, x.data(), incx, beta, y_ref.data(), incy);
+    testinghelpers::ref_xpbyv<T>( conjx, n, x.data(), incx, beta, y_ref.data(), incy );
 
     //----------------------------------------------------------
     //                  Call BLIS function.
     //----------------------------------------------------------
-    xpbyv<T>(conjx, n, x.data(), incx, beta, y.data(), incy);
+    xpbyv<T>( conjx, n, x.data(), incx, beta, y.data(), incy );
 
     //----------------------------------------------------------
     //              Compute component-wise error.

@@ -39,14 +39,15 @@
 #include "inc/check_error.h"
 
 template<typename T>
-void test_nrm2( gtint_t n, gtint_t incx, double thresh, char datatype )
+void test_nrm2( gtint_t n, gtint_t incx, double thresh )
 {
     //----------------------------------------------------------
     //        Initialize vectors with random numbers.
     //----------------------------------------------------------
-    std::vector<T> x( testinghelpers::buff_dim(n, incx) );
-    testinghelpers::datagenerators::randomgenerators( -10, 10, n, incx, x.data(), datatype );
-
+    //std::vector<T> x( testinghelpers::buff_dim( n, incx ) );
+    //testinghelpers::datagenerators::randomgenerators( -10, 10, n, incx, x.data() );
+    std::vector<T> x = testinghelpers::get_random_vector<T>( -10, -10, n, incx );
+    
     //----------------------------------------------------------
     //    Call reference implementation to get ref results.
     //----------------------------------------------------------
@@ -57,11 +58,10 @@ void test_nrm2( gtint_t n, gtint_t incx, double thresh, char datatype )
     //----------------------------------------------------------
     //                  Call BLIS function.
     //----------------------------------------------------------
-    real norm = nrm2<T, real>(n, x.data(), incx);
+    real norm = nrm2<T, real>( n, x.data(), incx );
 
     //----------------------------------------------------------
     //              Compute error.
     //----------------------------------------------------------
     computediff<real>( norm, norm_ref, thresh );
 }
-

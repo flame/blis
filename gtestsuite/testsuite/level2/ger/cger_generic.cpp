@@ -44,12 +44,11 @@ class cgerTest :
                                                    scomplex,
                                                    gtint_t,
                                                    gtint_t,
-                                                   gtint_t,
-                                                   char>> {};
+                                                   gtint_t>> {};
 
-TEST_P(cgerTest, RandomData) {
+TEST_P(cgerTest, RandomData)
+{
     using T = scomplex;
-
     //----------------------------------------------------------
     // Initialize values from the parameters passed through
     // test suite instantiation (INSTANTIATE_TEST_SUITE_P).
@@ -74,8 +73,6 @@ TEST_P(cgerTest, RandomData) {
     // If increment is zero, then the array size matches the matrix size.
     // If increment are nonnegative, the array size is bigger than the matrix size.
     gtint_t lda_inc = std::get<8>(GetParam());
-    // specifies the datatype for randomgenerators
-    char datatype   = std::get<9>(GetParam());
 
     // Set the threshold for the errors:
     double thresh = 2*std::max(m,n)*testinghelpers::getEpsilon<T>();
@@ -83,13 +80,13 @@ TEST_P(cgerTest, RandomData) {
     //----------------------------------------------------------
     //     Call test body using these parameters
     //----------------------------------------------------------
-    test_ger<T>(storage, conjx, conjy, m, n, alpha, incx, incy, lda_inc, thresh, datatype);
+    test_ger<T>( storage, conjx, conjy, m, n, alpha, incx, incy, lda_inc, thresh );
 }
 
 class cgerTestPrint {
 public:
     std::string operator()(
-        testing::TestParamInfo<std::tuple<char,char,char,gtint_t,gtint_t,scomplex,gtint_t,gtint_t,gtint_t,char>> str) const {
+        testing::TestParamInfo<std::tuple<char,char,char,gtint_t,gtint_t,scomplex,gtint_t,gtint_t,gtint_t>> str) const {
         char sfm       = std::get<0>(str.param);
         char conjx     = std::get<1>(str.param);
         char conjy     = std::get<2>(str.param);
@@ -99,7 +96,6 @@ public:
         gtint_t incx   = std::get<6>(str.param);
         gtint_t incy   = std::get<7>(str.param);
         gtint_t ld_inc = std::get<8>(str.param);
-        char datatype  = std::get<9>(str.param);
 #ifdef TEST_BLAS
         std::string str_name = "cger_";
 #elif TEST_CBLAS
@@ -119,7 +115,6 @@ public:
                     alpha_str = alpha_str + "pi" + (( alpha.imag > 0) ? std::to_string(int(alpha.imag)) : ("m" + std::to_string(int(std::abs(alpha.imag)))));
         str_name    = str_name + "_a" + alpha_str;
         str_name    = str_name + "_" + std::to_string(ld_inc);
-        str_name    = str_name + "_" + datatype;
         return str_name;
     }
 };
@@ -141,8 +136,7 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(scomplex{1.0, -2.0}),                          // alpha
             ::testing::Values(gtint_t(1)),                                   // stride size for x
             ::testing::Values(gtint_t(1)),                                   // stride size for y
-            ::testing::Values(gtint_t(0), gtint_t(2)),                       // increment to the leading dim of a
-            ::testing::Values(ELEMENT_TYPE)                                  // i : integer, f : float  datatype type tested
+            ::testing::Values(gtint_t(0), gtint_t(2))                        // increment to the leading dim of a
         ),
         ::cgerTestPrint()
     );

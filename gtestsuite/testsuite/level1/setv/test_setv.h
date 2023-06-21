@@ -43,7 +43,8 @@
  */
 
 template<typename T>
-void test_setv( char conjalpha, gtint_t n, T alpha, gtint_t incx ) {
+void test_setv( char conjalpha, gtint_t n, T alpha, gtint_t incx )
+{
     //----------------------------------------------------------
     //        Initialize vectors with random numbers.
     //----------------------------------------------------------

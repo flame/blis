@@ -44,12 +44,13 @@
 
 template<typename T>
 static void test_axpyv( char conjx, gtint_t n, gtint_t incx, gtint_t incy,
-    T alpha, double thresh, char datatype ) {
+                        T alpha, double thresh )
+{
     //----------------------------------------------------------
     //        Initialize vectors with random numbers.
     //----------------------------------------------------------
-    std::vector<T> x = testinghelpers::get_random_vector<T>(-10, 10, n, incx, datatype);
-    std::vector<T> y = testinghelpers::get_random_vector<T>(-10, 10, n, incy, datatype);
+    std::vector<T> x = testinghelpers::get_random_vector<T>( -10, 10, n, incx );
+    std::vector<T> y = testinghelpers::get_random_vector<T>( -10, 10, n, incy );
 
     //----------------------------------------------------------
     //    Call reference implementation to get ref results.

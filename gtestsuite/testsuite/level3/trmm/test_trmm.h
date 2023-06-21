@@ -42,20 +42,19 @@
 #include <algorithm>
 
 template<typename T>
-void test_trmm( char storage, char side, char uploa, char transa,
-    char diaga, gtint_t m, gtint_t n, T alpha, gtint_t lda_inc,
-    gtint_t ldb_inc, double thresh, char datatype ) {
-
+void test_trmm( char storage, char side, char uploa, char transa, char diaga,
+    gtint_t m, gtint_t n, T alpha, gtint_t lda_inc, gtint_t ldb_inc, double thresh )
+{
     gtint_t mn;
     testinghelpers::set_dim_with_side( side, m, n, &mn );
-    gtint_t lda = testinghelpers::get_leading_dimension(storage, transa, mn, mn, lda_inc);
-    gtint_t ldb = testinghelpers::get_leading_dimension(storage, 'n', m, n, ldb_inc);
+    gtint_t lda = testinghelpers::get_leading_dimension( storage, transa, mn, mn, lda_inc );
+    gtint_t ldb = testinghelpers::get_leading_dimension( storage, 'n', m, n, ldb_inc );
 
     //----------------------------------------------------------
     //        Initialize matrics with random values.
     //----------------------------------------------------------
-    std::vector<T> a = testinghelpers::get_random_matrix<T>(-2, 8, storage, transa, mn, mn, lda, datatype);
-    std::vector<T> b = testinghelpers::get_random_matrix<T>(-5, 2, storage, 'n', m, n, ldb, datatype);
+    std::vector<T> a = testinghelpers::get_random_matrix<T>( -2, 8, storage, transa, mn, mn, lda );
+    std::vector<T> b = testinghelpers::get_random_matrix<T>( -5, 2, storage, 'n', m, n, ldb );
 
     // Create a copy of v so that we can check reference results.
     std::vector<T> b_ref(b);

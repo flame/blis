@@ -44,10 +44,10 @@ class csyrkTest :
                                                    scomplex,
                                                    scomplex,
                                                    gtint_t,
-                                                   gtint_t,
-                                                   char>> {};
+                                                   gtint_t>> {};
 
-TEST_P(csyrkTest, RandomData) {
+TEST_P(csyrkTest, RandomData)
+{
     using T = scomplex;
     //----------------------------------------------------------
     // Initialize values from the parameters passed through
@@ -72,8 +72,6 @@ TEST_P(csyrkTest, RandomData) {
     // If increments are nonnegative, the array size is bigger than the matrix size.
     gtint_t lda_inc = std::get<7>(GetParam());
     gtint_t ldc_inc = std::get<8>(GetParam());
-    // specifies the datatype for randomgenerators
-    char datatype   = std::get<9>(GetParam());
 
     // Set the threshold for the errors:
     double thresh =  m*k*testinghelpers::getEpsilon<T>();
@@ -81,13 +79,13 @@ TEST_P(csyrkTest, RandomData) {
     //----------------------------------------------------------
     //     Call test body using these parameters
     //----------------------------------------------------------
-    test_syrk<T>(storage, uplo, transa, m, k, lda_inc, ldc_inc, alpha, beta, thresh, datatype);
+    test_syrk<T>( storage, uplo, transa, m, k, lda_inc, ldc_inc, alpha, beta, thresh );
 }
 
 class csyrkTestPrint {
 public:
     std::string operator()(
-        testing::TestParamInfo<std::tuple<char, char, char, gtint_t, gtint_t, scomplex, scomplex, gtint_t, gtint_t, char>> str) const {
+        testing::TestParamInfo<std::tuple<char, char, char, gtint_t, gtint_t, scomplex, scomplex, gtint_t, gtint_t>> str) const {
         char sfm        = std::get<0>(str.param);
         char uplo       = std::get<1>(str.param);
         char tsa        = std::get<2>(str.param);
@@ -97,7 +95,6 @@ public:
         scomplex beta   = std::get<6>(str.param);
         gtint_t lda_inc = std::get<7>(str.param);
         gtint_t ldc_inc = std::get<8>(str.param);
-        char datatype   = std::get<9>(str.param);
 #ifdef TEST_BLAS
         std::string str_name = "csyrk_";
 #elif TEST_CBLAS
@@ -118,7 +115,6 @@ public:
         str_name = str_name + "_a" + beta_str;
         str_name = str_name + "_" + std::to_string(lda_inc);
         str_name = str_name + "_" + std::to_string(ldc_inc);
-        str_name = str_name + "_" + datatype;
         return str_name;
     }
 };
@@ -140,8 +136,7 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(scomplex{2.0, -1.0}, scomplex{-2.0, 3.0}),     // alpha
             ::testing::Values(scomplex{-3.0, 2.0}, scomplex{4.0, -1.0}),     // beta
             ::testing::Values(gtint_t(0), gtint_t(3)),                       // increment to the leading dim of a
-            ::testing::Values(gtint_t(0), gtint_t(2)),                       // increment to the leading dim of c
-            ::testing::Values(ELEMENT_TYPE)                                  // i : integer, f : dcomplex  datatype type tested
+            ::testing::Values(gtint_t(0), gtint_t(2))                        // increment to the leading dim of c
         ),
         ::csyrkTestPrint()
     );

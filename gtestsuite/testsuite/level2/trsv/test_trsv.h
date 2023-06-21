@@ -43,16 +43,16 @@
 
 template<typename T>
 void test_trsv( char storage, char uploa, char transa, char diaga, gtint_t n,
-    T alpha, gtint_t lda_inc, gtint_t incx,  double thresh, char datatype ) {
-
+    T alpha, gtint_t lda_inc, gtint_t incx,  double thresh )
+{
     // Compute the leading dimensions for matrix size calculation.
-    gtint_t lda = testinghelpers::get_leading_dimension(storage, transa, n, n, lda_inc);
+    gtint_t lda = testinghelpers::get_leading_dimension( storage, transa, n, n, lda_inc );
 
     //----------------------------------------------------------
     //        Initialize matrics with random integer numbers.
     //----------------------------------------------------------
-    std::vector<T> a = testinghelpers::get_random_matrix<T>(1, 5, storage, transa, n, n, lda, datatype);
-    std::vector<T> x = testinghelpers::get_random_vector<T>(1, 3, n, incx, datatype);
+    std::vector<T> a = testinghelpers::get_random_matrix<T>( 1, 5, storage, transa, n, n, lda );
+    std::vector<T> x = testinghelpers::get_random_vector<T>( 1, 3, n, incx );
 
     mktrim<T>( storage, uploa, n, a.data(), lda );
 

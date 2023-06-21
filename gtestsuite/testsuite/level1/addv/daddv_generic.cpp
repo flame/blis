@@ -36,7 +36,7 @@
 #include "test_addv.h"
 
 class daddvGenericTest :
-        public ::testing::TestWithParam<std::tuple<char, gtint_t, gtint_t, gtint_t, char>> {};
+        public ::testing::TestWithParam<std::tuple<char, gtint_t, gtint_t, gtint_t>> {};
 
 GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(daddvGenericTest);
 
@@ -55,8 +55,6 @@ TEST_P( daddvGenericTest, RandomData )
     gtint_t incx = std::get<2>(GetParam());
     // stride size for y:
     gtint_t incy = std::get<3>(GetParam());
-    // specifies the datatype for randomgenerators
-    char datatype = std::get<4>(GetParam());
 
     // Set the threshold for the errors:
     double thresh = testinghelpers::getEpsilon<T>();
@@ -64,19 +62,18 @@ TEST_P( daddvGenericTest, RandomData )
     //----------------------------------------------------------
     //     Call generic test body using those parameters
     //----------------------------------------------------------
-    test_addv<T>(conj_x, n, incx, incy, thresh, datatype);
+    test_addv<T>( conj_x, n, incx, incy, thresh );
 }
 
 // Prints the test case combination
 class daddvGenericTestPrint {
 public:
     std::string operator()(
-        testing::TestParamInfo<std::tuple<char,gtint_t,gtint_t,gtint_t,char>> str) const {
+        testing::TestParamInfo<std::tuple<char,gtint_t,gtint_t,gtint_t>> str) const {
         char conj      = std::get<0>(str.param);
         gtint_t n      = std::get<1>(str.param);
         gtint_t incx   = std::get<2>(str.param);
         gtint_t incy   = std::get<3>(str.param);
-        char datatype  = std::get<4>(str.param);
         std::string str_name = "bli_daddv";
         str_name += "_" + std::to_string(n);
         str_name += "_" + std::string(&conj, 1);
@@ -84,7 +81,6 @@ public:
         str_name += "_" + incx_str;
         std::string incy_str = ( incy > 0) ? std::to_string(incy) : "m" + std::to_string(std::abs(incy));
         str_name += "_" + incy_str;
-        str_name = str_name + "_" + datatype;
         return str_name;
     }
 };
@@ -98,8 +94,7 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values('n'),                                          // n: not transpose for x
             ::testing::Range(gtint_t(10), gtint_t(101), 10),                 // m size of vector takes values from 10 to 100 with step size of 10.
             ::testing::Values(gtint_t(1)),                                   // stride size for x
-            ::testing::Values(gtint_t(1)),                                   // stride size for y
-            ::testing::Values(ELEMENT_TYPE)                                  // i : integer, f : float  datatype type tested
+            ::testing::Values(gtint_t(1))                                    // stride size for y
         ),
         ::daddvGenericTestPrint()
     );

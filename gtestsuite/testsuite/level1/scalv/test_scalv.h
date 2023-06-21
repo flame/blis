@@ -43,24 +43,24 @@
  */
 
 template<typename T>
-static void test_scalv(char conja_alpha, gtint_t n, gtint_t incx, T alpha, double thresh, char datatype)
+static void test_scalv( char conja_alpha, gtint_t n, gtint_t incx, T alpha, double thresh )
 {
     //----------------------------------------------------------
     //        Initialize vector with random numbers.
     //----------------------------------------------------------
-    std::vector<T> x = testinghelpers::get_random_vector<T>(-10, 10, n, incx, datatype);
+    std::vector<T> x = testinghelpers::get_random_vector<T>( -10, 10, n, incx );
 
     //----------------------------------------------------------
     //    Call reference implementation to get ref results.
     //----------------------------------------------------------
     // Create a copy of y so that we can check reference results.
     std::vector<T> x_ref(x);
-    testinghelpers::ref_scalv<T>(conja_alpha, n, alpha, x_ref.data(), incx);
+    testinghelpers::ref_scalv<T>( conja_alpha, n, alpha, x_ref.data(), incx );
 
     //----------------------------------------------------------
     //                  Call BLIS function.
     //----------------------------------------------------------
-    scalv<T>(conja_alpha, n, alpha, x.data(), incx);
+    scalv<T>( conja_alpha, n, alpha, x.data(), incx );
 
     //----------------------------------------------------------
     //              Compute component-wise error.

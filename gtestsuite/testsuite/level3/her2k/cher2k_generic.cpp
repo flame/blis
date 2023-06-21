@@ -46,10 +46,10 @@ class cher2kTest :
                                                    float,
                                                    gtint_t,
                                                    gtint_t,
-                                                   gtint_t,
-                                                   char>> {};
+                                                   gtint_t>> {};
 
-TEST_P(cher2kTest, RandomData) {
+TEST_P(cher2kTest, RandomData)
+{
     using T = scomplex;
     using RT = typename testinghelpers::type_info<T>::real_type;
     //----------------------------------------------------------
@@ -78,8 +78,6 @@ TEST_P(cher2kTest, RandomData) {
     gtint_t lda_inc = std::get<8>(GetParam());
     gtint_t ldb_inc = std::get<9>(GetParam());
     gtint_t ldc_inc = std::get<10>(GetParam());
-    // specifies the datatype for randomgenerators
-    char datatype   = std::get<11>(GetParam());
 
     // Set the threshold for the errors:
     double thresh = 2*m*k*testinghelpers::getEpsilon<T>();
@@ -87,13 +85,13 @@ TEST_P(cher2kTest, RandomData) {
     //----------------------------------------------------------
     //     Call test body using these parameters
     //----------------------------------------------------------
-    test_her2k<T>(storage, uplo, transa, transb, m, k, lda_inc, ldb_inc, ldc_inc, alpha, beta, thresh, datatype);
+    test_her2k<T>( storage, uplo, transa, transb, m, k, lda_inc, ldb_inc, ldc_inc, alpha, beta, thresh );
 }
 
 class cher2kTestPrint {
 public:
     std::string operator()(
-        testing::TestParamInfo<std::tuple<char, char, char, char, gtint_t, gtint_t, scomplex, float, gtint_t, gtint_t, gtint_t,char>> str) const {
+        testing::TestParamInfo<std::tuple<char, char, char, char, gtint_t, gtint_t, scomplex, float, gtint_t, gtint_t, gtint_t>> str) const {
         char sfm        = std::get<0>(str.param);
         char uplo       = std::get<1>(str.param);
         char tsa        = std::get<2>(str.param);
@@ -105,7 +103,6 @@ public:
         gtint_t lda_inc = std::get<8>(str.param);
         gtint_t ldb_inc = std::get<9>(str.param);
         gtint_t ldc_inc = std::get<10>(str.param);
-        char datatype   = std::get<11>(str.param);
 #ifdef TEST_BLAS
         std::string str_name = "cher2k_";
 #elif TEST_CBLAS
@@ -126,7 +123,6 @@ public:
         str_name = str_name + "_" + std::to_string(lda_inc);
         str_name = str_name + "_" + std::to_string(ldb_inc);
         str_name = str_name + "_" + std::to_string(ldc_inc);
-        str_name = str_name + "_" + datatype;
         return str_name;
     }
 };
@@ -150,8 +146,7 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(-3.0, 2.0),                                    // beta
             ::testing::Values(gtint_t(0), gtint_t(5)),                       // increment to the leading dim of a
             ::testing::Values(gtint_t(0), gtint_t(2)),                       // increment to the leading dim of b
-            ::testing::Values(gtint_t(0), gtint_t(1)),                       // increment to the leading dim of c
-            ::testing::Values(ELEMENT_TYPE)                                  // i : integer, f : float  datatype type tested
+            ::testing::Values(gtint_t(0), gtint_t(1))                        // increment to the leading dim of c
         ),
         ::cher2kTestPrint()
     );

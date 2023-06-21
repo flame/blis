@@ -48,12 +48,12 @@ class strmm3Test :
                                                    float,
                                                    gtint_t,
                                                    gtint_t,
-                                                   gtint_t,
-                                                   char>> {};
+                                                   gtint_t>> {};
 
 GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(strmm3Test);
 
-TEST_P(strmm3Test, RandomData) {
+TEST_P(strmm3Test, RandomData)
+{
     using T = float;
     //----------------------------------------------------------
     // Initialize values from the parameters passed through
@@ -86,8 +86,6 @@ TEST_P(strmm3Test, RandomData) {
     gtint_t lda_inc = std::get<10>(GetParam());
     gtint_t ldb_inc = std::get<11>(GetParam());
     gtint_t ldc_inc = std::get<12>(GetParam());
-    // specifies the datatype for randomgenerators
-    char datatype   = std::get<13>(GetParam());
 
     // Set the threshold for the errors:
     double thresh = m*n*testinghelpers::getEpsilon<T>();
@@ -95,13 +93,13 @@ TEST_P(strmm3Test, RandomData) {
     //----------------------------------------------------------
     //     Call test body using these parameters
     //----------------------------------------------------------
-    test_trmm3<T>( storage, side, uploa, transa, diaga, transb, m, n, alpha, lda_inc, ldb_inc, beta, ldc_inc, thresh, datatype );
+    test_trmm3<T>( storage, side, uploa, transa, diaga, transb, m, n, alpha, lda_inc, ldb_inc, beta, ldc_inc, thresh );
 }
 
 class strmm3TestPrint {
 public:
     std::string operator()(
-        testing::TestParamInfo<std::tuple<char, char, char, char, char, char, gtint_t, gtint_t, float, float, gtint_t, gtint_t, gtint_t, char>> str) const {
+        testing::TestParamInfo<std::tuple<char, char, char, char, char, char, gtint_t, gtint_t, float, float, gtint_t, gtint_t, gtint_t>> str) const {
         char sfm        = std::get<0>(str.param);
         char side       = std::get<1>(str.param);
         char uploa      = std::get<2>(str.param);
@@ -115,7 +113,6 @@ public:
         gtint_t lda_inc = std::get<10>(str.param);
         gtint_t ldb_inc = std::get<11>(str.param);
         gtint_t ldc_inc = std::get<12>(str.param);
-        char datatype   = std::get<13>(str.param);
         std::string str_name = "blis_strmm3";
         str_name = str_name + "_" + sfm+sfm+sfm;
         str_name = str_name + "_" + side + uploa + transa + transb;
@@ -129,7 +126,6 @@ public:
         str_name = str_name + "_" + std::to_string(lda_inc);
         str_name = str_name + "_" + std::to_string(ldb_inc);
         str_name = str_name + "_" + std::to_string(ldc_inc);
-        str_name = str_name + "_" + datatype;
         return str_name;
     }
 };
@@ -152,8 +148,7 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(-1.0,  2.0),                                   // beta
             ::testing::Values(gtint_t(0)),                                   // increment to the leading dim of a
             ::testing::Values(gtint_t(0)),                                   // increment to the leading dim of b
-            ::testing::Values(gtint_t(0)),                                   // increment to the leading dim of c
-            ::testing::Values(ELEMENT_TYPE)                                  // i : integer, f : float  datatype type tested
+            ::testing::Values(gtint_t(0))                                    // increment to the leading dim of c
         ),
         ::strmm3TestPrint()
     );

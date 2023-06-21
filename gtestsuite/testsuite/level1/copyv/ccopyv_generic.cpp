@@ -39,8 +39,7 @@ class ccopyvGenericTest :
         public ::testing::TestWithParam<std::tuple<char,
                                                    gtint_t,
                                                    gtint_t,
-                                                   gtint_t,
-                                                   char>> {};
+                                                   gtint_t>> {};
 
 // Tests using random integers as vector elements.
 TEST_P( ccopyvGenericTest, RandomData )
@@ -58,8 +57,6 @@ TEST_P( ccopyvGenericTest, RandomData )
     gtint_t incx = std::get<2>(GetParam());
     // stride size for y:
     gtint_t incy = std::get<3>(GetParam());
-    // specifies the datatype for randomgenerators
-    char datatype = std::get<4>(GetParam());
 
     // Set the threshold for the errors:
     double thresh = testinghelpers::getEpsilon<T>();
@@ -67,7 +64,7 @@ TEST_P( ccopyvGenericTest, RandomData )
     //----------------------------------------------------------
     //     Call generic test body using those parameters
     //----------------------------------------------------------
-    test_copyv<T>(conjx, n, incx, incy, thresh, datatype);
+    test_copyv<T>( conjx, n, incx, incy, thresh );
 }
 
 // Used to generate a test case with a sensible name.
@@ -77,12 +74,11 @@ TEST_P( ccopyvGenericTest, RandomData )
 class ccopyvGenericTestPrint {
 public:
     std::string operator()(
-        testing::TestParamInfo<std::tuple<char,gtint_t,gtint_t,gtint_t,char>> str) const {
+        testing::TestParamInfo<std::tuple<char,gtint_t,gtint_t,gtint_t>> str) const {
         char conjx    = std::get<0>(str.param);
         gtint_t n     = std::get<1>(str.param);
         gtint_t incx  = std::get<2>(str.param);
         gtint_t incy  = std::get<3>(str.param);
-        char datatype = std::get<4>(str.param);
 #ifdef TEST_BLAS
         std::string str_name = "ccopy_";
 #elif TEST_CBLAS
@@ -96,7 +92,6 @@ public:
         str_name += "_" + incx_str;
         std::string incy_str = ( incy > 0) ? std::to_string(incy) : "m" + std::to_string(std::abs(incy));
         str_name += "_" + incy_str;
-        str_name = str_name + "_" + datatype;
         return str_name;
     }
 };
@@ -113,8 +108,7 @@ INSTANTIATE_TEST_SUITE_P(
             ),                                                               // n: use x, c: use conj(x)
             ::testing::Range(gtint_t(10), gtint_t(101), 10),                 // m size of vector takes values from 10 to 100 with step size of 10.
             ::testing::Values(gtint_t(1)),                                   // stride size for x
-            ::testing::Values(gtint_t(1)),                                   // stride size for y
-            ::testing::Values(ELEMENT_TYPE)                                  // i : integer, f : float  datatype type tested
+            ::testing::Values(gtint_t(1))                                    // stride size for y
         ),
         ::ccopyvGenericTestPrint()
     );
@@ -133,8 +127,7 @@ INSTANTIATE_TEST_SUITE_P(
             ),                                                               // n: use x, c: use conj(x)
             ::testing::Values(gtint_t(3), gtint_t(30), gtint_t(112)),        // m size of vector
             ::testing::Values(gtint_t(2), gtint_t(11)),                      // stride size for x
-            ::testing::Values(gtint_t(3), gtint_t(33)),                      // stride size for y
-            ::testing::Values(ELEMENT_TYPE)                                  // i : integer, f : float  datatype type tested
+            ::testing::Values(gtint_t(3), gtint_t(33))                       // stride size for y
         ),
         ::ccopyvGenericTestPrint()
     );
@@ -150,8 +143,7 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values('n'),                                          // n: use x, c: use conj(x)
             ::testing::Values(gtint_t(3), gtint_t(30), gtint_t(112)),        // m size of vector
             ::testing::Values(gtint_t(-5), gtint_t(7)),                      // stride size for x
-            ::testing::Values(gtint_t(13), gtint_t(-9)),                      // stride size for y
-            ::testing::Values(ELEMENT_TYPE)                                  // i : integer, f : float  datatype type tested
+            ::testing::Values(gtint_t(13), gtint_t(-9))                      // stride size for y
         ),
         ::ccopyvGenericTestPrint()
     );

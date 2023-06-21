@@ -41,8 +41,7 @@ class saxpbyvGenericTest :
                                                    gtint_t,
                                                    gtint_t,
                                                    float,
-                                                   float,
-                                                   char>> {};
+                                                   float>> {};
 // Tests using random integers as vector elements.
 TEST_P( saxpbyvGenericTest, RandomData )
 {
@@ -63,8 +62,6 @@ TEST_P( saxpbyvGenericTest, RandomData )
     T alpha = std::get<4>(GetParam());
     // beta
     T beta = std::get<5>(GetParam());
-    // specifies the datatype for randomgenerators
-    char datatype = std::get<6>(GetParam());
 
     // Set the threshold for the errors:
     float thresh = testinghelpers::getEpsilon<T>();
@@ -72,7 +69,7 @@ TEST_P( saxpbyvGenericTest, RandomData )
     //----------------------------------------------------------
     //     Call generic test body using those parameters
     //----------------------------------------------------------
-    test_axpbyv<T>(conj_x, n, incx, incy, alpha, beta, thresh, datatype);
+    test_axpbyv<T>( conj_x, n, incx, incy, alpha, beta, thresh );
 }
 
 // Used to generate a test case with a sensible name.
@@ -82,14 +79,13 @@ TEST_P( saxpbyvGenericTest, RandomData )
 class saxpbyvGenericTestPrint {
 public:
     std::string operator()(
-        testing::TestParamInfo<std::tuple<char,gtint_t,gtint_t,gtint_t,float,float,char>> str) const {
+        testing::TestParamInfo<std::tuple<char,gtint_t,gtint_t,gtint_t,float,float>> str) const {
         char conj     = std::get<0>(str.param);
         gtint_t n     = std::get<1>(str.param);
         gtint_t incx  = std::get<2>(str.param);
         gtint_t incy  = std::get<3>(str.param);
         float alpha   = std::get<4>(str.param);
         float beta    = std::get<5>(str.param);
-        char datatype = std::get<6>(str.param);
 #ifdef TEST_BLAS
         std::string str_name = "saxpby_";
 #elif TEST_CBLAS
@@ -107,7 +103,6 @@ public:
         str_name = str_name + "_a" + alpha_str;
         std::string beta_str = ( beta > 0) ? std::to_string(int(beta)) : "m" + std::to_string(int(std::abs(beta)));
         str_name = str_name + "_b" + beta_str;
-        str_name = str_name + "_" + datatype;
         return str_name;
     }
 };
@@ -122,8 +117,7 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(gtint_t(1)),                                   // stride size for x
             ::testing::Values(gtint_t(1)),                                   // stride size for y
             ::testing::Values(float(2.0), float(-2.0)),                      // alpha
-            ::testing::Values(float(-1.0)),                                  // beta
-            ::testing::Values(ELEMENT_TYPE)                                  // i : integer, f : float  datatype type tested
+            ::testing::Values(float(-1.0))                                   // beta
         ),
         ::saxpbyvGenericTestPrint()
     );
@@ -141,8 +135,7 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(gtint_t(1)),                                   // stride size for x
             ::testing::Values(gtint_t(1)),                                   // stride size for y
             ::testing::Values(float(2.0)),                                   // alpha
-            ::testing::Values(float(1.0)),                                   // beta
-            ::testing::Values(ELEMENT_TYPE)                                  // i : integer, f : float  datatype type tested
+            ::testing::Values(float(1.0))                                    // beta
         ),
         ::saxpbyvGenericTestPrint()
     );
@@ -160,8 +153,7 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(gtint_t(11)),                                  /*(gtint_t(-5), gtint_t(-17))*/// stride size for x
             ::testing::Values(gtint_t(3)),                                   /*(gtint_t(-12), gtint_t(-4))*/// stride size for y
             ::testing::Values(float(4.0)),                                   // alpha
-            ::testing::Values(float(2.0)),                                   // beta
-            ::testing::Values(ELEMENT_TYPE)                                  // i : integer, f : float  datatype type tested
+            ::testing::Values(float(2.0))                                    // beta
         ),
         ::saxpbyvGenericTestPrint()
     );
@@ -179,8 +171,7 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(gtint_t(11), gtint_t(-11)),                    // stride size for x
             ::testing::Values(gtint_t(-3), gtint_t(4)),                      // stride size for y
             ::testing::Values(4.0),                                          // alpha
-            ::testing::Values(-2.0),                                         // beta
-            ::testing::Values(ELEMENT_TYPE)                                  // i : integer, f : float  datatype type tested
+            ::testing::Values(-2.0)                                          // beta
         ),
         ::saxpbyvGenericTestPrint()
     );

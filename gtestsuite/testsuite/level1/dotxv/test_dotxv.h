@@ -44,13 +44,13 @@
 
 template<typename T>
 static void test_dotxv( gtint_t n, char conjx, char conjy, T alpha,
-  gtint_t incx, gtint_t incy, T beta, double thresh, char datatype )
+                        gtint_t incx, gtint_t incy, T beta, double thresh )
 {
     //----------------------------------------------------------
     //        Initialize vectors with random numbers.
     //----------------------------------------------------------
-    std::vector<T> x = testinghelpers::get_random_vector<T>(-10, 10, n, incx, datatype);
-    std::vector<T> y = testinghelpers::get_random_vector<T>(-10, 10, n, incy, datatype);
+    std::vector<T> x = testinghelpers::get_random_vector<T>( -10, 10, n, incx );
+    std::vector<T> y = testinghelpers::get_random_vector<T>( -10, 10, n, incy );
 
     //----------------------------------------------------------
     //    Call reference implementation to get ref results.
@@ -59,14 +59,14 @@ static void test_dotxv( gtint_t n, char conjx, char conjy, T alpha,
     std::vector<T> y_ref(y);
     T rho_ref;
     testinghelpers::initone(rho_ref);
-    testinghelpers::ref_dotxv<T>(conjx, conjy, n, alpha, x.data(), incx, y.data(), incy, beta, &rho_ref);
+    testinghelpers::ref_dotxv<T>( conjx, conjy, n, alpha, x.data(), incx, y.data(), incy, beta, &rho_ref );
 
     //----------------------------------------------------------
     //                  Call BLIS function.
     //----------------------------------------------------------
     T rho;
     testinghelpers::initone(rho);
-    dotxv(conjx, conjy, n, &alpha, x.data(), incx, y.data(), incy, &beta, &rho);
+    dotxv( conjx, conjy, n, &alpha, x.data(), incx, y.data(), incy, &beta, &rho );
 
     //----------------------------------------------------------
     //              Compute error.

@@ -36,7 +36,7 @@
 #include "test_dotxv.h"
 
 class cdotxvGenericTest :
-        public ::testing::TestWithParam<std::tuple<gtint_t, char, char, gtint_t, gtint_t, scomplex, scomplex, char>> {};
+        public ::testing::TestWithParam<std::tuple<gtint_t, char, char, gtint_t, gtint_t, scomplex, scomplex>> {};
 
 GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(cdotxvGenericTest);
 
@@ -62,8 +62,6 @@ TEST_P( cdotxvGenericTest, RandomData )
     T alpha = std::get<5>(GetParam());
     // beta
     T beta  = std::get<6>(GetParam());
-    // specifies the datatype for randomgenerators
-    char datatype = std::get<7>(GetParam());
 
     // Set the threshold for the errors:
     double thresh = n*testinghelpers::getEpsilon<T>();
@@ -71,7 +69,7 @@ TEST_P( cdotxvGenericTest, RandomData )
     //----------------------------------------------------------
     //     Call generic test body using those parameters
     //----------------------------------------------------------
-    test_dotxv<T>(n, conj_x, conj_y, alpha, incx, incy, beta, thresh, datatype);
+    test_dotxv<T>( n, conj_x, conj_y, alpha, incx, incy, beta, thresh );
 }
 
 // Used to generate a test case with a sensible name.
@@ -81,7 +79,7 @@ TEST_P( cdotxvGenericTest, RandomData )
 class cdotxvGenericTestPrint {
 public:
     std::string operator()(
-        testing::TestParamInfo<std::tuple<gtint_t,char,char,gtint_t,gtint_t,scomplex,scomplex,char>> str) const {
+        testing::TestParamInfo<std::tuple<gtint_t,char,char,gtint_t,gtint_t,scomplex,scomplex>> str) const {
         gtint_t n      = std::get<0>(str.param);
         char conjx     = std::get<1>(str.param);
         char conjy     = std::get<2>(str.param);
@@ -89,7 +87,6 @@ public:
         gtint_t incy   = std::get<4>(str.param);
         scomplex alpha = std::get<5>(str.param);
         scomplex beta  = std::get<6>(str.param);
-        char datatype  = std::get<7>(str.param);
         std::string str_name = "bli_cdotxv";
         str_name += "_" + std::to_string(n);
         str_name += "_" + std::string(&conjx, 1);
@@ -104,7 +101,6 @@ public:
                     beta_str = beta_str + "pi" + (( beta.imag > 0) ? std::to_string(int(beta.imag)) : ("m" + std::to_string(int(std::abs(beta.imag)))));
         str_name = str_name + "_a" + alpha_str;
         str_name = str_name + "_b" + beta_str;
-        str_name = str_name + "_" + datatype;
         return str_name;
     }
 };
@@ -121,8 +117,7 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(gtint_t(1)),                                   // stride size for x
             ::testing::Values(gtint_t(1)),                                   // stride size for y
             ::testing::Values(scomplex{1.0, -1.0}),                          // alpha
-            ::testing::Values(scomplex{-1.0, 1.0}),                          // beta
-            ::testing::Values(ELEMENT_TYPE)                                  // i : integer, f : float  datatype type tested
+            ::testing::Values(scomplex{-1.0, 1.0})                           // beta
         ),
         ::cdotxvGenericTestPrint()
     );
@@ -138,8 +133,7 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(gtint_t(1)),                                   // stride size for x
             ::testing::Values(gtint_t(1)),                                   // stride size for y
             ::testing::Values(scomplex{1.0, -1.0}),                          // alpha
-            ::testing::Values(scomplex{-1.0, 1.0}),                          // beta
-            ::testing::Values(ELEMENT_TYPE)                                  // i : integer, f : float  datatype type tested
+            ::testing::Values(scomplex{-1.0, 1.0})                           // beta
         ),
         ::cdotxvGenericTestPrint()
     );
@@ -157,10 +151,8 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(gtint_t(2), gtint_t(11)),                      // stride size for x
             ::testing::Values(gtint_t(3), gtint_t(33)),                      // stride size for y
             ::testing::Values(scomplex{1.0, -1.0}),                          // alpha
-            ::testing::Values(scomplex{-1.0, 1.0}),                          // beta
-            ::testing::Values(ELEMENT_TYPE)                                  // i : integer, f : float  datatype type tested
+            ::testing::Values(scomplex{-1.0, 1.0})                           // beta
         ),
         ::cdotxvGenericTestPrint()
     );
-
 #endif

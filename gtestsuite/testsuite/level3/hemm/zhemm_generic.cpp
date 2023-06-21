@@ -47,10 +47,10 @@ class zhemmTest :
                                                    dcomplex,
                                                    gtint_t,
                                                    gtint_t,
-                                                   gtint_t,
-                                                   char>> {};
+                                                   gtint_t>> {};
 
-TEST_P(zhemmTest, RandomData) {
+TEST_P(zhemmTest, RandomData)
+{
     using T = dcomplex;
     //----------------------------------------------------------
     // Initialize values from the parameters passed through
@@ -81,8 +81,6 @@ TEST_P(zhemmTest, RandomData) {
     gtint_t lda_inc = std::get<9>(GetParam());
     gtint_t ldb_inc = std::get<10>(GetParam());
     gtint_t ldc_inc = std::get<11>(GetParam());
-    // specifies the datatype for randomgenerators
-    char datatype   = std::get<12>(GetParam());
 
     // Set the threshold for the errors:
     double thresh = 10*m*n*testinghelpers::getEpsilon<T>();
@@ -90,13 +88,13 @@ TEST_P(zhemmTest, RandomData) {
     //----------------------------------------------------------
     //     Call test body using these parameters
     //----------------------------------------------------------
-    test_hemm<T>(storage, side, uplo, conja, transb, m, n, lda_inc, ldb_inc, ldc_inc, alpha, beta, thresh, datatype);
+    test_hemm<T>( storage, side, uplo, conja, transb, m, n, lda_inc, ldb_inc, ldc_inc, alpha, beta, thresh );
 }
 
 class zhemmTestPrint {
 public:
     std::string operator()(
-        testing::TestParamInfo<std::tuple<char, char, char, char, char, gtint_t, gtint_t, dcomplex, dcomplex, gtint_t, gtint_t, gtint_t,char>> str) const {
+        testing::TestParamInfo<std::tuple<char, char, char, char, char, gtint_t, gtint_t, dcomplex, dcomplex, gtint_t, gtint_t, gtint_t>> str) const {
         char sfm        = std::get<0>(str.param);
         char side       = std::get<1>(str.param);
         char uplo       = std::get<2>(str.param);
@@ -109,7 +107,6 @@ public:
         gtint_t lda_inc = std::get<9>(str.param);
         gtint_t ldb_inc = std::get<10>(str.param);
         gtint_t ldc_inc = std::get<11>(str.param);
-        char datatype   = std::get<12>(str.param);
 #ifdef TEST_BLAS
         std::string str_name = "zhemm_";
 #elif TEST_CBLAS
@@ -130,7 +127,6 @@ public:
         str_name = str_name + "_" + std::to_string(lda_inc);
         str_name = str_name + "_" + std::to_string(ldb_inc);
         str_name = str_name + "_" + std::to_string(ldc_inc);
-        str_name = str_name + "_" + datatype;
         return str_name;
     }
 };
@@ -155,8 +151,7 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(dcomplex{4.0, -1.0}),                          // beta
             ::testing::Values(gtint_t(0), gtint_t(3)),                       // increment to the leading dim of a
             ::testing::Values(gtint_t(0), gtint_t(5)),                       // increment to the leading dim of b
-            ::testing::Values(gtint_t(0), gtint_t(6)),                       // increment to the leading dim of c
-            ::testing::Values(ELEMENT_TYPE)                                  // i : integer, f : float  datatype type tested
+            ::testing::Values(gtint_t(0), gtint_t(6))                        // increment to the leading dim of c
         ),
         ::zhemmTestPrint()
     );

@@ -46,12 +46,12 @@ class dgemmtTest :
                                                    double,
                                                    gtint_t,
                                                    gtint_t,
-                                                   gtint_t,
-                                                   char>> {};
+                                                   gtint_t>> {};
 
 GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(dgemmtTest);
 
-TEST_P(dgemmtTest, RandomData) {
+TEST_P(dgemmtTest, RandomData)
+{
     using T = double;
     //----------------------------------------------------------
     // Initialize values from the parameters passed through
@@ -79,8 +79,6 @@ TEST_P(dgemmtTest, RandomData) {
     gtint_t lda_inc = std::get<8>(GetParam());
     gtint_t ldb_inc = std::get<9>(GetParam());
     gtint_t ldc_inc = std::get<10>(GetParam());
-    // specifies the datatype for randomgenerators
-    char datatype   = std::get<11>(GetParam());
 
     // Set the threshold for the errors:
     double thresh = 10*n*k*testinghelpers::getEpsilon<T>();
@@ -88,13 +86,13 @@ TEST_P(dgemmtTest, RandomData) {
     //----------------------------------------------------------
     //     Call test body using these parameters
     //----------------------------------------------------------
-    test_gemmt<T>(storage, uplo, transa, transb, n, k, lda_inc, ldb_inc, ldc_inc, alpha, beta, thresh, datatype);
+    test_gemmt<T>( storage, uplo, transa, transb, n, k, lda_inc, ldb_inc, ldc_inc, alpha, beta, thresh );
 }
 
 class dgemmtTestPrint {
 public:
     std::string operator()(
-        testing::TestParamInfo<std::tuple<char,char,char,char,gtint_t,gtint_t,double,double,gtint_t,gtint_t,gtint_t,char>> str) const {
+        testing::TestParamInfo<std::tuple<char,char,char,char,gtint_t,gtint_t,double,double,gtint_t,gtint_t,gtint_t>> str) const {
         char sfm        = std::get<0>(str.param);
         char tsa        = std::get<1>(str.param);
         char tsb        = std::get<2>(str.param);
@@ -106,7 +104,6 @@ public:
         gtint_t lda_inc = std::get<8>(str.param);
         gtint_t ldb_inc = std::get<9>(str.param);
         gtint_t ldc_inc = std::get<10>(str.param);
-        char datatype   = std::get<11>(str.param);
 #ifdef TEST_BLAS
         std::string str_name = "dgemmt_";
 #elif TEST_CBLAS
@@ -126,7 +123,6 @@ public:
         str_name = str_name + "_" + std::to_string(lda_inc);
         str_name = str_name + "_" + std::to_string(ldb_inc);
         str_name = str_name + "_" + std::to_string(ldc_inc);
-        str_name = str_name + "_" + datatype;
         return str_name;
     }
 };
@@ -151,8 +147,7 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(3.0),                                          // beta
             ::testing::Values(gtint_t(0), gtint_t(4)),                       // increment to the leading dim of a
             ::testing::Values(gtint_t(0), gtint_t(1)),                       // increment to the leading dim of b
-            ::testing::Values(gtint_t(0), gtint_t(2)),                       // increment to the leading dim of c
-            ::testing::Values(ELEMENT_TYPE)                                  // i : integer, f : float  datatype type tested
+            ::testing::Values(gtint_t(0), gtint_t(2))                       // increment to the leading dim of c
         ),
         ::dgemmtTestPrint()
     );

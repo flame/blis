@@ -41,26 +41,24 @@
 #include <algorithm>
 
 template<typename T>
-void test_syr2k( char storage, char uplo, char transa, char transb,
-    gtint_t m, gtint_t k,
-    gtint_t lda_inc, gtint_t ldb_inc, gtint_t ldc_inc,
-    T alpha, T beta,
-    double thresh, char datatype
-) {
+void test_syr2k( char storage, char uplo, char transa, char transb, gtint_t m,
+    gtint_t k, gtint_t lda_inc, gtint_t ldb_inc, gtint_t ldc_inc, T alpha,
+    T beta, double thresh )
+{
     // Compute the leading dimensions of a, b, and c.
-    gtint_t lda = testinghelpers::get_leading_dimension(storage, transa, m, k, lda_inc);
-    gtint_t ldb = testinghelpers::get_leading_dimension(storage, transb, m, k, ldb_inc);
-    gtint_t ldc = testinghelpers::get_leading_dimension(storage, 'n', m, m, ldc_inc);
+    gtint_t lda = testinghelpers::get_leading_dimension( storage, transa, m, k, lda_inc );
+    gtint_t ldb = testinghelpers::get_leading_dimension( storage, transb, m, k, ldb_inc );
+    gtint_t ldc = testinghelpers::get_leading_dimension( storage, 'n', m, m, ldc_inc );
 
     //----------------------------------------------------------
     //        Initialize matrics with random integer numbers.
     //----------------------------------------------------------
-    std::vector<T> a = testinghelpers::get_random_matrix<T>(-2, 8, storage, transa, m, k, lda, datatype);
-    std::vector<T> b = testinghelpers::get_random_matrix<T>(-5, 2, storage, transb, m, k, ldb, datatype);
+    std::vector<T> a = testinghelpers::get_random_matrix<T>( -2, 8, storage, transa, m, k, lda );
+    std::vector<T> b = testinghelpers::get_random_matrix<T>( -5, 2, storage, transb, m, k, ldb );
     // Since matrix C, stored in c, is symmetric and we only use the upper or lower
     // part in the computation of her2k and zero-out the rest to ensure
     // that code operates as expected.
-    std::vector<T> c = testinghelpers::get_random_matrix<T>(-3, 5, storage, uplo, m, ldc, datatype);
+    std::vector<T> c = testinghelpers::get_random_matrix<T>(-3, 5, storage, uplo, m, ldc );
 
     // Create a copy of c so that we can check reference results.
     std::vector<T> c_ref(c);

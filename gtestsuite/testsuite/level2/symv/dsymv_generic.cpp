@@ -45,12 +45,11 @@ class dsymvTest :
                                                    double,
                                                    gtint_t,
                                                    gtint_t,
-                                                   gtint_t,
-                                                   char>> {};
+                                                   gtint_t>> {};
 
-TEST_P(dsymvTest, RandomData) {
+TEST_P(dsymvTest, RandomData)
+{
     using T = double;
-
     //----------------------------------------------------------
     // Initialize values from the parameters passed through
     // test suite instantiation (INSTANTIATE_TEST_SUITE_P).
@@ -77,8 +76,6 @@ TEST_P(dsymvTest, RandomData) {
     // If increment is zero, then the array size matches the matrix size.
     // If increment are nonnegative, the array size is bigger than the matrix size.
     gtint_t lda_inc = std::get<9>(GetParam());
-    // specifies the datatype for randomgenerators
-    char datatype   = std::get<10>(GetParam());
 
     // Set the threshold for the errors:
     double thresh = 10*n*testinghelpers::getEpsilon<T>();
@@ -86,13 +83,13 @@ TEST_P(dsymvTest, RandomData) {
     //----------------------------------------------------------
     //     Call test body using these parameters
     //----------------------------------------------------------
-    test_symv<T>(storage, uploa, conja, conjx, n, alpha, lda_inc, incx, beta, incy, thresh, datatype);
+    test_symv<T>( storage, uploa, conja, conjx, n, alpha, lda_inc, incx, beta, incy, thresh );
 }
 
 class dsymvTestPrint {
 public:
     std::string operator()(
-        testing::TestParamInfo<std::tuple<char,char,char,char,gtint_t,double,double,gtint_t,gtint_t,gtint_t,char>> str) const {
+        testing::TestParamInfo<std::tuple<char,char,char,char,gtint_t,double,double,gtint_t,gtint_t,gtint_t>> str) const {
         char sfm       = std::get<0>(str.param);
         char uploa     = std::get<1>(str.param);
         char conja     = std::get<2>(str.param);
@@ -103,7 +100,6 @@ public:
         gtint_t incx   = std::get<7>(str.param);
         gtint_t incy   = std::get<8>(str.param);
         gtint_t ld_inc = std::get<9>(str.param);
-        char datatype  = std::get<10>(str.param);
 #ifdef TEST_BLAS
         std::string str_name = "dsymv_";
 #elif TEST_CBLAS
@@ -123,7 +119,6 @@ public:
         str_name    = str_name + "_" + incx_str;
         str_name    = str_name + "_" + incy_str;
         str_name    = str_name + "_" + std::to_string(ld_inc);
-        str_name    = str_name + "_" + datatype;
         return str_name;
     }
 };
@@ -146,8 +141,7 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values( 2.0, -1.0 ),                                  // beta
             ::testing::Values(gtint_t(1)),                                   // stride size for x
             ::testing::Values(gtint_t(1)),                                   // stride size for y
-            ::testing::Values(gtint_t(0), gtint_t(3)),                       // increment to the leading dim of a
-            ::testing::Values(ELEMENT_TYPE)                                  // i : integer, f : float  datatype type tested
+            ::testing::Values(gtint_t(0), gtint_t(3))                       // increment to the leading dim of a
         ),
         ::dsymvTestPrint()
     );

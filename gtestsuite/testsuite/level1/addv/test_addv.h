@@ -43,26 +43,25 @@
  */
 
 template<typename T>
-void test_addv( char conjx, gtint_t n, gtint_t incx, gtint_t incy,
-               double thresh, char datatype ) {
-
+void test_addv( char conjx, gtint_t n, gtint_t incx, gtint_t incy, double thresh )
+{
     //----------------------------------------------------------
     //        Initialize vectors with random numbers.
     //----------------------------------------------------------
-    std::vector<T> x = testinghelpers::get_random_vector<T>(-10, 10, n, incx, datatype);
-    std::vector<T> y = testinghelpers::get_random_vector<T>(-10, 10, n, incy, datatype);
+    std::vector<T> x = testinghelpers::get_random_vector<T>( -10, 10, n, incx );
+    std::vector<T> y = testinghelpers::get_random_vector<T>( -10, 10, n, incy );
 
     //----------------------------------------------------------
     //    Call reference implementation to get ref results.
     //----------------------------------------------------------
     // Create a copy of y so that we can check reference results.
     std::vector<T> y_ref(y);
-    testinghelpers::ref_addv<T>(conjx, n, x.data(), incx, y_ref.data(), incy);
+    testinghelpers::ref_addv<T>( conjx, n, x.data(), incx, y_ref.data(), incy );
 
     //----------------------------------------------------------
     //                  Call BLIS function.
     //----------------------------------------------------------
-    addv(conjx, n, x.data(), incx, y.data(), incy);
+    addv( conjx, n, x.data(), incx, y.data(), incy );
 
     //----------------------------------------------------------
     //              Compute component-wise error.

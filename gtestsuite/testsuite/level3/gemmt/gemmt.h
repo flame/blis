@@ -154,6 +154,7 @@ static void typed_gemmt(char storage, char uplo, char trnsa, char trnsb,
         throw std::runtime_error("Error in testsuite/level3/gemmt.h: Invalid typename in typed_gemmt().");
 }
 #endif
+
 template<typename T>
 static void gemmt( char storage, char uplo, char transa, char transb, gtint_t n, gtint_t k,
     T* alpha, T* ap, gtint_t lda, T* bp, gtint_t ldb, T* beta, T* cp, gtint_t ldc )

@@ -43,12 +43,11 @@ class ztrmvTest :
                                                    gtint_t,
                                                    dcomplex,
                                                    gtint_t,
-                                                   gtint_t,
-                                                   char>> {};
+                                                   gtint_t>> {};
 
-TEST_P(ztrmvTest, RandomData) {
+TEST_P(ztrmvTest, RandomData)
+{
     using T = dcomplex;
-
     //----------------------------------------------------------
     // Initialize values from the parameters passed through
     // test suite instantiation (INSTANTIATE_TEST_SUITE_P).
@@ -71,8 +70,6 @@ TEST_P(ztrmvTest, RandomData) {
     // If increment is zero, then the array size matches the matrix size.
     // If increment are nonnegative, the array size is bigger than the matrix size.
     gtint_t lda_inc = std::get<7>(GetParam());
-    // specifies the datatype for randomgenerators
-    char datatype   = std::get<8>(GetParam());
 
     // Set the threshold for the errors:
     double thresh = 10*n*testinghelpers::getEpsilon<T>();
@@ -80,13 +77,13 @@ TEST_P(ztrmvTest, RandomData) {
     //----------------------------------------------------------
     //     Call test body using these parameters
     //----------------------------------------------------------
-    test_trmv<T>(storage, uploa, transa, diaga, n, alpha, lda_inc, incx, thresh, datatype);
+    test_trmv<T>( storage, uploa, transa, diaga, n, alpha, lda_inc, incx, thresh );
 }
 
 class ztrmvTestPrint {
 public:
     std::string operator()(
-        testing::TestParamInfo<std::tuple<char,char,char,char,gtint_t,dcomplex,gtint_t,gtint_t,char>> str) const {
+        testing::TestParamInfo<std::tuple<char,char,char,char,gtint_t,dcomplex,gtint_t,gtint_t>> str) const {
         char sfm       = std::get<0>(str.param);
         char uploa     = std::get<1>(str.param);
         char transa    = std::get<2>(str.param);
@@ -95,7 +92,6 @@ public:
         dcomplex alpha = std::get<5>(str.param);
         gtint_t incx   = std::get<6>(str.param);
         gtint_t ld_inc = std::get<7>(str.param);
-        char datatype  = std::get<8>(str.param);
 #ifdef TEST_BLAS
         std::string str_name = "ztrmv_";
 #elif TEST_CBLAS
@@ -113,7 +109,6 @@ public:
         std::string incx_str = ( incx > 0) ? std::to_string(incx) : "m" + std::to_string(std::abs(incx));
         str_name    = str_name + "_" + incx_str;
         str_name    = str_name + "_" + std::to_string(ld_inc);
-        str_name    = str_name + "_" + datatype;
         return str_name;
     }
 };
@@ -138,8 +133,7 @@ INSTANTIATE_TEST_SUITE_P(
 #endif
             ),                                                               // alpha
             ::testing::Values(gtint_t(1)),                                   // stride size for x
-            ::testing::Values(gtint_t(0), gtint_t(5)),                       // increment to the leading dim of a
-            ::testing::Values(ELEMENT_TYPE)                                  // i : integer, f : float  datatype type tested
+            ::testing::Values(gtint_t(0), gtint_t(5))                        // increment to the leading dim of a
         ),
         ::ztrmvTestPrint()
     );

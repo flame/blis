@@ -44,12 +44,11 @@ class zher2Test :
                                                    dcomplex,
                                                    gtint_t,
                                                    gtint_t,
-                                                   gtint_t,
-                                                   char>> {};
+                                                   gtint_t>> {};
 
-TEST_P(zher2Test, RandomData) {
+TEST_P(zher2Test, RandomData)
+{
     using T = dcomplex;
-
     //----------------------------------------------------------
     // Initialize values from the parameters passed through
     // test suite instantiation (INSTANTIATE_TEST_SUITE_P).
@@ -74,8 +73,6 @@ TEST_P(zher2Test, RandomData) {
     // If increment is zero, then the array size matches the matrix size.
     // If increment are nonnegative, the array size is bigger than the matrix size.
     gtint_t lda_inc = std::get<8>(GetParam());
-    // specifies the datatype for randomgenerators
-    char datatype   = std::get<9>(GetParam());
 
     // Set the threshold for the errors:
     double thresh = 6*std::sqrt(n)*testinghelpers::getEpsilon<T>();
@@ -83,13 +80,13 @@ TEST_P(zher2Test, RandomData) {
     //----------------------------------------------------------
     //     Call test body using these parameters
     //----------------------------------------------------------
-    test_her2<T>(storage, uploa, conjx, conjy, n, alpha, incx, incy, lda_inc, thresh, datatype);
+    test_her2<T>( storage, uploa, conjx, conjy, n, alpha, incx, incy, lda_inc, thresh );
 }
 
 class zher2TestPrint {
 public:
     std::string operator()(
-        testing::TestParamInfo<std::tuple<char,char,char,char,gtint_t,dcomplex,gtint_t,gtint_t,gtint_t,char>> str) const {
+        testing::TestParamInfo<std::tuple<char,char,char,char,gtint_t,dcomplex,gtint_t,gtint_t,gtint_t>> str) const {
         char sfm       = std::get<0>(str.param);
         char uploa     = std::get<1>(str.param);
         char conjx     = std::get<2>(str.param);
@@ -99,7 +96,6 @@ public:
         gtint_t incx   = std::get<6>(str.param);
         gtint_t incy   = std::get<7>(str.param);
         gtint_t ld_inc = std::get<8>(str.param);
-        char datatype  = std::get<9>(str.param);
 #ifdef TEST_BLAS
         std::string str_name = "zher2_";
 #elif TEST_CBLAS
@@ -118,7 +114,6 @@ public:
         str_name    = str_name + "_" + incx_str;
         str_name    = str_name + "_" + incy_str;
         str_name    = str_name + "_" + std::to_string(ld_inc);
-        str_name    = str_name + "_" + datatype;
         return str_name;
     }
 };
@@ -140,8 +135,7 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(dcomplex{1.0, -2.0}),                          // alpha
             ::testing::Values(gtint_t(1)),                                   // stride size for x
             ::testing::Values(gtint_t(1)),                                   // stride size for y
-            ::testing::Values(gtint_t(0), gtint_t(5)),                       // increment to the leading dim of a
-            ::testing::Values(ELEMENT_TYPE)                                  // i : integer, f : float  datatype type tested
+            ::testing::Values(gtint_t(0), gtint_t(5))                       // increment to the leading dim of a
         ),
         ::zher2TestPrint()
     );

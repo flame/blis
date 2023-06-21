@@ -40,8 +40,7 @@ class zaxpyvGenericTest :
                                                    gtint_t,
                                                    gtint_t,
                                                    gtint_t,
-                                                   dcomplex,
-                                                   char>> {};
+                                                   dcomplex>> {};
 // Tests using random integers as vector elements.
 TEST_P( zaxpyvGenericTest, RandomData )
 {
@@ -60,15 +59,13 @@ TEST_P( zaxpyvGenericTest, RandomData )
     gtint_t incy = std::get<3>(GetParam());
     // alpha
     T alpha = std::get<4>(GetParam());
-    // specifies the datatype for randomgenerators
-    char datatype = std::get<5>(GetParam());
 
     // Set the threshold for the errors:
     double thresh = 2*testinghelpers::getEpsilon<T>();
     //----------------------------------------------------------
     //     Call generic test body using those parameters
     //----------------------------------------------------------
-    test_axpyv<T>(conj_x, n, incx, incy, alpha, thresh, datatype);
+    test_axpyv<T>( conj_x, n, incx, incy, alpha, thresh );
 }
 
 // Used to generate a test case with a sensible name.
@@ -78,13 +75,12 @@ TEST_P( zaxpyvGenericTest, RandomData )
 class zaxpyvGenericTestPrint {
 public:
     std::string operator()(
-        testing::TestParamInfo<std::tuple<char,gtint_t,gtint_t,gtint_t,dcomplex,char>> str) const {
+        testing::TestParamInfo<std::tuple<char,gtint_t,gtint_t,gtint_t,dcomplex>> str) const {
         char conj      = std::get<0>(str.param);
         gtint_t n      = std::get<1>(str.param);
         gtint_t incx   = std::get<2>(str.param);
         gtint_t incy   = std::get<3>(str.param);
         dcomplex alpha = std::get<4>(str.param);
-        char datatype  = std::get<5>(str.param);
 #ifdef TEST_BLAS
       std::string str_name = "zaxpy_";
 #elif TEST_CBLAS
@@ -101,7 +97,6 @@ public:
         std::string alpha_str = ( alpha.real > 0) ? std::to_string(int(alpha.real)) : ("m" + std::to_string(int(std::abs(alpha.real))));
                   alpha_str = alpha_str + "pi" + (( alpha.imag > 0) ? std::to_string(int(alpha.imag)) : ("m" + std::to_string(int(std::abs(alpha.imag)))));
         str_name = str_name + "_a" + alpha_str;
-        str_name = str_name + "_" + datatype;
         return str_name;
     }
 };
@@ -119,8 +114,7 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Range(gtint_t(10), gtint_t(101), 10),                 // m size of vector takes values from 10 to 100 with step size of 10.
             ::testing::Values(gtint_t(1)),                                   // stride size for x
             ::testing::Values(gtint_t(1)),                                   // stride size for y
-            ::testing::Values(dcomplex{-3.0, 1.0}, dcomplex{1.0, 2.0}),      // alpha
-            ::testing::Values(ELEMENT_TYPE)                                  // i : integer, f : float  datatype type tested
+            ::testing::Values(dcomplex{-3.0, 1.0}, dcomplex{1.0, 2.0})       // alpha
         ),
         ::zaxpyvGenericTestPrint()
     );
@@ -140,8 +134,7 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Range(gtint_t(10), gtint_t(101), 10),                 // m size of vector takes values from 10 to 100 with step size of 10.
             ::testing::Values(gtint_t(2)),                                   // stride size for x
             ::testing::Values(gtint_t(3)),                                   // stride size for y
-            ::testing::Values(dcomplex{-1.0, 2.0}),                          // alpha
-            ::testing::Values(ELEMENT_TYPE)                                  // i : integer, f : float  datatype type tested
+            ::testing::Values(dcomplex{-1.0, 2.0})                           // alpha
         ),
         ::zaxpyvGenericTestPrint()
     );
@@ -158,8 +151,7 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Range(gtint_t(10), gtint_t(101), 10),                 // m size of vector takes values from 10 to 100 with step size of 10.
             ::testing::Values(gtint_t(-4)),                                  // stride size for x
             ::testing::Values(gtint_t(-3)),                                  // stride size for y
-            ::testing::Values(dcomplex{4.0, 3.1}),                           // alpha
-            ::testing::Values(ELEMENT_TYPE)                                  // i : integer, f : float  datatype type tested
+            ::testing::Values(dcomplex{4.0, 3.1})                            // alpha
         ),
         ::zaxpyvGenericTestPrint()
     );

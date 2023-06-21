@@ -313,7 +313,7 @@ void randomgenerators( int from, int to, char storage, gtint_t m, gtint_t n,
 
 template<typename T>
 void randomgenerators(int from, int to, char storage, char uplo, gtint_t k,
-                    T* a, gtint_t lda, char datatype) {
+                    T* a, gtint_t lda, char datatype ) {
     randomgenerators<T>(from, to, storage, k, k, a, lda, datatype);
     if( (storage=='c')||(storage=='C') )
     {
@@ -359,14 +359,15 @@ void randomgenerators(int from, int to, char storage, char uplo, gtint_t k,
 
 template<typename T>
 std::vector<T> get_random_matrix(int from, int to, char storage, char trans, gtint_t m, gtint_t n,
-                    gtint_t lda, char datatype)
+                    gtint_t lda, char datatype )
 {
     std::vector<T> a(matsize(storage, trans, m, n, lda));
     testinghelpers::datagenerators::randomgenerators<T>( from, to, storage, m, n, a.data(), trans, lda, datatype );
     return a;
 }
+
 template<typename T>
-std::vector<T> get_random_matrix(int from, int to, char storage, char uplo, gtint_t k, gtint_t lda, char datatype)
+std::vector<T> get_random_matrix(int from, int to, char storage, char uplo, gtint_t k, gtint_t lda, char datatype )
 {
     // Create matrix for the given sizes.
     std::vector<T> a( testinghelpers::matsize( storage, 'n', k, k, lda ) );
@@ -375,15 +376,13 @@ std::vector<T> get_random_matrix(int from, int to, char storage, char uplo, gtin
 }
 
 template<typename T>
-std::vector<T> get_random_vector(int from, int to, gtint_t n, gtint_t incx, char datatype)
+std::vector<T> get_random_vector(int from, int to, gtint_t n, gtint_t incx, char datatype )
 {
     // Create vector for the given sizes.
     std::vector<T> x( testinghelpers::buff_dim(n, incx) );
     testinghelpers::datagenerators::randomgenerators( from, to, n, incx, x.data(), datatype );
     return x;
 }
-
-
 
 template<typename T>
 void set_vector( gtint_t n, gtint_t incx, T* x, T value )

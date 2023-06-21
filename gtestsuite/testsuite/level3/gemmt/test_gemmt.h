@@ -42,20 +42,20 @@
 
 template<typename T>
 void test_gemmt( char storage, char uplo, char trnsa, char trnsb, gtint_t n,
-    gtint_t k, gtint_t lda_inc, gtint_t ldb_inc, gtint_t ldc_inc,
-    T alpha, T beta, double thresh, char datatype ) {
-
+    gtint_t k, gtint_t lda_inc, gtint_t ldb_inc, gtint_t ldc_inc, T alpha,
+    T beta, double thresh )
+{
     // Compute the leading dimensions of a, b, and c.
-    gtint_t lda = testinghelpers::get_leading_dimension(storage, trnsa, n, k, lda_inc);
-    gtint_t ldb = testinghelpers::get_leading_dimension(storage, trnsb, k, n, ldb_inc);
-    gtint_t ldc = testinghelpers::get_leading_dimension(storage, 'n', n, n, ldc_inc);
+    gtint_t lda = testinghelpers::get_leading_dimension( storage, trnsa, n, k, lda_inc );
+    gtint_t ldb = testinghelpers::get_leading_dimension( storage, trnsb, k, n, ldb_inc );
+    gtint_t ldc = testinghelpers::get_leading_dimension( storage, 'n', n, n, ldc_inc );
 
     //----------------------------------------------------------
     //         Initialize matrics with random numbers
     //----------------------------------------------------------
-    std::vector<T> a = testinghelpers::get_random_matrix<T>(-2, 8, storage, trnsa, n, k, lda, datatype);
-    std::vector<T> b = testinghelpers::get_random_matrix<T>(-5, 2, storage, trnsb, k, n, ldb, datatype);
-    std::vector<T> c = testinghelpers::get_random_matrix<T>(-3, 5, storage, 'n', n, n, ldc, datatype);
+    std::vector<T> a = testinghelpers::get_random_matrix<T>( -2, 8, storage, trnsa, n, k, lda );
+    std::vector<T> b = testinghelpers::get_random_matrix<T>( -5, 2, storage, trnsb, k, n, ldb );
+    std::vector<T> c = testinghelpers::get_random_matrix<T>( -3, 5, storage, 'n', n, n, ldc );
 
     // Create a copy of c so that we can check reference results.
     std::vector<T> c_ref(c);

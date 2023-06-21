@@ -40,8 +40,7 @@ class sxpbyvGenericTest :
                                                    gtint_t,
                                                    gtint_t,
                                                    gtint_t,
-                                                   float,
-                                                   char>> {};
+                                                   float>> {};
 
 GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(sxpbyvGenericTest);
 
@@ -63,8 +62,6 @@ TEST_P( sxpbyvGenericTest, RandomData )
     gtint_t incy = std::get<3>(GetParam());
     // beta
     T beta = std::get<4>(GetParam());
-    // specifies the datatype for randomgenerators
-    char datatype = std::get<5>(GetParam());
 
     // Set the threshold for the errors:
     float thresh = 2*testinghelpers::getEpsilon<T>();
@@ -72,7 +69,7 @@ TEST_P( sxpbyvGenericTest, RandomData )
     //----------------------------------------------------------
     //     Call generic test body using those parameters
     //----------------------------------------------------------
-    test_xpbyv<T>(conj_x, n, incx, incy, beta, thresh, datatype);
+    test_xpbyv<T>( conj_x, n, incx, incy, beta, thresh );
 }
 
 // Used to generate a test case with a sensible name.
@@ -82,13 +79,12 @@ TEST_P( sxpbyvGenericTest, RandomData )
 class sxpbyvGenericTestPrint {
 public:
     std::string operator()(
-        testing::TestParamInfo<std::tuple<char,gtint_t,gtint_t,gtint_t,float,char>> str) const {
+        testing::TestParamInfo<std::tuple<char,gtint_t,gtint_t,gtint_t,float>> str) const {
         char conj     = std::get<0>(str.param);
         gtint_t n     = std::get<1>(str.param);
         gtint_t incx  = std::get<2>(str.param);
         gtint_t incy  = std::get<3>(str.param);
         float beta    = std::get<4>(str.param);
-        char datatype = std::get<5>(str.param);
         std::string str_name = "bli_sxpbyv";
         str_name += "_" + std::to_string(n);
         str_name += "_" + std::string(&conj, 1);
@@ -98,7 +94,6 @@ public:
         str_name += "_" + incy_str;
         std::string beta_str = ( beta > 0) ? std::to_string(int(beta)) : "m" + std::to_string(int(std::abs(beta)));
         str_name = str_name + "_b" + beta_str;
-        str_name = str_name + "_" + datatype;
         return str_name;
     }
 };
@@ -113,8 +108,7 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Range(gtint_t(10), gtint_t(101), 10),                 // m size of vector takes values from 10 to 100 with step size of 10.
             ::testing::Values(gtint_t(1)),                                   // stride size for x
             ::testing::Values(gtint_t(1)),                                   // stride size for y
-            ::testing::Values(float(2.0), float(-2.0)),                      // beta
-            ::testing::Values(ELEMENT_TYPE)                                  // i : integer, f : float  datatype type tested
+            ::testing::Values(float(2.0), float(-2.0))                       // beta
         ),
         ::sxpbyvGenericTestPrint()
     );
@@ -130,8 +124,7 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(gtint_t(3), gtint_t(30), gtint_t(112)),        // m size of vector
             ::testing::Values(gtint_t(1)),                                   // stride size for x
             ::testing::Values(gtint_t(1)),                                   // stride size for y
-            ::testing::Values(float(2.0)),                                   // beta
-            ::testing::Values(ELEMENT_TYPE)                                  // i : integer, f : float  datatype type tested
+            ::testing::Values(float(2.0))                                    // beta
         ),
         ::sxpbyvGenericTestPrint()
     );
@@ -148,8 +141,7 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(gtint_t(3), gtint_t(30), gtint_t(112)),        // m size of vector
             ::testing::Values(gtint_t(2), gtint_t(11)),                      /*(gtint_t(-5), gtint_t(-17))*/// stride size for x
             ::testing::Values(gtint_t(3), gtint_t(33)),                      /*(gtint_t(-12), gtint_t(-4))*/// stride size for y
-            ::testing::Values(float(4.0)),                                   // beta
-            ::testing::Values(ELEMENT_TYPE)                                  // i : integer, f : float  datatype type tested
+            ::testing::Values(float(4.0))                                    // beta
         ),
         ::sxpbyvGenericTestPrint()
     );

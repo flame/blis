@@ -43,11 +43,10 @@
 template<typename T>
 
 void test_gemv( char storage, char trnsa, char conjx, gtint_t m, gtint_t n,
-    T alpha, gtint_t lda_inc, gtint_t incx, T beta, gtint_t incy,
-    double thresh, char datatype ) {
-
+    T alpha, gtint_t lda_inc, gtint_t incx, T beta, gtint_t incy, double thresh )
+{
     // Compute the leading dimensions for matrix size calculation.
-    gtint_t lda = testinghelpers::get_leading_dimension(storage, 'n', m, n, lda_inc);
+    gtint_t lda = testinghelpers::get_leading_dimension( storage, 'n', m, n, lda_inc );
 
     // Get correct vector lengths.
     gtint_t lenx = ( testinghelpers::chknotrans( trnsa ) ) ? n : m ;
@@ -56,9 +55,9 @@ void test_gemv( char storage, char trnsa, char conjx, gtint_t m, gtint_t n,
     //----------------------------------------------------------
     //        Initialize matrics with random integer numbers.
     //----------------------------------------------------------
-    std::vector<T> a = testinghelpers::get_random_matrix<T>(1, 5, storage, 'n', m, n, lda, datatype);
-    std::vector<T> x = testinghelpers::get_random_vector<T>(1, 3, lenx, incx, datatype);
-    std::vector<T> y = testinghelpers::get_random_vector<T>(1, 3, leny, incy, datatype);
+    std::vector<T> a = testinghelpers::get_random_matrix<T>( 1, 5, storage, 'n', m, n, lda );
+    std::vector<T> x = testinghelpers::get_random_vector<T>( 1, 3, lenx, incx );
+    std::vector<T> y = testinghelpers::get_random_vector<T>( 1, 3, leny, incy );
 
     // Create a copy of c so that we can check reference results.
     std::vector<T> y_ref(y);

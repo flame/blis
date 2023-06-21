@@ -36,7 +36,7 @@
 #include "test_nrm2.h"
 
 class dnrm2Test :
-        public ::testing::TestWithParam<std::tuple<gtint_t, gtint_t, char>> {};
+        public ::testing::TestWithParam<std::tuple<gtint_t, gtint_t>> {};
 
 TEST_P( dnrm2Test, RandomData )
 {
@@ -49,8 +49,6 @@ TEST_P( dnrm2Test, RandomData )
     gtint_t n = std::get<0>(GetParam());
     // stride size for x:
     gtint_t incx = std::get<1>(GetParam());
-    // specifies the datatype for randomgenerators
-    char datatype = std::get<2>(GetParam());
 
     // Set the threshold for the errors:
     double thresh = std::sqrt(n)*testinghelpers::getEpsilon<T>();
@@ -58,17 +56,16 @@ TEST_P( dnrm2Test, RandomData )
     //----------------------------------------------------------
     //     Call test body using these parameters
     //----------------------------------------------------------
-    test_nrm2<T>(n, incx, thresh, datatype);
+    test_nrm2<T>( n, incx, thresh );
 }
 
 // Prints the test case combination
 class dnrm2TestPrint {
 public:
     std::string operator()(
-        testing::TestParamInfo<std::tuple<gtint_t, gtint_t, char>> str) const {
+        testing::TestParamInfo<std::tuple<gtint_t, gtint_t>> str) const {
         gtint_t n     = std::get<0>(str.param);
         gtint_t incx  = std::get<1>(str.param);
-        char datatype = std::get<2>(str.param);
 #ifdef TEST_BLAS
         std::string str_name = "dnrm2_";
 #elif TEST_CBLAS
@@ -79,7 +76,6 @@ public:
         str_name    = str_name + "_" + std::to_string(n);
         std::string incx_str = ( incx > 0) ? std::to_string(incx) : "m" + std::to_string(std::abs(incx));
         str_name    = str_name + "_" + incx_str;
-        str_name    = str_name + "_" + datatype;
         return str_name;
     }
 };
@@ -94,8 +90,7 @@ INSTANTIATE_TEST_SUITE_P(
 #ifndef TEST_BLIS_TYPED
             ,gtint_t(-1), gtint_t(-2)
 #endif
-        ),                                                                   // stride size for x
-            ::testing::Values('i')                                           // i : integer, f : float  datatype type tested
+        )                                                                    // stride size for x
         ),
         ::dnrm2TestPrint()
     );
