@@ -917,6 +917,83 @@ void zgemm_blis_impl
     bli_obj_set_conjtrans( blis_transa, &ao );
     bli_obj_set_conjtrans( blis_transb, &bo );
 
+    /* Call GEMV when m == 1 or n == 1 with the context set
+    to an uninitialized void pointer i.e. ((void *)0)*/
+    if (n0 == 1)
+    {
+        if (bli_is_notrans(blis_transa))
+        {
+            bli_zgemv_unf_var2
+            (
+                blis_transa,
+                bli_extract_conj(blis_transb),
+                m0, k0,
+                (dcomplex *)alpha,
+                (dcomplex *)a, rs_a, cs_a,
+                (dcomplex *)b, bli_is_notrans(blis_transb) ? rs_b : cs_b,
+                (dcomplex *)beta,
+                c, rs_c,
+                ((void *)0)
+            );
+        }
+        else
+        {
+            bli_zgemv_unf_var1
+            (
+                blis_transa,
+                bli_extract_conj(blis_transb),
+                k0, m0,
+                (dcomplex *)alpha,
+                (dcomplex *)a, rs_a, cs_a,
+                (dcomplex *)b, bli_is_notrans(blis_transb) ? rs_b : cs_b,
+                (dcomplex *)beta,
+                c, rs_c,
+                ((void *)0)
+            );
+        }
+
+        AOCL_DTL_LOG_GEMM_STATS(AOCL_DTL_LEVEL_TRACE_1, *m, *n, *k);
+        bli_finalize_auto();
+        return;
+    }
+    else if (m0 == 1)
+    {
+        if (bli_is_notrans(blis_transb))
+        {
+            bli_zgemv_unf_var1
+            (
+                blis_transb,
+                bli_extract_conj(blis_transa),
+                n0, k0,
+                (dcomplex *)alpha,
+                (dcomplex *)b, cs_b, rs_b,
+                (dcomplex *)a, bli_is_notrans(blis_transa) ? cs_a : rs_a,
+                (dcomplex *)beta,
+                c, cs_c,
+                ((void *)0)
+            );
+        }
+        else
+        {
+            bli_zgemv_unf_var2
+            (
+                blis_transb,
+                bli_extract_conj(blis_transa),
+                k0, n0,
+                (dcomplex *)alpha,
+                (dcomplex *)b, cs_b, rs_b,
+                (dcomplex *)a, bli_is_notrans(blis_transa) ? cs_a : rs_a,
+                (dcomplex *)beta,
+                c, cs_c,
+                ((void *)0)
+            );
+        }
+
+        AOCL_DTL_LOG_GEMM_STATS(AOCL_DTL_LEVEL_TRACE_1, *m, *n, *k);
+        bli_finalize_auto();
+        return;
+    }
+
     // default instance performance tuning is done in zgemm.
     // Single instance tuning is done based on env set.
     //dim_t single_instance = bli_env_get_var( "BLIS_SINGLE_INSTANCE", -1 );
@@ -968,50 +1045,6 @@ void zgemm_blis_impl
         /* Finalize BLIS */
         bli_finalize_auto();
         return;
-    }
-
-    /* Call Gemv when m/n=1 */
-    if (n0 == 1)
-    {
-        if (bli_is_notrans(blis_transa))
-        {
-            bli_zgemv_unf_var2(
-                BLIS_NO_TRANSPOSE,
-                bli_extract_conj(blis_transb),
-                m0, k0,
-                (dcomplex *)alpha,
-                (dcomplex *)a, rs_a, cs_a,
-                (dcomplex *)b, bli_is_notrans(blis_transb) ? rs_b : cs_b,
-                (dcomplex *)beta,
-                c, rs_c,
-                ((void *)0));
-            AOCL_DTL_LOG_GEMM_STATS(AOCL_DTL_LEVEL_TRACE_1, *m, *n, *k);
-            AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
-            /* Finalize BLIS. */
-            bli_finalize_auto();
-            return;
-        }
-    }
-    else if (m0 == 1)
-    {
-        if (bli_is_trans(blis_transb))
-        {
-            bli_zgemv_unf_var2(
-                blis_transb,
-                bli_extract_conj(blis_transa),
-                k0, n0,
-                (dcomplex *)alpha,
-                (dcomplex *)b, cs_b, rs_b,
-                (dcomplex *)a, bli_is_notrans(blis_transa) ? cs_a : rs_a,
-                (dcomplex *)beta,
-                c, cs_c,
-                ((void *)0));
-            AOCL_DTL_LOG_GEMM_STATS(AOCL_DTL_LEVEL_TRACE_1, *m, *n, *k);
-            AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
-            /* Finalize BLIS. */
-            bli_finalize_auto();
-            return;
-        }
     }
 
 #ifdef BLIS_ENABLE_SMALL_MATRIX
