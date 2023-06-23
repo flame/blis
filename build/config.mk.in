@@ -53,8 +53,9 @@ CONFIG_NAME       := @config_name@
 # sub-configuration in CONFIG_LIST corresponds to a configuration
 # sub-directory in the 'config' directory. See the 'config_registry'
 # file for the full list of registered configurations.
-CONFIG_LIST       := @config_list@
-FULL_CONFIG_LIST  := @full_config_list@
+CONFIG_LIST         := @config_list@
+FULL_CONFIG_LIST    := @full_config_list@
+FULL_SUBCONFIG_LIST := @full_subconfig_list@
 
 # This list of kernels needed for the configurations in CONFIG_LIST.
 # Each item in this list corresponds to a sub-directory in the top-level
@@ -103,8 +104,11 @@ CLANG_OT_12_0_0   := @clang_older_than_12_0_0@
 AOCC_OT_2_0_0     := @aocc_older_than_2_0_0@
 AOCC_OT_3_0_0     := @aocc_older_than_3_0_0@
 
-# The C++ compiler. NOTE: A C++ is typically not needed.
+# The C++ compiler. NOTE: A C++ compiler is typically not needed.
 CXX               := @CXX@
+
+# The Fortran compiler. NOTE: A Fortran compiler is typically not needed.
+FC                := @FC@
 
 # Static library indexer.
 RANLIB            := @RANLIB@

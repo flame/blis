@@ -35,8 +35,71 @@
 #include "blis.h"
 #include STRINGIFY_INT(../PASTEMAC(plugin,BLIS_PNAME_INFIX).h)
 
-void PASTEMAC3(plugin_init,BLIS_PNAME_INFIX,BLIS_CNAME_INFIX,BLIS_REF_SUFFIX)( PASTECH2(plugin,BLIS_PNAME_INFIX,params) )
-{
+// -- Macros to help concisely instantiate bli_func_init() ---------------------
 
+#define gen_func_init_ro( func_p, opname ) \
+do { \
+	bli_func_init( func_p, PASTEMAC(s,opname), PASTEMAC(d,opname), \
+	                       NULL,               NULL ); \
+} while (0)
+
+#define gen_func_init_co( func_p, opname ) \
+do { \
+	bli_func_init( func_p, NULL,               NULL, \
+	                       PASTEMAC(c,opname), PASTEMAC(z,opname) ); \
+} while (0)
+
+#define gen_func_init( func_p, opname ) \
+do { \
+	bli_func_init( func_p, PASTEMAC(s,opname), PASTEMAC(d,opname), \
+	                       PASTEMAC(c,opname), PASTEMAC(z,opname) ); \
+} while (0)
+
+// -----------------------------------------------------------------------------
+
+void PASTEMAC3(plugin_init,BLIS_PNAME_INFIX,BLIS_CNAME_INFIX,BLIS_REF_SUFFIX)( PASTECH2(plugin,BLIS_PNAME_INFIX,_params) )
+{
+	cntx_t* cntx = ( cntx_t* )bli_gks_lookup_id( PASTECH(BLIS_ARCH,BLIS_CNAME_UPPER_INFIX) );
+
+    // ------------------------------------------------------------------------>
+	// -- Example Initialization ---------------------------------------------->
+	// ------------------------------------------------------------------------>
+
+	blksz_t blkszs[ MY_NUM_BLOCK_SIZES ];
+	siz_t   bmults[ MY_NUM_BLOCK_SIZES ];
+	func_t  funcs[ MY_NUM_KERNELS ];
+	mbool_t mbools[ MY_NUM_KERNEL_PREFS ];
+
+	// -- Set blocksizes -------------------------------------------------------
+    //                                             s     d     c     z
+	bli_blksz_init_easy( &blkszs[ MY_BLKSZ_1 ],  256,  128,  128,   64 );
+	bli_blksz_init_easy( &blkszs[ MY_BLKSZ_2 ],  256,  256,  256,  256 );
+	bmults[ MY_BLKSZ_1 ] = bszids[ MY_BLKSZ_1 ];
+	bmults[ MY_BLKSZ_2 ] = bszids[ MY_BLKSZ_2 ];
+
+	// -- Set micro-kernels ----------------------------------------------------
+
+	gen_func_init   ( &funcs[ MY_KERNEL_1 ], PASTECH2(my_kernel_1,BLIS_CNAME_INFIX,BLIS_REF_SUFFIX) );
+	gen_func_init_co( &funcs[ MY_KERNEL_2 ], PASTECH2(my_kernel_2,BLIS_CNAME_INFIX,BLIS_REF_SUFFIX) );
+
+	// -- Set preferences ------------------------------------------------------
+	//                                        s      d      c      z
+	bli_mbool_init( &mbools[ MY_PREF_1 ],  TRUE,  TRUE,  TRUE,  TRUE );
+	bli_mbool_init( &mbools[ MY_PREF_2 ], FALSE, FALSE, FALSE, FALSE );
+
+	// -- Put block sizes, kernels, and preferences into the context -----------
+
+	for ( dim_t i = 0; i < MY_NUM_BLOCK_SIZES; i++ )
+		bli_cntx_set_blksz( bszids[ i ], &blkszs[ i ], bmults[ i ], cntx );
+
+	for ( dim_t i = 0; i < MY_NUM_KERNELS; i++ )
+		bli_cntx_set_ukr( kerids[ i ], &funcs[ i ], cntx );
+
+	for ( dim_t i = 0; i < MY_NUM_KERNEL_PREFS; i++ )
+		bli_cntx_set_ukr_pref( prefids[ i ], &mbools[ i ], cntx );
+
+	// <------------------------------------------------------------------------
+	// <------------------------------------------------------------------------
+	// <------------------------------------------------------------------------
 }
 

@@ -91,7 +91,7 @@ BLIS_INLINE void bli_func_copy_dt
 
 // -----------------------------------------------------------------------------
 
-func_t* bli_func_create
+BLIS_EXPORT_BLIS func_t* bli_func_create
      (
        void_fp ptr_s,
        void_fp ptr_d,
@@ -99,7 +99,7 @@ func_t* bli_func_create
        void_fp ptr_z
      );
 
-void bli_func_init
+BLIS_EXPORT_BLIS void bli_func_init
      (
        func_t* f,
        void_fp ptr_s,
@@ -108,14 +108,14 @@ void bli_func_init
        void_fp ptr_z
      );
 
-void bli_func_init_null
+BLIS_EXPORT_BLIS void bli_func_init_null
      (
        func_t* f
      );
 
-void bli_func_free( func_t* f );
+BLIS_EXPORT_BLIS void bli_func_free( func_t* f );
 
-func2_t* bli_func2_create
+BLIS_EXPORT_BLIS func2_t* bli_func2_create
      (
        void_fp ptr_ss, void_fp ptr_sd, void_fp ptr_sc, void_fp ptr_sz,
        void_fp ptr_ds, void_fp ptr_dd, void_fp ptr_dc, void_fp ptr_dz,
@@ -123,7 +123,7 @@ func2_t* bli_func2_create
        void_fp ptr_zs, void_fp ptr_zd, void_fp ptr_zc, void_fp ptr_zz
      );
 
-void bli_func2_init
+BLIS_EXPORT_BLIS void bli_func2_init
      (
        func2_t* f,
        void_fp ptr_ss, void_fp ptr_sd, void_fp ptr_sc, void_fp ptr_sz,
@@ -132,21 +132,21 @@ void bli_func2_init
        void_fp ptr_zs, void_fp ptr_zd, void_fp ptr_zc, void_fp ptr_zz
      );
 
-void bli_func2_init_null
+BLIS_EXPORT_BLIS void bli_func2_init_null
      (
        func2_t* f
      );
 
-void bli_func2_free( func2_t* f );
+BLIS_EXPORT_BLIS void bli_func2_free( func2_t* f );
 
 // -----------------------------------------------------------------------------
 
-bool bli_func_is_null_dt(       num_t   dt,
-                          const func_t* f );
-bool bli_func_is_null( const func_t* f );
+BLIS_EXPORT_BLIS bool bli_func_is_null_dt(       num_t   dt,
+                                           const func_t* f );
+BLIS_EXPORT_BLIS bool bli_func_is_null( const func_t* f );
 
-bool bli_func2_is_null_dt(       num_t    dt1,
-                                 num_t    dt2,
-                           const func2_t* f );
-bool bli_func2_is_null( const func2_t* f );
+BLIS_EXPORT_BLIS bool bli_func2_is_null_dt(       num_t    dt1,
+                                                  num_t    dt2,
+                                            const func2_t* f );
+BLIS_EXPORT_BLIS bool bli_func2_is_null( const func2_t* f );
 

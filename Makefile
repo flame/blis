@@ -306,13 +306,27 @@ endif
 FRAGS_TO_INSTALL := $(CONFIG_MK_FILE) \
                     $(COMMON_MK_FILE) \
                     $(DIST_PATH)/build/gen-make-frags/gen-make-frag.sh \
+                    $(DIST_PATH)/build/gen-make-frags/fragment.mk \
+                    $(DIST_PATH)/build/gen-make-frags/ignore_list \
+                    $(DIST_PATH)/build/gen-make-frags/special_list \
+                    $(DIST_PATH)/build/gen-make-frags/suffix_list \
                     $(DIST_PATH)/build/flatten-headers.py \
                     $(DIST_PATH)/build/mirror-tree.sh \
-                    $(DIST_PATH)/config_registry
+                    $(DIST_PATH)/config_registry \
+                    $(DIST_PATH)/build/detect/iset/avx.s \
+                    $(DIST_PATH)/build/detect/iset/avx512dq.s \
+                    $(DIST_PATH)/build/detect/iset/avx512f.s \
+                    $(DIST_PATH)/build/detect/iset/fma3.s \
+                    $(DIST_PATH)/build/detect/iset/fma4.s
 
 # Define a list of plugin makefile fragments to install.
 PLUGIN_FRAGS_TO_INSTALL := $(DIST_PATH)/build/plugin/bli_plugin_init_ref.c \
+                           $(DIST_PATH)/build/plugin/bli_plugin_init_zen3.c \
                            $(DIST_PATH)/build/plugin/bli_plugin_register.c \
+                           $(DIST_PATH)/build/plugin/bli_kernel_defs_zen3.h \
+                           $(DIST_PATH)/build/plugin/my_kernel_1_ref.c \
+                           $(DIST_PATH)/build/plugin/my_kernel_2_ref.c \
+                           $(DIST_PATH)/build/plugin/my_kernel_1_zen3.c \
                            $(DIST_PATH)/build/plugin/bli_plugin.h.in \
                            $(DIST_PATH)/build/plugin/config.mk.in \
                            $(DIST_PATH)/build/plugin/Makefile
@@ -1052,7 +1066,8 @@ $(MK_SHARE_DIR_INST): $(CONFIGURE_FILE) $(FRAGS_TO_INSTALL) $(PLUGIN_FRAGS_TO_IN
 ifeq ($(ENABLE_VERBOSE),yes)
 	$(MKDIR) $(@)
 	$(MKDIR) $(@)/plugin
-	$(INSTALL) -m 0644 $(FRAGS_TO_INSTALL) $(@)
+	$(INSTALL) -m 0755 $(filter %.sh,$(FRAGS_TO_INSTALL)) $(@)
+	$(INSTALL) -m 0644 $(filter-out %.sh,$(FRAGS_TO_INSTALL)) $(@)
 	$(INSTALL) -m 0644 $(PLUGIN_FRAGS_TO_INSTALL) $(@)/plugin
 	$(INSTALL) -m 0755 $(CONFIGURE_FILE) $(@)/configure-plugin
 #	$(MKDIR) -p $(@)/$(CONFIG_DIR)/$(CONFIG_NAME)
@@ -1067,7 +1082,8 @@ else
 	@$(MKDIR) $(@)
 	@$(MKDIR) $(@)/plugin
 	@echo "Installing $(notdir $(FRAGS_TO_INSTALL)) into $(@)/"
-	@$(INSTALL) -m 0644 $(FRAGS_TO_INSTALL) $(@)
+	@$(INSTALL) -m 0755 $(filter %.sh,$(FRAGS_TO_INSTALL)) $(@)
+	@$(INSTALL) -m 0644 $(filter-out %.sh,$(FRAGS_TO_INSTALL)) $(@)
 	@echo "Installing $(notdir $(PLUGIN_FRAGS_TO_INSTALL)) into $(@)/plugin/"
 	@$(INSTALL) -m 0644 $(PLUGIN_FRAGS_TO_INSTALL) $(@)/plugin
 	@echo "Installing $(CONFIGURE_FILE) into $(@)/configure-plugin"

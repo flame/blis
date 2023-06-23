@@ -88,6 +88,8 @@ err_t bli_stack_init
 	}
 
 	stack->size = initial_size;
+
+	return BLIS_SUCCESS;
 }
 
 err_t bli_stack_finalize( stck_t* stack )

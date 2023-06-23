@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2023, Southern Methodist University
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -32,35 +32,57 @@
 
 */
 
-#ifndef BLIS_GKS_H
-#define BLIS_GKS_H
+#include "blis.h"
+#include STRINGIFY_INT(../../PASTEMAC(plugin,BLIS_PNAME_INFIX).h)
 
-void                           bli_gks_init( void );
-void                           bli_gks_finalize( void );
+void PASTEMAC2(plugin_init,BLIS_PNAME_INFIX,BLIS_CNAME_INFIX)( PASTECH2(plugin,BLIS_PNAME_INFIX,_params) )
+{
+	cntx_t* cntx = ( cntx_t* )bli_gks_lookup_id( PASTECH(BLIS_ARCH,BLIS_CNAME_UPPER_INFIX) );
 
-void                           bli_gks_init_index( void );
+    // ------------------------------------------------------------------------>
+	// -- Example Initialization ---------------------------------------------->
+	// ------------------------------------------------------------------------>
 
-BLIS_EXPORT_BLIS const cntx_t* bli_gks_lookup_id( arch_t id );
-void                           bli_gks_register_cntx( arch_t id, void_fp nat_fp, void_fp ref_fp );
+	// Update the context with optimized native micro-kernels.
+	bli_cntx_set_ukrs
+	(
+	  cntx,
 
-BLIS_EXPORT_BLIS const cntx_t* bli_gks_query_cntx( void );
-const cntx_t*                  bli_gks_query_cntx_noinit( void );
-const cntx_t*                  bli_gks_query_cntx_impl( void );
+	  kerids[ MY_KERNEL_1 ], BLIS_DOUBLE, bli_dmy_kernel_1_zen3,
 
-BLIS_EXPORT_BLIS void          bli_gks_init_ref_cntx( cntx_t* cntx );
+	  BLIS_VA_END
+	);
 
-bool                           bli_gks_cntx_l3_nat_ukr_is_ref( num_t dt, ukr_t ukr_id, const cntx_t* cntx );
+	// Update the context with preferences.
+	bli_cntx_set_ukr_prefs
+	(
+	  cntx,
 
-BLIS_EXPORT_BLIS const char*   bli_gks_l3_ukr_impl_string( ukr_t ukr, ind_t method, num_t dt );
-BLIS_EXPORT_BLIS kimpl_t       bli_gks_l3_ukr_impl_type( ukr_t ukr, ind_t method, num_t dt );
+	  prefids[ MY_PREF_1 ], BLIS_DOUBLE, TRUE,
+	  prefids[ MY_PREF_2 ], BLIS_DOUBLE, TRUE,
 
-//char*                          bli_gks_l3_ukr_avail_impl_string( ukr_t ukr, num_t dt );
+	  BLIS_VA_END
+	);
 
-BLIS_EXPORT_BLIS err_t bli_gks_register_blksz( siz_t* bs_id );
+	blksz_t blkszs[ MY_NUM_BLOCK_SIZES ];
+	bszid_t bmults[ MY_NUM_BLOCK_SIZES ];
 
-BLIS_EXPORT_BLIS err_t bli_gks_register_ukr( siz_t* ukr_id );
+	// Update block sizes
+	//                                             s     d     c     z
+	bli_blksz_init_easy( &blkszs[ MY_BLKSZ_1 ],  320,  240,  182,   96 );
+	bmults[ MY_BLKSZ_1 ] = bszids[ MY_BLKSZ_1 ];
 
-BLIS_EXPORT_BLIS err_t bli_gks_register_ukr_pref( siz_t* ukr_pref_id );
+	bli_cntx_set_blkszs
+	(
+	  cntx,
 
-#endif
+	  bszids[ MY_BLKSZ_1 ], &blkszs[ MY_BLKSZ_1 ], bmults[ MY_BLKSZ_1 ],
+
+	  BLIS_VA_END
+	);
+
+	// <------------------------------------------------------------------------
+	// <------------------------------------------------------------------------
+	// <------------------------------------------------------------------------
+}
 

@@ -694,6 +694,7 @@ pass_config_kernel_registries()
 
 			# Add the kernels in klist to full_kernel_list. Duplicates will
 			# be filtered out later.
+			full_subconfig_list="${full_subconfig_list} ${cname}"
 			full_kernel_list="${full_kernel_list} ${klist}"
 
 			# Only consider updating the indirect blacklist (pass 0) or
@@ -775,6 +776,7 @@ pass_config_kernel_registries()
 	# Remove duplicates and excess whitespace from the full config and
 	# kernel lists.
 	full_config_list=$(canonicalize_ws "$(rm_duplicate_words_simple "${full_config_list}")")
+	full_subconfig_list=$(canonicalize_ws "$(rm_duplicate_words_simple "${full_subconfig_list}")")
 	full_kernel_list=$(canonicalize_ws "$(rm_duplicate_words_simple "${full_kernel_list}")")
 }
 
@@ -1389,9 +1391,11 @@ has_pragma_omp_simd()
 {
 	local main_c main_c_filepath binname rval
 
+	omp_simd_path="${omp_simd_path-${dist_path}/build}"
+
 	# Path to omp-simd detection source file.
 	main_c="omp_simd_detect.c"
-	main_c_filepath=$(find "${dist_path}/build" -name "${main_c}")
+	main_c_filepath=$(find "${omp_simd_path}" -name "${main_c}")
 
 	# Binary executable filename.
 	binname="omp_simd-detect.x"
@@ -2030,12 +2034,12 @@ check_compiler_version_ranges()
 
 check_assembler()
 {
-	local cc asm_dir cflags asm_fp
+	local cc cflags asm_fp
 
 	cc="${found_cc}"
 
 	# The directory where the assembly files will be.
-	asm_dir="${dist_path}/build"
+	asm_dir=${asm_dir-${dist_path}/build}
 
 	# Most of the time, we won't need any additional compiler flags.
 	cflags=""
@@ -2429,6 +2433,383 @@ check_tool()
 	echo "${rval}"
 }
 
+build_and_check_configurations()
+{
+	# Use the selected config name to look up the list of configurations
+	# and kernels associated with that name.
+	#config_list=${config_registry[${config_name}]}
+	#kernel_list=${kernel_registry[${config_name}]}
+	config_list=$(query_array "config_registry" "${config_name}")
+	kernel_list=$(query_array "kernel_registry" "${config_name}")
+
+	# Use the config_registry and kernel_registry to build a kconfig_registry
+	# for the selected config_name.
+	build_kconfig_registry "${config_name}"
+
+	# Print the configuration list and kernel list, if requested.
+	if [ "${show_config_list}" == "1" ]; then
+
+		echo "${script_name}: configuration list:"
+		#for k in "${!config_registry[@]}"; do
+		for cr_var in ${!config_registry_*}; do
+
+			#v=${config_registry[$k]}
+			k=${cr_var##config_registry_}; v=${!cr_var}
+
+			echo "${script_name}:   $k: ${v}"
+		done
+
+		echo "${script_name}: kernel list:"
+		#for k in "${!kernel_registry[@]}"; do
+		for kr_var in ${!kernel_registry_*}; do
+
+			#v=${kernel_registry[$k]}
+			k=${kr_var##kernel_registry_}; v=${!kr_var}
+
+			echo "${script_name}:   $k: ${v}"
+		done
+
+		echo "${script_name}: kernel-to-config map for '${config_name}':"
+		#for k in "${!kconfig_registry[@]}"; do
+		for kc_var in ${!kconfig_registry_*}; do
+
+			#v=${kconfig_registry[$k]}
+			k=${kc_var##kconfig_registry_}; v=${!kc_var}
+
+			echo "${script_name}:   $k: ${v}"
+		done
+	fi
+
+	# For each kernel in the kernel list, reduce the list of associated
+	# sub-configurations (in the kconfig_registry) to a singleton using
+	# the following rules:
+	# 1. If the list is a singleton, use that name.
+	# 2. If the list contains a sub-configuration name that matches the
+	#    kernel name, use that name.
+	# 3. Otherwise, use the first name in the list.
+	# We use the chosen singleton to ceate a "kernel:subconfig" pair, which
+	# we accumulate into a list. This list is the kernel-to-config map, or
+	# kconfig_map.
+
+	# We use a sorted version of kernel_list so that it ends up matching the
+	# display order of the kconfig_registry above.
+	# shellcheck disable=2086
+	kernel_list_sort=$(echo ${kernel_list} | xargs -n1 | sort -u)
+
+	kconfig_map=""
+	for kernel in ${kernel_list_sort}; do
+
+		#configs="${kconfig_registry[$kernel]}"
+		configs=$(query_array "kconfig_registry" "${kernel}")
+
+		has_one_kernel=$(is_singleton "${configs}")
+		contains_kernel=$(is_in_list "${kernel}" "${configs}")
+
+		# Check if the list is a singleton.
+		if [ "${has_one_kernel}" == "true" ]; then
+
+			reducedclist="${configs}"
+
+		# Check if the list contains a sub-config name that matches the kernel.
+		elif [ "${contains_kernel}" == "true" ]; then
+
+			reducedclist="${kernel}"
+
+		# Otherwise, use the last name.
+		else
+
+			last_config=${configs##* }
+			reducedclist="${last_config}"
+		fi
+
+		# Create a new "kernel:subconfig" pair and add it to the kconfig_map
+		# list, removing whitespace.
+		new_pair="${kernel}:${reducedclist}"
+		kconfig_map=$(canonicalize_ws "${kconfig_map} ${new_pair}")
+	done
+
+	if [ "${show_config_list}" == "1" ]; then
+
+		echo "${script_name}: kernel-to-config map for '${config_name}' (chosen pairs):"
+		for k in ${kconfig_map}; do
+			echo "${script_name}:   $k"
+		done
+	fi
+
+
+	echo "${script_name}: checking configuration against contents of '${registry_file}'."
+
+	# First, ensure that the config name is registered (ie: it is present
+	# in the config_registry file).
+	if [ -z "${config_list}" ]; then
+
+		# NOTE: This branch should never execute when using auto-detection,
+		# but we have it here just in case.
+		if [[ $1 = auto ]]; then
+
+			echo "${script_name}: 'auto-detected configuration '${config_name}' is NOT registered!"
+			echo "${script_name}: "
+			echo "${script_name}: *** Cannot continue with unregistered configuration '${config_name}'. ***"
+			echo "${script_name}: "
+			exit 1;
+
+		else
+
+			# At this point, we know: (a) config_list is empty; and (b) the user
+			# requested manual configuration. If the config_name given by the
+			# user is present in the configuration blacklist (config_blist),
+			# then we can deduce why the config_list is empty: because the only
+			# subconfig implied by config_name is blacklisted. Thus, we cannot
+			# proceed.
+
+			if [[ $(is_in_list "${config_name}" "${config_blist}") = true ]]; then
+
+				echo "${script_name}: 'user-specified configuration '${config_name}' is blacklisted!"
+				echo "${script_name}: "
+				echo "${script_name}: *** Cannot continue with blacklisted configuration '${config_name}'. ***"
+				echo "${script_name}: *** Try updating your compiler and/or assembler (binutils) versions. ***"
+				echo "${script_name}: "
+				exit 1;
+			else
+
+				# If config_name is NOT present in config_blist, then we know
+				# that config_list is empty simply because config_name is
+				# unregistered.
+
+				echo "${script_name}: 'user-specified configuration '${config_name}' is NOT registered!"
+				echo "${script_name}: "
+				echo "${script_name}: *** Cannot continue with unregistered configuration '${config_name}'. ***"
+				echo "${script_name}: "
+				exit 1;
+			fi
+		fi
+	else
+
+		# This branch executes when the configuration is found to be present
+		# (i.e. registered) in the config_registry file.
+
+		echo "${script_name}: configuration '${config_name}' is registered."
+		echo "${script_name}: '${config_name}' is defined as having the following sub-configurations:"
+		echo "${script_name}:    ${config_list}"
+		echo "${script_name}: which collectively require the following kernels:"
+		echo "${script_name}:    ${kernel_list}"
+
+	fi
+
+
+	echo "${script_name}: checking sub-configurations:"
+
+	# Now, verify that the constituent configurations associated with the
+	# config name are all valid.
+	for conf in ${config_list}; do
+
+		# First confirm that the current configuration is registered.
+		#this_clist=${config_registry[${conf}]}
+		this_clist=$(query_array "config_registry" "${conf}")
+
+		# If the config_list associated with conf is empty, then it was
+		# never entered into the config_registry to begin with. Thus,
+		# conf must be unregistered.
+		if [ -z "${this_clist}" ]; then
+			echo "${script_name}: '${conf}' is NOT registered!"
+			echo "${script_name}: "
+			echo "${script_name}: *** Cannot continue with unregistered configuration '${conf}'. ***"
+			echo "${script_name}: "
+			exit 1;
+		else
+			echo -n "${script_name}:   '${conf}' is registered."
+		fi
+
+		# Then confirm that the current sub-configuration directory exists.
+		if [ ! -d "${config_dirpath}/${conf}" ]; then
+			echo "..but does NOT exist!"
+			echo "${script_name}: "
+			echo "${script_name}: *** Cannot continue with nonexistent configuration '${conf}'. ***"
+			echo "${script_name}: "
+			exit 1;
+		else
+			echo "..and exists."
+		fi
+	done
+
+
+	echo "${script_name}: checking sub-configurations' requisite kernels:"
+
+	# Also, let's verify that the requisite kernel sets associated with
+	# the config name all correspond to directories that exist.
+	for kernel in ${kernel_list}; do
+
+		echo -n "${script_name}:   '${kernel}' kernels..."
+
+		# Confirm that the current kernel sub-directory exists.
+		if [ ! -d "${kernels_dirpath}/${kernel}" ]; then
+			echo "do NOT exist!"
+			echo "${script_name}: "
+			echo "${script_name}: *** Cannot continue with nonexistent kernel '${kernel}'. ***"
+			echo "${script_name}: "
+			exit 1;
+		else
+			echo "exist."
+		fi
+	done
+}
+
+check_build_tools()
+{
+	# -- Check the operating system --------------------------------------------
+
+	os_name=$(uname -s)
+	os_vers=$(uname -r)
+	echo "${script_name}: detected ${os_name} kernel version ${os_vers}."
+
+	# Define a single variable off of which we can branch to tell if we are
+	# building for Windows.
+	is_win=no
+	if [[ $os_name == MSYS* ]] || \
+	   [[ $os_name == MINGW* ]]  || \
+	   [[ $os_name == CYGWIN* ]] ; then
+		is_win=yes
+	fi
+
+
+	# -- Find a python interpreter ---------------------------------------------
+
+	# Acquire the default python search order.
+	python_search_list=$(get_python_search_list)
+
+	# Select a python interpreter from the default list, or from PYTHON if it
+	# refers to a valid binary.
+	# shellcheck disable=2153
+	select_tool_w_env "${python_search_list}" "${PYTHON}" "PYTHON" \
+	                  "python interpreter" "yes" found_python
+
+	# -- Check the python version ----------------------------------------------
+
+	# Check the python interpreter's version.
+	get_python_version
+	check_python
+
+
+	# -- Find a C compiler -----------------------------------------------------
+
+	# Acquire the default compiler search order. This will vary based on os_name.
+	cc_search_list=$(get_cc_search_list)
+
+	# Select a C compiler from the default list, or from CC if it refers to a
+	# valid binary.
+	select_tool_w_env "${cc_search_list}" "${CC}" "CC" \
+	                  "C compiler" "yes" found_cc
+
+	# Also check the compiler to see if we are (cross-)compiling for Windows
+	if "${found_cc}" -dM -E - < /dev/null 2> /dev/null | grep -q _WIN32; then
+		is_win=yes
+	fi
+	is_msvc=no
+	if "${found_cc}" -dM -E - < /dev/null 2> /dev/null | grep -q _MSC_VER; then
+		is_msvc=yes
+	fi
+
+
+	# -- Check the compiler version --------------------------------------------
+
+	# Initialize the blacklist to empty.
+	blacklist_init
+
+	# Check the compiler's version. Certain versions of certain compilers
+	# will preclude building certain sub-configurations, which are added
+	# to a blacklist. We also make note of certain version ranges that
+	# will be useful to know about later.
+	get_compiler_version
+	check_compiler
+	check_compiler_version_ranges
+
+	# Now check the assembler's ability to assemble code. Older versions
+	# of binutils may not be aware of certain instruction sets. Those
+	# sub-configurations employing kernels that use such instruction sets
+	# will also be blacklisted.
+	get_binutils_version
+	check_assembler
+
+	# Check if there is any incompatibility due to the operating system.
+	check_os
+
+	# Remove duplicates and whitespace from the blacklist.
+	blacklist_cleanup
+
+	if [ -n "${config_blist}" ]; then
+
+		echo "${script_name}: configuration blacklist:"
+		echo "${script_name}:   ${config_blist}"
+	fi
+
+
+	# -- Find a C++ compiler ---------------------------------------------------
+
+	# Acquire the default C++ compiler search order. This will vary based on
+	# os_name.
+	cxx_search_list=$(get_cxx_search_list)
+
+	# Select a C compiler from the default list, or from CC if it refers to a
+	# valid binary.
+	select_tool_w_env "${cxx_search_list}" "${CXX}" "CXX" \
+	                  "C++ compiler" "no" found_cxx
+
+
+	# -- Find a Fortran compiler -----------------------------------------------
+
+	# Acquire the default Fortran compiler search order.
+	fc_search_list=$(get_fc_search_list)
+
+	# Select a Fortran compiler from the default list, or from FC if it refers
+	# to a valid binary.
+	# NOTE: A Fortran compiler is not necessary for building BLIS. The only
+	# reason we might want to query it is to detect the style of returning
+	# complex values from functions. The 'gnu' style returns complex values
+	# from functions normally, via the C language return statement, while the
+	# 'intel' style returns them in a "hidden" parameter (inserted by the
+	# compiler) that precedes all other function parameters.
+	select_tool_w_env "${fc_search_list}" "${FC}" "FC" \
+	                  "Fortran compiler" "no" found_fc
+
+
+	# -- Find a static library archiver ----------------------------------------
+
+	# Acquire the default archiver search order.
+	ar_search_list=$(get_ar_search_list)
+
+	# Select an archiver from the default list, or from AR if it refers
+	# to a valid binary.
+	select_tool_w_env "${ar_search_list}" "${AR}" "AR" \
+	                  "library archiver" "yes" found_ar
+
+
+	# -- Find an archive indexer -----------------------------------------------
+
+	# Acquire the default archive indexer search order.
+	ranlib_search_list=$(get_ranlib_search_list)
+
+	# Select an archive indexer from the default list, or from RANLIB if it
+	# refers to a valid binary.
+	select_tool_w_env "${ranlib_search_list}" "${RANLIB}" "RANLIB" \
+	                  "archive indexer" "yes" found_ranlib
+}
+
+create_makefile_fragment()
+{
+	local recursive
+	recursive="-r"
+	if [ "$4" = "false" ]; then
+		recursive=""
+	fi
+	echo "${script_name}: creating makefile fragments in $3"
+	"${gen_make_frags_sh}"                       \
+		-h ${recursive} -v0                      \
+		-o "${script_name}"                      \
+		-p "$1" "$2" "$3"                        \
+		"${gen_make_frags_dirpath}/fragment.mk"  \
+		"${gen_make_frags_dirpath}/suffix_list"  \
+		"${gen_make_frags_dirpath}/ignore_list"
+}
 
 
 #
@@ -2658,6 +3039,7 @@ blis_main()
 
 	# The list of all sub-configurations and configuration families.
 	full_config_list=''
+	full_subconfig_list=''
 
 	# The list of kernel sets that will be needed by the sub-configurations
 	# in config_list.
@@ -3003,144 +3385,7 @@ blis_main()
 		done
 	done
 
-
-	# -- Check the operating system --------------------------------------------
-
-	os_name=$(uname -s)
-	os_vers=$(uname -r)
-	echo "${script_name}: detected ${os_name} kernel version ${os_vers}."
-
-	# Define a single variable off of which we can branch to tell if we are
-	# building for Windows.
-	is_win=no
-	if [[ $os_name == MSYS* ]] || \
-	   [[ $os_name == MINGW* ]]  || \
-	   [[ $os_name == CYGWIN* ]] ; then
-		is_win=yes
-	fi
-
-
-	# -- Find a python interpreter ---------------------------------------------
-
-	# Acquire the default python search order.
-	python_search_list=$(get_python_search_list)
-
-	# Select a python interpreter from the default list, or from PYTHON if it
-	# refers to a valid binary.
-	# shellcheck disable=2153
-	select_tool_w_env "${python_search_list}" "${PYTHON}" "PYTHON" \
-	                  "python interpreter" "yes" found_python
-
-	# -- Check the python version ----------------------------------------------
-
-	# Check the python interpreter's version.
-	get_python_version
-	check_python
-
-
-	# -- Find a C compiler -----------------------------------------------------
-
-	# Acquire the default compiler search order. This will vary based on os_name.
-	cc_search_list=$(get_cc_search_list)
-
-	# Select a C compiler from the default list, or from CC if it refers to a
-	# valid binary.
-	select_tool_w_env "${cc_search_list}" "${CC}" "CC" \
-	                  "C compiler" "yes" found_cc
-
-	# Also check the compiler to see if we are (cross-)compiling for Windows
-	if "${found_cc}" -dM -E - < /dev/null 2> /dev/null | grep -q _WIN32; then
-		is_win=yes
-	fi
-	is_msvc=no
-	if "${found_cc}" -dM -E - < /dev/null 2> /dev/null | grep -q _MSC_VER; then
-		is_msvc=yes
-	fi
-
-
-	# -- Check the compiler version --------------------------------------------
-
-	# Initialize the blacklist to empty.
-	blacklist_init
-
-	# Check the compiler's version. Certain versions of certain compilers
-	# will preclude building certain sub-configurations, which are added
-	# to a blacklist. We also make note of certain version ranges that
-	# will be useful to know about later.
-	get_compiler_version
-	check_compiler
-	check_compiler_version_ranges
-
-	# Now check the assembler's ability to assemble code. Older versions
-	# of binutils may not be aware of certain instruction sets. Those
-	# sub-configurations employing kernels that use such instruction sets
-	# will also be blacklisted.
-	get_binutils_version
-	check_assembler
-
-	# Check if there is any incompatibility due to the operating system.
-	check_os
-
-	# Remove duplicates and whitespace from the blacklist.
-	blacklist_cleanup
-
-	if [ -n "${config_blist}" ]; then
-
-		echo "${script_name}: configuration blacklist:"
-		echo "${script_name}:   ${config_blist}"
-	fi
-
-
-	# -- Find a C++ compiler ---------------------------------------------------
-
-	# Acquire the default C++ compiler search order. This will vary based on
-	# os_name.
-	cxx_search_list=$(get_cxx_search_list)
-
-	# Select a C compiler from the default list, or from CC if it refers to a
-	# valid binary.
-	select_tool_w_env "${cxx_search_list}" "${CXX}" "CXX" \
-	                  "C++ compiler" "no" found_cxx
-
-
-	# -- Find a Fortran compiler -----------------------------------------------
-
-	# Acquire the default Fortran compiler search order.
-	fc_search_list=$(get_fc_search_list)
-
-	# Select a Fortran compiler from the default list, or from FC if it refers
-	# to a valid binary.
-	# NOTE: A Fortran compiler is not necessary for building BLIS. The only
-	# reason we might want to query it is to detect the style of returning
-	# complex values from functions. The 'gnu' style returns complex values
-	# from functions normally, via the C language return statement, while the
-	# 'intel' style returns them in a "hidden" parameter (inserted by the
-	# compiler) that precedes all other function parameters.
-	select_tool_w_env "${fc_search_list}" "${FC}" "FC" \
-	                  "Fortran compiler" "no" found_fc
-
-
-	# -- Find a static library archiver ----------------------------------------
-
-	# Acquire the default archiver search order.
-	ar_search_list=$(get_ar_search_list)
-
-	# Select an archiver from the default list, or from AR if it refers
-	# to a valid binary.
-	select_tool_w_env "${ar_search_list}" "${AR}" "AR" \
-	                  "library archiver" "yes" found_ar
-
-
-	# -- Find an archive indexer -----------------------------------------------
-
-	# Acquire the default archive indexer search order.
-	ranlib_search_list=$(get_ranlib_search_list)
-
-	# Select an archive indexer from the default list, or from RANLIB if it
-	# refers to a valid binary.
-	select_tool_w_env "${ranlib_search_list}" "${RANLIB}" "RANLIB" \
-	                  "archive indexer" "yes" found_ranlib
-
+	check_build_tools
 
 	# -- Read the configuration registry ---------------------------------------
 
@@ -3278,223 +3523,7 @@ blis_main()
 
 	fi
 
-	# Use the selected config name to look up the list of configurations
-	# and kernels associated with that name.
-	#config_list=${config_registry[${config_name}]}
-	#kernel_list=${kernel_registry[${config_name}]}
-	config_list=$(query_array "config_registry" "${config_name}")
-	kernel_list=$(query_array "kernel_registry" "${config_name}")
-
-	# Use the config_registry and kernel_registry to build a kconfig_registry
-	# for the selected config_name.
-	build_kconfig_registry "${config_name}"
-
-	# Print the configuration list and kernel list, if requested.
-	if [ "${show_config_list}" == "1" ]; then
-
-		echo "${script_name}: configuration list:"
-		#for k in "${!config_registry[@]}"; do
-		for cr_var in ${!config_registry_*}; do
-
-			#v=${config_registry[$k]}
-			k=${cr_var##config_registry_}; v=${!cr_var}
-
-			echo "${script_name}:   $k: ${v}"
-		done
-
-		echo "${script_name}: kernel list:"
-		#for k in "${!kernel_registry[@]}"; do
-		for kr_var in ${!kernel_registry_*}; do
-
-			#v=${kernel_registry[$k]}
-			k=${kr_var##kernel_registry_}; v=${!kr_var}
-
-			echo "${script_name}:   $k: ${v}"
-		done
-
-		echo "${script_name}: kernel-to-config map for '${config_name}':"
-		#for k in "${!kconfig_registry[@]}"; do
-		for kc_var in ${!kconfig_registry_*}; do
-
-			#v=${kconfig_registry[$k]}
-			k=${kc_var##kconfig_registry_}; v=${!kc_var}
-
-			echo "${script_name}:   $k: ${v}"
-		done
-	fi
-
-	# For each kernel in the kernel list, reduce the list of associated
-	# sub-configurations (in the kconfig_registry) to a singleton using
-	# the following rules:
-	# 1. If the list is a singleton, use that name.
-	# 2. If the list contains a sub-configuration name that matches the
-	#    kernel name, use that name.
-	# 3. Otherwise, use the first name in the list.
-	# We use the chosen singleton to ceate a "kernel:subconfig" pair, which
-	# we accumulate into a list. This list is the kernel-to-config map, or
-	# kconfig_map.
-
-	# We use a sorted version of kernel_list so that it ends up matching the
-	# display order of the kconfig_registry above.
-	# shellcheck disable=2086
-	kernel_list_sort=$(echo ${kernel_list} | xargs -n1 | sort -u)
-
-	kconfig_map=""
-	for kernel in ${kernel_list_sort}; do
-
-		#configs="${kconfig_registry[$kernel]}"
-		configs=$(query_array "kconfig_registry" "${kernel}")
-
-		has_one_kernel=$(is_singleton "${configs}")
-		contains_kernel=$(is_in_list "${kernel}" "${configs}")
-
-		# Check if the list is a singleton.
-		if [ "${has_one_kernel}" == "true" ]; then
-
-			reducedclist="${configs}"
-
-		# Check if the list contains a sub-config name that matches the kernel.
-		elif [ "${contains_kernel}" == "true" ]; then
-
-			reducedclist="${kernel}"
-
-		# Otherwise, use the last name.
-		else
-
-			last_config=${configs##* }
-			reducedclist="${last_config}"
-		fi
-
-		# Create a new "kernel:subconfig" pair and add it to the kconfig_map
-		# list, removing whitespace.
-		new_pair="${kernel}:${reducedclist}"
-		kconfig_map=$(canonicalize_ws "${kconfig_map} ${new_pair}")
-	done
-
-	if [ "${show_config_list}" == "1" ]; then
-
-		echo "${script_name}: kernel-to-config map for '${config_name}' (chosen pairs):"
-		for k in ${kconfig_map}; do
-			echo "${script_name}:   $k"
-		done
-	fi
-
-
-	echo "${script_name}: checking configuration against contents of '${registry_file}'."
-
-	# First, ensure that the config name is registered (ie: it is present
-	# in the config_registry file).
-	if [ -z "${config_list}" ]; then
-
-		# NOTE: This branch should never execute when using auto-detection,
-		# but we have it here just in case.
-		if [[ $1 = auto ]]; then
-
-			echo "${script_name}: 'auto-detected configuration '${config_name}' is NOT registered!"
-			echo "${script_name}: "
-			echo "${script_name}: *** Cannot continue with unregistered configuration '${config_name}'. ***"
-			echo "${script_name}: "
-			exit 1;
-
-		else
-
-			# At this point, we know: (a) config_list is empty; and (b) the user
-			# requested manual configuration. If the config_name given by the
-			# user is present in the configuration blacklist (config_blist),
-			# then we can deduce why the config_list is empty: because the only
-			# subconfig implied by config_name is blacklisted. Thus, we cannot
-			# proceed.
-
-			if [[ $(is_in_list "${config_name}" "${config_blist}") = true ]]; then
-
-				echo "${script_name}: 'user-specified configuration '${config_name}' is blacklisted!"
-				echo "${script_name}: "
-				echo "${script_name}: *** Cannot continue with blacklisted configuration '${config_name}'. ***"
-				echo "${script_name}: *** Try updating your compiler and/or assembler (binutils) versions. ***"
-				echo "${script_name}: "
-				exit 1;
-			else
-
-				# If config_name is NOT present in config_blist, then we know
-				# that config_list is empty simply because config_name is
-				# unregistered.
-
-				echo "${script_name}: 'user-specified configuration '${config_name}' is NOT registered!"
-				echo "${script_name}: "
-				echo "${script_name}: *** Cannot continue with unregistered configuration '${config_name}'. ***"
-				echo "${script_name}: "
-				exit 1;
-			fi
-		fi
-	else
-
-		# This branch executes when the configuration is found to be present
-		# (i.e. registered) in the config_registry file.
-
-		echo "${script_name}: configuration '${config_name}' is registered."
-		echo "${script_name}: '${config_name}' is defined as having the following sub-configurations:"
-		echo "${script_name}:    ${config_list}"
-		echo "${script_name}: which collectively require the following kernels:"
-		echo "${script_name}:    ${kernel_list}"
-
-	fi
-
-
-	echo "${script_name}: checking sub-configurations:"
-
-	# Now, verify that the constituent configurations associated with the
-	# config name are all valid.
-	for conf in ${config_list}; do
-
-		# First confirm that the current configuration is registered.
-		#this_clist=${config_registry[${conf}]}
-		this_clist=$(query_array "config_registry" "${conf}")
-
-		# If the config_list associated with conf is empty, then it was
-		# never entered into the config_registry to begin with. Thus,
-		# conf must be unregistered.
-		if [ -z "${this_clist}" ]; then
-			echo "${script_name}: '${conf}' is NOT registered!"
-			echo "${script_name}: "
-			echo "${script_name}: *** Cannot continue with unregistered configuration '${conf}'. ***"
-			echo "${script_name}: "
-			exit 1;
-		else
-			echo -n "${script_name}:   '${conf}' is registered."
-		fi
-
-		# Then confirm that the current sub-configuration directory exists.
-		if [ ! -d "${config_dirpath}/${conf}" ]; then
-			echo "..but does NOT exist!"
-			echo "${script_name}: "
-			echo "${script_name}: *** Cannot continue with nonexistent configuration '${conf}'. ***"
-			echo "${script_name}: "
-			exit 1;
-		else
-			echo "..and exists."
-		fi
-	done
-
-
-	echo "${script_name}: checking sub-configurations' requisite kernels:"
-
-	# Also, let's verify that the requisite kernel sets associated with
-	# the config name all correspond to directories that exist.
-	for kernel in ${kernel_list}; do
-
-		echo -n "${script_name}:   '${kernel}' kernels..."
-
-		# Confirm that the current kernel sub-directory exists.
-		if [ ! -d "${kernels_dirpath}/${kernel}" ]; then
-			echo "do NOT exist!"
-			echo "${script_name}: "
-			echo "${script_name}: *** Cannot continue with nonexistent kernel '${kernel}'. ***"
-			echo "${script_name}: "
-			exit 1;
-		else
-			echo "exist."
-		fi
-	done
+	build_and_check_configurations
 
 	# In order to determine the default behavior of the --with[out]-memkind
 	# option, we try to detect whether libmemkind is available. If it is,
@@ -4233,6 +4262,7 @@ blis_main()
 	add_config_var config_list
 	add_config_var kernel_list
 	add_config_var full_config_list
+	add_config_var full_subconfig_list
 	add_config_var full_kernel_list
 	add_config_var kconfig_map
 	add_config_var os_name
@@ -4250,6 +4280,7 @@ blis_main()
 	add_config_var aocc_older_than_3_0_0
 	add_config_var CC                        found_cc
 	add_config_var CXX                       found_cxx
+	add_config_var FC                        found_fc
 	add_config_var AR                        found_ar
 	add_config_var RANLIB                    found_ranlib
 	add_config_var PYTHON                    found_python
@@ -4472,17 +4503,6 @@ blis_main()
 
 	# -- Generate makefile fragements ------------------------------------------
 
-	create_makefile_fragment() {
-		echo "${script_name}: creating makefile fragments in $3"
-		"${gen_make_frags_sh}"                           \
-			-h -r -v0                                \
-			-o "${script_name}"                      \
-			-p "$1" "$2" "$3"                        \
-			"${gen_make_frags_dirpath}/fragment.mk"  \
-			"${gen_make_frags_dirpath}/suffix_list"  \
-			"${gen_make_frags_dirpath}/ignore_list"
-	}
-
 	clist_contains_cname=$(is_in_list "${config_name}" "${config_list}")
 
 	# If the config_list does not already contain the config_name (i.e.,
@@ -4598,15 +4618,42 @@ print_usage_plugin()
 
  Usage:
 
-   ${script_name} [options] [env. vars.] confname
+   ${script_name} [options] [env. vars.] plugin_name
 
  Arguments:
 
    plugin_name   The name of the plugin which is being configured. This
                  name will form part of the symbol name for the kernel
-                 registration function.
+                 registration function. This argument is optional if it
+                 can be determined from the name of an existing
+                 bli_plugin_<plugin_name>.h file.
 
  Options:
+
+   --init
+
+                 A synonym for '--disable-examples --enable-templates --disable-build'.
+
+   --build
+
+                 A synonym for '--disable-examples --disable-templates --enable-build'.
+
+   --disable-examples, --enable-examples
+
+                 Do not include (included by default) example code for plugin
+                 registration, kernels, etc.
+
+   --disable-templates, --enable-templates
+
+                 Do not create (included by default) files which make up the
+                 basic plug-in file structure, for example if the plugin has
+                 already been created and only build files need to be generated.
+
+   --disable-build, --enable-build
+
+                 Do not create (included by default) files necessary for
+                 actually building the plugin. ${script_name} can be re-run
+                 later to generate these files if desired.
 
    --enable-verbose-make, --disable-verbose-make
 
@@ -4709,12 +4756,22 @@ EOF
 
 get_config_var()
 {
-	echo "$(grep "^ *$1 *:=" ${sharedir}/config.mk | sed 's/'$1' *:= *//')"
+	echo "$(grep "^ *$1 *:=" ${sharedir}/blis/config.mk | sed 's/'$1' *:= *//')"
 }
 
 maybe_echo()
 {
 	[ ${quiet_flag} == '0' ] && echo "$@"
+}
+
+strip_examples()
+{
+	local src dest
+
+	src="$1"
+	dest="$2"
+
+	perl -p0 -e 's/[^\n]*----->.*<-----[^\n]*//gms;' -e 's/[^\n]*<-----[^\n]*\n//gms;' "${src}" > "${dest}"
 }
 
 plugin_main()
@@ -4727,19 +4784,69 @@ plugin_main()
 	# The path to the script. We need this to find the top-level directory
 	# of the source distribution in the event that the user has chosen to
 	# build elsewhere.
-	sharedir=${0%"/${script_name}"}
+	sharedir=${0%"/${script_name}"}/..
 	add_config_var sharedir
+
+	# Other paths which we'll need to build the plugin
+	prefix=$(get_config_var prefix | sed 's/\$/\\\\\\$/g')
+	exec_prefix=$(get_config_var exec_prefix | sed 's/\$/\\\\\\$/g')
+	libdir=$(get_config_var libdir | sed 's/\$/\\\\\\$/g')
+	includedir=$(get_config_var includedir | sed 's/\$/\\\\\\$/g')
+	add_config_var prefix
+	add_config_var exec_prefix
+	add_config_var libdir
+	add_config_var includedir
+
+	# Compiler information which might be overridden for this plugin.
+	CC="${CC-$(get_config_var CC)}"
+	CXX="${CXX-$(get_config_var CXX)}"
+	FC="${FC-$(get_config_var FC)}"
+	PYTHON="${PYTHON-$(get_config_var PYTHON)}"
+	AR="${AR-$(get_config_var AR)}"
+	RANLIB="${RANLIB-$(get_config_var RANLIB)}"
+	add_config_var CC        found_cc
+	add_config_var CC_VENDOR cc_vendor
+	add_config_var CXX       found_cxx
+	add_config_var FC        found_fc
+	add_config_var AR        found_ar
+	add_config_var RANLIB    found_ranlib
+	add_config_var PYTHON    found_python
+
+	add_config_var gcc_older_than_4_9_0
+	add_config_var gcc_older_than_6_1_0
+	add_config_var gcc_older_than_9_1_0
+	add_config_var gcc_older_than_10_3_0
+	add_config_var clang_older_than_9_0_0
+	add_config_var clang_older_than_12_0_0
+	add_config_var aocc_older_than_2_0_0
+	add_config_var aocc_older_than_3_0_0
 
 	# The path to the directory in which we are building. We do this to
 	# make explicit that we distinguish between the top-level directory
 	# of the distribution and the directory in which we are building.
 	cur_dirpath="."
 
+	# The name of the (top-level) configuration directory.
+	config_dir='config'
+	config_dirpath="${config_dir}"
+
+	# The name of the (top-level) kernels directory.
+	kernels_dir='kernels'
+	kernels_dirpath="${kernels_dir}"
+
+	# The name of the (top-level) reference kernels directory.
+	refkern_dir='ref_kernels'
+	refkern_dirpath="${refkern_dir}"
+
+	asm_dir="${sharedir}/blis"
+	omp_simd_path="${sharedir}/blis"
+
 	# Path to 'mirror-tree.sh' script.
-	mirror_tree_sh="${sharedir}/mirror-tree.sh"
+	mirror_tree_sh="${sharedir}/blis/mirror-tree.sh"
 
 	# Path to 'gen-make-frags.sh' script.
-	gen_make_frags_sh="${sharedir}/gen-make-frag.sh"
+	gen_make_frags_sh="${sharedir}/blis/gen-make-frag.sh"
+	gen_make_frags_dirpath="${sharedir}/blis"
 
 	# The major and minor/build .so version numbers.
 	so_version_major=$(get_config_var SO_MAJOR)
@@ -4752,10 +4859,14 @@ plugin_main()
 	add_config_var cflags_preset
 	add_config_var ldflags_preset
 
+
 	# Option variables.
 	quiet_flag='0'
 	force_flag='0'
 	show_config_list='0'
+	examples_flag='1'
+	buildfiles_flag='1'
+	templates_flag='1'
 
 	# Additional flags.
 	enable_verbose=$(get_config_var ENABLE_VERBOSE)
@@ -4763,11 +4874,19 @@ plugin_main()
 	enable_shared=$(get_config_var MK_ENABLE_SHARED)
 	enable_rpath=$(get_config_var MK_ENABLE_RPATH)
 	export_shared=$(get_config_var EXPORT_SHARED)
+	enable_asan=$(get_config_var MK_ENABLE_ASAN)
+	enable_debug=$(get_config_var ENABLE_DEBUG)
+	debug_type=$(get_config_var DEBUG_TYPE)
+	enable_arg_max_hack=$(get_config_var ARG_MAX_HACK)
 	add_config_var enable_verbose
 	add_config_var mk_enable_static enable_static
 	add_config_var mk_enable_shared enable_shared
 	add_config_var enable_rpath
 	add_config_var export_shared
+	add_config_var enable_asan
+	add_config_var enable_debug
+	add_config_var debug_type
+	add_config_var enable_arg_max_hack
 
 	# -- Configuration registry --
 
@@ -4791,6 +4910,7 @@ plugin_main()
 
 	# The list of all sub-configurations and configuration families.
 	full_config_list=$(get_config_var FULL_CONFIG_LIST)
+	full_subconfig_list=$(get_config_var FULL_SUBCONFIG_LIST)
 
 	# The list of all kernel sets.
 	full_kernel_list=$(get_config_var FULL_KERNEL_LIST)
@@ -4802,13 +4922,25 @@ plugin_main()
 
 		# Process our command line options.
 		unset OPTIND
-		while getopts ":hcd:e:qf" opt; do
+		while getopts ":hcd:e:qf-:" opt; do
 			case $opt in
 				-)
 					case "$OPTARG" in
 
 						help)
 							print_usage_plugin
+							;;
+
+						init)
+							examples_flag=0
+							templates_flag=1
+							buildfiles_flag=0
+							;;
+
+						build)
+							examples_flag=0
+							templates_flag=0
+							buildfiles_flag=1
 							;;
 
 						quiet)
@@ -4819,11 +4951,56 @@ plugin_main()
 							force_flag=1
 							;;
 
+						enable-examples)
+							examples_flag=1
+							;;
+						disable-examples)
+							examples_flag=0
+							;;
+
+						enable-templates)
+							templates_flag=1
+							;;
+						disable-templates)
+							templates_flag=0
+							;;
+
+						enable-build)
+							buildfiles_flag=1
+							;;
+						disable-build)
+							buildfiles_flag=0
+							;;
+
+						enable-debug)
+							debug_type=noopt
+							;;
+						enable-debug=*)
+							debug_type=${OPTARG#*=}
+							;;
+						disable-debug)
+							debug_type='off'
+							;;
+
+						enable-asan)
+							enable_asan='yes'
+							;;
+						disable-asan)
+							enable_asan='no'
+							;;
+
 						enable-verbose-make)
 							enable_verbose='yes'
 							;;
 						disable-verbose-make)
 							enable_verbose='no'
+							;;
+
+						enable-arg-max-hack)
+							enable_arg_max_hack='yes'
+							;;
+						disable-arg-max-hack)
+							enable_arg_max_hack='no'
 							;;
 
 						enable-static)
@@ -4863,7 +5040,6 @@ plugin_main()
 					print_usage_plugin
 					;;
 				d)
-					debug_flag=1
 					debug_type=$OPTARG
 					;;
 				e)
@@ -4903,82 +5079,279 @@ plugin_main()
 		done
 	done
 
-	if [ $# != "1" ]; then   # more than one configuration argument given.
+	# Get the name of the plugin to build.
+	if [ $# -gt "1" ]; then   # more than one configuration argument given.
 		print_usage_plugin
+	elif [ $# == "0" ]; then   # try to guess the plugin name.
+		plugin_h=$(ls bli_plugin_*.h 2>/dev/null)
+		if [ -z ${plugin_h} ]; then
+			print_usage_plugin
+		else
+			plugin_name=$(echo ${plugin_h} | sed -e 's/bli_plugin_//' -e 's/\.h//')
+		fi
+	else
+		plugin_name="${1}"
 	fi
-
-	# The name of the plugin to build.
-	plugin_name="${1}"
 	add_config_var plugin_name
 
-	# -- Let's begin! --
+	maybe_echo "${script_name}: configuring BLIS plugin '${plugin_name}'"
 
-	maybe_echo "${script_name}: configuring BLIS plugin \"${plugin_name}\""
-
-	# -- Makefile --
-
-	maybe_echo -n "${script_name}: copying Makefile..."
-
-	if [ -e Makefile ] && [ ${force_flag} == '0' ]; then
-		maybe_echo "already done"
+	# Check if CFLAGS is non-empty.
+	if [ -n "${CFLAGS}" ]; then
+		cflags_preset="${CFLAGS}"
+		maybe_echo "${script_name}: detected preset CFLAGS; prepending:"
+		maybe_echo "${script_name}:   ${cflags_preset}"
 	else
-		cp ${sharedir}/Makefile.plugin Makefile
-		maybe_echo "done"
+		cflags_preset=''
+		maybe_echo "${script_name}: no preset CFLAGS detected."
 	fi
 
-	# -- config_registry --
-
-	maybe_echo -n "${script_name}: copying the configuration registry..."
-
-	if [ -e config_registry ] && [ ${force_flag} == '0' ]; then
-		maybe_echo "already done"
+	# Check if LDFLAGS is non-empty.
+	if [ -n "${LDFLAGS}" ]; then
+		ldflags_preset="${LDFLAGS}"
+		maybe_echo "${script_name}: detected preset LDFLAGS; prepending:"
+		maybe_echo "${script_name}:   ${ldflags_preset}"
 	else
-		cp ${sharedir}/config_registry config_registry
-		maybe_echo "done"
+		ldflags_preset=''
+		maybe_echo "${script_name}: no preset LDFLAGS detected."
 	fi
 
-	# -- ref_kernels directory --
-
-	maybe_echo -n "${script_name}: creating ref_kernels directory..."
-
-	if [ -e ref_kernels/plugin_cntx_ref.c ] && [ ${force_flag} == '0' ]; then
-		maybe_echo "already done"
+	# Check if the verbose make flag was specified.
+	if [[ ${enable_verbose} = yes ]]; then
+		maybe_echo "${script_name}: enabling verbose make output. (disable with 'make V=0'.)"
 	else
-		mkdir -p ref_kernels
-		cp ${sharedir}/plugin/bli_plugin_init_ref.c ref_kernels
-		maybe_echo "done"
+		maybe_echo "${script_name}: disabling verbose make output. (enable with 'make V=1'.)"
 	fi
 
-	# -- config directory --
+	# Check if the ARG_MAX hack was requested.
+	if [[ ${enable_arg_max_hack} = yes ]]; then
+		maybe_echo "${script_name}: enabling ARG_MAX hack."
+	else
+		echo "${script_name}: disabling ARG_MAX hack."
+	fi
 
-	maybe_echo "${script_name}: creating config directories:"
+	# Check if the debug flag was specified.
+	if [[ ${debug_type} = opt ]]; then
+		enable_debug='yes'
+		maybe_echo "${script_name}: enabling debug symbols with optimizations."
+	elif [[ ${debug_type} = sde ]]; then
+		enable_debug='yes'
+		maybe_echo "${script_name}: enabling SDE processor emulation."
+	elif [[ ${debug_type} = noopt ]]; then
+		enable_debug='yes'
+		maybe_echo "${script_name}: enabling debug symbols; optimizations disabled."
+	else
+		debug_type='off'
+		enable_debug='no'
+		maybe_echo "${script_name}: debug symbols disabled."
+	fi
 
-	for config in ${full_config_list}; do
-		maybe_echo -n "${script_name}: config/${config}..."
+	# Check if the AddressSanitizer flag was specified.
+	if [[ ${enable_asan} = yes ]]; then
+		maybe_echo "${script_name}: enabling AddressSanitizer support (except for optimized kernels)."
+	else
+		enable_asan='no'
+		maybe_echo "${script_name}: AddressSanitizer support disabled."
+	fi
 
-		if [ -e config/${config}/make_defs.mk ] && [ ${force_flag} == '0' ]; then
+	# Check if the static lib flag was specified.
+	if   [[ ${enable_static} = yes && ${enable_shared} = yes ]]; then
+		maybe_echo "${script_name}: building BLIS plugin '${plugin_name}' as both static and shared libraries."
+		enable_shared_01=1
+	elif [[ ${enable_static} = no && ${enable_shared} = yes ]]; then
+		maybe_echo "${script_name}: building BLIS plugin '${plugin_name}' as a shared library (static library disabled)."
+		enable_shared_01=1
+	elif [[ ${enable_static} = yes && ${enable_shared} = no ]]; then
+		maybe_echo "${script_name}: building BLIS plugin '${plugin_name}' as a static library (shared library disabled)."
+		enable_shared_01=0
+	else
+		maybe_echo "${script_name}: Both static and shared libraries were disabled."
+		maybe_echo "${script_name}: *** Please enable one (or both) to continue."
+		exit 1
+	fi
+
+	# Check if the "export shared" flag was specified.
+	if [[ ${export_shared} = all ]]; then
+		if [[ ${enable_shared} = yes ]]; then
+			echo "${script_name}: exporting all symbols within shared library."
+		else
+			echo "${script_name}: ignoring request to export all symbols within shared library."
+		fi
+	elif [[ ${export_shared} = public ]]; then
+		if [[ ${enable_shared} = yes ]]; then
+			echo "${script_name}: exporting only public symbols within shared library."
+		fi
+	else
+		echo "${script_name}: *** Invalid argument '${export_shared}' to --export-shared option given."
+		echo "${script_name}: *** Please use 'public' or 'all'."
+		exit 1
+	fi
+
+	if [ ${templates_flag} == '1' ]; then
+
+		# -- config_registry --
+
+		maybe_echo -n "${script_name}: copying the configuration registry..."
+
+		if [ -e config_registry ] && [ ${force_flag} == '0' ]; then
 			maybe_echo "already done"
 		else
-			mkdir -p config/${config}
-			cp ${sharedir}/config/${config}/make_defs.mk config/${config}
+			cp ${sharedir}/blis/config_registry config_registry
 			maybe_echo "done"
 		fi
-	done
 
-	# -- kernels directory --
+		# -- bli_plugin_register.c --
 
-	maybe_echo "${script_name}: creating kernels directories:"
+		maybe_echo -n "${script_name}: copying bli_plugin_register.c..."
 
-	for kernels in ${full_kernel_list}; do
-		maybe_echo -n "${script_name}: kernels/${kernels}..."
-
-		if [ -e kernels/${kernels} ] && [ ${force_flag} == '0' ]; then
+		if [ -e bli_plugin_register.c ] && [ ${force_flag} == '0' ]; then
 			maybe_echo "already done"
 		else
-			mkdir -p kernels/${kernels}
+			if [ ${examples_flag} == '1' ]; then
+				cp ${sharedir}/blis/plugin/bli_plugin_register.c bli_plugin_register.c
+			else
+				strip_examples ${sharedir}/blis/plugin/bli_plugin_register.c bli_plugin_register.c
+			fi
 			maybe_echo "done"
 		fi
-	done
+
+		# -- bli_plugin_<name>.h --
+
+		if [ -e bli_plugin_${plugin_name}.h ] && [ ${force_flag} == '0' ]; then
+			maybe_echo "${script_name}: creating bli_plugin_${plugin_name}.h from ${sharedir}/blis/plugin/bli_plugin.h.in...already done"
+		else
+			if [ ${examples_flag} == '1' ]; then
+				generate_config_file ${sharedir}/blis/plugin/bli_plugin.h.in bli_plugin_${plugin_name}.h
+			else
+				generate_config_file ${sharedir}/blis/plugin/bli_plugin.h.in bli_plugin_${plugin_name}_.h
+				strip_examples bli_plugin_${plugin_name}_.h bli_plugin_${plugin_name}.h
+				rm bli_plugin_${plugin_name}_.h
+			fi
+		fi
+
+		# -- ref_kernels directory --
+
+		maybe_echo -n "${script_name}: creating ref_kernels directory..."
+
+		done="true"
+		if [ ${examples_flag} == '1' ]; then
+			files="bli_plugin_init_ref.c my_kernel_1_ref.c my_kernel_2_ref.c"
+		else
+			files="bli_plugin_init_ref.c"
+		fi
+		for file in ${files}; do
+			if [ ! -e ref_kernels/${file} ] || [ ${force_flag} == '1' ]; then
+				mkdir -p ref_kernels
+				if [ ${examples_flag} == '1' ]; then
+					cp ${sharedir}/blis/plugin/${file} ref_kernels/${file}
+				else
+					strip_examples ${sharedir}/blis/plugin/${file} ref_kernels/${file}
+				fi
+				done="false"
+			fi
+		done
+
+		if [ "${done}" == "true" ]; then
+			maybe_echo "already done"
+		else
+			maybe_echo "done"
+		fi
+
+		# -- config directory --
+
+		maybe_echo "${script_name}: creating config directories:"
+
+		for config in ${full_config_list}; do
+			maybe_echo -n "${script_name}:   config/${config}..."
+
+			if [ -e config/${config}/make_defs.mk ] && [ ${force_flag} == '0' ]; then
+				maybe_echo "already done"
+			else
+				mkdir -p config/${config}
+				cp ${sharedir}/blis/config/${config}/make_defs.mk config/${config}
+				maybe_echo "done"
+			fi
+		done
+
+		for config in ${full_subconfig_list}; do
+			if [ ! -e config/${config}/bli_plugin_init_${config}.c ] || [ ${force_flag} == '1' ]; then
+				if [ ${config} != zen3 ] || [ ${examples_flag} == '0' ]; then
+					strip_examples ${sharedir}/blis/plugin/bli_kernel_defs_zen3.h config/${config}/bli_kernel_defs_${config}.h
+					strip_examples ${sharedir}/blis/plugin/bli_plugin_init_zen3.c config/${config}/bli_plugin_init_${config}.c
+					perl -pi -e "s/zen3/${config}/g" config/${config}/bli_plugin_init_${config}.c
+				else
+					cp ${sharedir}/blis/plugin/bli_kernel_defs_zen3.h config/${config}/bli_kernel_defs_${config}.h
+					cp ${sharedir}/blis/plugin/bli_plugin_init_zen3.c config/${config}/bli_plugin_init_${config}.c
+				fi
+			fi
+		done
+
+		# -- kernels directory --
+
+		maybe_echo "${script_name}: creating kernels directories:"
+
+		for kernels in ${full_kernel_list}; do
+			maybe_echo -n "${script_name}:   kernels/${kernels}..."
+
+			if [ -e kernels/${kernels} ] && [ ${force_flag} == '0' ]; then
+				maybe_echo "already done"
+			else
+				mkdir -p kernels/${kernels}
+				maybe_echo "done"
+			fi
+		done
+
+		if [ ${examples_flag} == '1' ]; then
+			if [ ! -e kernels/zen3/my_kernel_1_zen3.c ] || [ ${force_flag} == '1' ]; then
+				cp ${sharedir}/blis/plugin/my_kernel_1_zen3.c kernels/zen3
+			fi
+		fi
+
+	fi
+
+	if [ ${buildfiles_flag} == '1' ]; then
+
+		check_build_tools
+
+		# Try to determine whether the chosen compiler supports #pragma omp simd.
+		pragma_omp_simd=$(has_pragma_omp_simd)
+		add_config_var pragma_omp_simd
+
+		# -- Makefile --
+
+		maybe_echo -n "${script_name}: copying Makefile..."
+
+		if [ -e Makefile ] && [ ${force_flag} == '0' ]; then
+			maybe_echo "already done"
+		else
+			cp ${sharedir}/blis/plugin/Makefile Makefile
+			maybe_echo "done"
+		fi
+
+		# -- config.mk --
+
+		# The name/path to the registry (master list) of supported configurations.
+		registry_file="config_registry"
+		registry_filepath=${registry_file}
+
+		# Read the registered configuration names and lists into associative
+		# arrays.
+		echo -n "${script_name}: reading configuration registry..."
+		read_registry_file "${registry_filepath}"
+		echo "done."
+
+		build_and_check_configurations
+
+		generate_config_file ${sharedir}/blis/plugin/config.mk.in config.mk
+
+		# -- Makefile fragments --
+
+		create_makefile_fragment FRAME . obj/${config_name} false
+		create_makefile_fragment CONFIG config obj/${config_name}/config
+		create_makefile_fragment KERNELS kernels obj/${config_name}/kernels
+		create_makefile_fragment REFKERN ref_kernels obj/${config_name}/ref_kernels
+
+	fi
 
 	# Exit peacefully.
 	return 0

@@ -35,11 +35,31 @@
 #include "blis.h"
 #include STRINGIFY_INT(PASTEMAC(plugin,BLIS_PNAME_INFIX).h)
 
-err_t PASTEMAC(plugin_register,BLIS_PNAME_INFIX)( PASTECH2(plugin,BLIS_PNAME_INFIX,params) )
+err_t PASTEMAC(plugin_register,BLIS_PNAME_INFIX)( PASTECH2(plugin,BLIS_PNAME_INFIX,_params) )
 {
+	// ------------------------------------------------------------------------>
+	// -- Example Plugin Registration  ---------------------------------------->
+	// ------------------------------------------------------------------------>
+
 	//
 	// Register slots for new microkernels, preferences, and block sizes.
 	//
+
+	err_t err;
+
+	err = bli_gks_register_blksz( &bszids[ MY_BLKSZ_1 ] );
+	err = bli_gks_register_blksz( &bszids[ MY_BLKSZ_1 ] );
+	err = bli_gks_register_ukr( &kerids[ MY_KERNEL_1 ] );
+	err = bli_gks_register_ukr( &kerids[ MY_KERNEL_2 ] );
+	err = bli_gks_register_ukr_pref( &prefids[ MY_PREF_1 ] );
+	err = bli_gks_register_ukr_pref( &prefids[ MY_PREF_2 ] );
+
+	if ( err != BLIS_SUCCESS )
+		return err;
+
+	// <------------------------------------------------------------------------
+	// <------------------------------------------------------------------------
+	// <------------------------------------------------------------------------
 
 	//
 	// Initialize the context for each enabled sub-configuration.
@@ -47,8 +67,10 @@ err_t PASTEMAC(plugin_register,BLIS_PNAME_INFIX)( PASTECH2(plugin,BLIS_PNAME_INF
 
 	#undef GENTCONF
 	#define GENTCONF( CONFIG, config ) \
-	PASTEMAC4(plugin_init,BLIS_PNAME_INFIX,_,config,BLIS_REF_SUFFIX)( PASTECH2(plugin,BLIS_PNAME_INFIX,params_only) );
+	PASTEMAC4(plugin_init,BLIS_PNAME_INFIX,_,config,BLIS_REF_SUFFIX)( PASTECH2(plugin,BLIS_PNAME_INFIX,_params_only) );
 
 	INSERT_GENTCONF
+
+	return BLIS_SUCCESS;
 }
 

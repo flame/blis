@@ -49,6 +49,11 @@
 #define BLIS_CNAME_INFIX  PASTECH(_,BLIS_CNAME)
 #endif
 
+// Add an underscore to the BLIS kernel set string, if it was defined.
+#ifdef  BLIS_CNAME_UPPER
+#define BLIS_CNAME_UPPER_INFIX  PASTECH(_,BLIS_CNAME_UPPER)
+#endif
+
 // Add an underscore to the plugin name, if it was defined.
 #ifdef  BLIS_PNAME
 #define BLIS_PNAME_INFIX  PASTECH(_,BLIS_PNAME)

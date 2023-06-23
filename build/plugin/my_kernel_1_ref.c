@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2023, Southern Methodist University
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -32,35 +32,26 @@
 
 */
 
-#ifndef BLIS_GKS_H
-#define BLIS_GKS_H
+#include "blis.h"
+#include STRINGIFY_INT(../PASTEMAC(plugin,BLIS_PNAME_INFIX).h)
 
-void                           bli_gks_init( void );
-void                           bli_gks_finalize( void );
+#undef  GENTFUNC
+#define GENTFUNC( ctype, ch, opname, arch, suf ) \
+\
+void PASTEMAC3(ch,opname,arch,suf) \
+     ( \
+             int    n, \
+       const ctype* a, \
+             ctype* x  \
+     ) \
+{ \
+	if ( bli_zero_dim1( n ) ) return; \
+\
+	for ( dim_t i = 0; i < n; ++i ) \
+	{ \
+		PASTEMAC(ch,copys)( *a, x[ i ] ); \
+	} \
+}
 
-void                           bli_gks_init_index( void );
-
-BLIS_EXPORT_BLIS const cntx_t* bli_gks_lookup_id( arch_t id );
-void                           bli_gks_register_cntx( arch_t id, void_fp nat_fp, void_fp ref_fp );
-
-BLIS_EXPORT_BLIS const cntx_t* bli_gks_query_cntx( void );
-const cntx_t*                  bli_gks_query_cntx_noinit( void );
-const cntx_t*                  bli_gks_query_cntx_impl( void );
-
-BLIS_EXPORT_BLIS void          bli_gks_init_ref_cntx( cntx_t* cntx );
-
-bool                           bli_gks_cntx_l3_nat_ukr_is_ref( num_t dt, ukr_t ukr_id, const cntx_t* cntx );
-
-BLIS_EXPORT_BLIS const char*   bli_gks_l3_ukr_impl_string( ukr_t ukr, ind_t method, num_t dt );
-BLIS_EXPORT_BLIS kimpl_t       bli_gks_l3_ukr_impl_type( ukr_t ukr, ind_t method, num_t dt );
-
-//char*                          bli_gks_l3_ukr_avail_impl_string( ukr_t ukr, num_t dt );
-
-BLIS_EXPORT_BLIS err_t bli_gks_register_blksz( siz_t* bs_id );
-
-BLIS_EXPORT_BLIS err_t bli_gks_register_ukr( siz_t* ukr_id );
-
-BLIS_EXPORT_BLIS err_t bli_gks_register_ukr_pref( siz_t* ukr_pref_id );
-
-#endif
+INSERT_GENTFUNC_BASIC( my_kernel_1, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX )
 

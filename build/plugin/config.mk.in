@@ -34,6 +34,9 @@
 #
 #
 
+ifndef CONFIG_MK_PLUGIN_INCLUDED
+CONFIG_MK_PLUGIN_INCLUDED := yes
+
 # The installation prefix, exec_prefix, libdir, includedir, and shareddir
 # values from configure tell us where to install the libraries, header files,
 # and public makefile fragments. We must first assign each substituted
@@ -50,10 +53,10 @@ includedir        := @includedir@
 sharedir          := @sharedir@
 
 # Define the name of the config makefile.
-CONFIG_MK_FILE    := $(sharedir)/config.mk
+REAL_CONFIG_MK_FILE := $(sharedir)/blis/config.mk
 
 # Include the configuration file.
--include $(CONFIG_MK_FILE)
+include $(REAL_CONFIG_MK_FILE)
 
 # The name of the plugin.
 PLUGIN_NAME       := @plugin_name@
@@ -127,3 +130,6 @@ MK_ENABLE_RPATH   := @enable_rpath@
 # Whether to export all symbols within the shared library, even those symbols
 # that are considered to be for internal use only.
 EXPORT_SHARED     := @export_shared@
+
+# end of ifndef CONFIG_MK_PLUGIN_INCLUDED conditional block
+endif
