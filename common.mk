@@ -425,6 +425,7 @@ REFKERN_PATH       := $(DIST_PATH)/$(REFKERN_DIR)
 KERNELS_PATH       := $(DIST_PATH)/$(KERNELS_DIR)
 ADDON_PATH         := $(DIST_PATH)/$(ADDON_DIR)
 SANDBOX_PATH       := $(DIST_PATH)/$(SANDBOX_DIR)
+BUILD_PATH         := $(DIST_PATH)/$(BUILD_DIR)
 
 # Construct paths to some optional C++ template headers contributed by AMD.
 VEND_CPP_PATH      := $(DIST_PATH)/$(VEND_CPP_DIR)
@@ -546,6 +547,11 @@ ARFLAGS    := cr
 # Used to refresh CHANGELOG.
 GIT        := git
 GIT_LOG    := $(GIT) log --decorate
+
+# Define the locations of a script to generate a list of shared library symbols
+# within BLIS as well as the symbol file itself.
+GEN_SYMS   := $(BUILD_PATH)/gen-libblis-symbols.sh
+SYM_FILE   := $(BUILD_PATH)/libblis-symbols.def
 
 
 
