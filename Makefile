@@ -62,6 +62,7 @@
         clean cleanmk cleanh cleanlib distclean \
         cleantest cleanblastest cleanblistest \
         changelog \
+        symbols \
         install uninstall uninstall-old \
         uninstall-libs uninstall-lib-symlinks uninstall-headers \
         uninstall-old-libs uninstall-lib-symlinks uninstall-old-headers
@@ -494,6 +495,19 @@ endif
 check-env-make-defs: check-env-fragments
 ifeq ($(ALL_MAKE_DEFS_MK_PRESENT),no)
 	$(error Cannot proceed: Some make_defs.mk files not found or mislabeled!)
+endif
+
+
+# --- Shared/dynamic libblis symbol file creation/refresh ---
+
+symbols: check-env $(SYM_FILE)
+
+$(SYM_FILE): $(HEADERS_TO_INSTALL)
+ifeq ($(ENABLE_VERBOSE),yes)
+	$(GEN_SYMS) > $(SYM_FILE)
+else
+	@echo "Updating $(SYM_FILE)"
+	@$(GEN_SYMS) > $(SYM_FILE)
 endif
 
 
