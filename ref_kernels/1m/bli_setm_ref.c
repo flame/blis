@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2023, Southern Methodist University
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -32,27 +32,52 @@
 
 */
 
-#ifndef BLIS_L1M_KER_PROT_H
-#define BLIS_L1M_KER_PROT_H
+#include "blis.h"
 
-//
-// Define template prototypes for level-1m kernels.
-//
 
-#undef  L1MTPROT
-#define L1MTPROT( ctype, ch, funcname, opname ) \
+#define SETM_BODY( ctype, ch, pragma, cdim, inca, op ) \
 \
-void PASTEMAC(ch,funcname) \
+do \
+{ \
+	for ( dim_t k = n; k != 0; --k ) \
+	{ \
+		pragma \
+		for ( dim_t mn = 0; mn < cdim; mn++ ) \
+			PASTEMAC(ch,op)( kappa_cast, *(alpha1 + mn*inca) ); \
+\
+		alpha1 += lda; \
+	} \
+} while(0)
+
+
+#undef  GENTFUNC
+#define GENTFUNC( ctype, ch, opname, arch, suf ) \
+\
+void PASTEMAC3(ch,opname,arch,suf) \
      ( \
-       PASTECH(opname,_params), \
-       BLIS_CNTX_PARAM  \
-     );
+             conj_t  conja, \
+             dim_t   m, \
+             dim_t   n, \
+       const void*   kappa, \
+             void*   a, inc_t inca, inc_t lda, \
+       const cntx_t* cntx  \
+     ) \
+{ \
+	( void )cntx; \
+\
+	ctype           kappa_cast = *( ctype* )kappa; \
+	ctype* restrict alpha1     = a; \
+\
+	if ( inca == 1 ) \
+	{ \
+		if ( bli_is_conj( conja ) ) SETM_BODY( ctype, ch, PRAGMA_SIMD, m, 1, copyjs ); \
+		else                        SETM_BODY( ctype, ch, PRAGMA_SIMD, m, 1, copys ); \
+	} \
+	else \
+	{ \
+		if ( bli_is_conj( conja ) ) SETM_BODY( ctype, ch, PRAGMA_SIMD, m, inca, copyjs ); \
+		else                        SETM_BODY( ctype, ch, PRAGMA_SIMD, m, inca, copys ); \
+	} \
+}
 
-#define PACKM_KER_PROT(      ctype, ch, fn )  L1MTPROT( ctype, ch, fn, packm_cxk );
-#define UNPACKM_KER_PROT(    ctype, ch, fn )  L1MTPROT( ctype, ch, fn, unpackm_cxk );
-#define PACKM_DIAG_KER_PROT( ctype, ch, fn )  L1MTPROT( ctype, ch, fn, packm_cxc_diag );
-#define SETM_KER_PROT(       ctype, ch, fn )  L1MTPROT( ctype, ch, fn, setm );
-
-
-#endif
-
+INSERT_GENTFUNC_BASIC( setm, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX )

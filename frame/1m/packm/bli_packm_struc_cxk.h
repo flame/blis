@@ -32,29 +32,26 @@
 
 */
 
-#undef  GENTPROT
-#define GENTPROT( ctype, ch, varname ) \
-\
-BLIS_EXPORT_BLIS void PASTEMAC(ch,varname) \
-     ( \
-             struc_t strucc, \
-             diag_t  diagc, \
-             uplo_t  uploc, \
-             conj_t  conjc, \
-             pack_t  schema, \
-             bool    invdiag, \
-             dim_t   panel_dim, \
-             dim_t   panel_len, \
-             dim_t   panel_dim_max, \
-             dim_t   panel_len_max, \
-             dim_t   panel_dim_off, \
-             dim_t   panel_len_off, \
-       const void*   kappa, \
-       const void*   c, inc_t incc, inc_t ldc, \
-             void*   p,             inc_t ldp, \
-       const void*   params, \
-       const cntx_t* cntx  \
+BLIS_EXPORT_BLIS void bli_packm_struc_cxk
+     (
+             num_t   dt_c,
+             num_t   dt_p,
+             struc_t strucc,
+             diag_t  diagc,
+             uplo_t  uploc,
+             conj_t  conjc,
+             pack_t  schema,
+             bool    invdiag,
+             dim_t   panel_dim,
+             dim_t   panel_len,
+             dim_t   panel_dim_max,
+             dim_t   panel_len_max,
+             dim_t   panel_dim_off,
+             dim_t   panel_len_off,
+       const void*   kappa,
+       const void*   c, inc_t incc, inc_t ldc,
+             void*   p,             inc_t ldp,
+       const void*   params,
+       const cntx_t* cntx
      );
-
-INSERT_GENTPROT_BASIC( packm_struc_cxk )
 

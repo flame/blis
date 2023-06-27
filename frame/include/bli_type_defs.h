@@ -680,6 +680,9 @@ typedef enum
 	BLIS_UNPACKM_MRXK_KER,
 	BLIS_UNPACKM_NRXK_KER,
 
+	// other l1m kernels
+	BLIS_SETM_KER,
+
 	// l3 native kernels
 	BLIS_GEMM_UKR,
 	BLIS_GEMMTRSM_L_UKR,

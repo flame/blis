@@ -133,6 +133,7 @@ INSERT_PROTMAC_BASIC( GEMMSUP_KER_PROT, gemmsup_gx_ukr_name )
 #define packm_nrxnr_diag_1er_ker_name  GENARNAME(packm_nrxnr_diag_1er)
 #define unpackm_mrxk_ker_name          GENARNAME(unpackm_mrxk)
 #define unpackm_nrxk_ker_name          GENARNAME(unpackm_nrxk)
+#define setm_ker_name                  GENARNAME(setm)
 
 // Instantiate prototypes for above functions using the pre-defined packm
 // kernel prototype-generating macros.
@@ -147,6 +148,7 @@ INSERT_PROTMAC_BASIC( PACKM_DIAG_KER_PROT, packm_mrxmr_diag_1er_ker_name )
 INSERT_PROTMAC_BASIC( PACKM_DIAG_KER_PROT, packm_nrxnr_diag_1er_ker_name )
 INSERT_PROTMAC_BASIC( UNPACKM_KER_PROT,    unpackm_mrxk_ker_name )
 INSERT_PROTMAC_BASIC( UNPACKM_KER_PROT,    unpackm_nrxk_ker_name )
+INSERT_PROTMAC_BASIC( SETM_KER_PROT,       setm_ker_name )
 
 
 // -- Level-1f kernel prototype redefinitions ----------------------------------
@@ -419,6 +421,8 @@ void GENBARNAME(cntx_init)
 
 	gen_func_init( &funcs[ BLIS_UNPACKM_MRXK_KER ],  unpackm_mrxk_ker_name );
 	gen_func_init( &funcs[ BLIS_UNPACKM_NRXK_KER ],  unpackm_nrxk_ker_name );
+
+	gen_func_init( &funcs[ BLIS_SETM_KER ],  setm_ker_name );
 
 
 	// -- Set level-3 small/unpacked handlers ----------------------------------
