@@ -55,8 +55,7 @@ void PASTECH2(bls_,ch,opname) \
 	   kernel function pointer. This means that we always use the same
 	   kernel, even for edge cases. */ \
 	num_t dt     = PASTEMAC(ch,type); \
-	ukr_t ker_id = bli_is_col_packed( schema ) ? BLIS_PACKM_NRXK_KER \
-	                                           : BLIS_PACKM_MRXK_KER; \
+	ukr_t ker_id = BLIS_PACKM_KER; \
 \
 	/* Query the context for the packm kernel corresponding to the current
 	   panel dimension, or kernel id. If the id is invalid, the function will
@@ -75,6 +74,8 @@ void PASTECH2(bls_,ch,opname) \
 		  conja, \
 		  schema, \
 		  panel_dim, \
+		  panel_dim_max, \
+		  1, /* this shouldn't be hard-coded */ \
 		  panel_len, \
 		  panel_len_max, \
 		  kappa, \

@@ -47,11 +47,13 @@
 #define PRAGMA_UNROLL_2
 #endif
 
-void bli_dpackm_armv8a_int_8xk
+void bli_dpackm_armv8a_int_6x8
      (
              conj_t  conja,
              pack_t  schema,
              dim_t   cdim0,
+             dim_t   cdim_max,
+             dim_t   cdim_bcast,
              dim_t   k0,
              dim_t   k0_max,
        const void*   kappa,
@@ -62,7 +64,8 @@ void bli_dpackm_armv8a_int_8xk
      )
 {
   // This is the panel dimension assumed by the packm kernel.
-  const dim_t    mnr    = 8;
+  const dim_t    mr     = 6;
+  const dim_t    nr     = 8;
 
   // Typecast local copies of integers in case dim_t and inc_t are a
   // different size than is expected by load instructions.
@@ -93,7 +96,182 @@ void bli_dpackm_armv8a_int_8xk
 
   // -------------------------------------------------------------------------
 
-  if ( cdim0 == mnr && !gs )
+  if ( cdim0 == mr && cdim_bcast == 1 && !gs )
+  {
+    if ( unitk )
+    {
+      if ( inca == 1 )
+      {
+        // No need to use k-loops here.
+        // Simply let compiler to expand loops.
+        PRAGMA_UNROLL_2
+        for ( dim_t ik = k_iter * 2 + k_left; ik > 0; --ik )
+        {
+          float64x2_t v0 = vld1q_f64( a_loc + 0 );
+          float64x2_t v1 = vld1q_f64( a_loc + 2 );
+          float64x2_t v2 = vld1q_f64( a_loc + 4 );
+
+          vst1q_f64( p_loc + 0, v0 );
+          vst1q_f64( p_loc + 2, v1 );
+          vst1q_f64( p_loc + 4, v2 );
+
+          a_loc += lda;
+          p_loc += ldp;
+        }
+      }
+      else // if ( lda == 1 )
+      {
+        float64x2_t v0 = (float64x2_t)vdupq_n_u64( 0 );
+        float64x2_t v1 = (float64x2_t)vdupq_n_u64( 0 );
+        float64x2_t v2 = (float64x2_t)vdupq_n_u64( 0 );
+        float64x2_t v3 = (float64x2_t)vdupq_n_u64( 0 );
+        float64x2_t v4 = (float64x2_t)vdupq_n_u64( 0 );
+        float64x2_t v5 = (float64x2_t)vdupq_n_u64( 0 );
+
+        PRAGMA_NOUNROLL
+        for ( ; k_iter > 0; --k_iter )
+        {
+          v0 = vld1q_f64( a_loc + inca * 0 );
+          v1 = vld1q_f64( a_loc + inca * 1 );
+          v2 = vld1q_f64( a_loc + inca * 2 );
+          v3 = vld1q_f64( a_loc + inca * 3 );
+          v4 = vld1q_f64( a_loc + inca * 4 );
+          v5 = vld1q_f64( a_loc + inca * 5 );
+
+          // In-register transpose.
+          float64x2_t vd0_1 = vtrn1q_f64( v0, v1 );
+          float64x2_t vd1_1 = vtrn1q_f64( v2, v3 );
+          float64x2_t vd2_1 = vtrn1q_f64( v4, v5 );
+          float64x2_t vd0_2 = vtrn2q_f64( v0, v1 );
+          float64x2_t vd1_2 = vtrn2q_f64( v2, v3 );
+          float64x2_t vd2_2 = vtrn2q_f64( v4, v5 );
+
+          vst1q_f64( p_loc + 0, vd0_1 );
+          vst1q_f64( p_loc + 2, vd1_1 );
+          vst1q_f64( p_loc + 4, vd2_1 );
+          p_loc += ldp;
+
+          vst1q_f64( p_loc + 0, vd0_2 );
+          vst1q_f64( p_loc + 2, vd1_2 );
+          vst1q_f64( p_loc + 4, vd2_2 );
+          p_loc += ldp;
+          a_loc += 2 * lda; // 2;
+        }
+        for ( ; k_left > 0; --k_left )
+        {
+          v0 = vld1q_lane_f64( a_loc + inca * 0, v0, 0 );
+          v0 = vld1q_lane_f64( a_loc + inca * 1, v0, 1 );
+          v1 = vld1q_lane_f64( a_loc + inca * 2, v1, 0 );
+          v1 = vld1q_lane_f64( a_loc + inca * 3, v1, 1 );
+          v2 = vld1q_lane_f64( a_loc + inca * 4, v2, 0 );
+          v2 = vld1q_lane_f64( a_loc + inca * 5, v2, 1 );
+
+          vst1q_f64( p_loc + 0, v0 );
+          vst1q_f64( p_loc + 2, v1 );
+          vst1q_f64( p_loc + 4, v2 );
+          p_loc += ldp;
+          a_loc += lda; // 1;
+        }
+      }
+    }
+    else // if ( !unitk )
+    {
+      float64x2_t vkappa = vld1q_dup_f64( kappa );
+
+      if ( inca == 1 )
+      {
+        // No need to use k-loops here.
+        // Simply let compiler to expand loops.
+        PRAGMA_UNROLL_2
+        for ( dim_t ik = k_iter * 2 + k_left; ik > 0; --ik )
+        {
+          float64x2_t v0 = vld1q_f64( a_loc + 0 );
+          float64x2_t v1 = vld1q_f64( a_loc + 2 );
+          float64x2_t v2 = vld1q_f64( a_loc + 4 );
+
+          // Scale by kappa.
+          v0 = vmulq_f64( v0, vkappa );
+          v1 = vmulq_f64( v1, vkappa );
+          v2 = vmulq_f64( v2, vkappa );
+
+          vst1q_f64( p_loc + 0, v0 );
+          vst1q_f64( p_loc + 2, v1 );
+          vst1q_f64( p_loc + 4, v2 );
+
+          a_loc += lda;
+          p_loc += ldp;
+        }
+      }
+      else // if ( lda == 1 )
+      {
+        float64x2_t v0 = (float64x2_t)vdupq_n_u64( 0 );
+        float64x2_t v1 = (float64x2_t)vdupq_n_u64( 0 );
+        float64x2_t v2 = (float64x2_t)vdupq_n_u64( 0 );
+        float64x2_t v3 = (float64x2_t)vdupq_n_u64( 0 );
+        float64x2_t v4 = (float64x2_t)vdupq_n_u64( 0 );
+        float64x2_t v5 = (float64x2_t)vdupq_n_u64( 0 );
+
+        PRAGMA_NOUNROLL
+        for ( ; k_iter > 0; --k_iter )
+        {
+          v0 = vld1q_f64( a_loc + inca * 0 );
+          v1 = vld1q_f64( a_loc + inca * 1 );
+          v2 = vld1q_f64( a_loc + inca * 2 );
+          v3 = vld1q_f64( a_loc + inca * 3 );
+          v4 = vld1q_f64( a_loc + inca * 4 );
+          v5 = vld1q_f64( a_loc + inca * 5 );
+
+          // Scale by kappa.
+          v0 = vmulq_f64( v0, vkappa );
+          v1 = vmulq_f64( v1, vkappa );
+          v2 = vmulq_f64( v2, vkappa );
+          v3 = vmulq_f64( v3, vkappa );
+          v4 = vmulq_f64( v4, vkappa );
+          v5 = vmulq_f64( v5, vkappa );
+
+          // In-register transpose.
+          float64x2_t vd0_1 = vtrn1q_f64( v0, v1 );
+          float64x2_t vd1_1 = vtrn1q_f64( v2, v3 );
+          float64x2_t vd2_1 = vtrn1q_f64( v4, v5 );
+          float64x2_t vd0_2 = vtrn2q_f64( v0, v1 );
+          float64x2_t vd1_2 = vtrn2q_f64( v2, v3 );
+          float64x2_t vd2_2 = vtrn2q_f64( v4, v5 );
+
+          vst1q_f64( p_loc + 0, vd0_1 );
+          vst1q_f64( p_loc + 2, vd1_1 );
+          vst1q_f64( p_loc + 4, vd2_1 );
+          p_loc += ldp;
+
+          vst1q_f64( p_loc + 0, vd0_2 );
+          vst1q_f64( p_loc + 2, vd1_2 );
+          vst1q_f64( p_loc + 4, vd2_2 );
+          p_loc += ldp;
+          a_loc += 2 * lda; // 2;
+        }
+        for ( ; k_left > 0; --k_left )
+        {
+          v0 = vld1q_lane_f64( a_loc + inca * 0, v0, 0 );
+          v0 = vld1q_lane_f64( a_loc + inca * 1, v0, 1 );
+          v1 = vld1q_lane_f64( a_loc + inca * 2, v1, 0 );
+          v1 = vld1q_lane_f64( a_loc + inca * 3, v1, 1 );
+          v2 = vld1q_lane_f64( a_loc + inca * 4, v2, 0 );
+          v2 = vld1q_lane_f64( a_loc + inca * 5, v2, 1 );
+
+          // Scale by kappa.
+          v0 = vmulq_f64( v0, vkappa );
+          v1 = vmulq_f64( v1, vkappa );
+          v2 = vmulq_f64( v2, vkappa );
+
+          vst1q_f64( p_loc + 0, v0 );
+          vst1q_f64( p_loc + 2, v1 );
+          vst1q_f64( p_loc + 4, v2 );
+          p_loc += ldp;
+          a_loc += lda; // 1;
+        }
+      }
+    }
+  }
+  else if ( cdim0 == nr && cdim_bcast == 1 && !gs )
   {
     if ( unitk )
     {
@@ -298,58 +476,24 @@ void bli_dpackm_armv8a_int_8xk
       }
     }
   }
-  else // if ( cdim0 < mnr || gs )
-  {
-    PASTEMAC(dscal2m,BLIS_TAPI_EX_SUF)
-    (
-      0,
-      BLIS_NONUNIT_DIAG,
-      BLIS_DENSE,
-      ( trans_t )conja,
-      cdim0,
-      k0,
-      kappa,
-      a, inca0, lda0,
-      p,     1, ldp0,
-      cntx,
-      NULL
-    );
+	else
+	{
+		bli_dscal2bbs_mxn
+		(
+		  conja,
+		  cdim0,
+		  k0,
+		  kappa,
+		  a,       inca, lda,
+		  p, cdim_bcast, ldp
+		);
+	}
 
-    if ( cdim0 < mnr )
-    {
-      // Handle zero-filling along the "long" edge of the micropanel.
-
-      const dim_t      i      = cdim0;
-      const dim_t      m_edge = mnr - cdim0;
-      const dim_t      n_edge = k0_max;
-      double* restrict p_edge = ( double* )p + (i  )*1;
-
-      bli_dset0s_mxn
-      (
-        m_edge,
-        n_edge,
-        p_edge, 1, ldp
-      );
-    }
-  }
-
-//bli_dfprintm( stdout, "packm 8xk ker: a_packed", cdim0, k0_max, p, 1, ldp0, "%5.2f", "" );
-
-  if ( k0 < k0_max )
-  {
-    // Handle zero-filling along the "short" (far) edge of the micropanel.
-
-    const dim_t      j      = k0;
-    const dim_t      m_edge = mnr;
-    const dim_t      n_edge = k0_max - k0;
-    double* restrict p_edge = ( double* )p + (j  )*ldp;
-
-    bli_dset0s_mxn
-    (
-      m_edge,
-      n_edge,
-      p_edge, 1, ldp
-    );
-  }
+	bli_dset0s_edge
+	(
+	  cdim0*cdim_bcast, cdim_max*cdim_bcast,
+	  k0, k0_max,
+	  p, ldp
+	);
 }
 

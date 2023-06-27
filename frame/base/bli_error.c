@@ -42,6 +42,8 @@ static const char *bli_error_string[-BLIS_ERROR_CODE_MAX] =
 	[-BLIS_UNDEFINED_ERROR_CODE]                 = "Undefined error code.",
 	[-BLIS_NULL_POINTER]                         = "Encountered unexpected null pointer.",
 	[-BLIS_NOT_YET_IMPLEMENTED]                  = "Requested functionality not yet implemented.",
+	[-BLIS_OUT_OF_BOUNDS]                        = "Requested index is out of bounds.",
+	[-BLIS_LOCK_FAILURE]                         = "Failed to obtain lock.",
 
 	[-BLIS_INVALID_SIDE]                         = "Invalid side parameter value.",
 	[-BLIS_INVALID_UPLO]                         = "Invalid uplo_t parameter value.",

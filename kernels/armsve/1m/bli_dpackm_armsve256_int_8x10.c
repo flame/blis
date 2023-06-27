@@ -42,11 +42,13 @@
 //   SVE vector length = 256 bits.
 //
 
-void bli_dpackm_armsve256_int_8xk
+void bli_dpackm_armsve256_int_8x10
      (
              conj_t  conja,
              pack_t  schema,
              dim_t   cdim_,
+             dim_t   cdim_max,
+             dim_t   cdim_bcast,
              dim_t   n_,
              dim_t   n_max_,
        const void*   kappa,
@@ -57,9 +59,8 @@ void bli_dpackm_armsve256_int_8xk
      )
 {
     const int64_t cdim  = cdim_;
-    const int64_t mnr   = 8;
+    const int64_t mr    = 8;
     const int64_t n     = n_;
-    const int64_t n_max = n_max_;
     const int64_t inca  = inca_;
     const int64_t lda   = lda_;
     const int64_t ldp   = ldp_;
@@ -76,7 +77,7 @@ void bli_dpackm_armsve256_int_8xk
     //   with each element as: 0, 1*inca, 2*inca, 3*inca
     z_index = svindex_u64( 0, inca * sizeof( double ) );
 
-    if ( cdim == mnr )
+    if ( cdim == mr && cdim_bcast == 1 )
     {
         if ( bli_deq1( *(( double* )kappa) ) )
         {
@@ -180,53 +181,25 @@ void bli_dpackm_armsve256_int_8xk
             }
         } // end of if ( *kappa == 1.0 )
     }
-    else // if ( cdim < mnr )
-    {
-        bli_dscal2m_ex
-        (
-          0,
-          BLIS_NONUNIT_DIAG,
-          BLIS_DENSE,
-          ( trans_t )conja,
-          cdim,
-          n,
-          kappa,
-          a, inca, lda,
-          p, 1,    ldp,
-          cntx,
-          NULL
-        );
+	else
+	{
+		bli_dscal2bbs_mxn
+		(
+		  conja,
+		  cdim_,
+		  n_,
+		  kappa,
+		  a,       inca, lda,
+		  p, cdim_bcast, ldp
+		);
+	}
 
-        // if ( cdim < mnr )
-        {
-            const dim_t      i      = cdim;
-            const dim_t      m_edge = mnr - i;
-            const dim_t      n_edge = n_max;
-            double* restrict p_edge = ( double* )p + (i  )*1;
-
-            bli_dset0s_mxn
-            (
-              m_edge,
-              n_edge,
-              p_edge, 1, ldp
-            );
-        }
-    }
-
-    if ( n < n_max )
-    {
-        const dim_t      j      = n;
-        const dim_t      m_edge = mnr;
-        const dim_t      n_edge = n_max - j;
-        double* restrict p_edge = ( double* )p + (j  )*ldp;
-
-        bli_dset0s_mxn
-        (
-          m_edge,
-          n_edge,
-          p_edge, 1, ldp
-        );
-    }
+	bli_dset0s_edge
+	(
+	  cdim_*cdim_bcast, cdim_max*cdim_bcast,
+	  n_, n_max_,
+	  p, ldp
+	);
 }
 
 #endif // __has_include(<arm_sve.h>)

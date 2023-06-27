@@ -96,8 +96,7 @@ void bli_cntx_init_armsve( cntx_t* cntx )
 	  bli_cntx_set_ukrs
 	  (
 		cntx,
-		BLIS_PACKM_MRXK_KER, BLIS_DOUBLE, bli_dpackm_armsve512_asm_16xk,
-		BLIS_PACKM_NRXK_KER, BLIS_DOUBLE, bli_dpackm_armsve512_asm_10xk,
+		BLIS_PACKM_KER, BLIS_DOUBLE, bli_dpackm_armsve512_asm_16x10,
 		BLIS_VA_END
 	  );
 	}
@@ -106,7 +105,7 @@ void bli_cntx_init_armsve( cntx_t* cntx )
 	  bli_cntx_set_ukrs
 	  (
 		cntx,
-		BLIS_PACKM_MRXK_KER, BLIS_DOUBLE, bli_dpackm_armsve256_int_8xk,
+		BLIS_PACKM_KER, BLIS_DOUBLE, bli_dpackm_armsve256_int_8x10,
 		BLIS_VA_END
 	  );
 	}

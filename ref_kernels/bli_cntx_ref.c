@@ -123,31 +123,21 @@ INSERT_PROTMAC_BASIC( GEMMSUP_KER_PROT, gemmsup_gx_ukr_name )
 
 // -- Construct arch-specific names for reference packm kernels --
 
-#define packm_mrxk_ker_name            GENARNAME(packm_mrxk)
-#define packm_nrxk_ker_name            GENARNAME(packm_nrxk)
-#define packm_mrxk_1er_ker_name        GENARNAME(packm_mrxk_1er)
-#define packm_nrxk_1er_ker_name        GENARNAME(packm_nrxk_1er)
-#define packm_mrxmr_diag_ker_name      GENARNAME(packm_mrxmr_diag)
-#define packm_nrxnr_diag_ker_name      GENARNAME(packm_nrxnr_diag)
-#define packm_mrxmr_diag_1er_ker_name  GENARNAME(packm_mrxmr_diag_1er)
-#define packm_nrxnr_diag_1er_ker_name  GENARNAME(packm_nrxnr_diag_1er)
-#define unpackm_mrxk_ker_name          GENARNAME(unpackm_mrxk)
-#define unpackm_nrxk_ker_name          GENARNAME(unpackm_nrxk)
-#define setm_ker_name                  GENARNAME(setm)
+#define packm_ker_name           GENARNAME(packm)
+#define packm_1er_ker_name       GENARNAME(packm_1er)
+#define packm_diag_ker_name      GENARNAME(packm_diag)
+#define packm_diag_1er_ker_name  GENARNAME(packm_diag_1er)
+#define unpackm_ker_name         GENARNAME(unpackm)
+#define setm_ker_name            GENARNAME(setm)
 
 // Instantiate prototypes for above functions using the pre-defined packm
 // kernel prototype-generating macros.
 
-INSERT_PROTMAC_BASIC( PACKM_KER_PROT,      packm_mrxk_ker_name )
-INSERT_PROTMAC_BASIC( PACKM_KER_PROT,      packm_nrxk_ker_name )
-INSERT_PROTMAC_BASIC( PACKM_KER_PROT,      packm_mrxk_1er_ker_name )
-INSERT_PROTMAC_BASIC( PACKM_KER_PROT,      packm_nrxk_1er_ker_name )
-INSERT_PROTMAC_BASIC( PACKM_DIAG_KER_PROT, packm_mrxmr_diag_ker_name )
-INSERT_PROTMAC_BASIC( PACKM_DIAG_KER_PROT, packm_nrxnr_diag_ker_name )
-INSERT_PROTMAC_BASIC( PACKM_DIAG_KER_PROT, packm_mrxmr_diag_1er_ker_name )
-INSERT_PROTMAC_BASIC( PACKM_DIAG_KER_PROT, packm_nrxnr_diag_1er_ker_name )
-INSERT_PROTMAC_BASIC( UNPACKM_KER_PROT,    unpackm_mrxk_ker_name )
-INSERT_PROTMAC_BASIC( UNPACKM_KER_PROT,    unpackm_nrxk_ker_name )
+INSERT_PROTMAC_BASIC( PACKM_KER_PROT,      packm_ker_name )
+INSERT_PROTMAC_BASIC( PACKM_KER_PROT,      packm_1er_ker_name )
+INSERT_PROTMAC_BASIC( PACKM_DIAG_KER_PROT, packm_diag_ker_name )
+INSERT_PROTMAC_BASIC( PACKM_DIAG_KER_PROT, packm_diag_1er_ker_name )
+INSERT_PROTMAC_BASIC( UNPACKM_KER_PROT,    unpackm_ker_name )
 INSERT_PROTMAC_BASIC( SETM_KER_PROT,       setm_ker_name )
 
 
@@ -247,16 +237,15 @@ void GENBARNAME(cntx_init)
        cntx_t* cntx
      )
 {
-	blksz_t  blkszs[ BLIS_NUM_BLKSZS ];
-	func_t*  funcs;
-	mbool_t* mbools;
-	dim_t    i;
-	void_fp* vfuncs;
+	blksz_t blkszs[ BLIS_NUM_BLKSZS ];
+	func_t  funcs [ BLIS_NUM_UKRS ];
+	mbool_t mbools[ BLIS_NUM_UKR_PREFS ];
+	void_fp vfuncs[ BLIS_NUM_LEVEL3_OPS ];
 
 
-	// -- Clear the context ----------------------------------------------------
+	// -- Initialize the context -----------------------------------------------
 
-	bli_cntx_clear( cntx );
+	bli_cntx_init( cntx );
 
 
 	// -- Set blocksizes -------------------------------------------------------
@@ -324,9 +313,6 @@ void GENBARNAME(cntx_init)
 
 
 	// -- Set level-3 native micro-kernels and preferences ---------------------
-
-	funcs = cntx->ukrs;
-	mbools = cntx->ukr_prefs;
 
 	gen_func_init( &funcs[ BLIS_GEMM_UKR ],       gemm_ukr_name       );
 	gen_func_init( &funcs[ BLIS_GEMMTRSM_L_UKR ], gemmtrsm_l_ukr_name );
@@ -407,30 +393,28 @@ void GENBARNAME(cntx_init)
 
 	// -- Set level-1m (packm/unpackm) kernels ---------------------------------
 
-	gen_func_init( &funcs[ BLIS_PACKM_MRXK_KER ],  packm_mrxk_ker_name );
-	gen_func_init( &funcs[ BLIS_PACKM_NRXK_KER ],  packm_nrxk_ker_name );
+	gen_func_init   ( &funcs[ BLIS_PACKM_KER ],           packm_ker_name );
+	gen_func_init_co( &funcs[ BLIS_PACKM_1ER_KER ],       packm_1er_ker_name );
+	gen_func_init   ( &funcs[ BLIS_PACKM_DIAG_KER ],      packm_diag_ker_name );
+	gen_func_init_co( &funcs[ BLIS_PACKM_DIAG_1ER_KER ],  packm_diag_1er_ker_name );
+	gen_func_init   ( &funcs[ BLIS_UNPACKM_KER ],         unpackm_ker_name );
+	gen_func_init   ( &funcs[ BLIS_SETM_KER ],            setm_ker_name );
 
-	gen_func_init_co( &funcs[ BLIS_PACKM_MRXK_1ER_KER ],  packm_mrxk_1er_ker_name );
-	gen_func_init_co( &funcs[ BLIS_PACKM_NRXK_1ER_KER ],  packm_nrxk_1er_ker_name );
 
-	gen_func_init( &funcs[ BLIS_PACKM_MRXMR_DIAG_KER ],  packm_mrxmr_diag_ker_name );
-	gen_func_init( &funcs[ BLIS_PACKM_NRXNR_DIAG_KER ],  packm_nrxnr_diag_ker_name );
+	// -- Put the default kernels and their preferences into the context -------
 
-	gen_func_init_co( &funcs[ BLIS_PACKM_MRXMR_DIAG_1ER_KER ],  packm_mrxmr_diag_1er_ker_name );
-	gen_func_init_co( &funcs[ BLIS_PACKM_NRXNR_DIAG_1ER_KER ],  packm_nrxnr_diag_1er_ker_name );
+	for ( dim_t i = 0; i < BLIS_NUM_UKRS; i++ )
+		bli_cntx_set_ukr( i, &funcs[ i ], cntx );
 
-	gen_func_init( &funcs[ BLIS_UNPACKM_MRXK_KER ],  unpackm_mrxk_ker_name );
-	gen_func_init( &funcs[ BLIS_UNPACKM_NRXK_KER ],  unpackm_nrxk_ker_name );
-
-	gen_func_init( &funcs[ BLIS_SETM_KER ],  setm_ker_name );
+	for ( dim_t i = 0; i < BLIS_NUM_UKR_PREFS; i++ )
+		bli_cntx_set_ukr_pref( i, &mbools[ i ], cntx );
 
 
 	// -- Set level-3 small/unpacked handlers ----------------------------------
 
-	vfuncs = cntx->l3_sup_handlers;
-
 	// Initialize all of the function pointers to NULL;
-	for ( i = 0; i < BLIS_NUM_LEVEL3_OPS; ++i ) vfuncs[ i ] = NULL;
+	for ( dim_t i = 0; i < BLIS_NUM_LEVEL3_OPS; ++i )
+		vfuncs[ i ] = NULL;
 
 	// The level-3 sup handlers are oapi-based, so we only set one slot per
 	// operation.
@@ -439,9 +423,7 @@ void GENBARNAME(cntx_init)
 	vfuncs[ BLIS_GEMM ]  = bli_gemmsup_ref;
 	vfuncs[ BLIS_GEMMT ] = bli_gemmtsup_ref;
 
-
-	// -- Set miscellaneous fields ---------------------------------------------
-
-	bli_cntx_set_method( BLIS_NAT, cntx );
+	for ( dim_t i = 0; i < BLIS_NUM_LEVEL3_OPS; i++ )
+		bli_cntx_set_l3_sup_handler( i, vfuncs[ i ], cntx );
 }
 

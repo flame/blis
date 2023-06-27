@@ -35,7 +35,7 @@
 #include "blis.h"
 
 
-#define PACKM_DIAG_BODY( ctype, ch, mn_min, mn_max, inca, lda, op ) \
+#define PACKM_DIAG_BODY( ctype, ch, mn_min, mn_max, dfac, inca, lda, op ) \
 \
 do \
 { \
@@ -47,14 +47,14 @@ do \
 
 
 #define PACKM_DIAG_BODY_L( ctype, ch, op ) \
-	PACKM_DIAG_BODY( ctype, ch, k+1, cdim, inca_l, lda_l, op )
+	PACKM_DIAG_BODY( ctype, ch, k+1, cdim, cdim_bcast, inca_l, lda_l, op )
 
 #define PACKM_DIAG_BODY_U( ctype, ch, op ) \
-	PACKM_DIAG_BODY( ctype, ch, 0, k, inca_u, lda_u, op )
+	PACKM_DIAG_BODY( ctype, ch, 0, k, cdim_bcast, inca_u, lda_u, op )
 
 
 #undef  GENTFUNC
-#define GENTFUNC( ctype, ch, opname, mnr0, bb0, arch, suf ) \
+#define GENTFUNC( ctype, ch, opname, arch, suf ) \
 \
 void PASTEMAC3(ch,opname,arch,suf) \
      ( \
@@ -65,6 +65,8 @@ void PASTEMAC3(ch,opname,arch,suf) \
              pack_t  schema, \
              bool    invdiag, \
              dim_t   cdim, \
+             dim_t   cdim_max, \
+             dim_t   cdim_bcast, \
              dim_t   n_max, \
        const void*   kappa, \
        const void*   a, inc_t inca, inc_t lda, \
@@ -73,15 +75,10 @@ void PASTEMAC3(ch,opname,arch,suf) \
        const cntx_t* cntx  \
      ) \
 { \
-	const num_t dt        = PASTEMAC(ch,type); \
-	const dim_t cdim_max  = bli_cntx_get_blksz_def_dt( dt, mnr0, cntx ); \
-	const dim_t cdim_pack = bli_cntx_get_blksz_max_dt( dt, mnr0, cntx ); \
-	const dim_t dfac      = bli_cntx_get_blksz_def_dt( dt, bb0, cntx ); \
-\
 	/* start by zeroing out the whole block */ \
 	PASTEMAC(ch,set0s_mxn) \
 	( \
-	  cdim_pack, \
+	  cdim_max, \
 	  n_max, \
 	  p, 1, ldp  \
 	); \
@@ -131,47 +128,46 @@ void PASTEMAC3(ch,opname,arch,suf) \
 	if ( bli_is_unit_diag( diaga ) ) \
 	{ \
 		for ( dim_t mnk = 0; mnk < cdim; ++mnk ) \
-		for ( dim_t d = 0; d < dfac; ++d ) \
-			PASTEMAC(ch,set1s)( *(pi1 + mnk*(dfac + ldp) + d) ); \
+		for ( dim_t d = 0; d < cdim_bcast; ++d ) \
+			PASTEMAC(ch,set1s)( *(pi1 + mnk*(cdim_bcast + ldp) + d) ); \
 	} \
 	else if ( bli_is_hermitian( struca ) ) \
 	{ \
 		for ( dim_t mnk = 0; mnk < cdim; ++mnk ) \
-		for ( dim_t d = 0; d < dfac; ++d ) \
+		for ( dim_t d = 0; d < cdim_bcast; ++d ) \
 		{ \
 			ctype mu; \
 			PASTEMAC(ch,copys)( *(alpha1 + mnk*(inca + lda)), mu ); \
 			PASTEMAC(ch,seti0s)( mu ); \
-			PASTEMAC(ch,scal2s)( kappa_cast, mu, *(pi1 + mnk*(dfac + ldp) + d) ); \
+			PASTEMAC(ch,scal2s)( kappa_cast, mu, *(pi1 + mnk*(cdim_bcast + ldp) + d) ); \
 		} \
 	} \
 	else if ( bli_is_conj( conja )) \
 	{ \
 		for ( dim_t mnk = 0; mnk < cdim; ++mnk ) \
-		for ( dim_t d = 0; d < dfac; ++d ) \
-			PASTEMAC(ch,scal2js)( kappa_cast, *(alpha1 + mnk*(inca + lda)), *(pi1 + mnk*(dfac + ldp) + d) ); \
+		for ( dim_t d = 0; d < cdim_bcast; ++d ) \
+			PASTEMAC(ch,scal2js)( kappa_cast, *(alpha1 + mnk*(inca + lda)), *(pi1 + mnk*(cdim_bcast + ldp) + d) ); \
 	} \
 	else \
 	{ \
 		for ( dim_t mnk = 0; mnk < cdim; ++mnk ) \
-		for ( dim_t d = 0; d < dfac; ++d ) \
-			PASTEMAC(ch,scal2s)( kappa_cast, *(alpha1 + mnk*(inca + lda)), *(pi1 + mnk*(dfac + ldp) + d) ); \
+		for ( dim_t d = 0; d < cdim_bcast; ++d ) \
+			PASTEMAC(ch,scal2s)( kappa_cast, *(alpha1 + mnk*(inca + lda)), *(pi1 + mnk*(cdim_bcast + ldp) + d) ); \
 	} \
 \
 	/* invert the diagonal if requested */ \
 	if ( invdiag ) \
 	{ \
 		for ( dim_t mnk = 0; mnk < cdim; ++mnk ) \
-		for ( dim_t d = 0; d < dfac; ++d ) \
-			PASTEMAC(ch,inverts)( *(pi1 + mnk*(dfac + ldp) + d) ); \
+		for ( dim_t d = 0; d < cdim_bcast; ++d ) \
+			PASTEMAC(ch,inverts)( *(pi1 + mnk*(cdim_bcast + ldp) + d) ); \
 	} \
 \
 	/* if this an edge case in both directions, extend the diagonal with ones */ \
 	for ( dim_t mnk = cdim; mnk < bli_min( cdim_max, n_max ); ++mnk ) \
-	for ( dim_t d = 0; d < dfac; ++d ) \
-		PASTEMAC(ch,set1s)( *(pi1 + mnk*(dfac + ldp) + d) ); \
+	for ( dim_t d = 0; d < cdim_bcast; ++d ) \
+		PASTEMAC(ch,set1s)( *(pi1 + mnk*(cdim_bcast + ldp) + d) ); \
 }
 
-INSERT_GENTFUNC_BASIC( packm_mrxmr_diag, BLIS_MR, BLIS_BBM, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX )
-INSERT_GENTFUNC_BASIC( packm_nrxnr_diag, BLIS_NR, BLIS_BBN, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX )
+INSERT_GENTFUNC_BASIC( packm_diag, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX )
 

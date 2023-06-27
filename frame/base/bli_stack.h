@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2023, Southern Methodist University
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -32,30 +32,47 @@
 
 */
 
-#undef  GENTPROT
-#define GENTPROT( ctype, ch, varname ) \
-\
-BLIS_EXPORT_BLIS void PASTEMAC(ch,varname) \
-     ( \
-             struc_t strucc, \
-             diag_t  diagc, \
-             uplo_t  uploc, \
-             conj_t  conjc, \
-             pack_t  schema, \
-             bool    invdiag, \
-             dim_t   panel_dim, \
-             dim_t   panel_len, \
-             dim_t   panel_dim_max, \
-             dim_t   panel_len_max, \
-             dim_t   panel_dim_off, \
-             dim_t   panel_len_off, \
-             dim_t   panel_bcast, \
-       const void*   kappa, \
-       const void*   c, inc_t incc, inc_t ldc, \
-             void*   p,             inc_t ldp, \
-       const void*   params, \
-       const cntx_t* cntx \
+#ifndef BLIS_STACK_H
+#define BLIS_STACK_H
+
+// -- Stack type based on a dynamic block array --
+
+/*
+typedef struct
+{
+	siz_t elem_size;
+	siz_t block_len;
+	siz_t max_blocks;
+	siz_t size;
+	siz_t capacity;
+
+	void** blocks;
+
+	bli_pthread_mutex_t lock;
+} stck_t;
+*/
+
+
+BLIS_EXPORT_BLIS err_t bli_stack_init
+     (
+       siz_t   elem_size,
+       siz_t   block_len,
+       siz_t   max_blocks,
+       siz_t   initial_size,
+       stck_t* stack
      );
 
-INSERT_GENTPROT_BASIC( packm_struc_cxk )
+BLIS_EXPORT_BLIS err_t bli_stack_finalize( stck_t* stack );
+
+BLIS_INLINE siz_t bli_stack_size( const stck_t* stack )
+{
+	return stack->size;
+}
+
+BLIS_EXPORT_BLIS err_t bli_stack_get( siz_t i, void** elem, const stck_t* stack );
+
+BLIS_EXPORT_BLIS err_t bli_stack_push( siz_t* i, stck_t* stack );
+
+
+#endif
 

@@ -90,7 +90,7 @@ void bli_packm_def_cntl_init_node
 	cntl->rev_iter_if_lower = rev_iter_if_lower;
 	cntl->pack_schema       = pack_schema;
 	cntl->pack_buf_type     = pack_buf_type;
-	cntl->params            = NULL;
+	cntl->params            = cntl;
 
 	bli_packm_cntl_init_node
 	(
