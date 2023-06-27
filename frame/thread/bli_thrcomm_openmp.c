@@ -114,6 +114,10 @@ void bli_thrcomm_cleanup_openmp( thrcomm_t* comm )
 
 void bli_thrcomm_barrier_openmp( dim_t t_id, thrcomm_t* comm )
 {
+	// Return early if the comm is NULL or if there is only one
+	// thread participating.
+	if ( comm == NULL || comm->n_threads == 1 ) return;
+
 	bli_thrcomm_tree_barrier( comm->barriers[t_id] );
 }
 
@@ -176,27 +180,42 @@ void bli_thrcomm_tree_barrier_free( barrier_t* barrier )
 	return;
 }
 
+// Use __sync_* builtins (assumed available) if __atomic_* ones are not present.
+#ifndef __ATOMIC_RELAXED
+
+#define __ATOMIC_RELAXED
+#define __ATOMIC_ACQUIRE
+#define __ATOMIC_RELEASE
+#define __ATOMIC_ACQ_REL
+
+//#define __atomic_add_fetch( ptr, value, constraint ) __sync_add_and_fetch( ptr, value )
+//#define __atomic_fetch_add( ptr, value, constraint ) __sync_fetch_and_add( ptr, value )
+
+#define __atomic_load_n(    ptr,        constraint ) __sync_fetch_and_add( ptr, 0     )
+#define __atomic_sub_fetch( ptr, value, constraint ) __sync_sub_and_fetch( ptr, value )
+#define __atomic_fetch_xor( ptr, value, constraint ) __sync_fetch_and_xor( ptr, value )
+
+#endif
+
 void bli_thrcomm_tree_barrier( barrier_t* barack )
 {
-	int my_signal = barack->signal;
-	int my_count;
+	gint_t my_signal = __atomic_load_n( &barack->signal, __ATOMIC_RELAXED );
 
-	_Pragma( "omp atomic capture" )
-		my_count = barack->count--;
+	dim_t my_count =
+	__atomic_sub_fetch( &barack->count, 1, __ATOMIC_ACQ_REL );
 
-	if ( my_count == 1 )
+	if ( my_count == 0 )
 	{
 		if ( barack->dad != NULL )
 		{
 			bli_thrcomm_tree_barrier( barack->dad );
 		}
 		barack->count = barack->arity;
-		barack->signal = !barack->signal;
+		__atomic_fetch_xor( &barack->signal, 1, __ATOMIC_RELEASE );
 	}
 	else
 	{
-		volatile int* listener = &barack->signal;
-		while ( *listener == my_signal ) {}
+		while ( __atomic_load_n( &barack->signal, __ATOMIC_ACQUIRE ) == my_signal ) {}
 	}
 }
 
