@@ -69,8 +69,8 @@ void PASTEMAC(ch,varname) \
 	dim_t   panel_dim_r   = bli_packm_def_cntl_bmult_m_def( cntl ); \
 	dim_t   ldp_r         = ldp; \
 \
-	ukr_t   cxk_ker_id    = BLIS_PACKM_KER; \
-	ukr_t   cxc_ker_id    = BLIS_PACKM_DIAG_KER; \
+	ukr2_t   cxk_ker_id   = BLIS_PACKM_KER; \
+	ukr2_t   cxc_ker_id   = BLIS_PACKM_DIAG_KER; \
 \
 	if ( bli_is_1m_packed( schema ) ) \
 	{ \
@@ -84,11 +84,8 @@ void PASTEMAC(ch,varname) \
 		ldp_r *= 2; \
 	} \
 \
-	packm_cxk_ker_ft      f_cxk  = bli_cntx_get_ukr_dt( dt_p, cxk_ker_id, cntx ); \
-	packm_cxc_diag_ker_ft f_cxc  = bli_cntx_get_ukr_dt( dt_p, cxc_ker_id, cntx ); \
-	setm_ker_ft           f_setr = bli_cntx_get_ukr_dt( dt_pr, BLIS_SETM_KER, cntx ); \
-\
-	const void*           zero_r = bli_obj_buffer_for_const( dt_pr, &BLIS_ZERO ); \
+	packm_cxk_ker_ft      f_cxk  = bli_cntx_get_ukr2_dt( dt_p, dt_p, cxk_ker_id, cntx ); \
+	packm_cxc_diag_ker_ft f_cxc  = bli_cntx_get_ukr2_dt( dt_p, dt_p, cxc_ker_id, cntx ); \
 \
 	/* For general matrices, pack and return early */ \
 	if ( bli_is_general( strucc ) ) \
@@ -146,14 +143,11 @@ void PASTEMAC(ch,varname) \
 		   explicitly store zeros */ \
 		if ( bli_is_upper( uploc ) && bli_is_triangular( strucc ) ) \
 		{ \
-			f_setr \
+			PASTEMAC(chr,set0s_mxn) \
 			( \
-			  BLIS_NO_CONJUGATE, \
 			  panel_dim_r, \
 			  p10_len_max * ( bli_is_1m_packed( schema ) ? 2 : 1), \
-			  zero_r, \
-			  p10, 1, ldp_r, \
-			  cntx \
+			  ( ctyper* )p10, 1, ldp_r \
 			); \
 		} \
 		else \
@@ -234,14 +228,11 @@ void PASTEMAC(ch,varname) \
 		   explicitly store zeros */ \
 		if ( bli_is_lower( uploc ) && bli_is_triangular( strucc ) ) \
 		{ \
-			f_setr \
+			PASTEMAC(chr,set0s_mxn) \
 			( \
-			  BLIS_NO_CONJUGATE, \
 			  panel_dim_r, \
 			  p12_len_max * ( bli_is_1m_packed( schema ) ? 2 : 1), \
-			  zero_r, \
-			  p12, 1, ldp_r, \
-			  cntx \
+			  ( ctyper* )p12, 1, ldp_r \
 			); \
 		} \
 		else \
@@ -265,5 +256,5 @@ void PASTEMAC(ch,varname) \
 	} \
 }
 
-INSERT_GENTFUNCR_BASIC( packm_struc_ckx )
+INSERT_GENTFUNCR_BASIC( packm_struc_cxk )
 

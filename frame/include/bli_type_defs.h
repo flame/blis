@@ -684,18 +684,6 @@ typedef enum
 	BLIS_DOTXF_KER,
 	BLIS_DOTXAXPYF_KER,
 
-	// pack kernels
-	BLIS_PACKM_KER,
-	BLIS_PACKM_1ER_KER,
-	BLIS_PACKM_DIAG_KER,
-	BLIS_PACKM_DIAG_1ER_KER,
-
-	// unpack kernels
-	BLIS_UNPACKM_KER,
-
-	// other l1m kernels
-	BLIS_SETM_KER,
-
 	// l3 native kernels
 	BLIS_GEMM_UKR,
 	BLIS_GEMMTRSM_L_UKR,
@@ -722,6 +710,22 @@ typedef enum
 	// BLIS_NUM_UKRS must be last!
 	BLIS_NUM_UKRS
 } ukr_t;
+
+
+typedef enum
+{
+	// pack kernels
+	BLIS_PACKM_KER,
+	BLIS_PACKM_1ER_KER,
+	BLIS_PACKM_DIAG_KER,
+	BLIS_PACKM_DIAG_1ER_KER,
+
+	// unpack kernels
+	BLIS_UNPACKM_KER,
+
+	// BLIS_NUM_UKR2S must be last!
+	BLIS_NUM_UKR2S
+} ukr2_t;
 
 
 typedef enum
@@ -1442,6 +1446,7 @@ typedef struct cntx_s
 	stck_t bmults;
 
 	stck_t ukrs;
+	stck_t ukr2s;
 	stck_t ukr_prefs;
 
 	stck_t l3_sup_handlers;

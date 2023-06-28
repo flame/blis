@@ -117,16 +117,5 @@
        const void*   params  \
 
 
-// setm kernel
-
-#define setm_params \
-\
-             conj_t  conja, \
-             dim_t   m, \
-             dim_t   n, \
-       const void*   kappa, \
-             void*   a, inc_t inca, inc_t lda
-
-
 #endif
 

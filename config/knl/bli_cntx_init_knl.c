@@ -52,9 +52,6 @@ void bli_cntx_init_knl( cntx_t* cntx )
 	  BLIS_GEMM_UKR, BLIS_FLOAT,  bli_sgemm_knl_asm_24x16,
 	  BLIS_GEMM_UKR, BLIS_DOUBLE, bli_dgemm_knl_asm_24x8,
 
-	  // packm
-	  BLIS_PACKM_KER, BLIS_DOUBLE, bli_dpackm_knl_asm_24x8,
-
 	  // axpyf
 	  BLIS_AXPYF_KER, BLIS_FLOAT,  bli_saxpyf_zen_int_8,
 	  BLIS_AXPYF_KER, BLIS_DOUBLE, bli_daxpyf_zen_int_8,
@@ -94,6 +91,17 @@ void bli_cntx_init_knl( cntx_t* cntx )
 	  BLIS_SCALV_KER,  BLIS_FLOAT,  bli_sscalv_zen_int10,
 	  BLIS_SCALV_KER,  BLIS_DOUBLE, bli_dscalv_zen_int10,
 #endif
+
+	  BLIS_VA_END
+	);
+
+	// Update the context with optimized packing micro-kernels.
+	bli_cntx_set_ukr2s
+	(
+	  cntx,
+
+	  // packm
+	  BLIS_PACKM_KER, BLIS_DOUBLE, BLIS_DOUBLE, bli_dpackm_knl_asm_24x8,
 
 	  BLIS_VA_END
 	);

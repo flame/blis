@@ -54,6 +54,10 @@ BLIS_EXPORT_BLIS err_t bli_cntx_init( cntx_t* cntx )
 	if ( error != BLIS_SUCCESS )
 		return error;
 
+	error = bli_stack_init( sizeof( func2_t ), 32, 32, BLIS_NUM_UKR2S, &cntx->ukr2s );
+	if ( error != BLIS_SUCCESS )
+		return error;
+
 	error = bli_stack_init( sizeof( mbool_t ), 32, 32, BLIS_NUM_UKR_PREFS, &cntx->ukr_prefs );
 	if ( error != BLIS_SUCCESS )
 		return error;
@@ -81,6 +85,10 @@ BLIS_EXPORT_BLIS err_t bli_cntx_free( cntx_t* cntx )
 		return error;
 
 	error = bli_stack_finalize( &cntx->ukrs );
+	if ( error != BLIS_SUCCESS )
+		return error;
+
+	error = bli_stack_finalize( &cntx->ukr2s );
 	if ( error != BLIS_SUCCESS )
 		return error;
 
@@ -139,22 +147,10 @@ void bli_cntx_set_blkszs( cntx_t* cntx, ... )
 		blksz_t* blksz = ( blksz_t* )va_arg( args, blksz_t* );
 		bszid_t  bm_id = ( bszid_t  )va_arg( args, bszid_t  );
 
-		if ( bs_id >= BLIS_NUM_BLKSZS || bm_id >= BLIS_NUM_BLKSZS )
-			bli_abort();
-
 		// Copy the blksz_t object contents into the appropriate
 		// location within the context's blksz_t array. Do the same
 		// for the blocksize multiple id.
-		//cntx_blkszs[ bs_id ] = *blksz;
-		//bli_blksz_copy( blksz, cntx_blksz );
-		blksz_t* cntx_blksz;
-		bli_stack_get( bs_id, ( void** )&cntx_blksz, &cntx->blkszs );
-		bli_blksz_copy_if_pos( blksz, cntx_blksz );
-
-		// Copy the blocksize multiple id into the context.
-		bszid_t* cntx_bmult;
-		bli_stack_get( bs_id, ( void** )&cntx_bmult, &cntx->bmults );
-		*cntx_bmult = bm_id;
+		bli_cntx_set_blksz( bs_id, blksz, bm_id, cntx );
 	}
 
 	// Shutdown variable argument environment and clean up stack.
@@ -204,16 +200,60 @@ void bli_cntx_set_ukrs( cntx_t* cntx , ... )
 		const num_t   ukr_dt = ( num_t   )va_arg( args, num_t   );
 		      void_fp ukr_fp = ( void_fp )va_arg( args, void_fp );
 
-		if ( ukr_id >= BLIS_NUM_UKRS )
-			bli_abort();
+		// Store the ukernel function pointer into the context.
+		bli_cntx_set_ukr_dt( ukr_fp, ukr_dt, ukr_id, cntx );
+	}
 
-		// Index into the func_t and mbool_t for the current kernel id
-		// being processed.
-		func_t* ukrs;
-		bli_stack_get( ukr_id, ( void** )&ukrs, &cntx->ukrs );
+	// Shutdown variable argument environment and clean up stack.
+	va_end( args );
+}
+
+// -----------------------------------------------------------------------------
+
+void bli_cntx_set_ukr2s( cntx_t* cntx , ... )
+{
+	// This function can be called from the bli_cntx_init_*() function for
+	// a particular architecture if the kernel developer wishes to use
+	// non-default microkernels. It should be called after
+	// bli_cntx_init_<subconfig>_ref() so that the context begins with
+	// default microkernels across all datatypes.
+
+	/* Example prototypes:
+
+	   void bli_cntx_set_ukr2s
+	   (
+	     cntx_t* cntx,
+	     ukr2_t ukr0_id, num_t dt1_0, num_t dt2_0, void_fp ukr0_fp,
+	     ukr2_t ukr1_id, num_t dt1_1, num_t dt2_1, void_fp ukr1_fp,
+	     ukr2_t ukr2_id, num_t dt1_2, num_t dt2_2, void_fp ukr2_fp,
+	     ...,
+	     BLIS_VA_END
+	   );
+	*/
+
+	// Initialize variable argument environment.
+	va_list   args;
+	va_start( args, cntx );
+
+	// Process ukernels until BLIS_VA_END is reached.
+	while ( true )
+	{
+		const int ukr_id0 = va_arg( args, int );
+
+		// If we find a ukernel id of BLIS_VA_END, then we are done.
+		if ( ukr_id0 == BLIS_VA_END ) break;
+
+		// Here, we query the variable argument list for:
+		// - the ukr_t of the kernel we're about to process (already done),
+		// - the datatype of the kernel, and
+		// - the kernel function pointer
+		const ukr2_t  ukr_id  = ( ukr2_t  )ukr_id0;
+		const num_t   ukr_dt1 = ( num_t   )va_arg( args, num_t   );
+		const num_t   ukr_dt2 = ( num_t   )va_arg( args, num_t   );
+		      void_fp ukr_fp  = ( void_fp )va_arg( args, void_fp );
 
 		// Store the ukernel function pointer into the context.
-		bli_func_set_dt( ukr_fp, ukr_dt, ukrs );
+		bli_cntx_set_ukr2_dt( ukr_fp, ukr_dt1, ukr_dt2, ukr_id, cntx );
 	}
 
 	// Shutdown variable argument environment and clean up stack.
@@ -263,16 +303,8 @@ void bli_cntx_set_ukr_prefs( cntx_t* cntx , ... )
 		const num_t      ukr_pref_dt = ( num_t      )va_arg( args, num_t );
 		const bool       ukr_pref    = ( bool       )va_arg( args, int );
 
-		if ( ukr_pref_id >= BLIS_NUM_UKR_PREFS )
-			bli_abort();
-
-		// Index into the func_t and mbool_t for the current kernel id
-		// being processed.
-		mbool_t* ukr_prefs;
-		bli_stack_get( ukr_pref_id, ( void** )&ukr_prefs, &cntx->ukr_prefs );
-
 		// Store the ukernel preference value into the context.
-		bli_mbool_set_dt( ukr_pref, ukr_pref_dt, ukr_prefs );
+		bli_cntx_set_ukr_pref_dt( ukr_pref, ukr_pref_dt, ukr_pref_id, cntx );
 	}
 
 	// Shutdown variable argument environment and clean up stack.
@@ -363,6 +395,15 @@ err_t bli_cntx_register_ukr( siz_t* ukr_id, const func_t* ukr, cntx_t* cntx )
 		return error;
 
 	return bli_cntx_set_ukr( *ukr_id, ukr, cntx );
+}
+
+err_t bli_cntx_register_ukr2( siz_t* ukr_id, const func2_t* ukr, cntx_t* cntx )
+{
+	err_t error = bli_stack_push( ukr_id, &cntx->ukr2s );
+	if ( error != BLIS_SUCCESS )
+		return error;
+
+	return bli_cntx_set_ukr2( *ukr_id, ukr, cntx );
 }
 
 err_t bli_cntx_register_ukr_pref( siz_t* ukr_pref_id, const mbool_t* ukr_pref, cntx_t* cntx )

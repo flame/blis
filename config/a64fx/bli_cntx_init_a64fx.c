@@ -55,8 +55,16 @@ void bli_cntx_init_a64fx( cntx_t* cntx )
 	  BLIS_GEMM_UKR, BLIS_SCOMPLEX, bli_cgemm_armsve_asm_2vx10_unindexed,
 	  BLIS_GEMM_UKR, BLIS_DCOMPLEX, bli_zgemm_armsve_asm_2vx10_unindexed,
 
+	  BLIS_VA_END
+	);
+
+	// Update the context with optimized packing micro-kernels.
+	bli_cntx_set_ukr2s
+	(
+	  cntx,
+
 	  // packm
-	  BLIS_PACKM_KER, BLIS_DOUBLE, bli_dpackm_armsve512_asm_16x10,
+	  BLIS_PACKM_KER, BLIS_DOUBLE, BLIS_DOUBLE, bli_dpackm_armsve512_asm_16x10,
 
 	  BLIS_VA_END
 	);

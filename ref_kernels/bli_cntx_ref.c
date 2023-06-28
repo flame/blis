@@ -56,6 +56,29 @@ protmac( double,   d, kername ) \
 protmac( scomplex, c, kername ) \
 protmac( dcomplex, z, kername )
 
+#undef  INSERT_PROTMAC_MIXED
+#define INSERT_PROTMAC_MIXED( protmac, kername ) \
+\
+protmac( float,    float,    s, s, kername ) \
+protmac( double,   float,    d, s, kername ) \
+protmac( scomplex, float,    c, s, kername ) \
+protmac( dcomplex, float,    z, s, kername ) \
+\
+protmac( float,    double,   s, d, kername ) \
+protmac( double,   double,   d, d, kername ) \
+protmac( scomplex, double,   c, d, kername ) \
+protmac( dcomplex, double,   z, d, kername ) \
+\
+protmac( float,    scomplex, s, c, kername ) \
+protmac( double,   scomplex, d, c, kername ) \
+protmac( scomplex, scomplex, c, c, kername ) \
+protmac( dcomplex, scomplex, z, c, kername ) \
+\
+protmac( float,    dcomplex, s, z, kername ) \
+protmac( double,   dcomplex, d, z, kername ) \
+protmac( scomplex, dcomplex, c, z, kername ) \
+protmac( dcomplex, dcomplex, z, z, kername )
+
 
 // -- Level-3 native micro-kernel prototype redefinitions ----------------------
 
@@ -128,17 +151,15 @@ INSERT_PROTMAC_BASIC( GEMMSUP_KER_PROT, gemmsup_gx_ukr_name )
 #define packm_diag_ker_name      GENARNAME(packm_diag)
 #define packm_diag_1er_ker_name  GENARNAME(packm_diag_1er)
 #define unpackm_ker_name         GENARNAME(unpackm)
-#define setm_ker_name            GENARNAME(setm)
 
 // Instantiate prototypes for above functions using the pre-defined packm
 // kernel prototype-generating macros.
 
-INSERT_PROTMAC_BASIC( PACKM_KER_PROT,      packm_ker_name )
-INSERT_PROTMAC_BASIC( PACKM_KER_PROT,      packm_1er_ker_name )
-INSERT_PROTMAC_BASIC( PACKM_DIAG_KER_PROT, packm_diag_ker_name )
-INSERT_PROTMAC_BASIC( PACKM_DIAG_KER_PROT, packm_diag_1er_ker_name )
-INSERT_PROTMAC_BASIC( UNPACKM_KER_PROT,    unpackm_ker_name )
-INSERT_PROTMAC_BASIC( SETM_KER_PROT,       setm_ker_name )
+INSERT_PROTMAC_MIXED( PACKM_KER_PROT2,      packm_ker_name )
+INSERT_PROTMAC_MIXED( PACKM_KER_PROT2,      packm_1er_ker_name )
+INSERT_PROTMAC_MIXED( PACKM_DIAG_KER_PROT2, packm_diag_ker_name )
+INSERT_PROTMAC_MIXED( PACKM_DIAG_KER_PROT2, packm_diag_1er_ker_name )
+INSERT_PROTMAC_MIXED( UNPACKM_KER_PROT2,    unpackm_ker_name )
 
 
 // -- Level-1f kernel prototype redefinitions ----------------------------------
@@ -210,16 +231,52 @@ do { \
 	                       NULL,               NULL ); \
 } while (0)
 
+#define gen_func_init_ro_mixed( func_p, opname ) \
+do { \
+	bli_func2_init( func_p, PASTEMAC2(s,s,opname), PASTEMAC2(s,d,opname), \
+	                        NULL,                  NULL, \
+	                        PASTEMAC2(d,s,opname), PASTEMAC2(d,d,opname), \
+	                        NULL,                  NULL, \
+	                        NULL,                  NULL, \
+	                        NULL,                  NULL, \
+	                        NULL,                  NULL, \
+	                        NULL,                  NULL ); \
+} while (0)
+
 #define gen_func_init_co( func_p, opname ) \
 do { \
 	bli_func_init( func_p, NULL,               NULL, \
 	                       PASTEMAC(c,opname), PASTEMAC(z,opname) ); \
 } while (0)
 
+#define gen_func_init_co_mixed( func_p, opname ) \
+do { \
+	bli_func2_init( func_p, NULL,                  NULL, \
+	                        NULL,                  NULL, \
+	                        NULL,                  NULL, \
+	                        NULL,                  NULL, \
+	                        NULL,                  NULL, \
+	                        PASTEMAC2(c,c,opname), PASTEMAC2(c,z,opname), \
+	                        NULL,                  NULL, \
+	                        PASTEMAC2(z,c,opname), PASTEMAC2(z,z,opname) ); \
+} while (0)
+
 #define gen_func_init( func_p, opname ) \
 do { \
 	bli_func_init( func_p, PASTEMAC(s,opname), PASTEMAC(d,opname), \
 	                       PASTEMAC(c,opname), PASTEMAC(z,opname) ); \
+} while (0)
+
+#define gen_func_init_mixed( func_p, opname ) \
+do { \
+	bli_func2_init( func_p, PASTEMAC2(s,s,opname), PASTEMAC2(s,d,opname), \
+	                        PASTEMAC2(s,c,opname), PASTEMAC2(s,z,opname), \
+	                        PASTEMAC2(d,s,opname), PASTEMAC2(d,d,opname), \
+	                        PASTEMAC2(d,c,opname), PASTEMAC2(d,z,opname), \
+	                        PASTEMAC2(c,s,opname), PASTEMAC2(c,d,opname), \
+	                        PASTEMAC2(c,c,opname), PASTEMAC2(c,z,opname), \
+	                        PASTEMAC2(z,s,opname), PASTEMAC2(z,d,opname), \
+	                        PASTEMAC2(z,c,opname), PASTEMAC2(z,z,opname) ); \
 } while (0)
 
 #define gen_sup_func_init( func0_p, func1_p, opname ) \
@@ -239,6 +296,7 @@ void GENBARNAME(cntx_init)
 {
 	blksz_t blkszs[ BLIS_NUM_BLKSZS ];
 	func_t  funcs [ BLIS_NUM_UKRS ];
+	func2_t func2s[ BLIS_NUM_UKR2S ];
 	mbool_t mbools[ BLIS_NUM_UKR_PREFS ];
 	void_fp vfuncs[ BLIS_NUM_LEVEL3_OPS ];
 
@@ -393,18 +451,20 @@ void GENBARNAME(cntx_init)
 
 	// -- Set level-1m (packm/unpackm) kernels ---------------------------------
 
-	gen_func_init   ( &funcs[ BLIS_PACKM_KER ],           packm_ker_name );
-	gen_func_init_co( &funcs[ BLIS_PACKM_1ER_KER ],       packm_1er_ker_name );
-	gen_func_init   ( &funcs[ BLIS_PACKM_DIAG_KER ],      packm_diag_ker_name );
-	gen_func_init_co( &funcs[ BLIS_PACKM_DIAG_1ER_KER ],  packm_diag_1er_ker_name );
-	gen_func_init   ( &funcs[ BLIS_UNPACKM_KER ],         unpackm_ker_name );
-	gen_func_init   ( &funcs[ BLIS_SETM_KER ],            setm_ker_name );
+	gen_func_init_mixed   ( &func2s[ BLIS_PACKM_KER ],           packm_ker_name );
+	gen_func_init_co_mixed( &func2s[ BLIS_PACKM_1ER_KER ],       packm_1er_ker_name );
+	gen_func_init_mixed   ( &func2s[ BLIS_PACKM_DIAG_KER ],      packm_diag_ker_name );
+	gen_func_init_co_mixed( &func2s[ BLIS_PACKM_DIAG_1ER_KER ],  packm_diag_1er_ker_name );
+	gen_func_init_mixed   ( &func2s[ BLIS_UNPACKM_KER ],         unpackm_ker_name );
 
 
 	// -- Put the default kernels and their preferences into the context -------
 
 	for ( dim_t i = 0; i < BLIS_NUM_UKRS; i++ )
 		bli_cntx_set_ukr( i, &funcs[ i ], cntx );
+
+	for ( dim_t i = 0; i < BLIS_NUM_UKR2S; i++ )
+		bli_cntx_set_ukr2( i, &func2s[ i ], cntx );
 
 	for ( dim_t i = 0; i < BLIS_NUM_UKR_PREFS; i++ )
 		bli_cntx_set_ukr_pref( i, &mbools[ i ], cntx );

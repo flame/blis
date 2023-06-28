@@ -93,19 +93,19 @@ void bli_cntx_init_armsve( cntx_t* cntx )
 	// Set VL-specific packing routines if applicable.
 	if ( m_r_d == 16 )
 	{
-	  bli_cntx_set_ukrs
+	  bli_cntx_set_ukr2s
 	  (
 		cntx,
-		BLIS_PACKM_KER, BLIS_DOUBLE, bli_dpackm_armsve512_asm_16x10,
+		BLIS_PACKM_KER, BLIS_DOUBLE, BLIS_DOUBLE, bli_dpackm_armsve512_asm_16x10,
 		BLIS_VA_END
 	  );
 	}
 	else if ( m_r_d == 8 )
 	{
-	  bli_cntx_set_ukrs
+	  bli_cntx_set_ukr2s
 	  (
 		cntx,
-		BLIS_PACKM_KER, BLIS_DOUBLE, bli_dpackm_armsve256_int_8x10,
+		BLIS_PACKM_KER, BLIS_DOUBLE, BLIS_DOUBLE, bli_dpackm_armsve256_int_8x10,
 		BLIS_VA_END
 	  );
 	}

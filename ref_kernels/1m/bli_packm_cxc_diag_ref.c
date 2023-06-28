@@ -35,28 +35,33 @@
 #include "blis.h"
 
 
-#define PACKM_DIAG_BODY( ctype, ch, mn_min, mn_max, dfac, inca, lda, op ) \
+#define PACKM_DIAG_BODY( ctypea, ctypep, cha, chp, mn_min, mn_max, dfac, inca, lda, op ) \
 \
 do \
 { \
 	for ( dim_t k = 0; k < cdim; k++ ) \
 	for ( dim_t mn = mn_min; mn < mn_max; mn++ ) \
-	for ( dim_t d = 0; d < dfac; d++ ) \
-		PASTEMAC(ch,op)( kappa_cast, *(alpha1 + mn*inca + k*lda), *(pi1 + mn*dfac + d + k*ldp) ); \
+	{ \
+		ctypep alpha_cast, kappa_alpha; \
+		PASTEMAC2(cha,chp,copys)( *(alpha1 + mn*inca + k*lda), alpha_cast ); \
+		PASTEMAC(chp,op)( kappa_cast, alpha_cast, kappa_alpha ); \
+		for ( dim_t d = 0; d < dfac; d++ ) \
+			PASTEMAC(chp,copys)( kappa_alpha, *(pi1 + mn*dfac + d + k*ldp) ); \
+	} \
 } while(0)
 
 
-#define PACKM_DIAG_BODY_L( ctype, ch, op ) \
-	PACKM_DIAG_BODY( ctype, ch, k+1, cdim, cdim_bcast, inca_l, lda_l, op )
+#define PACKM_DIAG_BODY_L( ctypea, ctypep, cha, chp, op ) \
+	PACKM_DIAG_BODY( ctypea, ctypep, cha, chp, k+1, cdim, cdim_bcast, inca_l, lda_l, op )
 
-#define PACKM_DIAG_BODY_U( ctype, ch, op ) \
-	PACKM_DIAG_BODY( ctype, ch, 0, k, cdim_bcast, inca_u, lda_u, op )
+#define PACKM_DIAG_BODY_U( ctypea, ctypep, cha, chp, op ) \
+	PACKM_DIAG_BODY( ctypea, ctypep, cha, chp, 0, k, cdim_bcast, inca_u, lda_u, op )
 
 
-#undef  GENTFUNC
-#define GENTFUNC( ctype, ch, opname, arch, suf ) \
+#undef  GENTFUNC2
+#define GENTFUNC2( ctypea, ctypep, cha, chp, opname, arch, suf ) \
 \
-void PASTEMAC3(ch,opname,arch,suf) \
+void PASTEMAC4(cha,chp,opname,arch,suf) \
      ( \
              struc_t struca, \
              diag_t  diaga, \
@@ -76,16 +81,16 @@ void PASTEMAC3(ch,opname,arch,suf) \
      ) \
 { \
 	/* start by zeroing out the whole block */ \
-	PASTEMAC(ch,set0s_mxn) \
+	PASTEMAC(chp,set0s_mxn) \
 	( \
 	  cdim_max, \
 	  n_max, \
 	  p, 1, ldp  \
 	); \
 \
-	      ctype           kappa_cast = *( ctype* )kappa; \
-	const ctype* restrict alpha1     = a; \
-	      ctype* restrict pi1        = p; \
+	      ctypep           kappa_cast = *( ctypep* )kappa; \
+	const ctypea* restrict alpha1     = a; \
+	      ctypep* restrict pi1        = p; \
 \
 	/* write the strictly lower part if it exists */ \
 	if ( bli_is_lower( uploa ) || bli_is_herm_or_symm( struca ) ) \
@@ -101,8 +106,8 @@ void PASTEMAC3(ch,opname,arch,suf) \
 				bli_toggle_conj( &conja_l ); \
 		} \
 \
-		if ( bli_is_conj( conja_l ) ) PACKM_DIAG_BODY_L( ctype, ch, scal2js ); \
-		else                          PACKM_DIAG_BODY_L( ctype, ch, scal2s ); \
+		if ( bli_is_conj( conja_l ) ) PACKM_DIAG_BODY_L( ctypea, ctypep, cha, chp, scal2js ); \
+		else                          PACKM_DIAG_BODY_L( ctypea, ctypep, cha, chp, scal2s ); \
 	} \
 \
 	/* write the strictly upper part if it exists */ \
@@ -120,8 +125,8 @@ void PASTEMAC3(ch,opname,arch,suf) \
 				bli_toggle_conj( &conja_u ); \
 		} \
 \
-		if ( bli_is_conj( conja_u ) ) PACKM_DIAG_BODY_U( ctype, ch, scal2js ); \
-		else                          PACKM_DIAG_BODY_U( ctype, ch, scal2s ); \
+		if ( bli_is_conj( conja_u ) ) PACKM_DIAG_BODY_U( ctypea, ctypep, cha, chp, scal2js ); \
+		else                          PACKM_DIAG_BODY_U( ctypea, ctypep, cha, chp, scal2s ); \
 	} \
 \
 	/* write the diagonal */ \
@@ -129,30 +134,41 @@ void PASTEMAC3(ch,opname,arch,suf) \
 	{ \
 		for ( dim_t mnk = 0; mnk < cdim; ++mnk ) \
 		for ( dim_t d = 0; d < cdim_bcast; ++d ) \
-			PASTEMAC(ch,set1s)( *(pi1 + mnk*(cdim_bcast + ldp) + d) ); \
+			PASTEMAC(chp,set1s)( *(pi1 + mnk*(cdim_bcast + ldp) + d) ); \
 	} \
 	else if ( bli_is_hermitian( struca ) ) \
 	{ \
 		for ( dim_t mnk = 0; mnk < cdim; ++mnk ) \
-		for ( dim_t d = 0; d < cdim_bcast; ++d ) \
 		{ \
-			ctype mu; \
-			PASTEMAC(ch,copys)( *(alpha1 + mnk*(inca + lda)), mu ); \
-			PASTEMAC(ch,seti0s)( mu ); \
-			PASTEMAC(ch,scal2s)( kappa_cast, mu, *(pi1 + mnk*(cdim_bcast + ldp) + d) ); \
+			ctypep alpha_cast, kappa_alpha; \
+			PASTEMAC2(cha,chp,copys)( *(alpha1 + mnk*(inca + lda)), alpha_cast ); \
+			PASTEMAC(chp,seti0s)( alpha_cast ); \
+			PASTEMAC(chp,scal2s)( kappa_cast, alpha_cast, kappa_alpha ); \
+			for ( dim_t d = 0; d < cdim_bcast; ++d ) \
+				PASTEMAC(chp,copys)( kappa_alpha, *(pi1 + mnk*(cdim_bcast + ldp) + d) ); \
 		} \
 	} \
 	else if ( bli_is_conj( conja )) \
 	{ \
 		for ( dim_t mnk = 0; mnk < cdim; ++mnk ) \
-		for ( dim_t d = 0; d < cdim_bcast; ++d ) \
-			PASTEMAC(ch,scal2js)( kappa_cast, *(alpha1 + mnk*(inca + lda)), *(pi1 + mnk*(cdim_bcast + ldp) + d) ); \
+		{ \
+			ctypep alpha_cast, kappa_alpha; \
+			PASTEMAC2(cha,chp,copys)( *(alpha1 + mnk*(inca + lda)), alpha_cast ); \
+			PASTEMAC(chp,scal2js)( kappa_cast, alpha_cast, kappa_alpha ); \
+			for ( dim_t d = 0; d < cdim_bcast; ++d ) \
+				PASTEMAC(chp,copys)( kappa_alpha, *(pi1 + mnk*(cdim_bcast + ldp) + d) ); \
+		} \
 	} \
 	else \
 	{ \
 		for ( dim_t mnk = 0; mnk < cdim; ++mnk ) \
-		for ( dim_t d = 0; d < cdim_bcast; ++d ) \
-			PASTEMAC(ch,scal2s)( kappa_cast, *(alpha1 + mnk*(inca + lda)), *(pi1 + mnk*(cdim_bcast + ldp) + d) ); \
+		{ \
+			ctypep alpha_cast, kappa_alpha; \
+			PASTEMAC2(cha,chp,copys)( *(alpha1 + mnk*(inca + lda)), alpha_cast ); \
+			PASTEMAC(chp,scal2s)( kappa_cast, alpha_cast, kappa_alpha ); \
+			for ( dim_t d = 0; d < cdim_bcast; ++d ) \
+				PASTEMAC(chp,copys)( kappa_alpha, *(pi1 + mnk*(cdim_bcast + ldp) + d) ); \
+		} \
 	} \
 \
 	/* invert the diagonal if requested */ \
@@ -160,14 +176,15 @@ void PASTEMAC3(ch,opname,arch,suf) \
 	{ \
 		for ( dim_t mnk = 0; mnk < cdim; ++mnk ) \
 		for ( dim_t d = 0; d < cdim_bcast; ++d ) \
-			PASTEMAC(ch,inverts)( *(pi1 + mnk*(cdim_bcast + ldp) + d) ); \
+			PASTEMAC(chp,inverts)( *(pi1 + mnk*(cdim_bcast + ldp) + d) ); \
 	} \
 \
 	/* if this an edge case in both directions, extend the diagonal with ones */ \
 	for ( dim_t mnk = cdim; mnk < bli_min( cdim_max, n_max ); ++mnk ) \
 	for ( dim_t d = 0; d < cdim_bcast; ++d ) \
-		PASTEMAC(ch,set1s)( *(pi1 + mnk*(cdim_bcast + ldp) + d) ); \
+		PASTEMAC(chp,set1s)( *(pi1 + mnk*(cdim_bcast + ldp) + d) ); \
 }
 
-INSERT_GENTFUNC_BASIC( packm_diag, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX )
+INSERT_GENTFUNC2_BASIC( packm_diag, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX )
+INSERT_GENTFUNC2_MIX_DP( packm_diag, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX )
 

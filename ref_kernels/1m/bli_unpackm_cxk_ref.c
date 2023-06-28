@@ -35,7 +35,7 @@
 #include "blis.h"
 
 
-#define UNPACKM_BODY( ctype, ch, pragma, cdim, dfac, inca, op ) \
+#define UNPACKM_BODY( ctypep, ctypea, chp, cha, pragma, cdim, dfac, inca, op ) \
 \
 do \
 { \
@@ -43,7 +43,11 @@ do \
 	{ \
 		pragma \
 		for ( dim_t mn = 0; mn < cdim; mn++ ) \
-			PASTEMAC(ch,op)( *kappa_cast, *(pi1 + mn*dfac), *(alpha1 + mn*inca) ); \
+		{ \
+			ctypep kappa_pi; \
+			PASTEMAC(chp,op)( *kappa_cast, *(pi1 + mn*dfac), kappa_pi ); \
+			PASTEMAC2(chp,cha,copys)( kappa_pi, *(alpha1 + mn*inca) ); \
+		} \
 \
 		alpha1 += lda; \
 		pi1    += ldp; \
@@ -51,10 +55,10 @@ do \
 } while(0)
 
 
-#undef  GENTFUNC
-#define GENTFUNC( ctype, ch, opname, arch, suf ) \
+#undef  GENTFUNC2
+#define GENTFUNC2( ctypep, ctypea, chp, cha, opname, arch, suf ) \
 \
-void PASTEMAC3(ch,opname,arch,suf) \
+void PASTEMAC4(chp,cha,opname,arch,suf) \
      ( \
              conj_t  conja, \
              pack_t  schema, \
@@ -68,48 +72,49 @@ void PASTEMAC3(ch,opname,arch,suf) \
        const cntx_t* cntx  \
      ) \
 { \
-	const dim_t mr  = PASTECH(BLIS_MR_, ch); \
-	const dim_t nr  = PASTECH(BLIS_NR_, ch); \
+	const dim_t mr  = PASTECH(BLIS_MR_, chp); \
+	const dim_t nr  = PASTECH(BLIS_NR_, chp); \
     /* It's not clear if unpack needs to care about BB storage... */ \
-	const dim_t bbm = PASTECH(BLIS_BBM_, ch); \
-	const dim_t bbn = PASTECH(BLIS_BBN_, ch); \
+	const dim_t bbm = PASTECH(BLIS_BBM_, chp); \
+	const dim_t bbn = PASTECH(BLIS_BBN_, chp); \
 \
-	const ctype* restrict kappa_cast = kappa; \
-	const ctype* restrict pi1        = p; \
-	      ctype* restrict alpha1     = a; \
+	const ctypep* restrict kappa_cast = kappa; \
+	const ctypep* restrict pi1        = p; \
+	      ctypea* restrict alpha1     = a; \
 \
 	if ( cdim == mr && cdim_bcast == bbm && mr != -1 ) \
 	{ \
 		if ( inca == 1 ) \
 		{ \
-			if ( bli_is_conj( conja ) ) UNPACKM_BODY( ctype, ch, PRAGMA_SIMD, mr, bbm, 1, scal2js ); \
-			else                        UNPACKM_BODY( ctype, ch, PRAGMA_SIMD, mr, bbm, 1, scal2s ); \
+			if ( bli_is_conj( conja ) ) UNPACKM_BODY( ctypep, ctypea, chp, cha, PRAGMA_SIMD, mr, bbm, 1, scal2js ); \
+			else                        UNPACKM_BODY( ctypep, ctypea, chp, cha, PRAGMA_SIMD, mr, bbm, 1, scal2s ); \
 		} \
 		else \
 		{ \
-			if ( bli_is_conj( conja ) ) UNPACKM_BODY( ctype, ch, PRAGMA_SIMD, mr, bbm, inca, scal2js ); \
-			else                        UNPACKM_BODY( ctype, ch, PRAGMA_SIMD, mr, bbm, inca, scal2s ); \
+			if ( bli_is_conj( conja ) ) UNPACKM_BODY( ctypep, ctypea, chp, cha, PRAGMA_SIMD, mr, bbm, inca, scal2js ); \
+			else                        UNPACKM_BODY( ctypep, ctypea, chp, cha, PRAGMA_SIMD, mr, bbm, inca, scal2s ); \
 		} \
 	} \
 	else if ( cdim == nr && cdim_bcast == bbn && nr != -1 ) \
 	{ \
 		if ( inca == 1 ) \
 		{ \
-			if ( bli_is_conj( conja ) ) UNPACKM_BODY( ctype, ch, PRAGMA_SIMD, nr, bbn, 1, scal2js ); \
-			else                        UNPACKM_BODY( ctype, ch, PRAGMA_SIMD, nr, bbn, 1, scal2s ); \
+			if ( bli_is_conj( conja ) ) UNPACKM_BODY( ctypep, ctypea, chp, cha, PRAGMA_SIMD, nr, bbn, 1, scal2js ); \
+			else                        UNPACKM_BODY( ctypep, ctypea, chp, cha, PRAGMA_SIMD, nr, bbn, 1, scal2s ); \
 		} \
 		else \
 		{ \
-			if ( bli_is_conj( conja ) ) UNPACKM_BODY( ctype, ch, PRAGMA_SIMD, nr, bbn, inca, scal2js ); \
-			else                        UNPACKM_BODY( ctype, ch, PRAGMA_SIMD, nr, bbn, inca, scal2s ); \
+			if ( bli_is_conj( conja ) ) UNPACKM_BODY( ctypep, ctypea, chp, cha, PRAGMA_SIMD, nr, bbn, inca, scal2js ); \
+			else                        UNPACKM_BODY( ctypep, ctypea, chp, cha, PRAGMA_SIMD, nr, bbn, inca, scal2s ); \
 		} \
 	} \
 	else \
 	{ \
-		if ( bli_is_conj( conja ) ) UNPACKM_BODY( ctype, ch, , cdim, cdim_bcast, inca, scal2js ); \
-		else                        UNPACKM_BODY( ctype, ch, , cdim, cdim_bcast, inca, scal2s ); \
+		if ( bli_is_conj( conja ) ) UNPACKM_BODY( ctypep, ctypea, chp, cha, , cdim, cdim_bcast, inca, scal2js ); \
+		else                        UNPACKM_BODY( ctypep, ctypea, chp, cha, , cdim, cdim_bcast, inca, scal2s ); \
 	} \
 }
 
-INSERT_GENTFUNC_BASIC( unpackm, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX )
+INSERT_GENTFUNC2_BASIC( unpackm, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX )
+INSERT_GENTFUNC2_MIX_DP( unpackm, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX )
 

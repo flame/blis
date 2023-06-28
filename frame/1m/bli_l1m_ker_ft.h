@@ -53,7 +53,6 @@ GENTDEF( packm )
 GENTDEF( packm_cxk )
 GENTDEF( unpackm_cxk )
 GENTDEF( packm_cxc_diag )
-GENTDEF( setm )
 
 
 #endif

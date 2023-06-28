@@ -214,12 +214,12 @@ void PASTEMAC(ch,varname) \
 		n_panel_full  = &n; \
 	} \
 \
-	num_t dt     = PASTEMAC(ch,type); \
-	ukr_t ker_id = BLIS_UNPACKM_KER; \
+	num_t  dt     = PASTEMAC(ch,type); \
+	ukr2_t ker_id = BLIS_UNPACKM_KER; \
 \
 	/* Query the context for the unpackm kernel corresponding to the current
 	   panel dimension, or kernel id. */ \
-	PASTECH(unpackm_cxk,_ker_ft) f = bli_cntx_get_ukr_dt( dt, ker_id, cntx ); \
+	unpackm_cxk_ker_ft f = bli_cntx_get_ukr2_dt( dt, dt, ker_id, cntx ); \
 \
 	/* Compute the total number of iterations we'll need. */ \
 	num_iter = iter_dim / panel_dim_max + ( iter_dim % panel_dim_max ? 1 : 0 ); \

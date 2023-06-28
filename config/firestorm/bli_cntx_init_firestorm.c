@@ -52,10 +52,6 @@ void bli_cntx_init_firestorm( cntx_t* cntx )
 	  BLIS_GEMM_UKR, BLIS_FLOAT,  bli_sgemm_armv8a_asm_12x8r,
 	  BLIS_GEMM_UKR, BLIS_DOUBLE, bli_dgemm_armv8a_asm_8x6r,
 
-	  // packm
-	  BLIS_PACKM_KER, BLIS_FLOAT,  bli_spackm_armv8a_int_8x12,
-	  BLIS_PACKM_KER, BLIS_DOUBLE, bli_dpackm_armv8a_int_6x8,
-
 	  // gemmsup
 	  BLIS_GEMMSUP_RRR_UKR, BLIS_DOUBLE, bli_dgemmsup_rv_armv8a_asm_6x8m,
 	  BLIS_GEMMSUP_RRC_UKR, BLIS_DOUBLE, bli_dgemmsup_rd_armv8a_asm_6x8m,
@@ -65,6 +61,18 @@ void bli_cntx_init_firestorm( cntx_t* cntx )
 	  BLIS_GEMMSUP_CRC_UKR, BLIS_DOUBLE, bli_dgemmsup_rd_armv8a_asm_6x8n,
 	  BLIS_GEMMSUP_CCR_UKR, BLIS_DOUBLE, bli_dgemmsup_rv_armv8a_asm_6x8n,
 	  BLIS_GEMMSUP_CCC_UKR, BLIS_DOUBLE, bli_dgemmsup_rv_armv8a_asm_6x8n,
+
+	  BLIS_VA_END
+	);
+
+	// Update the context with optimized packing micro-kernels.
+	bli_cntx_set_ukr2s
+	(
+	  cntx,
+
+	  // packm
+	  BLIS_PACKM_KER, BLIS_FLOAT,  BLIS_FLOAT,  bli_spackm_armv8a_int_8x12,
+	  BLIS_PACKM_KER, BLIS_DOUBLE, BLIS_DOUBLE, bli_dpackm_armv8a_int_6x8,
 
 	  BLIS_VA_END
 	);
