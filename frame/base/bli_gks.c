@@ -248,6 +248,7 @@ void bli_gks_finalize( void )
 				printf( "bli_gks_finalize(): cntx for ind_t %d: ", ( int )ind );
 				#endif
 
+				bli_cntx_free( gks_id );
 				bli_free_intl( gks_id );
 			}
 		}
@@ -309,7 +310,7 @@ void bli_gks_register_cntx
        void_fp ref_fp
      )
 {
-	err_t r_val;
+	err_t e_val;
 
 	// This function is called by bli_gks_init() for each architecture that
 	// will be supported by BLIS. It takes an architecture id and two
@@ -326,7 +327,7 @@ void bli_gks_register_cntx
 	// Sanity check: verify that the arch_t id is valid.
 	if ( bli_error_checking_is_enabled() )
 	{
-		err_t e_val = bli_check_valid_arch_id( id );
+		e_val = bli_check_valid_arch_id( id );
 		bli_check_error_code( e_val );
 	}
 
@@ -352,8 +353,12 @@ void bli_gks_register_cntx
 	// Allocate memory for a single context and store the address at
 	// the element in the gks[ id ] array that is reserved for native
 	// execution.
-	cntx_t* gks_id = bli_calloc_intl( sizeof( cntx_t ), &r_val );
+	cntx_t* gks_id = bli_calloc_intl( sizeof( cntx_t ), &e_val );
 	gks[ id ] = gks_id;
+
+	// Initialize the context structure
+	e_val = bli_cntx_init( gks_id );
+	bli_check_error_code( e_val );
 
 	// Call the context initialization function on the element of the newly
 	// allocated array corresponding to native execution.
@@ -374,7 +379,6 @@ void bli_gks_register_cntx
 	// with NR blocking used to pack A and MR blocking used to pack B, with the
 	// arguments to the gemmtrsm microkernel swapped at the last minute, as the
 	// kernel is called.
-	err_t e_val;
 
 	const blksz_t* mc = bli_cntx_get_blksz( BLIS_MC, gks_id );
 	const blksz_t* nc = bli_cntx_get_blksz( BLIS_NC, gks_id );
