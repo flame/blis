@@ -61,6 +61,13 @@ if(ENABLE_OPENMP)
 endif()
 target_link_libraries(BenchGer optimized "${LIB_NAME}.lib")
 
+add_executable(BenchNrm2 bench_nrm2.c)
+target_link_libraries(BenchNrm2 debug "${LIB_NAME}.lib")
+if(ENABLE_OPENMP)
+    target_link_libraries(BenchNrm2 OpenMP::OpenMP_CXX)
+endif()
+target_link_libraries(BenchNrm2 optimized "${LIB_NAME}.lib")
+
 add_executable(BenchScalv bench_scalv.c)
 target_link_libraries(BenchScalv debug "${LIB_NAME}.lib")
 if(ENABLE_OPENMP)
