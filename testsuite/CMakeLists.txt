@@ -7,8 +7,8 @@ add_executable(test_libblis "")
 add_subdirectory(src)
 
 target_link_libraries(test_libblis debug "${LIB_NAME}.lib")
-if(ENABLE_OPENMP AND BUILD_SHARED_LIBS)
-    target_link_libraries(test_libblis "${OMP_LIB}")
+if(ENABLE_OPENMP)
+    target_link_libraries(test_libblis OpenMP::OpenMP_CXX)
 endif()
 target_link_libraries(test_libblis optimized  "${LIB_NAME}.lib")
 
