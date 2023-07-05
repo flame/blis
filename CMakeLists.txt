@@ -622,7 +622,7 @@ if (ENABLE_ASAN_TESTS)
 endif ()
 
 # Set object libraries created in kernels directory to be added into BLIS library.
-set(OBJECT_LIBRARIES 
+set(OBJECT_LIBRARIES
     $<TARGET_OBJECTS:zen_1>
     $<TARGET_OBJECTS:zen_1f>
     $<TARGET_OBJECTS:zen_2>
@@ -634,7 +634,7 @@ set(OBJECT_LIBRARIES
     $<TARGET_OBJECTS:haswell_3supd6x8>
 )
 # Ammend the list of object libraries to include zen4 paths as appropriate.
-if(${TARGET_ARCH} STREQUAL zen4 OR 
+if(${TARGET_ARCH} STREQUAL zen4 OR
    ${TARGET_ARCH} STREQUAL amdzen)
    set(OBJECT_LIBRARIES ${OBJECT_LIBRARIES}
       $<TARGET_OBJECTS:zen4_1>
@@ -649,7 +649,7 @@ endif()
 if(BUILD_SHARED_LIBS)
     add_library("${PROJECT_NAME}" SHARED ${CMAKE_SOURCE_DIR}/bli_config.h
                          ${CMAKE_SOURCE_DIR}/include/${TARGET_ARCH}/blis.h
-                         ${headers} 
+                         ${headers}
                          ${OBJECT_LIBRARIES}
                          )
     if(ENABLE_OPENMP)
@@ -661,7 +661,7 @@ endif()
 if(NOT BUILD_SHARED_LIBS)
     add_library("${PROJECT_NAME}" STATIC ${CMAKE_SOURCE_DIR}/bli_config.h
                          ${CMAKE_SOURCE_DIR}/include/${TARGET_ARCH}/blis.h
-                         ${headers} 
+                         ${headers}
                          ${OBJECT_LIBRARIES}
                          )
     set_target_properties("${PROJECT_NAME}" PROPERTIES LINKER_LANGUAGE C OUTPUT_NAME "${LIB_NAME}" STATIC_LIBRARY_OPTIONS "${STATIC_LIB_OPTIONS}")
@@ -680,6 +680,30 @@ endif()
 
 link_directories(${CMAKE_LIBRARY_OUTPUT_DIRECTORY})
 add_definitions(-DEXPMODULE)
+
+if(NOT CMAKE_INSTALL_PREFIX)
+  if(WIN32)
+    set(CMAKE_INSTALL_PREFIX
+        "${PROJECT_BINARY_DIR}/libblis"
+        CACHE PATH "Install path prefix, prepended onto install directories")
+  else()
+    set(CMAKE_INSTALL_PREFIX
+        "/usr/local/blis"
+        CACHE PATH "Install path prefix, prepended onto install directories")
+  endif()
+endif()
+
+# Public blis headers
+set(BLIS_PUBLIC_HEADERS
+    ${CMAKE_SOURCE_DIR}/include/${TARGET_ARCH}/${BLIS_H}
+    ${CMAKE_SOURCE_DIR}/include/${TARGET_ARCH}/${CBLAS_H}
+)
+
+set_target_properties(${PROJECT_NAME} PROPERTIES PUBLIC_HEADER "${BLIS_PUBLIC_HEADERS}")
+
+install(TARGETS ${PROJECT_NAME} LIBRARY DESTINATION ${CMAKE_INSTALL_PREFIX}/lib
+        ARCHIVE DESTINATION ${CMAKE_INSTALL_PREFIX}/lib
+        PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_PREFIX}/include)
 
 add_subdirectory(config)
 add_subdirectory(ref_kernels)
