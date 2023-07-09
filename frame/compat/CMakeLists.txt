@@ -1,4 +1,4 @@
-##Copyright (C) 2022, Advanced Micro Devices, Inc. All rights reserved.##
+##Copyright (C) 2023, Advanced Micro Devices, Inc. All rights reserved.##
 
 target_sources("${PROJECT_NAME}"
     PRIVATE
@@ -49,6 +49,8 @@ ${TARGET_ARCH} STREQUAL amdzen)
         ${CMAKE_CURRENT_SOURCE_DIR}/bla_scal_amd.c
         ${CMAKE_CURRENT_SOURCE_DIR}/bla_swap_amd.c
         ${CMAKE_CURRENT_SOURCE_DIR}/bla_trsm_amd.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/bla_gemm_pack_get_size.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/bla_gemm_pack.c
         )
 else()
         target_sources("${PROJECT_NAME}"

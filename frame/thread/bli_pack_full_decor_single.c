@@ -4,8 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2018 - 2019, Advanced Micro Devices, Inc.
+   Copyright (C) 2023, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -33,31 +32,42 @@
 
 */
 
-#include "bli_packm_cntl.h"
-#include "bli_packm_check.h"
-#include "bli_packm_init.h"
-#include "bli_packm_int.h"
+#include "blis.h"
 
-#include "bli_packm_part.h"
+#ifndef BLIS_ENABLE_OPENMP
 
-#include "bli_packm_var.h"
+#define SKIP_THRINFO_TREE
 
-#include "bli_packm_struc_cxk.h"
-#include "bli_packm_struc_cxk_4mi.h"
-#include "bli_packm_struc_cxk_3mis.h"
-#include "bli_packm_struc_cxk_rih.h"
-#include "bli_packm_struc_cxk_1er.h"
+void* bli_pack_full_thread_entry( void* data_void ) { return NULL; }
 
-#include "bli_packm_cxk.h"
-#include "bli_packm_cxk_4mi.h"
-#include "bli_packm_cxk_3mis.h"
-#include "bli_packm_cxk_rih.h"
-#include "bli_packm_cxk_1er.h"
+void bli_pack_full_thread_decorator
+     (
+       pack_full_t   func,
+       const char*   identifier,
+             obj_t*  alpha_obj,
+             obj_t*  src_obj,
+             obj_t*  dest_obj,
+             cntx_t* cntx,
+             rntm_t* rntm
+     )
+{
+    thrinfo_t thread = BLIS_GEMM_SINGLE_THREADED;
 
-#include "bli_pack_full.h"
+    {
+        rntm_t* restrict rntm_p = rntm;
 
-// Mixed datatype support.
-#ifdef BLIS_ENABLE_GEMM_MD
-#include "bli_packm_md.h"
+        func
+        (
+         identifier,
+         alpha_obj,
+         src_obj,
+         dest_obj,
+         cntx,
+         rntm_p,
+         &thread
+        );
+    }
+
+}
+
 #endif
-

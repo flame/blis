@@ -199,6 +199,9 @@
 #include "bla_gemm_batch.h"
 #include "bla_gemm3m.h"
 #include "bla_gemm3m_check.h"
+#include "bla_gemm_pack_get_size.h"
+#include "bla_gemm_pack.h"
+
 // -- Transpose and Copy Routines --
 #include "bla_omatadd.h"
 #include "bla_omatcopy.h"

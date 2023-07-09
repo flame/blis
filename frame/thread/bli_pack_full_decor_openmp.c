@@ -4,8 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2018 - 2019, Advanced Micro Devices, Inc.
+   Copyright (C) 2023, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -33,31 +32,50 @@
 
 */
 
-#include "bli_packm_cntl.h"
-#include "bli_packm_check.h"
-#include "bli_packm_init.h"
-#include "bli_packm_int.h"
+#include "blis.h"
 
-#include "bli_packm_part.h"
+#ifdef BLIS_ENABLE_OPENMP
 
-#include "bli_packm_var.h"
+void* bli_pack_full_thread_entry( void* data_void ) { return NULL; }
 
-#include "bli_packm_struc_cxk.h"
-#include "bli_packm_struc_cxk_4mi.h"
-#include "bli_packm_struc_cxk_3mis.h"
-#include "bli_packm_struc_cxk_rih.h"
-#include "bli_packm_struc_cxk_1er.h"
+void bli_pack_full_thread_decorator
+     (
+       pack_full_t   func,
+       const char*   identifier,
+             obj_t*  alpha_obj,
+             obj_t*  src_obj,
+             obj_t*  dest_obj,
+             cntx_t* cntx,
+             rntm_t* rntm
+     )
+{
+    dim_t n_threads = bli_rntm_num_threads( rntm );
 
-#include "bli_packm_cxk.h"
-#include "bli_packm_cxk_4mi.h"
-#include "bli_packm_cxk_3mis.h"
-#include "bli_packm_cxk_rih.h"
-#include "bli_packm_cxk_1er.h"
+    /* Ensure n_threads is always greater than or equal to 1 */
+    /* Passing BLIS_IC_NT and BLIS_JC_NT for pack can lead to n_threads */
+    /* becoming negative. In that case, packing is done using 1 thread */
+    n_threads = ( n_threads > 0 ) ? n_threads : 1;
 
-#include "bli_pack_full.h"
+    _Pragma( "omp parallel num_threads(n_threads)" )
+    {
+        thrinfo_t thread;
+        bli_thrinfo_set_n_way( n_threads, &thread );
+        bli_thrinfo_set_work_id( omp_get_thread_num(), &thread );
 
-// Mixed datatype support.
-#ifdef BLIS_ENABLE_GEMM_MD
-#include "bli_packm_md.h"
+        rntm_t           rntm_l = *rntm;
+        rntm_t* restrict rntm_p = &rntm_l;
+
+        func
+        (
+         identifier,
+         alpha_obj,
+         src_obj,
+         dest_obj,
+         cntx,
+         rntm_p,
+         &thread
+        );
+    }
+}
 #endif
 

@@ -4,8 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2018 - 2019, Advanced Micro Devices, Inc.
+   Copyright (C) 2023, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -33,31 +32,12 @@
 
 */
 
-#include "bli_packm_cntl.h"
-#include "bli_packm_check.h"
-#include "bli_packm_init.h"
-#include "bli_packm_int.h"
+#ifndef BLIS_PACK_FULL_DECOR_OPENMP_H
+#define BLIS_PACK_FULL_DECOR_OPENMP_H
 
-#include "bli_packm_part.h"
+// Definitions specific to situations when OpenMP multithreading is enabled.
+#ifdef BLIS_ENABLE_OPENMP
 
-#include "bli_packm_var.h"
-
-#include "bli_packm_struc_cxk.h"
-#include "bli_packm_struc_cxk_4mi.h"
-#include "bli_packm_struc_cxk_3mis.h"
-#include "bli_packm_struc_cxk_rih.h"
-#include "bli_packm_struc_cxk_1er.h"
-
-#include "bli_packm_cxk.h"
-#include "bli_packm_cxk_4mi.h"
-#include "bli_packm_cxk_3mis.h"
-#include "bli_packm_cxk_rih.h"
-#include "bli_packm_cxk_1er.h"
-
-#include "bli_pack_full.h"
-
-// Mixed datatype support.
-#ifdef BLIS_ENABLE_GEMM_MD
-#include "bli_packm_md.h"
 #endif
 
+#endif

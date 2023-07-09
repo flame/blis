@@ -4,8 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2018 - 2019, Advanced Micro Devices, Inc.
+   Copyright (C) 2023, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -33,31 +32,30 @@
 
 */
 
-#include "bli_packm_cntl.h"
-#include "bli_packm_check.h"
-#include "bli_packm_init.h"
-#include "bli_packm_int.h"
+#include "blis.h"
 
-#include "bli_packm_part.h"
+void bli_pack_full_init
+     (
+       const char*   identifier,
+             obj_t*  alpha_obj,
+             obj_t*  src_obj,
+             obj_t*  dest_obj,
+             cntx_t* cntx,
+             rntm_t* rntm
+     );
 
-#include "bli_packm_var.h"
+#undef GENTPROT
+#define GENTPROT( ctype, ch, tfuncname )  \
+\
+void PASTEMAC(ch,tfuncname) \
+     ( \
+       const char*   identifier, \
+             obj_t*  alpha_obj, \
+             obj_t*  src_obj, \
+             obj_t*  dest, \
+             cntx_t* cntx, \
+             rntm_t* rntm, \
+             thrinfo_t* thread \
+     ); \
 
-#include "bli_packm_struc_cxk.h"
-#include "bli_packm_struc_cxk_4mi.h"
-#include "bli_packm_struc_cxk_3mis.h"
-#include "bli_packm_struc_cxk_rih.h"
-#include "bli_packm_struc_cxk_1er.h"
-
-#include "bli_packm_cxk.h"
-#include "bli_packm_cxk_4mi.h"
-#include "bli_packm_cxk_3mis.h"
-#include "bli_packm_cxk_rih.h"
-#include "bli_packm_cxk_1er.h"
-
-#include "bli_pack_full.h"
-
-// Mixed datatype support.
-#ifdef BLIS_ENABLE_GEMM_MD
-#include "bli_packm_md.h"
-#endif
-
+INSERT_GENTPROT_BASIC0_SD( packm_full )

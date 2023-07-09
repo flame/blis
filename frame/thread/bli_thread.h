@@ -57,6 +57,10 @@
 // for the sup code path.
 #include "bli_l3_sup_decor.h"
 
+// Include the pack full thread decorator and related definitions and prototypes
+// for the pack code path.
+#include "bli_pack_full_decor.h"
+
 // Initialization-related prototypes.
 void bli_thread_init( void );
 void bli_thread_update_tl( void );

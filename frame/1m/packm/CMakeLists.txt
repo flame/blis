@@ -1,4 +1,4 @@
-##Copyright (C) 2020, Advanced Micro Devices, Inc. All rights reserved.##
+##Copyright (C) 2020 - 2023, Advanced Micro Devices, Inc. All rights reserved.##
 
 target_sources("${PROJECT_NAME}"
      PRIVATE
@@ -22,5 +22,6 @@ target_sources("${PROJECT_NAME}"
     ${CMAKE_CURRENT_SOURCE_DIR}/bli_packm_struc_cxk_rih.c
     ${CMAKE_CURRENT_SOURCE_DIR}/bli_packm_thrinfo.c
     ${CMAKE_CURRENT_SOURCE_DIR}/bli_packm_unb_var1.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/bli_pack_full.c
     )
 
