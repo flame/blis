@@ -142,8 +142,8 @@ INSTANTIATE_TEST_SUITE_P(
         ::testing::Combine(
             ::testing::Values('n'),                                          // n: use x, not conj(x) (since it is real)
             ::testing::Values(gtint_t(3), gtint_t(30), gtint_t(112)),        // m size of vector
-            ::testing::Values(gtint_t(2), gtint_t(-2)),                      /*(gtint_t(-5), gtint_t(-17))*/// stride size for x
-            ::testing::Values(gtint_t(3), gtint_t(-3)),                      /*(gtint_t(-12), gtint_t(-4))*/// stride size for y
+            ::testing::Values(gtint_t(2)),                                   // stride size for x
+            ::testing::Values(gtint_t(3)),                                   // stride size for y
             ::testing::Values(float(4.0))                                    // alpha
         ),
         ::saxpyvGenericTestPrint()

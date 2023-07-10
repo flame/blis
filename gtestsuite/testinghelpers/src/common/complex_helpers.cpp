@@ -89,18 +89,18 @@ dcomplex operator*(const dcomplex x, const dcomplex y)
 
 bool operator== (const scomplex x, const scomplex y)
 {
-    return {(x.real==y.real) && (x.imag==y.imag)};
+    return ((x.real==y.real) && (x.imag==y.imag));
 }
 bool operator== (const dcomplex x, const dcomplex y)
 {
-    return {(x.real==y.real) && (x.imag==y.imag)};
+    return ((x.real==y.real) && (x.imag==y.imag));
 }
 
 bool operator!= (const scomplex x, const scomplex y)
 {
-    return {!((x.real==y.real) && (x.imag==y.imag))};
+    return (!((x.real==y.real) && (x.imag==y.imag)));
 }
 bool operator!= (const dcomplex x, const dcomplex y)
 {
-    return {!((x.real==y.real) && (x.imag==y.imag))};
+    return (!((x.real==y.real) && (x.imag==y.imag)));
 }

@@ -64,13 +64,13 @@ void test_gemv( char storage, char trnsa, char conjx, gtint_t m, gtint_t n,
     //----------------------------------------------------------
     //                  Call BLIS function
     //----------------------------------------------------------
-    gemv( storage, trnsa, conjx, m, n, &alpha, a.data(), lda,
+    gemv<T>( storage, trnsa, conjx, m, n, &alpha, a.data(), lda,
                          x.data(), incx, &beta, y.data(), incy );
 
     //----------------------------------------------------------
     //                  Call reference implementation.
     //----------------------------------------------------------
-    testinghelpers::ref_gemv( storage, trnsa, conjx, m, n, alpha, a.data(),
+    testinghelpers::ref_gemv<T>( storage, trnsa, conjx, m, n, alpha, a.data(),
                          lda, x.data(), incx, beta, y_ref.data(), incy );
 
     //----------------------------------------------------------

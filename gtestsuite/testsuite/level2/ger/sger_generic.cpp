@@ -75,7 +75,7 @@ TEST_P(sgerTest, RandomData)
     gtint_t lda_inc = std::get<8>(GetParam());
 
     // Set the threshold for the errors:
-    double thresh = 4*std::max(m,n)*testinghelpers::getEpsilon<T>();
+    double thresh = 4*(std::max)(m,n)*testinghelpers::getEpsilon<T>();
 
     //----------------------------------------------------------
     //     Call test body using these parameters
@@ -101,7 +101,7 @@ public:
 #elif TEST_CBLAS
         std::string str_name = "cblas_sger";
 #else  //#elif TEST_BLIS_TYPED
-        std::string str_name = "blis_sger";
+        std::string str_name = "bli_sger";
 #endif
         str_name    = str_name + "_" + sfm;
         str_name    = str_name + "_" + conjx+conjy;

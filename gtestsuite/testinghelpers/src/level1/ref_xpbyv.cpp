@@ -33,7 +33,6 @@
 */
 
 #include "blis.h"
-#include <dlfcn.h>
 #include "level1/ref_xpbyv.h"
 
 namespace testinghelpers {
@@ -50,19 +49,19 @@ void ref_xpbyv( char conj_x, gtint_t n, const T* x,
     /* Check the typename T passed to this function template and call respective function.*/
     if (typeid(T) == typeid(float))
     {
-        ref_cblas_scal = (Fptr_ref_cblas_scal)dlsym(refCBLASModule.get(), "cblas_sscal");
+        ref_cblas_scal = (Fptr_ref_cblas_scal)refCBLASModule.loadSymbol("cblas_sscal");
     }
     else if (typeid(T) == typeid(double))
     {
-        ref_cblas_scal = (Fptr_ref_cblas_scal)dlsym(refCBLASModule.get(), "cblas_dscal");
+        ref_cblas_scal = (Fptr_ref_cblas_scal)refCBLASModule.loadSymbol("cblas_dscal");
     }
     else if (typeid(T) == typeid(scomplex))
     {
-        ref_cblas_scal = (Fptr_ref_cblas_scal)dlsym(refCBLASModule.get(), "cblas_cscal");
+        ref_cblas_scal = (Fptr_ref_cblas_scal)refCBLASModule.loadSymbol("cblas_cscal");
     }
     else if (typeid(T) == typeid(dcomplex))
     {
-        ref_cblas_scal = (Fptr_ref_cblas_scal)dlsym(refCBLASModule.get(), "cblas_zscal");
+        ref_cblas_scal = (Fptr_ref_cblas_scal)refCBLASModule.loadSymbol("cblas_zscal");
     }
     else
     {
@@ -80,19 +79,19 @@ void ref_xpbyv( char conj_x, gtint_t n, const T* x,
     /* Check the typename T passed to this function template and call respective function.*/
     if (typeid(T) == typeid(float))
     {
-        ref_cblas_axpby = (Fptr_ref_cblas_axpby)dlsym(refCBLASModule.get(), "cblas_saxpy");
+        ref_cblas_axpby = (Fptr_ref_cblas_axpby)refCBLASModule.loadSymbol("cblas_saxpy");
     }
     else if (typeid(T) == typeid(double))
     {
-        ref_cblas_axpby = (Fptr_ref_cblas_axpby)dlsym(refCBLASModule.get(), "cblas_daxpy");
+        ref_cblas_axpby = (Fptr_ref_cblas_axpby)refCBLASModule.loadSymbol("cblas_daxpy");
     }
     else if (typeid(T) == typeid(scomplex))
     {
-        ref_cblas_axpby = (Fptr_ref_cblas_axpby)dlsym(refCBLASModule.get(), "cblas_caxpy");
+        ref_cblas_axpby = (Fptr_ref_cblas_axpby)refCBLASModule.loadSymbol("cblas_caxpy");
     }
     else if (typeid(T) == typeid(dcomplex))
     {
-        ref_cblas_axpby = (Fptr_ref_cblas_axpby)dlsym(refCBLASModule.get(), "cblas_zaxpy");
+        ref_cblas_axpby = (Fptr_ref_cblas_axpby)refCBLASModule.loadSymbol("cblas_zaxpy");
     }
     else
     {

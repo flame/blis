@@ -32,23 +32,45 @@
 
 */
 
+#ifdef WIN32
+#include <windows.h>
+#include <libloaderapi.h>
+#elif defined __linux__
 #include <dlfcn.h>
+#endif
 #include <stdexcept>
 
+/**
+ * This is a helper class that we use to load the symbols 
+ * from the reference library dynamically so that we get
+ * the reference solution.
+ * Since dynamic loading can be time consuming this class works
+ * in the following manner.
+ * - We have a thread local instance of this object. That means
+ *   that for each executable there is a global variable called
+ *   refCBLASModule.
+ * - The constructor of refCBLASModule (which is called automatically)
+ *   loads the library either with a call to dlopen (Linux) or with
+ *   a call to LoadLibrary (Windows).
+ * - Similarly the destructor unloads the library.
+ * - The member function loadSymbol() is used to return the pointer 
+ *   to that symbol in the library, either with a call to ldsym (Linux)
+ *   or with a call to GetProcAddress (Windows).
+ * This means that the library is only loaded once per executable
+ * due to having the global variable refCBLASModule and unloaded once
+ * at the end. Multiple calls to loadSymbol are used to access the 
+ * corresponding API used for reference.
+*/
 namespace testinghelpers {
 class refCBLAS
 {
   private:
-#ifdef REF_IS_MKL
-    void *MKLCoreModule = nullptr;
-    void *MKLGNUThreadModule = nullptr;
-#endif
     void *refCBLASModule = nullptr;
 
   public:
     refCBLAS();
     ~refCBLAS();
-    void* get();
+    void* loadSymbol(const char*);
 };
 } //end of testinghelpers namespace
 

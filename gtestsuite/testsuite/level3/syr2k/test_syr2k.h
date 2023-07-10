@@ -72,7 +72,7 @@ void test_syr2k( char storage, char uplo, char transa, char transb, gtint_t m,
     //----------------------------------------------------------
     //                  Call reference implementation.
     //----------------------------------------------------------
-    testinghelpers::ref_syr2k( storage, uplo, transa, transb, m, k, alpha,
+    testinghelpers::ref_syr2k<T>( storage, uplo, transa, transb, m, k, alpha,
                a.data(), lda, b.data(), ldb, beta, c_ref.data(), ldc );
 
     //----------------------------------------------------------

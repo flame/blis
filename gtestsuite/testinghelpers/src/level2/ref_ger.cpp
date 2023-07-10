@@ -33,7 +33,6 @@
 */
 
 #include "blis.h"
-#include <dlfcn.h>
 #include "level2/ref_ger.h"
 
 /*
@@ -68,25 +67,25 @@ void ref_ger( char storage, char conjx, char conjy, gtint_t m, gtint_t n,
     /* Check the typename T passed to this function template and call respective function.*/
     if (typeid(T) == typeid(float))
     {
-        ref_cblas_ger = (Fptr_ref_cblas_ger)dlsym(refCBLASModule.get( ), "cblas_sger");
+        ref_cblas_ger = (Fptr_ref_cblas_ger)refCBLASModule.loadSymbol("cblas_sger");
     }
     else if (typeid(T) == typeid(double))
     {
-        ref_cblas_ger = (Fptr_ref_cblas_ger)dlsym(refCBLASModule.get(), "cblas_dger");
+        ref_cblas_ger = (Fptr_ref_cblas_ger)refCBLASModule.loadSymbol("cblas_dger");
     }
     else if (typeid(T) == typeid(scomplex))
     {
       if( cfy )
-        ref_cblas_ger = (Fptr_ref_cblas_ger)dlsym(refCBLASModule.get(), "cblas_cgerc");
+        ref_cblas_ger = (Fptr_ref_cblas_ger)refCBLASModule.loadSymbol("cblas_cgerc");
        else
-        ref_cblas_ger = (Fptr_ref_cblas_ger)dlsym(refCBLASModule.get(), "cblas_cgeru");
+        ref_cblas_ger = (Fptr_ref_cblas_ger)refCBLASModule.loadSymbol("cblas_cgeru");
     }
     else if (typeid(T) == typeid(dcomplex))
     {
       if( cfy )
-        ref_cblas_ger = (Fptr_ref_cblas_ger)dlsym(refCBLASModule.get(), "cblas_zgerc");
+        ref_cblas_ger = (Fptr_ref_cblas_ger)refCBLASModule.loadSymbol("cblas_zgerc");
        else
-        ref_cblas_ger = (Fptr_ref_cblas_ger)dlsym(refCBLASModule.get(), "cblas_zgeru");
+        ref_cblas_ger = (Fptr_ref_cblas_ger)refCBLASModule.loadSymbol("cblas_zgeru");
     }
     else
     {

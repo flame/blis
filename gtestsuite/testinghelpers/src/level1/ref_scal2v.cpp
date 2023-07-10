@@ -33,7 +33,6 @@
 */
 
 #include "blis.h"
-#include <dlfcn.h>
 #include "level1/ref_scalv.h"
 
 namespace testinghelpers {
@@ -49,19 +48,19 @@ void ref_scal2v(char conjx, gtint_t n, T alpha, T* x, gtint_t incx, T* y, gtint_
     /* Check the typename T passed to this function template and call respective function.*/
     if (typeid(T) == typeid(float))
     {
-        ref_cblas_scal = (Fptr_ref_cblas_scal)dlsym(refCBLASModule.get(), "cblas_sscal");
+        ref_cblas_scal = (Fptr_ref_cblas_scal)refCBLASModule.loadSymbol("cblas_sscal");
     }
     else if (typeid(T) == typeid(double))
     {
-        ref_cblas_scal = (Fptr_ref_cblas_scal)dlsym(refCBLASModule.get(), "cblas_dscal");
+        ref_cblas_scal = (Fptr_ref_cblas_scal)refCBLASModule.loadSymbol("cblas_dscal");
     }
     else if (typeid(T) == typeid(scomplex))
     {
-        ref_cblas_scal = (Fptr_ref_cblas_scal)dlsym(refCBLASModule.get(), "cblas_cscal");
+        ref_cblas_scal = (Fptr_ref_cblas_scal)refCBLASModule.loadSymbol("cblas_cscal");
     }
     else if (typeid(T) == typeid(dcomplex))
     {
-        ref_cblas_scal = (Fptr_ref_cblas_scal)dlsym(refCBLASModule.get(), "cblas_zscal");
+        ref_cblas_scal = (Fptr_ref_cblas_scal)refCBLASModule.loadSymbol("cblas_zscal");
     }
     else
     {

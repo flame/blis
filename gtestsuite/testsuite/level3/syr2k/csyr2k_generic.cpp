@@ -107,7 +107,7 @@ public:
 #elif TEST_CBLAS
         std::string str_name = "cblas_csyr2k";
 #else  //#elif TEST_BLIS_TYPED
-        std::string str_name = "blis_csyr2k";
+        std::string str_name = "bli_csyr2k";
 #endif
         str_name = str_name + "_" + sfm+sfm+sfm;
         str_name = str_name + "_" + uplo;

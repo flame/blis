@@ -33,7 +33,6 @@
 */
 
 #include "blis.h"
-#include <dlfcn.h>
 #include "level3/ref_symm.h"
 
 namespace testinghelpers {
@@ -66,19 +65,19 @@ void ref_symm (
     /* Check the typename T passed to this function template and call respective function.*/
     if (typeid(T) == typeid(float))
     {
-        ref_cblas_symm = (Fptr_ref_cblas_symm)dlsym(refCBLASModule.get( ), "cblas_ssymm");
+        ref_cblas_symm = (Fptr_ref_cblas_symm)refCBLASModule.loadSymbol("cblas_ssymm");
     }
     else if (typeid(T) == typeid(double))
     {
-        ref_cblas_symm = (Fptr_ref_cblas_symm)dlsym(refCBLASModule.get(), "cblas_dsymm");
+        ref_cblas_symm = (Fptr_ref_cblas_symm)refCBLASModule.loadSymbol("cblas_dsymm");
     }
     else if (typeid(T) == typeid(scomplex))
     {
-        ref_cblas_symm = (Fptr_ref_cblas_symm)dlsym(refCBLASModule.get(), "cblas_csymm");
+        ref_cblas_symm = (Fptr_ref_cblas_symm)refCBLASModule.loadSymbol("cblas_csymm");
     }
     else if (typeid(T) == typeid(dcomplex))
     {
-        ref_cblas_symm = (Fptr_ref_cblas_symm)dlsym(refCBLASModule.get(), "cblas_zsymm");
+        ref_cblas_symm = (Fptr_ref_cblas_symm)refCBLASModule.loadSymbol("cblas_zsymm");
     }
     else
     {

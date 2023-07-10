@@ -33,7 +33,6 @@
 */
 
 #include "blis.h"
-#include <dlfcn.h>
 #include "level2/ref_syr.h"
 
 /*
@@ -66,11 +65,11 @@ void ref_syr( char storage, char uploa, char conjx, gtint_t n, T alpha,
     /* Check the typename T passed to this function template and call respective function.*/
     if (typeid(T) == typeid(float))
     {
-        ref_cblas_syr = (Fptr_ref_cblas_syr)dlsym(refCBLASModule.get(), "cblas_ssyr");
+        ref_cblas_syr = (Fptr_ref_cblas_syr)refCBLASModule.loadSymbol("cblas_ssyr");
     }
     else if (typeid(T) == typeid(double))
     {
-        ref_cblas_syr = (Fptr_ref_cblas_syr)dlsym(refCBLASModule.get(), "cblas_dsyr");
+        ref_cblas_syr = (Fptr_ref_cblas_syr)refCBLASModule.loadSymbol("cblas_dsyr");
     }
     else
     {

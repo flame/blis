@@ -33,7 +33,6 @@
 */
 
 #include "blis.h"
-#include <dlfcn.h>
 #include "level1/ref_dotxv.h"
 
 namespace testinghelpers {

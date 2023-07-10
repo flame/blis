@@ -70,7 +70,7 @@ void test_trmm3( char storage, char side, char uploa, char transa, char diaga,
     //----------------------------------------------------------
     //                  Call reference implementation.
     //----------------------------------------------------------
-    testinghelpers::ref_trmm3( storage, side, uploa, transa, diaga, transb,
+    testinghelpers::ref_trmm3<T>( storage, side, uploa, transa, diaga, transb,
           m, n, alpha, a.data(), lda, b.data(), ldb, beta, c_ref.data(), ldc );
 
     //----------------------------------------------------------

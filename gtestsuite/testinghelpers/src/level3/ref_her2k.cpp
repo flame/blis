@@ -33,7 +33,6 @@
 */
 
 #include "blis.h"
-#include <dlfcn.h>
 #include "level3/ref_her2k.h"
 
 namespace testinghelpers {
@@ -65,11 +64,11 @@ void ref_her2k(
     /* Check the typename T passed to this function template and call respective function.*/
     if (typeid(T) == typeid(scomplex))
     {
-        ref_cblas_her2k = (Fptr_ref_cblas_her2k)dlsym(refCBLASModule.get(), "cblas_cher2k");
+        ref_cblas_her2k = (Fptr_ref_cblas_her2k)refCBLASModule.loadSymbol("cblas_cher2k");
     }
     else if (typeid(T) == typeid(dcomplex))
     {
-        ref_cblas_her2k = (Fptr_ref_cblas_her2k)dlsym(refCBLASModule.get(), "cblas_zher2k");
+        ref_cblas_her2k = (Fptr_ref_cblas_her2k)refCBLASModule.loadSymbol("cblas_zher2k");
     }
     else
     {

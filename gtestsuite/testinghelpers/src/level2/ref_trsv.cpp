@@ -33,7 +33,6 @@
 */
 
 #include "blis.h"
-#include <dlfcn.h>
 #include "level2/ref_trsv.h"
 
 /*
@@ -73,19 +72,19 @@ void ref_trsv( char storage, char uploa, char transa, char diaga,
     /* Check the typename T passed to this function template and call respective function.*/
     if (typeid(T) == typeid(float))
     {
-        ref_cblas_trsv = (Fptr_ref_cblas_trsv)dlsym(refCBLASModule.get(), "cblas_strsv");
+        ref_cblas_trsv = (Fptr_ref_cblas_trsv)refCBLASModule.loadSymbol("cblas_strsv");
     }
     else if (typeid(T) == typeid(double))
     {
-        ref_cblas_trsv = (Fptr_ref_cblas_trsv)dlsym(refCBLASModule.get(), "cblas_dtrsv");
+        ref_cblas_trsv = (Fptr_ref_cblas_trsv)refCBLASModule.loadSymbol("cblas_dtrsv");
     }
     else if (typeid(T) == typeid(scomplex))
     {
-        ref_cblas_trsv = (Fptr_ref_cblas_trsv)dlsym(refCBLASModule.get(), "cblas_ctrsv");
+        ref_cblas_trsv = (Fptr_ref_cblas_trsv)refCBLASModule.loadSymbol("cblas_ctrsv");
     }
     else if (typeid(T) == typeid(dcomplex))
     {
-        ref_cblas_trsv = (Fptr_ref_cblas_trsv)dlsym(refCBLASModule.get(), "cblas_ztrsv");
+        ref_cblas_trsv = (Fptr_ref_cblas_trsv)refCBLASModule.loadSymbol("cblas_ztrsv");
     }
     else
     {

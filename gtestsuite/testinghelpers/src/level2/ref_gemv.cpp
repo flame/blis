@@ -33,7 +33,6 @@
 */
 
 #include "blis.h"
-#include <dlfcn.h>
 #include "level2/ref_gemv.h"
 
 /*
@@ -73,19 +72,19 @@ void ref_gemv( char storage, char trans, char conjx, gtint_t m, gtint_t n, T alp
     /* Check the typename T passed to this function template and call respective function.*/
     if (typeid(T) == typeid(float))
     {
-        ref_cblas_gemv = (Fptr_ref_cblas_gemv)dlsym(refCBLASModule.get( ), "cblas_sgemv");
+        ref_cblas_gemv = (Fptr_ref_cblas_gemv)refCBLASModule.loadSymbol("cblas_sgemv");
     }
     else if (typeid(T) == typeid(double))
     {
-        ref_cblas_gemv = (Fptr_ref_cblas_gemv)dlsym(refCBLASModule.get(), "cblas_dgemv");
+        ref_cblas_gemv = (Fptr_ref_cblas_gemv)refCBLASModule.loadSymbol("cblas_dgemv");
     }
     else if (typeid(T) == typeid(scomplex))
     {
-        ref_cblas_gemv = (Fptr_ref_cblas_gemv)dlsym(refCBLASModule.get(), "cblas_cgemv");
+        ref_cblas_gemv = (Fptr_ref_cblas_gemv)refCBLASModule.loadSymbol("cblas_cgemv");
     }
     else if (typeid(T) == typeid(dcomplex))
     {
-        ref_cblas_gemv = (Fptr_ref_cblas_gemv)dlsym(refCBLASModule.get(), "cblas_zgemv");
+        ref_cblas_gemv = (Fptr_ref_cblas_gemv)refCBLASModule.loadSymbol("cblas_zgemv");
     }
     else
     {

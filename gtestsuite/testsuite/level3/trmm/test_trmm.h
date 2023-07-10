@@ -67,7 +67,7 @@ void test_trmm( char storage, char side, char uploa, char transa, char diaga,
     //----------------------------------------------------------
     //                  Call reference implementation.
     //----------------------------------------------------------
-    testinghelpers::ref_trmm( storage, side, uploa, transa, diaga, m, n, alpha, a.data(), lda, b_ref.data(), ldb );
+    testinghelpers::ref_trmm<T>( storage, side, uploa, transa, diaga, m, n, alpha, a.data(), lda, b_ref.data(), ldb );
 
     //----------------------------------------------------------
     //              check component-wise error.

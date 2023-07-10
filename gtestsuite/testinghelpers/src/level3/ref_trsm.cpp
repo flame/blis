@@ -33,7 +33,6 @@
 */
 
 #include "blis.h"
-#include <dlfcn.h>
 #include "level3/ref_trsm.h"
 
 /*
@@ -76,19 +75,19 @@ void ref_trsm( char storage, char side, char uploa, char transa, char diaga,
     /* Check the typename T passed to this function template and call respective function.*/
     if (typeid(T) == typeid(float))
     {
-        ref_cblas_trsm = (Fptr_ref_cblas_trsm)dlsym(refCBLASModule.get( ), "cblas_strsm");
+        ref_cblas_trsm = (Fptr_ref_cblas_trsm)refCBLASModule.loadSymbol("cblas_strsm");
     }
     else if (typeid(T) == typeid(double))
     {
-        ref_cblas_trsm = (Fptr_ref_cblas_trsm)dlsym(refCBLASModule.get(), "cblas_dtrsm");
+        ref_cblas_trsm = (Fptr_ref_cblas_trsm)refCBLASModule.loadSymbol("cblas_dtrsm");
     }
     else if (typeid(T) == typeid(scomplex))
     {
-        ref_cblas_trsm = (Fptr_ref_cblas_trsm)dlsym(refCBLASModule.get(), "cblas_ctrsm");
+        ref_cblas_trsm = (Fptr_ref_cblas_trsm)refCBLASModule.loadSymbol("cblas_ctrsm");
     }
     else if (typeid(T) == typeid(dcomplex))
     {
-        ref_cblas_trsm = (Fptr_ref_cblas_trsm)dlsym(refCBLASModule.get(), "cblas_ztrsm");
+        ref_cblas_trsm = (Fptr_ref_cblas_trsm)refCBLASModule.loadSymbol("cblas_ztrsm");
     }
     else
     {

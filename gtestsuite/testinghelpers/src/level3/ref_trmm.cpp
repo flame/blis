@@ -33,7 +33,6 @@
 */
 
 #include "blis.h"
-#include <dlfcn.h>
 #include "level3/ref_trmm.h"
 
 /*
@@ -75,19 +74,19 @@ void ref_trmm( char storage, char side, char uploa, char transa, char diaga,
     /* Check the typename T passed to this function template and call respective function.*/
     if (typeid(T) == typeid(float))
     {
-        ref_cblas_trmm = (Fptr_ref_cblas_trmm)dlsym(refCBLASModule.get( ), "cblas_strmm");
+        ref_cblas_trmm = (Fptr_ref_cblas_trmm)refCBLASModule.loadSymbol("cblas_strmm");
     }
     else if (typeid(T) == typeid(double))
     {
-        ref_cblas_trmm = (Fptr_ref_cblas_trmm)dlsym(refCBLASModule.get(), "cblas_dtrmm");
+        ref_cblas_trmm = (Fptr_ref_cblas_trmm)refCBLASModule.loadSymbol("cblas_dtrmm");
     }
     else if (typeid(T) == typeid(scomplex))
     {
-        ref_cblas_trmm = (Fptr_ref_cblas_trmm)dlsym(refCBLASModule.get(), "cblas_ctrmm");
+        ref_cblas_trmm = (Fptr_ref_cblas_trmm)refCBLASModule.loadSymbol("cblas_ctrmm");
     }
     else if (typeid(T) == typeid(dcomplex))
     {
-        ref_cblas_trmm = (Fptr_ref_cblas_trmm)dlsym(refCBLASModule.get(), "cblas_ztrmm");
+        ref_cblas_trmm = (Fptr_ref_cblas_trmm)refCBLASModule.loadSymbol("cblas_ztrmm");
     }
     else
     {

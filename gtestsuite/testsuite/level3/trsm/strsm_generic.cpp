@@ -78,7 +78,7 @@ TEST_P(strsmTest, RandomData)
     gtint_t ldb_inc = std::get<9>(GetParam());
 
     // Set the threshold for the errors:
-    double thresh = std::max(m, n)*testinghelpers::getEpsilon<T>();
+    double thresh = (std::max)(m, n)*testinghelpers::getEpsilon<T>();
 
     //----------------------------------------------------------
     //     Call test body using these parameters
@@ -105,7 +105,7 @@ public:
 #elif TEST_CBLAS
         std::string str_name = "cblas_strsm";
 #else  //#elif TEST_BLIS_TYPED
-        std::string str_name = "blis_strsm";
+        std::string str_name = "bli_strsm";
 #endif
         str_name = str_name + "_" + sfm+sfm+sfm;
         str_name = str_name + "_" + side + uploa + transa;

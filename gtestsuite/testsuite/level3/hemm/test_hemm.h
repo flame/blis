@@ -73,7 +73,7 @@ void test_hemm( char storage, char side, char uplo, char conja, char transb,
     //----------------------------------------------------------
     //                  Call reference implementation.
     //----------------------------------------------------------
-    testinghelpers::ref_hemm( storage, side, uplo, conja, transb, m, n, alpha,
+    testinghelpers::ref_hemm<T>( storage, side, uplo, conja, transb, m, n, alpha,
                a.data(), lda, b.data(), ldb, beta, c_ref.data(), ldc );
 
     //----------------------------------------------------------

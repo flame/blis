@@ -33,7 +33,6 @@
 */
 
 #include "blis.h"
-#include <dlfcn.h>
 #include "level1/ref_amaxv.h"
 
 namespace testinghelpers {
@@ -49,19 +48,19 @@ gtint_t ref_amaxv( gtint_t n, const T* x, gtint_t incx ) {
     /* Check the typename T passed to this function template and call respective function.*/
     if (typeid(T) == typeid(float))
     {
-        ref_cblas_amaxv = (Fptr_ref_cblas_amaxv)dlsym(refCBLASModule.get( ), "cblas_isamax");
+        ref_cblas_amaxv = (Fptr_ref_cblas_amaxv)refCBLASModule.loadSymbol("cblas_isamax");
     }
     else if (typeid(T) == typeid(double))
     {
-        ref_cblas_amaxv = (Fptr_ref_cblas_amaxv)dlsym(refCBLASModule.get(), "cblas_idamax");
+        ref_cblas_amaxv = (Fptr_ref_cblas_amaxv)refCBLASModule.loadSymbol("cblas_idamax");
     }
     else if (typeid(T) == typeid(scomplex))
     {
-        ref_cblas_amaxv = (Fptr_ref_cblas_amaxv)dlsym(refCBLASModule.get(), "cblas_icamax");
+        ref_cblas_amaxv = (Fptr_ref_cblas_amaxv)refCBLASModule.loadSymbol("cblas_icamax");
     }
     else if (typeid(T) == typeid(dcomplex))
     {
-        ref_cblas_amaxv = (Fptr_ref_cblas_amaxv)dlsym(refCBLASModule.get(), "cblas_izamax");
+        ref_cblas_amaxv = (Fptr_ref_cblas_amaxv)refCBLASModule.loadSymbol("cblas_izamax");
     }
     else
     {

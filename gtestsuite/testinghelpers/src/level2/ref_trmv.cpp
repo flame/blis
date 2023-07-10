@@ -33,7 +33,6 @@
 */
 
 #include "blis.h"
-#include <dlfcn.h>
 #include "level2/ref_trmv.h"
 
 /*
@@ -74,19 +73,19 @@ void ref_trmv( char storage, char uploa, char transa, char diaga,
     /* Check the typename T passed to this function template and call respective function.*/
     if (typeid(T) == typeid(float))
     {
-        ref_cblas_trmv = (Fptr_ref_cblas_trmv)dlsym(refCBLASModule.get(), "cblas_strmv");
+        ref_cblas_trmv = (Fptr_ref_cblas_trmv)refCBLASModule.loadSymbol("cblas_strmv");
     }
     else if (typeid(T) == typeid(double))
     {
-        ref_cblas_trmv = (Fptr_ref_cblas_trmv)dlsym(refCBLASModule.get(), "cblas_dtrmv");
+        ref_cblas_trmv = (Fptr_ref_cblas_trmv)refCBLASModule.loadSymbol("cblas_dtrmv");
     }
     else if (typeid(T) == typeid(scomplex))
     {
-        ref_cblas_trmv = (Fptr_ref_cblas_trmv)dlsym(refCBLASModule.get(), "cblas_ctrmv");
+        ref_cblas_trmv = (Fptr_ref_cblas_trmv)refCBLASModule.loadSymbol("cblas_ctrmv");
     }
     else if (typeid(T) == typeid(dcomplex))
     {
-        ref_cblas_trmv = (Fptr_ref_cblas_trmv)dlsym(refCBLASModule.get(), "cblas_ztrmv");
+        ref_cblas_trmv = (Fptr_ref_cblas_trmv)refCBLASModule.loadSymbol("cblas_ztrmv");
     }
     else
     {

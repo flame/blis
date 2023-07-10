@@ -69,7 +69,7 @@ void test_gemm( char storage, char trnsa, char trnsb, gtint_t m, gtint_t n,
     //----------------------------------------------------------
     //                  Call reference implementation.
     //----------------------------------------------------------
-    testinghelpers::ref_gemm( storage, trnsa, trnsb, m, n, k, alpha,
+    testinghelpers::ref_gemm<T>( storage, trnsa, trnsb, m, n, k, alpha,
                a.data(), lda, b.data(), ldb, beta, c_ref.data(), ldc );
 
     //----------------------------------------------------------

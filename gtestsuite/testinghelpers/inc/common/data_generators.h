@@ -77,14 +77,14 @@ void randomgenerators(int from, int to, char storage, char uplo, gtint_t m,
 
 template<typename T>
 std::vector<T> get_random_matrix(int from, int to, char storage, char trans, gtint_t m, gtint_t n,
-                    gtint_t lda, char datatype = ELEMENT_TYPE );
+                    gtint_t lda, char datatype = BLIS_ELEMENT_TYPE );
 
 template<typename T>
 std::vector<T> get_random_matrix(int from, int to, char storage, char uplo, gtint_t k,
-                    gtint_t lda, char datatype = ELEMENT_TYPE );
+                    gtint_t lda, char datatype = BLIS_ELEMENT_TYPE );
 
 template<typename T>
-std::vector<T> get_random_vector(int from, int to, gtint_t n, gtint_t incx,char datatype = ELEMENT_TYPE);
+std::vector<T> get_random_vector(int from, int to, gtint_t n, gtint_t incx,char datatype = BLIS_ELEMENT_TYPE);
 
 template<typename T>
 std::vector<T> get_vector( gtint_t n, gtint_t incx, T value );

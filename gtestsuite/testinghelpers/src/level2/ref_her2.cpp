@@ -33,7 +33,6 @@
 */
 
 #include "blis.h"
-#include <dlfcn.h>
 #include "level2/ref_her2.h"
 
 /*
@@ -66,11 +65,11 @@ void ref_her2( char storage, char uploa, char conjx, char conjy, gtint_t n,
     /* Check the typename T passed to this function template and call respective function.*/
     if (typeid(T) == typeid(scomplex))
     {
-        ref_cblas_her2 = (Fptr_ref_cblas_her2)dlsym(refCBLASModule.get(), "cblas_cher2");
+        ref_cblas_her2 = (Fptr_ref_cblas_her2)refCBLASModule.loadSymbol("cblas_cher2");
     }
     else if (typeid(T) == typeid(dcomplex))
     {
-        ref_cblas_her2 = (Fptr_ref_cblas_her2)dlsym(refCBLASModule.get(), "cblas_zher2");
+        ref_cblas_her2 = (Fptr_ref_cblas_her2)refCBLASModule.loadSymbol("cblas_zher2");
     }
     else
     {

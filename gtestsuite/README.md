@@ -41,7 +41,6 @@ First create and `build` directory using
 $ mkdir build
 $ cd build
 ```
-
 ## Configure BLIS GTestSuite with OpenBLAS as reference
 ```console
 $ cmake .. -DBLIS_PATH=/path_to_blis_installation -DREF_CBLAS=OpenBLAS -DOPENBLAS_PATH=/path_to_openblas_lib
@@ -66,22 +65,29 @@ There are multiple configuration options to chose from when invoking CMake. Thos
 ## Compiler Options
 * `-DCMAKE_CXX_COMPILER=path_to_preferred_compiler` can be used to specify the compiler.
 * For example, to compile with Clang, use `-DCMAKE_CXX_COMPILER=clang++`.
-## Threading Options (Linux Only)
+## Threading Options
 * For single threaded BLIS, use `-DENABLE_THREADING=no`.
-* For multithreaded BLIS that uses pthreads, use `-DENABLE_THREADING=pthreads`.
+* For multithreaded BLIS that uses pthreads, use `-DENABLE_THREADING=pthreads` (Linux only).
 * For multithreaded BLIS that uses OpenMP, use `-DENABLE_THREADING=openmp`. [**Default**]
-    * In addition, to use Intel OpenMP runtime, use `-DOpenMP_LIBRARY=Intel`.
-    * For GNU OpenMP runtime, use `-DOpenMP_LIBRARY=GNU`. [**Default**]
-## BLIS Linking Type (Linux Only)
+    * GNU OpenMP runtime is used by default on Linux.
+    * LLVM OpenMP runtime is used by default on Windows, except if MKL is used as a reference, in which case Intel OpenMP runtime is used.
+## Threading Options for MKL (if used as reference)
+In general, the variable `MKL_ENABLE_THREADING` gets its value from `ENABLE_THREADING` defined above, but can be overwritten, especially if we want to test single-threaded BLIS with multi-threaded MKL.
+* For threaded MKL version, use `-DMKL_ENABLE_THREADING=openmp`.
+For threaded MKL the following OpenMP runtimes are used:
+* GNU is used by default on Linux.
+* Intel is used by default on Windows.
+
+## BLIS Linking Type
 * To link static BLIS, use `-DBLIS_LINKING_TYPE=static`. [**Default**]
 * To link shared BLIS, use `-DBLIS_LINKING_TYPE=shared`.
 ## Integer Size
 * For testing a 32-bit integer BLIS library, use `-DINT_SIZE=32`. [**Default**"]
 * For testing a 64-bit integer BLIS library, use `-DINT_SIZE=64`.
-## Address Sanitizer
+## Address Sanitizer (Linux Only)
 * To build using address sanitizer, configure using `-DENABLE_ASAN=ON`. [**OFF by default**]
 * An installation to BLIS which was build with ASAN flags[CFLAGS="-O0 -g -fsanitize=address"] needs to be provided.
-## Code Coverage[Only GCC Compiler]
+## Code Coverage (Only GCC Compiler)
 * BLIS : Configure BLIS Library with code coverage flags[CFLAGS="-O0 -fprofile-arcs -ftest-coverage"], compile and install.
 * Gtestsuite : To build for code coverage, configure cmake with `-DENABLE_COVERAGE=ON`. [**OFF by default**] and then compile and run the executable.
 * CodeCoverage : in gtestsuite folder, run the below mentioned steps or bash script - to generate html LCOV-code coverage report.
@@ -155,6 +161,11 @@ You can also find more details in [CMake Documentation](https://cmake.org/cmake/
 
 ## Using the Executables
 As we mentioned earlier, all cpp files of each API directory are compiled into one executable. This executable can be run separately which can be very useful while developing or debugging.
+When MKL is used as a reference, the following environment variables need to be set before calling the executables, depending on the configuration.
+* MKL_INTERFACE_LAYER=LP64 or MKL_INTERFACE_LAYER=ILP64 depending on whether 32 or 64 bit integers are used, respectivelly.
+* MKL_THREADING_LAYER=SEQUENTIAL for sequential MKL.
+* MKL_THREADING_LAYER=INTEL or MKL_THREADING_LAYER=GNU depending on whether we execute on Windows or on Linux, respectivelly.
+
 ### To run all addv tests use:
 ```console
 $ ./testsuite.level1.addv
@@ -318,3 +329,68 @@ To overcome this issue and generate tests which fullfill the requirements for th
 * Add the lda_inc parameter: lda += lda_inc
 
 To test an m-by-n matrix A (column-major), stored in an array a, use lda_inc = 0 as a parameter to the test generator. To test for the case where A is a submatrix of k-by-n matrix B, use lda_inc = k-m.
+
+# BLIS GTestSuite on Windows
+Building and runing GTestSuite on Windows is somewhat similar to Linux. In this section we focus on what is different, so please read the previous sections so that you have the complete picture.
+
+The instructions are given for building and running through the terminal, but using cmake-gui is also possible. An x64 Native Toolbox Command Prompt can be used so that the environment is set and the necessary compilers are available.
+
+## Build System Generators
+On the descriptions above we assumed that Make will be used to build the libraries. The same instructions can be modified so that Ninja is used instead in a straigthforward manner. On Windows, where Make cannot be used, you can invoke CMake in one of the two ways below. Beware that Windows environment needs to be set correctly otherwise there might be some libraries missing.
+
+### Generate using Ninja
+```console
+$ cmake .. -G "Ninja" -DCMAKE_C_COMPILER=clang-cl -DCMAKE_CXX_COMPILER=clang-cl [more variables that we'll explain later]
+```
+We specify the compilers to clang-cl, so that it's the same as the default option for BLIS library builds.
+
+### Generate using Visual Studio
+```console
+$ cmake .. -G "Visual Studio 17 2022" -TClangCl [more variables that we'll explain later]
+```
+-TClangCl sets the toolbox to be used for the generation. To see what VS generators you have available, type
+```console
+$ cmake --help
+```
+
+## Configuring CMake
+On Windows currently the BLIS repo does not have a CMake target for the library and the headers, so to configure properly we need to replace the variable BLIS_PATH that was used on Linux with the variables BLIS_LIB_PATH and BLIS_INCLUDE.
+So, we can invoke cmake using
+```console
+$ cmake ..  -G "Visual Studio 17 2022" -TClangCl -DBLIS_LIB_PATH=/path_to_blis_libraries -DBLIS_INCLUDE=/path_to_blis_headers -DREF_CBLAS=OpenBLAS -DOPENBLAS_PATH=/path_to_openblas_dll
+```
+## Additional CMake Configuration Opions
+The configuration is similar to Linux. In this section we only mention the specifics for Windows.
+### BLIS Linking Type
+* `-DBLIS_LINKING_TYPE=static` implies that AOCL-LibBlis-Win.lib (or AOCL-LibBlis-Win-MT.lib) will be tested.
+* `-DBLIS_LINKING_TYPE=shared` implies that AOCL-LibBlis-Win-dll.lib (or AOCL-LibBlis-Win-MT-dll.lib) will be tested. Windows needs to find the coresponding dlls (AOCL-LibBlis-Win-dll.dll or AOCL-LibBlis-Win-MT-dll.dll) to be able to run the tests. The CMake system uses the prepends the Environment's PATH to the path provided during configuration, so that `ctest` can find the dll. To run the executables separately, you need to copy the dll manually, or specify the PATH.
+### Threading Options
+The path to the OpenMP runtime needs to be passed using `-DOpenMP_libomp_LIBRARY=/path_to_openmp_runtime`.
+
+## Building the Tests
+The building process is similar to Windows with the main difference that a testinghelpers.lib is built.
+### Building with Ninja
+To build with Ninja, replace the word `make` with `ninja`.
+### Building with Visual Studio
+To build everything use
+```console
+$ cmake --build . --config Release
+```
+To build a specific target use
+```console
+$ cmake --build . --config Release --target testsuite.level1
+```
+
+## To run tests with Visual Studio
+The process is similar to Linux, apart from the modification below. For parallel builds etc. you can add the options after `Release`.
+```console
+$ ctest -C Release
+```
+
+## Using the executables using Visual Studio
+Visual Studio is a multiconfig generator. That means that it can build for `Release`, `Debug`, etc. simultaneously. For that reason VS will create a directory named Release, where it puts all the executables. So, to runn all addv tests, use
+```console
+$ cd Release
+$ testsuite.level1.addv.exe
+```
+Then, you can use filters in the same way if you need to.

@@ -33,7 +33,6 @@
 */
 
 #include "blis.h"
-#include <dlfcn.h>
 #include "level3/ref_syr2k.h"
 
 namespace testinghelpers {
@@ -66,19 +65,19 @@ void ref_syr2k(
     /* Check the typename T passed to this function template and call respective function.*/
     if (typeid(T) == typeid(float))
     {
-        ref_cblas_syr2k = (Fptr_ref_cblas_syr2k)dlsym(refCBLASModule.get( ), "cblas_ssyr2k");
+        ref_cblas_syr2k = (Fptr_ref_cblas_syr2k)refCBLASModule.loadSymbol("cblas_ssyr2k");
     }
     else if (typeid(T) == typeid(double))
     {
-        ref_cblas_syr2k = (Fptr_ref_cblas_syr2k)dlsym(refCBLASModule.get(), "cblas_dsyr2k");
+        ref_cblas_syr2k = (Fptr_ref_cblas_syr2k)refCBLASModule.loadSymbol("cblas_dsyr2k");
     }
     else if (typeid(T) == typeid(scomplex))
     {
-        ref_cblas_syr2k = (Fptr_ref_cblas_syr2k)dlsym(refCBLASModule.get(), "cblas_csyr2k");
+        ref_cblas_syr2k = (Fptr_ref_cblas_syr2k)refCBLASModule.loadSymbol("cblas_csyr2k");
     }
     else if (typeid(T) == typeid(dcomplex))
     {
-        ref_cblas_syr2k = (Fptr_ref_cblas_syr2k)dlsym(refCBLASModule.get(), "cblas_zsyr2k");
+        ref_cblas_syr2k = (Fptr_ref_cblas_syr2k)refCBLASModule.loadSymbol("cblas_zsyr2k");
     }
     else
     {

@@ -97,7 +97,7 @@ public:
 #elif TEST_CBLAS
         std::string str_name = "cblas_dtrmv";
 #else  //#elif TEST_BLIS_TYPED
-        std::string str_name = "blis_dtrmv";
+        std::string str_name = "bli_dtrmv";
 #endif
         str_name    = str_name + "_" + sfm;
         str_name    = str_name + "_" + uploa+transa;

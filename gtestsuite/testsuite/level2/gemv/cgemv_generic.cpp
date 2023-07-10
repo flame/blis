@@ -78,7 +78,7 @@ TEST_P(cgemvTest, RandomData)
     gtint_t lda_inc = std::get<9>(GetParam());
 
     // Set the threshold for the errors:
-    double thresh = 2*std::max(m,n)*testinghelpers::getEpsilon<T>();
+    double thresh = 2*(std::max)(m,n)*testinghelpers::getEpsilon<T>();
 
     //----------------------------------------------------------
     //     Call test body using these parameters
@@ -105,7 +105,7 @@ public:
 #elif TEST_CBLAS
         std::string str_name = "cblas_cgemv";
 #else  //#elif TEST_BLIS_TYPED
-        std::string str_name = "blis_cgemv";
+        std::string str_name = "bli_cgemv";
 #endif
         str_name    = str_name + "_" + sfm;
         str_name    = str_name + "_" + transa+conjx;

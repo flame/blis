@@ -33,7 +33,6 @@
 */
 
 #include "blis.h"
-#include <dlfcn.h>
 #include "level3/ref_syrk.h"
 
 namespace testinghelpers {
@@ -65,19 +64,19 @@ void ref_syrk(
     /* Check the typename T passed to this function template and call respective function.*/
     if (typeid(T) == typeid(float))
     {
-        ref_cblas_syrk = (Fptr_ref_cblas_syrk)dlsym(refCBLASModule.get( ), "cblas_ssyrk");
+        ref_cblas_syrk = (Fptr_ref_cblas_syrk)refCBLASModule.loadSymbol("cblas_ssyrk");
     }
     else if (typeid(T) == typeid(double))
     {
-        ref_cblas_syrk = (Fptr_ref_cblas_syrk)dlsym(refCBLASModule.get(), "cblas_dsyrk");
+        ref_cblas_syrk = (Fptr_ref_cblas_syrk)refCBLASModule.loadSymbol("cblas_dsyrk");
     }
     else if (typeid(T) == typeid(scomplex))
     {
-        ref_cblas_syrk = (Fptr_ref_cblas_syrk)dlsym(refCBLASModule.get(), "cblas_csyrk");
+        ref_cblas_syrk = (Fptr_ref_cblas_syrk)refCBLASModule.loadSymbol("cblas_csyrk");
     }
     else if (typeid(T) == typeid(dcomplex))
     {
-        ref_cblas_syrk = (Fptr_ref_cblas_syrk)dlsym(refCBLASModule.get(), "cblas_zsyrk");
+        ref_cblas_syrk = (Fptr_ref_cblas_syrk)refCBLASModule.loadSymbol("cblas_zsyrk");
     }
     else
     {

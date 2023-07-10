@@ -33,7 +33,6 @@
 */
 
 #include "blis.h"
-#include <dlfcn.h>
 #include "level2/ref_symv.h"
 
 /*
@@ -67,11 +66,11 @@ void ref_symv( char storage, char uploa, char conja, char conjx, gtint_t n,
     /* Check the typename T passed to this function template and call respective function.*/
     if (typeid(T) == typeid(float))
     {
-        ref_cblas_symv = (Fptr_ref_cblas_symv)dlsym(refCBLASModule.get(), "cblas_ssymv");
+        ref_cblas_symv = (Fptr_ref_cblas_symv)refCBLASModule.loadSymbol("cblas_ssymv");
     }
     else if (typeid(T) == typeid(double))
     {
-        ref_cblas_symv = (Fptr_ref_cblas_symv)dlsym(refCBLASModule.get(), "cblas_dsymv");
+        ref_cblas_symv = (Fptr_ref_cblas_symv)refCBLASModule.loadSymbol("cblas_dsymv");
     }
     else
     {

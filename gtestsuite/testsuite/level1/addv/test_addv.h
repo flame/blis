@@ -61,7 +61,7 @@ void test_addv( char conjx, gtint_t n, gtint_t incx, gtint_t incy, double thresh
     //----------------------------------------------------------
     //                  Call BLIS function.
     //----------------------------------------------------------
-    addv( conjx, n, x.data(), incx, y.data(), incy );
+    addv<T>( conjx, n, x.data(), incx, y.data(), incy );
 
     //----------------------------------------------------------
     //              Compute component-wise error.

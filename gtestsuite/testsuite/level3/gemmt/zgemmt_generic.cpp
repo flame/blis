@@ -81,7 +81,7 @@ TEST_P(zgemmtTest, RandomData)
     gtint_t ldc_inc = std::get<10>(GetParam());
 
     // Set the threshold for the errors:
-    double thresh = std::max(n,k)*testinghelpers::getEpsilon<T>();
+    double thresh = (std::max)(n,k)*testinghelpers::getEpsilon<T>();
 
     //----------------------------------------------------------
     //     Call test body using these parameters

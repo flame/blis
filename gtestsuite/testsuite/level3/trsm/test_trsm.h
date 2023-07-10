@@ -75,7 +75,7 @@ void test_trsm( char storage, char side, char uploa, char transa, char diaga,
     //----------------------------------------------------------
     //                  Call reference implementation.
     //----------------------------------------------------------
-    testinghelpers::ref_trsm( storage, side, uploa, transa, diaga, m, n, alpha, a.data(),
+    testinghelpers::ref_trsm<T>( storage, side, uploa, transa, diaga, m, n, alpha, a.data(),
                                                                      lda, b_ref.data(), ldb );
 
     //----------------------------------------------------------

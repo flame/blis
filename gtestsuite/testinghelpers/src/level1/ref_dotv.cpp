@@ -33,7 +33,6 @@
 */
 
 #include "blis.h"
-#include <dlfcn.h>
 #include "level1/ref_dotv.h"
 
 namespace testinghelpers {
@@ -49,11 +48,11 @@ void ref_dotv(gtint_t len, const T* xp,
     /* Check the typename T passed to this function template and call respective function.*/
     if (typeid(T) == typeid(float))
     {
-        ref_cblas_dot = (Fptr_ref_cblas_dot)dlsym(refCBLASModule.get(), "cblas_sdot");
+        ref_cblas_dot = (Fptr_ref_cblas_dot)refCBLASModule.loadSymbol("cblas_sdot");
     }
     else if (typeid(T) == typeid(double))
     {
-        ref_cblas_dot = (Fptr_ref_cblas_dot)dlsym(refCBLASModule.get(), "cblas_ddot");
+        ref_cblas_dot = (Fptr_ref_cblas_dot)refCBLASModule.loadSymbol("cblas_ddot");
     }
     else
     {
@@ -97,11 +96,11 @@ void ref_dotv( char conj_x, char conj_y, gtint_t len, const T* xp, gtint_t incx,
     /* Check the typename T passed to this function template and call respective function.*/
     if (typeid(T) == typeid(scomplex))
     {
-        ref_cblas_dot = (Fptr_ref_cblas_dot)dlsym(refCBLASModule.get(), "cblas_cdotu_sub");
+        ref_cblas_dot = (Fptr_ref_cblas_dot)refCBLASModule.loadSymbol("cblas_cdotu_sub");
     }
     else if (typeid(T) == typeid(dcomplex))
     {
-        ref_cblas_dot = (Fptr_ref_cblas_dot)dlsym(refCBLASModule.get(), "cblas_zdotu_sub");
+        ref_cblas_dot = (Fptr_ref_cblas_dot)refCBLASModule.loadSymbol("cblas_zdotu_sub");
     }
     else
     {

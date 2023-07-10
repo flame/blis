@@ -33,7 +33,6 @@
 */
 
 #include "blis.h"
-#include <dlfcn.h>
 #include "level2/ref_hemv.h"
 
 /*
@@ -68,11 +67,11 @@ void ref_hemv( char storage, char uploa, char conja, char conjx, gtint_t n,
     /* Check the typename T passed to this function template and call respective function.*/
     if (typeid(T) == typeid(scomplex))
     {
-        ref_cblas_hemv = (Fptr_ref_cblas_hemv)dlsym(refCBLASModule.get(), "cblas_chemv");
+        ref_cblas_hemv = (Fptr_ref_cblas_hemv)refCBLASModule.loadSymbol("cblas_chemv");
     }
     else if (typeid(T) == typeid(dcomplex))
     {
-        ref_cblas_hemv = (Fptr_ref_cblas_hemv)dlsym(refCBLASModule.get(), "cblas_zhemv");
+        ref_cblas_hemv = (Fptr_ref_cblas_hemv)refCBLASModule.loadSymbol("cblas_zhemv");
     }
     else
     {

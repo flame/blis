@@ -54,16 +54,24 @@
 template<typename T>
 static void dotv_(gtint_t n, T* x, gtint_t incx, T* y, gtint_t incy, T* rho) {
 
-  if constexpr (std::is_same<T, float>::value)
-    *rho = sdot_( &n, x, &incx, y, &incy );
-  else if constexpr (std::is_same<T, double>::value)
-    *rho = ddot_( &n, x, &incx, y, &incy );
-  else if constexpr (std::is_same<T, scomplex>::value)
-    *rho = cdotu_( &n, x, &incx, y, &incy );
-  else if constexpr (std::is_same<T, dcomplex>::value)
-    *rho = zdotu_( &n, x, &incx, y, &incy );
-  else
-    throw std::runtime_error("Error in testsuite/level1/dotv.h: Invalid typename in dotv_().");
+    if constexpr (std::is_same<T, float>::value)
+        *rho = sdot_(&n, x, &incx, y, &incy);
+    else if constexpr (std::is_same<T, double>::value)
+        *rho = ddot_( &n, x, &incx, y, &incy );
+    else if constexpr (std::is_same<T, scomplex>::value)
+    #ifdef BLIS_DISABLE_COMPLEX_RETURN_INTEL
+        *rho = cdotu_(&n, x, &incx, y, &incy);
+    #else
+        cdotu_(rho, &n, x, &incx, y, &incy);
+    #endif
+    else if constexpr (std::is_same<T, dcomplex>::value)
+    #ifdef BLIS_DISABLE_COMPLEX_RETURN_INTEL
+        *rho = zdotu_(&n, x, &incx, y, &incy);
+    #else
+        zdotu_(rho, &n, x, &incx, y, &incy);
+    #endif
+    else
+        throw std::runtime_error("Error in testsuite/level1/dotv.h: Invalid typename in dotv_().");
 }
 
 template<typename T>

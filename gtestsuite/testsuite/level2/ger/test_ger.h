@@ -60,13 +60,13 @@ void test_ger( char storage, char conjx, char conjy, gtint_t m, gtint_t n,
     //----------------------------------------------------------
     //                  Call BLIS function
     //----------------------------------------------------------
-    ger( storage, conjx, conjy, m, n, &alpha, x.data(), incx,
+    ger<T>( storage, conjx, conjy, m, n, &alpha, x.data(), incx,
                                               y.data(), incy, a.data(), lda );
 
     //----------------------------------------------------------
     //                  Call reference implementation.
     //----------------------------------------------------------
-    testinghelpers::ref_ger( storage, conjx, conjy, m, n, alpha,
+    testinghelpers::ref_ger<T>( storage, conjx, conjy, m, n, alpha,
                           x.data(), incx, y.data(), incy, a_ref.data(), lda );
 
     //----------------------------------------------------------

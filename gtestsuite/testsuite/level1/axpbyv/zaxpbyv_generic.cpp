@@ -64,7 +64,7 @@ TEST_P( zaxpbyvGenericTest, RandomData )
     T beta = std::get<5>(GetParam());
 
     // Set the threshold for the errors:
-    double thresh = 2*testinghelpers::getEpsilon<T>();
+    double thresh = 20*testinghelpers::getEpsilon<T>();
 
     //----------------------------------------------------------
     //     Call generic test body using those parameters

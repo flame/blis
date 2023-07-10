@@ -69,7 +69,7 @@ void test_gemmt( char storage, char uplo, char trnsa, char trnsb, gtint_t n,
     //----------------------------------------------------------
     //                  Call reference implementation.
     //----------------------------------------------------------
-    testinghelpers::ref_gemmt( storage, uplo, trnsa, trnsb, n, k, alpha,
+    testinghelpers::ref_gemmt<T>( storage, uplo, trnsa, trnsb, n, k, alpha,
                a.data(), lda, b.data(), ldb, beta, c_ref.data(), ldc );
 
     //----------------------------------------------------------

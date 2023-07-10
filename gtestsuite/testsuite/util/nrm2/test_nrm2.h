@@ -78,7 +78,7 @@ void test_nrm2( gtint_t n, gtint_t incx, gtint_t i, T iexval, gtint_t j = 0, T j
     //----------------------------------------------------------
     //        Initialize vectors with random numbers.
     //----------------------------------------------------------
-    std::vector<T> x = testinghelpers::get_random_vector<T>(-10, 10, n, incx, ELEMENT_TYPE);
+    std::vector<T> x = testinghelpers::get_random_vector<T>(-10, 10, n, incx);
     // Initialize ith element of vector x to iexval.
     x[i*incx] = iexval;
     // Initialize jth element of vector x to jexval.

@@ -38,40 +38,71 @@
 #endif
 #include "common/refCBLAS.h"
 
+/**
+ * This is a helper class that we use to load the symbols
+ * from the reference library dynamically so that we get
+ * the reference solution.
+ * Since dynamic loading can be time consuming this class works
+ * in the following manner.
+ * - We have a thread local instance of this object. That means
+ *   that for each executable there is a global variable called
+ *   refCBLASModule.
+ * - The constructor of refCBLASModule (which is called automatically)
+ *   loads the library either with a call to dlopen (Linux) or with
+ *   a call to LoadLibrary (Windows).
+ * - Similarly the destructor unloads the library.
+ * - The member function loadSymbol() is used to return the pointer
+ *   to that symbol in the library, either with a call to ldsym (Linux)
+ *   or with a call to GetProcAddress (Windows).
+ * This means that the library is only loaded once per executable
+ * due to having the global variable refCBLASModule and unloaded once
+ * at the end. Multiple calls to loadSymbol are used to access the
+ * corresponding API used for reference.
+*/
+
 namespace testinghelpers {
 refCBLAS::refCBLAS() {
+
     std::cout << "refCBLAS constructor\n";
     if (!refCBLASModule)
     {
-#ifdef REF_IS_MKL
-        // Dummy call to force linker, link OpenMP library if MKL is used.
-        omp_get_num_threads();
-        MKLCoreModule = dlopen(MKL_CORE, RTLD_GLOBAL | RTLD_LAZY);
-        MKLGNUThreadModule = dlopen(MKL_GNU_THREAD, RTLD_GLOBAL | RTLD_LAZY);
-#endif
-#ifdef ENABLE_ASAN
-        refCBLASModule = dlopen(REFERENCE_BLAS, RTLD_LOCAL | RTLD_LAZY);
+#ifdef WIN32
+    refCBLASModule = LoadLibraryEx(REFERENCE_BLAS, NULL, LOAD_LIBRARY_SAFE_CURRENT_DIRS);
 #else
-        refCBLASModule = dlopen(REFERENCE_BLAS, RTLD_DEEPBIND | RTLD_LAZY);
+  #ifdef ENABLE_ASAN
+    refCBLASModule = dlopen(REFERENCE_BLAS, RTLD_LOCAL | RTLD_LAZY);
+  #else
+    refCBLASModule = dlopen(REFERENCE_BLAS, RTLD_DEEPBIND | RTLD_LAZY);
+  #endif
 #endif
     }
 
     if (refCBLASModule == nullptr)
     {
+#ifndef WIN32
       std::cout<<dlerror();
+#endif
       throw std::runtime_error("Reference Library cannot be found. LIB_PATH=" REFERENCE_BLAS );
     }
 }
 
 refCBLAS::~refCBLAS() {
     std::cout << "refCBLAS destructor\n" <<std::endl;
-#ifdef REF_IS_MKL
-    dlclose(MKLCoreModule);
-    dlclose(MKLGNUThreadModule);
-#endif
+#ifdef WIN32
+    FreeLibrary((HMODULE)refCBLASModule);
+#else
     dlclose(refCBLASModule);
+#endif
 }
-void* refCBLAS::get() { return refCBLASModule; }
+
+void* refCBLAS::loadSymbol(const char* symbol)
+{
+#ifdef WIN32
+    return reinterpret_cast<void*>(GetProcAddress((HMODULE)refCBLASModule, symbol));
+#else
+    return dlsym(refCBLASModule, symbol);
+#endif
+}
 } //end of testinghelpers namespace
 
 thread_local testinghelpers::refCBLAS refCBLASModule;

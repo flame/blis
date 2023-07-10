@@ -33,7 +33,6 @@
 */
 
 #include "blis.h"
-#include <dlfcn.h>
 #include "level1/ref_axpyv.h"
 
 namespace testinghelpers {
@@ -50,19 +49,19 @@ void ref_axpyv( char conj_x, gtint_t n, T alpha,
     /* Check the typename T passed to this function template and call respective function.*/
     if (typeid(T) == typeid(float))
     {
-        ref_cblas_axpy = (Fptr_ref_cblas_axpy)dlsym(refCBLASModule.get(), "cblas_saxpy");
+        ref_cblas_axpy = (Fptr_ref_cblas_axpy)refCBLASModule.loadSymbol("cblas_saxpy");
     }
     else if (typeid(T) == typeid(double))
     {
-        ref_cblas_axpy = (Fptr_ref_cblas_axpy)dlsym(refCBLASModule.get(), "cblas_daxpy");
+        ref_cblas_axpy = (Fptr_ref_cblas_axpy)refCBLASModule.loadSymbol("cblas_daxpy");
     }
     else if (typeid(T) == typeid(scomplex))
     {
-        ref_cblas_axpy = (Fptr_ref_cblas_axpy)dlsym(refCBLASModule.get(), "cblas_caxpy");
+        ref_cblas_axpy = (Fptr_ref_cblas_axpy)refCBLASModule.loadSymbol("cblas_caxpy");
     }
     else if (typeid(T) == typeid(dcomplex))
     {
-        ref_cblas_axpy = (Fptr_ref_cblas_axpy)dlsym(refCBLASModule.get(), "cblas_zaxpy");
+        ref_cblas_axpy = (Fptr_ref_cblas_axpy)refCBLASModule.loadSymbol("cblas_zaxpy");
     }
     else
     {

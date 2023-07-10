@@ -33,7 +33,6 @@
 */
 
 #include "blis.h"
-#include <dlfcn.h>
 #include "level1/ref_copyv.h"
 
 namespace testinghelpers {
@@ -49,19 +48,19 @@ void ref_copyv( char conj_x, gtint_t n, const T* xp, gtint_t incx,
     /* Check the typename T passed to this function template and call respective function.*/
     if (typeid(T) == typeid(float))
     {
-        ref_cblas_copyv = (Fptr_ref_cblas_copyv)dlsym(refCBLASModule.get(), "cblas_scopy");
+        ref_cblas_copyv = (Fptr_ref_cblas_copyv)refCBLASModule.loadSymbol("cblas_scopy");
     }
     else if (typeid(T) == typeid(double))
     {
-        ref_cblas_copyv = (Fptr_ref_cblas_copyv)dlsym(refCBLASModule.get(), "cblas_dcopy");
+        ref_cblas_copyv = (Fptr_ref_cblas_copyv)refCBLASModule.loadSymbol("cblas_dcopy");
     }
     else if (typeid(T) == typeid(scomplex))
     {
-        ref_cblas_copyv = (Fptr_ref_cblas_copyv)dlsym(refCBLASModule.get(), "cblas_ccopy");
+        ref_cblas_copyv = (Fptr_ref_cblas_copyv)refCBLASModule.loadSymbol("cblas_ccopy");
     }
     else if (typeid(T) == typeid(dcomplex))
     {
-        ref_cblas_copyv = (Fptr_ref_cblas_copyv)dlsym(refCBLASModule.get(), "cblas_zcopy");
+        ref_cblas_copyv = (Fptr_ref_cblas_copyv)refCBLASModule.loadSymbol("cblas_zcopy");
     }
     else
     {

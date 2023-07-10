@@ -58,10 +58,10 @@ void test_amaxv( gtint_t n, gtint_t incx, double thresh )
     //----------------------------------------------------------
     //                  Call BLIS function.
     //----------------------------------------------------------
-    gtint_t idx = amaxv( n, x.data(), incx );
+    gtint_t idx = amaxv<T>( n, x.data(), incx );
 
     //----------------------------------------------------------
     //              Compute component-wise error.
     //----------------------------------------------------------
-    computediff<gtint_t>( idx, idx_ref );
+    EXPECT_EQ( idx, idx_ref );
 }

@@ -33,7 +33,6 @@
 */
 
 #include "blis.h"
-#include <dlfcn.h>
 #include "level3/ref_hemm.h"
 
 namespace testinghelpers {
@@ -66,11 +65,11 @@ void ref_hemm (
     /* Check the typename T passed to this function template and call respective function.*/
     if (typeid(T) == typeid(scomplex))
     {
-        ref_cblas_hemm = (Fptr_ref_cblas_hemm)dlsym(refCBLASModule.get(), "cblas_chemm");
+        ref_cblas_hemm = (Fptr_ref_cblas_hemm)refCBLASModule.loadSymbol("cblas_chemm");
     }
     else if (typeid(T) == typeid(dcomplex))
     {
-        ref_cblas_hemm = (Fptr_ref_cblas_hemm)dlsym(refCBLASModule.get(), "cblas_zhemm");
+        ref_cblas_hemm = (Fptr_ref_cblas_hemm)refCBLASModule.loadSymbol("cblas_zhemm");
     }
     else
     {
