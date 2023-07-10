@@ -893,30 +893,6 @@ void zgemm_blis_impl
     const inc_t rs_c = 1;
     const inc_t cs_c = *ldc;
 
-    const num_t dt     = BLIS_DCOMPLEX;
-
-    obj_t       alphao = BLIS_OBJECT_INITIALIZER_1X1;
-    obj_t       ao     = BLIS_OBJECT_INITIALIZER;
-    obj_t       bo     = BLIS_OBJECT_INITIALIZER;
-    obj_t       betao  = BLIS_OBJECT_INITIALIZER_1X1;
-    obj_t       co     = BLIS_OBJECT_INITIALIZER;
-
-    dim_t       m0_a, n0_a;
-    dim_t       m0_b, n0_b;
-
-    bli_set_dims_with_trans( blis_transa, m0, k0, &m0_a, &n0_a );
-    bli_set_dims_with_trans( blis_transb, k0, n0, &m0_b, &n0_b );
-
-    bli_obj_init_finish_1x1( dt, (dcomplex*)alpha, &alphao );
-    bli_obj_init_finish_1x1( dt, (dcomplex*)beta,  &betao  );
-
-    bli_obj_init_finish( dt, m0_a, n0_a, (dcomplex*)a, rs_a, cs_a, &ao );
-    bli_obj_init_finish( dt, m0_b, n0_b, (dcomplex*)b, rs_b, cs_b, &bo );
-    bli_obj_init_finish( dt, m0,   n0,   (dcomplex*)c, rs_c, cs_c, &co );
-
-    bli_obj_set_conjtrans( blis_transa, &ao );
-    bli_obj_set_conjtrans( blis_transb, &bo );
-
     /* Call GEMV when m == 1 or n == 1 with the context set
     to an uninitialized void pointer i.e. ((void *)0)*/
     if (n0 == 1)
@@ -999,12 +975,37 @@ void zgemm_blis_impl
     //dim_t single_instance = bli_env_get_var( "BLIS_SINGLE_INSTANCE", -1 );
 
     //dim_t nt = bli_thread_get_num_threads(); // get number of threads
-    bool is_parallel = bli_thread_get_is_parallel(); // Check if parallel zgemm is invoked.
 
     // This function is invoked on all architectures including 'generic'.
     // Non-AVX2+FMA3 platforms will use the kernels derived from the context.
     if (bli_cpuid_is_avx2fma3_supported() == FALSE)
     {
+        // This code is duplicated below, however we don't want to move it out of
+        // this IF block as we want to avoid object initialization until required.
+        // Also this is temporary fix which will be replaced later.
+        const num_t dt     = BLIS_DCOMPLEX;
+
+        obj_t       alphao = BLIS_OBJECT_INITIALIZER_1X1;
+        obj_t       ao     = BLIS_OBJECT_INITIALIZER;
+        obj_t       bo     = BLIS_OBJECT_INITIALIZER;
+        obj_t       betao  = BLIS_OBJECT_INITIALIZER_1X1;
+        obj_t       co     = BLIS_OBJECT_INITIALIZER;
+
+        dim_t       m0_a, n0_a;
+        dim_t       m0_b, n0_b;
+
+        bli_set_dims_with_trans( blis_transa, m0, k0, &m0_a, &n0_a );
+        bli_set_dims_with_trans( blis_transb, k0, n0, &m0_b, &n0_b );
+
+        bli_obj_init_finish_1x1( dt, (dcomplex*)alpha, &alphao );
+        bli_obj_init_finish_1x1( dt, (dcomplex*)beta,  &betao  );
+
+        bli_obj_init_finish( dt, m0_a, n0_a, (dcomplex*)a, rs_a, cs_a, &ao );
+        bli_obj_init_finish( dt, m0_b, n0_b, (dcomplex*)b, rs_b, cs_b, &bo );
+        bli_obj_init_finish( dt, m0,   n0,   (dcomplex*)c, rs_c, cs_c, &co );
+
+        bli_obj_set_conjtrans( blis_transa, &ao );
+        bli_obj_set_conjtrans( blis_transb, &bo );
 
         // Will call parallelized zgemm code - sup & native
         PASTEMAC(gemm, BLIS_OAPI_EX_SUF)
@@ -1026,26 +1027,55 @@ void zgemm_blis_impl
     }
 
     /*
-    Invoking the API for input sizes with k=1.
-    - For single thread, the API has no constraints before invoking.
-    - For multiple threads, the constraint is that m and n should individually be less than 128.
+    Invoking the API for input sizes with k = 1.
+    - The API is single-threaded.
+    - The input constraints are that k should be 1, and transa and transb
+      should be N and N respectively.
     */
-    if((k0 == 1) && ((!is_parallel) || ((is_parallel) && (m0 < 128) && (n0 < 128)))
-        && bli_is_notrans(blis_transa)
-        && bli_is_notrans(blis_transb))
+    if( ( k0 == 1 ) && bli_is_notrans( blis_transa ) && bli_is_notrans( blis_transb ) )
     {
-        bli_zgemm_4x6_avx2_k1_nn( m0, n0, k0,
-                            (dcomplex*)alpha,
-                            (dcomplex*)a, *lda,
-                            (dcomplex*)b, *ldb,
-                            (dcomplex*)beta,
-                            c, *ldc);
+        bli_zgemm_4x4_avx2_k1_nn
+        ( 
+            m0, n0, k0,
+            (dcomplex*)alpha,
+            (dcomplex*)a, *lda,
+            (dcomplex*)b, *ldb,
+            (dcomplex*)beta,
+            c, *ldc
+        );
+
         AOCL_DTL_LOG_GEMM_STATS(AOCL_DTL_LEVEL_TRACE_1, *m, *n, *k);
         AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
         /* Finalize BLIS */
         bli_finalize_auto();
         return;
     }
+
+    const num_t dt     = BLIS_DCOMPLEX;
+
+    obj_t       alphao = BLIS_OBJECT_INITIALIZER_1X1;
+    obj_t       ao     = BLIS_OBJECT_INITIALIZER;
+    obj_t       bo     = BLIS_OBJECT_INITIALIZER;
+    obj_t       betao  = BLIS_OBJECT_INITIALIZER_1X1;
+    obj_t       co     = BLIS_OBJECT_INITIALIZER;
+
+    dim_t       m0_a, n0_a;
+    dim_t       m0_b, n0_b;
+
+    bli_set_dims_with_trans( blis_transa, m0, k0, &m0_a, &n0_a );
+    bli_set_dims_with_trans( blis_transb, k0, n0, &m0_b, &n0_b );
+
+    bli_obj_init_finish_1x1( dt, (dcomplex*)alpha, &alphao );
+    bli_obj_init_finish_1x1( dt, (dcomplex*)beta,  &betao  );
+
+    bli_obj_init_finish( dt, m0_a, n0_a, (dcomplex*)a, rs_a, cs_a, &ao );
+    bli_obj_init_finish( dt, m0_b, n0_b, (dcomplex*)b, rs_b, cs_b, &bo );
+    bli_obj_init_finish( dt, m0,   n0,   (dcomplex*)c, rs_c, cs_c, &co );
+
+    bli_obj_set_conjtrans( blis_transa, &ao );
+    bli_obj_set_conjtrans( blis_transb, &bo );
+
+    bool is_parallel = bli_thread_get_is_parallel(); // Check if parallel zgemm is invoked.
 
 #ifdef BLIS_ENABLE_SMALL_MATRIX
 
