@@ -620,98 +620,63 @@ void zscal_blis_impl
        dcomplex*   x, const f77_int* incx
      )
 {
-  AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1)
-  AOCL_DTL_LOG_SCAL_INPUTS(AOCL_DTL_LEVEL_TRACE_1, 'Z', (void *)alpha, *n, *incx);
-  dim_t n0;
-  dcomplex *x0;
-  inc_t incx0;
+    AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1)
+    AOCL_DTL_LOG_SCAL_INPUTS(AOCL_DTL_LEVEL_TRACE_1, 'Z', (void *)alpha, *n, *incx);
 
-  // When n is zero or the alpha pointer passed is null, return early
-  if ((*n == 0) || (alpha == NULL))
-  {
-      AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
-      return;
-  }
+    dim_t n0 = (dim_t)(*n);
+    dcomplex *x0 = x;
+    inc_t incx0 = (inc_t)(*incx);
 
-  /* Convert/typecast negative values of n to zero. */
-  if (*n < 0)
-    n0 = (dim_t)0;
-  else
-    n0 = (dim_t)(*n);
+    /*
+        When n is zero or the alpha pointer passed is null
+        or the incx is zero or alpha is 1, return early.
+    */
+    if ((n0 <= 0) || (alpha == NULL) || (incx0 <= 0) || PASTEMAC(z, eq1)(*alpha))
+    {
+        AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
+        return;
+    }
 
-  /* If the input increments are negative, adjust the pointers so we can
-    use positive increments instead. */
-  if (*incx < 0)
-  {
-    /* The semantics of negative stride in BLAS are that the vector
-    operand be traversed in reverse order. (Another way to think
-    of this is that negative strides effectively reverse the order
-    of the vector, but without any explicit data movements.) This
-    is also how BLIS interprets negative strides. The differences
-    is that with BLAS, the caller *always* passes in the 0th (i.e.,
-    top-most or left-most) element of the vector, even when the
-    stride is negative. By contrast, in BLIS, negative strides are
-    used *relative* to the vector address as it is given. Thus, in
-    BLIS, if this backwards traversal is desired, the caller *must*
-    pass in the address to the (n-1)th (i.e., the bottom-most or
-    right-most) element along with a negative stride. */
+    // Definition of function pointer
+    zscalv_ker_ft scalv_fun_ptr;
 
-    x0 = (x) + (n0 - 1) * (-*incx);
-    incx0 = (inc_t)(*incx);
-  }
-  else
-  {
-    x0 = (x);
-    incx0 = (inc_t)(*incx);
-  }
+    cntx_t* cntx = NULL;
 
-  /* If the incx is zero, return early. */
-  if (bli_zero_dim1(incx0))
-    return;
+    // Query the architecture ID
+    arch_t id = bli_arch_query_id();
 
-  // Definition of function pointer
-  zscalv_ker_ft scalv_fun_ptr;
+    // Pick the kernel based on the architecture ID
+    switch (id)
+    {
+        case BLIS_ARCH_ZEN4:
+        case BLIS_ARCH_ZEN:
+        case BLIS_ARCH_ZEN2:
+        case BLIS_ARCH_ZEN3:
 
-  cntx_t* cntx = NULL;
+          // AVX2 Kernel
+          scalv_fun_ptr = bli_zscalv_zen_int;
+          break;
 
-  // Query the architecture ID
-  arch_t id = bli_arch_query_id();
+        default:
 
-  // Pick the kernel based on the architecture ID
-  switch (id)
-  {
-  case BLIS_ARCH_ZEN4:
-  case BLIS_ARCH_ZEN:
-  case BLIS_ARCH_ZEN2:
-  case BLIS_ARCH_ZEN3:
+          // Query the context
+          cntx = bli_gks_query_cntx();
 
-    // AVX2 Kernel
-    scalv_fun_ptr = bli_zscalv_zen_int;
-    break;
+          // Query the function pointer using the context
+          scalv_fun_ptr = bli_cntx_get_l1v_ker_dt(BLIS_DCOMPLEX, BLIS_SCALV_KER, cntx);
+    }
 
-  default:
+    // Call the function based on the function pointer assigned above
+    scalv_fun_ptr
+    (
+      BLIS_NO_CONJUGATE,
+      n0,
+      (dcomplex*) alpha,
+      x0, incx0,
+      cntx
+    );
 
-    // Query the context
-    cntx = bli_gks_query_cntx();
-
-    // Query the function pointer using the context
-    scalv_fun_ptr = bli_cntx_get_l1v_ker_dt(BLIS_DCOMPLEX, BLIS_SCALV_KER, cntx);
-  }
-
-  /* The expectation is that the condition to return early for vector dimension is zero
-  or the real part of alpha is 1 and imaginary part 0 is inside the compute kernel called */
-
-  // Call the function based on the function pointer assigned above
-  scalv_fun_ptr
-  (
-    BLIS_NO_CONJUGATE,
-    n0,
-    (dcomplex*) alpha,
-    x0, incx0,
-    cntx
-  );
-
-  AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1)
+    AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1)
 }
 #ifdef BLIS_ENABLE_BLAS
 void zscal_

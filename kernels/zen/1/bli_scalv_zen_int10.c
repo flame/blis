@@ -817,10 +817,20 @@ void bli_zscalv_zen_int
 	cntx_t* restrict cntx
 	)
 {
-	// If the vector dimension is zero, or if alpha is unit, return early.
-	if (bli_zero_dim1(n) || PASTEMAC(z, eq1)(*alpha))
-		return;
+	/*
+		Undefined behaviour
+		-------------------
 
+		1. This layer is not BLAS complaint and the kernel results in
+		undefined behaviour when n <= 0 and incx <= 1. The expectation
+		is that the application/higher-layer invoking this layer should
+		the arg checks.
+	*/
+	// if (bli_zero_dim1(n) || PASTEMAC(z, eq1)(*alpha))
+	//	return;
+
+	// To Do: This call to SETV needs to be removed for BLAS compliance
+	// Currently removing this is resulting in ZHERK failures
 	if (PASTEMAC(z, eq0)(*alpha))
 	{
 		// Expert interface of setv is invoked when alpha is zero
@@ -834,8 +844,7 @@ void bli_zscalv_zen_int
 			zero,
 			x, incx,
 			cntx,
-			NULL
-		);
+			NULL);
 
 		return;
 	}
@@ -896,33 +905,29 @@ void bli_zscalv_zen_int
 			x_vec_ymm[2] = _mm256_loadu_pd(x0 + 2 * n_elem_per_reg);
 			x_vec_ymm[3] = _mm256_loadu_pd(x0 + 3 * n_elem_per_reg);
 
-			temp_ymm[0] = _mm256_mul_pd(x_vec_ymm[0], alpha_real_ymm);
-			temp_ymm[1] = _mm256_mul_pd(x_vec_ymm[0], alpha_imag_ymm);
-			temp_ymm[2] = _mm256_mul_pd(x_vec_ymm[1], alpha_real_ymm);
-			temp_ymm[3] = _mm256_mul_pd(x_vec_ymm[1], alpha_imag_ymm);
-			temp_ymm[4] = _mm256_mul_pd(x_vec_ymm[2], alpha_real_ymm);
-			temp_ymm[5] = _mm256_mul_pd(x_vec_ymm[2], alpha_imag_ymm);
-			temp_ymm[6] = _mm256_mul_pd(x_vec_ymm[3], alpha_real_ymm);
-			temp_ymm[7] = _mm256_mul_pd(x_vec_ymm[3], alpha_imag_ymm);
+			temp_ymm[0] = _mm256_mul_pd(x_vec_ymm[0], alpha_imag_ymm);
+			temp_ymm[1] = _mm256_mul_pd(x_vec_ymm[1], alpha_imag_ymm);
+			temp_ymm[2] = _mm256_mul_pd(x_vec_ymm[2], alpha_imag_ymm);
+			temp_ymm[3] = _mm256_mul_pd(x_vec_ymm[3], alpha_imag_ymm);
 
-			temp_ymm[1] = _mm256_permute_pd(temp_ymm[1], 0b0101);
-			temp_ymm[3] = _mm256_permute_pd(temp_ymm[3], 0b0101);
-			temp_ymm[5] = _mm256_permute_pd(temp_ymm[5], 0b0101);
-			temp_ymm[7] = _mm256_permute_pd(temp_ymm[7], 0b0101);
+			temp_ymm[4] = _mm256_permute_pd(temp_ymm[0], 0b0101);
+			temp_ymm[5] = _mm256_permute_pd(temp_ymm[1], 0b0101);
+			temp_ymm[6] = _mm256_permute_pd(temp_ymm[2], 0b0101);
+			temp_ymm[7] = _mm256_permute_pd(temp_ymm[3], 0b0101);
 
 			/*
-				a[i+63:i] := b[i+63:i] - c[i+63:i] for odd indices
-				a[i+63:i] := b[i+63:i] + c[i+63:i] for even indices
+				a[i+63:i] := alpha_real * b[i+63:i] - c[i+63:i] for odd indices
+				a[i+63:i] := alpha_real * b[i+63:i] + c[i+63:i] for even indices
 			*/
-			temp_ymm[0] = _mm256_addsub_pd(temp_ymm[0], temp_ymm[1]);
-			temp_ymm[2] = _mm256_addsub_pd(temp_ymm[2], temp_ymm[3]);
-			temp_ymm[4] = _mm256_addsub_pd(temp_ymm[4], temp_ymm[5]);
-			temp_ymm[6] = _mm256_addsub_pd(temp_ymm[6], temp_ymm[7]);
+			temp_ymm[0] = _mm256_fmaddsub_pd(x_vec_ymm[0], alpha_real_ymm, temp_ymm[4]);
+			temp_ymm[1] = _mm256_fmaddsub_pd(x_vec_ymm[1], alpha_real_ymm, temp_ymm[5]);
+			temp_ymm[2] = _mm256_fmaddsub_pd(x_vec_ymm[2], alpha_real_ymm, temp_ymm[6]);
+			temp_ymm[3] = _mm256_fmaddsub_pd(x_vec_ymm[3], alpha_real_ymm, temp_ymm[7]);
 
 			_mm256_storeu_pd(x0, temp_ymm[0]);
-			_mm256_storeu_pd(x0 + n_elem_per_reg, temp_ymm[2]);
-			_mm256_storeu_pd(x0 + 2 * n_elem_per_reg, temp_ymm[4]);
-			_mm256_storeu_pd(x0 + 3 * n_elem_per_reg, temp_ymm[6]);
+			_mm256_storeu_pd(x0 + n_elem_per_reg, temp_ymm[1]);
+			_mm256_storeu_pd(x0 + 2 * n_elem_per_reg, temp_ymm[2]);
+			_mm256_storeu_pd(x0 + 3 * n_elem_per_reg, temp_ymm[3]);
 
 			x0 += 4 * n_elem_per_reg;
 		}
@@ -932,19 +937,17 @@ void bli_zscalv_zen_int
 			x_vec_ymm[0] = _mm256_loadu_pd(x0);
 			x_vec_ymm[1] = _mm256_loadu_pd(x0 + n_elem_per_reg);
 
-			temp_ymm[0] = _mm256_mul_pd(x_vec_ymm[0], alpha_real_ymm);
-			temp_ymm[1] = _mm256_mul_pd(x_vec_ymm[0], alpha_imag_ymm);
-			temp_ymm[2] = _mm256_mul_pd(x_vec_ymm[1], alpha_real_ymm);
-			temp_ymm[3] = _mm256_mul_pd(x_vec_ymm[1], alpha_imag_ymm);
+			temp_ymm[0] = _mm256_mul_pd(x_vec_ymm[0], alpha_imag_ymm);
+			temp_ymm[1] = _mm256_mul_pd(x_vec_ymm[1], alpha_imag_ymm);
 
-			temp_ymm[1] = _mm256_permute_pd(temp_ymm[1], 0b0101);
-			temp_ymm[3] = _mm256_permute_pd(temp_ymm[3], 0b0101);
+			temp_ymm[2] = _mm256_permute_pd(temp_ymm[0], 0b0101);
+			temp_ymm[3] = _mm256_permute_pd(temp_ymm[1], 0b0101);
 
-			temp_ymm[0] = _mm256_addsub_pd(temp_ymm[0], temp_ymm[1]);
-			temp_ymm[2] = _mm256_addsub_pd(temp_ymm[2], temp_ymm[3]);
+			temp_ymm[0] = _mm256_fmaddsub_pd(x_vec_ymm[0], alpha_real_ymm, temp_ymm[2]);
+			temp_ymm[1] = _mm256_fmaddsub_pd(x_vec_ymm[1], alpha_real_ymm, temp_ymm[3]);
 
 			_mm256_storeu_pd(x0, temp_ymm[0]);
-			_mm256_storeu_pd(x0 + n_elem_per_reg, temp_ymm[2]);
+			_mm256_storeu_pd(x0 + n_elem_per_reg, temp_ymm[1]);
 
 			x0 += 2 * n_elem_per_reg;
 		}
@@ -953,44 +956,42 @@ void bli_zscalv_zen_int
 		{
 			x_vec_ymm[0] = _mm256_loadu_pd(x0);
 
-			temp_ymm[0] = _mm256_mul_pd(x_vec_ymm[0], alpha_real_ymm);
-			temp_ymm[1] = _mm256_mul_pd(x_vec_ymm[0], alpha_imag_ymm);
+			temp_ymm[0] = _mm256_mul_pd(x_vec_ymm[0], alpha_imag_ymm);
 
-			temp_ymm[1] = _mm256_permute_pd(temp_ymm[1], 0b0101);
+			temp_ymm[1] = _mm256_permute_pd(temp_ymm[0], 0b0101);
 
-			temp_ymm[0] = _mm256_addsub_pd(temp_ymm[0], temp_ymm[1]);
+			temp_ymm[0] = _mm256_fmaddsub_pd(x_vec_ymm[0], alpha_real_ymm, temp_ymm[1]);
 
 			_mm256_storeu_pd(x0, temp_ymm[0]);
 
 			x0 += n_elem_per_reg;
 		}
-	}
 
-	// Issue vzeroupper instruction to clear upper lanes of ymm registers.
-	// This avoids a performance penalty caused by false dependencies when
-	// transitioning from AVX to SSE instructions (which may occur later,
-	// especially if BLIS is compiled with -mfpmath=sse).
-	_mm256_zeroupper();
+		// Issue vzeroupper instruction to clear upper lanes of ymm registers.
+		// This avoids a performance penalty caused by false dependencies when
+		// transitioning from AVX to SSE instructions (which may occur later,
+		// especially if BLIS is compiled with -mfpmath=sse).
+		_mm256_zeroupper();
+	}
 
 	/* In double complex data type the computation of
 	unit stride elements can still be vectorized using SSE*/
-	__m128d temp_ymm[2], alpha_real_ymm, alpha_imag_ymm, x_vec_ymm;
+	__m128d temp_xmm[2], alpha_real_xmm, alpha_imag_xmm, x_vec_xmm;
 
-	alpha_real_ymm = _mm_set1_pd(real);
-	alpha_imag_ymm = _mm_set1_pd(imag);
+	alpha_real_xmm = _mm_set1_pd(real);
+	alpha_imag_xmm = _mm_set1_pd(imag);
 
 	for (; i < n; i++)
 	{
-		x_vec_ymm = _mm_loadu_pd(x0);
+		x_vec_xmm = _mm_loadu_pd(x0);
 
-		temp_ymm[0] = _mm_mul_pd(x_vec_ymm, alpha_real_ymm);
-		temp_ymm[1] = _mm_mul_pd(x_vec_ymm, alpha_imag_ymm);
+		temp_xmm[0] = _mm_permute_pd(x_vec_xmm, 0b01);
 
-		temp_ymm[1] = _mm_permute_pd(temp_ymm[1], 0b01);
+		temp_xmm[1] = _mm_mul_pd(temp_xmm[0], alpha_imag_xmm);
 
-		temp_ymm[0] = _mm_addsub_pd(temp_ymm[0], temp_ymm[1]);
+		temp_xmm[0] = _mm_fmaddsub_pd(x_vec_xmm, alpha_real_xmm, temp_xmm[1]);
 
-		_mm_storeu_pd(x0, temp_ymm[0]);
+		_mm_storeu_pd(x0, temp_xmm[0]);
 
 		x0 += 2 * incx;
 	}
