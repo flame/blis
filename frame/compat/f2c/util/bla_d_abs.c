@@ -36,12 +36,12 @@
 
 #ifdef BLIS_ENABLE_BLAS
 
-double bla_d_abs(const bla_double *x)
+double bla_d_abs(bla_double x)
 {
-	if(*x >= 0.0)
-		return(*x);
+	if(x >= 0.0)
+		return(x);
 
-	return(- *x);
+	return(- x);
 }
 
 #endif

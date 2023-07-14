@@ -55,7 +55,7 @@
     bla_integer info;
     bla_scomplex temp1, temp2;
     bla_integer i__, j, k;
-    //extern bla_logical PASTEF770(lsame)(bla_character *, bla_character *, ftnlen, ftnlen);
+    //extern bla_logical PASTEF770(bla_lsame)(bla_character *, bla_character *, ftnlen, ftnlen);
     bla_integer kk, ix, iy, jx = 0, jy = 0, kx = 0, ky = 0;
     //extern /* Subroutine */ int PASTEF770(xerbla)(bla_character *, bla_integer *, ftnlen);
 
@@ -167,7 +167,7 @@
 
     /* Function Body */
     info = 0;
-    if (! PASTEF770(lsame)(uplo, "U", (ftnlen)1, (ftnlen)1) && ! PASTEF770(lsame)(uplo, "L", (
+    if (! PASTEF770(bla_lsame)(uplo, "U", (ftnlen)1, (ftnlen)1) && ! PASTEF770(bla_lsame)(uplo, "L", (
 	    ftnlen)1, (ftnlen)1)) {
 	info = 1;
     } else if (*n < 0) {
@@ -210,7 +210,7 @@
 /*     are accessed sequentially with one pass through AP. */
 
     kk = 1;
-    if (PASTEF770(lsame)(uplo, "U", (ftnlen)1, (ftnlen)1)) {
+    if (PASTEF770(bla_lsame)(uplo, "U", (ftnlen)1, (ftnlen)1)) {
 
 /*        Form  A  when upper triangle is stored in AP. */
 
@@ -219,7 +219,7 @@
 	    for (j = 1; j <= i__1; ++j) {
 		i__2 = j;
 		i__3 = j;
-		if (bli_creal(x[i__2]) != 0.f || bli_cimag(x[i__2]) != 0.f || (bli_creal(y[i__3]) != 0.f 
+		if (bli_creal(x[i__2]) != 0.f || bli_cimag(x[i__2]) != 0.f || (bli_creal(y[i__3]) != 0.f
 			|| bli_cimag(y[i__3]) != 0.f)) {
 		    bla_r_cnjg(&q__2, &y[j]);
 		    bli_csets( (bli_creal(*alpha) * bli_creal(q__2) - bli_cimag(*alpha) * bli_cimag(q__2)), (bli_creal(*alpha) * bli_cimag(q__2) + bli_cimag(*alpha) * bli_creal(q__2)), q__1 );
@@ -266,7 +266,7 @@
 	    for (j = 1; j <= i__1; ++j) {
 		i__2 = jx;
 		i__3 = jy;
-		if (bli_creal(x[i__2]) != 0.f || bli_cimag(x[i__2]) != 0.f || (bli_creal(y[i__3]) != 0.f 
+		if (bli_creal(x[i__2]) != 0.f || bli_cimag(x[i__2]) != 0.f || (bli_creal(y[i__3]) != 0.f
 			|| bli_cimag(y[i__3]) != 0.f)) {
 		    bla_r_cnjg(&q__2, &y[jy]);
 		    bli_csets( (bli_creal(*alpha) * bli_creal(q__2) - bli_cimag(*alpha) * bli_cimag(q__2)), (bli_creal(*alpha) * bli_cimag(q__2) + bli_cimag(*alpha) * bli_creal(q__2)), q__1 );
@@ -322,7 +322,7 @@
 	    for (j = 1; j <= i__1; ++j) {
 		i__2 = j;
 		i__3 = j;
-		if (bli_creal(x[i__2]) != 0.f || bli_cimag(x[i__2]) != 0.f || (bli_creal(y[i__3]) != 0.f 
+		if (bli_creal(x[i__2]) != 0.f || bli_cimag(x[i__2]) != 0.f || (bli_creal(y[i__3]) != 0.f
 			|| bli_cimag(y[i__3]) != 0.f)) {
 		    bla_r_cnjg(&q__2, &y[j]);
 		    bli_csets( (bli_creal(*alpha) * bli_creal(q__2) - bli_cimag(*alpha) * bli_cimag(q__2)), (bli_creal(*alpha) * bli_cimag(q__2) + bli_cimag(*alpha) * bli_creal(q__2)), q__1 );
@@ -369,7 +369,7 @@
 	    for (j = 1; j <= i__1; ++j) {
 		i__2 = jx;
 		i__3 = jy;
-		if (bli_creal(x[i__2]) != 0.f || bli_cimag(x[i__2]) != 0.f || (bli_creal(y[i__3]) != 0.f 
+		if (bli_creal(x[i__2]) != 0.f || bli_cimag(x[i__2]) != 0.f || (bli_creal(y[i__3]) != 0.f
 			|| bli_cimag(y[i__3]) != 0.f)) {
 		    bla_r_cnjg(&q__2, &y[jy]);
 		    bli_csets( (bli_creal(*alpha) * bli_creal(q__2) - bli_cimag(*alpha) * bli_cimag(q__2)), (bli_creal(*alpha) * bli_cimag(q__2) + bli_cimag(*alpha) * bli_creal(q__2)), q__1 );
@@ -443,7 +443,7 @@
     bla_integer info;
     bla_dcomplex temp1, temp2;
     bla_integer i__, j, k;
-    //extern bla_logical PASTEF770(lsame)(bla_character *, bla_character *, ftnlen, ftnlen);
+    //extern bla_logical PASTEF770(bla_lsame)(bla_character *, bla_character *, ftnlen, ftnlen);
     bla_integer kk, ix, iy, jx = 0, jy = 0, kx = 0, ky = 0;
     //extern /* Subroutine */ int PASTEF770(xerbla)(bla_character *, bla_integer *, ftnlen);
 
@@ -555,7 +555,7 @@
 
     /* Function Body */
     info = 0;
-    if (! PASTEF770(lsame)(uplo, "U", (ftnlen)1, (ftnlen)1) && ! PASTEF770(lsame)(uplo, "L", (
+    if (! PASTEF770(bla_lsame)(uplo, "U", (ftnlen)1, (ftnlen)1) && ! PASTEF770(bla_lsame)(uplo, "L", (
 	    ftnlen)1, (ftnlen)1)) {
 	info = 1;
     } else if (*n < 0) {
@@ -598,7 +598,7 @@
 /*     are accessed sequentially with one pass through AP. */
 
     kk = 1;
-    if (PASTEF770(lsame)(uplo, "U", (ftnlen)1, (ftnlen)1)) {
+    if (PASTEF770(bla_lsame)(uplo, "U", (ftnlen)1, (ftnlen)1)) {
 
 /*        Form  A  when upper triangle is stored in AP. */
 
@@ -607,7 +607,7 @@
 	    for (j = 1; j <= i__1; ++j) {
 		i__2 = j;
 		i__3 = j;
-		if (bli_zreal(x[i__2]) != 0. || bli_zimag(x[i__2]) != 0. || (bli_zreal(y[i__3]) != 0. || 
+		if (bli_zreal(x[i__2]) != 0. || bli_zimag(x[i__2]) != 0. || (bli_zreal(y[i__3]) != 0. ||
 			bli_zimag(y[i__3]) != 0.)) {
 		    bla_d_cnjg(&z__2, &y[j]);
 		    bli_zsets( (bli_zreal(*alpha) * bli_zreal(z__2) - bli_zimag(*alpha) * bli_zimag(z__2)), (bli_zreal(*alpha) * bli_zimag(z__2) + bli_zimag(*alpha) * bli_zreal(z__2)), z__1 );
@@ -654,7 +654,7 @@
 	    for (j = 1; j <= i__1; ++j) {
 		i__2 = jx;
 		i__3 = jy;
-		if (bli_zreal(x[i__2]) != 0. || bli_zimag(x[i__2]) != 0. || (bli_zreal(y[i__3]) != 0. || 
+		if (bli_zreal(x[i__2]) != 0. || bli_zimag(x[i__2]) != 0. || (bli_zreal(y[i__3]) != 0. ||
 			bli_zimag(y[i__3]) != 0.)) {
 		    bla_d_cnjg(&z__2, &y[jy]);
 		    bli_zsets( (bli_zreal(*alpha) * bli_zreal(z__2) - bli_zimag(*alpha) * bli_zimag(z__2)), (bli_zreal(*alpha) * bli_zimag(z__2) + bli_zimag(*alpha) * bli_zreal(z__2)), z__1 );
@@ -710,7 +710,7 @@
 	    for (j = 1; j <= i__1; ++j) {
 		i__2 = j;
 		i__3 = j;
-		if (bli_zreal(x[i__2]) != 0. || bli_zimag(x[i__2]) != 0. || (bli_zreal(y[i__3]) != 0. || 
+		if (bli_zreal(x[i__2]) != 0. || bli_zimag(x[i__2]) != 0. || (bli_zreal(y[i__3]) != 0. ||
 			bli_zimag(y[i__3]) != 0.)) {
 		    bla_d_cnjg(&z__2, &y[j]);
 		    bli_zsets( (bli_zreal(*alpha) * bli_zreal(z__2) - bli_zimag(*alpha) * bli_zimag(z__2)), (bli_zreal(*alpha) * bli_zimag(z__2) + bli_zimag(*alpha) * bli_zreal(z__2)), z__1 );
@@ -757,7 +757,7 @@
 	    for (j = 1; j <= i__1; ++j) {
 		i__2 = jx;
 		i__3 = jy;
-		if (bli_zreal(x[i__2]) != 0. || bli_zimag(x[i__2]) != 0. || (bli_zreal(y[i__3]) != 0. || 
+		if (bli_zreal(x[i__2]) != 0. || bli_zimag(x[i__2]) != 0. || (bli_zreal(y[i__3]) != 0. ||
 			bli_zimag(y[i__3]) != 0.)) {
 		    bla_d_cnjg(&z__2, &y[jy]);
 		    bli_zsets( (bli_zreal(*alpha) * bli_zreal(z__2) - bli_zimag(*alpha) * bli_zimag(z__2)), (bli_zreal(*alpha) * bli_zimag(z__2) + bli_zimag(*alpha) * bli_zreal(z__2)), z__1 );

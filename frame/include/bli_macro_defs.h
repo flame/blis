@@ -90,6 +90,12 @@
 #define PASTEF772(ch1,ch2,name)                ch1 ## ch2 ## name ## _
 #define PASTEF773(ch1,ch2,ch3,name)     ch1 ## ch2 ## ch3 ## name ## _
 
+// Same as above, except with f2c_ prefix.
+#define PASTEF2C(ch1,name)          f2c_ ## ch1               ## name ## _
+#define PASTEF2C2(ch1,ch2,name)     f2c_ ## ch1 ## ch2        ## name ## _
+#define PASTEF2C3(ch1,ch2,ch3,name) f2c_ ## ch1 ## ch2 ## ch3 ## name ## _
+
+
 // -- Include other groups of macros
 
 #include "bli_genarray_macro_defs.h"

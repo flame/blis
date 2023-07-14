@@ -155,6 +155,9 @@ extern "C" {
 #include "bli_castv.h"
 #include "bli_projm.h"
 #include "bli_projv.h"
+#include "bli_scanm.h"
+#include "bli_scanv.h"
+#include "bli_inverttv.h"
 
 
 // -- Level-0 operations --

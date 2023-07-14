@@ -38,6 +38,31 @@
 #ifdef BLIS_ENABLE_LEVEL4
 
 //
+// Define function pointer query interfaces for typed APIs.
+//
+
+#undef  GENFRONT
+#define GENFRONT( opname ) \
+\
+GENARRAY_FPA( PASTECH2(opname,BLIS_TAPI_EX_SUF,_vft), \
+              PASTECH(opname,BLIS_TAPI_EX_SUF) ); \
+\
+PASTECH2(opname,BLIS_TAPI_EX_SUF,_vft) \
+PASTEMAC2(opname,BLIS_TAPI_EX_SUF,_qfp)( num_t dt ) \
+{ \
+    return PASTECH2(opname,BLIS_TAPI_EX_SUF,_fpa)[ dt ]; \
+}
+
+
+//GENFRONT( chol )
+//GENFRONT( trinv )
+//GENFRONT( ttmm )
+GENFRONT( hevd )
+GENFRONT( rhevd )
+GENFRONT( hevpinv )
+
+
+//
 // Define function pointer query interfaces for implementations.
 //
 

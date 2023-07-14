@@ -37,6 +37,24 @@
 #define BLIS_L4_FPA_H
 
 //
+// Prototype function pointer query interfaces for typed APIs.
+//
+
+#undef  GENPROT
+#define GENPROT( opname ) \
+\
+PASTECH2(opname,BLIS_TAPI_EX_SUF,_vft) \
+PASTEMAC2(opname,BLIS_TAPI_EX_SUF,_qfp)( num_t dt );
+
+//GENPROT( chol )
+//GENPROT( trinv )
+//GENPROT( ttmm )
+GENPROT( hevd )
+GENPROT( rhevd )
+GENPROT( hevpinv )
+
+
+//
 // Prototype function pointer query interfaces for implementations.
 //
 

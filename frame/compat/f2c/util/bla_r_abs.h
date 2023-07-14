@@ -34,7 +34,7 @@
 
 #ifdef BLIS_ENABLE_BLAS
 
-double bla_r_abs(const bla_real *x);
+double bla_r_abs(bla_real x);
 
 #endif
 

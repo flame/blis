@@ -50,7 +50,7 @@
     bla_integer info;
     bla_double temp1, temp2;
     bla_integer i__, j, k;
-    //extern bla_logical PASTEF770(lsame)(bla_character *, bla_character *, ftnlen, ftnlen);
+    //extern bla_logical PASTEF770(bla_lsame)(bla_character *, bla_character *, ftnlen, ftnlen);
     bla_integer kk, ix, iy, jx, jy, kx, ky;
     //extern /* Subroutine */ int PASTEF770(xerbla)(bla_character *, bla_integer *, ftnlen);
 
@@ -160,7 +160,7 @@
 
     /* Function Body */
     info = 0;
-    if (! PASTEF770(lsame)(uplo, "U", (ftnlen)1, (ftnlen)1) && ! PASTEF770(lsame)(uplo, "L", (
+    if (! PASTEF770(bla_lsame)(uplo, "U", (ftnlen)1, (ftnlen)1) && ! PASTEF770(bla_lsame)(uplo, "L", (
 	    ftnlen)1, (ftnlen)1)) {
 	info = 1;
     } else if (*n < 0) {
@@ -237,7 +237,7 @@
 	return 0;
     }
     kk = 1;
-    if (PASTEF770(lsame)(uplo, "U", (ftnlen)1, (ftnlen)1)) {
+    if (PASTEF770(bla_lsame)(uplo, "U", (ftnlen)1, (ftnlen)1)) {
 
 /*        Form  y  when AP contains the upper triangle. */
 
@@ -351,7 +351,7 @@
     bla_integer info;
     bla_real temp1, temp2;
     bla_integer i__, j, k;
-    //extern bla_logical PASTEF770(lsame)(bla_character *, bla_character *, ftnlen, ftnlen);
+    //extern bla_logical PASTEF770(bla_lsame)(bla_character *, bla_character *, ftnlen, ftnlen);
     bla_integer kk, ix, iy, jx, jy, kx, ky;
     //extern /* Subroutine */ int PASTEF770(xerbla)(bla_character *, bla_integer *, ftnlen);
 
@@ -461,7 +461,7 @@
 
     /* Function Body */
     info = 0;
-    if (! PASTEF770(lsame)(uplo, "U", (ftnlen)1, (ftnlen)1) && ! PASTEF770(lsame)(uplo, "L", (
+    if (! PASTEF770(bla_lsame)(uplo, "U", (ftnlen)1, (ftnlen)1) && ! PASTEF770(bla_lsame)(uplo, "L", (
 	    ftnlen)1, (ftnlen)1)) {
 	info = 1;
     } else if (*n < 0) {
@@ -538,7 +538,7 @@
 	return 0;
     }
     kk = 1;
-    if (PASTEF770(lsame)(uplo, "U", (ftnlen)1, (ftnlen)1)) {
+    if (PASTEF770(bla_lsame)(uplo, "U", (ftnlen)1, (ftnlen)1)) {
 
 /*        Form  y  when AP contains the upper triangle. */
 

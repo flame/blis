@@ -347,3 +347,7 @@ nn       #   parameters: transa transb
 1        # hpdinv
 -1       #   dimensions: m
 ?        #   parameters: uplo
+
+1        # hevd
+-1       #   dimensions: m
+?        #   parameters: uplo

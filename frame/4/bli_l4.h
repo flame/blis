@@ -38,6 +38,8 @@
 
 #include "bli_l4_check.h"
 
+#include "f2c_lapack.h"
+
 // Define function types.
 #include "bli_l4_ft_opt.h"
 #include "bli_l4_ft.h"
@@ -55,3 +57,7 @@
 #include "bli_trinv.h"
 #include "bli_ttmm.h"
 #include "bli_hpdinv.h"
+
+#include "bli_hevd.h"
+#include "bli_hevpinv.h"
+

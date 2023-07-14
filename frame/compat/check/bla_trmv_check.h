@@ -41,13 +41,13 @@
 	f77_int nota, ta, conja; \
 	f77_int unita, nonua; \
 \
-	lower = PASTEF770(lsame)( uploa,  "L", (ftnlen)1, (ftnlen)1 ); \
-	upper = PASTEF770(lsame)( uploa,  "U", (ftnlen)1, (ftnlen)1 ); \
-	nota  = PASTEF770(lsame)( transa, "N", (ftnlen)1, (ftnlen)1 ); \
-	ta    = PASTEF770(lsame)( transa, "T", (ftnlen)1, (ftnlen)1 ); \
-	conja = PASTEF770(lsame)( transa, "C", (ftnlen)1, (ftnlen)1 ); \
-	unita = PASTEF770(lsame)( diaga,  "U", (ftnlen)1, (ftnlen)1 ); \
-	nonua = PASTEF770(lsame)( diaga,  "N", (ftnlen)1, (ftnlen)1 ); \
+	lower = PASTEF770(bla_lsame)( uploa,  "L", (ftnlen)1, (ftnlen)1 ); \
+	upper = PASTEF770(bla_lsame)( uploa,  "U", (ftnlen)1, (ftnlen)1 ); \
+	nota  = PASTEF770(bla_lsame)( transa, "N", (ftnlen)1, (ftnlen)1 ); \
+	ta    = PASTEF770(bla_lsame)( transa, "T", (ftnlen)1, (ftnlen)1 ); \
+	conja = PASTEF770(bla_lsame)( transa, "C", (ftnlen)1, (ftnlen)1 ); \
+	unita = PASTEF770(bla_lsame)( diaga,  "U", (ftnlen)1, (ftnlen)1 ); \
+	nonua = PASTEF770(bla_lsame)( diaga,  "N", (ftnlen)1, (ftnlen)1 ); \
 \
 	if      ( !lower && !upper ) \
 		info = 1; \

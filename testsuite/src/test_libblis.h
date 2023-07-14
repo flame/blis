@@ -292,6 +292,7 @@ typedef struct test_ops_s
 	test_op_t trinv;
 	test_op_t ttmm;
 	test_op_t hpdinv;
+	test_op_t hevd;
 
 } test_ops_t;
 
@@ -576,3 +577,4 @@ char libblis_test_proj_dtchar_to_precchar( char dt_char );
 #include "test_trinv.h"
 #include "test_ttmm.h"
 #include "test_hpdinv.h"
+#include "test_hevd.h"

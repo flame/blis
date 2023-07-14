@@ -186,4 +186,157 @@ void bli_hpdinv_check
 	bli_check_error_code( e_val );
 }
 
+void bli_hevd_check
+     (
+       const obj_t*  a,
+       const obj_t*  v,
+       const obj_t*  e,
+       const cntx_t* cntx
+     )
+{
+	err_t e_val;
+
+	// Check object datatypes.
+
+	e_val = bli_check_floating_object( a );
+	bli_check_error_code( e_val );
+
+	e_val = bli_check_floating_object( v );
+	bli_check_error_code( e_val );
+
+	e_val = bli_check_floating_object( e );
+	bli_check_error_code( e_val );
+
+	e_val = bli_check_real_object( e );
+	bli_check_error_code( e_val );
+
+	e_val = bli_check_consistent_object_datatypes( a, v );
+	bli_check_error_code( e_val );
+
+	e_val = bli_check_object_real_proj_of( v, e );
+	bli_check_error_code( e_val );
+
+	// Check object dimensions.
+
+	e_val = bli_check_matrix_object( a );
+	bli_check_error_code( e_val );
+
+	e_val = bli_check_matrix_object( v );
+	bli_check_error_code( e_val );
+
+	e_val = bli_check_vector_object( e );
+	bli_check_error_code( e_val );
+
+	// Check matrix squareness.
+
+	e_val = bli_check_square_object( a );
+	bli_check_error_code( e_val );
+
+	e_val = bli_check_square_object( v );
+	bli_check_error_code( e_val );
+
+	// Check object dimensions.
+
+	e_val = bli_check_conformal_dims( a, v );
+	bli_check_error_code( e_val );
+
+	e_val = bli_check_vector_dim_equals( e, bli_obj_length( v ) );
+	bli_check_error_code( e_val );
+
+	// Check object structure.
+
+	bool is_herm      = bli_obj_is_hermitian( a );
+	bool is_real_symm = bli_obj_is_symmetric( a ) && bli_obj_is_real( a );
+
+	if ( !is_herm && !is_real_symm )
+	{
+		e_val = BLIS_EXPECTED_HERMITIAN_OBJECT;
+		bli_check_error_code( e_val );
+	}
+
+	// Check object buffers (for non-NULLness).
+
+	e_val = bli_check_object_buffer( a );
+	bli_check_error_code( e_val );
+
+	e_val = bli_check_object_buffer( v );
+	bli_check_error_code( e_val );
+
+	e_val = bli_check_object_buffer( e );
+	bli_check_error_code( e_val );
+}
+
+void bli_rhevd_check
+     (
+       const obj_t*  v,
+       const obj_t*  e,
+       const obj_t*  a,
+       const cntx_t* cntx
+     )
+{
+	bli_hevd_check( a, v, e, cntx );
+}
+
+void bli_hevpinv_check
+     (
+             double  thresh,
+       const obj_t*  a,
+       const obj_t*  p,
+       const cntx_t* cntx
+     )
+{
+	err_t e_val;
+
+	// Check object datatypes.
+
+	e_val = bli_check_floating_object( a );
+	bli_check_error_code( e_val );
+
+	e_val = bli_check_floating_object( p );
+	bli_check_error_code( e_val );
+
+	e_val = bli_check_consistent_object_datatypes( a, p );
+	bli_check_error_code( e_val );
+
+	// Check object dimensions.
+
+	e_val = bli_check_matrix_object( a );
+	bli_check_error_code( e_val );
+
+	e_val = bli_check_matrix_object( p );
+	bli_check_error_code( e_val );
+
+	// Check matrix squareness.
+
+	e_val = bli_check_square_object( a );
+	bli_check_error_code( e_val );
+
+	e_val = bli_check_square_object( p );
+	bli_check_error_code( e_val );
+
+	// Check object dimensions.
+
+	e_val = bli_check_conformal_dims( a, p );
+	bli_check_error_code( e_val );
+
+	// Check object structure.
+
+	bool is_herm      = bli_obj_is_hermitian( a );
+	bool is_real_symm = bli_obj_is_symmetric( a ) && bli_obj_is_real( a );
+
+	if ( !is_herm && !is_real_symm )
+	{
+		e_val = BLIS_EXPECTED_HERMITIAN_OBJECT;
+		bli_check_error_code( e_val );
+	}
+
+	// Check object buffers (for non-NULLness).
+
+	e_val = bli_check_object_buffer( a );
+	bli_check_error_code( e_val );
+
+	e_val = bli_check_object_buffer( p );
+	bli_check_error_code( e_val );
+}
+
 #endif

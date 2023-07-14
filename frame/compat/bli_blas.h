@@ -78,13 +78,23 @@
 #define BLIS_MAX_BLAS_FUNC_STR_LENGTH (7+1)
 
 
-// -- Utility macros --
+#include "bla_lsame.h"
+#include "bla_xerbla.h"
+#include "bla_xerbla_array.h"
+
+// -- Utility prototypes --
+
+#include "bla_a_max.h"  // max() macro that works with any type
+#include "bla_a_min.h"  // min() macro that works with any type
 
 #include "bla_r_sign.h"
 #include "bla_d_sign.h"
 
 #include "bla_r_cnjg.h"
 #include "bla_d_cnjg.h"
+
+#include "bla_r_real.h"
+#include "bla_d_real.h"
 
 #include "bla_r_imag.h"
 #include "bla_d_imag.h"
@@ -98,9 +108,11 @@
 #include "bla_c_abs.h"
 #include "bla_z_abs.h"
 
-#include "bla_lsame.h"
-#include "bla_xerbla.h"
-#include "bla_xerbla_array.h"
+#include "bla_i_len.h"
+#include "bla_nint.h"
+#include "bla_pow.h"
+#include "bla_s_cmp.h"
+#include "bla_s_copy.h"
 
 
 // -- Level-0 BLAS prototypes --
@@ -123,10 +135,14 @@
 #include "bla_scal.h"
 #include "bla_swap.h"
 
+// CBLAS-related wrappers.
 #include "f77_amax_sub.h"
 #include "f77_asum_sub.h"
 #include "f77_dot_sub.h"
 #include "f77_nrm2_sub.h"
+
+// LAPACK-via-f2c-related wrappers.
+#include "f2c_dot.h"
 
 
 // -- Level-2 BLAS prototypes --
@@ -217,6 +233,11 @@
 
 #include "bla_gemm3m.h"
 #include "bla_gemm3m_check.h"
+
+
+// -- "Level-4" (LAPACK) prototypes --
+
+#include "bla_lamch.h"
 
 
 // -- Fortran-compatible APIs to BLIS functions --

@@ -341,6 +341,7 @@ void libblis_test_level4_ops( thread_data_t* tdata, test_params_t* params, test_
 	libblis_test_trinv( tdata, params, &(ops->trinv) );
 	libblis_test_ttmm( tdata, params, &(ops->ttmm) );
 	libblis_test_hpdinv( tdata, params, &(ops->hpdinv) );
+	libblis_test_hevd( tdata, params, &(ops->hevd) );
 }
 
 
@@ -445,6 +446,7 @@ void libblis_test_read_ops_file( char* input_filename, test_ops_t* ops )
 	libblis_test_read_op_info( ops, input_stream, BLIS_NOID,  BLIS_TEST_DIMS_M,   2, &(ops->trinv) );
 	libblis_test_read_op_info( ops, input_stream, BLIS_NOID,  BLIS_TEST_DIMS_M,   1, &(ops->ttmm) );
 	libblis_test_read_op_info( ops, input_stream, BLIS_NOID,  BLIS_TEST_DIMS_M,   1, &(ops->hpdinv) );
+	libblis_test_read_op_info( ops, input_stream, BLIS_NOID,  BLIS_TEST_DIMS_M,   1, &(ops->hevd) );
 
 	// Output the section overrides.
 	libblis_test_output_section_overrides( stdout, ops );

@@ -75,4 +75,64 @@ typedef err_t (*PASTECH2(ch,opname,tsuf)) \
 
 INSERT_GENTDEF( trinv )
 
+// hevd
+
+#undef  GENTDEFR
+#define GENTDEFR( ctype, ctype_r, ch, chr, opname, tsuf ) \
+\
+typedef err_t (*PASTECH3(ch,opname,BLIS_TAPI_EX_SUF,tsuf)) \
+     ( \
+             bool     comp_evecs, \
+             uplo_t   uploa, \
+             dim_t    m, \
+       const ctype*   a, inc_t rs_a, inc_t cs_a, \
+             ctype*   v, inc_t rs_v, inc_t cs_v, \
+             ctype_r* e, inc_t ince, \
+             ctype*   work, \
+             dim_t    lwork, \
+             ctype_r* rwork, \
+       const cntx_t*  cntx, \
+       const rntm_t*  rntm  \
+     );
+
+INSERT_GENTDEFR( hevd )
+
+// rhevd
+
+#undef  GENTDEFR
+#define GENTDEFR( ctype, ctype_r, ch, chr, opname, tsuf ) \
+\
+typedef err_t (*PASTECH3(ch,opname,BLIS_TAPI_EX_SUF,tsuf)) \
+     ( \
+             uplo_t   uploa, \
+             dim_t    m, \
+       const ctype*   v, inc_t rs_v, inc_t cs_v, \
+             ctype_r* e, inc_t ince, \
+             ctype*   a, inc_t rs_a, inc_t cs_a, \
+       const cntx_t*  cntx, \
+       const rntm_t*  rntm  \
+     );
+
+INSERT_GENTDEFR( rhevd )
+
+// hevpinv
+
+#undef  GENTDEFR
+#define GENTDEFR( ctype, ctype_r, ch, chr, opname, tsuf ) \
+\
+typedef err_t (*PASTECH3(ch,opname,BLIS_TAPI_EX_SUF,tsuf)) \
+     ( \
+             double   thresh, \
+             uplo_t   uploa, \
+             dim_t    m, \
+       const ctype*   a, inc_t rs_a, inc_t cs_a, \
+             ctype*   p, inc_t rs_p, inc_t cs_p, \
+       const cntx_t*  cntx, \
+       const rntm_t*  rntm  \
+     );
+
+INSERT_GENTDEFR( hevpinv )
+
+
 #endif
+

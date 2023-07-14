@@ -64,4 +64,28 @@ void bli_hpdinv_check
        const cntx_t* cntx
      );
 
+void bli_hevd_check
+     (
+       const obj_t*  a,
+       const obj_t*  v,
+       const obj_t*  e,
+       const cntx_t* cntx
+     );
+
+void bli_rhevd_check
+     (
+       const obj_t*  v,
+       const obj_t*  e,
+       const obj_t*  a,
+       const cntx_t* cntx
+     );
+
+void bli_hevpinv_check
+     (
+             double  thresh,
+       const obj_t*  a,
+       const obj_t*  p,
+       const cntx_t* cntx
+     );
+
 #endif

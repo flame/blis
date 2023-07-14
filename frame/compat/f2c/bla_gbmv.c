@@ -54,7 +54,7 @@
     bla_integer info;
     bla_scomplex temp;
     bla_integer lenx, leny, i__, j, k;
-    //extern bla_logical PASTEF770(lsame)(bla_character *, bla_character *, ftnlen, ftnlen);
+    //extern bla_logical PASTEF770(bla_lsame)(bla_character *, bla_character *, ftnlen, ftnlen);
     bla_integer ix, iy, jx, jy, kx, ky;
     //extern /* Subroutine */ int PASTEF770(xerbla)(bla_character *, bla_integer *, ftnlen);
     bla_logical noconj;
@@ -203,8 +203,8 @@
 
     /* Function Body */
     info = 0;
-    if (! PASTEF770(lsame)(trans, "N", (ftnlen)1, (ftnlen)1) && ! PASTEF770(lsame)(trans, "T", (
-	    ftnlen)1, (ftnlen)1) && ! PASTEF770(lsame)(trans, "C", (ftnlen)1, (ftnlen)1)
+    if (! PASTEF770(bla_lsame)(trans, "N", (ftnlen)1, (ftnlen)1) && ! PASTEF770(bla_lsame)(trans, "T", (
+	    ftnlen)1, (ftnlen)1) && ! PASTEF770(bla_lsame)(trans, "C", (ftnlen)1, (ftnlen)1)
 	    ) {
 	info = 1;
     } else if (*m < 0) {
@@ -229,17 +229,17 @@
 
 /*     Quick return if possible. */
 
-    if (*m == 0 || *n == 0 || (bli_creal(*alpha) == 0.f && bli_cimag(*alpha) == 0.f && (bli_creal(*beta) 
+    if (*m == 0 || *n == 0 || (bli_creal(*alpha) == 0.f && bli_cimag(*alpha) == 0.f && (bli_creal(*beta)
 	    == 1.f && bli_cimag(*beta) == 0.f))) {
 	return 0;
     }
 
-    noconj = PASTEF770(lsame)(trans, "T", (ftnlen)1, (ftnlen)1);
+    noconj = PASTEF770(bla_lsame)(trans, "T", (ftnlen)1, (ftnlen)1);
 
 /*     Set  LENX  and  LENY, the lengths of the vectors x and y, and set */
 /*     up the start points in  X  and  Y. */
 
-    if (PASTEF770(lsame)(trans, "N", (ftnlen)1, (ftnlen)1)) {
+    if (PASTEF770(bla_lsame)(trans, "N", (ftnlen)1, (ftnlen)1)) {
 	lenx = *n;
 	leny = *m;
     } else {
@@ -308,7 +308,7 @@
 	return 0;
     }
     kup1 = *ku + 1;
-    if (PASTEF770(lsame)(trans, "N", (ftnlen)1, (ftnlen)1)) {
+    if (PASTEF770(bla_lsame)(trans, "N", (ftnlen)1, (ftnlen)1)) {
 
 /*        Form  y := alpha*A*x + y. */
 
@@ -491,7 +491,7 @@
     bla_integer info;
     bla_double temp;
     bla_integer lenx, leny, i__, j, k;
-    //extern bla_logical PASTEF770(lsame)(bla_character *, bla_character *, ftnlen, ftnlen);
+    //extern bla_logical PASTEF770(bla_lsame)(bla_character *, bla_character *, ftnlen, ftnlen);
     bla_integer ix, iy, jx, jy, kx, ky;
     //extern /* Subroutine */ int PASTEF770(xerbla)(bla_character *, bla_integer *, ftnlen);
     bla_integer kup1;
@@ -635,8 +635,8 @@
 
     /* Function Body */
     info = 0;
-    if (! PASTEF770(lsame)(trans, "N", (ftnlen)1, (ftnlen)1) && ! PASTEF770(lsame)(trans, "T", (
-	    ftnlen)1, (ftnlen)1) && ! PASTEF770(lsame)(trans, "C", (ftnlen)1, (ftnlen)1)
+    if (! PASTEF770(bla_lsame)(trans, "N", (ftnlen)1, (ftnlen)1) && ! PASTEF770(bla_lsame)(trans, "T", (
+	    ftnlen)1, (ftnlen)1) && ! PASTEF770(bla_lsame)(trans, "C", (ftnlen)1, (ftnlen)1)
 	    ) {
 	info = 1;
     } else if (*m < 0) {
@@ -668,7 +668,7 @@
 /*     Set  LENX  and  LENY, the lengths of the vectors x and y, and set */
 /*     up the start points in  X  and  Y. */
 
-    if (PASTEF770(lsame)(trans, "N", (ftnlen)1, (ftnlen)1)) {
+    if (PASTEF770(bla_lsame)(trans, "N", (ftnlen)1, (ftnlen)1)) {
 	lenx = *n;
 	leny = *m;
     } else {
@@ -729,7 +729,7 @@
 	return 0;
     }
     kup1 = *ku + 1;
-    if (PASTEF770(lsame)(trans, "N", (ftnlen)1, (ftnlen)1)) {
+    if (PASTEF770(bla_lsame)(trans, "N", (ftnlen)1, (ftnlen)1)) {
 
 /*        Form  y := alpha*A*x + y. */
 
@@ -847,7 +847,7 @@
     bla_integer info;
     bla_real temp;
     bla_integer lenx, leny, i__, j, k;
-    //extern bla_logical PASTEF770(lsame)(bla_character *, bla_character *, ftnlen, ftnlen);
+    //extern bla_logical PASTEF770(bla_lsame)(bla_character *, bla_character *, ftnlen, ftnlen);
     bla_integer ix, iy, jx, jy, kx, ky;
     //extern /* Subroutine */ int PASTEF770(xerbla)(bla_character *, bla_integer *, ftnlen);
     bla_integer kup1;
@@ -991,8 +991,8 @@
 
     /* Function Body */
     info = 0;
-    if (! PASTEF770(lsame)(trans, "N", (ftnlen)1, (ftnlen)1) && ! PASTEF770(lsame)(trans, "T", (
-	    ftnlen)1, (ftnlen)1) && ! PASTEF770(lsame)(trans, "C", (ftnlen)1, (ftnlen)1)
+    if (! PASTEF770(bla_lsame)(trans, "N", (ftnlen)1, (ftnlen)1) && ! PASTEF770(bla_lsame)(trans, "T", (
+	    ftnlen)1, (ftnlen)1) && ! PASTEF770(bla_lsame)(trans, "C", (ftnlen)1, (ftnlen)1)
 	    ) {
 	info = 1;
     } else if (*m < 0) {
@@ -1024,7 +1024,7 @@
 /*     Set  LENX  and  LENY, the lengths of the vectors x and y, and set */
 /*     up the start points in  X  and  Y. */
 
-    if (PASTEF770(lsame)(trans, "N", (ftnlen)1, (ftnlen)1)) {
+    if (PASTEF770(bla_lsame)(trans, "N", (ftnlen)1, (ftnlen)1)) {
 	lenx = *n;
 	leny = *m;
     } else {
@@ -1085,7 +1085,7 @@
 	return 0;
     }
     kup1 = *ku + 1;
-    if (PASTEF770(lsame)(trans, "N", (ftnlen)1, (ftnlen)1)) {
+    if (PASTEF770(bla_lsame)(trans, "N", (ftnlen)1, (ftnlen)1)) {
 
 /*        Form  y := alpha*A*x + y. */
 
@@ -1207,7 +1207,7 @@
     bla_integer info;
     bla_dcomplex temp;
     bla_integer lenx, leny, i__, j, k;
-    //extern bla_logical PASTEF770(lsame)(bla_character *, bla_character *, ftnlen, ftnlen);
+    //extern bla_logical PASTEF770(bla_lsame)(bla_character *, bla_character *, ftnlen, ftnlen);
     bla_integer ix, iy, jx, jy, kx, ky;
     //extern /* Subroutine */ int PASTEF770(xerbla)(bla_character *, bla_integer *, ftnlen);
     bla_logical noconj;
@@ -1356,8 +1356,8 @@
 
     /* Function Body */
     info = 0;
-    if (! PASTEF770(lsame)(trans, "N", (ftnlen)1, (ftnlen)1) && ! PASTEF770(lsame)(trans, "T", (
-	    ftnlen)1, (ftnlen)1) && ! PASTEF770(lsame)(trans, "C", (ftnlen)1, (ftnlen)1)
+    if (! PASTEF770(bla_lsame)(trans, "N", (ftnlen)1, (ftnlen)1) && ! PASTEF770(bla_lsame)(trans, "T", (
+	    ftnlen)1, (ftnlen)1) && ! PASTEF770(bla_lsame)(trans, "C", (ftnlen)1, (ftnlen)1)
 	    ) {
 	info = 1;
     } else if (*m < 0) {
@@ -1382,17 +1382,17 @@
 
 /*     Quick return if possible. */
 
-    if (*m == 0 || *n == 0 || (bli_zreal(*alpha) == 0. && bli_zimag(*alpha) == 0. && (bli_zreal(*beta) == 
+    if (*m == 0 || *n == 0 || (bli_zreal(*alpha) == 0. && bli_zimag(*alpha) == 0. && (bli_zreal(*beta) ==
 	    1. && bli_zimag(*beta) == 0.))) {
 	return 0;
     }
 
-    noconj = PASTEF770(lsame)(trans, "T", (ftnlen)1, (ftnlen)1);
+    noconj = PASTEF770(bla_lsame)(trans, "T", (ftnlen)1, (ftnlen)1);
 
 /*     Set  LENX  and  LENY, the lengths of the vectors x and y, and set */
 /*     up the start points in  X  and  Y. */
 
-    if (PASTEF770(lsame)(trans, "N", (ftnlen)1, (ftnlen)1)) {
+    if (PASTEF770(bla_lsame)(trans, "N", (ftnlen)1, (ftnlen)1)) {
 	lenx = *n;
 	leny = *m;
     } else {
@@ -1461,7 +1461,7 @@
 	return 0;
     }
     kup1 = *ku + 1;
-    if (PASTEF770(lsame)(trans, "N", (ftnlen)1, (ftnlen)1)) {
+    if (PASTEF770(bla_lsame)(trans, "N", (ftnlen)1, (ftnlen)1)) {
 
 /*        Form  y := alpha*A*x + y. */
 
