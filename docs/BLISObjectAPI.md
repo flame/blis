@@ -764,7 +764,7 @@ void bli_axpbyv
        obj_t*  x,
        obj_t*  beta,
        obj_t*  y
-     )
+     );
 ```
 Perform
 ```
@@ -991,7 +991,7 @@ void bli_xpbyv
        obj_t*  x,
        obj_t*  beta,
        obj_t*  y
-     )
+     );
 ```
 Perform
 ```
@@ -2187,7 +2187,7 @@ void bli_getsc
        obj_t*  chi,
        double* zeta_r,
        double* zeta_i
-     )
+     );
 ```
 Copy the real and imaginary values from the scalar object `chi` to `zeta_r` and `zeta_i`. If `chi` is stored as a real type, then `zeta_i` is set to zero. (If `chi` is stored in single precision, the corresponding elements are typecast/promoted during the copy.)
 
