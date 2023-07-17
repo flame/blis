@@ -169,7 +169,7 @@ int main( int argc, char** argv )
 	//bli_obj_apply_trans( trans, &e );
 
 	// Copy 'e' to 'f', transposing 'e' in the process. Notice that we haven't
-	// modified any properties of 'd'. It's the source operand that matters
+	// modified any properties of 'f'. It's the source operand that matters
 	// when marking an operand for transposition, not the destination.
 	bli_copym( &e, &f );
 

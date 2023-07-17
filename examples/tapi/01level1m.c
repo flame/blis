@@ -171,7 +171,7 @@ int main( int argc, char** argv )
 
 
 	// Copy 'e' to 'f', transposing 'e' in the process. Notice that we haven't
-	// modified any properties of 'd'. It's the source operand that matters
+	// modified any properties of 'f'. It's the source operand that matters
 	// when marking an operand for transposition, not the destination.
 	bli_dcopym( 0, BLIS_NONUNIT_DIAG, BLIS_DENSE, BLIS_TRANSPOSE,
 	            n, m, e, rs, cs, f, rsf, csf );
