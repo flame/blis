@@ -34,52 +34,54 @@
 
 #include "blis.h"
 
-#ifdef BLIS_ENABLE_OPENMP
+#ifndef BLIS_ENABLE_MULTITHREADING
 
-void* bli_pack_full_thread_entry( void* data_void ) { return NULL; }
-
-void bli_pack_full_thread_decorator
+err_t bli_l3_compute_thread_decorator
      (
-       pack_full_t   func,
-       const char*   identifier,
-             obj_t*  alpha_obj,
-             obj_t*  src_obj,
-             obj_t*  dest_obj,
-             cntx_t* cntx,
-             rntm_t* rntm
+       l3computeint_t func,
+       opid_t         family,
+       obj_t*         a,
+       obj_t*         b,
+       obj_t*         beta,
+       obj_t*         c,
+       cntx_t*        cntx,
+       rntm_t*        rntm
      )
 {
-    dim_t n_threads = bli_rntm_num_threads( rntm );
+    const dim_t n_threads = 1;
+    array_t* restrict array = bli_sba_checkout_array( n_threads );
+    bli_sba_rntm_set_pool( 0, array, rntm );
+    bli_pba_rntm_set_pba( rntm );
 
-    /* Ensure n_threads is always greater than or equal to 1 */
-    /* Passing BLIS_IC_NT and BLIS_JC_NT for pack can lead to n_threads */
-    /* becoming negative. In that case, packing is done using 1 thread */
-    // n_threads = ( n_threads > 0 ) ? n_threads : 1;
-
-    // Explicitly setting n_threads = 1 to force packing with only a single
-    // thread.
-    n_threads = 1;
-
-    _Pragma( "omp parallel num_threads(n_threads)" )
     {
-        thrinfo_t thread;
-        bli_thrinfo_set_n_way( n_threads, &thread );
-        bli_thrinfo_set_work_id( omp_get_thread_num(), &thread );
+        rntm_t* restrict rntm_p = rntm;
+        const dim_t tid = 0;
 
-        rntm_t           rntm_l = *rntm;
-        rntm_t* restrict rntm_p = &rntm_l;
+        // This optimization allows us to use one of the global thrinfo_t
+        // objects for single-threaded execution rather than grow one from
+        // scratch. The key is that bli_thrinfo_sup_grow(), which is called
+        // from within the variants, will immediately return if it detects
+        // that the thrinfo_t* passed into it is either
+        // &BLIS_GEMM_SINGLE_THREADED or &BLIS_PACKM_SINGLE_THREADED.
+        thrinfo_t* thread = &BLIS_GEMM_SINGLE_THREADED;
+
+        ( void )tid;
 
         func
         (
-         identifier,
-         alpha_obj,
-         src_obj,
-         dest_obj,
-         cntx,
-         rntm_p,
-         &thread
+          a,
+          b,
+          beta,
+          c,
+          cntx,
+          rntm_p,
+          thread
         );
     }
-}
-#endif
 
+    bli_sba_checkin_array( array );
+
+    return BLIS_SUCCESS;
+}
+
+#endif

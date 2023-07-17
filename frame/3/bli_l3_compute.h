@@ -32,54 +32,49 @@
 
 */
 
-#include "blis.h"
+void bli_gemm_compute_init
+(
+  obj_t*  a,
+  obj_t*  b,
+  obj_t*  beta,
+  obj_t*  c,
+  cntx_t* cntx,
+  rntm_t* rntm
+);
 
-#ifdef BLIS_ENABLE_OPENMP
+err_t bli_gemm_compute
+(
+  obj_t*     a,
+  obj_t*     b,
+  obj_t*     beta,
+  obj_t*     c,
+  cntx_t*    cntx,
+  rntm_t*    rntm,
+  thrinfo_t* thread
+);
 
-void* bli_pack_full_thread_entry( void* data_void ) { return NULL; }
+// Prototype BLAS-like interfaces with void pointer operands.
 
-void bli_pack_full_thread_decorator
-     (
-       pack_full_t   func,
-       const char*   identifier,
-             obj_t*  alpha_obj,
-             obj_t*  src_obj,
-             obj_t*  dest_obj,
-             cntx_t* cntx,
-             rntm_t* rntm
-     )
-{
-    dim_t n_threads = bli_rntm_num_threads( rntm );
+#undef GENTPROT
+#define GENTPROT( ctype, ch, varname ) \
+\
+void PASTEMAC( ch, varname ) \
+      ( \
+        bool             packa, \
+        bool             packb, \
+        bool             packeda, \
+        bool             packedb, \
+        dim_t            m, \
+        dim_t            n, \
+        dim_t            k, \
+        void*   restrict a, inc_t rs_a, inc_t cs_a, \
+        void*   restrict b, inc_t rs_b, inc_t cs_b, \
+        void*   restrict beta, \
+        void*   restrict c, inc_t rs_c, inc_t cs_c, \
+        stor3_t          stor_id, \
+        cntx_t* restrict cntx, \
+        rntm_t* restrict rntm, \
+        thrinfo_t* restrict thread \
+      );
 
-    /* Ensure n_threads is always greater than or equal to 1 */
-    /* Passing BLIS_IC_NT and BLIS_JC_NT for pack can lead to n_threads */
-    /* becoming negative. In that case, packing is done using 1 thread */
-    // n_threads = ( n_threads > 0 ) ? n_threads : 1;
-
-    // Explicitly setting n_threads = 1 to force packing with only a single
-    // thread.
-    n_threads = 1;
-
-    _Pragma( "omp parallel num_threads(n_threads)" )
-    {
-        thrinfo_t thread;
-        bli_thrinfo_set_n_way( n_threads, &thread );
-        bli_thrinfo_set_work_id( omp_get_thread_num(), &thread );
-
-        rntm_t           rntm_l = *rntm;
-        rntm_t* restrict rntm_p = &rntm_l;
-
-        func
-        (
-         identifier,
-         alpha_obj,
-         src_obj,
-         dest_obj,
-         cntx,
-         rntm_p,
-         &thread
-        );
-    }
-}
-#endif
-
+INSERT_GENTPROT_BASIC0( gemm_compute )

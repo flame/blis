@@ -2,6 +2,8 @@
 
 target_sources("${PROJECT_NAME}"
     PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/bli_l3_compute_decor_openmp.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/bli_l3_compute_decor_single.c
     ${CMAKE_CURRENT_SOURCE_DIR}/bli_l3_decor_openmp.c
     ${CMAKE_CURRENT_SOURCE_DIR}/bli_l3_decor_pthreads.c
     ${CMAKE_CURRENT_SOURCE_DIR}/bli_l3_decor_single.c

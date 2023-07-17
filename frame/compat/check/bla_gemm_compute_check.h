@@ -32,54 +32,56 @@
 
 */
 
-#include "blis.h"
-
-#ifdef BLIS_ENABLE_OPENMP
-
-void* bli_pack_full_thread_entry( void* data_void ) { return NULL; }
-
-void bli_pack_full_thread_decorator
-     (
-       pack_full_t   func,
-       const char*   identifier,
-             obj_t*  alpha_obj,
-             obj_t*  src_obj,
-             obj_t*  dest_obj,
-             cntx_t* cntx,
-             rntm_t* rntm
-     )
-{
-    dim_t n_threads = bli_rntm_num_threads( rntm );
-
-    /* Ensure n_threads is always greater than or equal to 1 */
-    /* Passing BLIS_IC_NT and BLIS_JC_NT for pack can lead to n_threads */
-    /* becoming negative. In that case, packing is done using 1 thread */
-    // n_threads = ( n_threads > 0 ) ? n_threads : 1;
-
-    // Explicitly setting n_threads = 1 to force packing with only a single
-    // thread.
-    n_threads = 1;
-
-    _Pragma( "omp parallel num_threads(n_threads)" )
-    {
-        thrinfo_t thread;
-        bli_thrinfo_set_n_way( n_threads, &thread );
-        bli_thrinfo_set_work_id( omp_get_thread_num(), &thread );
-
-        rntm_t           rntm_l = *rntm;
-        rntm_t* restrict rntm_p = &rntm_l;
-
-        func
-        (
-         identifier,
-         alpha_obj,
-         src_obj,
-         dest_obj,
-         cntx,
-         rntm_p,
-         &thread
-        );
-    }
+#define bla_gemm_compute_check( dt_str, op_str, transa, transb, m, n, k, lda, ldb, rs_c, cs_c ) \
+{ \
+	f77_int info = 0; \
+	f77_int nota,  notb; \
+	f77_int conja, conjb; \
+	f77_int ta,    tb; \
+	f77_int packa, packb; \
+	f77_int nrowa, nrowb; \
+\
+	nota  = PASTE_LSAME( transa, "N", (ftnlen)1, (ftnlen)1 ); \
+	notb  = PASTE_LSAME( transb, "N", (ftnlen)1, (ftnlen)1 ); \
+	conja = PASTE_LSAME( transa, "C", (ftnlen)1, (ftnlen)1 ); \
+	conjb = PASTE_LSAME( transb, "C", (ftnlen)1, (ftnlen)1 ); \
+	ta    = PASTE_LSAME( transa, "T", (ftnlen)1, (ftnlen)1 ); \
+	tb    = PASTE_LSAME( transb, "T", (ftnlen)1, (ftnlen)1 ); \
+	packa = PASTE_LSAME( transa, "P", (ftnlen)1, (ftnlen)1 ); \
+	packb = PASTE_LSAME( transb, "P", (ftnlen)1, (ftnlen)1 ); \
+\
+	if ( nota || packa ) { nrowa = *m; } \
+	else        { nrowa = *k; } \
+	if ( notb || packb ) { nrowb = *k; } \
+	else        { nrowb = *n; } \
+\
+	if      ( !nota && !conja && !ta && !packa ) \
+		info = 1; \
+	else if ( !notb && !conjb && !tb && !packb ) \
+		info = 2; \
+	else if ( *m < 0 ) \
+		info = 3; \
+	else if ( *n < 0 ) \
+		info = 4; \
+	else if ( *k < 0 ) \
+		info = 5; \
+	else if ( !packa && *lda < bli_max( 1, nrowa ) ) /* lda is ignored when A is packed. */ \
+		info = 7; \
+	else if ( !packb && *ldb < bli_max( 1, nrowb ) ) /* ldb is ignored when B is packed. */ \
+		info = 9; \
+	else if ( ( *rs_c == 1 && *cs_c < bli_max( 1, *m ) ) || ( *cs_c == 1 && *rs_c < bli_max( 1, *n ) ) ) \
+		info = 12; \
+\
+	if ( info != 0 ) \
+	{ \
+		char func_str[ BLIS_MAX_BLAS_FUNC_STR_LENGTH ]; \
+\
+		sprintf( func_str, "%s%-5s", dt_str, op_str ); \
+\
+		bli_string_mkupper( func_str ); \
+\
+		PASTE_XERBLA( func_str, &info, (ftnlen)6 ); \
+\
+		return; \
+	} \
 }
-#endif
-

@@ -33,53 +33,51 @@
 */
 
 #include "blis.h"
+#ifdef BLIS_ENABLE_CBLAS
 
-#ifdef BLIS_ENABLE_OPENMP
+#include "cblas.h"
+#include "cblas_f77.h"
 
-void* bli_pack_full_thread_entry( void* data_void ) { return NULL; }
-
-void bli_pack_full_thread_decorator
-     (
-       pack_full_t   func,
-       const char*   identifier,
-             obj_t*  alpha_obj,
-             obj_t*  src_obj,
-             obj_t*  dest_obj,
-             cntx_t* cntx,
-             rntm_t* rntm
-     )
+f77_int cblas_dgemm_pack_get_size( enum  CBLAS_IDENTIFIER Identifier,
+                                   const f77_int M,
+                                   const f77_int N,
+                                   const f77_int K )
 {
-    dim_t n_threads = bli_rntm_num_threads( rntm );
+    AOCL_DTL_TRACE_ENTRY( AOCL_DTL_LEVEL_TRACE_1 );
 
-    /* Ensure n_threads is always greater than or equal to 1 */
-    /* Passing BLIS_IC_NT and BLIS_JC_NT for pack can lead to n_threads */
-    /* becoming negative. In that case, packing is done using 1 thread */
-    // n_threads = ( n_threads > 0 ) ? n_threads : 1;
+    char ID;
+    f77_int tbytes = 0;
 
-    // Explicitly setting n_threads = 1 to force packing with only a single
-    // thread.
-    n_threads = 1;
-
-    _Pragma( "omp parallel num_threads(n_threads)" )
-    {
-        thrinfo_t thread;
-        bli_thrinfo_set_n_way( n_threads, &thread );
-        bli_thrinfo_set_work_id( omp_get_thread_num(), &thread );
-
-        rntm_t           rntm_l = *rntm;
-        rntm_t* restrict rntm_p = &rntm_l;
-
-        func
-        (
-         identifier,
-         alpha_obj,
-         src_obj,
-         dest_obj,
-         cntx,
-         rntm_p,
-         &thread
-        );
-    }
-}
+#ifdef F77_CHAR
+    F77_CHAR F77_ID;
+#else
+    #define F77_ID &ID
 #endif
 
+#ifdef F77_INT
+    F77_INT F77_M=M, F77_N=N, F77_K=K;
+#else
+    #define F77_M M
+    #define F77_N N
+    #define F77_K K
+#endif
+
+    if      (Identifier == CblasAMatrix ) ID = 'A';
+    else if (Identifier == CblasBMatrix ) ID = 'B';
+    else
+    {
+        cblas_xerbla( 1, "cblas_dgemm_pack_get_size",
+                         "Illegal CBLAS_IDENTIFIER setting, %d\n", Identifier );
+        AOCL_DTL_TRACE_EXIT( AOCL_DTL_LEVEL_TRACE_1 );
+        return 0;
+    }
+
+#ifdef F77_CHAR
+    F77_ID = C2F_CHAR( &ID );
+#endif
+    tbytes = F77_dgemm_pack_get_size ( F77_ID, &F77_M, &F77_N, &F77_K );
+
+    AOCL_DTL_TRACE_EXIT( AOCL_DTL_LEVEL_TRACE_1 );
+    return tbytes;
+}
+#endif

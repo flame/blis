@@ -183,6 +183,7 @@
 #include "bla_trmm.h"
 #include "bla_trsm.h"
 #include "bla_gemmt.h"
+#include "bla_gemm_compute.h"
 
 #include "bla_gemm_check.h"
 #include "bla_hemm_check.h"
@@ -194,6 +195,7 @@
 #include "bla_trmm_check.h"
 #include "bla_trsm_check.h"
 #include "bla_gemmt_check.h"
+#include "bla_gemm_compute_check.h"
 
 // -- Batch Extension prototypes --
 #include "bla_gemm_batch.h"

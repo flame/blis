@@ -202,6 +202,14 @@
 #define F77_cgemm_batch  cgemm_batch
 #define F77_zgemm_batch  zgemm_batch
 
+// -- Pack-Compute APIs --
+#define F77_sgemm_pack_get_size  sgemm_pack_get_size_blis_impl
+#define F77_dgemm_pack_get_size  dgemm_pack_get_size_blis_impl
+#define F77_sgemm_pack  sgemm_pack_blis_impl
+#define F77_dgemm_pack  dgemm_pack_blis_impl
+#define F77_sgemm_compute  sgemm_compute_blis_impl
+#define F77_dgemm_compute  dgemm_compute_blis_impl
+
 // (BLIS_ENABLE_NO_UNDERSCORE_API) ends
 #else
 /*
@@ -389,6 +397,14 @@
 #define F77_dgemm_batch  dgemm_batch_
 #define F77_cgemm_batch  cgemm_batch_
 #define F77_zgemm_batch  zgemm_batch_
+
+// -- Pack-Compute APIs --
+#define F77_sgemm_pack_get_size  sgemm_pack_get_size_blis_impl
+#define F77_dgemm_pack_get_size  dgemm_pack_get_size_blis_impl
+#define F77_sgemm_pack  sgemm_pack_blis_impl
+#define F77_dgemm_pack  dgemm_pack_blis_impl
+#define F77_sgemm_compute  sgemm_compute_blis_impl
+#define F77_dgemm_compute  dgemm_compute_blis_impl
 #endif
 
 #endif /*  CBLAS_F77_H */

@@ -32,54 +32,41 @@
 
 */
 
-#include "blis.h"
+// BLAS Extension APIs
+/* ?gemm_compute.h */
+/* BLAS interface to compute matrix-matrix product  */
+/* Datatype : s & d (single and double precision only supported) */
+/* BLAS Extensions */
+/* output is the gemm result */
 
-#ifdef BLIS_ENABLE_OPENMP
+#undef  GENTPROTRO
+#define GENTPROTRO( ftype, ch, blasname ) \
+\
+IF_BLIS_ENABLE_BLAS(\
+BLIS_EXPORT_BLAS void PASTEF77(ch,blasname) \
+     ( \
+       const f77_char* transa, \
+       const f77_char* transb, \
+       const f77_int*  m, \
+       const f77_int*  n, \
+       const f77_int*  k, \
+       const ftype*   a, const f77_int* lda, \
+       const ftype*   b, const f77_int* ldb, \
+       const ftype*   beta, \
+             ftype*   c, const f77_int* ldc \
+     ); \
+)\
+BLIS_EXPORT_BLAS void PASTEF77S(ch,blasname) \
+     ( \
+       const f77_char* transa, \
+       const f77_char* transb, \
+       const f77_int*  m, \
+       const f77_int*  n, \
+       const f77_int*  k, \
+       const ftype*   a, const f77_int* rs_a, const f77_int* cs_a, \
+       const ftype*   b, const f77_int* rs_b, const f77_int* cs_b, \
+       const ftype*   beta, \
+             ftype*   c, const f77_int* rs_c, const f77_int* cs_c \
+     );
 
-void* bli_pack_full_thread_entry( void* data_void ) { return NULL; }
-
-void bli_pack_full_thread_decorator
-     (
-       pack_full_t   func,
-       const char*   identifier,
-             obj_t*  alpha_obj,
-             obj_t*  src_obj,
-             obj_t*  dest_obj,
-             cntx_t* cntx,
-             rntm_t* rntm
-     )
-{
-    dim_t n_threads = bli_rntm_num_threads( rntm );
-
-    /* Ensure n_threads is always greater than or equal to 1 */
-    /* Passing BLIS_IC_NT and BLIS_JC_NT for pack can lead to n_threads */
-    /* becoming negative. In that case, packing is done using 1 thread */
-    // n_threads = ( n_threads > 0 ) ? n_threads : 1;
-
-    // Explicitly setting n_threads = 1 to force packing with only a single
-    // thread.
-    n_threads = 1;
-
-    _Pragma( "omp parallel num_threads(n_threads)" )
-    {
-        thrinfo_t thread;
-        bli_thrinfo_set_n_way( n_threads, &thread );
-        bli_thrinfo_set_work_id( omp_get_thread_num(), &thread );
-
-        rntm_t           rntm_l = *rntm;
-        rntm_t* restrict rntm_p = &rntm_l;
-
-        func
-        (
-         identifier,
-         alpha_obj,
-         src_obj,
-         dest_obj,
-         cntx,
-         rntm_p,
-         &thread
-        );
-    }
-}
-#endif
-
+INSERT_GENTPROTRO_BLAS( gemm_compute )

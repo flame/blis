@@ -1,4 +1,4 @@
-##Copyright (C) 2022, Advanced Micro Devices, Inc. All rights reserved.##
+##Copyright (C) 2022-23, Advanced Micro Devices, Inc. All rights reserved.##
 
 target_sources("${PROJECT_NAME}"
      PRIVATE
@@ -26,12 +26,13 @@ target_sources("${PROJECT_NAME}"
     ${CMAKE_CURRENT_SOURCE_DIR}/bli_l3_ukr_oapi.c
     ${CMAKE_CURRENT_SOURCE_DIR}/bli_l3_ukr_tapi.c
     ${CMAKE_CURRENT_SOURCE_DIR}/bli_l3_smart_threading.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/bli_l3_compute.c
     )
 # Select AMD specific sources for AMD configurations.
-if(${TARGET_ARCH} STREQUAL zen OR 
-   ${TARGET_ARCH} STREQUAL zen2 OR 
+if(${TARGET_ARCH} STREQUAL zen OR
+   ${TARGET_ARCH} STREQUAL zen2 OR
    ${TARGET_ARCH} STREQUAL zen3 OR
-   ${TARGET_ARCH} STREQUAL zen4 OR 
+   ${TARGET_ARCH} STREQUAL zen4 OR
    ${TARGET_ARCH} STREQUAL amdzen)
     target_sources("${PROJECT_NAME}"
     PRIVATE

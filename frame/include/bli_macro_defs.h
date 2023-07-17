@@ -287,6 +287,8 @@
 #define dgemm_batch_ dgemm_batch
 #define cgemm_batch_ cgemm_batch
 #define zgemm_batch_ zgemm_batch
+#define sgemm_compute_ sgemm_compute
+#define dgemm_compute_ dgemm_compute
 #define saxpby_ saxpby
 #define daxpby_ daxpby
 #define caxpby_ caxpby
@@ -391,6 +393,7 @@
 #define dgbmv                     DGBMV
 #define dgemm                     DGEMM
 #define dgemm_batch               DGEMM_BATCH
+#define dgemm_compute             DGEMM_COMPUTE
 #define dgemmt                    DGEMMT
 #define dgemv                     DGEMV
 #define dger                      DGER
@@ -464,6 +467,7 @@
 #define sgbmv                     SGBMV
 #define sgemm                     SGEMM
 #define sgemm_batch               SGEMM_BATCH
+#define sgemm_compute             SGEMM_COMPUTE
 #define sgemmt                    SGEMMT
 #define sgemv                     SGEMV
 #define sger                      SGER

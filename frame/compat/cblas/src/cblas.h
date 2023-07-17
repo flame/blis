@@ -48,6 +48,8 @@ enum CBLAS_TRANSPOSE {CblasNoTrans=111, CblasTrans=112, CblasConjTrans=113};
 enum CBLAS_UPLO {CblasUpper=121, CblasLower=122};
 enum CBLAS_DIAG {CblasNonUnit=131, CblasUnit=132};
 enum CBLAS_SIDE {CblasLeft=141, CblasRight=142};
+enum CBLAS_STORAGE {CblasPacked=151};
+enum CBLAS_IDENTIFIER {CblasAMatrix=161, CblasBMatrix=162};
 
 #ifdef __cplusplus
 extern "C" {
@@ -992,6 +994,190 @@ BLIS_EXPORT_BLAS f77_int cblas_isamin(f77_int N, const float  *X, f77_int incX);
 BLIS_EXPORT_BLAS f77_int cblas_idamin(f77_int N, const double *X, f77_int incX);
 BLIS_EXPORT_BLAS f77_int cblas_icamin(f77_int N, const void   *X, f77_int incX);
 BLIS_EXPORT_BLAS f77_int cblas_izamin(f77_int N, const void   *X, f77_int incX);
+
+
+// -- PACK COMPUTE APIs --
+/** \addtogroup INTERFACE CBLAS INTERFACE
+ *  @{
+ */
+
+/**
+* cblas_sgemm_pack_get_size calculates and returns the number of bytes necessary
+* to store the specified matrix after packing.
+*
+* @param[in] Identifier Specifies the matrix to be packed. CblasAMatrix or CblasBMatrix.
+* @param[in] M Specifies the number of rows of the matrix Mat(A) and the number of columns of the matrix Mat(B).
+* @param[in] N Specifies the order of the matrix C.
+* @param[in] K Specifies the number of columns of the matrix Mat(A) and the number of rows of the matrix Mat(B).
+* @return The size in bytes required to store the specified matrix after packing.
+*/
+BLIS_EXPORT_BLAS f77_int cblas_sgemm_pack_get_size(enum CBLAS_IDENTIFIER Identifier,
+                const f77_int M, const f77_int N, const f77_int K);
+
+/**
+* cblas_dgemm_pack_get_size calculates and returns the number of bytes necessary
+* to store the specified matrix after packing.
+*
+* @param[in] Identifier Specifies the matrix to be packed. CblasAMatrix or CblasBMatrix.
+* @param[in] M Specifies the number of rows of the matrix Mat(A) and the number of columns of the matrix Mat(B).
+* @param[in] N Specifies the order of the matrix C.
+* @param[in] K Specifies the number of columns of the matrix Mat(A) and the number of rows of the matrix Mat(B).
+* @return The size in bytes required to store the specified matrix after packing.
+*/
+BLIS_EXPORT_BLAS f77_int cblas_dgemm_pack_get_size(enum CBLAS_IDENTIFIER Identifier,
+                const f77_int M, const f77_int N, const f77_int K);
+
+/**
+* cblas_sgemm_pack scales by alpha and packs the specified matrix into the
+* allocated buffer. It is imperative to allocate a buffer of type float and size
+* as returned by the cblas_sgemm_pack_get_size() before invoking this routine.
+*
+* @note If both the matrices are to be packed, the user must ensure that only
+* one matrix is packed with the scalar alpha and the other with a unit-scalar.
+*
+* @param[in] Order Storage scheme of matrices. CblasRowMajor or CblasColMajor.
+* @param[in] Identifier Specifies the matrix to be packed. CblasAMatrix or CblasBMatrix.
+* @param[in] Trans Specifies the form of Mat(X) used in the matrix multiplication:
+* if trans = CblasNoTrans, then Mat(X) = X;
+* if trans = CblasTrans, then Mat(X) = \f$X^T\f$;
+* if trans = CblasConjTrans, then Mat(X) = \f$X^H\f$.
+* @param[in] M Specifies the number of rows of the matrix Mat(A) and the number of columns of the matrix Mat(B).
+* @param[in] N Specifies the order of the matrix C.
+* @param[in] K Specifies the number of columns of the matrix Mat(A) and the number of rows of the matrix Mat(B).
+* @param[in] alpha Specifies the scalar alpha.
+* @param[in] src The matrix to be packed.
+* @param[in] ld Specifies the leading dimension of the matrix to be packed.
+* @param[out] dest The buffer to store the scaled and packed matrix.
+* @return None
+*/
+BLIS_EXPORT_BLAS void cblas_sgemm_pack(enum CBLAS_ORDER Order,
+                 enum CBLAS_IDENTIFIER Identifier, enum CBLAS_TRANSPOSE Trans,
+                 const f77_int M, const f77_int N, const f77_int K,
+                 const float alpha, const float *src, const f77_int ld,
+                 float* dest );
+
+/**
+* cblas_dgemm_pack scales by alpha and packs the specified matrix into the
+* allocated buffer. It is imperative to allocate a buffer of type double and
+* size as returned by the cblas_dgemm_pack_get_size() before invoking this
+* routine.
+*
+* @note If both the matrices are to be packed, the user must ensure that only
+* one matrix is packed with the scalar alpha and the other with a unit-scalar.
+*
+* @param[in] Order Storage scheme of matrices. CblasRowMajor or CblasColMajor.
+* @param[in] Identifier Specifies the matrix to be packed. CblasAMatrix or CblasBMatrix.
+* @param[in] Trans Specifies the form of Mat(X) used in the matrix multiplication:
+* if trans = CblasNoTrans, then Mat(X) = X;
+* if trans = CblasTrans, then Mat(X) = \f$X^T\f$;
+* if trans = CblasConjTrans, then Mat(X) = \f$X^H\f$.
+* @param[in] M Specifies the number of rows of the matrix Mat(A) and the number of columns of the matrix Mat(B).
+* @param[in] N Specifies the order of the matrix C.
+* @param[in] K Specifies the number of columns of the matrix Mat(A) and the number of rows of the matrix Mat(B).
+* @param[in] alpha Specifies the scalar alpha.
+* @param[in] src The matrix to be packed.
+* @param[in] ld Specifies the leading dimension of the matrix to be packed.
+* @param[out] dest The buffer to store the scaled and packed matrix.
+* @return None
+*/
+BLIS_EXPORT_BLAS void cblas_dgemm_pack(enum CBLAS_ORDER Order,
+                 enum CBLAS_IDENTIFIER Identifier, enum CBLAS_TRANSPOSE Trans,
+                 const f77_int M, const f77_int N, const f77_int K,
+                 const double alpha, const double *src, const f77_int ld,
+                 double* dest );
+
+/**
+* cblas_sgemm_compute computes the matrix-matrix product where one or both the
+* input matrices are packed and adds this to the scalar-matrix product. This
+* operation is defined as:
+* C := Mat(A) * Mat(B) + beta*C,
+* where,
+* Mat(X) is one of Mat(X) = X, or Mat(X) = \f$X^T\f$, or Mat(X) = \f$X^H\f$,
+* beta is a scalar,
+* A, B and C are matrices:
+* Mat(A) is an nxk matrix, or a packed matrix buffer,
+* Mat(B) is a kxn matrix, or a packed matrix buffer,
+* C is an mxn matrix.
+*
+* @note In case both the matrices are to be packed, the user must ensure that
+* only one matrix is packed with alpha scalar and the other with a unit-scalar,
+* during the packing process
+*
+* @param[in] Order Storage scheme of matrices. CblasRowMajor or CblasColMajor.
+* @param[in] TransA Specifies the form of Mat(A) used in the matrix multiplication:
+* if transa = CblasNoTrans, then Mat(A) = A;
+* if transa = CblasTrans, then Mat(A) = \f$A^T\f$;
+* if transa = CblasConjTrans, then Mat(A) = \f$A^H\f$;
+* if transa = CblasPacked, then A matrix is packed and lda is ignored.
+* @param[in] TransB Specifies the form of Mat(B) used in the matrix multiplication:
+* if transb = CblasNoTrans, then Mat(B) = B;
+* if transb = CblasTrans, then Mat(B) = \f$B^T\f$;
+* if transb = CblasConjTrans, then Mat(B) = \f$B^H\f$;
+* if transb = CblasPacked, then B matrix is packed and ldb is ignored.
+* @param[in] M Specifies the number of rows of the matrix Mat(A) and the number of columns of the matrix Mat(B).
+* @param[in] N Specifies the order of the matrix C.
+* @param[in] K Specifies the number of columns of the matrix Mat(A) and the number of rows of the matrix Mat(B).
+* @param[in] A  The array is float matrix A or a buffer with packed matrix A.
+* @param[in] lda Specifies the leading dimension of A.
+* @param[in] B The array is float matrix B or a buffer with packed matrix B.
+* @param[in] ldb Specifies the leading dimension of B.
+* @param[in] beta Specifies the scalar beta.
+* @param[in,out] C The array is float matrix C.
+* @param[in] ldc Specifies the leading dimension of C.
+* @return None
+*/
+BLIS_EXPORT_BLAS void cblas_sgemm_compute(enum CBLAS_ORDER Order,
+                 f77_int TransA, f77_int TransB,
+                 const f77_int M, const f77_int N, const f77_int K,
+                 const float* A, f77_int lda, const float* B, f77_int ldb,
+                 float beta, float* C, f77_int ldc);
+
+/**
+* cblas_dgemm_compute computes the matrix-matrix product where one or both the
+* input matrices are packed and adds this to the scalar-matrix product. This
+* operation is defined as:
+* C := Mat(A) * Mat(B) + beta*C,
+* where,
+* Mat(X) is one of Mat(X) = X, or Mat(X) = \f$X^T\f$, or Mat(X) = \f$X^H\f$,
+* beta is a scalar,
+* A, B and C are matrices:
+* Mat(A) is an nxk matrix, or a packed matrix buffer,
+* Mat(B) is a kxn matrix, or a packed matrix buffer,
+* C is an mxn matrix.
+*
+* @note In case both the matrices are to be packed, the user must ensure that
+* only one matrix is packed with alpha scalar and the other with a unit-scalar,
+* during the packing process
+*
+* @param[in] Order Storage scheme of matrices. CblasRowMajor or CblasColMajor.
+* @param[in] TransA Specifies the form of Mat(A) used in the matrix multiplication:
+* if transa = CblasNoTrans, then Mat(A) = A;
+* if transa = CblasTrans, then Mat(A) = \f$A^T\f$;
+* if transa = CblasConjTrans, then Mat(A) = \f$A^H\f$;
+* if transa = CblasPacked, then A matrix is packed and lda is ignored.
+* @param[in] TransB Specifies the form of Mat(B) used in the matrix multiplication:
+* if transb = CblasNoTrans, then Mat(B) = B;
+* if transb = CblasTrans, then Mat(B) = \f$B^T\f$;
+* if transb = CblasConjTrans, then Mat(B) = \f$B^H\f$;
+* if transb = CblasPacked, then B matrix is packed and ldb is ignored.
+* @param[in] M Specifies the number of rows of the matrix Mat(A) and the number of columns of the matrix Mat(B).
+* @param[in] N Specifies the order of the matrix C.
+* @param[in] K Specifies the number of columns of the matrix Mat(A) and the number of rows of the matrix Mat(B).
+* @param[in] A  The array is double matrix A or a buffer with packed matrix A.
+* @param[in] lda Specifies the leading dimension of A.
+* @param[in] B The array is double matrix B or a buffer with packed matrix B.
+* @param[in] ldb Specifies the leading dimension of B.
+* @param[in] beta Specifies the scalar beta.
+* @param[in,out] C The array is double matrix C.
+* @param[in] ldc Specifies the leading dimension of C.
+* @return None
+*/
+BLIS_EXPORT_BLAS void cblas_dgemm_compute(enum CBLAS_ORDER Order,
+                 f77_int TransA, f77_int TransB,
+                 const f77_int M, const f77_int N, const f77_int K,
+                 const double* A, f77_int lda, const double* B, f77_int ldb,
+                 double beta, double* C, f77_int ldc);
+/** @}*/
 
 #ifdef __cplusplus
 }

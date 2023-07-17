@@ -30,11 +30,14 @@ ${CMAKE_CURRENT_SOURCE_DIR}/bla_omatcopy.c
 ${CMAKE_CURRENT_SOURCE_DIR}/bla_imatcopy.c
 ${CMAKE_CURRENT_SOURCE_DIR}/bla_omatcopy2.c
 ${CMAKE_CURRENT_SOURCE_DIR}/bla_omatadd.c
+${CMAKE_CURRENT_SOURCE_DIR}/bla_gemm_pack_get_size.c
+${CMAKE_CURRENT_SOURCE_DIR}/bla_gemm_pack.c
+${CMAKE_CURRENT_SOURCE_DIR}/bla_gemm_compute.c
 	)
 
 # Select AMD specific sources for AMD configurations.
-if(${TARGET_ARCH} STREQUAL zen OR 
-${TARGET_ARCH} STREQUAL zen2 OR 
+if(${TARGET_ARCH} STREQUAL zen OR
+${TARGET_ARCH} STREQUAL zen2 OR
 ${TARGET_ARCH} STREQUAL zen3 OR
 ${TARGET_ARCH} STREQUAL zen4 OR
 ${TARGET_ARCH} STREQUAL amdzen)
@@ -49,8 +52,6 @@ ${TARGET_ARCH} STREQUAL amdzen)
         ${CMAKE_CURRENT_SOURCE_DIR}/bla_scal_amd.c
         ${CMAKE_CURRENT_SOURCE_DIR}/bla_swap_amd.c
         ${CMAKE_CURRENT_SOURCE_DIR}/bla_trsm_amd.c
-        ${CMAKE_CURRENT_SOURCE_DIR}/bla_gemm_pack_get_size.c
-        ${CMAKE_CURRENT_SOURCE_DIR}/bla_gemm_pack.c
         )
 else()
         target_sources("${PROJECT_NAME}"

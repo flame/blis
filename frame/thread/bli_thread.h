@@ -60,6 +60,9 @@
 // Include the pack full thread decorator and related definitions and prototypes
 // for the pack code path.
 #include "bli_pack_full_decor.h"
+// Include the level-3 thread decorator and related definitions and prototypes
+// for the compute code path.
+#include "bli_l3_compute_decor.h"
 
 // Initialization-related prototypes.
 void bli_thread_init( void );

@@ -32,54 +32,13 @@
 
 */
 
-#include "blis.h"
+#ifndef BLIS_L3_SUP_DECOR_OPENMP_H
+#define BLIS_L3_SUP_DECOR_OPENMP_H
 
+// Definitions specific to situations when OpenMP multithreading is enabled.
 #ifdef BLIS_ENABLE_OPENMP
 
-void* bli_pack_full_thread_entry( void* data_void ) { return NULL; }
+#endif
 
-void bli_pack_full_thread_decorator
-     (
-       pack_full_t   func,
-       const char*   identifier,
-             obj_t*  alpha_obj,
-             obj_t*  src_obj,
-             obj_t*  dest_obj,
-             cntx_t* cntx,
-             rntm_t* rntm
-     )
-{
-    dim_t n_threads = bli_rntm_num_threads( rntm );
-
-    /* Ensure n_threads is always greater than or equal to 1 */
-    /* Passing BLIS_IC_NT and BLIS_JC_NT for pack can lead to n_threads */
-    /* becoming negative. In that case, packing is done using 1 thread */
-    // n_threads = ( n_threads > 0 ) ? n_threads : 1;
-
-    // Explicitly setting n_threads = 1 to force packing with only a single
-    // thread.
-    n_threads = 1;
-
-    _Pragma( "omp parallel num_threads(n_threads)" )
-    {
-        thrinfo_t thread;
-        bli_thrinfo_set_n_way( n_threads, &thread );
-        bli_thrinfo_set_work_id( omp_get_thread_num(), &thread );
-
-        rntm_t           rntm_l = *rntm;
-        rntm_t* restrict rntm_p = &rntm_l;
-
-        func
-        (
-         identifier,
-         alpha_obj,
-         src_obj,
-         dest_obj,
-         cntx,
-         rntm_p,
-         &thread
-        );
-    }
-}
 #endif
 
