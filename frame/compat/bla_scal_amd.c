@@ -438,50 +438,20 @@ void zdscal_blis_impl
 {
     AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1)
     AOCL_DTL_LOG_SCAL_INPUTS(AOCL_DTL_LEVEL_TRACE_1, 'Z', (void *) alpha, *n, *incx );
-    dim_t  n_elem;
-    dcomplex* x0;
-    inc_t  incx0;
+    dim_t  n_elem = (dim_t)(*n);
+    dcomplex* x0 = x;
+    inc_t  incx0 = (inc_t)(*incx);
     /* Initialize BLIS. */
     //bli_init_auto();
 
-    /* Convert/typecast negative values of n to zero. */
-    if ( *n < 0 ) n_elem = ( dim_t )0;
-    else          n_elem = ( dim_t )(*n);
-
     /*
-      Return early when n <= 0 or incx <= 0 or alpha == 1.0 - BLAS exception
-      Return early when alpha pointer is NULL - BLIS exception
+        When n is zero or the alpha pointer passed is null
+        or the incx is zero or alpha is 1, return early.
     */
-    if (*n <= 0 || alpha == NULL || bli_deq1(*alpha) || incx <= 0)
+    if ((n_elem <= 0) || (alpha == NULL) || (incx0 <= 0) || PASTEMAC(d, eq1)(*alpha))
     {
-      AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
-      return;
-    }
-
-    /* If the input increments are negative, adjust the pointers so we can
-       use positive increments instead. */
-    if ( *incx < 0 )
-    {
-        /* The semantics of negative stride in BLAS are that the vector
-        operand be traversed in reverse order. (Another way to think
-        of this is that negative strides effectively reverse the order
-        of the vector, but without any explicit data movements.) This
-        is also how BLIS interprets negative strides. The differences
-        is that with BLAS, the caller *always* passes in the 0th (i.e.,
-        top-most or left-most) element of the vector, even when the
-        stride is negative. By contrast, in BLIS, negative strides are
-        used *relative* to the vector address as it is given. Thus, in
-        BLIS, if this backwards traversal is desired, the caller *must*
-        pass in the address to the (n-1)th (i.e., the bottom-most or
-        right-most) element along with a negative stride. */
-
-        x0    = (x) + (n_elem-1)*(-*incx);
-        incx0 = ( inc_t )(*incx);
-    }
-    else
-    {
-        x0    = (x);
-        incx0 = ( inc_t )(*incx);
+        AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
+        return;
     }
 
     dcomplex  alpha_cast;
@@ -500,6 +470,11 @@ void zdscal_blis_impl
     switch (arch_id_local)
     {
       case BLIS_ARCH_ZEN4:
+#if defined(BLIS_KERNELS_ZEN4)
+          // AVX2 Kernel
+          scalv_ker_ptr = bli_zdscalv_zen_int_avx512;
+          break;
+#endif
       case BLIS_ARCH_ZEN:
       case BLIS_ARCH_ZEN2:
       case BLIS_ARCH_ZEN3:

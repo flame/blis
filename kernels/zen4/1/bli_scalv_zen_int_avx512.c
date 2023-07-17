@@ -417,3 +417,150 @@ void bli_dscalv_zen_int_avx512
         x0 += incx;
     }
 }
+
+/*
+    Functionality
+    -------------
+
+    This function scales a double complex vector by an element of the
+    type double.
+
+    x := conjalpha(alpha) * x
+
+    Function Signature
+    -------------------
+
+    * 'conjalpha' - Variable specified if alpha needs to be conjugated
+    * 'n' - Length of the array passed
+    * 'alpha' - Pointer to the element by which the vector is to be scaled
+    * 'x' - Double complex pointer pointing to an array
+    * 'incx' - Stride to point to the next element in the array
+    * 'cntx' - BLIS context object
+
+    Exception
+    ----------
+
+    None
+
+    Deviation from BLAS
+    --------------------
+
+    None
+
+    Undefined behaviour
+    -------------------
+
+    1. The kernel results in undefined behaviour when n <= 0 and incx <= 1. The expectation
+       is that these are standard BLAS exceptions and should be handled in a higher layer.
+*/
+void bli_zdscalv_zen_int_avx512
+     (
+       conj_t           conjalpha,
+       dim_t            n,
+       dcomplex* restrict alpha,
+       dcomplex* restrict x, inc_t incx,
+       cntx_t* restrict cntx
+     )
+{
+    /*
+        This kernel only performs the computation
+        when alpha is double from the BLAS layer
+        alpha is passed as double complex to adhere
+        to function pointer definition in BLIS
+    */
+    const double alphac = (*alpha).real;
+
+    dim_t i = 0;
+
+    double *restrict x0 = (double *)x;
+
+    if (incx == 1)
+    {
+        __m512d alphav, xv[4];
+        const dim_t n_elem_per_reg = 8; // number of elements per register
+
+        alphav = _mm512_set1_pd(alphac);
+
+        for (; (i + 15) < n; i += 16)
+        {
+            xv[0] = _mm512_loadu_pd(x0);
+            xv[1] = _mm512_loadu_pd(x0 + n_elem_per_reg);
+            xv[2] = _mm512_loadu_pd(x0 + 2 * n_elem_per_reg);
+            xv[3] = _mm512_loadu_pd(x0 + 3 * n_elem_per_reg);
+
+            xv[0] = _mm512_mul_pd(alphav, xv[0]);
+            xv[1] = _mm512_mul_pd(alphav, xv[1]);
+            xv[2] = _mm512_mul_pd(alphav, xv[2]);
+            xv[3] = _mm512_mul_pd(alphav, xv[3]);
+
+            _mm512_storeu_pd(x0, xv[0]);
+            _mm512_storeu_pd(x0 + n_elem_per_reg, xv[1]);
+            _mm512_storeu_pd(x0 + 2 * n_elem_per_reg, xv[2]);
+            _mm512_storeu_pd(x0 + 3 * n_elem_per_reg, xv[3]);
+
+            x0 += 4 * n_elem_per_reg;
+        }
+
+        for (; (i + 7) < n; i += 8)
+        {
+            xv[0] = _mm512_loadu_pd(x0);
+            xv[1] = _mm512_loadu_pd(x0 + n_elem_per_reg);
+
+            xv[0] = _mm512_mul_pd(alphav, xv[0]);
+            xv[1] = _mm512_mul_pd(alphav, xv[1]);
+
+            _mm512_storeu_pd(x0, xv[0]);
+            _mm512_storeu_pd(x0 + n_elem_per_reg, xv[1]);
+
+            x0 += 2 * n_elem_per_reg;
+        }
+
+        for (; (i + 3) < n; i += 4)
+        {
+            xv[0] = _mm512_loadu_pd(x0);
+
+            xv[0] = _mm512_mul_pd(alphav, xv[0]);
+
+            _mm512_storeu_pd(x0, xv[0]);
+
+            x0 += n_elem_per_reg;
+        }
+
+        for (; (i + 1) < n; i += 2)
+        {
+            __m256d xv = _mm256_loadu_pd(x0);
+
+            __m256d alphav = _mm256_set1_pd(alphac);
+
+            xv = _mm256_mul_pd(alphav, xv);
+
+            _mm256_storeu_pd(x0, xv);
+
+            x0 += 4;
+        }
+
+        // Issue vzeroupper instruction to clear upper lanes of ymm registers.
+        // This avoids a performance penalty caused by false dependencies when
+        // transitioning from AVX to SSE instructions (which may occur as soon
+        // as the n_left cleanup loop below if BLIS is compiled with
+        // -mfpmath=sse).
+        _mm256_zeroupper();
+    }
+
+    /* In double complex data type the computation of
+    unit stride elements can still be vectorized using SSE*/
+    __m128d alpha_reg, x_vec;
+
+    alpha_reg = _mm_set1_pd((*alpha).real);
+
+    for (; i < n; ++i)
+    {
+        x_vec = _mm_loadu_pd(x0);
+
+        x_vec = _mm_mul_pd(x_vec, alpha_reg);
+
+        _mm_storeu_pd(x0, x_vec);
+
+        x0 += 2 * incx;
+    }
+}
