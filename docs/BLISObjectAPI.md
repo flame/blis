@@ -433,7 +433,7 @@ Return the storage datatype property of `obj`.
 ---
 
 ```c
-dom_t bli_obj_dom( obj_t* obj );
+dom_t bli_obj_domain( obj_t* obj );
 ```
 Return the domain component of the storage datatype property of `obj`.
 
