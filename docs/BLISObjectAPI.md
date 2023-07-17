@@ -85,57 +85,57 @@ The following tables list various types used throughout the BLIS object API.
 
 ### Floating-point types
 
-| BLIS fp type      | Type definition                        | Used to represent...                 |
-|:------------------|:---------------------------------------|:-------------------------------------|
-| `float`           | _N/A_                                  | single-precision real numbers        |
-| `double`          | _N/A_                                  | double-precision real numbers        |
-| `scomplex`        | `struct { float real; float imag; }`   | single-precision complex numbers     |
-| `dcomplex`        | `struct { double real; double imag; }` | double-precision complex numbers     |
+| BLIS fp type      | Type definition                        | Used to represent...              |
+|:------------------|:---------------------------------------|:----------------------------------|
+| `float`           | _N/A_                                  | single-precision real numbers.    |
+| `double`          | _N/A_                                  | double-precision real numbers.    |
+| `scomplex`        | `struct { float real; float imag; }`   | single-precision complex numbers. |
+| `dcomplex`        | `struct { double real; double imag; }` | double-precision complex numbers. |
 
 ### Enumerated parameter types
 
-| `num_t`         | Semantic meaning: Matrix/vector operand...              |
-|:----------------|:--------------------------------------------------------|
-| `BLIS_FLOAT`    | contains single-precision real elements.                |
-| `BLIS_DOUBLE`   | contains double-precision real elements.                |
-| `BLIS_SCOMPLEX` | contains single-precision complex elements.             |
-| `BLIS_DCOMPLEX` | contains double-precision complex elements.             |
-| `BLIS_INT`      | contains integer elements of type `gint_t`.             |
-| `BLIS_CONSTANT` | contains polymorphic representation of a constant value |
+| `num_t`         | Semantic meaning: Matrix/vector operand...               |
+|:----------------|:---------------------------------------------------------|
+| `BLIS_FLOAT`    | contains single-precision real elements.                 |
+| `BLIS_DOUBLE`   | contains double-precision real elements.                 |
+| `BLIS_SCOMPLEX` | contains single-precision complex elements.              |
+| `BLIS_DCOMPLEX` | contains double-precision complex elements.              |
+| `BLIS_INT`      | contains integer elements of type `gint_t`.              |
+| `BLIS_CONSTANT` | contains polymorphic representation of a constant value. |
 
-| `dom_t`         | Semantic meaning: Matrix/vector operand...  |
-|:----------------|:--------------------------------------------|
-| `BLIS_REAL`     | contains real domain elements.              |
-| `BLIS_COMPLEX`  | contains complex domain elements.           |
+| `dom_t`         | Semantic meaning: Matrix/vector operand... |
+|:----------------|:-------------------------------------------|
+| `BLIS_REAL`     | contains real domain elements.             |
+| `BLIS_COMPLEX`  | contains complex domain elements.          |
 
-| `prec_t`           | Semantic meaning: Matrix/vector operand...  |
-|:-------------------|:--------------------------------------------|
-| `BLIS_SINGLE_PREC` | contains single-precision elements.         |
-| `BLIS_DOUBLE_PREC` | contains double-precision elements.         |
+| `prec_t`           | Semantic meaning: Matrix/vector operand... |
+|:-------------------|:-------------------------------------------|
+| `BLIS_SINGLE_PREC` | contains single-precision elements.        |
+| `BLIS_DOUBLE_PREC` | contains double-precision elements.        |
 
-| `trans_t`                | Semantic meaning: Matrix operand ...              |
-|:-------------------------|:--------------------------------------------------|
-| `BLIS_NO_TRANSPOSE`      | will be used as given.                            |
-| `BLIS_TRANSPOSE`         | will be implicitly transposed.                    |
-| `BLIS_CONJ_NO_TRANSPOSE` | will be implicitly conjugated.                    |
-| `BLIS_CONJ_TRANSPOSE`    | will be implicitly transposed _and_ conjugated.   |
+| `trans_t`                | Semantic meaning: Matrix operand ...            |
+|:-------------------------|:------------------------------------------------|
+| `BLIS_NO_TRANSPOSE`      | will be used as given.                          |
+| `BLIS_TRANSPOSE`         | will be implicitly transposed.                  |
+| `BLIS_CONJ_NO_TRANSPOSE` | will be implicitly conjugated.                  |
+| `BLIS_CONJ_TRANSPOSE`    | will be implicitly transposed _and_ conjugated. |
 
-| `conj_t`             | Semantic meaning: Matrix/vector operand...               |
-|:---------------------|:---------------------------------------------------------|
-| `BLIS_NO_CONJUGATE`  | will be used as given.                                   |
-| `BLIS_CONJUGATE`     | will be implicitly conjugated.                           |
+| `conj_t`             | Semantic meaning: Matrix/vector operand... |
+|:---------------------|:-------------------------------------------|
+| `BLIS_NO_CONJUGATE`  | will be used as given.                     |
+| `BLIS_CONJUGATE`     | will be implicitly conjugated.             |
 
-| `side_t`     | Semantic meaning: Matrix operand...                |
-|:-------------|:---------------------------------------------------|
-| `BLIS_LEFT`  | appears on the left.                               |
-| `BLIS_RIGHT` | appears on the right.                              |
+| `side_t`     | Semantic meaning: Matrix operand... |
+|:-------------|:------------------------------------|
+| `BLIS_LEFT`  | appears on the left.                |
+| `BLIS_RIGHT` | appears on the right.               |
 
-| `struc_t`         | Semantic meaning: Matrix operand...                               |
-|:------------------|:------------------------------------------------------------------|
-| `BLIS_GENERAL`    | has no structure.                                                 |
-| `BLIS_HERMITIAN`  | has Hermitian structure.                                          |
-| `BLIS_SYMMETRIC`  | has symmetric structure.                                          |
-| `BLIS_TRIANGULAR` | has triangular structure.                                         |
+| `struc_t`         | Semantic meaning: Matrix operand... |
+|:------------------|:------------------------------------|
+| `BLIS_GENERAL`    | has no structure.                   |
+| `BLIS_HERMITIAN`  | has Hermitian structure.            |
+| `BLIS_SYMMETRIC`  | has symmetric structure.            |
+| `BLIS_TRIANGULAR` | has triangular structure.           |
 
 | `uplo_t`     | Semantic meaning: Matrix operand...                               |
 |:-------------|:------------------------------------------------------------------|
