@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2020-21, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2020-23, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -1086,6 +1086,110 @@ void bli_cntx_set_l3_sup_blkszs( dim_t n_bs, ... )
 
 // -----------------------------------------------------------------------------
 
+void bli_cntx_set_l3_sup_tri_blkszs( dim_t n_bs, ... )
+{
+	// This function can be called from the bli_cntx_init_*() function for
+	// a particular architecture if the kernel developer wishes to use
+	// non-default l3 sup blocksizes for operations that deal with triangular
+	// matrices. It should be called after bli_cntx_init_defaults() so that 
+	// the context begins with default blocksizes across all datatypes.
+
+	/* Example prototypes:
+
+	   void bli_cntx_set_blkszs
+	   (
+	     dim_t   n_bs,
+	     bszid_t bs0_id, blksz_t* blksz0,
+	     bszid_t bs1_id, blksz_t* blksz1,
+	     bszid_t bs2_id, blksz_t* blksz2,
+	     ...
+	     cntx_t* cntx
+	   );
+	*/
+
+	va_list   args;
+	dim_t     i;
+
+	// Allocate some temporary local arrays.
+	#ifdef BLIS_ENABLE_MEM_TRACING
+	printf( "bli_cntx_set_blkszs(): " );
+	#endif
+	bszid_t* bszids = bli_malloc_intl( n_bs * sizeof( bszid_t  ) );
+
+	#ifdef BLIS_ENABLE_MEM_TRACING
+	printf( "bli_cntx_set_blkszs(): " );
+	#endif
+	blksz_t** blkszs = bli_malloc_intl( n_bs * sizeof( blksz_t* ) );
+
+	// -- Begin variable argument section --
+
+	// Initialize variable argument environment.
+	va_start( args, n_bs );
+
+	// Process n_bs tuples.
+	for ( i = 0; i < n_bs; ++i )
+	{
+		// Here, we query the variable argument list for:
+		// - the bszid_t of the blocksize we're about to process,
+		// - the address of the blksz_t object.
+		bszid_t  bs_id = ( bszid_t  )va_arg( args, bszid_t  );
+		blksz_t* blksz = ( blksz_t* )va_arg( args, blksz_t* );
+
+		// Store the values in our temporary arrays.
+		bszids[ i ] = bs_id;
+		blkszs[ i ] = blksz;
+	}
+
+	// The last argument should be the context pointer.
+	cntx_t* cntx = ( cntx_t* )va_arg( args, cntx_t* );
+
+	// Shutdown variable argument environment and clean up stack.
+	va_end( args );
+
+	// -- End variable argument section --
+
+	// Query the context for the addresses of:
+	// - the blocksize object array
+	blksz_t* cntx_l3_sup_tri_blkszs = bli_cntx_l3_sup_tri_blkszs_buf( cntx );
+
+	// Now that we have the context address, we want to copy the values
+	// from the temporary buffers into the corresponding buffers in the
+	// context. Notice that the blksz_t* pointers were saved, rather than
+	// the objects themselves, but we copy the contents of the objects
+	// when copying into the context.
+
+	// Process each blocksize id tuple provided.
+	for ( i = 0; i < n_bs; ++i )
+	{
+		// Read the current blocksize id, blksz_t* pointer, blocksize
+		// multiple id, and blocksize scalar.
+		bszid_t  bs_id = bszids[ i ];
+		blksz_t* blksz = blkszs[ i ];
+
+		blksz_t* cntx_l3_sup_tri_blksz = &cntx_l3_sup_tri_blkszs[ bs_id ];
+
+		// Copy the blksz_t object contents into the appropriate
+		// location within the context's blksz_t array.
+		//cntx_l3_sup_blkszs[ bs_id ] = *blksz;
+		//bli_blksz_copy( blksz, cntx_l3_sup_blksz );
+		bli_blksz_copy_if_pos( blksz, cntx_l3_sup_tri_blksz );
+	}
+
+	// Free the temporary local arrays.
+
+	#ifdef BLIS_ENABLE_MEM_TRACING
+	printf( "bli_cntx_set_blkszs(): " );
+	#endif
+	bli_free_intl( blkszs );
+
+	#ifdef BLIS_ENABLE_MEM_TRACING
+	printf( "bli_cntx_set_blkszs(): " );
+	#endif
+	bli_free_intl( bszids );
+}
+
+// -----------------------------------------------------------------------------
+
 void bli_cntx_set_l3_sup_kers( dim_t n_ukrs, ... )
 {
 	// This function can be called from the bli_cntx_init_*() function for
@@ -1258,6 +1362,139 @@ void bli_cntx_set_l3_sup_kers( dim_t n_ukrs, ... )
 
 	#ifdef BLIS_ENABLE_MEM_TRACING
 	printf( "bli_cntx_set_l3_sup_kers(): " );
+	#endif
+	bli_free_intl( ukr_prefs );
+}
+
+// -----------------------------------------------------------------------------
+
+void bli_cntx_set_l3_sup_tri_kers( dim_t n_ukrs, ... )
+{
+	// This function can be called from the bli_cntx_init_*() function for
+	// a particular architecture if the kernel developer wishes to use
+	// non-default level-3 microkernels for small/unpacked matrices for operations
+	// that deal with triangular matrices. It should be called after 
+	// bli_cntx_init_defaults() so that the context begins with default sup 
+	// micro/millikernels across all datatypes.
+
+	/* Example prototypes:
+
+	   void bli_cntx_set_l3_sup_kers
+	   (
+	     dim_t   n_ukrs,
+	     stor3_t stor_id0, num_t dt0, void* ukr0_fp, bool pref0,
+	     stor3_t stor_id1, num_t dt1, void* ukr1_fp, bool pref1,
+	     stor3_t stor_id2, num_t dt2, void* ukr2_fp, bool pref2,
+	     ...
+	     cntx_t* cntx
+	   );
+	*/
+
+	va_list   args;
+	dim_t     i;
+
+	// Allocate some temporary local arrays.
+
+	#ifdef BLIS_ENABLE_MEM_TRACING
+	printf( "bli_cntx_set_l3_sup_tri_kers(): " );
+	#endif
+	stor3_t* st3_ids   = bli_malloc_intl( n_ukrs * sizeof( stor3_t ) );
+
+	#ifdef BLIS_ENABLE_MEM_TRACING
+	printf( "bli_cntx_set_l3_sup_tri_kers(): " );
+	#endif
+	num_t*   ukr_dts   = bli_malloc_intl( n_ukrs * sizeof( num_t   ) );
+
+	#ifdef BLIS_ENABLE_MEM_TRACING
+	printf( "bli_cntx_set_l3_sup_tri_kers(): " );
+	#endif
+	void**   ukr_fps   = bli_malloc_intl( n_ukrs * sizeof( void*   ) );
+
+	#ifdef BLIS_ENABLE_MEM_TRACING
+	printf( "bli_cntx_set_l3_sup_tri_kers(): " );
+	#endif
+	bool*    ukr_prefs = bli_malloc_intl( n_ukrs * sizeof( bool    ) );
+
+	// -- Begin variable argument section --
+
+	// Initialize variable argument environment.
+	va_start( args, n_ukrs );
+
+	// Process n_ukrs tuples.
+	for ( i = 0; i < n_ukrs; ++i )
+	{
+		// Here, we query the variable argument list for:
+		// - the stor3_t storage case being assigned to the kernel we're
+		//   about to process,
+		// - the datatype of the kernel,
+		// - the kernel function pointer, and
+		// - the kernel function storage preference
+		// that we need to store to the context.
+		const stor3_t  st3_id   = ( stor3_t )va_arg( args, stor3_t );
+		const num_t    ukr_dt   = ( num_t   )va_arg( args, num_t   );
+		      void*    ukr_fp   = ( void*   )va_arg( args, void*   );
+		const bool     ukr_pref = ( bool    )va_arg( args, int     );
+
+		// Store the values in our temporary arrays.
+		st3_ids[ i ]   = st3_id;
+		ukr_dts[ i ]   = ukr_dt;
+		ukr_fps[ i ]   = ukr_fp;
+		ukr_prefs[ i ] = ukr_pref;
+	}
+
+	// The last argument should be the context pointer.
+	cntx_t* cntx = ( cntx_t* )va_arg( args, cntx_t* );
+
+	// Shutdown variable argument environment and clean up stack.
+	va_end( args );
+
+	// -- End variable argument section --
+
+	// Query the context for the addresses of:
+	// - the l3 small/unpacked ukernel func_t array
+	// - the l3 small/unpacked ukernel preferences array
+	func_t*  cntx_l3_sup_tri_kers       = bli_cntx_l3_sup_tri_kers_buf( cntx );
+	mbool_t* cntx_l3_sup_tri_kers_prefs = bli_cntx_l3_sup_tri_kers_prefs_buf( cntx );
+
+	// Process each blocksize id tuple provided.
+	for ( i = 0; i < n_ukrs; ++i )
+	{
+		// Read the current stor3_t id, ukernel datatype, ukernel function
+		// pointer, and ukernel preference.
+		const stor3_t st3_id   = st3_ids[ i ];
+		const num_t   ukr_dt   = ukr_dts[ i ];
+		      void*   ukr_fp   = ukr_fps[ i ];
+		const bool    ukr_pref = ukr_prefs[ i ];
+
+		// Index to the func_t and mbool_t for the current stor3_t id
+		// being processed.
+		func_t*  ukrs   = &cntx_l3_sup_tri_kers[ st3_id ];
+		mbool_t* prefs  = &cntx_l3_sup_tri_kers_prefs[ st3_id ];
+
+		// Store the ukernel function pointer and preference values into
+		// the stor3_t location in the context.
+		bli_func_set_dt( ukr_fp, ukr_dt, ukrs );
+		bli_mbool_set_dt( ukr_pref, ukr_dt, prefs );
+	}
+
+	// Free the temporary local arrays.
+	#ifdef BLIS_ENABLE_MEM_TRACING
+	printf( "bli_cntx_set_l3_sup_tri_kers(): " );
+	#endif
+	bli_free_intl( st3_ids );
+
+	#ifdef BLIS_ENABLE_MEM_TRACING
+	printf( "bli_cntx_set_l3_sup_tri_kers(): " );
+	#endif
+	bli_free_intl( ukr_dts );
+
+	#ifdef BLIS_ENABLE_MEM_TRACING
+	printf( "bli_cntx_set_l3_sup_tri_kers(): " );
+	#endif
+	bli_free_intl( ukr_fps );
+
+	#ifdef BLIS_ENABLE_MEM_TRACING
+	printf( "bli_cntx_set_l3_sup_tri_kers(): " );
 	#endif
 	bli_free_intl( ukr_prefs );
 }

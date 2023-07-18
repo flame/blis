@@ -364,11 +364,31 @@ void PASTEMACT(ch,opname,uplo,varname) \
 	stor_id = bli_stor3_trans( stor_id ); \
 \
 	/* Query the context for various blocksizes. */ \
-	const dim_t NR  = bli_cntx_get_l3_sup_blksz_def_dt( dt, BLIS_NR, cntx ); \
-	const dim_t MR  = bli_cntx_get_l3_sup_blksz_def_dt( dt, BLIS_MR, cntx ); \
-	const dim_t NC0 = bli_cntx_get_l3_sup_blksz_def_dt( dt, BLIS_NC, cntx ); \
-	const dim_t MC0 = bli_cntx_get_l3_sup_blksz_def_dt( dt, BLIS_MC, cntx ); \
-	const dim_t KC0 = bli_cntx_get_l3_sup_blksz_def_dt( dt, BLIS_KC, cntx ); \
+	dim_t NR  = bli_cntx_get_l3_sup_tri_blksz_def_dt( dt, BLIS_NR, cntx ); \
+	dim_t MR  = bli_cntx_get_l3_sup_tri_blksz_def_dt( dt, BLIS_MR, cntx ); \
+	dim_t NC0 = bli_cntx_get_l3_sup_tri_blksz_def_dt( dt, BLIS_NC, cntx ); \
+	dim_t MC0 = bli_cntx_get_l3_sup_tri_blksz_def_dt( dt, BLIS_MC, cntx ); \
+	dim_t KC0 = bli_cntx_get_l3_sup_tri_blksz_def_dt( dt, BLIS_KC, cntx ); \
+	/* Query the maximum blocksize for MR, which implies a maximum blocksize
+	extension for the final iteration. */ \
+	dim_t MRM = bli_cntx_get_l3_sup_tri_blksz_max_dt( dt, BLIS_MR, cntx ); \
+\
+	/* Query the context for the sup microkernel address and cast it to its
+	   function pointer type. */ \
+	PASTECH(ch,gemmsup_ker_ft) \
+               gemmsup_ker = bli_cntx_get_l3_sup_tri_ker_dt( dt, stor_id, cntx ); \
+\
+	if( ( 0 == NR ) || ( 0 == MR )  || ( 0 == NC0 ) || ( 0 == MC0 ) || ( 0 == KC0 ) ) \
+	{ \
+		NR = bli_cntx_get_l3_sup_blksz_def_dt( dt, BLIS_NR, cntx ); \
+		MR  = bli_cntx_get_l3_sup_blksz_def_dt( dt, BLIS_MR, cntx ); \
+		NC0 = bli_cntx_get_l3_sup_blksz_def_dt( dt, BLIS_NC, cntx ); \
+		MC0 = bli_cntx_get_l3_sup_blksz_def_dt( dt, BLIS_MC, cntx ); \
+		KC0 = bli_cntx_get_l3_sup_blksz_def_dt( dt, BLIS_KC, cntx ); \
+		MRM = bli_cntx_get_l3_sup_blksz_max_dt( dt, BLIS_MR, cntx ); \
+		gemmsup_ker = bli_cntx_get_l3_sup_ker_dt( dt, stor_id, cntx ); \
+	} \
+	const dim_t MRE = MRM - MR; \
 \
 	dim_t KC; \
 	if      ( packa && packb ) \
@@ -413,11 +433,6 @@ void PASTEMACT(ch,opname,uplo,varname) \
 	const dim_t NC  = bli_align_dim_to_mult( NC0, MR ); \
 	const dim_t MC  = bli_align_dim_to_mult( MC0, NR ); \
 \
-	/* Query the maximum blocksize for MR, which implies a maximum blocksize
-	   extension for the final iteration. */ \
-	const dim_t MRM = bli_cntx_get_l3_sup_blksz_max_dt( dt, BLIS_MR, cntx ); \
-	const dim_t MRE = MRM - MR; \
-\
 	/* Compute partitioning step values for each matrix of each loop. */ \
 	const inc_t jcstep_c = rs_c; \
 	const inc_t jcstep_a = rs_a; \
@@ -436,11 +451,6 @@ void PASTEMACT(ch,opname,uplo,varname) \
 	const inc_t irstep_c = cs_c * NR; \
 	const inc_t irstep_b = cs_b * NR; \
 	*/ \
-\
-	/* Query the context for the sup microkernel address and cast it to its
-	   function pointer type. */ \
-	PASTECH(ch,gemmsup_ker_ft) \
-               gemmsup_ker = bli_cntx_get_l3_sup_ker_dt( dt, stor_id, cntx ); \
 \
 	ctype* restrict a_00       = a; \
 	ctype* restrict b_00       = b; \
@@ -838,11 +848,31 @@ void PASTEMACT(ch,opname,uplo,varname) \
 	stor_id = bli_stor3_trans( stor_id ); \
 \
 	/* Query the context for various blocksizes. */ \
-	const dim_t NR  = bli_cntx_get_l3_sup_blksz_def_dt( dt, BLIS_NR, cntx ); \
-	const dim_t MR  = bli_cntx_get_l3_sup_blksz_def_dt( dt, BLIS_MR, cntx ); \
-	const dim_t NC0 = bli_cntx_get_l3_sup_blksz_def_dt( dt, BLIS_NC, cntx ); \
-	const dim_t MC0 = bli_cntx_get_l3_sup_blksz_def_dt( dt, BLIS_MC, cntx ); \
-	const dim_t KC0 = bli_cntx_get_l3_sup_blksz_def_dt( dt, BLIS_KC, cntx ); \
+	dim_t NR  = bli_cntx_get_l3_sup_tri_blksz_def_dt( dt, BLIS_NR, cntx ); \
+	dim_t MR  = bli_cntx_get_l3_sup_tri_blksz_def_dt( dt, BLIS_MR, cntx ); \
+	dim_t NC0 = bli_cntx_get_l3_sup_tri_blksz_def_dt( dt, BLIS_NC, cntx ); \
+	dim_t MC0 = bli_cntx_get_l3_sup_tri_blksz_def_dt( dt, BLIS_MC, cntx ); \
+	dim_t KC0 = bli_cntx_get_l3_sup_tri_blksz_def_dt( dt, BLIS_KC, cntx ); \
+\
+	/* Query the maximum blocksize for MR, which implies a maximum blocksize
+	extension for the final iteration. */ \
+	dim_t MRM = bli_cntx_get_l3_sup_tri_blksz_max_dt( dt, BLIS_MR, cntx ); \
+	/* Query the context for the sup microkernel address and cast it to its
+	   function pointer type. */ \
+	PASTECH(ch,gemmsup_ker_ft) \
+               gemmsup_ker = bli_cntx_get_l3_sup_tri_ker_dt( dt, stor_id, cntx ); \
+\
+	if( ( 0 == NR ) || ( 0 == MR ) || ( 0 == NC0 ) || ( 0 == MC0 ) || ( 0 == KC0 ) ) \
+	{ \
+		NR = bli_cntx_get_l3_sup_blksz_def_dt( dt, BLIS_NR, cntx ); \
+		MR  = bli_cntx_get_l3_sup_blksz_def_dt( dt, BLIS_MR, cntx ); \
+		NC0 = bli_cntx_get_l3_sup_blksz_def_dt( dt, BLIS_NC, cntx ); \
+		MC0 = bli_cntx_get_l3_sup_blksz_def_dt( dt, BLIS_MC, cntx ); \
+		KC0 = bli_cntx_get_l3_sup_blksz_def_dt( dt, BLIS_KC, cntx ); \
+		MRM = bli_cntx_get_l3_sup_blksz_max_dt( dt, BLIS_MR, cntx ); \
+		gemmsup_ker = bli_cntx_get_l3_sup_ker_dt( dt, stor_id, cntx ); \
+	} \
+	const dim_t MRE = MRM - MR; \
 \
 	dim_t KC; \
 	if      ( packa && packb ) \
@@ -887,11 +917,6 @@ void PASTEMACT(ch,opname,uplo,varname) \
 	const dim_t NC  = bli_align_dim_to_mult( NC0, MR ); \
 	const dim_t MC  = bli_align_dim_to_mult( MC0, NR ); \
 \
-	/* Query the maximum blocksize for MR, which implies a maximum blocksize
-	   extension for the final iteration. */ \
-	const dim_t MRM = bli_cntx_get_l3_sup_blksz_max_dt( dt, BLIS_MR, cntx ); \
-	const dim_t MRE = MRM - MR; \
-\
 	/* Compute partitioning step values for each matrix of each loop. */ \
 	const inc_t jcstep_c = rs_c; \
 	const inc_t jcstep_a = rs_a; \
@@ -910,11 +935,6 @@ void PASTEMACT(ch,opname,uplo,varname) \
 	const inc_t irstep_c = cs_c * NR; \
 	const inc_t irstep_b = cs_b * NR; \
 	*/ \
-\
-	/* Query the context for the sup microkernel address and cast it to its
-	   function pointer type. */ \
-	PASTECH(ch,gemmsup_ker_ft) \
-               gemmsup_ker = bli_cntx_get_l3_sup_ker_dt( dt, stor_id, cntx ); \
 \
 	ctype* restrict a_00       = a; \
 	ctype* restrict b_00       = b; \
@@ -1487,11 +1507,31 @@ void PASTEMACT(ch,opname,uplo,varname) \
 	} \
 \
 	/* Query the context for various blocksizes. */ \
-	const dim_t NR  = bli_cntx_get_l3_sup_blksz_def_dt( dt, BLIS_NR, cntx ); \
-	const dim_t MR  = bli_cntx_get_l3_sup_blksz_def_dt( dt, BLIS_MR, cntx ); \
-	const dim_t NC  = bli_cntx_get_l3_sup_blksz_def_dt( dt, BLIS_NC, cntx ); \
-	const dim_t MC  = bli_cntx_get_l3_sup_blksz_def_dt( dt, BLIS_MC, cntx ); \
-	const dim_t KC0 = bli_cntx_get_l3_sup_blksz_def_dt( dt, BLIS_KC, cntx ); \
+	dim_t NR  = bli_cntx_get_l3_sup_tri_blksz_def_dt( dt, BLIS_NR, cntx ); \
+	dim_t MR  = bli_cntx_get_l3_sup_tri_blksz_def_dt( dt, BLIS_MR, cntx ); \
+	dim_t NC  = bli_cntx_get_l3_sup_tri_blksz_def_dt( dt, BLIS_NC, cntx ); \
+	dim_t MC  = bli_cntx_get_l3_sup_tri_blksz_def_dt( dt, BLIS_MC, cntx ); \
+	dim_t KC0 = bli_cntx_get_l3_sup_tri_blksz_def_dt( dt, BLIS_KC, cntx ); \
+	/* Query the maximum blocksize for NR, which implies a maximum blocksize
+	   extension for the final iteration. */ \
+	dim_t NRM = bli_cntx_get_l3_sup_tri_blksz_max_dt( dt, BLIS_NR, cntx ); \
+\
+	/* Query the context for the sup microkernel address and cast it to its
+	   function pointer type. */ \
+	PASTECH(ch,gemmsup_ker_ft) \
+               gemmsup_ker = bli_cntx_get_l3_sup_tri_ker_dt( dt, stor_id, cntx ); \
+\
+	if( ( 0 == NR ) || ( 0 == MR ) || ( 0 == NC ) || ( 0 == MC ) || ( 0 == KC0 ) ) \
+	{ \
+		NR = bli_cntx_get_l3_sup_blksz_def_dt( dt, BLIS_NR, cntx ); \
+		MR  = bli_cntx_get_l3_sup_blksz_def_dt( dt, BLIS_MR, cntx ); \
+		NC = bli_cntx_get_l3_sup_blksz_def_dt( dt, BLIS_NC, cntx ); \
+		MC = bli_cntx_get_l3_sup_blksz_def_dt( dt, BLIS_MC, cntx ); \
+		KC0 = bli_cntx_get_l3_sup_blksz_def_dt( dt, BLIS_KC, cntx ); \
+		NRM = bli_cntx_get_l3_sup_blksz_max_dt( dt, BLIS_NR, cntx ); \
+		gemmsup_ker = bli_cntx_get_l3_sup_ker_dt( dt, stor_id, cntx ); \
+	} \
+	const dim_t NRE = NRM - NR; \
 \
 	dim_t KC; \
 	if      ( packa && packb ) \
@@ -1531,11 +1571,6 @@ void PASTEMACT(ch,opname,uplo,varname) \
 		else                               KC = (( KC0 / 5 ) / 4 ) * 4; \
 	} \
 \
-	/* Query the maximum blocksize for NR, which implies a maximum blocksize
-	   extension for the final iteration. */ \
-	const dim_t NRM = bli_cntx_get_l3_sup_blksz_max_dt( dt, BLIS_NR, cntx ); \
-	const dim_t NRE = NRM - NR; \
-\
 	/* Compute partitioning step values for each matrix of each loop. */ \
 	const inc_t jcstep_c = cs_c; \
 	const inc_t jcstep_b = cs_b; \
@@ -1558,10 +1593,6 @@ void PASTEMACT(ch,opname,uplo,varname) \
 	const inc_t irstep_a = rs_a * MR; \
 	*/ \
 \
-	/* Query the context for the sup microkernel address and cast it to its
-	   function pointer type. */ \
-	PASTECH(ch,gemmsup_ker_ft) \
-               gemmsup_ker = bli_cntx_get_l3_sup_ker_dt( dt, stor_id, cntx ); \
 	ctype ct[ BLIS_STACK_BUF_MAX_SIZE / sizeof( ctype ) ]  __attribute__((aligned(BLIS_STACK_BUF_ALIGN_SIZE))); \
 \
 	/* storage-scheme of ct should be same as that of C.
@@ -2143,11 +2174,32 @@ void PASTEMACT(ch,opname,uplo,varname) \
 	} \
 \
 	/* Query the context for various blocksizes. */ \
-	const dim_t NR  = bli_cntx_get_l3_sup_blksz_def_dt( dt, BLIS_NR, cntx ); \
-	const dim_t MR  = bli_cntx_get_l3_sup_blksz_def_dt( dt, BLIS_MR, cntx ); \
-	const dim_t NC  = bli_cntx_get_l3_sup_blksz_def_dt( dt, BLIS_NC, cntx ); \
-	const dim_t MC  = bli_cntx_get_l3_sup_blksz_def_dt( dt, BLIS_MC, cntx ); \
-	const dim_t KC0 = bli_cntx_get_l3_sup_blksz_def_dt( dt, BLIS_KC, cntx ); \
+	dim_t NR  = bli_cntx_get_l3_sup_tri_blksz_def_dt( dt, BLIS_NR, cntx ); \
+	dim_t MR  = bli_cntx_get_l3_sup_tri_blksz_def_dt( dt, BLIS_MR, cntx ); \
+	dim_t NC  = bli_cntx_get_l3_sup_tri_blksz_def_dt( dt, BLIS_NC, cntx ); \
+	dim_t MC  = bli_cntx_get_l3_sup_tri_blksz_def_dt( dt, BLIS_MC, cntx ); \
+	dim_t KC0 = bli_cntx_get_l3_sup_tri_blksz_def_dt( dt, BLIS_KC, cntx ); \
+\
+	/* Query the maximum blocksize for NR, which implies a maximum blocksize
+	   extension for the final iteration. */ \
+	dim_t NRM = bli_cntx_get_l3_sup_tri_blksz_max_dt( dt, BLIS_NR, cntx ); \
+\
+	/* Query the context for the sup microkernel address and cast it to its
+	   function pointer type. */ \
+	PASTECH(ch,gemmsup_ker_ft) \
+               gemmsup_ker = bli_cntx_get_l3_sup_tri_ker_dt( dt, stor_id, cntx ); \
+\
+	if( ( 0 == NR ) || ( 0 == MR ) || ( 0 == NC ) || ( 0 == MC ) || ( 0 == KC0 ) ) \
+	{ \
+		NR = bli_cntx_get_l3_sup_blksz_def_dt( dt, BLIS_NR, cntx ); \
+		MR  = bli_cntx_get_l3_sup_blksz_def_dt( dt, BLIS_MR, cntx ); \
+		NC = bli_cntx_get_l3_sup_blksz_def_dt( dt, BLIS_NC, cntx ); \
+		MC = bli_cntx_get_l3_sup_blksz_def_dt( dt, BLIS_MC, cntx ); \
+		KC0 = bli_cntx_get_l3_sup_blksz_def_dt( dt, BLIS_KC, cntx ); \
+		NRM = bli_cntx_get_l3_sup_blksz_max_dt( dt, BLIS_NR, cntx ); \
+		gemmsup_ker = bli_cntx_get_l3_sup_ker_dt( dt, stor_id, cntx ); \
+	} \
+	const dim_t NRE = NRM - NR; \
 \
 	dim_t KC; \
 	if      ( packa && packb ) \
@@ -2194,11 +2246,6 @@ void PASTEMACT(ch,opname,uplo,varname) \
 		else                               KC = (( KC0 / 5 ) / 4 ) * 4; \
 	} \
 \
-	/* Query the maximum blocksize for NR, which implies a maximum blocksize
-	   extension for the final iteration. */ \
-	const dim_t NRM = bli_cntx_get_l3_sup_blksz_max_dt( dt, BLIS_NR, cntx ); \
-	const dim_t NRE = NRM - NR; \
-\
 	/* Compute partitioning step values for each matrix of each loop. */ \
 	const inc_t jcstep_c = cs_c; \
 	const inc_t jcstep_b = cs_b; \
@@ -2221,10 +2268,6 @@ void PASTEMACT(ch,opname,uplo,varname) \
 	const inc_t irstep_a = rs_a * MR; \
 	*/ \
 \
-	/* Query the context for the sup microkernel address and cast it to its
-	   function pointer type. */ \
-	PASTECH(ch,gemmsup_ker_ft) \
-               gemmsup_ker = bli_cntx_get_l3_sup_ker_dt( dt, stor_id, cntx ); \
 	ctype ct[ BLIS_STACK_BUF_MAX_SIZE / sizeof( ctype ) ] __attribute__((aligned(BLIS_STACK_BUF_ALIGN_SIZE))); \
 \
 	/* Storage scheme of ct should be same as that of C.

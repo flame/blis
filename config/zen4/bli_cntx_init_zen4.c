@@ -320,6 +320,59 @@ void bli_cntx_init_zen4( cntx_t* cntx )
       BLIS_MR, &blkszs[ BLIS_MR ],
       cntx
     );
+
+    // Initialize level-3 sup blocksize objects for operations dealing with 
+    //triangular objects with architecture-specific values.
+    //  
+    bli_blksz_init     ( &blkszs[ BLIS_MR ],    6,     6,     3,      3,
+                                                9,     9,     3,      3    );
+    bli_blksz_init_easy( &blkszs[ BLIS_NR ],    16,    8,     8,      4    );
+    bli_blksz_init_easy( &blkszs[ BLIS_MC ],    144,   72,    72,     36   );
+    bli_blksz_init_easy( &blkszs[ BLIS_KC ],    512,   256,   128,    64   );
+    bli_blksz_init_easy( &blkszs[ BLIS_NC ],    8160,  4080,  2040,   1020 );
+    // Update the context with the current architecture's register and cache
+    // blocksizes (and multiples) for native execution.
+    bli_cntx_set_l3_sup_tri_blkszs
+    (
+      5,
+      // level-3
+      BLIS_KC, &blkszs[ BLIS_KC ],
+      BLIS_MC, &blkszs[ BLIS_MC ],
+      BLIS_NR, &blkszs[ BLIS_NR ],
+      BLIS_NC, &blkszs[ BLIS_NC ],
+      BLIS_MR, &blkszs[ BLIS_MR ],
+      cntx
+    );
+
+    bli_cntx_set_l3_sup_tri_kers
+    (
+      24,
+      BLIS_RRR, BLIS_FLOAT, bli_sgemmsup_rv_zen_asm_6x16m, TRUE,
+      BLIS_RRC, BLIS_FLOAT, bli_sgemmsup_rd_zen_asm_6x16m, TRUE,
+      BLIS_RCR, BLIS_FLOAT, bli_sgemmsup_rv_zen_asm_6x16m, TRUE,
+      BLIS_RCC, BLIS_FLOAT, bli_sgemmsup_rv_zen_asm_6x16n, TRUE,
+      BLIS_CRR, BLIS_FLOAT, bli_sgemmsup_rv_zen_asm_6x16m, TRUE,
+      BLIS_CRC, BLIS_FLOAT, bli_sgemmsup_rd_zen_asm_6x16n, TRUE,
+      BLIS_CCR, BLIS_FLOAT, bli_sgemmsup_rv_zen_asm_6x16n, TRUE,
+      BLIS_CCC, BLIS_FLOAT, bli_sgemmsup_rv_zen_asm_6x16n, TRUE,
+      BLIS_RRR, BLIS_DOUBLE, bli_dgemmsup_rv_haswell_asm_6x8m, TRUE,
+      BLIS_RRC, BLIS_DOUBLE, bli_dgemmsup_rd_haswell_asm_6x8m, TRUE,
+      BLIS_RCR, BLIS_DOUBLE, bli_dgemmsup_rv_haswell_asm_6x8m, TRUE,
+      BLIS_RCC, BLIS_DOUBLE, bli_dgemmsup_rv_haswell_asm_6x8n, TRUE,
+      BLIS_CRR, BLIS_DOUBLE, bli_dgemmsup_rv_haswell_asm_6x8m, TRUE,
+      BLIS_CRC, BLIS_DOUBLE, bli_dgemmsup_rd_haswell_asm_6x8n, TRUE,
+      BLIS_CCR, BLIS_DOUBLE, bli_dgemmsup_rv_haswell_asm_6x8n, TRUE,
+      BLIS_CCC, BLIS_DOUBLE, bli_dgemmsup_rv_haswell_asm_6x8n, TRUE,
+      BLIS_RRR, BLIS_DCOMPLEX, bli_zgemmsup_rv_zen_asm_3x4m, TRUE,
+      BLIS_RRC, BLIS_DCOMPLEX, bli_zgemmsup_rd_zen_asm_3x4m, TRUE,
+      BLIS_RCR, BLIS_DCOMPLEX, bli_zgemmsup_rv_zen_asm_3x4m, TRUE,
+      BLIS_RCC, BLIS_DCOMPLEX, bli_zgemmsup_rv_zen_asm_3x4n, TRUE,
+      BLIS_CRR, BLIS_DCOMPLEX, bli_zgemmsup_rv_zen_asm_3x4m, TRUE,
+      BLIS_CRC, BLIS_DCOMPLEX, bli_zgemmsup_rd_zen_asm_3x4n, TRUE,
+      BLIS_CCR, BLIS_DCOMPLEX, bli_zgemmsup_rv_zen_asm_3x4n, TRUE,
+      BLIS_CCC, BLIS_DCOMPLEX, bli_zgemmsup_rv_zen_asm_3x4n, TRUE,
+      cntx
+    );
 }
 
 /*
@@ -358,65 +411,6 @@ void bli_zen4_override_trsm_blkszs (cntx_t* cntx)
     );
 }
 
-
-// Since the output of syrk/gemmt is a triangular matrix,
-// near-to-square shaped kernel performs better than 
-// skewed/rectangular shaped kernel.
-// Hence we are overriding blocksizes and kernel
-// function pointers for gemmt/syrk with avx2 specific ones
-void bli_zen4_override_gemmt_blkszs (cntx_t* cntx)
-{
-    blksz_t blkszs[ BLIS_NUM_BLKSZS ];
-
-    bli_blksz_init     ( &blkszs[ BLIS_MR ],    6,     6,     3,      3,
-                                                9,     9,     3,      3    );
-    bli_blksz_init_easy( &blkszs[ BLIS_NR ],    16,    8,     8,      4    );
-    bli_blksz_init_easy( &blkszs[ BLIS_MC ],    144,   72,    72,     36   );
-    bli_blksz_init_easy( &blkszs[ BLIS_KC ],    512,   256,   128,    64   );
-    bli_blksz_init_easy( &blkszs[ BLIS_NC ],    8160,  4080,  2040,   1020 );
-    // Update the context with the current architecture's register and cache
-    // blocksizes (and multiples) for native execution.
-    bli_cntx_set_l3_sup_blkszs
-    (
-      4,
-      // level-3
-      BLIS_KC, &blkszs[ BLIS_KC ],
-      BLIS_MC, &blkszs[ BLIS_MC ],
-      BLIS_NR, &blkszs[ BLIS_NR ],
-      BLIS_MR, &blkszs[ BLIS_MR ],
-      cntx
-    );
-
-    bli_cntx_set_l3_sup_kers
-    (
-      24,
-      BLIS_RRR, BLIS_FLOAT, bli_sgemmsup_rv_zen_asm_6x16m, TRUE,
-      BLIS_RRC, BLIS_FLOAT, bli_sgemmsup_rd_zen_asm_6x16m, TRUE,
-      BLIS_RCR, BLIS_FLOAT, bli_sgemmsup_rv_zen_asm_6x16m, TRUE,
-      BLIS_RCC, BLIS_FLOAT, bli_sgemmsup_rv_zen_asm_6x16n, TRUE,
-      BLIS_CRR, BLIS_FLOAT, bli_sgemmsup_rv_zen_asm_6x16m, TRUE,
-      BLIS_CRC, BLIS_FLOAT, bli_sgemmsup_rd_zen_asm_6x16n, TRUE,
-      BLIS_CCR, BLIS_FLOAT, bli_sgemmsup_rv_zen_asm_6x16n, TRUE,
-      BLIS_CCC, BLIS_FLOAT, bli_sgemmsup_rv_zen_asm_6x16n, TRUE,
-      BLIS_RRR, BLIS_DOUBLE, bli_dgemmsup_rv_haswell_asm_6x8m, TRUE,
-      BLIS_RRC, BLIS_DOUBLE, bli_dgemmsup_rd_haswell_asm_6x8m, TRUE,
-      BLIS_RCR, BLIS_DOUBLE, bli_dgemmsup_rv_haswell_asm_6x8m, TRUE,
-      BLIS_RCC, BLIS_DOUBLE, bli_dgemmsup_rv_haswell_asm_6x8n, TRUE,
-      BLIS_CRR, BLIS_DOUBLE, bli_dgemmsup_rv_haswell_asm_6x8m, TRUE,
-      BLIS_CRC, BLIS_DOUBLE, bli_dgemmsup_rd_haswell_asm_6x8n, TRUE,
-      BLIS_CCR, BLIS_DOUBLE, bli_dgemmsup_rv_haswell_asm_6x8n, TRUE,
-      BLIS_CCC, BLIS_DOUBLE, bli_dgemmsup_rv_haswell_asm_6x8n, TRUE,
-      BLIS_RRR, BLIS_DCOMPLEX, bli_zgemmsup_rv_zen_asm_3x4m, TRUE,
-      BLIS_RRC, BLIS_DCOMPLEX, bli_zgemmsup_rd_zen_asm_3x4m, TRUE,
-      BLIS_RCR, BLIS_DCOMPLEX, bli_zgemmsup_rv_zen_asm_3x4m, TRUE,
-      BLIS_RCC, BLIS_DCOMPLEX, bli_zgemmsup_rv_zen_asm_3x4n, TRUE,
-      BLIS_CRR, BLIS_DCOMPLEX, bli_zgemmsup_rv_zen_asm_3x4m, TRUE,
-      BLIS_CRC, BLIS_DCOMPLEX, bli_zgemmsup_rd_zen_asm_3x4n, TRUE,
-      BLIS_CCR, BLIS_DCOMPLEX, bli_zgemmsup_rv_zen_asm_3x4n, TRUE,
-      BLIS_CCC, BLIS_DCOMPLEX, bli_zgemmsup_rv_zen_asm_3x4n, TRUE,
-      cntx
-    );
-}
 
 /*
  * Restore the block sizes to default values needed for zen4 context.

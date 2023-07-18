@@ -288,16 +288,22 @@ err_t bli_gemmtsup_int
 	const bool    is_rcc_crc_ccr_ccc = !is_rrr_rrc_rcr_crr;
 
 	const num_t   dt         = bli_obj_dt( c );
-	const bool    row_pref   = bli_cntx_l3_sup_ker_prefers_rows_dt( dt, stor_id, cntx );
+	dim_t  MR          = bli_cntx_get_l3_sup_tri_blksz_def_dt( dt, BLIS_MR, cntx );
+	dim_t  NR          = bli_cntx_get_l3_sup_tri_blksz_def_dt( dt, BLIS_NR, cntx );
+	bool    row_pref   = bli_cntx_l3_sup_tri_ker_prefers_rows_dt( dt, stor_id, cntx );
 
+	if( (0 == MR) || (0 == NR) )
+	{
+		MR         = bli_cntx_get_l3_sup_blksz_def_dt( dt, BLIS_MR, cntx );
+		NR         = bli_cntx_get_l3_sup_blksz_def_dt( dt, BLIS_NR, cntx );
+		row_pref   = bli_cntx_l3_sup_ker_prefers_rows_dt( dt, stor_id, cntx );
+	}
 	const bool    is_primary = ( row_pref ? is_rrr_rrc_rcr_crr
 	                                      : is_rcc_crc_ccr_ccc );
 
 	const dim_t  m           = bli_obj_length( c );
 	const dim_t  n           = m;
 	const dim_t  k           = bli_obj_width( a );
-	const dim_t  MR          = bli_cntx_get_blksz_def_dt( dt, BLIS_MR, cntx );
-	const dim_t  NR          = bli_cntx_get_blksz_def_dt( dt, BLIS_NR, cntx );
 	const bool   auto_factor = bli_rntm_auto_factor( rntm );
 	const dim_t  n_threads   = bli_rntm_num_threads( rntm );
 	bool         use_bp      = TRUE;

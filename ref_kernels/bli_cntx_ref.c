@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2018 - 2021, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2018 - 2023, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -484,6 +484,79 @@ void GENBARNAME(cntx_init)
 
 	funcs  = bli_cntx_l3_sup_kers_buf( cntx );
 	mbools = bli_cntx_l3_sup_kers_prefs_buf( cntx );
+
+#if 0
+	// Adhere to the small/unpacked ukernel mappings:
+	// - rv -> rrr, rcr
+	// - rg -> rrc, rcc
+	// - cv -> ccr, ccc
+	// - cg -> crr, crc
+	gen_sup_func_init( &funcs[ BLIS_RRR ],
+	                   &funcs[ BLIS_RCR ], gemmsup_rv_ukr_name );
+	gen_sup_func_init( &funcs[ BLIS_RRC ],
+	                   &funcs[ BLIS_RCC ], gemmsup_rg_ukr_name );
+	gen_sup_func_init( &funcs[ BLIS_CCR ],
+	                   &funcs[ BLIS_CCC ], gemmsup_cv_ukr_name );
+	gen_sup_func_init( &funcs[ BLIS_CRR ],
+	                   &funcs[ BLIS_CRC ], gemmsup_cg_ukr_name );
+#endif
+	gen_func_init( &funcs[ BLIS_RRR ], gemmsup_rv_ukr_name );
+	gen_func_init( &funcs[ BLIS_RRC ], gemmsup_rv_ukr_name );
+	gen_func_init( &funcs[ BLIS_RCR ], gemmsup_rv_ukr_name );
+	gen_func_init( &funcs[ BLIS_RCC ], gemmsup_rv_ukr_name );
+	gen_func_init( &funcs[ BLIS_CRR ], gemmsup_rv_ukr_name );
+	gen_func_init( &funcs[ BLIS_CRC ], gemmsup_rv_ukr_name );
+	gen_func_init( &funcs[ BLIS_CCR ], gemmsup_rv_ukr_name );
+	gen_func_init( &funcs[ BLIS_CCC ], gemmsup_rv_ukr_name );
+
+	// Register the general-stride/generic ukernel to the "catch-all" slot
+	// associated with the BLIS_XXX enum value. This slot will be queried if
+	// *any* operand is stored with general stride.
+	gen_func_init( &funcs[ BLIS_XXX ], gemmsup_gx_ukr_name );
+
+
+	// Set the l3 sup ukernel storage preferences.
+	//                                       s      d      c      z
+	bli_mbool_init( &mbools[ BLIS_RRR ],  TRUE,  TRUE,  TRUE,  TRUE );
+	bli_mbool_init( &mbools[ BLIS_RRC ],  TRUE,  TRUE,  TRUE,  TRUE );
+	bli_mbool_init( &mbools[ BLIS_RCR ],  TRUE,  TRUE,  TRUE,  TRUE );
+	bli_mbool_init( &mbools[ BLIS_RCC ],  TRUE,  TRUE,  TRUE,  TRUE );
+	bli_mbool_init( &mbools[ BLIS_CRR ],  TRUE,  TRUE,  TRUE,  TRUE );
+	bli_mbool_init( &mbools[ BLIS_CRC ],  TRUE,  TRUE,  TRUE,  TRUE );
+	bli_mbool_init( &mbools[ BLIS_CCR ],  TRUE,  TRUE,  TRUE,  TRUE );
+	bli_mbool_init( &mbools[ BLIS_CCC ],  TRUE,  TRUE,  TRUE,  TRUE );
+
+	bli_mbool_init( &mbools[ BLIS_XXX ],  TRUE,  TRUE,  TRUE,  TRUE );
+
+
+	// -- Set level-3 small/unpacked micro-kernels, preferences and blocksizes 
+	//    for matrices dealing with triangular matrices-------------
+
+// -- Set blocksizes -------------------------------------------------------
+
+	//                                          s     d     c     z
+	bli_blksz_init_easy( &blkszs[ BLIS_MR ],    0,    0,    0,    0 );
+	bli_blksz_init_easy( &blkszs[ BLIS_NR ],    0,    0,    0,    0 );
+	bli_blksz_init_easy( &blkszs[ BLIS_MC ],    0,    0,    0,    0 );
+	bli_blksz_init_easy( &blkszs[ BLIS_KC ],    0,    0,    0,    0 );
+	bli_blksz_init_easy( &blkszs[ BLIS_NC ],    0,    0,    0,    0 );
+
+	// Initialize the context with the default blocksize objects and their
+	// multiples.
+	bli_cntx_set_l3_sup_tri_blkszs
+    (
+      5,
+      // level-3
+      BLIS_KC, &blkszs[ BLIS_KC ],
+      BLIS_MC, &blkszs[ BLIS_MC ],
+      BLIS_NR, &blkszs[ BLIS_NR ],
+      BLIS_NC, &blkszs[ BLIS_NC ],
+      BLIS_MR, &blkszs[ BLIS_MR ],
+      cntx
+    );
+
+	funcs  = bli_cntx_l3_sup_tri_kers_buf( cntx );
+	mbools = bli_cntx_l3_sup_tri_kers_prefs_buf( cntx );
 
 #if 0
 	// Adhere to the small/unpacked ukernel mappings:

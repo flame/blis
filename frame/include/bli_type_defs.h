@@ -1481,8 +1481,11 @@ typedef struct cntx_s
 	blksz_t   l3_sup_thresh[ BLIS_NUM_THRESH ];
 	void*     l3_sup_handlers[ BLIS_NUM_LEVEL3_OPS ];
 	blksz_t   l3_sup_blkszs[ BLIS_NUM_BLKSZS ];
+	blksz_t   l3_sup_tri_blkszs[ BLIS_NUM_BLKSZS ];
 	func_t    l3_sup_kers[ BLIS_NUM_3OP_RC_COMBOS ];
+	func_t    l3_sup_tri_kers[ BLIS_NUM_3OP_RC_COMBOS ];
 	mbool_t   l3_sup_kers_prefs[ BLIS_NUM_3OP_RC_COMBOS ];
+	mbool_t   l3_sup_tri_kers_prefs[ BLIS_NUM_3OP_RC_COMBOS ];
 
 	func_t    l1f_kers[ BLIS_NUM_LEVEL1F_KERS ];
 	func_t    l1v_kers[ BLIS_NUM_LEVEL1V_KERS ];
