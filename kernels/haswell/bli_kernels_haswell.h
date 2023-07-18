@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2022, Advanced Micro Devices, Inc.
+   Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -219,6 +219,12 @@ GEMMSUP_KER_PROT( double,   d, gemmsup_rv_haswell_asm_3x8 )
 GEMMSUP_KER_PROT( double,   d, gemmsup_rv_haswell_asm_2x8 )
 GEMMSUP_KER_PROT( double,   d, gemmsup_rv_haswell_asm_1x8 )
 
+GEMMSUP_KER_PROT( double,   d, gemmsup_rv_haswell_asm_5x7 )
+GEMMSUP_KER_PROT( double,   d, gemmsup_rv_haswell_asm_4x7 )
+GEMMSUP_KER_PROT( double,   d, gemmsup_rv_haswell_asm_3x7 )
+GEMMSUP_KER_PROT( double,   d, gemmsup_rv_haswell_asm_2x7 )
+GEMMSUP_KER_PROT( double,   d, gemmsup_rv_haswell_asm_1x7 )
+
 GEMMSUP_KER_PROT( double,   d, gemmsup_rv_haswell_asm_6x6 )
 GEMMSUP_KER_PROT( double,   d, gemmsup_rv_haswell_asm_5x6 )
 GEMMSUP_KER_PROT( double,   d, gemmsup_rv_haswell_asm_4x6 )
@@ -226,12 +232,24 @@ GEMMSUP_KER_PROT( double,   d, gemmsup_rv_haswell_asm_3x6 )
 GEMMSUP_KER_PROT( double,   d, gemmsup_rv_haswell_asm_2x6 )
 GEMMSUP_KER_PROT( double,   d, gemmsup_rv_haswell_asm_1x6 )
 
+GEMMSUP_KER_PROT( double,   d, gemmsup_rv_haswell_asm_5x5 )
+GEMMSUP_KER_PROT( double,   d, gemmsup_rv_haswell_asm_4x5 )
+GEMMSUP_KER_PROT( double,   d, gemmsup_rv_haswell_asm_3x5 )
+GEMMSUP_KER_PROT( double,   d, gemmsup_rv_haswell_asm_2x5 )
+GEMMSUP_KER_PROT( double,   d, gemmsup_rv_haswell_asm_1x5 )
+
 GEMMSUP_KER_PROT( double,   d, gemmsup_rv_haswell_asm_6x4 )
 GEMMSUP_KER_PROT( double,   d, gemmsup_rv_haswell_asm_5x4 )
 GEMMSUP_KER_PROT( double,   d, gemmsup_rv_haswell_asm_4x4 )
 GEMMSUP_KER_PROT( double,   d, gemmsup_rv_haswell_asm_3x4 )
 GEMMSUP_KER_PROT( double,   d, gemmsup_rv_haswell_asm_2x4 )
 GEMMSUP_KER_PROT( double,   d, gemmsup_rv_haswell_asm_1x4 )
+
+GEMMSUP_KER_PROT( double,   d, gemmsup_rv_haswell_asm_5x3 )
+GEMMSUP_KER_PROT( double,   d, gemmsup_rv_haswell_asm_4x3 )
+GEMMSUP_KER_PROT( double,   d, gemmsup_rv_haswell_asm_3x3 )
+GEMMSUP_KER_PROT( double,   d, gemmsup_rv_haswell_asm_2x3 )
+GEMMSUP_KER_PROT( double,   d, gemmsup_rv_haswell_asm_1x3 )
 
 GEMMSUP_KER_PROT( double,   d, gemmsup_rv_haswell_asm_6x2 )
 GEMMSUP_KER_PROT( double,   d, gemmsup_rv_haswell_asm_5x2 )

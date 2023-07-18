@@ -2392,939 +2392,1119 @@ err_t bli_dgemm_small
         }
 
         m_remainder = M - row_idx;
-
-        if (m_remainder >= 12)
+        if(m_remainder)
         {
-            m_remainder -= 12;
+            // Sets up the mask for loading relevant remainder elements in load direction
+            // int64_t array of size 4 represents the mask for 4 elements of AVX2 vector register.
+            //
+            // Low end           High end                           *   Low end           High end
+            //  ________________________                            *    ________________________
+            // |     |     |     |     |                            *   |     |     |     |     |
+            // | 1   |  2  |  3  | 4   |  ----> Source vector       *   | 1   |  2  |  3  | 4   |  ----> Source vector
+            // |_____|_____|_____|_____|                            *   |_____|_____|_____|_____|
+            //                                                      *
+            //  ________________________                            *    ________________________
+            // |     |     |     |     |                            *   |     |     |     |     |
+            // | -1  |  -1 |  -1 | 0   |  ----> Mask vector( mask_3 )   | -1  |  -1 |  0  | 0   |  ----> Mask vector( mask_2 )
+            // |_____|_____|_____|_____|                            *   |_____|_____|_____|_____|
+            //                                                      *
+            //  ________________________                            *    ________________________
+            // |     |     |     |     |                            *   |     |     |     |     |
+            // | 1   |  2  |  3  | 0   |  ----> Destination vector  *   | 1   |  2  |  0  | 0   |  ----> Destination vector
+            // |_____|_____|_____|_____|                            *   |_____|_____|_____|_____|
+            //
+            // -1 sets all the bits to 1.
+            //
+            dim_t m_rem = 0;
+            int64_t mask_4[4] = {0};
+            mask_4[0] = -1;
+            mask_4[1] = -1;
+            mask_4[2] = -1;
+            mask_4[3] = -1;
 
-            for (col_idx = 0; (col_idx + 2) < N; col_idx += 3)
+            int64_t mask_3[4] = {0};
+            mask_3[0] = -1;
+            mask_3[1] = -1;
+            mask_3[2] = -1;
+            mask_3[3] = 0;
+
+            int64_t mask_2[4] = {0};
+            mask_2[0] = -1;
+            mask_2[1] = -1;
+            mask_2[2] = 0;
+            mask_2[3] = 0;
+
+            int64_t mask_1[4] = {0};
+            mask_1[0] = -1;
+            mask_1[1] = 0;
+            mask_1[2] = 0;
+            mask_1[3] = 0;
+
+            int64_t *mask_ptr[] = {mask_4, mask_1, mask_2, mask_3, mask_4};
+            if(m_remainder > 12)
             {
-                //pointer math to point to proper memory
-                tC = C + ldc * col_idx + row_idx;
-                tB = B + tb_inc_col * col_idx;
-                tA = A + row_idx;
-
-                // clear scratch registers.
-                ymm4 = _mm256_setzero_pd();
-                ymm5 = _mm256_setzero_pd();
-                ymm6 = _mm256_setzero_pd();
-                ymm8 = _mm256_setzero_pd();
-                ymm9 = _mm256_setzero_pd();
-                ymm10 = _mm256_setzero_pd();
-                ymm12 = _mm256_setzero_pd();
-                ymm13 = _mm256_setzero_pd();
-                ymm14 = _mm256_setzero_pd();
-
-                for (k = 0; k < K; ++k)
-                {
-                    // The inner loop broadcasts the B matrix data and
-                    // multiplies it with the A matrix.
-                    ymm0 = _mm256_broadcast_sd(tB + tb_inc_col * 0);
-                    ymm1 = _mm256_broadcast_sd(tB + tb_inc_col * 1);
-                    ymm2 = _mm256_broadcast_sd(tB + tb_inc_col * 2);
-                    tB += tb_inc_row;
-
-                    //broadcasted matrix B elements are multiplied
-                    //with matrix A columns.
-                    ymm3 = _mm256_loadu_pd(tA);
-                    //                   ymm4 += ymm0 * ymm3;
-                    ymm4 = _mm256_fmadd_pd(ymm0, ymm3, ymm4);
-                    //                    ymm8 += ymm1 * ymm3;
-                    ymm8 = _mm256_fmadd_pd(ymm1, ymm3, ymm8);
-                    //                    ymm12 += ymm2 * ymm3;
-                    ymm12 = _mm256_fmadd_pd(ymm2, ymm3, ymm12);
-
-                    ymm3 = _mm256_loadu_pd(tA + 4);
-                    //                    ymm5 += ymm0 * ymm3;
-                    ymm5 = _mm256_fmadd_pd(ymm0, ymm3, ymm5);
-                    //                    ymm9 += ymm1 * ymm3;
-                    ymm9 = _mm256_fmadd_pd(ymm1, ymm3, ymm9);
-                    //                    ymm13 += ymm2 * ymm3;
-                    ymm13 = _mm256_fmadd_pd(ymm2, ymm3, ymm13);
-
-                    ymm3 = _mm256_loadu_pd(tA + 8);
-                    //                   ymm6 += ymm0 * ymm3;
-                    ymm6 = _mm256_fmadd_pd(ymm0, ymm3, ymm6);
-                    //                    ymm10 += ymm1 * ymm3;
-                    ymm10 = _mm256_fmadd_pd(ymm1, ymm3, ymm10);
-                    //                    ymm14 += ymm2 * ymm3;
-                    ymm14 = _mm256_fmadd_pd(ymm2, ymm3, ymm14);
-
-                    tA += lda;
-                }
-                // alpha, beta multiplication.
-                ymm0 = _mm256_broadcast_sd(alpha_cast);
-                ymm1 = _mm256_broadcast_sd(beta_cast);
-
-                //multiply A*B by alpha.
-                ymm4 = _mm256_mul_pd(ymm4, ymm0);
-                ymm5 = _mm256_mul_pd(ymm5, ymm0);
-                ymm6 = _mm256_mul_pd(ymm6, ymm0);
-                ymm8 = _mm256_mul_pd(ymm8, ymm0);
-                ymm9 = _mm256_mul_pd(ymm9, ymm0);
-                ymm10 = _mm256_mul_pd(ymm10, ymm0);
-                ymm12 = _mm256_mul_pd(ymm12, ymm0);
-                ymm13 = _mm256_mul_pd(ymm13, ymm0);
-                ymm14 = _mm256_mul_pd(ymm14, ymm0);
-
-                if(is_beta_non_zero)
-                {
-                    // multiply C by beta and accumulate.
-                    ymm2 = _mm256_loadu_pd(tC);
-                    ymm4 = _mm256_fmadd_pd(ymm2, ymm1, ymm4);
-                    ymm2 = _mm256_loadu_pd(tC + 4);
-                    ymm5 = _mm256_fmadd_pd(ymm2, ymm1, ymm5);
-                    ymm2 = _mm256_loadu_pd(tC + 8);
-                    ymm6 = _mm256_fmadd_pd(ymm2, ymm1, ymm6);
-
-                    // multiply C by beta and accumulate.
-                    double *ttC = tC +ldc;
-                    ymm2 = _mm256_loadu_pd(ttC);
-                    ymm8 = _mm256_fmadd_pd(ymm2, ymm1, ymm8);
-                    ymm2 = _mm256_loadu_pd(ttC + 4);
-                    ymm9 = _mm256_fmadd_pd(ymm2, ymm1, ymm9);
-                    ymm2 = _mm256_loadu_pd(ttC + 8);
-                    ymm10 = _mm256_fmadd_pd(ymm2, ymm1, ymm10);
-
-                    // multiply C by beta and accumulate.
-                    ttC += ldc;
-                    ymm2 = _mm256_loadu_pd(ttC);
-                    ymm12 = _mm256_fmadd_pd(ymm2, ymm1, ymm12);
-                    ymm2 = _mm256_loadu_pd(ttC + 4);
-                    ymm13 = _mm256_fmadd_pd(ymm2, ymm1, ymm13);
-                    ymm2 = _mm256_loadu_pd(ttC + 8);
-                    ymm14 = _mm256_fmadd_pd(ymm2, ymm1, ymm14);
-
-                }
-                _mm256_storeu_pd(tC, ymm4);
-                _mm256_storeu_pd(tC + 4, ymm5);
-                _mm256_storeu_pd(tC + 8, ymm6);
-
-                tC += ldc;
-
-                _mm256_storeu_pd(tC, ymm8);
-                _mm256_storeu_pd(tC + 4, ymm9);
-                _mm256_storeu_pd(tC + 8, ymm10);
-
-                tC += ldc;
-
-                _mm256_storeu_pd(tC, ymm12);
-                _mm256_storeu_pd(tC + 4, ymm13);
-                _mm256_storeu_pd(tC + 8, ymm14);
-            }
-            n_remainder = N - col_idx;
-            // if the N is not multiple of 3.
-            // handling edge case.
-            if (n_remainder == 2)
-            {
-                //pointer math to point to proper memory
-                tC = C + ldc * col_idx + row_idx;
-                tB = B + tb_inc_col * col_idx;
-                tA = A + row_idx;
-
-                // clear scratch registers.
-                ymm8 = _mm256_setzero_pd();
-                ymm9 = _mm256_setzero_pd();
-                ymm10 = _mm256_setzero_pd();
-                ymm12 = _mm256_setzero_pd();
-                ymm13 = _mm256_setzero_pd();
-                ymm14 = _mm256_setzero_pd();
-
-                for (k = 0; k < K; ++k)
-                {
-                    // The inner loop broadcasts the B matrix data and
-                    // multiplies it with the A matrix.
-                    ymm0 = _mm256_broadcast_sd(tB + tb_inc_col * 0);
-                    ymm1 = _mm256_broadcast_sd(tB + tb_inc_col * 1);
-                    tB += tb_inc_row;
-
-                    //broadcasted matrix B elements are multiplied
-                    //with matrix A columns.
-                    ymm3 = _mm256_loadu_pd(tA);
-                    ymm8 = _mm256_fmadd_pd(ymm0, ymm3, ymm8);
-                    ymm12 = _mm256_fmadd_pd(ymm1, ymm3, ymm12);
-
-                    ymm3 = _mm256_loadu_pd(tA + 4);
-                    ymm9 = _mm256_fmadd_pd(ymm0, ymm3, ymm9);
-                    ymm13 = _mm256_fmadd_pd(ymm1, ymm3, ymm13);
-
-                    ymm3 = _mm256_loadu_pd(tA + 8);
-                    ymm10 = _mm256_fmadd_pd(ymm0, ymm3, ymm10);
-                    ymm14 = _mm256_fmadd_pd(ymm1, ymm3, ymm14);
-
-                    tA += lda;
-
-                }
-                // alpha, beta multiplication.
-                ymm0 = _mm256_broadcast_sd(alpha_cast);
-                ymm1 = _mm256_broadcast_sd(beta_cast);
-
-                //multiply A*B by alpha.
-                ymm8 = _mm256_mul_pd(ymm8, ymm0);
-                ymm9 = _mm256_mul_pd(ymm9, ymm0);
-                ymm10 = _mm256_mul_pd(ymm10, ymm0);
-                ymm12 = _mm256_mul_pd(ymm12, ymm0);
-                ymm13 = _mm256_mul_pd(ymm13, ymm0);
-                ymm14 = _mm256_mul_pd(ymm14, ymm0);
-
-
-                if(is_beta_non_zero)
-                {
-                    // multiply C by beta and accumulate.
-                    ymm2 = _mm256_loadu_pd(tC + 0);
-                    ymm8 = _mm256_fmadd_pd(ymm2, ymm1, ymm8);
-                    ymm2 = _mm256_loadu_pd(tC + 4);
-                    ymm9 = _mm256_fmadd_pd(ymm2, ymm1, ymm9);
-                    ymm2 = _mm256_loadu_pd(tC + 8);
-                    ymm10 = _mm256_fmadd_pd(ymm2, ymm1, ymm10);
-
-                    double *ttC = tC + ldc;
-
-                    // multiply C by beta and accumulate.
-                    ymm2 = _mm256_loadu_pd(ttC);
-                    ymm12 = _mm256_fmadd_pd(ymm2, ymm1, ymm12);
-                    ymm2 = _mm256_loadu_pd(ttC + 4);
-                    ymm13 = _mm256_fmadd_pd(ymm2, ymm1, ymm13);
-                    ymm2 = _mm256_loadu_pd(ttC + 8);
-                    ymm14 = _mm256_fmadd_pd(ymm2, ymm1, ymm14);
-
-                }
-                _mm256_storeu_pd(tC + 0, ymm8);
-                _mm256_storeu_pd(tC + 4, ymm9);
-                _mm256_storeu_pd(tC + 8, ymm10);
-
-                tC += ldc;
-
-                _mm256_storeu_pd(tC, ymm12);
-                _mm256_storeu_pd(tC + 4, ymm13);
-                _mm256_storeu_pd(tC + 8, ymm14);
-
-                col_idx += 2;
-            }
-            // if the N is not multiple of 3.
-            // handling edge case.
-            if (n_remainder == 1)
-            {
-                //pointer math to point to proper memory
-                tC = C + ldc * col_idx + row_idx;
-                tB = B + tb_inc_col * col_idx;
-                tA = A + row_idx;
-
-                // clear scratch registers.
-                ymm12 = _mm256_setzero_pd();
-                ymm13 = _mm256_setzero_pd();
-                ymm14 = _mm256_setzero_pd();
-
-                for (k = 0; k < K; ++k)
-                {
-                    // The inner loop broadcasts the B matrix data and
-                    // multiplies it with the A matrix.
-                    ymm0 = _mm256_broadcast_sd(tB + tb_inc_col * 0);
-                    tB += tb_inc_row;
-
-                    //broadcasted matrix B elements are multiplied
-                    //with matrix A columns.
-                    ymm3 = _mm256_loadu_pd(tA);
-                    ymm12 = _mm256_fmadd_pd(ymm0, ymm3, ymm12);
-
-                    ymm3 = _mm256_loadu_pd(tA + 4);
-                    ymm13 = _mm256_fmadd_pd(ymm0, ymm3, ymm13);
-
-                    ymm3 = _mm256_loadu_pd(tA + 8);
-                    ymm14 = _mm256_fmadd_pd(ymm0, ymm3, ymm14);
-
-                    tA += lda;
-
-                }
-                // alpha, beta multiplication.
-                ymm0 = _mm256_broadcast_sd(alpha_cast);
-                ymm1 = _mm256_broadcast_sd(beta_cast);
-
-                //multiply A*B by alpha.
-                ymm12 = _mm256_mul_pd(ymm12, ymm0);
-                ymm13 = _mm256_mul_pd(ymm13, ymm0);
-                ymm14 = _mm256_mul_pd(ymm14, ymm0);
-
-
-                if(is_beta_non_zero)
-                {
-                    // multiply C by beta and accumulate.
-                    ymm2 = _mm256_loadu_pd(tC + 0);
-                    ymm12 = _mm256_fmadd_pd(ymm2, ymm1, ymm12);
-                    ymm2 = _mm256_loadu_pd(tC + 4);
-                    ymm13 = _mm256_fmadd_pd(ymm2, ymm1, ymm13);
-                    ymm2 = _mm256_loadu_pd(tC + 8);
-                    ymm14 = _mm256_fmadd_pd(ymm2, ymm1, ymm14);
-
-                }
-                _mm256_storeu_pd(tC + 0, ymm12);
-                _mm256_storeu_pd(tC + 4, ymm13);
-                _mm256_storeu_pd(tC + 8, ymm14);
-            }
-
-            row_idx += 12;
-        }
-
-        if (m_remainder >= 8)
-        {
-            m_remainder -= 8;
-
-            for (col_idx = 0; (col_idx + 2) < N; col_idx += 3)
-            {
-                //pointer math to point to proper memory
-                tC = C + ldc * col_idx + row_idx;
-                tB = B + tb_inc_col * col_idx;
-                tA = A + row_idx;
-
-                // clear scratch registers.
-                ymm4 = _mm256_setzero_pd();
-                ymm5 = _mm256_setzero_pd();
-                ymm6 = _mm256_setzero_pd();
-                ymm7 = _mm256_setzero_pd();
-                ymm8 = _mm256_setzero_pd();
-                ymm9 = _mm256_setzero_pd();
-
-                for (k = 0; k < K; ++k)
-                {
-                    // The inner loop broadcasts the B matrix data and
-                    // multiplies it with the A matrix.
-                    ymm0 = _mm256_broadcast_sd(tB + tb_inc_col * 0);
-                    ymm1 = _mm256_broadcast_sd(tB + tb_inc_col * 1);
-                    ymm2 = _mm256_broadcast_sd(tB + tb_inc_col * 2);
-                    tB += tb_inc_row;
-
-                    //broadcasted matrix B elements are multiplied
-                    //with matrix A columns.
-                    ymm3 = _mm256_loadu_pd(tA);
-                    ymm4 = _mm256_fmadd_pd(ymm0, ymm3, ymm4);
-                    ymm6 = _mm256_fmadd_pd(ymm1, ymm3, ymm6);
-                    ymm8 = _mm256_fmadd_pd(ymm2, ymm3, ymm8);
-
-                    ymm3 = _mm256_loadu_pd(tA + 4);
-                    ymm5 = _mm256_fmadd_pd(ymm0, ymm3, ymm5);
-                    ymm7 = _mm256_fmadd_pd(ymm1, ymm3, ymm7);
-                    ymm9 = _mm256_fmadd_pd(ymm2, ymm3, ymm9);
-
-                    tA += lda;
-                }
-                // alpha, beta multiplication.
-                ymm0 = _mm256_broadcast_sd(alpha_cast);
-                ymm1 = _mm256_broadcast_sd(beta_cast);
-
-                //multiply A*B by alpha.
-                ymm4 = _mm256_mul_pd(ymm4, ymm0);
-                ymm5 = _mm256_mul_pd(ymm5, ymm0);
-                ymm6 = _mm256_mul_pd(ymm6, ymm0);
-                ymm7 = _mm256_mul_pd(ymm7, ymm0);
-                ymm8 = _mm256_mul_pd(ymm8, ymm0);
-                ymm9 = _mm256_mul_pd(ymm9, ymm0);
-
-                if(is_beta_non_zero)
-                {
-                    // multiply C by beta and accumulate.
-                    ymm2 = _mm256_loadu_pd(tC);
-                    ymm4 = _mm256_fmadd_pd(ymm2, ymm1, ymm4);
-                    ymm2 = _mm256_loadu_pd(tC + 4);
-                    ymm5 = _mm256_fmadd_pd(ymm2, ymm1, ymm5);
-
-                    double* ttC = tC + ldc;
-
-                    // multiply C by beta and accumulate.
-                    ymm2 = _mm256_loadu_pd(ttC);
-                    ymm6 = _mm256_fmadd_pd(ymm2, ymm1, ymm6);
-                    ymm2 = _mm256_loadu_pd(ttC + 4);
-                    ymm7 = _mm256_fmadd_pd(ymm2, ymm1, ymm7);
-
-                    ttC += ldc;
-
-                    // multiply C by beta and accumulate.
-                    ymm2 = _mm256_loadu_pd(ttC);
-                    ymm8 = _mm256_fmadd_pd(ymm2, ymm1, ymm8);
-                    ymm2 = _mm256_loadu_pd(ttC + 4);
-                    ymm9 = _mm256_fmadd_pd(ymm2, ymm1, ymm9);
-                }
-
-                _mm256_storeu_pd(tC, ymm4);
-                _mm256_storeu_pd(tC + 4, ymm5);
-
-                tC += ldc;
-                _mm256_storeu_pd(tC, ymm6);
-                _mm256_storeu_pd(tC + 4, ymm7);
-
-                tC += ldc;
-                _mm256_storeu_pd(tC, ymm8);
-                _mm256_storeu_pd(tC + 4, ymm9);
-
-            }
-            n_remainder = N - col_idx;
-            // if the N is not multiple of 3.
-            // handling edge case.
-            if (n_remainder == 2)
-            {
-                //pointer math to point to proper memory
-                tC = C + ldc * col_idx + row_idx;
-                tB = B + tb_inc_col * col_idx;
-                tA = A + row_idx;
-
-                // clear scratch registers.
-                ymm4 = _mm256_setzero_pd();
-                ymm5 = _mm256_setzero_pd();
-                ymm6 = _mm256_setzero_pd();
-                ymm7 = _mm256_setzero_pd();
-
-                for (k = 0; k < K; ++k)
-                {
-                    // The inner loop broadcasts the B matrix data and
-                    // multiplies it with the A matrix.
-                    ymm0 = _mm256_broadcast_sd(tB + tb_inc_col * 0);
-                    ymm1 = _mm256_broadcast_sd(tB + tb_inc_col * 1);
-                    tB += tb_inc_row;
-
-                    //broadcasted matrix B elements are multiplied
-                    //with matrix A columns.
-                    ymm3 = _mm256_loadu_pd(tA);
-                    ymm4 = _mm256_fmadd_pd(ymm0, ymm3, ymm4);
-                    ymm6 = _mm256_fmadd_pd(ymm1, ymm3, ymm6);
-
-                    ymm3 = _mm256_loadu_pd(tA + 4);
-                    ymm5 = _mm256_fmadd_pd(ymm0, ymm3, ymm5);
-                    ymm7 = _mm256_fmadd_pd(ymm1, ymm3, ymm7);
-
-                    tA += lda;
-                }
-                // alpha, beta multiplication.
-                ymm0 = _mm256_broadcast_sd(alpha_cast);
-                ymm1 = _mm256_broadcast_sd(beta_cast);
-
-                //multiply A*B by alpha.
-                ymm4 = _mm256_mul_pd(ymm4, ymm0);
-                ymm5 = _mm256_mul_pd(ymm5, ymm0);
-                ymm6 = _mm256_mul_pd(ymm6, ymm0);
-                ymm7 = _mm256_mul_pd(ymm7, ymm0);
-
-                if(is_beta_non_zero)
-                {
-                // multiply C by beta and accumulate.
-                ymm2 = _mm256_loadu_pd(tC);
-                ymm4 = _mm256_fmadd_pd(ymm2, ymm1, ymm4);
-                ymm2 = _mm256_loadu_pd(tC + 4);
-                ymm5 = _mm256_fmadd_pd(ymm2, ymm1, ymm5);
-
-                double* ttC = tC + ldc;
-
-                // multiply C by beta and accumulate.
-                ymm2 = _mm256_loadu_pd(ttC);
-                ymm6 = _mm256_fmadd_pd(ymm2, ymm1, ymm6);
-                ymm2 = _mm256_loadu_pd(ttC + 4);
-                ymm7 = _mm256_fmadd_pd(ymm2, ymm1, ymm7);
-                }
-                _mm256_storeu_pd(tC, ymm4);
-                _mm256_storeu_pd(tC + 4, ymm5);
-
-                tC += ldc;
-                _mm256_storeu_pd(tC, ymm6);
-                _mm256_storeu_pd(tC + 4, ymm7);
-
-                col_idx += 2;
-
-            }
-            // if the N is not multiple of 3.
-            // handling edge case.
-            if (n_remainder == 1)
-            {
-                //pointer math to point to proper memory
-                tC = C + ldc * col_idx + row_idx;
-                tB = B + tb_inc_col * col_idx;
-                tA = A + row_idx;
-
-                ymm4 = _mm256_setzero_pd();
-                ymm5 = _mm256_setzero_pd();
-
-                for (k = 0; k < K; ++k)
-                {
-                    // The inner loop broadcasts the B matrix data and
-                    // multiplies it with the A matrix.
-                    ymm0 = _mm256_broadcast_sd(tB + tb_inc_col * 0);
-                    tB += tb_inc_row;
-
-                    //broadcasted matrix B elements are multiplied
-                    //with matrix A columns.
-                    ymm3 = _mm256_loadu_pd(tA);
-                    ymm4 = _mm256_fmadd_pd(ymm0, ymm3, ymm4);
-
-                    ymm3 = _mm256_loadu_pd(tA + 4);
-                    ymm5 = _mm256_fmadd_pd(ymm0, ymm3, ymm5);
-
-                    tA += lda;
-                }
-                // alpha, beta multiplication.
-                ymm0 = _mm256_broadcast_sd(alpha_cast);
-                ymm1 = _mm256_broadcast_sd(beta_cast);
-
-                ymm4 = _mm256_mul_pd(ymm4, ymm0);
-                ymm5 = _mm256_mul_pd(ymm5, ymm0);
-
-                if(is_beta_non_zero)
-                {
-                    // multiply C by beta and accumulate.
-                    ymm2 = _mm256_loadu_pd(tC);
-                    ymm4 = _mm256_fmadd_pd(ymm2, ymm1, ymm4);
-                    ymm2 = _mm256_loadu_pd(tC + 4);
-                    ymm5 = _mm256_fmadd_pd(ymm2, ymm1, ymm5);
-                }
-                _mm256_storeu_pd(tC, ymm4);
-                _mm256_storeu_pd(tC + 4, ymm5);
-
-            }
-
-            row_idx += 8;
-        }
-
-        if (m_remainder >= 4)
-        {
-            m_remainder -= 4;
-
-            for (col_idx = 0; (col_idx + 2) < N; col_idx += 3)
-            {
-                //pointer math to point to proper memory
-                tC = C + ldc * col_idx + row_idx;
-                tB = B + tb_inc_col * col_idx;
-                tA = A + row_idx;
-
-                // clear scratch registers.
-                ymm4 = _mm256_setzero_pd();
-                ymm5 = _mm256_setzero_pd();
-                ymm6 = _mm256_setzero_pd();
-
-                for (k = 0; k < K; ++k)
-                {
-                    // The inner loop broadcasts the B matrix data and
-                    // multiplies it with the A matrix.
-                    ymm0 = _mm256_broadcast_sd(tB + tb_inc_col * 0);
-                    ymm1 = _mm256_broadcast_sd(tB + tb_inc_col * 1);
-                    ymm2 = _mm256_broadcast_sd(tB + tb_inc_col * 2);
-                    tB += tb_inc_row;
-
-                    //broadcasted matrix B elements are multiplied
-                    //with matrix A columns.
-                    ymm3 = _mm256_loadu_pd(tA);
-                    ymm4 = _mm256_fmadd_pd(ymm0, ymm3, ymm4);
-                    ymm5 = _mm256_fmadd_pd(ymm1, ymm3, ymm5);
-                    ymm6 = _mm256_fmadd_pd(ymm2, ymm3, ymm6);
-
-                    tA += lda;
-                }
-                // alpha, beta multiplication.
-                ymm0 = _mm256_broadcast_sd(alpha_cast);
-                ymm1 = _mm256_broadcast_sd(beta_cast);
-
-                //multiply A*B by alpha.
-                ymm4 = _mm256_mul_pd(ymm4, ymm0);
-                ymm5 = _mm256_mul_pd(ymm5, ymm0);
-                ymm6 = _mm256_mul_pd(ymm6, ymm0);
-
-                if(is_beta_non_zero)
-                {
-                    // multiply C by beta and accumulate.
-                    ymm2 = _mm256_loadu_pd(tC);
-                    ymm4 = _mm256_fmadd_pd(ymm2, ymm1, ymm4);
-
-                    double* ttC = tC + ldc;
-
-                    // multiply C by beta and accumulate.
-                    ymm2 = _mm256_loadu_pd(ttC);
-                    ymm5 = _mm256_fmadd_pd(ymm2, ymm1, ymm5);
-
-                    ttC += ldc;
-
-                    // multiply C by beta and accumulate.
-                    ymm2 = _mm256_loadu_pd(ttC);
-                    ymm6 = _mm256_fmadd_pd(ymm2, ymm1, ymm6);
-                }
-                _mm256_storeu_pd(tC, ymm4);
-
-                tC += ldc;
-                _mm256_storeu_pd(tC, ymm5);
-
-                tC += ldc;
-                _mm256_storeu_pd(tC, ymm6);
-            }
-            n_remainder = N - col_idx;
-            // if the N is not multiple of 3.
-            // handling edge case.
-            if (n_remainder == 2)
-            {
-                //pointer math to point to proper memory
-                tC = C + ldc * col_idx + row_idx;
-                tB = B + tb_inc_col * col_idx;
-                tA = A + row_idx;
-
-                ymm4 = _mm256_setzero_pd();
-                ymm5 = _mm256_setzero_pd();
-
-                for (k = 0; k < K; ++k)
-                {
-                    // The inner loop broadcasts the B matrix data and
-                    // multiplies it with the A matrix.
-                    ymm0 = _mm256_broadcast_sd(tB + tb_inc_col * 0);
-                    ymm1 = _mm256_broadcast_sd(tB + tb_inc_col * 1);
-                    tB += tb_inc_row;
-
-                    //broadcasted matrix B elements are multiplied
-                    //with matrix A columns.
-                    ymm3 = _mm256_loadu_pd(tA);
-                    ymm4 = _mm256_fmadd_pd(ymm0, ymm3, ymm4);
-                    ymm5 = _mm256_fmadd_pd(ymm1, ymm3, ymm5);
-
-                    tA += lda;
-                }
-                // alpha, beta multiplication.
-                ymm0 = _mm256_broadcast_sd(alpha_cast);
-                ymm1 = _mm256_broadcast_sd(beta_cast);
-
-                //multiply A*B by alpha.
-                ymm4 = _mm256_mul_pd(ymm4, ymm0);
-                ymm5 = _mm256_mul_pd(ymm5, ymm0);
-
-                if(is_beta_non_zero)
-                {
-                    // multiply C by beta and accumulate.
-                    ymm2 = _mm256_loadu_pd(tC);
-                    ymm4 = _mm256_fmadd_pd(ymm2, ymm1, ymm4);
-
-                    double* ttC = tC + ldc;
-
-                    // multiply C by beta and accumulate.
-                    ymm2 = _mm256_loadu_pd(ttC);
-                    ymm5 = _mm256_fmadd_pd(ymm2, ymm1, ymm5);
-                }
-                _mm256_storeu_pd(tC, ymm4);
-
-                tC += ldc;
-                _mm256_storeu_pd(tC, ymm5);
-
-                col_idx += 2;
-
-            }
-            // if the N is not multiple of 3.
-            // handling edge case.
-            if (n_remainder == 1)
-            {
-                //pointer math to point to proper memory
-                tC = C + ldc * col_idx + row_idx;
-                tB = B + tb_inc_col * col_idx;
-                tA = A + row_idx;
-
-                ymm4 = _mm256_setzero_pd();
-
-                for (k = 0; k < K; ++k)
-                {
-                    // The inner loop broadcasts the B matrix data and
-                    // multiplies it with the A matrix.
-                    ymm0 = _mm256_broadcast_sd(tB + tb_inc_col * 0);
-                    tB += tb_inc_row;
-
-                    //broadcasted matrix B elements are multiplied
-                    //with matrix A columns.
-                    ymm3 = _mm256_loadu_pd(tA);
-                    ymm4 = _mm256_fmadd_pd(ymm0, ymm3, ymm4);
-
-                    tA += lda;
-                }
-                // alpha, beta multiplication.
-                ymm0 = _mm256_broadcast_sd(alpha_cast);
-                ymm1 = _mm256_broadcast_sd(beta_cast);
-
-                ymm4 = _mm256_mul_pd(ymm4, ymm0);
-
-                if(is_beta_non_zero)
-                {
-                    // multiply C by beta and accumulate.
-                    ymm2 = _mm256_loadu_pd(tC);
-                    ymm4 = _mm256_fmadd_pd(ymm2, ymm1, ymm4);
-
-                }
-                _mm256_storeu_pd(tC, ymm4);
-
-            }
-
-            row_idx += 4;
-        }
-        // M is not a multiple of 32.
-        // The handling of edge case where the remainder
-        // dimension is less than 8. The padding takes place
-        // to handle this case.
-        if ((m_remainder) && (lda > 3))
-        {
-            double f_temp[8] = {0.0};
-
-            for (col_idx = 0; (col_idx + 2) < N; col_idx += 3)
-            {
-                //pointer math to point to proper memory
-                tC = C + ldc * col_idx + row_idx;
-                tB = B + tb_inc_col * col_idx;
-                tA = A + row_idx;
-
-                // clear scratch registers.
-                ymm5 = _mm256_setzero_pd();
-                ymm7 = _mm256_setzero_pd();
-                ymm9 = _mm256_setzero_pd();
-
-                for (k = 0; k < (K - 1); ++k)
-                {
-                    // The inner loop broadcasts the B matrix data and
-                    // multiplies it with the A matrix.
-                    ymm0 = _mm256_broadcast_sd(tB + tb_inc_col * 0);
-                    ymm1 = _mm256_broadcast_sd(tB + tb_inc_col * 1);
-                    ymm2 = _mm256_broadcast_sd(tB + tb_inc_col * 2);
-                    tB += tb_inc_row;
-
-                    //broadcasted matrix B elements are multiplied
-                    //with matrix A columns.
-                    ymm3 = _mm256_loadu_pd(tA);
-                    ymm5 = _mm256_fmadd_pd(ymm0, ymm3, ymm5);
-                    ymm7 = _mm256_fmadd_pd(ymm1, ymm3, ymm7);
-                    ymm9 = _mm256_fmadd_pd(ymm2, ymm3, ymm9);
-
-                    tA += lda;
-                }
-                // alpha, beta multiplication.
-                ymm0 = _mm256_broadcast_sd(tB + tb_inc_col * 0);
-                ymm1 = _mm256_broadcast_sd(tB + tb_inc_col * 1);
-                ymm2 = _mm256_broadcast_sd(tB + tb_inc_col * 2);
-                tB += tb_inc_row;
-
-                for (int i = 0; i < m_remainder; i++)
-                {
-                    f_temp[i] = tA[i];
-                }
-                ymm3 = _mm256_loadu_pd(f_temp);
-                ymm5 = _mm256_fmadd_pd(ymm0, ymm3, ymm5);
-                ymm7 = _mm256_fmadd_pd(ymm1, ymm3, ymm7);
-                ymm9 = _mm256_fmadd_pd(ymm2, ymm3, ymm9);
-
-                ymm0 = _mm256_broadcast_sd(alpha_cast);
-                ymm1 = _mm256_broadcast_sd(beta_cast);
-
-                //multiply A*B by alpha.
-                ymm5 = _mm256_mul_pd(ymm5, ymm0);
-                ymm7 = _mm256_mul_pd(ymm7, ymm0);
-                ymm9 = _mm256_mul_pd(ymm9, ymm0);
-
-                if(is_beta_non_zero)
-                {
-                    for (int i = 0; i < m_remainder; i++)
-                    {
-                        f_temp[i] = tC[i];
-                    }
-                    ymm2 = _mm256_loadu_pd(f_temp);
-                    ymm5 = _mm256_fmadd_pd(ymm2, ymm1, ymm5);
-
-
-                    double* ttC = tC + ldc;
-
-                    for (int i = 0; i < m_remainder; i++)
-                    {
-                        f_temp[i] = ttC[i];
-                    }
-                    ymm2 = _mm256_loadu_pd(f_temp);
-                    ymm7 = _mm256_fmadd_pd(ymm2, ymm1, ymm7);
-
-                    ttC += ldc;
-                    for (int i = 0; i < m_remainder; i++)
-                    {
-                        f_temp[i] = ttC[i];
-                    }
-                    ymm2 = _mm256_loadu_pd(f_temp);
-                    ymm9 = _mm256_fmadd_pd(ymm2, ymm1, ymm9);
-                }
-                    _mm256_storeu_pd(f_temp, ymm5);
-                    for (int i = 0; i < m_remainder; i++)
-                    {
-                        tC[i] = f_temp[i];
-                    }
-
-                    tC += ldc;
-                    _mm256_storeu_pd(f_temp, ymm7);
-                    for (int i = 0; i < m_remainder; i++)
-                    {
-                        tC[i] = f_temp[i];
-                    }
-
-                    tC += ldc;
-                    _mm256_storeu_pd(f_temp, ymm9);
-                    for (int i = 0; i < m_remainder; i++)
-                    {
-                        tC[i] = f_temp[i];
-                    }
-            }
-            n_remainder = N - col_idx;
-            // if the N is not multiple of 3.
-            // handling edge case.
-            if (n_remainder == 2)
-            {
-                //pointer math to point to proper memory
-                tC = C + ldc * col_idx + row_idx;
-                tB = B + tb_inc_col * col_idx;
-                tA = A + row_idx;
-
-                ymm5 = _mm256_setzero_pd();
-                ymm7 = _mm256_setzero_pd();
-
-                for (k = 0; k < (K - 1); ++k)
-                {
-                    // The inner loop broadcasts the B matrix data and
-                    // multiplies it with the A matrix.
-                    ymm0 = _mm256_broadcast_sd(tB + tb_inc_col * 0);
-                    ymm1 = _mm256_broadcast_sd(tB + tb_inc_col * 1);
-                    tB += tb_inc_row;
-
-                    ymm3 = _mm256_loadu_pd(tA);
-                    ymm5 = _mm256_fmadd_pd(ymm0, ymm3, ymm5);
-                    ymm7 = _mm256_fmadd_pd(ymm1, ymm3, ymm7);
-
-                    tA += lda;
-                }
-
-                ymm0 = _mm256_broadcast_sd(tB + tb_inc_col * 0);
-                ymm1 = _mm256_broadcast_sd(tB + tb_inc_col * 1);
-                tB += tb_inc_row;
-
-                for (int i = 0; i < m_remainder; i++)
-                {
-                    f_temp[i] = tA[i];
-                }
-                ymm3 = _mm256_loadu_pd(f_temp);
-                ymm5 = _mm256_fmadd_pd(ymm0, ymm3, ymm5);
-                ymm7 = _mm256_fmadd_pd(ymm1, ymm3, ymm7);
-
-                ymm0 = _mm256_broadcast_sd(alpha_cast);
-                ymm1 = _mm256_broadcast_sd(beta_cast);
-
-                ymm5 = _mm256_mul_pd(ymm5, ymm0);
-                ymm7 = _mm256_mul_pd(ymm7, ymm0);
-
-                if(is_beta_non_zero)
-                {
-                    for (int i = 0; i < m_remainder; i++)
-                    {
-                        f_temp[i] = tC[i];
-                    }
-                    ymm2 = _mm256_loadu_pd(f_temp);
-                    ymm5 = _mm256_fmadd_pd(ymm2, ymm1, ymm5);
-
-                    double* ttC = tC + ldc;
-
-                    for (int i = 0; i < m_remainder; i++)
-                    {
-                        f_temp[i] = ttC[i];
-                    }
-                    ymm2 = _mm256_loadu_pd(f_temp);
-                    ymm7 = _mm256_fmadd_pd(ymm2, ymm1, ymm7);
-
-                }
-                _mm256_storeu_pd(f_temp, ymm5);
-                for (int i = 0; i < m_remainder; i++)
-                {
-                    tC[i] = f_temp[i];
-                }
-
-                tC += ldc;
-                _mm256_storeu_pd(f_temp, ymm7);
-                for (int i = 0; i < m_remainder; i++)
-                {
-                    tC[i] = f_temp[i];
-                }
-            }
-            // if the N is not multiple of 3.
-            // handling edge case.
-            if (n_remainder == 1)
-            {
-                //pointer math to point to proper memory
-                tC = C + ldc * col_idx + row_idx;
-                tB = B + tb_inc_col * col_idx;
-                tA = A + row_idx;
-
-                ymm5 = _mm256_setzero_pd();
-
-                for (k = 0; k < (K - 1); ++k)
-                {
-                    // The inner loop broadcasts the B matrix data and
-                    // multiplies it with the A matrix.
-                    ymm0 = _mm256_broadcast_sd(tB + tb_inc_col * 0);
-                    tB += tb_inc_row;
-
-                    ymm3 = _mm256_loadu_pd(tA);
-                    ymm5 = _mm256_fmadd_pd(ymm0, ymm3, ymm5);
-
-                    tA += lda;
-                }
-
-                ymm0 = _mm256_broadcast_sd(tB + tb_inc_col * 0);
-                tB += tb_inc_row;
-
-                for (int i = 0; i < m_remainder; i++)
-                {
-                    f_temp[i] = tA[i];
-                }
-                ymm3 = _mm256_loadu_pd(f_temp);
-                ymm5 = _mm256_fmadd_pd(ymm0, ymm3, ymm5);
-
-                ymm0 = _mm256_broadcast_sd(alpha_cast);
-                ymm1 = _mm256_broadcast_sd(beta_cast);
-
-                // multiply C by beta and accumulate.
-                ymm5 = _mm256_mul_pd(ymm5, ymm0);
-
-                if(is_beta_non_zero)
-                {
-
-                    for (int i = 0; i < m_remainder; i++)
-                    {
-                        f_temp[i] = tC[i];
-                    }
-                    ymm2 = _mm256_loadu_pd(f_temp);
-                    ymm5 = _mm256_fmadd_pd(ymm2, ymm1, ymm5);
-                }
-                _mm256_storeu_pd(f_temp, ymm5);
-                for (int i = 0; i < m_remainder; i++)
-                {
-                    tC[i] = f_temp[i];
-                }
-            }
-            m_remainder = 0;
-        }
-
-        if (m_remainder)
-        {
-            double result;
-            for (; row_idx < M; row_idx += 1)
-            {
-                for (col_idx = 0; col_idx < N; col_idx += 1)
+                // Handles edge cases where remainder elements are between 12-16(13, 14, 15).
+                // Here m_rem gives index in mask_ptr that points which mask to be used based
+                // on remainder elements which could be 1, 2, or 3 here.
+                m_rem = (m_remainder % 12);
+                __m256i maskVec = _mm256_loadu_si256( (__m256i *)mask_ptr[m_rem]);
+                for (col_idx = 0; (col_idx + 2) < N; col_idx += 3)
                 {
                     //pointer math to point to proper memory
                     tC = C + ldc * col_idx + row_idx;
                     tB = B + tb_inc_col * col_idx;
                     tA = A + row_idx;
 
-                    result = 0;
+                    // clear scratch registers.
+                    ymm4 = _mm256_setzero_pd();
+                    ymm5 = _mm256_setzero_pd();
+                    ymm6 = _mm256_setzero_pd();
+                    ymm7 = _mm256_setzero_pd();
+                    ymm8 = _mm256_setzero_pd();
+                    ymm9 = _mm256_setzero_pd();
+                    ymm10 = _mm256_setzero_pd();
+                    ymm11 = _mm256_setzero_pd();
+                    ymm12 = _mm256_setzero_pd();
+                    ymm13 = _mm256_setzero_pd();
+                    ymm14 = _mm256_setzero_pd();
+                    ymm15 = _mm256_setzero_pd();
+
                     for (k = 0; k < K; ++k)
                     {
-                        result += (*tA) * (*tB);
-                        tA += lda;
+                        // The inner loop broadcasts the B matrix data and
+                        // multiplies it with the A matrix.
+                        // This loop is processing D_MR x K
+                        ymm0 = _mm256_broadcast_sd(tB + tb_inc_col * 0);
+                        ymm1 = _mm256_broadcast_sd(tB + tb_inc_col * 1);
+                        ymm2 = _mm256_broadcast_sd(tB + tb_inc_col * 2);
                         tB += tb_inc_row;
+
+                        //broadcasted matrix B elements are multiplied
+                        //with matrix A columns.
+                        ymm3 = _mm256_loadu_pd(tA);
+                        ymm4 = _mm256_fmadd_pd(ymm0, ymm3, ymm4);
+                        ymm8 = _mm256_fmadd_pd(ymm1, ymm3, ymm8);
+                        ymm12 = _mm256_fmadd_pd(ymm2, ymm3, ymm12);
+
+                        ymm3 = _mm256_loadu_pd(tA + 4);
+                        ymm5 = _mm256_fmadd_pd(ymm0, ymm3, ymm5);
+                        ymm9 = _mm256_fmadd_pd(ymm1, ymm3, ymm9);
+                        ymm13 = _mm256_fmadd_pd(ymm2, ymm3, ymm13);
+
+                        ymm3 = _mm256_loadu_pd(tA + 8);
+                        ymm6 = _mm256_fmadd_pd(ymm0, ymm3, ymm6);
+                        ymm10 = _mm256_fmadd_pd(ymm1, ymm3, ymm10);
+                        ymm14 = _mm256_fmadd_pd(ymm2, ymm3, ymm14);
+
+                        // Masked load the relevant remainder elements only
+                        // using maskVec.
+                        ymm3 = _mm256_maskload_pd(tA + 12, maskVec);
+                        ymm7 = _mm256_fmadd_pd(ymm0, ymm3, ymm7);
+                        ymm11 = _mm256_fmadd_pd(ymm1, ymm3, ymm11);
+                        ymm15 = _mm256_fmadd_pd(ymm2, ymm3, ymm15);
+
+                        tA += lda;
+                    }
+                    // alpha, beta multiplication.
+                    ymm0 = _mm256_broadcast_sd(alpha_cast);
+                    ymm1 = _mm256_broadcast_sd(beta_cast);
+
+                    //multiply A*B by alpha.
+                    ymm4 = _mm256_mul_pd(ymm4, ymm0);
+                    ymm5 = _mm256_mul_pd(ymm5, ymm0);
+                    ymm6 = _mm256_mul_pd(ymm6, ymm0);
+                    ymm7 = _mm256_mul_pd(ymm7, ymm0);
+                    ymm8 = _mm256_mul_pd(ymm8, ymm0);
+                    ymm9 = _mm256_mul_pd(ymm9, ymm0);
+                    ymm10 = _mm256_mul_pd(ymm10, ymm0);
+                    ymm11 = _mm256_mul_pd(ymm11, ymm0);
+                    ymm12 = _mm256_mul_pd(ymm12, ymm0);
+                    ymm13 = _mm256_mul_pd(ymm13, ymm0);
+                    ymm14 = _mm256_mul_pd(ymm14, ymm0);
+                    ymm15 = _mm256_mul_pd(ymm15, ymm0);
+
+                    if(is_beta_non_zero)
+                    {
+                        // multiply C by beta and accumulate col 1.
+                        ymm2 = _mm256_loadu_pd(tC);
+                        ymm4 = _mm256_fmadd_pd(ymm2, ymm1, ymm4);
+                        ymm2 = _mm256_loadu_pd(tC + 4);
+                        ymm5 = _mm256_fmadd_pd(ymm2, ymm1, ymm5);
+                        ymm2 = _mm256_loadu_pd(tC + 8);
+                        ymm6 = _mm256_fmadd_pd(ymm2, ymm1, ymm6);
+                        // Masked load the relevant remaider elements of C matrix
+                        // Scale by beta.
+                        ymm2 = _mm256_maskload_pd(tC + 12, maskVec);
+                        ymm7 = _mm256_fmadd_pd(ymm2, ymm1, ymm7);
+
+                        // multiply C by beta and accumulate, col 2.
+                        double* ttC  = tC + ldc;
+                        ymm2 = _mm256_loadu_pd(ttC);
+                        ymm8 = _mm256_fmadd_pd(ymm2, ymm1, ymm8);
+                        ymm2 = _mm256_loadu_pd(ttC + 4);
+                        ymm9 = _mm256_fmadd_pd(ymm2, ymm1, ymm9);
+                        ymm2 = _mm256_loadu_pd(ttC + 8);
+                        ymm10 = _mm256_fmadd_pd(ymm2, ymm1, ymm10);
+                        // Masked load the relevant remaider elements of C matrix
+                        // Scale by beta.
+                        ymm2 = _mm256_maskload_pd(ttC + 12, maskVec);
+                        ymm11 = _mm256_fmadd_pd(ymm2, ymm1, ymm11);
+
+                        // multiply C by beta and accumulate, col 3.
+                        ttC += ldc;
+                        ymm2 = _mm256_loadu_pd(ttC);
+                        ymm12 = _mm256_fmadd_pd(ymm2, ymm1, ymm12);
+                        ymm2 = _mm256_loadu_pd(ttC + 4);
+                        ymm13 = _mm256_fmadd_pd(ymm2, ymm1, ymm13);
+                        ymm2 = _mm256_loadu_pd(ttC + 8);
+                        ymm14 = _mm256_fmadd_pd(ymm2, ymm1, ymm14);
+                        // Masked load the relevant remaider elements of C matrix
+                        // Scale by beta.
+                        ymm2 = _mm256_maskload_pd(ttC + 12, maskVec);
+                        ymm15 = _mm256_fmadd_pd(ymm2, ymm1, ymm15);
+                    }
+                    _mm256_storeu_pd(tC, ymm4);
+                    _mm256_storeu_pd(tC + 4, ymm5);
+                    _mm256_storeu_pd(tC + 8, ymm6);
+                    // Masked store the relevant remaider elements of C matrix
+                    _mm256_maskstore_pd(tC + 12, maskVec, ymm7);
+
+                    tC += ldc;
+
+                    _mm256_storeu_pd(tC, ymm8);
+                    _mm256_storeu_pd(tC + 4, ymm9);
+                    _mm256_storeu_pd(tC + 8, ymm10);
+                    // Masked store the relevant remaider elements of C matrix
+                    _mm256_maskstore_pd(tC + 12, maskVec, ymm11);
+
+                    tC += ldc;
+
+                    _mm256_storeu_pd(tC, ymm12);
+                    _mm256_storeu_pd(tC + 4, ymm13);
+                    _mm256_storeu_pd(tC + 8, ymm14);
+                    // Masked store the relevant remaider elements of C matrix
+                    _mm256_maskstore_pd(tC + 12, maskVec, ymm15);
+                }
+                n_remainder = N - col_idx;
+
+                // if the N is not multiple of 3.
+                // handling edge case.
+                if (n_remainder == 2)
+                {
+                    //pointer math to point to proper memory
+                    tC = C + ldc * col_idx + row_idx;
+                    tB = B + tb_inc_col * col_idx;
+                    tA = A + row_idx;
+
+                    // clear scratch registers.
+                    ymm8 = _mm256_setzero_pd();
+                    ymm9 = _mm256_setzero_pd();
+                    ymm10 = _mm256_setzero_pd();
+                    ymm11 = _mm256_setzero_pd();
+                    ymm12 = _mm256_setzero_pd();
+                    ymm13 = _mm256_setzero_pd();
+                    ymm14 = _mm256_setzero_pd();
+                    ymm15 = _mm256_setzero_pd();
+
+                    for (k = 0; k < K; ++k)
+                    {
+                        // The inner loop broadcasts the B matrix data and
+                        // multiplies it with the A matrix.
+                        ymm0 = _mm256_broadcast_sd(tB + tb_inc_col * 0);
+                        ymm1 = _mm256_broadcast_sd(tB + tb_inc_col * 1);
+                        tB += tb_inc_row;
+
+                        //broadcasted matrix B elements are multiplied
+                        //with matrix A columns.
+                        ymm3 = _mm256_loadu_pd(tA);
+                        ymm8 = _mm256_fmadd_pd(ymm0, ymm3, ymm8);
+                        ymm12 = _mm256_fmadd_pd(ymm1, ymm3, ymm12);
+
+                        ymm3 = _mm256_loadu_pd(tA + 4);
+                        ymm9 = _mm256_fmadd_pd(ymm0, ymm3, ymm9);
+                        ymm13 = _mm256_fmadd_pd(ymm1, ymm3, ymm13);
+
+                        ymm3 = _mm256_loadu_pd(tA + 8);
+                        ymm10 = _mm256_fmadd_pd(ymm0, ymm3, ymm10);
+                        ymm14 = _mm256_fmadd_pd(ymm1, ymm3, ymm14);
+
+                        // Masked load the relevant remainder elements only
+                        // using maskVec.
+                        ymm3 = _mm256_maskload_pd(tA + 12, maskVec);
+                        ymm11 = _mm256_fmadd_pd(ymm0, ymm3, ymm11);
+                        ymm15 = _mm256_fmadd_pd(ymm1, ymm3, ymm15);
+
+                        tA += lda;
+
+                    }
+                    // alpha, beta multiplication.
+                    ymm0 = _mm256_broadcast_sd(alpha_cast);
+                    ymm1 = _mm256_broadcast_sd(beta_cast);
+
+                    //multiply A*B by alpha.
+                    ymm8 = _mm256_mul_pd(ymm8, ymm0);
+                    ymm9 = _mm256_mul_pd(ymm9, ymm0);
+                    ymm10 = _mm256_mul_pd(ymm10, ymm0);
+                    ymm11 = _mm256_mul_pd(ymm11, ymm0);
+                    ymm12 = _mm256_mul_pd(ymm12, ymm0);
+                    ymm13 = _mm256_mul_pd(ymm13, ymm0);
+                    ymm14 = _mm256_mul_pd(ymm14, ymm0);
+                    ymm15 = _mm256_mul_pd(ymm15, ymm0);
+
+                    if(is_beta_non_zero)
+                    {
+                        // multiply C by beta and accumulate, col 1.
+                        ymm2 = _mm256_loadu_pd(tC + 0);
+                        ymm8 = _mm256_fmadd_pd(ymm2, ymm1, ymm8);
+                        ymm2 = _mm256_loadu_pd(tC + 4);
+                        ymm9 = _mm256_fmadd_pd(ymm2, ymm1, ymm9);
+                        ymm2 = _mm256_loadu_pd(tC + 8);
+                        ymm10 = _mm256_fmadd_pd(ymm2, ymm1, ymm10);
+                        // Masked load the relevant remaider elements of C matrix
+                        // Scale by beta.
+                        ymm2 = _mm256_maskload_pd(tC + 12, maskVec);
+                        ymm11 = _mm256_fmadd_pd(ymm2, ymm1, ymm11);
+
+                        // multiply C by beta and accumulate, col 2.
+                        double *ttC = tC + ldc;
+
+                        ymm2 = _mm256_loadu_pd(ttC);
+                        ymm12 = _mm256_fmadd_pd(ymm2, ymm1, ymm12);
+                        ymm2 = _mm256_loadu_pd(ttC + 4);
+                        ymm13 = _mm256_fmadd_pd(ymm2, ymm1, ymm13);
+                        ymm2 = _mm256_loadu_pd(ttC + 8);
+                        ymm14 = _mm256_fmadd_pd(ymm2, ymm1, ymm14);
+                        // Masked load the relevant remaider elements of C matrix
+                        // Scale by beta.
+                        ymm2 = _mm256_maskload_pd(ttC + 12, maskVec);
+                        ymm15 = _mm256_fmadd_pd(ymm2, ymm1, ymm15);
                     }
 
-                    result *= (*alpha_cast);
+                    _mm256_storeu_pd(tC + 0, ymm8);
+                    _mm256_storeu_pd(tC + 4, ymm9);
+                    _mm256_storeu_pd(tC + 8, ymm10);
+                    // Masked store the relevant remaider elements of C matrix
+                    _mm256_maskstore_pd(tC + 12, maskVec, ymm11);
+
+                    tC += ldc;
+
+                    _mm256_storeu_pd(tC, ymm12);
+                    _mm256_storeu_pd(tC + 4, ymm13);
+                    _mm256_storeu_pd(tC + 8, ymm14);
+                    // Masked store the relevant remaider elements of C matrix
+                    _mm256_maskstore_pd(tC + 12, maskVec, ymm15);
+                    col_idx += 2;
+                }
+                // if the N is not multiple of 3.
+                // handling edge case.
+                if (n_remainder == 1)
+                {
+                    //pointer math to point to proper memory
+                    tC = C + ldc * col_idx + row_idx;
+                    tB = B + tb_inc_col * col_idx;
+                    tA = A + row_idx;
+
+                    // clear scratch registers.
+                    ymm12 = _mm256_setzero_pd();
+                    ymm13 = _mm256_setzero_pd();
+                    ymm14 = _mm256_setzero_pd();
+                    ymm15 = _mm256_setzero_pd();
+
+                    for (k = 0; k < K; ++k)
+                    {
+                        // The inner loop broadcasts the B matrix data and
+                        // multiplies it with the A matrix.
+                        ymm0 = _mm256_broadcast_sd(tB + tb_inc_col * 0);
+                        tB += tb_inc_row;
+
+                        //broadcasted matrix B elements are multiplied
+                        //with matrix A columns.
+                        ymm3 = _mm256_loadu_pd(tA);
+                        ymm12 = _mm256_fmadd_pd(ymm0, ymm3, ymm12);
+
+                        ymm3 = _mm256_loadu_pd(tA + 4);
+                        ymm13 = _mm256_fmadd_pd(ymm0, ymm3, ymm13);
+
+                        ymm3 = _mm256_loadu_pd(tA + 8);
+                        ymm14 = _mm256_fmadd_pd(ymm0, ymm3, ymm14);
+
+                        // Masked load the relevant remainder elements only
+                        // using maskVec.
+                        ymm3 = _mm256_maskload_pd(tA + 12, maskVec);
+                        ymm15 = _mm256_fmadd_pd(ymm0, ymm3, ymm15);
+
+                        tA += lda;
+
+                    }
+                    // alpha, beta multiplication.
+                    ymm0 = _mm256_broadcast_sd(alpha_cast);
+                    ymm1 = _mm256_broadcast_sd(beta_cast);
+
+                    //multiply A*B by alpha.
+                    ymm12 = _mm256_mul_pd(ymm12, ymm0);
+                    ymm13 = _mm256_mul_pd(ymm13, ymm0);
+                    ymm14 = _mm256_mul_pd(ymm14, ymm0);
+                    ymm15 = _mm256_mul_pd(ymm15, ymm0);
+
                     if(is_beta_non_zero)
-                        (*tC) = (*tC) * (*beta_cast) + result;
-                    else
-                    (*tC) = result;
+                    {
+                        // multiply C by beta and accumulate.
+                        ymm2 = _mm256_loadu_pd(tC + 0);
+                        ymm12 = _mm256_fmadd_pd(ymm2, ymm1, ymm12);
+                        ymm2 = _mm256_loadu_pd(tC + 4);
+                        ymm13 = _mm256_fmadd_pd(ymm2, ymm1, ymm13);
+                        ymm2 = _mm256_loadu_pd(tC + 8);
+                        ymm14 = _mm256_fmadd_pd(ymm2, ymm1, ymm14);
+                        // Masked load the relevant remaider elements of C matrix
+                        // Scale by beta.
+                        ymm2 = _mm256_maskload_pd(tC + 12, maskVec);
+                        ymm15 = _mm256_fmadd_pd(ymm2, ymm1, ymm15);
+                    }
+
+                    _mm256_storeu_pd(tC + 0, ymm12);
+                    _mm256_storeu_pd(tC + 4, ymm13);
+                    _mm256_storeu_pd(tC + 8, ymm14);
+                    // Masked store the relevant remaider elements of C matrix
+                    _mm256_maskstore_pd(tC + 12, maskVec, ymm15);
+                }
+            }
+            else if(m_remainder > 8)
+            {
+                // Handles edge cases where remainder elements are between 9-12(9, 10, 11, 12).
+                // Here m_rem gives index in mask_ptr that points which mask to be used based
+                // on remainder elements which could be 1, 2, 3 or 4 here.
+                m_rem = (m_remainder % 8);
+                __m256i maskVec = _mm256_loadu_si256( (__m256i *)mask_ptr[m_rem]);
+
+                for (col_idx = 0; (col_idx + 2) < N; col_idx += 3)
+                {
+                    //pointer math to point to proper memory
+                    tC = C + ldc * col_idx + row_idx;
+                    tB = B + tb_inc_col * col_idx;
+                    tA = A + row_idx;
+
+                    // clear scratch registers.
+                    ymm4 = _mm256_setzero_pd();
+                    ymm5 = _mm256_setzero_pd();
+                    ymm6 = _mm256_setzero_pd();
+                    ymm8 = _mm256_setzero_pd();
+                    ymm9 = _mm256_setzero_pd();
+                    ymm10 = _mm256_setzero_pd();
+                    ymm12 = _mm256_setzero_pd();
+                    ymm13 = _mm256_setzero_pd();
+                    ymm14 = _mm256_setzero_pd();
+
+                    for (k = 0; k < K; ++k)
+                    {
+                        // The inner loop broadcasts the B matrix data and
+                        // multiplies it with the A matrix.
+                        ymm0 = _mm256_broadcast_sd(tB + tb_inc_col * 0);
+                        ymm1 = _mm256_broadcast_sd(tB + tb_inc_col * 1);
+                        ymm2 = _mm256_broadcast_sd(tB + tb_inc_col * 2);
+                        tB += tb_inc_row;
+
+                        //broadcasted matrix B elements are multiplied
+                        //with matrix A columns.
+                        ymm3 = _mm256_loadu_pd(tA);
+                        ymm4 = _mm256_fmadd_pd(ymm0, ymm3, ymm4);
+                        ymm8 = _mm256_fmadd_pd(ymm1, ymm3, ymm8);
+                        ymm12 = _mm256_fmadd_pd(ymm2, ymm3, ymm12);
+
+                        ymm3 = _mm256_loadu_pd(tA + 4);
+                        ymm5 = _mm256_fmadd_pd(ymm0, ymm3, ymm5);
+                        ymm9 = _mm256_fmadd_pd(ymm1, ymm3, ymm9);
+                        ymm13 = _mm256_fmadd_pd(ymm2, ymm3, ymm13);
+
+                        // Masked load the relevant remainder elements only
+                        // using maskVec.
+                        ymm3 = _mm256_maskload_pd(tA + 8, maskVec);
+                        ymm6 = _mm256_fmadd_pd(ymm0, ymm3, ymm6);
+                        ymm10 = _mm256_fmadd_pd(ymm1, ymm3, ymm10);
+                        ymm14 = _mm256_fmadd_pd(ymm2, ymm3, ymm14);
+
+                        tA += lda;
+                    }
+                    // alpha, beta multiplication.
+                    ymm0 = _mm256_broadcast_sd(alpha_cast);
+                    ymm1 = _mm256_broadcast_sd(beta_cast);
+
+                    //multiply A*B by alpha.
+                    ymm4 = _mm256_mul_pd(ymm4, ymm0);
+                    ymm5 = _mm256_mul_pd(ymm5, ymm0);
+                    ymm6 = _mm256_mul_pd(ymm6, ymm0);
+                    ymm8 = _mm256_mul_pd(ymm8, ymm0);
+                    ymm9 = _mm256_mul_pd(ymm9, ymm0);
+                    ymm10 = _mm256_mul_pd(ymm10, ymm0);
+                    ymm12 = _mm256_mul_pd(ymm12, ymm0);
+                    ymm13 = _mm256_mul_pd(ymm13, ymm0);
+                    ymm14 = _mm256_mul_pd(ymm14, ymm0);
+
+                    if(is_beta_non_zero)
+                    {
+                        // multiply C by beta and accumulate.
+                        ymm2 = _mm256_loadu_pd(tC);
+                        ymm4 = _mm256_fmadd_pd(ymm2, ymm1, ymm4);
+
+                        ymm2 = _mm256_loadu_pd(tC + 4);
+                        ymm5 = _mm256_fmadd_pd(ymm2, ymm1, ymm5);
+                        // Masked load the relevant remaider elements of C matrix
+                        // Scale by beta.
+                        ymm2 = _mm256_maskload_pd(tC + 8, maskVec);
+                        ymm6 = _mm256_fmadd_pd(ymm2, ymm1, ymm6);
+
+                        // multiply C by beta and accumulate.
+                        double *ttC = tC +ldc;
+                        ymm2 = _mm256_loadu_pd(ttC);
+                        ymm8 = _mm256_fmadd_pd(ymm2, ymm1, ymm8);
+
+                        ymm2 = _mm256_loadu_pd(ttC + 4);
+                        ymm9 = _mm256_fmadd_pd(ymm2, ymm1, ymm9);
+                        // Masked load the relevant remaider elements of C matrix
+                        // Scale by beta.
+                        ymm2 = _mm256_maskload_pd(ttC + 8, maskVec);
+                        ymm10 = _mm256_fmadd_pd(ymm2, ymm1, ymm10);
+
+                        // multiply C by beta and accumulate.
+                        ttC += ldc;
+                        ymm2 = _mm256_loadu_pd(ttC);
+                        ymm12 = _mm256_fmadd_pd(ymm2, ymm1, ymm12);
+
+                        ymm2 = _mm256_loadu_pd(ttC + 4);
+                        ymm13 = _mm256_fmadd_pd(ymm2, ymm1, ymm13);
+                        // Masked load the relevant remaider elements of C matrix
+                        // Scale by beta.
+                        ymm2 = _mm256_maskload_pd(ttC + 8, maskVec);
+                        ymm14 = _mm256_fmadd_pd(ymm2, ymm1, ymm14);
+
+                    }
+                    _mm256_storeu_pd(tC, ymm4);
+                    _mm256_storeu_pd(tC + 4, ymm5);
+                    // Masked store the relevant remaider elements of C matrix
+                    _mm256_maskstore_pd(tC + 8, maskVec, ymm6);
+
+                    tC += ldc;
+
+                    _mm256_storeu_pd(tC, ymm8);
+                    _mm256_storeu_pd(tC + 4, ymm9);
+                    // Masked store the relevant remaider elements of C matrix
+                    _mm256_maskstore_pd(tC + 8, maskVec, ymm10);
+
+                    tC += ldc;
+
+                    _mm256_storeu_pd(tC, ymm12);
+                    _mm256_storeu_pd(tC + 4, ymm13);
+                    // Masked store the relevant remaider elements of C matrix
+                    _mm256_maskstore_pd(tC + 8, maskVec, ymm14);
+                }
+                n_remainder = N - col_idx;
+                // if the N is not multiple of 3.
+                // handling edge case.
+                if (n_remainder == 2)
+                {
+                    //pointer math to point to proper memory
+                    tC = C + ldc * col_idx + row_idx;
+                    tB = B + tb_inc_col * col_idx;
+                    tA = A + row_idx;
+
+                    // clear scratch registers.
+                    ymm8 = _mm256_setzero_pd();
+                    ymm9 = _mm256_setzero_pd();
+                    ymm10 = _mm256_setzero_pd();
+                    ymm12 = _mm256_setzero_pd();
+                    ymm13 = _mm256_setzero_pd();
+                    ymm14 = _mm256_setzero_pd();
+
+                    for (k = 0; k < K; ++k)
+                    {
+                        // The inner loop broadcasts the B matrix data and
+                        // multiplies it with the A matrix.
+                        ymm0 = _mm256_broadcast_sd(tB + tb_inc_col * 0);
+                        ymm1 = _mm256_broadcast_sd(tB + tb_inc_col * 1);
+                        tB += tb_inc_row;
+
+                        //broadcasted matrix B elements are multiplied
+                        //with matrix A columns.
+                        ymm3 = _mm256_loadu_pd(tA);
+                        ymm8 = _mm256_fmadd_pd(ymm0, ymm3, ymm8);
+                        ymm12 = _mm256_fmadd_pd(ymm1, ymm3, ymm12);
+
+                        ymm3 = _mm256_loadu_pd(tA + 4);
+                        ymm9 = _mm256_fmadd_pd(ymm0, ymm3, ymm9);
+                        ymm13 = _mm256_fmadd_pd(ymm1, ymm3, ymm13);
+
+                        // Masked load the relevant remainder elements only
+                        // using maskVec.
+                        ymm3 = _mm256_maskload_pd(tA + 8, maskVec);
+                        ymm10 = _mm256_fmadd_pd(ymm0, ymm3, ymm10);
+                        ymm14 = _mm256_fmadd_pd(ymm1, ymm3, ymm14);
+
+                        tA += lda;
+
+                    }
+                    // alpha, beta multiplication.
+                    ymm0 = _mm256_broadcast_sd(alpha_cast);
+                    ymm1 = _mm256_broadcast_sd(beta_cast);
+
+                    //multiply A*B by alpha.
+                    ymm8 = _mm256_mul_pd(ymm8, ymm0);
+                    ymm9 = _mm256_mul_pd(ymm9, ymm0);
+                    ymm10 = _mm256_mul_pd(ymm10, ymm0);
+                    ymm12 = _mm256_mul_pd(ymm12, ymm0);
+                    ymm13 = _mm256_mul_pd(ymm13, ymm0);
+                    ymm14 = _mm256_mul_pd(ymm14, ymm0);
+
+
+                    if(is_beta_non_zero)
+                    {
+                        // multiply C by beta and accumulate.
+                        ymm2 = _mm256_loadu_pd(tC + 0);
+                        ymm8 = _mm256_fmadd_pd(ymm2, ymm1, ymm8);
+
+                        ymm2 = _mm256_loadu_pd(tC + 4);
+                        ymm9 = _mm256_fmadd_pd(ymm2, ymm1, ymm9);
+                        // Masked load the relevant remaider elements of C matrix
+                        // Scale by beta.
+                        ymm2 = _mm256_maskload_pd(tC + 8, maskVec);
+                        ymm10 = _mm256_fmadd_pd(ymm2, ymm1, ymm10);
+
+                        double *ttC = tC + ldc;
+
+                        // multiply C by beta and accumulate.
+                        ymm2 = _mm256_loadu_pd(ttC);
+                        ymm12 = _mm256_fmadd_pd(ymm2, ymm1, ymm12);
+
+                        ymm2 = _mm256_loadu_pd(ttC + 4);
+                        ymm13 = _mm256_fmadd_pd(ymm2, ymm1, ymm13);
+                        // Masked load the relevant remaider elements of C matrix
+                        // Scale by beta.
+                        ymm2 = _mm256_maskload_pd(ttC + 8, maskVec);
+                        ymm14 = _mm256_fmadd_pd(ymm2, ymm1, ymm14);
+
+                    }
+                    _mm256_storeu_pd(tC + 0, ymm8);
+                    _mm256_storeu_pd(tC + 4, ymm9);
+                    // Masked store the relevant remaider elements of C matrix
+                    _mm256_maskstore_pd(tC + 8, maskVec, ymm10);
+
+                    tC += ldc;
+
+                    _mm256_storeu_pd(tC, ymm12);
+                    _mm256_storeu_pd(tC + 4, ymm13);
+                    // Masked store the relevant remaider elements of C matrix
+                    _mm256_maskstore_pd(tC + 8, maskVec, ymm14);
+
+                    col_idx += 2;
+                }
+                // if the N is not multiple of 3.
+                // handling edge case.
+                if (n_remainder == 1)
+                {
+                    //pointer math to point to proper memory
+                    tC = C + ldc * col_idx + row_idx;
+                    tB = B + tb_inc_col * col_idx;
+                    tA = A + row_idx;
+
+                    // clear scratch registers.
+                    ymm12 = _mm256_setzero_pd();
+                    ymm13 = _mm256_setzero_pd();
+                    ymm14 = _mm256_setzero_pd();
+
+                    for (k = 0; k < K; ++k)
+                    {
+                        // The inner loop broadcasts the B matrix data and
+                        // multiplies it with the A matrix.
+                        ymm0 = _mm256_broadcast_sd(tB + tb_inc_col * 0);
+                        tB += tb_inc_row;
+
+                        //broadcasted matrix B elements are multiplied
+                        //with matrix A columns.
+                        ymm3 = _mm256_loadu_pd(tA);
+                        ymm12 = _mm256_fmadd_pd(ymm0, ymm3, ymm12);
+
+                        ymm3 = _mm256_loadu_pd(tA + 4);
+                        ymm13 = _mm256_fmadd_pd(ymm0, ymm3, ymm13);
+
+                        // Masked load the relevant remainder elements only
+                        // using maskVec.
+                        ymm3 = _mm256_maskload_pd(tA + 8, maskVec);
+                        ymm14 = _mm256_fmadd_pd(ymm0, ymm3, ymm14);
+
+                        tA += lda;
+
+                    }
+                    // alpha, beta multiplication.
+                    ymm0 = _mm256_broadcast_sd(alpha_cast);
+                    ymm1 = _mm256_broadcast_sd(beta_cast);
+
+                    //multiply A*B by alpha.
+                    ymm12 = _mm256_mul_pd(ymm12, ymm0);
+                    ymm13 = _mm256_mul_pd(ymm13, ymm0);
+                    ymm14 = _mm256_mul_pd(ymm14, ymm0);
+
+
+                    if(is_beta_non_zero)
+                    {
+                        // multiply C by beta and accumulate.
+                        ymm2 = _mm256_loadu_pd(tC + 0);
+                        ymm12 = _mm256_fmadd_pd(ymm2, ymm1, ymm12);
+
+                        ymm2 = _mm256_loadu_pd(tC + 4);
+                        ymm13 = _mm256_fmadd_pd(ymm2, ymm1, ymm13);
+                        // Masked load the relevant remaider elements of C matrix
+                        // Scale by beta.
+                        ymm2 = _mm256_maskload_pd(tC + 8, maskVec);
+                        ymm14 = _mm256_fmadd_pd(ymm2, ymm1, ymm14);
+
+                    }
+                    _mm256_storeu_pd(tC + 0, ymm12);
+                    _mm256_storeu_pd(tC + 4, ymm13);
+                    // Masked store the relevant remaider elements of C matrix
+                    _mm256_maskstore_pd(tC + 8, maskVec, ymm14);
+                }
+            }
+            else if(m_remainder > 4)
+            {
+                // Handles edge cases where remainder elements are between 5-8(5, 6, 7, 8).
+                // Here m_rem gives index in mask_ptr that points which mask to be used based
+                // on remainder elements which could be 1, 2, 3 or 4 here.
+                m_rem = (m_remainder % 4);
+                __m256i maskVec = _mm256_loadu_si256( (__m256i *)mask_ptr[m_rem]);
+                for (col_idx = 0; (col_idx + 2) < N; col_idx += 3)
+                {
+                    //pointer math to point to proper memory
+                    tC = C + ldc * col_idx + row_idx;
+                    tB = B + tb_inc_col * col_idx;
+                    tA = A + row_idx;
+
+                    // clear scratch registers.
+                    ymm4 = _mm256_setzero_pd();
+                    ymm5 = _mm256_setzero_pd();
+                    ymm6 = _mm256_setzero_pd();
+                    ymm7 = _mm256_setzero_pd();
+                    ymm8 = _mm256_setzero_pd();
+                    ymm9 = _mm256_setzero_pd();
+                    ymm10 = _mm256_setzero_pd();
+                    ymm11 = _mm256_setzero_pd();
+                    ymm12 = _mm256_setzero_pd();
+                    ymm13 = _mm256_setzero_pd();
+                    ymm14 = _mm256_setzero_pd();
+                    ymm15 = _mm256_setzero_pd();
+
+                    for (k = 0; k < K; ++k)
+                    {
+                        // The inner loop broadcasts the B matrix data and
+                        // multiplies it with the A matrix.
+                        ymm0 = _mm256_broadcast_sd(tB + tb_inc_col * 0);
+                        ymm1 = _mm256_broadcast_sd(tB + tb_inc_col * 1);
+                        ymm2 = _mm256_broadcast_sd(tB + tb_inc_col * 2);
+                        tB += tb_inc_row;
+
+                        //broadcasted matrix B elements are multiplied
+                        //with matrix A columns.
+                        ymm3 = _mm256_loadu_pd(tA);
+                        ymm4 = _mm256_fmadd_pd(ymm0, ymm3, ymm4);
+                        ymm8 = _mm256_fmadd_pd(ymm1, ymm3, ymm8);
+                        ymm12 = _mm256_fmadd_pd(ymm2, ymm3, ymm12);
+
+                        // Masked load the relevant remainder elements only
+                        // using maskVec.
+                        ymm3 = _mm256_maskload_pd(tA + 4, maskVec);
+                        ymm5 = _mm256_fmadd_pd(ymm0, ymm3, ymm5);
+                        ymm9 = _mm256_fmadd_pd(ymm1, ymm3, ymm9);
+                        ymm13 = _mm256_fmadd_pd(ymm2, ymm3, ymm13);
+
+                        tA += lda;
+                    }
+                    // alpha, beta multiplication.
+                    ymm0 = _mm256_broadcast_sd(alpha_cast);
+                    ymm1 = _mm256_broadcast_sd(beta_cast);
+
+                    //multiply A*B by alpha.
+                    ymm4 = _mm256_mul_pd(ymm4, ymm0);
+                    ymm5 = _mm256_mul_pd(ymm5, ymm0);
+                    ymm6 = _mm256_mul_pd(ymm6, ymm0);
+                    ymm8 = _mm256_mul_pd(ymm8, ymm0);
+                    ymm9 = _mm256_mul_pd(ymm9, ymm0);
+                    ymm10 = _mm256_mul_pd(ymm10, ymm0);
+                    ymm12 = _mm256_mul_pd(ymm12, ymm0);
+                    ymm13 = _mm256_mul_pd(ymm13, ymm0);
+                    ymm14 = _mm256_mul_pd(ymm14, ymm0);
+
+                    if(is_beta_non_zero)
+                    {
+                        // multiply C by beta and accumulate.
+                        ymm2 = _mm256_loadu_pd(tC);
+                        ymm4 = _mm256_fmadd_pd(ymm2, ymm1, ymm4);
+                        // Masked load the relevant remaider elements of C matrix
+                        // Scale by beta.
+                        ymm2 = _mm256_maskload_pd(tC + 4, maskVec);
+                        ymm5 = _mm256_fmadd_pd(ymm2, ymm1, ymm5);
+
+                        // multiply C by beta and accumulate.
+                        double *ttC = tC +ldc;
+                        ymm2 = _mm256_loadu_pd(ttC);
+                        ymm8 = _mm256_fmadd_pd(ymm2, ymm1, ymm8);
+                        // Masked load the relevant remaider elements of C matrix
+                        // Scale by beta.
+                        ymm2 = _mm256_maskload_pd(ttC + 4, maskVec);
+                        ymm9 = _mm256_fmadd_pd(ymm2, ymm1, ymm9);
+
+                        // multiply C by beta and accumulate.
+                        ttC += ldc;
+                        ymm2 = _mm256_loadu_pd(ttC);
+                        ymm12 = _mm256_fmadd_pd(ymm2, ymm1, ymm12);
+                        // Masked load the relevant remaider elements of C matrix
+                        // Scale by beta.
+                        ymm2 = _mm256_maskload_pd(ttC + 4, maskVec);
+                        ymm13 = _mm256_fmadd_pd(ymm2, ymm1, ymm13);
+                    }
+                    _mm256_storeu_pd(tC, ymm4);
+                    // Masked store the relevant remaider elements of C matrix
+                    _mm256_maskstore_pd(tC + 4, maskVec, ymm5);
+
+                    tC += ldc;
+
+                    _mm256_storeu_pd(tC, ymm8);
+                    // Masked store the relevant remaider elements of C matrix
+                    _mm256_maskstore_pd(tC + 4, maskVec, ymm9);
+
+                    tC += ldc;
+
+                    _mm256_storeu_pd(tC, ymm12);
+                    // Masked store the relevant remaider elements of C matrix
+                    _mm256_maskstore_pd(tC + 4, maskVec, ymm13);
+                }
+                n_remainder = N - col_idx;
+                // if the N is not multiple of 3.
+                // handling edge case.
+                if (n_remainder == 2)
+                {
+                    //pointer math to point to proper memory
+                    tC = C + ldc * col_idx + row_idx;
+                    tB = B + tb_inc_col * col_idx;
+                    tA = A + row_idx;
+
+                    // clear scratch registers.
+                    ymm8 = _mm256_setzero_pd();
+                    ymm9 = _mm256_setzero_pd();
+                    ymm10 = _mm256_setzero_pd();
+                    ymm12 = _mm256_setzero_pd();
+                    ymm13 = _mm256_setzero_pd();
+                    ymm14 = _mm256_setzero_pd();
+
+                    for (k = 0; k < K; ++k)
+                    {
+                        // The inner loop broadcasts the B matrix data and
+                        // multiplies it with the A matrix.
+                        ymm0 = _mm256_broadcast_sd(tB + tb_inc_col * 0);
+                        ymm1 = _mm256_broadcast_sd(tB + tb_inc_col * 1);
+                        tB += tb_inc_row;
+
+                        //broadcasted matrix B elements are multiplied
+                        //with matrix A columns.
+                        ymm3 = _mm256_loadu_pd(tA);
+                        ymm8 = _mm256_fmadd_pd(ymm0, ymm3, ymm8);
+                        ymm12 = _mm256_fmadd_pd(ymm1, ymm3, ymm12);
+
+                        // Masked load the relevant remainder elements only
+                        // using maskVec.
+                        ymm3 = _mm256_maskload_pd(tA + 4, maskVec);
+                        ymm9 = _mm256_fmadd_pd(ymm0, ymm3, ymm9);
+                        ymm13 = _mm256_fmadd_pd(ymm1, ymm3, ymm13);
+                        tA += lda;
+
+                    }
+                    // alpha, beta multiplication.
+                    ymm0 = _mm256_broadcast_sd(alpha_cast);
+                    ymm1 = _mm256_broadcast_sd(beta_cast);
+
+                    //multiply A*B by alpha.
+                    ymm8 = _mm256_mul_pd(ymm8, ymm0);
+                    ymm9 = _mm256_mul_pd(ymm9, ymm0);
+                    ymm10 = _mm256_mul_pd(ymm10, ymm0);
+                    ymm12 = _mm256_mul_pd(ymm12, ymm0);
+                    ymm13 = _mm256_mul_pd(ymm13, ymm0);
+
+
+                    if(is_beta_non_zero)
+                    {
+                        // multiply C by beta and accumulate.
+                        ymm2 = _mm256_loadu_pd(tC + 0);
+                        ymm8 = _mm256_fmadd_pd(ymm2, ymm1, ymm8);
+                        // Masked load the relevant remaider elements of C matrix
+                        // Scale by beta.
+                        ymm2 = _mm256_maskload_pd(tC + 4, maskVec);
+                        ymm9 = _mm256_fmadd_pd(ymm2, ymm1, ymm9);
+
+                        double *ttC = tC + ldc;
+
+                        // multiply C by beta and accumulate.
+                        ymm2 = _mm256_loadu_pd(ttC);
+                        ymm12 = _mm256_fmadd_pd(ymm2, ymm1, ymm12);
+                        // Masked load the relevant remaider elements of C matrix
+                        // Scale by beta.
+                        ymm2 = _mm256_maskload_pd(ttC + 4, maskVec);
+                        ymm13 = _mm256_fmadd_pd(ymm2, ymm1, ymm13);
+
+                    }
+                    _mm256_storeu_pd(tC + 0, ymm8);
+                    // Masked store the relevant remaider elements of C matrix
+                    _mm256_maskstore_pd(tC + 4, maskVec, ymm9);
+
+                    tC += ldc;
+
+                    _mm256_storeu_pd(tC, ymm12);
+                    // Masked store the relevant remaider elements of C matrix
+                    _mm256_maskstore_pd(tC + 4, maskVec, ymm13);
+
+                    col_idx += 2;
+                }
+                // if the N is not multiple of 3.
+                // handling edge case.
+                if (n_remainder == 1)
+                {
+                    //pointer math to point to proper memory
+                    tC = C + ldc * col_idx + row_idx;
+                    tB = B + tb_inc_col * col_idx;
+                    tA = A + row_idx;
+
+                    // clear scratch registers.
+                    ymm12 = _mm256_setzero_pd();
+                    ymm13 = _mm256_setzero_pd();
+
+                    for (k = 0; k < K; ++k)
+                    {
+                        // The inner loop broadcasts the B matrix data and
+                        // multiplies it with the A matrix.
+                        ymm0 = _mm256_broadcast_sd(tB + tb_inc_col * 0);
+                        tB += tb_inc_row;
+
+                        //broadcasted matrix B elements are multiplied
+                        //with matrix A columns.
+                        ymm3 = _mm256_loadu_pd(tA);
+                        ymm12 = _mm256_fmadd_pd(ymm0, ymm3, ymm12);
+
+                        // Masked load the relevant remainder elements only
+                        // using maskVec.
+                        ymm3 = _mm256_maskload_pd(tA + 4, maskVec);
+                        ymm13 = _mm256_fmadd_pd(ymm0, ymm3, ymm13);
+
+                        tA += lda;
+
+                    }
+                    // alpha, beta multiplication.
+                    ymm0 = _mm256_broadcast_sd(alpha_cast);
+                    ymm1 = _mm256_broadcast_sd(beta_cast);
+
+                    //multiply A*B by alpha.
+                    ymm12 = _mm256_mul_pd(ymm12, ymm0);
+                    ymm13 = _mm256_mul_pd(ymm13, ymm0);
+
+                    if(is_beta_non_zero)
+                    {
+                        // multiply C by beta and accumulate.
+                        ymm2 = _mm256_loadu_pd(tC + 0);
+                        ymm12 = _mm256_fmadd_pd(ymm2, ymm1, ymm12);
+                        // Masked load the relevant remaider elements of C matrix
+                        // Scale by beta.
+                        ymm2 = _mm256_maskload_pd(tC + 4, maskVec);
+                        ymm13 = _mm256_fmadd_pd(ymm2, ymm1, ymm13);
+                    }
+                    _mm256_storeu_pd(tC + 0, ymm12);
+                    // Masked store the relevant remaider elements of C matrix
+                    _mm256_maskstore_pd(tC + 4, maskVec, ymm13);
+                }
+            }
+            else
+            {
+                __m256i maskVec = _mm256_loadu_si256( (__m256i *)mask_ptr[m_remainder]);
+                for (col_idx = 0; (col_idx + 2) < N; col_idx += 3)
+                {
+                    //pointer math to point to proper memory
+                    tC = C + ldc * col_idx + row_idx;
+                    tB = B + tb_inc_col * col_idx;
+                    tA = A + row_idx;
+
+                    // clear scratch registers.
+                    ymm4 = _mm256_setzero_pd();
+                    ymm5 = _mm256_setzero_pd();
+                    ymm6 = _mm256_setzero_pd();
+
+                    for (k = 0; k < K; ++k)
+                    {
+                        // The inner loop broadcasts the B matrix data and
+                        // multiplies it with the A matrix.
+                        ymm0 = _mm256_broadcast_sd(tB + tb_inc_col * 0);
+                        ymm1 = _mm256_broadcast_sd(tB + tb_inc_col * 1);
+                        ymm2 = _mm256_broadcast_sd(tB + tb_inc_col * 2);
+                        tB += tb_inc_row;
+
+                        //broadcasted matrix B elements are multiplied
+                        //with matrix A columns.
+
+                        // Masked load the relevant remainder elements only
+                        // using maskVec.
+                        ymm3 = _mm256_maskload_pd(tA, maskVec);
+                        ymm4 = _mm256_fmadd_pd(ymm0, ymm3, ymm4);
+                        ymm5 = _mm256_fmadd_pd(ymm1, ymm3, ymm5);
+                        ymm6 = _mm256_fmadd_pd(ymm2, ymm3, ymm6);
+
+                        tA += lda;
+                    }
+                    // alpha, beta multiplication.
+                    ymm0 = _mm256_broadcast_sd(alpha_cast);
+                    ymm1 = _mm256_broadcast_sd(beta_cast);
+
+                    //multiply A*B by alpha.
+                    ymm4 = _mm256_mul_pd(ymm4, ymm0);
+                    ymm5 = _mm256_mul_pd(ymm5, ymm0);
+                    ymm6 = _mm256_mul_pd(ymm6, ymm0);
+
+                    if(is_beta_non_zero)
+                    {
+                        // Masked load the relevant remaider elements of C matrix
+                        // Scale by beta.
+                        ymm2 = _mm256_maskload_pd(tC, maskVec);
+                        ymm4 = _mm256_fmadd_pd(ymm2, ymm1, ymm4);
+
+                        double* ttC = tC + ldc;
+
+                        // Masked load the relevant remaider elements of C matrix
+                        // Scale by beta.
+                        ymm2 = _mm256_maskload_pd(ttC, maskVec);
+                        ymm5 = _mm256_fmadd_pd(ymm2, ymm1, ymm5);
+
+                        ttC += ldc;
+
+                        // Masked load the relevant remaider elements of C matrix
+                        // Scale by beta.
+                        ymm2 = _mm256_maskload_pd(ttC, maskVec);
+                        ymm6 = _mm256_fmadd_pd(ymm2, ymm1, ymm6);
+                    }
+                    // Masked store the relevant remaider elements of C matrix
+                    _mm256_maskstore_pd(tC, maskVec, ymm4);
+
+                    tC += ldc;
+                    // Masked store the relevant remaider elements of C matrix
+                    _mm256_maskstore_pd(tC, maskVec, ymm5);
+
+                    tC += ldc;
+                    // Masked store the relevant remaider elements of C matrix
+                    _mm256_maskstore_pd(tC, maskVec, ymm6);
+                }
+                n_remainder = N - col_idx;
+                // if the N is not multiple of 3.
+                // handling edge case.
+                if (n_remainder == 2)
+                {
+                    //pointer math to point to proper memory
+                    tC = C + ldc * col_idx + row_idx;
+                    tB = B + tb_inc_col * col_idx;
+                    tA = A + row_idx;
+
+                    ymm4 = _mm256_setzero_pd();
+                    ymm5 = _mm256_setzero_pd();
+
+                    for (k = 0; k < K; ++k)
+                    {
+                        // The inner loop broadcasts the B matrix data and
+                        // multiplies it with the A matrix.
+                        ymm0 = _mm256_broadcast_sd(tB + tb_inc_col * 0);
+                        ymm1 = _mm256_broadcast_sd(tB + tb_inc_col * 1);
+                        tB += tb_inc_row;
+
+                        //broadcasted matrix B elements are multiplied
+                        //with matrix A columns.
+
+                        // Masked load the relevant remainder elements only
+                        // using maskVec.
+                        ymm3 = _mm256_maskload_pd(tA, maskVec);
+                        ymm4 = _mm256_fmadd_pd(ymm0, ymm3, ymm4);
+                        ymm5 = _mm256_fmadd_pd(ymm1, ymm3, ymm5);
+
+                        tA += lda;
+                    }
+                    // alpha, beta multiplication.
+                    ymm0 = _mm256_broadcast_sd(alpha_cast);
+                    ymm1 = _mm256_broadcast_sd(beta_cast);
+
+                    //multiply A*B by alpha.
+                    ymm4 = _mm256_mul_pd(ymm4, ymm0);
+                    ymm5 = _mm256_mul_pd(ymm5, ymm0);
+
+                    if(is_beta_non_zero)
+                    {
+                        // Masked load the relevant remaider elements of C matrix
+                        // Scale by beta.
+                        ymm2 = _mm256_maskload_pd(tC, maskVec);
+                        ymm4 = _mm256_fmadd_pd(ymm2, ymm1, ymm4);
+
+                        double* ttC = tC + ldc;
+
+                        // Masked load the relevant remaider elements of C matrix
+                        // Scale by beta.
+                        ymm2 = _mm256_maskload_pd(ttC, maskVec);
+                        ymm5 = _mm256_fmadd_pd(ymm2, ymm1, ymm5);
+                    }
+                    // Masked store the relevant remaider elements of C matrix
+                    _mm256_maskstore_pd(tC, maskVec, ymm4);
+
+                    tC += ldc;
+                    // Masked store the relevant remaider elements of C matrix
+                    _mm256_maskstore_pd(tC, maskVec, ymm5);
+
+                    col_idx += 2;
+
+                }
+                // if the N is not multiple of 3.
+                // handling edge case.
+                if (n_remainder == 1)
+                {
+                    //pointer math to point to proper memory
+                    tC = C + ldc * col_idx + row_idx;
+                    tB = B + tb_inc_col * col_idx;
+                    tA = A + row_idx;
+
+                    ymm4 = _mm256_setzero_pd();
+
+                    for (k = 0; k < K; ++k)
+                    {
+                        // The inner loop broadcasts the B matrix data and
+                        // multiplies it with the A matrix.
+                        ymm0 = _mm256_broadcast_sd(tB + tb_inc_col * 0);
+                        tB += tb_inc_row;
+
+                        //broadcasted matrix B elements are multiplied
+                        //with matrix A columns.
+
+                        // Masked load the relevant remainder elements only
+                        // using maskVec.
+                        ymm3 = _mm256_maskload_pd(tA, maskVec);
+                        ymm4 = _mm256_fmadd_pd(ymm0, ymm3, ymm4);
+
+                        tA += lda;
+                    }
+                    // alpha, beta multiplication.
+                    ymm0 = _mm256_broadcast_sd(alpha_cast);
+                    ymm1 = _mm256_broadcast_sd(beta_cast);
+
+                    ymm4 = _mm256_mul_pd(ymm4, ymm0);
+
+                    if(is_beta_non_zero)
+                    {
+                        // Masked load the relevant remaider elements of C matrix
+                        // Scale by beta.
+                        ymm2 = _mm256_maskload_pd(tC, maskVec);
+                        ymm4 = _mm256_fmadd_pd(ymm2, ymm1, ymm4);
+
+                    }
+                    // Masked store the relevant remaider elements of C matrix
+                    _mm256_maskstore_pd(tC, maskVec, ymm4);
                 }
             }
         }
 
-    // Return the buffer to pool
+        // Return the buffer to pool
         if ((required_packing_A == 1) && bli_mem_is_alloc( &local_mem_buf_A_s )) {
 #ifdef BLIS_ENABLE_MEM_TRACING
         printf( "bli_dgemm_small(): releasing mem pool block\n" );
