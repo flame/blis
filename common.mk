@@ -967,7 +967,12 @@ endif
 #
 
 ifeq ($(OS_NAME),Linux)
+# Exclude -lrt on Android by detecting Bionic.
+# $(CC) -E bionic.h returns a "bionic" substring iff Bionic is detected.
+BIONIC := $(findstring bionic,$(shell $(CC) -E bionic.h))
+ifeq (,$(BIONIC))
 LDFLAGS += -lrt
+endif
 endif
 
 
@@ -1270,4 +1275,3 @@ BUILD_CPPFLAGS := -DBLIS_IS_BUILDING_LIBRARY
 
 # end of ifndef COMMON_MK_INCLUDED conditional block
 endif
-
