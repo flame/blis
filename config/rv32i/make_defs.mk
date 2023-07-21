@@ -47,8 +47,8 @@ THIS_CONFIG    := rv32i
 # may specify additional flags here as needed.
 CPPROCFLAGS    := -DRISCV_SIZE=32
 
-RISCV_ARCH     := $(shell $(CC) -E frame/base/bli_riscv_detect_arch.h | grep '^[^\#]')
-RISCV_ABI      := $(shell $(CC) -E frame/base/bli_riscv_detect_abi.h | grep '^[^\#]')
+RISCV_ARCH     := $(shell $(CC) -E build/detect/riscv/bli_riscv_detect_arch.h | grep '^[^\#]')
+RISCV_ABI      := $(shell $(CC) -E build/detect/riscv/bli_riscv_detect_abi.h | grep '^[^\#]')
 
 ifeq (,$(findstring 32,$(RISCV_ARCH)))
 $(error The RISC-V compiler architecture $(RISCV_ARCH) is not compatible with $(THIS_CONFIG))

@@ -1252,7 +1252,7 @@ auto_detect()
 	# Special case for RISC-V, whose architecture can be detected with
 	# preprocessor macros alone. This avoids having to run RISC-V binaries
 	# on a cross-compiler host. Returns "generic" if RISC-V not detected.
-	riscv_config=$(${cmd} -E "${dist_path}/frame/base/bli_riscv_cpuid.h" |
+	riscv_config=$(${cmd} -E "${dist_path}/build/detect/riscv/bli_riscv_cpuid.h" |
 	               grep '^[^#]')
 	if [[ $riscv_config != *generic* ]]; then
 		echo "${riscv_config}"
