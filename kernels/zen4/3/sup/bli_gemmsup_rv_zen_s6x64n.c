@@ -41,21 +41,18 @@
 
 /*
    rrr:
-     --------        ------        --------  
-     --------        ------        --------  
-     --------   +=   ------ ...    --------  
-     --------        ------        --------  
-     --------        ------            : 
-     --------        ------            : 
+     --------        ------        --------
+     --------        ------        --------
+     --------   +=   ------ ...    --------
+     --------        ------        --------
+     --------        ------            :
+     --------        ------            :
    Assumptions:
    - B is row-stored;
    - A is row-stored;
    - m0 and n0 are at most MR (6) and NR (64), respectively.
    Therefore, this (r)ow-preferential kernel is well-suited for contiguous
    (v)ector loads on B and single-element broadcasts from A.
-
-   NOTE: These kernels currently do not have in-register transpose 
-   implemented and hence they do not support column-oriented IO.
 */
 void bli_sgemmsup_rv_zen_asm_6x64n_avx512
      (
@@ -138,6 +135,10 @@ void bli_sgemmsup_rv_zen_asm_6x64n_avx512
     uint64_t cs_b   = cs_b0;
     uint64_t rs_c   = rs_c0;
     uint64_t cs_c   = cs_c0;
+
+    // Query the panel stride of B and convert it to units of bytes.
+    uint64_t ps_b   = bli_auxinfo_ps_b( data );
+    uint64_t ps_b4  = ps_b * sizeof( float );
 
     float *abuf = a;
     float *bbuf = b;
@@ -360,9 +361,9 @@ void bli_sgemmsup_rv_zen_asm_6x64n_avx512
      */
     /* Transposing 4x16 tiles to 16x4 tiles */
     mov( var( cbuf ), rcx )             // load address of c
-    mov( var( cs_c ), rdi )             // load rs_c
-    lea( mem( , rdi, 4 ), rdi )         // rdi = rs_c *= sizeof(dt) => rs_c *= 4
-    lea( mem( rdi, rdi, 2 ), r12 )      // rdi += rdi * 2 => rdi = 3 * rs_c
+    mov( var( cs_c ), rdi )             // load cs_c; rdi = cs_c
+    lea( mem( , rdi, 4 ), rdi )         // rdi = cs_c*sizeof(dt) => rdi = cs_c*4
+    lea( mem( rdi, rdi, 2 ), r12 )      // rdi += rdi * 2 => rdi = 3 * cs_c
 
     TRANSPOSE_4X16(  8, 12, 16, 20 )
     lea( mem( rcx, r12, 4 ), rcx )
@@ -415,9 +416,9 @@ void bli_sgemmsup_rv_zen_asm_6x64n_avx512
      */
     /* Transposing 4x16 tiles to 16x4 tiles */
     mov( var( cbuf ), rcx )             // load address of c
-    mov( var( cs_c ), rdi )             // load rs_c
-    lea( mem( , rdi, 4 ), rdi )         // rs_c *= sizeof(float)
-    lea( mem( rdi, rdi, 2 ), r12 )
+    mov( var( cs_c ), rdi )             // load cs_c; rdi = cs_c
+    lea( mem( , rdi, 4 ), rdi )         // rdi = cs_c*sizeof(dt) => rdi = cs_c*4
+    lea( mem( rdi, rdi, 2 ), r12 )      // rdi += rdi * 2 => rdi = 3 * cs_c
 
     TRANSPOSE_4X16_BZ(  8, 12, 16, 20 )
     lea( mem( rcx, r12, 4 ), rcx )
@@ -425,7 +426,7 @@ void bli_sgemmsup_rv_zen_asm_6x64n_avx512
     lea( mem( rcx, r12, 4 ), rcx )
     TRANSPOSE_4X16_BZ( 10, 14, 18, 22 )
     lea( mem( rcx, r12, 4 ), rcx )
-    TRANSPOSE_4X16_BZ( 11, 15, 19, 23 ) 
+    TRANSPOSE_4X16_BZ( 11, 15, 19, 23 )
 
     /* Transposing 2x16 tiles to 16x2 tiles */
     mov( var( cbuf ), rcx )             // load address of c
@@ -438,26 +439,24 @@ void bli_sgemmsup_rv_zen_asm_6x64n_avx512
     lea( mem( rcx, rdi, 2 ), rcx )
     TRANSPOSE_2X16_BZ( 27, 31 )
 
-    jmp( .SDONE )                       // jump to the end
+    jmp( .SDONE )                     // jump to the end
 
 
     label( .SDONE )
 
-    mov( var( cs_b ), rdx )
-    lea( mem( , rdx, 4 ), rdx )
-    lea( mem( , rdx, 8 ), rdx )     // rdx  = cs_b * 8
-    lea( mem( , rdx, 8 ), rdx )     // rdx += cs_b * 8  => rdx = cs_b * 16
-    mov( var( bbuf ), rbx )
-    add( rdx, rbx )
+    mov( var( ps_b4 ), rdx )          // load ps_b4; rdx = ps_b4
+    mov( var( bbuf ), rbx )           // load b
+    add( rdx, rbx )                   // b += ps_b4
     mov( rbx, var( bbuf ) )
 
-    mov( var( cs_c ), rdx )
-    lea( mem( , rdx, 4 ), rdx )
-    lea( mem( , rdx, 8 ), rdx )     // rdx  = cs_c * 8
-    lea( mem( , rdx, 8 ), rdx )     // rdx  = rdx * 8 = cs_c * 8 * 8 => rdx = cs_c * 64
-    mov( var( cbuf ), rcx )              // load address of c
-    add( rdx, rcx )                    // c += rs_c * MR
-    mov( rcx, var( cbuf ) )              // store updated c
+    mov( var( cs_c ), rdx )           // load cs_c; rdx = cs_c
+    lea( mem( , rdx, 4 ), rdx )       // rdx = cs_c*sizeof(dt) => rdx = cs_c*4
+    lea( mem( , rdx, 8 ), rdx )       // rdx = cs_c * 8
+    lea( mem( , rdx, 8 ), rdx )       // rdx = rdx * 8 = cs_c * 8 * 8
+                                      // => rdx = cs_c * 64
+    mov( var( cbuf ), rcx )           // load address of c
+    add( rdx, rcx )                   // c += rs_c * MR
+    mov( rcx, var( cbuf ) )           // store updated c
 
     dec( r11 )
     jne( .N_LOOP_ITER )
@@ -473,6 +472,7 @@ void bli_sgemmsup_rv_zen_asm_6x64n_avx512
       [b]      "m" (b),
       [rs_b]   "m" (rs_b),
       [cs_b]   "m" (cs_b),
+      [ps_b4]  "m" (ps_b4),
       [alpha]  "m" (alpha),
       [beta]   "m" (beta),
       [c]      "m" (c),
@@ -523,7 +523,7 @@ void bli_sgemmsup_rv_zen_asm_6x64n_avx512
               data,cntx
             );
             cij += nr_cur*cs_c0;
-            bj  += nr_cur*cs_b0; 
+            bj  += nr_cur*cs_b0;
             n_left -= nr_cur;
         }
 
@@ -539,7 +539,7 @@ void bli_sgemmsup_rv_zen_asm_6x64n_avx512
               data,cntx
             );
             cij += nr_cur*cs_c0;
-            bj  += nr_cur*cs_b0; 
+            bj  += nr_cur*cs_b0;
             n_left -= nr_cur;
         }
 
@@ -555,7 +555,7 @@ void bli_sgemmsup_rv_zen_asm_6x64n_avx512
               data,cntx
             );
             cij += nr_cur*cs_c0;
-            bj  += nr_cur*cs_b0; 
+            bj  += nr_cur*cs_b0;
             n_left -= nr_cur;
         }
 
@@ -571,7 +571,7 @@ void bli_sgemmsup_rv_zen_asm_6x64n_avx512
               data,cntx
             );
             cij += nr_cur*cs_c0;
-            bj  += nr_cur*cs_b0; 
+            bj  += nr_cur*cs_b0;
             n_left -= nr_cur;
         }
 
@@ -637,7 +637,7 @@ void bli_sgemmsup_rv_zen_asm_6x64n_avx512
                     dim_t mr_cur = ( bli_is_not_edge_f( ii, m_iter, m_left )
                                      ? mr : m_left );
 
-                    bli_sgemv_ex 
+                    bli_sgemv_ex
                     (
                       BLIS_NO_TRANSPOSE, conjb, mr_cur, k0,
                       alpha, ai_ii, rs_a0, cs_a0, bj, rs_b0,
@@ -645,7 +645,7 @@ void bli_sgemmsup_rv_zen_asm_6x64n_avx512
                     );
                     cij_ii += mr_cur*rs_c0;
                     ai_ii  += ps_a0;
-                } 
+                }
             }
             n_left -= nr_cur;
         }
@@ -680,6 +680,10 @@ void bli_sgemmsup_rv_zen_asm_5x64n_avx512
     uint64_t cs_b   = cs_b0;
     uint64_t rs_c   = rs_c0;
     uint64_t cs_c   = cs_c0;
+
+    // Query the panel stride of B and convert it to units of bytes.
+    uint64_t ps_b   = bli_auxinfo_ps_b( data );
+    uint64_t ps_b4  = ps_b * sizeof( float );
 
     float *abuf = a;
     float *bbuf = b;
@@ -741,7 +745,7 @@ void bli_sgemmsup_rv_zen_asm_5x64n_avx512
     VFMA4( 4, 20, 21, 22, 23 )
     vbroadcastss( mem( rax, r8, 4 ), zmm5 )
     VFMA4( 5, 24, 25, 26, 27 )
-  
+
     add( r9, rbx )
     add( r10, rax )
 
@@ -763,7 +767,7 @@ void bli_sgemmsup_rv_zen_asm_5x64n_avx512
     VFMA4( 4, 20, 21, 22, 23 )
     vbroadcastss( mem( rax, r8, 4 ), zmm5 )
     VFMA4( 5, 24, 25, 26, 27 )
-  
+
     add( r9, rbx )
     add( r10, rax )
 
@@ -785,7 +789,7 @@ void bli_sgemmsup_rv_zen_asm_5x64n_avx512
     VFMA4( 4, 20, 21, 22, 23 )
     vbroadcastss( mem( rax, r8, 4 ), zmm5 )
     VFMA4( 5, 24, 25, 26, 27 )
-  
+
     add( r9, rbx )
     add( r10, rax )
 
@@ -807,7 +811,7 @@ void bli_sgemmsup_rv_zen_asm_5x64n_avx512
     VFMA4( 4, 20, 21, 22, 23 )
     vbroadcastss( mem( rax, r8, 4 ), zmm5 )
     VFMA4( 5, 24, 25, 26, 27 )
-  
+
     add( r9, rbx )
     add( r10, rax )
 
@@ -842,7 +846,7 @@ void bli_sgemmsup_rv_zen_asm_5x64n_avx512
     VFMA4( 4, 20, 21, 22, 23 )
     vbroadcastss( mem( rax, r8, 4 ), zmm5 )
     VFMA4( 5, 24, 25, 26, 27 )
-  
+
     add( r9, rbx )
     add( r10, rax )
     dec( rsi )
@@ -958,7 +962,7 @@ void bli_sgemmsup_rv_zen_asm_5x64n_avx512
     lea( mem( rcx, r12, 4 ), rcx )
     TRANSPOSE_4X16_BZ( 10, 14, 18, 22 )
     lea( mem( rcx, r12, 4 ), rcx )
-    TRANSPOSE_4X16_BZ( 11, 15, 19, 23 ) 
+    TRANSPOSE_4X16_BZ( 11, 15, 19, 23 )
 
     /* Transposing 1x16 tiles to 16x1 tiles */
     mov( var( cbuf ), rcx )             // load address of c
@@ -979,12 +983,9 @@ void bli_sgemmsup_rv_zen_asm_5x64n_avx512
 
     label( .SDONE )
 
-    mov( var( cs_b ), rdx )
-    lea( mem( , rdx, 4 ), rdx )
-    lea( mem( , rdx, 8 ), rdx )     // rdx  = cs_b * 8
-    lea( mem( , rdx, 8 ), rdx )     // rdx += cs_b * 8  => rdx = cs_b * 16
-    mov( var( bbuf ), rbx )
-    add( rdx, rbx )
+    mov( var( ps_b4 ), rdx )    // load ps_b4
+    mov( var( bbuf ), rbx )     // load b
+    add( rdx, rbx )             // b += ps_b4
     mov( rbx, var( bbuf ) )
 
     mov( var( cs_c ), rdx )
@@ -1009,6 +1010,7 @@ void bli_sgemmsup_rv_zen_asm_5x64n_avx512
       [b]      "m" (b),
       [rs_b]   "m" (rs_b),
       [cs_b]   "m" (cs_b),
+      [ps_b4]  "m" (ps_b4),
       [alpha]  "m" (alpha),
       [beta]   "m" (beta),
       [c]      "m" (c),
@@ -1059,7 +1061,7 @@ void bli_sgemmsup_rv_zen_asm_5x64n_avx512
               data,cntx
             );
             cij += nr_cur*cs_c0;
-            bj  += nr_cur*cs_b0; 
+            bj  += nr_cur*cs_b0;
             n_left -= nr_cur;
         }
 
@@ -1075,7 +1077,7 @@ void bli_sgemmsup_rv_zen_asm_5x64n_avx512
               data,cntx
             );
             cij += nr_cur*cs_c0;
-            bj  += nr_cur*cs_b0; 
+            bj  += nr_cur*cs_b0;
             n_left -= nr_cur;
         }
 
@@ -1091,7 +1093,7 @@ void bli_sgemmsup_rv_zen_asm_5x64n_avx512
               data,cntx
             );
             cij += nr_cur*cs_c0;
-            bj  += nr_cur*cs_b0; 
+            bj  += nr_cur*cs_b0;
             n_left -= nr_cur;
         }
 
@@ -1107,7 +1109,7 @@ void bli_sgemmsup_rv_zen_asm_5x64n_avx512
               data,cntx
             );
             cij += nr_cur*cs_c0;
-            bj  += nr_cur*cs_b0; 
+            bj  += nr_cur*cs_b0;
             n_left -= nr_cur;
         }
 
@@ -1173,7 +1175,7 @@ void bli_sgemmsup_rv_zen_asm_5x64n_avx512
                     dim_t mr_cur = ( bli_is_not_edge_f( ii, m_iter, m_left )
                                      ? mr : m_left );
 
-                    bli_sgemv_ex 
+                    bli_sgemv_ex
                     (
                       BLIS_NO_TRANSPOSE, conjb, mr_cur, k0,
                       alpha, ai_ii, rs_a0, cs_a0, bj, rs_b0,
@@ -1181,7 +1183,7 @@ void bli_sgemmsup_rv_zen_asm_5x64n_avx512
                     );
                     cij_ii += mr_cur*rs_c0;
                     ai_ii  += ps_a0;
-                } 
+                }
             }
             n_left -= nr_cur;
         }
@@ -1216,6 +1218,10 @@ void bli_sgemmsup_rv_zen_asm_4x64n_avx512
     uint64_t cs_b   = cs_b0;
     uint64_t rs_c   = rs_c0;
     uint64_t cs_c   = cs_c0;
+
+    // Query the panel stride of B and convert it to units of bytes.
+    uint64_t ps_b   = bli_auxinfo_ps_b( data );
+    uint64_t ps_b4  = ps_b * sizeof( float );
 
     float *abuf = a;
     float *bbuf = b;
@@ -1466,28 +1472,26 @@ void bli_sgemmsup_rv_zen_asm_4x64n_avx512
     lea( mem( rcx, r12, 4 ), rcx )
     TRANSPOSE_4X16_BZ( 10, 14, 18, 22 )
     lea( mem( rcx, r12, 4 ), rcx )
-    TRANSPOSE_4X16_BZ( 11, 15, 19, 23 ) 
+    TRANSPOSE_4X16_BZ( 11, 15, 19, 23 )
 
-    jmp( .SDONE )                       // jump to the end
+    jmp( .SDONE )                     // jump to the end
 
 
     label( .SDONE )
 
-    mov( var( cs_b ), rdx )
-    lea( mem( , rdx, 4 ), rdx )
-    lea( mem( , rdx, 8 ), rdx )     // rdx  = cs_b * 8
-    lea( mem( , rdx, 8 ), rdx )     // rdx += cs_b * 8  => rdx = cs_b * 16
-    mov( var( bbuf ), rbx )
-    add( rdx, rbx )
+    mov( var( ps_b4 ), rdx )          // load ps_b4; rdx = ps_b4
+    mov( var( bbuf ), rbx )           // load b
+    add( rdx, rbx )                   // b += ps_b4
     mov( rbx, var( bbuf ) )
 
-    mov( var( cs_c ), rdx )
-    lea( mem( , rdx, 4 ), rdx )
-    lea( mem( , rdx, 8 ), rdx )     // rdx  = cs_c * 8
-    lea( mem( , rdx, 8 ), rdx )     // rdx  = rdx * 8 = cs_c * 8 * 8 => rdx = cs_c * 64
-    mov( var( cbuf ), rcx )              // load address of c
-    add( rdx, rcx )                    // c += rs_c * MR
-    mov( rcx, var( cbuf ) )              // store updated c
+    mov( var( cs_c ), rdx )           // load cs_c; rdx = cs_c
+    lea( mem( , rdx, 4 ), rdx )       // rdx = cs_c*sizeof(dt) => rdx = cs_c*4
+    lea( mem( , rdx, 8 ), rdx )       // rdx = cs_c * 8
+    lea( mem( , rdx, 8 ), rdx )       // rdx = rdx * 8 = cs_c * 8 * 8
+                                      // => rdx = cs_c * 64
+    mov( var( cbuf ), rcx )           // load address of c
+    add( rdx, rcx )                   // c += rs_c * MR
+    mov( rcx, var( cbuf ) )           // store updated c
 
     dec( r11 )
     jne( .N_LOOP_ITER )
@@ -1503,6 +1507,7 @@ void bli_sgemmsup_rv_zen_asm_4x64n_avx512
       [b]      "m" (b),
       [rs_b]   "m" (rs_b),
       [cs_b]   "m" (cs_b),
+      [ps_b4]  "m" (ps_b4),
       [alpha]  "m" (alpha),
       [beta]   "m" (beta),
       [c]      "m" (c),
@@ -1553,7 +1558,7 @@ void bli_sgemmsup_rv_zen_asm_4x64n_avx512
               data,cntx
             );
             cij += nr_cur*cs_c0;
-            bj  += nr_cur*cs_b0; 
+            bj  += nr_cur*cs_b0;
             n_left -= nr_cur;
         }
 
@@ -1569,7 +1574,7 @@ void bli_sgemmsup_rv_zen_asm_4x64n_avx512
               data,cntx
             );
             cij += nr_cur*cs_c0;
-            bj  += nr_cur*cs_b0; 
+            bj  += nr_cur*cs_b0;
             n_left -= nr_cur;
         }
 
@@ -1585,7 +1590,7 @@ void bli_sgemmsup_rv_zen_asm_4x64n_avx512
               data,cntx
             );
             cij += nr_cur*cs_c0;
-            bj  += nr_cur*cs_b0; 
+            bj  += nr_cur*cs_b0;
             n_left -= nr_cur;
         }
 
@@ -1601,7 +1606,7 @@ void bli_sgemmsup_rv_zen_asm_4x64n_avx512
               data,cntx
             );
             cij += nr_cur*cs_c0;
-            bj  += nr_cur*cs_b0; 
+            bj  += nr_cur*cs_b0;
             n_left -= nr_cur;
         }
 
@@ -1667,7 +1672,7 @@ void bli_sgemmsup_rv_zen_asm_4x64n_avx512
                     dim_t mr_cur = ( bli_is_not_edge_f( ii, m_iter, m_left )
                                      ? mr : m_left );
 
-                    bli_sgemv_ex 
+                    bli_sgemv_ex
                     (
                       BLIS_NO_TRANSPOSE, conjb, mr_cur, k0,
                       alpha, ai_ii, rs_a0, cs_a0, bj, rs_b0,
@@ -1675,7 +1680,7 @@ void bli_sgemmsup_rv_zen_asm_4x64n_avx512
                     );
                     cij_ii += mr_cur*rs_c0;
                     ai_ii  += ps_a0;
-                } 
+                }
             }
             n_left -= nr_cur;
         }
@@ -1710,6 +1715,10 @@ void bli_sgemmsup_rv_zen_asm_3x64n_avx512
     uint64_t cs_b   = cs_b0;
     uint64_t rs_c   = rs_c0;
     uint64_t cs_c   = cs_c0;
+
+    // Query the panel stride of B and convert it to units of bytes.
+    uint64_t ps_b   = bli_auxinfo_ps_b( data );
+    uint64_t ps_b4  = ps_b * sizeof( float );
 
     float *abuf = a;
     float *bbuf = b;
@@ -1937,9 +1946,9 @@ void bli_sgemmsup_rv_zen_asm_3x64n_avx512
 
     /* Transposing 2x16 tiles to 16x2 tiles */
     mov( var( cbuf ), rcx )             // load address of c
-    mov( var( cs_c ), rdi )             // load rs_c
-    lea( mem( , rdi, 4 ), rdi )         // rs_c *= sizeof(float)
-    lea( mem( rdi, rdi, 2 ), r12 )
+    mov( var( cs_c ), rdi )             // load cs_c; rdi = cs_c
+    lea( mem( , rdi, 4 ), rdi )         // rdi = cs_c*sizeof(dt) => rdi = cs_c*4
+    lea( mem( rdi, rdi, 2 ), r12 )      // rdi += rdi * 2 => rdi = 3 * cs_c
 
     TRANSPOSE_2X16_BZ(  8, 12 )
     lea( mem( rcx, rdi, 2 ), rcx )
@@ -1950,39 +1959,37 @@ void bli_sgemmsup_rv_zen_asm_3x64n_avx512
     TRANSPOSE_2X16_BZ( 11, 15 )
 
     /* Transposing 1x16 tiles to 16x1 tiles */
-    mov( var( cbuf ), rcx )
-    mov( var( rs_c ), rdi )
-    lea( mem( , rdi, 4 ), rdi )
-    lea( mem( rcx, rdi, 2 ), rcx )
-    mov( var( cs_c ), rdi )               // load rs_c
-    lea( mem( , rdi, 4 ), rdi )           // rs_c *= sizeof(float)
-    lea( mem( rdi, rdi, 2 ), r12 )
+    mov( var( cbuf ), rcx )             // load address of c
+    mov( var( rs_c ), rdi )             // load rs_c; rdi = rs_c
+    lea( mem( , rdi, 4 ), rdi )         // rdi = rs_c*sizeof(dt) => rdi = rs_c*4
+    lea( mem( rcx, rdi, 2 ), rcx )      // c += rdi * 2
+    mov( var( cs_c ), rdi )             // load cs_c; rdi = cs_c
+    lea( mem( , rdi, 4 ), rdi )         // rdi = cs_c*sizeof(dt) => rdi = cs_c*4
+    lea( mem( rdi, rdi, 2 ), r12 )      // rdi += rdi * 2 => rdi = 3 * cs_c
 
     UPDATE_C_1X16_BZ( 16 )
     UPDATE_C_1X16_BZ( 17 )
     UPDATE_C_1X16_BZ( 18 )
     UPDATE_C_1X16_BZ( 19 )
 
-    jmp( .SDONE )                       // jump to the end
+    jmp( .SDONE )                     // jump to the end
 
 
     label( .SDONE )
 
-    mov( var( cs_b ), rdx )
-    lea( mem( , rdx, 4 ), rdx )
-    lea( mem( , rdx, 8 ), rdx )     // rdx  = cs_b * 8
-    lea( mem( , rdx, 8 ), rdx )     // rdx += cs_b * 8  => rdx = cs_b * 16
-    mov( var( bbuf ), rbx )
-    add( rdx, rbx )
+    mov( var( ps_b4 ), rdx )          // load ps_b4
+    mov( var( bbuf ), rbx )           // load b
+    add( rdx, rbx )                   // b += ps_b4
     mov( rbx, var( bbuf ) )
 
-    mov( var( cs_c ), rdx )
-    lea( mem( , rdx, 4 ), rdx )
-    lea( mem( , rdx, 8 ), rdx )     // rdx  = cs_c * 8
-    lea( mem( , rdx, 8 ), rdx )     // rdx  = rdx * 8 = cs_c * 8 * 8 => rdx = cs_c * 64
-    mov( var( cbuf ), rcx )              // load address of c
-    add( rdx, rcx )                    // c += rs_c * MR
-    mov( rcx, var( cbuf ) )              // store updated c
+    mov( var( cs_c ), rdx )           // load cs_c; rdx = cs_c
+    lea( mem( , rdx, 4 ), rdx )       // rdx = cs_c*sizeof(dt) => rdx = cs_c*4
+    lea( mem( , rdx, 8 ), rdx )       // rdx = cs_c * 8
+    lea( mem( , rdx, 8 ), rdx )       // rdx = rdx * 8 = cs_c * 8 * 8
+                                      // => rdx = cs_c * 64
+    mov( var( cbuf ), rcx )           // load address of c
+    add( rdx, rcx )                   // c += rs_c * MR
+    mov( rcx, var( cbuf ) )           // store updated c
 
     dec( r11 )
     jne( .N_LOOP_ITER )
@@ -1998,6 +2005,7 @@ void bli_sgemmsup_rv_zen_asm_3x64n_avx512
       [b]      "m" (b),
       [rs_b]   "m" (rs_b),
       [cs_b]   "m" (cs_b),
+      [ps_b4]  "m" (ps_b4),
       [alpha]  "m" (alpha),
       [beta]   "m" (beta),
       [c]      "m" (c),
@@ -2048,7 +2056,7 @@ void bli_sgemmsup_rv_zen_asm_3x64n_avx512
               data,cntx
             );
             cij += nr_cur*cs_c0;
-            bj  += nr_cur*cs_b0; 
+            bj  += nr_cur*cs_b0;
             n_left -= nr_cur;
         }
 
@@ -2064,7 +2072,7 @@ void bli_sgemmsup_rv_zen_asm_3x64n_avx512
               data,cntx
             );
             cij += nr_cur*cs_c0;
-            bj  += nr_cur*cs_b0; 
+            bj  += nr_cur*cs_b0;
             n_left -= nr_cur;
         }
 
@@ -2080,7 +2088,7 @@ void bli_sgemmsup_rv_zen_asm_3x64n_avx512
               data,cntx
             );
             cij += nr_cur*cs_c0;
-            bj  += nr_cur*cs_b0; 
+            bj  += nr_cur*cs_b0;
             n_left -= nr_cur;
         }
 
@@ -2096,7 +2104,7 @@ void bli_sgemmsup_rv_zen_asm_3x64n_avx512
               data,cntx
             );
             cij += nr_cur*cs_c0;
-            bj  += nr_cur*cs_b0; 
+            bj  += nr_cur*cs_b0;
             n_left -= nr_cur;
         }
 
@@ -2162,7 +2170,7 @@ void bli_sgemmsup_rv_zen_asm_3x64n_avx512
                     dim_t mr_cur = ( bli_is_not_edge_f( ii, m_iter, m_left )
                                      ? mr : m_left );
 
-                    bli_sgemv_ex 
+                    bli_sgemv_ex
                     (
                       BLIS_NO_TRANSPOSE, conjb, mr_cur, k0,
                       alpha, ai_ii, rs_a0, cs_a0, bj, rs_b0,
@@ -2170,7 +2178,7 @@ void bli_sgemmsup_rv_zen_asm_3x64n_avx512
                     );
                     cij_ii += mr_cur*rs_c0;
                     ai_ii  += ps_a0;
-                } 
+                }
             }
             n_left -= nr_cur;
         }
@@ -2205,6 +2213,10 @@ void bli_sgemmsup_rv_zen_asm_2x64n_avx512
     uint64_t cs_b   = cs_b0;
     uint64_t rs_c   = rs_c0;
     uint64_t cs_c   = cs_c0;
+
+    // Query the panel stride of B and convert it to units of bytes.
+    uint64_t ps_b   = bli_auxinfo_ps_b( data );
+    uint64_t ps_b4  = ps_b * sizeof( float );
 
     float *abuf = a;
     float *bbuf = b;
@@ -2422,12 +2434,9 @@ void bli_sgemmsup_rv_zen_asm_2x64n_avx512
 
     label( .SDONE )
 
-    mov( var( cs_b ), rdx )
-    lea( mem( , rdx, 4 ), rdx )
-    lea( mem( , rdx, 8 ), rdx )     // rdx  = cs_b * 8
-    lea( mem( , rdx, 8 ), rdx )     // rdx += cs_b * 8  => rdx = cs_b * 16
-    mov( var( bbuf ), rbx )
-    add( rdx, rbx )
+    mov( var( ps_b4 ), rdx )    // load ps_b4
+    mov( var( bbuf ), rbx )     // load b
+    add( rdx, rbx )             // b += ps_b4
     mov( rbx, var( bbuf ) )
 
     mov( var( cs_c ), rdx )
@@ -2452,6 +2461,7 @@ void bli_sgemmsup_rv_zen_asm_2x64n_avx512
       [b]      "m" (b),
       [rs_b]   "m" (rs_b),
       [cs_b]   "m" (cs_b),
+      [ps_b4]  "m" (ps_b4),
       [alpha]  "m" (alpha),
       [beta]   "m" (beta),
       [c]      "m" (c),
@@ -2502,7 +2512,7 @@ void bli_sgemmsup_rv_zen_asm_2x64n_avx512
               data,cntx
             );
             cij += nr_cur*cs_c0;
-            bj  += nr_cur*cs_b0; 
+            bj  += nr_cur*cs_b0;
             n_left -= nr_cur;
         }
 
@@ -2518,7 +2528,7 @@ void bli_sgemmsup_rv_zen_asm_2x64n_avx512
               data,cntx
             );
             cij += nr_cur*cs_c0;
-            bj  += nr_cur*cs_b0; 
+            bj  += nr_cur*cs_b0;
             n_left -= nr_cur;
         }
 
@@ -2534,7 +2544,7 @@ void bli_sgemmsup_rv_zen_asm_2x64n_avx512
               data,cntx
             );
             cij += nr_cur*cs_c0;
-            bj  += nr_cur*cs_b0; 
+            bj  += nr_cur*cs_b0;
             n_left -= nr_cur;
         }
 
@@ -2550,7 +2560,7 @@ void bli_sgemmsup_rv_zen_asm_2x64n_avx512
               data,cntx
             );
             cij += nr_cur*cs_c0;
-            bj  += nr_cur*cs_b0; 
+            bj  += nr_cur*cs_b0;
             n_left -= nr_cur;
         }
 
@@ -2616,7 +2626,7 @@ void bli_sgemmsup_rv_zen_asm_2x64n_avx512
                     dim_t mr_cur = ( bli_is_not_edge_f( ii, m_iter, m_left )
                                      ? mr : m_left );
 
-                    bli_sgemv_ex 
+                    bli_sgemv_ex
                     (
                       BLIS_NO_TRANSPOSE, conjb, mr_cur, k0,
                       alpha, ai_ii, rs_a0, cs_a0, bj, rs_b0,
@@ -2624,7 +2634,7 @@ void bli_sgemmsup_rv_zen_asm_2x64n_avx512
                     );
                     cij_ii += mr_cur*rs_c0;
                     ai_ii  += ps_a0;
-                } 
+                }
             }
             n_left -= nr_cur;
         }
@@ -2659,6 +2669,10 @@ void bli_sgemmsup_rv_zen_asm_1x64n_avx512
     uint64_t cs_b   = cs_b0;
     uint64_t rs_c   = rs_c0;
     uint64_t cs_c   = cs_c0;
+
+    // Query the panel stride of B and convert it to units of bytes.
+    uint64_t ps_b   = bli_auxinfo_ps_b( data );
+    uint64_t ps_b4  = ps_b * sizeof( float );
 
     float *abuf = a;
     float *bbuf = b;
@@ -2806,7 +2820,7 @@ void bli_sgemmsup_rv_zen_asm_1x64n_avx512
     label( .SROWSTORED )
 
     UPDATE_C4( 4,  8,  9, 10, 11 )
- 
+
     jmp( .SDONE )               // jump to the end
 
 
@@ -2814,9 +2828,9 @@ void bli_sgemmsup_rv_zen_asm_1x64n_avx512
 
     /* Transposing 1x16 tiles to 16x1 tiles */
     mov( var( cbuf ), rcx )             // load address of c
-    mov( var( cs_c ), rdi )             // load rs_c
-    lea( mem( , rdi, 4 ), rdi )         // rdi = rs_c *= sizeof(dt) => rs_c *= 4
-    lea( mem( rdi, rdi, 2 ), r12 )      // rdi += rdi * 2 => rdi = 3 * rs_c
+    mov( var( cs_c ), rdi )             // load cs_c; rdi = cs_c
+    lea( mem( , rdi, 4 ), rdi )         // rdi = cs_c*sizeof(dt) => rdi = cs_c*4
+    lea( mem( rdi, rdi, 2 ), r12 )      // rdi += rdi * 2 => rdi = 3 * cs_c
 
     UPDATE_C_1X16(  8 )
     UPDATE_C_1X16(  9 )
@@ -2843,9 +2857,9 @@ void bli_sgemmsup_rv_zen_asm_1x64n_avx512
 
     /* Transposing 2x16 tiles to 16x2 tiles */
     mov( var( cbuf ), rcx )             // load address of c
-    mov( var( cs_c ), rdi )             // load rs_c
-    lea( mem( , rdi, 4 ), rdi )         // rs_c *= sizeof(float)
-    lea( mem( rdi, rdi, 2 ), r12 )
+    mov( var( cs_c ), rdi )             // load cs_c; rdi = cs_c
+    lea( mem( , rdi, 4 ), rdi )         // rdi = cs_c*sizeof(dt) => rdi = cs_c*4
+    lea( mem( rdi, rdi, 2 ), r12 )      // rdi += rdi * 2 => rdi = 3 * cs_c
 
     UPDATE_C_1X16_BZ(  8 )
     UPDATE_C_1X16_BZ(  9 )
@@ -2857,21 +2871,19 @@ void bli_sgemmsup_rv_zen_asm_1x64n_avx512
 
     label( .SDONE )
 
-    mov( var( cs_b ), rdx )
-    lea( mem( , rdx, 4 ), rdx )
-    lea( mem( , rdx, 8 ), rdx )     // rdx  = cs_b * 8
-    lea( mem( , rdx, 8 ), rdx )     // rdx += cs_b * 8  => rdx = cs_b * 16
-    mov( var( bbuf ), rbx )
-    add( rdx, rbx )
+    mov( var( ps_b4 ), rdx )    // load ps_b4
+    mov( var( bbuf ), rbx )     // load b
+    add( rdx, rbx )             // b += ps_b4
     mov( rbx, var( bbuf ) )
 
-    mov( var( cs_c ), rdx )
-    lea( mem( , rdx, 4 ), rdx )
-    lea( mem( , rdx, 8 ), rdx )     // rdx  = cs_c * 8
-    lea( mem( , rdx, 8 ), rdx )     // rdx  = rdx * 8 = cs_c * 8 * 8 => rdx = cs_c * 64
-    mov( var( cbuf ), rcx )              // load address of c
-    add( rdx, rcx )                    // c += rs_c * MR
-    mov( rcx, var( cbuf ) )              // store updated c
+    mov( var( cs_c ), rdx )           // load cs_c; rdx = cs_c
+    lea( mem( , rdx, 4 ), rdx )       // rdx = cs_c*sizeof(dt) => rdx = cs_c*4
+    lea( mem( , rdx, 8 ), rdx )       // rdx = cs_c * 8
+    lea( mem( , rdx, 8 ), rdx )       // rdx = rdx * 8 = cs_c * 8 * 8
+                                      // => rdx = cs_c * 64
+    mov( var( cbuf ), rcx )           // load address of c
+    add( rdx, rcx )                   // c += rs_c * MR
+    mov( rcx, var( cbuf ) )           // store updated c
 
     dec( r11 )
     jne( .N_LOOP_ITER )
@@ -2887,6 +2899,7 @@ void bli_sgemmsup_rv_zen_asm_1x64n_avx512
       [b]      "m" (b),
       [rs_b]   "m" (rs_b),
       [cs_b]   "m" (cs_b),
+      [ps_b4]  "m" (ps_b4),
       [alpha]  "m" (alpha),
       [beta]   "m" (beta),
       [c]      "m" (c),
@@ -2937,7 +2950,7 @@ void bli_sgemmsup_rv_zen_asm_1x64n_avx512
               data,cntx
             );
             cij += nr_cur*cs_c0;
-            bj  += nr_cur*cs_b0; 
+            bj  += nr_cur*cs_b0;
             n_left -= nr_cur;
         }
 
@@ -2953,7 +2966,7 @@ void bli_sgemmsup_rv_zen_asm_1x64n_avx512
               data,cntx
             );
             cij += nr_cur*cs_c0;
-            bj  += nr_cur*cs_b0; 
+            bj  += nr_cur*cs_b0;
             n_left -= nr_cur;
         }
 
@@ -2969,7 +2982,7 @@ void bli_sgemmsup_rv_zen_asm_1x64n_avx512
               data,cntx
             );
             cij += nr_cur*cs_c0;
-            bj  += nr_cur*cs_b0; 
+            bj  += nr_cur*cs_b0;
             n_left -= nr_cur;
         }
 
@@ -2985,7 +2998,7 @@ void bli_sgemmsup_rv_zen_asm_1x64n_avx512
               data,cntx
             );
             cij += nr_cur*cs_c0;
-            bj  += nr_cur*cs_b0; 
+            bj  += nr_cur*cs_b0;
             n_left -= nr_cur;
         }
 
@@ -3051,7 +3064,7 @@ void bli_sgemmsup_rv_zen_asm_1x64n_avx512
                     dim_t mr_cur = ( bli_is_not_edge_f( ii, m_iter, m_left )
                                      ? mr : m_left );
 
-                    bli_sgemv_ex 
+                    bli_sgemv_ex
                     (
                       BLIS_NO_TRANSPOSE, conjb, mr_cur, k0,
                       alpha, ai_ii, rs_a0, cs_a0, bj, rs_b0,
@@ -3059,7 +3072,7 @@ void bli_sgemmsup_rv_zen_asm_1x64n_avx512
                     );
                     cij_ii += mr_cur*rs_c0;
                     ai_ii  += ps_a0;
-                } 
+                }
             }
             n_left -= nr_cur;
         }

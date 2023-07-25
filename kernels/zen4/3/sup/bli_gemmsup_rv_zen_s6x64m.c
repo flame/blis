@@ -53,9 +53,6 @@
    - m0 and n0 are at most MR (6) and NR (64), respectively.
    Therefore, this (r)ow-preferential kernel is well-suited for contiguous
    (v)ector loads on B and single-element broadcasts from A.
-
-   NOTE: These kernels currently do not have in-register transpose 
-   implemented and hence they do not support column-oriented IO.
 */
 void bli_sgemmsup_rv_zen_asm_6x64m_avx512
      (
@@ -95,7 +92,7 @@ void bli_sgemmsup_rv_zen_asm_6x64m_avx512
               data, cntx
             );
             cij += nr_cur * cs_c0;
-            bj  += nr_cur * cs_b0; 
+            bj  += nr_cur * cs_b0;
             n_left -= nr_cur;
         }
 
@@ -111,7 +108,7 @@ void bli_sgemmsup_rv_zen_asm_6x64m_avx512
               data, cntx
             );
             cij += nr_cur * cs_c0;
-            bj  += nr_cur * cs_b0; 
+            bj  += nr_cur * cs_b0;
             n_left -= nr_cur;
         }
 
@@ -127,7 +124,7 @@ void bli_sgemmsup_rv_zen_asm_6x64m_avx512
               data, cntx
             );
             cij += nr_cur * cs_c0;
-            bj  += nr_cur * cs_b0; 
+            bj  += nr_cur * cs_b0;
             n_left -= nr_cur;
         }
 
@@ -143,7 +140,7 @@ void bli_sgemmsup_rv_zen_asm_6x64m_avx512
               data, cntx
             );
             cij += nr_cur * cs_c0;
-            bj  += nr_cur * cs_b0; 
+            bj  += nr_cur * cs_b0;
             n_left -= nr_cur;
         }
 
@@ -195,21 +192,21 @@ void bli_sgemmsup_rv_zen_asm_6x64m_avx512
             else
             {
                 const dim_t mr = 6;
-        
+
                 // Since A is packed into row panels,
                 // we must use a loop over gemv.
                 dim_t m_iter = ( m0 + mr - 1 ) / mr;
                 dim_t m_left =   m0            % mr;
-        
+
                 float* restrict ai_ii  = ai;
                 float* restrict cij_ii = cij;
-        
+
                 for ( dim_t ii = 0; ii < m_iter; ii += 1 )
                 {
                     dim_t mr_cur = ( bli_is_not_edge_f( ii, m_iter, m_left )
                                      ? mr : m_left );
-                
-                    bli_sgemv_ex 
+
+                    bli_sgemv_ex
                     (
                       BLIS_NO_TRANSPOSE, conjb, mr_cur, k0,
                       alpha, ai_ii, rs_a0, cs_a0, bj, rs_b0,
@@ -217,7 +214,7 @@ void bli_sgemmsup_rv_zen_asm_6x64m_avx512
                     );
                     cij_ii += mr_cur * rs_c0;
                     ai_ii += ps_a0;
-                } 
+                }
             }
             n_left -= nr_cur;
         }
@@ -240,6 +237,10 @@ void bli_sgemmsup_rv_zen_asm_6x64m_avx512
     uint64_t cs_b   = cs_b0;
     uint64_t rs_c   = rs_c0;
     uint64_t cs_c   = cs_c0;
+
+    // Query the panel stride of A and convert it to units of bytes.
+    uint64_t ps_a   = bli_auxinfo_ps_a( data );
+    uint64_t ps_a4  = ps_a * sizeof( float );
 
     float *abuf = a;
     float *bbuf = b;
@@ -474,18 +475,18 @@ void bli_sgemmsup_rv_zen_asm_6x64m_avx512
      * 4x16 & 2x16 each.
      * These smaller 4x16 & 2x16 tiles are transposed to 16x4 & 16x2 tiles,
      * to get the transpose of 6x64 tile and are stored as 64x6 tile.
-     * 
-     * |-----------------------------------|       |------------------|--------| 
-     * |        |        |        |        |       |                  |        | 
-     * |        |        |        |        |       |       16x4       |  16x2  | 
-     * |  4x16  |  4x16  |  4x16  |  4x16  |       |                  |        | 
-     * |        |        |        |        |       |------------------|--------| 
-     * |        |        |        |        |       |                  |        | 
-     * |-----------------------------------|  ->   |       16x4       |  16x2  | 
-     * |        |        |        |        |       |                  |        | 
-     * |  2x16  |  2x16  |  2x16  |  2x16  |       |------------------|--------| 
-     * |        |        |        |        |       |                  |        | 
-     * |-----------------------------------|       |       16x4       |  16x2  | 
+     *
+     * |-----------------------------------|       |------------------|--------|
+     * |        |        |        |        |       |                  |        |
+     * |        |        |        |        |       |       16x4       |  16x2  |
+     * |  4x16  |  4x16  |  4x16  |  4x16  |       |                  |        |
+     * |        |        |        |        |       |------------------|--------|
+     * |        |        |        |        |       |                  |        |
+     * |-----------------------------------|  ->   |       16x4       |  16x2  |
+     * |        |        |        |        |       |                  |        |
+     * |  2x16  |  2x16  |  2x16  |  2x16  |       |------------------|--------|
+     * |        |        |        |        |       |                  |        |
+     * |-----------------------------------|       |       16x4       |  16x2  |
      *                                             |                  |        |
      *                                             |------------------|--------|
      *                                             |                  |        |
@@ -495,9 +496,9 @@ void bli_sgemmsup_rv_zen_asm_6x64m_avx512
      */
     /* Transposing 4x16 tiles to 16x4 tiles */
     mov( var( cbuf ), rcx )             // load address of c
-    mov( var( cs_c ), rdi )             // load rs_c
-    lea( mem( , rdi, 4 ), rdi )         // rdi = rs_c *= sizeof(dt) => rs_c *= 4
-    lea( mem( rdi, rdi, 2 ), r12 )      // rdi += rdi * 2 => rdi = 3 * rs_c
+    mov( var( cs_c ), rdi )             // load cs_c; rdi = cs_c
+    lea( mem( , rdi, 4 ), rdi )         // rdi = cs_c*sizeof(dt) => rdi = cs_c*4
+    lea( mem( rdi, rdi, 2 ), r12 )      // rdi += rdi * 2 => rdi = 3 * cs_c
 
     TRANSPOSE_4X16( 8, 12, 16, 20 )
     lea( mem( rcx, r12, 4 ), rcx )
@@ -510,7 +511,11 @@ void bli_sgemmsup_rv_zen_asm_6x64m_avx512
 
     /* Transposing 2x16 tiles to 16x2 tiles */
     mov( var( cbuf ), rcx )             // load address of c
-    lea( mem( rcx, r10, 4 ), rcx )
+    mov( var( rs_c ), r12 )             // load rs_c; r12 = rs_c
+    lea( mem( , r12, 4 ), r12 )         // r12 = rs_c*sizeof(dt) => r12 = rs_c*4
+    lea( mem( rcx, r12, 4 ), rcx )      // rcx += 4 * r12 => rcx = 4 * rs_c
+
+
     TRANSPOSE_2X16( 24, 28 )
     lea( mem( rcx, rdi, 2 ), rcx )
     TRANSPOSE_2X16( 25, 29 )
@@ -553,7 +558,7 @@ void bli_sgemmsup_rv_zen_asm_6x64m_avx512
     mov( var( cbuf ), rcx )             // load address of c
     mov( var( cs_c ), rdi )             // load rs_c
     lea( mem( , rdi, 4 ), rdi )         // rs_c *= sizeof(float)
-    lea( mem( rdi, rdi, 2 ), r12 )
+    lea( mem( rdi, rdi, 2 ), r12 )      // rdi += rdi * 2 => rdi = 3 * cs_c
 
     TRANSPOSE_4X16_BZ( 8, 12, 16, 20 )
     lea( mem( rcx, r12, 4 ), rcx )
@@ -561,11 +566,14 @@ void bli_sgemmsup_rv_zen_asm_6x64m_avx512
     lea( mem( rcx, r12, 4 ), rcx )
     TRANSPOSE_4X16_BZ( 10, 14, 18, 22 )
     lea( mem( rcx, r12, 4 ), rcx )
-    TRANSPOSE_4X16_BZ( 11, 15, 19, 23 ) 
+    TRANSPOSE_4X16_BZ( 11, 15, 19, 23 )
 
     /* Transposing 2x16 tiles to 16x2 tiles */
     mov( var( cbuf ), rcx )             // load address of c
-    lea( mem( rcx, r10, 4 ), rcx )
+    mov( var( rs_c ), r12 )             // load rs_c; r12 = rs_c
+    lea( mem( , r12, 4 ), r12 )         // r12 = rs_c*sizeof(dt) => r12 = rs_c*4
+    lea( mem( rcx, r12, 4 ), rcx )      // rcx += 4 * r12 => rcx = 4 * rs_c
+
     TRANSPOSE_2X16_BZ( 24, 28 )
     lea( mem( rcx, rdi, 2 ), rcx )
     TRANSPOSE_2X16_BZ( 25, 29 )
@@ -579,13 +587,12 @@ void bli_sgemmsup_rv_zen_asm_6x64m_avx512
 
     label( .SDONE )
 
-    lea( mem( , r8, 2 ), rdx )          // rdx = rs_a * 2
-    lea( mem( rdx, r8, 4 ), rdx )       // rdx = rs_a * 6
+    mov( var( ps_a4 ), rdx )            // load panel stride of a; rdx = ps_a4
     mov( var( abuf ), rax )             // load address of a
-    add( rdx, rax )                     // a += rs_a * 6(MR)
+    add( rdx, rax )                     // a += ps_a4
     mov( rax, var( abuf ) )             // store updated a
 
-    mov( var( rs_c ), rdi )         
+    mov( var( rs_c ), rdi )             // load rs_c; rdi = rs_c
     lea( mem(    , rdi, 4 ), rdi )      // rdi = rs_c *= sizeof(dt) => rs_c *= 4
     lea( mem(    , rdi, 2 ), rdx )      // rdx = rs_c * 2
     lea( mem( rdx, rdi, 4 ), rdx )      // rdx = rdi * 4 => rdx = rs_c * 6
@@ -604,6 +611,7 @@ void bli_sgemmsup_rv_zen_asm_6x64m_avx512
       [a]      "m" (a),
       [rs_a]   "m" (rs_a),
       [cs_a]   "m" (cs_a),
+      [ps_a4]  "m" (ps_a4),
       [b]      "m" (b),
       [rs_b]   "m" (rs_b),
       [cs_b]   "m" (cs_b),
@@ -639,7 +647,7 @@ void bli_sgemmsup_rv_zen_asm_6x64m_avx512
         const dim_t i_edge = m0 - ( dim_t )m_left;
 
         float* restrict cij = c + i_edge * rs_c;
-        float* restrict ai  = a + i_edge * rs_a;
+        float* restrict ai  = a + m_iter * ps_a;
         float* restrict bj  = b;
 
         if ( 4 <= m_left )
@@ -658,7 +666,7 @@ void bli_sgemmsup_rv_zen_asm_6x64m_avx512
             ai  += mr_cur * rs_a;
             m_left -= mr_cur;
         }
-    
+
         if ( 2 <= m_left )
         {
             const dim_t mr_cur = 2;
@@ -723,6 +731,10 @@ void bli_sgemmsup_rv_zen_asm_6x48m_avx512
     uint64_t cs_b   = cs_b0;
     uint64_t rs_c   = rs_c0;
     uint64_t cs_c   = cs_c0;
+
+    // Query the panel stride of A and convert it to units of bytes.
+    uint64_t ps_a   = bli_auxinfo_ps_a( data );
+    uint64_t ps_a4  = ps_a * sizeof( float );
 
     float *abuf = a;
     float *bbuf = b;
@@ -914,7 +926,7 @@ void bli_sgemmsup_rv_zen_asm_6x48m_avx512
     jne( .K_LEFT_LOOP )     // if rsi != 0, repeat k-loop
 
 
-    label(.SPOSTACCUM)	
+    label(.SPOSTACCUM)
     // Scaling A * B with alpha.
     ALPHA_SCALE3( 7, 8, 9, 10 )
     ALPHA_SCALE3( 7, 12, 13, 14 )
@@ -955,9 +967,9 @@ void bli_sgemmsup_rv_zen_asm_6x48m_avx512
      * to get the transpose of 6x64 tile and are stored as 64x6 tile.
      */
     mov( var( cbuf ), rcx )             // load address of c
-    mov( var( cs_c ), rdi )             // load rs_c
-    lea( mem( , rdi, 4 ), rdi )         // rdi = rs_c *= sizeof(dt) => rs_c *= 4
-    lea( mem( rdi, rdi, 2 ), r12 )      // rdi += rdi * 2 => rdi = 3 * rs_c
+    mov( var( cs_c ), rdi )             // load cs_c; rdi = cs_c
+    lea( mem( , rdi, 4 ), rdi )         // rdi = cs_c*sizeof(dt) => rdi = cs_c*4
+    lea( mem( rdi, rdi, 2 ), r12 )      // rdi += rdi * 2 => rdi = 3 * cs_c
 
     TRANSPOSE_4X16( 8, 12, 16, 20 )
     lea( mem( rcx, r12, 4 ), rcx )
@@ -967,7 +979,10 @@ void bli_sgemmsup_rv_zen_asm_6x48m_avx512
     lea( mem( rcx, r12, 4 ), rcx )
 
     mov( var( cbuf ), rcx )             // load address of c
-    lea( mem( rcx, r10, 4 ), rcx )
+    mov( var( rs_c ), r12 )             // load rs_c; r12 = rs_c
+    lea( mem( , r12, 4 ), r12 )         // r12 = rs_c*sizeof(dt) => r12 = rs_c*4
+    lea( mem( rcx, r12, 4 ), rcx )      // rcx += 4 * r12 => rcx = 4 * rs_c
+   
     TRANSPOSE_2X16( 24, 28 )
     lea( mem( rcx, rdi, 2 ), rcx )
     TRANSPOSE_2X16( 25, 29 )
@@ -1005,9 +1020,9 @@ void bli_sgemmsup_rv_zen_asm_6x48m_avx512
      * to get the transpose of 6x64 tile and are stored as 64x6 tile.
      */
     mov( var( cbuf ), rcx )             // load address of c
-    mov( var( cs_c ), rdi )             // load rs_c
-    lea( mem( , rdi, 4 ), rdi )         // rs_c *= sizeof(float)
-    lea( mem( rdi, rdi, 2 ), r12 )
+    mov( var( cs_c ), rdi )             // load cs_c; rdi = cs_c
+    lea( mem( , rdi, 4 ), rdi )         // rdi = cs_c*sizeof(dt) => rdi = cs_c*4
+    lea( mem( rdi, rdi, 2 ), r12 )      // rdi += rdi * 2 => rdi = 3 * cs_c
 
     /* Transposing 4x16 tiles to 16x4 tiles */
     TRANSPOSE_4X16_BZ( 8, 12, 16, 20 )
@@ -1018,7 +1033,10 @@ void bli_sgemmsup_rv_zen_asm_6x48m_avx512
 
     /* Transposing 2x16 tiles to 16x2 tiles */
     mov( var( cbuf ), rcx )             // load address of c
-    lea( mem( rcx, r10, 4 ), rcx )
+    mov( var( rs_c ), r12 )             // load rs_c; r12 = rs_c
+    lea( mem( , r12, 4 ), r12 )         // r12 = rs_c*sizeof(dt) => r12 = rs_c*4
+    lea( mem( rcx, r12, 4 ), rcx )      // rcx += 4 * r12 => rcx = 4 * rs_c
+
     TRANSPOSE_2X16_BZ( 24, 28 )
     lea( mem( rcx, rdi, 2 ), rcx )
     TRANSPOSE_2X16_BZ( 25, 29 )
@@ -1030,13 +1048,12 @@ void bli_sgemmsup_rv_zen_asm_6x48m_avx512
 
     label( .SDONE )
 
-    lea( mem( , r8, 2 ), rdx )          // rdx = rs_a * 2
-    lea( mem( rdx, r8, 4 ), rdx )       // rdx = rs_a * 6
+    mov( var( ps_a4 ), rdx )            // load panel stride of a
     mov( var( abuf ), rax )             // load address of a
-    add( rdx, rax )                     // a += rs_a * 6(MR)
+    add( rdx, rax )                     // a += ps_a4
     mov( rax, var( abuf ) )             // store updated a
 
-    mov( var( rs_c ), rdi )         
+    mov( var( rs_c ), rdi )             // load rs_c; rdi = rs_c
     lea( mem(    , rdi, 4 ), rdi )      // rdi = rs_c *= sizeof(dt) => rs_c *= 4
     lea( mem(    , rdi, 2 ), rdx )      // rdx = rs_c * 2
     lea( mem( rdx, rdi, 4 ), rdx )      // rdx = rdi * 4 => rdx = rs_c * 6
@@ -1055,6 +1072,7 @@ void bli_sgemmsup_rv_zen_asm_6x48m_avx512
       [a]      "m" (a),
       [rs_a]   "m" (rs_a),
       [cs_a]   "m" (cs_a),
+      [ps_a4]  "m" (ps_a4),
       [b]      "m" (b),
       [rs_b]   "m" (rs_b),
       [cs_b]   "m" (cs_b),
@@ -1090,7 +1108,7 @@ void bli_sgemmsup_rv_zen_asm_6x48m_avx512
         const dim_t i_edge = m0 - ( dim_t )m_left;
 
         float* restrict cij = c + i_edge*rs_c;
-        float* restrict ai  = a + i_edge*rs_a;
+        float* restrict ai  = a + m_iter * ps_a;
         float* restrict bj  = b;
 
         if ( 4 <= m_left )
@@ -1109,7 +1127,7 @@ void bli_sgemmsup_rv_zen_asm_6x48m_avx512
             ai  += mr_cur * rs_a;
             m_left -= mr_cur;
         }
-    
+
         if ( 2 <= m_left )
         {
             const dim_t mr_cur = 2;
@@ -1174,6 +1192,10 @@ void bli_sgemmsup_rv_zen_asm_6x32m_avx512
     uint64_t cs_b   = cs_b0;
     uint64_t rs_c   = rs_c0;
     uint64_t cs_c   = cs_c0;
+
+    // Query the panel stride of A and convert it to units of bytes.
+    uint64_t ps_a   = bli_auxinfo_ps_a( data );
+    uint64_t ps_a4  = ps_a * sizeof( float );
 
     float *abuf = a;
     float *bbuf = b;
@@ -1327,10 +1349,10 @@ void bli_sgemmsup_rv_zen_asm_6x32m_avx512
 
     label( .CONSID_K_LEFT )
 
-    mov( var( k_left ), rsi )              // i = k_left;
-	  test( rsi, rsi )                     // check i via logical AND.
-	  je( .SPOSTACCUM )                    // if i == 0, we're done; jump to end.
-	                                   // else, we prepare to enter k_left loop.
+    mov( var( k_left ), rsi )       // i = k_left;
+    test( rsi, rsi )                // check i via logical AND.
+    je( .SPOSTACCUM )               // if i == 0, we're done; jump to end.
+                                    // else, we prepare to enter k_left loop.
 
     label( .K_LEFT_LOOP )
     // Load 2 rows from B matrix.
@@ -1397,9 +1419,9 @@ void bli_sgemmsup_rv_zen_asm_6x32m_avx512
      * to get the transpose of 6x64 tile and are stored as 64x6 tile.
      */
     mov( var( cbuf ), rcx )             // load address of c
-    mov( var( cs_c ), rdi )             // load rs_c
-    lea( mem( , rdi, 4 ), rdi )         // rdi = rs_c *= sizeof(dt) => rs_c *= 4
-    lea( mem( rdi, rdi, 2 ), r12 )      // rdi += rdi * 2 => rdi = 3 * rs_c
+    mov( var( cs_c ), rdi )             // load cs_c; rdi = cs_c
+    lea( mem( , rdi, 4 ), rdi )         // rdi = cs_c*sizeof(dt) => rdi = cs_c*4
+    lea( mem( rdi, rdi, 2 ), r12 )      // rdi += rdi * 2 => rdi = 3 * cs_c
 
     /* Transposing 4x16 tiles to 16x4 tiles */
     TRANSPOSE_4X16( 8, 12, 16, 20 )
@@ -1409,7 +1431,11 @@ void bli_sgemmsup_rv_zen_asm_6x32m_avx512
 
     /* Transposing 2x16 tiles to 16x2 tiles */
     mov( var( cbuf ), rcx )             // load address of c
-    lea( mem( rcx, r10, 4 ), rcx )
+    mov( var( rs_c ), r12 )             // load rs_c; r12 = rs_c
+    lea( mem( , r12, 4 ), r12 )         // r12 = rs_c*sizeof(dt) => r12 = rs_c*4
+    lea( mem( rcx, r12, 4 ), rcx )      // rcx += 4 * r12 => rcx = 4 * rs_c
+
+
     TRANSPOSE_2X16( 24, 28 )
     lea( mem( rcx, rdi, 2 ), rcx )
     TRANSPOSE_2X16( 25, 29 )
@@ -1445,9 +1471,9 @@ void bli_sgemmsup_rv_zen_asm_6x32m_avx512
      */
     /* Transposing 4x16 tiles to 16x4 tiles */
     mov( var( cbuf ), rcx )             // load address of c
-    mov( var( cs_c ), rdi )             // load rs_c
-    lea( mem( , rdi, 4 ), rdi )         // rs_c *= sizeof(float)
-    lea( mem( rdi, rdi, 2 ), r12 )
+    mov( var( cs_c ), rdi )             // load cs_c; rdi = cs_c
+    lea( mem( , rdi, 4 ), rdi )         // rdi = cs_c*sizeof(dt) => rdi = cs_c*4
+    lea( mem( rdi, rdi, 2 ), r12 )      // rdi += rdi * 2 => rdi = 3 * cs_c
 
     TRANSPOSE_4X16_BZ( 8, 12, 16, 20 )
     lea( mem( rcx, r12, 4 ), rcx )
@@ -1455,7 +1481,10 @@ void bli_sgemmsup_rv_zen_asm_6x32m_avx512
 
     /* Transposing 2x16 tiles to 16x2 tiles */
     mov( var( cbuf ), rcx )             // load address of c
-    lea( mem( rcx, r10, 4 ), rcx )
+    mov( var( rs_c ), r12 )             // load rs_c; r12 = rs_c
+    lea( mem( , r12, 4 ), r12 )         // r12 = rs_c*sizeof(dt) => r12 = rs_c*4
+    lea( mem( rcx, r12, 4 ), rcx )      // rcx += 4 * r12 => rcx = 4 * rs_c
+
     TRANSPOSE_2X16_BZ( 24, 28 )
     lea( mem( rcx, rdi, 2 ), rcx )
     TRANSPOSE_2X16_BZ( 25, 29 )
@@ -1465,13 +1494,12 @@ void bli_sgemmsup_rv_zen_asm_6x32m_avx512
 
     label( .SDONE )
 
-    lea( mem( , r8, 2 ), rdx )          // rdx = rs_a * 2
-    lea( mem( rdx, r8, 4 ), rdx )       // rdx = rs_a * 6
+    mov( var( ps_a4 ), rdx )            // load panel stride of a
     mov( var( abuf ), rax )             // load address of a
-    add( rdx, rax )                     // a += rs_a * 6(MR)
+    add( rdx, rax )                     // a += ps_a4
     mov( rax, var( abuf ) )             // store updated a
 
-    mov( var( rs_c ), rdi )         
+    mov( var( rs_c ), rdi )             // load rs_c; rdi = rs_c
     lea( mem(    , rdi, 4 ), rdi )      // rdi = rs_c *= sizeof(dt) => rs_c *= 4
     lea( mem(    , rdi, 2 ), rdx )      // rdx = rs_c * 2
     lea( mem( rdx, rdi, 4 ), rdx )      // rdx = rdi * 4 => rdx = rs_c * 6
@@ -1490,6 +1518,7 @@ void bli_sgemmsup_rv_zen_asm_6x32m_avx512
       [a]      "m" (a),
       [rs_a]   "m" (rs_a),
       [cs_a]   "m" (cs_a),
+      [ps_a4]  "m" (ps_a4),
       [b]      "m" (b),
       [rs_b]   "m" (rs_b),
       [cs_b]   "m" (cs_b),
@@ -1525,7 +1554,7 @@ void bli_sgemmsup_rv_zen_asm_6x32m_avx512
         const dim_t i_edge = m0 - ( dim_t )m_left;
 
         float* restrict cij = c + i_edge*rs_c;
-        float* restrict ai  = a + i_edge*rs_a;
+        float* restrict ai  = a + m_iter * ps_a;
         float* restrict bj  = b;
 
         if ( 4 <= m_left )
@@ -1544,7 +1573,7 @@ void bli_sgemmsup_rv_zen_asm_6x32m_avx512
             ai  += mr_cur * rs_a;
             m_left -= mr_cur;
         }
-    
+
         if ( 2 <= m_left )
         {
             const dim_t mr_cur = 2;
@@ -1609,6 +1638,10 @@ void bli_sgemmsup_rv_zen_asm_6x16m_avx512
     uint64_t cs_b   = cs_b0;
     uint64_t rs_c   = rs_c0;
     uint64_t cs_c   = cs_c0;
+
+    // Query the panel stride of A and convert it to units of bytes.
+    uint64_t ps_a   = bli_auxinfo_ps_a( data );
+    uint64_t ps_a4  = ps_a * sizeof( float );
 
     float *abuf = a;
     float *bbuf = b;
@@ -1830,16 +1863,19 @@ void bli_sgemmsup_rv_zen_asm_6x16m_avx512
      */
     /* Transposing 4x16 tiles to 16x4 tiles */
     mov( var( cbuf ), rcx )             // load address of c
-    mov( var( cs_c ), rdi )             // load rs_c
-    lea( mem( , rdi, 4 ), rdi )         // rdi = rs_c *= sizeof(dt) => rs_c *= 4
-    lea( mem( rdi, rdi, 2 ), r12 )      // rdi += rdi * 2 => rdi = 3 * rs_c
+    mov( var( cs_c ), rdi )             // load cs_c; rdi = cs_c
+    lea( mem( , rdi, 4 ), rdi )         // rdi = cs_c*sizeof(dt) => rdi = cs_c*4
+    lea( mem( rdi, rdi, 2 ), r12 )      // rdi += rdi * 2 => rdi = 3 * cs_c
 
     TRANSPOSE_4X16( 8, 12, 16, 20 )
     lea( mem( rcx, r12, 4 ), rcx )
 
     /* Transposing 2x16 tiles to 16x2 tiles */
     mov( var( cbuf ), rcx )             // load address of c
-    lea( mem( rcx, r10, 4 ), rcx )
+    mov( var( rs_c ), r12 )             // load rs_c; r12 = rs_c
+    lea( mem( , r12, 4 ), r12 )         // r12 = rs_c*sizeof(dt) => r12 = rs_c*4
+    lea( mem( rcx, r12, 4 ), rcx )      // rcx += 4 * r12 => rcx = 4 * rs_c
+
     TRANSPOSE_2X16( 24, 28 )
 
     jmp( .SDONE )                       // jump to the end
@@ -1873,15 +1909,18 @@ void bli_sgemmsup_rv_zen_asm_6x16m_avx512
      */
     /* Transposing 4x16 tiles to 16x4 tiles */
     mov( var( cbuf ), rcx )             // load address of c
-    mov( var( cs_c ), rdi )             // load rs_c
-    lea( mem( , rdi, 4 ), rdi )         // rs_c *= sizeof(float)
-    lea( mem( rdi, rdi, 2 ), r12 )
+    mov( var( cs_c ), rdi )             // load cs_c; rdi = cs_c
+    lea( mem( , rdi, 4 ), rdi )         // rdi = cs_c*sizeof(dt) => rdi = cs_c*4
+    lea( mem( rdi, rdi, 2 ), r12 )      // rdi += rdi * 2 => rdi = 3 * cs_c
 
     TRANSPOSE_4X16_BZ( 8, 12, 16, 20 )
 
     /* Transposing 2x16 tiles to 16x2 tiles */
     mov( var( cbuf ), rcx )             // load address of c
-    lea( mem( rcx, r10, 4 ), rcx )
+    mov( var( rs_c ), r12 )             // load rs_c; r12 = rs_c
+    lea( mem( , r12, 4 ), r12 )         // r12 = rs_c*sizeof(dt) => r12 = rs_c*4
+    lea( mem( rcx, r12, 4 ), rcx )      // rcx += 4 * r12 => rcx = 4 * rs_c
+
     TRANSPOSE_2X16_BZ( 24, 28 )
 
     jmp( .SDONE )                       // jump to the end
@@ -1889,13 +1928,12 @@ void bli_sgemmsup_rv_zen_asm_6x16m_avx512
 
     label( .SDONE )
 
-    lea( mem( , r8, 2 ), rdx )          // rdx = rs_a * 2
-    lea( mem( rdx, r8, 4 ), rdx )       // rdx = rs_a * 6
+    mov( var( ps_a4 ), rdx )            // load panel stride of a
     mov( var( abuf ), rax )             // load address of a
-    add( rdx, rax )                     // a += rs_a * 6(MR)
+    add( rdx, rax )                     // a += ps_a4
     mov( rax, var( abuf ) )             // store updated a
 
-    mov( var( rs_c ), rdi )         
+    mov( var( rs_c ), rdi )             // load rs_c; rdi = rs_c
     lea( mem(    , rdi, 4 ), rdi )      // rdi = rs_c *= sizeof(dt) => rs_c *= 4
     lea( mem(    , rdi, 2 ), rdx )      // rdx = rs_c * 2
     lea( mem( rdx, rdi, 4 ), rdx )      // rdx = rdi * 4 => rdx = rs_c * 6
@@ -1914,6 +1952,7 @@ void bli_sgemmsup_rv_zen_asm_6x16m_avx512
       [a]      "m" (a),
       [rs_a]   "m" (rs_a),
       [cs_a]   "m" (cs_a),
+      [ps_a4]  "m" (ps_a4),
       [b]      "m" (b),
       [rs_b]   "m" (rs_b),
       [cs_b]   "m" (cs_b),
@@ -1949,7 +1988,7 @@ void bli_sgemmsup_rv_zen_asm_6x16m_avx512
         const dim_t i_edge = m0 - ( dim_t )m_left;
 
         float* restrict cij = c + i_edge*rs_c;
-        float* restrict ai  = a + i_edge*rs_a;
+        float* restrict ai  = a + m_iter*ps_a;
         float* restrict bj  = b;
 
         if ( 4 <= m_left )
@@ -2275,7 +2314,7 @@ void bli_sgemmsup_rv_zen_asm_4x64m_avx512
     lea( mem( rcx, r12, 4 ), rcx )
     TRANSPOSE_4X16_BZ( 10, 14, 18, 22 )
     lea( mem( rcx, r12, 4 ), rcx )
-    TRANSPOSE_4X16_BZ( 11, 15, 19, 23 ) 
+    TRANSPOSE_4X16_BZ( 11, 15, 19, 23 )
 
     jmp( .SDONE )                       // jump to the end
 
