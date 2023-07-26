@@ -86,12 +86,10 @@ int main( int argc, char** argv )
 	libblis_test_read_ops_file( libblis_test_operations_filename, &ops );
 
 	// Walk through all test modules.
-	//libblis_test_all_ops( &params, &ops );
 	libblis_test_thread_decorator( &params, &ops );
 
 	// Finalize libblis.
 	bli_finalize();
-
 #ifdef BLIS_ENABLE_HPX
 	return bli_thread_finalize_hpx();
 #else
@@ -110,7 +108,9 @@ typedef struct thread_data
 	unsigned int       id;
 	unsigned int       xc;
 	//pthread_mutex_t*   mutex;
+#ifdef BLIS_ENABLE_HPX
 	pthread_barrier_t* barrier;
+#endif
 } thread_data_t;
 #endif
 
@@ -132,6 +132,21 @@ void* libblis_test_thread_entry( void* tdata_void )
 void libblis_test_thread_decorator( test_params_t* params, test_ops_t* ops )
 {
 	err_t r_val;
+
+#ifdef BLIS_ENABLE_HPX
+        int nt = params->n_app_threads;
+	thread_data_t* tdata   = bli_malloc_user( sizeof( thread_data_t ) * nt, &r_val );
+	tdata->params  = params;
+	tdata->ops     = ops;
+	tdata->nt      = nt;
+	tdata->id      = 1;
+	tdata->xc      = 0;
+
+	// Walk through all test modules.
+	libblis_test_all_ops( tdata, params, ops );
+
+        bli_free_user(tdata);
+#else
 
 	// Query the total number of threads to simulate.
 	size_t nt = ( size_t )params->n_app_threads;
@@ -215,6 +230,7 @@ void libblis_test_thread_decorator( test_params_t* params, test_ops_t* ops )
 	#endif
 	//bli_free_user( mutex );
 	bli_free_user( barrier );
+#endif
 }
 
 
@@ -2396,8 +2412,10 @@ void libblis_test_op_driver
 				}
 			}
 
+#ifndef BLIS_ENABLE_HPX
 			// Wait for all other threads so that the output stays organized.
 			bli_pthread_barrier_wait( tdata->barrier );
+#endif
 
 			// These statements should only be executed by one thread.
 			if ( tdata->id == 0 )
@@ -2447,8 +2465,10 @@ void libblis_test_op_driver
 	if ( tdata->id == 0 )
 		op->test_done = TRUE;
 
+#ifndef BLIS_ENABLE_HPX
 	// Wait here so that all threads know we are done
 	bli_pthread_barrier_wait( tdata->barrier );
+#endif
 }
 
 
