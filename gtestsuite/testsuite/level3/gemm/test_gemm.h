@@ -77,3 +77,62 @@ void test_gemm( char storage, char trnsa, char trnsb, gtint_t m, gtint_t n,
     //----------------------------------------------------------
     computediff<T>( storage, m, n, c.data(), c_ref.data(), ldc, thresh );
 }
+
+// Test body used for exception value testing, by iducing an exception value
+// in the index that is passed for each of the matrices.
+/*
+  (ai, aj) is the index with corresponding exception value aexval in matrix A.
+  The index is with respect to the assumption that the matrix is column stored,
+  without any transpose. In case of the row-storage and/or transpose, the index
+  is translated from its assumption accordingly.
+  Ex : (2, 3) with storage 'c' and transpose 'n' becomes (3, 2) if storage becomes
+  'r' or transpose becomes 't'.
+*/
+// (bi, bj) is the index with corresponding exception value bexval in matrix B.
+// (ci, cj) is the index with corresponding exception value cexval in matrix C.
+template<typename T>
+void test_gemm( char storage, char trnsa, char trnsb, gtint_t m, gtint_t n,
+    gtint_t k, gtint_t lda_inc, gtint_t ldb_inc, gtint_t ldc_inc, T alpha,
+    T beta, gtint_t ai, gtint_t aj, T aexval, gtint_t bi, gtint_t bj, T bexval,
+    gtint_t ci, gtint_t cj, T cexval, double thresh )
+{
+    // Compute the leading dimensions of a, b, and c.
+    gtint_t lda = testinghelpers::get_leading_dimension( storage, trnsa, m, k, lda_inc );
+    gtint_t ldb = testinghelpers::get_leading_dimension( storage, trnsb, k, n, ldb_inc );
+    gtint_t ldc = testinghelpers::get_leading_dimension( storage, 'n', m, n, ldc_inc );
+
+    //----------------------------------------------------------
+    //         Initialize matrics with random numbers
+    //----------------------------------------------------------
+    std::vector<T> a = testinghelpers::get_random_matrix<T>( -2, 8, storage, trnsa, m, k, lda );
+    std::vector<T> b = testinghelpers::get_random_matrix<T>( -5, 2, storage, trnsb, k, n, ldb );
+    std::vector<T> c = testinghelpers::get_random_matrix<T>( -3, 5, storage, 'n', m, n, ldc );
+
+    // Inducing exception values onto the matrices based on the indices passed as arguments.
+    // Assumption is that the indices are with respect to the matrices in column storage without
+    // any transpose. In case of difference in storage scheme or transposition, the row and column
+    // indices are appropriately swapped.
+    testinghelpers::set_ev_mat( storage, trnsa, lda, ai, aj, aexval, a.data() );
+    testinghelpers::set_ev_mat( storage, trnsb, ldb, bi, bj, bexval, b.data() );
+    testinghelpers::set_ev_mat( storage, 'n', ldc, ci, cj, cexval, c.data() );
+
+    // Create a copy of c so that we can check reference results.
+    std::vector<T> c_ref(c);
+
+    //----------------------------------------------------------
+    //                  Call BLIS function
+    //----------------------------------------------------------
+    gemm<T>( storage, trnsa, trnsb, m, n, k, &alpha, a.data(), lda,
+                                b.data(), ldb, &beta, c.data(), ldc );
+
+    //----------------------------------------------------------
+    //                  Call reference implementation.
+    //----------------------------------------------------------
+    testinghelpers::ref_gemm( storage, trnsa, trnsb, m, n, k, alpha,
+               a.data(), lda, b.data(), ldb, beta, c_ref.data(), ldc );
+
+    //----------------------------------------------------------
+    //              check component-wise error.
+    //----------------------------------------------------------
+    computediff<T>( storage, m, n, c.data(), c_ref.data(), ldc, thresh, true );
+}

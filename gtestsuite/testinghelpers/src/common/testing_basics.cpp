@@ -614,4 +614,76 @@ template void print_matrix<double>( char, gtint_t, gtint_t, double *, gtint_t, c
 template void print_matrix<scomplex>( char, gtint_t, gtint_t, scomplex *, gtint_t, const char * );
 template void print_matrix<dcomplex>( char, gtint_t, gtint_t, dcomplex *, gtint_t, const char * );
 
+
+/*
+    Helper function that returns a string based on the value that is passed
+    The return values are as follows :
+    If datatype is real : "nan", "inf"/"minus_inf", "value", where "value"
+    is the string version of the value that is passed, if it is not nan/inf/-inf.
+
+    If the datatype is complex : The string is concatenated with both the real and
+    imaginary components values, based on analysis done separately to each of them
+    (similar to real datatype).
+*/
+template<typename T>
+std::string get_value_string(T exval)
+{
+  std::string exval_str;
+  if constexpr (testinghelpers::type_info<T>::is_real)
+  {
+    if(std::isnan(exval))
+      exval_str = "nan";
+    else if(std::isinf(exval))
+      exval_str = (exval >= 0) ? "inf" : "minus_inf";
+    else
+      exval_str = ( exval >= 0) ? std::to_string(int(exval)) : "minus_" + std::to_string(int(std::abs(exval)));
+  }
+  else
+  {
+    if(std::isnan(exval.real))
+    {
+      exval_str = "nan";
+      if(std::isinf(exval.imag))
+        exval_str = exval_str + "pi" + ((exval.imag >= 0) ? "inf" : "minus_inf");
+      else
+        exval_str = exval_str + "pi" + ((exval.imag >= 0)? std::to_string(int(exval.imag)) : "m" + std::to_string(int(std::abs(exval.imag))));
+    }
+    else if(std::isnan(exval.imag))
+    {
+      if(std::isinf(exval.real))
+        exval_str = ((exval.real >= 0) ? "inf" : "minus_inf");
+      else
+        exval_str = ((exval.real >= 0)? std::to_string(int(exval.real)) : "m" + std::to_string(int(std::abs(exval.real))));
+      exval_str = exval_str + "pinan";
+    }
+    else if(std::isinf(exval.real))
+    {
+      exval_str = ((exval.real >= 0) ? "inf" : "minus_inf");
+      if(std::isnan(exval.imag))
+        exval_str = exval_str + "pinan";
+      else
+        exval_str = exval_str + "pi" + ((exval.imag >= 0)? std::to_string(int(exval.imag)) : "m" + std::to_string(int(std::abs(exval.imag))));
+    }
+    else if(std::isinf(exval.imag))
+    {
+      if(std::isnan(exval.real))
+        exval_str = "nan";
+      else
+        exval_str = ((exval.real >= 0)? std::to_string(int(exval.real)) : "m" + std::to_string(int(std::abs(exval.real))));
+
+      exval_str = exval_str + ((exval.imag >= 0) ? "inf" : "minus_inf");
+    }
+    else
+    {
+        exval_str = ((exval.real >= 0)? std::to_string(int(exval.real)) : "m" + std::to_string(int(std::abs(exval.real))));
+        exval_str = exval_str + "pi" + ((exval.imag >= 0)? std::to_string(int(exval.imag)) : "m" + std::to_string(int(std::abs(exval.imag))));
+    }
+  }
+  return exval_str;
+}
+template std::string testinghelpers::get_value_string( float );
+template std::string testinghelpers::get_value_string( double );
+template std::string testinghelpers::get_value_string( scomplex );
+template std::string testinghelpers::get_value_string( dcomplex );
+
 } //end of namespace testinghelpers

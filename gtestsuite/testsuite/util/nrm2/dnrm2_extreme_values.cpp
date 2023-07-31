@@ -88,10 +88,10 @@ public:
         std::string incx_str = ( incx > 0) ? std::to_string(incx) : "m" + std::to_string(std::abs(incx));
         str_name    = str_name + "_" + incx_str;
         str_name    = str_name + "_i" + std::to_string(i);
-        std::string iexval_str = getValueString(iexval);
+        std::string iexval_str = testinghelpers::get_value_string(iexval);
         str_name    = str_name + "_" + iexval_str;
         str_name    = str_name + "_j" + std::to_string(j);
-        std::string jexval_str = getValueString(jexval);
+        std::string jexval_str = testinghelpers::get_value_string(jexval);
         str_name    = str_name + "_" + jexval_str;
         return str_name;
     }

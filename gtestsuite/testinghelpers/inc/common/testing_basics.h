@@ -371,4 +371,13 @@ void print_vector( const char *vec, gtint_t n, T *x, gtint_t incx, const char *s
 template<typename T>
 void print_matrix( const char *mat, char storage, gtint_t m, gtint_t n, T *a, gtint_t ld, const char *spec );
 
+/**
+ * @brief returns a string with the correct NaN/Inf for printing
+ *
+ * @tparam T float, double, scomplex, dcomplex.
+ * @param exval exception value for setting the string.
+ */
+template<typename T>
+std::string get_value_string( T exval );
+
 } //end of namespace testinghelpers

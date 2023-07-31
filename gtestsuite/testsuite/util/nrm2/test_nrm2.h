@@ -99,18 +99,3 @@ void test_nrm2( gtint_t n, gtint_t incx, gtint_t i, T iexval, gtint_t j = 0, T j
     // Compare using NaN/Inf checks.
     computediff<RT>( norm, norm_ref, true );
 }
-
-// Helper function that returns a string with the correct NaN/Inf printing
-// so that we can print the test names correctly from using parametrized testing.
-template<typename T>
-std::string getValueString(T exval)
-{
-  std::string exval_str;
-  if(std::isnan(exval))
-    exval_str = "nan";
-  else if(std::isinf(exval))
-    exval_str = (exval > 0) ? "inf" : "minus_inf";
-  else
-    exval_str = ( exval > 0) ? std::to_string(int(exval)) : "minus_" + std::to_string(int(std::abs(exval)));
-  return exval_str;
-}

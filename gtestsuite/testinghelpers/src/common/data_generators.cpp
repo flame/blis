@@ -441,6 +441,26 @@ std::vector<T> get_matrix( char storage, char trans, gtint_t m, gtint_t n, gtint
     return a;
 }
 
+template<typename T>
+void set_ev_mat( char storage, char trns, gtint_t ld, gtint_t i, gtint_t j, T exval, T* m )
+{
+    // Setting the exception values on the indices passed as arguments
+    if ( storage == 'c' || storage == 'C' )
+    {
+      if ( trns == 'n' || trns == 'N' )
+        m[i + j*ld] = exval;
+      else
+        m[j + i*ld] = exval;
+    }
+    else
+    {
+      if ( trns == 'n' || trns == 'N' )
+        m[i*ld + j] = exval;
+      else
+        m[j*ld + i] = exval;
+    }
+}
+
 } //end of namespace testinghelpers
 
 // Explicit template instantiations
@@ -493,3 +513,18 @@ template std::vector<float> testinghelpers::get_matrix( char, char, gtint_t, gti
 template std::vector<double> testinghelpers::get_matrix( char, char, gtint_t, gtint_t, gtint_t, double );
 template std::vector<scomplex> testinghelpers::get_matrix( char, char, gtint_t, gtint_t, gtint_t, scomplex );
 template std::vector<dcomplex> testinghelpers::get_matrix( char, char, gtint_t, gtint_t, gtint_t, dcomplex );
+
+template void testinghelpers::set_vector<float>( gtint_t, gtint_t, float*, float );
+template void testinghelpers::set_vector<double>( gtint_t, gtint_t, double*, double );
+template void testinghelpers::set_vector<scomplex>( gtint_t, gtint_t, scomplex*, scomplex );
+template void testinghelpers::set_vector<dcomplex>( gtint_t, gtint_t, dcomplex*, dcomplex );
+
+template void testinghelpers::set_matrix<float>( char, gtint_t, gtint_t, float*, char, gtint_t, float );
+template void testinghelpers::set_matrix<double>( char, gtint_t, gtint_t, double*, char, gtint_t, double );
+template void testinghelpers::set_matrix<scomplex>( char, gtint_t, gtint_t, scomplex*, char, gtint_t, scomplex );
+template void testinghelpers::set_matrix<dcomplex>( char, gtint_t, gtint_t, dcomplex*, char, gtint_t, dcomplex );
+
+template void testinghelpers::set_ev_mat<float>( char, char, gtint_t, gtint_t, gtint_t, float, float* );
+template void testinghelpers::set_ev_mat<double>( char, char, gtint_t, gtint_t, gtint_t, double, double* );
+template void testinghelpers::set_ev_mat<scomplex>( char, char, gtint_t, gtint_t, gtint_t, scomplex, scomplex* );
+template void testinghelpers::set_ev_mat<dcomplex>( char, char, gtint_t, gtint_t, gtint_t, dcomplex, dcomplex* );
