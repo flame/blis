@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2022 - 2023, Advanced Micro Devices, Inc.All rights reserved.
+   Copyright (C) 2022 - 2023, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -474,7 +474,12 @@ void bli_dgemm_zen4_asm_32x6(
           [offsetPtr] "m" (offsetPtr)
         : // register clobber list
           "rax", "rbx", "rcx", "rdx", "rdi", "rsi", "r8", "r9", "r10", "r11", "r12",
-          "r13", "r14", "r15", "zmm0", "zmm1", "zmm2", "zmm3", "zmm4", "zmm5",
+          "r13", "r14", "r15", "k0", "k1", "k2", "k3", "k4", "xmm1",
+          "xmm2", "ymm2", "ymm4", "ymm5", "ymm6", "ymm7", "ymm8", "ymm9",
+          "ymm10", "ymm11", "ymm12", "ymm13", "ymm14", "ymm15", "ymm16",
+          "ymm17", "ymm18", "ymm19", "ymm20", "ymm21", "ymm22", "ymm23",
+          "ymm24", "ymm25", "ymm26", "ymm27", "ymm28", "ymm29", "ymm30",
+          "ymm31", "zmm0", "zmm1", "zmm2", "zmm3", "zmm4", "zmm5",
           "zmm6", "zmm7", "zmm8", "zmm9", "zmm10", "zmm11", "zmm12", "zmm13",
           "zmm14", "zmm15", "zmm16", "zmm17", "zmm18", "zmm19", "zmm20", "zmm21",
           "zmm22", "zmm23", "zmm24", "zmm25", "zmm26", "zmm27", "zmm28", "zmm29",
