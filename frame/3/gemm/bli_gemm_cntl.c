@@ -36,8 +36,7 @@
 #include "blis.h"
 
 
-static packm_ker_ft GENARRAY(packm_struc_cxk,packm_struc_cxk);
-static packm_ker_ft GENARRAY2_ALL(packm_struc_cxk_md,packm_struc_cxk_md);
+static packm_ker_ft GENARRAY2_ALL(packm_struc_cxk,packm_struc_cxk);
 
 void bli_gemm_var_cntl_init_node
      (
@@ -202,37 +201,35 @@ void bli_gemm_cntl_init
 	else { macro_kernel_fp = NULL; bli_abort(); } // Should never execute.
 #endif
 
-	const num_t         dt_a          = bli_obj_dt( a );
-	const num_t         dt_b          = bli_obj_dt( b );
-	const num_t         dt_ap         = bli_dt_domain( dt_a ) | comp_prec;
-	const num_t         dt_bp         = bli_dt_domain( dt_b ) | comp_prec;
-	const bool          trmm_r        = family == BLIS_TRMM && bli_obj_is_triangular( b );
-	const bool          a_lo_tri      = bli_obj_is_triangular( a ) && bli_obj_is_lower( a );
-	const bool          b_up_tri      = bli_obj_is_triangular( b ) && bli_obj_is_upper( b );
-	      pack_t        schema_a      = BLIS_PACKED_ROW_PANELS;
-	      pack_t        schema_b      = BLIS_PACKED_COL_PANELS;
-	const packm_ker_ft  packm_a_ukr   = dt_a == dt_ap ? packm_struc_cxk[ dt_a ]
-	                                                  : packm_struc_cxk_md[ dt_a ][ dt_ap ];
-	const packm_ker_ft  packm_b_ukr   = dt_b == dt_bp ? packm_struc_cxk[ dt_b ]
-	                                                  : packm_struc_cxk_md[ dt_b ][ dt_bp ];
-	const dim_t         mr_def        = bli_cntx_get_blksz_def_dt( dt_comp, BLIS_MR, cntx );
-	const dim_t         mr_pack       = bli_cntx_get_blksz_max_dt( dt_comp, BLIS_MR, cntx );
-	const dim_t         mr_bcast      = bli_cntx_get_blksz_max_dt( dt_comp, BLIS_BBM, cntx );
-	      dim_t         mr_scale      = 1;
-	const dim_t         nr_def        = bli_cntx_get_blksz_def_dt( dt_comp, BLIS_NR, cntx );
-	const dim_t         nr_pack       = bli_cntx_get_blksz_max_dt( dt_comp, BLIS_NR, cntx );
-	const dim_t         nr_bcast      = bli_cntx_get_blksz_max_dt( dt_comp, BLIS_BBN, cntx );
-	      dim_t         nr_scale      = 1;
-	const dim_t         kr_def        = bli_cntx_get_blksz_def_dt( dt_comp, BLIS_KR, cntx );
-	const dim_t         mc_def        = bli_cntx_get_blksz_def_dt( dt_comp, BLIS_MC, cntx );
-	const dim_t         mc_max        = bli_cntx_get_blksz_max_dt( dt_comp, BLIS_MC, cntx );
-	      dim_t         mc_scale      = 1;
-	const dim_t         nc_def        = bli_cntx_get_blksz_def_dt( dt_comp, BLIS_NC, cntx );
-	const dim_t         nc_max        = bli_cntx_get_blksz_max_dt( dt_comp, BLIS_NC, cntx );
-	      dim_t         nc_scale      = 1;
-	const dim_t         kc_def        = bli_cntx_get_blksz_def_dt( dt_comp, BLIS_KC, cntx );
-	const dim_t         kc_max        = bli_cntx_get_blksz_max_dt( dt_comp, BLIS_KC, cntx );
-	      dim_t         kc_scale      = 1;
+	const num_t        dt_a        = bli_obj_dt( a );
+	const num_t        dt_b        = bli_obj_dt( b );
+	const num_t        dt_ap       = bli_dt_domain( dt_a ) | comp_prec;
+	const num_t        dt_bp       = bli_dt_domain( dt_b ) | comp_prec;
+	const bool         trmm_r      = family == BLIS_TRMM && bli_obj_is_triangular( b );
+	const bool         a_lo_tri    = bli_obj_is_triangular( a ) && bli_obj_is_lower( a );
+	const bool         b_up_tri    = bli_obj_is_triangular( b ) && bli_obj_is_upper( b );
+	      pack_t       schema_a    = BLIS_PACKED_ROW_PANELS;
+	      pack_t       schema_b    = BLIS_PACKED_COL_PANELS;
+	const packm_ker_ft packm_a_ukr = packm_struc_cxk[ dt_a ][ dt_ap ];
+	const packm_ker_ft packm_b_ukr = packm_struc_cxk[ dt_b ][ dt_bp ];
+	const dim_t        mr_def      = bli_cntx_get_blksz_def_dt( dt_comp, BLIS_MR, cntx );
+	const dim_t        mr_pack     = bli_cntx_get_blksz_max_dt( dt_comp, BLIS_MR, cntx );
+	const dim_t        mr_bcast    = bli_cntx_get_blksz_max_dt( dt_comp, BLIS_BBM, cntx );
+	      dim_t        mr_scale    = 1;
+	const dim_t        nr_def      = bli_cntx_get_blksz_def_dt( dt_comp, BLIS_NR, cntx );
+	const dim_t        nr_pack     = bli_cntx_get_blksz_max_dt( dt_comp, BLIS_NR, cntx );
+	const dim_t        nr_bcast    = bli_cntx_get_blksz_max_dt( dt_comp, BLIS_BBN, cntx );
+	      dim_t        nr_scale    = 1;
+	const dim_t        kr_def      = bli_cntx_get_blksz_def_dt( dt_comp, BLIS_KR, cntx );
+	const dim_t        mc_def      = bli_cntx_get_blksz_def_dt( dt_comp, BLIS_MC, cntx );
+	const dim_t        mc_max      = bli_cntx_get_blksz_max_dt( dt_comp, BLIS_MC, cntx );
+	      dim_t        mc_scale    = 1;
+	const dim_t        nc_def      = bli_cntx_get_blksz_def_dt( dt_comp, BLIS_NC, cntx );
+	const dim_t        nc_max      = bli_cntx_get_blksz_max_dt( dt_comp, BLIS_NC, cntx );
+	      dim_t        nc_scale    = 1;
+	const dim_t        kc_def      = bli_cntx_get_blksz_def_dt( dt_comp, BLIS_KC, cntx );
+	const dim_t        kc_max      = bli_cntx_get_blksz_max_dt( dt_comp, BLIS_KC, cntx );
+	      dim_t        kc_scale    = 1;
 
 	if ( im == BLIS_1M )
 	{

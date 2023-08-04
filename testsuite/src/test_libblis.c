@@ -2627,7 +2627,7 @@ void libblis_test_mobj_create( test_params_t* params, num_t dt, trans_t trans, c
 
 thrinfo_t* libblis_test_pobj_create( bszid_t bmult_id_m, bszid_t bmult_id_n, invdiag_t inv_diag, pack_t pack_schema, packbuf_t pack_buf, obj_t* a, obj_t* p, cntx_t* cntx )
 {
-	static packm_ker_ft GENARRAY(packm_struc_cxk,packm_struc_cxk);
+	static packm_ker_ft GENARRAY2_ALL(packm_struc_cxk,packm_struc_cxk);
 
 	bool does_inv_diag;
 	if ( inv_diag == BLIS_NO_INVERT_DIAG ) does_inv_diag = FALSE;
@@ -2642,11 +2642,11 @@ thrinfo_t* libblis_test_pobj_create( bszid_t bmult_id_m, bszid_t bmult_id_n, inv
 	packm_def_cntl_t cntl;
 	bli_packm_def_cntl_init_node
 	(
-	  NULL, // func ptr is not referenced b/c we don't call via l3 _int().
+	  NULL, // func ptr is not referenced b/c we don't call via bli_l3_int().
 	  dt,
 	  dt,
 	  dt,
-	  packm_struc_cxk[ dt ],
+	  packm_struc_cxk[ dt ][ dt ],
 	  bli_cntx_get_blksz_def_dt( dt, bmult_id_m, cntx ),
 	  bli_cntx_get_blksz_max_dt( dt, bmult_id_m, cntx ),
 	  1,

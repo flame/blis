@@ -32,10 +32,10 @@
 
 */
 
-#undef  GENTPROT
-#define GENTPROT( ctype, ch, varname ) \
+#undef  GENTPROT2
+#define GENTPROT2( ctypec, ctypep, chc, chp, varname ) \
 \
-BLIS_EXPORT_BLIS void PASTEMAC(ch,varname) \
+BLIS_EXPORT_BLIS void PASTEMAC2(chc,chp,varname) \
      ( \
              struc_t strucc, \
              diag_t  diagc, \
@@ -57,5 +57,6 @@ BLIS_EXPORT_BLIS void PASTEMAC(ch,varname) \
        const cntx_t* cntx \
      );
 
-INSERT_GENTPROT_BASIC( packm_struc_cxk )
+INSERT_GENTPROT2_BASIC( packm_struc_cxk )
+INSERT_GENTPROT2_MIX_DP( packm_struc_cxk )
 
