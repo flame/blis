@@ -372,15 +372,15 @@ void GENBARNAME(cntx_init)
 
 	// -- Set level-3 native micro-kernels and preferences ---------------------
 
-	gen_func_init( &funcs[ BLIS_GEMM_UKR ],       gemm_ukr_name       );
-	gen_func_init( &funcs[ BLIS_GEMMTRSM_L_UKR ], gemmtrsm_l_ukr_name );
-	gen_func_init( &funcs[ BLIS_GEMMTRSM_U_UKR ], gemmtrsm_u_ukr_name );
-	gen_func_init( &funcs[ BLIS_TRSM_L_UKR ],     trsm_l_ukr_name     );
-	gen_func_init( &funcs[ BLIS_TRSM_U_UKR ],     trsm_u_ukr_name     );
+	gen_func_init( &funcs[ bli_ker_idx( BLIS_GEMM_UKR ) ],       gemm_ukr_name       );
+	gen_func_init( &funcs[ bli_ker_idx( BLIS_GEMMTRSM_L_UKR ) ], gemmtrsm_l_ukr_name );
+	gen_func_init( &funcs[ bli_ker_idx( BLIS_GEMMTRSM_U_UKR ) ], gemmtrsm_u_ukr_name );
+	gen_func_init( &funcs[ bli_ker_idx( BLIS_TRSM_L_UKR ) ],     trsm_l_ukr_name     );
+	gen_func_init( &funcs[ bli_ker_idx( BLIS_TRSM_U_UKR ) ],     trsm_u_ukr_name     );
 
-	gen_func_init_ro( &funcs[ BLIS_GEMM1M_UKR ],       gemm1m_ukr_name       );
-	gen_func_init_ro( &funcs[ BLIS_GEMMTRSM1M_L_UKR ], gemmtrsm1m_l_ukr_name );
-	gen_func_init_ro( &funcs[ BLIS_GEMMTRSM1M_U_UKR ], gemmtrsm1m_u_ukr_name );
+	gen_func_init_ro( &funcs[ bli_ker_idx( BLIS_GEMM1M_UKR ) ],       gemm1m_ukr_name       );
+	gen_func_init_ro( &funcs[ bli_ker_idx( BLIS_GEMMTRSM1M_L_UKR ) ], gemmtrsm1m_l_ukr_name );
+	gen_func_init_ro( &funcs[ bli_ker_idx( BLIS_GEMMTRSM1M_U_UKR ) ], gemmtrsm1m_u_ukr_name );
 
 	//                                                           s      d      c      z
 	bli_mbool_init( &mbools[ BLIS_GEMM_UKR_ROW_PREF ],        TRUE,  TRUE,  TRUE,  TRUE );
@@ -392,19 +392,19 @@ void GENBARNAME(cntx_init)
 
 	// -- Set level-3 small/unpacked micro-kernels and preferences -------------
 
-	gen_func_init( &funcs[ BLIS_GEMMSUP_RRR_UKR ], gemmsup_rv_ukr_name );
-	gen_func_init( &funcs[ BLIS_GEMMSUP_RRC_UKR ], gemmsup_rv_ukr_name );
-	gen_func_init( &funcs[ BLIS_GEMMSUP_RCR_UKR ], gemmsup_rv_ukr_name );
-	gen_func_init( &funcs[ BLIS_GEMMSUP_RCC_UKR ], gemmsup_rv_ukr_name );
-	gen_func_init( &funcs[ BLIS_GEMMSUP_CRR_UKR ], gemmsup_rv_ukr_name );
-	gen_func_init( &funcs[ BLIS_GEMMSUP_CRC_UKR ], gemmsup_rv_ukr_name );
-	gen_func_init( &funcs[ BLIS_GEMMSUP_CCR_UKR ], gemmsup_rv_ukr_name );
-	gen_func_init( &funcs[ BLIS_GEMMSUP_CCC_UKR ], gemmsup_rv_ukr_name );
+	gen_func_init( &funcs[ bli_ker_idx( BLIS_GEMMSUP_RRR_UKR ) ], gemmsup_rv_ukr_name );
+	gen_func_init( &funcs[ bli_ker_idx( BLIS_GEMMSUP_RRC_UKR ) ], gemmsup_rv_ukr_name );
+	gen_func_init( &funcs[ bli_ker_idx( BLIS_GEMMSUP_RCR_UKR ) ], gemmsup_rv_ukr_name );
+	gen_func_init( &funcs[ bli_ker_idx( BLIS_GEMMSUP_RCC_UKR ) ], gemmsup_rv_ukr_name );
+	gen_func_init( &funcs[ bli_ker_idx( BLIS_GEMMSUP_CRR_UKR ) ], gemmsup_rv_ukr_name );
+	gen_func_init( &funcs[ bli_ker_idx( BLIS_GEMMSUP_CRC_UKR ) ], gemmsup_rv_ukr_name );
+	gen_func_init( &funcs[ bli_ker_idx( BLIS_GEMMSUP_CCR_UKR ) ], gemmsup_rv_ukr_name );
+	gen_func_init( &funcs[ bli_ker_idx( BLIS_GEMMSUP_CCC_UKR ) ], gemmsup_rv_ukr_name );
 
 	// Register the general-stride/generic ukernel to the "catch-all" slot
 	// associated with the BLIS_XXX enum value. This slot will be queried if
 	// *any* operand is stored with general stride.
-	gen_func_init( &funcs[ BLIS_GEMMSUP_XXX_UKR ], gemmsup_gx_ukr_name );
+	gen_func_init( &funcs[ bli_ker_idx( BLIS_GEMMSUP_XXX_UKR ) ], gemmsup_gx_ukr_name );
 
 
 	// Set the l3 sup ukernel storage preferences.
@@ -423,48 +423,48 @@ void GENBARNAME(cntx_init)
 
 	// -- Set level-1f kernels -------------------------------------------------
 
-	gen_func_init( &funcs[ BLIS_AXPY2V_KER ],    axpy2v_ker_name    );
-	gen_func_init( &funcs[ BLIS_DOTAXPYV_KER ],  dotaxpyv_ker_name  );
-	gen_func_init( &funcs[ BLIS_AXPYF_KER ],     axpyf_ker_name     );
-	gen_func_init( &funcs[ BLIS_DOTXF_KER ],     dotxf_ker_name     );
-	gen_func_init( &funcs[ BLIS_DOTXAXPYF_KER ], dotxaxpyf_ker_name );
+	gen_func_init( &funcs[ bli_ker_idx( BLIS_AXPY2V_KER ) ],    axpy2v_ker_name    );
+	gen_func_init( &funcs[ bli_ker_idx( BLIS_DOTAXPYV_KER ) ],  dotaxpyv_ker_name  );
+	gen_func_init( &funcs[ bli_ker_idx( BLIS_AXPYF_KER ) ],     axpyf_ker_name     );
+	gen_func_init( &funcs[ bli_ker_idx( BLIS_DOTXF_KER ) ],     dotxf_ker_name     );
+	gen_func_init( &funcs[ bli_ker_idx( BLIS_DOTXAXPYF_KER ) ], dotxaxpyf_ker_name );
 
 
 	// -- Set level-1v kernels -------------------------------------------------
 
-	gen_func_init( &funcs[ BLIS_ADDV_KER ],     addv_ker_name     );
-	gen_func_init( &funcs[ BLIS_AMAXV_KER ],    amaxv_ker_name    );
-	gen_func_init( &funcs[ BLIS_AXPBYV_KER ],   axpbyv_ker_name   );
-	gen_func_init( &funcs[ BLIS_AXPYV_KER ],    axpyv_ker_name    );
-	gen_func_init( &funcs[ BLIS_COPYV_KER ],    copyv_ker_name    );
-	gen_func_init( &funcs[ BLIS_DOTV_KER ],     dotv_ker_name     );
-	gen_func_init( &funcs[ BLIS_DOTXV_KER ],    dotxv_ker_name    );
-	gen_func_init( &funcs[ BLIS_INVERTV_KER ],  invertv_ker_name  );
-	gen_func_init( &funcs[ BLIS_INVSCALV_KER ], invscalv_ker_name );
-	gen_func_init( &funcs[ BLIS_SCALV_KER ],    scalv_ker_name    );
-	gen_func_init( &funcs[ BLIS_SCAL2V_KER ],   scal2v_ker_name   );
-	gen_func_init( &funcs[ BLIS_SETV_KER ],     setv_ker_name     );
-	gen_func_init( &funcs[ BLIS_SUBV_KER ],     subv_ker_name     );
-	gen_func_init( &funcs[ BLIS_SWAPV_KER ],    swapv_ker_name    );
-	gen_func_init( &funcs[ BLIS_XPBYV_KER ],    xpbyv_ker_name    );
+	gen_func_init( &funcs[ bli_ker_idx( BLIS_ADDV_KER ) ],     addv_ker_name     );
+	gen_func_init( &funcs[ bli_ker_idx( BLIS_AMAXV_KER ) ],    amaxv_ker_name    );
+	gen_func_init( &funcs[ bli_ker_idx( BLIS_AXPBYV_KER ) ],   axpbyv_ker_name   );
+	gen_func_init( &funcs[ bli_ker_idx( BLIS_AXPYV_KER ) ],    axpyv_ker_name    );
+	gen_func_init( &funcs[ bli_ker_idx( BLIS_COPYV_KER ) ],    copyv_ker_name    );
+	gen_func_init( &funcs[ bli_ker_idx( BLIS_DOTV_KER ) ],     dotv_ker_name     );
+	gen_func_init( &funcs[ bli_ker_idx( BLIS_DOTXV_KER ) ],    dotxv_ker_name    );
+	gen_func_init( &funcs[ bli_ker_idx( BLIS_INVERTV_KER ) ],  invertv_ker_name  );
+	gen_func_init( &funcs[ bli_ker_idx( BLIS_INVSCALV_KER ) ], invscalv_ker_name );
+	gen_func_init( &funcs[ bli_ker_idx( BLIS_SCALV_KER ) ],    scalv_ker_name    );
+	gen_func_init( &funcs[ bli_ker_idx( BLIS_SCAL2V_KER ) ],   scal2v_ker_name   );
+	gen_func_init( &funcs[ bli_ker_idx( BLIS_SETV_KER ) ],     setv_ker_name     );
+	gen_func_init( &funcs[ bli_ker_idx( BLIS_SUBV_KER ) ],     subv_ker_name     );
+	gen_func_init( &funcs[ bli_ker_idx( BLIS_SWAPV_KER ) ],    swapv_ker_name    );
+	gen_func_init( &funcs[ bli_ker_idx( BLIS_XPBYV_KER ) ],    xpbyv_ker_name    );
 
 
 	// -- Set level-1m (packm/unpackm) kernels ---------------------------------
 
-	gen_func_init_mixed   ( &func2s[ BLIS_PACKM_KER ],           packm_ker_name );
-	gen_func_init_co_mixed( &func2s[ BLIS_PACKM_1ER_KER ],       packm_1er_ker_name );
-	gen_func_init_mixed   ( &func2s[ BLIS_PACKM_DIAG_KER ],      packm_diag_ker_name );
-	gen_func_init_co_mixed( &func2s[ BLIS_PACKM_DIAG_1ER_KER ],  packm_diag_1er_ker_name );
-	gen_func_init_mixed   ( &func2s[ BLIS_UNPACKM_KER ],         unpackm_ker_name );
+	gen_func_init_mixed   ( &func2s[ bli_ker_idx( BLIS_PACKM_KER ) ],           packm_ker_name );
+	gen_func_init_co_mixed( &func2s[ bli_ker_idx( BLIS_PACKM_1ER_KER ) ],       packm_1er_ker_name );
+	gen_func_init_mixed   ( &func2s[ bli_ker_idx( BLIS_PACKM_DIAG_KER ) ],      packm_diag_ker_name );
+	gen_func_init_co_mixed( &func2s[ bli_ker_idx( BLIS_PACKM_DIAG_1ER_KER ) ],  packm_diag_1er_ker_name );
+	gen_func_init_mixed   ( &func2s[ bli_ker_idx( BLIS_UNPACKM_KER ) ],         unpackm_ker_name );
 
 
 	// -- Put the default kernels and their preferences into the context -------
 
 	for ( dim_t i = 0; i < BLIS_NUM_UKRS; i++ )
-		bli_cntx_set_ukr( i, &funcs[ i ], cntx );
+		bli_cntx_set_ukr( BLIS_1TYPE_KER + i, &funcs[ i ], cntx );
 
 	for ( dim_t i = 0; i < BLIS_NUM_UKR2S; i++ )
-		bli_cntx_set_ukr2( i, &func2s[ i ], cntx );
+		bli_cntx_set_ukr2( BLIS_2TYPE_KER + i, &func2s[ i ], cntx );
 
 	for ( dim_t i = 0; i < BLIS_NUM_UKR_PREFS; i++ )
 		bli_cntx_set_ukr_pref( i, &mbools[ i ], cntx );

@@ -117,7 +117,7 @@ BLIS_INLINE dim_t bli_cntx_get_bmult_dt( num_t dt, bszid_t bs_id, const cntx_t* 
 BLIS_INLINE const func_t* bli_cntx_get_ukrs( ukr_t ukr_id, const cntx_t* cntx )
 {
 	const func_t* ukr;
-	err_t error = bli_stack_get( ukr_id, ( void** )&ukr, &cntx->ukrs );
+	err_t error = bli_stack_get( bli_ker_idx( ukr_id ), ( void** )&ukr, &cntx->ukrs );
 	if ( error != BLIS_SUCCESS )
 		bli_check_error_code( error );
 	return ukr;
@@ -135,7 +135,7 @@ BLIS_INLINE void_fp bli_cntx_get_ukr_dt( num_t dt, ukr_t ukr_id, const cntx_t* c
 BLIS_INLINE const func2_t* bli_cntx_get_ukr2s( ukr2_t ukr_id, const cntx_t* cntx )
 {
 	const func2_t* ukr;
-	err_t error = bli_stack_get( ukr_id, ( void** )&ukr, &cntx->ukr2s );
+	err_t error = bli_stack_get( bli_ker_idx( ukr_id ), ( void** )&ukr, &cntx->ukr2s );
 	if ( error != BLIS_SUCCESS )
 		bli_check_error_code( error );
 	return ukr;
@@ -276,17 +276,6 @@ BLIS_INLINE void bli_cntx_set_blksz_max_dt( num_t dt, bszid_t bs_id, dim_t bs, c
 	bli_blksz_set_max( bs, dt, ( blksz_t* )bli_cntx_get_blksz( bs_id, cntx ) );
 }
 
-BLIS_INLINE err_t bli_cntx_set_ukr( ukr_t ukr_id, const func_t* func, cntx_t* cntx )
-{
-	*( func_t* )bli_cntx_get_ukrs( ukr_id, cntx ) = *func;
-	return BLIS_SUCCESS;
-}
-
-BLIS_INLINE void bli_cntx_set_ukr_dt( void_fp fp, num_t dt, ukr_t ker_id, cntx_t* cntx )
-{
-	bli_func_set_dt( fp, dt, ( func_t* )bli_cntx_get_ukrs( ker_id, cntx ) );
-}
-
 BLIS_INLINE err_t bli_cntx_set_ukr2( ukr2_t ukr_id, const func2_t* func, cntx_t* cntx )
 {
 	*( func2_t* )bli_cntx_get_ukr2s( ukr_id, cntx ) = *func;
@@ -296,6 +285,24 @@ BLIS_INLINE err_t bli_cntx_set_ukr2( ukr2_t ukr_id, const func2_t* func, cntx_t*
 BLIS_INLINE void bli_cntx_set_ukr2_dt( void_fp fp, num_t dt1, num_t dt2, ukr2_t ker_id, cntx_t* cntx )
 {
 	bli_func2_set_dt( fp, dt1, dt2, ( func2_t* )bli_cntx_get_ukr2s( ker_id, cntx ) );
+}
+
+BLIS_INLINE err_t bli_cntx_set_ukr( ukr_t ukr_id, const func_t* func, cntx_t* cntx )
+{
+	*( func_t* )bli_cntx_get_ukrs( ukr_id, cntx ) = *func;
+	return BLIS_SUCCESS;
+}
+
+BLIS_INLINE void bli_cntx_set_ukr_dt( void_fp fp, num_t dt, ukr_t ker_id, cntx_t* cntx )
+{
+	if ( bli_ker_ntype( ker_id ) == 2 )
+	{
+		bli_cntx_set_ukr2_dt( fp, dt, dt, (ukr2_t)ker_id, cntx );
+	}
+	else
+	{
+		bli_func_set_dt( fp, dt, ( func_t* )bli_cntx_get_ukrs( ker_id, cntx ) );
+	}
 }
 
 BLIS_INLINE err_t bli_cntx_set_ukr_pref( ukr_pref_t ukr_id, const mbool_t* prefs, cntx_t* cntx )

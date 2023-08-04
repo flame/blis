@@ -112,6 +112,12 @@ void bli_cntx_init_zen( cntx_t* cntx )
 	  BLIS_GEMMSUP_CCC_UKR, BLIS_DCOMPLEX, bli_zgemmsup_rv_zen_asm_3x4n,
 #endif
 
+	  // packm
+	  BLIS_PACKM_KER, BLIS_FLOAT,    bli_spackm_haswell_asm_6x16,
+	  BLIS_PACKM_KER, BLIS_DOUBLE,   bli_dpackm_haswell_asm_6x8,
+	  BLIS_PACKM_KER, BLIS_SCOMPLEX, bli_cpackm_haswell_asm_3x8,
+	  BLIS_PACKM_KER, BLIS_DCOMPLEX, bli_zpackm_haswell_asm_3x4,
+
 	  // axpyf
 	  BLIS_AXPYF_KER,  BLIS_FLOAT,  bli_saxpyf_zen_int_8,
 	  BLIS_AXPYF_KER,  BLIS_DOUBLE, bli_daxpyf_zen_int_8,
@@ -151,20 +157,6 @@ void bli_cntx_init_zen( cntx_t* cntx )
 	  // swapv
 	  BLIS_SWAPV_KER,  BLIS_FLOAT,  bli_sswapv_zen_int8,
 	  BLIS_SWAPV_KER,  BLIS_DOUBLE, bli_dswapv_zen_int8,
-
-	  BLIS_VA_END
-	);
-
-	// Update the context with optimized packing micro-kernels.
-	bli_cntx_set_ukr2s
-	(
-	  cntx,
-
-	  // packm
-	  BLIS_PACKM_KER, BLIS_FLOAT,    BLIS_FLOAT,    bli_spackm_haswell_asm_6x16,
-	  BLIS_PACKM_KER, BLIS_DOUBLE,   BLIS_DOUBLE,   bli_dpackm_haswell_asm_6x8,
-	  BLIS_PACKM_KER, BLIS_SCOMPLEX, BLIS_SCOMPLEX, bli_cpackm_haswell_asm_3x8,
-	  BLIS_PACKM_KER, BLIS_DCOMPLEX, BLIS_DCOMPLEX, bli_zpackm_haswell_asm_3x4,
 
 	  BLIS_VA_END
 	);

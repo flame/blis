@@ -658,10 +658,23 @@ typedef enum
 
 // -- Kernel ID types --
 
+// Encode the number of independent type parameters in the high
+// bits of the kernel ID. This lets us identify kernel IDs as the
+// appropriate type while also using them as linear indices after
+// masking out these bits.
+#define BLIS_NTYPE_KER_SHIFT 28
+#define BLIS_NTYPE_KER_BITS  (0xFu << BLIS_NTYPE_KER_SHIFT)
+#define BLIS_1TYPE_KER       (  0u << BLIS_NTYPE_KER_SHIFT)
+#define BLIS_2TYPE_KER       (  1u << BLIS_NTYPE_KER_SHIFT)
+#define BLIS_3TYPE_KER       (  2u << BLIS_NTYPE_KER_SHIFT)
+
+#define bli_ker_idx( ker )	 ((ker) & ~BLIS_NTYPE_KER_BITS)
+#define bli_ker_ntype( ker ) (((ker) & BLIS_NTYPE_KER_BITS) >> BLIS_NTYPE_KER_SHIFT)
+
 typedef enum
 {
 	// l1v kernels
-	BLIS_ADDV_KER,
+	BLIS_ADDV_KER = BLIS_1TYPE_KER,
 	BLIS_AMAXV_KER,
 	BLIS_AXPBYV_KER,
 	BLIS_AXPYV_KER,
@@ -708,14 +721,14 @@ typedef enum
 	BLIS_GEMMSUP_XXX_UKR,
 
 	// BLIS_NUM_UKRS must be last!
-	BLIS_NUM_UKRS
+	BLIS_NUM_UKRS_, BLIS_NUM_UKRS = bli_ker_idx( BLIS_NUM_UKRS_ )
 } ukr_t;
 
 
 typedef enum
 {
 	// pack kernels
-	BLIS_PACKM_KER,
+	BLIS_PACKM_KER = BLIS_2TYPE_KER,
 	BLIS_PACKM_1ER_KER,
 	BLIS_PACKM_DIAG_KER,
 	BLIS_PACKM_DIAG_1ER_KER,
@@ -724,7 +737,7 @@ typedef enum
 	BLIS_UNPACKM_KER,
 
 	// BLIS_NUM_UKR2S must be last!
-	BLIS_NUM_UKR2S
+	BLIS_NUM_UKR2S_, BLIS_NUM_UKR2S = bli_ker_idx( BLIS_NUM_UKR2S_ )
 } ukr2_t;
 
 
