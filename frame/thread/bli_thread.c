@@ -674,6 +674,7 @@ siz_t bli_thread_range_mdim
 {
 	bszid_t  bszid  = bli_cntl_bszid( cntl );
 	opid_t   family = bli_cntl_family( cntl );
+	blksz_t* bmult;
 
 	// This is part of trsm's current implementation, whereby right side
 	// cases are implemented in left-side micro-kernels, which requires
@@ -681,11 +682,20 @@ siz_t bli_thread_range_mdim
 	// packing A and B.
 	if ( family == BLIS_TRSM )
 	{
+		bmult = bli_cntx_get_trsm_bmult( bszid, cntx);
+		// if trsm blockszs are not set then use global blockszs
+		if (bli_blksz_get_def( bli_obj_dt( a ) , bmult ) == 0)
+		{
+			bmult  = bli_cntx_get_bmult( bszid, cntx );
+		}
 		if ( bli_obj_root_is_triangular( a ) ) bszid = BLIS_MR;
 		else                                   bszid = BLIS_NR;
 	}
+	else
+	{
+		bmult  = bli_cntx_get_bmult( bszid, cntx );
+	}
 
-	blksz_t* bmult  = bli_cntx_get_bmult( bszid, cntx );
 	obj_t*   x;
 	bool     use_weighted;
 
@@ -734,6 +744,7 @@ siz_t bli_thread_range_ndim
 {
 	bszid_t  bszid  = bli_cntl_bszid( cntl );
 	opid_t   family = bli_cntl_family( cntl );
+	blksz_t* bmult;
 
 	// This is part of trsm's current implementation, whereby right side
 	// cases are implemented in left-side micro-kernels, which requires
@@ -741,11 +752,21 @@ siz_t bli_thread_range_ndim
 	// packing A and B.
 	if ( family == BLIS_TRSM )
 	{
+		bmult = bli_cntx_get_trsm_bmult( bszid, cntx);
+
+		// if trsm blockszs are not set then use global blockszs
+		if (bli_blksz_get_def( bli_obj_dt( a ) , bmult ) == 0)
+		{
+			bmult  = bli_cntx_get_bmult( bszid, cntx );
+		}
 		if ( bli_obj_root_is_triangular( b ) ) bszid = BLIS_MR;
 		else                                   bszid = BLIS_NR;
 	}
+	else
+	{
+		bmult  = bli_cntx_get_bmult( bszid, cntx );
+	}
 
-	blksz_t* bmult  = bli_cntx_get_bmult( bszid, cntx );
 	obj_t*   x;
 	bool     use_weighted;
 

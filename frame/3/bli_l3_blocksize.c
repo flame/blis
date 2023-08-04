@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2020 - 2021, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2020 - 2023, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -330,7 +330,11 @@ dim_t PASTEMAC0(opname) \
 	   because even when the triangle is on the right, packing of that
 	   matrix uses MR, since only left-side trsm micro-kernels are
 	   supported. */ \
-	mnr   = bli_cntx_get_blksz_def_dt( dt, BLIS_MR, cntx ); \
+	mnr   = bli_cntx_get_trsm_blksz_def_dt( dt, BLIS_MR, cntx ); \
+	if( mnr == 0 ) \
+	{ \
+		mnr   = bli_cntx_get_blksz_def_dt( dt, BLIS_MR, cntx ); \
+	} \
 	b_alg = bli_align_dim_to_mult( b_alg, mnr ); \
 	b_max = bli_align_dim_to_mult( b_max, mnr ); \
 \

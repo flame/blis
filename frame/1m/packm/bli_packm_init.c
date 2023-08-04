@@ -6,6 +6,7 @@
 
    Copyright (C) 2014, The University of Texas at Austin
    Copyright (C) 2016, Hewlett Packard Enterprise Development LP
+   Copyright (C) 2023, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -180,6 +181,7 @@ siz_t bli_packm_init
 	bli_packm_init_pack
 	(
 	  invert_diag,
+	  bli_cntl_family( cntl ),
 	  schema,
 	  pack_ord_if_up,
 	  pack_ord_if_lo,
@@ -198,6 +200,7 @@ siz_t bli_packm_init
 siz_t bli_packm_init_pack
      (
        invdiag_t invert_diag,
+       opid_t    family,
        pack_t    schema,
        packord_t pack_ord_if_up,
        packord_t pack_ord_if_lo,
@@ -215,10 +218,11 @@ siz_t bli_packm_init_pack
 	trans_t   transa       = bli_obj_onlytrans_status( a );
 	dim_t     m_a          = bli_obj_length( a );
 	dim_t     n_a          = bli_obj_width( a );
-	dim_t     bmult_m_def  = bli_cntx_get_blksz_def_dt( dt_tar, bmult_id_m, cntx );
-	dim_t     bmult_m_pack = bli_cntx_get_blksz_max_dt( dt_tar, bmult_id_m, cntx );
-	dim_t     bmult_n_def  = bli_cntx_get_blksz_def_dt( dt_tar, bmult_id_n, cntx );
-	dim_t     bmult_n_pack = bli_cntx_get_blksz_max_dt( dt_tar, bmult_id_n, cntx );
+
+	dim_t     bmult_m_def  = 0;
+	dim_t     bmult_m_pack = 0;
+	dim_t     bmult_n_def  = 0;
+	dim_t     bmult_n_pack = 0;
 
 	dim_t     m_p, n_p;
 	dim_t     m_p_pad, n_p_pad;
@@ -227,6 +231,33 @@ siz_t bli_packm_init_pack
 	inc_t     rs_p, cs_p;
 	inc_t     is_p;
 
+	if( family == BLIS_TRSM )
+	{
+		bmult_m_def  = bli_cntx_get_trsm_blksz_def_dt( dt_tar, bmult_id_m, cntx );
+		bmult_m_pack = bli_cntx_get_trsm_blksz_max_dt( dt_tar, bmult_id_m, cntx );
+		bmult_n_def  = bli_cntx_get_trsm_blksz_def_dt( dt_tar, bmult_id_n, cntx );
+		bmult_n_pack = bli_cntx_get_trsm_blksz_max_dt( dt_tar, bmult_id_n, cntx );
+
+		// bmult_m_def will be zero when trsm block sizes are not set, use global
+		// block sizes in this case
+		if( bmult_m_def == 0 )
+		{
+			bmult_m_def  = bli_cntx_get_blksz_def_dt( dt_tar, bmult_id_m, cntx );
+			bmult_m_pack = bli_cntx_get_blksz_max_dt( dt_tar, bmult_id_m, cntx );
+		}
+		if( bmult_n_def == 0 )
+		{
+			bmult_n_def  = bli_cntx_get_blksz_def_dt( dt_tar, bmult_id_n, cntx );
+			bmult_n_pack = bli_cntx_get_blksz_max_dt( dt_tar, bmult_id_n, cntx );
+		}
+	}
+	else
+	{
+		bmult_m_def  = bli_cntx_get_blksz_def_dt( dt_tar, bmult_id_m, cntx );
+		bmult_m_pack = bli_cntx_get_blksz_max_dt( dt_tar, bmult_id_m, cntx );
+		bmult_n_def  = bli_cntx_get_blksz_def_dt( dt_tar, bmult_id_n, cntx );
+		bmult_n_pack = bli_cntx_get_blksz_max_dt( dt_tar, bmult_id_n, cntx );
+	}
 
 	// We begin by copying the fields of A.
 	bli_obj_alias_to( a, p );

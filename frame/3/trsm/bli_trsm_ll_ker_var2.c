@@ -173,26 +173,12 @@ void PASTEMAC(ch,varname) \
 	PASTECH(ch,gemmtrsm_ukr_ft) \
 	               gemmtrsm_ukr = bli_cntx_get_l3_vir_ukr_dt( dt, BLIS_GEMMTRSM_L_UKR, cntx ); \
 	PASTECH(ch,gemm_ukr_ft) \
-	                   gemm_ukr = bli_cntx_get_l3_vir_ukr_dt( dt, BLIS_GEMM_UKR, cntx ); \
-\
-	/* Zen4 TRSM Fixme:
-	 *
-	 * On Zen4 we want to use AVX-512 kernels for GEMM and AVX2 kernels
-	 * for TRSM (Till we implement TRSM AVX-512 kernels)
-	 *
-	 * The AVX2 kernels for TRSM are enabled in the context, but they
-	 * are compatible with only AVX2 version of GEMM kernels.
-	 *
-	 * Here we force the GEMM kernels to the AVX2 varients for float and double.
-	 * For scomplex and dcomplex reference path is retained as is.
-	 *
-	 * We need to revisit this when TRSM AVX-512 kernels are implemented.
-	 */ \
-	bool      col_pref    = bli_cntx_l3_vir_ukr_prefers_cols_dt( dt, BLIS_GEMM_UKR, cntx ); \
-	if (bli_arch_query_id() == BLIS_ARCH_ZEN4 && ((dt == BLIS_FLOAT) || (dt == BLIS_DOUBLE)) ) \
+	                   gemm_ukr = bli_cntx_get_l3_vir_ukr_dt( dt, BLIS_GEMM_FOR_TRSM_UKR, cntx ); \
+	bool col_pref = bli_cntx_l3_vir_ukr_prefers_cols_dt( dt, BLIS_GEMM_FOR_TRSM_UKR, cntx ); \
+	if( gemm_ukr == NULL || bli_cntx_method( cntx ) != BLIS_NAT ) \
 	{ \
-		gemm_ukr = bli_cntx_get_l3_vir_ukr_dt( dt, BLIS_GEMM_FOR_TRSM_UKR, cntx ); \
-		col_pref = bli_cntx_l3_vir_ukr_prefers_cols_dt( dt, BLIS_GEMM_FOR_TRSM_UKR, cntx ); \
+		gemm_ukr = bli_cntx_get_l3_vir_ukr_dt( dt, BLIS_GEMM_UKR, cntx ); \
+		col_pref = bli_cntx_l3_vir_ukr_prefers_cols_dt( dt, BLIS_GEMM_UKR, cntx ); \
 	} \
 \
 	/* Temporary C buffer for edge cases. Note that the strides of this

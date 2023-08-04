@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2018 - 2019, Advanced Micro Devices, Inc.
+   Copyright (C) 2018 - 2023, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -284,10 +284,10 @@ void libblis_test_gemm_ukr_experiment
 	// allocated so we can re-store it to the object afterward.
 	void* buf_ap = bli_obj_buffer( &ap );
 	void* buf_bp = bli_obj_buffer( &bp );
-	bli_packm_init_pack( BLIS_NO_INVERT_DIAG, BLIS_PACKED_ROW_PANELS,
+	bli_packm_init_pack( BLIS_NO_INVERT_DIAG, BLIS_GEMM, BLIS_PACKED_ROW_PANELS,
 	                     BLIS_PACK_FWD_IF_UPPER, BLIS_PACK_FWD_IF_LOWER,
 	                     BLIS_MR, BLIS_KR, &a, &ap, cntx );
-	bli_packm_init_pack( BLIS_NO_INVERT_DIAG, BLIS_PACKED_COL_PANELS,
+	bli_packm_init_pack( BLIS_NO_INVERT_DIAG, BLIS_GEMM, BLIS_PACKED_COL_PANELS,
 	                     BLIS_PACK_FWD_IF_UPPER, BLIS_PACK_FWD_IF_LOWER,
 	                     BLIS_KR, BLIS_NR, &b, &bp, cntx );
 	bli_obj_set_buffer( buf_ap, &ap );

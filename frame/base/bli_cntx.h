@@ -212,6 +212,16 @@ BLIS_INLINE blksz_t* bli_cntx_get_blksz( bszid_t bs_id, cntx_t* cntx )
 	return blksz;
 }
 
+BLIS_INLINE blksz_t* bli_cntx_get_trsm_blksz( bszid_t bs_id, cntx_t* cntx )
+{
+    blksz_t* blkszs = bli_cntx_trsm_blkszs_buf( cntx );
+    blksz_t* blksz  = &blkszs[ bs_id ];
+
+    // Return the address of the blksz_t identified by bs_id.
+    return blksz;
+
+}
+
 BLIS_INLINE dim_t bli_cntx_get_blksz_def_dt( num_t dt, bszid_t bs_id, cntx_t* cntx )
 {
 	blksz_t* blksz  = bli_cntx_get_blksz( bs_id, cntx );
@@ -221,9 +231,27 @@ BLIS_INLINE dim_t bli_cntx_get_blksz_def_dt( num_t dt, bszid_t bs_id, cntx_t* cn
 	return bs_dt;
 }
 
+BLIS_INLINE dim_t bli_cntx_get_trsm_blksz_def_dt( num_t dt, bszid_t bs_id, cntx_t* cntx )
+{
+	blksz_t* blksz  = bli_cntx_get_trsm_blksz( bs_id, cntx );
+	dim_t    bs_dt  = bli_blksz_get_def( dt, blksz );
+
+	// Return the main (default) blocksize value for the datatype given.
+	return bs_dt;
+}
+
 BLIS_INLINE dim_t bli_cntx_get_blksz_max_dt( num_t dt, bszid_t bs_id, cntx_t* cntx )
 {
 	blksz_t* blksz  = bli_cntx_get_blksz( bs_id, cntx );
+	dim_t    bs_dt  = bli_blksz_get_max( dt, blksz );
+
+	// Return the auxiliary (maximum) blocksize value for the datatype given.
+	return bs_dt;
+}
+
+BLIS_INLINE dim_t bli_cntx_get_trsm_blksz_max_dt( num_t dt, bszid_t bs_id, cntx_t* cntx )
+{
+	blksz_t* blksz  = bli_cntx_get_trsm_blksz( bs_id, cntx );
 	dim_t    bs_dt  = bli_blksz_get_max( dt, blksz );
 
 	// Return the auxiliary (maximum) blocksize value for the datatype given.
@@ -242,6 +270,14 @@ BLIS_INLINE blksz_t* bli_cntx_get_bmult( bszid_t bs_id, cntx_t* cntx )
 {
 	bszid_t           bm_id  = bli_cntx_get_bmult_id( bs_id, cntx );
 	blksz_t* restrict bmult  = bli_cntx_get_blksz( bm_id, cntx );
+
+	return bmult;
+}
+
+BLIS_INLINE blksz_t* bli_cntx_get_trsm_bmult( bszid_t bs_id, cntx_t* cntx )
+{
+	bszid_t           bm_id  = bli_cntx_get_bmult_id( bs_id, cntx );
+	blksz_t* restrict bmult  = bli_cntx_get_trsm_blksz( bm_id, cntx );
 
 	return bmult;
 }
@@ -350,15 +386,6 @@ BLIS_INLINE blksz_t* bli_cntx_get_l3_sup_tri_blksz( bszid_t bs_id, cntx_t* cntx 
 
 	// Return the address of the blksz_t identified by bs_id.
 	return blksz;
-}
-BLIS_INLINE blksz_t* bli_cntx_get_trsm_blksz( bszid_t bs_id, cntx_t* cntx )
-{
-    blksz_t* blkszs = bli_cntx_trsm_blkszs_buf( cntx );
-    blksz_t* blksz  = &blkszs[ bs_id ];
-
-    // Return the address of the blksz_t identified by bs_id.
-    return blksz;
-
 }
 
 BLIS_INLINE dim_t bli_cntx_get_l3_sup_blksz_def_dt( num_t dt, bszid_t bs_id, cntx_t* cntx )

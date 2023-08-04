@@ -447,6 +447,36 @@ void bli_gks_register_cntx
 	e_val = bli_check_valid_mc_mod_mult( mc, nr ); bli_check_error_code( e_val );
 	e_val = bli_check_valid_nc_mod_mult( nc, mr ); bli_check_error_code( e_val );
 #endif
+
+
+	// Verify that cache blocksizes are whole multiples of register blocksizes for TRSM.
+	mc = bli_cntx_get_trsm_blksz( BLIS_MC, gks_id_nat );
+	nc = bli_cntx_get_trsm_blksz( BLIS_NC, gks_id_nat );
+	kc = bli_cntx_get_trsm_blksz( BLIS_KC, gks_id_nat );
+	mr = bli_cntx_get_trsm_blksz( BLIS_MR, gks_id_nat );
+	nr = bli_cntx_get_trsm_blksz( BLIS_NR, gks_id_nat );
+	kr = bli_cntx_get_trsm_blksz( BLIS_KR, gks_id_nat );
+
+	// If trsm blocksizes are not set then skip check.
+	for ( num_t dt = BLIS_DT_LO; dt <= BLIS_DT_HI; ++dt )
+	{
+		dim_t mr_dt  = bli_blksz_get_def( dt, mr );
+		dim_t nr_dt  = bli_blksz_get_def( dt, nr );
+		dim_t kr_dt  = bli_blksz_get_def( dt, kr );
+
+		if( mr_dt == 0 || nr_dt == 0 || kr_dt == 0 )
+		{
+			return;
+		}
+	}
+
+	e_val = bli_check_valid_mc_mod_mult( mc, mr ); bli_check_error_code( e_val );
+	e_val = bli_check_valid_nc_mod_mult( nc, nr ); bli_check_error_code( e_val );
+	e_val = bli_check_valid_kc_mod_mult( kc, kr ); bli_check_error_code( e_val );
+#ifndef BLIS_RELAX_MCNR_NCMR_CONSTRAINTS
+	e_val = bli_check_valid_mc_mod_mult( mc, nr ); bli_check_error_code( e_val );
+	e_val = bli_check_valid_nc_mod_mult( nc, mr ); bli_check_error_code( e_val );
+#endif
 }
 
 // -----------------------------------------------------------------------------

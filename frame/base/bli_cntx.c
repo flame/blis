@@ -424,11 +424,14 @@ void bli_cntx_set_ind_blkszs( ind_t method, dim_t n_bs, ... )
 			// to the blocksize multiple.
 			blksz_t* cntx_blksz = bli_cntx_get_blksz( bs_id, cntx );
 			blksz_t* cntx_bmult = bli_cntx_get_bmult( bs_id, cntx );
+			blksz_t* cntx_trsm_blksz = bli_cntx_get_trsm_blksz( bs_id, cntx );
 
 			// Copy the real domain values of the blksz_t object into the
 			// the complex domain slots of the same object.
 			bli_blksz_copy_dt( BLIS_FLOAT,  cntx_blksz, BLIS_SCOMPLEX, cntx_blksz );
 			bli_blksz_copy_dt( BLIS_DOUBLE, cntx_blksz, BLIS_DCOMPLEX, cntx_blksz );
+			bli_blksz_copy_dt( BLIS_FLOAT,  cntx_blksz, BLIS_SCOMPLEX, cntx_trsm_blksz);
+			bli_blksz_copy_dt( BLIS_DOUBLE, cntx_blksz, BLIS_DCOMPLEX, cntx_trsm_blksz);
 
 			// If the default blocksize scalar is non-unit, we need to scale
 			// the complex domain default blocksizes.
@@ -438,6 +441,8 @@ void bli_cntx_set_ind_blkszs( ind_t method, dim_t n_bs, ... )
 				// blocksize object.
 				bli_blksz_scale_def( 1, ( dim_t )dsclr, BLIS_SCOMPLEX, cntx_blksz );
 				bli_blksz_scale_def( 1, ( dim_t )dsclr, BLIS_DCOMPLEX, cntx_blksz );
+				bli_blksz_scale_def( 1, ( dim_t )dsclr, BLIS_SCOMPLEX, cntx_trsm_blksz);
+				bli_blksz_scale_def( 1, ( dim_t )dsclr, BLIS_DCOMPLEX, cntx_trsm_blksz);
 
 				// Perform rounding to ensure the newly scaled values are still
 				// multiples of their register blocksize multiples. But only
@@ -451,6 +456,8 @@ void bli_cntx_set_ind_blkszs( ind_t method, dim_t n_bs, ... )
 					// Round the newly-scaled blocksizes down to their multiple.
 					bli_blksz_reduce_def_to( BLIS_FLOAT,  cntx_bmult, BLIS_SCOMPLEX, cntx_blksz );
 					bli_blksz_reduce_def_to( BLIS_DOUBLE, cntx_bmult, BLIS_DCOMPLEX, cntx_blksz );
+					bli_blksz_reduce_def_to( BLIS_FLOAT,  cntx_bmult, BLIS_SCOMPLEX, cntx_trsm_blksz );
+					bli_blksz_reduce_def_to( BLIS_DOUBLE, cntx_bmult, BLIS_DCOMPLEX, cntx_trsm_blksz );
 				}
 			}
 
@@ -462,6 +469,8 @@ void bli_cntx_set_ind_blkszs( ind_t method, dim_t n_bs, ... )
 				// blocksize object.
 				bli_blksz_scale_max( 1, ( dim_t )msclr, BLIS_SCOMPLEX, cntx_blksz );
 				bli_blksz_scale_max( 1, ( dim_t )msclr, BLIS_DCOMPLEX, cntx_blksz );
+				bli_blksz_scale_max( 1, ( dim_t )msclr, BLIS_SCOMPLEX, cntx_trsm_blksz );
+				bli_blksz_scale_max( 1, ( dim_t )msclr, BLIS_DCOMPLEX, cntx_trsm_blksz );
 
 				// Perform rounding to ensure the newly scaled values are still
 				// multiples of their register blocksize multiples. But only
@@ -475,6 +484,8 @@ void bli_cntx_set_ind_blkszs( ind_t method, dim_t n_bs, ... )
 					// Round the newly-scaled blocksizes down to their multiple.
 					bli_blksz_reduce_max_to( BLIS_FLOAT,  cntx_bmult, BLIS_SCOMPLEX, cntx_blksz );
 					bli_blksz_reduce_max_to( BLIS_DOUBLE, cntx_bmult, BLIS_DCOMPLEX, cntx_blksz );
+					bli_blksz_reduce_max_to( BLIS_FLOAT,  cntx_bmult, BLIS_SCOMPLEX, cntx_trsm_blksz );
+					bli_blksz_reduce_max_to( BLIS_DOUBLE, cntx_bmult, BLIS_DCOMPLEX, cntx_trsm_blksz );
 				}
 			}
 		}
