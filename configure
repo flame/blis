@@ -1129,7 +1129,7 @@ get_fc_search_list()
 {
 	local list
 
-	list="gfortran ifort"
+	list="gfortran ifort ifx nvfortran"
 
 	echo "${list}"
 }
@@ -4042,11 +4042,33 @@ main()
 			# Query the compiler "vendor" (ie: the compiler's simple name).
 			# The last part ({ read first rest ; echo $first ; }) is a workaround
 			# to OS X's egrep only returning the first match.
-			fc_vendor=$(echo "${vendor_string}" | grep -oE 'IFORT|GNU' |
+			fc_vendor=$(echo "${vendor_string}" | grep -oE 'IFORT|IFX|GNU|NVIDIA|PGI' |
 			            { read -r first rest ; echo "${first}"; })
 
-			if [[ ${fc_vendor} = IFORT ]]; then
+			if [[ ${fc_vendor} = IFORT || ${fc_vendor} = IFX ]]; then
 				complex_return='intel'
+			elif [[ ${fc_vendor} = NVIDIA || ${fc_vendor} = PGI ]]; then
+                            # nvfortran on x86_64 and ppc64le, and aarch64 prior to 23.9, the convention is intel.
+                            # On aarch64 alone, starting with 23.9, the convention is gnu.
+                            if "$(uname -m)" = "aarch64" ]]; then
+                                fc_version=$(echo "${vendor_string}" \
+                                             | grep -oE '[0-9]+\.[0-9]+\.?[0-9]*' \
+                                             | { read -r first rest ; echo "${first}"; })
+                                if [ ${fc_version:0:2} -lt 23 ]; then
+                                    complex_return='intel'
+                                elif [ ${fc_version:0:2} -eq 23 ]; then
+                                    # use 3:5 because minor version numbers include 1 and 11
+                                    if [ ${fc_version:3:5} -lt 9 ]; then
+                                        complex_return='intel'
+                                    else
+                                        complex_return='gnu'
+                                    fi
+                                else
+                                    complex_return='gnu'
+                                fi
+                            else
+                                complex_return='intel'
+                            fi
 			elif [[ ${fc_vendor} = GNU ]]; then
 				complex_return='gnu'
 			else
