@@ -1,10 +1,9 @@
-##Copyright (C) 2022, Advanced Micro Devices, Inc. All rights reserved.##
+##Copyright (C) 2023, Advanced Micro Devices, Inc. All rights reserved.##
 
 target_sources("${PROJECT_NAME}"
      PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/bli_gemv_unb_var1.c
     ${CMAKE_CURRENT_SOURCE_DIR}/bli_gemv_unb_var2.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/bli_gemv_unf_var2.c    
     ${CMAKE_CURRENT_SOURCE_DIR}/bli_gemv_var_oapi.c
     )
 
@@ -17,10 +16,12 @@ if(${TARGET_ARCH} STREQUAL zen OR
      target_sources("${PROJECT_NAME}"
      PRIVATE
      ${CMAKE_CURRENT_SOURCE_DIR}/bli_gemv_unf_var1_amd.c
+     ${CMAKE_CURRENT_SOURCE_DIR}/bli_gemv_unf_var2_amd.c
      )
 else()
      target_sources("${PROJECT_NAME}"
      PRIVATE
      ${CMAKE_CURRENT_SOURCE_DIR}/bli_gemv_unf_var1.c
+     ${CMAKE_CURRENT_SOURCE_DIR}/bli_gemv_unf_var2.c
      )
 endif() 

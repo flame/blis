@@ -269,6 +269,29 @@ void bli_dscalv_zen_int_avx512
           cntx_t *restrict cntx
         )
 {
+    // If the vector dimension is zero, or if alpha is unit, return early.
+    if (bli_zero_dim1(n) || PASTEMAC(d, eq1)(*alpha))
+        return;
+
+    // If alpha is zero, use setv.
+    if (PASTEMAC(d, eq0)(*alpha))
+    {
+        double *zero = bli_d0;
+        if (cntx == NULL) cntx = bli_gks_query_cntx();
+        dsetv_ker_ft f = bli_cntx_get_l1v_ker_dt(BLIS_DOUBLE, BLIS_SETV_KER, cntx);
+
+        f
+        (
+          BLIS_NO_CONJUGATE,
+          n,
+          zero,
+          x, incx,
+          cntx
+        );
+
+        return;
+    }
+
     dim_t i = 0;
     double *restrict x0;
 

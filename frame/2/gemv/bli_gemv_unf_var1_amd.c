@@ -212,21 +212,20 @@ void bli_dgemv_unf_var1
     double *A1;
     double *y1;
     dim_t i;
-    dim_t f, b_fuse;
+    dim_t f;
     dim_t n_elem, n_iter;
     inc_t rs_at, cs_at;
     conj_t conja;
+    //memory pool declarations for packing vector X.
+    mem_t mem_bufX;
+    rntm_t rntm;
+    double *x_buf = x;
+    inc_t buf_incx = incx;
 
-    // Copy the alpha to the temp alpha
-    double alpha_temp = *alpha;
+    bli_init_once();
 
-    // Memory pool declarations for packing vector X.
-    mem_t   mem_bufX;
-    rntm_t  rntm;
-    double* x_temp = x;
-    inc_t   temp_incx = incx;
-
-    //bli_init_once();
+    if (cntx == NULL)
+      cntx = bli_gks_query_cntx();
 
     bli_set_dims_incs_with_trans(transa,
                                  m, n, rs_a, cs_a,
@@ -234,151 +233,185 @@ void bli_dgemv_unf_var1
 
     conja = bli_extract_conj(transa);
 
-    /*
-      Fatbinary config amdzen when run on non-AMD X86
-      will query for the support of AVX512 or AVX2, if
-      AVX512 - arch_id will be zen4 or for AVX2 it will
-      be zen3
-    */
-    arch_t id = bli_arch_query_id();
-
-    /*
-      Function pointer declaration for the functions
-      that will be used by this API
-    */
-    ddotxf_ker_ft   dotxf_kr_ptr; // DOTXF
-
-    /*
-      Boolean to check if the y has been packed
-      and memory needs to be freed in the end
-    */
-    bool is_x_temp_buf_created = FALSE;
-
-    switch (id)
+    // This function is invoked on all architectures including 'generic'.
+    // Non-AVX2+FMA3 platforms will use the kernels derived from the context.
+    if (bli_cpuid_is_avx2fma3_supported() == FALSE)
     {
-      case BLIS_ARCH_ZEN4:
-      case BLIS_ARCH_ZEN:
-      case BLIS_ARCH_ZEN2:
-      case BLIS_ARCH_ZEN3:
+        if ( cntx == NULL ) cntx = bli_gks_query_cntx();
+        const num_t dt = PASTEMAC(d,type);
+        double*  x1;
+        double*  y1;
+        PASTECH(d,dotxf_ker_ft) kfp_df;
+        /* Query the context for the kernel function pointer and fusing factor. */
+        kfp_df = bli_cntx_get_l1f_ker_dt( dt, BLIS_DOTXF_KER, cntx );
+        dim_t b_fuse = bli_cntx_get_blksz_def_dt( dt, BLIS_DF, cntx );
 
-      /*
-        Assign the AVX2 based kernel function pointers for DOTXF,
-        SCAL2V and corresponding fusing factor of DOTXF kernel
-      */
+        for ( i = 0; i < n_iter; i += f )
+        {
+            f  = bli_determine_blocksize_dim_f( i, n_iter, b_fuse );
 
-      dotxf_kr_ptr = bli_ddotxf_zen_int_8;
-      b_fuse = 8;
+            A1 = a + (i  )*rs_at + (0  )*cs_at;
+            x1 = x + (0  )*incy;
+            y1 = y + (i  )*incy;
 
-      break;
-      default:
-        // For non-Zen architectures, query the context if it is NULL
-        if(cntx == NULL) cntx = bli_gks_query_cntx();
+            /* y1 = beta * y1 + alpha * A1 * x; */
+            kfp_df
+            (
+            conja,
+            conjx,
+            n_elem,
+            f,
+            alpha,
+            A1,   cs_at, rs_at,
+            x1,   incx,
+            beta,
+            y1,   incy,
+            cntx
+            );
 
-        /*
-          Query the context for the kernel function pointers for
-          DOTXF, SCAL2V and corresponding fusing
-          factor of DOTXF kernel
-        */
-        dotxf_kr_ptr = bli_cntx_get_l1f_ker_dt(BLIS_DOUBLE, BLIS_DOTXF_KER, cntx);
-        b_fuse = bli_cntx_get_blksz_def_dt(BLIS_DOUBLE, BLIS_AF, cntx);
+        }
+
+      AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_3);
+      return;
     }
-
     if (incx > 1)
     {
-        /*
+    /*
           Initialize mem pool buffer to NULL and size to 0
           "buf" and "size" fields are assigned once memory
           is allocated from the pool in bli_membrk_acquire_m().
           This will ensure bli_mem_is_alloc() will be passed on
           an allocated memory if created or a NULL .
-        */
+    */
 
-        mem_bufX.pblk.buf = NULL;
-        mem_bufX.pblk.block_size = 0;
-        mem_bufX.buf_type = 0;
-        mem_bufX.size = 0;
-        mem_bufX.pool = NULL;
+    mem_bufX.pblk.buf = NULL;
+    mem_bufX.pblk.block_size = 0;
+    mem_bufX.buf_type = 0;
+    mem_bufX.size = 0;
+    mem_bufX.pool = NULL;
 
-        /* In order to get the buffer from pool via rntm access to memory broker
-            is needed.Following are initializations for rntm */
+    /* In order to get the buffer from pool via rntm access to memory broker
+        is needed.Following are initializations for rntm */
 
-        bli_rntm_init_from_global(&rntm);
-        bli_rntm_set_num_threads_only(1, &rntm);
-        bli_membrk_rntm_set_membrk(&rntm);
+    bli_rntm_init_from_global(&rntm);
+    bli_rntm_set_num_threads_only(1, &rntm);
+    bli_membrk_rntm_set_membrk(&rntm);
 
-        //calculate the size required for n_elem double elements in vector X.
-        size_t buffer_size = n_elem * sizeof(double);
+    //calculate the size required for n_elem double elements in vector X.
+    size_t buffer_size = n_elem * sizeof(double);
 
 #ifdef BLIS_ENABLE_MEM_TRACING
-        printf("bli_dgemv_unf_var1(): get mem pool block\n");
+    printf("bli_dgemv_unf_var1(): get mem pool block\n");
 #endif
 
-        /*acquire a Buffer(n_elem*size(double)) from the memory broker
-          and save the associated mem_t entry to mem_bufX.*/
-        bli_membrk_acquire_m(&rntm,
-                            buffer_size,
-                            BLIS_BUFFER_FOR_B_PANEL,
-                            &mem_bufX);
+    /*acquire a Buffer(n_elem*size(double)) from the memory broker
+      and save the associated mem_t entry to mem_bufX.*/
+    bli_membrk_acquire_m(&rntm,
+                         buffer_size,
+                         BLIS_BUFFER_FOR_B_PANEL,
+                         &mem_bufX);
 
-        /*Continue packing X if buffer memory is allocated*/
-        if ((bli_mem_is_alloc(&mem_bufX)))
-        {
-          x_temp    = bli_mem_buffer(&mem_bufX);
-          temp_incx = 1;
+    /*Continue packing X if buffer memory is allocated*/
+    if ((bli_mem_is_alloc(&mem_bufX)))
+    {
+      x_buf = bli_mem_buffer(&mem_bufX);
 
-          // Query the context if it is NULL
-          if(cntx == NULL) cntx = bli_gks_query_cntx();
+      //pack X vector with non-unit stride to a temp buffer x_buf with unit stride
+      for (dim_t x_index = 0; x_index < n_elem; x_index++)
+      {
+        *(x_buf + x_index) = *(x + (x_index * incx));
+      }
+      // stride of vector x_buf =1
+      buf_incx = 1;
+    }
+  }
 
-          dscal2v_ker_ft  scal2v_kr_ptr; // SCAL2V
+  dim_t fuse_factor = 8;
+  dim_t f_temp =0;
 
-          scal2v_kr_ptr = bli_cntx_get_l1v_ker_dt(BLIS_DOUBLE, BLIS_SCAL2V_KER, cntx);
-
-          /*
-            Invoke the SCAL2V function using the function
-            pointer and scale by alpha as we pack X vector
-          */
-          scal2v_kr_ptr
-          (
-            BLIS_NO_CONJUGATE,
-            n_elem,
-            &alpha_temp,
-            x, incx,
-            x_temp, temp_incx,
-            cntx
-          );
-
-          is_x_temp_buf_created = TRUE;
-
-          // Set alpha_temp to 1.0 since X has already been scaled by alpha
-          alpha_temp = *bli_d1;
-        }
+  if (n < 4)
+  {
+     fuse_factor = 2;
+  } else if (n < 8)
+  {
+     fuse_factor = 4;
   }
 
   for (i = 0; i < n_iter; i += f)
   {
-    f = bli_determine_blocksize_dim_f(i, n_iter, b_fuse);
+    f = bli_determine_blocksize_dim_f(i, n_iter, fuse_factor);
 
     //A = a + i * row_increment + 0 * column_increment
     A1 = a + (i)*rs_at;
     y1 = y + (i)*incy;
 
     /* y1 = beta * y1 + alpha * A1 * x; */
-    dotxf_kr_ptr
-    (
-      conja,
-      conjx,
-      n_elem,
-      f,
-      &alpha_temp,
-      A1, cs_at, rs_at,
-      x_temp, temp_incx,
-      beta,
-      y1, incy,
-      cntx
-    );
+    switch (f)
+    {
+    case 8:
+
+      bli_ddotxf_zen_int_8(
+          conja,
+          conjx,
+          n_elem,
+          f,
+          alpha,
+          A1, cs_at, rs_at,
+          x_buf, buf_incx,
+          beta,
+          y1, incy,
+          cntx);
+
+      break;
+    default:
+
+      if (f < 4)
+      {
+        bli_ddotxf_zen_int_2(
+            conja,
+            conjx,
+            n_elem,
+            f,
+            alpha,
+            A1, cs_at, rs_at,
+            x_buf, buf_incx,
+            beta,
+            y1, incy,
+            cntx);
+      }
+      else
+      {
+        bli_ddotxf_zen_int_4(
+            conja,
+            conjx,
+            n_elem,
+            f,
+            alpha,
+            A1, cs_at, rs_at,
+            x_buf, buf_incx,
+            beta,
+            y1, incy,
+            cntx);
+      }
+    }
+
+    f_temp = bli_determine_blocksize_dim_f(i + f, n_iter, fuse_factor);
+
+    if (f_temp < fuse_factor)
+    {
+      switch (fuse_factor)
+      {
+      case 8:
+        fuse_factor = 4;
+        break;
+      case 4:
+        fuse_factor = 2;
+        break;
+      }
+    }
   }
 
-  if (is_x_temp_buf_created)
+  if ((incx > 1) && bli_mem_is_alloc(&mem_bufX))
   {
 #ifdef BLIS_ENABLE_MEM_TRACING
     printf("bli_dgemv_unf_var1(): releasing mem pool block\n");
