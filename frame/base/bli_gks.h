@@ -35,8 +35,8 @@
 #ifndef BLIS_GKS_H
 #define BLIS_GKS_H
 
-void                           bli_gks_init( void );
-void                           bli_gks_finalize( void );
+int                            bli_gks_init( void );
+int                            bli_gks_finalize( void );
 
 void                           bli_gks_init_index( void );
 
