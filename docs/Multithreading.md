@@ -205,7 +205,7 @@ If you still wish to set the parallelization scheme globally, but you want to do
 
 **Note**: Regardless of which way ([automatic](Multithreading.md#globally-at-runtime-the-automatic-way) or [manual](Multithreading.md#globally-at-runtime-the-manual-way)) the global runtime API is used to specify multithreading, that specification will affect operation of BLIS through **both** the BLAS compatibility layer as well as the native ([typed](docs/BLISTypedAPI.md) and [object](docs/BLISObjectAPI.md)) APIs that are unique to BLIS.
 
-If BLIS is being used by two or more application-level threads, each of those application threads will track their own global state for the purpose of specifying parallelism. We felt this makes sense because each application thread may wish to specify a different parallelization scheme without affecting the scheme for he other application thread(s).
+If BLIS is being used by two or more application-level threads, each of those application threads will track their own global state for the purpose of specifying parallelism. We felt this makes sense because each application thread may wish to specify a different parallelization scheme without affecting the scheme for the other application thread(s).
 
 ### Globally at runtime: the automatic way
 

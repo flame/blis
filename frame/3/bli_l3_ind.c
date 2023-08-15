@@ -37,7 +37,7 @@
 
 // This array tracks whether a particular operation is implemented for each of
 // the induced methods. This array is meant to be read-only.
-static bool bli_l3_ind_oper_impl[BLIS_NUM_IND_METHODS][BLIS_NUM_LEVEL3_OPS] =
+static const bool bli_l3_ind_oper_impl[BLIS_NUM_IND_METHODS][BLIS_NUM_LEVEL3_OPS] =
 {
         /*   gemm  gemmt  hemm  herk  her2k  symm  syrk  syr2k  trmm3  trmm  trsm  */
 /* 1m   */ { TRUE, TRUE,  TRUE, TRUE, TRUE,  TRUE, TRUE, TRUE,  TRUE,  TRUE, TRUE  },
