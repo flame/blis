@@ -63,14 +63,14 @@ dim_t num_eltwise = 0; // To keep track of eltwise operations.
 
 #define GEN_FUNC_NAME(prototype,ctype) prototype ## ctype
 
-inline void float_to_bf16( float* float_value, bfloat16* bf16_val )
+static inline void float_to_bf16( float* float_value, bfloat16* bf16_val )
 {
 	/*Set offset 2 to copy most significant 2 bytes of float
 	to convert float values to bf16 values*/
 	memcpy( ( bf16_val ), (char *)( float_value ) + 2, sizeof ( bfloat16 ) );
 }
 
-inline float bf16_to_float
+static inline float bf16_to_float
      (
        bfloat16 bf16_val
      )
@@ -81,7 +81,7 @@ inline float bf16_to_float
 	return float_value;
 }
 
-inline void convert_float_arr_to_bf16( float* array, bfloat16* array_bf16, int size )
+static inline void convert_float_arr_to_bf16( float* array, bfloat16* array_bf16, int size )
 {
 	for (int i=0; i< size; i++)
 	{
@@ -353,7 +353,7 @@ int min (int a, int b)
 }
 
 #define GEN_MAT_MUL_ACC_CHK_DOWNSCALE(ACCUM_type,SCALE_type,BLAS_DOWNSCALE_SFX) \
-inline ACCUM_type mat_mul_accuracy_check_downscale_ ## BLAS_DOWNSCALE_SFX \
+static inline ACCUM_type mat_mul_accuracy_check_downscale_ ## BLAS_DOWNSCALE_SFX \
      (\
        ACCUM_type temp_accum,\
        aocl_post_op*  post_op, \
@@ -370,7 +370,7 @@ GEN_MAT_MUL_ACC_CHK_DOWNSCALE(int32_t,float,u8s8s32os8)
 GEN_MAT_MUL_ACC_CHK_DOWNSCALE(int32_t,float,s8s8s32os8)
 GEN_MAT_MUL_ACC_CHK_DOWNSCALE(int16_t,float,s8s8s16os8)
 
-inline float mat_mul_accuracy_check_downscale_bf16bf16f32obf16
+static inline float mat_mul_accuracy_check_downscale_bf16bf16f32obf16
      (
        float temp_accum,
        aocl_post_op*  post_op,
@@ -381,7 +381,7 @@ inline float mat_mul_accuracy_check_downscale_bf16bf16f32obf16
 }
 
 #define GEN_MAT_MUL_ACC_CHK_ACCUM(A_type, B_type, C_type,ACCUM_type,BLAS_SFX) \
-inline ACCUM_type mat_mul_accuracy_check_accum_ ## BLAS_SFX \
+static inline ACCUM_type mat_mul_accuracy_check_accum_ ## BLAS_SFX \
      (\
        A_type* a, \
        B_type* b, \
@@ -421,7 +421,7 @@ GEN_MAT_MUL_ACC_CHK_ACCUM(int8_t,int8_t,int32_t,int32_t,s8s8s32os32)
 GEN_MAT_MUL_ACC_CHK_ACCUM(int8_t,int8_t,int8_t,int16_t,s8s8s16os8)
 GEN_MAT_MUL_ACC_CHK_ACCUM(int8_t,int8_t,int16_t,int16_t,s8s8s16os16)
 
-inline float mat_mul_accuracy_check_accum_bf16bf16f32of32
+static inline float mat_mul_accuracy_check_accum_bf16bf16f32of32
      (
        bfloat16* a,
        bfloat16* b,
@@ -451,7 +451,7 @@ inline float mat_mul_accuracy_check_accum_bf16bf16f32of32
 	return temp_accum;
 }
 
-inline float mat_mul_accuracy_check_accum_bf16bf16f32obf16
+static inline float mat_mul_accuracy_check_accum_bf16bf16f32obf16
      (
        bfloat16* a,
        bfloat16* b,
@@ -483,7 +483,7 @@ inline float mat_mul_accuracy_check_accum_bf16bf16f32obf16
 }
 
 #define GEN_GELU_TANH_POSTOP_INT(ACCUM_type,BLAS_SFX) \
-inline ACCUM_type GELU_TANH_post_op_ ## BLAS_SFX \
+static inline ACCUM_type GELU_TANH_post_op_ ## BLAS_SFX \
      (\
        ACCUM_type temp_accum \
      )\
@@ -505,7 +505,7 @@ GEN_GELU_TANH_POSTOP_INT(int16_t,s8s8s16os8)
 GEN_GELU_TANH_POSTOP_INT(int16_t,s8s8s16os16)
 
 #define GEN_GELU_TANH_POSTOP_FLOAT(BLAS_SFX) \
-inline float GELU_TANH_post_op_ ## BLAS_SFX \
+static inline float GELU_TANH_post_op_ ## BLAS_SFX \
      (\
        float temp_accum \
      )\
@@ -521,7 +521,7 @@ GEN_GELU_TANH_POSTOP_FLOAT(bf16bf16f32of32)
 GEN_GELU_TANH_POSTOP_FLOAT(bf16bf16f32obf16)
 
 #define GEN_GELU_ERF_POSTOP_INT(ACCUM_type,BLAS_SFX) \
-inline ACCUM_type GELU_ERF_post_op_ ## BLAS_SFX \
+static inline ACCUM_type GELU_ERF_post_op_ ## BLAS_SFX \
      (\
        ACCUM_type temp_accum \
      )\
@@ -541,7 +541,7 @@ GEN_GELU_ERF_POSTOP_INT(int16_t,s8s8s16os8)
 GEN_GELU_ERF_POSTOP_INT(int16_t,s8s8s16os16)
 
 #define GEN_GELU_ERF_POSTOP_FLOAT(BLAS_SFX) \
-inline float GELU_ERF_post_op_ ## BLAS_SFX \
+static inline float GELU_ERF_post_op_ ## BLAS_SFX \
      (\
        float temp_accum \
      )\

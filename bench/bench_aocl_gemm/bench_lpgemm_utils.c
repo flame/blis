@@ -157,7 +157,7 @@ void softmax_bench_driver_ ## SOFTMAX_SFX \
 
 GEN_SOFTMAX_BENCH_DRV_FN(float,softmax_f32)
 
-inline float gelu_tanh_f32
+static inline float gelu_tanh_f32
      (
        float temp_accum
      )
@@ -168,7 +168,7 @@ inline float gelu_tanh_f32
 	return temp_accum;
 }\
 
-inline float gelu_erf_f32
+static inline float gelu_erf_f32
      (
        float temp_accum
      )
