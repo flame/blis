@@ -127,12 +127,13 @@ void somatadd_ (f77_char* transa,f77_char* transb, f77_int* m, f77_int* n, const
  }
  float* aptr;
  float* bptr;
+ err_t     r_val;
 
  //pre transpose
  if(*transa == 't' || *transa == 'T' ||
   *transa == 'c' || *transa == 'C')
  {
-  aptr = (float *) bli_malloc_user((*m)*(*lda)*sizeof(float));
+  aptr = (float *) bli_malloc_user((*m)*(*lda)*sizeof(float), &r_val);
   bli_stranspose(A,aptr,*m,*lda);
  }
  else
@@ -143,7 +144,7 @@ void somatadd_ (f77_char* transa,f77_char* transb, f77_int* m, f77_int* n, const
  if(*transb == 't' || *transb == 'T' ||
   *transb == 'c' || *transb == 'C')
  {
-  bptr = (float *) bli_malloc_user((*m)*(*ldb)*sizeof(float));
+  bptr = (float *) bli_malloc_user((*m)*(*ldb)*sizeof(float), &r_val);
   bli_stranspose(B,bptr,*m,*ldb);
  }
  else
@@ -198,12 +199,13 @@ void domatadd_ (f77_char* transa,f77_char* transb, f77_int* m, f77_int* n, const
  }
  double* aptr;
  double* bptr;
+ err_t     r_val;
 
  //pre transpose
  if(*transa == 't' || *transa == 'T' ||
   *transa == 'c' || *transa == 'C')
  {
-  aptr = (double *) bli_malloc_user((*m)*(*lda)*sizeof(double));
+  aptr = (double *) bli_malloc_user((*m)*(*lda)*sizeof(double), &r_val);
   bli_dtranspose(A,aptr,*m,*lda);
  }
  else
@@ -214,7 +216,7 @@ void domatadd_ (f77_char* transa,f77_char* transb, f77_int* m, f77_int* n, const
  if(*transb == 't' || *transb == 'T' ||
   *transb == 'c' || *transb == 'C')
  {
-  bptr = (double *) bli_malloc_user((*m)*(*ldb)*sizeof(double));
+  bptr = (double *) bli_malloc_user((*m)*(*ldb)*sizeof(double), &r_val);
   bli_dtranspose(B,bptr,*m,*ldb);
  }
  else
@@ -269,12 +271,13 @@ void comatadd_ (f77_char* transa,f77_char* transb, f77_int* m, f77_int* n, const
  }
  scomplex* aptr;
  scomplex* bptr;
+ err_t     r_val;
 
  //pre transpose
  if(*transa == 't' || *transa == 'T' ||
   *transa == 'c' || *transa == 'C')
  {
-  aptr = (scomplex *) bli_malloc_user((*m)*(*lda)*sizeof(scomplex));
+  aptr = (scomplex *) bli_malloc_user((*m)*(*lda)*sizeof(scomplex), &r_val);
   bli_ctranspose(A,aptr,*m,*lda);
  }
  else
@@ -285,7 +288,7 @@ void comatadd_ (f77_char* transa,f77_char* transb, f77_int* m, f77_int* n, const
  if(*transb == 't' || *transb == 'T' ||
   *transb == 'c' || *transb == 'C')
  {
-  bptr = (scomplex *) bli_malloc_user((*m)*(*ldb)*sizeof(scomplex));
+  bptr = (scomplex *) bli_malloc_user((*m)*(*ldb)*sizeof(scomplex), &r_val);
   bli_ctranspose(B,bptr,*m,*ldb);
  }
  else
@@ -355,12 +358,13 @@ void zomatadd_ (f77_char* transa,f77_char* transb, f77_int* m, f77_int* n, const
 
  dcomplex* aptr;
  dcomplex* bptr;
+ err_t     r_val;
 
  //pre transpose
  if(*transa == 't' || *transa == 'T' ||
   *transa == 'c' || *transa == 'C')
  {
-  aptr = (dcomplex *) bli_malloc_user((*m)*(*lda)*sizeof(dcomplex));
+  aptr = (dcomplex *) bli_malloc_user((*m)*(*lda)*sizeof(dcomplex), &r_val);
   bli_ztranspose(A,aptr,*m,*lda);
  }
  else
@@ -371,7 +375,7 @@ void zomatadd_ (f77_char* transa,f77_char* transb, f77_int* m, f77_int* n, const
  if(*transb == 't' || *transb == 'T' ||
   *transb == 'c' || *transb == 'C')
  {
-  bptr = (dcomplex *) bli_malloc_user((*m)*(*ldb)*sizeof(dcomplex));
+  bptr = (dcomplex *) bli_malloc_user((*m)*(*ldb)*sizeof(dcomplex), &r_val);
   bli_ztranspose(B,bptr,*m,*ldb);
  }
  else

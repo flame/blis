@@ -413,7 +413,7 @@ double ddot_blis_impl
     /*
       Initialize mem pool buffer to NULL and size to 0
       "buf" and "size" fields are assigned once memory
-      is allocated from the pool in bli_membrk_acquire_m().
+      is allocated from the pool in bli_pba_acquire_m().
       This will ensure bli_mem_is_alloc() will be passed on
       an allocated memory if created or a NULL .
     */
@@ -430,7 +430,7 @@ double ddot_blis_impl
     */
     bli_rntm_init_from_global(&rntm);
     bli_rntm_set_num_threads_only(1, &rntm);
-    bli_membrk_rntm_set_membrk(&rntm);
+    bli_pba_rntm_set_pba(&rntm);
 
     // Calculate the size required for rho buffer.
     size_t buffer_size = nt * sizeof(double);
@@ -443,7 +443,7 @@ double ddot_blis_impl
       Acquire a buffer (nt * size(double)) from the memory broker
       and save the associated mem_t entry to mem_buf_rho.
     */
-    bli_membrk_acquire_m(&rntm,
+    bli_pba_acquire_m(&rntm,
                          buffer_size,
                          BLIS_BITVAL_BUFFER_FOR_A_BLOCK,
                          &mem_buf_rho);
@@ -523,7 +523,7 @@ double ddot_blis_impl
           rho += rho_temp[i];
 
         // Releasing the allocated memory if it was allocated
-        bli_membrk_release(&rntm, &mem_buf_rho);
+        bli_pba_release(&rntm, &mem_buf_rho);
     }
 #endif
 

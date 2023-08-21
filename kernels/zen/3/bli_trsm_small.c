@@ -8308,12 +8308,12 @@ BLIS_INLINE  err_t bli_dtrsm_small_XAltB_XAuB
 
     bli_rntm_init_from_global( &rntm );
     bli_rntm_set_num_threads_only( 1, &rntm );
-    bli_membrk_rntm_set_membrk( &rntm );
+    bli_pba_rntm_set_pba( &rntm );
 
     siz_t buffer_size = bli_pool_block_size(
-                          bli_membrk_pool(
+                          bli_pba_pool(
                             bli_packbuf_index(BLIS_BITVAL_BUFFER_FOR_A_BLOCK),
-                            bli_rntm_membrk(&rntm)));
+                            bli_rntm_pba(&rntm)));
 
     if( (d_nr * n * sizeof(double)) > buffer_size)
         return BLIS_NOT_YET_IMPLEMENTED;
@@ -8321,7 +8321,7 @@ BLIS_INLINE  err_t bli_dtrsm_small_XAltB_XAuB
     if (required_packing_A == 1)
     {
         // Get the buffer from the pool.
-        bli_membrk_acquire_m(&rntm,
+        bli_pba_acquire_m(&rntm,
                              buffer_size,
                              BLIS_BITVAL_BUFFER_FOR_A_BLOCK,
                              &local_mem_buf_A_s);
@@ -10628,7 +10628,7 @@ BLIS_INLINE  err_t bli_dtrsm_small_XAltB_XAuB
 
     if ((required_packing_A == 1) && bli_mem_is_alloc( &local_mem_buf_A_s ))
     {
-      bli_membrk_release(&rntm,
+      bli_pba_release(&rntm,
                          &local_mem_buf_A_s);
     }
 
@@ -10718,12 +10718,12 @@ BLIS_INLINE  err_t bli_dtrsm_small_XAutB_XAlB
 
     bli_rntm_init_from_global( &rntm );
     bli_rntm_set_num_threads_only( 1, &rntm );
-    bli_membrk_rntm_set_membrk( &rntm );
+    bli_pba_rntm_set_pba( &rntm );
 
     siz_t buffer_size = bli_pool_block_size(
-                          bli_membrk_pool(
+                          bli_pba_pool(
                             bli_packbuf_index(BLIS_BITVAL_BUFFER_FOR_A_BLOCK),
-                            bli_rntm_membrk(&rntm)));
+                            bli_rntm_pba(&rntm)));
 
     if( (d_nr * n * sizeof(double)) > buffer_size)
         return BLIS_NOT_YET_IMPLEMENTED;
@@ -10731,7 +10731,7 @@ BLIS_INLINE  err_t bli_dtrsm_small_XAutB_XAlB
     if (required_packing_A == 1)
     {
       // Get the buffer from the pool.
-      bli_membrk_acquire_m(&rntm,
+      bli_pba_acquire_m(&rntm,
                            buffer_size,
                            BLIS_BITVAL_BUFFER_FOR_A_BLOCK,
                            &local_mem_buf_A_s);
@@ -12984,7 +12984,7 @@ BLIS_INLINE  err_t bli_dtrsm_small_XAutB_XAlB
 
     if ((required_packing_A == 1) && bli_mem_is_alloc( &local_mem_buf_A_s ))
     {
-      bli_membrk_release(&rntm,
+      bli_pba_release(&rntm,
                          &local_mem_buf_A_s);
     }
     return BLIS_SUCCESS;
@@ -13064,12 +13064,12 @@ BLIS_INLINE err_t bli_dtrsm_small_AltXB_AuXB
 
     bli_rntm_init_from_global( &rntm );
     bli_rntm_set_num_threads_only( 1, &rntm );
-    bli_membrk_rntm_set_membrk( &rntm );
+    bli_pba_rntm_set_pba( &rntm );
 
     siz_t buffer_size = bli_pool_block_size(
-                            bli_membrk_pool(
+                            bli_pba_pool(
                             bli_packbuf_index(BLIS_BITVAL_BUFFER_FOR_A_BLOCK),
-                            bli_rntm_membrk(&rntm)));
+                            bli_rntm_pba(&rntm)));
 
     if((d_mr * m * sizeof(double)) > buffer_size)
         return BLIS_NOT_YET_IMPLEMENTED;
@@ -13077,7 +13077,7 @@ BLIS_INLINE err_t bli_dtrsm_small_AltXB_AuXB
     if(required_packing_A == 1)
     {
         // Get the buffer from the pool.
-        bli_membrk_acquire_m(&rntm,
+        bli_pba_acquire_m(&rntm,
                              buffer_size,
                              BLIS_BITVAL_BUFFER_FOR_A_BLOCK,
                              &local_mem_buf_A_s);
@@ -14961,7 +14961,7 @@ BLIS_INLINE err_t bli_dtrsm_small_AltXB_AuXB
     if ((required_packing_A == 1) &&
          bli_mem_is_alloc( &local_mem_buf_A_s ))
     {
-        bli_membrk_release(&rntm,&local_mem_buf_A_s);
+        bli_pba_release(&rntm,&local_mem_buf_A_s);
     }
   return BLIS_SUCCESS;
 }
@@ -15076,12 +15076,12 @@ BLIS_INLINE err_t bli_dtrsm_small_AutXB_AlXB
 
     bli_rntm_init_from_global( &rntm );
     bli_rntm_set_num_threads_only( 1, &rntm );
-    bli_membrk_rntm_set_membrk( &rntm );
+    bli_pba_rntm_set_pba( &rntm );
 
     siz_t buffer_size = bli_pool_block_size(
-                          bli_membrk_pool(
+                          bli_pba_pool(
                             bli_packbuf_index(BLIS_BITVAL_BUFFER_FOR_A_BLOCK),
-                            bli_rntm_membrk(&rntm)));
+                            bli_rntm_pba(&rntm)));
 
     if ( (d_mr * m * sizeof(double)) > buffer_size)
         return BLIS_NOT_YET_IMPLEMENTED;
@@ -15089,7 +15089,7 @@ BLIS_INLINE err_t bli_dtrsm_small_AutXB_AlXB
     if (required_packing_A == 1)
     {
         // Get the buffer from the pool.
-        bli_membrk_acquire_m(&rntm,
+        bli_pba_acquire_m(&rntm,
                              buffer_size,
                              BLIS_BITVAL_BUFFER_FOR_A_BLOCK,
                              &local_mem_buf_A_s);
@@ -17062,7 +17062,7 @@ BLIS_INLINE err_t bli_dtrsm_small_AutXB_AlXB
     if ((required_packing_A == 1) &&
         bli_mem_is_alloc( &local_mem_buf_A_s ))
     {
-        bli_membrk_release(&rntm, &local_mem_buf_A_s);
+        bli_pba_release(&rntm, &local_mem_buf_A_s);
     }
   return BLIS_SUCCESS;
 }
@@ -17664,12 +17664,12 @@ BLIS_INLINE  err_t bli_strsm_small_XAutB_XAlB
 
     bli_rntm_init_from_global( &rntm );
     bli_rntm_set_num_threads_only( 1, &rntm );
-    bli_membrk_rntm_set_membrk( &rntm );
+    bli_pba_rntm_set_pba( &rntm );
 
     siz_t buffer_size = bli_pool_block_size(
-                          bli_membrk_pool(
+                          bli_pba_pool(
                             bli_packbuf_index(BLIS_BITVAL_BUFFER_FOR_A_BLOCK),
-                            bli_rntm_membrk(&rntm)));
+                            bli_rntm_pba(&rntm)));
 
     if( (d_nr * n * sizeof(float)) > buffer_size)
         return BLIS_NOT_YET_IMPLEMENTED;
@@ -17677,7 +17677,7 @@ BLIS_INLINE  err_t bli_strsm_small_XAutB_XAlB
     if (required_packing_A == 1)
     {
       // Get the buffer from the pool.
-      bli_membrk_acquire_m(&rntm,
+      bli_pba_acquire_m(&rntm,
                            buffer_size,
                            BLIS_BITVAL_BUFFER_FOR_A_BLOCK,
                            &local_mem_buf_A_s);
@@ -21242,7 +21242,7 @@ BLIS_INLINE  err_t bli_strsm_small_XAutB_XAlB
 
     if ((required_packing_A == 1) && bli_mem_is_alloc( &local_mem_buf_A_s ))
     {
-      bli_membrk_release(&rntm,
+      bli_pba_release(&rntm,
                          &local_mem_buf_A_s);
     }
     return BLIS_SUCCESS;
@@ -21333,12 +21333,12 @@ BLIS_INLINE  err_t bli_strsm_small_XAltB_XAuB
 
     bli_rntm_init_from_global( &rntm );
     bli_rntm_set_num_threads_only( 1, &rntm );
-    bli_membrk_rntm_set_membrk( &rntm );
+    bli_pba_rntm_set_pba( &rntm );
 
     siz_t buffer_size = bli_pool_block_size(
-                          bli_membrk_pool(
+                          bli_pba_pool(
                             bli_packbuf_index(BLIS_BITVAL_BUFFER_FOR_A_BLOCK),
-                            bli_rntm_membrk(&rntm)));
+                            bli_rntm_pba(&rntm)));
 
     if( (d_nr * n * sizeof(float)) > buffer_size)
         return BLIS_NOT_YET_IMPLEMENTED;
@@ -21346,7 +21346,7 @@ BLIS_INLINE  err_t bli_strsm_small_XAltB_XAuB
     if (required_packing_A == 1)
     {
         // Get the buffer from the pool.
-        bli_membrk_acquire_m(&rntm,
+        bli_pba_acquire_m(&rntm,
                              buffer_size,
                              BLIS_BITVAL_BUFFER_FOR_A_BLOCK,
                              &local_mem_buf_A_s);
@@ -25083,7 +25083,7 @@ BLIS_INLINE  err_t bli_strsm_small_XAltB_XAuB
 
     if ((required_packing_A == 1) && bli_mem_is_alloc( &local_mem_buf_A_s ))
     {
-      bli_membrk_release(&rntm,
+      bli_pba_release(&rntm,
                          &local_mem_buf_A_s);
     }
 
@@ -25203,12 +25203,12 @@ BLIS_INLINE err_t bli_strsm_small_AutXB_AlXB
 
     bli_rntm_init_from_global( &rntm );
     bli_rntm_set_num_threads_only( 1, &rntm );
-    bli_membrk_rntm_set_membrk( &rntm );
+    bli_pba_rntm_set_pba( &rntm );
 
     siz_t buffer_size = bli_pool_block_size(
-                          bli_membrk_pool(
+                          bli_pba_pool(
                             bli_packbuf_index(BLIS_BITVAL_BUFFER_FOR_A_BLOCK),
-                            bli_rntm_membrk(&rntm)));
+                            bli_rntm_pba(&rntm)));
 
     if ( (d_mr * m * sizeof(float)) > buffer_size)
         return BLIS_NOT_YET_IMPLEMENTED;
@@ -25216,7 +25216,7 @@ BLIS_INLINE err_t bli_strsm_small_AutXB_AlXB
     if (required_packing_A == 1)
     {
         // Get the buffer from the pool.
-        bli_membrk_acquire_m(&rntm,
+        bli_pba_acquire_m(&rntm,
                              buffer_size,
                              BLIS_BITVAL_BUFFER_FOR_A_BLOCK,
                              &local_mem_buf_A_s);
@@ -29501,7 +29501,7 @@ BLIS_INLINE err_t bli_strsm_small_AutXB_AlXB
     if ((required_packing_A == 1) &&
         bli_mem_is_alloc( &local_mem_buf_A_s ))
     {
-        bli_membrk_release(&rntm, &local_mem_buf_A_s);
+        bli_pba_release(&rntm, &local_mem_buf_A_s);
     }
   return BLIS_SUCCESS;
 }
@@ -29583,12 +29583,12 @@ BLIS_INLINE err_t bli_strsm_small_AltXB_AuXB
 
     bli_rntm_init_from_global( &rntm );
     bli_rntm_set_num_threads_only( 1, &rntm );
-    bli_membrk_rntm_set_membrk( &rntm );
+    bli_pba_rntm_set_pba( &rntm );
 
     siz_t buffer_size = bli_pool_block_size(
-                            bli_membrk_pool(
+                            bli_pba_pool(
                             bli_packbuf_index(BLIS_BITVAL_BUFFER_FOR_A_BLOCK),
-                            bli_rntm_membrk(&rntm)));
+                            bli_rntm_pba(&rntm)));
 
     if((d_mr * m * sizeof(float)) > buffer_size)
         return BLIS_NOT_YET_IMPLEMENTED;
@@ -29596,7 +29596,7 @@ BLIS_INLINE err_t bli_strsm_small_AltXB_AuXB
     if(required_packing_A == 1)
     {
         // Get the buffer from the pool.
-        bli_membrk_acquire_m(&rntm,
+        bli_pba_acquire_m(&rntm,
                              buffer_size,
                              BLIS_BITVAL_BUFFER_FOR_A_BLOCK,
                              &local_mem_buf_A_s);
@@ -33658,7 +33658,7 @@ BLIS_INLINE err_t bli_strsm_small_AltXB_AuXB
     if ((required_packing_A == 1) &&
          bli_mem_is_alloc( &local_mem_buf_A_s ))
     {
-        bli_membrk_release(&rntm,&local_mem_buf_A_s);
+        bli_pba_release(&rntm,&local_mem_buf_A_s);
     }
   return BLIS_SUCCESS;
 }
@@ -33735,12 +33735,12 @@ BLIS_INLINE err_t bli_ztrsm_small_AutXB_AlXB
 
     bli_rntm_init_from_global( &rntm );
     bli_rntm_set_num_threads_only( 1, &rntm );
-    bli_membrk_rntm_set_membrk( &rntm );
+    bli_pba_rntm_set_pba( &rntm );
 
     siz_t buffer_size = bli_pool_block_size(
-                          bli_membrk_pool(
+                          bli_pba_pool(
                             bli_packbuf_index(BLIS_BITVAL_BUFFER_FOR_A_BLOCK),
-                            bli_rntm_membrk(&rntm)));
+                            bli_rntm_pba(&rntm)));
 
     if ( (d_mr * m * sizeof(dcomplex)) > buffer_size)
         return BLIS_NOT_YET_IMPLEMENTED;
@@ -33748,7 +33748,7 @@ BLIS_INLINE err_t bli_ztrsm_small_AutXB_AlXB
     if (required_packing_A == 1)
     {
         // Get the buffer from the pool.
-        bli_membrk_acquire_m(&rntm,
+        bli_pba_acquire_m(&rntm,
                              buffer_size,
                              BLIS_BITVAL_BUFFER_FOR_A_BLOCK,
                              &local_mem_buf_A_s);
@@ -34900,7 +34900,7 @@ BLIS_INLINE err_t bli_ztrsm_small_AutXB_AlXB
     if ((required_packing_A == 1) &&
         bli_mem_is_alloc( &local_mem_buf_A_s ))
     {
-        bli_membrk_release(&rntm, &local_mem_buf_A_s);
+        bli_pba_release(&rntm, &local_mem_buf_A_s);
     }
     return BLIS_SUCCESS;
 }
@@ -34977,12 +34977,12 @@ BLIS_INLINE err_t bli_ztrsm_small_AltXB_AuXB
 
     bli_rntm_init_from_global( &rntm );
     bli_rntm_set_num_threads_only( 1, &rntm );
-    bli_membrk_rntm_set_membrk( &rntm );
+    bli_pba_rntm_set_pba( &rntm );
 
     siz_t buffer_size = bli_pool_block_size(
-                            bli_membrk_pool(
+                            bli_pba_pool(
                             bli_packbuf_index(BLIS_BITVAL_BUFFER_FOR_A_BLOCK),
-                            bli_rntm_membrk(&rntm)));
+                            bli_rntm_pba(&rntm)));
 
     if((d_mr * m * sizeof(dcomplex)) > buffer_size)
         return BLIS_NOT_YET_IMPLEMENTED;
@@ -34990,7 +34990,7 @@ BLIS_INLINE err_t bli_ztrsm_small_AltXB_AuXB
     if(required_packing_A == 1)
     {
         // Get the buffer from the pool.
-        bli_membrk_acquire_m(&rntm,
+        bli_pba_acquire_m(&rntm,
                              buffer_size,
                              BLIS_BITVAL_BUFFER_FOR_A_BLOCK,
                              &local_mem_buf_A_s);
@@ -36131,7 +36131,7 @@ BLIS_INLINE err_t bli_ztrsm_small_AltXB_AuXB
     if ((required_packing_A == 1) &&
         bli_mem_is_alloc( &local_mem_buf_A_s ))
     {
-        bli_membrk_release(&rntm, &local_mem_buf_A_s);
+        bli_pba_release(&rntm, &local_mem_buf_A_s);
     }
 
     return BLIS_SUCCESS;
@@ -36189,12 +36189,12 @@ BLIS_INLINE err_t bli_ztrsm_small_XAutB_XAlB
 
     bli_rntm_init_from_global( &rntm );
     bli_rntm_set_num_threads_only( 1, &rntm );
-    bli_membrk_rntm_set_membrk( &rntm );
+    bli_pba_rntm_set_pba( &rntm );
 
     siz_t buffer_size = bli_pool_block_size(
-            bli_membrk_pool(
+            bli_pba_pool(
                 bli_packbuf_index(BLIS_BITVAL_BUFFER_FOR_A_BLOCK),
-                bli_rntm_membrk(&rntm)));
+                bli_rntm_pba(&rntm)));
 
     if( (d_nr * n * sizeof(dcomplex)) > buffer_size)
         return BLIS_NOT_YET_IMPLEMENTED;
@@ -36202,7 +36202,7 @@ BLIS_INLINE err_t bli_ztrsm_small_XAutB_XAlB
     if (required_packing_A == 1)
     {
         // Get the buffer from the pool.
-        bli_membrk_acquire_m(&rntm,
+        bli_pba_acquire_m(&rntm,
                 buffer_size,
                 BLIS_BITVAL_BUFFER_FOR_A_BLOCK,
                 &local_mem_buf_A_s);
@@ -37597,7 +37597,7 @@ BLIS_INLINE err_t bli_ztrsm_small_XAutB_XAlB
     if ((required_packing_A == 1) &&
             bli_mem_is_alloc( &local_mem_buf_A_s ))
     {
-        bli_membrk_release(&rntm, &local_mem_buf_A_s);
+        bli_pba_release(&rntm, &local_mem_buf_A_s);
     }
 
 
@@ -37656,12 +37656,12 @@ BLIS_INLINE err_t bli_ztrsm_small_XAltB_XAuB
 
     bli_rntm_init_from_global( &rntm );
     bli_rntm_set_num_threads_only( 1, &rntm );
-    bli_membrk_rntm_set_membrk( &rntm );
+    bli_pba_rntm_set_pba( &rntm );
 
     siz_t buffer_size = bli_pool_block_size(
-            bli_membrk_pool(
+            bli_pba_pool(
                 bli_packbuf_index(BLIS_BITVAL_BUFFER_FOR_A_BLOCK),
-                bli_rntm_membrk(&rntm)));
+                bli_rntm_pba(&rntm)));
 
     if( (d_nr * n * sizeof(dcomplex)) > buffer_size)
         return BLIS_NOT_YET_IMPLEMENTED;
@@ -37669,7 +37669,7 @@ BLIS_INLINE err_t bli_ztrsm_small_XAltB_XAuB
     if (required_packing_A == 1)
     {
         // Get the buffer from the pool.
-        bli_membrk_acquire_m(&rntm,
+        bli_pba_acquire_m(&rntm,
                 buffer_size,
                 BLIS_BITVAL_BUFFER_FOR_A_BLOCK,
                 &local_mem_buf_A_s);
@@ -39039,7 +39039,7 @@ BLIS_INLINE err_t bli_ztrsm_small_XAltB_XAuB
     if ((required_packing_A == 1) &&
             bli_mem_is_alloc( &local_mem_buf_A_s ))
     {
-        bli_membrk_release(&rntm, &local_mem_buf_A_s);
+        bli_pba_release(&rntm, &local_mem_buf_A_s);
     }
 
 
@@ -42281,12 +42281,12 @@ BLIS_INLINE err_t bli_ctrsm_small_AutXB_AlXB
 
 	bli_rntm_init_from_global( &rntm );
 	bli_rntm_set_num_threads_only( 1, &rntm );
-	bli_membrk_rntm_set_membrk( &rntm );
+	bli_pba_rntm_set_pba( &rntm );
 
 	siz_t buffer_size = bli_pool_block_size(
-			bli_membrk_pool(
+			bli_pba_pool(
 				bli_packbuf_index(BLIS_BITVAL_BUFFER_FOR_A_BLOCK),
-				bli_rntm_membrk(&rntm)));
+				bli_rntm_pba(&rntm)));
 
 	if ( (d_mr * m * sizeof(scomplex)) > buffer_size)
 		return BLIS_NOT_YET_IMPLEMENTED;
@@ -42294,7 +42294,7 @@ BLIS_INLINE err_t bli_ctrsm_small_AutXB_AlXB
 	if (required_packing_A == 1)
 	{
 		// Get the buffer from the pool.
-		bli_membrk_acquire_m(&rntm,
+		bli_pba_acquire_m(&rntm,
 				buffer_size,
 				BLIS_BITVAL_BUFFER_FOR_A_BLOCK,
 				&local_mem_buf_A_s);
@@ -44735,7 +44735,7 @@ BLIS_INLINE err_t bli_ctrsm_small_AutXB_AlXB
 	if ((required_packing_A == 1) &&
 			bli_mem_is_alloc( &local_mem_buf_A_s ))
 	{
-		bli_membrk_release(&rntm, &local_mem_buf_A_s);
+		bli_pba_release(&rntm, &local_mem_buf_A_s);
 	}
 
 	return BLIS_SUCCESS;
@@ -44819,12 +44819,12 @@ BLIS_INLINE err_t bli_ctrsm_small_AltXB_AuXB
 
 	bli_rntm_init_from_global( &rntm );
 	bli_rntm_set_num_threads_only( 1, &rntm );
-	bli_membrk_rntm_set_membrk( &rntm );
+	bli_pba_rntm_set_pba( &rntm );
 
 	siz_t buffer_size = bli_pool_block_size(
-			bli_membrk_pool(
+			bli_pba_pool(
 				bli_packbuf_index(BLIS_BITVAL_BUFFER_FOR_A_BLOCK),
-				bli_rntm_membrk(&rntm)));
+				bli_rntm_pba(&rntm)));
 
 	if ( (d_mr * m * sizeof(scomplex)) > buffer_size)
 		return BLIS_NOT_YET_IMPLEMENTED;
@@ -44832,7 +44832,7 @@ BLIS_INLINE err_t bli_ctrsm_small_AltXB_AuXB
 	if (required_packing_A == 1)
 	{
 		// Get the buffer from the pool.
-		bli_membrk_acquire_m(&rntm,
+		bli_pba_acquire_m(&rntm,
 				buffer_size,
 				BLIS_BITVAL_BUFFER_FOR_A_BLOCK,
 				&local_mem_buf_A_s);
@@ -47521,7 +47521,7 @@ BLIS_INLINE err_t bli_ctrsm_small_AltXB_AuXB
 	if ((required_packing_A == 1) &&
 			bli_mem_is_alloc( &local_mem_buf_A_s ))
 	{
-		bli_membrk_release(&rntm, &local_mem_buf_A_s);
+		bli_pba_release(&rntm, &local_mem_buf_A_s);
 	}
 
 
@@ -47600,12 +47600,12 @@ BLIS_INLINE  err_t bli_ctrsm_small_XAutB_XAlB
 
 	bli_rntm_init_from_global( &rntm );
 	bli_rntm_set_num_threads_only( 1, &rntm );
-	bli_membrk_rntm_set_membrk( &rntm );
+	bli_pba_rntm_set_pba( &rntm );
 
 	siz_t buffer_size = bli_pool_block_size(
-			bli_membrk_pool(
+			bli_pba_pool(
 				bli_packbuf_index(BLIS_BITVAL_BUFFER_FOR_A_BLOCK),
-				bli_rntm_membrk(&rntm)));
+				bli_rntm_pba(&rntm)));
 
 	if ( (d_mr * m * sizeof(scomplex)) > buffer_size)
 		return BLIS_NOT_YET_IMPLEMENTED;
@@ -47613,7 +47613,7 @@ BLIS_INLINE  err_t bli_ctrsm_small_XAutB_XAlB
 	if (required_packing_A == 1)
 	{
 		// Get the buffer from the pool.
-		bli_membrk_acquire_m(&rntm,
+		bli_pba_acquire_m(&rntm,
 				buffer_size,
 				BLIS_BITVAL_BUFFER_FOR_A_BLOCK,
 				&local_mem_buf_A_s);
@@ -49144,7 +49144,7 @@ BLIS_INLINE  err_t bli_ctrsm_small_XAutB_XAlB
 	if ((required_packing_A == 1) &&
 			bli_mem_is_alloc( &local_mem_buf_A_s ))
 	{
-		bli_membrk_release(&rntm, &local_mem_buf_A_s);
+		bli_pba_release(&rntm, &local_mem_buf_A_s);
 	}
 
 
@@ -49223,12 +49223,12 @@ BLIS_INLINE  err_t bli_ctrsm_small_XAltB_XAuB
 
 	bli_rntm_init_from_global( &rntm );
 	bli_rntm_set_num_threads_only( 1, &rntm );
-	bli_membrk_rntm_set_membrk( &rntm );
+	bli_pba_rntm_set_pba( &rntm );
 
 	siz_t buffer_size = bli_pool_block_size(
-			bli_membrk_pool(
+			bli_pba_pool(
 				bli_packbuf_index(BLIS_BITVAL_BUFFER_FOR_A_BLOCK),
-				bli_rntm_membrk(&rntm)));
+				bli_rntm_pba(&rntm)));
 
 	if ( (d_mr * m * sizeof(scomplex)) > buffer_size)
 		return BLIS_NOT_YET_IMPLEMENTED;
@@ -49236,7 +49236,7 @@ BLIS_INLINE  err_t bli_ctrsm_small_XAltB_XAuB
 	if (required_packing_A == 1)
 	{
 		// Get the buffer from the pool.
-		bli_membrk_acquire_m(&rntm,
+		bli_pba_acquire_m(&rntm,
 				buffer_size,
 				BLIS_BITVAL_BUFFER_FOR_A_BLOCK,
 				&local_mem_buf_A_s);
@@ -50795,7 +50795,7 @@ BLIS_INLINE  err_t bli_ctrsm_small_XAltB_XAuB
 	if ((required_packing_A == 1) &&
 			bli_mem_is_alloc( &local_mem_buf_A_s ))
 	{
-		bli_membrk_release(&rntm, &local_mem_buf_A_s);
+		bli_pba_release(&rntm, &local_mem_buf_A_s);
 	}
 
 

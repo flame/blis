@@ -63,19 +63,10 @@ void bli_init_auto( void )
 
 void bli_finalize_auto( void )
 {
-#ifdef BLIS_ENABLE_STAY_AUTO_INITIALIZED
-
-	// If BLIS was configured to stay initialized after being automatically
-	// initialized, we honor the configuration request and do nothing.
-	// BLIS will remain initialized unless and until the user explicitly
-	// calls bli_finalize().
-
-#else
-
-	bli_thread_finalize_tl();
-	bli_finalize_once();
-
-#endif
+	// The _auto() functions are used when initializing the BLAS compatibility
+	// layer. It would not make much sense to automatically initialize and
+	// finalize for every BLAS routine call; therefore, we remain initialized
+	// unless and until the application explicitly calls bli_finalize().
 }
 
 // -----------------------------------------------------------------------------

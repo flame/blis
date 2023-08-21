@@ -69,8 +69,8 @@ void PASTEMAC0(opname) \
 \
 	f \
 	( \
-	   buf_chi, \
-	   buf_absq  \
+	  buf_chi, \
+	  buf_absq  \
 	); \
 }
 
@@ -105,9 +105,9 @@ void PASTEMAC0(opname) \
 \
 	f \
 	( \
-	   conjchi, \
-	   buf_chi, \
-	   buf_psi  \
+	  conjchi, \
+	  buf_chi, \
+	  buf_psi  \
 	); \
 }
 
@@ -142,8 +142,8 @@ void PASTEMAC0(opname) \
 \
 	f \
 	( \
-	   conjchi, \
-	   buf_chi  \
+	  conjchi, \
+	  buf_chi  \
 	); \
 }
 
@@ -175,8 +175,8 @@ void PASTEMAC0(opname) \
 \
 	f \
 	( \
-	   buf_chi, \
-	   buf_psi  \
+	  buf_chi, \
+	  buf_psi  \
 	); \
 }
 
@@ -218,9 +218,9 @@ void PASTEMAC0(opname) \
 \
 	f \
 	( \
-	   buf_chi, \
-	   zeta_r, \
-	   zeta_i  \
+	  buf_chi, \
+	  zeta_r, \
+	  zeta_i  \
 	); \
 }
 
@@ -252,9 +252,9 @@ void PASTEMAC0(opname) \
 \
 	f \
 	( \
-	   zeta_r, \
-	   zeta_i, \
-	   buf_chi  \
+	  zeta_r, \
+	  zeta_i, \
+	  buf_chi  \
 	); \
 }
 
@@ -295,9 +295,9 @@ void PASTEMAC0(opname) \
 \
 	f \
 	( \
-	   buf_chi, \
-	   buf_zeta_r, \
-	   buf_zeta_i  \
+	  buf_chi, \
+	  buf_zeta_r, \
+	  buf_zeta_i  \
 	); \
 }
 
@@ -332,9 +332,9 @@ void PASTEMAC0(opname) \
 \
 	f \
 	( \
-	   buf_zeta_i, \
-	   buf_zeta_r, \
-	   buf_chi  \
+	  buf_zeta_i, \
+	  buf_zeta_r, \
+	  buf_chi  \
 	); \
 }
 

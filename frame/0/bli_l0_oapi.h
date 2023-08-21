@@ -128,9 +128,3 @@ BLIS_EXPORT_BLIS void PASTEMAC0(opname) \
 
 GENPROT( zipsc )
 
-
-
-
-
-
-

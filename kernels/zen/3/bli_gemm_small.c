@@ -306,12 +306,12 @@ static err_t bli_sgemm_small
 
         bli_rntm_init_from_global( &rntm );
         bli_rntm_set_num_threads_only( 1, &rntm );
-        bli_membrk_rntm_set_membrk( &rntm );
+        bli_pba_rntm_set_pba( &rntm );
 
         // Get the current size of the buffer pool for A block packing.
-        // We will use the same size to avoid pool re-initialization
-        siz_t buffer_size = bli_pool_block_size(bli_membrk_pool(bli_packbuf_index(BLIS_BITVAL_BUFFER_FOR_A_BLOCK),
-                                                bli_rntm_membrk(&rntm)));
+        // We will use the same size to avoid pool re-initialization 
+        siz_t buffer_size = bli_pool_block_size(bli_pba_pool(bli_packbuf_index(BLIS_BITVAL_BUFFER_FOR_A_BLOCK),
+                                                bli_rntm_pba(&rntm)));
 
         // Based on the available memory in the buffer we will decide if
         // we want to do packing or not.
@@ -336,8 +336,8 @@ static err_t bli_sgemm_small
             printf( "bli_sgemm_small: Requesting mem pool block of size %lu\n", buffer_size);
 #endif
             // Get the buffer from the pool, if there is no pool with
-            // required size, it will be created.
-            bli_membrk_acquire_m(&rntm,
+            // required size, it will be created. 
+            bli_pba_acquire_m(&rntm,
                                  buffer_size,
                                  BLIS_BITVAL_BUFFER_FOR_A_BLOCK,
                                  &local_mem_buf_A_s);
@@ -1737,7 +1737,7 @@ static err_t bli_sgemm_small
 #ifdef BLIS_ENABLE_MEM_TRACING
         printf( "bli_sgemm_small(): releasing mem pool block\n" );
 #endif
-            bli_membrk_release(&rntm,
+            bli_pba_release(&rntm,
                                &local_mem_buf_A_s);
         }
 
@@ -1854,13 +1854,13 @@ err_t bli_dgemm_small
 
         bli_rntm_init_from_global( &rntm );
         bli_rntm_set_num_threads_only( 1, &rntm );
-        bli_membrk_rntm_set_membrk( &rntm );
+        bli_pba_rntm_set_pba( &rntm );
 
         // Get the current size of the buffer pool for A block packing.
         // We will use the same size to avoid pool re-initliazaton
         siz_t buffer_size = bli_pool_block_size(
-            bli_membrk_pool(bli_packbuf_index(BLIS_BITVAL_BUFFER_FOR_A_BLOCK),
-                            bli_rntm_membrk(&rntm)));
+            bli_pba_pool(bli_packbuf_index(BLIS_BITVAL_BUFFER_FOR_A_BLOCK),
+                            bli_rntm_pba(&rntm)));
 
         //
         // This kernel assumes that "A" will be unpackged if N <= 3.
@@ -1885,7 +1885,7 @@ err_t bli_dgemm_small
             printf( "bli_dgemm_small: Requesting mem pool block of size %lu\n", buffer_size);
 #endif
             // Get the buffer from the pool.
-            bli_membrk_acquire_m(&rntm,
+            bli_pba_acquire_m(&rntm,
                                  buffer_size,
                                  BLIS_BITVAL_BUFFER_FOR_A_BLOCK,
                                  &local_mem_buf_A_s);
@@ -3509,7 +3509,7 @@ err_t bli_dgemm_small
 #ifdef BLIS_ENABLE_MEM_TRACING
         printf( "bli_dgemm_small(): releasing mem pool block\n" );
 #endif
-        bli_membrk_release(&rntm,
+        bli_pba_release(&rntm,
                            &local_mem_buf_A_s);
         }
         AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO);
@@ -4550,13 +4550,13 @@ err_t bli_dgemm_small_At
 
         bli_rntm_init_from_global( &rntm );
         bli_rntm_set_num_threads_only( 1, &rntm );
-        bli_membrk_rntm_set_membrk( &rntm );
+        bli_pba_rntm_set_pba( &rntm );
 
         // Get the current size of the buffer pool for A block packing.
         // We will use the same size to avoid pool re-initliazaton
         siz_t buffer_size = bli_pool_block_size(
-            bli_membrk_pool(bli_packbuf_index(BLIS_BITVAL_BUFFER_FOR_A_BLOCK),
-                            bli_rntm_membrk(&rntm)));
+            bli_pba_pool(bli_packbuf_index(BLIS_BITVAL_BUFFER_FOR_A_BLOCK),
+                            bli_rntm_pba(&rntm)));
 
         //
         // This kernel assumes that "A" will be unpackged if N <= 3.
@@ -4581,7 +4581,7 @@ err_t bli_dgemm_small_At
             printf( "bli_dgemm_small: Requesting mem pool block of size %lu\n", buffer_size);
 #endif
             // Get the buffer from the pool.
-            bli_membrk_acquire_m(&rntm,
+            bli_pba_acquire_m(&rntm,
                                  buffer_size,
                                  BLIS_BITVAL_BUFFER_FOR_A_BLOCK,
                                  &local_mem_buf_A_s);
@@ -5888,7 +5888,7 @@ err_t bli_dgemm_small_At
 #ifdef BLIS_ENABLE_MEM_TRACING
         printf( "bli_dgemm_small_At(): releasing mem pool block\n" );
 #endif
-        bli_membrk_release(&rntm,
+        bli_pba_release(&rntm,
                            &local_mem_buf_A_s);
         }
         AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO);
@@ -6035,13 +6035,13 @@ err_t bli_zgemm_small
 
         bli_rntm_init_from_global( &rntm );
         bli_rntm_set_num_threads_only( 1, &rntm );
-        bli_membrk_rntm_set_membrk( &rntm );
+        bli_pba_rntm_set_pba( &rntm );
 
         // Get the current size of the buffer pool for A block packing.
         // We will use the same size to avoid pool re-initliazaton
         siz_t buffer_size = bli_pool_block_size(
-                bli_membrk_pool(bli_packbuf_index(BLIS_BITVAL_BUFFER_FOR_A_BLOCK),
-                    bli_rntm_membrk(&rntm)));
+                bli_pba_pool(bli_packbuf_index(BLIS_BITVAL_BUFFER_FOR_A_BLOCK),
+                    bli_rntm_pba(&rntm)));
 
         //
         // This kernel assumes that "A" will be unpackged if N <= 3.
@@ -6063,7 +6063,7 @@ err_t bli_zgemm_small
                   buffer_size);
 #endif
             // Get the buffer from the pool.
-            bli_membrk_acquire_m(&rntm,
+            bli_pba_acquire_m(&rntm,
                     buffer_size,
                     BLIS_BITVAL_BUFFER_FOR_A_BLOCK,
                     &local_mem_buf_A_s);
@@ -9874,7 +9874,7 @@ err_t bli_zgemm_small
 #ifdef BLIS_ENABLE_MEM_TRACING
             printf( "bli_zgemm_small(): releasing mem pool block\n" );
 #endif
-            bli_membrk_release(&rntm,
+            bli_pba_release(&rntm,
                     &local_mem_buf_A_s);
         }
         AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO);
@@ -9999,13 +9999,13 @@ err_t bli_zgemm_small_At
 
         bli_rntm_init_from_global( &rntm );
         bli_rntm_set_num_threads_only( 1, &rntm );
-        bli_membrk_rntm_set_membrk( &rntm );
+        bli_pba_rntm_set_pba( &rntm );
 
         // Get the current size of the buffer pool for A block packing.
         // We will use the same size to avoid pool re-initliazaton
         siz_t buffer_size = bli_pool_block_size(
-                bli_membrk_pool(bli_packbuf_index(BLIS_BITVAL_BUFFER_FOR_A_BLOCK),
-                    bli_rntm_membrk(&rntm)));
+                bli_pba_pool(bli_packbuf_index(BLIS_BITVAL_BUFFER_FOR_A_BLOCK),
+                    bli_rntm_pba(&rntm)));
 
         //
         // This kernel assumes that "A" will be unpackged if N <= 3.
@@ -10031,7 +10031,7 @@ err_t bli_zgemm_small_At
             buffer_size);
 #endif
             // Get the buffer from the pool.
-            bli_membrk_acquire_m(&rntm,
+            bli_pba_acquire_m(&rntm,
                     buffer_size,
                     BLIS_BITVAL_BUFFER_FOR_A_BLOCK,
                     &local_mem_buf_A_s);
@@ -13576,7 +13576,7 @@ err_t bli_zgemm_small_At
 #ifdef BLIS_ENABLE_MEM_TRACING
             printf( "bli_zgemm_small_At(): releasing mem pool block\n" );
 #endif
-            bli_membrk_release(&rntm,
+            bli_pba_release(&rntm,
                     &local_mem_buf_A_s);
         }
         AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO);

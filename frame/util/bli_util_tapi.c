@@ -213,64 +213,6 @@ INSERT_GENTFUNCR_BASIC0( normfm )
 INSERT_GENTFUNCR_BASIC0( normim )
 
 
-#undef  GENTFUNC
-#define GENTFUNC( ctype, ch, opname, varname ) \
-\
-void PASTEMAC2(ch,opname,EX_SUF) \
-     ( \
-       char*  s1, \
-       dim_t  n, \
-       void*  x, inc_t incx, \
-       char*  format, \
-       char*  s2  \
-     ) \
-{ \
-	bli_init_once(); \
-\
-	PASTEMAC(ch,varname) \
-	( \
-	  stdout, \
-	  s1, \
-	  n, \
-	  x, incx, \
-	  format, \
-	  s2  \
-	); \
-}
-
-INSERT_GENTFUNC_BASIC_I( printv, fprintv )
-
-
-#undef  GENTFUNC
-#define GENTFUNC( ctype, ch, opname, varname ) \
-\
-void PASTEMAC2(ch,opname,EX_SUF) \
-     ( \
-       char*  s1, \
-       dim_t  m, \
-       dim_t  n, \
-       void*  x, inc_t rs_x, inc_t cs_x, \
-       char*  format, \
-       char*  s2  \
-     ) \
-{ \
-	bli_init_once(); \
-\
-	PASTEMAC(ch,varname) \
-	( \
-	  stdout, \
-	  s1, \
-	  m, \
-	  n, \
-	  x, rs_x, cs_x, \
-	  format, \
-	  s2  \
-	); \
-}
-
-INSERT_GENTFUNC_BASIC_I( printm, fprintm )
-
-
 #undef  GENTFUNCR
 #define GENTFUNCR( ctype, ctype_r, ch, chr, opname ) \
 \
@@ -429,6 +371,168 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 }
 
 INSERT_GENTFUNCR_BASIC0( sumsqv )
+
+// -----------------------------------------------------------------------------
+
+// Operations with only basic interfaces.
+
+#ifdef BLIS_TAPI_BASIC
+
+#undef  GENTFUNC
+#define GENTFUNC( ctype, ch, opname ) \
+\
+void PASTEMAC(ch,opname) \
+     ( \
+       conj_t  conjchi, \
+       ctype*  chi, \
+       ctype*  psi, \
+       bool*   is_eq  \
+     ) \
+{ \
+	bli_init_once(); \
+\
+	ctype chi_conj; \
+\
+	PASTEMAC(ch,copycjs)( conjchi, *chi, chi_conj ); \
+\
+	*is_eq = PASTEMAC(ch,eq)( chi_conj, *psi ); \
+}
+
+INSERT_GENTFUNC_BASIC0( eqsc )
+
+
+#undef  GENTFUNC
+#define GENTFUNC( ctype, ch, opname ) \
+\
+void PASTEMAC(ch,opname) \
+     ( \
+       conj_t  conjx, \
+       dim_t   n, \
+       ctype*  x, inc_t incx, \
+       ctype*  y, inc_t incy, \
+       bool*   is_eq  \
+     ) \
+{ \
+	bli_init_once(); \
+\
+	/* If x is zero length, return with a result of TRUE. */ \
+	if ( bli_zero_dim1( n ) ) { *is_eq = TRUE; return; } \
+\
+	/* Obtain a valid context from the gks if necessary. */ \
+	/*if ( cntx == NULL ) cntx = bli_gks_query_cntx();*/ \
+\
+	*is_eq = PASTEMAC2(ch,opname,_unb_var1) \
+	( \
+	  conjx, \
+	  n, \
+	  x, incx, \
+	  y, incy  \
+	); \
+}
+
+INSERT_GENTFUNC_BASIC0( eqv )
+
+
+#undef  GENTFUNC
+#define GENTFUNC( ctype, ch, opname ) \
+\
+void PASTEMAC(ch,opname) \
+     ( \
+       doff_t  diagoffx, \
+       diag_t  diagx, \
+       uplo_t  uplox, \
+       trans_t transx, \
+       dim_t   m, \
+       dim_t   n, \
+       ctype*  x, inc_t rs_x, inc_t cs_x, \
+       ctype*  y, inc_t rs_y, inc_t cs_y, \
+       bool*   is_eq  \
+     ) \
+{ \
+	bli_init_once(); \
+\
+	/* If x has a zero dimension, return with a result of TRUE. See the
+	   _unb_var() variant for why we return TRUE in this scenario. */ \
+	if ( bli_zero_dim2( m, n ) ) { *is_eq = TRUE; return; } \
+\
+	/* Obtain a valid context from the gks if necessary. */ \
+	/*if ( cntx == NULL ) cntx = bli_gks_query_cntx();*/ \
+\
+	/* Invoke the helper variant. */ \
+	*is_eq = PASTEMAC2(ch,opname,_unb_var1) \
+	( \
+	  diagoffx, \
+	  diagx, \
+	  uplox, \
+	  transx, \
+	  m, \
+	  n, \
+	  x, rs_x, cs_x, \
+	  y, rs_y, cs_y  \
+	); \
+}
+
+INSERT_GENTFUNC_BASIC0( eqm )
+
+
+#undef  GENTFUNC
+#define GENTFUNC( ctype, ch, opname, varname ) \
+\
+void PASTEMAC(ch,opname) \
+     ( \
+       char*  s1, \
+       dim_t  n, \
+       void*  x, inc_t incx, \
+       char*  format, \
+       char*  s2  \
+     ) \
+{ \
+	bli_init_once(); \
+\
+	PASTEMAC(ch,varname) \
+	( \
+	  stdout, \
+	  s1, \
+	  n, \
+	  x, incx, \
+	  format, \
+	  s2  \
+	); \
+}
+
+INSERT_GENTFUNC_BASIC_I( printv, fprintv )
+
+
+#undef  GENTFUNC
+#define GENTFUNC( ctype, ch, opname, varname ) \
+\
+void PASTEMAC(ch,opname) \
+     ( \
+       char*  s1, \
+       dim_t  m, \
+       dim_t  n, \
+       void*  x, inc_t rs_x, inc_t cs_x, \
+       char*  format, \
+       char*  s2  \
+     ) \
+{ \
+	bli_init_once(); \
+\
+	PASTEMAC(ch,varname) \
+	( \
+	  stdout, \
+	  s1, \
+	  m, \
+	  n, \
+	  x, rs_x, cs_x, \
+	  format, \
+	  s2  \
+	); \
+}
+
+INSERT_GENTFUNC_BASIC_I( printm, fprintm )
+
+#endif // #ifdef BLIS_TAPI_BASIC
 
 
 #endif

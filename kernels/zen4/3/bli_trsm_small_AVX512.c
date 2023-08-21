@@ -2034,12 +2034,12 @@ BLIS_INLINE err_t bli_dtrsm_small_XAltB_XAuB_AVX512
 
   bli_rntm_init_from_global(&rntm);
   bli_rntm_set_num_threads_only(1, &rntm);
-  bli_membrk_rntm_set_membrk(&rntm);
+  bli_pba_rntm_set_pba(&rntm);
 
   siz_t buffer_size = bli_pool_block_size(
-    bli_membrk_pool(
+    bli_pba_pool(
       bli_packbuf_index(BLIS_BITVAL_BUFFER_FOR_A_BLOCK),
-      bli_rntm_membrk(&rntm)));
+      bli_rntm_pba(&rntm)));
 
   if ((d_nr * n * sizeof(double)) > buffer_size)
     return BLIS_NOT_YET_IMPLEMENTED;
@@ -2047,7 +2047,7 @@ BLIS_INLINE err_t bli_dtrsm_small_XAltB_XAuB_AVX512
   if (required_packing_A == 1)
   {
     // Get the buffer from the pool.
-    bli_membrk_acquire_m(&rntm,
+    bli_pba_acquire_m(&rntm,
                buffer_size,
                BLIS_BITVAL_BUFFER_FOR_A_BLOCK,
                &local_mem_buf_A_s); // acquire memory for A01 pack
@@ -4306,7 +4306,7 @@ BLIS_INLINE err_t bli_dtrsm_small_XAltB_XAuB_AVX512
 
   if ((required_packing_A == 1) && bli_mem_is_alloc(&local_mem_buf_A_s))
   {
-    bli_membrk_release(&rntm,
+    bli_pba_release(&rntm,
                &local_mem_buf_A_s);
   }
   return BLIS_SUCCESS;
@@ -4364,12 +4364,12 @@ BLIS_INLINE err_t bli_dtrsm_small_XAutB_XAlB_AVX512
 
   bli_rntm_init_from_global(&rntm);
   bli_rntm_set_num_threads_only(1, &rntm);
-  bli_membrk_rntm_set_membrk(&rntm);
+  bli_pba_rntm_set_pba(&rntm);
 
   siz_t buffer_size = bli_pool_block_size(
-    bli_membrk_pool(
+    bli_pba_pool(
       bli_packbuf_index(BLIS_BITVAL_BUFFER_FOR_A_BLOCK),
-      bli_rntm_membrk(&rntm)));
+      bli_rntm_pba(&rntm)));
 
   if ((d_nr * n * sizeof(double)) > buffer_size)
     return BLIS_NOT_YET_IMPLEMENTED;
@@ -4377,7 +4377,7 @@ BLIS_INLINE err_t bli_dtrsm_small_XAutB_XAlB_AVX512
   if (required_packing_A)
   {
     // Get the buffer from the pool.
-    bli_membrk_acquire_m(&rntm,
+    bli_pba_acquire_m(&rntm,
                buffer_size,
                BLIS_BITVAL_BUFFER_FOR_A_BLOCK,
                &local_mem_buf_A_s); // acquire memory for A01 pack
@@ -6606,7 +6606,7 @@ else if ( n_remainder == 2)
 
   if ((required_packing_A) && bli_mem_is_alloc(&local_mem_buf_A_s))
   {
-    bli_membrk_release(&rntm,
+    bli_pba_release(&rntm,
                &local_mem_buf_A_s);
   }
   return BLIS_SUCCESS;
@@ -7278,12 +7278,12 @@ BLIS_INLINE err_t bli_dtrsm_small_AutXB_AlXB_AVX512
 
   bli_rntm_init_from_global(&rntm);
   bli_rntm_set_num_threads_only(1, &rntm);
-  bli_membrk_rntm_set_membrk(&rntm);
+  bli_pba_rntm_set_pba(&rntm);
 
   siz_t buffer_size = bli_pool_block_size(
-    bli_membrk_pool(
+    bli_pba_pool(
       bli_packbuf_index(BLIS_BITVAL_BUFFER_FOR_A_BLOCK),
-      bli_rntm_membrk(&rntm)));
+      bli_rntm_pba(&rntm)));
 
   if ((d_mr * m * sizeof(double)) > buffer_size)
     return BLIS_NOT_YET_IMPLEMENTED;
@@ -7291,7 +7291,7 @@ BLIS_INLINE err_t bli_dtrsm_small_AutXB_AlXB_AVX512
   if (required_packing_A == 1)
   {
     // Get the buffer from the pool.
-    bli_membrk_acquire_m(&rntm,
+    bli_pba_acquire_m(&rntm,
                buffer_size,
                BLIS_BITVAL_BUFFER_FOR_A_BLOCK,
                &local_mem_buf_A_s);
@@ -9193,7 +9193,7 @@ BLIS_INLINE err_t bli_dtrsm_small_AutXB_AlXB_AVX512
   if ((required_packing_A == 1) &&
     bli_mem_is_alloc(&local_mem_buf_A_s))
   {
-    bli_membrk_release(&rntm, &local_mem_buf_A_s);
+    bli_pba_release(&rntm, &local_mem_buf_A_s);
   }
   return BLIS_SUCCESS;
 }
@@ -9245,12 +9245,12 @@ BLIS_INLINE err_t bli_dtrsm_small_AltXB_AuXB_AVX512
 
   bli_rntm_init_from_global(&rntm);
   bli_rntm_set_num_threads_only(1, &rntm);
-  bli_membrk_rntm_set_membrk(&rntm);
+  bli_pba_rntm_set_pba(&rntm);
 
   siz_t buffer_size = bli_pool_block_size(
-    bli_membrk_pool(
+    bli_pba_pool(
       bli_packbuf_index(BLIS_BITVAL_BUFFER_FOR_A_BLOCK),
-      bli_rntm_membrk(&rntm)));
+      bli_rntm_pba(&rntm)));
 
   if ((d_mr * m * sizeof(double)) > buffer_size)
     return BLIS_NOT_YET_IMPLEMENTED;
@@ -9258,7 +9258,7 @@ BLIS_INLINE err_t bli_dtrsm_small_AltXB_AuXB_AVX512
   if (required_packing_A == 1)
   {
     // Get the buffer from the pool.
-    bli_membrk_acquire_m(&rntm,
+    bli_pba_acquire_m(&rntm,
                buffer_size,
                BLIS_BITVAL_BUFFER_FOR_A_BLOCK,
                &local_mem_buf_A_s);
@@ -11006,7 +11006,7 @@ BLIS_INLINE err_t bli_dtrsm_small_AltXB_AuXB_AVX512
   if ((required_packing_A == 1) &&
     bli_mem_is_alloc(&local_mem_buf_A_s))
   {
-    bli_membrk_release(&rntm, &local_mem_buf_A_s);
+    bli_pba_release(&rntm, &local_mem_buf_A_s);
   }
   return BLIS_SUCCESS;
 }

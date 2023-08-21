@@ -102,7 +102,7 @@ void PASTEMAC(ch,varname) \
         /*
             Initialize mem pool buffer to NULL and size to 0
             "buf" and "size" fields are assigned once memory
-            is allocated from the pool in bli_membrk_acquire_m().
+            is allocated from the pool in bli_pba_acquire_m().
             This will ensure bli_mem_is_alloc() will be passed on
             an allocated memory if created or a NULL .
         */\
@@ -119,7 +119,7 @@ void PASTEMAC(ch,varname) \
 \
         bli_rntm_init_from_global(&rntm);\
         bli_rntm_set_num_threads_only(1, &rntm);\
-        bli_membrk_rntm_set_membrk(&rntm);\
+        bli_pba_rntm_set_pba(&rntm);\
 \
         /*
             Calculate the size required for n_elem double elements in vector Y.
@@ -130,7 +130,7 @@ void PASTEMAC(ch,varname) \
             Acquire a Buffer(n_elem*size(double)) from the memory broker
             and save the associated mem_t entry to mem_bufY.
         */\
-        bli_membrk_acquire_m(&rntm,\
+        bli_pba_acquire_m(&rntm,\
                             buffer_size,\
                             BLIS_BUFFER_FOR_B_PANEL,\
                             &mem_bufY);\
@@ -245,7 +245,7 @@ void PASTEMAC(ch,varname) \
         );\
 \
         /* Return the buffer to pool */\
-        bli_membrk_release(&rntm, &mem_bufY);\
+        bli_pba_release(&rntm, &mem_bufY);\
   }\
 \
     AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_3); \
@@ -373,7 +373,7 @@ void bli_dgemv_unf_var2
         /*
           Initialize mem pool buffer to NULL and size to 0
           "buf" and "size" fields are assigned once memory
-          is allocated from the pool in bli_membrk_acquire_m().
+          is allocated from the pool in bli_pba_acquire_m().
           This will ensure bli_mem_is_alloc() will be passed on
           an allocated memory if created or a NULL .
         */
@@ -386,7 +386,7 @@ void bli_dgemv_unf_var2
 
         bli_rntm_init_from_global( &rntm );
         bli_rntm_set_num_threads_only( 1, &rntm );
-        bli_membrk_rntm_set_membrk( &rntm );
+        bli_pba_rntm_set_pba( &rntm );
 
         //calculate the size required for n_elem double elements in vector Y.
         size_t buffer_size = n_elem * sizeof(double);
@@ -397,7 +397,7 @@ void bli_dgemv_unf_var2
 
         /*acquire a Buffer(n_elem*size(double)) from the memory broker
         and save the associated mem_t entry to mem_bufY.*/
-        bli_membrk_acquire_m(&rntm,
+        bli_pba_acquire_m(&rntm,
                                 buffer_size,
                                 BLIS_BUFFER_FOR_B_PANEL,
                                 &mem_bufY);
@@ -490,7 +490,7 @@ void bli_dgemv_unf_var2
         printf( "bli_dgemv_unf_var2(): releasing mem pool block\n" );
 #endif
         // Return the buffer to pool
-        bli_membrk_release(&rntm , &mem_bufY);
+        bli_pba_release(&rntm , &mem_bufY);
     }
 
     AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_3);
@@ -753,7 +753,7 @@ void bli_zgemv_unf_var2
     /*
       Initialize mem pool buffer to NULL and size to 0
       "buf" and "size" fields are assigned once memory
-      is allocated from the pool in bli_membrk_acquire_m().
+      is allocated from the pool in bli_pba_acquire_m().
       This will ensure bli_mem_is_alloc() will be passed on
       an allocated memory if created or a NULL .
     */
@@ -770,7 +770,7 @@ void bli_zgemv_unf_var2
 
     bli_rntm_init_from_global(&rntm);
     bli_rntm_set_num_threads_only(1, &rntm);
-    bli_membrk_rntm_set_membrk(&rntm);
+    bli_pba_rntm_set_pba(&rntm);
 
     // Calculate the size required for n_elem double elements in vector Y.
     size_t buffer_size = n_elem * sizeof(dcomplex);
@@ -783,7 +783,7 @@ void bli_zgemv_unf_var2
       Acquire a Buffer(n_elem*size(double)) from the memory broker
       and save the associated mem_t entry to mem_bufY.
     */
-    bli_membrk_acquire_m(&rntm,
+    bli_pba_acquire_m(&rntm,
                           buffer_size,
                           BLIS_BUFFER_FOR_B_PANEL,
                           &mem_bufY);
@@ -875,7 +875,7 @@ void bli_zgemv_unf_var2
 #endif
 
     // Return the buffer to pool
-    bli_membrk_release(&rntm, &mem_bufY);
+    bli_pba_release(&rntm, &mem_bufY);
   }
 
   AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_3);

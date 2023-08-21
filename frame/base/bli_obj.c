@@ -147,6 +147,7 @@ void bli_obj_alloc_buffer
 	siz_t  elem_size;
 	siz_t  buffer_size;
 	void*  p;
+	err_t  r_val;
 
 	bli_init_once();
 
@@ -195,7 +196,7 @@ void bli_obj_alloc_buffer
 	buffer_size = ( siz_t )n_elem * elem_size;
 
 	// Allocate the buffer.
-	p = bli_malloc_user( buffer_size );
+	p = bli_malloc_user( buffer_size, &r_val );
 
 	// Set individual fields.
 	bli_obj_set_buffer( p, obj );

@@ -175,4 +175,3 @@ typedef void (*PASTECH2(ch,opname,tsuf)) \
 
 INSERT_GENTDEFR( zipsc )
 
-

@@ -405,7 +405,7 @@ LPGEMM_5LOOP(uint8_t,int8_t,int32_t,u8s8s32o32)
 		{
 			if ( bli_mem_is_alloc( &mem_b ) )
 			{
-				bli_membrk_release( rntm, &mem_b );
+				bli_pba_release( rntm, &mem_b );
 			}
 		}
 	}
@@ -413,14 +413,14 @@ LPGEMM_5LOOP(uint8_t,int8_t,int32_t,u8s8s32o32)
 	{
 		if ( bli_mem_is_alloc( &mem_a ) )
 		{
-			bli_membrk_release( rntm, &mem_a );
+			bli_pba_release( rntm, &mem_a );
 		}
 	}
 	if ( c_downscale == TRUE )
 	{
 		if ( bli_mem_is_alloc( &mem_scale_c ) )
 		{
-			bli_membrk_release( rntm, &mem_scale_c );
+			bli_pba_release( rntm, &mem_scale_c );
 		}
 	}
 }

@@ -90,7 +90,7 @@ void bli_l3_packm
 
 			// The chief thread acquires a block from the memory broker
 			// and saves the associated mem_t entry to local_mem_s.
-			bli_membrk_acquire_m
+			bli_pba_acquire_m
 			(
 			  rntm,
 			  size_needed,
@@ -126,12 +126,12 @@ void bli_l3_packm
 				// The chief thread releases the existing block associated with
 				// the mem_t entry in the control tree, and then re-acquires a
 				// new block, saving the associated mem_t entry to local_mem_s.
-				bli_membrk_release
+				bli_pba_release
 				(
 				  rntm,
 				  cntl_mem_p
 				);
-				bli_membrk_acquire_m
+				bli_pba_acquire_m
 				(
 				  rntm,
 				  size_needed,

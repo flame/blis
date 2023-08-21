@@ -118,7 +118,7 @@ AOCL_GEMM_REORDER(int8_t,s8s8s16os16)
 	// that in the case that a runtime is passed in, we make a local copy.
 	rntm_t rntm_g;
 	bli_rntm_init_from_global(&rntm_g);
-	bli_membrk_rntm_set_membrk(&rntm_g);
+	bli_pba_rntm_set_pba(&rntm_g);
 
 	lpgemm_cntx_t* lcntx_g = lpgemm_get_global_cntx_obj( S8S8S16OS16 );
 

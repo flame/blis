@@ -95,22 +95,6 @@ GENPROT( normim )
 \
 void PASTEMAC(opname,_check) \
      ( \
-       FILE*  file, \
-       char*  s1, \
-       obj_t* x, \
-       char*  format, \
-       char*  s2  \
-     );
-
-GENPROT( fprintv )
-GENPROT( fprintm )
-
-
-#undef  GENPROT
-#define GENPROT( opname ) \
-\
-void PASTEMAC(opname,_check) \
-     ( \
        obj_t*  x  \
      );
 
@@ -132,6 +116,49 @@ void PASTEMAC(opname,_check) \
 
 GENPROT( sumsqv )
 
+// -----------------------------------------------------------------------------
+
+#undef  GENTPROT
+#define GENTPROT( opname ) \
+\
+void PASTEMAC(opname,_check) \
+     ( \
+       obj_t*  chi, \
+       obj_t*  psi, \
+       bool*   is_eq  \
+     );
+
+GENTPROT( eqsc )
+
+
+#undef  GENPROT
+#define GENPROT( opname ) \
+\
+void PASTEMAC(opname,_check) \
+     ( \
+       obj_t*  x, \
+       obj_t*  y, \
+       bool*   is_eq  \
+    );
+
+GENPROT( eqv )
+GENPROT( eqm )
+
+
+#undef  GENPROT
+#define GENPROT( opname ) \
+\
+void PASTEMAC(opname,_check) \
+     ( \
+       FILE*  file, \
+       char*  s1, \
+       obj_t* x, \
+       char*  format, \
+       char*  s2  \
+     );
+
+GENPROT( fprintv )
+GENPROT( fprintm )
 
 // -----------------------------------------------------------------------------
 

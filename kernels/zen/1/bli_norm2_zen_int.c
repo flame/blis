@@ -103,7 +103,7 @@ void bli_snorm2fv_unb_var1_avx2
     // Memory pool declarations for packing vector X.
     // Initialize mem pool buffer to NULL and size to 0.
     // "buf" and "size" fields are assigned once memory
-    // is allocated from the pool in bli_membrk_acquire_m().
+    // is allocated from the pool in bli_pba_acquire_m().
     // This will ensure bli_mem_is_alloc() will be passed on
     // an allocated memory if created or a NULL.
     mem_t   mem_bufX = {0};
@@ -116,7 +116,7 @@ void bli_snorm2fv_unb_var1_avx2
         //is needed. Following are initializations for rntm.
         bli_rntm_init_from_global( &rntm );
         bli_rntm_set_num_threads_only( 1, &rntm );
-        bli_membrk_rntm_set_membrk( &rntm );
+        bli_pba_rntm_set_pba( &rntm );
 
         // Calculate the size required for "n" float elements in vector x.
         size_t buffer_size = n * sizeof( float );
@@ -127,7 +127,7 @@ void bli_snorm2fv_unb_var1_avx2
 
         // Acquire a Buffer(n*size(float)) from the memory broker
         // and save the associated mem_t entry to mem_bufX.
-        bli_membrk_acquire_m
+        bli_pba_acquire_m
         (
             &rntm,
             buffer_size,
@@ -226,7 +226,7 @@ void bli_snorm2fv_unb_var1_avx2
                         printf( "bli_snorm2fv_unb_var1_avx2(): releasing mem pool block\n" );
                     #endif
                     // Return the buffer to pool.
-                    bli_membrk_release( &rntm , &mem_bufX );
+                    bli_pba_release( &rntm , &mem_bufX );
                 }
 
                 AOCL_DTL_TRACE_EXIT( AOCL_DTL_LEVEL_TRACE_3 );
@@ -241,7 +241,7 @@ void bli_snorm2fv_unb_var1_avx2
                         printf( "bli_snorm2fv_unb_var1_avx2(): releasing mem pool block\n" );
                     #endif
                     // Return the buffer to pool.
-                    bli_membrk_release( &rntm , &mem_bufX );
+                    bli_pba_release( &rntm , &mem_bufX );
                 }
 
                 AOCL_DTL_TRACE_EXIT( AOCL_DTL_LEVEL_TRACE_3 );
@@ -256,7 +256,7 @@ void bli_snorm2fv_unb_var1_avx2
                         printf( "bli_snorm2fv_unb_var1_avx2(): releasing mem pool block\n" );
                     #endif
                     // Return the buffer to pool.
-                    bli_membrk_release( &rntm , &mem_bufX );
+                    bli_pba_release( &rntm , &mem_bufX );
                 }
 
                 AOCL_DTL_TRACE_EXIT( AOCL_DTL_LEVEL_TRACE_3 );
@@ -271,7 +271,7 @@ void bli_snorm2fv_unb_var1_avx2
                         printf( "bli_snorm2fv_unb_var1_avx2(): releasing mem pool block\n" );
                     #endif
                     // Return the buffer to pool.
-                    bli_membrk_release( &rntm , &mem_bufX );
+                    bli_pba_release( &rntm , &mem_bufX );
                 }
 
                 AOCL_DTL_TRACE_EXIT( AOCL_DTL_LEVEL_TRACE_3 );
@@ -489,7 +489,7 @@ void bli_snorm2fv_unb_var1_avx2
                         printf( "bli_snorm2fv_unb_var1_avx2(): releasing mem pool block\n" );
                     #endif
                     // Return the buffer to pool.
-                    bli_membrk_release( &rntm , &mem_bufX );
+                    bli_pba_release( &rntm , &mem_bufX );
                 }
 
                 AOCL_DTL_TRACE_EXIT( AOCL_DTL_LEVEL_TRACE_3 );
@@ -504,7 +504,7 @@ void bli_snorm2fv_unb_var1_avx2
                         printf( "bli_snorm2fv_unb_var1_avx2(): releasing mem pool block\n" );
                     #endif
                     // Return the buffer to pool.
-                    bli_membrk_release( &rntm , &mem_bufX );
+                    bli_pba_release( &rntm , &mem_bufX );
                 }
 
                 AOCL_DTL_TRACE_EXIT( AOCL_DTL_LEVEL_TRACE_3 );
@@ -519,7 +519,7 @@ void bli_snorm2fv_unb_var1_avx2
                         printf( "bli_snorm2fv_unb_var1_avx2(): releasing mem pool block\n" );
                     #endif
                     // Return the buffer to pool.
-                    bli_membrk_release( &rntm , &mem_bufX );
+                    bli_pba_release( &rntm , &mem_bufX );
                 }
 
                 AOCL_DTL_TRACE_EXIT( AOCL_DTL_LEVEL_TRACE_3 );
@@ -692,7 +692,7 @@ void bli_snorm2fv_unb_var1_avx2
                         printf( "bli_snorm2fv_unb_var1_avx2(): releasing mem pool block\n" );
                     #endif
                     // Return the buffer to pool.
-                    bli_membrk_release( &rntm , &mem_bufX );
+                    bli_pba_release( &rntm , &mem_bufX );
                 }
 
                 AOCL_DTL_TRACE_EXIT( AOCL_DTL_LEVEL_TRACE_3 );
@@ -707,7 +707,7 @@ void bli_snorm2fv_unb_var1_avx2
                         printf( "bli_snorm2fv_unb_var1_avx2(): releasing mem pool block\n" );
                     #endif
                     // Return the buffer to pool.
-                    bli_membrk_release( &rntm , &mem_bufX );
+                    bli_pba_release( &rntm , &mem_bufX );
                 }
 
                 AOCL_DTL_TRACE_EXIT( AOCL_DTL_LEVEL_TRACE_3 );
@@ -831,7 +831,7 @@ void bli_snorm2fv_unb_var1_avx2
                         printf( "bli_snorm2fv_unb_var1_avx2(): releasing mem pool block\n" );
                     #endif
                     // Return the buffer to pool.
-                    bli_membrk_release( &rntm , &mem_bufX );
+                    bli_pba_release( &rntm , &mem_bufX );
                 }
 
                 AOCL_DTL_TRACE_EXIT( AOCL_DTL_LEVEL_TRACE_3 );
@@ -925,7 +925,7 @@ void bli_snorm2fv_unb_var1_avx2
                         printf( "bli_snorm2fv_unb_var1_avx2(): releasing mem pool block\n" );
                     #endif
                     // Return the buffer to pool.
-                    bli_membrk_release( &rntm , &mem_bufX );
+                    bli_pba_release( &rntm , &mem_bufX );
                 }
 
                 AOCL_DTL_TRACE_EXIT( AOCL_DTL_LEVEL_TRACE_3 );
@@ -970,7 +970,7 @@ void bli_snorm2fv_unb_var1_avx2
                 printf( "bli_snorm2fv_unb_var1_avx2(): releasing mem pool block\n" );
             #endif
             // Return the buffer to pool.
-            bli_membrk_release( &rntm , &mem_bufX );
+            bli_pba_release( &rntm , &mem_bufX );
         }
 
         AOCL_DTL_TRACE_EXIT( AOCL_DTL_LEVEL_TRACE_3 );
@@ -1030,7 +1030,7 @@ void bli_snorm2fv_unb_var1_avx2
             printf( "bli_snorm2fv_unb_var1_avx2(): releasing mem pool block\n" );
         #endif
         // Return the buffer to pool.
-        bli_membrk_release( &rntm , &mem_bufX );
+        bli_pba_release( &rntm , &mem_bufX );
     }
 
     AOCL_DTL_TRACE_EXIT( AOCL_DTL_LEVEL_TRACE_3 );
@@ -1057,7 +1057,7 @@ void bli_scnorm2fv_unb_var1_avx2
     // Memory pool declarations for packing vector X.
     // Initialize mem pool buffer to NULL and size to 0.
     // "buf" and "size" fields are assigned once memory
-    // is allocated from the pool in bli_membrk_acquire_m().
+    // is allocated from the pool in bli_pba_acquire_m().
     // This will ensure bli_mem_is_alloc() will be passed on
     // an allocated memory if created or a NULL.
     mem_t   mem_bufX = {0};
@@ -1070,7 +1070,7 @@ void bli_scnorm2fv_unb_var1_avx2
         //is needed. Following are initializations for rntm.
         bli_rntm_init_from_global( &rntm );
         bli_rntm_set_num_threads_only( 1, &rntm );
-        bli_membrk_rntm_set_membrk( &rntm );
+        bli_pba_rntm_set_pba( &rntm );
 
         // Calculate the size required for "n" scomplex elements in vector x.
         size_t buffer_size = n * sizeof( scomplex );
@@ -1081,7 +1081,7 @@ void bli_scnorm2fv_unb_var1_avx2
 
         // Acquire a Buffer(n*size(scomplex)) from the memory broker
         // and save the associated mem_t entry to mem_bufX.
-        bli_membrk_acquire_m
+        bli_pba_acquire_m
         (
             &rntm,
             buffer_size,
@@ -1180,7 +1180,7 @@ void bli_scnorm2fv_unb_var1_avx2
                         printf( "bli_scnorm2fv_unb_var1_avx2(): releasing mem pool block\n" );
                     #endif
                     // Return the buffer to pool.
-                    bli_membrk_release( &rntm , &mem_bufX );
+                    bli_pba_release( &rntm , &mem_bufX );
                 }
 
                 AOCL_DTL_TRACE_EXIT( AOCL_DTL_LEVEL_TRACE_3 );
@@ -1195,7 +1195,7 @@ void bli_scnorm2fv_unb_var1_avx2
                         printf( "bli_scnorm2fv_unb_var1_avx2(): releasing mem pool block\n" );
                     #endif
                     // Return the buffer to pool.
-                    bli_membrk_release( &rntm , &mem_bufX );
+                    bli_pba_release( &rntm , &mem_bufX );
                 }
 
                 AOCL_DTL_TRACE_EXIT( AOCL_DTL_LEVEL_TRACE_3 );
@@ -1210,7 +1210,7 @@ void bli_scnorm2fv_unb_var1_avx2
                         printf( "bli_scnorm2fv_unb_var1_avx2(): releasing mem pool block\n" );
                     #endif
                     // Return the buffer to pool.
-                    bli_membrk_release( &rntm , &mem_bufX );
+                    bli_pba_release( &rntm , &mem_bufX );
                 }
 
                 AOCL_DTL_TRACE_EXIT( AOCL_DTL_LEVEL_TRACE_3 );
@@ -1225,7 +1225,7 @@ void bli_scnorm2fv_unb_var1_avx2
                         printf( "bli_scnorm2fv_unb_var1_avx2(): releasing mem pool block\n" );
                     #endif
                     // Return the buffer to pool.
-                    bli_membrk_release( &rntm , &mem_bufX );
+                    bli_pba_release( &rntm , &mem_bufX );
                 }
 
                 AOCL_DTL_TRACE_EXIT( AOCL_DTL_LEVEL_TRACE_3 );
@@ -1444,7 +1444,7 @@ void bli_scnorm2fv_unb_var1_avx2
                         printf( "bli_scnorm2fv_unb_var1_avx2(): releasing mem pool block\n" );
                     #endif
                     // Return the buffer to pool.
-                    bli_membrk_release( &rntm , &mem_bufX );
+                    bli_pba_release( &rntm , &mem_bufX );
                 }
 
                 AOCL_DTL_TRACE_EXIT( AOCL_DTL_LEVEL_TRACE_3 );
@@ -1459,7 +1459,7 @@ void bli_scnorm2fv_unb_var1_avx2
                         printf( "bli_scnorm2fv_unb_var1_avx2(): releasing mem pool block\n" );
                     #endif
                     // Return the buffer to pool.
-                    bli_membrk_release( &rntm , &mem_bufX );
+                    bli_pba_release( &rntm , &mem_bufX );
                 }
 
                 AOCL_DTL_TRACE_EXIT( AOCL_DTL_LEVEL_TRACE_3 );
@@ -1474,7 +1474,7 @@ void bli_scnorm2fv_unb_var1_avx2
                         printf( "bli_scnorm2fv_unb_var1_avx2(): releasing mem pool block\n" );
                     #endif
                     // Return the buffer to pool.
-                    bli_membrk_release( &rntm , &mem_bufX );
+                    bli_pba_release( &rntm , &mem_bufX );
                 }
 
                 AOCL_DTL_TRACE_EXIT( AOCL_DTL_LEVEL_TRACE_3 );
@@ -1647,7 +1647,7 @@ void bli_scnorm2fv_unb_var1_avx2
                         printf( "bli_scnorm2fv_unb_var1_avx2(): releasing mem pool block\n" );
                     #endif
                     // Return the buffer to pool.
-                    bli_membrk_release( &rntm , &mem_bufX );
+                    bli_pba_release( &rntm , &mem_bufX );
                 }
 
                 AOCL_DTL_TRACE_EXIT( AOCL_DTL_LEVEL_TRACE_3 );
@@ -1662,7 +1662,7 @@ void bli_scnorm2fv_unb_var1_avx2
                         printf( "bli_scnorm2fv_unb_var1_avx2(): releasing mem pool block\n" );
                     #endif
                     // Return the buffer to pool.
-                    bli_membrk_release( &rntm , &mem_bufX );
+                    bli_pba_release( &rntm , &mem_bufX );
                 }
 
                 AOCL_DTL_TRACE_EXIT( AOCL_DTL_LEVEL_TRACE_3 );
@@ -1785,7 +1785,7 @@ void bli_scnorm2fv_unb_var1_avx2
                         printf( "bli_scnorm2fv_unb_var1_avx2(): releasing mem pool block\n" );
                     #endif
                     // Return the buffer to pool.
-                    bli_membrk_release( &rntm , &mem_bufX );
+                    bli_pba_release( &rntm , &mem_bufX );
                 }
 
                 AOCL_DTL_TRACE_EXIT( AOCL_DTL_LEVEL_TRACE_3 );
@@ -1882,7 +1882,7 @@ void bli_scnorm2fv_unb_var1_avx2
                         printf( "bli_scnorm2fv_unb_var1_avx2(): releasing mem pool block\n" );
                     #endif
                     // Return the buffer to pool.
-                    bli_membrk_release( &rntm , &mem_bufX );
+                    bli_pba_release( &rntm , &mem_bufX );
                 }
 
                 AOCL_DTL_TRACE_EXIT( AOCL_DTL_LEVEL_TRACE_3 );
@@ -1926,7 +1926,7 @@ void bli_scnorm2fv_unb_var1_avx2
                         printf( "bli_scnorm2fv_unb_var1_avx2(): releasing mem pool block\n" );
                     #endif
                     // Return the buffer to pool.
-                    bli_membrk_release( &rntm , &mem_bufX );
+                    bli_pba_release( &rntm , &mem_bufX );
                 }
 
                 AOCL_DTL_TRACE_EXIT( AOCL_DTL_LEVEL_TRACE_3 );
@@ -1971,7 +1971,7 @@ void bli_scnorm2fv_unb_var1_avx2
                 printf( "bli_scnorm2fv_unb_var1_avx2(): releasing mem pool block\n" );
             #endif
             // Return the buffer to pool.
-            bli_membrk_release( &rntm , &mem_bufX );
+            bli_pba_release( &rntm , &mem_bufX );
         }
 
         AOCL_DTL_TRACE_EXIT( AOCL_DTL_LEVEL_TRACE_3 );
@@ -2031,7 +2031,7 @@ void bli_scnorm2fv_unb_var1_avx2
             printf( "bli_scnorm2fv_unb_var1_avx2(): releasing mem pool block\n" );
         #endif
         // Return the buffer to pool.
-        bli_membrk_release( &rntm , &mem_bufX );
+        bli_pba_release( &rntm , &mem_bufX );
     }
 
     AOCL_DTL_TRACE_EXIT( AOCL_DTL_LEVEL_TRACE_3 );
@@ -2058,7 +2058,7 @@ void bli_dnorm2fv_unb_var1_avx2
     // Memory pool declarations for packing vector X.
     // Initialize mem pool buffer to NULL and size to 0.
     // "buf" and "size" fields are assigned once memory
-    // is allocated from the pool in bli_membrk_acquire_m().
+    // is allocated from the pool in bli_pba_acquire_m().
     // This will ensure bli_mem_is_alloc() will be passed on
     // an allocated memory if created or a NULL.
     mem_t   mem_bufX = {0};
@@ -2071,7 +2071,7 @@ void bli_dnorm2fv_unb_var1_avx2
         //is needed. Following are initializations for rntm.
         bli_rntm_init_from_global( &rntm );
         bli_rntm_set_num_threads_only( 1, &rntm );
-        bli_membrk_rntm_set_membrk( &rntm );
+        bli_pba_rntm_set_pba( &rntm );
 
         // Calculate the size required for "n" double elements in vector x.
         size_t buffer_size = n * sizeof( double );
@@ -2082,7 +2082,7 @@ void bli_dnorm2fv_unb_var1_avx2
 
         // Acquire a Buffer(n*size(double)) from the memory broker
         // and save the associated mem_t entry to mem_bufX.
-        bli_membrk_acquire_m
+        bli_pba_acquire_m
         (
             &rntm,
             buffer_size,
@@ -2163,7 +2163,7 @@ void bli_dnorm2fv_unb_var1_avx2
                         printf( "bli_dnorm2fv_unb_var1_avx2(): releasing mem pool block\n" );
                     #endif
                     // Return the buffer to pool.
-                    bli_membrk_release( &rntm , &mem_bufX );
+                    bli_pba_release( &rntm , &mem_bufX );
                 }
 
                 AOCL_DTL_TRACE_EXIT( AOCL_DTL_LEVEL_TRACE_3 );
@@ -2178,7 +2178,7 @@ void bli_dnorm2fv_unb_var1_avx2
                         printf( "bli_dnorm2fv_unb_var1_avx2(): releasing mem pool block\n" );
                     #endif
                     // Return the buffer to pool.
-                    bli_membrk_release( &rntm , &mem_bufX );
+                    bli_pba_release( &rntm , &mem_bufX );
                 }
 
                 AOCL_DTL_TRACE_EXIT( AOCL_DTL_LEVEL_TRACE_3 );
@@ -2303,7 +2303,7 @@ void bli_dnorm2fv_unb_var1_avx2
                         printf( "bli_dnorm2fv_unb_var1_avx2(): releasing mem pool block\n" );
                     #endif
                     // Return the buffer to pool.
-                    bli_membrk_release( &rntm , &mem_bufX );
+                    bli_pba_release( &rntm , &mem_bufX );
                 }
 
                 AOCL_DTL_TRACE_EXIT( AOCL_DTL_LEVEL_TRACE_3 );
@@ -2392,7 +2392,7 @@ void bli_dnorm2fv_unb_var1_avx2
                         printf( "bli_dnorm2fv_unb_var1_avx2(): releasing mem pool block\n" );
                     #endif
                     // Return the buffer to pool.
-                    bli_membrk_release( &rntm , &mem_bufX );
+                    bli_pba_release( &rntm , &mem_bufX );
                 }
 
                 AOCL_DTL_TRACE_EXIT( AOCL_DTL_LEVEL_TRACE_3 );
@@ -2437,7 +2437,7 @@ void bli_dnorm2fv_unb_var1_avx2
                 printf( "bli_dnorm2fv_unb_var1_avx2(): releasing mem pool block\n" );
             #endif
             // Return the buffer to pool.
-            bli_membrk_release( &rntm , &mem_bufX );
+            bli_pba_release( &rntm , &mem_bufX );
         }
 
         AOCL_DTL_TRACE_EXIT( AOCL_DTL_LEVEL_TRACE_3 );
@@ -2498,7 +2498,7 @@ void bli_dnorm2fv_unb_var1_avx2
             printf( "bli_dnorm2fv_unb_var1(): releasing mem pool block\n" );
         #endif
         // Return the buffer to pool.
-        bli_membrk_release( &rntm , &mem_bufX );
+        bli_pba_release( &rntm , &mem_bufX );
     }
 
     AOCL_DTL_TRACE_EXIT( AOCL_DTL_LEVEL_TRACE_3 );
@@ -2525,7 +2525,7 @@ void bli_dznorm2fv_unb_var1_avx2
     // Memory pool declarations for packing vector X.
     // Initialize mem pool buffer to NULL and size to 0.
     // "buf" and "size" fields are assigned once memory
-    // is allocated from the pool in bli_membrk_acquire_m().
+    // is allocated from the pool in bli_pba_acquire_m().
     // This will ensure bli_mem_is_alloc() will be passed on
     // an allocated memory if created or a NULL.
     mem_t   mem_bufX = {0};
@@ -2538,7 +2538,7 @@ void bli_dznorm2fv_unb_var1_avx2
         //is needed. Following are initializations for rntm.
         bli_rntm_init_from_global( &rntm );
         bli_rntm_set_num_threads_only( 1, &rntm );
-        bli_membrk_rntm_set_membrk( &rntm );
+        bli_pba_rntm_set_pba( &rntm );
 
         // Calculate the size required for "n" dcomplex elements in vector x.
         size_t buffer_size = n * sizeof( dcomplex );
@@ -2549,7 +2549,7 @@ void bli_dznorm2fv_unb_var1_avx2
 
         // Acquire a Buffer(n*size(dcomplex)) from the memory broker
         // and save the associated mem_t entry to mem_bufX.
-        bli_membrk_acquire_m
+        bli_pba_acquire_m
         (
             &rntm,
             buffer_size,
@@ -2630,7 +2630,7 @@ void bli_dznorm2fv_unb_var1_avx2
                         printf( "bli_dznorm2fv_unb_var1_avx2(): releasing mem pool block\n" );
                     #endif
                     // Return the buffer to pool.
-                    bli_membrk_release( &rntm , &mem_bufX );
+                    bli_pba_release( &rntm , &mem_bufX );
                 }
 
                 AOCL_DTL_TRACE_EXIT( AOCL_DTL_LEVEL_TRACE_3 );
@@ -2645,7 +2645,7 @@ void bli_dznorm2fv_unb_var1_avx2
                         printf( "bli_dznorm2fv_unb_var1_avx2(): releasing mem pool block\n" );
                     #endif
                     // Return the buffer to pool.
-                    bli_membrk_release( &rntm , &mem_bufX );
+                    bli_pba_release( &rntm , &mem_bufX );
                 }
 
                 AOCL_DTL_TRACE_EXIT( AOCL_DTL_LEVEL_TRACE_3 );
@@ -2770,7 +2770,7 @@ void bli_dznorm2fv_unb_var1_avx2
                         printf( "bli_dznorm2fv_unb_var1_avx2(): releasing mem pool block\n" );
                     #endif
                     // Return the buffer to pool.
-                    bli_membrk_release( &rntm , &mem_bufX );
+                    bli_pba_release( &rntm , &mem_bufX );
                 }
 
                 AOCL_DTL_TRACE_EXIT( AOCL_DTL_LEVEL_TRACE_3 );
@@ -2864,7 +2864,7 @@ void bli_dznorm2fv_unb_var1_avx2
                         printf( "bli_dznorm2fv_unb_var1_avx2(): releasing mem pool block\n" );
                     #endif
                     // Return the buffer to pool.
-                    bli_membrk_release( &rntm , &mem_bufX );
+                    bli_pba_release( &rntm , &mem_bufX );
                 }
 
                 AOCL_DTL_TRACE_EXIT( AOCL_DTL_LEVEL_TRACE_3 );
@@ -2909,7 +2909,7 @@ void bli_dznorm2fv_unb_var1_avx2
                         printf( "bli_dznorm2fv_unb_var1_avx2(): releasing mem pool block\n" );
                     #endif
                     // Return the buffer to pool.
-                    bli_membrk_release( &rntm , &mem_bufX );
+                    bli_pba_release( &rntm , &mem_bufX );
                 }
 
                 AOCL_DTL_TRACE_EXIT( AOCL_DTL_LEVEL_TRACE_3 );
@@ -2955,7 +2955,7 @@ void bli_dznorm2fv_unb_var1_avx2
                 printf( "bli_dnorm2fv_unb_var1_avx2(): releasing mem pool block\n" );
             #endif
             // Return the buffer to pool.
-            bli_membrk_release( &rntm , &mem_bufX );
+            bli_pba_release( &rntm , &mem_bufX );
         }
 
         AOCL_DTL_TRACE_EXIT( AOCL_DTL_LEVEL_TRACE_3 );
@@ -3016,7 +3016,7 @@ void bli_dznorm2fv_unb_var1_avx2
             printf( "bli_dznorm2fv_unb_var1(): releasing mem pool block\n" );
         #endif
         // Return the buffer to pool.
-        bli_membrk_release( &rntm , &mem_bufX );
+        bli_pba_release( &rntm , &mem_bufX );
     }
 
     AOCL_DTL_TRACE_EXIT( AOCL_DTL_LEVEL_TRACE_3 );

@@ -35,8 +35,13 @@
 // This file defines macros used to allow the _tapi.c files to produce
 // typed APIs that contain context parameters.
 
-// Define the macro to add a suffix to the typed API function names
-// (in function definitions).
+// Define a macro that allows the source code to determine which interface
+// (basic or expert) we are compiling.
+#undef  BLIS_TAPI_EXPERT
+#define BLIS_TAPI_EXPERT
+
+// Define the macro to add a suffix to the function names (in function
+// definitions).
 #undef  EX_SUF
 #define EX_SUF BLIS_TAPI_EX_SUF
 
@@ -49,8 +54,4 @@
 // it is not needed when expert parameters are passed in through the API.
 #undef  BLIS_TAPI_EX_DECLS
 #define BLIS_TAPI_EX_DECLS
-
-// Define the macro to pass the local expert variables to another function.
-//#undef  BLIS_TAPI_EX_VARS
-//#define BLIS_TAPI_EX_VARS ,cntx, rntm
 

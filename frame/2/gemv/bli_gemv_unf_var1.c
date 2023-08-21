@@ -90,7 +90,7 @@ void PASTEMAC(ch,varname) \
         /*
         Initialize mem pool buffer to NULL and size to 0
         "buf" and "size" fields are assigned once memory
-        is allocated from the pool in bli_membrk_acquire_m().
+        is allocated from the pool in bli_pba_acquire_m().
         This will ensure bli_mem_is_alloc() will be passed on
         an allocated memory if created or a NULL .
         */\
@@ -107,7 +107,7 @@ void PASTEMAC(ch,varname) \
 \
         bli_rntm_init_from_global(&rntm);\
         bli_rntm_set_num_threads_only(1, &rntm);\
-        bli_membrk_rntm_set_membrk(&rntm);\
+        bli_pba_rntm_set_pba(&rntm);\
 \
         /*
           Calculate the size required for n_elem double elements in vector Y.
@@ -118,7 +118,7 @@ void PASTEMAC(ch,varname) \
           Acquire a Buffer(n_elem*size(double)) from the memory broker
           and save the associated mem_t entry to mem_bufX.
         */\
-        bli_membrk_acquire_m(&rntm, buffer_size, BLIS_BUFFER_FOR_B_PANEL, &mem_bufX);\
+        bli_pba_acquire_m(&rntm, buffer_size, BLIS_BUFFER_FOR_B_PANEL, &mem_bufX);\
 \
         /*
          Continue packing X if buffer memory is allocated
@@ -190,7 +190,7 @@ void PASTEMAC(ch,varname) \
         /*
           Return the buffer to pool
         */\
-        bli_membrk_release(&rntm, &mem_bufX);\
+        bli_pba_release(&rntm, &mem_bufX);\
     }\
 }
 

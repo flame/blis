@@ -100,6 +100,7 @@ extern "C" {
 // -- Base operation prototypes --
 
 #include "bli_init.h"
+#include "bli_malloc.h"
 #include "bli_const.h"
 #include "bli_obj.h"
 #include "bli_obj_scalar.h"
@@ -110,7 +111,7 @@ extern "C" {
 #include "bli_rntm.h"
 #include "bli_gks.h"
 #include "bli_ind.h"
-#include "bli_membrk.h"
+#include "bli_pba.h"
 #include "bli_pool.h"
 #include "bli_array.h"
 #include "bli_apool.h"
@@ -136,7 +137,8 @@ extern "C" {
 #include "bli_arch.h"
 #include "bli_cpuid.h"
 #include "bli_string.h"
-#include "bli_setgetij.h"
+#include "bli_setgetijm.h"
+#include "bli_setgetijv.h"
 #include "bli_setri.h"
 
 #include "bli_castm.h"

@@ -52,16 +52,13 @@ GENPROT( normiv )
 GENPROT( norm1m )
 GENPROT( normfm )
 GENPROT( normim )
-GENPROT( fprintv )
-GENPROT( fprintm )
-//GENPROT( printv )
-//GENPROT( printm )
 GENPROT( randv )
 GENPROT( randnv )
 GENPROT( randm )
 GENPROT( randnm )
 GENPROT( sumsqv )
 
+// -----------------------------------------------------------------------------
 
 #undef  GENPROT
 #define GENPROT( opname ) \
@@ -69,6 +66,9 @@ GENPROT( sumsqv )
 PASTECH(opname,_vft) \
 PASTEMAC(opname,_qfp)( num_t dt );
 
+GENPROT( eqsc )
+GENPROT( eqv )
+GENPROT( eqm )
 GENPROT( fprintv )
 GENPROT( fprintm )
 //GENPROT( printv )

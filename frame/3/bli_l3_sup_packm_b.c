@@ -87,7 +87,7 @@ void PASTEMAC(ch,opname) \
 				   function before the other threads have a chance to copy
 				   from it. (A barrier would fix that race condition, but
 				   then again, I prefer to keep barriers to a minimum.) */ \
-				bli_membrk_acquire_m \
+				bli_pba_acquire_m \
 				( \
 				  rntm, \
 				  size_needed, \
@@ -131,12 +131,12 @@ void PASTEMAC(ch,opname) \
 					   above for why the acquisition needs to be directly to
 					   the chief thread's passed-in mem_t and not a local
 					   (temporary) mem_t. */ \
-					bli_membrk_release \
+					bli_pba_release \
 					( \
 					  rntm, \
 					  mem \
 					); \
-					bli_membrk_acquire_m \
+					bli_pba_acquire_m \
 					( \
 					  rntm, \
 					  size_needed, \
@@ -197,7 +197,7 @@ void PASTEMAC(ch,opname) \
 			   is allocated, which it should be. */ \
 			if ( bli_mem_is_alloc( mem ) ) \
 			{ \
-				bli_membrk_release \
+				bli_pba_release \
 				( \
 				  rntm, \
 				  mem \

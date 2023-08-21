@@ -220,8 +220,9 @@ thrinfo_t* bli_thrinfo_sup_create_for_cntl
 		// pointers.
 		if ( bli_thread_am_ochief( thread_par ) )
 		{
+			err_t r_val;
 			if ( parent_n_way > BLIS_NUM_STATIC_COMMS )
-				new_comms = bli_malloc_intl( parent_n_way * sizeof( thrcomm_t* ) );
+				new_comms = bli_malloc_intl( parent_n_way * sizeof( thrcomm_t* ), &r_val );
 			else
 				new_comms = static_comms;
 		}

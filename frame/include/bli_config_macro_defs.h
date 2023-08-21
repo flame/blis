@@ -149,16 +149,6 @@
   #define BLIS_RELAX_MCNR_NCMR_CONSTRAINTS
 #endif
 
-// Stay initialized after auto-initialization, unless and until the user
-// explicitly calls bli_finalize().
-#ifdef BLIS_DISABLE_STAY_AUTO_INITIALIZED
-  #undef BLIS_ENABLE_STAY_AUTO_INITIALIZED
-#else
-  // Default behavior is enabled.
-  #undef  BLIS_ENABLE_STAY_AUTO_INITIALIZED // In case user explicitly enabled.
-  #define BLIS_ENABLE_STAY_AUTO_INITIALIZED
-#endif
-
 
 // -- BLAS COMPATIBILITY LAYER -------------------------------------------------
 

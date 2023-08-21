@@ -17,6 +17,7 @@ project, as well as those we think a new user or developer might ask. If you do 
   * [What is a macrokernel?](FAQ.md#what-is-a-macrokernel)
   * [What is a context?](FAQ.md#what-is-a-context)
   * [I am used to thinking in terms of column-major/row-major storage and leading dimensions. What is a "row stride" / "column stride"?](FAQ.md#im-used-to-thinking-in-terms-of-column-majorrow-major-storage-and-leading-dimensions-what-is-a-row-stride--column-stride)
+  * [Why does BLIS have vector (level-1v) and matrix (level-1m) variations of most level-1 operations?](FAQ.md#why-does-blis-have-vector-level-1v-and-matrix-level-1m-variations-of-most-level-1-operations)
   * [What does it mean when a matrix with general stride is column-tilted or row-tilted?](FAQ.md#what-does-it-mean-when-a-matrix-with-general-stride-is-column-tilted-or-row-tilted)
   * [I am not really interested in all of these newfangled features in BLIS. Can I just use BLIS as a BLAS library?](FAQ.md#im-not-really-interested-in-all-of-these-newfangled-features-in-blis-can-i-just-use-blis-as-a-blas-library)
   * [What about CBLAS?](FAQ.md#what-about-cblas)
@@ -116,6 +117,16 @@ Traditional BLAS assumes that matrices are stored in column-major order (or, as 
 In generalized storage, we have a row stride and a column stride. The row stride measures the distance in memory between rows (within a single column) while the column stride measures the distance between columns (within a single row). Column-major storage corresponds to the situation where the row stride equals 1. Since the row stride is unit, you only have to track the column stride (i.e., the leading dimension). Similarly, in row-major order, the column stride is equal to 1 and only the row stride must be tracked.
 
 BLIS also supports situations where both the row stride and column stride are non-unit. We call this situation "general stride".
+
+### Why does BLIS have vector (level-1v) and matrix (level-1m) variations of most level-1 operations?
+
+At first glance, it might appear that an element-wise operation such as `copym` or `axpym` would be sufficiently general purpose to cover the cases where the operands are vectors. After all, an *m x 1* matrix can be viewed as a vector of length m and vice versa. But in BLIS, operations on vectors are treated slightly differently than operations on matrices.
+
+If an application wishes to perform an element-wise operation on two objects, and the application calls a level-1m operation, the dimensions of those objects must be conformal, or "match up" (after any transposition implied by the object properties). This includes situations where one of the dimensions is unit.
+
+However, if an application instead decides to perform an element-wise operation on two objects, and the application calls a level-1v operation, the dimension constraints are slightly relaxed. In this scenario, BLIS only checks that the vector *lengths* are equal. This allows for the vectors to have different orientations (row vs column) while still being considered conformal. So, you could perform a `copyv` operation to copy from an *m x 1* vector to a *1 x m* vector. A `copym` operation on such objects would not be allowed (unless it was executed with the source object containing an implicit transposition).
+
+Another way to think about level-1v operations is that they will work with any two matrix objects in situations where (a) the corresponding level-1m operation *would have* worked if the input had been transposed, and (b) all operands happen to be vectors (i.e., have one unit dimension).
 
 ### What does it mean when a matrix with general stride is column-tilted or row-tilted?
 

@@ -123,7 +123,7 @@ BLIS_INLINE void lpgemm_alloc_mem_panel
 {
 	if ( bli_mem_is_unalloc( mem ) )
 	{
-		bli_membrk_acquire_m
+		bli_pba_acquire_m
 		(
 		  rntm_l,
 		  size_req,
@@ -136,8 +136,8 @@ BLIS_INLINE void lpgemm_alloc_mem_panel
 		siz_t mem_size = bli_mem_size( mem );
 		if ( mem_size < size_req )
 		{
-			bli_membrk_release( rntm_l, mem );
-			bli_membrk_acquire_m
+			bli_pba_release( rntm_l, mem );
+			bli_pba_acquire_m
 			(
 			  rntm_l,
 			  size_req,

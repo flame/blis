@@ -38,18 +38,22 @@
 // Prototype object APIs (expert and non-expert).
 #include "bli_oapi_ex.h"
 #include "bli_util_oapi.h"
+#include "bli_xapi_undef.h"
 
 #include "bli_oapi_ba.h"
 #include "bli_util_oapi.h"
+#include "bli_xapi_undef.h"
 
 // Prototype typed APIs (expert and non-expert).
 #include "bli_tapi_ex.h"
 #include "bli_util_tapi.h"
 #include "bli_util_ft.h"
+#include "bli_xapi_undef.h"
 
 #include "bli_tapi_ba.h"
 #include "bli_util_tapi.h"
 #include "bli_util_ft.h"
+#include "bli_xapi_undef.h"
 
 // Generate function pointer arrays for tapi functions (expert only).
 #include "bli_util_fpa.h"

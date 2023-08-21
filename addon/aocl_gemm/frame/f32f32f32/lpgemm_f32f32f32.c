@@ -395,7 +395,7 @@ LPGEMM_5LOOP(float,float,float,f32f32f32of32)
         {
             if ( bli_mem_is_alloc( &mem_b ) )
             {
-                bli_membrk_release( rntm, &mem_b );
+                bli_pba_release( rntm, &mem_b );
             }
         }
     }
@@ -403,7 +403,7 @@ LPGEMM_5LOOP(float,float,float,f32f32f32of32)
     {
         if ( bli_mem_is_alloc( &mem_a ) )
         {
-            bli_membrk_release( rntm, &mem_a );
+            bli_pba_release( rntm, &mem_a );
         }
     }
 }

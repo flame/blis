@@ -52,10 +52,6 @@ struct thrcomm_s
 	void*  sent_object;
 	dim_t  n_threads;
 
-//#ifdef BLIS_USE_PTHREAD_MUTEX
-//	bli_pthread_mutex_t mutex;
-//#endif
-
 	// NOTE: barrier_sense was originally a gint_t-based bool_t, but upon
 	// redefining bool_t as bool we discovered that some gcc __atomic built-ins
 	// don't allow the use of bool for the variables being operated upon.

@@ -43,7 +43,9 @@ blksz_t* bli_blksz_create_ed
        dim_t b_z, dim_t be_z
      )
 {
-	blksz_t* b = bli_malloc_intl( sizeof( blksz_t ) );
+	err_t r_val;
+
+	blksz_t* b = bli_malloc_intl( sizeof( blksz_t ), &r_val );
 
 	bli_blksz_init_ed
 	(
@@ -63,7 +65,9 @@ blksz_t* bli_blksz_create
        dim_t be_s, dim_t be_d, dim_t be_c, dim_t be_z
      )
 {
-	blksz_t* b = bli_malloc_intl( sizeof( blksz_t ) );
+	err_t r_val;
+
+	blksz_t* b = bli_malloc_intl( sizeof( blksz_t ), &r_val );
 
 	bli_blksz_init
 	(

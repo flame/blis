@@ -121,6 +121,8 @@ void* libblis_test_thread_entry( void* tdata_void )
 
 void libblis_test_thread_decorator( test_params_t* params, test_ops_t* ops )
 {
+	err_t r_val;
+
 	// Query the total number of threads to simulate.
 	size_t nt = ( size_t )params->n_app_threads;
 
@@ -130,12 +132,12 @@ void libblis_test_thread_decorator( test_params_t* params, test_ops_t* ops )
 	#ifdef BLIS_ENABLE_MEM_TRACING
 	printf( "libblis_test_thread_decorator(): " );
 	#endif
-	bli_pthread_t* pthread = bli_malloc_user( sizeof( bli_pthread_t ) * nt );
+	bli_pthread_t* pthread = bli_malloc_user( sizeof( bli_pthread_t ) * nt, &r_val );
 
 	#ifdef BLIS_ENABLE_MEM_TRACING
 	printf( "libblis_test_thread_decorator(): " );
 	#endif
-	thread_data_t* tdata   = bli_malloc_user( sizeof( thread_data_t ) * nt );
+	thread_data_t* tdata   = bli_malloc_user( sizeof( thread_data_t ) * nt, &r_val );
 
 	// Allocate a mutex for the threads to share.
 	//bli_pthread_mutex_t* mutex   = bli_malloc_user( sizeof( bli_pthread_mutex_t ) );
@@ -145,7 +147,7 @@ void libblis_test_thread_decorator( test_params_t* params, test_ops_t* ops )
 	#ifdef BLIS_ENABLE_MEM_TRACING
 	printf( "libblis_test_thread_decorator(): " );
 	#endif
-	bli_pthread_barrier_t* barrier = bli_malloc_user( sizeof( bli_pthread_barrier_t ) );
+	bli_pthread_barrier_t* barrier = bli_malloc_user( sizeof( bli_pthread_barrier_t ), &r_val );
 
 	// Initialize the mutex.
 	//bli_pthread_mutex_init( mutex, NULL );

@@ -69,7 +69,7 @@ err_t bli_l3_sup_thread_decorator
 	bli_sba_rntm_set_pool( 0, array, rntm );
 
 	// Set the packing block allocator field of the rntm.
-	bli_membrk_rntm_set_membrk( rntm );
+	bli_pba_rntm_set_pba( rntm );
 
 #ifndef SKIP_THRINFO_TREE
 	// Allcoate a global communicator for the root thrinfo_t structures.

@@ -347,6 +347,8 @@ void bli_gks_register_cntx
        void_fp ind_fp
      )
 {
+	err_t r_val;
+
 	// This function is called by bli_gks_init() for each architecture that
 	// will be supported by BLIS. It takes an architecture id and three
 	// function pointers, one to a function that initializes a native context
@@ -395,7 +397,7 @@ void bli_gks_register_cntx
 	// needs to be allocated. Allocate the memory and initialize it to
 	// zeros/NULL, storing the address of the allocated memory at the element
 	// for the current architecture id.
-	gks[ id ] = bli_calloc_intl( sizeof( cntx_t* ) * BLIS_NUM_IND_METHODS );
+	gks[ id ] = bli_calloc_intl( sizeof( cntx_t* ) * BLIS_NUM_IND_METHODS, &r_val );
 
 	// Alias the allocated array for readability.
 	cntx_t** restrict gks_id = gks[ id ];
@@ -407,7 +409,7 @@ void bli_gks_register_cntx
 	// Allocate memory for a single context and store the address at
 	// the element in the gks[ id ] array that is reserved for native
 	// execution.
-	gks_id[ BLIS_NAT ] = bli_calloc_intl( sizeof( cntx_t ) );
+	gks_id[ BLIS_NAT ] = bli_calloc_intl( sizeof( cntx_t ), &r_val );
 
 	// Alias the allocated context address for readability.
 	cntx_t* restrict gks_id_nat = gks_id[ BLIS_NAT ];
@@ -534,6 +536,7 @@ cntx_t* bli_gks_query_ind_cntx
 	bli_init_once();
 
 	cntx_t* gks_id_ind;
+	err_t r_val;
 
 	// Return the address of a context that will be suited for executing a
 	// level-3 operation via the requested induced method (and datatype) for
@@ -592,7 +595,7 @@ cntx_t* bli_gks_query_ind_cntx
 			// If gks_id_ind is NULL, then we know we must allocate and then
 			// initialize the context, storing its address back to
 			// gks_id[ ind ].
-			gks_id_ind    = bli_calloc_intl( sizeof( cntx_t ) );
+			gks_id_ind    = bli_calloc_intl( sizeof( cntx_t ), &r_val );
 			gks_id[ ind ] = gks_id_ind;
 
 			// Before we can call the induced method context initialization

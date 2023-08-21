@@ -32,28 +32,47 @@
 
 */
 
-// This file defines macros used to allow the _tapi.c files to produce
-// typed APIs that omit expert parameters.
+BLIS_EXPORT_BLIS err_t bli_setijv
+     (
+       double  ar,
+       double  ai,
+       dim_t   i,
+       obj_t*  x
+     );
 
-// Define a macro that allows the source code to determine which interface
-// (basic or expert) we are compiling.
-#undef  BLIS_TAPI_BASIC
-#define BLIS_TAPI_BASIC
+#undef  GENTPROT
+#define GENTPROT( ctype, ch, opname ) \
+\
+BLIS_EXPORT_BLIS void PASTEMAC(ch,opname) \
+     ( \
+       double         ar, \
+       double         ai, \
+       dim_t          i, \
+       void* restrict x, inc_t incx  \
+     );
 
-// Define the macro to omit a suffix from the function names (in function
-// definitions).
-#undef  EX_SUF
-#define EX_SUF
+INSERT_GENTPROT_BASIC0( setijv )
 
-// Define the macro to omit expert arguments from function signatures
-// and prototypes.
-#undef  BLIS_TAPI_EX_PARAMS
-#define BLIS_TAPI_EX_PARAMS
+// -----------------------------------------------------------------------------
 
-// Define the macro to add local expert variables that are initialized
-// to NULL. The "( void )" statements are to prevent unused variable
-// warnings by the compiler.
-#undef  BLIS_TAPI_EX_DECLS
-#define BLIS_TAPI_EX_DECLS   cntx_t* cntx = NULL; ( void )cntx; \
-                             rntm_t* rntm = NULL; ( void )rntm;
+BLIS_EXPORT_BLIS err_t bli_getijv
+      (
+        dim_t   i,
+        obj_t*  x,
+        double* ar,
+        double* ai
+      );
+
+#undef  GENTPROT
+#define GENTPROT( ctype, ch, opname ) \
+\
+BLIS_EXPORT_BLIS void PASTEMAC(ch,opname) \
+     ( \
+       dim_t          i, \
+       void* restrict b, inc_t incx, \
+       double*        ar, \
+       double*        ai  \
+     );
+
+INSERT_GENTPROT_BASIC0( getijv )
 

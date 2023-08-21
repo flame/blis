@@ -676,7 +676,7 @@ void lpgemm_ ## LPGEMM_SFX ## _openmp_thread_decorator \
 	/* Set the packing block allocator field of the rntm. This will be
 	 * inherited by all of the child threads when they make local copies of
 	 * the rntm below.*/ \
-	bli_membrk_rntm_set_membrk( rntm_g ); \
+	bli_pba_rntm_set_pba( rntm_g ); \
  \
 	thrcomm_t static_lpgemm_comms[BLIS_LPGEMM_NUM_STATIC_COMMS]; \
 	thrcomm_t* cur_lpgemm_comms = static_lpgemm_comms; \
@@ -770,7 +770,7 @@ void lpgemm_ ## LPGEMM_SFX ## _thread_decorator \
 	/* Set the packing block allocator field of the rntm. This will be
 	 * inherited by all of the child threads when they make local copies of
 	 * the rntm below.*/ \
-	bli_membrk_rntm_set_membrk( rntm_g ); \
+	bli_pba_rntm_set_pba( rntm_g ); \
  \
 	thrcomm_t static_lpgemm_comm; \
 	thrcomm_t* cur_lpgemm_comm = &static_lpgemm_comm; \

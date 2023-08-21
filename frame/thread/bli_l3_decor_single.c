@@ -78,7 +78,7 @@ void bli_l3_thread_decorator
 	bli_sba_rntm_set_pool( 0, array, rntm );
 
 	// Set the packing block allocator field of the rntm.
-	bli_membrk_rntm_set_membrk( rntm );
+	bli_pba_rntm_set_pba( rntm );
 
 	// Allcoate a global communicator for the root thrinfo_t structures.
 	thrcomm_t* restrict gl_comm = bli_thrcomm_create( rntm, n_threads );

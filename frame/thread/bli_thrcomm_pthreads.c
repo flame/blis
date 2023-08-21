@@ -93,18 +93,10 @@ void bli_thrcomm_init( dim_t n_threads, thrcomm_t* comm )
 	comm->n_threads = n_threads;
 	comm->barrier_sense = 0;
 	comm->barrier_threads_arrived = 0;
-
-//#ifdef BLIS_USE_PTHREAD_MUTEX
-//	bli_pthread_mutex_init( &comm->mutex, NULL );
-//#endif
 }
 
 void bli_thrcomm_cleanup( thrcomm_t* comm )
 {
-//#ifdef BLIS_USE_PTHREAD_MUTEX
-//	if ( comm == NULL ) return;
-//	bli_pthread_mutex_destroy( &comm->mutex );
-//#endif
 }
 
 void bli_thrcomm_barrier( dim_t t_id, thrcomm_t* comm )
@@ -114,13 +106,7 @@ void bli_thrcomm_barrier( dim_t t_id, thrcomm_t* comm )
 	bool  my_sense = comm->sense;
 	dim_t my_threads_arrived;
 
-#ifdef BLIS_USE_PTHREAD_MUTEX
-	bli_pthread_mutex_lock( &comm->mutex );
-	my_threads_arrived = ++(comm->threads_arrived);
-	bli_pthread_mutex_unlock( &comm->mutex );
-#else
 	my_threads_arrived = __sync_add_and_fetch(&(comm->threads_arrived), 1);
-#endif
 
 	if ( my_threads_arrived == comm->n_threads )
 	{

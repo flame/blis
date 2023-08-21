@@ -36,6 +36,7 @@
 
 bool bli_obj_equals( obj_t* a, obj_t* b )
 {
+#if 0
 	bool  r_val = FALSE;
 	num_t dt_a;
 	num_t dt_b;
@@ -80,6 +81,18 @@ bool bli_obj_equals( obj_t* a, obj_t* b )
 	}
 
 	return r_val;
+#else
+	bool r_val;
+
+	if ( bli_obj_is_1x1( a ) && bli_obj_is_1x1( b ) )
+		bli_eqsc( a, b, &r_val );
+	else if ( bli_obj_is_vector( a ) && bli_obj_is_vector( b ) )
+		bli_eqv( a, b, &r_val );
+	else
+		bli_eqm( a, b, &r_val );
+
+	return r_val;
+#endif
 }
 
 bool bli_obj_imag_equals( obj_t* a, obj_t* b )

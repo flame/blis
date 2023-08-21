@@ -108,25 +108,6 @@ GENFRONT( normim )
 \
 void PASTEMAC(opname,_check) \
      ( \
-       FILE*  file, \
-       char*  s1, \
-       obj_t* x, \
-       char*  format, \
-       char*  s2  \
-     ) \
-{ \
-	bli_utilm_fprint_check( file, s1, x, format, s2 ); \
-}
-
-GENFRONT( fprintv )
-GENFRONT( fprintm )
-
-
-#undef  GENFRONT
-#define GENFRONT( opname ) \
-\
-void PASTEMAC(opname,_check) \
-     ( \
        obj_t*  x  \
      ) \
 { \
@@ -154,6 +135,73 @@ void PASTEMAC(opname,_check) \
 
 GENFRONT( sumsqv )
 
+// -----------------------------------------------------------------------------
+
+#undef  GENFRONT
+#define GENFRONT( opname ) \
+\
+void PASTEMAC(opname,_check) \
+     ( \
+       obj_t*  chi, \
+       obj_t*  psi, \
+       bool*   is_eq  \
+     ) \
+{ \
+	bli_l0_xxbsc_check( chi, psi, is_eq ); \
+}
+
+GENFRONT( eqsc )
+
+
+#undef  GENFRONT
+#define GENFRONT( opname ) \
+\
+void PASTEMAC(opname,_check) \
+     ( \
+       obj_t*  x, \
+       obj_t*  y, \
+       bool*   is_eq  \
+     ) \
+{ \
+	bli_l1v_xy_check( x, y ); \
+}
+
+GENFRONT( eqv )
+
+
+#undef  GENFRONT
+#define GENFRONT( opname ) \
+\
+void PASTEMAC(opname,_check) \
+     ( \
+       obj_t*  x, \
+       obj_t*  y, \
+       bool*   is_eq  \
+     ) \
+{ \
+	bli_l1m_xy_check( x, y ); \
+}
+
+GENFRONT( eqm )
+
+
+#undef  GENFRONT
+#define GENFRONT( opname ) \
+\
+void PASTEMAC(opname,_check) \
+     ( \
+       FILE*  file, \
+       char*  s1, \
+       obj_t* x, \
+       char*  format, \
+       char*  s2  \
+     ) \
+{ \
+	bli_utilm_fprint_check( file, s1, x, format, s2 ); \
+}
+
+GENFRONT( fprintv )
+GENFRONT( fprintm )
 
 // -----------------------------------------------------------------------------
 

@@ -177,7 +177,7 @@ AOCL_GEMM_MATMUL(bfloat16,bfloat16,float,float,bf16bf16f32of32)
 	// that in the case that a runtime is passed in, we make a local copy.
 	rntm_t rntm_g;
 	bli_rntm_init_from_global( &rntm_g );
-	bli_membrk_rntm_set_membrk( &rntm_g );
+	bli_pba_rntm_set_pba( &rntm_g );
 
 	lpgemm_cntx_t* lcntx_g = lpgemm_get_global_cntx_obj( BF16BF16F32OF32 );
 

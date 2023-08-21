@@ -78,33 +78,34 @@ void bli_cntx_set_blkszs( ind_t method, dim_t n_bs, ... )
 
 	va_list   args;
 	dim_t     i;
+	err_t     r_val;
 
 	// Allocate some temporary local arrays.
 
 	#ifdef BLIS_ENABLE_MEM_TRACING
 	printf( "bli_cntx_set_blkszs(): " );
 	#endif
-	bszid_t*  bszids = bli_malloc_intl( n_bs * sizeof( bszid_t  ) );
+	bszid_t*  bszids = bli_malloc_intl( n_bs * sizeof( bszid_t  ), &r_val );
 
 	#ifdef BLIS_ENABLE_MEM_TRACING
 	printf( "bli_cntx_set_blkszs(): " );
 	#endif
-	blksz_t** blkszs = bli_malloc_intl( n_bs * sizeof( blksz_t* ) );
+	blksz_t** blkszs = bli_malloc_intl( n_bs * sizeof( blksz_t* ), &r_val );
 
 	#ifdef BLIS_ENABLE_MEM_TRACING
 	printf( "bli_cntx_set_blkszs(): " );
 	#endif
-	bszid_t*  bmults = bli_malloc_intl( n_bs * sizeof( bszid_t  ) );
+	bszid_t*  bmults = bli_malloc_intl( n_bs * sizeof( bszid_t  ), &r_val );
 
 	#ifdef BLIS_ENABLE_MEM_TRACING
 	printf( "bli_cntx_set_blkszs(): " );
 	#endif
-	double*   dsclrs = bli_malloc_intl( n_bs * sizeof( double   ) );
+	double*   dsclrs = bli_malloc_intl( n_bs * sizeof( double   ), &r_val );
 
 	#ifdef BLIS_ENABLE_MEM_TRACING
 	printf( "bli_cntx_set_blkszs(): " );
 	#endif
-	double*   msclrs = bli_malloc_intl( n_bs * sizeof( double   ) );
+	double*   msclrs = bli_malloc_intl( n_bs * sizeof( double   ), &r_val );
 
 	// -- Begin variable argument section --
 
@@ -343,6 +344,7 @@ void bli_cntx_set_ind_blkszs( ind_t method, dim_t n_bs, ... )
 
 	va_list   args;
 	dim_t     i;
+	err_t     r_val;
 
 	// Return early if called with BLIS_NAT.
 	if ( method == BLIS_NAT ) return;
@@ -352,17 +354,17 @@ void bli_cntx_set_ind_blkszs( ind_t method, dim_t n_bs, ... )
 	#ifdef BLIS_ENABLE_MEM_TRACING
 	printf( "bli_cntx_set_ind_blkszs(): " );
 	#endif
-	bszid_t* bszids = bli_malloc_intl( n_bs * sizeof( bszid_t  ) );
+	bszid_t* bszids = bli_malloc_intl( n_bs * sizeof( bszid_t  ), &r_val );
 
 	#ifdef BLIS_ENABLE_MEM_TRACING
 	printf( "bli_cntx_set_ind_blkszs(): " );
 	#endif
-	double*  dsclrs = bli_malloc_intl( n_bs * sizeof( double   ) );
+	double*  dsclrs = bli_malloc_intl( n_bs * sizeof( double   ), &r_val );
 
 	#ifdef BLIS_ENABLE_MEM_TRACING
 	printf( "bli_cntx_set_ind_blkszs(): " );
 	#endif
-	double*  msclrs = bli_malloc_intl( n_bs * sizeof( double   ) );
+	double*  msclrs = bli_malloc_intl( n_bs * sizeof( double   ), &r_val );
 
 	// -- Begin variable argument section --
 
@@ -534,28 +536,29 @@ void bli_cntx_set_l3_nat_ukrs( dim_t n_ukrs, ... )
 
 	va_list   args;
 	dim_t     i;
+	err_t     r_val;
 
 	// Allocate some temporary local arrays.
 
 	#ifdef BLIS_ENABLE_MEM_TRACING
 	printf( "bli_cntx_set_l3_nat_ukrs(): " );
 	#endif
-	l3ukr_t* ukr_ids   = bli_malloc_intl( n_ukrs * sizeof( l3ukr_t ) );
+	l3ukr_t* ukr_ids   = bli_malloc_intl( n_ukrs * sizeof( l3ukr_t ), &r_val );
 
 	#ifdef BLIS_ENABLE_MEM_TRACING
 	printf( "bli_cntx_set_l3_nat_ukrs(): " );
 	#endif
-	num_t*   ukr_dts   = bli_malloc_intl( n_ukrs * sizeof( num_t   ) );
+	num_t*   ukr_dts   = bli_malloc_intl( n_ukrs * sizeof( num_t   ), &r_val );
 
 	#ifdef BLIS_ENABLE_MEM_TRACING
 	printf( "bli_cntx_set_l3_nat_ukrs(): " );
 	#endif
-	void_fp* ukr_fps   = bli_malloc_intl( n_ukrs * sizeof( void_fp ) );
+	void_fp* ukr_fps   = bli_malloc_intl( n_ukrs * sizeof( void_fp ), &r_val );
 
 	#ifdef BLIS_ENABLE_MEM_TRACING
 	printf( "bli_cntx_set_l3_nat_ukrs(): " );
 	#endif
-	bool*    ukr_prefs = bli_malloc_intl( n_ukrs * sizeof( bool    ) );
+	bool*    ukr_prefs = bli_malloc_intl( n_ukrs * sizeof( bool    ), &r_val );
 
 	// -- Begin variable argument section --
 
@@ -691,23 +694,24 @@ void bli_cntx_set_l3_vir_ukrs( dim_t n_ukrs, ... )
 
 	va_list   args;
 	dim_t     i;
+	err_t     r_val;
 
 	// Allocate some temporary local arrays.
 
 	#ifdef BLIS_ENABLE_MEM_TRACING
 	printf( "bli_cntx_set_l3_vir_ukrs(): " );
 	#endif
-	l3ukr_t* ukr_ids   = bli_malloc_intl( n_ukrs * sizeof( l3ukr_t ) );
+	l3ukr_t* ukr_ids   = bli_malloc_intl( n_ukrs * sizeof( l3ukr_t ), &r_val );
 
 	#ifdef BLIS_ENABLE_MEM_TRACING
 	printf( "bli_cntx_set_l3_vir_ukrs(): " );
 	#endif
-	num_t*   ukr_dts   = bli_malloc_intl( n_ukrs * sizeof( num_t   ) );
+	num_t*   ukr_dts   = bli_malloc_intl( n_ukrs * sizeof( num_t   ), &r_val );
 
 	#ifdef BLIS_ENABLE_MEM_TRACING
 	printf( "bli_cntx_set_l3_vir_ukrs(): " );
 	#endif
-	void_fp* ukr_fps   = bli_malloc_intl( n_ukrs * sizeof( void_fp ) );
+	void_fp* ukr_fps   = bli_malloc_intl( n_ukrs * sizeof( void_fp ), &r_val );
 
 	// -- Begin variable argument section --
 
@@ -811,20 +815,21 @@ void bli_cntx_set_l3_sup_thresh( dim_t n_thresh, ... )
 
 	*/
 
-	va_list     args;
-	dim_t       i;
+	va_list   args;
+	dim_t     i;
+	err_t     r_val;
 
 	// Allocate some temporary local arrays.
 
 	#ifdef BLIS_ENABLE_MEM_TRACING
 	printf( "bli_cntx_set_l3_sup_thresh(): " );
 	#endif
-	threshid_t* threshids = bli_malloc_intl( n_thresh * sizeof( threshid_t  ) );
+	threshid_t* threshids = bli_malloc_intl( n_thresh * sizeof( threshid_t ), &r_val );
 
 	#ifdef BLIS_ENABLE_MEM_TRACING
 	printf( "bli_cntx_set_l3_sup_thresh(): " );
 	#endif
-	blksz_t**   threshs = bli_malloc_intl( n_thresh * sizeof( blksz_t* ) );
+	blksz_t**   threshs = bli_malloc_intl( n_thresh * sizeof( blksz_t* ), &r_val );
 
 	// -- Begin variable argument section --
 
@@ -918,18 +923,19 @@ void bli_cntx_set_l3_sup_handlers( dim_t n_ops, ... )
 
 	va_list   args;
 	dim_t     i;
+	err_t     r_val;
 
 	// Allocate some temporary local arrays.
 
 	#ifdef BLIS_ENABLE_MEM_TRACING
 	printf( "bli_cntx_set_l3_sup_handlers(): " );
 	#endif
-	opid_t* op_ids = bli_malloc_intl( n_ops * sizeof( opid_t ) );
+	opid_t* op_ids = bli_malloc_intl( n_ops * sizeof( opid_t ), &r_val );
 
 	#ifdef BLIS_ENABLE_MEM_TRACING
 	printf( "bli_cntx_set_l3_sup_handlers(): " );
 	#endif
-	void**  op_fps = bli_malloc_intl( n_ops * sizeof( void*  ) );
+	void**  op_fps = bli_malloc_intl( n_ops * sizeof( void*  ), &r_val );
 
 	// -- Begin variable argument section --
 
@@ -1016,17 +1022,18 @@ void bli_cntx_set_l3_sup_blkszs( dim_t n_bs, ... )
 
 	va_list   args;
 	dim_t     i;
+	err_t     r_val;
 
 	// Allocate some temporary local arrays.
 	#ifdef BLIS_ENABLE_MEM_TRACING
 	printf( "bli_cntx_set_blkszs(): " );
 	#endif
-	bszid_t* bszids = bli_malloc_intl( n_bs * sizeof( bszid_t  ) );
+	bszid_t* bszids = bli_malloc_intl( n_bs * sizeof( bszid_t  ), &r_val );
 
 	#ifdef BLIS_ENABLE_MEM_TRACING
 	printf( "bli_cntx_set_blkszs(): " );
 	#endif
-	blksz_t** blkszs = bli_malloc_intl( n_bs * sizeof( blksz_t* ) );
+	blksz_t** blkszs = bli_malloc_intl( n_bs * sizeof( blksz_t* ), &r_val );
 
 	// -- Begin variable argument section --
 
@@ -1120,17 +1127,18 @@ void bli_cntx_set_l3_sup_tri_blkszs( dim_t n_bs, ... )
 
 	va_list   args;
 	dim_t     i;
+	err_t     r_val;
 
 	// Allocate some temporary local arrays.
 	#ifdef BLIS_ENABLE_MEM_TRACING
 	printf( "bli_cntx_set_blkszs(): " );
 	#endif
-	bszid_t* bszids = bli_malloc_intl( n_bs * sizeof( bszid_t  ) );
+	bszid_t* bszids = bli_malloc_intl( n_bs * sizeof( bszid_t  ), &r_val );
 
 	#ifdef BLIS_ENABLE_MEM_TRACING
 	printf( "bli_cntx_set_blkszs(): " );
 	#endif
-	blksz_t** blkszs = bli_malloc_intl( n_bs * sizeof( blksz_t* ) );
+	blksz_t** blkszs = bli_malloc_intl( n_bs * sizeof( blksz_t* ), &r_val );
 
 	// -- Begin variable argument section --
 
@@ -1224,28 +1232,29 @@ void bli_cntx_set_l3_sup_kers( dim_t n_ukrs, ... )
 
 	va_list   args;
 	dim_t     i;
+	err_t     r_val;
 
 	// Allocate some temporary local arrays.
 
 	#ifdef BLIS_ENABLE_MEM_TRACING
 	printf( "bli_cntx_set_l3_sup_kers(): " );
 	#endif
-	stor3_t* st3_ids   = bli_malloc_intl( n_ukrs * sizeof( stor3_t ) );
+	stor3_t* st3_ids   = bli_malloc_intl( n_ukrs * sizeof( stor3_t ), &r_val );
 
 	#ifdef BLIS_ENABLE_MEM_TRACING
 	printf( "bli_cntx_set_l3_sup_kers(): " );
 	#endif
-	num_t*   ukr_dts   = bli_malloc_intl( n_ukrs * sizeof( num_t   ) );
+	num_t*   ukr_dts   = bli_malloc_intl( n_ukrs * sizeof( num_t   ), &r_val );
 
 	#ifdef BLIS_ENABLE_MEM_TRACING
 	printf( "bli_cntx_set_l3_sup_kers(): " );
 	#endif
-	void**   ukr_fps   = bli_malloc_intl( n_ukrs * sizeof( void*   ) );
+	void**   ukr_fps   = bli_malloc_intl( n_ukrs * sizeof( void*   ), &r_val );
 
 	#ifdef BLIS_ENABLE_MEM_TRACING
 	printf( "bli_cntx_set_l3_sup_kers(): " );
 	#endif
-	bool*    ukr_prefs = bli_malloc_intl( n_ukrs * sizeof( bool    ) );
+	bool*    ukr_prefs = bli_malloc_intl( n_ukrs * sizeof( bool    ), &r_val );
 
 	// -- Begin variable argument section --
 
@@ -1403,28 +1412,29 @@ void bli_cntx_set_l3_sup_tri_kers( dim_t n_ukrs, ... )
 
 	va_list   args;
 	dim_t     i;
+	err_t     r_val;
 
 	// Allocate some temporary local arrays.
 
 	#ifdef BLIS_ENABLE_MEM_TRACING
 	printf( "bli_cntx_set_l3_sup_tri_kers(): " );
 	#endif
-	stor3_t* st3_ids   = bli_malloc_intl( n_ukrs * sizeof( stor3_t ) );
+	stor3_t* st3_ids   = bli_malloc_intl( n_ukrs * sizeof( stor3_t ), &r_val );
 
 	#ifdef BLIS_ENABLE_MEM_TRACING
 	printf( "bli_cntx_set_l3_sup_tri_kers(): " );
 	#endif
-	num_t*   ukr_dts   = bli_malloc_intl( n_ukrs * sizeof( num_t   ) );
+	num_t*   ukr_dts   = bli_malloc_intl( n_ukrs * sizeof( num_t   ), &r_val );
 
 	#ifdef BLIS_ENABLE_MEM_TRACING
 	printf( "bli_cntx_set_l3_sup_tri_kers(): " );
 	#endif
-	void**   ukr_fps   = bli_malloc_intl( n_ukrs * sizeof( void*   ) );
+	void**   ukr_fps   = bli_malloc_intl( n_ukrs * sizeof( void*   ), &r_val );
 
 	#ifdef BLIS_ENABLE_MEM_TRACING
 	printf( "bli_cntx_set_l3_sup_tri_kers(): " );
 	#endif
-	bool*    ukr_prefs = bli_malloc_intl( n_ukrs * sizeof( bool    ) );
+	bool*    ukr_prefs = bli_malloc_intl( n_ukrs * sizeof( bool    ), &r_val );
 
 	// -- Begin variable argument section --
 
@@ -1533,17 +1543,18 @@ void bli_cntx_set_trsm_blkszs( dim_t n_bs, ... )
 
 	va_list   args;
 	dim_t     i;
+	err_t     r_val;
 
 	// Allocate some temporary local arrays.
 	#ifdef BLIS_ENABLE_MEM_TRACING
 	printf( "bli_cntx_set_blkszs(): " );
 	#endif
-	bszid_t* bszids = bli_malloc_intl( n_bs * sizeof( bszid_t  ) );
+	bszid_t* bszids = bli_malloc_intl( n_bs * sizeof( bszid_t  ), &r_val );
 
 	#ifdef BLIS_ENABLE_MEM_TRACING
 	printf( "bli_cntx_set_blkszs(): " );
 	#endif
-	blksz_t** blkszs = bli_malloc_intl( n_bs * sizeof( blksz_t* ) );
+	blksz_t** blkszs = bli_malloc_intl( n_bs * sizeof( blksz_t* ), &r_val );
 
 	// -- Begin variable argument section --
 
@@ -1637,23 +1648,24 @@ void bli_cntx_set_l1f_kers( dim_t n_kers, ... )
 
 	va_list   args;
 	dim_t     i;
+	err_t     r_val;
 
 	// Allocate some temporary local arrays.
 
 	#ifdef BLIS_ENABLE_MEM_TRACING
 	printf( "bli_cntx_set_l1f_kers(): " );
 	#endif
-	l1fkr_t* ker_ids   = bli_malloc_intl( n_kers * sizeof( l1fkr_t ) );
+	l1fkr_t* ker_ids   = bli_malloc_intl( n_kers * sizeof( l1fkr_t ), &r_val );
 
 	#ifdef BLIS_ENABLE_MEM_TRACING
 	printf( "bli_cntx_set_l1f_kers(): " );
 	#endif
-	num_t*   ker_dts   = bli_malloc_intl( n_kers * sizeof( num_t   ) );
+	num_t*   ker_dts   = bli_malloc_intl( n_kers * sizeof( num_t   ), &r_val );
 
 	#ifdef BLIS_ENABLE_MEM_TRACING
 	printf( "bli_cntx_set_l1f_kers(): " );
 	#endif
-	void_fp* ker_fps   = bli_malloc_intl( n_kers * sizeof( void_fp ) );
+	void_fp* ker_fps   = bli_malloc_intl( n_kers * sizeof( void_fp ), &r_val );
 
 	// -- Begin variable argument section --
 
@@ -1755,23 +1767,24 @@ void bli_cntx_set_l1v_kers( dim_t n_kers, ... )
 
 	va_list   args;
 	dim_t     i;
+	err_t     r_val;
 
 	// Allocate some temporary local arrays.
 
 	#ifdef BLIS_ENABLE_MEM_TRACING
 	printf( "bli_cntx_set_l1v_kers(): " );
 	#endif
-	l1vkr_t* ker_ids   = bli_malloc_intl( n_kers * sizeof( l1vkr_t ) );
+	l1vkr_t* ker_ids   = bli_malloc_intl( n_kers * sizeof( l1vkr_t ), &r_val );
 
 	#ifdef BLIS_ENABLE_MEM_TRACING
 	printf( "bli_cntx_set_l1v_kers(): " );
 	#endif
-	num_t*   ker_dts   = bli_malloc_intl( n_kers * sizeof( num_t   ) );
+	num_t*   ker_dts   = bli_malloc_intl( n_kers * sizeof( num_t   ), &r_val );
 
 	#ifdef BLIS_ENABLE_MEM_TRACING
 	printf( "bli_cntx_set_l1v_kers(): " );
 	#endif
-	void_fp* ker_fps   = bli_malloc_intl( n_kers * sizeof( void_fp ) );
+	void_fp* ker_fps   = bli_malloc_intl( n_kers * sizeof( void_fp ), &r_val );
 
 	// -- Begin variable argument section --
 
@@ -1873,18 +1886,19 @@ void bli_cntx_set_l3_thresh_funcs( dim_t n_funcs, ... )
 
 	va_list   args;
 	dim_t     i;
+	err_t     r_val;
 
 	// Allocate some temporary local arrays.
 
 	#ifdef BLIS_ENABLE_MEM_TRACING
 	printf( "bli_cntx_set_l3_thresh_funcs(): " );
 	#endif
-	opid_t* func_ids   = bli_malloc_intl( n_funcs * sizeof( opid_t ) );
+	opid_t* func_ids   = bli_malloc_intl( n_funcs * sizeof( opid_t ), &r_val );
 
 	#ifdef BLIS_ENABLE_MEM_TRACING
 	printf( "bli_cntx_set_l3_thresh_funcs(): " );
 	#endif
-	void_fp* func_fps   = bli_malloc_intl( n_funcs * sizeof( void_fp ) );
+	void_fp* func_fps   = bli_malloc_intl( n_funcs * sizeof( void_fp ), &r_val );
 
 	// -- Begin variable argument section --
 
@@ -1972,23 +1986,24 @@ void bli_cntx_set_packm_kers( dim_t n_kers, ... )
 
 	va_list   args;
 	dim_t     i;
+	err_t     r_val;
 
 	// Allocate some temporary local arrays.
 
 	#ifdef BLIS_ENABLE_MEM_TRACING
 	printf( "bli_cntx_set_packm_kers(): " );
 	#endif
-	l1mkr_t* ker_ids   = bli_malloc_intl( n_kers * sizeof( l1mkr_t ) );
+	l1mkr_t* ker_ids   = bli_malloc_intl( n_kers * sizeof( l1mkr_t ), &r_val );
 
 	#ifdef BLIS_ENABLE_MEM_TRACING
 	printf( "bli_cntx_set_packm_kers(): " );
 	#endif
-	num_t*   ker_dts   = bli_malloc_intl( n_kers * sizeof( num_t   ) );
+	num_t*   ker_dts   = bli_malloc_intl( n_kers * sizeof( num_t   ), &r_val );
 
 	#ifdef BLIS_ENABLE_MEM_TRACING
 	printf( "bli_cntx_set_packm_kers(): " );
 	#endif
-	void_fp* ker_fps   = bli_malloc_intl( n_kers * sizeof( void_fp ) );
+	void_fp* ker_fps   = bli_malloc_intl( n_kers * sizeof( void_fp ), &r_val );
 
 	// -- Begin variable argument section --
 

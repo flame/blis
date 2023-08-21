@@ -45,13 +45,14 @@ cntl_t* bli_unpackm_cntl_create_node
 {
 	cntl_t*           cntl;
 	unpackm_params_t* params;
+	err_t             r_val;
 
 	// NOTE: If this function is ever called, figure out whether the
 	// bli_malloc_intl() below needs to be changed to bli_sba_acquire().
 	bli_abort();
 
 	// Allocate an unpackm_params_t struct.
-	params = bli_malloc_intl( sizeof( unpackm_params_t ) );
+	params = bli_malloc_intl( sizeof( unpackm_params_t ), &r_val );
 
 	// Initialize the unpackm_params_t struct.
 	params->size      = sizeof( unpackm_params_t );
