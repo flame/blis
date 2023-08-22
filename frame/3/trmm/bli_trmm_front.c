@@ -172,7 +172,7 @@ void bli_trmm_front
 			if ( bli_is_left( side ) ) { toggle = TRUE; }
 		} else {
 			// As in the default case (below), toggle for preferential storage
-			if ( bli_cntx_l3_vir_ukr_dislikes_storage_of( &c_local, BLIS_GEMM_UKR, cntx ) ) {
+			if ( bli_cntx_dislikes_storage_of( &c_local, BLIS_GEMM_VIR_UKR, cntx ) ) {
 				toggle = TRUE;
 			}
 		}
@@ -203,7 +203,7 @@ void bli_trmm_front
 	// of row- vs. column storage breaks down.
 	//if ( !bli_obj_is_1x1( &c_local ) ) // NOTE: This conditional should NOT
 	                                     // be enabled. See issue #342 comments.
-	if ( bli_cntx_l3_vir_ukr_dislikes_storage_of( &c_local, BLIS_GEMM_UKR, cntx ) )
+	if ( bli_cntx_dislikes_storage_of( &c_local, BLIS_GEMM_VIR_UKR, cntx ) )
 	{
 		bli_toggle_side( &side );
 		bli_obj_induce_trans( &a_local );

@@ -121,7 +121,7 @@ void PASTEMAC(ch,varname) \
 	PASTECH(ch,dotaxpyv_ker_ft) kfp_vf; \
 \
 	/* Query the context for the kernel function pointer. */ \
-	kfp_vf = bli_cntx_get_l1f_ker_dt( dt, BLIS_DOTAXPYV_KER, cntx ); \
+	kfp_vf = bli_cntx_get_ukr_dt( dt, BLIS_DOTAXPYV_KER, cntx ); \
 \
 	for ( i = 0; i < m; ++i ) \
 	{ \

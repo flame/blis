@@ -104,7 +104,7 @@ void bli_ddotxaxpyf_penryn_int
 	// If the vector lengths are zero, scale y by beta and return.
 	if ( bli_zero_dim1( m ) )
 	{
-		dscalv_ker_ft f = bli_cntx_get_l1v_ker_dt( BLIS_DOUBLE, BLIS_SCALV_KER, cntx );
+		dscalv_ker_ft f = bli_cntx_get_ukr_dt( BLIS_DOUBLE, BLIS_SCALV_KER, cntx );
 
 		f
 		(
@@ -149,7 +149,7 @@ void bli_ddotxaxpyf_penryn_int
 
 	if ( use_ref == TRUE )
 	{
-		ddotxaxpyf_ker_ft f = bli_cntx_get_l1f_ker_dt( BLIS_DOUBLE, BLIS_DOTXAXPYF_KER, cntx );
+		ddotxaxpyf_ker_ft f = bli_cntx_get_ukr_dt( BLIS_DOUBLE, BLIS_DOTXAXPYF_KER, cntx );
 		f
 		(
 		  conjat,

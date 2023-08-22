@@ -85,7 +85,7 @@ err_t bli_gemmsup_int
 	const bool    is_rcc_crc_ccr_ccc = !is_rrr_rrc_rcr_crr;
 
 	const num_t   dt         = bli_obj_dt( c );
-	const bool    row_pref   = bli_cntx_l3_sup_ker_prefers_rows_dt( dt, stor_id, cntx );
+	const bool    row_pref   = bli_cntx_ukr_prefers_rows_dt( dt, bli_stor3_ukr( stor_id ), cntx );
 
 	const bool    is_primary = ( row_pref ? is_rrr_rrc_rcr_crr
 	                                      : is_rcc_crc_ccr_ccc );
@@ -259,7 +259,7 @@ err_t bli_gemmtsup_int
 	const bool    is_rcc_crc_ccr_ccc = !is_rrr_rrc_rcr_crr;
 
 	const num_t   dt         = bli_obj_dt( c );
-	const bool    row_pref   = bli_cntx_l3_sup_ker_prefers_rows_dt( dt, stor_id, cntx );
+	const bool    row_pref   = bli_cntx_ukr_prefers_rows_dt( dt, bli_stor3_ukr( stor_id ), cntx );
 
 	const bool    is_primary = ( row_pref ? is_rrr_rrc_rcr_crr
 	                                      : is_rcc_crc_ccr_ccc );

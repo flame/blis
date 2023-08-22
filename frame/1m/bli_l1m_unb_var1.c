@@ -80,7 +80,7 @@ void PASTEMAC(ch,opname) \
 	conjx = bli_extract_conj( transx ); \
 \
 	/* Query the kernel needed for this operation. */ \
-	PASTECH2(ch,kername,_ker_ft) f = bli_cntx_get_l1v_ker_dt( dt, kerid, cntx ); \
+	PASTECH2(ch,kername,_ker_ft) f = bli_cntx_get_ukr_dt( dt, kerid, cntx ); \
 \
 	/* Handle dense and upper/lower storage cases separately. */ \
 	if ( bli_is_dense( uplox_eff ) ) \
@@ -197,7 +197,7 @@ void PASTEMAC(ch,opname) \
 	conjx = bli_extract_conj( transx ); \
 \
 	/* Query the kernel needed for this operation. */ \
-	PASTECH2(ch,kername,_ker_ft) f = bli_cntx_get_l1v_ker_dt( dt, kerid, cntx ); \
+	PASTECH2(ch,kername,_ker_ft) f = bli_cntx_get_ukr_dt( dt, kerid, cntx ); \
 \
 	/* Handle dense and upper/lower storage cases separately. */ \
 	if ( bli_is_dense( uplox_eff ) ) \
@@ -310,7 +310,7 @@ void PASTEMAC(ch,opname) \
 	if ( bli_is_zeros( uplox_eff ) ) return; \
 \
 	/* Query the kernel needed for this operation. */ \
-	PASTECH2(ch,kername,_ker_ft) f = bli_cntx_get_l1v_ker_dt( dt, kerid, cntx ); \
+	PASTECH2(ch,kername,_ker_ft) f = bli_cntx_get_ukr_dt( dt, kerid, cntx ); \
 \
 	/* Handle dense and upper/lower storage cases separately. */ \
 	if ( bli_is_dense( uplox_eff ) ) \
@@ -424,7 +424,7 @@ void PASTEMAC(ch,opname) \
 	conjx = bli_extract_conj( transx ); \
 \
 	/* Query the kernel needed for this operation. */ \
-	PASTECH2(ch,kername,_ker_ft) f = bli_cntx_get_l1v_ker_dt( dt, kerid, cntx ); \
+	PASTECH2(ch,kername,_ker_ft) f = bli_cntx_get_ukr_dt( dt, kerid, cntx ); \
 \
 	/* Handle dense and upper/lower storage cases separately. */ \
 	if ( bli_is_dense( uplox_eff ) ) \

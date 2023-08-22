@@ -43,47 +43,33 @@ void bli_cntx_init_knl( cntx_t* cntx )
 
 	// -------------------------------------------------------------------------
 
-	// Update the context with optimized native gemm micro-kernels and
-	// their storage preferences.
-	bli_cntx_set_l3_nat_ukrs
+	// Update the context with optimized native gemm micro-kernels.
+	bli_cntx_set_ukrs
 	(
-	  2,
-	  BLIS_GEMM_UKR,       BLIS_FLOAT,    bli_sgemm_knl_asm_24x16, FALSE,
-	  BLIS_GEMM_UKR,       BLIS_DOUBLE,   bli_dgemm_knl_asm_24x8,  FALSE,
-	  cntx
-	);
+	  cntx,
 
-	// Update the context with optimized packm kernels.
-	bli_cntx_set_packm_kers
-	(
-	  2,
-	  BLIS_PACKM_8XK_KER,  BLIS_DOUBLE, bli_dpackm_knl_asm_8xk,
-	  BLIS_PACKM_24XK_KER, BLIS_DOUBLE, bli_dpackm_knl_asm_24xk,
-	  cntx
-	);
+	  // level-3
+	  BLIS_GEMM_UKR, BLIS_FLOAT,  bli_sgemm_knl_asm_24x16,
+	  BLIS_GEMM_UKR, BLIS_DOUBLE, bli_dgemm_knl_asm_24x8,
 
-	// Update the context with optimized level-1f kernels.
-	bli_cntx_set_l1f_kers
-	(
-	  4,
+	  // packm
+	  BLIS_PACKM_MRXK_KER, BLIS_DOUBLE, bli_dpackm_knl_asm_24xk,
+	  BLIS_PACKM_NRXK_KER, BLIS_DOUBLE, bli_dpackm_knl_asm_8xk,
+
 	  // axpyf
-	  BLIS_AXPYF_KER,     BLIS_FLOAT,  bli_saxpyf_zen_int_8,
-	  BLIS_AXPYF_KER,     BLIS_DOUBLE, bli_daxpyf_zen_int_8,
-	  // dotxf
-	  BLIS_DOTXF_KER,     BLIS_FLOAT,  bli_sdotxf_zen_int_8,
-	  BLIS_DOTXF_KER,     BLIS_DOUBLE, bli_ddotxf_zen_int_8,
-	  cntx
-	);
+	  BLIS_AXPYF_KER, BLIS_FLOAT,  bli_saxpyf_zen_int_8,
+	  BLIS_AXPYF_KER, BLIS_DOUBLE, bli_daxpyf_zen_int_8,
 
-	// Update the context with optimized level-1v kernels.
-	bli_cntx_set_l1v_kers
-	(
-	  10,
+	  // dotxf
+	  BLIS_DOTXF_KER, BLIS_FLOAT,  bli_sdotxf_zen_int_8,
+	  BLIS_DOTXF_KER, BLIS_DOUBLE, bli_ddotxf_zen_int_8,
+
 #if 1
 	  // amaxv
 	  BLIS_AMAXV_KER,  BLIS_FLOAT,  bli_samaxv_zen_int,
 	  BLIS_AMAXV_KER,  BLIS_DOUBLE, bli_damaxv_zen_int,
 #endif
+
 	  // axpyv
 #if 0
 	  BLIS_AXPYV_KER,  BLIS_FLOAT,  bli_saxpyv_zen_int,
@@ -92,12 +78,15 @@ void bli_cntx_init_knl( cntx_t* cntx )
 	  BLIS_AXPYV_KER,  BLIS_FLOAT,  bli_saxpyv_zen_int10,
 	  BLIS_AXPYV_KER,  BLIS_DOUBLE, bli_daxpyv_zen_int10,
 #endif
+
 	  // dotv
 	  BLIS_DOTV_KER,   BLIS_FLOAT,  bli_sdotv_zen_int,
 	  BLIS_DOTV_KER,   BLIS_DOUBLE, bli_ddotv_zen_int,
+
 	  // dotxv
 	  BLIS_DOTXV_KER,  BLIS_FLOAT,  bli_sdotxv_zen_int,
 	  BLIS_DOTXV_KER,  BLIS_DOUBLE, bli_ddotxv_zen_int,
+
 	  // scalv
 #if 0
 	  BLIS_SCALV_KER,  BLIS_FLOAT,  bli_sscalv_zen_int,
@@ -106,7 +95,20 @@ void bli_cntx_init_knl( cntx_t* cntx )
 	  BLIS_SCALV_KER,  BLIS_FLOAT,  bli_sscalv_zen_int10,
 	  BLIS_SCALV_KER,  BLIS_DOUBLE, bli_dscalv_zen_int10,
 #endif
-	  cntx
+
+	  BLIS_VA_END
+	);
+
+	// Update the context with storage preferences.
+	bli_cntx_set_ukr_prefs
+	(
+	  cntx,
+
+	  // level-3
+	  BLIS_GEMM_UKR_ROW_PREF, BLIS_FLOAT,  FALSE,
+	  BLIS_GEMM_UKR_ROW_PREF, BLIS_DOUBLE, FALSE,
+
+	  BLIS_VA_END
 	);
 
 	// Initialize level-3 blocksize objects with architecture-specific values.
@@ -125,17 +127,20 @@ void bli_cntx_init_knl( cntx_t* cntx )
 	// blocksizes (and multiples) for native execution.
 	bli_cntx_set_blkszs
 	(
-	  BLIS_NAT, 7,
+	  cntx,
+
 	  // level-3
 	  BLIS_NC, &blkszs[ BLIS_NC ], BLIS_NR,
 	  BLIS_KC, &blkszs[ BLIS_KC ], BLIS_KR,
 	  BLIS_MC, &blkszs[ BLIS_MC ], BLIS_MR,
 	  BLIS_NR, &blkszs[ BLIS_NR ], BLIS_NR,
 	  BLIS_MR, &blkszs[ BLIS_MR ], BLIS_MR,
+
 	  // level-1f
 	  BLIS_AF, &blkszs[ BLIS_AF ], BLIS_AF,
 	  BLIS_DF, &blkszs[ BLIS_DF ], BLIS_DF,
-	  cntx
+
+	  BLIS_VA_END
 	);
 }
 

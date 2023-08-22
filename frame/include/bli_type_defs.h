@@ -626,7 +626,8 @@ typedef enum
 
 typedef enum
 {
-	BLIS_ADDV_KER  = 0,
+	// l1v kernels
+	BLIS_ADDV_KER,
 	BLIS_AMAXV_KER,
 	BLIS_AXPBYV_KER,
 	BLIS_AXPYV_KER,
@@ -640,108 +641,82 @@ typedef enum
 	BLIS_SETV_KER,
 	BLIS_SUBV_KER,
 	BLIS_SWAPV_KER,
-	BLIS_XPBYV_KER
-} l1vkr_t;
-
-#define BLIS_NUM_LEVEL1V_KERS 15
-
-
-typedef enum
-{
-	BLIS_AXPY2V_KER = 0,
+	BLIS_XPBYV_KER,
+	BLIS_AXPY2V_KER,
 	BLIS_DOTAXPYV_KER,
+
+	// l1f kernels
 	BLIS_AXPYF_KER,
 	BLIS_DOTXF_KER,
-	BLIS_DOTXAXPYF_KER
-} l1fkr_t;
+	BLIS_DOTXAXPYF_KER,
 
-#define BLIS_NUM_LEVEL1F_KERS 5
+	// pack kernels
+	BLIS_PACKM_MRXK_KER,
+	BLIS_PACKM_NRXK_KER,
+	BLIS_PACKM_MRXK_1ER_KER,
+	BLIS_PACKM_NRXK_1ER_KER,
+	BLIS_PACKM_MRXMR_DIAG_KER,
+	BLIS_PACKM_NRXNR_DIAG_KER,
+	BLIS_PACKM_MRXMR_DIAG_1ER_KER,
+	BLIS_PACKM_NRXNR_DIAG_1ER_KER,
 
+	// unpack kernels
+	BLIS_UNPACKM_MRXK_KER,
+	BLIS_UNPACKM_NRXK_KER,
 
-typedef enum
-{
-	BLIS_PACKM_0XK_KER  = 0,
-	BLIS_PACKM_1XK_KER  = 1,
-	BLIS_PACKM_2XK_KER  = 2,
-	BLIS_PACKM_3XK_KER  = 3,
-	BLIS_PACKM_4XK_KER  = 4,
-	BLIS_PACKM_5XK_KER  = 5,
-	BLIS_PACKM_6XK_KER  = 6,
-	BLIS_PACKM_7XK_KER  = 7,
-	BLIS_PACKM_8XK_KER  = 8,
-	BLIS_PACKM_9XK_KER  = 9,
-	BLIS_PACKM_10XK_KER = 10,
-	BLIS_PACKM_11XK_KER = 11,
-	BLIS_PACKM_12XK_KER = 12,
-	BLIS_PACKM_13XK_KER = 13,
-	BLIS_PACKM_14XK_KER = 14,
-	BLIS_PACKM_15XK_KER = 15,
-	BLIS_PACKM_16XK_KER = 16,
-	BLIS_PACKM_17XK_KER = 17,
-	BLIS_PACKM_18XK_KER = 18,
-	BLIS_PACKM_19XK_KER = 19,
-	BLIS_PACKM_20XK_KER = 20,
-	BLIS_PACKM_21XK_KER = 21,
-	BLIS_PACKM_22XK_KER = 22,
-	BLIS_PACKM_23XK_KER = 23,
-	BLIS_PACKM_24XK_KER = 24,
-	BLIS_PACKM_25XK_KER = 25,
-	BLIS_PACKM_26XK_KER = 26,
-	BLIS_PACKM_27XK_KER = 27,
-	BLIS_PACKM_28XK_KER = 28,
-	BLIS_PACKM_29XK_KER = 29,
-	BLIS_PACKM_30XK_KER = 30,
-	BLIS_PACKM_31XK_KER = 31,
-
-	BLIS_UNPACKM_0XK_KER  = 0,
-	BLIS_UNPACKM_1XK_KER  = 1,
-	BLIS_UNPACKM_2XK_KER  = 2,
-	BLIS_UNPACKM_3XK_KER  = 3,
-	BLIS_UNPACKM_4XK_KER  = 4,
-	BLIS_UNPACKM_5XK_KER  = 5,
-	BLIS_UNPACKM_6XK_KER  = 6,
-	BLIS_UNPACKM_7XK_KER  = 7,
-	BLIS_UNPACKM_8XK_KER  = 8,
-	BLIS_UNPACKM_9XK_KER  = 9,
-	BLIS_UNPACKM_10XK_KER = 10,
-	BLIS_UNPACKM_11XK_KER = 11,
-	BLIS_UNPACKM_12XK_KER = 12,
-	BLIS_UNPACKM_13XK_KER = 13,
-	BLIS_UNPACKM_14XK_KER = 14,
-	BLIS_UNPACKM_15XK_KER = 15,
-	BLIS_UNPACKM_16XK_KER = 16,
-	BLIS_UNPACKM_17XK_KER = 17,
-	BLIS_UNPACKM_18XK_KER = 18,
-	BLIS_UNPACKM_19XK_KER = 19,
-	BLIS_UNPACKM_20XK_KER = 20,
-	BLIS_UNPACKM_21XK_KER = 21,
-	BLIS_UNPACKM_22XK_KER = 22,
-	BLIS_UNPACKM_23XK_KER = 23,
-	BLIS_UNPACKM_24XK_KER = 24,
-	BLIS_UNPACKM_25XK_KER = 25,
-	BLIS_UNPACKM_26XK_KER = 26,
-	BLIS_UNPACKM_27XK_KER = 27,
-	BLIS_UNPACKM_28XK_KER = 28,
-	BLIS_UNPACKM_29XK_KER = 29,
-	BLIS_UNPACKM_30XK_KER = 30,
-	BLIS_UNPACKM_31XK_KER = 31
-
-} l1mkr_t;
-
-#define BLIS_NUM_PACKM_KERS   32
-#define BLIS_NUM_UNPACKM_KERS 32
-
-
-typedef enum
-{
-	BLIS_GEMM_UKR = 0,
+	// l3 native kernels
+	BLIS_GEMM_UKR,
 	BLIS_GEMMTRSM_L_UKR,
 	BLIS_GEMMTRSM_U_UKR,
 	BLIS_TRSM_L_UKR,
-	BLIS_TRSM_U_UKR
-} l3ukr_t;
+	BLIS_TRSM_U_UKR,
 
-#define BLIS_NUM_LEVEL3_UKRS 5
+	// l3 virtual kernels
+	BLIS_GEMM_VIR_UKR,
+	BLIS_GEMMTRSM_L_VIR_UKR,
+	BLIS_GEMMTRSM_U_VIR_UKR,
+	BLIS_TRSM_L_VIR_UKR,
+	BLIS_TRSM_U_VIR_UKR,
+
+	// gemmsup kernels
+	BLIS_GEMMSUP_RRR_UKR,
+	BLIS_GEMMSUP_RRC_UKR,
+	BLIS_GEMMSUP_RCR_UKR,
+	BLIS_GEMMSUP_RCC_UKR,
+	BLIS_GEMMSUP_CRR_UKR,
+	BLIS_GEMMSUP_CRC_UKR,
+	BLIS_GEMMSUP_CCR_UKR,
+	BLIS_GEMMSUP_CCC_UKR,
+	BLIS_GEMMSUP_XXX_UKR,
+
+	// BLIS_NUM_UKRS must be last!
+	BLIS_NUM_UKRS
+} ukr_t;
+
+
+typedef enum
+{
+    // l3 kernel row preferences
+	BLIS_GEMM_UKR_ROW_PREF,
+	BLIS_GEMMTRSM_L_UKR_ROW_PREF,
+	BLIS_GEMMTRSM_U_UKR_ROW_PREF,
+	BLIS_TRSM_L_UKR_ROW_PREF,
+	BLIS_TRSM_U_UKR_ROW_PREF,
+
+    // gemmsup kernel row preferences
+	BLIS_GEMMSUP_RRR_UKR_ROW_PREF,
+	BLIS_GEMMSUP_RRC_UKR_ROW_PREF,
+	BLIS_GEMMSUP_RCR_UKR_ROW_PREF,
+	BLIS_GEMMSUP_RCC_UKR_ROW_PREF,
+	BLIS_GEMMSUP_CRR_UKR_ROW_PREF,
+	BLIS_GEMMSUP_CRC_UKR_ROW_PREF,
+	BLIS_GEMMSUP_CCR_UKR_ROW_PREF,
+	BLIS_GEMMSUP_CCC_UKR_ROW_PREF,
+	BLIS_GEMMSUP_XXX_UKR_ROW_PREF,
+
+    // BLIS_NUM_UKR_PREFS must be last!
+    BLIS_NUM_UKR_PREFS
+} ukr_pref_t;
 
 
 typedef enum
@@ -885,38 +860,44 @@ typedef enum
 	// NOTE: the level-3 blocksizes MUST be indexed starting at zero.
 	// At one point, we made this assumption in bli_cntx_set_blkszs()
 	// and friends.
-
-	BLIS_KR = 0,
+	BLIS_KR,
 	BLIS_MR,
 	BLIS_NR,
 	BLIS_MC,
 	BLIS_KC,
 	BLIS_NC,
 
+	// broadcast factors for packing
+	BLIS_BBM,
+	BLIS_BBN,
+
+	// level-2 blocksizes
 	BLIS_M2, // level-2 blocksize in m dimension
 	BLIS_N2, // level-2 blocksize in n dimension
 
+	// level-1f blocksizes
 	BLIS_AF, // level-1f axpyf fusing factor
 	BLIS_DF, // level-1f dotxf fusing factor
 	BLIS_XF, // level-1f dotxaxpyf fusing factor
 
-	BLIS_NO_PART  // used as a placeholder when blocksizes are not applicable.
+	// gemmsup thresholds
+	BLIS_MT, // level-3 small/unpacked matrix threshold in m dimension
+	BLIS_NT, // level-3 small/unpacked matrix threshold in n dimension
+	BLIS_KT, // level-3 small/unpacked matrix threshold in k dimension
+
+	// gemmsup block sizes
+	BLIS_KR_SUP,
+	BLIS_MR_SUP,
+	BLIS_NR_SUP,
+	BLIS_MC_SUP,
+	BLIS_KC_SUP,
+	BLIS_NC_SUP,
+
+	// BLIS_NO_PART (= BLIS_NUM_BLKSZS) must be last!
+	BLIS_NO_PART, // used as a placeholder when blocksizes are not applicable,
+	              // such as when characterizing a packm operation.
+	BLIS_NUM_BLKSZS = BLIS_NO_PART
 } bszid_t;
-
-#define BLIS_NUM_BLKSZS 11
-
-
-// -- Threshold ID type --
-
-typedef enum
-{
-	BLIS_MT = 0, // level-3 small/unpacked matrix threshold in m dimension
-	BLIS_NT,     // level-3 small/unpacked matrix threshold in n dimension
-	BLIS_KT      // level-3 small/unpacked matrix threshold in k dimension
-
-} threshid_t;
-
-#define BLIS_NUM_THRESH 3
 
 
 // -- Architecture ID type --
@@ -1439,21 +1420,10 @@ typedef struct cntx_s
 	blksz_t   blkszs[ BLIS_NUM_BLKSZS ];
 	bszid_t   bmults[ BLIS_NUM_BLKSZS ];
 
-	func_t    l3_vir_ukrs[ BLIS_NUM_LEVEL3_UKRS ];
-	func_t    l3_nat_ukrs[ BLIS_NUM_LEVEL3_UKRS ];
-	mbool_t   l3_nat_ukrs_prefs[ BLIS_NUM_LEVEL3_UKRS ];
+	func_t    ukrs[ BLIS_NUM_UKRS ];
+	mbool_t   ukr_prefs[ BLIS_NUM_UKR_PREFS ];
 
-	blksz_t   l3_sup_thresh[ BLIS_NUM_THRESH ];
-	void*     l3_sup_handlers[ BLIS_NUM_LEVEL3_OPS ];
-	blksz_t   l3_sup_blkszs[ BLIS_NUM_BLKSZS ];
-	func_t    l3_sup_kers[ BLIS_NUM_3OP_RC_COMBOS ];
-	mbool_t   l3_sup_kers_prefs[ BLIS_NUM_3OP_RC_COMBOS ];
-
-	func_t    l1f_kers[ BLIS_NUM_LEVEL1F_KERS ];
-	func_t    l1v_kers[ BLIS_NUM_LEVEL1V_KERS ];
-
-	func_t    packm_kers[ BLIS_NUM_PACKM_KERS ];
-	func_t    unpackm_kers[ BLIS_NUM_UNPACKM_KERS ];
+	void_fp   l3_sup_handlers[ BLIS_NUM_LEVEL3_OPS ];
 
 	ind_t     method;
 
@@ -1586,6 +1556,7 @@ typedef enum
 	// Architecture-related errors
 	BLIS_INVALID_ARCH_ID                       = (-150),
 	BLIS_UNINITIALIZED_GKS_CNTX                = (-151),
+	BLIS_INVALID_UKR_ID                        = (-152),
 
 	// Blocksize-related errors
 	BLIS_MC_DEF_NONMULTIPLE_OF_MR              = (-160),

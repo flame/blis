@@ -43,11 +43,11 @@ static func_t packm_struc_cxk_kers[BLIS_NUM_PACK_SCHEMA_TYPES] =
     { { bli_spackm_struc_cxk,      bli_cpackm_struc_cxk,
         bli_dpackm_struc_cxk,      bli_zpackm_struc_cxk,      } },
 // 0001 row/col panels: 1m-expanded (1e)
-    { { NULL,                      bli_cpackm_struc_cxk_1er,
-        NULL,                      bli_zpackm_struc_cxk_1er,  } },
+    { { NULL,                      bli_cpackm_struc_cxk,
+        NULL,                      bli_zpackm_struc_cxk,  } },
 // 0010 row/col panels: 1m-reordered (1r)
-    { { NULL,                      bli_cpackm_struc_cxk_1er,
-        NULL,                      bli_zpackm_struc_cxk_1er,  } },
+    { { NULL,                      bli_cpackm_struc_cxk,
+        NULL,                      bli_zpackm_struc_cxk,  } },
 };
 
 static void_fp GENARRAY2_ALL(packm_struc_cxk_md,packm_struc_cxk_md);

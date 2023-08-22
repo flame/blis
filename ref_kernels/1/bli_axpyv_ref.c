@@ -58,7 +58,7 @@ void PASTEMAC3(ch,opname,arch,suf) \
 	{ \
 		/* Query the context for the kernel function pointer. */ \
 		const num_t             dt     = PASTEMAC(ch,type); \
-		PASTECH(ch,addv_ker_ft) addv_p = bli_cntx_get_l1v_ker_dt( dt, BLIS_ADDV_KER, cntx ); \
+		PASTECH(ch,addv_ker_ft) addv_p = bli_cntx_get_ukr_dt( dt, BLIS_ADDV_KER, cntx ); \
 \
 		addv_p \
 		( \
@@ -148,7 +148,7 @@ void PASTEMAC3(ch,opname,arch,suf) \
 	{ \
 		/* Query the context for the kernel function pointer. */ \
 		const num_t             dt     = PASTEMAC(ch,type); \
-		PASTECH(ch,addv_ker_ft) addv_p = bli_cntx_get_l1v_ker_dt( dt, BLIS_ADDV_KER, cntx ); \
+		PASTECH(ch,addv_ker_ft) addv_p = bli_cntx_get_ukr_dt( dt, BLIS_ADDV_KER, cntx ); \
 \
 		addv_p \
 		( \

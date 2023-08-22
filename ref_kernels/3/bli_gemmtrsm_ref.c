@@ -34,6 +34,9 @@
 
 #include "blis.h"
 
+// An implementation that indexes through B with the assumption that all
+// elements were broadcast (duplicated) by a factor of NP/NR.
+
 #undef  GENTFUNC
 #define GENTFUNC( ctype, ch, opname, arch, suf, trsmkerid ) \
 \
@@ -60,21 +63,38 @@ void PASTEMAC3(ch,opname,arch,suf) \
 	const inc_t     packnr = bli_cntx_get_blksz_max_dt( dt, BLIS_NR, cntx ); \
 \
 	const inc_t     rs_b   = packnr; \
-	const inc_t     cs_b   = 1; \
+	const inc_t     cs_b   = bli_cntx_get_blksz_def_dt( dt, BLIS_BBN, cntx ); \
+/*
+printf( "bli_gemmtrsm_ref(): cs_b = %d\n", (int)cs_b ); \
+printf( "bli_gemmtrsm_ref(): k nr = %d %d\n", (int)k, (int)nr ); \
+*/ \
 \
 	ctype*          minus_one = PASTEMAC(ch,m1); \
 \
 	PASTECH(ch,gemm_ukr_ft) \
-	              gemm_ukr = bli_cntx_get_l3_nat_ukr_dt( dt, BLIS_GEMM_UKR, cntx ); \
+	              gemm_ukr = bli_cntx_get_ukr_dt( dt, BLIS_GEMM_UKR, cntx ); \
 	PASTECH(ch,trsm_ukr_ft) \
-	              trsm_ukr = bli_cntx_get_l3_nat_ukr_dt( dt, trsmkerid, cntx ); \
+	              trsm_ukr = bli_cntx_get_ukr_dt( dt, trsmkerid, cntx ); \
+\
+/*
+PASTEMAC(d,fprintm)( stdout, "gemmtrsm_ukr: b01", k, nr, \
+                     (double*)bx1, rs_b, cs_b, "%5.2f", "" ); \
+PASTEMAC(d,fprintm)( stdout, "gemmtrsm_ukr: b11", mr, 2*nr, \
+                     (double*)b11, rs_b, 1, "%5.2f", "" ); \
+*/ \
 \
 	ctype           ct[ BLIS_STACK_BUF_MAX_SIZE \
 	                    / sizeof( ctype ) ] \
 	                    __attribute__((aligned(BLIS_STACK_BUF_ALIGN_SIZE))); \
-	/* FGVZ: Should we be querying the preference of BLIS_GEMMTRSM_?_UKR
-	   instead? */ \
-	const bool      col_pref    = bli_cntx_l3_vir_ukr_prefers_cols_dt( dt, BLIS_GEMM_UKR, cntx ); \
+	/* to FGVZ: Should we be querying the preference of BLIS_GEMMTRSM_?_UKR
+	   instead?
+
+	   to DAM: Given that this reference kernel is implemented in terms of gemm,
+	   I think that is the preference we want to query. There might be other
+	   circumstances where we would want the gemmtrsm_? operations to have
+	   and exercise their own IO preferences -- I'd have to think about it --
+	   but this doesn't seem to be one of them. */ \
+	const bool      col_pref    = bli_cntx_ukr_prefers_cols_dt( dt, BLIS_GEMM_VIR_UKR, cntx ); \
 	const inc_t     rs_ct       = ( col_pref ? 1 : nr ); \
 	const inc_t     cs_ct       = ( col_pref ? mr : 1 ); \
 \
@@ -106,6 +126,19 @@ void PASTEMAC3(ch,opname,arch,suf) \
 	  data, \
 	  cntx  \
 	); \
+/*
+PASTEMAC(d,fprintm)( stdout, "gemmtrsm_ukr: b11 after gemm", mr, 2*nr, \
+                     (double*)b11, rs_b, 1, "%5.2f", "" ); \
+*/ \
+\
+	/* Broadcast the elements of the updated b11 submatrix to their
+	   duplicated neighbors. */ \
+	PASTEMAC(ch,bcastbbs_mxn) \
+	( \
+	  m, \
+	  n, \
+	  b11, rs_b, cs_b  \
+	); \
 \
 	/* b11 = inv(a11) * b11;
 	   c11 = b11; */ \
@@ -117,6 +150,10 @@ void PASTEMAC3(ch,opname,arch,suf) \
 	  data, \
 	  cntx  \
 	); \
+/*
+PASTEMAC(d,fprintm)( stdout, "gemmtrsm_ukr: b11 after trsm", mr, 2*nr, \
+                     (double*)b11, rs_b, 1, "%5.2f", "" ); \
+*/ \
 \
 	if ( use_ct ) \
 	{ \

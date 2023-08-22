@@ -43,14 +43,28 @@ void bli_cntx_init_thunderx2( cntx_t* cntx )
 
 	// -------------------------------------------------------------------------
 
-	// Update the context with optimized native gemm micro-kernels and
-	// their storage preferences.
-	bli_cntx_set_l3_nat_ukrs
+	// Update the context with optimized native gemm micro-kernels.
+	bli_cntx_set_ukrs
 	(
-	  2,
-	  BLIS_GEMM_UKR, BLIS_FLOAT,    bli_sgemm_armv8a_asm_8x12, FALSE,
-	  BLIS_GEMM_UKR, BLIS_DOUBLE,   bli_dgemm_armv8a_asm_6x8,  FALSE,
-	  cntx
+	  cntx,
+
+	  // level-3
+	  BLIS_GEMM_UKR, BLIS_FLOAT,  bli_sgemm_armv8a_asm_8x12,
+	  BLIS_GEMM_UKR, BLIS_DOUBLE, bli_dgemm_armv8a_asm_6x8,
+
+	  BLIS_VA_END
+	);
+
+	// Update the context with storage preferences.
+	bli_cntx_set_ukr_prefs
+	(
+	  cntx,
+
+	  // level-3
+	  BLIS_GEMM_UKR_ROW_PREF, BLIS_FLOAT,  FALSE,
+	  BLIS_GEMM_UKR_ROW_PREF, BLIS_DOUBLE, FALSE,
+
+	  BLIS_VA_END
 	);
 
 	// Initialize level-3 blocksize objects with architecture-specific values.
@@ -65,13 +79,16 @@ void bli_cntx_init_thunderx2( cntx_t* cntx )
 	// blocksizes (and multiples) for native execution.
 	bli_cntx_set_blkszs
 	(
-	  BLIS_NAT, 5,
+	  cntx,
+
+	  // level-3
 	  BLIS_NC, &blkszs[ BLIS_NC ], BLIS_NR,
 	  BLIS_KC, &blkszs[ BLIS_KC ], BLIS_KR,
 	  BLIS_MC, &blkszs[ BLIS_MC ], BLIS_MR,
 	  BLIS_NR, &blkszs[ BLIS_NR ], BLIS_NR,
 	  BLIS_MR, &blkszs[ BLIS_MR ], BLIS_MR,
-	  cntx
+
+	  BLIS_VA_END
 	);
 }
 

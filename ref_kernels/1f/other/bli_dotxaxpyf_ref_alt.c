@@ -67,8 +67,8 @@ void PASTEMAC(ch,varname) \
 \
 	/* Query the context for the kernel function pointer. */ \
 	const num_t          dt     = PASTEMAC(ch,type); \
-	PASTECH(ch,dotxv_ft) kfp_dv = bli_cntx_get_l1v_ker_dt( dt, BLIS_DOTXV_KER, cntx ); \
-	PASTECH(ch,axpyv_ft) kfp_av = bli_cntx_get_l1v_ker_dt( dt, BLIS_AXPYV_KER, cntx ); \
+	PASTECH(ch,dotxv_ft) kfp_dv = bli_cntx_get_ukr_dt( dt, BLIS_DOTXV_KER, cntx ); \
+	PASTECH(ch,axpyv_ft) kfp_av = bli_cntx_get_ukr_dt( dt, BLIS_AXPYV_KER, cntx ); \
 \
 	/* A is m x n.                   */ \
 	/* y = beta * y + alpha * A^T w; */ \

@@ -113,7 +113,7 @@ void PASTEMAC3(ch,opname,arch,suf) \
 		const num_t              dt     = PASTEMAC(ch,type); \
 		PASTECH(ch,dotxv_ker_ft) kfp_dv \
 		= \
-		bli_cntx_get_l1v_ker_dt( dt, BLIS_DOTXV_KER, cntx ); \
+		bli_cntx_get_ukr_dt( dt, BLIS_DOTXV_KER, cntx ); \
 \
 		for ( dim_t i = 0; i < b_n; ++i ) \
 		{ \

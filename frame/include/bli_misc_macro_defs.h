@@ -164,5 +164,11 @@ BLIS_INLINE void bli_toggle_bool( bool* b )
 #define bli_iformatspec() "%6d"
 
 
+// Sentinel constant used to indicate the end of a variable argument function
+// (See bli_cntx.c)
+
+#define BLIS_VA_END  (-1)
+
+
 #endif
 

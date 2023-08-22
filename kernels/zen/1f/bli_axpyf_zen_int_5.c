@@ -108,8 +108,9 @@ void bli_saxpyf_zen_int_5
     // operation as a loop over axpyv.
     if ( b_n != fuse_fac )
     {
-        if(cntx == NULL) cntx = bli_gks_query_cntx();
-        saxpyv_ker_ft f = bli_cntx_get_l1v_ker_dt( BLIS_FLOAT, BLIS_AXPYV_KER, cntx );
+        if ( cntx == NULL ) cntx = bli_gks_query_cntx();
+
+        saxpyv_ker_ft f = bli_cntx_get_ukr_dt( BLIS_FLOAT, BLIS_AXPYV_KER, cntx );
 
         for ( i = 0; i < b_n; ++i )
         {
@@ -131,7 +132,7 @@ void bli_saxpyf_zen_int_5
               cntx
             );
         }
-        
+
         return;
     }
 
@@ -359,7 +360,9 @@ void bli_daxpyf_zen_int_5
     // operation as a loop over axpyv.
     if ( b_n != fuse_fac )
     {
-        daxpyv_ker_ft f = bli_cntx_get_l1v_ker_dt( BLIS_DOUBLE, BLIS_AXPYV_KER, cntx );
+        if ( cntx == NULL ) cntx = bli_gks_query_cntx();
+
+        daxpyv_ker_ft f = bli_cntx_get_ukr_dt( BLIS_DOUBLE, BLIS_AXPYV_KER, cntx );
 
         for ( i = 0; i < b_n; ++i )
         {
@@ -381,7 +384,7 @@ void bli_daxpyf_zen_int_5
               cntx
             );
         }
-        
+
         return;
     }
 
@@ -559,7 +562,7 @@ void bli_daxpyf_zen_int_5
 
 // -----------------------------------------------------------------------------
 
-static void bli_daxpyf_zen_int_16x2
+void bli_daxpyf_zen_int_16x2
      (
        conj_t           conja,
        conj_t           conjx,
@@ -608,7 +611,7 @@ static void bli_daxpyf_zen_int_16x2
     // operation as a loop over axpyv.
     if ( b_n != fuse_fac )
     {
-        daxpyv_ker_ft f = bli_cntx_get_l1v_ker_dt( BLIS_DOUBLE, BLIS_AXPYV_KER, cntx );
+        daxpyv_ker_ft f = bli_cntx_get_ukr_dt( BLIS_DOUBLE, BLIS_AXPYV_KER, cntx );
 
         for ( i = 0; i < b_n; ++i )
         {
@@ -843,6 +846,7 @@ static void bli_daxpyf_zen_int_16x2
 }
 
 // -----------------------------------------------------------------------------
+
 void bli_daxpyf_zen_int_16x4
      (
        conj_t           conja,
@@ -895,8 +899,9 @@ void bli_daxpyf_zen_int_16x4
     // operation as a loop over axpyv.
     if ( b_n != fuse_fac )
     {
-        if(cntx == NULL) cntx = bli_gks_query_cntx();
-        daxpyv_ker_ft f = bli_cntx_get_l1v_ker_dt( BLIS_DOUBLE, BLIS_AXPYV_KER, cntx );
+        if ( cntx == NULL ) cntx = bli_gks_query_cntx();
+
+        daxpyv_ker_ft f = bli_cntx_get_ukr_dt( BLIS_DOUBLE, BLIS_AXPYV_KER, cntx );
 
         for ( i = 0; i < b_n; ++i )
         {

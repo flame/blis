@@ -104,7 +104,7 @@ void bli_saxpyf_zen_int_8
 	// operation as a loop over axpyv.
 	if ( b_n != fuse_fac )
 	{
-		saxpyv_ker_ft f = bli_cntx_get_l1v_ker_dt( BLIS_FLOAT, BLIS_AXPYV_KER, cntx );
+		saxpyv_ker_ft f = bli_cntx_get_ukr_dt( BLIS_FLOAT, BLIS_AXPYV_KER, cntx );
 
 		for ( i = 0; i < b_n; ++i )
 		{
@@ -313,7 +313,7 @@ void bli_daxpyf_zen_int_8
 	// operation as a loop over axpyv.
 	if ( b_n != fuse_fac )
 	{
-		daxpyv_ker_ft f = bli_cntx_get_l1v_ker_dt( BLIS_DOUBLE, BLIS_AXPYV_KER, cntx );
+		daxpyv_ker_ft f = bli_cntx_get_ukr_dt( BLIS_DOUBLE, BLIS_AXPYV_KER, cntx );
 
 		for ( i = 0; i < b_n; ++i )
 		{

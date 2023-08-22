@@ -45,9 +45,6 @@ void bli_cntx_init_armsve( cntx_t* cntx )
 		return;
 
 	blksz_t blkszs[ BLIS_NUM_BLKSZS ];
-#if 0
-	blksz_t thresh[ BLIS_NUM_THRESH ];
-#endif
 
 	// Set default kernel blocksizes and functions.
 	bli_cntx_init_armsve_ref( cntx );
@@ -64,35 +61,55 @@ void bli_cntx_init_armsve( cntx_t* cntx )
 	bli_c_blksz_armsve(&m_r_c, &n_r_c, &k_c_c, &m_c_c, &n_c_c);
 	bli_z_blksz_armsve(&m_r_z, &n_r_z, &k_c_z, &m_c_z, &n_c_z);
 
-	// Update the context with optimized native gemm micro-kernels and
-	// their storage preferences.
-	bli_cntx_set_l3_nat_ukrs
+	// Update the context with optimized native gemm micro-kernels.
+	bli_cntx_set_ukrs
 	(
-	  4,
+	  cntx,
+
+	  // level-3
 	  // These are vector-length agnostic kernels. Yet knowing mr is required at runtime.
-	  BLIS_GEMM_UKR, BLIS_FLOAT,    bli_sgemm_armsve_asm_2vx10_unindexed, FALSE,
-	  BLIS_GEMM_UKR, BLIS_DOUBLE,   bli_dgemm_armsve_asm_2vx10_unindexed, FALSE,
-	  BLIS_GEMM_UKR, BLIS_SCOMPLEX, bli_cgemm_armsve_asm_2vx10_unindexed, FALSE,
-	  BLIS_GEMM_UKR, BLIS_DCOMPLEX, bli_zgemm_armsve_asm_2vx10_unindexed, FALSE,
-	  cntx
+	  BLIS_GEMM_UKR, BLIS_FLOAT,    bli_sgemm_armsve_asm_2vx10_unindexed,
+	  BLIS_GEMM_UKR, BLIS_DOUBLE,   bli_dgemm_armsve_asm_2vx10_unindexed,
+	  BLIS_GEMM_UKR, BLIS_SCOMPLEX, bli_cgemm_armsve_asm_2vx10_unindexed,
+	  BLIS_GEMM_UKR, BLIS_DCOMPLEX, bli_zgemm_armsve_asm_2vx10_unindexed,
+
+	  BLIS_VA_END
+	);
+
+	// Update the context with storage preferences.
+	bli_cntx_set_ukr_prefs
+	(
+	  cntx,
+
+	  // level-3
+	  BLIS_GEMM_UKR_ROW_PREF, BLIS_FLOAT,    FALSE,
+	  BLIS_GEMM_UKR_ROW_PREF, BLIS_DOUBLE,   FALSE,
+	  BLIS_GEMM_UKR_ROW_PREF, BLIS_SCOMPLEX, FALSE,
+	  BLIS_GEMM_UKR_ROW_PREF, BLIS_DCOMPLEX, FALSE,
+
+	  BLIS_VA_END
 	);
 
 	// Set VL-specific packing routines if applicable.
-	if (m_r_d==16)
-	  bli_cntx_set_packm_kers
+	if ( m_r_d == 16 )
+	{
+	  bli_cntx_set_ukrs
 	  (
-		2,
-		BLIS_PACKM_10XK_KER, BLIS_DOUBLE, bli_dpackm_armsve512_asm_10xk,
-		BLIS_PACKM_16XK_KER, BLIS_DOUBLE, bli_dpackm_armsve512_asm_16xk,
-		cntx
+		cntx,
+		BLIS_PACKM_MRXK_KER, BLIS_DOUBLE, bli_dpackm_armsve512_asm_16xk,
+		BLIS_PACKM_NRXK_KER, BLIS_DOUBLE, bli_dpackm_armsve512_asm_10xk,
+		BLIS_VA_END
 	  );
-	else if (m_r_d==8)
-	  bli_cntx_set_packm_kers
+	}
+	else if ( m_r_d == 8 )
+	{
+	  bli_cntx_set_ukrs
 	  (
-		1,
-		BLIS_PACKM_8XK_KER, BLIS_DOUBLE, bli_dpackm_armsve256_int_8xk,
-		cntx
+		cntx,
+		BLIS_PACKM_MRXK_KER, BLIS_DOUBLE, bli_dpackm_armsve256_int_8xk,
+		BLIS_VA_END
 	  );
+	}
 
 	// Initialize level-3 blocksize objects with architecture-specific values.
 	//                                           s      d      c      z
@@ -106,64 +123,16 @@ void bli_cntx_init_armsve( cntx_t* cntx )
 	// blocksizes (and multiples) for native execution.
 	bli_cntx_set_blkszs
 	(
-	  BLIS_NAT, 5,
+	  cntx,
+
+	  // level-3
 	  BLIS_NC, &blkszs[ BLIS_NC ], BLIS_NR,
 	  BLIS_KC, &blkszs[ BLIS_KC ], BLIS_KR,
 	  BLIS_MC, &blkszs[ BLIS_MC ], BLIS_MR,
 	  BLIS_NR, &blkszs[ BLIS_NR ], BLIS_NR,
 	  BLIS_MR, &blkszs[ BLIS_MR ], BLIS_MR,
-	  cntx
+
+	  BLIS_VA_END
 	);
-
-#if 0
-	// Initialize sup thresholds with architecture-appropriate values.
-	//                                          s     d     c     z
-	bli_blksz_init_easy( &thresh[ BLIS_MT ],   -1,  101,   -1,   -1 );
-	bli_blksz_init_easy( &thresh[ BLIS_NT ],   -1,  101,   -1,   -1 );
-	bli_blksz_init_easy( &thresh[ BLIS_KT ],   -1,  101,   -1,   -1 );
-
-	// Initialize the context with the sup thresholds.
-	bli_cntx_set_l3_sup_thresh
-	(
-	  3,
-	  BLIS_MT, &thresh[ BLIS_MT ],
-	  BLIS_NT, &thresh[ BLIS_NT ],
-	  BLIS_KT, &thresh[ BLIS_KT ],
-	  cntx
-	);
-
-	// Update the context with optimized small/unpacked gemm kernels.
-	bli_cntx_set_l3_sup_kers
-	(
-	  4,
-	  BLIS_RRR, BLIS_DOUBLE, bli_dgemmsup_rv_armsve_10x2v_unindexed, TRUE,
-	  BLIS_RCR, BLIS_DOUBLE, bli_dgemmsup_rv_armsve_10x2v_unindexed, TRUE,
-	  BLIS_CCR, BLIS_DOUBLE, bli_dgemmsup_rv_armsve_10x2v_unindexed, TRUE,
-	  BLIS_CCC, BLIS_DOUBLE, bli_dgemmsup_rv_armsve_10x2v_unindexed, TRUE,
-	  cntx
-	);
-
-	// Initialize level-3 sup blocksize objects with architecture-specific
-	// values.
-	//                                           s      d      c      z
-	bli_blksz_init_easy( &blkszs[ BLIS_MR ],    -1, n_r_d,    -1,    -1 );
-	bli_blksz_init_easy( &blkszs[ BLIS_NR ],    -1, m_r_d,    -1,    -1 );
-	bli_blksz_init_easy( &blkszs[ BLIS_MC ],    -1,   120,    -1,    -1 );
-	bli_blksz_init_easy( &blkszs[ BLIS_KC ],    -1,   256,    -1,    -1 );
-	bli_blksz_init_easy( &blkszs[ BLIS_NC ],    -1,  2048,    -1,    -1 );
-
-	// Update the context with the current architecture's register and cache
-	// blocksizes for small/unpacked level-3 problems.
-	bli_cntx_set_l3_sup_blkszs
-	(
-	  5,
-	  BLIS_NC, &blkszs[ BLIS_NC ],
-	  BLIS_KC, &blkszs[ BLIS_KC ],
-	  BLIS_MC, &blkszs[ BLIS_MC ],
-	  BLIS_NR, &blkszs[ BLIS_NR ],
-	  BLIS_MR, &blkszs[ BLIS_MR ],
-	  cntx
-	);
-#endif
 }
 

@@ -34,8 +34,8 @@
 
 #include "blis.h"
 
-#undef  GENTFUNC
-#define GENTFUNC( ctype, ch, varname, kername ) \
+#undef  GENTFUNCR
+#define GENTFUNCR( ctype, ctype_r, ch, chr, varname, cxk_kername, cxc_kername ) \
 \
 void PASTEMAC(ch,varname) \
      ( \
@@ -58,460 +58,249 @@ void PASTEMAC(ch,varname) \
        cntx_t*         cntx  \
      ) \
 { \
-	/* Handle micro-panel packing based on the structure of the matrix
-	   being packed. */ \
-	if      ( bli_is_general( strucc ) ) \
-	{ \
-		/* For micro-panels of general matrices, we can call the pack
-		   kernel front-end directly. */ \
-		PASTEMAC(ch,kername) \
-		( \
-		  conjc, \
-		  schema, \
-		  panel_dim, \
-		  panel_dim_max, \
-		  panel_len, \
-		  panel_len_max, \
-		  kappa, \
-		  c, incc, ldc, \
-		  p,       ldp, \
-		  cntx  \
-		); \
-	} \
-	else if ( bli_is_herm_or_symm( strucc ) ) \
-	{ \
-		/* Call a helper function for micro-panels of Hermitian/symmetric
-		   matrices. */ \
-		PASTEMAC(ch,packm_herm_cxk) \
-		( \
-		  strucc, \
-		  diagc, \
-		  uploc, \
-		  conjc, \
-		  schema, \
-		  invdiag, \
-		  panel_dim, \
-		  panel_len, \
-		  panel_dim_max, \
-		  panel_len_max, \
-		  panel_dim_off, \
-		  panel_len_off, \
-		  kappa, \
-		  c, incc, ldc, \
-		  p,       ldp, \
-		     is_p, \
-		  cntx  \
-		); \
-	} \
-	else /* ( bli_is_triangular( strucc ) ) */ \
-	{ \
-		/* Call a helper function for micro-panels of triangular
-		   matrices. */ \
-		PASTEMAC(ch,packm_tri_cxk) \
-		( \
-		  strucc, \
-		  diagc, \
-		  uploc, \
-		  conjc, \
-		  schema, \
-		  invdiag, \
-		  panel_dim, \
-		  panel_len, \
-		  panel_dim_max, \
-		  panel_len_max, \
-		  panel_dim_off, \
-		  panel_len_off, \
-		  kappa, \
-		  c, incc, ldc, \
-		  p,       ldp, \
-		     is_p, \
-		  cntx  \
-		); \
-	} \
-}
-
-INSERT_GENTFUNC_BASIC( packm_struc_cxk, packm_cxk )
-
-
-
-
-#undef  GENTFUNC
-#define GENTFUNC( ctype, ch, varname, kername ) \
+	num_t   dt            = PASTEMAC(ch,type); \
+	num_t   dt_r          = PASTEMAC(chr,type); \
+	dim_t   panel_len_pad = panel_len_max - panel_len; \
 \
-void PASTEMAC(ch,varname) \
-     ( \
-       struc_t         strucc, \
-       diag_t          diagc, \
-       uplo_t          uploc, \
-       conj_t          conjc, \
-       pack_t          schema, \
-       bool            invdiag, \
-       dim_t           panel_dim, \
-       dim_t           panel_len, \
-       dim_t           panel_dim_max, \
-       dim_t           panel_len_max, \
-       dim_t           panel_dim_off, \
-       dim_t           panel_len_off, \
-       ctype* restrict kappa, \
-       ctype* restrict c, inc_t incc, inc_t ldc, \
-       ctype* restrict p,             inc_t ldp, \
-                          inc_t is_p, \
-       cntx_t*         cntx  \
-     ) \
-{ \
+	bszid_t bsz_id        = bli_is_col_packed( schema ) ? BLIS_NR : BLIS_MR; \
+	dim_t   packmrnr      = bli_cntx_get_blksz_max_dt( dt, bsz_id, cntx ); \
+	dim_t   packmrnr_r    = bli_cntx_get_blksz_max_dt( dt_r, bsz_id, cntx ); \
+\
+	ukr_t   cxk_ker_id    = bli_is_col_packed( schema ) ? BLIS_PACKM_NRXK_KER \
+	                                                    : BLIS_PACKM_MRXK_KER; \
+	ukr_t   cxc_ker_id    = bli_is_col_packed( schema ) ? BLIS_PACKM_NRXNR_DIAG_KER \
+	                                                    : BLIS_PACKM_MRXMR_DIAG_KER; \
+\
+	if ( bli_is_1m_packed( schema ) ) \
+	{ \
+		cxk_ker_id = bli_is_col_packed( schema ) ? BLIS_PACKM_NRXK_1ER_KER \
+		                                         : BLIS_PACKM_MRXK_1ER_KER; \
+		cxc_ker_id = bli_is_col_packed( schema ) ? BLIS_PACKM_NRXNR_DIAG_1ER_KER \
+		                                         : BLIS_PACKM_MRXMR_DIAG_1ER_KER; \
+	} \
+\
+	PASTECH2(ch,cxk_kername,_ker_ft) f_cxk = bli_cntx_get_ukr_dt( dt, cxk_ker_id, cntx ); \
+	PASTECH2(ch,cxc_kername,_ker_ft) f_cxc = bli_cntx_get_ukr_dt( dt, cxc_ker_id, cntx ); \
+\
+	/* For general matrices, pack and return early */ \
+	if ( bli_is_general( strucc ) ) \
+	{ \
+		f_cxk \
+		( \
+		  conjc, \
+		  schema, \
+		  panel_dim, \
+		  panel_len, \
+		  panel_len_max, \
+		  kappa, \
+		  c, incc, ldc, \
+		  p,       ldp, \
+		  cntx  \
+		); \
+		return; \
+	} \
+\
+	/* Sanity check. Diagonals should not intersect the short end of
+	   a micro-panel. If they do, then somehow the constraints on
+	   cache blocksizes being a whole multiple of the register
+	   blocksizes was somehow violated. */ \
 	doff_t diagoffc = panel_dim_off - panel_len_off; \
-	doff_t diagoffc_abs; \
-	dim_t  i, j; \
+	if ( (          -panel_dim < diagoffc && diagoffc <         0 ) || \
+		 ( panel_len-panel_dim < diagoffc && diagoffc < panel_len ) ) \
+		bli_check_error_code( BLIS_NOT_YET_IMPLEMENTED ); \
 \
-	/* Handle the case where the micro-panel does NOT intersect the
-	   diagonal separately from the case where it does intersect. */ \
-	if ( !bli_intersects_diag_n( diagoffc, panel_dim, panel_len ) ) \
+	/* For triangular, symmetric, and hermitian matrices we need to consider
+	   three parts. */ \
+\
+	/* Pack to p10. */ \
+	if ( 0 < diagoffc ) \
 	{ \
-		/* If the current panel is unstored, we need to make a few
-		   adjustments so we refer to the data where it is actually
-		   stored, also taking conjugation into account. (Note this
-		   implicitly assumes we are operating on a dense panel
-		   within a larger symmetric or Hermitian matrix, since a
-		   general matrix would not contain any unstored region.) */ \
-		if ( bli_is_unstored_subpart_n( diagoffc, uploc, panel_dim, panel_len ) ) \
+		dim_t  p10_dim     = panel_dim; \
+		dim_t  p10_len     = bli_min( diagoffc, panel_len ); \
+		dim_t  p10_len_max = p10_len == panel_len ? panel_len_max : p10_len; \
+		ctype* p10         = p; \
+		conj_t conjc10     = conjc; \
+		ctype* c10         = c; \
+		inc_t  incc10      = incc; \
+		inc_t  ldc10       = ldc; \
+\
+		if ( bli_is_upper( uploc ) ) \
 		{ \
-			c = c + diagoffc * ( doff_t )ldc + \
-			       -diagoffc * ( doff_t )incc;  \
-			bli_swap_incs( &incc, &ldc ); \
-\
-			if ( bli_is_hermitian( strucc ) ) \
-				bli_toggle_conj( &conjc ); \
-		} \
-\
-		/* Pack the full panel. */ \
-		PASTEMAC(ch,kername) \
-		( \
-		  conjc, \
-		  schema, \
-		  panel_dim, \
-		  panel_dim_max, \
-		  panel_len, \
-		  panel_len_max, \
-		  kappa, \
-		  c, incc, ldc, \
-		  p,       ldp, \
-		  cntx  \
-		); \
-	} \
-	else /* if ( bli_intersects_diag_n( diagoffc, panel_dim, panel_len ) ) */ \
-	{ \
-		ctype* restrict c10; \
-		ctype* restrict p10; \
-		dim_t           p10_dim, p10_len; \
-		inc_t           incc10, ldc10; \
-		doff_t          diagoffc10; \
-		conj_t          conjc10; \
-\
-		ctype* restrict c12; \
-		ctype* restrict p12; \
-		dim_t           p12_dim, p12_len; \
-		inc_t           incc12, ldc12; \
-		doff_t          diagoffc12; \
-		conj_t          conjc12; \
-\
-		/* Sanity check. Diagonals should not intersect the short end of
-		   a micro-panel. If they do, then somehow the constraints on
-		   cache blocksizes being a whole multiple of the register
-		   blocksizes was somehow violated. */ \
-		if ( diagoffc < 0 ) \
-			bli_check_error_code( BLIS_NOT_YET_IMPLEMENTED ); \
-\
-		diagoffc_abs = bli_abs( diagoffc ); \
-\
-		if      ( bli_is_lower( uploc ) ) \
-		{ \
-			p10_dim    = panel_dim; \
-			p10_len    = diagoffc_abs; \
-			p10        = p; \
-			c10        = c; \
-			incc10     = incc; \
-			ldc10      = ldc; \
-			conjc10    = conjc; \
-\
-			p12_dim    = panel_dim; \
-			p12_len    = panel_len - p10_len; \
-			j          = p10_len; \
-			diagoffc12 = diagoffc_abs - j; \
-			p12        = p + (j  )*ldp; \
-			c12        = c + (j  )*ldc; \
-			c12        = c12 + diagoffc12 * ( doff_t )ldc + \
-			                  -diagoffc12 * ( doff_t )incc;  \
-			incc12     = ldc; \
-			ldc12      = incc; \
-			conjc12    = conjc; \
-\
-			if ( bli_is_hermitian( strucc ) ) \
-				bli_toggle_conj( &conjc12 ); \
-		} \
-		else /* if ( bli_is_upper( uploc ) ) */ \
-		{ \
-			p10_dim    = panel_dim; \
-			p10_len    = diagoffc_abs + panel_dim; \
-			diagoffc10 = diagoffc; \
-			p10        = p; \
-			c10        = c; \
-			c10        = c10 + diagoffc10 * ( doff_t )ldc + \
-			                  -diagoffc10 * ( doff_t )incc;  \
-			incc10     = ldc; \
-			ldc10      = incc; \
-			conjc10    = conjc; \
-\
-			p12_dim    = panel_dim; \
-			p12_len    = panel_len - p10_len; \
-			j          = p10_len; \
-			p12        = p + (j  )*ldp; \
-			c12        = c + (j  )*ldc; \
-			incc12     = incc; \
-			ldc12      = ldc; \
-			conjc12    = conjc; \
+			bli_reflect_to_stored_part( diagoffc, c10, incc10, ldc10 ); \
 \
 			if ( bli_is_hermitian( strucc ) ) \
 				bli_toggle_conj( &conjc10 ); \
 		} \
 \
-		/* Pack to p10. For upper storage, this includes the unstored
-		   triangle of c11. */ \
-		/* NOTE: Since we're only packing partial panels here, we pass in
-		   p1x_len as panel_len_max; otherwise, the packm kernel will zero-
-		   fill the columns up to panel_len_max, which is not what we need
-		   or want to happen. */ \
-		PASTEMAC(ch,kername) \
-		( \
-		  conjc10, \
-		  schema, \
-		  p10_dim, \
-		  panel_dim_max, \
-		  p10_len, \
-		  p10_len, \
-		  kappa, \
-		  c10, incc10, ldc10, \
-		  p10,         ldp, \
-		  cntx  \
-		); \
-\
-		/* Pack to p12. For lower storage, this includes the unstored
-		   triangle of c11. */ \
-		/* NOTE: Since we're only packing partial panels here, we pass in
-		   p1x_len as panel_len_max; otherwise, the packm kernel will zero-
-		   fill the columns up to panel_len_max, which is not what we need
-		   or want to happen. */ \
-		PASTEMAC(ch,kername) \
-		( \
-		  conjc12, \
-		  schema, \
-		  p12_dim, \
-		  panel_dim_max, \
-		  p12_len, \
-		  p12_len, \
-		  kappa, \
-		  c12, incc12, ldc12, \
-		  p12,         ldp, \
-		  cntx  \
-		); \
-\
-		/* Pack the stored triangle of c11 to p11. */ \
+		/* If we are referencing the unstored part of a triangular matrix,
+		   explicitly store zeros */ \
+		if ( bli_is_upper( uploc ) && bli_is_triangular( strucc ) ) \
 		{ \
-			dim_t           p11_m  = panel_dim; \
-			dim_t           p11_n  = panel_dim; \
-			dim_t           j2     = diagoffc_abs; \
-			ctype* restrict c11    = c + (j2 )*ldc; \
-			ctype* restrict p11    = p + (j2 )*ldp; \
-			trans_t         transc = ( trans_t )conjc; \
-\
-			PASTEMAC2(ch,copym,BLIS_TAPI_EX_SUF) \
-			( \
-			  0, \
-			  BLIS_NONUNIT_DIAG, \
-			  uploc, \
-			  transc, \
-			  p11_m, \
-			  p11_n, \
-			  c11, incc, ldc, \
-			  p11,    1, ldp, \
-			  cntx, \
-			  NULL  \
-			); \
-\
-			/* If source matrix c is Hermitian, we have to zero out the
-			   imaginary components of the diagonal of p11 in case the
-			   corresponding elements in c11 were not already zero. */ \
-			if ( bli_is_hermitian( strucc ) ) \
+			if ( bli_is_1m_packed( schema ) ) \
 			{ \
-				ctype* restrict pi11 = p11; \
+				ctype_r* restrict zero = PASTEMAC(chr,0); \
 \
-				for ( i = 0; i < p11_m; ++i ) \
-				{ \
-					PASTEMAC(ch,seti0s)( *pi11 ); \
-\
-					pi11 += 1 + ldp; \
-				} \
+				PASTEMAC2(chr,setm,BLIS_TAPI_EX_SUF) \
+				( \
+				  BLIS_NO_CONJUGATE, \
+				  0, \
+				  BLIS_NONUNIT_DIAG, \
+				  BLIS_DENSE, \
+				  packmrnr_r, \
+				  p10_len_max * 2, \
+				  zero, \
+				  ( ctype_r* )p10, 1, ldp, \
+				  cntx, \
+				  NULL  \
+				); \
 			} \
+			else \
+			{ \
+				ctype* restrict zero = PASTEMAC(ch,0); \
 \
-			/* Now that the diagonal has been made explicitly Hermitian
-			   (if applicable), we can now safely scale the stored
-			   triangle specified by uploc. */ \
-			PASTEMAC2(ch,scalm,BLIS_TAPI_EX_SUF) \
+				PASTEMAC2(ch,setm,BLIS_TAPI_EX_SUF) \
+				( \
+				  BLIS_NO_CONJUGATE, \
+				  0, \
+				  BLIS_NONUNIT_DIAG, \
+				  BLIS_DENSE, \
+				  packmrnr, \
+				  p10_len_max, \
+				  zero, \
+				  p10, 1, ldp, \
+				  cntx, \
+				  NULL  \
+				); \
+			} \
+		} \
+		else \
+		{ \
+			f_cxk \
 			( \
-			  BLIS_NO_CONJUGATE, \
-			  0, \
-			  BLIS_NONUNIT_DIAG, \
-			  uploc, \
-			  p11_m, \
-			  p11_n, \
+			  conjc10, \
+			  schema, \
+			  p10_dim, \
+			  p10_len, \
+			  p10_len_max, \
 			  kappa, \
-			  p11, 1, ldp, \
-			  cntx, \
-			  NULL  \
+			  c10, incc10, ldc10, \
+			  p10,         ldp, \
+			  cntx  \
+			); \
+		} \
+	} \
+\
+	/* Pack to p11. */ \
+	if ( 0 <= diagoffc && diagoffc + panel_dim <= panel_len ) \
+	{ \
+		dim_t  i           = diagoffc; \
+		dim_t  p11_dim     = panel_dim; \
+		dim_t  p11_len_max = panel_dim + ( diagoffc + panel_dim == panel_len \
+		                                   ? panel_len_pad : 0 ); \
+		ctype* p11         = p + i * ldp; \
+		conj_t conjc11     = conjc; \
+		ctype* c11         = c + i * ldc; \
+		inc_t  incc11      = incc; \
+		inc_t  ldc11       = ldc; \
+\
+		f_cxc \
+		( \
+		  strucc, \
+		  diagc, \
+		  uploc, \
+		  conjc11, \
+		  schema, \
+		  invdiag, \
+		  p11_dim, \
+		  p11_len_max, \
+		  kappa, \
+		  c11, incc11, ldc11, \
+		  p11,         ldp, \
+		  cntx  \
+		); \
+	} \
+\
+	/* Pack to p12. */ \
+	if ( diagoffc + panel_dim < panel_len ) \
+	{ \
+		dim_t  i           = bli_max( 0, diagoffc + panel_dim ); \
+		dim_t  p12_dim     = panel_dim; \
+		dim_t  p12_len     = panel_len - i; \
+		/* If we are packing p12, then it is always the last partial block \
+		   and so we should make sure to pad with zeros if necessary. */ \
+		dim_t  p12_len_max = p12_len + panel_len_pad; \
+		ctype* p12         = p + i * ldp; \
+		conj_t conjc12     = conjc; \
+		ctype* c12         = c + i * ldc; \
+		inc_t  incc12      = incc; \
+		inc_t  ldc12       = ldc; \
+\
+		if ( bli_is_lower( uploc ) ) \
+		{ \
+			bli_reflect_to_stored_part( diagoffc - i, c12, incc12, ldc12 ); \
+\
+			if ( bli_is_hermitian( strucc ) ) \
+				bli_toggle_conj( &conjc12 ); \
+		} \
+\
+		/* If we are referencing the unstored part of a triangular matrix,
+		   explicitly store zeros */ \
+		if ( bli_is_lower( uploc ) && bli_is_triangular( strucc ) ) \
+		{ \
+			if ( bli_is_1m_packed( schema ) ) \
+			{ \
+			    ctype_r* restrict zero = PASTEMAC(chr,0); \
+\
+				PASTEMAC2(chr,setm,BLIS_TAPI_EX_SUF) \
+				( \
+				  BLIS_NO_CONJUGATE, \
+				  0, \
+				  BLIS_NONUNIT_DIAG, \
+				  BLIS_DENSE, \
+				  packmrnr_r, \
+				  p12_len_max * 2, \
+				  zero, \
+				  ( ctype_r* )p12, 1, ldp, \
+				  cntx, \
+				  NULL  \
+				); \
+			} \
+			else \
+			{ \
+				ctype* restrict zero = PASTEMAC(ch,0); \
+\
+				PASTEMAC2(ch,setm,BLIS_TAPI_EX_SUF) \
+				( \
+				  BLIS_NO_CONJUGATE, \
+				  0, \
+				  BLIS_NONUNIT_DIAG, \
+				  BLIS_DENSE, \
+				  packmrnr, \
+				  p12_len_max, \
+				  zero, \
+				  p12, 1, ldp, \
+				  cntx, \
+				  NULL  \
+				); \
+			} \
+		} \
+		else \
+		{ \
+			f_cxk \
+			( \
+			  conjc12, \
+			  schema, \
+			  p12_dim, \
+			  p12_len, \
+			  p12_len_max, \
+			  kappa, \
+			  c12, incc12, ldc12, \
+			  p12,         ldp, \
+			  cntx  \
 			); \
 		} \
 	} \
 }
 
-INSERT_GENTFUNC_BASIC( packm_herm_cxk, packm_cxk )
-
-
-
-
-
-#undef  GENTFUNC
-#define GENTFUNC( ctype, ch, varname, kername ) \
-\
-void PASTEMAC(ch,varname) \
-     ( \
-       struc_t         strucc, \
-       diag_t          diagc, \
-       uplo_t          uploc, \
-       conj_t          conjc, \
-       pack_t          schema, \
-       bool            invdiag, \
-       dim_t           panel_dim, \
-       dim_t           panel_len, \
-       dim_t           panel_dim_max, \
-       dim_t           panel_len_max, \
-       dim_t           panel_dim_off, \
-       dim_t           panel_len_off, \
-       ctype* restrict kappa, \
-       ctype* restrict c, inc_t incc, inc_t ldc, \
-       ctype* restrict p,             inc_t ldp, \
-                          inc_t is_p, \
-       cntx_t*         cntx  \
-     ) \
-{ \
-	doff_t diagoffc = panel_dim_off - panel_len_off; \
-\
-	/* Pack the panel. */ \
-	PASTEMAC(ch,kername) \
-	( \
-	  conjc, \
-	  schema, \
-	  panel_dim, \
-	  panel_dim_max, \
-	  panel_len, \
-	  panel_len_max, \
-	  kappa, \
-	  c, incc, ldc, \
-	  p,       ldp, \
-	  cntx  \
-	); \
-\
-\
-	/* If the diagonal of c is implicitly unit, explicitly set the
-	   the diagonal of the packed panel to kappa. */ \
-	if ( bli_is_unit_diag( diagc ) ) \
-	{ \
-		PASTEMAC2(ch,setd,BLIS_TAPI_EX_SUF) \
-		( \
-		  BLIS_NO_CONJUGATE, \
-		  diagoffc, \
-		  panel_dim, \
-		  panel_len, \
-		  kappa, \
-		  p, 1, ldp, \
-		  cntx, \
-		  NULL  \
-		); \
-	} \
-\
-	/* If requested, invert the diagonal of the packed panel. */ \
-	if ( invdiag == TRUE ) \
-	{ \
-		PASTEMAC2(ch,invertd,BLIS_TAPI_EX_SUF) \
-		( \
-		  diagoffc, \
-		  panel_dim, \
-		  panel_len, \
-		  p, 1, ldp, \
-		  cntx, \
-		  NULL  \
-		); \
-	} \
-\
-	/* Set the region opposite the diagonal of p to zero. To do this,
-	   we need to reference the "unstored" region on the other side of
-	   the diagonal. This amounts to toggling uploc and then shifting
-	   the diagonal offset to shrink the newly referenced region (by
-	   one diagonal). Note that this zero-filling is not needed for
-	   trsm, since the unstored region is not referenced by the trsm
-	   micro-kernel; however, zero-filling is needed for trmm, which
-	   uses the gemm micro-kernel.*/ \
-	{ \
-		ctype* restrict zero  = PASTEMAC(ch,0); \
-		uplo_t          uplop = uploc; \
-\
-		bli_toggle_uplo( &uplop ); \
-		bli_shift_diag_offset_to_shrink_uplo( uplop, &diagoffc ); \
-\
-		PASTEMAC2(ch,setm,BLIS_TAPI_EX_SUF) \
-		( \
-		  BLIS_NO_CONJUGATE, \
-		  diagoffc, \
-		  BLIS_NONUNIT_DIAG, \
-		  uplop, \
-		  panel_dim, \
-		  panel_len, \
-		  zero, \
-		  p, 1, ldp, \
-		  cntx, \
-		  NULL  \
-		); \
-	} \
-\
-	/* If this panel is an edge case in both panel dimension and length,
-	   then it must be a bottom-right corner case. Set the part of the
-	   diagonal that extends into the zero-padded region to identity.
-	   NOTE: This is actually only necessary when packing for trsm, as
-	   it helps prevent NaNs and Infs from creeping into the computation.
-	   However, we set the region to identity for trmm as well. Those
-	   1.0's end up getting muliplied by the 0.0's in the zero-padded
-	   region of the other matrix, so there is no harm in this. */ \
-	if ( panel_dim != panel_dim_max && \
-	     panel_len != panel_len_max ) \
-	{ \
-		ctype* restrict one    = PASTEMAC(ch,1); \
-		dim_t           i      = panel_dim; \
-		dim_t           j      = panel_len; \
-		dim_t           m_br   = panel_dim_max - i; \
-		dim_t           n_br   = panel_len_max - j; \
-		ctype*          p_br   = p + (i  ) + (j  )*ldp; \
-\
-		PASTEMAC2(ch,setd,BLIS_TAPI_EX_SUF) \
-		( \
-		  BLIS_NO_CONJUGATE, \
-		  0, \
-		  m_br, \
-		  n_br, \
-		  one, \
-		  p_br, 1, ldp, \
-		  cntx, \
-		  NULL  \
-		); \
-	} \
-}
-
-INSERT_GENTFUNC_BASIC( packm_tri_cxk, packm_cxk )
+INSERT_GENTFUNCR_BASIC2( packm_struc_cxk, packm_cxk, packm_cxc_diag )
 

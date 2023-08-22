@@ -102,35 +102,40 @@ INSERT_GENTDEF( packm_cxk )
 \
 typedef void (*PASTECH3(ch,opname,_ker,tsuf)) \
      ( \
-       conj_t           conjp, \
+       conj_t           conja, \
+       pack_t           schema, \
+       dim_t            cdim, \
        dim_t            n, \
        ctype*  restrict kappa, \
        ctype*  restrict p,             inc_t ldp, \
        ctype*  restrict a, inc_t inca, inc_t lda, \
-       cntx_t* restrict cntx  \
+       cntx_t* restrict cntx \
      );
 
 INSERT_GENTDEF( unpackm_cxk )
 
-// packm_1er_ker
+// packm_diag_ker
 
 #undef  GENTDEF
 #define GENTDEF( ctype, ch, opname, tsuf ) \
 \
 typedef void (*PASTECH3(ch,opname,_ker,tsuf)) \
      ( \
+       struc_t          struca, \
+       diag_t           diaga, \
+       uplo_t           uploa, \
        conj_t           conja, \
        pack_t           schema, \
+       bool             invdiag, \
        dim_t            cdim, \
-       dim_t            n, \
        dim_t            n_max, \
        ctype*  restrict kappa, \
        ctype*  restrict a, inc_t inca, inc_t lda, \
        ctype*  restrict p,             inc_t ldp, \
-       cntx_t* restrict cntx  \
+       cntx_t* restrict cntx \
      );
 
-INSERT_GENTDEF( packm_cxk_1er )
+INSERT_GENTDEF( packm_cxc_diag )
 
 
 #endif

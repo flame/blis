@@ -289,6 +289,13 @@ GENTFUNCCO( dcomplex, double, z, d, tfuncname, varname1, varname2 )
 GENTFUNCCO( scomplex, float,  c, s, tfuncname, varname1, varname2, varname3 ) \
 GENTFUNCCO( dcomplex, double, z, d, tfuncname, varname1, varname2, varname3 )
 
+// -- (four auxiliary arguments) --
+
+#define INSERT_GENTFUNCCO_BASIC4( tfuncname, varname1, varname2, varname3, varname4 ) \
+\
+GENTFUNCCO( scomplex, float,  c, s, tfuncname, varname1, varname2, varname3, varname4 ) \
+GENTFUNCCO( dcomplex, double, z, d, tfuncname, varname1, varname2, varname3, varname4 )
+
 
 
 // -- Basic one-operand macro with integer instance --

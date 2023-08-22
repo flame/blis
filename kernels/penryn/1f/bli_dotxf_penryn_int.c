@@ -90,7 +90,7 @@ void bli_ddotxf_penryn_int
 	// If the vector lengths are zero, scale r by beta and return.
 	if ( bli_zero_dim1( m ) )
 	{
-		dscalv_ker_ft f = bli_cntx_get_l1v_ker_dt( BLIS_DOUBLE, BLIS_SCALV_KER, cntx );
+		dscalv_ker_ft f = bli_cntx_get_ukr_dt( BLIS_DOUBLE, BLIS_SCALV_KER, cntx );
 
 		f
 		(
@@ -134,7 +134,7 @@ void bli_ddotxf_penryn_int
 	// Call the reference implementation if needed.
 	if ( use_ref == TRUE )
 	{
-		ddotxf_ker_ft f = bli_cntx_get_l1f_ker_dt( BLIS_DOUBLE, BLIS_DOTXF_KER, cntx );
+		ddotxf_ker_ft f = bli_cntx_get_ukr_dt( BLIS_DOUBLE, BLIS_DOTXF_KER, cntx );
 
 		f
 		( conjat,

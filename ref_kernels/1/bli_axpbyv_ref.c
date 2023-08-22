@@ -60,7 +60,7 @@ void PASTEMAC3(ch,opname,arch,suf) \
 \
 			/* Query the context for the kernel function pointer. */ \
 			const num_t             dt     = PASTEMAC(ch,type); \
-			PASTECH(ch,setv_ker_ft) setv_p = bli_cntx_get_l1v_ker_dt( dt, BLIS_SETV_KER, cntx ); \
+			PASTECH(ch,setv_ker_ft) setv_p = bli_cntx_get_ukr_dt( dt, BLIS_SETV_KER, cntx ); \
 \
 			setv_p \
 			( \
@@ -83,7 +83,7 @@ void PASTEMAC3(ch,opname,arch,suf) \
 \
 			/* Query the context for the kernel function pointer. */ \
 			const num_t              dt      = PASTEMAC(ch,type); \
-			PASTECH(ch,scalv_ker_ft) scalv_p = bli_cntx_get_l1v_ker_dt( dt, BLIS_SCALV_KER, cntx ); \
+			PASTECH(ch,scalv_ker_ft) scalv_p = bli_cntx_get_ukr_dt( dt, BLIS_SCALV_KER, cntx ); \
 \
 			scalv_p \
 			( \
@@ -105,7 +105,7 @@ void PASTEMAC3(ch,opname,arch,suf) \
 \
 			/* Query the context for the kernel function pointer. */ \
 			const num_t              dt      = PASTEMAC(ch,type); \
-			PASTECH(ch,copyv_ker_ft) copyv_p = bli_cntx_get_l1v_ker_dt( dt, BLIS_COPYV_KER, cntx ); \
+			PASTECH(ch,copyv_ker_ft) copyv_p = bli_cntx_get_ukr_dt( dt, BLIS_COPYV_KER, cntx ); \
 \
 			copyv_p \
 			( \
@@ -123,7 +123,7 @@ void PASTEMAC3(ch,opname,arch,suf) \
 \
 			/* Query the context for the kernel function pointer. */ \
 			const num_t             dt     = PASTEMAC(ch,type); \
-			PASTECH(ch,addv_ker_ft) addv_p = bli_cntx_get_l1v_ker_dt( dt, BLIS_ADDV_KER, cntx ); \
+			PASTECH(ch,addv_ker_ft) addv_p = bli_cntx_get_ukr_dt( dt, BLIS_ADDV_KER, cntx ); \
 \
 			addv_p \
 			( \
@@ -141,7 +141,7 @@ void PASTEMAC3(ch,opname,arch,suf) \
 \
 			/* Query the context for the kernel function pointer. */ \
 			const num_t              dt      = PASTEMAC(ch,type); \
-			PASTECH(ch,xpbyv_ker_ft) xpbyv_p = bli_cntx_get_l1v_ker_dt( dt, BLIS_XPBYV_KER, cntx ); \
+			PASTECH(ch,xpbyv_ker_ft) xpbyv_p = bli_cntx_get_ukr_dt( dt, BLIS_XPBYV_KER, cntx ); \
 \
 			xpbyv_p \
 			( \
@@ -163,7 +163,7 @@ void PASTEMAC3(ch,opname,arch,suf) \
 \
 			/* Query the context for the kernel function pointer. */ \
 			const num_t               dt       = PASTEMAC(ch,type); \
-			PASTECH(ch,scal2v_ker_ft) scal2v_p = bli_cntx_get_l1v_ker_dt( dt, BLIS_SCAL2V_KER, cntx ); \
+			PASTECH(ch,scal2v_ker_ft) scal2v_p = bli_cntx_get_ukr_dt( dt, BLIS_SCAL2V_KER, cntx ); \
 \
 			scal2v_p \
 			( \
@@ -182,7 +182,7 @@ void PASTEMAC3(ch,opname,arch,suf) \
 \
 			/* Query the context for the kernel function pointer. */ \
 			const num_t              dt      = PASTEMAC(ch,type); \
-			PASTECH(ch,axpyv_ker_ft) axpyv_p = bli_cntx_get_l1v_ker_dt( dt, BLIS_AXPYV_KER, cntx ); \
+			PASTECH(ch,axpyv_ker_ft) axpyv_p = bli_cntx_get_ukr_dt( dt, BLIS_AXPYV_KER, cntx ); \
 \
 			axpyv_p \
 			( \

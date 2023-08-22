@@ -173,7 +173,7 @@ mddm_t bli_gemm_md_ccr
 	// preference.
 	const num_t dt = BLIS_REAL | bli_obj_comp_prec( c );
 	const bool  row_pref
-	      = bli_cntx_l3_nat_ukr_prefers_rows_dt( dt, BLIS_GEMM_UKR, *cntx );
+	      = bli_cntx_ukr_prefers_rows_dt( dt, BLIS_GEMM_UKR, *cntx );
 
 	// We can only perform this case of mixed-domain gemm, C += A*B where
 	// B is real, if the microkernel prefers column output. If it prefers
@@ -236,8 +236,8 @@ mddm_t bli_gemm_md_ccr
 
 	// Use the default pack schemas in the objects.
 
-	// static func_t* bli_cntx_get_l3_vir_ukrs( l3ukr_t ukr_id, cntx_t* cntx )
-	func_t* l3_vir_ukrs = bli_cntx_get_l3_vir_ukrs( BLIS_GEMM_UKR, *cntx );
+	// static func_t* bli_cntx_get_ukrs( ukr_t ukr_id, cntx_t* cntx )
+	func_t* l3_vir_ukrs = bli_cntx_get_ukrs( BLIS_GEMM_VIR_UKR, *cntx );
 
 	// Rather than check which complex datatype dt_comp refers to, we set
 	// the mixed-domain virtual microkernel for both types.
@@ -278,7 +278,7 @@ mddm_t bli_gemm_md_crc
 	// preference.
 	const num_t dt = BLIS_REAL | bli_obj_comp_prec( c );
 	const bool  col_pref
-	      = bli_cntx_l3_nat_ukr_prefers_cols_dt( dt, BLIS_GEMM_UKR, *cntx );
+	      = bli_cntx_ukr_prefers_cols_dt( dt, BLIS_GEMM_UKR, *cntx );
 
 	// We can only perform this case of mixed-domain gemm, C += A*B where
 	// A is real, if the microkernel prefers row output. If it prefers
@@ -341,8 +341,8 @@ mddm_t bli_gemm_md_crc
 
 	// Use the default pack schemas in the objects.
 
-	// static func_t* bli_cntx_get_l3_vir_ukrs( l3ukr_t ukr_id, cntx_t* cntx )
-	func_t* l3_vir_ukrs = bli_cntx_get_l3_vir_ukrs( BLIS_GEMM_UKR, *cntx );
+	// static func_t* bli_cntx_get_ukrs( ukr_t ukr_id, cntx_t* cntx )
+	func_t* l3_vir_ukrs = bli_cntx_get_ukrs( BLIS_GEMM_VIR_UKR, *cntx );
 
 	// Rather than check which complex datatype dt_comp refers to, we set
 	// the mixed-domain virtual microkernel for both types.
@@ -430,13 +430,11 @@ mddm_t bli_gemm_md_rcc
 	const num_t dt_complex = bli_obj_dt( a );
 	cntx_t* cntx_1m = bli_gks_query_ind_cntx( BLIS_1M, dt_complex );
 
-	func_t* cntx_funcs    = bli_cntx_packm_kers_buf( *cntx );
-	func_t* cntx_1m_funcs = bli_cntx_packm_kers_buf( cntx_1m );
+	func_t* cntx_funcs    = bli_cntx_ukrs_buf( *cntx );
+	func_t* cntx_1m_funcs = bli_cntx_ukrs_buf( cntx_1m );
 
-	for ( dim_t i = 0; i <= BLIS_PACKM_31XK_KER; ++i )
-	{
-		cntx_funcs[ i ] = cntx_1m_funcs[ i ];
-	}
+	cntx_funcs[ BLIS_PACKM_MRXK_KER ] = cntx_1m_funcs[ BLIS_PACKM_MRXK_KER ];
+	cntx_funcs[ BLIS_PACKM_NRXK_KER ] = cntx_1m_funcs[ BLIS_PACKM_NRXK_KER ];
 
 	// Return the computation and execution domains.
 	return doms;

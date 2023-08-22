@@ -85,32 +85,33 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 \
 	if ( bli_is_nonunit_diag( diagx ) ) \
 	{ \
-	    x1   = x + offx; \
-	    y1   = y + offy; \
+		x1   = x + offx; \
+		y1   = y + offy; \
 	} \
 	else /* if ( bli_is_unit_diag( diagx ) ) */ \
 	{ \
-	    /* Simulate a unit diagonal for x with a zero increment over a unit
-	       scalar. */ \
-	    x1   = PASTEMAC(ch,1); \
-	    incx = 0; \
-	    y1   = y + offy; \
+		/* Simulate a unit diagonal for x with a zero increment over a unit
+		   scalar. */ \
+		x1   = PASTEMAC(ch,1); \
+		incx = 0; \
+		y1   = y + offy; \
 	} \
 \
 	/* Obtain a valid context from the gks if necessary. */ \
 	if ( cntx == NULL ) cntx = bli_gks_query_cntx(); \
 \
 	/* Query the context for the operation's kernel address. */ \
-	PASTECH2(ch,kername,_ker_ft) f = bli_cntx_get_l1v_ker_dt( dt, kerid, cntx ); \
+	PASTECH2(ch,kername,_ker_ft) f = bli_cntx_get_ukr_dt( dt, kerid, cntx ); \
 \
 	/* Invoke the kernel with the appropriate parameters. */ \
-	f( \
-	   conjx, \
-	   n_elem, \
-	   x1, incx, \
-	   y1, incy, \
-	   cntx  \
-	 ); \
+	f \
+	( \
+	  conjx, \
+	  n_elem, \
+	  x1, incx, \
+	  y1, incy, \
+	  cntx  \
+	); \
 }
 
 INSERT_GENTFUNC_BASIC2( addd,  addv,  BLIS_ADDV_KER )
@@ -164,33 +165,34 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 \
 	if ( bli_is_nonunit_diag( diagx ) ) \
 	{ \
-	    x1   = x + offx; \
-	    y1   = y + offy; \
+		x1   = x + offx; \
+		y1   = y + offy; \
 	} \
 	else /* if ( bli_is_unit_diag( diagx ) ) */ \
 	{ \
-	    /* Simulate a unit diagonal for x with a zero increment over a unit
-	       scalar. */ \
-	    x1   = PASTEMAC(ch,1); \
-	    incx = 0; \
-	    y1   = y + offy; \
+		/* Simulate a unit diagonal for x with a zero increment over a unit
+		   scalar. */ \
+		x1   = PASTEMAC(ch,1); \
+		incx = 0; \
+		y1   = y + offy; \
 	} \
 \
 	/* Obtain a valid context from the gks if necessary. */ \
 	if ( cntx == NULL ) cntx = bli_gks_query_cntx(); \
 \
 	/* Query the context for the operation's kernel address. */ \
-	PASTECH2(ch,kername,_ker_ft) f = bli_cntx_get_l1v_ker_dt( dt, kerid, cntx ); \
+	PASTECH2(ch,kername,_ker_ft) f = bli_cntx_get_ukr_dt( dt, kerid, cntx ); \
 \
 	/* Invoke the kernel with the appropriate parameters. */ \
-	f( \
-	   conjx, \
-	   n_elem, \
-	   alpha, \
-	   x1, incx, \
-	   y1, incy, \
-	   cntx  \
-	 ); \
+	f \
+	( \
+	  conjx, \
+	  n_elem, \
+	  alpha, \
+	  x1, incx, \
+	  y1, incy, \
+	  cntx  \
+	); \
 }
 
 INSERT_GENTFUNC_BASIC2( axpyd,  axpyv,  BLIS_AXPYV_KER )
@@ -233,20 +235,21 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 	  &offx, &n_elem, &incx \
 	); \
 \
-    x1 = x + offx; \
+	x1 = x + offx; \
 \
 	/* Obtain a valid context from the gks if necessary. */ \
 	if ( cntx == NULL ) cntx = bli_gks_query_cntx(); \
 \
 	/* Query the context for the operation's kernel address. */ \
-	PASTECH2(ch,kername,_ker_ft) f = bli_cntx_get_l1v_ker_dt( dt, kerid, cntx ); \
+	PASTECH2(ch,kername,_ker_ft) f = bli_cntx_get_ukr_dt( dt, kerid, cntx ); \
 \
 	/* Invoke the kernel with the appropriate parameters. */ \
-	f( \
-	   n_elem, \
-	   x1, incx, \
-	   cntx  \
-	 ); \
+	f \
+	( \
+	  n_elem, \
+	  x1, incx, \
+	  cntx  \
+	); \
 }
 
 INSERT_GENTFUNC_BASIC2( invertd, invertv, BLIS_INVERTV_KER )
@@ -290,22 +293,23 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 	  &offx, &n_elem, &incx \
 	); \
 \
-    x1 = x + offx; \
+	x1 = x + offx; \
 \
 	/* Obtain a valid context from the gks if necessary. */ \
 	if ( cntx == NULL ) cntx = bli_gks_query_cntx(); \
 \
 	/* Query the context for the operation's kernel address. */ \
-	PASTECH2(ch,kername,_ker_ft) f = bli_cntx_get_l1v_ker_dt( dt, kerid, cntx ); \
+	PASTECH2(ch,kername,_ker_ft) f = bli_cntx_get_ukr_dt( dt, kerid, cntx ); \
 \
 	/* Invoke the kernel with the appropriate parameters. */ \
-	f( \
-	   conjalpha, \
-	   n_elem, \
-	   alpha, \
-	   x1, incx, \
-	   cntx  \
-	 ); \
+	f \
+	( \
+	  conjalpha, \
+	  n_elem, \
+	  alpha, \
+	  x1, incx, \
+	  cntx  \
+	); \
 }
 
 INSERT_GENTFUNC_BASIC2( invscald, invscalv, BLIS_INVSCALV_KER )
@@ -362,27 +366,28 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 		PASTEMAC(ch,setis)( *alpha, *chi11 ); \
 	} */ \
 \
-	/* Acquire the addres of the imaginary component of the first element,
+	/* Acquire the address of the imaginary component of the first element,
 	   and scale the increment for use in the real domain. Note that the
 	   indexing into the imaginary field only needs to work for complex
 	   datatypes since we return early for real domain types. */ \
-    x1   = ( ctype_r* )( x + offx ) + 1; \
+	x1   = ( ctype_r* )( x + offx ) + 1; \
 	incx = 2*incx; \
 \
 	/* Obtain a valid context from the gks if necessary. */ \
 	if ( cntx == NULL ) cntx = bli_gks_query_cntx(); \
 \
 	/* Query the context for the operation's kernel address. */ \
-	PASTECH2(chr,kername,_ker_ft) f = bli_cntx_get_l1v_ker_dt( dt_r, kerid, cntx ); \
+	PASTECH2(chr,kername,_ker_ft) f = bli_cntx_get_ukr_dt( dt_r, kerid, cntx ); \
 \
 	/* Invoke the kernel with the appropriate parameters. */ \
-	f( \
-	   BLIS_NO_CONJUGATE, \
-	   n_elem, \
-	   alpha, \
-	   x1, incx, \
-	   cntx  \
-	 ); \
+	f \
+	( \
+	  BLIS_NO_CONJUGATE, \
+	  n_elem, \
+	  alpha, \
+	  x1, incx, \
+	  cntx  \
+	); \
 }
 
 INSERT_GENTFUNCR_BASIC2( setid, setv, BLIS_SETV_KER )
@@ -425,22 +430,23 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 	  &offx, &n_elem, &incx \
 	); \
 \
-    x1 = x + offx; \
+	x1 = x + offx; \
 \
 	/* Obtain a valid context from the gks if necessary. */ \
 	if ( cntx == NULL ) cntx = bli_gks_query_cntx(); \
 \
 	/* Query the context for the operation's kernel address. */ \
-	PASTECH2(ch,kername,_ker_ft) f = bli_cntx_get_l1v_ker_dt( dt, kerid, cntx ); \
+	PASTECH2(ch,kername,_ker_ft) f = bli_cntx_get_ukr_dt( dt, kerid, cntx ); \
 \
 	/* Invoke the kernel with the appropriate parameters. */ \
-	f( \
-	   BLIS_NO_CONJUGATE, \
-	   n_elem, \
-	   alpha, 0, \
-	   x1, incx, \
-	   cntx  \
-	 ); \
+	f \
+	( \
+	  BLIS_NO_CONJUGATE, \
+	  n_elem, \
+	  alpha, 0, \
+	  x1, incx, \
+	  cntx  \
+	); \
 }
 
 INSERT_GENTFUNC_BASIC2( shiftd, addv, BLIS_ADDV_KER )
@@ -492,33 +498,34 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 \
 	if ( bli_is_nonunit_diag( diagx ) ) \
 	{ \
-	    x1   = x + offx; \
-	    y1   = y + offy; \
+		x1   = x + offx; \
+		y1   = y + offy; \
 	} \
 	else /* if ( bli_is_unit_diag( diagx ) ) */ \
 	{ \
-	    /* Simulate a unit diagonal for x with a zero increment over a unit
-	       scalar. */ \
-	    x1   = PASTEMAC(ch,1); \
-	    incx = 0; \
-	    y1   = y + offy; \
+		/* Simulate a unit diagonal for x with a zero increment over a unit
+		   scalar. */ \
+		x1   = PASTEMAC(ch,1); \
+		incx = 0; \
+		y1   = y + offy; \
 	} \
 \
 	/* Obtain a valid context from the gks if necessary. */ \
 	if ( cntx == NULL ) cntx = bli_gks_query_cntx(); \
 \
 	/* Query the context for the operation's kernel address. */ \
-	PASTECH2(ch,kername,_ker_ft) f = bli_cntx_get_l1v_ker_dt( dt, kerid, cntx ); \
+	PASTECH2(ch,kername,_ker_ft) f = bli_cntx_get_ukr_dt( dt, kerid, cntx ); \
 \
 	/* Invoke the kernel with the appropriate parameters. */ \
-	f( \
-	   conjx, \
-	   n_elem, \
-	   x1, incx, \
-	   beta, \
-	   y1, incy, \
-	   cntx  \
-	 ); \
+	f \
+	( \
+	  conjx, \
+	  n_elem, \
+	  x1, incx, \
+	  beta, \
+	  y1, incy, \
+	  cntx  \
+	); \
 }
 
 INSERT_GENTFUNC_BASIC2( xpbyd,  xpbyv,  BLIS_XPBYV_KER )

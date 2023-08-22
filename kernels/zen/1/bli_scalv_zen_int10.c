@@ -84,7 +84,8 @@ void bli_sscalv_zen_int10
 
 		if ( cntx == NULL ) cntx = bli_gks_query_cntx();
 
-		ssetv_ker_ft f = bli_cntx_get_l1v_ker_dt( BLIS_FLOAT, BLIS_SETV_KER, cntx );
+		ssetv_ker_ft f = bli_cntx_get_ukr_dt( BLIS_FLOAT, BLIS_SETV_KER, cntx );
+
 		f
 		(
 		  BLIS_NO_CONJUGATE,
@@ -93,7 +94,7 @@ void bli_sscalv_zen_int10
 		  x, incx,
 		  cntx
 		);
-		
+
 		return;
 	}
 
@@ -275,9 +276,9 @@ void bli_dscalv_zen_int10
 	{
 		double* zero = bli_d0;
 
-		if( cntx == NULL ) cntx = bli_gks_query_cntx();
+		if ( cntx == NULL ) cntx = bli_gks_query_cntx();
 
-		dsetv_ker_ft f = bli_cntx_get_l1v_ker_dt( BLIS_DOUBLE, BLIS_SETV_KER, cntx );
+		dsetv_ker_ft f = bli_cntx_get_ukr_dt( BLIS_DOUBLE, BLIS_SETV_KER, cntx );
 
 		f
 		(
@@ -287,7 +288,7 @@ void bli_dscalv_zen_int10
 		  x, incx,
 		  cntx
 		);
-		
+
 		return;
 	}
 
@@ -458,7 +459,7 @@ void bli_cscalv_zen_int10
 {
 	const num_t dt = BLIS_SCOMPLEX;
 
-	cscalv_ker_ft f = bli_cntx_get_l1v_ker_dt( dt, BLIS_SCALV_KER, cntx );
+	cscalv_ker_ft f = bli_cntx_get_ukr_dt( dt, BLIS_SCALV_KER, cntx );
 
 	f
 	(
@@ -469,4 +470,3 @@ void bli_cscalv_zen_int10
 	  cntx
 	);
 }
-
