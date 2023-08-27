@@ -36,8 +36,8 @@
 #include "blis.h"
 
 // This array tracks whether a particular operation is implemented for each of
-// the induced methods.
-static bool bli_l3_ind_oper_impl[BLIS_NUM_IND_METHODS][BLIS_NUM_LEVEL3_OPS] =
+// the induced methods. This array is meant to be read-only.
+static const bool bli_l3_ind_oper_impl[BLIS_NUM_IND_METHODS][BLIS_NUM_LEVEL3_OPS] =
 {
         /*   gemm  gemmt  hemm  herk  her2k  symm  syrk  syr2k  trmm3  trmm  trsm  */
 /* 1m   */ { TRUE, TRUE,  TRUE, TRUE, TRUE,  TRUE, TRUE, TRUE,  TRUE,  TRUE, TRUE  },
@@ -63,6 +63,11 @@ bool bli_l3_ind_oper_st[BLIS_NUM_IND_METHODS][BLIS_NUM_LEVEL3_OPS][2] =
 /* nat  */ { {TRUE,TRUE},   {TRUE,TRUE},   {TRUE,TRUE},   {TRUE,TRUE},   {TRUE,TRUE},   {TRUE,TRUE},
              {TRUE,TRUE},   {TRUE,TRUE},   {TRUE,TRUE},   {TRUE,TRUE},   {TRUE,TRUE}    },
 };
+
+// A mutex to allow synchronous access to the bli_l3_ind_oper_st array.
+#ifdef BLIS_DISABLE_TLS
+static bli_pthread_mutex_t oper_st_mutex = BLIS_PTHREAD_MUTEX_INITIALIZER;
+#endif
 
 // -----------------------------------------------------------------------------
 
@@ -191,9 +196,6 @@ void bli_l3_ind_oper_set_enable_all( opid_t oper, num_t dt, bool status )
 
 // -----------------------------------------------------------------------------
 
-// A mutex to allow synchronous access to the bli_l3_ind_oper_st array.
-static bli_pthread_mutex_t oper_st_mutex = BLIS_PTHREAD_MUTEX_INITIALIZER;
-
 void bli_l3_ind_oper_set_enable( opid_t oper, ind_t method, num_t dt, bool status )
 {
 	num_t idt;
@@ -218,8 +220,11 @@ void bli_l3_ind_oper_set_enable( opid_t oper, ind_t method, num_t dt, bool statu
 
 	idt = bli_ind_map_cdt_to_index( dt );
 
-	// Acquire the mutex protecting bli_l3_ind_oper_st.
+	// If TLS is disabled, we need to use a mutex to protect the status array
+	// since it will be shared with all application threads.
+	#ifdef BLIS_DISABLE_TLS
 	bli_pthread_mutex_lock( &oper_st_mutex );
+	#endif
 
 	// BEGIN CRITICAL SECTION
 	{
@@ -227,8 +232,9 @@ void bli_l3_ind_oper_set_enable( opid_t oper, ind_t method, num_t dt, bool statu
 	}
 	// END CRITICAL SECTION
 
-	// Release the mutex protecting bli_l3_ind_oper_st.
+	#ifdef BLIS_DISABLE_TLS
 	bli_pthread_mutex_unlock( &oper_st_mutex );
+	#endif
 }
 
 bool bli_l3_ind_oper_get_enable( opid_t oper, ind_t method, num_t dt )

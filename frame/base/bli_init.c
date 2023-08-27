@@ -64,28 +64,34 @@ void bli_finalize_auto( void )
 
 // -----------------------------------------------------------------------------
 
-static bli_pthread_switch_t lib_state = BLIS_PTHREAD_SWITCH_INIT;
-
 void bli_init_once( void )
 {
-	bli_pthread_switch_on( &lib_state, bli_init_apis );
+	bli_init_apis();
 }
 
 void bli_finalize_once( void )
 {
-	bli_pthread_switch_off( &lib_state, bli_finalize_apis );
+	bli_finalize_apis();
 }
 
 // -----------------------------------------------------------------------------
 
+static bli_pthread_switch_t gks_g_state    = BLIS_PTHREAD_SWITCH_INIT;
+static BLIS_THREAD_LOCAL
+       bli_pthread_switch_t ind_l_state    = BLIS_PTHREAD_SWITCH_INIT;
+static bli_pthread_switch_t thread_g_state = BLIS_PTHREAD_SWITCH_INIT;
+static BLIS_THREAD_LOCAL
+       bli_pthread_switch_t rntm_l_state   = BLIS_PTHREAD_SWITCH_INIT;
+static bli_pthread_switch_t memsys_g_state = BLIS_PTHREAD_SWITCH_INIT;
+
 int bli_init_apis( void )
 {
 	// Initialize various sub-APIs.
-	bli_gks_init();
-	bli_ind_init();
-	bli_thread_init();
-	bli_pack_init();
-	bli_memsys_init();
+	bli_pthread_switch_on( &gks_g_state,    bli_gks_init );
+	bli_pthread_switch_on( &ind_l_state,    bli_ind_init );
+	bli_pthread_switch_on( &thread_g_state, bli_thread_init );
+	bli_pthread_switch_on( &rntm_l_state,   bli_rntm_init );
+	bli_pthread_switch_on( &memsys_g_state, bli_memsys_init );
 
 	return 0;
 }
@@ -93,11 +99,11 @@ int bli_init_apis( void )
 int bli_finalize_apis( void )
 {
 	// Finalize various sub-APIs.
-	bli_memsys_finalize();
-	bli_pack_finalize();
-	bli_thread_finalize();
-	bli_ind_finalize();
-	bli_gks_finalize();
+	bli_pthread_switch_off( &memsys_g_state, bli_memsys_finalize );
+	bli_pthread_switch_off( &rntm_l_state,   bli_rntm_finalize );
+	bli_pthread_switch_off( &thread_g_state, bli_thread_finalize );
+	bli_pthread_switch_off( &ind_l_state,    bli_ind_finalize );
+	bli_pthread_switch_off( &gks_g_state,    bli_gks_finalize );
 
 	return 0;
 }

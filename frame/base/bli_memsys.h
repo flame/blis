@@ -37,10 +37,8 @@
 #ifndef BLIS_MEMSYS_H
 #define BLIS_MEMSYS_H
 
-// -----------------------------------------------------------------------------
-
-void bli_memsys_init( void );
-void bli_memsys_finalize( void );
+int bli_memsys_init( void );
+int bli_memsys_finalize( void );
 
 
 #endif

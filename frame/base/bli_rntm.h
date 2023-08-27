@@ -267,7 +267,8 @@ BLIS_INLINE void bli_rntm_clear_l3_sup( rntm_t* rntm )
           .l3_sup      = TRUE, \
         }  \
 
-BLIS_INLINE void bli_rntm_init( rntm_t* rntm )
+#if 0
+//BLIS_INLINE void bli_rntm_clear( rntm_t* rntm )
 {
 	bli_rntm_clear_thread_impl( rntm );
 
@@ -279,6 +280,7 @@ BLIS_INLINE void bli_rntm_init( rntm_t* rntm )
 	bli_rntm_clear_pack_b( rntm );
 	bli_rntm_clear_l3_sup( rntm );
 }
+#endif
 
 //
 // -- rntm_t total thread calculation ------------------------------------------
@@ -303,6 +305,15 @@ BLIS_INLINE dim_t bli_rntm_calc_num_threads
 //
 // -- Function prototypes ------------------------------------------------------
 //
+
+rntm_t*              bli_global_rntm( void );
+rntm_t*              bli_global_rntm_at_init( void );
+bli_pthread_mutex_t* bli_global_rntm_mutex( void );
+
+int bli_rntm_init( void );
+int bli_rntm_finalize( void );
+
+void bli_rntm_init_from_env( rntm_t* rntm );
 
 BLIS_EXPORT_BLIS void bli_rntm_init_from_global( rntm_t* rntm );
 
