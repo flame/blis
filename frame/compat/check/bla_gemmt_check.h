@@ -83,6 +83,12 @@
 \
 		PASTE_XERBLA( func_str, &info, (ftnlen)6 ); \
 \
+		AOCL_DTL_LOG_GEMMT_STATS(AOCL_DTL_LEVEL_TRACE_1, *dt_str, *n, *k); \
+		AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1); \
+\
+		/* Finalize BLIS. */ \
+		bli_finalize_auto(); \
+\
 		return; \
 	} \
 }

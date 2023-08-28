@@ -58,7 +58,10 @@ void PASTEF77S(ch,blasname) \
              ftype*    b, const f77_int* ldb  \
      ) \
 { \
-        AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_INFO)    \
+    AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_INFO) \
+    AOCL_DTL_LOG_TRSM_INPUTS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(ch), \
+                             *side, *uploa,*transa, *diaga, *m, *n, \
+                            (void*)alpha,*lda, *ldb); \
 \
     side_t  blis_side; \
     uplo_t  blis_uploa; \
@@ -89,7 +92,7 @@ void PASTEF77S(ch,blasname) \
     /* Quick return if possible. */ \
     if ( *m == 0 || *n == 0 ) \
     { \
-        AOCL_DTL_LOG_TRSM_STATS(AOCL_DTL_LEVEL_TRACE_1, *side, *m, *n); \
+        AOCL_DTL_LOG_TRSM_STATS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(ch), *side, *m, *n); \
         AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO); \
         /* Finalize BLIS. */ \
         bli_finalize_auto(); \
@@ -124,7 +127,7 @@ void PASTEF77S(ch,blasname) \
 								(ftype*) b, rs_b, cs_b, \
 								NULL, NULL \
 							  ); \
-		AOCL_DTL_LOG_TRSM_STATS(AOCL_DTL_LEVEL_TRACE_1, *side, *m, *n); \
+		AOCL_DTL_LOG_TRSM_STATS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(ch), *side, *m, *n); \
 		AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1) \
 		/* Finalize BLIS. */ \
 		bli_finalize_auto(); \
@@ -147,7 +150,7 @@ void PASTEF77S(ch,blasname) \
       NULL  \
     ); \
 \
-    AOCL_DTL_LOG_TRSM_STATS(AOCL_DTL_LEVEL_TRACE_1, *side, *m, *n); \
+    AOCL_DTL_LOG_TRSM_STATS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(ch), *side, *m, *n); \
     AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO) \
     /* Finalize BLIS. */ \
     bli_finalize_auto(); \
@@ -219,7 +222,7 @@ void PASTEF77S(ch,blasname) \
     /* Quick return if possible. */ \
     if ( *m == 0 || *n == 0 ) \
     { \
-        AOCL_DTL_LOG_TRSM_STATS(AOCL_DTL_LEVEL_TRACE_1, *side, *m, *n); \
+        AOCL_DTL_LOG_TRSM_STATS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(ch), *side, *m, *n); \
         AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO); \
         /* Finalize BLIS. */ \
         bli_finalize_auto(); \
@@ -255,7 +258,7 @@ void PASTEF77S(ch,blasname) \
 								(ftype*) b, rs_b, cs_b, \
 								NULL, NULL \
 							  ); \
-		AOCL_DTL_LOG_TRSM_STATS(AOCL_DTL_LEVEL_TRACE_1, *side, *m, *n); \
+		AOCL_DTL_LOG_TRSM_STATS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(ch), *side, *m, *n); \
 		AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1) \
 		/* Finalize BLIS. */ \
 		bli_finalize_auto(); \
@@ -304,7 +307,7 @@ void PASTEF77S(ch,blasname) \
                     (ftype*)b, rs_b, \
                     NULL \
                 ); \
-                AOCL_DTL_LOG_TRSM_STATS(AOCL_DTL_LEVEL_TRACE_1, *side, *m, *n); \
+                AOCL_DTL_LOG_TRSM_STATS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(ch), *side, *m, *n); \
                 AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO)  \
                 return; \
             } \
@@ -321,7 +324,7 @@ void PASTEF77S(ch,blasname) \
                     (ftype*)b, rs_b, \
                     NULL \
                 ); \
-                AOCL_DTL_LOG_TRSM_STATS(AOCL_DTL_LEVEL_TRACE_1, *side, *m, *n); \
+                AOCL_DTL_LOG_TRSM_STATS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(ch), *side, *m, *n); \
                 AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO)  \
                 return; \
             } \
@@ -347,7 +350,7 @@ void PASTEF77S(ch,blasname) \
                     PASTEMAC(ch,invscals)( a_conj, b[indx] ); \
                 } \
             }\
-            AOCL_DTL_LOG_TRSM_STATS(AOCL_DTL_LEVEL_TRACE_1, *side, *m, *n); \
+            AOCL_DTL_LOG_TRSM_STATS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(ch), *side, *m, *n); \
             AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO)  \
             return; \
         } \
@@ -371,7 +374,7 @@ void PASTEF77S(ch,blasname) \
                     (ftype*)a, cs_a, rs_a, \
                     (ftype*)b, cs_b, \
                     NULL); \
-                AOCL_DTL_LOG_TRSM_STATS(AOCL_DTL_LEVEL_TRACE_1, *side, *m, *n); \
+                AOCL_DTL_LOG_TRSM_STATS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(ch), *side, *m, *n); \
                 AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO)  \
                 return; \
             } \
@@ -390,7 +393,7 @@ void PASTEF77S(ch,blasname) \
                     (ftype*)a, cs_a, rs_a, \
                     (ftype*)b, cs_b, \
                     NULL); \
-                AOCL_DTL_LOG_TRSM_STATS(AOCL_DTL_LEVEL_TRACE_1, *side, *m, *n); \
+                AOCL_DTL_LOG_TRSM_STATS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(ch), *side, *m, *n); \
                 AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO)  \
                 return; \
             } \
@@ -416,7 +419,7 @@ void PASTEF77S(ch,blasname) \
                     PASTEMAC(ch,invscals)( a_conj, b[indx*cs_b] ); \
                 }\
             } \
-            AOCL_DTL_LOG_TRSM_STATS(AOCL_DTL_LEVEL_TRACE_1, *side, *m, *n); \
+            AOCL_DTL_LOG_TRSM_STATS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(ch), *side, *m, *n); \
             AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO)  \
             return; \
         } \
@@ -453,7 +456,7 @@ void PASTEF77S(ch,blasname) \
       NULL  \
     ); \
 \
-    AOCL_DTL_LOG_TRSM_STATS(AOCL_DTL_LEVEL_TRACE_1, *side, *m, *n); \
+    AOCL_DTL_LOG_TRSM_STATS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(ch), *side, *m, *n); \
     AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO)  \
     /* Finalize BLIS. */ \
     bli_finalize_auto(); \
@@ -491,7 +494,7 @@ void strsm_blis_impl
 )
 {
     AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_INFO)
-    AOCL_DTL_LOG_TRSM_INPUTS(AOCL_DTL_LEVEL_TRACE_1, 's',
+    AOCL_DTL_LOG_TRSM_INPUTS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(s),
                              *side, *uploa,*transa, *diaga, *m, *n,
                             (void*)alpha,*lda, *ldb);
 
@@ -523,7 +526,7 @@ void strsm_blis_impl
     /* Quick return if possible. */
     if ( *m == 0 || *n == 0 )
     {
-        AOCL_DTL_LOG_TRSM_STATS(AOCL_DTL_LEVEL_TRACE_1, *side, *m, *n);
+        AOCL_DTL_LOG_TRSM_STATS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(s), *side, *m, *n);
         AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO);
         /* Finalize BLIS. */
         bli_finalize_auto();
@@ -559,7 +562,7 @@ void strsm_blis_impl
 								(float*) b, rs_b, cs_b,
 								NULL, NULL
 							  );
-		AOCL_DTL_LOG_TRSM_STATS(AOCL_DTL_LEVEL_TRACE_1, *side, *m, *n);
+		AOCL_DTL_LOG_TRSM_STATS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(s), *side, *m, *n);
 		AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1)
 		/* Finalize BLIS. */
 		bli_finalize_auto();
@@ -583,7 +586,7 @@ void strsm_blis_impl
                     (float*)b, rs_b,
                     NULL
                 );
-                AOCL_DTL_LOG_TRSM_STATS(AOCL_DTL_LEVEL_TRACE_1, *side, *m, *n);
+                AOCL_DTL_LOG_TRSM_STATS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(s), *side, *m, *n);
                 AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO);
                 return;
             }
@@ -600,7 +603,7 @@ void strsm_blis_impl
                     (float*)b, rs_b,
                     NULL
                 );
-                AOCL_DTL_LOG_TRSM_STATS(AOCL_DTL_LEVEL_TRACE_1, *side, *m, *n);
+                AOCL_DTL_LOG_TRSM_STATS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(s), *side, *m, *n);
                 AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO);
                 return;
             }
@@ -625,7 +628,7 @@ void strsm_blis_impl
                     b[indx] = ( inva * b[indx] );
                 }
             }
-            AOCL_DTL_LOG_TRSM_STATS(AOCL_DTL_LEVEL_TRACE_1, *side, *m, *n);
+            AOCL_DTL_LOG_TRSM_STATS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(s), *side, *m, *n);
             AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO);
             return;
         }
@@ -652,7 +655,7 @@ void strsm_blis_impl
                     (float*)b, cs_b,
                     NULL
                 );
-                AOCL_DTL_LOG_TRSM_STATS(AOCL_DTL_LEVEL_TRACE_1, *side, *m, *n);
+                AOCL_DTL_LOG_TRSM_STATS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(s), *side, *m, *n);
                 AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO);
                 return;
             }
@@ -674,7 +677,7 @@ void strsm_blis_impl
                     (float*)b, cs_b,
                     NULL
                 );
-                AOCL_DTL_LOG_TRSM_STATS(AOCL_DTL_LEVEL_TRACE_1, *side, *m, *n);
+                AOCL_DTL_LOG_TRSM_STATS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(s), *side, *m, *n);
                 AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO);
                 return;
             }
@@ -699,7 +702,7 @@ void strsm_blis_impl
                     b[indx*cs_b] = (inva * b[indx*cs_b] );
                 }
             }
-            AOCL_DTL_LOG_TRSM_STATS(AOCL_DTL_LEVEL_TRACE_1, *side, *m, *n);
+            AOCL_DTL_LOG_TRSM_STATS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(s), *side, *m, *n);
             AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO);
             return;
         }
@@ -751,7 +754,7 @@ void strsm_blis_impl
 			     );
 		    if (status == BLIS_SUCCESS)
 		    {
-			    AOCL_DTL_LOG_TRSM_STATS(AOCL_DTL_LEVEL_TRACE_1, *side, *m, *n);
+			    AOCL_DTL_LOG_TRSM_STATS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(s), *side, *m, *n);
 			    AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO);
 			    /* Finalize BLIS. */
 			    bli_finalize_auto();
@@ -771,7 +774,7 @@ void strsm_blis_impl
         NULL
     );
 
-    AOCL_DTL_LOG_TRSM_STATS(AOCL_DTL_LEVEL_TRACE_1, *side, *m, *n);
+    AOCL_DTL_LOG_TRSM_STATS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(s), *side, *m, *n);
     AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO)
     /* Finalize BLIS. */
     bli_finalize_auto();
@@ -807,7 +810,7 @@ void dtrsm_blis_impl
 )
 {
     AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_INFO)
-    AOCL_DTL_LOG_TRSM_INPUTS(AOCL_DTL_LEVEL_TRACE_1, 'd',
+    AOCL_DTL_LOG_TRSM_INPUTS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(d),
                              *side, *uploa,*transa, *diaga, *m, *n,
                             (void*)alpha,*lda, *ldb);
 
@@ -839,7 +842,7 @@ void dtrsm_blis_impl
     /* Quick return if possible. */
     if ( *m == 0 || *n == 0 )
     {
-        AOCL_DTL_LOG_TRSM_STATS(AOCL_DTL_LEVEL_TRACE_1, *side, *m, *n);
+        AOCL_DTL_LOG_TRSM_STATS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(d), *side, *m, *n);
         AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO);
         /* Finalize BLIS. */
         bli_finalize_auto();
@@ -875,7 +878,7 @@ void dtrsm_blis_impl
 								(double*) b, rs_b, cs_b,
 								NULL, NULL
 							  );
-		AOCL_DTL_LOG_TRSM_STATS(AOCL_DTL_LEVEL_TRACE_1, *side, *m, *n);
+		AOCL_DTL_LOG_TRSM_STATS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(d), *side, *m, *n);
 		AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1)
 		/* Finalize BLIS. */
 		bli_finalize_auto();
@@ -899,7 +902,7 @@ void dtrsm_blis_impl
                     (double*)b, rs_b,
                     NULL
                 );
-                AOCL_DTL_LOG_TRSM_STATS(AOCL_DTL_LEVEL_TRACE_1, *side, *m, *n);
+                AOCL_DTL_LOG_TRSM_STATS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(d), *side, *m, *n);
                 AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO);
                 return;
             }
@@ -916,7 +919,7 @@ void dtrsm_blis_impl
                     (double*)b, rs_b,
                     NULL
                 );
-                AOCL_DTL_LOG_TRSM_STATS(AOCL_DTL_LEVEL_TRACE_1, *side, *m, *n);
+                AOCL_DTL_LOG_TRSM_STATS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(d), *side, *m, *n);
                 AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO);
                 return;
             }
@@ -941,7 +944,7 @@ void dtrsm_blis_impl
                     b[indx] = ( inva * b[indx] );
                 }
             }
-            AOCL_DTL_LOG_TRSM_STATS(AOCL_DTL_LEVEL_TRACE_1, *side, *m, *n);
+            AOCL_DTL_LOG_TRSM_STATS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(d), *side, *m, *n);
             AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO);
             return;
         }
@@ -968,7 +971,7 @@ void dtrsm_blis_impl
                     (double*)b, cs_b,
                     NULL
                 );
-                AOCL_DTL_LOG_TRSM_STATS(AOCL_DTL_LEVEL_TRACE_1, *side, *m, *n);
+                AOCL_DTL_LOG_TRSM_STATS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(d), *side, *m, *n);
                 AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO);
                 return;
             }
@@ -990,7 +993,7 @@ void dtrsm_blis_impl
                     (double*)b, cs_b,
                     NULL
                 );
-                AOCL_DTL_LOG_TRSM_STATS(AOCL_DTL_LEVEL_TRACE_1, *side, *m, *n);
+                AOCL_DTL_LOG_TRSM_STATS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(d), *side, *m, *n);
                 AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO);
                 return;
             }
@@ -1015,7 +1018,7 @@ void dtrsm_blis_impl
                     b[indx*cs_b] = (inva * b[indx*cs_b] );
                 }
             }
-            AOCL_DTL_LOG_TRSM_STATS(AOCL_DTL_LEVEL_TRACE_1, *side, *m, *n);
+            AOCL_DTL_LOG_TRSM_STATS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(d), *side, *m, *n);
             AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO);
             return;
         }
@@ -1137,7 +1140,7 @@ void dtrsm_blis_impl
         }
         if (status == BLIS_SUCCESS)
         {
-            AOCL_DTL_LOG_TRSM_STATS(AOCL_DTL_LEVEL_TRACE_1, *side, *m, *n);
+            AOCL_DTL_LOG_TRSM_STATS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(d), *side, *m, *n);
             AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO);
             /* Finalize BLIS. */
             bli_finalize_auto();
@@ -1155,7 +1158,7 @@ void dtrsm_blis_impl
         NULL,
         NULL
     );
-    AOCL_DTL_LOG_TRSM_STATS(AOCL_DTL_LEVEL_TRACE_1, *side, *m, *n);
+    AOCL_DTL_LOG_TRSM_STATS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(d), *side, *m, *n);
     AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO)
     /* Finalize BLIS. */
     bli_finalize_auto();
@@ -1192,7 +1195,7 @@ void ztrsm_blis_impl
 )
 {
     AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_INFO)
-    AOCL_DTL_LOG_TRSM_INPUTS(AOCL_DTL_LEVEL_TRACE_1, 'z',
+    AOCL_DTL_LOG_TRSM_INPUTS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(z),
                              *side, *uploa,*transa, *diaga, *m, *n,
                             (void*)alpha,*lda, *ldb);
 
@@ -1224,7 +1227,7 @@ void ztrsm_blis_impl
     /* Quick return if possible. */
     if ( *m == 0 || *n == 0 )
     {
-        AOCL_DTL_LOG_TRSM_STATS(AOCL_DTL_LEVEL_TRACE_1, *side, *m, *n);
+        AOCL_DTL_LOG_TRSM_STATS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(z), *side, *m, *n);
         AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO);
         /* Finalize BLIS. */
         bli_finalize_auto();
@@ -1260,7 +1263,7 @@ void ztrsm_blis_impl
 								(dcomplex*) b, rs_b, cs_b,
 								NULL, NULL
 							  );
-		AOCL_DTL_LOG_TRSM_STATS(AOCL_DTL_LEVEL_TRACE_1, *side, *m, *n);
+		AOCL_DTL_LOG_TRSM_STATS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(z), *side, *m, *n);
 		AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1)
 		/* Finalize BLIS. */
 		bli_finalize_auto();
@@ -1284,7 +1287,7 @@ void ztrsm_blis_impl
                     (dcomplex*)b, rs_b,
                     NULL
                 );
-                AOCL_DTL_LOG_TRSM_STATS(AOCL_DTL_LEVEL_TRACE_1, *side, *m, *n);
+                AOCL_DTL_LOG_TRSM_STATS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(z), *side, *m, *n);
                 AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO);
                 return;
             }
@@ -1301,7 +1304,7 @@ void ztrsm_blis_impl
                     (dcomplex*)b, rs_b,
                     NULL
                 );
-                AOCL_DTL_LOG_TRSM_STATS(AOCL_DTL_LEVEL_TRACE_1, *side, *m, *n);
+                AOCL_DTL_LOG_TRSM_STATS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(z), *side, *m, *n);
                 AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO);
                 return;
             }
@@ -1356,7 +1359,7 @@ void ztrsm_blis_impl
 
 	    }
 
-	    AOCL_DTL_LOG_TRSM_STATS(AOCL_DTL_LEVEL_TRACE_1, *side, *m, *n);
+	    AOCL_DTL_LOG_TRSM_STATS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(z), *side, *m, *n);
 	    AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO);
 	    return;
 	}
@@ -1383,7 +1386,7 @@ void ztrsm_blis_impl
                     (dcomplex*)b, cs_b,
                     NULL
                 );
-                AOCL_DTL_LOG_TRSM_STATS(AOCL_DTL_LEVEL_TRACE_1, *side, *m, *n);
+                AOCL_DTL_LOG_TRSM_STATS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(z), *side, *m, *n);
                 AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO);
                 return;
             }
@@ -1405,7 +1408,7 @@ void ztrsm_blis_impl
                     (dcomplex*)b, cs_b,
                     NULL
                 );
-                AOCL_DTL_LOG_TRSM_STATS(AOCL_DTL_LEVEL_TRACE_1, *side, *m, *n);
+                AOCL_DTL_LOG_TRSM_STATS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(z), *side, *m, *n);
                 AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO);
                 return;
             }
@@ -1459,7 +1462,7 @@ void ztrsm_blis_impl
                 }
             }
 
-	    AOCL_DTL_LOG_TRSM_STATS(AOCL_DTL_LEVEL_TRACE_1, *side, *m, *n);
+	    AOCL_DTL_LOG_TRSM_STATS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(z), *side, *m, *n);
 	    AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO);
 	    return;
 
@@ -1514,7 +1517,7 @@ void ztrsm_blis_impl
                     );
             if (status == BLIS_SUCCESS)
             {
-                AOCL_DTL_LOG_TRSM_STATS(AOCL_DTL_LEVEL_TRACE_1, *side, *m, *n);
+                AOCL_DTL_LOG_TRSM_STATS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(z), *side, *m, *n);
                 AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO);
                 /* Finalize BLIS. */
                 bli_finalize_auto();
@@ -1534,7 +1537,7 @@ void ztrsm_blis_impl
         NULL
     );
 
-    AOCL_DTL_LOG_TRSM_STATS(AOCL_DTL_LEVEL_TRACE_1, *side, *m, *n);
+    AOCL_DTL_LOG_TRSM_STATS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(z), *side, *m, *n);
     AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO)
     /* Finalize BLIS. */
     bli_finalize_auto();
@@ -1571,7 +1574,7 @@ void ctrsm_blis_impl
 )
 {
     AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_INFO)
-    AOCL_DTL_LOG_TRSM_INPUTS(AOCL_DTL_LEVEL_TRACE_1, 'c',
+    AOCL_DTL_LOG_TRSM_INPUTS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(c),
                              *side, *uploa,*transa, *diaga, *m, *n,
                             (void*)alpha,*lda, *ldb);
 
@@ -1603,7 +1606,7 @@ void ctrsm_blis_impl
     /* Quick return if possible. */
     if ( *m == 0 || *n == 0 )
     {
-        AOCL_DTL_LOG_TRSM_STATS(AOCL_DTL_LEVEL_TRACE_1, *side, *m, *n);
+        AOCL_DTL_LOG_TRSM_STATS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(c), *side, *m, *n);
         AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO);
         /* Finalize BLIS. */
         bli_finalize_auto();
@@ -1639,7 +1642,7 @@ void ctrsm_blis_impl
 								(scomplex*) b, rs_b, cs_b,
 								NULL, NULL
 							  );
-		AOCL_DTL_LOG_TRSM_STATS(AOCL_DTL_LEVEL_TRACE_1, *side, *m, *n);
+		AOCL_DTL_LOG_TRSM_STATS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(c), *side, *m, *n);
 		AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1)
 		/* Finalize BLIS. */
 		bli_finalize_auto();
@@ -1663,7 +1666,7 @@ void ctrsm_blis_impl
                     (scomplex*)b, rs_b,
                     NULL
                 );
-                AOCL_DTL_LOG_TRSM_STATS(AOCL_DTL_LEVEL_TRACE_1, *side, *m, *n);
+                AOCL_DTL_LOG_TRSM_STATS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(c), *side, *m, *n);
                 AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO);
                 return;
             }
@@ -1680,7 +1683,7 @@ void ctrsm_blis_impl
                     (scomplex*)b, rs_b,
                     NULL
                 );
-                AOCL_DTL_LOG_TRSM_STATS(AOCL_DTL_LEVEL_TRACE_1, *side, *m, *n);
+                AOCL_DTL_LOG_TRSM_STATS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(c), *side, *m, *n);
                 AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO);
                 return;
             }
@@ -1734,7 +1737,7 @@ void ctrsm_blis_impl
                 }
             }
 
-	    AOCL_DTL_LOG_TRSM_STATS(AOCL_DTL_LEVEL_TRACE_1, *side, *m, *n);
+	    AOCL_DTL_LOG_TRSM_STATS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(c), *side, *m, *n);
 	    AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO);
 	    return;
 
@@ -1762,7 +1765,7 @@ void ctrsm_blis_impl
                     (scomplex*)b, cs_b,
                     NULL
                 );
-                AOCL_DTL_LOG_TRSM_STATS(AOCL_DTL_LEVEL_TRACE_1, *side, *m, *n);
+                AOCL_DTL_LOG_TRSM_STATS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(c), *side, *m, *n);
                 AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO);
                 return;
             }
@@ -1784,7 +1787,7 @@ void ctrsm_blis_impl
                     (scomplex*)b, cs_b,
                     NULL
                 );
-                AOCL_DTL_LOG_TRSM_STATS(AOCL_DTL_LEVEL_TRACE_1, *side, *m, *n);
+                AOCL_DTL_LOG_TRSM_STATS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(c), *side, *m, *n);
                 AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO);
                 return;
             }
@@ -1838,7 +1841,7 @@ void ctrsm_blis_impl
                 }
             }
 
-	    AOCL_DTL_LOG_TRSM_STATS(AOCL_DTL_LEVEL_TRACE_1, *side, *m, *n);
+	    AOCL_DTL_LOG_TRSM_STATS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(c), *side, *m, *n);
 	    AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO);
 	    return;
         }
@@ -1891,7 +1894,7 @@ void ctrsm_blis_impl
                     );
             if (status == BLIS_SUCCESS)
             {
-                AOCL_DTL_LOG_TRSM_STATS(AOCL_DTL_LEVEL_TRACE_1, *side, *m, *n);
+                AOCL_DTL_LOG_TRSM_STATS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(c), *side, *m, *n);
                 AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO);
                 /* Finalize BLIS. */
                 bli_finalize_auto();
@@ -1911,7 +1914,7 @@ void ctrsm_blis_impl
         NULL
     );
 
-    AOCL_DTL_LOG_TRSM_STATS(AOCL_DTL_LEVEL_TRACE_1, *side, *m, *n);
+    AOCL_DTL_LOG_TRSM_STATS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(c), *side, *m, *n);
     AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO)
     /* Finalize BLIS. */
     bli_finalize_auto();

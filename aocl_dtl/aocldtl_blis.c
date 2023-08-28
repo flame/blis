@@ -92,6 +92,7 @@ void AOCL_DTL_log_gemm_sizes(int8 loglevel,
 }
 
 void AOCL_DTL_log_gemm_stats(int8 loglevel,
+                             char dt_type,
                              const f77_int m,
                              const f77_int n,
                              const f77_int k)
@@ -99,33 +100,52 @@ void AOCL_DTL_log_gemm_stats(int8 loglevel,
     char buffer[256];
 
     double flops = 2.0 * m * n * k;
+    if (dt_type == 'c' || dt_type == 'C' || dt_type == 'z' || dt_type == 'Z')
+    {
+        flops = 4.0 * flops;
+    }
 
     // Execution time is in micro seconds.
     Double execution_time = AOCL_DTL_get_time_spent();
 
-    sprintf(buffer, " nt=%ld %.3f ms %0.3f GFLOPS",
-            AOCL_get_requested_threads_count(),
-            execution_time/1000.0,
-            flops/(execution_time * 1e3));
+    if (execution_time != 0.0)
+        sprintf(buffer, " nt=%ld %.3f ms %0.3f GFLOPS",
+                AOCL_get_requested_threads_count(),
+                execution_time/1000.0,
+                flops/(execution_time * 1e3));
+    else
+        sprintf(buffer, " nt=%ld %.3f ms",
+                AOCL_get_requested_threads_count(),
+                execution_time/1000.0);
 
     DTL_Trace(loglevel, TRACE_TYPE_RAW, NULL, NULL, 0, buffer);
 }
 
 void AOCL_DTL_log_gemmt_stats(int8 loglevel,
+                             char dt_type,
                              const f77_int n,
                              const f77_int k)
 {
     char buffer[256];
 
     double flops = n * n * k;
+    if (dt_type == 'c' || dt_type == 'C' || dt_type == 'z' || dt_type == 'Z')
+    {
+        flops = 4.0 * flops;
+    }
 
     // Execution time is in micro seconds.
     Double execution_time = AOCL_DTL_get_time_spent();
 
-    sprintf(buffer, " nt=%ld %.3f ms %0.3f GFLOPS",
-            AOCL_get_requested_threads_count(),
-            execution_time/1000.0,
-            flops/(execution_time * 1e3));
+    if (execution_time != 0.0)
+        sprintf(buffer, " nt=%ld %.3f ms %0.3f GFLOPS",
+                AOCL_get_requested_threads_count(),
+                execution_time/1000.0,
+                flops/(execution_time * 1e3));
+    else
+        sprintf(buffer, " nt=%ld %.3f ms",
+                AOCL_get_requested_threads_count(),
+                execution_time/1000.0);
 
     DTL_Trace(loglevel, TRACE_TYPE_RAW, NULL, NULL, 0, buffer);
 }
@@ -164,6 +184,7 @@ void AOCL_DTL_log_trsm_sizes(int8 loglevel,
 }
 
 void AOCL_DTL_log_trsm_stats(int8 loglevel,
+                             char dt_type,
                              f77_char side,
                              const f77_int m,
                              const f77_int n)
@@ -179,14 +200,23 @@ void AOCL_DTL_log_trsm_stats(int8 loglevel,
     {
         flops = 1.0 * m * n * n;
     }
+    if (dt_type == 'c' || dt_type == 'C' || dt_type == 'z' || dt_type == 'Z')
+    {
+        flops = 4.0 * flops;
+    }
 
     // Execution time is in micro seconds.
     Double execution_time = AOCL_DTL_get_time_spent();
 
-    sprintf(buffer, " nt=%ld %.3f ms %0.3f GFLOPS",
-            AOCL_get_requested_threads_count(),
-            execution_time/1000.0,
-            flops/(execution_time * 1e3));
+    if (execution_time != 0.0)
+        sprintf(buffer, " nt=%ld %.3f ms %0.3f GFLOPS",
+                AOCL_get_requested_threads_count(),
+                execution_time/1000.0,
+                flops/(execution_time * 1e3));
+    else
+        sprintf(buffer, " nt=%ld %.3f ms",
+                AOCL_get_requested_threads_count(),
+                execution_time/1000.0);
 
     DTL_Trace(loglevel, TRACE_TYPE_RAW, NULL, NULL, 0, buffer);
 }
@@ -698,19 +728,29 @@ void AOCL_DTL_log_nrm2_sizes(int8 loglevel,
 }
 
 void AOCL_DTL_log_nrm2_stats(int8 loglevel,
+                             char dt_type,
                              const f77_int n)
 {
     char buffer[256];
 
     double flops = 2.0 * n;
+    if (dt_type == 'c' || dt_type == 'C' || dt_type == 'z' || dt_type == 'Z')
+    {
+        flops = 2.0 * flops;
+    }
 
     // Execution time is in micro seconds.
     Double execution_time = AOCL_DTL_get_time_spent();
 
-    sprintf(buffer, " nt=%ld %.3f ms %0.3f GFLOPS",
-            AOCL_get_requested_threads_count(),
-            execution_time/1000.0,
-            flops/(execution_time * 1e3));
+    if (execution_time != 0.0)
+        sprintf(buffer, " nt=%ld %.3f ms %0.3f GFLOPS",
+                AOCL_get_requested_threads_count(),
+                execution_time/1000.0,
+                flops/(execution_time * 1e3));
+    else
+        sprintf(buffer, " nt=%ld %.3f ms",
+                AOCL_get_requested_threads_count(),
+                execution_time/1000.0);
 
     DTL_Trace(loglevel, TRACE_TYPE_RAW, NULL, NULL, 0, buffer);
 }
