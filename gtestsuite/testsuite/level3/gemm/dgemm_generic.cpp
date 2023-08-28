@@ -79,7 +79,7 @@ TEST_P(DGemmTest, RandomData)
     gtint_t ldc_inc = std::get<10>(GetParam());
 
     // Set the threshold for the errors:
-    double thresh = 10*m*n*k*testinghelpers::getEpsilon<T>();
+    double thresh = 10*m*n*testinghelpers::getEpsilon<T>();
 
     //----------------------------------------------------------
     //     Call test body using these parameters
