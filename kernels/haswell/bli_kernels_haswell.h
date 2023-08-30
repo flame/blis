@@ -258,6 +258,11 @@ GEMMSUP_KER_PROT( double,   d, gemmsup_rv_haswell_asm_3x2 )
 GEMMSUP_KER_PROT( double,   d, gemmsup_rv_haswell_asm_2x2 )
 GEMMSUP_KER_PROT( double,   d, gemmsup_rv_haswell_asm_1x2 )
 
+GEMMSUP_KER_PROT( double,   d, gemmsup_rv_haswell_asm_5x1 )
+GEMMSUP_KER_PROT( double,   d, gemmsup_rv_haswell_asm_4x1 )
+GEMMSUP_KER_PROT( double,   d, gemmsup_rv_haswell_asm_3x1 )
+GEMMSUP_KER_PROT( double,   d, gemmsup_rv_haswell_asm_2x1 )
+GEMMSUP_KER_PROT( double,   d, gemmsup_rv_haswell_asm_1x1 )
 // gemmsup_rv (mkernel in m dim)
 
 GEMMSUP_KER_PROT( double,   d, gemmsup_rv_haswell_asm_6x8m )

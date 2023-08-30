@@ -7,6 +7,7 @@ ${CMAKE_CURRENT_SOURCE_DIR}/bli_gemmsup_rd_haswell_asm_dMx1.c
 ${CMAKE_CURRENT_SOURCE_DIR}/bli_gemmsup_rd_haswell_asm_dMx2.c
 ${CMAKE_CURRENT_SOURCE_DIR}/bli_gemmsup_rd_haswell_asm_dMx4.c
 ${CMAKE_CURRENT_SOURCE_DIR}/bli_gemmsup_rd_haswell_asm_dMx8.c
+${CMAKE_CURRENT_SOURCE_DIR}/bli_gemmsup_rv_haswell_asm_dMx1.c
 ${CMAKE_CURRENT_SOURCE_DIR}/bli_gemmsup_rv_haswell_asm_dMx2.c
 ${CMAKE_CURRENT_SOURCE_DIR}/bli_gemmsup_rv_haswell_asm_dMx3.c
 ${CMAKE_CURRENT_SOURCE_DIR}/bli_gemmsup_rv_haswell_asm_dMx4.c
