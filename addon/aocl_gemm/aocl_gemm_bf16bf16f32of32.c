@@ -83,14 +83,6 @@ AOCL_GEMM_MATMUL(bfloat16,bfloat16,float,float,bf16bf16f32of32)
 	bli_param_map_netlib_to_blis_trans( transa, &blis_transa );
 	bli_param_map_netlib_to_blis_trans( transb, &blis_transb );
 
-	/* Perform BLAS parameter checking. */
-	// Transpose not supported.
-	if ( ( blis_transa != BLIS_NO_TRANSPOSE ) ||
-	     ( blis_transb != BLIS_NO_TRANSPOSE ) )
-	{
-		return; // Error.
-	}
-
 	// Sanitize order input.
 	char order_use =
 			( ( order == 'r' ) || ( order == 'R' ) ||
@@ -100,15 +92,33 @@ AOCL_GEMM_MATMUL(bfloat16,bfloat16,float,float,bf16bf16f32of32)
 	bool is_row_major = ( ( order_use == 'r' ) || ( order_use == 'R' ) );
 	bool is_column_major = ( ( order_use == 'c' ) || ( order_use == 'C' ) );
 
-	// Row major input expected with leading dimensions >= row stride.
+	// Transpose is not supported for B matrix yet.
+	if ( ( is_row_major == TRUE ) && ( bli_is_trans( blis_transb ) ) )
+	{
+		return; // Error.
+	}
+	else if ( ( is_column_major == TRUE ) && ( bli_is_trans( blis_transa ) ) )
+	{
+		return; // Error.
+	}
+
+	// Check if strides are valid for Row major inputs.
 	if ( ( is_row_major == TRUE ) &&
-		 ( ( lda < k ) || ( ldb < n ) || ( ldc < n ) ) )
+	     ( ( bli_is_notrans( blis_transa ) && ( lda < k ) ) ||
+	       ( bli_is_trans( blis_transa )   && ( lda < m ) ) ||
+	       ( bli_is_notrans( blis_transb ) && ( ldb < n ) ) ||
+	       ( bli_is_trans( blis_transb )   && ( ldb < k ) ) ||
+	       ( ldc < n ) ) )
 	{
 		return; // Error.
 	}
 	// Column major input expected with leading dimensions >= column stride.
 	else if ( ( is_column_major == TRUE ) &&
-			  ( ( lda < m ) || ( ldb < k ) || ( ldc < m ) ) )
+	          ( ( bli_is_notrans( blis_transa ) && ( lda < m ) ) ||
+	            ( bli_is_trans( blis_transa )   && ( lda < k ) ) ||
+	            ( bli_is_notrans( blis_transb ) && ( ldb < k ) ) ||
+	            ( bli_is_trans( blis_transb )   && ( ldb < n ) ) ||
+	            ( ldc < m ) ) )
 	{
 		return; // Error.
 	}
@@ -121,10 +131,23 @@ AOCL_GEMM_MATMUL(bfloat16,bfloat16,float,float,bf16bf16f32of32)
 	}
 
 	// The strides are set assuming a row major kernel.
-	const inc_t rs_a = lda;
-	const inc_t cs_a = 1;
-	const inc_t rs_b = ldb;
-	const inc_t cs_b = 1;
+	inc_t rs_a = lda;
+	inc_t cs_a = 1;
+
+	if ( bli_is_trans( blis_transa ) )
+	{
+		rs_a = 1;
+		cs_a = lda;
+	}
+
+	inc_t rs_b = ldb;
+	inc_t cs_b = 1;
+
+	if( bli_is_trans( blis_transb ) )
+	{
+		rs_b = 1;
+		cs_b = ldb;
+	}
 	const inc_t rs_c = ldc;
 	const inc_t cs_c = 1;
 
@@ -134,12 +157,19 @@ AOCL_GEMM_MATMUL(bfloat16,bfloat16,float,float,bf16bf16f32of32)
 	bli_param_map_char_to_lpmtag( mem_format_a, &mtag_a );
 	bli_param_map_char_to_lpmtag( mem_format_b, &mtag_b );
 
-	if ( ( is_column_major == TRUE ) && ( mtag_b == REORDERED ) )
+	// Reorder is not supported for A matrix
+	if( ( is_row_major == TRUE ) && ( mtag_a == REORDERED ) )
 	{
-		// Reorder not supported with column major inputs.
+		return;
+	}
+	// Inputs swapped in column major, A becomes B from kernel point of view.
+	// Reorder is not supported for column major matrices.
+	else if ( ( is_column_major == TRUE ) && ( ( mtag_b == REORDERED ) || ( mtag_a == REORDERED ) ) )
+	{
 		return;
 	}
 
+	// From 5-loop function point of view
 	// B matrix needs to be packed in a certain format in order to be loaded
 	// and used in bf16 instrution. As such the mtag_b always needs to be either
 	// packed or reordered. B matrix as it is (unpacked) cannot be used, and
@@ -154,15 +184,17 @@ AOCL_GEMM_MATMUL(bfloat16,bfloat16,float,float,bf16bf16f32of32)
 		mtag_a = PACK;
 	}
 
-	// Only unpacked A supported now.
-	if ( ( is_row_major == TRUE ) && ( mtag_a != UNPACKED ) )
+	// From 5-loop function point of view,
+	// A matrix when in column major storage needs to be packed to row-major
+	// storage as kernel expects A matrix to be in row-major format.
+	if( ( is_row_major == TRUE ) && ( bli_is_trans(blis_transa ) ) )
 	{
-		return; // Error.
+		mtag_a = PACK;
 	}
-	// Inputs swapped in column major, B becomes A from kernel point of view.
-	else if ( ( is_column_major == TRUE ) && ( mtag_b != UNPACKED ) )
+	// Inputs swapped in column major, A becomes B from kernel point of view.
+	else if ( ( is_column_major == TRUE ) && ( bli_is_trans(blis_transb ) ) )
 	{
-		return; // Error.
+		mtag_b = PACK;
 	}
 
 	// Convert post op struct to post op linked list format.

@@ -69,4 +69,15 @@ void packb_nr64_bf16bf16f32of32
        dim_t*          cs_b
      );
 
+void packa_mr16_bf16bf16f32of32
+     (
+       bfloat16* pack_a_buffer,
+       const bfloat16* a,
+       const dim_t rs_a,
+       const dim_t cs_a,
+       const dim_t MC,
+       const dim_t KC,
+       dim_t* rs_p,
+       dim_t* cs_p
+     );
 #endif //BLIS_GEMM_BF16_PACKB

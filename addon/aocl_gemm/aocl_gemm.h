@@ -43,7 +43,7 @@
 #include "lpgemm_post_ops.h"
 #include "lpgemm_kernels.h"
 #include "lpgemm_utils_kernels.h"
-#include "lpgemm_packb_bf16.h"
+#include "lpgemm_pack_bf16.h"
 #include "lpgemm_packb_s16.h"
 #include "lpgemm_packa.h"
 #include "lpgemm_packb.h"

@@ -34,11 +34,13 @@
 
 #include "blis.h"
 #include "lpgemm_5loop_interface_apis.h"
-#include "lpgemm_packb_bf16.h"
+#include "lpgemm_pack_bf16.h"
 #include "lpgemm_kernels.h"
 #include "lpgemm_utils.h"
 #include "lpgemm_thrinfo_utils.h"
 #include "lpgemm_config.h"
+
+
 
 // Kernel function prototypes
 typedef void (*lpgemm_rowvar_bf16)
@@ -73,6 +75,7 @@ LPGEMM_5LOOP(bfloat16,bfloat16,float,bf16bf16f32of32)
 
 	const int16_t* a_use = NULL;
 	dim_t cs_a_use = cs_a;
+	dim_t rs_a_use = rs_a;
 	dim_t a_block_stride = 0;
 
 	const int16_t* b_use = NULL;
@@ -86,8 +89,11 @@ LPGEMM_5LOOP(bfloat16,bfloat16,float,bf16bf16f32of32)
 
 	// Pack buffer for B.
 	bfloat16* pack_b_buffer_bf16;
+	bfloat16* pack_a_buffer_bf16;
 	mem_t mem_b = BLIS_MEM_INITIALIZER;
+	mem_t mem_a = BLIS_MEM_INITIALIZER;
 	siz_t mem_b_size_req = 0;
+	siz_t mem_a_size_req = 0;
 	dim_t packb_min_NR = 16;
 
 	// Temporary buffer for C accumulation when downscaling is required.
@@ -315,6 +321,31 @@ LPGEMM_5LOOP(bfloat16,bfloat16,float,bf16bf16f32of32)
 					// Non bf16 based kernel requires update to this code.
 					cs_a_use = 2;
 					a_block_stride = rs_a;
+					rs_a_use = rs_a;
+				}
+				else if ( mtag_a == PACK )
+				{
+
+					mem_a_size_req = sizeof( bfloat16 ) * mc0 * kc0;
+
+					lpgemm_alloc_mem_panel
+						(
+						mem_a_size_req, BLIS_BUFFER_FOR_A_BLOCK,
+						&mem_a, rntm
+						);
+
+					pack_a_buffer_bf16 =
+						( bfloat16* ) bli_mem_buffer( &mem_a );
+
+						( packa_mr16_bf16bf16f32of32)
+						(
+						pack_a_buffer_bf16,
+						( a + ( rs_a * ic ) + ( cs_a * pc )), rs_a, cs_a,
+						( ic_end - ic_start ), kc0,
+						&rs_a_use, &cs_a_use
+						);
+						a_use = pack_a_buffer_bf16;
+						a_block_stride = rs_a_use;
 				}
 
 				for ( dim_t jr = 0; jr < nc0; jr += NR )
@@ -330,7 +361,7 @@ LPGEMM_5LOOP(bfloat16,bfloat16,float,bf16bf16f32of32)
 					( ( lpgemm_rowvar_bf16 )lcntx->kern_fun_ptr )
 					(
 					  mc0, nr0, kc0,
-					  a_use, rs_a, cs_a_use, a_block_stride,
+					  a_use, rs_a_use, cs_a_use, a_block_stride,
 					  ( b_use + ( jr * kc0_updated ) ), rs_b_use, cs_b_use,
 					  ( c_use_ic + jr ), rs_c_use, 1,
 					  alpha, beta0,
@@ -362,6 +393,13 @@ LPGEMM_5LOOP(bfloat16,bfloat16,float,bf16bf16f32of32)
 			{
 				bli_pba_release( rntm, &mem_b );
 			}
+		}
+	}
+	if( mtag_a == PACK )
+	{
+		if ( bli_mem_is_alloc( &mem_a ) )
+		{
+			bli_pba_release(rntm, &mem_a);
 		}
 	}
 	if ( c_downscale == TRUE )

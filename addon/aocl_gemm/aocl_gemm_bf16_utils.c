@@ -68,6 +68,19 @@ AOCL_GEMM_GET_REORDER_BUF_SIZE(bf16bf16f32of32)
 		return 0; // A reorder not supported.
 	}
 
+	// Reorder of a col-major matrix is not supported yet.
+	if (!( (order == 'r') || ( order == 'R' )))
+	{
+		printf("returning with order:%c\n", order);
+		return 0; 
+	}
+
+	// Reorder of matrix is only supported for non-trans matrices.
+	if(!( ( trans == 'n' ) || ( trans == 'N' ) ))
+	{
+		printf("returning with trans:%c\n", trans);
+		return 0;
+	}
 	// Extra space since packing does width in multiples of 16. The bf16
 	// instruction can be used as long as at least one zmm register can be fully
 	// loaded; and since k_dim needs to be at least 2, having n_dim at least 16
@@ -111,6 +124,20 @@ AOCL_GEMM_REORDER(bfloat16, bf16bf16f32of32)
 	if ( input_mat_type == A_MATRIX )
 	{
 		return; // A reorder not supported.
+	}
+	
+	// Reorder of a col-major matrix is not supported yet.
+	if (!( (order == 'r') || ( order == 'R' )))
+	{
+		printf("returning with order:%c\n", order);
+		return; 
+	}
+
+	// Reorder of matrix is only supported for non-trans matrices.
+	if (!( ( trans == 'n' ) || ( trans == 'N' ) ))
+	{
+		printf("Returning with trans:%c\n", trans);
+		return;
 	}
 
 	// Initialize a local runtime with global settings if necessary. Note

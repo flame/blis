@@ -42,6 +42,8 @@
 #define AOCL_GEMM_GET_REORDER_BUF_SIZE(LP_SFX) \
 BLIS_EXPORT_ADDON siz_t aocl_get_reorder_buf_size_ ## LP_SFX \
      ( \
+       const char  order, \
+       const char  trans, \
        const char  mat_type, \
        const dim_t k, \
        const dim_t n \
@@ -60,6 +62,8 @@ AOCL_GEMM_GET_REORDER_BUF_SIZE(s8s8s16os16);
 #define AOCL_GEMM_REORDER(B_type,LP_SFX) \
 BLIS_EXPORT_ADDON void aocl_reorder_ ## LP_SFX \
      ( \
+       const char    order, \
+       const char    trans, \
        const char    mat_type, \
        const B_type* input_buf_addr, \
        B_type*       reorder_buf_addr, \

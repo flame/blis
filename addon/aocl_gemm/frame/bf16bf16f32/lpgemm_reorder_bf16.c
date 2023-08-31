@@ -35,7 +35,7 @@
 #include "blis.h"
 #include "lpgemm_utils.h"
 #include "lpgemm_reorder_bf16.h"
-#include "lpgemm_packb_bf16.h"
+#include "lpgemm_pack_bf16.h"
 #include "lpgemm_config.h"
 #include "aocl_bf16_type.h"
 
