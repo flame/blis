@@ -1616,418 +1616,457 @@ void bli_zdotxf_zen_int_6
 		 cntx_t* restrict cntx
  	)
 {
-	/**
-	 * Handles only unit stride cases and 6 column at a time
-	 * b_n check for columns to be 6.
-	 */
-	if ( (inca == 1) && (incx == 1) && (incy == 1) && (b_n == 6) )
+	/* If the vectors are empty or if alpha is zero, return early */
+	if ( bli_zero_dim1( m ) || PASTEMAC(z,eq0)( *alpha ) )
 	{
-		/* Temporary rho buffer holds computed dot product result */
-		dcomplex r[ 6 ];
+		bli_zscalv_zen_int
+		(
+		  BLIS_NO_CONJUGATE,
+		  b_n,
+		  beta,
+		  y, incy,
+		  cntx
+		);
 
-		/* If beta is zero, clear y. Otherwise, scale by beta. */
-		if ( PASTEMAC(z,eq0)( *beta ) )
-		{
-			for ( dim_t i = 0; i < 6; ++i )
-			{
-				PASTEMAC(z,set0s)( y[i] );
-			}
-		}
-		else
-		{
-			for ( dim_t i = 0; i < 6; ++i )
-			{
-				PASTEMAC(z,scals)( *beta, y[i] );
-			}
-		}
-
-		/* If the vectors are empty or if alpha is zero, return early*/
-		if ( bli_zero_dim1( m ) || PASTEMAC(z,eq0)( *alpha ) ) return;
-
-		/* Initialize r vector to 0. */
-		for ( dim_t i = 0; i < 6; ++i ) PASTEMAC(z,set0s)( r[i] );
-
-		/* If a must be conjugated, we do so indirectly by first
-		 * toggling the effective conjugation of x and then conjugating
-		 * the resulting do products.
-		 * Rather conjugating each element of a matrix, final computed result
-		 * can be conjugated at the end of loop. This takes off the overhead
-		 * of conjugating each element inside the loop and improves the
-		 * performance.
-		 */
-		conj_t conjx_use = conjx;
-
-		if ( bli_is_conj( conjat ) )
-		{
-			bli_toggle_conj( &conjx_use );
-		}
-
-		/* Setting rho vectors to 0 */
-		v4df_t rho0v; rho0v.v = _mm256_setzero_pd();
-		v4df_t rho1v; rho1v.v = _mm256_setzero_pd();
-		v4df_t rho2v; rho2v.v = _mm256_setzero_pd();
-		v4df_t rho3v; rho3v.v = _mm256_setzero_pd();
-		v4df_t rho4v; rho4v.v = _mm256_setzero_pd();
-		v4df_t rho5v; rho5v.v = _mm256_setzero_pd();
-
-		v4df_t rho6v; rho6v.v = _mm256_setzero_pd();
-		v4df_t rho7v; rho7v.v = _mm256_setzero_pd();
-		v4df_t rho8v; rho8v.v = _mm256_setzero_pd();
-		v4df_t rho9v; rho9v.v = _mm256_setzero_pd();
-		v4df_t rho10v; rho10v.v = _mm256_setzero_pd();
-		v4df_t rho11v; rho11v.v = _mm256_setzero_pd();
-
-		/* Holds 2 dcomplex element of x vector
-		 * for computing dot product with A tile
-		 */
-		v4df_t x0v, x1v;
-		/* Holds 2x6 tile of matrix A */
-		v4df_t a0v, a1v, a2v, a3v, a4v, a5v;
-		/**
-		 * Since complex datatype multiplication is
-		 * being held in two sets of rho vectors.
-		 * Where first set holds the computaion with
-		 * real part of vector x and other holds
-		 * imaginary part of vector x.
-		 * For final computation, based on conj sign
-		 * of imaginary component needs to be toggled.
-		 */
-		__m256d no_conju = _mm256_setr_pd(-1, 1, -1, 1);
-		__m256d conju = _mm256_setr_pd(1, -1, 1, -1);
-		dim_t iter = m / 2;
-		dim_t rem = m % 2;
-		dim_t i = 0;
-
-		if ( bli_is_noconj( conjx_use ) )
-		{
-			if(iter)
-			{
-				for ( ; (i+1) < m; i+=2)
-				{
-					/*Load 2 dcomplex elements from
-					 * vector x
-					 */
-					x0v.v = _mm256_loadu_pd(
-							(double *)(x + i) );
-					/* x1v.v holds imaginary part of dcomplex
-					 * elements from vector x
-					 * It will do following operation.
-					 * R0 I0 R1 I1 => I0 I0 I1 I1
-					 *
-					 */
-					x1v.v = _mm256_permute_pd( x0v.v, 15 );
-					/* x1v.v holds real part of dcomplex
-					 * elements from vector x
-					 * It will do following operation.
-					 * R0 I0 R1 I1 => R0 R0 R1 R1
-					 */
-					x0v.v = _mm256_permute_pd( x0v.v, 0 );
-
-					/*Load 2x6 tile of matrix A*/
-					a0v.v = _mm256_loadu_pd( (double *)
-							(a + i + 0 * lda) );
-					a1v.v = _mm256_loadu_pd( (double *)
-							(a + i + 1 * lda) );
-					a2v.v = _mm256_loadu_pd( (double *)
-							(a + i + 2 * lda) );
-					a3v.v = _mm256_loadu_pd( (double *)
-							(a + i + 3 * lda) );
-					a4v.v = _mm256_loadu_pd( (double *)
-							(a + i + 4 * lda) );
-					a5v.v = _mm256_loadu_pd( (double *)
-							(a + i + 5 * lda) );
-
-					// perform: rho?v += a?v * x0v;
-					rho0v.v = _mm256_fmadd_pd( a0v.v,
-							x0v.v, rho0v.v );
-					rho6v.v = _mm256_fmadd_pd( a0v.v,
-							x1v.v, rho6v.v );
-
-					rho1v.v = _mm256_fmadd_pd( a1v.v,
-							x0v.v, rho1v.v );
-					rho7v.v = _mm256_fmadd_pd( a1v.v,
-							x1v.v, rho7v.v );
-
-					rho2v.v = _mm256_fmadd_pd( a2v.v,
-							x0v.v, rho2v.v );
-					rho8v.v = _mm256_fmadd_pd( a2v.v,
-							x1v.v, rho8v.v );
-
-					rho3v.v = _mm256_fmadd_pd( a3v.v,
-							x0v.v, rho3v.v );
-					rho9v.v = _mm256_fmadd_pd( a3v.v,
-							x1v.v, rho9v.v );
-
-					rho4v.v = _mm256_fmadd_pd( a4v.v,
-							x0v.v, rho4v.v );
-					rho10v.v = _mm256_fmadd_pd( a4v.v,
-							x1v.v, rho10v.v );
-
-					rho5v.v = _mm256_fmadd_pd( a5v.v,
-							x0v.v, rho5v.v );
-					rho11v.v = _mm256_fmadd_pd( a5v.v,
-							x1v.v, rho11v.v );
-				}
-
-				/*Swapping position of real and imag component
-				 * for horizontal addition to get the final
-				 * dot product computation
-				 * rho register are holding computation which needs
-				 * to be arranged in following manner.
-				 * Ra0*Ix0 | Ia0*Ix0 | Ra1*Ix1 | Ia1*Ix1
-				 *             ||
-				 *             \/
-				 * Ia0*Ix0 | Ra0*Ix0 | Ia1*Ix1 | Ra1*Ix1
-				 */
-				rho6v.v = _mm256_permute_pd(rho6v.v, 0x05);
-				rho7v.v = _mm256_permute_pd(rho7v.v, 0x05);
-				rho8v.v = _mm256_permute_pd(rho8v.v, 0x05);
-				rho9v.v = _mm256_permute_pd(rho9v.v, 0x05);
-				rho10v.v = _mm256_permute_pd(rho10v.v, 0x05);
-				rho11v.v = _mm256_permute_pd(rho11v.v, 0x05);
-
-				/*Negating imaginary part for computing
-				 * the final result of dcomplex multiplication
-				 */
-				rho6v.v = _mm256_mul_pd(rho6v.v, no_conju);
-				rho7v.v = _mm256_mul_pd(rho7v.v, no_conju);
-				rho8v.v = _mm256_mul_pd(rho8v.v, no_conju);
-				rho9v.v = _mm256_mul_pd(rho9v.v, no_conju);
-				rho10v.v = _mm256_mul_pd(rho10v.v, no_conju);
-				rho11v.v = _mm256_mul_pd(rho11v.v, no_conju);
-
-				rho0v.v = _mm256_add_pd(rho0v.v, rho6v.v);
-				rho1v.v = _mm256_add_pd(rho1v.v, rho7v.v);
-				rho2v.v = _mm256_add_pd(rho2v.v, rho8v.v);
-				rho3v.v = _mm256_add_pd(rho3v.v, rho9v.v);
-				rho4v.v = _mm256_add_pd(rho4v.v, rho10v.v);
-				rho5v.v = _mm256_add_pd(rho5v.v, rho11v.v);
-
-				/*rho0, rho1, rho2 holds final dot product
-				 * result of 6 dcomplex elements.
-				 */
-				rho0v.d[0] += rho0v.d[2];
-				rho0v.d[1] += rho0v.d[3];
-
-				rho0v.d[2] = rho1v.d[0] + rho1v.d[2];
-				rho0v.d[3] = rho1v.d[1] + rho1v.d[3];
-
-				rho1v.d[0] = rho2v.d[0] + rho2v.d[2];
-				rho1v.d[1] = rho2v.d[1] + rho2v.d[3];
-
-				rho1v.d[2] = rho3v.d[0] + rho3v.d[2];
-				rho1v.d[3] = rho3v.d[1] + rho3v.d[3];
-
-				rho2v.d[0] = rho4v.d[0] + rho4v.d[2];
-				rho2v.d[1] = rho4v.d[1] + rho4v.d[3];
-
-				rho2v.d[2] = rho5v.d[0] + rho5v.d[2];
-				rho2v.d[3] = rho5v.d[1] + rho5v.d[3];
-
-				/*Computed dot product result is being stored
-				 * in temp buffer r for further computation.
-				 */
-				_mm256_storeu_pd((double *)r, rho0v.v);
-				_mm256_storeu_pd((double *)(r+2) , rho1v.v);
-				_mm256_storeu_pd((double *)(r+4) , rho2v.v);
-
-			}
-			/*handles remainder cases*/
-			if(rem)
-			{
-				PRAGMA_SIMD
-					for(dim_t p = 0; p < 6 ; p++)
-					{
-						PASTEMAC(z,axpys)( a[i + p*lda]
-								, x[i], r[p] );
-					}
-			}
-		}
-		else
-		{
-			if(iter)
-			{
-				for ( ; (i+1) < m; i+=2)
-				{
-					/*Load 2 dcomplex elements from
-					 * vector x
-					 */
-					x0v.v = _mm256_loadu_pd( (double *)
-							(x + i) );
-					/* x1v.v holds imaginary part of dcomplex
-					 * elements from vector x
-					 */
-					x1v.v = _mm256_permute_pd( x0v.v, 15 );
-					/* x1v.v holds real part of dcomplex
-					 * elements from vector x
-					 */
-					x0v.v = _mm256_permute_pd( x0v.v, 0 );
-
-					/*Load 2x6 tile of matrix A*/
-					a0v.v = _mm256_loadu_pd( (double *)
-							(a + i + 0 * lda));
-					a1v.v = _mm256_loadu_pd( (double *)
-							(a + i + 1 * lda));
-					a2v.v = _mm256_loadu_pd( (double *)
-							(a + i + 2 * lda));
-					a3v.v = _mm256_loadu_pd( (double *)
-							(a + i + 3 * lda));
-					a4v.v = _mm256_loadu_pd( (double *)
-							(a + i + 4 * lda));
-					a5v.v = _mm256_loadu_pd( (double *)
-							(a + i + 5 * lda));
-
-					// perform: rho?v += a?v * x0v;
-					rho0v.v = _mm256_fmadd_pd( a0v.v,
-							x0v.v, rho0v.v );
-					rho6v.v = _mm256_fmadd_pd( a0v.v,
-							x1v.v, rho6v.v );
-
-					rho1v.v = _mm256_fmadd_pd( a1v.v,
-							x0v.v, rho1v.v );
-					rho7v.v = _mm256_fmadd_pd( a1v.v,
-							x1v.v, rho7v.v );
-
-					rho2v.v = _mm256_fmadd_pd( a2v.v,
-							x0v.v, rho2v.v );
-					rho8v.v = _mm256_fmadd_pd( a2v.v,
-							x1v.v, rho8v.v );
-
-					rho3v.v = _mm256_fmadd_pd( a3v.v,
-							x0v.v, rho3v.v );
-					rho9v.v = _mm256_fmadd_pd( a3v.v,
-							x1v.v, rho9v.v );
-
-					rho4v.v = _mm256_fmadd_pd( a4v.v,
-							x0v.v, rho4v.v );
-					rho10v.v = _mm256_fmadd_pd( a4v.v,
-							x1v.v, rho10v.v );
-
-					rho5v.v = _mm256_fmadd_pd( a5v.v,
-							x0v.v, rho5v.v );
-					rho11v.v = _mm256_fmadd_pd( a5v.v,
-							x1v.v, rho11v.v );
-				}
-
-				/*Swapping position of real and imag component
-				 * for horizontal addition to get the final
-				 * dot product computation
-				 * rho register are holding computation which needs
-				 * to be arranged in following manner.
-				 * Ra0*Ix0 | Ia0*Ix0 | Ra1*Ix1 | Ia1*Ix1
-				 *             ||
-				 *             \/
-				 * Ia0*Ix0 | Ra0*Ix0 | Ia1*Ix1 | Ra1*Ix1
-				 */
-				rho6v.v = _mm256_permute_pd(rho6v.v, 0x05);
-				rho7v.v = _mm256_permute_pd(rho7v.v, 0x05);
-				rho8v.v = _mm256_permute_pd(rho8v.v, 0x05);
-				rho9v.v = _mm256_permute_pd(rho9v.v, 0x05);
-				rho10v.v = _mm256_permute_pd(rho10v.v, 0x05);
-				rho11v.v = _mm256_permute_pd(rho11v.v, 0x05);
-
-				/*Negating imaginary part for computing
-				 * the final result of dcomplex multiplication
-				 */
-				rho6v.v = _mm256_mul_pd(rho6v.v, conju);
-				rho7v.v = _mm256_mul_pd(rho7v.v, conju);
-				rho8v.v = _mm256_mul_pd(rho8v.v, conju);
-				rho9v.v = _mm256_mul_pd(rho9v.v, conju);
-				rho10v.v = _mm256_mul_pd(rho10v.v, conju);
-				rho11v.v = _mm256_mul_pd(rho11v.v, conju);
-
-				rho0v.v = _mm256_add_pd(rho0v.v, rho6v.v);
-				rho1v.v = _mm256_add_pd(rho1v.v, rho7v.v);
-				rho2v.v = _mm256_add_pd(rho2v.v, rho8v.v);
-				rho3v.v = _mm256_add_pd(rho3v.v, rho9v.v);
-				rho4v.v = _mm256_add_pd(rho4v.v, rho10v.v);
-				rho5v.v = _mm256_add_pd(rho5v.v, rho11v.v);
-
-				/*rho0, rho1, rho2 holds final dot product
-				 * result of 6 dcomplex elements.
-				 */
-				rho0v.d[0] += rho0v.d[2];
-				rho0v.d[1] += rho0v.d[3];
-
-				rho0v.d[2] = rho1v.d[0] + rho1v.d[2];
-				rho0v.d[3] = rho1v.d[1] + rho1v.d[3];
-
-				rho1v.d[0] = rho2v.d[0] + rho2v.d[2];
-				rho1v.d[1] = rho2v.d[1] + rho2v.d[3];
-
-				rho1v.d[2] = rho3v.d[0] + rho3v.d[2];
-				rho1v.d[3] = rho3v.d[1] + rho3v.d[3];
-
-				rho2v.d[0] = rho4v.d[0] + rho4v.d[2];
-				rho2v.d[1] = rho4v.d[1] + rho4v.d[3];
-
-				rho2v.d[2] = rho5v.d[0] + rho5v.d[2];
-				rho2v.d[3] = rho5v.d[1] + rho5v.d[3];
-
-				/*Computed dot product result is being stored
-				 * in temp buffer r for further computation.
-				 */
-				_mm256_storeu_pd((double *)r, rho0v.v);
-				_mm256_storeu_pd((double *)(r+2) , rho1v.v);
-				_mm256_storeu_pd((double *)(r+4) , rho2v.v);
-
-			}
-			if(rem)
-			{
-				PRAGMA_SIMD
-					for(dim_t p = 0; p < 6 ; p++)
-					{
-						PASTEMAC(z,axpyjs)(a[i + p*lda]
-								, x[i], r[p] );
-					}
-			}
-		}
-
-		if ( bli_is_conj( conjat ) )
-			for ( dim_t i = 0; i < 6; ++i )
-			{
-				PASTEMAC(z,conjs)( r[i] );
-			}
-
-		/*scaling dot product result with alpha and
-		 * adding the result to vector
-		 */
-		for ( dim_t i = 0; i < 6; ++i )
-		{
-			PASTEMAC(z,axpys)( *alpha, r[i], y[i] );
-		}
+		return;
 	}
-	else
-	{
-		/* Query the context for the kernel function pointer. */
-		const num_t              dt     = PASTEMAC(z,type);
-		PASTECH(z,dotxv_ker_ft) kfp_dv
-			=
-			bli_cntx_get_l1v_ker_dt( dt, BLIS_DOTXV_KER, cntx );
 
+	// If b_n is not equal to the fusing factor, then perform the entire
+	// operation as a loop over dotxv.
+	if ( b_n != 6 )
+	{
 		for ( dim_t i = 0; i < b_n; ++i )
 		{
 			dcomplex* restrict a1   = a + (0  )*inca + (i  )*lda;
 			dcomplex* restrict x1   = x + (0  )*incx;
 			dcomplex* restrict psi1 = y + (i  )*incy;
 
-			kfp_dv
-				(
-				 conjat,
-				 conjx,
-				 m,
-				 alpha,
-				 a1, inca,
-				 x1, incx,
-				 beta,
-				 psi1,
-				 cntx
-				);
+			bli_zdotxv_zen_int
+			(
+			  conjat,
+			  conjx,
+			  m,
+			  alpha,
+			  a1, inca,
+			  x1, incx,
+			  beta,
+			  psi1,
+			  cntx
+			);
 		}
+
+		return;
 	}
 
-}
+	dim_t rem = m;
 
+	double *restrict av[6];
+	double *restrict x_temp = (double *)(x);
+
+	av[0] = (double *)(a + 0 * lda);
+	av[1] = (double *)(a + 1 * lda);
+	av[2] = (double *)(a + 2 * lda);
+	av[3] = (double *)(a + 3 * lda);
+	av[4] = (double *)(a + 4 * lda);
+	av[5] = (double *)(a + 5 * lda);
+
+	dcomplex res[6];
+
+	res[0] = res[1] = res[2] = res[3] = res[4] = res[5] = (*bli_z0);
+
+	conj_t conjx_use = conjx;
+
+	if (bli_is_conj(conjat))
+	{
+		bli_toggle_conj(&conjx_use);
+	}
+
+	if (incx == 1 && inca == 1)
+	{
+		rem = m % 2;
+		v4df_t rhov[12], a_vec[6], xv[2], conj_mul;
+
+		rhov[0].v = _mm256_setzero_pd();
+		rhov[1].v = _mm256_setzero_pd();
+		rhov[2].v = _mm256_setzero_pd();
+		rhov[3].v = _mm256_setzero_pd();
+		rhov[4].v = _mm256_setzero_pd();
+		rhov[5].v = _mm256_setzero_pd();
+		rhov[6].v = _mm256_setzero_pd();
+		rhov[7].v = _mm256_setzero_pd();
+		rhov[8].v = _mm256_setzero_pd();
+		rhov[9].v = _mm256_setzero_pd();
+		rhov[10].v = _mm256_setzero_pd();
+		rhov[11].v = _mm256_setzero_pd();
+
+		for (dim_t i = 0; (i + 1) < m; i += 2)
+		{
+			// Load 2 dcomplex elements from vector x
+			xv[0].v = _mm256_loadu_pd(x_temp);
+
+			// xv[1].v - R0 I0 R1 I1 => I0 I0 I1 I1
+			xv[1].v = _mm256_permute_pd(xv[0].v, 15);
+
+			// xv[0].v - R0 I0 R1 I1 => R0 R0 R1 R1
+			xv[0].v = _mm256_permute_pd(xv[0].v, 0);
+
+			a_vec[0].v = _mm256_loadu_pd((double *)(av[0]));
+			a_vec[1].v = _mm256_loadu_pd((double *)(av[1]));
+			a_vec[2].v = _mm256_loadu_pd((double *)(av[2]));
+			a_vec[3].v = _mm256_loadu_pd((double *)(av[3]));
+			a_vec[4].v = _mm256_loadu_pd((double *)(av[4]));
+			a_vec[5].v = _mm256_loadu_pd((double *)(av[5]));
+
+			// perform: rho?v += a?v * xv[0];
+			rhov[0].v = _mm256_fmadd_pd(a_vec[0].v, xv[0].v, rhov[0].v);
+			rhov[6].v = _mm256_fmadd_pd(a_vec[0].v, xv[1].v, rhov[6].v);
+
+			rhov[1].v = _mm256_fmadd_pd(a_vec[1].v, xv[0].v, rhov[1].v);
+			rhov[7].v = _mm256_fmadd_pd(a_vec[1].v, xv[1].v, rhov[7].v);
+
+			rhov[2].v = _mm256_fmadd_pd(a_vec[2].v, xv[0].v, rhov[2].v);
+			rhov[8].v = _mm256_fmadd_pd(a_vec[2].v, xv[1].v, rhov[8].v);
+
+			rhov[3].v = _mm256_fmadd_pd(a_vec[3].v, xv[0].v, rhov[3].v);
+			rhov[9].v = _mm256_fmadd_pd(a_vec[3].v, xv[1].v, rhov[9].v);
+
+			rhov[4].v = _mm256_fmadd_pd(a_vec[4].v, xv[0].v, rhov[4].v);
+			rhov[10].v = _mm256_fmadd_pd(a_vec[4].v, xv[1].v, rhov[10].v);
+
+			rhov[5].v = _mm256_fmadd_pd(a_vec[5].v, xv[0].v, rhov[5].v);
+			rhov[11].v = _mm256_fmadd_pd(a_vec[5].v, xv[1].v, rhov[11].v);
+
+			av[0] += 4;
+			av[1] += 4;
+			av[2] += 4;
+			av[3] += 4;
+			av[4] += 4;
+			av[5] += 4;
+
+			x_temp += 4;
+		}
+
+		if (bli_is_noconj(conjx_use))
+		{
+			conj_mul.v = _mm256_setr_pd(-1, 1, -1, 1);
+		}
+		else
+		{
+			conj_mul.v = _mm256_setr_pd(1, -1, 1, -1);
+		}
+
+		/*Swapping position of real and imag component
+		 * for horizontal addition to get the final
+		 * dot product computation
+		 * rho register are holding computation which needs
+		 * to be arranged in following manner.
+		 * Ra0*Ix0 | Ia0*Ix0 | Ra1*Ix1 | Ia1*Ix1
+		 *             ||
+		 *             \/
+		 * Ia0*Ix0 | Ra0*Ix0 | Ia1*Ix1 | Ra1*Ix1
+		 */
+		rhov[6].v = _mm256_permute_pd(rhov[6].v, 0x05);
+		rhov[7].v = _mm256_permute_pd(rhov[7].v, 0x05);
+		rhov[8].v = _mm256_permute_pd(rhov[8].v, 0x05);
+		rhov[9].v = _mm256_permute_pd(rhov[9].v, 0x05);
+		rhov[10].v = _mm256_permute_pd(rhov[10].v, 0x05);
+		rhov[11].v = _mm256_permute_pd(rhov[11].v, 0x05);
+
+		/*
+			Modifying the imag sign according to the conj value
+		*/
+		rhov[6].v = _mm256_mul_pd(rhov[6].v, conj_mul.v);
+		rhov[7].v = _mm256_mul_pd(rhov[7].v, conj_mul.v);
+		rhov[8].v = _mm256_mul_pd(rhov[8].v, conj_mul.v);
+		rhov[9].v = _mm256_mul_pd(rhov[9].v, conj_mul.v);
+		rhov[10].v = _mm256_mul_pd(rhov[10].v, conj_mul.v);
+		rhov[11].v = _mm256_mul_pd(rhov[11].v, conj_mul.v);
+
+		rhov[0].v = _mm256_add_pd(rhov[0].v, rhov[6].v);
+		rhov[1].v = _mm256_add_pd(rhov[1].v, rhov[7].v);
+		rhov[2].v = _mm256_add_pd(rhov[2].v, rhov[8].v);
+		rhov[3].v = _mm256_add_pd(rhov[3].v, rhov[9].v);
+		rhov[4].v = _mm256_add_pd(rhov[4].v, rhov[10].v);
+		rhov[5].v = _mm256_add_pd(rhov[5].v, rhov[11].v);
+
+		/*rho0, rho1, rho2 holds final dot product
+		 * result of 6 dcomplex elements.
+		 */
+		rhov[0].d[0] += rhov[0].d[2];
+		rhov[0].d[1] += rhov[0].d[3];
+
+		rhov[0].d[2] = rhov[1].d[0] + rhov[1].d[2];
+		rhov[0].d[3] = rhov[1].d[1] + rhov[1].d[3];
+
+		rhov[1].d[0] = rhov[2].d[0] + rhov[2].d[2];
+		rhov[1].d[1] = rhov[2].d[1] + rhov[2].d[3];
+
+		rhov[1].d[2] = rhov[3].d[0] + rhov[3].d[2];
+		rhov[1].d[3] = rhov[3].d[1] + rhov[3].d[3];
+
+		rhov[2].d[0] = rhov[4].d[0] + rhov[4].d[2];
+		rhov[2].d[1] = rhov[4].d[1] + rhov[4].d[3];
+
+		rhov[2].d[2] = rhov[5].d[0] + rhov[5].d[2];
+		rhov[2].d[3] = rhov[5].d[1] + rhov[5].d[3];
+
+		/*
+			Computed dot product result is being stored
+			in temp buffer r for further computation.
+		*/
+		_mm256_storeu_pd((double *)res, rhov[0].v);
+		_mm256_storeu_pd((double *)(res + 2), rhov[1].v);
+		_mm256_storeu_pd((double *)(res + 4), rhov[2].v);
+	}
+
+	// This section will have the whole of compute when incx != 1 || inca != 1
+	if (rem)
+	{
+		// Issue vzeroupper instruction to clear upper lanes of ymm registers.
+		// This avoids a performance penalty caused by false dependencies when
+		// transitioning from AVX to SSE instructions (which may occur later,
+		// especially if BLIS is compiled with -mfpmath=sse).
+		_mm256_zeroupper();
+
+		v2df_t rhov[12], a_vec[6], xv[2], conj_mul;
+
+		rhov[0].v = _mm_setzero_pd();
+		rhov[1].v = _mm_setzero_pd();
+		rhov[2].v = _mm_setzero_pd();
+		rhov[3].v = _mm_setzero_pd();
+		rhov[4].v = _mm_setzero_pd();
+		rhov[5].v = _mm_setzero_pd();
+		rhov[6].v = _mm_setzero_pd();
+		rhov[7].v = _mm_setzero_pd();
+		rhov[8].v = _mm_setzero_pd();
+		rhov[9].v = _mm_setzero_pd();
+		rhov[10].v = _mm_setzero_pd();
+		rhov[11].v = _mm_setzero_pd();
+
+		for (dim_t i = 0; i < rem; i++)
+		{
+			// Load 2 dcomplex elements from vector x
+			xv[0].v = _mm_loadu_pd(x_temp);
+
+			// xv[1].v - R0 I0 R1 I1 => I0 I0 I1 I1
+			xv[1].v = _mm_permute_pd(xv[0].v, 0b11);
+
+			// xv[0].v - R0 I0 R1 I1 => R0 R0 R1 R1
+			xv[0].v = _mm_permute_pd(xv[0].v, 0b00);
+
+			a_vec[0].v = _mm_loadu_pd((double *)(av[0]));
+			a_vec[1].v = _mm_loadu_pd((double *)(av[1]));
+			a_vec[2].v = _mm_loadu_pd((double *)(av[2]));
+			a_vec[3].v = _mm_loadu_pd((double *)(av[3]));
+			a_vec[4].v = _mm_loadu_pd((double *)(av[4]));
+			a_vec[5].v = _mm_loadu_pd((double *)(av[5]));
+
+			// perform: rho?v += a?v * xv[0];
+			rhov[0].v = _mm_fmadd_pd(a_vec[0].v, xv[0].v, rhov[0].v);
+			rhov[6].v = _mm_fmadd_pd(a_vec[0].v, xv[1].v, rhov[6].v);
+
+			rhov[1].v = _mm_fmadd_pd(a_vec[1].v, xv[0].v, rhov[1].v);
+			rhov[7].v = _mm_fmadd_pd(a_vec[1].v, xv[1].v, rhov[7].v);
+
+			rhov[2].v = _mm_fmadd_pd(a_vec[2].v, xv[0].v, rhov[2].v);
+			rhov[8].v = _mm_fmadd_pd(a_vec[2].v, xv[1].v, rhov[8].v);
+
+			rhov[3].v = _mm_fmadd_pd(a_vec[3].v, xv[0].v, rhov[3].v);
+			rhov[9].v = _mm_fmadd_pd(a_vec[3].v, xv[1].v, rhov[9].v);
+
+			rhov[4].v = _mm_fmadd_pd(a_vec[4].v, xv[0].v, rhov[4].v);
+			rhov[10].v = _mm_fmadd_pd(a_vec[4].v, xv[1].v, rhov[10].v);
+
+			rhov[5].v = _mm_fmadd_pd(a_vec[5].v, xv[0].v, rhov[5].v);
+			rhov[11].v = _mm_fmadd_pd(a_vec[5].v, xv[1].v, rhov[11].v);
+
+			av[0] += 2 * inca;
+			av[1] += 2 * inca;
+			av[2] += 2 * inca;
+			av[3] += 2 * inca;
+			av[4] += 2 * inca;
+			av[5] += 2 * inca;
+
+			x_temp += 2 * incx;
+		}
+
+		if (bli_is_noconj(conjx_use))
+		{
+			conj_mul.v = _mm_setr_pd(-1, 1);
+		}
+		else
+		{
+			conj_mul.v = _mm_setr_pd(1, -1);
+		}
+
+		rhov[6].v = _mm_permute_pd(rhov[6].v, 0b01);
+		rhov[7].v = _mm_permute_pd(rhov[7].v, 0b01);
+		rhov[8].v = _mm_permute_pd(rhov[8].v, 0b01);
+		rhov[9].v = _mm_permute_pd(rhov[9].v, 0b01);
+		rhov[10].v = _mm_permute_pd(rhov[10].v, 0b01);
+		rhov[11].v = _mm_permute_pd(rhov[11].v, 0b01);
+
+		/*
+			Modifying the imag sign according to the conj value
+		*/
+		rhov[6].v = _mm_mul_pd(rhov[6].v, conj_mul.v);
+		rhov[7].v = _mm_mul_pd(rhov[7].v, conj_mul.v);
+		rhov[8].v = _mm_mul_pd(rhov[8].v, conj_mul.v);
+		rhov[9].v = _mm_mul_pd(rhov[9].v, conj_mul.v);
+		rhov[10].v = _mm_mul_pd(rhov[10].v, conj_mul.v);
+		rhov[11].v = _mm_mul_pd(rhov[11].v, conj_mul.v);
+
+		rhov[0].v = _mm_add_pd(rhov[0].v, rhov[6].v);
+		rhov[1].v = _mm_add_pd(rhov[1].v, rhov[7].v);
+		rhov[2].v = _mm_add_pd(rhov[2].v, rhov[8].v);
+		rhov[3].v = _mm_add_pd(rhov[3].v, rhov[9].v);
+		rhov[4].v = _mm_add_pd(rhov[4].v, rhov[10].v);
+		rhov[5].v = _mm_add_pd(rhov[5].v, rhov[11].v);
+
+		rhov[6].v = _mm_loadu_pd((double *)(res));
+		rhov[7].v = _mm_loadu_pd((double *)(res + 1));
+		rhov[8].v = _mm_loadu_pd((double *)(res + 2));
+		rhov[9].v = _mm_loadu_pd((double *)(res + 3));
+		rhov[10].v = _mm_loadu_pd((double *)(res + 4));
+		rhov[11].v = _mm_loadu_pd((double *)(res + 5));
+
+		rhov[0].v = _mm_add_pd(rhov[0].v, rhov[6].v);
+		rhov[1].v = _mm_add_pd(rhov[1].v, rhov[7].v);
+		rhov[2].v = _mm_add_pd(rhov[2].v, rhov[8].v);
+		rhov[3].v = _mm_add_pd(rhov[3].v, rhov[9].v);
+		rhov[4].v = _mm_add_pd(rhov[4].v, rhov[10].v);
+		rhov[5].v = _mm_add_pd(rhov[5].v, rhov[11].v);
+
+		/*
+			Computed dot product result is being stored
+			in temp buffer r for further computation.
+		*/
+		_mm_storeu_pd((double *)res, rhov[0].v);
+		_mm_storeu_pd((double *)(res + 1), rhov[1].v);
+		_mm_storeu_pd((double *)(res + 2), rhov[2].v);
+		_mm_storeu_pd((double *)(res + 3), rhov[3].v);
+		_mm_storeu_pd((double *)(res + 4), rhov[4].v);
+		_mm_storeu_pd((double *)(res + 5), rhov[5].v);
+
+		// Issue vzeroupper instruction to clear upper lanes of ymm registers.
+		// This avoids a performance penalty caused by false dependencies when
+		// transitioning from AVX to SSE instructions (which may occur later,
+		// especially if BLIS is compiled with -mfpmath=sse).
+		_mm256_zeroupper();
+	}
+
+	// Multiplying 'A' * 'x' by 'alpha'
+	__m256d alpha_r, alpha_i, temp_v[3];
+	v4df_t rhov[3];
+
+	rhov[0].v = _mm256_loadu_pd((double *)(res));
+	rhov[1].v = _mm256_loadu_pd((double *)(res + 2));
+	rhov[2].v = _mm256_loadu_pd((double *)(res + 4));
+
+	if (bli_is_conj(conjat))
+	{
+		__m256d conj_mul = _mm256_setr_pd(1, -1, 1, -1);
+
+		rhov[0].v = _mm256_mul_pd(rhov[0].v, conj_mul);
+		rhov[1].v = _mm256_mul_pd(rhov[1].v, conj_mul);
+		rhov[2].v = _mm256_mul_pd(rhov[2].v, conj_mul);
+	}
+
+	alpha_r = _mm256_broadcast_sd(&((*alpha).real));
+	alpha_i = _mm256_broadcast_sd(&((*alpha).imag));
+
+	temp_v[0] = _mm256_mul_pd(rhov[0].v, alpha_i);
+	temp_v[1] = _mm256_mul_pd(rhov[1].v, alpha_i);
+	temp_v[2] = _mm256_mul_pd(rhov[2].v, alpha_i);
+
+	temp_v[0] = _mm256_permute_pd(temp_v[0], 0b0101);
+	temp_v[1] = _mm256_permute_pd(temp_v[1], 0b0101);
+	temp_v[2] = _mm256_permute_pd(temp_v[2], 0b0101);
+
+	rhov[0].v = _mm256_fmaddsub_pd(rhov[0].v, alpha_r, temp_v[0]);
+	rhov[1].v = _mm256_fmaddsub_pd(rhov[1].v, alpha_r, temp_v[1]);
+	rhov[2].v = _mm256_fmaddsub_pd(rhov[2].v, alpha_r, temp_v[2]);
+
+	// When 'beta' is not zero we need to multiply scale 'y' by 'beta'
+	if (!PASTEMAC(z, eq0)(*beta))
+	{
+		v4df_t yv[3];
+		__m256d beta_r, beta_i;
+
+		beta_r = _mm256_broadcast_sd(&((*beta).real));
+		beta_i = _mm256_broadcast_sd(&((*beta).imag));
+
+		if (incy == 1)
+		{
+			yv[0].v = _mm256_loadu_pd((double *)(y));
+			yv[1].v = _mm256_loadu_pd((double *)(y + 2));
+			yv[2].v = _mm256_loadu_pd((double *)(y + 4));
+		}
+		else
+		{
+			/*
+				This can be done using SSE instructions
+				but has been kept as scalar code to avoid
+				mixing SSE with AVX
+			*/
+			yv[0].d[0] = (*(y + 0 * incy)).real;
+			yv[0].d[1] = (*(y + 0 * incy)).imag;
+			yv[0].d[2] = (*(y + 1 * incy)).real;
+			yv[0].d[3] = (*(y + 1 * incy)).imag;
+
+			yv[1].d[0] = (*(y + 2 * incy)).real;
+			yv[1].d[1] = (*(y + 2 * incy)).imag;
+			yv[1].d[2] = (*(y + 3 * incy)).real;
+			yv[1].d[3] = (*(y + 3 * incy)).imag;
+
+			yv[2].d[0] = (*(y + 4 * incy)).real;
+			yv[2].d[1] = (*(y + 4 * incy)).imag;
+			yv[2].d[2] = (*(y + 5 * incy)).real;
+			yv[2].d[3] = (*(y + 5 * incy)).imag;
+		}
+
+		temp_v[0] = _mm256_mul_pd(yv[0].v, beta_i);
+		temp_v[1] = _mm256_mul_pd(yv[1].v, beta_i);
+		temp_v[2] = _mm256_mul_pd(yv[2].v, beta_i);
+
+		temp_v[0] = _mm256_permute_pd(temp_v[0], 0b0101);
+		temp_v[1] = _mm256_permute_pd(temp_v[1], 0b0101);
+		temp_v[2] = _mm256_permute_pd(temp_v[2], 0b0101);
+
+		yv[0].v = _mm256_fmaddsub_pd(yv[0].v, beta_r, temp_v[0]);
+		yv[1].v = _mm256_fmaddsub_pd(yv[1].v, beta_r, temp_v[1]);
+		yv[2].v = _mm256_fmaddsub_pd(yv[2].v, beta_r, temp_v[2]);
+
+		// Here we 'rhov' has 'alpha' * 'A' * 'x' that is added with 'y'
+		rhov[0].v = _mm256_add_pd(yv[0].v, rhov[0].v);
+		rhov[1].v = _mm256_add_pd(yv[1].v, rhov[1].v);
+		rhov[2].v = _mm256_add_pd(yv[2].v, rhov[2].v);
+	}
+
+	if (incy == 1)
+	{
+		_mm256_storeu_pd((double *)y, rhov[0].v);
+		_mm256_storeu_pd((double *)(y + 2), rhov[1].v);
+		_mm256_storeu_pd((double *)(y + 4), rhov[2].v);
+	}
+	else
+	{
+		(*(y + 0 * incy)).real = rhov[0].d[0];
+		(*(y + 0 * incy)).imag = rhov[0].d[1];
+		(*(y + 1 * incy)).real = rhov[0].d[2];
+		(*(y + 1 * incy)).imag = rhov[0].d[3];
+
+		(*(y + 2 * incy)).real = rhov[1].d[0];
+		(*(y + 2 * incy)).imag = rhov[1].d[1];
+		(*(y + 3 * incy)).real = rhov[1].d[2];
+		(*(y + 3 * incy)).imag = rhov[1].d[3];
+
+		(*(y + 4 * incy)).real = rhov[2].d[0];
+		(*(y + 4 * incy)).imag = rhov[2].d[1];
+		(*(y + 5 * incy)).real = rhov[2].d[2];
+		(*(y + 5 * incy)).imag = rhov[2].d[3];
+	}
+}
 
 /**
  * Performs dotxf operation on scomplex.
