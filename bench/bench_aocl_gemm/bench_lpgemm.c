@@ -107,7 +107,8 @@ GEN_FILL_ARRAY_FUNC(int32_t)
 
 void fill_array_bfloat16( void* arr, dim_t size )
 {
-	float* c_float = ( float* ) bli_malloc_user( sizeof( float ) * size );
+	err_t bli_errors = BLIS_SUCCESS;
+	float* c_float = ( float* ) bli_malloc_user( sizeof( float ) * size, &bli_errors );
 	for ( dim_t i = 0; i < size; ++i )
 	{
 		c_float[i] = 2.0;
@@ -1038,14 +1039,15 @@ void mat_mul_bench_main_ ## BLAS_SFX \
 	} \
  \
 	/* Get 64 byte aligned memory.*/ \
-	A_type* a = ( A_type* ) bli_malloc_user( sizeof( A_type ) * m * k ); \
+	err_t bli_errors = BLIS_SUCCESS; \
+	A_type* a = ( A_type* ) bli_malloc_user( sizeof( A_type ) * m * k, &bli_errors ); \
  \
-	B_type* b = ( B_type* ) bli_malloc_user( sizeof( B_type ) * n * k ); \
+	B_type* b = ( B_type* ) bli_malloc_user( sizeof( B_type ) * n * k, &bli_errors ); \
  \
-	C_type* c = ( C_type* ) bli_malloc_user( sizeof( C_type ) * m * n ); \
+	C_type* c = ( C_type* ) bli_malloc_user( sizeof( C_type ) * m * n, &bli_errors ); \
 	memset( ( void* ) c, 0, sizeof( C_type ) * m * n ); \
  \
-	C_type* c_ref = ( C_type* ) bli_malloc_user( sizeof( C_type ) * m * n ); \
+	C_type* c_ref = ( C_type* ) bli_malloc_user( sizeof( C_type ) * m * n, &bli_errors ); \
 	memset( ( void* ) c_ref, 0, sizeof( C_type ) * m * n ); \
  \
 	GEN_FUNC_NAME(fill_array_,A_type)( a, ( m * k ) ); \
@@ -1101,7 +1103,7 @@ void mat_mul_bench_main_ ## BLAS_SFX \
 		siz_t b_reorder_buf_siz_req = \
 			GEN_FUNC_NAME(aocl_get_reorder_buf_size_,REORDER_SFX)( 'B', k, n ); \
  \
-		B_type* b_reorder = ( B_type* ) bli_malloc_user( b_reorder_buf_siz_req ); \
+		B_type* b_reorder = ( B_type* ) bli_malloc_user( b_reorder_buf_siz_req, &bli_errors ); \
 		GEN_FUNC_NAME(aocl_reorder_,REORDER_SFX)( 'B', b, b_reorder, k, n, stride_b ); \
  \
 		GEN_FUNC_NAME(mat_mul_bench_driver_,BLAS_SFX) \
@@ -1192,27 +1194,28 @@ void mat_mul_bench_main_ ## BLAS_SFX \
 		n_repeats = global_n_repeat; \
 	} \
  \
+	err_t bli_errors = BLIS_SUCCESS; \
 	/* Get 64 byte aligned memory.*/ \
-	bfloat16* a = ( bfloat16* ) bli_malloc_user( sizeof( bfloat16 ) * m * k ); \
-	float *a_float = bli_malloc_user( m * k * sizeof( float )); \
+	bfloat16* a = ( bfloat16* ) bli_malloc_user( sizeof( bfloat16 ) * m * k, &bli_errors ); \
+	float *a_float = bli_malloc_user( m * k * sizeof( float ), &bli_errors); \
 	for ( int32_t i = 0; i < m*k; ++i ) \
     { \
         a_float[i] = ( float ) ( i % 5 ); \
     } \
 	convert_float_arr_to_bf16( a_float, a, m * k ); \
  \
-	bfloat16* b = ( bfloat16* ) bli_malloc_user( sizeof( bfloat16 ) * n * k ); \
-	float *b_float = bli_malloc_user( k * n * sizeof( float ));  \
+	bfloat16* b = ( bfloat16* ) bli_malloc_user( sizeof( bfloat16 ) * n * k, &bli_errors ); \
+	float *b_float = bli_malloc_user( k * n * sizeof( float ), &bli_errors);  \
 	for ( int32_t i = 0; i < k*n; ++i ) \
 	{ \
 		b_float[i] = ( float ) ( i % 5 );\
 	} \
 	convert_float_arr_to_bf16( b_float, b, k * n ); \
  \
-	C_type* c = ( C_type* ) bli_malloc_user( sizeof( C_type ) * m * n ); \
+	C_type* c = ( C_type* ) bli_malloc_user( sizeof( C_type ) * m * n, &bli_errors ); \
 	memset( ( void* ) c, 0, sizeof( C_type ) * m * n ); \
  \
-	C_type* c_ref = ( C_type* ) bli_malloc_user( sizeof( C_type ) * m * n ); \
+	C_type* c_ref = ( C_type* ) bli_malloc_user( sizeof( C_type ) * m * n, &bli_errors ); \
 	memset( ( void* ) c_ref, 0, sizeof( C_type ) * m * n ); \
  \
 	if ( bench_mode == 'a' ) \
@@ -1265,8 +1268,8 @@ void mat_mul_bench_main_ ## BLAS_SFX \
 		siz_t b_reorder_buf_siz_req = \
 			aocl_get_reorder_buf_size_bf16bf16f32of32( 'B', k, n ); \
  \
-		bfloat16* b_reorder = ( bfloat16* ) bli_malloc_user( b_reorder_buf_siz_req ); \
-			aocl_reorder_bf16bf16f32of32( 'B', b, b_reorder, k, n, stride_b ); \
+		bfloat16* b_reorder = ( bfloat16* ) bli_malloc_user( b_reorder_buf_siz_req, &bli_errors ); \
+		aocl_reorder_bf16bf16f32of32( 'B', b, b_reorder, k, n, stride_b ); \
  \
  		GEN_FUNC_NAME(mat_mul_bench_driver_,BLAS_SFX) \
 		( \

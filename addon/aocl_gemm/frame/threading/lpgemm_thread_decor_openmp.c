@@ -680,10 +680,11 @@ void lpgemm_ ## LPGEMM_SFX ## _openmp_thread_decorator \
  \
 	thrcomm_t static_lpgemm_comms[BLIS_LPGEMM_NUM_STATIC_COMMS]; \
 	thrcomm_t* cur_lpgemm_comms = static_lpgemm_comms; \
+	err_t bli_errors = BLIS_SUCCESS; \
  \
 	if ( jc_ways > BLIS_LPGEMM_NUM_STATIC_COMMS ) \
 	{ \
-		cur_lpgemm_comms = bli_malloc_intl( jc_ways * sizeof( thrcomm_t ) ); \
+		cur_lpgemm_comms = bli_malloc_intl( jc_ways * sizeof( thrcomm_t ), &bli_errors ); \
 	} \
 	for ( dim_t i = 0; i < jc_ways; ++i ) \
 	{ \
