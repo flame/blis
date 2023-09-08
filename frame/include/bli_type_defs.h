@@ -118,7 +118,11 @@ typedef   gint_t dim_t;      // dimension type
 #endif
 typedef   gint_t inc_t;      // increment/stride type
 typedef   gint_t doff_t;     // diagonal offset type
-typedef  guint_t siz_t;      // byte size type
+#ifdef BLIS_ARCH_64
+typedef uint64_t siz_t;      // byte size type
+#else
+typedef uint32_t siz_t;      // byte size type
+#endif
 typedef uint32_t objbits_t;  // object information bit field
 
 // -- Real types --
