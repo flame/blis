@@ -1,9 +1,25 @@
-##Copyright (C) 2020, Advanced Micro Devices, Inc. All rights reserved.##
+##Copyright (C) 2020-2023, Advanced Micro Devices, Inc. All rights reserved.##
 
 target_sources("${PROJECT_NAME}"
      PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/bli_gemmt_front.c
     ${CMAKE_CURRENT_SOURCE_DIR}/bli_gemmt_ker_var2.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/bli_gemmt_sup_var1n2m.c
     )
+
+# Select AMD specific sources for AMD configurations.
+if(${TARGET_ARCH} STREQUAL zen OR
+${TARGET_ARCH} STREQUAL zen2 OR
+${TARGET_ARCH} STREQUAL zen3 OR
+${TARGET_ARCH} STREQUAL zen4 OR
+${TARGET_ARCH} STREQUAL amdzen)
+        target_sources("${PROJECT_NAME}"
+        PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR}/bli_gemmt_sup_var1n2m_amd.c
+        )
+else()
+        target_sources("${PROJECT_NAME}"
+        PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR}/bli_gemmt_sup_var1n2m.c
+        )
+endif()
 
