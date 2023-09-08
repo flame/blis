@@ -892,6 +892,12 @@ arch_t bli_cpuid_query_id( void )
 	return BLIS_ARCH_GENERIC;
 }
 
+model_t bli_cpuid_query_model_id( arch_t arch_id )
+{
+	// Set default for architectures where separate models haven't been defined.
+	return BLIS_MODEL_DEFAULT;
+}
+
 bool bli_cpuid_is_thunderx2
      (
        uint32_t family,
@@ -965,6 +971,22 @@ bool bli_cpuid_is_cortexa9
 	if ( !bli_cpuid_has_features( features, expected ) ) return FALSE;
 
 	return TRUE;
+}
+
+#else
+
+// Define basic versions of these functions for architectures not explicitly
+// handled above.
+
+arch_t bli_cpuid_query_id( void )
+{
+	return BLIS_ARCH_GENERIC;
+}
+
+model_t bli_cpuid_query_model_id( arch_t arch_id )
+{
+    // Set default for architectures where separate models haven't been defined.
+    return BLIS_MODEL_DEFAULT;
 }
 
 #endif
