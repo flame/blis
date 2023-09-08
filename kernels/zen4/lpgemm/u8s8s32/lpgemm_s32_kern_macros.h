@@ -124,7 +124,7 @@
 	reg = _mm512_mask_mullo_epi32( reg, relu_cmp_mask, reg, selector2 ); \
 
 // Downscale macro
-#define CVT_MULRND_CVT32(reg,selector) \
+#define CVT_MULRND_CVT32(reg,selector,zero_point) \
 	reg = \
 	_mm512_cvtps_epi32 \
 	( \
@@ -134,7 +134,8 @@
 		( __m512 )selector, \
 		( _MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC ) \
 	  ) \
-	) \
+	); \
+	reg = _mm512_add_epi32( reg, _mm512_cvtepi8_epi32( zero_point ) ); \
 
 // Downscale store macro
 #define CVT_STORE_S32_S8(reg,m_ind,n_ind) \
@@ -147,7 +148,7 @@
 	) \
 
 // Downscale n < 16 macro
-#define CVT_MULRND_CVT32_LT16(reg,selector) \
+#define CVT_MULRND_CVT32_LT16(reg,selector,zero_point) \
 	reg = \
 	_mm512_cvtps_epi32 \
 	( \
@@ -157,7 +158,8 @@
 	    ( __m512 )selector, \
 	    ( _MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC ) \
 	  ) \
-	) \
+	); \
+	reg = _mm512_add_epi32( reg, _mm512_cvtepi8_epi32( zero_point ) ); \
 
 /* TANH GeLU (x) = 0.5* x * (1 + tanh ( 0.797884 * ( x + ( 0.044715 * x^3 ) ) ) )  */ 
 #define GELU_TANH_S32_AVX512(reg, y, r, r2, x, z, dn, x_tanh, q) \

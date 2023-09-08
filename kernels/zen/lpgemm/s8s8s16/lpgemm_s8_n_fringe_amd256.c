@@ -505,6 +505,7 @@ POST_OPS_DOWNSCALE_6x16:
 			__m256i temp_32[2];
 			__m256 temp_float[2];
 			__m256 scale_1, scale_2;
+			__m128i zero_point_0;
 			__m256 res_1, res_2;
 
 			/* Load the scale vector values into the register*/
@@ -517,13 +518,19 @@ POST_OPS_DOWNSCALE_6x16:
 				(float *)post_ops_list_temp->scale_factor +
 				post_ops_attr.post_op_c_j + (1 * 8));
 
+			// Load zero points (2 byte values).
+			zero_point_0 =
+				_mm_loadu_si128(
+				( __m128i const* )( ( int8_t* )post_ops_list_temp->op_args1 +
+				post_ops_attr.post_op_c_j + ( 0 * 16 ) ) );
+
 			// Scale first 16 columns of the 6 rows.
-			CVT_MULRND_CVT16(c_int16_0p0, scale_1, scale_2)
-			CVT_MULRND_CVT16(c_int16_1p0, scale_1, scale_2)
-			CVT_MULRND_CVT16(c_int16_2p0, scale_1, scale_2)
-			CVT_MULRND_CVT16(c_int16_3p0, scale_1, scale_2)
-			CVT_MULRND_CVT16(c_int16_4p0, scale_1, scale_2)
-			CVT_MULRND_CVT16(c_int16_5p0, scale_1, scale_2)
+			CVT_MULRND_CVT16(c_int16_0p0, scale_1, scale_2, zero_point_0)
+			CVT_MULRND_CVT16(c_int16_1p0, scale_1, scale_2, zero_point_0)
+			CVT_MULRND_CVT16(c_int16_2p0, scale_1, scale_2, zero_point_0)
+			CVT_MULRND_CVT16(c_int16_3p0, scale_1, scale_2, zero_point_0)
+			CVT_MULRND_CVT16(c_int16_4p0, scale_1, scale_2, zero_point_0)
+			CVT_MULRND_CVT16(c_int16_5p0, scale_1, scale_2, zero_point_0)
 
 			POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 		}
@@ -1120,6 +1127,7 @@ POST_OPS_DOWNSCALE_6xlt16:
 			__m256i temp_32[2];
 			__m256 temp_float[2];
 			__m256 scale_1, scale_2;
+			__m128i zero_point_0;
 			__m256 res_1, res_2;
 
 			float float_buf[16];
@@ -1131,13 +1139,19 @@ POST_OPS_DOWNSCALE_6xlt16:
 			scale_1 = _mm256_loadu_ps(float_buf + (0 * 8));
 			scale_2 = _mm256_loadu_ps(float_buf + (1 * 8));
 
+			int8_t zero_point_buf[16];
+
+			memcpy( zero_point_buf, ( ( int8_t* )post_ops_list_temp->op_args1 +
+					post_ops_attr.post_op_c_j ), ( n0_rem * sizeof( int8_t ) ) );
+			zero_point_0 = _mm_loadu_si128( ( __m128i const* )zero_point_buf );
+
 			// Scale first 16 columns of the 6 rows.
-			CVT_MULRND_CVT16(c_int16_0p0, scale_1, scale_2)
-			CVT_MULRND_CVT16(c_int16_1p0, scale_1, scale_2)
-			CVT_MULRND_CVT16(c_int16_2p0, scale_1, scale_2)
-			CVT_MULRND_CVT16(c_int16_3p0, scale_1, scale_2)
-			CVT_MULRND_CVT16(c_int16_4p0, scale_1, scale_2)
-			CVT_MULRND_CVT16(c_int16_5p0, scale_1, scale_2)
+			CVT_MULRND_CVT16(c_int16_0p0, scale_1, scale_2, zero_point_0)
+			CVT_MULRND_CVT16(c_int16_1p0, scale_1, scale_2, zero_point_0)
+			CVT_MULRND_CVT16(c_int16_2p0, scale_1, scale_2, zero_point_0)
+			CVT_MULRND_CVT16(c_int16_3p0, scale_1, scale_2, zero_point_0)
+			CVT_MULRND_CVT16(c_int16_4p0, scale_1, scale_2, zero_point_0)
+			CVT_MULRND_CVT16(c_int16_5p0, scale_1, scale_2, zero_point_0)
 
 			POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 		}

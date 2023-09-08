@@ -106,7 +106,7 @@
 	); \
  
 // Downscale macro
-#define CVT_MULRND_CVT16(reg, scale0, scale1) \
+#define CVT_MULRND_CVT16(reg, scale0, scale1, zero_point_0) \
  \
 	/* Extract the first 128 bits of the register*/ \
 	temp[0] = _mm256_extractf128_si256( reg, 0 ); \
@@ -159,6 +159,9 @@
  \
 	/*Permute to make sure the order is correct*/ \
 	reg = _mm256_permute4x64_epi64( reg, 0XD8 ); \
+ \
+	/* Zero point addition.*/ \
+	reg = _mm256_add_epi16( reg, _mm256_cvtepi8_epi16( zero_point_0 ) ); \
 
 // Downscale store macro
 #define CVT_STORE_S16_S8(reg0, reg1, m_ind, n_ind) \

@@ -95,7 +95,7 @@ void fill_array_ ## ctype ( void* arr, dim_t size ) \
 	ctype* temp_arr = ( ctype* ) arr; \
 	for ( dim_t i = 0; i < size; ++i ) \
 	{ \
-		temp_arr[i] = ( ctype )( i % 10 ); \
+		temp_arr[i] = ( ctype )( i % 20 ); \
 	} \
 } \
 
@@ -352,23 +352,28 @@ int min (int a, int b)
 	return ( a < b ? a : b );
 }
 
-#define GEN_MAT_MUL_ACC_CHK_DOWNSCALE(ACCUM_type,SCALE_type,BLAS_DOWNSCALE_SFX) \
+#define GEN_MAT_MUL_ACC_CHK_DOWNSCALE(C_type,ACCUM_type,SCALE_type,BLAS_DOWNSCALE_SFX) \
 static inline ACCUM_type mat_mul_accuracy_check_downscale_ ## BLAS_DOWNSCALE_SFX \
      (\
        ACCUM_type temp_accum,\
        aocl_post_op*  post_op, \
        dim_t j \
      )\
-{\
-	ACCUM_type out_temp_accum = ( ACCUM_type ) min ( max ( nearbyintf( ( SCALE_type )temp_accum * \
-		( *( ( SCALE_type* )post_op->sum.scale_factor + j ) ) ), S8_MIN ), S8_MAX ) ; \
+{ \
+	ACCUM_type out_temp_accum = \
+		( ACCUM_type )min( \
+						max( nearbyintf( ( SCALE_type )( temp_accum ) * \
+							( *( ( SCALE_type* )post_op->sum.scale_factor + j ) ) ) + \
+							*( ( C_type* )post_op->sum.zero_point + j ), \
+							S8_MIN ), \
+						S8_MAX ); \
 	return 	out_temp_accum; \
 }\
 
-GEN_MAT_MUL_ACC_CHK_DOWNSCALE(int16_t,float,u8s8s16os8)
-GEN_MAT_MUL_ACC_CHK_DOWNSCALE(int32_t,float,u8s8s32os8)
-GEN_MAT_MUL_ACC_CHK_DOWNSCALE(int32_t,float,s8s8s32os8)
-GEN_MAT_MUL_ACC_CHK_DOWNSCALE(int16_t,float,s8s8s16os8)
+GEN_MAT_MUL_ACC_CHK_DOWNSCALE(int8_t,int16_t,float,u8s8s16os8)
+GEN_MAT_MUL_ACC_CHK_DOWNSCALE(int8_t,int32_t,float,u8s8s32os8)
+GEN_MAT_MUL_ACC_CHK_DOWNSCALE(int8_t,int32_t,float,s8s8s32os8)
+GEN_MAT_MUL_ACC_CHK_DOWNSCALE(int8_t,int16_t,float,s8s8s16os8)
 
 static inline float mat_mul_accuracy_check_downscale_bf16bf16f32obf16
      (
@@ -735,7 +740,7 @@ GEN_MAT_MUL_ACC_CHK_DRV_FUNC(int8_t,int8_t,int16_t,int16_t,float,s8s8s16os16,s8s
 GEN_MAT_MUL_ACC_CHK_DRV_FUNC(int8_t,int8_t,int8_t,int16_t,float,s8s8s16os8,s8s8s16os8)
 
 /* Only supports bias followed by RELU and vice versa for now.*/ \
-#define GEN_MAT_MUL_POST_OPS_CREATOR(C_type,DSCALE_type,BLAS_SFX) \
+#define GEN_MAT_MUL_POST_OPS_CREATOR(C_DSCALE_type,C_type,DSCALE_type,BLAS_SFX) \
 aocl_post_op* lpgemm_create_post_ops_struct_ ## BLAS_SFX \
      ( \
        dim_t m, \
@@ -943,19 +948,27 @@ aocl_post_op* lpgemm_create_post_ops_struct_ ## BLAS_SFX \
 		{ \
 			/* Allocate scale buffer, return early if alloc fails.*/ \
 			post_ops->sum.scale_factor = malloc( n * sizeof( DSCALE_type ) ); \
-			if ( post_ops->sum.scale_factor == NULL ) \
+			post_ops->sum.zero_point = malloc( n * sizeof( C_DSCALE_type ) ); \
+			if ( ( post_ops->sum.scale_factor == NULL ) || \
+				 ( post_ops->sum.zero_point == NULL ) ) \
 			{ \
 				free ( post_ops->eltwise ); \
 				free ( post_ops->bias.bias ); \
 				free( post_ops->seq_vector ); \
 				free( post_ops ); \
+				if ( post_ops->sum.zero_point != NULL ) \
+				{ free( post_ops->sum.zero_point ); } \
+				if ( post_ops->sum.scale_factor != NULL ) \
+				{ free( post_ops->sum.scale_factor ); } \
 				return NULL; \
 			} \
-			/* Fill scale factor.*/ \
+			/* Fill scale factor and zero points.*/ \
 			DSCALE_type* temp_dscale_ptr = ( DSCALE_type* )post_ops->sum.scale_factor; \
+			C_DSCALE_type* temp_dzero_point_ptr = ( C_DSCALE_type* )post_ops->sum.zero_point; \
 			for ( dim_t i = 0; i < n; ++i ) \
 			{ \
 				temp_dscale_ptr[i] = ( ( DSCALE_type )1 )/ ( ( DSCALE_type )1000 ); \
+				temp_dzero_point_ptr[i] = (C_DSCALE_type)( i % 126 ); \
 			} \
 		} \
 	} \
@@ -965,12 +978,12 @@ aocl_post_op* lpgemm_create_post_ops_struct_ ## BLAS_SFX \
 	return post_ops; \
 } \
 
-GEN_MAT_MUL_POST_OPS_CREATOR(int16_t,float,u8s8s16os16)
-GEN_MAT_MUL_POST_OPS_CREATOR(int32_t,float,u8s8s32os32)
-GEN_MAT_MUL_POST_OPS_CREATOR(float,float,bf16bf16f32of32)
-GEN_MAT_MUL_POST_OPS_CREATOR(float,float,f32f32f32of32)
-GEN_MAT_MUL_POST_OPS_CREATOR(int32_t,float,s8s8s32os32)
-GEN_MAT_MUL_POST_OPS_CREATOR(int16_t,float,s8s8s16os16)
+GEN_MAT_MUL_POST_OPS_CREATOR(int8_t,int16_t,float,u8s8s16os16)
+GEN_MAT_MUL_POST_OPS_CREATOR(int8_t,int32_t,float,u8s8s32os32)
+GEN_MAT_MUL_POST_OPS_CREATOR(bfloat16,float,float,bf16bf16f32of32)
+GEN_MAT_MUL_POST_OPS_CREATOR(bfloat16,float,float,f32f32f32of32)
+GEN_MAT_MUL_POST_OPS_CREATOR(int8_t,int32_t,float,s8s8s32os32)
+GEN_MAT_MUL_POST_OPS_CREATOR(int8_t,int16_t,float,s8s8s16os16)
 
 void lpgemm_destroy_post_ops_struct( aocl_post_op* post_ops )
 {
@@ -997,6 +1010,10 @@ void lpgemm_destroy_post_ops_struct( aocl_post_op* post_ops )
 	if ( post_ops->sum.scale_factor != NULL )
 	{
 		free( post_ops->sum.scale_factor );
+	}
+	if ( post_ops->sum.zero_point != NULL )
+	{
+		free( post_ops->sum.zero_point );
 	}
 	if ( post_ops->bias.bias != NULL )
 	{
