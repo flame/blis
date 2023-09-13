@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2018 - 2022, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2018 - 2023, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -38,7 +38,7 @@
 
 // By default, it is effective to parallelize the outer loops.
 // Setting these macros to 1 will force JR and IR inner loops
-// to be not paralleized.
+// to be not parallelized.
 #define BLIS_THREAD_MAX_IR      1
 #define BLIS_THREAD_MAX_JR      1
 
@@ -50,7 +50,7 @@
 #define BLIS_SMALL_M_RECT_MATRIX_THRES 160
 #define BLIS_SMALL_K_RECT_MATRIX_THRES 128
 
-#define BLIS_SMALL_MATRIX_A_THRES_M_SYRK	96
-#define BLIS_SMALL_MATRIX_A_THRES_N_SYRK	128
+#define BLIS_SMALL_MATRIX_A_THRES_M_SYRK 96
+#define BLIS_SMALL_MATRIX_A_THRES_N_SYRK 128
 
 #endif
