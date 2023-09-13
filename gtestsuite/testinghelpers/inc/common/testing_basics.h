@@ -327,7 +327,7 @@ void make_triangular( char storage, char uplo, gtint_t n, T* a, gtint_t ld );
 /**
  * ==========================================================================
  * MKDIAG
- * Make an m x n matrix A, which adds a scalar value to 
+ * Make an m x n matrix A, which adds a scalar value to
  * every element along an arbitrary diagonal of a matrix.
  * It is assumed that the diagonal offset of A is zero
  * ==========================================================================
@@ -351,6 +351,7 @@ void print_scalar( T x, const char *spec );
 
 /**
  * print vector of length  n
+ * @param[in] vec  specifies the vector name
  * @param[in] n    specifies the length of the given vector.
  * @param[in] a    specifies pointer which points to the first element of a.
  * @param[in] incx specifies storage spacing between elements of a.
@@ -361,6 +362,7 @@ void print_vector( const char *vec, gtint_t n, T *x, gtint_t incx, const char *s
 
 /**
  * print matrix of size m x n
+ * @param[in] mat     specifies the matrix name
  * @param[in] storage specifies the storage format of matrix in memory.
  * @param[in] m       specifies the number of rows of given matrix.
  * @param[in] n       specifies the number of columns of given matrix.

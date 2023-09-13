@@ -493,7 +493,7 @@ template void make_triangular<dcomplex>( char, char, gtint_t, dcomplex *, gtint_
 /**
  * ==========================================================================
  * MKDIAG
- * Make an m x n matrix A, which adds a scalar value to 
+ * Make an m x n matrix A, which adds a scalar value to
  * every element along an arbitrary diagonal of a matrix.
  * It is assumed that the diagonal offset of A is zero
  * ==========================================================================
@@ -551,17 +551,18 @@ template void print_scalar<dcomplex>( dcomplex x, const char * );
 
 /**
  * print vector of length  n
+ * @param[in] vec  specifies the vector name
  * @param[in] n    specifies the length of the given vector.
  * @param[in] a    specifies pointer which points to the first element of a.
  * @param[in] incx specifies storage spacing between elements of a.
  * @param[in] spec specifies the format specifer.
  */
 template<typename T>
-void print_vector( gtint_t n, T *x, gtint_t incx, const char *spec )
+void print_vector( const char *vec, gtint_t n, T *x, gtint_t incx, const char *spec )
 {
     gtint_t i, idx;
     T val;
-
+    std::cout << "Vector " << vec << std::endl;
     for ( i = 0; i < n; i++ )
     {
         idx = (incx > 0) ? (i * incx) : ( - ( n - i - 1 ) * incx );
@@ -571,13 +572,14 @@ void print_vector( gtint_t n, T *x, gtint_t incx, const char *spec )
     }
     printf( "\n\n" );
 }
-template void print_vector<float>( gtint_t, float *, gtint_t, const char * );
-template void print_vector<double>( gtint_t, double *, gtint_t, const char * );
-template void print_vector<scomplex>( gtint_t, scomplex *, gtint_t, const char * );
-template void print_vector<dcomplex>( gtint_t, dcomplex *, gtint_t, const char * );
+template void print_vector<float>( const char *vec, gtint_t, float *, gtint_t, const char * );
+template void print_vector<double>( const char *vec, gtint_t, double *, gtint_t, const char * );
+template void print_vector<scomplex>( const char *vec, gtint_t, scomplex *, gtint_t, const char * );
+template void print_vector<dcomplex>( const char *vec, gtint_t, dcomplex *, gtint_t, const char * );
 
 /**
  * print matrix of size m x n
+ * @param[in] mat     specifies the matrix name
  * @param[in] storage specifies the storage format of matrix in memory.
  * @param[in] m       specifies the number of rows of given matrix.
  * @param[in] n       specifies the number of columns of given matrix.
@@ -586,7 +588,7 @@ template void print_vector<dcomplex>( gtint_t, dcomplex *, gtint_t, const char *
  * @param[in] spec    specifies the format specifer.
  */
 template<typename T>
-void print_matrix( char storage, gtint_t m, gtint_t n, T *a, gtint_t ld, const char *spec )
+void print_matrix( const char *mat, char storage, gtint_t m, gtint_t n, T *a, gtint_t ld, const char *spec )
 {
     gtint_t rs,cs;
     rs=cs=1;
@@ -597,6 +599,7 @@ void print_matrix( char storage, gtint_t m, gtint_t n, T *a, gtint_t ld, const c
         rs = ld ;
 
     gtint_t i, j;
+    std::cout << "Matrix " << mat << std::endl;
     for ( i = 0; i < m; i++ )
     {
         for ( j = 0; j < n; j++ )
@@ -609,10 +612,10 @@ void print_matrix( char storage, gtint_t m, gtint_t n, T *a, gtint_t ld, const c
     }
     printf( "\n" );
 }
-template void print_matrix<float>( char, gtint_t, gtint_t, float *, gtint_t, const char * );
-template void print_matrix<double>( char, gtint_t, gtint_t, double *, gtint_t, const char * );
-template void print_matrix<scomplex>( char, gtint_t, gtint_t, scomplex *, gtint_t, const char * );
-template void print_matrix<dcomplex>( char, gtint_t, gtint_t, dcomplex *, gtint_t, const char * );
+template void print_matrix<float>( const char *mat, char, gtint_t, gtint_t, float *, gtint_t, const char * );
+template void print_matrix<double>( const char *mat, char, gtint_t, gtint_t, double *, gtint_t, const char * );
+template void print_matrix<scomplex>( const char *mat, char, gtint_t, gtint_t, scomplex *, gtint_t, const char * );
+template void print_matrix<dcomplex>( const char *mat, char, gtint_t, gtint_t, dcomplex *, gtint_t, const char * );
 
 
 /*
