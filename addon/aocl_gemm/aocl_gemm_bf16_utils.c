@@ -68,19 +68,6 @@ AOCL_GEMM_GET_REORDER_BUF_SIZE(bf16bf16f32of32)
 		return 0; // A reorder not supported.
 	}
 
-	// Reorder of a col-major matrix is not supported yet.
-	if (!( (order == 'r') || ( order == 'R' )))
-	{
-		printf("returning with order:%c\n", order);
-		return 0; 
-	}
-
-	// Reorder of matrix is only supported for non-trans matrices.
-	if(!( ( trans == 'n' ) || ( trans == 'N' ) ))
-	{
-		printf("returning with trans:%c\n", trans);
-		return 0;
-	}
 	// Extra space since packing does width in multiples of 16. The bf16
 	// instruction can be used as long as at least one zmm register can be fully
 	// loaded; and since k_dim needs to be at least 2, having n_dim at least 16
@@ -98,10 +85,32 @@ AOCL_GEMM_GET_REORDER_BUF_SIZE(bf16bf16f32of32)
 
 AOCL_GEMM_REORDER(bfloat16, bf16bf16f32of32)
 {
+	trans_t blis_trans;
+
+	/* Map BLAS chars to their corresponding BLIS enumerated type value. */
+	bli_param_map_netlib_to_blis_trans( trans, &blis_trans );
+
 	if ( ( input_buf_addr == NULL ) || ( reorder_buf_addr == NULL ) ||
-	     ( k <= 0 ) || ( n <= 0 ) || ( ldb < n ) )
+	     ( k <= 0 ) || ( n <= 0 ) || ( bli_is_notrans( blis_trans ) && ( ldb < n ) ) ||
+	    ( bli_is_trans( blis_trans ) && ( ldb < k ) ) )
 	{
 		return; // Error.
+	}
+
+	inc_t rs_b, cs_b;
+	if( ( order == 'r') || ( order == 'R' ) )
+	{
+		rs_b = bli_is_notrans( blis_trans ) ? ldb : 1;
+		cs_b = bli_is_notrans( blis_trans ) ? 1 : ldb;
+	}
+	else if ( ( order == 'c' ) || ( order == 'C' ) )
+	{
+		rs_b = bli_is_notrans( blis_trans ) ? 1 : ldb;
+		cs_b = bli_is_notrans( blis_trans ) ? ldb : 1;
+	}
+	else
+	{
+		return; // Error
 	}
 
 	// Check if avx512_bf16 ISA is supported, lpgemm matmul only works with it.
@@ -125,20 +134,6 @@ AOCL_GEMM_REORDER(bfloat16, bf16bf16f32of32)
 	{
 		return; // A reorder not supported.
 	}
-	
-	// Reorder of a col-major matrix is not supported yet.
-	if (!( (order == 'r') || ( order == 'R' )))
-	{
-		printf("returning with order:%c\n", order);
-		return; 
-	}
-
-	// Reorder of matrix is only supported for non-trans matrices.
-	if (!( ( trans == 'n' ) || ( trans == 'N' ) ))
-	{
-		printf("Returning with trans:%c\n", trans);
-		return;
-	}
 
 	// Initialize a local runtime with global settings if necessary. Note
 	// that in the case that a runtime is passed in, we make a local copy.
@@ -155,7 +150,8 @@ AOCL_GEMM_REORDER(bfloat16, bf16bf16f32of32)
 	// Create dummy original b obj;
 	lpgemm_obj_t b;
 	b.storage.aligned_buffer = ( void* )input_buf_addr;
-	b.rs = ldb;
+	b.rs = rs_b;
+	b.cs = cs_b;
 	b.width = n;
 	b.length = k;
 

@@ -265,7 +265,7 @@ LPGEMM_5LOOP(bfloat16,bfloat16,float,bf16bf16f32of32)
 					(
 					  pack_b_buffer_bf16 + ( jc_packb_start * kc0_updated ),
 					  ( b + ( rs_b * pc ) + ( cs_b * jc ) +
-					    ( cs_b * jc_packb_start ) ), rs_b,
+					    ( cs_b * jc_packb_start ) ), rs_b, cs_b,
 					  ( jc_packb_end - jc_packb_start ), kc0,
 					  &rs_b_use, &cs_b_use
 					);

@@ -1012,11 +1012,15 @@ aocl_post_op* lpgemm_create_post_ops_struct_ ## BLAS_SFX \
 				free ( post_ops->eltwise ); \
 				free ( post_ops->bias.bias ); \
 				free( post_ops->seq_vector ); \
-				free( post_ops ); \
 				if ( post_ops->sum.zero_point != NULL ) \
-				{ free( post_ops->sum.zero_point ); } \
+				{ \
+					free( post_ops->sum.zero_point ); \
+				} \
 				if ( post_ops->sum.scale_factor != NULL ) \
-				{ free( post_ops->sum.scale_factor ); } \
+				{ \
+					free( post_ops->sum.scale_factor ); \
+				} \
+				free( post_ops ); \
 				return NULL; \
 			} \
 			/* Fill scale factor and zero points.*/ \
@@ -1167,7 +1171,7 @@ void mat_mul_bench_main_ ## BLAS_SFX \
 		} \
 	} \
  \
-	if ( ( op_b == 'p' ) || ( op_b == 'P' ) ) \
+	if ( ( op_b == 'p' ) || ( op_b == 'P' ) || ( op_b == 'n' ) || ( op_b == 'N' ) ) \
 	{ \
 		/* No reordering of B.*/ \
 		GEN_FUNC_NAME(mat_mul_bench_driver_,BLAS_SFX) \
@@ -1342,7 +1346,7 @@ void mat_mul_bench_main_ ## BLAS_SFX \
 		} \
 	} \
  \
-	if ( ( op_b == 'p' ) || ( op_b == 'P' ) ) \
+	if ( ( op_b == 'p' ) || ( op_b == 'P' ) || ( op_b == 'n' ) || ( op_b == 'N' ) )  \
 	{ \
 		/* No reordering of B.*/ \
 		GEN_FUNC_NAME(mat_mul_bench_driver_,BLAS_SFX) \

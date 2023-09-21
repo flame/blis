@@ -92,17 +92,8 @@ AOCL_GEMM_MATMUL(bfloat16,bfloat16,float,float,bf16bf16f32of32)
 	bool is_row_major = ( ( order_use == 'r' ) || ( order_use == 'R' ) );
 	bool is_column_major = ( ( order_use == 'c' ) || ( order_use == 'C' ) );
 
-	// Transpose is not supported for B matrix yet.
-	if ( ( is_row_major == TRUE ) && ( bli_is_trans( blis_transb ) ) )
-	{
-		return; // Error.
-	}
-	else if ( ( is_column_major == TRUE ) && ( bli_is_trans( blis_transa ) ) )
-	{
-		return; // Error.
-	}
 
-	// Check if strides are valid for Row major inputs.
+ 	// Check if strides are valid for Row major inputs.
 	if ( ( is_row_major == TRUE ) &&
 	     ( ( bli_is_notrans( blis_transa ) && ( lda < k ) ) ||
 	       ( bli_is_trans( blis_transa )   && ( lda < m ) ) ||
@@ -112,7 +103,7 @@ AOCL_GEMM_MATMUL(bfloat16,bfloat16,float,float,bf16bf16f32of32)
 	{
 		return; // Error.
 	}
-	// Column major input expected with leading dimensions >= column stride.
+	// Chcek if strides are valid for Column major inputs.
 	else if ( ( is_column_major == TRUE ) &&
 	          ( ( bli_is_notrans( blis_transa ) && ( lda < m ) ) ||
 	            ( bli_is_trans( blis_transa )   && ( lda < k ) ) ||
