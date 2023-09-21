@@ -58,10 +58,10 @@ void bli_thread_launch_hpx
 	thrcomm_t* gl_comm      = bli_thrcomm_create( ti, gl_comm_pool, n_threads );
 	hpx::threads::run_as_hpx_thread([&]()
 	{
-    hpx::execution::experimental::num_cores num_cores_(n_threads);
+		hpx::execution::experimental::num_cores num_cores_(n_threads);
 		hpx::execution::static_chunk_size chunk_size_(1);
 		hpx::experimental::for_loop(
-      hpx::execution::par.with(num_cores_).with(chunk_size_), 0, n_threads,
+		hpx::execution::par.with(num_cores_).with(chunk_size_), 0, n_threads,
 		[&gl_comm, &func, &params](const dim_t tid)
 		{
 			func( gl_comm, tid, params );
