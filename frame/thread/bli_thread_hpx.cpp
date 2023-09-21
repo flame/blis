@@ -36,8 +36,9 @@
 
 #ifdef BLIS_ENABLE_HPX
 
-#include <hpx/parallel/algorithms/for_loop.hpp>
+#include <hpx/execution.hpp>
 #include <hpx/hpx_start.hpp>
+#include <hpx/parallel/algorithms/for_loop.hpp>
 #include <hpx/runtime_local/run_as_hpx_thread.hpp>
 
 extern "C"
@@ -55,11 +56,12 @@ void bli_thread_launch_hpx
 	// Allocate a global communicator for the root thrinfo_t structures.
 	pool_t*    gl_comm_pool = nullptr;
 	thrcomm_t* gl_comm      = bli_thrcomm_create( ti, gl_comm_pool, n_threads );
-
 	hpx::threads::run_as_hpx_thread([&]()
 	{
+    hpx::execution::experimental::num_cores num_cores_(n_threads);
 		hpx::execution::static_chunk_size chunk_size_(1);
-		hpx::experimental::for_loop(hpx::execution::par.with(chunk_size_), 0, n_threads,
+		hpx::experimental::for_loop(
+      hpx::execution::par.with(num_cores_).with(chunk_size_), 0, n_threads,
 		[&gl_comm, &func, &params](const dim_t tid)
 		{
 			func( gl_comm, tid, params );
