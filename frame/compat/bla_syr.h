@@ -37,8 +37,8 @@
 //
 // Prototype BLAS-to-BLIS interfaces.
 //
-#undef  GENTPROTRO
-#define GENTPROTRO( ftype, ch, blasname ) \
+#undef  GENTPROT
+#define GENTPROT( ftype, ch, blasname ) \
 \
 BLIS_EXPORT_BLAS void PASTEF77(ch,blasname) \
      ( \
@@ -50,7 +50,7 @@ BLIS_EXPORT_BLAS void PASTEF77(ch,blasname) \
      );
 
 #ifdef BLIS_ENABLE_BLAS
-INSERT_GENTPROTRO_BLAS( syr )
+INSERT_GENTPROT_BLAS( syr )
 #endif
 
 #endif
