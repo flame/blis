@@ -37,7 +37,7 @@
 
 BLIS_EXPORT_BLIS cntl_t* bli_packm_cntl_create_node
      (
-       pool_t*   pool,
+       pool_t*   sba_pool,
        void_fp   var_func,
        bszid_t   bmid_m,
        bszid_t   bmid_n,
@@ -57,7 +57,7 @@ BLIS_EXPORT_BLIS cntl_t* bli_packm_cntl_create_node
 	#endif
 
 	// Allocate a packm_params_t struct.
-	params = bli_sba_acquire( pool, sizeof( packm_params_t ) );
+	params = bli_sba_acquire( sba_pool, sizeof( packm_params_t ) );
 
 	// Initialize the packm_params_t struct.
 	params->size              = sizeof( packm_params_t );
@@ -79,7 +79,7 @@ BLIS_EXPORT_BLIS cntl_t* bli_packm_cntl_create_node
 	// sync with the cntl_t tree.
 	cntl = bli_cntl_create_node
 	(
-	  pool,
+	  sba_pool,
 	  BLIS_NOID,
 	  BLIS_NO_PART,
 	  var_func,

@@ -85,7 +85,7 @@ BLIS_INLINE packbuf_t bli_cntl_packm_params_pack_buf_type( const cntl_t* cntl )
 
 cntl_t* bli_packm_cntl_create_node
      (
-       pool_t*   pool,
+       pool_t*   sba_pool,
        void_fp   var_func,
        bszid_t   bmid_m,
        bszid_t   bmid_n,

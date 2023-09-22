@@ -42,6 +42,18 @@ apool_t* bli_sba_query( void );
 void bli_sba_init( void );
 void bli_sba_finalize( void );
 
+void* bli_sba_acquire
+     (
+       pool_t* sba_pool,
+       siz_t   req_size
+     );
+
+void bli_sba_release
+     (
+       pool_t* sba_pool,
+       void*   block
+     );
+
 array_t* bli_sba_checkout_array
      (
        siz_t n_threads
@@ -52,16 +64,10 @@ void bli_sba_checkin_array
        array_t* array
      );
 
-void* bli_sba_acquire
+pool_t* bli_sba_array_elem
      (
-       pool_t* pool,
-       siz_t   req_size
-     );
-
-void bli_sba_release
-     (
-       pool_t* pool,
-       void*   block
+       siz_t    index,
+       array_t* array
      );
 
 #endif

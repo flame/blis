@@ -69,7 +69,7 @@ static void bli_l3_sup_thread_decorator_entry( thrcomm_t* gl_comm, dim_t tid, co
 	bli_l3_thread_decorator_thread_check( gl_comm, rntm );
 
 	// Create the root node of the thread's thrinfo_t structure.
-	pool_t*    pool   = bli_apool_array_elem( tid, array );
+	pool_t*    pool   = bli_sba_array_elem( tid, array );
 	thrinfo_t* thread = bli_l3_sup_thrinfo_create( tid, gl_comm, pool, rntm );
 
 	func
