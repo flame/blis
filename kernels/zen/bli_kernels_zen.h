@@ -260,6 +260,20 @@ GEMMSUP_KER_PROT( dcomplex,   z, gemmsup_rv_zen_asm_1x4n )
 GEMMSUP_KER_PROT( dcomplex,   z, gemmsup_rv_zen_asm_3x2 )
 GEMMSUP_KER_PROT( dcomplex,   z, gemmsup_rv_zen_asm_3x1 )
 
+err_t bli_dgemm_tiny
+(
+        trans_t transa,
+        trans_t transb,
+        dim_t  m,
+        dim_t  n,
+        dim_t  k,
+        const double*    alpha,
+        const double*    a, const inc_t rs_a0, const inc_t cs_a0,
+        const double*    b, const inc_t rs_b0, const inc_t cs_b0,
+        const double*    beta,
+        double*    c, const inc_t rs_c0, const inc_t cs_c0
+);
+
 err_t bli_dgemm_small
     (
       obj_t*  alpha,

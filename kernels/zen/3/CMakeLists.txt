@@ -3,6 +3,7 @@
 add_library(zen_3
      OBJECT
     ${CMAKE_CURRENT_SOURCE_DIR}/bli_gemm_small.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/bli_gemm_tiny.c
     ${CMAKE_CURRENT_SOURCE_DIR}/bli_trsm_small.c
     ${CMAKE_CURRENT_SOURCE_DIR}/bli_dgemm_avx2_k1.c
     ${CMAKE_CURRENT_SOURCE_DIR}/bli_zgemm_avx2_k1.c

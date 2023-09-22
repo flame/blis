@@ -468,8 +468,14 @@ void dgemm_blis_impl
         return;
     }
 
-    /* If alpha is zero scale C by beta and return early. */
-    if( PASTEMAC(d,eq0)( *alpha ))
+    /**
+     * If alpha is zero or k is zero scale C by beta and return early.
+     * Since k is zero, the only operation to be done is scaling of C by beta.
+     * Scalm function checks for beta = zero internally, if it is zero it invokes
+       setm kernel, otherwise it goes ahead and do the scaling
+       of C matrix.
+    */
+    if( (PASTEMAC(d,eq0)( *alpha )) || (*k == 0) )
     {
         bli_convert_blas_dim1(*m, m0);
         bli_convert_blas_dim1(*n, n0);
@@ -649,6 +655,33 @@ void dgemm_blis_impl
         AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
         /* Finalize BLIS */
         bli_finalize_auto();
+        return;
+    }
+
+    /**
+     *Early check for tiny sizes.
+     *if inputs are in range of tiny gemm kernel,
+     *we avoid creating and initalizing objects and directly
+     *operate on memory buffers.
+     *Function return failure in case of input matrix sizes are
+     *beyond threshold(larger inputs).
+     *It also returns failure for multi-threaded computation as it
+     *supports single threaded computation as of now.
+    */
+    err_t tiny_ret = bli_dgemm_tiny
+            (
+            blis_transa,
+            blis_transb,
+            m0, n0, k0,
+            alpha,
+            a, rs_a, cs_a,
+            b, rs_b, cs_b,
+            beta,
+            c, rs_c, cs_c
+            );
+
+    if(tiny_ret == BLIS_SUCCESS)
+    {
         return;
     }
 
