@@ -92,6 +92,7 @@ static const char *bli_error_string[-BLIS_ERROR_CODE_MAX] =
 	[-BLIS_UNEXPECTED_NULL_CONTROL_TREE]         = "Encountered unexpected null control tree node.",
 
 	[-BLIS_PACK_SCHEMA_NOT_SUPPORTED_FOR_UNPACK] = "Pack schema not yet supported/implemented for use with unpacking.",
+	[-BLIS_PACK_SCHEMA_NOT_SUPPORTED_FOR_PART]   = "Pack schema not yet supported/implemented for use with partitioning.",
 
 	[-BLIS_EXPECTED_NONNULL_OBJECT_BUFFER]       = "Encountered object with non-zero dimensions containing null buffer.",
 
@@ -114,6 +115,10 @@ static const char *bli_error_string[-BLIS_ERROR_CODE_MAX] =
 	[-BLIS_NC_MAX_NONMULTIPLE_OF_NR]             = "Maximum NC is non-multiple of NR for one or more datatypes.",
 	[-BLIS_KC_DEF_NONMULTIPLE_OF_KR]             = "Default KC is non-multiple of KR for one or more datatypes.",
 	[-BLIS_KC_MAX_NONMULTIPLE_OF_KR]             = "Maximum KC is non-multiple of KR for one or more datatypes.",
+	[-BLIS_MR_NOT_EVEN_FOR_REAL_TYPE]            = "MR is not an even number for one or more real-domain datatypes.",
+	[-BLIS_PACKMR_NOT_EVEN_FOR_REAL_TYPE]        = "PACKMR is not an even number for one or more real-domain datatypes.",
+	[-BLIS_NR_NOT_EVEN_FOR_REAL_TYPE]            = "NR is not an even number for one or more real-domain datatypes.",
+	[-BLIS_PACKNR_NOT_EVEN_FOR_REAL_TYPE]        = "PACKNR is not an even number for one or more real-domain datatypes.",
 };
 
 // -----------------------------------------------------------------------------

@@ -38,32 +38,6 @@
 // Define object-based interfaces (expert).
 //
 
-err_t bli_l3_return_early_if_trivial
-      (
-       const obj_t*  alpha,
-       const obj_t*  a,
-       const obj_t*  b,
-       const obj_t*  beta,
-       const obj_t*  c
-      )
-{
-	// If C has a zero dimension, return early.
-	if ( bli_obj_has_zero_dim( c ) )
-		return BLIS_SUCCESS;
-
-	// If alpha is zero, or if A or B has a zero dimension, scale C by beta
-	// and return early.
-	if ( bli_obj_equals( alpha, &BLIS_ZERO ) ||
-	     bli_obj_has_zero_dim( a ) ||
-	     bli_obj_has_zero_dim( b ) )
-	{
-		bli_scalm( beta, c );
-		return BLIS_SUCCESS;
-	}
-
-	return BLIS_FAILURE;
-}
-
 // If a sandbox was enabled, we forgo defining bli_gemm_ex() since it will be
 // defined in the sandbox environment.
 #ifdef BLIS_ENABLE_SANDBOX
@@ -97,8 +71,8 @@ void PASTEMAC(gemm,BLIS_OAPI_EX_SUF)
 	// other reason decides not to use the small/unpacked implementation,
 	// the function returns with BLIS_FAILURE, which causes execution to
 	// proceed towards the conventional implementation.
-	//if ( bli_gemmsup( alpha, a, b, beta, c, cntx, rntm ) == BLIS_SUCCESS )
-	//	return;
+	if ( bli_gemmsup( alpha, a, b, beta, c, cntx, rntm ) == BLIS_SUCCESS )
+		return;
 
 	// Default to using native execution.
 	num_t dt = bli_obj_dt( c );

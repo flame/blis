@@ -36,7 +36,7 @@
 #include "blis.h"
 
 
-static packm_ker_ft GENARRAY2_ALL(packm_struc_cxk,packm_struc_cxk);
+static packm_ker_ft GENARRAY2_MIXP(packm_struc_cxk,packm_struc_cxk);
 
 void bli_trsm_var_cntl_init_node
      (
@@ -133,18 +133,20 @@ void bli_trsm_l_cntl_init
 	const dir_t            direct         = bli_obj_is_lower( a ) ? BLIS_FWD
 	                                                              : BLIS_BWD;
 	const bool             row_pref       = bli_cntx_get_ukr_prefs_dt( dt_comp, BLIS_GEMM_UKR_ROW_PREF, cntx );
-	      pack_t           schema_a       = BLIS_PACKED_ROW_PANELS;
-	      pack_t           schema_b       = BLIS_PACKED_COL_PANELS;
+	      pack_t           schema_a       = BLIS_PACKED_PANELS;
+	      pack_t           schema_b       = BLIS_PACKED_PANELS;
 	const packm_ker_ft     packm_a_ukr    = packm_struc_cxk[ dt_a ][ dt_ap ];
 	const packm_ker_ft     packm_b_ukr    = packm_struc_cxk[ dt_b ][ dt_bp ];
 	const dim_t            mr_def         = bli_cntx_get_blksz_def_dt( dt_comp, BLIS_MR, cntx );
 	const dim_t            mr_pack        = bli_cntx_get_blksz_max_dt( dt_comp, BLIS_MR, cntx );
 	const dim_t            mr_bcast       = bli_cntx_get_blksz_max_dt( dt_comp, BLIS_BBM, cntx );
 	      dim_t            mr_scale       = 1;
+	      dim_t            mr_pack_scale  = 1;
 	const dim_t            nr_def         = bli_cntx_get_blksz_def_dt( dt_comp, BLIS_NR, cntx );
 	const dim_t            nr_pack        = bli_cntx_get_blksz_max_dt( dt_comp, BLIS_NR, cntx );
 	const dim_t            nr_bcast       = bli_cntx_get_blksz_max_dt( dt_comp, BLIS_BBN, cntx );
 	      dim_t            nr_scale       = 1;
+	      dim_t            nr_pack_scale  = 1;
 	const dim_t            kr_def         = bli_cntx_get_blksz_def_dt( dt_comp, BLIS_KR, cntx );
 	const dim_t            mc_def         = bli_cntx_get_blksz_def_dt( dt_comp, BLIS_MC, cntx );
 	const dim_t            mc_max         = bli_cntx_get_blksz_max_dt( dt_comp, BLIS_MC, cntx );
@@ -160,17 +162,19 @@ void bli_trsm_l_cntl_init
 	{
 		if ( ! row_pref )
 		{
-			schema_a = BLIS_PACKED_ROW_PANELS_1E;
-			schema_b = BLIS_PACKED_COL_PANELS_1R;
+			schema_a = BLIS_PACKED_PANELS_1E;
+			schema_b = BLIS_PACKED_PANELS_1R;
 			mr_scale = 2;
 			mc_scale = 2;
+			mr_pack_scale = 1; //don't divide PACKMR by 2 since we are also doubling k
 		}
 		else
 		{
-			schema_a = BLIS_PACKED_ROW_PANELS_1R;
-			schema_b = BLIS_PACKED_COL_PANELS_1E;
+			schema_a = BLIS_PACKED_PANELS_1R;
+			schema_b = BLIS_PACKED_PANELS_1E;
 			nr_scale = 2;
 			nc_scale = 2;
+			nr_pack_scale = 1; //don't divide PACKNR by 2 since we are also doubling k
 		}
 
 		kc_scale = 2;
@@ -253,6 +257,7 @@ void bli_trsm_l_cntl_init
 	  mr_pack,
 	  mr_bcast,
 	  mr_scale,
+	  mr_pack_scale,
 	  mr_def / mr_scale,
 	  FALSE,        // do NOT invert diagonal
 	  TRUE,         // reverse iteration if upper?
@@ -322,6 +327,7 @@ void bli_trsm_l_cntl_init
 	  mr_pack,
 	  mr_bcast,
 	  mr_scale,
+	  mr_pack_scale,
 	  mr_def / mr_scale,
 #ifdef BLIS_ENABLE_TRSM_PREINVERSION
 	  TRUE,         // invert diagonal
@@ -385,6 +391,7 @@ void bli_trsm_l_cntl_init
 	  nr_pack,
 	  nr_bcast,
 	  nr_scale,
+	  nr_pack_scale,
 	  mr_def / mr_scale,
 	  FALSE,        // do NOT invert diagonal
 	  FALSE,        // reverse iteration if upper?
@@ -532,7 +539,7 @@ void bli_trsm_r_cntl_init
 	  FALSE,   // do NOT invert diagonal
 	  FALSE,   // reverse iteration if upper?
 	  FALSE,   // reverse iteration if lower?
-	  schema_a, // normally BLIS_PACKED_ROW_PANELS
+	  schema_a, // normally BLIS_PACKED_PANELS
 	  BLIS_BUFFER_FOR_A_BLOCK,
 	  &cntl->pack_a_trsm
 	);
@@ -573,7 +580,7 @@ void bli_trsm_r_cntl_init
 	  TRUE,    // do NOT invert diagonal
 	  FALSE,   // reverse iteration if upper?
 	  TRUE,    // reverse iteration if lower?
-	  schema_b, // normally BLIS_PACKED_COL_PANELS
+	  schema_b, // normally BLIS_PACKED_PANELS
 	  BLIS_BUFFER_FOR_B_PANEL,
 	  &cntl->pack_b
 	);

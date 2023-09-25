@@ -40,8 +40,6 @@
 #include "bli_packm_int.h"
 #include "bli_packm_scalar.h"
 
-#include "bli_packm_part.h"
-
 #include "bli_packm_struc_cxk.h"
 
 #include "bli_packm_blk_var1.h"

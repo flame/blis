@@ -79,6 +79,7 @@ struct packm_def_cntl_s
 	dim_t        bmult_m_pack;
 	dim_t        bmult_m_bcast;
 	dim_t        bmult_m_scale;
+	dim_t        bmult_m_pack_scale;
 	dim_t        bmult_n_def;
 	bool         does_invert_diag;
 	bool         rev_iter_if_upper;
@@ -158,7 +159,7 @@ BLIS_INLINE void bli_packm_def_cntl_set_bmult_m( const blksz_t* bmult_m, cntl_t*
 	packm_def_cntl_t* cntl = ( packm_def_cntl_t* )cntl_;
 	num_t dt = cntl->dt_bmult;
 	cntl->bmult_m_def = bli_blksz_get_def( dt, bmult_m ) / cntl->bmult_m_scale;
-	cntl->bmult_m_pack = bli_blksz_get_max( dt, bmult_m );
+	cntl->bmult_m_pack = bli_blksz_get_max( dt, bmult_m ) / cntl->bmult_m_pack_scale;
 }
 
 BLIS_INLINE void bli_packm_def_cntl_set_bmult_m_bcast( const blksz_t* bmult_m_bcast, cntl_t* cntl_ )
@@ -245,6 +246,7 @@ BLIS_EXPORT_BLIS void bli_packm_def_cntl_init_node
        dim_t             bmult_m_pack,
        dim_t             bmult_m_bcast,
        dim_t             bmult_m_scale,
+	   dim_t             bmult_m_pack_scale,
        dim_t             bmult_n_def,
        bool              does_invert_diag,
        bool              rev_iter_if_upper,

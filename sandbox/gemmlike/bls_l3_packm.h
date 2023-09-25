@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2021, The University of Texas at Austin
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -32,40 +32,54 @@
 
 */
 
-// -- Level-3 native micro-kernel prototype redefinitions ----------------------
-
-#ifdef BLIS_ENABLE_GEMM_MD
-
-#if 0
-#undef  GENTFUNCCO
-#define GENTFUNCCO( ctype, ctype_r, ch, chr, opname, suf ) \
-\
-void PASTEMAC2(ch,opname,suf) \
-     ( \
-             dim_t      m, \
-             dim_t      n, \
-             dim_t      k, \
-       const void*      alpha, \
-       const void*      a, \
-       const void*      b, \
-       const void*      beta, \
-             void*      c, inc_t rs_c, inc_t cs_c, \
-             auxinfo_t* data, \
-       const cntx_t*    cntx  \
-     )
-#endif
-
-#undef  GENTPROTCO
-#define GENTPROTCO( ctype, ctype_r, ch, chr, funcname, opname ) \
-\
-void PASTEMAC(ch,funcname) \
-     ( \
-       PASTECH(opname,_params), \
-       BLIS_AUXINFO_PARAM, \
-       BLIS_CNTX_PARAM  \
+void bls_packm_int
+     (
+             num_t      dt,
+             conj_t     conj,
+             dim_t      m_alloc,
+             dim_t      k_alloc,
+             dim_t      m,
+             dim_t      k,
+             dim_t      mr,
+       const void*      kappa,
+       const void*      a, inc_t  rs_a, inc_t  cs_a,
+             void**     p, inc_t* rs_p, inc_t* cs_p,
+                           inc_t* ps_p,
+       const cntx_t*    cntx,
+             thrinfo_t* thread
      );
 
-INSERT_GENTPROTCO_BASIC( gemm_md_c2r_ref, gemm )
+void bls_packm_a
+     (
+             num_t      dt,
+             conj_t     conj,
+             dim_t      m_alloc,
+             dim_t      k_alloc,
+             dim_t      m,
+             dim_t      k,
+             dim_t      mr,
+       const void*      kappa,
+       const void*      a, inc_t  rs_a, inc_t  cs_a,
+             void**     p, inc_t* rs_p, inc_t* cs_p,
+                           inc_t* ps_p,
+       const cntx_t*    cntx,
+             thrinfo_t* thread
+     );
 
+void bls_packm_b
+     (
+             num_t      dt,
+             conj_t     conj,
+             dim_t      k_alloc,
+             dim_t      n_alloc,
+             dim_t      k,
+             dim_t      n,
+             dim_t      nr,
+       const void*      kappa,
+       const void*      b, inc_t  rs_b, inc_t  cs_b,
+             void**     p, inc_t* rs_p, inc_t* cs_p,
+                           inc_t* ps_p,
+       const cntx_t*    cntx,
+             thrinfo_t* thread
+     );
 
-#endif

@@ -278,24 +278,6 @@ print_usage()
                  compatibility layer. This automatically enables the
                  BLAS compatibility layer as well.
 
-   --disable-mixed-dt, --enable-mixed-dt
-
-                 Disable (enabled by default) support for mixing the
-                 storage domain and/or storage precision of matrix
-                 operands for the gemm operation, as well as support
-                 for computing in a precision different from one or
-                 both of matrices A and B.
-
-   --disable-mixed-dt-extra-mem, --enable-mixed-dt-extra-mem
-
-                 Disable (enabled by default) support for additional
-                 mixed datatype optimizations that require temporarily
-                 allocating extra memory--specifically, a single m x n
-                 matrix (per application thread) whose storage datatype
-                 is equal to the computation datatype. This option may
-                 only be enabled when mixed domain/precision support is
-                 enabled.
-
    --disable-sup-handling, --enable-sup-handling
 
                  Disable (enabled by default) handling of small/skinny
@@ -2563,8 +2545,6 @@ main()
 	blas_int_type_size=32
 	enable_blas='yes'
 	enable_cblas='no'
-	enable_mixed_dt='yes'
-	enable_mixed_dt_extra_mem='yes'
 	enable_sup_handling='yes'
 	enable_amd_frame_tweaks='no'
 	enable_memkind='' # The default memkind value is determined later on.
@@ -2796,20 +2776,6 @@ main()
 							;;
 						disable-cblas)
 							enable_cblas='no'
-							;;
-
-						enable-mixed-dt)
-							enable_mixed_dt='yes'
-							;;
-						disable-mixed-dt)
-							enable_mixed_dt='no'
-							;;
-
-						enable-mixed-dt-extra-mem)
-							enable_mixed_dt_extra_mem='yes'
-							;;
-						disable-mixed-dt-extra-mem)
-							enable_mixed_dt_extra_mem='no'
 							;;
 
 						sup)
@@ -3893,24 +3859,6 @@ main()
 		echo "${script_name}: the CBLAS compatibility layer is disabled."
 		enable_cblas_01=0
 	fi
-	if [[ ${enable_mixed_dt} = yes ]]; then
-		echo "${script_name}: mixed datatype support is enabled."
-
-		if [[ ${enable_mixed_dt_extra_mem} = yes ]]; then
-			echo "${script_name}: mixed datatype optimizations requiring extra memory are enabled."
-			enable_mixed_dt_extra_mem_01=1
-		else
-			echo "${script_name}: mixed datatype optimizations requiring extra memory are disabled."
-			enable_mixed_dt_extra_mem_01=0
-		fi
-
-		enable_mixed_dt_01=1
-	else
-		echo "${script_name}: mixed datatype support is disabled."
-
-		enable_mixed_dt_extra_mem_01=0
-		enable_mixed_dt_01=0
-	fi
 	if [[ ${enable_sup_handling} = yes ]]; then
 		echo "${script_name}: sup (skinny/unpacked) matrix handling is enabled."
 		enable_sup_handling_01=1
@@ -4265,8 +4213,6 @@ main()
 	-e "s/@blas_int_type_size@/${blas_int_type_size}/g"                  \
 	-e "s/@enable_blas@/${enable_blas_01}/g"                             \
 	-e "s/@enable_cblas@/${enable_cblas_01}/g"                           \
-	-e "s/@enable_mixed_dt@/${enable_mixed_dt_01}/g"                     \
-	-e "s/@enable_mixed_dt_extra_mem@/${enable_mixed_dt_extra_mem_01}/g" \
 	-e "s/@enable_sup_handling@/${enable_sup_handling_01}/g"             \
 	-e "s/@enable_memkind@/${enable_memkind_01}/g"                       \
 	-e "s/@enable_trsm_preinversion@/${enable_trsm_preinversion_01}/g"   \

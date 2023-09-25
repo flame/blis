@@ -270,7 +270,7 @@ void libblis_test_gemm_experiment
 	bli_obj_set_conjtrans( transa, &a );
 	bli_obj_set_conjtrans( transb, &b );
 
-	// Repeat the experiment n_repeats times and record results. 
+	// Repeat the experiment n_repeats times and record results.
 	for ( i = 0; i < n_repeats; ++i )
 	{
 		bli_copym( &c_save, &c );
@@ -399,7 +399,7 @@ void libblis_test_gemm_md
 	bli_obj_set_conjtrans( transa, &a );
 	bli_obj_set_conjtrans( transb, &b );
 
-	// Repeat the experiment n_repeats times and record results. 
+	// Repeat the experiment n_repeats times and record results.
 	for ( i = 0; i < n_repeats; ++i )
 	{
 		bli_copym( &c_save, &c );
@@ -485,8 +485,8 @@ void libblis_test_gemm_md_check
        double*        resid
      )
 {
-	num_t  dt_real = bli_obj_dt_proj_to_real( c );
-	num_t  dt_comp = bli_obj_dt_proj_to_complex( c );
+	num_t  dt_real = bli_obj_comp_prec( c ) | BLIS_REAL;
+	num_t  dt_comp = bli_obj_comp_prec( c ) | BLIS_COMPLEX;
 	num_t  dt;
 
 	dim_t  m       = bli_obj_length( c );
@@ -499,9 +499,7 @@ void libblis_test_gemm_md_check
 	double junk;
 
 	// Compute our reference checksum in the real domain if all operands
-	// are real, and in the complex domain otherwise. Also implicit in this
-	// is that we use the storage precision of C to determine the precision
-	// in which we perform the reference checksum.
+	// are real, and in the complex domain otherwise.
 	if ( bli_obj_is_real( a ) &&
 	     bli_obj_is_real( b ) &&
 	     bli_obj_is_real( c ) ) dt = dt_real;

@@ -37,6 +37,7 @@
 
 siz_t bli_packm_init
      (
+             num_t   dt_p,
        const obj_t*  c,
              obj_t*  p,
        const cntl_t* cntl
@@ -64,7 +65,6 @@ siz_t bli_packm_init
 
 	// Extract various fields from the control tree.
 	pack_t  schema       = bli_packm_def_cntl_pack_schema( cntl );
-	num_t   dt_tar       = bli_packm_def_cntl_target_dt( cntl );
 	num_t   dt_scalar    = bli_obj_scalar_dt( c );
 	dim_t   bmult_m_def  = bli_packm_def_cntl_bmult_m_def( cntl );
 	dim_t   bmult_m_pack = bli_packm_def_cntl_bmult_m_pack( cntl );
@@ -73,14 +73,14 @@ siz_t bli_packm_init
 	// Typecast the internal scalar value to the target datatype.
 	// Note that if the typecasting is needed, this must happen BEFORE we
 	// change the datatype of P to reflect the target_dt.
-	if ( dt_scalar != dt_tar )
+	if ( dt_scalar != dt_p )
 	{
-		bli_obj_scalar_cast_to( dt_tar, p );
+		bli_obj_scalar_cast_to( dt_p, p );
 	}
 
 	// Update the storage datatype of P to be the target datatype of A.
-	bli_obj_set_dt( dt_tar, p );
-	bli_obj_set_elem_size( bli_dt_size( dt_tar ), p );
+	bli_obj_set_dt( dt_p, p );
+	bli_obj_set_elem_size( bli_dt_size( dt_p ), p );
 
 	// Store the pack schema to the object.
 	bli_obj_set_pack_schema( schema, p );

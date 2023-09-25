@@ -85,29 +85,31 @@ void bli_gemm_ker_var2
              thrinfo_t* thread_par
      )
 {
-	      num_t  dt_exec   = bli_obj_exec_dt( c );
-	      num_t  dt_c      = bli_obj_dt( c );
+	const num_t  dt_comp   = bli_gemm_var_cntl_comp_dt( cntl );
+	const num_t  dt_a      = bli_obj_dt( a );
+	const num_t  dt_b      = bli_obj_dt( b );
+	const num_t  dt_c      = bli_obj_dt( c );
 
 	const pack_t schema_a  = bli_obj_pack_schema( a );
 	const pack_t schema_b  = bli_obj_pack_schema( b );
 
-	      dim_t  m         = bli_obj_length( c );
-	      dim_t  n         = bli_obj_width( c );
-	      dim_t  k         = bli_obj_width( a );
+	const dim_t  m         = bli_obj_length( c );
+	const dim_t  n         = bli_obj_width( c );
+	const dim_t  k         = bli_obj_width( a );
 
 	const char*  a_cast    = bli_obj_buffer_at_off( a );
 	const inc_t  is_a      = bli_obj_imag_stride( a );
-	      dim_t  pd_a      = bli_obj_panel_dim( a );
-	      inc_t  ps_a      = bli_obj_panel_stride( a );
+	const dim_t  pd_a      = bli_obj_panel_dim( a );
+	const inc_t  ps_a      = bli_obj_panel_stride( a );
 
 	const char*  b_cast    = bli_obj_buffer_at_off( b );
 	const inc_t  is_b      = bli_obj_imag_stride( b );
-	      dim_t  pd_b      = bli_obj_panel_dim( b );
-	      inc_t  ps_b      = bli_obj_panel_stride( b );
+	const dim_t  pd_b      = bli_obj_panel_dim( b );
+	const inc_t  ps_b      = bli_obj_panel_stride( b );
 
 	      char*  c_cast    = bli_obj_buffer_at_off( c );
-	      inc_t  rs_c      = bli_obj_row_stride( c );
-	      inc_t  cs_c      = bli_obj_col_stride( c );
+	const inc_t  rs_c      = bli_obj_row_stride( c );
+	const inc_t  cs_c      = bli_obj_col_stride( c );
 
 	// If any dimension is zero, return immediately.
 	if ( bli_zero_dim3( m, n, k ) ) return;
@@ -123,35 +125,15 @@ void bli_gemm_ker_var2
 
 	// Grab the addresses of the internal scalar buffers for the scalar
 	// merged above and the scalar attached to C.
-	// NOTE: We know that scalar_b is of type dt_exec due to the above code
-	// that casts the scalars of A and B to dt_exec via scalar_a and scalar_b,
+	// NOTE: We know that scalar_b is of type dt_comp due to the above code
+	// that casts the scalars of A and B to dt_comp via scalar_a and scalar_b,
 	// and we know that the internal scalar in C is already of the type dt_c
 	// due to the casting in the implementation of bli_obj_scalar_attach().
 	const char* alpha_cast = bli_obj_internal_scalar_buffer( &scalar_b );
 	const char* beta_cast  = bli_obj_internal_scalar_buffer( c );
 
-	/*
-#ifdef BLIS_ENABLE_GEMM_MD
-	// Tweak parameters in select mixed domain cases (rcc, crc, ccr).
-	if ( bli_cntx_method( cntx ) == BLIS_NAT )
-	{
-		bli_gemm_md_ker_var2_recast
-		(
-		  &dt_exec,
-		  bli_obj_dt( a ),
-		  bli_obj_dt( b ),
-		  &dt_c,
-		  &m, &n, &k,
-		  &pd_a, &ps_a,
-		  &pd_b, &ps_b,
-		  c,
-		  &rs_c, &cs_c
-		);
-	}
-#endif
-	*/
-
-	const siz_t dt_size   = bli_dt_size( dt_exec );
+	const siz_t dt_a_size = bli_dt_size( dt_a );
+	const siz_t dt_b_size = bli_dt_size( dt_b );
 	const siz_t dt_c_size = bli_dt_size( dt_c );
 
 	// Alias some constants to simpler names.
@@ -167,12 +149,12 @@ void bli_gemm_ker_var2
 	// temporary buffer are set so that they match the storage of the
 	// original C matrix. For example, if C is column-stored, ct will be
 	// column-stored as well.
-	char        ct[ BLIS_STACK_BUF_MAX_SIZE ]
+	      char  ct[ BLIS_STACK_BUF_MAX_SIZE ]
 	                __attribute__((aligned(BLIS_STACK_BUF_ALIGN_SIZE)));
 	const bool  row_pref    = bli_gemm_var_cntl_row_pref( cntl );
 	const inc_t rs_ct       = ( row_pref ? NR : 1 );
 	const inc_t cs_ct       = ( row_pref ? 1 : MR );
-	const char* zero        = bli_obj_buffer_for_const( dt_exec, &BLIS_ZERO );
+	const char* zero        = bli_obj_buffer_for_const( dt_comp, &BLIS_ZERO );
 
 	//
 	// Assumptions/assertions:
@@ -197,9 +179,9 @@ void bli_gemm_ker_var2
 	const dim_t m_left = m % MR;
 
 	// Determine some increments used to step through A, B, and C.
-	const inc_t rstep_a = ps_a * dt_size;
+	const inc_t rstep_a = ps_a * dt_a_size;
 
-	const inc_t cstep_b = ps_b * dt_size;
+	const inc_t cstep_b = ps_b * dt_b_size;
 
 	const inc_t rstep_c = rs_c * MR * dt_c_size;
 	const inc_t cstep_c = cs_c * NR * dt_c_size;
@@ -320,7 +302,7 @@ void bli_gemm_ker_var2
 			// we must still explicitly accumulate to a temporary microtile in
 			// situations where a virtual microkernel is being used, such as
 			// during the 1m method or some cases of mixed datatypes.
-			if ( dt_exec == dt_c )
+			if ( bli_dt_prec( dt_comp ) == bli_dt_prec( dt_c ) )
 			{
 				// Invoke the gemm micro-kernel.
 				gemm_ukr
@@ -355,7 +337,7 @@ void bli_gemm_ker_var2
 				);
 
 				// Accumulate to C with typecasting.
-				xpbys_mxn[ dt_exec ][ dt_c ]
+				xpbys_mxn[ dt_comp ][ dt_c ]
 				(
 				  m_cur, n_cur,
 				  &ct, rs_ct, cs_ct,

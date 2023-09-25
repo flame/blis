@@ -298,9 +298,7 @@ void bli_gemmsup_ref_var1n
 			  packa,
 			  BLIS_BUFFER_FOR_B_PANEL, // This algorithm packs matrix A to
 			  stor_id,                 // a "panel of B".
-			  BLIS_NO_TRANSPOSE,
 			  dt,
-			  NC,     KC,       // This "panel of B" is (at most) NC x KC.
 			  nc_cur, kc_cur, MR,
 			  one,
 			  a_pc,   rs_a,      cs_a,
@@ -356,9 +354,7 @@ void bli_gemmsup_ref_var1n
 				  packb,
 				  BLIS_BUFFER_FOR_A_BLOCK, // This algorithm packs matrix B to
 				  stor_id,                 // a "block of A".
-				  BLIS_NO_TRANSPOSE,
 				  dt,
-				  MC,     KC,       // This "block of A" is (at most) KC x MC.
 				  mc_cur, kc_cur, NR,
 				  one,
 				  b_ic,   cs_b,      rs_b,
@@ -704,9 +700,7 @@ void bli_gemmsup_ref_var2m
 			  packb,
 			  BLIS_BUFFER_FOR_B_PANEL, // This algorithm packs matrix B to
 			  stor_id,                 // a "panel of B."
-			  BLIS_NO_TRANSPOSE,
 			  dt,
-			  NC,     KC,       // This "panel of B" is (at most) KC x NC.
 			  nc_cur, kc_cur, NR,
 			  one,
 			  b_pc,   cs_b,      rs_b,
@@ -760,9 +754,7 @@ void bli_gemmsup_ref_var2m
 				  packa,
 				  BLIS_BUFFER_FOR_A_BLOCK, // This algorithm packs matrix A to
 				  stor_id,                 // a "block of A."
-				  BLIS_NO_TRANSPOSE,
 				  dt,
-				  MC,     KC,       // This "block of A" is (at most) MC x KC.
 				  mc_cur, kc_cur, MR,
 				  one,
 				  a_ic,   rs_a,      cs_a,

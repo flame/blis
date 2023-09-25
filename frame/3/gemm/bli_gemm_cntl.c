@@ -36,7 +36,7 @@
 #include "blis.h"
 
 
-static packm_ker_ft GENARRAY2_ALL(packm_struc_cxk,packm_struc_cxk);
+static packm_ker_ft GENARRAY2_MIXP(packm_struc_cxk,packm_struc_cxk);
 
 void bli_gemm_var_cntl_init_node
      (
@@ -44,7 +44,7 @@ void bli_gemm_var_cntl_init_node
        num_t            dt_comp,
        num_t            dt_out,
        gemm_ukr_ft      ukr,
-       gemm_ukr_ft     real_ukr,
+       gemm_ukr_ft      real_ukr,
        bool             row_pref,
        dim_t            mr,
        dim_t            nr,
@@ -84,14 +84,21 @@ void bli_gemm_cntl_init
              gemm_cntl_t* cntl
      )
 {
-	const prec_t      comp_prec     = bli_obj_comp_prec( c );
-	const num_t       dt_c          = bli_obj_dt( c );
-	const num_t       dt_comp       = ( im == BLIS_1M ? BLIS_REAL
-	                                                  : bli_dt_domain( dt_c )
-	                                  ) | comp_prec;
-	      gemm_ukr_ft gemm_ukr      = bli_cntx_get_ukr_dt( dt_comp, BLIS_GEMM_UKR, cntx );
-	      gemm_ukr_ft real_gemm_ukr = NULL;
-	const bool        row_pref      = bli_cntx_get_ukr_prefs_dt( dt_comp, BLIS_GEMM_UKR_ROW_PREF, cntx );
+	const bool   a_is_real = bli_obj_is_real( a );
+	const bool   b_is_real = bli_obj_is_real( b );
+	const bool   c_is_real = bli_obj_is_real( c );
+	const bool   induced   = im != BLIS_NAT ||
+	                         a_is_real != b_is_real ||
+	                         a_is_real != c_is_real ||
+	                         b_is_real != c_is_real;
+	const prec_t comp_prec = bli_obj_comp_prec( c );
+	const num_t  dt_c      = bli_obj_dt( c );
+	const num_t  dt_comp   = ( induced ? BLIS_REAL : bli_dt_domain( dt_c ) ) | comp_prec;
+	const num_t  dt_a      = bli_obj_dt( a );
+	const num_t  dt_b      = bli_obj_dt( b );
+	const num_t  dt_ap     = bli_dt_domain( dt_a ) | comp_prec;
+	const num_t  dt_bp     = bli_dt_domain( dt_b ) | comp_prec;
+	const bool   row_pref  = bli_cntx_get_ukr_prefs_dt( dt_comp, BLIS_GEMM_UKR_ROW_PREF, cntx );
 
 	// An optimization: If C is stored by rows and the micro-kernel prefers
 	// contiguous columns, or if C is stored by columns and the micro-kernel
@@ -130,6 +137,17 @@ void bli_gemm_cntl_init
 	if ( family == BLIS_TRMM3 ) needs_swap = bli_obj_is_triangular( b );
 #endif
 
+	if ( a_is_real && !b_is_real && !c_is_real )
+	{
+		// C := R * C *must* be swapped for column-preferring kernels
+		needs_swap = row_pref;
+	}
+	else if ( !a_is_real && b_is_real && !c_is_real )
+	{
+		// C := C * R *must* be swapped for row-preferring kernels
+		needs_swap = !row_pref;
+	}
+
 	// Swap the A and B operands if required. This transforms the operation
 	// C = alpha A B + beta C into C^T = alpha B^T A^T + beta C^T.
 	if ( needs_swap )
@@ -141,9 +159,33 @@ void bli_gemm_cntl_init
 		bli_obj_induce_trans( c );
 	}
 
+	// Cast alpha and beta to the computational precision.
+	// Alpha should be complex if any of A, B, or C are.
+	obj_t alpha_cast, beta_cast;
+	dom_t alpha_dom = bli_obj_is_complex( a ) ||
+	                  bli_obj_is_complex( b ) ||
+					  bli_obj_is_complex( c ) ? BLIS_COMPLEX : BLIS_REAL;
+	bli_obj_scalar_init_detached_copy_of( alpha_dom | comp_prec,
+	                                      BLIS_NO_CONJUGATE,
+	                                      alpha,
+	                                      &alpha_cast );
+	// Cast beta to the domain of C, since we will need to
+	// ignore the imaginary part of beta for real C.
+	bli_obj_scalar_init_detached_copy_of( bli_obj_domain( c ) | comp_prec,
+	                                      BLIS_NO_CONJUGATE,
+	                                      beta,
+	                                      &beta_cast );
+
+	// Cast the scalars of A, B, and C to the computational precision
+	bli_obj_scalar_cast_to( dt_ap, a );
+	bli_obj_scalar_cast_to( dt_bp, b );
+	bli_obj_scalar_cast_to( bli_dt_domain( dt_c ) | comp_prec, c );
+
 	// If alpha is non-unit, typecast and apply it to the scalar attached
-	// to B, unless it happens to be triangular.
-	if ( bli_obj_root_is_triangular( b ) )
+	// to B, unless alpha is complex and A is complex while B is not.
+	if ( bli_obj_is_complex( alpha ) &&
+	     bli_obj_is_complex( a ) &&
+	     bli_obj_is_real( b ) )
 	{
 		if ( !bli_obj_equals( alpha, &BLIS_ONE ) )
 			bli_obj_scalar_apply_scalar( alpha, a );
@@ -151,7 +193,13 @@ void bli_gemm_cntl_init
 	else // if ( bli_obj_root_is_triangular( b ) )
 	{
 		if ( !bli_obj_equals( alpha, &BLIS_ONE ) )
+		{
+			if ( bli_obj_is_complex( alpha ) &&
+			     bli_obj_is_real( b ) )
+				bli_obj_set_scalar_domain( BLIS_COMPLEX, b );
+
 			bli_obj_scalar_apply_scalar( alpha, b );
+		}
 	}
 
 	// If beta is non-unit, typecast and apply it to the scalar attached
@@ -159,16 +207,14 @@ void bli_gemm_cntl_init
 	if ( !bli_obj_equals( beta, &BLIS_ONE ) )
 		bli_obj_scalar_apply_scalar( beta, c );
 
-	void_fp macro_kernel_fp;
+	void_fp     macro_kernel_fp = bli_gemm_ker_var2;
+	gemm_ukr_ft gemm_ukr        = bli_cntx_get_ukr_dt( dt_comp, BLIS_GEMM_UKR, cntx );
+	gemm_ukr_ft real_gemm_ukr   = NULL;
 
 	// Set the macrokernel function pointer based on the operation family
 	// and struc/uplo properties.
-	if ( family == BLIS_GEMM || family == BLIS_HEMM || family == BLIS_SYMM )
-	{
-		macro_kernel_fp = bli_gemm_ker_var2;
-	}
 #ifdef BLIS_ENABLE_JRIR_TLB
-	else if ( family == BLIS_GEMMT )
+	if ( family == BLIS_GEMMT )
 	{
 		macro_kernel_fp = bli_obj_is_lower( c ) ? bli_gemmt_l_ker_var2b
 		                                        : bli_gemmt_u_ker_var2b;
@@ -182,9 +228,8 @@ void bli_gemm_cntl_init
 			macro_kernel_fp = bli_obj_is_lower( b ) ? bli_trmm_rl_ker_var2b
 			                                        : bli_trmm_ru_ker_var2b;
 	}
-	else { macro_kernel_fp = NULL; bli_abort(); } // Should never execute.
 #else
-	else if ( family == BLIS_GEMMT )
+	if ( family == BLIS_GEMMT )
 	{
 		macro_kernel_fp = bli_obj_is_lower( c ) ? bli_gemmt_l_ker_var2
 		                                        : bli_gemmt_u_ker_var2;
@@ -198,83 +243,137 @@ void bli_gemm_cntl_init
 			macro_kernel_fp = bli_obj_is_lower( b ) ? bli_trmm_rl_ker_var2
 			                                        : bli_trmm_ru_ker_var2;
 	}
-	else { macro_kernel_fp = NULL; bli_abort(); } // Should never execute.
 #endif
 
-	const num_t        dt_a        = bli_obj_dt( a );
-	const num_t        dt_b        = bli_obj_dt( b );
-	const num_t        dt_ap       = bli_dt_domain( dt_a ) | comp_prec;
-	const num_t        dt_bp       = bli_dt_domain( dt_b ) | comp_prec;
-	const bool         trmm_r      = family == BLIS_TRMM && bli_obj_is_triangular( b );
-	const bool         a_lo_tri    = bli_obj_is_triangular( a ) && bli_obj_is_lower( a );
-	const bool         b_up_tri    = bli_obj_is_triangular( b ) && bli_obj_is_upper( b );
-	      pack_t       schema_a    = BLIS_PACKED_ROW_PANELS;
-	      pack_t       schema_b    = BLIS_PACKED_COL_PANELS;
-	const packm_ker_ft packm_a_ukr = packm_struc_cxk[ dt_a ][ dt_ap ];
-	const packm_ker_ft packm_b_ukr = packm_struc_cxk[ dt_b ][ dt_bp ];
-	const dim_t        mr_def      = bli_cntx_get_blksz_def_dt( dt_comp, BLIS_MR, cntx );
-	const dim_t        mr_pack     = bli_cntx_get_blksz_max_dt( dt_comp, BLIS_MR, cntx );
-	const dim_t        mr_bcast    = bli_cntx_get_blksz_max_dt( dt_comp, BLIS_BBM, cntx );
-	      dim_t        mr_scale    = 1;
-	const dim_t        nr_def      = bli_cntx_get_blksz_def_dt( dt_comp, BLIS_NR, cntx );
-	const dim_t        nr_pack     = bli_cntx_get_blksz_max_dt( dt_comp, BLIS_NR, cntx );
-	const dim_t        nr_bcast    = bli_cntx_get_blksz_max_dt( dt_comp, BLIS_BBN, cntx );
-	      dim_t        nr_scale    = 1;
-	const dim_t        kr_def      = bli_cntx_get_blksz_def_dt( dt_comp, BLIS_KR, cntx );
-	const dim_t        mc_def      = bli_cntx_get_blksz_def_dt( dt_comp, BLIS_MC, cntx );
-	const dim_t        mc_max      = bli_cntx_get_blksz_max_dt( dt_comp, BLIS_MC, cntx );
-	      dim_t        mc_scale    = 1;
-	const dim_t        nc_def      = bli_cntx_get_blksz_def_dt( dt_comp, BLIS_NC, cntx );
-	const dim_t        nc_max      = bli_cntx_get_blksz_max_dt( dt_comp, BLIS_NC, cntx );
-	      dim_t        nc_scale    = 1;
-	const dim_t        kc_def      = bli_cntx_get_blksz_def_dt( dt_comp, BLIS_KC, cntx );
-	const dim_t        kc_max      = bli_cntx_get_blksz_max_dt( dt_comp, BLIS_KC, cntx );
-	      dim_t        kc_scale    = 1;
+	const bool         trmm_r        = family == BLIS_TRMM && bli_obj_is_triangular( b );
+	const bool         a_lo_tri      = bli_obj_is_triangular( a ) && bli_obj_is_lower( a );
+	const bool         b_up_tri      = bli_obj_is_triangular( b ) && bli_obj_is_upper( b );
+	      pack_t       schema_a      = BLIS_PACKED_PANELS;
+	      pack_t       schema_b      = BLIS_PACKED_PANELS;
+	const packm_ker_ft packm_a_ukr   = packm_struc_cxk[ dt_a ][ dt_ap ];
+	const packm_ker_ft packm_b_ukr   = packm_struc_cxk[ dt_b ][ dt_bp ];
+	const dim_t        mr_def        = bli_cntx_get_blksz_def_dt( dt_comp, BLIS_MR, cntx );
+	const dim_t        mr_pack       = bli_cntx_get_blksz_max_dt( dt_comp, BLIS_MR, cntx );
+	const dim_t        mr_bcast      = bli_cntx_get_blksz_max_dt( dt_comp, BLIS_BBM, cntx );
+	      dim_t        mr_scale      = 1;
+	      dim_t        mr_pack_scale = 1;
+	const dim_t        nr_def        = bli_cntx_get_blksz_def_dt( dt_comp, BLIS_NR, cntx );
+	const dim_t        nr_pack       = bli_cntx_get_blksz_max_dt( dt_comp, BLIS_NR, cntx );
+	const dim_t        nr_bcast      = bli_cntx_get_blksz_max_dt( dt_comp, BLIS_BBN, cntx );
+	      dim_t        nr_scale      = 1;
+	      dim_t        nr_pack_scale = 1;
+	const dim_t        kr_def        = bli_cntx_get_blksz_def_dt( dt_comp, BLIS_KR, cntx );
+	const dim_t        mc_def        = bli_cntx_get_blksz_def_dt( dt_comp, BLIS_MC, cntx );
+	const dim_t        mc_max        = bli_cntx_get_blksz_max_dt( dt_comp, BLIS_MC, cntx );
+	      dim_t        mc_scale      = 1;
+	const dim_t        nc_def        = bli_cntx_get_blksz_def_dt( dt_comp, BLIS_NC, cntx );
+	const dim_t        nc_max        = bli_cntx_get_blksz_max_dt( dt_comp, BLIS_NC, cntx );
+	      dim_t        nc_scale      = 1;
+	const dim_t        kc_def        = bli_cntx_get_blksz_def_dt( dt_comp, BLIS_KC, cntx );
+	const dim_t        kc_max        = bli_cntx_get_blksz_max_dt( dt_comp, BLIS_KC, cntx );
+	      dim_t        kc_scale      = 1;
 
 	if ( im == BLIS_1M )
 	{
-		if ( ! row_pref )
+		if ( !row_pref )
 		{
-			schema_a = BLIS_PACKED_ROW_PANELS_1E;
-			schema_b = BLIS_PACKED_COL_PANELS_1R;
+			schema_a = BLIS_PACKED_PANELS_1E;
+			schema_b = BLIS_PACKED_PANELS_1R;
 			mr_scale = 2;
 			mc_scale = 2;
+			mr_pack_scale = 1; //don't divide PACKMR by 2 since we are also doubling k
 		}
 		else
 		{
-			schema_a = BLIS_PACKED_ROW_PANELS_1R;
-			schema_b = BLIS_PACKED_COL_PANELS_1E;
+			schema_a = BLIS_PACKED_PANELS_1R;
+			schema_b = BLIS_PACKED_PANELS_1E;
 			nr_scale = 2;
 			nc_scale = 2;
+			nr_pack_scale = 1; //don't divide PACKNR by 2 since we are also doubling k
 		}
 
 		kc_scale = 2;
 		real_gemm_ukr = gemm_ukr;
 		gemm_ukr = bli_cntx_get_ukr_dt( dt_comp, BLIS_GEMM1M_UKR, cntx );
 	}
-
-#if 0
-#ifdef BLIS_ENABLE_GEMM_MD
-	cntx_t cntx_local;
-
-	// If any of the storage datatypes differ, or if the computation precision
-	// differs from the storage precision of C, utilize the mixed datatype
-	// code path.
-	// NOTE: If we ever want to support the caller setting the computation
-	// domain explicitly, we will need to check the computation dt against the
-	// storage dt of C (instead of the computation precision against the
-	// storage precision of C).
-	if ( bli_obj_dt( &c_local ) != bli_obj_dt( &a_local ) ||
-	     bli_obj_dt( &c_local ) != bli_obj_dt( &b_local ) ||
-	     bli_obj_comp_prec( &c_local ) != bli_obj_prec( &c_local ) )
+	else if ( (  c_is_real &&  a_is_real &&  b_is_real ) ||
+	          ( !c_is_real && !a_is_real && !b_is_real ) )
 	{
-		// Handle mixed datatype cases in bli_gemm_md(), which may modify
-		// the objects or the context. (If the context is modified, cntx
-		// is adjusted to point to cntx_local.)
-		bli_gemm_md( &a_local, &b_local, beta, &c_local, &schema_a, &schema_b, &cntx_local, &cntx );
+		// C_real += A_real * B_real
+		// C_complex += A_complex * B_complex
+		// Nothing to do.
 	}
-#endif
-#endif
+	else if ( ( !c_is_real && !a_is_real &&  b_is_real ) ||
+	          ( !c_is_real &&  a_is_real && !b_is_real ) )
+	{
+		// C_complex += A_complex * B_real
+		// C_complex += A_real * B_complex
+
+		// Pack the complex input operand as normal, except that
+		// the (rescaled) real-domain block sizes are used.
+
+		if ( a_is_real )
+		{
+			nc_scale = 2;
+			nr_scale = 2;
+			nr_pack_scale = 2;
+		}
+		else
+		{
+			mc_scale = 2;
+			mr_scale = 2;
+			mr_pack_scale = 2;
+		}
+
+		// A microkernel wrapper is necessary for cases where C is general-stored
+		// or does not match the storage preference of the real-domain
+		// gemm microkernel, or when beta is complex.
+
+		real_gemm_ukr = gemm_ukr;
+		gemm_ukr = bli_cntx_get_ukr_dt( dt_comp, BLIS_GEMMR2C_UKR, cntx );
+	}
+	else if (  c_is_real && !a_is_real && !b_is_real )
+	{
+		// C_real += A_complex * B_complex
+
+		// Pack both A and B in the 1r format and use 1/2
+		// of the real-domain KC block size since twice as
+		// many values will be packed.
+
+		schema_a = BLIS_PACKED_PANELS_1R;
+		schema_b = BLIS_PACKED_PANELS_1R;
+		kc_scale = 2;
+	}
+	else if ( !c_is_real &&  a_is_real &&  b_is_real )
+	{
+		// C_complex += A_real * B_real
+
+		// A microkernel wrapper is always needed to store
+		// only the real part of the AB product, but also deal
+		// with potentiall complex alpha and beta scalars.
+
+		real_gemm_ukr = gemm_ukr;
+		gemm_ukr = bli_cntx_get_ukr_dt( dt_comp, BLIS_GEMMRO_UKR, cntx );
+	}
+	else if ( (  c_is_real && !a_is_real &&  b_is_real ) ||
+	          (  c_is_real &&  a_is_real && !b_is_real ) )
+	{
+		// C_real += A_complex * B_real
+		// C_real += A_real * B_complex
+
+		// Pack only the real part of the complex operand.
+		// If alpha is also complex then it will be applied
+		// during packing.
+
+		if ( a_is_real )
+		{
+			schema_b = BLIS_PACKED_PANELS_RO;
+		}
+		else
+		{
+			schema_a = BLIS_PACKED_PANELS_RO;
+		}
+	}
 
 	// Create two nodes for the macro-kernel.
 	bli_cntl_init_node
@@ -322,6 +421,7 @@ void bli_gemm_cntl_init
 	  mr_pack,
 	  mr_bcast,
 	  mr_scale,
+	  mr_pack_scale,
 	  kr_def,
 	  FALSE,
 	  FALSE,
@@ -372,6 +472,7 @@ void bli_gemm_cntl_init
 	  nr_pack,
 	  nr_bcast,
 	  nr_scale,
+	  nr_pack_scale,
 	  kr_def,
 	  FALSE,
 	  FALSE,

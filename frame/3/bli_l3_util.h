@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2020, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -32,25 +33,17 @@
 
 */
 
-// -- Matrix partitioning ------------------------------------------------------
 
-void bli_packm_acquire_mpart_t2b( subpart_t    requested_part,
-                                  dim_t        i,
-                                  dim_t        b,
-                                  const obj_t* obj,
-                                        obj_t* sub_obj );
+//
+// Prototypes for level 3 BLAS utility functions
+//
 
-void bli_packm_acquire_mpart_l2r( subpart_t    requested_part,
-                                  dim_t        j,
-                                  dim_t        b,
-                                  const obj_t* obj,
-                                        obj_t* sub_obj );
-
-void bli_packm_acquire_mpart_tl2br( subpart_t    requested_part,
-                                    dim_t        ij,
-                                    dim_t        b,
-                                    const obj_t* obj,
-                                          obj_t* sub_obj );
-
-dim_t bli_packm_offset_to_panel_for( dim_t offmn, const obj_t* p );
+BLIS_EXPORT_BLIS err_t bli_l3_return_early_if_trivial
+      (
+       const obj_t*  alpha,
+       const obj_t*  a,
+       const obj_t*  b,
+       const obj_t*  beta,
+       const obj_t*  c
+      );
 

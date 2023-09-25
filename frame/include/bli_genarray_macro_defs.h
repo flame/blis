@@ -156,6 +156,17 @@ arrayname[BLIS_NUM_FP_TYPES][BLIS_NUM_FP_TYPES] = \
 }
 
 
+#define GENARRAY2_MIXP(arrayname,op) \
+\
+arrayname[BLIS_NUM_FP_TYPES][BLIS_NUM_FP_TYPES] = \
+{ \
+	{ PASTEMAC2(s,s,op), NULL,              PASTEMAC2(s,d,op), NULL,             }, \
+	{ NULL,              PASTEMAC2(c,c,op), NULL,              PASTEMAC2(c,z,op) }, \
+	{ PASTEMAC2(d,s,op), NULL,              PASTEMAC2(d,d,op), NULL,             }, \
+	{ NULL,              PASTEMAC2(z,c,op), NULL,              PASTEMAC2(z,z,op) }  \
+}
+
+
 #define GENARRAY2_EXT(arrayname,op) \
 \
 arrayname[BLIS_NUM_FP_TYPES][BLIS_NUM_FP_TYPES] = \

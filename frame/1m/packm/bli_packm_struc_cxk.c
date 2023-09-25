@@ -59,32 +59,41 @@ void PASTEMAC2(chc,chp,varname) \
        const cntx_t* cntx \
      ) \
 { \
-	cntl_t* cntl          = ( cntl_t* )params; \
-\
 	num_t   dt_c          = PASTEMAC(chc,type); \
 	num_t   dt_p          = PASTEMAC(chp,type); \
-	num_t   dt_pr         = PASTEMAC(chp_r,type); \
 \
 	dim_t   panel_len_pad = panel_len_max - panel_len; \
 \
-	dim_t   panel_dim_r   = bli_packm_def_cntl_bmult_m_def( cntl ); \
-	dim_t   ldp_r         = ldp; \
-\
-	ukr2_t   cxk_ker_id   = BLIS_PACKM_KER; \
-	ukr2_t   cxc_ker_id   = BLIS_PACKM_DIAG_KER; \
+	ukr2_t  cxk_ker_id    = BLIS_PACKM_KER; \
+	ukr2_t  cxc_ker_id    = BLIS_PACKM_DIAG_KER; \
 \
 	if ( bli_is_1m_packed( schema ) ) \
 	{ \
 		cxk_ker_id = BLIS_PACKM_1ER_KER; \
 		cxc_ker_id = BLIS_PACKM_DIAG_1ER_KER; \
 	} \
-	else if ( dt_p != dt_pr ) \
+	else if ( bli_is_ro_packed( schema ) ) \
 	{ \
-		/* We will zero out portions of the triangular matrix using a real-domain macro */ \
-		panel_dim_r *= 2; \
-		ldp_r *= 2; \
+		ctypep_r kappa_r, kappa_i; \
+		( void )kappa_r; \
+		PASTEMAC(chp,gets)( *( ctypep* )kappa, kappa_r, kappa_i ); \
+		if ( PASTEMAC(chp_r,eq0)( kappa_i ) ) \
+		{ \
+			/* Treat the matrix as real with doubled strides. */ \
+			dt_c = bli_dt_proj_to_real( dt_c ); \
+			dt_p = bli_dt_proj_to_real( dt_p ); \
+			incc *= 2; \
+			ldc *= 2; \
+		} \
+		else \
+		{ \
+			cxk_ker_id = BLIS_PACKM_RO_KER; \
+			cxc_ker_id = BLIS_PACKM_DIAG_RO_KER; \
+		} \
 	} \
 \
+	const void*           zero   = bli_obj_buffer_for_const( dt_p, &BLIS_ZERO ); \
+	setv_ker_ft           f_setv = bli_cntx_get_ukr_dt( dt_p, BLIS_SETV_KER, cntx ); \
 	packm_cxk_ker_ft      f_cxk  = bli_cntx_get_ukr2_dt( dt_c, dt_p, cxk_ker_id, cntx ); \
 	packm_cxc_diag_ker_ft f_cxc  = bli_cntx_get_ukr2_dt( dt_c, dt_p, cxc_ker_id, cntx ); \
 \
@@ -144,11 +153,13 @@ void PASTEMAC2(chc,chp,varname) \
 		   explicitly store zeros */ \
 		if ( bli_is_upper( uploc ) && bli_is_triangular( strucc ) ) \
 		{ \
-			PASTEMAC(chp_r,set0s_mxn) \
+			f_setv \
 			( \
-			  panel_dim_r, \
-			  p10_len_max * ( bli_is_1m_packed( schema ) ? 2 : 1), \
-			  ( ctypep_r* )p10, 1, ldp_r \
+			  BLIS_NO_CONJUGATE, \
+			  ldp * p10_len_max, \
+			  zero, \
+			  p10, 1, \
+			  cntx \
 			); \
 		} \
 		else \
@@ -229,11 +240,13 @@ void PASTEMAC2(chc,chp,varname) \
 		   explicitly store zeros */ \
 		if ( bli_is_lower( uploc ) && bli_is_triangular( strucc ) ) \
 		{ \
-			PASTEMAC(chp_r,set0s_mxn) \
+			f_setv \
 			( \
-			  panel_dim_r, \
-			  p12_len_max * ( bli_is_1m_packed( schema ) ? 2 : 1), \
-			  ( ctypep_r* )p12, 1, ldp_r \
+			  BLIS_NO_CONJUGATE, \
+			  ldp * p12_len_max, \
+			  zero, \
+			  p12, 1, \
+			  cntx \
 			); \
 		} \
 		else \
@@ -258,5 +271,5 @@ void PASTEMAC2(chc,chp,varname) \
 }
 
 INSERT_GENTFUNC2R_BASIC( packm_struc_cxk )
-INSERT_GENTFUNC2R_MIX_DP( packm_struc_cxk )
+INSERT_GENTFUNC2R_MIX_P( packm_struc_cxk )
 

@@ -35,8 +35,3 @@
 #include "bli_gemm_cntl.h"
 
 #include "bli_gemm_var.h"
-
-// Mixed datatype support.
-#ifdef BLIS_ENABLE_GEMM_MD
-#include "bli_gemm_md.h"
-#endif

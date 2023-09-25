@@ -89,8 +89,14 @@ void bli_gemmt_u_ker_var2b
              thrinfo_t* thread_par
      )
 {
-	const num_t  dt_exec   = bli_obj_exec_dt( c );
+	const num_t  dt_comp   = bli_gemm_var_cntl_comp_dt( cntl );
+	const num_t  dt_a      = bli_obj_dt( a );
+	const num_t  dt_b      = bli_obj_dt( b );
 	const num_t  dt_c      = bli_obj_dt( c );
+
+	const siz_t  dt_a_size = bli_dt_size( dt_a );
+	const siz_t  dt_b_size = bli_dt_size( dt_b );
+	const siz_t  dt_c_size = bli_dt_size( dt_c );
 
 	      doff_t diagoffc  = bli_obj_diag_offset( c );
 
@@ -102,12 +108,10 @@ void bli_gemmt_u_ker_var2b
 	      dim_t  k         = bli_obj_width( a );
 
 	const void*  buf_a     = bli_obj_buffer_at_off( a );
-	const inc_t  is_a      = bli_obj_imag_stride( a );
 	const dim_t  pd_a      = bli_obj_panel_dim( a );
 	const inc_t  ps_a      = bli_obj_panel_stride( a );
 
 	const void*  buf_b     = bli_obj_buffer_at_off( b );
-	const inc_t  is_b      = bli_obj_imag_stride( b );
 	const dim_t  pd_b      = bli_obj_panel_dim( b );
 	const inc_t  ps_b      = bli_obj_panel_stride( b );
 
@@ -126,9 +130,6 @@ void bli_gemmt_u_ker_var2b
 	const void* buf_alpha = bli_obj_internal_scalar_buffer( &scalar_b );
 	const void* buf_beta  = bli_obj_internal_scalar_buffer( c );
 
-	const siz_t dt_size   = bli_dt_size( dt_exec );
-	const siz_t dt_c_size = bli_dt_size( dt_c );
-
 	// Alias some constants to simpler names.
 	const dim_t MR = pd_a;
 	const dim_t NR = pd_b;
@@ -137,7 +138,7 @@ void bli_gemmt_u_ker_var2b
 	// function pointer type.
 	gemm_ukr_ft    gemm_ukr        = bli_gemm_var_cntl_ukr( cntl );
 	const void*    params          = bli_gemm_var_cntl_params( cntl );
-	xpbys_mxn_u_ft xpbys_mxn_u_ukr = xpbys_mxn_u[ dt_exec ];
+	xpbys_mxn_u_ft xpbys_mxn_u_ukr = xpbys_mxn_u[ dt_c ];
 
 	// Temporary C buffer for edge cases. Note that the strides of this
 	// temporary buffer are set so that they match the storage of the
@@ -149,7 +150,7 @@ void bli_gemmt_u_ker_var2b
 	const inc_t rs_ct       = ( row_pref ? NR : 1 );
 	const inc_t cs_ct       = ( row_pref ? 1 : MR );
 
-	const void* zero       = bli_obj_buffer_for_const( dt_exec, &BLIS_ZERO );
+	const void* zero       = bli_obj_buffer_for_const( dt_comp, &BLIS_ZERO );
 	const char* a_cast     = buf_a;
 	const char* b_cast     = buf_b;
 	      char* c_cast     = buf_c;
@@ -190,7 +191,7 @@ void bli_gemmt_u_ker_var2b
 		n        = n - j;
 		diagoffc = diagoffc % NR;
 		c_cast   = c_cast + (j  )*cs_c*dt_c_size;
-		b_cast   = b_cast + (jp )*ps_b*dt_size;
+		b_cast   = b_cast + (jp )*ps_b*dt_b_size;
 	}
 
 	// If there is a zero region below where the diagonal of C intersects
@@ -210,9 +211,9 @@ void bli_gemmt_u_ker_var2b
 	const dim_t m_left = m % MR;
 
 	// Determine some increments used to step through A, B, and C.
-	const inc_t rstep_a = ps_a * dt_size;
+	const inc_t rstep_a = ps_a * dt_a_size;
 
-	const inc_t cstep_b = ps_b * dt_size;
+	const inc_t cstep_b = ps_b * dt_b_size;
 
 	const inc_t rstep_c = rs_c * MR * dt_c_size;
 	const inc_t cstep_c = cs_c * NR * dt_c_size;
@@ -222,10 +223,6 @@ void bli_gemmt_u_ker_var2b
 	// Save the pack schemas of A and B to the auxinfo_t object.
 	bli_auxinfo_set_schema_a( schema_a, &aux );
 	bli_auxinfo_set_schema_b( schema_b, &aux );
-
-	// Save the imaginary stride of A and B to the auxinfo_t object.
-	bli_auxinfo_set_is_a( is_a, &aux );
-	bli_auxinfo_set_is_b( is_b, &aux );
 
 	// Save the virtual microkernel address and the params.
 	bli_auxinfo_set_ukr( gemm_ukr, &aux );

@@ -395,6 +395,9 @@ void bli_gks_register_cntx
 	e_val = bli_check_valid_nc_mod_mult( nc, mr ); bli_check_error_code( e_val );
 #endif
 
+	e_val = bli_check_valid_mr_even( mr ); bli_check_error_code( e_val );
+	e_val = bli_check_valid_nr_even( nr ); bli_check_error_code( e_val );
+
 	// Verify that the register blocksizes in the context are sufficiently large
 	// relative to the maximum stack buffer size defined at configure-time.
 	e_val = bli_check_sufficient_stack_buf_size( gks_id );

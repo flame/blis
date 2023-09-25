@@ -52,7 +52,11 @@ BLIS_INLINE void_fp bli_func2_get_dt
        const func2_t* func
      )
 {
-	return func->ptr[ dt1 ][ dt2 ];
+	// Arrange the pointer elements such that ((func2_t*)x)->ptr[0][dt]
+	// is equivalent to ((func_t*)x)->ptr[dt] and encodes the (dt,dt)
+	// "diagonal" value.
+	gint_t off = dt2 < dt1 ? dt2 + BLIS_NUM_FP_TYPES - dt1 : dt2 - dt1;
+	return func->ptr[ off ][ dt1 ];
 }
 
 // func_t modification
@@ -75,7 +79,11 @@ BLIS_INLINE void bli_func2_set_dt
        func2_t* func
      )
 {
-	func->ptr[ dt1 ][ dt2 ] = fp;
+	// Arrange the pointer elements such that ((func2_t*)x)->ptr[0][dt]
+	// is equivalent to ((func_t*)x)->ptr[dt] and encodes the (dt,dt)
+	// "diagonal" value.
+	gint_t off = dt2 < dt1 ? dt2 + BLIS_NUM_FP_TYPES - dt1 : dt2 - dt1;
+	func->ptr[ off ][ dt1 ] = fp;
 }
 
 BLIS_INLINE void bli_func_copy_dt

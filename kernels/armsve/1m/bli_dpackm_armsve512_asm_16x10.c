@@ -67,6 +67,10 @@ void bli_dpackm_armsve512_asm_16x10
     const bool    gs    = inca != 1 && lda != 1;
     const bool    unitk = bli_deq1( *(( double* )kappa) );
 
+// This never would have worked in the first place since GEMM packing used
+// BLIS_PACKED_ROW_PANELS and BLIS_PACKED_COL_PANELS, but with the removal
+// of the row/column packing bit it can't work via the schema anyways.
+#if 0
 #ifdef _A64FX
     {
         // Infer whether A or B is being packed.
@@ -75,6 +79,7 @@ void bli_dpackm_armsve512_asm_16x10
         if ( schema == BLIS_PACKED_COLUMNS )
             p = ( (uint64_t)0x2 << 56 ) | (uint64_t)p;
     }
+#endif
 #endif
 
     if ( cdim == mr && cdim_bcast == 1 && !gs && unitk )

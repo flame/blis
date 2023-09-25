@@ -33,6 +33,7 @@
 
 */
 
+#include "bli_l3_util.h"
 #include "bli_l3_thrinfo.h"
 #include "bli_l3_decor.h"
 #include "bli_l3_sup_decor.h"

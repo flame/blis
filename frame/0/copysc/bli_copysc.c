@@ -126,6 +126,5 @@ void PASTEMAC2(chx,chy,varname) \
 }
 
 INSERT_GENTFUNC2_BASIC( copysc )
-INSERT_GENTFUNC2_MIX_D( copysc )
-INSERT_GENTFUNC2_MIX_P( copysc )
+INSERT_GENTFUNC2_MIX_DP( copysc )
 

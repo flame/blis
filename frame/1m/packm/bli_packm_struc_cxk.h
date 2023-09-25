@@ -58,5 +58,5 @@ BLIS_EXPORT_BLIS void PASTEMAC2(chc,chp,varname) \
      );
 
 INSERT_GENTPROT2_BASIC( packm_struc_cxk )
-INSERT_GENTPROT2_MIX_DP( packm_struc_cxk )
+INSERT_GENTPROT2_MIX_P( packm_struc_cxk )
 

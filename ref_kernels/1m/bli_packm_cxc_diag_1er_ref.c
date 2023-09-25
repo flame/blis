@@ -35,19 +35,19 @@
 #include "blis.h"
 
 
-#define PACKM_SET1_1E( chp_r, mnk ) \
+#define PACKM_SET_1E( chp_r, val_r, val_i, mnk ) \
 do { \
-	PASTEMAC(chp_r,set1s)( *(pi1_ri + (mnk*2 + 0)*cdim_bcast + d + mnk*ldp2) ); \
-	PASTEMAC(chp_r,set0s)( *(pi1_ri + (mnk*2 + 1)*cdim_bcast + d + mnk*ldp2) ); \
-	PASTEMAC(chp_r,set0s)( *(pi1_ir + (mnk*2 + 0)*cdim_bcast + d + mnk*ldp2) ); \
-	PASTEMAC(chp_r,set1s)( *(pi1_ir + (mnk*2 + 1)*cdim_bcast + d + mnk*ldp2) ); \
+	PASTEMAC(chp_r,copys)(  val_r, *(pi1_ri + (mnk*2 + 0)*cdim_bcast + d + mnk*ldp2) ); \
+	PASTEMAC(chp_r,copys)(  val_i, *(pi1_ri + (mnk*2 + 1)*cdim_bcast + d + mnk*ldp2) ); \
+	PASTEMAC(chp_r,copys)( -val_i, *(pi1_ir + (mnk*2 + 0)*cdim_bcast + d + mnk*ldp2) ); \
+	PASTEMAC(chp_r,copys)(  val_r, *(pi1_ir + (mnk*2 + 1)*cdim_bcast + d + mnk*ldp2) ); \
 } while (0)
 
 
-#define PACKM_SET1_1R( chp_r, mnk ) \
+#define PACKM_SET_1R( chp_r, val_r, val_i, mnk ) \
 do { \
-	PASTEMAC(chp_r,set1s)( *(pi1_r + mnk*cdim_bcast + d + mnk*ldp2) ); \
-	PASTEMAC(chp_r,set0s)( *(pi1_i + mnk*cdim_bcast + d + mnk*ldp2) ); \
+	PASTEMAC(chp_r,copys)( val_r, *(pi1_r + mnk*cdim_bcast + d + mnk*ldp2) ); \
+	PASTEMAC(chp_r,copys)( val_i, *(pi1_i + mnk*cdim_bcast + d + mnk*ldp2) ); \
 } while (0)
 
 
@@ -147,6 +147,8 @@ void PASTEMAC4(cha,chp,opname,arch,suf) \
 \
 	      ctypep_r           kappa_r = ( ( ctypep_r* )kappa )[0]; \
 	      ctypep_r           kappa_i = ( ( ctypep_r* )kappa )[1]; \
+	      ctypep_r           one     = *PASTEMAC(chp_r,1); \
+	      ctypep_r           zero    = *PASTEMAC(chp_r,0); \
 	const ctypea_r* restrict alpha1  = ( const ctypea_r* )a; \
 \
 	if ( bli_is_1e_packed( schema ) ) \
@@ -204,7 +206,7 @@ void PASTEMAC4(cha,chp,opname,arch,suf) \
 		{ \
 			for ( dim_t mnk = 0; mnk < cdim; ++mnk ) \
 			for ( dim_t d = 0; d < cdim_bcast; ++d ) \
-				PACKM_SET1_1E( chp_r, mnk ); \
+				PACKM_SET_1E( chp_r, kappa_r, kappa_i, mnk ); \
 		} \
 		else if ( bli_is_hermitian( struca ) ) \
 		{ \
@@ -250,7 +252,7 @@ void PASTEMAC4(cha,chp,opname,arch,suf) \
 		/* if this an edge case in both directions, extend the diagonal with ones */ \
 		for ( dim_t mnk = cdim; mnk < bli_min( cdim_max, n_max ); ++mnk ) \
 		for ( dim_t d = 0; d < cdim_bcast; ++d ) \
-			PACKM_SET1_1E( chp_r, mnk ); \
+			PACKM_SET_1E( chp_r, one, zero, mnk ); \
 	} \
 	else /* bli_is_1r_packed( schema ) */ \
 	{ \
@@ -307,7 +309,7 @@ void PASTEMAC4(cha,chp,opname,arch,suf) \
 		{ \
 			for ( dim_t mnk = 0; mnk < cdim; ++mnk ) \
 			for ( dim_t d = 0; d < cdim_bcast; ++d ) \
-				PACKM_SET1_1R( chp_r, mnk ); \
+				PACKM_SET_1R( chp_r, kappa_r, kappa_i, mnk ); \
 		} \
 		else if ( bli_is_hermitian( struca ) ) \
 		{ \
@@ -345,7 +347,7 @@ void PASTEMAC4(cha,chp,opname,arch,suf) \
 		/* if this an edge case in both directions, extend the diagonal with ones */ \
 		for ( dim_t mnk = cdim; mnk < bli_min( cdim_max, n_max ); ++mnk ) \
 		for ( dim_t d = 0; d < cdim_bcast; ++d ) \
-			PACKM_SET1_1R( chp_r, mnk ); \
+			PACKM_SET_1R( chp_r, one, zero, mnk ); \
 	} \
 }
 

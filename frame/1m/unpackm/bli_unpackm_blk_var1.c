@@ -186,7 +186,7 @@ void PASTEMAC(ch,varname) \
 	if ( bli_is_row_stored_f( m_panel, n_panel, rs_p, cs_p ) ) \
 	{ \
 		/* Prepare to unpack from column panels. */ \
-		schema        = BLIS_PACKED_COL_PANELS; \
+		schema        = BLIS_PACKED_PANELS; \
 		iter_dim      = n; \
 		panel_len     = m; \
 		panel_dim_max = pd_p; \
@@ -201,7 +201,7 @@ void PASTEMAC(ch,varname) \
 	else /* if ( bli_is_col_stored_f( m_panel, n_panel, rs_p, cs_p ) ) */ \
 	{ \
 		/* Prepare to unpack from row panels. */ \
-		schema        = BLIS_PACKED_ROW_PANELS; \
+		schema        = BLIS_PACKED_PANELS; \
 		iter_dim      = m; \
 		panel_len     = n; \
 		panel_dim_max = pd_p; \

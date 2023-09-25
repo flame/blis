@@ -78,7 +78,6 @@ void PASTEMAC(ch,varname) \
 	inc_t  ldp, p_inc; \
 	conj_t conjc; \
 \
-\
 	/* Extract the conjugation bit from the transposition argument. */ \
 	conjc = bli_extract_conj( transc ); \
 \
@@ -90,38 +89,14 @@ void PASTEMAC(ch,varname) \
 		bli_toggle_trans( &transc ); \
 	} \
 \
-	/* Create flags to incidate row or column storage. Note that the
-	   schema bit that encodes row or column is describing the form of
-	   micro-panel, not the storage in the micro-panel. Hence the
-	   mismatch in "row" and "column" semantics. */ \
-	bool row_stored = bli_is_col_packed( schema ); \
-	/*bool col_stored = bli_is_row_packed( schema );*/ \
-\
-	/* If the row storage flag indicates row storage, then we are packing
-	   to column panels; otherwise, if the strides indicate column storage,
-	   we are packing to row panels. */ \
-	if ( row_stored ) \
-	{ \
-		/* Prepare to pack to row-stored column panels. */ \
-		iter_dim       = n; \
-		panel_len_full = m; \
-		panel_len_max  = m_max; \
-		panel_dim_max  = pd_p; \
-		vs_c           = cs_c; \
-		ldc            = rs_c; \
-		ldp            = rs_p; \
-	} \
-	else /* if ( col_stored ) */ \
-	{ \
-		/* Prepare to pack to column-stored row panels. */ \
-		iter_dim       = m; \
-		panel_len_full = n; \
-		panel_len_max  = n_max; \
-		panel_dim_max  = pd_p; \
-		vs_c           = rs_c; \
-		ldc            = cs_c; \
-		ldp            = cs_p; \
-	} \
+	/* Prepare to pack to row-stored column panels. */ \
+	iter_dim       = n; \
+	panel_len_full = m; \
+	panel_len_max  = m_max; \
+	panel_dim_max  = pd_p; \
+	vs_c           = cs_c; \
+	ldc            = rs_c; \
+	ldp            = rs_p; \
 \
 	num_t  dt     = PASTEMAC(ch,type); \
 	ukr2_t ker_id = BLIS_PACKM_KER; \
@@ -342,7 +317,6 @@ void PASTEMAC(ch,varname) \
 	inc_t  incp, ldp; \
 	conj_t conjc; \
 \
-\
 	/* Extract the conjugation bit from the transposition argument. */ \
 	conjc = bli_extract_conj( transc ); \
 \
@@ -354,37 +328,16 @@ void PASTEMAC(ch,varname) \
 		bli_toggle_trans( &transc ); \
 	} \
 \
-	/* Create flags to incidate row or column storage. Note that the
-	   schema bit that encodes row or column is describing the form of
-	   micro-panel, not the storage in the micro-panel. Hence the
-	   mismatch in "row" and "column" semantics. */ \
-	bool col_stored = bli_is_col_packed( schema ); \
-	/*bool row_stored = bli_is_row_packed( schema );*/ \
-\
-	if ( col_stored ) \
-	{ \
-		/* Prepare to pack to a column-stored matrix. */ \
-		iter_dim       = n; \
-		vector_len     = m; \
-		incc           = rs_c; \
-		ldc            = cs_c; \
-		incp           = 1; \
-		ldp            = cs_p; \
-	} \
-	else /* if ( row_stored ) */ \
-	{ \
-		/* Prepare to pack to a row-stored matrix. */ \
-		iter_dim       = m; \
-		vector_len     = n; \
-		incc           = cs_c; \
-		ldc            = rs_c; \
-		incp           = 1; \
-		ldp            = rs_p; \
-	} \
+	/* Prepare to pack to a column-stored matrix. */ \
+	iter_dim       = n; \
+	vector_len     = m; \
+	incc           = rs_c; \
+	ldc            = cs_c; \
+	incp           = 1; \
+	ldp            = cs_p; \
 \
 	/* Compute the total number of iterations we'll need. */ \
 	n_iter = iter_dim; \
-\
 \
 	ctype* p_begin = p_cast; \
 \

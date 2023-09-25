@@ -763,14 +763,6 @@ void libblis_test_output_params_struct( FILE* os, test_params_t* params )
 	gint_t  int_type_size;
 	cntx_t* cntx;
 
-#ifndef BLIS_ENABLE_GEMM_MD
-	// Notify the user if mixed domain or mixed precision was requested.
-	if ( params->mixed_domain || params->mixed_precision )
-	{
-		libblis_test_printf_error( "mixed domain and/or mixed precision testing requested, but building against BLIS without mixed datatype support.\n" );
-	}
-#endif
-
 	// Skip informational output if BLIS is running in quiet mode.
 	if ( libblis_test_quiet_mode ) return;
 
@@ -2627,7 +2619,7 @@ void libblis_test_mobj_create( test_params_t* params, num_t dt, trans_t trans, c
 
 thrinfo_t* libblis_test_pobj_create( bszid_t bmult_id_m, bszid_t bmult_id_n, invdiag_t inv_diag, pack_t pack_schema, packbuf_t pack_buf, obj_t* a, obj_t* p, cntx_t* cntx )
 {
-	static packm_ker_ft GENARRAY2_ALL(packm_struc_cxk,packm_struc_cxk);
+	static packm_ker_ft GENARRAY2_MIXP(packm_struc_cxk,packm_struc_cxk);
 
 	bool does_inv_diag;
 	if ( inv_diag == BLIS_NO_INVERT_DIAG ) does_inv_diag = FALSE;
@@ -2649,6 +2641,7 @@ thrinfo_t* libblis_test_pobj_create( bszid_t bmult_id_m, bszid_t bmult_id_n, inv
 	  packm_struc_cxk[ dt ][ dt ],
 	  bli_cntx_get_blksz_def_dt( dt, bmult_id_m, cntx ),
 	  bli_cntx_get_blksz_max_dt( dt, bmult_id_m, cntx ),
+	  1,
 	  1,
 	  1,
 	  bli_cntx_get_blksz_def_dt( dt, bmult_id_n, cntx ),

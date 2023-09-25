@@ -34,6 +34,7 @@
 
 BLIS_EXPORT_BLIS siz_t bli_packm_init
      (
+             num_t   dt_p,
        const obj_t*  a,
              obj_t*  p,
        const cntl_t* cntl

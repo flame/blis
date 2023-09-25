@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2023, Southern Methodist University
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -32,27 +32,34 @@
 
 */
 
+#include "blis.h"
 
-#undef  GENTPROT
-#define GENTPROT( ctype, ch, varname ) \
-\
-void PASTECH2(bls_,ch,varname) \
-     ( \
-       conj_t  conja, \
-       pack_t  schema, \
-       dim_t   panel_dim, \
-       dim_t   panel_dim_max, \
-       dim_t   panel_len, \
-       dim_t   panel_len_max, \
-       ctype*  kappa, \
-       ctype*  a, inc_t inca, inc_t lda, \
-       ctype*  p,             inc_t ldp, \
-       cntx_t* cntx  \
-     );
+//
+// Utility functions for level 3 BLAS
+//
 
-//INSERT_GENTPROT_BASIC( packm_cxk )
-GENTPROT( float,    s, packm_cxk )
-GENTPROT( double,   d, packm_cxk )
-GENTPROT( scomplex, c, packm_cxk )
-GENTPROT( dcomplex, z, packm_cxk )
+err_t bli_l3_return_early_if_trivial
+      (
+       const obj_t*  alpha,
+       const obj_t*  a,
+       const obj_t*  b,
+       const obj_t*  beta,
+       const obj_t*  c
+      )
+{
+	// If C has a zero dimension, return early.
+	if ( bli_obj_has_zero_dim( c ) )
+		return BLIS_SUCCESS;
 
+	// If alpha is zero, or if A or B has a zero dimension, scale C by beta
+	// and return early.
+	if ( bli_obj_equals( alpha, &BLIS_ZERO ) ||
+	     bli_obj_has_zero_dim( a ) ||
+	     bli_obj_has_zero_dim( b ) )
+	{
+		bli_scalm( beta, c );
+		return BLIS_SUCCESS;
+	}
+
+	return BLIS_FAILURE;
+}

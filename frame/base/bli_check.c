@@ -747,10 +747,8 @@ err_t bli_check_packm_schema_on_unpack( const obj_t* a )
 {
 	err_t e_val = BLIS_SUCCESS;
 
-	if ( bli_obj_pack_schema( a ) != BLIS_PACKED_ROWS &&
-	     bli_obj_pack_schema( a ) != BLIS_PACKED_COLUMNS &&
-	     bli_obj_pack_schema( a ) != BLIS_PACKED_ROW_PANELS &&
-	     bli_obj_pack_schema( a ) != BLIS_PACKED_COL_PANELS )
+	if ( bli_obj_pack_schema( a ) != BLIS_PACKED_MATRIX &&
+	     bli_obj_pack_schema( a ) != BLIS_PACKED_PANELS )
 		e_val = BLIS_PACK_SCHEMA_NOT_SUPPORTED_FOR_UNPACK;
 
 	return e_val;
@@ -953,6 +951,44 @@ err_t bli_check_valid_kc_mod_mult( const blksz_t* kc, const blksz_t* kr )
 
 		if      ( kc_def_dt % kr_dt != 0 ) return BLIS_KC_DEF_NONMULTIPLE_OF_KR;
 		else if ( kc_max_dt % kr_dt != 0 ) return BLIS_KC_MAX_NONMULTIPLE_OF_KR;
+	}
+
+	return BLIS_SUCCESS;
+}
+
+err_t bli_check_valid_mr_even( const blksz_t* mr )
+{
+	num_t dt;
+
+	for ( dt = BLIS_DT_LO; dt <= BLIS_DT_HI; ++dt )
+	{
+		if ( bli_is_complex( dt ) )
+			continue;
+
+		dim_t mr_dt = bli_blksz_get_def( dt, mr );
+		dim_t packmr_dt = bli_blksz_get_max( dt, mr );
+
+		if      ( mr_dt % 2 != 0 ) return BLIS_MR_NOT_EVEN_FOR_REAL_TYPE;
+		else if ( packmr_dt % 2 != 0 ) return BLIS_PACKMR_NOT_EVEN_FOR_REAL_TYPE;
+	}
+
+	return BLIS_SUCCESS;
+}
+
+err_t bli_check_valid_nr_even( const blksz_t* nr )
+{
+	num_t dt;
+
+	for ( dt = BLIS_DT_LO; dt <= BLIS_DT_HI; ++dt )
+	{
+		if ( bli_is_complex( dt ) )
+			continue;
+
+		dim_t nr_dt = bli_blksz_get_def( dt, nr );
+		dim_t packnr_dt = bli_blksz_get_max( dt, nr );
+
+		if      ( nr_dt % 2 != 0 ) return BLIS_NR_NOT_EVEN_FOR_REAL_TYPE;
+		else if ( packnr_dt % 2 != 0 ) return BLIS_PACKNR_NOT_EVEN_FOR_REAL_TYPE;
 	}
 
 	return BLIS_SUCCESS;

@@ -90,6 +90,11 @@ BLIS_INLINE dim_t bli_gemm_var_cntl_nr( const cntl_t* cntl )
 	return ( ( const gemm_var_cntl_t* ) cntl )->nr;
 }
 
+BLIS_INLINE num_t bli_gemm_var_cntl_comp_dt( const cntl_t* cntl )
+{
+	return ( ( const gemm_var_cntl_t* ) cntl )->dt_comp;
+}
+
 // -----------------------------------------------------------------------------
 
 BLIS_INLINE void bli_gemm_var_cntl_set_ukr( const func2_t* ukr, cntl_t* cntl_ )
@@ -155,6 +160,11 @@ BLIS_INLINE void bli_gemm_var_cntl_set_mr( dim_t mr, cntl_t* cntl )
 BLIS_INLINE void bli_gemm_var_cntl_set_nr( dim_t nr, cntl_t* cntl )
 {
 	( ( gemm_var_cntl_t* ) cntl )->nr = nr / ( ( gemm_var_cntl_t* ) cntl )->nr_scale;
+}
+
+BLIS_INLINE void bli_gemm_var_cntl_set_comp_dt( num_t dt, const cntl_t* cntl )
+{
+	( ( gemm_var_cntl_t* ) cntl )->dt_comp = dt;
 }
 
 // -----------------------------------------------------------------------------

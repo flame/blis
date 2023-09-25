@@ -46,16 +46,17 @@ void bli_packm_blk_var1
      )
 {
 	// Extract various fields from the control tree.
-	pack_t schema  = bli_packm_def_cntl_pack_schema( cntl );
-	bool   invdiag = bli_packm_def_cntl_does_invert_diag( cntl );
-	bool   revifup = bli_packm_def_cntl_rev_iter_if_upper( cntl );
-	bool   reviflo = bli_packm_def_cntl_rev_iter_if_lower( cntl );
+	pack_t schema    = bli_packm_def_cntl_pack_schema( cntl );
+	bool   invdiag   = bli_packm_def_cntl_does_invert_diag( cntl );
+	bool   revifup   = bli_packm_def_cntl_rev_iter_if_upper( cntl );
+	bool   reviflo   = bli_packm_def_cntl_rev_iter_if_lower( cntl );
+	num_t  dt_p      = bli_packm_def_cntl_target_dt( cntl );
 
 	// Every thread initializes p and determines the size of memory block
 	// needed (which gets embedded into the otherwise "blank" mem_t entry
 	// in the control tree node). Return early if no packing is required.
 	// If the requested size is zero, then we don't need to do any allocation.
-	siz_t size_p = bli_packm_init( c, p, cntl );
+	siz_t size_p = bli_packm_init( dt_p, c, p, cntl );
 	if ( size_p == 0 )
 		return;
 
@@ -71,8 +72,6 @@ void bli_packm_blk_var1
 
 	num_t   dt_c           = bli_obj_dt( c );
 	dim_t   dt_c_size      = bli_dt_size( dt_c );
-
-	num_t   dt_p           = bli_obj_dt( p );
 	dim_t   dt_p_size      = bli_dt_size( dt_p );
 
 	struc_t strucc         = bli_obj_struc( c );
