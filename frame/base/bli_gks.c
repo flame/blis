@@ -165,6 +165,16 @@ int bli_gks_init( void )
 #endif
 
 		// -- ARM-NEON (4 pipes x 128-bit vectors) --
+#ifdef BLIS_CONFIG_ALTRAMAX
+		bli_gks_register_cntx( BLIS_ARCH_ALTRAMAX,    bli_cntx_init_altramax,
+		                                              bli_cntx_init_altramax_ref,
+		                                              bli_cntx_init_altramax_ind );
+#endif
+#ifdef BLIS_CONFIG_ALTRA
+		bli_gks_register_cntx( BLIS_ARCH_ALTRA,       bli_cntx_init_altra,
+		                                              bli_cntx_init_altra_ref,
+		                                              bli_cntx_init_altra_ind );
+#endif
 #ifdef BLIS_CONFIG_FIRESTORM
 		bli_gks_register_cntx( BLIS_ARCH_FIRESTORM,   bli_cntx_init_firestorm,
 		                                              bli_cntx_init_firestorm_ref,
