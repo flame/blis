@@ -189,6 +189,33 @@ GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen_asm_6x16m )
 GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen_asm_6x8m )
 GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen_asm_6x4m )
 GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen_asm_6x2m )
+//gemmsup_rv (mkernel in m dim) for mask load/store
+GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen_asm_6x16m_mask )
+GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen_asm_6x8m_mask )
+GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen_asm_6x4m_mask )
+GEMMSUP_KER_PROT( float,   s, bli_sgemmsup_rv_zen_asm_6x8m )
+GEMMSUP_KER_PROT( float,   s, bli_sgemmsup_rv_zen_asm_6x4m )
+GEMMSUP_KER_PROT( float,   s, bli_sgemmsup_rv_zen_asm_6x2m )
+
+//gemmsup_rv (mkernel in m dim) for fringe case
+GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen_asm_1x16_mask )
+GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen_asm_2x16_mask )
+GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen_asm_3x16_mask )
+GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen_asm_4x16_mask )
+GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen_asm_5x16_mask )
+
+GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen_asm_1x8_mask )
+GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen_asm_2x8_mask )
+GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen_asm_3x8_mask )
+GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen_asm_4x8_mask )
+GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen_asm_5x8_mask )
+
+GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen_asm_1x4_mask )
+GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen_asm_2x4_mask )
+GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen_asm_3x4_mask )
+GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen_asm_4x4_mask )
+GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen_asm_5x4_mask )
+
 // gemmsup_rv (mkernel in n dim)
 
 GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen_asm_6x16n )
