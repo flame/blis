@@ -135,15 +135,16 @@ void libblis_test_thread_decorator( test_params_t* params, test_ops_t* ops )
 	err_t r_val;
 
 #ifdef BLIS_ENABLE_HPX
+	size_t nt = ( size_t )params->n_app_threads;
 
-	size_t tdata_size = ( size_t )params->n_app_threads *
+	size_t tdata_size = ( size_t )nt *
 	                    ( size_t )sizeof( thread_data_t );
 	thread_data_t* tdata = bli_malloc_user( tdata_size, &r_val );
 
 	tdata->params  = params;
 	tdata->ops     = ops;
 	tdata->nt      = nt;
-	tdata->id      = 1;
+	tdata->id      = 0;
 	tdata->xc      = 0;
 
 	// Walk through all test modules.
