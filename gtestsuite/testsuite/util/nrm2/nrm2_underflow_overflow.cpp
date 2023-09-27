@@ -69,6 +69,99 @@ TYPED_TEST(OUT_nrm2, zeroFP_vectorized) {
     computediff<RT>(0, norm);
 }
 
+/*
+    Adding a type-parameterized test to check for
+    overflow and underflow handling with multiple threads
+    in case of dnrm2 and dznrm2. Can also be used if snrm2
+    and scnrm2 are multithreaded.
+*/
+
+// Checking only for overflow, based on the threshold
+TYPED_TEST( OUT_nrm2, OFlow_MT ) {
+    using T = TypeParam;
+    using RT = typename testinghelpers::type_info<T>::real_type;
+    gtint_t n = 2950000;
+    std::vector<T> x(n, T{1.0}); // A normal value
+    RT bigval;
+    if constexpr ( std::is_same<RT, float>::value )
+    {
+        bigval = powf( ( float )FLT_RADIX, floorf( ( FLT_MAX_EXP - 23)  * 0.5f ) ) * ( 1.0f + FLT_EPSILON );
+    }
+    else
+    {
+        bigval = pow( ( double )FLT_RADIX, floor( ( DBL_MAX_EXP - 52)  * 0.5 ) ) * ( 1.0 + DBL_EPSILON );
+    }
+
+    // Set the threshold for the errors:
+    double thresh = 2*testinghelpers::getEpsilon<T>();
+    x[1000] = T{ bigval };
+    x[50000] = T{ bigval };
+    x[151001] = T{ bigval };
+    x[2949999] = T{ bigval };
+
+    RT norm = nrm2<T>( n, x.data(), 1 );
+    RT ref_norm = testinghelpers::ref_nrm2<T>( n, x.data(), 1 );
+    computediff<RT>( norm, ref_norm, thresh );
+}
+
+// Checking only for underflow, based on the threshold
+TYPED_TEST( OUT_nrm2, UFlow_MT ) {
+    using T = TypeParam;
+    using RT = typename testinghelpers::type_info<T>::real_type;
+    gtint_t n = 2950000;
+    std::vector<T> x(n, T{1.0}); // A normal value
+    RT smlval;
+    if constexpr ( std::is_same<RT, float>::value )
+    {
+        smlval = powf( ( float )FLT_RADIX, ceilf( ( FLT_MIN_EXP - 1 )  * 0.5f ) ) * ( 1.0f - FLT_EPSILON );
+    }
+    else
+    {
+        smlval = pow( ( double )FLT_RADIX, ceil( ( DBL_MIN_EXP - 1 )  * 0.5 ) ) * ( 1.0 - DBL_EPSILON );
+    }
+
+    // Set the threshold for the errors:
+    double thresh = 2*testinghelpers::getEpsilon<T>();
+    x[1000] = T{ smlval };
+    x[50000] = T{ smlval };
+    x[151001] = T{ smlval };
+    x[2949999] = T{ smlval };
+
+    RT norm = nrm2<T>( n, x.data(), 1 );
+    RT ref_norm = testinghelpers::ref_nrm2<T>( n, x.data(), 1 );
+    computediff<RT>( norm, ref_norm, thresh );
+}
+
+// Checking for both overflow and underflow, based on the thresholds
+TYPED_TEST( OUT_nrm2, OUFlow_MT ) {
+    using T = TypeParam;
+    using RT = typename testinghelpers::type_info<T>::real_type;
+    gtint_t n = 2950000;
+    std::vector<T> x(n, T{1.0}); // A normal value
+    RT bigval, smlval;
+    if constexpr ( std::is_same<RT, float>::value )
+    {
+        bigval = powf( ( float )FLT_RADIX, floorf( ( FLT_MAX_EXP - 23)  * 0.5f ) ) * ( 1.0f + FLT_EPSILON );
+        smlval = powf( ( float )FLT_RADIX, ceilf( ( FLT_MIN_EXP - 1 )  * 0.5f ) ) * ( 1.0f - FLT_EPSILON );
+    }
+    else
+    {
+        bigval = pow( ( double )FLT_RADIX, floor( ( DBL_MAX_EXP - 52)  * 0.5 ) ) * ( 1.0 + DBL_EPSILON );
+        smlval = pow( ( double )FLT_RADIX, ceil( ( DBL_MIN_EXP - 1 )  * 0.5 ) ) * ( 1.0 - DBL_EPSILON );
+    }
+
+    // Set the threshold for the errors:
+    double thresh = 2*testinghelpers::getEpsilon<T>();
+    x[1000] = T{ smlval };
+    x[50000] = T{ bigval };
+    x[151001] = T{ bigval };
+    x[2949999] = T{ smlval };
+
+    RT norm = nrm2<T>( n, x.data(), 1 );
+    RT ref_norm = testinghelpers::ref_nrm2<T>( n, x.data(), 1 );
+    computediff<RT>( norm, ref_norm, thresh );
+}
+
 // Specific test case used by an ISV.
 // Checks for overflow.
 TEST(dnrm2, largeDouble) {

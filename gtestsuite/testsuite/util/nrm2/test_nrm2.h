@@ -80,9 +80,9 @@ void test_nrm2( gtint_t n, gtint_t incx, gtint_t i, T iexval, gtint_t j = 0, T j
     //----------------------------------------------------------
     std::vector<T> x = testinghelpers::get_random_vector<T>(-10, 10, n, incx);
     // Initialize ith element of vector x to iexval.
-    x[i*incx] = iexval;
+    x[i*std::abs(incx)] = iexval;
     // Initialize jth element of vector x to jexval.
-    x[j*incx] = jexval;
+    x[j*std::abs(incx)] = jexval;
     //----------------------------------------------------------
     //    Call reference implementation to get ref results.
     //----------------------------------------------------------

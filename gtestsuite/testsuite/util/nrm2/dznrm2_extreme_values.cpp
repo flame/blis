@@ -119,7 +119,7 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(gtint_t(2)),
             // stride size for x
             ::testing::Values(gtint_t(1)),
-            // i : index of x that has value iexval                   
+            // i : index of x that has value iexval
             ::testing::Values(0),
             // iexval
             ::testing::Values(dcomplex{NaN, 1.0}, dcomplex{Inf, 9.0}, dcomplex{-1.0, -Inf}, dcomplex{2.0, NaN}, dcomplex{NaN, Inf}, dcomplex{Inf, NaN}),
@@ -137,7 +137,7 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(gtint_t(4)),
             // stride size for x
             ::testing::Values(gtint_t(1)),
-            // i : index of x that has value iexval                   
+            // i : index of x that has value iexval
             ::testing::Values(1),
             // iexval
             ::testing::Values(dcomplex{NaN, 1.0}, dcomplex{Inf, 9.0}, dcomplex{-1.0, -Inf}, dcomplex{2.0, NaN}, dcomplex{NaN, Inf}, dcomplex{Inf, NaN}),
@@ -157,7 +157,7 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(gtint_t(6)),
             // stride size for x
             ::testing::Values(gtint_t(1)),
-            // i : index of x that has value iexval                   
+            // i : index of x that has value iexval
             ::testing::Values(4),
             // iexval
             ::testing::Values(dcomplex{NaN, 1.0}, dcomplex{Inf, 9.0}, dcomplex{-1.0, -Inf}, dcomplex{2.0, NaN}, dcomplex{NaN, Inf}, dcomplex{Inf, NaN}),
@@ -167,7 +167,7 @@ INSTANTIATE_TEST_SUITE_P(
         ::dznrm2_TestPrint()
     );
 
-// Now let's check the combination of a vectorized path and 
+// Now let's check the combination of a vectorized path and
 // the scalar path, by putting an extreme value in each
 // to check that the checks are integrated correctly.
 INSTANTIATE_TEST_SUITE_P(
@@ -178,7 +178,7 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(gtint_t(7)),
             // stride size for x
             ::testing::Values(gtint_t(1)),
-            // i : index of x that has value iexval                   
+            // i : index of x that has value iexval
             ::testing::Values(2),
             // iexval
             ::testing::Values(dcomplex{NaN, 1.0}, dcomplex{Inf, 9.0}, dcomplex{-1.0, -Inf}, dcomplex{2.0, NaN}, dcomplex{NaN, Inf}, dcomplex{Inf, NaN}),
@@ -188,3 +188,77 @@ INSTANTIATE_TEST_SUITE_P(
         ::dznrm2_TestPrint()
     );
 
+// Mutlthreading Unit Tester
+/*
+    The following instantiator has data points that would suffice
+    the extreme value testing with 64 threads.
+
+    Sizes 128 and 129 ensure that each thread gets size 2, with
+    the first thread dealing with fringe case also, if required.
+
+    Sizes 256, 257 and 259 ensure that each thread gets size 4, with
+    the first two threads dealing wtih extra AVX and SSE cases also,
+    if required.
+
+    Sizes from 384 to 389 ensure that each thread gets size 6, with
+    the first few threads dealing with extra AVX and SSE cases if needed.
+
+    NOTE : Extreme values are induced at indices that are valid
+           for all the listed sizes in the instantiator.
+
+    Non-unit strides are also tested, since they might get packed
+*/
+INSTANTIATE_TEST_SUITE_P(
+        EVT_MT_Unit_Tester,
+        dznrm2_EVT,
+        ::testing::Combine(
+            // m size of vector
+            ::testing::Values(gtint_t(128),
+                              gtint_t(129),
+                              gtint_t(256),
+                              gtint_t(257),
+                              gtint_t(259),
+                              gtint_t(384),
+                              gtint_t(385),
+                              gtint_t(386),
+                              gtint_t(387),
+                              gtint_t(388),
+                              gtint_t(389)
+            ),
+            // stride size for x
+            ::testing::Values(gtint_t(1), gtint_t(3)),
+            // i : index of x that has value iexval
+            ::testing::Values(2, 17, 65, 110),
+            // iexval
+            ::testing::Values(dcomplex{NaN, 1.0}, dcomplex{Inf, 9.0}, dcomplex{-1.0, -Inf}, dcomplex{2.0, NaN}, dcomplex{NaN, Inf}, dcomplex{Inf, NaN}),
+            ::testing::Values(6, 25, 64, 127),
+            ::testing::Values(dcomplex{NaN, 1.0}, dcomplex{Inf, 9.0}, dcomplex{-1.0, -Inf}, dcomplex{2.0, NaN})
+        ),
+        ::dznrm2_TestPrint()
+    );
+
+// Instantiator if AOCL_DYNAMIC is enabled
+/*
+  The instantiator here checks for correctness of
+  the compute with sizes large enough to bypass
+  the thread setting logic with AOCL_DYNAMIC enabled
+*/
+INSTANTIATE_TEST_SUITE_P(
+        EVT_MT_AOCL_DYNAMIC,
+        dznrm2_EVT,
+        ::testing::Combine(
+            // m size of vector
+            ::testing::Values(gtint_t(1530000),
+                              gtint_t(1530001)
+            ),
+            // stride size for x
+            ::testing::Values(gtint_t(1), gtint_t(5)),
+            // i : index of x that has value iexval
+            ::testing::Values(800000, 1000000),
+            // iexval
+            ::testing::Values(dcomplex{NaN, Inf}, dcomplex{-Inf, NaN}, dcomplex{Inf, 0.0}),
+            ::testing::Values(1100000, 1500000),
+            ::testing::Values(dcomplex{NaN, Inf}, dcomplex{-Inf, NaN}, dcomplex{Inf, 0.0})
+        ),
+        ::dznrm2_TestPrint()
+    );

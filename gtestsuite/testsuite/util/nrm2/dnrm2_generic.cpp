@@ -9,14 +9,14 @@
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
    met:
-	- Redistributions of source code must retain the above copyright
-	  notice, this list of conditions and the following disclaimer.
-	- Redistributions in binary form must reproduce the above copyright
-	  notice, this list of conditions and the following disclaimer in the
-	  documentation and/or other materials provided with the distribution.
-	- Neither the name(s) of the copyright holder(s) nor the names of its
-	  contributors may be used to endorse or promote products derived
-	  from this software without specific prior written permission.
+    - Redistributions of source code must retain the above copyright
+      notice, this list of conditions and the following disclaimer.
+    - Redistributions in binary form must reproduce the above copyright
+      notice, this list of conditions and the following disclaimer in the
+      documentation and/or other materials provided with the distribution.
+    - Neither the name(s) of the copyright holder(s) nor the names of its
+      contributors may be used to endorse or promote products derived
+      from this software without specific prior written permission.
 
    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
    "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -87,13 +87,14 @@ public:
  *      - for-loop for multiples of 4 (F4)
  * - scalar path for n<=4 (S)
 */
+
 INSTANTIATE_TEST_SUITE_P(
-        AT,
+        AT_1T,
         dnrm2Test,
         ::testing::Combine(
             // m size of vector
             ::testing::Values(gtint_t(1),  // trivial case n=1
-                              gtint_t(3),  // will only go through S
+                              gtint_t(3),  // will go through SSE and scalar
                               gtint_t(8),  // 1*8 - will only go through F8
                               gtint_t(24), // 3*8 - will go through F8
                               gtint_t(34), // 4*8 + 2 - will go through F8 & S
@@ -105,11 +106,87 @@ INSTANTIATE_TEST_SUITE_P(
                               gtint_t(217)
             ),
             // stride size for x
-            ::testing::Values(gtint_t(1), gtint_t(4)
+            ::testing::Values(gtint_t(1), gtint_t(3)
 #ifndef TEST_BLIS_TYPED
-            , gtint_t(-1), gtint_t(-5)
+            , gtint_t(-1), gtint_t(-7)
 #endif
-        )                                                                    // stride size for x
+        )
+        ),
+        ::dnrm2TestPrint()
+    );
+
+// Multithreading unit tester
+/*
+    NOTE : The following instantiator is the most useful if BLIS
+           configured with aocl-dynamic disabled,  since then it
+           would be sufficient to verify functionality upto 64
+           threads.
+
+    The following instantiator has data points that would suffice
+    the extreme value testing with <= 64 threads.
+
+    Sizes from 256 to 259 ensure that each thread gets a minimum
+    size of 4, with some sizes inducing fringe cases.
+
+    Sizes from 512 to 515 ensure that each thread gets a minimum
+    size of 8, with some sizes inducing fringe cases.
+
+    Sizes from 768 to 771 ensure that each thread gets a minimum
+    size of 12( i.e 8-block loop + 4-block loop), with some sizes
+    inducing fringe cases.
+
+    Non-unit strides are also tested, since they might get packed.
+*/
+INSTANTIATE_TEST_SUITE_P(
+        AT_MT_Unit_Tester,
+        dnrm2Test,
+        ::testing::Combine(
+            // m size of vector
+            ::testing::Values(gtint_t(256),
+                              gtint_t(257),
+                              gtint_t(258),
+                              gtint_t(259),
+                              gtint_t(512),
+                              gtint_t(513),
+                              gtint_t(514),
+                              gtint_t(515),
+                              gtint_t(768),
+                              gtint_t(769),
+                              gtint_t(770),
+                              gtint_t(771)
+            ),
+            // stride size for x
+            ::testing::Values(gtint_t(1), gtint_t(3)
+#ifndef TEST_BLIS_TYPED
+            , gtint_t(-1), gtint_t(-7)
+#endif
+        )
+        ),
+        ::dnrm2TestPrint()
+    );
+
+// Instantiator if AOCL_DYNAMIC is enabled
+/*
+  The instantiator here checks for correctness of
+  the compute with sizes large enough to bypass
+  the thread setting logic with AOCL_DYNAMIC enabled
+*/
+INSTANTIATE_TEST_SUITE_P(
+        AT_MT_AOCL_DYNAMIC,
+        dnrm2Test,
+        ::testing::Combine(
+            // m size of vector
+            ::testing::Values(gtint_t(2950000),
+                              gtint_t(2950001),
+                              gtint_t(2950002),
+                              gtint_t(2950003)
+            ),
+            // stride size for x
+            ::testing::Values(gtint_t(1), gtint_t(3)
+#ifndef TEST_BLIS_TYPED
+            , gtint_t(-1), gtint_t(-7)
+#endif
+        )
         ),
         ::dnrm2TestPrint()
     );

@@ -120,7 +120,7 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(gtint_t(3)),
             // stride size for x
             ::testing::Values(gtint_t(1)),
-            // i : index of x that has value iexval                   
+            // i : index of x that has value iexval
             ::testing::Values(0),
             // iexval
             ::testing::Values(NaN, Inf, -Inf),
@@ -138,7 +138,7 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(gtint_t(8)),
             // stride size for x
             ::testing::Values(gtint_t(1)),
-            // i : index of x that has value iexval                   
+            // i : index of x that has value iexval
             ::testing::Values(3),
             // iexval
             ::testing::Values(NaN, Inf, -Inf),
@@ -158,7 +158,7 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(gtint_t(12)),
             // stride size for x
             ::testing::Values(gtint_t(1)),
-            // i : index of x that has value iexval                   
+            // i : index of x that has value iexval
             ::testing::Values(9),
             // iexval
             ::testing::Values(NaN, Inf, -Inf),
@@ -168,7 +168,7 @@ INSTANTIATE_TEST_SUITE_P(
         ::dnrm2_TestPrint()
     );
 
-// Now let's check the combination of a vectorized path and 
+// Now let's check the combination of a vectorized path and
 // the scalar path, by putting an extreme value in each
 // to check that the checks are integrated correctly.
 INSTANTIATE_TEST_SUITE_P(
@@ -179,7 +179,7 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(gtint_t(10)),
             // stride size for x
             ::testing::Values(gtint_t(1)),
-            // i : index of x that has value iexval                   
+            // i : index of x that has value iexval
             ::testing::Values(5),
             // iexval
             ::testing::Values(NaN, Inf, -Inf),
@@ -189,3 +189,78 @@ INSTANTIATE_TEST_SUITE_P(
         ::dnrm2_TestPrint()
     );
 
+// Multithreading unit tester
+/*
+    The following instantiator has data points that would suffice
+    the unit testing with <= 64 threads.
+
+    Sizes from 256 to 259 ensure that each thread gets a minimum
+    size of 4, with some sizes inducing fringe cases.
+
+    Sizes from 512 to 515 ensure that each thread gets a minimum
+    size of 8, with some sizes inducing fringe cases.
+
+    Sizes from 768 to 771 ensure that each thread gets a minimum
+    size of 12, with some sizes inducing fringe cases.
+
+    NOTE : Extreme values are induced at indices that are valid
+           for all the listed sizes in the instantiator.
+
+    Non-unit strides are also tested, since they might get packed.
+*/
+INSTANTIATE_TEST_SUITE_P(
+        EVT_MT_Unit_Tester,
+        dnrm2_EVT,
+        ::testing::Combine(
+            // m size of vector
+            ::testing::Values(gtint_t(256),
+                              gtint_t(257),
+                              gtint_t(258),
+                              gtint_t(259),
+                              gtint_t(512),
+                              gtint_t(513),
+                              gtint_t(514),
+                              gtint_t(515),
+                              gtint_t(768),
+                              gtint_t(769),
+                              gtint_t(770),
+                              gtint_t(771)),
+            // stride size for x
+            ::testing::Values(gtint_t(1), gtint_t(5)),
+            // i : index of x that has value iexval
+            ::testing::Values(0, 5, 100, 255),
+            // iexval
+            ::testing::Values(NaN, Inf, -Inf),
+            ::testing::Values(4, 17, 125, 201),
+            ::testing::Values(1.0, NaN, Inf, -Inf)
+        ),
+        ::dnrm2_TestPrint()
+    );
+
+// Instantiator if AOCL_DYNAMIC is enabled
+/*
+  The instantiator here checks for correctness of
+  the compute with sizes large enough to bypass
+  the thread setting logic with AOCL_DYNAMIC enabled
+*/
+INSTANTIATE_TEST_SUITE_P(
+        EVT_MT_AOCL_DYNAMIC,
+        dnrm2_EVT,
+        ::testing::Combine(
+            // m size of vector
+            ::testing::Values(gtint_t(2950000),
+                              gtint_t(2950001),
+                              gtint_t(2950002),
+                              gtint_t(2950003)
+            ),
+            // stride size for x
+            ::testing::Values(gtint_t(1), gtint_t(5)),
+            // i : index of x that has value iexval
+            ::testing::Values(1000000, 2000000),
+            // iexval
+            ::testing::Values(NaN, Inf),
+            ::testing::Values(1500000, 2500000),
+            ::testing::Values(-Inf, NaN)
+        ),
+        ::dnrm2_TestPrint()
+    );

@@ -203,6 +203,17 @@ void bli_thread_vector_partition
        dim_t  thread_id
      );
 
+void bli_normfv_thread_partition
+	 (
+		dim_t 	n_elem,
+		dim_t 	t_count,
+		dim_t* 	start,
+		dim_t* 	compute_len,
+		dim_t  	block_size,
+		dim_t 	incx,
+		dim_t 	thread_id
+	 );
+
 // -----------------------------------------------------------------------------
 
 dim_t bli_gcd( dim_t x, dim_t y );

@@ -2119,3 +2119,91 @@ void bli_thread_vector_partition
 		}
 	}
 }
+
+/*
+	Functionality :
+	--------------
+	This function calculated the amount of work the calling thread is supposed
+	to perform on a vector, in case of the norm api.
+
+	Function signature
+	-------------------
+
+	This function takes the following input:
+
+	* n_elem  	  - Number of element in the vector
+	* t_count 	  - Number of threads in the group
+	* start       - Vector start index (where the thread should start its processing)
+	* compute_len - Size of the chunk it needs to process
+	* block_size  - The factor by which the size should be a multiple for the AVX-2
+					code-section alone to be executed in the kernel.
+	* incx 		  - Increment of the vector
+	* thread_id   - ID of the thread
+
+	Exception
+	----------
+
+	None
+*/
+void bli_normfv_thread_partition
+	 (
+		dim_t 	n_elem,
+		dim_t 	t_count,
+		dim_t* 	start,
+		dim_t* 	compute_len,
+		dim_t  	block_size,
+		dim_t 	incx,
+		dim_t 	thread_id
+	 )
+{
+	dim_t job_per_thread = n_elem / t_count;
+	dim_t job_rem = n_elem % t_count;
+	dim_t job_rem_per_thread = job_per_thread % block_size;
+	dim_t thread_lim_excess = 0;
+
+	// Code-section to make job_per_thread as its nearset multiple of block_size
+	if( job_rem_per_thread )
+	{
+		job_rem += t_count * job_rem_per_thread;
+		job_per_thread -= job_rem_per_thread;
+	}
+
+	// Limit for the thread index, until which each thread gets block_size more elements
+	thread_lim_excess = job_rem / block_size;
+
+	// Add block_size to a thread's job size if its thread_id is within the thread limit
+	if ( thread_id < thread_lim_excess )
+	{
+		job_per_thread += block_size;
+		*start = thread_id * job_per_thread * incx;
+	}
+
+	// The last thread that has to deal with fringe cases, if they are present
+	else if ( thread_id == ( t_count - 1 ) )
+	{
+		*start = ( thread_lim_excess * block_size + thread_id * job_per_thread ) * incx;
+		job_per_thread += job_rem % block_size;
+	}
+
+	// Job allocation to the remaining threads
+	else
+	{
+		*start = ( thread_lim_excess * block_size + thread_id * job_per_thread ) * incx;
+	}
+
+	/*
+		As an example, let us consider the case where n_elem is 57 and t_count is 4.
+		Let us take block_size to be 4.
+
+		Thread 0 - 16
+		Thread 1 - 16
+		Thread 2 - 12
+		Thread 3 - 13
+
+		Here, only thread-3(last thread) has to deal with fringe cases. Every other thread has their
+		job size being the nearest upper/lower multiple of 4(block_size). Thus, the maximum
+		job difference between any two threads is 4(block_size).
+	*/
+
+	*compute_len = job_per_thread;
+}

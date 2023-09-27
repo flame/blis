@@ -71,3 +71,26 @@ TYPED_TEST(nrm2_EIC, zero_incx_vectorized) {
     RT ref_norm = testinghelpers::ref_nrm2<T>(n, x.data(), incx);
     computediff<RT>(blis_norm, ref_norm);
 }
+
+/*
+    The following test is specific to dnrm2 and dznrm2 apis.
+    In case of multithreading, each thread will calculate its
+    norm based on the data it operates on. All these norms will
+    be reduced post the parallel region.
+*/
+TYPED_TEST( nrm2_EIC, zero_incx_MT ) {
+    using T = TypeParam;
+    using RT = typename testinghelpers::type_info<T>::real_type;
+    gtint_t n = 2950000;
+    gtint_t incx = 0;
+    std::vector<T> x(n);
+    for (auto &xi : x)
+        testinghelpers::initone(xi);
+    // For incx=0, nrm2 iterates through the first element n-times.
+    // So, we initialize x[0] with a different value than the rest
+    // of the elements.
+    x[0] = T{10.0}*x[0];
+    RT blis_norm = nrm2<T>(n, x.data(), incx);
+    RT ref_norm = testinghelpers::ref_nrm2<T>(n, x.data(), incx);
+    computediff<RT>(blis_norm, ref_norm);
+}
