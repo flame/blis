@@ -38,5 +38,7 @@ BLIS_EXPORT_BLAS int PASTEF77(s,rot)(const bla_integer *n, bla_real *sx, const b
 BLIS_EXPORT_BLAS int PASTEF77(d,rot)(const bla_integer *n, bla_double *dx, const bla_integer *incx, bla_double *dy, const bla_integer *incy, const bla_double *c__, const bla_double *s);
 BLIS_EXPORT_BLAS int PASTEF77(cs,rot)(const bla_integer *n, bla_scomplex *cx, const bla_integer *incx, bla_scomplex *cy, const bla_integer *incy, const bla_real *c__, const bla_real *s);
 BLIS_EXPORT_BLAS int PASTEF77(zd,rot)(const bla_integer *n, bla_dcomplex *zx, const bla_integer *incx, bla_dcomplex *zy, const bla_integer *incy, const bla_double *c__, const bla_double *s);
+BLIS_EXPORT_BLAS int PASTEF77(c,rot)(const bla_integer *n, bla_scomplex *cx, const bla_integer *incx, bla_scomplex *cy, const bla_integer *incy, const bla_real *c__, const bla_scomplex *s);
+BLIS_EXPORT_BLAS int PASTEF77(z,rot)(const bla_integer *n, bla_dcomplex *cx, const bla_integer *incx, bla_dcomplex *cy, const bla_integer *incy, const bla_double *c__, const bla_dcomplex *s);
 
 #endif
