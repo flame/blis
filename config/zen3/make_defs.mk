@@ -1,6 +1,6 @@
 #
 #
-#  BLIS    
+#  BLIS
 #  An object-based framework for developing high-performance BLAS-like
 #  libraries.
 #
@@ -35,7 +35,7 @@
 
 # Declare the name of the current configuration and add it to the
 # running list of configurations included by common.mk.
-THIS_CONFIG    := zen3 
+THIS_CONFIG    := zen3
 #CONFIGS_INCL   += $(THIS_CONFIG)
 
 #
@@ -65,8 +65,8 @@ endif
 # they make explicit use of the rbp register.
 CKOPTFLAGS         := $(COPTFLAGS) -fomit-frame-pointer
 CROPTFLAGS         := $(CKOPTFLAGS)
-CKVECFLAGS         := -mavx2 -mfma -mfpmath=sse
-CRVECFLAGS         := $(CKVECFLAGS) -funsafe-math-optimizations -ffp-contract=fast
+CKVECFLAGS         := -mavx2 -mfma
+CRVECFLAGS         := $(CKVECFLAGS)
 ifeq ($(CC_VENDOR),gcc)
   ifeq ($(GCC_OT_9_1_0),yes)  # gcc versions older than 9.1.
     CVECFLAGS_VER  := -march=znver1 -mno-avx256-split-unaligned-store
@@ -77,6 +77,8 @@ ifeq ($(CC_VENDOR),gcc)
     CVECFLAGS_VER  := -march=znver3
   endif
   endif
+  CKVECFLAGS       += -mfpmath=sse
+  CRVECFLAGS       += -funsafe-math-optimizations -ffp-contract=fast
 else
 ifeq ($(CC_VENDOR),clang)
   ifeq ($(CLANG_OT_9_0_0),yes)  # clang versions older than 9.0.
@@ -92,6 +94,8 @@ ifeq ($(CC_VENDOR),clang)
   endif
   endif
   endif
+  CKVECFLAGS       += -mfpmath=sse
+  CRVECFLAGS       += -funsafe-math-optimizations -ffp-contract=fast
 else
 ifeq ($(CC_VENDOR),aocc)
   ifeq ($(AOCC_OT_2_0_0),yes)   # aocc versions older than 2.0.
@@ -103,8 +107,14 @@ ifeq ($(CC_VENDOR),aocc)
     CVECFLAGS_VER  := -march=znver3
   endif
   endif
+  CKVECFLAGS       += -mfpmath=sse
+  CRVECFLAGS       += -funsafe-math-optimizations -ffp-contract=fast
+ifeq ($(CC_VENDOR),nvc)
+  CVECFLAGS_VER    := -march=znver3
+  CRVECFLAGS       += -fast
 else
-  $(error gcc, clang, or aocc is required for this configuration.)
+  $(error gcc, clang, nvc or aocc is required for this configuration.)
+endif
 endif
 endif
 endif
@@ -114,4 +124,3 @@ CRVECFLAGS         += $(CVECFLAGS_VER)
 # Store all of the variables here to new variables containing the
 # configuration name.
 $(eval $(call store-make-defs,$(THIS_CONFIG)))
-
