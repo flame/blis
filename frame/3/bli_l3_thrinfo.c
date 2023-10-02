@@ -44,16 +44,14 @@ thrinfo_t* bli_l3_thrinfo_create
        const cntl_t*     cntl
      )
 {
-	pool_t* pool = NULL;
-	if ( array != NULL )
-		pool = bli_apool_array_elem( id, array );
+	pool_t* sba_pool = bli_sba_array_elem( id, array );
 
 	// Create the root thrinfo_t node.
 	thrinfo_t* root = bli_thrinfo_create_root
 	(
 	  gl_comm,
 	  id,
-	  pool,
+	  sba_pool,
 	  bli_pba_query()
 	);
 
@@ -123,7 +121,7 @@ thrinfo_t* bli_l3_sup_thrinfo_create
      (
              dim_t      id,
              thrcomm_t* gl_comm,
-             pool_t*    pool,
+             pool_t*    sba_pool,
        const rntm_t*    rntm
      )
 {
@@ -132,7 +130,7 @@ thrinfo_t* bli_l3_sup_thrinfo_create
 	(
 	  gl_comm,
 	  id,
-	  pool,
+	  sba_pool,
 	  bli_pba_query()
 	);
 
@@ -176,10 +174,10 @@ void bli_l3_sup_thrinfo_update
              thrinfo_t** root
      )
 {
-	thrcomm_t* gl_comm = bli_thrinfo_comm( *root );
-	dim_t      tid     = bli_thrinfo_thread_id( *root );
-	pool_t*    pool    = bli_thrinfo_sba_pool( *root );
-	dim_t      nt      = bli_thrinfo_num_threads( *root );
+	thrcomm_t* gl_comm  = bli_thrinfo_comm( *root );
+	dim_t      tid      = bli_thrinfo_thread_id( *root );
+	pool_t*    sba_pool = bli_thrinfo_sba_pool( *root );
+	dim_t      nt       = bli_thrinfo_num_threads( *root );
 
 	// Return early in single-threaded execution
 	// since the thread control tree may not have been
@@ -187,7 +185,7 @@ void bli_l3_sup_thrinfo_update
 	if ( nt == 1 ) return;
 
 	bli_thrinfo_free( *root );
-	*root = bli_l3_sup_thrinfo_create( tid, gl_comm, pool, rntm );
+	*root = bli_l3_sup_thrinfo_create( tid, gl_comm, sba_pool, rntm );
 }
 
 // -----------------------------------------------------------------------------
