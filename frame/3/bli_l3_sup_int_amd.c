@@ -134,7 +134,7 @@ err_t bli_gemmsup_int
 		  }
 	  }
 
-#if defined(BLIS_FAMILY_ZEN3) || defined(BLIS_FAMILY_AMDZEN)
+#if defined(BLIS_FAMILY_ZEN3) || defined(BLIS_FAMILY_AMDZEN) || defined(BLIS_FAMILY_X86_64)
 
 	  //Enable packing of B matrix for double data type when dims at per
 	  //thread level are above caches and enable packing of A when transA
@@ -212,7 +212,7 @@ err_t bli_gemmsup_int
 		  }
 	  }
 
-#if defined(BLIS_FAMILY_ZEN3) || defined(BLIS_FAMILY_AMDZEN)
+#if defined(BLIS_FAMILY_ZEN3) || defined(BLIS_FAMILY_AMDZEN) || defined(BLIS_FAMILY_X86_64)
 
 	  //Enable packing of B matrix for double data type when dims at per
 	  //thread level are above caches and enable packing of A when transA

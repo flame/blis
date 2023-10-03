@@ -8,7 +8,7 @@
 #
 
 # Processor families.
-x86_64:         intel64 amd64 amd64_legacy
+x86_64:         intel64 amdzen amd64_legacy
 intel64:        skx knl haswell sandybridge penryn generic
 amd64_legacy:   excavator steamroller piledriver bulldozer generic
 amdzen:         zen4 zen3 zen2 zen generic

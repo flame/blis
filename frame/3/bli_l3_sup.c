@@ -107,7 +107,7 @@ err_t bli_gemmsup
     if ( rntm == NULL ) { bli_rntm_init_from_global( &rntm_l ); rntm = &rntm_l; }
     else                { rntm_l = *rntm;                       rntm = &rntm_l; }
 
-#if defined(BLIS_FAMILY_ZEN4) || defined(BLIS_FAMILY_AMDZEN)
+#if defined(BLIS_FAMILY_ZEN4) || defined(BLIS_FAMILY_AMDZEN) || defined(BLIS_FAMILY_X86_64)
 
     if((bli_arch_query_id() == BLIS_ARCH_ZEN4))
     {
