@@ -557,12 +557,17 @@ void bli_snormfv_unb_var1
         rntm_t*  rntm
     )
 {
-    // Early return if n=1.
+    // Early return if n = 1.
     if ( n == 1 )
     {
-        *norm = bli_fabs(*x);
+        *norm = bli_fabs( *x );
+
+        // If the value in x is 0.0, the sign bit gets inverted
+        // Reinvert the sign bit in this case.
+        if ( ( *norm ) == -0.0 ) ( *norm ) = 0.0;
         return;
     }
+
     /* Disable AVX2 codepath.
     if( bli_cpuid_is_avx2fma3_supported() == TRUE )
     {
@@ -611,6 +616,17 @@ void bli_dnormfv_unb_var1
         rntm_t*  rntm
     )
 {
+    // Early return if n = 1.
+    if ( n == 1 )
+    {
+        *norm = bli_fabs( *x );
+
+        // If the value in x is 0.0, the sign bit gets inverted
+        // Reinvert the sign bit in this case.
+        if ( ( *norm ) == -0.0 ) ( *norm ) = 0.0;
+        return;
+    }
+
     arch_t id = bli_arch_query_id();
     switch (id)
     {
