@@ -102,6 +102,12 @@ void test_trsm(  )
     allocate_init_buffer(B , m , n);
     copy_buffer(B, B_ref , m ,n);
 
+    // Make A diagonally dominant to guarantee that the system has a solution.
+    for(int i=0; i<m; i++)
+    {
+        A[i+i*lda] = T{float(m)}*A[i+i*lda];
+    }
+
 #ifdef PRINT
     printmatrix(A, lda ,m,m, (char *)"A");
     printmatrix(B, ldb ,m,n, (char *)"B");
