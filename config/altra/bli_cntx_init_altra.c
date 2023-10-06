@@ -34,6 +34,8 @@
 
 #include "blis.h"
 
+//#define USE_ROWPREF_UKERNEL
+
 void bli_cntx_init_altra( cntx_t* cntx )
 {
 	blksz_t blkszs[ BLIS_NUM_BLKSZS ];
@@ -48,19 +50,32 @@ void bli_cntx_init_altra( cntx_t* cntx )
 	bli_cntx_set_l3_nat_ukrs
 	(
 	  2,
+#ifdef USE_ROWPREF_UKERNEL
+	  BLIS_GEMM_UKR, BLIS_FLOAT,    bli_sgemm_armv8a_asm_12x8r, TRUE,
+	  BLIS_GEMM_UKR, BLIS_DOUBLE,   bli_dgemm_armv8a_asm_8x6r,  TRUE,
+#else
 	  BLIS_GEMM_UKR, BLIS_FLOAT,    bli_sgemm_armv8a_asm_8x12, FALSE,
 	  BLIS_GEMM_UKR, BLIS_DOUBLE,   bli_dgemm_armv8a_asm_6x8,  FALSE,
+#endif
 	  cntx
 	);
 
 	// Initialize level-3 blocksize objects with architecture-specific values.
 	//                                           s      d      c      z
-	bli_blksz_init_easy( &blkszs[ BLIS_MR ],     8,     6,    -1,    -1 );
-	bli_blksz_init_easy( &blkszs[ BLIS_NR ],    12,     8,    -1,    -1 );
-	bli_blksz_init_easy( &blkszs[ BLIS_MC ],   192,   120,    -1,    -1 );
-	bli_blksz_init_easy( &blkszs[ BLIS_KC ],   640,   480,    -1,    -1 ); // Changed d to 480 - LDR
-//      bli_blksz_init_easy( &blkszs[ BLIS_NC ],  3072,  6144,    -1,    -1 ); // Doubled NC
+#ifdef USE_ROWPREF_UKERNEL
+	bli_blksz_init_easy( &blkszs[ BLIS_MR ],     12,     8,    -1,    -1 );
+	bli_blksz_init_easy( &blkszs[ BLIS_NR ],      8,     6,    -1,    -1 );
+	bli_blksz_init_easy( &blkszs[ BLIS_MC ],    192,   120,    -1,    -1 );
+	bli_blksz_init_easy( &blkszs[ BLIS_KC ],    640,   480,    -1,    -1 );
+	bli_blksz_init_easy( &blkszs[ BLIS_NC ],  12288,  8196,    -1,    -1 );
+#else
+	bli_blksz_init_easy( &blkszs[ BLIS_MR ],      8,     6,    -1,    -1 );
+	bli_blksz_init_easy( &blkszs[ BLIS_NR ],     12,     8,    -1,    -1 );
+	bli_blksz_init_easy( &blkszs[ BLIS_MC ],    192,   120,    -1,    -1 );
+	bli_blksz_init_easy( &blkszs[ BLIS_KC ],    640,   480,    -1,    -1 ); // Changed d to 480 - LDR
+//	bli_blksz_init_easy( &blkszs[ BLIS_NC ],   3072,  6144,    -1,    -1 ); // Doubled NC
 	bli_blksz_init_easy( &blkszs[ BLIS_NC ],  12288,  8192,    -1,    -1 ); // Increased NC slightly more
+#endif
 
 	// Update the context with the current architecture's register and cache
 	// blocksizes (and multiples) for native execution.
