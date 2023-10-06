@@ -11,7 +11,7 @@ TYPED_TEST(OUT_nrm2, maxFP_scalar) {
     using T = TypeParam;
     using RT = typename testinghelpers::type_info<T>::real_type;
 
-    RT maxval = std::numeric_limits<RT>::max();
+    RT maxval = (std::numeric_limits<RT>::max)();
     T x = T{maxval};
 
     RT norm = nrm2<T>(1, &x, 1);
@@ -22,7 +22,7 @@ TYPED_TEST(OUT_nrm2, maxFP_vectorized) {
     using RT = typename testinghelpers::type_info<T>::real_type;
     gtint_t n = 64;
     std::vector<T> x(n, T{0});
-    RT maxval = std::numeric_limits<RT>::max();
+    RT maxval = (std::numeric_limits<RT>::max)();
     x[17] = T{maxval};
     RT norm = nrm2<T>(n, x.data(), 1);
     computediff<RT>(maxval, norm);
@@ -33,7 +33,7 @@ TYPED_TEST(OUT_nrm2, minFP_scalar) {
     using T = TypeParam;
     using RT = typename testinghelpers::type_info<T>::real_type;
 
-    RT minval = std::numeric_limits<RT>::min();
+    RT minval = (std::numeric_limits<RT>::min)();
     T x = T{minval};
     RT norm = nrm2<T>(1, &x, 1);
     computediff<RT>(minval, norm);
@@ -43,7 +43,7 @@ TYPED_TEST(OUT_nrm2, minFP_vectorized) {
     using RT = typename testinghelpers::type_info<T>::real_type;
     gtint_t n = 64;
     std::vector<T> x(n, T{0});
-    RT minval = std::numeric_limits<RT>::min();
+    RT minval = (std::numeric_limits<RT>::min)();
     x[17] = T{minval};
     RT norm = nrm2<T>(n, x.data(), 1);
     computediff<RT>(minval, norm);

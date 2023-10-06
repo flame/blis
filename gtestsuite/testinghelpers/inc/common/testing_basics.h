@@ -36,6 +36,7 @@
 
 #include <stdio.h>
 #include <iostream>
+#include <sstream>
 #include "cblas.h"
 #include "common/type_info.h"
 
