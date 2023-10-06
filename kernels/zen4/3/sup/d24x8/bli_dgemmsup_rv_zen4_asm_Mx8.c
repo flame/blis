@@ -3284,13 +3284,21 @@ void bli_dgemmsup_rv_zen4_asm_8x8
 
     // zero out all accumulation registers
     vxorpd(zmm6, zmm6, zmm6)
+    vxorpd(zmm7, zmm7, zmm7)
     vxorpd(zmm8, zmm8, zmm8)
+    vxorpd(zmm9, zmm9, zmm9)
     vxorpd(zmm10, zmm10, zmm10)
+    vxorpd(zmm11, zmm11, zmm11)
     vxorpd(zmm12, zmm12, zmm12)
+    vxorpd(zmm13, zmm13, zmm13)
     vxorpd(zmm14, zmm14, zmm14)
+    vxorpd(zmm15, zmm15, zmm15)
     vxorpd(zmm16, zmm16, zmm16)
+    vxorpd(zmm17, zmm17, zmm17)
     vxorpd(zmm18, zmm18, zmm18)
+    vxorpd(zmm19, zmm19, zmm19)
     vxorpd(zmm20, zmm20, zmm20)
+    vxorpd(zmm21, zmm21, zmm21)
 
     // K is unrolled by 8 to facilitate prefetch of B
     // Assuming B to be col-stored, for each iteration of K,
@@ -3299,6 +3307,21 @@ void bli_dgemmsup_rv_zen4_asm_8x8
     mov(var(k_iter), rsi)                                  // i = k_iter
     sub(imm( 8+TAIL_NITER), rsi)                           // i -= NR + TAIL_NITER
     jle(.PREFETCHLOOP)                                     // jump if i <= 0
+
+    /**
+     * This edge kernel uses two separate vector register bank
+     * to hold fma result.
+     * Once the K loop is completed these two vector register banks
+     * are added together and final result is available in one
+     * register bank.
+     * Here odd iterations uses vector register zmm6,
+     * zmm8, zmm10, zmm12, zmm14, zmm16, zmm18, zmm20 to hold fma result.
+     * While even iterations uses zmm7, zmm9, zmm11
+     * zmm13, zmm15, zmm17, zmm19, zmm21 to hold fma result.
+     * At the end of K loop, these two banks are added together and
+     * final result is available in vector register zmm6,
+     * zmm8, zmm10, zmm12, zmm14, zmm16, zmm18, zmm20
+     */
 
     label(.LOOP1)
 
@@ -3335,22 +3358,22 @@ void bli_dgemmsup_rv_zen4_asm_8x8
         prefetch( 0,mem(r11,r9,1) )                             // prefetch B
         vbroadcastsd( mem(rbx),zmm30 )
         vbroadcastsd( mem(rbx,r9,1),zmm31 )
-        vfmadd231pd( zmm3,zmm30,zmm6 )
+        vfmadd231pd( zmm3,zmm30,zmm7 )
         vbroadcastsd( mem(rbx,r9,2),zmm30 )
-        vfmadd231pd( zmm3,zmm31,zmm8 )
+        vfmadd231pd( zmm3,zmm31,zmm9 )
         vbroadcastsd( mem(rbx,r13,1),zmm31 )
-        vfmadd231pd( zmm3,zmm30,zmm10 )
+        vfmadd231pd( zmm3,zmm30,zmm11 )
         vbroadcastsd( mem(r12),zmm30 )
         add( r8,rbx )                                     // b += rs_b
-        vfmadd231pd( zmm3,zmm31,zmm12 )
+        vfmadd231pd( zmm3,zmm31,zmm13 )
         vbroadcastsd( mem(r12,r9,1),zmm31 )
-        vfmadd231pd( zmm3,zmm30,zmm14 )
+        vfmadd231pd( zmm3,zmm30,zmm15 )
         vbroadcastsd( mem(r12,r9,2),zmm30 )
-        vfmadd231pd( zmm3,zmm31,zmm16 )
+        vfmadd231pd( zmm3,zmm31,zmm17 )
         vbroadcastsd( mem(r12,r13,1),zmm31 )
-        vfmadd231pd( zmm3,zmm30,zmm18 )
+        vfmadd231pd( zmm3,zmm30,zmm19 )
         add( r8,r12 )                                     // second pointer of b += rs_b
-        vfmadd231pd( zmm3,zmm31,zmm20 )
+        vfmadd231pd( zmm3,zmm31,zmm21 )
 
         // ---------------------------------- iteration 3
 
@@ -3383,22 +3406,22 @@ void bli_dgemmsup_rv_zen4_asm_8x8
         prefetch( 0,mem(r11,r13,1) )                             // prefetch B
         vbroadcastsd( mem(rbx),zmm30 )
         vbroadcastsd( mem(rbx,r9,1),zmm31 )
-        vfmadd231pd( zmm3,zmm30,zmm6 )
+        vfmadd231pd( zmm3,zmm30,zmm7 )
         vbroadcastsd( mem(rbx,r9,2),zmm30 )
-        vfmadd231pd( zmm3,zmm31,zmm8 )
+        vfmadd231pd( zmm3,zmm31,zmm9 )
         vbroadcastsd( mem(rbx,r13,1),zmm31 )
-        vfmadd231pd( zmm3,zmm30,zmm10 )
+        vfmadd231pd( zmm3,zmm30,zmm11 )
         vbroadcastsd( mem(r12),zmm30 )
         add( r8,rbx )                                     // b += rs_b
-        vfmadd231pd( zmm3,zmm31,zmm12 )
+        vfmadd231pd( zmm3,zmm31,zmm13 )
         vbroadcastsd( mem(r12,r9,1),zmm31 )
-        vfmadd231pd( zmm3,zmm30,zmm14 )
+        vfmadd231pd( zmm3,zmm30,zmm15 )
         vbroadcastsd( mem(r12,r9,2),zmm30 )
-        vfmadd231pd( zmm3,zmm31,zmm16 )
+        vfmadd231pd( zmm3,zmm31,zmm17 )
         vbroadcastsd( mem(r12,r13,1),zmm31 )
-        vfmadd231pd( zmm3,zmm30,zmm18 )
+        vfmadd231pd( zmm3,zmm30,zmm19 )
         add( r8,r12 )                                     // second pointer of b += rs_b
-        vfmadd231pd( zmm3,zmm31,zmm20 )
+        vfmadd231pd( zmm3,zmm31,zmm21 )
 
         // ---------------------------------- iteration 5
 
@@ -3431,22 +3454,22 @@ void bli_dgemmsup_rv_zen4_asm_8x8
         prefetch( 0,mem(r15,r9,1) )                             // prefetch B
         vbroadcastsd( mem(rbx),zmm30 )
         vbroadcastsd( mem(rbx,r9,1),zmm31 )
-        vfmadd231pd( zmm3,zmm30,zmm6 )
+        vfmadd231pd( zmm3,zmm30,zmm7 )
         vbroadcastsd( mem(rbx,r9,2),zmm30 )
-        vfmadd231pd( zmm3,zmm31,zmm8 )
+        vfmadd231pd( zmm3,zmm31,zmm9 )
         vbroadcastsd( mem(rbx,r13,1),zmm31 )
-        vfmadd231pd( zmm3,zmm30,zmm10 )
+        vfmadd231pd( zmm3,zmm30,zmm11 )
         vbroadcastsd( mem(r12),zmm30 )
         add( r8,rbx )                                     // b += rs_b
-        vfmadd231pd( zmm3,zmm31,zmm12 )
+        vfmadd231pd( zmm3,zmm31,zmm13 )
         vbroadcastsd( mem(r12,r9,1),zmm31 )
-        vfmadd231pd( zmm3,zmm30,zmm14 )
+        vfmadd231pd( zmm3,zmm30,zmm15 )
         vbroadcastsd( mem(r12,r9,2),zmm30 )
-        vfmadd231pd( zmm3,zmm31,zmm16 )
+        vfmadd231pd( zmm3,zmm31,zmm17 )
         vbroadcastsd( mem(r12,r13,1),zmm31 )
-        vfmadd231pd( zmm3,zmm30,zmm18 )
+        vfmadd231pd( zmm3,zmm30,zmm19 )
         add( r8,r12 )                                     // second pointer of b += rs_b
-        vfmadd231pd( zmm3,zmm31,zmm20 )
+        vfmadd231pd( zmm3,zmm31,zmm21 )
 
         // ---------------------------------- iteration 7
 
@@ -3477,22 +3500,22 @@ void bli_dgemmsup_rv_zen4_asm_8x8
         prefetch( 0,mem(r15,r13,1) )                             // prefetch B
         vbroadcastsd( mem(rbx),zmm30 )
         vbroadcastsd( mem(rbx,r9,1),zmm31 )
-        vfmadd231pd( zmm3,zmm30,zmm6 )
+        vfmadd231pd( zmm3,zmm30,zmm7 )
         vbroadcastsd( mem(rbx,r9,2),zmm30 )
-        vfmadd231pd( zmm3,zmm31,zmm8 )
+        vfmadd231pd( zmm3,zmm31,zmm9 )
         vbroadcastsd( mem(rbx,r13,1),zmm31 )
-        vfmadd231pd( zmm3,zmm30,zmm10 )
+        vfmadd231pd( zmm3,zmm30,zmm11 )
         vbroadcastsd( mem(r12),zmm30 )
         add( r8,rbx )                                     // b += rs_b
-        vfmadd231pd( zmm3,zmm31,zmm12 )
+        vfmadd231pd( zmm3,zmm31,zmm13 )
         vbroadcastsd( mem(r12,r9,1),zmm31 )
-        vfmadd231pd( zmm3,zmm30,zmm14 )
+        vfmadd231pd( zmm3,zmm30,zmm15 )
         vbroadcastsd( mem(r12,r9,2),zmm30 )
-        vfmadd231pd( zmm3,zmm31,zmm16 )
+        vfmadd231pd( zmm3,zmm31,zmm17 )
         vbroadcastsd( mem(r12,r13,1),zmm31 )
-        vfmadd231pd( zmm3,zmm30,zmm18 )
+        vfmadd231pd( zmm3,zmm30,zmm19 )
         add( r8,r12 )                                     // second pointer of b += rs_b
-        vfmadd231pd( zmm3,zmm31,zmm20 )
+        vfmadd231pd( zmm3,zmm31,zmm21 )
         lea(mem(r11,r8,8), r11)                            // b_next += 8*rs_b
         lea(mem(r15,r8,8), r15)                            // second pointer to b_next += 8*rs_b
         dec(rsi)                                           // i -= 1
@@ -3536,22 +3559,22 @@ void bli_dgemmsup_rv_zen4_asm_8x8
         prefetch( 0,mem(r11,r9,1) )                             // prefetch B
         vbroadcastsd( mem(rbx),zmm30 )
         vbroadcastsd( mem(rbx,r9,1),zmm31 )
-        vfmadd231pd( zmm3,zmm30,zmm6 )
+        vfmadd231pd( zmm3,zmm30,zmm7 )
         vbroadcastsd( mem(rbx,r9,2),zmm30 )
-        vfmadd231pd( zmm3,zmm31,zmm8 )
+        vfmadd231pd( zmm3,zmm31,zmm9 )
         vbroadcastsd( mem(rbx,r13,1),zmm31 )
-        vfmadd231pd( zmm3,zmm30,zmm10 )
+        vfmadd231pd( zmm3,zmm30,zmm11 )
         vbroadcastsd( mem(r12),zmm30 )
         add( r8,rbx )                                     // b += rs_b
-        vfmadd231pd( zmm3,zmm31,zmm12 )
+        vfmadd231pd( zmm3,zmm31,zmm13 )
         vbroadcastsd( mem(r12,r9,1),zmm31 )
-        vfmadd231pd( zmm3,zmm30,zmm14 )
+        vfmadd231pd( zmm3,zmm30,zmm15 )
         vbroadcastsd( mem(r12,r9,2),zmm30 )
-        vfmadd231pd( zmm3,zmm31,zmm16 )
+        vfmadd231pd( zmm3,zmm31,zmm17 )
         vbroadcastsd( mem(r12,r13,1),zmm31 )
-        vfmadd231pd( zmm3,zmm30,zmm18 )
+        vfmadd231pd( zmm3,zmm30,zmm19 )
         add( r8,r12 )                                     // second pointer of b += rs_b
-        vfmadd231pd( zmm3,zmm31,zmm20 )
+        vfmadd231pd( zmm3,zmm31,zmm21 )
 
         // ---------------------------------- iteration 3
         vmovupd( mem(rax),zmm3 MASK_KZ(2) )                           // load A     // Load A with mask and zero hint
@@ -3582,22 +3605,22 @@ void bli_dgemmsup_rv_zen4_asm_8x8
         prefetch( 0,mem(r11,r13,1) )                             // prefetch B
         vbroadcastsd( mem(rbx),zmm30 )
         vbroadcastsd( mem(rbx,r9,1),zmm31 )
-        vfmadd231pd( zmm3,zmm30,zmm6 )
+        vfmadd231pd( zmm3,zmm30,zmm7 )
         vbroadcastsd( mem(rbx,r9,2),zmm30 )
-        vfmadd231pd( zmm3,zmm31,zmm8 )
+        vfmadd231pd( zmm3,zmm31,zmm9 )
         vbroadcastsd( mem(rbx,r13,1),zmm31 )
-        vfmadd231pd( zmm3,zmm30,zmm10 )
+        vfmadd231pd( zmm3,zmm30,zmm11 )
         vbroadcastsd( mem(r12),zmm30 )
         add( r8,rbx )                                     // b += rs_b
-        vfmadd231pd( zmm3,zmm31,zmm12 )
+        vfmadd231pd( zmm3,zmm31,zmm13 )
         vbroadcastsd( mem(r12,r9,1),zmm31 )
-        vfmadd231pd( zmm3,zmm30,zmm14 )
+        vfmadd231pd( zmm3,zmm30,zmm15 )
         vbroadcastsd( mem(r12,r9,2),zmm30 )
-        vfmadd231pd( zmm3,zmm31,zmm16 )
+        vfmadd231pd( zmm3,zmm31,zmm17 )
         vbroadcastsd( mem(r12,r13,1),zmm31 )
-        vfmadd231pd( zmm3,zmm30,zmm18 )
+        vfmadd231pd( zmm3,zmm30,zmm19 )
         add( r8,r12 )                                     // second pointer of b += rs_b
-        vfmadd231pd( zmm3,zmm31,zmm20 )
+        vfmadd231pd( zmm3,zmm31,zmm21 )
 
         // ---------------------------------- iteration 5
         vmovupd( mem(rax),zmm3 MASK_KZ(2) )                           // load A     // Load A with mask and zero hint
@@ -3628,22 +3651,22 @@ void bli_dgemmsup_rv_zen4_asm_8x8
         prefetch( 0,mem(r15,r9,1) )                             // prefetch B
         vbroadcastsd( mem(rbx),zmm30 )
         vbroadcastsd( mem(rbx,r9,1),zmm31 )
-        vfmadd231pd( zmm3,zmm30,zmm6 )
+        vfmadd231pd( zmm3,zmm30,zmm7 )
         vbroadcastsd( mem(rbx,r9,2),zmm30 )
-        vfmadd231pd( zmm3,zmm31,zmm8 )
+        vfmadd231pd( zmm3,zmm31,zmm9 )
         vbroadcastsd( mem(rbx,r13,1),zmm31 )
-        vfmadd231pd( zmm3,zmm30,zmm10 )
+        vfmadd231pd( zmm3,zmm30,zmm11 )
         vbroadcastsd( mem(r12),zmm30 )
         add( r8,rbx )                                     // b += rs_b
-        vfmadd231pd( zmm3,zmm31,zmm12 )
+        vfmadd231pd( zmm3,zmm31,zmm13 )
         vbroadcastsd( mem(r12,r9,1),zmm31 )
-        vfmadd231pd( zmm3,zmm30,zmm14 )
+        vfmadd231pd( zmm3,zmm30,zmm15 )
         vbroadcastsd( mem(r12,r9,2),zmm30 )
-        vfmadd231pd( zmm3,zmm31,zmm16 )
+        vfmadd231pd( zmm3,zmm31,zmm17 )
         vbroadcastsd( mem(r12,r13,1),zmm31 )
-        vfmadd231pd( zmm3,zmm30,zmm18 )
+        vfmadd231pd( zmm3,zmm30,zmm19 )
         add( r8,r12 )                                     // second pointer of b += rs_b
-        vfmadd231pd( zmm3,zmm31,zmm20 )
+        vfmadd231pd( zmm3,zmm31,zmm21 )
 
         // ---------------------------------- iteration 7
         vmovupd( mem(rax),zmm3 MASK_KZ(2) )                           // load A     // Load A with mask and zero hint
@@ -3672,22 +3695,22 @@ void bli_dgemmsup_rv_zen4_asm_8x8
         prefetch( 0,mem(r15,r13,1) )                             // prefetch B
         vbroadcastsd( mem(rbx),zmm30 )
         vbroadcastsd( mem(rbx,r9,1),zmm31 )
-        vfmadd231pd( zmm3,zmm30,zmm6 )
+        vfmadd231pd( zmm3,zmm30,zmm7 )
         vbroadcastsd( mem(rbx,r9,2),zmm30 )
-        vfmadd231pd( zmm3,zmm31,zmm8 )
+        vfmadd231pd( zmm3,zmm31,zmm9 )
         vbroadcastsd( mem(rbx,r13,1),zmm31 )
-        vfmadd231pd( zmm3,zmm30,zmm10 )
+        vfmadd231pd( zmm3,zmm30,zmm11 )
         vbroadcastsd( mem(r12),zmm30 )
         add( r8,rbx )                                     // b += rs_b
-        vfmadd231pd( zmm3,zmm31,zmm12 )
+        vfmadd231pd( zmm3,zmm31,zmm13 )
         vbroadcastsd( mem(r12,r9,1),zmm31 )
-        vfmadd231pd( zmm3,zmm30,zmm14 )
+        vfmadd231pd( zmm3,zmm30,zmm15 )
         vbroadcastsd( mem(r12,r9,2),zmm30 )
-        vfmadd231pd( zmm3,zmm31,zmm16 )
+        vfmadd231pd( zmm3,zmm31,zmm17 )
         vbroadcastsd( mem(r12,r13,1),zmm31 )
-        vfmadd231pd( zmm3,zmm30,zmm18 )
+        vfmadd231pd( zmm3,zmm30,zmm19 )
         add( r8,r12 )                                     // second pointer of b += rs_b
-        vfmadd231pd( zmm3,zmm31,zmm20 )
+        vfmadd231pd( zmm3,zmm31,zmm21 )
         lea(mem(rdx, rdi, 1), rdx)                         // C += cs_c
         lea(mem(r11,r8,8), r11)                            // b_next += 8*rs_b
         lea(mem(r15,r8,8), r15)                            // second pointer of b_next += 8*rs_b
@@ -3730,22 +3753,22 @@ void bli_dgemmsup_rv_zen4_asm_8x8
         prefetch( 0,mem(r11,r9,1) )                             // prefetch B
         vbroadcastsd( mem(rbx),zmm30 )
         vbroadcastsd( mem(rbx,r9,1),zmm31 )
-        vfmadd231pd( zmm3,zmm30,zmm6 )
+        vfmadd231pd( zmm3,zmm30,zmm7 )
         vbroadcastsd( mem(rbx,r9,2),zmm30 )
-        vfmadd231pd( zmm3,zmm31,zmm8 )
+        vfmadd231pd( zmm3,zmm31,zmm9 )
         vbroadcastsd( mem(rbx,r13,1),zmm31 )
-        vfmadd231pd( zmm3,zmm30,zmm10 )
+        vfmadd231pd( zmm3,zmm30,zmm11 )
         vbroadcastsd( mem(r12),zmm30 )
         add( r8,rbx )                                     // b += rs_b
-        vfmadd231pd( zmm3,zmm31,zmm12 )
+        vfmadd231pd( zmm3,zmm31,zmm13 )
         vbroadcastsd( mem(r12,r9,1),zmm31 )
-        vfmadd231pd( zmm3,zmm30,zmm14 )
+        vfmadd231pd( zmm3,zmm30,zmm15 )
         vbroadcastsd( mem(r12,r9,2),zmm30 )
-        vfmadd231pd( zmm3,zmm31,zmm16 )
+        vfmadd231pd( zmm3,zmm31,zmm17 )
         vbroadcastsd( mem(r12,r13,1),zmm31 )
-        vfmadd231pd( zmm3,zmm30,zmm18 )
+        vfmadd231pd( zmm3,zmm30,zmm19 )
         add( r8,r12 )                                     // second pointer of b += rs_b
-        vfmadd231pd( zmm3,zmm31,zmm20 )
+        vfmadd231pd( zmm3,zmm31,zmm21 )
 
         // ---------------------------------- iteration 3
         vmovupd( mem(rax),zmm3 MASK_KZ(2) )                           // load A     // Load A with mask and zero hint
@@ -3776,22 +3799,22 @@ void bli_dgemmsup_rv_zen4_asm_8x8
         prefetch( 0,mem(r11,r13,1) )                             // prefetch B
         vbroadcastsd( mem(rbx),zmm30 )
         vbroadcastsd( mem(rbx,r9,1),zmm31 )
-        vfmadd231pd( zmm3,zmm30,zmm6 )
+        vfmadd231pd( zmm3,zmm30,zmm7 )
         vbroadcastsd( mem(rbx,r9,2),zmm30 )
-        vfmadd231pd( zmm3,zmm31,zmm8 )
+        vfmadd231pd( zmm3,zmm31,zmm9 )
         vbroadcastsd( mem(rbx,r13,1),zmm31 )
-        vfmadd231pd( zmm3,zmm30,zmm10 )
+        vfmadd231pd( zmm3,zmm30,zmm11 )
         vbroadcastsd( mem(r12),zmm30 )
         add( r8,rbx )                                     // b += rs_b
-        vfmadd231pd( zmm3,zmm31,zmm12 )
+        vfmadd231pd( zmm3,zmm31,zmm13 )
         vbroadcastsd( mem(r12,r9,1),zmm31 )
-        vfmadd231pd( zmm3,zmm30,zmm14 )
+        vfmadd231pd( zmm3,zmm30,zmm15 )
         vbroadcastsd( mem(r12,r9,2),zmm30 )
-        vfmadd231pd( zmm3,zmm31,zmm16 )
+        vfmadd231pd( zmm3,zmm31,zmm17 )
         vbroadcastsd( mem(r12,r13,1),zmm31 )
-        vfmadd231pd( zmm3,zmm30,zmm18 )
+        vfmadd231pd( zmm3,zmm30,zmm19 )
         add( r8,r12 )                                     // second pointer of b += rs_b
-        vfmadd231pd( zmm3,zmm31,zmm20 )
+        vfmadd231pd( zmm3,zmm31,zmm21 )
 
         // ---------------------------------- iteration 5
         vmovupd( mem(rax),zmm3 MASK_KZ(2) )                           // load A     // Load A with mask and zero hint
@@ -3822,22 +3845,22 @@ void bli_dgemmsup_rv_zen4_asm_8x8
         prefetch( 0,mem(r15,r9,1) )                             // prefetch B
         vbroadcastsd( mem(rbx),zmm30 )
         vbroadcastsd( mem(rbx,r9,1),zmm31 )
-        vfmadd231pd( zmm3,zmm30,zmm6 )
+        vfmadd231pd( zmm3,zmm30,zmm7 )
         vbroadcastsd( mem(rbx,r9,2),zmm30 )
-        vfmadd231pd( zmm3,zmm31,zmm8 )
+        vfmadd231pd( zmm3,zmm31,zmm9 )
         vbroadcastsd( mem(rbx,r13,1),zmm31 )
-        vfmadd231pd( zmm3,zmm30,zmm10 )
+        vfmadd231pd( zmm3,zmm30,zmm11 )
         vbroadcastsd( mem(r12),zmm30 )
         add( r8,rbx )                                     // b += rs_b
-        vfmadd231pd( zmm3,zmm31,zmm12 )
+        vfmadd231pd( zmm3,zmm31,zmm13 )
         vbroadcastsd( mem(r12,r9,1),zmm31 )
-        vfmadd231pd( zmm3,zmm30,zmm14 )
+        vfmadd231pd( zmm3,zmm30,zmm15 )
         vbroadcastsd( mem(r12,r9,2),zmm30 )
-        vfmadd231pd( zmm3,zmm31,zmm16 )
+        vfmadd231pd( zmm3,zmm31,zmm17 )
         vbroadcastsd( mem(r12,r13,1),zmm31 )
-        vfmadd231pd( zmm3,zmm30,zmm18 )
+        vfmadd231pd( zmm3,zmm30,zmm19 )
         add( r8,r12 )                                     // second pointer of b += rs_b
-        vfmadd231pd( zmm3,zmm31,zmm20 )
+        vfmadd231pd( zmm3,zmm31,zmm21 )
 
         // ---------------------------------- iteration 7
         vmovupd( mem(rax),zmm3 MASK_KZ(2) )                           // load A     // Load A with mask and zero hint
@@ -3866,27 +3889,35 @@ void bli_dgemmsup_rv_zen4_asm_8x8
         prefetch( 0,mem(r15,r13,1) )                             // prefetch B
         vbroadcastsd( mem(rbx),zmm30 )
         vbroadcastsd( mem(rbx,r9,1),zmm31 )
-        vfmadd231pd( zmm3,zmm30,zmm6 )
+        vfmadd231pd( zmm3,zmm30,zmm7 )
         vbroadcastsd( mem(rbx,r9,2),zmm30 )
-        vfmadd231pd( zmm3,zmm31,zmm8 )
+        vfmadd231pd( zmm3,zmm31,zmm9 )
         vbroadcastsd( mem(rbx,r13,1),zmm31 )
-        vfmadd231pd( zmm3,zmm30,zmm10 )
+        vfmadd231pd( zmm3,zmm30,zmm11 )
         vbroadcastsd( mem(r12),zmm30 )
         add( r8,rbx )                                     // b += rs_b
-        vfmadd231pd( zmm3,zmm31,zmm12 )
+        vfmadd231pd( zmm3,zmm31,zmm13 )
         vbroadcastsd( mem(r12,r9,1),zmm31 )
-        vfmadd231pd( zmm3,zmm30,zmm14 )
+        vfmadd231pd( zmm3,zmm30,zmm15 )
         vbroadcastsd( mem(r12,r9,2),zmm30 )
-        vfmadd231pd( zmm3,zmm31,zmm16 )
+        vfmadd231pd( zmm3,zmm31,zmm17 )
         vbroadcastsd( mem(r12,r13,1),zmm31 )
-        vfmadd231pd( zmm3,zmm30,zmm18 )
+        vfmadd231pd( zmm3,zmm30,zmm19 )
         add( r8,r12 )                                     // second pointer of b += rs_b
-        vfmadd231pd( zmm3,zmm31,zmm20 )
+        vfmadd231pd( zmm3,zmm31,zmm21 )
         lea(mem(r11,r8,8), r11)                            // b_next += 8*rs_b
         lea(mem(r15,r8,8), r15)                            // Second pointer of b_next += 8*rs_b
         dec(rsi)                                           // i -= 1
     jnz(.LOOP3)                                            // iterate again if i != 0.
 
+    vaddpd(zmm7, zmm6, zmm6)
+    vaddpd(zmm9, zmm8, zmm8)
+    vaddpd(zmm11, zmm10, zmm10)
+    vaddpd(zmm13, zmm12, zmm12)
+    vaddpd(zmm15, zmm14, zmm14)
+    vaddpd(zmm17, zmm16, zmm16)
+    vaddpd(zmm19, zmm18, zmm18)
+    vaddpd(zmm21, zmm20, zmm20)
 
     label(.TAIL)
     mov(var(k_left), rsi)                                  // i = k_left
