@@ -43,8 +43,10 @@
 
 #include "blis.h"
 
-#define S8_MIN  (-128)
-#define S8_MAX  (+127)
+// Used to clip downscaled output, will be set in the main loop based
+// on the accumulation and C data type.
+int64_t DSCALE_CLIP_MIN = 0;
+int64_t DSCALE_CLIP_MAX = 0;
 
 // Mode can be one of the follwoing:
 // 	1. p - performance, used for benchmarks.
@@ -77,7 +79,8 @@ static inline float bf16_to_float
 {
 	int32_t inter_temp = *( ( int16_t* ) &bf16_val );
 	inter_temp = inter_temp << 16;
-	float float_value = *( float* ) ( &inter_temp );
+	float float_value = 0.0;
+	memcpy( &float_value, &inter_temp, sizeof( int32_t ) );
 	return float_value;
 }
 
@@ -245,6 +248,7 @@ void mat_mul_ ## BLAS_SFX \
 
 GEN_BLIS_MAT_MUL_FUNC(uint8_t,int8_t,int16_t,int16_t,u8s8s16os16)
 GEN_BLIS_MAT_MUL_FUNC(uint8_t,int8_t,int8_t,int16_t,u8s8s16os8)
+GEN_BLIS_MAT_MUL_FUNC(uint8_t,int8_t,uint8_t,int16_t,u8s8s16ou8)
 GEN_BLIS_MAT_MUL_FUNC(uint8_t,int8_t,int32_t,int32_t,u8s8s32os32)
 GEN_BLIS_MAT_MUL_FUNC(uint8_t,int8_t,int8_t,int32_t,u8s8s32os8)
 GEN_BLIS_MAT_MUL_FUNC(bfloat16,bfloat16,float,float,bf16bf16f32of32)
@@ -343,6 +347,7 @@ void mat_mul_bench_driver_ ## BLAS_SFX \
 
 GEN_MAT_MUL_BENCH_DRV_FUNC(uint8_t,int8_t,int16_t,int16_t,u8s8s16os16)
 GEN_MAT_MUL_BENCH_DRV_FUNC(uint8_t,int8_t,int8_t,int16_t,u8s8s16os8)
+GEN_MAT_MUL_BENCH_DRV_FUNC(uint8_t,int8_t,uint8_t,int16_t,u8s8s16ou8)
 GEN_MAT_MUL_BENCH_DRV_FUNC(uint8_t,int8_t,int32_t,int32_t,u8s8s32os32)
 GEN_MAT_MUL_BENCH_DRV_FUNC(uint8_t,int8_t,int8_t,int32_t,u8s8s32os8)
 GEN_MAT_MUL_BENCH_DRV_FUNC(bfloat16,bfloat16,float,float,bf16bf16f32of32)
@@ -376,12 +381,13 @@ static inline ACCUM_type mat_mul_accuracy_check_downscale_ ## BLAS_DOWNSCALE_SFX
 						max( nearbyintf( ( SCALE_type )( temp_accum ) * \
 							( *( ( SCALE_type* )post_op->sum.scale_factor + j ) ) ) + \
 							*( ( C_type* )post_op->sum.zero_point + j ), \
-							S8_MIN ), \
-						S8_MAX ); \
+							DSCALE_CLIP_MIN ), \
+						DSCALE_CLIP_MAX ); \
 	return 	out_temp_accum; \
 }\
 
 GEN_MAT_MUL_ACC_CHK_DOWNSCALE(int8_t,int16_t,float,u8s8s16os8)
+GEN_MAT_MUL_ACC_CHK_DOWNSCALE(uint8_t,int16_t,float,u8s8s16ou8)
 GEN_MAT_MUL_ACC_CHK_DOWNSCALE(int8_t,int32_t,float,u8s8s32os8)
 GEN_MAT_MUL_ACC_CHK_DOWNSCALE(int8_t,int32_t,float,s8s8s32os8)
 GEN_MAT_MUL_ACC_CHK_DOWNSCALE(int8_t,int16_t,float,s8s8s16os8)
@@ -428,6 +434,7 @@ static inline ACCUM_type mat_mul_accuracy_check_accum_ ## BLAS_SFX \
 }\
 
 GEN_MAT_MUL_ACC_CHK_ACCUM(uint8_t,int8_t,int8_t,int16_t,u8s8s16os8)
+GEN_MAT_MUL_ACC_CHK_ACCUM(uint8_t,int8_t,uint8_t,int16_t,u8s8s16ou8)
 GEN_MAT_MUL_ACC_CHK_ACCUM(uint8_t,int8_t,int16_t,int16_t,u8s8s16os16)
 GEN_MAT_MUL_ACC_CHK_ACCUM(uint8_t,int8_t,int8_t,int32_t,u8s8s32os8)
 GEN_MAT_MUL_ACC_CHK_ACCUM(uint8_t,int8_t,int32_t,int32_t,u8s8s32os32)
@@ -512,6 +519,7 @@ static inline ACCUM_type GELU_TANH_post_op_ ## BLAS_SFX \
 }\
 
 GEN_GELU_TANH_POSTOP_INT(int16_t,u8s8s16os8)
+GEN_GELU_TANH_POSTOP_INT(int16_t,u8s8s16ou8)
 GEN_GELU_TANH_POSTOP_INT(int16_t,u8s8s16os16)
 GEN_GELU_TANH_POSTOP_INT(int32_t,u8s8s32os8)
 GEN_GELU_TANH_POSTOP_INT(int32_t,u8s8s32os32)
@@ -548,6 +556,7 @@ static inline ACCUM_type GELU_ERF_post_op_ ## BLAS_SFX \
 }\
 
 GEN_GELU_ERF_POSTOP_INT(int16_t,u8s8s16os8)
+GEN_GELU_ERF_POSTOP_INT(int16_t,u8s8s16ou8)
 GEN_GELU_ERF_POSTOP_INT(int16_t,u8s8s16os16)
 GEN_GELU_ERF_POSTOP_INT(int32_t,u8s8s32os8)
 GEN_GELU_ERF_POSTOP_INT(int32_t,u8s8s32os32)
@@ -584,6 +593,7 @@ GEN_MAT_MUL_GET_OUTPUT_TYPE_VALUE(int32_t,int32_t)
 GEN_MAT_MUL_GET_OUTPUT_TYPE_VALUE(int8_t,int32_t)
 GEN_MAT_MUL_GET_OUTPUT_TYPE_VALUE(int16_t,int16_t)
 GEN_MAT_MUL_GET_OUTPUT_TYPE_VALUE(int8_t,int16_t)
+GEN_MAT_MUL_GET_OUTPUT_TYPE_VALUE(uint8_t,int16_t)
 GEN_MAT_MUL_GET_OUTPUT_TYPE_VALUE(float,float)
 
 void mat_mul_get_output_type_valfloatbfloat16
@@ -776,6 +786,7 @@ cleanup_acc: \
 
 GEN_MAT_MUL_ACC_CHK_DRV_FUNC(uint8_t,int8_t,int16_t,int16_t,float,u8s8s16os16,u8s8s16os8)
 GEN_MAT_MUL_ACC_CHK_DRV_FUNC(uint8_t,int8_t,int8_t,int16_t,float,u8s8s16os8,u8s8s16os8)
+GEN_MAT_MUL_ACC_CHK_DRV_FUNC(uint8_t,int8_t,uint8_t,int16_t,float,u8s8s16ou8,u8s8s16ou8)
 GEN_MAT_MUL_ACC_CHK_DRV_FUNC(uint8_t,int8_t,int32_t,int32_t,float,u8s8s32os32,u8s8s32os8)
 GEN_MAT_MUL_ACC_CHK_DRV_FUNC(uint8_t,int8_t,int8_t,int32_t,float,u8s8s32os8,u8s8s32os8)
 GEN_MAT_MUL_ACC_CHK_DRV_FUNC(bfloat16,bfloat16,float,float,float,bf16bf16f32of32,bf16bf16f32obf16)
@@ -786,7 +797,6 @@ GEN_MAT_MUL_ACC_CHK_DRV_FUNC(int8_t,int8_t,int8_t,int32_t,float,s8s8s32os8,s8s8s
 GEN_MAT_MUL_ACC_CHK_DRV_FUNC(int8_t,int8_t,int16_t,int16_t,float,s8s8s16os16,s8s8s16os8)
 GEN_MAT_MUL_ACC_CHK_DRV_FUNC(int8_t,int8_t,int8_t,int16_t,float,s8s8s16os8,s8s8s16os8)
 
-/* Only supports bias followed by RELU and vice versa for now.*/ \
 #define GEN_MAT_MUL_POST_OPS_CREATOR(C_DSCALE_type,C_type,DSCALE_type,BLAS_SFX) \
 aocl_post_op* lpgemm_create_post_ops_struct_ ## BLAS_SFX \
      ( \
@@ -840,12 +850,12 @@ aocl_post_op* lpgemm_create_post_ops_struct_ ## BLAS_SFX \
 		num_eltwise = 0; \
 		while ( ops_tok ) \
 		{ \
-			if ( strcmp( ops_tok, "bias") == 0 ) \
+			if ( strcmp( ops_tok, "bias" ) == 0 ) \
 			{ \
 				post_ops->seq_vector[cur_op_index] = BIAS; \
 				cur_op_index++; \
 			} \
-			else if ( ( strcmp( ops_tok, "relu") == 0 ) && \
+			else if ( ( strcmp( ops_tok, "relu" ) == 0 ) && \
 					  ( is_activator_set == FALSE ) ) \
 			{ \
 				post_ops->seq_vector[cur_op_index] = ELTWISE; \
@@ -855,7 +865,7 @@ aocl_post_op* lpgemm_create_post_ops_struct_ ## BLAS_SFX \
 				activator_idx = cur_op_index; \
 				cur_op_index++; \
 			} \
-			else if ( ( strcmp( ops_tok, "prelu") == 0 ) && \
+			else if ( ( strcmp( ops_tok, "prelu" ) == 0 ) && \
 					  ( is_activator_set == FALSE ) ) \
 			{ \
 				post_ops->seq_vector[cur_op_index] = ELTWISE; \
@@ -865,7 +875,7 @@ aocl_post_op* lpgemm_create_post_ops_struct_ ## BLAS_SFX \
 				activator_idx = cur_op_index; \
 				cur_op_index++; \
 			} \
-			else if ( ( strcmp( ops_tok, "gelu_tanh") == 0 ) && \
+			else if ( ( strcmp( ops_tok, "gelu_tanh" ) == 0 ) && \
 					  ( is_activator_set == FALSE ) ) \
 			{ \
 				post_ops->seq_vector[cur_op_index] = ELTWISE; \
@@ -875,7 +885,7 @@ aocl_post_op* lpgemm_create_post_ops_struct_ ## BLAS_SFX \
 				activator_idx = cur_op_index; \
 				cur_op_index++; \
 			} \
-			else if ( ( strcmp( ops_tok, "gelu_erf") == 0 ) && \
+			else if ( ( strcmp( ops_tok, "gelu_erf" ) == 0 ) && \
 					  ( is_activator_set == FALSE ) ) \
 			{ \
 				post_ops->seq_vector[cur_op_index] = ELTWISE; \
@@ -885,7 +895,7 @@ aocl_post_op* lpgemm_create_post_ops_struct_ ## BLAS_SFX \
 				activator_idx = cur_op_index; \
 				cur_op_index++; \
 			} \
-			else if ( strcmp( ops_tok, "clip") == 0 ) \
+			else if ( strcmp( ops_tok, "clip" ) == 0 ) \
 			{ \
 				post_ops->seq_vector[cur_op_index] = ELTWISE; \
 				is_clip = TRUE; \
@@ -977,7 +987,7 @@ aocl_post_op* lpgemm_create_post_ops_struct_ ## BLAS_SFX \
 			( post_ops->eltwise + clip_idx )->algo.alpha = malloc( sizeof( C_type ) ); \
 			( post_ops->eltwise + clip_idx )->algo.beta = malloc( sizeof( C_type ) ); \
 			*( ( C_type* ) ( post_ops->eltwise + clip_idx )->algo.alpha ) = ( C_type ) ( -64 ); \
-			*( ( C_type* ) ( post_ops->eltwise + clip_idx )->algo.beta ) = ( C_type ) ( 3 ); \
+			*( ( C_type* ) ( post_ops->eltwise + clip_idx )->algo.beta ) = ( C_type ) ( 23 ); \
 			( post_ops->eltwise + clip_idx )->algo.algo_type = CLIP; \
 		} \
 	} \
@@ -1133,8 +1143,8 @@ void mat_mul_bench_main_ ## BLAS_SFX \
 		GEN_FUNC_NAME(fill_array_,C_type)( c_ref, ( m * n ) ); \
 	} \
  \
-	C_type alpha; \
-	C_type beta; \
+	C_type alpha = 0; \
+	C_type beta = 0; \
 	if ( bench_mode == 'p' ) \
 	{ \
 		alpha = 1; \
@@ -1232,6 +1242,7 @@ void mat_mul_bench_main_ ## BLAS_SFX \
 
 GEN_MAT_MUL_BENCH_MAIN_FUNC(uint8_t,int8_t,int16_t,u8s8s16os16,u8s8s16os16)
 GEN_MAT_MUL_BENCH_MAIN_FUNC(uint8_t,int8_t,int8_t,u8s8s16os8,u8s8s16os16)
+GEN_MAT_MUL_BENCH_MAIN_FUNC(uint8_t,int8_t,uint8_t,u8s8s16ou8,u8s8s16os16)
 GEN_MAT_MUL_BENCH_MAIN_FUNC(uint8_t,int8_t,int32_t,u8s8s32os32,u8s8s32os32)
 GEN_MAT_MUL_BENCH_MAIN_FUNC(uint8_t,int8_t,int8_t,u8s8s32os8,u8s8s32os32)
 GEN_MAT_MUL_BENCH_MAIN_FUNC(float,float,float,f32f32f32of32,f32f32f32of32)
@@ -1307,8 +1318,8 @@ void mat_mul_bench_main_ ## BLAS_SFX \
 		GEN_FUNC_NAME(fill_array_,C_type)( c_ref, ( m * n ) ); \
 	} \
  \
-	float alpha; \
-	float beta; \
+	float alpha = 0.0f; \
+	float beta = 0.0f; \
 	if ( bench_mode == 'p' ) \
 	{ \
 		alpha = 1; \
@@ -1454,11 +1465,12 @@ int main( int argc, char** argv )
 	char* file_name = NULL;
 	char* post_ops_str = NULL;
 	char* post_ops_str_dest = NULL; //Strtok is used to parse, need to maintain a copy.
+	char* dscale_type_str = NULL;
 
 	// Parse CLI arguments.
 	opterr = 0;
 	int opt_val;
-	while ( ( opt_val = getopt( argc, argv, "i:m:n:o:d" ) ) != -1 )
+	while ( ( opt_val = getopt( argc, argv, "i:m:n:o:d:" ) ) != -1 )
 	{
 		switch ( opt_val )
 		{
@@ -1476,6 +1488,7 @@ int main( int argc, char** argv )
 					break;
 			case 'd':
 					global_dscale_out = 'y';
+					dscale_type_str = optarg;
 					break;
 			default:
 					break;
@@ -1578,12 +1591,22 @@ int main( int argc, char** argv )
 				}
 				else
 				{
-					GEN_FUNC_NAME(mat_mul_bench_main_,u8s8s32os8)
-					(
-					  fin, fout, stor_order, transa, transb, op_a, op_b,
-					  m, n, k, stride_a, stride_b, stride_c,
-					  post_ops_str_dest
-					);
+					if ( ( strcmp( dscale_type_str, "S8" ) == 0 ) ||
+						 ( strcmp( dscale_type_str, "s8" ) == 0 ) )
+					{
+						DSCALE_CLIP_MIN = -128;
+						DSCALE_CLIP_MAX = +127;
+						GEN_FUNC_NAME(mat_mul_bench_main_,u8s8s32os8)
+						(
+						  fin, fout, stor_order, transa, transb, op_a, op_b,
+						  m, n, k, stride_a, stride_b, stride_c,
+						  post_ops_str_dest
+						);
+					}
+					else
+					{
+						printf("Downscale type not supported.\n");
+					}
 				}
 			}
 			else if ( ( op_type_char == 'f' ) || ( op_type_char == 'F' ) )
@@ -1608,12 +1631,34 @@ int main( int argc, char** argv )
 				}
 				else
 				{
-					GEN_FUNC_NAME(mat_mul_bench_main_,u8s8s16os8)
-					(
-						fin, fout, stor_order, transa, transb, op_a, op_b,
-						m, n, k, stride_a, stride_b, stride_c,
-						post_ops_str_dest
-					);
+					if ( ( strcmp( dscale_type_str, "S8" ) == 0 ) ||
+						 ( strcmp( dscale_type_str, "s8" ) == 0 ) )
+					{
+						DSCALE_CLIP_MIN = -128;
+						DSCALE_CLIP_MAX = +127;
+						GEN_FUNC_NAME(mat_mul_bench_main_,u8s8s16os8)
+						(
+							fin, fout, stor_order, transa, transb, op_a, op_b,
+							m, n, k, stride_a, stride_b, stride_c,
+							post_ops_str_dest
+						);
+					}
+					else if ( ( strcmp( dscale_type_str, "U8" ) == 0 ) ||
+							  ( strcmp( dscale_type_str, "u8" ) == 0 ) )
+					{
+						DSCALE_CLIP_MIN = 0;
+						DSCALE_CLIP_MAX = +255;
+						GEN_FUNC_NAME(mat_mul_bench_main_,u8s8s16ou8)
+						(
+							fin, fout, stor_order, transa, transb, op_a, op_b,
+							m, n, k, stride_a, stride_b, stride_c,
+							post_ops_str_dest
+						);
+					}
+					else
+					{
+						printf("Downscale type not supported.\n");
+					}
 				}
 			}
 			else if ((op_type_char == 'b') || (op_type_char == 'B'))
@@ -1650,12 +1695,22 @@ int main( int argc, char** argv )
 				}
 				else
 				{
-					GEN_FUNC_NAME(mat_mul_bench_main_,s8s8s32os8)
-					(
-					  fin, fout, stor_order, transa, transb, op_a, op_b,
-					  m, n, k, stride_a, stride_b, stride_c,
-					  post_ops_str_dest
-					);
+					if ( ( strcmp( dscale_type_str, "S8" ) == 0 ) ||
+						 ( strcmp( dscale_type_str, "s8" ) == 0 ) )
+					{
+						DSCALE_CLIP_MIN = -128;
+						DSCALE_CLIP_MAX = +127;
+						GEN_FUNC_NAME(mat_mul_bench_main_,s8s8s32os8)
+						(
+						  fin, fout, stor_order, transa, transb, op_a, op_b,
+						  m, n, k, stride_a, stride_b, stride_c,
+						  post_ops_str_dest
+						);
+					}
+					else
+					{
+						printf("Downscale type not supported.\n");
+					}
 				}
 			}
 			else if ( ( op_type_char == 'v' ) || ( op_type_char == 'V' ) )
@@ -1671,12 +1726,22 @@ int main( int argc, char** argv )
 				}
 				else
 				{
-					GEN_FUNC_NAME(mat_mul_bench_main_,s8s8s16os8)
-					(
-					  fin, fout, stor_order, transa, transb, op_a, op_b,
-					  m, n, k, stride_a, stride_b, stride_c,
-					  post_ops_str_dest
-					);
+					if ( ( strcmp( dscale_type_str, "S8" ) == 0 ) ||
+						 ( strcmp( dscale_type_str, "s8" ) == 0 ) )
+					{
+						DSCALE_CLIP_MIN = -128;
+						DSCALE_CLIP_MAX = +127;
+						GEN_FUNC_NAME(mat_mul_bench_main_,s8s8s16os8)
+						(
+						  fin, fout, stor_order, transa, transb, op_a, op_b,
+						  m, n, k, stride_a, stride_b, stride_c,
+						  post_ops_str_dest
+						);
+					}
+					else
+					{
+						printf("Downscale type not supported.\n");
+					}
 				}
 			}
 			if ( post_ops_str != NULL )

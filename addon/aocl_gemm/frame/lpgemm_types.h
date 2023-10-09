@@ -42,6 +42,24 @@ typedef enum
 	INT32 = 2
 } AOCL_ARRAY_TYPE;
 
+// Enum to denote the storage data type (output matrix).
+// It is expected that the enum entries are in ascending order of
+// storage data type size.
+typedef enum
+{
+	S8 = 0,
+	U8 = 1,
+	S16 = 2,
+	U16 = 3,
+	BF16 = 4,
+	S32 = 5,
+	U32 = 6,
+	F32 = 7,
+	S64 = 8,
+	U64 = 9,
+	F64 = 10
+} AOCL_STORAGE_TYPE;
+
 // Enum name template:A_mat_type ## B_mat_type ## Accumulate_type ## C_mat_type.
 typedef enum
 {

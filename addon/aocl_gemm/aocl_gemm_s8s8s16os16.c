@@ -153,7 +153,7 @@ AOCL_GEMM_MATMUL(int8_t,int8_t,int16_t,int16_t,s8s8s16os16)
 	  c, rs_c, cs_c,
 	  alpha, beta,
 	  &rntm_g, lcntx_g,
-	  post_op_list, FALSE
+	  post_op_list, S16
 	);
 #else
 	lpgemm_s8s8s16o16_thread_decorator
@@ -164,7 +164,7 @@ AOCL_GEMM_MATMUL(int8_t,int8_t,int16_t,int16_t,s8s8s16os16)
 	  c, rs_c, cs_c,
 	  alpha, beta,
 	  &rntm_g, lcntx_g,
-	  post_op_list, FALSE
+	  post_op_list, S16
 	);
 #endif
 }

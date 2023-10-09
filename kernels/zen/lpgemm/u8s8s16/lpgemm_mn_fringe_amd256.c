@@ -192,17 +192,34 @@ LPGEMM_MN_FRINGE_KERN(uint8_t,int8_t,int16_t,u8s8s16o16_4x16)
 		if ( ( post_ops_attr.buf_downscale != NULL ) &&
 			 ( post_ops_attr.is_first_k == TRUE ) )
 		{
-			// c[0,0-15]
-			S8_S16_BETA_OP(c_int16_0p0,0,0,0,selector1,selector2)
+			if ( post_ops_attr.c_stor_type == S8 )
+			{
+				// c[0,0-15]
+				S8_S16_BETA_OP(c_int16_0p0,0,0,0,selector1,selector2)
 
-			// c[1,0-15]
-			S8_S16_BETA_OP(c_int16_1p0,0,1,0,selector1,selector2)
+				// c[1,0-15]
+				S8_S16_BETA_OP(c_int16_1p0,0,1,0,selector1,selector2)
 
-			// c[2,0-15]
-			S8_S16_BETA_OP(c_int16_2p0,0,2,0,selector1,selector2)
+				// c[2,0-15]
+				S8_S16_BETA_OP(c_int16_2p0,0,2,0,selector1,selector2)
 
-			// c[3,0-15]
-			S8_S16_BETA_OP(c_int16_3p0,0,3,0,selector1,selector2)
+				// c[3,0-15]
+				S8_S16_BETA_OP(c_int16_3p0,0,3,0,selector1,selector2)
+			}
+			else if ( post_ops_attr.c_stor_type == U8 )
+			{
+				// c[0,0-15]
+				U8_S16_BETA_OP(c_int16_0p0,0,0,0,selector1,selector2)
+
+				// c[1,0-15]
+				U8_S16_BETA_OP(c_int16_1p0,0,1,0,selector1,selector2)
+
+				// c[2,0-15]
+				U8_S16_BETA_OP(c_int16_2p0,0,2,0,selector1,selector2)
+
+				// c[3,0-15]
+				U8_S16_BETA_OP(c_int16_3p0,0,3,0,selector1,selector2)
+			}
 		}
 		else
 		{
@@ -378,14 +395,28 @@ POST_OPS_4x16_DISABLE:
 	if ( ( post_ops_attr.buf_downscale != NULL ) &&
 		 ( post_ops_attr.is_last_k == TRUE ) )
 	{
-		// Store the results in downscaled type (int8 instead of int32).
-		__m128i temp[2];
+		if ( post_ops_attr.c_stor_type == S8 )
+		{
+			// Store the results in downscaled type (int8 instead of int32).
+			__m128i temp[2];
 
-		// c[0-1,0-15]
-		CVT_STORE_S16_S8_2ROW(c_int16_0p0, c_int16_1p0, 0, 1, 0);
+			// c[0-1,0-15]
+			CVT_STORE_S16_S8_2ROW(c_int16_0p0, c_int16_1p0, 0, 1, 0);
 
-		// c[2-3,0-15]
-		CVT_STORE_S16_S8_2ROW(c_int16_2p0, c_int16_3p0, 2, 3, 0);
+			// c[2-3,0-15]
+			CVT_STORE_S16_S8_2ROW(c_int16_2p0, c_int16_3p0, 2, 3, 0);
+		}
+		else if ( post_ops_attr.c_stor_type == U8 )
+		{
+			// Store the results in downscaled type (uint8 instead of int16).
+			__m128i temp[2];
+
+			// c[0-1,0-15]
+			CVT_STORE_S16_U8_2ROW(c_int16_0p0, c_int16_1p0, 0, 1, 0);
+
+			// c[2-3,0-15]
+			CVT_STORE_S16_U8_2ROW(c_int16_2p0, c_int16_3p0, 2, 3, 0);
+		}
 	}
 	// Case where the output C matrix is s16 or is the temp buffer used to
 	// store intermediate s16 accumulated values for downscaled (C-s8) api.
@@ -567,24 +598,48 @@ LPGEMM_MN_LT_NR0_FRINGE_KERN(uint8_t,int8_t,int16_t,u8s8s16o16_4xlt16)
 		if ( ( post_ops_attr.buf_downscale != NULL ) &&
 			 ( post_ops_attr.is_first_k == TRUE ) )
 		{
-			dim_t n0_rem_dscale_bytes = n0_rem * sizeof( int8_t );
+			if ( post_ops_attr.c_stor_type == S8 )
+			{
+				dim_t n0_rem_dscale_bytes = n0_rem * sizeof( int8_t );
 
-			S8_S16_BETA_NLT16_MEMCP_UTIL(buf0, 0, n0_rem_dscale_bytes);
-			S8_S16_BETA_NLT16_MEMCP_UTIL(buf1, 1, n0_rem_dscale_bytes);
-			S8_S16_BETA_NLT16_MEMCP_UTIL(buf2, 2, n0_rem_dscale_bytes);
-			S8_S16_BETA_NLT16_MEMCP_UTIL(buf3, 3, n0_rem_dscale_bytes);
+				S8_S16_BETA_NLT16_MEMCP_UTIL(buf0, 0, n0_rem_dscale_bytes);
+				S8_S16_BETA_NLT16_MEMCP_UTIL(buf1, 1, n0_rem_dscale_bytes);
+				S8_S16_BETA_NLT16_MEMCP_UTIL(buf2, 2, n0_rem_dscale_bytes);
+				S8_S16_BETA_NLT16_MEMCP_UTIL(buf3, 3, n0_rem_dscale_bytes);
 
-			// c[0,0-15]
-			S8_S16_BETA_OP_NLT16(c_int16_0p0,buf0,selector1,selector2)
+				// c[0,0-15]
+				S8_S16_BETA_OP_NLT16(c_int16_0p0,buf0,selector1,selector2)
 
-			// c[1,0-15]
-			S8_S16_BETA_OP_NLT16(c_int16_1p0,buf1,selector1,selector2)
+				// c[1,0-15]
+				S8_S16_BETA_OP_NLT16(c_int16_1p0,buf1,selector1,selector2)
 
-			// c[2,0-15]
-			S8_S16_BETA_OP_NLT16(c_int16_2p0,buf2,selector1,selector2)
+				// c[2,0-15]
+				S8_S16_BETA_OP_NLT16(c_int16_2p0,buf2,selector1,selector2)
 
-			// c[3,0-15]
-			S8_S16_BETA_OP_NLT16(c_int16_3p0,buf3,selector1,selector2)
+				// c[3,0-15]
+				S8_S16_BETA_OP_NLT16(c_int16_3p0,buf3,selector1,selector2)
+			}
+			else if ( post_ops_attr.c_stor_type == U8 )
+			{
+				dim_t n0_rem_dscale_bytes = n0_rem * sizeof( uint8_t );
+
+				U8_S16_BETA_NLT16_MEMCP_UTIL(buf0, 0, n0_rem_dscale_bytes);
+				U8_S16_BETA_NLT16_MEMCP_UTIL(buf1, 1, n0_rem_dscale_bytes);
+				U8_S16_BETA_NLT16_MEMCP_UTIL(buf2, 2, n0_rem_dscale_bytes);
+				U8_S16_BETA_NLT16_MEMCP_UTIL(buf3, 3, n0_rem_dscale_bytes);
+
+				// c[0,0-15]
+				U8_S16_BETA_OP_NLT16(c_int16_0p0,buf0,selector1,selector2)
+
+				// c[1,0-15]
+				U8_S16_BETA_OP_NLT16(c_int16_1p0,buf1,selector1,selector2)
+
+				// c[2,0-15]
+				U8_S16_BETA_OP_NLT16(c_int16_2p0,buf2,selector1,selector2)
+
+				// c[3,0-15]
+				U8_S16_BETA_OP_NLT16(c_int16_3p0,buf3,selector1,selector2)
+			}
 		}
 		else
 		{
@@ -768,21 +823,42 @@ POST_OPS_4xlt16_DISABLE:
 	if ( ( post_ops_attr.buf_downscale != NULL ) &&
 		 ( post_ops_attr.is_last_k == TRUE ) )
 	{
-		// Store the results in downscaled type (int8 instead of int32).
-		__m128i temp[2];
+		if ( post_ops_attr.c_stor_type == S8 )
+		{
+			// Store the results in downscaled type (int8 instead of int16).
+			__m128i temp[2];
 
-		// c[0-1,0-15]
-		CVT_STORE_S16_S8_2ROW_NLT16(c_int16_0p0, c_int16_1p0, buf0, buf1);
+			// c[0-1,0-15]
+			CVT_STORE_S16_S8_2ROW_NLT16(c_int16_0p0, c_int16_1p0, buf0, buf1);
 
-		// c[2-3,0-15]
-		CVT_STORE_S16_S8_2ROW_NLT16(c_int16_2p0, c_int16_3p0, buf2, buf3);
+			// c[2-3,0-15]
+			CVT_STORE_S16_S8_2ROW_NLT16(c_int16_2p0, c_int16_3p0, buf2, buf3);
 
-		dim_t n0_rem_dscale_bytes = n0_rem * sizeof( int8_t );
+			dim_t n0_rem_dscale_bytes = n0_rem * sizeof( int8_t );
 
-		CVT_STORE_S16_S8_NLT16_MEMCP_UTIL(buf0, 0, n0_rem_dscale_bytes);
-		CVT_STORE_S16_S8_NLT16_MEMCP_UTIL(buf1, 1, n0_rem_dscale_bytes);
-		CVT_STORE_S16_S8_NLT16_MEMCP_UTIL(buf2, 2, n0_rem_dscale_bytes);
-		CVT_STORE_S16_S8_NLT16_MEMCP_UTIL(buf3, 3, n0_rem_dscale_bytes);
+			CVT_STORE_S16_S8_NLT16_MEMCP_UTIL(buf0, 0, n0_rem_dscale_bytes);
+			CVT_STORE_S16_S8_NLT16_MEMCP_UTIL(buf1, 1, n0_rem_dscale_bytes);
+			CVT_STORE_S16_S8_NLT16_MEMCP_UTIL(buf2, 2, n0_rem_dscale_bytes);
+			CVT_STORE_S16_S8_NLT16_MEMCP_UTIL(buf3, 3, n0_rem_dscale_bytes);
+		}
+		else if ( post_ops_attr.c_stor_type == U8 )
+		{
+			// Store the results in downscaled type (uint8 instead of int16).
+			__m128i temp[2];
+
+			// c[0-1,0-15]
+			CVT_STORE_S16_U8_2ROW_NLT16(c_int16_0p0, c_int16_1p0, buf0, buf1);
+
+			// c[2-3,0-15]
+			CVT_STORE_S16_U8_2ROW_NLT16(c_int16_2p0, c_int16_3p0, buf2, buf3);
+
+			dim_t n0_rem_dscale_bytes = n0_rem * sizeof( uint8_t );
+
+			CVT_STORE_S16_U8_NLT16_MEMCP_UTIL(buf0, 0, n0_rem_dscale_bytes);
+			CVT_STORE_S16_U8_NLT16_MEMCP_UTIL(buf1, 1, n0_rem_dscale_bytes);
+			CVT_STORE_S16_U8_NLT16_MEMCP_UTIL(buf2, 2, n0_rem_dscale_bytes);
+			CVT_STORE_S16_U8_NLT16_MEMCP_UTIL(buf3, 3, n0_rem_dscale_bytes);
+		}
 	}
 	// Case where the output C matrix is s16 or is the temp buffer used to
 	// store intermediate s16 accumulated values for downscaled (C-s8) api.
@@ -923,11 +999,22 @@ LPGEMM_MN_FRINGE_KERN(uint8_t,int8_t,int16_t,u8s8s16o16_2x16)
 		if ( ( post_ops_attr.buf_downscale != NULL ) &&
 			 ( post_ops_attr.is_first_k == TRUE ) )
 		{
-			// c[0,0-15]
-			S8_S16_BETA_OP(c_int16_0p0,0,0,0,selector1,selector2)
+			if ( post_ops_attr.c_stor_type == S8 )
+			{
+				// c[0,0-15]
+				S8_S16_BETA_OP(c_int16_0p0,0,0,0,selector1,selector2)
 
-			// c[1,0-15]
-			S8_S16_BETA_OP(c_int16_1p0,0,1,0,selector1,selector2)
+				// c[1,0-15]
+				S8_S16_BETA_OP(c_int16_1p0,0,1,0,selector1,selector2)
+			}
+			else if ( post_ops_attr.c_stor_type == U8 )
+			{
+				// c[0,0-15]
+				U8_S16_BETA_OP(c_int16_0p0,0,0,0,selector1,selector2)
+
+				// c[1,0-15]
+				U8_S16_BETA_OP(c_int16_1p0,0,1,0,selector1,selector2)
+			}
 		}
 		else
 		{
@@ -1059,11 +1146,22 @@ POST_OPS_2x16_DISABLE:
 	if ( ( post_ops_attr.buf_downscale != NULL ) &&
 		 ( post_ops_attr.is_last_k == TRUE ) )
 	{
-		// Store the results in downscaled type (int8 instead of int32).
-		__m128i temp[2];
+		if ( post_ops_attr.c_stor_type == S8 )
+		{
+			// Store the results in downscaled type (int8 instead of int32).
+			__m128i temp[2];
 
-		// c[0-1,0-15]
-		CVT_STORE_S16_S8_2ROW(c_int16_0p0, c_int16_1p0, 0, 1, 0);
+			// c[0-1,0-15]
+			CVT_STORE_S16_S8_2ROW(c_int16_0p0, c_int16_1p0, 0, 1, 0);
+		}
+		else if ( post_ops_attr.c_stor_type == U8 )
+		{
+			// Store the results in downscaled type (uint8 instead of int16).
+			__m128i temp[2];
+
+			// c[0-1,0-15]
+			CVT_STORE_S16_U8_2ROW(c_int16_0p0, c_int16_1p0, 0, 1, 0);
+		}
 	}
 	// Case where the output C matrix is s16 or is the temp buffer used to
 	// store intermediate s16 accumulated values for downscaled (C-s8) api.
@@ -1188,16 +1286,32 @@ LPGEMM_MN_LT_NR0_FRINGE_KERN(uint8_t,int8_t,int16_t,u8s8s16o16_2xlt16)
 		if ( ( post_ops_attr.buf_downscale != NULL ) &&
 			 ( post_ops_attr.is_first_k == TRUE ) )
 		{
-			dim_t n0_rem_dscale_bytes = n0_rem * sizeof( int8_t );
+			if ( post_ops_attr.c_stor_type == S8 )
+			{
+				dim_t n0_rem_dscale_bytes = n0_rem * sizeof( int8_t );
 
-			S8_S16_BETA_NLT16_MEMCP_UTIL(buf0, 0, n0_rem_dscale_bytes);
-			S8_S16_BETA_NLT16_MEMCP_UTIL(buf1, 1, n0_rem_dscale_bytes);
+				S8_S16_BETA_NLT16_MEMCP_UTIL(buf0, 0, n0_rem_dscale_bytes);
+				S8_S16_BETA_NLT16_MEMCP_UTIL(buf1, 1, n0_rem_dscale_bytes);
 
-			// c[0,0-15]
-			S8_S16_BETA_OP_NLT16(c_int16_0p0,buf0,selector1,selector2)
+				// c[0,0-15]
+				S8_S16_BETA_OP_NLT16(c_int16_0p0,buf0,selector1,selector2)
 
-			// c[1,0-15]
-			S8_S16_BETA_OP_NLT16(c_int16_1p0,buf1,selector1,selector2)
+				// c[1,0-15]
+				S8_S16_BETA_OP_NLT16(c_int16_1p0,buf1,selector1,selector2)
+			}
+			else if ( post_ops_attr.c_stor_type == U8 )
+			{
+				dim_t n0_rem_dscale_bytes = n0_rem * sizeof( uint8_t );
+
+				U8_S16_BETA_NLT16_MEMCP_UTIL(buf0, 0, n0_rem_dscale_bytes);
+				U8_S16_BETA_NLT16_MEMCP_UTIL(buf1, 1, n0_rem_dscale_bytes);
+
+				// c[0,0-15]
+				U8_S16_BETA_OP_NLT16(c_int16_0p0,buf0,selector1,selector2)
+
+				// c[1,0-15]
+				U8_S16_BETA_OP_NLT16(c_int16_1p0,buf1,selector1,selector2)
+			}
 		}
 		else
 		{
@@ -1335,16 +1449,32 @@ POST_OPS_2xlt16_DISABLE:
 	if ( ( post_ops_attr.buf_downscale != NULL ) &&
 		 ( post_ops_attr.is_last_k == TRUE ) )
 	{
-		// Store the results in downscaled type (int8 instead of int32).
-		__m128i temp[2];
+		if ( post_ops_attr.c_stor_type == S8 )
+		{
+			// Store the results in downscaled type (int8 instead of int16).
+			__m128i temp[2];
 
-		// c[0-1,0-15]
-		CVT_STORE_S16_S8_2ROW_NLT16(c_int16_0p0, c_int16_1p0, buf0, buf1);
+			// c[0-1,0-15]
+			CVT_STORE_S16_S8_2ROW_NLT16(c_int16_0p0, c_int16_1p0, buf0, buf1);
 
-		dim_t n0_rem_dscale_bytes = n0_rem * sizeof( int8_t );
+			dim_t n0_rem_dscale_bytes = n0_rem * sizeof( int8_t );
 
-		CVT_STORE_S16_S8_NLT16_MEMCP_UTIL(buf0, 0, n0_rem_dscale_bytes);
-		CVT_STORE_S16_S8_NLT16_MEMCP_UTIL(buf1, 1, n0_rem_dscale_bytes);
+			CVT_STORE_S16_S8_NLT16_MEMCP_UTIL(buf0, 0, n0_rem_dscale_bytes);
+			CVT_STORE_S16_S8_NLT16_MEMCP_UTIL(buf1, 1, n0_rem_dscale_bytes);
+		}
+		else if ( post_ops_attr.c_stor_type == U8 )
+		{
+			// Store the results in downscaled type (uint8 instead of int16).
+			__m128i temp[2];
+
+			// c[0-1,0-15]
+			CVT_STORE_S16_U8_2ROW_NLT16(c_int16_0p0, c_int16_1p0, buf0, buf1);
+
+			dim_t n0_rem_dscale_bytes = n0_rem * sizeof( uint8_t );
+
+			CVT_STORE_S16_U8_NLT16_MEMCP_UTIL(buf0, 0, n0_rem_dscale_bytes);
+			CVT_STORE_S16_U8_NLT16_MEMCP_UTIL(buf1, 1, n0_rem_dscale_bytes);
+		}
 	}
 	// Case where the output C matrix is s16 or is the temp buffer used to
 	// store intermediate s16 accumulated values for downscaled (C-s8) api.
@@ -1449,8 +1579,16 @@ LPGEMM_MN_FRINGE_KERN(uint8_t,int8_t,int16_t,u8s8s16o16_1x16)
 		if ( ( post_ops_attr.buf_downscale != NULL ) &&
 			 ( post_ops_attr.is_first_k == TRUE ) )
 		{
-			// c[0,0-15]
-			S8_S16_BETA_OP(c_int16_0p0,0,0,0,selector1,selector2)
+			if ( post_ops_attr.c_stor_type == S8 )
+			{
+				// c[0,0-15]
+				S8_S16_BETA_OP(c_int16_0p0,0,0,0,selector1,selector2)
+			}
+			else if ( post_ops_attr.c_stor_type == U8 )
+			{
+				// c[0,0-15]
+				U8_S16_BETA_OP(c_int16_0p0,0,0,0,selector1,selector2)
+			}
 		}
 		else
 		{
@@ -1560,12 +1698,24 @@ POST_OPS_1x16_DISABLE:
 	if ( ( post_ops_attr.buf_downscale != NULL ) &&
 		 ( post_ops_attr.is_last_k == TRUE ) )
 	{
-		// Store the results in downscaled type (int8 instead of int32).
-		__m128i temp[2];
-		__m256i zero_reg = _mm256_setzero_si256();
+		if ( post_ops_attr.c_stor_type == S8 )
+		{
+			// Store the results in downscaled type (int8 instead of int16).
+			__m128i temp[2];
+			__m256i zero_reg = _mm256_setzero_si256();
 
-		// c[0-1,0-15]
-		CVT_STORE_S16_S8_1ROW(c_int16_0p0, zero_reg, 0, 0);
+			// c[0-1,0-15]
+			CVT_STORE_S16_S8_1ROW(c_int16_0p0, zero_reg, 0, 0);
+		}
+		else if ( post_ops_attr.c_stor_type == U8 )
+		{
+			// Store the results in downscaled type (uint8 instead of int16).
+			__m128i temp[2];
+			__m256i zero_reg = _mm256_setzero_si256();
+
+			// c[0-1,0-15]
+			CVT_STORE_S16_U8_1ROW(c_int16_0p0, zero_reg, 0, 0);
+		}
 	}
 	// Case where the output C matrix is s16 or is the temp buffer used to
 	// store intermediate s16 accumulated values for downscaled (C-s8) api.
@@ -1662,12 +1812,24 @@ LPGEMM_MN_LT_NR0_FRINGE_KERN(uint8_t,int8_t,int16_t,u8s8s16o16_1xlt16)
 		if ( ( post_ops_attr.buf_downscale != NULL ) &&
 			 ( post_ops_attr.is_first_k == TRUE ) )
 		{
-			dim_t n0_rem_dscale_bytes = n0_rem * sizeof( int8_t );
+			if ( post_ops_attr.c_stor_type == S8 )
+			{
+				dim_t n0_rem_dscale_bytes = n0_rem * sizeof( int8_t );
 
-			S8_S16_BETA_NLT16_MEMCP_UTIL(buf0, 0, n0_rem_dscale_bytes);
+				S8_S16_BETA_NLT16_MEMCP_UTIL(buf0, 0, n0_rem_dscale_bytes);
 
-			// c[0,0-15]
-			S8_S16_BETA_OP_NLT16(c_int16_0p0,buf0,selector1,selector2)
+				// c[0,0-15]
+				S8_S16_BETA_OP_NLT16(c_int16_0p0,buf0,selector1,selector2)
+			}
+			if ( post_ops_attr.c_stor_type == U8 )
+			{
+				dim_t n0_rem_dscale_bytes = n0_rem * sizeof( uint8_t );
+
+				U8_S16_BETA_NLT16_MEMCP_UTIL(buf0, 0, n0_rem_dscale_bytes);
+
+				// c[0,0-15]
+				U8_S16_BETA_OP_NLT16(c_int16_0p0,buf0,selector1,selector2)
+			}
 		}
 		else
 		{
@@ -1782,16 +1944,32 @@ POST_OPS_1xlt16_DISABLE:
 	if ( ( post_ops_attr.buf_downscale != NULL ) &&
 		 ( post_ops_attr.is_last_k == TRUE ) )
 	{
-		// Store the results in downscaled type (int8 instead of int32).
-		__m128i temp[2];
-		__m256i zero_reg = _mm256_setzero_si256();
+		if ( post_ops_attr.c_stor_type == S8 )
+		{
+			// Store the results in downscaled type (int8 instead of int16).
+			__m128i temp[2];
+			__m256i zero_reg = _mm256_setzero_si256();
 
-		// c[0-1,0-15]
-		CVT_STORE_S16_S8_1ROW_NLT16(c_int16_0p0, zero_reg, buf0);
+			// c[0-1,0-15]
+			CVT_STORE_S16_S8_1ROW_NLT16(c_int16_0p0, zero_reg, buf0);
 
-		dim_t n0_rem_dscale_bytes = n0_rem * sizeof( int8_t );
+			dim_t n0_rem_dscale_bytes = n0_rem * sizeof( int8_t );
 
-		CVT_STORE_S16_S8_NLT16_MEMCP_UTIL(buf0, 0, n0_rem_dscale_bytes);
+			CVT_STORE_S16_S8_NLT16_MEMCP_UTIL(buf0, 0, n0_rem_dscale_bytes);
+		}
+		else if ( post_ops_attr.c_stor_type == U8 )
+		{
+			// Store the results in downscaled type (uint8 instead of int16).
+			__m128i temp[2];
+			__m256i zero_reg = _mm256_setzero_si256();
+
+			// c[0-1,0-15]
+			CVT_STORE_S16_U8_1ROW_NLT16(c_int16_0p0, zero_reg, buf0);
+
+			dim_t n0_rem_dscale_bytes = n0_rem * sizeof( uint8_t );
+
+			CVT_STORE_S16_U8_NLT16_MEMCP_UTIL(buf0, 0, n0_rem_dscale_bytes);
+		}
 	}
 	// Case where the output C matrix is s16 or is the temp buffer used to
 	// store intermediate s16 accumulated values for downscaled (C-s8) api.

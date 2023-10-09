@@ -150,7 +150,8 @@ LPGEMM_5LOOP(float,float,float,f32f32f32of32)
     bool is_first_k = FALSE;
 
     lpgemm_post_op_attr post_ops_attr;
-    if ( c_downscale == TRUE )
+	post_ops_attr.c_stor_type = c_downscale;
+    if ( c_downscale < F32 )
     {
         post_ops_attr.buf_downscale = c;
     }

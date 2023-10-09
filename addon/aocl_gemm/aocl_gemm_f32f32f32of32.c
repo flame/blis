@@ -197,7 +197,7 @@ AOCL_GEMM_MATMUL(float,float,float,float,f32f32f32of32)
 		  c, rs_c, cs_c,
 		  alpha, beta,
 		  &rntm_g, lcntx_g,
-		  post_op_list, FALSE
+		  post_op_list, F32
 		);
 	}
 	else
@@ -210,7 +210,7 @@ AOCL_GEMM_MATMUL(float,float,float,float,f32f32f32of32)
 		  c, rs_c, cs_c,
 		  alpha, beta,
 		  &rntm_g, lcntx_g,
-		  post_op_list, FALSE
+		  post_op_list, F32
 		);
 	}
 #else
@@ -229,7 +229,7 @@ AOCL_GEMM_MATMUL(float,float,float,float,f32f32f32of32)
 		  c, rs_c, cs_c,
 		  alpha, beta,
 		  &rntm_g, lcntx_g,
-		  post_op_list, FALSE
+		  post_op_list, F32
 		);
 	}
 	else
@@ -242,7 +242,7 @@ AOCL_GEMM_MATMUL(float,float,float,float,f32f32f32of32)
 		  c, rs_c, cs_c,
 		  alpha, beta,
 		  &rntm_g, lcntx_g,
-		  post_op_list, FALSE
+		  post_op_list, F32
 		);
 	}
 #endif

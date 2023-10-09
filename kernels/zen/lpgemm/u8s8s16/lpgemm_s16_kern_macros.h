@@ -77,7 +77,7 @@
 	scratch1 = _mm256_loadu_si256( ( __m256i const* )buf_ ); \
 	S16_BETA_FMA(reg,scratch1,scratch2) \
 
-// Downscale beta scale macro, scratch2=beta
+// Downscale beta scale macro (s8 -> s16), scratch2=beta
 #define S8_S16_BETA_OP(reg,m_ir,m_ind,n_ind,scratch1,scratch2) \
 	scratch1 = \
 	_mm256_cvtepi8_epi16 \
@@ -91,19 +91,44 @@
 	); \
 	S16_BETA_FMA(reg,scratch1,scratch2) \
 
-// Downscale beta n < 16 scale macro, scratch2=beta
+// Downscale beta scale macro (u8 -> s16), scratch2=beta
+#define U8_S16_BETA_OP(reg,m_ir,m_ind,n_ind,scratch1,scratch2) \
+	scratch1 = \
+	_mm256_cvtepu8_epi16 \
+	( \
+	  _mm_loadu_si128 \
+	  ( \
+	    ( __m128i const* )( ( uint8_t* )post_ops_attr.buf_downscale + \
+	    ( post_ops_attr.rs_c_downscale * ( post_ops_attr.post_op_c_i + m_ind ) ) + \
+	    post_ops_attr.post_op_c_j + ( n_ind * 16 ) )\
+	  ) \
+	); \
+	S16_BETA_FMA(reg,scratch1,scratch2) \
+
+// Downscale beta n < 16 scale macro (s8 -> s16), scratch2=beta
 #define S8_S16_BETA_OP_NLT16(reg,buf_,scratch1,scratch2) \
 	scratch1 = _mm256_cvtepi8_epi16( _mm_loadu_si128( ( __m128i const* )buf_ ) ); \
 	S16_BETA_FMA(reg,scratch1,scratch2) \
 
-#define S8_S16_BETA_NLT16_MEMCP_UTIL(buf_,m_ind,bytes) \
+// Downscale beta n < 16 scale macro (u8 -> s16), scratch2=beta
+#define U8_S16_BETA_OP_NLT16(reg,buf_,scratch1,scratch2) \
+	scratch1 = _mm256_cvtepu8_epi16( _mm_loadu_si128( ( __m128i const* )buf_ ) ); \
+	S16_BETA_FMA(reg,scratch1,scratch2) \
+
+#define US8_S16_BETA_NLT16_MEMCP_HELPER(buf_,m_ind,bytes, C_type) \
 	memcpy \
 	( \
 	  buf_, \
-	  ( ( int8_t* )post_ops_attr.buf_downscale + \
+	  ( ( C_type* )post_ops_attr.buf_downscale + \
 		( post_ops_attr.rs_c_downscale * ( post_ops_attr.post_op_c_i + m_ind ) ) + \
 		post_ops_attr.post_op_c_j ), bytes \
 	); \
+
+#define S8_S16_BETA_NLT16_MEMCP_UTIL(buf_,m_ind,bytes) \
+	US8_S16_BETA_NLT16_MEMCP_HELPER(buf_,m_ind,bytes,int8_t) \
+
+#define U8_S16_BETA_NLT16_MEMCP_UTIL(buf_,m_ind,bytes) \
+	US8_S16_BETA_NLT16_MEMCP_HELPER(buf_,m_ind,bytes,uint8_t) \
  
 // Downscale macro
 #define CVT_MULRND_CVT16(reg, scale0, scale1, zero_point_0) \
@@ -122,33 +147,17 @@
 	res_1 = _mm256_mul_ps( temp_float[0], scale0 ); \
 	res_2 = _mm256_mul_ps( temp_float[1], scale1 ); \
  \
-	/* Round the resultant value to the nearest float value and clip the values between [-128, 127] */ \
+	/* Round the resultant value to the nearest float value. */ \
 	res_1 = \
-	_mm256_min_ps \
-	( \
-	  _mm256_max_ps \
-	  ( \
 	    _mm256_round_ps \
 	    ( \
 	      res_1, ( _MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC ) \
-	    ), \
-	    _mm256_set1_ps( ( float )S8_MIN ) \
-	  ), \
-	  _mm256_set1_ps( ( float )S8_MAX ) \
-	);\
+	    ); \
 	res_2 = \
-	_mm256_min_ps \
-	( \
-	  _mm256_max_ps \
-	  ( \
 	    _mm256_round_ps \
 	    ( \
 	      res_2, (_MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC) \
-	    ), \
-	    _mm256_set1_ps( ( float )S8_MIN ) \
-	  ), \
-	  _mm256_set1_ps( ( float )S8_MAX ) \
-	);\
+	    ); \
  \
 	/* Convert the clipped float32 scaled rounded value to int32 */ \
 	temp_32[0] = _mm256_cvtps_epi32( res_1 ); \
@@ -163,95 +172,151 @@
 	/* Zero point addition.*/ \
 	reg = _mm256_add_epi16( reg, _mm256_cvtepi8_epi16( zero_point_0 ) ); \
 
-// Downscale store macro
-#define CVT_STORE_S16_S8(reg0, reg1, m_ind, n_ind) \
-   /* Convert the s16 to s8 */ \
-	reg0 = _mm256_packs_epi16( reg0, reg1 ); \
-	reg0 = _mm256_permute4x64_epi64( reg0, 0XD8 ); \
+// Downscale store macro helper
+#define CVT_STORE_S16_SU8_HELPER(reg, m_ind, n_ind, C_type) \
+	reg = _mm256_permute4x64_epi64( reg, 0XD8 ); \
  \
 	_mm256_storeu_si256 \
 	( \
-	  ( __m256i* )( ( int8_t* )post_ops_attr.buf_downscale + \
+	  ( __m256i* )( ( C_type* )post_ops_attr.buf_downscale + \
 	  ( post_ops_attr.rs_c_downscale * ( post_ops_attr.post_op_c_i + m_ind ) ) + \
 	  post_ops_attr.post_op_c_j + ( n_ind * 32 ) ), \
-	  reg0 \
-	) \
+	  reg \
+	); \
 
-// Downscale store macro for fringe cases
-#define CVT_STORE_S16_S8_2ROW(reg0, reg1, m_ind0, m_ind1, n_ind) \
-	/* Convert the s16 to s8 */ \
+// Downscale store macro (s16 -> s8)
+#define CVT_STORE_S16_S8(reg0, reg1, m_ind, n_ind) \
+   /* Convert the s16 to s8 */ \
 	reg0 = _mm256_packs_epi16( reg0, reg1 ); \
-	reg0 = _mm256_permute4x64_epi64( reg0, 0XD8 ); \
+	CVT_STORE_S16_SU8_HELPER(reg0, m_ind, n_ind, int8_t) \
+
+// Downscale store macro (s16 -> u8)
+#define CVT_STORE_S16_U8(reg0, reg1, m_ind, n_ind) \
+   /* Convert the s16 to s8 */ \
+	reg0 = _mm256_packus_epi16( reg0, reg1 ); \
+	CVT_STORE_S16_SU8_HELPER(reg0, m_ind, n_ind, uint8_t) \
+
+// Downscale store helper macro for fringe cases
+#define CVT_STORE_S16_US8_2ROW_HELPER(reg, m_ind0, m_ind1, n_ind, C_type) \
+	reg = _mm256_permute4x64_epi64( reg, 0XD8 ); \
  \
 	/* Extract the first 128 bits of the register*/ \
-	temp[0] = _mm256_extractf128_si256( reg0, 0 ); \
+	temp[0] = _mm256_extractf128_si256( reg, 0 ); \
 	/* Extract the second 128 bits of the register*/ \
-	temp[1] = _mm256_extractf128_si256( reg0, 1 ); \
+	temp[1] = _mm256_extractf128_si256( reg, 1 ); \
  \
 	_mm_storeu_si128 \
 	( \
-	  ( __m128i* )( ( int8_t* )post_ops_attr.buf_downscale + \
+	  ( __m128i* )( ( C_type* )post_ops_attr.buf_downscale + \
 	  ( post_ops_attr.rs_c_downscale * ( post_ops_attr.post_op_c_i + m_ind0 ) ) + \
 	  post_ops_attr.post_op_c_j + ( n_ind * 16 ) ), \
 	  temp[0] \
 	); \
 	_mm_storeu_si128 \
 	( \
-	  ( __m128i* )( ( int8_t* )post_ops_attr.buf_downscale + \
+	  ( __m128i* )( ( C_type* )post_ops_attr.buf_downscale + \
 	  ( post_ops_attr.rs_c_downscale * ( post_ops_attr.post_op_c_i + m_ind1 ) ) + \
 	  post_ops_attr.post_op_c_j + ( n_ind * 16 ) ), \
 	  temp[1] \
 	); \
 
-// Downscale store macro for fringe cases
-#define CVT_STORE_S16_S8_1ROW(reg0, reg1, m_ind0, n_ind) \
+// Downscale store macro for fringe cases (s16 -> s8)
+#define CVT_STORE_S16_S8_2ROW(reg0, reg1, m_ind0, m_ind1, n_ind) \
 	/* Convert the s16 to s8 */ \
 	reg0 = _mm256_packs_epi16( reg0, reg1 ); \
-	reg0 = _mm256_permute4x64_epi64( reg0, 0XD8 ); \
+	CVT_STORE_S16_US8_2ROW_HELPER(reg0, m_ind0, m_ind1, n_ind, int8_t) \
+
+// Downscale store macro for fringe cases (s16 -> u8)
+#define CVT_STORE_S16_U8_2ROW(reg0, reg1, m_ind0, m_ind1, n_ind) \
+	/* Convert the s16 to u8 */ \
+	reg0 = _mm256_packus_epi16( reg0, reg1 ); \
+	CVT_STORE_S16_US8_2ROW_HELPER(reg0, m_ind0, m_ind1, n_ind, uint8_t) \
+
+// Downscale store helper macro for fringe cases
+#define CVT_STORE_S16_US8_1ROW(reg, m_ind0, n_ind, C_type) \
+	reg = _mm256_permute4x64_epi64( reg, 0XD8 ); \
  \
 	/* Extract the first 128 bits of the register*/ \
-	temp[0] = _mm256_extractf128_si256( reg0, 0 ); \
+	temp[0] = _mm256_extractf128_si256( reg, 0 ); \
  \
 	_mm_storeu_si128 \
 	( \
-	  ( __m128i* )( ( int8_t* )post_ops_attr.buf_downscale + \
+	  ( __m128i* )( ( C_type* )post_ops_attr.buf_downscale + \
 	  ( post_ops_attr.rs_c_downscale * ( post_ops_attr.post_op_c_i + m_ind0 ) ) + \
 	  post_ops_attr.post_op_c_j + ( n_ind * 16 ) ), \
 	  temp[0] \
 	); \
 
-// Downscale store macro for n < 16 fringe cases
-#define CVT_STORE_S16_S8_2ROW_NLT16(reg0, reg1, buf0, buf1) \
+// Downscale store (s16 -> s8) macro for fringe cases
+#define CVT_STORE_S16_S8_1ROW(reg0, reg1, m_ind0, n_ind) \
 	/* Convert the s16 to s8 */ \
 	reg0 = _mm256_packs_epi16( reg0, reg1 ); \
-	reg0 = _mm256_permute4x64_epi64( reg0, 0XD8 ); \
+	CVT_STORE_S16_US8_1ROW(reg0, m_ind0, n_ind, int8_t) \
+
+// Downscale store (s16 -> u8) macro for fringe cases
+#define CVT_STORE_S16_U8_1ROW(reg0, reg1, m_ind0, n_ind) \
+	/* Convert the s16 to u8 */ \
+	reg0 = _mm256_packus_epi16( reg0, reg1 ); \
+	CVT_STORE_S16_US8_1ROW(reg0, m_ind0, n_ind, uint8_t) \
+
+// Downscale store helper macro for n < 16 fringe cases
+#define CVT_STORE_S16_US8_2ROW_NLT16(reg, buf0, buf1) \
+	reg = _mm256_permute4x64_epi64( reg, 0XD8 ); \
  \
 	/* Extract the first 128 bits of the register*/ \
-	temp[0] = _mm256_extractf128_si256( reg0, 0 ); \
+	temp[0] = _mm256_extractf128_si256( reg, 0 ); \
 	/* Extract the second 128 bits of the register*/ \
-	temp[1] = _mm256_extractf128_si256( reg0, 1 ); \
+	temp[1] = _mm256_extractf128_si256( reg, 1 ); \
  \
 	_mm_storeu_si128( ( __m128i* )buf0, temp[0] ); \
 	_mm_storeu_si128( ( __m128i* )buf1, temp[1] ); \
 
-// Downscale store macro for n < 16 fringe cases
-#define CVT_STORE_S16_S8_1ROW_NLT16(reg0, reg1, buf0) \
+// Downscale store (int16 -> s8) macro for n < 16 fringe cases
+#define CVT_STORE_S16_S8_2ROW_NLT16(reg0, reg1, buf0, buf1) \
 	/* Convert the s16 to s8 */ \
 	reg0 = _mm256_packs_epi16( reg0, reg1 ); \
-	reg0 = _mm256_permute4x64_epi64( reg0, 0XD8 ); \
+	CVT_STORE_S16_US8_2ROW_NLT16(reg0, buf0, buf1) \
+
+// Downscale store (int16 -> u8) macro for n < 16 fringe cases
+#define CVT_STORE_S16_U8_2ROW_NLT16(reg0, reg1, buf0, buf1) \
+	/* Convert the s16 to s8 */ \
+	reg0 = _mm256_packus_epi16( reg0, reg1 ); \
+	CVT_STORE_S16_US8_2ROW_NLT16(reg0, buf0, buf1) \
+
+// Downscale store helper macro for n < 16 fringe cases
+#define CVT_STORE_S16_US8_1ROW_NLT16(reg, buf0) \
+	reg = _mm256_permute4x64_epi64( reg, 0XD8 ); \
  \
 	/* Extract the first 128 bits of the register*/ \
-	temp[0] = _mm256_extractf128_si256( reg0, 0 ); \
+	temp[0] = _mm256_extractf128_si256( reg, 0 ); \
  \
 	_mm_storeu_si128( ( __m128i* )buf0, temp[0] ); \
 
-#define CVT_STORE_S16_S8_NLT16_MEMCP_UTIL(buf_,m_ind,bytes) \
+// Downscale store (s16 -> s8) macro for n < 16 fringe cases
+#define CVT_STORE_S16_S8_1ROW_NLT16(reg0, reg1, buf0) \
+	/* Convert the s16 to s8 */ \
+	reg0 = _mm256_packs_epi16( reg0, reg1 ); \
+	CVT_STORE_S16_US8_1ROW_NLT16(reg0, buf0) \
+
+// Downscale store (s16 -> u8) macro for n < 16 fringe cases
+#define CVT_STORE_S16_U8_1ROW_NLT16(reg0, reg1, buf0) \
+	/* Convert the s16 to u8 */ \
+	reg0 = _mm256_packus_epi16( reg0, reg1 ); \
+	CVT_STORE_S16_US8_1ROW_NLT16(reg0, buf0) \
+
+#define CVT_STORE_S16_US8_NLT16_MEMCP_HELPER(buf_,m_ind,bytes, C_type) \
 	memcpy \
 	( \
-	  ( ( int8_t* )post_ops_attr.buf_downscale + \
+	  ( ( C_type* )post_ops_attr.buf_downscale + \
 		( post_ops_attr.rs_c_downscale * ( post_ops_attr.post_op_c_i + m_ind ) ) + \
 		post_ops_attr.post_op_c_j ), buf_, bytes \
 	); \
+
+#define CVT_STORE_S16_S8_NLT16_MEMCP_UTIL(buf_,m_ind,bytes) \
+	CVT_STORE_S16_US8_NLT16_MEMCP_HELPER(buf_,m_ind,bytes, int8_t) \
+
+#define CVT_STORE_S16_U8_NLT16_MEMCP_UTIL(buf_,m_ind,bytes) \
+	CVT_STORE_S16_US8_NLT16_MEMCP_HELPER(buf_,m_ind,bytes, uint8_t) \
 
 //--------------------------------------------------------------------------
 /* GeLU (x) = 0.5* x * (1 + tanh ( 0.797884 * ( x + ( 0.044715 * x^3 ) ) ) )  */

@@ -223,29 +223,58 @@ LPGEMM_M_FRINGE_KERN(uint8_t,int8_t,int16_t,u8s8s16o16_4x32)
 		if ( ( post_ops_attr.buf_downscale != NULL ) &&
 			 ( post_ops_attr.is_first_k == TRUE ) )
 		{
-			// c[0,0-15]
-			S8_S16_BETA_OP(c_int16_0p0,0,0,0,selector1,selector2)
+			if ( post_ops_attr.c_stor_type == S8 )
+			{
+				// c[0,0-15]
+				S8_S16_BETA_OP(c_int16_0p0,0,0,0,selector1,selector2)
 
-			// c[0, 16-31]
-			S8_S16_BETA_OP(c_int16_0p1,0,0,1,selector1,selector2)
+				// c[0, 16-31]
+				S8_S16_BETA_OP(c_int16_0p1,0,0,1,selector1,selector2)
 
-			// c[1,0-15]
-			S8_S16_BETA_OP(c_int16_1p0,0,1,0,selector1,selector2)
+				// c[1,0-15]
+				S8_S16_BETA_OP(c_int16_1p0,0,1,0,selector1,selector2)
 
-			// c[1,16-31]
-			S8_S16_BETA_OP(c_int16_1p1,0,1,1,selector1,selector2)
+				// c[1,16-31]
+				S8_S16_BETA_OP(c_int16_1p1,0,1,1,selector1,selector2)
 
-			// c[2,0-15]
-			S8_S16_BETA_OP(c_int16_2p0,0,2,0,selector1,selector2)
+				// c[2,0-15]
+				S8_S16_BETA_OP(c_int16_2p0,0,2,0,selector1,selector2)
 
-			// c[2,16-31]
-			S8_S16_BETA_OP(c_int16_2p1,0,2,1,selector1,selector2)
+				// c[2,16-31]
+				S8_S16_BETA_OP(c_int16_2p1,0,2,1,selector1,selector2)
 
-			// c[3,0-15]
-			S8_S16_BETA_OP(c_int16_3p0,0,3,0,selector1,selector2)
+				// c[3,0-15]
+				S8_S16_BETA_OP(c_int16_3p0,0,3,0,selector1,selector2)
 
-			// c[3,16-31]
-			S8_S16_BETA_OP(c_int16_3p1,0,3,1,selector1,selector2)
+				// c[3,16-31]
+				S8_S16_BETA_OP(c_int16_3p1,0,3,1,selector1,selector2)
+			}
+			else if ( post_ops_attr.c_stor_type == U8 )
+			{
+				// c[0,0-15]
+				U8_S16_BETA_OP(c_int16_0p0,0,0,0,selector1,selector2)
+
+				// c[0, 16-31]
+				U8_S16_BETA_OP(c_int16_0p1,0,0,1,selector1,selector2)
+
+				// c[1,0-15]
+				U8_S16_BETA_OP(c_int16_1p0,0,1,0,selector1,selector2)
+
+				// c[1,16-31]
+				U8_S16_BETA_OP(c_int16_1p1,0,1,1,selector1,selector2)
+
+				// c[2,0-15]
+				U8_S16_BETA_OP(c_int16_2p0,0,2,0,selector1,selector2)
+
+				// c[2,16-31]
+				U8_S16_BETA_OP(c_int16_2p1,0,2,1,selector1,selector2)
+
+				// c[3,0-15]
+				U8_S16_BETA_OP(c_int16_3p0,0,3,0,selector1,selector2)
+
+				// c[3,16-31]
+				U8_S16_BETA_OP(c_int16_3p1,0,3,1,selector1,selector2)
+			}
 		}
 		else
 		{
@@ -528,18 +557,36 @@ POST_OPS_4x32_DISABLE:
 	if ( ( post_ops_attr.buf_downscale != NULL ) &&
 		 ( post_ops_attr.is_last_k == TRUE ) )
 	{
-		// Store the results in downscaled type (int8 instead of int32).
-		// c[0,0-31]
-		CVT_STORE_S16_S8(c_int16_0p0, c_int16_0p1, 0, 0);
+		if ( post_ops_attr.c_stor_type == S8 )
+		{
+			// Store the results in downscaled type (int8 instead of int16).
+			// c[0,0-31]
+			CVT_STORE_S16_S8(c_int16_0p0, c_int16_0p1, 0, 0);
 
-		// c[1,0-31]
-		CVT_STORE_S16_S8(c_int16_1p0, c_int16_1p1, 1, 0);
+			// c[1,0-31]
+			CVT_STORE_S16_S8(c_int16_1p0, c_int16_1p1, 1, 0);
 
-		// c[2,0-31]
-		CVT_STORE_S16_S8(c_int16_2p0, c_int16_2p1, 2, 0);
+			// c[2,0-31]
+			CVT_STORE_S16_S8(c_int16_2p0, c_int16_2p1, 2, 0);
 
-		// c[3,0-31]
-		CVT_STORE_S16_S8(c_int16_3p0, c_int16_3p1, 3, 0);
+			// c[3,0-31]
+			CVT_STORE_S16_S8(c_int16_3p0, c_int16_3p1, 3, 0);
+		}
+		else if ( post_ops_attr.c_stor_type == U8 )
+		{
+			// Store the results in downscaled type (uint8 instead of int16).
+			// c[0,0-31]
+			CVT_STORE_S16_U8(c_int16_0p0, c_int16_0p1, 0, 0);
+
+			// c[1,0-31]
+			CVT_STORE_S16_U8(c_int16_1p0, c_int16_1p1, 1, 0);
+
+			// c[2,0-31]
+			CVT_STORE_S16_U8(c_int16_2p0, c_int16_2p1, 2, 0);
+
+			// c[3,0-31]
+			CVT_STORE_S16_U8(c_int16_3p0, c_int16_3p1, 3, 0);
+		}
 	}
 	// Case where the output C matrix is s16 or is the temp buffer used to
 	// store intermediate s16 accumulated values for downscaled (C-s8) api.
@@ -696,17 +743,34 @@ LPGEMM_M_FRINGE_KERN(uint8_t,int8_t,int16_t,u8s8s16o16_2x32)
 		if ( ( post_ops_attr.buf_downscale != NULL ) &&
 			 ( post_ops_attr.is_first_k == TRUE ) )
 		{
-			// c[0,0-15]
-			S8_S16_BETA_OP(c_int16_0p0,0,0,0,selector1,selector2)
+			if ( post_ops_attr.c_stor_type == S8 )
+			{
+				// c[0,0-15]
+				S8_S16_BETA_OP(c_int16_0p0,0,0,0,selector1,selector2)
 
-			// c[0, 16-31]
-			S8_S16_BETA_OP(c_int16_0p1,0,0,1,selector1,selector2)
+				// c[0, 16-31]
+				S8_S16_BETA_OP(c_int16_0p1,0,0,1,selector1,selector2)
 
-			// c[1,0-15]
-			S8_S16_BETA_OP(c_int16_1p0,0,1,0,selector1,selector2)
+				// c[1,0-15]
+				S8_S16_BETA_OP(c_int16_1p0,0,1,0,selector1,selector2)
 
-			// c[1,16-31]
-			S8_S16_BETA_OP(c_int16_1p1,0,1,1,selector1,selector2)
+				// c[1,16-31]
+				S8_S16_BETA_OP(c_int16_1p1,0,1,1,selector1,selector2)
+			}
+			else if ( post_ops_attr.c_stor_type == U8 )
+			{
+				// c[0,0-15]
+				U8_S16_BETA_OP(c_int16_0p0,0,0,0,selector1,selector2)
+
+				// c[0, 16-31]
+				U8_S16_BETA_OP(c_int16_0p1,0,0,1,selector1,selector2)
+
+				// c[1,0-15]
+				U8_S16_BETA_OP(c_int16_1p0,0,1,0,selector1,selector2)
+
+				// c[1,16-31]
+				U8_S16_BETA_OP(c_int16_1p1,0,1,1,selector1,selector2)
+			}
 		}
 		else
 		{
@@ -901,12 +965,24 @@ POST_OPS_2x32_DISABLE:
 	if ( ( post_ops_attr.buf_downscale != NULL ) &&
 		 ( post_ops_attr.is_last_k == TRUE ) )
 	{
-		// Store the results in downscaled type (int8 instead of int32).
-		// c[0,0-31]
-		CVT_STORE_S16_S8(c_int16_0p0, c_int16_0p1, 0, 0);
+		if ( post_ops_attr.c_stor_type == S8 )
+		{
+			// Store the results in downscaled type (int8 instead of int16).
+			// c[0,0-31]
+			CVT_STORE_S16_S8(c_int16_0p0, c_int16_0p1, 0, 0);
 
-		// c[1,0-31]
-		CVT_STORE_S16_S8(c_int16_1p0, c_int16_1p1, 1, 0);
+			// c[1,0-31]
+			CVT_STORE_S16_S8(c_int16_1p0, c_int16_1p1, 1, 0);
+		}
+		else if ( post_ops_attr.c_stor_type == U8 )
+		{
+			// Store the results in downscaled type (uint8 instead of int16).
+			// c[0,0-31]
+			CVT_STORE_S16_U8(c_int16_0p0, c_int16_0p1, 0, 0);
+
+			// c[1,0-31]
+			CVT_STORE_S16_U8(c_int16_1p0, c_int16_1p1, 1, 0);
+		}
 	}
 	// Case where the output C matrix is s16 or is the temp buffer used to
 	// store intermediate s16 accumulated values for downscaled (C-s8) api.
@@ -1019,11 +1095,22 @@ LPGEMM_M_FRINGE_KERN(uint8_t,int8_t,int16_t,u8s8s16o16_1x32)
 		if ( ( post_ops_attr.buf_downscale != NULL ) &&
 			 ( post_ops_attr.is_first_k == TRUE ) )
 		{
-			// c[0,0-15]
-			S8_S16_BETA_OP(c_int16_0p0,0,0,0,selector1,selector2)
+			if ( post_ops_attr.c_stor_type == S8 )
+			{
+				// c[0,0-15]
+				S8_S16_BETA_OP(c_int16_0p0,0,0,0,selector1,selector2)
 
-			// c[0, 16-31]
-			S8_S16_BETA_OP(c_int16_0p1,0,0,1,selector1,selector2)
+				// c[0, 16-31]
+				S8_S16_BETA_OP(c_int16_0p1,0,0,1,selector1,selector2)
+			}
+			else if ( post_ops_attr.c_stor_type == U8 )
+			{
+				// c[0,0-15]
+				U8_S16_BETA_OP(c_int16_0p0,0,0,0,selector1,selector2)
+
+				// c[0, 16-31]
+				U8_S16_BETA_OP(c_int16_0p1,0,0,1,selector1,selector2)
+			}
 		}
 		else
 		{
@@ -1174,9 +1261,18 @@ POST_OPS_1x32_DISABLE:
 	if ( ( post_ops_attr.buf_downscale != NULL ) &&
 		 ( post_ops_attr.is_last_k == TRUE ) )
 	{
-		// Store the results in downscaled type (int8 instead of int32).
-		// c[0,0-31]
-		CVT_STORE_S16_S8(c_int16_0p0, c_int16_0p1, 0, 0);
+		if ( post_ops_attr.c_stor_type == S8 )
+		{
+			// Store the results in downscaled type (int8 instead of int16).
+			// c[0,0-31]
+			CVT_STORE_S16_S8(c_int16_0p0, c_int16_0p1, 0, 0);
+		}
+		else if ( post_ops_attr.c_stor_type == U8 )
+		{
+			// Store the results in downscaled type (uint8 instead of int16).
+			// c[0,0-31]
+			CVT_STORE_S16_U8(c_int16_0p0, c_int16_0p1, 0, 0);
+		}
 	}
 	// Case where the output C matrix is s16 or is the temp buffer used to
 	// store intermediate s16 accumulated values for downscaled (C-s8) api.
