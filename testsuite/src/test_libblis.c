@@ -1869,7 +1869,8 @@ void libblis_test_op_driver
 					}
 
 					// Add this datatype combination to the list.
-					dc_str[ n_dt_combos ] = strdup( tmp );
+					dc_str[ n_dt_combos ] = ( char* ) malloc( ( n_operands_all + 1 ) * sizeof( char ) );
+					strcpy( dc_str[ n_dt_combos ], tmp );
 					n_dt_combos++;
 				}
 
