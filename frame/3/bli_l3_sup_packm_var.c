@@ -98,8 +98,8 @@ void PASTEMAC(ch,varname) \
 	ldc            = rs_c; \
 	ldp            = rs_p; \
 \
-	num_t  dt     = PASTEMAC(ch,type); \
-	ukr2_t ker_id = BLIS_PACKM_KER; \
+	num_t  dt      = PASTEMAC(ch,type); \
+	ukr_t ker_id   = BLIS_PACKM_KER; \
 \
 	/* Query the context for the unpackm kernel corresponding to the current
 	   panel dimension, or kernel id. */ \
@@ -371,7 +371,7 @@ void PASTEMAC(ch,varname) \
 			   or round-robin partitioning was requested at configure-time. */ \
 			if ( bli_is_my_iter( it, it_start, it_end, tid, nt ) ) \
 			{ \
-				PASTEMAC2(ch,scal2v,BLIS_TAPI_EX_SUF) \
+				PASTEMAC(ch,scal2v,BLIS_TAPI_EX_SUF) \
 				( \
 				  conjc, \
 				  vector_len, \

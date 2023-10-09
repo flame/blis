@@ -72,7 +72,7 @@ void PASTEMAC(ch,varname) \
 	/* y = beta * y; */ \
 	/* NOTE: We don't explicitly handle the case where beta == 0 here
 	   since that behavior is handled within the scalv kernel itself. */ \
-	PASTEMAC2(ch,scalv,scalvsuf) \
+	PASTEMAC(ch,scalv,scalvsuf) \
 	( \
 	  BLIS_NO_CONJUGATE, \
 	  n_elem, \
@@ -99,7 +99,7 @@ void PASTEMAC(ch,varname) \
 \
 		/* y = y + alpha * A1 * x1; */ \
 		/*kfp_af*/ \
-		PASTEMAC2(ch,axpyf,axpyfsuf) \
+		PASTEMAC(ch,axpyf,axpyfsuf) \
 		( \
 		  conja, \
 		  conjx, \
@@ -161,7 +161,7 @@ void PASTEMAC(ch,varname) \
 	if ( PASTEMAC(ch,eq0)( *beta ) ) \
 	{ \
 		/* y = 0; */ \
-		PASTEMAC2(ch,setv,BLIS_TAPI_EX_SUF) \
+		PASTEMAC(ch,setv,BLIS_TAPI_EX_SUF) \
 		( \
 		  BLIS_NO_CONJUGATE, \
 		  n_elem, \
@@ -174,7 +174,7 @@ void PASTEMAC(ch,varname) \
 	else \
 	{ \
 		/* y = beta * y; */ \
-		PASTEMAC2(ch,scalv,BLIS_TAPI_EX_SUF) \
+		PASTEMAC(ch,scalv,BLIS_TAPI_EX_SUF) \
 		( \
 		  BLIS_NO_CONJUGATE, \
 		  n_elem, \

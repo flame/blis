@@ -45,7 +45,7 @@ do \
 		for ( dim_t mn = 0; mn < cdim; ++mn ) \
 		{ \
 			ctypep_r alpha_r, alpha_i, ka_r, ka_i; \
-			PASTEMAC2(cha,chp,copyris)( *(alpha1 + mn*inca2 + 0), *(alpha1 + mn*inca2 + 1), alpha_r, alpha_i ); \
+			PASTEMAC(cha,chp,copyris)( *(alpha1 + mn*inca2 + 0), *(alpha1 + mn*inca2 + 1), alpha_r, alpha_i ); \
 			PASTEMAC(chp,op)( kappa_r, kappa_i, alpha_r, alpha_i, ka_r, ka_i ); \
 			for ( dim_t d = 0; d < dfac; ++d ) \
 			{ \
@@ -71,7 +71,7 @@ do \
 		for ( dim_t mn = 0; mn < cdim; ++mn ) \
 		{ \
 			ctypep_r alpha_r, alpha_i, ka_r, ka_i; \
-			PASTEMAC2(cha,chp,copyris)( *(alpha1 + mn*inca2 + 0), *(alpha1 + mn*inca2 + 1), alpha_r, alpha_i ); \
+			PASTEMAC(cha,chp,copyris)( *(alpha1 + mn*inca2 + 0), *(alpha1 + mn*inca2 + 1), alpha_r, alpha_i ); \
 			PASTEMAC(chp,op)( kappa_r, kappa_i, alpha_r, alpha_i, ka_r, ka_i ); \
 			for ( dim_t d = 0; d < dfac; ++d ) \
 				PASTEMAC(chp,copyris)( ka_r, ka_i, *(pi1_r + mn*dfac + d), *(pi1_i + mn*dfac + d) ); \
@@ -87,7 +87,7 @@ do \
 #undef  GENTFUNC2R
 #define GENTFUNC2R( ctypea, ctypea_r, cha, cha_r, ctypep, ctypep_r, chp, chp_r, opname, arch, suf ) \
 \
-void PASTEMAC4(cha,chp,opname,arch,suf) \
+void PASTEMAC(cha,chp,opname,arch,suf) \
      ( \
              conj_t  conja, \
              pack_t  schema, \

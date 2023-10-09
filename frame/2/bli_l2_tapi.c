@@ -43,7 +43,7 @@
 #undef  GENTFUNC
 #define GENTFUNC( ctype, ch, opname, ftname, rvarname, cvarname ) \
 \
-void PASTEMAC2(ch,opname,EX_SUF) \
+void PASTEMAC(ch,opname,EX_SUF) \
      ( \
              trans_t transa, \
              conj_t  conjx, \
@@ -76,7 +76,7 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 	   return early. */ \
 	if ( bli_zero_dim1( n_x ) || PASTEMAC(ch,eq0)( *alpha ) ) \
 	{ \
-		PASTEMAC2(ch,scalv,BLIS_TAPI_EX_SUF) \
+		PASTEMAC(ch,scalv,BLIS_TAPI_EX_SUF) \
 		( \
 		  BLIS_NO_CONJUGATE, \
 		  m_y, \
@@ -89,7 +89,7 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 	} \
 \
 	/* Declare a void function pointer for the current operation. */ \
-	PASTECH2(ch,ftname,_unb_ft) f; \
+	PASTECH(ch,ftname,_unb_ft) f; \
 \
 	/* Choose the underlying implementation. */ \
 	if ( bli_does_notrans( transa ) ) \
@@ -126,7 +126,7 @@ INSERT_GENTFUNC_BASIC( gemv, gemv, gemv_unf_var1, gemv_unf_var2 )
 #undef  GENTFUNC
 #define GENTFUNC( ctype, ch, opname, ftname, rvarname, cvarname ) \
 \
-void PASTEMAC2(ch,opname,EX_SUF) \
+void PASTEMAC(ch,opname,EX_SUF) \
      ( \
              conj_t conjx, \
              conj_t conjy, \
@@ -150,7 +150,7 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 	if ( cntx == NULL ) cntx = bli_gks_query_cntx(); \
 \
 	/* Declare a void function pointer for the current operation. */ \
-	PASTECH2(ch,ftname,_unb_ft) f; \
+	PASTECH(ch,ftname,_unb_ft) f; \
 \
 	/* Choose the underlying implementation. */ \
 	if ( bli_is_row_stored( rs_a, cs_a ) ) f = PASTEMAC(ch,rvarname); \
@@ -178,7 +178,7 @@ INSERT_GENTFUNC_BASIC( ger, ger, ger_unb_var1, ger_unb_var2 )
 #undef  GENTFUNC
 #define GENTFUNC( ctype, ch, opname, ftname, conjh, rvarname, cvarname ) \
 \
-void PASTEMAC2(ch,opname,EX_SUF) \
+void PASTEMAC(ch,opname,EX_SUF) \
      ( \
              uplo_t uploa, \
              conj_t conja, \
@@ -203,7 +203,7 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 	   return early. */ \
 	if ( bli_zero_dim1( m ) || PASTEMAC(ch,eq0)( *alpha ) ) \
 	{ \
-		PASTEMAC2(ch,scalv,BLIS_TAPI_EX_SUF) \
+		PASTEMAC(ch,scalv,BLIS_TAPI_EX_SUF) \
 		( \
 		  BLIS_NO_CONJUGATE, \
 		  m, \
@@ -216,7 +216,7 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 	} \
 \
 	/* Declare a void function pointer for the current operation. */ \
-	PASTECH2(ch,ftname,_unb_ft) f; \
+	PASTECH(ch,ftname,_unb_ft) f; \
 \
 	/* Choose the underlying implementation. */ \
 	if ( bli_is_lower( uploa ) ) \
@@ -255,7 +255,7 @@ INSERT_GENTFUNC_BASIC( symv, hemv, BLIS_NO_CONJUGATE, hemv_unf_var1, hemv_unf_va
 #undef  GENTFUNCR
 #define GENTFUNCR( ctype, ctype_r, ch, chr, opname, ftname, conjh, rvarname, cvarname ) \
 \
-void PASTEMAC2(ch,opname,EX_SUF) \
+void PASTEMAC(ch,opname,EX_SUF) \
      ( \
              uplo_t   uploa, \
              conj_t   conjx, \
@@ -278,13 +278,13 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 	/* Make a local copy of alpha, cast into the complex domain. This
 	   allows us to use the same underlying her variants to implement
 	   both her and syr operations. */ \
-	PASTEMAC2(chr,ch,copys)( *alpha, alpha_local ); \
+	PASTEMAC(chr,ch,copys)( *alpha, alpha_local ); \
 \
 	/* Obtain a valid context from the gks if necessary. */ \
 	if ( cntx == NULL ) cntx = bli_gks_query_cntx(); \
 \
 	/* Declare a void function pointer for the current operation. */ \
-	PASTECH2(ch,ftname,_unb_ft) f; \
+	PASTECH(ch,ftname,_unb_ft) f; \
 \
 	/* Choose the underlying implementation. */ \
 	if ( bli_is_lower( uploa ) ) \
@@ -319,7 +319,7 @@ INSERT_GENTFUNCR_BASIC( her, her, BLIS_CONJUGATE, her_unb_var1, her_unb_var2 )
 #undef  GENTFUNC
 #define GENTFUNC( ctype, ch, opname, ftname, conjh, rvarname, cvarname ) \
 \
-void PASTEMAC2(ch,opname,EX_SUF) \
+void PASTEMAC(ch,opname,EX_SUF) \
      ( \
              uplo_t uploa, \
              conj_t conjx, \
@@ -341,7 +341,7 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 	if ( cntx == NULL ) cntx = bli_gks_query_cntx(); \
 \
 	/* Declare a void function pointer for the current operation. */ \
-	PASTECH2(ch,ftname,_unb_ft) f; \
+	PASTECH(ch,ftname,_unb_ft) f; \
 \
 	/* Choose the underlying implementation. */ \
 	if ( bli_is_lower( uploa ) ) \
@@ -376,7 +376,7 @@ INSERT_GENTFUNC_BASIC( syr, her, BLIS_NO_CONJUGATE, her_unb_var1, her_unb_var2 )
 #undef  GENTFUNC
 #define GENTFUNC( ctype, ch, opname, ftname, conjh, rvarname, cvarname ) \
 \
-void PASTEMAC2(ch,opname,EX_SUF) \
+void PASTEMAC(ch,opname,EX_SUF) \
      ( \
              uplo_t uploa, \
              conj_t conjx, \
@@ -400,7 +400,7 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 	if ( cntx == NULL ) cntx = bli_gks_query_cntx(); \
 \
 	/* Declare a void function pointer for the current operation. */ \
-	PASTECH2(ch,ftname,_unb_ft) f; \
+	PASTECH(ch,ftname,_unb_ft) f; \
 \
 	/* Choose the underlying implementation. */ \
 	if ( bli_is_lower( uploa ) ) \
@@ -438,7 +438,7 @@ INSERT_GENTFUNC_BASIC( syr2, her2, BLIS_NO_CONJUGATE, her2_unf_var1, her2_unf_va
 #undef  GENTFUNC
 #define GENTFUNC( ctype, ch, opname, ftname, rvarname, cvarname ) \
 \
-void PASTEMAC2(ch,opname,EX_SUF) \
+void PASTEMAC(ch,opname,EX_SUF) \
      ( \
              uplo_t  uploa, \
              trans_t transa, \
@@ -463,7 +463,7 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 	/* If alpha is zero, set x to zero and return early. */ \
 	if ( PASTEMAC(ch,eq0)( *alpha ) ) \
 	{ \
-		PASTEMAC2(ch,setv,BLIS_TAPI_EX_SUF) \
+		PASTEMAC(ch,setv,BLIS_TAPI_EX_SUF) \
 		( \
 		  BLIS_NO_CONJUGATE, \
 		  m, \
@@ -476,7 +476,7 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 	} \
 \
 	/* Declare a void function pointer for the current operation. */ \
-	PASTECH2(ch,ftname,_unb_ft) f; \
+	PASTECH(ch,ftname,_unb_ft) f; \
 \
 	/* Choose the underlying implementation. */ \
 	if ( bli_does_notrans( transa ) ) \

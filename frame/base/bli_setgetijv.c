@@ -94,7 +94,7 @@ void PASTEMAC(ch,opname) \
 \
 	ctype* restrict x_i = x_cast + (i  )*incx; \
 \
-	PASTEMAC2(z,ch,sets)( ar, ai, *x_i ); \
+	PASTEMAC(z,ch,sets)( ar, ai, *x_i ); \
 }
 
 INSERT_GENTFUNC_BASIC( setijv )
@@ -161,7 +161,7 @@ void PASTEMAC(ch,opname) \
 \
 	const ctype* restrict x_i = x_cast + (i  )*incx; \
 \
-	PASTEMAC2(ch,z,gets)( *x_i, *ar, *ai ); \
+	PASTEMAC(ch,z,gets)( *x_i, *ar, *ai ); \
 }
 
 INSERT_GENTFUNC_BASIC( getijv )

@@ -41,13 +41,13 @@
 #undef  GENFRONT
 #define GENFRONT( opname ) \
 \
-GENARRAY_FPA( PASTECH2(opname,BLIS_TAPI_EX_SUF,_vft), \
+GENARRAY_FPA( PASTECH(opname,BLIS_TAPI_EX_SUF,_vft), \
               PASTECH(opname,BLIS_TAPI_EX_SUF) ); \
 \
-PASTECH2(opname,BLIS_TAPI_EX_SUF,_vft) \
-PASTEMAC2(opname,BLIS_TAPI_EX_SUF,_qfp)( num_t dt ) \
+PASTECH(opname,BLIS_TAPI_EX_SUF,_vft) \
+PASTEMAC(opname,BLIS_TAPI_EX_SUF,_qfp)( num_t dt ) \
 { \
-	return PASTECH2(opname,BLIS_TAPI_EX_SUF,_fpa)[ dt ]; \
+	return PASTECH(opname,BLIS_TAPI_EX_SUF,_fpa)[ dt ]; \
 }
 
 GENFRONT( addm )
@@ -67,13 +67,13 @@ GENFRONT( xpbym )
 #undef  GENFRONT
 #define GENFRONT( opname ) \
 \
-GENARRAY_FPA2( PASTECH2(opname,BLIS_TAPI_EX_SUF,_vft), \
+GENARRAY_FPA2( PASTECH(opname,BLIS_TAPI_EX_SUF,_vft), \
                PASTECH(opname,BLIS_TAPI_EX_SUF) ); \
 \
-PASTECH2(opname,BLIS_TAPI_EX_SUF,_vft) \
-PASTEMAC2(opname,BLIS_TAPI_EX_SUF,_qfp2)( num_t dtx, num_t dty ) \
+PASTECH(opname,BLIS_TAPI_EX_SUF,_vft) \
+PASTEMAC(opname,BLIS_TAPI_EX_SUF,_qfp2)( num_t dtx, num_t dty ) \
 { \
-	return PASTECH2(opname,BLIS_TAPI_EX_SUF,_fpa2)[ dtx ][ dty ]; \
+	return PASTECH(opname,BLIS_TAPI_EX_SUF,_fpa2)[ dtx ][ dty ]; \
 }
 
 GENFRONT( xpbym_md )

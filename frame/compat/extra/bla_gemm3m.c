@@ -114,7 +114,7 @@ void PASTEF77(ch,blasname) \
 		bli_rntm_disable_l3_sup( rntm ); \
 \
 		/* Call BLIS interface. */ \
-		PASTEMAC2(ch,blisname,BLIS_TAPI_EX_SUF) \
+		PASTEMAC(ch,blisname,BLIS_TAPI_EX_SUF) \
 		( \
 		  blis_transa, \
 		  blis_transb, \

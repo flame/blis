@@ -591,6 +591,8 @@ typedef enum
 
 typedef enum
 {
+	// -- Single-type kernels --
+
 	// l1v kernels
 	BLIS_ADDV_KER = BLIS_1TYPE_KER,
 	BLIS_AMAXV_KER,
@@ -616,20 +618,14 @@ typedef enum
 	BLIS_DOTXAXPYF_KER,
 
 	// l3 native kernels
-	BLIS_GEMM_UKR,
 	BLIS_GEMMTRSM_L_UKR,
 	BLIS_GEMMTRSM_U_UKR,
 	BLIS_TRSM_L_UKR,
 	BLIS_TRSM_U_UKR,
 
 	// l3 1m kernels
-	BLIS_GEMM1M_UKR,
 	BLIS_GEMMTRSM1M_L_UKR,
 	BLIS_GEMMTRSM1M_U_UKR,
-
-	// mixed-domain kernels
-	BLIS_GEMMR2C_UKR,
-	BLIS_GEMMRO_UKR,
 
 	// gemmsup kernels
 	BLIS_GEMMSUP_RRR_UKR,
@@ -643,12 +639,10 @@ typedef enum
 	BLIS_GEMMSUP_XXX_UKR,
 
 	// BLIS_NUM_UKRS must be last!
-	BLIS_NUM_UKRS_, BLIS_NUM_UKRS = bli_ker_idx( BLIS_NUM_UKRS_ )
-} ukr_t;
+	BLIS_NUM_UKRS_, BLIS_NUM_UKRS = bli_ker_idx( BLIS_NUM_UKRS_ ),
 
+	// -- Two-type kernels --
 
-typedef enum
-{
 	// pack kernels
 	BLIS_PACKM_KER = BLIS_2TYPE_KER,
 	BLIS_PACKM_1ER_KER,
@@ -660,9 +654,20 @@ typedef enum
 	// unpack kernels
 	BLIS_UNPACKM_KER,
 
+	// l3 native kernels
+	BLIS_GEMM_UKR,
+
+	// l3 1m kernels
+	BLIS_GEMM1M_UKR,
+
+	// mixed-domain kernels
+	BLIS_GEMM_CCR_UKR,
+	BLIS_GEMM_RCC_UKR,
+	BLIS_GEMM_CRR_UKR,
+
 	// BLIS_NUM_UKR2S must be last!
 	BLIS_NUM_UKR2S_, BLIS_NUM_UKR2S = bli_ker_idx( BLIS_NUM_UKR2S_ )
-} ukr2_t;
+} ukr_t;
 
 
 typedef enum

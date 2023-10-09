@@ -37,7 +37,7 @@
 #undef  GENFRONT
 #define GENFRONT( tname, opname ) \
 \
-void PASTEMAC0(opname) \
+void PASTEMAC(opname) \
      ( \
        obj_t*  alpha, \
        obj_t*  a, \
@@ -96,7 +96,7 @@ GENFRONT( gemm, gemm_ukernel )
 #undef  GENFRONT
 #define GENFRONT( tname, opname, opnamel, opnameu ) \
 \
-void PASTEMAC0(opname) \
+void PASTEMAC(opname) \
      ( \
        obj_t*  alpha, \
        obj_t*  a1x, \
@@ -185,7 +185,7 @@ GENFRONT( gemmtrsm, gemmtrsm_ukernel, gemmtrsm_l_ukernel, gemmtrsm_u_ukernel )
 #undef  GENFRONT
 #define GENFRONT( tname, opname, opnamel, opnameu ) \
 \
-void PASTEMAC0(opname) \
+void PASTEMAC(opname) \
      ( \
        obj_t*  a, \
        obj_t*  b, \

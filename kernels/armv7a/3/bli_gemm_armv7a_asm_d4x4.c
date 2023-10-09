@@ -38,7 +38,7 @@
 #define GENTPROT( ctype, ch, opname, suf ) \
 \
 extern \
-void PASTEMAC2(ch,opname,suf) \
+void PASTEMAC(ch,opname,suf) \
      ( \
              uint32_t   k, \
        const ctype*     alpha, \

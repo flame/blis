@@ -35,7 +35,7 @@
 #undef  GENTPROT2
 #define GENTPROT2( ctypec, ctypep, chc, chp, varname ) \
 \
-BLIS_EXPORT_BLIS void PASTEMAC2(chc,chp,varname) \
+BLIS_EXPORT_BLIS void PASTEMAC(chc,chp,varname) \
      ( \
              struc_t strucc, \
              diag_t  diagc, \

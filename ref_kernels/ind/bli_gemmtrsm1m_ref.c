@@ -38,7 +38,7 @@
 #undef  GENTFUNCRO
 #define GENTFUNCRO( ctype_r, ctype, chr, ch, opname, arch, suf, diagop ) \
 \
-static void PASTEMAC3(chr,opname,arch,suf) \
+static void PASTEMAC(chr,opname,arch,suf) \
      ( \
              dim_t           m, \
              dim_t           n, \
@@ -233,7 +233,7 @@ INSERT_GENTFUNCRO( trsm1m_l, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX, invscalris )
 #undef  GENTFUNCRO
 #define GENTFUNCRO( ctype_r, ctype, chr, ch, opname, arch, suf, diagop ) \
 \
-static void PASTEMAC3(chr,opname,arch,suf) \
+static void PASTEMAC(chr,opname,arch,suf) \
      ( \
              dim_t           m, \
              dim_t           n, \
@@ -427,7 +427,7 @@ INSERT_GENTFUNCRO( trsm1m_u, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX, invscalris )
 #undef  GENTFUNCRO
 #define GENTFUNCRO( ctype_r, ctype, chr, ch, opname, arch, suf, trsmname ) \
 \
-void PASTEMAC3(chr,opname,arch,suf) \
+void PASTEMAC(chr,opname,arch,suf) \
      ( \
              dim_t      m, \
              dim_t      n, \
@@ -540,7 +540,7 @@ void PASTEMAC3(chr,opname,arch,suf) \
 			ctype_r* restrict beta11_ir_r = b11_ir + i*rs_b2 + j*cs_b2 + 0*cs_b + d; \
 			ctype_r* restrict beta11_ir_i = b11_ir + i*rs_b2 + j*cs_b2 + 1*cs_b + d; \
 \
-			PASTEMAC3(ch,chr,ch,xpbyris) \
+			PASTEMAC(ch,chr,ch,xpbyris) \
 			( \
 			  *beta11t_r, \
 			  *beta11t_i, \
@@ -575,7 +575,7 @@ void PASTEMAC3(chr,opname,arch,suf) \
 			ctype_r* restrict beta11_r  = b11_r + i*rs_b2 + j*cs_b2 + d; \
 			ctype_r* restrict beta11_i  = b11_i + i*rs_b2 + j*cs_b2 + d; \
 \
-			PASTEMAC3(ch,chr,ch,xpbyris) \
+			PASTEMAC(ch,chr,ch,xpbyris) \
 			( \
 			  *beta11t_r, \
 			  *beta11t_i, \
@@ -589,7 +589,7 @@ void PASTEMAC3(chr,opname,arch,suf) \
 \
 	/* b11 = inv(a11) * b11;
 	   c11 = b11; */ \
-	PASTEMAC3(chr,trsmname,arch,suf) \
+	PASTEMAC(chr,trsmname,arch,suf) \
 	( \
 	  m, n, \
 	  a11, rs_a, cs_a, \

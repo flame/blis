@@ -214,8 +214,8 @@ void PASTEMAC(ch,varname) \
 		n_panel_full  = &n; \
 	} \
 \
-	num_t  dt     = PASTEMAC(ch,type); \
-	ukr2_t ker_id = BLIS_UNPACKM_KER; \
+	num_t  dt    = PASTEMAC(ch,type); \
+	ukr_t ker_id = BLIS_UNPACKM_KER; \
 \
 	/* Query the context for the unpackm kernel corresponding to the current
 	   panel dimension, or kernel id. */ \
@@ -248,7 +248,7 @@ void PASTEMAC(ch,varname) \
 		if ( bli_intersects_diag_n( diagoffc_i, *m_panel_full, *n_panel_full ) && \
 		     bli_is_upper_or_lower( uploc ) ) \
 		{ \
-			PASTEMAC2(ch,scal2m,BLIS_TAPI_EX_SUF) \
+			PASTEMAC(ch,scal2m,BLIS_TAPI_EX_SUF) \
 			( \
 			  diagoffc_i, \
 			  diagc, \

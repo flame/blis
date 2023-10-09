@@ -39,11 +39,11 @@
 
 // Define macros to construct the full symbol name from the operation name.
 #undef  GENARNAME             // opname, architecture, _ref (no bli_)
-#define GENARNAME(opname)     PASTECH2(opname,BLIS_CNAME_INFIX,BLIS_REF_SUFFIX)
+#define GENARNAME(opname)     PASTECH(opname,BLIS_CNAME_INFIX,BLIS_REF_SUFFIX)
 #undef  GENTARNAME            // bli, ch, opname, architecture, _ref
-#define GENTARNAME(ch,opname) PASTEMAC3(ch,opname,BLIS_CNAME_INFIX,BLIS_REF_SUFFIX)
+#define GENTARNAME(ch,opname) PASTEMAC(ch,opname,BLIS_CNAME_INFIX,BLIS_REF_SUFFIX)
 #undef  GENBARNAME            // bli_, opname, architecture, _ref
-#define GENBARNAME(opname)    PASTEMAC2(opname,BLIS_CNAME_INFIX,BLIS_REF_SUFFIX)
+#define GENBARNAME(opname)    PASTEMAC(opname,BLIS_CNAME_INFIX,BLIS_REF_SUFFIX)
 
 // Define a prototype-inserting template that uses an arbitrary prototype-
 // generating macro.
@@ -61,6 +61,14 @@ protmac( dcomplex, z, kername )
 \
 protmac( scomplex, c, kername ) \
 protmac( dcomplex, z, kername )
+
+#undef  INSERT_PROTMAC_MIX_RO
+#define INSERT_PROTMAC_MIX_RO( protmac, kername ) \
+\
+protmac( float,  float,  s, s, kername ) \
+protmac( double, float,  d, s, kername ) \
+protmac( float,  double, s, d, kername ) \
+protmac( double, double, d, d, kername )
 
 #undef  INSERT_PROTMAC_MIX_CO
 #define INSERT_PROTMAC_MIX_CO( protmac, kername ) \
@@ -120,7 +128,7 @@ protmac( dcomplex, dcomplex, z, z, kername )
 // Instantiate prototypes for above functions using the pre-defined level-3
 // microkernel prototype-generating macros.
 
-INSERT_PROTMAC_BASIC( GEMM_UKR_PROT,     gemm_ukr_name )
+INSERT_PROTMAC_MIX_P( GEMM_UKR2_PROT,    gemm_ukr_name )
 INSERT_PROTMAC_BASIC( GEMMTRSM_UKR_PROT, gemmtrsm_l_ukr_name )
 INSERT_PROTMAC_BASIC( GEMMTRSM_UKR_PROT, gemmtrsm_u_ukr_name )
 INSERT_PROTMAC_BASIC( TRSM_UKR_PROT,     trsm_l_ukr_name )
@@ -132,21 +140,23 @@ INSERT_PROTMAC_BASIC( TRSM_UKR_PROT,     trsm_u_ukr_name )
 // -- Construct arch-specific names for reference virtual level-3 microkernels --
 
 #define gemm1m_ukr_name        GENARNAME(gemm1m)
-#define gemmr2c_ukr_name       GENARNAME(gemmr2c)
-#define gemmro_ukr_name        GENARNAME(gemmro)
+#define gemm_ccr_ukr_name       GENARNAME(gemm_ccr)
+#define gemm_rcc_ukr_name       GENARNAME(gemm_rcc)
+#define gemm_crr_ukr_name        GENARNAME(gemm_crr)
 #define gemmtrsm1m_l_ukr_name  GENARNAME(gemmtrsm1m_l)
 #define gemmtrsm1m_u_ukr_name  GENARNAME(gemmtrsm1m_u)
 
 // Instantiate prototypes for above functions using the pre-defined level-3
 // microkernel prototype-generating macros.
 
-INSERT_PROTMAC_BASIC( GEMM_UKR_PROT,     gemm1m_ukr_name )
-INSERT_PROTMAC_BASIC( GEMM_UKR_PROT,     gemmr2c_ukr_name )
-INSERT_PROTMAC_BASIC( GEMM_UKR_PROT,     gemmro_ukr_name )
-INSERT_PROTMAC_BASIC( GEMMTRSM_UKR_PROT, gemmtrsm1m_l_ukr_name )
-INSERT_PROTMAC_BASIC( GEMMTRSM_UKR_PROT, gemmtrsm1m_u_ukr_name )
-INSERT_PROTMAC_BASIC( TRSM_UKR_PROT,     trsm1m_l_ukr_name )
-INSERT_PROTMAC_BASIC( TRSM_UKR_PROT,     trsm1m_u_ukr_name )
+INSERT_PROTMAC_MIX_RO( GEMM_UKR2_PROT,    gemm1m_ukr_name )
+INSERT_PROTMAC_MIX_RO( GEMM_UKR2_PROT,    gemm_ccr_ukr_name )
+INSERT_PROTMAC_MIX_RO( GEMM_UKR2_PROT,    gemm_rcc_ukr_name )
+INSERT_PROTMAC_MIX_RO( GEMM_UKR2_PROT,    gemm_crr_ukr_name )
+INSERT_PROTMAC_BASIC(  GEMMTRSM_UKR_PROT, gemmtrsm1m_l_ukr_name )
+INSERT_PROTMAC_BASIC(  GEMMTRSM_UKR_PROT, gemmtrsm1m_u_ukr_name )
+INSERT_PROTMAC_BASIC(  TRSM_UKR_PROT,     trsm1m_l_ukr_name )
+INSERT_PROTMAC_BASIC(  TRSM_UKR_PROT,     trsm1m_u_ukr_name )
 
 
 // -- Level-3 small/unpacked micro-kernel prototype definitions ----------------
@@ -275,9 +285,9 @@ do { \
 	                        NULL,                  NULL, \
 	                        NULL,                  NULL, \
 	                        NULL,                  NULL, \
-	                        PASTEMAC2(c,c,opname), PASTEMAC2(c,z,opname), \
+	                        PASTEMAC(c,c,opname), PASTEMAC(c,z,opname), \
 	                        NULL,                  NULL, \
-	                        PASTEMAC2(z,c,opname), PASTEMAC2(z,z,opname) ); \
+	                        PASTEMAC(z,c,opname), PASTEMAC(z,z,opname) ); \
 } while (0)
 
 #define gen_func_init( func_p, opname ) \
@@ -286,28 +296,40 @@ do { \
 	                       PASTEMAC(c,opname), PASTEMAC(z,opname) ); \
 } while (0)
 
+#define gen_func_init_ro_mix_p( func_p, opname ) \
+do { \
+	bli_func2_init( func_p, PASTEMAC(s,s,opname), PASTEMAC(s,d,opname), \
+	                        NULL,                  NULL, \
+	                        PASTEMAC(d,s,opname), PASTEMAC(d,d,opname), \
+	                        NULL,                  NULL, \
+	                        NULL,                  NULL, \
+	                        NULL,                  NULL, \
+	                        NULL,                  NULL, \
+	                        NULL,                  NULL ); \
+} while (0)
+
 #define gen_func_init_mix_p( func_p, opname ) \
 do { \
-	bli_func2_init( func_p, PASTEMAC2(s,s,opname), PASTEMAC2(s,d,opname), \
+	bli_func2_init( func_p, PASTEMAC(s,s,opname), PASTEMAC(s,d,opname), \
 	                        NULL,                  NULL, \
-	                        PASTEMAC2(d,s,opname), PASTEMAC2(d,d,opname), \
+	                        PASTEMAC(d,s,opname), PASTEMAC(d,d,opname), \
 	                        NULL,                  NULL, \
 	                        NULL,                  NULL, \
-	                        PASTEMAC2(c,c,opname), PASTEMAC2(c,z,opname), \
+	                        PASTEMAC(c,c,opname), PASTEMAC(c,z,opname), \
 	                        NULL,                  NULL, \
-	                        PASTEMAC2(z,c,opname), PASTEMAC2(z,z,opname) ); \
+	                        PASTEMAC(z,c,opname), PASTEMAC(z,z,opname) ); \
 } while (0)
 
 #define gen_func_init_mix_dp( func_p, opname ) \
 do { \
-	bli_func2_init( func_p, PASTEMAC2(s,s,opname), PASTEMAC2(s,d,opname), \
-	                        PASTEMAC2(s,c,opname), PASTEMAC2(s,z,opname), \
-	                        PASTEMAC2(d,s,opname), PASTEMAC2(d,d,opname), \
-	                        PASTEMAC2(d,c,opname), PASTEMAC2(d,z,opname), \
-	                        PASTEMAC2(c,s,opname), PASTEMAC2(c,d,opname), \
-	                        PASTEMAC2(c,c,opname), PASTEMAC2(c,z,opname), \
-	                        PASTEMAC2(z,s,opname), PASTEMAC2(z,d,opname), \
-	                        PASTEMAC2(z,c,opname), PASTEMAC2(z,z,opname) ); \
+	bli_func2_init( func_p, PASTEMAC(s,s,opname), PASTEMAC(s,d,opname), \
+	                        PASTEMAC(s,c,opname), PASTEMAC(s,z,opname), \
+	                        PASTEMAC(d,s,opname), PASTEMAC(d,d,opname), \
+	                        PASTEMAC(d,c,opname), PASTEMAC(d,z,opname), \
+	                        PASTEMAC(c,s,opname), PASTEMAC(c,d,opname), \
+	                        PASTEMAC(c,c,opname), PASTEMAC(c,z,opname), \
+	                        PASTEMAC(z,s,opname), PASTEMAC(z,d,opname), \
+	                        PASTEMAC(z,c,opname), PASTEMAC(z,z,opname) ); \
 } while (0)
 
 #define gen_sup_func_init( func0_p, func1_p, opname ) \
@@ -331,6 +353,12 @@ void GENBARNAME(cntx_init)
 	mbool_t mbools[ BLIS_NUM_UKR_PREFS ];
 	void_fp vfuncs[ BLIS_NUM_LEVEL3_OPS ];
 
+	// Make sure any unset function pointers or block sizes are NULL/0
+	memset( blkszs, 0, sizeof(blkszs) );
+	memset( funcs,  0, sizeof(funcs)  );
+	memset( func2s, 0, sizeof(func2s) );
+	memset( mbools, 0, sizeof(mbools) );
+	memset( vfuncs, 0, sizeof(vfuncs) );
 
 	// -- Initialize the context -----------------------------------------------
 
@@ -403,15 +431,18 @@ void GENBARNAME(cntx_init)
 
 	// -- Set level-3 native micro-kernels and preferences ---------------------
 
-	gen_func_init( &funcs[ bli_ker_idx( BLIS_GEMM_UKR ) ],       gemm_ukr_name       );
+	gen_func_init_mix_p( &func2s[ bli_ker_idx( BLIS_GEMM_UKR ) ], gemm_ukr_name );
+
+	gen_func_init_ro_mix_p( &func2s[ bli_ker_idx( BLIS_GEMM1M_UKR ) ],  gemm1m_ukr_name  );
+	gen_func_init_ro_mix_p( &func2s[ bli_ker_idx( BLIS_GEMM_CCR_UKR ) ], gemm_ccr_ukr_name );
+	gen_func_init_ro_mix_p( &func2s[ bli_ker_idx( BLIS_GEMM_RCC_UKR ) ], gemm_rcc_ukr_name );
+	gen_func_init_ro_mix_p( &func2s[ bli_ker_idx( BLIS_GEMM_CRR_UKR ) ],  gemm_crr_ukr_name  );
+
 	gen_func_init( &funcs[ bli_ker_idx( BLIS_GEMMTRSM_L_UKR ) ], gemmtrsm_l_ukr_name );
 	gen_func_init( &funcs[ bli_ker_idx( BLIS_GEMMTRSM_U_UKR ) ], gemmtrsm_u_ukr_name );
 	gen_func_init( &funcs[ bli_ker_idx( BLIS_TRSM_L_UKR ) ],     trsm_l_ukr_name     );
 	gen_func_init( &funcs[ bli_ker_idx( BLIS_TRSM_U_UKR ) ],     trsm_u_ukr_name     );
 
-	gen_func_init_ro( &funcs[ bli_ker_idx( BLIS_GEMM1M_UKR ) ],       gemm1m_ukr_name       );
-	gen_func_init_ro( &funcs[ bli_ker_idx( BLIS_GEMMR2C_UKR ) ],      gemmr2c_ukr_name      );
-	gen_func_init_ro( &funcs[ bli_ker_idx( BLIS_GEMMRO_UKR ) ],       gemmro_ukr_name       );
 	gen_func_init_ro( &funcs[ bli_ker_idx( BLIS_GEMMTRSM1M_L_UKR ) ], gemmtrsm1m_l_ukr_name );
 	gen_func_init_ro( &funcs[ bli_ker_idx( BLIS_GEMMTRSM1M_U_UKR ) ], gemmtrsm1m_u_ukr_name );
 

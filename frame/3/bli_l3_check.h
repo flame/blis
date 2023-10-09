@@ -140,6 +140,17 @@ void bli_hemm_basic_check
        const cntx_t* cntx
      );
 
+void bli_trsm_basic_check
+     (
+             side_t  side,
+       const obj_t*  alpha,
+       const obj_t*  a,
+       const obj_t*  b,
+       const obj_t*  beta,
+       const obj_t*  c,
+       const cntx_t* cntx
+     );
+
 void bli_herk_basic_check
      (
        const obj_t*  alpha,

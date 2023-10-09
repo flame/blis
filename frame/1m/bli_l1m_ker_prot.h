@@ -51,7 +51,7 @@ void PASTEMAC(ch,funcname) \
 #undef  L1MTPROT2
 #define L1MTPROT2( ctypex, ctypey, chx, chy, funcname, opname ) \
 \
-void PASTEMAC2(chx,chy,funcname) \
+void PASTEMAC(chx,chy,funcname) \
      ( \
        PASTECH(opname,_params), \
        BLIS_CNTX_PARAM  \

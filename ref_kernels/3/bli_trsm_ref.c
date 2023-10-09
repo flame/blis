@@ -40,7 +40,7 @@
 #undef  GENTFUNC
 #define GENTFUNC( ctype, ch, opname, arch, suf, diagop ) \
 \
-void PASTEMAC3(ch,opname,arch,suf) \
+void PASTEMAC(ch,opname,arch,suf) \
      ( \
        const void*      a0, \
              void*      b0, \
@@ -128,7 +128,7 @@ INSERT_GENTFUNC_BASIC( trsm_l, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX, invscals )
 #undef  GENTFUNC
 #define GENTFUNC( ctype, ch, opname, arch, suf, diagop ) \
 \
-void PASTEMAC3(ch,opname,arch,suf) \
+void PASTEMAC(ch,opname,arch,suf) \
      ( \
        const void*      a0, \
              void*      b0, \

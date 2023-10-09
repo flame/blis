@@ -37,141 +37,93 @@
 
 // axpbys_mxn
 
-BLIS_INLINE void bli_saxpbys_mxn( const dim_t m, const dim_t n, float* restrict alpha,
-                                                                float* restrict x, const inc_t rs_x, const inc_t cs_x,
-                                                                float* restrict beta,
-                                                                float* restrict y, const inc_t rs_y, const inc_t cs_y )
-{
-	// If beta is zero, overwrite y with x (in case y has infs or NaNs).
-	if ( bli_seq0( *beta ) )
-	{
-		bli_sscal2s_mxn( BLIS_NO_CONJUGATE, m, n, alpha, x, rs_x, cs_x, y, rs_y, cs_y );
-		return;
-	}
+// Notes:
+// - The first char encodes the type of a.
+// - The second char encodes the type of x.
+// - The third char encodes the type of b.
+// - The fourth char encodes the type of y.
+// - We only implement cases where typeof(a) == type(x) && typeof(b) == typeof(y).
 
-#ifdef BLIS_ENABLE_CR_CASES
-	if ( rs_x == 1 && rs_y == 1 )
-	{
-		for ( dim_t jj = 0; jj < n; ++jj )
-		for ( dim_t ii = 0; ii < m; ++ii )
-		bli_saxpbys( *alpha, *(x + ii + jj*cs_x), *beta, *(y + ii + jj*cs_y) );
-	}
-	else if ( cs_x == 1 && cs_y == 1 )
-	{
-		for ( dim_t ii = 0; ii < m; ++ii )
-		for ( dim_t jj = 0; jj < n; ++jj )
-		bli_saxpbys( *alpha, *(x + ii*rs_x + jj), *beta, *(y + ii*rs_y + jj) );
-	}
-	else
-#endif
-	{
-		for ( dim_t jj = 0; jj < n; ++jj )
-		for ( dim_t ii = 0; ii < m; ++ii )
-		bli_saxpbys( *alpha, *(x + ii*rs_x + jj*cs_x), *beta, *(y + ii*rs_y + jj*cs_y) );
-	}
+#undef  BLIS_ENABLE_CR_CASES
+#define BLIS_ENABLE_CR_CASES 0
+
+// -- bli_????axpbys_mxn --
+
+#undef  GENTFUNC2
+#define GENTFUNC2( ctypex, ctypey, chx, chy, opname, kername ) \
+\
+BLIS_INLINE void PASTEMAC(chx,chx,chy,chy,opname) \
+     ( \
+       const dim_t   m, \
+       const dim_t   n, \
+       const ctypex* alpha, \
+       const ctypex* x, inc_t rs_x, inc_t cs_x, \
+       const ctypey* beta, \
+             ctypey* y, inc_t rs_y, inc_t cs_y  \
+     ) \
+{ \
+	/* If beta is zero, overwrite y with alpha*x (in case y has infs or NaNs). */ \
+	if ( PASTEMAC(chy,eq0)( *beta ) ) \
+	{ \
+		PASTEMAC(chx,chx,chy,scal2s_mxn)( BLIS_NO_CONJUGATE, m, n, alpha, x, rs_x, cs_x, y, rs_y, cs_y ); \
+		return; \
+	} \
+\
+	if      ( BLIS_ENABLE_CR_CASES && rs_x == 1 && rs_y == 1 ) \
+	{ \
+		for ( dim_t jj = 0; jj < n; ++jj ) \
+		for ( dim_t ii = 0; ii < m; ++ii ) \
+		PASTEMAC(chx,chx,chy,chy,kername) \
+		( \
+		  *alpha, *(x + ii + jj*cs_x), \
+		  *beta,  *(y + ii + jj*cs_y) \
+		); \
+	} \
+	else if ( BLIS_ENABLE_CR_CASES && cs_x == 1 && cs_y == 1 ) \
+	{ \
+		for ( dim_t ii = 0; ii < m; ++ii ) \
+		for ( dim_t jj = 0; jj < n; ++jj ) \
+		PASTEMAC(chx,chx,chy,chy,kername) \
+		( \
+		  *alpha, *(x + ii*rs_x + jj), \
+		  *beta,  *(y + ii*rs_y + jj) \
+		); \
+	} \
+	else \
+	{ \
+		for ( dim_t jj = 0; jj < n; ++jj ) \
+		for ( dim_t ii = 0; ii < m; ++ii ) \
+		PASTEMAC(chx,chx,chy,chy,kername) \
+		( \
+		  *alpha, *(x + ii*rs_x + jj*cs_x), \
+		  *beta,  *(y + ii*rs_y + jj*cs_y) \
+		); \
+	} \
 }
 
-BLIS_INLINE void bli_daxpbys_mxn( const dim_t m, const dim_t n, double* restrict alpha,
-                                                                double* restrict x, const inc_t rs_x, const inc_t cs_x,
-                                                                double* restrict beta,
-                                                                double* restrict y, const inc_t rs_y, const inc_t cs_y )
-{
-	// If beta is zero, overwrite y with x (in case y has infs or NaNs).
-	if ( bli_deq0( *beta ) )
-	{
-		bli_dscal2s_mxn( BLIS_NO_CONJUGATE, m, n, alpha, x, rs_x, cs_x, y, rs_y, cs_y );
-		return;
-	}
+INSERT_GENTFUNC2_BASIC ( axpbys_mxn, axpbys )
+INSERT_GENTFUNC2_MIX_DP( axpbys_mxn, axpbys )
 
-#ifdef BLIS_ENABLE_CR_CASES
-	if ( rs_x == 1 && rs_y == 1 )
-	{
-		for ( dim_t jj = 0; jj < n; ++jj )
-		for ( dim_t ii = 0; ii < m; ++ii )
-		bli_daxpbys( *alpha, *(x + ii + jj*cs_x), *beta, *(y + ii + jj*cs_y) );
-	}
-	else if ( cs_x == 1 && cs_y == 1 )
-	{
-		for ( dim_t ii = 0; ii < m; ++ii )
-		for ( dim_t jj = 0; jj < n; ++jj )
-		bli_daxpbys( *alpha, *(x + ii*rs_x + jj), *beta, *(y + ii*rs_y + jj) );
-	}
-	else
-#endif
-	{
-		for ( dim_t jj = 0; jj < n; ++jj )
-		for ( dim_t ii = 0; ii < m; ++ii )
-		bli_daxpbys( *alpha, *(x + ii*rs_x + jj*cs_x), *beta, *(y + ii*rs_y + jj*cs_y) );
-	}
+
+// -- bli_?axpbys_mxn --
+
+#undef  GENTFUNC
+#define GENTFUNC( ctype, ch, opname ) \
+\
+BLIS_INLINE void PASTEMAC(ch,opname) \
+     ( \
+       const dim_t  m, \
+       const dim_t  n, \
+       const ctype* alpha, \
+       const ctype* x, inc_t rs_x, inc_t cs_x, \
+       const ctype* beta, \
+             ctype* y, inc_t rs_y, inc_t cs_y  \
+     ) \
+{ \
+    PASTEMAC(ch,ch,ch,ch,opname)( m, n, alpha, x, rs_x, cs_x, beta, y, rs_y, cs_y ); \
 }
 
-BLIS_INLINE void bli_caxpbys_mxn( const dim_t m, const dim_t n, scomplex* restrict alpha,
-                                                                scomplex* restrict x, const inc_t rs_x, const inc_t cs_x,
-                                                                scomplex* restrict beta,
-                                                                scomplex* restrict y, const inc_t rs_y, const inc_t cs_y )
-{
-	// If beta is zero, overwrite y with x (in case y has infs or NaNs).
-	if ( bli_ceq0( *beta ) )
-	{
-		bli_cscal2s_mxn( BLIS_NO_CONJUGATE, m, n, alpha, x, rs_x, cs_x, y, rs_y, cs_y );
-		return;
-	}
-
-#ifdef BLIS_ENABLE_CR_CASES
-	if ( rs_x == 1 && rs_y == 1 )
-	{
-		for ( dim_t jj = 0; jj < n; ++jj )
-		for ( dim_t ii = 0; ii < m; ++ii )
-		bli_caxpbys( *alpha, *(x + ii + jj*cs_x), *beta, *(y + ii + jj*cs_y) );
-	}
-	else if ( cs_x == 1 && cs_y == 1 )
-	{
-		for ( dim_t ii = 0; ii < m; ++ii )
-		for ( dim_t jj = 0; jj < n; ++jj )
-		bli_caxpbys( *alpha, *(x + ii*rs_x + jj), *beta, *(y + ii*rs_y + jj) );
-	}
-	else
-#endif
-	{
-		for ( dim_t jj = 0; jj < n; ++jj )
-		for ( dim_t ii = 0; ii < m; ++ii )
-		bli_caxpbys( *alpha, *(x + ii*rs_x + jj*cs_x), *beta, *(y + ii*rs_y + jj*cs_y) );
-	}
-}
-
-BLIS_INLINE void bli_zaxpbys_mxn( const dim_t m, const dim_t n, dcomplex* restrict alpha,
-                                                                dcomplex* restrict x, const inc_t rs_x, const inc_t cs_x,
-                                                                dcomplex* restrict beta,
-                                                                dcomplex* restrict y, const inc_t rs_y, const inc_t cs_y )
-{
-	// If beta is zero, overwrite y with x (in case y has infs or NaNs).
-	if ( bli_zeq0( *beta ) )
-	{
-		bli_zscal2s_mxn( BLIS_NO_CONJUGATE, m, n, alpha, x, rs_x, cs_x, y, rs_y, cs_y );
-		return;
-	}
-
-#ifdef BLIS_ENABLE_CR_CASES
-	if ( rs_x == 1 && rs_y == 1 )
-	{
-		for ( dim_t jj = 0; jj < n; ++jj )
-		for ( dim_t ii = 0; ii < m; ++ii )
-		bli_zaxpbys( *alpha, *(x + ii + jj*cs_x), *beta, *(y + ii + jj*cs_y) );
-	}
-	else if ( cs_x == 1 && cs_y == 1 )
-	{
-		for ( dim_t ii = 0; ii < m; ++ii )
-		for ( dim_t jj = 0; jj < n; ++jj )
-		bli_zaxpbys( *alpha, *(x + ii*rs_x + jj), *beta, *(y + ii*rs_y + jj) );
-	}
-	else
-#endif
-	{
-		for ( dim_t jj = 0; jj < n; ++jj )
-		for ( dim_t ii = 0; ii < m; ++ii )
-		bli_zaxpbys( *alpha, *(x + ii*rs_x + jj*cs_x), *beta, *(y + ii*rs_y + jj*cs_y) );
-	}
-}
+INSERT_GENTFUNC_BASIC( axpbys_mxn )
 
 
 #endif

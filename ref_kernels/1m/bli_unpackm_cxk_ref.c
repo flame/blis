@@ -46,7 +46,7 @@ do \
 		{ \
 			ctypep kappa_pi; \
 			PASTEMAC(chp,op)( *kappa_cast, *(pi1 + mn*dfac), kappa_pi ); \
-			PASTEMAC2(chp,cha,copys)( kappa_pi, *(alpha1 + mn*inca) ); \
+			PASTEMAC(chp,cha,copys)( kappa_pi, *(alpha1 + mn*inca) ); \
 		} \
 \
 		alpha1 += lda; \
@@ -58,7 +58,7 @@ do \
 #undef  GENTFUNC2
 #define GENTFUNC2( ctypep, ctypea, chp, cha, opname, arch, suf ) \
 \
-void PASTEMAC4(chp,cha,opname,arch,suf) \
+void PASTEMAC(chp,cha,opname,arch,suf) \
      ( \
              conj_t  conja, \
              pack_t  schema, \

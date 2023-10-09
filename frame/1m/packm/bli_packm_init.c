@@ -75,8 +75,13 @@ siz_t bli_packm_init
 	// change the datatype of P to reflect the target_dt.
 	if ( dt_scalar != dt_p )
 	{
-		bli_obj_scalar_cast_to( dt_p, p );
+		bli_obj_scalar_cast_to( bli_dt_domain( dt_scalar ) | bli_dt_prec( dt_p ), p );
 	}
+
+	// If we are only packing the real part of a complex matrix, use the
+	// real datatype for the packed matrix.
+	if ( schema == BLIS_PACKED_PANELS_RO )
+		dt_p = bli_dt_proj_to_real( dt_p );
 
 	// Update the storage datatype of P to be the target datatype of A.
 	bli_obj_set_dt( dt_p, p );

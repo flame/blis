@@ -42,7 +42,7 @@
 #undef  GENTDEF
 #define GENTDEF( ctype, ch, opname, tsuf ) \
 \
-typedef void (*PASTECH2(ch,opname,tsuf)) \
+typedef void (*PASTECH(ch,opname,tsuf)) \
      ( \
              conj_t conjchi, \
        const ctype* chi, \
@@ -59,7 +59,7 @@ INSERT_GENTDEF( invertsc )
 #undef  GENTDEF
 #define GENTDEF( ctype, ch, opname, tsuf ) \
 \
-typedef void (*PASTECH2(ch,opname,tsuf)) \
+typedef void (*PASTECH(ch,opname,tsuf)) \
      ( \
              conj_t conjchi, \
        const ctype* chi, \
@@ -73,7 +73,7 @@ INSERT_GENTDEF( mulsc )
 #undef  GENTDEFR
 #define GENTDEFR( ctype, ctype_r, ch, chr, opname, tsuf ) \
 \
-typedef void (*PASTECH2(ch,opname,tsuf)) \
+typedef void (*PASTECH(ch,opname,tsuf)) \
      ( \
        const ctype*   chi, \
              ctype_r* absq  \
@@ -86,7 +86,7 @@ INSERT_GENTDEFR( absqsc )
 #undef  GENTDEFR
 #define GENTDEFR( ctype, ctype_r, ch, chr, opname, tsuf ) \
 \
-typedef void (*PASTECH2(ch,opname,tsuf)) \
+typedef void (*PASTECH(ch,opname,tsuf)) \
      ( \
        const ctype*   chi, \
              ctype_r* norm  \
@@ -99,7 +99,7 @@ INSERT_GENTDEFR( normfsc )
 #undef  GENTDEF
 #define GENTDEF( ctype, ch, opname, tsuf ) \
 \
-typedef void (*PASTECH2(ch,opname,tsuf)) \
+typedef void (*PASTECH(ch,opname,tsuf)) \
      ( \
        const ctype* chi, \
              ctype* psi  \
@@ -112,7 +112,7 @@ INSERT_GENTDEF( sqrtsc )
 #undef  GENTDEF
 #define GENTDEF( ctype, ch, opname, tsuf ) \
 \
-typedef void (*PASTECH2(ch,opname,tsuf)) \
+typedef void (*PASTECH(ch,opname,tsuf)) \
      ( \
        const ctype* chi, \
              ctype* psi  \
@@ -125,7 +125,7 @@ INSERT_GENTDEF( sqrtrsc )
 #undef  GENTDEF
 #define GENTDEF( ctype, ch, opname, tsuf ) \
 \
-typedef void (*PASTECH2(ch,opname,tsuf)) \
+typedef void (*PASTECH(ch,opname,tsuf)) \
      ( \
        const ctype*  chi, \
              double* zeta_r, \
@@ -139,7 +139,7 @@ INSERT_GENTDEF( getsc )
 #undef  GENTDEF
 #define GENTDEF( ctype, ch, opname, tsuf ) \
 \
-typedef void (*PASTECH2(ch,opname,tsuf)) \
+typedef void (*PASTECH(ch,opname,tsuf)) \
      ( \
        double  zeta_r, \
        double  zeta_i, \
@@ -153,7 +153,7 @@ INSERT_GENTDEF( setsc )
 #undef  GENTDEFR
 #define GENTDEFR( ctype, ctype_r, ch, chr, opname, tsuf ) \
 \
-typedef void (*PASTECH2(ch,opname,tsuf)) \
+typedef void (*PASTECH(ch,opname,tsuf)) \
      ( \
        const ctype*   chi, \
              ctype_r* zeta_r, \
@@ -167,7 +167,7 @@ INSERT_GENTDEFR( unzipsc )
 #undef  GENTDEFR
 #define GENTDEFR( ctype, ctype_r, ch, chr, opname, tsuf ) \
 \
-typedef void (*PASTECH2(ch,opname,tsuf)) \
+typedef void (*PASTECH(ch,opname,tsuf)) \
      ( \
        const ctype_r* zeta_r, \
        const ctype_r* zeta_i, \

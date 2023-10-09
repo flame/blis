@@ -570,23 +570,6 @@ void PASTEMAC(trmm3,BLIS_OAPI_EX_SUF)
 	bli_obj_alias_submatrix( b, &b_local );
 	bli_obj_alias_submatrix( c, &c_local );
 
-	// We do not explicitly implement the cases where A is transposed.
-	// However, we can still handle them. Specifically, if A is marked as
-	// needing a transposition, we simply induce a transposition. This
-	// allows us to only explicitly implement the no-transpose cases. Once
-	// the transposition is induced, the correct algorithm will be called,
-	// since, for example, an algorithm over a transposed lower triangular
-	// matrix A moves in the same direction (forwards) as a non-transposed
-	// upper triangular matrix. And with the transposition induced, the
-	// matrix now appears to be upper triangular, so the upper triangular
-	// algorithm will grab the correct partitions, as if it were upper
-	// triangular (with no transpose) all along.
-	if ( bli_obj_has_trans( &a_local ) )
-	{
-		bli_obj_induce_trans( &a_local );
-		bli_obj_set_onlytrans( BLIS_NO_TRANSPOSE, &a_local );
-	}
-
 	// If A is being multiplied from the right, swap A and B so that
 	// the matrix will actually be on the right.
 	if ( bli_is_right( side ) )
@@ -669,23 +652,6 @@ void PASTEMAC(trmm,BLIS_OAPI_EX_SUF)
 	bli_obj_alias_submatrix( a, &a_local );
 	bli_obj_alias_submatrix( b, &b_local );
 	bli_obj_alias_submatrix( b, &c_local );
-
-	// We do not explicitly implement the cases where A is transposed.
-	// However, we can still handle them. Specifically, if A is marked as
-	// needing a transposition, we simply induce a transposition. This
-	// allows us to only explicitly implement the no-transpose cases. Once
-	// the transposition is induced, the correct algorithm will be called,
-	// since, for example, an algorithm over a transposed lower triangular
-	// matrix A moves in the same direction (forwards) as a non-transposed
-	// upper triangular matrix. And with the transposition induced, the
-	// matrix now appears to be upper triangular, so the upper triangular
-	// algorithm will grab the correct partitions, as if it were upper
-	// triangular (with no transpose) all along.
-	if ( bli_obj_has_trans( &a_local ) )
-	{
-		bli_obj_induce_trans( &a_local );
-		bli_obj_set_onlytrans( BLIS_NO_TRANSPOSE, &a_local );
-	}
 
 	// If A is being multiplied from the right, swap A and B so that
 	// the matrix will actually be on the right.
@@ -776,23 +742,6 @@ void PASTEMAC(trsm,BLIS_OAPI_EX_SUF)
 	bli_obj_alias_submatrix( a, &a_local );
 	bli_obj_alias_submatrix( b, &b_local );
 	bli_obj_alias_submatrix( b, &c_local );
-
-	// We do not explicitly implement the cases where A is transposed.
-	// However, we can still handle them. Specifically, if A is marked as
-	// needing a transposition, we simply induce a transposition. This
-	// allows us to only explicitly implement the no-transpose cases. Once
-	// the transposition is induced, the correct algorithm will be called,
-	// since, for example, an algorithm over a transposed lower triangular
-	// matrix A moves in the same direction (forwards) as a non-transposed
-	// upper triangular matrix. And with the transposition induced, the
-	// matrix now appears to be upper triangular, so the upper triangular
-	// algorithm will grab the correct partitions, as if it were upper
-	// triangular (with no transpose) all along.
-	if ( bli_obj_has_trans( &a_local ) )
-	{
-		bli_obj_induce_trans( &a_local );
-		bli_obj_set_onlytrans( BLIS_NO_TRANSPOSE, &a_local );
-	}
 
 #if 1
 

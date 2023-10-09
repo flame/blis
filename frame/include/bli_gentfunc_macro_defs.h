@@ -325,6 +325,24 @@ GENTFUNC2R( dcomplex, scomplex, float,    z, c, s, __VA_ARGS__ )
 
 
 
+// -- Real-only two-operand with complex projection of both operands --
+
+#define INSERT_GENTFUNC2RO( ... ) \
+\
+GENTFUNC2RO( float,  scomplex, float,  scomplex, s, c, s, c, __VA_ARGS__ ) \
+GENTFUNC2RO( double, dcomplex, double, dcomplex, d, z, d, z, __VA_ARGS__ )
+
+
+
+// -- Mixed precision real-only two-operand with complex projection of both operands --
+
+#define INSERT_GENTFUNC2RO_MIX_P( ... ) \
+\
+GENTFUNC2RO( float,  scomplex, double, dcomplex, s, c, d, z, __VA_ARGS__ ) \
+GENTFUNC2RO( double, dcomplex, float,  scomplex, d, z, s, c, __VA_ARGS__ )
+
+
+
 // -- Mixed domain/precision (all) two-operand macro with real projection of second operand --
 
 #define INSERT_GENTFUNC2R_MIX_DP( ... ) \

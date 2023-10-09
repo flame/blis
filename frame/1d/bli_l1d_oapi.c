@@ -73,8 +73,8 @@ void PASTEMAC(opname,EX_SUF) \
 \
 	/* Query a type-specific function pointer, except one that uses
 	   void* for function arguments instead of typed pointers. */ \
-	PASTECH2(opname,BLIS_TAPI_EX_SUF,_vft) f = \
-	PASTEMAC2(opname,BLIS_TAPI_EX_SUF,_qfp)( dt ); \
+	PASTECH(opname,BLIS_TAPI_EX_SUF,_vft) f = \
+	PASTEMAC(opname,BLIS_TAPI_EX_SUF,_qfp)( dt ); \
 \
 	f \
 	( \
@@ -139,8 +139,8 @@ void PASTEMAC(opname,EX_SUF) \
 \
 	/* Query a type-specific function pointer, except one that uses
 	   void* for function arguments instead of typed pointers. */ \
-	PASTECH2(opname,BLIS_TAPI_EX_SUF,_vft) f = \
-	PASTEMAC2(opname,BLIS_TAPI_EX_SUF,_qfp)( dt ); \
+	PASTECH(opname,BLIS_TAPI_EX_SUF,_vft) f = \
+	PASTEMAC(opname,BLIS_TAPI_EX_SUF,_qfp)( dt ); \
 \
 	f \
 	( \
@@ -188,8 +188,8 @@ void PASTEMAC(opname,EX_SUF) \
 \
 	/* Query a type-specific function pointer, except one that uses
 	   void* for function arguments instead of typed pointers. */ \
-	PASTECH2(opname,BLIS_TAPI_EX_SUF,_vft) f = \
-	PASTEMAC2(opname,BLIS_TAPI_EX_SUF,_qfp)( dt ); \
+	PASTECH(opname,BLIS_TAPI_EX_SUF,_vft) f = \
+	PASTEMAC(opname,BLIS_TAPI_EX_SUF,_qfp)( dt ); \
 \
 	f \
 	( \
@@ -244,8 +244,8 @@ void PASTEMAC(opname,EX_SUF) \
 \
 	/* Query a type-specific function pointer, except one that uses
 	   void* for function arguments instead of typed pointers. */ \
-	PASTECH2(opname,BLIS_TAPI_EX_SUF,_vft) f = \
-	PASTEMAC2(opname,BLIS_TAPI_EX_SUF,_qfp)( dt ); \
+	PASTECH(opname,BLIS_TAPI_EX_SUF,_vft) f = \
+	PASTEMAC(opname,BLIS_TAPI_EX_SUF,_qfp)( dt ); \
 \
 	f \
 	( \
@@ -295,8 +295,8 @@ void PASTEMAC(opname,EX_SUF) \
 \
 	/* Query a type-specific function pointer, except one that uses
 	   void* for function arguments instead of typed pointers. */ \
-	PASTECH2(opname,BLIS_TAPI_EX_SUF,_vft) f = \
-	PASTEMAC2(opname,BLIS_TAPI_EX_SUF,_qfp)( dt ); \
+	PASTECH(opname,BLIS_TAPI_EX_SUF,_vft) f = \
+	PASTEMAC(opname,BLIS_TAPI_EX_SUF,_qfp)( dt ); \
 \
 	f \
 	( \
@@ -351,8 +351,8 @@ void PASTEMAC(opname,EX_SUF) \
 \
 	/* Query a type-specific function pointer, except one that uses
 	   void* for function arguments instead of typed pointers. */ \
-	PASTECH2(opname,BLIS_TAPI_EX_SUF,_vft) f = \
-	PASTEMAC2(opname,BLIS_TAPI_EX_SUF,_qfp)( dt ); \
+	PASTECH(opname,BLIS_TAPI_EX_SUF,_vft) f = \
+	PASTEMAC(opname,BLIS_TAPI_EX_SUF,_qfp)( dt ); \
 \
 	f \
 	( \
@@ -413,8 +413,8 @@ void PASTEMAC(opname,EX_SUF) \
 \
 	/* Query a type-specific function pointer, except one that uses
 	   void* for function arguments instead of typed pointers. */ \
-	PASTECH2(opname,BLIS_TAPI_EX_SUF,_vft) f = \
-	PASTEMAC2(opname,BLIS_TAPI_EX_SUF,_qfp)( dt ); \
+	PASTECH(opname,BLIS_TAPI_EX_SUF,_vft) f = \
+	PASTEMAC(opname,BLIS_TAPI_EX_SUF,_qfp)( dt ); \
 \
 	f \
 	( \

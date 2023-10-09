@@ -225,7 +225,7 @@ err_t bls_gemm_int
 #undef  GENTFUNC
 #define GENTFUNC( ctype, ch, opname ) \
 \
-void PASTECH2(bls_,ch,opname) \
+void PASTECH(bls_,ch,opname) \
      ( \
        trans_t transa, \
        trans_t transb, \

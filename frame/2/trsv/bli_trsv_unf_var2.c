@@ -74,7 +74,7 @@ void PASTEMAC(ch,varname) \
 	conj_t  conja; \
 \
 	/* x = alpha * x; */ \
-	PASTEMAC2(ch,scalv,BLIS_TAPI_EX_SUF) \
+	PASTEMAC(ch,scalv,BLIS_TAPI_EX_SUF) \
 	( \
 	  BLIS_NO_CONJUGATE, \
 	  m, \

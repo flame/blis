@@ -49,7 +49,8 @@ const cntx_t*                  bli_gks_query_cntx_impl( void );
 
 BLIS_EXPORT_BLIS void          bli_gks_init_ref_cntx( cntx_t* cntx );
 
-bool                           bli_gks_cntx_l3_nat_ukr_is_ref( num_t dt, ukr_t ukr_id, const cntx_t* cntx );
+bool                           bli_gks_cntx_ukr_is_ref( num_t dt, ukr_t ukr_id, const cntx_t* cntx );
+bool                           bli_gks_cntx_ukr2_is_ref( num_t dt1, num_t dt2, ukr_t ukr_id, const cntx_t* cntx );
 
 BLIS_EXPORT_BLIS const char*   bli_gks_l3_ukr_impl_string( ukr_t ukr, ind_t method, num_t dt );
 BLIS_EXPORT_BLIS kimpl_t       bli_gks_l3_ukr_impl_type( ukr_t ukr, ind_t method, num_t dt );

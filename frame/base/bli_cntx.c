@@ -223,9 +223,9 @@ void bli_cntx_set_ukr2s( cntx_t* cntx , ... )
 	   void bli_cntx_set_ukr2s
 	   (
 	     cntx_t* cntx,
-	     ukr2_t ukr0_id, num_t dt1_0, num_t dt2_0, void_fp ukr0_fp,
-	     ukr2_t ukr1_id, num_t dt1_1, num_t dt2_1, void_fp ukr1_fp,
-	     ukr2_t ukr2_id, num_t dt1_2, num_t dt2_2, void_fp ukr2_fp,
+	     ukr_t ukr0_id, num_t dt1_0, num_t dt2_0, void_fp ukr0_fp,
+	     ukr_t ukr1_id, num_t dt1_1, num_t dt2_1, void_fp ukr1_fp,
+	     ukr_t ukr2_id, num_t dt1_2, num_t dt2_2, void_fp ukr2_fp,
 	     ...,
 	     BLIS_VA_END
 	   );
@@ -247,7 +247,7 @@ void bli_cntx_set_ukr2s( cntx_t* cntx , ... )
 		// - the ukr_t of the kernel we're about to process (already done),
 		// - the datatype of the kernel, and
 		// - the kernel function pointer
-		const ukr2_t  ukr_id  = ( ukr2_t  )ukr_id0;
+		const ukr_t   ukr_id  = ( ukr_t  )ukr_id0;
 		const num_t   ukr_dt1 = ( num_t   )va_arg( args, num_t   );
 		const num_t   ukr_dt2 = ( num_t   )va_arg( args, num_t   );
 		      void_fp ukr_fp  = ( void_fp )va_arg( args, void_fp );

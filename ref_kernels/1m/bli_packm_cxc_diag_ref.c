@@ -43,7 +43,7 @@ do \
 	for ( dim_t mn = mn_min; mn < mn_max; mn++ ) \
 	{ \
 		ctypep alpha_cast, kappa_alpha; \
-		PASTEMAC2(cha,chp,copys)( *(alpha1 + mn*inca + k*lda), alpha_cast ); \
+		PASTEMAC(cha,chp,copys)( *(alpha1 + mn*inca + k*lda), alpha_cast ); \
 		PASTEMAC(chp,op)( kappa_cast, alpha_cast, kappa_alpha ); \
 		for ( dim_t d = 0; d < dfac; d++ ) \
 			PASTEMAC(chp,copys)( kappa_alpha, *(pi1 + mn*dfac + d + k*ldp) ); \
@@ -61,7 +61,7 @@ do \
 #undef  GENTFUNC2
 #define GENTFUNC2( ctypea, ctypep, cha, chp, opname, arch, suf ) \
 \
-void PASTEMAC4(cha,chp,opname,arch,suf) \
+void PASTEMAC(cha,chp,opname,arch,suf) \
      ( \
              struc_t struca, \
              diag_t  diaga, \
@@ -141,7 +141,7 @@ void PASTEMAC4(cha,chp,opname,arch,suf) \
 		for ( dim_t mnk = 0; mnk < cdim; ++mnk ) \
 		{ \
 			ctypep alpha_cast, kappa_alpha; \
-			PASTEMAC2(cha,chp,copys)( *(alpha1 + mnk*(inca + lda)), alpha_cast ); \
+			PASTEMAC(cha,chp,copys)( *(alpha1 + mnk*(inca + lda)), alpha_cast ); \
 			PASTEMAC(chp,seti0s)( alpha_cast ); \
 			PASTEMAC(chp,scal2s)( kappa_cast, alpha_cast, kappa_alpha ); \
 			for ( dim_t d = 0; d < cdim_bcast; ++d ) \
@@ -153,7 +153,7 @@ void PASTEMAC4(cha,chp,opname,arch,suf) \
 		for ( dim_t mnk = 0; mnk < cdim; ++mnk ) \
 		{ \
 			ctypep alpha_cast, kappa_alpha; \
-			PASTEMAC2(cha,chp,copys)( *(alpha1 + mnk*(inca + lda)), alpha_cast ); \
+			PASTEMAC(cha,chp,copys)( *(alpha1 + mnk*(inca + lda)), alpha_cast ); \
 			PASTEMAC(chp,scal2js)( kappa_cast, alpha_cast, kappa_alpha ); \
 			for ( dim_t d = 0; d < cdim_bcast; ++d ) \
 				PASTEMAC(chp,copys)( kappa_alpha, *(pi1 + mnk*(cdim_bcast + ldp) + d) ); \
@@ -164,7 +164,7 @@ void PASTEMAC4(cha,chp,opname,arch,suf) \
 		for ( dim_t mnk = 0; mnk < cdim; ++mnk ) \
 		{ \
 			ctypep alpha_cast, kappa_alpha; \
-			PASTEMAC2(cha,chp,copys)( *(alpha1 + mnk*(inca + lda)), alpha_cast ); \
+			PASTEMAC(cha,chp,copys)( *(alpha1 + mnk*(inca + lda)), alpha_cast ); \
 			PASTEMAC(chp,scal2s)( kappa_cast, alpha_cast, kappa_alpha ); \
 			for ( dim_t d = 0; d < cdim_bcast; ++d ) \
 				PASTEMAC(chp,copys)( kappa_alpha, *(pi1 + mnk*(cdim_bcast + ldp) + d) ); \

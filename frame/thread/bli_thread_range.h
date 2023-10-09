@@ -53,7 +53,7 @@ BLIS_EXPORT_BLIS void bli_thread_range_sub
 #undef  GENPROT
 #define GENPROT( opname ) \
 \
-siz_t PASTEMAC0( opname ) \
+siz_t PASTEMAC( opname ) \
      ( \
              dir_t      direct, \
              dim_t      bmult, \

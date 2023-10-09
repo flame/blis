@@ -34,28 +34,26 @@
 
 #include "blis.h"
 
-#undef  GENTFUNCRO
-#define GENTFUNCRO( ctype_r, ctype, chr, ch, opname, arch, suf ) \
+#undef  GENTFUNC2RO
+#define GENTFUNC2RO( ctype_abr, ctype_ab, ctype_cr, ctype_c, chabr, chab, chcr, chc, opname, arch, suf ) \
 \
-void PASTEMAC3(chr,opname,arch,suf) \
+void PASTEMAC(chabr,chcr,opname,arch,suf) \
      ( \
              dim_t      m, \
              dim_t      n, \
              dim_t      k, \
        const void*      alpha0, \
-       const void*      a0, \
-       const void*      b0, \
+       const void*      a, \
+       const void*      b, \
        const void*      beta0, \
              void*      c0, inc_t rs_c, inc_t cs_c, \
              auxinfo_t* auxinfo, \
        const cntx_t*    cntx  \
      ) \
 { \
-	const ctype*      alpha     = alpha0; \
-	const ctype*      a         = a0; \
-	const ctype*      b         = b0; \
-	const ctype*      beta      = beta0; \
-	      ctype*      c         = c0; \
+	const ctype_ab*   alpha     = alpha0; \
+	const ctype_c*    beta      = beta0; \
+	      ctype_c*    c         = c0; \
 \
 	const cntl_t*     params    = bli_auxinfo_params( auxinfo ); \
 \
@@ -74,34 +72,27 @@ void PASTEMAC3(chr,opname,arch,suf) \
 	const dim_t       m_r        = row_pref ? m : 2 * m; \
 	const dim_t       n_r        = row_pref ? 2 * n : n; \
 \
-	      ctype       ct[ BLIS_STACK_BUF_MAX_SIZE / sizeof( ctype ) ] \
+	      ctype_ab    ct[ BLIS_STACK_BUF_MAX_SIZE / sizeof( ctype_ab ) ] \
 	                  __attribute__((aligned(BLIS_STACK_BUF_ALIGN_SIZE))); \
 	      inc_t       rs_ct; \
 	      inc_t       cs_ct; \
 \
-	const ctype_r* restrict a_r     = ( const ctype_r* ) a; \
+	const ctype_abr* restrict one_r   = PASTEMAC(chabr,1); \
+	const ctype_abr* restrict zero_r  = PASTEMAC(chabr,0); \
 \
-	const ctype_r* restrict b_r     = ( const ctype_r* ) b; \
+	const ctype_abr* restrict alpha_r = &PASTEMAC(chab,real)( *alpha ); \
+	const ctype_abr* restrict alpha_i = &PASTEMAC(chab,imag)( *alpha ); \
 \
-	const ctype_r* restrict one_r   = PASTEMAC(chr,1); \
-	const ctype_r* restrict zero_r  = PASTEMAC(chr,0); \
-\
-	const ctype_r* restrict alpha_r = &PASTEMAC(ch,real)( *alpha ); \
-	const ctype_r* restrict alpha_i = &PASTEMAC(ch,imag)( *alpha ); \
-\
-	const ctype_r* restrict beta_r  = &PASTEMAC(ch,real)( *beta ); \
-	const ctype_r* restrict beta_i  = &PASTEMAC(ch,imag)( *beta ); \
-\
-	      ctype_r*          c_use; \
-	      inc_t             rs_c_use; \
-	      inc_t             cs_c_use; \
+	const ctype_cr*  restrict beta_r  = &PASTEMAC(chc,real)( *beta ); \
+	const ctype_cr*  restrict beta_i  = &PASTEMAC(chc,imag)( *beta ); \
 \
 	auxinfo_t auxinfo_r = *auxinfo; \
 	bli_auxinfo_set_params( params_r, &auxinfo_r ); \
 \
-	if ( !PASTEMAC(chr,eq0)( *alpha_i ) || \
-	     !PASTEMAC(chr,eq0)( *beta_i ) || \
-	     !bli_is_preferentially_stored( rs_c, cs_c, row_pref ) ) \
+	if ( !PASTEMAC(chabr,eq0)( *alpha_i ) || \
+	     !PASTEMAC(chcr,eq0)( *beta_i ) || \
+	     !bli_is_preferentially_stored( rs_c, cs_c, row_pref ) || \
+	     !PASTEMAC(chab,chc,same) ) \
 	{ \
 		/* In the atypical cases, we compute the result into temporary
 		   workspace ct and then accumulated it back to c at the end. */ \
@@ -112,9 +103,8 @@ void PASTEMAC3(chr,opname,arch,suf) \
 		if ( !row_pref ) { rs_ct = 1;  cs_ct = mr; } \
 		else             { rs_ct = nr; cs_ct = 1; } \
 \
-		c_use    = ( ctype_r* )ct; \
-		rs_c_use = rs_ct; \
-		cs_c_use = cs_ct; \
+		inc_t rs_c_use = rs_ct; \
+		inc_t cs_c_use = cs_ct; \
 \
 		/* Convert the strides from being in units of complex elements to
 		   be in units of real elements. Note that we don't need to check for
@@ -130,20 +120,20 @@ void PASTEMAC3(chr,opname,arch,suf) \
 		  nr_r, \
 		  k, \
 		  one_r, \
-		  a_r, \
-		  b_r, \
+		  a, \
+		  b, \
 		  zero_r, \
-		  c_use, rs_c_use, cs_c_use, \
+		  ct, rs_c_use, cs_c_use, \
 		  &auxinfo_r, \
 		  cntx  \
 		); \
 \
-		PASTEMAC(ch,axpbys_mxn) \
+		PASTEMAC(chab,chab,chc,chc,axpbys_mxn) \
 		( \
 		  m, n, \
-		  ( ctype* )alpha, \
+		  alpha, \
 		  ct, rs_ct, cs_ct, \
-		  ( ctype* )beta, \
+		  beta, \
 		  c, rs_c, cs_c \
 		); \
 	} \
@@ -152,9 +142,8 @@ void PASTEMAC3(chr,opname,arch,suf) \
 		/* In the typical cases, we use the real part of beta and
 		   accumulate directly into the output matrix c. */ \
 \
-		c_use    = ( ctype_r* )c; \
-		rs_c_use = rs_c; \
-		cs_c_use = cs_c; \
+		inc_t rs_c_use = rs_c; \
+		inc_t cs_c_use = cs_c; \
 \
 		/* Convert the strides from being in units of complex elements to
 		   be in units of real elements. Note that we don't need to check for
@@ -170,15 +159,16 @@ void PASTEMAC3(chr,opname,arch,suf) \
 		  n_r, \
 		  k, \
 		  alpha_r, \
-		  a_r, \
-		  b_r, \
+		  a, \
+		  b, \
 		  beta_r, \
-		  c_use, rs_c_use, cs_c_use, \
+		  c, rs_c_use, cs_c_use, \
 		  &auxinfo_r, \
 		  cntx  \
 		); \
 	} \
 }
 
-INSERT_GENTFUNCRO( gemmr2c, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX )
+INSERT_GENTFUNC2RO( gemm_ccr, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX )
+INSERT_GENTFUNC2RO_MIX_P( gemm_ccr, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX )
 

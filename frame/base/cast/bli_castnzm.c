@@ -110,7 +110,7 @@ void bli_castnzm
 #undef  GENTFUNC2
 #define GENTFUNC2( ctype_a, ctype_b, cha, chb, opname ) \
 \
-void PASTEMAC2(cha,chb,opname) \
+void PASTEMAC(cha,chb,opname) \
      ( \
              trans_t transa, \
              dim_t   m, \
@@ -150,7 +150,7 @@ void PASTEMAC2(cha,chb,opname) \
 \
 				for ( i = 0; i < n_elem; ++i ) \
 				{ \
-					PASTEMAC2(cha,chb,copyjnzs)( a1[i], b1[i] ); \
+					PASTEMAC(cha,chb,copyjnzs)( a1[i], b1[i] ); \
 				} \
 			} \
 		} \
@@ -163,7 +163,7 @@ void PASTEMAC2(cha,chb,opname) \
 \
 				for ( i = 0; i < n_elem; ++i ) \
 				{ \
-					PASTEMAC2(cha,chb,copyjnzs)( *a1, *b1 ); \
+					PASTEMAC(cha,chb,copyjnzs)( *a1, *b1 ); \
 \
 					a1 += inca; \
 					b1 += incb; \
@@ -182,7 +182,7 @@ void PASTEMAC2(cha,chb,opname) \
 \
 				for ( i = 0; i < n_elem; ++i ) \
 				{ \
-					PASTEMAC2(cha,chb,copynzs)( a1[i], b1[i] ); \
+					PASTEMAC(cha,chb,copynzs)( a1[i], b1[i] ); \
 				} \
 			} \
 		} \
@@ -195,7 +195,7 @@ void PASTEMAC2(cha,chb,opname) \
 \
 				for ( i = 0; i < n_elem; ++i ) \
 				{ \
-					PASTEMAC2(cha,chb,copynzs)( *a1, *b1 ); \
+					PASTEMAC(cha,chb,copynzs)( *a1, *b1 ); \
 \
 					a1 += inca; \
 					b1 += incb; \

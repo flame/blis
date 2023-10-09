@@ -41,7 +41,7 @@
 #undef  GENTFUNC
 #define GENTFUNC( ctype, ch, opname, arch, suf ) \
 \
-void PASTEMAC3(ch,opname,arch,suf) \
+void PASTEMAC(ch,opname,arch,suf) \
      ( \
              conj_t     conja, \
              conj_t     conjb, \
@@ -252,7 +252,7 @@ INSERT_GENTFUNC_BASIC( gemmsup_r, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX )
 #undef  GENTFUNC
 #define GENTFUNC( ctype, ch, opname, arch, suf ) \
 \
-void PASTEMAC3(ch,opname,arch,suf) \
+void PASTEMAC(ch,opname,arch,suf) \
      ( \
              conj_t     conja, \
              conj_t     conjb, \

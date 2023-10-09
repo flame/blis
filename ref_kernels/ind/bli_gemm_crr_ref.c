@@ -34,28 +34,26 @@
 
 #include "blis.h"
 
-#undef  GENTFUNCRO
-#define GENTFUNCRO( ctype_r, ctype, chr, ch, opname, arch, suf ) \
+#undef  GENTFUNC2RO
+#define GENTFUNC2RO( ctype_abr, ctype_ab, ctype_cr, ctype_c, chabr, chab, chcr, chc, opname, arch, suf ) \
 \
-void PASTEMAC3(chr,opname,arch,suf) \
+void PASTEMAC(chabr,chcr,opname,arch,suf) \
      ( \
              dim_t      m, \
              dim_t      n, \
              dim_t      k, \
        const void*      alpha0, \
-       const void*      a0, \
-       const void*      b0, \
+       const void*      a, \
+       const void*      b, \
        const void*      beta0, \
              void*      c0, inc_t rs_c, inc_t cs_c, \
              auxinfo_t* auxinfo, \
        const cntx_t*    cntx  \
      ) \
 { \
-	const ctype*      alpha     = alpha0; \
-	const ctype*      a         = a0; \
-	const ctype*      b         = b0; \
-	const ctype*      beta      = beta0; \
-	      ctype*      c         = c0; \
+	const ctype_ab*   alpha     = alpha0; \
+	const ctype_c*    beta      = beta0; \
+	      ctype_c*    c         = c0; \
 \
 	const cntl_t*     params    = bli_auxinfo_params( auxinfo ); \
 \
@@ -66,24 +64,13 @@ void PASTEMAC3(chr,opname,arch,suf) \
 	const dim_t       mr        = bli_gemm_var_cntl_mr( params ); \
 	const dim_t       nr        = bli_gemm_var_cntl_nr( params ); \
 \
-	const dim_t       mr_r      = row_pref ? mr : 2 * mr; \
-	const dim_t       nr_r      = row_pref ? 2 * nr : nr; \
-\
-	      ctype       ct[ BLIS_STACK_BUF_MAX_SIZE / sizeof( ctype ) ] \
+	      ctype_abr   ct[ BLIS_STACK_BUF_MAX_SIZE / sizeof( ctype_abr ) ] \
 	                  __attribute__((aligned(BLIS_STACK_BUF_ALIGN_SIZE))); \
 	      inc_t       rs_ct; \
 	      inc_t       cs_ct; \
 \
-	const ctype_r* restrict a_r     = ( const ctype_r* ) a; \
-\
-	const ctype_r* restrict b_r     = ( const ctype_r* ) b; \
-\
-	const ctype_r* restrict one_r   = PASTEMAC(chr,1); \
-	const ctype_r* restrict zero_r  = PASTEMAC(chr,0); \
-\
-	      ctype_r*          c_use; \
-	      inc_t             rs_c_use; \
-	      inc_t             cs_c_use; \
+	const ctype_abr* restrict one_r   = PASTEMAC(chabr,1); \
+	const ctype_abr* restrict zero_r  = PASTEMAC(chabr,0); \
 \
 	auxinfo_t auxinfo_r = *auxinfo; \
 	bli_auxinfo_set_params( params_r, &auxinfo_r ); \
@@ -97,46 +84,52 @@ void PASTEMAC3(chr,opname,arch,suf) \
 	if ( !row_pref ) { rs_ct = 1;  cs_ct = mr; } \
 	else             { rs_ct = nr; cs_ct = 1; } \
 \
-	c_use    = ( ctype_r* )ct; \
-	rs_c_use = rs_ct; \
-	cs_c_use = cs_ct; \
-\
-	/* Convert the strides from being in units of complex elements to
-	   be in units of real elements. Note that we don't need to check for
-	   general storage here because that case corresponds to the scenario
-	   where we are using the ct buffer and its rs_ct/cs_ct strides. */ \
-	if ( !row_pref ) cs_c_use *= 2; \
-	else             rs_c_use *= 2; \
-\
 	/* c = beta * c + alpha_r * a * b; */ \
 	rgemm_ukr \
 	( \
-	  mr_r, \
-	  nr_r, \
+	  mr, \
+	  nr, \
 	  k, \
 	  one_r, \
-	  a_r, \
-	  b_r, \
+	  a, \
+	  b, \
 	  zero_r, \
-	  c_use, rs_c_use, cs_c_use, \
+	  ct, rs_ct, cs_ct, \
 	  &auxinfo_r, \
 	  cntx  \
 	); \
 \
-	ctype_r ar, ai; \
-	PASTEMAC(ch,gets)( *alpha, ar, ai ); \
+	ctype_abr ar, ai; \
+	PASTEMAC(chab,gets)( *alpha, ar, ai ); \
 \
-	for ( dim_t jj = 0; jj < n; ++jj ) \
-	for ( dim_t ii = 0; ii < m; ++ii ) \
+	if ( PASTEMAC(chc,eq0)( *beta ) ) \
 	{ \
-		ctype_r axr, axi; \
-		ctype ax; \
-		PASTEMAC(chr,scal2s)( ar, *(c_use + ii*rs_c_use + jj*cs_c_use), axr ); \
-		PASTEMAC(chr,scal2s)( ai, *(c_use + ii*rs_c_use + jj*cs_c_use), axi ); \
-		PASTEMAC(ch,sets)( axr, axi, ax ); \
-		PASTEMAC(ch,xpbys)( ax, *beta, *(c + ii*rs_c + jj*cs_c) ); \
+		for ( dim_t jj = 0; jj < n; ++jj ) \
+		for ( dim_t ii = 0; ii < m; ++ii ) \
+		{ \
+			ctype_abr axr, axi; \
+			ctype_ab ax; \
+			PASTEMAC(chabr,scal2s)( ar, *(ct + ii*rs_ct + jj*cs_ct), axr ); \
+			PASTEMAC(chabr,scal2s)( ai, *(ct + ii*rs_ct + jj*cs_ct), axi ); \
+			PASTEMAC(chab,sets)( axr, axi, ax ); \
+			PASTEMAC(chab,chc,copys)( ax, *(c + ii*rs_c + jj*cs_c) ); \
+		} \
+	} \
+	else \
+	{ \
+		for ( dim_t jj = 0; jj < n; ++jj ) \
+		for ( dim_t ii = 0; ii < m; ++ii ) \
+		{ \
+			ctype_abr axr, axi; \
+			ctype_ab ax; \
+			PASTEMAC(chabr,scal2s)( ar, *(ct + ii*rs_ct + jj*cs_ct), axr ); \
+			PASTEMAC(chabr,scal2s)( ai, *(ct + ii*rs_ct + jj*cs_ct), axi ); \
+			PASTEMAC(chab,sets)( axr, axi, ax ); \
+			PASTEMAC(chab,chc,chc,xpbys)( ax, *beta, *(c + ii*rs_c + jj*cs_c) ); \
+		} \
 	} \
 }
 
-INSERT_GENTFUNCRO( gemmro, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX )
+INSERT_GENTFUNC2RO( gemm_crr, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX )
+INSERT_GENTFUNC2RO_MIX_P( gemm_crr, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX )
 

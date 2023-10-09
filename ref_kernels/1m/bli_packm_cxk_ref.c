@@ -45,7 +45,7 @@ do \
 		for ( dim_t mn = 0; mn < cdim; mn++ ) \
 		{ \
 			ctypep alpha_cast, kappa_alpha; \
-			PASTEMAC2(cha,chp,copys)( *(alpha1 + mn*inca), alpha_cast ); \
+			PASTEMAC(cha,chp,copys)( *(alpha1 + mn*inca), alpha_cast ); \
 			PASTEMAC(chp,op)( kappa_cast, alpha_cast, kappa_alpha ); \
 			for ( dim_t d = 0; d < dfac; d++ ) \
 				PASTEMAC(chp,copys)( kappa_alpha, *(pi1 + mn*dfac + d) ); \
@@ -60,7 +60,7 @@ do \
 #undef  GENTFUNC2
 #define GENTFUNC2( ctypea, ctypep, cha, chp, opname, arch, suf ) \
 \
-void PASTEMAC4(cha,chp,opname,arch,suf) \
+void PASTEMAC(cha,chp,opname,arch,suf) \
      ( \
              conj_t  conja, \
              pack_t  schema, \

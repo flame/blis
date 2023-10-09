@@ -45,7 +45,8 @@ void* bli_packm_scalar( obj_t* kappa, obj_t* p )
 	// because we may not have a chance later due to using real-domain
 	// microkernels.
 	if ( bli_obj_scalar_has_nonzero_imag( p ) &&
-	     bli_obj_is_complex( p ) )
+	     ( bli_obj_is_complex( p ) ||
+           bli_obj_pack_schema( p ) == BLIS_PACKED_PANELS_RO ) )
 	{
 		//printf( "applying non-zero imag kappa\n_p" );
 

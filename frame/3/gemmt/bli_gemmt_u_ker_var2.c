@@ -62,7 +62,7 @@ BLIS_INLINE void PASTEMAC(ch,op) \
 	const ctype* restrict b_cast = b; \
 	      ctype* restrict y_cast = y; \
 \
-	PASTEMAC3(ch,ch,ch,xpbys_mxn_u) \
+	PASTEMAC(ch,ch,ch,xpbys_mxn_u) \
 	( \
 	  diagoff, \
 	  m, \
@@ -150,7 +150,7 @@ void bli_gemmt_u_ker_var2
 	const inc_t rs_ct       = ( row_pref ? NR : 1 );
 	const inc_t cs_ct       = ( row_pref ? 1 : MR );
 
-	const void* zero       = bli_obj_buffer_for_const( dt_comp, &BLIS_ZERO );
+	const void* zero       = bli_obj_buffer_for_const( BLIS_COMPLEX | dt_comp, &BLIS_ZERO );
 	const char* a_cast     = buf_a;
 	const char* b_cast     = buf_b;
 	      char* c_cast     = buf_c;

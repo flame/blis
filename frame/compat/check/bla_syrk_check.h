@@ -45,11 +45,11 @@
 	static char* dt_cst = dt_str; \
 \
 	is_r  = ( dt_cst[0] == 's' || dt_cst[0] == 'd' ); \
-	nota  = PASTEF770(lsame)( transa, "N", (ftnlen)1, (ftnlen)1 ); \
-	ta    = PASTEF770(lsame)( transa, "T", (ftnlen)1, (ftnlen)1 ); \
-	cta   = PASTEF770(lsame)( transa, "C", (ftnlen)1, (ftnlen)1 ); \
-	lower = PASTEF770(lsame)( uploc,  "L", (ftnlen)1, (ftnlen)1 ); \
-	upper = PASTEF770(lsame)( uploc,  "U", (ftnlen)1, (ftnlen)1 ); \
+	nota  = PASTEF77(lsame)( transa, "N", (ftnlen)1, (ftnlen)1 ); \
+	ta    = PASTEF77(lsame)( transa, "T", (ftnlen)1, (ftnlen)1 ); \
+	cta   = PASTEF77(lsame)( transa, "C", (ftnlen)1, (ftnlen)1 ); \
+	lower = PASTEF77(lsame)( uploc,  "L", (ftnlen)1, (ftnlen)1 ); \
+	upper = PASTEF77(lsame)( uploc,  "U", (ftnlen)1, (ftnlen)1 ); \
 \
 	if ( nota ) { nrowa = *m; } \
 	else        { nrowa = *k; } \
@@ -75,7 +75,7 @@
 \
 		bli_string_mkupper( func_str ); \
 \
-		PASTEF770(xerbla)( func_str, &info, (ftnlen)6 ); \
+		PASTEF77(xerbla)( func_str, &info, (ftnlen)6 ); \
 \
 		return; \
 	} \

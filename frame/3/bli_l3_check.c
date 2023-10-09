@@ -391,7 +391,7 @@ void bli_trsm_check
 
 	// Perform checks common to hemm/symm/trmm/trsm.
 
-	bli_hemm_basic_check( side, alpha, a, b, &BLIS_ZERO, b, cntx );
+	bli_trsm_basic_check( side, alpha, a, b, &BLIS_ZERO, b, cntx );
 
 	// Check matrix squareness.
 
@@ -457,14 +457,45 @@ void bli_gemmt_basic_check
 
 	// Check for consistent datatypes.
 
-	e_val = bli_check_consistent_object_datatypes( c, a );
-	bli_check_error_code( e_val );
-
-	e_val = bli_check_consistent_object_datatypes( c, b );
-	bli_check_error_code( e_val );
+	// Skip checking for consistent datatypes between A, B, and C since
+	// that is totally valid for mixed-datatype gemmt.
 }
 
 void bli_hemm_basic_check
+     (
+             side_t  side,
+       const obj_t*  alpha,
+       const obj_t*  a,
+       const obj_t*  b,
+       const obj_t*  beta,
+       const obj_t*  c,
+       const cntx_t* cntx
+     )
+{
+	err_t e_val;
+
+	// Perform standard checks.
+
+	bli_l3_basic_check( alpha, a, b, beta, c, cntx );
+
+	// Check object dimensions.
+
+	if ( bli_is_left( side ) )
+	{
+		e_val = bli_check_level3_dims( a, b, c );
+		bli_check_error_code( e_val );
+	}
+	else // if ( bli_is_right( side ) )
+	{
+		e_val = bli_check_level3_dims( b, a, c );
+		bli_check_error_code( e_val );
+	}
+
+	// Skip checking for consistent datatypes between A, B, and C since
+	// that is totally valid for mixed-datatype hemm.
+}
+
+void bli_trsm_basic_check
      (
              side_t  side,
        const obj_t*  alpha,
@@ -526,11 +557,8 @@ void bli_herk_basic_check
 
 	// Check for consistent datatypes.
 
-	e_val = bli_check_consistent_object_datatypes( c, a );
-	bli_check_error_code( e_val );
-
-	e_val = bli_check_consistent_object_datatypes( c, ah );
-	bli_check_error_code( e_val );
+	// Skip checking for consistent datatypes between A, B, and C since
+	// that is totally valid for mixed-datatype herk.
 }
 
 void bli_her2k_basic_check
@@ -560,19 +588,8 @@ void bli_her2k_basic_check
 	e_val = bli_check_level3_dims( b, ah, c );
 	bli_check_error_code( e_val );
 
-	// Check for consistent datatypes.
-
-	e_val = bli_check_consistent_object_datatypes( c, a );
-	bli_check_error_code( e_val );
-
-	e_val = bli_check_consistent_object_datatypes( c, ah );
-	bli_check_error_code( e_val );
-
-	e_val = bli_check_consistent_object_datatypes( c, b );
-	bli_check_error_code( e_val );
-
-	e_val = bli_check_consistent_object_datatypes( c, bh );
-	bli_check_error_code( e_val );
+	// Skip checking for consistent datatypes between A, B, and C since
+	// that is totally valid for mixed-datatype her2k.
 }
 
 void bli_l3_basic_check

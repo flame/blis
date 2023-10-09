@@ -51,7 +51,7 @@
 
 // Combine the CNAME and _ref for convenience to the code that defines
 // reference kernels.
-//#define BLIS_CNAME_REF_SUFFIX  PASTECH2(_,BLIS_CNAME,BLIS_REF_SUFFIX)
+//#define BLIS_CNAME_REF_SUFFIX  PASTECH(_,BLIS_CNAME,BLIS_REF_SUFFIX)
 
 // -- Prototype-generating macro definitions -----------------------------------
 
@@ -62,11 +62,11 @@ void PASTEMAC(cntx_init_,archname) \
      ( \
        cntx_t* cntx \
      ); \
-void PASTEMAC2(cntx_init_,archname,BLIS_REF_SUFFIX) \
+void PASTEMAC(cntx_init_,archname,BLIS_REF_SUFFIX) \
      ( \
        cntx_t* cntx \
      ); \
-void PASTEMAC2(cntx_init_,archname,BLIS_IND_SUFFIX) \
+void PASTEMAC(cntx_init_,archname,BLIS_IND_SUFFIX) \
      ( \
        ind_t   method, \
        cntx_t* cntx \

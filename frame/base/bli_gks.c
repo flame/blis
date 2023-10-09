@@ -476,7 +476,7 @@ void bli_gks_init_ref_cntx
 
 // -----------------------------------------------------------------------------
 
-bool bli_gks_cntx_l3_nat_ukr_is_ref
+bool bli_gks_cntx_ukr_is_ref
      (
              num_t   dt,
              ukr_t   ukr_id,
@@ -493,6 +493,29 @@ bool bli_gks_cntx_l3_nat_ukr_is_ref
 	// specified datatype.
 	void_fp ref_fp = bli_cntx_get_ukr_dt( dt, ukr_id, &ref_cntx );
 	void_fp fp     = bli_cntx_get_ukr_dt( dt, ukr_id, cntx );
+
+	// Return the result.
+	return fp == ref_fp;
+}
+
+bool bli_gks_cntx_ukr2_is_ref
+     (
+             num_t   dt1,
+             num_t   dt2,
+             ukr_t   ukr_id,
+       const cntx_t* cntx
+     )
+{
+	cntx_t ref_cntx;
+
+	// Initialize a context with reference kernels for the arch_t id queried
+	// via bli_arch_query_id().
+	bli_gks_init_ref_cntx( &ref_cntx );
+
+	// Query each context for the micro-kernel function pointer for the
+	// specified datatype.
+	void_fp ref_fp = bli_cntx_get_ukr2_dt( dt1, dt2, ukr_id, &ref_cntx );
+	void_fp fp     = bli_cntx_get_ukr2_dt( dt1, dt2, ukr_id, cntx );
 
 	// Return the result.
 	return fp == ref_fp;
@@ -578,7 +601,7 @@ kimpl_t bli_gks_l3_ukr_impl_type( ukr_t ukr, ind_t method, num_t dt )
 		// Query the native context from the gks.
 		const cntx_t* cntx = bli_gks_query_cntx();
 
-		if ( bli_gks_cntx_l3_nat_ukr_is_ref( dt, ukr, cntx ) )
+		if ( bli_gks_cntx_ukr_is_ref( dt, ukr, cntx ) )
 			return BLIS_REFERENCE_UKERNEL;
 		else
 			return BLIS_OPTIMIZED_UKERNEL;

@@ -54,7 +54,7 @@ do { \
 #define PACKM_SCAL_1E( ctypep_r, cha, chp, mn, k, op ) \
 do { \
 	ctypep_r alpha_r, alpha_i, ka_r, ka_i; \
-	PASTEMAC2(cha,chp,copyris)( *(alpha1 +  mn       *inca2       + 0 + k*lda2), \
+	PASTEMAC(cha,chp,copyris)( *(alpha1 +  mn       *inca2       + 0 + k*lda2), \
 	                            *(alpha1 +  mn       *inca2       + 1 + k*lda2), \
 	                            alpha_r, alpha_i ); \
 	PASTEMAC(chp,op)( kappa_r, kappa_i, alpha_r, alpha_i, ka_r, ka_i ); \
@@ -68,7 +68,7 @@ do { \
 #define PACKM_SCAL_1R( ctypep_r, cha, chp, mn, k, op ) \
 do { \
 	ctypep_r alpha_r, alpha_i, ka_r, ka_i; \
-	PASTEMAC2(cha,chp,copyris)( *(alpha1 +  mn       *inca2       + 0 + k*lda2), \
+	PASTEMAC(cha,chp,copyris)( *(alpha1 +  mn       *inca2       + 0 + k*lda2), \
 	                            *(alpha1 +  mn       *inca2       + 1 + k*lda2), \
 	                            alpha_r, alpha_i ); \
 	PASTEMAC(chp,op)( kappa_r, kappa_i, alpha_r, alpha_i, ka_r, ka_i ); \
@@ -122,7 +122,7 @@ do \
 #undef  GENTFUNC2R
 #define GENTFUNC2R( ctypea, ctypea_r, cha, cha_r, ctypep, ctypep_r, chp, chp_r, opname, arch, suf ) \
 \
-void PASTEMAC4(cha,chp,opname,arch,suf) \
+void PASTEMAC(cha,chp,opname,arch,suf) \
      ( \
              struc_t struca, \
              diag_t  diaga, \
@@ -214,7 +214,7 @@ void PASTEMAC4(cha,chp,opname,arch,suf) \
 			for ( dim_t d = 0; d < cdim_bcast; ++d ) \
 			{ \
 				ctypep_r alpha_r; \
-				PASTEMAC2(cha_r,chp_r,copys)( *(alpha1 + mnk*(inca2 + lda2)), alpha_r ); \
+				PASTEMAC(cha_r,chp_r,copys)( *(alpha1 + mnk*(inca2 + lda2)), alpha_r ); \
 				PASTEMAC(chp_r,scal2s)(  kappa_r, alpha_r, *(pi1_ri + (mnk*2 + 0)*cdim_bcast + d + mnk*ldp2) ); \
 				PASTEMAC(chp_r,scal2s)(  kappa_i, alpha_r, *(pi1_ri + (mnk*2 + 1)*cdim_bcast + d + mnk*ldp2) ); \
 				PASTEMAC(chp_r,scal2s)( -kappa_i, alpha_r, *(pi1_ir + (mnk*2 + 0)*cdim_bcast + d + mnk*ldp2) ); \
@@ -317,7 +317,7 @@ void PASTEMAC4(cha,chp,opname,arch,suf) \
 			for ( dim_t d = 0; d < cdim_bcast; ++d ) \
 			{ \
 				ctypep_r alpha_r; \
-				PASTEMAC2(cha_r,chp_r,copys)( *(alpha1 + mnk*(inca2 + lda2)), alpha_r ); \
+				PASTEMAC(cha_r,chp_r,copys)( *(alpha1 + mnk*(inca2 + lda2)), alpha_r ); \
 				PASTEMAC(chp_r,scal2s)( kappa_r, alpha_r, *(pi1_r + mnk*(cdim_bcast + ldp2) + d) ); \
 				PASTEMAC(chp_r,scal2s)( kappa_i, alpha_r, *(pi1_i + mnk*(cdim_bcast + ldp2) + d) ); \
 			} \

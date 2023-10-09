@@ -70,7 +70,9 @@ void bli_packm_blk_var1
 	if ( bli_error_checking_is_enabled() )
 		bli_packm_int_check( c, p );
 
+	// dt_p is updated by bli_packm_init for real-only packing
 	num_t   dt_c           = bli_obj_dt( c );
+	        dt_p           = bli_obj_dt( p );
 	dim_t   dt_c_size      = bli_dt_size( dt_c );
 	dim_t   dt_p_size      = bli_dt_size( dt_p );
 

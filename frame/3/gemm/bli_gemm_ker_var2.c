@@ -35,46 +35,6 @@
 
 #include "blis.h"
 
-typedef void (*xpbys_mxn_ft)
-    (
-            dim_t m,
-            dim_t n,
-      const void* x, inc_t rs_x, inc_t cs_x,
-      const void* b,
-            void* y, inc_t rs_y, inc_t cs_y
-    );
-
-#undef  GENTFUNC2
-#define GENTFUNC2(ctypex,ctypey,chx,chy,op) \
-\
-BLIS_INLINE void PASTEMAC2(chx,chy,op) \
-    ( \
-            dim_t m, \
-            dim_t n, \
-      const void* x, inc_t rs_x, inc_t cs_x, \
-      const void* b, \
-            void* y, inc_t rs_y, inc_t cs_y \
-    ) \
-{ \
-	const ctypex* restrict x_cast = x; \
-	const ctypey* restrict b_cast = b; \
-	      ctypey* restrict y_cast = y; \
-\
-	PASTEMAC3(chx,chy,chy,xpbys_mxn) \
-	( \
-	  m, n, \
-	  x_cast, rs_x, cs_x, \
-	  b_cast, \
-	  y_cast, rs_y,  cs_y \
-	); \
-}
-
-INSERT_GENTFUNC2_BASIC(xpbys_mxn_fn);
-INSERT_GENTFUNC2_MIX_DP(xpbys_mxn_fn);
-
-static xpbys_mxn_ft GENARRAY2_ALL(xpbys_mxn, xpbys_mxn_fn);
-
-
 void bli_gemm_ker_var2
      (
        const obj_t*     a,
@@ -85,7 +45,6 @@ void bli_gemm_ker_var2
              thrinfo_t* thread_par
      )
 {
-	const num_t  dt_comp   = bli_gemm_var_cntl_comp_dt( cntl );
 	const num_t  dt_a      = bli_obj_dt( a );
 	const num_t  dt_b      = bli_obj_dt( b );
 	const num_t  dt_c      = bli_obj_dt( c );
@@ -144,17 +103,6 @@ void bli_gemm_ker_var2
 	// function pointer type.
 	gemm_ukr_ft gemm_ukr = bli_gemm_var_cntl_ukr( cntl );
 	const void* params   = bli_gemm_var_cntl_params( cntl );
-
-	// Temporary C buffer for edge cases. Note that the strides of this
-	// temporary buffer are set so that they match the storage of the
-	// original C matrix. For example, if C is column-stored, ct will be
-	// column-stored as well.
-	      char  ct[ BLIS_STACK_BUF_MAX_SIZE ]
-	                __attribute__((aligned(BLIS_STACK_BUF_ALIGN_SIZE)));
-	const bool  row_pref    = bli_gemm_var_cntl_row_pref( cntl );
-	const inc_t rs_ct       = ( row_pref ? NR : 1 );
-	const inc_t cs_ct       = ( row_pref ? 1 : MR );
-	const char* zero        = bli_obj_buffer_for_const( dt_comp, &BLIS_ZERO );
 
 	//
 	// Assumptions/assertions:
@@ -298,53 +246,21 @@ void bli_gemm_ker_var2
 			bli_auxinfo_set_next_a( a2, &aux );
 			bli_auxinfo_set_next_b( b2, &aux );
 
-			// Edge case handling now occurs within the microkernel itself, but
-			// we must still explicitly accumulate to a temporary microtile in
-			// situations where a virtual microkernel is being used, such as
-			// during the 1m method or some cases of mixed datatypes.
-			if ( bli_dt_prec( dt_comp ) == bli_dt_prec( dt_c ) )
-			{
-				// Invoke the gemm micro-kernel.
-				gemm_ukr
-				(
-				  m_cur,
-				  n_cur,
-				  k,
-				  ( void* )alpha_cast,
-				  ( void* )a1,
-				  ( void* )b1,
-				  ( void* )beta_cast,
-				           c11, rs_c, cs_c,
-				  &aux,
-				  ( cntx_t* )cntx
-				);
-			}
-			else
-			{
-				// Invoke the gemm micro-kernel.
-				gemm_ukr
-				(
-				  MR,
-				  NR,
-				  k,
-				  ( void* )alpha_cast,
-				  ( void* )a1,
-				  ( void* )b1,
-				  ( void* )zero,
-				           &ct, rs_ct, cs_ct,
-				  &aux,
-				  ( cntx_t* )cntx
-				);
-
-				// Accumulate to C with typecasting.
-				xpbys_mxn[ dt_comp ][ dt_c ]
-				(
-				  m_cur, n_cur,
-				  &ct, rs_ct, cs_ct,
-				  ( void* )beta_cast,
-				  c11, rs_c, cs_c
-				);
-			}
+			// Edge case handling now occurs within the microkernel itself.
+			// Invoke the gemm micro-kernel.
+			gemm_ukr
+			(
+			  m_cur,
+			  n_cur,
+			  k,
+			  ( void* )alpha_cast,
+			  ( void* )a1,
+			  ( void* )b1,
+			  ( void* )beta_cast,
+			           c11, rs_c, cs_c,
+			  &aux,
+			  ( cntx_t* )cntx
+			);
 
 			// Decrement the number of microtiles assigned to the thread; once
 			// it reaches zero, return immediately.
