@@ -309,14 +309,24 @@ void bli_gemm_cntl_init
 		// Pack the complex input operand as normal, except that
 		// the (rescaled) real-domain block sizes are used.
 
-		if ( !a_is_real )
+		if ( !row_pref )
 		{
+			// We transpose the operation above to make sure that
+			// the complex matrix is on the right side for the storage
+			// preference of the microkernel, but things sometimes go
+			// wrong.
+			if ( a_is_real ) bli_abort();
 			mc_scale = 2;
 			mr_scale = 2;
 			mr_pack_scale = 2;
 		}
 		else
 		{
+			// We transpose the operation above to make sure that
+			// the complex matrix is on the right side for the storage
+			// preference of the microkernel, but things sometimes go
+			// wrong.
+			if ( b_is_real ) bli_abort();
 			nc_scale = 2;
 			nr_scale = 2;
 			nr_pack_scale = 2;

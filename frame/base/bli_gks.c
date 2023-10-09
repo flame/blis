@@ -396,12 +396,13 @@ void bli_gks_register_cntx
 	// arguments to the gemmtrsm microkernel swapped at the last minute, as the
 	// kernel is called.
 
-	const blksz_t* mc = bli_cntx_get_blksz( BLIS_MC, gks_id );
-	const blksz_t* nc = bli_cntx_get_blksz( BLIS_NC, gks_id );
-	const blksz_t* kc = bli_cntx_get_blksz( BLIS_KC, gks_id );
-	const blksz_t* mr = bli_cntx_get_blksz( BLIS_MR, gks_id );
-	const blksz_t* nr = bli_cntx_get_blksz( BLIS_NR, gks_id );
-	const blksz_t* kr = bli_cntx_get_blksz( BLIS_KR, gks_id );
+	const mbool_t* row_pref = bli_cntx_get_ukr_prefs( BLIS_GEMM_UKR_ROW_PREF, gks_id );
+	const blksz_t* mc       = bli_cntx_get_blksz( BLIS_MC, gks_id );
+	const blksz_t* nc       = bli_cntx_get_blksz( BLIS_NC, gks_id );
+	const blksz_t* kc       = bli_cntx_get_blksz( BLIS_KC, gks_id );
+	const blksz_t* mr       = bli_cntx_get_blksz( BLIS_MR, gks_id );
+	const blksz_t* nr       = bli_cntx_get_blksz( BLIS_NR, gks_id );
+	const blksz_t* kr       = bli_cntx_get_blksz( BLIS_KR, gks_id );
 
 	e_val = bli_check_valid_mc_mod_mult( mc, mr ); bli_check_error_code( e_val );
 	e_val = bli_check_valid_nc_mod_mult( nc, nr ); bli_check_error_code( e_val );
@@ -411,8 +412,8 @@ void bli_gks_register_cntx
 	e_val = bli_check_valid_nc_mod_mult( nc, mr ); bli_check_error_code( e_val );
 #endif
 
-	e_val = bli_check_valid_mr_even( mr ); bli_check_error_code( e_val );
-	e_val = bli_check_valid_nr_even( nr ); bli_check_error_code( e_val );
+	e_val = bli_check_valid_mr_even( mr, row_pref ); bli_check_error_code( e_val );
+	e_val = bli_check_valid_nr_even( nr, row_pref ); bli_check_error_code( e_val );
 
 	// Verify that the register blocksizes in the context are sufficiently large
 	// relative to the maximum stack buffer size defined at configure-time.

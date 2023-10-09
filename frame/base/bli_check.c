@@ -956,7 +956,7 @@ err_t bli_check_valid_kc_mod_mult( const blksz_t* kc, const blksz_t* kr )
 	return BLIS_SUCCESS;
 }
 
-err_t bli_check_valid_mr_even( const blksz_t* mr )
+err_t bli_check_valid_mr_even( const blksz_t* mr, const mbool_t* row_pref )
 {
 	num_t dt;
 
@@ -965,8 +965,12 @@ err_t bli_check_valid_mr_even( const blksz_t* mr )
 		if ( bli_is_complex( dt ) )
 			continue;
 
-		dim_t mr_dt = bli_blksz_get_def( dt, mr );
-		dim_t packmr_dt = bli_blksz_get_max( dt, mr );
+		dim_t mr_dt        = bli_blksz_get_def( dt, mr );
+		dim_t packmr_dt    = bli_blksz_get_max( dt, mr );
+		bool  prefers_rows = bli_mbool_get_dt( dt, row_pref );
+
+		if ( prefers_rows )
+			continue;
 
 		if      ( mr_dt % 2 != 0 ) return BLIS_MR_NOT_EVEN_FOR_REAL_TYPE;
 		else if ( packmr_dt % 2 != 0 ) return BLIS_PACKMR_NOT_EVEN_FOR_REAL_TYPE;
@@ -975,7 +979,7 @@ err_t bli_check_valid_mr_even( const blksz_t* mr )
 	return BLIS_SUCCESS;
 }
 
-err_t bli_check_valid_nr_even( const blksz_t* nr )
+err_t bli_check_valid_nr_even( const blksz_t* nr, const mbool_t* row_pref )
 {
 	num_t dt;
 
@@ -986,6 +990,10 @@ err_t bli_check_valid_nr_even( const blksz_t* nr )
 
 		dim_t nr_dt = bli_blksz_get_def( dt, nr );
 		dim_t packnr_dt = bli_blksz_get_max( dt, nr );
+		bool  prefers_rows = bli_mbool_get_dt( dt, row_pref );
+
+		if ( !prefers_rows )
+			continue;
 
 		if      ( nr_dt % 2 != 0 ) return BLIS_NR_NOT_EVEN_FOR_REAL_TYPE;
 		else if ( packnr_dt % 2 != 0 ) return BLIS_PACKNR_NOT_EVEN_FOR_REAL_TYPE;

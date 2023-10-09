@@ -116,6 +116,6 @@ err_t bli_check_valid_mc_mod_mult( const blksz_t* mc, const blksz_t* mr );
 err_t bli_check_valid_nc_mod_mult( const blksz_t* nc, const blksz_t* nr );
 err_t bli_check_valid_kc_mod_mult( const blksz_t* kc, const blksz_t* kr );
 
-err_t bli_check_valid_mr_even( const blksz_t* mr );
-err_t bli_check_valid_nr_even( const blksz_t* mr );
+err_t bli_check_valid_mr_even( const blksz_t* mr, const mbool_t* row_pref );
+err_t bli_check_valid_nr_even( const blksz_t* mr, const mbool_t* row_pref );
 
