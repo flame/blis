@@ -54,8 +54,12 @@ static cntx_t* cached_cntx = NULL;
 
 // -----------------------------------------------------------------------------
 
-void bli_gks_init( void )
+int bli_gks_init( void )
 {
+	// NOTE: This function is called once by ONLY ONE application thread per
+	// library init/finalize cycle (see bli_init.c). Thus, a mutex is not
+	// needed to protect the data initialization.
+
 	{
 		// Initialize the internal data structure we use to track registered
 		// contexts.
@@ -135,6 +139,14 @@ void bli_gks_init( void )
 #endif
 
 		// -- ARM-NEON (4 pipes x 128-bit vectors) --
+#ifdef BLIS_CONFIG_ALTRAMAX
+		bli_gks_register_cntx( BLIS_ARCH_ALTRAMAX,    bli_cntx_init_altramax,
+		                                              bli_cntx_init_altramax_ref );
+#endif
+#ifdef BLIS_CONFIG_ALTRA
+		bli_gks_register_cntx( BLIS_ARCH_ALTRA,       bli_cntx_init_altra,
+		                                              bli_cntx_init_altra_ref );
+#endif
 #ifdef BLIS_CONFIG_FIRESTORM
 		bli_gks_register_cntx( BLIS_ARCH_FIRESTORM,   bli_cntx_init_firestorm,
 		                                              bli_cntx_init_firestorm_ref );
@@ -223,11 +235,13 @@ void bli_gks_init( void )
 	// initialized given that bli_gks_init() is about to return.
 	cached_cntx = ( cntx_t* )bli_gks_query_cntx_noinit();
 #endif
+
+	return 0;
 }
 
 // -----------------------------------------------------------------------------
 
-void bli_gks_finalize( void )
+int bli_gks_finalize( void )
 {
 	arch_t id;
 
@@ -259,6 +273,8 @@ void bli_gks_finalize( void )
 	// Clear the cached pointers to the native and induced contexts.
 	cached_cntx = NULL;
 #endif
+
+	return 0;
 }
 
 // -----------------------------------------------------------------------------

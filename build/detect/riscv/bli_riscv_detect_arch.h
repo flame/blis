@@ -75,6 +75,12 @@
 #define RISCV_D
 #endif
 
+#if __riscv_flen >= 128
+#define RISCV_Q q
+#else
+#define RISCV_Q
+#endif
+
 #if __riscv_c
 #define RISCV_C c
 #else
@@ -92,6 +98,47 @@
 #define RISCV_V v
 #else
 #define RISCV_V
+#endif
+
+/* No test currently for Zicsr, which was removed from the base ISA,
+   but F implies Zicsr */
+#if __riscv_f
+#define RISCV_ZICSR _zicsr
+#else
+#define RISCV_ZICSR
+#endif
+
+/* No test currently for Zifencei, which was removed from the base ISA */
+#define RISCV_ZIFENCEI
+
+#if __riscv_zba
+#define RISCV_ZBA _zba
+#else
+#define RISCV_ZBA
+#endif
+
+#if __riscv_zbb
+#define RISCV_ZBB _zbb
+#else
+#define RISCV_ZBB
+#endif
+
+#if __riscv_zbc
+#define RISCV_ZBC _zbc
+#else
+#define RISCV_ZBC
+#endif
+
+#if __riscv_zbs
+#define RISCV_ZBS _zbs
+#else
+#define RISCV_ZBS
+#endif
+
+#if __riscv_zfh
+#define RISCV_ZFH _zfh
+#else
+#define RISCV_ZFH
 #endif
 
 #else /* __riscv_arch_test */
@@ -129,6 +176,12 @@
 #define RISCV_D
 #endif
 
+#if __riscv_flen >= 128
+#define RISCV_Q q
+#else
+#define RISCV_Q
+#endif
+
 #if __riscv_compressed
 #define RISCV_C c
 #else
@@ -144,12 +197,29 @@
 #define RISCV_V
 #endif
 
+/* No test currently for Zicsr, which was removed from the base ISA, but
+   F implies Zicsr */
+#if __riscv_flen >= 32
+#define RISCV_ZICSR _zicsr
+#else
+#define RISCV_ZICSR
+#endif
+
+#define RISCV_ZIFENCEI
+#define RISCV_ZBA
+#define RISCV_ZBB
+#define RISCV_ZBC
+#define RISCV_ZBS
+#define RISCV_ZFH
+
 #endif /* __riscv_arch_test */
 
 #define CAT2(a,b) a##b
 #define CAT(a,b) CAT2(a,b)
 
 CAT(rv, CAT(__riscv_xlen, CAT(RISCV_I, CAT(RISCV_E, CAT(RISCV_M, CAT(RISCV_A,
-CAT(RISCV_F, CAT(RISCV_D, CAT(RISCV_C, CAT(RISCV_P, RISCV_V))))))))))
+CAT(RISCV_F, CAT(RISCV_D, CAT(RISCV_Q, CAT(RISCV_C, CAT(RISCV_P, CAT(RISCV_V,
+CAT(RISCV_ZICSR, CAT(RISCV_ZIFENCEI, CAT(RISCV_ZBA, CAT(RISCV_ZBB,
+CAT(RISCV_ZBC, CAT(RISCV_ZBS, RISCV_ZFH))))))))))))))))))
 
 #endif /* __riscv */

@@ -46,12 +46,20 @@ extern "C" {
 void bli_thrcomm_init_hpx( dim_t n_threads, thrcomm_t* comm )
 {
 	if ( comm == nullptr ) return;
+
+	//comm->sent_object             = nullptr;
+	//comm->n_threads               = n_threads;
+	comm->ti                      = BLIS_HPX;
+	//comm->barrier_sense           = 0;
+	//comm->barrier_threads_arrived = 0;
+
 	comm->barrier = new hpx:barrier<>();
 }
 
 void bli_thrcomm_cleanup_hpx( thrcomm_t* comm )
 {
 	if ( comm == nullptr ) return;
+
 	delete comm->barrier;
 }
 
@@ -69,9 +77,11 @@ void bli_thrcomm_barrier( dim_t t_id, thrcomm_t* comm )
 void bli_thrcomm_init_hpx( dim_t n_threads, thrcomm_t* comm )
 {
 	if ( comm == nullptr ) return;
-	comm->sent_object = nullptr;
-	comm->n_threads = n_threads;
-	comm->barrier_sense = 0;
+
+	comm->sent_object             = nullptr;
+	comm->n_threads               = n_threads;
+	comm->ti                      = BLIS_HPX;
+	comm->barrier_sense           = 0;
 	comm->barrier_threads_arrived = 0;
 }
 

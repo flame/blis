@@ -41,6 +41,7 @@ void bli_thrcomm_init_single( dim_t n_threads, thrcomm_t* comm )
 
 	comm->sent_object             = NULL;
 	comm->n_threads               = n_threads;
+	comm->ti                      = BLIS_SINGLE;
 	comm->barrier_sense           = 0;
 	comm->barrier_threads_arrived = 0;
 }

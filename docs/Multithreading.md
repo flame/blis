@@ -101,7 +101,7 @@ The `cores` value is most appropriate for BLIS since we usually want to ignore h
 
 Setting these two variables is often enough. However, it obviously does not offer the level of control that `GOMP_CPU_AFFINITY` does. Sometimes, it takes some experimentation to determine whether a particular mapping is performing as expected. If multithreaded performance on eight cores is only twice what it is observed of single-threaded performance, the affinity mapping may be to blame. But if performance is six or seven times higher than sequential execution, then the mapping you chose is probably working fine.
 
-Unfortunately, the topic of thread-to-core affinity is well beyond the scope of this document. (A web search will uncover many [great resources](http://www.nersc.gov/users/software/programming-models/openmp/process-and-thread-affinity/) discussing the use of [GOMP_CPU_AFFINITY](https://gcc.gnu.org/onlinedocs/libgomp/GOMP_005fCPU_005fAFFINITY.html) and [OMP_PROC_BIND](https://gcc.gnu.org/onlinedocs/libgomp/OMP_005fPROC_005fBIND.html#OMP_005fPROC_005fBIND).) It's up to the user to determine an appropriate affinity mapping, and then choose your preferred method of expressing that mapping to the OpenMP implementation.
+Unfortunately, the topic of thread-to-core affinity is well beyond the scope of this document. (A web search will uncover many [great resources](https://web.archive.org/web/20190130102805/http://www.nersc.gov/users/software/programming-models/openmp/process-and-thread-affinity) discussing the use of [GOMP_CPU_AFFINITY](https://gcc.gnu.org/onlinedocs/libgomp/GOMP_005fCPU_005fAFFINITY.html) and [OMP_PROC_BIND](https://gcc.gnu.org/onlinedocs/libgomp/OMP_005fPROC_005fBIND.html#OMP_005fPROC_005fBIND).) It's up to the user to determine an appropriate affinity mapping, and then choose your preferred method of expressing that mapping to the OpenMP implementation.
 
 
 # Specifying multithreading
@@ -197,11 +197,15 @@ If `BLIS_THREAD_IMPL` is not set, BLIS will attempt to query its shorthand alter
 
 ## Globally at runtime
 
+***Note:** If you want to gain access to BLIS API function prototypes, be sure to #include "blis.h" from the relevant source files in your application.*
+
 If you still wish to set the parallelization scheme globally, but you want to do so at runtime, BLIS provides a thread-safe API for specifying multithreading. Think of these functions as a way to modify the same internal data structure into which the environment variables are read. (Recall that the environment variables are only read once, when BLIS is initialized).
 
 **Note**: If you set parallelization globally via environment variables and *then* your application *also* uses the global runtime API to set the ways of parallelism, the global runtime API will prevail.
 
 **Note**: Regardless of which way ([automatic](Multithreading.md#globally-at-runtime-the-automatic-way) or [manual](Multithreading.md#globally-at-runtime-the-manual-way)) the global runtime API is used to specify multithreading, that specification will affect operation of BLIS through **both** the BLAS compatibility layer as well as the native ([typed](docs/BLISTypedAPI.md) and [object](docs/BLISObjectAPI.md)) APIs that are unique to BLIS.
+
+If BLIS is being used by two or more application-level threads, each of those application threads will track their own global state for the purpose of specifying parallelism. We felt this makes sense because each application thread may wish to specify a different parallelization scheme without affecting the scheme for the other application thread(s).
 
 ### Globally at runtime: the automatic way
 
@@ -246,7 +250,7 @@ This will result in both OpenMP and pthreads implementations being compiled and 
 ```c
 void bli_thread_set_thread_impl( timpl_t ti );
 ```
-The function takes a `timpl_t`, which is an enumerated type that has three valid values corresponding to the four possible threading implementations: `BLIS_OPENMP`, `BLIS_POSIX`, `BLIS_HPX`, and `BLIS_SINGLE`. Forcing use of pthreads is as simple as calling:
+The function takes a `timpl_t`, which is an enumerated type that has four valid values corresponding to the four possible threading implementations: `BLIS_OPENMP`, `BLIS_POSIX`, `BLIS_HPX`, and `BLIS_SINGLE`. Forcing use of pthreads is as simple as calling:
 ```c
 bli_thread_set_thread_impl( BLIS_POSIX )
 ```
@@ -258,7 +262,9 @@ Note that if `BLIS_SINGLE` is specified, any other-related parameters previously
 
 ## Locally at runtime
 
-In addition to the global methods based on environment variables and runtime function calls, BLIS also offers a local, *per-call* method of requesting parallelism at runtime. This method has the benefit of being thread-safe and flexible; your application can spawn two threads at the application level, with each thread requesting different degrees of parallelism from their respective calls to level-3 BLIS operations.
+***Note:** If you want to gain access to BLIS API function prototypes, be sure to #include "blis.h" from the relevant source files in your application.*
+
+In addition to the global methods based on environment variables and runtime function calls, BLIS also offers a local, *per-call* method of requesting parallelism at runtime. This method has the benefit of being thread-safe and flexible; your application can spawn two or more threads at the application level, with each thread requesting different degrees of parallelism from their respective calls to level-3 BLIS operations.
 
 As with environment variables and the global runtime API, there are two ways to specify parallelism: the automatic way and the manual way. Both ways involve allocating a BLIS-specific object, initializing the object and encoding the desired parallelization, and then passing a pointer to the object into one of the expert interfaces of either the [typed](docs/BLISTypedAPI.md) or [object](docs/BLISObjectAPI) APIs. We provide examples of utilizing this threading object below.
 
@@ -276,10 +282,6 @@ You **must** initialize the `rntm_t`. This can be done in either of two ways.
 If you want to initialize it as part of the declaration, you may do so via the default `BLIS_RNTM_INITIALIZER` macro:
 ```c
 rntm_t rntm = BLIS_RNTM_INITIALIZER;
-```
-Alternatively, you can perform the same initialization by passing the address of the `rntm_t` to an initialization function:
-```c
-bli_rntm_init( &rntm );
 ```
 As of this writing, BLIS treats a default-initialized `rntm_t` as a request for single-threaded execution.
 
@@ -321,7 +323,7 @@ This will result in both OpenMP and pthreads implementations being compiled and 
 ```c
 void bli_rntm_set_thread_impl( timpl_t ti, rntm_t* rntm );
 ```
-The function takes a `timpl_t`, which is an enumerated type that has three valid values corresponding to the four possible threading implementations: `BLIS_OPENMP`, `BLIS_POSIX`, `BLIS_HPX`, and `BLIS_SINGLE`. Forcing use of pthreads is as simple as calling:
+The function takes a `timpl_t`, which is an enumerated type that has four valid values corresponding to the four possible threading implementations: `BLIS_OPENMP`, `BLIS_POSIX`, `BLIS_HPX`, and `BLIS_SINGLE`. Forcing use of pthreads is as simple as calling:
 ```c
 bli_rntm_set_thread_impl( BLIS_POSIX, &rntm );
 ```

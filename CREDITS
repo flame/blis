@@ -16,6 +16,7 @@ but many others have contributed code, ideas, and feedback, including
   Alex Arslan              @ararslan
   Vernon Austel                                       (IBM, T.J. Watson Research Center)
   Mohsen Aznaveh           @Aznaveh                   (Texas A&M University)
+  Abhishek Bagusetty       @abagusetty                (Argonne National Laboratory)
   Satish Balay             @balay                     (Argonne National Laboratory)
   Kihiro Bando             @bandokihiro
   Matthew Brett            @matthew-brett             (University of Birmingham)
@@ -36,12 +37,14 @@ but many others have contributed code, ideas, and feedback, including
   Victor Eijkhout          @VictorEijkhout            (Texas Advanced Computing Center)
   Evgeny Epifanovsky       @epifanovsky               (Q-Chem)
   Isuru Fernando           @isuruf
+  James Foster             @jd-foster                 (CSIRO)
   Roman Gareev             @gareevroman
   Richard Goldschmidt      @SuperFluffy
   Chris Goodyer
   Alexander Grund          @Flamefire
   John Gunnels             @jagunnels                 (IBM, T.J. Watson Research Center)
   Ali Emre Gülcü           @Lephar
+                           @h-vetinari
   Jeff Hammond             @jeffhammond               (Intel)
   Jacob Gorm Hansen        @jacobgorm
   Shivaprashanth H                                    (Global Edge)
@@ -52,6 +55,7 @@ but many others have contributed code, ideas, and feedback, including
   Matthew Honnibal         @honnibal
   Stefan Husmann           @stefanhusmann
   Francisco Igual          @figual                    (Universidad Complutense de Madrid)
+  John Mather              @jmather-sesi              (SideFX Software)
   Madeesh Kannan           @shadeMe
   Tony Kelman              @tkelman
   Lee Killough             @leekillough               (Tactical Computing Labs)
@@ -60,6 +64,7 @@ but many others have contributed code, ideas, and feedback, including
   Ivan Korostelev          @ivan23kor                 (University of Alberta)
   Kyungmin Lee             @kyungminlee               (Ohio State University)
   Michael Lehn             @michael-lehn
+                           @leo4678
   Shmuel Levine            @ShmuelLevine
                            @lschork2
   Dave Love                @loveshack
@@ -103,6 +108,7 @@ but many others have contributed code, ideas, and feedback, including
   Rene Sitt
   Tony Skjellum            @tonyskjellum              (The University of Tennessee at Chattanooga)
   Mikhail Smelyanskiy                                 (Intel, Parallel Computing Lab)
+  Barry Smith              @BarrySmith                (Argonne National Laboratory)
   Nathaniel Smith          @njsmith
   Shaden Smith             @ShadenSmith
   Tyler Smith              @tlrmchlsmth               (The University of Texas at Austin)
@@ -121,17 +127,18 @@ but many others have contributed code, ideas, and feedback, including
   Meghana Vankadari        @Meghana-vankadari         (AMD)
   Kiran Varaganti          @kvaragan                  (AMD)
   Natalia Vassilieva                                  (Hewlett Packard Enterprise)
-                           @h-vetinari
   Andrew Wildman           @awild82                   (University of Washington)
   Zhang Xianyi             @xianyi                    (Chinese Academy of Sciences)
   Benda Xu                 @heroxbd
   Guodong Xu               @docularxu                 (Linaro.org)
   RuQing Xu                @xrq-phys                  (The University of Tokyo)
+  Srinivas Yadav           @srinivasyadav18
   Costas Yamin             @cosstas
   Chenhan Yu               @ChenhanYu                 (The University of Texas at Austin)
   Roman Yurchak            @rth                       (Symerio)
   Stefano Zampini          @stefanozampini
   M. Zhou                  @cdluminate
+  Igor Zhuravlov           @jip                       (Far Eastern Federal University)
 
 BLIS's development was partially funded by grants from industry
 partners, including

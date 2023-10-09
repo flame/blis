@@ -56,7 +56,7 @@ BLIS_INLINE pool_t* bli_apool_pool( apool_t* apool )
 	return &(apool->pool);
 }
 
-BLIS_INLINE  bli_pthread_mutex_t* bli_apool_mutex( apool_t* apool )
+BLIS_INLINE bli_pthread_mutex_t* bli_apool_mutex( apool_t* apool )
 {
 	return &(apool->mutex);
 }

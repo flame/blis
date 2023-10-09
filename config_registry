@@ -35,10 +35,18 @@ bulldozer:   bulldozer
 # ARM architectures.
 armsve:      armsve/armsve
 a64fx:       a64fx/armsve
+
+# ARM Neon64 (4 pipes x 128b) architectures.
+altramax:    altramax/armv8a
+altra:       altra/armv8a
 firestorm:   firestorm/armv8a
+
+# ARM (2 pipes x 128b) architectures.
 thunderx2:   thunderx2/armv8a
 cortexa57:   cortexa57/armv8a
 cortexa53:   cortexa53/armv8a
+
+# ARM Vintage architectures.
 cortexa15:   cortexa15/armv7a
 cortexa9:    cortexa9/armv7a
 

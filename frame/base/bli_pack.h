@@ -35,15 +35,10 @@
 #ifndef BLIS_PACK_H
 #define BLIS_PACK_H
 
-void  bli_pack_init( void );
-void  bli_pack_finalize( void );
-
 BLIS_EXPORT_BLIS void bli_pack_get_pack_a( bool* pack_a );
 BLIS_EXPORT_BLIS void bli_pack_get_pack_b( bool* pack_b );
 BLIS_EXPORT_BLIS void bli_pack_set_pack_a( bool pack_a );
 BLIS_EXPORT_BLIS void bli_pack_set_pack_b( bool pack_b );
-
-void  bli_pack_init_rntm_from_env( rntm_t* rntm );
 
 #endif
 

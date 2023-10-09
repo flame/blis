@@ -287,7 +287,7 @@ void bli_?axpbyv
        ctype*  x, inc_t incx,
        ctype*  beta,
        ctype*  y, inc_t incy
-     )
+     );
 ```
 Perform
 ```
@@ -482,7 +482,7 @@ void bli_?xpbyv
        ctype*  x, inc_t incx,
        ctype*  beta,
        ctype*  y, inc_t incy
-     )
+     );
 ```
 Perform
 ```
@@ -1756,7 +1756,7 @@ void bli_getsc
        ctype*  chi,
        double* zeta_r,
        double* zeta_i
-     )
+     );
 ```
 Copy the real and imaginary values from the scalar object `chi` to `zeta_r` and `zeta_i`. If `chi` is stored as a real type, then `zeta_i` is set to zero. (If `chi` is stored in single precision, the corresponding elements are typecast/promoted during the copy.)
 
@@ -1770,7 +1770,7 @@ err_t bli_?getijv
        ctype*  x, incx,
        double* ar,
        double* ai
-     )
+     );
 ```
 Copy the real and imaginary values at the `i`th element of vector `x` to `ar` and `ai`. For real domain invocations, only `ar` is overwritten and `ai` is left unchanged. (If `x` contains elements stored in single precision, the corresponding elements are typecast/promoted during the copy.)
 Note that the object-based analogue of [getijv](BLISObjectAPI.md#getijv) does bounds checking of the vector element offset `i` against the vector length while the typed functions specified above do not (since the vector length is not given).
@@ -1786,7 +1786,7 @@ err_t bli_?getijm
        ctype*  b, inc_t rs_b, inc_t cs_b,
        double* ar,
        double* ai
-     )
+     );
 ```
 Copy the real and imaginary values at the (`i`,`j`) element of object `b` to `ar` and `ai`. For real domain invocations, only `ar` is overwritten and `ai` is left unchanged. (If `b` contains elements stored in single precision, the corresponding elements are typecast/promoted during the copy.)
 Note that the object-based analogue of [getijm](BLISObjectAPI.md#getijm) does bounds checking of the matrix element offsets (`i`,`j`) against the matrix dimensions while the typed functions specified above do not (since the matrix dimensions are not given).
@@ -1881,7 +1881,7 @@ void bli_?eqm
        ctype*  a, inc_t rs_a, inc_t cs_a,
        ctype*  b, inc_t rs_b, inc_t cs_b,
        bool*   is_eq
-     )
+     );
 ```
 Perform an element-wise comparison between matrices `A` and `B` and store the boolean result in the `bool` pointed to by `is_eq`.
 Here, `B` is an _m x n_ matrix, `A` is stored as a dense matrix, or lower- or upper-triangular/trapezoidal matrix with arbitrary diagonal offset and unit or non-unit diagonal.
