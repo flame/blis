@@ -94,10 +94,6 @@ err_t bli_stack_init
 
 err_t bli_stack_finalize( stck_t* stack )
 {
-	stack->size = 0;
-	stack->capacity = 0;
-	stack->max_blocks = 0;
-
 	siz_t len = stack->block_len;
 	siz_t num_blocks = ( stack->capacity + len - 1 ) / len;
 
@@ -105,6 +101,10 @@ err_t bli_stack_finalize( stck_t* stack )
 		bli_free_intl( stack->blocks[ block ] );
 
 	bli_free_intl( stack->blocks );
+
+	stack->size = 0;
+	stack->capacity = 0;
+	stack->max_blocks = 0;
 
 	return BLIS_SUCCESS;
 }
@@ -156,7 +156,7 @@ err_t bli_stack_push( siz_t* i, stck_t* stack )
 		// number of blocks (unless the stack is completely full and we
 		// return an error code below).
 		siz_t len = stack->block_len;
-		siz_t num_blocks_orig = stack->capacity / len;
+		siz_t num_blocks_orig = ( stack->capacity + len - 1) / len;
 		siz_t new_capacity = bli_max( stack->size + 1,
 		                              bli_min( ( stack->capacity * 3 ) / 2,
 		                                       stack->max_blocks * len

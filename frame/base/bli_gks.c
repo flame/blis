@@ -372,9 +372,7 @@ void bli_gks_register_cntx
 	cntx_t* gks_id = bli_calloc_intl( sizeof( cntx_t ), &e_val );
 	gks[ id ] = gks_id;
 
-	// Initialize the context structure
-	e_val = bli_cntx_init( gks_id );
-	bli_check_error_code( e_val );
+	// The context structure is initialied in bli_cntx_init_<config>_ref
 
 	// Call the context initialization function on the element of the newly
 	// allocated array corresponding to native execution.
@@ -511,6 +509,8 @@ bool bli_gks_cntx_ukr_is_ref
 	void_fp ref_fp = bli_cntx_get_ukr_dt( dt, ukr_id, &ref_cntx );
 	void_fp fp     = bli_cntx_get_ukr_dt( dt, ukr_id, cntx );
 
+    bli_cntx_free( &ref_cntx );
+
 	// Return the result.
 	return fp == ref_fp;
 }
@@ -533,6 +533,8 @@ bool bli_gks_cntx_ukr2_is_ref
 	// specified datatype.
 	void_fp ref_fp = bli_cntx_get_ukr2_dt( dt1, dt2, ukr_id, &ref_cntx );
 	void_fp fp     = bli_cntx_get_ukr2_dt( dt1, dt2, ukr_id, cntx );
+
+    bli_cntx_free( &ref_cntx );
 
 	// Return the result.
 	return fp == ref_fp;
