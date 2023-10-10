@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2023, Southern Methodist University
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -32,56 +32,26 @@
 
 */
 
-#ifndef BLIS_ARCH_CONFIG_PRE_H
-#define BLIS_ARCH_CONFIG_PRE_H
+#include "blis.h"
+#include STRINGIFY_INT(../PASTEMAC(plugin,BLIS_PNAME_INFIX).h)
 
-
-// -- Naming-related kernel definitions ----------------------------------------
-
-// The default suffix appended to reference kernels.
-#define BLIS_REF_SUFFIX  _ref
-
-// A suffix used for labeling certain induced method aware functions.
-#define BLIS_IND_SUFFIX  _ind
-
-// Add an underscore to the BLIS kernel set string, if it was defined.
-#ifdef  BLIS_CNAME
-#define BLIS_CNAME_INFIX  PASTECH(_,BLIS_CNAME)
-#endif
-
-// Add an underscore to the BLIS kernel set string, if it was defined.
-#ifdef  BLIS_CNAME_UPPER
-#define BLIS_CNAME_UPPER_INFIX  PASTECH(_,BLIS_CNAME_UPPER)
-#endif
-
-// Add an underscore to the plugin name, if it was defined.
-#ifdef  BLIS_PNAME
-#define BLIS_PNAME_INFIX  PASTECH(_,BLIS_PNAME)
-#endif
-
-// Combine the CNAME and _ref for convenience to the code that defines
-// reference kernels.
-//#define BLIS_CNAME_REF_SUFFIX  PASTECH(_,BLIS_CNAME,BLIS_REF_SUFFIX)
-
-// -- Prototype-generating macro definitions -----------------------------------
-
-// Prototype-generating macro for bli_cntx_init_<arch>*() functions.
-#define CNTX_INIT_PROTS( archname ) \
+#undef  GENTFUNC
+#define GENTFUNC( ctype, ch, opname, arch, suf ) \
 \
-void PASTEMAC(cntx_init_,archname) \
+void PASTEMAC3(ch,opname,arch,suf) \
      ( \
-       cntx_t* cntx \
-     ); \
-void PASTEMAC(cntx_init_,archname,BLIS_REF_SUFFIX) \
-     ( \
-       cntx_t* cntx \
-     ); \
-void PASTEMAC(cntx_init_,archname,BLIS_IND_SUFFIX) \
-     ( \
-       ind_t   method, \
-       cntx_t* cntx \
-     );
+             int    n, \
+       const ctype* a, \
+             ctype* x  \
+     ) \
+{ \
+	if ( bli_zero_dim1( n ) ) return; \
+\
+	for ( dim_t i = 0; i < n; ++i ) \
+	{ \
+		PASTEMAC(ch,copys)( *a, x[ i ] ); \
+	} \
+}
 
-
-#endif
+INSERT_GENTFUNC_BASIC( my_kernel_1, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX )
 

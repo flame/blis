@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2023, Southern Methodist University
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -32,56 +32,57 @@
 
 */
 
-#ifndef BLIS_ARCH_CONFIG_PRE_H
-#define BLIS_ARCH_CONFIG_PRE_H
+#include "blis.h"
+#include STRINGIFY_INT(../../PASTEMAC(plugin,BLIS_PNAME_INFIX).h)
 
+void PASTEMAC2(plugin_init,BLIS_PNAME_INFIX,BLIS_CNAME_INFIX)( PASTECH2(plugin,BLIS_PNAME_INFIX,_params) )
+{
+	cntx_t* cntx = ( cntx_t* )bli_gks_lookup_id( PASTECH(BLIS_ARCH,BLIS_CNAME_UPPER_INFIX) );
 
-// -- Naming-related kernel definitions ----------------------------------------
+    // ------------------------------------------------------------------------>
+	// -- Example Initialization ---------------------------------------------->
+	// ------------------------------------------------------------------------>
 
-// The default suffix appended to reference kernels.
-#define BLIS_REF_SUFFIX  _ref
+	// Update the context with optimized native micro-kernels.
+	bli_cntx_set_ukrs
+	(
+	  cntx,
 
-// A suffix used for labeling certain induced method aware functions.
-#define BLIS_IND_SUFFIX  _ind
+	  kerids[ MY_KERNEL_1 ], BLIS_DOUBLE, bli_dmy_kernel_1_zen3,
 
-// Add an underscore to the BLIS kernel set string, if it was defined.
-#ifdef  BLIS_CNAME
-#define BLIS_CNAME_INFIX  PASTECH(_,BLIS_CNAME)
-#endif
+	  BLIS_VA_END
+	);
 
-// Add an underscore to the BLIS kernel set string, if it was defined.
-#ifdef  BLIS_CNAME_UPPER
-#define BLIS_CNAME_UPPER_INFIX  PASTECH(_,BLIS_CNAME_UPPER)
-#endif
+	// Update the context with preferences.
+	bli_cntx_set_ukr_prefs
+	(
+	  cntx,
 
-// Add an underscore to the plugin name, if it was defined.
-#ifdef  BLIS_PNAME
-#define BLIS_PNAME_INFIX  PASTECH(_,BLIS_PNAME)
-#endif
+	  prefids[ MY_PREF_1 ], BLIS_DOUBLE, TRUE,
+	  prefids[ MY_PREF_2 ], BLIS_DOUBLE, TRUE,
 
-// Combine the CNAME and _ref for convenience to the code that defines
-// reference kernels.
-//#define BLIS_CNAME_REF_SUFFIX  PASTECH(_,BLIS_CNAME,BLIS_REF_SUFFIX)
+	  BLIS_VA_END
+	);
 
-// -- Prototype-generating macro definitions -----------------------------------
+	blksz_t blkszs[ MY_NUM_BLOCK_SIZES ];
+	bszid_t bmults[ MY_NUM_BLOCK_SIZES ];
 
-// Prototype-generating macro for bli_cntx_init_<arch>*() functions.
-#define CNTX_INIT_PROTS( archname ) \
-\
-void PASTEMAC(cntx_init_,archname) \
-     ( \
-       cntx_t* cntx \
-     ); \
-void PASTEMAC(cntx_init_,archname,BLIS_REF_SUFFIX) \
-     ( \
-       cntx_t* cntx \
-     ); \
-void PASTEMAC(cntx_init_,archname,BLIS_IND_SUFFIX) \
-     ( \
-       ind_t   method, \
-       cntx_t* cntx \
-     );
+	// Update block sizes
+	//                                             s     d     c     z
+	bli_blksz_init_easy( &blkszs[ MY_BLKSZ_1 ],  320,  240,  182,   96 );
+	bmults[ MY_BLKSZ_1 ] = bszids[ MY_BLKSZ_1 ];
 
+	bli_cntx_set_blkszs
+	(
+	  cntx,
 
-#endif
+	  bszids[ MY_BLKSZ_1 ], &blkszs[ MY_BLKSZ_1 ], bmults[ MY_BLKSZ_1 ],
+
+	  BLIS_VA_END
+	);
+
+	// <------------------------------------------------------------------------
+	// <------------------------------------------------------------------------
+	// <------------------------------------------------------------------------
+}
 

@@ -94,6 +94,7 @@
 #include "bli_gentdef_macro_defs.h"
 #include "bli_gentfunc_macro_defs.h"
 #include "bli_gentprot_macro_defs.h"
+#include "bli_gentconf_macro_defs.h"
 
 #include "bli_misc_macro_defs.h"
 #include "bli_edge_case_macro_defs.h"

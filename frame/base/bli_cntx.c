@@ -385,7 +385,14 @@ err_t bli_cntx_register_blksz( siz_t* bs_id, const blksz_t* blksz, bszid_t bmult
 
 	*bs_id = id_blksz;
 
-	return bli_cntx_set_blksz( id_blksz, blksz, bmult_id, cntx );
+	if ( blksz )
+	{
+		return bli_cntx_set_blksz( id_blksz, blksz, bmult_id, cntx );
+	}
+	else
+	{
+		return BLIS_SUCCESS;
+	}
 }
 
 err_t bli_cntx_register_ukr( siz_t* ukr_id, const func_t* ukr, cntx_t* cntx )
@@ -394,7 +401,14 @@ err_t bli_cntx_register_ukr( siz_t* ukr_id, const func_t* ukr, cntx_t* cntx )
 	if ( error != BLIS_SUCCESS )
 		return error;
 
-	return bli_cntx_set_ukr( *ukr_id, ukr, cntx );
+	if ( ukr )
+	{
+		return bli_cntx_set_ukr( *ukr_id, ukr, cntx );
+	}
+	else
+	{
+		return BLIS_SUCCESS;
+	}
 }
 
 err_t bli_cntx_register_ukr2( siz_t* ukr_id, const func2_t* ukr, cntx_t* cntx )
@@ -403,7 +417,14 @@ err_t bli_cntx_register_ukr2( siz_t* ukr_id, const func2_t* ukr, cntx_t* cntx )
 	if ( error != BLIS_SUCCESS )
 		return error;
 
-	return bli_cntx_set_ukr2( *ukr_id, ukr, cntx );
+	if ( ukr )
+	{
+		return bli_cntx_set_ukr2( *ukr_id, ukr, cntx );
+	}
+	else
+	{
+		return BLIS_SUCCESS;
+	}
 }
 
 err_t bli_cntx_register_ukr_pref( siz_t* ukr_pref_id, const mbool_t* ukr_pref, cntx_t* cntx )
@@ -412,7 +433,14 @@ err_t bli_cntx_register_ukr_pref( siz_t* ukr_pref_id, const mbool_t* ukr_pref, c
 	if ( error != BLIS_SUCCESS )
 		return error;
 
-	return bli_cntx_set_ukr_pref( *ukr_pref_id, ukr_pref, cntx );
+	if ( ukr_pref )
+	{
+		return bli_cntx_set_ukr_pref( *ukr_pref_id, ukr_pref, cntx );
+	}
+	else
+	{
+		return BLIS_SUCCESS;
+	}
 }
 
 

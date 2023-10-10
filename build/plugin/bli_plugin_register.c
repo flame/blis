@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2023, Southern Methodist University
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -32,56 +32,45 @@
 
 */
 
-#ifndef BLIS_ARCH_CONFIG_PRE_H
-#define BLIS_ARCH_CONFIG_PRE_H
+#include "blis.h"
+#include STRINGIFY_INT(PASTEMAC(plugin,BLIS_PNAME_INFIX).h)
 
+err_t PASTEMAC(plugin_register,BLIS_PNAME_INFIX)( PASTECH2(plugin,BLIS_PNAME_INFIX,_params) )
+{
+	// ------------------------------------------------------------------------>
+	// -- Example Plugin Registration  ---------------------------------------->
+	// ------------------------------------------------------------------------>
 
-// -- Naming-related kernel definitions ----------------------------------------
+	//
+	// Register slots for new microkernels, preferences, and block sizes.
+	//
 
-// The default suffix appended to reference kernels.
-#define BLIS_REF_SUFFIX  _ref
+	err_t err;
 
-// A suffix used for labeling certain induced method aware functions.
-#define BLIS_IND_SUFFIX  _ind
+	err = bli_gks_register_blksz( &bszids[ MY_BLKSZ_1 ] );
+	err = bli_gks_register_blksz( &bszids[ MY_BLKSZ_1 ] );
+	err = bli_gks_register_ukr( &kerids[ MY_KERNEL_1 ] );
+	err = bli_gks_register_ukr( &kerids[ MY_KERNEL_2 ] );
+	err = bli_gks_register_ukr_pref( &prefids[ MY_PREF_1 ] );
+	err = bli_gks_register_ukr_pref( &prefids[ MY_PREF_2 ] );
 
-// Add an underscore to the BLIS kernel set string, if it was defined.
-#ifdef  BLIS_CNAME
-#define BLIS_CNAME_INFIX  PASTECH(_,BLIS_CNAME)
-#endif
+	if ( err != BLIS_SUCCESS )
+		return err;
 
-// Add an underscore to the BLIS kernel set string, if it was defined.
-#ifdef  BLIS_CNAME_UPPER
-#define BLIS_CNAME_UPPER_INFIX  PASTECH(_,BLIS_CNAME_UPPER)
-#endif
+	// <------------------------------------------------------------------------
+	// <------------------------------------------------------------------------
+	// <------------------------------------------------------------------------
 
-// Add an underscore to the plugin name, if it was defined.
-#ifdef  BLIS_PNAME
-#define BLIS_PNAME_INFIX  PASTECH(_,BLIS_PNAME)
-#endif
+	//
+	// Initialize the context for each enabled sub-configuration.
+	//
 
-// Combine the CNAME and _ref for convenience to the code that defines
-// reference kernels.
-//#define BLIS_CNAME_REF_SUFFIX  PASTECH(_,BLIS_CNAME,BLIS_REF_SUFFIX)
+	#undef GENTCONF
+	#define GENTCONF( CONFIG, config ) \
+	PASTEMAC4(plugin_init,BLIS_PNAME_INFIX,_,config,BLIS_REF_SUFFIX)( PASTECH2(plugin,BLIS_PNAME_INFIX,_params_only) );
 
-// -- Prototype-generating macro definitions -----------------------------------
+	INSERT_GENTCONF
 
-// Prototype-generating macro for bli_cntx_init_<arch>*() functions.
-#define CNTX_INIT_PROTS( archname ) \
-\
-void PASTEMAC(cntx_init_,archname) \
-     ( \
-       cntx_t* cntx \
-     ); \
-void PASTEMAC(cntx_init_,archname,BLIS_REF_SUFFIX) \
-     ( \
-       cntx_t* cntx \
-     ); \
-void PASTEMAC(cntx_init_,archname,BLIS_IND_SUFFIX) \
-     ( \
-       ind_t   method, \
-       cntx_t* cntx \
-     );
-
-
-#endif
+	return BLIS_SUCCESS;
+}
 

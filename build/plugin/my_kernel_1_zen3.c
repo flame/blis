@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2023, Southern Methodist University
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -32,56 +32,32 @@
 
 */
 
-#ifndef BLIS_ARCH_CONFIG_PRE_H
-#define BLIS_ARCH_CONFIG_PRE_H
+#include "blis.h"
 
+void bli_dmy_kernel_1_zen3
+     (
+             int    n,
+       const double* a,
+             double* x
+     )
+{
+	if ( bli_zero_dim1( n ) ) return;
 
-// -- Naming-related kernel definitions ----------------------------------------
+	double a_local = *a;
+	dim_t i = 0;
 
-// The default suffix appended to reference kernels.
-#define BLIS_REF_SUFFIX  _ref
+	while ( i <= n-4 )
+	{
+		x[ i+0 ] = a_local;
+		x[ i+1 ] = a_local;
+		x[ i+2 ] = a_local;
+		x[ i+3 ] = a_local;
+		i += 4;
+	}
 
-// A suffix used for labeling certain induced method aware functions.
-#define BLIS_IND_SUFFIX  _ind
-
-// Add an underscore to the BLIS kernel set string, if it was defined.
-#ifdef  BLIS_CNAME
-#define BLIS_CNAME_INFIX  PASTECH(_,BLIS_CNAME)
-#endif
-
-// Add an underscore to the BLIS kernel set string, if it was defined.
-#ifdef  BLIS_CNAME_UPPER
-#define BLIS_CNAME_UPPER_INFIX  PASTECH(_,BLIS_CNAME_UPPER)
-#endif
-
-// Add an underscore to the plugin name, if it was defined.
-#ifdef  BLIS_PNAME
-#define BLIS_PNAME_INFIX  PASTECH(_,BLIS_PNAME)
-#endif
-
-// Combine the CNAME and _ref for convenience to the code that defines
-// reference kernels.
-//#define BLIS_CNAME_REF_SUFFIX  PASTECH(_,BLIS_CNAME,BLIS_REF_SUFFIX)
-
-// -- Prototype-generating macro definitions -----------------------------------
-
-// Prototype-generating macro for bli_cntx_init_<arch>*() functions.
-#define CNTX_INIT_PROTS( archname ) \
-\
-void PASTEMAC(cntx_init_,archname) \
-     ( \
-       cntx_t* cntx \
-     ); \
-void PASTEMAC(cntx_init_,archname,BLIS_REF_SUFFIX) \
-     ( \
-       cntx_t* cntx \
-     ); \
-void PASTEMAC(cntx_init_,archname,BLIS_IND_SUFFIX) \
-     ( \
-       ind_t   method, \
-       cntx_t* cntx \
-     );
-
-
-#endif
-
+	while ( i < n )
+	{
+		x[ i ] = a_local;
+		i++;
+	}
+}
