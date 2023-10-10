@@ -34,6 +34,7 @@
 */
 
 #include "blis.h"
+#include "armsve512_asm_transpose_d8x2.h"
 #include "armsve512_asm_transpose_d8x8.h"
 #include "../3/armsve_asm_macros.h"
 
