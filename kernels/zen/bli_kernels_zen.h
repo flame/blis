@@ -427,3 +427,8 @@ void bli_dznorm2fv_unb_var1_avx2
        double* norm,
        cntx_t*  cntx
      );
+
+GEMM_UKR_PROT( dcomplex, z, gemm_zen_asm_2x6)
+
+GEMMTRSM_UKR_PROT( dcomplex,   z, gemmtrsm_l_zen_asm_2x6)
+GEMMTRSM_UKR_PROT( dcomplex,   z, gemmtrsm_u_zen_asm_2x6)

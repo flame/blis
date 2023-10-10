@@ -49,19 +49,22 @@ void bli_cntx_init_zen3( cntx_t* cntx )
 	// their storage preferences.
 	bli_cntx_set_l3_nat_ukrs
 	(
-	  8,
+	  11,
 	  // gemm
 	  BLIS_GEMM_UKR,       BLIS_FLOAT,    bli_sgemm_haswell_asm_6x16,       TRUE,
 	  BLIS_GEMM_UKR,       BLIS_DOUBLE,   bli_dgemm_haswell_asm_6x8,        TRUE,
 	  BLIS_GEMM_UKR,       BLIS_SCOMPLEX, bli_cgemm_haswell_asm_3x8,        TRUE,
 	  BLIS_GEMM_UKR,       BLIS_DCOMPLEX, bli_zgemm_haswell_asm_3x4,        TRUE,
 
+	  BLIS_GEMM_FOR_TRSM_UKR, BLIS_DCOMPLEX, bli_zgemm_zen_asm_2x6,         TRUE,
 	  // gemmtrsm_l
 	  BLIS_GEMMTRSM_L_UKR, BLIS_FLOAT,    bli_sgemmtrsm_l_haswell_asm_6x16, TRUE,
 	  BLIS_GEMMTRSM_L_UKR, BLIS_DOUBLE,   bli_dgemmtrsm_l_haswell_asm_6x8,  TRUE,
+	  BLIS_GEMMTRSM_L_UKR, BLIS_DCOMPLEX, bli_zgemmtrsm_l_zen_asm_2x6,      TRUE,
 	  // gemmtrsm_u
 	  BLIS_GEMMTRSM_U_UKR, BLIS_FLOAT,    bli_sgemmtrsm_u_haswell_asm_6x16, TRUE,
 	  BLIS_GEMMTRSM_U_UKR, BLIS_DOUBLE,   bli_dgemmtrsm_u_haswell_asm_6x8,  TRUE,
+	  BLIS_GEMMTRSM_U_UKR, BLIS_DCOMPLEX, bli_zgemmtrsm_u_zen_asm_2x6,      TRUE,
 	  cntx
 	);
 
@@ -206,9 +209,11 @@ void bli_cntx_init_zen3( cntx_t* cntx )
 	// Using different cache block sizes for TRSM instead of common level-3 block sizes.
 	// Tuning is done for double-precision only.
 	//                                           s      d      c      z
-	bli_blksz_init_easy( &blkszs[ BLIS_MC ],   144,    72,   144,    72 );
-	bli_blksz_init_easy( &blkszs[ BLIS_KC ],   256,   492,   256,   256 );
-	bli_blksz_init_easy( &blkszs[ BLIS_NC ],  4080,  1600,  4080,  4080 );
+	bli_blksz_init_easy( &blkszs[ BLIS_MR ],     6,     6,     3,     2 );
+	bli_blksz_init_easy( &blkszs[ BLIS_NR ],    16,     8,     8,     6 );
+	bli_blksz_init_easy( &blkszs[ BLIS_MC ],   144,    72,   144,    24 );
+	bli_blksz_init_easy( &blkszs[ BLIS_KC ],   256,   492,   256,   512 );
+	bli_blksz_init_easy( &blkszs[ BLIS_NC ],  4080,  1600,  4080,  1536 );
 
 	// Update the context with the current architecture's register and cache
 	// blocksizes for level-3 TRSM problems.
