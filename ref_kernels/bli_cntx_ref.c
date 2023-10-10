@@ -482,6 +482,30 @@ void GENBARNAME(cntx_init)
 
 	// -- Set level-3 small/unpacked micro-kernels and preferences -------------
 
+	// -- Set SUP blocksizes -------------------------------------------------------
+	// These blocksizes are copied from native blocksizes for ref
+
+	//                                          s     d     c     z
+	bli_blksz_init_easy( &blkszs[ BLIS_MR ],    4,    4,    4,    4 );
+	bli_blksz_init_easy( &blkszs[ BLIS_NR ],   16,    8,    8,    4 );
+	bli_blksz_init_easy( &blkszs[ BLIS_MC ],  256,  128,  128,   64 );
+	bli_blksz_init_easy( &blkszs[ BLIS_KC ],  256,  256,  256,  256 );
+	bli_blksz_init_easy( &blkszs[ BLIS_NC ], 4096, 4096, 4096, 4096 );
+
+	// Initialize the context with the default blocksize objects and their
+	// multiples.
+	bli_cntx_set_l3_sup_blkszs
+	(
+	  5,
+	  // level-3
+	  BLIS_KC, &blkszs[ BLIS_KC ],
+	  BLIS_MC, &blkszs[ BLIS_MC ],
+	  BLIS_NR, &blkszs[ BLIS_NR ],
+	  BLIS_NC, &blkszs[ BLIS_NC ],
+	  BLIS_MR, &blkszs[ BLIS_MR ],
+	  cntx
+	);
+
 	funcs  = bli_cntx_l3_sup_kers_buf( cntx );
 	mbools = bli_cntx_l3_sup_kers_prefs_buf( cntx );
 
@@ -529,7 +553,7 @@ void GENBARNAME(cntx_init)
 	bli_mbool_init( &mbools[ BLIS_XXX ],  TRUE,  TRUE,  TRUE,  TRUE );
 
 
-	// -- Set level-3 small/unpacked micro-kernels, preferences and blocksizes 
+	// -- Set level-3 small/unpacked micro-kernels, preferences and blocksizes
 	//    for matrices dealing with triangular matrices-------------
 
 // -- Set blocksizes -------------------------------------------------------
@@ -544,16 +568,16 @@ void GENBARNAME(cntx_init)
 	// Initialize the context with the default blocksize objects and their
 	// multiples.
 	bli_cntx_set_l3_sup_tri_blkszs
-    (
-      5,
-      // level-3
-      BLIS_KC, &blkszs[ BLIS_KC ],
-      BLIS_MC, &blkszs[ BLIS_MC ],
-      BLIS_NR, &blkszs[ BLIS_NR ],
-      BLIS_NC, &blkszs[ BLIS_NC ],
-      BLIS_MR, &blkszs[ BLIS_MR ],
-      cntx
-    );
+	(
+	  5,
+	  // level-3
+	  BLIS_KC, &blkszs[ BLIS_KC ],
+	  BLIS_MC, &blkszs[ BLIS_MC ],
+	  BLIS_NR, &blkszs[ BLIS_NR ],
+	  BLIS_NC, &blkszs[ BLIS_NC ],
+	  BLIS_MR, &blkszs[ BLIS_MR ],
+	  cntx
+	);
 
 	funcs  = bli_cntx_l3_sup_tri_kers_buf( cntx );
 	mbools = bli_cntx_l3_sup_tri_kers_prefs_buf( cntx );

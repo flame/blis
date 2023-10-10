@@ -19,7 +19,7 @@ amdzen:         zen4 zen3 zen2 zen generic
 #arm32:       cortexa15 cortexa9 generic
 
 # Intel architectures.
-skx:         skx/skx/haswell/zen
+skx:         skx/skx/haswell/zen/zen4
 knl:         knl/knl/haswell/zen
 haswell:     haswell/haswell/zen
 sandybridge: sandybridge
