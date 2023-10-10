@@ -96,7 +96,7 @@ void bli_zpackm_haswell_asm_3x4
 
 	// -------------------------------------------------------------------------
 
-	if ( cdim0 == mr && cdim_bcast == 1 && !gs && !conja && unitk )
+	if ( cdim0 == mr && ldp0 == mr && cdim_bcast == 1 && !gs && !conja && unitk )
 	{
 		begin_asm()
 
@@ -338,7 +338,7 @@ void bli_zpackm_haswell_asm_3x4
 		  "memory"
 		)
 	}
-	else if ( cdim0 == nr && cdim_bcast == 1 && !gs && !conja && unitk )
+	else if ( cdim0 == nr && ldp0 == nr && cdim_bcast == 1 && !gs && !conja && unitk )
 	{
 		begin_asm()
 

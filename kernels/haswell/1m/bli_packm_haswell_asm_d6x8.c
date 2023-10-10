@@ -96,7 +96,7 @@ void bli_dpackm_haswell_asm_6x8
 
 	// -------------------------------------------------------------------------
 
-	if ( cdim0 == mr && cdim_bcast == 1 && !gs && unitk )
+	if ( cdim0 == mr && ldp0 == mr && cdim_bcast == 1 && !gs && unitk )
 	{
 		begin_asm()
 
@@ -336,7 +336,7 @@ void bli_dpackm_haswell_asm_6x8
 		  "memory"
 		)
 	}
-	else if ( cdim0 == nr && cdim_bcast == 1 && !gs && unitk )
+	else if ( cdim0 == nr && ldp0 == nr && cdim_bcast == 1 && !gs && unitk )
 	{
 		begin_asm()
 

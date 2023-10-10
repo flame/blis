@@ -367,7 +367,7 @@ void bli_spackm_knl_asm_24x16
     )
 
 	}
-    if ( cdim == nr && cdim_bcast == 1 )
+    if ( cdim == nr && ldp == nr && cdim_bcast == 1 )
     {
 
     BEGIN_ASM()
