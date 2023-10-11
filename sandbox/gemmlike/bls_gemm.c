@@ -102,10 +102,6 @@ void bls_gemm_ex
 
 	// -- bli_gemm_front() -----------------------------------------------------
 
-	obj_t a_local;
-	obj_t b_local;
-	obj_t c_local;
-
 	// If C has a zero dimension, return early.
 	if ( bli_obj_has_zero_dim( c ) )
 	{
@@ -123,25 +119,18 @@ void bls_gemm_ex
 	}
 
 	// Alias A, B, and C in case we need to apply transformations.
-	bli_obj_alias_to( a, &a_local );
-	bli_obj_alias_to( b, &b_local );
-	bli_obj_alias_to( c, &c_local );
+	obj_t a_local;
+	obj_t b_local;
+	obj_t c_local;
+	bli_obj_alias_submatrix( a, &a_local );
+	bli_obj_alias_submatrix( b, &b_local );
+	bli_obj_alias_submatrix( c, &c_local );
 
-	// Induce a transposition of A if it has its transposition property set.
-	// Then clear the transposition bit in the object.
-	if ( bli_obj_has_trans( &a_local ) )
-	{
-		bli_obj_induce_trans( &a_local );
-		bli_obj_set_onlytrans( BLIS_NO_TRANSPOSE, &a_local );
-	}
-
-	// Induce a transposition of B if it has its transposition property set.
-	// Then clear the transposition bit in the object.
-	if ( bli_obj_has_trans( &b_local ) )
-	{
-		bli_obj_induce_trans( &b_local );
-		bli_obj_set_onlytrans( BLIS_NO_TRANSPOSE, &b_local );
-	}
+	// Typecast alpha and beta to the correct type
+	obj_t alpha_cast, beta_cast;
+	num_t dt = bli_obj_dt( c );
+	bli_obj_scalar_init_detached_copy_of( dt, BLIS_NO_CONJUGATE, alpha, &alpha_cast );
+	bli_obj_scalar_init_detached_copy_of( dt, BLIS_NO_CONJUGATE, beta, &beta_cast );
 
 	// An optimization: If C is stored by rows and the micro-kernel prefers
 	// contiguous columns, or if C is stored by columns and the micro-kernel
@@ -174,10 +163,10 @@ void bls_gemm_ex
 	(
 	  bls_gemm_int,
 	  BLIS_GEMM, // operation family id
-	  alpha,
+	  &alpha_cast,
 	  &a_local,
 	  &b_local,
-	  beta,
+	  &beta_cast,
 	  &c_local,
 	  cntx,
 	  &rntm_l

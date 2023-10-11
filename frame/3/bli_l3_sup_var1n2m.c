@@ -244,7 +244,7 @@ void bli_gemmsup_ref_var1n
 	// Compute the JC loop thread range for the current thread.
 	dim_t jc_start, jc_end;
 	dim_t jc_tid = bli_thrinfo_work_id( thread_jc );
-	dim_t jc_nt  = bli_thrinfo_num_threads( thread_jc );
+	dim_t jc_nt  = bli_thrinfo_n_way( thread_jc );
 	bli_thread_range_sub( jc_tid, jc_nt, m, MR, FALSE, &jc_start, &jc_end );
 	const dim_t m_local = jc_end - jc_start;
 
@@ -321,7 +321,7 @@ void bli_gemmsup_ref_var1n
 			// Compute the IC loop thread range for the current thread.
 			dim_t ic_start, ic_end;
 			dim_t ic_tid = bli_thrinfo_work_id( thread_ic );
-			dim_t ic_nt  = bli_thrinfo_num_threads( thread_ic );
+			dim_t ic_nt  = bli_thrinfo_n_way( thread_ic );
 			bli_thread_range_sub( ic_tid, ic_nt, n, NR, FALSE, &ic_start, &ic_end );
 			const dim_t n_local = ic_end - ic_start;
 
@@ -391,7 +391,7 @@ void bli_gemmsup_ref_var1n
 				// Compute the JR loop thread range for the current thread.
 				dim_t jr_start, jr_end;
 				dim_t jr_tid = bli_thrinfo_work_id( thread_jr );
-				dim_t jr_nt  = bli_thrinfo_num_threads( thread_jr );
+				dim_t jr_nt  = bli_thrinfo_n_way( thread_jr );
 				bli_thread_range_sub( jr_tid, jr_nt, jr_iter, 1, FALSE, &jr_start, &jr_end );
 
 				// Loop over the m dimension (NR columns at a time).
@@ -648,7 +648,7 @@ void bli_gemmsup_ref_var2m
 	// Compute the JC loop thread range for the current thread.
 	dim_t jc_start, jc_end;
 	dim_t jc_tid = bli_thrinfo_work_id( thread_jc );
-	dim_t jc_nt  = bli_thrinfo_num_threads( thread_jc );
+	dim_t jc_nt  = bli_thrinfo_n_way( thread_jc );
 	bli_thread_range_sub( jc_tid, jc_nt, n, NR, FALSE, &jc_start, &jc_end );
 	const dim_t n_local = jc_end - jc_start;
 
@@ -723,7 +723,7 @@ void bli_gemmsup_ref_var2m
 			// Compute the IC loop thread range for the current thread.
 			dim_t ic_start, ic_end;
 			dim_t ic_tid = bli_thrinfo_work_id( thread_ic );
-			dim_t ic_nt  = bli_thrinfo_num_threads( thread_ic );
+			dim_t ic_nt  = bli_thrinfo_n_way( thread_ic );
 			bli_thread_range_sub( ic_tid, ic_nt, m, MR, FALSE, &ic_start, &ic_end );
 			const dim_t m_local = ic_end - ic_start;
 
@@ -791,7 +791,7 @@ void bli_gemmsup_ref_var2m
 				// Compute the JR loop thread range for the current thread.
 				dim_t jr_start, jr_end;
 				dim_t jr_tid = bli_thrinfo_work_id( thread_jr );
-				dim_t jr_nt  = bli_thrinfo_num_threads( thread_jr );
+				dim_t jr_nt  = bli_thrinfo_n_way( thread_jr );
 				bli_thread_range_sub( jr_tid, jr_nt, jr_iter, 1, FALSE, &jr_start, &jr_end );
 
 				// Loop over the n dimension (NR columns at a time).
