@@ -1086,7 +1086,7 @@ void dtrsm_blis_impl
          * is doing better than small multithread and native multithread */
         bool is_parallel = bli_thread_get_is_parallel();
         if ((!is_parallel && ((dim_a < 1500) && (size_b < 5e6)) ) ||
-            (is_parallel && (m0+n0)<320))
+            (is_parallel && (m0+n0)<200))
         {
             switch(id)
             {
