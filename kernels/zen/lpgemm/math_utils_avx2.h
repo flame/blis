@@ -44,8 +44,8 @@
 
 #define TBL_LN2 0x1.71547652b82fep+0
 #define EXPF_HUGE 0x1.8p+23
-#define EXPF_MIN -88.7228393f
-#define EXPF_MAX 88.7228393f
+#define EXPF_MIN -88.0f
+#define EXPF_MAX 88.0f
 #define inf 1.0/0.0
 #define sign -2147483648
 
@@ -84,8 +84,8 @@
     POLY_EVAL_6_AVX2 (r, r2, z); \
 \
     q = _mm256_add_epi32((__m256i) (r), _mm256_sllv_epi32 ((__m256i)dn, _mm256_set1_epi32 (23)) ); \
-    q =  (__m256i)_mm256_blendv_ps ((__m256)q, _mm256_set1_ps(inf), _mm256_cmp_ps (_mm256_set1_ps(88.0), x, 1)); \
-    q =  (__m256i)_mm256_blendv_ps ((__m256)q, _mm256_set1_ps(0.0), _mm256_cmp_ps (x, _mm256_set1_ps(-88.0), 1));
+    q =  (__m256i)_mm256_blendv_ps ((__m256)q, _mm256_set1_ps(inf), _mm256_cmp_ps (_mm256_set1_ps(EXPF_MAX), x, 1)); \
+    q =  (__m256i)_mm256_blendv_ps ((__m256)q, _mm256_set1_ps(0.0), _mm256_cmp_ps (x, _mm256_set1_ps(EXPF_MIN), 1));
 
 #define TANHF_AVX2(x_tanh, r, r2, x, z, dn, q) \
     x = _mm256_mul_ps (_mm256_andnot_ps(_mm256_set1_ps(-0.0f), x_tanh), _mm256_set1_ps(-2) ); \
@@ -132,8 +132,8 @@
     POLY_EVAL_6_SSE (r, r2, z); \
 \
     q = _mm_add_epi32((__m128i) (r), _mm_sllv_epi32 ((__m128i)dn, _mm_set1_epi32 (23)) ); \
-    q =  (__m128i)_mm_blendv_ps ((__m128)q, _mm_set1_ps(inf), _mm_cmp_ps (_mm_set1_ps(88.0), x, 1)); \
-    q =  (__m128i)_mm_blendv_ps ((__m128)q, _mm_set1_ps(0.0), _mm_cmp_ps (x, _mm_set1_ps(-88.0), 1));
+    q =  (__m128i)_mm_blendv_ps ((__m128)q, _mm_set1_ps(inf), _mm_cmp_ps (_mm_set1_ps(EXPF_MAX), x, 1)); \
+    q =  (__m128i)_mm_blendv_ps ((__m128)q, _mm_set1_ps(0.0), _mm_cmp_ps (x, _mm_set1_ps(EXPF_MIN), 1));
 
 #define TANHF_SSE(x_tanh, r, r2, x, z, dn, q) \
     x = _mm_mul_ps (_mm_andnot_ps(_mm_set1_ps(-0.0f), x_tanh), _mm_set1_ps(-2) ); \

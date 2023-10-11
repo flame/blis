@@ -44,8 +44,8 @@
 
 #define TBL_LN2 0x1.71547652b82fep+0
 #define EXPF_HUGE 0x1.8p+23
-#define EXPF_MIN -88.7228393f
-#define EXPF_MAX 88.7228393f
+#define EXPF_MIN -88.0f
+#define EXPF_MAX 88.0f
 #define inf 1.0/0.0
 #define sign -2147483648
 
