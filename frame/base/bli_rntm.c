@@ -37,7 +37,7 @@
 
 // The global rntm_t structure, which holds the global thread settings
 // along with a few other key parameters.
-rntm_t global_rntm;
+rntm_t global_rntm = BLIS_RNTM_INITIALIZER;
 
 // Make thread settings local to each thread calling BLIS routines
 BLIS_THREAD_LOCAL rntm_t tl_rntm = BLIS_RNTM_INITIALIZER;

@@ -91,3 +91,14 @@ void PASTEF770(bli_thread_set_num_threads)
 	//bli_finalize_auto();
 }
 
+f77_int PASTEF770(bli_info_get_info_value)
+     (
+     )
+{
+	// Call the BLIS function.
+	gint_t info_value = bli_info_get_info_value();
+	f77_int f77_info_value = (f77_int) info_value;
+
+	return f77_info_value;
+}
+

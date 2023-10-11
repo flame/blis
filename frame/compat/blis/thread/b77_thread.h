@@ -51,3 +51,7 @@ BLIS_EXPORT_BLAS void PASTEF770(bli_thread_set_num_threads)
        const f77_int* nt
      );
 
+BLIS_EXPORT_BLAS f77_int PASTEF770(bli_info_get_info_value)
+     (
+     );
+

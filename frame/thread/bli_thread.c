@@ -1853,6 +1853,35 @@ void bli_thread_init_rntm_from_env
 
 #endif // BLIS_ENABLE_MULTITHREADING
 
+	// Check environment for options to control xerbla
+
+	// Default: Don't stop on error
+	gint_t bli_stop_on_error_int  = bli_env_get_var( "BLIS_STOP_ON_ERROR", 0 );
+	bool bli_stop_on_error;
+
+	if ( bli_stop_on_error_int != 0 )
+	{
+		bli_stop_on_error = TRUE;
+	}
+	else
+	{
+		bli_stop_on_error = FALSE;
+	}
+	bli_rntm_set_stop_on_error_only(bli_stop_on_error, rntm);
+
+	// Default: print on error
+	gint_t bli_print_on_error_int = bli_env_get_var( "BLIS_PRINT_ON_ERROR", 1 );
+	bool bli_print_on_error;
+	if (bli_print_on_error_int  != 0 )
+        {
+		bli_print_on_error = TRUE;
+	}
+	else
+        {
+		bli_print_on_error = FALSE;
+	}
+	bli_rntm_set_print_on_error_only(bli_print_on_error, rntm);
+
 	// Save the results back in the runtime object.
 	bli_rntm_set_auto_factor_only( auto_factor, rntm );
 	bli_rntm_set_num_threads_only( nt, rntm );
@@ -2024,6 +2053,10 @@ void bli_thread_update_rntm_from_env
 	bli_rntm_set_num_threads_only( nt, rntm );
 	bli_rntm_set_ways_only( jc, pc, ic, jr, ir, rntm );
 	bli_rntm_set_blis_mt_only( blis_mt, rntm );
+
+	// Initialize info_value to 0
+	gint_t info_value = 0;
+	bli_rntm_set_info_value_only( info_value, rntm );
 
 #ifdef PRINT_THREADING
 	printf( "bli_thread_update_rntm_from_env(): tl_rntm\n" );

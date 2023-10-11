@@ -1534,6 +1534,12 @@ typedef struct rntm_s
 	// The packing block allocator, which is attached in the l3 thread decorator.
 	pba_t*    pba;
 
+	// Store values of environment variables to control BLIS version of xerbla
+	// and error code from xerbla
+	bool      stop_on_error;
+	bool      print_on_error;
+	gint_t    info_value;
+
 } rntm_t;
 
 

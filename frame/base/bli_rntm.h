@@ -225,6 +225,21 @@ BLIS_INLINE dim_t bli_rntm_equals( rntm_t* rntm1, rntm_t* rntm2 )
 }
 #endif
 
+BLIS_INLINE bool bli_rntm_stop_on_error( rntm_t* rntm )
+{
+	return rntm->stop_on_error;
+}
+
+BLIS_INLINE bool bli_rntm_print_on_error( rntm_t* rntm )
+{
+	return rntm->print_on_error;
+}
+
+BLIS_INLINE gint_t bli_rntm_info_value( rntm_t* rntm )
+{
+	return rntm->info_value;
+}
+
 //
 // -- rntm_t modification (internal use only) ----------------------------------
 //
@@ -310,6 +325,21 @@ BLIS_INLINE void bli_rntm_clear_sba_pool( rntm_t* rntm )
 BLIS_INLINE void bli_rntm_clear_pba( rntm_t* rntm )
 {
 	bli_rntm_set_pba( NULL, rntm );
+}
+
+BLIS_INLINE void bli_rntm_set_stop_on_error_only( bool stop_on_error, rntm_t* rntm )
+{
+	rntm->stop_on_error = stop_on_error;
+}
+
+BLIS_INLINE void bli_rntm_set_print_on_error_only( bool print_on_error, rntm_t* rntm )
+{
+	rntm->print_on_error = print_on_error;
+}
+
+BLIS_INLINE void bli_rntm_set_info_value_only( gint_t info_value, rntm_t* rntm )
+{
+	rntm->info_value = info_value;
 }
 
 //
@@ -422,7 +452,10 @@ BLIS_INLINE void bli_rntm_clear_l3_sup( rntm_t* rntm )
           .blis_mt     = FALSE, \
           .sba_pool    = NULL, \
           .pba         = NULL, \
-        }  \
+          .stop_on_error  = FALSE, \
+          .print_on_error = TRUE, \
+          .info_value     = 0, \
+        }
 
 BLIS_INLINE void bli_rntm_init( rntm_t* rntm )
 {
