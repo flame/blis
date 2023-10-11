@@ -110,9 +110,9 @@ void bli_dpackm_armsve512_asm_16x10
             "mov  x8, %[n_mker] \n\t"
             "mov  x9, %[n_left] \n\t"
             "ptrue p0.d \n\t"
-            BNE(AROWSTOR)
+            BNE(MAROWSTOR)
             // A stored in columns.
-            LABEL(ACOLSTOR)
+            LABEL(MACOLSTOR)
             // Prefetch distance.
             "mov  x17, #8 \n\t"
             "madd x17, x17, x3, xzr \n\t"
@@ -136,9 +136,9 @@ void bli_dpackm_armsve512_asm_16x10
             // "prfm PLDL1STRM, [x5] \n\t"
             // "prfm PLDL1STRM, [x6] \n\t"
             // "prfm PLDL1STRM, [x7] \n\t"
-            LABEL(ACOLSTORMKER)
+            LABEL(MACOLSTORMKER)
             "cmp  x8, xzr \n\t"
-            BEQ(ACOLSTORMKEREND)
+            BEQ(MACOLSTORMKEREND)
             "add  x5, x0, x3 \n\t"
             "add  x6, x5, x3 \n\t"
             "add  x7, x6, x3 \n\t"
@@ -204,11 +204,11 @@ void bli_dpackm_armsve512_asm_16x10
             "add  x0, x7, x3 \n\t"
             "add  x1, x16, x2 \n\t"
             "sub  x8, x8, #1 \n\t"
-            BRANCH(ACOLSTORMKER)
-            LABEL(ACOLSTORMKEREND)
-            LABEL(ACOLSTORLEFT)
+            BRANCH(MACOLSTORMKER)
+            LABEL(MACOLSTORMKEREND)
+            LABEL(MACOLSTORLEFT)
             "cmp  x9, xzr \n\t"
-            BEQ(UNITKDONE)
+            BEQ(MUNITKDONE)
             "ld1d z0.d, p0/z, [x0] \n\t"
             "ld1d z1.d, p0/z, [x0, #1, mul vl] \n\t"
             "st1d z0.d, p0, [x1] \n\t"
@@ -216,14 +216,14 @@ void bli_dpackm_armsve512_asm_16x10
             "add  x0, x0, x3 \n\t"
             "add  x1, x1, x2 \n\t"
             "sub  x9, x9, #1 \n\t"
-            BRANCH(ACOLSTORLEFT)
+            BRANCH(MACOLSTORLEFT)
             // A stored in rows.
-            LABEL(AROWSTOR)
+            LABEL(MAROWSTOR)
             // Prepare predicates for in-reg transpose.
             SVE512_IN_REG_TRANSPOSE_d8x8_PREPARE(x16,p0,p1,p2,p3,p8,p4,p6)
-            LABEL(AROWSTORMKER) // X[10-16] for A here not P. Be careful.
+            LABEL(MAROWSTORMKER) // X[10-16] for A here not P. Be careful.
             "cmp  x8, xzr \n\t"
-            BEQ(AROWSTORMKEREND)
+            BEQ(MAROWSTORMKEREND)
             "add  x10, x0, x4 \n\t"
             "add  x11, x10, x4 \n\t"
             "add  x12, x11, x4 \n\t"
@@ -285,15 +285,15 @@ void bli_dpackm_armsve512_asm_16x10
             "add  x0, x0, #64 \n\t"
             "add  x1, x16, x2 \n\t"
             "sub  x8, x8, #1 \n\t"
-            BRANCH(AROWSTORMKER)
-            LABEL(AROWSTORMKEREND)
+            BRANCH(MAROWSTORMKER)
+            LABEL(MAROWSTORMKEREND)
             "mov  x4, %[inca] \n\t" // Restore unshifted inca.
             "index z30.d, xzr, x4 \n\t" // Generate index.
             "lsl  x4, x4, #3 \n\t" // Shift again.
             "lsl  x5, x4, #3 \n\t" // Virtual column vl.
-            LABEL(AROWSTORLEFT)
+            LABEL(MAROWSTORLEFT)
             "cmp  x9, xzr \n\t"
-            BEQ(UNITKDONE)
+            BEQ(MUNITKDONE)
             "add  x6, x0, x5 \n\t"
             "ld1d z0.d, p0/z, [x0, z30.d, lsl #3] \n\t"
             "ld1d z1.d, p0/z, [x6, z30.d, lsl #3] \n\t"
@@ -302,8 +302,8 @@ void bli_dpackm_armsve512_asm_16x10
             "add  x1, x1, x2 \n\t"
             "add  x0, x0, #8 \n\t"
             "sub  x9, x9, #1 \n\t"
-            BRANCH(AROWSTORLEFT)
-            LABEL(UNITKDONE)
+            BRANCH(MAROWSTORLEFT)
+            LABEL(MUNITKDONE)
             "mov  x0, #0 \n\t"
             :
             : [a]      "r" (a),
@@ -343,9 +343,9 @@ void bli_dpackm_armsve512_asm_16x10
             "mov  x8, %[n_mker] \n\t"
             "mov  x9, %[n_left] \n\t"
             "ptrue p0.d \n\t"
-            BNE(AROWSTOR)
+            BNE(NAROWSTOR)
             // A stored in columns.
-            LABEL(ACOLSTOR)
+            LABEL(NACOLSTOR)
             // Prefetch distance.
             "mov  x17, #8 \n\t"
             "madd x17, x17, x3, xzr \n\t"
@@ -355,9 +355,9 @@ void bli_dpackm_armsve512_asm_16x10
             "lsl  x16, x16, #60 \n\t"
             "orr  x0, x0, x16 \n\t"
 #endif
-            LABEL(ACOLSTORMKER)
+            LABEL(NACOLSTORMKER)
             "cmp  x8, xzr \n\t"
-            BEQ(ACOLSTORMKEREND)
+            BEQ(NACOLSTORMKEREND)
             "add  x5, x0, x3 \n\t"
             "add  x6, x5, x3 \n\t"
             "add  x7, x6, x3 \n\t"
@@ -451,11 +451,11 @@ void bli_dpackm_armsve512_asm_16x10
             // "add  x1, x1, #320 \n\t"
             "add  x0, x7, x3 \n\t"
             "sub  x8, x8, #1 \n\t"
-            BRANCH(ACOLSTORMKER)
-            LABEL(ACOLSTORMKEREND)
-            LABEL(ACOLSTORLEFT)
+            BRANCH(NACOLSTORMKER)
+            LABEL(NACOLSTORMKEREND)
+            LABEL(NACOLSTORLEFT)
             "cmp  x9, xzr \n\t"
-            BEQ(UNITKDONE)
+            BEQ(NUNITKDONE)
             "ld1d z0.d, p0/z, [x0] \n\t"
             "ldr  q1, [x0, #64] \n\t"
             "st1d z0.d, p0, [x1] \n\t"
@@ -463,14 +463,14 @@ void bli_dpackm_armsve512_asm_16x10
             "add  x0, x0, x3 \n\t"
             "add  x1, x1, x2 \n\t"
             "sub  x9, x9, #1 \n\t"
-            BRANCH(ACOLSTORLEFT)
+            BRANCH(NACOLSTORLEFT)
             // A stored in rows.
-            LABEL(AROWSTOR)
+            LABEL(NAROWSTOR)
             // Prepare predicates for in-reg transpose.
             SVE512_IN_REG_TRANSPOSE_d8x8_PREPARE(x16,p0,p1,p2,p3,p8,p4,p6)
-            LABEL(AROWSTORMKER) // X[10-16] for A here not P. Be careful.
+            LABEL(NAROWSTORMKER) // X[10-16] for A here not P. Be careful.
             "cmp  x8, xzr \n\t"
-            BEQ(AROWSTORMKEREND)
+            BEQ(NAROWSTORMKEREND)
             "add  x10, x0, x4 \n\t"
             "add  x11, x10, x4 \n\t"
             "add  x12, x11, x4 \n\t"
@@ -521,15 +521,15 @@ void bli_dpackm_armsve512_asm_16x10
             "add  x1, x16, x2 \n\t"
             "add  x0, x0, #64 \n\t"
             "sub  x8, x8, #1 \n\t"
-            BRANCH(AROWSTORMKER)
-            LABEL(AROWSTORMKEREND)
+            BRANCH(NAROWSTORMKER)
+            LABEL(NAROWSTORMKEREND)
             "mov  x4, %[inca] \n\t" // Restore unshifted inca.
             "index z30.d, xzr, x4 \n\t" // Generate index.
             "lsl  x4, x4, #3 \n\t" // Shift again.
             "lsl  x5, x4, #3 \n\t" // Virtual column vl.
-            LABEL(AROWSTORLEFT)
+            LABEL(NAROWSTORLEFT)
             "cmp  x9, xzr \n\t"
-            BEQ(UNITKDONE)
+            BEQ(NUNITKDONE)
             "add  x6, x0, x5 \n\t"
             "add  x7, x6, x4 \n\t"
             "ld1d z0.d, p0/z, [x0, z30.d, lsl #3] \n\t"
@@ -541,8 +541,8 @@ void bli_dpackm_armsve512_asm_16x10
             "add  x1, x1, x2 \n\t"
             "add  x0, x0, #8 \n\t"
             "sub  x9, x9, #1 \n\t"
-            BRANCH(AROWSTORLEFT)
-            LABEL(UNITKDONE)
+            BRANCH(NAROWSTORLEFT)
+            LABEL(NUNITKDONE)
             "mov  x0, #0 \n\t"
             :
             : [a]      "r" (a),
