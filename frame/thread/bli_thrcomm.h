@@ -74,7 +74,7 @@ typedef struct barrier_s barrier_t;
 #ifdef BLIS_ENABLE_HPX
 typedef struct hpx_barrier_t
 {
-  void* handle;
+	void* handle;
 } hpx_barrier_t;
 #endif
 

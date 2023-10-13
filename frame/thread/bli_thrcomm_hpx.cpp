@@ -44,27 +44,27 @@ extern "C" {
 
 void hpx_barrier_init( hpx_barrier_t* barrier, dim_t n_threads )
 {
-    if ( barrier == nullptr ) return;
-    barrier->handle = new hpx::barrier<>( n_threads );
+	if ( barrier == nullptr ) return;
+	barrier->handle = new hpx::barrier<>( n_threads );
 }
 
 void hpx_barrier_destroy( hpx_barrier_t* barrier )
 {
-    if ( barrier == nullptr ) return;
+	if ( barrier == nullptr ) return;
 
-    auto* barrier_ = reinterpret_cast<hpx::barrier<>*>( barrier->handle );
-    barrier->handle = nullptr;
+	auto* barrier_ = reinterpret_cast<hpx::barrier<>*>( barrier->handle );
+	barrier->handle = nullptr;
 
-    delete barrier_; 
+	delete barrier_; 
 }
 
 void hpx_barrier_arrive_and_wait( hpx_barrier_t* barrier )
 {
-    if ( barrier == nullptr ) return;
-    auto* barrier_ = reinterpret_cast<hpx::barrier<>*>( barrier->handle );
+	if ( barrier == nullptr ) return;
+	auto* barrier_ = reinterpret_cast<hpx::barrier<>*>( barrier->handle );
 
-    if ( barrier_ == nullptr ) return;
-    barrier_->arrive_and_wait();
+	if ( barrier_ == nullptr ) return;
+	barrier_->arrive_and_wait();
 }
 
 void bli_thrcomm_init_hpx( dim_t n_threads, thrcomm_t* comm )
@@ -77,18 +77,18 @@ void bli_thrcomm_init_hpx( dim_t n_threads, thrcomm_t* comm )
 	// comm->barrier_sense           = 0;
 	// comm->barrier_threads_arrived = 0;
 
-    hpx_barrier_init( &comm->barrier, n_threads );
+	hpx_barrier_init( &comm->barrier, n_threads );
 }
 
 void bli_thrcomm_cleanup_hpx( thrcomm_t* comm )
 {
 	if ( comm == nullptr ) return;
-    hpx_barrier_destroy( &comm->barrier );
+	hpx_barrier_destroy( &comm->barrier );
 }
 
 void bli_thrcomm_barrier_hpx( dim_t t_id, thrcomm_t* comm )
 {
-    hpx_barrier_arrive_and_wait( &comm->barrier );
+	hpx_barrier_arrive_and_wait( &comm->barrier );
 }
 
 }
