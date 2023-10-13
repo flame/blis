@@ -36,43 +36,36 @@
 
 #ifdef BLIS_ENABLE_HPX
 
+#include <hpx/synchronization/barrier.hpp>
 extern "C" {
-
-#ifdef BLIS_USE_HPX_BARRIER
 
 // Define the pthread_barrier_t implementations of the init, cleanup, and
 // barrier functions.
 
-void bli_thrcomm_init_hpx( dim_t n_threads, thrcomm_t* comm )
+void hpx_barrier_init( hpx_barrier_t* barrier, dim_t n_threads )
 {
-	if ( comm == nullptr ) return;
-
-	//comm->sent_object             = nullptr;
-	//comm->n_threads               = n_threads;
-	comm->ti                      = BLIS_HPX;
-	//comm->barrier_sense           = 0;
-	//comm->barrier_threads_arrived = 0;
-
-	comm->barrier = new hpx:barrier<>();
+    if ( barrier == nullptr ) return;
+    barrier->handle = new hpx::barrier<>( n_threads );
 }
 
-void bli_thrcomm_cleanup_hpx( thrcomm_t* comm )
+void hpx_barrier_destroy( hpx_barrier_t* barrier )
 {
-	if ( comm == nullptr ) return;
+    if ( barrier == nullptr ) return;
 
-	delete comm->barrier;
+    auto* barrier_ = reinterpret_cast<hpx::barrier<>*>( barrier->handle );
+    barrier->handle = nullptr;
+
+    delete barrier_; 
 }
 
-void bli_thrcomm_barrier( dim_t t_id, thrcomm_t* comm )
+void hpx_barrier_arrive_and_wait( hpx_barrier_t* barrier )
 {
-	comm->barrier->arrive_and_wait();
+    if ( barrier == nullptr ) return;
+    auto* barrier_ = reinterpret_cast<hpx::barrier<>*>( barrier->handle );
+
+    if ( barrier_ == nullptr ) return;
+    barrier_->arrive_and_wait();
 }
-
-#else
-
-// Define the non-hpx::barrier implementations of the init, cleanup,
-// and barrier functions. These are the default unless the hpx::barrier
-// versions are requested at compile-time.
 
 void bli_thrcomm_init_hpx( dim_t n_threads, thrcomm_t* comm )
 {
@@ -81,22 +74,24 @@ void bli_thrcomm_init_hpx( dim_t n_threads, thrcomm_t* comm )
 	comm->sent_object             = nullptr;
 	comm->n_threads               = n_threads;
 	comm->ti                      = BLIS_HPX;
-	comm->barrier_sense           = 0;
-	comm->barrier_threads_arrived = 0;
+	// comm->barrier_sense           = 0;
+	// comm->barrier_threads_arrived = 0;
+
+    hpx_barrier_init( &comm->barrier, n_threads );
 }
 
 void bli_thrcomm_cleanup_hpx( thrcomm_t* comm )
 {
+	if ( comm == nullptr ) return;
+    hpx_barrier_destroy( &comm->barrier );
 }
 
 void bli_thrcomm_barrier_hpx( dim_t t_id, thrcomm_t* comm )
 {
-	bli_thrcomm_barrier_atomic( t_id, comm );
+    hpx_barrier_arrive_and_wait( &comm->barrier );
 }
 
-} // extern "C"
-
-#endif
+}
 
 #endif
 
