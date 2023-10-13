@@ -60,18 +60,18 @@ void bli_thread_launch_hpx
 	// Execute func on hpx-runtime with n_threads.
 	hpx::threads::run_as_hpx_thread([&]()
 	{
-	std::vector<hpx::future<void>> futures;
-	futures.reserve(n_threads);
-	
-	for (dim_t tid = 0; tid < n_threads; ++tid)
-	{
-		futures.push_back(hpx::async([tid, &gl_comm, &func, &params]()
-		{
-		  func( gl_comm, tid, params );
-		}));
-	}
+		std::vector<hpx::future<void>> futures;
+		futures.reserve(n_threads);
 
-	hpx::wait_all(futures);
+		for (dim_t tid = 0; tid < n_threads; ++tid)
+		{
+			futures.push_back(hpx::async([tid, &gl_comm, &func, &params]()
+			{
+			  func( gl_comm, tid, params );
+			}));
+		}
+
+		hpx::wait_all(futures);
 	});
 
 	// Free the global communicator, because the root thrinfo_t node
