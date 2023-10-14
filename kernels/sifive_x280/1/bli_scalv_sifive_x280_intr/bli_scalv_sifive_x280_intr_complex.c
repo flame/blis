@@ -51,13 +51,17 @@ SCALV(PRECISION_CHAR, void)
     size_t avl = n;
     while (avl) {
         size_t vl = VSETVL(PREC, LMUL)(avl);
+        RVV_TYPE_FX(PREC, LMUL, 2) xvec;
         RVV_TYPE_F(PREC, LMUL) xvec_real, xvec_imag;
 
         if (incx == 1)
-            VLSEG2_V_F(PREC, LMUL)( &xvec_real, &xvec_imag, (BASE_DT*) x, vl);
+            xvec = VLSEG2_V_F(PREC, LMUL, 2)( (BASE_DT*) x, vl);
         else
-            VLSSEG2_V_F(PREC, LMUL)(&xvec_real, &xvec_imag, (BASE_DT*) x, 2*FLT_SIZE*incx, vl);
-        
+            xvec = VLSSEG2_V_F(PREC, LMUL, 2)((BASE_DT*) x, 2*FLT_SIZE*incx, vl);
+
+        xvec_real = VGET_V_F(PREC, LMUL, 2)(xvec, 0);
+        xvec_imag = VGET_V_F(PREC, LMUL, 2)(xvec, 1);
+
         RVV_TYPE_F(PREC, LMUL) temp_real = VFMUL_VF(PREC, LMUL)(xvec_real, alpha->real, vl);
         RVV_TYPE_F(PREC, LMUL) temp_imag = VFMUL_VF(PREC, LMUL)(xvec_imag, alpha->real, vl);
         if (conjalpha == BLIS_NO_CONJUGATE) {
@@ -67,12 +71,14 @@ SCALV(PRECISION_CHAR, void)
             temp_real = VFMACC_VF(PREC, LMUL) (temp_real, alpha->imag, xvec_imag, vl);
             temp_imag = VFNMSAC_VF(PREC, LMUL)(temp_imag, alpha->imag, xvec_real, vl);
         }
-        
+
+        xvec = VSET_V_F(PREC, LMUL, 2)(xvec, 0, temp_real);
+        xvec = VSET_V_F(PREC, LMUL, 2)(xvec, 1, temp_imag);
 
         if (incx == 1)
-            VSSEG2_V_F(PREC, LMUL)( (BASE_DT*) x, temp_real, temp_imag, vl);
+            VSSEG2_V_F(PREC, LMUL, 2)( (BASE_DT*) x, xvec, vl);
         else
-            VSSSEG2_V_F(PREC, LMUL)((BASE_DT*) x, 2*FLT_SIZE*incx, temp_real, temp_imag, vl);
+            VSSSEG2_V_F(PREC, LMUL, 2)((BASE_DT*) x, 2*FLT_SIZE*incx, xvec, vl);
         
         x += vl*incx;
         avl -= vl;
