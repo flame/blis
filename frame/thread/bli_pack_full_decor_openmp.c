@@ -54,11 +54,7 @@ void bli_pack_full_thread_decorator
     /* Ensure n_threads is always greater than or equal to 1 */
     /* Passing BLIS_IC_NT and BLIS_JC_NT for pack can lead to n_threads */
     /* becoming negative. In that case, packing is done using 1 thread */
-    // n_threads = ( n_threads > 0 ) ? n_threads : 1;
-
-    // Explicitly setting n_threads = 1 to force packing with only a single
-    // thread.
-    n_threads = 1;
+    n_threads = ( n_threads > 0 ) ? n_threads : 1;
 
     _Pragma( "omp parallel num_threads(n_threads)" )
     {

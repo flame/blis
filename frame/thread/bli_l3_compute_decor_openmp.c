@@ -32,10 +32,6 @@
 
 */
 
-// @note: Presently MT is not supported, so n_threads have been explicitly
-//  initialized to 1 while intializing. Thus, even if BLIS is build with OpenMP
-//  support, the compute APIs work as an ST implementation.
-
 #include "blis.h"
 
 #ifdef BLIS_ENABLE_OPENMP

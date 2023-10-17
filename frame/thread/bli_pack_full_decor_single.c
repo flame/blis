@@ -34,9 +34,7 @@
 
 #include "blis.h"
 
-#ifndef BLIS_ENABLE_OPENMP
-
-#define SKIP_THRINFO_TREE
+#if !defined (BLIS_ENABLE_MULTITHREADING) || defined (BLIS_ENABLE_PTHREADS)
 
 void* bli_pack_full_thread_entry( void* data_void ) { return NULL; }
 

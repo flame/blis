@@ -33,6 +33,7 @@
 */
 
 #include "blis.h"
+#include "../../base/bli_pack_compute_utils.h"
 
 void bli_pack_full_init
      (
@@ -238,11 +239,6 @@ void PASTEMAC(ch,tfuncname) \
     /* Compute the JC loop thread range for the current thread. */ \
     dim_t jc_start, jc_end; \
     bli_thread_range_sub( thread_jc, n, NR, FALSE, &jc_start, &jc_end ); \
-    const dim_t n_local = jc_end - jc_start; \
-\
-    /* Compute number of primary and leftover components of the JC loop. */ \
-    /*const dim_t jc_iter = ( n_local + NC - 1 ) / NC;*/ \
-    const dim_t jc_left =   n_local % NC; \
 \
     inc_t  rs_b_use, cs_b_use, ps_b_use; \
 \
@@ -251,12 +247,59 @@ void PASTEMAC(ch,tfuncname) \
     for ( dim_t jj = jc_start; jj < jc_end; jj += NC ) \
     { \
         /* Calculate the thread's current JC block dimension. */ \
-        const dim_t nc_cur = ( NC <= jc_end - jj ? NC : jc_left ); \
+        dim_t nc_cur = ( NC <= ( jc_end - jj ) ? NC : ( jc_end - jj ) ); \
 \
-        const inc_t pcstep_b_use = ( ( nc_cur + NR - 1 ) / NR ) * NR; \
+        dim_t jc_cur_loop = jj;\
+        dim_t jc_cur_loop_rem = 0;\
+        dim_t n_sub_updated = 0;\
+\
+        /* This function returns the offsets that are computed for */ \
+        /* thread workload distribution in MT execution. */           \
+        get_B_panel_reordered_start_offset_width \
+        ( \
+          jj, n, NC, NR, \
+          &jc_cur_loop, &jc_cur_loop_rem, \
+          &nc_cur, &n_sub_updated \
+        ); \
+\
+        /* The offsets are calculated in such a way that it resembles */ \
+        /* the reorder buffer traversal in single threaded reordering. */ \
+        /* The panel boundaries (KCxNC) remain as it is accessed in */ \
+        /* single thread, and as a consequence a thread with jc_start */ \
+        /* inside the panel cannot consider NC range for reorder. It */ \
+        /* has to work with NC' < NC, and the offset is calulated using */ \
+        /* prev NC panels spanning k dim + cur NC panel spaning pc loop */ \
+        /* cur iteration + (NC - NC') spanning current kc0 (<= KC). */ \
+        /* */ \
+        /* Eg: Consider the following reordered buffer diagram: */ \
+        /*          t1              t2                     */ \
+        /*          |               |                      */ \
+        /*          |           |..NC..|                   */ \
+        /*          |           |      |                   */ \
+        /*          |.NC. |.NC. |NC'|NC"                   */ \
+        /*     pc=0-+-----+-----+---+--+                   */ \
+        /*        KC|     |     |   |  |                   */ \
+        /*          |  1  |  3  |   5  |                   */ \
+        /*    pc=KC-+-----+-----+---st-+                   */ \
+        /*        KC|     |     |   |  |                   */ \
+        /*          |  2  |  4  | 6 | 7|                   */ \
+        /* pc=k=2KC-+-----+-----+---+--+                   */ \
+        /*          |jc=0 |jc=NC|jc=2NC|                   */ \
+        /* */ \
+        /* The numbers 1,2..6,7 denotes the order in which reordered */ \
+        /* KCxNC blocks are stored in memory, ie: block 1 followed by 2 */ \
+        /* followed by 3, etc. Given two threads t1 and t2, and t2 needs */ \
+        /* to acces point st in the reorder buffer to write the data: */ \
+        /* The offset calulation logic will be: */ \
+        /* jc_cur_loop = 2NC, jc_cur_loop_rem = NC', pc = KC, */ \
+        /* n_sub_updated = NC, k = 2KC, kc0_updated = KC */ \
+        /* */ \
+        /* st = ( jc_cur_loop * k )    <traverse blocks 1,2,3,4> */ \
+        /*    + ( n_sub_updated * pc ) <traverse block 5>        */ \
+        /*    + ( NC' * kc0_updated)   <traverse block 6>        */ \
 \
         ctype* restrict b_jc = src + jj * jcstep_b; \
-        ctype* restrict b_jc_use = dest + jj * jcstep_b_use; \
+        ctype* restrict b_jc_use = dest + jc_cur_loop * jcstep_b_use; \
 \
         /* Compute the PC loop thread range for the current thread. */ \
         const dim_t pc_start = 0, pc_end = k; \
@@ -271,10 +314,10 @@ void PASTEMAC(ch,tfuncname) \
         for ( dim_t pp = pc_start; pp < pc_end; pp += KC ) \
         { \
             /* Calculate the thread's current PC block dimension. */ \
-            const dim_t kc_cur = ( KC <= pc_end - pp ? KC : pc_left ); \
+            const dim_t kc_cur = ( KC <= ( pc_end - pp ) ? KC : pc_left ); \
 \
             ctype* restrict b_pc = b_jc + pp * pcstep_b; \
-            ctype* restrict b_pc_use = b_jc_use + pp * pcstep_b_use; \
+            ctype* restrict b_pc_use = b_jc_use + pp * n_sub_updated + jc_cur_loop_rem * kc_cur; \
 \
             /* Packing is parallelized only at JC loop */ \
             thread_pb = &BLIS_GEMM_SINGLE_THREADED; \
@@ -307,6 +350,9 @@ void PASTEMAC(ch,tfuncname) \
             ); \
 \
         } \
+\
+        adjust_B_panel_reordered_jc( &jj, jc_cur_loop ); \
+\
     } \
 \
 } \

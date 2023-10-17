@@ -33,6 +33,7 @@
 */
 
 #include "blis.h"
+#include "../base/bli_pack_compute_utils.h"
 
 void bli_gemm_compute_init
 (
@@ -77,9 +78,6 @@ void bli_gemm_compute_init
     // bli_nthreads_optimum(a, b, c, BLIS_GEMM, rntm );
 #endif
 
-    // Explicitly set n_threads=1 and update rntm since only ST supported.
-    dim_t n_threads = 1;
-    bli_rntm_set_num_threads( n_threads, rntm );
     bli_rntm_set_ways_from_rntm_sup
     (
       bli_obj_length( c ),
@@ -362,22 +360,32 @@ void PASTEMAC( ch, varname ) \
     /* Compute the JC loop thread range for the current thread. */ \
     dim_t jc_start, jc_end; \
     bli_thread_range_sub( thread_jc, n, NR, FALSE, &jc_start, &jc_end ); \
-    const dim_t n_local = jc_end - jc_start; \
-\
-    /* Compute number of primary and leftover components of the JC loop. */ \
-    /*const dim_t jc_iter = ( n_local + NC - 1 ) / NC;*/ \
-    const dim_t jc_left =   n_local % NC; \
 \
     /* Loop over the n dimension (NC rows/columns at a time). */ \
     /*for ( dim_t jj = 0; jj < jc_iter; jj += 1 )*/ \
     for ( dim_t jj = jc_start; jj < jc_end; jj += NC ) \
     { \
         /* Calculate the thread's current JC block dimension. */ \
-        const dim_t nc_cur = ( NC <= jc_end - jj ? NC : jc_left ); \
-        const inc_t pcstep_b_use = ( ( nc_cur + NR - 1 ) / NR ) * NR; \
+        dim_t nc_cur = ( NC <= ( jc_end - jj ) ? NC : ( jc_end - jj ) ); \
+\
+        /* For MT correctness- to ensure full packing order of packed buffer */ \
+        /* for Single and Multi Threaded executions are same. */ \
+        dim_t jc_cur_loop = jj;\
+        dim_t jc_cur_loop_rem = 0;\
+        dim_t n_sub_updated = 0;\
+\
+        if ( packedb ) \
+        { \
+            get_B_panel_reordered_start_offset_width \
+            ( \
+              jj, n, NC, NR, \
+              &jc_cur_loop, &jc_cur_loop_rem, \
+              &nc_cur, &n_sub_updated \
+            ); \
+        } \
 \
         ctype* restrict b_jc = b_00 + jj * jcstep_b; \
-        ctype* restrict b_jc_use = b_00 + jj * jcstep_b_use; \
+        ctype* restrict b_jc_use = b_00 + jc_cur_loop * jcstep_b_use; \
         ctype* restrict c_jc = c_00 + jj * jcstep_c; \
 \
         /* Grow the thrinfo_t tree. */ \
@@ -398,7 +406,7 @@ void PASTEMAC( ch, varname ) \
         for ( dim_t pp = pc_start; pp < pc_end; pp += KC ) \
         { \
             /* Calculate the thread's current PC block dimension. */ \
-            const dim_t kc_cur = ( KC <= pc_end - pp ? KC : pc_left ); \
+            const dim_t kc_cur = ( KC <= ( pc_end - pp ) ? KC : pc_left ); \
             const inc_t icstep_a_use = kc_cur; \
 \
             ctype* restrict a_pc = a_00 + pp * pcstep_a; \
@@ -440,7 +448,7 @@ void PASTEMAC( ch, varname ) \
                 rs_b_use = NR; \
                 cs_b_use = 1; \
                 ps_b_use = kc_cur * NR; \
-                b_pc_use = b_jc_use + pp * pcstep_b_use; \
+                b_pc_use = b_jc_use + pp * n_sub_updated + jc_cur_loop_rem * kc_cur; \
             } else \
             { \
                 PASTEMAC(ch,packm_sup_b) \
@@ -614,6 +622,10 @@ void PASTEMAC( ch, varname ) \
             /* NOTE: This barrier is only needed if we are packing B (since
                that matrix is packed within the pc loop of this variant). */ \
             if ( packb ) bli_thread_barrier( thread_pb ); \
+        } \
+        if ( packedb ) \
+        { \
+            adjust_B_panel_reordered_jc( &jj, jc_cur_loop ); \
         } \
     } \
 \

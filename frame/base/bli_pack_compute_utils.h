@@ -31,57 +31,35 @@
    OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 */
-
 #include "blis.h"
 
-#if !defined (BLIS_ENABLE_MULTITHREADING) || defined (BLIS_ENABLE_PTHREADS)
+#ifndef PACK_COMPUTE_UTILS_H
+#define PACK_COMPUTE_UTILS_H
 
-err_t bli_l3_compute_thread_decorator
+dim_t get_Bpanel_width_for_kdim_traversal
      (
-       l3computeint_t func,
-       opid_t         family,
-       obj_t*         a,
-       obj_t*         b,
-       obj_t*         beta,
-       obj_t*         c,
-       cntx_t*        cntx,
-       rntm_t*        rntm
-     )
-{
-    const dim_t n_threads = 1;
-    array_t* restrict array = bli_sba_checkout_array( n_threads );
-    bli_sba_rntm_set_pool( 0, array, rntm );
-    bli_pba_rntm_set_pba( rntm );
+       dim_t jc,
+       dim_t n,
+       dim_t NC,
+       dim_t NR
+     );
 
-    {
-        rntm_t* restrict rntm_p = rntm;
-        const dim_t tid = 0;
+void get_B_panel_reordered_start_offset_width
+     (
+       dim_t  jc,
+       dim_t  n,
+       dim_t  NC,
+       dim_t  NR,
+       dim_t* panel_start,
+       dim_t* panel_offset,
+       dim_t* panel_width,
+       dim_t* panel_width_kdim_trav
+     );
 
-        // This optimization allows us to use one of the global thrinfo_t
-        // objects for single-threaded execution rather than grow one from
-        // scratch. The key is that bli_thrinfo_sup_grow(), which is called
-        // from within the variants, will immediately return if it detects
-        // that the thrinfo_t* passed into it is either
-        // &BLIS_GEMM_SINGLE_THREADED or &BLIS_PACKM_SINGLE_THREADED.
-        thrinfo_t* thread = &BLIS_GEMM_SINGLE_THREADED;
+void adjust_B_panel_reordered_jc( dim_t* jc, dim_t panel_start );
 
-        ( void )tid;
+#endif //PACK_COMPUTE_UTILS_H
 
-        func
-        (
-          a,
-          b,
-          beta,
-          c,
-          cntx,
-          rntm_p,
-          thread
-        );
-    }
 
-    bli_sba_checkin_array( array );
 
-    return BLIS_SUCCESS;
-}
 
-#endif

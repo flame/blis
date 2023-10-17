@@ -278,7 +278,6 @@ int main( int argc, char** argv )
             bli_printm( "b", &b, "%4.6f", "" );
             bli_printm( "c", &c, "%4.6f", "" );
 #endif
-            dtime = bli_clock();
 
 #ifdef BLIS
 
@@ -374,6 +373,8 @@ int main( int argc, char** argv )
                                     ap, lda,
                                     aBuffer );
 
+                  dtime = bli_clock();
+
                   cblas_sgemm_compute( cblas_order,
                                        CblasPacked,
                                        cblas_transb,
@@ -384,6 +385,8 @@ int main( int argc, char** argv )
                                        bp, ldb,
                                        *betap,
                                        cp, ldc );
+
+                  dtime_save = bli_clock_min_diff( dtime_save, dtime );
 
                   bli_free_user(aBuffer);
                 }
@@ -406,6 +409,8 @@ int main( int argc, char** argv )
                                     bp, ldb,
                                     bBuffer );
 
+                  dtime = bli_clock();
+
                   cblas_sgemm_compute( cblas_order,
                                        cblas_transa,
                                        CblasPacked,
@@ -416,6 +421,9 @@ int main( int argc, char** argv )
                                        bBuffer, ldb,
                                        *betap,
                                        cp, ldc );
+
+                  dtime_save = bli_clock_min_diff( dtime_save, dtime );
+
 
                   bli_free_user(bBuffer);
                 }
@@ -454,6 +462,8 @@ int main( int argc, char** argv )
                                     bp, ldb,
                                     bBuffer );
 
+                  dtime = bli_clock();
+
                   cblas_sgemm_compute( cblas_order,
                                        CblasPacked,
                                        CblasPacked,
@@ -465,12 +475,17 @@ int main( int argc, char** argv )
                                        *betap,
                                        cp, ldc );
 
+                  dtime_save = bli_clock_min_diff( dtime_save, dtime );
+
                   bli_free_user(aBuffer);
                   bli_free_user(bBuffer);
                 }
                 else
                 {
                   // Neither A nor B is pre-packed.
+
+                  dtime = bli_clock();
+
                   cblas_sgemm_compute( cblas_order,
                                        cblas_transa,
                                        cblas_transb,
@@ -481,6 +496,8 @@ int main( int argc, char** argv )
                                        bp, ldb,
                                        *betap,
                                        cp, ldc );
+
+                  dtime_save = bli_clock_min_diff( dtime_save, dtime );
                 }
 #else           // -- BLAS API --
                 float* aBuffer;
@@ -505,6 +522,8 @@ int main( int argc, char** argv )
                                (f77_int*)&lda,
                                aBuffer );
 
+                  dtime = bli_clock();
+
                   sgemm_compute_( &f77_packed,
                                   &f77_transb,
                                   &mm,
@@ -514,6 +533,8 @@ int main( int argc, char** argv )
                                   bp, (f77_int*)&ldb,
                                   betap,
                                   cp, (f77_int*)&ldc );
+
+                  dtime_save = bli_clock_min_diff( dtime_save, dtime );
 
                   bli_free_user( aBuffer );
                 }
@@ -536,6 +557,8 @@ int main( int argc, char** argv )
                                (f77_int*)&ldb,
                                bBuffer );
 
+                  dtime = bli_clock();
+
                   sgemm_compute_( &f77_transa,
                                   &f77_packed,
                                   &mm,
@@ -545,6 +568,8 @@ int main( int argc, char** argv )
                                   bBuffer, (f77_int*)&ldb,
                                   betap,
                                   cp, (f77_int*)&ldc );
+
+                  dtime_save = bli_clock_min_diff( dtime_save, dtime );
 
                   bli_free_user( bBuffer );
                 }
@@ -585,6 +610,8 @@ int main( int argc, char** argv )
                                (f77_int*)&ldb,
                                bBuffer );
 
+                  dtime = bli_clock();
+
                   sgemm_compute_( &f77_packed,
                                   &f77_packed,
                                   &mm,
@@ -595,12 +622,17 @@ int main( int argc, char** argv )
                                   betap,
                                   cp, (f77_int*)&ldc );
 
+                  dtime_save = bli_clock_min_diff( dtime_save, dtime );
+
                   bli_free_user(aBuffer);
                   bli_free_user(bBuffer);
                 }
                 else
                 {
                   // Neither A nor B is reordered.
+
+                  dtime = bli_clock();
+
                   sgemm_compute_( &f77_transa,
                                   &f77_transb,
                                   &mm,
@@ -610,6 +642,8 @@ int main( int argc, char** argv )
                                   bp, (f77_int*)&ldb,
                                   betap,
                                   cp, (f77_int*)&ldc );
+
+                  dtime_save = bli_clock_min_diff( dtime_save, dtime );
                 }
 #endif
             }
@@ -649,6 +683,8 @@ int main( int argc, char** argv )
                                     ap, lda,
                                     aBuffer );
 
+                  dtime = bli_clock();
+
                   cblas_dgemm_compute( cblas_order,
                                        CblasPacked,
                                        cblas_transb,
@@ -659,6 +695,8 @@ int main( int argc, char** argv )
                                        bp, ldb,
                                        *betap,
                                        cp, ldc );
+
+                  dtime_save = bli_clock_min_diff( dtime_save, dtime );
 
                   bli_free_user(aBuffer);
                 }
@@ -680,6 +718,8 @@ int main( int argc, char** argv )
                                     bp, ldb,
                                     bBuffer );
 
+                  dtime = bli_clock();
+
                   cblas_dgemm_compute( cblas_order,
                                        cblas_transa,
                                        CblasPacked,
@@ -690,6 +730,8 @@ int main( int argc, char** argv )
                                        bBuffer, ldb,
                                        *betap,
                                        cp, ldc );
+
+                  dtime_save = bli_clock_min_diff( dtime_save, dtime );
 
                   bli_free_user(bBuffer);
                 }
@@ -728,6 +770,8 @@ int main( int argc, char** argv )
                                     bp, ldb,
                                     bBuffer );
 
+                  dtime = bli_clock();
+
                   cblas_dgemm_compute( cblas_order,
                                        CblasPacked,
                                        CblasPacked,
@@ -739,12 +783,17 @@ int main( int argc, char** argv )
                                        *betap,
                                        cp, ldc );
 
+                  dtime_save = bli_clock_min_diff( dtime_save, dtime );
+
                   bli_free_user(aBuffer);
                   bli_free_user(bBuffer);
                 }
                 else
                 {
                   // Neither A nor B is pre-packed.
+
+                  dtime = bli_clock();
+
                   cblas_dgemm_compute( cblas_order,
                                        cblas_transa,
                                        cblas_transb,
@@ -755,6 +804,8 @@ int main( int argc, char** argv )
                                        bp, ldb,
                                        *betap,
                                        cp, ldc );
+
+                  dtime_save = bli_clock_min_diff( dtime_save, dtime );
                 }
 
 #else           // -- BLAS API --
@@ -780,6 +831,8 @@ int main( int argc, char** argv )
                                (f77_int*)&lda,
                                aBuffer );
 
+                  dtime = bli_clock();
+
                   dgemm_compute_( &f77_packed,
                                   &f77_transb,
                                   &mm,
@@ -789,6 +842,8 @@ int main( int argc, char** argv )
                                   bp, (f77_int*)&ldb,
                                   betap,
                                   cp, (f77_int*)&ldc );
+
+                  dtime_save = bli_clock_min_diff( dtime_save, dtime );
 
                   bli_free_user( aBuffer );
                 }
@@ -811,6 +866,8 @@ int main( int argc, char** argv )
                                (f77_int*)&ldb,
                                bBuffer );
 
+                  dtime = bli_clock();
+
                   dgemm_compute_( &f77_transa,
                                   &f77_packed,
                                   &mm,
@@ -820,6 +877,8 @@ int main( int argc, char** argv )
                                   bBuffer, (f77_int*)&ldb,
                                   betap,
                                   cp, (f77_int*)&ldc );
+
+                  dtime_save = bli_clock_min_diff( dtime_save, dtime );
 
                   bli_free_user( bBuffer );
                 }
@@ -858,6 +917,8 @@ int main( int argc, char** argv )
                                (f77_int*)&ldb,
                                bBuffer );
 
+                  dtime = bli_clock();
+
                   dgemm_compute_( &f77_packed,
                                   &f77_packed,
                                   &mm,
@@ -868,12 +929,17 @@ int main( int argc, char** argv )
                                   betap,
                                   cp, (f77_int*)&ldc );
 
+                  dtime_save = bli_clock_min_diff( dtime_save, dtime );
+
                   bli_free_user(aBuffer);
                   bli_free_user(bBuffer);
                 }
                 else
                 {
                   // Neither A nor B is reordered.
+
+                  dtime = bli_clock();
+
                   dgemm_compute_( &f77_transa,
                                   &f77_transb,
                                   &mm,
@@ -883,6 +949,8 @@ int main( int argc, char** argv )
                                   bp, (f77_int*)&ldb,
                                   betap,
                                   cp, (f77_int*)&ldc );
+
+                  dtime_save = bli_clock_min_diff( dtime_save, dtime );
                 }
 #endif
             }
@@ -891,8 +959,6 @@ int main( int argc, char** argv )
 #ifdef PRINT
             bli_printm( "c compute", &c, "%4.6f", "" );
 #endif
-
-            dtime_save = bli_clock_min_diff( dtime_save, dtime );
         }
 
         gflops = ( 2.0 * m * k * n ) / ( dtime_save * 1.0e9 );
