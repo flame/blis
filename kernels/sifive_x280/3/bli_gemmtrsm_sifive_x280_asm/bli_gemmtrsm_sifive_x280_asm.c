@@ -34,6 +34,7 @@
 
 // clang-format off
 #include "blis.h"
+#include "../../riscv_cmul_macros_asm.h"
 #include <stdint.h>
 #include <riscv_vector.h>
 
@@ -127,15 +128,13 @@
 // Single precision complex
 #define DATATYPE scomplex
 #define PRECISION_CHAR c
-#define PACKMR 4
-#define PACKNR 64
-#define VLSEG "vlseg2e32.v"
-#define VSSEG "vsseg2e32.v"
-#define VSSSEG "vssseg2e32.v"
-#define FLT_LOAD "flw"
+#define PACKMR 8
+#define PACKNR 32
+#define VLSEG2 "vlseg2e32.v "
+#define VSSEG2 "vsseg2e32.v "
+#define VSSSEG2 "vssseg2e32.v "
+#define FLT_LOAD "flw "
 #define FLT_SIZE sizeof(float)
-#define LOG_FLT_SIZE 2
-
 
 #include "./bli_gemmtrsm_l_sifive_x280_asm_complex.c"
 #include "./bli_gemmtrsm_u_sifive_x280_asm_complex.c"
@@ -144,24 +143,22 @@
 #undef PRECISION_CHAR
 #undef PACKMR
 #undef PACKNR
-#undef VLSEG
-#undef VSSEG
-#undef VSSSEG
+#undef VLSEG2
+#undef VSSEG2
+#undef VSSSEG2
 #undef FLT_LOAD
 #undef FLT_SIZE
-#undef LOG_FLT_SIZE
 
 // Double precision complex
 #define DATATYPE dcomplex
 #define PRECISION_CHAR z
-#define PACKMR 4
-#define PACKNR 32
-#define VLSEG "vlseg2e64.v"
-#define VSSEG "vsseg2e64.v"
-#define VSSSEG "vssseg2e64.v"
-#define FLT_LOAD "fld"
+#define PACKMR 8
+#define PACKNR 16
+#define VLSEG2 "vlseg2e64.v "
+#define VSSEG2 "vsseg2e64.v "
+#define VSSSEG2 "vssseg2e64.v "
+#define FLT_LOAD "fld "
 #define FLT_SIZE sizeof(double)
-#define LOG_FLT_SIZE 3
 
 #include "./bli_gemmtrsm_l_sifive_x280_asm_complex.c"
 #include "./bli_gemmtrsm_u_sifive_x280_asm_complex.c"
@@ -175,7 +172,6 @@
 #undef VSSSEG
 #undef FLT_LOAD
 #undef FLT_SIZE
-#undef LOG_FLT_SIZE
 
 
 

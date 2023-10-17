@@ -150,11 +150,21 @@ void bli_cntx_init_sifive_x280( cntx_t* cntx )
 	  BLIS_DOTXAXPYF_KER,  BLIS_SCOMPLEX, bli_cdotxaxpyf_sifive_x280_asm,
 	  BLIS_DOTXAXPYF_KER,  BLIS_DCOMPLEX, bli_zdotxaxpyf_sifive_x280_asm,
 
+	  // Level 1m
+	  BLIS_PACKM_MRXK_KER, BLIS_FLOAT,    bli_spackm_sifive_x280_asm_7xk,
+	  BLIS_PACKM_MRXK_KER, BLIS_DOUBLE,   bli_dpackm_sifive_x280_asm_7xk,
+	  BLIS_PACKM_MRXK_KER, BLIS_SCOMPLEX, bli_cpackm_sifive_x280_asm_6xk,
+	  BLIS_PACKM_MRXK_KER, BLIS_DCOMPLEX, bli_zpackm_sifive_x280_asm_6xk,
+	  BLIS_PACKM_NRXK_KER, BLIS_FLOAT,    bli_spackm_sifive_x280_asm_64xk,
+	  BLIS_PACKM_NRXK_KER, BLIS_DOUBLE,   bli_dpackm_sifive_x280_asm_32xk,
+	  BLIS_PACKM_NRXK_KER, BLIS_SCOMPLEX, bli_cpackm_sifive_x280_asm_32xk,
+	  BLIS_PACKM_NRXK_KER, BLIS_DCOMPLEX, bli_zpackm_sifive_x280_asm_16xk,
+
 	  // Level 3
 	  BLIS_GEMM_UKR,       BLIS_FLOAT,    bli_sgemm_sifive_x280_asm_7m4,
 	  BLIS_GEMM_UKR,       BLIS_DOUBLE,   bli_dgemm_sifive_x280_asm_7m4,
-	  BLIS_GEMM_UKR,       BLIS_SCOMPLEX, bli_cgemm_sifive_x280_asm_3m4,
-	  BLIS_GEMM_UKR,       BLIS_DCOMPLEX, bli_zgemm_sifive_x280_asm_3m4,
+	  BLIS_GEMM_UKR,       BLIS_SCOMPLEX, bli_cgemm_sifive_x280_asm_6m2,
+	  BLIS_GEMM_UKR,       BLIS_DCOMPLEX, bli_zgemm_sifive_x280_asm_6m2,
 
 	  BLIS_GEMMTRSM_L_UKR, BLIS_FLOAT,    bli_sgemmtrsm_l_sifive_x280_asm,
 	  BLIS_GEMMTRSM_L_UKR, BLIS_DOUBLE,   bli_dgemmtrsm_l_sifive_x280_asm,
@@ -183,12 +193,12 @@ void bli_cntx_init_sifive_x280( cntx_t* cntx )
 
 	// Initialize level-3 blocksize objects with architecture-specific values.
 	//                                           s      d      c      z
-	bli_blksz_init     ( &blkszs[ BLIS_MR ],     7,     7,     3,     3,
-	                                             8,     8,     4,     4 );
-	bli_blksz_init_easy( &blkszs[ BLIS_NR ],    64,    32,    64,    32 );
-	bli_blksz_init_easy( &blkszs[ BLIS_MC ],    56,    56,    24,    24 );
-	bli_blksz_init_easy( &blkszs[ BLIS_NC ],   512,   256,   512,   256 );
-	bli_blksz_init_easy( &blkszs[ BLIS_KC ],   256,   256,   256,   256 );
+	bli_blksz_init     ( &blkszs[ BLIS_MR ],     7,     7,     6,     6,
+	                                             8,     8,     8,     8 );
+	bli_blksz_init_easy( &blkszs[ BLIS_NR ],    64,    32,    32,    16 );
+	bli_blksz_init_easy( &blkszs[ BLIS_MC ],    28,    28,    24,    24 );
+	bli_blksz_init_easy( &blkszs[ BLIS_NC ],  1024,  1024,  1024,  1024 );
+	bli_blksz_init_easy( &blkszs[ BLIS_KC ],   256,   128,   256,   128 );
 	// Default BLIS_BBM_s = 1, but set here to ensure it's correct
 	bli_blksz_init_easy( &blkszs[ BLIS_BBM ],    1,     1,     1,     1 );
 	bli_blksz_init_easy( &blkszs[ BLIS_BBN ],    1,     1,     1,     1 );

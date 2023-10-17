@@ -37,6 +37,8 @@
 
 GEMMTRSM(GEMMTRSM_U, PRECISION_CHAR, void)
 {
+    (void) data;
+    (void) cntx;
     const DATATYPE* restrict alpha = alpha_;
     const DATATYPE* restrict a12 = a12_;
     const DATATYPE* restrict a11 = a11_;
@@ -44,155 +46,286 @@ GEMMTRSM(GEMMTRSM_U, PRECISION_CHAR, void)
     const DATATYPE* restrict b11 = b11_;
     DATATYPE* restrict c11 = c11_;
 
-    if (!(1 <= m && m <= PACKMR && 1 <= n && n <= PACKNR))
+    if (m <= 0 || n <= 0)
         return;
-    
-    dim_t m_2sz, a11_offset, c11_offset, temp;
-    size_t vl;
-    __asm__ volatile("vsetvli %0, %1, e%2, m4, ta, ma": "=r"(vl) : "r"(n), "i"(8*FLT_SIZE));
 
-    // Multiply step sizes by data size
-    __asm__("slli %0, %0, %1": "+r"(rsc) : "I"(LOG_FLT_SIZE+1));
-    __asm__("slli %0, %0, %1": "+r"(csc) : "I"(LOG_FLT_SIZE+1));
-    __asm__("slli %0, %1, %2": "=r"(m_2sz) : "r"(m), "I"(LOG_FLT_SIZE+1));
-    
-    __asm__("li %0, %1": "=r"(temp): "I"(2*(PACKMR+1)*FLT_SIZE)); 
-    __asm__("mul %0, %1, %2": "=r"(a11_offset) : "r"(m), "r"(temp));
-    __asm__("addi %0, %0, %1": "+r"(a11_offset) : "I"(-2*PACKMR * FLT_SIZE)); 
-    __asm__("mul %0, %1, %2": "=r"(c11_offset): "r"(m), "r"(rsc));
-    __asm__("sub %0, %0, %1": "+r"(c11_offset): "r"(rsc));   
-    // a11_offset = 2*(PACKMR*(m-1)+m)*sz = m*2*(PACKMR+1)*FLT_SIZE - 2*PACKMR*FLT_SIZE
-    // c11_offset = rsc*(m-1)*sz
-    
-    __asm__(FLT_LOAD " f0, %0(%1)" : : "I"(0*FLT_SIZE), "r"(alpha)); // f0 = a
-    __asm__(FLT_LOAD " f1, %0(%1)" : : "I"(1*FLT_SIZE), "r"(alpha)); // f1 = b
-    switch (m){ // Vector loads from b11 with Duff device, multiplying by alpha
-        case 3: __asm__(VLSEG "     v24, (%0)": : "r"(b11)); // v24 = c, v28 = d
-                __asm__("vfmul.vf    v0, v24,  f0"); // a*c
-                __asm__("vfmul.vf    v4, v28,  f0"); // a*d
-                __asm__("vfnmsac.vf  v0,  f1, v28"); // a*c - b*d
-                __asm__("vfmacc.vf   v4,  f1, v24"); // a*d + b*c
-                __asm__("addi %0, %0, %1": "+r"(b11): "I"(2 * PACKNR * FLT_SIZE));
-        case 2: __asm__(VLSEG "     v24, (%0)": : "r"(b11));
-                __asm__("vfmul.vf    v8, v24,  f0");
-                __asm__("vfmul.vf   v12, v28,  f0");
-                __asm__("vfnmsac.vf  v8,  f1, v28");
-                __asm__("vfmacc.vf  v12,  f1, v24");
-                __asm__("addi %0, %0, %1": "+r"(b11): "I"(2 * PACKNR * FLT_SIZE));
-        case 1: __asm__(VLSEG "     v24, (%0)": : "r"(b11));
-                __asm__("vfmul.vf   v16, v24,  f0");
-                __asm__("vfmul.vf   v20, v28,  f0");
-                __asm__("vfnmsac.vf v16,  f1, v28");
-                __asm__("vfmacc.vf  v20,  f1, v24");
-                // no sub of b11 on final entry
-    }
-    // b11 now positioned at start of last row
-    // v24 = row 0 from bottom (bottom row)
-    // v20 = row 1 from bottom
-    // v16 = row 2 from bottom
-    // v12 = row 3 from bottom
-    //  v8 = row 4 from bottom
-    //  v4 = row 5 from bottom
-    //  v0 = row 6 from bottom
+    __asm__ volatile("vsetvli zero, %0, e%1, m2, ta, ma" : : "r"(n), "i"(8 * FLT_SIZE));
 
-    // GEMM: B11 := alpha * B11 - A12 * B21
-    __asm__("add %0, %0, %1": "+r"(a12): "r"(m_2sz));
-    for (dim_t i = 0; i < k; i++){
-        __asm__(VLSEG " v24, (%0)": : "r"(b21)); // kth row of b01: v24 = c, v28 = d
-        switch (m){
-            case 3: __asm__(FLT_LOAD " f5, %0(%1)" : : "I"(-6*FLT_SIZE), "r"(a12)); // f5 = a
-                    __asm__(FLT_LOAD " f4, %0(%1)" : : "I"(-5*FLT_SIZE), "r"(a12)); // f4 = b
-                    __asm__("vfnmsac.vf  v0, f5, v24");               // a*c
-                    __asm__("vfnmsac.vf  v4, f5, v28");               // a*d
-                    __asm__("vfmacc.vf   v0, f4, v28");               // a*c - b*d
-                    __asm__("vfnmsac.vf  v4, f4, v24");               // a*d + b*c
-            case 2: __asm__(FLT_LOAD " f3, %0(%1)" : : "I"(-4*FLT_SIZE), "r"(a12));
-                    __asm__(FLT_LOAD " f2, %0(%1)" : : "I"(-3*FLT_SIZE), "r"(a12));
-                    __asm__("vfnmsac.vf  v8, f3, v24");
-                    __asm__("vfnmsac.vf v12, f3, v28");
-                    __asm__("vfmacc.vf   v8, f2, v28");
-                    __asm__("vfnmsac.vf v12, f2, v24");
-            case 1: __asm__(FLT_LOAD " f1, %0(%1)" : : "I"(-2*FLT_SIZE), "r"(a12));
-                    __asm__(FLT_LOAD " f0, %0(%1)" : : "I"(-1*FLT_SIZE), "r"(a12));
-                    __asm__("vfnmsac.vf v16, f1, v24");
-                    __asm__("vfnmsac.vf v20, f1, v28");
-                    __asm__("vfmacc.vf  v16, f0, v28");
-                    __asm__("vfnmsac.vf v20, f0, v24");
+    DATATYPE alpha_cast = *alpha;
+    if (alpha_cast.real == 0 && alpha_cast.imag == 0) {
+        switch (m) {
+            case 6:
+                __asm__("vmv.v.i v20, 0");
+                __asm__("vmv.v.i v22, 0");
+            case 5:
+                __asm__("vmv.v.i v16, 0");
+                __asm__("vmv.v.i v18, 0");
+            case 4:
+                __asm__("vmv.v.i v12, 0");
+                __asm__("vmv.v.i v14, 0");
+            case 3:
+                __asm__("vmv.v.i v8, 0");
+                __asm__("vmv.v.i v10, 0");
+            case 2:
+                __asm__("vmv.v.i v4, 0");
+                __asm__("vmv.v.i v6, 0");
+            case 1:
+                __asm__("vmv.v.i v0, 0");
+                __asm__("vmv.v.i v2, 0");
         }
-        __asm__("addi %0, %0, %1": "+r"(a12): "I"(2 * PACKMR * FLT_SIZE));
-        __asm__("addi %0, %0, %1": "+r"(b21): "I"(2 * PACKNR * FLT_SIZE));
+    }
+    else {
+        const DATATYPE* b11_tmp = b11;
+        switch (m) {
+            case 6:
+                __asm__(VLSEG2 "v24, (%0)" : : "r"(b11_tmp));
+                vcmul_vf2(v20, v22, v24, v26, alpha_cast.real, alpha_cast.imag);
+                __asm__("addi %0, %0, %1" : "+r"(b11_tmp) : "I"(PACKNR * 2 * FLT_SIZE));
+            case 5:
+                __asm__(VLSEG2 "v28, (%0)" : : "r"(b11_tmp));
+                vcmul_vf2(v16, v18, v28, v30, alpha_cast.real, alpha_cast.imag);
+                __asm__("addi %0, %0, %1" : "+r"(b11_tmp) : "I"(PACKNR * 2 * FLT_SIZE));
+            case 4:
+                __asm__(VLSEG2 "v24, (%0)" : : "r"(b11_tmp));
+                vcmul_vf2(v12, v14, v24, v26, alpha_cast.real, alpha_cast.imag);
+                __asm__("addi %0, %0, %1" : "+r"(b11_tmp) : "I"(PACKNR * 2 * FLT_SIZE));
+            case 3:
+                __asm__(VLSEG2 "v28, (%0)" : : "r"(b11_tmp));
+                vcmul_vf2(v8, v10, v28, v30, alpha_cast.real, alpha_cast.imag);
+                __asm__("addi %0, %0, %1" : "+r"(b11_tmp) : "I"(PACKNR * 2 * FLT_SIZE));
+            case 2:
+                __asm__(VLSEG2 "v24, (%0)" : : "r"(b11_tmp));
+                vcmul_vf2(v4, v6, v24, v26, alpha_cast.real, alpha_cast.imag);
+                __asm__("addi %0, %0, %1" : "+r"(b11_tmp) : "I"(PACKNR * 2 * FLT_SIZE));
+            case 1:
+                __asm__(VLSEG2 "v28, (%0)" : : "r"(b11_tmp));
+                vcmul_vf2(v0, v2, v28, v30, alpha_cast.real, alpha_cast.imag);
+        }
     }
 
-    // TRSM: B11 := inv(A11) * B11
-    // Move a11 to end of array and c11 to first entry in last row
-    __asm__("add %0, %0, %1": "+r"(a11): "r"(a11_offset));
-    __asm__("add %0, %0, %1": "+r"(c11): "r"(c11_offset));
+    if (k >= 1) {
+        __asm__(VLSEG2 "v24, (%0)" : : "r"(b21));
+        __asm__("addi %0, %0, %1" : "+r"(b21) : "I"(PACKNR * 2 * FLT_SIZE));
+    }
+    if (k >= 2) {
+        __asm__(VLSEG2 "v28, (%0)" : : "r"(b21));
+        __asm__("addi %0, %0, %1" : "+r"(b21) : "I"(PACKNR * 2 * FLT_SIZE));
+    }
 
-    // Row 0 from bottom (bottom row)
-    __asm__(FLT_LOAD " f0,  %0(%1)": : "I"(-2*FLT_SIZE), "r"(a11)); // f0 = a
-    __asm__(FLT_LOAD " f1,  %0(%1)": : "I"(-1*FLT_SIZE), "r"(a11)); // f1 = b
-    __asm__("vfmul.vf  v24, v20,  f1"); // b*d
-    __asm__("vfmul.vf  v28, v16,  f1"); // b*c
-    __asm__("vfmsub.vf v16,  f0, v24"); // a*c - b*d
-    __asm__("vfmadd.vf v20,  f0, v28"); // a*d + b*c
+    a12 += m - 1;
 
-    __asm__(VSSEG " v16, (%0)": : "r"(b11));
-    __asm__(VSSSEG " v16, (%0), %1": : "r"(c11), "r"(csc));
+    while (k > 0) {
+        switch (m) {
+            case 6:
+                __asm__(FLT_LOAD "ft10, %1(%0)" : : "r"(a12), "I"(-10 * FLT_SIZE));
+                __asm__(FLT_LOAD "ft11, %1(%0)" : : "r"(a12), "I"(-9 * FLT_SIZE));
+                vcnmsac_vf(v20, v22, ft10, ft11, v24, v26);
+            case 5:
+                __asm__(FLT_LOAD "ft8, %1(%0)" : : "r"(a12), "I"(-8 * FLT_SIZE));
+                __asm__(FLT_LOAD "ft9, %1(%0)" : : "r"(a12), "I"(-7 * FLT_SIZE));
+                vcnmsac_vf(v16, v18, ft8, ft9, v24, v26);
+            case 4:
+                __asm__(FLT_LOAD "ft6, %1(%0)" : : "r"(a12), "I"(-6 * FLT_SIZE));
+                __asm__(FLT_LOAD "ft7, %1(%0)" : : "r"(a12), "I"(-5 * FLT_SIZE));
+                vcnmsac_vf(v12, v14, ft6, ft7, v24, v26);
+            case 3:
+                __asm__(FLT_LOAD "ft4, %1(%0)" : : "r"(a12), "I"(-4 * FLT_SIZE));
+                __asm__(FLT_LOAD "ft5, %1(%0)" : : "r"(a12), "I"(-3 * FLT_SIZE));
+                vcnmsac_vf(v8, v10, ft4, ft5, v24, v26);
+            case 2:
+                __asm__(FLT_LOAD "ft2, %1(%0)" : : "r"(a12), "I"(-2 * FLT_SIZE));
+                __asm__(FLT_LOAD "ft3, %1(%0)" : : "r"(a12), "I"(-1 * FLT_SIZE));
+                vcnmsac_vf(v4, v6, ft2, ft3, v24, v26);
+            case 1:
+                __asm__(FLT_LOAD "ft0, %1(%0)" : : "r"(a12), "I"(0 * FLT_SIZE));
+                __asm__(FLT_LOAD "ft1, %1(%0)" : : "r"(a12), "I"(1 * FLT_SIZE));
+                vcnmsac_vf(v0, v2, ft0, ft1, v24, v26);
+        }
+        k -= 1;
+
+        if (k == 0) { break; }
+
+        if (k >= 2) {
+            __asm__(VLSEG2 "v24, (%0)" : : "r"(b21));
+            __asm__("addi %0, %0, %1" : "+r"(b21) : "I"(PACKNR * 2 * FLT_SIZE));
+        }
+        __asm__("addi %0, %0, %1" : "+r"(a12) : "I"(PACKMR * 2 * FLT_SIZE));
+
+        switch (m) {
+            case 6:
+                __asm__(FLT_LOAD "ft10, %1(%0)" : : "r"(a12), "I"(-10 * FLT_SIZE));
+                __asm__(FLT_LOAD "ft11, %1(%0)" : : "r"(a12), "I"(-9 * FLT_SIZE));
+                vcnmsac_vf(v20, v22, ft10, ft11, v28, v30);
+            case 5:
+                __asm__(FLT_LOAD "ft8, %1(%0)" : : "r"(a12), "I"(-8 * FLT_SIZE));
+                __asm__(FLT_LOAD "ft9, %1(%0)" : : "r"(a12), "I"(-7 * FLT_SIZE));
+                vcnmsac_vf(v16, v18, ft8, ft9, v28, v30);
+            case 4:
+                __asm__(FLT_LOAD "ft6, %1(%0)" : : "r"(a12), "I"(-6 * FLT_SIZE));
+                __asm__(FLT_LOAD "ft7, %1(%0)" : : "r"(a12), "I"(-5 * FLT_SIZE));
+                vcnmsac_vf(v12, v14, ft6, ft7, v28, v30);
+            case 3:
+                __asm__(FLT_LOAD "ft4, %1(%0)" : : "r"(a12), "I"(-4 * FLT_SIZE));
+                __asm__(FLT_LOAD "ft5, %1(%0)" : : "r"(a12), "I"(-3 * FLT_SIZE));
+                vcnmsac_vf(v8, v10, ft4, ft5, v28, v30);
+            case 2:
+                __asm__(FLT_LOAD "ft2, %1(%0)" : : "r"(a12), "I"(-2 * FLT_SIZE));
+                __asm__(FLT_LOAD "ft3, %1(%0)" : : "r"(a12), "I"(-1 * FLT_SIZE));
+                vcnmsac_vf(v4, v6, ft2, ft3, v28, v30);
+            case 1:
+                __asm__(FLT_LOAD "ft0, %1(%0)" : : "r"(a12), "I"(0 * FLT_SIZE));
+                __asm__(FLT_LOAD "ft1, %1(%0)" : : "r"(a12), "I"(1 * FLT_SIZE));
+                vcnmsac_vf(v0, v2, ft0, ft1, v28, v30);
+        }
+        k -= 1;
+
+        if (k >= 2) {
+            __asm__(VLSEG2 "v28, (%0)" : : "r"(b21));
+            __asm__("addi %0, %0, %1" : "+r"(b21) : "I"(PACKNR * 2 * FLT_SIZE));
+        }
+        __asm__("addi %0, %0, %1" : "+r"(a12) : "I"(PACKMR * 2 * FLT_SIZE));
+    }
+
+    a11 += (m - 1) * (PACKMR + 1); // (m - 1) + (m - 1) * PACKMR
+    b11 += (m - 1) * PACKNR;
+    c11 += (m - 1) * rsc;
+    rsc *= 2 * FLT_SIZE;
+    csc *= 2 * FLT_SIZE;
+
+    __asm__(FLT_LOAD "ft0, %1(%0)" : : "r"(a11), "I"(0 * FLT_SIZE));
+    __asm__(FLT_LOAD "ft1, %1(%0)" : : "r"(a11), "I"(1 * FLT_SIZE));
+    vcmul_vf(v24, v26, v0, v2, ft0, ft1);
+    __asm__(VSSEG2 "v24, (%0)" : : "r"(b11));
+    __asm__(VSSSEG2 "v24, (%0), %1" : : "r"(c11), "r"(csc));
+
     if (m == 1) return;
-    
-    switch (m){
-        case 3: __asm__(FLT_LOAD " f4, %0(%1)": : "I"(-6*FLT_SIZE), "r"(a11)); // f4 = a
-                __asm__(FLT_LOAD " f5, %0(%1)": : "I"(-5*FLT_SIZE), "r"(a11)); // f5 = b
-                __asm__("vfnmsac.vf   v0, f4, v16"); // - a*c
-                __asm__("vfnmsac.vf   v4, f4, v20"); // - a*d
-                __asm__("vfmacc.vf    v0, f5, v20"); // - a*c + b*d
-                __asm__("vfnmsac.vf   v4, f5, v16"); // - a*d - b*c
-        case 2: __asm__(FLT_LOAD " f2, %0(%1)": : "I"(-4*FLT_SIZE), "r"(a11));
-                __asm__(FLT_LOAD " f3, %0(%1)": : "I"(-3*FLT_SIZE), "r"(a11));
-                __asm__("vfnmsac.vf   v8, f2, v16");
-                __asm__("vfnmsac.vf  v12, f2, v20");
-                __asm__("vfmacc.vf    v8, f3, v20");
-                __asm__("vfnmsac.vf  v12, f3, v16");
+
+    switch (m) {
+        case 6:
+            __asm__(FLT_LOAD "ft10, %1(%0)" : : "r"(a11), "I"(-10 * FLT_SIZE));
+            __asm__(FLT_LOAD "ft11, %1(%0)" : : "r"(a11), "I"(-9 * FLT_SIZE));
+            vcnmsac_vf(v20, v22, ft10, ft11, v24, v26);
+        case 5:
+            __asm__(FLT_LOAD "ft8, %1(%0)" : : "r"(a11), "I"(-8 * FLT_SIZE));
+            __asm__(FLT_LOAD "ft9, %1(%0)" : : "r"(a11), "I"(-7 * FLT_SIZE));
+            vcnmsac_vf(v16, v18, ft8, ft9, v24, v26);
+        case 4:
+            __asm__(FLT_LOAD "ft6, %1(%0)" : : "r"(a11), "I"(-6 * FLT_SIZE));
+            __asm__(FLT_LOAD "ft7, %1(%0)" : : "r"(a11), "I"(-5 * FLT_SIZE));
+            vcnmsac_vf(v12, v14, ft6, ft7, v24, v26);
+        case 3:
+            __asm__(FLT_LOAD "ft4, %1(%0)" : : "r"(a11), "I"(-4 * FLT_SIZE));
+            __asm__(FLT_LOAD "ft5, %1(%0)" : : "r"(a11), "I"(-3 * FLT_SIZE));
+            vcnmsac_vf(v8, v10, ft4, ft5, v24, v26);
+        case 2:
+            __asm__(FLT_LOAD "ft2, %1(%0)" : : "r"(a11), "I"(-2 * FLT_SIZE));
+            __asm__(FLT_LOAD "ft3, %1(%0)" : : "r"(a11), "I"(-1 * FLT_SIZE));
+            vcnmsac_vf(v4, v6, ft2, ft3, v24, v26);
     }
-    // Pointer bumps
-    __asm__("addi %0, %0, %1": "+r"(a11): "I"(-2 * PACKMR * FLT_SIZE));
-    __asm__("addi %0, %0, %1": "+r"(b11): "I"(-2 * PACKNR * FLT_SIZE));
-    __asm__("sub %0, %0, %1": "+r"(c11): "r"(rsc));
+    __asm__("addi %0, %0, %1" : "+r"(a11) : "I"(-PACKMR * 2 * FLT_SIZE));
+    __asm__("addi %0, %0, %1" : "+r"(b11) : "I"(-PACKNR * 2 * FLT_SIZE));
+    __asm__("sub %0, %0, %1" : "+r"(c11) : "r"(rsc));
 
-    // Row 1 from bottom
-    __asm__(FLT_LOAD " f2,  %0(%1)": : "I"(-4*FLT_SIZE), "r"(a11)); // f0 = a
-    __asm__(FLT_LOAD " f3,  %0(%1)": : "I"(-3*FLT_SIZE), "r"(a11)); // f1 = b
-    __asm__("vfmul.vf  v24, v12,  f3"); // b*d
-    __asm__("vfmul.vf  v28,  v8,  f3"); // b*c
-    __asm__("vfmsub.vf  v8,  f2, v24"); // a*c - b*d
-    __asm__("vfmadd.vf v12,  f2, v28"); // a*d + b*c
-    
-    __asm__(VSSEG " v8, (%0)": : "r"(b11));
-    __asm__(VSSSEG " v8, (%0), %1": : "r"(c11), "r"(csc));
+    __asm__(FLT_LOAD "ft2, %1(%0)" : : "r"(a11), "I"(-2 * FLT_SIZE));
+    __asm__(FLT_LOAD "ft3, %1(%0)" : : "r"(a11), "I"(-1 * FLT_SIZE));
+    vcmul_vf(v24, v26, v4, v6, ft2, ft3);
+    __asm__(VSSEG2 "v24, (%0)" : : "r"(b11));
+    __asm__(VSSSEG2 "v24, (%0), %1" : : "r"(c11), "r"(csc));
+
     if (m == 2) return;
-    
-    __asm__(FLT_LOAD " f4, %0(%1)": : "I"(-6*FLT_SIZE), "r"(a11));
-    __asm__(FLT_LOAD " f5, %0(%1)": : "I"(-5*FLT_SIZE), "r"(a11));
-    __asm__("vfnmsac.vf   v0, f4,  v8");
-    __asm__("vfnmsac.vf   v4, f4, v12");
-    __asm__("vfmacc.vf    v0, f5, v12");
-    __asm__("vfnmsac.vf   v4, f5,  v8");
 
-    // Pointer bumps
-    __asm__("addi %0, %0, %1": "+r"(a11): "I"(-2 * PACKMR * FLT_SIZE));
-    __asm__("addi %0, %0, %1": "+r"(b11): "I"(-2 * PACKNR * FLT_SIZE));
-    __asm__("sub %0, %0, %1": "+r"(c11): "r"(rsc));
+    switch (m) {
+        case 6:
+            __asm__(FLT_LOAD "ft10, %1(%0)" : : "r"(a11), "I"(-10 * FLT_SIZE));
+            __asm__(FLT_LOAD "ft11, %1(%0)" : : "r"(a11), "I"(-9 * FLT_SIZE));
+            vcnmsac_vf(v20, v22, ft10, ft11, v24, v26);
+        case 5:
+            __asm__(FLT_LOAD "ft8, %1(%0)" : : "r"(a11), "I"(-8 * FLT_SIZE));
+            __asm__(FLT_LOAD "ft9, %1(%0)" : : "r"(a11), "I"(-7 * FLT_SIZE));
+            vcnmsac_vf(v16, v18, ft8, ft9, v24, v26);
+        case 4:
+            __asm__(FLT_LOAD "ft6, %1(%0)" : : "r"(a11), "I"(-6 * FLT_SIZE));
+            __asm__(FLT_LOAD "ft7, %1(%0)" : : "r"(a11), "I"(-5 * FLT_SIZE));
+            vcnmsac_vf(v12, v14, ft6, ft7, v24, v26);
+        case 3:
+            __asm__(FLT_LOAD "ft4, %1(%0)" : : "r"(a11), "I"(-4 * FLT_SIZE));
+            __asm__(FLT_LOAD "ft5, %1(%0)" : : "r"(a11), "I"(-3 * FLT_SIZE));
+            vcnmsac_vf(v8, v10, ft4, ft5, v24, v26);
+    }
+    __asm__("addi %0, %0, %1" : "+r"(a11) : "I"(-PACKMR * 2 * FLT_SIZE));
+    __asm__("addi %0, %0, %1" : "+r"(b11) : "I"(-PACKNR * 2 * FLT_SIZE));
+    __asm__("sub %0, %0, %1" : "+r"(c11) : "r"(rsc));
 
-    // Row 2 from bottom
-    __asm__(FLT_LOAD " f4, %0(%1)": : "I"(-6*FLT_SIZE), "r"(a11));
-    __asm__(FLT_LOAD " f5, %0(%1)": : "I"(-5*FLT_SIZE), "r"(a11));
-    __asm__("vfmul.vf  v24, v4,  f5"); // b*d
-    __asm__("vfmul.vf  v28, v0,  f5"); // b*c
-    __asm__("vfmsub.vf  v0, f4, v24"); // a*c - b*d
-    __asm__("vfmadd.vf  v4, f4, v28"); // a*d + b*c
+    __asm__(FLT_LOAD "ft4, %1(%0)" : : "r"(a11), "I"(-4 * FLT_SIZE));
+    __asm__(FLT_LOAD "ft5, %1(%0)" : : "r"(a11), "I"(-3 * FLT_SIZE));
+    vcmul_vf(v24, v26, v8, v10, ft4, ft5);
+    __asm__(VSSEG2 "v24, (%0)" : : "r"(b11));
+    __asm__(VSSSEG2 "v24, (%0), %1" : : "r"(c11), "r"(csc));
 
-    __asm__(VSSEG " v0, (%0)": : "r"(b11));
-    __asm__(VSSSEG " v0, (%0), %1": : "r"(c11), "r"(csc));
-    
+    if (m == 3) return;
+
+    switch (m) {
+        case 6:
+            __asm__(FLT_LOAD "ft10, %1(%0)" : : "r"(a11), "I"(-10 * FLT_SIZE));
+            __asm__(FLT_LOAD "ft11, %1(%0)" : : "r"(a11), "I"(-9 * FLT_SIZE));
+            vcnmsac_vf(v20, v22, ft10, ft11, v24, v26);
+        case 5:
+            __asm__(FLT_LOAD "ft8, %1(%0)" : : "r"(a11), "I"(-8 * FLT_SIZE));
+            __asm__(FLT_LOAD "ft9, %1(%0)" : : "r"(a11), "I"(-7 * FLT_SIZE));
+            vcnmsac_vf(v16, v18, ft8, ft9, v24, v26);
+        case 4:
+            __asm__(FLT_LOAD "ft6, %1(%0)" : : "r"(a11), "I"(-6 * FLT_SIZE));
+            __asm__(FLT_LOAD "ft7, %1(%0)" : : "r"(a11), "I"(-5 * FLT_SIZE));
+            vcnmsac_vf(v12, v14, ft6, ft7, v24, v26);
+    }
+    __asm__("addi %0, %0, %1" : "+r"(a11) : "I"(-PACKMR * 2 * FLT_SIZE));
+    __asm__("addi %0, %0, %1" : "+r"(b11) : "I"(-PACKNR * 2 * FLT_SIZE));
+    __asm__("sub %0, %0, %1" : "+r"(c11) : "r"(rsc));
+
+    __asm__(FLT_LOAD "ft6, %1(%0)" : : "r"(a11), "I"(-6 * FLT_SIZE));
+    __asm__(FLT_LOAD "ft7, %1(%0)" : : "r"(a11), "I"(-5 * FLT_SIZE));
+    vcmul_vf(v24, v26, v12, v14, ft6, ft7);
+    __asm__(VSSEG2 "v24, (%0)" : : "r"(b11));
+    __asm__(VSSSEG2 "v24, (%0), %1" : : "r"(c11), "r"(csc));
+
+    if (m == 4) return;
+
+    switch (m) {
+        case 6:
+            __asm__(FLT_LOAD "ft10, %1(%0)" : : "r"(a11), "I"(-10 * FLT_SIZE));
+            __asm__(FLT_LOAD "ft11, %1(%0)" : : "r"(a11), "I"(-9 * FLT_SIZE));
+            vcnmsac_vf(v20, v22, ft10, ft11, v24, v26);
+        case 5:
+            __asm__(FLT_LOAD "ft8, %1(%0)" : : "r"(a11), "I"(-8 * FLT_SIZE));
+            __asm__(FLT_LOAD "ft9, %1(%0)" : : "r"(a11), "I"(-7 * FLT_SIZE));
+            vcnmsac_vf(v16, v18, ft8, ft9, v24, v26);
+    }
+    __asm__("addi %0, %0, %1" : "+r"(a11) : "I"(-PACKMR * 2 * FLT_SIZE));
+    __asm__("addi %0, %0, %1" : "+r"(b11) : "I"(-PACKNR * 2 * FLT_SIZE));
+    __asm__("sub %0, %0, %1" : "+r"(c11) : "r"(rsc));
+
+    __asm__(FLT_LOAD "ft8, %1(%0)" : : "r"(a11), "I"(-8 * FLT_SIZE));
+    __asm__(FLT_LOAD "ft9, %1(%0)" : : "r"(a11), "I"(-7 * FLT_SIZE));
+    vcmul_vf(v24, v26, v16, v18, ft8, ft9);
+    __asm__(VSSEG2 "v24, (%0)" : : "r"(b11));
+    __asm__(VSSSEG2 "v24, (%0), %1" : : "r"(c11), "r"(csc));
+
+    if (m == 5) return;
+
+    __asm__(FLT_LOAD "ft10, %1(%0)" : : "r"(a11), "I"(-10 * FLT_SIZE));
+    __asm__(FLT_LOAD "ft11, %1(%0)" : : "r"(a11), "I"(-9 * FLT_SIZE));
+    vcnmsac_vf(v20, v22, ft10, ft11, v24, v26);
+
+    __asm__("addi %0, %0, %1" : "+r"(a11) : "I"(-PACKMR * 2 * FLT_SIZE));
+    __asm__("addi %0, %0, %1" : "+r"(b11) : "I"(-PACKNR * 2 * FLT_SIZE));
+    __asm__("sub %0, %0, %1" : "+r"(c11) : "r"(rsc));
+
+    __asm__(FLT_LOAD "ft10, %1(%0)" : : "r"(a11), "I"(-10 * FLT_SIZE));
+    __asm__(FLT_LOAD "ft11, %1(%0)" : : "r"(a11), "I"(-9 * FLT_SIZE));
+    vcmul_vf(v24, v26, v20, v22, ft10, ft11);
+    __asm__(VSSEG2 "v24, (%0)" : : "r"(b11));
+    __asm__(VSSSEG2 "v24, (%0), %1" : : "r"(c11), "r"(csc));
+
+    return;
 }
 #endif

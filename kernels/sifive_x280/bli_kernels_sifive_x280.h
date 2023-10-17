@@ -134,11 +134,21 @@ DOTXAXPYF_KER_PROT(double,  d, dotxaxpyf_sifive_x280_asm)
 DOTXAXPYF_KER_PROT(scomplex,c, dotxaxpyf_sifive_x280_asm)
 DOTXAXPYF_KER_PROT(dcomplex,z, dotxaxpyf_sifive_x280_asm)
 
+// Level 1m
+PACKM_KER_PROT(float,       s, packm_sifive_x280_asm_7xk)
+PACKM_KER_PROT(double,      d, packm_sifive_x280_asm_7xk)
+PACKM_KER_PROT(scomplex,    c, packm_sifive_x280_asm_6xk)
+PACKM_KER_PROT(dcomplex,    z, packm_sifive_x280_asm_6xk)
+PACKM_KER_PROT(float,       s, packm_sifive_x280_asm_64xk)
+PACKM_KER_PROT(double,      d, packm_sifive_x280_asm_32xk)
+PACKM_KER_PROT(scomplex,    c, packm_sifive_x280_asm_32xk)
+PACKM_KER_PROT(dcomplex,    z, packm_sifive_x280_asm_16xk)
+
 // Level 3
 GEMM_UKR_PROT(float,        s, gemm_sifive_x280_asm_7m4)
 GEMM_UKR_PROT(double,       d, gemm_sifive_x280_asm_7m4)
-GEMM_UKR_PROT(scomplex,     c, gemm_sifive_x280_asm_3m4)
-GEMM_UKR_PROT(dcomplex,     z, gemm_sifive_x280_asm_3m4)
+GEMM_UKR_PROT(scomplex,     c, gemm_sifive_x280_asm_6m2)
+GEMM_UKR_PROT(dcomplex,     z, gemm_sifive_x280_asm_6m2)
 
 GEMMTRSM_UKR_PROT(float,    s, gemmtrsm_l_sifive_x280_asm)
 GEMMTRSM_UKR_PROT(double,   d, gemmtrsm_l_sifive_x280_asm)

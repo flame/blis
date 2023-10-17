@@ -50,6 +50,13 @@
   __asm__("vfnmsac.vf "#vd_r", "#rs1_i", "#vs2_i);\
   __asm__("vfmacc.vf "#vd_i", "#rs1_r", "#vs2_i)
 
+#define vcmul_vf2(vd_r, vd_i, vs2_r, vs2_i, rs1_r, rs1_i) \
+  \
+  __asm__("vfmul.vf "#vd_r", "#vs2_r", %0" : : "f"(rs1_r));\
+  __asm__("vfmul.vf "#vd_i", "#vs2_r", %0" : : "f"(rs1_i));\
+  __asm__("vfnmsac.vf "#vd_r", %0, "#vs2_i : : "f"(rs1_i));\
+  __asm__("vfmacc.vf "#vd_i", %0, "#vs2_i : : "f"(rs1_r))
+
 // vd = conj(vs2) * f[rs1]
 #define vcmul_vf_conj(vd_r, vd_i, vs2_r, vs2_i, rs1_r, rs1_i) \
   \
@@ -57,6 +64,13 @@
   __asm__("vfmul.vf "#vd_i", "#vs2_r", "#rs1_i);\
   __asm__("vfmacc.vf "#vd_r", "#rs1_i", "#vs2_i);\
   __asm__("vfnmsac.vf "#vd_i", "#rs1_r", "#vs2_i)
+
+#define vcmul_vf_conj2(vd_r, vd_i, vs2_r, vs2_i, rs1_r, rs1_i) \
+  \
+  __asm__("vfmul.vf "#vd_r", "#vs2_r", %0" : : "f"(rs1_r));\
+  __asm__("vfmul.vf "#vd_i", "#vs2_r", %0" : : "f"(rs1_i));\
+  __asm__("vfmacc.vf "#vd_r", %0, "#vs2_i : : "f"(rs1_i));\
+  __asm__("vfnmsac.vf "#vd_i", %0, "#vs2_i : : "f"(rs1_r))
 
 // vd += vs2 * f[rs1]
 #define vcmacc_vf(vd_r, vd_i, rs1_r, rs1_i, vs2_r, vs2_i) \
@@ -66,11 +80,26 @@
   __asm__("vfnmsac.vf "#vd_r", "#rs1_i", "#vs2_i);\
   __asm__("vfmacc.vf "#vd_i", "#rs1_r", "#vs2_i)
 
+#define vcmacc_vf2(vd_r, vd_i, rs1_r, rs1_i, vs2_r, vs2_i) \
+  \
+  __asm__("vfmacc.vf "#vd_r", %0, "#vs2_r : : "f"(rs1_r));\
+  __asm__("vfmacc.vf "#vd_i", %0, "#vs2_r : : "f"(rs1_i));\
+  __asm__("vfnmsac.vf "#vd_r", %0, "#vs2_i : : "f"(rs1_i));\
+  __asm__("vfmacc.vf "#vd_i", %0, "#vs2_i : : "f"(rs1_r))
+
 // vd += conj(vs2) * f[rs1]
 #define vcmacc_vf_conj(vd_r, vd_i, rs1_r, rs1_i, vs2_r, vs2_i) \
   \
   __asm__("vfmacc.vf "#vd_r", "#rs1_r", "#vs2_r);\
   __asm__("vfmacc.vf "#vd_i", "#rs1_i", "#vs2_r);\
+  __asm__("vfmacc.vf "#vd_r", "#rs1_i", "#vs2_i);\
+  __asm__("vfnmsac.vf "#vd_i", "#rs1_r", "#vs2_i)
+
+// vd -= vs2 * f[rs1]
+#define vcnmsac_vf(vd_r, vd_i, rs1_r, rs1_i, vs2_r, vs2_i) \
+  \
+  __asm__("vfnmsac.vf "#vd_r", "#rs1_r", "#vs2_r);\
+  __asm__("vfnmsac.vf "#vd_i", "#rs1_i", "#vs2_r);\
   __asm__("vfmacc.vf "#vd_r", "#rs1_i", "#vs2_i);\
   __asm__("vfnmsac.vf "#vd_i", "#rs1_r", "#vs2_i)
 

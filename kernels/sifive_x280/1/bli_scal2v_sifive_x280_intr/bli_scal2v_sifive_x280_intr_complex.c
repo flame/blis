@@ -77,8 +77,13 @@ SCAL2V(PRECISION_CHAR, void)
             yvec_imag = VFNMSAC_VF(PREC, LMUL)(yvec_imag, alpha->real, xvec_imag, vl);
         }
 
+        // FIXME: remove the #pragmas and change the __riscv_vset_v_f intrinsics to use 
+        // __riscv_vcreate_v_f once they become available in LLVM.
+        #pragma GCC diagnostic push
+        #pragma GCC diagnostic ignored "-Wuninitialized"
         yvec = VSET_V_F(PREC, LMUL, 2)(yvec, 0, yvec_real);
         yvec = VSET_V_F(PREC, LMUL, 2)(yvec, 1, yvec_imag);
+        #pragma GCC diagnostic pop
 
         if (incy == 1)
             VSSEG2_V_F(PREC, LMUL, 2)( (BASE_DT*) y, yvec, vl);
