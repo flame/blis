@@ -42,9 +42,9 @@
 \
 BLIS_EXPORT_BLIS void PASTEMAC(ch,opname) \
      ( \
-       conj_t  conjchi, \
-       ctype*  chi, \
-       ctype*  psi  \
+             conj_t conjchi, \
+       const ctype* chi, \
+             ctype* psi  \
      );
 
 INSERT_GENTPROT_BASIC0( addsc )
@@ -59,8 +59,8 @@ INSERT_GENTPROT_BASIC0( invertsc )
 \
 BLIS_EXPORT_BLIS void PASTEMAC(ch,opname) \
      ( \
-       ctype*   chi, \
-       ctype_r* absq  \
+       const ctype*   chi, \
+             ctype_r* absq  \
      );
 
 INSERT_GENTPROTR_BASIC0( absqsc )
@@ -72,8 +72,8 @@ INSERT_GENTPROTR_BASIC0( normfsc )
 \
 BLIS_EXPORT_BLIS void PASTEMAC(ch,opname) \
      ( \
-       ctype*  chi, \
-       ctype*  psi  \
+       const ctype* chi, \
+             ctype* psi  \
      );
 
 INSERT_GENTPROT_BASIC0( sqrtsc )
@@ -85,9 +85,9 @@ INSERT_GENTPROT_BASIC0( sqrtrsc )
 \
 BLIS_EXPORT_BLIS void PASTEMAC(ch,opname) \
      ( \
-       ctype*  chi, \
-       double* zeta_r, \
-       double* zeta_i  \
+       const ctype*  chi, \
+             double* zeta_r, \
+             double* zeta_i  \
      );
 
 INSERT_GENTPROT_BASIC0( getsc )
@@ -98,9 +98,9 @@ INSERT_GENTPROT_BASIC0( getsc )
 \
 BLIS_EXPORT_BLIS void PASTEMAC(ch,opname) \
      ( \
-       double  zeta_r, \
-       double  zeta_i, \
-       ctype*  chi  \
+       double zeta_r, \
+       double zeta_i, \
+       ctype* chi  \
      );
 
 INSERT_GENTPROT_BASIC0( setsc )
@@ -111,9 +111,9 @@ INSERT_GENTPROT_BASIC0( setsc )
 \
 BLIS_EXPORT_BLIS void PASTEMAC(ch,opname) \
      ( \
-       ctype*   chi, \
-       ctype_r* zeta_r, \
-       ctype_r* zeta_i  \
+       const ctype*   chi, \
+             ctype_r* zeta_r, \
+             ctype_r* zeta_i  \
      );
 
 INSERT_GENTPROTR_BASIC0( unzipsc )
@@ -124,9 +124,9 @@ INSERT_GENTPROTR_BASIC0( unzipsc )
 \
 BLIS_EXPORT_BLIS void PASTEMAC(ch,opname) \
      ( \
-       ctype_r* zeta_r, \
-       ctype_r* zeta_i, \
-       ctype*   chi  \
+       const ctype_r* zeta_r, \
+       const ctype_r* zeta_i, \
+             ctype*   chi  \
      );
 
 INSERT_GENTPROTR_BASIC0( zipsc )
@@ -135,15 +135,15 @@ INSERT_GENTPROTR_BASIC0( zipsc )
 
 BLIS_EXPORT_BLIS void bli_igetsc
      (
-       dim_t*  chi,
-       double* zeta_r,
-       double* zeta_i
+       const dim_t*  chi,
+             double* zeta_r,
+             double* zeta_i
      );
 
 BLIS_EXPORT_BLIS void bli_isetsc
      (
-       double  zeta_r,
-       double  zeta_i,
-       dim_t*  chi
+       double zeta_r,
+       double zeta_i,
+       dim_t* chi
      );
 

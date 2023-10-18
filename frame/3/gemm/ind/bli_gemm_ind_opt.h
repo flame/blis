@@ -34,16 +34,16 @@
 
 BLIS_INLINE void bli_gemm_ind_recast_1m_params
      (
-       num_t* dt_exec,
-       num_t* dt_c,
-       pack_t schema_a,
-       obj_t* c,
-       dim_t* m,
-       dim_t* n,
-       dim_t* k,
-       inc_t* pd_a, inc_t* ps_a,
-       inc_t* pd_b, inc_t* ps_b,
-       inc_t* rs_c, inc_t* cs_c
+             num_t* dt_exec,
+             num_t* dt_c,
+             pack_t schema_a,
+       const obj_t* c,
+             dim_t* m,
+             dim_t* n,
+             dim_t* k,
+             inc_t* pd_a, inc_t* ps_a,
+             inc_t* pd_b, inc_t* ps_b,
+             inc_t* rs_c, inc_t* cs_c
      )
 {
 	obj_t beta;

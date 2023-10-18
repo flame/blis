@@ -37,9 +37,9 @@
 
 void bli_thrinfo_sup_grow
      (
-       rntm_t*    rntm,
-       bszid_t*   bszid_par,
-       thrinfo_t* thread
+             rntm_t*    rntm,
+       const bszid_t*   bszid_par,
+             thrinfo_t* thread
      )
 {
 	if ( thread == &BLIS_GEMM_SINGLE_THREADED ||
@@ -75,10 +75,10 @@ void bli_thrinfo_sup_grow
 
 thrinfo_t* bli_thrinfo_sup_rgrow
      (
-       rntm_t*    rntm,
-       bszid_t*   bszid_par,
-       bszid_t*   bszid_cur,
-       thrinfo_t* thread_par
+             rntm_t*    rntm,
+       const bszid_t*   bszid_par,
+       const bszid_t*   bszid_cur,
+             thrinfo_t* thread_par
      )
 {
 	thrinfo_t* thread_cur;
@@ -139,10 +139,10 @@ thrinfo_t* bli_thrinfo_sup_rgrow
 
 thrinfo_t* bli_thrinfo_sup_create_for_cntl
      (
-       rntm_t*    rntm,
-       bszid_t*   bszid_par,
-       bszid_t*   bszid_chl,
-       thrinfo_t* thread_par
+             rntm_t*    rntm,
+       const bszid_t*   bszid_par,
+       const bszid_t*   bszid_chl,
+             thrinfo_t* thread_par
      )
 {
 	// If we are running with a single thread, all of the code can be reduced
@@ -151,14 +151,14 @@ thrinfo_t* bli_thrinfo_sup_create_for_cntl
 	{
 		thrinfo_t* thread_chl = bli_thrinfo_create
 		(
-		  rntm,                        // rntm
-		  &BLIS_SINGLE_COMM,           // ocomm
-		  0,                           // ocomm_id
-		  1,                           // n_way
-		  0,                           // work_id
-		  FALSE,                       // free_comm
-		  BLIS_NO_PART,                // bszid
-		  NULL                         // sub_node
+		  rntm,               // rntm
+		  &BLIS_SINGLE_COMM,  // ocomm
+		  0,                  // ocomm_id
+		  1,                  // n_way
+		  0,                  // work_id
+		  FALSE,              // free_comm
+		  BLIS_NO_PART,       // bszid
+		  NULL                // sub_node
 		);
 
 		return thread_chl;

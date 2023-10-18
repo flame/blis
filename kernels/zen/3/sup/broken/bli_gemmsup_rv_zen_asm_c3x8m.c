@@ -123,8 +123,8 @@ void bli_cgemmsup_rv_zen_asm_3x8m
        scomplex*    restrict b, inc_t rs_b0, inc_t cs_b0,
        scomplex*    restrict beta,
        scomplex*    restrict c, inc_t rs_c0, inc_t cs_c0,
-       auxinfo_t*   restrict data,
-       cntx_t*      restrict cntx
+       auxinfo_t*            data,
+       cntx_t*               cntx
      )
 {
 	uint64_t n_left = n0 % 8;
@@ -495,7 +495,7 @@ void bli_cgemmsup_rv_zen_asm_3x8m
 	vmulps(ymm1, ymm3, ymm3)
 	vaddsubps(ymm3, ymm13, ymm13)
 
-	/* (ßr + ßi)x C + ((ar + ai) x AB) */
+	/* (ï¿½r + ï¿½i)x C + ((ar + ai) x AB) */
 	mov(var(beta), rbx)                // load address of beta
 	vbroadcastss(mem(rbx), ymm1)       // load beta_r and duplicate
 	vbroadcastss(mem(rbx, 4), ymm2)    // load beta_i and duplicate
@@ -583,7 +583,7 @@ void bli_cgemmsup_rv_zen_asm_3x8m
 
 	CGEMM_INPUT_SCALE_CS_BETA_NZ
 	vaddps(ymm9, ymm0, ymm9)
-	add(rdi, rcx) 
+	add(rdi, rcx)
 
 	CGEMM_INPUT_SCALE_CS_BETA_NZ
 	vaddps(ymm13, ymm0, ymm13)
@@ -609,18 +609,18 @@ void bli_cgemmsup_rv_zen_asm_3x8m
 	vmovups(xmm2, mem(rcx))				// store (gamma03-13)
 	vmovhpd(xmm12, mem(rcx, 16))	// store (gamma33)
 	lea(mem(rcx, rsi, 1), rcx)
-	
+
 	/******************Transpose bottom tile 4x3***************************/
 	vunpcklpd(ymm9, ymm5, ymm0)        //a8a9b8b9     a12a13b12b13 //gamma04-14 gamma06-16
 	vunpckhpd(ymm9, ymm5, ymm2)        //a10a11b10b11 a14a15b14b15 //gamma05-15 gamma07-17
-	
+
 	vmovups(xmm0, mem(rcx))				// store (gamma04-14)
 	vmovlpd(xmm13, mem(rcx, 16))	// store (gamma24)
 	lea(mem(rcx, rsi, 1), rcx)
 	vmovups(xmm2, mem(rcx))				// store (gamma05-15)
 	vmovhpd(xmm13, mem(rcx, 16))	// store (gamma25)
 	lea(mem(rcx, rsi, 1), rcx)
-	
+
 	vextractf128(imm(0x1), ymm0, xmm0)
 	vextractf128(imm(0x1), ymm2, xmm2)
 	vextractf128(imm(0x1), ymm13, xmm13)
@@ -658,8 +658,8 @@ void bli_cgemmsup_rv_zen_asm_3x8m
 	mov(var(cs_c), rsi)        // load cs_c
 	lea(mem(, rsi, 8), rsi)    // rsi = cs_c * sizeof(dt)
 
-	vunpcklpd(ymm8, ymm4, ymm0) //a0a1b0b1 a4a4b4b5 
-	vunpckhpd(ymm8, ymm4, ymm2) //a2a3b2b3 a6a7b6b7 
+	vunpcklpd(ymm8, ymm4, ymm0) //a0a1b0b1 a4a4b4b5
+	vunpckhpd(ymm8, ymm4, ymm2) //a2a3b2b3 a6a7b6b7
 
 	/******************Transpose top tile 4x3***************************/
 	vmovups(xmm0, mem(rcx))
@@ -680,8 +680,8 @@ void bli_cgemmsup_rv_zen_asm_3x8m
 	lea(mem(rcx, rsi, 1), rcx)
 
 	/******************Transpose bottom tile 4x3***************************/
-	vunpcklpd(ymm9, ymm5, ymm0)  //a8a9b8b9     a12a13b12b13 
-	vunpckhpd(ymm9, ymm5, ymm2)  //a10a11b10b11 a14a15b14b15 
+	vunpcklpd(ymm9, ymm5, ymm0)  //a8a9b8b9     a12a13b12b13
+	vunpckhpd(ymm9, ymm5, ymm2)  //a10a11b10b11 a14a15b14b15
 
 	vmovups(xmm0, mem(rcx))
 	vmovlpd(xmm13, mem(rcx, 16))
@@ -788,8 +788,8 @@ void bli_cgemmsup_rv_zen_asm_3x4m
        scomplex*    restrict b, inc_t rs_b0, inc_t cs_b0,
        scomplex*    restrict beta,
        scomplex*    restrict c, inc_t rs_c0, inc_t cs_c0,
-       auxinfo_t*   restrict data,
-       cntx_t*      restrict cntx
+       auxinfo_t*            data,
+       cntx_t*               cntx
      )
 {
 	//void*    a_next = bli_auxinfo_next_a( data );
@@ -1060,7 +1060,7 @@ void bli_cgemmsup_rv_zen_asm_3x4m
 	vmulps(ymm1, ymm3, ymm3)
 	vaddsubps(ymm3, ymm12, ymm12)
 
-	/* (ßr + ßi)x C + ((ar + ai) x AB) */
+	/* (ï¿½r + ï¿½i)x C + ((ar + ai) x AB) */
 	mov(var(beta), rbx)                // load address of beta
 	vbroadcastss(mem(rbx), ymm1)       // load beta_r and duplicate
 	vbroadcastss(mem(rbx, 4), ymm2)    // load beta_i and duplicate
@@ -1117,7 +1117,7 @@ void bli_cgemmsup_rv_zen_asm_3x4m
 	CGEMM_INPUT_SCALE_CS_BETA_NZ
 	vaddps(ymm4, ymm0, ymm4)
 	add(rdi, rcx)
-	
+
 	CGEMM_INPUT_SCALE_CS_BETA_NZ
 	vaddps(ymm8, ymm0, ymm8)
 	add(rdi, rcx)
@@ -1136,7 +1136,7 @@ void bli_cgemmsup_rv_zen_asm_3x4m
 	vmovups(xmm2, mem(rcx))				// store (gamma01-11)
 	vmovhpd(xmm12, mem(rcx, 16))	// store (gamma21)
 	lea(mem(rcx, rsi, 1), rcx)
-	
+
 	vextractf128(imm(0x1), ymm0, xmm0)
 	vextractf128(imm(0x1), ymm2, xmm2)
 	vextractf128(imm(0x1), ymm12, xmm12)
@@ -1172,8 +1172,8 @@ void bli_cgemmsup_rv_zen_asm_3x4m
 	mov(var(cs_c), rsi)        // load cs_c
 	lea(mem(, rsi, 8), rsi)    // rsi = cs_c * sizeof(dt)
 
-	vunpcklpd(ymm8, ymm4, ymm0) //a0a1b0b1 a4a4b4b5 
-	vunpckhpd(ymm8, ymm4, ymm2) //a2a3b2b3 a6a7b6b7 
+	vunpcklpd(ymm8, ymm4, ymm0) //a0a1b0b1 a4a4b4b5
+	vunpckhpd(ymm8, ymm4, ymm2) //a2a3b2b3 a6a7b6b7
 
 	vmovups(xmm0, mem(rcx))
 	vmovlpd(xmm12, mem(rcx, 16))
@@ -1277,8 +1277,8 @@ void bli_cgemmsup_rv_zen_asm_3x2m
        scomplex*    restrict b, inc_t rs_b0, inc_t cs_b0,
        scomplex*    restrict beta,
        scomplex*    restrict c, inc_t rs_c0, inc_t cs_c0,
-       auxinfo_t*   restrict data,
-       cntx_t*      restrict cntx
+       auxinfo_t*            data,
+       cntx_t*               cntx
      )
 {
 	//void*    a_next = bli_auxinfo_next_a( data );
@@ -1543,7 +1543,7 @@ void bli_cgemmsup_rv_zen_asm_3x2m
 	vmulps(xmm1, xmm3, xmm3)
 	vaddsubps(xmm3, xmm12, xmm12)
 
-	/* (ßr + ßi)x C + ((ar + ai) x AB) */
+	/* (ï¿½r + ï¿½i)x C + ((ar + ai) x AB) */
 	mov(var(beta), rbx)                // load address of beta
 	vbroadcastss(mem(rbx), xmm1)       // load beta_r and duplicate
 	vbroadcastss(mem(rbx, 4), xmm2)    // load beta_i and duplicate
@@ -1627,7 +1627,7 @@ void bli_cgemmsup_rv_zen_asm_3x2m
 	CGEMM_INPUT_SCALE_CS_BETA_NZ_128
 	vaddps(xmm4, xmm0, xmm4)
 	add(rdi, rcx)
-	
+
 	CGEMM_INPUT_SCALE_CS_BETA_NZ_128
 	vaddps(xmm8, xmm0, xmm8)
 	add(rdi, rcx)
@@ -1753,4 +1753,3 @@ void bli_cgemmsup_rv_zen_asm_3x2m
 	}
 }
 
- 

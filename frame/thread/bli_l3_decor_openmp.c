@@ -46,29 +46,18 @@ void* bli_l3_thread_entry( void* data_void ) { return NULL; }
 
 void bli_l3_thread_decorator
      (
-       l3int_t    func,
-       opid_t     family,
-       obj_t*     alpha,
-       obj_t*     a,
-       obj_t*     b,
-       obj_t*     beta,
-       obj_t*     c,
-       cntx_t*    cntx,
-       rntm_t*    rntm,
-       cntl_t*    cntl
+             l3int_t func,
+             opid_t  family,
+       const obj_t*  alpha,
+       const obj_t*  a,
+       const obj_t*  b,
+       const obj_t*  beta,
+       const obj_t*  c,
+       const cntx_t* cntx,
+             rntm_t* rntm,
+             cntl_t* cntl
      )
 {
-	// This is part of a hack to support mixed domain in bli_gemm_front().
-	// Sometimes we need to specify a non-standard schema for A and B, and
-	// we decided to transmit them via the schema field in the obj_t's
-	// rather than pass them in as function parameters. Once the values
-	// have been read, we immediately reset them back to their expected
-	// values for unpacked objects.
-	pack_t schema_a = bli_obj_pack_schema( a );
-	pack_t schema_b = bli_obj_pack_schema( b );
-	bli_obj_set_pack_schema( BLIS_NOT_PACKED, a );
-	bli_obj_set_pack_schema( BLIS_NOT_PACKED, b );
-
 	// Query the total number of threads from the rntm_t object.
 	const dim_t n_threads = bli_rntm_num_threads( rntm );
 
@@ -83,7 +72,7 @@ void bli_l3_thread_decorator
 	// with an internal lock to ensure only one application thread accesses
 	// the sba at a time. bli_sba_checkout_array() will also automatically
 	// resize the array_t, if necessary.
-	array_t* restrict array = bli_sba_checkout_array( n_threads );
+	array_t* array = bli_sba_checkout_array( n_threads );
 
 	// Access the pool_t* for thread 0 and embed it into the rntm. We do
 	// this up-front only so that we have the rntm_t.sba_pool field
@@ -96,7 +85,7 @@ void bli_l3_thread_decorator
 	bli_pba_rntm_set_pba( rntm );
 
 	// Allocate a global communicator for the root thrinfo_t structures.
-	thrcomm_t* restrict gl_comm = bli_thrcomm_create( rntm, n_threads );
+	thrcomm_t* gl_comm = bli_thrcomm_create( rntm, n_threads );
 
 
 	_Pragma( "omp parallel num_threads(n_threads)" )
@@ -104,8 +93,8 @@ void bli_l3_thread_decorator
 		// Create a thread-local copy of the master thread's rntm_t. This is
 		// necessary since we want each thread to be able to track its own
 		// small block pool_t as it executes down the function stack.
-		rntm_t           rntm_l = *rntm;
-		rntm_t* restrict rntm_p = &rntm_l;
+		rntm_t  rntm_l = *rntm;
+		rntm_t* rntm_p = &rntm_l;
 
 		// Query the thread's id from OpenMP.
 		const dim_t tid = omp_get_thread_num();
@@ -119,7 +108,6 @@ void bli_l3_thread_decorator
 		// be allocated/initialized.
 		bli_sba_rntm_set_pool( tid, array, rntm_p );
 
-
 		obj_t      a_t, b_t, c_t;
 		cntl_t*    cntl_use;
 		thrinfo_t* thread;
@@ -132,6 +120,17 @@ void bli_l3_thread_decorator
 		bli_obj_alias_to( a, &a_t );
 		bli_obj_alias_to( b, &b_t );
 		bli_obj_alias_to( c, &c_t );
+
+		// This is part of a hack to support mixed domain in bli_gemm_front().
+		// Sometimes we need to specify a non-standard schema for A and B, and
+		// we decided to transmit them via the schema field in the obj_t's
+		// rather than pass them in as function parameters. Once the values
+		// have been read, we immediately reset them back to their expected
+		// values for unpacked objects.
+		pack_t schema_a = bli_obj_pack_schema( &a_t );
+		pack_t schema_b = bli_obj_pack_schema( &b_t );
+		bli_obj_set_pack_schema( BLIS_NOT_PACKED, &a_t );
+		bli_obj_set_pack_schema( BLIS_NOT_PACKED, &b_t );
 
 		// Create a default control tree for the operation, if needed.
 		bli_l3_cntl_create_if( family, schema_a, schema_b,

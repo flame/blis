@@ -45,14 +45,14 @@
 \
 void PASTEMAC2(ch,opname,EX_SUF) \
      ( \
-       conj_t  conjx, \
-       conj_t  conjy, \
-       dim_t   n, \
-       ctype*  alphax, \
-       ctype*  alphay, \
-       ctype*  x, inc_t incx, \
-       ctype*  y, inc_t incy, \
-       ctype*  z, inc_t incz  \
+             conj_t conjx, \
+             conj_t conjy, \
+             dim_t  n, \
+       const ctype* alphax, \
+       const ctype* alphay, \
+       const ctype* x, inc_t incx, \
+       const ctype* y, inc_t incy, \
+             ctype* z, inc_t incz  \
        BLIS_TAPI_EX_PARAMS  \
      ) \
 { \
@@ -72,12 +72,12 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 	  conjx, \
 	  conjy, \
 	  n, \
-	  alphax, \
-	  alphay, \
-	  x, incx, \
-	  y, incy, \
-	  z, incz, \
-	  cntx  \
+	  ( ctype* )alphax, \
+	  ( ctype* )alphay, \
+	  ( ctype* )x, incx, \
+	  ( ctype* )y, incy, \
+	            z, incz, \
+	  ( cntx_t* )cntx  \
 	); \
 }
 
@@ -89,14 +89,14 @@ INSERT_GENTFUNC_BASIC( axpy2v, BLIS_AXPY2V_KER )
 \
 void PASTEMAC2(ch,opname,EX_SUF) \
      ( \
-       conj_t  conja, \
-       conj_t  conjx, \
-       dim_t   m, \
-       dim_t   b_n, \
-       ctype*  alpha, \
-       ctype*  a, inc_t inca, inc_t lda, \
-       ctype*  x, inc_t incx, \
-       ctype*  y, inc_t incy  \
+             conj_t conja, \
+             conj_t conjx, \
+             dim_t  m, \
+             dim_t  b_n, \
+       const ctype* alpha, \
+       const ctype* a, inc_t inca, inc_t lda, \
+       const ctype* x, inc_t incx, \
+             ctype* y, inc_t incy  \
        BLIS_TAPI_EX_PARAMS  \
      ) \
 { \
@@ -117,11 +117,11 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 	  conjx, \
 	  m, \
 	  b_n, \
-	  alpha, \
-	  a, inca, lda, \
-	  x, incx, \
-	  y, incy, \
-	  cntx  \
+	  ( ctype* )alpha, \
+	  ( ctype* )a, inca, lda, \
+	  ( ctype* )x, incx, \
+	            y, incy, \
+	  ( cntx_t* )cntx  \
 	); \
 }
 
@@ -133,15 +133,15 @@ INSERT_GENTFUNC_BASIC( axpyf, BLIS_AXPYF_KER )
 \
 void PASTEMAC2(ch,opname,EX_SUF) \
      ( \
-       conj_t  conjxt, \
-       conj_t  conjx, \
-       conj_t  conjy, \
-       dim_t   n, \
-       ctype*  alpha, \
-       ctype*  x, inc_t incx, \
-       ctype*  y, inc_t incy, \
-       ctype*  rho, \
-       ctype*  z, inc_t incz  \
+             conj_t conjxt, \
+             conj_t conjx, \
+             conj_t conjy, \
+             dim_t  n, \
+       const ctype* alpha, \
+       const ctype* x, inc_t incx, \
+       const ctype* y, inc_t incy, \
+             ctype* rho, \
+             ctype* z, inc_t incz  \
        BLIS_TAPI_EX_PARAMS  \
      ) \
 { \
@@ -162,12 +162,12 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 	  conjx, \
 	  conjy, \
 	  n, \
-	  alpha, \
-	  x, incx, \
-	  y, incy, \
-	  rho, \
-	  z, incz, \
-	  cntx  \
+	  ( ctype* )alpha, \
+	  ( ctype* )x, incx, \
+	  ( ctype* )y, incy, \
+	            rho, \
+	            z, incz, \
+	  ( cntx_t* )cntx  \
 	); \
 }
 
@@ -179,19 +179,19 @@ INSERT_GENTFUNC_BASIC( dotaxpyv, BLIS_DOTAXPYV_KER )
 \
 void PASTEMAC2(ch,opname,EX_SUF) \
      ( \
-       conj_t  conjat, \
-       conj_t  conja, \
-       conj_t  conjw, \
-       conj_t  conjx, \
-       dim_t   m, \
-       dim_t   b_n, \
-       ctype*  alpha, \
-       ctype*  a, inc_t inca, inc_t lda, \
-       ctype*  w, inc_t incw, \
-       ctype*  x, inc_t incx, \
-       ctype*  beta, \
-       ctype*  y, inc_t incy, \
-       ctype*  z, inc_t incz  \
+             conj_t conjat, \
+             conj_t conja, \
+             conj_t conjw, \
+             conj_t conjx, \
+             dim_t  m, \
+             dim_t  b_n, \
+       const ctype* alpha, \
+       const ctype* a, inc_t inca, inc_t lda, \
+       const ctype* w, inc_t incw, \
+       const ctype* x, inc_t incx, \
+       const ctype* beta, \
+             ctype* y, inc_t incy, \
+             ctype* z, inc_t incz  \
        BLIS_TAPI_EX_PARAMS  \
      ) \
 { \
@@ -214,14 +214,14 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 	  conjx, \
 	  m, \
 	  b_n, \
-	  alpha, \
-	  a, inca, lda, \
-	  w, incw, \
-	  x, incx, \
-	  beta, \
-	  y, incy, \
-	  z, incz, \
-	  cntx  \
+	  ( ctype* )alpha, \
+	  ( ctype* )a, inca, lda, \
+	  ( ctype* )w, incw, \
+	  ( ctype* )x, incx, \
+	  ( ctype* )beta, \
+	            y, incy, \
+	            z, incz, \
+	  ( cntx_t* )cntx  \
 	); \
 }
 
@@ -233,15 +233,15 @@ INSERT_GENTFUNC_BASIC( dotxaxpyf, BLIS_DOTXAXPYF_KER )
 \
 void PASTEMAC2(ch,opname,EX_SUF) \
      ( \
-       conj_t  conjat, \
-       conj_t  conjx, \
-       dim_t   m, \
-       dim_t   b_n, \
-       ctype*  alpha, \
-       ctype*  a, inc_t inca, inc_t lda, \
-       ctype*  x, inc_t incx, \
-       ctype*  beta, \
-       ctype*  y, inc_t incy  \
+             conj_t conjat, \
+             conj_t conjx, \
+             dim_t  m, \
+             dim_t  b_n, \
+       const ctype* alpha, \
+       const ctype* a, inc_t inca, inc_t lda, \
+       const ctype* x, inc_t incx, \
+       const ctype* beta, \
+             ctype* y, inc_t incy  \
        BLIS_TAPI_EX_PARAMS  \
      ) \
 { \
@@ -262,12 +262,12 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 	  conjx, \
 	  m, \
 	  b_n, \
-	  alpha, \
-	  a, inca, lda, \
-	  x, incx, \
-	  beta, \
-	  y, incy, \
-	  cntx  \
+	  ( ctype* )alpha, \
+	  ( ctype* )a, inca, lda, \
+	  ( ctype* )x, incx, \
+	  ( ctype* )beta, \
+	            y, incy, \
+	  ( cntx_t* )cntx  \
 	); \
 }
 

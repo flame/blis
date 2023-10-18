@@ -34,8 +34,8 @@
 
 */
 
-#ifndef BLIS_MEMBRK_H
-#define BLIS_MEMBRK_H
+#ifndef BLIS_PBA_H
+#define BLIS_PBA_H
 
 // Packing block allocator (formerly memory broker)
 
@@ -73,17 +73,17 @@ BLIS_INLINE pool_t* bli_pba_pool( dim_t pool_index, pba_t* pba )
 	return &(pba->pools[ pool_index ]);
 }
 
-BLIS_INLINE siz_t bli_pba_align_size( pba_t* pba )
+BLIS_INLINE siz_t bli_pba_align_size( const pba_t* pba )
 {
 	return pba->align_size;
 }
 
-BLIS_INLINE malloc_ft bli_pba_malloc_fp( pba_t* pba )
+BLIS_INLINE malloc_ft bli_pba_malloc_fp( const pba_t* pba )
 {
 	return pba->malloc_fp;
 }
 
-BLIS_INLINE free_ft bli_pba_free_fp( pba_t* pba )
+BLIS_INLINE free_ft bli_pba_free_fp( const pba_t* pba )
 {
 	return pba->free_fp;
 }
@@ -123,7 +123,7 @@ BLIS_EXPORT_BLIS pba_t* bli_pba_query( void );
 
 void bli_pba_init
      (
-       cntx_t*   cntx
+       const cntx_t* cntx
      );
 void bli_pba_finalize
      (
@@ -156,16 +156,16 @@ BLIS_INLINE void bli_pba_rntm_set_pba
 
 siz_t bli_pba_pool_size
      (
-       pba_t*    pba,
-       packbuf_t buf_type
+       const pba_t*    pba,
+             packbuf_t buf_type
      );
 
 // ----------------------------------------------------------------------------
 
 void bli_pba_init_pools
      (
-       cntx_t* cntx,
-       pba_t*  pba
+       const cntx_t* cntx,
+             pba_t*  pba
      );
 void bli_pba_finalize_pools
      (
@@ -174,18 +174,18 @@ void bli_pba_finalize_pools
 
 void bli_pba_compute_pool_block_sizes
      (
-       siz_t*  bs_a,
-       siz_t*  bs_b,
-       siz_t*  bs_c,
-       cntx_t* cntx
+             siz_t*  bs_a,
+             siz_t*  bs_b,
+             siz_t*  bs_c,
+       const cntx_t* cntx
      );
 void bli_pba_compute_pool_block_sizes_dt
      (
-       num_t   dt,
-       siz_t*  bs_a,
-       siz_t*  bs_b,
-       siz_t*  bs_c,
-       cntx_t* cntx
+             num_t   dt,
+             siz_t*  bs_a,
+             siz_t*  bs_b,
+             siz_t*  bs_c,
+       const cntx_t* cntx
      );
 
 #endif

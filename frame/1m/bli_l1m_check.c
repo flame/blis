@@ -43,8 +43,8 @@
 \
 void PASTEMAC(opname,_check) \
      ( \
-       obj_t*  x, \
-       obj_t*  y  \
+       const obj_t* x, \
+       const obj_t* y  \
      ) \
 { \
 	bli_l1m_xy_check( x, y ); \
@@ -60,9 +60,9 @@ GENFRONT( subm )
 \
 void PASTEMAC(opname,_check) \
      ( \
-       obj_t*  alpha, \
-       obj_t*  x, \
-       obj_t*  y  \
+       const obj_t* alpha, \
+       const obj_t* x, \
+       const obj_t* y  \
      ) \
 { \
 	bli_l1m_axy_check( alpha, x, y ); \
@@ -77,8 +77,8 @@ GENFRONT( scal2m )
 \
 void PASTEMAC(opname,_check) \
      ( \
-       obj_t*  alpha, \
-       obj_t*  x  \
+       const obj_t* alpha, \
+       const obj_t* x  \
      ) \
 { \
 	bli_l1m_ax_check( alpha, x ); \
@@ -94,9 +94,9 @@ GENFRONT( setm )
 \
 void PASTEMAC(opname,_check) \
      ( \
-       obj_t*  x, \
-       obj_t*  beta, \
-       obj_t*  y  \
+       const obj_t* x, \
+       const obj_t* beta, \
+       const obj_t* y  \
      ) \
 { \
 	bli_l1m_axy_check( beta, x, y ); \
@@ -109,8 +109,8 @@ GENFRONT( xpbym )
 
 void bli_l1m_xy_check
      (
-       obj_t*  x,
-       obj_t*  y 
+       const obj_t* x,
+       const obj_t* y
      )
 {
 	err_t e_val;
@@ -150,9 +150,9 @@ void bli_l1m_xy_check
 
 void bli_l1m_axy_check
      (
-       obj_t*  alpha,
-       obj_t*  x,
-       obj_t*  y 
+       const obj_t* alpha,
+       const obj_t* x,
+       const obj_t* y
      )
 {
 	err_t e_val;
@@ -201,8 +201,8 @@ void bli_l1m_axy_check
 
 void bli_l1m_ax_check
      (
-       obj_t*  alpha,
-       obj_t*  x 
+       const obj_t* alpha,
+       const obj_t* x
      )
 {
 	err_t e_val;

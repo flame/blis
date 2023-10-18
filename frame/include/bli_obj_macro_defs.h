@@ -42,363 +42,363 @@
 
 // Info query
 
-BLIS_INLINE num_t bli_obj_dt( obj_t* obj )
+BLIS_INLINE num_t bli_obj_dt( const obj_t* obj )
 {
 	return ( num_t )
 	       ( obj->info & BLIS_DATATYPE_BITS );
 }
 
-BLIS_INLINE bool bli_obj_is_float( obj_t* obj )
+BLIS_INLINE bool bli_obj_is_float( const obj_t* obj )
 {
 	return ( bool )
 	       ( bli_obj_dt( obj ) == BLIS_BITVAL_FLOAT_TYPE );
 }
 
-BLIS_INLINE bool bli_obj_is_double( obj_t* obj )
+BLIS_INLINE bool bli_obj_is_double( const obj_t* obj )
 {
 	return ( bool )
 	       ( bli_obj_dt( obj ) == BLIS_BITVAL_DOUBLE_TYPE );
 }
 
-BLIS_INLINE bool bli_obj_is_scomplex( obj_t* obj )
+BLIS_INLINE bool bli_obj_is_scomplex( const obj_t* obj )
 {
 	return ( bool )
 	       ( bli_obj_dt( obj ) == BLIS_BITVAL_SCOMPLEX_TYPE );
 }
 
-BLIS_INLINE bool bli_obj_is_dcomplex( obj_t* obj )
+BLIS_INLINE bool bli_obj_is_dcomplex( const obj_t* obj )
 {
 	return ( bool )
 	       ( bli_obj_dt( obj ) == BLIS_BITVAL_DCOMPLEX_TYPE );
 }
 
-BLIS_INLINE bool bli_obj_is_int( obj_t* obj )
+BLIS_INLINE bool bli_obj_is_int( const obj_t* obj )
 {
 	return ( bool )
 	       ( bli_obj_dt( obj ) == BLIS_BITVAL_INT_TYPE );
 }
 
-BLIS_INLINE bool bli_obj_is_const( obj_t* obj )
+BLIS_INLINE bool bli_obj_is_const( const obj_t* obj )
 {
 	return ( bool )
 	       ( bli_obj_dt( obj ) == BLIS_BITVAL_CONST_TYPE );
 }
 
-BLIS_INLINE dom_t bli_obj_domain( obj_t* obj )
+BLIS_INLINE dom_t bli_obj_domain( const obj_t* obj )
 {
 	return ( dom_t )
 	       ( obj->info & BLIS_DOMAIN_BIT );
 }
 
-BLIS_INLINE prec_t bli_obj_prec( obj_t* obj )
+BLIS_INLINE prec_t bli_obj_prec( const obj_t* obj )
 {
 	return ( prec_t )
 	       ( obj->info & BLIS_PRECISION_BIT );
 }
 
-BLIS_INLINE bool bli_obj_is_single_prec( obj_t* obj )
+BLIS_INLINE bool bli_obj_is_single_prec( const obj_t* obj )
 {
 	return ( bool )
 	       ( bli_obj_prec( obj ) == BLIS_BITVAL_SINGLE_PREC );
 }
 
-BLIS_INLINE bool bli_obj_is_double_prec( obj_t* obj )
+BLIS_INLINE bool bli_obj_is_double_prec( const obj_t* obj )
 {
 	return ( bool )
 	       ( bli_obj_prec( obj ) == BLIS_BITVAL_DOUBLE_PREC );
 }
 
-BLIS_INLINE num_t bli_obj_dt_proj_to_single_prec( obj_t* obj )
+BLIS_INLINE num_t bli_obj_dt_proj_to_single_prec( const obj_t* obj )
 {
 	return ( num_t )
 	       ( bli_obj_dt( obj ) & ~BLIS_BITVAL_SINGLE_PREC );
 }
 
-BLIS_INLINE num_t bli_obj_dt_proj_to_double_prec( obj_t* obj )
+BLIS_INLINE num_t bli_obj_dt_proj_to_double_prec( const obj_t* obj )
 {
 	return ( num_t )
 	       ( bli_obj_dt( obj ) | BLIS_BITVAL_DOUBLE_PREC );
 }
 
-BLIS_INLINE bool bli_obj_is_real( obj_t* obj )
+BLIS_INLINE bool bli_obj_is_real( const obj_t* obj )
 {
 	return ( bool )
 	       ( bli_obj_domain( obj ) == BLIS_BITVAL_REAL &&
 	         !bli_obj_is_const( obj ) );
 }
 
-BLIS_INLINE bool bli_obj_is_complex( obj_t* obj )
+BLIS_INLINE bool bli_obj_is_complex( const obj_t* obj )
 {
 	return ( bool )
 	       ( bli_obj_domain( obj ) == BLIS_BITVAL_COMPLEX &&
 	         !bli_obj_is_const( obj ) );
 }
 
-BLIS_INLINE num_t bli_obj_dt_proj_to_real( obj_t* obj )
+BLIS_INLINE num_t bli_obj_dt_proj_to_real( const obj_t* obj )
 {
 	return ( num_t )
 	       ( bli_obj_dt( obj ) & ~BLIS_BITVAL_COMPLEX );
 }
 
-BLIS_INLINE num_t bli_obj_dt_proj_to_complex( obj_t* obj )
+BLIS_INLINE num_t bli_obj_dt_proj_to_complex( const obj_t* obj )
 {
 	return ( num_t )
 	       ( bli_obj_dt( obj ) | BLIS_BITVAL_COMPLEX );
 }
 
-BLIS_INLINE num_t bli_obj_target_dt( obj_t* obj )
+BLIS_INLINE num_t bli_obj_target_dt( const obj_t* obj )
 {
 	return ( num_t )
 	       ( ( obj->info & BLIS_TARGET_DT_BITS ) >> BLIS_TARGET_DT_SHIFT );
 }
 
-BLIS_INLINE dom_t bli_obj_target_domain( obj_t* obj )
+BLIS_INLINE dom_t bli_obj_target_domain( const obj_t* obj )
 {
 	return ( dom_t )
 	       ( ( obj->info & BLIS_TARGET_DOMAIN_BIT ) >> BLIS_TARGET_DT_SHIFT );
 }
 
-BLIS_INLINE prec_t bli_obj_target_prec( obj_t* obj )
+BLIS_INLINE prec_t bli_obj_target_prec( const obj_t* obj )
 {
 	return ( prec_t )
 	       ( ( obj->info & BLIS_TARGET_PREC_BIT ) >> BLIS_TARGET_DT_SHIFT );
 }
 
-BLIS_INLINE num_t bli_obj_exec_dt( obj_t* obj )
+BLIS_INLINE num_t bli_obj_exec_dt( const obj_t* obj )
 {
 	return ( num_t )
 	       ( ( obj->info & BLIS_EXEC_DT_BITS ) >> BLIS_EXEC_DT_SHIFT );
 }
 
-BLIS_INLINE dom_t bli_obj_exec_domain( obj_t* obj )
+BLIS_INLINE dom_t bli_obj_exec_domain( const obj_t* obj )
 {
 	return ( dom_t )
 	       ( ( obj->info & BLIS_EXEC_DOMAIN_BIT ) >> BLIS_EXEC_DT_SHIFT );
 }
 
-BLIS_INLINE prec_t bli_obj_exec_prec( obj_t* obj )
+BLIS_INLINE prec_t bli_obj_exec_prec( const obj_t* obj )
 {
 	return ( prec_t )
 	       ( ( obj->info & BLIS_EXEC_PREC_BIT ) >> BLIS_EXEC_DT_SHIFT );
 }
 
-BLIS_INLINE num_t bli_obj_comp_dt( obj_t* obj )
+BLIS_INLINE num_t bli_obj_comp_dt( const obj_t* obj )
 {
 	return ( num_t )
 	       ( ( obj->info & BLIS_COMP_DT_BITS ) >> BLIS_COMP_DT_SHIFT );
 }
 
-BLIS_INLINE dom_t bli_obj_comp_domain( obj_t* obj )
+BLIS_INLINE dom_t bli_obj_comp_domain( const obj_t* obj )
 {
 	return ( dom_t )
 	       ( ( obj->info & BLIS_COMP_DOMAIN_BIT ) >> BLIS_COMP_DT_SHIFT );
 }
 
-BLIS_INLINE prec_t bli_obj_comp_prec( obj_t* obj )
+BLIS_INLINE prec_t bli_obj_comp_prec( const obj_t* obj )
 {
 	return ( prec_t )
 	       ( ( obj->info & BLIS_COMP_PREC_BIT ) >> BLIS_COMP_DT_SHIFT );
 }
 
 // NOTE: This function queries info2.
-BLIS_INLINE num_t bli_obj_scalar_dt( obj_t* obj )
+BLIS_INLINE num_t bli_obj_scalar_dt( const obj_t* obj )
 {
 	return ( num_t )
 	       ( ( obj->info2 & BLIS_SCALAR_DT_BITS ) >> BLIS_SCALAR_DT_SHIFT );
 }
 
 // NOTE: This function queries info2.
-BLIS_INLINE dom_t bli_obj_scalar_domain( obj_t* obj )
+BLIS_INLINE dom_t bli_obj_scalar_domain( const obj_t* obj )
 {
 	return ( dom_t )
 	       ( ( obj->info2 & BLIS_SCALAR_DOMAIN_BIT ) >> BLIS_SCALAR_DT_SHIFT );
 }
 
 // NOTE: This function queries info2.
-BLIS_INLINE prec_t bli_obj_scalar_prec( obj_t* obj )
+BLIS_INLINE prec_t bli_obj_scalar_prec( const obj_t* obj )
 {
 	return ( prec_t )
 	       ( ( obj->info2 & BLIS_SCALAR_PREC_BIT ) >> BLIS_SCALAR_DT_SHIFT );
 }
 
-BLIS_INLINE trans_t bli_obj_conjtrans_status( obj_t* obj )
+BLIS_INLINE trans_t bli_obj_conjtrans_status( const obj_t* obj )
 {
 	return ( trans_t )
 	       ( obj->info & BLIS_CONJTRANS_BITS );
 }
 
-BLIS_INLINE trans_t bli_obj_onlytrans_status( obj_t* obj )
+BLIS_INLINE trans_t bli_obj_onlytrans_status( const obj_t* obj )
 {
 	return ( trans_t )
 	       ( obj->info & BLIS_TRANS_BIT );
 }
 
-BLIS_INLINE bool bli_obj_has_trans( obj_t* obj )
+BLIS_INLINE bool bli_obj_has_trans( const obj_t* obj )
 {
 	return ( bool )
 	       ( bli_obj_onlytrans_status( obj ) == BLIS_BITVAL_TRANS );
 }
 
-BLIS_INLINE bool bli_obj_has_notrans( obj_t* obj )
+BLIS_INLINE bool bli_obj_has_notrans( const obj_t* obj )
 {
 	return ( bool )
 	       ( bli_obj_onlytrans_status( obj ) == BLIS_BITVAL_NO_TRANS );
 }
 
-BLIS_INLINE conj_t bli_obj_conj_status( obj_t* obj )
+BLIS_INLINE conj_t bli_obj_conj_status( const obj_t* obj )
 {
 	return ( conj_t )
 	       ( obj->info & BLIS_CONJ_BIT );
 }
 
-BLIS_INLINE bool bli_obj_has_conj( obj_t* obj )
+BLIS_INLINE bool bli_obj_has_conj( const obj_t* obj )
 {
 	return ( bool )
 	       ( bli_obj_conj_status( obj ) == BLIS_BITVAL_CONJ );
 }
 
-BLIS_INLINE bool bli_obj_has_noconj( obj_t* obj )
+BLIS_INLINE bool bli_obj_has_noconj( const obj_t* obj )
 {
 	return ( bool )
 	       ( bli_obj_conj_status( obj ) == BLIS_BITVAL_NO_CONJ );
 }
 
-BLIS_INLINE uplo_t bli_obj_uplo( obj_t* obj )
+BLIS_INLINE uplo_t bli_obj_uplo( const obj_t* obj )
 {
 	return ( uplo_t )
 	       ( obj->info & BLIS_UPLO_BITS );
 }
 
-BLIS_INLINE bool bli_obj_is_upper( obj_t* obj )
+BLIS_INLINE bool bli_obj_is_upper( const obj_t* obj )
 {
 	return ( bool )
 	       ( bli_obj_uplo( obj ) == BLIS_BITVAL_UPPER );
 }
 
-BLIS_INLINE bool bli_obj_is_lower( obj_t* obj )
+BLIS_INLINE bool bli_obj_is_lower( const obj_t* obj )
 {
 	return ( bool )
 	       ( bli_obj_uplo( obj ) == BLIS_BITVAL_LOWER );
 }
 
-BLIS_INLINE bool bli_obj_is_upper_or_lower( obj_t* obj )
+BLIS_INLINE bool bli_obj_is_upper_or_lower( const obj_t* obj )
 {
 	return ( bool )
 	       ( bli_obj_is_upper( obj ) ||
 	         bli_obj_is_lower( obj ) );
 }
 
-BLIS_INLINE bool bli_obj_is_dense( obj_t* obj )
+BLIS_INLINE bool bli_obj_is_dense( const obj_t* obj )
 {
 	return ( bool )
 	       ( bli_obj_uplo( obj ) == BLIS_BITVAL_DENSE );
 }
 
-BLIS_INLINE bool bli_obj_is_zeros( obj_t* obj )
+BLIS_INLINE bool bli_obj_is_zeros( const obj_t* obj )
 {
 	return ( bool )
 	       ( bli_obj_uplo( obj ) == BLIS_BITVAL_ZEROS );
 }
 
-BLIS_INLINE diag_t bli_obj_diag( obj_t* obj )
+BLIS_INLINE diag_t bli_obj_diag( const obj_t* obj )
 {
 	return ( diag_t )
 	       ( obj->info & BLIS_UNIT_DIAG_BIT );
 }
 
-BLIS_INLINE bool bli_obj_has_nonunit_diag( obj_t* obj )
+BLIS_INLINE bool bli_obj_has_nonunit_diag( const obj_t* obj )
 {
 	return ( bool )
 	       ( bli_obj_diag( obj ) == BLIS_BITVAL_NONUNIT_DIAG );
 }
 
-BLIS_INLINE bool bli_obj_has_unit_diag( obj_t* obj )
+BLIS_INLINE bool bli_obj_has_unit_diag( const obj_t* obj )
 {
 	return ( bool )
 	       ( bli_obj_diag( obj ) == BLIS_BITVAL_UNIT_DIAG );
 }
 
-BLIS_INLINE bool bli_obj_has_inverted_diag( obj_t* obj )
+BLIS_INLINE bool bli_obj_has_inverted_diag( const obj_t* obj )
 {
 	return ( bool )
 	       ( ( obj->info & BLIS_INVERT_DIAG_BIT ) == BLIS_BITVAL_INVERT_DIAG );
 }
 
-BLIS_INLINE bool bli_obj_is_pack_rev_if_upper( obj_t* obj )
+BLIS_INLINE bool bli_obj_is_pack_rev_if_upper( const obj_t* obj )
 {
 	return ( bool )
 	       ( ( obj->info & BLIS_PACK_REV_IF_UPPER_BIT ) == BLIS_BITVAL_PACK_REV_IF_UPPER );
 }
 
-BLIS_INLINE bool bli_obj_is_pack_rev_if_lower( obj_t* obj )
+BLIS_INLINE bool bli_obj_is_pack_rev_if_lower( const obj_t* obj )
 {
 	return ( bool )
 	       ( ( obj->info & BLIS_PACK_REV_IF_LOWER_BIT ) == BLIS_BITVAL_PACK_REV_IF_LOWER );
 }
 
-BLIS_INLINE pack_t bli_obj_pack_schema( obj_t* obj )
+BLIS_INLINE pack_t bli_obj_pack_schema( const obj_t* obj )
 {
 	return ( pack_t )
 	       ( obj->info & BLIS_PACK_SCHEMA_BITS );
 }
 
-BLIS_INLINE bool bli_obj_is_packed( obj_t* obj )
+BLIS_INLINE bool bli_obj_is_packed( const obj_t* obj )
 {
 	return ( bool )
 	       ( obj->info & BLIS_PACK_BIT );
 }
 
-BLIS_INLINE bool bli_obj_is_row_packed( obj_t* obj )
+BLIS_INLINE bool bli_obj_is_row_packed( const obj_t* obj )
 {
 	return ( bool )
 	       ( ( obj->info & BLIS_PACK_RC_BIT ) == ( BLIS_BITVAL_PACKED_UNSPEC ^
-                                                   BLIS_BITVAL_PACKED_ROWS    ) );
+	                                               BLIS_BITVAL_PACKED_ROWS    ) );
 }
 
-BLIS_INLINE bool bli_obj_is_col_packed( obj_t* obj )
+BLIS_INLINE bool bli_obj_is_col_packed( const obj_t* obj )
 {
 	return ( bool )
 	       ( ( obj->info & BLIS_PACK_RC_BIT ) == ( BLIS_BITVAL_PACKED_UNSPEC ^
-                                                   BLIS_BITVAL_PACKED_COLUMNS ) );
+	                                               BLIS_BITVAL_PACKED_COLUMNS ) );
 }
 
-BLIS_INLINE bool bli_obj_is_panel_packed( obj_t* obj )
+BLIS_INLINE bool bli_obj_is_panel_packed( const obj_t* obj )
 {
 	return ( bool )
 	       ( obj->info & BLIS_PACK_PANEL_BIT );
 }
 
-BLIS_INLINE packbuf_t bli_obj_pack_buffer_type( obj_t* obj )
+BLIS_INLINE packbuf_t bli_obj_pack_buffer_type( const obj_t* obj )
 {
 	return ( packbuf_t )
 	       ( obj->info & BLIS_PACK_BUFFER_BITS );
 }
 
-BLIS_INLINE struc_t bli_obj_struc( obj_t* obj )
+BLIS_INLINE struc_t bli_obj_struc( const obj_t* obj )
 {
 	return ( struc_t )
 	       ( obj->info & BLIS_STRUC_BITS );
 }
 
-BLIS_INLINE bool bli_obj_is_general( obj_t* obj )
+BLIS_INLINE bool bli_obj_is_general( const obj_t* obj )
 {
 	return ( bool )
 	       ( bli_obj_struc( obj ) == BLIS_BITVAL_GENERAL );
 }
 
-BLIS_INLINE bool bli_obj_is_hermitian( obj_t* obj )
+BLIS_INLINE bool bli_obj_is_hermitian( const obj_t* obj )
 {
 	return ( bool )
 	       ( bli_obj_struc( obj ) == BLIS_BITVAL_HERMITIAN );
 }
 
-BLIS_INLINE bool bli_obj_is_symmetric( obj_t* obj )
+BLIS_INLINE bool bli_obj_is_symmetric( const obj_t* obj )
 {
 	return ( bool )
 	       ( bli_obj_struc( obj ) == BLIS_BITVAL_SYMMETRIC );
 }
 
-BLIS_INLINE bool bli_obj_is_triangular( obj_t* obj )
+BLIS_INLINE bool bli_obj_is_triangular( const obj_t* obj )
 {
 	return ( bool )
 	       ( bli_obj_struc( obj ) == BLIS_BITVAL_TRIANGULAR );
@@ -599,49 +599,49 @@ BLIS_INLINE void bli_obj_toggle_uplo( obj_t* obj )
 
 // Root matrix query
 
-BLIS_INLINE obj_t* bli_obj_root( obj_t* obj )
+BLIS_INLINE obj_t* bli_obj_root( const obj_t* obj )
 {
 	return ( obj_t* )( obj->root );
 }
 
-BLIS_INLINE bool bli_obj_root_is_general( obj_t* obj )
+BLIS_INLINE bool bli_obj_root_is_general( const obj_t* obj )
 {
 	return ( bool )
 	       ( bli_obj_is_general( bli_obj_root( obj ) ) );
 }
 
-BLIS_INLINE bool bli_obj_root_is_hermitian( obj_t* obj )
+BLIS_INLINE bool bli_obj_root_is_hermitian( const obj_t* obj )
 {
 	return ( bool )
 	       ( bli_obj_is_hermitian( bli_obj_root( obj ) ) );
 }
 
-BLIS_INLINE bool bli_obj_root_is_symmetric( obj_t* obj )
+BLIS_INLINE bool bli_obj_root_is_symmetric( const obj_t* obj )
 {
 	return ( bool )
 	       ( bli_obj_is_symmetric( bli_obj_root( obj ) ) );
 }
 
-BLIS_INLINE bool bli_obj_root_is_triangular( obj_t* obj )
+BLIS_INLINE bool bli_obj_root_is_triangular( const obj_t* obj )
 {
 	return ( bool )
 	       ( bli_obj_is_triangular( bli_obj_root( obj ) ) );
 }
 
-BLIS_INLINE bool bli_obj_root_is_herm_or_symm( obj_t* obj )
+BLIS_INLINE bool bli_obj_root_is_herm_or_symm( const obj_t* obj )
 {
 	return ( bool )
 	       ( bli_obj_is_hermitian( bli_obj_root( obj ) ) ||
 	         bli_obj_is_symmetric( bli_obj_root( obj ) ) );
 }
 
-BLIS_INLINE bool bli_obj_root_is_upper( obj_t* obj )
+BLIS_INLINE bool bli_obj_root_is_upper( const obj_t* obj )
 {
 	return ( bool )
 	       ( bli_obj_is_upper( bli_obj_root( obj ) ) );
 }
 
-BLIS_INLINE bool bli_obj_root_is_lower( obj_t* obj )
+BLIS_INLINE bool bli_obj_root_is_lower( const obj_t* obj )
 {
 	return ( bool )
 	       ( bli_obj_is_lower( bli_obj_root( obj ) ) );
@@ -656,13 +656,13 @@ BLIS_INLINE void bli_obj_set_as_root( obj_t* obj )
 
 // Diagonal offset query
 
-BLIS_INLINE doff_t bli_obj_diag_offset( obj_t* obj )
+BLIS_INLINE doff_t bli_obj_diag_offset( const obj_t* obj )
 {
 	return ( doff_t )
 	       ( obj->diag_off );
 }
 
-BLIS_INLINE doff_t bli_obj_diag_offset_after_trans( obj_t* obj )
+BLIS_INLINE doff_t bli_obj_diag_offset_after_trans( const obj_t* obj )
 {
 	return ( doff_t )
 	       ( bli_obj_has_trans( obj ) ? -bli_obj_diag_offset( obj )
@@ -688,46 +688,46 @@ BLIS_INLINE void bli_obj_inc_diag_offset( doff_t offset, obj_t* obj )
 
 // Dimension query
 
-BLIS_INLINE dim_t bli_obj_length( obj_t* obj )
+BLIS_INLINE dim_t bli_obj_length( const obj_t* obj )
 {
 	return ( obj->dim[ BLIS_M ] );
 }
 
-BLIS_INLINE dim_t bli_obj_width( obj_t* obj )
+BLIS_INLINE dim_t bli_obj_width( const obj_t* obj )
 {
 	return ( obj->dim[ BLIS_N ] );
 }
 
-BLIS_INLINE dim_t bli_obj_dim( mdim_t mdim, obj_t* obj )
+BLIS_INLINE dim_t bli_obj_dim( mdim_t mdim, const obj_t* obj )
 {
 	return ( obj->dim[ mdim ] );
 }
 
-BLIS_INLINE dim_t bli_obj_min_dim( obj_t* obj )
+BLIS_INLINE dim_t bli_obj_min_dim( const obj_t* obj )
 {
 	return bli_min( bli_obj_length( obj ),
 	                bli_obj_width( obj ) );
 }
 
-BLIS_INLINE dim_t bli_obj_max_dim( obj_t* obj )
+BLIS_INLINE dim_t bli_obj_max_dim( const obj_t* obj )
 {
 	return bli_max( bli_obj_length( obj ),
 	                bli_obj_width( obj ) );
 }
 
-BLIS_INLINE dim_t bli_obj_length_after_trans( obj_t* obj )
+BLIS_INLINE dim_t bli_obj_length_after_trans( const obj_t* obj )
 {
 	return ( bli_obj_has_trans( obj ) ? bli_obj_width( obj )
 	                                  : bli_obj_length( obj ) );
 }
 
-BLIS_INLINE dim_t bli_obj_width_after_trans( obj_t* obj )
+BLIS_INLINE dim_t bli_obj_width_after_trans( const obj_t* obj )
 {
 	return ( bli_obj_has_trans( obj ) ? bli_obj_length( obj )
 	                                  : bli_obj_width( obj ) );
 }
 
-BLIS_INLINE bool bli_obj_is_1x1( obj_t* x )
+BLIS_INLINE bool bli_obj_is_1x1( const obj_t* x )
 {
 	return ( bool )
 	       ( bli_obj_length( x ) == 1 &&
@@ -736,34 +736,34 @@ BLIS_INLINE bool bli_obj_is_1x1( obj_t* x )
 
 // Stride/increment query
 
-BLIS_INLINE inc_t bli_obj_row_stride( obj_t* obj )
+BLIS_INLINE inc_t bli_obj_row_stride( const obj_t* obj )
 {
 	return ( obj->rs );
 }
 
-BLIS_INLINE inc_t bli_obj_col_stride( obj_t* obj )
+BLIS_INLINE inc_t bli_obj_col_stride( const obj_t* obj )
 {
 	return ( obj->cs );
 }
 
-BLIS_INLINE inc_t bli_obj_imag_stride( obj_t* obj )
+BLIS_INLINE inc_t bli_obj_imag_stride( const obj_t* obj )
 {
 	return ( obj->is );
 }
 
-BLIS_INLINE inc_t bli_obj_row_stride_mag( obj_t* obj )
+BLIS_INLINE inc_t bli_obj_row_stride_mag( const obj_t* obj )
 {
 	return ( inc_t )
 	       ( bli_abs( obj->rs ) );
 }
 
-BLIS_INLINE inc_t bli_obj_col_stride_mag( obj_t* obj )
+BLIS_INLINE inc_t bli_obj_col_stride_mag( const obj_t* obj )
 {
 	return ( inc_t )
 	       ( bli_abs( obj->cs ) );
 }
 
-BLIS_INLINE inc_t bli_obj_imag_stride_mag( obj_t* obj )
+BLIS_INLINE inc_t bli_obj_imag_stride_mag( const obj_t* obj )
 {
 	return ( inc_t )
 	       ( bli_abs( obj->is ) );
@@ -773,7 +773,7 @@ BLIS_INLINE inc_t bli_obj_imag_stride_mag( obj_t* obj )
 // of the smallest submatrices of an object that could still encompass
 // the stored data above (if obj is upper) or below (if obj is lower)
 // the diagonal.
-BLIS_INLINE dim_t bli_obj_length_stored( obj_t* obj )
+BLIS_INLINE dim_t bli_obj_length_stored( const obj_t* obj )
 {
 	return ( dim_t )
 	       ( bli_obj_is_upper( obj )
@@ -784,7 +784,7 @@ BLIS_INLINE dim_t bli_obj_length_stored( obj_t* obj )
 	       );
 }
 
-BLIS_INLINE dim_t bli_obj_width_stored( obj_t* obj )
+BLIS_INLINE dim_t bli_obj_width_stored( const obj_t* obj )
 {
 	return ( dim_t )
 	       ( bli_obj_is_lower( obj )
@@ -795,25 +795,25 @@ BLIS_INLINE dim_t bli_obj_width_stored( obj_t* obj )
 	       );
 }
 
-BLIS_INLINE dim_t bli_obj_length_stored_after_trans( obj_t* obj )
+BLIS_INLINE dim_t bli_obj_length_stored_after_trans( const obj_t* obj )
 {
 	return ( bli_obj_has_trans( obj ) ? bli_obj_width_stored( obj )
 	                                  : bli_obj_length_stored( obj ) );
 }
 
-BLIS_INLINE dim_t bli_obj_width_stored_after_trans( obj_t* obj )
+BLIS_INLINE dim_t bli_obj_width_stored_after_trans( const obj_t* obj )
 {
 	return ( bli_obj_has_trans( obj ) ? bli_obj_length_stored( obj )
 	                                  : bli_obj_width_stored( obj ) );
 }
 
-BLIS_INLINE dim_t bli_obj_vector_dim( obj_t* x )
+BLIS_INLINE dim_t bli_obj_vector_dim( const obj_t* x )
 {
 	return ( bli_obj_length( x ) == 1 ? bli_obj_width( x )
 	                                  : bli_obj_length( x ) );
 }
 
-BLIS_INLINE inc_t bli_obj_vector_inc( obj_t* x )
+BLIS_INLINE inc_t bli_obj_vector_inc( const obj_t* x )
 {
 	return ( bli_obj_is_1x1( x ) ? 1 :
 	         ( bli_obj_length( x ) == 1 ? bli_obj_col_stride( x )
@@ -821,26 +821,26 @@ BLIS_INLINE inc_t bli_obj_vector_inc( obj_t* x )
 	       );
 }
 
-BLIS_INLINE bool bli_obj_is_vector( obj_t* x )
+BLIS_INLINE bool bli_obj_is_vector( const obj_t* x )
 {
 	return ( bool )
 	       ( bli_obj_length( x ) == 1 ||
 	         bli_obj_width(  x ) == 1 );
 }
 
-BLIS_INLINE bool bli_obj_is_row_vector( obj_t* x )
+BLIS_INLINE bool bli_obj_is_row_vector( const obj_t* x )
 {
 	return ( bool )
 	       ( bli_obj_length( x ) == 1 );
 }
 
-BLIS_INLINE bool bli_obj_is_col_vector( obj_t* x )
+BLIS_INLINE bool bli_obj_is_col_vector( const obj_t* x )
 {
 	return ( bool )
 	       ( bli_obj_width( x ) == 1 );
 }
 
-BLIS_INLINE bool bli_obj_has_zero_dim( obj_t* x )
+BLIS_INLINE bool bli_obj_has_zero_dim( const obj_t* x )
 {
 	return ( bool )
 	       ( bli_obj_length( x ) == 0 ||
@@ -894,32 +894,32 @@ BLIS_INLINE void bli_obj_set_dims_with_trans( trans_t trans, dim_t m, dim_t n, o
 // "obj" macros are used on packed matrices.
 //
 
-BLIS_INLINE bool bli_obj_is_row_stored( obj_t* obj )
+BLIS_INLINE bool bli_obj_is_row_stored( const obj_t* obj )
 {
 	return ( bool )
 	       ( bli_obj_col_stride_mag( obj ) == 1 );
 }
 
-BLIS_INLINE bool bli_obj_is_col_stored( obj_t* obj )
+BLIS_INLINE bool bli_obj_is_col_stored( const obj_t* obj )
 {
 	return ( bool )
 	       ( bli_obj_row_stride_mag( obj ) == 1 );
 }
 
-BLIS_INLINE bool bli_obj_is_gen_stored( obj_t* obj )
+BLIS_INLINE bool bli_obj_is_gen_stored( const obj_t* obj )
 {
 	return ( bool )
 	       ( bli_obj_row_stride_mag( obj ) != 1 &&
 	         bli_obj_col_stride_mag( obj ) != 1 );
 }
 
-BLIS_INLINE bool bli_obj_is_row_tilted( obj_t* obj )
+BLIS_INLINE bool bli_obj_is_row_tilted( const obj_t* obj )
 {
 	return ( bool )
 	       ( bli_obj_col_stride_mag( obj ) < bli_obj_row_stride_mag( obj ) );
 }
 
-BLIS_INLINE bool bli_obj_is_col_tilted( obj_t* obj )
+BLIS_INLINE bool bli_obj_is_col_tilted( const obj_t* obj )
 {
 	return ( bool )
 	       ( bli_obj_row_stride_mag( obj ) < bli_obj_col_stride_mag( obj ) );
@@ -950,17 +950,17 @@ BLIS_INLINE void bli_obj_set_imag_stride( inc_t is, obj_t* obj )
 
 // Offset query
 
-BLIS_INLINE dim_t bli_obj_row_off( obj_t* obj )
+BLIS_INLINE dim_t bli_obj_row_off( const obj_t* obj )
 {
 	return ( obj->off[ BLIS_M ] );
 }
 
-BLIS_INLINE dim_t bli_obj_col_off( obj_t* obj )
+BLIS_INLINE dim_t bli_obj_col_off( const obj_t* obj )
 {
 	return ( obj->off[ BLIS_N ] );
 }
 
-BLIS_INLINE dim_t bli_obj_off( mdim_t mdim, obj_t* obj )
+BLIS_INLINE dim_t bli_obj_off( mdim_t mdim, const obj_t* obj )
 {
 	return ( obj->off[ mdim ] );
 }
@@ -991,33 +991,33 @@ BLIS_INLINE void bli_obj_inc_offs( dim_t offm, dim_t offn, obj_t* obj )
 
 // Diagonal offset predicates
 
-BLIS_INLINE bool bli_obj_is_strictly_above_diag( obj_t* obj )
+BLIS_INLINE bool bli_obj_is_strictly_above_diag( const obj_t* obj )
 {
 	return ( bool )
 	       ( ( doff_t )bli_obj_length( obj ) <= -bli_obj_diag_offset( obj ) );
 }
 
-BLIS_INLINE bool bli_obj_is_strictly_below_diag( obj_t* obj )
+BLIS_INLINE bool bli_obj_is_strictly_below_diag( const obj_t* obj )
 {
 	return ( bool )
 	       ( ( doff_t )bli_obj_width( obj ) <= bli_obj_diag_offset( obj ) );
 }
 
-BLIS_INLINE bool bli_obj_is_outside_diag( obj_t* obj )
+BLIS_INLINE bool bli_obj_is_outside_diag( const obj_t* obj )
 {
 	return ( bool )
 	       ( bli_obj_is_strictly_above_diag( obj ) ||
 	         bli_obj_is_strictly_below_diag( obj ) );
 }
 
-BLIS_INLINE bool bli_obj_intersects_diag( obj_t* obj )
+BLIS_INLINE bool bli_obj_intersects_diag( const obj_t* obj )
 {
 	return ( bool )
 	       ( !bli_obj_is_strictly_above_diag( obj ) &&
 	         !bli_obj_is_strictly_below_diag( obj ) );
 }
 
-BLIS_INLINE bool bli_obj_is_unstored_subpart( obj_t* obj )
+BLIS_INLINE bool bli_obj_is_unstored_subpart( const obj_t* obj )
 {
 	return ( bool )
 	       ( ( bli_obj_root_is_lower( obj ) && bli_obj_is_strictly_above_diag( obj ) ) ||
@@ -1026,7 +1026,7 @@ BLIS_INLINE bool bli_obj_is_unstored_subpart( obj_t* obj )
 
 // Buffer address query
 
-BLIS_INLINE void* bli_obj_buffer( obj_t* obj )
+BLIS_INLINE void* bli_obj_buffer( const obj_t* obj )
 {
 	return ( void* )
 	       ( obj->buffer );
@@ -1041,7 +1041,7 @@ BLIS_INLINE void bli_obj_set_buffer( void* p, obj_t* obj )
 
 // Bufferless scalar field query
 
-BLIS_INLINE void* bli_obj_internal_scalar_buffer( obj_t* obj )
+BLIS_INLINE void* bli_obj_internal_scalar_buffer( const obj_t* obj )
 {
 	return ( void* )
 	       ( &( obj->scalar ) );
@@ -1049,14 +1049,14 @@ BLIS_INLINE void* bli_obj_internal_scalar_buffer( obj_t* obj )
 
 // Bufferless scalar field modification
 
-BLIS_INLINE void bli_obj_copy_internal_scalar( obj_t* a, obj_t* b )
+BLIS_INLINE void bli_obj_copy_internal_scalar( const obj_t* a, obj_t* b )
 {
 	b->scalar = a->scalar;
 }
 
 // Element size query
 
-BLIS_INLINE siz_t bli_obj_elem_size( obj_t* obj )
+BLIS_INLINE siz_t bli_obj_elem_size( const obj_t* obj )
 {
 	return ( siz_t )
 	       ( obj->elem_size );
@@ -1071,12 +1071,12 @@ BLIS_INLINE void bli_obj_set_elem_size( siz_t size, obj_t* obj )
 
 // Packed matrix info query
 
-BLIS_INLINE dim_t bli_obj_padded_length( obj_t* obj )
+BLIS_INLINE dim_t bli_obj_padded_length( const obj_t* obj )
 {
 	return ( obj->m_padded );
 }
 
-BLIS_INLINE dim_t bli_obj_padded_width( obj_t* obj )
+BLIS_INLINE dim_t bli_obj_padded_width( const obj_t* obj )
 {
 	return ( obj->n_padded );
 }
@@ -1101,22 +1101,22 @@ BLIS_INLINE void bli_obj_set_padded_dims( dim_t m, dim_t n, obj_t* obj )
 
 // Packed panel info query
 
-BLIS_INLINE dim_t bli_obj_panel_length( obj_t* obj )
+BLIS_INLINE dim_t bli_obj_panel_length( const obj_t* obj )
 {
 	return ( obj->m_panel );
 }
 
-BLIS_INLINE dim_t bli_obj_panel_width( obj_t* obj )
+BLIS_INLINE dim_t bli_obj_panel_width( const obj_t* obj )
 {
 	return ( obj->n_panel );
 }
 
-BLIS_INLINE inc_t bli_obj_panel_dim( obj_t* obj )
+BLIS_INLINE inc_t bli_obj_panel_dim( const obj_t* obj )
 {
 	return ( obj->pd );
 }
 
-BLIS_INLINE inc_t bli_obj_panel_stride( obj_t* obj )
+BLIS_INLINE inc_t bli_obj_panel_stride( const obj_t* obj )
 {
 	return ( obj->ps );
 }
@@ -1151,7 +1151,7 @@ BLIS_INLINE void bli_obj_set_panel_stride( inc_t ps, obj_t* obj )
 
 // stor3_t-related
 
-BLIS_INLINE stor3_t bli_obj_stor3_from_strides( obj_t* c, obj_t* a, obj_t* b )
+BLIS_INLINE stor3_t bli_obj_stor3_from_strides( const obj_t* c, const obj_t* a, const obj_t* b )
 {
 	const inc_t rs_c = bli_obj_row_stride( c );
 	const inc_t cs_c = bli_obj_col_stride( c );
@@ -1191,22 +1191,22 @@ BLIS_INLINE stor3_t bli_obj_stor3_from_strides( obj_t* c, obj_t* a, obj_t* b )
 
 // Function pointer query
 
-BLIS_INLINE obj_pack_fn_t bli_obj_pack_fn( obj_t* obj )
+BLIS_INLINE obj_pack_fn_t bli_obj_pack_fn( const obj_t* obj )
 {
 	return obj->pack_fn;
 }
 
-BLIS_INLINE void* bli_obj_pack_params( obj_t* obj )
+BLIS_INLINE void* bli_obj_pack_params( const obj_t* obj )
 {
 	return obj->pack_params;
 }
 
-BLIS_INLINE obj_ker_fn_t bli_obj_ker_fn( obj_t* obj )
+BLIS_INLINE obj_ker_fn_t bli_obj_ker_fn( const obj_t* obj )
 {
 	return obj->ker_fn;
 }
 
-BLIS_INLINE void* bli_obj_ker_params( obj_t* obj )
+BLIS_INLINE void* bli_obj_ker_params( const obj_t* obj )
 {
 	return obj->ker_params;
 }
@@ -1261,7 +1261,7 @@ BLIS_INLINE void bli_obj_init_finish( num_t dt, dim_t m, dim_t n, void* p, inc_t
 	bli_obj_set_buffer( p, obj );
 
 	bli_obj_set_scalar_dt( dt, obj );
-	void* restrict s = bli_obj_internal_scalar_buffer( obj );
+	void* s = bli_obj_internal_scalar_buffer( obj );
 
 	if      ( bli_dt_prec_is_single( dt ) ) { (( scomplex* )s)->real = 1.0F;
 	                                          (( scomplex* )s)->imag = 0.0F; }
@@ -1315,7 +1315,7 @@ BLIS_INLINE void bli_obj_set_defaults( obj_t* obj )
 
 // Acquire buffer at object's submatrix offset (offset-aware buffer query).
 
-BLIS_INLINE void* bli_obj_buffer_at_off( obj_t* obj )
+BLIS_INLINE void* bli_obj_buffer_at_off( const obj_t* obj )
 {
 	return ( void* )
 	       (
@@ -1330,7 +1330,7 @@ BLIS_INLINE void* bli_obj_buffer_at_off( obj_t* obj )
 
 // Acquire buffer from BLIS_CONSTANT object.
 
-BLIS_INLINE void* bli_obj_buffer_for_const( num_t dt, obj_t* obj )
+BLIS_INLINE const void* bli_obj_buffer_for_const( num_t dt, const obj_t* obj )
 {
 	void* p;
 
@@ -1345,7 +1345,7 @@ BLIS_INLINE void* bli_obj_buffer_for_const( num_t dt, obj_t* obj )
 
 // Acquire buffer from scalar (1x1) object, including BLIS_CONSTANT objects.
 
-BLIS_INLINE void* bli_obj_buffer_for_1x1( num_t dt, obj_t* obj )
+BLIS_INLINE void* bli_obj_buffer_for_1x1( num_t dt, const obj_t* obj )
 {
 	return ( void* )
 	       ( bli_obj_is_const( obj ) ? bli_obj_buffer_for_const( dt, obj )
@@ -1360,21 +1360,21 @@ BLIS_INLINE void* bli_obj_buffer_for_1x1( num_t dt, obj_t* obj )
 
 BLIS_INLINE void bli_obj_reset_origin( obj_t* obj )
 {
-    bli_obj_set_buffer( bli_obj_buffer_at_off( obj ), obj );
-    bli_obj_set_offs( 0, 0, obj );
+	bli_obj_set_buffer( bli_obj_buffer_at_off( obj ), obj );
+	bli_obj_set_offs( 0, 0, obj );
 	bli_obj_set_as_root( obj );
 }
 
 // Make a full alias (shallow copy).
 
-BLIS_INLINE void bli_obj_alias_to( obj_t* a, obj_t* b )
+BLIS_INLINE void bli_obj_alias_to( const obj_t* a, obj_t* b )
 {
 	bli_obj_init_full_shallow_copy_of( a, b );
 }
 
 // Check if two objects are aliases of one another.
 
-BLIS_INLINE bool bli_obj_is_alias_of( obj_t* a, obj_t* b )
+BLIS_INLINE bool bli_obj_is_alias_of( const obj_t* a, const obj_t* b )
 {
 	return ( bool )
 	       ( bli_obj_buffer( a ) == bli_obj_buffer( b ) );
@@ -1384,7 +1384,7 @@ BLIS_INLINE bool bli_obj_is_alias_of( obj_t* a, obj_t* b )
 // Create an alias with a trans value applied.
 // (Note: trans may include a conj component.)
 
-BLIS_INLINE void bli_obj_alias_with_trans( trans_t trans, obj_t* a, obj_t* b )
+BLIS_INLINE void bli_obj_alias_with_trans( trans_t trans, const obj_t* a, obj_t* b )
 {
 	bli_obj_alias_to( a, b );
 	bli_obj_apply_trans( trans, b );
@@ -1392,7 +1392,7 @@ BLIS_INLINE void bli_obj_alias_with_trans( trans_t trans, obj_t* a, obj_t* b )
 
 // Create an alias with a conj value applied.
 
-BLIS_INLINE void bli_obj_alias_with_conj( conj_t conja, obj_t* a, obj_t* b )
+BLIS_INLINE void bli_obj_alias_with_conj( conj_t conja, const obj_t* a, obj_t* b )
 {
 	bli_obj_alias_to( a, b );
 	bli_obj_apply_conj( conja, b );
@@ -1400,7 +1400,7 @@ BLIS_INLINE void bli_obj_alias_with_conj( conj_t conja, obj_t* a, obj_t* b )
 
 // Alias only the real part.
 
-BLIS_INLINE void bli_obj_real_part( obj_t* c, obj_t* r )
+BLIS_INLINE void bli_obj_real_part( const obj_t* c, obj_t* r )
 {
 	bli_obj_alias_to( c, r );
 
@@ -1433,7 +1433,7 @@ BLIS_INLINE void bli_obj_real_part( obj_t* c, obj_t* r )
 
 // Alias only the imaginary part.
 
-BLIS_INLINE void bli_obj_imag_part( obj_t* c, obj_t* i )
+BLIS_INLINE void bli_obj_imag_part( const obj_t* c, obj_t* i )
 {
 	if ( bli_obj_is_complex( c ) )
 	{
@@ -1472,7 +1472,7 @@ BLIS_INLINE void bli_obj_imag_part( obj_t* c, obj_t* i )
 // chosen buffer (possibly using an auxiliary datatype if the object is
 // BLIS_CONSTANT).
 
-BLIS_INLINE void bli_obj_scalar_set_dt_buffer( obj_t* obj, num_t dt_aux, num_t* dt, void** buf )
+BLIS_INLINE void bli_obj_scalar_set_dt_buffer( const obj_t* obj, num_t dt_aux, num_t* dt, void** buf )
 {
 	if ( bli_obj_is_const( obj ) )
 	{

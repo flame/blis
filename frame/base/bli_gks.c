@@ -243,7 +243,7 @@ void bli_gks_finalize( void )
 		// Iterate over the architectures in the gks array.
 		for ( id = 0; id < BLIS_NUM_ARCHS; ++id )
 		{
-			cntx_t** restrict gks_id = gks[ id ];
+			cntx_t** gks_id = gks[ id ];
 
 			// Only consider context arrays for architectures that were allocated
 			// in the first place.
@@ -253,7 +253,7 @@ void bli_gks_finalize( void )
 				// referenced by cntx_pp.
 				for ( ind = 0; ind < BLIS_NUM_IND_METHODS; ++ind )
 				{
-					cntx_t* restrict gks_id_ind = gks_id[ ind ];
+					cntx_t* gks_id_ind = gks_id[ ind ];
 
 					// If the current context was allocated, free it.
 					if ( gks_id_ind != NULL )
@@ -299,7 +299,7 @@ void bli_gks_init_index( void )
 
 // -----------------------------------------------------------------------------
 
-cntx_t* bli_gks_lookup_nat_cntx
+const cntx_t* bli_gks_lookup_nat_cntx
      (
        arch_t id
      )
@@ -312,7 +312,7 @@ cntx_t* bli_gks_lookup_nat_cntx
 
 // -----------------------------------------------------------------------------
 
-cntx_t* bli_gks_lookup_ind_cntx
+const cntx_t* bli_gks_lookup_ind_cntx
      (
        arch_t id,
        ind_t  ind
@@ -333,8 +333,8 @@ cntx_t* bli_gks_lookup_ind_cntx
 
 	// Index into the array of context pointers for the given architecture id,
 	// and then index into the subarray for the given induced method.
-	cntx_t** restrict gks_id     = gks[ id ];
-	cntx_t*  restrict gks_id_ind = gks_id[ ind ];
+	cntx_t** gks_id     = gks[ id ];
+	cntx_t*  gks_id_ind = gks_id[ ind ];
 
 	// Return the context pointer at gks_id_ind.
 	return gks_id_ind;
@@ -342,7 +342,7 @@ cntx_t* bli_gks_lookup_ind_cntx
 
 // -----------------------------------------------------------------------------
 
-cntx_t** bli_gks_lookup_id
+const cntx_t* const * bli_gks_lookup_id
      (
        arch_t id
      )
@@ -353,10 +353,10 @@ cntx_t** bli_gks_lookup_id
 	// initialized.
 
 	// Index into the array of context pointers for the given architecture id.
-	cntx_t** restrict gks_id = gks[ id ];
+	cntx_t** gks_id = gks[ id ];
 
 	// Return the context pointer at gks_id_ind.
-	return gks_id;
+	return ( const cntx_t* const * )gks_id;
 }
 
 // -----------------------------------------------------------------------------
@@ -422,7 +422,7 @@ void bli_gks_register_cntx
 	gks[ id ] = bli_calloc_intl( sizeof( cntx_t* ) * BLIS_NUM_IND_METHODS, &r_val );
 
 	// Alias the allocated array for readability.
-	cntx_t** restrict gks_id = gks[ id ];
+	cntx_t** gks_id = gks[ id ];
 
 	#ifdef BLIS_ENABLE_MEM_TRACING
 	printf( "bli_gks_register_cntx(): " );
@@ -434,7 +434,7 @@ void bli_gks_register_cntx
 	gks_id[ BLIS_NAT ] = bli_calloc_intl( sizeof( cntx_t ), &r_val );
 
 	// Alias the allocated context address for readability.
-	cntx_t* restrict gks_id_nat = gks_id[ BLIS_NAT ];
+	cntx_t* gks_id_nat = gks_id[ BLIS_NAT ];
 
 	// Call the context initialization function on the element of the newly
 	// allocated array corresponding to native execution.
@@ -457,12 +457,12 @@ void bli_gks_register_cntx
 	// kernel is called.
 	err_t e_val;
 
-	blksz_t* restrict mc = bli_cntx_get_blksz( BLIS_MC, gks_id_nat );
-	blksz_t* restrict nc = bli_cntx_get_blksz( BLIS_NC, gks_id_nat );
-	blksz_t* restrict kc = bli_cntx_get_blksz( BLIS_KC, gks_id_nat );
-	blksz_t* restrict mr = bli_cntx_get_blksz( BLIS_MR, gks_id_nat );
-	blksz_t* restrict nr = bli_cntx_get_blksz( BLIS_NR, gks_id_nat );
-	blksz_t* restrict kr = bli_cntx_get_blksz( BLIS_KR, gks_id_nat );
+	const blksz_t* mc = bli_cntx_get_blksz( BLIS_MC, gks_id_nat );
+	const blksz_t* nc = bli_cntx_get_blksz( BLIS_NC, gks_id_nat );
+	const blksz_t* kc = bli_cntx_get_blksz( BLIS_KC, gks_id_nat );
+	const blksz_t* mr = bli_cntx_get_blksz( BLIS_MR, gks_id_nat );
+	const blksz_t* nr = bli_cntx_get_blksz( BLIS_NR, gks_id_nat );
+	const blksz_t* kr = bli_cntx_get_blksz( BLIS_KR, gks_id_nat );
 
 	e_val = bli_check_valid_mc_mod_mult( mc, mr ); bli_check_error_code( e_val );
 	e_val = bli_check_valid_nc_mod_mult( nc, nr ); bli_check_error_code( e_val );
@@ -480,12 +480,12 @@ void bli_gks_register_cntx
 
 // -----------------------------------------------------------------------------
 
-cntx_t* bli_gks_query_cntx( void )
+const cntx_t* bli_gks_query_cntx( void )
 {
 	return bli_gks_query_nat_cntx();
 }
 
-cntx_t* bli_gks_query_nat_cntx( void )
+const cntx_t* bli_gks_query_nat_cntx( void )
 {
 	bli_init_once();
 
@@ -497,14 +497,14 @@ cntx_t* bli_gks_query_nat_cntx( void )
 	arch_t id = bli_arch_query_id();
 
 	// Use the architecture id to look up a pointer to its context.
-	cntx_t* cntx = bli_gks_lookup_nat_cntx( id );
+	const cntx_t* cntx = bli_gks_lookup_nat_cntx( id );
 
 	return cntx;
 }
 
 // -----------------------------------------------------------------------------
 
-cntx_t* bli_gks_query_cntx_noinit( void )
+const cntx_t* bli_gks_query_cntx_noinit( void )
 {
 	// This function is identical to bli_gks_query_cntx(), except that it
 	// does not call bli_init_once().
@@ -513,7 +513,7 @@ cntx_t* bli_gks_query_cntx_noinit( void )
 	arch_t id = bli_arch_query_id();
 
 	// Use the architecture id to look up a pointer to its context.
-	cntx_t* cntx = bli_gks_lookup_nat_cntx( id );
+	const cntx_t* cntx = bli_gks_lookup_nat_cntx( id );
 
 	return cntx;
 }
@@ -524,7 +524,7 @@ cntx_t* bli_gks_query_cntx_noinit( void )
 // with a new entry corresponding to a context for an ind_t value.
 static bli_pthread_mutex_t gks_mutex = BLIS_PTHREAD_MUTEX_INITIALIZER;
 
-cntx_t* bli_gks_query_ind_cntx
+const cntx_t* bli_gks_query_ind_cntx
      (
        ind_t ind,
        num_t dt
@@ -564,8 +564,8 @@ cntx_t* bli_gks_query_ind_cntx
 
 	// Query the gks for the array of context pointers corresponding to the
 	// given architecture id.
-	cntx_t** restrict gks_id     = gks[ id ];
-	cntx_t*  restrict gks_id_nat = gks_id[ BLIS_NAT ];
+	cntx_t** gks_id     = gks[ id ];
+	cntx_t*  gks_id_nat = gks_id[ BLIS_NAT ];
 
 	// If for some reason the native context was requested, we can return
 	// its address early.
@@ -651,9 +651,9 @@ void bli_gks_init_ref_cntx
 
 bool bli_gks_cntx_l3_nat_ukr_is_ref
      (
-       num_t   dt,
-       ukr_t   ukr_id,
-       cntx_t* cntx
+             num_t   dt,
+             ukr_t   ukr_id,
+       const cntx_t* cntx
      )
 {
 	cntx_t ref_cntx;
@@ -675,7 +675,7 @@ bool bli_gks_cntx_l3_nat_ukr_is_ref
 // -- level-3 micro-kernel implementation strings ------------------------------
 //
 
-static char* bli_gks_l3_ukr_impl_str[BLIS_NUM_UKR_IMPL_TYPES] =
+static const char* bli_gks_l3_ukr_impl_str[BLIS_NUM_UKR_IMPL_TYPES] =
 {
 	"refrnce",
 	"virtual",
@@ -685,15 +685,15 @@ static char* bli_gks_l3_ukr_impl_str[BLIS_NUM_UKR_IMPL_TYPES] =
 
 // -----------------------------------------------------------------------------
 
-char* bli_gks_l3_ukr_impl_string( ukr_t ukr, ind_t method, num_t dt )
+const char* bli_gks_l3_ukr_impl_string( ukr_t ukr, ind_t method, num_t dt )
 {
 	kimpl_t ki;
 
 	// Query the context for the current induced method and datatype, and
 	// then query the ukernel function pointer for the given datatype from
 	// that context.
-	cntx_t* cntx  = bli_gks_query_ind_cntx( method, dt );
-	void_fp fp    = bli_cntx_get_ukr_dt( dt, ukr, cntx );
+	const cntx_t* cntx = bli_gks_query_ind_cntx( method, dt );
+	void_fp fp         = bli_cntx_get_ukr_dt( dt, ukr, cntx );
 
 	// Check whether the ukernel function pointer is NULL for the given
 	// datatype. If it is NULL, return the string for not applicable.
@@ -759,7 +759,7 @@ kimpl_t bli_gks_l3_ukr_impl_type( ukr_t ukr, ind_t method, num_t dt )
 		}
 
 		// Query the native context from the gks.
-		cntx_t* nat_cntx = bli_gks_lookup_nat_cntx( id );
+		const cntx_t* nat_cntx = bli_gks_lookup_nat_cntx( id );
 
 		if ( bli_gks_cntx_l3_nat_ukr_is_ref( dt, ukr, nat_cntx ) )
 			return BLIS_REFERENCE_UKERNEL;

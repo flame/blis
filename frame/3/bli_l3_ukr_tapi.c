@@ -47,8 +47,8 @@ void PASTEMAC(ch,opname) \
        ctype*     restrict b, \
        ctype*     restrict beta, \
        ctype*     restrict c, inc_t rs_c, inc_t cs_c, \
-       auxinfo_t* restrict data, \
-       cntx_t*    restrict cntx  \
+       auxinfo_t*          data, \
+       cntx_t*             cntx  \
      ) \
 { \
 	bli_init_once(); \
@@ -92,8 +92,8 @@ void PASTEMAC(ch,opname) \
        ctype*     restrict bx1, \
        ctype*     restrict b11, \
        ctype*     restrict c11, inc_t rs_c, inc_t cs_c, \
-       auxinfo_t* restrict data, \
-       cntx_t*    restrict cntx  \
+       auxinfo_t*          data, \
+       cntx_t*             cntx  \
      ) \
 { \
 	bli_init_once(); \
@@ -133,8 +133,8 @@ void PASTEMAC(ch,opname) \
        ctype*     restrict a, \
        ctype*     restrict b, \
        ctype*     restrict c, inc_t rs_c, inc_t cs_c, \
-       auxinfo_t* restrict data, \
-       cntx_t*    restrict cntx  \
+       auxinfo_t*          data, \
+       cntx_t*             cntx  \
      ) \
 { \
 	bli_init_once(); \

@@ -45,7 +45,7 @@ void PASTEMAC(ch,opname) \
         dim_t            n, \
         ctype*  restrict x, inc_t incx, \
         ctype*  restrict y, inc_t incy, \
-        cntx_t* restrict cntx  \
+        cntx_t*          cntx  \
       );
 
 
@@ -56,7 +56,7 @@ void PASTEMAC(ch,opname) \
        dim_t            n, \
        ctype*  restrict x, inc_t incx, \
        dim_t*  restrict index, \
-       cntx_t* restrict cntx  \
+       cntx_t*          cntx  \
      ); \
 
 
@@ -70,7 +70,7 @@ void PASTEMAC(ch,opname) \
        ctype*  restrict x, inc_t incx, \
        ctype*  restrict beta, \
        ctype*  restrict y, inc_t incy, \
-       cntx_t* restrict cntx  \
+       cntx_t*          cntx  \
      ); \
 
 
@@ -83,7 +83,7 @@ void PASTEMAC(ch,opname) \
        ctype*  restrict alpha, \
        ctype*  restrict x, inc_t incx, \
        ctype*  restrict y, inc_t incy, \
-       cntx_t* restrict cntx  \
+       cntx_t*          cntx  \
      ); \
 
 
@@ -95,7 +95,7 @@ void PASTEMAC(ch,opname) \
         dim_t            n, \
         ctype*  restrict x, inc_t incx, \
         ctype*  restrict y, inc_t incy, \
-        cntx_t* restrict cntx  \
+        cntx_t*          cntx  \
       );
 
 
@@ -109,7 +109,7 @@ void PASTEMAC(ch,opname) \
        ctype*  restrict x, inc_t incx, \
        ctype*  restrict y, inc_t incy, \
        ctype*  restrict rho, \
-       cntx_t* restrict cntx  \
+       cntx_t*          cntx  \
      ); \
 
 
@@ -125,7 +125,7 @@ void PASTEMAC(ch,opname) \
        ctype*  restrict y, inc_t incy, \
        ctype*  restrict beta, \
        ctype*  restrict rho, \
-       cntx_t* restrict cntx  \
+       cntx_t*          cntx  \
      ); \
 
 
@@ -135,7 +135,7 @@ void PASTEMAC(ch,opname) \
      ( \
        dim_t            n, \
        ctype*  restrict x, inc_t incx, \
-       cntx_t* restrict cntx  \
+       cntx_t*          cntx  \
      ); \
 
 
@@ -159,7 +159,7 @@ void PASTEMAC(ch,opname) \
        dim_t            n, \
        ctype*  restrict alpha, \
        ctype*  restrict x, inc_t incx, \
-       cntx_t* restrict cntx  \
+       cntx_t*          cntx  \
      ); \
 
 
@@ -172,7 +172,7 @@ void PASTEMAC(ch,opname) \
        ctype*  restrict alpha, \
        ctype*  restrict x, inc_t incx, \
        ctype*  restrict y, inc_t incy, \
-       cntx_t* restrict cntx  \
+       cntx_t*          cntx  \
      ); \
 
 
@@ -184,7 +184,7 @@ void PASTEMAC(ch,opname) \
        dim_t            n, \
        ctype*  restrict alpha, \
        ctype*  restrict x, inc_t incx, \
-       cntx_t* restrict cntx  \
+       cntx_t*          cntx  \
      ); \
 
 
@@ -196,7 +196,7 @@ void PASTEMAC(ch,opname) \
         dim_t            n, \
         ctype*  restrict x, inc_t incx, \
         ctype*  restrict y, inc_t incy, \
-        cntx_t* restrict cntx  \
+        cntx_t*          cntx  \
       );
 
 
@@ -207,7 +207,7 @@ void PASTEMAC(ch,opname) \
        dim_t            n, \
        ctype*  restrict x, inc_t incx, \
        ctype*  restrict y, inc_t incy, \
-       cntx_t* restrict cntx  \
+       cntx_t*          cntx  \
      ); \
 
 
@@ -220,6 +220,6 @@ void PASTEMAC(ch,opname) \
        ctype*  restrict x, inc_t incx, \
        ctype*  restrict beta, \
        ctype*  restrict y, inc_t incy, \
-       cntx_t* restrict cntx  \
+       cntx_t*          cntx  \
      ); \
 

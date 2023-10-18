@@ -82,8 +82,8 @@ void bli_zgemmsup_rv_zen_asm_2x4
        dcomplex*    restrict b, inc_t rs_b0, inc_t cs_b0,
        dcomplex*    restrict beta,
        dcomplex*    restrict c, inc_t rs_c0, inc_t cs_c0,
-       auxinfo_t*   restrict data,
-       cntx_t*      restrict cntx
+       auxinfo_t*            data,
+       cntx_t*               cntx
      )
 {
 	//void*    a_next = bli_auxinfo_next_a( data );
@@ -357,7 +357,7 @@ void bli_zgemmsup_rv_zen_asm_2x4
 	vmulpd(ymm1, ymm3, ymm3)
 	vaddsubpd(ymm3, ymm9, ymm9)
 
-	/* (ßr + ßi)x C + ((ar + ai) x AB) */
+	/* (ï¿½r + ï¿½i)x C + ((ar + ai) x AB) */
 	mov(var(beta), rbx) // load address of beta
 	vbroadcastsd(mem(rbx), ymm1) // load beta_r and duplicate
 	vbroadcastsd(mem(rbx, 8), ymm2) // load beta_i and duplicate
@@ -413,7 +413,7 @@ void bli_zgemmsup_rv_zen_asm_2x4
 	mov(var(cs_c), rsi)        // load cs_c
 	lea(mem(, rsi, 8), rsi)    // rsi = cs_c * sizeof(real dt)
 	lea(mem(, rsi, 2), rsi)    // rsi = cs_c * sizeof((real+imag) dt)
-	
+
 	lea(mem(rsi, rsi, 2), r13)           // r13 = 3*rs_a
 
 	ZGEMM_INPUT_SCALE_CS_BETA_NZ
@@ -423,16 +423,16 @@ void bli_zgemmsup_rv_zen_asm_2x4
 	ZGEMM_INPUT_SCALE_CS_BETA_NZ
 	vaddpd(ymm8, ymm0, ymm8)
 	add(rdi, rcx)
-	
+
 	lea(mem(r12, rsi, 2), rcx)
-	
+
 	ZGEMM_INPUT_SCALE_CS_BETA_NZ
 	vaddpd(ymm5, ymm0, ymm5)
 	add(rdi, rcx)
 
 	ZGEMM_INPUT_SCALE_CS_BETA_NZ
 	vaddpd(ymm9, ymm0, ymm9)
-	add(rdi, rcx) 
+	add(rdi, rcx)
 
 	mov(r12, rcx)                      // reset rcx to current utile of c.
 
@@ -454,12 +454,12 @@ void bli_zgemmsup_rv_zen_asm_2x4
 	vmovups(xmm8, mem(rcx, 16))
 
 	add(rsi, rcx)
-	
+
 	vmovups(xmm5, mem(rcx))
 	vmovups(xmm9, mem(rcx, 16))
-	
+
 	add(rsi, rcx)
-	
+
 	vextractf128(imm(0x1), ymm5, xmm5)
 	vextractf128(imm(0x1), ymm9, xmm9)
 	vmovups(xmm5, mem(rcx))
@@ -501,12 +501,12 @@ void bli_zgemmsup_rv_zen_asm_2x4
 	vmovups(xmm8, mem(rcx, 16))
 
 	add(rsi, rcx)
-	
+
 	vmovups(xmm5, mem(rcx))
 	vmovups(xmm9, mem(rcx, 16))
-	
+
 	add(rsi, rcx)
-	
+
 	vextractf128(imm(0x1), ymm5, xmm5)
 	vextractf128(imm(0x1), ymm9, xmm9)
 	vmovups(xmm5, mem(rcx))
@@ -558,8 +558,8 @@ void bli_zgemmsup_rv_zen_asm_1x4
        dcomplex*    restrict b, inc_t rs_b0, inc_t cs_b0,
        dcomplex*    restrict beta,
        dcomplex*    restrict c, inc_t rs_c0, inc_t cs_c0,
-       auxinfo_t*   restrict data,
-       cntx_t*      restrict cntx
+       auxinfo_t*            data,
+       cntx_t*               cntx
      )
 {
 
@@ -781,7 +781,7 @@ void bli_zgemmsup_rv_zen_asm_1x4
 	vmulpd(ymm1, ymm3, ymm3)
 	vaddsubpd(ymm3, ymm5, ymm5)
 
-	/* (ßr + ßi)x C + ((ar + ai) x AB) */
+	/* (ï¿½r + ï¿½i)x C + ((ar + ai) x AB) */
 	mov(var(beta), rbx) // load address of beta
 	vbroadcastsd(mem(rbx), ymm1) // load beta_r and duplicate
 	vbroadcastsd(mem(rbx, 8), ymm2) // load beta_i and duplicate
@@ -828,14 +828,14 @@ void bli_zgemmsup_rv_zen_asm_1x4
 	mov(var(cs_c), rsi)        // load cs_c
 	lea(mem(, rsi, 8), rsi)    // rsi = cs_c * sizeof(real dt)
 	lea(mem(, rsi, 2), rsi)    // rsi = cs_c * sizeof((real+imag) dt)
-	
+
 	lea(mem(rsi, rsi, 2), r13)           // r13 = 3*rs_a
 
 	ZGEMM_INPUT_SCALE_CS_BETA_NZ
 	vaddpd(ymm4, ymm0, ymm4)
 
 	lea(mem(r12, rsi, 2), rcx)
-	
+
 	ZGEMM_INPUT_SCALE_CS_BETA_NZ
 	vaddpd(ymm5, ymm0, ymm5)
 
@@ -854,7 +854,7 @@ void bli_zgemmsup_rv_zen_asm_1x4
 	vmovups(xmm4, mem(rcx))
 
 	add(rsi, rcx)
-	
+
 	vmovups(xmm5, mem(rcx))
 
 	add(rsi, rcx)
@@ -943,8 +943,8 @@ void bli_zgemmsup_rv_zen_asm_2x2
        dcomplex*    restrict b, inc_t rs_b0, inc_t cs_b0,
        dcomplex*    restrict beta,
        dcomplex*    restrict c, inc_t rs_c0, inc_t cs_c0,
-       auxinfo_t*   restrict data,
-       cntx_t*      restrict cntx
+       auxinfo_t*            data,
+       cntx_t*               cntx
 
      )
 {
@@ -1178,7 +1178,7 @@ void bli_zgemmsup_rv_zen_asm_2x2
 	vmulpd(ymm1, ymm3, ymm3)
 	vaddsubpd(ymm3, ymm8, ymm8)
 
-	/* (ßr + ßi)x C + ((ar + ai) x AB) */
+	/* (ï¿½r + ï¿½i)x C + ((ar + ai) x AB) */
 	mov(var(beta), rbx) // load address of beta
 	vbroadcastsd(mem(rbx), ymm1) // load beta_r and duplicate
 	vbroadcastsd(mem(rbx, 8), ymm2) // load beta_i and duplicate
@@ -1226,7 +1226,7 @@ void bli_zgemmsup_rv_zen_asm_2x2
 	mov(var(cs_c), rsi)        // load cs_c
 	lea(mem(, rsi, 8), rsi)    // rsi = cs_c * sizeof(real dt)
 	lea(mem(, rsi, 2), rsi)    // rsi = cs_c * sizeof((real+imag) dt)
-	
+
 	lea(mem(rsi, rsi, 2), r13)           // r13 = 3*rs_a
 
 	ZGEMM_INPUT_SCALE_CS_BETA_NZ
@@ -1330,8 +1330,8 @@ void bli_zgemmsup_rv_zen_asm_1x2
        dcomplex*    restrict b, inc_t rs_b0, inc_t cs_b0,
        dcomplex*    restrict beta,
        dcomplex*    restrict c, inc_t rs_c0, inc_t cs_c0,
-       auxinfo_t*   restrict data,
-       cntx_t*      restrict cntx
+       auxinfo_t*            data,
+       cntx_t*               cntx
 
      )
 {
@@ -1529,7 +1529,7 @@ void bli_zgemmsup_rv_zen_asm_1x2
 	vmulpd(ymm1, ymm3, ymm3)
 	vaddsubpd(ymm3, ymm4, ymm4)
 
-	/* (ßr + ßi)x C + ((ar + ai) x AB) */
+	/* (ï¿½r + ï¿½i)x C + ((ar + ai) x AB) */
 	mov(var(beta), rbx) // load address of beta
 	vbroadcastsd(mem(rbx), ymm1) // load beta_r and duplicate
 	vbroadcastsd(mem(rbx, 8), ymm2) // load beta_i and duplicate
@@ -1571,7 +1571,7 @@ void bli_zgemmsup_rv_zen_asm_1x2
 	mov(var(cs_c), rsi)        // load cs_c
 	lea(mem(, rsi, 8), rsi)    // rsi = cs_c * sizeof(real dt)
 	lea(mem(, rsi, 2), rsi)    // rsi = cs_c * sizeof((real+imag) dt)
-	
+
 	lea(mem(rsi, rsi, 2), r13)           // r13 = 3*rs_a
 
 	ZGEMM_INPUT_SCALE_CS_BETA_NZ
@@ -1602,7 +1602,7 @@ void bli_zgemmsup_rv_zen_asm_1x2
 
 	vmovupd(ymm4, mem(rcx))
 	add(rdi, rcx)
-	
+
 
 	jmp(.SDONE)                        // jump to end.
 

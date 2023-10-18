@@ -64,8 +64,8 @@ void bli_dgemm_bgq_int_8x8
        double*    restrict b,
        double*    restrict beta,
        double*    restrict c, inc_t rs_c, inc_t cs_c,
-       auxinfo_t* restrict data,
-       cntx_t*    restrict cntx
+       auxinfo_t*          data,
+       cntx_t*             cntx
      )
 {
     GEMM_UKR_SETUP_CT_ANY( d, 8, 8, false );
@@ -228,8 +228,8 @@ void bli_zgemm_bgq_int_4x4
        dcomplex*  restrict b,
        dcomplex*  restrict beta,
        dcomplex*  restrict c, inc_t rs_c, inc_t cs_c,
-       auxinfo_t* restrict data,
-       cntx_t*    restrict cntx
+       auxinfo_t*          data,
+       cntx_t*             cntx
      )
 {
     GEMM_UKR_SETUP_CT_ANY( z, 4, 4, false );

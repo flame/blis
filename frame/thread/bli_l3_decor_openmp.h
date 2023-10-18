@@ -43,7 +43,7 @@ void bli_l3_thread_decorator_thread_check
      (
        dim_t      n_threads,
        dim_t      tid,
-	   thrcomm_t* gl_comm,
+       thrcomm_t* gl_comm,
        rntm_t*    rntm
      );
 

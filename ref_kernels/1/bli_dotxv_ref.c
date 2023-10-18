@@ -47,7 +47,7 @@ void PASTEMAC3(ch,opname,arch,suf) \
        ctype*  restrict y, inc_t incy, \
        ctype*  restrict beta, \
        ctype*  restrict rho, \
-       cntx_t* restrict cntx  \
+       cntx_t*          cntx  \
      ) \
 { \
 	ctype dotxy; \

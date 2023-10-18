@@ -63,8 +63,8 @@ void bli_sgemm_power10_mma_8x16
         float*     restrict b,
         float*     restrict beta,
         float*     restrict c, inc_t rs_c0, inc_t cs_c,
-        auxinfo_t* restrict data,
-        cntx_t*    restrict cntx
+        auxinfo_t*          data,
+        cntx_t*             cntx
     )
 {
     // Typecast local copies of integers in case dim_t and inc_t are a

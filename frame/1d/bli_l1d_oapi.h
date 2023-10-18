@@ -42,10 +42,10 @@
 \
 BLIS_EXPORT_BLIS void PASTEMAC(opname,EX_SUF) \
      ( \
-       obj_t*  x, \
-       obj_t*  y  \
+       const obj_t* x, \
+       const obj_t* y  \
        BLIS_OAPI_EX_PARAMS  \
-     ); 
+     );
 
 GENTPROT( addd )
 GENTPROT( copyd )
@@ -57,11 +57,11 @@ GENTPROT( subd )
 \
 BLIS_EXPORT_BLIS void PASTEMAC(opname,EX_SUF) \
      ( \
-       obj_t*  alpha, \
-       obj_t*  x, \
-       obj_t*  y  \
+       const obj_t* alpha, \
+       const obj_t* x, \
+       const obj_t* y  \
        BLIS_OAPI_EX_PARAMS  \
-     ); 
+     );
 
 GENTPROT( axpyd )
 GENTPROT( scal2d )
@@ -72,9 +72,9 @@ GENTPROT( scal2d )
 \
 BLIS_EXPORT_BLIS void PASTEMAC(opname,EX_SUF) \
      ( \
-       obj_t*  x  \
+       const obj_t* x  \
        BLIS_OAPI_EX_PARAMS  \
-     ); 
+     );
 
 GENTPROT( invertd )
 
@@ -84,10 +84,10 @@ GENTPROT( invertd )
 \
 BLIS_EXPORT_BLIS void PASTEMAC(opname,EX_SUF) \
      ( \
-       obj_t*  alpha, \
-       obj_t*  x  \
+       const obj_t* alpha, \
+       const obj_t* x  \
        BLIS_OAPI_EX_PARAMS  \
-     ); 
+     );
 
 GENTPROT( invscald )
 GENTPROT( scald )
@@ -101,9 +101,9 @@ GENTPROT( shiftd )
 \
 BLIS_EXPORT_BLIS void PASTEMAC(opname,EX_SUF) \
      ( \
-       obj_t*  x, \
-       obj_t*  beta, \
-       obj_t*  y  \
+       const obj_t* x, \
+       const obj_t* beta, \
+       const obj_t* y  \
        BLIS_OAPI_EX_PARAMS  \
      );
 

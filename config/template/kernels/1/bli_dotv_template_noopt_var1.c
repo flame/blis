@@ -43,7 +43,7 @@ void bli_zdotv_template_noopt
        dcomplex* restrict x, inc_t incx,
        dcomplex* restrict y, inc_t incy,
        dcomplex* restrict rho,
-       cntx_t*   restrict cntx
+       cntx_t*            cntx
      )
 {
 /*
@@ -187,7 +187,7 @@ void bli_zdotv_template_noopt
 	// Initialize accumulator to zero.
 	bli_zset0s( dotxy );
 
-	
+
 	conjx_use = conjx;
 
 	// If y must be conjugated, we compute the result indirectly by first

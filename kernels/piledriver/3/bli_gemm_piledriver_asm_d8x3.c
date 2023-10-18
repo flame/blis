@@ -50,8 +50,8 @@ void bli_sgemm_piledriver_asm_16x3
        float*     restrict b,
        float*     restrict beta,
        float*     restrict c, inc_t rs_c0, inc_t cs_c0,
-       auxinfo_t* restrict data,
-       cntx_t*    restrict cntx
+       auxinfo_t*          data,
+       cntx_t*             cntx
      )
 {
 	void*   a_next = bli_auxinfo_next_a( data );
@@ -531,8 +531,8 @@ void bli_dgemm_piledriver_asm_8x3
        double*    restrict b,
        double*    restrict beta,
        double*    restrict c, inc_t rs_c0, inc_t cs_c0,
-       auxinfo_t* restrict data,
-       cntx_t*    restrict cntx
+       auxinfo_t*          data,
+       cntx_t*             cntx
      )
 {
 	void*   a_next = bli_auxinfo_next_a( data );
@@ -987,8 +987,8 @@ void bli_cgemm_piledriver_asm_4x2
        scomplex*  restrict b,
        scomplex*  restrict beta,
        scomplex*  restrict c, inc_t rs_c0, inc_t cs_c0,
-       auxinfo_t* restrict data,
-       cntx_t*    restrict cntx
+       auxinfo_t*          data,
+       cntx_t*             cntx
      )
 {
 	void*   a_next = bli_auxinfo_next_a( data );
@@ -1397,8 +1397,8 @@ void bli_zgemm_piledriver_asm_2x2
        dcomplex*  restrict b,
        dcomplex*  restrict beta,
        dcomplex*  restrict c, inc_t rs_c0, inc_t cs_c0,
-       auxinfo_t* restrict data,
-       cntx_t*    restrict cntx
+       auxinfo_t*          data,
+       cntx_t*             cntx
      )
 {
 	void*   a_next = bli_auxinfo_next_a( data );

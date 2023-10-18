@@ -37,44 +37,47 @@
 
 void bli_gemm_blk_var2
      (
-       obj_t*  a,
-       obj_t*  b,
-       obj_t*  c,
-       cntx_t* cntx,
-       rntm_t* rntm,
-       cntl_t* cntl,
-       thrinfo_t* thread
+       const obj_t*  a,
+       const obj_t*  b,
+       const obj_t*  c,
+       const cntx_t* cntx,
+             rntm_t* rntm,
+             cntl_t* cntl,
+             thrinfo_t* thread
      )
 {
-	obj_t b1, c1;
-	dim_t my_start, my_end;
-	dim_t b_alg;
+	obj_t bp, cp;
+	bli_obj_alias_to( b, &bp );
+	bli_obj_alias_to( c, &cp );
 
 	// Determine the direction in which to partition (forwards or backwards).
-	dir_t direct = bli_l3_direct( a, b, c, cntl );
+	dir_t direct = bli_l3_direct( a, &bp, &cp, cntl );
 
 	// Prune any zero region that exists along the partitioning dimension.
-	bli_l3_prune_unref_mparts_n( a, b, c, cntl );
+	bli_l3_prune_unref_mparts_n( a, &bp, &cp, cntl );
 
 	// Determine the current thread's subpartition range.
+	dim_t my_start, my_end;
 	bli_thread_range_ndim
 	(
-	  direct, thread, a, b, c, cntl, cntx,
+	  direct, thread, a, &bp, &cp, cntl, cntx,
 	  &my_start, &my_end
 	);
 
 	// Partition along the n dimension.
+	dim_t b_alg;
 	for ( dim_t i = my_start; i < my_end; i += b_alg )
 	{
 		// Determine the current algorithmic blocksize.
-		b_alg = bli_determine_blocksize( direct, i, my_end, b,
+		b_alg = bli_determine_blocksize( direct, i, my_end, &bp,
 		                                 bli_cntl_bszid( cntl ), cntx );
 
 		// Acquire partitions for B1 and C1.
+		obj_t b1, c1;
 		bli_acquire_mpart_ndim( direct, BLIS_SUBPART1,
-		                        i, b_alg, b, &b1 );
+		                        i, b_alg, &bp, &b1 );
 		bli_acquire_mpart_ndim( direct, BLIS_SUBPART1,
-		                        i, b_alg, c, &c1 );
+		                        i, b_alg, &cp, &c1 );
 
 		// Perform gemm subproblem.
 		bli_l3_int

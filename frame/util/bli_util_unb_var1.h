@@ -162,10 +162,10 @@ INSERT_GENTPROTR_BASIC0( sumsqv_unb_var1 )
 \
 bool PASTEMAC(ch,varname) \
      ( \
-       conj_t  conjx, \
-       dim_t   n, \
-       ctype*  x, inc_t incx, \
-       ctype*  y, inc_t incy  \
+       conj_t conjx, \
+       dim_t  n, \
+       ctype* x, inc_t incx, \
+       ctype* y, inc_t incy  \
      );
 
 INSERT_GENTPROT_BASIC0( eqv_unb_var1 )
@@ -194,12 +194,12 @@ INSERT_GENTPROT_BASIC0( eqm_unb_var1 )
 \
 BLIS_EXPORT_BLIS void PASTEMAC(ch,opname) \
      ( \
-       FILE*  file, \
-       char*  s1, \
-       dim_t  n, \
-       ctype* x, inc_t incx, \
-       char*  format, \
-       char*  s2  \
+             FILE*  file, \
+       const char*  s1, \
+             dim_t  n, \
+       const ctype* x, inc_t incx, \
+       const char*  format, \
+       const char*  s2  \
      );
 
 INSERT_GENTPROT_BASIC0_I( fprintv )
@@ -210,13 +210,13 @@ INSERT_GENTPROT_BASIC0_I( fprintv )
 \
 BLIS_EXPORT_BLIS void PASTEMAC(ch,opname) \
      ( \
-       FILE*  file, \
-       char*  s1, \
-       dim_t  m, \
-       dim_t  n, \
-       ctype* x, inc_t rs_x, inc_t cs_x, \
-       char*  format, \
-       char*  s2  \
+             FILE*  file, \
+       const char*  s1, \
+             dim_t  m, \
+             dim_t  n, \
+       const ctype* x, inc_t rs_x, inc_t cs_x, \
+       const char*  format, \
+       const char*  s2  \
      );
 
 INSERT_GENTPROT_BASIC0_I( fprintm )

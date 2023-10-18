@@ -69,8 +69,8 @@ void bli_dgemmsup_rd_armv8a_int_3x4
        double*    restrict b, inc_t rs_b, inc_t cs_b,
        double*    restrict beta,
        double*    restrict c, inc_t rs_c, inc_t cs_c,
-       auxinfo_t* restrict data,
-       cntx_t*    restrict cntx
+       auxinfo_t*          data,
+       cntx_t*             cntx
      )
 {
   // if ( m0 == 3 && n0 == 4 )

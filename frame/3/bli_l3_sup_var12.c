@@ -38,19 +38,19 @@
 
 typedef void (*FUNCPTR_T)
      (
-       conj_t           conja,
-       conj_t           conjb,
-       dim_t            m,
-       dim_t            n,
-       dim_t            k,
-       void*   restrict alpha,
-       void*   restrict a, inc_t rs_a, inc_t cs_a,
-       void*   restrict b, inc_t rs_b, inc_t cs_b,
-       void*   restrict beta,
-       void*   restrict c, inc_t rs_c, inc_t cs_c,
-       stor3_t          eff_id,
-       cntx_t* restrict cntx,
-       rntm_t* restrict rntm
+       conj_t  conja,
+       conj_t  conjb,
+       dim_t   m,
+       dim_t   n,
+       dim_t   k,
+       void*   alpha,
+       void*   a, inc_t rs_a, inc_t cs_a,
+       void*   b, inc_t rs_b, inc_t cs_b,
+       void*   beta,
+       void*   c, inc_t rs_c, inc_t cs_c,
+       stor3_t eff_id,
+       cntx_t* cntx,
+       rntm_t* rntm
      );
 
 #if 0
@@ -95,20 +95,20 @@ void bli_gemmsup_ref_var2
 
 	const dim_t    k         = bli_obj_width( &at );
 
-	void* restrict buf_a     = bli_obj_buffer_at_off( &at );
+	void* buf_a     = bli_obj_buffer_at_off( &at );
 	const inc_t    rs_a      = bli_obj_row_stride( &at );
 	const inc_t    cs_a      = bli_obj_col_stride( &at );
 
-	void* restrict buf_b     = bli_obj_buffer_at_off( &bt );
+	void* buf_b     = bli_obj_buffer_at_off( &bt );
 	const inc_t    rs_b      = bli_obj_row_stride( &bt );
 	const inc_t    cs_b      = bli_obj_col_stride( &bt );
 
-	void* restrict buf_c     = bli_obj_buffer_at_off( c );
+	void* buf_c     = bli_obj_buffer_at_off( c );
 	const inc_t    rs_c      = bli_obj_row_stride( c );
 	const inc_t    cs_c      = bli_obj_col_stride( c );
 
-	void* restrict buf_alpha = bli_obj_buffer_for_1x1( dt_exec, alpha );
-	void* restrict buf_beta  = bli_obj_buffer_for_1x1( dt_exec, beta );
+	void* buf_alpha = bli_obj_buffer_for_1x1( dt_exec, alpha );
+	void* buf_beta  = bli_obj_buffer_for_1x1( dt_exec, beta );
 
 #else
 
@@ -121,11 +121,11 @@ void bli_gemmsup_ref_var2
 	const dim_t    n         = bli_obj_width( c );
 	      dim_t    k;
 
-	void* restrict buf_a = bli_obj_buffer_at_off( a );
+	void* buf_a = bli_obj_buffer_at_off( a );
 	      inc_t    rs_a;
 	      inc_t    cs_a;
 
-	void* restrict buf_b = bli_obj_buffer_at_off( b );
+	void* buf_b = bli_obj_buffer_at_off( b );
 	      inc_t    rs_b;
 	      inc_t    cs_b;
 
@@ -157,12 +157,12 @@ void bli_gemmsup_ref_var2
 		cs_b  = bli_obj_row_stride( b );
 	}
 
-	void* restrict buf_c     = bli_obj_buffer_at_off( c );
+	void* buf_c     = bli_obj_buffer_at_off( c );
 	const inc_t    rs_c      = bli_obj_row_stride( c );
 	const inc_t    cs_c      = bli_obj_col_stride( c );
 
-	void* restrict buf_alpha = bli_obj_buffer_for_1x1( dt_exec, alpha );
-	void* restrict buf_beta  = bli_obj_buffer_for_1x1( dt_exec, beta );
+	void* buf_alpha = bli_obj_buffer_for_1x1( dt_exec, alpha );
+	void* buf_beta  = bli_obj_buffer_for_1x1( dt_exec, beta );
 
 #endif
 
@@ -200,14 +200,14 @@ void PASTEMAC(ch,varname) \
        dim_t            m, \
        dim_t            n, \
        dim_t            k, \
-       void*   restrict alpha, \
-       void*   restrict a, inc_t rs_a, inc_t cs_a, \
-       void*   restrict b, inc_t rs_b, inc_t cs_b, \
-       void*   restrict beta, \
-       void*   restrict c, inc_t rs_c, inc_t cs_c, \
+       void*   alpha, \
+       void*   a, inc_t rs_a, inc_t cs_a, \
+       void*   b, inc_t rs_b, inc_t cs_b, \
+       void*   beta, \
+       void*   c, inc_t rs_c, inc_t cs_c, \
        stor3_t          eff_id, \
-       cntx_t* restrict cntx, \
-       rntm_t* restrict rntm  \
+       cntx_t* cntx, \
+       rntm_t* rntm  \
      ) \
 { \
 	/* If any dimension is zero, return immediately. */ \
@@ -266,13 +266,13 @@ void PASTEMAC(ch,varname) \
 	PASTECH(ch,gemmsup_ker_ft) \
                gemmsup_ker = bli_cntx_get_l3_sup_ker_dt( dt, stor_id, cntx ); \
 \
-	ctype* restrict a_00       = a; \
-	ctype* restrict b_00       = b; \
-	ctype* restrict c_00       = c; \
-	ctype* restrict alpha_cast = alpha; \
-	ctype* restrict beta_cast  = beta; \
+	ctype* a_00       = a; \
+	ctype* b_00       = b; \
+	ctype* c_00       = c; \
+	ctype* alpha_cast = alpha; \
+	ctype* beta_cast  = beta; \
 \
-	ctype* restrict one        = PASTEMAC(ch,1); \
+	ctype* one        = PASTEMAC(ch,1); \
 \
 	auxinfo_t       aux; \
 \
@@ -305,8 +305,8 @@ void PASTEMAC(ch,varname) \
 	{ \
 		const dim_t nc_cur = ( bli_is_not_edge_f( jj, jc_iter, jc_left ) ? NC : jc_left ); \
 \
-		ctype* restrict b_jc = b_00 + jj * jcstep_b; \
-		ctype* restrict c_jc = c_00 + jj * jcstep_c; \
+		ctype* b_jc = b_00 + jj * jcstep_b; \
+		ctype* c_jc = c_00 + jj * jcstep_c; \
 \
 		const dim_t jr_iter = ( nc_cur + NR - 1 ) / NR; \
 		const dim_t jr_left =   nc_cur % NR; \
@@ -316,19 +316,19 @@ void PASTEMAC(ch,varname) \
 		{ \
 			const dim_t kc_cur = ( bli_is_not_edge_f( pp, pc_iter, pc_left ) ? KC : pc_left ); \
 \
-			ctype* restrict a_pc = a_00 + pp * pcstep_a; \
-			ctype* restrict b_pc = b_jc + pp * pcstep_b; \
+			ctype* a_pc = a_00 + pp * pcstep_a; \
+			ctype* b_pc = b_jc + pp * pcstep_b; \
 \
 			/* Only apply beta to the first iteration of the pc loop. */ \
-			ctype* restrict beta_use = ( pp == 0 ? beta_cast : one ); \
+			ctype* beta_use = ( pp == 0 ? beta_cast : one ); \
 \
 			/* Loop over the m dimension (MC rows at a time). */ \
 			for ( dim_t ii = 0; ii < ic_iter; ii += ic_inc ) \
 			{ \
 				const dim_t mc_cur = ( bli_is_not_edge_f( ii, ic_iter, ic_left ) ? MC : ic_left ); \
 \
-				ctype* restrict a_ic = a_pc + ii * icstep_a; \
-				ctype* restrict c_ic = c_jc + ii * icstep_c; \
+				ctype* a_ic = a_pc + ii * icstep_a; \
+				ctype* c_ic = c_jc + ii * icstep_c; \
 \
 				const dim_t ir_iter = ( mc_cur + MR - 1 ) / MR; \
 				const dim_t ir_left =   mc_cur % MR; \
@@ -338,11 +338,11 @@ void PASTEMAC(ch,varname) \
 				{ \
 					const dim_t nr_cur = ( bli_is_not_edge_f( j, jr_iter, jr_left ) ? NR : jr_left ); \
 \
-					ctype* restrict b_jr = b_pc + j * jrstep_b; \
-					ctype* restrict c_jr = c_ic + j * jrstep_c; \
+					ctype* b_jr = b_pc + j * jrstep_b; \
+					ctype* c_jr = c_ic + j * jrstep_c; \
 \
 /*
-					ctype* restrict b2 = b_jr; \
+					ctype* b2 = b_jr; \
 */ \
 \
 					/* Loop over the m dimension (MR rows at a time). */ \
@@ -350,13 +350,13 @@ void PASTEMAC(ch,varname) \
 					{ \
 						const dim_t mr_cur = ( bli_is_not_edge_f( i, ir_iter, ir_left ) ? MR : ir_left ); \
 \
-						ctype* restrict a_ir = a_ic + i * irstep_a; \
-						ctype* restrict c_ir = c_jr + i * irstep_c; \
+						ctype* a_ir = a_ic + i * irstep_a; \
+						ctype* c_ir = c_jr + i * irstep_c; \
 \
 						/* Save addresses of next panels of A and B to the auxinfo_t
 						   object. */ \
 /*
-						ctype* restrict a2 = bli_gemm_get_next_a_upanel( a_ir, irstep_a, ir_inc ); \
+						ctype* a2 = bli_gemm_get_next_a_upanel( a_ir, irstep_a, ir_inc ); \
 						if ( bli_is_last_iter( i, ir_iter, 0, 1 ) ) \
 						{ \
 							a2 = a_00; \
@@ -442,20 +442,20 @@ void bli_gemmsup_ref_var1
 
 	const dim_t    k         = bli_obj_width( &at );
 
-	void* restrict buf_a     = bli_obj_buffer_at_off( &at );
+	void* buf_a     = bli_obj_buffer_at_off( &at );
 	const inc_t    rs_a      = bli_obj_row_stride( &at );
 	const inc_t    cs_a      = bli_obj_col_stride( &at );
 
-	void* restrict buf_b     = bli_obj_buffer_at_off( &bt );
+	void* buf_b     = bli_obj_buffer_at_off( &bt );
 	const inc_t    rs_b      = bli_obj_row_stride( &bt );
 	const inc_t    cs_b      = bli_obj_col_stride( &bt );
 
-	void* restrict buf_c     = bli_obj_buffer_at_off( c );
+	void* buf_c     = bli_obj_buffer_at_off( c );
 	const inc_t    rs_c      = bli_obj_row_stride( c );
 	const inc_t    cs_c      = bli_obj_col_stride( c );
 
-	void* restrict buf_alpha = bli_obj_buffer_for_1x1( dt_exec, alpha );
-	void* restrict buf_beta  = bli_obj_buffer_for_1x1( dt_exec, beta );
+	void* buf_alpha = bli_obj_buffer_for_1x1( dt_exec, alpha );
+	void* buf_beta  = bli_obj_buffer_for_1x1( dt_exec, beta );
 
 #else
 
@@ -468,11 +468,11 @@ void bli_gemmsup_ref_var1
 	const dim_t    n         = bli_obj_width( c );
 	      dim_t    k;
 
-	void* restrict buf_a = bli_obj_buffer_at_off( a );
+	void* buf_a = bli_obj_buffer_at_off( a );
 	      inc_t    rs_a;
 	      inc_t    cs_a;
 
-	void* restrict buf_b = bli_obj_buffer_at_off( b );
+	void* buf_b = bli_obj_buffer_at_off( b );
 	      inc_t    rs_b;
 	      inc_t    cs_b;
 
@@ -504,12 +504,12 @@ void bli_gemmsup_ref_var1
 		cs_b  = bli_obj_row_stride( b );
 	}
 
-	void* restrict buf_c     = bli_obj_buffer_at_off( c );
+	void* buf_c     = bli_obj_buffer_at_off( c );
 	const inc_t    rs_c      = bli_obj_row_stride( c );
 	const inc_t    cs_c      = bli_obj_col_stride( c );
 
-	void* restrict buf_alpha = bli_obj_buffer_for_1x1( dt_exec, alpha );
-	void* restrict buf_beta  = bli_obj_buffer_for_1x1( dt_exec, beta );
+	void* buf_alpha = bli_obj_buffer_for_1x1( dt_exec, alpha );
+	void* buf_beta  = bli_obj_buffer_for_1x1( dt_exec, beta );
 
 #endif
 
@@ -547,14 +547,14 @@ void PASTEMAC(ch,varname) \
        dim_t            m, \
        dim_t            n, \
        dim_t            k, \
-       void*   restrict alpha, \
-       void*   restrict a, inc_t rs_a, inc_t cs_a, \
-       void*   restrict b, inc_t rs_b, inc_t cs_b, \
-       void*   restrict beta, \
-       void*   restrict c, inc_t rs_c, inc_t cs_c, \
+       void*   alpha, \
+       void*   a, inc_t rs_a, inc_t cs_a, \
+       void*   b, inc_t rs_b, inc_t cs_b, \
+       void*   beta, \
+       void*   c, inc_t rs_c, inc_t cs_c, \
        stor3_t          eff_id, \
-       cntx_t* restrict cntx, \
-       rntm_t* restrict rntm  \
+       cntx_t* cntx, \
+       rntm_t* rntm  \
      ) \
 { \
 	/* If any dimension is zero, return immediately. */ \
@@ -617,13 +617,13 @@ void PASTEMAC(ch,varname) \
 	PASTECH(ch,gemmsup_ker_ft) \
                gemmsup_ker = bli_cntx_get_l3_sup_ker_dt( dt, stor_id, cntx ); \
 \
-	ctype* restrict a_00       = a; \
-	ctype* restrict b_00       = b; \
-	ctype* restrict c_00       = c; \
-	ctype* restrict alpha_cast = alpha; \
-	ctype* restrict beta_cast  = beta; \
+	ctype* a_00       = a; \
+	ctype* b_00       = b; \
+	ctype* c_00       = c; \
+	ctype* alpha_cast = alpha; \
+	ctype* beta_cast  = beta; \
 \
-	ctype* restrict one        = PASTEMAC(ch,1); \
+	ctype* one        = PASTEMAC(ch,1); \
 \
 	auxinfo_t       aux; \
 \
@@ -656,8 +656,8 @@ void PASTEMAC(ch,varname) \
 	{ \
 		const dim_t nc_cur = ( bli_is_not_edge_f( jj, jc_iter, jc_left ) ? NC : jc_left ); \
 \
-		ctype* restrict a_jc = a_00 + jj * jcstep_a; \
-		ctype* restrict c_jc = c_00 + jj * jcstep_c; \
+		ctype* a_jc = a_00 + jj * jcstep_a; \
+		ctype* c_jc = c_00 + jj * jcstep_c; \
 \
 		const dim_t jr_iter = ( nc_cur + MR - 1 ) / MR; \
 		const dim_t jr_left =   nc_cur % MR; \
@@ -667,19 +667,19 @@ void PASTEMAC(ch,varname) \
 		{ \
 			const dim_t kc_cur = ( bli_is_not_edge_f( pp, pc_iter, pc_left ) ? KC : pc_left ); \
 \
-			ctype* restrict a_pc = a_jc + pp * pcstep_a; \
-			ctype* restrict b_pc = b_00 + pp * pcstep_b; \
+			ctype* a_pc = a_jc + pp * pcstep_a; \
+			ctype* b_pc = b_00 + pp * pcstep_b; \
 \
 			/* Only apply beta to the first iteration of the pc loop. */ \
-			ctype* restrict beta_use = ( pp == 0 ? beta_cast : one ); \
+			ctype* beta_use = ( pp == 0 ? beta_cast : one ); \
 \
 			/* Loop over the n dimension (MC rows at a time). */ \
 			for ( dim_t ii = 0; ii < ic_iter; ii += ic_inc ) \
 			{ \
 				const dim_t mc_cur = ( bli_is_not_edge_f( ii, ic_iter, ic_left ) ? MC : ic_left ); \
 \
-				ctype* restrict b_ic = b_pc + ii * icstep_b; \
-				ctype* restrict c_ic = c_jc + ii * icstep_c; \
+				ctype* b_ic = b_pc + ii * icstep_b; \
+				ctype* c_ic = c_jc + ii * icstep_c; \
 \
 				const dim_t ir_iter = ( mc_cur + NR - 1 ) / NR; \
 				const dim_t ir_left =   mc_cur % NR; \
@@ -689,16 +689,16 @@ void PASTEMAC(ch,varname) \
 				{ \
 					const dim_t nr_cur = ( bli_is_not_edge_f( j, jr_iter, jr_left ) ? NR : jr_left ); \
 \
-					ctype* restrict a_jr = a_pc + j * jrstep_a; \
-					ctype* restrict c_jr = c_ic + j * jrstep_c; \
+					ctype* a_jr = a_pc + j * jrstep_a; \
+					ctype* c_jr = c_ic + j * jrstep_c; \
 \
 					/* Loop over the n dimension (MR rows at a time). */ \
 					for ( dim_t i = 0; i < ir_iter; i += ir_inc ) \
 					{ \
 						const dim_t mr_cur = ( bli_is_not_edge_f( i, ir_iter, ir_left ) ? MR : ir_left ); \
 \
-						ctype* restrict b_ir = b_ic + i * irstep_b; \
-						ctype* restrict c_ir = c_jr + i * irstep_c; \
+						ctype* b_ir = b_ic + i * irstep_b; \
+						ctype* c_ir = c_jr + i * irstep_c; \
 \
 						/* Invoke the gemmsup micro-kernel. */ \
 						gemmsup_ker \

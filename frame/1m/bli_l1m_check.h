@@ -42,8 +42,8 @@
 \
 void PASTEMAC(opname,_check) \
      ( \
-       obj_t*  x, \
-       obj_t*  y  \
+       const obj_t* x, \
+       const obj_t* y  \
     );
 
 GENPROT( addm )
@@ -56,9 +56,9 @@ GENPROT( subm )
 \
 void PASTEMAC(opname,_check) \
      ( \
-       obj_t*  alpha, \
-       obj_t*  x, \
-       obj_t*  y  \
+       const obj_t* alpha, \
+       const obj_t* x, \
+       const obj_t* y  \
     );
 
 GENPROT( axpym )
@@ -70,8 +70,8 @@ GENPROT( scal2m )
 \
 void PASTEMAC(opname,_check) \
      ( \
-       obj_t*  alpha, \
-       obj_t*  x  \
+       const obj_t* alpha, \
+       const obj_t* x  \
     );
 
 GENPROT( invscalm )
@@ -84,9 +84,9 @@ GENPROT( setm )
 \
 void PASTEMAC(opname,_check) \
      ( \
-       obj_t*  x, \
-       obj_t*  beta, \
-       obj_t*  y  \
+       const obj_t* x, \
+       const obj_t* beta, \
+       const obj_t* y  \
     );
 
 GENPROT( xpbym )
@@ -96,20 +96,20 @@ GENPROT( xpbym )
 
 void bli_l1m_xy_check
      (
-       obj_t*  x,
-       obj_t*  y 
+       const obj_t*  x,
+       const obj_t*  y
      );
 
 void bli_l1m_axy_check
      (
-       obj_t*  alpha,
-       obj_t*  x,
-       obj_t*  y 
+       const obj_t*  alpha,
+       const obj_t*  x,
+       const obj_t*  y
      );
 
 void bli_l1m_ax_check
      (
-       obj_t*  alpha,
-       obj_t*  x 
+       const obj_t*  alpha,
+       const obj_t*  x
      );
 

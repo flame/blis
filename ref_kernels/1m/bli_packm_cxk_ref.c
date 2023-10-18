@@ -1480,7 +1480,7 @@ void PASTEMAC3(ch,opname,arch,suf) \
        ctype*  restrict kappa, \
        ctype*  restrict a, inc_t inca, inc_t lda, \
        ctype*  restrict p,             inc_t ldp, \
-       cntx_t* restrict cntx \
+       cntx_t*          cntx \
      ) \
 { \
 	const dim_t     mnr        = PASTECH2(mnr0, _, ch); \

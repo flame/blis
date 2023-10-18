@@ -42,12 +42,12 @@
 \
 void PASTEMAC(opname,_check) \
      ( \
-       obj_t*  alpha, \
-       obj_t*  a, \
-       obj_t*  b, \
-       obj_t*  beta, \
-       obj_t*  c, \
-       cntx_t* cntx  \
+       const obj_t*  alpha, \
+       const obj_t*  a, \
+       const obj_t*  b, \
+       const obj_t*  beta, \
+       const obj_t*  c, \
+       const cntx_t* cntx  \
     );
 
 GENPROT( gemm )
@@ -61,13 +61,13 @@ GENPROT( syr2k )
 \
 void PASTEMAC(opname,_check) \
      ( \
-       side_t  side, \
-       obj_t*  alpha, \
-       obj_t*  a, \
-       obj_t*  b, \
-       obj_t*  beta, \
-       obj_t*  c, \
-       cntx_t* cntx  \
+             side_t  side, \
+       const obj_t*  alpha, \
+       const obj_t*  a, \
+       const obj_t*  b, \
+       const obj_t*  beta, \
+       const obj_t*  c, \
+       const cntx_t* cntx  \
     );
 
 GENPROT( hemm )
@@ -80,11 +80,11 @@ GENPROT( trmm3 )
 \
 void PASTEMAC(opname,_check) \
      ( \
-       obj_t*  alpha, \
-       obj_t*  a, \
-       obj_t*  beta, \
-       obj_t*  c, \
-       cntx_t* cntx  \
+       const obj_t*  alpha, \
+       const obj_t*  a, \
+       const obj_t*  beta, \
+       const obj_t*  c, \
+       const cntx_t* cntx  \
     );
 
 GENPROT( herk )
@@ -96,11 +96,11 @@ GENPROT( syrk )
 \
 void PASTEMAC(opname,_check) \
      ( \
-       side_t  side, \
-       obj_t*  alpha, \
-       obj_t*  a, \
-       obj_t*  b, \
-       cntx_t* cntx  \
+             side_t  side, \
+       const obj_t*  alpha, \
+       const obj_t*  a, \
+       const obj_t*  b, \
+       const cntx_t* cntx  \
     );
 
 GENPROT( trmm )
@@ -111,63 +111,63 @@ GENPROT( trsm )
 
 void bli_gemm_basic_check
      (
-       obj_t*  alpha,
-       obj_t*  a,
-       obj_t*  b,
-       obj_t*  beta,
-       obj_t*  c,
-       cntx_t* cntx
+       const obj_t*  alpha,
+       const obj_t*  a,
+       const obj_t*  b,
+       const obj_t*  beta,
+       const obj_t*  c,
+       const cntx_t* cntx
      );
 
 void bli_gemmt_basic_check
      (
-       obj_t*  alpha,
-       obj_t*  a,
-       obj_t*  b,
-       obj_t*  beta,
-       obj_t*  c,
-       cntx_t* cntx
+       const obj_t*  alpha,
+       const obj_t*  a,
+       const obj_t*  b,
+       const obj_t*  beta,
+       const obj_t*  c,
+       const cntx_t* cntx
      );
 
 void bli_hemm_basic_check
      (
-       side_t  side,
-       obj_t*  alpha,
-       obj_t*  a,
-       obj_t*  b,
-       obj_t*  beta,
-       obj_t*  c,
-       cntx_t* cntx
+             side_t  side,
+       const obj_t*  alpha,
+       const obj_t*  a,
+       const obj_t*  b,
+       const obj_t*  beta,
+       const obj_t*  c,
+       const cntx_t* cntx
      );
 
 void bli_herk_basic_check
      (
-       obj_t*  alpha,
-       obj_t*  a,
-       obj_t*  ah,
-       obj_t*  beta,
-       obj_t*  c,
-       cntx_t* cntx
+       const obj_t*  alpha,
+       const obj_t*  a,
+       const obj_t*  ah,
+       const obj_t*  beta,
+       const obj_t*  c,
+       const cntx_t* cntx
      );
 
 void bli_her2k_basic_check
      (
-       obj_t*  alpha,
-       obj_t*  a,
-       obj_t*  bh,
-       obj_t*  b,
-       obj_t*  ah,
-       obj_t*  beta,
-       obj_t*  c,
-       cntx_t* cntx
+       const obj_t*  alpha,
+       const obj_t*  a,
+       const obj_t*  bh,
+       const obj_t*  b,
+       const obj_t*  ah,
+       const obj_t*  beta,
+       const obj_t*  c,
+       const cntx_t* cntx
      );
 
 void bli_l3_basic_check
      (
-       obj_t*  alpha,
-       obj_t*  a,
-       obj_t*  b,
-       obj_t*  beta,
-       obj_t*  c,
-       cntx_t* cntx
+       const obj_t*  alpha,
+       const obj_t*  a,
+       const obj_t*  b,
+       const obj_t*  beta,
+       const obj_t*  c,
+       const cntx_t* cntx
      );

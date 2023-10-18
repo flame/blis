@@ -42,10 +42,10 @@
 \
 BLIS_EXPORT_BLIS void PASTEMAC2(ch,opname,EX_SUF) \
       ( \
-        conj_t  conjx, \
-        dim_t   n, \
-        ctype*  x, inc_t incx, \
-        ctype*  y, inc_t incy  \
+              conj_t conjx, \
+              dim_t  n, \
+        const ctype* x, inc_t incx, \
+              ctype* y, inc_t incy  \
         BLIS_TAPI_EX_PARAMS  \
       );
 
@@ -59,9 +59,9 @@ INSERT_GENTPROT_BASIC0( subv )
 \
 BLIS_EXPORT_BLIS void PASTEMAC2(ch,opname,EX_SUF) \
      ( \
-       dim_t   n, \
-       ctype*  x, inc_t incx, \
-       dim_t*  index  \
+             dim_t  n, \
+       const ctype* x, inc_t incx, \
+             dim_t* index  \
        BLIS_TAPI_EX_PARAMS  \
      ); \
 
@@ -73,12 +73,12 @@ INSERT_GENTPROT_BASIC0( amaxv )
 \
 BLIS_EXPORT_BLIS void PASTEMAC2(ch,opname,EX_SUF) \
      ( \
-       conj_t  conjx, \
-       dim_t   n, \
-       ctype*  alpha, \
-       ctype*  x, inc_t incx, \
-       ctype*  beta, \
-       ctype*  y, inc_t incy  \
+             conj_t conjx, \
+             dim_t  n, \
+       const ctype* alpha, \
+       const ctype* x, inc_t incx, \
+       const ctype* beta, \
+             ctype* y, inc_t incy  \
        BLIS_TAPI_EX_PARAMS  \
      ); \
 
@@ -90,11 +90,11 @@ INSERT_GENTPROT_BASIC0( axpbyv )
 \
 BLIS_EXPORT_BLIS void PASTEMAC2(ch,opname,EX_SUF) \
      ( \
-       conj_t  conjx, \
-       dim_t   n, \
-       ctype*  alpha, \
-       ctype*  x, inc_t incx, \
-       ctype*  y, inc_t incy  \
+             conj_t conjx, \
+             dim_t  n, \
+       const ctype* alpha, \
+       const ctype* x, inc_t incx, \
+             ctype* y, inc_t incy  \
        BLIS_TAPI_EX_PARAMS  \
      ); \
 
@@ -107,12 +107,12 @@ INSERT_GENTPROT_BASIC0( scal2v )
 \
 BLIS_EXPORT_BLIS void PASTEMAC2(ch,opname,EX_SUF) \
      ( \
-       conj_t  conjx, \
-       conj_t  conjy, \
-       dim_t   n, \
-       ctype*  x, inc_t incx, \
-       ctype*  y, inc_t incy, \
-       ctype*  rho  \
+             conj_t conjx, \
+             conj_t conjy, \
+             dim_t  n, \
+       const ctype* x, inc_t incx, \
+       const ctype* y, inc_t incy, \
+             ctype* rho  \
        BLIS_TAPI_EX_PARAMS  \
      ); \
 
@@ -124,14 +124,14 @@ INSERT_GENTPROT_BASIC0( dotv )
 \
 BLIS_EXPORT_BLIS void PASTEMAC2(ch,opname,EX_SUF) \
      ( \
-       conj_t  conjx, \
-       conj_t  conjy, \
-       dim_t   n, \
-       ctype*  alpha, \
-       ctype*  x, inc_t incx, \
-       ctype*  y, inc_t incy, \
-       ctype*  beta, \
-       ctype*  rho  \
+             conj_t conjx, \
+             conj_t conjy, \
+             dim_t  n, \
+       const ctype* alpha, \
+       const ctype* x, inc_t incx, \
+       const ctype* y, inc_t incy, \
+       const ctype* beta, \
+             ctype* rho  \
        BLIS_TAPI_EX_PARAMS  \
      ); \
 
@@ -143,8 +143,8 @@ INSERT_GENTPROT_BASIC0( dotxv )
 \
 BLIS_EXPORT_BLIS void PASTEMAC2(ch,opname,EX_SUF) \
      ( \
-       dim_t   n, \
-       ctype*  x, inc_t incx  \
+       dim_t  n, \
+       ctype* x, inc_t incx  \
        BLIS_TAPI_EX_PARAMS  \
      ); \
 
@@ -156,10 +156,10 @@ INSERT_GENTPROT_BASIC0( invertv )
 \
 BLIS_EXPORT_BLIS void PASTEMAC2(ch,opname,EX_SUF) \
      ( \
-       conj_t  conjalpha, \
-       dim_t   n, \
-       ctype*  alpha, \
-       ctype*  x, inc_t incx  \
+             conj_t conjalpha, \
+             dim_t  n, \
+       const ctype* alpha, \
+             ctype* x, inc_t incx  \
        BLIS_TAPI_EX_PARAMS  \
      ); \
 
@@ -173,9 +173,9 @@ INSERT_GENTPROT_BASIC0( setv )
 \
 BLIS_EXPORT_BLIS void PASTEMAC2(ch,opname,EX_SUF) \
      ( \
-       dim_t   n, \
-       ctype*  x, inc_t incx, \
-       ctype*  y, inc_t incy  \
+       dim_t  n, \
+       ctype* x, inc_t incx, \
+       ctype* y, inc_t incy  \
        BLIS_TAPI_EX_PARAMS  \
      ); \
 
@@ -187,11 +187,11 @@ INSERT_GENTPROT_BASIC0( swapv )
 \
 BLIS_EXPORT_BLIS void PASTEMAC2(ch,opname,EX_SUF) \
      ( \
-       conj_t  conjx, \
-       dim_t   n, \
-       ctype*  x, inc_t incx, \
-       ctype*  beta, \
-       ctype*  y, inc_t incy  \
+             conj_t conjx, \
+             dim_t  n, \
+       const ctype* x, inc_t incx, \
+       const ctype* beta, \
+             ctype* y, inc_t incy  \
        BLIS_TAPI_EX_PARAMS  \
      ); \
 

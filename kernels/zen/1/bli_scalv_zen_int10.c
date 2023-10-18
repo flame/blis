@@ -61,7 +61,7 @@ void bli_sscalv_zen_int10
        dim_t            n,
        float*  restrict alpha,
        float*  restrict x, inc_t incx,
-       cntx_t* restrict cntx
+       cntx_t*          cntx
      )
 {
 	const dim_t      n_elem_per_reg = 8;
@@ -82,7 +82,7 @@ void bli_sscalv_zen_int10
 	{
 		float* zero = bli_s0;
 
-		if ( cntx == NULL ) cntx = bli_gks_query_cntx();
+		if ( cntx == NULL ) cntx = ( cntx_t* )bli_gks_query_cntx();
 
 		ssetv_ker_ft f = bli_cntx_get_ukr_dt( BLIS_FLOAT, BLIS_SETV_KER, cntx );
 
@@ -255,7 +255,7 @@ void bli_dscalv_zen_int10
        dim_t            n,
        double* restrict alpha,
        double* restrict x, inc_t incx,
-       cntx_t* restrict cntx
+       cntx_t*          cntx
      )
 {
 	const dim_t      n_elem_per_reg = 4;
@@ -276,7 +276,7 @@ void bli_dscalv_zen_int10
 	{
 		double* zero = bli_d0;
 
-		if ( cntx == NULL ) cntx = bli_gks_query_cntx();
+		if ( cntx == NULL ) cntx = ( cntx_t* )bli_gks_query_cntx();
 
 		dsetv_ker_ft f = bli_cntx_get_ukr_dt( BLIS_DOUBLE, BLIS_SETV_KER, cntx );
 

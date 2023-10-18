@@ -40,8 +40,8 @@ void bli_ztrsm_l_template_noopt
        dcomplex*  restrict a11,
        dcomplex*  restrict b11,
        dcomplex*  restrict c11, inc_t rs_c, inc_t cs_c,
-       auxinfo_t* restrict data,
-       cntx_t*    restrict cntx
+       auxinfo_t*          data,
+       cntx_t*             cntx
      )
 {
 /*

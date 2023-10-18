@@ -36,27 +36,27 @@
 
 BLIS_EXPORT_BLIS void bli_setrm
      (
-       obj_t* alpha,
-       obj_t* b
+       const obj_t* alpha,
+       const obj_t* b
      );
 
 BLIS_EXPORT_BLIS void bli_setrv
      (
-       obj_t* alpha,
-       obj_t* x
+       const obj_t* alpha,
+       const obj_t* x
      );
 
 // -- seti ---------------------------------------------------------------------
 
 BLIS_EXPORT_BLIS void bli_setim
      (
-       obj_t* alpha,
-       obj_t* b
+       const obj_t* alpha,
+       const obj_t* b
      );
 
 BLIS_EXPORT_BLIS void bli_setiv
      (
-       obj_t* alpha,
-       obj_t* x
+       const obj_t* alpha,
+       const obj_t* x
      );
 

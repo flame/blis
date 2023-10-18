@@ -49,8 +49,8 @@ void PASTEMAC2(ch,opname,suf) \
        ctype*     restrict b, \
        ctype*     restrict beta, \
        ctype*     restrict c, inc_t rs_c, inc_t cs_c, \
-       auxinfo_t* restrict data, \
-       cntx_t*    restrict cntx  \
+       auxinfo_t*          data, \
+       cntx_t*             cntx  \
      ) \
 { \
 	const num_t       dt        = PASTEMAC(ch,type); \

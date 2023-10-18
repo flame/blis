@@ -43,51 +43,51 @@ typedef struct mddm_s
 
 void bli_gemm_md
      (
-       obj_t*   a,
-       obj_t*   b,
-       obj_t*   beta,
-       obj_t*   c,
-       cntx_t*  cntx_local,
-       cntx_t** cntx
+             obj_t*   a,
+             obj_t*   b,
+       const obj_t*   beta,
+             obj_t*   c,
+             cntx_t*  cntx_local,
+       const cntx_t** cntx
      );
-mddm_t bli_gemm_md_ccc( obj_t* a, obj_t* b, obj_t* beta, obj_t* c, cntx_t* cntx_l, cntx_t** cntx );
-mddm_t bli_gemm_md_ccr( obj_t* a, obj_t* b, obj_t* beta, obj_t* c, cntx_t* cntx_l, cntx_t** cntx );
-mddm_t bli_gemm_md_crc( obj_t* a, obj_t* b, obj_t* beta, obj_t* c, cntx_t* cntx_l, cntx_t** cntx );
-mddm_t bli_gemm_md_rcc( obj_t* a, obj_t* b, obj_t* beta, obj_t* c, cntx_t* cntx_l, cntx_t** cntx );
-mddm_t bli_gemm_md_rrc( obj_t* a, obj_t* b, obj_t* beta, obj_t* c, cntx_t* cntx_l, cntx_t** cntx );
-mddm_t bli_gemm_md_rcr( obj_t* a, obj_t* b, obj_t* beta, obj_t* c, cntx_t* cntx_l, cntx_t** cntx );
-mddm_t bli_gemm_md_crr( obj_t* a, obj_t* b, obj_t* beta, obj_t* c, cntx_t* cntx_l, cntx_t** cntx );
-mddm_t bli_gemm_md_rrr( obj_t* a, obj_t* b, obj_t* beta, obj_t* c, cntx_t* cntx_l, cntx_t** cntx );
+mddm_t bli_gemm_md_ccc( obj_t* a, obj_t* b, const obj_t* beta, obj_t* c, cntx_t* cntx_l, const cntx_t** cntx );
+mddm_t bli_gemm_md_ccr( obj_t* a, obj_t* b, const obj_t* beta, obj_t* c, cntx_t* cntx_l, const cntx_t** cntx );
+mddm_t bli_gemm_md_crc( obj_t* a, obj_t* b, const obj_t* beta, obj_t* c, cntx_t* cntx_l, const cntx_t** cntx );
+mddm_t bli_gemm_md_rcc( obj_t* a, obj_t* b, const obj_t* beta, obj_t* c, cntx_t* cntx_l, const cntx_t** cntx );
+mddm_t bli_gemm_md_rrc( obj_t* a, obj_t* b, const obj_t* beta, obj_t* c, cntx_t* cntx_l, const cntx_t** cntx );
+mddm_t bli_gemm_md_rcr( obj_t* a, obj_t* b, const obj_t* beta, obj_t* c, cntx_t* cntx_l, const cntx_t** cntx );
+mddm_t bli_gemm_md_crr( obj_t* a, obj_t* b, const obj_t* beta, obj_t* c, cntx_t* cntx_l, const cntx_t** cntx );
+mddm_t bli_gemm_md_rrr( obj_t* a, obj_t* b, const obj_t* beta, obj_t* c, cntx_t* cntx_l, const cntx_t** cntx );
 
 // -----------------------------------------------------------------------------
 
 void bli_gemm_md_front
      (
-       obj_t*  alpha,
-       obj_t*  a,
-       obj_t*  b,
-       obj_t*  beta,
-       obj_t*  c,
-       cntx_t* cntx,
-       rntm_t* rntm,
-       cntl_t* cntl
+       const obj_t*  alpha,
+       const obj_t*  a,
+       const obj_t*  b,
+       const obj_t*  beta,
+       const obj_t*  c,
+       const cntx_t* cntx,
+             rntm_t* rntm,
+             cntl_t* cntl
      );
 
 void bli_gemm_md_zgemm
      (
-       obj_t*  alpha,
-       obj_t*  a,
-       obj_t*  b,
-       obj_t*  beta,
-       obj_t*  c,
-       cntx_t* cntx,
-       rntm_t* rntm,
-       cntl_t* cntl
+       const obj_t*  alpha,
+       const obj_t*  a,
+       const obj_t*  b,
+       const obj_t*  beta,
+       const obj_t*  c,
+       const cntx_t* cntx,
+             rntm_t* rntm,
+             cntl_t* cntl
      );
 
 // -----------------------------------------------------------------------------
 
-BLIS_INLINE bool bli_gemm_md_is_crr( obj_t* a, obj_t* b, obj_t* c )
+BLIS_INLINE bool bli_gemm_md_is_crr( const obj_t* a, const obj_t* b, const obj_t* c )
 {
 	bool r_val = FALSE;
 
@@ -107,7 +107,7 @@ BLIS_INLINE bool bli_gemm_md_is_crr( obj_t* a, obj_t* b, obj_t* c )
 	return r_val;
 }
 
-BLIS_INLINE bool bli_gemm_md_is_ccr( obj_t* a, obj_t* b, obj_t* c )
+BLIS_INLINE bool bli_gemm_md_is_ccr( const obj_t* a, const obj_t* b, const obj_t* c )
 {
 	bool r_val = FALSE;
 
@@ -127,7 +127,7 @@ BLIS_INLINE bool bli_gemm_md_is_ccr( obj_t* a, obj_t* b, obj_t* c )
 	return r_val;
 }
 
-BLIS_INLINE bool bli_gemm_md_is_crc( obj_t* a, obj_t* b, obj_t* c )
+BLIS_INLINE bool bli_gemm_md_is_crc( const obj_t* a, const obj_t* b, const obj_t* c )
 {
 	bool r_val = FALSE;
 
@@ -151,17 +151,17 @@ BLIS_INLINE bool bli_gemm_md_is_crc( obj_t* a, obj_t* b, obj_t* c )
 
 BLIS_INLINE void bli_gemm_md_ker_var2_recast
      (
-       num_t* dt_comp,
-       num_t  dt_a,
-       num_t  dt_b,
-       num_t* dt_c,
-       dim_t* m,
-       dim_t* n,
-       dim_t* k,
-       inc_t* pd_a, inc_t* ps_a,
-       inc_t* pd_b, inc_t* ps_b,
-       obj_t* c,
-       inc_t* rs_c, inc_t* cs_c
+             num_t* dt_comp,
+             num_t  dt_a,
+             num_t  dt_b,
+             num_t* dt_c,
+             dim_t* m,
+             dim_t* n,
+             dim_t* k,
+             inc_t* pd_a, inc_t* ps_a,
+             inc_t* pd_b, inc_t* ps_b,
+       const obj_t* c,
+             inc_t* rs_c, inc_t* cs_c
      )
 {
 	if      ( bli_is_real( *dt_c )    &&

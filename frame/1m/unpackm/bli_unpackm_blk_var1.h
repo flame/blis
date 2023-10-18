@@ -34,11 +34,11 @@
 
 void bli_unpackm_blk_var1
      (
-       obj_t*  p,
-       obj_t*  c,
-       cntx_t* cntx,
-       cntl_t* cntl,
-       thrinfo_t* thread
+       const obj_t*  p,
+       const obj_t*  c,
+       const cntx_t* cntx,
+       const cntl_t* cntl,
+       const thrinfo_t* thread
      );
 
 

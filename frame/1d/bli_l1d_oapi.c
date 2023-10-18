@@ -45,8 +45,8 @@
 \
 void PASTEMAC(opname,EX_SUF) \
      ( \
-       obj_t*  x, \
-       obj_t*  y  \
+       const obj_t* x, \
+       const obj_t* y  \
        BLIS_OAPI_EX_PARAMS  \
      ) \
 { \
@@ -69,7 +69,7 @@ void PASTEMAC(opname,EX_SUF) \
 	inc_t     cs_y      = bli_obj_col_stride( y ); \
 \
 	if ( bli_error_checking_is_enabled() ) \
-	    PASTEMAC(opname,_check)( x, y ); \
+		PASTEMAC(opname,_check)( x, y ); \
 \
 	/* Query a type-specific function pointer, except one that uses
 	   void* for function arguments instead of typed pointers. */ \
@@ -100,9 +100,9 @@ GENFRONT( subd )
 \
 void PASTEMAC(opname,EX_SUF) \
      ( \
-       obj_t*  alpha, \
-       obj_t*  x, \
-       obj_t*  y  \
+       const obj_t* alpha, \
+       const obj_t* x, \
+       const obj_t* y  \
        BLIS_OAPI_EX_PARAMS  \
      ) \
 { \
@@ -129,7 +129,7 @@ void PASTEMAC(opname,EX_SUF) \
 	obj_t     alpha_local; \
 \
 	if ( bli_error_checking_is_enabled() ) \
-	    PASTEMAC(opname,_check)( alpha, x, y ); \
+		PASTEMAC(opname,_check)( alpha, x, y ); \
 \
 	/* Create local copy-casts of scalars (and apply internal conjugation
 	   as needed). */ \
@@ -166,7 +166,7 @@ GENFRONT( scal2d )
 \
 void PASTEMAC(opname,EX_SUF) \
      ( \
-       obj_t*  x  \
+       const obj_t* x  \
        BLIS_OAPI_EX_PARAMS  \
      ) \
 { \
@@ -184,7 +184,7 @@ void PASTEMAC(opname,EX_SUF) \
 	inc_t     cs_x      = bli_obj_col_stride( x ); \
 \
 	if ( bli_error_checking_is_enabled() ) \
-	    PASTEMAC(opname,_check)( x ); \
+		PASTEMAC(opname,_check)( x ); \
 \
 	/* Query a type-specific function pointer, except one that uses
 	   void* for function arguments instead of typed pointers. */ \
@@ -210,8 +210,8 @@ GENFRONT( invertd )
 \
 void PASTEMAC(opname,EX_SUF) \
      ( \
-       obj_t*  alpha, \
-       obj_t*  x  \
+       const obj_t* alpha, \
+       const obj_t* x  \
        BLIS_OAPI_EX_PARAMS  \
      ) \
 { \
@@ -234,7 +234,7 @@ void PASTEMAC(opname,EX_SUF) \
 	obj_t     alpha_local; \
 \
 	if ( bli_error_checking_is_enabled() ) \
-	    PASTEMAC(opname,_check)( alpha, x ); \
+		PASTEMAC(opname,_check)( alpha, x ); \
 \
 	/* Create local copy-casts of scalars (and apply internal conjugation
 	   as needed). */ \
@@ -270,8 +270,8 @@ GENFRONT( setd )
 \
 void PASTEMAC(opname,EX_SUF) \
      ( \
-       obj_t*  alpha, \
-       obj_t*  x  \
+       const obj_t* alpha, \
+       const obj_t* x  \
        BLIS_OAPI_EX_PARAMS  \
      ) \
 { \
@@ -291,7 +291,7 @@ void PASTEMAC(opname,EX_SUF) \
 	void*     buf_alpha = bli_obj_buffer_for_1x1( dt, alpha ); \
 \
 	if ( bli_error_checking_is_enabled() ) \
-	    PASTEMAC(opname,_check)( alpha, x ); \
+		PASTEMAC(opname,_check)( alpha, x ); \
 \
 	/* Query a type-specific function pointer, except one that uses
 	   void* for function arguments instead of typed pointers. */ \
@@ -318,8 +318,8 @@ GENFRONT( setid )
 \
 void PASTEMAC(opname,EX_SUF) \
      ( \
-       obj_t*  alpha, \
-       obj_t*  x  \
+       const obj_t* alpha, \
+       const obj_t* x  \
        BLIS_OAPI_EX_PARAMS  \
      ) \
 { \
@@ -341,7 +341,7 @@ void PASTEMAC(opname,EX_SUF) \
 	obj_t     alpha_local; \
 \
 	if ( bli_error_checking_is_enabled() ) \
-	    PASTEMAC(opname,_check)( alpha, x ); \
+		PASTEMAC(opname,_check)( alpha, x ); \
 \
 	/* Create local copy-casts of scalars (and apply internal conjugation
 	   as needed). */ \
@@ -374,9 +374,9 @@ GENFRONT( shiftd )
 \
 void PASTEMAC(opname,EX_SUF) \
      ( \
-       obj_t*  x, \
-       obj_t*  beta, \
-       obj_t*  y  \
+       const obj_t* x, \
+       const obj_t* beta, \
+       const obj_t* y  \
        BLIS_OAPI_EX_PARAMS  \
      ) \
 { \
@@ -403,7 +403,7 @@ void PASTEMAC(opname,EX_SUF) \
 	obj_t     beta_local; \
 \
 	if ( bli_error_checking_is_enabled() ) \
-	    PASTEMAC(opname,_check)( x, beta, y ); \
+		PASTEMAC(opname,_check)( x, beta, y ); \
 \
 	/* Create local copy-casts of scalars (and apply internal conjugation
 	   as needed). */ \

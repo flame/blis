@@ -69,8 +69,8 @@ void bli_dgemmsup_rv_armv8a_int_6x4mn
        double*    restrict b0, inc_t rs_b, inc_t cs_b,
        double*    restrict beta,
        double*    restrict c0, inc_t rs_c, inc_t cs_c,
-       auxinfo_t* restrict data,
-       cntx_t*    restrict cntx
+       auxinfo_t*          data,
+       cntx_t*             cntx
      )
 {
   // Unlike the rd case, this rv case does not impose restriction upon
@@ -123,7 +123,7 @@ void bli_dgemmsup_rv_armv8a_int_6x4mn
       for ( ; k > 0; --k )
       {
         // A columns.
-        // if ( m0 > 0 ) 
+        // if ( m0 > 0 )
                       va_0 = vld1q_lane_f64( a_loc + rs_a * 0, va_0, 0 );
         if ( m0 > 1 ) va_0 = vld1q_lane_f64( a_loc + rs_a * 1, va_0, 1 );
         if ( m0 > 2 ) va_1 = vld1q_lane_f64( a_loc + rs_a * 2, va_1, 0 );

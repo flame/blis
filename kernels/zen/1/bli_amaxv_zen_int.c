@@ -104,7 +104,7 @@ void bli_samaxv_zen_int
        dim_t            n,
        float*  restrict x, inc_t incx,
        dim_t*  restrict i_max,
-       cntx_t* restrict cntx
+       cntx_t*          cntx
      )
 {
 	float*  minus_one = PASTEMAC(s,m1);
@@ -202,7 +202,7 @@ void bli_samaxv_zen_int
 		max_vec_hi.v    = _mm256_extractf128_ps( max_vec.v, 1 );
 		maxInx_vec_lo.v = _mm256_extractf128_ps( maxInx_vec.v, 0 );
 		maxInx_vec_hi.v = _mm256_extractf128_ps( maxInx_vec.v, 1 );
-		
+
 		mask_vec_lo.v = CMP128( s, max_vec_hi.v, max_vec_lo.v, maxInx_vec_hi.v, maxInx_vec_lo.v );
 
 		max_vec_lo.v    = _mm_blendv_ps( max_vec_lo.v, max_vec_hi.v, mask_vec_lo.v );
@@ -210,7 +210,7 @@ void bli_samaxv_zen_int
 
 		max_vec_hi.v    = _mm_permute_ps( max_vec_lo.v, 14 );
 		maxInx_vec_hi.v = _mm_permute_ps( maxInx_vec_lo.v, 14 );
-		
+
 		mask_vec_lo.v = CMP128( s, max_vec_hi.v, max_vec_lo.v, maxInx_vec_hi.v, maxInx_vec_lo.v );
 
 		max_vec_lo.v    = _mm_blendv_ps( max_vec_lo.v, max_vec_hi.v, mask_vec_lo.v );
@@ -218,7 +218,7 @@ void bli_samaxv_zen_int
 
 		max_vec_hi.v    = _mm_permute_ps( max_vec_lo.v, 1 );
 		maxInx_vec_hi.v = _mm_permute_ps( maxInx_vec_lo.v, 1 );
-		
+
 		mask_vec_lo.v = CMP128( s, max_vec_hi.v, max_vec_lo.v, maxInx_vec_hi.v, maxInx_vec_lo.v );
 
 		max_vec_lo.v    = _mm_blendv_ps( max_vec_lo.v, max_vec_hi.v, mask_vec_lo.v );
@@ -269,7 +269,7 @@ void bli_damaxv_zen_int
        dim_t            n,
        double* restrict x, inc_t incx,
        dim_t*  restrict i_max,
-       cntx_t* restrict cntx
+       cntx_t*          cntx
      )
 {
 	double* minus_one = PASTEMAC(d,m1);
@@ -367,15 +367,15 @@ void bli_damaxv_zen_int
 		max_vec_hi.v    = _mm256_extractf128_pd( max_vec.v, 1 );
 		maxInx_vec_lo.v = _mm256_extractf128_pd( maxInx_vec.v, 0 );
 		maxInx_vec_hi.v = _mm256_extractf128_pd( maxInx_vec.v, 1 );
-		
+
 		mask_vec_lo.v = CMP128( d, max_vec_hi.v, max_vec_lo.v, maxInx_vec_hi.v, maxInx_vec_lo.v );
 
 		max_vec_lo.v    = _mm_blendv_pd( max_vec_lo.v, max_vec_hi.v, mask_vec_lo.v );
 		maxInx_vec_lo.v = _mm_blendv_pd( maxInx_vec_lo.v, maxInx_vec_hi.v, mask_vec_lo.v );
-		
+
 		max_vec_hi.v    = _mm_permute_pd( max_vec_lo.v, 1 );
 		maxInx_vec_hi.v = _mm_permute_pd( maxInx_vec_lo.v, 1 );
-		
+
 		mask_vec_lo.v = CMP128( d, max_vec_hi.v, max_vec_lo.v, maxInx_vec_hi.v, maxInx_vec_lo.v );
 
 		max_vec_lo.v    = _mm_blendv_pd( max_vec_lo.v, max_vec_hi.v, mask_vec_lo.v );

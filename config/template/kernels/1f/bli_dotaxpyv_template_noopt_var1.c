@@ -46,7 +46,7 @@ void bli_zdotaxpyv_template_noopt
        dcomplex* restrict y, inc_t incy,
        dcomplex* restrict rho,
        dcomplex* restrict z, inc_t incz,
-       cntx_t*   restrict cntx
+       cntx_t*            cntx
      )
 {
 /*

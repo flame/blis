@@ -40,20 +40,20 @@
 
 /*
    rrr:
-	 --------        ------        --------      
-	 --------        ------        --------      
-	 --------   +=   ------ ...    --------      
-	 --------        ------        --------      
-	 --------        ------            :         
-	 --------        ------            :         
+	 --------        ------        --------
+	 --------        ------        --------
+	 --------   +=   ------ ...    --------
+	 --------        ------        --------
+	 --------        ------            :
+	 --------        ------            :
 
    rcr:
-	 --------        | | | |       --------      
-	 --------        | | | |       --------      
-	 --------   +=   | | | | ...   --------      
-	 --------        | | | |       --------      
-	 --------        | | | |           :         
-	 --------        | | | |           :         
+	 --------        | | | |       --------
+	 --------        | | | |       --------
+	 --------   +=   | | | | ...   --------
+	 --------        | | | |       --------
+	 --------        | | | |           :
+	 --------        | | | |           :
 
    Assumptions:
    - B is row-stored;
@@ -69,12 +69,12 @@
    cost of the in-register transpose).
 
    crr:
-	 | | | | | | | |       ------        --------      
-	 | | | | | | | |       ------        --------      
-	 | | | | | | | |  +=   ------ ...    --------      
-	 | | | | | | | |       ------        --------      
-	 | | | | | | | |       ------            :         
-	 | | | | | | | |       ------            :         
+	 | | | | | | | |       ------        --------
+	 | | | | | | | |       ------        --------
+	 | | | | | | | |  +=   ------ ...    --------
+	 | | | | | | | |       ------        --------
+	 | | | | | | | |       ------            :
+	 | | | | | | | |       ------            :
 */
 
 // Prototype reference microkernels.
@@ -103,8 +103,8 @@ void PASTEMAC(ch,opname) \
        ctype*     restrict b, inc_t rs_b, inc_t cs_b, \
        ctype*     restrict beta, \
        ctype*     restrict c, inc_t rs_c, inc_t cs_c, \
-       auxinfo_t* restrict data, \
-       cntx_t*    restrict cntx \
+       auxinfo_t*          data, \
+       cntx_t*             cntx \
      ) \
 { \
 	for ( dim_t i = 0; i < mdim; ++i ) \
@@ -175,8 +175,8 @@ void PASTEMAC(ch,opname) \
        ctype*     restrict b, inc_t rs_b, inc_t cs_b, \
        ctype*     restrict beta, \
        ctype*     restrict c, inc_t rs_c, inc_t cs_c, \
-       auxinfo_t* restrict data, \
-       cntx_t*    restrict cntx \
+       auxinfo_t*          data, \
+       cntx_t*             cntx \
      ) \
 { \
 	for ( dim_t i = 0; i < m; ++i ) \

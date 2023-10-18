@@ -58,11 +58,11 @@ static FUNCPTR_T GENARRAY(ftypes,unpackm_blk_var1);
 
 void bli_unpackm_blk_var1
      (
-       obj_t*  p,
-       obj_t*  c,
-       cntx_t* cntx,
-       cntl_t* cntl,
-       thrinfo_t* thread
+       const obj_t*  p,
+       const obj_t*  c,
+       const cntx_t* cntx,
+       const cntl_t* cntl,
+       const thrinfo_t* thread
      )
 {
 	num_t     dt_cp     = bli_obj_dt( c );
@@ -108,19 +108,22 @@ void bli_unpackm_blk_var1
 	f = ftypes[dt_cp];
 
 	// Invoke the function.
-	f( strucc,
-	   diagoffc,
-	   diagc,
-	   uploc,
-	   transc,
-	   m_c,
-	   n_c,
-	   m_panel,
-	   n_panel,
-	   buf_p, rs_p, cs_p,
-	          pd_p, ps_p,
-	   buf_c, rs_c, cs_c,
-	   cntx );
+	f
+	(
+	  strucc,
+	  diagoffc,
+	  diagc,
+	  uploc,
+	  transc,
+	  m_c,
+	  n_c,
+	  m_panel,
+	  n_panel,
+	  buf_p, rs_p, cs_p,
+	         pd_p, ps_p,
+	  buf_c, rs_c, cs_c,
+	  ( cntx_t* )cntx
+	);
 }
 
 
@@ -144,29 +147,28 @@ void PASTEMAC(ch,varname) \
        cntx_t* cntx  \
      ) \
 { \
-	ctype* restrict one       = PASTEMAC(ch,1); \
-	ctype* restrict c_cast    = c; \
-	ctype* restrict p_cast    = p; \
-	ctype* restrict c_begin; \
-	ctype* restrict p_begin; \
+	ctype* one    = PASTEMAC(ch,1); \
+	ctype* c_cast = c; \
+	ctype* p_cast = p; \
+	ctype* c_begin; \
+	ctype* p_begin; \
 \
-	dim_t           iter_dim; \
-	dim_t           num_iter; \
-	dim_t           it, ic, ip; \
-	dim_t           ic0, ip0; \
-	doff_t          ic_inc, ip_inc; \
-	doff_t          diagoffc_i; \
-	doff_t          diagoffc_inc; \
-	dim_t           panel_len; \
-	dim_t           panel_dim_i; \
-	dim_t           panel_dim_max; \
-	inc_t           vs_c; \
-	inc_t           incc, ldc; \
-	inc_t           ldp; \
-	dim_t*          m_panel_full; \
-	dim_t*          n_panel_full; \
-	pack_t          schema; \
-\
+	dim_t  iter_dim; \
+	dim_t  num_iter; \
+	dim_t  it, ic, ip; \
+	dim_t  ic0, ip0; \
+	doff_t ic_inc, ip_inc; \
+	doff_t diagoffc_i; \
+	doff_t diagoffc_inc; \
+	dim_t  panel_len; \
+	dim_t  panel_dim_i; \
+	dim_t  panel_dim_max; \
+	inc_t  vs_c; \
+	inc_t  incc, ldc; \
+	inc_t  ldp; \
+	dim_t* m_panel_full; \
+	dim_t* n_panel_full; \
+	pack_t schema; \
 \
 	/* If c needs a transposition, induce it so that we can more simply
 	   express the remaining parameters and code. */ \
@@ -274,7 +276,7 @@ void PASTEMAC(ch,varname) \
 			  one, \
 			  p_begin,       ldp, \
 			  c_begin, incc, ldc, \
-			  cntx  \
+			  ( cntx_t* )cntx  \
 			); \
 		} \
 \

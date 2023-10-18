@@ -40,23 +40,23 @@ BLIS_EXPORT_BLIS void bli_obj_scalar_init_detached
 
 BLIS_EXPORT_BLIS void bli_obj_scalar_init_detached_copy_of
      (
-       num_t  dt,
-       conj_t conj,
-       obj_t* alpha,
-       obj_t* beta
+             num_t  dt,
+             conj_t conj,
+       const obj_t* alpha,
+             obj_t* beta
      );
 
 BLIS_EXPORT_BLIS void bli_obj_scalar_detach
      (
-       obj_t* a,
-       obj_t* alpha
+       const obj_t* a,
+             obj_t* alpha
      );
 
 BLIS_EXPORT_BLIS void bli_obj_scalar_attach
      (
-       conj_t conj,
-       obj_t* alpha,
-       obj_t* a
+             conj_t conj,
+       const obj_t* alpha,
+             obj_t* a
      );
 
 BLIS_EXPORT_BLIS void bli_obj_scalar_cast_to
@@ -67,8 +67,8 @@ BLIS_EXPORT_BLIS void bli_obj_scalar_cast_to
 
 BLIS_EXPORT_BLIS void bli_obj_scalar_apply_scalar
      (
-       obj_t* alpha,
-       obj_t* a
+       const obj_t* alpha,
+             obj_t* a
      );
 
 BLIS_EXPORT_BLIS void bli_obj_scalar_reset
@@ -83,7 +83,7 @@ BLIS_EXPORT_BLIS bool bli_obj_scalar_has_nonzero_imag
 
 BLIS_EXPORT_BLIS bool bli_obj_scalar_equals
      (
-       obj_t* a,
-       obj_t* beta
+       const obj_t* a,
+       const obj_t* beta
      );
 

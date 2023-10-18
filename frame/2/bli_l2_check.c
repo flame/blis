@@ -36,11 +36,11 @@
 
 void bli_gemv_check
      (
-       obj_t*  alpha,
-       obj_t*  a,
-       obj_t*  x,
-       obj_t*  beta,
-       obj_t*  y 
+       const obj_t* alpha,
+       const obj_t* a,
+       const obj_t* x,
+       const obj_t* beta,
+       const obj_t* y
      )
 {
 	err_t e_val;
@@ -66,11 +66,11 @@ void bli_gemv_check
 
 void bli_hemv_check
      (
-       obj_t*  alpha,
-       obj_t*  a,
-       obj_t*  x,
-       obj_t*  beta,
-       obj_t*  y 
+       const obj_t* alpha,
+       const obj_t* a,
+       const obj_t* x,
+       const obj_t* beta,
+       const obj_t* y
      )
 {
 	err_t e_val;
@@ -101,11 +101,11 @@ void bli_hemv_check
 
 void bli_symv_check
      (
-       obj_t*  alpha,
-       obj_t*  a,
-       obj_t*  x,
-       obj_t*  beta,
-       obj_t*  y 
+       const obj_t* alpha,
+       const obj_t* a,
+       const obj_t* x,
+       const obj_t* beta,
+       const obj_t* y
      )
 {
 	err_t e_val;
@@ -136,9 +136,9 @@ void bli_symv_check
 
 void bli_trmv_check
      (
-       obj_t*  alpha,
-       obj_t*  a,
-       obj_t*  x 
+       const obj_t* alpha,
+       const obj_t* a,
+       const obj_t* x
      )
 {
 	err_t e_val;
@@ -166,9 +166,9 @@ void bli_trmv_check
 
 void bli_trsv_check
      (
-       obj_t*  alpha,
-       obj_t*  a,
-       obj_t*  x 
+       const obj_t* alpha,
+       const obj_t* a,
+       const obj_t* x
      )
 {
 	err_t e_val;
@@ -196,10 +196,10 @@ void bli_trsv_check
 
 void bli_ger_check
      (
-       obj_t*  alpha,
-       obj_t*  x,
-       obj_t*  y,
-       obj_t*  a 
+       const obj_t* alpha,
+       const obj_t* x,
+       const obj_t* y,
+       const obj_t* a
      )
 {
 	err_t e_val;
@@ -225,9 +225,9 @@ void bli_ger_check
 
 void bli_her_check
      (
-       obj_t*  alpha,
-       obj_t*  x,
-       obj_t*  a 
+       const obj_t* alpha,
+       const obj_t* x,
+       const obj_t* a
      )
 {
 	err_t e_val;
@@ -255,10 +255,10 @@ void bli_her_check
 
 void bli_her2_check
      (
-       obj_t*  alpha,
-       obj_t*  x,
-       obj_t*  y,
-       obj_t*  a 
+       const obj_t* alpha,
+       const obj_t* x,
+       const obj_t* y,
+       const obj_t* a
      )
 {
 	err_t e_val;
@@ -289,9 +289,9 @@ void bli_her2_check
 
 void bli_syr_check
      (
-       obj_t*  alpha,
-       obj_t*  x,
-       obj_t*  a 
+       const obj_t* alpha,
+       const obj_t* x,
+       const obj_t* a
      )
 {
 	err_t e_val;
@@ -319,10 +319,10 @@ void bli_syr_check
 
 void bli_syr2_check
      (
-       obj_t*  alpha,
-       obj_t*  x,
-       obj_t*  y,
-       obj_t*  a 
+       const obj_t* alpha,
+       const obj_t* x,
+       const obj_t* y,
+       const obj_t* a
      )
 {
 	err_t e_val;
@@ -355,11 +355,11 @@ void bli_syr2_check
 
 void bli_xxmv_check
      (
-       obj_t*  alpha,
-       obj_t*  a,
-       obj_t*  x,
-       obj_t*  beta,
-       obj_t*  y 
+       const obj_t* alpha,
+       const obj_t* a,
+       const obj_t* x,
+       const obj_t* beta,
+       const obj_t* y
      )
 {
 	err_t e_val;
@@ -424,10 +424,10 @@ void bli_xxmv_check
 
 void bli_xxr_check
      (
-       obj_t*  alpha,
-       obj_t*  x,
-       obj_t*  y,
-       obj_t*  a 
+       const obj_t* alpha,
+       const obj_t* x,
+       const obj_t* y,
+       const obj_t* a
      )
 {
 	err_t e_val;

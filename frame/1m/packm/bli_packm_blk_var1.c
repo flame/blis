@@ -54,12 +54,12 @@ static void_fp GENARRAY2_ALL(packm_struc_cxk_md,packm_struc_cxk_md);
 
 void bli_packm_blk_var1
      (
-       obj_t*   c,
-       obj_t*   p,
-       cntx_t*  cntx,
-       rntm_t*  rntm,
-       cntl_t*  cntl,
-       thrinfo_t* thread
+       const obj_t*   c,
+             obj_t*   p,
+       const cntx_t*  cntx,
+             rntm_t*  rntm,
+             cntl_t*  cntl,
+       const thrinfo_t* thread
      )
 {
 	// Extract various fields from the control tree.
@@ -272,7 +272,7 @@ void bli_packm_blk_var1
 				                c_use, incc, ldc,
 				                p_use,       ldp,
 				                       is_p_use,
-				                cntx,
+				                ( cntx_t* )cntx,
 				                params );
 			}
 
@@ -304,7 +304,7 @@ void bli_packm_blk_var1
 				                kappa_cast,
 				                c_begin, incc, ldc,
 				                p_begin,       ldp, is_p,
-				                cntx,
+				                ( cntx_t* )cntx,
 				                params );
 			}
 		}

@@ -349,8 +349,8 @@ void bli_cntl_mark_family
 
 dim_t bli_cntl_calc_num_threads_in
      (
-       rntm_t* rntm,
-       cntl_t* cntl
+       const rntm_t* rntm,
+       const cntl_t* cntl
      )
 {
 	dim_t n_threads_in = 1;

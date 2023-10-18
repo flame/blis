@@ -51,7 +51,7 @@ void bli_dpackm_haswell_asm_8xk
        double*    restrict kappa,
        double*    restrict a, inc_t inca0, inc_t lda0,
        double*    restrict p,              inc_t ldp0,
-       cntx_t*    restrict cntx
+       cntx_t*             cntx
      )
 {
 #if 0
@@ -107,7 +107,7 @@ void bli_dpackm_haswell_asm_8xk
 	if ( cdim0 == mnr && !gs && unitk )
 	{
 		begin_asm()
-		
+
 		mov(var(a), rax)                   // load address of a.
 
 		mov(var(inca), r8)                 // load inca
@@ -121,13 +121,13 @@ void bli_dpackm_haswell_asm_8xk
 
 		mov(var(one), rdx)                 // load address of 1.0 constant
 		vmovsd(mem(rdx), xmm1)             // load 1.0
-		
+
 		mov(var(kappa), rcx)               // load address of kappa
 		vmovsd(mem(rcx), xmm0)             // load kappa
-		
+
 
 										   // now branch on kappa == 1.0
-		
+
 		vucomisd(xmm0, xmm1)               // set ZF if kappa == 1.0
 		je(.DKAPPAUNIT)                    // if ZF = 1, jump to beta == 0 case
 
@@ -137,7 +137,7 @@ void bli_dpackm_haswell_asm_8xk
 
 		cmp(imm(8), r8)                    // set ZF if (8*inca) == 8.
 		jz(.DCOLNONU)                      // jump to column storage case
-		
+
 		// -- kappa non-unit, row storage on A -------------------------------------
 
 		label(.DROWNONU)
@@ -150,7 +150,7 @@ void bli_dpackm_haswell_asm_8xk
 		label(.DCOLNONU)
 
 		jmp(.DDONE)                        // jump to end.
-		
+
 
 
 
@@ -161,7 +161,7 @@ void bli_dpackm_haswell_asm_8xk
 
 
 		// -- kappa unit, row storage on A -----------------------------------------
-		
+
 		label(.DROWUNIT)
 
 		lea(mem(r8,  r8,  2), r12)         // r12 = 3*inca
@@ -265,7 +265,7 @@ void bli_dpackm_haswell_asm_8xk
 		// -- kappa unit, column storage on A --------------------------------------
 
 		label(.DCOLUNIT)
-		
+
 		lea(mem(r10, r10, 2), r13)         // r13 = 3*lda
 
 		mov(var(k_iter), rsi)              // i = k_iter;
@@ -329,8 +329,8 @@ void bli_dpackm_haswell_asm_8xk
 
 
 		label(.DDONE)
-		
-		
+
+
 
 		end_asm(
 		: // output operands (none)
@@ -384,7 +384,7 @@ void bli_dpackm_haswell_asm_8xk
 			(
 			  m_edge,
 			  n_edge,
-			  p_edge, 1, ldp 
+			  p_edge, 1, ldp
 			);
 		}
 	}
@@ -402,7 +402,7 @@ void bli_dpackm_haswell_asm_8xk
 		(
 		  m_edge,
 		  n_edge,
-		  p_edge, 1, ldp 
+		  p_edge, 1, ldp
 		);
 	}
 }

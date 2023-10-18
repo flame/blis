@@ -53,7 +53,7 @@ void PASTEMAC3(ch,opname,arch,suf) \
        ctype*  restrict beta, \
        ctype*  restrict y, inc_t incy, \
        ctype*  restrict z, inc_t incz, \
-       cntx_t* restrict cntx  \
+       cntx_t*          cntx  \
      ) \
 { \
 	/* A is m x n.                   */ \

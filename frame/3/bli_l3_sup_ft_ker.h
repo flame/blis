@@ -57,8 +57,8 @@ typedef void (*PASTECH3(ch,opname,_ker,tsuf)) \
        ctype*     restrict b, inc_t rs_b, inc_t cs_b, \
        ctype*     restrict beta, \
        ctype*     restrict c, inc_t rs_c, inc_t cs_c, \
-       auxinfo_t* restrict data, \
-       cntx_t*    restrict cntx  \
+       auxinfo_t*          data, \
+       cntx_t*             cntx  \
      );
 
 INSERT_GENTDEF( gemmsup )

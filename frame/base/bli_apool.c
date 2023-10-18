@@ -36,7 +36,7 @@
 
 void bli_apool_init
      (
-       apool_t* restrict apool
+       apool_t* apool
      )
 {
 	err_t r_val;
@@ -47,7 +47,7 @@ void bli_apool_init
 	// library initialization.
 
 	// Query the mutex from the apool_t.
-	//bli_pthread_mutex_t* restrict mutex = bli_apool_mutex( apool );
+	//bli_pthread_mutex_t* mutex = bli_apool_mutex( apool );
 
 	// Initialize the mutex.
 	//*mutex = BLIS_PTHREAD_MUTEX_INITIALIZER;
@@ -76,7 +76,7 @@ void bli_apool_init
 	const siz_t align_size = 64;
 
 	// Query the underlying pool_t from the apool_t.
-	pool_t* restrict pool = bli_apool_pool( apool );
+	pool_t* pool = bli_apool_pool( apool );
 
 	// Set the default array_t length of the apool_t.
 	bli_apool_set_def_array_len( num_elem, apool );
@@ -92,7 +92,7 @@ void bli_apool_init
 	#endif
 
 	// Allocate the block_ptrs array.
-	array_t** restrict block_ptrs
+	array_t** block_ptrs
 	=
 	bli_malloc_intl( block_ptrs_len * sizeof( array_t* ), &r_val );
 
@@ -139,8 +139,8 @@ void bli_apool_init
 
 void bli_apool_alloc_block
      (
-       siz_t              num_elem,
-       array_t** restrict array_p
+       siz_t     num_elem,
+       array_t** array_p
      )
 {
 	err_t r_val;
@@ -156,9 +156,7 @@ void bli_apool_alloc_block
 	// Allocate the array_t via the bli_fmalloc_align() wrapper, which performs
 	// alignment logic and opaquely saves the original pointer so that it can
 	// be recovered when it's time to free the block.
-	array_t* restrict array
-	=
-	bli_malloc_intl( block_size, &r_val );
+	array_t* array = bli_malloc_intl( block_size, &r_val );
 
 	// Initialize an array_t struct within the newly allocated memory region.
 	bli_array_init( num_elem, sizeof( pool_t* ), array );
@@ -169,16 +167,16 @@ void bli_apool_alloc_block
 
 void bli_apool_free_block
      (
-       array_t* restrict array
+       array_t* array
      )
 {
-	const siz_t       num_elem = bli_array_num_elem( array );
-	pool_t** restrict buf      = bli_array_buf( array );
+	const siz_t    num_elem = bli_array_num_elem( array );
+	      pool_t** buf      = bli_array_buf( array );
 
 	// Step through the array and finalize each pool_t.
 	for ( dim_t i = 0; i < num_elem; ++i )
 	{
-		pool_t* restrict pool = buf[ i ];
+		pool_t* pool = buf[ i ];
 
 		#ifdef BLIS_ENABLE_MEM_TRACING
 		printf( "bli_apool_free_block(): freeing pool_t %d within array_t.\n",
@@ -218,25 +216,25 @@ void bli_apool_free_block
 
 void bli_apool_finalize
      (
-       apool_t* restrict apool
+       apool_t* apool
      )
 {
 	// NOTE: Since the apool_t's mutex is now initialized statically, we no
 	// longer need to explicitly destroy it.
 
 	// Query the mutex from the apool_t.
-	//bli_pthread_mutex_t* restrict mutex = bli_apool_mutex( apool );
+	//bli_pthread_mutex_t* mutex = bli_apool_mutex( apool );
 
 	// Destroy the mutex.
 	//bli_pthread_mutex_destroy( mutex );
 
 	// Query the underlying pool_t and mutex from the apool_t.
-	pool_t* restrict pool = bli_apool_pool( apool );
+	pool_t* pool = bli_apool_pool( apool );
 
 	// ----------------------------------------------------------------
 
 	// Query the block_ptrs array.
-	array_t** restrict block_ptrs = bli_pool_block_ptrs( pool );
+	array_t** block_ptrs = bli_pool_block_ptrs( pool );
 
 	// Query the total number of blocks currently allocated.
 	siz_t num_blocks = bli_pool_num_blocks( pool );
@@ -270,8 +268,8 @@ void bli_apool_finalize
 
 array_t* bli_apool_checkout_array
      (
-       siz_t             n_threads,
-       apool_t* restrict apool
+       siz_t    n_threads,
+       apool_t* apool
      )
 {
 	// Acquire the apool_t's mutex.
@@ -298,10 +296,10 @@ array_t* bli_apool_checkout_array
 	// At this point, at least one array_t is guaranteed to be available.
 
 	// Query the underlying pool_t from the apool_t.
-	pool_t* restrict pool = bli_apool_pool( apool );
+	pool_t* pool = bli_apool_pool( apool );
 
 	// Query the block_ptrs array.
-	array_t** restrict block_ptrs = bli_pool_block_ptrs( pool );
+	array_t** block_ptrs = bli_pool_block_ptrs( pool );
 
 	// Query the top_index of the pool.
 	const siz_t top_index = bli_pool_top_index( pool );
@@ -313,7 +311,7 @@ array_t* bli_apool_checkout_array
 	#endif
 
 	// Select the array_t* at top_index to return to the caller.
-	array_t* restrict array = block_ptrs[ top_index ];
+	array_t* array = block_ptrs[ top_index ];
 
 	// Increment the pool's top_index.
 	bli_pool_set_top_index( top_index + 1, pool );
@@ -333,15 +331,15 @@ array_t* bli_apool_checkout_array
 
 void bli_apool_checkin_array
      (
-       array_t* restrict array,
-       apool_t* restrict apool
+       array_t* array,
+       apool_t* apool
      )
 {
 	// Acquire the apool_t's mutex.
 	bli_apool_lock( apool );
 
 	// Query the underlying pool_t from the apool_t.
-	pool_t* restrict pool = bli_apool_pool( apool );
+	pool_t* pool = bli_apool_pool( apool );
 
 	// ----------------------------------------------------------------------------
 
@@ -351,7 +349,7 @@ void bli_apool_checkin_array
 	// change.
 
 	// Query the block_ptrs array.
-	array_t** restrict block_ptrs = bli_pool_block_ptrs( pool );
+	array_t** block_ptrs = bli_pool_block_ptrs( pool );
 
 	// Query the top_index of the pool.
 	const siz_t top_index = bli_pool_top_index( pool );
@@ -376,8 +374,8 @@ void bli_apool_checkin_array
 
 pool_t* bli_apool_array_elem
      (
-       siz_t             index,
-       array_t* restrict array
+       siz_t    index,
+       array_t* array
      )
 {
 	err_t r_val;
@@ -391,8 +389,8 @@ pool_t* bli_apool_array_elem
 	// stores in the array_t are pool_t*, that means that the function is
 	// actually returning the address of a pool_t*, or pool_t**, hence the
 	// dereferencing below.
-	pool_t** restrict pool_p = bli_array_elem( index, array );
-	pool_t*           pool   = *pool_p;
+	pool_t** pool_p = bli_array_elem( index, array );
+	pool_t*  pool   = *pool_p;
 
 	// If the element is NULL, then it means a pool_t has not yet been created
 	// and allocated for the given index (thread id).
@@ -463,8 +461,8 @@ pool_t* bli_apool_array_elem
 
 void bli_apool_grow
      (
-       siz_t             num_blocks_add,
-       apool_t* restrict apool
+       siz_t    num_blocks_add,
+       apool_t* apool
      )
 {
 	err_t r_val;
@@ -473,7 +471,7 @@ void bli_apool_grow
 	if ( num_blocks_add == 0 ) return;
 
 	// Query the underlying pool_t from the apool_t.
-	pool_t* restrict pool = bli_apool_pool( apool );
+	pool_t* pool = bli_apool_pool( apool );
 
 	// Query the default initial array length from the apool_t.
 	const siz_t num_elem = bli_apool_def_array_len( apool );
@@ -499,7 +497,7 @@ void bli_apool_grow
 		const siz_t block_ptrs_len_new = 2 * block_ptrs_len_cur;
 
 		// Query the current block_ptrs array.
-		array_t** restrict block_ptrs_cur = bli_pool_block_ptrs( pool );
+		array_t** block_ptrs_cur = bli_pool_block_ptrs( pool );
 
 		#ifdef BLIS_ENABLE_MEM_TRACING
 		printf( "bli_apool_grow(): growing block_ptrs_len (%d -> %d): ",
@@ -507,7 +505,7 @@ void bli_apool_grow
 		#endif
 
 		// Allocate a new block_ptrs array.
-		array_t** restrict block_ptrs_new
+		array_t** block_ptrs_new
 		=
 		bli_malloc_intl( block_ptrs_len_new * sizeof( array_t* ), &r_val );
 
@@ -541,7 +539,7 @@ void bli_apool_grow
 	// blocks.
 
 	// Query the current block_ptrs array (which was maybe just resized).
-	array_t** restrict block_ptrs = bli_pool_block_ptrs( pool );
+	array_t** block_ptrs = bli_pool_block_ptrs( pool );
 
 	#ifdef BLIS_ENABLE_MEM_TRACING
 	printf( "bli_apool_grow(): growing apool_t (%d -> %d).\n",

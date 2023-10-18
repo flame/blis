@@ -42,11 +42,11 @@
 \
 void PASTEMAC(opname,_check) \
      ( \
-       obj_t*  alpha, \
-       obj_t*  a, \
-       obj_t*  x, \
-       obj_t*  beta, \
-       obj_t*  y  \
+       const obj_t* alpha, \
+       const obj_t* a, \
+       const obj_t* x, \
+       const obj_t* beta, \
+       const obj_t* y  \
     );
 
 GENPROT( gemv )
@@ -59,10 +59,10 @@ GENPROT( symv )
 \
 void PASTEMAC(opname,_check) \
      ( \
-       obj_t*  alpha, \
-       obj_t*  x, \
-       obj_t*  y, \
-       obj_t*  a  \
+       const obj_t* alpha, \
+       const obj_t* x, \
+       const obj_t* y, \
+       const obj_t* a  \
     );
 
 GENPROT( ger )
@@ -75,9 +75,9 @@ GENPROT( syr2 )
 \
 void PASTEMAC(opname,_check) \
      ( \
-       obj_t*  alpha, \
-       obj_t*  x, \
-       obj_t*  a  \
+       const obj_t* alpha, \
+       const obj_t* x, \
+       const obj_t* a  \
     );
 
 GENPROT( her )
@@ -89,9 +89,9 @@ GENPROT( syr )
 \
 void PASTEMAC(opname,_check) \
      ( \
-       obj_t*  alpha, \
-       obj_t*  a, \
-       obj_t*  x  \
+       const obj_t* alpha, \
+       const obj_t* a, \
+       const obj_t* x  \
     );
 
 GENPROT( trmv )
@@ -102,17 +102,17 @@ GENPROT( trsv )
 
 void bli_xxmv_check
      (
-       obj_t*  alpha,
-       obj_t*  a,
-       obj_t*  x,
-       obj_t*  beta,
-       obj_t*  y 
+       const obj_t* alpha,
+       const obj_t* a,
+       const obj_t* x,
+       const obj_t* beta,
+       const obj_t* y
      );
 
 void bli_xxr_check
      (
-       obj_t*  alpha,
-       obj_t*  x,
-       obj_t*  y,
-       obj_t*  a 
+       const obj_t* alpha,
+       const obj_t* x,
+       const obj_t* y,
+       const obj_t* a
      );

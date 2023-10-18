@@ -1005,7 +1005,7 @@ void libblis_test_output_params_struct( FILE* os, test_params_t* params )
 	libblis_test_fprintf_c( os, "\n" );
 
 	// Query a native context.
-	cntx = bli_gks_query_nat_cntx();
+	cntx = ( cntx_t* )bli_gks_query_nat_cntx();
 
 	libblis_test_fprintf_c( os, "level-3 blocksizes             s       d       c       z \n" );
 	libblis_test_fprintf_c( os, "  mc                     %7d %7d %7d %7d\n",
@@ -1137,8 +1137,8 @@ void libblis_test_output_params_struct( FILE* os, test_params_t* params )
 	libblis_test_fprintf_c( os, "\n" );
 
 	// Query a native context.
-	cntx_c = bli_gks_query_ind_cntx( im, BLIS_SCOMPLEX );
-	cntx_z = bli_gks_query_ind_cntx( im, BLIS_DCOMPLEX );
+	cntx_c = ( cntx_t* )bli_gks_query_ind_cntx( im, BLIS_SCOMPLEX );
+	cntx_z = ( cntx_t* )bli_gks_query_ind_cntx( im, BLIS_DCOMPLEX );
 
 	libblis_test_fprintf_c( os, "level-3 blocksizes                             c       z \n" );
 	libblis_test_fprintf_c( os, "  mc                                     %7d %7d\n",
@@ -2234,7 +2234,7 @@ void libblis_test_op_driver
 				// Query the implementation string associated with the
 				// current operation and datatype. If the operation is
 				// not level-3, we will always get back the native string.
-				ind_str = bli_ind_oper_get_avail_impl_string( op->opid, datatype );
+				ind_str = ( char* )bli_ind_oper_get_avail_impl_string( op->opid, datatype );
 
 				// Loop over the requested parameter combinations.
 				for ( pci = 0; pci < n_param_combos; ++pci )
@@ -3109,7 +3109,7 @@ void libblis_test_parse_command_line( int argc, char** argv )
 	bli_getopt_init_state( 0, &state );
 
 	// Process all option arguments until we get a -1, which means we're done.
-	while( (opt = bli_getopt( argc, argv, "g:o:", &state )) != -1 )
+	while( (opt = bli_getopt( argc, ( const char** )argv, "g:o:", &state )) != -1 )
 	{
 		// Explicitly typecast opt, which is an int, to a char. (Failing to
 		// typecast resulted in at least one user-reported problem whereby

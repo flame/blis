@@ -72,8 +72,8 @@ void bli_dgemmsup_rd_haswell_asm_6x1
        double*    restrict b, inc_t rs_b0, inc_t cs_b0,
        double*    restrict beta,
        double*    restrict c, inc_t rs_c0, inc_t cs_c0,
-       auxinfo_t* restrict data,
-       cntx_t*    restrict cntx
+       auxinfo_t*          data,
+       cntx_t*             cntx
      )
 {
 	//void*    a_next = bli_auxinfo_next_a( data );
@@ -586,8 +586,8 @@ void bli_dgemmsup_rd_haswell_asm_3x1
        double*    restrict b, inc_t rs_b0, inc_t cs_b0,
        double*    restrict beta,
        double*    restrict c, inc_t rs_c0, inc_t cs_c0,
-       auxinfo_t* restrict data,
-       cntx_t*    restrict cntx
+       auxinfo_t*          data,
+       cntx_t*             cntx
      )
 {
 	//void*    a_next = bli_auxinfo_next_a( data );
@@ -995,8 +995,8 @@ void bli_dgemmsup_rd_haswell_asm_2x1
        double*    restrict b, inc_t rs_b0, inc_t cs_b0,
        double*    restrict beta,
        double*    restrict c, inc_t rs_c0, inc_t cs_c0,
-       auxinfo_t* restrict data,
-       cntx_t*    restrict cntx
+       auxinfo_t*          data,
+       cntx_t*             cntx
      )
 {
 	//void*    a_next = bli_auxinfo_next_a( data );
@@ -1369,8 +1369,8 @@ void bli_dgemmsup_rd_haswell_asm_1x1
        double*    restrict b, inc_t rs_b0, inc_t cs_b0,
        double*    restrict beta,
        double*    restrict c, inc_t rs_c0, inc_t cs_c0,
-       auxinfo_t* restrict data,
-       cntx_t*    restrict cntx
+       auxinfo_t*          data,
+       cntx_t*             cntx
      )
 {
 	//void*    a_next = bli_auxinfo_next_a( data );

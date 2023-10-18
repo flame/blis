@@ -57,8 +57,8 @@ void PASTEMAC3(ch,opname,arch,suf) \
        ctype*     restrict b, inc_t rs_b, inc_t cs_b, \
        ctype*     restrict beta, \
        ctype*     restrict c, inc_t rs_c, inc_t cs_c, \
-       auxinfo_t* restrict data, \
-       cntx_t*    restrict cntx  \
+       auxinfo_t*          data, \
+       cntx_t*             cntx  \
      ) \
 { \
 	/* NOTE: This microkernel can actually handle arbitrarily large
@@ -262,8 +262,8 @@ void PASTEMAC3(ch,opname,arch,suf) \
        ctype*     restrict b, inc_t rs_b, inc_t cs_b, \
        ctype*     restrict beta, \
        ctype*     restrict c, inc_t rs_c, inc_t cs_c, \
-       auxinfo_t* restrict data, \
-       cntx_t*    restrict cntx  \
+       auxinfo_t*          data, \
+       cntx_t*             cntx  \
      ) \
 { \
 	/* NOTE: This microkernel can actually handle arbitrarily large

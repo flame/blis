@@ -43,13 +43,13 @@
 \
 void PASTEMAC0(opname) \
      ( \
-       obj_t*  a, \
-       obj_t*  ah, \
-       obj_t*  c, \
-       cntx_t* cntx, \
-       rntm_t* rntm, \
-       cntl_t* cntl, \
-       thrinfo_t* thread  \
+       const obj_t*  a, \
+       const obj_t*  ah, \
+       const obj_t*  c, \
+       const cntx_t* cntx, \
+             rntm_t* rntm, \
+             cntl_t* cntl, \
+             thrinfo_t* thread  \
      );
 
 GENPROT( gemmt_x_ker_var2 )

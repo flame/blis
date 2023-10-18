@@ -44,39 +44,39 @@
 \
 void PASTEMAC(ch,varname) \
      ( \
-       trans_t          transc, \
-       pack_t           schema, \
-       dim_t            m, \
-       dim_t            n, \
-       dim_t            m_max, \
-       dim_t            n_max, \
-       ctype*  restrict kappa, \
-       ctype*  restrict c, inc_t rs_c, inc_t cs_c, \
-       ctype*  restrict p, inc_t rs_p, inc_t cs_p, \
-                           dim_t pd_p, inc_t ps_p, \
-       cntx_t* restrict cntx, \
-       thrinfo_t* restrict thread  \
+       trans_t transc, \
+       pack_t  schema, \
+       dim_t   m, \
+       dim_t   n, \
+       dim_t   m_max, \
+       dim_t   n_max, \
+       ctype*  kappa, \
+       ctype*  c, inc_t rs_c, inc_t cs_c, \
+       ctype*  p, inc_t rs_p, inc_t cs_p, \
+                  dim_t pd_p, inc_t ps_p, \
+       cntx_t* cntx, \
+       thrinfo_t* thread  \
      ) \
 { \
-	ctype* restrict kappa_cast = kappa; \
-	ctype* restrict c_cast     = c; \
-	ctype* restrict p_cast     = p; \
+	ctype* kappa_cast = kappa; \
+	ctype* c_cast     = c; \
+	ctype* p_cast     = p; \
 \
-	dim_t           iter_dim; \
-	dim_t           n_iter; \
-	dim_t           it, ic; \
-	dim_t           ic0; \
-	doff_t          ic_inc; \
-	dim_t           panel_len_full; \
-	dim_t           panel_len_i; \
-	dim_t           panel_len_max; \
-	dim_t           panel_len_max_i; \
-	dim_t           panel_dim_i; \
-	dim_t           panel_dim_max; \
-	inc_t           vs_c; \
-	inc_t           ldc; \
-	inc_t           ldp, p_inc; \
-	conj_t          conjc; \
+	dim_t  iter_dim; \
+	dim_t  n_iter; \
+	dim_t  it, ic; \
+	dim_t  ic0; \
+	doff_t ic_inc; \
+	dim_t  panel_len_full; \
+	dim_t  panel_len_i; \
+	dim_t  panel_len_max; \
+	dim_t  panel_len_max_i; \
+	dim_t  panel_dim_i; \
+	dim_t  panel_dim_max; \
+	inc_t  vs_c; \
+	inc_t  ldc; \
+	inc_t  ldp, p_inc; \
+	conj_t conjc; \
 \
 \
 	/* Extract the conjugation bit from the transposition argument. */ \
@@ -141,7 +141,7 @@ void PASTEMAC(ch,varname) \
 		ic_inc = panel_dim_max; \
 	} \
 \
-	ctype* restrict p_begin = p_cast; \
+	ctype* p_begin = p_cast; \
 \
 	/* Query the number of threads and thread ids from the current thread's
 	   packm thrinfo_t node. */ \
@@ -166,10 +166,10 @@ void PASTEMAC(ch,varname) \
 	{ \
 		panel_dim_i = bli_min( panel_dim_max, iter_dim - ic ); \
 \
-		ctype* restrict c_begin = c_cast   + (ic  )*vs_c; \
+		ctype* c_begin = c_cast   + (ic  )*vs_c; \
 \
-		ctype* restrict c_use = c_begin; \
-		ctype* restrict p_use = p_begin; \
+		ctype* c_use = c_begin; \
+		ctype* p_use = p_begin; \
 \
 		{ \
 			panel_len_i     = panel_len_full; \
@@ -317,28 +317,28 @@ bli_thread_barrier( thread ); \
 \
 void PASTEMAC(ch,varname) \
      ( \
-       trans_t          transc, \
-       pack_t           schema, \
-       dim_t            m, \
-       dim_t            n, \
-       ctype*  restrict kappa, \
-       ctype*  restrict c, inc_t rs_c, inc_t cs_c, \
-       ctype*  restrict p, inc_t rs_p, inc_t cs_p, \
-       cntx_t* restrict cntx, \
-       thrinfo_t* restrict thread  \
+       trans_t transc, \
+       pack_t  schema, \
+       dim_t   m, \
+       dim_t   n, \
+       ctype*  kappa, \
+       ctype*  c, inc_t rs_c, inc_t cs_c, \
+       ctype*  p, inc_t rs_p, inc_t cs_p, \
+       cntx_t* cntx, \
+       thrinfo_t* thread  \
      ) \
 { \
-	ctype* restrict kappa_cast = kappa; \
-	ctype* restrict c_cast     = c; \
-	ctype* restrict p_cast     = p; \
+	ctype* kappa_cast = kappa; \
+	ctype* c_cast     = c; \
+	ctype* p_cast     = p; \
 \
-	dim_t           iter_dim; \
-	dim_t           n_iter; \
-	dim_t           it; \
-	dim_t           vector_len; \
-	inc_t           incc, ldc; \
-	inc_t           incp, ldp; \
-	conj_t          conjc; \
+	dim_t  iter_dim; \
+	dim_t  n_iter; \
+	dim_t  it; \
+	dim_t  vector_len; \
+	inc_t  incc, ldc; \
+	inc_t  incp, ldp; \
+	conj_t conjc; \
 \
 \
 	/* Extract the conjugation bit from the transposition argument. */ \
@@ -384,7 +384,7 @@ void PASTEMAC(ch,varname) \
 	n_iter = iter_dim; \
 \
 \
-	ctype* restrict p_begin = p_cast; \
+	ctype* p_begin = p_cast; \
 \
 	/* Query the number of threads and thread ids from the current thread's
 	   packm thrinfo_t node. */ \
@@ -406,10 +406,10 @@ void PASTEMAC(ch,varname) \
 	/* Iterate over every logical micropanel in the source matrix. */ \
 	for ( it = 0; it < n_iter; it += 1 ) \
 	{ \
-		ctype* restrict c_begin = c_cast + (it  )*ldc; \
+		ctype* c_begin = c_cast + (it  )*ldc; \
 \
-		ctype* restrict c_use = c_begin; \
-		ctype* restrict p_use = p_begin; \
+		ctype* c_use = c_begin; \
+		ctype* p_use = p_begin; \
 \
 		{ \
 			/* The definition of bli_packm_my_iter() will depend on whether slab

@@ -36,21 +36,21 @@
 
 typedef void (*setijm_fp)
      (
-       double         ar,
-       double         ai,
-       dim_t          i,
-       dim_t          j,
-       void* restrict b, inc_t rs, inc_t cs
+       double ar,
+       double ai,
+       dim_t  i,
+       dim_t  j,
+       void*  b, inc_t rs, inc_t cs
      );
 static setijm_fp GENARRAY(ftypes_setijm,setijm);
 
 err_t bli_setijm
      (
-       double  ar,
-       double  ai,
-       dim_t   i,
-       dim_t   j,
-       obj_t*  b
+             double ar,
+             double ai,
+             dim_t  i,
+             dim_t  j,
+       const obj_t* b
      )
 {
 	dim_t m  = bli_obj_length( b );
@@ -90,16 +90,16 @@ err_t bli_setijm
 \
 void PASTEMAC(ch,opname) \
      ( \
-       double         ar, \
-       double         ai, \
-       dim_t          i, \
-       dim_t          j, \
-       void* restrict b, inc_t rs, inc_t cs  \
+       double ar, \
+       double ai, \
+       dim_t  i, \
+       dim_t  j, \
+       void*  b, inc_t rs, inc_t cs  \
      ) \
 { \
-	ctype* restrict b_cast = ( ctype* )b; \
+	ctype* b_cast = ( ctype* )b; \
 \
-	ctype* restrict b_ij = b_cast + (i  )*rs + (j  )*cs; \
+	ctype* b_ij = b_cast + (i  )*rs + (j  )*cs; \
 \
 	PASTEMAC2(z,ch,sets)( ar, ai, *b_ij ); \
 }
@@ -110,21 +110,21 @@ INSERT_GENTFUNC_BASIC0( setijm )
 
 typedef void (*getijm_fp)
      (
-       dim_t          i,
-       dim_t          j,
-       void* restrict b, inc_t rs, inc_t cs,
-       double*        ar,
-       double*        ai
+             dim_t   i,
+             dim_t   j,
+       const void*   b, inc_t rs, inc_t cs,
+             double* ar,
+             double* ai
      );
 static getijm_fp GENARRAY(ftypes_getijm,getijm);
 
 err_t bli_getijm
       (
-        dim_t   i,
-        dim_t   j,
-        obj_t*  b,
-        double* ar,
-        double* ai
+              dim_t   i,
+              dim_t   j,
+        const obj_t*  b,
+              double* ar,
+              double* ai
       )
 {
 	dim_t m  = bli_obj_length( b );
@@ -164,16 +164,16 @@ err_t bli_getijm
 \
 void PASTEMAC(ch,opname) \
      ( \
-       dim_t          i, \
-       dim_t          j, \
-       void* restrict b, inc_t rs, inc_t cs, \
-       double*        ar, \
-       double*        ai  \
+             dim_t   i, \
+             dim_t   j, \
+       const void*   b, inc_t rs, inc_t cs, \
+             double* ar, \
+             double* ai  \
      ) \
 { \
-	ctype* restrict b_cast = ( ctype* )b; \
+	const ctype* b_cast = ( const ctype* )b; \
 \
-	ctype* restrict b_ij = b_cast + (i  )*rs + (j  )*cs; \
+	const ctype* b_ij = b_cast + (i  )*rs + (j  )*cs; \
 \
 	PASTEMAC2(ch,z,gets)( *b_ij, *ar, *ai ); \
 }

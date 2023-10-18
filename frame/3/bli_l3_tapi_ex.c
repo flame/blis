@@ -44,18 +44,18 @@
 \
 void PASTEMAC2(ch,opname,BLIS_OAPI_EX_SUF) \
      ( \
-       trans_t transa, \
-       trans_t transb, \
-       dim_t   m, \
-       dim_t   n, \
-       dim_t   k, \
-       ctype*  alpha, \
-       ctype*  a, inc_t rs_a, inc_t cs_a, \
-       ctype*  b, inc_t rs_b, inc_t cs_b, \
-       ctype*  beta, \
-       ctype*  c, inc_t rs_c, inc_t cs_c, \
-       cntx_t* cntx, \
-       rntm_t* rntm  \
+             trans_t transa, \
+             trans_t transb, \
+             dim_t   m, \
+             dim_t   n, \
+             dim_t   k, \
+       const ctype*  alpha, \
+       const ctype*  a, inc_t rs_a, inc_t cs_a, \
+       const ctype*  b, inc_t rs_b, inc_t cs_b, \
+       const ctype*  beta, \
+             ctype*  c, inc_t rs_c, inc_t cs_c, \
+       const cntx_t* cntx, \
+             rntm_t* rntm  \
      ) \
 { \
 	bli_init_once(); \
@@ -74,12 +74,12 @@ void PASTEMAC2(ch,opname,BLIS_OAPI_EX_SUF) \
 	bli_set_dims_with_trans( transa, m, k, &m_a, &n_a ); \
 	bli_set_dims_with_trans( transb, k, n, &m_b, &n_b ); \
 \
-	bli_obj_init_finish_1x1( dt, alpha, &alphao ); \
-	bli_obj_init_finish_1x1( dt, beta,  &betao  ); \
+	bli_obj_init_finish_1x1( dt, ( void* )alpha, &alphao ); \
+	bli_obj_init_finish_1x1( dt, ( void* )beta,  &betao  ); \
 \
-	bli_obj_init_finish( dt, m_a, n_a, a, rs_a, cs_a, &ao ); \
-	bli_obj_init_finish( dt, m_b, n_b, b, rs_b, cs_b, &bo ); \
-	bli_obj_init_finish( dt, m,   n,   c, rs_c, cs_c, &co ); \
+	bli_obj_init_finish( dt, m_a, n_a, ( void* )a, rs_a, cs_a, &ao ); \
+	bli_obj_init_finish( dt, m_b, n_b, ( void* )b, rs_b, cs_b, &bo ); \
+	bli_obj_init_finish( dt, m,   n,            c, rs_c, cs_c, &co ); \
 \
 	bli_obj_set_conjtrans( transa, &ao ); \
 	bli_obj_set_conjtrans( transb, &bo ); \
@@ -103,19 +103,19 @@ INSERT_GENTFUNC_BASIC0( gemm )
 \
 void PASTEMAC2(ch,opname,BLIS_OAPI_EX_SUF) \
      ( \
-       side_t  side, \
-       uplo_t  uploa, \
-       conj_t  conja, \
-       trans_t transb, \
-       dim_t   m, \
-       dim_t   n, \
-       ctype*  alpha, \
-       ctype*  a, inc_t rs_a, inc_t cs_a, \
-       ctype*  b, inc_t rs_b, inc_t cs_b, \
-       ctype*  beta, \
-       ctype*  c, inc_t rs_c, inc_t cs_c, \
-       cntx_t* cntx, \
-       rntm_t* rntm  \
+             side_t  side, \
+             uplo_t  uploa, \
+             conj_t  conja, \
+             trans_t transb, \
+             dim_t   m, \
+             dim_t   n, \
+       const ctype*  alpha, \
+       const ctype*  a, inc_t rs_a, inc_t cs_a, \
+       const ctype*  b, inc_t rs_b, inc_t cs_b, \
+       const ctype*  beta, \
+             ctype*  c, inc_t rs_c, inc_t cs_c, \
+       const cntx_t* cntx, \
+             rntm_t* rntm  \
      ) \
 { \
 	bli_init_once(); \
@@ -134,12 +134,12 @@ void PASTEMAC2(ch,opname,BLIS_OAPI_EX_SUF) \
 	bli_set_dim_with_side(   side,   m, n, &mn_a ); \
 	bli_set_dims_with_trans( transb, m, n, &m_b, &n_b ); \
 \
-	bli_obj_init_finish_1x1( dt, alpha, &alphao ); \
-	bli_obj_init_finish_1x1( dt, beta,  &betao  ); \
+	bli_obj_init_finish_1x1( dt, ( void* )alpha, &alphao ); \
+	bli_obj_init_finish_1x1( dt, ( void* )beta,  &betao  ); \
 \
-	bli_obj_init_finish( dt, mn_a, mn_a, a, rs_a, cs_a, &ao ); \
-	bli_obj_init_finish( dt, m_b,  n_b,  b, rs_b, cs_b, &bo ); \
-	bli_obj_init_finish( dt, m,    n,    c, rs_c, cs_c, &co ); \
+	bli_obj_init_finish( dt, mn_a, mn_a, ( void* )a, rs_a, cs_a, &ao ); \
+	bli_obj_init_finish( dt, m_b,  n_b,  ( void* )b, rs_b, cs_b, &bo ); \
+	bli_obj_init_finish( dt, m,    n,             c, rs_c, cs_c, &co ); \
 \
 	bli_obj_set_uplo( uploa, &ao ); \
 	bli_obj_set_conj( conja, &ao ); \
@@ -169,16 +169,16 @@ INSERT_GENTFUNC_BASIC( symm, BLIS_SYMMETRIC )
 \
 void PASTEMAC2(ch,opname,BLIS_OAPI_EX_SUF) \
      ( \
-       uplo_t   uploc, \
-       trans_t  transa, \
-       dim_t    m, \
-       dim_t    k, \
-       ctype_r* alpha, \
-       ctype*   a, inc_t rs_a, inc_t cs_a, \
-       ctype_r* beta, \
-       ctype*   c, inc_t rs_c, inc_t cs_c, \
-       cntx_t*  cntx, \
-       rntm_t*  rntm  \
+             uplo_t   uploc, \
+             trans_t  transa, \
+             dim_t    m, \
+             dim_t    k, \
+       const ctype_r* alpha, \
+       const ctype*   a, inc_t rs_a, inc_t cs_a, \
+       const ctype_r* beta, \
+             ctype*   c, inc_t rs_c, inc_t cs_c, \
+       const cntx_t*  cntx, \
+             rntm_t*  rntm  \
      ) \
 { \
 	bli_init_once(); \
@@ -195,11 +195,11 @@ void PASTEMAC2(ch,opname,BLIS_OAPI_EX_SUF) \
 \
 	bli_set_dims_with_trans( transa, m, k, &m_a, &n_a ); \
 \
-	bli_obj_init_finish_1x1( dt_r, alpha, &alphao ); \
-	bli_obj_init_finish_1x1( dt_r, beta,  &betao  ); \
+	bli_obj_init_finish_1x1( dt_r, ( void* )alpha, &alphao ); \
+	bli_obj_init_finish_1x1( dt_r, ( void* )beta,  &betao  ); \
 \
-	bli_obj_init_finish( dt, m_a, n_a, a, rs_a, cs_a, &ao ); \
-	bli_obj_init_finish( dt, m,   m,   c, rs_c, cs_c, &co ); \
+	bli_obj_init_finish( dt, m_a, n_a, ( void* )a, rs_a, cs_a, &ao ); \
+	bli_obj_init_finish( dt, m,   m,            c, rs_c, cs_c, &co ); \
 \
 	bli_obj_set_uplo( uploc, &co ); \
 	bli_obj_set_conjtrans( transa, &ao ); \
@@ -225,18 +225,18 @@ INSERT_GENTFUNCR_BASIC0( herk )
 \
 void PASTEMAC2(ch,opname,BLIS_OAPI_EX_SUF) \
      ( \
-       uplo_t   uploc, \
-       trans_t  transa, \
-       trans_t  transb, \
-       dim_t    m, \
-       dim_t    k, \
-       ctype*   alpha, \
-       ctype*   a, inc_t rs_a, inc_t cs_a, \
-       ctype*   b, inc_t rs_b, inc_t cs_b, \
-       ctype_r* beta, \
-       ctype*   c, inc_t rs_c, inc_t cs_c, \
-       cntx_t*  cntx, \
-       rntm_t*  rntm  \
+             uplo_t   uploc, \
+             trans_t  transa, \
+             trans_t  transb, \
+             dim_t    m, \
+             dim_t    k, \
+       const ctype*   alpha, \
+       const ctype*   a, inc_t rs_a, inc_t cs_a, \
+       const ctype*   b, inc_t rs_b, inc_t cs_b, \
+       const ctype_r* beta, \
+             ctype*   c, inc_t rs_c, inc_t cs_c, \
+       const cntx_t*  cntx, \
+             rntm_t*  rntm  \
      ) \
 { \
 	bli_init_once(); \
@@ -256,12 +256,12 @@ void PASTEMAC2(ch,opname,BLIS_OAPI_EX_SUF) \
 	bli_set_dims_with_trans( transa, m, k, &m_a, &n_a ); \
 	bli_set_dims_with_trans( transb, m, k, &m_b, &n_b ); \
 \
-	bli_obj_init_finish_1x1( dt,   alpha, &alphao ); \
-	bli_obj_init_finish_1x1( dt_r, beta,  &betao  ); \
+	bli_obj_init_finish_1x1( dt,   ( void* )alpha, &alphao ); \
+	bli_obj_init_finish_1x1( dt_r, ( void* )beta,  &betao  ); \
 \
-	bli_obj_init_finish( dt, m_a, n_a, a, rs_a, cs_a, &ao ); \
-	bli_obj_init_finish( dt, m_b, n_b, b, rs_b, cs_b, &bo ); \
-	bli_obj_init_finish( dt, m,   m,   c, rs_c, cs_c, &co ); \
+	bli_obj_init_finish( dt, m_a, n_a, ( void* )a, rs_a, cs_a, &ao ); \
+	bli_obj_init_finish( dt, m_b, n_b, ( void* )b, rs_b, cs_b, &bo ); \
+	bli_obj_init_finish( dt, m,   m,            c, rs_c, cs_c, &co ); \
 \
 	bli_obj_set_uplo( uploc, &co ); \
 	bli_obj_set_conjtrans( transa, &ao ); \
@@ -289,16 +289,16 @@ INSERT_GENTFUNCR_BASIC0( her2k )
 \
 void PASTEMAC2(ch,opname,BLIS_OAPI_EX_SUF) \
      ( \
-       uplo_t  uploc, \
-       trans_t transa, \
-       dim_t   m, \
-       dim_t   k, \
-       ctype*  alpha, \
-       ctype*  a, inc_t rs_a, inc_t cs_a, \
-       ctype*  beta, \
-       ctype*  c, inc_t rs_c, inc_t cs_c, \
-       cntx_t* cntx, \
-       rntm_t* rntm  \
+             uplo_t  uploc, \
+             trans_t transa, \
+             dim_t   m, \
+             dim_t   k, \
+       const ctype*  alpha, \
+       const ctype*  a, inc_t rs_a, inc_t cs_a, \
+       const ctype*  beta, \
+             ctype*  c, inc_t rs_c, inc_t cs_c, \
+       const cntx_t* cntx, \
+             rntm_t* rntm  \
      ) \
 { \
 	bli_init_once(); \
@@ -314,11 +314,11 @@ void PASTEMAC2(ch,opname,BLIS_OAPI_EX_SUF) \
 \
 	bli_set_dims_with_trans( transa, m, k, &m_a, &n_a ); \
 \
-	bli_obj_init_finish_1x1( dt, alpha, &alphao ); \
-	bli_obj_init_finish_1x1( dt, beta,  &betao  ); \
+	bli_obj_init_finish_1x1( dt, ( void* )alpha, &alphao ); \
+	bli_obj_init_finish_1x1( dt, ( void* )beta,  &betao  ); \
 \
-	bli_obj_init_finish( dt, m_a, n_a, a, rs_a, cs_a, &ao ); \
-	bli_obj_init_finish( dt, m,   m,   c, rs_c, cs_c, &co ); \
+	bli_obj_init_finish( dt, m_a, n_a, ( void* )a, rs_a, cs_a, &ao ); \
+	bli_obj_init_finish( dt, m,   m,            c, rs_c, cs_c, &co ); \
 \
 	bli_obj_set_uplo( uploc, &co ); \
 	bli_obj_set_conjtrans( transa, &ao ); \
@@ -344,18 +344,18 @@ INSERT_GENTFUNC_BASIC0( syrk )
 \
 void PASTEMAC2(ch,opname,BLIS_OAPI_EX_SUF) \
      ( \
-       uplo_t  uploc, \
-       trans_t transa, \
-       trans_t transb, \
-       dim_t   m, \
-       dim_t   k, \
-       ctype*  alpha, \
-       ctype*  a, inc_t rs_a, inc_t cs_a, \
-       ctype*  b, inc_t rs_b, inc_t cs_b, \
-       ctype*  beta, \
-       ctype*  c, inc_t rs_c, inc_t cs_c, \
-       cntx_t* cntx, \
-       rntm_t* rntm  \
+             uplo_t  uploc, \
+             trans_t transa, \
+             trans_t transb, \
+             dim_t   m, \
+             dim_t   k, \
+       const ctype*  alpha, \
+       const ctype*  a, inc_t rs_a, inc_t cs_a, \
+       const ctype*  b, inc_t rs_b, inc_t cs_b, \
+       const ctype*  beta, \
+             ctype*  c, inc_t rs_c, inc_t cs_c, \
+       const cntx_t* cntx, \
+             rntm_t* rntm  \
      ) \
 { \
 	bli_init_once(); \
@@ -374,12 +374,12 @@ void PASTEMAC2(ch,opname,BLIS_OAPI_EX_SUF) \
 	bli_set_dims_with_trans( transa, m, k, &m_a, &n_a ); \
 	bli_set_dims_with_trans( transb, m, k, &m_b, &n_b ); \
 \
-	bli_obj_init_finish_1x1( dt, alpha, &alphao ); \
-	bli_obj_init_finish_1x1( dt, beta,  &betao  ); \
+	bli_obj_init_finish_1x1( dt, ( void* )alpha, &alphao ); \
+	bli_obj_init_finish_1x1( dt, ( void* )beta,  &betao  ); \
 \
-	bli_obj_init_finish( dt, m_a, n_a, a, rs_a, cs_a, &ao ); \
-	bli_obj_init_finish( dt, m_b, n_b, b, rs_b, cs_b, &bo ); \
-	bli_obj_init_finish( dt, m,   m,   c, rs_c, cs_c, &co ); \
+	bli_obj_init_finish( dt, m_a, n_a, ( void* )a, rs_a, cs_a, &ao ); \
+	bli_obj_init_finish( dt, m_b, n_b, ( void* )b, rs_b, cs_b, &bo ); \
+	bli_obj_init_finish( dt, m,   m,            c, rs_c, cs_c, &co ); \
 \
 	bli_obj_set_uplo( uploc, &co ); \
 	bli_obj_set_conjtrans( transa, &ao ); \
@@ -407,18 +407,18 @@ INSERT_GENTFUNC_BASIC0( syr2k )
 \
 void PASTEMAC2(ch,opname,BLIS_OAPI_EX_SUF) \
      ( \
-       uplo_t  uploc, \
-       trans_t transa, \
-       trans_t transb, \
-       dim_t   m, \
-       dim_t   k, \
-       ctype*  alpha, \
-       ctype*  a, inc_t rs_a, inc_t cs_a, \
-       ctype*  b, inc_t rs_b, inc_t cs_b, \
-       ctype*  beta, \
-       ctype*  c, inc_t rs_c, inc_t cs_c, \
-       cntx_t* cntx, \
-       rntm_t* rntm  \
+             uplo_t  uploc, \
+             trans_t transa, \
+             trans_t transb, \
+             dim_t   m, \
+             dim_t   k, \
+       const ctype*  alpha, \
+       const ctype*  a, inc_t rs_a, inc_t cs_a, \
+       const ctype*  b, inc_t rs_b, inc_t cs_b, \
+       const ctype*  beta, \
+             ctype*  c, inc_t rs_c, inc_t cs_c, \
+       const cntx_t* cntx, \
+             rntm_t* rntm  \
      ) \
 { \
 	bli_init_once(); \
@@ -437,12 +437,12 @@ void PASTEMAC2(ch,opname,BLIS_OAPI_EX_SUF) \
 	bli_set_dims_with_trans( transa, m, k, &m_a, &n_a ); \
 	bli_set_dims_with_trans( transb, k, m, &m_b, &n_b ); \
 \
-	bli_obj_init_finish_1x1( dt, alpha, &alphao ); \
-	bli_obj_init_finish_1x1( dt, beta,  &betao  ); \
+	bli_obj_init_finish_1x1( dt, ( void* )alpha, &alphao ); \
+	bli_obj_init_finish_1x1( dt, ( void* )beta,  &betao  ); \
 \
-	bli_obj_init_finish( dt, m_a, n_a, a, rs_a, cs_a, &ao ); \
-	bli_obj_init_finish( dt, m_b, n_b, b, rs_b, cs_b, &bo ); \
-	bli_obj_init_finish( dt, m,   m,   c, rs_c, cs_c, &co ); \
+	bli_obj_init_finish( dt, m_a, n_a, ( void* )a, rs_a, cs_a, &ao ); \
+	bli_obj_init_finish( dt, m_b, n_b, ( void* )b, rs_b, cs_b, &bo ); \
+	bli_obj_init_finish( dt, m,   m,            c, rs_c, cs_c, &co ); \
 \
 	bli_obj_set_uplo( uploc, &co ); \
 	bli_obj_set_conjtrans( transa, &ao ); \
@@ -468,20 +468,20 @@ INSERT_GENTFUNC_BASIC0( gemmt )
 \
 void PASTEMAC2(ch,opname,BLIS_OAPI_EX_SUF) \
      ( \
-       side_t  side, \
-       uplo_t  uploa, \
-       trans_t transa, \
-       diag_t  diaga, \
-       trans_t transb, \
-       dim_t   m, \
-       dim_t   n, \
-       ctype*  alpha, \
-       ctype*  a, inc_t rs_a, inc_t cs_a, \
-       ctype*  b, inc_t rs_b, inc_t cs_b, \
-       ctype*  beta, \
-       ctype*  c, inc_t rs_c, inc_t cs_c, \
-       cntx_t* cntx, \
-       rntm_t* rntm  \
+             side_t  side, \
+             uplo_t  uploa, \
+             trans_t transa, \
+             diag_t  diaga, \
+             trans_t transb, \
+             dim_t   m, \
+             dim_t   n, \
+       const ctype*  alpha, \
+       const ctype*  a, inc_t rs_a, inc_t cs_a, \
+       const ctype*  b, inc_t rs_b, inc_t cs_b, \
+       const ctype*  beta, \
+             ctype*  c, inc_t rs_c, inc_t cs_c, \
+       const cntx_t* cntx, \
+             rntm_t* rntm  \
      ) \
 { \
 	bli_init_once(); \
@@ -500,12 +500,12 @@ void PASTEMAC2(ch,opname,BLIS_OAPI_EX_SUF) \
 	bli_set_dim_with_side(   side,   m, n, &mn_a ); \
 	bli_set_dims_with_trans( transb, m, n, &m_b, &n_b ); \
 \
-	bli_obj_init_finish_1x1( dt, alpha, &alphao ); \
-	bli_obj_init_finish_1x1( dt, beta,  &betao  ); \
+	bli_obj_init_finish_1x1( dt, ( void* )alpha, &alphao ); \
+	bli_obj_init_finish_1x1( dt, ( void* )beta,  &betao  ); \
 \
-	bli_obj_init_finish( dt, mn_a, mn_a, a, rs_a, cs_a, &ao ); \
-	bli_obj_init_finish( dt, m_b,  n_b,  b, rs_b, cs_b, &bo ); \
-	bli_obj_init_finish( dt, m,    n,    c, rs_c, cs_c, &co ); \
+	bli_obj_init_finish( dt, mn_a, mn_a, ( void* )a, rs_a, cs_a, &ao ); \
+	bli_obj_init_finish( dt, m_b,  n_b,  ( void* )b, rs_b, cs_b, &bo ); \
+	bli_obj_init_finish( dt, m,    n,             c, rs_c, cs_c, &co ); \
 \
 	bli_obj_set_uplo( uploa, &ao ); \
 	bli_obj_set_diag( diaga, &ao ); \
@@ -535,17 +535,17 @@ INSERT_GENTFUNC_BASIC0( trmm3 )
 \
 void PASTEMAC2(ch,opname,BLIS_OAPI_EX_SUF) \
      ( \
-       side_t  side, \
-       uplo_t  uploa, \
-       trans_t transa, \
-       diag_t  diaga, \
-       dim_t   m, \
-       dim_t   n, \
-       ctype*  alpha, \
-       ctype*  a, inc_t rs_a, inc_t cs_a, \
-       ctype*  b, inc_t rs_b, inc_t cs_b, \
-       cntx_t* cntx, \
-       rntm_t* rntm  \
+             side_t  side, \
+             uplo_t  uploa, \
+             trans_t transa, \
+             diag_t  diaga, \
+             dim_t   m, \
+             dim_t   n, \
+       const ctype*  alpha, \
+       const ctype*  a, inc_t rs_a, inc_t cs_a, \
+             ctype*  b, inc_t rs_b, inc_t cs_b, \
+       const cntx_t* cntx, \
+             rntm_t* rntm  \
      ) \
 { \
 	bli_init_once(); \
@@ -560,10 +560,10 @@ void PASTEMAC2(ch,opname,BLIS_OAPI_EX_SUF) \
 \
 	bli_set_dim_with_side( side, m, n, &mn_a ); \
 \
-	bli_obj_init_finish_1x1( dt, alpha, &alphao ); \
+	bli_obj_init_finish_1x1( dt, ( void* )alpha, &alphao ); \
 \
-	bli_obj_init_finish( dt, mn_a, mn_a, a, rs_a, cs_a, &ao ); \
-	bli_obj_init_finish( dt, m,    n,    b, rs_b, cs_b, &bo ); \
+	bli_obj_init_finish( dt, mn_a, mn_a, ( void* )a, rs_a, cs_a, &ao ); \
+	bli_obj_init_finish( dt, m,    n,             b, rs_b, cs_b, &bo ); \
 \
 	bli_obj_set_uplo( uploa, &ao ); \
 	bli_obj_set_diag( diaga, &ao ); \

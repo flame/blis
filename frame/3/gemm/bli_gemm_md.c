@@ -39,12 +39,12 @@
 
 void bli_gemm_md
      (
-       obj_t*   a,
-       obj_t*   b,
-       obj_t*   beta,
-       obj_t*   c,
-       cntx_t*  cntx_local,
-       cntx_t** cntx
+             obj_t*   a,
+             obj_t*   b,
+       const obj_t*   beta,
+             obj_t*   c,
+             cntx_t*  cntx_local,
+       const cntx_t** cntx
      )
 {
 	mddm_t doms;
@@ -148,12 +148,12 @@ void bli_gemm_md
 //                 cab
 mddm_t bli_gemm_md_ccr
      (
-       obj_t*   a,
-       obj_t*   b,
-       obj_t*   beta,
-       obj_t*   c,
-       cntx_t*  cntx_local,
-       cntx_t** cntx
+             obj_t*   a,
+             obj_t*   b,
+       const obj_t*   beta,
+             obj_t*   c,
+             cntx_t*  cntx_local,
+       const cntx_t** cntx
      )
 {
 	mddm_t doms;
@@ -201,48 +201,51 @@ mddm_t bli_gemm_md_ccr
 
 	// Copy the real domain blocksizes into the slots of their complex
 	// counterparts.
-	blksz_t* blksz_mr = bli_cntx_get_blksz( BLIS_MR, *cntx );
-	blksz_t* blksz_nr = bli_cntx_get_blksz( BLIS_NR, *cntx );
-	blksz_t* blksz_mc = bli_cntx_get_blksz( BLIS_MC, *cntx );
-	blksz_t* blksz_nc = bli_cntx_get_blksz( BLIS_NC, *cntx );
-	blksz_t* blksz_kc = bli_cntx_get_blksz( BLIS_KC, *cntx );
+	blksz_t blksz_mr = *bli_cntx_get_blksz( BLIS_MR, cntx_local );
+	blksz_t blksz_nr = *bli_cntx_get_blksz( BLIS_NR, cntx_local );
+	blksz_t blksz_mc = *bli_cntx_get_blksz( BLIS_MC, cntx_local );
+	blksz_t blksz_nc = *bli_cntx_get_blksz( BLIS_NC, cntx_local );
+	blksz_t blksz_kc = *bli_cntx_get_blksz( BLIS_KC, cntx_local );
 
-	bli_blksz_copy_dt( BLIS_FLOAT,  blksz_mr, BLIS_SCOMPLEX, blksz_mr );
-	bli_blksz_copy_dt( BLIS_DOUBLE, blksz_mr, BLIS_DCOMPLEX, blksz_mr );
+	bli_blksz_copy_dt( BLIS_FLOAT,  &blksz_mr, BLIS_SCOMPLEX, &blksz_mr );
+	bli_blksz_copy_dt( BLIS_DOUBLE, &blksz_mr, BLIS_DCOMPLEX, &blksz_mr );
 
-	bli_blksz_copy_dt( BLIS_FLOAT,  blksz_nr, BLIS_SCOMPLEX, blksz_nr );
-	bli_blksz_copy_dt( BLIS_DOUBLE, blksz_nr, BLIS_DCOMPLEX, blksz_nr );
+	bli_blksz_copy_dt( BLIS_FLOAT,  &blksz_nr, BLIS_SCOMPLEX, &blksz_nr );
+	bli_blksz_copy_dt( BLIS_DOUBLE, &blksz_nr, BLIS_DCOMPLEX, &blksz_nr );
 
-	bli_blksz_copy_dt( BLIS_FLOAT,  blksz_mc, BLIS_SCOMPLEX, blksz_mc );
-	bli_blksz_copy_dt( BLIS_DOUBLE, blksz_mc, BLIS_DCOMPLEX, blksz_mc );
+	bli_blksz_copy_dt( BLIS_FLOAT,  &blksz_mc, BLIS_SCOMPLEX, &blksz_mc );
+	bli_blksz_copy_dt( BLIS_DOUBLE, &blksz_mc, BLIS_DCOMPLEX, &blksz_mc );
 
-	bli_blksz_copy_dt( BLIS_FLOAT,  blksz_nc, BLIS_SCOMPLEX, blksz_nc );
-	bli_blksz_copy_dt( BLIS_DOUBLE, blksz_nc, BLIS_DCOMPLEX, blksz_nc );
+	bli_blksz_copy_dt( BLIS_FLOAT,  &blksz_nc, BLIS_SCOMPLEX, &blksz_nc );
+	bli_blksz_copy_dt( BLIS_DOUBLE, &blksz_nc, BLIS_DCOMPLEX, &blksz_nc );
 
-	bli_blksz_copy_dt( BLIS_FLOAT,  blksz_kc, BLIS_SCOMPLEX, blksz_kc );
-	bli_blksz_copy_dt( BLIS_DOUBLE, blksz_kc, BLIS_DCOMPLEX, blksz_kc );
+	bli_blksz_copy_dt( BLIS_FLOAT,  &blksz_kc, BLIS_SCOMPLEX, &blksz_kc );
+	bli_blksz_copy_dt( BLIS_DOUBLE, &blksz_kc, BLIS_DCOMPLEX, &blksz_kc );
 
 	// Halve both the real and complex MR's (which are both real MR's).
-	bli_blksz_scale_def_max( 1, 2, BLIS_FLOAT,    blksz_mr );
-	bli_blksz_scale_def_max( 1, 2, BLIS_DOUBLE,   blksz_mr );
-	bli_blksz_scale_def_max( 1, 2, BLIS_SCOMPLEX, blksz_mr );
-	bli_blksz_scale_def_max( 1, 2, BLIS_DCOMPLEX, blksz_mr );
+	bli_blksz_scale_def_max( 1, 2, BLIS_FLOAT,    &blksz_mr );
+	bli_blksz_scale_def_max( 1, 2, BLIS_DOUBLE,   &blksz_mr );
+	bli_blksz_scale_def_max( 1, 2, BLIS_SCOMPLEX, &blksz_mr );
+	bli_blksz_scale_def_max( 1, 2, BLIS_DCOMPLEX, &blksz_mr );
 
 	// Halve both the real and complex MC's (which are both real MC's).
-	bli_blksz_scale_def_max( 1, 2, BLIS_FLOAT,    blksz_mc );
-	bli_blksz_scale_def_max( 1, 2, BLIS_DOUBLE,   blksz_mc );
-	bli_blksz_scale_def_max( 1, 2, BLIS_SCOMPLEX, blksz_mc );
-	bli_blksz_scale_def_max( 1, 2, BLIS_DCOMPLEX, blksz_mc );
+	bli_blksz_scale_def_max( 1, 2, BLIS_FLOAT,    &blksz_mc );
+	bli_blksz_scale_def_max( 1, 2, BLIS_DOUBLE,   &blksz_mc );
+	bli_blksz_scale_def_max( 1, 2, BLIS_SCOMPLEX, &blksz_mc );
+	bli_blksz_scale_def_max( 1, 2, BLIS_DCOMPLEX, &blksz_mc );
+
+    bli_cntx_set_blksz( BLIS_MR, &blksz_mr, BLIS_MR, cntx_local );
+    bli_cntx_set_blksz( BLIS_NR, &blksz_nr, BLIS_NR, cntx_local );
+    bli_cntx_set_blksz( BLIS_MC, &blksz_mc, BLIS_MR, cntx_local );
+    bli_cntx_set_blksz( BLIS_NC, &blksz_nc, BLIS_NR, cntx_local );
+    bli_cntx_set_blksz( BLIS_KC, &blksz_kc, BLIS_KC, cntx_local );
 
 	// Use the default pack schemas in the objects.
 
-	// static func_t* bli_cntx_get_ukrs( ukr_t ukr_id, cntx_t* cntx )
-	func_t* l3_vir_ukrs = bli_cntx_get_ukrs( BLIS_GEMM_VIR_UKR, *cntx );
-
 	// Rather than check which complex datatype dt_comp refers to, we set
 	// the mixed-domain virtual microkernel for both types.
-	bli_func_set_dt( bli_cgemm_md_c2r_ref, BLIS_SCOMPLEX, l3_vir_ukrs );
-	bli_func_set_dt( bli_zgemm_md_c2r_ref, BLIS_DCOMPLEX, l3_vir_ukrs );
+    bli_cntx_set_ukr_dt( bli_cgemm_md_c2r_ref, BLIS_SCOMPLEX, BLIS_GEMM_VIR_UKR, cntx_local );
+    bli_cntx_set_ukr_dt( bli_zgemm_md_c2r_ref, BLIS_DCOMPLEX, BLIS_GEMM_VIR_UKR, cntx_local );
 
 	// Return the computation and execution domains.
 	return doms;
@@ -253,12 +256,12 @@ mddm_t bli_gemm_md_ccr
 //                 cab
 mddm_t bli_gemm_md_crc
      (
-       obj_t*   a,
-       obj_t*   b,
-       obj_t*   beta,
-       obj_t*   c,
-       cntx_t*  cntx_local,
-       cntx_t** cntx
+             obj_t*   a,
+             obj_t*   b,
+       const obj_t*   beta,
+             obj_t*   c,
+             cntx_t*  cntx_local,
+       const cntx_t** cntx
      )
 {
 	mddm_t doms;
@@ -306,48 +309,51 @@ mddm_t bli_gemm_md_crc
 
 	// Copy the real domain blocksizes into the slots of their complex
 	// counterparts.
-	blksz_t* blksz_mr = bli_cntx_get_blksz( BLIS_MR, *cntx );
-	blksz_t* blksz_nr = bli_cntx_get_blksz( BLIS_NR, *cntx );
-	blksz_t* blksz_mc = bli_cntx_get_blksz( BLIS_MC, *cntx );
-	blksz_t* blksz_nc = bli_cntx_get_blksz( BLIS_NC, *cntx );
-	blksz_t* blksz_kc = bli_cntx_get_blksz( BLIS_KC, *cntx );
+	blksz_t blksz_mr = *bli_cntx_get_blksz( BLIS_MR, cntx_local );
+	blksz_t blksz_nr = *bli_cntx_get_blksz( BLIS_NR, cntx_local );
+	blksz_t blksz_mc = *bli_cntx_get_blksz( BLIS_MC, cntx_local );
+	blksz_t blksz_nc = *bli_cntx_get_blksz( BLIS_NC, cntx_local );
+	blksz_t blksz_kc = *bli_cntx_get_blksz( BLIS_KC, cntx_local );
 
-	bli_blksz_copy_dt( BLIS_FLOAT,  blksz_mr, BLIS_SCOMPLEX, blksz_mr );
-	bli_blksz_copy_dt( BLIS_DOUBLE, blksz_mr, BLIS_DCOMPLEX, blksz_mr );
+	bli_blksz_copy_dt( BLIS_FLOAT,  &blksz_mr, BLIS_SCOMPLEX, &blksz_mr );
+	bli_blksz_copy_dt( BLIS_DOUBLE, &blksz_mr, BLIS_DCOMPLEX, &blksz_mr );
 
-	bli_blksz_copy_dt( BLIS_FLOAT,  blksz_nr, BLIS_SCOMPLEX, blksz_nr );
-	bli_blksz_copy_dt( BLIS_DOUBLE, blksz_nr, BLIS_DCOMPLEX, blksz_nr );
+	bli_blksz_copy_dt( BLIS_FLOAT,  &blksz_nr, BLIS_SCOMPLEX, &blksz_nr );
+	bli_blksz_copy_dt( BLIS_DOUBLE, &blksz_nr, BLIS_DCOMPLEX, &blksz_nr );
 
-	bli_blksz_copy_dt( BLIS_FLOAT,  blksz_mc, BLIS_SCOMPLEX, blksz_mc );
-	bli_blksz_copy_dt( BLIS_DOUBLE, blksz_mc, BLIS_DCOMPLEX, blksz_mc );
+	bli_blksz_copy_dt( BLIS_FLOAT,  &blksz_mc, BLIS_SCOMPLEX, &blksz_mc );
+	bli_blksz_copy_dt( BLIS_DOUBLE, &blksz_mc, BLIS_DCOMPLEX, &blksz_mc );
 
-	bli_blksz_copy_dt( BLIS_FLOAT,  blksz_nc, BLIS_SCOMPLEX, blksz_nc );
-	bli_blksz_copy_dt( BLIS_DOUBLE, blksz_nc, BLIS_DCOMPLEX, blksz_nc );
+	bli_blksz_copy_dt( BLIS_FLOAT,  &blksz_nc, BLIS_SCOMPLEX, &blksz_nc );
+	bli_blksz_copy_dt( BLIS_DOUBLE, &blksz_nc, BLIS_DCOMPLEX, &blksz_nc );
 
-	bli_blksz_copy_dt( BLIS_FLOAT,  blksz_kc, BLIS_SCOMPLEX, blksz_kc );
-	bli_blksz_copy_dt( BLIS_DOUBLE, blksz_kc, BLIS_DCOMPLEX, blksz_kc );
+	bli_blksz_copy_dt( BLIS_FLOAT,  &blksz_kc, BLIS_SCOMPLEX, &blksz_kc );
+	bli_blksz_copy_dt( BLIS_DOUBLE, &blksz_kc, BLIS_DCOMPLEX, &blksz_kc );
 
 	// Halve both the real and complex NR's (which are both real NR's).
-	bli_blksz_scale_def_max( 1, 2, BLIS_FLOAT,    blksz_nr );
-	bli_blksz_scale_def_max( 1, 2, BLIS_DOUBLE,   blksz_nr );
-	bli_blksz_scale_def_max( 1, 2, BLIS_SCOMPLEX, blksz_nr );
-	bli_blksz_scale_def_max( 1, 2, BLIS_DCOMPLEX, blksz_nr );
+	bli_blksz_scale_def_max( 1, 2, BLIS_FLOAT,    &blksz_nr );
+	bli_blksz_scale_def_max( 1, 2, BLIS_DOUBLE,   &blksz_nr );
+	bli_blksz_scale_def_max( 1, 2, BLIS_SCOMPLEX, &blksz_nr );
+	bli_blksz_scale_def_max( 1, 2, BLIS_DCOMPLEX, &blksz_nr );
 
 	// Halve both the real and complex NC's (which are both real NC's).
-	bli_blksz_scale_def_max( 1, 2, BLIS_FLOAT,    blksz_nc );
-	bli_blksz_scale_def_max( 1, 2, BLIS_DOUBLE,   blksz_nc );
-	bli_blksz_scale_def_max( 1, 2, BLIS_SCOMPLEX, blksz_nc );
-	bli_blksz_scale_def_max( 1, 2, BLIS_DCOMPLEX, blksz_nc );
+	bli_blksz_scale_def_max( 1, 2, BLIS_FLOAT,    &blksz_nc );
+	bli_blksz_scale_def_max( 1, 2, BLIS_DOUBLE,   &blksz_nc );
+	bli_blksz_scale_def_max( 1, 2, BLIS_SCOMPLEX, &blksz_nc );
+	bli_blksz_scale_def_max( 1, 2, BLIS_DCOMPLEX, &blksz_nc );
+
+    bli_cntx_set_blksz( BLIS_MR, &blksz_mr, BLIS_MR, cntx_local );
+    bli_cntx_set_blksz( BLIS_NR, &blksz_nr, BLIS_NR, cntx_local );
+    bli_cntx_set_blksz( BLIS_MC, &blksz_mc, BLIS_MR, cntx_local );
+    bli_cntx_set_blksz( BLIS_NC, &blksz_nc, BLIS_NR, cntx_local );
+    bli_cntx_set_blksz( BLIS_KC, &blksz_kc, BLIS_KC, cntx_local );
 
 	// Use the default pack schemas in the objects.
 
-	// static func_t* bli_cntx_get_ukrs( ukr_t ukr_id, cntx_t* cntx )
-	func_t* l3_vir_ukrs = bli_cntx_get_ukrs( BLIS_GEMM_VIR_UKR, *cntx );
-
 	// Rather than check which complex datatype dt_comp refers to, we set
 	// the mixed-domain virtual microkernel for both types.
-	bli_func_set_dt( bli_cgemm_md_c2r_ref, BLIS_SCOMPLEX, l3_vir_ukrs );
-	bli_func_set_dt( bli_zgemm_md_c2r_ref, BLIS_DCOMPLEX, l3_vir_ukrs );
+    bli_cntx_set_ukr_dt( bli_cgemm_md_c2r_ref, BLIS_SCOMPLEX, BLIS_GEMM_VIR_UKR, cntx_local );
+    bli_cntx_set_ukr_dt( bli_zgemm_md_c2r_ref, BLIS_DCOMPLEX, BLIS_GEMM_VIR_UKR, cntx_local );
 
 	// Return the computation and execution domains.
 	return doms;
@@ -358,12 +364,12 @@ mddm_t bli_gemm_md_crc
 //                 cab
 mddm_t bli_gemm_md_rcc
      (
-       obj_t*   a,
-       obj_t*   b,
-       obj_t*   beta,
-       obj_t*   c,
-       cntx_t*  cntx_local,
-       cntx_t** cntx
+             obj_t*   a,
+             obj_t*   b,
+       const obj_t*   beta,
+             obj_t*   c,
+             cntx_t*  cntx_local,
+       const cntx_t** cntx
      )
 {
 	mddm_t doms;
@@ -384,32 +390,38 @@ mddm_t bli_gemm_md_rcc
 
 	// Copy the real domain blocksizes into the slots of their complex
 	// counterparts.
-	blksz_t* blksz_mr = bli_cntx_get_blksz( BLIS_MR, *cntx );
-	blksz_t* blksz_nr = bli_cntx_get_blksz( BLIS_NR, *cntx );
-	blksz_t* blksz_mc = bli_cntx_get_blksz( BLIS_MC, *cntx );
-	blksz_t* blksz_nc = bli_cntx_get_blksz( BLIS_NC, *cntx );
-	blksz_t* blksz_kc = bli_cntx_get_blksz( BLIS_KC, *cntx );
+	blksz_t blksz_mr = *bli_cntx_get_blksz( BLIS_MR, cntx_local );
+	blksz_t blksz_nr = *bli_cntx_get_blksz( BLIS_NR, cntx_local );
+	blksz_t blksz_mc = *bli_cntx_get_blksz( BLIS_MC, cntx_local );
+	blksz_t blksz_nc = *bli_cntx_get_blksz( BLIS_NC, cntx_local );
+	blksz_t blksz_kc = *bli_cntx_get_blksz( BLIS_KC, cntx_local );
 
-	bli_blksz_copy_dt( BLIS_FLOAT,  blksz_mr, BLIS_SCOMPLEX, blksz_mr );
-	bli_blksz_copy_dt( BLIS_DOUBLE, blksz_mr, BLIS_DCOMPLEX, blksz_mr );
+	bli_blksz_copy_dt( BLIS_FLOAT,  &blksz_mr, BLIS_SCOMPLEX, &blksz_mr );
+	bli_blksz_copy_dt( BLIS_DOUBLE, &blksz_mr, BLIS_DCOMPLEX, &blksz_mr );
 
-	bli_blksz_copy_dt( BLIS_FLOAT,  blksz_nr, BLIS_SCOMPLEX, blksz_nr );
-	bli_blksz_copy_dt( BLIS_DOUBLE, blksz_nr, BLIS_DCOMPLEX, blksz_nr );
+	bli_blksz_copy_dt( BLIS_FLOAT,  &blksz_nr, BLIS_SCOMPLEX, &blksz_nr );
+	bli_blksz_copy_dt( BLIS_DOUBLE, &blksz_nr, BLIS_DCOMPLEX, &blksz_nr );
 
-	bli_blksz_copy_dt( BLIS_FLOAT,  blksz_mc, BLIS_SCOMPLEX, blksz_mc );
-	bli_blksz_copy_dt( BLIS_DOUBLE, blksz_mc, BLIS_DCOMPLEX, blksz_mc );
+	bli_blksz_copy_dt( BLIS_FLOAT,  &blksz_mc, BLIS_SCOMPLEX, &blksz_mc );
+	bli_blksz_copy_dt( BLIS_DOUBLE, &blksz_mc, BLIS_DCOMPLEX, &blksz_mc );
 
-	bli_blksz_copy_dt( BLIS_FLOAT,  blksz_nc, BLIS_SCOMPLEX, blksz_nc );
-	bli_blksz_copy_dt( BLIS_DOUBLE, blksz_nc, BLIS_DCOMPLEX, blksz_nc );
+	bli_blksz_copy_dt( BLIS_FLOAT,  &blksz_nc, BLIS_SCOMPLEX, &blksz_nc );
+	bli_blksz_copy_dt( BLIS_DOUBLE, &blksz_nc, BLIS_DCOMPLEX, &blksz_nc );
 
-	bli_blksz_copy_dt( BLIS_FLOAT,  blksz_kc, BLIS_SCOMPLEX, blksz_kc );
-	bli_blksz_copy_dt( BLIS_DOUBLE, blksz_kc, BLIS_DCOMPLEX, blksz_kc );
+	bli_blksz_copy_dt( BLIS_FLOAT,  &blksz_kc, BLIS_SCOMPLEX, &blksz_kc );
+	bli_blksz_copy_dt( BLIS_DOUBLE, &blksz_kc, BLIS_DCOMPLEX, &blksz_kc );
 
 	// Halve both the real and complex KC's (which are both real KC's).
-	bli_blksz_scale_def_max( 1, 2, BLIS_FLOAT,    blksz_kc );
-	bli_blksz_scale_def_max( 1, 2, BLIS_DOUBLE,   blksz_kc );
-	bli_blksz_scale_def_max( 1, 2, BLIS_SCOMPLEX, blksz_kc );
-	bli_blksz_scale_def_max( 1, 2, BLIS_DCOMPLEX, blksz_kc );
+	bli_blksz_scale_def_max( 1, 2, BLIS_FLOAT,    &blksz_kc );
+	bli_blksz_scale_def_max( 1, 2, BLIS_DOUBLE,   &blksz_kc );
+	bli_blksz_scale_def_max( 1, 2, BLIS_SCOMPLEX, &blksz_kc );
+	bli_blksz_scale_def_max( 1, 2, BLIS_DCOMPLEX, &blksz_kc );
+
+    bli_cntx_set_blksz( BLIS_MR, &blksz_mr, BLIS_MR, cntx_local );
+    bli_cntx_set_blksz( BLIS_NR, &blksz_nr, BLIS_NR, cntx_local );
+    bli_cntx_set_blksz( BLIS_MC, &blksz_mc, BLIS_MR, cntx_local );
+    bli_cntx_set_blksz( BLIS_NC, &blksz_nc, BLIS_NR, cntx_local );
+    bli_cntx_set_blksz( BLIS_KC, &blksz_kc, BLIS_KC, cntx_local );
 
 	// Use the 1r pack schema for both A and B with the conjugation
 	// of A or B toggled (to produce ar * br - ai * bi).
@@ -427,14 +439,14 @@ mddm_t bli_gemm_md_rcc
 	// the target datatype. (The packm_blk_var1_md() function has "built-in"
 	// support for packing to 1r (and 1e) schemas, whereas the
 	// packm_blk_var1() function relies on packm kernels for packing to 1r.
-	const num_t dt_complex = bli_obj_dt( a );
-	cntx_t* cntx_1m = bli_gks_query_ind_cntx( BLIS_1M, dt_complex );
+	const num_t   dt_complex = bli_obj_dt( a );
+	const cntx_t* cntx_1m    = bli_gks_query_ind_cntx( BLIS_1M, dt_complex );
 
-	func_t* cntx_funcs    = bli_cntx_ukrs_buf( *cntx );
-	func_t* cntx_1m_funcs = bli_cntx_ukrs_buf( cntx_1m );
+	const func_t* packm_1m_mr = bli_cntx_get_ukrs( BLIS_PACKM_MRXK_KER, cntx_1m );
+	const func_t* packm_1m_nr = bli_cntx_get_ukrs( BLIS_PACKM_NRXK_KER, cntx_1m );
 
-	cntx_funcs[ BLIS_PACKM_MRXK_KER ] = cntx_1m_funcs[ BLIS_PACKM_MRXK_KER ];
-	cntx_funcs[ BLIS_PACKM_NRXK_KER ] = cntx_1m_funcs[ BLIS_PACKM_NRXK_KER ];
+    bli_cntx_set_ukr( BLIS_PACKM_MRXK_KER, packm_1m_mr, cntx_local );
+    bli_cntx_set_ukr( BLIS_PACKM_NRXK_KER, packm_1m_nr, cntx_local );
 
 	// Return the computation and execution domains.
 	return doms;
@@ -445,12 +457,12 @@ mddm_t bli_gemm_md_rcc
 //                 cab
 mddm_t bli_gemm_md_crr
      (
-       obj_t*   a,
-       obj_t*   b,
-       obj_t*   beta,
-       obj_t*   c,
-       cntx_t*  cntx_local,
-       cntx_t** cntx
+             obj_t*   a,
+             obj_t*   b,
+       const obj_t*   beta,
+             obj_t*   c,
+             cntx_t*  cntx_local,
+       const cntx_t** cntx
      )
 {
 	mddm_t doms;
@@ -502,12 +514,12 @@ mddm_t bli_gemm_md_crr
 //                 cab
 mddm_t bli_gemm_md_rcr
      (
-       obj_t*   a,
-       obj_t*   b,
-       obj_t*   beta,
-       obj_t*   c,
-       cntx_t*  cntx_local,
-       cntx_t** cntx
+             obj_t*   a,
+             obj_t*   b,
+       const obj_t*   beta,
+             obj_t*   c,
+             cntx_t*  cntx_local,
+       const cntx_t** cntx
      )
 {
 	mddm_t doms;
@@ -540,12 +552,12 @@ mddm_t bli_gemm_md_rcr
 //                 cab
 mddm_t bli_gemm_md_rrc
      (
-       obj_t*   a,
-       obj_t*   b,
-       obj_t*   beta,
-       obj_t*   c,
-       cntx_t*  cntx_local,
-       cntx_t** cntx
+             obj_t*   a,
+             obj_t*   b,
+       const obj_t*   beta,
+             obj_t*   c,
+             cntx_t*  cntx_local,
+       const cntx_t** cntx
      )
 {
 	mddm_t doms;
@@ -578,12 +590,12 @@ mddm_t bli_gemm_md_rrc
 //                 cab
 mddm_t bli_gemm_md_rrr
      (
-       obj_t*   a,
-       obj_t*   b,
-       obj_t*   beta,
-       obj_t*   c,
-       cntx_t*  cntx_local,
-       cntx_t** cntx
+             obj_t*   a,
+             obj_t*   b,
+       const obj_t*   beta,
+             obj_t*   c,
+             cntx_t*  cntx_local,
+       const cntx_t** cntx
      )
 {
 	mddm_t doms;
@@ -608,12 +620,12 @@ mddm_t bli_gemm_md_rrr
 //                 cab
 mddm_t bli_gemm_md_ccc
      (
-       obj_t*   a,
-       obj_t*   b,
-       obj_t*   beta,
-       obj_t*   c,
-       cntx_t*  cntx_local,
-       cntx_t** cntx
+             obj_t*   a,
+             obj_t*   b,
+       const obj_t*   beta,
+             obj_t*   c,
+             cntx_t*  cntx_local,
+       const cntx_t** cntx
      )
 {
 	mddm_t doms;

@@ -36,39 +36,43 @@
 
 void bli_gemm_blk_var3
      (
-       obj_t*  a,
-       obj_t*  b,
-       obj_t*  c,
-       cntx_t* cntx,
-       rntm_t* rntm,
-       cntl_t* cntl,
-       thrinfo_t* thread
+       const obj_t*  a,
+       const obj_t*  b,
+       const obj_t*  c,
+       const cntx_t* cntx,
+             rntm_t* rntm,
+             cntl_t* cntl,
+             thrinfo_t* thread
      )
 {
-	obj_t a1, b1;
-	dim_t b_alg;
+	obj_t ap, bp, cs;
+	bli_obj_alias_to( a, &ap );
+	bli_obj_alias_to( b, &bp );
+	bli_obj_alias_to( c, &cs );
 
 	// Determine the direction in which to partition (forwards or backwards).
-	dir_t direct = bli_l3_direct( a, b, c, cntl );
+	dir_t direct = bli_l3_direct( &ap, &bp, &cs, cntl );
 
 	// Prune any zero region that exists along the partitioning dimension.
-	bli_l3_prune_unref_mparts_k( a, b, c, cntl );
+	bli_l3_prune_unref_mparts_k( &ap, &bp, &cs, cntl );
 
 	// Query dimension in partitioning direction.
-	dim_t k_trans = bli_obj_width_after_trans( a );
+	dim_t k_trans = bli_obj_width_after_trans( &ap );
 
 	// Partition along the k dimension.
+	dim_t b_alg;
 	for ( dim_t i = 0; i < k_trans; i += b_alg )
 	{
 		// Determine the current algorithmic blocksize.
-		b_alg = bli_l3_determine_kc( direct, i, k_trans, a, b,
+		b_alg = bli_l3_determine_kc( direct, i, k_trans, &ap, &bp,
 		                             bli_cntl_bszid( cntl ), cntx, cntl );
 
 		// Acquire partitions for A1 and B1.
+		obj_t a1, b1;
 		bli_acquire_mpart_ndim( direct, BLIS_SUBPART1,
-		                        i, b_alg, a, &a1 );
+		                        i, b_alg, &ap, &a1 );
 		bli_acquire_mpart_mdim( direct, BLIS_SUBPART1,
-		                        i, b_alg, b, &b1 );
+		                        i, b_alg, &bp, &b1 );
 
 		// Perform gemm subproblem.
 		bli_l3_int
@@ -77,7 +81,7 @@ void bli_gemm_blk_var3
 		  &a1,
 		  &b1,
 		  &BLIS_ONE,
-		  c,
+		  &cs,
 		  cntx,
 		  rntm,
 		  bli_cntl_sub_node( cntl ),
@@ -107,7 +111,7 @@ void bli_gemm_blk_var3
 		// Thus, for neither trmm nor trmm3 should we reset the scalar on C
 		// after the first iteration.
 		if ( bli_cntl_family( cntl ) != BLIS_TRMM )
-		if ( i == 0 ) bli_obj_scalar_reset( c );
+		if ( i == 0 ) bli_obj_scalar_reset( &cs );
 	}
 }
 

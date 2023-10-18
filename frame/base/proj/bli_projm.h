@@ -34,13 +34,13 @@
 
 BLIS_EXPORT_BLIS void bli_projm
      (
-       obj_t* a,
-       obj_t* b
+       const obj_t* a,
+       const obj_t* b
      );
 
 void bli_projm_check
      (
-       obj_t* a,
-       obj_t* b
+       const obj_t* a,
+       const obj_t* b
      );
 

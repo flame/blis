@@ -70,8 +70,8 @@ void bli_dgemm_power10_mma_8x8
         double*    restrict b,
         double*    restrict beta,
         double*    restrict c, inc_t rs_c0, inc_t cs_c,
-        auxinfo_t* restrict data,
-        cntx_t*    restrict cntx
+        auxinfo_t*          data,
+        cntx_t*             cntx
     )
 {
 

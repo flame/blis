@@ -1120,26 +1120,26 @@ typedef struct
 
 	// Pointers to the micro-panels of A and B which will be used by the
 	// next call to the micro-kernel.
-	void*  a_next;
-	void*  b_next;
+	const void* a_next;
+	const void* b_next;
 
 	// The imaginary strides of A and B.
-	inc_t  is_a;
-	inc_t  is_b;
+	inc_t is_a;
+	inc_t is_b;
 
 	// The panel strides of A and B.
 	// NOTE: These are only used in situations where iteration over the
 	// micropanels takes place in part within the kernel code (e.g. sup
 	// millikernels).
-	inc_t  ps_a;
-	inc_t  ps_b;
+	inc_t ps_a;
+	inc_t ps_b;
 
 	// The type to convert to on output.
 	//num_t  dt_on_output;
 
 	// (Virtual) microkernel address and additional parameters.
 	void_fp ukr;
-	void*   params;
+	const void* params;
 
 } auxinfo_t;
 
@@ -1171,23 +1171,23 @@ struct thrinfo_s;
 
 typedef void (*obj_pack_fn_t)
     (
-      struct obj_s*     a,
-      struct obj_s*     ap,
-      struct cntx_s*    cntx,
-      struct rntm_s*    rntm,
-      struct cntl_s*    cntl,
-      struct thrinfo_s* thread
+      const struct obj_s*     a,
+            struct obj_s*     ap,
+      const struct cntx_s*    cntx,
+            struct rntm_s*    rntm,
+            struct cntl_s*    cntl,
+      const struct thrinfo_s* thread
     );
 
 typedef void (*obj_ker_fn_t)
     (
-      struct obj_s*     a,
-      struct obj_s*     b,
-      struct obj_s*     c,
-      struct cntx_s*    cntx,
-      struct rntm_s*    rntm,
-      struct cntl_s*    cntl,
-      struct thrinfo_s* thread
+      const struct obj_s*     a,
+      const struct obj_s*     b,
+      const struct obj_s*     c,
+      const struct cntx_s*    cntx,
+            struct rntm_s*    rntm,
+            struct cntl_s*    cntl,
+      const struct thrinfo_s* thread
     );
 
 typedef struct obj_s
@@ -1306,7 +1306,7 @@ typedef struct obj_s
 // Define these macros here since they must be updated if contents of
 // obj_t changes.
 
-BLIS_INLINE void bli_obj_init_full_shallow_copy_of( obj_t* a, obj_t* b )
+BLIS_INLINE void bli_obj_init_full_shallow_copy_of( const obj_t* a, obj_t* b )
 {
 	b->root        = a->root;
 

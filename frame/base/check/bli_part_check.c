@@ -34,11 +34,11 @@
 
 #include "blis.h"
 
-void bli_acquire_mpart_t2b_check( subpart_t  requested_part,
-                                      dim_t  i,
-                                      dim_t  b,
-                                      obj_t* obj,
-                                      obj_t* sub_obj )
+void bli_acquire_mpart_t2b_check(       subpart_t requested_part,
+                                        dim_t     i,
+                                        dim_t     b,
+                                  const obj_t*    obj,
+                                  const obj_t*    sub_obj )
 {
 	err_t e_val;
 
@@ -52,11 +52,11 @@ void bli_acquire_mpart_t2b_check( subpart_t  requested_part,
 	bli_check_error_code( e_val );
 }
 
-void bli_acquire_mpart_l2r_check( subpart_t  requested_part,
-                                      dim_t  j,
-                                      dim_t  b,
-                                      obj_t* obj,
-                                      obj_t* sub_obj )
+void bli_acquire_mpart_l2r_check(       subpart_t requested_part,
+                                        dim_t     j,
+                                        dim_t     b,
+                                  const obj_t*    obj,
+                                  const obj_t*    sub_obj )
 {
 	err_t e_val;
 
@@ -70,11 +70,11 @@ void bli_acquire_mpart_l2r_check( subpart_t  requested_part,
 	bli_check_error_code( e_val );
 }
 
-void bli_acquire_mpart_tl2br_check( subpart_t  requested_part,
-                                        dim_t  ij,
-                                        dim_t  b,
-                                        obj_t* obj,
-                                        obj_t* sub_obj )
+void bli_acquire_mpart_tl2br_check(       subpart_t requested_part,
+                                          dim_t     ij,
+                                          dim_t     b,
+                                    const obj_t*    obj,
+                                    const obj_t*    sub_obj )
 {
 	err_t e_val;
 

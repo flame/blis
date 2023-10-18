@@ -121,7 +121,7 @@ void bli_arch_set_id( void )
 		// initialized. Query the address of an internal context data structure
 		// corresponding to req_id. This pointer will be NULL if the associated
 		// subconfig is not available.
-		cntx_t** req_cntx = bli_gks_lookup_id( req_id );
+		const cntx_t* const * req_cntx = bli_gks_lookup_id( req_id );
 
 		// This function checks the context pointer and aborts with a useful
 		// error message if the pointer is found to be NULL.
@@ -262,7 +262,7 @@ void bli_arch_set_id( void )
 // enumeration that is typedef'ed in bli_type_defs.h. That is, the
 // index order of each string should correspond to the implied/assigned
 // enum value given to the corresponding BLIS_ARCH_ value.
-static char* config_name[ BLIS_NUM_ARCHS ] =
+static const char* config_name[ BLIS_NUM_ARCHS ] =
 {
     "skx",
     "knl",
@@ -297,11 +297,11 @@ static char* config_name[ BLIS_NUM_ARCHS ] =
     "power9",
     "power7",
     "bgq",
-    
+
     "generic"
 };
 
-char* bli_arch_string( arch_t id )
+const char* bli_arch_string( arch_t id )
 {
 	return config_name[ id ];
 }
@@ -320,9 +320,9 @@ bool bli_arch_get_logging( void )
 	return arch_dolog;
 }
 
-void bli_arch_log( char* fmt, ... )
+void bli_arch_log( const char* fmt, ... )
 {
-	char prefix[] = "libblis: ";
+	const char prefix[] = "libblis: ";
 	int  n_chars  = strlen( prefix ) + strlen( fmt ) + 1;
 
 	if ( bli_arch_get_logging() && fmt )

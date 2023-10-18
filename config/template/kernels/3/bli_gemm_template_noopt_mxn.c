@@ -45,8 +45,8 @@ void bli_zgemm_template_noopt
        dcomplex*  restrict b1,
        dcomplex*  restrict beta,
        dcomplex*  restrict c11, inc_t rs_c, inc_t cs_c,
-       auxinfo_t* restrict data,
-       cntx_t*    restrict cntx
+       auxinfo_t*          data,
+       cntx_t*             cntx
      )
 {
 /*

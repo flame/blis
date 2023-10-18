@@ -69,8 +69,8 @@ void bli_dgemmsup_rv_armv8a_int_3x8mn
        double*    restrict b0, inc_t rs_b, inc_t cs_b,
        double*    restrict beta,
        double*    restrict c0, inc_t rs_c, inc_t cs_c,
-       auxinfo_t* restrict data,
-       cntx_t*    restrict cntx
+       auxinfo_t*          data,
+       cntx_t*             cntx
      )
 {
   // Unlike the rd case, this rv case does not impose restriction upon

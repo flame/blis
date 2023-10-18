@@ -63,8 +63,8 @@ void bli_i16gemm_power10_mma_8x16
         short*     restrict b,
         int32_t*       restrict beta,
         int32_t*       restrict c, inc_t rs_c0, inc_t cs_c0,
-        auxinfo_t* restrict data,
-        cntx_t*    restrict cntx
+        auxinfo_t*          data,
+        cntx_t*             cntx
     )
 {
 

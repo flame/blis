@@ -34,14 +34,14 @@
 
 #include "blis.h"
 
-void bli_daxpyv_bgq_int 
-     ( 
+void bli_daxpyv_bgq_int
+     (
        conj_t           conjx,
        dim_t            n,
        double* restrict alpha,
        double* restrict x, inc_t incx,
        double* restrict y, inc_t incy,
-       cntx_t* restrict cntx
+       cntx_t*          cntx
      )
 {
 	if ( bli_zero_dim1( n ) ) return;
@@ -70,7 +70,7 @@ void bli_daxpyv_bgq_int
         xv = vec_lda( 0 * sizeof(double), &x[i*4] );
         yv = vec_lda( 0 * sizeof(double), &y[i*4] );
         zv = vec_madd( alphav, xv, yv );
-        vec_sta( zv, 0 * sizeof(double), &y[i*4] );   
+        vec_sta( zv, 0 * sizeof(double), &y[i*4] );
 	}
     for ( dim_t i = 0; i < n_left; i++ )
     {

@@ -45,7 +45,7 @@ void bli_daxpyf_bgq_int
        double* restrict a, inc_t inca, inc_t lda,
        double* restrict x, inc_t incx,
        double* restrict y, inc_t incy,
-       cntx_t* restrict cntx
+       cntx_t*          cntx
      )
 {
 	const dim_t fusefac = 8;
@@ -60,7 +60,7 @@ void bli_daxpyf_bgq_int
 		use_ref = TRUE;
 	// Call the reference implementation if needed.
 	if ( use_ref == TRUE )
-	{   
+	{
 //        printf("%d\t%d\t%d\t%d\t%d\t%d\n", fusefac, inca, incx, incy, bli_is_unaligned_to( ( siz_t )a, 32 ), bli_is_unaligned_to( ( siz_t )y, 32));
 //        printf("DEFAULTING TO REFERENCE IMPLEMENTATION\n");
 		BLIS_DAXPYF_KERNEL_REF( conja, conjx, m, b_n, alpha, a, inca, lda, x, incx, y, incy, cntx );
@@ -134,7 +134,7 @@ void bli_daxpyf_bgq_int
 
         vec_sta( yv, 0 * sizeof(double), &y0[i*4]);
 	}
-    
+
     for ( dim_t i = 0; i < m_left; ++i )
     {
         y0[4*m_run + i] += chi0 * a0[4*m_run + i]

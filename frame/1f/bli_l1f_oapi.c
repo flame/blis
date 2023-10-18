@@ -45,11 +45,11 @@
 \
 void PASTEMAC(opname,EX_SUF) \
      ( \
-       obj_t*  alphax, \
-       obj_t*  alphay, \
-       obj_t*  x, \
-       obj_t*  y, \
-       obj_t*  z  \
+       const obj_t* alphax, \
+       const obj_t* alphay, \
+       const obj_t* x, \
+       const obj_t* y, \
+       const obj_t* z  \
        BLIS_OAPI_EX_PARAMS  \
      ) \
 { \
@@ -76,7 +76,7 @@ void PASTEMAC(opname,EX_SUF) \
 	obj_t     alphay_local; \
 \
 	if ( bli_error_checking_is_enabled() ) \
-	    PASTEMAC(opname,_check)( alphax, alphay, x, y, z ); \
+		PASTEMAC(opname,_check)( alphax, alphay, x, y, z ); \
 \
 	/* Create local copy-casts of scalars (and apply internal conjugation
 	   as needed). */ \
@@ -115,10 +115,10 @@ GENFRONT( axpy2v )
 \
 void PASTEMAC(opname,EX_SUF) \
      ( \
-       obj_t*  alpha, \
-       obj_t*  a, \
-       obj_t*  x, \
-       obj_t*  y  \
+       const obj_t* alpha, \
+       const obj_t* a, \
+       const obj_t* x, \
+       const obj_t* y  \
        BLIS_OAPI_EX_PARAMS  \
      ) \
 { \
@@ -145,7 +145,7 @@ void PASTEMAC(opname,EX_SUF) \
 	obj_t     alpha_local; \
 \
 	if ( bli_error_checking_is_enabled() ) \
-	    PASTEMAC(opname,_check)( alpha, a, x, y ); \
+		PASTEMAC(opname,_check)( alpha, a, x, y ); \
 \
 	/* Create local copy-casts of scalars (and apply internal conjugation
 	   as needed). */ \
@@ -184,12 +184,12 @@ GENFRONT( axpyf )
 \
 void PASTEMAC(opname,EX_SUF) \
      ( \
-       obj_t*  alpha, \
-       obj_t*  xt, \
-       obj_t*  x, \
-       obj_t*  y, \
-       obj_t*  rho, \
-       obj_t*  z  \
+       const obj_t* alpha, \
+       const obj_t* xt, \
+       const obj_t* x, \
+       const obj_t* y, \
+       const obj_t* rho, \
+       const obj_t* z  \
        BLIS_OAPI_EX_PARAMS  \
      ) \
 { \
@@ -216,7 +216,7 @@ void PASTEMAC(opname,EX_SUF) \
 	obj_t     alpha_local; \
 \
 	if ( bli_error_checking_is_enabled() ) \
-	    PASTEMAC(opname,_check)( alpha, xt, x, y, rho, z ); \
+		PASTEMAC(opname,_check)( alpha, xt, x, y, rho, z ); \
 \
 	/* Create local copy-casts of scalars (and apply internal conjugation
 	   as needed). */ \
@@ -253,14 +253,14 @@ GENFRONT( dotaxpyv )
 \
 void PASTEMAC(opname,EX_SUF) \
      ( \
-       obj_t*  alpha, \
-       obj_t*  at, \
-       obj_t*  a, \
-       obj_t*  w, \
-       obj_t*  x, \
-       obj_t*  beta, \
-       obj_t*  y, \
-       obj_t*  z  \
+       const obj_t* alpha, \
+       const obj_t* at, \
+       const obj_t* a, \
+       const obj_t* w, \
+       const obj_t* x, \
+       const obj_t* beta, \
+       const obj_t* y, \
+       const obj_t* z  \
        BLIS_OAPI_EX_PARAMS  \
      ) \
 { \
@@ -295,7 +295,7 @@ void PASTEMAC(opname,EX_SUF) \
 	obj_t     beta_local; \
 \
 	if ( bli_error_checking_is_enabled() ) \
-	    PASTEMAC(opname,_check)( alpha, at, a, w, x, beta, y, z ); \
+		PASTEMAC(opname,_check)( alpha, at, a, w, x, beta, y, z ); \
 \
 	/* Create local copy-casts of scalars (and apply internal conjugation
 	   as needed). */ \
@@ -342,11 +342,11 @@ GENFRONT( dotxaxpyf )
 \
 void PASTEMAC(opname,EX_SUF) \
      ( \
-       obj_t*  alpha, \
-       obj_t*  a, \
-       obj_t*  x, \
-       obj_t*  beta, \
-       obj_t*  y  \
+       const obj_t* alpha, \
+       const obj_t* a, \
+       const obj_t* x, \
+       const obj_t* beta, \
+       const obj_t* y  \
        BLIS_OAPI_EX_PARAMS  \
      ) \
 { \
@@ -375,7 +375,7 @@ void PASTEMAC(opname,EX_SUF) \
 	obj_t     beta_local; \
 \
 	if ( bli_error_checking_is_enabled() ) \
-	    PASTEMAC(opname,_check)( alpha, a, x, beta, y ); \
+		PASTEMAC(opname,_check)( alpha, a, x, beta, y ); \
 \
 	/* Create local copy-casts of scalars (and apply internal conjugation
 	   as needed). */ \

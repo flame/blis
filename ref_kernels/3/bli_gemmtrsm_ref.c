@@ -51,30 +51,30 @@ void PASTEMAC3(ch,opname,arch,suf) \
        ctype*     restrict bx1, \
        ctype*     restrict b11, \
        ctype*     restrict c11, inc_t rs_c, inc_t cs_c, \
-       auxinfo_t* restrict data, \
-       cntx_t*    restrict cntx  \
+       auxinfo_t*          data, \
+       cntx_t*             cntx  \
      ) \
 { \
-	const num_t     dt     = PASTEMAC(ch,type); \
+	const num_t dt     = PASTEMAC(ch,type); \
 \
-	const dim_t     mr     = bli_cntx_get_blksz_def_dt( dt, BLIS_MR, cntx ); \
-	const dim_t     nr     = bli_cntx_get_blksz_def_dt( dt, BLIS_NR, cntx ); \
+	const dim_t mr     = bli_cntx_get_blksz_def_dt( dt, BLIS_MR, cntx ); \
+	const dim_t nr     = bli_cntx_get_blksz_def_dt( dt, BLIS_NR, cntx ); \
 \
-	const inc_t     packnr = bli_cntx_get_blksz_max_dt( dt, BLIS_NR, cntx ); \
+	const inc_t packnr = bli_cntx_get_blksz_max_dt( dt, BLIS_NR, cntx ); \
 \
-	const inc_t     rs_b   = packnr; \
-	const inc_t     cs_b   = bli_cntx_get_blksz_def_dt( dt, BLIS_BBN, cntx ); \
+	const inc_t rs_b   = packnr; \
+	const inc_t cs_b   = bli_cntx_get_blksz_def_dt( dt, BLIS_BBN, cntx ); \
 /*
 printf( "bli_gemmtrsm_ref(): cs_b = %d\n", (int)cs_b ); \
 printf( "bli_gemmtrsm_ref(): k nr = %d %d\n", (int)k, (int)nr ); \
 */ \
 \
-	ctype*          minus_one = PASTEMAC(ch,m1); \
+	ctype*      minus_one = PASTEMAC(ch,m1); \
 \
 	PASTECH(ch,gemm_ukr_ft) \
-	              gemm_ukr = bli_cntx_get_ukr_dt( dt, BLIS_GEMM_UKR, cntx ); \
+	            gemm_ukr = bli_cntx_get_ukr_dt( dt, BLIS_GEMM_UKR, cntx ); \
 	PASTECH(ch,trsm_ukr_ft) \
-	              trsm_ukr = bli_cntx_get_ukr_dt( dt, trsmkerid, cntx ); \
+	            trsm_ukr = bli_cntx_get_ukr_dt( dt, trsmkerid, cntx ); \
 \
 /*
 PASTEMAC(d,fprintm)( stdout, "gemmtrsm_ukr: b01", k, nr, \
@@ -94,15 +94,15 @@ PASTEMAC(d,fprintm)( stdout, "gemmtrsm_ukr: b11", mr, 2*nr, \
 	   circumstances where we would want the gemmtrsm_? operations to have
 	   and exercise their own IO preferences -- I'd have to think about it --
 	   but this doesn't seem to be one of them. */ \
-	const bool      col_pref    = bli_cntx_ukr_prefers_cols_dt( dt, BLIS_GEMM_VIR_UKR, cntx ); \
-	const inc_t     rs_ct       = ( col_pref ? 1 : nr ); \
-	const inc_t     cs_ct       = ( col_pref ? mr : 1 ); \
+	const bool      col_pref = bli_cntx_ukr_prefers_cols_dt( dt, BLIS_GEMM_VIR_UKR, cntx ); \
+	const inc_t     rs_ct    = ( col_pref ? 1 : nr ); \
+	const inc_t     cs_ct    = ( col_pref ? mr : 1 ); \
 \
-	const bool      use_ct      = ( m < mr || n < nr ); \
+	const bool      use_ct   = ( m < mr || n < nr ); \
 \
-	ctype* restrict c11_use     = c11; \
-	inc_t           rs_c_use    = rs_c; \
-	inc_t           cs_c_use    = cs_c; \
+	ctype* restrict c11_use  = c11; \
+	inc_t           rs_c_use = rs_c; \
+	inc_t           cs_c_use = cs_c; \
 \
 	if ( use_ct ) \
 	{ \

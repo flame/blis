@@ -43,11 +43,11 @@
 \
 void PASTEMAC0(opname) \
      ( \
-       obj_t*  alpha, \
-       obj_t*  a, \
-       obj_t*  b, \
-       obj_t*  beta, \
-       obj_t*  c  \
+       const obj_t* alpha, \
+       const obj_t* a, \
+       const obj_t* b, \
+       const obj_t* beta, \
+       const obj_t* c  \
      ) \
 { \
 	/* Invoke the expert interface and request default cntx_t and rntm_t
@@ -66,12 +66,12 @@ GENFRONT( syr2k )
 \
 void PASTEMAC0(opname) \
      ( \
-       side_t  side, \
-       obj_t*  alpha, \
-       obj_t*  a, \
-       obj_t*  b, \
-       obj_t*  beta, \
-       obj_t*  c  \
+             side_t side, \
+       const obj_t* alpha, \
+       const obj_t* a, \
+       const obj_t* b, \
+       const obj_t* beta, \
+       const obj_t* c  \
      ) \
 { \
 	/* Invoke the expert interface and request default cntx_t and rntm_t
@@ -89,10 +89,10 @@ GENFRONT( trmm3 )
 \
 void PASTEMAC0(opname) \
      ( \
-       obj_t*  alpha, \
-       obj_t*  a, \
-       obj_t*  beta, \
-       obj_t*  c  \
+       const obj_t* alpha, \
+       const obj_t* a, \
+       const obj_t* beta, \
+       const obj_t* c  \
      ) \
 { \
 	/* Invoke the expert interface and request default cntx_t and rntm_t
@@ -109,10 +109,10 @@ GENFRONT( syrk )
 \
 void PASTEMAC0(opname) \
      ( \
-       side_t  side, \
-       obj_t*  alpha, \
-       obj_t*  a, \
-       obj_t*  b  \
+             side_t side, \
+       const obj_t* alpha, \
+       const obj_t* a, \
+       const obj_t* b  \
      ) \
 { \
 	/* Invoke the expert interface and request default cntx_t and rntm_t

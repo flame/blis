@@ -80,14 +80,14 @@ void bli_cgemmsup_rv_zen_asm_3x8n
        scomplex*    restrict b, inc_t rs_b0, inc_t cs_b0,
        scomplex*    restrict beta,
        scomplex*    restrict c, inc_t rs_c0, inc_t cs_c0,
-       auxinfo_t*   restrict data,
-       cntx_t*      restrict cntx
+       auxinfo_t*            data,
+       cntx_t*               cntx
      )
 {
 	uint64_t m_left = m0 % 3;
 	if ( m_left )
 	{
-		cgemmsup_ker_ft ker_fps[3] = 
+		cgemmsup_ker_ft ker_fps[3] =
 		{
 			NULL,
 			bli_cgemmsup_rv_zen_asm_1x8n,
@@ -120,7 +120,7 @@ void bli_cgemmsup_rv_zen_asm_3x8n
 	uint64_t rs_c   = rs_c0;
 	uint64_t cs_c   = cs_c0;
 
-	
+
 	if ( n_iter == 0 ) goto consider_edge_cases;
 
 	// -------------------------------------------------------------------------
@@ -150,7 +150,7 @@ void bli_cgemmsup_rv_zen_asm_3x8n
 		ymm13 = _mm256_setzero_ps();
 		ymm14 = _mm256_setzero_ps();
 		ymm15 = _mm256_setzero_ps();
-		
+
 		dim_t ta_inc_row = rs_a;
 		dim_t tb_inc_row = rs_b;
 		dim_t tc_inc_row = rs_c;
@@ -170,7 +170,7 @@ void bli_cgemmsup_rv_zen_asm_3x8n
 			// This loop is processing MR x K
 			ymm0 = _mm256_loadu_ps((float const *)(tB + tb_inc_row * k_iter));
 			ymm1 = _mm256_loadu_ps((float const *)(tB + tb_inc_row * k_iter +  4));
-			
+
 			//broadcasted matrix B elements are multiplied
 			//with matrix A columns.
 			ymm2 = _mm256_broadcast_ss((float const *)(tA));
@@ -534,8 +534,8 @@ void bli_cgemmsup_rv_zen_asm_2x8n
        scomplex*    restrict b, inc_t rs_b0, inc_t cs_b0,
        scomplex*    restrict beta,
        scomplex*    restrict c, inc_t rs_c0, inc_t cs_c0,
-       auxinfo_t*   restrict data,
-       cntx_t*      restrict cntx
+       auxinfo_t*            data,
+       cntx_t*               cntx
      )
 {
 	//void*    a_next = bli_auxinfo_next_a( data );
@@ -600,7 +600,7 @@ void bli_cgemmsup_rv_zen_asm_2x8n
 			// This loop is processing MR x K
 			ymm0 = _mm256_loadu_ps((float const *)(tB + tb_inc_row * k_iter));
 			ymm1 = _mm256_loadu_ps((float const *)(tB + tb_inc_row * k_iter +  4));
-			
+
 			//broadcasted matrix B elements are multiplied
 			//with matrix A columns.
 			ymm2 = _mm256_broadcast_ss((float const *)(tA));
@@ -882,8 +882,8 @@ void bli_cgemmsup_rv_zen_asm_1x8n
        scomplex*    restrict b, inc_t rs_b0, inc_t cs_b0,
        scomplex*    restrict beta,
        scomplex*    restrict c, inc_t rs_c0, inc_t cs_c0,
-       auxinfo_t*   restrict data,
-       cntx_t*      restrict cntx
+       auxinfo_t*            data,
+       cntx_t*               cntx
      )
 {
 
@@ -1151,8 +1151,8 @@ void bli_cgemmsup_rv_zen_asm_3x4
        scomplex*    restrict b, inc_t rs_b0, inc_t cs_b0,
        scomplex*    restrict beta,
        scomplex*    restrict c, inc_t rs_c0, inc_t cs_c0,
-       auxinfo_t*   restrict data,
-       cntx_t*      restrict cntx
+       auxinfo_t*            data,
+       cntx_t*               cntx
      )
 {
 
@@ -1184,7 +1184,7 @@ void bli_cgemmsup_rv_zen_asm_3x4
 	ymm10 = _mm256_setzero_ps();
 	ymm12 = _mm256_setzero_ps();
 	ymm14 = _mm256_setzero_ps();
-	
+
 	dim_t ta_inc_row = rs_a;
 	dim_t tb_inc_row = rs_b;
 	dim_t tc_inc_row = rs_c;
@@ -1386,8 +1386,8 @@ void bli_cgemmsup_rv_zen_asm_3x2
        scomplex*    restrict b, inc_t rs_b0, inc_t cs_b0,
        scomplex*    restrict beta,
        scomplex*    restrict c, inc_t rs_c0, inc_t cs_c0,
-       auxinfo_t*   restrict data,
-       cntx_t*      restrict cntx
+       auxinfo_t*            data,
+       cntx_t*               cntx
      )
 {
 
@@ -1408,7 +1408,7 @@ void bli_cgemmsup_rv_zen_asm_3x2
 	scomplex *tB = b;
 	scomplex *tC = c;
 	// clear scratch registers.
-	__m128 xmm0, xmm1, xmm2, xmm3; 
+	__m128 xmm0, xmm1, xmm2, xmm3;
 	__m128 xmm4 = _mm_setzero_ps();
 	__m128 xmm6 = _mm_setzero_ps();
 	__m128 xmm8 = _mm_setzero_ps();

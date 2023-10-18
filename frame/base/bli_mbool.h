@@ -36,7 +36,7 @@
 
 // mbool_t query
 
-BLIS_INLINE bool bli_mbool_get_dt( num_t dt, mbool_t* mb )
+BLIS_INLINE bool bli_mbool_get_dt( num_t dt, const mbool_t* mb )
 {
 	return ( bool )( mb->v[ dt ] );
 }

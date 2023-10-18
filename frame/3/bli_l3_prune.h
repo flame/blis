@@ -33,46 +33,27 @@
 */
 
 
-#undef  GENPROT
-#define GENPROT( dim ) \
-\
-void PASTEMAC(l3_prune_unref_mparts_,dim) \
-     ( \
-       obj_t*  a, \
-       obj_t*  b, \
-       obj_t*  c, \
-       cntl_t* cntl  \
+void bli_l3_prune_unref_mparts_m
+     (
+             obj_t*  a,
+       const obj_t*  b,
+             obj_t*  c,
+       const cntl_t* cntl
      );
 
-GENPROT( m )
-GENPROT( n )
-GENPROT( k )
-
-// -----------------------------------------------------------------------------
-
-#undef  GENPROT
-#define GENPROT( opname, dim ) \
-\
-void PASTEMAC2(opname,_prune_unref_mparts_,dim) \
-     ( \
-       obj_t*  a, \
-       obj_t*  b, \
-       obj_t*  c  \
+void bli_l3_prune_unref_mparts_n
+     (
+       const obj_t*  a,
+             obj_t*  b,
+             obj_t*  c,
+       const cntl_t* cntl
      );
 
-GENPROT( gemm, m )
-GENPROT( gemm, n )
-GENPROT( gemm, k )
-
-GENPROT( gemmt, m )
-GENPROT( gemmt, n )
-GENPROT( gemmt, k )
-
-GENPROT( trmm, m )
-GENPROT( trmm, n )
-GENPROT( trmm, k )
-
-GENPROT( trsm, m )
-GENPROT( trsm, n )
-GENPROT( trsm, k )
+void bli_l3_prune_unref_mparts_k
+     (
+             obj_t*  a,
+             obj_t*  b,
+       const obj_t*  c,
+       const cntl_t* cntl
+     );
 

@@ -42,8 +42,8 @@
 \
 void PASTEMAC(opname,_check) \
      ( \
-       obj_t*  x, \
-       obj_t*  y  \
+       const obj_t* x, \
+       const obj_t* y  \
      );
 
 GENTPROT( addv )
@@ -57,8 +57,8 @@ GENTPROT( swapv )
 \
 void PASTEMAC(opname,_check) \
      ( \
-       obj_t*  x, \
-       obj_t*  index  \
+       const obj_t* x, \
+       const obj_t* index  \
      );
 
 GENTPROT( amaxv )
@@ -69,10 +69,10 @@ GENTPROT( amaxv )
 \
 void PASTEMAC(opname,_check) \
      ( \
-       obj_t*  alpha, \
-       obj_t*  x, \
-       obj_t*  beta, \
-       obj_t*  y  \
+       const obj_t* alpha, \
+       const obj_t* x, \
+       const obj_t* beta, \
+       const obj_t* y  \
      );
 
 GENTPROT( axpbyv )
@@ -83,9 +83,9 @@ GENTPROT( axpbyv )
 \
 void PASTEMAC(opname,_check) \
      ( \
-       obj_t*  alpha, \
-       obj_t*  x, \
-       obj_t*  y  \
+       const obj_t* alpha, \
+       const obj_t* x, \
+       const obj_t* y  \
      );
 
 GENTPROT( axpyv )
@@ -97,9 +97,9 @@ GENTPROT( scal2v )
 \
 void PASTEMAC(opname,_check) \
      ( \
-       obj_t*  x, \
-       obj_t*  y, \
-       obj_t*  rho  \
+       const obj_t* x, \
+       const obj_t* y, \
+       const obj_t* rho  \
      );
 
 GENTPROT( dotv )
@@ -110,11 +110,11 @@ GENTPROT( dotv )
 \
 void PASTEMAC(opname,_check) \
      ( \
-       obj_t*  alpha, \
-       obj_t*  x, \
-       obj_t*  y, \
-       obj_t*  beta, \
-       obj_t*  rho  \
+       const obj_t* alpha, \
+       const obj_t* x, \
+       const obj_t* y, \
+       const obj_t* beta, \
+       const obj_t* rho  \
      );
 
 GENTPROT( dotxv )
@@ -125,7 +125,7 @@ GENTPROT( dotxv )
 \
 void PASTEMAC(opname,_check) \
      ( \
-       obj_t*  x  \
+       const obj_t* x  \
      );
 
 GENTPROT( invertv )
@@ -136,8 +136,8 @@ GENTPROT( invertv )
 \
 void PASTEMAC(opname,_check) \
      ( \
-       obj_t*  alpha, \
-       obj_t*  x  \
+       const obj_t* alpha, \
+       const obj_t* x  \
      );
 
 GENTPROT( invscalv )
@@ -150,9 +150,9 @@ GENTPROT( setv )
 \
 void PASTEMAC(opname,_check) \
      ( \
-       obj_t*  x, \
-       obj_t*  beta, \
-       obj_t*  y  \
+       const obj_t* x, \
+       const obj_t* beta, \
+       const obj_t* y  \
      );
 
 GENTPROT( xpbyv )
@@ -163,55 +163,55 @@ GENTPROT( xpbyv )
 
 void bli_l1v_xy_check
      (
-       obj_t*  x,
-       obj_t*  y 
+       const obj_t* x,
+       const obj_t* y
      );
 
 void bli_l1v_axy_check
      (
-       obj_t*  alpha,
-       obj_t*  x,
-       obj_t*  y 
+       const obj_t* alpha,
+       const obj_t* x,
+       const obj_t* y
      );
 
 void bli_l1v_xby_check
      (
-       obj_t*  x,
-       obj_t*  beta,
-       obj_t*  y
+       const obj_t* x,
+       const obj_t* beta,
+       const obj_t* y
      );
 
 void bli_l1v_axby_check
      (
-       obj_t*  alpha,
-       obj_t*  x,
-       obj_t*  beta,
-       obj_t*  y
+       const obj_t* alpha,
+       const obj_t* x,
+       const obj_t* beta,
+       const obj_t* y
      );
 
 void bli_l1v_dot_check
      (
-       obj_t*  alpha,
-       obj_t*  x,
-       obj_t*  y,
-       obj_t*  beta,
-       obj_t*  rho 
+       const obj_t* alpha,
+       const obj_t* x,
+       const obj_t* y,
+       const obj_t* beta,
+       const obj_t* rho
      );
 
 void bli_l1v_x_check
      (
-       obj_t*  x 
+       const obj_t* x
      );
 
 void bli_l1v_ax_check
      (
-       obj_t*  alpha,
-       obj_t*  x 
+       const obj_t* alpha,
+       const obj_t* x
      );
 
 void bli_l1v_xi_check
      (
-       obj_t*  x,
-       obj_t*  index
+       const obj_t* x,
+       const obj_t* index
      );
 

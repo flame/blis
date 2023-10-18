@@ -308,7 +308,7 @@ void GENBARNAME(cntx_init)
 
 	// -- Set level-3 virtual micro-kernels ------------------------------------
 
-	funcs = bli_cntx_ukrs_buf( cntx );
+	funcs = cntx->ukrs;
 
 	// NOTE: We set the virtual micro-kernel slots to contain the addresses
 	// of the native micro-kernels. In general, the ukernels in the virtual
@@ -324,7 +324,7 @@ void GENBARNAME(cntx_init)
 
 	// -- Set level-3 native micro-kernels and preferences ---------------------
 
-	mbools = bli_cntx_ukr_prefs_buf( cntx );
+	mbools = cntx->ukr_prefs;
 
 	gen_func_init( &funcs[ BLIS_GEMM_UKR ],       gemm_ukr_name       );
 	gen_func_init( &funcs[ BLIS_GEMMTRSM_L_UKR ], gemmtrsm_l_ukr_name );
@@ -419,7 +419,7 @@ void GENBARNAME(cntx_init)
 
 	// -- Set level-3 small/unpacked handlers ----------------------------------
 
-	vfuncs = bli_cntx_l3_sup_handlers_buf( cntx );
+	vfuncs = cntx->l3_sup_handlers;
 
 	// Initialize all of the function pointers to NULL;
 	for ( i = 0; i < BLIS_NUM_LEVEL3_OPS; ++i ) vfuncs[ i ] = NULL;
@@ -455,7 +455,7 @@ void GENBAINAME(cntx_init)
 
 	// -- Set induced method level-3 virtual micro-kernels ---------------------
 
-	funcs = bli_cntx_ukrs_buf( cntx );
+	funcs = cntx->ukrs;
 
 	if ( method == BLIS_1M )
 	{
@@ -486,8 +486,8 @@ void GENBAINAME(cntx_init)
 	// beta has a zero imaginary component and C is either row- or column-stored).
 	if ( method == BLIS_1M )
 	{
-		func_t* gemm_nat_ukrs = bli_cntx_get_ukrs( BLIS_GEMM_UKR, cntx );
-		func_t* gemm_vir_ukrs = bli_cntx_get_ukrs( BLIS_GEMM_VIR_UKR, cntx );
+		func_t* gemm_nat_ukrs = ( func_t* )bli_cntx_get_ukrs( BLIS_GEMM_UKR, cntx );
+		func_t* gemm_vir_ukrs = ( func_t* )bli_cntx_get_ukrs( BLIS_GEMM_VIR_UKR, cntx );
 
 		bli_func_copy_dt( BLIS_FLOAT,  gemm_nat_ukrs, BLIS_FLOAT,  gemm_vir_ukrs );
 		bli_func_copy_dt( BLIS_DOUBLE, gemm_nat_ukrs, BLIS_DOUBLE, gemm_vir_ukrs );

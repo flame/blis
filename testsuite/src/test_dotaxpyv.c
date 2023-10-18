@@ -179,7 +179,7 @@ void libblis_test_dotaxpyv_experiment
 
 
 	// Query a context.
-	cntx = bli_gks_query_cntx();
+	cntx = ( cntx_t* )bli_gks_query_cntx();
 
 	// Use the datatype of the first char in the datatype combination string.
 	bli_param_map_char_to_blis_dt( dc_str[0], &datatype );
@@ -222,7 +222,7 @@ void libblis_test_dotaxpyv_experiment
 	bli_obj_alias_to( &x, &xt );
 
 	// Determine whether to make a copy of x with or without conjugation.
-	// 
+	//
 	//  conjx conjy  ~conjx^conjy   y is initialized as
 	//  n     n      c              y = conj(x)
 	//  n     c      n              y = x
@@ -239,7 +239,7 @@ void libblis_test_dotaxpyv_experiment
 	bli_obj_set_conj( conjx,  &x );
 	bli_obj_set_conj( conjy,  &y );
 
-	// Repeat the experiment n_repeats times and record results. 
+	// Repeat the experiment n_repeats times and record results.
 	for ( i = 0; i < n_repeats; ++i )
 	{
 		bli_copysc( &BLIS_MINUS_ONE, &rho );

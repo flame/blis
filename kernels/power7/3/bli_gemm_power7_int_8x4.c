@@ -58,8 +58,8 @@ void bli_sgemm_power7_int_8x4
        float*     restrict b,
        float*     restrict beta,
        float*     restrict c, inc_t rs_c, inc_t cs_c,
-       auxinfo_t* restrict data,
-       cntx_t*    restrict cntx
+       auxinfo_t*          data,
+       cntx_t*             cntx
      )
 {
 #if 1 || defined(UTEST)
@@ -100,8 +100,8 @@ void bli_dgemm_power7_int_8x4
        double*    restrict b,
        double*    restrict beta,
        double*    restrict c, inc_t rs_c, inc_t cs_c,
-       auxinfo_t* restrict data,
-       cntx_t*    restrict cntx
+       auxinfo_t*          data,
+       cntx_t*             cntx
      )
 {
     if ( cs_c == 1 )
@@ -457,8 +457,8 @@ void bli_cgemm_power7_int_8x4
        scomplex*  restrict b,
        scomplex*  restrict beta,
        scomplex*  restrict c, inc_t rs_c, inc_t cs_c,
-       auxinfo_t* restrict data,
-       cntx_t*    restrict cntx
+       auxinfo_t*          data,
+       cntx_t*             cntx
      )
 {
 #if 1 || defined(UTEST)
@@ -510,8 +510,8 @@ void bli_zgemm_power7_int_8x4
        scomplex*  restrict b,
        scomplex*  restrict beta,
        scomplex*  restrict c, inc_t rs_c, inc_t cs_c,
-       auxinfo_t* restrict data,
-       cntx_t*    restrict cntx
+       auxinfo_t*          data,
+       cntx_t*             cntx
      )
 {
 #if 1 || defined(UTEST)

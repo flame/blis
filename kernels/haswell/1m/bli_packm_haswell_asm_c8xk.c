@@ -51,7 +51,7 @@ void bli_cpackm_haswell_asm_8xk
        scomplex*  restrict kappa,
        scomplex*  restrict a, inc_t inca0, inc_t lda0,
        scomplex*  restrict p,              inc_t ldp0,
-       cntx_t*    restrict cntx
+       cntx_t*             cntx
      )
 {
 #if 0

@@ -41,7 +41,7 @@ thrinfo_t* bli_thrinfo_create
        thrcomm_t* ocomm,
        dim_t      ocomm_id,
        dim_t      n_way,
-       dim_t      work_id, 
+       dim_t      work_id,
        bool       free_comm,
        bszid_t    bszid,
        thrinfo_t* sub_node
@@ -51,13 +51,13 @@ thrinfo_t* bli_thrinfo_create
 	printf( "bli_thrinfo_create(): " );
 	#endif
 
-    thrinfo_t* thread = bli_sba_acquire( rntm, sizeof( thrinfo_t ) );
+	thrinfo_t* thread = bli_sba_acquire( rntm, sizeof( thrinfo_t ) );
 
-    bli_thrinfo_init
+	bli_thrinfo_init
 	(
 	  thread,
 	  ocomm, ocomm_id,
-	  n_way, work_id, 
+	  n_way, work_id,
 	  free_comm,
 	  bszid,
 	  sub_node
@@ -72,7 +72,7 @@ void bli_thrinfo_init
        thrcomm_t* ocomm,
        dim_t      ocomm_id,
        dim_t      n_way,
-       dim_t      work_id, 
+       dim_t      work_id,
        bool       free_comm,
        bszid_t    bszid,
        thrinfo_t* sub_node

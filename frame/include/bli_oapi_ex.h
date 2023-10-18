@@ -48,7 +48,7 @@
 // Define the macro to add expert arguments to function signatures
 // and prototypes.
 #undef  BLIS_OAPI_EX_PARAMS
-#define BLIS_OAPI_EX_PARAMS   ,cntx_t* cntx, rntm_t* rntm
+#define BLIS_OAPI_EX_PARAMS   , const cntx_t* cntx, rntm_t* rntm
 
 // Define the macro to omit the expert variable declaration block, since
 // it is not needed when expert parameters are passed in through the API.

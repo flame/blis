@@ -34,23 +34,23 @@
 
 // -- Matrix partitioning ------------------------------------------------------
 
-void bli_packm_acquire_mpart_t2b( subpart_t requested_part,
-                                  dim_t     i,
-                                  dim_t     b,
-                                  obj_t*    obj,
-                                  obj_t*    sub_obj );
+void bli_packm_acquire_mpart_t2b( subpart_t    requested_part,
+                                  dim_t        i,
+                                  dim_t        b,
+                                  const obj_t* obj,
+                                        obj_t* sub_obj );
 
-void bli_packm_acquire_mpart_l2r( subpart_t requested_part,
-                                  dim_t     j,
-                                  dim_t     b,
-                                  obj_t*    obj,
-                                  obj_t*    sub_obj );
+void bli_packm_acquire_mpart_l2r( subpart_t    requested_part,
+                                  dim_t        j,
+                                  dim_t        b,
+                                  const obj_t* obj,
+                                        obj_t* sub_obj );
 
-void bli_packm_acquire_mpart_tl2br( subpart_t requested_part,
-                                    dim_t     ij,
-                                    dim_t     b,
-                                    obj_t*    obj,
-                                    obj_t*    sub_obj );
+void bli_packm_acquire_mpart_tl2br( subpart_t    requested_part,
+                                    dim_t        ij,
+                                    dim_t        b,
+                                    const obj_t* obj,
+                                          obj_t* sub_obj );
 
-dim_t bli_packm_offset_to_panel_for( dim_t offmn, obj_t* p );
+dim_t bli_packm_offset_to_panel_for( dim_t offmn, const obj_t* p );
 
