@@ -32,66 +32,96 @@
 
 */
 
-// Using the GENERIC_GEMM template, create GEMM functions for each datatype
+#include "blis.h"
 
-#include "generic_gemm.h"
-#include "gemm_pack.h"
+/* 
+    Macro function template for creating BLIS GEMM kernels using the Goto method.
 
-#define GENERIC_GEMM(ch, DTYPE_IN, DTYPE_OUT, NEW_PB, MULT, UK_FUNC) \
+    This GEMM template assumes that the matrices are both not transposed.
+
+    ch - kernel name prefix
+    DTYPE_IN, DTYPE_OUT - datatypes of the input and output operands respectively
+    NEW_PB - number of iterations of the innermost loop
+    PACK_A, PACK_B - pack kernels names
+    MICROKERNEL - microkernel function name
+    K_MMA - number of outer products performed by an instruction
+    MR, NR, MC, KC, NC - Cache blocking parameters
+    B_ALIGN, A_ALIGN - Extra byte alignment for the pack matrix buffers
+*/
+#define GENERIC_GEMM( \
+    ch, \
+    DTYPE_IN, \
+    DTYPE_OUT, \
+    NEW_PB, \
+    PACK_A, \
+    PACK_B, \
+    MICROKERNEL, \
+    K_MMA, \
+    MR, \
+    NR, \
+    MC, \
+    KC, \
+    NC, \
+    B_ALIGN, \
+    A_ALIGN \
+) \
 \
-void GEMM_PASTEMAC(ch) \
+void GEMM_FUNC_NAME(ch) \
     ( \
-        dim_t MR, dim_t NR, dim_t KC, dim_t NC, dim_t MC, \
-        int m, int n, int k, \
-        DTYPE_IN* restrict A, int rs_a, int cs_a, int A_align, \
-        DTYPE_IN* restrict B, int rs_b, int cs_b, int B_align, \
-        DTYPE_OUT* restrict C, int rs_c, int cs_c, \
-        DTYPE_OUT* alpha, DTYPE_OUT* beta \
+        trans_t transa, \
+        trans_t transb, \
+        dim_t   m, \
+        dim_t   n, \
+        dim_t   k, \
+        DTYPE_OUT*  alpha, \
+        DTYPE_IN*  a, inc_t rsa, inc_t csa, \
+        DTYPE_IN*  b, inc_t rsb, inc_t csb, \
+        DTYPE_OUT*  beta, \
+        DTYPE_OUT*  c, inc_t rsc, inc_t csc \
     ) \
 { \
     DTYPE_OUT zero  = 0.0; \
     DTYPE_OUT beta_  = *beta; \
     \
-    DTYPE_IN * restrict btilde_sys = ( DTYPE_IN *) aligned_alloc( P10_PG_SIZE, B_align + KC * NC * sizeof( DTYPE_IN ) ); \
-    DTYPE_IN * restrict atilde_sys = ( DTYPE_IN *) aligned_alloc( P10_PG_SIZE, A_align + MC * KC * sizeof( DTYPE_IN ) ); \
+    DTYPE_IN * restrict btilde_sys = ( DTYPE_IN *) aligned_alloc( P10_PG_SIZE, B_ALIGN + KC * NC * sizeof( DTYPE_IN ) ); \
+    DTYPE_IN * restrict atilde_sys = ( DTYPE_IN *) aligned_alloc( P10_PG_SIZE, A_ALIGN + MC * KC * sizeof( DTYPE_IN ) ); \
     \
-    DTYPE_IN * restrict btilde_usr = ( DTYPE_IN *)((char *)btilde_sys + B_align); \
-    DTYPE_IN * restrict atilde_usr = ( DTYPE_IN *)((char *)atilde_sys + A_align); \
+    DTYPE_IN * restrict btilde_usr = ( DTYPE_IN *)((char *)btilde_sys + B_ALIGN); \
+    DTYPE_IN * restrict atilde_usr = ( DTYPE_IN *)((char *)atilde_sys + A_ALIGN); \
     \
-    const int rstep_c = MC*rs_c; \
-    const int cstep_c = NC*cs_c; \
+    const int rstep_c = MC * rsc; \
+    const int cstep_c = NC * csc; \
     \
-    const int rstep_a = MC*rs_a; \
-    const int cstep_a = KC*cs_a; \
+    const int rstep_a = MC * rsa; \
+    const int cstep_a = KC * csa; \
     \
-    const int rstep_b = KC*rs_b; \
-    const int cstep_b = NC*cs_b; \
+    const int rstep_b = KC * rsb; \
+    const int cstep_b = NC * csb; \
     \
-    const int rstep_mt_c = MR*rs_c; \
-    const int cstep_mt_c = NR*cs_c; \
+    const int rstep_mt_c = MR * rsc; \
+    const int cstep_mt_c = NR * csc; \
     \
-    DTYPE_OUT * restrict cblock = C; \
-    DTYPE_IN  * restrict bblock = B; \
+    DTYPE_OUT * restrict cblock = c; \
+    DTYPE_IN  * restrict bblock = b; \
     \
     DTYPE_OUT tmp_cmicrotile[MR*NR];  \
-    int   rs_ct = ( rs_c == 1 ? 1 : NR ); \
-    int   cs_ct = ( rs_c == 1 ? MR : 1 ); \
+    int   rsct = ( rsc == 1 ? 1 : NR ); \
+    int   csct = ( rsc == 1 ? MR : 1 ); \
     \
     for ( int jc=0; jc<n; jc+=NC ) \
     { \
         int jb = bli_min( NC, n-jc ); \
-        DTYPE_IN * restrict apanel = A; \
+        DTYPE_IN * restrict apanel = a; \
         DTYPE_IN * restrict bpanel = bblock; \
         \
         for ( int pc=0; pc<k; pc+=KC ) \
         { \
             int pb = bli_min( KC, k-pc ); \
-            ch ## _packB \
-            (NR, pb, jb, bpanel, rs_b, cs_b, btilde_usr); \
+            PACK_B (NR, pb, jb, bpanel, rsb, csb, btilde_usr); \
             \
             int new_pb = NEW_PB; \
-            const int a_ps = new_pb * (MULT * MR); \
-            const int b_ps = new_pb * (MULT * NR); \
+            const int a_ps = new_pb * (K_MMA * MR); \
+            const int b_ps = new_pb * (K_MMA * NR); \
             \
             DTYPE_OUT * restrict cpanel = cblock; \
             DTYPE_IN  * restrict ablock = apanel; \
@@ -100,8 +130,8 @@ void GEMM_PASTEMAC(ch) \
             { \
                 int ib = bli_min( MC, m-ic ); \
                 \
-                ch ## _packA \
-                ( MR, ib, pb, ablock, rs_a, cs_a, atilde_usr ); \
+                /* pack_a (ib, pb, (uint32_t *) ablock, rsa, csa, (uint32_t *) atilde_usr ); */ \
+                PACK_A (MR, ib, pb, ablock, rsa, csa, atilde_usr ); \
                 \
                 DTYPE_OUT * restrict cmicrotile_col = cpanel; \
                 DTYPE_IN  * restrict bmicropanel = btilde_usr; \
@@ -117,16 +147,16 @@ void GEMM_PASTEMAC(ch) \
                         int irb = bli_min( MR, ib-ir ); \
                         \
                         if (jrb == NR && irb == MR) \
-                            UK_FUNC (new_pb, alpha, amicropanel, bmicropanel, beta, cmicrotile, rs_c, cs_c, NULL, NULL); \
+                            MICROKERNEL (new_pb, alpha, amicropanel, bmicropanel, beta, cmicrotile, rsc, csc, NULL, NULL); \
                         else \
                         { \
-                            UK_FUNC (new_pb, alpha, amicropanel, bmicropanel, &zero, tmp_cmicrotile, rs_ct, cs_ct, NULL, NULL); \
+                            MICROKERNEL (new_pb, alpha, amicropanel, bmicropanel, &zero, tmp_cmicrotile, rsct, csct, NULL, NULL); \
                             \
                             for (int j=0; j<jrb;j++) \
                                 for (int i=0; i<irb;i++)  \
-                                    cmicrotile[i*rs_c + j*cs_c] = \
-                                        beta_ * cmicrotile[i*rs_c + j*cs_c] + \
-                                        tmp_cmicrotile[i*rs_ct + j*cs_ct]; \
+                                    cmicrotile[i*rsc + j*csc] = \
+                                        beta_ * cmicrotile[i*rsc + j*csc] + \
+                                        tmp_cmicrotile[i*rsct + j*csct]; \
                         } \
                         amicropanel += a_ps; \
                         cmicrotile += rstep_mt_c; \
@@ -143,12 +173,8 @@ void GEMM_PASTEMAC(ch) \
         cblock += cstep_c; \
         bblock += cstep_b; \
     } \
+    \
     free(btilde_sys); \
     free(atilde_sys); \
 } 
 
-GENERIC_GEMM( sb, bfloat16, float,   (pb/2 + pb%2), 2,  bli_sbgemm_power10_mma_8x16);
-GENERIC_GEMM(i16,  int16_t,   int,   (pb/2 + pb%2), 2, bli_i16gemm_power10_mma_8x16);
-GENERIC_GEMM( sh,  float16, float,   (pb/2 + pb%2), 2,  bli_shgemm_power10_mma_8x16); 
-GENERIC_GEMM( i8,   int8_t,   int, (pb/4 + (pb%4>0)), 4,  bli_i8gemm_power10_mma_8x16);
-GENERIC_GEMM( i4,  nibbles,   int, (pb/8 + (pb%8>0)), 8,  bli_i4gemm_power10_mma_8x16);

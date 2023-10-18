@@ -245,7 +245,6 @@ files-that-dont-contain = $(strip $(foreach f, $(1), $(if $(findstring $(2),$(f)
 # function.
 rm-dups = $(if $1,$(firstword $1) $(call rm-dups,$(filter-out $(firstword $1),$1)))
 
-
 #
 # --- Include makefile configuration file --------------------------------------
 #

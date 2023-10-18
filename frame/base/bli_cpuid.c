@@ -855,6 +855,14 @@ arch_t bli_cpuid_query_id( void )
 		{
 			// Check for each ARMv8 configuration that is enabled, check for that
 			// microarchitecture. We check from most recent to most dated.
+#ifdef BLIS_CONFIG_ARMSVE
+			if ( bli_cpuid_is_armsve( model, part, features ) )
+				return BLIS_ARCH_ARMSVE;
+#endif
+#ifdef BLIS_CONFIG_A64FX
+			if ( bli_cpuid_is_a64fx( model, part, features ) )
+				return BLIS_ARCH_A64FX;
+#endif
 #ifdef BLIS_CONFIG_THUNDERX2
 			if ( bli_cpuid_is_thunderx2( model, part, features ) )
 				return BLIS_ARCH_THUNDERX2;
@@ -937,6 +945,36 @@ bool bli_cpuid_is_cortexa53
 {
 	// Check for expected CPU features.
 	const uint32_t expected = FEATURE_NEON;
+
+	if ( !bli_cpuid_has_features( features, expected ) ) return FALSE;
+
+	return TRUE;
+}
+
+bool bli_cpuid_is_armsve
+     (
+       uint32_t family,
+       uint32_t model,
+       uint32_t features
+     )
+{
+	// Check for expected CPU features.
+	const uint32_t expected = FEATURE_SVE;
+
+	if ( !bli_cpuid_has_features( features, expected ) ) return FALSE;
+
+	return TRUE;
+}
+
+bool bli_cpuid_is_a64fx
+     (
+       uint32_t family,
+       uint32_t model,
+       uint32_t features
+     )
+{
+	// Check for expected CPU features.
+	const uint32_t expected = FEATURE_SVE;
 
 	if ( !bli_cpuid_has_features( features, expected ) ) return FALSE;
 
@@ -1483,6 +1521,10 @@ uint32_t bli_cpuid_query
 	if ( strstr( feat_str, "neon"  ) != NULL ||
 	     strstr( feat_str, "asimd" ) != NULL )
 		*features |= FEATURE_NEON;
+
+	// Parse the feature string to check for SVE features.
+	if ( strstr( feat_str, "sve" ) != NULL )
+		*features |= FEATURE_SVE;
 
 	//printf( "bli_cpuid_query(): features var: %u\n", *features );
 

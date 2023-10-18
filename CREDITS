@@ -42,6 +42,7 @@ but many others have contributed code and feedback, including
   Shivaprashanth H                             (Global Edge)
   Jean-Michel Hautbois     @jhautbois
   Ian Henriksen            @insertinterestingnamehere (The University of Texas at Austin)
+  Greg Henry                                   (Intel)
   Minh Quan Ho             @hominhquan
   Matthew Honnibal         @honnibal
   Stefan Husmann           @stefanhusmann
@@ -53,6 +54,7 @@ but many others have contributed code and feedback, including
   Kyungmin Lee             @kyungminlee        (Ohio State University)
   Michael Lehn             @michael-lehn
   Shmuel Levine            @ShmuelLevine
+                           @lschork2
   Dave Love                @loveshack
   Tze Meng Low                                 (The University of Texas at Austin)
   Ye Luo                   @ye-luo             (Argonne National Laboratory)
@@ -92,6 +94,7 @@ but many others have contributed code and feedback, including
   Paul Springer            @springer13         (RWTH Aachen University)
   Adam J. Stewart          @adamjstewart       (University of Illinois at Urbana-Champaign)
   Vladimir Sukarev
+  Chengguo Sun             @chengguosun
   Santanu Thangaraj                            (AMD)
   Nicholai Tukanov         @nicholaiTukanov    (The University of Texas at Austin)
   Rhys Ulerich             @RhysU              (The University of Texas at Austin)
@@ -99,6 +102,7 @@ but many others have contributed code and feedback, including
   Meghana Vankadari        @Meghana-vankadari  (AMD)
   Kiran Varaganti          @kvaragan           (AMD)
   Natalia Vassilieva                           (Hewlett Packard Enterprise)
+  Andrew Wildman           @awild82            (University of Washington)
   Zhang Xianyi             @xianyi             (Chinese Academy of Sciences)
   Benda Xu                 @heroxbd
   Guodong Xu               @docularxu          (Linaro.org)
@@ -106,6 +110,7 @@ but many others have contributed code and feedback, including
   Costas Yamin             @cosstas
   Chenhan Yu               @ChenhanYu          (The University of Texas at Austin)
   Roman Yurchak            @rth                (Symerio)
+  Stefano Zampini          @stefanozampini
   M. Zhou                  @cdluminate
 
 BLIS's development was partially funded by grants from industry

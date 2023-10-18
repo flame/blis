@@ -5,6 +5,8 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2019, Forschunszentrum Juelich
+   Copyright (C) 2020, The University of Tokyo
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -31,23 +33,10 @@
    OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 */
+#include "blis.h"
 
-// Prototypes and template for the low precision POWER10 GEMM API
+dim_t bli_vl_bits_armsve(void);
 
-#define GEMM_FUNC_NAME_(ch)    bli_ ## ch ## gemm
-#define GEMM_FUNC_NAME(ch)     GEMM_FUNC_NAME_(ch)
+void bli_s_blksz_armsve(dim_t *m_r_, dim_t *n_r_, dim_t *k_c_, dim_t *m_c_, dim_t *n_c_);
+void bli_d_blksz_armsve(dim_t *m_r_, dim_t *n_r_, dim_t *k_c_, dim_t *m_c_, dim_t *n_c_);
 
-#define GEMM_FUNC_PROT(DTYPE_IN, DTYPE_OUT, ch) \
-    void GEMM_FUNC_NAME(ch) \
-        ( \
-            trans_t transa, \
-            trans_t transb, \
-            dim_t   m, \
-            dim_t   n, \
-            dim_t   k, \
-            DTYPE_OUT*  alpha, \
-            DTYPE_IN*  a, inc_t rsa, inc_t csa, \
-            DTYPE_IN*  b, inc_t rsb, inc_t csb, \
-            DTYPE_OUT*  beta, \
-            DTYPE_OUT*  c, inc_t rsc, inc_t csc \
-        ) 

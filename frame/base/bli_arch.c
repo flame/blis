@@ -220,6 +220,12 @@ void bli_arch_set_id( void )
 		#endif
 
 		// ARM microarchitectures.
+		#ifdef BLIS_FAMILY_ARMSVE
+		arch_id = BLIS_ARCH_ARMSVE;
+		#endif
+		#ifdef BLIS_FAMILY_A64FX
+		arch_id = BLIS_ARCH_A64FX;
+		#endif
 		#ifdef BLIS_FAMILY_THUNDERX2
 		arch_id = BLIS_ARCH_THUNDERX2;
 		#endif
@@ -355,6 +361,7 @@ void bli_arch_check_id( void )
 
 #endif
 
+
 	if ( bli_arch_get_logging() )
         {
 		if ( model_id == BLIS_MODEL_DEFAULT )
@@ -406,6 +413,8 @@ static char* config_name[ BLIS_NUM_ARCHS ] =
     "thunderx2",
     "cortexa57",
     "cortexa53",
+    "armsve",
+    "a64fx",
     "cortexa15",
     "cortexa9",
 
@@ -413,8 +422,6 @@ static char* config_name[ BLIS_NUM_ARCHS ] =
     "power9",
     "power7",
     "bgq",
-
-    "generic"
 };
 
 char* bli_arch_string( arch_t id )
@@ -440,8 +447,6 @@ static char* model_name[ BLIS_NUM_MODELS ] =
 
     "Milan",
     "Milan-X",
-
-    "default"
 };
 
 char* bli_model_string( model_t id )

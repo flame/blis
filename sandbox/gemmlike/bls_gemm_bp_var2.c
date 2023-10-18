@@ -539,12 +539,6 @@ void PASTECH2(bls_,ch,varname) \
 \
 	ctype       zero    = *PASTEMAC(ch,0); \
 \
-	/* Clear the temporary C buffer in case it has any infs or NaNs.
-	   NOTE: This initialization should really be done statically since
-	   var2 executes this microkernel wrapper many times, and the overhead
-	   of touching the temporary microtile adds up. */ \
-	PASTEMAC(ch,set0s_mxn)( MR, NR, ct, rs_ct, cs_ct ); \
-\
 	/* Handle interior and edge cases separately. */ \
 	if ( mr_cur == MR && nr_cur == NR ) \
 	{ \

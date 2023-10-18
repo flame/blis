@@ -811,7 +811,8 @@ read_registry_file()
 					# canonicalize whitespace, and then remove duplicate kernel
 					# set names, if they exist. Finally, update the kernel registry
 					# with the new kernel list.
-					newklist=$(echo -e "${klisttmp}" | sed -e "s/${ker}/${kers_ker}/g")
+					#newklist=$(echo -e "${klisttmp}" | sed -e "s/${ker}/${kers_ker}/g")
+					newklist=$(substitute_words "${ker}" "${kers_ker}" "${klisttmp}")
 					newklist=$(canonicalize_ws "${newklist}")
 					newklist=$(rm_duplicate_words "${newklist}")
 
@@ -831,6 +832,26 @@ read_registry_file()
 			done
 		done
 	done
+}
+
+substitute_words()
+{
+	local word new_words list newlist
+
+	word="$1"
+	new_words="$2"
+	list="$3"
+
+	for str in ${list}; do
+
+		if [ "${str}" == "${word}" ]; then
+			newlist="${newlist} ${new_words}"
+		else
+			newlist="${newlist} ${str}"
+		fi
+	done
+
+	echo "${newlist}"
 }
 
 build_kconfig_registry()
@@ -1453,7 +1474,7 @@ get_compiler_version()
 		cc_version=$(${cc} -dumpversion)
 	# If compiler is AOCC, first grep for clang and then the version number.
 	elif [ "${cc_vendor}" = "clang" ]; then
-		cc_version=$(echo "${vendor_string}" | egrep -o 'clang version [0-9]+\.[0-9]+\.?[0-9]*' | egrep -o '[0-9]+\.[0-9]+\.?[0-9]*')
+		cc_version=$(echo "${vendor_string}" | egrep -o '(clang|LLVM) version [0-9]+\.[0-9]+\.?[0-9]*' | egrep -o '[0-9]+\.[0-9]+\.?[0-9]*')
 	elif [ "${cc_vendor}" = "oneAPI" ]; then
 		# Treat Intel oneAPI's clang as clang, not icc.
 		cc_vendor="clang"
@@ -2426,6 +2447,11 @@ main()
 	fi
 
 	echo "${script_name}: using '${found_cc}' C compiler."
+
+	# Also check the compiler to see if we are (cross-)compiling for Windows
+	if ${found_cc} -dM -E - < /dev/null 2> /dev/null | grep -q _WIN32; then
+		is_win=yes
+	fi
 
 
 	# -- Find a C++ compiler ---------------------------------------------------
@@ -3819,6 +3845,23 @@ main()
 			ln -sf "${dist_path}/Makefile"
 		else
 			echo "${script_name}: Non-symbolic link file or directory 'Makefile' blocks creation of symlink."
+			echo "${script_name}: *** Please remove this entity and re-run configure."
+			exit 1
+		fi
+
+		# If 'blis.pc.in' symlink does not already exist in the current
+		# directory, create a symbolic link to it. If one does exist, we
+		# use -f to force creation of a new link.
+		if [ ! -e "./blis.pc.in" ]; then
+
+			echo "${script_name}: creating symbolic link to blis.pc.in."
+			ln -s "${dist_path}/blis.pc.in"
+
+		elif [ -h "./blis.pc.in" ]; then
+			echo "${script_name}: symbolic link to blis.pc.in already exists; forcing creation of new link."
+			ln -sf "${dist_path}/blis.pc.in"
+		else
+			echo "${script_name}: Non-symbolic link file or directory 'blis.pc.in' blocks creation of symlink."
 			echo "${script_name}: *** Please remove this entity and re-run configure."
 			exit 1
 		fi

@@ -805,6 +805,8 @@ void bli_sgemmtrsm_u_haswell_asm_6x16
 	
 	vzeroupper()
 	
+
+
 	end_asm(
 	: // output operands (none)
 	: // input operands
@@ -848,7 +850,7 @@ void bli_sgemmtrsm_u_haswell_asm_6x16
 	vmovhpd(xmm1, mem(rcx, r10, 1))*/
 
 void bli_dgemmtrsm_u_haswell_asm_6x8
-(
+     (
     dim_t               k0,
     double*    restrict alpha,
     double*    restrict a10,
@@ -858,7 +860,7 @@ void bli_dgemmtrsm_u_haswell_asm_6x8
     double*    restrict c11, inc_t rs_c0, inc_t cs_c0,
     auxinfo_t* restrict data,
     cntx_t*    restrict cntx
-)
+     )
 {
 	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_9);
 	//void*   a_next = bli_auxinfo_next_a( data );
@@ -938,6 +940,8 @@ void bli_dgemmtrsm_u_haswell_asm_6x8
 	vmovapd(mem(rbx, -1*32), ymm1)
 	
 	 // iteration 1
+	prefetch(0, mem(rax, 72*8))
+
 	vbroadcastsd(mem(rax, 6*8), ymm2)
 	vbroadcastsd(mem(rax, 7*8), ymm3)
 	vfmadd231pd(ymm0, ymm2, ymm4)
@@ -963,7 +967,7 @@ void bli_dgemmtrsm_u_haswell_asm_6x8
 	vmovapd(mem(rbx, 1*32), ymm1)
 	
 	 // iteration 2
-	prefetch(0, mem(rax, 76*8))
+	prefetch(0, mem(rax, 80*8))
 	
 	vbroadcastsd(mem(rax, 12*8), ymm2)
 	vbroadcastsd(mem(rax, 13*8), ymm3)
@@ -1558,6 +1562,7 @@ void bli_dgemmtrsm_u_haswell_asm_6x8
 	
 	vzeroupper()
 	
+
 
 	end_asm(
 	: // output operands (none)

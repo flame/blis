@@ -72,7 +72,15 @@ ifeq ($(CC_VENDOR),icc)
 CKVECFLAGS     := -xCORE-AVX512
 else
 ifeq ($(CC_VENDOR),clang)
+# NOTE: We have to use -march=haswell on Windows because apparently AVX512
+# uses an alternate calling convention where xmm registers are not callee-saved
+# on the stack. When this is mixed with framework code compiled for general
+# x86_64 mode then chaos ensues (e.g. #514).
+ifeq ($(IS_WIN),yes)
+CKVECFLAGS     := -mavx512f -mavx512dq -mavx512bw -mavx512vl -mfpmath=sse -march=haswell
+else
 CKVECFLAGS     := -mavx512f -mavx512dq -mavx512bw -mavx512vl -mfpmath=sse -march=skylake-avx512
+endif
 else
 $(error gcc, icc, or clang is required for this configuration.)
 endif
@@ -98,7 +106,15 @@ ifeq ($(CC_VENDOR),icc)
 CRVECFLAGS     := -xCORE-AVX2
 else
 ifeq ($(CC_VENDOR),clang)
+# NOTE: We have to use -march=haswell on Windows because apparently AVX512
+# uses an alternate calling convention where xmm registers are not callee-saved
+# on the stack. When this is mixed with framework code compiled for general
+# x86_64 mode then chaos ensues (e.g. #514).
+ifeq ($(IS_WIN),yes)
+CRVECFLAGS     := -march=haswell -funsafe-math-optimizations -ffp-contract=fast
+else
 CRVECFLAGS     := -march=skylake-avx512 -mno-avx512f -mno-avx512vl -mno-avx512bw -mno-avx512dq -mno-avx512cd -funsafe-math-optimizations -ffp-contract=fast
+endif
 else
 $(error gcc, icc, or clang is required for this configuration.)
 endif

@@ -405,7 +405,7 @@ void libblis_test_gemm_md
 	}
 
 	// Estimate the performance of the best experiment repeat.
-	//*perf = ( 2.0 * m * n * k ) / time_min / FLOPS_PER_UNIT_PERF;
+	// *perf = ( 2.0 * m * n * k ) / time_min / FLOPS_PER_UNIT_PERF;
 	//if ( bli_obj_is_complex( &c ) ) *perf *= 4.0;
 	*perf = libblis_test_gemm_flops( &a, &b, &c ) / time_min / FLOPS_PER_UNIT_PERF;
 
@@ -438,7 +438,7 @@ void libblis_test_gemm_impl
 	{
 		case BLIS_TEST_SEQ_FRONT_END:
 			bli_gemm( alpha, a, b, beta, c );
-		break;
+			break;
 
 		default:
 		libblis_test_printf_error( "Invalid interface type.\n" );

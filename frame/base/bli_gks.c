@@ -164,6 +164,16 @@ void bli_gks_init( void )
 		                                              bli_cntx_init_cortexa53_ref,
 		                                              bli_cntx_init_cortexa53_ind );
 #endif
+#ifdef BLIS_CONFIG_ARMSVE
+		bli_gks_register_cntx( BLIS_ARCH_ARMSVE,      bli_cntx_init_armsve,
+		                                              bli_cntx_init_armsve_ref,
+		                                              bli_cntx_init_armsve_ind );
+#endif
+#ifdef BLIS_CONFIG_A64FX
+		bli_gks_register_cntx( BLIS_ARCH_A64FX,       bli_cntx_init_a64fx,
+		                                              bli_cntx_init_a64fx_ref,
+		                                              bli_cntx_init_a64fx_ind );
+#endif
 #ifdef BLIS_CONFIG_CORTEXA15
 		bli_gks_register_cntx( BLIS_ARCH_CORTEXA15,   bli_cntx_init_cortexa15,
 		                                              bli_cntx_init_cortexa15_ref,

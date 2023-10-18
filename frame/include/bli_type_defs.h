@@ -1033,6 +1033,8 @@ typedef enum
 	BLIS_ARCH_BULLDOZER,
 
 	// ARM
+	BLIS_ARCH_ARMSVE,
+	BLIS_ARCH_A64FX,
 	BLIS_ARCH_THUNDERX2,
 	BLIS_ARCH_CORTEXA57,
 	BLIS_ARCH_CORTEXA53,
@@ -1045,13 +1047,12 @@ typedef enum
 	BLIS_ARCH_POWER7,
 	BLIS_ARCH_BGQ,
 
-	// Dummy value, always the last one.
-	// In config_name in bli_arch.c this is also set to "generic"
-	BLIS_ARCH_GENERIC_LAST
+	// The total number of defined architectures. This must be last in the
+	// list of enums since its definition assumes that the previous enum
+	// value is given index num_archs-1.
+	BLIS_NUM_ARCHS
 
 } arch_t;
-
-#define BLIS_NUM_ARCHS (BLIS_ARCH_GENERIC_LAST + 1)
 
 
 typedef enum
@@ -1072,13 +1073,12 @@ typedef enum
 	BLIS_MODEL_MILAN,
 	BLIS_MODEL_MILAN_X,
 
-	// Dummy value, always the last one.
-	// In config_name in bli_arch.c this is also set to "generic"
-	BLIS_MODEL_DEFAULT_LAST
+	// The total number of defined models. This must be last in the
+	// list of enums since its definition assumes that the previous enum
+	// value is given index num_models-1.
+	BLIS_NUM_MODELS
 
 } model_t;
-
-#define BLIS_NUM_MODELS (BLIS_MODEL_DEFAULT_LAST + 1)
 
 //
 // -- BLIS misc. structure types -----------------------------------------------

@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2020, The University of Tokyo
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -30,35 +31,16 @@
    (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
    OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+
 */
+// Specify to use single precision.
+#define DT    "s"
+#define LD1   "ld1w"
+#define ST1   "st1w"
+#define LD1R  "ld1rw"
+#define PRFG  "prfw"
+#define SZ    "4"
+#define OFFS  "uxtw #2"
+// Include macros.
+#include "armsve_asm_macros.h"
 
-// Templates for packing routines prototypes
-
-#include "bli_sandbox.h"
-
-#define PACK_FUNC_NAME_(ch, mat) ch ## _pack ## mat
-#define PACK_FUNC_NAME(ch, mat)  PACK_FUNC_NAME_(ch, mat)
-
-#define PACK_MACRO_PROTO(ch, DTYPE_IN) \
-\
-void PACK_FUNC_NAME(ch, A) \
-    (  \
-        dim_t MR, \
-        int m, int k, \
-        DTYPE_IN* ap, int rs_a, int cs_a, \
-        DTYPE_IN* apack \
-    ); \
-\
-void PACK_FUNC_NAME(ch, B) \
-    ( \
-        dim_t NR, \
-        int k, int n, \
-        DTYPE_IN* bp, int rs_b, int cs_b, \
-        DTYPE_IN* bpack \
-    ); 
-
-PACK_MACRO_PROTO(sb, bfloat16)
-PACK_MACRO_PROTO(sh, float16)
-PACK_MACRO_PROTO(i16, int16_t)
-PACK_MACRO_PROTO(i8, int8_t)
-PACK_MACRO_PROTO(i4, nibbles)

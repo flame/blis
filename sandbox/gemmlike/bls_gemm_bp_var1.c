@@ -231,9 +231,6 @@ void PASTECH2(bls_,ch,varname) \
 	thrinfo_t* restrict thread_jr = NULL; \
 	thrinfo_t* restrict thread_ir = NULL; \
 \
-	/* Clear the temporary C buffer in case it has any infs or NaNs. */ \
-	PASTEMAC(ch,set0s_mxn)( MR, NR, ct, rs_ct, cs_ct ); \
-\
 	/* Identify the current thrinfo_t node and then grow the tree. */ \
 	thread_jc = thread; \
 	bli_thrinfo_sup_grow( rntm, bszids_jc, thread_jc ); \

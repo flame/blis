@@ -1,24 +1,20 @@
 ### Low Precision POWER10 Kernels
 
-This is a special BLIS Sandbox that allows users to call low precision POWER10 `gemm` kernels. 
+This is a special BLIS Sandbox that allows users to call POWER10 reduced precision/integer `GEMM` kernels. 
+
+Supported kernels: `IEEE float16 (bli_shgemm), bfloat16 (bli_sbgemm), int16 (bli_i16gemm), int8 (bli_i8gemm), int4 (bli_i4gemm)`.
 
 #### Introduction
 
-This document describes how the low precision POWER10 `gemm` kernels are implemented. The document will also demonstrate how to call the `gemm` kernels. 
+This document describes how the low precision POWER10 `gemm` kernels are implemented and explains how to call the POWER10 `GEMM` kernels. 
 
-**Important: This sandbox does not have the full functionality of BLIS. This sandbox can only perform single threaded, no transpose, GEMM. At this time, full functioning POWER10 hardware has not be released. Once hardware has been released, the kernels will be further optimized in areas such as prefetching and cache blocksizes.**
+**Important: These kernels does not have the full functionality of BLIS. The kernels can only perform single threaded, no transpose, GEMM.**
 
 #### Implementation
 
-The kernels are implemented in `generic_gemm.c`. They are instantiated with macro templates. The main template is called `GENERIC_GEMM`. This template is used to create the 5-loop `gemm` function.
+The kernels are implemented in `gemm.c`. They are instantiated with macro templates. The main template is called `GENERIC_GEMM`. This template is used to create the 5-loop `gemm` function.
 
-The API points are created in `gemm_api.c`. In this file, the API points are wrappers for the functions that are created by the templates in `generic_gemm.c`.
-
-#### Kernels
-
-The following low precision datatypes have POWER10 `gemm` kernels: `IEEE float16, bfloat16, int16, int8, int4`. 
-
-#### Low Precision Types
+#### Reduced precision/integer Types
 
 | BLIS type  | BLIS char | Type definition                        | Used to represent...                 |
 |:-----------|:----------|:---------------------------------------|:-------------------------------------|
@@ -28,9 +24,9 @@ The following low precision datatypes have POWER10 `gemm` kernels: `IEEE float16
 | `int8`     | `i8`       | `int8_t`  | 8 bit integers |
 | `int4`     | `i4`       | `typedef union{ uint8_t v; struct { uint8_t nib1:4; uint8_t nib2:4; } bits; }` | 4 bit integers |
 
-#### Low Precision API
+#### Reduced Precision/Integer API
 
-The API that is used for the low precision POWER10 `gemm` kernels is similar to the existing [BLIS basic typed API](https://github.com/flame/blis/blob/master/docs/BLISTypedAPI.md). The main difference between the two is that in the existing BLIS typed API, there is only one type for the input and output matrices. However in the low precision API, there is a input and output type.
+The API that is used for the reduced precision/integer POWER10 `GEMM` kernels is similar to the existing [BLIS basic typed API](https://github.com/flame/blis/blob/master/docs/BLISTypedAPI.md). The main difference is the POWER10 kernels expect two types: `ctype_in` and `ctype_out`.
 
 Thus the new `gemm` call looks like the following:
 
@@ -50,10 +46,7 @@ void bli_??gemm
      );
 ```
 
-The first `?` is for the output type. The second `?` is for the input type. 
-
-At this time for IEEE float16 and bfloat16, the only output type is single precision float. For int16, int8, and int4, the only output type is 32 bit int.
-
+`??` is meant to replaced with the kernel prefix.
 
 #### How To Build The Sandbox
 
@@ -64,6 +57,9 @@ Add the following flags when running the configure script to build BLIS correctl
 Ensure that you have GCC 10.2 or greater.
 
 
+#### P10 Testsuite
+
+In `p10_testsuite`, there are performance gathering and correctness checking programs for the POWER10 reduced precision/integer `GEMM` kernels. By default, the performance gathering and correctness checking is done over square matrices ranging from 80 to 4000 in increments of 80. Performance is measured in GFLOPs, and correctness is measured using the BLIS method (detailed in `blis/testsuite/test_gemm.c`).
 
 #### References
 

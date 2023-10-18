@@ -67,7 +67,7 @@ void PASTECH2(bls_,ch,opname) \
 	siz_t size_needed = sizeof( ctype ) * k_pack * n_pack; \
 \
 	/* Check the mem_t entry provided by the caller. If it is unallocated,
-	   then we need to acquire a block from the memory broker. */ \
+	   then we need to acquire a block from the packed block allocator. */ \
 	if ( bli_mem_is_unalloc( mem ) ) \
 	{ \
 		if ( bli_thread_am_ochief( thread ) ) \
@@ -104,8 +104,8 @@ void PASTECH2(bls_,ch,opname) \
 	else /* if ( bli_mem_is_alloc( mem ) ) */ \
 	{ \
 		/* If the mem_t entry provided by the caller does NOT contain a NULL
-		   buffer, then a block has already been acquired from the memory
-		   broker and cached by the caller. */ \
+		   buffer, then a block has already been acquired from the packed
+		   block allocator and cached by the caller. */ \
 \
 		/* As a sanity check, we should make sure that the mem_t object isn't
 		   associated with a block that is too small compared to the size of

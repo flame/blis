@@ -95,8 +95,8 @@ void bli_dgemm_power9_asm_12x6
   "                                               \n\t"
   DPREFETCH
   "                                               \n\t"
-  "cmpwi            %%r0, %%r11, 0                \n\t" // if k_iter == 0,
-  "beq              %%r0, DCONSIDERKLEFT          \n\t" // then jmp to k_left
+  "cmpwi                  %%r11, 0                \n\t" // if k_iter == 0,
+  "beq                    DCONSIDERKLEFT          \n\t" // then jmp to k_left
   "mtctr            %%r11                         \n\t" // else, do k_iter loop
   "                                               \n\t"  
   "DLOOPKITER:                                    \n\t" // k_iter loop
@@ -107,8 +107,8 @@ void bli_dgemm_power9_asm_12x6
   "                                               \n\t"
   "DCONSIDERKLEFT:                                \n\t"
   "                                               \n\t"
-  "cmpwi            %%r0, %%r12, 0                \n\t" // if k_left == 0,
-  "beq              %%r0, DPOSTACCUM              \n\t" // then jmp to post accum
+  "cmpwi                  %%r12, 0                \n\t" // if k_left == 0,
+  "beq                    DPOSTACCUM              \n\t" // then jmp to post accum
   "mtctr            %%r12                         \n\t" // else, do k_left loop
   "                                               \n\t"
   "DLOOPKLEFT:                                    \n\t" // k_left loop 
@@ -121,10 +121,10 @@ void bli_dgemm_power9_asm_12x6
   "                                               \n\t"
   DSCALE_ALPHA											                    
   "                                               \n\t"
-  "cmpdi            %%r0, %%r26, 0                \n\t" // if beta == 0,
-  "beq              %%r0, DBETAZERO               \n\t" // then jmp to BZ
+  "cmpdi                  %%r26, 0                \n\t" // if beta == 0,
+  "beq                    DBETAZERO               \n\t" // then jmp to BZ
   "                                               \n\t"
-  "cmpwi            %%r0, %%r9, 8                 \n\t" // if rs_c == 8
+  "cmpwi                  %%r9, 8                 \n\t" // if rs_c == 8
   "beq              DCOLSTOREDBNZ                 \n\t" // then jmp to col store 
   "                                               \n\t"
   "DGENSTOREDBNZ:                                 \n\t" // BNZ gen stored case 
@@ -143,7 +143,7 @@ void bli_dgemm_power9_asm_12x6
   "                                               \n\t"
   "DBETAZERO:                                     \n\t" // BZ case
   "                                               \n\t" 
-  "cmpwi            %%r0, %%r9, 8                 \n\t" // if rs_c == 8,
+  "cmpwi                  %%r9, 8                 \n\t" // if rs_c == 8,
   "beq              DCOLSTORED                    \n\t" // C is col stored
   "                                               \n\t"
   "DGENSTORED:                                    \n\t" // BZ gen stored case
