@@ -69,10 +69,10 @@ void PASTEMAC2(chx,chy,op) \
 	); \
 }
 
-INSERT_GENTFUNC2_BASIC0(xbpys_mxn_fn);
-INSERT_GENTFUNC2_MIXDP0(xbpys_mxn_fn);
+INSERT_GENTFUNC2_BASIC0(xpbys_mxn_fn);
+INSERT_GENTFUNC2_MIXDP0(xpbys_mxn_fn);
 
-static xpbys_mxn_vft GENARRAY2_ALL(xbpys_mxn, xbpys_mxn_fn);
+static xpbys_mxn_vft GENARRAY2_ALL(xpbys_mxn, xpbys_mxn_fn);
 
 
 void bli_gemm_ker_var2
@@ -345,7 +345,7 @@ void bli_gemm_ker_var2
 				);
 
 				// Accumulate to C with type-casting.
-				xbpys_mxn[ dt_exec ][ dt_c ]
+				xpbys_mxn[ dt_exec ][ dt_c ]
 				(
 				    m_cur, n_cur,
 				    &ct, rs_ct, cs_ct,
