@@ -475,11 +475,23 @@ static real c_b52 = 0.f;
     integer mx, my;
     complex cdot[1];
     integer lenx, leny;
-    extern /* Complex */ complex cdotc_(integer *, complex *, integer 
+    extern /* Complex */
+#ifdef BLIS_ENABLE_COMPLEX_RETURN_INTEL
+ void cdotc_(complex *,
+#else
+complex cdotc_(
+#endif
+ integer *, complex *, integer 
 	    *, complex *, integer *);
     extern /* Subroutine */ int ccopy_(integer *, complex *, integer *, 
 	    complex *, integer *);
-    extern /* Complex */ complex cdotu_(integer *, complex *, integer 
+    extern /* Complex */
+#ifdef BLIS_ENABLE_COMPLEX_RETURN_INTEL
+ void cdotu_(complex *,
+#else
+complex cdotu_(
+#endif
+ integer *, complex *, integer 
 	    *, complex *, integer *);
     extern /* Subroutine */ int cswap_(integer *, complex *, integer *, 
 	    complex *, integer *), ctest_(integer *, complex *, complex *, 
@@ -526,14 +538,26 @@ static real c_b52 = 0.f;
 	    }
 	    if (combla_1.icase == 1) {
 /*              .. CDOTC .. */
-		q__1 = cdotc_(&combla_1.n, cx, &combla_1.incx, cy, &
+
+#ifdef BLIS_ENABLE_COMPLEX_RETURN_INTEL
+		cdotc_(&q__1,
+#else
+		q__1 = cdotc_(
+#endif
+		 &combla_1.n, cx, &combla_1.incx, cy, &
 			combla_1.incy);
 		cdot[0].r = q__1.r, cdot[0].i = q__1.i;
 		ctest_(&c__1, cdot, &ct6[kn + (ki << 2) - 5], &csize1[kn - 1],
 			 sfac);
 	    } else if (combla_1.icase == 2) {
 /*              .. CDOTU .. */
-		q__1 = cdotu_(&combla_1.n, cx, &combla_1.incx, cy, &
+
+#ifdef BLIS_ENABLE_COMPLEX_RETURN_INTEL
+		cdotu_(&q__1,
+#else
+		q__1 = cdotu_(
+#endif
+		 &combla_1.n, cx, &combla_1.incx, cy, &
 			combla_1.incy);
 		cdot[0].r = q__1.r, cdot[0].i = q__1.i;
 		ctest_(&c__1, cdot, &ct7[kn + (ki << 2) - 5], &csize1[kn - 1],

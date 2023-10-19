@@ -342,7 +342,8 @@ SANDBOX_CXX_SUFS   := cc cpp cxx
 SANDBOX_SRC_SUFS   := $(SANDBOX_C99_SUFS) $(SANDBOX_CXX_SUFS)
 
 # Header suffixes.
-FRAME_HDR_SUFS     := h
+FRAME_H99_SUFS     := h
+FRAME_HDR_SUFS     := $(FRAME_H99_SUFS)
 
 ADDON_H99_SUFS     := h
 ADDON_HXX_SUFS     := hh hpp hxx
@@ -357,8 +358,8 @@ ALL_HDR_SUFS       := $(sort $(FRAME_HDR_SUFS) \
                              $(ADDON_HDR_SUFS) \
                              $(SANDBOX_HDR_SUFS) )
 
-ALL_H99_SUFS       := $(sort $(FRAME_HDR_SUFS) \
-                             $(ADDON_HDR_SUFS) \
+ALL_H99_SUFS       := $(sort $(FRAME_H99_SUFS) \
+                             $(ADDON_H99_SUFS) \
                              $(SANDBOX_H99_SUFS) )
 
 # The names of scripts that check output from the BLAS test drivers and
