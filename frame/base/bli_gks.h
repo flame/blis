@@ -50,7 +50,7 @@ BLIS_EXPORT_BLIS const cntx_t* bli_gks_query_nat_cntx( void );
 
 const cntx_t*                  bli_gks_query_cntx_noinit( void );
 
-BLIS_EXPORT_BLIS const cntx_t* bli_gks_query_ind_cntx( ind_t ind, num_t dt );
+BLIS_EXPORT_BLIS const cntx_t* bli_gks_query_ind_cntx( ind_t ind );
 
 BLIS_EXPORT_BLIS void          bli_gks_init_ref_cntx( cntx_t* cntx );
 

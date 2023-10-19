@@ -1136,9 +1136,11 @@ void libblis_test_output_params_struct( FILE* os, test_params_t* params )
 	                        bli_ind_oper_get_avail_impl_string( BLIS_GEMM, BLIS_DCOMPLEX ) );
 	libblis_test_fprintf_c( os, "\n" );
 
-	// Query a native context.
-	cntx_c = ( cntx_t* )bli_gks_query_ind_cntx( im, BLIS_SCOMPLEX );
-	cntx_z = ( cntx_t* )bli_gks_query_ind_cntx( im, BLIS_DCOMPLEX );
+	// Query a native context. NOTE: Now that we've removed the dt argument from
+	// bli_gks_query_ind_cntx(), we can consolidate cntx_c and cntx_z; there is
+	// no need to query two contexts since they are the same.
+	cntx_c = ( cntx_t* )bli_gks_query_ind_cntx( im );
+	cntx_z = ( cntx_t* )bli_gks_query_ind_cntx( im );
 
 	libblis_test_fprintf_c( os, "level-3 blocksizes                             c       z \n" );
 	libblis_test_fprintf_c( os, "  mc                                     %7d %7d\n",

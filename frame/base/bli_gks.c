@@ -526,8 +526,7 @@ static bli_pthread_mutex_t gks_mutex = BLIS_PTHREAD_MUTEX_INITIALIZER;
 
 const cntx_t* bli_gks_query_ind_cntx
      (
-       ind_t ind,
-       num_t dt
+       ind_t ind
      )
 {
 	bli_init_once();
@@ -692,7 +691,7 @@ const char* bli_gks_l3_ukr_impl_string( ukr_t ukr, ind_t method, num_t dt )
 	// Query the context for the current induced method and datatype, and
 	// then query the ukernel function pointer for the given datatype from
 	// that context.
-	const cntx_t* cntx = bli_gks_query_ind_cntx( method, dt );
+	const cntx_t* cntx = bli_gks_query_ind_cntx( method );
 	void_fp fp         = bli_cntx_get_ukr_dt( dt, ukr, cntx );
 
 	// Check whether the ukernel function pointer is NULL for the given

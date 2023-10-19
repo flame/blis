@@ -436,7 +436,7 @@ LIBBLIS            := libblis
 ifeq ($(OS_NAME),Darwin)
 SHLIB_EXT          := dylib
 else ifeq ($(IS_WIN),yes)
-ifeq ($(CC_VENDOR),gcc)
+ifeq ($(IS_MSVC),no)
 SHLIB_EXT          := dll.a
 else
 SHLIB_EXT          := lib
@@ -524,7 +524,7 @@ GIT_LOG    := $(GIT) log --decorate
 # manually override whatever they need.
 
 # Define the external libraries we may potentially need at link-time.
-ifeq ($(IS_WIN),yes)
+ifeq ($(IS_MSVC),yes)
 LIBM       :=
 else
 LIBM       := -lm
@@ -566,7 +566,7 @@ else
 SOFLAGS    := -shared
 ifeq ($(IS_WIN),yes)
 # Windows shared library link flags.
-ifeq ($(CC_VENDOR),clang)
+ifeq ($(IS_MSVC),yes)
 SOFLAGS    += -Wl,-implib:$(BASE_LIB_PATH)/$(LIBBLIS).lib
 else
 SOFLAGS    += -Wl,--out-implib,$(BASE_LIB_PATH)/$(LIBBLIS).dll.a
@@ -699,7 +699,7 @@ $(foreach c, $(CONFIG_LIST_FAM), $(eval $(call append-var-for,CWARNFLAGS,$(c))))
 # --- Position-independent code flags (shared libraries only) ---
 
 # Emit position-independent code for dynamic linking.
-ifeq ($(IS_WIN),yes)
+ifeq ($(IS_MSVC),yes)
 # Note: Don't use any fPIC flags for Windows builds since all code is position-
 # independent.
 CPICFLAGS :=
@@ -751,6 +751,14 @@ endif
 # Determine default export behavior / visibility of symbols for clang.
 ifeq ($(CC_VENDOR),clang)
 ifeq ($(IS_WIN),yes)
+ifeq ($(IS_MSVC),no)
+# This is a clang build targetting MinGW-w64 env
+ifeq ($(EXPORT_SHARED),all)
+BUILD_SYMFLAGS := -Wl,--export-all-symbols, -Wl,--enable-auto-import
+else # ifeq ($(EXPORT_SHARED),all)
+BUILD_SYMFLAGS := -Wl,--exclude-all-symbols
+endif
+endif # ifeq ($(IS_MSVC),no)
 ifeq ($(EXPORT_SHARED),all)
 # NOTE: clang on Windows does not appear to support exporting all symbols
 # by default, and therefore we ignore the value of EXPORT_SHARED.
