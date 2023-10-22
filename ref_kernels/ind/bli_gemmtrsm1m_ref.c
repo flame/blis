@@ -438,7 +438,7 @@ void PASTEMAC(chr,opname,arch,suf) \
        const void*      bx10, \
              void*      b110, \
              void*      c110, inc_t rs_c, inc_t cs_c, \
-             auxinfo_t* auxinfo, \
+       const auxinfo_t* auxinfo, \
        const cntx_t*    cntx  \
      ) \
 { \

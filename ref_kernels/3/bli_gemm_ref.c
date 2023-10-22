@@ -50,7 +50,7 @@ static void PASTEMAC(ch,ch,opname,arch,suf) \
        const void*      b0, \
        const void*      beta0, \
              void*      c0, inc_t rs_c, inc_t cs_c, \
-             auxinfo_t* data, \
+       const auxinfo_t* data, \
        const cntx_t*    cntx  \
      ) \
 { \
@@ -159,7 +159,7 @@ void PASTEMAC(ch,ch,opname,arch,suf) \
        const void*      b0, \
        const void*      beta0, \
              void*      c0, inc_t rs_c, inc_t cs_c, \
-             auxinfo_t* data, \
+       const auxinfo_t* data, \
        const cntx_t*    cntx  \
      ) \
 { \
@@ -314,7 +314,7 @@ void PASTEMAC(chab,chc,opname,arch,suf) \
        const void*      b, \
        const void*      beta0, \
              void*      c0, inc_t rs_c, inc_t cs_c, \
-             auxinfo_t* auxinfo, \
+       const auxinfo_t* auxinfo, \
        const cntx_t*    cntx  \
      ) \
 { \

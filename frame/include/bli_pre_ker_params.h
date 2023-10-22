@@ -38,7 +38,7 @@
 // These macros are used in bli_*_ker_prot.h and bli_*_ker_ft.h to make it
 // easy to update them in the future, if needed.
 
-#define BLIS_AUXINFO_PARAM        auxinfo_t* data
+#define BLIS_AUXINFO_PARAM  const auxinfo_t* data
 #define BLIS_CNTX_PARAM     const cntx_t*    cntx
 
 

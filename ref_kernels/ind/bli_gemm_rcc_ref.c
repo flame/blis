@@ -47,7 +47,7 @@ void PASTEMAC(chabr,chcr,opname,arch,suf) \
        const void*      b, \
        const void*      beta0, \
              void*      c0, inc_t rs_c, inc_t cs_c, \
-             auxinfo_t* auxinfo, \
+       const auxinfo_t* auxinfo, \
        const cntx_t*    cntx  \
      ) \
 { \
