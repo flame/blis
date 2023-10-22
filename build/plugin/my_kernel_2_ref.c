@@ -42,7 +42,7 @@
 #undef  GENTFUNCCO
 #define GENTFUNCCO( ctype, ch, opname, arch, suf ) \
 \
-void PASTEMAC3(ch,opname,arch,suf) \
+void PASTEMAC(ch,opname,arch,suf) \
      ( \
        int    m, \
        int    n, \

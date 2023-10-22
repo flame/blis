@@ -57,7 +57,7 @@ do { \
 
 // -----------------------------------------------------------------------------
 
-void PASTEMAC3(plugin_init,BLIS_PNAME_INFIX,BLIS_CNAME_INFIX,BLIS_REF_SUFFIX)( PASTECH2(plugin,BLIS_PNAME_INFIX,_params) )
+void PASTEMAC(plugin_init,BLIS_PNAME_INFIX,BLIS_CNAME_INFIX,BLIS_REF_SUFFIX)( PASTECH(plugin,BLIS_PNAME_INFIX,_params) )
 {
 	cntx_t* cntx = ( cntx_t* )bli_gks_lookup_id( PASTECH(BLIS_ARCH,BLIS_CNAME_UPPER_INFIX) );
 
@@ -79,8 +79,8 @@ void PASTEMAC3(plugin_init,BLIS_PNAME_INFIX,BLIS_CNAME_INFIX,BLIS_REF_SUFFIX)( P
 
 	// -- Set micro-kernels ----------------------------------------------------
 
-	gen_func_init   ( &funcs[ MY_KERNEL_1 ], PASTECH2(my_kernel_1,BLIS_CNAME_INFIX,BLIS_REF_SUFFIX) );
-	gen_func_init_co( &funcs[ MY_KERNEL_2 ], PASTECH2(my_kernel_2,BLIS_CNAME_INFIX,BLIS_REF_SUFFIX) );
+	gen_func_init   ( &funcs[ MY_KERNEL_1 ], PASTECH(my_kernel_1,BLIS_CNAME_INFIX,BLIS_REF_SUFFIX) );
+	gen_func_init_co( &funcs[ MY_KERNEL_2 ], PASTECH(my_kernel_2,BLIS_CNAME_INFIX,BLIS_REF_SUFFIX) );
 
 	// -- Set preferences ------------------------------------------------------
 	//                                        s      d      c      z

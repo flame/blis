@@ -91,7 +91,7 @@ enum
 #undef GENTPROT
 #define GENTPROT( ctype, ch, config_infix ) \
 \
-void PASTEMAC3(ch,my_kernel_1,config_infix,BLIS_REF_SUFFIX) \
+void PASTEMAC(ch,my_kernel_1,config_infix,BLIS_REF_SUFFIX) \
      ( \
              int    n, \
        const ctype* a, \
@@ -102,7 +102,7 @@ void PASTEMAC3(ch,my_kernel_1,config_infix,BLIS_REF_SUFFIX) \
 #undef GENTPROTCO
 #define GENTPROTCO( ctype, ctyper, ch, chr, config_infix ) \
 \
-void PASTEMAC3(ch,my_kernel_2,config_infix,BLIS_REF_SUFFIX) \
+void PASTEMAC(ch,my_kernel_2,config_infix,BLIS_REF_SUFFIX) \
      ( \
        int    m, \
        int    n, \
@@ -137,10 +137,10 @@ INSERT_GENTCONF
 #undef GENTCONF
 #define GENTCONF( CONFIG, config ) \
 \
-void PASTEMAC3(plugin_init,BLIS_PNAME_INFIX,_,config)( PASTECH2(plugin,BLIS_PNAME_INFIX,_params) ); \
-void PASTEMAC4(plugin_init,BLIS_PNAME_INFIX,_,config,BLIS_REF_SUFFIX)( PASTECH2(plugin,BLIS_PNAME_INFIX,_params) );
+void PASTEMAC(plugin_init,BLIS_PNAME_INFIX,_,config)( PASTECH(plugin,BLIS_PNAME_INFIX,_params) ); \
+void PASTEMAC(plugin_init,BLIS_PNAME_INFIX,_,config,BLIS_REF_SUFFIX)( PASTECH(plugin,BLIS_PNAME_INFIX,_params) );
 
 INSERT_GENTCONF
 
-BLIS_EXPORT_BLIS err_t PASTEMAC(plugin_register,BLIS_PNAME_INFIX)( PASTECH2(plugin,BLIS_PNAME_INFIX,_params) );
+BLIS_EXPORT_BLIS err_t PASTEMAC(plugin_register,BLIS_PNAME_INFIX)( PASTECH(plugin,BLIS_PNAME_INFIX,_params) );
 
