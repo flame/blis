@@ -274,7 +274,7 @@ BLIS_INLINE err_t bli_cntx_set_blksz( bszid_t bs_id, const blksz_t* blksz, bszid
 	if ( error != BLIS_SUCCESS )
 		return error;
 
-	bli_blksz_copy_if_pos( blksz, cntx_blksz );
+	bli_blksz_copy_if_nonneg( blksz, cntx_blksz );
 	*cntx_mult_id = mult_id;
 
 	return BLIS_SUCCESS;
