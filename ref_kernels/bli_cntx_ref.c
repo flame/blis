@@ -396,15 +396,13 @@ void GENBARNAME(cntx_init)
 	// thresholds is that the sup code path is executed if a dimension is
 	// strictly less than its corresponding threshold. So actually, the
 	// thresholds specify the minimum dimension size that will still dispatch
-	// the non-sup/large code path. This "strictly less than" behavior ensures
-	// that a default value of 1 always disables sup (except for dimensions
-	// of 0 which are handled before sup is invoked). Note that a default value
-	// of 0 is effectively ignored by bli_blksz_copy_if_pos and so results
-	// in an uninitialized value (see github.com/flame/blis/issues/781).
+	// the non-sup/large code path. This "strictly less than" behavior was
+	// chosen over "less than or equal to" so that threshold values of 0 would
+	// effectively disable sup (even for matrix dimensions of 0).
 	//                                          s     d     c     z
-	bli_blksz_init_easy( &blkszs[ BLIS_MT ],    1,    1,    1,    1 );
-	bli_blksz_init_easy( &blkszs[ BLIS_NT ],    1,    1,    1,    1 );
-	bli_blksz_init_easy( &blkszs[ BLIS_KT ],    1,    1,    1,    1 );
+	bli_blksz_init_easy( &blkszs[ BLIS_MT ],    0,    0,    0,    0 );
+	bli_blksz_init_easy( &blkszs[ BLIS_NT ],    0,    0,    0,    0 );
+	bli_blksz_init_easy( &blkszs[ BLIS_KT ],    0,    0,    0,    0 );
 
 	// Initialize the context with the default blocksize objects and their
 	// multiples.
