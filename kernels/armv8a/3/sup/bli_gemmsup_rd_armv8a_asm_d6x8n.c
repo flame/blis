@@ -37,7 +37,6 @@
 #include "blis.h"
 #include "assert.h"
 
-GEMMSUP_KER_PROT( double, d, gemmsup_r_armv8a_ref2 )
 
 // Label locality & misc.
 #include "../armv8a_asm_utils.h"
@@ -102,6 +101,122 @@ GEMMSUP_KER_PROT( double, d, gemmsup_r_armv8a_ref2 )
 " prfm PLDL1KEEP, ["#CADDR"]         \n\t" \
 " add  "#CADDR", "#CADDR", "#DLONGC" \n\t"
 
+
+BLIS_INLINE
+void bli_dgemmsup_rd_armv8a_inline_4x8n
+     (
+       conj_t              conja,
+       conj_t              conjb,
+       dim_t               m0,
+       dim_t               n0,
+       dim_t               k0,
+       double*    restrict alpha,
+       double*    restrict a, inc_t rs_a0, inc_t cs_a0,
+       double*    restrict b, inc_t rs_b0, inc_t cs_b0,
+       double*    restrict beta,
+       double*    restrict c, inc_t rs_c0, inc_t cs_c0,
+       auxinfo_t*          data,
+       cntx_t*             cntx
+     )
+{
+  assert( m0 == 4 );
+
+  for ( ; n0 > 0; n0 -= 8 )
+  {
+    // Call twice the 2xc kernel in column order.
+    dim_t n_loc = ( n0 < 8 ) ? n0 : 8;
+    bli_dgemmsup_rd_armv8a_int_2x8
+    (
+      conja, conjb, 2, n_loc, k0,
+      alpha, a, rs_a0, cs_a0, b, rs_b0, cs_b0,
+      beta, c, rs_c0, cs_c0, data, cntx
+    );
+    bli_dgemmsup_rd_armv8a_int_2x8
+    (
+      conja, conjb, 2, n_loc, k0,
+      alpha, a + 2 * rs_a0, rs_a0, cs_a0, b, rs_b0, cs_b0,
+      beta, c + 2 * rs_c0, rs_c0, cs_c0, data, cntx
+    );
+    b += 8 * cs_b0;
+    c += 8 * cs_c0;
+  }
+}
+
+BLIS_INLINE
+void bli_dgemmsup_rd_armv8a_inline_3x8n
+     (
+       conj_t              conja,
+       conj_t              conjb,
+       dim_t               m0,
+       dim_t               n0,
+       dim_t               k0,
+       double*    restrict alpha,
+       double*    restrict a, inc_t rs_a0, inc_t cs_a0,
+       double*    restrict b, inc_t rs_b0, inc_t cs_b0,
+       double*    restrict beta,
+       double*    restrict c, inc_t rs_c0, inc_t cs_c0,
+       auxinfo_t*          data,
+       cntx_t*             cntx
+     )
+{
+  assert( m0 == 3 );
+
+  for ( ; n0 >= 4; n0 -= 4 )
+  {
+    bli_dgemmsup_rd_armv8a_asm_3x4
+    (
+      conja, conjb, 3, 4, k0,
+      alpha, a, rs_a0, cs_a0, b, rs_b0, cs_b0,
+      beta, c, rs_c0, cs_c0, data, cntx
+    );
+    b += 4 * cs_b0;
+    c += 4 * cs_c0;
+  }
+  if ( n0 > 0 )
+  {
+    bli_dgemmsup_rd_armv8a_int_3x4
+    (
+      conja, conjb, 3, n0, k0,
+      alpha, a, rs_a0, cs_a0, b, rs_b0, cs_b0,
+      beta, c, rs_c0, cs_c0, data, cntx
+    );
+  }
+}
+
+BLIS_INLINE
+void bli_dgemmsup_rd_armv8a_inline_rx8n
+     (
+       conj_t              conja,
+       conj_t              conjb,
+       dim_t               m0,
+       dim_t               n0,
+       dim_t               k0,
+       double*    restrict alpha,
+       double*    restrict a, inc_t rs_a0, inc_t cs_a0,
+       double*    restrict b, inc_t rs_b0, inc_t cs_b0,
+       double*    restrict beta,
+       double*    restrict c, inc_t rs_c0, inc_t cs_c0,
+       auxinfo_t*          data,
+       cntx_t*             cntx
+     )
+{
+  assert( m0 <= 2 );
+
+  for ( ; n0 > 0; n0 -= 8 )
+  {
+    dim_t n_loc = ( n0 < 8 ) ? n0 : 8;
+    bli_dgemmsup_rd_armv8a_int_2x8
+    (
+      conja, conjb, m0, n_loc, k0,
+      alpha, a, rs_a0, cs_a0, b, rs_b0, cs_b0,
+      beta, c, rs_c0, cs_c0, data, cntx
+    );
+    b += 8 * cs_b0;
+    c += 8 * cs_c0;
+  }
+}
+
+
 void bli_dgemmsup_rd_armv8a_asm_6x8n
      (
        conj_t              conja,
@@ -120,116 +235,51 @@ void bli_dgemmsup_rd_armv8a_asm_6x8n
 {
   if ( m0 != 6 )
   {
-    if ( m0 < 6 )
-    {
-      if ( m0 == 5 )
-      {
-        // 3xk calls.
-        dim_t n = n0;
-        double *b_loc = b;
-        double *c_loc = c;
-        for ( ; n >= 4; n -= 4 )
-        {
-          bli_dgemmsup_rd_armv8a_asm_3x4
-          (
-            conja, conjb, 3, 4, k0,
-            alpha, a, rs_a0, cs_a0, b_loc, rs_b0, cs_b0,
-            beta, c_loc, rs_c0, cs_c0, data, cntx
-          );
-          b_loc += 4 * cs_b0;
-          c_loc += 4 * cs_c0;
-        }
-        if ( n > 0 )
-        {
-          bli_dgemmsup_rd_armv8a_int_3x4
-          (
-            conja, conjb, 3, n, k0,
-            alpha, a, rs_a0, cs_a0, b_loc, rs_b0, cs_b0,
-            beta, c_loc, rs_c0, cs_c0, data, cntx
-          );
-        }
-        a += 3 * rs_a0;
-        c += 3 * rs_c0;
+    assert( m0 <= 9 );
 
-        // 2xk calls.
-        for ( ; n0 > 0; n0 -= 8 )
-        {
-          dim_t n_loc = ( n0 < 8 ) ? n0 : 8;
-          bli_dgemmsup_rd_armv8a_int_2x8
-          (
-            conja, conjb, 2, n_loc, k0,
-            alpha, a, rs_a0, cs_a0, b, rs_b0, cs_b0,
-            beta, c, rs_c0, cs_c0, data, cntx
-          );
-          b += 8 * cs_b0;
-          c += 8 * cs_c0;
-        }
-        return;
-      }
-      else if ( m0 == 4 )
-      {
-        for ( ; n0 > 0; n0 -= 8 )
-        {
-          dim_t n_loc = ( n0 < 8 ) ? n0 : 8;
-          bli_dgemmsup_rd_armv8a_int_2x8
-          (
-            conja, conjb, 2, n_loc, k0,
-            alpha, a, rs_a0, cs_a0, b, rs_b0, cs_b0,
-            beta, c, rs_c0, cs_c0, data, cntx
-          );
-          bli_dgemmsup_rd_armv8a_int_2x8
-          (
-            conja, conjb, 2, n_loc, k0,
-            alpha, a + 2 * rs_a0, rs_a0, cs_a0, b, rs_b0, cs_b0,
-            beta, c + 2 * rs_c0, rs_c0, cs_c0, data, cntx
-          );
-          b += 8 * cs_b0;
-          c += 8 * cs_c0;
-        }
-      }
-      else if ( m0 == 3 )
-      {
-        for ( ; n0 >= 4; n0 -= 4 )
-        {
-          bli_dgemmsup_rd_armv8a_asm_3x4
-          (
-            conja, conjb, 3, 4, k0,
-            alpha, a, rs_a0, cs_a0, b, rs_b0, cs_b0,
-            beta, c, rs_c0, cs_c0, data, cntx
-          );
-          b += 4 * cs_b0;
-          c += 4 * cs_c0;
-        }
-        if ( n0 > 0 )
-        {
-          bli_dgemmsup_rd_armv8a_int_3x4
-          (
-            conja, conjb, 3, n0, k0,
-            alpha, a, rs_a0, cs_a0, b, rs_b0, cs_b0,
-            beta, c, rs_c0, cs_c0, data, cntx
-          );
-        }
-      }
-      else // m0 == 2 or 1.
-      {
-        for ( ; n0 > 0; n0 -= 8 )
-        {
-          dim_t n_loc = ( n0 < 8 ) ? n0 : 8;
-          bli_dgemmsup_rd_armv8a_int_2x8
-          (
-            conja, conjb, m0, n_loc, k0,
-            alpha, a, rs_a0, cs_a0, b, rs_b0, cs_b0,
-            beta, c, rs_c0, cs_c0, data, cntx
-          );
-          b += 8 * cs_b0;
-          c += 8 * cs_c0;
-        }
-      }
-    }
-    else
+    // Manual separation.
+    dgemmsup_ker_ft ker_fp1 = NULL;
+    dgemmsup_ker_ft ker_fp2 = NULL;
+    dim_t           mr1, mr2;
+
+    switch ( m0 )
     {
-      assert( FALSE );
+      case 9:
+        ker_fp1 = bli_dgemmsup_rd_armv8a_asm_6x8n; mr1 = 6; // This function.
+        ker_fp2 = bli_dgemmsup_rd_armv8a_inline_3x8n; mr2 = 3; break;
+      case 8:
+        ker_fp1 = bli_dgemmsup_rd_armv8a_asm_6x8n; mr1 = 6; // This function.
+        ker_fp2 = bli_dgemmsup_rd_armv8a_inline_rx8n; mr2 = 2; break;
+      case 7:
+        ker_fp1 = bli_dgemmsup_rd_armv8a_inline_3x8n; mr1 = 3;
+        ker_fp2 = bli_dgemmsup_rd_armv8a_inline_4x8n; mr2 = 4; break;
+      case 5:
+        ker_fp1 = bli_dgemmsup_rd_armv8a_inline_3x8n; mr1 = 3;
+        ker_fp2 = bli_dgemmsup_rd_armv8a_inline_rx8n; mr2 = 2; break;
+      case 4:
+        ker_fp1 = bli_dgemmsup_rd_armv8a_inline_4x8n; mr1 = 4; break;
+      case 3:
+        ker_fp1 = bli_dgemmsup_rd_armv8a_inline_3x8n; mr1 = 3; break;
+      default:
+        ker_fp1 = bli_dgemmsup_rd_armv8a_inline_rx8n; mr1 = m0; break;
     }
+
+    ker_fp1
+    (
+      conja, conjb, mr1, n0, k0,
+      alpha, a, rs_a0, cs_a0, b, rs_b0, cs_b0,
+      beta, c, rs_c0, cs_c0, data, cntx
+    );
+    a += mr1 * rs_a0;
+    c += mr1 * rs_c0;
+    if ( ker_fp2 )
+      ker_fp2
+      (
+        conja, conjb, mr2, n0, k0,
+        alpha, a, rs_a0, cs_a0, b, rs_b0, cs_b0,
+        beta, c, rs_c0, cs_c0, data, cntx
+      );
+
     return;
   }
 

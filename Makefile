@@ -213,8 +213,19 @@ MK_REFKERN_OBJS     := $(foreach arch, $(CONFIG_LIST), \
 MK_FRAME_OBJS       := $(call gen-obj-paths-from-src,$(FRAME_SRC_SUFS),$(MK_FRAME_SRC),$(FRAME_PATH),$(BASE_OBJ_FRAME_PATH))
 
 # Generate object file paths for the addon source code. If one or more addons
-# were not enabled a configure-time, this variable will we empty.
-MK_ADDON_OBJS       := $(call gen-obj-paths-from-src,$(ADDON_SRC_SUFS),$(MK_ADDON_SRC),$(ADDON_PATH),$(BASE_OBJ_ADDON_PATH))
+# were not enabled a configure-time, these variable will we empty.
+# NOTE: We separate the source and objects into kernel and non-kernel lists.
+MK_ADDON_KERS_SRC   := $(foreach addon, $(ADDON_LIST), \
+                           $(filter $(ADDON_PATH)/$(addon)/$(KERNELS_DIR)/%, \
+                                    $(MK_ADDON_SRC)) \
+                        )
+MK_ADDON_OTHER_SRC  := $(foreach addon, $(ADDON_LIST), \
+                           $(filter-out $(ADDON_PATH)/$(addon)/$(KERNELS_DIR)/%, \
+                                        $(MK_ADDON_SRC)) \
+                        )
+MK_ADDON_KERS_OBJS  := $(call gen-obj-paths-from-src,$(ADDON_SRC_SUFS),$(MK_ADDON_KERS_SRC),$(ADDON_PATH),$(BASE_OBJ_ADDON_PATH))
+MK_ADDON_OTHER_OBJS := $(call gen-obj-paths-from-src,$(ADDON_SRC_SUFS),$(MK_ADDON_OTHER_SRC),$(ADDON_PATH),$(BASE_OBJ_ADDON_PATH))
+MK_ADDON_OBJS       := $(MK_ADDON_KERS_OBJS) $(MK_ADDON_OTHER_OBJS)
 
 # Generate object file paths for the sandbox source code. If a sandbox was not
 # enabled a configure-time, this variable will we empty.
@@ -492,10 +503,10 @@ flat-header: check-env $(BLIS_H_FLAT)
 
 $(BLIS_H_FLAT): $(ALL_H99_FILES)
 ifeq ($(ENABLE_VERBOSE),yes)
-	$(FLATTEN_H) -c -v1 $(BLIS_H_SRC_PATH) $@ "./$(INCLUDE_DIR)" "$(ALL_H99_DIRPATHS)"
+	$(FLATTEN_H) -l -v1 $(BLIS_H_SRC_PATH) $@ "./$(INCLUDE_DIR)" "$(ALL_H99_DIRPATHS)"
 else
 	@echo -n "Generating monolithic blis.h"
-	@$(FLATTEN_H) -c -v1 $(BLIS_H_SRC_PATH) $@ "./$(INCLUDE_DIR)" "$(ALL_H99_DIRPATHS)"
+	@$(FLATTEN_H) -l -v1 $(BLIS_H_SRC_PATH) $@ "./$(INCLUDE_DIR)" "$(ALL_H99_DIRPATHS)"
 	@echo "Generated $@"
 endif
 
@@ -505,10 +516,10 @@ flat-cblas-header: check-env $(CBLAS_H_FLAT)
 
 $(CBLAS_H_FLAT): $(FRAME_H99_FILES)
 ifeq ($(ENABLE_VERBOSE),yes)
-	$(FLATTEN_H) -c -v1 $(CBLAS_H_SRC_PATH) $@ "./$(INCLUDE_DIR)" "$(ALL_H99_DIRPATHS)"
+	$(FLATTEN_H) -l -v1 $(CBLAS_H_SRC_PATH) $@ "./$(INCLUDE_DIR)" "$(ALL_H99_DIRPATHS)"
 else
 	@echo -n "Generating monolithic cblas.h"
-	@$(FLATTEN_H) -c -v1 $(CBLAS_H_SRC_PATH) $@ "./$(INCLUDE_DIR)" "$(ALL_H99_DIRPATHS)"
+	@$(FLATTEN_H) -l -v1 $(CBLAS_H_SRC_PATH) $@ "./$(INCLUDE_DIR)" "$(ALL_H99_DIRPATHS)"
 	@echo "Generated $@"
 endif
 
@@ -580,6 +591,7 @@ endef
 
 # first argument: a configuration name from the union of config_list and
 # config_name, used to look up the CFLAGS to use during compilation.
+# second argument: the C99 addon file suffix being considered.
 define make-c99-addon-rule
 $(BASE_OBJ_ADDON_PATH)/%.o: $(ADDON_PATH)/%.$(2) $(BLIS_H_FLAT) $(ADDON_H99_FILES) $(MAKE_DEFS_MK_PATHS)
 ifeq ($(ENABLE_VERBOSE),yes)
@@ -590,6 +602,23 @@ else
 endif
 endef
 
+# first argument: a configuration name from the union of config_list and
+# config_name, used to look up the CFLAGS to use during compilation.
+# second argument: the C99 addon file suffix being considered.
+# third argument: the name of the addon being considered.
+define make-c99-addon-kers-rule
+$(BASE_OBJ_ADDON_PATH)/$(3)/$(KERNELS_DIR)/%.o: $(ADDON_PATH)/$(3)/$(KERNELS_DIR)/%.$(2) $(BLIS_H_FLAT) $(ADDON_H99_FILES) $(MAKE_DEFS_MK_PATHS)
+ifeq ($(ENABLE_VERBOSE),yes)
+	$(CC) $(call get-addon-kernel-c99flags-for,$(1)) -c $$< -o $$@
+else
+	@echo "Compiling $$@" $(call get-addon-kernel-text-for,$(1))
+	@$(CC) $(call get-addon-kernel-c99flags-for,$(1)) -c $$< -o $$@
+endif
+endef
+
+# first argument: a configuration name from the union of config_list and
+# config_name, used to look up the CFLAGS to use during compilation.
+# second argument: the C++ addon file suffix being considered.
 define make-cxx-addon-rule
 $(BASE_OBJ_ADDON_PATH)/%.o: $(ADDON_PATH)/%.$(2) $(BLIS_H_FLAT) $(ADDON_HXX_FILES) $(MAKE_DEFS_MK_PATHS)
 ifeq ($(ENABLE_VERBOSE),yes)
@@ -602,6 +631,7 @@ endef
 
 # first argument: a configuration name from the union of config_list and
 # config_name, used to look up the CFLAGS to use during compilation.
+# second argument: the C99 sandbox file suffix being considered.
 define make-c99-sandbox-rule
 $(BASE_OBJ_SANDBOX_PATH)/%.o: $(SANDBOX_PATH)/%.$(2) $(BLIS_H_FLAT) $(SANDBOX_H99_FILES) $(MAKE_DEFS_MK_PATHS)
 ifeq ($(ENABLE_VERBOSE),yes)
@@ -612,6 +642,9 @@ else
 endif
 endef
 
+# first argument: a configuration name from the union of config_list and
+# config_name, used to look up the CFLAGS to use during compilation.
+# second argument: the C++ sandbox file suffix being considered.
 define make-cxx-sandbox-rule
 $(BASE_OBJ_SANDBOX_PATH)/%.o: $(SANDBOX_PATH)/%.$(2) $(BLIS_H_FLAT) $(SANDBOX_HXX_FILES) $(MAKE_DEFS_MK_PATHS)
 ifeq ($(ENABLE_VERBOSE),yes)
@@ -656,6 +689,12 @@ $(foreach kset, $(KERNEL_LIST), $(eval $(call make-kernels-rule,$(kset),$(call g
 # configuration family.
 $(foreach suf, $(ADDON_C99_SUFS), \
 $(foreach conf, $(CONFIG_NAME), $(eval $(call make-c99-addon-rule,$(conf),$(suf)))))
+
+# Instantiate the build rule for C addon/kernels files. Use the CFLAGS for the
+# configuration family.
+$(foreach addon, $(ADDON_LIST), \
+$(foreach suf, $(ADDON_C99_SUFS), \
+$(foreach conf, $(CONFIG_NAME), $(eval $(call make-c99-addon-kers-rule,$(conf),$(suf),$(addon))))))
 
 # Instantiate the build rule for C++ addon files. Use the CFLAGS for the
 # configuration family.

@@ -42,6 +42,8 @@ char libblis_test_binary_name[ MAX_BINARY_NAME_LENGTH + 1 ];
 char libblis_test_parameters_filename[ MAX_FILENAME_LENGTH + 1 ];
 char libblis_test_operations_filename[ MAX_FILENAME_LENGTH + 1 ];
 
+bool libblis_test_quiet_mode = FALSE;
+
 char libblis_test_pass_string[ MAX_PASS_STRING_LENGTH + 1 ];
 char libblis_test_warn_string[ MAX_PASS_STRING_LENGTH + 1 ];
 char libblis_test_fail_string[ MAX_PASS_STRING_LENGTH + 1 ];
@@ -746,6 +748,9 @@ void libblis_test_read_op_info( test_ops_t*  ops,
 
 void libblis_test_output_section_overrides( FILE* os, test_ops_t* ops )
 {
+	// Skip informational output if BLIS is running in quiet mode.
+	if ( libblis_test_quiet_mode ) return;
+
 	libblis_test_fprintf_c( os, "\n" );
 	libblis_test_fprintf_c( os, "--- Section overrides ---\n" );
 	libblis_test_fprintf_c( os, "\n" );
@@ -772,6 +777,17 @@ void libblis_test_output_params_struct( FILE* os, test_params_t* params )
 	cntx_t* cntx;
 	cntx_t* cntx_c;
 	cntx_t* cntx_z;
+
+#ifndef BLIS_ENABLE_GEMM_MD
+	// Notify the user if mixed domain or mixed precision was requested.
+	if ( params->mixed_domain || params->mixed_precision )
+	{
+		libblis_test_printf_error( "mixed domain and/or mixed precision testing requested, but building against BLIS without mixed datatype support.\n" );
+	}
+#endif
+
+	// Skip informational output if BLIS is running in quiet mode.
+	if ( libblis_test_quiet_mode ) return;
 
 	// If bli_info_get_int_type_size() returns 32 or 64, the size is forced.
 	// Otherwise, the size is chosen automatically. We query the result of
@@ -1268,14 +1284,6 @@ void libblis_test_output_params_struct( FILE* os, test_params_t* params )
 	libblis_test_fprintf_c( os, "\n" );
 	libblis_test_fprintf( os, "\n" );
 
-#ifndef BLIS_ENABLE_GEMM_MD
-	// Notify the user if mixed domain or mixed precision was requested.
-	if ( params->mixed_domain || params->mixed_precision )
-	{
-		libblis_test_printf_error( "mixed domain and/or mixed precision testing requested, but building against BLIS without mixed datatype support.\n" );
-	}
-#endif
-
 	// If mixed domain or mixed precision was requested, we disable all
 	// induced methods except 1m and native execution.
 	if ( params->mixed_domain || params->mixed_precision )
@@ -1294,6 +1302,12 @@ void libblis_test_output_params_struct( FILE* os, test_params_t* params )
 
 void libblis_test_output_op_struct( FILE* os, test_op_t* op, char* op_str )
 {
+	// Skip informational output if BLIS is running in quiet mode.
+	if ( libblis_test_quiet_mode ) return;
+
+	libblis_test_fprintf_c( os, "--- %s ---\n", op_str );
+	libblis_test_fprintf_c( os, "\n" );
+
 	dimset_t dimset = op->dimset;
 
 	if      ( dimset == BLIS_TEST_DIMS_MNK )
@@ -2113,8 +2127,6 @@ void libblis_test_op_driver
 	if ( tdata->id == 0 )
 	{
 		// Output a heading and the contents of the op struct.
-		libblis_test_fprintf_c( stdout, "--- %s ---\n", op_str );
-		libblis_test_fprintf_c( stdout, "\n" );
 		libblis_test_output_op_struct( stdout, op, op_str );
 
 		// Also output to a matlab file if requested (and successfully opened).
@@ -2126,8 +2138,6 @@ void libblis_test_op_driver
 			// stdout (at the end of libblis_test_read_parameter_file()).
 			libblis_test_output_params_struct( output_stream, params );
 
-			libblis_test_fprintf_c( output_stream, "--- %s ---\n", op_str );
-			libblis_test_fprintf_c( output_stream, "\n" );
 			libblis_test_output_op_struct( output_stream, op, op_str );
 		}
 	}
@@ -3111,7 +3121,7 @@ void libblis_test_parse_command_line( int argc, char** argv )
 	bli_getopt_init_state( 0, &state );
 
 	// Process all option arguments until we get a -1, which means we're done.
-	while( (opt = bli_getopt( argc, ( const char** )argv, "g:o:", &state )) != -1 )
+	while( (opt = bli_getopt( argc, ( const char** )argv, "g:o:q", &state )) != -1 )
 	{
 		// Explicitly typecast opt, which is an int, to a char. (Failing to
 		// typecast resulted in at least one user-reported problem whereby
@@ -3121,17 +3131,19 @@ void libblis_test_parse_command_line( int argc, char** argv )
 		switch( opt_ch )
 		{
 			case 'g':
-			libblis_test_printf_infoc( "detected -g option; using \"%s\" for parameters filename.\n", state.optarg );
 			strncpy( libblis_test_parameters_filename,
 			         state.optarg, MAX_FILENAME_LENGTH );
 			gave_option_g = TRUE;
 			break;
 
 			case 'o':
-			libblis_test_printf_infoc( "detected -o option; using \"%s\" for operations filename.\n", state.optarg );
 			strncpy( libblis_test_operations_filename,
 			         state.optarg, MAX_FILENAME_LENGTH );
 			gave_option_o = TRUE;
+			break;
+
+			case 'q':
+			libblis_test_quiet_mode = TRUE;
 			break;
 
 			case '?':
@@ -3145,20 +3157,36 @@ void libblis_test_parse_command_line( int argc, char** argv )
 
 	if ( gave_option_g == FALSE )
 	{
+		// Skip informational output if BLIS is running in quiet mode.
+		if ( !libblis_test_quiet_mode )
 		libblis_test_printf_infoc( "no -g option given; defaulting to \"%s\" for parameters filename.\n", PARAMETERS_FILENAME );
 
 		// Copy default parameters filename into its global string.
 		strncpy( libblis_test_parameters_filename,
 		         PARAMETERS_FILENAME, MAX_FILENAME_LENGTH );
 	}
+	else
+	{
+		// Skip informational output if BLIS is running in quiet mode.
+		if ( !libblis_test_quiet_mode )
+		libblis_test_printf_infoc( "detected -g option; using \"%s\" for parameters filename.\n", state.optarg );
+	}
 
 	if ( gave_option_o == FALSE )
 	{
+		// Skip informational output if BLIS is running in quiet mode.
+		if ( !libblis_test_quiet_mode )
 		libblis_test_printf_infoc( "no -o option given; defaulting to \"%s\" for operations filename.\n", OPERATIONS_FILENAME );
 
 		// Copy default operations filename into its global string.
 		strncpy( libblis_test_operations_filename,
 		         OPERATIONS_FILENAME, MAX_FILENAME_LENGTH );
+	}
+	else
+	{
+		// Skip informational output if BLIS is running in quiet mode.
+		if ( !libblis_test_quiet_mode )
+		libblis_test_printf_infoc( "detected -o option; using \"%s\" for operations filename.\n", state.optarg );
 	}
 
 	// If there are still arguments remaining after getopt() processing is

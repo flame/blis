@@ -36,7 +36,6 @@
 #include "blis.h"
 #include "assert.h"
 
-GEMMSUP_KER_PROT( double, d, gemmsup_r_armv8a_ref2 )
 
 // Label locality & misc.
 #include "../armv8a_asm_utils.h"

@@ -278,14 +278,16 @@ def flatten_header( inputfile, header_dirpaths, cursp ):
 
 				# Mark the beginning of the header being inserted.
 				ostring += "%s%s%c" % ( beginstr, header, '\n' )
-				ostring += "#line %d \"%s\"%c\n" % ( 1, header_path, '\n' )
+				if line_numbers:
+					ostring += "#line %d \"%s\"%c\n" % ( 1, header_path, '\n' )
 
 				# Recurse on the header, accumulating the string.
 				ostring += flatten_header( header_path, header_dirpaths, cursp + "  " )
 
 				# Mark the end of the header being inserted.
 				ostring += "%s%s%c" % ( endstr, header, '\n' )
-				ostring += "#line %d \"%s\"%c\n" % ( lineno+1, inputfile, '\n' )
+				if line_numbers:
+					ostring += "#line %d \"%s\"%c\n" % ( lineno+1, inputfile, '\n' )
 
 				echov2( "%sheader file '%s' fully processed." \
 				        % ( cursp, header_path ) )
@@ -350,6 +352,7 @@ script_name    = None
 output_name    = None
 strip_comments = None
 recursive_flag = None
+line_numbers   = None
 verbose_flag   = None
 regex          = None
 root_inputfile = None
@@ -360,6 +363,7 @@ def main():
 	global output_name
 	global strip_comments
 	global recursive_flag
+	global line_numbers
 	global verbose_flag
 	global regex
 	global root_inputfile
@@ -371,13 +375,14 @@ def main():
 
 	strip_comments = False
 	recursive_flag = False
+	line_numbers   = False
 	verbose_flag   = "1"
 
 	nestsp         = "  "
 
 	# Process our command line options.
 	try:
-		opts, args = getopt.getopt( sys.argv[1:], "o:rchv:" )
+		opts, args = getopt.getopt( sys.argv[1:], "o:rclhv:" )
 
 	except getopt.GetoptError as err:
 		# print help information and exit:
@@ -390,6 +395,8 @@ def main():
 			output_name = optarg
 		elif opt == "-r":
 			recursive_flag = True
+		elif opt == "-l":
+			line_numbers = True
 		elif opt == "-c":
 			strip_comments = True
 		elif opt == "-v":
@@ -400,6 +407,9 @@ def main():
 		else:
 			print_usage()
 			sys.exit()
+
+	if line_numbers and strip_comments:
+		my_print( "WARNING: stripping comments will result in inaccurate line numbers" )
 
 	# Make sure that the verboseness level is valid.
 	if ( verbose_flag != "0" and
