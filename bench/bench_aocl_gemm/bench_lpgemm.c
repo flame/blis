@@ -834,6 +834,8 @@ aocl_post_op* lpgemm_create_post_ops_struct_ ## BLAS_SFX \
 	post_ops->eltwise = NULL; \
 	post_ops->bias.bias = NULL; \
 	post_ops->sum.scale_factor = NULL; \
+	post_ops->sum.buff = NULL; \
+	post_ops->sum.zero_point = NULL; \
 	if ( post_ops_str != NULL ) \
 	{ \
 		char* ops_tok = strtok(post_ops_str, ", " ); \
@@ -998,9 +1000,6 @@ aocl_post_op* lpgemm_create_post_ops_struct_ ## BLAS_SFX \
 		cur_op_index++; \
  \
 		post_ops->sum.is_power_of_2 = FALSE; \
-		post_ops->sum.scale_factor = NULL; \
-		post_ops->sum.buff = NULL; \
-		post_ops->sum.zero_point = NULL; \
 		if ( global_dscale_out == 'y' ) \
 		{ \
 			/* Allocate scale buffer, return early if alloc fails.*/ \

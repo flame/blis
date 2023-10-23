@@ -182,7 +182,7 @@ LPGEMM_5LOOP(int8_t,int8_t,int32_t,s8s8s32o32)
 
 				lpgemm_alloc_mem_panel
 				(
-				  mem_scale_c_size_req, BLIS_BUFFER_FOR_C_PANEL,
+				  mem_scale_c_size_req, BLIS_BUFFER_FOR_GEN_USE,
 				  &mem_scale_c, rntm
 				);
 
