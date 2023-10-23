@@ -46,7 +46,7 @@ typedef struct rntm_s
 	bool      auto_factor;
 
 	dim_t     num_threads;
-	dim_t*    thrloop;
+	dim_t     thrloop[ BLIS_NUM_LOOPS ];
 	bool      pack_a;
 	bool      pack_b;
 	bool      l3_sup;
@@ -129,22 +129,6 @@ BLIS_INLINE pba_t* bli_rntm_pba( const rntm_t* rntm )
 	return rntm->pba;
 }
 
-#if 0
-BLIS_INLINE dim_t bli_rntm_equals( rntm_t* rntm1, rntm_t* rntm2 )
-{
-	const bool nt = bli_rntm_num_threads( rntm1 ) == bli_rntm_num_threads( rntm2 );
-	const bool jc = bli_rntm_jc_ways( rntm1 ) == bli_rntm_jc_ways( rntm2 );
-	const bool pc = bli_rntm_pc_ways( rntm1 ) == bli_rntm_pc_ways( rntm2 );
-	const bool ic = bli_rntm_ic_ways( rntm1 ) == bli_rntm_ic_ways( rntm2 );
-	const bool jr = bli_rntm_jr_ways( rntm1 ) == bli_rntm_jr_ways( rntm2 );
-	const bool ir = bli_rntm_ir_ways( rntm1 ) == bli_rntm_ir_ways( rntm2 );
-	const bool pr = bli_rntm_pr_ways( rntm1 ) == bli_rntm_pr_ways( rntm2 );
-
-	if ( nt && jc && pc && ic && jr && ir && pr ) return TRUE;
-	else                                          return FALSE;
-}
-#endif
-
 //
 // -- rntm_t modification (internal use only) ----------------------------------
 //
@@ -170,7 +154,7 @@ BLIS_INLINE void bli_rntm_set_jc_ways_only( dim_t ways, rntm_t* rntm )
 }
 BLIS_INLINE void bli_rntm_set_pc_ways_only( dim_t ways, rntm_t* rntm )
 {
-	bli_rntm_set_ways_for_only( BLIS_KC, ways, rntm );
+	bli_rntm_set_ways_for_only( BLIS_KC, 1, rntm );
 }
 BLIS_INLINE void bli_rntm_set_ic_ways_only( dim_t ways, rntm_t* rntm )
 {
@@ -193,7 +177,7 @@ BLIS_INLINE void bli_rntm_set_ways_only( dim_t jc, dim_t pc, dim_t ic, dim_t jr,
 {
 	// Record the number of ways of parallelism per loop.
 	bli_rntm_set_jc_ways_only( jc, rntm );
-	bli_rntm_set_pc_ways_only( pc, rntm );
+	bli_rntm_set_pc_ways_only(  1, rntm );
 	bli_rntm_set_ic_ways_only( ic, rntm );
 	bli_rntm_set_jr_ways_only( jr, rntm );
 	bli_rntm_set_ir_ways_only( ir, rntm );
@@ -212,11 +196,11 @@ BLIS_INLINE void bli_rntm_set_pba( pba_t* pba, rntm_t* rntm )
 
 BLIS_INLINE void bli_rntm_clear_num_threads_only( rntm_t* rntm )
 {
-	bli_rntm_set_num_threads_only( -1, rntm );
+	bli_rntm_set_num_threads_only( 1, rntm );
 }
 BLIS_INLINE void bli_rntm_clear_ways_only( rntm_t* rntm )
 {
-	bli_rntm_set_ways_only( -1, -1, -1, -1, -1, rntm );
+	bli_rntm_set_ways_only( 1, 1, 1, 1, 1, rntm );
 }
 BLIS_INLINE void bli_rntm_clear_sba_pool( rntm_t* rntm )
 {
@@ -244,14 +228,16 @@ BLIS_INLINE void bli_rntm_set_ways( dim_t jc, dim_t pc, dim_t ic, dim_t jr, dim_
 {
 	// Record the number of ways of parallelism per loop.
 	bli_rntm_set_jc_ways_only( jc, rntm );
-	bli_rntm_set_pc_ways_only( pc, rntm );
+	bli_rntm_set_pc_ways_only(  1, rntm );
 	bli_rntm_set_ic_ways_only( ic, rntm );
 	bli_rntm_set_jr_ways_only( jr, rntm );
 	bli_rntm_set_ir_ways_only( ir, rntm );
 	bli_rntm_set_pr_ways_only(  1, rntm );
 
-	// Set the num_threads field to a default state.
-	bli_rntm_clear_num_threads_only( rntm );
+	// Set the num_threads field to the product of all the ways. The only
+	// benefit of doing this, though, is that the user can query the total
+	// number of threads from the rntm_t after calling this function.
+	bli_rntm_set_num_threads_only( jc * 1 * ic * jr * ir, rntm );
 }
 
 BLIS_INLINE void bli_rntm_set_pack_a( bool pack_a, rntm_t* rntm )
@@ -307,8 +293,8 @@ BLIS_INLINE void bli_rntm_clear_l3_sup( rntm_t* rntm )
 #define BLIS_RNTM_INITIALIZER \
         { \
           .auto_factor = TRUE, \
-          .num_threads = -1, \
-          .thrloop     = { -1, -1, -1, -1, -1, -1 }, \
+          .num_threads = 1, \
+          .thrloop     = { 1, 1, 1, 1, 1, 1 }, \
           .pack_a      = FALSE, \
           .pack_b      = FALSE, \
           .l3_sup      = TRUE, \

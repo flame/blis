@@ -1564,7 +1564,7 @@ void bli_thread_set_ways( dim_t jc, dim_t pc, dim_t ic, dim_t jr, dim_t ir )
 	// Acquire the mutex protecting global_rntm.
 	bli_pthread_mutex_lock( &global_rntm_mutex );
 
-	bli_rntm_set_ways_only( jc, pc, ic, jr, ir, &global_rntm );
+	bli_rntm_set_ways_only( jc, 1, ic, jr, ir, &global_rntm );
 
 	// Release the mutex protecting global_rntm.
 	bli_pthread_mutex_unlock( &global_rntm_mutex );
@@ -1595,6 +1595,17 @@ void bli_thread_init_rntm_from_env
 	// function is only called from bli_thread_init(), which is only called
 	// by bli_init_once().
 
+	// NOTE: While much of the multithreading cpp case of this function may seem
+	// redundant with bli_rntm_set_ways_from_rntm(), we need them both. This
+	// function is only called to initialize the global rntm_t. Here, the
+	// consistency logic serves to make sure that sane values will be returned
+	// if the application (in the time between library initialization and when
+	// computation begins) subsequently queries the number of threads or ways
+	// via the runtime API. The bli_rntm_set_ways_from_rntm() function also
+	// needs the same consistency logic, but for a different reason: that
+	// function guarantees that the rntm_t has sane values in the event that the
+	// application passed in a custom rntm_t via an expert interface.
+
 	bool  auto_factor = FALSE;
 	dim_t nt;
 	dim_t jc, pc, ic, jr, ir;
@@ -1608,44 +1619,72 @@ void bli_thread_init_rntm_from_env
 	if ( nt == -1 )
 		nt = bli_env_get_var( "OMP_NUM_THREADS", -1 );
 
-	// Read the environment variables for the number of threads (ways
-	// of parallelism) for each individual loop.
+	// Read the environment variables for the number of threads (ways of
+	// parallelism) for each individual loop.
 	jc = bli_env_get_var( "BLIS_JC_NT", -1 );
 	pc = bli_env_get_var( "BLIS_PC_NT", -1 );
 	ic = bli_env_get_var( "BLIS_IC_NT", -1 );
 	jr = bli_env_get_var( "BLIS_JR_NT", -1 );
 	ir = bli_env_get_var( "BLIS_IR_NT", -1 );
 
-	// If any BLIS_*_NT environment variable was set, then we ignore the
-	// value of BLIS_NUM_THREADS or OMP_NUM_THREADS and use the
-	// BLIS_*_NT values instead (with unset variables being treated as if
-	// they contained 1).
-	if ( jc != -1 || pc != -1 || ic != -1 || jr != -1 || ir != -1 )
+	bool nt_set   = FALSE;
+	bool ways_set = FALSE;
+
+	// Some users are mischievous/dumb. Make sure they don't cause trouble.
+	if ( nt < 1 ) nt = 1;
+	if ( jc < 1 ) jc = 1;
+	if ( pc < 1 ) pc = 1;
+	if ( ic < 1 ) ic = 1;
+	if ( jr < 1 ) jr = 1;
+	if ( ir < 1 ) ir = 1;
+
+	// First, we establish whether or not the number of threads or ways of
+	// parallelism were set to meaningful values.
+	if ( nt > 1 ) { nt_set   = TRUE; }
+	if ( jc > 1 ) { ways_set = TRUE; }
+	if ( pc > 1 ) { ways_set = TRUE; pc = 1; } // Disable pc_nt values.
+	if ( ic > 1 ) { ways_set = TRUE; }
+	if ( jr > 1 ) { ways_set = TRUE; }
+	if ( ir > 1 ) { ways_set = TRUE; }
+
+	// Now we use the values of nt_set and ways_set to determine how to
+	// interpret the original values we found in the rntm_t object.
+
+	if ( ways_set == TRUE )
 	{
-		if ( jc == -1 ) jc = 1;
-		if ( pc == -1 ) pc = 1;
-		if ( ic == -1 ) ic = 1;
-		if ( jr == -1 ) jr = 1;
-		if ( ir == -1 ) ir = 1;
+		// If the per-loop ways of parallelism were set, then we use the values
+		// that were given and interpreted above. The only thing left to do is
+		// calculate the correct number of threads. Notice that if the user also
+		// happened to set BLIS_NUM_THREADS, that value is discarded in favor of
+		// the implied value from the per-loop ways of parallelism.
 
-		// Unset the value for nt.
-		nt = -1;
+		nt = jc * pc * ic * jr * ir;
+		auto_factor = FALSE;
 	}
+	else if ( ways_set == FALSE && nt_set == TRUE )
+	{
+		// If the ways were not set but the number of thread was set, then we
+		// will attempt to automatically generate a thread factorization that
+		// will work given the problem size. This auto-factorization will
+		// occur later, in bli_rntm_set_ways_from_rntm(), once we know the
+		// problem size.
 
-	// By this time, one of the following conditions holds:
-	// - nt is -1 and the ways for each loop are -1.
-	// - nt is -1 and the ways for each loop are all set.
-	// - nt is set and the ways for each loop are -1.
-
-	// If nt is set (ie: not -1), then we know we will perform an automatic
-	// thread factorization (later, in bli_rntm.c).
-	if ( nt != -1 ) auto_factor = TRUE;
+		// Make note that auto-factorization will be performed.
+		auto_factor = TRUE;
+	}
+	else // if ( ways_set == FALSE && nt_set == FALSE )
+	{
+		// If neither the ways nor the number of threads were set, then we
+		// allow the default values to stand.
+		//nt = jc = pc = ic = jr = ir = 1;
+		//auto_factor = FALSE;
+	}
 
 #else
 
-	// When multithreading is disabled, always set the rntm_t ways
-	// values to 1.
-	nt = -1;
+	// When multithreading is disabled, always set the per-loop ways of
+	// parallelism to 1.
+	nt = 1;
 	jc = pc = ic = jr = ir = 1;
 
 #endif

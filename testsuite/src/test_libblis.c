@@ -818,8 +818,7 @@ void libblis_test_output_params_struct( FILE* os, test_params_t* params )
 	char ir_nt_str[16];
 
 	// Query the number of ways of parallelism per loop (and overall) and
-	// convert these values into strings, with "unset" being used if the
-	// value returned was -1 (indicating the environment variable was unset).
+	// convert these values into strings.
 	dim_t nt    = bli_thread_get_num_threads();
 	dim_t jc_nt = bli_thread_get_jc_nt();
 	dim_t pc_nt = bli_thread_get_pc_nt();
@@ -827,18 +826,12 @@ void libblis_test_output_params_struct( FILE* os, test_params_t* params )
 	dim_t jr_nt = bli_thread_get_jr_nt();
 	dim_t ir_nt = bli_thread_get_ir_nt();
 
-	if (    nt == -1 ) sprintf(    nt_str, "unset" );
-	else               sprintf(    nt_str, "%d", ( int )   nt );
-	if ( jc_nt == -1 ) sprintf( jc_nt_str, "unset" );
-	else               sprintf( jc_nt_str, "%d", ( int )jc_nt );
-	if ( pc_nt == -1 ) sprintf( pc_nt_str, "unset" );
-	else               sprintf( pc_nt_str, "%d", ( int )pc_nt );
-	if ( ic_nt == -1 ) sprintf( ic_nt_str, "unset" );
-	else               sprintf( ic_nt_str, "%d", ( int )ic_nt );
-	if ( jr_nt == -1 ) sprintf( jr_nt_str, "unset" );
-	else               sprintf( jr_nt_str, "%d", ( int )jr_nt );
-	if ( ir_nt == -1 ) sprintf( ir_nt_str, "unset" );
-	else               sprintf( ir_nt_str, "%d", ( int )ir_nt );
+	sprintf(    nt_str, "%d", ( int )   nt );
+	sprintf( jc_nt_str, "%d", ( int )jc_nt );
+	sprintf( pc_nt_str, "%d", ( int )pc_nt );
+	sprintf( ic_nt_str, "%d", ( int )ic_nt );
+	sprintf( jr_nt_str, "%d", ( int )jr_nt );
+	sprintf( ir_nt_str, "%d", ( int )ir_nt );
 
 	// Set up rntm_t objects for each of the four families:
 	// gemm, herk, trmm, trsm.
