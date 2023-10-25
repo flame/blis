@@ -208,3 +208,6 @@ bool bli_cntx_gemmsup_thresh_is_met_zen4
 		obj_t*  c,
 		cntx_t* cntx
 	 );
+
+// function for resetting zmm registers after L3 apis
+void bli_zero_zmm();

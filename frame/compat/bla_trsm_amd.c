@@ -40,6 +40,24 @@
 // Define BLAS-to-BLIS interfaces.
 //
 
+#if defined(BLIS_KERNELS_ZEN4)
+
+    #define TRSM_BLIS_IMPL(ch, blasname) \
+        PASTEF77S(ch,blasname) ( side, uploa, transa, diaga, m, n, alpha, a, lda, b, ldb ); \
+        arch_t id = bli_arch_query_id(); \
+        if (id == BLIS_ARCH_ZEN4) \
+        { \
+            bli_zero_zmm(); \
+        } \
+
+#else
+
+    #define TRSM_BLIS_IMPL(ch, blasname) \
+        PASTEF77S(ch,blasname) ( side, uploa, transa, diaga, m, n, alpha, a, lda, b, ldb ); \
+
+#endif
+
+
 #ifdef BLIS_BLAS3_CALLS_TAPI
 
 #undef  GENTFUNC
@@ -169,7 +187,7 @@ void PASTEF77(ch,blasname) \
              ftype*    b, const f77_int* ldb  \
      ) \
 { \
-    PASTEF77S(ch,blasname) ( side, uploa, transa, diaga, m, n, alpha, a, lda, b, ldb ); \
+    TRSM_BLIS_IMPL(ch,blasname) \
 } \
 )
 #else
@@ -474,7 +492,7 @@ void PASTEF77(ch,blasname) \
              ftype*    b, const f77_int* ldb  \
      ) \
 { \
-    PASTEF77S(ch,blasname) ( side, uploa, transa, diaga, m, n, alpha, a, lda, b, ldb ); \
+    TRSM_BLIS_IMPL(ch, blasname) \
 } \
 
 #endif
@@ -794,6 +812,13 @@ void strsm_
 )
 {
     strsm_blis_impl ( side, uploa, transa, diaga, m, n, alpha, a, lda, b, ldb );
+#if defined(BLIS_KERNELS_ZEN4)
+    arch_t id = bli_arch_query_id();
+    if (id == BLIS_ARCH_ZEN4)
+    {
+        bli_zero_zmm();
+    }
+#endif
 }
 #endif
 void dtrsm_blis_impl
@@ -1178,6 +1203,13 @@ void dtrsm_
 )
 {
     dtrsm_blis_impl ( side, uploa, transa, diaga, m, n, alpha, a, lda, b, ldb );
+#if defined(BLIS_KERNELS_ZEN4)
+    arch_t id = bli_arch_query_id();
+    if (id == BLIS_ARCH_ZEN4)
+    {
+        bli_zero_zmm();
+    }
+#endif
 }
 #endif
 
@@ -1557,6 +1589,13 @@ void ztrsm_
 )
 {
     ztrsm_blis_impl ( side, uploa, transa, diaga, m, n, alpha, a, lda, b, ldb );
+#if defined(BLIS_KERNELS_ZEN4)
+    arch_t id = bli_arch_query_id();
+    if (id == BLIS_ARCH_ZEN4)
+    {
+        bli_zero_zmm();
+    }
+#endif
 }
 #endif
 
@@ -1934,6 +1973,13 @@ void ctrsm_
 )
 {
     ctrsm_blis_impl ( side, uploa, transa, diaga, m, n, alpha, a, lda, b, ldb );
+#if defined(BLIS_KERNELS_ZEN4)
+    arch_t id = bli_arch_query_id();
+    if (id == BLIS_ARCH_ZEN4)
+    {
+        bli_zero_zmm();
+    }
+#endif
 }
 
 #endif

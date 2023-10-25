@@ -40,6 +40,23 @@
 // Define BLAS-to-BLIS interfaces.
 //
 
+#if defined(BLIS_KERNELS_ZEN4)
+
+    #define SYMM_BLIS_IMPL(ch, blasname) \
+        PASTEF77S(ch,blasname) ( side, uploa, m, n, alpha, a, lda, b, ldb, beta, c, ldc ); \
+        arch_t id = bli_arch_query_id(); \
+        if (id == BLIS_ARCH_ZEN4) \
+        { \
+            bli_zero_zmm(); \
+        } \
+
+#else
+
+    #define SYMM_BLIS_IMPL(ch, blasname) \
+        PASTEF77S(ch,blasname) ( side, uploa, m, n, alpha, a, lda, b, ldb, beta, c, ldc ); \
+
+#endif
+
 #ifdef BLIS_BLAS3_CALLS_TAPI
 
 #undef  GENTFUNC
@@ -165,7 +182,7 @@ void PASTEF77(ch,blasname) \
              ftype*    c, const f77_int* ldc  \
      ) \
 { \
-	PASTEF77S(ch,blasname) ( side, uploa, m, n, alpha, a, lda, b, ldb, beta, c, ldc ); \
+	SYMM_BLIS_IMPL(ch,blasname) \
 } \
 )
 
@@ -316,7 +333,7 @@ void PASTEF77(ch,blasname) \
              ftype*    c, const f77_int* ldc  \
      ) \
 { \
-	PASTEF77S(ch,blasname) ( side, uploa, m, n, alpha, a, lda, b, ldb, beta, c, ldc ); \
+	SYMM_BLIS_IMPL(ch,blasname) \
 } \
 )
 
