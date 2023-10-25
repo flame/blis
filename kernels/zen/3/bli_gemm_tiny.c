@@ -164,55 +164,99 @@ static err_t bli_dgemm_tiny_24x8_kernel
     double *A = a_local;
     double *B = b_local;
     double *C = c_local;
-    double *alpha_cast, *beta_cast;
+    double *alpha_cast;
+    double beta_cast = *beta;
+    double one_local = 1.0;
     alpha_cast = (double *)alpha;
-    beta_cast = (double *)beta;
     /**
      * Set blocking and micro tile parameters before computing
      */
-    dim_t NC = 4080;
-    dim_t MC = 144;
-    dim_t KC = 480;
-    dim_t MR_ = 24;
-    dim_t NR_ = 8;
+    const dim_t MC = 144;
+    const dim_t KC = 480;
+    const dim_t MR_ = 24;
+    const dim_t NR_ = 8;
     /**
-     * NC and MC must be in multiple of MR_ and NR_.
+     * MC must be in multiple of MR_.
      * if not return early.
     */
-    if( (NC % NR_ != 0) || (MC % MR_ != 0) )
+    if( MC % MR_ != 0 )
     {
         return BLIS_FAILURE;
     }
-    dim_t n_part_rem = N % NC;
     dim_t n_rem = N % NR_;
     dim_t m_part_rem = M % MC;
     dim_t k_rem = K % KC;
-    dim_t n_part = 0;
     dim_t n_cur  = 0;
     dim_t m_cur  = 0;
     dim_t k_cur  = 0;
+    dim_t k_iter = 0;
     auxinfo_t aux;
     inc_t ps_a_use = (MR_ * rs_a);
     bli_auxinfo_set_ps_a( ps_a_use, &aux );
-    for ( dim_t n_iter = 0; n_iter < N; n_iter += NC )
+
+    /**
+     * JC Loop is eliminated as it iterates only once, So computation
+     * can start from K loop.
+     * Here K loop is divided into two parts to avoid repetitive check for Beta.
+     * For first iteration, it will use Beta to scale C matrix.
+     * Subsequent iterations will scale C matrix by 1.
+     */
+    k_iter = 0; //1st k loop, scale C matrix by beta
+    k_cur = (KC <= K ? KC : k_rem);
+    for ( dim_t m_iter = 0; m_iter < M;  m_iter += MC)
     {
-        n_part = (NC <= (N - n_iter) ? NC : n_part_rem);
-        for ( dim_t k_iter = 0; k_iter < K; k_iter += KC )
+        m_cur = (MC <= (M - m_iter) ? MC : m_part_rem);
+        for ( dim_t jr_iter = 0; jr_iter < N; jr_iter += NR_ )
         {
-            k_cur = (KC <= (K - k_iter) ? KC : k_rem);
-            for ( dim_t m_iter = 0; m_iter < M;  m_iter += MC)
+            n_cur = (NR_ <= (N - jr_iter) ? NR_ : n_rem);
+            bli_dgemmsup_rv_zen4_asm_24x8m(conja,
+                                           conjb,
+                                           m_cur,
+                                           n_cur,
+                                           k_cur,
+                                           alpha_cast,
+                                           (A + (m_iter * rs_a) + (k_iter * cs_a)), /*A matrix offset*/
+                                           rs_a,
+                                           cs_a,
+                                           (B + (jr_iter * cs_b) + (k_iter * rs_b)), /*B matrix offset*/
+                                           rs_b,
+                                           cs_b,
+                                           &beta_cast,
+                                           (C + jr_iter * cs_c + m_iter * rs_c), /*C matrix offset*/
+                                           rs_c,
+                                           cs_c,
+                                           &aux,
+                                           NULL);
+        }
+    }
+    // k_iter = KC loop where C matrix is scaled by one. Beta is one.
+    for (k_iter = KC ; k_iter < K; k_iter += KC )
+    {
+        k_cur = (KC <= (K - k_iter) ? KC : k_rem);
+        for ( dim_t m_iter = 0; m_iter < M;  m_iter += MC)
+        {
+            m_cur = (MC <= (M - m_iter) ? MC : m_part_rem);
+            for ( dim_t jr_iter = 0; jr_iter < N; jr_iter += NR_ )
             {
-                m_cur = (MC <= (M - m_iter) ? MC : m_part_rem);
-                for ( dim_t jr_iter = 0; jr_iter < n_part; jr_iter += NR_ )
-                {
-                    n_cur = (NR_ <= (N - jr_iter) ? NR_ : n_rem);
-                    bli_dgemmsup_rv_zen4_asm_24x8m(conja, conjb, m_cur, n_cur, k_cur,
-                            alpha_cast, A + m_iter * rs_a,
-                            rs_a, cs_a,
-                            B + jr_iter * cs_b, rs_b, cs_b,
-                            beta_cast,
-                            (C + jr_iter * cs_c + m_iter * rs_c), rs_c, cs_c, &aux, NULL);
-                }
+                n_cur = (NR_ <= (N - jr_iter) ? NR_ : n_rem);
+                bli_dgemmsup_rv_zen4_asm_24x8m(conja,
+                                               conjb,
+                                               m_cur,
+                                               n_cur,
+                                               k_cur,
+                                               alpha_cast,
+                                               (A + (m_iter * rs_a) + (k_iter * cs_a)), /*A matrix offset*/
+                                               rs_a,
+                                               cs_a,
+                                               (B + (jr_iter * cs_b) + (k_iter * rs_b)), /*B matrix offset*/
+                                               rs_b,
+                                               cs_b,
+                                               &one_local,
+                                               (C + jr_iter * cs_c + m_iter * rs_c), /*C matrix offset*/
+                                               rs_c,
+                                               cs_c,
+                                               &aux,
+                                               NULL);
             }
         }
     }
@@ -340,55 +384,104 @@ static err_t bli_dgemm_tiny_6x8_kernel
     double *A = a_local;
     double *B = b_local;
     double *C = c_local;
-    double *alpha_cast, *beta_cast;
+    double *alpha_cast;
+    double beta_cast = *beta;
+    double one_local = 1.0;
+
     alpha_cast = (double *)alpha;
-    beta_cast = (double *)beta;
     /**
      * Set blocking and micro tile parameters before computing
      */
-    dim_t NC = 4080;
-    dim_t MC = 72;
-    dim_t KC = 256;
-    dim_t MR_ = 6;
-    dim_t NR_ = 8;
+    const dim_t MC = 72;
+    const dim_t KC = 256;
+    const dim_t MR_ = 6;
+    const dim_t NR_ = 8;
+
+
     /**
-     * NC and MC must be in multiple of MR_ and NR_.
+     * MC must be in multiple of MR_.
      * if not return early.
     */
-    if( (NC % NR_ != 0) || (MC % MR_ != 0) )
+    if( MC % MR_ != 0 )
     {
         return BLIS_FAILURE;
     }
-    dim_t n_part_rem = N % NC;
     dim_t n_rem = N % NR_;
     dim_t m_part_rem = M % MC;
     dim_t k_rem = K % KC;
-    dim_t n_part = 0;
     dim_t n_cur  = 0;
     dim_t m_cur  = 0;
     dim_t k_cur  = 0;
+    dim_t k_iter = 0;
+
     auxinfo_t aux;
     inc_t ps_a_use = (MR_ * rs_a);
     bli_auxinfo_set_ps_a( ps_a_use, &aux );
-    for ( dim_t n_iter = 0; n_iter < N; n_iter += NC )
+    dgemmsup_ker_ft kern_ptr = kern_fp[stor_id];
+
+    /**
+     * JC Loop is eliminated as it iterates only once, So computation
+     * can start from K loop.
+     * Here K loop is divided into parts to avoid repetitive check for Beta.
+     * For first iteration, it will use Beta to scale C matrix.
+     * Subsequent iterations will scale C matrix by 1.
+     */
+    k_iter = 0; //1st k loop, scale C matrix by beta
+    k_cur = (KC <= K ? KC : k_rem);
+    for ( dim_t m_iter = 0; m_iter < M;  m_iter += MC)
     {
-        n_part = (NC <= (N - n_iter) ? NC : n_part_rem);
-        for ( dim_t k_iter = 0; k_iter < K; k_iter += KC )
+        m_cur = (MC <= (M - m_iter) ? MC : m_part_rem);
+        for ( dim_t jr_iter = 0; jr_iter < N; jr_iter += NR_ )
         {
-            k_cur = (KC <= (K - k_iter) ? KC : k_rem);
-            for ( dim_t m_iter = 0; m_iter < M;  m_iter += MC)
+            n_cur = (NR_ <= (N - jr_iter) ? NR_ : n_rem);
+            kern_ptr(conja,
+                     conjb,
+                     m_cur,
+                     n_cur,
+                     k_cur,
+                     alpha_cast,
+                     (A + (m_iter * rs_a) + (k_iter * cs_a)), /*A matrix offset*/
+                     rs_a,
+                     cs_a,
+                     (B + (jr_iter * cs_b) + (k_iter * rs_b)), /*B matrix offset*/
+                     rs_b,
+                     cs_b,
+                     &beta_cast,
+                     (C + (jr_iter * cs_c) + (m_iter * rs_c)), /*C matrix offset*/
+                     rs_c,
+                     cs_c,
+                     &aux,
+                     NULL);
+        }
+    }
+    // k_iter = KC loop where C matrix is scaled by one. Beta is one.
+    for (k_iter = KC; k_iter < K; k_iter += KC )
+    {
+        k_cur = (KC <= (K - k_iter) ? KC : k_rem);
+        for ( dim_t m_iter = 0; m_iter < M;  m_iter += MC)
+        {
+            m_cur = (MC <= (M - m_iter) ? MC : m_part_rem);
+            for ( dim_t jr_iter = 0; jr_iter < N; jr_iter += NR_ )
             {
-                m_cur = (MC <= (M - m_iter) ? MC : m_part_rem);
-                for ( dim_t jr_iter = 0; jr_iter < n_part; jr_iter += NR_ )
-                {
-                    n_cur = (NR_ <= (N - jr_iter) ? NR_ : n_rem);
-                    kern_fp[stor_id](conja, conjb, m_cur, n_cur, k_cur,
-                            alpha_cast, A + m_iter * rs_a,
-                            rs_a, cs_a,
-                            B + jr_iter * cs_b, rs_b, cs_b,
-                            beta_cast,
-                            (C + jr_iter * cs_c + m_iter * rs_c), rs_c, cs_c, &aux, NULL);
-                }
+                n_cur = (NR_ <= (N - jr_iter) ? NR_ : n_rem);
+                kern_ptr(conja,
+                         conjb,
+                         m_cur,
+                         n_cur,
+                         k_cur,
+                         alpha_cast,
+                         (A + (m_iter * rs_a) + (k_iter * cs_a)), /*A matrix offset*/
+                         rs_a,
+                         cs_a,
+                         (B + (jr_iter * cs_b) + (k_iter * rs_b)), /*B matrix offset*/
+                         rs_b,
+                         cs_b,
+                         &one_local,
+                         (C + (jr_iter * cs_c) + (m_iter * rs_c)), /*C matrix offset*/
+                         rs_c,
+                         cs_c,
+                         &aux,
+                         NULL);
             }
         }
     }
