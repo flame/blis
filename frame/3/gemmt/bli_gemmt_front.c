@@ -53,22 +53,6 @@ void bli_gemmt_front
 	obj_t   b_local;
 	obj_t   c_local;
 
-	// If C has a zero dimension, return early.
-	if ( bli_obj_has_zero_dim( c ) )
-	{
-		return;
-	}
-
-	// If alpha is zero, or if A or B has a zero dimension, scale C by beta
-	// and return early.
-	if ( bli_obj_equals( alpha, &BLIS_ZERO ) ||
-	     bli_obj_has_zero_dim( a ) ||
-	     bli_obj_has_zero_dim( b ) )
-	{
-		bli_scalm( beta, c );
-		return;
-	}
-
 	// Alias A, B, and C in case we need to apply transformations.
 	bli_obj_alias_to( a, &a_local );
 	bli_obj_alias_to( b, &b_local );

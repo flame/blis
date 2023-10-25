@@ -71,8 +71,7 @@
 #include "bli_l3_sup_ref.h"
 #include "bli_l3_sup_int.h"
 #include "bli_l3_sup_vars.h"
-#include "bli_l3_sup_packm_a.h"
-#include "bli_l3_sup_packm_b.h"
+#include "bli_l3_sup_packm.h"
 #include "bli_l3_sup_packm_var.h"
 
 // Prototype microkernel wrapper APIs.

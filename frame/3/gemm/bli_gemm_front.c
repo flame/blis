@@ -53,22 +53,6 @@ void bli_gemm_front
 	obj_t   b_local;
 	obj_t   c_local;
 
-	// If C has a zero dimension, return early.
-	if ( bli_obj_has_zero_dim( c ) )
-	{
-		return;
-	}
-
-	// If alpha is zero, or if A or B has a zero dimension, scale C by beta
-	// and return early.
-	if ( bli_obj_equals( alpha, &BLIS_ZERO ) ||
-	     bli_obj_has_zero_dim( a ) ||
-	     bli_obj_has_zero_dim( b ) )
-	{
-		bli_scalm( beta, c );
-		return;
-	}
-
 #if 0
 #ifdef BLIS_ENABLE_SMALL_MATRIX
 	// Only handle small problems separately for homogeneous datatypes.
