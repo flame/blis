@@ -1453,14 +1453,17 @@ int main( int argc, char** argv )
 		  "  It is to be noted only one activator can be used at a time.\n" \
 		  "  If more than one activator is used, only the first activator is\n" \
 		  "  applied and the other activators are ignored.\n" \
-		  "--Downscaled version of an API is enabled by using -d arg.\n" \
+		  "--Downscaled version of an API is enabled by using -d arg followed\n" \
+		  "  by the datatype that needs to be downscaled to"
 		  "  Downscaled api's are used to enable quantization workflows.\n" \
 		  "  Following downscaled api's are supported:\n" \
-		  "    1. u8s8s32os32 -d = u8s8s32os8.\n" \
-		  "    2. u8s8s16os16 -d = u8s8s16os8.\n" \
-		  "    3. bf16bf16f32obf32 -d = bf16bf16f32obf16.\n" \
-		  "    4. s8s8s32os32 -d = s8s8s32os8.\n" \
-		  "    5. s8s8s16os16 -d = s8s8s16os8.\n" \
+		  "    1. u8s8s32os32 -d s8 = u8s8s32os8.\n" \
+		  "    2. u8s8s16os16 -d s8 = u8s8s16os8.\n" \
+		  "    3. u8s8s16os16 -d u8 = u8s8s16ou8.\n" \
+		  "    4. bf16bf16f32obf32 -d bf16 = bf16bf16f32obf16.\n" \
+		  "    5. s8s8s32os32 -d s8 = s8s8s32os8.\n" \
+		  "    6. s8s8s16os16 -d s8 = s8s8s16os8.\n" \
+		  "  Example: ./bench_lpgemm -m a -n 2 -o bias,relu -d bf16 -i input.txt\n" \
 		);
 		exit( 1 );
 	}

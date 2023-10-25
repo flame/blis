@@ -174,7 +174,7 @@ LPGEMM_5LOOP(bfloat16,bfloat16,float,bf16bf16f32of32)
 
 				lpgemm_alloc_mem_panel
 				(
-			  	 mem_scale_c_size_req, BLIS_BUFFER_FOR_C_PANEL,
+			  	 mem_scale_c_size_req, BLIS_BUFFER_FOR_GEN_USE,
 			  	 &mem_scale_c, rntm
 				);
 
@@ -342,7 +342,7 @@ LPGEMM_5LOOP(bfloat16,bfloat16,float,bf16bf16f32of32)
 						(
 						pack_a_buffer_bf16,
 						( a + ( rs_a * ic ) + ( cs_a * pc )), rs_a, cs_a,
-						( ic_end - ic_start ), kc0,
+						mc0, kc0,
 						&rs_a_use, &cs_a_use
 						);
 						a_use = pack_a_buffer_bf16;
