@@ -89,7 +89,7 @@ err_t bli_gemmsup_ref
 
 	// Parse and interpret the contents of the rntm_t object to properly
 	// set the ways of parallelism for each loop.
-	bli_rntm_set_ways_from_rntm_sup
+	bli_rntm_factorize_sup
 	(
 	  bli_obj_length( c ),
 	  bli_obj_width( c ),
@@ -163,7 +163,7 @@ err_t bli_gemmtsup_ref
 
 	// Parse and interpret the contents of the rntm_t object to properly
 	// set the ways of parallelism for each loop.
-	bli_rntm_set_ways_from_rntm_sup
+	bli_rntm_factorize_sup
 	(
 	  bli_obj_length( c ),
 	  bli_obj_width( c ),
