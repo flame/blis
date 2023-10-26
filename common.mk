@@ -5,7 +5,7 @@
 #  libraries.
 #
 #  Copyright (C) 2014, The University of Texas at Austin
-#  Copyright (C) 2020-2022, Advanced Micro Devices, Inc. All rights reserved.
+#  Copyright (C) 2020-2023, Advanced Micro Devices, Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -599,27 +599,35 @@ SOFLAGS    += -Wl,-soname,$(LIBBLIS_SONAME)
 endif
 endif
 
+# Decide whether to use static or shared library on Linux and OS X
+MK_USE_LIB=static
+ifeq ($(MK_ENABLE_STATIC),no)
+  MK_USE_LIB=shared
+endif
+ifeq ($(USE_SHARED),yes)
+  MK_USE_LIB=shared
+endif
+
 # Decide which library to link to for things like the testsuite and BLIS test
 # drivers. We default to the static library, unless only the shared library was
 # enabled, in which case we use the shared library.
 LIBBLIS_L      := $(LIBBLIS_A)
 LIBBLIS_LINK   := $(LIBBLIS_A_PATH)
 ifeq ($(MK_ENABLE_SHARED),yes)
-ifeq ($(MK_ENABLE_STATIC),no)
-LIBBLIS_L      := $(LIBBLIS_SO)
-LIBBLIS_LINK   := $(LIBBLIS_SO_PATH)
-ifeq ($(IS_WIN),no)
-# For Linux and OS X: set rpath property of shared object.
-LDFLAGS        += -Wl,-rpath,$(BASE_LIB_PATH)
+  ifeq ($(MK_USE_LIB),shared)
+    LIBBLIS_L      := $(LIBBLIS_SO)
+    LIBBLIS_LINK   := $(LIBBLIS_SO_PATH)
+    ifeq ($(IS_WIN),no)
+      # For Linux and OS X: set rpath property of shared object.
+      LDFLAGS        += -Wl,-rpath,$(BASE_LIB_PATH)
+    endif
+  endif
+  # On windows, use the shared library even if static is created.
+  ifeq ($(IS_WIN),yes)
+    LIBBLIS_L      := $(LIBBLIS_SO)
+    LIBBLIS_LINK   := $(LIBBLIS_SO_PATH)
+  endif
 endif
-endif
-# On windows, use the shared library even if static is created.
-ifeq ($(IS_WIN),yes)
-LIBBLIS_L      := $(LIBBLIS_SO)
-LIBBLIS_LINK   := $(LIBBLIS_SO_PATH)
-endif
-endif
-
 
 #
 # --- Include makefile definitions file ----------------------------------------

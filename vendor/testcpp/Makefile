@@ -3,7 +3,7 @@
 #  libraries.
 #
 #  Copyright (C) 2014, The University of Texas at Austin
-#  Copyright (C) 2017 - 2021, Advanced Micro Devices, Inc.
+#  Copyright (C) 2017-2023, Advanced Micro Devices, Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -142,8 +142,7 @@ LIBBLIS_LINK   := $(LIB_PATH)/$(LIBBLIS_L)
 #
 all: blis 
 
-
-blis: test_asum_blis.x \
+CPPEXES := test_asum_blis.x \
 	test_axpy_blis.x \
 	test_copy_blis.x \
 	test_dot_blis.x \
@@ -183,8 +182,10 @@ blis: test_asum_blis.x \
 	test_trmm_blis.x \
 	test_trsm_blis.x \
 	test_trsv_blis.x 
- 
 
+CPPEXES := $(addprefix $(MK_USE_LIB)/,$(CPPEXES))
+
+blis: $(CPPEXES)
 
 # --Object file rules --
 
@@ -197,7 +198,8 @@ test_%_blis.o: test_%.cc
 
 # -- Executable file rules --
 
-test_%_blis.x: test_%_blis.o $(LIBBLIS_LINK)
+$(MK_USE_LIB)/test_%_blis.x: test_%_blis.o $(LIBBLIS_LINK)
+	@mkdir -p ./$(MK_USE_LIB)
 	@$(LINKER) $^       $(LIBBLIS_LINK) $(LDFLAGS) -o $@
 	./$@
 
@@ -206,5 +208,5 @@ test_%_blis.x: test_%_blis.o $(LIBBLIS_LINK)
 clean: cleanx
 
 cleanx:
-	- $(RM_F) *.o *.x
+	- $(RM_F) ./*.o ./{shared,static}/*.x
 
