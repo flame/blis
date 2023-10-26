@@ -109,57 +109,8 @@ void bli_snorm2fv_unb_var1_avx2
     
     float sumsq = 0.0f;
     dim_t i = 0;
-    dim_t n_remainder = 0;
-    float  *x_buf = x;
 
-    // Memory pool declarations for packing vector X.
-    // Initialize mem pool buffer to NULL and size to 0.
-    // "buf" and "size" fields are assigned once memory
-    // is allocated from the pool in bli_pba_acquire_m().
-    // This will ensure bli_mem_is_alloc() will be passed on
-    // an allocated memory if created or a NULL.
-    mem_t   mem_bufX = {0};
-    rntm_t  rntm;
-
-    // Packing for non-unit strided vector x.
-    if ( incx != 1 )
-    {
-        // In order to get the buffer from pool via rntm access to memory broker
-        //is needed. Following are initializations for rntm.
-        bli_rntm_init_from_global( &rntm );
-        bli_rntm_set_num_threads_only( 1, &rntm );
-        bli_pba_rntm_set_pba( &rntm );
-
-        // Calculate the size required for "n" float elements in vector x.
-        size_t buffer_size = n * sizeof( float );
-
-        #ifdef BLIS_ENABLE_MEM_TRACING
-            printf( "bli_snorm2fv_unb_var1_avx2(): get mem pool block\n" );
-        #endif
-
-        // Acquire a Buffer(n*size(float)) from the memory broker
-        // and save the associated mem_t entry to mem_bufX.
-        bli_pba_acquire_m
-        (
-            &rntm,
-            buffer_size,
-            BLIS_BUFFER_FOR_B_PANEL,
-            &mem_bufX
-        );
-
-        // Continue packing X if buffer memory is allocated.
-        if ( ( bli_mem_is_alloc( &mem_bufX ) ) )
-        {
-            x_buf = bli_mem_buffer( &mem_bufX );
-            // Pack vector x with non-unit stride to a temp buffer x_buf with unit stride.
-            for ( dim_t x_index = 0; x_index < n; x_index++ )
-            {
-                *( x_buf + x_index ) = *( x + ( x_index * incx ) );
-            }
-        }
-    }
-
-    float *xt = x_buf;
+    float *xt = x;
 
     // Compute the sum of squares on 3 accumulators to avoid overflow
     // and underflow, depending on the vector element value.
@@ -180,7 +131,7 @@ void bli_snorm2fv_unb_var1_avx2
     float abs_chi;
     bool isbig = false;
 
-    if ( n >= 64 )
+    if ( ( n >= 64 ) && ( incx == 1 ) )
     {
         // Constants used for comparisons.
         v8sf_t temp, thres_sml_vec, thres_big_vec, zerov;
@@ -229,62 +180,11 @@ void bli_snorm2fv_unb_var1_avx2
             mask_vec1.v = _mm256_cmp_ps(x1v.v, x1v.v, _CMP_UNORD_Q);
             mask_vec2.v = _mm256_cmp_ps(x2v.v, x2v.v, _CMP_UNORD_Q);
             mask_vec3.v = _mm256_cmp_ps(x3v.v, x3v.v, _CMP_UNORD_Q);
-            if ( bli_horizontal_or_sf( mask_vec0.v ) )
-            {
-                *norm = NAN;
-                if ( ( incx != 1 ) && bli_mem_is_alloc( &mem_bufX ) )
-                {
-                    #ifdef BLIS_ENABLE_MEM_TRACING
-                        printf( "bli_snorm2fv_unb_var1_avx2(): releasing mem pool block\n" );
-                    #endif
-                    // Return the buffer to pool.
-                    bli_pba_release( &rntm , &mem_bufX );
-                }
 
-                AOCL_DTL_TRACE_EXIT( AOCL_DTL_LEVEL_TRACE_3 );
-                return;
-            }
-            if ( bli_horizontal_or_sf( mask_vec1.v ) )
+            if ( bli_horizontal_or_sf( mask_vec0.v ) || bli_horizontal_or_sf( mask_vec1.v )
+              || bli_horizontal_or_sf( mask_vec2.v ) || bli_horizontal_or_sf( mask_vec3.v ) )
             {
                 *norm = NAN;
-                if ( ( incx != 1 ) && bli_mem_is_alloc( &mem_bufX ) )
-                {
-                    #ifdef BLIS_ENABLE_MEM_TRACING
-                        printf( "bli_snorm2fv_unb_var1_avx2(): releasing mem pool block\n" );
-                    #endif
-                    // Return the buffer to pool.
-                    bli_pba_release( &rntm , &mem_bufX );
-                }
-
-                AOCL_DTL_TRACE_EXIT( AOCL_DTL_LEVEL_TRACE_3 );
-                return;
-            }
-            if ( bli_horizontal_or_sf( mask_vec2.v ) )
-            {
-                *norm = NAN;
-                if ( ( incx != 1 ) && bli_mem_is_alloc( &mem_bufX ) )
-                {
-                    #ifdef BLIS_ENABLE_MEM_TRACING
-                        printf( "bli_snorm2fv_unb_var1_avx2(): releasing mem pool block\n" );
-                    #endif
-                    // Return the buffer to pool.
-                    bli_pba_release( &rntm , &mem_bufX );
-                }
-
-                AOCL_DTL_TRACE_EXIT( AOCL_DTL_LEVEL_TRACE_3 );
-                return;
-            }
-            if ( bli_horizontal_or_sf( mask_vec3.v ) )
-            {
-                *norm = NAN;
-                if ( ( incx != 1 ) && bli_mem_is_alloc( &mem_bufX ) )
-                {
-                    #ifdef BLIS_ENABLE_MEM_TRACING
-                        printf( "bli_snorm2fv_unb_var1_avx2(): releasing mem pool block\n" );
-                    #endif
-                    // Return the buffer to pool.
-                    bli_pba_release( &rntm , &mem_bufX );
-                }
 
                 AOCL_DTL_TRACE_EXIT( AOCL_DTL_LEVEL_TRACE_3 );
                 return;
@@ -492,47 +392,10 @@ void bli_snorm2fv_unb_var1_avx2
             mask_vec0.v = _mm256_cmp_ps(x0v.v, x0v.v, _CMP_UNORD_Q);
             mask_vec1.v = _mm256_cmp_ps(x1v.v, x1v.v, _CMP_UNORD_Q);
             mask_vec2.v = _mm256_cmp_ps(x2v.v, x2v.v, _CMP_UNORD_Q);
-            if ( bli_horizontal_or_sf( mask_vec0.v ) )
+            if ( bli_horizontal_or_sf( mask_vec0.v ) || bli_horizontal_or_sf( mask_vec1.v )
+              || bli_horizontal_or_sf( mask_vec2.v ) )
             {
                 *norm = NAN;
-                if ( ( incx != 1 ) && bli_mem_is_alloc( &mem_bufX ) )
-                {
-                    #ifdef BLIS_ENABLE_MEM_TRACING
-                        printf( "bli_snorm2fv_unb_var1_avx2(): releasing mem pool block\n" );
-                    #endif
-                    // Return the buffer to pool.
-                    bli_pba_release( &rntm , &mem_bufX );
-                }
-
-                AOCL_DTL_TRACE_EXIT( AOCL_DTL_LEVEL_TRACE_3 );
-                return;
-            }
-            if ( bli_horizontal_or_sf( mask_vec1.v ) )
-            {
-                *norm = NAN;
-                if ( ( incx != 1 ) && bli_mem_is_alloc( &mem_bufX ) )
-                {
-                    #ifdef BLIS_ENABLE_MEM_TRACING
-                        printf( "bli_snorm2fv_unb_var1_avx2(): releasing mem pool block\n" );
-                    #endif
-                    // Return the buffer to pool.
-                    bli_pba_release( &rntm , &mem_bufX );
-                }
-
-                AOCL_DTL_TRACE_EXIT( AOCL_DTL_LEVEL_TRACE_3 );
-                return;
-            }
-            if ( bli_horizontal_or_sf( mask_vec2.v ) )
-            {
-                *norm = NAN;
-                if ( ( incx != 1 ) && bli_mem_is_alloc( &mem_bufX ) )
-                {
-                    #ifdef BLIS_ENABLE_MEM_TRACING
-                        printf( "bli_snorm2fv_unb_var1_avx2(): releasing mem pool block\n" );
-                    #endif
-                    // Return the buffer to pool.
-                    bli_pba_release( &rntm , &mem_bufX );
-                }
 
                 AOCL_DTL_TRACE_EXIT( AOCL_DTL_LEVEL_TRACE_3 );
                 return;
@@ -695,32 +558,9 @@ void bli_snorm2fv_unb_var1_avx2
             // Check if any of the values is a NaN and if so, return.
             mask_vec0.v = _mm256_cmp_ps(x0v.v, x0v.v, _CMP_UNORD_Q);
             mask_vec1.v = _mm256_cmp_ps(x1v.v, x1v.v, _CMP_UNORD_Q);
-            if ( bli_horizontal_or_sf( mask_vec0.v ) )
+            if ( bli_horizontal_or_sf( mask_vec0.v ) || bli_horizontal_or_sf( mask_vec1.v ) )
             {
                 *norm = NAN;
-                if ( ( incx != 1 ) && bli_mem_is_alloc( &mem_bufX ) )
-                {
-                    #ifdef BLIS_ENABLE_MEM_TRACING
-                        printf( "bli_snorm2fv_unb_var1_avx2(): releasing mem pool block\n" );
-                    #endif
-                    // Return the buffer to pool.
-                    bli_pba_release( &rntm , &mem_bufX );
-                }
-
-                AOCL_DTL_TRACE_EXIT( AOCL_DTL_LEVEL_TRACE_3 );
-                return;
-            }
-            if ( bli_horizontal_or_sf( mask_vec1.v ) )
-            {
-                *norm = NAN;
-                if ( ( incx != 1 ) && bli_mem_is_alloc( &mem_bufX ) )
-                {
-                    #ifdef BLIS_ENABLE_MEM_TRACING
-                        printf( "bli_snorm2fv_unb_var1_avx2(): releasing mem pool block\n" );
-                    #endif
-                    // Return the buffer to pool.
-                    bli_pba_release( &rntm , &mem_bufX );
-                }
 
                 AOCL_DTL_TRACE_EXIT( AOCL_DTL_LEVEL_TRACE_3 );
                 return;
@@ -837,14 +677,6 @@ void bli_snorm2fv_unb_var1_avx2
             if ( bli_horizontal_or_sf( mask_vec0.v ) )
             {
                 *norm = NAN;
-                if ( ( incx != 1 ) && bli_mem_is_alloc( &mem_bufX ) )
-                {
-                    #ifdef BLIS_ENABLE_MEM_TRACING
-                        printf( "bli_snorm2fv_unb_var1_avx2(): releasing mem pool block\n" );
-                    #endif
-                    // Return the buffer to pool.
-                    bli_pba_release( &rntm , &mem_bufX );
-                }
 
                 AOCL_DTL_TRACE_EXIT( AOCL_DTL_LEVEL_TRACE_3 );
                 return;
@@ -918,75 +750,35 @@ void bli_snorm2fv_unb_var1_avx2
         sum_big = horizontal_add_sf(sum_big_vec0.v);
     }
 
-    n_remainder = n - i;
-    bool hasInf = false;
-
-    if ( ( n_remainder > 0 ) )
+    // Put first the most likely to happen to avoid evaluations on if statements.
+    for ( ; i < n; i++)
     {
-        // Put first the most likely to happen to avoid evaluations on if statements.
-        for (i = 0; i < n_remainder; i++)
+        abs_chi = bli_fabs( *xt );
+        // If any of the elements is NaN, then return NaN as a result.
+        if ( bli_isnan( abs_chi ) )
         {
-            abs_chi = bli_fabs( *xt );
-            // If any of the elements is NaN, then return NaN as a result.
-            if ( bli_isnan( abs_chi ) )
-            {
-                *norm = abs_chi;
-                if ( ( incx != 1 ) && bli_mem_is_alloc( &mem_bufX ) )
-                {
-                    #ifdef BLIS_ENABLE_MEM_TRACING
-                        printf( "bli_snorm2fv_unb_var1_avx2(): releasing mem pool block\n" );
-                    #endif
-                    // Return the buffer to pool.
-                    bli_pba_release( &rntm , &mem_bufX );
-                }
+            *norm = abs_chi;
 
-                AOCL_DTL_TRACE_EXIT( AOCL_DTL_LEVEL_TRACE_3 );
-                return;
-            }
-            // Else, if any of the elements is an Inf, then return +Inf as a result.
-            if ( bli_isinf( abs_chi ) )
-            {
-                *norm = abs_chi;
-                // Instead of returning immediately, use this flag
-                // to denote that there is an Inf element in the vector.
-                // That is used to avoid cases where there is a NaN which comes
-                // after an Inf.
-                hasInf = true;
-            }
-            // Most likely case: medium values, not over/under-flow.
-            if ( ( abs_chi <= thres_big ) && ( abs_chi >= thres_sml ) )
-            {
-                sum_med += abs_chi * abs_chi;
-            }
-            // Case where there could be an overflow. Scaling is required.
-            else if ( abs_chi > thres_big )
-            {
-                sum_big += ( abs_chi * scale_big ) * ( abs_chi * scale_big );
-                isbig = true;
-            }
-            // Case where there could be an underflow. Scaling is required.
-            else if (  ( !isbig ) && ( abs_chi < thres_sml ) )
-            {
-                sum_sml += ( abs_chi * scale_sml ) * ( abs_chi * scale_sml );
-            }
-            xt++;
+            AOCL_DTL_TRACE_EXIT( AOCL_DTL_LEVEL_TRACE_3 );
+            return;
         }
-    }
-    // Early return if there is an Inf.
-    if ( hasInf ) 
-    {
-        
-        if ( ( incx != 1 ) && bli_mem_is_alloc( &mem_bufX ) )
+        // Most likely case: medium values, not over/under-flow.
+        if ( ( abs_chi <= thres_big ) && ( abs_chi >= thres_sml ) )
         {
-            #ifdef BLIS_ENABLE_MEM_TRACING
-                printf( "bli_snorm2fv_unb_var1_avx2(): releasing mem pool block\n" );
-            #endif
-            // Return the buffer to pool.
-            bli_pba_release( &rntm , &mem_bufX );
+            sum_med += abs_chi * abs_chi;
         }
-
-        AOCL_DTL_TRACE_EXIT( AOCL_DTL_LEVEL_TRACE_3 );
-        return;
+        // Case where there could be an overflow. Scaling is required.
+        else if ( abs_chi > thres_big )
+        {
+            sum_big += ( abs_chi * scale_big ) * ( abs_chi * scale_big );
+            isbig = true;
+        }
+        // Case where there could be an underflow. Scaling is required.
+        else if (  ( !isbig ) && ( abs_chi < thres_sml ) )
+        {
+            sum_sml += ( abs_chi * scale_sml ) * ( abs_chi * scale_sml );
+        }
+        xt += incx;
     }
     
     // Combine accumulators.
@@ -1036,15 +828,6 @@ void bli_snorm2fv_unb_var1_avx2
 
     *norm = scale * sqrtf( sumsq );
 
-    if ( ( incx != 1 ) && bli_mem_is_alloc( &mem_bufX ) )
-    {
-        #ifdef BLIS_ENABLE_MEM_TRACING
-            printf( "bli_snorm2fv_unb_var1_avx2(): releasing mem pool block\n" );
-        #endif
-        // Return the buffer to pool.
-        bli_pba_release( &rntm , &mem_bufX );
-    }
-
     AOCL_DTL_TRACE_EXIT( AOCL_DTL_LEVEL_TRACE_3 );
 
     return;
@@ -1063,57 +846,8 @@ void bli_scnorm2fv_unb_var1_avx2
 
     float sumsq = 0.0f;
     dim_t i = 0;
-    dim_t n_remainder = 0;
-    scomplex  *x_buf = x;
 
-    // Memory pool declarations for packing vector X.
-    // Initialize mem pool buffer to NULL and size to 0.
-    // "buf" and "size" fields are assigned once memory
-    // is allocated from the pool in bli_pba_acquire_m().
-    // This will ensure bli_mem_is_alloc() will be passed on
-    // an allocated memory if created or a NULL.
-    mem_t   mem_bufX = {0};
-    rntm_t  rntm;
-
-    // Packing for non-unit strided vector x.
-    if ( incx != 1 )
-    {
-        // In order to get the buffer from pool via rntm access to memory broker
-        //is needed. Following are initializations for rntm.
-        bli_rntm_init_from_global( &rntm );
-        bli_rntm_set_num_threads_only( 1, &rntm );
-        bli_pba_rntm_set_pba( &rntm );
-
-        // Calculate the size required for "n" scomplex elements in vector x.
-        size_t buffer_size = n * sizeof( scomplex );
-
-        #ifdef BLIS_ENABLE_MEM_TRACING
-            printf( "bli_scnorm2fv_unb_var1_avx2(): get mem pool block\n" );
-        #endif
-
-        // Acquire a Buffer(n*size(scomplex)) from the memory broker
-        // and save the associated mem_t entry to mem_bufX.
-        bli_pba_acquire_m
-        (
-            &rntm,
-            buffer_size,
-            BLIS_BUFFER_FOR_B_PANEL,
-            &mem_bufX
-        );
-
-        // Continue packing X if buffer memory is allocated.
-        if ( ( bli_mem_is_alloc( &mem_bufX ) ) )
-        {
-            x_buf = bli_mem_buffer( &mem_bufX );
-            // Pack vector x with non-unit stride to a temp buffer x_buf with unit stride.
-            for ( dim_t x_index = 0; x_index < n; x_index++ )
-            {
-                *( x_buf + x_index ) = *( x + ( x_index * incx ) );
-            }
-        }
-    }
-
-    scomplex *xt = x_buf;
+    scomplex *xt = x;
 
     // Compute the sum of squares on 3 accumulators to avoid overflow
     // and underflow, depending on the vector element value.
@@ -1134,7 +868,7 @@ void bli_scnorm2fv_unb_var1_avx2
     float abs_chi;
     bool isbig = false;
 
-    if ( n >= 64 )
+    if ( ( n >= 64 ) && ( incx == 1 ) )
     {
         // Constants used for comparisons.
         v8sf_t temp, thres_sml_vec, thres_big_vec, zerov;
@@ -1183,62 +917,10 @@ void bli_scnorm2fv_unb_var1_avx2
             mask_vec1.v = _mm256_cmp_ps(x1v.v, x1v.v, _CMP_UNORD_Q);
             mask_vec2.v = _mm256_cmp_ps(x2v.v, x2v.v, _CMP_UNORD_Q);
             mask_vec3.v = _mm256_cmp_ps(x3v.v, x3v.v, _CMP_UNORD_Q);
-            if ( bli_horizontal_or_sf( mask_vec0.v ) )
+            if ( bli_horizontal_or_sf( mask_vec0.v ) || bli_horizontal_or_sf( mask_vec1.v )
+              || bli_horizontal_or_sf( mask_vec2.v ) || bli_horizontal_or_sf( mask_vec3.v ) )
             {
                 *norm = NAN;
-                if ( ( incx != 1 ) && bli_mem_is_alloc( &mem_bufX ) )
-                {
-                    #ifdef BLIS_ENABLE_MEM_TRACING
-                        printf( "bli_scnorm2fv_unb_var1_avx2(): releasing mem pool block\n" );
-                    #endif
-                    // Return the buffer to pool.
-                    bli_pba_release( &rntm , &mem_bufX );
-                }
-
-                AOCL_DTL_TRACE_EXIT( AOCL_DTL_LEVEL_TRACE_3 );
-                return;
-            }
-            if ( bli_horizontal_or_sf( mask_vec1.v ) )
-            {
-                *norm = NAN;
-                if ( ( incx != 1 ) && bli_mem_is_alloc( &mem_bufX ) )
-                {
-                    #ifdef BLIS_ENABLE_MEM_TRACING
-                        printf( "bli_scnorm2fv_unb_var1_avx2(): releasing mem pool block\n" );
-                    #endif
-                    // Return the buffer to pool.
-                    bli_pba_release( &rntm , &mem_bufX );
-                }
-
-                AOCL_DTL_TRACE_EXIT( AOCL_DTL_LEVEL_TRACE_3 );
-                return;
-            }
-            if ( bli_horizontal_or_sf( mask_vec2.v ) )
-            {
-                *norm = NAN;
-                if ( ( incx != 1 ) && bli_mem_is_alloc( &mem_bufX ) )
-                {
-                    #ifdef BLIS_ENABLE_MEM_TRACING
-                        printf( "bli_scnorm2fv_unb_var1_avx2(): releasing mem pool block\n" );
-                    #endif
-                    // Return the buffer to pool.
-                    bli_pba_release( &rntm , &mem_bufX );
-                }
-
-                AOCL_DTL_TRACE_EXIT( AOCL_DTL_LEVEL_TRACE_3 );
-                return;
-            }
-            if ( bli_horizontal_or_sf( mask_vec3.v ) )
-            {
-                *norm = NAN;
-                if ( ( incx != 1 ) && bli_mem_is_alloc( &mem_bufX ) )
-                {
-                    #ifdef BLIS_ENABLE_MEM_TRACING
-                        printf( "bli_scnorm2fv_unb_var1_avx2(): releasing mem pool block\n" );
-                    #endif
-                    // Return the buffer to pool.
-                    bli_pba_release( &rntm , &mem_bufX );
-                }
 
                 AOCL_DTL_TRACE_EXIT( AOCL_DTL_LEVEL_TRACE_3 );
                 return;
@@ -1447,47 +1129,10 @@ void bli_scnorm2fv_unb_var1_avx2
             mask_vec0.v = _mm256_cmp_ps(x0v.v, x0v.v, _CMP_UNORD_Q);
             mask_vec1.v = _mm256_cmp_ps(x1v.v, x1v.v, _CMP_UNORD_Q);
             mask_vec2.v = _mm256_cmp_ps(x2v.v, x2v.v, _CMP_UNORD_Q);
-            if ( bli_horizontal_or_sf( mask_vec0.v ) )
+            if ( bli_horizontal_or_sf( mask_vec0.v ) || bli_horizontal_or_sf( mask_vec1.v )
+              || bli_horizontal_or_sf( mask_vec2.v ) )
             {
                 *norm = NAN;
-                if ( ( incx != 1 ) && bli_mem_is_alloc( &mem_bufX ) )
-                {
-                    #ifdef BLIS_ENABLE_MEM_TRACING
-                        printf( "bli_scnorm2fv_unb_var1_avx2(): releasing mem pool block\n" );
-                    #endif
-                    // Return the buffer to pool.
-                    bli_pba_release( &rntm , &mem_bufX );
-                }
-
-                AOCL_DTL_TRACE_EXIT( AOCL_DTL_LEVEL_TRACE_3 );
-                return;
-            }
-            if ( bli_horizontal_or_sf( mask_vec1.v ) )
-            {
-                *norm = NAN;
-                if ( ( incx != 1 ) && bli_mem_is_alloc( &mem_bufX ) )
-                {
-                    #ifdef BLIS_ENABLE_MEM_TRACING
-                        printf( "bli_scnorm2fv_unb_var1_avx2(): releasing mem pool block\n" );
-                    #endif
-                    // Return the buffer to pool.
-                    bli_pba_release( &rntm , &mem_bufX );
-                }
-
-                AOCL_DTL_TRACE_EXIT( AOCL_DTL_LEVEL_TRACE_3 );
-                return;
-            }
-            if ( bli_horizontal_or_sf( mask_vec2.v ) )
-            {
-                *norm = NAN;
-                if ( ( incx != 1 ) && bli_mem_is_alloc( &mem_bufX ) )
-                {
-                    #ifdef BLIS_ENABLE_MEM_TRACING
-                        printf( "bli_scnorm2fv_unb_var1_avx2(): releasing mem pool block\n" );
-                    #endif
-                    // Return the buffer to pool.
-                    bli_pba_release( &rntm , &mem_bufX );
-                }
 
                 AOCL_DTL_TRACE_EXIT( AOCL_DTL_LEVEL_TRACE_3 );
                 return;
@@ -1650,32 +1295,9 @@ void bli_scnorm2fv_unb_var1_avx2
             // Check if any of the values is a NaN and if so, return.
             mask_vec0.v = _mm256_cmp_ps(x0v.v, x0v.v, _CMP_UNORD_Q);
             mask_vec1.v = _mm256_cmp_ps(x1v.v, x1v.v, _CMP_UNORD_Q);
-            if ( bli_horizontal_or_sf( mask_vec0.v ) )
+            if ( bli_horizontal_or_sf( mask_vec0.v ) || bli_horizontal_or_sf( mask_vec1.v ) )
             {
                 *norm = NAN;
-                if ( ( incx != 1 ) && bli_mem_is_alloc( &mem_bufX ) )
-                {
-                    #ifdef BLIS_ENABLE_MEM_TRACING
-                        printf( "bli_scnorm2fv_unb_var1_avx2(): releasing mem pool block\n" );
-                    #endif
-                    // Return the buffer to pool.
-                    bli_pba_release( &rntm , &mem_bufX );
-                }
-
-                AOCL_DTL_TRACE_EXIT( AOCL_DTL_LEVEL_TRACE_3 );
-                return;
-            }
-            if ( bli_horizontal_or_sf( mask_vec1.v ) )
-            {
-                *norm = NAN;
-                if ( ( incx != 1 ) && bli_mem_is_alloc( &mem_bufX ) )
-                {
-                    #ifdef BLIS_ENABLE_MEM_TRACING
-                        printf( "bli_scnorm2fv_unb_var1_avx2(): releasing mem pool block\n" );
-                    #endif
-                    // Return the buffer to pool.
-                    bli_pba_release( &rntm , &mem_bufX );
-                }
 
                 AOCL_DTL_TRACE_EXIT( AOCL_DTL_LEVEL_TRACE_3 );
                 return;
@@ -1791,14 +1413,6 @@ void bli_scnorm2fv_unb_var1_avx2
             if ( bli_horizontal_or_sf( mask_vec0.v ) )
             {
                 *norm = NAN;
-                if ( ( incx != 1 ) && bli_mem_is_alloc( &mem_bufX ) )
-                {
-                    #ifdef BLIS_ENABLE_MEM_TRACING
-                        printf( "bli_scnorm2fv_unb_var1_avx2(): releasing mem pool block\n" );
-                    #endif
-                    // Return the buffer to pool.
-                    bli_pba_release( &rntm , &mem_bufX );
-                }
 
                 AOCL_DTL_TRACE_EXIT( AOCL_DTL_LEVEL_TRACE_3 );
                 return;
@@ -1872,122 +1486,66 @@ void bli_scnorm2fv_unb_var1_avx2
         sum_big = horizontal_add_sf(sum_big_vec0.v);
     }
 
-    n_remainder = n - i;
-    bool hasInf = false;
     double chi_r, chi_i;
-    if ( ( n_remainder > 0 ) )
+    // Put first the most likely to happen to avoid evaluations on if statements.
+    for ( ; i < n; i++)
     {
-        // Put first the most likely to happen to avoid evaluations on if statements.
-        for (i = 0; i < n_remainder; i++)
+        // Get real and imaginary component of the vector element.
+        bli_csgets(*xt, chi_r, chi_i);
+        // Start with accumulating the real component of the vector element.
+        abs_chi = bli_fabs( chi_r );
+        // If any of the elements is NaN, then return NaN as a result.
+        if ( bli_isnan( abs_chi ) )
         {
-            // Get real and imaginary component of the vector element.            
-            bli_csgets(*xt, chi_r, chi_i);
-            // Start with accumulating the real component of the vector element.
-            abs_chi = bli_fabs( chi_r );
-            // If any of the elements is NaN, then return NaN as a result.
-            if ( bli_isnan( abs_chi ) )
-            {
-                *norm = abs_chi;
-                if ( ( incx != 1 ) && bli_mem_is_alloc( &mem_bufX ) )
-                {
-                    #ifdef BLIS_ENABLE_MEM_TRACING
-                        printf( "bli_scnorm2fv_unb_var1_avx2(): releasing mem pool block\n" );
-                    #endif
-                    // Return the buffer to pool.
-                    bli_pba_release( &rntm , &mem_bufX );
-                }
+            *norm = abs_chi;
 
-                AOCL_DTL_TRACE_EXIT( AOCL_DTL_LEVEL_TRACE_3 );
-                return;
-            }
-            // Else, if any of the elements is an Inf, then return +Inf as a result.
-            if ( bli_isinf( abs_chi ) )
-            {
-                *norm = abs_chi;
-                // Instead of returning immediately, use this flag
-                // to denote that there is an Inf element in the vector.
-                // That is used to avoid cases where there is a NaN which comes
-                // after an Inf.
-                hasInf = true;
-            }
-            // Most likely case: medium values, not over/under-flow.
-            if ( ( abs_chi <= thres_big ) && ( abs_chi >= thres_sml ) )
-            {
-                sum_med += abs_chi * abs_chi;
-            }
-            // Case where there could be an overflow. Scaling is required.
-            else if ( abs_chi > thres_big )
-            {
-                sum_big += ( abs_chi * scale_big ) * ( abs_chi * scale_big );
-                isbig = true;
-            }
-            // Case where there could be an underflow. Scaling is required.
-            else if (  ( !isbig ) && ( abs_chi < thres_sml ) )
-            {
-                sum_sml += ( abs_chi * scale_sml ) * ( abs_chi * scale_sml );
-            }
-            // Accumulate the imaginary component of the vector element.
-            abs_chi = bli_fabs( chi_i );
-            // If any of the elements is NaN, then return NaN as a result.
-            if ( bli_isnan( abs_chi ) )
-            {
-                *norm = abs_chi;
-                if ( ( incx != 1 ) && bli_mem_is_alloc( &mem_bufX ) )
-                {
-                    #ifdef BLIS_ENABLE_MEM_TRACING
-                        printf( "bli_scnorm2fv_unb_var1_avx2(): releasing mem pool block\n" );
-                    #endif
-                    // Return the buffer to pool.
-                    bli_pba_release( &rntm , &mem_bufX );
-                }
-
-                AOCL_DTL_TRACE_EXIT( AOCL_DTL_LEVEL_TRACE_3 );
-                return;
-            }
-            // Else, if any of the elements is an Inf, then return +Inf as a result.
-            if ( bli_isinf( abs_chi ) )
-            {
-                *norm = abs_chi;
-                // Instead of returning immediately, use this flag
-                // to denote that there is an Inf element in the vector.
-                // That is used to avoid cases where there is a NaN which comes
-                // after an Inf.
-                hasInf = true;
-            }
-            // Most likely case: medium values, not over/under-flow.
-            if ( ( abs_chi <= thres_big ) && ( abs_chi >= thres_sml ) )
-            {
-                sum_med += abs_chi * abs_chi;
-            }
-            // Case where there could be an overflow. Scaling is required.
-            else if ( abs_chi > thres_big )
-            {
-                sum_big += ( abs_chi * scale_big ) * ( abs_chi * scale_big );
-                isbig = true;
-            }
-            // Case where there could be an underflow. Scaling is required.
-            else if (  ( !isbig ) && ( abs_chi < thres_sml ) )
-            {
-                sum_sml += ( abs_chi * scale_sml ) * ( abs_chi * scale_sml );
-            }
-
-            xt++;
+            AOCL_DTL_TRACE_EXIT( AOCL_DTL_LEVEL_TRACE_3 );
+            return;
         }
-    }
-    // Early return if there is an Inf.
-    if ( hasInf ) 
-    {
-        if ( ( incx != 1 ) && bli_mem_is_alloc( &mem_bufX ) )
+        // Most likely case: medium values, not over/under-flow.
+        if ( ( abs_chi <= thres_big ) && ( abs_chi >= thres_sml ) )
         {
-            #ifdef BLIS_ENABLE_MEM_TRACING
-                printf( "bli_scnorm2fv_unb_var1_avx2(): releasing mem pool block\n" );
-            #endif
-            // Return the buffer to pool.
-            bli_pba_release( &rntm , &mem_bufX );
+            sum_med += abs_chi * abs_chi;
+        }
+        // Case where there could be an overflow. Scaling is required.
+        else if ( abs_chi > thres_big )
+        {
+            sum_big += ( abs_chi * scale_big ) * ( abs_chi * scale_big );
+            isbig = true;
+        }
+        // Case where there could be an underflow. Scaling is required.
+        else if (  ( !isbig ) && ( abs_chi < thres_sml ) )
+        {
+            sum_sml += ( abs_chi * scale_sml ) * ( abs_chi * scale_sml );
+        }
+        // Accumulate the imaginary component of the vector element.
+        abs_chi = bli_fabs( chi_i );
+        // If any of the elements is NaN, then return NaN as a result.
+        if ( bli_isnan( abs_chi ) )
+        {
+            *norm = abs_chi;
+
+            AOCL_DTL_TRACE_EXIT( AOCL_DTL_LEVEL_TRACE_3 );
+            return;
+        }
+        // Most likely case: medium values, not over/under-flow.
+        if ( ( abs_chi <= thres_big ) && ( abs_chi >= thres_sml ) )
+        {
+            sum_med += abs_chi * abs_chi;
+        }
+        // Case where there could be an overflow. Scaling is required.
+        else if ( abs_chi > thres_big )
+        {
+            sum_big += ( abs_chi * scale_big ) * ( abs_chi * scale_big );
+            isbig = true;
+        }
+        // Case where there could be an underflow. Scaling is required.
+        else if (  ( !isbig ) && ( abs_chi < thres_sml ) )
+        {
+            sum_sml += ( abs_chi * scale_sml ) * ( abs_chi * scale_sml );
         }
 
-        AOCL_DTL_TRACE_EXIT( AOCL_DTL_LEVEL_TRACE_3 );
-        return;
+        xt += incx;
     }
     
     // Combine accumulators.
@@ -2036,15 +1594,6 @@ void bli_scnorm2fv_unb_var1_avx2
     }
 
     *norm = scale * sqrtf( sumsq );
-
-    if ( ( incx != 1 ) && bli_mem_is_alloc( &mem_bufX ) )
-    {
-        #ifdef BLIS_ENABLE_MEM_TRACING
-            printf( "bli_scnorm2fv_unb_var1_avx2(): releasing mem pool block\n" );
-        #endif
-        // Return the buffer to pool.
-        bli_pba_release( &rntm , &mem_bufX );
-    }
 
     AOCL_DTL_TRACE_EXIT( AOCL_DTL_LEVEL_TRACE_3 );
 

@@ -318,15 +318,76 @@ void bli_cnormfv_unb_var1
         rntm_t*  rntm
     )
 {
+    scomplex *x_buf = x;
+    inc_t incx_buf = incx;
+
+    // Querying the architecture ID to deploy the appropriate kernel
     arch_t id = bli_arch_query_id();
-    switch (id)
+    switch ( id )
     {
         case BLIS_ARCH_ZEN4:
         case BLIS_ARCH_ZEN3:
         case BLIS_ARCH_ZEN2:
-        case BLIS_ARCH_ZEN:
+        case BLIS_ARCH_ZEN:;
 #ifdef BLIS_KERNELS_ZEN
-            bli_scnorm2fv_unb_var1_avx2( n, x, incx, norm, cntx );
+            // Memory pool declarations for packing vector X.
+            // Initialize mem pool buffer to NULL and size to 0.
+            // "buf" and "size" fields are assigned once memory
+            // is allocated from the pool in bli_pba_acquire_m().
+            // This will ensure bli_mem_is_alloc() will be passed on
+            // an allocated memory if created or a NULL.
+            mem_t   mem_buf_X = { 0 };
+            rntm_t  rntm_l;
+            // Packing for non-unit strided vector x.
+            if ( incx != 1 )
+            {
+                // In order to get the buffer from pool via rntm access to memory broker
+                // is needed. Following are initializations for rntm.
+                if ( rntm == NULL ) { bli_rntm_init_from_global( &rntm_l ); }
+                else                { rntm_l = *rntm; }
+                bli_rntm_set_num_threads_only( 1, &rntm_l );
+                bli_pba_rntm_set_pba( &rntm_l );
+
+                // Calculate the size required for "n" scomplex elements in vector x.
+                size_t buffer_size = n * sizeof( scomplex );
+
+                #ifdef BLIS_ENABLE_MEM_TRACING
+                    printf( "bli_scnorm2fv_unb_var1_avx2(): get mem pool block\n" );
+                #endif
+
+                // Acquire a Buffer(n*size(scomplex)) from the memory broker
+                // and save the associated mem_t entry to mem_buf_X.
+                bli_pba_acquire_m
+                (
+                    &rntm_l,
+                    buffer_size,
+                    BLIS_BUFFER_FOR_B_PANEL,
+                    &mem_buf_X
+                );
+
+                // Continue packing X if buffer memory is allocated.
+                if ( bli_mem_is_alloc( &mem_buf_X ) )
+                {
+                    x_buf = bli_mem_buffer( &mem_buf_X );
+                    // Pack vector x with non-unit stride to a temp buffer x_buf with unit stride.
+                    for ( dim_t x_index = 0; x_index < n; x_index++ )
+                    {
+                        *( x_buf + x_index ) = *( x + ( x_index * incx ) );
+                    }
+                    incx_buf = 1;
+                }
+            }
+
+            bli_scnorm2fv_unb_var1_avx2( n, x_buf, incx_buf, norm, cntx );
+
+            if ( bli_mem_is_alloc( &mem_buf_X ) )
+            {
+                #ifdef BLIS_ENABLE_MEM_TRACING
+                    printf( "bli_scnorm2fv_unb_var1_avx2(): releasing mem pool block\n" );
+                #endif
+                // Return the buffer to pool.
+                bli_pba_release( &rntm_l , &mem_buf_X );
+            }
             break;
 #endif
         default:;
@@ -345,8 +406,8 @@ void bli_cnormfv_unb_var1
             bli_csumsqv_unb_var1
             (
                 n,
-                x,
-                incx,
+                x_buf,
+                incx_buf,
                 &scale,
                 &sumsq,
                 cntx,
@@ -814,6 +875,9 @@ void bli_snormfv_unb_var1
         return;
     }
 
+    float *x_buf = x;
+    inc_t incx_buf = incx;
+
     // Querying the architecture ID to deploy the appropriate kernel
     arch_t id = bli_arch_query_id();
     switch ( id )
@@ -821,9 +885,69 @@ void bli_snormfv_unb_var1
         case BLIS_ARCH_ZEN4:
         case BLIS_ARCH_ZEN3:
         case BLIS_ARCH_ZEN2:
-        case BLIS_ARCH_ZEN:
+        case BLIS_ARCH_ZEN:;
 #ifdef BLIS_KERNELS_ZEN
-            bli_snorm2fv_unb_var1_avx2( n, x, incx, norm, cntx );
+            // Memory pool declarations for packing vector X.
+            // Initialize mem pool buffer to NULL and size to 0.
+            // "buf" and "size" fields are assigned once memory
+            // is allocated from the pool in bli_pba_acquire_m().
+            // This will ensure bli_mem_is_alloc() will be passed on
+            // an allocated memory if created or a NULL.
+            mem_t   mem_buf_X = { 0 };
+            rntm_t  rntm_l;
+            // Packing for non-unit strided vector x.
+            if ( incx != 1 )
+            {
+                // Initialize a local runtime with global settings if necessary. Note
+                // that in the case that a runtime is passed in, we make a local copy.
+                if ( rntm == NULL ) { bli_rntm_init_from_global( &rntm_l ); }
+                else                { rntm_l = *rntm; }
+
+                // In order to get the buffer from pool via rntm access to memory broker
+                // is needed. Following are initializations for rntm.
+                bli_rntm_set_num_threads_only( 1, &rntm_l );
+                bli_pba_rntm_set_pba( &rntm_l );
+
+                // Calculate the size required for "n" float elements in vector x.
+                size_t buffer_size = n * sizeof( float );
+
+                #ifdef BLIS_ENABLE_MEM_TRACING
+                    printf( "bli_snorm2fv_unb_var1_avx2(): get mem pool block\n" );
+                #endif
+
+                // Acquire a Buffer(n*size(float)) from the memory broker
+                // and save the associated mem_t entry to mem_buf_X.
+                bli_pba_acquire_m
+                (
+                    &rntm_l,
+                    buffer_size,
+                    BLIS_BUFFER_FOR_B_PANEL,
+                    &mem_buf_X
+                );
+
+                // Continue packing X if buffer memory is allocated.
+                if ( bli_mem_is_alloc( &mem_buf_X ) )
+                {
+                    x_buf = bli_mem_buffer( &mem_buf_X );
+                    // Pack vector x with non-unit stride to a temp buffer x_buf with unit stride.
+                    for ( dim_t x_index = 0; x_index < n; x_index++ )
+                    {
+                        *( x_buf + x_index ) = *( x + ( x_index * incx ) );
+                    }
+                    incx_buf = 1;
+                }
+            }
+
+            bli_snorm2fv_unb_var1_avx2( n, x_buf, incx_buf, norm, cntx );
+
+            if ( bli_mem_is_alloc( &mem_buf_X ) )
+            {
+                #ifdef BLIS_ENABLE_MEM_TRACING
+                    printf( "bli_snorm2fv_unb_var1_avx2(): releasing mem pool block\n" );
+                #endif
+                // Return the buffer to pool.
+                bli_pba_release( &rntm_l , &mem_buf_X );
+            }
             break;
 #endif
         default:;
@@ -841,8 +965,8 @@ void bli_snormfv_unb_var1
             bli_ssumsqv_unb_var1
             (
                 n,
-                x,
-                incx,
+                x_buf,
+                incx_buf,
                 &scale,
                 &sumsq,
                 cntx,
