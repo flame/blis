@@ -40,38 +40,24 @@
 /* BLAS Extensions */
 /* returns number of bytes */
 
-#ifdef BLIS_ENABLE_BLAS
-f77_int dgemm_pack_get_size_
-     (
-       const f77_char* identifier,
-       const f77_int*  pm,
-       const f77_int*  pn,
-       const f77_int*  pk
+#undef  GENTPROTRO
+#define GENTPROTRO( ftype, ch, blasname ) \
+\
+IF_BLIS_ENABLE_BLAS(\
+BLIS_EXPORT_BLAS f77_int PASTEF77(ch,blasname) \
+     ( \
+       const f77_char* identifier, \
+       const f77_int*  pm, \
+       const f77_int*  pn, \
+       const f77_int*  pk \
+     ); \
+)\
+BLIS_EXPORT_BLAS f77_int PASTEF77S(ch,blasname) \
+     ( \
+       const f77_char* identifier, \
+       const f77_int*  pm, \
+       const f77_int*  pn, \
+       const f77_int*  pk \
      );
-#endif
 
-BLIS_EXPORT_BLAS f77_int dgemm_pack_get_size_blis_impl
-     (
-       const f77_char* identifier,
-       const f77_int*  pm,
-       const f77_int*  pn,
-       const f77_int*  pk
-     );
-
-#ifdef BLIS_ENABLE_BLAS
-f77_int sgemm_pack_get_size_
-     (
-       const f77_char* identifier,
-       const f77_int*  pm,
-       const f77_int*  pn,
-       const f77_int*  pk
-     );
-#endif
-
-BLIS_EXPORT_BLAS f77_int sgemm_pack_get_size_blis_impl
-     (
-       const f77_char* identifier,
-       const f77_int*  pm,
-       const f77_int*  pn,
-       const f77_int*  pk
-     );
+INSERT_GENTPROTRO_BLAS( gemm_pack_get_size )

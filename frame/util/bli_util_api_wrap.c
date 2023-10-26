@@ -2574,6 +2574,60 @@ void DGEMM_BATCH_( const f77_char* transa_array, const f77_char* transb_array,co
     dgemm_batch_blis_impl( transa_array, transb_array, m_array, n_array, k_array, alpha_array, a_array, lda_array, b_array, ldb_array, beta_array, c_array, ldc_array, group_count, group_size);
 }
 
+f77_int DGEMM_PACK_GET_SIZE(const f77_char* identifier, const f77_int* pm, const f77_int* pn, const f77_int* pk)
+{
+    return dgemm_pack_get_size_blis_impl( identifier, pm, pn, pk );
+}
+
+f77_int dgemm_pack_get_size(const f77_char* identifier, const f77_int* pm, const f77_int* pn, const f77_int* pk)
+{
+    return dgemm_pack_get_size_blis_impl( identifier, pm, pn, pk );
+}
+
+f77_int DGEMM_PACK_GET_SIZE_(const f77_char* identifier, const f77_int* pm, const f77_int* pn, const f77_int* pk)
+{
+    return dgemm_pack_get_size_blis_impl( identifier, pm, pn, pk );
+}
+
+void DGEMM_PACK( const f77_char* identifier, const f77_char* trans, const f77_int* mm, const f77_int* nn, const f77_int* kk, const double* alpha, const double* src, const f77_int* pld, double* dest )
+{
+    dgemm_pack_blis_impl( identifier, trans, mm, nn, kk, alpha, src, pld, dest );
+}
+
+void dgemm_pack( const f77_char* identifier, const f77_char* trans, const f77_int* mm, const f77_int* nn, const f77_int* kk, const double* alpha, const double* src, const f77_int* pld, double* dest )
+{
+    dgemm_pack_blis_impl( identifier, trans, mm, nn, kk, alpha, src, pld, dest );
+}
+
+void DGEMM_PACK_( const f77_char* identifier, const f77_char* trans, const f77_int* mm, const f77_int* nn, const f77_int* kk, const double* alpha, const double* src, const f77_int* pld, double* dest )
+{
+    dgemm_pack_blis_impl( identifier, trans, mm, nn, kk, alpha, src, pld, dest );
+}
+
+void DGEMM_COMPUTE( const f77_char* transa, const f77_char* transb, const f77_int* m, const f77_int* n, const f77_int* k, const double* a, const f77_int* lda, const double* b, const f77_int* ldb, const double* beta, double* c, const f77_int* ldc )
+{
+    f77_int rs_a = 1;
+    f77_int rs_b = 1;
+    f77_int rs_c = 1;
+    dgemm_compute_blis_impl( transa, transb, m, n, k, a, &rs_a, lda, b, &rs_b, ldb, beta, c, &rs_c, ldc );
+}
+
+void dgemm_compute( const f77_char* transa, const f77_char* transb, const f77_int* m, const f77_int* n, const f77_int* k, const double* a, const f77_int* lda, const double* b, const f77_int* ldb, const double* beta, double* c, const f77_int* ldc )
+{
+    f77_int rs_a = 1;
+    f77_int rs_b = 1;
+    f77_int rs_c = 1;
+    dgemm_compute_blis_impl( transa, transb, m, n, k, a, &rs_a, lda, b, &rs_b, ldb, beta, c, &rs_c, ldc );
+}
+
+void DGEMM_COMPUTE_( const f77_char* transa, const f77_char* transb, const f77_int* m, const f77_int* n, const f77_int* k, const double* a, const f77_int* lda, const double* b, const f77_int* ldb, const double* beta, double* c, const f77_int* ldc )
+{
+    f77_int rs_a = 1;
+    f77_int rs_b = 1;
+    f77_int rs_c = 1;
+    dgemm_compute_blis_impl( transa, transb, m, n, k, a, &rs_a, lda, b, &rs_b, ldb, beta, c, &rs_c, ldc );
+}
+
 void DGEMMT( const f77_char* uploc, const f77_char* transa, const f77_char* transb, const f77_int* n, const f77_int* k, const  double* alpha, const double* a, const f77_int* lda, const double* b, const f77_int* ldb, const double* beta, double* c, const f77_int* ldc)
 {
     dgemmt_blis_impl( uploc, transa, transb, n, k, alpha, a, lda, b, ldb, beta, c, ldc);
@@ -2979,6 +3033,60 @@ void sgemm_batch(const f77_char* transa_array, const f77_char* transb_array,cons
 void SGEMM_BATCH_(const f77_char* transa_array, const f77_char* transb_array,const f77_int *m_array, const f77_int *n_array, const f77_int *k_array,const float* alpha_array, const float** a_array, const  f77_int *lda_array, const float** b_array, const f77_int *ldb_array, const float* beta_array, float** c_array, const f77_int *ldc_array, const f77_int* group_count, const f77_int *group_size)
 {
     sgemm_batch_blis_impl( transa_array, transb_array, m_array, n_array, k_array, alpha_array, a_array, lda_array, b_array, ldb_array, beta_array, c_array, ldc_array, group_count, group_size);
+}
+
+f77_int SGEMM_PACK_GET_SIZE(const f77_char* identifier, const f77_int* pm, const f77_int* pn, const f77_int* pk)
+{
+    return sgemm_pack_get_size_blis_impl( identifier, pm, pn, pk );
+}
+
+f77_int sgemm_pack_get_size(const f77_char* identifier, const f77_int* pm, const f77_int* pn, const f77_int* pk)
+{
+    return sgemm_pack_get_size_blis_impl( identifier, pm, pn, pk );
+}
+
+f77_int SGEMM_PACK_GET_SIZE_(const f77_char* identifier, const f77_int* pm, const f77_int* pn, const f77_int* pk)
+{
+    return sgemm_pack_get_size_blis_impl( identifier, pm, pn, pk );
+}
+
+void SGEMM_PACK( const f77_char* identifier, const f77_char* trans, const f77_int* mm, const f77_int* nn, const f77_int* kk, const float* alpha, const float* src, const f77_int* pld, float* dest )
+{
+    sgemm_pack_blis_impl( identifier, trans, mm, nn, kk, alpha, src, pld, dest );
+}
+
+void sgemm_pack( const f77_char* identifier, const f77_char* trans, const f77_int* mm, const f77_int* nn, const f77_int* kk, const float* alpha, const float* src, const f77_int* pld, float* dest )
+{
+    sgemm_pack_blis_impl( identifier, trans, mm, nn, kk, alpha, src, pld, dest );
+}
+
+void SGEMM_PACK_( const f77_char* identifier, const f77_char* trans, const f77_int* mm, const f77_int* nn, const f77_int* kk, const float* alpha, const float* src, const f77_int* pld, float* dest )
+{
+    sgemm_pack_blis_impl( identifier, trans, mm, nn, kk, alpha, src, pld, dest );
+}
+
+void SGEMM_COMPUTE( const f77_char* transa, const f77_char* transb, const f77_int* m, const f77_int* n, const f77_int* k, const float* a, const f77_int* lda, const float* b, const f77_int* ldb, const float* beta, float* c, const f77_int* ldc )
+{
+    f77_int rs_a = 1;
+    f77_int rs_b = 1;
+    f77_int rs_c = 1;
+    sgemm_compute_blis_impl( transa, transb, m, n, k, a, &rs_a, lda, b, &rs_b, ldb, beta, c, &rs_c, ldc );
+}
+
+void sgemm_compute( const f77_char* transa, const f77_char* transb, const f77_int* m, const f77_int* n, const f77_int* k, const float* a, const f77_int* lda, const float* b, const f77_int* ldb, const float* beta, float* c, const f77_int* ldc )
+{
+    f77_int rs_a = 1;
+    f77_int rs_b = 1;
+    f77_int rs_c = 1;
+    sgemm_compute_blis_impl( transa, transb, m, n, k, a, &rs_a, lda, b, &rs_b, ldb, beta, c, &rs_c, ldc );
+}
+
+void SGEMM_COMPUTE_( const f77_char* transa, const f77_char* transb, const f77_int* m, const f77_int* n, const f77_int* k, const float* a, const f77_int* lda, const float* b, const f77_int* ldb, const float* beta, float* c, const f77_int* ldc )
+{
+    f77_int rs_a = 1;
+    f77_int rs_b = 1;
+    f77_int rs_c = 1;
+    sgemm_compute_blis_impl( transa, transb, m, n, k, a, &rs_a, lda, b, &rs_b, ldb, beta, c, &rs_c, ldc );
 }
 
 void SGEMMT( const f77_char* uploc, const f77_char* transa, const f77_char* transb, const f77_int* n, const f77_int* k, const  float* alpha, const float* a, const f77_int* lda, const float* b, const f77_int* ldb, const float* beta, float* c, const f77_int* ldc)

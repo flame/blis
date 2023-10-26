@@ -256,7 +256,7 @@ void dgemm_compute_blis_impl
 }
 
 #ifdef BLIS_ENABLE_BLAS
-BLIS_EXPORT_BLAS void dgemm_compute_
+void dgemm_compute_
 (
     const f77_char* transa,
     const f77_char* transb,

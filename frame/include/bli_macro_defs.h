@@ -289,6 +289,10 @@
 #define zgemm_batch_ zgemm_batch
 #define sgemm_compute_ sgemm_compute
 #define dgemm_compute_ dgemm_compute
+#define sgemm_pack_get_size_ sgemm_pack_get_size
+#define dgemm_pack_get_size_ dgemm_pack_get_size
+#define sgemm_pack_ sgemm_pack
+#define dgemm_pack_ dgemm_pack
 #define saxpby_ saxpby
 #define daxpby_ daxpby
 #define caxpby_ caxpby
@@ -394,6 +398,8 @@
 #define dgemm                     DGEMM
 #define dgemm_batch               DGEMM_BATCH
 #define dgemm_compute             DGEMM_COMPUTE
+#define dgemm_pack_get_size       DGEMM_PACK_GET_SIZE
+#define dgemm_pack                DGEMM_PACK
 #define dgemmt                    DGEMMT
 #define dgemv                     DGEMV
 #define dger                      DGER
@@ -468,6 +474,8 @@
 #define sgemm                     SGEMM
 #define sgemm_batch               SGEMM_BATCH
 #define sgemm_compute             SGEMM_COMPUTE
+#define sgemm_pack_get_size       SGEMM_PACK_GET_SIZE
+#define sgemm_pack                SGEMM_PACK
 #define sgemmt                    SGEMMT
 #define sgemv                     SGEMV
 #define sger                      SGER

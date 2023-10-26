@@ -42,54 +42,32 @@
 
 // Currently we are not adding blis interfaces - these BLAS interfaces will be available by default
 
-#ifdef BLIS_ENABLE_BLAS
-BLIS_EXPORT_BLAS void dgemm_pack_
-     (
-       const f77_char* identifier,
-       const f77_char* trans,
-       const f77_int*  m,
-       const f77_int*  n,
-       const f77_int*  k,
-       const double*   alpha,
-       const double*   src, const f77_int*  pld,
-             double*   dest
+#undef  GENTPROTRO
+#define GENTPROTRO( ftype, ch, blasname ) \
+\
+IF_BLIS_ENABLE_BLAS(\
+BLIS_EXPORT_BLAS void PASTEF77(ch,blasname) \
+     ( \
+       const f77_char* identifier, \
+       const f77_char* trans, \
+       const f77_int*  m, \
+       const f77_int*  n, \
+       const f77_int*  k, \
+       const ftype*    alpha, \
+       const ftype*    src, const f77_int*  pld, \
+             ftype*    dest \
+     ); \
+)\
+BLIS_EXPORT_BLAS void PASTEF77S(ch,blasname) \
+     ( \
+       const f77_char* identifier, \
+       const f77_char* trans, \
+       const f77_int*  m, \
+       const f77_int*  n, \
+       const f77_int*  k, \
+       const ftype*    alpha, \
+       const ftype*    src, const f77_int*  pld, \
+             ftype*    dest \
      );
-#endif
 
-BLIS_EXPORT_BLAS void dgemm_pack_blis_impl
-     (
-       const f77_char* identifier,
-       const f77_char* trans,
-       const f77_int*  m,
-       const f77_int*  n,
-       const f77_int*  k,
-       const double*   alpha,
-       const double*   src, const f77_int*  pld,
-             double*   dest
-     );
-
-#ifdef BLIS_ENABLE_BLAS
-BLIS_EXPORT_BLAS void sgemm_pack_
-     (
-       const f77_char* identifier,
-       const f77_char* trans,
-       const f77_int*  m,
-       const f77_int*  n,
-       const f77_int*  k,
-       const float*    alpha,
-       const float*    src,  const f77_int*  pld,
-             float*    dest
-     );
-#endif
-
-BLIS_EXPORT_BLAS void sgemm_pack_blis_impl
-     (
-       const f77_char* identifier,
-       const f77_char* trans,
-       const f77_int*  m,
-       const f77_int*  n,
-       const f77_int*  k,
-       const float*    alpha,
-       const float*    src, const f77_int*  pld,
-             float*    dest
-     );
+INSERT_GENTPROTRO_BLAS( gemm_pack )

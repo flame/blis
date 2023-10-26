@@ -1560,6 +1560,30 @@ BLIS_EXPORT_BLIS void DGEMM_BATCH_( const f77_char* transa_array,  const f77_cha
 
 
 
+BLIS_EXPORT_BLIS f77_int DGEMM_PACK_GET_SIZE(const f77_char* identifier, const f77_int* pm, const f77_int* pn, const f77_int* pk);
+
+BLIS_EXPORT_BLIS f77_int dgemm_pack_get_size(const f77_char* identifier, const f77_int* pm, const f77_int* pn, const f77_int* pk);
+
+BLIS_EXPORT_BLIS f77_int DGEMM_PACK_GET_SIZE_(const f77_char* identifier, const f77_int* pm, const f77_int* pn, const f77_int* pk);
+
+
+
+BLIS_EXPORT_BLIS void DGEMM_PACK( const f77_char* identifier, const f77_char* trans, const f77_int* mm, const f77_int* nn, const f77_int* kk, const double* alpha, const double* src, const f77_int* pld, double* dest );
+
+BLIS_EXPORT_BLIS void dgemm_pack( const f77_char* identifier, const f77_char* trans, const f77_int* mm, const f77_int* nn, const f77_int* kk, const double* alpha, const double* src, const f77_int* pld, double* dest );
+
+BLIS_EXPORT_BLIS void DGEMM_PACK_( const f77_char* identifier, const f77_char* trans, const f77_int* mm, const f77_int* nn, const f77_int* kk, const double* alpha, const double* src, const f77_int* pld, double* dest );
+
+
+
+BLIS_EXPORT_BLIS void DGEMM_COMPUTE( const f77_char* transa, const f77_char* transb, const f77_int* m, const f77_int* n, const f77_int* k, const double* a, const f77_int* lda, const double* b, const f77_int* ldb, const double* beta, double* c, const f77_int* ldc );
+
+BLIS_EXPORT_BLIS void dgemm_compute( const f77_char* transa, const f77_char* transb, const f77_int* m, const f77_int* n, const f77_int* k, const double* a, const f77_int* lda, const double* b, const f77_int* ldb, const double* beta, double* c, const f77_int* ldc );
+
+BLIS_EXPORT_BLIS void DGEMM_COMPUTE_( const f77_char* transa, const f77_char* transb, const f77_int* m, const f77_int* n, const f77_int* k, const double* a, const f77_int* lda, const double* b, const f77_int* ldb, const double* beta, double* c, const f77_int* ldc );
+
+
+
 BLIS_EXPORT_BLIS void DGEMMT( const f77_char* uploc,  const f77_char* transa,  const f77_char* transb,  const f77_int* n,  const f77_int* k,  const  double* alpha,  const double* a,  const f77_int* lda,  const double* b,  const f77_int* ldb,  const double* beta,  double* c,  const f77_int* ldc);
 
 BLIS_EXPORT_BLIS void dgemmt( const f77_char* uploc,  const f77_char* transa,  const f77_char* transb,  const f77_int* n,  const f77_int* k,  const  double* alpha,  const double* a,  const f77_int* lda,  const double* b,  const f77_int* ldb,  const double* beta,  double* c,  const f77_int* ldc);
@@ -1581,6 +1605,30 @@ BLIS_EXPORT_BLIS void SGEMM_BATCH(const f77_char* transa_array,  const f77_char*
 BLIS_EXPORT_BLIS void sgemm_batch(const f77_char* transa_array,  const f77_char* transb_array, const f77_int *m_array,  const f77_int *n_array,  const f77_int *k_array, const float* alpha_array,  const float** a_array,  const  f77_int *lda_array,  const float** b_array,  const f77_int *ldb_array,  const float* beta_array,  float** c_array,  const f77_int *ldc_array,  const f77_int* group_count,  const f77_int *group_size);
 
 BLIS_EXPORT_BLIS void SGEMM_BATCH_(const f77_char* transa_array,  const f77_char* transb_array, const f77_int *m_array,  const f77_int *n_array,  const f77_int *k_array, const float* alpha_array,  const float** a_array,  const  f77_int *lda_array,  const float** b_array,  const f77_int *ldb_array,  const float* beta_array,  float** c_array,  const f77_int *ldc_array,  const f77_int* group_count,  const f77_int *group_size);
+
+
+
+BLIS_EXPORT_BLIS f77_int SGEMM_PACK_GET_SIZE(const f77_char* identifier, const f77_int* pm, const f77_int* pn, const f77_int* pk);
+
+BLIS_EXPORT_BLIS f77_int sgemm_pack_get_size(const f77_char* identifier, const f77_int* pm, const f77_int* pn, const f77_int* pk);
+
+BLIS_EXPORT_BLIS f77_int SGEMM_PACK_GET_SIZE_(const f77_char* identifier, const f77_int* pm, const f77_int* pn, const f77_int* pk);
+
+
+
+BLIS_EXPORT_BLIS void SGEMM_PACK( const f77_char* identifier, const f77_char* trans, const f77_int* mm, const f77_int* nn, const f77_int* kk, const float* alpha, const float* src, const f77_int* pld, float* dest );
+
+BLIS_EXPORT_BLIS void sgemm_pack( const f77_char* identifier, const f77_char* trans, const f77_int* mm, const f77_int* nn, const f77_int* kk, const float* alpha, const float* src, const f77_int* pld, float* dest );
+
+BLIS_EXPORT_BLIS void SGEMM_PACK_( const f77_char* identifier, const f77_char* trans, const f77_int* mm, const f77_int* nn, const f77_int* kk, const float* alpha, const float* src, const f77_int* pld, float* dest );
+
+
+
+BLIS_EXPORT_BLIS void SGEMM_COMPUTE( const f77_char* transa, const f77_char* transb, const f77_int* m, const f77_int* n, const f77_int* k, const float* a, const f77_int* lda, const float* b, const f77_int* ldb, const float* beta, float* c, const f77_int* ldc );
+
+BLIS_EXPORT_BLIS void sgemm_compute( const f77_char* transa, const f77_char* transb, const f77_int* m, const f77_int* n, const f77_int* k, const float* a, const f77_int* lda, const float* b, const f77_int* ldb, const float* beta, float* c, const f77_int* ldc );
+
+BLIS_EXPORT_BLIS void SGEMM_COMPUTE_( const f77_char* transa, const f77_char* transb, const f77_int* m, const f77_int* n, const f77_int* k, const float* a, const f77_int* lda, const float* b, const f77_int* ldb, const float* beta, float* c, const f77_int* ldc );
 
 
 
