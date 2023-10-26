@@ -62,6 +62,9 @@ static model_t model_id = -1;
 // bli_arch_set_id() and bli_arch_check_id()
 static dim_t __attribute__ ((unused)) req_id = -1;
 
+// Keep track if AOCL_ENABLE_INSTRUCTIONS environment variable was set.
+static bool __attribute__ ((unused)) aocl_e_i = FALSE;
+
 arch_t bli_arch_query_id( void )
 {
 	bli_arch_set_id_once();
@@ -135,6 +138,19 @@ void bli_arch_set_id( void )
 	// subconfiguration. "__blis_arch_type_name" will be defined by the
 	// configure command in bli_config.h, with the default name of BLIS_ARCH_TYPE
 	req_id = bli_env_get_var_arch_type( __blis_arch_type_name, -1 );
+
+	// If "__blis_arch_type_name" environment variable was not set, check
+	// AOCL generic environment variable AOCL_ENABLE_INSTRUCTIONS. For simplicity
+	// we refer to either of these options below as "BLIS_ARCH_TYPE" and only
+	// distinguish between them where necessary.
+	if ( req_id == -1 )
+	{
+		req_id = bli_env_get_var_arch_type( "AOCL_ENABLE_INSTRUCTIONS", -1 );
+		if ( req_id != -1 )
+		{
+			aocl_e_i = TRUE;
+		}
+	}
 
 #ifndef BLIS_CONFIGURETIME_CPUID
 	if ( req_id != -1 )
@@ -316,6 +332,10 @@ void bli_arch_check_id( void )
 {
 	bli_arch_set_id_once();
 
+	bool arch_reset = FALSE;
+	arch_t orig_arch_id= req_id;
+	model_t orig_model_id = model_id;
+
 	// Check arch value against configured options. Only needed
 	// if user has set it. This function will also do the
 	// logging of chosen arch and model (if desired).
@@ -338,19 +358,100 @@ void bli_arch_check_id( void )
 		// called, so ensure cntx has been initialized here.
 		bli_gks_init_once();
 
-		// At this point, we know that req_id is in the valid range, but we
-		// don't yet know if it refers to a context that was actually
-		// initialized. Query the address of an internal context data structure
-		// corresponding to req_id. This pointer will be NULL if the associated
-		// subconfig is not available.
-		cntx_t** req_cntx = bli_gks_lookup_id( req_id );
-
-		// This function checks the context pointer and aborts with a useful
-		// error message if the pointer is found to be NULL.
-		if ( bli_error_checking_is_enabled() )
+		bool test_arch = TRUE;
+		while (test_arch)
 		{
-			err_t e_val = bli_check_initialized_gks_cntx( req_cntx );
-			bli_check_error_code( e_val );
+
+			// At this point, we know that req_id is in the valid range, but we
+			// don't yet know if it refers to a context that was actually
+			// initialized. Query the address of an internal context data structure
+			// corresponding to req_id. This pointer will be NULL if the associated
+			// subconfig is not available.
+			cntx_t** req_cntx = bli_gks_lookup_id( req_id );
+
+			// This function checks the context pointer and aborts with a useful
+			// error message if the pointer is found to be NULL.
+			if ( bli_error_checking_is_enabled() )
+			{
+				err_t e_val = bli_check_initialized_gks_cntx( req_cntx );
+				bli_check_error_code( e_val );
+			}
+
+			// If BLIS_ARCH_TYPE (or renamed version of this environment variable)
+			// was set, we always use this value of req_id to set arch_id.
+			// However, if AOCL_ENABLE_INSTRUCTIONS was set instead, we check for
+			// ISA compatibility and switch to a supported option if necessary.
+			if ( aocl_e_i )
+			{
+#if defined(__x86_64__) || defined(_M_X64) || defined(__i386) || defined(_M_IX86)
+
+				// If AVX2 test fails here we assume either:
+				// 1. Config was either zen, zen2, zen3, zen4, haswell or skx,
+				//    so there is no fallback code path, hence error checking
+				//    above will fail.
+				// 2. Config was amdzen, intel64 or x86_64, and will have 
+				//    generic code path.
+				if ( !bli_cpuid_is_avx2fma3_supported() )
+				{
+					switch (req_id)
+					{
+						case BLIS_ARCH_ZEN4:
+						case BLIS_ARCH_ZEN3:
+						case BLIS_ARCH_ZEN2:
+						case BLIS_ARCH_ZEN:
+						case BLIS_ARCH_EXCAVATOR:
+						case BLIS_ARCH_SKX:
+						case BLIS_ARCH_HASWELL:
+							arch_reset = TRUE;
+							req_id = BLIS_ARCH_GENERIC;
+							model_id = BLIS_MODEL_DEFAULT;
+							continue;
+							break;
+					}
+				}
+				// If AVX512 test fails here we assume either:
+				// 1. Config was either zen4 or skx, so there is
+				//    no fallback code path, hence error checking
+				//    above will fail.
+				// 2. Config was amdzen, intel64 or x86_64, and will have 
+				//    appropriate avx2 code path to try.
+				if ( !bli_cpuid_is_avx512_supported() )
+				{
+					switch (req_id)
+					{
+						case BLIS_ARCH_ZEN4:
+							arch_reset = TRUE;
+							req_id = BLIS_ARCH_ZEN3;
+							model_id = BLIS_MODEL_DEFAULT;
+							continue;
+							break;
+						case BLIS_ARCH_SKX:
+							arch_reset = TRUE;
+							req_id = BLIS_ARCH_HASWELL;
+							model_id = BLIS_MODEL_DEFAULT;
+							continue;
+							break;
+					}
+				}
+				// If both tests above pass, we accept req_id choice.
+				test_arch = FALSE;
+
+				// Note: Pre-AVX2 systems from AMD and Intel, and Intel KNL,
+				//       have not been included in these tests, and thus could
+				//       continue to give illegal instruction errors on other
+				//       platforms, just as if BLIS_ARCH_TYPE was set to the
+				//       same value.
+#else
+				// Non-x86 platforms just accept value given for now.
+				// Similar logic to x86 if block could be implemented
+				// here if desired.
+				test_arch = FALSE;
+#endif				
+			}
+			else
+			{
+				test_arch = FALSE;
+			}
 		}
 
 		// Finally, we can be confident that req_id (1) is in range and (2)
@@ -361,19 +462,48 @@ void bli_arch_check_id( void )
 
 #endif
 
-
 	if ( bli_arch_get_logging() )
         {
-		if ( model_id == BLIS_MODEL_DEFAULT )
+		if ( arch_reset )
 		{
-			fprintf( stderr, "libblis: selecting sub-configuration '%s'.\n",
-				 bli_arch_string( arch_id ) );
+			if ( orig_model_id == BLIS_MODEL_DEFAULT )
+			{
+				fprintf( stderr, "libblis: Sub-configuration '%s' is not supported on this system.\nlibblis: Switching to sub-configuration '%s'.\n",
+					 bli_arch_string( orig_arch_id ), bli_arch_string( arch_id ) );
+			}
+			else
+			{
+				fprintf( stderr, "libblis: Sub-configuration '%s', model '%s' is not supported on this system.\nlibblis: Switching to sub-configuration '%s', model '%s'.\n",
+					 bli_arch_string( orig_arch_id ), bli_model_string( orig_model_id ), bli_arch_string( arch_id ), bli_model_string( model_id ) );
+			}
 		}
 		else
 		{
-			fprintf( stderr, "libblis: selecting sub-configuration '%s', model '%s'.\n",
-				 bli_arch_string( arch_id ), bli_model_string( model_id ) );
+			if ( model_id == BLIS_MODEL_DEFAULT )
+			{
+				fprintf( stderr, "libblis: Selecting sub-configuration '%s'.\n",
+					 bli_arch_string( arch_id ) );
+			}
+			else
+			{
+				fprintf( stderr, "libblis: Selecting sub-configuration '%s', model '%s'.\n",
+					 bli_arch_string( arch_id ), bli_model_string( model_id ) );
+			}
 		}
+#if 0
+		if ( orig_model_id == BLIS_MODEL_DEFAULT )
+		{
+			fprintf( stderr, "libblis: Actual hardware '%s'.\n",
+				 bli_arch_string( actual_arch_id ) );
+
+		}
+		else
+		{
+			fprintf( stderr, "libblis: Actual hardware '%s', model '%s'.\n",
+				 bli_arch_string( actual_arch_id ), bli_model_string( actual_model_id ) );
+
+		}
+#endif
         }
 
 	//printf( "blis_arch_check_id(): arch_id, model_id = %u, %u\n", arch_id, model_id );
