@@ -41,6 +41,19 @@
 // Thread entry point prototype.
 void* bli_l3_sup_thread_entry( void* data_void );
 
+err_t bli_l3_sup_thread_decorator_pthreads
+     (
+             l3supint_ft func,
+             opid_t      family,
+       const obj_t*      alpha,
+       const obj_t*      a,
+       const obj_t*      b,
+       const obj_t*      beta,
+       const obj_t*      c,
+       const cntx_t*     cntx,
+             rntm_t*     rntm
+     );
+
 #endif
 
 #endif

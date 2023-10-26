@@ -70,7 +70,7 @@ void bli_l3_int
 	{
 		if ( bli_thread_am_ochief( thread ) )
 			bli_scalm( beta, c );
-		bli_thread_barrier( thread );
+		bli_thread_barrier( rntm, thread );
 		return;
 	}
 
@@ -84,7 +84,7 @@ void bli_l3_int
 
 		if ( bli_thread_am_ochief( thread ) )
 			bli_scalm( beta, c );
-		bli_thread_barrier( thread );
+		bli_thread_barrier( rntm, thread );
 		return;
 	}
 

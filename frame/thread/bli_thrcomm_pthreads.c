@@ -37,35 +37,12 @@
 
 #ifdef BLIS_ENABLE_PTHREADS
 
-thrcomm_t* bli_thrcomm_create( rntm_t* rntm, dim_t n_threads )
-{
-	#ifdef BLIS_ENABLE_MEM_TRACING
-	printf( "bli_thrcomm_create(): " );
-	#endif
-
-	thrcomm_t* comm = bli_sba_acquire( rntm, sizeof(thrcomm_t) );
-
-	bli_thrcomm_init( n_threads, comm );
-
-	return comm;
-}
-
-void bli_thrcomm_free( rntm_t* rntm, thrcomm_t* comm )
-{
-	if ( comm == NULL ) return;
-
-	bli_thrcomm_cleanup( comm );
-
-	#ifdef BLIS_ENABLE_MEM_TRACING
-	printf( "bli_thrcomm_free(): " );
-	#endif
-
-	bli_sba_release( rntm, comm );
-}
-
 #ifdef BLIS_USE_PTHREAD_BARRIER
 
-void bli_thrcomm_init( dim_t n_threads, thrcomm_t* comm )
+// Define the pthread_barrier_t implementations of the init, cleanup, and
+// barrier functions.
+
+void bli_thrcomm_init_pthreads( dim_t n_threads, thrcomm_t* comm )
 {
 	if ( comm == NULL ) return;
 	comm->sent_object = NULL;
@@ -73,7 +50,7 @@ void bli_thrcomm_init( dim_t n_threads, thrcomm_t* comm )
 	bli_pthread_barrier_init( &comm->barrier, NULL, n_threads );
 }
 
-void bli_thrcomm_cleanup( thrcomm_t* comm )
+void bli_thrcomm_cleanup_pthreads( thrcomm_t* comm )
 {
 	if ( comm == NULL ) return;
 	bli_pthread_barrier_destroy( &comm->barrier );
@@ -86,7 +63,11 @@ void bli_thrcomm_barrier( dim_t t_id, thrcomm_t* comm )
 
 #else
 
-void bli_thrcomm_init( dim_t n_threads, thrcomm_t* comm )
+// Define the non-pthread_barrier_t implementations of the init, cleanup,
+// and barrier functions. These are the default unless the pthread_barrier_t
+// versions are requested at compile-time.
+
+void bli_thrcomm_init_pthreads( dim_t n_threads, thrcomm_t* comm )
 {
 	if ( comm == NULL ) return;
 	comm->sent_object = NULL;
@@ -95,11 +76,11 @@ void bli_thrcomm_init( dim_t n_threads, thrcomm_t* comm )
 	comm->barrier_threads_arrived = 0;
 }
 
-void bli_thrcomm_cleanup( thrcomm_t* comm )
+void bli_thrcomm_cleanup_pthreads( thrcomm_t* comm )
 {
 }
 
-void bli_thrcomm_barrier( dim_t t_id, thrcomm_t* comm )
+void bli_thrcomm_barrier_pthreads( dim_t t_id, thrcomm_t* comm )
 {
 #if 0
 	if ( comm == NULL || comm->n_threads == 1 ) return;

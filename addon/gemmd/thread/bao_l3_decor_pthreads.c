@@ -39,7 +39,7 @@
 // A data structure to assist in passing operands to additional threads.
 typedef struct thread_data
 {
-	l3sbxint_t func;
+	l3aoint_ft func;
 	opid_t     family;
 	obj_t*     alpha;
 	obj_t*     a;
@@ -59,7 +59,7 @@ void* bao_l3_thread_entry( void* data_void )
 {
 	thread_data_t* data     = data_void;
 
-	l3sbxint_t     func     = data->func;
+	l3aoint_ft     func     = data->func;
 	opid_t         family   = data->family;
 	obj_t*         alpha    = data->alpha;
 	obj_t*         a        = data->a;
@@ -111,9 +111,9 @@ void* bao_l3_thread_entry( void* data_void )
 	return NULL;
 }
 
-void bao_l3_thread_decorator
+void bao_l3_thread_decorator_pthreads
      (
-       l3sbxint_t func,
+       l3aoint_ft func,
        opid_t     family,
        obj_t*     alpha,
        obj_t*     a,
@@ -215,6 +215,13 @@ void bao_l3_thread_decorator
 	#endif
 	bli_free_intl( datas );
 }
+
+#else
+
+// Define a dummy function bli_l3_thread_entry(), which is needed for
+// consistent dynamic linking behavior when building shared objects in Linux
+// or OSX, or Windows DLLs; otherwise, we risk having an unresolved symbol.
+void* bao_l3_thread_entry( void* data_void ) { return NULL; }
 
 #endif
 

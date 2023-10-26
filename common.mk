@@ -814,44 +814,46 @@ $(foreach c, $(CONFIG_LIST_FAM), $(eval $(call append-var-for,CPPROCFLAGS,$(c)))
 # since that option forces --enable-threading=none, and thus -pthread never gets
 # added to begin with.
 
+CTHREADFLAGS :=
+
 ifeq ($(CC_VENDOR),gcc)
-ifeq ($(THREADING_MODEL),auto)
-THREADING_MODEL := openmp
-endif
-ifeq ($(THREADING_MODEL),openmp)
-CTHREADFLAGS := -fopenmp
+#ifneq ($(findstring auto,$(THREADING_MODEL)),)
+#THREADING_MODEL := openmp
+#endif
+ifneq ($(findstring openmp,$(THREADING_MODEL)),)
+CTHREADFLAGS += -fopenmp
 LDFLAGS      += -fopenmp
 endif
-ifeq ($(THREADING_MODEL),pthreads)
-CTHREADFLAGS := -pthread
+ifneq ($(findstring pthreads,$(THREADING_MODEL)),)
+CTHREADFLAGS += -pthread
 LDFLAGS      += $(LIBPTHREAD)
 endif
 endif
 
 ifeq ($(CC_VENDOR),icc)
-ifeq ($(THREADING_MODEL),auto)
-THREADING_MODEL := openmp
-endif
-ifeq ($(THREADING_MODEL),openmp)
-CTHREADFLAGS := -fopenmp
+#ifneq ($(findstring auto,$(THREADING_MODEL)),)
+#THREADING_MODEL := openmp
+#endif
+ifneq ($(findstring openmp,$(THREADING_MODEL)),)
+CTHREADFLAGS += -fopenmp
 LDFLAGS      += -fopenmp
 endif
-ifeq ($(THREADING_MODEL),pthreads)
-CTHREADFLAGS := -pthread
+ifneq ($(findstring pthreads,$(THREADING_MODEL)),)
+CTHREADFLAGS += -pthread
 LDFLAGS      += $(LIBPTHREAD)
 endif
 endif
 
 ifeq ($(CC_VENDOR),clang)
-ifeq ($(THREADING_MODEL),auto)
-THREADING_MODEL := pthreads
-endif
-ifeq ($(THREADING_MODEL),openmp)
-CTHREADFLAGS := -fopenmp
+#ifneq ($(findstring auto,$(THREADING_MODEL)),)
+#THREADING_MODEL := pthreads
+#endif
+ifneq ($(findstring openmp,$(THREADING_MODEL)),)
+CTHREADFLAGS += -fopenmp
 LDFLAGS      += -fopenmp
 endif
-ifeq ($(THREADING_MODEL),pthreads)
-CTHREADFLAGS := -pthread
+ifneq ($(findstring pthreads,$(THREADING_MODEL)),)
+CTHREADFLAGS += -pthread
 LDFLAGS      += $(LIBPTHREAD)
 endif
 endif

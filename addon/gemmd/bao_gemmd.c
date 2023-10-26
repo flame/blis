@@ -81,16 +81,28 @@ void bao_gemmd_ex
 	if ( rntm == NULL ) { bli_rntm_init_from_global( &rntm_l ); rntm = &rntm_l; }
 	else                { rntm_l = *rntm;                       rntm = &rntm_l; }
 
+	// Set the .pack_a and .pack_b fields to TRUE. This is only needed because
+	// this addon uses bli_thrinfo_sup_grow(), which calls
+	// bli_thrinfo_sup_create_for_cntl(), which employs an optimization if
+	// both fields are FALSE (as is often the case with sup). However, this
+	// addon implements the "large" code path, and so both A and B must
+	// always be packed. Setting the fields to TRUE will avoid the optimization
+	// while this addon implementation executes (and it also reinforces the
+	// fact that we *are* indeed packing A and B, albeit not in the sup context
+	// originally envisioned for the .pack_a and .pack_b fields).
+	bli_rntm_set_pack_a( TRUE, rntm );
+	bli_rntm_set_pack_b( TRUE, rntm );
+
 	// Obtain a valid (native) context from the gks if necessary.
 	// NOTE: This must be done before calling the _check() function, since
 	// that function assumes the context pointer is valid.
-	if ( cntx == NULL ) cntx = bli_gks_query_cntx();
+	if ( cntx == NULL ) cntx = ( cntx_t* )bli_gks_query_cntx();
 
 	// Check parameters.
 	if ( bli_error_checking_is_enabled() )
 		bao_gemmd_check( alpha, a, d, b, beta, c, cntx );
 
-	// -- bli_gemmd_front() ----------------------------------------------------
+	// -- bao_gemmd_front() ----------------------------------------------------
 
 	obj_t a_local;
 	obj_t b_local;

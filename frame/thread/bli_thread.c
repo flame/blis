@@ -50,7 +50,7 @@ extern bli_pthread_mutex_t global_rntm_mutex;
 
 void bli_thread_init( void )
 {
-	bli_thrcomm_init( 1, &BLIS_SINGLE_COMM );
+	bli_thrcomm_init( BLIS_SINGLE, 1, &BLIS_SINGLE_COMM );
 	bli_packm_thrinfo_init_single( &BLIS_PACKM_SINGLE_THREADED );
 	bli_l3_thrinfo_init_single( &BLIS_GEMM_SINGLE_THREADED );
 
@@ -1554,6 +1554,14 @@ dim_t bli_thread_get_num_threads( void )
 	return bli_rntm_num_threads( &global_rntm );
 }
 
+timpl_t bli_thread_get_thread_impl( void )
+{
+	// We must ensure that global_rntm has been initialized.
+	bli_init_once();
+
+	return bli_rntm_thread_impl( &global_rntm );
+}
+
 // ----------------------------------------------------------------------------
 
 void bli_thread_set_ways( dim_t jc, dim_t pc, dim_t ic, dim_t jr, dim_t ir )
@@ -1584,7 +1592,23 @@ void bli_thread_set_num_threads( dim_t n_threads )
 	bli_pthread_mutex_unlock( &global_rntm_mutex );
 }
 
+void bli_thread_set_thread_impl( timpl_t ti )
+{
+	// We must ensure that global_rntm has been initialized.
+	bli_init_once();
+
+	// Acquire the mutex protecting global_rntm.
+	bli_pthread_mutex_lock( &global_rntm_mutex );
+
+	bli_rntm_set_thread_impl_only( ti, &global_rntm );
+
+	// Release the mutex protecting global_rntm.
+	bli_pthread_mutex_unlock( &global_rntm_mutex );
+}
+
 // ----------------------------------------------------------------------------
+
+//#define PRINT_IMPL
 
 void bli_thread_init_rntm_from_env
      (
@@ -1606,18 +1630,69 @@ void bli_thread_init_rntm_from_env
 	// function guarantees that the rntm_t has sane values in the event that the
 	// application passed in a custom rntm_t via an expert interface.
 
-	bool  auto_factor = FALSE;
-	dim_t nt;
-	dim_t jc, pc, ic, jr, ir;
+	bool    auto_factor = FALSE;
+	dim_t   nt;
+	dim_t   jc, pc, ic, jr, ir;
+	timpl_t ti;
 
 #ifdef BLIS_ENABLE_MULTITHREADING
+
+	// Try to read BLIS_THREAD_IMPL.
+	char* ti_env = bli_env_get_str( "BLIS_THREAD_IMPL" );
+
+	// If BLIS_THREAD_IMPL was not set, try to read BLIS_TI.
+	if ( ti_env == NULL ) ti_env = bli_env_get_str( "BLIS_TI" );
+
+	if ( ti_env != NULL )
+	{
+		// If BLIS_THREAD_IMPL was set, parse the value. If the value was
+		// anything other than a "openmp" or "pthreads" (or reasonable
+		// variations thereof), interpret it as a request for single-threaded
+		// execution.
+		if      ( !strncmp( ti_env, "openmp",   6 ) ) ti = BLIS_OPENMP;
+		else if ( !strncmp( ti_env, "omp",      3 ) ) ti = BLIS_OPENMP;
+		else if ( !strncmp( ti_env, "pthreads", 8 ) ) ti = BLIS_POSIX;
+		else if ( !strncmp( ti_env, "pthread",  7 ) ) ti = BLIS_POSIX;
+		else if ( !strncmp( ti_env, "posix",    5 ) ) ti = BLIS_POSIX;
+		else                                          ti = BLIS_SINGLE;
+
+		#ifdef PRINT_IMPL
+		if      ( ti == BLIS_OPENMP )
+			printf( "detected BLIS_THREAD_IMPL=openmp.\n" );
+		else if ( ti == BLIS_POSIX )
+			printf( "detected BLIS_THREAD_IMPL=pthreads.\n" );
+		else
+			printf( "detected BLIS_THREAD_IMPL=single.\n" );
+		#endif
+	}
+	else
+	{
+		// If BLIS_THREAD_IMPL was unset, default to the implementation that
+		// was determined at configure-time.
+		#ifdef BLIS_ENABLE_OPENMP_AS_DEFAULT
+		ti = BLIS_OPENMP;
+		#endif
+		#ifdef BLIS_ENABLE_PTHREADS_AS_DEFAULT
+		ti = BLIS_POSIX;
+		#endif
+
+		#ifdef PRINT_IMPL
+		printf( "BLIS_THREAD_IMPL unset.\n" );
+		if      ( ti == BLIS_OPENMP )
+			printf( "defaulting to BLIS_THREAD_IMPL=openmp.\n" );
+		else if ( ti == BLIS_POSIX )
+			printf( "defaulting to BLIS_THREAD_IMPL=pthreads.\n" );
+		#endif
+	}
 
 	// Try to read BLIS_NUM_THREADS first.
 	nt = bli_env_get_var( "BLIS_NUM_THREADS", -1 );
 
-	// If BLIS_NUM_THREADS was not set, try to read OMP_NUM_THREADS.
-	if ( nt == -1 )
-		nt = bli_env_get_var( "OMP_NUM_THREADS", -1 );
+	// If BLIS_NUM_THREADS was not set, try to read BLIS_NT.
+	if ( nt == -1 ) nt = bli_env_get_var( "BLIS_NT", -1 );
+
+	// If neither BLIS_NUM_THREADS nor BLIS_NT were set, try OMP_NUM_THREADS.
+	if ( nt == -1 ) nt = bli_env_get_var( "OMP_NUM_THREADS", -1 );
 
 	// Read the environment variables for the number of threads (ways of
 	// parallelism) for each individual loop.
@@ -1650,13 +1725,15 @@ void bli_thread_init_rntm_from_env
 	// Now we use the values of nt_set and ways_set to determine how to
 	// interpret the original values we found in the rntm_t object.
 
-	if ( ways_set == TRUE )
+	if ( ( ways_set == TRUE && nt_set == TRUE  ) ||
+	     ( ways_set == TRUE && nt_set == FALSE ) )
 	{
 		// If the per-loop ways of parallelism were set, then we use the values
 		// that were given and interpreted above. The only thing left to do is
-		// calculate the correct number of threads. Notice that if the user also
-		// happened to set BLIS_NUM_THREADS, that value is discarded in favor of
-		// the implied value from the per-loop ways of parallelism.
+		// calculate the correct number of threads. Notice that whatever value
+		// may have been asigned to BLIS_NUM_THREADS will be ignored, and the
+		// total number of threads will be taken to be the number implied from
+		// the per-loop ways of parallelism.
 
 		nt = jc * pc * ic * jr * ir;
 		auto_factor = FALSE;
@@ -1682,21 +1759,27 @@ void bli_thread_init_rntm_from_env
 
 #else
 
+	// Note that we don't even bother checking BLIS_THREAD_IMPL if neither
+	// OpenMP nor pthreads was enabled at compile time.
+	ti = BLIS_SINGLE;
+
 	// When multithreading is disabled, always set the per-loop ways of
 	// parallelism to 1.
-	nt = 1;
 	jc = pc = ic = jr = ir = 1;
+	nt = 1;
+	auto_factor = FALSE;
 
 #endif
 
 	// Save the results back in the runtime object.
-	bli_rntm_set_auto_factor_only( auto_factor, rntm );
+	bli_rntm_set_thread_impl_only( ti, rntm );
 	bli_rntm_set_num_threads_only( nt, rntm );
 	bli_rntm_set_ways_only( jc, pc, ic, jr, ir, rntm );
+	bli_rntm_set_auto_factor_only( auto_factor, rntm );
 
-#if 0
+	#if 0
 	printf( "bli_thread_init_rntm_from_env()\n" );
 	bli_rntm_print( rntm );
-#endif
+	#endif
 }
 

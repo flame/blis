@@ -35,36 +35,7 @@
 
 #include "blis.h"
 
-#ifndef BLIS_ENABLE_MULTITHREADING
-
-//Constructors and destructors for constructors
-thrcomm_t* bli_thrcomm_create( rntm_t* rntm, dim_t n_threads )
-{
-	#ifdef BLIS_ENABLE_MEM_TRACING
-	printf( "bli_thrcomm_create(): " );
-	#endif
-
-	thrcomm_t* comm = bli_sba_acquire( rntm, sizeof( thrcomm_t ) );
-
-	bli_thrcomm_init( n_threads, comm );
-
-	return comm;
-}
-
-void bli_thrcomm_free( rntm_t* rntm, thrcomm_t* comm )
-{
-	if ( comm == NULL ) return;
-
-	bli_thrcomm_cleanup( comm );
-
-	#ifdef BLIS_ENABLE_MEM_TRACING
-	printf( "bli_thrcomm_free(): " );
-	#endif
-
-	bli_sba_release( rntm, comm );
-}
-
-void bli_thrcomm_init( dim_t n_threads, thrcomm_t* comm )
+void bli_thrcomm_init_single( dim_t n_threads, thrcomm_t* comm )
 {
 	if ( comm == NULL ) return;
 
@@ -74,15 +45,13 @@ void bli_thrcomm_init( dim_t n_threads, thrcomm_t* comm )
 	comm->barrier_threads_arrived = 0;
 }
 
-void bli_thrcomm_cleanup( thrcomm_t* comm )
+void bli_thrcomm_cleanup_single( thrcomm_t* comm )
 {
 	if ( comm == NULL ) return;
 }
 
-void bli_thrcomm_barrier( dim_t t_id, thrcomm_t* comm )
+void bli_thrcomm_barrier_single( dim_t t_id, thrcomm_t* comm )
 {
 	return;
 }
-
-#endif
 

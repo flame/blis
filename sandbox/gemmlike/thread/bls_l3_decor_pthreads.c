@@ -39,18 +39,18 @@
 // A data structure to assist in passing operands to additional threads.
 typedef struct thread_data
 {
-	l3sbxint_t func;
-	opid_t     family;
-	obj_t*     alpha;
-	obj_t*     a;
-	obj_t*     b;
-	obj_t*     beta;
-	obj_t*     c;
-	cntx_t*    cntx;
-	rntm_t*    rntm;
-	dim_t      tid;
-	thrcomm_t* gl_comm;
-	array_t*   array;
+	l3sbxint_ft func;
+	opid_t      family;
+	obj_t*      alpha;
+	obj_t*      a;
+	obj_t*      b;
+	obj_t*      beta;
+	obj_t*      c;
+	cntx_t*     cntx;
+	rntm_t*     rntm;
+	dim_t       tid;
+	thrcomm_t*  gl_comm;
+	array_t*    array;
 } thread_data_t;
 
 // Entry point function for additional threads.
@@ -58,7 +58,7 @@ void* bls_l3_thread_entry( void* data_void )
 {
 	thread_data_t* data     = data_void;
 
-	l3sbxint_t     func     = data->func;
+	l3sbxint_ft    func     = data->func;
 	opid_t         family   = data->family;
 	obj_t*         alpha    = data->alpha;
 	obj_t*         a        = data->a;
@@ -108,17 +108,17 @@ void* bls_l3_thread_entry( void* data_void )
 	return NULL;
 }
 
-void bls_l3_thread_decorator
+void bls_l3_thread_decorator_pthreads
      (
-       l3sbxint_t func,
-       opid_t     family,
-       obj_t*     alpha,
-       obj_t*     a,
-       obj_t*     b,
-       obj_t*     beta,
-       obj_t*     c,
-       cntx_t*    cntx,
-       rntm_t*    rntm
+       l3sbxint_ft func,
+       opid_t      family,
+       obj_t*      alpha,
+       obj_t*      a,
+       obj_t*      b,
+       obj_t*      beta,
+       obj_t*      c,
+       cntx_t*     cntx,
+       rntm_t*     rntm
      )
 {
 	err_t r_val;
@@ -145,7 +145,7 @@ void bls_l3_thread_decorator
 	bli_pba_rntm_set_pba( rntm );
 
 	// Allocate a global communicator for the root thrinfo_t structures.
-	thrcomm_t* restrict gl_comm = bli_thrcomm_create( rntm, n_threads );
+	thrcomm_t* gl_comm = bli_thrcomm_create( rntm, n_threads );
 
 	// Allocate an array of pthread objects and auxiliary data structs to pass
 	// to the thread entry functions.
@@ -210,6 +210,13 @@ void bls_l3_thread_decorator
 	#endif
 	bli_free_intl( datas );
 }
+
+#else
+
+// Define a dummy function bli_l3_thread_entry(), which is needed for
+// consistent dynamic linking behavior when building shared objects in Linux
+// or OSX, or Windows DLLs; otherwise, we risk having an unresolved symbol.
+void* bli_l3_thread_entry( void* data_void ) { return NULL; }
 
 #endif
 

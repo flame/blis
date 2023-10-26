@@ -89,6 +89,14 @@ gint_t bli_env_get_var( const char* env, gint_t fallback )
 	return r_val;
 }
 
+char* bli_env_get_str( const char* env )
+{
+	// Query the environment variable.
+	return getenv( env );
+}
+
+
+
 #if 0
 #ifdef _MSC_VER
 #define strerror_r(errno,buf,len) strerror_s(buf,len,errno)

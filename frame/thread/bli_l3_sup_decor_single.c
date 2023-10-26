@@ -35,21 +35,19 @@
 
 #include "blis.h"
 
-#ifndef BLIS_ENABLE_MULTITHREADING
-
 #define SKIP_THRINFO_TREE
 
-err_t bli_l3_sup_thread_decorator
+err_t bli_l3_sup_thread_decorator_single
      (
-             l3supint_t func,
-             opid_t     family,
-       const obj_t*     alpha,
-       const obj_t*     a,
-       const obj_t*     b,
-       const obj_t*     beta,
-       const obj_t*     c,
-       const cntx_t*    cntx,
-             rntm_t*    rntm
+             l3supint_ft func,
+             opid_t      family,
+       const obj_t*      alpha,
+       const obj_t*      a,
+       const obj_t*      b,
+       const obj_t*      beta,
+       const obj_t*      c,
+       const cntx_t*     cntx,
+             rntm_t*     rntm
      )
 {
 	// For sequential execution, we use only one thread.
@@ -137,6 +135,4 @@ err_t bli_l3_sup_thread_decorator
 
 	return BLIS_SUCCESS;
 }
-
-#endif
 

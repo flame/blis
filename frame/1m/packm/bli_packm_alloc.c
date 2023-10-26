@@ -103,7 +103,7 @@ void* bli_packm_alloc_ex
 
 		// Broadcast the address of the chief thread's local mem_t entry to
 		// all threads.
-		local_mem_p = bli_thread_broadcast( thread, &local_mem_s );
+		local_mem_p = bli_thread_broadcast( rntm, thread, &local_mem_s );
 
 		// Save the chief thread's local mem_t entry to the mem_t field in
 		// this thread's control tree node.
@@ -111,7 +111,7 @@ void* bli_packm_alloc_ex
 
 		// Barrier so that the master thread doesn't return from the function
 		// before we are done reading.
-		bli_thread_barrier( thread );
+		bli_thread_barrier( rntm, thread );
 	}
 
 	return bli_mem_buffer( cntl_mem_p );

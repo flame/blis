@@ -4,7 +4,8 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2021, The University of Texas at Austin
+   Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2018, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -32,18 +33,13 @@
 
 */
 
-#ifndef BLIS_SBX_L3_DECOR_H
-#define BLIS_SBX_L3_DECOR_H
-
-// -- sup definitions ----------------------------------------------------------
-
-// Level-3 sup internal function type.
-typedef void (*l3sbxint_t)
+// Level-3 internal function type.
+typedef void (*l3aoint_ft)
      (
        obj_t*     alpha,
        obj_t*     a,
-       obj_t*     d,
        obj_t*     b,
+       obj_t*     d,
        obj_t*     beta,
        obj_t*     c,
        cntx_t*    cntx,
@@ -51,25 +47,43 @@ typedef void (*l3sbxint_t)
        thrinfo_t* thread
      );
 
-// Level-3 sup thread decorator prototype.
+// Level-3 thread decorator function type.
+typedef void (*l3ao_decor_ft)
+     (
+       l3aoint_ft func,
+       opid_t   family,
+       obj_t*   alpha,
+       obj_t*   a,
+       obj_t*   b,
+       obj_t*   d,
+       obj_t*   beta,
+       obj_t*   c,
+       cntx_t*  cntx,
+       rntm_t*  rntm
+     );
+
+// Level-3 thread decorator prototype.
 void bao_l3_thread_decorator
      (
-       l3sbxint_t func,
-       opid_t     family,
-       obj_t*     alpha,
-       obj_t*     a,
-       obj_t*     d,
-       obj_t*     b,
-       obj_t*     beta,
-       obj_t*     c,
-       cntx_t*    cntx,
-       rntm_t*    rntm
+       l3aoint_ft func,
+       opid_t   family,
+       obj_t*   alpha,
+       obj_t*   a,
+       obj_t*   b,
+       obj_t*   d,
+       obj_t*   beta,
+       obj_t*   c,
+       cntx_t*  cntx,
+       rntm_t*  rntm
+     );
+
+void bao_l3_thread_decorator_check
+     (
+       rntm_t* rntm
      );
 
 // Include definitions specific to the method of multithreading.
 #include "bao_l3_decor_single.h"
 #include "bao_l3_decor_openmp.h"
 #include "bao_l3_decor_pthreads.h"
-
-#endif
 

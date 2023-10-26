@@ -70,6 +70,8 @@ BLIS_EXPORT_BLIS gint_t bli_info_get_enable_sba_pools( void );
 BLIS_EXPORT_BLIS gint_t bli_info_get_enable_threading( void );
 BLIS_EXPORT_BLIS gint_t bli_info_get_enable_openmp( void );
 BLIS_EXPORT_BLIS gint_t bli_info_get_enable_pthreads( void );
+BLIS_EXPORT_BLIS gint_t bli_info_get_enable_openmp_as_default( void );
+BLIS_EXPORT_BLIS gint_t bli_info_get_enable_pthreads_as_default( void );
 BLIS_EXPORT_BLIS gint_t bli_info_get_thread_part_jrir_slab( void );
 BLIS_EXPORT_BLIS gint_t bli_info_get_thread_part_jrir_rr( void );
 BLIS_EXPORT_BLIS gint_t bli_info_get_enable_memkind( void );

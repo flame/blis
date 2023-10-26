@@ -195,17 +195,19 @@ dim_t bli_ipow( dim_t base, dim_t power );
 
 // -----------------------------------------------------------------------------
 
-BLIS_EXPORT_BLIS dim_t bli_thread_get_jc_nt( void );
-BLIS_EXPORT_BLIS dim_t bli_thread_get_pc_nt( void );
-BLIS_EXPORT_BLIS dim_t bli_thread_get_ic_nt( void );
-BLIS_EXPORT_BLIS dim_t bli_thread_get_jr_nt( void );
-BLIS_EXPORT_BLIS dim_t bli_thread_get_ir_nt( void );
-BLIS_EXPORT_BLIS dim_t bli_thread_get_num_threads( void );
+BLIS_EXPORT_BLIS dim_t   bli_thread_get_jc_nt( void );
+BLIS_EXPORT_BLIS dim_t   bli_thread_get_pc_nt( void );
+BLIS_EXPORT_BLIS dim_t   bli_thread_get_ic_nt( void );
+BLIS_EXPORT_BLIS dim_t   bli_thread_get_jr_nt( void );
+BLIS_EXPORT_BLIS dim_t   bli_thread_get_ir_nt( void );
+BLIS_EXPORT_BLIS dim_t   bli_thread_get_num_threads( void );
+BLIS_EXPORT_BLIS timpl_t bli_thread_get_thread_impl( void );
 
-BLIS_EXPORT_BLIS void  bli_thread_set_ways( dim_t jc, dim_t pc, dim_t ic, dim_t jr, dim_t ir );
-BLIS_EXPORT_BLIS void  bli_thread_set_num_threads( dim_t value );
+BLIS_EXPORT_BLIS void    bli_thread_set_ways( dim_t jc, dim_t pc, dim_t ic, dim_t jr, dim_t ir );
+BLIS_EXPORT_BLIS void    bli_thread_set_num_threads( dim_t value );
+BLIS_EXPORT_BLIS void    bli_thread_set_thread_impl( timpl_t ti );
 
-void  bli_thread_init_rntm_from_env( rntm_t* rntm );
+void                     bli_thread_init_rntm_from_env( rntm_t* rntm );
 
 // -----------------------------------------------------------------------------
 
