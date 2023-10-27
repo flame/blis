@@ -118,6 +118,7 @@ get-noopt-cxxflags-for   = $(strip $(CFLAGS_PRESET) \
 get-refinit-cflags-for   = $(strip $(call load-var-for,COPTFLAGS,$(1)) \
                                    $(call get-noopt-cflags-for,$(1)) \
                                    -DBLIS_CNAME=$(1) \
+                                   $(BUILD_ASANFLAGS) \
                                    $(BUILD_CPPFLAGS) \
                                    $(BUILD_SYMFLAGS) \
                                    -DBLIS_IN_REF_KERNEL=1 \
@@ -129,6 +130,7 @@ get-refkern-cflags-for   = $(strip $(call load-var-for,CROPTFLAGS,$(1)) \
                                    $(call get-noopt-cflags-for,$(1)) \
                                    $(COMPSIMDFLAGS) \
                                    -DBLIS_CNAME=$(1) \
+                                   $(BUILD_ASANFLAGS) \
                                    $(BUILD_CPPFLAGS) \
                                    $(BUILD_SYMFLAGS) \
                                    -DBLIS_IN_REF_KERNEL=1 \
@@ -137,12 +139,14 @@ get-refkern-cflags-for   = $(strip $(call load-var-for,CROPTFLAGS,$(1)) \
 
 get-config-cflags-for    = $(strip $(call load-var-for,COPTFLAGS,$(1)) \
                                    $(call get-noopt-cflags-for,$(1)) \
+                                   $(BUILD_ASANFLAGS) \
                                    $(BUILD_CPPFLAGS) \
                                    $(BUILD_SYMFLAGS) \
                             )
 
 get-frame-cflags-for     = $(strip $(call load-var-for,COPTFLAGS,$(1)) \
                                    $(call get-noopt-cflags-for,$(1)) \
+                                   $(BUILD_ASANFLAGS) \
                                    $(BUILD_CPPFLAGS) \
                                    $(BUILD_SYMFLAGS) \
                             )
@@ -201,11 +205,14 @@ get-sandbox-cxxflags-for = $(strip $(call load-var-for,COPTFLAGS,$(1)) \
 # Define a separate function that will return appropriate flags for use by
 # applications that want to use the same basic flags as those used when BLIS
 # was compiled. (NOTE: This is the same as the $(get-frame-cflags-for ...)
-# function, except that it omits two variables that contain flags exclusively
-# for use when BLIS is being compiled/built: BUILD_CPPFLAGS, which contains a
-# cpp macro that confirms that BLIS is being built; and BUILD_SYMFLAGS, which
-# contains symbol export flags that are only needed when a shared library is
-# being compiled/linked.)
+# function, except that it omits a few variables that contain flags exclusively
+# for use when BLIS is being compiled/built:
+# - BUILD_CPPFLAGS, which contains a cpp macro that confirms that BLIS
+#   is being built;
+# - BUILD_SYMFLAGS, which contains symbol export flags that are only
+#   needed when a shared library is being compiled/linked; and
+# - BUILD_ASANFLAGS, which contains a flag that causes the compiler to
+#   insert instrumentation for memory error detection.
 get-user-cflags-for      = $(strip $(call load-var-for,COPTFLAGS,$(1)) \
                                    $(call get-noopt-cflags-for,$(1)) \
                             )
@@ -563,6 +570,11 @@ ifeq ($(DEBUG_TYPE),sde)
 LDFLAGS    := $(filter-out $(LIBMEMKIND),$(LDFLAGS))
 endif
 
+# If AddressSanitizer is enabled, add the compiler flag to LDFLAGS.
+ifeq ($(MK_ENABLE_ASAN),yes)
+LDFLAGS    += -fsanitize=address
+endif
+
 # Specify the shared library's 'soname' field.
 # NOTE: The flag for creating shared objects is different for Linux and OS X.
 ifeq ($(OS_NAME),Darwin)
@@ -808,11 +820,19 @@ $(foreach c, $(CONFIG_LIST_FAM), $(eval $(call append-var-for,CXXLANGFLAGS,$(c))
 CPPROCFLAGS := -D_POSIX_C_SOURCE=200112L
 $(foreach c, $(CONFIG_LIST_FAM), $(eval $(call append-var-for,CPPROCFLAGS,$(c))))
 
+# --- AddressSanitizer flags ---
+
+ifeq ($(MK_ENABLE_ASAN),yes)
+BUILD_ASANFLAGS := -fsanitize=address
+else
+BUILD_ASANFLAGS :=
+endif
+
 # --- Threading flags ---
 
 # NOTE: We don't have to explicitly omit -pthread when --disable-system is given
-# since that option forces --enable-threading=none, and thus -pthread never gets
-# added to begin with.
+# since that option forces --enable-threading=single, and thus -pthread never
+# gets added to begin with.
 
 CTHREADFLAGS :=
 

@@ -224,11 +224,21 @@ print_usage()
 	echo " "
 	echo "   --enable-mem-tracing, --disable-mem-tracing"
 	echo " "
-	echo "                 Enable (disable by default) output to stdout that traces"
+	echo "                 Enable (disabled by default) output to stdout that traces"
 	echo "                 the allocation and freeing of memory, including the names"
 	echo "                 of the functions that triggered the allocation/freeing."
 	echo "                 Enabling this option WILL NEGATIVELY IMPACT PERFORMANCE."
 	echo "                 Please use only for informational/debugging purposes."
+	echo " "
+	echo "   --enable-asan, --disable-asan"
+	echo " "
+	echo "                 Enable (disabled by default) compiling and linking BLIS"
+	echo "                 framework code with the AddressSanitizer (ASan) library."
+	echo "                 Optimized kernels are NOT compiled with ASan support due"
+	echo "                 to limitations of register assignment in inline assembly."
+	echo "                 WARNING: ENABLING THIS OPTION WILL NEGATIVELY IMPACT"
+	echo "                 PERFORMANCE. Please use only for informational/debugging"
+	echo "                 purposes."
 	echo " "
 	echo "   -i SIZE, --int-size=SIZE"
 	echo " "
@@ -1325,6 +1335,17 @@ blacklistbu_add()
 	fi
 }
 
+blacklistos_add()
+{
+	# Check whether we've already blacklisted the given sub-config so
+	# we don't output redundant messages.
+	if [ $(is_in_list "$1" "${config_blist}") == "false" ]; then
+
+		echowarn "The operating system does not support building '$1'; adding to blacklist."
+		config_blist="${config_blist} $1"
+	fi
+}
+
 blacklist_init()
 {
 	config_blist=""
@@ -1979,6 +2000,13 @@ check_assembler()
 	fi
 }
 
+check_os()
+{
+	if [[ "$(uname -s)" == "Darwin" && "$(uname -m)" == "arm64" ]]; then
+		blacklistos_add "armsve"
+	fi
+}
+
 try_assemble()
 {
 	local cc cflags asm_src asm_base asm_bin rval
@@ -2451,6 +2479,9 @@ main()
 	debug_type=''
 	debug_flag=''
 
+	# A flag indicating whether AddressSanitizer should be used.
+	enable_asan='no'
+
 	# The system flag.
 	enable_system='yes'
 
@@ -2575,6 +2606,12 @@ main()
 							;;
 						disable-debug)
 							debug_flag=0
+							;;
+						enable-asan)
+							enable_asan='yes'
+							;;
+						disable-asan)
+							enable_asan='no'
 							;;
 						enable-verbose-make)
 							enable_verbose='yes'
@@ -2866,6 +2903,9 @@ main()
 	# will also be blacklisted.
 	get_binutils_version
 	check_assembler
+
+    # Check if there is any incompatibility due to the operating system.
+	check_os
 
 	# Remove duplicates and whitespace from the blacklist.
 	blacklist_cleanup
@@ -3357,6 +3397,20 @@ main()
 		echo "${script_name}: no preset LDFLAGS detected."
 	fi
 
+	# Check if the verbose make flag was specified.
+	if [ "x${enable_verbose}" = "xyes" ]; then
+		echo "${script_name}: enabling verbose make output. (disable with 'make V=0'.)"
+	else
+		echo "${script_name}: disabling verbose make output. (enable with 'make V=1'.)"
+	fi
+
+	# Check if the ARG_MAX hack was requested.
+	if [ "x${enable_arg_max_hack}" = "xyes" ]; then
+		echo "${script_name}: enabling ARG_MAX hack."
+	else
+		echo "${script_name}: disabling ARG_MAX hack."
+	fi
+
 	# Check if the debug flag was specified.
 	if [ -n "${debug_flag}" ]; then
 		if [ "x${debug_type}" = "xopt" ]; then
@@ -3373,29 +3427,24 @@ main()
 		echo "${script_name}: debug symbols disabled."
 	fi
 
-	# Check if the verbose make flag was specified.
-	if [ "x${enable_verbose}" = "xyes" ]; then
-		echo "${script_name}: enabling verbose make output. (disable with 'make V=0'.)"
+	# Check if the AddressSanitizer flag was specified.
+	if [ "x${enable_asan}" = "xyes" ]; then
+		echo "${script_name}: enabling AddressSanitizer support (except for optimized kernels)."
 	else
-		echo "${script_name}: disabling verbose make output. (enable with 'make V=1'.)"
+        enable_asan='no'
+		echo "${script_name}: AddressSanitizer support disabled."
 	fi
 
-	# Check if the ARG_MAX hack was requested.
-	if [ "x${enable_arg_max_hack}" = "xyes" ]; then
-		echo "${script_name}: enabling ARG_MAX hack."
-	else
-		echo "${script_name}: disabling ARG_MAX hack."
-	fi
-
-	enable_shared_01=1
 	# Check if the static lib flag was specified.
 	if   [ "x${enable_static}" = "xyes" -a "x${enable_shared}" = "xyes" ]; then
 		echo "${script_name}: building BLIS as both static and shared libraries."
+		enable_shared_01=1
+	elif [ "x${enable_static}" = "xno"  -a "x${enable_shared}" = "xyes" ]; then
+		echo "${script_name}: building BLIS as a shared library (static library disabled)."
+		enable_shared_01=1
 	elif [ "x${enable_static}" = "xyes" -a "x${enable_shared}" = "xno"  ]; then
 		echo "${script_name}: building BLIS as a static library (shared library disabled)."
 		enable_shared_01=0
-	elif [ "x${enable_static}" = "xno"  -a "x${enable_shared}" = "xyes" ]; then
-		echo "${script_name}: building BLIS as a shared library (static library disabled)."
 	else
 		echo "${script_name}: Both static and shared libraries were disabled."
 		echo "${script_name}: *** Please enable one (or both) to continue."
@@ -3917,7 +3966,7 @@ main()
 	# Create a #define for the configuration family (config_name).
 	uconf=$(echo ${config_name} | tr '[:lower:]' '[:upper:]')
 	config_name_define="#define BLIS_FAMILY_${uconf}\n"
-	
+
 	# Create a list of #defines, one for each configuration in config_list.
 	config_list_defines=""
 	for conf in ${config_list}; do
@@ -4012,6 +4061,7 @@ main()
 		| sed -e "s/@libpthread@/${libpthread_esc}/g" \
 		| sed -e "s/@cflags_preset@/${cflags_preset_esc}/g" \
 		| sed -e "s/@ldflags_preset@/${ldflags_preset_esc}/g" \
+		| sed -e "s/@enable_asan@/${enable_asan}/g" \
 		| sed -e "s/@debug_type@/${debug_type}/g" \
 		| sed -e "s/@enable_system@/${enable_system}/g" \
 		| sed -e "s/@threading_model@/${threading_model}/g" \
