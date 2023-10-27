@@ -162,6 +162,31 @@ INSTANTIATE_TEST_SUITE_P(
     );
 
 INSTANTIATE_TEST_SUITE_P(
+        TinySizes,
+        DGemmComputeTest,
+        ::testing::Combine(
+            ::testing::Values('c'
+#ifndef TEST_BLAS
+            ,'r'
+#endif
+            ),                                                   // storage format
+            ::testing::Values('n', 't', 'c'),                    // transa
+            ::testing::Values('n', 't', 'c'),                    // transb
+            ::testing::Values('u', 'p'),                         // packa
+            ::testing::Values('u', 'p'),                         // packb
+            ::testing::Range(gtint_t(1), gtint_t(3), 1),         // m
+            ::testing::Range(gtint_t(1), gtint_t(3), 1),         // n
+            ::testing::Range(gtint_t(1), gtint_t(3), 1),         // k
+            ::testing::Values(0.0, 1.0, -1.2, 2.1),              // alpha
+            ::testing::Values(0.0, 1.0, -1.2, 2.1),              // beta
+            ::testing::Values(gtint_t(0)),                       // increment to the leading dim of a
+            ::testing::Values(gtint_t(0)),                       // increment to the leading dim of b
+            ::testing::Values(gtint_t(0))                        // increment to the leading dim of c
+        ),
+        ::DGemmComputeTestPrint()
+    );
+
+INSTANTIATE_TEST_SUITE_P(
         DimensionsGtBlocksizes,                                  // Dimensions > SUP Blocksizes
         DGemmComputeTest,
         ::testing::Combine(

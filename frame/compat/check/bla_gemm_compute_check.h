@@ -69,7 +69,12 @@
 		info = 7; \
 	else if ( !packb && *ldb < bli_max( 1, nrowb ) ) /* ldb is ignored when B is packed. */ \
 		info = 9; \
-	else if ( ( *rs_c == 1 && *cs_c < bli_max( 1, *m ) ) || ( *cs_c == 1 && *rs_c < bli_max( 1, *n ) ) ) \
+	else if ( *rs_c < 1 || *cs_c < 1 ) \
+		info = 12; \
+	else if ( /* Skip check for validity of strides when m==1 or n==1. */ \
+	         ( *m != 1 && *n != 1 ) && \
+	         ( ( *rs_c == 1 && *cs_c < bli_max( 1, *m ) ) || \
+	           ( *cs_c == 1 && *rs_c < bli_max( 1, *n ) ) ) ) \
 		info = 12; \
 \
 	if ( info != 0 ) \

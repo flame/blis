@@ -167,6 +167,21 @@ TYPED_TEST(GEMM_Compute_IIT_ERS_Test, invalid_ldb)
 }
 
 // When info == 12
+TYPED_TEST(GEMM_Compute_IIT_ERS_Test, invalid_ldc_lt_zero)
+{
+  using T = TypeParam;
+  // Defining the C matrix with values for debugging purposes
+  std::vector<T> c = testinghelpers::get_random_matrix<T>(-10, 10, STORAGE, 'N', N, N, LDC, 'f');
+
+  // Copy so that we check that the elements of C are not modified.
+  std::vector<T> c_ref(c);
+  // Call BLIS Gemm with a invalid value for m.
+  gemm_compute<T>( STORAGE, TRANS, TRANS, 'U', 'U', M, N, K, nullptr, nullptr, LDA, nullptr, LDB, nullptr, nullptr, -1 );
+  // Use bitwise comparison (no threshold).
+  computediff<T>( STORAGE, N, N, c.data(), c_ref.data(), LDC);
+}
+
+// When info == 12
 TYPED_TEST(GEMM_Compute_IIT_ERS_Test, invalid_ldc)
 {
   using T = TypeParam;
