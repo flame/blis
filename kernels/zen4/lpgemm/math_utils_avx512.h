@@ -113,7 +113,9 @@
     POLY_EVAL_HORNER_16_0_AVX512(r,x); \
 \
     x = (__m512)_mm512_mask_xor_epi32 ((__m512i)_mm512_set1_ps(1), _mm512_cmpnle_ps_mask \
-        ( _mm512_set1_ps(3.9192059040069580078125f), r), (__m512i)x, _mm512_set1_epi32(0)); \
+        ( _mm512_set1_ps(3.553f), r), (__m512i)x, _mm512_set1_epi32(0)); \
+    x = (__m512)_mm512_mask_xor_epi32 ((__m512i)_mm512_set1_ps(1), _mm512_cmpnle_ps_mask \
+        ( _mm512_set1_ps(1.0f), x), (__m512i)x, _mm512_set1_epi32(0)); \
     x_erf = (__m512)_mm512_or_epi32(_mm512_and_epi32 ((__m512i)x_erf, _mm512_set1_epi32(~(0x7FFFFFFF))), (__m512i)x);
 
 #endif // AOCL_LPGEMM_MATH_UTILS_AVX512_H

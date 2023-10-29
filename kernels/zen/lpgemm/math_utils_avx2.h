@@ -112,7 +112,8 @@
 \
     POLY_EVAL_HORNER_16_0_AVX2(r,x); \
 \
-    x = _mm256_blendv_ps (x, _mm256_set1_ps(1), _mm256_cmp_ps (_mm256_set1_ps(3.9192059040069580078125f), r, 1)); \
+    x = _mm256_blendv_ps (x, _mm256_set1_ps(1), _mm256_cmp_ps (_mm256_set1_ps(3.553f), r, 1)); \
+    x = _mm256_blendv_ps (x, _mm256_set1_ps(1), _mm256_cmp_ps (_mm256_set1_ps(1.0f), x, 1)); \
     x_erf = _mm256_or_ps(_mm256_and_ps (x_erf, (__m256)_mm256_set1_epi32(~(0x7FFFFFFF))), x);
 
 //Trignometric EXP, TANH and ERF functions for SSE
@@ -160,7 +161,8 @@
 \
     POLY_EVAL_HORNER_16_0_SSE(r,x); \
 \
-    x = _mm_blendv_ps (x, _mm_set1_ps(1), _mm_cmp_ps (_mm_set1_ps(3.9192059040069580078125f), r, 1)); \
+    x = _mm_blendv_ps (x, _mm_set1_ps(1), _mm_cmp_ps (_mm_set1_ps(3.553f), r, 1)); \
+    x = _mm_blendv_ps (x, _mm_set1_ps(1), _mm_cmp_ps (_mm_set1_ps(1.0f), x, 1)); \
     x_erf = _mm_or_ps(_mm_and_ps (x_erf, (__m128)_mm_set1_epi32(~(0x7FFFFFFF))), x);
 
 #endif // AOCL_LPGEMM_MATH_UTILS_AVX2_H

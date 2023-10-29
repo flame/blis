@@ -149,7 +149,7 @@ void reorderb_nr64_bf16bf16f32of32
 				// st = ( jc_cur_loop * k )    <traverse blocks 1,2,3,4>
 				//    + ( n_sub_updated * pc ) <traverse block 5>
 				//    + ( NC' * kc0_updated)   <traverse block 6>
-				( ( packb_bf16 )lcntx->packb_fun_ptr )
+				( ( pack_bf16 )lcntx->packb_fun_ptr )
 				(
 				  ( ( bfloat16* )b_reorder->storage.aligned_buffer ) +
 				  ( jc_cur_loop * k_updated ) + ( n_sub_updated * pc ) +

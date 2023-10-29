@@ -1157,6 +1157,7 @@ void mat_mul_bench_main_ ## BLAS_SFX \
 	{ \
 		alpha = 2; \
 		beta = 9; \
+		n_repeats = 1; \
 	} \
  \
 	aocl_post_op* post_op = NULL; \

@@ -47,7 +47,7 @@ BLIS_INLINE dim_t get_packb_bf16bf16f32of32_min_NR()
 	return 16;
 }
 
-typedef void (*packb_bf16)
+typedef void (*pack_bf16)
      (
        bfloat16*,
        const bfloat16*,

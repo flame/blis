@@ -261,7 +261,7 @@ LPGEMM_5LOOP(bfloat16,bfloat16,float,bf16bf16f32of32)
 				if ( ( jc_packb_end > jc_packb_start ) &&
 					 ( jc_packb_start < ( jc + nc0 ) ) )
 				{
-					( ( packb_bf16 )lcntx->packb_fun_ptr )
+					( ( pack_bf16 )lcntx->packb_fun_ptr )
 					(
 					  pack_b_buffer_bf16 + ( jc_packb_start * kc0_updated ),
 					  ( b + ( rs_b * pc ) + ( cs_b * jc ) +
@@ -338,7 +338,7 @@ LPGEMM_5LOOP(bfloat16,bfloat16,float,bf16bf16f32of32)
 					pack_a_buffer_bf16 =
 						( bfloat16* ) bli_mem_buffer( &mem_a );
 
-						( packa_mr16_bf16bf16f32of32)
+					( ( pack_bf16 )lcntx->packa_fun_ptr )
 						(
 						pack_a_buffer_bf16,
 						( a + ( rs_a * ic ) + ( cs_a * pc )), rs_a, cs_a,
