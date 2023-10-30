@@ -88,8 +88,18 @@ AOCL_GEMM_MATMUL(uint8_t,int8_t,int16_t,int16_t,u8s8s16os16)
 		return; // Only row major supported.
 	}
 
-	// Row major input expected with leading dimensions equal to row stride.
-	if ((lda != k) || (ldb != n) || (ldc != n))
+	bool is_row_major = ( ( order_use == 'r' ) || ( order_use == 'R' ) );
+	bool is_column_major = ( ( order_use == 'c' ) || ( order_use == 'C' ) );
+
+	// Row major input expected with leading dimensions >= row stride.
+	if ( ( is_row_major == TRUE ) &&
+	     ( ( lda < k ) || ( ldb < n ) || ( ldc < n ) ) )
+	{
+		return; // Error.
+	}
+	// Column major input expected with leading dimensions >= column stride.
+	else if ( ( is_column_major == TRUE ) &&
+	          ( ( lda < m ) || ( ldb < k ) || ( ldc < m ) ) )
 	{
 		return; // Error.
 	}

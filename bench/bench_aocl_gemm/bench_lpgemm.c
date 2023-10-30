@@ -317,7 +317,8 @@ void mat_mul_bench_driver_ ## BLAS_SFX \
 	{ \
 		if ( bench_mode == 'a' ) \
 		{ \
-			GEN_FUNC_NAME(fill_array_,C_type)( c, ( m * n ) ); \
+			int32_t size_C = ( ( stor_order == 'r') || ( stor_order == 'R' ) )? m * ldc : n * ldc; \
+			GEN_FUNC_NAME(fill_array_,C_type)( c, ( size_C ) ); \
 		} \
  \
 		struct timespec tstart={0,0}, tend={0,0}; \
@@ -1106,6 +1107,21 @@ void mat_mul_bench_main_ ## BLAS_SFX \
        char*   post_ops_str \
      ) \
 { \
+	if( ( stor_order != 'r' ) && ( stor_order != 'R' ) ) \
+	{ \
+		printf("The stor_order(1st arg in input.txt) is not valid\n"); \
+		return; \
+	} \
+	if( ( transa != 'n' ) && ( transa != 'N' ) ) \
+	{ \
+		printf("The transa(2nd arg in input.txt) is not valid\n"); \
+		return; \
+	} \
+	if( ( transb != 'n' ) && ( transb != 'N' ) ) \
+	{ \
+		printf("The transb (3rd arg in input.txt) is not valid\n"); \
+		return; \
+	} \
 	/* Reorder and pack of A matrix is not supported */ \
 	if( ( op_a != 'N' ) && ( op_a != 'n' ) ) \
 	{ \
@@ -1125,25 +1141,31 @@ void mat_mul_bench_main_ ## BLAS_SFX \
 		n_repeats = global_n_repeat; \
 	} \
  \
+	/* sizes are hardcoded since all datatypes other than bf16 only support
+	row major and no-transpose cases. In future, when we support transpose support
+	for all datatypes, these needs to be modified. */ \
+	int32_t size_A = m * stride_a; \
+	int32_t size_B = k * stride_b; \
+	int32_t size_C = m * stride_c; \
 	/* Get 64 byte aligned memory.*/ \
 	err_t bli_errors = BLIS_SUCCESS; \
-	A_type* a = ( A_type* ) bli_malloc_user( sizeof( A_type ) * m * k, &bli_errors ); \
+	A_type* a = ( A_type* ) bli_malloc_user( sizeof( A_type ) * size_A, &bli_errors ); \
  \
-	B_type* b = ( B_type* ) bli_malloc_user( sizeof( B_type ) * n * k, &bli_errors ); \
+	B_type* b = ( B_type* ) bli_malloc_user( sizeof( B_type ) * size_B, &bli_errors ); \
  \
-	C_type* c = ( C_type* ) bli_malloc_user( sizeof( C_type ) * m * n, &bli_errors ); \
-	memset( ( void* ) c, 0, sizeof( C_type ) * m * n ); \
+	C_type* c = ( C_type* ) bli_malloc_user( sizeof( C_type ) * size_C, &bli_errors ); \
+	memset( ( void* ) c, 0, sizeof( C_type ) * size_C ); \
  \
-	C_type* c_ref = ( C_type* ) bli_malloc_user( sizeof( C_type ) * m * n, &bli_errors ); \
-	memset( ( void* ) c_ref, 0, sizeof( C_type ) * m * n ); \
+	C_type* c_ref = ( C_type* ) bli_malloc_user( sizeof( C_type ) * size_C, &bli_errors ); \
+	memset( ( void* ) c_ref, 0, sizeof( C_type ) * size_C ); \
  \
-	GEN_FUNC_NAME(fill_array_,A_type)( a, ( m * k ) ); \
-	GEN_FUNC_NAME(fill_array_,B_type)( b, ( k * n ) ); \
+	GEN_FUNC_NAME(fill_array_,A_type)( a, ( size_A ) ); \
+	GEN_FUNC_NAME(fill_array_,B_type)( b, ( size_B ) ); \
  \
 	if ( bench_mode == 'a' ) \
 	{ \
-		GEN_FUNC_NAME(fill_array_,C_type)( c, ( m * n ) ); \
-		GEN_FUNC_NAME(fill_array_,C_type)( c_ref, ( m * n ) ); \
+		GEN_FUNC_NAME(fill_array_,C_type)( c, ( size_C ) ); \
+		GEN_FUNC_NAME(fill_array_,C_type)( c_ref, ( size_C ) ); \
 	} \
  \
 	C_type alpha = 0; \
@@ -1274,10 +1296,26 @@ void mat_mul_bench_main_ ## BLAS_SFX \
 	   char*   post_ops_str \
      ) \
 { \
+	if( ( stor_order != 'r' ) && ( stor_order != 'R' ) && ( stor_order != 'c' ) && ( stor_order != 'C' ) ) \
+	{ \
+		printf("The stor_order(1st arg in input.txt) is not valid\n"); \
+		return; \
+	} \
+	if( ( transa != 'n' ) && ( transa != 'N' ) && ( transa != 't' ) && (transa != 'T' ) ) \
+	{ \
+		printf("The transa ( 2nd arg in input.txt) is not valid\n"); \
+		return; \
+	} \
+	if( ( transb != 'n' ) && ( transb != 'N' ) && ( transb != 't' ) && (transb != 'T' ) ) \
+	{ \
+		printf("The transb ( 3nd arg in input.txt) is not valid\n"); \
+		return; \
+	} \
 	/* Reorder is not supported for A matrix*/ \
 	if( ( op_a != 'p' ) && ( op_a != 'P' ) && ( op_a != 'n' ) && ( op_a != 'N' ) ) \
 	{ \
 		printf("The op_a (4th arg in input.txt) is not valid\n"); \
+		return; \
 	} \
 	if ( ( op_b != 'p' ) && ( op_b != 'P' ) && ( op_b != 'r' ) && ( op_b != 'R' ) && ( op_b != 'N' ) && ( op_b != 'n' ) ) \
 	{ \
@@ -1291,35 +1329,50 @@ void mat_mul_bench_main_ ## BLAS_SFX \
 		n_repeats = global_n_repeat; \
 	} \
  \
+	int32_t size_A = 0; \
+	int32_t size_B = 0; \
+	int32_t size_C = 0; \
+	if( ( stor_order == 'r' ) || ( stor_order == 'R' ) ) \
+	{ \
+		size_A = ( ( transa == 'n' ) || ( transa == 'N' ) ) ? m * stride_a : k * stride_a; \
+		size_B = ( ( transb == 'n' ) || ( transb == 'N' ) ) ? k * stride_b : n * stride_b; \
+		size_C = m * stride_c; \
+	} \
+	else \
+	{ \
+		size_A = ( ( transa == 'n' ) || ( transa == 'N' ) ) ? k * stride_a : m * stride_a; \
+		size_B = ( ( transb == 'n' ) || ( transb == 'N' ) ) ? n * stride_b : k * stride_b; \
+		size_C = n * stride_c; \
+	} \
 	err_t bli_errors = BLIS_SUCCESS; \
 	/* Get 64 byte aligned memory.*/ \
-	bfloat16* a = ( bfloat16* ) bli_malloc_user( sizeof( bfloat16 ) * m * k, &bli_errors ); \
-	float *a_float = bli_malloc_user( m * k * sizeof( float ), &bli_errors); \
-	for ( int32_t i = 0; i < m*k; ++i ) \
+	bfloat16* a = ( bfloat16* ) bli_malloc_user( sizeof( bfloat16 ) * size_A, &bli_errors ); \
+	float *a_float = bli_malloc_user( size_A * sizeof( float ), &bli_errors); \
+	for ( int32_t i = 0; i < size_A; ++i ) \
 	{ \
 		a_float[i] = ( float ) ( i % 5 ); \
 	} \
  \
-	convert_float_arr_to_bf16( a_float, a, m * k ); \
+	convert_float_arr_to_bf16( a_float, a, size_A ); \
  \
-	bfloat16* b = ( bfloat16* ) bli_malloc_user( sizeof( bfloat16 ) * n * k, &bli_errors ); \
-	float *b_float = bli_malloc_user( k * n * sizeof( float ), &bli_errors);  \
-	for ( int32_t i = 0; i < k*n; ++i ) \
+	bfloat16* b = ( bfloat16* ) bli_malloc_user( sizeof( bfloat16 ) * size_B, &bli_errors ); \
+	float *b_float = bli_malloc_user( size_B * sizeof( float ), &bli_errors);  \
+	for ( int32_t i = 0; i < size_B; ++i ) \
 	{ \
 		b_float[i] = ( float ) ( i % 5 );\
 	} \
-	convert_float_arr_to_bf16( b_float, b, k * n ); \
+	convert_float_arr_to_bf16( b_float, b, size_B ); \
  \
-	C_type* c = ( C_type* ) bli_malloc_user( sizeof( C_type ) * m * n, &bli_errors ); \
-	memset( ( void* ) c, 0, sizeof( C_type ) * m * n ); \
+	C_type* c = ( C_type* ) bli_malloc_user( sizeof( C_type ) * size_C, &bli_errors ); \
+	memset( ( void* ) c, 0, sizeof( C_type ) * size_C ); \
  \
-	C_type* c_ref = ( C_type* ) bli_malloc_user( sizeof( C_type ) * m * n, &bli_errors ); \
-	memset( ( void* ) c_ref, 0, sizeof( C_type ) * m * n ); \
+	C_type* c_ref = ( C_type* ) bli_malloc_user( sizeof( C_type ) * size_C, &bli_errors ); \
+	memset( ( void* ) c_ref, 0, sizeof( C_type ) * size_C ); \
  \
 	if ( bench_mode == 'a' ) \
 	{ \
-		GEN_FUNC_NAME(fill_array_,C_type)( c, ( m * n ) ); \
-		GEN_FUNC_NAME(fill_array_,C_type)( c_ref, ( m * n ) ); \
+		GEN_FUNC_NAME(fill_array_,C_type)( c, ( size_C ) ); \
+		GEN_FUNC_NAME(fill_array_,C_type)( c_ref, ( size_C ) ); \
 	} \
  \
 	float alpha = 0.0f; \
