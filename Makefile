@@ -324,7 +324,6 @@ FRAGS_TO_INSTALL := $(CONFIG_MK_FILE) \
 PLUGIN_FRAGS_TO_INSTALL := $(DIST_PATH)/build/plugin/bli_plugin_init_ref.c \
                            $(DIST_PATH)/build/plugin/bli_plugin_init_zen3.c \
                            $(DIST_PATH)/build/plugin/bli_plugin_register.c \
-                           $(DIST_PATH)/build/plugin/bli_kernel_defs_zen3.h \
                            $(DIST_PATH)/build/plugin/my_kernel_1_ref.c \
                            $(DIST_PATH)/build/plugin/my_kernel_2_ref.c \
                            $(DIST_PATH)/build/plugin/my_kernel_1_zen3.c \
@@ -1091,6 +1090,8 @@ ifeq ($(ENABLE_VERBOSE),yes)
 		$(MKDIR) -p $(@)/$(CONFIG_DIR)/$$THIS_CONFIG; \
 		$(INSTALL) -m 0644 $(CONFIG_DIR)/$$THIS_CONFIG/$(MAKE_DEFS_FILE) \
 		              $(@)/$(CONFIG_DIR)/$$THIS_CONFIG; \
+		$(INSTALL) -m 0644 $(CONFIG_DIR)/$$THIS_CONFIG/bli_kernel_defs_$$THIS_CONFIG.h \
+		              $(@)/$(CONFIG_DIR)/$$THIS_CONFIG; \
 	done
 else
 	@$(MKDIR) $(@)
@@ -1107,9 +1108,12 @@ else
 #	@$(INSTALL) -m 0644 $(CONFIG_DIR)/$(CONFIG_NAME)/$(MAKE_DEFS_FILE) \
 #	               $(@)/$(CONFIG_DIR)/$(CONFIG_NAME)/
 	@for THIS_CONFIG in $(FULL_CONFIG_LIST); do \
-		echo "Installing $(CONFIG_DIR)/$$THIS_CONFIG/$(MAKE_DEFS_FILE) into $(@)/$(CONFIG_DIR)/$$THIS_CONFIG"; \
 		$(MKDIR) -p $(@)/$(CONFIG_DIR)/$$THIS_CONFIG; \
+		echo "Installing $(CONFIG_DIR)/$$THIS_CONFIG/$(MAKE_DEFS_FILE) into $(@)/$(CONFIG_DIR)/$$THIS_CONFIG"; \
 		$(INSTALL) -m 0644 $(CONFIG_DIR)/$$THIS_CONFIG/$(MAKE_DEFS_FILE) \
+		              $(@)/$(CONFIG_DIR)/$$THIS_CONFIG; \
+		echo "Installing $(CONFIG_DIR)/$$THIS_CONFIG/bli_kernel_defs_$$THIS_CONFIG.h into $(@)/$(CONFIG_DIR)/$$THIS_CONFIG"; \
+		$(INSTALL) -m 0644 $(CONFIG_DIR)/$$THIS_CONFIG/bli_kernel_defs_$$THIS_CONFIG.h \
 		              $(@)/$(CONFIG_DIR)/$$THIS_CONFIG; \
 	done
 endif

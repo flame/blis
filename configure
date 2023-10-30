@@ -5222,13 +5222,15 @@ plugin_main()
 		for config in ${full_subconfig_list}; do
 			if [ ! -e config/${config}/bli_plugin_init_${config}.c ] || [ ${force_flag} == '1' ]; then
 				if [ ${config} != zen3 ] || [ ${examples_flag} == '0' ]; then
-					strip_examples ${sharedir}/blis/plugin/bli_kernel_defs_zen3.h config/${config}/bli_kernel_defs_${config}.h
 					strip_examples ${sharedir}/blis/plugin/bli_plugin_init_zen3.c config/${config}/bli_plugin_init_${config}.c
 					perl -pi -e "s/zen3/${config}/g" config/${config}/bli_plugin_init_${config}.c
 				else
-					cp ${sharedir}/blis/plugin/bli_kernel_defs_zen3.h config/${config}/bli_kernel_defs_${config}.h
 					cp ${sharedir}/blis/plugin/bli_plugin_init_zen3.c config/${config}/bli_plugin_init_${config}.c
 				fi
+			fi
+
+			if [ ! -e config/${config}/bli_kernel_defs_${config}.h ] || [ ${force_flag} == '1' ]; then
+				cp ${sharedir}/blis/config/${config}/bli_kernel_defs_${config}.h config/${config}/bli_kernel_defs_${config}.h
 			fi
 		done
 
