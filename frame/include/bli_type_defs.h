@@ -139,8 +139,20 @@ typedef uint32_t objbits_t;  // object information bit field
 		#include <complex.h>
 
 		// Typedef official complex types to BLIS complex type names.
-		typedef  float complex scomplex;
+
+		// This cpp guard provides a temporary hack to allow libflame
+		// interoperability with BLIS.
+		#ifndef _DEFINED_SCOMPLEX
+		#define _DEFINED_SCOMPLEX
+		typedef float complex scomplex;
+		#endif
+
+		// This cpp guard provides a temporary hack to allow libflame
+		// interoperability with BLIS.
+		#ifndef _DEFINED_DCOMPLEX
+		#define _DEFINED_DCOMPLEX
 		typedef double complex dcomplex;
+		#endif
 	#else
 		#error "Configuration requested C99 complex types, but C99 does not appear to be supported."
 	#endif
