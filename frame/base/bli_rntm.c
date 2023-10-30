@@ -1606,14 +1606,22 @@ static void aocl_dscalv_dynamic
 		case BLIS_ARCH_ZEN2:
 		case BLIS_ARCH_ZEN3:
 
-			if ( n_elem <= 10000 )
+			if ( n_elem <= 30000)
 				*nt_ideal = 1;
-			else if (n_elem <= 20000)
+			else if (n_elem <= 100000)
 				*nt_ideal = 2;
-			else if (n_elem <= 50000)
-				*nt_ideal = 4;
-			else
+			else if (n_elem <= 500000)
 				*nt_ideal = 8;
+			else if (n_elem <= 4000000)
+				*nt_ideal = 12;
+			else if (n_elem <= 2500000)
+				*nt_ideal = 16;
+			else if(n_elem <= 7000000)
+				*nt_ideal = 24;
+			else if(n_elem <= 10000000)
+				*nt_ideal = 32;
+			else
+				*nt_ideal = 64;
 
 			break;
 
