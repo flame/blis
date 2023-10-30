@@ -40,7 +40,7 @@
 #define D_MR  8
 #define D_NR  6
 
-void bli_dgemm_8x6_avx2_k1_nn
+err_t bli_dgemm_8x6_avx2_k1_nn
      (
     dim_t  m,
     dim_t  n,
@@ -58,7 +58,7 @@ void bli_dgemm_8x6_avx2_k1_nn
     alpha_val = *alpha;
 
     if((m == 0) || (n == 0) || (((alpha_val == 0.0) || (k == 0)) && (beta_val == 1.0))){
-        return;
+        return BLIS_FAILURE;
     }
 
     dim_t m_remainder = (m % D_MR);
@@ -1090,5 +1090,5 @@ void bli_dgemm_8x6_avx2_k1_nn
         }
         n_remainder = n_remainder - 2;
     }
-    return;
+    return BLIS_SUCCESS;
 }

@@ -204,6 +204,18 @@ GEMMSUP_KER_PROT( dcomplex,   z, gemmsup_cv_zen4_asm_2x3 )
 GEMMSUP_KER_PROT( dcomplex,   z, gemmsup_cv_zen4_asm_2x2 )
 GEMMSUP_KER_PROT( dcomplex,   z, gemmsup_cv_zen4_asm_2x1 )
 
+err_t bli_dgemm_24x8_avx512_k1_nn
+    (
+      dim_t m,
+      dim_t n,
+      dim_t k,
+      double* alpha,
+      double* a, const inc_t lda,
+      double* b, const inc_t ldb,
+      double* beta,
+      double* c, const inc_t ldc
+     );
+
 // threshold functions
 bool bli_cntx_gemmsup_thresh_is_met_zen4
 	 (

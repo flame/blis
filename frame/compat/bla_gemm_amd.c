@@ -588,18 +588,40 @@ void dgemm_blis_impl
 
     if((k0 == 1) && bli_is_notrans(blis_transa) && bli_is_notrans(blis_transb))
     {
-        bli_dgemm_8x6_avx2_k1_nn( m0, n0, k0,
-                  (double*)alpha,
-                  (double*)a, *lda,
-                  (double*)b, *ldb,
-                  (double*)beta,
-                  c, *ldc
-                );
-        AOCL_DTL_LOG_GEMM_STATS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(d), *m, *n, *k);
-        AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
-        /* Finalize BLIS */
-        bli_finalize_auto();
-        return;
+	err_t ret = BLIS_FAILURE;
+	arch_t arch_id = bli_arch_query_id();
+	if(arch_id == BLIS_ARCH_ZEN ||
+	   arch_id == BLIS_ARCH_ZEN2 ||
+	   arch_id == BLIS_ARCH_ZEN3 )
+	{
+           ret = bli_dgemm_8x6_avx2_k1_nn( m0, n0, k0,
+                     (double*)alpha,
+                     (double*)a, *lda,
+                     (double*)b, *ldb,
+                     (double*)beta,
+                     c, *ldc
+                    );
+	}
+#if defined(BLIS_FAMILY_ZEN4) || defined(BLIS_FAMILY_AMDZEN) || defined(BLIS_FAMILY_X86_64)
+	else if( arch_id == BLIS_ARCH_ZEN4 )
+	{
+           ret = bli_dgemm_24x8_avx512_k1_nn( m0, n0, k0,
+                     (double*)alpha,
+                     (double*)a, *lda,
+                     (double*)b, *ldb,
+                     (double*)beta,
+                     c, *ldc
+                    );
+	}
+#endif
+	if(ret == BLIS_SUCCESS)
+	{
+            AOCL_DTL_LOG_GEMM_STATS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(d), *m, *n, *k);
+            AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
+            /* Finalize BLIS */
+            bli_finalize_auto();
+            return;
+	}
     }
 
     if (n0 == 1)

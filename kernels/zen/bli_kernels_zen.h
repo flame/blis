@@ -318,7 +318,7 @@ err_t bli_zgemm_small_At
       cntl_t* cntl
     );
 
-void bli_dgemm_8x6_avx2_k1_nn
+err_t bli_dgemm_8x6_avx2_k1_nn
     (
       dim_t m,
       dim_t n,

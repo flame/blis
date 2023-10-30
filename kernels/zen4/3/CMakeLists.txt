@@ -14,6 +14,7 @@ add_library(zen4_3
     ${CMAKE_CURRENT_SOURCE_DIR}/bli_zgemm_zen4_asm_4x12.c
     ${CMAKE_CURRENT_SOURCE_DIR}/bli_zgemmtrsm_l_4x12.c
     ${CMAKE_CURRENT_SOURCE_DIR}/bli_zgemmtrsm_u_4x12.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/bli_dgemm_avx512_k1.c
     )
 
 target_compile_options(zen4_3 PRIVATE /arch:AVX2 /arch:AVX512)
