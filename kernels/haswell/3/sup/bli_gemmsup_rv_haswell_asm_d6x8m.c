@@ -10144,7 +10144,7 @@ static void bli_dgemmsup_rv_haswell_asm_6x3m
 	"xmm12", "xmm13", "xmm14", "xmm15",
 	"ymm0", "ymm1", "ymm2", "ymm3", "ymm4",
 	"ymm6", "ymm8", "ymm10", "ymm12", "ymm14",
-	"memory"
+	"ymm15", "memory"
 	)
 
 	consider_edge_cases_nleft_3:
@@ -10637,8 +10637,8 @@ static void bli_dgemmsup_rv_haswell_asm_6x1m
 	"xmm8", "xmm9", "xmm10", "xmm11",
 	"xmm12", "xmm13", "xmm14", "xmm15",
 	"ymm0", "ymm1", "ymm2", "ymm3", "ymm4",
-	"ymm6", "ymm8", "ymm10", "ymm12", "ymm14",
-	"memory"
+	"ymm5", "ymm6", "ymm7", "ymm8", "ymm9", "ymm10", "ymm11",
+	"ymm12", "ymm13", "ymm14", "ymm15", "memory"
 	)
 
 	consider_edge_cases_nleft_1:
@@ -12036,8 +12036,8 @@ void bli_dgemmsup_rv_haswell_asm_6x4m
 	  "xmm8", "xmm9", "xmm10", "xmm11",
 	  "xmm12", "xmm13", "xmm14", "xmm15",
 	  "ymm0", "ymm1", "ymm2", "ymm3", "ymm4",
-	  "ymm6", "ymm8", "ymm10", "ymm12", "ymm14",
-	  "memory"
+	  "ymm5", "ymm6", "ymm7", "ymm8", "ymm9", "ymm10", "ymm11",
+	  "ymm12", "ymm13", "ymm14",  "ymm15", "memory"
 	)
 
 	consider_edge_cases:
@@ -12677,8 +12677,8 @@ void bli_dgemmsup_rv_haswell_asm_6x2m
 	  "xmm8", "xmm9", "xmm10", "xmm11",
 	  "xmm12", "xmm13", "xmm14", "xmm15",
 	  "ymm0", "ymm1", "ymm2", "ymm3", "ymm4",
-	  "ymm6", "ymm8", "ymm10", "ymm12", "ymm14",
-	  "memory"
+	  "ymm5", "ymm6", "ymm7", "ymm8", "ymm9", "ymm10", "ymm11",
+	  "ymm12", "ymm13", "ymm14", "ymm15", "memory"
 	)
 
 	consider_edge_cases:

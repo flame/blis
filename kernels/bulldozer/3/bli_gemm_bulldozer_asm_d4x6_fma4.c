@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2023, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -760,7 +761,8 @@ void bli_sgemm_bulldozer_asm_8x8_fma4
 	  "xmm4", "xmm5", "xmm6", "xmm7",
 	  "xmm8", "xmm9", "xmm10", "xmm11",
 	  "xmm12", "xmm13", "xmm14", "xmm15",
-	  "memory"
+	  "ymm0", "ymm1", "ymm2", "ymm3", "ymm4", "ymm5", "ymm7", "ymm8",
+	  "ymm9", "ymm10", "ymm11", "ymm12", "ymm13", "ymm14", "ymm15", "memory"
 	)
 }
 
@@ -1857,7 +1859,8 @@ void bli_cgemm_bulldozer_asm_8x4_fma4
 	  "ymm4", "ymm5", "ymm6", "ymm7",
 	  "ymm8", "ymm9", "ymm10", "ymm11",
 	  "ymm12", "ymm13", "ymm14", "ymm15",
-	  "memory"
+	  "xmm0", "xmm2", "xmm6", "xmm7", "xmm8", "xmm9", "xmm10", "xmm11",
+	  "xmm12", "xmm13", "xmm14", "xmm15", "memory"
 	)
 }
 
@@ -2530,7 +2533,8 @@ void bli_zgemm_bulldozer_asm_4x4_fma4
 	  "ymm4", "ymm5", "ymm6", "ymm7",
 	  "ymm8", "ymm9", "ymm10", "ymm11",
 	  "ymm12", "ymm13", "ymm14", "ymm15",
-	  "memory"
+	  "xmm0", "xmm2", "xmm6", "xmm7", "xmm8", "xmm9", "xmm10", "xmm11",
+	  "xmm12", "xmm13", "xmm14", "xmm15", "memory"
 	)
 }
 

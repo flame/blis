@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2023, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -695,7 +696,7 @@ void bli_sgemm_knl_asm_24x16
       "zmm6", "zmm7", "zmm8", "zmm9", "zmm10", "zmm11", "zmm12", "zmm13",
       "zmm14", "zmm15", "zmm16", "zmm17", "zmm18", "zmm19", "zmm20", "zmm21",
       "zmm22", "zmm23", "zmm24", "zmm25", "zmm26", "zmm27", "zmm28", "zmm29",
-      "zmm30", "zmm31", "memory"
+      "zmm30", "zmm31", "k0", "k1", "k2", "xmm1", "ymm3", "ymm5", "memory"
     )
 
 #ifdef LOOPMON

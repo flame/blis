@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2023, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -304,7 +305,8 @@ void bli_dpackm_knl_asm_8xk
           "zmm24", "zmm25", "zmm26", "zmm27", "zmm28", "zmm29",
           "zmm30", "zmm31",
           "rax", "rbx", "rcx", "rdx", "rdi", "rsi",
-          "r8", "r9", "r10", "r11", "r12", "r13", "r14", "memory"
+          "r8", "r9", "r10", "r11", "r12", "r13", "r14", "k0", "k1",
+          "ymm0", "ymm3", "memory"
     )
 
 	}
@@ -608,7 +610,8 @@ void bli_dpackm_knl_asm_24xk
           "zmm24", "zmm25", "zmm26", "zmm27", "zmm28", "zmm29",
           "zmm30", "zmm31",
           "rax", "rbx", "rcx", "rdi", "rsi",
-          "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15", "memory"
+          "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15",
+          "k0", "k1", "k2", "k3", "ymm0", "ymm1", "ymm2", "ymm3", "memory"
     )
 
 	}

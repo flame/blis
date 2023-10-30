@@ -943,8 +943,8 @@ void bli_dgemmsup_rv_haswell_asm_5x7
 	  "xmm8", "xmm9", "xmm10", "xmm11",
 	  "xmm12", "xmm13", "xmm14", "xmm15",
 	  "ymm0", "ymm1", "ymm2", "ymm3", "ymm4",
-	  "ymm6", "ymm8", "ymm10", "ymm12",
-	  "ymm5", "ymm7", "ymm9", "ymm15",
+	  "ymm5", "ymm6", "ymm7", "ymm8", "ymm9",
+	  "ymm10", "ymm11", "ymm12", "ymm15",
 	  "memory"
 	)
 }
@@ -1405,8 +1405,8 @@ void bli_dgemmsup_rv_haswell_asm_4x7
 	  "xmm8", "xmm9", "xmm10", "xmm11",
 	  "xmm12", "xmm13", "xmm14", "xmm15",
 	  "ymm0", "ymm1", "ymm2", "ymm3", "ymm4",
-	  "ymm6", "ymm8", "ymm10", "ymm12",
-	  "ymm5", "ymm7", "ymm11", "ymm15",
+	  "ymm5", "ymm6", "ymm7", "ymm8", "ymm9",
+	  "ymm10", "ymm11", "ymm12", "ymm15",
 	  "memory"
 	)
 }
@@ -1833,9 +1833,9 @@ void bli_dgemmsup_rv_haswell_asm_3x7
 	  "xmm8", "xmm9", "xmm10", "xmm11",
 	  "xmm12", "xmm13", "xmm14", "xmm15",
 	  "ymm0", "ymm1", "ymm2", "ymm3", "ymm4",
-	  "ymm6", "ymm8", "ymm10", "ymm12",
-	  "ymm5", "ymm15",
-	  "memory"
+	  "ymm5", "ymm6", "ymm7", "ymm8", "ymm9",
+	  "ymm10", "ymm11", "ymm12", "ymm13",
+	  "ymm14", "ymm15", "memory"
 	)
 }
 
@@ -2225,9 +2225,8 @@ void bli_dgemmsup_rv_haswell_asm_2x7
 	  "xmm8", "xmm9", "xmm10", "xmm11",
 	  "xmm12", "xmm13", "xmm14", "xmm15",
 	  "ymm0", "ymm1", "ymm2", "ymm3", "ymm4",
-	  "ymm6", "ymm8", "ymm10", "ymm12",
-	  "ymm15",
-	  "memory"
+	  "ymm5", "ymm6", "ymm8", "ymm10","ymm11",
+	  "ymm12", "ymm13", "ymm14", "ymm15", "memory"
 	)
 }
 
@@ -2579,8 +2578,7 @@ void bli_dgemmsup_rv_haswell_asm_1x7
 	  "xmm8", "xmm9", "xmm10", "xmm11",
 	  "xmm12", "xmm13", "xmm14", "xmm15",
 	  "ymm0", "ymm1", "ymm2", "ymm3", "ymm4",
-	  "ymm6", "ymm8", "ymm10", "ymm12",
-	  "ymm15",
-	  "memory"
+	  "ymm6", "ymm7", "ymm8", "ymm9", "ymm10",
+	  "ymm12", "ymm15", "memory"
 	)
 }

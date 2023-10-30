@@ -2270,7 +2270,7 @@ void bli_dgemmsup_rv_haswell_asm_3x6
 	  "xmm12", "xmm13", "xmm14", "xmm15",
 	  "ymm0", "ymm1", "ymm2", "ymm3", "ymm4", "ymm5", "ymm6",
 	  "ymm7", "ymm8", "ymm9", "ymm10", "ymm11",
-	  "memory"
+	  "ymm12", "ymm13", "ymm14", "ymm15", "memory"
 	)
 }
 
@@ -2700,7 +2700,7 @@ void bli_dgemmsup_rv_haswell_asm_2x6
 	  "xmm12", "xmm13", "xmm14", "xmm15",
 	  "ymm0", "ymm1", "ymm2", "ymm3", "ymm4", "ymm5", "ymm6",
 	  "ymm7", "ymm8", "ymm9", "ymm10", "ymm11",
-	  "memory"
+	  "ymm12", "ymm13", "memory"
 	)
 }
 
@@ -3077,7 +3077,7 @@ void bli_dgemmsup_rv_haswell_asm_1x6
 	  "xmm8", "xmm9", "xmm10", "xmm11",
 	  "xmm12", "xmm13", "xmm14", "xmm15",
 	  "ymm0", "ymm1", "ymm2", "ymm3", "ymm4", "ymm5",
-	  "memory"
+	  "ymm6", "ymm7", "memory"
 	)
 }
 

@@ -2142,7 +2142,7 @@ void bli_dgemmsup_rv_haswell_asm_2x2
 	  "xmm8", "xmm9", "xmm10", "xmm11",
 	  "xmm12", "xmm13", "xmm14", "xmm15",
 	  "ymm0", "ymm2", "ymm3",
-	  "memory"
+	  "ymm10", "ymm11", "memory"
 	)
 }
 
@@ -2467,7 +2467,7 @@ void bli_dgemmsup_rv_haswell_asm_1x2
 	  "xmm8", "xmm9", "xmm10", "xmm11",
 	  "xmm12", "xmm13", "xmm14", "xmm15",
 	  "ymm0", "ymm2", "ymm3",
-	  "memory"
+	  "ymm7", "memory"
 	)
 }
 

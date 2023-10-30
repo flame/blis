@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2023, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -322,7 +323,11 @@ void bli_spackm_knl_asm_16xk
           "zmm24", "zmm25", "zmm26", "zmm27", "zmm28", "zmm29",
           "zmm30", "zmm31",
           "rax", "rbx", "rcx", "rdx", "rdi", "rsi",
-          "r8", "r9", "r10", "r11", "r12", "r13", "r14", "memory"
+          "r8", "r9", "r10", "r11", "r12", "r13", "r14", "k0", "k1",
+          "xmm0", "xmm1", "xmm2", "xmm3", "xmm4", "xmm5", "xmm6", "xmm7",
+          "xmm12", "xmm13", "xmm15", "ymm0", "ymm1", "ymm2", "ymm3",
+          "ymm4", "ymm5", "ymm6", "ymm7", "ymm8", "ymm9", "ymm10", "ymm11",
+          "ymm12", "ymm13", "ymm15", "memory"
     )
 
 	}
@@ -625,7 +630,11 @@ void bli_spackm_knl_asm_24xk
           "zmm24", "zmm25", "zmm26", "zmm27", "zmm28", "zmm29",
           "zmm30", "zmm31",
           "rax", "rbx", "rcx", "rdx", "rdi", "rsi",
-          "r8", "r9", "r10", "r11", "r12", "r13", "r14", "memory"
+          "r8", "r9", "r10", "r11", "r12", "r13", "r14", "k0", "k1",
+          "k2", "xmm0", "xmm1", "xmm2", "xmm3", "xmm4", "xmm5", "xmm6",
+          "xmm7", "xmm12", "xmm13", "xmm15", "ymm0", "ymm1", "ymm2",
+          "ymm3", "ymm4", "ymm5", "ymm6", "ymm7", "ymm8", "ymm9", "ymm10",
+          "ymm11", "ymm12", "ymm13", "ymm15", "memory"
     )
 
 	}

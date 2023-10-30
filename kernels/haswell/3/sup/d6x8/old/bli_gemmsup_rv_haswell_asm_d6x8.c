@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2019, Advanced Micro Devices, Inc.
+   Copyright (C) 2019 - 2023, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -809,7 +809,9 @@ void bli_dgemmsup_rv_haswell_asm_6x8
 	  "xmm4", "xmm5", "xmm6", "xmm7",
 	  "xmm8", "xmm9", "xmm10", "xmm11",
 	  "xmm12", "xmm13", "xmm14", "xmm15",
-	  "memory"
+	  "ymm0", "ymm1", "ymm2", "ymm3", "ymm4", "ymm5", "ymm6", "ymm7",
+	  "ymm8", "ymm9", "ymm10", "ymm11", "ymm12", "ymm13", "ymm14",
+	  "ymm15", "memory"
 	)
 	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_7);
 }
@@ -1437,7 +1439,8 @@ void bli_dgemmsup_rv_haswell_asm_5x8
 	  "xmm4", "xmm5", "xmm6", "xmm7",
 	  "xmm8", "xmm9", "xmm10", "xmm11",
 	  "xmm12", "xmm13", "xmm14", "xmm15",
-	  "memory"
+	  "ymm0", "ymm1", "ymm2", "ymm3", "ymm4", "ymm5", "ymm6", "ymm7",
+	  "ymm8", "ymm9", "ymm10", "ymm11", "ymm12", "ymm13", "memory"
 	)
 	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_7);
 }
@@ -1927,7 +1930,8 @@ void bli_dgemmsup_rv_haswell_asm_4x8
 	  "xmm4", "xmm5", "xmm6", "xmm7",
 	  "xmm8", "xmm9", "xmm10", "xmm11",
 	  "xmm12", "xmm13", "xmm14", "xmm15",
-	  "memory"
+	  "ymm0", "ymm1", "ymm2", "ymm3", "ymm4", "ymm5", "ymm6", "ymm7",
+	  "ymm8", "ymm9", "ymm10", "ymm11", "memory"
 	)
 	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_7);
 }
@@ -2444,7 +2448,8 @@ void bli_dgemmsup_rv_haswell_asm_3x8
 	  "xmm4", "xmm5", "xmm6", "xmm7",
 	  "xmm8", "xmm9", "xmm10", "xmm11",
 	  "xmm12", "xmm13", "xmm14", "xmm15",
-	  "memory"
+	  "ymm0", "ymm1", "ymm2", "ymm3", "ymm4", "ymm5", "ymm6", "ymm7",
+	  "ymm8", "ymm9", "ymm10", "ymm11", "memory"
 	)
 
     AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_7);
@@ -2848,7 +2853,7 @@ void bli_dgemmsup_rv_haswell_asm_2x8
 	  "xmm4", "xmm5", "xmm6", "xmm7",
 	  "xmm8", "xmm9", "xmm10", "xmm11",
 	  "xmm12", "xmm13", "xmm14", "xmm15",
-	  "memory"
+	  "ymm0", "ymm1", "ymm2", "ymm3", "ymm4", "ymm5", "ymm6", "ymm7", "memory"
 	)
 	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_7);
 }
@@ -3216,7 +3221,7 @@ void bli_dgemmsup_rv_haswell_asm_1x8
 	  "xmm4", "xmm5", "xmm6", "xmm7",
 	  "xmm8", "xmm9", "xmm10", "xmm11",
 	  "xmm12", "xmm13", "xmm14", "xmm15",
-	  "memory"
+	  "ymm0", "ymm1", "ymm2", "ymm3", "ymm4", "ymm5", "memory"
 	)
 	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_7);
 }
@@ -3823,7 +3828,9 @@ void bli_dgemmsup_rv_haswell_asm_6x6
 	  "xmm4", "xmm5", "xmm6", "xmm7",
 	  "xmm8", "xmm9", "xmm10", "xmm11",
 	  "xmm12", "xmm13", "xmm14", "xmm15",
-	  "memory"
+	  "ymm0", "ymm1", "ymm2", "ymm3", "ymm4", "ymm5", "ymm6", "ymm7",
+	  "ymm8", "ymm9", "ymm10", "ymm11", "ymm12", "ymm13", "ymm14",
+	  "ymm15", "memory"
 	)
 	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_7);
 }
@@ -4449,7 +4456,8 @@ void bli_dgemmsup_rv_haswell_asm_5x6
 	  "xmm4", "xmm5", "xmm6", "xmm7",
 	  "xmm8", "xmm9", "xmm10", "xmm11",
 	  "xmm12", "xmm13", "xmm14", "xmm15",
-	  "memory"
+	  "ymm0", "ymm1", "ymm2", "ymm3", "ymm4", "ymm5", "ymm6", "ymm7",
+	  "ymm8", "ymm9", "ymm10", "ymm11", "ymm12", "ymm13", "memory"
 	)
 
 	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_7);
@@ -4933,7 +4941,8 @@ void bli_dgemmsup_rv_haswell_asm_4x6
 	  "xmm4", "xmm5", "xmm6", "xmm7",
 	  "xmm8", "xmm9", "xmm10", "xmm11",
 	  "xmm12", "xmm13", "xmm14", "xmm15",
-	  "memory"
+	  "ymm0", "ymm1", "ymm2", "ymm3", "ymm4", "ymm5", "ymm6", "ymm7",
+	  "ymm8", "ymm9", "ymm10", "ymm11", "memory"
 	)
 	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_7);
 }
@@ -5447,7 +5456,8 @@ void bli_dgemmsup_rv_haswell_asm_3x6
 	  "xmm4", "xmm5", "xmm6", "xmm7",
 	  "xmm8", "xmm9", "xmm10", "xmm11",
 	  "xmm12", "xmm13", "xmm14", "xmm15",
-	  "memory"
+	  "ymm0", "ymm1", "ymm2", "ymm3", "ymm4", "ymm5", "ymm6", "ymm7",
+	  "ymm8", "ymm9", "ymm10", "ymm11", "memory"
 	)
 	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_7);
 }
@@ -5863,7 +5873,8 @@ void bli_dgemmsup_rv_haswell_asm_2x6
 	  "xmm4", "xmm5", "xmm6", "xmm7",
 	  "xmm8", "xmm9", "xmm10", "xmm11",
 	  "xmm12", "xmm13", "xmm14", "xmm15",
-	  "memory"
+	  "ymm0", "ymm1", "ymm2", "ymm3", "ymm4", "ymm5", "ymm6", "ymm7",
+	  "ymm8", "ymm9", "ymm10", "ymm11", "memory"
 	)
 	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_7);
 }
@@ -6233,7 +6244,7 @@ void bli_dgemmsup_rv_haswell_asm_1x6
 	  "xmm4", "xmm5", "xmm6", "xmm7",
 	  "xmm8", "xmm9", "xmm10", "xmm11",
 	  "xmm12", "xmm13", "xmm14", "xmm15",
-	  "memory"
+	  "ymm0", "ymm1", "ymm2", "ymm3", "ymm4", "ymm5", "memory"
 	)
 	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_7);
 }
@@ -6710,7 +6721,8 @@ void bli_dgemmsup_rv_haswell_asm_6x4
 	  "xmm4", "xmm5", "xmm6", "xmm7",
 	  "xmm8", "xmm9", "xmm10", "xmm11",
 	  "xmm12", "xmm13", "xmm14", "xmm15",
-	  "memory"
+	  "ymm0", "ymm1", "ymm2", "ymm3", "ymm4", "ymm6", "ymm8", "ymm10",
+	  "ymm12", "ymm14", "memory"
 	)
 	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_7);
 }
@@ -7205,7 +7217,8 @@ void bli_dgemmsup_rv_haswell_asm_5x4
 	  "xmm4", "xmm5", "xmm6", "xmm7",
 	  "xmm8", "xmm9", "xmm10", "xmm11",
 	  "xmm12", "xmm13", "xmm14", "xmm15",
-	  "memory"
+	  "ymm0", "ymm1", "ymm2", "ymm3", "ymm4", "ymm6", "ymm8", "ymm10",
+	  "ymm12", "memory"
 	)
 	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_7);
 }
@@ -7606,7 +7619,7 @@ void bli_dgemmsup_rv_haswell_asm_4x4
 	  "xmm4", "xmm5", "xmm6", "xmm7",
 	  "xmm8", "xmm9", "xmm10", "xmm11",
 	  "xmm12", "xmm13", "xmm14", "xmm15",
-	  "memory"
+	  "ymm0", "ymm1", "ymm2", "ymm3", "ymm4", "ymm6", "ymm8", "ymm10", "memory"
 	)
 	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_7);
 }
@@ -8014,7 +8027,7 @@ void bli_dgemmsup_rv_haswell_asm_3x4
 	  "xmm4", "xmm5", "xmm6", "xmm7",
 	  "xmm8", "xmm9", "xmm10", "xmm11",
 	  "xmm12", "xmm13", "xmm14", "xmm15",
-	  "memory"
+	  "ymm0", "ymm1", "ymm2", "ymm3", "ymm4", "ymm6", "ymm8", "ymm10", "memory"
 	)
 	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_7);
 }
@@ -8357,7 +8370,7 @@ void bli_dgemmsup_rv_haswell_asm_2x4
 	  "xmm4", "xmm5", "xmm6", "xmm7",
 	  "xmm8", "xmm9", "xmm10", "xmm11",
 	  "xmm12", "xmm13", "xmm14", "xmm15",
-	  "memory"
+	  "ymm0", "ymm1", "ymm2", "ymm3", "ymm4", "ymm6", "memory"
 	)
 	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_7);
 }
@@ -8677,7 +8690,7 @@ void bli_dgemmsup_rv_haswell_asm_1x4
 	  "xmm4", "xmm5", "xmm6", "xmm7",
 	  "xmm8", "xmm9", "xmm10", "xmm11",
 	  "xmm12", "xmm13", "xmm14", "xmm15",
-	  "memory"
+	  "ymm0", "ymm1", "ymm2", "ymm3", "ymm4", "memory"
 	)
 	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_7);
 }
@@ -9132,7 +9145,7 @@ void bli_dgemmsup_rv_haswell_asm_6x2
 	  "xmm4", "xmm5", "xmm6", "xmm7",
 	  "xmm8", "xmm9", "xmm10", "xmm11",
 	  "xmm12", "xmm13", "xmm14", "xmm15",
-	  "memory"
+	  "ymm0", "ymm1", "ymm2", "ymm3", "ymm4", "ymm6", "memory"
 	)
 	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_7);
 }
@@ -9582,7 +9595,7 @@ void bli_dgemmsup_rv_haswell_asm_5x2
 	  "xmm4", "xmm5", "xmm6", "xmm7",
 	  "xmm8", "xmm9", "xmm10", "xmm11",
 	  "xmm12", "xmm13", "xmm14", "xmm15",
-	  "memory"
+	  "ymm0", "ymm1", "ymm2", "ymm3", "ymm4", "ymm6", "memory"
 	)
 	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_7);
 }
@@ -9971,7 +9984,7 @@ void bli_dgemmsup_rv_haswell_asm_4x2
 	  "xmm4", "xmm5", "xmm6", "xmm7",
 	  "xmm8", "xmm9", "xmm10", "xmm11",
 	  "xmm12", "xmm13", "xmm14", "xmm15",
-	  "memory"
+	  "ymm0", "ymm1", "ymm2", "ymm3", "ymm4", "ymm6", "memory"
 	)
 	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_7);
 }
@@ -10377,7 +10390,7 @@ void bli_dgemmsup_rv_haswell_asm_3x2
 	  "xmm4", "xmm5", "xmm6", "xmm7",
 	  "xmm8", "xmm9", "xmm10", "xmm11",
 	  "xmm12", "xmm13", "xmm14", "xmm15",
-	  "memory"
+	  "ymm0", "ymm1", "ymm2", "ymm3", "ymm4", "ymm6", "ymm8", "ymm10", "memory"
 	)
 	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_7);
 }
@@ -10707,7 +10720,7 @@ void bli_dgemmsup_rv_haswell_asm_2x2
 	  "xmm4", "xmm5", "xmm6", "xmm7",
 	  "xmm8", "xmm9", "xmm10", "xmm11",
 	  "xmm12", "xmm13", "xmm14", "xmm15",
-	  "memory"
+	  "ymm0", "ymm2", "ymm3", "memory"
 	)
 	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_7);
 }
@@ -11014,7 +11027,7 @@ void bli_dgemmsup_rv_haswell_asm_1x2
 	  "xmm4", "xmm5", "xmm6", "xmm7",
 	  "xmm8", "xmm9", "xmm10", "xmm11",
 	  "xmm12", "xmm13", "xmm14", "xmm15",
-	  "memory"
+	  "ymm0", "ymm2", "ymm3", "memory"
 	)
 	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_7);
 }
