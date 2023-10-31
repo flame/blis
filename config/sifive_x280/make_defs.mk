@@ -49,8 +49,7 @@ THIS_CONFIG    := sifive_x280
 CMISCFLAGS_SIFIVE := -mcmodel=medany -march=rv64gcv_zba_zbb_zvl512b -mabi=lp64d
 CPPROCFLAGS    :=
 CMISCFLAGS     := $(CMISCFLAGS_SIFIVE) -fdata-sections -ffunction-sections \
-                  -fdiagnostics-color=always -fno-rtti -fno-exceptions \
-                  -std=gnu++17
+                  -fdiagnostics-color=always -fno-rtti -fno-exceptions
 CPICFLAGS      := -fPIC
 CWARNFLAGS     := -Wall -Wextra -Wno-unused-function -Wno-unused-parameter \
                   -Wno-sign-compare -Wno-unused-variable
