@@ -35,6 +35,10 @@
 
 #include "blis.h"
 
+// Make thread settings local to each thread calling BLIS routines.
+// (The definition resides in bli_rntm.c.)
+extern BLIS_THREAD_LOCAL rntm_t tl_rntm;
+
 /* cgbmv.f -- translated by f2c (version 19991025).
    You must link the resulting object file with the libraries:
 	-lf2c -lm   (in that order)
@@ -202,6 +206,11 @@ int PASTEF77S(c,gbmv)(const bla_character *trans, const bla_integer *m, const bl
     --y;
 
     /* Function Body */
+
+    // Initialize info_value to 0
+    gint_t info_value = 0;
+    bli_rntm_set_info_value_only( info_value, &tl_rntm );
+
     info = 0;
     if (! PASTE_LSAME(trans, "N", (ftnlen)1, (ftnlen)1) && ! PASTE_LSAME(trans, "T", (
 	    ftnlen)1, (ftnlen)1) && ! PASTE_LSAME(trans, "C", (ftnlen)1, (ftnlen)1)
@@ -635,6 +644,11 @@ int PASTEF77S(d,gbmv)(const bla_character *trans, const bla_integer *m, const bl
     --y;
 
     /* Function Body */
+
+    // Initialize info_value to 0
+    gint_t info_value = 0;
+    bli_rntm_set_info_value_only( info_value, &tl_rntm );
+
     info = 0;
     if (! PASTE_LSAME(trans, "N", (ftnlen)1, (ftnlen)1) && ! PASTE_LSAME(trans, "T", (
 	    ftnlen)1, (ftnlen)1) && ! PASTE_LSAME(trans, "C", (ftnlen)1, (ftnlen)1)
@@ -992,6 +1006,11 @@ int PASTEF77S(s,gbmv)(const bla_character *trans, const bla_integer *m, const bl
     --y;
 
     /* Function Body */
+
+    // Initialize info_value to 0
+    gint_t info_value = 0;
+    bli_rntm_set_info_value_only( info_value, &tl_rntm );
+
     info = 0;
     if (! PASTE_LSAME(trans, "N", (ftnlen)1, (ftnlen)1) && ! PASTE_LSAME(trans, "T", (
 	    ftnlen)1, (ftnlen)1) && ! PASTE_LSAME(trans, "C", (ftnlen)1, (ftnlen)1)
@@ -1358,6 +1377,11 @@ int PASTEF77S(z,gbmv)(const bla_character *trans, const bla_integer *m, const bl
     --y;
 
     /* Function Body */
+
+    // Initialize info_value to 0
+    gint_t info_value = 0;
+    bli_rntm_set_info_value_only( info_value, &tl_rntm );
+
     info = 0;
     if (! PASTE_LSAME(trans, "N", (ftnlen)1, (ftnlen)1) && ! PASTE_LSAME(trans, "T", (
 	    ftnlen)1, (ftnlen)1) && ! PASTE_LSAME(trans, "C", (ftnlen)1, (ftnlen)1)

@@ -35,6 +35,10 @@
 
 #include "blis.h"
 
+// Make thread settings local to each thread calling BLIS routines.
+// (The definition resides in bli_rntm.c.)
+extern BLIS_THREAD_LOCAL rntm_t tl_rntm;
+
 /* dspmv.f -- translated by f2c (version 19991025).
    You must link the resulting object file with the libraries:
 	-lf2c -lm   (in that order)
@@ -159,6 +163,11 @@ int PASTEF77S(d,spmv)(const bla_character *uplo, const bla_integer *n, const bla
     --ap;
 
     /* Function Body */
+
+    // Initialize info_value to 0
+    gint_t info_value = 0;
+    bli_rntm_set_info_value_only( info_value, &tl_rntm );
+
     info = 0;
     if (! PASTE_LSAME(uplo, "U", (ftnlen)1, (ftnlen)1) && ! PASTE_LSAME(uplo, "L", (
 	    ftnlen)1, (ftnlen)1)) {
@@ -461,6 +470,11 @@ int PASTEF77S(s,spmv)(const bla_character *uplo, const bla_integer *n, const bla
     --ap;
 
     /* Function Body */
+
+    // Initialize info_value to 0
+    gint_t info_value = 0;
+    bli_rntm_set_info_value_only( info_value, &tl_rntm );
+
     info = 0;
     if (! PASTE_LSAME(uplo, "U", (ftnlen)1, (ftnlen)1) && ! PASTE_LSAME(uplo, "L", (
 	    ftnlen)1, (ftnlen)1)) {
