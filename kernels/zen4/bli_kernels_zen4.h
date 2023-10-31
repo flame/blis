@@ -55,6 +55,8 @@ GEMMTRSM_UKR_PROT( double,   d, gemmtrsm_l_zen_asm_16x14)
 GEMMTRSM_UKR_PROT( double,   d, gemmtrsm_u_zen_asm_16x14)
 GEMMTRSM_UKR_PROT( double,   d, gemmtrsm_l_zen4_asm_8x24)
 GEMMTRSM_UKR_PROT( double,   d, gemmtrsm_u_zen4_asm_8x24)
+GEMMTRSM_UKR_PROT( dcomplex, z, gemmtrsm_l_zen4_asm_4x12)
+GEMMTRSM_UKR_PROT( dcomplex, z, gemmtrsm_u_zen4_asm_4x12)
 
 //packing kernels
 PACKM_KER_PROT( double,   d, packm_zen4_asm_16xk )
@@ -69,6 +71,8 @@ PACKM_KER_PROT( dcomplex, z, packm_zen4_asm_4xk )
 GEMM_UKR_PROT( double,   d, gemm_zen4_asm_32x6 )
 GEMM_UKR_PROT( double,   d, gemm_zen4_asm_8x24 )
 GEMM_UKR_PROT( dcomplex, z, gemm_zen4_asm_12x4 )
+GEMM_UKR_PROT( dcomplex, z, gemm_zen4_asm_4x12 )
+
 
 //sgemm rv sup
 GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen_asm_6x64m_avx512 )
