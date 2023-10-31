@@ -360,7 +360,8 @@ POST_OPS_DOWNSCALE_4x16:
 		__m256i temp_32[2];
 		__m256 temp_float[2];
 		__m256 scale_1, scale_2;
-		__m128i zero_point_0;
+		__m128i _zero_point_0;
+		__m256i zero_point_0 = _mm256_setzero_si256();
 		__m256 res_1, res_2;
 
 		/* Load the scale vector values into the register*/
@@ -374,10 +375,18 @@ POST_OPS_DOWNSCALE_4x16:
 			post_ops_attr.post_op_c_j + (1 * 8));
 
 		// Load zero points (2 byte values).
-		zero_point_0 =
+		_zero_point_0 =
 		   _mm_loadu_si128(
 		   ( __m128i const* )( ( int8_t* )post_ops_list_temp->op_args1 +
 		   post_ops_attr.post_op_c_j + ( 0 * 16 ) ) );
+		if ( post_ops_attr.c_stor_type == S8 )
+		{
+			zero_point_0 = _mm256_cvtepi8_epi16( _zero_point_0 );
+		}
+		else if ( post_ops_attr.c_stor_type == U8 )
+		{
+			zero_point_0 = _mm256_cvtepu8_epi16( _zero_point_0 );
+		}
 
 		// Scale first 16 columns of the 4 rows.
 		CVT_MULRND_CVT16(c_int16_0p0, scale_1, scale_2, zero_point_0)
@@ -789,7 +798,8 @@ POST_OPS_DOWNSCALE_4xlt16:
 		__m256i temp_32[2];
 		__m256 temp_float[2];
 		__m256 scale_1, scale_2;
-		__m128i zero_point_0;
+		__m128i _zero_point_0;
+		__m256i zero_point_0 = _mm256_setzero_si256();
 		__m256 res_1, res_2;
 
 		float float_buf[16];
@@ -801,11 +811,24 @@ POST_OPS_DOWNSCALE_4xlt16:
 		scale_1 = _mm256_loadu_ps(float_buf + (0 * 8));
 		scale_2 = _mm256_loadu_ps(float_buf + (1 * 8));
 
-		int8_t zero_point_buf[16];
+		if ( post_ops_attr.c_stor_type == S8 )
+		{
+			int8_t zero_point_buf[16];
 
-		memcpy( zero_point_buf, ( ( int8_t* )post_ops_list_temp->op_args1 +
-				post_ops_attr.post_op_c_j ), ( n0_rem * sizeof( int8_t ) ) );
-		zero_point_0 = _mm_loadu_si128( ( __m128i const* )zero_point_buf );
+			memcpy( zero_point_buf, ( ( int8_t* )post_ops_list_temp->op_args1 +
+					post_ops_attr.post_op_c_j ), ( n0_rem * sizeof( int8_t ) ) );
+			_zero_point_0 = _mm_loadu_si128( ( __m128i const* )zero_point_buf );
+			zero_point_0 = _mm256_cvtepi8_epi16( _zero_point_0 );
+		}
+		else if ( post_ops_attr.c_stor_type == U8 )
+		{
+			uint8_t zero_point_buf[16];
+
+			memcpy( zero_point_buf, ( ( uint8_t* )post_ops_list_temp->op_args1 +
+					post_ops_attr.post_op_c_j ), ( n0_rem * sizeof( uint8_t ) ) );
+			_zero_point_0 = _mm_loadu_si128( ( __m128i const* )zero_point_buf );
+			zero_point_0 = _mm256_cvtepu8_epi16( _zero_point_0 );
+		}
 
 		// Scale first 16 columns of the 6 rows.
 		CVT_MULRND_CVT16(c_int16_0p0, scale_1, scale_2, zero_point_0)
@@ -1113,7 +1136,8 @@ POST_OPS_DOWNSCALE_2x16:
 		__m256i temp_32[2];
 		__m256 temp_float[2];
 		__m256 scale_1, scale_2;
-		__m128i zero_point_0;
+		__m128i _zero_point_0;
+		__m256i zero_point_0 = _mm256_setzero_si256();
 		__m256 res_1, res_2;
 
 		/* Load the scale vector values into the register*/
@@ -1127,10 +1151,18 @@ POST_OPS_DOWNSCALE_2x16:
 			post_ops_attr.post_op_c_j + (1 * 8));
 
 		// Load zero points (2 byte values).
-		zero_point_0 =
+		_zero_point_0 =
 		   _mm_loadu_si128(
 		   ( __m128i const* )( ( int8_t* )post_ops_list_temp->op_args1 +
 		   post_ops_attr.post_op_c_j + ( 0 * 16 ) ) );
+		if ( post_ops_attr.c_stor_type == S8 )
+		{
+			zero_point_0 = _mm256_cvtepi8_epi16( _zero_point_0 );
+		}
+		else if ( post_ops_attr.c_stor_type == U8 )
+		{
+			zero_point_0 = _mm256_cvtepu8_epi16( _zero_point_0 );
+		}
 
 		// Scale first 16 columns of the 2 rows.
 		CVT_MULRND_CVT16(c_int16_0p0, scale_1, scale_2, zero_point_0)
@@ -1417,7 +1449,8 @@ POST_OPS_DOWNSCALE_2xlt16:
 		__m256i temp_32[2];
 		__m256 temp_float[2];
 		__m256 scale_1, scale_2;
-		__m128i zero_point_0;
+		__m128i _zero_point_0;
+		__m256i zero_point_0 = _mm256_setzero_si256();
 		__m256 res_1, res_2;
 
 		float float_buf[16];
@@ -1429,11 +1462,24 @@ POST_OPS_DOWNSCALE_2xlt16:
 		scale_1 = _mm256_loadu_ps(float_buf + (0 * 8));
 		scale_2 = _mm256_loadu_ps(float_buf + (1 * 8));
 
-		int8_t zero_point_buf[16];
+		if ( post_ops_attr.c_stor_type == S8 )
+		{
+			int8_t zero_point_buf[16];
 
-		memcpy( zero_point_buf, ( ( int8_t* )post_ops_list_temp->op_args1 +
-				post_ops_attr.post_op_c_j ), ( n0_rem * sizeof( int8_t ) ) );
-		zero_point_0 = _mm_loadu_si128( ( __m128i const* )zero_point_buf );
+			memcpy( zero_point_buf, ( ( int8_t* )post_ops_list_temp->op_args1 +
+					post_ops_attr.post_op_c_j ), ( n0_rem * sizeof( int8_t ) ) );
+			_zero_point_0 = _mm_loadu_si128( ( __m128i const* )zero_point_buf );
+			zero_point_0 = _mm256_cvtepi8_epi16( _zero_point_0 );
+		}
+		else if ( post_ops_attr.c_stor_type == U8 )
+		{
+			uint8_t zero_point_buf[16];
+
+			memcpy( zero_point_buf, ( ( uint8_t* )post_ops_list_temp->op_args1 +
+					post_ops_attr.post_op_c_j ), ( n0_rem * sizeof( uint8_t ) ) );
+			_zero_point_0 = _mm_loadu_si128( ( __m128i const* )zero_point_buf );
+			zero_point_0 = _mm256_cvtepu8_epi16( _zero_point_0 );
+		}
 
 		// Scale first 16 columns of the 6 rows.
 		CVT_MULRND_CVT16(c_int16_0p0, scale_1, scale_2, zero_point_0)
@@ -1666,7 +1712,8 @@ POST_OPS_DOWNSCALE_1x16:
 		__m256i temp_32[2];
 		__m256 temp_float[2];
 		__m256 scale_1, scale_2;
-		__m128i zero_point_0;
+		__m128i _zero_point_0;
+		__m256i zero_point_0 = _mm256_setzero_si256();
 		__m256 res_1, res_2;
 
 		/* Load the scale vector values into the register*/
@@ -1680,10 +1727,18 @@ POST_OPS_DOWNSCALE_1x16:
 			post_ops_attr.post_op_c_j + (1 * 8));
 
 		// Load zero points (2 byte values).
-		zero_point_0 =
+		_zero_point_0 =
 		   _mm_loadu_si128(
 		   ( __m128i const* )( ( int8_t* )post_ops_list_temp->op_args1 +
 		   post_ops_attr.post_op_c_j + ( 0 * 16 ) ) );
+		if ( post_ops_attr.c_stor_type == S8 )
+		{
+			zero_point_0 = _mm256_cvtepi8_epi16( _zero_point_0 );
+		}
+		else if ( post_ops_attr.c_stor_type == U8 )
+		{
+			zero_point_0 = _mm256_cvtepu8_epi16( _zero_point_0 );
+		}
 
 		// Scale first 16 columns of the 2 rows.
 		CVT_MULRND_CVT16(c_int16_0p0, scale_1, scale_2, zero_point_0)
@@ -1913,7 +1968,8 @@ POST_OPS_DOWNSCALE_1xlt16:
 		__m256i temp_32[2];
 		__m256 temp_float[2];
 		__m256 scale_1, scale_2;
-		__m128i zero_point_0;
+		__m128i _zero_point_0;
+		__m256i zero_point_0 = _mm256_setzero_si256();
 		__m256 res_1, res_2;
 
 		float float_buf[16];
@@ -1925,11 +1981,24 @@ POST_OPS_DOWNSCALE_1xlt16:
 		scale_1 = _mm256_loadu_ps(float_buf + (0 * 8));
 		scale_2 = _mm256_loadu_ps(float_buf + (1 * 8));
 
-		int8_t zero_point_buf[16];
+		if ( post_ops_attr.c_stor_type == S8 )
+		{
+			int8_t zero_point_buf[16];
 
-		memcpy( zero_point_buf, ( ( int8_t* )post_ops_list_temp->op_args1 +
-				post_ops_attr.post_op_c_j ), ( n0_rem * sizeof( int8_t ) ) );
-		zero_point_0 = _mm_loadu_si128( ( __m128i const* )zero_point_buf );
+			memcpy( zero_point_buf, ( ( int8_t* )post_ops_list_temp->op_args1 +
+					post_ops_attr.post_op_c_j ), ( n0_rem * sizeof( int8_t ) ) );
+			_zero_point_0 = _mm_loadu_si128( ( __m128i const* )zero_point_buf );
+			zero_point_0 = _mm256_cvtepi8_epi16( _zero_point_0 );
+		}
+		else if ( post_ops_attr.c_stor_type == U8 )
+		{
+			uint8_t zero_point_buf[16];
+
+			memcpy( zero_point_buf, ( ( uint8_t* )post_ops_list_temp->op_args1 +
+					post_ops_attr.post_op_c_j ), ( n0_rem * sizeof( uint8_t ) ) );
+			_zero_point_0 = _mm_loadu_si128( ( __m128i const* )zero_point_buf );
+			zero_point_0 = _mm256_cvtepu8_epi16( _zero_point_0 );
+		}
 
 		// Scale first 16 columns of the 2 rows.
 		CVT_MULRND_CVT16(c_int16_0p0, scale_1, scale_2, zero_point_0)

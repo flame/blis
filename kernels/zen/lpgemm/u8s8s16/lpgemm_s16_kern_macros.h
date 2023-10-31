@@ -170,7 +170,7 @@
 	reg = _mm256_permute4x64_epi64( reg, 0XD8 ); \
  \
 	/* Zero point addition.*/ \
-	reg = _mm256_add_epi16( reg, _mm256_cvtepi8_epi16( zero_point_0 ) ); \
+	reg = _mm256_add_epi16( reg, zero_point_0 ); \
 
 // Downscale store macro helper
 #define CVT_STORE_S16_SU8_HELPER(reg, m_ind, n_ind, C_type) \
