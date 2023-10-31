@@ -814,15 +814,21 @@ void bli_zgemv_unf_var2
   }
   else
   {
-    // Invoke the ZSCALV function using the function pointer
-    scalv_kr_ptr
-    (
-      BLIS_NO_CONJUGATE,
-      n_elem,
-      beta,
-      y_buf, buf_incy,
-      cntx
-    );
+    /*
+      Invoke the ZSCALV function using the function
+      pointer only when alpha is not 1.
+    */
+    if(!PASTEMAC(z, eq1)(*beta))
+    {
+      scalv_kr_ptr
+      (
+        BLIS_NO_CONJUGATE,
+        n_elem,
+        beta,
+        y_buf, buf_incy,
+        cntx
+      );
+    }
   }
 
   // If alpha is zero(0), we only need to scalv y and return
