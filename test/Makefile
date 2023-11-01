@@ -160,7 +160,7 @@ TEST_OPS := dotv axpyv \
             gemm hemm herk her2k trmm trsm \
 
 # Include extension API's added by AMD in operations list
-# Keeping it seperate in case it needs to be guarded by a variable
+# Keeping it separate in case it needs to be guarded by a variable
 
 TEST_OPS := $(TEST_OPS) axpbyv cabs1 copyv gemm3m gemm_batch \
             gemmt imatcopy omatadd omatcopy omatcopy2 \

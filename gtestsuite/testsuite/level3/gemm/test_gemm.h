@@ -78,7 +78,7 @@ void test_gemm( char storage, char trnsa, char trnsb, gtint_t m, gtint_t n,
     computediff<T>( storage, m, n, c.data(), c_ref.data(), ldc, thresh );
 }
 
-// Test body used for exception value testing, by iducing an exception value
+// Test body used for exception value testing, by inducing an exception value
 // in the index that is passed for each of the matrices.
 /*
   (ai, aj) is the index with corresponding exception value aexval in matrix A.

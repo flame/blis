@@ -2073,7 +2073,7 @@ void PASTEMACT(ch,opname,uplo,varname) \
 						m_off_cblock += mr_cur; \
 					} \
 \
-					/* Invoke the gemmsup millikerneli for remaining rectangular part. */ \
+					/* Invoke the gemmsup millikernel for remaining rectangular part. */ \
 					gemmsup_ker \
 					( \
 					  conja, \

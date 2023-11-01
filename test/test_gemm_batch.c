@@ -45,7 +45,7 @@
 
 /* Format for FILE input
  * For each input set, first line contains 'storage scheme'
- *  and 'group count' seperated by space.
+ *  and 'group count' separated by space.
  * Following 'group_count' number of lines contains all the parameters of
  * each group separated by space in each line in the following order:
  *  tA tB m n k lda ldb ldc alpha_r alpha_i beta_r beta_i group_size

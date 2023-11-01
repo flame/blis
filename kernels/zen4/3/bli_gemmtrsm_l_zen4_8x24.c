@@ -156,7 +156,7 @@ static int64_t offsets[24] __attribute__((aligned(64))) =
 /*
  * number of accumulation registers = 24/8 * 8 = 24     zmm8 to zmm31
  * number of registers used for load B = 24/8 = 3       zmm0 to zmm2
- * number of regusters used for broadcast A = 2         zmm6 and zmm7
+ * number of registers used for broadcast A = 2         zmm6 and zmm7
  */
 void bli_dgemmtrsm_l_zen4_asm_8x24
      (

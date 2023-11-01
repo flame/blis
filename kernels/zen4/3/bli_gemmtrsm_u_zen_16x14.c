@@ -407,7 +407,7 @@ void bli_dgemmtrsm_u_zen_asm_16x14
         /*
         C prefetch Loop
                 Note: This loop runs 14 times,
-                These 14 iterations are done seperately so that c11 can be prefetched here.
+                These 14 iterations are done separately so that c11 can be prefetched here.
         */
         ADD(R11, RSI)
         ADD(IMM(14), RSI)

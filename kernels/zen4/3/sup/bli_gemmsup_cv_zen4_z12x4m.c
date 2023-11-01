@@ -916,7 +916,7 @@ void bli_zgemmsup_cv_zen4_asm_12x4m
     const double *v = &value;
 
     // Assigning the type of alpha and beta scaling
-    // In order to facilitate handling special cases seperately
+    // In order to facilitate handling special cases separately
     char alpha_mul_type = BLIS_MUL_DEFAULT;
     char beta_mul_type  = BLIS_MUL_DEFAULT;
 
@@ -1400,7 +1400,7 @@ void bli_zgemmsup_cv_zen4_asm_12x3m
     const double *v = &value;
 
     // Assigning the type of alpha and beta scaling
-    // In order to facilitate handling special cases seperately
+    // In order to facilitate handling special cases separately
     char alpha_mul_type = BLIS_MUL_DEFAULT;
     char beta_mul_type  = BLIS_MUL_DEFAULT;
 
@@ -1819,7 +1819,7 @@ void bli_zgemmsup_cv_zen4_asm_12x2m
     const double *v = &value;
 
     // Assigning the type of alpha and beta scaling
-    // In order to facilitate handling special cases seperately
+    // In order to facilitate handling special cases separately
     char alpha_mul_type = BLIS_MUL_DEFAULT;
     char beta_mul_type  = BLIS_MUL_DEFAULT;
 
@@ -2224,7 +2224,7 @@ void bli_zgemmsup_cv_zen4_asm_12x1m
     */
 
     // Assigning the type of alpha and beta scaling
-    // In order to facilitate handling special cases seperately
+    // In order to facilitate handling special cases separately
     char alpha_mul_type = BLIS_MUL_DEFAULT;
     char beta_mul_type  = BLIS_MUL_DEFAULT;
 

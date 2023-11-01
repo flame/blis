@@ -88,7 +88,7 @@ LPGEMM_MN_FRINGE_KERN(int8_t,int8_t,int16_t,s8s8s16o16_4x16)
         //convert signed int8 to uint8 for u8s8s16 FMA ops
         a_int32_0 = _mm256_add_epi8( a_int32_0, vec_uint8 );
 
-		// Seperate register for intermediate op
+		// Separate register for intermediate op
 		inter_vec = _mm256_maddubs_epi16(a_int32_0, b0);
 
 		// Perform column direction mat-mul with k = 2.
@@ -101,7 +101,7 @@ LPGEMM_MN_FRINGE_KERN(int8_t,int8_t,int16_t,s8s8s16o16_4x16)
         //convert signed int8 to uint8 for u8s8s16 FMA ops
         a_int32_0 = _mm256_add_epi8( a_int32_0, vec_uint8 );
 
-		// Seperate register for intermediate op
+		// Separate register for intermediate op
 		inter_vec = _mm256_maddubs_epi16(a_int32_0, b0);
 
 		// Perform column direction mat-mul with k = 2.
@@ -114,7 +114,7 @@ LPGEMM_MN_FRINGE_KERN(int8_t,int8_t,int16_t,s8s8s16o16_4x16)
         //convert signed int8 to uint8 for u8s8s16 FMA ops
         a_int32_0 = _mm256_add_epi8( a_int32_0, vec_uint8 );
 
-		// Seperate register for intermediate op
+		// Separate register for intermediate op
 		inter_vec = _mm256_maddubs_epi16(a_int32_0, b0);
 
 		// Perform column direction mat-mul with k = 2.
@@ -127,7 +127,7 @@ LPGEMM_MN_FRINGE_KERN(int8_t,int8_t,int16_t,s8s8s16o16_4x16)
         //convert signed int8 to uint8 for u8s8s16 FMA ops
         a_int32_0 = _mm256_add_epi8( a_int32_0, vec_uint8 );
 
-		// Seperate register for intermediate op
+		// Separate register for intermediate op
 		inter_vec = _mm256_maddubs_epi16(a_int32_0, b0);
 
 		// Perform column direction mat-mul with k = 2.
@@ -148,7 +148,7 @@ LPGEMM_MN_FRINGE_KERN(int8_t,int8_t,int16_t,s8s8s16o16_4x16)
         //convert signed int8 to uint8 for u8s8s16 FMA ops
         a_int32_0 = _mm256_add_epi8( a_int32_0, vec_uint8 );
 
-		// Seperate register for intermediate op
+		// Separate register for intermediate op
 		inter_vec = _mm256_maddubs_epi16(a_int32_0, b0);
 
 		// Perform column direction mat-mul with k = 2.
@@ -161,7 +161,7 @@ LPGEMM_MN_FRINGE_KERN(int8_t,int8_t,int16_t,s8s8s16o16_4x16)
         //convert signed int8 to uint8 for u8s8s16 FMA ops
         a_int32_0 = _mm256_add_epi8( a_int32_0, vec_uint8 );
 
-		// Seperate register for intermediate op
+		// Separate register for intermediate op
 		inter_vec = _mm256_maddubs_epi16(a_int32_0, b0);
 
 		// Perform column direction mat-mul with k = 2.
@@ -174,7 +174,7 @@ LPGEMM_MN_FRINGE_KERN(int8_t,int8_t,int16_t,s8s8s16o16_4x16)
         //convert signed int8 to uint8 for u8s8s16 FMA ops
         a_int32_0 = _mm256_add_epi8( a_int32_0, vec_uint8 );
 
-		// Seperate register for intermediate op
+		// Separate register for intermediate op
 		inter_vec = _mm256_maddubs_epi16(a_int32_0, b0);
 
 		// Perform column direction mat-mul with k = 2.
@@ -187,7 +187,7 @@ LPGEMM_MN_FRINGE_KERN(int8_t,int8_t,int16_t,s8s8s16o16_4x16)
         //convert signed int8 to uint8 for u8s8s16 FMA ops
         a_int32_0 = _mm256_add_epi8( a_int32_0, vec_uint8 );
 
-		// Seperate register for intermediate op
+		// Separate register for intermediate op
 		inter_vec = _mm256_maddubs_epi16(a_int32_0, b0);
 
 		// Perform column direction mat-mul with k = 2.
@@ -513,7 +513,7 @@ LPGEMM_MN_LT_NR0_FRINGE_KERN(int8_t,int8_t,int16_t,s8s8s16o16_4xlt16)
         //convert signed int8 to uint8 for u8s8s16 FMA ops
         a_int32_0 = _mm256_add_epi8( a_int32_0, vec_uint8 );
 
-		// Seperate register for intermediate op
+		// Separate register for intermediate op
 		inter_vec = _mm256_maddubs_epi16(a_int32_0, b0);
 
 		// Perform column direction mat-mul with k = 2.
@@ -526,7 +526,7 @@ LPGEMM_MN_LT_NR0_FRINGE_KERN(int8_t,int8_t,int16_t,s8s8s16o16_4xlt16)
         //convert signed int8 to uint8 for u8s8s16 FMA ops
         a_int32_0 = _mm256_add_epi8( a_int32_0, vec_uint8 );
 
-		// Seperate register for intermediate op
+		// Separate register for intermediate op
 		inter_vec = _mm256_maddubs_epi16(a_int32_0, b0);
 
 		// Perform column direction mat-mul with k = 2.
@@ -539,7 +539,7 @@ LPGEMM_MN_LT_NR0_FRINGE_KERN(int8_t,int8_t,int16_t,s8s8s16o16_4xlt16)
         //convert signed int8 to uint8 for u8s8s16 FMA ops
         a_int32_0 = _mm256_add_epi8( a_int32_0, vec_uint8 );
 
-		// Seperate register for intermediate op
+		// Separate register for intermediate op
 		inter_vec = _mm256_maddubs_epi16(a_int32_0, b0);
 
 		// Perform column direction mat-mul with k = 2.
@@ -552,7 +552,7 @@ LPGEMM_MN_LT_NR0_FRINGE_KERN(int8_t,int8_t,int16_t,s8s8s16o16_4xlt16)
         //convert signed int8 to uint8 for u8s8s16 FMA ops
         a_int32_0 = _mm256_add_epi8( a_int32_0, vec_uint8 );
 
-		// Seperate register for intermediate op
+		// Separate register for intermediate op
 		inter_vec = _mm256_maddubs_epi16(a_int32_0, b0);
 
 		// Perform column direction mat-mul with k = 2.
@@ -573,7 +573,7 @@ LPGEMM_MN_LT_NR0_FRINGE_KERN(int8_t,int8_t,int16_t,s8s8s16o16_4xlt16)
         //convert signed int8 to uint8 for u8s8s16 FMA ops
         a_int32_0 = _mm256_add_epi8( a_int32_0, vec_uint8 );
 
-		// Seperate register for intermediate op
+		// Separate register for intermediate op
 		inter_vec = _mm256_maddubs_epi16(a_int32_0, b0);
 
 		// Perform column direction mat-mul with k = 2.
@@ -586,7 +586,7 @@ LPGEMM_MN_LT_NR0_FRINGE_KERN(int8_t,int8_t,int16_t,s8s8s16o16_4xlt16)
         //convert signed int8 to uint8 for u8s8s16 FMA ops
         a_int32_0 = _mm256_add_epi8( a_int32_0, vec_uint8 );
 
-		// Seperate register for intermediate op
+		// Separate register for intermediate op
 		inter_vec = _mm256_maddubs_epi16(a_int32_0, b0);
 
 		// Perform column direction mat-mul with k = 2.
@@ -599,7 +599,7 @@ LPGEMM_MN_LT_NR0_FRINGE_KERN(int8_t,int8_t,int16_t,s8s8s16o16_4xlt16)
         //convert signed int8 to uint8 for u8s8s16 FMA ops
         a_int32_0 = _mm256_add_epi8( a_int32_0, vec_uint8 );
 
-		// Seperate register for intermediate op
+		// Separate register for intermediate op
 		inter_vec = _mm256_maddubs_epi16(a_int32_0, b0);
 
 		// Perform column direction mat-mul with k = 2.
@@ -612,7 +612,7 @@ LPGEMM_MN_LT_NR0_FRINGE_KERN(int8_t,int8_t,int16_t,s8s8s16o16_4xlt16)
         //convert signed int8 to uint8 for u8s8s16 FMA ops
         a_int32_0 = _mm256_add_epi8( a_int32_0, vec_uint8 );
 
-		// Seperate register for intermediate op
+		// Separate register for intermediate op
 		inter_vec = _mm256_maddubs_epi16(a_int32_0, b0);
 
 		// Perform column direction mat-mul with k = 2.
@@ -969,7 +969,7 @@ LPGEMM_MN_FRINGE_KERN(int8_t,int8_t,int16_t,s8s8s16o16_2x16)
         //convert signed int8 to uint8 for u8s8s16 FMA ops
         a_int32_0 = _mm256_add_epi8( a_int32_0, vec_uint8 );
 
-		// Seperate register for intermediate op
+		// Separate register for intermediate op
 		inter_vec = _mm256_maddubs_epi16(a_int32_0, b0);
 
 		// Perform column direction mat-mul with k = 2.
@@ -982,7 +982,7 @@ LPGEMM_MN_FRINGE_KERN(int8_t,int8_t,int16_t,s8s8s16o16_2x16)
         //convert signed int8 to uint8 for u8s8s16 FMA ops
         a_int32_0 = _mm256_add_epi8( a_int32_0, vec_uint8 );
 
-		// Seperate register for intermediate op
+		// Separate register for intermediate op
 		inter_vec = _mm256_maddubs_epi16(a_int32_0, b0);
 
 		// Perform column direction mat-mul with k = 2.
@@ -1002,7 +1002,7 @@ LPGEMM_MN_FRINGE_KERN(int8_t,int8_t,int16_t,s8s8s16o16_2x16)
         //convert signed int8 to uint8 for u8s8s16 FMA ops
         a_int32_0 = _mm256_add_epi8( a_int32_0, vec_uint8 );
 
-		// Seperate register for intermediate op
+		// Separate register for intermediate op
 		inter_vec = _mm256_maddubs_epi16(a_int32_0, b0);
 
 		// Perform column direction mat-mul with k = 2.
@@ -1015,7 +1015,7 @@ LPGEMM_MN_FRINGE_KERN(int8_t,int8_t,int16_t,s8s8s16o16_2x16)
         //convert signed int8 to uint8 for u8s8s16 FMA ops
         a_int32_0 = _mm256_add_epi8( a_int32_0, vec_uint8 );
 
-		// Seperate register for intermediate op
+		// Separate register for intermediate op
 		inter_vec = _mm256_maddubs_epi16(a_int32_0, b0);
 
 		// Perform column direction mat-mul with k = 2.
@@ -1270,7 +1270,7 @@ LPGEMM_MN_LT_NR0_FRINGE_KERN(int8_t,int8_t,int16_t,s8s8s16o16_2xlt16)
         //convert signed int8 to uint8 for u8s8s16 FMA ops
         a_int32_0 = _mm256_add_epi8( a_int32_0, vec_uint8 );
 
-		// Seperate register for intermediate op
+		// Separate register for intermediate op
 		inter_vec = _mm256_maddubs_epi16(a_int32_0, b0);
 
 		// Perform column direction mat-mul with k = 2.
@@ -1283,7 +1283,7 @@ LPGEMM_MN_LT_NR0_FRINGE_KERN(int8_t,int8_t,int16_t,s8s8s16o16_2xlt16)
         //convert signed int8 to uint8 for u8s8s16 FMA ops
         a_int32_0 = _mm256_add_epi8( a_int32_0, vec_uint8 );
 
-		// Seperate register for intermediate op
+		// Separate register for intermediate op
 		inter_vec = _mm256_maddubs_epi16(a_int32_0, b0);
 
 		// Perform column direction mat-mul with k = 4.
@@ -1303,7 +1303,7 @@ LPGEMM_MN_LT_NR0_FRINGE_KERN(int8_t,int8_t,int16_t,s8s8s16o16_2xlt16)
         //convert signed int8 to uint8 for u8s8s16 FMA ops
         a_int32_0 = _mm256_add_epi8( a_int32_0, vec_uint8 );
 
-		// Seperate register for intermediate op
+		// Separate register for intermediate op
 		inter_vec = _mm256_maddubs_epi16(a_int32_0, b0);
 
 		// Perform column direction mat-mul with k = 2.
@@ -1316,7 +1316,7 @@ LPGEMM_MN_LT_NR0_FRINGE_KERN(int8_t,int8_t,int16_t,s8s8s16o16_2xlt16)
         //convert signed int8 to uint8 for u8s8s16 FMA ops
         a_int32_0 = _mm256_add_epi8( a_int32_0, vec_uint8 );
 
-		// Seperate register for intermediate op
+		// Separate register for intermediate op
 		inter_vec = _mm256_maddubs_epi16(a_int32_0, b0);
 
 		// Perform column direction mat-mul with k = 2.
@@ -1594,7 +1594,7 @@ LPGEMM_MN_FRINGE_KERN(int8_t,int8_t,int16_t,s8s8s16o16_1x16)
 
 		b0 = _mm256_loadu_si256((__m256i const *)(b + (32 * kr) + (NR * 0)));
 
-		// Seperate register for intermediate op
+		// Separate register for intermediate op
 		inter_vec = _mm256_maddubs_epi16(a_int32_0, b0);
 
 		// Perform column direction mat-mul with k = 2.
@@ -1614,7 +1614,7 @@ LPGEMM_MN_FRINGE_KERN(int8_t,int8_t,int16_t,s8s8s16o16_1x16)
         //convert signed int8 to uint8 for u8s8s16 FMA ops
         a_int32_0 = _mm256_add_epi8( a_int32_0, vec_uint8 );
 
-		// Seperate register for intermediate op
+		// Separate register for intermediate op
 		inter_vec = _mm256_maddubs_epi16(a_int32_0, b0);
 
 		// Perform column direction mat-mul with k = 2.
@@ -1836,7 +1836,7 @@ LPGEMM_MN_LT_NR0_FRINGE_KERN(int8_t,int8_t,int16_t,s8s8s16o16_1xlt16)
         //convert signed int8 to uint8 for u8s8s16 FMA ops
         a_int32_0 = _mm256_add_epi8( a_int32_0, vec_uint8 );
 
-		// Seperate register for intermediate op
+		// Separate register for intermediate op
 		inter_vec = _mm256_maddubs_epi16(a_int32_0, b0);
 
 		// Perform column direction mat-mul with k = 2.
@@ -1856,7 +1856,7 @@ LPGEMM_MN_LT_NR0_FRINGE_KERN(int8_t,int8_t,int16_t,s8s8s16o16_1xlt16)
         //convert signed int8 to uint8 for u8s8s16 FMA ops
         a_int32_0 = _mm256_add_epi8( a_int32_0, vec_uint8 );
 
-		// Seperate register for intermediate op
+		// Separate register for intermediate op
 		inter_vec = _mm256_maddubs_epi16(a_int32_0, b0);
 
 		// Perform column direction mat-mul with k = 2.

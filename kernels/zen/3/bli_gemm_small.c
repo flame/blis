@@ -2532,7 +2532,7 @@ err_t bli_dgemm_small
                         ymm5 = _mm256_fmadd_pd(ymm2, ymm1, ymm5);
                         ymm2 = _mm256_loadu_pd(tC + 8);
                         ymm6 = _mm256_fmadd_pd(ymm2, ymm1, ymm6);
-                        // Masked load the relevant remaider elements of C matrix
+                        // Masked load the relevant remainder elements of C matrix
                         // Scale by beta.
                         ymm2 = _mm256_maskload_pd(tC + 12, maskVec);
                         ymm7 = _mm256_fmadd_pd(ymm2, ymm1, ymm7);
@@ -2545,7 +2545,7 @@ err_t bli_dgemm_small
                         ymm9 = _mm256_fmadd_pd(ymm2, ymm1, ymm9);
                         ymm2 = _mm256_loadu_pd(ttC + 8);
                         ymm10 = _mm256_fmadd_pd(ymm2, ymm1, ymm10);
-                        // Masked load the relevant remaider elements of C matrix
+                        // Masked load the relevant remainder elements of C matrix
                         // Scale by beta.
                         ymm2 = _mm256_maskload_pd(ttC + 12, maskVec);
                         ymm11 = _mm256_fmadd_pd(ymm2, ymm1, ymm11);
@@ -2558,7 +2558,7 @@ err_t bli_dgemm_small
                         ymm13 = _mm256_fmadd_pd(ymm2, ymm1, ymm13);
                         ymm2 = _mm256_loadu_pd(ttC + 8);
                         ymm14 = _mm256_fmadd_pd(ymm2, ymm1, ymm14);
-                        // Masked load the relevant remaider elements of C matrix
+                        // Masked load the relevant remainder elements of C matrix
                         // Scale by beta.
                         ymm2 = _mm256_maskload_pd(ttC + 12, maskVec);
                         ymm15 = _mm256_fmadd_pd(ymm2, ymm1, ymm15);
@@ -2566,7 +2566,7 @@ err_t bli_dgemm_small
                     _mm256_storeu_pd(tC, ymm4);
                     _mm256_storeu_pd(tC + 4, ymm5);
                     _mm256_storeu_pd(tC + 8, ymm6);
-                    // Masked store the relevant remaider elements of C matrix
+                    // Masked store the relevant remainder elements of C matrix
                     _mm256_maskstore_pd(tC + 12, maskVec, ymm7);
 
                     tC += ldc;
@@ -2574,7 +2574,7 @@ err_t bli_dgemm_small
                     _mm256_storeu_pd(tC, ymm8);
                     _mm256_storeu_pd(tC + 4, ymm9);
                     _mm256_storeu_pd(tC + 8, ymm10);
-                    // Masked store the relevant remaider elements of C matrix
+                    // Masked store the relevant remainder elements of C matrix
                     _mm256_maskstore_pd(tC + 12, maskVec, ymm11);
 
                     tC += ldc;
@@ -2582,7 +2582,7 @@ err_t bli_dgemm_small
                     _mm256_storeu_pd(tC, ymm12);
                     _mm256_storeu_pd(tC + 4, ymm13);
                     _mm256_storeu_pd(tC + 8, ymm14);
-                    // Masked store the relevant remaider elements of C matrix
+                    // Masked store the relevant remainder elements of C matrix
                     _mm256_maskstore_pd(tC + 12, maskVec, ymm15);
                 }
                 n_remainder = N - col_idx;
@@ -2660,7 +2660,7 @@ err_t bli_dgemm_small
                         ymm9 = _mm256_fmadd_pd(ymm2, ymm1, ymm9);
                         ymm2 = _mm256_loadu_pd(tC + 8);
                         ymm10 = _mm256_fmadd_pd(ymm2, ymm1, ymm10);
-                        // Masked load the relevant remaider elements of C matrix
+                        // Masked load the relevant remainder elements of C matrix
                         // Scale by beta.
                         ymm2 = _mm256_maskload_pd(tC + 12, maskVec);
                         ymm11 = _mm256_fmadd_pd(ymm2, ymm1, ymm11);
@@ -2674,7 +2674,7 @@ err_t bli_dgemm_small
                         ymm13 = _mm256_fmadd_pd(ymm2, ymm1, ymm13);
                         ymm2 = _mm256_loadu_pd(ttC + 8);
                         ymm14 = _mm256_fmadd_pd(ymm2, ymm1, ymm14);
-                        // Masked load the relevant remaider elements of C matrix
+                        // Masked load the relevant remainder elements of C matrix
                         // Scale by beta.
                         ymm2 = _mm256_maskload_pd(ttC + 12, maskVec);
                         ymm15 = _mm256_fmadd_pd(ymm2, ymm1, ymm15);
@@ -2683,7 +2683,7 @@ err_t bli_dgemm_small
                     _mm256_storeu_pd(tC + 0, ymm8);
                     _mm256_storeu_pd(tC + 4, ymm9);
                     _mm256_storeu_pd(tC + 8, ymm10);
-                    // Masked store the relevant remaider elements of C matrix
+                    // Masked store the relevant remainder elements of C matrix
                     _mm256_maskstore_pd(tC + 12, maskVec, ymm11);
 
                     tC += ldc;
@@ -2691,7 +2691,7 @@ err_t bli_dgemm_small
                     _mm256_storeu_pd(tC, ymm12);
                     _mm256_storeu_pd(tC + 4, ymm13);
                     _mm256_storeu_pd(tC + 8, ymm14);
-                    // Masked store the relevant remaider elements of C matrix
+                    // Masked store the relevant remainder elements of C matrix
                     _mm256_maskstore_pd(tC + 12, maskVec, ymm15);
                     col_idx += 2;
                 }
@@ -2755,7 +2755,7 @@ err_t bli_dgemm_small
                         ymm13 = _mm256_fmadd_pd(ymm2, ymm1, ymm13);
                         ymm2 = _mm256_loadu_pd(tC + 8);
                         ymm14 = _mm256_fmadd_pd(ymm2, ymm1, ymm14);
-                        // Masked load the relevant remaider elements of C matrix
+                        // Masked load the relevant remainder elements of C matrix
                         // Scale by beta.
                         ymm2 = _mm256_maskload_pd(tC + 12, maskVec);
                         ymm15 = _mm256_fmadd_pd(ymm2, ymm1, ymm15);
@@ -2764,7 +2764,7 @@ err_t bli_dgemm_small
                     _mm256_storeu_pd(tC + 0, ymm12);
                     _mm256_storeu_pd(tC + 4, ymm13);
                     _mm256_storeu_pd(tC + 8, ymm14);
-                    // Masked store the relevant remaider elements of C matrix
+                    // Masked store the relevant remainder elements of C matrix
                     _mm256_maskstore_pd(tC + 12, maskVec, ymm15);
                 }
             }
@@ -2847,7 +2847,7 @@ err_t bli_dgemm_small
 
                         ymm2 = _mm256_loadu_pd(tC + 4);
                         ymm5 = _mm256_fmadd_pd(ymm2, ymm1, ymm5);
-                        // Masked load the relevant remaider elements of C matrix
+                        // Masked load the relevant remainder elements of C matrix
                         // Scale by beta.
                         ymm2 = _mm256_maskload_pd(tC + 8, maskVec);
                         ymm6 = _mm256_fmadd_pd(ymm2, ymm1, ymm6);
@@ -2859,7 +2859,7 @@ err_t bli_dgemm_small
 
                         ymm2 = _mm256_loadu_pd(ttC + 4);
                         ymm9 = _mm256_fmadd_pd(ymm2, ymm1, ymm9);
-                        // Masked load the relevant remaider elements of C matrix
+                        // Masked load the relevant remainder elements of C matrix
                         // Scale by beta.
                         ymm2 = _mm256_maskload_pd(ttC + 8, maskVec);
                         ymm10 = _mm256_fmadd_pd(ymm2, ymm1, ymm10);
@@ -2871,7 +2871,7 @@ err_t bli_dgemm_small
 
                         ymm2 = _mm256_loadu_pd(ttC + 4);
                         ymm13 = _mm256_fmadd_pd(ymm2, ymm1, ymm13);
-                        // Masked load the relevant remaider elements of C matrix
+                        // Masked load the relevant remainder elements of C matrix
                         // Scale by beta.
                         ymm2 = _mm256_maskload_pd(ttC + 8, maskVec);
                         ymm14 = _mm256_fmadd_pd(ymm2, ymm1, ymm14);
@@ -2879,21 +2879,21 @@ err_t bli_dgemm_small
                     }
                     _mm256_storeu_pd(tC, ymm4);
                     _mm256_storeu_pd(tC + 4, ymm5);
-                    // Masked store the relevant remaider elements of C matrix
+                    // Masked store the relevant remainder elements of C matrix
                     _mm256_maskstore_pd(tC + 8, maskVec, ymm6);
 
                     tC += ldc;
 
                     _mm256_storeu_pd(tC, ymm8);
                     _mm256_storeu_pd(tC + 4, ymm9);
-                    // Masked store the relevant remaider elements of C matrix
+                    // Masked store the relevant remainder elements of C matrix
                     _mm256_maskstore_pd(tC + 8, maskVec, ymm10);
 
                     tC += ldc;
 
                     _mm256_storeu_pd(tC, ymm12);
                     _mm256_storeu_pd(tC + 4, ymm13);
-                    // Masked store the relevant remaider elements of C matrix
+                    // Masked store the relevant remainder elements of C matrix
                     _mm256_maskstore_pd(tC + 8, maskVec, ymm14);
                 }
                 n_remainder = N - col_idx;
@@ -2962,7 +2962,7 @@ err_t bli_dgemm_small
 
                         ymm2 = _mm256_loadu_pd(tC + 4);
                         ymm9 = _mm256_fmadd_pd(ymm2, ymm1, ymm9);
-                        // Masked load the relevant remaider elements of C matrix
+                        // Masked load the relevant remainder elements of C matrix
                         // Scale by beta.
                         ymm2 = _mm256_maskload_pd(tC + 8, maskVec);
                         ymm10 = _mm256_fmadd_pd(ymm2, ymm1, ymm10);
@@ -2975,7 +2975,7 @@ err_t bli_dgemm_small
 
                         ymm2 = _mm256_loadu_pd(ttC + 4);
                         ymm13 = _mm256_fmadd_pd(ymm2, ymm1, ymm13);
-                        // Masked load the relevant remaider elements of C matrix
+                        // Masked load the relevant remainder elements of C matrix
                         // Scale by beta.
                         ymm2 = _mm256_maskload_pd(ttC + 8, maskVec);
                         ymm14 = _mm256_fmadd_pd(ymm2, ymm1, ymm14);
@@ -2983,14 +2983,14 @@ err_t bli_dgemm_small
                     }
                     _mm256_storeu_pd(tC + 0, ymm8);
                     _mm256_storeu_pd(tC + 4, ymm9);
-                    // Masked store the relevant remaider elements of C matrix
+                    // Masked store the relevant remainder elements of C matrix
                     _mm256_maskstore_pd(tC + 8, maskVec, ymm10);
 
                     tC += ldc;
 
                     _mm256_storeu_pd(tC, ymm12);
                     _mm256_storeu_pd(tC + 4, ymm13);
-                    // Masked store the relevant remaider elements of C matrix
+                    // Masked store the relevant remainder elements of C matrix
                     _mm256_maskstore_pd(tC + 8, maskVec, ymm14);
 
                     col_idx += 2;
@@ -3050,7 +3050,7 @@ err_t bli_dgemm_small
 
                         ymm2 = _mm256_loadu_pd(tC + 4);
                         ymm13 = _mm256_fmadd_pd(ymm2, ymm1, ymm13);
-                        // Masked load the relevant remaider elements of C matrix
+                        // Masked load the relevant remainder elements of C matrix
                         // Scale by beta.
                         ymm2 = _mm256_maskload_pd(tC + 8, maskVec);
                         ymm14 = _mm256_fmadd_pd(ymm2, ymm1, ymm14);
@@ -3058,7 +3058,7 @@ err_t bli_dgemm_small
                     }
                     _mm256_storeu_pd(tC + 0, ymm12);
                     _mm256_storeu_pd(tC + 4, ymm13);
-                    // Masked store the relevant remaider elements of C matrix
+                    // Masked store the relevant remainder elements of C matrix
                     _mm256_maskstore_pd(tC + 8, maskVec, ymm14);
                 }
             }
@@ -3135,7 +3135,7 @@ err_t bli_dgemm_small
                         // multiply C by beta and accumulate.
                         ymm2 = _mm256_loadu_pd(tC);
                         ymm4 = _mm256_fmadd_pd(ymm2, ymm1, ymm4);
-                        // Masked load the relevant remaider elements of C matrix
+                        // Masked load the relevant remainder elements of C matrix
                         // Scale by beta.
                         ymm2 = _mm256_maskload_pd(tC + 4, maskVec);
                         ymm5 = _mm256_fmadd_pd(ymm2, ymm1, ymm5);
@@ -3144,7 +3144,7 @@ err_t bli_dgemm_small
                         double *ttC = tC +ldc;
                         ymm2 = _mm256_loadu_pd(ttC);
                         ymm8 = _mm256_fmadd_pd(ymm2, ymm1, ymm8);
-                        // Masked load the relevant remaider elements of C matrix
+                        // Masked load the relevant remainder elements of C matrix
                         // Scale by beta.
                         ymm2 = _mm256_maskload_pd(ttC + 4, maskVec);
                         ymm9 = _mm256_fmadd_pd(ymm2, ymm1, ymm9);
@@ -3153,25 +3153,25 @@ err_t bli_dgemm_small
                         ttC += ldc;
                         ymm2 = _mm256_loadu_pd(ttC);
                         ymm12 = _mm256_fmadd_pd(ymm2, ymm1, ymm12);
-                        // Masked load the relevant remaider elements of C matrix
+                        // Masked load the relevant remainder elements of C matrix
                         // Scale by beta.
                         ymm2 = _mm256_maskload_pd(ttC + 4, maskVec);
                         ymm13 = _mm256_fmadd_pd(ymm2, ymm1, ymm13);
                     }
                     _mm256_storeu_pd(tC, ymm4);
-                    // Masked store the relevant remaider elements of C matrix
+                    // Masked store the relevant remainder elements of C matrix
                     _mm256_maskstore_pd(tC + 4, maskVec, ymm5);
 
                     tC += ldc;
 
                     _mm256_storeu_pd(tC, ymm8);
-                    // Masked store the relevant remaider elements of C matrix
+                    // Masked store the relevant remainder elements of C matrix
                     _mm256_maskstore_pd(tC + 4, maskVec, ymm9);
 
                     tC += ldc;
 
                     _mm256_storeu_pd(tC, ymm12);
-                    // Masked store the relevant remaider elements of C matrix
+                    // Masked store the relevant remainder elements of C matrix
                     _mm256_maskstore_pd(tC + 4, maskVec, ymm13);
                 }
                 n_remainder = N - col_idx;
@@ -3231,7 +3231,7 @@ err_t bli_dgemm_small
                         // multiply C by beta and accumulate.
                         ymm2 = _mm256_loadu_pd(tC + 0);
                         ymm8 = _mm256_fmadd_pd(ymm2, ymm1, ymm8);
-                        // Masked load the relevant remaider elements of C matrix
+                        // Masked load the relevant remainder elements of C matrix
                         // Scale by beta.
                         ymm2 = _mm256_maskload_pd(tC + 4, maskVec);
                         ymm9 = _mm256_fmadd_pd(ymm2, ymm1, ymm9);
@@ -3241,20 +3241,20 @@ err_t bli_dgemm_small
                         // multiply C by beta and accumulate.
                         ymm2 = _mm256_loadu_pd(ttC);
                         ymm12 = _mm256_fmadd_pd(ymm2, ymm1, ymm12);
-                        // Masked load the relevant remaider elements of C matrix
+                        // Masked load the relevant remainder elements of C matrix
                         // Scale by beta.
                         ymm2 = _mm256_maskload_pd(ttC + 4, maskVec);
                         ymm13 = _mm256_fmadd_pd(ymm2, ymm1, ymm13);
 
                     }
                     _mm256_storeu_pd(tC + 0, ymm8);
-                    // Masked store the relevant remaider elements of C matrix
+                    // Masked store the relevant remainder elements of C matrix
                     _mm256_maskstore_pd(tC + 4, maskVec, ymm9);
 
                     tC += ldc;
 
                     _mm256_storeu_pd(tC, ymm12);
-                    // Masked store the relevant remaider elements of C matrix
+                    // Masked store the relevant remainder elements of C matrix
                     _mm256_maskstore_pd(tC + 4, maskVec, ymm13);
 
                     col_idx += 2;
@@ -3305,13 +3305,13 @@ err_t bli_dgemm_small
                         // multiply C by beta and accumulate.
                         ymm2 = _mm256_loadu_pd(tC + 0);
                         ymm12 = _mm256_fmadd_pd(ymm2, ymm1, ymm12);
-                        // Masked load the relevant remaider elements of C matrix
+                        // Masked load the relevant remainder elements of C matrix
                         // Scale by beta.
                         ymm2 = _mm256_maskload_pd(tC + 4, maskVec);
                         ymm13 = _mm256_fmadd_pd(ymm2, ymm1, ymm13);
                     }
                     _mm256_storeu_pd(tC + 0, ymm12);
-                    // Masked store the relevant remaider elements of C matrix
+                    // Masked store the relevant remainder elements of C matrix
                     _mm256_maskstore_pd(tC + 4, maskVec, ymm13);
                 }
             }
@@ -3362,34 +3362,34 @@ err_t bli_dgemm_small
 
                     if(is_beta_non_zero)
                     {
-                        // Masked load the relevant remaider elements of C matrix
+                        // Masked load the relevant remainder elements of C matrix
                         // Scale by beta.
                         ymm2 = _mm256_maskload_pd(tC, maskVec);
                         ymm4 = _mm256_fmadd_pd(ymm2, ymm1, ymm4);
 
                         double* ttC = tC + ldc;
 
-                        // Masked load the relevant remaider elements of C matrix
+                        // Masked load the relevant remainder elements of C matrix
                         // Scale by beta.
                         ymm2 = _mm256_maskload_pd(ttC, maskVec);
                         ymm5 = _mm256_fmadd_pd(ymm2, ymm1, ymm5);
 
                         ttC += ldc;
 
-                        // Masked load the relevant remaider elements of C matrix
+                        // Masked load the relevant remainder elements of C matrix
                         // Scale by beta.
                         ymm2 = _mm256_maskload_pd(ttC, maskVec);
                         ymm6 = _mm256_fmadd_pd(ymm2, ymm1, ymm6);
                     }
-                    // Masked store the relevant remaider elements of C matrix
+                    // Masked store the relevant remainder elements of C matrix
                     _mm256_maskstore_pd(tC, maskVec, ymm4);
 
                     tC += ldc;
-                    // Masked store the relevant remaider elements of C matrix
+                    // Masked store the relevant remainder elements of C matrix
                     _mm256_maskstore_pd(tC, maskVec, ymm5);
 
                     tC += ldc;
-                    // Masked store the relevant remaider elements of C matrix
+                    // Masked store the relevant remainder elements of C matrix
                     _mm256_maskstore_pd(tC, maskVec, ymm6);
                 }
                 n_remainder = N - col_idx;
@@ -3434,23 +3434,23 @@ err_t bli_dgemm_small
 
                     if(is_beta_non_zero)
                     {
-                        // Masked load the relevant remaider elements of C matrix
+                        // Masked load the relevant remainder elements of C matrix
                         // Scale by beta.
                         ymm2 = _mm256_maskload_pd(tC, maskVec);
                         ymm4 = _mm256_fmadd_pd(ymm2, ymm1, ymm4);
 
                         double* ttC = tC + ldc;
 
-                        // Masked load the relevant remaider elements of C matrix
+                        // Masked load the relevant remainder elements of C matrix
                         // Scale by beta.
                         ymm2 = _mm256_maskload_pd(ttC, maskVec);
                         ymm5 = _mm256_fmadd_pd(ymm2, ymm1, ymm5);
                     }
-                    // Masked store the relevant remaider elements of C matrix
+                    // Masked store the relevant remainder elements of C matrix
                     _mm256_maskstore_pd(tC, maskVec, ymm4);
 
                     tC += ldc;
-                    // Masked store the relevant remaider elements of C matrix
+                    // Masked store the relevant remainder elements of C matrix
                     _mm256_maskstore_pd(tC, maskVec, ymm5);
 
                     col_idx += 2;
@@ -3492,13 +3492,13 @@ err_t bli_dgemm_small
 
                     if(is_beta_non_zero)
                     {
-                        // Masked load the relevant remaider elements of C matrix
+                        // Masked load the relevant remainder elements of C matrix
                         // Scale by beta.
                         ymm2 = _mm256_maskload_pd(tC, maskVec);
                         ymm4 = _mm256_fmadd_pd(ymm2, ymm1, ymm4);
 
                     }
-                    // Masked store the relevant remaider elements of C matrix
+                    // Masked store the relevant remainder elements of C matrix
                     _mm256_maskstore_pd(tC, maskVec, ymm4);
                 }
             }

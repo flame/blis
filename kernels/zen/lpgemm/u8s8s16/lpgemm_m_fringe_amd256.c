@@ -95,7 +95,7 @@ LPGEMM_M_FRINGE_KERN(uint8_t,int8_t,int16_t,u8s8s16o16_4x32)
 		// Broadcast a[1,kr:kr+2].
 		a_int32_1 = _mm256_set1_epi16(*(uint16_t *)(a + (rs_a * 1) + (cs_a * offset)));
 
-		// Seperate register for intermediate op
+		// Separate register for intermediate op
 		inter_vec[0] = _mm256_maddubs_epi16(a_int32_0, b0);
 		inter_vec[1] = _mm256_maddubs_epi16(a_int32_0, b1);
 
@@ -107,7 +107,7 @@ LPGEMM_M_FRINGE_KERN(uint8_t,int8_t,int16_t,u8s8s16o16_4x32)
 		// Broadcast a[2,kr:kr+2].
 		a_int32_0 = _mm256_set1_epi16(*(uint16_t *)(a + (rs_a * 2) + (cs_a * offset)));
 
-		// Seperate register for intermediate op
+		// Separate register for intermediate op
 		inter_vec[2] = _mm256_maddubs_epi16(a_int32_1, b0);
 		inter_vec[3] = _mm256_maddubs_epi16(a_int32_1, b1);
 
@@ -119,7 +119,7 @@ LPGEMM_M_FRINGE_KERN(uint8_t,int8_t,int16_t,u8s8s16o16_4x32)
 		// Broadcast a[3,kr:kr+2].
 		a_int32_1 = _mm256_set1_epi16(*(uint16_t *)(a + (rs_a * 3) + (cs_a * offset)));
 
-		// Seperate register for intermediate op
+		// Separate register for intermediate op
 		inter_vec[0] = _mm256_maddubs_epi16(a_int32_0, b0);
 		inter_vec[1] = _mm256_maddubs_epi16(a_int32_0, b1);
 
@@ -128,7 +128,7 @@ LPGEMM_M_FRINGE_KERN(uint8_t,int8_t,int16_t,u8s8s16o16_4x32)
 		c_int16_2p0 = _mm256_add_epi16(inter_vec[0], c_int16_2p0);
 		c_int16_2p1 = _mm256_add_epi16(inter_vec[1], c_int16_2p1);
 
-		// Seperate register for intermediate op
+		// Separate register for intermediate op
 		inter_vec[2] = _mm256_maddubs_epi16(a_int32_1, b0);
 		inter_vec[3] = _mm256_maddubs_epi16(a_int32_1, b1);
 
@@ -149,7 +149,7 @@ LPGEMM_M_FRINGE_KERN(uint8_t,int8_t,int16_t,u8s8s16o16_4x32)
 		a_kfringe = *(a + (rs_a * 0) + (cs_a * (k_full_pieces * 2)));
 		a_int32_0 = _mm256_set1_epi8(a_kfringe);
 
-		// Seperate register for intermediate op
+		// Separate register for intermediate op
 		inter_vec[0] = _mm256_maddubs_epi16(a_int32_0, b0);
 		inter_vec[1] = _mm256_maddubs_epi16(a_int32_0, b1);
 
@@ -161,7 +161,7 @@ LPGEMM_M_FRINGE_KERN(uint8_t,int8_t,int16_t,u8s8s16o16_4x32)
 		a_kfringe = *(a + (rs_a * 1) + (cs_a * (k_full_pieces * 2)));
 		a_int32_1 = _mm256_set1_epi8(a_kfringe);
 
-		// Seperate register for intermediate op
+		// Separate register for intermediate op
 		inter_vec[2] = _mm256_maddubs_epi16(a_int32_1, b0);
 		inter_vec[3] = _mm256_maddubs_epi16(a_int32_1, b1);
 
@@ -173,7 +173,7 @@ LPGEMM_M_FRINGE_KERN(uint8_t,int8_t,int16_t,u8s8s16o16_4x32)
 		a_kfringe = *(a + (rs_a * 2) + (cs_a * (k_full_pieces * 2)));
 		a_int32_0 = _mm256_set1_epi8(a_kfringe);
 
-		// Seperate register for intermediate op
+		// Separate register for intermediate op
 		inter_vec[0] = _mm256_maddubs_epi16(a_int32_0, b0);
 		inter_vec[1] = _mm256_maddubs_epi16(a_int32_0, b1);
 
@@ -185,7 +185,7 @@ LPGEMM_M_FRINGE_KERN(uint8_t,int8_t,int16_t,u8s8s16o16_4x32)
 		a_kfringe = *(a + (rs_a * 3) + (cs_a * (k_full_pieces * 2)));
 		a_int32_1 = _mm256_set1_epi8(a_kfringe);
 
-		// Seperate register for intermediate op
+		// Separate register for intermediate op
 		inter_vec[2] = _mm256_maddubs_epi16(a_int32_1, b0);
 		inter_vec[3] = _mm256_maddubs_epi16(a_int32_1, b1);
 
@@ -687,7 +687,7 @@ LPGEMM_M_FRINGE_KERN(uint8_t,int8_t,int16_t,u8s8s16o16_2x32)
 		// Broadcast a[1,kr:kr+2].
 		a_int32_1 = _mm256_set1_epi16(*(uint16_t *)(a + (rs_a * 1) + (cs_a * offset)));
 
-		// Seperate register for intermediate op
+		// Separate register for intermediate op
 		inter_vec[0] = _mm256_maddubs_epi16(a_int32_0, b0);
 		inter_vec[1] = _mm256_maddubs_epi16(a_int32_0, b1);
 
@@ -696,7 +696,7 @@ LPGEMM_M_FRINGE_KERN(uint8_t,int8_t,int16_t,u8s8s16o16_2x32)
 		c_int16_0p0 = _mm256_add_epi16(inter_vec[0], c_int16_0p0);
 		c_int16_0p1 = _mm256_add_epi16(inter_vec[1], c_int16_0p1);
 
-		// Seperate register for intermediate op
+		// Separate register for intermediate op
 		inter_vec[2] = _mm256_maddubs_epi16(a_int32_1, b0);
 		inter_vec[3] = _mm256_maddubs_epi16(a_int32_1, b1);
 
@@ -716,7 +716,7 @@ LPGEMM_M_FRINGE_KERN(uint8_t,int8_t,int16_t,u8s8s16o16_2x32)
 		a_kfringe = *(a + (rs_a * 0) + (cs_a * (k_full_pieces * 2)));
 		a_int32_0 = _mm256_set1_epi8(a_kfringe);
 
-		// Seperate register for intermediate op
+		// Separate register for intermediate op
 		inter_vec[0] = _mm256_maddubs_epi16(a_int32_0, b0);
 		inter_vec[1] = _mm256_maddubs_epi16(a_int32_0, b1);
 
@@ -728,7 +728,7 @@ LPGEMM_M_FRINGE_KERN(uint8_t,int8_t,int16_t,u8s8s16o16_2x32)
 		a_kfringe = *(a + (rs_a * 1) + (cs_a * (k_full_pieces * 2)));
 		a_int32_1 = _mm256_set1_epi8(a_kfringe);
 
-		// Seperate register for intermediate op
+		// Separate register for intermediate op
 		inter_vec[2] = _mm256_maddubs_epi16(a_int32_1, b0);
 		inter_vec[3] = _mm256_maddubs_epi16(a_int32_1, b1);
 
@@ -1080,7 +1080,7 @@ LPGEMM_M_FRINGE_KERN(uint8_t,int8_t,int16_t,u8s8s16o16_1x32)
 		b0 = _mm256_loadu_si256((__m256i const *)(b + (64 * kr) + (NR * 0)));
 		b1 = _mm256_loadu_si256((__m256i const *)(b + (64 * kr) + (NR * 1)));
 
-		// Seperate register for intermediate op
+		// Separate register for intermediate op
 		inter_vec[0] = _mm256_maddubs_epi16(a_int32_0, b0);
 		inter_vec[1] = _mm256_maddubs_epi16(a_int32_0, b1);
 
@@ -1100,7 +1100,7 @@ LPGEMM_M_FRINGE_KERN(uint8_t,int8_t,int16_t,u8s8s16o16_1x32)
 		a_kfringe = *(a + (rs_a * 0) + (cs_a * (k_full_pieces * 2)));
 		a_int32_0 = _mm256_set1_epi8(a_kfringe);
 
-		// Seperate register for intermediate op
+		// Separate register for intermediate op
 		inter_vec[0] = _mm256_maddubs_epi16(a_int32_0, b0);
 		inter_vec[1] = _mm256_maddubs_epi16(a_int32_0, b1);
 

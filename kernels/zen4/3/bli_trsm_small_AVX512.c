@@ -729,7 +729,7 @@ err_t bli_trsm_small_mt_AVX512
 // region - GEMM DTRSM for right variants
 
 #define BLIS_DTRSM_SMALL_GEMM_8nx8m_AVX512(a01, b10, cs_b, p_lda, k_iter, b11) \
-  /*K loop is broken into two seperate loops
+  /*K loop is broken into two separate loops
     each loop computes k/2 iterations */ \
   \
   int itr = (k_iter / 2); /*itr count for first loop*/\
@@ -900,7 +900,7 @@ err_t bli_trsm_small_mt_AVX512
 */
 
 #define BLIS_DTRSM_SMALL_GEMM_8nx4m_AVX512(a01, b10, cs_b, p_lda, k_iter, b11) \
-  /*K loop is broken into two seperate loops
+  /*K loop is broken into two separate loops
     each loop computes k/2 iterations */ \
   \
   int itr = (k_iter / 2); /*itr count for first loop*/\
@@ -979,7 +979,7 @@ err_t bli_trsm_small_mt_AVX512
 
 
 #define BLIS_DTRSM_SMALL_GEMM_8nx3m_AVX512(a01, b10, cs_b, p_lda, k_iter, b11) \
-  /*K loop is broken into two seperate loops
+  /*K loop is broken into two separate loops
     each loop computes k/2 iterations */ \
   \
   int itr = (k_iter / 2); /*itr count for first loop*/\
@@ -1062,7 +1062,7 @@ err_t bli_trsm_small_mt_AVX512
   ymm16 = _mm256_add_pd(ymm16, ymm31);
 
   #define BLIS_DTRSM_SMALL_GEMM_8nx2m_AVX512(a01, b10, cs_b, p_lda, k_iter, b11) \
-  /*K loop is broken into two seperate loops
+  /*K loop is broken into two separate loops
     each loop computes k/2 iterations */ \
   \
   int itr = (k_iter / 2); /*itr count for first loop*/\
@@ -1142,7 +1142,7 @@ err_t bli_trsm_small_mt_AVX512
   ymm16 = _mm256_add_pd(ymm16, ymm31);
 
 #define BLIS_DTRSM_SMALL_GEMM_8nx1m_AVX512(a01, b10, cs_b, p_lda, k_iter, b11) \
-  /*K loop is broken into two seperate loops
+  /*K loop is broken into two separate loops
     each loop computes k/2 iterations */ \
   \
   int itr = (k_iter / 2); /*itr count for first loop*/\

@@ -278,7 +278,7 @@ void bli_samaxv_zen_int_avx512(
             mask.v = _mm512_sub_ps(max_vec_1.v, x_vec_1.v);
             // Type cast mask from IEEE754 (float) to integer type
             // This operation will not need a new register, its just to convince
-            // the compiler. But its accounted as seperate register in the
+            // the compiler. But its accounted as separate register in the
             // above calculations
             intMask = _mm512_castps_si512(mask.v);
             // Extract the signbit and build the mask.
@@ -312,7 +312,7 @@ void bli_samaxv_zen_int_avx512(
             mask.v = _mm512_sub_ps(max_vec_2.v, x_vec_2.v);
             // Type cast mask from IEEE754 (float) to integer type
             // This operation will not need a new register, its just to convince
-            // the compiler. But its accounted as seperate register in the
+            // the compiler. But its accounted as separate register in the
             // above calculations
             intMask = _mm512_castps_si512(mask.v);
             // Extract the signbit and build the mask.
@@ -345,7 +345,7 @@ void bli_samaxv_zen_int_avx512(
             mask.v = _mm512_sub_ps(max_vec_3.v, x_vec_3.v);
             // Type cast mask from IEEE754 (float) to integer type
             // This operation will not need a new register, its just to convince
-            // the compiler. But its accounted as seperate register in the
+            // the compiler. But its accounted as separate register in the
             // above calculations
             intMask = _mm512_castps_si512(mask.v);
             // Extract the signbit and build the mask.
@@ -397,7 +397,7 @@ void bli_samaxv_zen_int_avx512(
             mask.v = _mm512_sub_ps(max_vec_2.v, max_vec_3.v);
             // Type cast mask from IEEE754 (float) to integer type
             // This operation will not need a new register, its just to convince
-            // the compiler. But its accounted as seperate register in the
+            // the compiler. But its accounted as separate register in the
             // above calculations
             intMask = _mm512_castps_si512(mask.v);
             // Extract the signbit and build the mask.
@@ -423,7 +423,7 @@ void bli_samaxv_zen_int_avx512(
             mask.v = _mm512_sub_ps(max_vec_1.v, max_vec_2.v);
             // Type cast mask from IEEE754 (float) to integer type
             // This operation will not need a new register, its just to convince
-            // the compiler. But its accounted as seperate register in the
+            // the compiler. But its accounted as separate register in the
             // above calculations
             intMask = _mm512_castps_si512(mask.v);
             // Extract the signbit and build the mask.

@@ -20,18 +20,18 @@
 #endif
 
 // BLIS TODO: This is workaround to check if BLIS is built with
-//            openmp support. Ideally we dont' want any library
+//            openmp support. Ideally we don't want any library
 //            specific code in dtl.
 #include <blis.h>
 
 #if defined(__linux__)
 
 /*
-    Disable intrumentation for these functions as they will also be
-    called from compiler generated instumation code to trace
+    Disable instrumentation for these functions as they will also be
+    called from compiler generated instrumentation code to trace
     function execution.
 
-    It needs to be part of declration in the C file so can't be
+    It needs to be part of declaration in the C file so can't be
     moved to header file.
 
 */
