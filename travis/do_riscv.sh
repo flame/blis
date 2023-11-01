@@ -16,8 +16,8 @@ case $1 in
 	;;
 	"sifive_x280")
 	TARBALL=riscv64-glibc-ubuntu-20.04-llvm-nightly-${TAG}-nightly.tar.gz
-	*)
 	;;
+	*)
 	exit 1
 	;;
 esac
