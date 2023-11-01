@@ -2066,8 +2066,6 @@ void bli_dnorm2fv_unb_var1_avx2
 
     double *xt = x;
 
-    dim_t n_rem = n % 4;
-
     // Compute the sum of squares on 3 accumulators to avoid overflow
     // and underflow, depending on the vector element value.
     // Accumulator for small values; using scaling to avoid underflow.
@@ -2090,108 +2088,6 @@ void bli_dnorm2fv_unb_var1_avx2
 
     if( incx == 1 )
     {
-        // Attending to the fringe case requiring SSE code section.
-        if ( n_rem >= 2 )
-        {
-            // Clearing the upper 128-bit lanes if and when required.
-            // This ensures that the AVX-SSE transition penalty is avoided.
-            _mm256_zeroupper();
-
-            // Partial sums used for scaling, and registers to store thresholds
-            // and scaling factors
-            v2df_t sum_med_vec, sum_big_vec, sum_sml_vec;
-            v2df_t thres_sml_vec, thres_big_vec;
-            v2df_t scale_sml_vec, scale_big_vec;
-
-            // Vectors used for intermediate arithmetic and absolute value
-            v2df_t temp, zerov;
-
-            sum_med_vec.v = _mm_setzero_pd();
-            sum_big_vec.v = _mm_setzero_pd();
-            sum_sml_vec.v = _mm_setzero_pd();
-
-            temp.v = _mm_set1_pd( -0.0 );
-            thres_big_vec.v = _mm_loaddup_pd( &thres_big );
-            thres_sml_vec.v = _mm_loaddup_pd( &thres_sml );
-
-            // Vectors used for loading from memory and setting masks
-            v2df_t x0v, mask_vec;
-
-            v2df_t med_blend, non_med_blend;
-
-            x0v.v = _mm_loadu_pd( xt );
-
-            // Getting the abs of the vector elements.
-            x0v.v = _mm_andnot_pd( temp.v, x0v.v );
-
-            // Check if any of the values is a NaN and if so, return.
-            mask_vec.v = _mm_cmp_pd( x0v.v, x0v.v, _CMP_UNORD_Q );
-
-            // Checking for the presence of atleast one NaN
-            if ( bli_horizontal_or_df_128( mask_vec.v ) )
-            {
-                *norm = NAN;
-                return;
-            }
-
-            mask_vec.v = CMP128_df( x0v.v, thres_sml_vec.v, thres_big_vec.v );
-
-            if ( !bli_horizontal_or_df_128( mask_vec.v ) )
-            {
-                // Scaling is not necessary; only medium values.
-                sum_med_vec.v = _mm_fmadd_pd( x0v.v, x0v.v, sum_med_vec.v );
-            }
-            else
-            {
-                // Mask vector which indicate whether xi > thres_big.
-                mask_vec.v = _mm_cmp_pd( x0v.v, thres_big_vec.v, _CMP_GT_OQ );
-                zerov.v = _mm_setzero_pd();
-
-                if ( bli_horizontal_or_df_128( mask_vec.v ) )
-                {
-                    scale_big_vec.v = _mm_loaddup_pd( &scale_big );
-                    isbig = true;
-
-                    // Fill sum_med vector without scaling.
-                    med_blend.v = _mm_blendv_pd( x0v.v, zerov.v, mask_vec.v );
-                    sum_med_vec.v = _mm_fmadd_pd( med_blend.v, med_blend.v, sum_med_vec.v );
-
-                    // Fill sum_big vector using scaling.
-                    zerov.v = _mm_setzero_pd();
-                    non_med_blend.v = _mm_blendv_pd( zerov.v, scale_big_vec.v, mask_vec.v ); 
-                    non_med_blend.v = _mm_mul_pd( x0v.v, non_med_blend.v );
-                    sum_big_vec.v = _mm_fmadd_pd( non_med_blend.v, non_med_blend.v, sum_big_vec.v );
-                }
-                else
-                {
-                    scale_sml_vec.v = _mm_loaddup_pd( &scale_sml );
-                    // Mask vector which indicates whether xi > thres_small.
-                    mask_vec.v = _mm_cmp_pd( x0v.v, thres_sml_vec.v, _CMP_LT_OQ );
-                    // Fill sum_med vector without scaling.
-                    med_blend.v = _mm_blendv_pd( x0v.v, zerov.v, mask_vec.v );
-                    sum_med_vec.v = _mm_fmadd_pd( med_blend.v, med_blend.v, sum_med_vec.v );
-
-                    // Accumulate small values only if there have not been any big values so far.
-                    if ( !isbig )
-                    {
-                        // Fill sum_sml vector using scaling.
-                        zerov.v = _mm_setzero_pd();
-                        non_med_blend.v = _mm_blendv_pd( zerov.v, scale_sml_vec.v, mask_vec.v );
-                        non_med_blend.v = _mm_mul_pd( x0v.v, non_med_blend.v );
-                        sum_sml_vec.v = _mm_fmadd_pd( non_med_blend.v, non_med_blend.v, sum_sml_vec.v );
-                    }
-                }
-            }
-
-            // Final accumulation on the appropriate scalars
-            sum_sml += sum_sml_vec.v[0] + sum_sml_vec.v[1];
-            sum_med += sum_med_vec.v[0] + sum_med_vec.v[1];
-            sum_big += sum_big_vec.v[0] + sum_big_vec.v[1];
-
-            xt += 2;
-            i += 2;
-        }
-
         // AVX-2 code-section
         // Partial sums used for scaling.
         v4df_t sum_med_vec0, sum_big_vec0, sum_sml_vec0;
@@ -2233,6 +2129,8 @@ void bli_dnorm2fv_unb_var1_avx2
             if ( bli_horizontal_or_df( mask_vec0.v ) || bli_horizontal_or_df( mask_vec1.v ) )
             {
                 *norm = NAN;
+
+                AOCL_DTL_TRACE_EXIT( AOCL_DTL_LEVEL_TRACE_3 );
                 return;
             }
 
@@ -2352,6 +2250,8 @@ void bli_dnorm2fv_unb_var1_avx2
             if ( bli_horizontal_or_df( mask_vec0.v ) )
             {
                 *norm = NAN;
+
+                AOCL_DTL_TRACE_EXIT( AOCL_DTL_LEVEL_TRACE_3 );
                 return;
             }
 
@@ -2410,24 +2310,25 @@ void bli_dnorm2fv_unb_var1_avx2
         sum_med_vec0.v = _mm256_add_pd( sum_med_vec0.v, sum_med_vec1.v );
         sum_big_vec0.v = _mm256_add_pd( sum_big_vec0.v, sum_big_vec1.v );
 
-        sum_sml_vec0.v = _mm256_hadd_pd( sum_sml_vec0.v, sum_sml_vec0.v );
-        sum_med_vec0.v = _mm256_hadd_pd( sum_med_vec0.v, sum_med_vec0.v );
-        sum_big_vec0.v = _mm256_hadd_pd( sum_big_vec0.v, sum_big_vec0.v );
-
-        sum_sml += sum_sml_vec0.v[0] + sum_sml_vec0.v[2];
-        sum_med += sum_med_vec0.v[0] + sum_med_vec0.v[2];
-        sum_big += sum_big_vec0.v[0] + sum_big_vec0.v[2];
+        sum_sml += sum_sml_vec0.v[0] + sum_sml_vec0.v[1]
+                + sum_sml_vec0.v[2] + sum_sml_vec0.v[3];
+        sum_med += sum_med_vec0.v[0] + sum_med_vec0.v[1]
+                + sum_med_vec0.v[2] + sum_med_vec0.v[3];
+        sum_big += sum_big_vec0.v[0] + sum_big_vec0.v[1]
+                + sum_big_vec0.v[2] + sum_big_vec0.v[3];
     }
 
     // Dealing with fringe cases
+    double abs_chi;
     for( ; i < n; i += 1 )
     {
-        double abs_chi;
         abs_chi = bli_fabs( *xt );
         // Any thread encountering a NAN sets the sum_med accumalator to NAN
         if ( bli_isnan( abs_chi ) )
         {
             *norm = NAN;
+
+            AOCL_DTL_TRACE_EXIT( AOCL_DTL_LEVEL_TRACE_3 );
             return;
         }
         // Most likely case: medium values, not over/under-flow.
@@ -2512,6 +2413,8 @@ void bli_dznorm2fv_unb_var1_avx2
        cntx_t*  cntx
     )
 {
+    AOCL_DTL_TRACE_ENTRY( AOCL_DTL_LEVEL_TRACE_3 );
+
     double sumsq = 0;
 
     dcomplex *xt = x;
@@ -2578,6 +2481,8 @@ void bli_dznorm2fv_unb_var1_avx2
             if ( bli_horizontal_or_df( mask_vec0.v ) || bli_horizontal_or_df( mask_vec1.v ) )
             {
                 *norm = NAN;
+
+                AOCL_DTL_TRACE_EXIT( AOCL_DTL_LEVEL_TRACE_3 );
                 return;
             }
 
@@ -2697,6 +2602,8 @@ void bli_dznorm2fv_unb_var1_avx2
             if ( bli_horizontal_or_df( mask_vec0.v ) )
             {
                 *norm = NAN;
+
+                AOCL_DTL_TRACE_EXIT( AOCL_DTL_LEVEL_TRACE_3 );
                 return;
             }
 
@@ -2755,113 +2662,75 @@ void bli_dznorm2fv_unb_var1_avx2
         sum_med_vec0.v = _mm256_add_pd( sum_med_vec0.v, sum_med_vec1.v );
         sum_big_vec0.v = _mm256_add_pd( sum_big_vec0.v, sum_big_vec1.v );
 
-        sum_sml_vec0.v = _mm256_hadd_pd( sum_sml_vec0.v, sum_sml_vec0.v );
-        sum_med_vec0.v = _mm256_hadd_pd( sum_med_vec0.v, sum_med_vec0.v );
-        sum_big_vec0.v = _mm256_hadd_pd( sum_big_vec0.v, sum_big_vec0.v );
-
-        // Final accumulation on the appropriate scalars
-        sum_sml += sum_sml_vec0.v[0] + sum_sml_vec0.v[2];
-        sum_med += sum_med_vec0.v[0] + sum_med_vec0.v[2];
-        sum_big += sum_big_vec0.v[0] + sum_big_vec0.v[2];
+        sum_sml += sum_sml_vec0.v[0] + sum_sml_vec0.v[1]
+                + sum_sml_vec0.v[2] + sum_sml_vec0.v[3];
+        sum_med += sum_med_vec0.v[0] + sum_med_vec0.v[1]
+                + sum_med_vec0.v[2] + sum_med_vec0.v[3];
+        sum_big += sum_big_vec0.v[0] + sum_big_vec0.v[1]
+                + sum_big_vec0.v[2] + sum_big_vec0.v[3];
     }
 
-
-    // Clearing the upper 128-bit lanes if and when required.
-    // This ensures that the AVX-SSE transition penalty is avoided.
-    _mm256_zeroupper();
-
-    // Dealing with fringe cases using SSE instructions and 128-bit registers.
-    // This is because each element of dcomplex type is 128 bits in size, thereby
-    // giving scope for this optimization.
-    for( ; i < n; i += 1 )
+    // Scalar loop to handle the fringe cases
+    double chi_r, chi_i;
+    double abs_chi;
+    for ( ; i < n; i++)
     {
-        v2df_t sum_med_vec, sum_big_vec, sum_sml_vec;
-        v2df_t thres_sml_vec, thres_big_vec;
-        v2df_t scale_sml_vec, scale_big_vec;
+        // Get real and imaginary component of the vector element.
+        bli_zdgets(*xt, chi_r, chi_i);
 
-        v2df_t temp, zerov;
-
-        sum_med_vec.v = _mm_setzero_pd();
-        sum_big_vec.v = _mm_setzero_pd();
-        sum_sml_vec.v = _mm_setzero_pd();
-
-        temp.v = _mm_set1_pd( -0.0 );
-        thres_big_vec.v = _mm_loaddup_pd( &thres_big );
-        thres_sml_vec.v = _mm_loaddup_pd( &thres_sml );
-
-        // Vectors used for loading from memory and setting masks
-        v2df_t x0v, mask_vec;
-
-        v2df_t med_blend, non_med_blend;
-
-        x0v.v = _mm_loadu_pd( ( const double * )xt );
-
-        // Getting the abs of the vector elements.
-        x0v.v = _mm_andnot_pd( temp.v, x0v.v );
-
-        // Check if any of the values is a NaN and if so, return.
-        mask_vec.v = _mm_cmp_pd(x0v.v, x0v.v, _CMP_UNORD_Q);
-
-        // Checking for the presence of atleast one NaN
-        if ( bli_horizontal_or_df_128( mask_vec.v ) )
+        // Start with accumulating the real component of the vector element.
+        abs_chi = bli_fabs( chi_r );
+        // If any of the elements is NaN, then return NaN as a result.
+        if ( bli_isnan( abs_chi ) )
         {
-            *norm = NAN;
+            *norm = abs_chi;
+
+            AOCL_DTL_TRACE_EXIT( AOCL_DTL_LEVEL_TRACE_3 );
             return;
         }
-
-        mask_vec.v = CMP128_df( x0v.v, thres_sml_vec.v, thres_big_vec.v );
-
-        if ( !bli_horizontal_or_df_128( mask_vec.v ) )
+        // Most likely case: medium values, not over/under-flow.
+        if ( ( abs_chi <= thres_big ) && ( abs_chi >= thres_sml ) )
         {
-            // Scaling is not necessary; only medium values.
-            sum_med_vec.v = _mm_fmadd_pd( x0v.v, x0v.v, sum_med_vec.v );
+            sum_med += abs_chi * abs_chi;
         }
-        else
+        // Case where there could be an overflow. Scaling is required.
+        else if ( abs_chi > thres_big )
         {
-            // Mask vector which indicate whether xi > thres_big.
-            mask_vec.v = _mm_cmp_pd( x0v.v, thres_big_vec.v, _CMP_GT_OQ );
-            zerov.v = _mm_setzero_pd();
-
-            if ( bli_horizontal_or_df_128( mask_vec.v ) )
-            {
-                scale_big_vec.v = _mm_loaddup_pd( &scale_big );
-                isbig = true;
-
-                // Fill sum_med vector without scaling.
-                med_blend.v = _mm_blendv_pd( x0v.v, zerov.v, mask_vec.v );
-                sum_med_vec.v = _mm_fmadd_pd( med_blend.v, med_blend.v, sum_med_vec.v );
-
-                // Fill sum_big vector using scaling.
-                zerov.v = _mm_setzero_pd();
-                non_med_blend.v = _mm_blendv_pd( zerov.v, scale_big_vec.v, mask_vec.v ); 
-                non_med_blend.v = _mm_mul_pd( x0v.v, non_med_blend.v );
-                sum_big_vec.v = _mm_fmadd_pd( non_med_blend.v, non_med_blend.v, sum_big_vec.v );
-            }
-            else
-            {
-                scale_sml_vec.v = _mm_loaddup_pd( &scale_sml );
-                // Mask vector which indicates whether xi > thres_small.
-                mask_vec.v = _mm_cmp_pd( x0v.v, thres_sml_vec.v, _CMP_LT_OQ );
-                // Fill sum_med vector without scaling.
-                med_blend.v = _mm_blendv_pd( x0v.v, zerov.v, mask_vec.v );
-                sum_med_vec.v = _mm_fmadd_pd( med_blend.v, med_blend.v, sum_med_vec.v );
-
-                // Accumulate small values only if there have not been any big values so far.
-                if ( !isbig )
-                {
-                    // Fill sum_sml vector using scaling.
-                    zerov.v = _mm_setzero_pd();
-                    non_med_blend.v = _mm_blendv_pd( zerov.v, scale_sml_vec.v, mask_vec.v );
-                    non_med_blend.v = _mm_mul_pd( x0v.v, non_med_blend.v );
-                    sum_sml_vec.v = _mm_fmadd_pd( non_med_blend.v, non_med_blend.v, sum_sml_vec.v );
-                }
-            }
+            sum_big += ( abs_chi * scale_big ) * ( abs_chi * scale_big );
+            isbig = true;
+        }
+        // Case where there could be an underflow. Scaling is required.
+        else if ( ( !isbig ) && ( abs_chi < thres_sml ) )
+        {
+            sum_sml += ( abs_chi * scale_sml ) * ( abs_chi * scale_sml );
         }
 
-        // Final accumulation on the appropriate scalars
-        sum_sml += sum_sml_vec.v[0] + sum_sml_vec.v[1];
-        sum_med += sum_med_vec.v[0] + sum_med_vec.v[1];
-        sum_big += sum_big_vec.v[0] + sum_big_vec.v[1];
+        // Accumulate the imaginary component of the vector element.
+        abs_chi = bli_fabs( chi_i );
+        // If any of the elements is NaN, then return NaN as a result.
+        if ( bli_isnan( abs_chi ) )
+        {
+            *norm = abs_chi;
+
+            AOCL_DTL_TRACE_EXIT( AOCL_DTL_LEVEL_TRACE_3 );
+            return;
+        }
+        // Most likely case: medium values, not over/under-flow.
+        if ( ( abs_chi <= thres_big ) && ( abs_chi >= thres_sml ) )
+        {
+            sum_med += abs_chi * abs_chi;
+        }
+        // Case where there could be an overflow. Scaling is required.
+        else if ( abs_chi > thres_big )
+        {
+            sum_big += ( abs_chi * scale_big ) * ( abs_chi * scale_big );
+            isbig = true;
+        }
+        // Case where there could be an underflow. Scaling is required.
+        else if ( ( !isbig ) && ( abs_chi < thres_sml ) )
+        {
+            sum_sml += ( abs_chi * scale_sml ) * ( abs_chi * scale_sml );
+        }
 
         xt += incx;
     }
