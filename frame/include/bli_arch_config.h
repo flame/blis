@@ -389,12 +389,6 @@ CNTX_INIT_PROTS( generic )
 #include "bli_kernels_bgq.h"
 #endif
 
-// -- SiFive RISC-V architectures --
-
-#ifdef BLIS_KERNELS_SIFIVE_X280
-#include "bli_kernels_sifive_x280.h"
-#endif
-
 // -- RISC-V --
 
 #ifdef BLIS_KERNELS_RVI
@@ -402,6 +396,12 @@ CNTX_INIT_PROTS( generic )
 #endif
 #ifdef BLIS_KERNELS_RVIV
 #include "bli_kernels_rviv.h"
+#endif
+
+// -- SiFive RISC-V architectures --
+
+#ifdef BLIS_KERNELS_SIFIVE_X280
+#include "bli_kernels_sifive_x280.h"
 #endif
 
 
