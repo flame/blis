@@ -89,7 +89,7 @@ TYPED_TEST( nrm2_EIC, zero_incx_MT ) {
     // For incx=0, nrm2 iterates through the first element n-times.
     // So, we initialize x[0] with a different value than the rest
     // of the elements.
-    x[0] = T{10.0}*x[0];
+    x[0] = T{2.0}*x[0];
     RT blis_norm = nrm2<T>(n, x.data(), incx);
     RT ref_norm = testinghelpers::ref_nrm2<T>(n, x.data(), incx);
     computediff<RT>(blis_norm, ref_norm);

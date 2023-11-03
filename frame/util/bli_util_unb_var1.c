@@ -814,41 +814,47 @@ void bli_snormfv_unb_var1
         return;
     }
 
-    /* Disable AVX2 codepath.
-    if( bli_cpuid_is_avx2fma3_supported() == TRUE )
+    // Querying the architecture ID to deploy the appropriate kernel
+    arch_t id = bli_arch_query_id();
+    switch ( id )
     {
-        bli_snorm2fv_unb_var1_avx2( n, x, incx, norm, cntx );
-    }
-    else*/
-    {
-        float* zero       = bli_s0;
-        float* one        = bli_s1;
-        float  scale;
-        float  sumsq;
-        float  sqrt_sumsq;
+        case BLIS_ARCH_ZEN4:
+        case BLIS_ARCH_ZEN3:
+        case BLIS_ARCH_ZEN2:
+        case BLIS_ARCH_ZEN:
+#ifdef BLIS_KERNELS_ZEN
+            bli_snorm2fv_unb_var1_avx2( n, x, incx, norm, cntx );
+            break;
+#endif
+        default:;
+            float* zero       = bli_s0;
+            float* one        = bli_s1;
+            float  scale;
+            float  sumsq;
+            float  sqrt_sumsq;
 
-        // Initialize scale and sumsq to begin the summation.
-        bli_sscopys( *zero, scale );
-        bli_sscopys( *one,  sumsq );
+            // Initialize scale and sumsq to begin the summation.
+            bli_sscopys( *zero, scale );
+            bli_sscopys( *one,  sumsq );
 
-        // Compute the sum of the squares of the vector.
-        bli_ssumsqv_unb_var1
-        (
-            n,
-            x,
-            incx,
-            &scale,
-            &sumsq,
-            cntx,
-            rntm
-        );
+            // Compute the sum of the squares of the vector.
+            bli_ssumsqv_unb_var1
+            (
+                n,
+                x,
+                incx,
+                &scale,
+                &sumsq,
+                cntx,
+                rntm
+            );
 
-        // Compute: norm = scale * sqrt( sumsq )
-        bli_ssqrt2s( sumsq, sqrt_sumsq );
-        bli_sscals( scale, sqrt_sumsq );
+            // Compute: norm = scale * sqrt( sumsq )
+            bli_ssqrt2s( sumsq, sqrt_sumsq );
+            bli_sscals( scale, sqrt_sumsq );
 
-        // Store the final value to the output variable.
-        bli_scopys( sqrt_sumsq, *norm );
+            // Store the final value to the output variable.
+            bli_scopys( sqrt_sumsq, *norm );
     }
 }
 
