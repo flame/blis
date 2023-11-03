@@ -3,16 +3,19 @@
 set -e
 set -x
 
-TAG=2023.02.25
+TAG=2023.10.18
 
 # The prebuilt toolchains only support hardfloat, so we only
 # test these for now.
 case $1 in
 	"rv32iv")
-	TARBALL=riscv32-glibc-ubuntu-20.04-nightly-${TAG}-nightly.tar.gz
+	TARBALL=riscv32-glibc-ubuntu-20.04-gcc-nightly-${TAG}-nightly.tar.gz
 	;;
 	"rv64iv")
-	TARBALL=riscv64-glibc-ubuntu-20.04-nightly-${TAG}-nightly.tar.gz
+	TARBALL=riscv64-glibc-ubuntu-20.04-gcc-nightly-${TAG}-nightly.tar.gz
+	;;
+	"sifive_x280")
+	TARBALL=riscv64-glibc-ubuntu-20.04-llvm-nightly-${TAG}-nightly.tar.gz
 	;;
 	*)
 	exit 1
