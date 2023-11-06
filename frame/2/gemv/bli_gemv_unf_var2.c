@@ -62,7 +62,6 @@ void PASTEMAC(ch,varname) \
 \
     const num_t dt = PASTEMAC(ch,type); \
 \
-    ctype*  zero       = PASTEMAC(ch,0); \
     ctype*  A1; \
     ctype*  x1; \
     ctype*  y1; \
