@@ -82,15 +82,26 @@ void PASTEF772S(chx,cha,blasname) \
 	/* Convert/typecast negative values of n to zero. */ \
 	bli_convert_blas_dim1( *n, n0 ); \
 \
-	/* If the input increments are negative, adjust the pointers so we can
-	   use positive increments instead. */ \
-	bli_convert_blas_incv( n0, (ftype_x*)x, *incx, x0, incx0 ); \
+	/* If the input increments are less than or equal to zero, return. */ \
+	if ( (*incx) <= 0 ) { \
+		AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1); \
+		return ; \
+	} else { \
+		incx0 = ( inc_t )(*incx); \
+		x0 = (x); \
+	} \
 \
 	/* NOTE: We do not natively implement BLAS's csscal/zdscal in BLIS.
 	   that is, we just always sub-optimally implement those cases
 	   by casting alpha to ctype_x (potentially the complex domain) and
 	   using the homogeneous datatype instance according to that type. */ \
 	PASTEMAC2(cha,chx,copys)( *alpha, alpha_cast ); \
+\
+	/* If alpha is a unit scalar, return early. */ \
+	if ( PASTEMAC(c, eq1)(alpha_cast) ) { \
+		AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1); \
+		return ; \
+	} \
 \
 	/* Call BLIS interface. */ \
 	PASTEMAC2(chx,blisname,BLIS_TAPI_EX_SUF) \
@@ -142,42 +153,18 @@ void sscal_blis_impl
 
     /* Convert/typecast negative values of n to zero. */
     if ( *n < 0 ) n0 = ( dim_t )0;
-    else              n0 = ( dim_t )(*n);
+    else          n0 = ( dim_t )(*n);
 
-    /* If the input increments are negative, adjust the pointers so we can
-       use positive increments instead. */
-    if ( *incx < 0 )
+    /* If the input increments are less than or equal to zero, return. */
+    if ( (*incx) <= 0 )
     {
-        /* The semantics of negative stride in BLAS are that the vector
-        operand be traversed in reverse order. (Another way to think
-        of this is that negative strides effectively reverse the order
-        of the vector, but without any explicit data movements.) This
-        is also how BLIS interprets negative strides. The differences
-        is that with BLAS, the caller *always* passes in the 0th (i.e.,
-        top-most or left-most) element of the vector, even when the
-        stride is negative. By contrast, in BLIS, negative strides are
-        used *relative* to the vector address as it is given. Thus, in
-        BLIS, if this backwards traversal is desired, the caller *must*
-        pass in the address to the (n-1)th (i.e., the bottom-most or
-        right-most) element along with a negative stride. */
-
-        x0    = (x) + (n0-1)*(-*incx);
-        incx0 = ( inc_t )(*incx);
-
+      AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
+      return ;
     }
     else
     {
-        x0    = (x);
-        incx0 = ( inc_t )(*incx);
-    }
-
-    /*
-      According to the BLAS definition, return early when incx <= 0
-    */
-    if (incx0 <= 0)
-    {
-        AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
-        return;
+      x0    = (x);
+      incx0 = ( inc_t )(*incx);
     }
 
     cntx_t *cntx = NULL;
@@ -263,39 +250,22 @@ void dscal_blis_impl
       Return early when n <= 0 or incx <= 0 or alpha == 1.0 - BLAS exception
       Return early when alpha pointer is NULL - BLIS exception
     */
-    if ((*n) <= 0 || alpha == NULL || bli_deq1(*alpha) || (*incx) <= 0)
+    if ((*n) <= 0 || alpha == NULL || bli_deq1(*alpha))
     {
         AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
         return;
     }
 
-    /* If the input increments are negative, adjust the pointers so we can
-       use positive increments instead.
-       * This check is redundant and can be safely removed
-       */
-    if ( *incx < 0 )
+    /* If the input increments are less than or equal to zero, return. */
+    if ( (*incx) <= 0 )
     {
-        /* The semantics of negative stride in BLAS are that the vector
-        operand be traversed in reverse order. (Another way to think
-        of this is that negative strides effectively reverse the order
-        of the vector, but without any explicit data movements.) This
-        is also how BLIS interprets negative strides. The differences
-        is that with BLAS, the caller *always* passes in the 0th (i.e.,
-        top-most or left-most) element of the vector, even when the
-        stride is negative. By contrast, in BLIS, negative strides are
-        used *relative* to the vector address as it is given. Thus, in
-        BLIS, if this backwards traversal is desired, the caller *must*
-        pass in the address to the (n-1)th (i.e., the bottom-most or
-        right-most) element along with a negative stride. */
-
-        x0    = (x) + (n_elem-1)*(-*incx);
-        incx0 = ( inc_t )(*incx);
-
+      AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
+      return ;
     }
     else
     {
-        x0    = (x);
-        incx0 = ( inc_t )(*incx);
+      x0    = (x);
+      incx0 = ( inc_t )(*incx);
     }
 
      // Definition of function pointer
