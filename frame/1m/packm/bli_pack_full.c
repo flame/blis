@@ -45,6 +45,8 @@ void bli_pack_full_init
              rntm_t* rntm
      )
 {
+    AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_2);
+
     // Initializing the cntx if one isn't already passed.
     if ( cntx == NULL ) {
         cntx = bli_gks_query_cntx();
@@ -77,6 +79,8 @@ void bli_pack_full_init
      rntm
     );
 
+    AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_2);
+
 }
 
 // Full pack function for A matrix
@@ -98,6 +102,8 @@ void PASTEMAC(ch,tfuncname) \
        thrinfo_t* thread \
      ) \
 {\
+    AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_5); \
+\
     const num_t dt = PASTEMAC(ch,type); \
 \
     /* Query the context for various blocksizes. */ \
@@ -192,6 +198,8 @@ void PASTEMAC(ch,tfuncname) \
         } \
     } \
 \
+    AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_5); \
+\
 } \
 
 INSERT_GENTFUNC_BASIC0_SD( pack_full_a )
@@ -217,6 +225,8 @@ void PASTEMAC(ch,tfuncname) \
         thrinfo_t* thread \
     ) \
 { \
+    AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_5); \
+\
     const num_t dt = PASTEMAC(ch,type); \
 \
     /* Query the context for various blocksizes. */ \
@@ -355,6 +365,8 @@ void PASTEMAC(ch,tfuncname) \
 \
     } \
 \
+    AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_5); \
+\
 } \
 
 INSERT_GENTFUNC_BASIC0_SD( pack_full_b )
@@ -374,6 +386,8 @@ void PASTEMAC(ch,tfuncname) \
              thrinfo_t* thread \
      ) \
 { \
+\
+    AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_4); \
 \
     const num_t dt = bli_obj_dt( src_obj ); \
 \
@@ -429,6 +443,8 @@ void PASTEMAC(ch,tfuncname) \
           thread \
         ); \
     } \
+\
+    AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_4); \
 \
 } \
 

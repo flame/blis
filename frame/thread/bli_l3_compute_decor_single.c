@@ -36,7 +36,7 @@
 
 #if !defined (BLIS_ENABLE_MULTITHREADING) || defined (BLIS_ENABLE_PTHREADS)
 
-err_t bli_l3_compute_thread_decorator
+void bli_l3_compute_thread_decorator
      (
        l3computeint_t func,
        opid_t         family,
@@ -48,6 +48,8 @@ err_t bli_l3_compute_thread_decorator
        rntm_t*        rntm
      )
 {
+    AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_3);
+
     const dim_t n_threads = 1;
     array_t* restrict array = bli_sba_checkout_array( n_threads );
     bli_sba_rntm_set_pool( 0, array, rntm );
@@ -81,7 +83,8 @@ err_t bli_l3_compute_thread_decorator
 
     bli_sba_checkin_array( array );
 
-    return BLIS_SUCCESS;
+    AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_3);
+
 }
 
 #endif

@@ -49,6 +49,8 @@ void bli_pack_full_thread_decorator
              rntm_t* rntm
      )
 {
+    AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_3);
+
     dim_t n_threads = bli_rntm_num_threads( rntm );
 
     /* Ensure n_threads is always greater than or equal to 1 */
@@ -76,6 +78,8 @@ void bli_pack_full_thread_decorator
          &thread
         );
     }
+
+    AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_3);
 }
 #endif
 

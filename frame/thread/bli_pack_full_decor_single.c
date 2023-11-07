@@ -49,6 +49,8 @@ void bli_pack_full_thread_decorator
              rntm_t* rntm
      )
 {
+    AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_3);
+
     thrinfo_t thread = BLIS_GEMM_SINGLE_THREADED;
 
     {
@@ -65,6 +67,8 @@ void bli_pack_full_thread_decorator
          &thread
         );
     }
+
+    AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_3);
 
 }
 

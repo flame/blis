@@ -32,6 +32,89 @@
 
 */
 
+#define bla_gemm_get_size_check( dt_str, op_str, identifier, m, n, k ) \
+{ \
+	f77_int info = 0; \
+	f77_int A_identifier, B_identifier; \
+\
+	A_identifier  = PASTE_LSAME( identifier, "A", (ftnlen)1, (ftnlen)1 ); \
+	B_identifier  = PASTE_LSAME( identifier, "B", (ftnlen)1, (ftnlen)1 ); \
+\
+	if      ( !A_identifier && !B_identifier ) \
+		info = 1; \
+	else if ( *m < 0 ) \
+		info = 2; \
+	else if ( *n < 0 ) \
+		info = 3; \
+	else if ( *k < 0 ) \
+		info = 4; \
+\
+	if ( info != 0 ) \
+	{ \
+		char func_str[ BLIS_MAX_BLAS_FUNC_STR_LENGTH ]; \
+\
+		sprintf( func_str, "%s%-5s", dt_str, op_str ); \
+\
+		bli_string_mkupper( func_str ); \
+\
+		PASTE_XERBLA( func_str, &info, (ftnlen)6 ); \
+\
+		return 0; \
+	} \
+}
+
+#define bla_gemm_pack_check( dt_str, op_str, identifier, trans, m, n, k, pld ) \
+{ \
+	f77_int info = 0; \
+	f77_int A_identifier, B_identifier; \
+	f77_int no_trans_param, conj_param, trans_param; \
+	f77_int nrow; \
+\
+	A_identifier  = PASTE_LSAME( identifier, "A", (ftnlen)1, (ftnlen)1 ); \
+	B_identifier  = PASTE_LSAME( identifier, "B", (ftnlen)1, (ftnlen)1 ); \
+\
+	no_trans_param  = PASTE_LSAME( trans, "N", (ftnlen)1, (ftnlen)1 ); \
+	conj_param      = PASTE_LSAME( trans, "C", (ftnlen)1, (ftnlen)1 ); \
+	trans_param     = PASTE_LSAME( trans, "T", (ftnlen)1, (ftnlen)1 ); \
+\
+	if ( A_identifier ) \
+	{ \
+		if ( no_trans_param ) { nrow = *m; } \
+		else                  { nrow = *k; } \
+	} \
+	else if ( B_identifier ) \
+	{ \
+		if ( no_trans_param ) { nrow = *k; } \
+		else                  { nrow = *n; } \
+	} \
+\
+	if      ( !A_identifier && !B_identifier ) \
+		info = 1; \
+	else if ( !no_trans_param && !conj_param && !trans_param ) \
+		info = 2; \
+	else if ( *m < 0 ) \
+		info = 3; \
+	else if ( *n < 0 ) \
+		info = 4; \
+	else if ( *k < 0 ) \
+		info = 5; \
+	else if ( *pld < bli_max( 1, nrow ) ) \
+		info = 6; \
+\
+	if ( info != 0 ) \
+	{ \
+		char func_str[ BLIS_MAX_BLAS_FUNC_STR_LENGTH ]; \
+\
+		sprintf( func_str, "%s%-5s", dt_str, op_str ); \
+\
+		bli_string_mkupper( func_str ); \
+\
+		PASTE_XERBLA( func_str, &info, (ftnlen)6 ); \
+\
+		return; \
+	} \
+}
+
 #define bla_gemm_compute_check( dt_str, op_str, transa, transb, m, n, k, lda, ldb, rs_c, cs_c ) \
 { \
 	f77_int info = 0; \

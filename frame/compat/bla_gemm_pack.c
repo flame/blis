@@ -53,9 +53,35 @@ void sgemm_pack_blis_impl
              float*    dest
      )
 {
+    AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1);
+
     dim_t m;
     dim_t n;
     dim_t k;
+
+    bli_init_auto(); // initialize blis
+
+    /* Perform BLAS parameter checking. */
+    PASTEBLACHK(gemm_pack)
+    (
+      MKSTR(s),
+      MKSTR(gemm),
+      identifier,
+      trans,
+      mm,
+      nn,
+      kk,
+      pld
+    );
+
+    /* Quick return. */
+    if ( *mm == 0 || *nn == 0 )
+    {
+      /* Finalize BLIS. */
+      bli_finalize_auto();
+      AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
+      return;
+    }
 
     dim_t m0 = 0;
     dim_t n0 = 0;
@@ -88,11 +114,6 @@ void sgemm_pack_blis_impl
     {
         bli_set_dims_with_trans( blis_trans, k, n, &m0, &n0 );
     }
-    else 
-    {
-        bli_print_msg( " Invalid IDENTIFIER setting sgemm_pack_() .", __FILE__, __LINE__ );
-        return;
-    }
 
     bli_obj_init_finish_1x1( dt, (float*)alpha,  &alpha_obj );
 
@@ -102,6 +123,13 @@ void sgemm_pack_blis_impl
     bli_obj_set_conjtrans( blis_trans, &src_obj );
 
     bli_pack_full_init(identifier, &alpha_obj, &src_obj, &dest_obj, NULL, NULL);
+
+    /* Finalize BLIS. */
+    bli_finalize_auto();
+
+    AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
+
+    return;
 }
 
 void sgemm_pack_
@@ -131,9 +159,35 @@ void dgemm_pack_blis_impl
              double*   dest
      )
 {
+    AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1);
+
     dim_t m;
     dim_t n;
     dim_t k;
+
+    bli_init_auto(); // initialize blis
+
+    /* Perform BLAS parameter checking. */
+    PASTEBLACHK(gemm_pack)
+    (
+      MKSTR(d),
+      MKSTR(gemm),
+      identifier,
+      trans,
+      mm,
+      nn,
+      kk,
+      pld
+    );
+
+    /* Quick return. */
+    if ( *mm == 0 || *nn == 0 )
+    {
+      /* Finalize BLIS. */
+      bli_finalize_auto();
+      AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
+      return;
+    }
 
     dim_t m0 = 0;
     dim_t n0 = 0;
@@ -165,11 +219,6 @@ void dgemm_pack_blis_impl
     {
         bli_set_dims_with_trans( blis_trans, k, n, &m0, &n0 );
     }
-    else 
-    {
-        bli_print_msg( " Invalid IDENTIFIER setting dgemm_pack_() .", __FILE__, __LINE__ );
-        return;
-    }
 
     bli_obj_init_finish_1x1( dt, (double*)alpha,  &alpha_obj );
 
@@ -179,6 +228,13 @@ void dgemm_pack_blis_impl
     bli_obj_set_conjtrans( blis_trans, &src_obj );
 
     bli_pack_full_init(identifier, &alpha_obj, &src_obj, &dest_obj, NULL, NULL);
+
+    /* Finalize BLIS. */
+    bli_finalize_auto();
+
+    AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
+
+    return;
 }
 
 void dgemm_pack_

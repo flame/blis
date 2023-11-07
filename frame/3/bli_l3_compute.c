@@ -45,6 +45,8 @@ void bli_gemm_compute_init
     rntm_t* rntm
 )
 {
+    AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_2);
+
     if ( bli_error_checking_is_enabled() )
     {
         // @todo: Add call to error checking function here
@@ -97,9 +99,11 @@ void bli_gemm_compute_init
         cntx,
         rntm
     );
+
+    AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_2);
 }
 
-err_t bli_gemm_compute
+void bli_gemm_compute
 (
     obj_t*     a,
     obj_t*     b,
@@ -110,6 +114,8 @@ err_t bli_gemm_compute
     thrinfo_t* thread
 )
 {
+    AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_4);
+
     const num_t  dt     = bli_obj_dt( c );
     const dim_t  m      = bli_obj_length( c );
     const dim_t  n      = bli_obj_width( c );
@@ -242,7 +248,8 @@ err_t bli_gemm_compute
         );
     }
 
-    return BLIS_SUCCESS;
+    AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_4);
+
 }
 
 #undef  GENTFUNC
@@ -267,6 +274,8 @@ void PASTEMAC( ch, varname ) \
         thrinfo_t* restrict thread \
       ) \
 { \
+    AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_5); \
+\
     const num_t dt = PASTEMAC( ch, type ); \
 \
     /* If m or n is zero, return immediately. */ \
@@ -644,6 +653,9 @@ void PASTEMAC( ch, varname ) \
       &mem_b, \
       thread_pb  \
     ); \
+\
+    AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_5); \
+\
 }
 
 INSERT_GENTFUNC_BASIC0_SD( gemm_compute )

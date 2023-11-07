@@ -55,6 +55,26 @@ f77_int dgemm_pack_get_size_blis_impl
     bli_init_auto(); // initialize blis
     cntx_t* cntx = bli_gks_query_cntx(); // Get processor specific context.
 
+    /* Perform BLAS parameter checking. */
+    PASTEBLACHK(gemm_get_size)
+    (
+      MKSTR(d),
+      MKSTR(gemm),
+      identifier,
+      pm,
+      pn,
+      pk
+    );
+
+    /* Quick return. */
+    if ( *pm == 0 || *pn == 0 )
+    {
+      /* Finalize BLIS. */
+      bli_finalize_auto();
+      AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
+      return 0;
+    }
+
     num_t dt = BLIS_DOUBLE;  // Double precision
     f77_int tbytes   = 0;    // total number of bytes needed for packing.
     f77_int m = *pm;
@@ -126,14 +146,12 @@ f77_int dgemm_pack_get_size_blis_impl
 
         tbytes = ps_max * sizeof( double );
     }
-    else
-    {
-        bli_print_msg( " Invalid IDENTIFIER setting dgemm_pack_get_size_() .", __FILE__, __LINE__ );
-        AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
-        return tbytes;
-    }
+
+    /* Finalize BLIS. */
+    bli_finalize_auto();
 
     AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
+
     return tbytes;
 }
 
@@ -158,8 +176,30 @@ f77_int sgemm_pack_get_size_blis_impl
        const f77_int* pk
      )
 {
+    AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1);
+
     bli_init_auto(); // initialize blis
     cntx_t* cntx = bli_gks_query_cntx(); // Get processor specific context.
+
+    /* Perform BLAS parameter checking. */
+    PASTEBLACHK(gemm_get_size)
+    (
+      MKSTR(s),
+      MKSTR(gemm),
+      identifier,
+      pm,
+      pn,
+      pk
+    );
+
+    /* Quick return. */
+    if ( *pm == 0 || *pn == 0 )
+    {
+      /* Finalize BLIS. */
+      bli_finalize_auto();
+      AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
+      return 0;
+    }
 
     num_t dt = BLIS_FLOAT;  // Single precision
     f77_int tbytes   = 0;    // total number of bytes needed for packing.
@@ -232,11 +272,11 @@ f77_int sgemm_pack_get_size_blis_impl
 
         tbytes = ps_max * sizeof( float );
     }
-    else
-    {
-        bli_print_msg( " Invalid IDENTIFIER setting sgemm_pack_get_size_() .", __FILE__, __LINE__ );
-        return tbytes;
-    }
+
+    /* Finalize BLIS. */
+    bli_finalize_auto();
+
+    AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
 
     return tbytes;
 }

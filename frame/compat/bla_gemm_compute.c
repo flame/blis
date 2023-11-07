@@ -54,6 +54,8 @@ void sgemm_compute_blis_impl
           float*    c, const f77_int* rs_c, const f77_int* cs_c
 )
 {
+    AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1);
+
     trans_t blis_transa;
     trans_t blis_transb;
     dim_t   m0, n0, k0;
@@ -83,11 +85,12 @@ void sgemm_compute_blis_impl
       rs_c, cs_c
     );
 
-    /* Quick return if possible. */
+    /* Quick return. */
     if ( *m == 0 || *n == 0 )
     {
       /* Finalize BLIS. */
       bli_finalize_auto();
+      AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
       return;
     }
 
@@ -131,6 +134,9 @@ void sgemm_compute_blis_impl
 
     /* Finalize BLIS. */
     bli_finalize_auto();
+
+    AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
+
     return;
 }
 
@@ -176,6 +182,8 @@ void dgemm_compute_blis_impl
           double*   c, const f77_int* rs_c, const f77_int* cs_c
 )
 {
+    AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1);
+
     trans_t blis_transa;
     trans_t blis_transb;
     dim_t   m0, n0, k0;
@@ -205,11 +213,12 @@ void dgemm_compute_blis_impl
       rs_c, cs_c
     );
 
-   /* Quick return if possible. */
+   /* Quick return. */
     if ( *m == 0 || *n == 0 )
     {
       /* Finalize BLIS. */
       bli_finalize_auto();
+      AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
       return;
     }
 
@@ -253,6 +262,10 @@ void dgemm_compute_blis_impl
 
     /* Finalize BLIS. */
     bli_finalize_auto();
+
+    AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
+
+    return;
 }
 
 #ifdef BLIS_ENABLE_BLAS

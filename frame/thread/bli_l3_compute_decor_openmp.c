@@ -38,7 +38,7 @@
 
 void* bli_l3_compute_thread_entry( void* data_void ) { return NULL; }
 
-err_t bli_l3_compute_thread_decorator
+void bli_l3_compute_thread_decorator
      (
        l3computeint_t func,
        opid_t         family,
@@ -50,6 +50,8 @@ err_t bli_l3_compute_thread_decorator
        rntm_t*        rntm
      )
 {
+    AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_3);
+
     // Query the total number of threads from the rntm_t object.
     const dim_t n_threads = bli_rntm_num_threads( rntm );
 
@@ -123,7 +125,8 @@ err_t bli_l3_compute_thread_decorator
     // mutual exclusion.
     bli_sba_checkin_array( array );
 
-    return BLIS_SUCCESS;
+    AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_3);
+
 }
 
 #endif

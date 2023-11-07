@@ -42,7 +42,7 @@ void bli_gemm_compute_init
   rntm_t* rntm
 );
 
-err_t bli_gemm_compute
+void bli_gemm_compute
 (
   obj_t*     a,
   obj_t*     b,
