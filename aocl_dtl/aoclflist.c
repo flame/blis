@@ -5,10 +5,11 @@
  *               each thread. This is used to log the data
  *               to correct file as per the current thread id.
  *
- * Copyright (C) 2020, Advanced Micro Devices, Inc
+ * Copyright (C) 2020-2023, Advanced Micro Devices, Inc. All rights reserved.
  *
  *==================================================================*/
 
+#include "blis.h"
 #include "aocltpdef.h"
 #include "aocldtl.h"
 #include "aoclfal.h"
@@ -63,7 +64,11 @@ AOCL_FLIST_Node * AOCL_FLIST_GetNode(AOCL_FLIST_Node *plist, AOCL_TID tid)
         {
             if (temp->fp == NULL)
             {
+#ifdef BLIS_ENABLE_PTHREADS
+                AOCL_DEBUGPRINT("Could not get saved time stamp for thread = %ld", tid);
+#else
                 AOCL_DEBUGPRINT("Could not get saved time stamp for thread = %d", tid);
+#endif
             }
             return temp;
         }
@@ -92,7 +97,11 @@ AOCL_FAL_FILE *AOCL_FLIST_GetFile(AOCL_FLIST_Node *plist, AOCL_TID tid)
         {
             if (temp->fp == NULL)
             {
+#ifdef BLIS_ENABLE_PTHREADS
+                AOCL_DEBUGPRINT("File associated with this thread id %ld does not exists or closed", tid);
+#else
                 AOCL_DEBUGPRINT("File associated with this thread id %d does not exists or closed", tid);
+#endif
             }
             return temp->fp;
         }
@@ -118,8 +127,11 @@ AOCL_FAL_FILE *AOCL_FLIST_AddFile(const int8 *pchFilePrefix, AOCL_FLIST_Node **p
     }
 
     /* We don't have exiting file, lets try to open new one */
+#ifdef BLIS_ENABLE_PTHREADS
+    sprintf(pchFileName, "P%d_T%lu_%s", AOCL_getpid(), tid, pchFilePrefix);
+#else
     sprintf(pchFileName, "P%d_T%u_%s", AOCL_getpid(), tid, pchFilePrefix);
-
+#endif
     file = AOCL_FAL_Open(pchFileName, "wb");
     if (file == NULL)
     {

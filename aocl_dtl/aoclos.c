@@ -3,9 +3,10 @@
  *
  * Description : Abstraction for os services used by DTL.
  *
- * Copyright (C) 2022, Advanced Micro Devices, Inc. All rights reserved.
+ * Copyright (C) 2022-2023, Advanced Micro Devices, Inc. All rights reserved.
  *
  *==================================================================*/
+#include "blis.h"
 #include "aocltpdef.h"
 #include "aocldtl.h"
 #include "aoclfal.h"
@@ -47,7 +48,10 @@ AOCL_TID AOCL_gettid(void)
   return omp_get_thread_num();
 #else
 #ifdef BLIS_ENABLE_PTHREADS
-  return pthread_self();
+  // pthread_self is not suitable for this purpose and may be replaced
+  // in a later release with something else. It returns a value of type
+  // pthread_t, which on linux is an unsigned long int.
+  return (AOCL_TID) pthread_self();
 #else
   return 0;
 #endif
@@ -89,7 +93,11 @@ AOCL_TID AOCL_gettid(void)
   return omp_get_thread_num();
 #else
 #ifdef BLIS_ENABLE_PTHREADS
-  return pthread_self();
+  // pthread_self is not suitable for this purpose and may be replaced
+  // in a later release with something else. It returns a value of type
+  // pthread_t, whose type may depend upon the operating system. On
+  // freeBSD it is a pointer to an empty struct.
+  return (AOCL_TID) pthread_self();
 #else
   return 0;
 #endif
