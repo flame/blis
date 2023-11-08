@@ -36,6 +36,7 @@
 #define BLIS_ARCH_H
 
 BLIS_EXPORT_BLIS arch_t bli_arch_query_id( void );
+BLIS_EXPORT_BLIS bool bli_aocl_enable_instruction_query( void );
 
 void bli_arch_set_id_once( void );
 void bli_arch_set_id( void );

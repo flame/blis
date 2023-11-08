@@ -65,6 +65,12 @@ static dim_t __attribute__ ((unused)) req_id = -1;
 // Keep track if AOCL_ENABLE_INSTRUCTIONS environment variable was set.
 static bool __attribute__ ((unused)) aocl_e_i = FALSE;
 
+bool bli_aocl_enable_instruction_query( void )
+{
+	// Return whether the AOCL_ENABLE_INSTRUCTIONS environment variable is set or not.
+	return aocl_e_i;
+}
+
 arch_t bli_arch_query_id( void )
 {
 	bli_arch_set_id_once();
