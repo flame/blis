@@ -34,6 +34,7 @@
 
 #include "blis.h"
 #include "aocl_gemm_interface_apis.h"
+#include "aocl_gemm_check.h"
 #include "lpgemm_types.h"
 #include "lpgemm_5loop_interface_apis.h"
 #include "lpgemm_config.h"
@@ -60,11 +61,16 @@ AOCL_GEMM_MATMUL(uint8_t,int8_t,uint8_t,int16_t,u8s8s16ou8)
 	// Set MC, NC, KC, NR, MR.
 	aocl_lpgemm_init_global_cntx();
 
-	// Null check for pointers.
-	if ((a == NULL) || (b == NULL) || (c == NULL))
-	{
-		return; // Error.
-	}
+	// check for validity of params.
+	AOCL_GEMM_CHECK
+	(
+	  "u8s8s16ou8",
+	  order, transa, transb,
+	  m, n, k,
+	  a, lda, mem_format_a,
+	  b, ldb, mem_format_b,
+	  c, ldc
+	);
 
 	/* Map BLAS chars to their corresponding BLIS enumerated type value. */
 	bli_param_map_netlib_to_blis_trans(transa, &blis_transa);
@@ -75,39 +81,14 @@ AOCL_GEMM_MATMUL(uint8_t,int8_t,uint8_t,int16_t,u8s8s16ou8)
 	if ( ( blis_transa != BLIS_NO_TRANSPOSE ) ||
 		 ( blis_transb != BLIS_NO_TRANSPOSE ) )
 	{
+		bli_print_msg(" Transpose of matrices is not supported.", __FILE__, __LINE__ );
 		return; // Error.
 	}
 
-	// Sanitize order input.
-	char order_use =
-			( ( order == 'r' ) || ( order == 'R' ) ||
-			  ( order == 'c' ) || ( order == 'C' ) ) ?
-			order : 'r';
-	if ( ( order_use != 'r' ) && ( order_use != 'R' ) )
+	if ( ( order != 'r' ) && ( order != 'R' ) )
 	{
+		bli_print_msg(" Operation only supports row-major matrices.", __FILE__, __LINE__ );
 		return; // Only row major supported.
-	}
-
-	bool is_row_major = ( ( order_use == 'r' ) || ( order_use == 'R' ) );
-	bool is_column_major = ( ( order_use == 'c' ) || ( order_use == 'C' ) );
-
-	// Row major input expected with leading dimensions >= row stride.
-	if ( ( is_row_major == TRUE ) &&
-	     ( ( lda < k ) || ( ldb < n ) || ( ldc < n ) ) )
-	{
-		return; // Error.
-	}
-	// Column major input expected with leading dimensions >= column stride.
-	else if ( ( is_column_major == TRUE ) &&
-	          ( ( lda < m ) || ( ldb < k ) || ( ldc < m ) ) )
-	{
-		return; // Error.
-	}
-
-	// Check if dimensions are valid.
-	if ((m <= 0) || (n <= 0) || (k <= 0) || (lda <= 0) || (ldb <= 0) || (ldc <= 0))
-	{
-		return; // Error.
 	}
 
 	const inc_t rs_a = lda;
@@ -135,16 +116,19 @@ AOCL_GEMM_MATMUL(uint8_t,int8_t,uint8_t,int16_t,u8s8s16ou8)
 	// Only unpacked A supported now.
 	if (mtag_a != UNPACKED)
 	{
+		bli_print_msg(" A matrix needs to be unpacked.", __FILE__, __LINE__ );
 		return; // Error.
 	}
 
 	// Convert post op struct to post op linked list format.
 	lpgemm_post_op post_op_list[AOCL_MAX_POST_OPS];
-	lpgemm_translate_to_post_ops_list
+	err_t err = lpgemm_translate_to_post_ops_list
 	(
 	  post_op_unparsed, post_op_list,
-	  ( void* )c, ( void* )( &order_use )
+	  ( void* )c, ( void* )( &order )
 	);
+
+	if( err != BLIS_SUCCESS ) return;
 
 	// Initialize a local runtime with global settings if necessary. Note
 	// that in the case that a runtime is passed in, we make a local copy.

@@ -55,7 +55,7 @@ BLIS_INLINE void lpgemm_set_node_params
 	post_op_node->next = NULL;
 }
 
-void lpgemm_translate_to_post_ops_list
+err_t lpgemm_translate_to_post_ops_list
      (
        aocl_post_op*   post_op_unparsed,
        lpgemm_post_op* post_op_list,
@@ -70,7 +70,7 @@ void lpgemm_translate_to_post_ops_list
 		  post_op_list, POST_OPS_DISABLE,
 		  NULL, NULL, NULL, NULL, FALSE
 		);
-		return;
+		return BLIS_SUCCESS;
 	}
 
 	if ( ( post_op_unparsed->seq_length > AOCL_MAX_POST_OPS ) )
@@ -80,7 +80,7 @@ void lpgemm_translate_to_post_ops_list
 		  post_op_list, POST_OPS_DISABLE,
 		  NULL, NULL, NULL, NULL, FALSE
 		);
-		return; //Error, seq length exceeds max post ops permitted.
+		return BLIS_SUCCESS; //Error, seq length exceeds max post ops permitted.
 	}
 
 	dim_t e_i = 0; //Multiple eltwise supported.
@@ -110,6 +110,11 @@ void lpgemm_translate_to_post_ops_list
 									tmp_code = POST_OPS_RELU;
 									break;
 							case PRELU:
+									if( ( post_op_unparsed->eltwise + e_i )->algo.alpha == NULL )
+									{
+										bli_print_msg(" Post_op.alpha is NULL. Exiting..", __FILE__, __LINE__ );
+										return BLIS_NULL_POINTER;
+									}
 									tmp_code = POST_OPS_RELU_SCALE;
 									break;
 							case GELU_TANH:
@@ -119,6 +124,12 @@ void lpgemm_translate_to_post_ops_list
 									tmp_code = POST_OPS_GELU_ERF;
 									break;
 							case CLIP:
+									if( ( ( post_op_unparsed->eltwise + e_i )->algo.alpha == NULL ) ||
+									    ( ( post_op_unparsed->eltwise + e_i )->algo.beta  == NULL ) )
+									{
+										bli_print_msg(" Post_op.clip min or max value is NULL. Exiting..", __FILE__, __LINE__ );
+										return BLIS_NULL_POINTER;
+									}
 									tmp_code = POST_OPS_CLIP;
 									break;
 							default:
@@ -137,6 +148,11 @@ void lpgemm_translate_to_post_ops_list
 					}
 					break;
 			case BIAS:
+					if( post_op_unparsed->bias.bias == NULL )
+					{
+						bli_print_msg(" Post_op.bias is NULL. Exiting..", __FILE__, __LINE__ );
+						return BLIS_NULL_POINTER;
+					}
 					lpgemm_set_node_params
 					(
 					  ( post_op_list + i ), POST_OPS_BIAS,
@@ -145,6 +161,12 @@ void lpgemm_translate_to_post_ops_list
 					);
 					break;
 			case SCALE:
+					if( ( post_op_unparsed->sum.scale_factor == NULL ) ||
+					    ( post_op_unparsed->sum.zero_point   == NULL ) )
+					{
+						bli_print_msg(" Post_op.scale scale_factor or zero_point is NULL. Exiting..", __FILE__, __LINE__ );
+						return BLIS_NULL_POINTER;
+					}
 					lpgemm_set_node_params
 					(
 					  ( post_op_list + i ), POST_OPS_DOWNSCALE,
@@ -163,4 +185,5 @@ void lpgemm_translate_to_post_ops_list
 			( post_op_list + i )->next = ( post_op_list + i + 1);
 		}
 	}
+	return BLIS_SUCCESS;
 }

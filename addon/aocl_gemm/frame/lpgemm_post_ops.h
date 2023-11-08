@@ -76,7 +76,7 @@ typedef struct lpgemm_post_op_attr_t
 	int16_t* b_col_sum_vec_s16;
 } lpgemm_post_op_attr;
 
-void lpgemm_translate_to_post_ops_list
+err_t lpgemm_translate_to_post_ops_list
      (
        aocl_post_op*   post_op_unparsed,
        lpgemm_post_op* post_op_list,

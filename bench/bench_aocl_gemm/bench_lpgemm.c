@@ -86,7 +86,7 @@ static inline void bfloat16_to_float( bfloat16 bf16_val, float*  float_val )
 {
     int32_t inter_temp = *( ( int16_t* ) &bf16_val );
     inter_temp = inter_temp << 16;
-    *float_val = *(( float* ) ( &inter_temp ));
+    memcpy( float_val, &inter_temp, sizeof( int32_t ) );
 }
 
 #define CONVERT_TO_FLOAT(ctype) \
@@ -144,9 +144,17 @@ PRINT_MATRIX(int16_t)
 PRINT_MATRIX(float)
 PRINT_MATRIX(int32_t)
 
-void* lpgemm_malloc( size_t size )
+void* lpgemm_malloc( int32_t size )
 {
     void* p;
+    // creating a dummy buffer of size 4 bytes in case
+    // size of the matrix is negative.
+    if( size <= 0 )
+    {
+        p = malloc( 4 );
+        return p;
+    }
+
     if( bench_mode == 'a' )
     {
         p = malloc(size);
@@ -185,6 +193,7 @@ void lpgemm_free( void* p )
 #define GEN_FILL_ARRAY_FUNC(ctype) \
 void fill_array_ ## ctype ( void* arr, dim_t size ) \
 { \
+    if( size < 0 ) return; \
     ctype* temp_arr = ( ctype* ) arr; \
     for ( dim_t i = 0; i < size; ++i ) \
     { \
@@ -201,6 +210,7 @@ GEN_FILL_ARRAY_FUNC(int32_t)
 void fill_array_bfloat16( void* arr, dim_t size )
 {
     err_t bli_errors = BLIS_SUCCESS;
+    if( size < 0 ) return;
     float* c_float = ( float* ) bli_malloc_user( sizeof( float ) * size, &bli_errors );
     for ( dim_t i = 0; i < size; ++i )
     {
@@ -249,34 +259,10 @@ void mat_mul_ ## BLAS_SFX \
        aocl_post_op*  post_op\
      ) \
 { \
-    char storage = stor_order; \
-    char reordera = 'n'; \
-    char reorderb = 'n'; \
- \
-    if ( ( op_a == 'p' ) || ( op_a == 'P' ) ) \
-    { \
-        reordera = 'p'; \
-    } \
-    else if ( ( op_a == 'r' ) || ( op_a == 'R' ) ) \
-    { \
-        reordera = 'r'; \
-    } \
- \
-     if ( ( op_b == 'p' ) || ( op_b == 'P' ) ) \
-    { \
-        /* No reordering of B.*/ \
-        reorderb = 'n'; \
-    } \
-    else if ( ( op_b == 'r' ) || ( op_b == 'R' ) ) \
-    { \
-        /* Reordered B.*/ \
-        reorderb = 'r'; \
-    } \
- \
-    aocl_gemm_ ## BLAS_SFX( storage, transa, transb, m, n, k, \
+    aocl_gemm_ ## BLAS_SFX( stor_order, transa, transb, m, n, k, \
                     alpha, \
-                    a, lda, reordera, \
-                    b, ldb, reorderb, \
+                    a, lda, op_a, \
+                    b, ldb, op_b, \
                     beta, \
                     c, ldc, post_op ); \
  \
@@ -1235,15 +1221,18 @@ void mat_mul_bench_main_ ## BLAS_SFX \
     GEN_FUNC_NAME(fill_array_,B_type)(b, size_B ); \
  \
     C_type* c = ( C_type* ) lpgemm_malloc( sizeof( C_type ) * size_C ); \
-    memset( ( void* ) c, 0, sizeof( C_type ) * size_C ); \
  \
     C_type* c_ref = ( C_type* ) lpgemm_malloc( sizeof( C_type ) * size_C ); \
-    memset( ( void* ) c_ref, 0, sizeof( C_type ) * size_C ); \
  \
     if ( bench_mode == 'a' ) \
     { \
         GEN_FUNC_NAME(fill_array_,C_type)( c, ( size_C ) ); \
         GEN_FUNC_NAME(fill_array_,C_type)( c_ref, ( size_C ) ); \
+    } \
+    else \
+    { \
+        memset( ( void* ) c, 0, sizeof( C_type ) * size_C ); \
+        memset( ( void* ) c_ref, 0, sizeof( C_type ) * size_C ); \
     } \
  \
     Sum_type alpha = 0; \

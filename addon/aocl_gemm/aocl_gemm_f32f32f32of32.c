@@ -34,6 +34,7 @@
 
 #include "blis.h"
 #include "aocl_gemm_interface_apis.h"
+#include "aocl_gemm_check.h"
 #include "lpgemm_types.h"
 #include "lpgemm_post_ops.h"
 #include "lpgemm_thread_decor_openmp.h"
@@ -64,13 +65,16 @@ AOCL_GEMM_MATMUL(float,float,float,float,f32f32f32of32)
 	AOCL_DTL_LOG_GEMM_INPUTS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(s), transa, transb, m, n, k,\
 	      (void*)&alpha, lda, ldb, (void*)&beta, ldc);
 
-	// Null check for pointers.
-	if ( ( a == NULL ) || ( b == NULL ) || ( c == NULL ) )
-	{
-		AOCL_DTL_TRACE_EXIT_ERR(AOCL_DTL_LEVEL_TRACE_1, \
-						"Invalid pointers provided for input parameters.");
-		return; // Error.
-	}
+	// check for validity of params.
+	AOCL_GEMM_CHECK
+	(
+	  "f32f32f32of32",
+	  order, transa, transb,
+	  m, n, k,
+	  a, lda, mem_format_a,
+	  b, ldb, mem_format_b,
+	  c, ldc
+	);
 
 	/* Map BLAS chars to their corresponding BLIS enumerated type value. */
 	bli_param_map_netlib_to_blis_trans( transa, &blis_transa );
@@ -86,36 +90,8 @@ AOCL_GEMM_MATMUL(float,float,float,float,f32f32f32of32)
 		return; // Error.
 	}
 
-	// Sanitize order input.
-	char order_use =
-			( ( order == 'r' ) || ( order == 'R' ) ||
-			  ( order == 'c' ) || ( order == 'C' ) ) ?
-			order : 'r';
-
-	bool is_row_major = ( ( order_use == 'r' ) || ( order_use == 'R' ) );
-	bool is_column_major = ( ( order_use == 'c' ) || ( order_use == 'C' ) );
-
-	// Row major input expected with leading dimensions >= row stride.
-	if ( ( is_row_major == TRUE ) &&
-		 ( ( lda < k ) || ( ldb < n ) || ( ldc < n ) ) )
-	{
-		return; // Error.
-	}
-	// Column major input expected with leading dimensions >= column stride.
-	else if ( ( is_column_major == TRUE ) &&
-			  ( ( lda < m ) || ( ldb < k ) || ( ldc < m ) ) )
-	{
-		return; // Error.
-	}
-
-	// Check if dimensions are valid.
-	if ( ( m <= 0) || ( n <= 0 ) || ( k <= 0 ) ||
-	     ( lda <= 0 ) || ( ldb <= 0 ) || ( ldc <= 0 ) )
-	{
-		AOCL_DTL_TRACE_EXIT_ERR(AOCL_DTL_LEVEL_TRACE_1, \
-						"Invalid matrix dimensions.");
-		return; // Error.
-	}
+	bool is_row_major = ( ( order == 'r' ) || ( order == 'R' ) );
+	bool is_column_major = ( ( order == 'c' ) || ( order == 'C' ) );
 
 	// The strides are set assuming a row major kernel.
 	const inc_t rs_a = lda;
@@ -168,11 +144,13 @@ AOCL_GEMM_MATMUL(float,float,float,float,f32f32f32of32)
 
 	// Convert post op struct to post op linked list format.
 	lpgemm_post_op post_op_list[AOCL_MAX_POST_OPS];
-	lpgemm_translate_to_post_ops_list
+	err_t err = lpgemm_translate_to_post_ops_list
 	(
 	  post_op_unparsed, post_op_list,
-	  ( void* )c, ( void* )( &order_use )
+	  ( void* )c, ( void* )( &order )
 	);
+
+	if( err != BLIS_SUCCESS ) return;
 
 	// Initialize a local runtime with global settings if necessary. Note
 	// that in the case that a runtime is passed in, we make a local copy.
