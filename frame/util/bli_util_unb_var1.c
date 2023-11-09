@@ -460,21 +460,6 @@ void bli_znormfv_unb_var1
             norm_fp   = bli_dznorm2fv_unb_var1_avx2;
             reduce_fp = bli_dnorm2fv_unb_var1_avx2;
 
-            // Setting the ideal number of threads if support is enabled
-            #if defined( BLIS_ENABLE_OPENMP ) && defined( AOCL_DYNAMIC )
-                if ( n < 2000 )
-                    nt_ideal = 1;
-                else if ( n < 6500 )
-                    nt_ideal = 4;
-                else if ( n < 71000 )
-                    nt_ideal = 8;
-                else if ( n < 200000 )
-                    nt_ideal = 16;
-                else if ( n < 1530000 )
-                    nt_ideal = 32;
-                
-            #endif
-
             break;
 #endif
         default:;
@@ -517,6 +502,32 @@ void bli_znormfv_unb_var1
     */
     if ( norm_fp == NULL && reduce_fp == NULL )
         return;
+    
+    /*
+        When the size is such that nt_ideal is 1, and packing is not
+        required( incx == 1 ), we can directly call the kernel to
+        avoid framework overheads( fast-path ).
+    */
+    else if ( ( incx == 1 ) && ( n < 2000 ) )
+    {
+        norm_fp( n, x, incx, norm, cntx );
+        return;
+    }
+
+    // Setting the ideal number of threads if support is enabled
+    #if defined( BLIS_ENABLE_OPENMP ) && defined( AOCL_DYNAMIC )
+        if ( n < 2000 )
+            nt_ideal = 1;
+        else if ( n < 6500 )
+            nt_ideal = 4;
+        else if ( n < 71000 )
+            nt_ideal = 8;
+        else if ( n < 200000 )
+            nt_ideal = 16;
+        else if ( n < 1530000 )
+            nt_ideal = 32;
+        
+    #endif
 
     // Initialize a local runtime with global settings if necessary. Note
     // that in the case that a runtime is passed in, we make a local copy.
@@ -1023,22 +1034,6 @@ void bli_dnormfv_unb_var1
 
         norm_fp = bli_dnorm2fv_unb_var1_avx2;
 
-        // Setting the ideal number of threads if support is enabled
-        #if defined( BLIS_ENABLE_OPENMP ) && defined( AOCL_DYNAMIC )
-
-            if ( n < 4000 )
-                nt_ideal = 1;
-            else if ( n < 17000 )
-                nt_ideal = 4;
-            else if ( n < 136000 )
-                nt_ideal = 8;
-            else if ( n < 365000 )
-                nt_ideal = 16;
-            else if ( n < 2950000 )
-                nt_ideal = 32;
-
-        #endif
-
         break;
 #endif
         default:;
@@ -1080,6 +1075,33 @@ void bli_dnormfv_unb_var1
     */
     if ( norm_fp == NULL )
         return;
+    
+    /*
+        When the size is such that nt_ideal is 1, and packing is not
+        required( incx == 1 ), we can directly call the kernel to
+        avoid framework overheads( fast-path ).
+    */
+    else if ( ( incx == 1 ) && ( n < 4000 ) )
+    {
+        norm_fp( n, x, incx, norm, cntx );
+        return;
+    }
+
+    // Setting the ideal number of threads if support is enabled
+    #if defined( BLIS_ENABLE_OPENMP ) && defined( AOCL_DYNAMIC )
+
+        if ( n < 4000 )
+            nt_ideal = 1;
+        else if ( n < 17000 )
+            nt_ideal = 4;
+        else if ( n < 136000 )
+            nt_ideal = 8;
+        else if ( n < 365000 )
+            nt_ideal = 16;
+        else if ( n < 2950000 )
+            nt_ideal = 32;
+
+    #endif
 
     // Initialize a local runtime with global settings if necessary. Note
     // that in the case that a runtime is passed in, we make a local copy.
