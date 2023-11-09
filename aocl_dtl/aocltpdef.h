@@ -4,7 +4,7 @@
  *
  * Description : Abstraction for various datatypes used by DTL.
  *
- * Copyright (C) 2020-2023, Advanced Micro Devices, Inc. All rights reserved.
+ * Copyright (C) 2020 - 2023, Advanced Micro Devices, Inc. All rights reserved.
  *
  *==================================================================*/
 #ifndef AOCL_TYPEDEF_H_

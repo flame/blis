@@ -5,7 +5,7 @@
  * cblas_zgemmt.c
  * This program is a C interface to zgemmt.
  *
- * Copyright (C) 2020, Advanced Micro Devices, Inc.
+ * Copyright (C) 2020 - 2023, Advanced Micro Devices, Inc. All rights reserved.
  *
  */
 

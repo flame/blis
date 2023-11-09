@@ -5,7 +5,7 @@
  *               libaray, all debug features (except auto trace)
  *               can be enabled/disabled in this file.
  *
- * Copyright (C) 2020-2022, Advanced Micro Devices, Inc. All rights reserved.
+ * Copyright (C) 2020 - 2023, Advanced Micro Devices, Inc. All rights reserved.
  *
  *==================================================================*/
 

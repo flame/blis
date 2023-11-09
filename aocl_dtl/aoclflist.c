@@ -5,7 +5,7 @@
  *               each thread. This is used to log the data
  *               to correct file as per the current thread id.
  *
- * Copyright (C) 2020-2023, Advanced Micro Devices, Inc. All rights reserved.
+ * Copyright (C) 2020 - 2023, Advanced Micro Devices, Inc. All rights reserved.
  *
  *==================================================================*/
 

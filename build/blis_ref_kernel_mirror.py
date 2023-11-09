@@ -1,4 +1,4 @@
-"""Copyright (C) 2021-2023, Advanced Micro Devices, Inc. All Rights Reserved"""
+"""Copyright (C) 2021 - 2023, Advanced Micro Devices, Inc. All rights reserved."""
 
 ################################################################################
 # This file is used to mirroring the refkernels folder data into to zen, zen2, #

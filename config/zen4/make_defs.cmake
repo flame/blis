@@ -1,4 +1,4 @@
-##Copyright (C) 2023, Advanced Micro Devices, Inc ##
+##Copyright (C) 2023, Advanced Micro Devices, Inc. All rights reserved. ##
 
 # FLAGS that are specific to the 'zen4' architecture are added here.
 # FLAGS that are common for all the AMD architectures are present in

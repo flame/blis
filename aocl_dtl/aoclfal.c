@@ -3,7 +3,7 @@
  * 
  * Description : Platform/os independed file handling API's
  *
- * Copyright (C) 2020, Advanced Micro Devices, Inc
+ * Copyright (C) 2020 - 2023, Advanced Micro Devices, Inc. All rights reserved.
  * 
  *==================================================================*/
 

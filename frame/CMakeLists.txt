@@ -1,4 +1,4 @@
-##Copyright (C) 2020-2023, Advanced Micro Devices, Inc. All rights reserved.##
+##Copyright (C) 2020 - 2023, Advanced Micro Devices, Inc. All rights reserved.##
 
 # Collect all subdirectory paths that have at least one file with suffix in FRAME_SRC_SUFS list.
 get_filepaths_with_suffixes(LOCAL_SOURCE_FILES ${CMAKE_CURRENT_SOURCE_DIR} "${FRAME_SRC_SUFS}")

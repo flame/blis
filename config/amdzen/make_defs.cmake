@@ -1,4 +1,4 @@
-##Copyright (C) 2023, Advanced Micro Devices, Inc ##
+##Copyright (C) 2023, Advanced Micro Devices, Inc. All rights reserved. ##
 
 # For architecture independent files we still need to define
 # the required flags.

@@ -1,4 +1,4 @@
-##Copyright (C) 2020-2021, Advanced Micro Devices, Inc. All rights reserved.##
+##Copyright (C) 2020 - 2023, Advanced Micro Devices, Inc. All rights reserved.##
 
 add_library(haswell_1m
      OBJECT

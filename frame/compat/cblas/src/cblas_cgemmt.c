@@ -4,7 +4,7 @@
  *
  * cblas_cgemmt.c
  * This program is a C interface to cgemmt.
- * Copyright (C) 2020, Advanced Micro Devices, Inc.
+ * Copyright (C) 2020 - 2023, Advanced Micro Devices, Inc. All rights reserved.
  *
  */
 

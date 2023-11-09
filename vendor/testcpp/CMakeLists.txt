@@ -1,4 +1,4 @@
-##Copyright (C) 2020-2023, Advanced Micro Devices, Inc. All rights reserved.##
+##Copyright (C) 2020 - 2023, Advanced Micro Devices, Inc. All rights reserved.##
 
 # Comments:
 # - DIST_PATH is assumed to not exist if BLIS_INSTALL_PATH is given.

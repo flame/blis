@@ -5,7 +5,7 @@
  *
  * The program is a C interface to daxpby.
  *
- * Copyright (C) 2020, Advanced Micro Devices, Inc.
+ * Copyright (C) 2020 - 2023, Advanced Micro Devices, Inc. All rights reserved.
  */
 #include "cblas.h"
 #include "cblas_f77.h"

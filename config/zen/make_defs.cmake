@@ -1,4 +1,4 @@
-##Copyright (C) 2023, Advanced Micro Devices, Inc ##
+##Copyright (C) 2023, Advanced Micro Devices, Inc. All rights reserved. ##
 
 # Include file containing common flags for all AMD architectures
 include(${CMAKE_SOURCE_DIR}/config/zen/amd_config.cmake)

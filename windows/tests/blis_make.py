@@ -1,4 +1,4 @@
-"""Copyright (C) 2020, Advanced Micro Devices, Inc. All Rights Reserved"""
+"""Copyright (C) 2020 - 2023, Advanced Micro Devices, Inc. All rights reserved."""
 import re
 import subprocess
 import yaml

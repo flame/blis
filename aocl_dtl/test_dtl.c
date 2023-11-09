@@ -3,7 +3,7 @@
  * 
  * Description : Unit test cases for dtl.
  *
- * Copyright (C) 2020, Advanced Micro Devices, Inc
+ * Copyright (C) 2020 - 2023, Advanced Micro Devices, Inc. All rights reserved.
  * 
  *==================================================================*/
 

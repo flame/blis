@@ -1,4 +1,4 @@
-##Copyright (C) 2023, Advanced Micro Devices, Inc ##
+##Copyright (C) 2023, Advanced Micro Devices, Inc. All rights reserved. ##
 
 # Writing a function that will be used to generate the required object
 # libraries for the required addons.

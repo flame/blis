@@ -5,7 +5,7 @@
  *               each thread. This is used to log the deta
  *               to correct file as per the current thread id.
  *
- * Copyright (C) 2020, Advanced Micro Devices, Inc
+ * Copyright (C) 2020 - 2023, Advanced Micro Devices, Inc. All rights reserved.
  *
  *==================================================================*/
 

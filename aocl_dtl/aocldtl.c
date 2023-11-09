@@ -5,7 +5,7 @@
  *               These functions are invoked though macros by
  *               end user.
  *
- * Copyright (C) 2020-2023, Advanced Micro Devices, Inc. All rights reserved.
+ * Copyright (C) 2020 - 2023, Advanced Micro Devices, Inc. All rights reserved.
  *
  *=======================================================================*/
 #include "blis.h"

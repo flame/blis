@@ -1,4 +1,4 @@
-##Copyright (C) 2023, Advanced Micro Devices, Inc ##
+##Copyright (C) 2023, Advanced Micro Devices, Inc. All rights reserved. ##
 
 if(NOT WIN32)
     if(NOT (DEBUG_TYPE STREQUAL "off"))
