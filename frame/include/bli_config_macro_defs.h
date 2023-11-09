@@ -231,7 +231,7 @@
       #ifdef BLIS_IS_BUILDING_LIBRARY
         #define BLIS_EXPORT __declspec(dllexport)
       #else
-        #define BLIS_EXPORT __declspec(dllimport)
+        #define BLIS_EXPORT
       #endif
     #elif defined(__GNUC__) && __GNUC__ >= 4
       #define BLIS_EXPORT __attribute__ ((visibility ("default")))

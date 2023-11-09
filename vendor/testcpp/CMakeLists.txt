@@ -1,124 +1,70 @@
-##Copyright (C) 2020, Advanced Micro Devices, Inc. All rights reserved.##
+##Copyright (C) 2020-2023, Advanced Micro Devices, Inc. All rights reserved.##
 
-include_directories(${CMAKE_CURRENT_SOURCE_DIR})
-include_directories(${CMAKE_SOURCE_DIR}/cpp)
+# Comments:
+# - DIST_PATH is assumed to not exist if BLIS_INSTALL_PATH is given.
+# - We must use recursively expanded assignment for LIB_PATH and INC_PATH in
+#   the second case because CONFIG_NAME is not yet set.
+if(NOT DEFINED BLIS_INSTALL_PATH)
+    set(DIST_PATH ${CMAKE_BINARY_DIR})
+    set(LIB_PATH ${DIST_PATH}/lib/${BLIS_CONFIG_FAMILY})
+    set(INC_PATH ${DIST_PATH}/include/${BLIS_CONFIG_FAMILY})
+else()
+    set(LIB_PATH ${BLIS_INSTALL_PATH}/lib)
+    set(INC_PATH ${BLIS_INSTALL_PATH}/include/blis)
+endif()
 
-add_executable(test_asum_blis test_asum.cc)
-target_link_libraries(test_asum_blis PRIVATE "${LIB_NAME}.lib" )
+# Include the corresponding make_defs.cmake that holds the required compiler options.
+include(${CMAKE_SOURCE_DIR}/config/${BLIS_CONFIG_FAMILY}/make_defs.cmake)
 
-add_executable(test_axpy_blis test_axpy.cc)
-target_link_libraries(test_axpy_blis PRIVATE "${LIB_NAME}.lib" )
+# Gather all local source files.
+file(GLOB testcpp_sources LIST_DIRECTORIES false ${CMAKE_CURRENT_SOURCE_DIR}/*.cc)
+list(TRANSFORM testcpp_sources REPLACE ${CMAKE_CURRENT_SOURCE_DIR}/ "")
 
-add_executable(test_copy_blis test_copy.cc)
-target_link_libraries(test_copy_blis PRIVATE "${LIB_NAME}.lib" )
+# Override the value of CINCFLAGS so that the value of CFLAGS returned by
+# get-user-cflags-for() is not cluttered up with include paths needed only
+# while building BLIS.
+set(CINFLAGS ${INC_PATH})
 
-add_executable(test_dot_blis test_dot.cc)
-target_link_libraries(test_dot_blis PRIVATE "${LIB_NAME}.lib" )
+# Create one executable for each of the sources.
+foreach(source ${testcpp_sources})
+    string(REPLACE .cc "" exec_name ${source})
+    string(APPEND exec_name "_blis")
+    add_executable(${exec_name} ${source})
+    target_compile_options(${exec_name}
+                            PRIVATE
+                            # load-var-for,COPTFLAGS
+                            ${COPTFLAGS}
+                            # get-noopt-cflags-for
+                            ${CDBGFLAGS}
+                            ${CWARNFLAGS}
+                            ${CPICFLAGS}
+                            ${CMISCFLAGS}
+                            ${CXXLANGFLAGS}
 
-add_executable(test_dotc_blis test_dotc.cc)
-target_link_libraries(test_dotc_blis PRIVATE "${LIB_NAME}.lib" )
+                        )
+    target_include_directories(${exec_name}
+                            BEFORE
+                            PRIVATE
+                            # in get-noopt-cflags-for
+                            ${CINFLAGS}
+                            # Add local header paths
+                            ${CMAKE_CURRENT_SOURCE_DIR}
+                            ${CMAKE_SOURCE_DIR}/vendor/cpp
+                        )
+    target_link_libraries(${exec_name} PRIVATE ${LDFLAGS} libblis)
+    if(THREADING_MODEL STREQUAL "openmp")
+        target_link_libraries(${exec_name} PRIVATE OpenMP::OpenMP_C)
+    endif()
+    set_target_properties(${exec_name} PROPERTIES CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
+    # Put all those targets under vendor-testcpp-targets folder name so that they appear all together in IDE.
+    set_target_properties(${exec_name} PROPERTIES FOLDER vendor-testcpp-targets)
+    add_custom_target(${exec_name}.x
+                        COMMAND ${exec_name})
+    # Put all those targets under vendor-testcpp-targets folder name so that they appear all together in IDE.
+    set_target_properties(${exec_name}.x PROPERTIES FOLDER vendor-testcpp-targets)
+    list(APPEND test_executables "${exec_name}.x")
+endforeach()
 
-add_executable(test_gbmv_blis test_gbmv.cc)
-target_link_libraries(test_gbmv_blis PRIVATE "${LIB_NAME}.lib" )
-
-add_executable(test_gemm_blis test_gemm.cc)
-target_link_libraries(test_gemm_blis PRIVATE "${LIB_NAME}.lib" )
-
-add_executable(test_gemv_blis test_gemv.cc)
-target_link_libraries(test_gemv_blis PRIVATE "${LIB_NAME}.lib" )
-
-add_executable(test_ger_blis test_ger.cc)
-target_link_libraries(test_ger_blis PRIVATE "${LIB_NAME}.lib" )
-
-add_executable(test_gerc_blis test_gerc.cc)
-target_link_libraries(test_gerc_blis PRIVATE "${LIB_NAME}.lib" )
-
-add_executable(test_geru_blis test_geru.cc)
-target_link_libraries(test_geru_blis PRIVATE "${LIB_NAME}.lib" )
-
-add_executable(test_hemm_blis test_hemm.cc)
-target_link_libraries(test_hemm_blis PRIVATE "${LIB_NAME}.lib" )
-
-add_executable(test_hemv_blis test_hemv.cc)
-target_link_libraries(test_hemv_blis PRIVATE "${LIB_NAME}.lib" )
-
-add_executable(test_her2_blis test_her2.cc)
-target_link_libraries(test_her2_blis PRIVATE "${LIB_NAME}.lib" )
-
-add_executable(test_her_blis test_her.cc)
-target_link_libraries(test_her_blis PRIVATE "${LIB_NAME}.lib" )
-
-add_executable(test_herk_blis test_herk.cc)
-target_link_libraries(test_herk_blis PRIVATE "${LIB_NAME}.lib" )
-
-add_executable(test_hpr2_blis test_hpr2.cc)
-target_link_libraries(test_hpr2_blis PRIVATE "${LIB_NAME}.lib" )
-
-add_executable(test_hpr_blis test_hpr.cc)
-target_link_libraries(test_hpr_blis PRIVATE "${LIB_NAME}.lib" )
-
-add_executable(test_nrm2_blis test_nrm2.cc)
-target_link_libraries(test_nrm2_blis PRIVATE "${LIB_NAME}.lib" )
-
-add_executable(test_rot_blis test_rot.cc)
-target_link_libraries(test_rot_blis PRIVATE "${LIB_NAME}.lib" )
-
-add_executable(test_rotg_blis test_rotg.cc)
-target_link_libraries(test_rotg_blis PRIVATE "${LIB_NAME}.lib" )
-
-add_executable(test_rotm_blis test_rotm.cc)
-target_link_libraries(test_rotm_blis PRIVATE "${LIB_NAME}.lib" )
-
-add_executable(test_rotmg_blis test_rotmg.cc)
-target_link_libraries(test_rotmg_blis PRIVATE "${LIB_NAME}.lib" )
-
-add_executable(test_scal_blis test_scal.cc)
-target_link_libraries(test_scal_blis PRIVATE "${LIB_NAME}.lib" )
-
-add_executable(test_sdsdot_blis test_sdsdot.cc)
-target_link_libraries(test_sdsdot_blis PRIVATE "${LIB_NAME}.lib" )
-
-add_executable(test_spr2_blis test_spr2.cc)
-target_link_libraries(test_spr2_blis PRIVATE "${LIB_NAME}.lib" )
-
-add_executable(test_spr_blis test_spr.cc)
-target_link_libraries(test_spr_blis PRIVATE "${LIB_NAME}.lib" )
-
-add_executable(test_swap_blis test_swap.cc)
-target_link_libraries(test_swap_blis PRIVATE "${LIB_NAME}.lib" )
-
-add_executable(test_symm_blis test_symm.cc)
-target_link_libraries(test_symm_blis PRIVATE "${LIB_NAME}.lib" )
-
-add_executable(test_syr2_blis test_syr2.cc)
-target_link_libraries(test_syr2_blis PRIVATE "${LIB_NAME}.lib" )
-
-add_executable(test_syr2k_blis test_syr2k.cc)
-target_link_libraries(test_syr2k_blis PRIVATE "${LIB_NAME}.lib" )
-
-add_executable(test_syr_blis test_syr.cc)
-target_link_libraries(test_syr_blis PRIVATE "${LIB_NAME}.lib" )
-
-add_executable(test_syrk_blis test_syrk.cc)
-target_link_libraries(test_syrk_blis PRIVATE "${LIB_NAME}.lib" )
-
-add_executable(test_tbmv_blis test_tbmv.cc)
-target_link_libraries(test_tbmv_blis PRIVATE "${LIB_NAME}.lib" )
-
-add_executable(test_tbsv_blis test_tbsv.cc)
-target_link_libraries(test_tbsv_blis PRIVATE "${LIB_NAME}.lib" )
-
-add_executable(test_tpmv_blis test_tpmv.cc)
-target_link_libraries(test_tpmv_blis PRIVATE "${LIB_NAME}.lib" )
-
-add_executable(test_tpsv_blis test_tpsv.cc)
-target_link_libraries(test_tpsv_blis PRIVATE "${LIB_NAME}.lib" )
-
-add_executable(test_trmm_blis test_trmm.cc)
-target_link_libraries(test_trmm_blis PRIVATE "${LIB_NAME}.lib" )
-
-add_executable(test_trsm_blis test_trsm.cc)
-target_link_libraries(test_trsm_blis PRIVATE "${LIB_NAME}.lib" )
-
-add_executable(test_trsv_blis test_trsv.cc)
-target_link_libraries(test_trsv_blis PRIVATE "${LIB_NAME}.lib" )
+add_custom_target(checkbliscpp DEPENDS ${test_executables})
+# Put all those targets under vendor-testcpp-targets folder name so that they appear all together in IDE.
+set_target_properties(checkbliscpp PROPERTIES FOLDER vendor-testcpp-targets)

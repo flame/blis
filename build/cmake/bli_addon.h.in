@@ -1,0 +1,17 @@
+/*
+ * Copyright (C) 2020-2023, Advanced Micro Devices, Inc. All rights reserved.
+ */
+
+#ifndef BLIS_ADDON_H
+#define BLIS_ADDON_H
+
+#if ${ENABLE_ADDONS_01}
+#define BLIS_ENABLE_ADDONS
+#else
+#define BLIS_DISABLE_ADDONS
+#endif
+
+// Enabled addons
+${ADDON_LIST_INCLUDES}
+
+#endif
