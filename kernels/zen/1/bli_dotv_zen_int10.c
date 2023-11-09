@@ -53,6 +53,17 @@ typedef union
 	double  d[4] __attribute__((aligned(64)));
 } v4df_t;
 
+
+//Loads lower 3 64-bit double precision elements into ymm register
+static int64_t mask_3[4] = {-1, -1, -1, 0};
+//Loads lower 2 64-bit double precision elements into ymm register
+static int64_t mask_2[4] = {-1, -1, 0, 0};
+//Loads lower 1 64-bit double precision elements into ymm register
+static int64_t mask_1[4] = {-1, 0, 0, 0};
+//Loads 4 64-bit double precision elements into ymm register
+static int64_t mask_0[4] = {0, 0, 0, 0};
+
+static int64_t *mask_ptr[] = {mask_0, mask_1, mask_2, mask_3};
 // -----------------------------------------------------------------------------
 
 void bli_sdotv_zen_int10
@@ -421,12 +432,15 @@ void bli_ddotv_zen_int10
 			y0 += 1*n_elem_per_reg;
 		}
 
-		for ( ; (i + 0) < n; i += 1 )
+		if(i < n)
 		{
-			rho0 += (*x0) * (*y0);
+			__m256i maskVec = _mm256_loadu_si256( (__m256i *)mask_ptr[(n - i)]);
 
-			x0 += 1;
-			y0 += 1;
+			xv[0] = _mm256_maskload_pd( x0, maskVec );
+			yv[0] = _mm256_maskload_pd( y0, maskVec );
+
+			rhov[0].v = _mm256_fmadd_pd( xv[0], yv[0], rhov[0].v );
+			i = n;
 		}
 
 		// Manually add the results from above to finish the sum.

@@ -334,8 +334,13 @@ void bli_ddotv_zen_int_avx512
             x0 += 2 * n_elem_per_reg;
             y0 += 2 * n_elem_per_reg;
         }
+        rhov[0] = _mm512_add_pd(rhov[0], rhov[2]);
+        rhov[1] = _mm512_add_pd(rhov[1], rhov[3]);
 
-        for (; (i + 7) < n; i += 8)
+        rhov[0] = _mm512_add_pd(rhov[0], rhov[4]);
+        rhov[0] = _mm512_add_pd(rhov[0], rhov[1]);
+
+        if((i + 7) < n)
         {
             xv[0] = _mm512_loadu_pd(x0);
 
@@ -345,57 +350,33 @@ void bli_ddotv_zen_int_avx512
 
             x0 += n_elem_per_reg;
             y0 += n_elem_per_reg;
+            i += 8;
         }
-
-        __m256d temp[2];
-        temp[0] = _mm256_setzero_pd();
-
-        for (; (i + 3) < n; i += 4)
+        if(i < n)
         {
-            __m256d x_vec = _mm256_loadu_pd(x0);
+            // calculate mask based on remainder elements of vector
+            // which are not in multiple of 8.
+            // Here bitmask is prepared based on remainder elements
+            // to load only required elements from memory into
+            // vector register.
+            //for example if n-i=3 case bitmask is prepared as following.
+            //1 is shifted by n-i(3), mask becomes 0b1000.
+            //substracting 1 from it makes mask 0b111 which states that
+            //3 elements from memory are to be loaded into vector register.
+            __mmask8 mask = (1 << (n-i)) - 1;
+            rhov[1] = _mm512_setzero_pd();
 
-            __m256d y_vec = _mm256_loadu_pd(y0);
+            xv[0] = _mm512_mask_loadu_pd(rhov[1], mask, x0);
 
-            temp[0] = _mm256_fmadd_pd(x_vec, y_vec, temp[0]);
+            yv[0] = _mm512_mask_loadu_pd(rhov[1], mask, y0);
 
-            x0 += 4;
-            y0 += 4;
+            rhov[0] = _mm512_fmadd_pd(xv[0], yv[0], rhov[0]);
+
+            x0 += (n-i);
+            y0 += (n-i);
+            i += (n-i);
         }
-
-        __m128d temp_128[2];
-        temp_128[0] = _mm_setzero_pd();
-
-        for (; (i + 1) < n; i += 2)
-        {
-            __m128d x_vec = _mm_loadu_pd(x0 + 0 * n_elem_per_reg);
-
-            __m128d y_vec = _mm_loadu_pd(y0 + 0 * n_elem_per_reg);
-
-            temp_128[0] = _mm_fmadd_pd(x_vec, y_vec, temp_128[0]);
-
-            x0 += 2;
-            y0 += 2;
-        }
-
-        // Add the results from above to finish the sum.
-        rhov[0] = _mm512_add_pd(rhov[0], rhov[2]);
-        rhov[1] = _mm512_add_pd(rhov[1], rhov[3]);
-
-        rhov[0] = _mm512_add_pd(rhov[0], rhov[1]);
-        rhov[0] = _mm512_add_pd(rhov[0], rhov[4]);
-
-        temp[1] = _mm512_extractf64x4_pd(rhov[0], 0);
-        temp[0] = _mm256_add_pd(temp[0], temp[1]);
-
-        temp[1] = _mm512_extractf64x4_pd(rhov[0], 1);
-        temp[0] = _mm256_add_pd(temp[0], temp[1]);
-
-        temp_128[1] = _mm256_extractf64x2_pd(temp[0], 0);
-        temp_128[0] = _mm_add_pd(temp_128[0], temp_128[1]);
-        temp_128[1] = _mm256_extractf64x2_pd(temp[0], 1);
-        temp_128[0] = _mm_add_pd(temp_128[0], temp_128[1]);
-
-        rho0 = temp_128[0][0] + temp_128[0][1];
+        rho0 = _mm512_reduce_add_pd(rhov[0]);
     }
 
     for (; i < n; ++i)
