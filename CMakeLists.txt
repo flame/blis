@@ -673,6 +673,8 @@ configure_file(build/cmake/bli_addon.h.in ${PROJECT_BINARY_DIR}/bli_addon.h)
 # append as we add the corresponding subdirectories. This variable will be
 # transformed into a string and will be used to generate the flatten blis.h header.
 set(ALL_HEADER_PATHS_LIST "")
+# Track files to set dependencies for blis.h.
+set(ALL_HEADER_FILES_LIST "")
 
 # Include functionality that returns header paths.
 include(${CMAKE_SOURCE_DIR}/build/cmake/subdir_helper_functions.cmake)
@@ -685,14 +687,19 @@ list(FIND CONFIG_LIST ${BLIS_CONFIG_FAMILY} IS_UMBRELLA)
 if(${IS_UMBRELLA} STREQUAL "-1")
     # Collect all subdirectory paths that have at least one file with suffix in ALL_H99_SUFS list.
     get_dirpaths_with_suffixes(${BLIS_CONFIG_FAMILY}_HEADER_PATHS ${CMAKE_SOURCE_DIR}/config/${BLIS_CONFIG_FAMILY} "${ALL_H99_SUFS}")
+    # Collect all files in the subdirectories.
+    get_filepaths_with_suffixes(${BLIS_CONFIG_FAMILY}_HEADER_FILES ${CMAKE_SOURCE_DIR}/config/${BLIS_CONFIG_FAMILY} "${ALL_H99_SUFS}")
 endif()
 list(APPEND ALL_HEADER_PATHS_LIST "${${BLIS_CONFIG_FAMILY}_HEADER_PATHS}")
+list(APPEND ALL_HEADER_FILES_LIST "${${BLIS_CONFIG_FAMILY}_HEADER_FILES}")
 
 # Get header directory paths for each of the sub-configurations present
 # in the configuration list.
 foreach(CONF ${CONFIG_LIST})
     get_dirpaths_with_suffixes(config_${CONF}_HEADER_PATHS ${CMAKE_SOURCE_DIR}/config/${CONF} "${ALL_H99_SUFS}")
     list(APPEND ALL_HEADER_PATHS_LIST "${config_${CONF}_HEADER_PATHS}")
+    get_filepaths_with_suffixes(config_${CONF}_FILES_PATHS ${CMAKE_SOURCE_DIR}/config/${CONF} "${ALL_H99_SUFS}")
+    list(APPEND ALL_HEADER_FILES_LIST "${config_${CONF}_HEADER_FILES}")
 endforeach()
 
 # Get header directory paths for each of the kernels present
@@ -701,15 +708,21 @@ foreach(KERN ${KERNEL_LIST})
     # Collect all subdirectory paths that have at least one file with suffix in ALL_H99_SUFS list.
     get_dirpaths_with_suffixes(kernels_${KERN}_HEADER_PATHS ${CMAKE_SOURCE_DIR}/kernels/${KERN} "${ALL_H99_SUFS}")
     list(APPEND ALL_HEADER_PATHS_LIST "${kernels_${KERN}_HEADER_PATHS}")
+    get_filepaths_with_suffixes(kernels_${KERN}_HEADER_FILES ${CMAKE_SOURCE_DIR}/kernels/${KERN} "${ALL_H99_SUFS}")
+    list(APPEND ALL_HEADER_PATHS_FILES "${kernels_${KERN}_HEADER_FILES}")
 endforeach()
 
 # Get header directory paths for framework directory.
 get_dirpaths_with_suffixes(frame_HEADER_PATHS ${CMAKE_SOURCE_DIR}/frame "${ALL_H99_SUFS}")
 list(APPEND ALL_HEADER_PATHS_LIST "${frame_HEADER_PATHS}")
+get_filepaths_with_suffixes(frame_HEADER_FILES ${CMAKE_SOURCE_DIR}/frame "${ALL_H99_SUFS}")
+list(APPEND ALL_HEADER_FILES_LIST "${frame_HEADER_FILES}")
 
 # Get header directory paths for AOCL DTL logs directory.
 get_dirpaths_with_suffixes(aocl_dtl_HEADER_PATHS ${CMAKE_SOURCE_DIR}/aocl_dtl "${ALL_H99_SUFS}")
 list(APPEND ALL_HEADER_PATHS_LIST "${aocl_dtl_HEADER_PATHS}")
+get_filepaths_with_suffixes(aocl_dtl_HEADER_FILES ${CMAKE_SOURCE_DIR}/aocl_dtl "${ALL_H99_SUFS}")
+list(APPEND ALL_HEADER_FILES_LIST "${aocl_dtl_FILES_PATHS}")
 
 # Get a copy of the header paths without including the addons and the sandbox.
 set(FRAME_HEADER_DIRPATHS_LIST ${ALL_HEADER_PATHS_LIST})
@@ -718,11 +731,18 @@ set(FRAME_HEADER_DIRPATHS_LIST ${ALL_HEADER_PATHS_LIST})
 foreach(ADDON ${ENABLE_ADDON})
     get_dirpaths_with_suffixes(addon_${ADDON}_HEADER_PATHS ${CMAKE_SOURCE_DIR}/addon/${ADDON} "${ALL_H99_SUFS}")
     list(APPEND ALL_HEADER_PATHS_LIST "${addon_${ADDON}_HEADER_PATHS}")
+    get_filepaths_with_suffixes(addon_${ADDON}_HEADER_FILES ${CMAKE_SOURCE_DIR}/addon/${ADDON} "${ALL_H99_SUFS}")
+    list(APPEND ALL_HEADER_FILES_LIST "${addon_${ADDON}_HEADER_FILES}")
 endforeach()
 
 # Pick up generated bli_config.h and bli_addon.h that get generated in
 # current build directory.
 list(PREPEND ALL_HEADER_PATHS_LIST ${PROJECT_BINARY_DIR}/)
+list(PREPEND ALL_HEADER_FILES_LIST ${PROJECT_BINARY_DIR}/bli_config.h)
+if(NOT (ENABLE_ADDON STREQUAL ""))
+    list(PREPEND ALL_HEADER_FILES_LIST ${PROJECT_BINARY_DIR}/bli_addon.h)
+endif()
+
 # Create a string out of this list so that it can be processed by flatten-headers.py.
 list(JOIN ALL_HEADER_PATHS_LIST " " ALL_HEADER_PATHS_STRING)
 
@@ -739,6 +759,7 @@ add_custom_command(OUTPUT ${PROJECT_BINARY_DIR}/include/${BLIS_CONFIG_FAMILY}/bl
                 "${PROJECT_BINARY_DIR}/include"
                 "${ALL_HEADER_PATHS_STRING}"
                 COMMENT "Generating monolithic blis header file: ${CMAKE_SOURCE_DIR}/include/${BLIS_CONFIG_FAMILY}/blis.h"
+                DEPENDS ${ALL_HEADER_FILES_LIST}
                 )
 add_custom_target(flat-header DEPENDS ${PROJECT_BINARY_DIR}/include/${BLIS_CONFIG_FAMILY}/blis.h)
 #--------------------------------------------
@@ -753,6 +774,7 @@ if(ENABLE_CBLAS)
                     "${PROJECT_BINARY_DIR}/${include}"
                     "${ALL_HEADER_PATHS_STRING}"
                     COMMENT "Generating monolithic cblas header file: ${CMAKE_SOURCE_DIR}/include/${BLIS_CONFIG_FAMILY}/cblas.h"
+                    DEPENDS ${ALL_HEADER_FILES_LIST}
                     )
     add_custom_target(flat-cblas-header DEPENDS ${PROJECT_BINARY_DIR}/include/${BLIS_CONFIG_FAMILY}/cblas.h)
 endif()
