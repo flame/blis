@@ -493,7 +493,7 @@ if(ENABLE_MIXED_DT)
     else()
         message("   Mixed datatype optimizations requiring extra memory are disabled.")
         set(ENABLE_MIXED_DT_EXTRA_MEM_01 0)
-    endif()
+    endif()    
     set(ENABLE_MIXED_DT_01 1)
 else()
     message("   Mixed datatype support is disabled.")
@@ -730,31 +730,31 @@ list(JOIN ALL_HEADER_PATHS_LIST " " ALL_HEADER_PATHS_STRING)
 #     Consolidated blis.h header creation
 #--------------------------------------------
 # Creating a directory for the generated flatten headers.
-file(MAKE_DIRECTORY ${CMAKE_SOURCE_DIR}/include/${BLIS_CONFIG_FAMILY})
+file(MAKE_DIRECTORY ${PROJECT_BINARY_DIR}/include/${BLIS_CONFIG_FAMILY})
 # Flatten header python script file which expand header contents in blis.h.
-add_custom_command(OUTPUT ${CMAKE_SOURCE_DIR}/include/${BLIS_CONFIG_FAMILY}/blis.h
+add_custom_command(OUTPUT ${PROJECT_BINARY_DIR}/include/${BLIS_CONFIG_FAMILY}/blis.h
                 COMMAND ${Python_EXECUTABLE} ${CMAKE_SOURCE_DIR}/build/flatten-headers.py -c -v1
                 "${CMAKE_SOURCE_DIR}/frame/include/blis.h"
-                "${CMAKE_SOURCE_DIR}/include/${BLIS_CONFIG_FAMILY}/blis.h"
-                "${CMAKE_SOURCE_DIR}/include"
+                "${PROJECT_BINARY_DIR}/include/${BLIS_CONFIG_FAMILY}/blis.h"
+                "${PROJECT_BINARY_DIR}/include"
                 "${ALL_HEADER_PATHS_STRING}"
                 COMMENT "Generating monolithic blis header file: ${CMAKE_SOURCE_DIR}/include/${BLIS_CONFIG_FAMILY}/blis.h"
                 )
-add_custom_target(flat-header DEPENDS ${CMAKE_SOURCE_DIR}/include/${BLIS_CONFIG_FAMILY}/blis.h)
+add_custom_target(flat-header DEPENDS ${PROJECT_BINARY_DIR}/include/${BLIS_CONFIG_FAMILY}/blis.h)
 #--------------------------------------------
 #     Consolidated cblas.h header creation
 #--------------------------------------------
 # Flatten header python script file which expand header contents in cblas.h.
 if(ENABLE_CBLAS)
-    add_custom_command(OUTPUT ${CMAKE_SOURCE_DIR}/include/${BLIS_CONFIG_FAMILY}/cblas.h
+    add_custom_command(OUTPUT ${PROJECT_BINARY_DIR}/include/${BLIS_CONFIG_FAMILY}/cblas.h
                     COMMAND ${Python_EXECUTABLE} ${CMAKE_SOURCE_DIR}/build/flatten-headers.py -c -v1
                     "${CMAKE_SOURCE_DIR}/frame/compat/cblas/src/cblas.h"
-                    "${CMAKE_SOURCE_DIR}/include/${BLIS_CONFIG_FAMILY}/cblas.h"
-                    "${CMAKE_SOURCE_DIR}/${include}"
+                    "${PROJECT_BINARY_DIR}/include/${BLIS_CONFIG_FAMILY}/cblas.h"
+                    "${PROJECT_BINARY_DIR}/${include}"
                     "${ALL_HEADER_PATHS_STRING}"
                     COMMENT "Generating monolithic cblas header file: ${CMAKE_SOURCE_DIR}/include/${BLIS_CONFIG_FAMILY}/cblas.h"
                     )
-    add_custom_target(flat-cblas-header DEPENDS ${CMAKE_SOURCE_DIR}/include/${BLIS_CONFIG_FAMILY}/cblas.h)
+    add_custom_target(flat-cblas-header DEPENDS ${PROJECT_BINARY_DIR}/include/${BLIS_CONFIG_FAMILY}/cblas.h)
 endif()
 
 #--------------------------------------------
@@ -890,7 +890,7 @@ list(REMOVE_DUPLICATES REF_KER_H_PATHS)
 # Create list of include directories, to be used while creating the library.
 # NOTE: We no longer need every header path in the source tree since we
 # now #include the monolithic/flattened blis.h instead.
-set(CINFLAGS ${CMAKE_SOURCE_DIR}/include/${BLIS_CONFIG_FAMILY})
+set(CINFLAGS ${PROJECT_BINARY_DIR}/include/${BLIS_CONFIG_FAMILY})
 list(APPEND CINFLAGS ${REF_KER_H_PATHS})
 # Then add frame/include since it's needed for bli_oapi_w[o]_cntx.h.
 list(APPEND CINFLAGS ${CMAKE_SOURCE_DIR}/frame/include)
@@ -976,20 +976,20 @@ endforeach()
 #--------------------------------------------
 # Public blis headers.
 set(BLIS_PUBLIC_HEADERS
-    ${CMAKE_SOURCE_DIR}/include/${BLIS_CONFIG_FAMILY}/blis.h
+    ${PROJECT_BINARY_DIR}/include/${BLIS_CONFIG_FAMILY}/blis.h
     # Include AMD's C++ template header files in the list of headers
     # to install.
     ${CMAKE_SOURCE_DIR}/vendor/cpp/blis.hh
     ${CMAKE_SOURCE_DIR}/vendor/cpp/cblas.hh
 )
 if(ENABLE_CBLAS)
-    list(APPEND BLIS_PUBLIC_HEADERS ${CMAKE_SOURCE_DIR}/include/${BLIS_CONFIG_FAMILY}/cblas.h)
+    list(APPEND BLIS_PUBLIC_HEADERS ${PROJECT_BINARY_DIR}/include/${BLIS_CONFIG_FAMILY}/cblas.h)
 endif()
 
 # --- Library name and local paths ---
 # From old CMake
 if(WIN32)
-    add_definitions(-D_CRT_SECURE_NO_WARNINGS)
+    add_definitions(-D_CRT_SECURE_NO_WARNINGS)    
     add_definitions(-D_CRT_SECURE_NO_DEPRECATE)
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /Oi")
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /MP${CMake_MSVC_PARALLEL}")
@@ -1038,7 +1038,7 @@ endif()
 set_target_properties(libblis PROPERTIES PUBLIC_HEADER "${BLIS_PUBLIC_HEADERS}")
 set_target_properties(libblis PROPERTIES OUTPUT_NAME ${LIBBLIS})
 if(WIN32)
-    set_target_properties(libblis
+    set_target_properties(libblis 
                             PROPERTIES
                             ARCHIVE_OUTPUT_DIRECTORY  "${CMAKE_SOURCE_DIR}/bin"
                             LIBRARY_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/bin"
