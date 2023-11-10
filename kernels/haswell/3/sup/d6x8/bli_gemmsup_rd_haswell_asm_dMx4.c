@@ -1342,17 +1342,6 @@ void bli_dgemmsup_rd_haswell_asm_1x4
 
 	vperm2f128(imm(0x20), ymm2, ymm0, ymm4 )
 
-
-	//vhaddpd( ymm8, ymm5, ymm0 )
-	//vextractf128(imm(1), ymm0, xmm1 )
-	//vaddpd( xmm0, xmm1, xmm0 )
-
-	//vhaddpd( ymm14, ymm11, ymm2 )
-	//vextractf128(imm(1), ymm2, xmm1 )
-	//vaddpd( xmm2, xmm1, xmm2 )
-
-	//vperm2f128(imm(0x20), ymm2, ymm0, ymm5 )
-
 	                                   // xmm4[0:3] = sum(ymm4) sum(ymm7) sum(ymm10) sum(ymm13)
 
 

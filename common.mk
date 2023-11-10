@@ -699,7 +699,7 @@ endif
 
 # Disable tautological comparision warnings in clang.
 ifeq ($(CC_VENDOR),clang)
-CWARNFLAGS += -Wno-tautological-compare
+CWARNFLAGS += -Wno-tautological-compare -Wno-pass-failed
 endif
 
 $(foreach c, $(CONFIG_LIST_FAM), $(eval $(call append-var-for,CWARNFLAGS,$(c))))

@@ -822,7 +822,7 @@ blastest-bin: check-env blastest-f2c $(BLASTEST_DRV_BIN_PATHS)
 blastest-run: $(BLASTEST_DRV_BINS_R)
 
 # f2c object file rule.
-$(BASE_OBJ_BLASTEST_PATH)/%.o: $(BLASTEST_F2C_SRC_PATH)/%.c
+$(BASE_OBJ_BLASTEST_PATH)/%.o: $(BLASTEST_F2C_SRC_PATH)/%.c $(BLIS_H_FLAT)
 ifeq ($(ENABLE_VERBOSE),yes)
 	$(CC) $(call get-user-cflags-for,$(CONFIG_NAME)) $(BLAT_CFLAGS) -c $< -o $@
 else
@@ -831,7 +831,7 @@ else
 endif
 
 # driver object file rule.
-$(BASE_OBJ_BLASTEST_PATH)/%.o: $(BLASTEST_DRV_SRC_PATH)/%.c
+$(BASE_OBJ_BLASTEST_PATH)/%.o: $(BLASTEST_DRV_SRC_PATH)/%.c $(BLIS_H_FLAT)
 ifeq ($(ENABLE_VERBOSE),yes)
 	$(CC) $(call get-user-cflags-for,$(CONFIG_NAME)) $(BLAT_CFLAGS) -c $< -o $@
 else
@@ -919,7 +919,7 @@ testsuite: testsuite-run
 testsuite-bin: check-env $(TESTSUITE_BIN)
 
 # Object file rule.
-$(BASE_OBJ_TESTSUITE_PATH)/%.o: $(TESTSUITE_SRC_PATH)/%.c
+$(BASE_OBJ_TESTSUITE_PATH)/%.o: $(TESTSUITE_SRC_PATH)/%.c $(BLIS_H_FLAT)
 ifeq ($(ENABLE_VERBOSE),yes)
 	$(CC) $(call get-user-cflags-for,$(CONFIG_NAME)) -c $< -o $@
 else

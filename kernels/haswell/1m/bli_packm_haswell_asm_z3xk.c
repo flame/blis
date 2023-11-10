@@ -107,7 +107,7 @@ void bli_zpackm_haswell_asm_3xk
 	if ( cdim0 == mnr && !gs && !conja && unitk )
 	{
 		begin_asm()
-		
+
 		mov(var(a), rax)                   // load address of a.
 
 		mov(var(inca), r8)                 // load inca
@@ -124,14 +124,14 @@ void bli_zpackm_haswell_asm_3xk
 		mov(var(one), rdx)                 // load address of 1.0 constant
 		vbroadcastsd(mem(rdx, 0), ymm1)    // load 1.0 and duplicate
 		vxorpd(ymm0, ymm0, ymm0)           // set ymm0 to 0.0.
-		
+
 		mov(var(kappa), rcx)               // load address of kappa
 		vbroadcastsd(mem(rcx, 0), ymm10)   // load kappa_r and duplicate
 		vbroadcastsd(mem(rcx, 8), ymm11)   // load kappa_i and duplicate
-		
+
 
 										   // now branch on kappa == 1.0
-		
+
 		vucomisd(xmm1, xmm10)              // set ZF if kappa_r == 1.0.
 		sete(r12b)                         // r12b = ( ZF == 1 ? 1 : 0 );
 		vucomisd(xmm0, xmm11)              // set ZF if kappa_i == 0.0.
@@ -145,7 +145,7 @@ void bli_zpackm_haswell_asm_3xk
 
 		cmp(imm(16), r8)                   // set ZF if (16*inca) == 16.
 		jz(.ZCOLNONU)                      // jump to column storage case
-		
+
 		// -- kappa non-unit, row storage on A -------------------------------------
 
 		label(.ZROWNONU)
@@ -158,7 +158,7 @@ void bli_zpackm_haswell_asm_3xk
 		label(.ZCOLNONU)
 
 		jmp(.ZDONE)                        // jump to end.
-		
+
 
 
 
@@ -169,7 +169,7 @@ void bli_zpackm_haswell_asm_3xk
 
 
 		// -- kappa unit, row storage on A -----------------------------------------
-		
+
 		label(.ZROWUNIT)
 
 		//lea(mem(r8,  r8,  2), r12)         // r12 = 3*inca
@@ -257,7 +257,7 @@ void bli_zpackm_haswell_asm_3xk
 		// -- kappa unit, column storage on A --------------------------------------
 
 		label(.ZCOLUNIT)
-		
+
 		lea(mem(r10, r10, 2), r13)         // r13 = 3*lda
 
 		mov(var(k_iter), rsi)              // i = k_iter;
@@ -321,8 +321,8 @@ void bli_zpackm_haswell_asm_3xk
 
 
 		label(.ZDONE)
-		
-		
+
+
 
 		end_asm(
 		: // output operands (none)
@@ -378,7 +378,7 @@ void bli_zpackm_haswell_asm_3xk
 			(
 			  m_edge,
 			  n_edge,
-			  p_edge, 1, ldp 
+			  p_edge, 1, ldp
 			);
 		}
 	}
@@ -396,7 +396,7 @@ void bli_zpackm_haswell_asm_3xk
 		(
 		  m_edge,
 		  n_edge,
-		  p_edge, 1, ldp 
+		  p_edge, 1, ldp
 		);
 	}
 }

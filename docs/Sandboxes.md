@@ -37,11 +37,11 @@ utility functions.
 To enable a sandbox at configure-time, you simply specify it as an option to
 `configure`. Either of the following usages are accepted:
 ```
-$ ./configure --enable-sandbox=ref99 auto
-$ ./configure -s ref99 auto
+$ ./configure --enable-sandbox=gemmlike auto
+$ ./configure -s gemmlike auto
 ```
-Here, we tell `configure` that we want to use the `ref99` sandbox, which
-corresponds to a sub-directory of `sandbox` named `ref99`. (Reminder: the
+Here, we tell `configure` that we want to use the `gemmlike` sandbox, which
+corresponds to a sub-directory of `sandbox` named `gemmlike`. (Reminder: the
 `auto` argument is the configuration target and thus unrelated to
 sandboxes.)
 
@@ -50,7 +50,7 @@ sizes and shapes, you'll need to disable the skinny/unpacked "sup"
 sub-framework within BLIS, which is enabled by default. This can be
 done by passing the `--disable-sup-handling` option to configure:
 ```
-$ ./configure --enable-sandbox=ref99 --disable-sup-handling auto
+$ ./configure --enable-sandbox=gemmlike --disable-sup-handling auto
 ```
 If you leave sup enabled, the sup implementation will, at runtime, detect
 and handle certain smaller problem sizes upstream of where BLIS calls
@@ -62,13 +62,14 @@ As `configure` runs, you should get output that includes lines
 similar to:
 ```
 configure: configuring for alternate gemm implementation:
-configure:   sandbox/ref99
+configure:   sandbox/gemmlike
 ```
 And when you build BLIS, the last files to be compiled will be the source
 code in the specified sandbox:
 ```
-Compiling obj/haswell/sandbox/ref99/blx_gemm_ref_var2.o ('haswell' CFLAGS for sandboxes)
-Compiling obj/haswell/sandbox/ref99/oapi/bli_gemmnat.o ('haswell' CFLAGS for sandboxes)
+Compiling obj/haswell/sandbox/gemmlike/bli_gemmnat.o ('haswell' CFLAGS for sandboxes)
+Compiling obj/haswell/sandbox/gemmlike/bls_gemm.o ('haswell' CFLAGS for sandboxes)
+Compiling obj/haswell/sandbox/gemmlike/bls_gemm_bp_var1.o ('haswell' CFLAGS for sandboxes)
 ...
 ```
 That's it! After the BLIS library is built, it will contain your chosen
@@ -92,16 +93,19 @@ will be found!
 2. Your sandbox must be written in C99 or C++11. If you write your sandbox in
 C++11, you must use one of the BLIS-approved file extensions for your source
 files (`.cc`, `.cpp`, `.cxx`) and your header files (`.hh`, `.hpp`, `.hxx`).
-Note that `blis.h`
-already contains all of its definitions inside of an `extern "C"` block, so
-you should be able to `#include "blis.h"` from your C++11 source code without
-any issues.
+Note that `blis.h` already contains all of its definitions inside of an
+`extern "C"` block, so you should be able to `#include "blis.h"` from your
+C++11 source code without any issues.
 
 3. All of your code to replace BLIS's default implementation of `bli_gemmnat()`
 should reside in the named sandbox directory, or some directory therein.
-(Obviously.) For example, the "reference" sandbox is located in
-`sandbox/ref99`. All of the code associated with this sandbox will be
-contained within `sandbox/ref99`.
+(Obviously.) For example, the "gemmlike" sandbox is located in
+`sandbox/gemmlike`. All of the code associated with this sandbox will be
+contained within `sandbox/gemmlike`. Note that you absolutely *may* include
+additional code and interfaces within the sandbox, if you wish -- code and
+interfaces that are not directly or indirectly needed for satisfying the
+the "contract" set forth by the sandbox (i.e., including a local definition
+of`bli_gemmnat()`).
 
 4. The *only* header file that is required of your sandbox is `bli_sandbox.h`.
 It must be named `bli_sandbox.h` because `blis.h` will `#include` this file
@@ -116,16 +120,17 @@ you should only place things (e.g. prototypes or type definitions) in
 Usually, neither of these situations will require any of your local definitions
 since those local definitions are only needed to define your sandbox
 implementation of `bli_gemmnat()`, and this function is already prototyped by
-BLIS.
+BLIS. *But if you are adding additional APIs and/or operations to the sandbox
+that are unrelated to `bli_gemmnat()`, then you'll want to `#include` those
+function prototypes from within `bli_sandbox.h`*
 
 5. Your definition of `bli_gemmnat()` should be the **only function you define**
 in your sandbox that begins with `bli_`. If you define other functions that
 begin with `bli_`, you risk a namespace collision with existing framework
 functions. To guarantee safety, please prefix your locally-defined sandbox
-functions with another prefix. Here, in the `ref99` sandbox, we use the prefix
-`blx_`. (The `x` is for sandbox. Or experimental.) Also, please avoid the
-prefix `bla_` since that prefix is also used in BLIS for BLAS compatibility
-functions.
+functions with another prefix. Here, in the `gemmlike` sandbox, we use the prefix
+`bls_`. (The `s` is for sandbox.) Also, please avoid the prefix `bla_` since that
+prefix is also used in BLIS for BLAS compatibility functions.
 
 If you follow these rules, you will be much more likely to have a pleasant
 experience integrating your BLIS sandbox into the larger framework.
@@ -207,14 +212,8 @@ enabled in `input.general`. However, if those options *are* enabled and BLIS was
 built with mixed datatype support, then BLIS assumes that the implementation of
 `gemm` will support mixing of datatypes. BLIS *must* assume this, because
 there's no way for it to confirm at runtime that an implementation was written
-to support mixing datatypes. Note that even the `ref99` sandbox included with
+to support mixing datatypes. Note that even the `gemmlike` sandbox included with
 BLIS does not support mixed-datatype computation.
-
-* **Multithreading in ref99.** The current reference sandbox, `ref99`, does not
-currently implement multithreading.
-
-* **Packing matrices in ref99.** The current reference sandbox, `ref99`, does not
-currently implement packing of matrices A or B.
 
 ## Conclusion
 

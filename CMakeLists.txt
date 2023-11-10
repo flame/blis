@@ -798,7 +798,7 @@ endif()
 
 # Disable tautological comparision warnings in clang.
 if("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
-    list(APPEND CWARNFLAGS -Wno-tautological-compare)
+    list(APPEND CWARNFLAGS -Wno-tautological-compare -Wno-pass-failed)
 endif()
 
 # Add extra warning flags for Windows builds.

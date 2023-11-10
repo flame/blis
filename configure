@@ -1540,6 +1540,8 @@ check_compiler()
 	#   cortexa15: any
 	#   cortexa9: any
 	#
+	#   armsve: clang11+, gcc10+
+	#
 	#   generic: any
 	#
 	# Note: These compiler requirements were originally modeled after similar
@@ -1584,6 +1586,9 @@ check_compiler()
 			blacklistcc_add "skx"
 			# gcc 5.x may support POWER9 but it is unverified.
 			blacklistcc_add "power9"
+		fi
+		if [ ${cc_major} -lt 10 ]; then
+			blacklistcc_add "armsve"
 		fi
 	fi
 
@@ -1646,6 +1651,9 @@ check_compiler()
 				# See comment above regarding zen support.
 				#blacklistcc_add "zen"
 				: # explicit no-op since bash can't handle empty loop bodies.
+			fi
+			if [ ${cc_major} -lt 11 ]; then
+				blacklistcc_add "armsve"
 			fi
 		fi
 	fi
