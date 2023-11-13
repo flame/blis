@@ -1070,11 +1070,11 @@ define make-helper-header-rule
 $(INSTALL_INCDIR)/$(notdir $(1)): $(BUILD_DIR)/$(notdir $(1)) $(CONFIG_MK_FILE)
 ifeq ($(ENABLE_VERBOSE),yes)
 	$(MKDIR) $(INSTALL_INCDIR)
-	$(INSTALL) -m 0644 -T $$(<) $$(@)
+	$(INSTALL) -m 0644 $$(<) $$(@)
 else
 	@$(MKDIR) $(INSTALL_INCDIR)
 	@echo "Installing $$(@F) helper header into $(INSTALL_INCDIR)/"
-	@$(INSTALL) -m 0644 -T $$(<) $$(@)
+	@$(INSTALL) -m 0644 $$(<) $$(@)
 endif
 endef
 
