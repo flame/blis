@@ -284,9 +284,12 @@ endif
 # Define a list of headers to install. The default is to only install blis.h.
 HEADERS_TO_INSTALL      := $(BLIS_H_FLAT)
 
-# If CBLAS is enabled, we also install cblas.h so the user does not need to
-# change their source code to #include "blis.h" in order to access the CBLAS
-# function prototypes and enums.
+# If CBLAS is enabled, we also install cblas.h. This allows the user to continue
+# using #include "cblas.h" in their application, if they wish. (NOTE: Even if we
+# didn't install cblas.h, the user could *still* access CBLAS definitions and
+# function prototypes, but they would have to update their source code to use
+# #include "blis.h" instead of #include "cblas.h" since the latter header file
+# would not exist.)
 ifeq ($(MK_ENABLE_CBLAS),yes)
 HEADERS_TO_INSTALL += $(CBLAS_H_FLAT)
 endif
