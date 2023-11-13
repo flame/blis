@@ -1067,7 +1067,7 @@ install-helper-headers: check-env $(HELP_HEADERS_INSTALLED)
 
 # A rule to install a helper header file.
 define make-helper-header-rule
-$(INSTALL_INCDIR)/$(notdir $(1)): $(BUILD_DIR)/$(notdir $(1)) $(CONFIG_MK_FILE)
+$(INSTALL_INCDIR)/$(notdir $(1)): $(BUILD_PATH)/$(notdir $(1)) $(CONFIG_MK_FILE)
 ifeq ($(ENABLE_VERBOSE),yes)
 	$(MKDIR) $(INSTALL_INCDIR)
 	$(INSTALL) -m 0644 $$(<) $$(@)
