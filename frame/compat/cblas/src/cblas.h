@@ -36,6 +36,8 @@
 // definition of f77_int. But in order to #include that header, we
 // also need to pull in the headers that precede it in blis.h.
 #include "bli_system.h"
+#include "bli_lang_defs.h"
+
 #include "bli_config.h"
 #include "bli_config_macro_defs.h"
 #include "bli_type_defs.h"
