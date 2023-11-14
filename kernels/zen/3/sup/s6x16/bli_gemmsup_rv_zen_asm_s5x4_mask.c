@@ -98,7 +98,6 @@ void bli_sgemmsup_rv_zen_asm_5x4_mask
     lea(mem(, r9, 4), r9)              // cs_a *= sizeof(float)
 
     lea(mem(r8, r8, 2), r13)           // r13 = 3*rs_a
-    lea(mem(r8, r8, 4), r15)           // r15 = 5*rs_a
 
     mov(var(rs_b), r10)                // load rs_b
     lea(mem(, r10, 4), r10)            // rs_b *= sizeof(float)
@@ -390,11 +389,10 @@ void bli_sgemmsup_rv_zen_asm_5x4_mask
       [mask_vec] "m"   (mask_vec)
     : // register clobber list
       "rax", "rbx", "rcx", "rdx", "rsi", "rdi",
-      "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15",
+      "r8", "r9", "r10", "r11", "r12", "r13", "r14",
       "xmm0", "xmm1", "xmm2", "xmm3",
-      "xmm4", "xmm5", "xmm6", "xmm7",
-      "xmm8", "xmm9", "xmm10", "xmm11",
-      "xmm12", "xmm13", "xmm14", "xmm15",
+      "xmm4", "xmm6", "xmm7",
+      "xmm8", "xmm10", "xmm12",
       "memory"
     )
 }
@@ -451,7 +449,6 @@ void bli_sgemmsup_rv_zen_asm_4x4_mask
     lea(mem(, r9, 4), r9)              // cs_a *= sizeof(float)
 
     lea(mem(r8, r8, 2), r13)           // r13 = 3*rs_a
-    lea(mem(r8, r8, 4), r15)           // r15 = 5*rs_a
 
     mov(var(rs_b), r10)                // load rs_b
     lea(mem(, r10, 4), r10)            // rs_b *= sizeof(float)
@@ -723,11 +720,10 @@ void bli_sgemmsup_rv_zen_asm_4x4_mask
       [mask_vec] "m"  (mask_vec)
     : // register clobber list
       "rax", "rbx", "rcx", "rdx", "rsi", "rdi",
-      "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15",
+      "r8", "r9", "r10", "r11", "r12", "r13", "r14",
       "xmm0", "xmm1", "xmm2", "xmm3",
-      "xmm4", "xmm5", "xmm6", "xmm7",
-      "xmm8", "xmm9", "xmm10", "xmm11",
-      "xmm12", "xmm13", "xmm14", "xmm15",
+      "xmm4", "xmm6", "xmm7",
+      "xmm8", "xmm10",
       "memory"
     )
 }
@@ -782,9 +778,6 @@ void bli_sgemmsup_rv_zen_asm_3x4_mask
     mov(var(cs_a), r9)                 // load cs_a
     lea(mem(, r8, 4), r8)              // rs_a *= sizeof(float)
     lea(mem(, r9, 4), r9)              // cs_a *= sizeof(float)
-
-    lea(mem(r8, r8, 2), r13)           // r13 = 3*rs_a
-    lea(mem(r8, r8, 4), r15)           // r15 = 5*rs_a
 
     mov(var(rs_b), r10)                // load rs_b
     lea(mem(, r10, 4), r10)            // rs_b *= sizeof(float)
@@ -858,7 +851,6 @@ void bli_sgemmsup_rv_zen_asm_3x4_mask
     vfmadd231ps(xmm0, xmm3, xmm6)
 
     vbroadcastss(mem(rax, r8,  2), xmm2)
-    vbroadcastss(mem(rax, r13, 1), xmm3)
     vfmadd231ps(xmm0, xmm2, xmm8)
 
     add(r9, rax)                       // a += cs_a;
@@ -875,7 +867,6 @@ void bli_sgemmsup_rv_zen_asm_3x4_mask
     vfmadd231ps(xmm0, xmm3, xmm6)
 
     vbroadcastss(mem(rax, r8,  2), xmm2)
-    vbroadcastss(mem(rax, r13, 1), xmm3)
     vfmadd231ps(xmm0, xmm2, xmm8)
 
     add(r9, rax)                       // a += cs_a;
@@ -892,7 +883,6 @@ void bli_sgemmsup_rv_zen_asm_3x4_mask
     vfmadd231ps(xmm0, xmm3, xmm6)
 
     vbroadcastss(mem(rax, r8,  2), xmm2)
-    vbroadcastss(mem(rax, r13, 1), xmm3)
     vfmadd231ps(xmm0, xmm2, xmm8)
 
     add(r9, rax)                       // a += cs_a;
@@ -909,7 +899,6 @@ void bli_sgemmsup_rv_zen_asm_3x4_mask
     vfmadd231ps(xmm0, xmm3, xmm6)
 
     vbroadcastss(mem(rax, r8,  2), xmm2)
-    vbroadcastss(mem(rax, r13, 1), xmm3)
     vfmadd231ps(xmm0, xmm2, xmm8)
 
     add(r9, rax)                       // a += cs_a;
@@ -935,7 +924,6 @@ void bli_sgemmsup_rv_zen_asm_3x4_mask
     vfmadd231ps(xmm0, xmm3, xmm6)
 
     vbroadcastss(mem(rax, r8,  2), xmm2)
-    vbroadcastss(mem(rax, r13, 1), xmm3)
     vfmadd231ps(xmm0, xmm2, xmm8)
 
     add(r9, rax)                       // a += cs_a;
@@ -1042,11 +1030,10 @@ void bli_sgemmsup_rv_zen_asm_3x4_mask
       [mask_vec] "m"   (mask_vec)
     : // register clobber list
       "rax", "rbx", "rcx", "rdx", "rsi", "rdi",
-      "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15",
+      "r8", "r9", "r10", "r11", "r12", "r14",
       "xmm0", "xmm1", "xmm2", "xmm3",
-      "xmm4", "xmm5", "xmm6", "xmm7",
-      "xmm8", "xmm9", "xmm10", "xmm11",
-      "xmm12", "xmm13", "xmm14", "xmm15",
+      "xmm4", "xmm6", "xmm7",
+      "xmm8", "xmm10",
       "memory"
     )
 }
@@ -1101,9 +1088,6 @@ void bli_sgemmsup_rv_zen_asm_2x4_mask
     mov(var(cs_a), r9)                 // load cs_a
     lea(mem(, r8, 4), r8)              // rs_a *= sizeof(float)
     lea(mem(, r9, 4), r9)              // cs_a *= sizeof(float)
-
-    lea(mem(r8, r8, 2), r13)           // r13 = 3*rs_a
-    lea(mem(r8, r8, 4), r15)           // r15 = 5*rs_a
 
     mov(var(rs_b), r10)                // load rs_b
     lea(mem(, r10, 4), r10)            // rs_b *= sizeof(float)
@@ -1332,11 +1316,9 @@ void bli_sgemmsup_rv_zen_asm_2x4_mask
       [mask_vec] "m"   (mask_vec)
     : // register clobber list
       "rax", "rbx", "rcx", "rdx", "rsi", "rdi",
-      "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15",
+      "r8", "r9", "r10", "r11", "r12", "r14",
       "xmm0", "xmm1", "xmm2", "xmm3",
-      "xmm4", "xmm5", "xmm6", "xmm7",
-      "xmm8", "xmm9", "xmm10", "xmm11",
-      "xmm12", "xmm13", "xmm14", "xmm15",
+      "xmm4", "xmm6", "xmm7",
       "memory"
     )
 }
@@ -1392,9 +1374,6 @@ void bli_sgemmsup_rv_zen_asm_1x4_mask
     lea(mem(, r8, 4), r8)              // rs_a *= sizeof(float)
     lea(mem(, r9, 4), r9)              // cs_a *= sizeof(float)
 
-    lea(mem(r8, r8, 2), r13)           // r13 = 3*rs_a
-    lea(mem(r8, r8, 4), r15)           // r15 = 5*rs_a
-
     mov(var(rs_b), r10)                // load rs_b
     lea(mem(, r10, 4), r10)            // rs_b *= sizeof(float)
 
@@ -1408,7 +1387,6 @@ void bli_sgemmsup_rv_zen_asm_1x4_mask
     mov(var(rs_c), rdi)                // load rs_c
     lea(mem(, rdi, 4), rdi)            // rs_c *= sizeof(float)
 
-    vxorps(xmm1,  xmm1,  xmm1)
     vxorps(xmm4,  xmm4,  xmm4)
 
     mov(var(b), rbx)                   // load address of b.
@@ -1603,11 +1581,9 @@ void bli_sgemmsup_rv_zen_asm_1x4_mask
       [mask_vec] "m"  (mask_vec)
     : // register clobber list
       "rax", "rbx", "rcx", "rdx", "rsi", "rdi",
-      "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15",
-      "xmm0", "xmm1", "xmm2", "xmm3",
-      "xmm4", "xmm5", "xmm6", "xmm7",
-      "xmm8", "xmm9", "xmm10", "xmm11",
-      "xmm12", "xmm13", "xmm14", "xmm15",
+      "r8", "r9", "r10", "r11", "r12", "r14",
+      "xmm0", "xmm2", "xmm3",
+      "xmm4", "xmm7",
       "memory"
     )
 }

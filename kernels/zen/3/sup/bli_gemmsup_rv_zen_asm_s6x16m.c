@@ -3107,10 +3107,7 @@ void bli_sgemmsup_rv_zen_asm_6x16m_mask
     : // register clobber list
       "rax", "rbx", "rcx", "rdx", "rsi", "rdi",
       "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15",
-      "xmm0", "xmm1", "xmm2", "xmm3",
-      "xmm4", "xmm5", "xmm6", "xmm7",
-      "xmm8", "xmm9", "xmm10", "xmm11",
-      "xmm12", "xmm13", "xmm14", "xmm15",
+      "xmm0", "xmm1",
       "ymm0", "ymm1", "ymm2", "ymm3", "ymm4", "ymm5", "ymm6",
       "ymm7", "ymm8", "ymm9", "ymm10", "ymm11", "ymm12",
       "ymm13", "ymm14", "ymm15",
@@ -3582,10 +3579,7 @@ void bli_sgemmsup_rv_zen_asm_6x8m_mask
     : // register clobber list
       "rax", "rbx", "rcx", "rdx", "rsi", "rdi",
       "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15",
-      "xmm0", "xmm1", "xmm2", "xmm3",
-      "xmm4", "xmm5", "xmm6", "xmm7",
-      "xmm8", "xmm9", "xmm10", "xmm11",
-      "xmm12", "xmm13", "xmm14", "xmm15",
+      "xmm0", "xmm1",
       "ymm0", "ymm1", "ymm2", "ymm3", "ymm4", "ymm6",
       "ymm8", "ymm10", "ymm12", "ymm14",
       "memory"
@@ -4036,9 +4030,8 @@ void bli_sgemmsup_rv_zen_asm_6x4m_mask
       "rax", "rbx", "rcx", "rdx", "rsi", "rdi",
       "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15",
       "xmm0", "xmm1", "xmm2", "xmm3",
-      "xmm4", "xmm5", "xmm6", "xmm7",
-      "xmm8", "xmm9", "xmm10", "xmm11",
-      "xmm12", "xmm13", "xmm14", "xmm15",
+      "xmm4", "xmm6", "xmm7",
+      "xmm8", "xmm10", "xmm12", "xmm14",
       "memory"
     )
 

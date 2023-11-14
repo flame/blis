@@ -334,6 +334,8 @@ void bli_sgemmsup_rv_zen_asm_5x8_mask
 
     /* TODO: Add column storage support*/
 
+    jmp(.SDONE)                        // jump to end.
+
     label(.SBETAZERO)
 
     cmp(imm(4), rdi)                   // set ZF if (4*rs_c) == 4.
@@ -382,16 +384,12 @@ void bli_sgemmsup_rv_zen_asm_5x8_mask
       [c]          "m"   (c),
       [rs_c]       "m"   (rs_c),
       [cs_c]       "m"   (cs_c),
-      [mask_vec]   "m"   (mask_vec),
-      [n0]         "m"   (n0)
+      [mask_vec]   "m"   (mask_vec)
     : // register clobber list
       "rax", "rbx", "rcx", "rdx", "rsi", "rdi",
       "r8", "r9", "r10", "r12", "r13", "r14",
-      "xmm0", "xmm1", "xmm2", "xmm3",
-      "xmm4", "xmm5", "xmm6", "xmm7",
-      "xmm8", "xmm9", "xmm10", "xmm11",
-      "xmm12", "xmm13", "xmm14", "xmm15",
-      "ymm0", "ymm1", "ymm2", "ymm3", "ymm4", "ymm6",
+      "xmm0", "xmm7",
+      "ymm0", "ymm2", "ymm3", "ymm4", "ymm6",
       "ymm7", "ymm8", "ymm10", "ymm12",
       "memory"
     )
@@ -669,6 +667,8 @@ void bli_sgemmsup_rv_zen_asm_4x8_mask
 
     /* TODO: Add column storage support*/
 
+    jmp(.SDONE)                        // jump to end.
+
     label(.SBETAZERO)
 
     cmp(imm(4), rdi)                   // set ZF if (4*rs_c) == 4.
@@ -693,6 +693,8 @@ void bli_sgemmsup_rv_zen_asm_4x8_mask
 
     /* TODO: Add column storage support*/
 
+    jmp(.SDONE)                        // jump to end.
+
     label(.SDONE)
 
     label(.SRETURN)
@@ -714,16 +716,12 @@ void bli_sgemmsup_rv_zen_asm_4x8_mask
       [c]          "m"   (c),
       [rs_c]       "m"   (rs_c),
       [cs_c]       "m"   (cs_c),
-      [mask_vec]   "m"   (mask_vec),
-      [n0]         "m"   (n0)
+      [mask_vec]   "m"   (mask_vec)
     : // register clobber list
       "rax", "rbx", "rcx", "rdx", "rsi", "rdi",
       "r8", "r9", "r10", "r12", "r13", "r14",
-      "xmm0", "xmm1", "xmm2", "xmm3",
-      "xmm4", "xmm5", "xmm6", "xmm7",
-      "xmm8", "xmm9", "xmm10", "xmm11",
-      "xmm12", "xmm13", "xmm14", "xmm15",
-      "ymm0", "ymm1", "ymm2", "ymm3", "ymm4", "ymm6",
+      "xmm0", "xmm7",
+      "ymm0", "ymm2", "ymm3", "ymm4", "ymm6",
       "ymm7", "ymm8", "ymm10",
       "memory"
     )
@@ -777,8 +775,6 @@ void bli_sgemmsup_rv_zen_asm_3x8_mask
     lea(mem(, r8, 4), r8)              // rs_a *= sizeof(float)
 
     lea(mem(, r9, 4), r9)              // cs_a *= sizeof(float)
-
-    lea(mem(r8, r8, 2), r13)           // r13 = 3*rs_a
 
     mov(var(rs_b), r10)                // load rs_b
     lea(mem(, r10, 4), r10)            // rs_b *= sizeof(float)
@@ -924,7 +920,6 @@ void bli_sgemmsup_rv_zen_asm_3x8_mask
 
     vbroadcastss(mem(rax, r8,  2), ymm2)
     vfmadd231ps(ymm0, ymm2, ymm8)
-    vbroadcastss(mem(rax, r13, 1), ymm2)
 
     add(r9, rax)                       // a += cs_a;
 
@@ -1007,6 +1002,8 @@ void bli_sgemmsup_rv_zen_asm_3x8_mask
 
     /* TODO: Add column storage support*/
 
+    jmp(.SDONE)                        // jump to end.
+
     label(.SDONE)
 
     label(.SRETURN)
@@ -1031,12 +1028,9 @@ void bli_sgemmsup_rv_zen_asm_3x8_mask
       [mask_vec]   "m"   (mask_vec)
     : // register clobber list
       "rax", "rbx", "rcx", "rdx", "rsi", "rdi",
-      "r8", "r9", "r10", "r12", "r13", "r14",
-      "xmm0", "xmm1", "xmm2", "xmm3",
-      "xmm4", "xmm5", "xmm6", "xmm7",
-      "xmm8", "xmm9", "xmm10", "xmm11",
-      "xmm12", "xmm13", "xmm14", "xmm15",
-      "ymm0", "ymm1", "ymm2", "ymm3", "ymm4", "ymm6",
+      "r8", "r9", "r10", "r12", "r14",
+      "xmm0", "xmm7",
+      "ymm0", "ymm2", "ymm3", "ymm4", "ymm6",
       "ymm7", "ymm8",
       "memory"
     )
@@ -1268,6 +1262,8 @@ void bli_sgemmsup_rv_zen_asm_2x8_mask
 
     /* TODO: Add column storage support*/
 
+    jmp(.SDONE)                        // jump to end.
+
     label(.SBETAZERO)
 
     cmp(imm(4), rdi)                   // set ZF if (4*rs_c) == 4.
@@ -1285,6 +1281,8 @@ void bli_sgemmsup_rv_zen_asm_2x8_mask
     label(.SCOTORBZ)
 
     /* TODO: Add column storage support*/
+
+    jmp(.SDONE)                        // jump to end.
 
     label(.SDONE)
 
@@ -1307,16 +1305,12 @@ void bli_sgemmsup_rv_zen_asm_2x8_mask
       [c]          "m"   (c),
       [rs_c]       "m"   (rs_c),
       [cs_c]       "m"   (cs_c),
-      [mask_vec]   "m"   (mask_vec),
-      [n0]         "m"   (n0)
+      [mask_vec]   "m"   (mask_vec)
     : // register clobber list
       "rax", "rbx", "rcx", "rdx", "rsi", "rdi",
       "r8", "r9", "r10", "r12", "r14",
-      "xmm0", "xmm1", "xmm2", "xmm3",
-      "xmm4", "xmm5", "xmm6", "xmm7",
-      "xmm8", "xmm9", "xmm10", "xmm11",
-      "xmm12", "xmm13", "xmm14", "xmm15",
-      "ymm0", "ymm1", "ymm2", "ymm3", "ymm4", "ymm6", "ymm7",
+      "xmm0", "xmm7",
+      "ymm0", "ymm2", "ymm3", "ymm4", "ymm6", "ymm7",
       "memory"
     )
 }
@@ -1571,16 +1565,12 @@ void bli_sgemmsup_rv_zen_asm_1x8_mask
       [c]          "m"    (c),
       [rs_c]       "m"    (rs_c),
       [cs_c]       "m"    (cs_c),
-      [mask_vec]   "m"    (mask_vec),
-      [n0]         "m"    (n0)
+      [mask_vec]   "m"    (mask_vec)
     : // register clobber list
       "rax", "rbx", "rcx", "rdx", "rsi", "rdi",
       "r8", "r9", "r10", "r12", "r14",
-      "xmm0", "xmm1", "xmm2", "xmm3",
-      "xmm4", "xmm5", "xmm6", "xmm7",
-      "xmm8", "xmm9", "xmm10", "xmm11",
-      "xmm12", "xmm13", "xmm14", "xmm15",
-      "ymm0", "ymm1", "ymm2", "ymm3", "ymm4", "ymm7",
+      "xmm0", "xmm7",
+      "ymm0", "ymm2", "ymm3", "ymm4", "ymm7",
       "memory"
     )
 }

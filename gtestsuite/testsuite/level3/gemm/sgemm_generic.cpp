@@ -148,3 +148,77 @@ INSTANTIATE_TEST_SUITE_P(
         ),
         ::SGemmTestPrint()
     );
+
+// Black box testing.
+INSTANTIATE_TEST_SUITE_P(
+        sgemm_sup_m,
+        SGemmTest,
+        ::testing::Combine(
+            ::testing::Values('c'
+#ifndef TEST_BLAS
+            ,'r'
+#endif
+            ),                                                               // storage format
+            ::testing::Values('n','t'),                                      // transa
+            ::testing::Values('n','t'),                                      // transb
+            ::testing::Range(gtint_t(1), gtint_t(600), 1),                  // m
+            ::testing::Values(50),                  // n
+            ::testing::Values(30),                  // k
+            ::testing::Values( 1.0, 0.0, -2.0),                                   // alpha
+            ::testing::Values(-1.0,  1.0, 0.0),                                   // beta
+            ::testing::Values(gtint_t(2)),                       // increment to the leading dim of a
+            ::testing::Values(gtint_t(3)),                       // increment to the leading dim of b
+            ::testing::Values(gtint_t(7))                        // increment to the leading dim of c
+        ),
+        ::SGemmTestPrint()
+    );
+
+
+// Black box testing.
+INSTANTIATE_TEST_SUITE_P(
+        sgemm_sup_n,
+        SGemmTest,
+        ::testing::Combine(
+            ::testing::Values('c'
+#ifndef TEST_BLAS
+            ,'r'
+#endif
+            ),                                                               // storage format
+            ::testing::Values('n','t'),                                      // transa
+            ::testing::Values('n','t'),                                      // transb
+            ::testing::Values(30),                  // m
+            ::testing::Range(gtint_t(1), gtint_t(600), 1),                  // n
+            ::testing::Values(30),                  // k
+            ::testing::Values( 1.0, 0.0, -2.0),                                   // alpha
+            ::testing::Values(-1.0,  1.0, 0.0),                                   // beta
+            ::testing::Values(gtint_t(2)),                       // increment to the leading dim of a
+            ::testing::Values(gtint_t(3)),                       // increment to the leading dim of b
+            ::testing::Values(gtint_t(7))                        // increment to the leading dim of c
+        ),
+        ::SGemmTestPrint()
+    );
+
+
+// Black box testing.
+INSTANTIATE_TEST_SUITE_P(
+        sgemm_sup_m_n_k_100,
+        SGemmTest,
+        ::testing::Combine(
+            ::testing::Values('c'
+#ifndef TEST_BLAS
+            ,'r'
+#endif
+            ),                                                               // storage format
+            ::testing::Values('n','t'),                                      // transa
+            ::testing::Values('n','t'),                                      // transb
+            ::testing::Range(gtint_t(1), gtint_t(100), 1),                   // m
+            ::testing::Range(gtint_t(1), gtint_t(100), 1),                   // n
+            ::testing::Range(gtint_t(1), gtint_t(100), 1),                   // k
+            ::testing::Values( 1.0, 0.0, -2.0),                                   // alpha
+            ::testing::Values(-1.0,  1.0, 0.0),                                   // beta
+            ::testing::Values(gtint_t(2)),                       // increment to the leading dim of a
+            ::testing::Values(gtint_t(3)),                       // increment to the leading dim of b
+            ::testing::Values(gtint_t(7))                        // increment to the leading dim of c
+        ),
+        ::SGemmTestPrint()
+    );

@@ -450,15 +450,11 @@ void bli_sgemmsup_rv_zen_asm_5x16_mask
       [c]          "m"   (c),
       [rs_c]       "m"   (rs_c),
       [cs_c]       "m"   (cs_c),
-      [mask_vec]   "m"   (mask_vec),
-      [n0]         "m"   (n0)
+      [mask_vec]   "m"   (mask_vec)
     : // register clobber list
       "rax", "rbx", "rcx", "rdx", "rsi", "rdi",
       "r8", "r9", "r10", "r12", "r13", "r14",
-      "xmm0", "xmm1", "xmm2", "xmm3",
-      "xmm4", "xmm5", "xmm6", "xmm7",
-      "xmm8", "xmm9", "xmm10", "xmm11",
-      "xmm12", "xmm13", "xmm14", "xmm15",
+      "xmm0", "xmm1",
       "ymm0", "ymm1", "ymm2", "ymm3", "ymm4", "ymm5", "ymm6",
       "ymm7", "ymm8", "ymm9", "ymm10", "ymm11", "ymm12", "ymm13",
       "memory"
@@ -841,15 +837,11 @@ void bli_sgemmsup_rv_zen_asm_4x16_mask
       [c]          "m"   (c),
       [rs_c]       "m"   (rs_c),
       [cs_c]       "m"   (cs_c),
-      [mask_vec]   "m"   (mask_vec),
-      [n0]         "m"   (n0)
+      [mask_vec]   "m"   (mask_vec)
     : // register clobber list
       "rax", "rbx", "rcx", "rdx", "rsi", "rdi",
       "r8", "r9", "r10", "r12", "r13", "r14",
-      "xmm0", "xmm1", "xmm2", "xmm3",
-      "xmm4", "xmm5", "xmm6", "xmm7",
-      "xmm8", "xmm9", "xmm10", "xmm11",
-      "xmm12", "xmm13", "xmm14", "xmm15",
+      "xmm0", "xmm12",
       "ymm0", "ymm1", "ymm2", "ymm3", "ymm4", "ymm5", "ymm6",
       "ymm7", "ymm8", "ymm9", "ymm10", "ymm11", "ymm12",
       "memory"
@@ -1200,10 +1192,7 @@ void bli_sgemmsup_rv_zen_asm_3x16_mask
     : // register clobber list
       "rax", "rbx", "rcx", "rdx", "rsi", "rdi",
       "r8", "r9", "r10", "r12", "r14",
-      "xmm0", "xmm1", "xmm2", "xmm3",
-      "xmm4", "xmm5", "xmm6", "xmm7",
-      "xmm8", "xmm9", "xmm10", "xmm11",
-      "xmm12", "xmm13", "xmm14", "xmm15",
+      "xmm0", "xmm12",
       "ymm0", "ymm1", "ymm2", "ymm3", "ymm4", "ymm5", "ymm6",
       "ymm7", "ymm8", "ymm9", "ymm12",
       "memory"
@@ -1511,15 +1500,11 @@ void bli_sgemmsup_rv_zen_asm_2x16_mask
       [c]          "m"   (c),
       [rs_c]       "m"   (rs_c),
       [cs_c]       "m"   (cs_c),
-      [mask_vec]   "m"   (mask_vec),
-      [n0]         "m"   (n0)
+      [mask_vec]   "m"   (mask_vec)
     : // register clobber list
       "rax", "rbx", "rcx", "rdx", "rsi", "rdi",
       "r8", "r9", "r10", "r12", "r14",
-      "xmm0", "xmm1", "xmm2", "xmm3",
-      "xmm4", "xmm5", "xmm6", "xmm7",
-      "xmm8", "xmm9", "xmm10", "xmm11",
-      "xmm12", "xmm13", "xmm14", "xmm15",
+      "xmm0", "xmm14",
       "ymm0", "ymm1", "ymm2", "ymm3", "ymm4", "ymm5", "ymm6",
       "ymm7", "ymm14",
       "memory"
@@ -1795,15 +1780,11 @@ void bli_sgemmsup_rv_zen_asm_1x16_mask
       [c]          "m"   (c),
       [rs_c]       "m"   (rs_c),
       [cs_c]       "m"   (cs_c),
-      [mask_vec]   "m"   (mask_vec),
-      [n0]         "m"   (n0)
+      [mask_vec]   "m"   (mask_vec)
     : // register clobber list
       "rax", "rbx", "rcx", "rdx", "rsi", "rdi",
       "r8", "r9", "r10", "r12", "r14",
-      "xmm0", "xmm1", "xmm2", "xmm3",
-      "xmm4", "xmm5", "xmm6", "xmm7",
-      "xmm8", "xmm9", "xmm10", "xmm11",
-      "xmm12", "xmm13", "xmm14", "xmm15",
+      "xmm0","xmm12",
       "ymm0", "ymm1", "ymm2", "ymm3", "ymm4", "ymm5", "ymm12",
       "memory"
     )
