@@ -150,18 +150,19 @@ if(WIN32)
     option(ENABLE_NO_UNDERSCORE_API "Export APIs without underscore." OFF)
     option(ENABLE_UPPERCASE_API "Export APIs with uppercase." OFF)
     # Setting path to OpenMP runtime.
-    set(OpenMP_libomp_LIBRARY "C:/Program Files/Microsoft Visual Studio/2022/Professional/VC/Tools/Llvm/x64/lib/libomp.lib" CACHE STRING "openmp library path")
+    set(OpenMP_libomp_LIBRARY "C:/Program Files/LLVM/lib/libomp.lib" CACHE STRING "openmp library path")
 endif()
-set(ENABLE_DEBUG "off" CACHE STRING "Enable debugging symbols in the library.")
-set_property(CACHE ENABLE_DEBUG PROPERTY STRINGS "off" "noopt" "opt")
-if( NOT ((ENABLE_DEBUG STREQUAL "off") OR (ENABLE_DEBUG STREQUAL "noopt") OR (ENABLE_DEBUG STREQUAL "opt")) )
-    message(FATAL_ERROR "ENABLE_DEBUG option '${ENABLE_DEBUG}' is not supported. Please use one of the following options \
-            during CMake invokation: off, noopt, opt")
-endif()
-# Check if user provided CMAKE_BUILD_TYPE. If that's the case, map it to the internal ENABLE_DEBUG type
-# and clean cache from CMAKE_BUILD_TYPE. We do this because CMake will add some flags depending on the
-# the build type and on Linux we want to have more control over what flags are being used.
+# Debug & Release flags option setting is only available for Linux. On Windows the default flags are used.
 if(NOT WIN32)
+    set(ENABLE_DEBUG "off" CACHE STRING "Enable debugging symbols in the library.")
+    set_property(CACHE ENABLE_DEBUG PROPERTY STRINGS "off" "noopt" "opt")
+    if( NOT ((ENABLE_DEBUG STREQUAL "off") OR (ENABLE_DEBUG STREQUAL "noopt") OR (ENABLE_DEBUG STREQUAL "opt")) )
+        message(FATAL_ERROR "ENABLE_DEBUG option '${ENABLE_DEBUG}' is not supported. Please use one of the following options \
+                during CMake invokation: off, noopt, opt")
+    endif()
+    # Check if user provided CMAKE_BUILD_TYPE. If that's the case, map it to the internal ENABLE_DEBUG type
+    # and clean cache from CMAKE_BUILD_TYPE. We do this because CMake will add some flags depending on the
+    # the build type and on Linux we want to have more control over what flags are being used.
     if(CMAKE_BUILD_TYPE)
         if(CMAKE_BUILD_TYPE STREQUAL "Debug")
             set(ENABLE_DEBUG "noopt")
@@ -200,11 +201,14 @@ if( NOT ((THREAD_PART_JRIR STREQUAL "slab") OR (THREAD_PART_JRIR STREQUAL "rr"))
     message(FATAL_ERROR "THREAD_PART_JRIR option '${THREAD_PART_JRIR}' is not supported. Please use one of the following options \
             during CMake invokation: slab, rr")
 endif()
-set(EXPORT_SHARED "public" CACHE STRING "Specify the subset of library symbols that are exported within a shared library.")
-set_property(CACHE EXPORT_SHARED PROPERTY STRINGS "public" "all")
-if( NOT ((EXPORT_SHARED STREQUAL "public") OR (EXPORT_SHARED STREQUAL "all")) )
-    message(FATAL_ERROR "EXPORT_SHARED option '${EXPORT_SHARED}' is not supported. Please use one of the following options \
-    during CMake invokation: publis, all")
+# Export symbols only for Linux.
+if(NOT WIN32)
+    set(EXPORT_SHARED "public" CACHE STRING "Specify the subset of library symbols that are exported within a shared library.")
+    set_property(CACHE EXPORT_SHARED PROPERTY STRINGS "public" "all")
+    if( NOT ((EXPORT_SHARED STREQUAL "public") OR (EXPORT_SHARED STREQUAL "all")) )
+        message(FATAL_ERROR "EXPORT_SHARED option '${EXPORT_SHARED}' is not supported. Please use one of the following options \
+        during CMake invokation: public, all")
+    endif()
 endif()
 option(ENABLE_PBA_POOLS "Internal memory pools for packing blocks" ON)
 option(ENABLE_SBA_POOLS "Internal memory pools for small blocks" ON)
@@ -351,16 +355,18 @@ else()
     message("   Building BLIS as a static library.")
     set(ENABLE_SHARED_01 0)
 endif()
+if(NOT WIN32)
 cmake_print_variables(EXPORT_SHARED)
-if(EXPORT_SHARED STREQUAL "all")
-    if(BUILD_SHARED_LIBS)
-        message("   Exporting all symbols within shared library.")
+    if(EXPORT_SHARED STREQUAL "all")
+        if(BUILD_SHARED_LIBS)
+            message("   Exporting all symbols within shared library.")
+        else()
+            message("   Ignoring request to export all symbols within shared library.")
+        endif()
     else()
-        message("   Ignoring request to export all symbols within shared library.")
-    endif()
-else()
-    if(BUILD_SHARED_LIBS)
-        message("   Exporting only public symbols within shared library.")
+        if(BUILD_SHARED_LIBS)
+            message("   Exporting only public symbols within shared library.")
+        endif()
     endif()
 endif()
 cmake_print_variables(ENABLE_SYSTEM)
@@ -1068,20 +1074,12 @@ endif()
 # Add headers as a property to the library.
 set_target_properties(libblis PROPERTIES PUBLIC_HEADER "${BLIS_PUBLIC_HEADERS}")
 set_target_properties(libblis PROPERTIES OUTPUT_NAME ${LIBBLIS})
-if(WIN32)
-    set_target_properties(libblis 
-                            PROPERTIES
-                            ARCHIVE_OUTPUT_DIRECTORY  "${CMAKE_SOURCE_DIR}/bin"
-                            LIBRARY_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/bin"
-                            RUNTIME_OUTPUT_DIRECTORY  "${CMAKE_SOURCE_DIR}/bin"
-                        )
-endif()
 
 # Install targets.
 install(TARGETS libblis LIBRARY DESTINATION ${CMAKE_INSTALL_PREFIX}/lib
         ARCHIVE DESTINATION ${CMAKE_INSTALL_PREFIX}/lib
         RUNTIME DESTINATION ${CMAKE_INSTALL_PREFIX}/lib
-        PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_PREFIX}/include/blis)
+        PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_PREFIX}/include)
 
 # --- Primary targets ---
 add_custom_target(libs DEPENDS libblis)
@@ -1097,20 +1095,16 @@ if(ENABLE_BLAS)
     add_subdirectory(blastest EXCLUDE_FROM_ALL)
 endif()
 
-# Add generic testing target.
+# Add generic testing target `test`.
 set(available_testsuites checkblis)
 if(ENABLE_BLAS)
     list(APPEND available_testsuites checkblas)
 endif()
-add_custom_target(check DEPENDS ${available_testsuites})
+add_custom_target(test DEPENDS ${available_testsuites})
 
-#--------------------------------------------
-#                  Clean-up
-#--------------------------------------------
-# Add distclean target
-add_custom_target(distclean
-    COMMAND ${CMAKE_BUILD_TOOL} clean
-    COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_SOURCE_DIR}/build/distclean.cmake
-    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-    COMMENT "Remove cmake_generated files and executables"
-)
+# Add generic testing target `check`.
+set(available_testsuites checkblis-fast)
+if(ENABLE_BLAS)
+    list(APPEND available_testsuites checkblas)
+endif()
+add_custom_target(check DEPENDS ${available_testsuites})

@@ -100,23 +100,24 @@ foreach(source ${blastest_sources})
     set_target_properties(${exec_name}.x PROPERTIES FOLDER blastest-targets)
     # Add a target for running the tests. Rules are different for level-1 APIs, compared to levels 2 and 3.
     if(${exec_name} MATCHES 1)
-        add_custom_command(OUTPUT ${CMAKE_BINARY_DIR}/out.${exec_name}
-                            COMMAND ${exec_name}.x > ${CMAKE_BINARY_DIR}/out.${exec_name}
-                            COMMENT "Running ${exec_name}.x with output redirected to ${CMAKE_BINARY_DIR}/out.${exec_name}"
+        add_custom_target(run-${exec_name}
+                            COMMAND ${exec_name}.x > out.${exec_name}
+                            COMMENT "Running ${exec_name}.x with output redirected to out.${exec_name}"
                             DEPENDS ${exec_name}.x
+                            BYPRODUCTS ${CMAKE_BINARY_DIR}/out.${exec_name}
                             WORKING_DIRECTORY $<TARGET_FILE_DIR:libblis>
                             VERBATIM
                             )
     else()# name has 2 or 3
-        add_custom_command(OUTPUT ${CMAKE_BINARY_DIR}/out.${exec_name}
+        add_custom_target(run-${exec_name}
                             COMMAND ${exec_name}.x < ${CMAKE_CURRENT_SOURCE_DIR}/input/${exec_name}.in
-                            COMMENT "Running ${exec_name}.x with output saved to ${CMAKE_BINARY_DIR}/out.${exec_name}"
+                            COMMENT "Running ${exec_name}.x with input ${CMAKE_CURRENT_SOURCE_DIR}/input/${exec_name}.in and output saved to out.${exec_name}"
                             DEPENDS ${exec_name}.x
+                            BYPRODUCTS ${CMAKE_BINARY_DIR}/out.${exec_name}
                             WORKING_DIRECTORY $<TARGET_FILE_DIR:libblis>
                             VERBATIM
                         )
     endif()
-    add_custom_target(run-${exec_name} DEPENDS ${CMAKE_BINARY_DIR}/out.${exec_name})
     # Put all those targets under blastest-targets-targets folder name so that they appear all together in IDE.
     set_target_properties(run-${exec_name} PROPERTIES FOLDER blastest-targets)
     list(APPEND test_executables "run-${exec_name}")
@@ -124,8 +125,9 @@ endforeach()
 
 add_custom_target(testblas DEPENDS ${test_executables})
 add_custom_target(checkblas
-                    COMMAND ${Python_EXECUTABLE} ${CMAKE_SOURCE_DIR}/build/cmake/check-blastest.py ${CMAKE_BINARY_DIR}
+                    COMMAND ${Python_EXECUTABLE} ${CMAKE_SOURCE_DIR}/build/cmake/check-blastest.py "."
                     DEPENDS testblas
+                    WORKING_DIRECTORY $<TARGET_FILE_DIR:libblis>
                 )
 # Put all those targets under blastest-targets-targets folder name so that they appear all together in IDE.
 set_target_properties(testblas checkblas PROPERTIES FOLDER blastest-targets)

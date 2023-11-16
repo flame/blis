@@ -74,21 +74,20 @@ function(add_testblis flavour)
         set(dashflavour -${flavour})
         set(printflavour "(${flavour})")
     endif()
-    # A rule to run the testsuite using the input.*${dotflavour} files, which
-    # run a set of tests designed to finish much more quickly.
-    add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/output.testsuite${dotflavour}
+    # A rule to run the testsuite using the input.*${dotflavour} files.
+    add_custom_target(testblis${dashflavour}
                         COMMAND test_libblis.x -g ${CMAKE_CURRENT_SOURCE_DIR}/input.general${dotflavour} -o ${CMAKE_CURRENT_SOURCE_DIR}/input.operations${dotflavour} > ${CMAKE_CURRENT_BINARY_DIR}/output.testsuite${dotflavour}
                         COMMENT "Running test_libblis.x ${printflavour} with output redirected to ${CMAKE_CURRENT_BINARY_DIR}/output.testsuite${dotflavour}"
                         DEPENDS test_libblis.x ${CMAKE_CURRENT_SOURCE_DIR}/input.general${dotflavour} ${CMAKE_CURRENT_SOURCE_DIR}/input.operations${dotflavour}
+                        BYPRODUCTS ${CMAKE_CURRENT_BINARY_DIR}/output.testsuite${dotflavour}
                         WORKING_DIRECTORY $<TARGET_FILE_DIR:libblis>
                         VERBATIM
-                      )
-    add_custom_target(testblis${dashflavour} DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/output.testsuite${dotflavour})
+                    )
     # Check the results of the BLIS testsuite.
     add_custom_target(checkblis${dashflavour}
-                       COMMAND ${Python_EXECUTABLE} ${CMAKE_SOURCE_DIR}/build/cmake/check-blistest.py ${CMAKE_CURRENT_BINARY_DIR}/output.testsuite${dotflavour}
-                       DEPENDS testblis${dashflavour}
-                     )
+                        COMMAND ${Python_EXECUTABLE} ${CMAKE_SOURCE_DIR}/build/cmake/check-blistest.py ${CMAKE_CURRENT_BINARY_DIR}/output.testsuite${dotflavour}
+                        DEPENDS testblis${dashflavour}
+                  )                
 endfunction()
 
 # Add testing targets using functions above for all input file options.

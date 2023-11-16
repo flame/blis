@@ -23,11 +23,14 @@ The BLIS CMake system is based on the [Make build system](BuildSystem.md) and is
   * Python (3.4 or later for python3)
   * GNU `make` (3.81 or later) on Linux
   * Visual Studio 17 2022 on Windows
-  * a working C99 compiler (gcc or clang on Linux and clang-cl **only** on Windows)
+  * a working C99 compiler (gcc or clang on Linux and **only** clang-cl on Windows)
 
-Note that, on Windows, BLIS implements basic pthreads functionality automatically, so a POSIX threads is not required. On Linux, the implementation is the same to the one of the Make system.
+**_NOTE:_**
+To get clang-cl on Visual Studio, one needs to choose "C++ Clang tools for Windows" when installing "Desktop development with C++" with Visual Studio.
 
-CMake is used to build out of source so we need to start by creating a build directory from which we will do the configuration and build steps. Since there is a directory called blis/build, the build directory must have a different name. Here is an example on how to create the directory:
+Note that, on Windows, BLIS implements basic pthreads functionality automatically, so a POSIX threads library is not required. On Linux, the implementation is the same to the one of the Make system.
+
+CMake is used to build out of source, so we need to start by creating a build directory from which we will do the configuration and build. Since there is a directory called blis/build, the build directory must have a different name. Here is an example of creating the directory:
 ```
 $ mkdir build_blis
 $ cd build_blis
@@ -44,7 +47,7 @@ The first step is to choose the appropriate BLIS configuration. As on the Make b
   * zen4
   * generic
 
-Instructions on how to add a configuration on the CMake system, are provided in a later section.
+Instructions on how to add a configuration on the CMake system, are provided in [Adding configurations](CMakeBuildSystem.md#adding-configurations).
 
 ### Multithreading
 
@@ -91,9 +94,9 @@ We remind users that to specify the installation prefix in cmake, one needs to c
 ```
 cmake .. -DBLIS_CONFIG_FAMILY=auto -DCMAKE_INSTALL_PREFIX=<prefix>
 ```
-This will cause libraries to eventually be installed to `<prefix>/lib` and headers will be installed to `<prefix>/include/blis`.
+This will cause libraries to eventually be installed to `<prefix>/lib` and headers will be installed to `<prefix>/include`.
 
-Options to specify the library install and the header install separately, like in Make system, is not currently supported by the CMake equivalent.
+Option to specify the library install and the header install separately, like in Make system, is not currently supported by the CMake equivalent.
 
 ## Step 3: Compilation
 
@@ -155,14 +158,21 @@ The BLIS CMake system aims to be combatible with the current `make` system. For 
 | `testblis-salt` | Run the BLIS testsuite while simulating application-level threading (runs for a few seconds). |
 | `testsuite`     | Same as `testblis`.                                |
 | `testblas`      | Run the BLAS test drivers with default parameters (runs for a few seconds). |
+| `checkbliscpp`  | Run the BLIS C++ tests (runs for a few seconds). |
 
-### Running the testsuites.
+**_NOTE:_** 
+Using those targets sets the environment appropriately, so copying the input files and/or the DLL in case of Windows builds is not required.
+
+### Running the testsuites
 * On Linux all targets can be build and run in `build_blis` directory.
-* On Windows, when Visual Studio has been used as a generator, one can build and run the blis API related tests from testsuite directory and blas API tests from blastest directory.
+* On Windows, when Visual Studio has been used as a generator, one can build and run the blis API related tests from `build_blis/testsuite` directory and blas API tests from `build_blis/blastest` directory. To build and run the BLIS C++  interface tests, execute the target `checkbliscpp` in `build_blis/vendor/testcpp` directory. The targets `check` and `test` can be used in `build_blis` directory.
+* On Windows, if Visual Studio is used to build the library and tests, note that only the high level targets will appear. All targets are available to build from the command prompt.
 
 ## Adding configurations
 
-ToDo
+The CMake system is designed to closely relate to the BLIS Make system. Assuming that a user has followed the steps in [Configuration How To](ConfigurationHowTo.md), adding the new configuration on the CMake system requires the following steps:
+* Add a `make_defs.cmake` file which is equivalent to `make_defs.mk`. One can see `blis/config/zen/make_defs.cmake` and `blis/config/zen/make_defs.mk` for an example.
+* Update `blis/CMakeLists.txt` to remove the error for the particular new configuration and to add the option in `set_property()` so that it appears in cmake-gui. 
 
 ## Some examples
 
@@ -197,6 +207,9 @@ cmake .. -G "Visual Studio 17 2022" -TClangCl -DENABLE_THREADING=openmp -DINT_SI
 
 ### Example 2: single-threaded ILP64 libraries for amdzen configuration with aocl_gemm addon enabled and default compiler
 
+**_NOTE:_** 
+Addon functionality is currently available only on Linux.
+
 * With configure script:
 ```
 ./configure --enable-threading=no --int-size=64 --blas-int-size=64 --enable-addon=aocl_gemm amdzen
@@ -205,11 +218,6 @@ cmake .. -G "Visual Studio 17 2022" -TClangCl -DENABLE_THREADING=openmp -DINT_SI
 * With CMake on Linux:
 ```
 cmake .. -DENABLE_THREADING=no -DINT_SIZE=64 -DBLAS_INT_SIZE=64 -DENABLE_ADDON=aocl_gemm -DBLIS_CONFIG_FAMILY=amdzen
-```
-
-* With CMake on Windows:
-```
-cmake .. -G "Visual Studio 17 2022" -TClangCl -DENABLE_THREADING=no -DINT_SIZE=64 -DBLAS_INT_SIZE=64 -DENABLE_ADDON=aocl_gemm -DBLIS_CONFIG_FAMILY=amdzen
 ```
 
 ## Conclusion
