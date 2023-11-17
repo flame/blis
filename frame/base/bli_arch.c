@@ -505,13 +505,27 @@ void bli_arch_check_id( void )
 		{
 			if ( model_id == BLIS_MODEL_DEFAULT )
 			{
+#ifdef DISABLE_BLIS_ARCH_TYPE
+				fprintf( stderr, "libblis: Selecting sub-configuration '%s'.\n"
+                                                 "libblis: User control of sub-configuration using AOCL_ENABLE_INSTRUCTIONS\n"
+                                                 "libblis: or using "__blis_arch_type_name" and "__blis_model_type_name" is disabled.\n",
+					 bli_arch_string( arch_id ) );
+#else
 				fprintf( stderr, "libblis: Selecting sub-configuration '%s'.\n",
 					 bli_arch_string( arch_id ) );
+#endif
 			}
 			else
 			{
+#ifdef DISABLE_BLIS_ARCH_TYPE
+				fprintf( stderr, "libblis: Selecting sub-configuration '%s', model '%s'.\n"
+                                                 "libblis: User control of sub-configuration using AOCL_ENABLE_INSTRUCTIONS\n"
+                                                 "libblis: or using "__blis_arch_type_name" and "__blis_model_type_name" is disabled.\n",
+					 bli_arch_string( arch_id ), bli_model_string( model_id ) );
+#else
 				fprintf( stderr, "libblis: Selecting sub-configuration '%s', model '%s'.\n",
 					 bli_arch_string( arch_id ), bli_model_string( model_id ) );
+#endif
 			}
 		}
 #if 0

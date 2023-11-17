@@ -5,7 +5,7 @@
 #  libraries.
 #
 #  Copyright (C) 2014, The University of Texas at Austin
-#  Copyright (C) 2020-2023, Advanced Micro Devices, Inc. All rights reserved.
+#  Copyright (C) 2020 - 2023, Advanced Micro Devices, Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -355,11 +355,12 @@ print_usage()
 	echo " "
 	echo "   --enable-blis-arch-type, --disable-blis-arch-type"
 	echo " "
-	echo "                 Disable (Enabled by default) support for BLIS_ARCH_TYPE and BLIS_MODEL_TYPE"
-	echo "                 environment variables, which allows user to select"
+	echo "                 Disable support for AOCL_ENABLE_INSTRUCTIONS, BLIS_ARCH_TYPE and"
+	echo "                 BLIS_MODEL_TYPE environment variables, which allows user to select"
 	echo "                 architecture specific code path and optimizations at runtime."
 	echo "                 If disabled, in builds with multiple code paths, BLIS"
 	echo "                 will still select path and optimizations automatically."
+	echo "                 Default: Enabled in builds with multiple code paths, else disabled."
 	echo " "
 	echo "   --rename-blis-arch-type=STRING"
 	echo " "
@@ -2076,7 +2077,7 @@ main()
 	enable_aocl_dynamic='yes'
 	force_version='no'
 	complex_return='default'
-	disable_blis_arch_type='no'
+	disable_blis_arch_type='unset'
 	rename_blis_arch_type='BLIS_ARCH_TYPE'
 	rename_blis_model_type='BLIS_MODEL_TYPE'
 
@@ -2810,6 +2811,19 @@ main()
 
 	fi
 
+	# Based on the number of sub-configurations, set default value for disable_blis_arch_type
+	# (if user hasn't set option). BLIS_ARCH_TYPE functionality only makes sense for use with
+	# processor families containing multiple sub-configurations, but user can force the 
+	# functionality to be enabled/disabled with --enable-blis-arch-type/--disable-blis-arch-type
+	# configure options.
+	if [ "x${disable_blis_arch_type}" = "xunset"  ]; then
+		config_list_count=$(echo ${config_list} |wc -w)
+		if [ "x${config_list_count}" = "x1"  ]; then
+			disable_blis_arch_type='yes'
+		else
+			disable_blis_arch_type='no'
+		fi
+	fi
 
 	echo "${script_name}: checking sub-configurations:"
 
@@ -3301,7 +3315,8 @@ main()
 	fi
 
 	if [ "x${disable_blis_arch_type}" = "xyes"  ]; then
-		echo "${script_name}: user selection of code path using BLIS_ARCH_TYPE and BLIS_MODEL_TYPE env vars is disabled."
+		echo "${script_name}: user selection of code path using AOCL_ENABLE_INSTRUCTIONS,"
+		echo "${script_name}:    BLIS_ARCH_TYPE and BLIS_MODEL_TYPE env vars is disabled."
 		disable_blis_arch_type_01='1'
 	else
 		disable_blis_arch_type_01='0'

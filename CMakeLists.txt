@@ -1,4 +1,4 @@
-##Copyright (C) 2022-2023, Advanced Micro Devices, Inc. All rights reserved.##
+##Copyright (C) 2022 - 2023, Advanced Micro Devices, Inc. All rights reserved.##
 
 cmake_minimum_required(VERSION 3.15.0)
 if(WIN32)
@@ -122,7 +122,7 @@ set(CONFIG_NAME_DEFINE "#define BLIS_FAMILY_${UCONF}\n")
 #create a AOCL specific #define
 #This macro is enabled only for zen family configurations.
 #This enables us to use different cache block sizes for TRSM instead of common level-3 block sizes.
-if(BLIS_CONFIG_FAMILY MATCHES "zen|amd64")
+if(BLIS_CONFIG_FAMILY MATCHES "zen|amd64|x86_64")
     set(ENABLE_AOCL_ZEN ON)
     set(ENABLE_AOCL_ZEN_01 1)
 else()
@@ -258,7 +258,15 @@ else()
                 during CMake invokation: default, gnu, intel")
     endif()
 endif()
-option(DISABLE_BLIS_ARCH_TYPE "Disable BLIS_ARCH_TYPE and BLIS_MODEL_TYPE functionality" OFF)
+# If the CONFIG_LIST does not already contain the CONFIG_NAME (i.e.,
+# if CONFIG_NAME is an umbrella family), default is to enable BLIS_ARCH_TYPE functionality,
+# otherwise default is to disable BLIS_ARCH_TYPE functionality.
+list(FIND CONFIG_LIST ${BLIS_CONFIG_FAMILY} IS_UMBRELLA)
+if(${IS_UMBRELLA} STREQUAL "-1")
+    option(DISABLE_BLIS_ARCH_TYPE "Disable AOCL_ENABLE_INSTRUCTIONS, BLIS_ARCH_TYPE and BLIS_MODEL_TYPE functionality" OFF)
+else()
+    option(DISABLE_BLIS_ARCH_TYPE "Disable AOCL_ENABLE_INSTRUCTIONS, BLIS_ARCH_TYPE and BLIS_MODEL_TYPE functionality" ON)
+endif()
 set(RENAME_BLIS_ARCH_TYPE "BLIS_ARCH_TYPE" CACHE STRING "BLIS_ARCH_TYPE env var renamed to supplied value")
 set(RENAME_BLIS_MODEL_TYPE "BLIS_MODEL_TYPE" CACHE STRING "BLIS_MODEL_TYPE env var renamed to supplied value")
 if(NOT WIN32)
@@ -608,7 +616,8 @@ else()
 endif()
 cmake_print_variables(DISABLE_BLIS_ARCH_TYPE)
 if(DISABLE_BLIS_ARCH_TYPE)
-    message("   User selection of code path using BLIS_ARCH_TYPE and BLIS_MODEL_TYPE env vars is disabled.")
+    message("   User selection of code path using AOCL_ENABLE_INSTRUCTIONS, BLIS_ARCH_TYPE and")
+    message("   BLIS_MODEL_TYPE env vars is disabled.")
     set(DISABLE_BLIS_ARCH_TYPE_01 1)
 else()
     set(DISABLE_BLIS_ARCH_TYPE_01 0)
