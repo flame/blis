@@ -1362,7 +1362,7 @@ void ztrsm_blis_impl
 		     * As the dimension of A is 1x1, there's going to
 		     * be only one 1 element of A.
 		     */
-		    if(*transa == 'C' && *diaga == 'N')
+		    if(blis_transa == BLIS_CONJ_TRANSPOSE)
 		    {
 			    a_dup.real = a->real;
 			    a_dup.imag = a->imag * -1.0;
@@ -1466,7 +1466,7 @@ void ztrsm_blis_impl
 		 * As the dimension of A is 1x1, there's going to
 		 * be only one 1 element of A.
 		 */
-                if(*transa == 'C' && *diaga == 'N')
+                if(blis_transa == BLIS_CONJ_TRANSPOSE)
                 {
                         a_dup.real = a->real;
                         a_dup.imag = a->imag * -1.0;
@@ -1748,7 +1748,7 @@ void ctrsm_blis_impl
 		 * As the dimension of A is 1x1, there's going to
 		 * be only one 1 element of A.
 		 */
-                if(*transa == 'C' && *diaga == 'N')
+                if(blis_transa == BLIS_CONJ_TRANSPOSE)
                 {
                         a_dup.real = a->real;
                         a_dup.imag = a->imag * -1.0;
@@ -1852,7 +1852,7 @@ void ctrsm_blis_impl
 		 * As the dimension of A is 1x1, there's going to
 		 * be only one 1 element of A.
 		 */
-                if(*transa == 'C' && *diaga == 'N')
+                if(blis_transa == BLIS_CONJ_TRANSPOSE)
                 {
                         a_dup.real = a->real;
                         a_dup.imag = a->imag * -1.0;
