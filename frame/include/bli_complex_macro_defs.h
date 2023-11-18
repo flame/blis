@@ -45,7 +45,88 @@
 #define bli_dimag( x )  ( 0.0 )
 
 
-#ifndef BLIS_ENABLE_C99_COMPLEX
+#if defined(__cplusplus) && defined(BLIS_ENABLE_STD_COMPLEX)
+
+} // extern "C"
+
+// Create functions bli_[cz]{real,imag} for std::complex<T> which mimic those
+// for the simple struct version. Since normally x.real/x.imag are
+// lvalues, we have to create a wrapper since x.real()/x.imag() in std::complex
+// are rvalues. These will only be used if the user has typedef'd scomplex as
+// std::complex<float> and dcomplex as std::complex<double> themselves.
+
+#include <complex>
+
+template <typename T, bool Imag>
+struct bli_complex_wrapper
+{
+	std::complex<T>& ref;
+
+	bli_complex_wrapper(std::complex<T>& ref) : ref(ref) {}
+
+	operator T() const { return Imag ? ref.imag() : ref.real(); }
+
+	bli_complex_wrapper& operator=(const bli_complex_wrapper& other)
+	{
+		return *this = static_cast<T>( other );
+	}
+
+	bli_complex_wrapper& operator=(T other)
+	{
+		if (Imag)
+			ref.imag(other);
+		else
+			ref.real(other);
+		return *this;
+	}
+};
+
+inline bli_complex_wrapper<float,false> bli_creal( std::complex<float>& x )
+{
+	return x;
+}
+
+inline float bli_creal( const std::complex<float>& x )
+{
+	return x.real();
+}
+
+inline bli_complex_wrapper<float,true> bli_cimag( std::complex<float>& x )
+{
+	return x;
+}
+
+inline float bli_cimag( const std::complex<float>& x )
+{
+	return x.imag();
+}
+
+inline bli_complex_wrapper<double,false> bli_zreal( std::complex<double>& x )
+{
+	return x;
+}
+
+inline double bli_zreal( const std::complex<double>& x )
+{
+	return x.real();
+}
+
+inline bli_complex_wrapper<double,true> bli_zimag( std::complex<double>& x )
+{
+	return x;
+}
+
+inline double bli_zimag( const std::complex<double>& x )
+{
+	return x.imag();
+}
+
+#define __typeof__(x) auto
+
+extern "C"
+{
+
+#elif !defined(BLIS_ENABLE_C99_COMPLEX)
 
 
 #define bli_creal( x )  ( (x).real )
@@ -56,6 +137,8 @@
 
 #else // ifdef BLIS_ENABLE_C99_COMPLEX
 
+// Note that these definitions probably don't work because of constructs
+// like `bli_zreal( x ) = yr`.
 
 #define bli_creal( x )  ( crealf(x) )
 #define bli_cimag( x )  ( cimagf(x) )

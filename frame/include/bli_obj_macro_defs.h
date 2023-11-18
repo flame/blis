@@ -1096,10 +1096,10 @@ BLIS_INLINE void bli_obj_init_finish( num_t dt, dim_t m, dim_t n, void* p, inc_t
 	bli_obj_set_scalar_dt( dt, obj );
 	void* s = bli_obj_internal_scalar_buffer( obj );
 
-	if      ( bli_dt_prec_is_single( dt ) ) { (( scomplex* )s)->real = 1.0F;
-	                                          (( scomplex* )s)->imag = 0.0F; }
-	else if ( bli_dt_prec_is_double( dt ) ) { (( dcomplex* )s)->real = 1.0;
-	                                          (( dcomplex* )s)->imag = 0.0; }
+	if      ( bli_dt_prec_is_single( dt ) ) { bli_creal( *( scomplex* )s ) = 1.0F;
+	                                          bli_cimag( *( scomplex* )s ) = 0.0F; }
+	else if ( bli_dt_prec_is_double( dt ) ) { bli_zreal( *( dcomplex* )s ) = 1.0;
+	                                          bli_zimag( *( dcomplex* )s ) = 0.0; }
 }
 
 // Finish the initialization started by the 1x1-specific static initializer
