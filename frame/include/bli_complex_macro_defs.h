@@ -45,7 +45,7 @@
 #define bli_dimag( x )  ( 0.0 )
 
 
-#if defined(__cplusplus)
+#if defined(__cplusplus) && defined(BLIS_ENABLE_STD_COMPLEX)
 
 } // extern "C"
 
@@ -56,14 +56,13 @@
 // std::complex<float> and dcomplex as std::complex<double> themselves.
 
 #include <complex>
-#include <type_traits>
 
-template <typename Ref, typename T, bool Imag>
+template <typename T, bool Imag>
 struct bli_complex_wrapper
 {
-	Ref& ref;
+	std::complex<T>& ref;
 
-	bli_complex_wrapper(Ref& ref) : ref(ref) {}
+	bli_complex_wrapper(std::complex<T>& ref) : ref(ref) {}
 
 	operator T() const { return Imag ? ref.imag() : ref.real(); }
 
@@ -82,84 +81,45 @@ struct bli_complex_wrapper
 	}
 };
 
-// Use template functions to detect if the user has typedef'd [sd]complex
-// using std::complex<T>.
-
-template <typename T>
-typename std::enable_if<std::is_same<std::complex<float>,
-                                     typename std::remove_const<T>::type>::value,
-                        bli_complex_wrapper<T,float,false>>::type
-bli_creal( T& x )
+inline bli_complex_wrapper<float,false> bli_creal( std::complex<float>& x )
 {
 	return x;
 }
 
-template <typename T>
-typename std::enable_if<std::is_same<std::complex<float>,
-                                     typename std::remove_const<T>::type>::value,
-                        bli_complex_wrapper<T,float,true>>::type
-bli_cimag( T& x )
+inline float bli_creal( const std::complex<float>& x )
+{
+	return x.real();
+}
+
+inline bli_complex_wrapper<float,true> bli_cimag( std::complex<float>& x )
 {
 	return x;
 }
 
-template <typename T>
-typename std::enable_if<std::is_same<std::complex<double>,
-                                     typename std::remove_const<T>::type>::value,
-                        bli_complex_wrapper<T,double,false>>::type
-bli_zreal( T& x )
+inline float bli_cimag( const std::complex<float>& x )
+{
+	return x.imag();
+}
+
+inline bli_complex_wrapper<double,false> bli_zreal( std::complex<double>& x )
 {
 	return x;
 }
 
-template <typename T>
-typename std::enable_if<std::is_same<std::complex<double>,
-                                     typename std::remove_const<T>::type>::value,
-                        bli_complex_wrapper<T,double,true>>::type
-bli_zimag( T& x )
+inline double bli_zreal( const std::complex<double>& x )
+{
+	return x.real();
+}
+
+inline bli_complex_wrapper<double,true> bli_zimag( std::complex<double>& x )
 {
 	return x;
 }
 
-// Normal (struct) versions.
-
-template <typename T>
-typename std::enable_if<!std::is_same<std::complex<float>,
-                                      typename std::remove_const<T>::type>::value,
-                        float&>::type
-bli_creal( T& x )
+inline double bli_zimag( const std::complex<double>& x )
 {
-	return const_cast<scomplex&>( x ).real;
+	return x.imag();
 }
-
-template <typename T>
-typename std::enable_if<!std::is_same<std::complex<float>,
-                                      typename std::remove_const<T>::type>::value,
-                        float&>::type
-bli_cimag( T& x )
-{
-	return const_cast<scomplex&>( x ).imag;
-}
-
-template <typename T>
-typename std::enable_if<!std::is_same<std::complex<double>,
-                                      typename std::remove_const<T>::type>::value,
-                        double&>::type
-bli_zreal( T& x )
-{
-	return const_cast<dcomplex&>( x ).real;
-}
-
-template <typename T>
-typename std::enable_if<!std::is_same<std::complex<double>,
-                                      typename std::remove_const<T>::type>::value,
-                        double&>::type
-bli_zimag( T& x )
-{
-	return const_cast<dcomplex&>( x ).imag;
-}
-
-// Not sure how __typeof___ works in C++ so work around it.
 
 #define __typeof__(x) auto
 

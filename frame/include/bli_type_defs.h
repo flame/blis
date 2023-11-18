@@ -133,12 +133,37 @@ typedef uint32_t objbits_t;  // object information bit field
 
 // -- Complex types --
 
-#ifdef BLIS_ENABLE_C99_COMPLEX
+#if defined(__cplusplus) && defined(BLIS_ENABLE_STD_COMPLEX)
+
+	} //extern "C"
+
+	#include <complex>
+
+	// Typedef official C++ complex types to BLIS complex type names.
+
+	// This cpp guard provides a temporary hack to allow libflame
+	// interoperability with BLIS.
+	#ifndef _DEFINED_SCOMPLEX
+	#define _DEFINED_SCOMPLEX
+	typedef std::complex<float> scomplex;
+	#endif
+
+	// This cpp guard provides a temporary hack to allow libflame
+	// interoperability with BLIS.
+	#ifndef _DEFINED_DCOMPLEX
+	#define _DEFINED_DCOMPLEX
+	typedef std::complex<double> dcomplex;
+	#endif
+
+	extern "C"
+	{
+
+#elif defined(BLIS_ENABLE_C99_COMPLEX)
 
 	#if __STDC_VERSION__ >= 199901L
 		#include <complex.h>
 
-		// Typedef official complex types to BLIS complex type names.
+		// Typedef official C99 complex types to BLIS complex type names.
 
 		// This cpp guard provides a temporary hack to allow libflame
 		// interoperability with BLIS.
