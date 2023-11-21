@@ -128,12 +128,11 @@ void bli_sgemmsup_rv_zen_asm_5x4_mask
 
     lea(mem(r12, rdi, 2), rdx)         //
     lea(mem(rdx, rdi, 1), rdx)         // rdx = c + 3*rs_c;
-    prefetch(0, mem(r12, 5*8))         // prefetch c + 0*rs_c
-    prefetch(0, mem(r12, rdi, 1, 5*8)) // prefetch c + 1*rs_c
-    prefetch(0, mem(r12, rdi, 2, 5*8)) // prefetch c + 2*rs_c
-    prefetch(0, mem(rdx, 5*8))         // prefetch c + 3*rs_c
-    prefetch(0, mem(rdx, rdi, 1, 5*8)) // prefetch c + 4*rs_c
-    prefetch(0, mem(rdx, rdi, 2, 5*8)) // prefetch c + 5*rs_c
+    prefetch(0, mem(r12, 0))         // prefetch c + 0*rs_c
+    prefetch(0, mem(r12, rdi, 1, 0)) // prefetch c + 1*rs_c
+    prefetch(0, mem(r12, rdi, 2, 0)) // prefetch c + 2*rs_c
+    prefetch(0, mem(rdx, 0))         // prefetch c + 3*rs_c
+    prefetch(0, mem(rdx, rdi, 1, 0)) // prefetch c + 4*rs_c
 
     jmp(.SPOSTPFETCH)                  // jump to end of prefetching c
     label(.SCOLPFETCH)                 // column-stored prefetching c
@@ -478,12 +477,10 @@ void bli_sgemmsup_rv_zen_asm_4x4_mask
 
     lea(mem(r12, rdi, 2), rdx)         //
     lea(mem(rdx, rdi, 1), rdx)         // rdx = c + 3*rs_c;
-    prefetch(0, mem(r12, 5*8))         // prefetch c + 0*rs_c
-    prefetch(0, mem(r12, rdi, 1, 5*8)) // prefetch c + 1*rs_c
-    prefetch(0, mem(r12, rdi, 2, 5*8)) // prefetch c + 2*rs_c
-    prefetch(0, mem(rdx, 5*8))         // prefetch c + 3*rs_c
-    prefetch(0, mem(rdx, rdi, 1, 5*8)) // prefetch c + 4*rs_c
-    prefetch(0, mem(rdx, rdi, 2, 5*8)) // prefetch c + 5*rs_c
+    prefetch(0, mem(r12, 0))         // prefetch c + 0*rs_c
+    prefetch(0, mem(r12, rdi, 1, 0)) // prefetch c + 1*rs_c
+    prefetch(0, mem(r12, rdi, 2, 0)) // prefetch c + 2*rs_c
+    prefetch(0, mem(rdx, 0))         // prefetch c + 3*rs_c
 
     jmp(.SPOSTPFETCH)                  // jump to end of prefetching c
     label(.SCOLPFETCH)                 // column-stored prefetching c
@@ -804,14 +801,9 @@ void bli_sgemmsup_rv_zen_asm_3x4_mask
     jz(.SCOLPFETCH)                    // jump to column storage case
     label(.SROWPFETCH)                 // row-stored prefetching on c
 
-    lea(mem(r12, rdi, 2), rdx)         //
-    lea(mem(rdx, rdi, 1), rdx)         // rdx = c + 3*rs_c;
-    prefetch(0, mem(r12, 5*8))         // prefetch c + 0*rs_c
-    prefetch(0, mem(r12, rdi, 1, 5*8)) // prefetch c + 1*rs_c
-    prefetch(0, mem(r12, rdi, 2, 5*8)) // prefetch c + 2*rs_c
-    prefetch(0, mem(rdx, 5*8))         // prefetch c + 3*rs_c
-    prefetch(0, mem(rdx, rdi, 1, 5*8)) // prefetch c + 4*rs_c
-    prefetch(0, mem(rdx, rdi, 2, 5*8)) // prefetch c + 5*rs_c
+    prefetch(0, mem(r12, 0))         // prefetch c + 0*rs_c
+    prefetch(0, mem(r12, rdi, 1, 0)) // prefetch c + 1*rs_c
+    prefetch(0, mem(r12, rdi, 2, 0)) // prefetch c + 2*rs_c
 
     jmp(.SPOSTPFETCH)                  // jump to end of prefetching c
     label(.SCOLPFETCH)                 // column-stored prefetching c
@@ -1113,14 +1105,8 @@ void bli_sgemmsup_rv_zen_asm_2x4_mask
     jz(.SCOLPFETCH)                    // jump to column storage case
     label(.SROWPFETCH)                 // row-stored prefetching on c
 
-    lea(mem(r12, rdi, 2), rdx)         //
-    lea(mem(rdx, rdi, 1), rdx)         // rdx = c + 3*rs_c;
-    prefetch(0, mem(r12, 5*8))         // prefetch c + 0*rs_c
-    prefetch(0, mem(r12, rdi, 1, 5*8)) // prefetch c + 1*rs_c
-    prefetch(0, mem(r12, rdi, 2, 5*8)) // prefetch c + 2*rs_c
-    prefetch(0, mem(rdx, 5*8))         // prefetch c + 3*rs_c
-    prefetch(0, mem(rdx, rdi, 1, 5*8)) // prefetch c + 4*rs_c
-    prefetch(0, mem(rdx, rdi, 2, 5*8)) // prefetch c + 5*rs_c
+    prefetch(0, mem(r12, 0))         // prefetch c + 0*rs_c
+    prefetch(0, mem(r12, rdi, 1, 0)) // prefetch c + 1*rs_c
 
     jmp(.SPOSTPFETCH)                  // jump to end of prefetching c
     label(.SCOLPFETCH)                 // column-stored prefetching c
@@ -1396,14 +1382,7 @@ void bli_sgemmsup_rv_zen_asm_1x4_mask
     jz(.SCOLPFETCH)                    // jump to column storage case
     label(.SROWPFETCH)                 // row-stored prefetching on c
 
-    lea(mem(r12, rdi, 2), rdx)         //
-    lea(mem(rdx, rdi, 1), rdx)         // rdx = c + 3*rs_c;
-    prefetch(0, mem(r12, 5*8))         // prefetch c + 0*rs_c
-    prefetch(0, mem(r12, rdi, 1, 5*8)) // prefetch c + 1*rs_c
-    prefetch(0, mem(r12, rdi, 2, 5*8)) // prefetch c + 2*rs_c
-    prefetch(0, mem(rdx, 5*8))         // prefetch c + 3*rs_c
-    prefetch(0, mem(rdx, rdi, 1, 5*8)) // prefetch c + 4*rs_c
-    prefetch(0, mem(rdx, rdi, 2, 5*8)) // prefetch c + 5*rs_c
+    prefetch(0, mem(r12, 0))         // prefetch c + 0*rs_c
 
     jmp(.SPOSTPFETCH)                  // jump to end of prefetching c
     label(.SCOLPFETCH)                 // column-stored prefetching c
