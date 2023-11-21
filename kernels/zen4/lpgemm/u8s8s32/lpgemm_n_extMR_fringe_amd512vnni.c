@@ -1671,8 +1671,9 @@ POST_OPS_DOWNSCALE_12x16:
 			_mm512_loadu_si512( ( float* )post_ops_list_temp->scale_factor +
 							post_ops_attr.post_op_c_j + ( 0 * 16 ) );
 		__m128i zero_point0 =
-			_mm_loadu_epi8( ( int8_t* )post_ops_list_temp->op_args1 +
-					post_ops_attr.post_op_c_j + ( 0 * 16 ) );
+			_mm_loadu_si128( ( __m128i const* )
+					( ( int8_t* )post_ops_list_temp->op_args1 +
+					post_ops_attr.post_op_c_j + ( 0 * 16 ) ) );
 
 		// c[0, 0-15]
 		CVT_MULRND_CVT32(c_int32_0p0,selector1,zero_point0);
@@ -2579,11 +2580,13 @@ POST_OPS_DOWNSCALE_9x32:
 			_mm512_loadu_si512( ( float* )post_ops_list_temp->scale_factor +
 							post_ops_attr.post_op_c_j + ( 1 * 16 ) );
 		__m128i zero_point0 =
-			_mm_loadu_epi8( ( int8_t* )post_ops_list_temp->op_args1 +
-					post_ops_attr.post_op_c_j + ( 0 * 16 ) );
+			_mm_loadu_si128( ( __m128i const* )
+					( ( int8_t* )post_ops_list_temp->op_args1 +
+					post_ops_attr.post_op_c_j + ( 0 * 16 ) ) );
 		__m128i zero_point1 =
-			_mm_loadu_epi8( ( int8_t* )post_ops_list_temp->op_args1 +
-					post_ops_attr.post_op_c_j + ( 1 * 16 ) );
+			_mm_loadu_si128( ( __m128i const* )
+					( ( int8_t* )post_ops_list_temp->op_args1 +
+					post_ops_attr.post_op_c_j + ( 1 * 16 ) ) );
 
 		// c[0, 0-15]
 		CVT_MULRND_CVT32(c_int32_0p0,selector1,zero_point0);

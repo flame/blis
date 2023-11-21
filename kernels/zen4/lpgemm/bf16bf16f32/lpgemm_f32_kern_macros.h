@@ -40,7 +40,8 @@
 
 // Disable BF16 kernel in cases where compilers support other avx 512
 // features except BF16 ISA.
-#if defined( BLIS_GCC ) && ( __GNUC__ < 10 )
+#if ( defined( BLIS_GCC ) && ( ( __GNUC__ < 11 ) || \
+	  ( ( __GNUC__ == 11 ) && ( __GNUC_MINOR__ < 2 ) ) ) )
 #define LPGEMM_BF16_NOT_SUPPORTED
 #endif
 
