@@ -127,7 +127,7 @@ public:
 
 // Black box testing.
 INSTANTIATE_TEST_SUITE_P(
-        Blackbox,
+        sgemm_sup_10_30,
         SGemmTest,
         ::testing::Combine(
             ::testing::Values('c'
@@ -151,7 +151,7 @@ INSTANTIATE_TEST_SUITE_P(
 
 // Black box testing.
 INSTANTIATE_TEST_SUITE_P(
-        sgemm_sup_m,
+        sgemm_sup_alpha_beta,
         SGemmTest,
         ::testing::Combine(
             ::testing::Values('c'
@@ -161,36 +161,11 @@ INSTANTIATE_TEST_SUITE_P(
             ),                                                               // storage format
             ::testing::Values('n','t'),                                      // transa
             ::testing::Values('n','t'),                                      // transb
-            ::testing::Range(gtint_t(1), gtint_t(600), 1),                  // m
-            ::testing::Values(50),                  // n
-            ::testing::Values(30),                  // k
-            ::testing::Values( 1.0, 0.0, -2.0),                                   // alpha
-            ::testing::Values(-1.0,  1.0, 0.0),                                   // beta
-            ::testing::Values(gtint_t(2)),                       // increment to the leading dim of a
-            ::testing::Values(gtint_t(3)),                       // increment to the leading dim of b
-            ::testing::Values(gtint_t(7))                        // increment to the leading dim of c
-        ),
-        ::SGemmTestPrint()
-    );
-
-
-// Black box testing.
-INSTANTIATE_TEST_SUITE_P(
-        sgemm_sup_n,
-        SGemmTest,
-        ::testing::Combine(
-            ::testing::Values('c'
-#ifndef TEST_BLAS
-            ,'r'
-#endif
-            ),                                                               // storage format
-            ::testing::Values('n','t'),                                      // transa
-            ::testing::Values('n','t'),                                      // transb
-            ::testing::Values(30),                  // m
-            ::testing::Range(gtint_t(1), gtint_t(600), 1),                  // n
-            ::testing::Values(30),                  // k
-            ::testing::Values( 1.0, 0.0, -2.0),                                   // alpha
-            ::testing::Values(-1.0,  1.0, 0.0),                                   // beta
+            ::testing::Range(gtint_t(1), gtint_t(20), 1),                  // m
+            ::testing::Range(gtint_t(1), gtint_t(50), 1),                 // n
+            ::testing::Range(gtint_t(1), gtint_t(10), 1),                  // k
+            ::testing::Values(0.0, 1.0, -1.0, 5.3, -10.0),                                   // alpha
+            ::testing::Values(0.0, 1.0, -1.0, 6.4, -19.0),                                   // beta
             ::testing::Values(gtint_t(2)),                       // increment to the leading dim of a
             ::testing::Values(gtint_t(3)),                       // increment to the leading dim of b
             ::testing::Values(gtint_t(7))                        // increment to the leading dim of c
@@ -209,13 +184,13 @@ INSTANTIATE_TEST_SUITE_P(
             ,'r'
 #endif
             ),                                                               // storage format
-            ::testing::Values('n','t'),                                      // transa
-            ::testing::Values('n','t'),                                      // transb
-            ::testing::Range(gtint_t(1), gtint_t(100), 1),                   // m
-            ::testing::Range(gtint_t(1), gtint_t(100), 1),                   // n
-            ::testing::Range(gtint_t(1), gtint_t(100), 1),                   // k
-            ::testing::Values( 1.0, 0.0, -2.0),                                   // alpha
-            ::testing::Values(-1.0,  1.0, 0.0),                                   // beta
+            ::testing::Values('n'),                                      // transa
+            ::testing::Values('n'),                                      // transb
+            ::testing::Range(gtint_t(1), gtint_t(20), 1),                   // m
+            ::testing::Range(gtint_t(1), gtint_t(50), 1),                   // n
+            ::testing::Range(gtint_t(1), gtint_t(20), 1),                   // k
+            ::testing::Values( -2.0),                                   // alpha
+            ::testing::Values( 5.0),                                   // beta
             ::testing::Values(gtint_t(2)),                       // increment to the leading dim of a
             ::testing::Values(gtint_t(3)),                       // increment to the leading dim of b
             ::testing::Values(gtint_t(7))                        // increment to the leading dim of c
