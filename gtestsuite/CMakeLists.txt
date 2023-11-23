@@ -49,76 +49,78 @@ if(APPLE)
 endif()
 
 # Set the path to the BLIS installation.
-if(LINUX)
-    if(NOT(BLIS_PATH))
-        message(FATAL_ERROR "Need to provide a BLIS installation path during CMake invocation. Please use \
-        $ cmake .. -DBLIS_PATH=/home/username/blis_installation")
-    endif()
-    # Set the path to BLIS include directory.
-    set(BLIS_INCLUDE ${BLIS_PATH}/include/blis)
-else()
-    if(NOT(BLIS_LIB_PATH))
-        message(FATAL_ERROR "Need to provide a path to BLIS library during CMake invocation. Please use \
-        $ cmake .. -DBLIS_LIB_PATH=/home/username/blis_installation/path_to_library")
-    endif()
-    # Set the path to BLIS include directory.
-    if(NOT(BLIS_INCLUDE))
-        message(FATAL_ERROR "Need to provide a path to BLIS headers during CMake invocation. Please use \
-        $ cmake .. -DBLIS_INCLUDE=/home/username/blis_installation/path_to_headers")
-    endif()
+set(BLIS_PATH "undefined" CACHE STRING "Setting the path to a BLIS installation that needs testing.")
+if(BLIS_PATH STREQUAL "undefined")
+    message(FATAL_ERROR "Need to provide a BLIS installation path during CMake invocation. Please use \
+    $ cmake .. -DBLIS_PATH=/home/username/blis_installation")
 endif()
+
+# Set the path to BLIS include directory.
+# Adding both paths so that testing works with installation using configure/Make or CMake.
+set(BLIS_INCLUDE ${BLIS_PATH}/include/ ${BLIS_PATH}/include/blis CACHE STRING "Setting the path to the BLIS headers.")
+set(BLIS_LIB_PATH ${BLIS_PATH}/lib CACHE STRING "Setting the path to the BLIS library.")
 
 # Use REF_BLAS to set the library that will be used for reference results.
 set(REF_CBLAS CACHE STRING "Library used to compute reference results.")
-# Set the possible values of reference CBLAS for cmake-gui
+# Set the possible values of reference CBLAS for cmake-gui and throw errors for disabled options.
 if(LINUX)
     set_property(CACHE REF_CBLAS PROPERTY STRINGS "OpenBLAS" "Netlib" "MKL")
+    if(NOT ((REF_CBLAS STREQUAL "OpenBLAS") OR (REF_CBLAS STREQUAL "Netlib") OR(REF_CBLAS STREQUAL "MKL")))
+        message(FATAL_ERROR "REF_CBLAS option '${REF_CBLAS}' is not supported. Please, use one of the following options \
+                during CMake invokation: OpenBLAS, Netlib, MKL or modify CMakeLists.txt to include this option.")
+    endif()
 else()
     set_property(CACHE REF_CBLAS PROPERTY STRINGS "OpenBLAS" "MKL")
+    if(NOT ((REF_CBLAS STREQUAL "OpenBLAS") OR (REF_CBLAS STREQUAL "MKL")))
+        message(FATAL_ERROR "REF_CBLAS option '${REF_CBLAS}' is not supported. Please, use one of the following options \
+                during CMake invokation: OpenBLAS, MKL or modify CMakeLists.txt to include this option.")
+    endif()
 endif()
 
 # Set OpenMP as the default option
-set(ENABLE_THREADING "openmp" CACHE STRING "Setting OpenMP as the threading library")
+set(ENABLE_THREADING "openmp" CACHE STRING "the threading flag")
 # Set the possible values of theading libraries for cmake-gui
-if(LINUX)
-    set_property(CACHE ENABLE_THREADING PROPERTY STRINGS "openmp" "pthreads" "no")
-else()
+if(WIN32)
     set_property(CACHE ENABLE_THREADING PROPERTY STRINGS "openmp" "no")
+    if( NOT ((ENABLE_THREADING STREQUAL "openmp") OR (ENABLE_THREADING STREQUAL "no")) )
+        message(FATAL_ERROR "ENABLE_THREADING option '${ENABLE_THREADING}' is not supported. Please use one of the following options \
+                during CMake invokation: openmp, no")
+    endif()
+else()
+    set_property(CACHE ENABLE_THREADING PROPERTY STRINGS "openmp" "pthreads" "no")
+    if( NOT ((ENABLE_THREADING STREQUAL "openmp") OR (ENABLE_THREADING STREQUAL "pthreads") OR (ENABLE_THREADING STREQUAL "no")) )
+        message(FATAL_ERROR "ENABLE_THREADING option '${ENABLE_THREADING}' is not supported. Please use one of the following options \
+                during CMake invokation: openmp, pthreads, no")
+    endif()
 endif()
 
-
-# Set the possibe values of OpenMP runtimes
+# Setting path to OpenMP runtime.
 if(WIN32)
-    # Set LLVM OpenMP library as the default option
-    set(OpenMP_LIBRARY "LLVM" CACHE STRING "Using LLVM OpenMP library")
-    set_property(CACHE OpenMP_LIBRARY PROPERTY STRINGS "LLVM" "Intel")
+   set(OpenMP_libomp_LIBRARY "C:/Program Files/LLVM/lib/libomp.lib" CACHE STRING "openmp library path")
 endif()
 
 # If MKL is used as a reference set up the threading library options.
 if(REF_CBLAS STREQUAL "MKL")
     # MKL threading option is set up as BLIS threading option by default.
-    set(MKL_ENABLE_THREADING  ${ENABLE_THREADING} CACHE STRING "Setting MKL threading the same as BLIS threading")
+    set(MKL_ENABLE_THREADING ${ENABLE_THREADING} CACHE STRING "Setting MKL threading option.")
 endif()
 
 # Set up OpenMP flags correctly if it's required.
 if( (ENABLE_THREADING STREQUAL "openmp") OR (MKL_ENABLE_THREADING STREQUAL "openmp") )
-    if(WIN32)
-        set(OpenMP_libomp_LIBRARY "C:/Program Files/LLVM/lib/libomp.lib" CACHE STRING "openmp library path")
-    endif()
     find_package(OpenMP)
-    if(OPENMP_FOUND)
-        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
-        set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OpenMP_EXE_LINKER_FLAGS}")
-    else()
+    if(NOT OPENMP_FOUND)
         message (FATAL_ERROR "Openmp Not Found, please provide an OpenMP library using -DOpenMP_libomp_LIBRARY=path_to_omp_lib.")
     endif()
 endif()
 
 # Set static BLIS as the default library we build against.
-set(BLIS_LINKING_TYPE "static" CACHE STRING "Linking to a static BLIS library")
+set(BLIS_LINKING_TYPE "static" CACHE STRING "Type of BLIS library (shared or static) that is being tested.")
 # Set the possible values of BLIS linking type for cmake-gui
 set_property(CACHE BLIS_LINKING_TYPE PROPERTY STRINGS "static" "shared")
+if( NOT ((BLIS_LINKING_TYPE STREQUAL "static") OR (BLIS_LINKING_TYPE STREQUAL "shared")) )
+    message(FATAL_ERROR "BLIS_LINKING_TYPE option '${BLIS_LINKING_TYPE}' is not supported. Please use one of the following options \
+            during CMake invokation: static, shared")
+endif()
 
 # Set common libraries.
 if(LINUX)
@@ -128,20 +130,21 @@ if(LINUX)
 endif()
 
 # Use INT_SIZE to set the int type used for testing.
-set(INT_SIZE "32" CACHE STRING "Integer size used in testing suite.")
+set(INT_SIZE "32" CACHE STRING "Integer size used in testing suite. Must match the integer size of BLIS.")
 # Set the possible values of reference CBLAS for cmake-gui
 set_property(CACHE INT_SIZE PROPERTY STRINGS "32" "64")
 if( NOT ((INT_SIZE STREQUAL "32") OR (INT_SIZE STREQUAL "64")) )
-    message(FATAL_ERROR "INT_SIZE option ${INT_SIZE} is not supported. Must be 32 or 64.")
+    message(FATAL_ERROR "INT_SIZE option '${INT_SIZE}' is not supported. Please use one of the following options \
+            during CMake invokation: 32, 64")
 endif()
 
 # Use TEST_INTERFACE to set which interface, supported by BLIS is meant to be tested.
-set(TEST_INTERFACE "BLAS" CACHE STRING "Interface that is being tested.")
+set(TEST_INTERFACE "BLAS" CACHE STRING "Interface of BLIS that is being tested.")
 # Set the possible values of interfaces for cmake-gui
 set_property(CACHE TEST_INTERFACE PROPERTY STRINGS "BLAS" "CBLAS" "BLIS_TYPED")
 if( NOT ((TEST_INTERFACE STREQUAL "BLAS") OR (TEST_INTERFACE STREQUAL "CBLAS") OR (TEST_INTERFACE STREQUAL "BLIS_TYPED")) )
     message(FATAL_ERROR "TEST_INTERFACE option ${TEST_INTERFACE} is not supported. Please use on of the following options \
-            during CMake invokation: -DTEST_INTERFACE=BLAS or -DTEST_INTERFACE=CBLAS or -DTEST_INTERFACE=BLIS_TYPED")
+            during CMake invokation: BLAS, CBLAS, BLIS_TYPED")
 endif()
 
 # Use BLIS_ELEMENT_TYPE to set whether the elements of any matrix/vector tested are integers or floating point values.
@@ -150,7 +153,7 @@ set(BLIS_ELEMENT_TYPE "f" CACHE STRING "Type of elements of matrices/vectors")
 set_property(CACHE BLIS_ELEMENT_TYPE PROPERTY STRINGS "f" "i")
 if( NOT ((BLIS_ELEMENT_TYPE STREQUAL "f") OR (BLIS_ELEMENT_TYPE STREQUAL "i")) )
     message(FATAL_ERROR "BLIS_ELEMENT_TYPE option ${BLIS_ELEMENT_TYPE} is not supported. Please use on of the following options \
-            during CMake invokation: -DBLIS_ELEMENT_TYPE=f or -DBLIS_ELEMENT_TYPE=i")
+            during CMake invokation: f, i")
 endif()
 
 if(LINUX)
@@ -232,6 +235,42 @@ else() #WIN32
     endif()
 endif()
 
+# Set up the library name.
+if(WIN32)
+    set(LIBBLIS AOCL-LibBlis-Win)
+else()
+    set(LIBBLIS blis)
+endif()
+# Append if threading is required.
+if(NOT (ENABLE_THREADING STREQUAL "no"))
+    if(WIN32)
+        string(APPEND LIBBLIS -MT)
+    else()
+        string(APPEND LIBBLIS -mt)
+    endif()
+endif()
+# Append for dll if necessary.
+if(WIN32 AND (BLIS_LINKING_TYPE STREQUAL "shared"))
+    string(APPEND LIBBLIS -dll)
+endif()
+# Setting the suffix for find_library().
+if(WIN32)
+    set(CMAKE_FIND_LIBRARY_SUFFIXES .lib)
+else()
+    if(BLIS_LINKING_TYPE STREQUAL "shared")
+        set(CMAKE_FIND_LIBRARY_SUFFIXES .so)
+    else()
+        set(CMAKE_FIND_LIBRARY_SUFFIXES .a)
+    endif()
+endif()
+
+find_library(BLIS_LIBRARY NAMES ${LIBBLIS} PATHS ${BLIS_LIB_PATH})
+if(${BLIS_LIBRARY} STREQUAL BLIS_LIBRARY-NOTFOUND)
+    message(FATAL_ERROR "Blis Library ${LIBBLIS} not found in BLIS_LIB_PATH=${BLIS_LIB_PATH}")
+else()
+    message(STATUS "Found ${LIBBLIS} BLIS Library : " ${BLIS_LIBRARY})
+endif()
+
 # Set compiler options and BLIS library for Linux.
 if(LINUX)
     # Add compiler definition.
@@ -245,53 +284,18 @@ if(LINUX)
     if(ENABLE_COVERAGE)
         set(CMAKE_CXX_FLAGS "-O0 --coverage")
     endif()
+endif()
 
-    if(ENABLE_THREADING STREQUAL "no")
-        if(BLIS_LINKING_TYPE STREQUAL "static")
-            set(Blis_LIBRARY "${BLIS_PATH}/lib/libblis.a")
-        else()
-            set(Blis_LIBRARY "${BLIS_PATH}/lib/libblis.so")
-        endif()
-        find_library(libblis NAMES blis PATHS ${BLIS_PATH}/lib)
-    else()
-        if(BLIS_LINKING_TYPE STREQUAL "static")
-            set(Blis_LIBRARY "${BLIS_PATH}/lib/libblis-mt.a")
-        else()
-            set(Blis_LIBRARY "${BLIS_PATH}/lib/libblis-mt.so")
-        endif()
-        find_library(libblis NAMES blis-mt PATHS ${BLIS_PATH}/lib)
-    endif()
-    if(${libblis} STREQUAL libblis-NOTFOUND)
-        message(FATAL_ERROR "Blis Library not found : " ${BLIS_PATH})
-    else()
-        message(STATUS "Found BLIS Library : " ${Blis_LIBRARY})
-    endif()
-else()
-    add_definitions(-DBOOST_THREAD_USE_LIB)
-    set(CMAKE_POSITION_INDEPENDENT_CODE ON)  
+#Setting up the correct Windows Runtime Library.
+if(WIN32)
     cmake_policy(SET CMP0091 NEW)
-    if(BLIS_LINKING_TYPE STREQUAL "shared")
+    if(BUILD_SHARED_LIBS)
         set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
     else()
         set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
     endif()
-    
-    if(ENABLE_THREADING STREQUAL "no")
-        if(BLIS_LINKING_TYPE STREQUAL "static")
-            set(Blis_LIBRARY "${BLIS_LIB_PATH}/AOCL-LibBlis-Win.lib")
-        else()
-            set(Blis_LIBRARY "${BLIS_LIB_PATH}/AOCL-LibBlis-Win-dll.lib")
-            set(BLIS_DLL "${BLIS_LIB_PATH}/AOCL-LibBlis-Win-dll.dll")
-        endif()
-    else()
-        if(BLIS_LINKING_TYPE STREQUAL "static")
-            set(Blis_LIBRARY "${BLIS_LIB_PATH}/AOCL-LibBlis-Win-MT.lib")
-        else()
-            set(Blis_LIBRARY "${BLIS_LIB_PATH}/AOCL-LibBlis-Win-MT-dll.lib")
-            set(BLIS_DLL "${BLIS_LIB_PATH}/AOCL-LibBlis-Win-MT-dll.dll")
-        endif()
-    endif()
 endif()
+
 
 add_subdirectory(testinghelpers)
 add_subdirectory(testsuite)

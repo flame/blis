@@ -88,7 +88,7 @@ foreach(dir ${DIRS})
         set_target_properties(${target_name}.${dir}.${subdir} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
         set_target_properties(${target_name}.${dir}.${subdir} PROPERTIES OUTPUT_NAME ${target_name}.${dir}.${subdir})
         target_include_directories(${target_name}.${dir}.${subdir} PUBLIC ${BLIS_INCLUDE} ${CMAKE_SOURCE_DIR}/testinghelpers/inc ${CMAKE_SOURCE_DIR}/testsuite/)
-        target_link_libraries(${target_name}.${dir}.${subdir} gtest gtest_main testinghelpers ${Blis_LIBRARY} ${COMMON_LIBS})
+        target_link_libraries(${target_name}.${dir}.${subdir} gtest gtest_main testinghelpers ${BLIS_LIBRARY} ${COMMON_LIBS})
         # if we test serial BLIS, but MKL is used as a reference we still need to set up OpenMP.
         if( (ENABLE_THREADING STREQUAL "openmp") OR (MKL_ENABLE_THREADING STREQUAL "openmp"))
           target_link_libraries(${target_name}.${dir}.${subdir} OpenMP::OpenMP_CXX)

@@ -33,7 +33,7 @@
 */
 
 #include "blis.h"
-#include <dlfcn.h>
+
 #include "level3/ref_gemm_compute.h"
 
 /*
