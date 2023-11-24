@@ -35,11 +35,34 @@
 // We need to #include "bli_type_defs.h" in order to pull in the
 // definition of f77_int. But in order to #include that header, we
 // also need to pull in the headers that precede it in blis.h.
+
+// NOTE: PLEASE DON'T CHANGE THE ORDER IN WHICH HEADERS ARE INCLUDED UNLESS
+// YOU ARE SURE THAT IT DOESN'T BREAK INTER-HEADER MACRO DEPENDENCIES.
+// ALSO REMEMBER TO UPDATE ./frame/include/blis.h APPROPRIATELY
+
+// -- configure definitions --
+
+// NOTE: bli_config.h header must be included before any BLIS header.
+// It is bootstrapped by ./configure and does not depend on later
+// headers. Moreover, these configuration variables are necessary to change
+// some default behaviors (e.g. disable OS-detection in bli_system.h in case
+// of --disable-system).
+#include "bli_config.h"
+
+// -- System and language-related headers --
+
+// NOTE: bli_system.h header must be included before bli_config_macro_defs.h.
 #include "bli_system.h"
 #include "bli_lang_defs.h"
 
-#include "bli_config.h"
+
+// -- configure default definitions --
+
 #include "bli_config_macro_defs.h"
+
+
+// -- Common BLIS definitions --
+
 #include "bli_type_defs.h"
 
 /*
