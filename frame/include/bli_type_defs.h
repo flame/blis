@@ -1586,7 +1586,7 @@ typedef struct cntx_s
 // NOTE: The order of these fields must be kept consistent with the definition
 // of the BLIS_RNTM_INITIALIZER macro in bli_rntm.h.
 
-typedef struct rntm_s
+typedef struct __attribute__((aligned(64))) rntm_s
 {
 	// "External" fields: these may be queried by the end-user.
 	bool      auto_factor;
