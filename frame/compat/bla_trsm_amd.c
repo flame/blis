@@ -1532,9 +1532,15 @@ void ztrsm_blis_impl
         * In case of multithread when [m,n]<=128 single thread implementation
         * is doing better than native multithread */
         bool is_parallel = bli_thread_get_is_parallel();
+        dim_t dim_a = n0;
+        if (blis_side == BLIS_LEFT)
+            dim_a = m0;
 
+        // size of output matrix(B)
+        dim_t size_b = m0*n0;
         if((!is_parallel && m0<=500 && n0<=500) ||
-           (is_parallel && (m0+n0)<128))
+           (is_parallel && (m0+n0)<128) || 
+           (dim_a<35 && size_b<3500))
         {
             err_t status;
             status = bli_trsm_small
