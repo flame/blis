@@ -340,6 +340,7 @@ void init_def_params( params_t* params )
 	params->ps_str    = GLOB_DEF_PS_STR;
 	params->m_str     = GLOB_DEF_M_STR;
 	params->n_str     = GLOB_DEF_N_STR;
+	params->k_str     = GLOB_DEF_K_STR;
 
 	params->nr_str    = GLOB_DEF_NR_STR;
 
