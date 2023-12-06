@@ -330,17 +330,17 @@ void bli_cnormfv_unb_var1
         case BLIS_ARCH_ZEN2:
         case BLIS_ARCH_ZEN:;
 #ifdef BLIS_KERNELS_ZEN
-            // Memory pool declarations for packing vector X.
-            // Initialize mem pool buffer to NULL and size to 0.
-            // "buf" and "size" fields are assigned once memory
-            // is allocated from the pool in bli_pba_acquire_m().
-            // This will ensure bli_mem_is_alloc() will be passed on
-            // an allocated memory if created or a NULL.
-            mem_t   mem_buf_X = { 0 };
-            rntm_t  rntm_l;
-            // Packing for non-unit strided vector x.
+            // Handling the kernel call in case of non-unit strides
             if ( incx != 1 )
             {
+                // Memory pool declarations for packing vector X.
+                // Initialize mem pool buffer to NULL and size to 0.
+                // "buf" and "size" fields are assigned once memory
+                // is allocated from the pool in bli_pba_acquire_m().
+                // This will ensure bli_mem_is_alloc() will be passed on
+                // an allocated memory if created or a NULL.
+                mem_t   mem_buf_X = { 0 };
+                rntm_t  rntm_l;
                 // In order to get the buffer from pool via rntm access to memory broker
                 // is needed. Following are initializations for rntm.
                 if ( rntm == NULL ) { bli_rntm_init_from_global( &rntm_l ); }
@@ -376,18 +376,24 @@ void bli_cnormfv_unb_var1
                     }
                     incx_buf = 1;
                 }
+
+                bli_scnorm2fv_unb_var1_avx2( n, x_buf, incx_buf, norm, cntx );
+
+                if ( bli_mem_is_alloc( &mem_buf_X ) )
+                {
+                    #ifdef BLIS_ENABLE_MEM_TRACING
+                        printf( "bli_scnorm2fv_unb_var1_avx2(): releasing mem pool block\n" );
+                    #endif
+                    // Return the buffer to pool.
+                    bli_pba_release( &rntm_l , &mem_buf_X );
+                }
             }
-
-            bli_scnorm2fv_unb_var1_avx2( n, x_buf, incx_buf, norm, cntx );
-
-            if ( bli_mem_is_alloc( &mem_buf_X ) )
+            else
             {
-                #ifdef BLIS_ENABLE_MEM_TRACING
-                    printf( "bli_scnorm2fv_unb_var1_avx2(): releasing mem pool block\n" );
-                #endif
-                // Return the buffer to pool.
-                bli_pba_release( &rntm_l , &mem_buf_X );
+                // Call the kernel with the unit-strided vector x
+                bli_scnorm2fv_unb_var1_avx2( n, x_buf, incx_buf, norm, cntx );
             }
+
             break;
 #endif
         default:;
@@ -898,17 +904,17 @@ void bli_snormfv_unb_var1
         case BLIS_ARCH_ZEN2:
         case BLIS_ARCH_ZEN:;
 #ifdef BLIS_KERNELS_ZEN
-            // Memory pool declarations for packing vector X.
-            // Initialize mem pool buffer to NULL and size to 0.
-            // "buf" and "size" fields are assigned once memory
-            // is allocated from the pool in bli_pba_acquire_m().
-            // This will ensure bli_mem_is_alloc() will be passed on
-            // an allocated memory if created or a NULL.
-            mem_t   mem_buf_X = { 0 };
-            rntm_t  rntm_l;
-            // Packing for non-unit strided vector x.
+            // Handling the kernel call in case of non-unit strides
             if ( incx != 1 )
             {
+                // Memory pool declarations for packing vector X.
+                // Initialize mem pool buffer to NULL and size to 0.
+                // "buf" and "size" fields are assigned once memory
+                // is allocated from the pool in bli_pba_acquire_m().
+                // This will ensure bli_mem_is_alloc() will be passed on
+                // an allocated memory if created or a NULL.
+                mem_t   mem_buf_X = { 0 };
+                rntm_t  rntm_l;
                 // Initialize a local runtime with global settings if necessary. Note
                 // that in the case that a runtime is passed in, we make a local copy.
                 if ( rntm == NULL ) { bli_rntm_init_from_global( &rntm_l ); }
@@ -947,18 +953,24 @@ void bli_snormfv_unb_var1
                     }
                     incx_buf = 1;
                 }
+
+                bli_snorm2fv_unb_var1_avx2( n, x_buf, incx_buf, norm, cntx );
+
+                if ( bli_mem_is_alloc( &mem_buf_X ) )
+                {
+                    #ifdef BLIS_ENABLE_MEM_TRACING
+                        printf( "bli_snorm2fv_unb_var1_avx2(): releasing mem pool block\n" );
+                    #endif
+                    // Return the buffer to pool.
+                    bli_pba_release( &rntm_l , &mem_buf_X );
+                }
             }
-
-            bli_snorm2fv_unb_var1_avx2( n, x_buf, incx_buf, norm, cntx );
-
-            if ( bli_mem_is_alloc( &mem_buf_X ) )
+            else
             {
-                #ifdef BLIS_ENABLE_MEM_TRACING
-                    printf( "bli_snorm2fv_unb_var1_avx2(): releasing mem pool block\n" );
-                #endif
-                // Return the buffer to pool.
-                bli_pba_release( &rntm_l , &mem_buf_X );
+                // Call the kernel with the unit-strided vector x
+                bli_snorm2fv_unb_var1_avx2( n, x_buf, incx_buf, norm, cntx );
             }
+
             break;
 #endif
         default:;
