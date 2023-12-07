@@ -60,23 +60,6 @@ endif()
 set(BLIS_INCLUDE ${BLIS_PATH}/include/ ${BLIS_PATH}/include/blis CACHE STRING "Setting the path to the BLIS headers.")
 set(BLIS_LIB_PATH ${BLIS_PATH}/lib CACHE STRING "Setting the path to the BLIS library.")
 
-# Use REF_BLAS to set the library that will be used for reference results.
-set(REF_CBLAS CACHE STRING "Library used to compute reference results.")
-# Set the possible values of reference CBLAS for cmake-gui and throw errors for disabled options.
-if(LINUX)
-    set_property(CACHE REF_CBLAS PROPERTY STRINGS "OpenBLAS" "Netlib" "MKL")
-    if(NOT ((REF_CBLAS STREQUAL "OpenBLAS") OR (REF_CBLAS STREQUAL "Netlib") OR(REF_CBLAS STREQUAL "MKL")))
-        message(FATAL_ERROR "REF_CBLAS option '${REF_CBLAS}' is not supported. Please, use one of the following options \
-                during CMake invokation: OpenBLAS, Netlib, MKL or modify CMakeLists.txt to include this option.")
-    endif()
-else()
-    set_property(CACHE REF_CBLAS PROPERTY STRINGS "OpenBLAS" "MKL")
-    if(NOT ((REF_CBLAS STREQUAL "OpenBLAS") OR (REF_CBLAS STREQUAL "MKL")))
-        message(FATAL_ERROR "REF_CBLAS option '${REF_CBLAS}' is not supported. Please, use one of the following options \
-                during CMake invokation: OpenBLAS, MKL or modify CMakeLists.txt to include this option.")
-    endif()
-endif()
-
 # Set OpenMP as the default option
 set(ENABLE_THREADING "openmp" CACHE STRING "the threading flag")
 # Set the possible values of theading libraries for cmake-gui
@@ -99,18 +82,18 @@ if(WIN32)
    set(OpenMP_libomp_LIBRARY "C:/Program Files/LLVM/lib/libomp.lib" CACHE STRING "openmp library path")
 endif()
 
-# If MKL is used as a reference set up the threading library options.
-if(REF_CBLAS STREQUAL "MKL")
-    # MKL threading option is set up as BLIS threading option by default.
-    set(MKL_ENABLE_THREADING ${ENABLE_THREADING} CACHE STRING "Setting MKL threading option.")
-endif()
-
 # Set up OpenMP flags correctly if it's required.
 if( (ENABLE_THREADING STREQUAL "openmp") OR (MKL_ENABLE_THREADING STREQUAL "openmp") )
     find_package(OpenMP)
     if(NOT OPENMP_FOUND)
         message (FATAL_ERROR "Openmp Not Found, please provide an OpenMP library using -DOpenMP_libomp_LIBRARY=path_to_omp_lib.")
     endif()
+endif()
+
+# If MKL is used as a reference set up the threading library options.
+if(REF_CBLAS STREQUAL "MKL")
+    # MKL threading option is set up as BLIS threading option by default.
+    set(MKL_ENABLE_THREADING ${ENABLE_THREADING} CACHE STRING "Setting MKL threading option.")
 endif()
 
 # Set static BLIS as the default library we build against.
@@ -158,21 +141,30 @@ endif()
 
 if(LINUX)
     if(REF_LIB)
-        set(REFLIB_PATH ${REF_LIB}/..)
-        find_library(reflib NAMES openblas cblas mkl_rt HINTS ${REFLIB_PATH} PATHS ${REFLIB_PATH})
+        get_filename_component(REFLIB_PATH ${REF_LIB}/.. ABSOLUTE)
+        get_filename_component(library ${REF_LIB} NAME)
+        find_library(reflib NAMES ${library} PATHS ${REFLIB_PATH} NO_DEFAULT_PATH)
         if(${reflib} STREQUAL reflib-NOTFOUND)
             message(FATAL_ERROR "Reference Library not found : " ${REF_LIB})
         else()
             message(STATUS "Found Reference Library : " ${reflib})
         endif()
     else()
+        # Use REF_BLAS to set the library that will be used for reference results.
+        set(REF_CBLAS CACHE STRING "Library used to compute reference results.")
+        # Set the possible values of theading libraries for cmake-gui
+        set_property(CACHE REF_CBLAS PROPERTY STRINGS "OpenBLAS" "Netlib" "MKL")
+        if(NOT ((REF_CBLAS STREQUAL "OpenBLAS") OR (REF_CBLAS STREQUAL "Netlib") OR(REF_CBLAS STREQUAL "MKL")))
+            message(FATAL_ERROR "REF_CBLAS option '${REF_CBLAS}' is not supported. Please, use one of the following options \
+                    during CMake invokation: OpenBLAS, Netlib, MKL or modify CMakeLists.txt to include this option.")
+        endif()
         if(REF_CBLAS STREQUAL "OpenBLAS")
             if(NOT(OPENBLAS_PATH))
                 message(FATAL_ERROR "Need to provide an OpenBLAS installation path \
                 during CMake invokation when OpenBLAS is used for reference results. Please use \
                 $ cmake .. -DOPENBLAS_PATH=/home/username/openblas_installation")
             endif()
-            find_library(reflib NAMES openblas HINTS ${OPENBLAS_PATH} PATHS ${OPENBLAS_PATH})
+            find_library(reflib NAMES openblas PATHS ${OPENBLAS_PATH} NO_DEFAULT_PATH)
             if(${reflib} STREQUAL reflib-NOTFOUND)
                 message(FATAL_ERROR "OpenBLAS Reference Library not found : " ${OPENBLAS_PATH})
             else()
@@ -186,9 +178,9 @@ if(LINUX)
                 $ cmake .. -DNETLIB_PATH=/home/username/netlib_installation")
             endif()
             if(INT_SIZE STREQUAL "32")
-                find_library(netlib NAMES cblas HINTS ${NETLIB_PATH} PATHS ${NETLIB_PATH})
+                find_library(netlib NAMES cblas PATHS ${NETLIB_PATH} NO_DEFAULT_PATH)
             else()
-                find_library(netlib NAMES cblas64 HINTS ${NETLIB_PATH} PATHS ${NETLIB_PATH})
+                find_library(netlib NAMES cblas64 PATHS ${NETLIB_PATH} NO_DEFAULT_PATH)
             endif()
             if(${netlib} STREQUAL netlib-NOTFOUND)
                 message(FATAL_ERROR "Netlib Reference Library not found : "  ${NETLIB_PATH})
@@ -199,7 +191,7 @@ if(LINUX)
         elseif(REF_CBLAS STREQUAL "MKL")
             set(MKL_PATH $ENV{MKLROOT}/lib/intel64
                     CACHE STRING "The path to MKL.")
-            find_library(mkllib NAMES mkl_rt HINTS ${MKL_PATH} PATHS ${MKL_PATH})
+            find_library(mkllib NAMES mkl_rt PATHS ${MKL_PATH} NO_DEFAULT_PATH)
             if(${mkllib} STREQUAL mkllib-NOTFOUND)
                 message(FATAL_ERROR "MKL Reference Library not found : " ${MKL_PATH})
             else()
@@ -212,9 +204,13 @@ if(LINUX)
         endif()
     endif()
 else() #WIN32
-    if( NOT ((REF_CBLAS STREQUAL "OpenBLAS") OR (REF_CBLAS STREQUAL "MKL")) )
-        message(FATAL_ERROR "REF_CBLAS option ${REF_CBLAS} is not supported. Please use on of the following options \
-                during CMake invokation: -DREF_CBLAS=OpenBLAS or -DREF_CBLAS=MKL")
+    # Use REF_BLAS to set the library that will be used for reference results.
+    set(REF_CBLAS CACHE STRING "Library used to compute reference results.")
+    # Set the possible values of theading libraries for cmake-gui
+    set_property(CACHE REF_CBLAS PROPERTY STRINGS "OpenBLAS" "MKL")
+    if(NOT ((REF_CBLAS STREQUAL "OpenBLAS") OR (REF_CBLAS STREQUAL "MKL")))
+        message(FATAL_ERROR "REF_CBLAS option '${REF_CBLAS}' is not supported. Please, use one of the following options \
+                during CMake invokation: OpenBLAS, MKL or modify CMakeLists.txt to include this option.")
     endif()
     if(REF_CBLAS STREQUAL "OpenBLAS")
         if(NOT(OPENBLAS_PATH))
@@ -231,7 +227,7 @@ else() #WIN32
                     $ cmake .. -DMKL_PATH=/home/username/path_to_mkl_rt")
         endif()
         set(REF_LIB "${MKL_PATH}/mkl_rt.2.dll" CACHE STRING "Reference MKL Library")
-        message(STATUS "Found MKL Reference Library : " ${REF_LIB})      
+        message(STATUS "Found MKL Reference Library : " ${REF_LIB})
     endif()
 endif()
 
@@ -264,7 +260,7 @@ else()
     endif()
 endif()
 
-find_library(BLIS_LIBRARY NAMES ${LIBBLIS} PATHS ${BLIS_LIB_PATH})
+find_library(BLIS_LIBRARY NAMES ${LIBBLIS} PATHS ${BLIS_LIB_PATH} NO_DEFAULT_PATH)
 if(${BLIS_LIBRARY} STREQUAL BLIS_LIBRARY-NOTFOUND)
     message(FATAL_ERROR "Blis Library ${LIBBLIS} not found in BLIS_LIB_PATH=${BLIS_LIB_PATH}")
 else()
