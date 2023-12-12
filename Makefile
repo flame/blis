@@ -57,7 +57,7 @@
         testblis testblis-fast testblis-md testblis-salt \
         check checkblas \
         checkblis checkblis-fast checkblis-md checkblis-salt \
-        install-headers install-libs install-lib-symlinks \
+        install-headers install-helper-headers install-libs install-lib-symlinks \
         showconfig \
         clean cleanmk cleanh cleanlib distclean \
         cleantest cleanblastest cleanblistest \
@@ -282,11 +282,14 @@ endif
 #
 
 # Define a list of headers to install. The default is to only install blis.h.
-HEADERS_TO_INSTALL := $(BLIS_H_FLAT)
+HEADERS_TO_INSTALL      := $(BLIS_H_FLAT)
 
-# If CBLAS is enabled, we also install cblas.h so the user does not need to
-# change their source code to #include "blis.h" in order to access the CBLAS
-# function prototypes and enums.
+# If CBLAS is enabled, we also install cblas.h. This allows the user to continue
+# using #include "cblas.h" in their application, if they wish. (NOTE: Even if we
+# didn't install cblas.h, the user could *still* access CBLAS definitions and
+# function prototypes, but they would have to update their source code to use
+# #include "blis.h" instead of #include "cblas.h" since the latter header file
+# would not exist.)
 ifeq ($(MK_ENABLE_CBLAS),yes)
 HEADERS_TO_INSTALL += $(CBLAS_H_FLAT)
 endif
@@ -295,6 +298,19 @@ endif
 # to install.
 ifeq ($(INSTALL_HH),yes)
 HEADERS_TO_INSTALL += $(wildcard $(VEND_CPP_PATH)/*.hh)
+endif
+
+# Define a list of so-called helper headers to install. These helper headers
+# are very simple headers that go one directory up from INCDIR/blis (which
+# by default is PREFIX/include/blis, where PREFIX is the install prefix). The
+# default is to only install the blis.h helper header.
+HELP_HEADERS_TO_INSTALL := $(HELP_BLIS_H_PATH)
+HELP_HEADERS_INSTALLED  := $(INSTALL_INCDIR)/$(BLIS_H)
+
+# If CBLAS is enabled, we also install the cblas.h helper header.
+ifeq ($(MK_ENABLE_CBLAS),yes)
+HELP_HEADERS_TO_INSTALL += $(HELP_CBLAS_H_PATH)
+HELP_HEADERS_INSTALLED  += $(INSTALL_INCDIR)/$(CBLAS_H)
 endif
 
 
@@ -1034,8 +1050,9 @@ endif
 
 # --- Install header rules ---
 
-install-headers: check-env $(MK_INCL_DIR_INST)
+install-headers: check-env $(MK_INCL_DIR_INST) install-helper-headers
 
+# Rule for installing main headers.
 $(MK_INCL_DIR_INST): $(HEADERS_TO_INSTALL) $(CONFIG_MK_FILE)
 ifeq ($(ENABLE_VERBOSE),yes)
 	$(MKDIR) $(@)
@@ -1046,6 +1063,23 @@ else
 	@$(INSTALL) -m 0644 $(HEADERS_TO_INSTALL) $(@)
 endif
 
+install-helper-headers: check-env $(HELP_HEADERS_INSTALLED)
+
+# A rule to install a helper header file.
+define make-helper-header-rule
+$(INSTALL_INCDIR)/$(notdir $(1)): $(BUILD_PATH)/$(notdir $(1)) $(CONFIG_MK_FILE)
+ifeq ($(ENABLE_VERBOSE),yes)
+	$(MKDIR) $(INSTALL_INCDIR)
+	$(INSTALL) -m 0644 $$(<) $$(@)
+else
+	@$(MKDIR) $(INSTALL_INCDIR)
+	@echo "Installing $$(@F) helper header into $(INSTALL_INCDIR)/"
+	@$(INSTALL) -m 0644 $$(<) $$(@)
+endif
+endef
+
+# Instantiate the rule above for each helper header file to install.
+$(foreach h, $(HELP_HEADERS_TO_INSTALL), $(eval $(call make-helper-header-rule,$(h))))
 
 # --- Install share rules ---
 
@@ -1068,11 +1102,9 @@ else
 	               $(@)/$(CONFIG_DIR)/$(CONFIG_NAME)/
 endif
 
-$(PC_SHARE_DIR_INST):  $(PC_IN_FILE)
+$(PC_SHARE_DIR_INST): $(PC_IN_FILE)
+ifeq ($(ENABLE_VERBOSE),yes)
 	$(MKDIR) $(@)
-ifeq ($(ENABLE_VERBOSE),no)
-	@echo "Installing $(PC_OUT_FILE) into $(@)/"
-endif
 	$(shell cat "$(PC_IN_FILE)" \
 	| sed -e "s#@PACKAGE_VERSION@#$(VERSION)#g" \
 	| sed -e "s#@prefix@#$(prefix)#g" \
@@ -1082,6 +1114,19 @@ endif
 	| sed -e "s#@LDFLAGS@#$(LDFLAGS)#g" \
 	> "$(PC_OUT_FILE)" )
 	$(INSTALL) -m 0644 $(PC_OUT_FILE) $(@)
+else
+	@$(MKDIR) $(@)
+	@echo "Installing $(PC_OUT_FILE) into $(@)/"
+	@$(shell cat "$(PC_IN_FILE)" \
+	| sed -e "s#@PACKAGE_VERSION@#$(VERSION)#g" \
+	| sed -e "s#@prefix@#$(prefix)#g" \
+	| sed -e "s#@exec_prefix@#$(exec_prefix)#g" \
+	| sed -e "s#@libdir@#$(libdir)#g" \
+	| sed -e "s#@includedir@#$(includedir)#g" \
+	| sed -e "s#@LDFLAGS@#$(LDFLAGS)#g" \
+	> "$(PC_OUT_FILE)" )
+	@$(INSTALL) -m 0644 $(PC_OUT_FILE) $(@)
+endif
 
 # --- Install library rules ---
 
@@ -1401,9 +1446,12 @@ endif
 uninstall-headers: check-env
 ifeq ($(ENABLE_VERBOSE),yes)
 	- $(RM_RF) $(MK_INCL_DIR_INST)
+	- $(RM_RF) $(HELP_HEADERS_INSTALLED)
 else
 	@echo "Uninstalling directory '$(notdir $(MK_INCL_DIR_INST))' from $(dir $(MK_INCL_DIR_INST))"
 	@- $(RM_RF) $(MK_INCL_DIR_INST)
+	@echo "Uninstalling $(notdir $(HELP_HEADERS_INSTALLED)) from $(dir $(INSTALL_INCDIR))"
+	@- $(RM_RF) $(HELP_HEADERS_INSTALLED)
 endif
 
 uninstall-share: check-env
