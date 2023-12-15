@@ -1095,16 +1095,41 @@ if(ENABLE_BLAS)
     add_subdirectory(blastest EXCLUDE_FROM_ALL)
 endif()
 
+if(ENABLE_BLAS AND WIN32 AND BUILD_SHARED_LIBS)
+set(DETAILED_BLATEST_MESSAGE "Details: Level2 and level3 API tests define a custom version of xerbla_() to test the error codes. \
+On Linux and on Windows/static versions of BLIS library, the custom xerbla_() gets called inside the library\
+due to the linking process and all tests work. On Windows/shared version of the library, symbol resolution\
+happens at load-time so the blis implementation of xerbla_() gets called instead of the custom one. \
+That causes errors when the tests are run which are independent of the BLIS library. \
+Please use static builds only on Windows.")
+endif()
+
 # Add generic testing target `test`.
 set(available_testsuites checkblis)
-if(ENABLE_BLAS)
-    list(APPEND available_testsuites checkblas)
+if(WIN32 AND BUILD_SHARED_LIBS)
+    if(ENABLE_BLAS)
+        set(TEST_WARNING "Target `test` depends only on target `checkblis` because `checkblas` target is not available on Windows for shared builds of BLIS. ")
+    endif()
+else()
+    if(ENABLE_BLAS)
+        list(APPEND available_testsuites checkblas)
+    endif()
 endif()
-add_custom_target(test DEPENDS ${available_testsuites})
+add_custom_target(test 
+                DEPENDS ${available_testsuites}
+                COMMENT "Running target `test`. ${TEST_WARNING} ${DETAILED_BLATEST_MESSAGE}")
 
 # Add generic testing target `check`.
 set(available_testsuites checkblis-fast)
-if(ENABLE_BLAS)
-    list(APPEND available_testsuites checkblas)
+if(WIN32 AND BUILD_SHARED_LIBS)
+    if(ENABLE_BLAS)
+        set(CHECK_WARNING "Target `check` depends only on target `checkblis-fast` because `checkblas` target is not available on Windows for shared builds of BLIS. ")
+    endif()
+else()
+    if(ENABLE_BLAS)
+        list(APPEND available_testsuites checkblas)
+    endif()
 endif()
-add_custom_target(check DEPENDS ${available_testsuites})
+add_custom_target(check
+                DEPENDS ${available_testsuites}
+                COMMENT "Running target `check`. ${CHECK_WARNING} ${DETAILED_BLATEST_MESSAGE}")

@@ -123,11 +123,22 @@ foreach(source ${blastest_sources})
     list(APPEND test_executables "run-${exec_name}")
 endforeach()
 
-add_custom_target(testblas DEPENDS ${test_executables})
-add_custom_target(checkblas
-                    COMMAND ${Python_EXECUTABLE} ${CMAKE_SOURCE_DIR}/build/cmake/check-blastest.py "."
-                    DEPENDS testblas
-                    WORKING_DIRECTORY $<TARGET_FILE_DIR:libblis>
-                )
+if(WIN32 AND BUILD_SHARED_LIBS)
+    add_custom_target(testblas
+                     DEPENDS libblis
+                     COMMENT "`testblas` target is not available on Windows for shared builds of BLIS.  ${DETAILED_BLATEST_MESSAGE}"
+                     )
+    add_custom_target(checkblas 
+                      DEPENDS testblas
+                      COMMENT "`checkblas` target is not available on Windows for shared builds of BLIS.  ${DETAILED_BLATEST_MESSAGE}"
+                    )
+else()
+    add_custom_target(testblas DEPENDS ${test_executables})
+    add_custom_target(checkblas
+                        COMMAND ${Python_EXECUTABLE} ${CMAKE_SOURCE_DIR}/build/cmake/check-blastest.py "."
+                        DEPENDS testblas
+                        WORKING_DIRECTORY $<TARGET_FILE_DIR:libblis>
+                    )
+endif()
 # Put all those targets under blastest-targets-targets folder name so that they appear all together in IDE.
 set_target_properties(testblas checkblas PROPERTIES FOLDER blastest-targets)
