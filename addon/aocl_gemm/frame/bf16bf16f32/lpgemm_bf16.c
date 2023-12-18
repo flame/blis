@@ -331,7 +331,7 @@ LPGEMM_5LOOP(bfloat16,bfloat16,float,bf16bf16f32of32)
 
 					lpgemm_alloc_mem_panel
 						(
-						mem_a_size_req, BLIS_BUFFER_FOR_A_BLOCK,
+						mem_a_size_req, BLIS_BUFFER_FOR_GEN_USE,
 						&mem_a, rntm
 						);
 

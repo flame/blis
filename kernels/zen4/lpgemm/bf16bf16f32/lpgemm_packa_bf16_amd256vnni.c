@@ -379,6 +379,9 @@ void packa_mr16_bf16bf16f32of32_row_major
 {
 	dim_t MR = 32;
 
+	dim_t k_left = KC % 32;
+
+	__mmask32 mask = 0xFFFFFFFF >> ( 32 - k_left );
 	__m512i a_reg[32];
 
 	dim_t ic = 0, kr = 0;
@@ -454,36 +457,13 @@ void packa_mr16_bf16bf16f32of32_row_major
 			_mm512_storeu_si512( pack_a_buffer + ( ( ic + 30 ) * KC ) + kr , a_reg[30] );
 			_mm512_storeu_si512( pack_a_buffer + ( ( ic + 31 ) * KC ) + kr , a_reg[31] );
 		}
-		for( ; ( kr + 15 ) < KC; kr += 16 )
-		{
-			MASKED_LOAD_32_ROWS_AVX512( 0xFFFF )
 
-			MASKED_STORE_32_ROWS_AVX512( 0xFFFF )
-		}
-		for( ; ( kr + 7 ) < KC; kr += 8 )
+		if( k_left > 0 )
 		{
-			MASKED_LOAD_32_ROWS_AVX512( 0xFF )
-
-			MASKED_STORE_32_ROWS_AVX512( 0xFF )
+			MASKED_LOAD_32_ROWS_AVX512( mask )
+			MASKED_STORE_32_ROWS_AVX512( mask )
 		}
-		for( ; ( kr + 3 ) < KC; kr += 4 )
-		{
-			MASKED_LOAD_32_ROWS_AVX512( 0xF )
 
-			MASKED_STORE_32_ROWS_AVX512( 0xF )
-		}
-		for( ; ( kr + 1 ) < KC; kr += 2 )
-		{
-			MASKED_LOAD_32_ROWS_AVX512( 0x3 )
-
-			MASKED_STORE_32_ROWS_AVX512( 0x3 )
-		}
-		for( ; ( kr ) < KC; kr += 1 )
-		{
-			MASKED_LOAD_32_ROWS_AVX512( 0x1 )
-
-			MASKED_STORE_32_ROWS_AVX512( 0x1 )
-		}
 	}
 	for( ; ( ic + 16 - 1 ) < MC; ic += 16 )
 	{
@@ -523,37 +503,15 @@ void packa_mr16_bf16bf16f32of32_row_major
 			_mm512_storeu_si512( pack_a_buffer + ( ( ic + 14 ) * KC ) + kr , a_reg[14] );
 			_mm512_storeu_si512( pack_a_buffer + ( ( ic + 15 ) * KC ) + kr , a_reg[15] );
 		}
-		for( ; ( kr + 16 - 1 ) < KC; kr += 16 )
-		{
-			MASKED_LOAD_16_ROWS_AVX512( 0xFFFF )
-			MASKED_STORE_16_ROWS_AVX512( 0xFFFF )
-		}
-		for( ; ( kr + 7 ) < KC; kr += 8 )
-		{
-			MASKED_LOAD_16_ROWS_AVX512( 0xFF )
 
-			MASKED_STORE_16_ROWS_AVX512( 0xFF )
-		}
-		for( ; ( kr + 3 ) < KC; kr += 4 )
+		if( k_left > 0 )
 		{
-			MASKED_LOAD_16_ROWS_AVX512( 0xF )
-
-			MASKED_STORE_16_ROWS_AVX512( 0xF )
+			MASKED_LOAD_16_ROWS_AVX512( mask )
+			MASKED_STORE_16_ROWS_AVX512( mask )
 		}
-		for( ; ( kr + 1 ) < KC; kr += 2 )
-		{
-			MASKED_LOAD_16_ROWS_AVX512( 0x3 )
 
-			MASKED_STORE_16_ROWS_AVX512( 0x3 )
-		}
-		for( ; ( kr ) < KC; kr += 1 )
-		{
-			MASKED_LOAD_16_ROWS_AVX512( 0x1 )
-
-			MASKED_STORE_16_ROWS_AVX512( 0x1 )
-		}
 	}
-	for( ; ( ic + 7 - 1 ) < MC; ic += 8 )
+	for( ; ( ic + 8 - 1 ) < MC; ic += 8 )
 	{
 		for( kr = 0; ( kr + 32 - 1 ) < KC; kr += 32 )
 		{
@@ -575,35 +533,13 @@ void packa_mr16_bf16bf16f32of32_row_major
 			_mm512_storeu_si512( pack_a_buffer + ( ( ic + 6 ) * KC ) + kr , a_reg[6] );
 			_mm512_storeu_si512( pack_a_buffer + ( ( ic + 7 ) * KC ) + kr , a_reg[7] );
 		}
-		for( ; ( kr + 16 - 1 ) < KC; kr += 16 )
-		{
-			MASKED_LOAD_8_ROWS_AVX512( 0xFFFF )
-			MASKED_STORE_8_ROWS_AVX512( 0xFFFF )
-		}
-		for( ; ( kr + 7 ) < KC; kr += 8 )
-		{
-			MASKED_LOAD_8_ROWS_AVX512( 0xFF )
 
-			MASKED_STORE_8_ROWS_AVX512( 0xFF )
-		}
-		for( ; ( kr + 3 ) < KC; kr += 4 )
+		if( k_left > 0 )
 		{
-			MASKED_LOAD_8_ROWS_AVX512( 0xF )
-
-			MASKED_STORE_8_ROWS_AVX512( 0xF )
+			MASKED_LOAD_8_ROWS_AVX512( mask )
+			MASKED_STORE_8_ROWS_AVX512( mask )
 		}
-		for( ; ( kr + 1 ) < KC; kr += 2 )
-		{
-			MASKED_LOAD_8_ROWS_AVX512( 0x3 )
 
-			MASKED_STORE_8_ROWS_AVX512( 0x3 )
-		}
-		for( ; ( kr ) < KC; kr += 1 )
-		{
-			MASKED_LOAD_8_ROWS_AVX512( 0x1 )
-
-			MASKED_STORE_8_ROWS_AVX512( 0x1 )
-		}
 	}
 	for( ; ( ic + 4 - 1 ) < MC; ic += 4 )
 	{
@@ -619,35 +555,13 @@ void packa_mr16_bf16bf16f32of32_row_major
 			_mm512_storeu_si512( pack_a_buffer + ( ( ic + 2 ) * KC ) + kr , a_reg[2] );
 			_mm512_storeu_si512( pack_a_buffer + ( ( ic + 3 ) * KC ) + kr , a_reg[3] );
 		}
-		for( ; ( kr + 16 - 1 ) < KC; kr += 16 )
-		{
-			MASKED_LOAD_4_ROWS_AVX512( 0xFFFF )
-			MASKED_STORE_4_ROWS_AVX512( 0xFFFF )
-		}
-		for( ; ( kr + 7 ) < KC; kr += 8 )
-		{
-			MASKED_LOAD_4_ROWS_AVX512( 0xFF )
 
-			MASKED_STORE_4_ROWS_AVX512( 0xFF )
-		}
-		for( ; ( kr + 3 ) < KC; kr += 4 )
+		if( k_left > 0 )
 		{
-			MASKED_LOAD_4_ROWS_AVX512( 0xF )
-
-			MASKED_STORE_4_ROWS_AVX512( 0xF )
+			MASKED_LOAD_4_ROWS_AVX512( mask )
+			MASKED_STORE_4_ROWS_AVX512( mask )
 		}
-		for( ; ( kr + 1 ) < KC; kr += 2 )
-		{
-			MASKED_LOAD_4_ROWS_AVX512( 0x3 )
 
-			MASKED_STORE_4_ROWS_AVX512( 0x3 )
-		}
-		for( ; ( kr ) < KC; kr += 1 )
-		{
-			MASKED_LOAD_4_ROWS_AVX512( 0x1 )
-
-			MASKED_STORE_4_ROWS_AVX512( 0x1 )
-		}
 	}
 
 	for( ; ( ic + 2 - 1 ) < MC; ic += 2 )
@@ -762,6 +676,27 @@ void packa_mr16_bf16bf16f32of32_col_major
 
 	__m256i a_reg[16], b_reg[16];
 
+	// These registers are set with zeroes to avoid compiler warnings
+	// To-DO: TO be removed when pack code is optimized for fringe cases.
+
+	a_reg[0] = _mm256_setzero_si256();
+	a_reg[1] = _mm256_setzero_si256();
+	a_reg[2] = _mm256_setzero_si256();
+	a_reg[3] = _mm256_setzero_si256();
+	a_reg[4] = _mm256_setzero_si256();
+	a_reg[5] = _mm256_setzero_si256();
+	a_reg[6] = _mm256_setzero_si256();
+	a_reg[7] = _mm256_setzero_si256();
+	a_reg[8] = _mm256_setzero_si256();
+	a_reg[9] = _mm256_setzero_si256();
+	a_reg[10] = _mm256_setzero_si256();
+	a_reg[11] = _mm256_setzero_si256();
+	a_reg[12] = _mm256_setzero_si256();
+	a_reg[13] = _mm256_setzero_si256();
+	a_reg[14] = _mm256_setzero_si256();
+	a_reg[15] = _mm256_setzero_si256();
+
+
 	dim_t ic, kr;
 
 	for( ic = 0; ( ic + MR - 1 ) < MC; ic += MR)
@@ -821,14 +756,6 @@ void packa_mr16_bf16bf16f32of32_col_major
 			a_reg[5] = _mm256_loadu_si256( (__m256i const *)( a + ( ic * rs_a ) + ( ( kr + 5 ) * cs_a ) ) );
 			a_reg[6] = _mm256_loadu_si256( (__m256i const *)( a + ( ic * rs_a ) + ( ( kr + 6 ) * cs_a ) ) );
 			a_reg[7] = _mm256_loadu_si256( (__m256i const *)( a + ( ic * rs_a ) + ( ( kr + 7 ) * cs_a ) ) );
-			a_reg[8] = _mm256_setzero_si256();
-			a_reg[9] = _mm256_setzero_si256();
-			a_reg[10] = _mm256_setzero_si256();
-			a_reg[11] = _mm256_setzero_si256();
-			a_reg[12] = _mm256_setzero_si256();
-			a_reg[13] = _mm256_setzero_si256();
-			a_reg[14] = _mm256_setzero_si256();
-			a_reg[15] = _mm256_setzero_si256();
 
 			UNPACKLO_EPI16
 			UNPACKHI_EPI16
@@ -846,18 +773,7 @@ void packa_mr16_bf16bf16f32of32_col_major
 			a_reg[1] = _mm256_loadu_si256( (__m256i const *)( a + ( ic * rs_a ) + ( ( kr + 1 ) * cs_a ) ) );
 			a_reg[2] = _mm256_loadu_si256( (__m256i const *)( a + ( ic * rs_a ) + ( ( kr + 2 ) * cs_a ) ) );
 			a_reg[3] = _mm256_loadu_si256( (__m256i const *)( a + ( ic * rs_a ) + ( ( kr + 3 ) * cs_a ) ) );
-			a_reg[4] = _mm256_setzero_si256();
-			a_reg[5] = _mm256_setzero_si256();
-			a_reg[6] = _mm256_setzero_si256();
-			a_reg[7] = _mm256_setzero_si256();
-			a_reg[8] = _mm256_setzero_si256();
-			a_reg[9] = _mm256_setzero_si256();
-			a_reg[10] = _mm256_setzero_si256();
-			a_reg[11] = _mm256_setzero_si256();
-			a_reg[12] = _mm256_setzero_si256();
-			a_reg[13] = _mm256_setzero_si256();
-			a_reg[14] = _mm256_setzero_si256();
-			a_reg[15] = _mm256_setzero_si256();
+
 
 			UNPACKLO_EPI16
 			UNPACKHI_EPI16
@@ -872,20 +788,7 @@ void packa_mr16_bf16bf16f32of32_col_major
 		{
 			a_reg[0] = _mm256_loadu_si256( (__m256i const *)( a + ( ic * rs_a ) + ( ( kr + 0 ) * cs_a ) ) );
 			a_reg[1] = _mm256_loadu_si256( (__m256i const *)( a + ( ic * rs_a ) + ( ( kr + 1 ) * cs_a ) ) );
-			a_reg[2] = _mm256_setzero_si256();
-			a_reg[3] = _mm256_setzero_si256();
-			a_reg[4] = _mm256_setzero_si256();
-			a_reg[5] = _mm256_setzero_si256();
-			a_reg[6] = _mm256_setzero_si256();
-			a_reg[7] = _mm256_setzero_si256();
-			a_reg[8] = _mm256_setzero_si256();
-			a_reg[9] = _mm256_setzero_si256();
-			a_reg[10] = _mm256_setzero_si256();
-			a_reg[11] = _mm256_setzero_si256();
-			a_reg[12] = _mm256_setzero_si256();
-			a_reg[13] = _mm256_setzero_si256();
-			a_reg[14] = _mm256_setzero_si256();
-			a_reg[15] = _mm256_setzero_si256();
+
 
 			UNPACKLO_EPI16
 			UNPACKHI_EPI16
@@ -899,21 +802,7 @@ void packa_mr16_bf16bf16f32of32_col_major
 		for( ; ( kr ) < KC; kr += 1)
 		{
 			a_reg[0] = _mm256_loadu_si256( (__m256i const *)(a + ( ic * rs_a ) + ( ( kr + 0 ) * cs_a ) ) );
-			a_reg[1] = _mm256_setzero_si256();
-			a_reg[2] = _mm256_setzero_si256();
-			a_reg[3] = _mm256_setzero_si256();
-			a_reg[4] = _mm256_setzero_si256();
-			a_reg[5] = _mm256_setzero_si256();
-			a_reg[6] = _mm256_setzero_si256();
-			a_reg[7] = _mm256_setzero_si256();
-			a_reg[8] = _mm256_setzero_si256();
-			a_reg[9] = _mm256_setzero_si256();
-			a_reg[10] = _mm256_setzero_si256();
-			a_reg[11] = _mm256_setzero_si256();
-			a_reg[12] = _mm256_setzero_si256();
-			a_reg[13] = _mm256_setzero_si256();
-			a_reg[14] = _mm256_setzero_si256();
-			a_reg[15] = _mm256_setzero_si256();
+
 
 			UNPACKLO_EPI16
 			UNPACKHI_EPI16
@@ -925,7 +814,6 @@ void packa_mr16_bf16bf16f32of32_col_major
 			MASKED_STORE_EPI16(0x01)
 		}
 	}
-
 	for( ; ( ic + 8 - 1) < MC; ic += 8)
 	{
 		for( kr = 0; ( kr + 15 ) < KC; kr += 16)
@@ -963,7 +851,6 @@ void packa_mr16_bf16bf16f32of32_col_major
 			_mm256_storeu_si256( (__m256i *)( pack_a_buffer + ( ic + 5 ) * KC + kr ), a_reg[12] );
 			_mm256_storeu_si256( (__m256i *)( pack_a_buffer + ( ic + 6 ) * KC + kr ), a_reg[10] );
 			_mm256_storeu_si256( (__m256i *)( pack_a_buffer + ( ic + 7 ) * KC + kr ), a_reg[14] );
-			_mm256_storeu_si256( (__m256i *)( pack_a_buffer + ( ic + 8 ) * KC + kr ), a_reg[1] );
 		}
 
 		for( ; ( kr + 7 ) < KC; kr += 8)
@@ -976,14 +863,7 @@ void packa_mr16_bf16bf16f32of32_col_major
 			a_reg[5] = _mm256_maskz_loadu_epi16( 0xFF, a + ( ic * rs_a ) + ( ( kr + 5 ) * cs_a ) );
 			a_reg[6] = _mm256_maskz_loadu_epi16( 0xFF, a + ( ic * rs_a ) + ( ( kr + 6 ) * cs_a ) );
 			a_reg[7] = _mm256_maskz_loadu_epi16( 0xFF, a + ( ic * rs_a ) + ( ( kr + 7 ) * cs_a ) );
-			a_reg[8] = _mm256_setzero_si256();
-			a_reg[9] = _mm256_setzero_si256();
-			a_reg[10] = _mm256_setzero_si256();
-			a_reg[11] = _mm256_setzero_si256();
-			a_reg[12] = _mm256_setzero_si256();
-			a_reg[13] = _mm256_setzero_si256();
-			a_reg[14] = _mm256_setzero_si256();
-			a_reg[15] = _mm256_setzero_si256();
+
 			UNPACKLO_EPI16
 			UNPACKHI_EPI16
 			UNPACKLO_EPI32
@@ -1007,18 +887,7 @@ void packa_mr16_bf16bf16f32of32_col_major
 			a_reg[1] = _mm256_maskz_loadu_epi16( 0xFF, a + ( ic * rs_a ) + ( ( kr + 1 ) * cs_a ) );
 			a_reg[2] = _mm256_maskz_loadu_epi16( 0xFF, a + ( ic * rs_a ) + ( ( kr + 2 ) * cs_a ) );
 			a_reg[3] = _mm256_maskz_loadu_epi16( 0xFF, a + ( ic * rs_a ) + ( ( kr + 3 ) * cs_a ) );
-			a_reg[4] = _mm256_setzero_si256();
-			a_reg[5] = _mm256_setzero_si256();
-			a_reg[6] = _mm256_setzero_si256();
-			a_reg[7] = _mm256_setzero_si256();
-			a_reg[8] = _mm256_setzero_si256();
-			a_reg[9] = _mm256_setzero_si256();
-			a_reg[10] = _mm256_setzero_si256();
-			a_reg[11] = _mm256_setzero_si256();
-			a_reg[12] = _mm256_setzero_si256();
-			a_reg[13] = _mm256_setzero_si256();
-			a_reg[14] = _mm256_setzero_si256();
-			a_reg[15] = _mm256_setzero_si256();
+
 
 			UNPACKLO_EPI16
 			UNPACKHI_EPI16
@@ -1040,20 +909,7 @@ void packa_mr16_bf16bf16f32of32_col_major
 		{
 			a_reg[0] = _mm256_maskz_loadu_epi16( 0xFF, a + ( ic * rs_a ) + ( ( kr + 0 ) * cs_a ) );
 			a_reg[1] = _mm256_maskz_loadu_epi16( 0xFF, a + ( ic * rs_a ) + ( ( kr + 1 ) * cs_a ) );
-			a_reg[2] = _mm256_setzero_si256();
-			a_reg[3] = _mm256_setzero_si256();
-			a_reg[4] = _mm256_setzero_si256();
-			a_reg[5] = _mm256_setzero_si256();
-			a_reg[6] = _mm256_setzero_si256();
-			a_reg[7] = _mm256_setzero_si256();
-			a_reg[8] = _mm256_setzero_si256();
-			a_reg[9] = _mm256_setzero_si256();
-			a_reg[10] = _mm256_setzero_si256();
-			a_reg[11] = _mm256_setzero_si256();
-			a_reg[12] = _mm256_setzero_si256();
-			a_reg[13] = _mm256_setzero_si256();
-			a_reg[14] = _mm256_setzero_si256();
-			a_reg[15] = _mm256_setzero_si256();
+
 
 			UNPACKLO_EPI16
 			UNPACKHI_EPI16
@@ -1074,21 +930,6 @@ void packa_mr16_bf16bf16f32of32_col_major
 		for( ; ( kr ) < KC; kr += 1)
 		{
 			a_reg[0] = _mm256_maskz_loadu_epi16( 0xFF, a + ( ic * rs_a ) + ( ( kr + 0 ) * cs_a ) );
-			a_reg[1] = _mm256_setzero_si256();
-			a_reg[2] = _mm256_setzero_si256();
-			a_reg[3] = _mm256_setzero_si256();
-			a_reg[4] = _mm256_setzero_si256();
-			a_reg[5] = _mm256_setzero_si256();
-			a_reg[6] = _mm256_setzero_si256();
-			a_reg[7] = _mm256_setzero_si256();
-			a_reg[8] = _mm256_setzero_si256();
-			a_reg[9] = _mm256_setzero_si256();
-			a_reg[10] = _mm256_setzero_si256();
-			a_reg[11] = _mm256_setzero_si256();
-			a_reg[12] = _mm256_setzero_si256();
-			a_reg[13] = _mm256_setzero_si256();
-			a_reg[14] = _mm256_setzero_si256();
-			a_reg[15] = _mm256_setzero_si256();
 
 			UNPACKLO_EPI16
 			UNPACKHI_EPI16
@@ -1153,14 +994,7 @@ void packa_mr16_bf16bf16f32of32_col_major
 			a_reg[5] = _mm256_maskz_loadu_epi16( 0x0F, a + ( ic * rs_a ) + ( ( kr + 5 ) * cs_a ) );
 			a_reg[6] = _mm256_maskz_loadu_epi16( 0x0F, a + ( ic * rs_a ) + ( ( kr + 6 ) * cs_a ) );
 			a_reg[7] = _mm256_maskz_loadu_epi16( 0x0F, a + ( ic * rs_a ) + ( ( kr + 7 ) * cs_a ) );
-			a_reg[8] = _mm256_setzero_si256();
-			a_reg[9] = _mm256_setzero_si256();
-			a_reg[10] = _mm256_setzero_si256();
-			a_reg[11] = _mm256_setzero_si256();
-			a_reg[12] = _mm256_setzero_si256();
-			a_reg[13] = _mm256_setzero_si256();
-			a_reg[14] = _mm256_setzero_si256();
-			a_reg[15] = _mm256_setzero_si256();
+
 			UNPACKLO_EPI16
 			UNPACKHI_EPI16
 			UNPACKLO_EPI32
@@ -1180,18 +1014,7 @@ void packa_mr16_bf16bf16f32of32_col_major
 			a_reg[1] = _mm256_maskz_loadu_epi16( 0x0F, a + ( ic * rs_a ) + ( ( kr + 1 ) * cs_a ) );
 			a_reg[2] = _mm256_maskz_loadu_epi16( 0x0F, a + ( ic * rs_a ) + ( ( kr + 2 ) * cs_a ) );
 			a_reg[3] = _mm256_maskz_loadu_epi16( 0x0F, a + ( ic * rs_a ) + ( ( kr + 3 ) * cs_a ) );
-			a_reg[4] = _mm256_setzero_si256();
-			a_reg[5] = _mm256_setzero_si256();
-			a_reg[6] = _mm256_setzero_si256();
-			a_reg[7] = _mm256_setzero_si256();
-			a_reg[8] = _mm256_setzero_si256();
-			a_reg[9] = _mm256_setzero_si256();
-			a_reg[10] = _mm256_setzero_si256();
-			a_reg[11] = _mm256_setzero_si256();
-			a_reg[12] = _mm256_setzero_si256();
-			a_reg[13] = _mm256_setzero_si256();
-			a_reg[14] = _mm256_setzero_si256();
-			a_reg[15] = _mm256_setzero_si256();
+
 
 			UNPACKLO_EPI16
 			UNPACKHI_EPI16
@@ -1209,20 +1032,7 @@ void packa_mr16_bf16bf16f32of32_col_major
 		{
 			a_reg[0] = _mm256_maskz_loadu_epi16( 0x0F, a + ( ic * rs_a ) + ( ( kr + 0 ) * cs_a ) );
 			a_reg[1] = _mm256_maskz_loadu_epi16( 0x0F, a + ( ic * rs_a ) + ( ( kr + 1 ) * cs_a ) );
-			a_reg[2] = _mm256_setzero_si256();
-			a_reg[3] = _mm256_setzero_si256();
-			a_reg[4] = _mm256_setzero_si256();
-			a_reg[5] = _mm256_setzero_si256();
-			a_reg[6] = _mm256_setzero_si256();
-			a_reg[7] = _mm256_setzero_si256();
-			a_reg[8] = _mm256_setzero_si256();
-			a_reg[9] = _mm256_setzero_si256();
-			a_reg[10] = _mm256_setzero_si256();
-			a_reg[11] = _mm256_setzero_si256();
-			a_reg[12] = _mm256_setzero_si256();
-			a_reg[13] = _mm256_setzero_si256();
-			a_reg[14] = _mm256_setzero_si256();
-			a_reg[15] = _mm256_setzero_si256();
+
 
 			UNPACKLO_EPI16
 			UNPACKHI_EPI16
@@ -1239,21 +1049,7 @@ void packa_mr16_bf16bf16f32of32_col_major
 		for( ; ( kr ) < KC; kr += 1)
 		{
 			a_reg[0] = _mm256_maskz_loadu_epi16( 0x0F, a + ( ic * rs_a ) + ( ( kr + 0 ) * cs_a ) );
-			a_reg[1] = _mm256_setzero_si256();
-			a_reg[2] = _mm256_setzero_si256();
-			a_reg[3] = _mm256_setzero_si256();
-			a_reg[4] = _mm256_setzero_si256();
-			a_reg[5] = _mm256_setzero_si256();
-			a_reg[6] = _mm256_setzero_si256();
-			a_reg[7] = _mm256_setzero_si256();
-			a_reg[8] = _mm256_setzero_si256();
-			a_reg[9] = _mm256_setzero_si256();
-			a_reg[10] = _mm256_setzero_si256();
-			a_reg[11] = _mm256_setzero_si256();
-			a_reg[12] = _mm256_setzero_si256();
-			a_reg[13] = _mm256_setzero_si256();
-			a_reg[14] = _mm256_setzero_si256();
-			a_reg[15] = _mm256_setzero_si256();
+
 
 			UNPACKLO_EPI16
 			UNPACKHI_EPI16
@@ -1326,14 +1122,8 @@ void packa_mr16_bf16bf16f32of32_col_major
 			a_reg[5] = _mm256_maskz_loadu_epi16( mask, a + ( ic * rs_a ) + ( ( kr + 5 ) * cs_a ) );
 			a_reg[6] = _mm256_maskz_loadu_epi16( mask, a + ( ic * rs_a ) + ( ( kr + 6 ) * cs_a ) );
 			a_reg[7] = _mm256_maskz_loadu_epi16( mask, a + ( ic * rs_a ) + ( ( kr + 7 ) * cs_a ) );
-			a_reg[8] = _mm256_setzero_si256();
-			a_reg[9] = _mm256_setzero_si256();
-			a_reg[10] = _mm256_setzero_si256();
-			a_reg[11] = _mm256_setzero_si256();
-			a_reg[12] = _mm256_setzero_si256();
-			a_reg[13] = _mm256_setzero_si256();
-			a_reg[14] = _mm256_setzero_si256();
-			a_reg[15] = _mm256_setzero_si256();
+
+
 			UNPACKLO_EPI16
 			UNPACKHI_EPI16
 			UNPACKLO_EPI32
@@ -1364,18 +1154,7 @@ void packa_mr16_bf16bf16f32of32_col_major
 			a_reg[1] = _mm256_maskz_loadu_epi16( mask, a + ( ic * rs_a ) + ( ( kr + 1 ) * cs_a ) );
 			a_reg[2] = _mm256_maskz_loadu_epi16( mask, a + ( ic * rs_a ) + ( ( kr + 2 ) * cs_a ) );
 			a_reg[3] = _mm256_maskz_loadu_epi16( mask, a + ( ic * rs_a ) + ( ( kr + 3 ) * cs_a ) );
-			a_reg[4] = _mm256_setzero_si256();
-			a_reg[5] = _mm256_setzero_si256();
-			a_reg[6] = _mm256_setzero_si256();
-			a_reg[7] = _mm256_setzero_si256();
-			a_reg[8] = _mm256_setzero_si256();
-			a_reg[9] = _mm256_setzero_si256();
-			a_reg[10] = _mm256_setzero_si256();
-			a_reg[11] = _mm256_setzero_si256();
-			a_reg[12] = _mm256_setzero_si256();
-			a_reg[13] = _mm256_setzero_si256();
-			a_reg[14] = _mm256_setzero_si256();
-			a_reg[15] = _mm256_setzero_si256();
+
 
 			UNPACKLO_EPI16
 			UNPACKHI_EPI16
@@ -1405,20 +1184,7 @@ void packa_mr16_bf16bf16f32of32_col_major
 		{
 			a_reg[0] = _mm256_maskz_loadu_epi16( mask, a + ( ic * rs_a ) + ( ( kr + 0 ) * cs_a ) );
 			a_reg[1] = _mm256_maskz_loadu_epi16( mask, a + ( ic * rs_a ) + ( ( kr + 1 ) * cs_a ) );
-			a_reg[2] = _mm256_setzero_si256();
-			a_reg[3] = _mm256_setzero_si256();
-			a_reg[4] = _mm256_setzero_si256();
-			a_reg[5] = _mm256_setzero_si256();
-			a_reg[6] = _mm256_setzero_si256();
-			a_reg[7] = _mm256_setzero_si256();
-			a_reg[8] = _mm256_setzero_si256();
-			a_reg[9] = _mm256_setzero_si256();
-			a_reg[10] = _mm256_setzero_si256();
-			a_reg[11] = _mm256_setzero_si256();
-			a_reg[12] = _mm256_setzero_si256();
-			a_reg[13] = _mm256_setzero_si256();
-			a_reg[14] = _mm256_setzero_si256();
-			a_reg[15] = _mm256_setzero_si256();
+
 
 			UNPACKLO_EPI16
 			UNPACKHI_EPI16
@@ -1446,21 +1212,7 @@ void packa_mr16_bf16bf16f32of32_col_major
 		for( ; ( kr ) < KC; kr += 1)
 		{
 			a_reg[0] = _mm256_maskz_loadu_epi16( mask, a + ( ic * rs_a ) + ( ( kr + 0 ) * cs_a ) );
-			a_reg[1] = _mm256_setzero_si256();
-			a_reg[2] = _mm256_setzero_si256();
-			a_reg[3] = _mm256_setzero_si256();
-			a_reg[4] = _mm256_setzero_si256();
-			a_reg[5] = _mm256_setzero_si256();
-			a_reg[6] = _mm256_setzero_si256();
-			a_reg[7] = _mm256_setzero_si256();
-			a_reg[8] = _mm256_setzero_si256();
-			a_reg[9] = _mm256_setzero_si256();
-			a_reg[10] = _mm256_setzero_si256();
-			a_reg[11] = _mm256_setzero_si256();
-			a_reg[12] = _mm256_setzero_si256();
-			a_reg[13] = _mm256_setzero_si256();
-			a_reg[14] = _mm256_setzero_si256();
-			a_reg[15] = _mm256_setzero_si256();
+
 
 			UNPACKLO_EPI16
 			UNPACKHI_EPI16
