@@ -61,7 +61,7 @@ target_include_directories(test_libblis.x
                         # Add local header paths
                         ${CMAKE_CURRENT_SOURCE_DIR}/src
                     )
-target_link_libraries(test_libblis.x PRIVATE ${LDFLAGS} libblis)
+target_link_libraries(test_libblis.x PRIVATE libblis ${LDFLAGS})
 if(THREADING_MODEL STREQUAL "openmp")
     target_link_libraries(test_libblis.x PRIVATE OpenMP::OpenMP_C)
 endif()
@@ -70,7 +70,7 @@ endif()
 # Wrap the creation of testing helpers in this function.
 function(add_testblis flavour)
     if (NOT(flavour STREQUAL ""))
-        set(dotflavour .${flavour})  
+        set(dotflavour .${flavour})
         set(dashflavour -${flavour})
         set(printflavour "(${flavour})")
     endif()
@@ -87,7 +87,7 @@ function(add_testblis flavour)
     add_custom_target(checkblis${dashflavour}
                         COMMAND ${Python_EXECUTABLE} ${CMAKE_SOURCE_DIR}/build/cmake/check-blistest.py ${CMAKE_CURRENT_BINARY_DIR}/output.testsuite${dotflavour}
                         DEPENDS testblis${dashflavour}
-                  )                
+                  )
 endfunction()
 
 # Add testing targets using functions above for all input file options.
