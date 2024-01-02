@@ -1,14 +1,13 @@
-i s32 r n n n r 74 512 515 515 512 512 none
-i s8 r n n n r 253 2048 660 660 2048 2048 none
-i s8 r n n n p 81 128 3 3 128 128 bias,relu,clip
-f f32 r n n n r 482 690 2048 2048 690 690 none
-f f32 c n n n p 100 200 300 100 300 100 bias,relu,clip
-s s16 r n n n r 144 1024 512 512 1024 1024 none
-s s8 r n n n r 128 128 128 128 128 128 bias,relu,clip
-s u8 r n n n r 100 200 300 300 200 200 none
-b f32 c t n n n 16 256 512 512 512 256 none
-b bf16 r n t n r 100 200 300 300 300 200 bias,relu,clip
-u s32 r n n n r 482 30 2050 2050 30 30 none
-u s8 r n n n r 451 1127 200 200 1127 1127 bias,relu,clip
-v s16 r n n n r 500 1000 200 200 1000 1000 none
-v s8 r n n n r 500 1000 200 200 1000 1000 bias,relu,clip
+r n n n r 74 512 515 515 512 512 *:none
+r n n n r 253 2048 660 660 2048 2048 *
+r n n n p 81 128 3 3 128 128 u8s8s32os32:bias,relu,clip
+r n n n p 81 128 3 3 128 128 u8s8s32os8:bias,relu,clip
+r n n n r 482 690 2050 2050 690 690 *:scale=scalar,zp=scalar,gelu_tanh,clip
+r n n n r 482 690 2050 2050 690 690 *:scale=vector,zp=vector,bias,gelu_erf,clip
+c n n n p 100 200 300 100 300 100 f32f32f32of32:bias,gelu_tanh,clip
+c n n n p 100 200 300 100 300 100 f32f32f32of32:bias,gelu_erf,clip
+r n n n r 144 1024 512 512 1024 1024 *:scale=vector,zp=scalar,relu,clip
+r n n n r 144 1024 512 512 1024 1024 *:zp=vector,scale=scalar,relu,clip
+r n n n r 128 128 128 128 128 128 *:bias,relu,clip
+r n n n r 100 200 300 300 200 200 u8s8s16ou8:none
+c t n n n 16 256 512 512 512 256 bf16bf16f32of32:none

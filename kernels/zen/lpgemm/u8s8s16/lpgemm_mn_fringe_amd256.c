@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2022 - 2023, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2022 - 2024, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -359,26 +359,44 @@ POST_OPS_DOWNSCALE_4x16:
 		__m128i temp[2];
 		__m256i temp_32[2];
 		__m256 temp_float[2];
-		__m256 scale_1, scale_2;
-		__m128i _zero_point_0;
+		__m256 scale_1 = _mm256_setzero_ps();
+		__m256 scale_2 = _mm256_setzero_ps();
+		__m128i _zero_point_0 = _mm_setzero_si128();
 		__m256i zero_point_0 = _mm256_setzero_si256();
 		__m256 res_1, res_2;
 
-		/* Load the scale vector values into the register*/
-		scale_1 =
-			_mm256_loadu_ps(
-			(float *)post_ops_list_temp->scale_factor +
-			post_ops_attr.post_op_c_j + (0 * 8));
-		scale_2 =
-			_mm256_loadu_ps(
-			(float *)post_ops_list_temp->scale_factor +
-			post_ops_attr.post_op_c_j + (1 * 8));
+		if ( post_ops_list_temp->scale_factor_len > 1 )
+		{
+			/* Load the scale vector values into the register*/
+			scale_1 = _mm256_loadu_ps(
+				( float* )post_ops_list_temp->scale_factor +
+				post_ops_attr.post_op_c_j + ( 0 * 8 ) );
+			scale_2 = _mm256_loadu_ps(
+				( float* )post_ops_list_temp->scale_factor +
+				post_ops_attr.post_op_c_j + ( 1 * 8 ) );
+		}
+		else if ( post_ops_list_temp->scale_factor_len == 1 )
+		{
+			/* Broadcast scale factor. */
+			scale_1 =
+				_mm256_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+			scale_2 =
+				_mm256_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+		}
 
-		// Load zero points (2 byte values).
-		_zero_point_0 =
-		   _mm_loadu_si128(
-		   ( __m128i const* )( ( int8_t* )post_ops_list_temp->op_args1 +
-		   post_ops_attr.post_op_c_j + ( 0 * 16 ) ) );
+		if ( *( ( dim_t* )post_ops_list_temp->op_args3 ) > 1 )
+		{
+			// Load zero points (2 byte values).
+			_zero_point_0 = _mm_loadu_si128(
+				( __m128i const* )( ( int8_t* )post_ops_list_temp->op_args1 +
+				post_ops_attr.post_op_c_j + ( 0 * 16 ) ) );
+		}
+		else if ( *( ( dim_t* )post_ops_list_temp->op_args3 ) == 1 )
+		{
+			// Broadcast zero point.
+			_zero_point_0 = _mm_set1_epi8(
+					*( ( int8_t* )post_ops_list_temp->op_args1 ) );
+		}
 		if ( post_ops_attr.c_stor_type == S8 )
 		{
 			zero_point_0 = _mm256_cvtepi8_epi16( _zero_point_0 );
@@ -797,36 +815,64 @@ POST_OPS_DOWNSCALE_4xlt16:
 		__m128i temp[2];
 		__m256i temp_32[2];
 		__m256 temp_float[2];
-		__m256 scale_1, scale_2;
-		__m128i _zero_point_0;
+		__m256 scale_1 = _mm256_setzero_ps();
+		__m256 scale_2 = _mm256_setzero_ps();
+		__m128i _zero_point_0 = _mm_setzero_si128();
 		__m256i zero_point_0 = _mm256_setzero_si256();
 		__m256 res_1, res_2;
 
-		float float_buf[16];
+		if ( post_ops_list_temp->scale_factor_len > 1 )
+		{
+			float float_buf[16] = { 0 };
 
-		memcpy( float_buf, ( ( float* )post_ops_list_temp->scale_factor +
-				post_ops_attr.post_op_c_j ), ( n0_rem * sizeof( float ) ) );
+			memcpy( float_buf, ( ( float* )post_ops_list_temp->scale_factor +
+					post_ops_attr.post_op_c_j ), ( n0_rem * sizeof( float ) ) );
 
-		// Load the scale vector values into the register
-		scale_1 = _mm256_loadu_ps(float_buf + (0 * 8));
-		scale_2 = _mm256_loadu_ps(float_buf + (1 * 8));
+			// Load the scale vector values into the register
+			scale_1 = _mm256_loadu_ps(float_buf + (0 * 8));
+			scale_2 = _mm256_loadu_ps(float_buf + (1 * 8));
+		}
+		else if ( post_ops_list_temp->scale_factor_len == 1 )
+		{
+			/* Broadcast scale factor. */
+			scale_1 =
+				_mm256_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+			scale_2 =
+				_mm256_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+		}
+
+		if ( *( ( dim_t* )post_ops_list_temp->op_args3 ) > 1 )
+		{
+			if ( post_ops_attr.c_stor_type == S8 )
+			{
+				int8_t zero_point_buf[16];
+
+				memcpy( zero_point_buf, ( ( int8_t* )post_ops_list_temp->op_args1 +
+						post_ops_attr.post_op_c_j ), ( n0_rem * sizeof( int8_t ) ) );
+				_zero_point_0 = _mm_loadu_si128( ( __m128i const* )zero_point_buf );
+			}
+			else if ( post_ops_attr.c_stor_type == U8 )
+			{
+				uint8_t zero_point_buf[16];
+
+				memcpy( zero_point_buf, ( ( uint8_t* )post_ops_list_temp->op_args1 +
+						post_ops_attr.post_op_c_j ), ( n0_rem * sizeof( uint8_t ) ) );
+				_zero_point_0 = _mm_loadu_si128( ( __m128i const* )zero_point_buf );
+			}
+		}
+		else if ( *( ( dim_t* )post_ops_list_temp->op_args3 ) == 1 )
+		{
+			// Broadcast zero point.
+			_zero_point_0 = _mm_set1_epi8(
+					*( ( int8_t* )post_ops_list_temp->op_args1 ) );
+		}
 
 		if ( post_ops_attr.c_stor_type == S8 )
 		{
-			int8_t zero_point_buf[16];
-
-			memcpy( zero_point_buf, ( ( int8_t* )post_ops_list_temp->op_args1 +
-					post_ops_attr.post_op_c_j ), ( n0_rem * sizeof( int8_t ) ) );
-			_zero_point_0 = _mm_loadu_si128( ( __m128i const* )zero_point_buf );
 			zero_point_0 = _mm256_cvtepi8_epi16( _zero_point_0 );
 		}
 		else if ( post_ops_attr.c_stor_type == U8 )
 		{
-			uint8_t zero_point_buf[16];
-
-			memcpy( zero_point_buf, ( ( uint8_t* )post_ops_list_temp->op_args1 +
-					post_ops_attr.post_op_c_j ), ( n0_rem * sizeof( uint8_t ) ) );
-			_zero_point_0 = _mm_loadu_si128( ( __m128i const* )zero_point_buf );
 			zero_point_0 = _mm256_cvtepu8_epi16( _zero_point_0 );
 		}
 
@@ -1135,26 +1181,44 @@ POST_OPS_DOWNSCALE_2x16:
 		__m128i temp[2];
 		__m256i temp_32[2];
 		__m256 temp_float[2];
-		__m256 scale_1, scale_2;
-		__m128i _zero_point_0;
+		__m256 scale_1 = _mm256_setzero_ps();
+		__m256 scale_2 = _mm256_setzero_ps();
+		__m128i _zero_point_0 = _mm_setzero_si128();
 		__m256i zero_point_0 = _mm256_setzero_si256();
 		__m256 res_1, res_2;
 
-		/* Load the scale vector values into the register*/
-		scale_1 =
-			_mm256_loadu_ps(
-			(float *)post_ops_list_temp->scale_factor +
-			post_ops_attr.post_op_c_j + (0 * 8));
-		scale_2 =
-			_mm256_loadu_ps(
-			(float *)post_ops_list_temp->scale_factor +
-			post_ops_attr.post_op_c_j + (1 * 8));
+		if ( post_ops_list_temp->scale_factor_len > 1 )
+		{
+			/* Load the scale vector values into the register*/
+			scale_1 = _mm256_loadu_ps(
+				( float* )post_ops_list_temp->scale_factor +
+				post_ops_attr.post_op_c_j + ( 0 * 8 ) );
+			scale_2 = _mm256_loadu_ps(
+				( float* )post_ops_list_temp->scale_factor +
+				post_ops_attr.post_op_c_j + ( 1 * 8 ) );
+		}
+		else if ( post_ops_list_temp->scale_factor_len == 1 )
+		{
+			/* Broadcast scale factor. */
+			scale_1 =
+				_mm256_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+			scale_2 =
+				_mm256_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+		}
 
-		// Load zero points (2 byte values).
-		_zero_point_0 =
-		   _mm_loadu_si128(
-		   ( __m128i const* )( ( int8_t* )post_ops_list_temp->op_args1 +
-		   post_ops_attr.post_op_c_j + ( 0 * 16 ) ) );
+		if ( *( ( dim_t* )post_ops_list_temp->op_args3 ) > 1 )
+		{
+			// Load zero points (2 byte values).
+			_zero_point_0 = _mm_loadu_si128(
+				( __m128i const* )( ( int8_t* )post_ops_list_temp->op_args1 +
+				post_ops_attr.post_op_c_j + ( 0 * 16 ) ) );
+		}
+		else if ( *( ( dim_t* )post_ops_list_temp->op_args3 ) == 1 )
+		{
+			// Broadcast zero point.
+			_zero_point_0 = _mm_set1_epi8(
+					*( ( int8_t* )post_ops_list_temp->op_args1 ) );
+		}
 		if ( post_ops_attr.c_stor_type == S8 )
 		{
 			zero_point_0 = _mm256_cvtepi8_epi16( _zero_point_0 );
@@ -1448,36 +1512,64 @@ POST_OPS_DOWNSCALE_2xlt16:
 		__m128i temp[2];
 		__m256i temp_32[2];
 		__m256 temp_float[2];
-		__m256 scale_1, scale_2;
-		__m128i _zero_point_0;
+		__m256 scale_1 = _mm256_setzero_ps();
+		__m256 scale_2 = _mm256_setzero_ps();
+		__m128i _zero_point_0 = _mm_setzero_si128();
 		__m256i zero_point_0 = _mm256_setzero_si256();
 		__m256 res_1, res_2;
 
-		float float_buf[16];
+		if ( post_ops_list_temp->scale_factor_len > 1 )
+		{
+			float float_buf[16] = { 0 };
 
-		memcpy( float_buf, ( ( float* )post_ops_list_temp->scale_factor +
-				post_ops_attr.post_op_c_j ), ( n0_rem * sizeof( float ) ) );
+			memcpy( float_buf, ( ( float* )post_ops_list_temp->scale_factor +
+					post_ops_attr.post_op_c_j ), ( n0_rem * sizeof( float ) ) );
 
-		// Load the scale vector values into the register
-		scale_1 = _mm256_loadu_ps(float_buf + (0 * 8));
-		scale_2 = _mm256_loadu_ps(float_buf + (1 * 8));
+			// Load the scale vector values into the register
+			scale_1 = _mm256_loadu_ps(float_buf + (0 * 8));
+			scale_2 = _mm256_loadu_ps(float_buf + (1 * 8));
+		}
+		else if ( post_ops_list_temp->scale_factor_len == 1 )
+		{
+			/* Broadcast scale factor. */
+			scale_1 =
+				_mm256_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+			scale_2 =
+				_mm256_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+		}
+
+		if ( *( ( dim_t* )post_ops_list_temp->op_args3 ) > 1 )
+		{
+			if ( post_ops_attr.c_stor_type == S8 )
+			{
+				int8_t zero_point_buf[16];
+
+				memcpy( zero_point_buf, ( ( int8_t* )post_ops_list_temp->op_args1 +
+						post_ops_attr.post_op_c_j ), ( n0_rem * sizeof( int8_t ) ) );
+				_zero_point_0 = _mm_loadu_si128( ( __m128i const* )zero_point_buf );
+			}
+			else if ( post_ops_attr.c_stor_type == U8 )
+			{
+				uint8_t zero_point_buf[16];
+
+				memcpy( zero_point_buf, ( ( uint8_t* )post_ops_list_temp->op_args1 +
+						post_ops_attr.post_op_c_j ), ( n0_rem * sizeof( uint8_t ) ) );
+				_zero_point_0 = _mm_loadu_si128( ( __m128i const* )zero_point_buf );
+			}
+		}
+		else if ( *( ( dim_t* )post_ops_list_temp->op_args3 ) == 1 )
+		{
+			// Broadcast zero point.
+			_zero_point_0 = _mm_set1_epi8(
+					*( ( int8_t* )post_ops_list_temp->op_args1 ) );
+		}
 
 		if ( post_ops_attr.c_stor_type == S8 )
 		{
-			int8_t zero_point_buf[16];
-
-			memcpy( zero_point_buf, ( ( int8_t* )post_ops_list_temp->op_args1 +
-					post_ops_attr.post_op_c_j ), ( n0_rem * sizeof( int8_t ) ) );
-			_zero_point_0 = _mm_loadu_si128( ( __m128i const* )zero_point_buf );
 			zero_point_0 = _mm256_cvtepi8_epi16( _zero_point_0 );
 		}
 		else if ( post_ops_attr.c_stor_type == U8 )
 		{
-			uint8_t zero_point_buf[16];
-
-			memcpy( zero_point_buf, ( ( uint8_t* )post_ops_list_temp->op_args1 +
-					post_ops_attr.post_op_c_j ), ( n0_rem * sizeof( uint8_t ) ) );
-			_zero_point_0 = _mm_loadu_si128( ( __m128i const* )zero_point_buf );
 			zero_point_0 = _mm256_cvtepu8_epi16( _zero_point_0 );
 		}
 
@@ -1711,26 +1803,44 @@ POST_OPS_DOWNSCALE_1x16:
 		__m128i temp[2];
 		__m256i temp_32[2];
 		__m256 temp_float[2];
-		__m256 scale_1, scale_2;
-		__m128i _zero_point_0;
+		__m256 scale_1 = _mm256_setzero_ps();
+		__m256 scale_2 = _mm256_setzero_ps();
+		__m128i _zero_point_0 = _mm_setzero_si128();
 		__m256i zero_point_0 = _mm256_setzero_si256();
 		__m256 res_1, res_2;
 
-		/* Load the scale vector values into the register*/
-		scale_1 =
-			_mm256_loadu_ps(
-			(float *)post_ops_list_temp->scale_factor +
-			post_ops_attr.post_op_c_j + (0 * 8));
-		scale_2 =
-			_mm256_loadu_ps(
-			(float *)post_ops_list_temp->scale_factor +
-			post_ops_attr.post_op_c_j + (1 * 8));
+		if ( post_ops_list_temp->scale_factor_len > 1 )
+		{
+			/* Load the scale vector values into the register*/
+			scale_1 = _mm256_loadu_ps(
+				( float* )post_ops_list_temp->scale_factor +
+				post_ops_attr.post_op_c_j + ( 0 * 8 ) );
+			scale_2 = _mm256_loadu_ps(
+				( float* )post_ops_list_temp->scale_factor +
+				post_ops_attr.post_op_c_j + ( 1 * 8 ) );
+		}
+		else if ( post_ops_list_temp->scale_factor_len == 1 )
+		{
+			/* Broadcast scale factor. */
+			scale_1 =
+				_mm256_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+			scale_2 =
+				_mm256_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+		}
 
-		// Load zero points (2 byte values).
-		_zero_point_0 =
-		   _mm_loadu_si128(
-		   ( __m128i const* )( ( int8_t* )post_ops_list_temp->op_args1 +
-		   post_ops_attr.post_op_c_j + ( 0 * 16 ) ) );
+		if ( *( ( dim_t* )post_ops_list_temp->op_args3 ) > 1 )
+		{
+			// Load zero points (2 byte values).
+			_zero_point_0 = _mm_loadu_si128(
+				( __m128i const* )( ( int8_t* )post_ops_list_temp->op_args1 +
+				post_ops_attr.post_op_c_j + ( 0 * 16 ) ) );
+		}
+		else if ( *( ( dim_t* )post_ops_list_temp->op_args3 ) == 1 )
+		{
+			// Broadcast zero point.
+			_zero_point_0 = _mm_set1_epi8(
+					*( ( int8_t* )post_ops_list_temp->op_args1 ) );
+		}
 		if ( post_ops_attr.c_stor_type == S8 )
 		{
 			zero_point_0 = _mm256_cvtepi8_epi16( _zero_point_0 );
@@ -1967,36 +2077,64 @@ POST_OPS_DOWNSCALE_1xlt16:
 		__m128i temp[2];
 		__m256i temp_32[2];
 		__m256 temp_float[2];
-		__m256 scale_1, scale_2;
-		__m128i _zero_point_0;
+		__m256 scale_1 = _mm256_setzero_ps();
+		__m256 scale_2 = _mm256_setzero_ps();
+		__m128i _zero_point_0 = _mm_setzero_si128();
 		__m256i zero_point_0 = _mm256_setzero_si256();
 		__m256 res_1, res_2;
 
-		float float_buf[16];
+		if ( post_ops_list_temp->scale_factor_len > 1 )
+		{
+			float float_buf[16] = { 0 };
 
-		memcpy( float_buf, ( ( float* )post_ops_list_temp->scale_factor +
-				post_ops_attr.post_op_c_j ), ( n0_rem * sizeof( float ) ) );
+			memcpy( float_buf, ( ( float* )post_ops_list_temp->scale_factor +
+					post_ops_attr.post_op_c_j ), ( n0_rem * sizeof( float ) ) );
 
-		// Load the scale vector values into the register
-		scale_1 = _mm256_loadu_ps(float_buf + (0 * 8));
-		scale_2 = _mm256_loadu_ps(float_buf + (1 * 8));
+			// Load the scale vector values into the register
+			scale_1 = _mm256_loadu_ps(float_buf + (0 * 8));
+			scale_2 = _mm256_loadu_ps(float_buf + (1 * 8));
+		}
+		else if ( post_ops_list_temp->scale_factor_len == 1 )
+		{
+			/* Broadcast scale factor. */
+			scale_1 =
+				_mm256_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+			scale_2 =
+				_mm256_set1_ps( *( ( float* )post_ops_list_temp->scale_factor ) );
+		}
+
+		if ( *( ( dim_t* )post_ops_list_temp->op_args3 ) > 1 )
+		{
+			if ( post_ops_attr.c_stor_type == S8 )
+			{
+				int8_t zero_point_buf[16];
+
+				memcpy( zero_point_buf, ( ( int8_t* )post_ops_list_temp->op_args1 +
+						post_ops_attr.post_op_c_j ), ( n0_rem * sizeof( int8_t ) ) );
+				_zero_point_0 = _mm_loadu_si128( ( __m128i const* )zero_point_buf );
+			}
+			else if ( post_ops_attr.c_stor_type == U8 )
+			{
+				uint8_t zero_point_buf[16];
+
+				memcpy( zero_point_buf, ( ( uint8_t* )post_ops_list_temp->op_args1 +
+						post_ops_attr.post_op_c_j ), ( n0_rem * sizeof( uint8_t ) ) );
+				_zero_point_0 = _mm_loadu_si128( ( __m128i const* )zero_point_buf );
+			}
+		}
+		else if ( *( ( dim_t* )post_ops_list_temp->op_args3 ) == 1 )
+		{
+			// Broadcast zero point.
+			_zero_point_0 = _mm_set1_epi8(
+					*( ( int8_t* )post_ops_list_temp->op_args1 ) );
+		}
 
 		if ( post_ops_attr.c_stor_type == S8 )
 		{
-			int8_t zero_point_buf[16];
-
-			memcpy( zero_point_buf, ( ( int8_t* )post_ops_list_temp->op_args1 +
-					post_ops_attr.post_op_c_j ), ( n0_rem * sizeof( int8_t ) ) );
-			_zero_point_0 = _mm_loadu_si128( ( __m128i const* )zero_point_buf );
 			zero_point_0 = _mm256_cvtepi8_epi16( _zero_point_0 );
 		}
 		else if ( post_ops_attr.c_stor_type == U8 )
 		{
-			uint8_t zero_point_buf[16];
-
-			memcpy( zero_point_buf, ( ( uint8_t* )post_ops_list_temp->op_args1 +
-					post_ops_attr.post_op_c_j ), ( n0_rem * sizeof( uint8_t ) ) );
-			_zero_point_0 = _mm_loadu_si128( ( __m128i const* )zero_point_buf );
 			zero_point_0 = _mm256_cvtepu8_epi16( _zero_point_0 );
 		}
 

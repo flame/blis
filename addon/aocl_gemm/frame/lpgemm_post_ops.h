@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2022 - 2023, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2022 - 2024, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -52,10 +52,11 @@ typedef enum
 typedef struct lpgemm_post_op_t
 {
 	LPGEMM_POST_OP_CODE op_code;
-	void* op_args1;
-	void* op_args2; // alpha, zero_point, storage order
-	void* op_args3; // beta, downscale buffer/original C matrix
+	void* op_args1; // zero_point, bias, sum_buff
+	void* op_args2; // alpha, storage order, sum_zero_point
+	void* op_args3; // beta, zero_point_len
 	void* scale_factor;
+	dim_t scale_factor_len;
 	bool is_power_of_2;
 	struct lpgemm_post_op_t* next;
 } lpgemm_post_op;

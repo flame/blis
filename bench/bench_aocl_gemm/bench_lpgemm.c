@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2022 - 2023, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2022 - 2024, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -65,6 +65,13 @@ dim_t num_eltwise = 0; // To keep track of eltwise operations.
 #define XSTR(str) _XSTR(str)
 
 #define GEN_FUNC_NAME(prototype,ctype) prototype ## ctype
+
+// Inplace to lower func.
+static inline void str_tolower( char* str )
+{
+    for ( char* c = str; ( *c ) != '\0'; ++c )
+    { *( c ) = tolower( *( c ) ); }
+}
 
 static inline void float_to_bf16( float* float_value, bfloat16* bf16_val )
 {
@@ -455,11 +462,23 @@ static inline ACCUM_type mat_mul_accuracy_check_downscale_ ## BLAS_DOWNSCALE_SFX
        dim_t j \
      )\
 { \
+    dim_t j_scale = j; \
+    if ( post_op->sum.scale_factor_len == 1 ) \
+    { \
+       j_scale = 0; \
+    } \
+ \
+    dim_t j_zp = j; \
+    if ( post_op->sum.zero_point_len == 1 ) \
+    { \
+       j_zp = 0; \
+    } \
+ \
     ACCUM_type out_temp_accum = \
         ( ACCUM_type )min( \
                         max( nearbyintf( ( SCALE_type )( temp_accum ) * \
-                            ( *( ( SCALE_type* )post_op->sum.scale_factor + j ) ) ) + \
-                            *( ( C_type* )post_op->sum.zero_point + j ), \
+                            ( *( ( SCALE_type* )post_op->sum.scale_factor + j_scale ) ) ) + \
+                            *( ( C_type* )post_op->sum.zero_point + j_zp ), \
                             DSCALE_CLIP_MIN ), \
                         DSCALE_CLIP_MAX ); \
     return 	out_temp_accum; \
@@ -884,6 +903,30 @@ GEN_MAT_MUL_ACC_CHK_DRV_FUNC(int8_t,int8_t,int8_t,int32_t,float,s8s8s32os8,s8s8s
 GEN_MAT_MUL_ACC_CHK_DRV_FUNC(int8_t,int8_t,int16_t,int16_t,float,s8s8s16os16,s8s8s16os8)
 GEN_MAT_MUL_ACC_CHK_DRV_FUNC(int8_t,int8_t,int8_t,int16_t,float,s8s8s16os8,s8s8s16os8)
 
+void lpgemm_destroy_post_ops_struct( aocl_post_op* post_ops )
+{
+    if ( post_ops == NULL )
+    {
+        return;
+    }
+
+    if ( post_ops->eltwise != NULL )
+    {
+        for ( dim_t i = 0; i < num_eltwise; ++i )
+        {
+            free( ( post_ops->eltwise + i )->algo.alpha );
+            free( ( post_ops->eltwise + i )->algo.beta );
+        }
+        free( post_ops->eltwise );
+    }
+
+    free( post_ops->sum.scale_factor );
+    free( post_ops->sum.zero_point );
+    free( post_ops->bias.bias );
+    free( post_ops->seq_vector );
+    free( post_ops );
+}
+
 #define GEN_MAT_MUL_POST_OPS_CREATOR(C_DSCALE_type,C_type,DSCALE_type,BLAS_SFX) \
 aocl_post_op* lpgemm_create_post_ops_struct_ ## BLAS_SFX \
      ( \
@@ -892,10 +935,17 @@ aocl_post_op* lpgemm_create_post_ops_struct_ ## BLAS_SFX \
        char* post_ops_str \
      ) \
 { \
+    if ( ( ( post_ops_str == NULL ) || \
+           ( strcmp( post_ops_str, "none" ) == 0 ) ) && \
+         ( global_dscale_out == 'n' ) ) \
+    { \
+        return NULL; \
+    } \
+ \
     aocl_post_op* post_ops = NULL; \
     post_ops = ( aocl_post_op* ) malloc( sizeof( aocl_post_op ) ); \
  \
-    if ( ( post_ops == NULL ) && ( global_dscale_out == 'n' ) ) \
+    if ( post_ops == NULL ) \
     { \
         return NULL; \
     } \
@@ -911,8 +961,7 @@ aocl_post_op* lpgemm_create_post_ops_struct_ ## BLAS_SFX \
  \
     if ( post_ops->seq_vector == NULL ) \
     { \
-        free( post_ops ); \
-        return NULL; \
+        goto err_handler; \
     } \
  \
     /* Parse post ops list.*/ \
@@ -923,25 +972,35 @@ aocl_post_op* lpgemm_create_post_ops_struct_ ## BLAS_SFX \
     post_ops->sum.scale_factor = NULL; \
     post_ops->sum.buff = NULL; \
     post_ops->sum.zero_point = NULL; \
-    if ( post_ops_str != NULL ) \
+    post_ops->sum.scale_factor_len = 0; \
+    post_ops->sum.zero_point_len = 0; \
+ \
+    bool is_bias = FALSE; \
+    bool is_relu = FALSE; \
+    bool is_param_relu = FALSE; \
+    bool is_gelu_tanh = FALSE; \
+    bool is_gelu_erf = FALSE; \
+    bool is_clip = FALSE; \
+    bool is_scalar_scale = FALSE; \
+    bool is_scalar_zp = FALSE; \
+    dim_t activator_idx = 0; \
+    dim_t clip_idx = 0; \
+ \
+    /* Post-Ops string parser. */ \
+    num_eltwise = 0; /* Global variable, zero out for definied behavior. */\
+    if ( strcmp( post_ops_str, "none" ) != 0 ) \
     { \
-        char* ops_tok = strtok(post_ops_str, ", " ); \
-        bool is_relu = FALSE; \
-        bool is_param_relu = FALSE; \
-        bool is_gelu_tanh = FALSE; \
-        bool is_gelu_erf = FALSE; \
-        bool is_clip = FALSE; \
-        dim_t activator_idx = 0; \
-        dim_t clip_idx = 0; \
+        char* ops_tok = strtok(post_ops_str, ", =" ); \
  \
         /* Ensure only one activator is used as an eltwise post-op.*/ \
         bool is_activator_set = FALSE; \
-        num_eltwise = 0; \
         while ( ops_tok ) \
         { \
+            str_tolower( ops_tok ); \
             if ( strcmp( ops_tok, "bias" ) == 0 ) \
             { \
                 post_ops->seq_vector[cur_op_index] = BIAS; \
+                is_bias = TRUE; \
                 cur_op_index++; \
             } \
             else if ( ( strcmp( ops_tok, "relu" ) == 0 ) && \
@@ -992,49 +1051,69 @@ aocl_post_op* lpgemm_create_post_ops_struct_ ## BLAS_SFX \
                 clip_idx = cur_op_index; \
                 cur_op_index++; \
             } \
-            ops_tok = strtok( NULL, ", " ); \
-        } \
+            else if ( strcmp( ops_tok, "scale" ) == 0 ) \
+            { \
+                ops_tok = strtok( NULL, ", " ); \
+                str_tolower( ops_tok ); \
+                if ( ( strcmp( ops_tok, "scalar" ) == 0 ) || \
+                     ( strcmp( ops_tok, "s" ) == 0 ) ) \
+                { \
+                    is_scalar_scale = TRUE; \
+                } \
+            } \
+            else if ( strcmp( ops_tok, "zp" ) == 0 ) \
+            { \
+                ops_tok = strtok( NULL, ", " ); \
+                str_tolower( ops_tok ); \
+                if ( ( strcmp( ops_tok, "scalar" ) == 0 ) || \
+                     ( strcmp( ops_tok, "s" ) == 0 ) ) \
+                { \
+                    is_scalar_zp = TRUE; \
+                } \
+            } \
  \
+            ops_tok = strtok( NULL, ", =" ); \
+        } \
+    } \
+ \
+    if ( is_bias == TRUE ) \
+    { \
         /* Allocate bias buffer, return early if alloc fails.*/ \
         post_ops->bias.bias = malloc( n * sizeof( C_type ) ); \
         if ( post_ops->bias.bias == NULL ) \
         { \
-            free( post_ops->seq_vector ); \
-            free( post_ops ); \
-            return NULL; \
+            goto err_handler; \
         } \
         GEN_FUNC_NAME(fill_array_post_ops_,C_type)( post_ops->bias.bias, n ); \
+    } \
+ \
+    if ( num_eltwise > 0 ) \
+    { \
+        if ( num_eltwise > 1 ) \
+        { \
+            if ( activator_idx < clip_idx ) \
+            { \
+                activator_idx = 0; \
+                clip_idx = 1; \
+            } \
+            else \
+            { \
+                activator_idx = 1; \
+                clip_idx = 0; \
+            } \
+        } \
+        else \
+        { \
+           activator_idx = 0; \
+           clip_idx = 0; \
+        } \
  \
         post_ops->eltwise = malloc( num_eltwise * sizeof( aocl_post_op_eltwise ) ); \
         if ( post_ops->eltwise == NULL ) \
         { \
-            free( post_ops->bias.bias ); \
-            free( post_ops->seq_vector ); \
-            free( post_ops ); \
-            return NULL; \
+            goto err_handler; \
         } \
  \
-        if ( num_eltwise > 0 ) \
-        { \
-            if ( num_eltwise > 1 ) \
-            { \
-                if ( activator_idx < clip_idx ) \
-                { \
-                    activator_idx = 0; \
-                    clip_idx = 1; \
-                } \
-                else \
-                { \
-                    activator_idx = 1; \
-                    clip_idx = 0; \
-                } \
-            } \
-            else \
-            { \
-               activator_idx = 0; \
-               clip_idx = 0; \
-            } \
-        } \
         /* Only one of relu,prelu,gelu_tanh,gelu_erf allowed as an activator.*/ \
         if ( is_relu == TRUE ) \
         { \
@@ -1050,6 +1129,10 @@ aocl_post_op* lpgemm_create_post_ops_struct_ ## BLAS_SFX \
             ( post_ops->eltwise + activator_idx )->scale_factor = NULL; \
             ( post_ops->eltwise + activator_idx )->algo.beta = NULL; \
             ( post_ops->eltwise + activator_idx )->algo.alpha = malloc( sizeof( C_type ) ); \
+            if ( ( post_ops->eltwise + activator_idx )->algo.alpha == NULL ) \
+            { \
+                goto err_handler; \
+            } \
             *( ( C_type* ) ( post_ops->eltwise + activator_idx )->algo.alpha ) = ( C_type )6; \
             ( post_ops->eltwise + activator_idx )->algo.algo_type = PRELU; \
         } \
@@ -1073,8 +1156,18 @@ aocl_post_op* lpgemm_create_post_ops_struct_ ## BLAS_SFX \
         { \
             ( post_ops->eltwise + clip_idx )->is_power_of_2 = FALSE; \
             ( post_ops->eltwise + clip_idx )->scale_factor = NULL; \
+            ( post_ops->eltwise + clip_idx )->algo.alpha = NULL; \
+            ( post_ops->eltwise + clip_idx )->algo.beta = NULL; \
             ( post_ops->eltwise + clip_idx )->algo.alpha = malloc( sizeof( C_type ) ); \
+            if ( ( post_ops->eltwise + clip_idx )->algo.alpha == NULL ) \
+            { \
+                goto err_handler; \
+            } \
             ( post_ops->eltwise + clip_idx )->algo.beta = malloc( sizeof( C_type ) ); \
+            if ( ( post_ops->eltwise + clip_idx )->algo.beta == NULL ) \
+            { \
+                goto err_handler; \
+            } \
             *( ( C_type* ) ( post_ops->eltwise + clip_idx )->algo.alpha ) = ( C_type ) ( -64 ); \
             *( ( C_type* ) ( post_ops->eltwise + clip_idx )->algo.beta ) = ( C_type ) ( 23 ); \
             ( post_ops->eltwise + clip_idx )->algo.algo_type = CLIP; \
@@ -1089,40 +1182,54 @@ aocl_post_op* lpgemm_create_post_ops_struct_ ## BLAS_SFX \
         post_ops->sum.is_power_of_2 = FALSE; \
         if ( global_dscale_out == 'y' ) \
         { \
-            /* Allocate scale buffer, return early if alloc fails.*/ \
-            post_ops->sum.scale_factor = malloc( n * sizeof( DSCALE_type ) ); \
-            post_ops->sum.zero_point = malloc( n * sizeof( C_DSCALE_type ) ); \
-            if ( ( post_ops->sum.scale_factor == NULL ) || \
-                 ( post_ops->sum.zero_point == NULL ) ) \
+            dim_t n_scale = n; \
+            if ( is_scalar_scale == TRUE ) \
             { \
-                free ( post_ops->eltwise ); \
-                free ( post_ops->bias.bias ); \
-                free( post_ops->seq_vector ); \
-                if ( post_ops->sum.zero_point != NULL ) \
-                { \
-                    free( post_ops->sum.zero_point ); \
-                } \
-                if ( post_ops->sum.scale_factor != NULL ) \
-                { \
-                    free( post_ops->sum.scale_factor ); \
-                } \
-                free( post_ops ); \
-                return NULL; \
+                n_scale = 1; \
             } \
+ \
+            dim_t n_zp = n; \
+            if ( is_scalar_zp == TRUE ) \
+            { \
+                n_zp = 1; \
+            } \
+ \
+            /* Allocate scale buffer, return early if alloc fails.*/ \
+            post_ops->sum.scale_factor = malloc( n_scale * sizeof( DSCALE_type ) ); \
+            if ( post_ops->sum.scale_factor == NULL ) \
+            { \
+                goto err_handler; \
+            } \
+            post_ops->sum.zero_point = malloc( n_zp * sizeof( C_DSCALE_type ) ); \
+            if ( post_ops->sum.zero_point == NULL ) \
+            { \
+                goto err_handler; \
+            } \
+ \
             /* Fill scale factor and zero points.*/ \
             DSCALE_type* temp_dscale_ptr = ( DSCALE_type* )post_ops->sum.scale_factor; \
-            C_DSCALE_type* temp_dzero_point_ptr = ( C_DSCALE_type* )post_ops->sum.zero_point; \
-            for ( dim_t i = 0; i < n; ++i ) \
+            for ( dim_t i = 0; i < n_scale; ++i ) \
             { \
                 temp_dscale_ptr[i] = ( ( DSCALE_type )1 )/ ( ( DSCALE_type )1000 ); \
-                temp_dzero_point_ptr[i] = (C_DSCALE_type)( i % 126 ); \
             } \
+            post_ops->sum.scale_factor_len = n_scale; \
+ \
+            C_DSCALE_type* temp_dzero_point_ptr = ( C_DSCALE_type* )post_ops->sum.zero_point; \
+            for ( dim_t i = 0; i < n_zp; ++i ) \
+            { \
+                temp_dzero_point_ptr[i] = (C_DSCALE_type)( ( i + 9 ) % 126 ); \
+            } \
+            post_ops->sum.zero_point_len = n_zp; \
         } \
     } \
  \
     post_ops->seq_length = cur_op_index; \
  \
     return post_ops; \
+ \
+    err_handler: \
+    lpgemm_destroy_post_ops_struct( post_ops ); \
+    return NULL; \
 } \
 
 GEN_MAT_MUL_POST_OPS_CREATOR(int8_t,int16_t,float,u8s8s16os16)
@@ -1131,48 +1238,6 @@ GEN_MAT_MUL_POST_OPS_CREATOR(bfloat16,float,float,bf16bf16f32of32)
 GEN_MAT_MUL_POST_OPS_CREATOR(bfloat16,float,float,f32f32f32of32)
 GEN_MAT_MUL_POST_OPS_CREATOR(int8_t,int32_t,float,s8s8s32os32)
 GEN_MAT_MUL_POST_OPS_CREATOR(int8_t,int16_t,float,s8s8s16os16)
-
-void lpgemm_destroy_post_ops_struct( aocl_post_op* post_ops )
-{
-    if ( post_ops == NULL )
-    {
-        return;
-    }
-
-    if ( post_ops->eltwise != NULL )
-    {
-        for ( dim_t i = 0; i < num_eltwise; ++i )
-        {
-            if ( ( post_ops->eltwise + i )->algo.alpha != NULL )
-            {
-                free( ( post_ops->eltwise + i )->algo.alpha );
-            }
-            if ( ( post_ops->eltwise + i )->algo.beta != NULL )
-            {
-                free( ( post_ops->eltwise + i )->algo.beta );
-            }
-        }
-        free( post_ops->eltwise );
-    }
-    if ( post_ops->sum.scale_factor != NULL )
-    {
-        free( post_ops->sum.scale_factor );
-    }
-    if ( post_ops->sum.zero_point != NULL )
-    {
-        free( post_ops->sum.zero_point );
-    }
-    if ( post_ops->bias.bias != NULL )
-    {
-        free( post_ops->bias.bias );
-    }
-    if( post_ops->seq_vector != NULL )
-    {
-        free( post_ops->seq_vector );
-    }
-
-    free( post_ops );
-}
 
 #define GEN_MAT_MUL_BENCH_MAIN_FUNC(A_type, B_type, C_type, Sum_type, BLAS_SFX, REORDER_SFX) \
 void mat_mul_bench_main_ ## BLAS_SFX \
@@ -1250,7 +1315,9 @@ void mat_mul_bench_main_ ## BLAS_SFX \
     } 	\
  \
     aocl_post_op* post_op = NULL; \
-    if ( ( post_ops_str != NULL ) || ( global_dscale_out == 'y' ) ) \
+    if ( ( ( post_ops_str != NULL ) && \
+           ( strcmp( post_ops_str, "none" ) != 0 ) ) || \
+         ( global_dscale_out == 'y' ) ) \
     { \
         post_op = GEN_FUNC_NAME(lpgemm_create_post_ops_struct_,REORDER_SFX)( m, n, post_ops_str ); \
         if ( post_op == NULL ) \
@@ -1373,9 +1440,16 @@ int main( int argc, char** argv )
     }
 
     char* file_name = NULL;
-    char post_ops_str[50];
-    char* post_ops_str_dest = NULL; //Strtok is used to parse, need to maintain a copy.
-    char dscale_type_str[10];
+
+#define GEMM_TYPE_STR_LEN 24
+	char gemm_type_str[GEMM_TYPE_STR_LEN];
+
+#define POST_OPS_STR_LEN 104
+    char post_ops_str[POST_OPS_STR_LEN];
+    char post_ops_str_dest[POST_OPS_STR_LEN]; //Strtok is used to parse, need to maintain a copy.
+
+#define OPS_INPUT_STR_LEN 128
+	char ops_input_str[OPS_INPUT_STR_LEN];
 
     // Parse CLI arguments.
     opterr = 0;
@@ -1424,7 +1498,6 @@ int main( int argc, char** argv )
 
     fout = fopen( "lpgemm_accuracy_test_failures.txt", "w" );
 
-    char op_type_char;
     char op_a, op_b;
     char stor_order;
     char transa, transb;
@@ -1466,57 +1539,61 @@ int main( int argc, char** argv )
         }
 
         // Input format: data_type stor_type pack/reorder m n k lda ldb ldc
-        while ( fscanf( fin, "%c %s %c %c %c %c %c %d %d %d %d %d %d %s\n",
-                &op_type_char, dscale_type_str, &stor_order, &transa, &transb, &op_a, &op_b, &m, &n, &k,
-                &stride_a, &stride_b, &stride_c, post_ops_str ) == 14 )
+        while ( fscanf( fin, "%c %c %c %c %c %d %d %d %d %d %d %s\n",
+                &stor_order, &transa, &transb, &op_a, &op_b, &m, &n, &k,
+                &stride_a, &stride_b, &stride_c, ops_input_str ) == 12 )
         {
+            char* ops_tok = strtok( ops_input_str, ":" );
+            strncpy( gemm_type_str, ops_tok, GEMM_TYPE_STR_LEN - 1 );
+            str_tolower( gemm_type_str ); \
+
+            ops_tok = strtok( NULL, "" );
+            if ( ops_tok != NULL )
+            {
+                strncpy( post_ops_str, ops_tok, POST_OPS_STR_LEN - 1 );
+            }
+            else
+            {
+                strncpy( post_ops_str, "none", POST_OPS_STR_LEN - 1 );
+            }
+
             stor_order = ( ( stor_order == 'r' ) || ( stor_order == 'R' ) ||
                             ( stor_order == 'c' ) || ( stor_order == 'C' ) ) ?
                             stor_order : 'r';
 
-            if ( strcmp( post_ops_str, "none" ) != 0 )
+            if ( ( strcmp( gemm_type_str, "u8s8s32os32" ) == 0 ) ||
+                 ( strcmp( gemm_type_str, "*" ) == 0 ) )
             {
-                post_ops_str_dest = ( char* )malloc \
-                        ( ( strlen( post_ops_str) + 1 )* sizeof( char ) );
-                strcpy( post_ops_str_dest, post_ops_str );
+                // Copy the original post op str to a temp string buffer.
+                // Done so that strtok can be applied on the same (strtok
+                // is a destructive parser.
+                strncpy( post_ops_str_dest, post_ops_str, POST_OPS_STR_LEN );
+                global_dscale_out = 'n';
+                GEN_FUNC_NAME(mat_mul_bench_main_,u8s8s32os32)
+                (
+                  fin, fout, stor_order, transa, transb, op_a, op_b,
+                  m, n, k, stride_a, stride_b, stride_c,
+                  post_ops_str_dest
+                );
             }
-
-            if ( ( op_type_char == 'i' ) || ( op_type_char == 'I' ) )
+            if ( ( strcmp( gemm_type_str, "u8s8s32os8" ) == 0 ) ||
+                 ( strcmp( gemm_type_str, "*" ) == 0 ) )
             {
-                if ( ( strcmp( dscale_type_str, "S32" ) == 0 ) ||
-                     ( strcmp( dscale_type_str, "s32" ) == 0 ) )
-                {
-                    global_dscale_out = 'n';
-                    GEN_FUNC_NAME(mat_mul_bench_main_,u8s8s32os32)
-                    (
-                      fin, fout, stor_order, transa, transb, op_a, op_b,
-                      m, n, k, stride_a, stride_b, stride_c,
-                      post_ops_str_dest
-                    );
-                }
-                else
-                {
-                    if ( ( strcmp( dscale_type_str, "S8" ) == 0 ) ||
-                         ( strcmp( dscale_type_str, "s8" ) == 0 ) )
-                    {
-                        global_dscale_out = 'y';
-                        DSCALE_CLIP_MIN = -128;
-                        DSCALE_CLIP_MAX = +127;
-                        GEN_FUNC_NAME(mat_mul_bench_main_,u8s8s32os8)
-                        (
-                          fin, fout, stor_order, transa, transb, op_a, op_b,
-                          m, n, k, stride_a, stride_b, stride_c,
-                          post_ops_str_dest
-                        );
-                    }
-                    else
-                    {
-                        printf("Downscale type not supported.\n");
-                    }
-                }
+                strncpy( post_ops_str_dest, post_ops_str, POST_OPS_STR_LEN );
+                global_dscale_out = 'y';
+                DSCALE_CLIP_MIN = -128;
+                DSCALE_CLIP_MAX = +127;
+                GEN_FUNC_NAME(mat_mul_bench_main_,u8s8s32os8)
+                (
+                  fin, fout, stor_order, transa, transb, op_a, op_b,
+                  m, n, k, stride_a, stride_b, stride_c,
+                  post_ops_str_dest
+                );
             }
-            else if ( ( op_type_char == 'f' ) || ( op_type_char == 'F' ) )
+            if ( ( strcmp( gemm_type_str, "f32f32f32of32" ) == 0 ) ||
+                 ( strcmp( gemm_type_str, "*" ) == 0 ) )
             {
+                strncpy( post_ops_str_dest, post_ops_str, POST_OPS_STR_LEN );
                 global_dscale_out = 'n';
                 GEN_FUNC_NAME(mat_mul_bench_main_,f32f32f32of32)
                 (
@@ -1525,161 +1602,125 @@ int main( int argc, char** argv )
                   post_ops_str_dest
                 );
             }
-            else if ((op_type_char == 's') || (op_type_char == 'S'))
+            if ( ( strcmp( gemm_type_str, "u8s8s16os16" ) == 0 ) ||
+                 ( strcmp( gemm_type_str, "*" ) == 0 ) )
             {
-                if ( ( strcmp( dscale_type_str, "S16" ) == 0 ) ||
-                     ( strcmp( dscale_type_str, "s16" ) == 0 ) )
-                {
-                    global_dscale_out = 'n';
-                    GEN_FUNC_NAME(mat_mul_bench_main_,u8s8s16os16)
-                    (
-                        fin, fout, stor_order, transa, transb, op_a, op_b,
-                        m, n, k, stride_a, stride_b, stride_c,
-                        post_ops_str_dest
-                    );
-                }
-                else
-                {
-                    if ( ( strcmp( dscale_type_str, "S8" ) == 0 ) ||
-                         ( strcmp( dscale_type_str, "s8" ) == 0 ) )
-                    {
-                        global_dscale_out = 'y';
-                        DSCALE_CLIP_MIN = -128;
-                        DSCALE_CLIP_MAX = +127;
-                        GEN_FUNC_NAME(mat_mul_bench_main_,u8s8s16os8)
-                        (
-                            fin, fout, stor_order, transa, transb, op_a, op_b,
-                            m, n, k, stride_a, stride_b, stride_c,
-                            post_ops_str_dest
-                        );
-                    }
-                    else if ( ( strcmp( dscale_type_str, "U8" ) == 0 ) ||
-                              ( strcmp( dscale_type_str, "u8" ) == 0 ) )
-                    {
-                        global_dscale_out = 'y';
-                        DSCALE_CLIP_MIN = 0;
-                        DSCALE_CLIP_MAX = +255;
-                        GEN_FUNC_NAME(mat_mul_bench_main_,u8s8s16ou8)
-                        (
-                            fin, fout, stor_order, transa, transb, op_a, op_b,
-                            m, n, k, stride_a, stride_b, stride_c,
-                            post_ops_str_dest
-                        );
-                    }
-                    else
-                    {
-                        printf("Downscale type not supported.\n");
-                    }
-                }
+                strncpy( post_ops_str_dest, post_ops_str, POST_OPS_STR_LEN );
+                global_dscale_out = 'n';
+                GEN_FUNC_NAME(mat_mul_bench_main_,u8s8s16os16)
+                (
+                    fin, fout, stor_order, transa, transb, op_a, op_b,
+                    m, n, k, stride_a, stride_b, stride_c,
+                    post_ops_str_dest
+                );
             }
-            else if ((op_type_char == 'b') || (op_type_char == 'B'))
+            if ( ( strcmp( gemm_type_str, "u8s8s16os8" ) == 0 ) ||
+                 ( strcmp( gemm_type_str, "*" ) == 0 ) )
             {
-                if ( ( strcmp( dscale_type_str, "F32" ) == 0 ) ||
-                     ( strcmp( dscale_type_str, "f32" ) == 0 ) )
-                {
-                    global_dscale_out = 'n';
-                    GEN_FUNC_NAME(mat_mul_bench_main_, bf16bf16f32of32)
-                    (
-                        fin, fout, stor_order, transa, transb, op_a, op_b,
-                        m, n, k, stride_a, stride_b, stride_c,
-                        post_ops_str_dest
-                    );
-                }
-                else if ( ( strcmp( dscale_type_str, "BF16" ) == 0 ) ||
-                          ( strcmp( dscale_type_str, "bf16" ) == 0 ) )
-                {
-                    global_dscale_out = 'y';
-                    GEN_FUNC_NAME(mat_mul_bench_main_, bf16bf16f32obf16)
-                    (
-                        fin, fout, stor_order, transa, transb, op_a, op_b,
-                        m, n, k, stride_a, stride_b, stride_c,
-                        post_ops_str_dest
-                    );
-                }
-                else
-                {
-                    printf("Downscale type not supported.\n");
-                }
+                strncpy( post_ops_str_dest, post_ops_str, POST_OPS_STR_LEN );
+                global_dscale_out = 'y';
+                DSCALE_CLIP_MIN = -128;
+                DSCALE_CLIP_MAX = +127;
+                GEN_FUNC_NAME(mat_mul_bench_main_,u8s8s16os8)
+                (
+                    fin, fout, stor_order, transa, transb, op_a, op_b,
+                    m, n, k, stride_a, stride_b, stride_c,
+                    post_ops_str_dest
+                );
             }
-            else if ( ( op_type_char == 'u' ) || ( op_type_char == 'U' ) )
+            if ( ( strcmp( gemm_type_str, "u8s8s16ou8" ) == 0 ) ||
+                      ( strcmp( gemm_type_str, "*" ) == 0 ) )
             {
-                if ( ( strcmp( dscale_type_str, "S32" ) == 0 ) ||
-                     ( strcmp( dscale_type_str, "s32" ) == 0 ) )
-                {
-                    global_dscale_out = 'n';
-                    GEN_FUNC_NAME(mat_mul_bench_main_,s8s8s32os32)
-                    (
-                      fin, fout, stor_order, transa, transb, op_a, op_b,
-                      m, n, k, stride_a, stride_b, stride_c,
-                      post_ops_str_dest
-                    );
-                }
-                else
-                {
-                    if ( ( strcmp( dscale_type_str, "S8" ) == 0 ) ||
-                         ( strcmp( dscale_type_str, "s8" ) == 0 ) )
-                    {
-                        global_dscale_out = 'y';
-                        DSCALE_CLIP_MIN = -128;
-                        DSCALE_CLIP_MAX = +127;
-                        GEN_FUNC_NAME(mat_mul_bench_main_,s8s8s32os8)
-                        (
-                          fin, fout, stor_order, transa, transb, op_a, op_b,
-                          m, n, k, stride_a, stride_b, stride_c,
-                          post_ops_str_dest
-                        );
-                    }
-                    else
-                    {
-                        printf("Downscale type not supported.\n");
-                    }
-                }
+                strncpy( post_ops_str_dest, post_ops_str, POST_OPS_STR_LEN );
+                global_dscale_out = 'y';
+                DSCALE_CLIP_MIN = 0;
+                DSCALE_CLIP_MAX = +255;
+                GEN_FUNC_NAME(mat_mul_bench_main_,u8s8s16ou8)
+                (
+                    fin, fout, stor_order, transa, transb, op_a, op_b,
+                    m, n, k, stride_a, stride_b, stride_c,
+                    post_ops_str_dest
+                );
             }
-            else if ( ( op_type_char == 'v' ) || ( op_type_char == 'V' ) )
+            if ( ( strcmp( gemm_type_str, "bf16bf16f32of32" ) == 0 ) ||
+                 ( strcmp( gemm_type_str, "*" ) == 0 ) )
             {
-                if ( ( strcmp( dscale_type_str, "S16" ) == 0 ) ||
-                     ( strcmp( dscale_type_str, "s16" ) == 0 ) )
-                {
-                    global_dscale_out = 'n';
-                    GEN_FUNC_NAME(mat_mul_bench_main_,s8s8s16os16)
-                    (
-                      fin, fout, stor_order, transa, transb, op_a, op_b,
-                      m, n, k, stride_a, stride_b, stride_c,
-                      post_ops_str_dest
-                    );
-                }
-                else
-                {
-                    if ( ( strcmp( dscale_type_str, "S8" ) == 0 ) ||
-                         ( strcmp( dscale_type_str, "s8" ) == 0 ) )
-                    {
-                        global_dscale_out = 'y';
-                        DSCALE_CLIP_MIN = -128;
-                        DSCALE_CLIP_MAX = +127;
-                        GEN_FUNC_NAME(mat_mul_bench_main_,s8s8s16os8)
-                        (
-                          fin, fout, stor_order, transa, transb, op_a, op_b,
-                          m, n, k, stride_a, stride_b, stride_c,
-                          post_ops_str_dest
-                        );
-                    }
-                    else
-                    {
-                        printf("Downscale type not supported.\n");
-                    }
-                }
+                strncpy( post_ops_str_dest, post_ops_str, POST_OPS_STR_LEN );
+                global_dscale_out = 'n';
+                GEN_FUNC_NAME(mat_mul_bench_main_, bf16bf16f32of32)
+                (
+                    fin, fout, stor_order, transa, transb, op_a, op_b,
+                    m, n, k, stride_a, stride_b, stride_c,
+                    post_ops_str_dest
+                );
             }
-            if ( strcmp( post_ops_str, "none" ) != 0 )
+            if ( ( strcmp( gemm_type_str, "bf16bf16f32obf16" ) == 0 ) ||
+                      ( strcmp( gemm_type_str, "*" ) == 0 ) )
             {
-                strcpy( post_ops_str_dest, post_ops_str );
+                strncpy( post_ops_str_dest, post_ops_str, POST_OPS_STR_LEN );
+                global_dscale_out = 'y';
+                GEN_FUNC_NAME(mat_mul_bench_main_, bf16bf16f32obf16)
+                (
+                    fin, fout, stor_order, transa, transb, op_a, op_b,
+                    m, n, k, stride_a, stride_b, stride_c,
+                    post_ops_str_dest
+                );
+            }
+            if ( ( strcmp( gemm_type_str, "s8s8s32os32" ) == 0 ) ||
+                 ( strcmp( gemm_type_str, "*" ) == 0 ) )
+            {
+                strncpy( post_ops_str_dest, post_ops_str, POST_OPS_STR_LEN );
+                global_dscale_out = 'n';
+                GEN_FUNC_NAME(mat_mul_bench_main_,s8s8s32os32)
+                (
+                  fin, fout, stor_order, transa, transb, op_a, op_b,
+                  m, n, k, stride_a, stride_b, stride_c,
+                  post_ops_str_dest
+                );
+            }
+            if ( ( strcmp( gemm_type_str, "s8s8s32os8" ) == 0 ) ||
+                 ( strcmp( gemm_type_str, "*" ) == 0 ) )
+            {
+                strncpy( post_ops_str_dest, post_ops_str, POST_OPS_STR_LEN );
+                global_dscale_out = 'y';
+                DSCALE_CLIP_MIN = -128;
+                DSCALE_CLIP_MAX = +127;
+                GEN_FUNC_NAME(mat_mul_bench_main_,s8s8s32os8)
+                (
+                  fin, fout, stor_order, transa, transb, op_a, op_b,
+                  m, n, k, stride_a, stride_b, stride_c,
+                  post_ops_str_dest
+                );
+            }
+            if ( ( strcmp( gemm_type_str, "s8s8s16os16" ) == 0 ) ||
+                 ( strcmp( gemm_type_str, "*" ) == 0 ) )
+            {
+                strncpy( post_ops_str_dest, post_ops_str, POST_OPS_STR_LEN );
+                global_dscale_out = 'n';
+                GEN_FUNC_NAME(mat_mul_bench_main_,s8s8s16os16)
+                (
+                  fin, fout, stor_order, transa, transb, op_a, op_b,
+                  m, n, k, stride_a, stride_b, stride_c,
+                  post_ops_str_dest
+                );
+            }
+            if ( ( strcmp( gemm_type_str, "s8s8s16os8" ) == 0 ) ||
+                 ( strcmp( gemm_type_str, "*" ) == 0 ) )
+            {
+                strncpy( post_ops_str_dest, post_ops_str, POST_OPS_STR_LEN );
+                global_dscale_out = 'y';
+                DSCALE_CLIP_MIN = -128;
+                DSCALE_CLIP_MAX = +127;
+                GEN_FUNC_NAME(mat_mul_bench_main_,s8s8s16os8)
+                (
+                  fin, fout, stor_order, transa, transb, op_a, op_b,
+                  m, n, k, stride_a, stride_b, stride_c,
+                  post_ops_str_dest
+                );
             }
         }
     }
 
-    if ( post_ops_str_dest != NULL )
-    {
-        free( post_ops_str_dest );
-    }
     if ( fin )
     {
         fclose( fin );
