@@ -314,7 +314,7 @@ file(STRINGS ${CMAKE_SOURCE_DIR}/version VERSION)
 # Get timestamp.
 string(TIMESTAMP BUILD_DATE "%Y%m%d")
 # Update using the timestamp.
-set(VERSION_STRING "AOCL-BLIS ${VERSION} Build ${BUILD_DATE}")
+set(VERSION_STRING "AOCL-BLAS ${VERSION} Build ${BUILD_DATE}")
 # Initial message.
 message(STATUS "Starting configuration of BLIS ${VERSION_STRING}.")
 # Check if the user requested a custom version string.

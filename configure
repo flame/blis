@@ -1877,7 +1877,7 @@ set_default_version()
 	echo "${script_name}: determining default version string."
 
 	# Use what's in the version file as-is.
-	version="AOCL-BLIS $(cat "${version_file}") Build $(date +%Y%m%d)"
+	version="AOCL-BLAS $(cat "${version_file}") Build $(date +%Y%m%d)"
 }
 
 

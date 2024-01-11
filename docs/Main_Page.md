@@ -1,5 +1,5 @@
 @mainpage
-# Welcome to AOCL-BLIS
+# Welcome to AOCL-BLAS
 
 ---
 
@@ -14,9 +14,9 @@
 
 ## Introduction
 
-<b> AOCL BLIS </b> BLIS is a portable software framework for instantiating high-performance BLAS-like dense linear algebra libraries. The framework was designed to isolate essential kernels of computation that, when optimized, immediately enable optimized implementations of most of its commonly used and computationally intensive operations. BLIS is written in ISO C99 and available under a new/modified/3-clause BSD license. While BLIS exports a new BLAS-like API, it also includes a BLAS compatibility layer which gives application developers access to BLIS implementations via traditional BLAS routine calls. An object-based API unique to BLIS is also available.
+<b> AOCL BLAS </b> BLIS is a portable software framework for instantiating high-performance BLAS-like dense linear algebra libraries. The framework was designed to isolate essential kernels of computation that, when optimized, immediately enable optimized implementations of most of its commonly used and computationally intensive operations. BLIS is written in ISO C99 and available under a new/modified/3-clause BSD license. While BLIS exports a new BLAS-like API, it also includes a BLAS compatibility layer which gives application developers access to BLIS implementations via traditional BLAS routine calls. An object-based API unique to BLIS is also available.
 
-How to Download BLIS
+How to Download AOCL BLAS
 --------------------
 
 There are a few ways to download BLIS. We list the most common four ways below.
@@ -135,4 +135,4 @@ omitted (mostly for brevity's sake) and thus more examples could be written.
 
 ## CONTACTS
 
-AOCL BLIS is developed and maintained by AMD. You can contact us on the email-id <b>[aoclsupport@amd.com](mailto:aoclsupport@amd.com)</b>
+AOCL BLAS is developed and maintained by AMD. You can contact us on the email-id <b>[aoclsupport@amd.com](mailto:aoclsupport@amd.com)</b>
