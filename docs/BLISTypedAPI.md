@@ -905,7 +905,7 @@ void bli_?axpy2v
 ```
 Perform
 ```
-  z := y + alphax * conjx(x) + alphay * conjy(y)
+  z := z + alphax * conjx(x) + alphay * conjy(y)
 ```
 where `x`, `y`, and `z` are vectors of length _m_. The kernel, if optimized, is implemented as a fused pair of calls to [axpyv](BLISTypedAPI.md#axpyv).
 
@@ -929,7 +929,7 @@ void bli_?dotaxpyv
 Perform
 ```
   rho := conjxt(x^T) * conjy(y)
-  y   := y + alpha * conjx(x)
+  z   := z + alpha * conjx(x)
 ```
 where `x`, `y`, and `z` are vectors of length _m_ and `alpha` and `rho` are scalars. The kernel, if optimized, is implemented as a fusion of calls to [dotv](BLISTypedAPI.md#dotv) and [axpyv](BLISTypedAPI.md#axpyv).
 
@@ -974,7 +974,7 @@ void bli_?dotxf
 ```
 Perform
 ```
-  y := y + alpha * conjat(A^T) * conjx(x)
+  y := beta * y + alpha * conjat(A^T) * conjx(x)
 ```
 where `A` is an _m x b_ matrix, and `y` and `x` are vectors. The kernel, if optimized, is implemented as a fused series of calls to [dotxv](BLISTypedAPI.md#dotxv) where _b_ is less than or equal to an implementation-dependent fusing factor specific to `dotxf`.
 
@@ -1751,7 +1751,7 @@ where, on entry, `scale` and `sumsq` contain `scale_old` and `sumsq_old`, respec
 
 #### getsc
 ```c
-void bli_getsc
+void bli_?getsc
      (
        ctype*  chi,
        double* zeta_r,
@@ -1767,7 +1767,7 @@ Copy the real and imaginary values from the scalar object `chi` to `zeta_r` and 
 err_t bli_?getijv
      (
        dim_t   i,
-       ctype*  x, incx,
+       ctype*   x, inc_t incx,
        double* ar,
        double* ai
      );
@@ -1795,10 +1795,10 @@ Note that the object-based analogue of [getijm](BLISObjectAPI.md#getijm) does bo
 
 #### setsc
 ```c
-void bli_setsc
+void bli_?setsc
      (
-       double* zeta_r,
-       double* zeta_i,
+       double  zeta_r,
+       double  zeta_i,
        ctype*  chi
      );
 ```
@@ -1813,7 +1813,7 @@ err_t bli_?setijv
        double  ar,
        double  ai,
        dim_t   i,
-       ctype*  x, incx
+       ctype*  x, inc_t incx
      );
 ```
 Copy real and imaginary values `ar` and `ai` to the `i`th element of vector object `x`. For real domain invocations, only `ar` is copied and `ai` is ignored. (If `x` contains elements stored in single precision, the corresponding elements are typecast/demoted during the copy.)

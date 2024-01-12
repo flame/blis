@@ -1284,6 +1284,7 @@ Observed object properties: `conj?(alpha)`, `diagoff(A)`, `uplo(A)`.
 ```c
 void bli_scal2m
      (
+       obj_t*  alpha,
        obj_t*  a,
        obj_t*  b
      );
@@ -1403,7 +1404,7 @@ void bli_axpy2v
 ```
 Perform
 ```
-  y := y + conj?(alphax) * conj?(x) + conj?(alphay) * conj?(y)
+  z := z + conj?(alphax) * conj?(x) + conj?(alphay) * conj?(y)
 ```
 where `x`, `y`, and `z` are vectors of length _m_. The kernel, if optimized, is implemented as a fused pair of calls to [axpyv](BLISObjectAPI.md#axpyv).
 
@@ -1425,7 +1426,7 @@ void bli_dotaxpyv
 Perform
 ```
   rho := conj?(x)^T * conj?(y)
-  y   := y + conj?(alpha) * conj?(x)
+  z   := z + conj?(alpha) * conj?(x)
 ```
 where `x`, `y`, and `z` are vectors of length _m_ and `alpha` and `rho` are scalars. The kernel, if optimized, is implemented as a fusion of calls to [dotv](BLISObjectAPI.md#dotv) and [axpyv](BLISObjectAPI.md#axpyv).
 
@@ -2198,7 +2199,7 @@ Copy the real and imaginary values from the scalar object `chi` to `zeta_r` and 
 err_t bli_getijv
       (
         dim_t   i,
-        obj_t*  b,
+        obj_t*  x,
         double* ar,
         double* ai
       )
@@ -2228,8 +2229,8 @@ If either the row offset `i` is beyond the _m_ dimension of `b` or less than zer
 ```c
 void bli_setsc
      (
-       double* zeta_r,
-       double* zeta_i,
+       double  zeta_r,
+       double  zeta_i,
        obj_t*  chi
      );
 ```
@@ -2272,8 +2273,8 @@ If either the row offset `i` is beyond the _m_ dimension of `b` or less than zer
 ```c
 void bli_eqsc
      (
-       obj_t  chi,
-       obj_t  psi,
+       obj_t* chi,
+       obj_t* psi,
        bool*  is_eq
      );
 ```
@@ -2288,8 +2289,8 @@ Observed object properties: `conj?(chi)`, `conj?(psi)`.
 ```c
 void bli_eqv
      (
-       obj_t  x,
-       obj_t  y,
+       obj_t* x,
+       obj_t* y,
        bool*  is_eq
      );
 ```
@@ -2304,8 +2305,8 @@ Observed object properties: `conj?(x)`, `conj?(y)`.
 ```c
 void bli_eqm
      (
-       obj_t  a,
-       obj_t  b,
+       obj_t* a,
+       obj_t* b,
        bool*  is_eq
      );
 ```
