@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2023, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2023-2024, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -80,7 +80,7 @@ class daxpbyvGenericTestPrint {
 public:
     std::string operator()(
         testing::TestParamInfo<std::tuple<char,gtint_t,gtint_t,gtint_t,double,double>> str) const {
-        char conj     = std::get<0>(str.param);
+        char conjx     = std::get<0>(str.param);
         gtint_t n     = std::get<1>(str.param);
         gtint_t incx  = std::get<2>(str.param);
         gtint_t incy  = std::get<3>(str.param);
@@ -93,12 +93,12 @@ public:
 #else  //#elif TEST_BLIS_TYPED
         std::string str_name = "bli_daxpbyv";
 #endif
-        str_name += "_" + std::to_string(n);
-        str_name += "_" + std::string(&conj, 1);
+        str_name += "_n" + std::to_string(n);
+        str_name += ( conjx == 'n' )? "_noconjx" : "_conjx";
         std::string incx_str = ( incx > 0) ? std::to_string(incx) : "m" + std::to_string(std::abs(incx));
-        str_name += "_" + incx_str;
+        str_name += "_incx" + incx_str;
         std::string incy_str = ( incy > 0) ? std::to_string(incy) : "m" + std::to_string(std::abs(incy));
-        str_name += "_" + incy_str;
+        str_name += "_incy" + incy_str;
         std::string alpha_str = ( alpha > 0) ? std::to_string(int(alpha)) : "m" + std::to_string(int(std::abs(alpha)));
         str_name = str_name + "_a" + alpha_str;
         std::string beta_str = ( beta > 0) ? std::to_string(int(beta)) : "m" + std::to_string(int(std::abs(beta)));
@@ -107,7 +107,7 @@ public:
     }
 };
 
-// Black box testing for generic and main use of caxpy.
+// Black box testing for generic and main use of daxpby.
 INSTANTIATE_TEST_SUITE_P(
         Blackbox,
         daxpbyvGenericTest,
@@ -116,8 +116,8 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Range(gtint_t(10), gtint_t(101), 10),          // m size of vector takes values from 10 to 100 with step size of 10.
             ::testing::Values(gtint_t(1)),                            // stride size for x
             ::testing::Values(gtint_t(1)),                            // stride size for y
-            ::testing::Values(double(2.0), double(-2.0)),             // alpha
-            ::testing::Values(double(-1.0))                           // beta
+            ::testing::Values(double(2.3), double(-3.7), double(0.0)), // alpha
+            ::testing::Values(double(-4.9), double(1.2), double(0.0))  // beta
         ),
         ::daxpbyvGenericTestPrint()
     );
@@ -145,7 +145,7 @@ INSTANTIATE_TEST_SUITE_P(
 // Only test very few cases as sanity check.
 // We can modify the values using implementantion details.
 INSTANTIATE_TEST_SUITE_P(
-        NonUnitPositiveIncrements,
+        nonUnitPositiveIncrements,
         daxpbyvGenericTest,
         ::testing::Combine(
             ::testing::Values('n'
@@ -156,8 +156,8 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Range(gtint_t(10), gtint_t(31), 10),                  // m size of vector takes values from 10 to 100 with step size of 10.
             ::testing::Values(gtint_t(7)),                                   // stride size for x
             ::testing::Values(gtint_t(3)),                                   // stride size for y
-            ::testing::Values(4.0),                                          // alpha
-            ::testing::Values(-2.0)                                          // beta
+            ::testing::Values(double(4.3), double(0.0)),                     // alpha
+            ::testing::Values(double(-1.9), double(0.0))                     // beta
         ),
         ::daxpbyvGenericTestPrint()
     );
@@ -167,15 +167,15 @@ INSTANTIATE_TEST_SUITE_P(
 // Only test very few cases as sanity check.
 // We can modify the values using implementantion details.
 INSTANTIATE_TEST_SUITE_P(
-        NegativeIncrements,
+        negativeIncrements,
         daxpbyvGenericTest,
         ::testing::Combine(
             ::testing::Values('n'),                                          // n: use x, c: use conj(x)
             ::testing::Range(gtint_t(10), gtint_t(31), 10),                  // m size of vector takes values from 10 to 100 with step size of 10.
             ::testing::Values(gtint_t(11), gtint_t(-11)),                    // stride size for x
             ::testing::Values(gtint_t(-3), gtint_t(4)),                      // stride size for y
-            ::testing::Values(4.0),                                          // alpha
-            ::testing::Values(-2.0)                                          // beta
+            ::testing::Values(double(4.7)),                                  // alpha
+            ::testing::Values(double(-2.5))                                  // beta
         ),
         ::daxpbyvGenericTestPrint()
     );

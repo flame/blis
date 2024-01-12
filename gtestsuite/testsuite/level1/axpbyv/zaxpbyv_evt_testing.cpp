@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2023, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2023-2024, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -297,7 +297,7 @@ INSTANTIATE_TEST_SUITE_P(
 
 // Exception value testing(on vectors) with non unit strides
 INSTANTIATE_TEST_SUITE_P(
-    bli_zaxpbyv_zen_int_evt_vec_NUS,
+    bli_zaxpbyv_zen_int_evt_vec_nonUnitStrides,
     zaxpbyvEVTTest,
     ::testing::Combine(
         ::testing::Values('n' // n: use x, c: use conj(x)
@@ -308,7 +308,7 @@ INSTANTIATE_TEST_SUITE_P(
                           ),
         ::testing::Values(gtint_t(1), gtint_t(5)), // m, size of vector to enter NUS loop directly.
         ::testing::Values(gtint_t(3)), // stride size for x
-        ::testing::Values(gtint_t(-4)), // stride size for y
+        ::testing::Values(gtint_t(5)), // stride size for y
         ::testing::Values(gtint_t(0)), // indices to set exception values on x
         ::testing::Values(dcomplex{0.0, 0.0}, dcomplex{NaN, 2.3},
                           dcomplex{-Inf, 0.0}, dcomplex{Inf, NaN}), // exception values to set on x
@@ -327,7 +327,7 @@ INSTANTIATE_TEST_SUITE_P(
            includes testing that cover cases where NaN might be induced due to 0 * (Inf or -Inf).
 */
 INSTANTIATE_TEST_SUITE_P(
-    bli_zaxpbyv_zen_int_evt_alphabeta_US,
+    bli_zaxpbyv_zen_int_evt_alphabeta_unitStrides,
     zaxpbyvEVTTest,
     ::testing::Combine(
         ::testing::Values('n' // n: use x, c: use conj(x)
@@ -350,7 +350,7 @@ INSTANTIATE_TEST_SUITE_P(
 
 // Exception value testing(on alpha/beta) with non-unit stride
 INSTANTIATE_TEST_SUITE_P(
-    bli_zaxpbyv_zen_int_evt_alphabeta_NUS,
+    bli_zaxpbyv_zen_int_evt_alphabeta_nonUnitStrides,
     zaxpbyvEVTTest,
     ::testing::Combine(
         ::testing::Values('n' // n: use x, c: use conj(x)
@@ -361,7 +361,7 @@ INSTANTIATE_TEST_SUITE_P(
                           ),
         ::testing::Values(gtint_t(5)), // m, size of vector to enter NUS loop directly.
         ::testing::Values(gtint_t(3)), // stride size for x
-        ::testing::Values(gtint_t(-4)), // stride size for y
+        ::testing::Values(gtint_t(5)), // stride size for y
         ::testing::Values(gtint_t(0)), // indices to set exception values on x
         ::testing::Values(dcomplex{0.0, 0.0}), // exception values to set on x
         ::testing::Values(gtint_t(0)), // indices to set exception values on y

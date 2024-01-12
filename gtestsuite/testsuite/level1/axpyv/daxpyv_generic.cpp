@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2023, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2023-2024, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -101,7 +101,7 @@ public:
     }
 };
 
-// Black box testing for generic and main use of caxpy.
+// Black box testing for generic and main use of daxpy.
 INSTANTIATE_TEST_SUITE_P(
         Blackbox,
         daxpyvGenericTest,
@@ -110,7 +110,7 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Range(gtint_t(10), gtint_t(101), 10),                 // m size of vector takes values from 10 to 100 with step size of 10.
             ::testing::Values(gtint_t(1)),                                   // stride size for x
             ::testing::Values(gtint_t(1)),                                   // stride size for y
-            ::testing::Values(double(2.0), double(-2.0))                     // alpha
+            ::testing::Values(double(2.3), double(-4.1))                     // alpha
         ),
         ::daxpyvGenericTestPrint()
     );
@@ -137,14 +137,14 @@ INSTANTIATE_TEST_SUITE_P(
 // Only test very few cases as sanity check.
 // We can modify the values using implementantion details.
 INSTANTIATE_TEST_SUITE_P(
-        NonUnitPositiveIncrements,
+        nonUnitPositiveIncrements,
         daxpyvGenericTest,
         ::testing::Combine(
             ::testing::Values('n'),                                          // n: use x, not conj(x) (since it is real)
             ::testing::Values(gtint_t(3), gtint_t(30), gtint_t(112)),        // m size of vector
             ::testing::Values(gtint_t(2)),                                   /*(gtint_t(-5), gtint_t(-17))*/// stride size for x
             ::testing::Values(gtint_t(3)),                                   /*(gtint_t(-12), gtint_t(-4))*/// stride size for y
-            ::testing::Values(double(4.0))                                   // beta
+            ::testing::Values(double(4.1))                                   // alpha
         ),
         ::daxpyvGenericTestPrint()
     );
@@ -154,14 +154,60 @@ INSTANTIATE_TEST_SUITE_P(
 // Only test very few cases as sanity check.
 // We can modify the values using implementantion details.
 INSTANTIATE_TEST_SUITE_P(
-        NegativeIncrements,
+        negativeIncrements,
         daxpyvGenericTest,
         ::testing::Combine(
             ::testing::Values('n'),                                          // n: use x, c: use conj(x)
             ::testing::Range(gtint_t(10), gtint_t(101), 10),                 // m size of vector takes values from 10 to 100 with step size of 10.
             ::testing::Values(gtint_t(-4)),                                  // stride size for x
             ::testing::Values(gtint_t(-3)),                                  // stride size for y
-            ::testing::Values(4.0)                                           // alpha
+            ::testing::Values(double(4.1))                                   // alpha
+        ),
+        ::daxpyvGenericTestPrint()
+    );
+#endif
+
+// The following instantiator is enabled only if BLIS has been configured for openmp
+// with aocl-dynamic enabled.
+#if defined(BLIS_ENABLE_OPENMP) && defined(AOCL_DYNAMIC)
+// Checking for the thresholds with unit strides
+INSTANTIATE_TEST_SUITE_P(
+        aoclDynamicThresholds_unitStrides,
+        daxpyvGenericTest,
+        ::testing::Combine(
+            ::testing::Values('n'),                 // n: use x, c: use conj(x)
+            ::testing::Values(// Sizes are based on the thresholds
+                              gtint_t(4000),        // nt_ideal = 1
+                              gtint_t(11000),       // nt_ideal = 4
+                              gtint_t(300000),      // nt_ideal = 8
+                              gtint_t(750000),      // nt_ideal = 16
+                              gtint_t(2600000),     // nt_ideal = 32
+                              gtint_t(4000000)),    // nt_ideal = 64
+
+            ::testing::Values(gtint_t(1)),          // stride size for x
+            ::testing::Values(gtint_t(1)),          // stride size for y
+            ::testing::Values(double(4.1))          // alpha
+        ),
+        ::daxpyvGenericTestPrint()
+    );
+
+// Checking for the thresholds with non-unit strides
+INSTANTIATE_TEST_SUITE_P(
+        aoclDynamicThresholds_nonUnitStrides,
+        daxpyvGenericTest,
+        ::testing::Combine(
+            ::testing::Values('n'),                 // n: use x, c: use conj(x)
+            ::testing::Values(// Sizes are based on the thresholds
+                              gtint_t(4000),        // nt_ideal = 1
+                              gtint_t(11000),       // nt_ideal = 4
+                              gtint_t(300000),      // nt_ideal = 8
+                              gtint_t(750000),      // nt_ideal = 16
+                              gtint_t(2600000),     // nt_ideal = 32
+                              gtint_t(4000000)),    // nt_ideal = 64
+
+            ::testing::Values(gtint_t(3)),          // stride size for x
+            ::testing::Values(gtint_t(3)),          // stride size for y
+            ::testing::Values(double(4.1))          // alpha
         ),
         ::daxpyvGenericTestPrint()
     );

@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2023, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2023-2024, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -126,7 +126,7 @@ public:
 
 // Accuracy testing of the main loop, single and multiple runs
 INSTANTIATE_TEST_SUITE_P(
-    bli_zaxpbyv_zen_int_acc_US_main,
+    bli_zaxpbyv_zen_int_acc_unitStrides_main,
     zaxpbyvAccTest,
     ::testing::Combine(
         ::testing::Values('n' // n: use x, c: use conj(x)
@@ -145,7 +145,7 @@ INSTANTIATE_TEST_SUITE_P(
 
 // Accuracy testing of different combinations of fringe loops(L6, L4, L2, 1)
 INSTANTIATE_TEST_SUITE_P(
-    bli_zaxpbyv_zen_int_acc_US_fringe,
+    bli_zaxpbyv_zen_int_acc_unitStrides_fringe,
     zaxpbyvAccTest,
     ::testing::Combine(
         ::testing::Values('n' // n: use x, c: use conj(x)
@@ -164,7 +164,7 @@ INSTANTIATE_TEST_SUITE_P(
 
 // Accuracy testing of 3*L8 + L6 + L4 + L2 + 1, a case of main + all fringe cases taken
 INSTANTIATE_TEST_SUITE_P(
-    bli_zaxpbyv_zen_int_acc_US_combine,
+    bli_zaxpbyv_zen_int_acc_unitStrides_combine,
     zaxpbyvAccTest,
     ::testing::Combine(
         ::testing::Values('n' // n: use x, c: use conj(x)
@@ -183,7 +183,7 @@ INSTANTIATE_TEST_SUITE_P(
 
 // Accuracy testing with non-unit strides
 INSTANTIATE_TEST_SUITE_P(
-    bli_zaxpbyv_zen_int_acc_NUS,
+    bli_zaxpbyv_zen_int_acc_nonUnitStrides,
     zaxpbyvAccTest,
     ::testing::Combine(
         ::testing::Values('n' // n: use x, c: use conj(x)
@@ -193,8 +193,16 @@ INSTANTIATE_TEST_SUITE_P(
 #endif
                           ),
         ::testing::Values(gtint_t(10), gtint_t(17)), // m
-        ::testing::Values(gtint_t(-3), gtint_t(4)), // stride size for x
-        ::testing::Values(gtint_t(6), gtint_t(-2)), // stride size for y
+        ::testing::Values(
+#ifndef TEST_BLIS_TYPED
+                          gtint_t(-3),
+#endif
+                          gtint_t(4)), // stride size for x
+        ::testing::Values(
+#ifndef TEST_BLIS_TYPED
+                          gtint_t(-2),
+#endif
+                          gtint_t(6)), // stride size for y
         ::testing::Values(dcomplex{0.0, 0.0}, dcomplex{1.0, 0.0}, dcomplex{2.2, -3.3}), // alpha
         ::testing::Values(dcomplex{0.0, 0.0}, dcomplex{1.0, 0.0}, dcomplex{1.0, 2.0}) // beta
         ),
