@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2023, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2023 - 2024, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -44,6 +44,7 @@
  * @param[in] incx increment of x
  *
  * If n < 1 or incx <= 0, return 0.
+ * If n == 1, return 1(BLAS) or 0(CBLAS).
  */
 
 template<typename T>
@@ -61,9 +62,7 @@ static gtint_t amaxv_(gtint_t n, T* x, gtint_t incx) {
     else
       throw std::runtime_error("Error in testsuite/level1/amaxv.h: Invalid typename in amaxv_().");
 
-    // Since we are comparing against CBLAS which is 0-based and BLAS is 1-based,
-    // we need to use -1 here.
-    return (idx-1);
+    return idx;
 }
 
 template<typename T>
@@ -106,7 +105,9 @@ template<typename T>
 static gtint_t amaxv(gtint_t n, T* x, gtint_t incx)
 {
 #ifdef TEST_BLAS
-    return amaxv_<T>(n, x, incx);
+    // Since we would be comparing against CBLAS which is 0-based and BLAS 
+    // which is 1-based, we need decrement the result of BLAS call by 1.
+    return ( amaxv_<T>(n, x, incx) - 1 );
 #elif TEST_CBLAS
     return cblas_amaxv<T>(n, x, incx);
 #elif TEST_BLIS_TYPED
