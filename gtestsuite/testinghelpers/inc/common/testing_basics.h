@@ -177,6 +177,22 @@ static void alphax( gtint_t n, T alpha, T *xp, gtint_t incx )
     }
 }
 
+template<typename T>
+static T ONE() {
+    if constexpr (testinghelpers::type_info<T>::is_real)
+        return 1.0;
+    else
+        return {1.0, 0.0};
+}
+
+template<typename T>
+static T ZERO() {
+    if constexpr (testinghelpers::type_info<T>::is_real)
+        return 0.0;
+    else
+        return {0.0, 0.0};
+}
+
 /**
  * @brief Returns the boolean form of a trans value.
  *
