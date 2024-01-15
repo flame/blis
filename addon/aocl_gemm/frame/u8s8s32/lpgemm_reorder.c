@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2022 - 2023, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2022 - 2024, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -177,6 +177,7 @@ void reordera_mr6_u8s8s32o32
 	dim_t KC = lcntx->blksz.KC;
 
 	dim_t rs_a = a->rs;
+	dim_t cs_a = a->cs;
 	dim_t rs_a_reorder;
 	dim_t cs_a_reorder;
 
@@ -202,7 +203,7 @@ void reordera_mr6_u8s8s32o32
 			  ( ( ( uint8_t* )a_reorder->storage.aligned_buffer ) + ( pc * m ) +
 				( ic * kc0_updated ) ),
 			  ( ( ( uint8_t* )a->storage.aligned_buffer ) + ( rs_a * ic ) + pc ),
-			  rs_a, mc0, kc0, &rs_a_reorder, &cs_a_reorder
+			  rs_a, cs_a, mc0, kc0, &rs_a_reorder, &cs_a_reorder
 			);
 		}
 	}

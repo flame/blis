@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2023, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2023 - 2024, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -39,6 +39,7 @@
 #include "lpgemm_utils_s8.h"
 #include "lpgemm_config.h"
 #include "lpgemm_thrinfo_utils.h"
+#include "lpgemm_packa_s16.h"
 
 // Kernel function prototypes
 typedef void (*lpgemm_rowvar_s16_s8)
@@ -83,6 +84,7 @@ LPGEMM_5LOOP(int8_t,int8_t,int16_t,s8s8s16o16)
 	const int8_t *a_use;
 	dim_t rs_a_use = rs_a;
 	dim_t cs_a_use = cs_a;
+	dim_t a_block_stride = 0;
 
 	dim_t rs_b_use = rs_b;
 	dim_t cs_b_use = cs_b;
@@ -91,6 +93,11 @@ LPGEMM_5LOOP(int8_t,int8_t,int16_t,s8s8s16o16)
 	int16_t *c_use_ic = NULL;
 	dim_t rs_c_use = rs_c;
 	dim_t rs_c_downscale = rs_c;
+
+	// Pack buffer for A.
+	int8_t* pack_a_buffer_s8s8s16o16;
+	mem_t mem_a = BLIS_MEM_INITIALIZER;
+	siz_t mem_a_size_req = 0;
 
 	// Pack buffer for B.
 	int8_t *pack_b_buffer_s8s8s16o16;
@@ -339,10 +346,48 @@ LPGEMM_5LOOP(int8_t,int8_t,int16_t,s8s8s16o16)
 					c_use_ic = c_use_jc + ( rs_c_use * ic );
 				}
 
-				a_use = a + (rs_a * ic) + (cs_a * pc);
-				cs_a_use = 1;
+				// Matrix A packed and reordered code path is not triggerred
+				// currently for row-major inputs since we do not support it yet.
+				// Pack is enabled for column-major inputs to transform into
+				// row-major inputs as kernel expects row storage format.
+				if ( mtag_a == PACK )
+				{
+					mem_a_size_req = sizeof( uint8_t ) * mc0 * kc0_updated;
 
-				dim_t a_block_stride = rs_a;
+					lpgemm_alloc_mem_panel
+					(
+					  mem_a_size_req, BLIS_BUFFER_FOR_A_BLOCK,
+					  &mem_a, rntm
+					);
+					pack_a_buffer_s8s8s16o16 = ( int8_t* )bli_mem_buffer( &mem_a );
+
+					( ( packa_s16 )lcntx->packa_fun_ptr )
+					(
+					  ( uint8_t* )pack_a_buffer_s8s8s16o16,
+					  ( uint8_t* )( a + ( rs_a * ic ) + ( cs_a * pc ) ), rs_a, cs_a,
+					  mc0, kc0,
+					  &rs_a_use, &cs_a_use
+					);
+					a_use = pack_a_buffer_s8s8s16o16;
+
+					if( cs_a == 1 ) 
+					{
+						a_block_stride = kc0_updated;
+					}
+
+					else
+					{
+						a_block_stride = rs_a_use;
+					}
+					
+				}
+
+				else
+				{
+					a_use = a + ( rs_a * ic ) + ( cs_a * pc );
+					cs_a_use = 1;
+					a_block_stride = rs_a;
+				}
 
 				post_ops_attr.b_sum_offset = 0;
 

@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2023, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2023 - 2024, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -54,11 +54,11 @@
 	KMACRO(S8S8S16OS16, lpgemm_rowvar_s8s8s16o16_6x32) \
 
 #define LPGEMM_PACKA_FUNC_MAP_AVX512_VNNI_BF16 \
-	PAMACRO(U8S8S16OS16, NULL) \
-	PAMACRO(U8S8S32OS32, packa_k64_u8s8s32o32) \
+	PAMACRO(U8S8S16OS16, packa_u8s8s16os16) \
+	PAMACRO(U8S8S32OS32, packa_u8s8s32os32) \
 	PAMACRO(BF16BF16F32OF32, packa_mr16_bf16bf16f32of32) \
-	PAMACRO(S8S8S32OS32, packa_k64_s8s8s32os32) \
-	PAMACRO(S8S8S16OS16, NULL) \
+	PAMACRO(S8S8S32OS32, packa_u8s8s32os32) \
+	PAMACRO(S8S8S16OS16, packa_u8s8s16os16) \
 
 #define LPGEMM_PACKB_FUNC_MAP_AVX512_VNNI_BF16 \
 	PBMACRO(U8S8S16OS16, packb_nr32_u8s8s16o16) \
@@ -82,11 +82,11 @@
 	KMACRO(S8S8S16OS16, lpgemm_rowvar_s8s8s16o16_6x32) \
 
 #define LPGEMM_PACKA_FUNC_MAP_AVX512_VNNI \
-	PAMACRO(U8S8S16OS16, NULL) \
-	PAMACRO(U8S8S32OS32, packa_k64_u8s8s32o32) \
+	PAMACRO(U8S8S16OS16, packa_u8s8s16os16) \
+	PAMACRO(U8S8S32OS32, packa_u8s8s32os32) \
 	PAMACRO(BF16BF16F32OF32, packa_mr16_bf16bf16f32of32) \
-	PAMACRO(S8S8S32OS32, packa_k64_s8s8s32os32) \
-	PAMACRO(S8S8S16OS16, NULL) \
+	PAMACRO(S8S8S32OS32, packa_u8s8s32os32) \
+	PAMACRO(S8S8S16OS16, packa_u8s8s16os16) \
 
 #define LPGEMM_PACKB_FUNC_MAP_AVX512_VNNI \
 	PBMACRO(U8S8S16OS16, packb_nr32_u8s8s16o16) \
@@ -110,11 +110,11 @@
 	KMACRO(S8S8S16OS16, lpgemm_rowvar_s8s8s16o16_6x32) \
 
 #define LPGEMM_PACKA_FUNC_MAP_AVX512 \
-	PAMACRO(U8S8S16OS16, NULL) \
-	PAMACRO(U8S8S32OS32, packa_k64_u8s8s32o32) \
+	PAMACRO(U8S8S16OS16, packa_u8s8s16os16) \
+	PAMACRO(U8S8S32OS32, packa_u8s8s32os32) \
 	PAMACRO(BF16BF16F32OF32, packa_mr16_bf16bf16f32of32) \
-	PAMACRO(S8S8S32OS32, packa_k64_s8s8s32os32) \
-	PAMACRO(S8S8S16OS16, NULL) \
+	PAMACRO(S8S8S32OS32, packa_u8s8s32os32) \
+	PAMACRO(S8S8S16OS16, packa_u8s8s16os16) \
 
 #define LPGEMM_PACKB_FUNC_MAP_AVX512 \
 	PBMACRO(U8S8S16OS16, packb_nr32_u8s8s16o16) \
@@ -138,11 +138,11 @@
 	KMACRO(S8S8S16OS16, lpgemm_rowvar_s8s8s16o16_6x32) \
 
 #define LPGEMM_PACKA_FUNC_MAP_AVX2 \
-	PAMACRO(U8S8S16OS16, NULL) \
+	PAMACRO(U8S8S16OS16, packa_u8s8s16os16) \
 	PAMACRO(U8S8S32OS32, NULL) \
 	PAMACRO(BF16BF16F32OF32, NULL) \
 	PAMACRO(S8S8S32OS32, NULL) \
-	PAMACRO(S8S8S16OS16, NULL) \
+	PAMACRO(S8S8S16OS16, packa_u8s8s16os16) \
 
 #define LPGEMM_PACKB_FUNC_MAP_AVX2 \
 	PBMACRO(U8S8S16OS16, packb_nr32_u8s8s16o16) \

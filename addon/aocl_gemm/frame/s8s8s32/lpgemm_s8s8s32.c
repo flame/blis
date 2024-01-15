@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2023, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2023 - 2024, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -40,6 +40,7 @@
 #include "lpgemm_utils_s8.h"
 #include "lpgemm_thrinfo_utils.h"
 #include "lpgemm_config.h"
+#include "lpgemm_packa.h"
 
 // Kernel function prototypes
 typedef void (*lpgemm_rowvar_s32_s8)
@@ -349,7 +350,7 @@ LPGEMM_5LOOP(int8_t,int8_t,int32_t,s8s8s32o32)
 				// currently since we do not support it yet.
 				if ( mtag_a == PACK )
 				{
-					mem_a_size_req = sizeof( int8_t ) * mc0 * kc0_updated;
+					mem_a_size_req = sizeof( uint8_t ) * mc0 * kc0_updated;
 
 					lpgemm_alloc_mem_panel
 					(
@@ -358,15 +359,24 @@ LPGEMM_5LOOP(int8_t,int8_t,int32_t,s8s8s32o32)
 					);
 					pack_a_buffer_s8s8s32o32 = ( int8_t* )bli_mem_buffer( &mem_a );
 
-					( ( packa_s32_s8 )lcntx->packa_fun_ptr )
+					( ( packa_s32 )lcntx->packa_fun_ptr )
 					(
-					  pack_a_buffer_s8s8s32o32,
-					  ( a + ( rs_a * ic ) + pc ), rs_a,
+					  ( uint8_t* )pack_a_buffer_s8s8s32o32,
+					  ( uint8_t* )( a + ( rs_a * ic ) + ( cs_a * pc ) ), rs_a, cs_a,
 					  mc0, kc0,
 					  &rs_a_use, &cs_a_use
 					);
 					a_use = pack_a_buffer_s8s8s32o32;
-					a_block_stride = kc0_updated;
+
+					if( cs_a == 1 ) 
+					{
+						a_block_stride = kc0_updated;
+					}
+
+					else
+					{
+						a_block_stride = rs_a_use;
+					}
 				}
 
 				else

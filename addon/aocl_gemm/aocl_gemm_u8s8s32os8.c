@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2022 - 2023, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2022 - 2024, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -78,10 +78,9 @@ AOCL_GEMM_MATMUL(uint8_t,int8_t,int8_t,int32_t,u8s8s32os8)
 
 	/* Perform BLAS parameter checking. */
 	// Transpose not supported.
-	if ( ( blis_transa != BLIS_NO_TRANSPOSE ) ||
-	     ( blis_transb != BLIS_NO_TRANSPOSE ) )
+	if ( ( blis_transb != BLIS_NO_TRANSPOSE ) )
 	{
-		bli_print_msg(" Transpose of matrices is not supported.", __FILE__, __LINE__ );
+		bli_print_msg(" Transpose of B matrices is not supported.", __FILE__, __LINE__ );
 		return; // Error.
 	}
 
@@ -91,10 +90,10 @@ AOCL_GEMM_MATMUL(uint8_t,int8_t,int8_t,int32_t,u8s8s32os8)
 		return; // Only row major supported.
 	}
 
-	const inc_t rs_a = lda;
-	const inc_t cs_a = 1;
-	const inc_t rs_b = ldb;
-	const inc_t cs_b = 1;
+	inc_t rs_a = lda;
+	inc_t cs_a = 1;
+	inc_t rs_b = ldb;
+	inc_t cs_b = 1;
 	const inc_t rs_c = ldc;
 	const inc_t cs_c = 1;
 
@@ -103,6 +102,16 @@ AOCL_GEMM_MATMUL(uint8_t,int8_t,int8_t,int32_t,u8s8s32os8)
 
 	bli_param_map_char_to_lpmtag( mem_format_a, &mtag_a );
 	bli_param_map_char_to_lpmtag( mem_format_b, &mtag_b );
+
+	// Pack is enabled for row major storage when trans A is true.
+	// Pack tranforms column major matrix to row-major storage as kernel
+	// expects A matrix to be in row-major format.
+	if ( bli_is_trans( blis_transa ) )
+	{
+		rs_a = 1;
+		cs_a = lda;
+		mtag_a = PACK;
+	}
 
 	// B matrix needs to be packed in a certain format in order to be loaded
 	// and used in VNNI instrution. As such the mtag_b always needs to be either
@@ -113,8 +122,8 @@ AOCL_GEMM_MATMUL(uint8_t,int8_t,int8_t,int32_t,u8s8s32os8)
 		mtag_b = PACK;
 	}
 
-	// Only unpacked A supported now.
-	if ( mtag_a != UNPACKED )
+	// Only unpacked A supported now for row-major A matrix.
+	if ( !( bli_is_trans( blis_transa ) ) && ( mtag_a != UNPACKED ) )
 	{
 		bli_print_msg(" A matrix needs to be unpacked.", __FILE__, __LINE__ );
 		return; // Error.
