@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2023, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2023 - 2024, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -95,7 +95,7 @@ struct ComparisonHelper{
                                             j(-11),
                                             binary_comparison(false),
                                             nan_inf_check(false) {};
-    // Constructor for the generic case where theshold is used.
+    // Constructor for the generic case where threshold is used.
     ComparisonHelper(ObjType object_type, double threshold) : threshold(threshold),
                                                               object_type(object_type),
                                                               i(-11),
@@ -121,10 +121,11 @@ testing::AssertionResult NumericalComparisonFPOnly(const char* blis_sol_char,
     }
     else {
         double error = testinghelpers::getError(blis_sol,ref_sol);
-        if (error < comp_helper.threshold) return testing::AssertionSuccess();
+        if (error <= comp_helper.threshold) return testing::AssertionSuccess();
         return testing::AssertionFailure() << error_message
-                                           << ",    thesh = " << comp_helper.threshold
-                                           << ",    error = " << error;
+                                           << ",    thresh = " << comp_helper.threshold
+                                           << ",    error = " << error
+                                           << " (" << error/testinghelpers::getEpsilon<T>() << " * eps)";
     }
 }
 
