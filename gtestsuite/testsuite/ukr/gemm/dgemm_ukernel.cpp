@@ -573,8 +573,20 @@ TEST_P(dgemmSmallUkernel, gemm_small)
         }
         // reset to default signal handler
         testinghelpers::ProtectedBuffer::stop_signal_handler();
+
         // Set the threshold for the errors:
-        double thresh = 10 * (std::max)(n,(std::max)(k,m)) * testinghelpers::getEpsilon<T>();
+        // Check gtestsuite gemm.h or netlib source code for reminder of the
+        // functionality from which we estimate operation count per element
+        // of output, and hence the multipler for epsilon.
+        double thresh;
+        if (m == 0 || n == 0)
+            thresh = 0.0;
+        else if ((alpha == testinghelpers::ZERO<T>() || k == 0) && (beta == testinghelpers::ZERO<T>() ||
+                  beta == testinghelpers::ONE<T>()))
+            thresh = 0.0;
+        else
+            thresh = (3*k+1)*testinghelpers::getEpsilon<T>();
+            //thresh = (4*k+1)*testinghelpers::getEpsilon<T>();
 
         // call reference implementation
         testinghelpers::ref_gemm<T>( storage, 'n', 'n', m, n, k, alpha,
@@ -612,7 +624,19 @@ TEST_P(dgemmSmallUkernel, gemm_small)
                         );
 
         // Set the threshold for the errors:
-        double thresh = 10 * (std::max)(n,(std::max)(k,m)) * testinghelpers::getEpsilon<T>();
+        // Check gtestsuite gemm.h or netlib source code for reminder of the
+        // functionality from which we estimate operation count per element
+        // of output, and hence the multipler for epsilon.
+        double thresh;
+        if (m == 0 || n == 0)
+            thresh = 0.0;
+        else if ((alpha == testinghelpers::ZERO<T>() || k == 0) && (beta == testinghelpers::ZERO<T>() ||
+                  beta == testinghelpers::ONE<T>()))
+            thresh = 0.0;
+        else
+            thresh = (3*k+1)*testinghelpers::getEpsilon<T>();
+            //thresh = (4*k+1)*testinghelpers::getEpsilon<T>();
+
         // call reference implementation
         testinghelpers::ref_gemm<T>( storage, 'n', 'n', m, n, k, alpha,
                                     a.data(), lda, b.data(), ldb, beta, c_ref.data(), ldc);

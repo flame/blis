@@ -102,7 +102,17 @@ TEST_P(DGEMMEVT, ExceptionValueTest)
     gtint_t ldc_inc = std::get<19>(GetParam());
 
     // Set the threshold for the errors:
-    double thresh = 10*m*n*testinghelpers::getEpsilon<T>();
+    // Check gtestsuite gemm.h or netlib source code for reminder of the
+    // functionality from which we estimate operation count per element
+    // of output, and hence the multipler for epsilon.
+    double thresh;
+    if (m == 0 || n == 0)
+        thresh = 0.0;
+    else if ((alpha == testinghelpers::ZERO<T>() || k == 0) &&
+             (beta == testinghelpers::ZERO<T>() || beta == testinghelpers::ONE<T>()))
+        thresh = 0.0;
+    else
+        thresh = (3*k+1)*testinghelpers::getEpsilon<T>();
 
     //----------------------------------------------------------
     //     Call test body using these parameters

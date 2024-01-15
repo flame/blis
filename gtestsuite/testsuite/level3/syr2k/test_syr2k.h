@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2023, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2023 - 2024, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -41,24 +41,24 @@
 #include <algorithm>
 
 template<typename T>
-void test_syr2k( char storage, char uplo, char transa, char transb, gtint_t m,
+void test_syr2k( char storage, char uplo, char transa, char transb, gtint_t n,
     gtint_t k, gtint_t lda_inc, gtint_t ldb_inc, gtint_t ldc_inc, T alpha,
     T beta, double thresh )
 {
     // Compute the leading dimensions of a, b, and c.
-    gtint_t lda = testinghelpers::get_leading_dimension( storage, transa, m, k, lda_inc );
-    gtint_t ldb = testinghelpers::get_leading_dimension( storage, transb, m, k, ldb_inc );
-    gtint_t ldc = testinghelpers::get_leading_dimension( storage, 'n', m, m, ldc_inc );
+    gtint_t lda = testinghelpers::get_leading_dimension( storage, transa, n, k, lda_inc );
+    gtint_t ldb = testinghelpers::get_leading_dimension( storage, transb, n, k, ldb_inc );
+    gtint_t ldc = testinghelpers::get_leading_dimension( storage, 'n', n, n, ldc_inc );
 
     //----------------------------------------------------------
     //        Initialize matrics with random integer numbers.
     //----------------------------------------------------------
-    std::vector<T> a = testinghelpers::get_random_matrix<T>( -2, 8, storage, transa, m, k, lda );
-    std::vector<T> b = testinghelpers::get_random_matrix<T>( -5, 2, storage, transb, m, k, ldb );
+    std::vector<T> a = testinghelpers::get_random_matrix<T>( -2, 8, storage, transa, n, k, lda );
+    std::vector<T> b = testinghelpers::get_random_matrix<T>( -5, 2, storage, transb, n, k, ldb );
     // Since matrix C, stored in c, is symmetric and we only use the upper or lower
     // part in the computation of her2k and zero-out the rest to ensure
     // that code operates as expected.
-    std::vector<T> c = testinghelpers::get_random_matrix<T>(-3, 5, storage, uplo, m, ldc );
+    std::vector<T> c = testinghelpers::get_random_matrix<T>(-3, 5, storage, uplo, n, ldc );
 
     // Create a copy of c so that we can check reference results.
     std::vector<T> c_ref(c);
@@ -66,17 +66,17 @@ void test_syr2k( char storage, char uplo, char transa, char transb, gtint_t m,
     //----------------------------------------------------------
     //                  Call BLIS function
     //----------------------------------------------------------
-    syr2k<T>( storage, uplo, transa, transb, m, k, &alpha, a.data(), lda,
+    syr2k<T>( storage, uplo, transa, transb, n, k, &alpha, a.data(), lda,
                                 b.data(), ldb, &beta, c.data(), ldc );
 
     //----------------------------------------------------------
     //                  Call reference implementation.
     //----------------------------------------------------------
-    testinghelpers::ref_syr2k<T>( storage, uplo, transa, transb, m, k, alpha,
+    testinghelpers::ref_syr2k<T>( storage, uplo, transa, transb, n, k, alpha,
                a.data(), lda, b.data(), ldb, beta, c_ref.data(), ldc );
 
     //----------------------------------------------------------
     //              check component-wise error.
     //----------------------------------------------------------
-    computediff<T>( storage, m, m, c.data(), c_ref.data(), ldc, thresh );
+    computediff<T>( storage, n, n, c.data(), c_ref.data(), ldc, thresh );
 }

@@ -61,7 +61,22 @@ TEST_P(zgemmUkrSUP, FunctionalTest)
     char transa = std::get<7>(GetParam());                                  // transa
     char transb = std::get<8>(GetParam());                                  // transb
     bool is_memory_test = std::get<9>(GetParam());                          // is_memory_test
-    double thresh = 30 * ((std::max)(k,gtint_t(10))) * testinghelpers::getEpsilon<T>(); // Set the threshold for the errors
+
+    // Set the threshold for the errors:
+    // Check gtestsuite gemm.h or netlib source code for reminder of the
+    // functionality from which we estimate operation count per element
+    // of output, and hence the multipler for epsilon.
+    // No adjustment applied yet for complex data.
+    double thresh;
+    if (m == 0 || n == 0)
+        thresh = 0.0;
+    else if ((alpha == testinghelpers::ZERO<T>() || k == 0) && (beta == testinghelpers::ZERO<T>() ||
+              beta == testinghelpers::ONE<T>()))
+        thresh = 0.0;
+    else
+        thresh = (3*k+1)*testinghelpers::getEpsilon<T>();
+        //thresh = (63*k+1)*testinghelpers::getEpsilon<T>();
+
     test_complex_gemmsup_ukr(storageC, transa, transb, m, n, k, alpha, beta, thresh, kern_ptr, is_memory_test);
 }// end of function
 
@@ -993,7 +1008,21 @@ TEST_P(zgemmUkrNat, MicroKernelTest)
     gtint_t n = std::get<5>(GetParam());                                    // n
     zgemm_ukr_ft kern_ptr = std::get<6>(GetParam());                        // pointer to the gemm kernel
     bool is_memory_test   = std::get<7>(GetParam());                        // is_memory_test    
-    double thresh = 10 * ((std::max)(k,gtint_t(1))) * testinghelpers::getEpsilon<T>(); // Set the threshold for the errors
+
+    // Set the threshold for the errors:
+    // Check gtestsuite gemm.h or netlib source code for reminder of the
+    // functionality from which we estimate operation count per element
+    // of output, and hence the multipler for epsilon.
+    // No adjustment applied yet for complex data.
+    double thresh;
+    if (m == 0 || n == 0)
+        thresh = 0.0;
+    else if ((alpha == testinghelpers::ZERO<T>() || k == 0) && (beta == testinghelpers::ZERO<T>() ||
+              beta == testinghelpers::ONE<T>()))
+        thresh = 0.0;
+    else
+        thresh = (3*k+1)*testinghelpers::getEpsilon<T>();
+        //thresh = (4*k+1)*testinghelpers::getEpsilon<T>();
 
     test_gemmnat_ukr(storage, m, n, k, alpha, beta, thresh, kern_ptr, is_memory_test);
 }// end of function

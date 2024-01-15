@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2023, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2023 - 2024, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -63,9 +63,9 @@ TEST_P(csyr2kTest, RandomData)
     char transa = std::get<2>(GetParam());
     // denotes whether matrix b is n,c,t,h
     char transb = std::get<3>(GetParam());
-    // matrix size m
-    gtint_t m  = std::get<4>(GetParam());
     // matrix size n
+    gtint_t n  = std::get<4>(GetParam());
+    // matrix size k
     gtint_t k  = std::get<5>(GetParam());
     // specifies alpha value
     T alpha = std::get<6>(GetParam());
@@ -79,12 +79,23 @@ TEST_P(csyr2kTest, RandomData)
     gtint_t ldc_inc = std::get<10>(GetParam());
 
     // Set the threshold for the errors:
-    double thresh = m*k*testinghelpers::getEpsilon<T>();
+    // Check gtestsuite syr2k.h or netlib source code for reminder of the
+    // functionality from which we estimate operation count per element
+    // of output, and hence the multipler for epsilon.
+    // No adjustment applied yet for complex data.
+    double thresh;
+    if (n == 0)
+        thresh = 0.0;
+    else if ((alpha == testinghelpers::ZERO<T>() || k == 0) &&
+             (beta == testinghelpers::ZERO<T>() || beta == testinghelpers::ONE<T>()))
+        thresh = 0.0;
+    else
+        thresh = (6*k+1)*testinghelpers::getEpsilon<T>();
 
     //----------------------------------------------------------
     //     Call test body using these parameters
     //----------------------------------------------------------
-    test_syr2k<T>( storage, uplo, transa, transb, m, k, lda_inc, ldb_inc, ldc_inc, alpha, beta, thresh );
+    test_syr2k<T>( storage, uplo, transa, transb, n, k, lda_inc, ldb_inc, ldc_inc, alpha, beta, thresh );
 }
 
 class csyr2kTestPrint {
@@ -95,7 +106,7 @@ public:
         char uplo       = std::get<1>(str.param);
         char tsa        = std::get<2>(str.param);
         char tsb        = std::get<3>(str.param);
-        gtint_t m       = std::get<4>(str.param);
+        gtint_t n       = std::get<4>(str.param);
         gtint_t k       = std::get<5>(str.param);
         scomplex alpha  = std::get<6>(str.param);
         scomplex beta   = std::get<7>(str.param);
@@ -112,7 +123,7 @@ public:
         str_name = str_name + "_" + sfm+sfm+sfm;
         str_name = str_name + "_" + uplo;
         str_name = str_name + "_" + tsa + tsb;
-        str_name = str_name + "_" + std::to_string(m);
+        str_name = str_name + "_" + std::to_string(n);
         str_name = str_name + "_" + std::to_string(k);
         std::string alpha_str = ( alpha.real > 0) ? std::to_string(int(alpha.real)) : ("m" + std::to_string(int(std::abs(alpha.real))));
                     alpha_str = alpha_str + "pi" + (( alpha.imag > 0) ? std::to_string(int(alpha.imag)) : ("m" + std::to_string(int(std::abs(alpha.imag)))));
@@ -140,8 +151,8 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values('u','l'),                                      // u:upper, l:lower
             ::testing::Values('n'),                                          // transa
             ::testing::Values('n'),                                          // transb
-            ::testing::Range(gtint_t(10), gtint_t(31), 10),                  // m
             ::testing::Range(gtint_t(10), gtint_t(31), 10),                  // n
+            ::testing::Range(gtint_t(10), gtint_t(31), 10),                  // k
             ::testing::Values(scomplex{2.0, -1.0}, scomplex{-2.0, 3.0}),     // alpha
             ::testing::Values(scomplex{-3.0, 2.0}, scomplex{4.0, -1.0}),     // beta
             ::testing::Values(gtint_t(0), gtint_t(2)),                       // increment to the leading dim of a

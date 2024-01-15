@@ -60,24 +60,24 @@
  */
 
 template<typename T>
-static void syrk_(char uplo, char transa, gtint_t m, gtint_t k, T* alpha,
+static void syrk_(char uplo, char transa, gtint_t n, gtint_t k, T* alpha,
                     T* ap, gtint_t lda,  T* beta, T* cp, gtint_t ldc )
 {
     if constexpr (std::is_same<T, float>::value)
-        ssyrk_( &uplo, &transa, &m, &k, alpha, ap, &lda, beta, cp, &ldc );
+        ssyrk_( &uplo, &transa, &n, &k, alpha, ap, &lda, beta, cp, &ldc );
     else if constexpr (std::is_same<T, double>::value)
-        dsyrk_( &uplo, &transa, &m, &k, alpha, ap, &lda, beta, cp, &ldc );
+        dsyrk_( &uplo, &transa, &n, &k, alpha, ap, &lda, beta, cp, &ldc );
     else if constexpr (std::is_same<T, scomplex>::value)
-        csyrk_( &uplo, &transa, &m, &k, alpha, ap, &lda, beta, cp, &ldc );
+        csyrk_( &uplo, &transa, &n, &k, alpha, ap, &lda, beta, cp, &ldc );
     else if constexpr (std::is_same<T, dcomplex>::value)
-        zsyrk_( &uplo, &transa, &m, &k, alpha, ap, &lda, beta, cp, &ldc );
+        zsyrk_( &uplo, &transa, &n, &k, alpha, ap, &lda, beta, cp, &ldc );
     else
         throw std::runtime_error("Error in testsuite/level3/syrk.h: Invalid typename in syrk_().");
 }
 
 template<typename T>
 static void cblas_syrk(char storage, char uplo, char trnsa,
-    gtint_t m, gtint_t k, T* alpha, T* ap, gtint_t lda,
+    gtint_t n, gtint_t k, T* alpha, T* ap, gtint_t lda,
     T* beta, T* cp, gtint_t ldc)
 {
     enum CBLAS_ORDER cblas_order;
@@ -89,20 +89,20 @@ static void cblas_syrk(char storage, char uplo, char trnsa,
     testinghelpers::char_to_cblas_trans( trnsa, &cblas_transa );
 
     if constexpr (std::is_same<T, float>::value)
-        cblas_ssyrk( cblas_order, cblas_uplo, cblas_transa, m, k, *alpha, ap, lda, *beta, cp, ldc );
+        cblas_ssyrk( cblas_order, cblas_uplo, cblas_transa, n, k, *alpha, ap, lda, *beta, cp, ldc );
     else if constexpr (std::is_same<T, double>::value)
-        cblas_dsyrk( cblas_order, cblas_uplo, cblas_transa, m, k, *alpha, ap, lda, *beta, cp, ldc );
+        cblas_dsyrk( cblas_order, cblas_uplo, cblas_transa, n, k, *alpha, ap, lda, *beta, cp, ldc );
     else if constexpr (std::is_same<T, scomplex>::value)
-        cblas_csyrk( cblas_order, cblas_uplo, cblas_transa, m, k, alpha, ap, lda, beta, cp, ldc );
+        cblas_csyrk( cblas_order, cblas_uplo, cblas_transa, n, k, alpha, ap, lda, beta, cp, ldc );
     else if constexpr (std::is_same<T, dcomplex>::value)
-        cblas_zsyrk( cblas_order, cblas_uplo, cblas_transa, m, k, alpha, ap, lda, beta, cp, ldc );
+        cblas_zsyrk( cblas_order, cblas_uplo, cblas_transa, n, k, alpha, ap, lda, beta, cp, ldc );
     else
         throw std::runtime_error("Error in testsuite/level3/syrk.h: Invalid typename in cblas_syrk().");
 }
 
 template<typename T>
 static void typed_syrk(char storage, char uplo, char trnsa,
-    gtint_t m, gtint_t k, T* alpha, T* ap, gtint_t lda,
+    gtint_t n, gtint_t k, T* alpha, T* ap, gtint_t lda,
     T* beta, T* cp, gtint_t ldc)
 {
     trans_t transa;
@@ -115,7 +115,7 @@ static void typed_syrk(char storage, char uplo, char trnsa,
 
     rsa=rsc=1;
     csa=csc=1;
-    /* a = m x k   c = m x m    */
+    /* a = n x k   c = n x n    */
     if( (storage == 'c') || (storage == 'C') ) {
         csa = lda ;
         csc = ldc ;
@@ -126,19 +126,19 @@ static void typed_syrk(char storage, char uplo, char trnsa,
     }
 
     if constexpr (std::is_same<T, float>::value)
-        bli_ssyrk( blis_uplo, transa, m, k, alpha, ap, rsa, csa, beta, cp, rsc, csc );
+        bli_ssyrk( blis_uplo, transa, n, k, alpha, ap, rsa, csa, beta, cp, rsc, csc );
     else if constexpr (std::is_same<T, double>::value)
-        bli_dsyrk( blis_uplo, transa, m, k, alpha, ap, rsa, csa, beta, cp, rsc, csc );
+        bli_dsyrk( blis_uplo, transa, n, k, alpha, ap, rsa, csa, beta, cp, rsc, csc );
     else if constexpr (std::is_same<T, scomplex>::value)
-        bli_csyrk( blis_uplo, transa, m, k, alpha, ap, rsa, csa, beta, cp, rsc, csc );
+        bli_csyrk( blis_uplo, transa, n, k, alpha, ap, rsa, csa, beta, cp, rsc, csc );
     else if constexpr (std::is_same<T, dcomplex>::value)
-        bli_zsyrk( blis_uplo, transa, m, k, alpha, ap, rsa, csa, beta, cp, rsc, csc );
+        bli_zsyrk( blis_uplo, transa, n, k, alpha, ap, rsa, csa, beta, cp, rsc, csc );
     else
         throw std::runtime_error("Error in testsuite/level3/syrk.h: Invalid typename in typed_syrk().");
 }
 
 template<typename T>
-static void syrk( char storage, char uplo, char transa, gtint_t m, gtint_t k,
+static void syrk( char storage, char uplo, char transa, gtint_t n, gtint_t k,
     T* alpha, T* ap, gtint_t lda, T* beta, T* cp, gtint_t ldc )
 {
 
@@ -150,13 +150,13 @@ static void syrk( char storage, char uplo, char transa, gtint_t m, gtint_t k,
 
 #ifdef TEST_BLAS
     if( storage == 'c' || storage == 'C' )
-        syrk_<T>( uplo, transa, m, k, alpha, ap, lda, beta, cp, ldc );
+        syrk_<T>( uplo, transa, n, k, alpha, ap, lda, beta, cp, ldc );
     else
         throw std::runtime_error("Error in testsuite/level3/syrk.h: BLAS interface cannot be tested for row-major order.");
 #elif TEST_CBLAS
-    cblas_syrk<T>( storage, uplo, transa, m, k, alpha, ap, lda, beta, cp, ldc );
+    cblas_syrk<T>( storage, uplo, transa, n, k, alpha, ap, lda, beta, cp, ldc );
 #elif TEST_BLIS_TYPED
-    typed_syrk<T>( storage, uplo, transa, m, k, alpha, ap, lda, beta, cp, ldc );
+    typed_syrk<T>( storage, uplo, transa, n, k, alpha, ap, lda, beta, cp, ldc );
 #else
     throw std::runtime_error("Error in testsuite/level3/syrk.h: No interfaces are set to be tested.");
 #endif

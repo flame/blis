@@ -85,7 +85,18 @@ TEST_P(ztrsmEVT, NaNInfCheck)
     EVT_TYPE b_init = std::get<11>(GetParam());
 
     // Set the threshold for the errors:
-    double thresh = (std::max)(m, n)*testinghelpers::getEpsilon<T>();
+    // Check gtestsuite trsm.h or netlib source code for reminder of the
+    // functionality from which we estimate operation count per element
+    // of output, and hence the multipler for epsilon.
+    // No adjustment applied yet for complex data.
+    double thresh;
+    if (m == 0 || n == 0 || alpha == testinghelpers::ZERO<T>())
+        thresh = 0.0;
+    else
+        if ( side == 'l' || side == 'L' )
+            thresh = 3*m*testinghelpers::getEpsilon<T>();
+        else
+            thresh = 3*n*testinghelpers::getEpsilon<T>();
 
     //----------------------------------------------------------
     //     Call test body using these parameters

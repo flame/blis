@@ -207,7 +207,20 @@ static void test_gemmnat_ukr(
         // storage of all matrices A, B and C.
         // since A is col-storage, A' will be row-storage
     }
-    double thresh = 10 * ((std::max)(k,gtint_t(1))) * testinghelpers::getEpsilon<T>();
+
+    // Set the threshold for the errors:
+    // Check gtestsuite gemm.h or netlib source code for reminder of the
+    // functionality from which we estimate operation count per element
+    // of output, and hence the multipler for epsilon.
+    double thresh;
+    if (m == 0 || n == 0)
+        thresh = 0.0;
+    else if ((alpha == testinghelpers::ZERO<T>() || k == 0) && (beta == testinghelpers::ZERO<T>() ||
+              beta == testinghelpers::ONE<T>()))
+        thresh = 0.0;
+    else
+        thresh = (3*k+1)*testinghelpers::getEpsilon<T>();
+
     // call reference implementation
     testinghelpers::ref_gemm<T>( storage, transa, transb, m, n, k, alpha,
                                 buf_a, lda, buf_b, ldb, beta, (T*)buf_cref, ldc);
@@ -324,7 +337,17 @@ static void test_gemmk1_ukr( FT ukr_fp, gtint_t m, gtint_t n, gtint_t k, char st
     testinghelpers::ProtectedBuffer::stop_signal_handler();
 
     // Set the threshold for the errors:
-    double thresh = 10 * (std::max)(n,(std::max)(k,m)) * testinghelpers::getEpsilon<T>();
+    // Check gtestsuite gemm.h or netlib source code for reminder of the
+    // functionality from which we estimate operation count per element
+    // of output, and hence the multipler for epsilon.
+    double thresh;
+    if (m == 0 || n == 0)
+        thresh = 0.0;
+    else if ((alpha == testinghelpers::ZERO<T>() || k == 0) && (beta == testinghelpers::ZERO<T>() ||
+              beta == testinghelpers::ONE<T>()))
+        thresh = 0.0;
+    else
+        thresh = (3*k+1)*testinghelpers::getEpsilon<T>();
 
     // call reference implementation
     testinghelpers::ref_gemm<T>( storage, 'n', 'n', m, n, k, alpha,
@@ -551,7 +574,17 @@ static void test_gemmsup_ukr( FT ukr_fp, char trnsa, char trnsb, gtint_t m, gtin
     testinghelpers::ProtectedBuffer::stop_signal_handler();
 
     // Set the threshold for the errors:
-    double thresh = 10 * ((std::max)(k,gtint_t(1))) * testinghelpers::getEpsilon<T>();
+    // Check gtestsuite gemm.h or netlib source code for reminder of the
+    // functionality from which we estimate operation count per element
+    // of output, and hence the multipler for epsilon.
+    double thresh;
+    if (m == 0 || n == 0)
+        thresh = 0.0;
+    else if ((alpha == testinghelpers::ZERO<T>() || k == 0) && (beta == testinghelpers::ZERO<T>() ||
+              beta == testinghelpers::ONE<T>()))
+        thresh = 0.0;
+    else
+        thresh = (3*k+1)*testinghelpers::getEpsilon<T>();
 
     // call reference implementation
     testinghelpers::ref_gemm<T>( storage, trnsa, trnsb, m, n, k, alpha,

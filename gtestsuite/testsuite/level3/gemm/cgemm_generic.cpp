@@ -77,7 +77,20 @@ TEST_P(cgemmAPI, FunctionalTest)
     gtint_t ldb_inc = std::get<9>(GetParam());
     gtint_t ldc_inc = std::get<10>(GetParam());
     // Set the threshold for the errors:
-    double thresh = 10*m*n*testinghelpers::getEpsilon<T>();
+
+    // Check gtestsuite gemm.h or netlib source code for reminder of the
+    // functionality from which we estimate operation count per element
+    // of output, and hence the multipler for epsilon.
+    // No adjustment applied yet for complex data.
+    double thresh;
+    if (m == 0 || n == 0)
+        thresh = 0.0;
+    else if ((alpha == testinghelpers::ZERO<T>() || k == 0) &&
+             (beta == testinghelpers::ZERO<T>() || beta == testinghelpers::ONE<T>()))
+        thresh = 0.0;
+    else
+        thresh = (3*k+1)*testinghelpers::getEpsilon<T>();
+
     //----------------------------------------------------------
     //     Call test body using these parameters
     //----------------------------------------------------------

@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2023, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2023 - 2024, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -60,8 +60,8 @@ TEST_P(cherkTest, RandomData)
     char uplo = std::get<1>(GetParam());
     // denotes whether matrix a is n,c,t,h
     char transa = std::get<2>(GetParam());
-    // matrix size m
-    gtint_t m  = std::get<3>(GetParam());
+    // matrix size n
+    gtint_t n  = std::get<3>(GetParam());
     // matrix size k
     gtint_t k  = std::get<4>(GetParam());
     // specifies alpha value
@@ -75,12 +75,22 @@ TEST_P(cherkTest, RandomData)
     gtint_t ldc_inc = std::get<8>(GetParam());
 
     // Set the threshold for the errors:
-    double thresh = m*k*testinghelpers::getEpsilon<T>();
+    // Check gtestsuite herk.h or netlib source code for reminder of the
+    // functionality from which we estimate operation count per element
+    // of output, and hence the multipler for epsilon.
+    // No adjustment applied yet for complex data.
+    double thresh;
+    if (n == 0)
+        thresh = 0.0;
+    else if ((alpha == 0.0f || k == 0) && (beta == 0.0f || beta == 1.0f))
+        thresh = 0.0;
+    else
+        thresh = (3*k+1)*testinghelpers::getEpsilon<T>();
 
     //----------------------------------------------------------
     //     Call test body using these parameters
     //----------------------------------------------------------
-    test_herk<T>( storage, uplo, transa, m, k, lda_inc, ldc_inc, alpha, beta, thresh );
+    test_herk<T>( storage, uplo, transa, n, k, lda_inc, ldc_inc, alpha, beta, thresh );
 }
 
 class cherkTestPrint {
@@ -90,7 +100,7 @@ public:
         char sfm        = std::get<0>(str.param);
         char uplo       = std::get<1>(str.param);
         char tsa        = std::get<2>(str.param);
-        gtint_t m       = std::get<3>(str.param);
+        gtint_t n       = std::get<3>(str.param);
         gtint_t k       = std::get<4>(str.param);
         float alpha     = std::get<5>(str.param);
         float beta      = std::get<6>(str.param);
@@ -106,7 +116,7 @@ public:
         str_name = str_name + "_" + sfm+sfm+sfm;
         str_name = str_name + "_" + uplo;
         str_name = str_name + "_" + tsa;
-        str_name = str_name + "_" + std::to_string(m);
+        str_name = str_name + "_" + std::to_string(n);
         str_name = str_name + "_" + std::to_string(k);
         std::string alpha_str = ( alpha > 0) ? std::to_string(int(alpha)) : "m" + std::to_string(int(std::abs(alpha)));
         str_name = str_name + "_a" + alpha_str;
@@ -130,8 +140,8 @@ INSTANTIATE_TEST_SUITE_P(
             ),                                                               // storage format
             ::testing::Values('u','l'),                                      // u:upper, l:lower
             ::testing::Values('n','c'),                                      // transa
-            ::testing::Range(gtint_t(10), gtint_t(31), 10),                  // m
             ::testing::Range(gtint_t(10), gtint_t(31), 10),                  // n
+            ::testing::Range(gtint_t(10), gtint_t(31), 10),                  // k
             ::testing::Values(-2.0, 3.0),                                    // alpha
             ::testing::Values(4.0, -1.0),                                    // beta
             ::testing::Values(gtint_t(0), gtint_t(2)),                       // increment to the leading dim of a

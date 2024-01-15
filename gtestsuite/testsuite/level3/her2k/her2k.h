@@ -47,7 +47,7 @@
                          the matrix multiplication
  * @param[in]     transb specifies the form of op( B ) to be used in
                          the matrix multiplication
- * @param[in]     m      specifies the number of rows and cols of the  matrix
+ * @param[in]     n      specifies the number of rows and cols of the  matrix
                          op( A ) and rows of the matrix C and B
  * @param[in]     k      specifies the number of columns of the matrix
                          op( B ) and the number of columns of the matrix C
@@ -65,20 +65,20 @@
  */
 
 template<typename T, typename RT = typename testinghelpers::type_info<T>::real_type>
-static void her2k_(char uplo, char transa, gtint_t m, gtint_t k, T* alpha,
+static void her2k_(char uplo, char transa, gtint_t n, gtint_t k, T* alpha,
                     T* ap, gtint_t lda, T* bp, gtint_t ldb, RT* beta, T* cp, gtint_t ldc )
 {
     if constexpr (std::is_same<T, scomplex>::value)
-        cher2k_( &uplo, &transa, &m, &k, alpha, ap, &lda, bp, &ldb, beta, cp, &ldc );
+        cher2k_( &uplo, &transa, &n, &k, alpha, ap, &lda, bp, &ldb, beta, cp, &ldc );
     else if constexpr (std::is_same<T, dcomplex>::value)
-        zher2k_( &uplo, &transa, &m, &k, alpha, ap, &lda, bp, &ldb, beta, cp, &ldc );
+        zher2k_( &uplo, &transa, &n, &k, alpha, ap, &lda, bp, &ldb, beta, cp, &ldc );
     else
         throw std::runtime_error("Error in testsuite/level3/her2k.h: Invalid typename in her2k_().");
 }
 
 template<typename T, typename RT = typename testinghelpers::type_info<T>::real_type>
 static void cblas_her2k(char storage, char uplo, char transa,
-    gtint_t m, gtint_t k, T* alpha, T* ap, gtint_t lda,
+    gtint_t n, gtint_t k, T* alpha, T* ap, gtint_t lda,
     T* bp, gtint_t ldb, RT* beta, T* cp, gtint_t ldc)
 {
     enum CBLAS_ORDER cblas_order;
@@ -90,16 +90,16 @@ static void cblas_her2k(char storage, char uplo, char transa,
     testinghelpers::char_to_cblas_trans( transa, &cblas_transa );
 
     if constexpr (std::is_same<T, scomplex>::value)
-        cblas_cher2k( cblas_order, cblas_uplo, cblas_transa, m, k, alpha, ap, lda, bp, ldb, *beta, cp, ldc );
+        cblas_cher2k( cblas_order, cblas_uplo, cblas_transa, n, k, alpha, ap, lda, bp, ldb, *beta, cp, ldc );
     else if constexpr (std::is_same<T, dcomplex>::value)
-        cblas_zher2k( cblas_order, cblas_uplo, cblas_transa, m, k, alpha, ap, lda, bp, ldb, *beta, cp, ldc );
+        cblas_zher2k( cblas_order, cblas_uplo, cblas_transa, n, k, alpha, ap, lda, bp, ldb, *beta, cp, ldc );
     else
         throw std::runtime_error("Error in testsuite/level3/her2k.h: Invalid typename in cblas_her2k().");
 }
 
 template<typename T, typename RT = typename testinghelpers::type_info<T>::real_type>
 static void typed_her2k(char storage, char uplo, char trnsa, char trnsb,
-    gtint_t m, gtint_t k, T* alpha, T* ap, gtint_t lda,
+    gtint_t n, gtint_t k, T* alpha, T* ap, gtint_t lda,
     T* bp, gtint_t ldb, RT* beta, T* cp, gtint_t ldc)
 {
     trans_t transa, transb;
@@ -114,7 +114,7 @@ static void typed_her2k(char storage, char uplo, char trnsa, char trnsb,
 
     rsa=rsb=rsc=1;
     csa=csb=csc=1;
-    /* a = m x k       b = k x n       c = m x n    */
+    /* a = n x k       b = k x n       c = n x n    */
     if( (storage == 'c') || (storage == 'C') ) {
         csa = lda ;
         csb = ldb ;
@@ -127,19 +127,19 @@ static void typed_her2k(char storage, char uplo, char trnsa, char trnsb,
     }
 
     if constexpr (std::is_same<T, float>::value)
-        bli_sher2k( blis_uplo, transa, transb, m, k, alpha, ap, rsa, csa, bp, rsb, csb, beta, cp, rsc, csc );
+        bli_sher2k( blis_uplo, transa, transb, n, k, alpha, ap, rsa, csa, bp, rsb, csb, beta, cp, rsc, csc );
     else if constexpr (std::is_same<T, double>::value)
-        bli_dher2k( blis_uplo, transa, transb, m, k, alpha, ap, rsa, csa, bp, rsb, csb, beta, cp, rsc, csc );
+        bli_dher2k( blis_uplo, transa, transb, n, k, alpha, ap, rsa, csa, bp, rsb, csb, beta, cp, rsc, csc );
     else if constexpr (std::is_same<T, scomplex>::value)
-        bli_cher2k( blis_uplo, transa, transb, m, k, alpha, ap, rsa, csa, bp, rsb, csb, beta, cp, rsc, csc );
+        bli_cher2k( blis_uplo, transa, transb, n, k, alpha, ap, rsa, csa, bp, rsb, csb, beta, cp, rsc, csc );
     else if constexpr (std::is_same<T, dcomplex>::value)
-        bli_zher2k( blis_uplo, transa, transb, m, k, alpha, ap, rsa, csa, bp, rsb, csb, beta, cp, rsc, csc );
+        bli_zher2k( blis_uplo, transa, transb, n, k, alpha, ap, rsa, csa, bp, rsb, csb, beta, cp, rsc, csc );
     else
         throw std::runtime_error("Error in testsuite/level3/her2k.h: Invalid typename in typed_her2k().");
 }
 
 template<typename T, typename RT = typename testinghelpers::type_info<T>::real_type>
-static void her2k( char storage, char uplo, char transa, char transb, gtint_t m, gtint_t k,
+static void her2k( char storage, char uplo, char transa, char transb, gtint_t n, gtint_t k,
     T* alpha, T* ap, gtint_t lda, T* bp, gtint_t ldb, RT* beta, T* cp, gtint_t ldc )
 {
 
@@ -152,14 +152,14 @@ static void her2k( char storage, char uplo, char transa, char transb, gtint_t m,
 
 #ifdef TEST_BLAS
     if( storage == 'c' || storage == 'C' )
-        her2k_<T>( uplo, transa, m, k, alpha, ap, lda, bp, ldb, beta, cp, ldc );
+        her2k_<T>( uplo, transa, n, k, alpha, ap, lda, bp, ldb, beta, cp, ldc );
     else
         throw std::runtime_error("Error in testsuite/level3/her2k.h: BLAS interface cannot be tested for row-major order.");
 
 #elif TEST_CBLAS
-    cblas_her2k<T>( storage, uplo, transa, m, k, alpha, ap, lda, bp, ldb, beta, cp, ldc );
+    cblas_her2k<T>( storage, uplo, transa, n, k, alpha, ap, lda, bp, ldb, beta, cp, ldc );
 #elif TEST_BLIS_TYPED
-    typed_her2k<T>( storage, uplo, transa, transb, m, k, alpha, ap, lda, bp, ldb, beta, cp, ldc );
+    typed_her2k<T>( storage, uplo, transa, transb, n, k, alpha, ap, lda, bp, ldb, beta, cp, ldc );
 #else
     throw std::runtime_error("Error in testsuite/level3/her2k.h: No interfaces are set to be tested.");
 #endif
