@@ -1,104 +1,167 @@
-##Copyright (C) 2022, Advanced Micro Devices, Inc. All rights reserved.##
-
-add_definitions(-DBLAS="AOCL")
-add_definitions(-DN_REPEAT=1000)
-add_definitions(-DINT_FS="%lld")
-add_definitions(-DUINT_FS="%llu")
-
-add_executable(BenchAmaxv bench_amaxv.c)
-target_link_libraries(BenchAmaxv debug "${LIB_NAME}.lib")
-if(ENABLE_OPENMP)
-    target_link_libraries(BenchAmaxv OpenMP::OpenMP_CXX)
+##Copyright (C) 2022-2024, Advanced Micro Devices, Inc. All rights reserved.##
+# Comments:
+# Set the path to the BLIS installation.
+set(BLIS_INSTALL_PATH "" CACHE STRING "Setting the path to a BLIS installation that needs testing.")
+if(BLIS_INSTALL_PATH)
+    message(STATUS "BLIS_INSTALL_PATH :" ${BLIS_INSTALL_PATH})
 endif()
-target_link_libraries(BenchAmaxv optimized "${LIB_NAME}.lib")
 
-add_executable(BenchAxpbyv bench_axpbyv.c)
-target_link_libraries(BenchAxpbyv debug "${LIB_NAME}.lib")
-if(ENABLE_OPENMP)
-    target_link_libraries(BenchAxpbyv OpenMP::OpenMP_CXX)
-endif()
-target_link_libraries(BenchAxpbyv optimized "${LIB_NAME}.lib")
+# - DIST_PATH is assumed to not exist if BLIS_INSTALL_PATH is given.
+# - We must use recursively expanded assignment for LIB_PATH and INC_PATH in
+#   the second case because CONFIG_NAME is not yet set.
+# Override the value of CINCFLAGS so that the value of CFLAGS returned by
+# get-user-cflags-for() is not cluttered up with include paths needed only
+# while building BLIS.
 
-add_executable(BenchCopyv bench_copyv.c)
-target_link_libraries(BenchCopyv debug "${LIB_NAME}.lib")
-if(ENABLE_OPENMP)
-    target_link_libraries(BenchCopyv OpenMP::OpenMP_CXX)
+#if(NOT DEFINED BLIS_INSTALL_PATH)
+if(BLIS_INSTALL_PATH STREQUAL "")
+    set(DIST_PATH ${CMAKE_BINARY_DIR})
+    set(LIB_PATH ${DIST_PATH}/lib/${BLIS_CONFIG_FAMILY})
+    set(INC_PATH ${DIST_PATH}/include/${BLIS_CONFIG_FAMILY})
+    set(CINFLAGS ${INC_PATH})
+    set(LIBBLIS  libblis)
+    message(STATUS "CMAKE_BINARY_DIR : " ${DIST_PATH})
+else()
+    set(LIB_PATH ${BLIS_INSTALL_PATH}/lib)
+    set(INC_PATH ${BLIS_INSTALL_PATH}/include)
+    set(CINFLAGS ${INC_PATH})
+    # Set up the library name.
+    if(WIN32)
+        set(LIB_BLIS AOCL-LibBlis-Win)
+    else()
+        set(LIB_BLIS libblis)
+    endif()
+    # Append if threading is required.
+    if(NOT (ENABLE_THREADING STREQUAL "no"))
+        if(WIN32)
+            string(APPEND LIB_BLIS -MT)
+        else()
+            string(APPEND LIB_BLIS -mt)
+        endif()
+    endif()
+    # Append for dll if necessary.
+    if(WIN32 AND BUILD_SHARED_LIBS)
+        string(APPEND LIB_BLIS -dll)
+    endif()
+    # Setting the suffix for find_library().
+    if(WIN32)
+        set(LIB_BLIS .lib)
+    else()
+        if(BUILD_SHARED_LIBS)
+            string(APPEND LIB_BLIS .so)
+        else()
+            string(APPEND LIB_BLIS .a)
+        endif()
+    endif()
+    set(LIBBLIS  ${LIB_PATH}/${LIB_BLIS})
+    message(STATUS "BLIS_INSTALL_PATH : " ${LIBBLIS})
 endif()
-target_link_libraries(BenchCopyv optimized "${LIB_NAME}.lib")
 
-add_executable(BenchDotv bench_dotv.c)
-target_link_libraries(BenchDotv debug "${LIB_NAME}.lib")
-if(ENABLE_OPENMP)
-    target_link_libraries(BenchDotv OpenMP::OpenMP_CXX)
+if(WIN32)
+    set(LIBSUFFIX dll)
+else()
+    set(LIBSUFFIX so)
 endif()
-target_link_libraries(BenchDotv optimized "${LIB_NAME}.lib")
 
-add_executable(BenchGemm bench_gemm.c)
-target_link_libraries(BenchGemm debug "${LIB_NAME}.lib")
-if(ENABLE_OPENMP)
-    target_link_libraries(BenchGemm OpenMP::OpenMP_CXX)
+set(NREPEATS "1000" CACHE STRING "Set no. of times loop repeats.")
+set(MKL_PATH $ENV{MKLROOT} CACHE STRING "Set MKL_PATH.")
+if(THREADING_MODEL STREQUAL "no")
+    set(MKL_THREAD "${MKL_PATH}/libmkl_sequential.${LIBSUFFIX}")
+else()
+    set(MKL_THREAD "${MKL_PATH}/libmkl_gnu_thread.${LIBSUFFIX}")
+    set(MKL_OMP iomp5)
 endif()
-target_link_libraries(BenchGemm optimized "${LIB_NAME}.lib")
+set(INTEL_LP64 "${MKL_PATH}/libmkl_intel_lp64.${LIBSUFFIX}")
+set(MKL_CORE "${MKL_PATH}/libmkl_core.${LIBSUFFIX}")
+set(COMMON_LIBS pthread m dl ${MKL_OMP})
+set(MKL_LIB ${INTEL_LP64} ${MKL_CORE} ${MKL_THREAD} ${COMMON_LIBS})
+set(OPENBLAS_PATH "/home/amd/mylibs/openblas" CACHE STRING "Set OPENBLAS_PATH.")
+set(OPENBLAS_LIB "${OPENBLAS_PATH}/libopenblas.${LIBSUFFIX}")
+set(ATLAS_PATH "/home/amd/mylibs/atlas" CACHE STRING "Set ATLAS_PATH.")
+set(F77BLAS_LIB "${ATLAS_PATH}/libf77blas.${LIBSUFFIX}")
+set(ATLAS_LIB "${ATLAS_PATH}/libatlas.${LIBSUFFIX}")
+set(ATLAS_LIB ${ATLAS_LIB} ${F77BLAS_LIB})
 
-add_executable(BenchGemmt bench_gemmt.c)
-target_link_libraries(BenchGemmt debug "${LIB_NAME}.lib")
-if(ENABLE_OPENMP)
-    target_link_libraries(BenchGemmt OpenMP::OpenMP_CXX)
-endif()
-target_link_libraries(BenchGemmt optimized "${LIB_NAME}.lib")
 
-add_executable(BenchGemv bench_gemv.c)
-target_link_libraries(BenchGemv debug "${LIB_NAME}.lib")
-if(ENABLE_OPENMP)
-    target_link_libraries(BenchGemv OpenMP::OpenMP_CXX)
-endif()
-target_link_libraries(BenchGemv optimized "${LIB_NAME}.lib")
+# Include the corresponding make_defs.cmake that holds the required compiler options.
+include(${CMAKE_SOURCE_DIR}/config/${BLIS_CONFIG_FAMILY}/make_defs.cmake)
 
-add_executable(BenchGer bench_ger.c)
-target_link_libraries(BenchGer debug "${LIB_NAME}.lib")
-if(ENABLE_OPENMP)
-    target_link_libraries(BenchGer OpenMP::OpenMP_CXX)
-endif()
-target_link_libraries(BenchGer optimized "${LIB_NAME}.lib")
+# Gather all local source files.
+file(GLOB file_list LIST_DIRECTORIES false RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}/" "*.c")
 
-add_executable(BenchNrm2 bench_nrm2.c)
-target_link_libraries(BenchNrm2 debug "${LIB_NAME}.lib")
-if(ENABLE_OPENMP)
-    target_link_libraries(BenchNrm2 OpenMP::OpenMP_CXX)
-endif()
-target_link_libraries(BenchNrm2 optimized "${LIB_NAME}.lib")
+set(BENCH_FLAGS -DN_REPEAT=${NREPEATS} -DINT_FS="%lld" -DUINT_FS="%llu")
+# Create an executable using the sources above.
+function(benchexe extn)
+    set(dblas "aocl")
+    if(extn STREQUAL "mkl")
+        set(BLAS_LIBS ${MKL_LIB})
+        set(dblas ${extn})
+    elseif(extn STREQUAL "openblas")
+        set(BLAS_LIBS ${OPENBLAS_LIB})
+        set(dblas ${extn})
+    elseif(extn STREQUAL "atlas")
+        set(BLAS_LIBS ${ATLAS_LIB})
+        set(dblas ${extn})
+    endif()
+    set(BENCH_FLAGS "${BENCH_FLAGS}" -DBLAS="${dblas}")
+    foreach(src ${file_list})
+        string(REGEX REPLACE ".c$" "" exec_name ${src})
+        set(exec_name "${exec_name}_${extn}")
+        add_executable(${exec_name}.x ${src})
+        target_compile_options(${exec_name}.x
+                                PRIVATE
+                                # load-var-for,COPTFLAGS
+                                ${COPTFLAGS}
+                            )
+        if(WIN32 AND BUILD_SHARED_LIBS)
+            target_compile_definitions(${exec_name}.x
+                                        PRIVATE
+                                        # in get-noopt-cflags-for
+                                        ${VERS_DEF}
+                                        "-DBLIS_EXPORT=__declspec(dllimport)"
+                                        ${BENCH_FLAGS}
+                                    )
+        else()
+            target_compile_definitions(${exec_name}.x
+                                        PRIVATE
+                                        # in get-noopt-cflags-for
+                                        ${VERS_DEF}
+                                        ${BENCH_FLAGS}
+                                    )
+        endif()
+        target_include_directories(${exec_name}.x
+                                BEFORE
+                                PRIVATE
+                                # in get-noopt-cflags-for
+                                ${CINFLAGS}
+                            )
+        target_link_libraries(${exec_name}.x PRIVATE ${BLAS_LIBS} ${LIBBLIS} ${LDFLAGS})
+        if(THREADING_MODEL STREQUAL "openmp")
+            target_link_libraries(${exec_name}.x PRIVATE OpenMP::OpenMP_C)
+        endif()
+        list(APPEND temp_executables ${exec_name}.x)
+    endforeach()
+     set(bench_executables ${temp_executables} PARENT_SCOPE)
+endfunction()
 
-add_executable(BenchScalv bench_scalv.c)
-target_link_libraries(BenchScalv debug "${LIB_NAME}.lib")
-if(ENABLE_OPENMP)
-    target_link_libraries(BenchScalv OpenMP::OpenMP_CXX)
-endif()
-target_link_libraries(BenchScalv optimized "${LIB_NAME}.lib")
+benchexe("blis")
+add_custom_target(bench_blis DEPENDS ${bench_executables})
+benchexe("mkl")
+add_custom_target(bench_mkl DEPENDS ${bench_executables})
+benchexe("openblas")
+add_custom_target(bench_openblas DEPENDS ${bench_executables})
+benchexe("atlas")
+add_custom_target(bench_atlas DEPENDS ${bench_executables})
+add_custom_target(benchmark DEPENDS bench_blis bench_mkl bench_openblas)
 
-add_executable(BenchSwapv bench_swapv.c)
-target_link_libraries(BenchSwapv debug "${LIB_NAME}.lib")
-if(ENABLE_OPENMP)
-    target_link_libraries(BenchSwapv OpenMP::OpenMP_CXX)
-endif()
-target_link_libraries(BenchSwapv optimized "${LIB_NAME}.lib")
+# Put all those targets under bench-targets folder name so that they appear all together in IDE.
+# NOTE : To run bench for atlas, add bench_atlas to the bench-targets
+set_target_properties(benchmark bench_blis bench_mkl bench_openblas PROPERTIES FOLDER bench-targets)
 
-add_executable(BenchSyrk bench_syrk.c)
-target_link_libraries(BenchSyrk debug "${LIB_NAME}.lib")
-if(ENABLE_OPENMP)
-    target_link_libraries(BenchSyrk OpenMP::OpenMP_CXX)
+# Add bench_aocl_gemm only if aocl_gemm is in the ENABLE_ADDON list.
+# This needs to work in cases where both aocl_gemm and gemmd are requested.
+# lpgemm_index will be -1 if it's not found in ENABLE_ADDON list.
+list(FIND ENABLE_ADDON "aocl_gemm" lpgemm_index)
+if(NOT (lpgemm_index STREQUAL -1))
+    add_subdirectory(bench_aocl_gemm EXCLUDE_FROM_ALL)
 endif()
-target_link_libraries(BenchSyrk optimized "${LIB_NAME}.lib")
-
-add_executable(BenchTrsm bench_trsm.c)
-target_link_libraries(BenchTrsm debug "${LIB_NAME}.lib")
-if(ENABLE_OPENMP)
-    target_link_libraries(BenchTrsm OpenMP::OpenMP_CXX)
-endif()
-target_link_libraries(BenchTrsm optimized "${LIB_NAME}.lib")
-
-add_executable(BenchTrsv bench_trsv.c)
-target_link_libraries(BenchTrsv debug "${LIB_NAME}.lib")
-if(ENABLE_OPENMP)
-    target_link_libraries(BenchTrsv OpenMP::OpenMP_CXX)
-endif()
-target_link_libraries(BenchTrsv optimized "${LIB_NAME}.lib")

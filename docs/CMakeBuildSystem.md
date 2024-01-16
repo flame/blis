@@ -72,9 +72,9 @@ On Windows, specify Visual Studio generator using
 cmake -G "Visual Studio 17 2022"
 ```
 
-For the rest of this documentation, we will use the platform-agnostic commands to build the libraries, but the usual make commands can be used instead. On the following command snippets we ommit specifying the generator, but one can use their prefered way of building using common CMake practices. 
+For the rest of this documentation, we will use the platform-agnostic commands to build the libraries, but the usual make commands can be used instead. On the following command snippets we ommit specifying the generator, but one can use their prefered way of building using common CMake practices.
 
-### Choosing a configuration 
+### Choosing a configuration
 
 This step is equivalent to running `./configure <confname>` using the Make system. In this case, simply run:
 ```
@@ -160,7 +160,7 @@ The BLIS CMake system aims to be combatible with the current `make` system. For 
 | `testblas`      | Run the BLAS test drivers with default parameters (runs for a few seconds). |
 | `checkbliscpp`  | Run the BLIS C++ tests (runs for a few seconds). |
 
-**_NOTE:_** 
+**_NOTE:_**
 Using those targets sets the environment appropriately, so copying the input files and/or the DLL in case of Windows builds is not required.
 
 ### Running the testsuites
@@ -172,13 +172,13 @@ Using those targets sets the environment appropriately, so copying the input fil
 
 The CMake system is designed to closely relate to the BLIS Make system. Assuming that a user has followed the steps in [Configuration How To](ConfigurationHowTo.md), adding the new configuration on the CMake system requires the following steps:
 * Add a `make_defs.cmake` file which is equivalent to `make_defs.mk`. One can see `blis/config/zen/make_defs.cmake` and `blis/config/zen/make_defs.mk` for an example.
-* Update `blis/CMakeLists.txt` to remove the error for the particular new configuration and to add the option in `set_property()` so that it appears in cmake-gui. 
+* Update `blis/CMakeLists.txt` to remove the error for the particular new configuration and to add the option in `set_property()` so that it appears in cmake-gui.
 
 ## Some examples
 
 In this section we provide some examples for users that are familiar with the build system based in Makefiles and want to try the new CMake system.
 
-**_NOTE:_** 
+**_NOTE:_**
 The CMake system generates the shared libraries by default. To build the static libraries, you need to specify the corresponding CMake variable below
 ```
 cmake .. -DBUILD_SHARED_LIBS=OFF -DBLIS_CONFIG_FAMILY=amdzen
@@ -207,7 +207,7 @@ cmake .. -G "Visual Studio 17 2022" -TClangCl -DENABLE_THREADING=openmp -DINT_SI
 
 ### Example 2: single-threaded ILP64 libraries for amdzen configuration with aocl_gemm addon enabled and default compiler
 
-**_NOTE:_** 
+**_NOTE:_**
 Addon functionality is currently available only on Linux.
 
 * With configure script:
@@ -218,6 +218,71 @@ Addon functionality is currently available only on Linux.
 * With CMake on Linux:
 ```
 cmake .. -DENABLE_THREADING=no -DINT_SIZE=64 -DBLAS_INT_SIZE=64 -DENABLE_ADDON=aocl_gemm -DBLIS_CONFIG_FAMILY=amdzen
+```
+
+### Bench
+* Bench is used to measure performance. The bench targets depend on BLIS library, which is built depending on the cmake configuration.
+
+## 1. Bench CMake Configuration
+
+## 1.1.Move to "bench" folder within blis_build dir created during configuring cmake.
+
+## 1.2.Now build bench selecting the targets
+# 1.2.1.To build blis targets
+* To build the benchmark executables with the BLIS library built from CMake project use
+```
+$ cmake ..
+$ cmake --build . --target bench_blis         #builds blis extension executables
+```
+
+* To build the benchmark executables with any BLIS package provide a path to the installation using
+```
+$ cmake .. -DBLIS_INSTALL_PATH=/BLIS_installation_path
+$ cmake --build . --target bench_blis         #builds blis extension executables
+```
+
+## 1.2.2.To build MKL targets
+* To build the benchmark executables with MKLROOT use
+```
+$ cmake ..
+$ cmake --build . --target bench_mkl          #builds mkl extension executables
+```
+
+* If MKLROOT is not set, then set MKL_PATH and build the benchmark executables using
+```
+$ cmake .. -DMKL_PATH=/path_to_MKL_library
+$ cmake --build . --target bench_mkl           #builds mkl extension executables
+```
+
+## 1.2.3.To build openblas targets
+* To build benchmark executables for Openblas,set the OPENBLAS_PATH and build using
+```
+$ cmake .. -DOPENBLAS_PATH=/path_to_Openblas
+$ cmake --build . --target bench_openblas      #builds openblas extension executables
+```
+
+## 1.2.4.To build for all targets
+* To build for all benchmark executables set the MKL_PATH,OPENBLAS_PATH, then build using
+```
+$ cmake .. -DMKL_PATH=/path_to_MKL_library  -DOPENBLAS_PATH=/path_to_Openblas
+$ cmake --build . --target benchmark           #builds for all targets
+```
+
+## 2.To measure performance for "bench_aocl_gemm" only when lpgemm is configured during cmake.
+```
+cmake .. -DENABLE_ADDON="aocl_gemm"
+```
+
+# 2.1.Move to "bench_aocl_gemm" folder within blis_build/bench folder.
+
+# 2.2.Now build bench_aocl_gemm
+```
+$ cmake --build . or cmake --build . --target benchmark_lpgemm
+```
+
+## 3.Run any of the bench executable
+```
+ ./<executable> ../../bench/inputfile.txt outfile.txt
 ```
 
 ## Conclusion
