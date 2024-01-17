@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2023, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2023-24, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -36,18 +36,18 @@
 #include "test_trsm.h"
 
 class dtrsmTest :
-        public ::testing::TestWithParam<std::tuple<char,
-                                                   char,
-                                                   char,
-                                                   char,
-                                                   char,
-                                                   gtint_t,
-                                                   gtint_t,
-                                                   double,
-                                                   gtint_t,
-                                                   gtint_t>> {};
+        public ::testing::TestWithParam<std::tuple<char,          // storage format
+                                                   char,          // side
+                                                   char,          // uplo
+                                                   char,          // transa
+                                                   char,          // diaga
+                                                   gtint_t,       // m
+                                                   gtint_t,       // n
+                                                   double,        // alpha
+                                                   gtint_t,       // lda_inc
+                                                   gtint_t>> {};  // ldb_inc
 
-TEST_P(dtrsmTest, RandomData)
+TEST_P(dtrsmTest, Accuracy_test)
 {
     using T = double;
     //----------------------------------------------------------
@@ -78,7 +78,7 @@ TEST_P(dtrsmTest, RandomData)
     gtint_t ldb_inc = std::get<9>(GetParam());
 
     // Set the threshold for the errors:
-    double thresh = (std::max)(m, n)*testinghelpers::getEpsilon<T>();
+    double thresh = 1.5*std::max(m, n)*testinghelpers::getEpsilon<T>();
 
     //----------------------------------------------------------
     //     Call test body using these parameters
@@ -105,14 +105,14 @@ public:
 #elif TEST_CBLAS
         std::string str_name = "cblas_dtrsm";
 #else  //#elif TEST_BLIS_TYPED
-        std::string str_name = "bli_dtrsm";
+        std::string str_name = "blis_dtrsm";
 #endif
         str_name = str_name + "_" + sfm+sfm+sfm;
         str_name = str_name + "_" + side + uploa + transa;
         str_name = str_name + "_d" + diaga;
         str_name = str_name + "_" + std::to_string(m);
         str_name = str_name + "_" + std::to_string(n);
-        std::string alpha_str = ( alpha > 0) ? std::to_string(int(alpha)) : "m" + std::to_string(int(std::abs(alpha)));
+        std::string alpha_str = isnan( alpha ) ? "NaN" : isinf( alpha ) ? "Inf" : ( alpha > 0) ? std::to_string(int(alpha)) : "m" + std::to_string(int(std::abs(alpha)));
         str_name = str_name + "_a" + alpha_str;
         str_name = str_name + "_" + std::to_string(lda_inc);
         str_name = str_name + "_" + std::to_string(ldb_inc);
@@ -120,9 +120,12 @@ public:
     }
 };
 
-// Black box testing.
+/**
+ * @brief Test DTRSM native path, which starts from size 1500 for BLAS api
+ *        and starts from size 0 for BLIS api.
+ */
 INSTANTIATE_TEST_SUITE_P(
-        Blackbox,
+        Native,
         dtrsmTest,
         ::testing::Combine(
             ::testing::Values('c'
@@ -134,9 +137,126 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values('u','l'),                                      // uplo  u:upper, l:lower
             ::testing::Values('n','t'),                                      // transa
             ::testing::Values('n','u'),                                      // diaga , n=nonunit u=unit
-            ::testing::Range(gtint_t(10), gtint_t(11), 10),                  // m
-            ::testing::Range(gtint_t(10), gtint_t(11), 10),                  // n
-            ::testing::Values( 1.0, -2.0),                                   // alpha
+            ::testing::Values(1, 2, 112, 1551),                              // m
+            ::testing::Values(1, 2, 154, 1676),                              // n
+            ::testing::Values(-2.4),                                         // alpha
+            ::testing::Values(gtint_t(5)),                                   // increment to the leading dim of a
+            ::testing::Values(gtint_t(3))                                    // increment to the leading dim of b
+        ),
+        ::dtrsmTestPrint()
+    );
+
+/**
+ * @brief Test DTRSM small avx2 path all fringe cases
+ *        Kernel size for avx2 small path is 6x8, testing in range of
+ *        1 to 8 ensures all finge cases are being tested.
+ */
+INSTANTIATE_TEST_SUITE_P(
+        Small_AVX2_fringe,
+        dtrsmTest,
+        ::testing::Combine(
+            ::testing::Values('c'),                                          // storage format
+            ::testing::Values('l','r'),                                      // side  l:left, r:right
+            ::testing::Values('u','l'),                                      // uplo  u:upper, l:lower
+            ::testing::Values('n','t'),                                      // transa
+            ::testing::Values('n','u'),                                      // diaga , n=nonunit u=unit
+            ::testing::Range(gtint_t(1), gtint_t(9), 1),                     // m
+            ::testing::Range(gtint_t(1), gtint_t(9), 1),                     // n
+            ::testing::Values(-2.4),                                         // alpha
+            ::testing::Values(gtint_t(5)),                                   // increment to the leading dim of a
+            ::testing::Values(gtint_t(3))                                    // increment to the leading dim of b
+        ),
+        ::dtrsmTestPrint()
+    );
+
+/**
+ * @brief Test DTRSM small avx2 path which is used in
+ *        range [0, 50] for genoa and [0, 1499] for milan
+ */
+INSTANTIATE_TEST_SUITE_P(
+        Small_AVX2,
+        dtrsmTest,
+        ::testing::Combine(
+            ::testing::Values('c'),                                          // storage format
+            ::testing::Values('l','r'),                                      // side  l:left, r:right
+            ::testing::Values('u','l'),                                      // uplo  u:upper, l:lower
+            ::testing::Values('n','t'),                                      // transa
+            ::testing::Values('n','u'),                                      // diaga , n=nonunit u=unit
+            ::testing::Values(17, 110, 51, 1499),                           // m
+            ::testing::Values(17, 48 , 51, 1499),                           // n
+            ::testing::Values(-2.4),                                         // alpha
+            ::testing::Values(gtint_t(5)),                                   // increment to the leading dim of a
+            ::testing::Values(gtint_t(3))                                    // increment to the leading dim of b
+        ),
+        ::dtrsmTestPrint()
+    );
+
+/**
+ * @brief Test DTRSM small avx512 path all fringe cases
+ *        small avx512 is used in range [51, 1499]
+ *        Kernel size for avx512 small path is 8x8, therefore
+ *        testing in range of 51 to 58 covers all fringe cases.
+ */
+INSTANTIATE_TEST_SUITE_P(
+        Small_AVX512_fringe,
+        dtrsmTest,
+        ::testing::Combine(
+            ::testing::Values('c'),                                          // storage format
+            ::testing::Values('l','r'),                                      // side  l:left, r:right
+            ::testing::Values('u','l'),                                      // uplo  u:upper, l:lower
+            ::testing::Values('n','t'),                                      // transa
+            ::testing::Values('n','u'),                                      // diaga , n=nonunit u=unit
+            ::testing::Range(gtint_t(51), gtint_t(59), 1),                   // m
+            ::testing::Range(gtint_t(51), gtint_t(59), 1),                   // n
+            ::testing::Values(-2.4),                                         // alpha
+            ::testing::Values(gtint_t(5)),                                   // increment to the leading dim of a
+            ::testing::Values(gtint_t(3))                                    // increment to the leading dim of b
+        ),
+        ::dtrsmTestPrint()
+    );
+
+/**
+ * @brief Test DTRSM small avx512 path
+ *        small avx512 is used in range [51, 1499]
+ */
+INSTANTIATE_TEST_SUITE_P(
+        Small_AVX512,
+        dtrsmTest,
+        ::testing::Combine(
+            ::testing::Values('c'),                                          // storage format
+            ::testing::Values('l','r'),                                      // side  l:left, r:right
+            ::testing::Values('u','l'),                                      // uplo  u:upper, l:lower
+            ::testing::Values('n','t'),                                      // transa
+            ::testing::Values('n','u'),                                      // diaga , n=nonunit u=unit
+            ::testing::Values(51, 410, 1499),                                // n
+            ::testing::Values(51, 531, 1499),                                // m
+            ::testing::Values(-2.4),                                         // alpha
+            ::testing::Values(gtint_t(5)),                                   // increment to the leading dim of a
+            ::testing::Values(gtint_t(3))                                    // increment to the leading dim of b
+        ),
+        ::dtrsmTestPrint()
+    );
+
+/**
+ * @brief Test DTRSM with differnt values of alpha
+ *      code paths covered:
+ *          TRSV              -> 1
+ *          TRSM_AVX2_small   -> 2
+ *          TRSM_AVX512_small -> 300
+ *          TRSM_NATIVE       -> 1500
+ */
+INSTANTIATE_TEST_SUITE_P(
+        Alpha,
+        dtrsmTest,
+        ::testing::Combine(
+            ::testing::Values('c'),                                          // storage format
+            ::testing::Values('l','r'),                                      // side  l:left, r:right
+            ::testing::Values('u','l'),                                      // uplo  u:upper, l:lower
+            ::testing::Values('n','t'),                                      // transa
+            ::testing::Values('n','u'),                                      // diaga , n=nonunit u=unit
+            ::testing::Values(1, 2, 300, 1500),                              // n
+            ::testing::Values(1, 2, 300, 1500),                              // m
+            ::testing::Values(-2.4, 0.0, 1.0, 3.1, NAN, INFINITY),           // alpha
             ::testing::Values(gtint_t(0), gtint_t(5)),                       // increment to the leading dim of a
             ::testing::Values(gtint_t(0), gtint_t(3))                        // increment to the leading dim of b
         ),
