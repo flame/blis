@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2023, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2023-2024, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -36,11 +36,12 @@
 #include "test_subv.h"
 
 class ssubvGenericTest :
+        // input params: x or conj(x), vector length, stride size of x, stride size of y
         public ::testing::TestWithParam<std::tuple<char, gtint_t, gtint_t, gtint_t>> {};
 
 GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(ssubvGenericTest);
 
-TEST_P( ssubvGenericTest, RandomData )
+TEST_P( ssubvGenericTest, FunctionalTest )
 {
     using T = float;
     //----------------------------------------------------------
@@ -75,26 +76,74 @@ public:
         gtint_t incx   = std::get<2>(str.param);
         gtint_t incy   = std::get<3>(str.param);
         std::string str_name = "bli_ssubv";
-        str_name += "_" + std::to_string(n);
-        str_name += "_" + std::string(&conj, 1);
+        str_name += "_n_" + std::to_string(n);
+        str_name += "_conj_" + std::string(&conj, 1);
         std::string incx_str = ( incx > 0) ? std::to_string(incx) : "m" + std::to_string(std::abs(incx));
-        str_name += "_" + incx_str;
+        str_name += "_incx_" + incx_str;
         std::string incy_str = ( incy > 0) ? std::to_string(incy) : "m" + std::to_string(std::abs(incy));
-        str_name += "_" + incy_str;
+        str_name += "_incy_" + incy_str;
         return str_name;
     }
 };
 
 #ifdef TEST_BLIS_TYPED
-// Black box testing.
 INSTANTIATE_TEST_SUITE_P(
-        Blackbox,
+        PositiveIncrements,
         ssubvGenericTest,
         ::testing::Combine(
-            ::testing::Values('n'),                                          // n: not transpose for x
-            ::testing::Range(gtint_t(10), gtint_t(101), 10),                 // m size of vector takes values from 10 to 100 with step size of 10.
-            ::testing::Values(gtint_t(1), gtint_t(4)),                       // stride size for x
-            ::testing::Values(gtint_t(1), gtint_t(7))                        // stride size for y
+            // n: use x, c: use conj(x)
+            ::testing::Values('n'),
+            // n: size of vector.
+            // as don't have BLIS vectorized kernels for subv,
+            // having fewer sizes or maybe a Range would be sufficient
+            // to ensure code coverage of the reference kernel.
+            ::testing::Values(
+                gtint_t( 1),
+                gtint_t( 2),
+                gtint_t( 3),
+                gtint_t( 5),
+                gtint_t( 7),
+                gtint_t( 9),
+                gtint_t(10),
+                gtint_t(15),
+                gtint_t(20),
+                gtint_t(55),
+                gtint_t(99)
+            ),
+            // incx: stride of x vector.
+            ::testing::Values(
+                gtint_t(1),gtint_t(5)
+            ),
+            // incy: stride of y vector.
+            ::testing::Values(
+                gtint_t(1),gtint_t(5)
+            )
+        ),
+        ::ssubvGenericTestPrint()
+    );
+#endif
+
+#ifdef TEST_BLIS_TYPED
+INSTANTIATE_TEST_SUITE_P(
+        PositiveIncrementforConjugate,
+        ssubvGenericTest,
+        ::testing::Combine(
+            // c: conjugate for x
+            ::testing::Values('c'),
+            // n: size of vector.
+            // as conjugate of a real number x is x,
+            // so adding a single test that uses 'c' as an option for sanity check.
+            ::testing::Values(
+                gtint_t( 1),gtint_t( 7)
+            ),
+            // incx: stride of x vector.
+            ::testing::Values(
+                gtint_t(1),gtint_t(5)
+            ),
+            // incy: stride of y vector.
+            ::testing::Values(
+                gtint_t(1),gtint_t(5)
+            )
         ),
         ::ssubvGenericTestPrint()
     );

@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2023, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2023-2024, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -36,11 +36,12 @@
 #include "test_subv.h"
 
 class csubvGenericTest :
+        // input params: x or conj(x), vector length, stride size of x, stride size of y
         public ::testing::TestWithParam<std::tuple<char, gtint_t, gtint_t, gtint_t>> {};
 
 GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(csubvGenericTest);
 
-TEST_P( csubvGenericTest, RandomData )
+TEST_P( csubvGenericTest, FunctionalTest )
 {
     using T = scomplex;
     //----------------------------------------------------------
@@ -75,26 +76,48 @@ public:
         gtint_t incx   = std::get<2>(str.param);
         gtint_t incy   = std::get<3>(str.param);
         std::string str_name = "bli_csubv";
-        str_name += "_" + std::to_string(n);
-        str_name += "_" + std::string(&conj, 1);
+        str_name += "_n_" + std::to_string(n);
+        str_name += "_conj_" + std::string(&conj, 1);
         std::string incx_str = ( incx > 0) ? std::to_string(incx) : "m" + std::to_string(std::abs(incx));
-        str_name += "_" + incx_str;
+        str_name += "_incx_" + incx_str;
         std::string incy_str = ( incy > 0) ? std::to_string(incy) : "m" + std::to_string(std::abs(incy));
-        str_name += "_" + incy_str;
+        str_name += "_incy_" + incy_str;
         return str_name;
     }
 };
 
 #ifdef TEST_BLIS_TYPED
-// Black box testing.
 INSTANTIATE_TEST_SUITE_P(
-        Blackbox,
+        PositiveIncrements,
         csubvGenericTest,
         ::testing::Combine(
-            ::testing::Values('n','c'),                                      // n: not transpose for x, c: conjugate for x
-            ::testing::Range(gtint_t(10), gtint_t(101), 10),                 // m size of vector takes values from 10 to 100 with step size of 10.
-            ::testing::Values(gtint_t(1), gtint_t(4)),                       // stride size for x
-            ::testing::Values(gtint_t(1), gtint_t(7))                        // stride size for y
+            // n: use x, c: use conj(x)
+            ::testing::Values('n','c'),
+            // n: size of vector.
+            // as we don't have BLIS vectorized kernels for subv,
+            // having fewer sizes or maybe a Range would be sufficient 
+            // to ensure code coverage of the reference kernel.
+            ::testing::Values(
+                gtint_t( 1),
+                gtint_t( 2),
+                gtint_t( 3),
+                gtint_t( 5),
+                gtint_t( 7),
+                gtint_t( 9),
+                gtint_t(10),
+                gtint_t(15),
+                gtint_t(20),
+                gtint_t(55),
+                gtint_t(99)
+            ),
+            // incx: stride of x vector.
+            ::testing::Values(
+                gtint_t(1),gtint_t(5)
+            ),
+            // incy: stride of y vector.
+            ::testing::Values(
+                gtint_t(1),gtint_t(5)
+            )
         ),
         ::csubvGenericTestPrint()
     );
