@@ -6,7 +6,7 @@
 
    Copyright (C) 2014, The University of Texas at Austin
    Copyright (C) 2016, Hewlett Packard Enterprise Development LP
-   Copyright (C) 2021 - 2023, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2021 - 2024, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -1023,6 +1023,7 @@ typedef enum
 	BLIS_ARCH_PENRYN,
 
 	// AMD
+	BLIS_ARCH_ZEN5,
 	BLIS_ARCH_ZEN4,
 	BLIS_ARCH_ZEN3,
 	BLIS_ARCH_ZEN2,
@@ -1062,6 +1063,10 @@ typedef enum
 
 	// Default model
 	BLIS_MODEL_DEFAULT,
+
+	// AMD Zen5
+	BLIS_MODEL_TURIN,
+	BLIS_MODEL_TURIN_DENSE,
 
 	// AMD Zen4
 	BLIS_MODEL_GENOA,

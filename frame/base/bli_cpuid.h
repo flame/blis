@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2018 - 2023, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2018 - 2024, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -68,6 +68,7 @@ bool bli_cpuid_is_sandybridge( uint32_t family, uint32_t model, uint32_t feature
 bool bli_cpuid_is_penryn( uint32_t family, uint32_t model, uint32_t features );
 
 // AMD
+bool bli_cpuid_is_zen5( uint32_t family, uint32_t model, uint32_t features );
 bool bli_cpuid_is_zen4( uint32_t family, uint32_t model, uint32_t features );
 bool bli_cpuid_is_avx512_fallback( uint32_t family, uint32_t model, uint32_t features );
 bool bli_cpuid_is_zen3( uint32_t family, uint32_t model, uint32_t features );
@@ -78,6 +79,7 @@ bool bli_cpuid_is_steamroller( uint32_t family, uint32_t model, uint32_t feature
 bool bli_cpuid_is_piledriver( uint32_t family, uint32_t model, uint32_t features );
 bool bli_cpuid_is_bulldozer( uint32_t family, uint32_t model, uint32_t features );
 
+model_t bli_cpuid_get_zen5_cpuid_model( uint32_t family, uint32_t model, uint32_t features );
 model_t bli_cpuid_get_zen4_cpuid_model( uint32_t family, uint32_t model, uint32_t features );
 model_t bli_cpuid_get_zen3_cpuid_model( uint32_t family, uint32_t model, uint32_t features );
 
@@ -167,23 +169,27 @@ enum
 };
 enum
 {
-  FEATURE_SSE3 = 0x0001,
-  FEATURE_SSSE3 = 0x0002,
-  FEATURE_SSE41 = 0x0004,
-  FEATURE_SSE42 = 0x0008,
-  FEATURE_AVX = 0x0010,
-  FEATURE_AVX2 = 0x0020,
-  FEATURE_FMA3 = 0x0040,
-  FEATURE_FMA4 = 0x0080,
-  FEATURE_AVX512F = 0x0100,
-  FEATURE_AVX512DQ = 0x0200,
-  FEATURE_AVX512PF = 0x0400,
-  FEATURE_AVX512ER = 0x0800,
-  FEATURE_AVX512CD = 0x1000,
-  FEATURE_AVX512BW = 0x2000,
-  FEATURE_AVX512VL = 0x4000,
-  FEATURE_AVX512VNNI = 0x8000,
-  FEATURE_AVX512BF16 = 0x10000
+	FEATURE_SSE3 = 0x0001,
+	FEATURE_SSSE3 = 0x0002,
+	FEATURE_SSE41 = 0x0004,
+	FEATURE_SSE42 = 0x0008,
+	FEATURE_AVX = 0x0010,
+	FEATURE_AVX2 = 0x0020,
+	FEATURE_FMA3 = 0x0040,
+	FEATURE_FMA4 = 0x0080,
+	FEATURE_AVX512F = 0x0100,
+	FEATURE_AVX512DQ = 0x0200,
+	FEATURE_AVX512PF = 0x0400,
+	FEATURE_AVX512ER = 0x0800,
+	FEATURE_AVX512CD = 0x1000,
+	FEATURE_AVX512BW = 0x2000,
+	FEATURE_AVX512VL = 0x4000,
+	FEATURE_AVX512VNNI = 0x8000,
+	FEATURE_AVX512BF16 = 0x10000,
+	FEATURE_AVXVNNI = 0x20000,
+	FEATURE_AVX512VP2INTERSECT = 0x40000,
+	FEATURE_MOVDIRI = 0x80000,
+	FEATURE_MOVDIR64B = 0x100000
 };
 
 #elif defined(__aarch64__) || defined(__arm__) || defined(_M_ARM)

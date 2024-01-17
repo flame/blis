@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2018 - 2023, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2018 - 2024, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -898,9 +898,22 @@ err_t bli_check_valid_model_id( arch_t arch_id, model_t model_id )
 	// Model ranges are specified in bli_type_defs.h
 	err_t e_val = BLIS_INVALID_MODEL_ID;
 
+	if ( arch_id == BLIS_ARCH_ZEN5 )
+	{
+		if ( ( gint_t )model_id >= BLIS_MODEL_TURIN &&
+		     ( gint_t )model_id <= BLIS_MODEL_TURIN_DENSE )
+		{
+			e_val = BLIS_SUCCESS;
+		}
+		if ( ( gint_t )model_id >= BLIS_MODEL_GENOA &&
+		     ( gint_t )model_id <= BLIS_MODEL_GENOA_X )
+		{
+			e_val = BLIS_SUCCESS;
+		}
+	}
 	if ( arch_id == BLIS_ARCH_ZEN4 )
 	{
-		if ( ( gint_t )model_id >= BLIS_MODEL_GENOA &&
+		if ( ( gint_t )model_id >= BLIS_MODEL_TURIN &&
 		     ( gint_t )model_id <= BLIS_MODEL_GENOA_X )
 		{
 			e_val = BLIS_SUCCESS;

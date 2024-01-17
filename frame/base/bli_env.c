@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2018 - 2023, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2018 - 2024, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -150,6 +150,10 @@ gint_t bli_env_get_var_arch_type( const char* env, gint_t fallback )
 				r_val = BLIS_ARCH_PENRYN;
 			}
 			// AMD
+			else if (strcmp(str, "zen5") == 0)
+			{
+				r_val = BLIS_ARCH_ZEN4;
+			}
 			else if (strcmp(str, "zen4") == 0)
 			{
 				r_val = BLIS_ARCH_ZEN4;
@@ -313,7 +317,17 @@ gint_t bli_env_get_var_model_type( const char* env, gint_t fallback )
 				str[i] = tolower(str[i]);
 			}
 			// AMD
-			if (strcmp(str, "genoa") == 0)
+			if (strcmp(str, "turin") == 0)
+			{
+				r_val = BLIS_MODEL_TURIN;
+			}
+			else if ((strcmp(str, "turin_dense") == 0) ||
+			         (strcmp(str, "turin-dense") == 0) ||
+			         (strcmp(str, "turindense") == 0))
+			{
+				r_val = BLIS_MODEL_TURIN_DENSE;
+			}
+			else if (strcmp(str, "genoa") == 0)
 			{
 				r_val = BLIS_MODEL_GENOA;
 			}

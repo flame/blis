@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2018 - 2023, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2018 - 2024, Advanced Micro Devices, Inc. All rights reserved.
    Copyright (C) 2019, Dave Love, University of Manchester
 
    Redistribution and use in source and binary forms, with or without
@@ -185,10 +185,11 @@ arch_t bli_cpuid_query_id( void )
 	}
 	else if ( vendor == VENDOR_AMD )
 	{
-
 		// Check for each AMD configuration that is enabled, check for that
 		// microarchitecture. We check from most recent to most dated.
 #ifdef BLIS_CONFIG_ZEN4
+		if ( bli_cpuid_is_zen5( family, model, features ) )
+			return BLIS_ARCH_ZEN4;
 		if ( bli_cpuid_is_zen4( family, model, features ) )
 			return BLIS_ARCH_ZEN4;
 		// Fallback test for future AMD processors
@@ -240,6 +241,22 @@ model_t bli_cpuid_query_model_id( arch_t arch_id )
 	// Set default for architectures where separate models haven't been defined.
 	model_t cpuid_model = BLIS_MODEL_DEFAULT;
 
+#ifdef BLIS_CONFIG_ZEN5
+	if (arch_id == BLIS_ARCH_ZEN5)
+	{
+		// Call the CPUID instruction and parse its results into a family id,
+		// model id, and a feature bit field. The return value encodes the
+		// vendor.
+
+		uint32_t __attribute__ ((unused)) vendor;
+		uint32_t family, model, features;
+
+		vendor = bli_cpuid_query( &family, &model, &features );
+
+		// Check CPU model.
+		cpuid_model = bli_cpuid_get_zen5_cpuid_model( family, model, features );
+	}
+#endif
 #ifdef BLIS_CONFIG_ZEN4
 	if (arch_id == BLIS_ARCH_ZEN4)
 	{
@@ -252,8 +269,16 @@ model_t bli_cpuid_query_model_id( arch_t arch_id )
 
 		vendor = bli_cpuid_query( &family, &model, &features );
 
-		// Check CPU model.
-		cpuid_model = bli_cpuid_get_zen4_cpuid_model( family, model, features );
+		// For now, zen4 code path is also used for zen5 so check
+		// for zen5 models here too.
+		if ( family == 0x19 )
+		{
+			cpuid_model = bli_cpuid_get_zen4_cpuid_model( family, model, features );
+		}
+		else if ( family == 0x1A )
+		{
+			cpuid_model = bli_cpuid_get_zen5_cpuid_model( family, model, features );
+		}
 	}
 #endif
 #ifdef BLIS_CONFIG_ZEN3
@@ -386,6 +411,60 @@ bool bli_cpuid_is_penryn
 }
 
 // -----------------------------------------------------------------------------
+bool bli_cpuid_is_zen5
+     (
+       uint32_t family,
+       uint32_t model,
+       uint32_t features
+     )
+{
+	// Check for expected CPU features.
+	const uint32_t expected = FEATURE_SSE3               |
+	                          FEATURE_SSSE3              |
+	                          FEATURE_SSE41              |
+	                          FEATURE_SSE42              |
+	                          FEATURE_AVX                |
+	                          FEATURE_FMA3               |
+	                          FEATURE_AVX2               |
+	                          FEATURE_AVX512F            |
+	                          FEATURE_AVX512DQ           |
+	                          FEATURE_AVX512CD           |
+	                          FEATURE_AVX512BW           |
+	                          FEATURE_AVX512VL           |
+	                          FEATURE_AVX512VNNI         |
+	                          FEATURE_AVX512BF16         |
+	                          FEATURE_MOVDIRI            |
+	                          FEATURE_MOVDIR64B          |
+	                          FEATURE_AVX512VP2INTERSECT |
+	                          FEATURE_AVXVNNI;
+
+	if ( !bli_cpuid_has_features( features, expected ) ) return FALSE;
+
+	// For zen5 the family id is 0x1A
+	if ( family != 0x1A ) return FALSE;
+
+	return TRUE;
+}
+model_t bli_cpuid_get_zen5_cpuid_model
+    (
+       uint32_t family,
+       uint32_t model,
+       uint32_t features
+    )
+{
+	// Look at model of CPU and set cpuid_model appropriately.
+	// For Zen5, the default is Turin.
+	model_t cpuid_model = BLIS_MODEL_TURIN;
+	if ( family == 0x1A )
+	{
+		if ( 0x10 <= model && model <= 0x1f ) // Turin Dense
+		{
+			cpuid_model = BLIS_MODEL_TURIN_DENSE;
+		}
+	}
+	return cpuid_model;
+}
+
 bool bli_cpuid_is_zen4
      (
        uint32_t family,
@@ -437,6 +516,14 @@ model_t bli_cpuid_get_zen4_cpuid_model
 		if ( 0xA0 <= model && model <= 0xAf ) // Bergamo
 		{
 			cpuid_model = BLIS_MODEL_BERGAMO;
+		}
+		else
+		{
+			uint32_t l3_cache_size = bli_cpuid_query_l3_cache_size();
+			if ( l3_cache_size > 393216 )
+			{
+				cpuid_model = BLIS_MODEL_GENOA_X;
+			}
 		}
 	}
 	return cpuid_model;
@@ -1060,7 +1147,7 @@ model_t bli_cpuid_query_model_id( arch_t arch_id )
 
    Copyright (C) 2017, The University of Texas at Austin
    Copyright (C) 2017, Devin Matthews
-   Copyright (C) 2018 - 2023, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2018 - 2024, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -1092,29 +1179,33 @@ model_t bli_cpuid_query_model_id( arch_t arch_id )
 
 enum
 {
-                                      // input register(s)     output register
-	FEATURE_MASK_SSE3     = (1u<< 0), // cpuid[eax=1]         :ecx[0]
-	FEATURE_MASK_SSSE3    = (1u<< 9), // cpuid[eax=1]         :ecx[9]
-	FEATURE_MASK_SSE41    = (1u<<19), // cpuid[eax=1]         :ecx[19]
-	FEATURE_MASK_SSE42    = (1u<<20), // cpuid[eax=1]         :ecx[20]
-	FEATURE_MASK_AVX      = (1u<<28), // cpuid[eax=1]         :ecx[28]
-	FEATURE_MASK_AVX2     = (1u<< 5), // cpuid[eax=7,ecx=0]   :ebx[5]
-	FEATURE_MASK_FMA3     = (1u<<12), // cpuid[eax=1]         :ecx[12]
-	FEATURE_MASK_FMA4     = (1u<<16), // cpuid[eax=0x80000001]:ecx[16]
-	FEATURE_MASK_AVX512F  = (1u<<16), // cpuid[eax=7,ecx=0]   :ebx[16]
-	FEATURE_MASK_AVX512DQ = (1u<<17), // cpuid[eax=7,ecx=0]   :ebx[17]
-	FEATURE_MASK_AVX512PF = (1u<<26), // cpuid[eax=7,ecx=0]   :ebx[26]
-	FEATURE_MASK_AVX512ER = (1u<<27), // cpuid[eax=7,ecx=0]   :ebx[27]
-	FEATURE_MASK_AVX512CD = (1u<<28), // cpuid[eax=7,ecx=0]   :ebx[28]
-	FEATURE_MASK_AVX512BW = (1u<<30), // cpuid[eax=7,ecx=0]   :ebx[30]
-	FEATURE_MASK_AVX512VL = (1u<<31), // cpuid[eax=7,ecx=0]   :ebx[31]
-	FEATURE_MASK_AVX512VNNI = (1u<<11), // cpuid[eax=7,ecx=0]   :ecx[11]
-	FEATURE_MASK_AVX512BF16 = (1u<< 5), // cpuid[eax=7,ecx=1]   :eax[5]
-	FEATURE_MASK_XGETBV   = (1u<<26)|
-                            (1u<<27), // cpuid[eax=1]         :ecx[27:26]
-	XGETBV_MASK_XMM       = 0x02u,    // xcr0[1]
-	XGETBV_MASK_YMM       = 0x04u,    // xcr0[2]
-	XGETBV_MASK_ZMM       = 0xe0u     // xcr0[7:5]
+                                                    // input register(s)     output register
+	FEATURE_MASK_SSE3               = (1u<< 0), // cpuid[eax=1]          :ecx[0]
+	FEATURE_MASK_SSSE3              = (1u<< 9), // cpuid[eax=1]          :ecx[9]
+	FEATURE_MASK_SSE41              = (1u<<19), // cpuid[eax=1]          :ecx[19]
+	FEATURE_MASK_SSE42              = (1u<<20), // cpuid[eax=1]          :ecx[20]
+	FEATURE_MASK_AVX                = (1u<<28), // cpuid[eax=1]          :ecx[28]
+	FEATURE_MASK_AVX2               = (1u<< 5), // cpuid[eax=7,ecx=0]    :ebx[5]
+	FEATURE_MASK_FMA3               = (1u<<12), // cpuid[eax=1]          :ecx[12]
+	FEATURE_MASK_FMA4               = (1u<<16), // cpuid[eax=0x80000001] :ecx[16]
+	FEATURE_MASK_AVX512F            = (1u<<16), // cpuid[eax=7,ecx=0]    :ebx[16]
+	FEATURE_MASK_AVX512DQ           = (1u<<17), // cpuid[eax=7,ecx=0]    :ebx[17]
+	FEATURE_MASK_AVX512PF           = (1u<<26), // cpuid[eax=7,ecx=0]    :ebx[26]
+	FEATURE_MASK_AVX512ER           = (1u<<27), // cpuid[eax=7,ecx=0]    :ebx[27]
+	FEATURE_MASK_AVX512CD           = (1u<<28), // cpuid[eax=7,ecx=0]    :ebx[28]
+	FEATURE_MASK_AVX512BW           = (1u<<30), // cpuid[eax=7,ecx=0]    :ebx[30]
+	FEATURE_MASK_AVX512VL           = (1u<<31), // cpuid[eax=7,ecx=0]    :ebx[31]
+	FEATURE_MASK_AVX512VNNI         = (1u<<11), // cpuid[eax=7,ecx=0]    :ecx[11]
+	FEATURE_MASK_MOVDIRI            = (1u<<27), // cpuid[eax=7,ecx=0]    :ecx[27]
+	FEATURE_MASK_MOVDIR64B          = (1u<<28), // cpuid[eax=7,ecx=0]    :ecx[28]
+	FEATURE_MASK_AVX512VP2INTERSECT = (1u<<8),  // cpuid[eax=7,ecx=0]    :edx[8]
+	FEATURE_MASK_AVXVNNI            = (1u<< 4), // cpuid[eax=7,ecx=1]    :eax[4]
+	FEATURE_MASK_AVX512BF16         = (1u<< 5), // cpuid[eax=7,ecx=1]    :eax[5]
+	FEATURE_MASK_XGETBV             = (1u<<26)|
+                                          (1u<<27), // cpuid[eax=1]          :ecx[27:26]
+	XGETBV_MASK_XMM                 = 0x02u,    // xcr0[1]
+	XGETBV_MASK_YMM                 = 0x04u,    // xcr0[2]
+	XGETBV_MASK_ZMM                 = 0xe0u     // xcr0[7:5]
 };
 
 
@@ -1178,6 +1269,10 @@ uint32_t bli_cpuid_query
 		if ( bli_cpuid_has_features( ebx, FEATURE_MASK_AVX512VL ) ) *features |= FEATURE_AVX512VL;
 
 		if ( bli_cpuid_has_features( ecx, FEATURE_MASK_AVX512VNNI ) ) *features |= FEATURE_AVX512VNNI;
+		if ( bli_cpuid_has_features( ecx, FEATURE_MASK_MOVDIRI ) )    *features |= FEATURE_MOVDIRI;
+		if ( bli_cpuid_has_features( ecx, FEATURE_MASK_MOVDIR64B ) )  *features |= FEATURE_MOVDIR64B;
+
+		if ( bli_cpuid_has_features( edx, FEATURE_MASK_AVX512VP2INTERSECT ) ) *features |= FEATURE_AVX512VP2INTERSECT;
 
 		// This is actually a macro that modifies the last four operands,
 		// hence why they are not passed by address.
@@ -1186,6 +1281,7 @@ uint32_t bli_cpuid_query
 		// 5th feature bit of the returned value
 		__cpuid_count( 7, 1, eax, ebx, ecx, edx );
 
+		if ( bli_cpuid_has_features( eax, FEATURE_MASK_AVXVNNI ) )    *features |= FEATURE_AVXVNNI;
 		if ( bli_cpuid_has_features( eax, FEATURE_MASK_AVX512BF16 ) ) *features |= FEATURE_AVX512BF16;
 
 	}
@@ -1306,8 +1402,8 @@ uint32_t bli_cpuid_query
 			// only if the xcr[7:5] bits are set. If they are not set, then
 			// clear all feature bits related to AVX-512.
 			if ( !bli_cpuid_has_features( eax, XGETBV_MASK_XMM |
-				                               XGETBV_MASK_YMM |
-				                               XGETBV_MASK_ZMM ) )
+				                           XGETBV_MASK_YMM |
+				                           XGETBV_MASK_ZMM ) )
 			{
 				*features &= ~( FEATURE_AVX512F  |
 				                FEATURE_AVX512DQ |
@@ -1322,7 +1418,7 @@ uint32_t bli_cpuid_query
 			// only if the xcr[2] bit is set. If it is not set, then
 			// clear all feature bits related to AVX.
 			if ( !bli_cpuid_has_features( eax, XGETBV_MASK_XMM |
-				                               XGETBV_MASK_YMM ) )
+				                           XGETBV_MASK_YMM ) )
 			{
 				*features &= ~( FEATURE_AVX  |
 				                FEATURE_AVX2 |

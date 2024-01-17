@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2022 - 2023, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2022 - 2024, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -49,8 +49,7 @@
 	bli_blksz_init_easy( &blkszs[ BLIS_NC ],  6144,  4002,  4080,  2004 );  \
 	                                                                        \
 	bli_blksz_init_easy( &blkszs[ BLIS_AF ],     5,     5,    -1,    -1 );  \
-	bli_blksz_init_easy( &blkszs[ BLIS_DF ],     8,     8,    -1,    -1 );  \
-
+	bli_blksz_init_easy( &blkszs[ BLIS_DF ],     8,     8,    -1,    -1 );
 
 #define BLI_CNTX_DEFAULT_BLKSZ_LIST_BERGAMO(blkszs) \
 	/*                                           s      d      c      z */  \
@@ -62,8 +61,33 @@
 	bli_blksz_init_easy( &blkszs[ BLIS_NC ],  6144,  3600,  4080,  2004 );  \
 	                                                                        \
 	bli_blksz_init_easy( &blkszs[ BLIS_AF ],     5,     5,    -1,    -1 );  \
-	bli_blksz_init_easy( &blkszs[ BLIS_DF ],     8,     8,    -1,    -1 );  \
+	bli_blksz_init_easy( &blkszs[ BLIS_DF ],     8,     8,    -1,    -1 );
 
+/* Starting point for Turin, copied from Genoa */
+#define BLI_CNTX_DEFAULT_BLKSZ_LIST_TURIN(blkszs) \
+	/*                                           s      d      c      z */  \
+	bli_blksz_init_easy( &blkszs[ BLIS_MR ],    32,    32,     3,    12 );  \
+	bli_blksz_init_easy( &blkszs[ BLIS_NR ],    12,     6,     8,     4 );  \
+	bli_blksz_init_easy( &blkszs[ BLIS_MC ],   512,   128,   144,    60 );  \
+	bli_blksz_init     ( &blkszs[ BLIS_KC ],   480,   512,   256,   512,    \
+	                                           480,   320,   256,   160 );  \
+	bli_blksz_init_easy( &blkszs[ BLIS_NC ],  6144,  4002,  4080,  2004 );  \
+	                                                                        \
+	bli_blksz_init_easy( &blkszs[ BLIS_AF ],     5,     5,    -1,    -1 );  \
+	bli_blksz_init_easy( &blkszs[ BLIS_DF ],     8,     8,    -1,    -1 );
+
+/* Starting point for Turin Dense, copied from Bergamo */
+#define BLI_CNTX_DEFAULT_BLKSZ_LIST_TURIN_DENSE(blkszs) \
+	/*                                           s      d      c      z */  \
+	bli_blksz_init_easy( &blkszs[ BLIS_MR ],    32,    32,     3,    12 );  \
+	bli_blksz_init_easy( &blkszs[ BLIS_NR ],    12,     6,     8,     4 );  \
+	bli_blksz_init_easy( &blkszs[ BLIS_MC ],   512,    64,   144,    60 );  \
+	bli_blksz_init     ( &blkszs[ BLIS_KC ],   480,   512,   256,   512,    \
+	                                           480,   320,   256,   160 );  \
+	bli_blksz_init_easy( &blkszs[ BLIS_NC ],  6144,  3600,  4080,  2004 );  \
+	                                                                        \
+	bli_blksz_init_easy( &blkszs[ BLIS_AF ],     5,     5,    -1,    -1 );  \
+	bli_blksz_init_easy( &blkszs[ BLIS_DF ],     8,     8,    -1,    -1 );
 
 void bli_cntx_init_zen4( cntx_t* cntx )
 {
@@ -212,7 +236,15 @@ void bli_cntx_init_zen4( cntx_t* cntx )
 	// These are reference block sizes and may be overridden based on
 	// number of threads used at runtime.
 
-	if ( bli_init_model_query_id() == BLIS_MODEL_BERGAMO )
+	if ( bli_init_model_query_id() == BLIS_MODEL_TURIN_DENSE )
+	{
+	    BLI_CNTX_DEFAULT_BLKSZ_LIST_TURIN_DENSE(blkszs);
+	}
+	else if ( bli_init_model_query_id() == BLIS_MODEL_TURIN )
+	{
+	    BLI_CNTX_DEFAULT_BLKSZ_LIST_TURIN(blkszs);
+	}
+	else if ( bli_init_model_query_id() == BLIS_MODEL_BERGAMO )
 	{
 	    BLI_CNTX_DEFAULT_BLKSZ_LIST_BERGAMO(blkszs);
 	}
