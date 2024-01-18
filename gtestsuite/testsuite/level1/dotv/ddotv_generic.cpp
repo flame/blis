@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2023, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2023 - 2024, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -90,27 +90,32 @@ public:
 #else  //#elif TEST_BLIS_TYPED
         std::string str_name = "bli_ddotv";
 #endif
-        str_name += "_" + std::to_string(n);
-        str_name += "_" + std::string(&conjx, 1);
-        str_name += "_" + std::string(&conjy, 1);
+        str_name += "_n" + std::to_string(n);
+        str_name += (conjx == 'n') ? "_noconjx" : "_conjx";
+        str_name += (conjy == 'n') ? "_noconjy" : "_conjy";
         std::string incx_str = ( incx > 0) ? std::to_string(incx) : "m" + std::to_string(std::abs(incx));
-        str_name += "_" + incx_str;
+        str_name += "_incx" + incx_str;
         std::string incy_str = ( incy > 0) ? std::to_string(incy) : "m" + std::to_string(std::abs(incy));
-        str_name += "_" + incy_str;
+        str_name += "_incy" + incy_str;
         return str_name;
     }
 };
 
-// Black box testing for generic and main use of sdot.
+// Black box testing for generic use of ddot.
 INSTANTIATE_TEST_SUITE_P(
-        Blackbox,
+        unitPositiveStride,
         ddotvGenericTest,
         ::testing::Combine(
-            ::testing::Values('n'),                                          // n: use x, not conj(x) (since it is real)
-            ::testing::Values('n'),                                          // n: use y, not conj(y) (since it is real)
-            ::testing::Range(gtint_t(10), gtint_t(101), 10),                 // m size of vector takes values from 10 to 100 with step size of 10.
-            ::testing::Values(gtint_t(1)),                                   // stride size for x
-            ::testing::Values(gtint_t(1))                                    // stride size for y
+            // conj(x): user n (no_conjugate) since it is real.
+            ::testing::Values('n'),
+            // conj(y): user n (no_conjugate) since it is real.
+            ::testing::Values('n'),
+            // m: size of vector.
+            ::testing::Range(gtint_t(10), gtint_t(101), 10),
+            // incx: stride of x vector.
+            ::testing::Values(gtint_t(1)),          // unit stride
+            // incy: stride of y vector.
+            ::testing::Values(gtint_t(1))           // unit stride
         ),
         ::ddotvGenericTestPrint()
     );
@@ -137,14 +142,23 @@ INSTANTIATE_TEST_SUITE_P(
 // Only test very few cases as sanity check.
 // We can modify the values using implementantion details.
 INSTANTIATE_TEST_SUITE_P(
-        NonUnitPositiveIncrements,
+        nonUnitPositiveStrides,
         ddotvGenericTest,
         ::testing::Combine(
-            ::testing::Values('n'),                                          // use x, not conj(x) (since it is real)
-            ::testing::Values('n'),                                          // use y, not conj(y) (since it is real)
-            ::testing::Values(gtint_t(3), gtint_t(30), gtint_t(112)),        // m size of vector
-            ::testing::Values(gtint_t(2), gtint_t(11)),                      // stride size for x
-            ::testing::Values(gtint_t(3), gtint_t(33))                       // stride size for y
+            // conj(x): user n (no_conjugate) since it is real.
+            ::testing::Values('n'),
+            // conj(y): user n (no_conjugate) since it is real.
+            ::testing::Values('n'),
+            // m: size of vector.
+            ::testing::Range(gtint_t(10), gtint_t(101), 10),
+            // incx: stride of x vector.
+            ::testing::Values(
+                               gtint_t(3), gtint_t(7)   // few non-unit positive strides for sanity check
+            ),
+            // incy: stride of y vector.
+            ::testing::Values(
+                               gtint_t(3), gtint_t(7)   // few non-unit positive strides for sanity check
+            )
         ),
         ::ddotvGenericTestPrint()
     );
@@ -154,14 +168,54 @@ INSTANTIATE_TEST_SUITE_P(
 // Only test very few cases as sanity check.
 // We can modify the values using implementantion details.
 INSTANTIATE_TEST_SUITE_P(
-        NegativeIncrements,
+        negativeStrides,
         ddotvGenericTest,
         ::testing::Combine(
-            ::testing::Values('n'),                                          // n: use x, c: use conj(x)
-            ::testing::Values('n'),                                          // n: use y, c: use conj(y)
-            ::testing::Values(gtint_t(3), gtint_t(30), gtint_t(112)),        // m size of vector
-            ::testing::Values(gtint_t(-2)),                                  // stride size for x
-            ::testing::Values(gtint_t(-3))                                   // stride size for y
+            // conj(x): user n (no_conjugate) since it is real.
+            ::testing::Values('n'),
+            // conj(y): user n (no_conjugate) since it is real.
+            ::testing::Values('n'),
+            // m: size of vector.
+            ::testing::Range(gtint_t(10), gtint_t(101), 10),
+            // incx: stride of x vector.
+            ::testing::Values(
+                               gtint_t(-1), gtint_t(-3), gtint_t(-7)   // few non-unit negative strides for sanity check
+            ),
+            // incy: stride of y vector.
+            ::testing::Values(
+                               gtint_t(-1), gtint_t(-3), gtint_t(-7)   // few non-unit negative strides for sanity check
+            )
+        ),
+        ::ddotvGenericTestPrint()
+    );
+#endif
+
+#if defined(BLIS_ENABLE_OPENMP) && defined(AOCL_DYNAMIC)
+INSTANTIATE_TEST_SUITE_P(
+        AOCLDynamicThresholds,
+        ddotvGenericTest,
+        ::testing::Combine(
+            // conj(x): user n (no_conjugate) since it is real.
+            ::testing::Values('n'),
+            // conj(y): user n (no_conjugate) since it is real.
+            ::testing::Values('n'),
+            // m: size of vector.
+            ::testing::Values(
+                               gtint_t(  2500),     // nt_ideal = 1
+                               gtint_t(  5000),     // nt_ideal = 4
+                               gtint_t( 15000),     // nt_ideal = 8
+                               gtint_t( 40000),     // nt_ideal = 16
+                               gtint_t(200000),     // nt_ideal = 32
+                               gtint_t(250000)      // nt_ideal = max_available
+            ),
+            // incx: stride of x vector.
+            ::testing::Values(
+                               gtint_t(1)           // unit stride
+            ),
+            // incy: stride of y vector.
+            ::testing::Values(
+                               gtint_t(1)           // unit stride
+            )
         ),
         ::ddotvGenericTestPrint()
     );
