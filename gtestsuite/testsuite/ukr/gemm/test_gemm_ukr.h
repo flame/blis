@@ -178,10 +178,78 @@ static void test_gemmnat_ukr( char storage, gtint_t m, gtint_t n, gtint_t k, T a
     free(buf_cref);
 }
 
+
+// The function is templatized based on the datatype and function-pointer type to the kernel.
 template<typename T, typename FT>
-static void test_gemmsup_ukr( char storage, char trnsa, char trnsb, gtint_t m, gtint_t n, gtint_t k, T alpha, T beta, FT ukr_fp, gtint_t MR, bool row_pref)
+static void test_gemmk1_ukr( FT ukr_fp, gtint_t m, gtint_t n, gtint_t k, char storage, T alpha, T beta )
 {
     // Compute the leading dimensions of a, b, and c.
+    //char storage = storageC;
+    gtint_t lda = testinghelpers::get_leading_dimension( storage, 'n', m, k, 0 );
+    gtint_t ldb = testinghelpers::get_leading_dimension( storage, 'n', k, n, 0 );
+    gtint_t ldc = testinghelpers::get_leading_dimension( storage, 'n', m, n, 0 );
+
+     //----------------------------------------------------------
+    //         Initialize matrices with random numbers
+    //----------------------------------------------------------
+    gtint_t sizea =  testinghelpers::matsize( storage, 'n', m, k, lda ) * sizeof(T);
+    gtint_t sizeb =  testinghelpers::matsize( storage, 'n', k, n, ldb ) * sizeof(T);
+    gtint_t sizec =  testinghelpers::matsize( storage, 'n', m, n, ldc ) * sizeof(T);
+    T *buf_a = (T*)malloc(sizea);
+    T *buf_b = (T*)malloc(sizeb);
+    T *buf_c = (T*)malloc(sizec);
+    T *buf_cref = (T*)malloc(sizec);
+
+    // Check if the memory has been successfully allocated
+    if ((buf_a == NULL) ||(buf_b == NULL) ||(buf_c == NULL) ||(buf_cref == NULL)) {
+        printf("Memory not allocated for input and output Matrix.\n");
+        return ;
+    }
+    testinghelpers::datagenerators::randomgenerators<T>( -2, 8, storage, m, k, (T*)(buf_a), 'n', lda);
+    testinghelpers::datagenerators::randomgenerators<T>( -5, 2, storage, k, n, (T*)(buf_b), 'n', ldb);
+    testinghelpers::datagenerators::randomgenerators<T>( -3, 5, storage, m, n, (T*)(buf_c), 'n', ldc);
+
+    // Create a copy of c so that we can check reference results.
+    memcpy(buf_cref, buf_c, sizec);
+    // call micro-kernel
+    ukr_fp (
+        m,
+        n,
+        k,
+        &alpha,
+        buf_a,
+        lda,
+        buf_b,
+        ldb,
+        &beta,
+        buf_c,
+        ldc
+        );
+
+    // Set the threshold for the errors:
+    double thresh = 10 * std::max(n,std::max(k,m)) * testinghelpers::getEpsilon<T>();
+
+    // call reference implementation
+    testinghelpers::ref_gemm<T>( storage, 'n', 'n', m, n, k, alpha,
+                                 buf_a, lda, buf_b, ldb, beta, buf_cref, ldc);
+
+    // Check component-wise error
+    computediff<T>( storage, m, n, buf_c, buf_cref, ldc, thresh );
+
+    free(buf_a);
+    free(buf_b);
+    free(buf_c);
+    free(buf_cref);
+}
+
+
+
+
+template<typename T, typename FT>
+static void test_dgemmsup_ukr( FT ukr_fp, char trnsa, char trnsb, gtint_t m, gtint_t n, gtint_t k, T alpha, T beta, char storageC, gtint_t MR, bool row_pref)
+{
+    // Compute the leading dimensions of a, b, and c.
+    char storage = storageC;
     gtint_t lda = testinghelpers::get_leading_dimension( storage, trnsa, m, k, 0 );
     gtint_t ldb = testinghelpers::get_leading_dimension( storage, trnsb, k, n, 0 );
     gtint_t ldc = testinghelpers::get_leading_dimension( storage, 'n', m, n, 0 );
@@ -411,44 +479,44 @@ static void test_zgemmsup_ukr( char storage, char trnsa, char trnsb, gtint_t m, 
         rs_a = cs_a0;
         cs_a = rs_a0;
     }
-    
+
     //Panel stride update is required only for zen4 sup kernels
-    #if defined(BLIS_KERNELS_ZEN4) && defined(GTEST_AVX512)
-        auxinfo_t data;
-        inc_t ps_a_use = (12 * rs_a); //12 = MR
-        bli_auxinfo_set_ps_a( ps_a_use, &data );
-    
-        ukr_fp(
-            BLIS_NO_CONJUGATE,
-            BLIS_NO_CONJUGATE,
-            m,
-            n,
-            k,
-            &alpha,
-            buf_a, rs_a, cs_a,
-            buf_b, rs_b, cs_b,
-            &beta,
-            buf_c, rs_c, cs_c,
-            &data,
-            NULL
-          );
-    #else
-        ukr_fp(
-            BLIS_NO_CONJUGATE,
-            BLIS_NO_CONJUGATE,
-            m,
-            n,
-            k,
-            &alpha,
-            buf_a, rs_a, cs_a,
-            buf_b, rs_b, cs_b,
-            &beta,
-            buf_c, rs_c, cs_c,
-            NULL,
-            NULL
-          );
-    #endif
- 
+#if defined(BLIS_KERNELS_ZEN4) && defined(GTEST_AVX512)
+    auxinfo_t data;
+    inc_t ps_a_use = (12 * rs_a); //12 = MR
+    bli_auxinfo_set_ps_a( ps_a_use, &data );
+
+    ukr_fp(
+        BLIS_NO_CONJUGATE,
+        BLIS_NO_CONJUGATE,
+        m,
+        n,
+        k,
+        &alpha,
+        buf_a, rs_a, cs_a,
+        buf_b, rs_b, cs_b,
+        &beta,
+        buf_c, rs_c, cs_c,
+        &data,
+        NULL
+        );
+#else
+    ukr_fp(
+        BLIS_NO_CONJUGATE,
+        BLIS_NO_CONJUGATE,
+        m,
+        n,
+        k,
+        &alpha,
+        buf_a, rs_a, cs_a,
+        buf_b, rs_b, cs_b,
+        &beta,
+        buf_c, rs_c, cs_c,
+        NULL,
+        NULL
+        );
+#endif
+
     // Set the threshold for the errors:
     double thresh = 20 * (std::max(k,1)) * testinghelpers::getEpsilon<T>();
 
