@@ -3,7 +3,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2023, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2023-2024, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -292,6 +292,45 @@ if(WIN32)
     endif()
 endif()
 
+# The following part will be used to set up a list of defines that dictate
+# which kernel tests can be build and run on the current architecture.
+# Given that the symbols of kernel functions are not exported for shared libraries
+# we only set up those defines for static libs.
+# This way, kernel tests won't be compiled/run for shared versions of BLIS.
+if(BLIS_LINKING_TYPE STREQUAL "static")
+    if(ENABLE_THREADING STREQUAL "openmp")
+        try_run(RUNRESULT COMPILERESULT "${CMAKE_BINARY_DIR}/temp" SOURCES ${CMAKE_SOURCE_DIR}/cmake/config_ukr_tests.cpp
+            COMPILE_DEFINITIONS -I${BLIS_PATH}/include/ -I${BLIS_PATH}/include/blis
+            LINK_LIBRARIES ${BLIS_LIBRARY} ${COMMON_LIBS} OpenMP::OpenMP_CXX      
+            RUN_OUTPUT_VARIABLE UKR_CONFIG
+            COMPILE_OUTPUT_VARIABLE COMP_VAR
+        )
+    else()
+        try_run(RUNRESULT COMPILERESULT "${CMAKE_BINARY_DIR}/temp" SOURCES ${CMAKE_SOURCE_DIR}/cmake/config_ukr_tests.cpp
+            COMPILE_DEFINITIONS -I${BLIS_PATH}/include/ -I${BLIS_PATH}/include/blis
+            LINK_LIBRARIES ${BLIS_LIBRARY} ${COMMON_LIBS}       
+            RUN_OUTPUT_VARIABLE UKR_CONFIG
+            COMPILE_OUTPUT_VARIABLE COMP_VAR
+        )
+    endif()
+    # Uncomment this to debug this snippet above, if necessary.
+    #message("Build output: ${COMP_VAR}")
+    # Remove all empty items from the list.
+    list(REMOVE_ITEM UKR_CONFIG "")
+    # We iterate through the list returned from the snippet above.
+    # For example, UKR_CONFIG = AVX2FMA3 for zen3
+    # or UKR_CONFIG = AVX2FMA3;AVX512;AVX512VNNI;AVX512BF16 for zen4
+    # Depending on the values of this list we define corresponding macros
+    # -DGTEST_AVX2FMA3 on zen3
+    # or -DGTEST_AVX2FMA3;-DGTEST_AVX512;-DGTEST_AVX512VNNI;-DGTEST_AVX512BF16 on zen4
+    # Those macros are passed when compiling the tests in testsuite/CMakeLists.txt.
+    foreach(ukrconf ${UKR_CONFIG})
+        list(APPEND UKR_DEFINES "-DGTEST_${ukrconf}")
+    endforeach()
+    message(STATUS "Since BLIS GTestSuite is used to check the static version of blis, all kernel tests are enabled.")
+else()
+    message(WARNING "Since BLIS GTestSuite is used to check the shared version of blis, all kernel tests are disabled.")
+endif()
 
 add_subdirectory(testinghelpers)
 add_subdirectory(testsuite)
