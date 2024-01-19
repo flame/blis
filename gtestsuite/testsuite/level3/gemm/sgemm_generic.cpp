@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2023, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2023-2024, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -125,72 +125,47 @@ public:
     }
 };
 
-// Black box testing.
+/* Testing SUP kernel: bli_sgemmsup_rv_zen_asm_6x16m */
 INSTANTIATE_TEST_SUITE_P(
-        sgemm_sup_10_30,
+        bli_sgemmsup_rv_zen_asm_6x16m,
         SGemmTest,
         ::testing::Combine(
             ::testing::Values('c'
 #ifndef TEST_BLAS
             ,'r'
 #endif
-            ),                                                               // storage format
-            ::testing::Values('n','t'),                                      // transa
-            ::testing::Values('n','t'),                                      // transb
-            ::testing::Range(gtint_t(10), gtint_t(31), 10),                  // m
-            ::testing::Range(gtint_t(10), gtint_t(31), 10),                  // n
-            ::testing::Range(gtint_t(10), gtint_t(31), 10),                  // k
-            ::testing::Values( 1.0, -2.0),                                   // alpha
-            ::testing::Values(-1.0,  1.0),                                   // beta
-            ::testing::Values(gtint_t(0), gtint_t(2)),                       // increment to the leading dim of a
-            ::testing::Values(gtint_t(0), gtint_t(3)),                       // increment to the leading dim of b
-            ::testing::Values(gtint_t(0), gtint_t(7))                        // increment to the leading dim of c
+            ),                                                   // storage format
+            ::testing::Values('n','t'),                          // transa
+            ::testing::Values('n','t'),                          // transb
+            ::testing::Range(gtint_t(1), gtint_t(17), 1),        // m
+            ::testing::Range(gtint_t(1), gtint_t(17), 1),        // n
+            ::testing::Range(gtint_t(1), gtint_t(17), 1),        // k
+            ::testing::Values(5.3),                              // alpha
+            ::testing::Values(6.4),                              // beta
+            ::testing::Values(gtint_t(0)),                       // increment to the leading dim of a
+            ::testing::Values(gtint_t(0)),                       // increment to the leading dim of b
+            ::testing::Values(gtint_t(0))                        // increment to the leading dim of c
         ),
         ::SGemmTestPrint()
     );
 
-// Black box testing.
+/*Test for multiple alpha and beat values*/
 INSTANTIATE_TEST_SUITE_P(
-        sgemm_sup_alpha_beta,
+        bli_sgemmsup_rv_zen_asm_6x16m_alpha_beta,
         SGemmTest,
         ::testing::Combine(
             ::testing::Values('c'
 #ifndef TEST_BLAS
             ,'r'
 #endif
-            ),                                                               // storage format
-            ::testing::Values('n','t'),                                      // transa
-            ::testing::Values('n','t'),                                      // transb
-            ::testing::Range(gtint_t(1), gtint_t(20), 1),                  // m
-            ::testing::Range(gtint_t(1), gtint_t(50), 1),                 // n
-            ::testing::Range(gtint_t(1), gtint_t(10), 1),                  // k
-            ::testing::Values(0.0, 1.0, -1.0, 5.3, -10.0),                                   // alpha
-            ::testing::Values(0.0, 1.0, -1.0, 6.4, -19.0),                                   // beta
-            ::testing::Values(gtint_t(2)),                       // increment to the leading dim of a
-            ::testing::Values(gtint_t(3)),                       // increment to the leading dim of b
-            ::testing::Values(gtint_t(7))                        // increment to the leading dim of c
-        ),
-        ::SGemmTestPrint()
-    );
-
-
-// Black box testing.
-INSTANTIATE_TEST_SUITE_P(
-        sgemm_sup_m_n_k_100,
-        SGemmTest,
-        ::testing::Combine(
-            ::testing::Values('c'
-#ifndef TEST_BLAS
-            ,'r'
-#endif
-            ),                                                               // storage format
-            ::testing::Values('n'),                                      // transa
-            ::testing::Values('n'),                                      // transb
-            ::testing::Range(gtint_t(1), gtint_t(20), 1),                   // m
-            ::testing::Range(gtint_t(1), gtint_t(50), 1),                   // n
-            ::testing::Range(gtint_t(1), gtint_t(20), 1),                   // k
-            ::testing::Values( -2.0),                                   // alpha
-            ::testing::Values( 5.0),                                   // beta
+            ),                                                   // storage format
+            ::testing::Values('n','t'),                          // transa
+            ::testing::Values('n','t'),                          // transb
+            ::testing::Values(gtint_t(6), gtint_t(16)),          // m
+            ::testing::Values(gtint_t(6), gtint_t(16)),          // n
+            ::testing::Values(gtint_t(5)),                       // k
+            ::testing::Values(0.0, 1.0, -1.0, -10.0),       // alpha
+            ::testing::Values(0.0, 1.0, -1.0, -19.0),       // beta
             ::testing::Values(gtint_t(2)),                       // increment to the leading dim of a
             ::testing::Values(gtint_t(3)),                       // increment to the leading dim of b
             ::testing::Values(gtint_t(7))                        // increment to the leading dim of c
