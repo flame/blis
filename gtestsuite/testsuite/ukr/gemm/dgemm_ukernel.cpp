@@ -56,7 +56,7 @@ TEST_P(DGEMMUkrSUPTest, sup_kernel)
     char transb = std::get<9>(GetParam());
     bool row_pref = std::get<10>(GetParam());
 
-    test_gemmsup_ukr(kern_ptr, transa, transb, m, n, k, alpha, beta, storageC, MR, row_pref);
+    test_gemmsup_ukr(storageC, transa, transb, m, n, k, alpha, beta, kern_ptr, MR, row_pref);
 
 }// end of function
 
@@ -96,7 +96,7 @@ INSTANTIATE_TEST_SUITE_P (
         ::testing::Combine(
             ::testing::Range(gtint_t(1), gtint_t(7), 1),            // values of m
             ::testing::Range(gtint_t(1), gtint_t(9), 1),            // values of n
-            ::testing::Values(gtint_t(12), gtint_t(17)),                         // values of k
+            ::testing::Values(gtint_t(12), gtint_t(17)),            // values of k
             ::testing::Values(2.0),                                 // alpha value
             ::testing::Values(1.0, 0.0),                            // beta value
             ::testing::Values('r'),                                 // storage of c
@@ -115,7 +115,7 @@ INSTANTIATE_TEST_SUITE_P (
         ::testing::Combine(
             ::testing::Range(gtint_t(1), gtint_t(7), 1),            // values of m
             ::testing::Range(gtint_t(1), gtint_t(9), 1),            // values of n
-            ::testing::Values(gtint_t(12), gtint_t(17)),                         // values of k
+            ::testing::Values(gtint_t(12), gtint_t(17)),            // values of k
             ::testing::Values(2.0),                                 // alpha value
             ::testing::Values(1.0, 0.0),                            // beta value
             ::testing::Values('c'),                                 // storage of c
@@ -134,7 +134,7 @@ INSTANTIATE_TEST_SUITE_P (
         ::testing::Combine(
             ::testing::Range(gtint_t(1), gtint_t(7), 1),            // values of m
             ::testing::Range(gtint_t(1), gtint_t(9), 1),            // values of n
-            ::testing::Values(gtint_t(12), gtint_t(17)),                         // values of k
+            ::testing::Values(gtint_t(12), gtint_t(17)),            // values of k
             ::testing::Values(2.0),                                 // alpha value
             ::testing::Values(1.0,  0.0),                           // beta value
             ::testing::Values('r'),                                 // storage of c
@@ -154,7 +154,7 @@ INSTANTIATE_TEST_SUITE_P (
         ::testing::Combine(
             ::testing::Range(gtint_t(1), gtint_t(7), 1),            // values of m
             ::testing::Range(gtint_t(1), gtint_t(9), 1),            // values of n
-            ::testing::Values(gtint_t(12), gtint_t(17)),                         // values of k
+            ::testing::Values(gtint_t(12), gtint_t(17)),            // values of k
             ::testing::Values(2.0),                                 // alpha value
             ::testing::Values(1.0, 0.0),                            // beta value
             ::testing::Values('c'),                                 // storage of c
@@ -173,7 +173,7 @@ INSTANTIATE_TEST_SUITE_P (
         ::testing::Combine(
             ::testing::Range(gtint_t(1), gtint_t(7), 1),            // values of m
             ::testing::Range(gtint_t(1), gtint_t(9), 1),            // values of n
-            ::testing::Values(gtint_t(12), gtint_t(17)),                         // values of k
+            ::testing::Values(gtint_t(12), gtint_t(17)),            // values of k
             ::testing::Values(2.0),                                 // alpha value
             ::testing::Values(1.0, 0.0),                            // beta value
             ::testing::Values('r'),                                 // storage of c
@@ -192,7 +192,7 @@ INSTANTIATE_TEST_SUITE_P (
         ::testing::Combine(
             ::testing::Range(gtint_t(1), gtint_t(7), 1),            // values of m
             ::testing::Range(gtint_t(1), gtint_t(9), 1),            // values of n
-            ::testing::Values(gtint_t(12), gtint_t(17)),                         // values of k
+            ::testing::Values(gtint_t(12), gtint_t(17)),            // values of k
             ::testing::Values(2.0),                                 // alpha value
             ::testing::Values(1.0,  0.0),                           // beta value
             ::testing::Values('c'),                                 // storage of c
@@ -212,7 +212,7 @@ INSTANTIATE_TEST_SUITE_P (
          ::testing::Combine(
              ::testing::Range(gtint_t(1), gtint_t(25), 1),           // values of m
              ::testing::Range(gtint_t(1), gtint_t(9), 1),            // values of n
-             ::testing::Values(gtint_t(16), gtint_t(37)),                         // values of k
+             ::testing::Values(gtint_t(16), gtint_t(37)),            // values of k
              ::testing::Values(2.0),                                 // alpha value
              ::testing::Values(1.0, 0.0),                            // beta value
              ::testing::Values('c'),                                 // storage of c
@@ -231,7 +231,7 @@ INSTANTIATE_TEST_SUITE_P (
          ::testing::Combine(
              ::testing::Range(gtint_t(1), gtint_t(25), 1),           // values of m
              ::testing::Range(gtint_t(1), gtint_t(9), 1),            // values of n
-             ::testing::Values(gtint_t(16), gtint_t(37)),                         // values of k
+             ::testing::Values(gtint_t(16), gtint_t(37)),            // values of k
              ::testing::Values(2.0),                                 // alpha value
              ::testing::Values(1.0, 0.0),                            // beta value
              ::testing::Values('r'),                                 // storage of c
@@ -260,7 +260,7 @@ TEST_P(DGEMMUkrNatTest, native_kernel_testing)
     gtint_t m = std::get<4>(GetParam());
     gtint_t n = std::get<5>(GetParam());
     dgemm_ukr_ft kern_ptr = std::get<6>(GetParam());
-    test_gemmnat_ukr(kern_ptr, m, n, k, storage, alpha, beta);
+    test_gemmnat_ukr(storage, m, n, k, alpha, beta, kern_ptr);
 }// end of function
 
 
@@ -289,7 +289,7 @@ INSTANTIATE_TEST_SUITE_P (
     bli_dgemm_zen4_asm_32x6,
     DGEMMUkrNatTest,
     ::testing::Combine(
-        ::testing::Values(24, 37),            // values of k
+        ::testing::Values(24, 37),        // values of k
         ::testing::Values(1.0),           // alpha value
         ::testing::Values(1.0, 0.0),      // beta value
         ::testing::Values('r', 'c'),      // storage
@@ -304,7 +304,7 @@ INSTANTIATE_TEST_SUITE_P (
     bli_dgemm_zen4_asm_8x24,
     DGEMMUkrNatTest,
     ::testing::Combine(
-        ::testing::Values(24, 37),            // values of k
+        ::testing::Values(24, 37),        // values of k
         ::testing::Values(1.0),           // alpha value
         ::testing::Values(1.0, 0.0),      // beta value
         ::testing::Values('r', 'c'),      // storage
@@ -320,7 +320,7 @@ INSTANTIATE_TEST_SUITE_P (
     bli_dgemm_haswell_asm_6x8,
     DGEMMUkrNatTest,
     ::testing::Combine(
-        ::testing::Values(13, 16),        // values of k
+        ::testing::Values(13, 16),     // values of k
         ::testing::Values(1.0),        // alpha value
         ::testing::Values(1.0, 0.0),   // beta value
         ::testing::Values('r', 'c'),   // storage

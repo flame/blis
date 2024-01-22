@@ -40,12 +40,12 @@
 #include "blis.h"
 
 /**
- * @brief Generic test body for axpby operation.
+ * @brief Generic test body for gemm operation.
  */
 
 // The function is templatized based on the datatype and function-pointer type to the kernel.
 template<typename T, typename FT>
-static void test_gemmnat_ukr( FT ukr_fp, gtint_t m, gtint_t n, gtint_t k, char storage, T alpha, T beta )
+static void test_gemmnat_ukr( char storage, gtint_t m, gtint_t n, gtint_t k, T alpha, T beta, FT ukr_fp )
 {
     gtint_t ldc  = m; // initialization
 
@@ -66,7 +66,12 @@ static void test_gemmnat_ukr( FT ukr_fp, gtint_t m, gtint_t n, gtint_t k, char s
     gtint_t lda = cs;
     gtint_t sizea =  m * k * sizeof(T);
     T *buf_a = (T*)aligned_alloc(BLIS_HEAP_STRIDE_ALIGN_SIZE, sizea);
-    testinghelpers::datagenerators::randomgenerators<T>( -2, 8, 'r', m, k, (T*)(buf_a), 'n', cs);
+    // Check if the memory has been successfully allocated
+    if (buf_a == NULL) {
+        printf("Matrix A: Memory not allocated.\n");
+        return ;
+    }
+    testinghelpers::datagenerators::randomgenerators<T>( -2, 8, 'c', m, k, (T*)(buf_a), 'n', cs);
 
     // Create matrix B with row-storage
     rs = n;
@@ -75,6 +80,11 @@ static void test_gemmnat_ukr( FT ukr_fp, gtint_t m, gtint_t n, gtint_t k, char s
 
     gtint_t sizeb =  k * n * sizeof(T);
     T *buf_b = (T*)aligned_alloc(BLIS_HEAP_STRIDE_ALIGN_SIZE, sizeb);
+    // Check if the memory has been successfully allocated
+    if (buf_b == NULL) {
+        printf("Matrix B: Memory not allocated.\n");
+        return ;
+    }
     testinghelpers::datagenerators::randomgenerators<T>( -5, 2, 'r', k, n, (T*)(buf_b), 'n', rs);
 
     T *buf_c;
@@ -98,11 +108,20 @@ static void test_gemmnat_ukr( FT ukr_fp, gtint_t m, gtint_t n, gtint_t k, char s
         sizec =  m * n * sizeof(T);
         buf_c = (T*)malloc(sizec);
         testinghelpers::datagenerators::randomgenerators<T>( -5, 2, 'c', m, n, (T*)(buf_c), 'n', cs);
+    }
 
+    // Check if the memory has been successfully allocated
+    if (buf_c == NULL) {
+        printf("Matrix C: Memory not allocated.\n");
+        return ;
     }
     buf_cref = (T*)malloc(sizec);
+    // Check if the memory has been successfully allocated
+    if (buf_cref == NULL) {
+        printf("Matrix C Ref: Memory not allocated.\n");
+        return ;
+    }
     memcpy(buf_cref, buf_c, sizec);
-
 
     // Invoke micro-kernel
     auxinfo_t data;
@@ -124,7 +143,7 @@ static void test_gemmnat_ukr( FT ukr_fp, gtint_t m, gtint_t n, gtint_t k, char s
         );
 
     // Set the threshold for the errors:
-    double thresh = 10 * std::max(n,std::max(k,m)) * testinghelpers::getEpsilon<T>();
+    double thresh = 10 * (std::max(k,1)) * testinghelpers::getEpsilon<T>();
 
     // In native micro-kernel
     // op(A) = No transpose & op(B) = transpose
@@ -159,27 +178,36 @@ static void test_gemmnat_ukr( FT ukr_fp, gtint_t m, gtint_t n, gtint_t k, char s
     free(buf_cref);
 }
 
-
-
-
 template<typename T, typename FT>
-static void test_gemmsup_ukr( FT ukr_fp, char trnsa, char trnsb, gtint_t m, gtint_t n, gtint_t k, T alpha, T beta, char storageC, gtint_t MR, bool row_pref)
+static void test_gemmsup_ukr( char storage, char trnsa, char trnsb, gtint_t m, gtint_t n, gtint_t k, T alpha, T beta, FT ukr_fp, gtint_t MR, bool row_pref)
 {
     // Compute the leading dimensions of a, b, and c.
-    char storage = storageC;
     gtint_t lda = testinghelpers::get_leading_dimension( storage, trnsa, m, k, 0 );
     gtint_t ldb = testinghelpers::get_leading_dimension( storage, trnsb, k, n, 0 );
     gtint_t ldc = testinghelpers::get_leading_dimension( storage, 'n', m, n, 0 );
 
+     //----------------------------------------------------------
+    //         Initialize matrices with random numbers
     //----------------------------------------------------------
-    //         Initialize matrics with random numbers
-    //----------------------------------------------------------
-    std::vector<T> a = testinghelpers::get_random_matrix<T>( -2, 8, storage, trnsa, m, k, lda );
-    std::vector<T> b = testinghelpers::get_random_matrix<T>( -5, 2, storage, trnsb, k, n, ldb );
-    std::vector<T> c = testinghelpers::get_random_matrix<T>( -3, 5, storage, 'n', m, n, ldc );
+    gtint_t sizea =  testinghelpers::matsize( storage, trnsa, m, k, lda ) * sizeof(T);
+    gtint_t sizeb =  testinghelpers::matsize( storage, trnsb, k, n, ldb ) * sizeof(T);
+    gtint_t sizec =  testinghelpers::matsize( storage, 'n', m, n, ldc ) * sizeof(T);
+    T *buf_a = (T*)malloc(sizea);
+    T *buf_b = (T*)malloc(sizeb);
+    T *buf_c = (T*)malloc(sizec);
+    T *buf_cref = (T*)malloc(sizec);
+
+    // Check if the memory has been successfully allocated
+    if ((buf_a == NULL) ||(buf_b == NULL) ||(buf_c == NULL) ||(buf_cref == NULL)) {
+        printf("Memory not allocated for input and output Matrix.\n");
+        return ;
+    }
+    testinghelpers::datagenerators::randomgenerators<T>( -2, 8, storage, m, k, (T*)(buf_a), trnsa, lda);
+    testinghelpers::datagenerators::randomgenerators<T>( -5, 2, storage, k, n, (T*)(buf_b), trnsb, ldb);
+    testinghelpers::datagenerators::randomgenerators<T>( -3, 5, storage, m, n, (T*)(buf_c), 'n', ldc);
 
     // Create a copy of c so that we can check reference results.
-    std::vector<T> c_ref(c);
+    memcpy(buf_cref, buf_c, sizec);
     inc_t str_id = 0;
     gtint_t rs_a = 1, cs_a = 1, rs_b = 1, cs_b = 1, rs_c = 1, cs_c = 1;
     gtint_t rs_a0 = 1, cs_a0 = 1, rs_b0 = 1, cs_b0 = 1;
@@ -260,10 +288,10 @@ static void test_gemmsup_ukr( FT ukr_fp, char trnsa, char trnsb, gtint_t m, gtin
             m,
             k,
             &alpha,
-            b.data(), cs_b, rs_b,
-            a.data(), cs_a, rs_a,
+            buf_b, cs_b, rs_b,
+            buf_a, cs_a, rs_a,
             &beta,
-            c.data(), cs_c, rs_c,
+            buf_c, cs_c, rs_c,
             &data,
             NULL
           );
@@ -280,23 +308,160 @@ static void test_gemmsup_ukr( FT ukr_fp, char trnsa, char trnsb, gtint_t m, gtin
             n,
             k,
             &alpha,
-            a.data(), rs_a, cs_a,
-            b.data(), rs_b, cs_b,
+            buf_a, rs_a, cs_a,
+            buf_b, rs_b, cs_b,
             &beta,
-            c.data(), rs_c, cs_c,
+            buf_c, rs_c, cs_c,
             &data,
             NULL
           );
     }
 
     // Set the threshold for the errors:
-    double thresh = 10 * std::max(n,std::max(k,m)) * testinghelpers::getEpsilon<T>();
+    double thresh = 10 * (std::max(k,1)) * testinghelpers::getEpsilon<T>();
 
     // call reference implementation
-    testinghelpers::ref_gemm<T>( storageC, trnsa, trnsb, m, n, k, alpha,
-                                 a.data(), lda, b.data(), ldb, beta, c_ref.data(), ldc);
+    testinghelpers::ref_gemm<T>( storage, trnsa, trnsb, m, n, k, alpha,
+                                 buf_a, lda, buf_b, ldb, beta, buf_cref, ldc);
 
     // Check component-wise error
-    computediff<T>( storageC, m, n, c.data(), c_ref.data(), ldc, thresh );
+    computediff<T>( storage, m, n, buf_c, buf_cref, ldc, thresh );
+
+    free(buf_a);
+    free(buf_b);
+    free(buf_c);
+    free(buf_cref);
+}
+
+template<typename T, typename FT>
+static void test_zgemmsup_ukr( char storage, char trnsa, char trnsb, gtint_t m, gtint_t n, gtint_t k, T alpha, T beta, FT ukr_fp)
+{
+    // Compute the leading dimensions of a, b, and c.
+    gtint_t lda = testinghelpers::get_leading_dimension( storage, trnsa, m, k, 0 );
+    gtint_t ldb = testinghelpers::get_leading_dimension( storage, trnsb, k, n, 0 );
+    gtint_t ldc = testinghelpers::get_leading_dimension( storage, 'n', m, n, 0 );
+
+    //----------------------------------------------------------
+    //         Initialize matrices with random numbers
+    //----------------------------------------------------------
+    gtint_t sizea =  testinghelpers::matsize( storage, trnsa, m, k, lda ) * sizeof(T);
+    gtint_t sizeb =  testinghelpers::matsize( storage, trnsb, k, n, ldb ) * sizeof(T);
+    gtint_t sizec =  testinghelpers::matsize( storage, 'n', m, n, ldc ) * sizeof(T);
+    T *buf_a = (T*)malloc(sizea);
+    T *buf_b = (T*)malloc(sizeb);
+    T *buf_c = (T*)malloc(sizec);
+    T *buf_cref = (T*)malloc(sizec);
+
+    // Check if the memory has been successfully allocated
+    if ((buf_a == NULL) ||(buf_b == NULL) ||(buf_c == NULL) ||(buf_cref == NULL)) {
+        printf("Memory not allocated for input and output Matrix.\n");
+        return ;
+    }
+
+    testinghelpers::datagenerators::randomgenerators<T>( -2, 8, storage, m, k, (T*)(buf_a), trnsa, lda);
+    testinghelpers::datagenerators::randomgenerators<T>( -5, 2, storage, k, n, (T*)(buf_b), trnsb, ldb);
+    testinghelpers::datagenerators::randomgenerators<T>( -3, 5, storage, m, n, (T*)(buf_c), 'n', ldc);
+
+    // Create a copy of c so that we can check reference results.
+    memcpy(buf_cref, buf_c, sizec);
+    gtint_t rs_a = 1, cs_a = 1, rs_b = 1, cs_b = 1, rs_c = 1, cs_c = 1;
+    gtint_t rs_a0 = 1, cs_a0 = 1, rs_b0 = 1, cs_b0 = 1;
+
+    if(storage == 'r')
+    {
+        rs_a = lda;
+        rs_b = ldb;
+        rs_c = ldc;
+
+        cs_a = 1;
+        cs_b = 1;
+        cs_c = 1;
+
+        rs_a0 = lda;
+        rs_b0 = ldb;
+
+        cs_a0 = 1;
+        cs_b0 = 1;
+    }
+    else
+    {
+        cs_a = lda;
+        cs_b = ldb;
+        cs_c = ldc;
+
+        rs_a = 1;
+        rs_b = 1;
+        rs_c = 1;
+
+        cs_a0 = lda;
+        cs_b0 = ldb;
+
+        rs_a0 = 1;
+        rs_b0 = 1;
+    }
+
+    if(trnsb == 't' || trnsb == 'T')
+    {
+        rs_b = cs_b0;
+        cs_b = rs_b0;
+    }
+
+    if(trnsa == 't' || trnsa == 'T')
+    {
+        rs_a = cs_a0;
+        cs_a = rs_a0;
+    }
+    
+    //Panel stride update is required only for zen4 sup kernels
+    #if defined(BLIS_KERNELS_ZEN4) && defined(GTEST_AVX512)
+        auxinfo_t data;
+        inc_t ps_a_use = (12 * rs_a); //12 = MR
+        bli_auxinfo_set_ps_a( ps_a_use, &data );
+    
+        ukr_fp(
+            BLIS_NO_CONJUGATE,
+            BLIS_NO_CONJUGATE,
+            m,
+            n,
+            k,
+            &alpha,
+            buf_a, rs_a, cs_a,
+            buf_b, rs_b, cs_b,
+            &beta,
+            buf_c, rs_c, cs_c,
+            &data,
+            NULL
+          );
+    #else
+        ukr_fp(
+            BLIS_NO_CONJUGATE,
+            BLIS_NO_CONJUGATE,
+            m,
+            n,
+            k,
+            &alpha,
+            buf_a, rs_a, cs_a,
+            buf_b, rs_b, cs_b,
+            &beta,
+            buf_c, rs_c, cs_c,
+            NULL,
+            NULL
+          );
+    #endif
+ 
+    // Set the threshold for the errors:
+    double thresh = 20 * (std::max(k,1)) * testinghelpers::getEpsilon<T>();
+
+    // call reference implementation
+    testinghelpers::ref_gemm<T>( storage, trnsa, trnsb, m, n, k, alpha,
+                                 buf_a, lda, buf_b, ldb, beta, buf_cref, ldc);
+
+    // Check component-wise error
+    computediff<T>( storage, m, n, buf_c, buf_cref, ldc, thresh );
+
+    free(buf_a);
+    free(buf_b);
+    free(buf_c);
+    free(buf_cref);
 
 }
