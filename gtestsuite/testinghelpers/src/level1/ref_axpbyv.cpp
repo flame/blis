@@ -37,7 +37,7 @@
 
 namespace testinghelpers {
 
-#if !defined(REF_IS_OPENBLAS) || !defined(REF_IS_MKL)
+#if !defined(REF_IS_OPENBLAS) && !defined(REF_IS_MKL)
 template<typename T>
 void ref_axpbyv( char conj_x, gtint_t n, T alpha, const T* x,
                     gtint_t incx, T beta, T* y, gtint_t incy )

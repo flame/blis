@@ -42,6 +42,9 @@ class daxpyvUkrTest :
                                                    gtint_t,         // incx
                                                    gtint_t,         // incy
                                                    double>> {};     // alpha
+
+GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(daxpyvUkrTest);
+
 // Tests using random integers as vector elements.
 TEST_P( daxpyvUkrTest, AccuracyCheck )
 {
@@ -100,7 +103,7 @@ public:
     }
 };
 
-#ifdef BLIS_KERNELS_ZEN
+#if defined(BLIS_KERNELS_ZEN) && defined(GTEST_AVX2FMA3)
 /*
     Unit testing for functionality of bli_daxpyv_zen_int10 kernel.
     The code structure for bli_daxpyv_zen_int10( ... ) is as follows :
@@ -203,7 +206,7 @@ INSTANTIATE_TEST_SUITE_P(
     );
 #endif
 
-#ifdef BLIS_KERNELS_ZEN4
+#if defined(BLIS_KERNELS_ZEN4) && defined(GTEST_AVX512)
 /*
     Unit testing for functionality of bli_daxpyv_zen_int_avx512 kernel.
     The code structure for bli_daxpyv_zen_int_avx512( ... ) is as follows :

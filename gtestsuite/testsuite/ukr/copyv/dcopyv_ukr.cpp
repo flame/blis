@@ -42,6 +42,8 @@ class dcopyvUkrTest :
                                                    gtint_t,
                                                    gtint_t>> {};
 
+GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(dcopyvUkrTest);
+
 // Tests using random integers as vector elements.
 TEST_P( dcopyvUkrTest, AccuracyCheck )
 {
@@ -93,7 +95,7 @@ public:
     }
 };
 
-#ifdef BLIS_KERNELS_ZEN
+#if defined(BLIS_KERNELS_ZEN) && defined(GTEST_AVX2FMA3)
 /*
     Unit testing for functionality of bli_dcopyv_zen_int kernel.
     The code structure for bli_dcopyv_zen_int( ... ) is as follows :

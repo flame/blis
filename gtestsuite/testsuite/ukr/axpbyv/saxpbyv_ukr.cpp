@@ -43,6 +43,9 @@ class saxpbyvUkrTest :
                                                    gtint_t,         // incy
                                                    float,          // alpha
                                                    float>> {};     // beta
+
+GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(saxpbyvUkrTest);
+
 // Tests using random integers as vector elements.
 TEST_P( saxpbyvUkrTest, AccuracyCheck )
 {
@@ -106,7 +109,7 @@ public:
     }
 };
 
-#ifdef BLIS_KERNELS_ZEN
+#if defined(BLIS_KERNELS_ZEN) && defined(GTEST_AVX2FMA3)
 // Unit testing with unit stride
 INSTANTIATE_TEST_SUITE_P(
         bli_saxpbyv_zen_int10_unitStride,

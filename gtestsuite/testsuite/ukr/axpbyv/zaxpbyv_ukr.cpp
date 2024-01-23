@@ -43,6 +43,9 @@ class zaxpbyvUkrTest :
                                                    gtint_t,         // incy
                                                    dcomplex,          // alpha
                                                    dcomplex>> {};     // beta
+
+GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(zaxpbyvUkrTest);
+
 // Tests using random integers as vector elements.
 TEST_P( zaxpbyvUkrTest, AccuracyCheck )
 {
@@ -108,7 +111,7 @@ public:
     }
 };
 
-#ifdef BLIS_KERNELS_ZEN
+#if defined(BLIS_KERNELS_ZEN) && defined(GTEST_AVX2FMA3)
 // Unit testing with unit stride
 INSTANTIATE_TEST_SUITE_P(
         bli_zaxpbyv_zen_int_unitStride,

@@ -43,6 +43,9 @@ class daxpbyvUkrTest :
                                                    gtint_t,         // incy
                                                    double,          // alpha
                                                    double>> {};     // beta
+
+GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(daxpbyvUkrTest);
+
 // Tests using random integers as vector elements.
 TEST_P( daxpbyvUkrTest, AccuracyCheck )
 {
@@ -106,7 +109,7 @@ public:
     }
 };
 
-#ifdef BLIS_KERNELS_ZEN
+#if defined(BLIS_KERNELS_ZEN) && defined(GTEST_AVX2FMA3)
 /*
     Unit testing for functionality of bli_daxpbyv_zen_int10 kernel.
     The code structure for bli_daxpbyv_zen_int10( ... ) is as follows :
