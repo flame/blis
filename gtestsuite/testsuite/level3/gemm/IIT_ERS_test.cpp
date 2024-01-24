@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2023, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2023-2024, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -46,7 +46,7 @@ TYPED_TEST_SUITE(Gemm_IIT_ERS_Test, TypeParam); // Defining individual testsuite
 // Adding namespace to get default parameters(valid case) from testinghelpers/common/wrong_input_helpers.h.
 using namespace testinghelpers::IIT;
 
-#ifdef TEST_BLAS
+#if defined(TEST_BLAS) || defined(TEST_CBLAS)
 
 /*
     Incorrect Input Testing(IIT)
@@ -69,11 +69,17 @@ TYPED_TEST(Gemm_IIT_ERS_Test, invalid_transa)
   using T = TypeParam;
   // Defining the C matrix with values for debugging purposes
   std::vector<T> c = testinghelpers::get_random_matrix<T>(-10, 10, STORAGE, 'N', N, N, LDC);
-
+  std::vector<T> a = testinghelpers::get_random_matrix<T>(-10, 10, STORAGE, 'N', M, K, LDA);
+  std::vector<T> b = testinghelpers::get_random_matrix<T>(-10, 10, STORAGE, 'N', K, N, LDB);
   // Copy so that we check that the elements of C are not modified.
   std::vector<T> c_ref(c);
+  T alpha, beta;
+
+  testinghelpers::initone<T>( alpha );
+  testinghelpers::initone<T>( beta );
+
   // Call BLIS Gemm with a invalid value for TRANS value for A.
-  gemm<T>( STORAGE, 'p', TRANS, M, N, K, nullptr, nullptr, LDA, nullptr, LDB, nullptr, nullptr, LDC );
+  gemm<T>( STORAGE, 'p', TRANS, M, N, K, &alpha, a.data(), LDA, b.data(), LDB, &beta, c.data(), LDC );
   // Use bitwise comparison (no threshold).
   computediff<T>( STORAGE, N, N, c.data(), c_ref.data(), LDC);
 }
@@ -84,11 +90,17 @@ TYPED_TEST(Gemm_IIT_ERS_Test, invalid_transb)
   using T = TypeParam;
   // Defining the C matrix with values for debugging purposes
   std::vector<T> c = testinghelpers::get_random_matrix<T>(-10, 10, STORAGE, 'N', N, N, LDC);
-
+  std::vector<T> a = testinghelpers::get_random_matrix<T>(-10, 10, STORAGE, 'N', M, K, LDA);
+  std::vector<T> b = testinghelpers::get_random_matrix<T>(-10, 10, STORAGE, 'N', K, N, LDB);
   // Copy so that we check that the elements of C are not modified.
   std::vector<T> c_ref(c);
+  T alpha, beta;
+
+  testinghelpers::initone<T>( alpha );
+  testinghelpers::initone<T>( beta );
+
   // Call BLIS Gemm with a invalid value for TRANS value for B.
-  gemm<T>( STORAGE, TRANS, 'p', M, N, K, nullptr, nullptr, LDA, nullptr, LDB, nullptr, nullptr, LDC );
+  gemm<T>( STORAGE, TRANS, 'p', M, N, K, &alpha, a.data(), LDA, b.data(), LDB, &beta, c.data(), LDC );
   // Use bitwise comparison (no threshold).
   computediff<T>( STORAGE, N, N, c.data(), c_ref.data(), LDC);
 }
@@ -99,11 +111,16 @@ TYPED_TEST(Gemm_IIT_ERS_Test, m_lt_zero)
   using T = TypeParam;
   // Defining the C matrix with values for debugging purposes
   std::vector<T> c = testinghelpers::get_random_matrix<T>(-10, 10, STORAGE, 'N', N, N, LDC);
-
+  std::vector<T> a = testinghelpers::get_random_matrix<T>(-10, 10, STORAGE, 'N', M, K, LDA);
+  std::vector<T> b = testinghelpers::get_random_matrix<T>(-10, 10, STORAGE, 'N', K, N, LDB);
   // Copy so that we check that the elements of C are not modified.
   std::vector<T> c_ref(c);
+  T alpha, beta;
+
+  testinghelpers::initone<T>( alpha );
+  testinghelpers::initone<T>( beta );
   // Call BLIS Gemm with a invalid value for m.
-  gemm<T>( STORAGE, TRANS, TRANS, -1, N, K, nullptr, nullptr, LDA, nullptr, LDB, nullptr, nullptr, LDC );
+  gemm<T>( STORAGE, TRANS, TRANS, -1, N, K, &alpha, a.data(), LDA, b.data(), LDB, &beta, c.data(), LDC );
   // Use bitwise comparison (no threshold).
   computediff<T>( STORAGE, N, N, c.data(), c_ref.data(), LDC);
 }
@@ -114,11 +131,16 @@ TYPED_TEST(Gemm_IIT_ERS_Test, n_lt_zero)
   using T = TypeParam;
   // Defining the C matrix with values for debugging purposes
   std::vector<T> c = testinghelpers::get_random_matrix<T>(-10, 10, STORAGE, 'N', N, N, LDC);
-
+  std::vector<T> a = testinghelpers::get_random_matrix<T>(-10, 10, STORAGE, 'N', M, K, LDA);
+  std::vector<T> b = testinghelpers::get_random_matrix<T>(-10, 10, STORAGE, 'N', K, N, LDB);
   // Copy so that we check that the elements of C are not modified.
   std::vector<T> c_ref(c);
+  T alpha, beta;
+
+  testinghelpers::initone<T>( alpha );
+  testinghelpers::initone<T>( beta );
   // Call BLIS Gemm with a invalid value for n.
-  gemm<T>( STORAGE, TRANS, TRANS, M, -1, K, nullptr, nullptr, LDA, nullptr, LDB, nullptr, nullptr, LDC );
+  gemm<T>( STORAGE, TRANS, TRANS, M, -1, K, &alpha, a.data(), LDA, b.data(), LDB, &beta, c.data(), LDC );
   // Use bitwise comparison (no threshold).
   computediff<T>( STORAGE, N, N, c.data(), c_ref.data(), LDC);
 }
@@ -129,11 +151,16 @@ TYPED_TEST(Gemm_IIT_ERS_Test, k_lt_zero)
   using T = TypeParam;
   // Defining the C matrix with values for debugging purposes
   std::vector<T> c = testinghelpers::get_random_matrix<T>(-10, 10, STORAGE, 'N', N, N, LDC);
-
+  std::vector<T> a = testinghelpers::get_random_matrix<T>(-10, 10, STORAGE, 'N', M, K, LDA);
+  std::vector<T> b = testinghelpers::get_random_matrix<T>(-10, 10, STORAGE, 'N', K, N, LDB);
   // Copy so that we check that the elements of C are not modified.
   std::vector<T> c_ref(c);
+  T alpha, beta;
+
+  testinghelpers::initone<T>( alpha );
+  testinghelpers::initone<T>( beta );
   // Call BLIS Gemm with a invalid value for k.
-  gemm<T>( STORAGE, TRANS, TRANS, M, N, -1, nullptr, nullptr, LDA, nullptr, LDB, nullptr, nullptr, LDC );
+  gemm<T>( STORAGE, TRANS, TRANS, M, N, -1, &alpha, a.data(), LDA, b.data(), LDB, &beta, c.data(), LDC );
   // Use bitwise comparison (no threshold).
   computediff<T>( STORAGE, N, N, c.data(), c_ref.data(), LDC);
 }
@@ -144,11 +171,16 @@ TYPED_TEST(Gemm_IIT_ERS_Test, invalid_lda)
   using T = TypeParam;
   // Defining the C matrix with values for debugging purposes
   std::vector<T> c = testinghelpers::get_random_matrix<T>(-10, 10, STORAGE, 'N', N, N, LDC);
-
+  std::vector<T> a = testinghelpers::get_random_matrix<T>(-10, 10, STORAGE, 'N', M, K, LDA);
+  std::vector<T> b = testinghelpers::get_random_matrix<T>(-10, 10, STORAGE, 'N', K, N, LDB);
   // Copy so that we check that the elements of C are not modified.
   std::vector<T> c_ref(c);
+  T alpha, beta;
+
+  testinghelpers::initone<T>( alpha );
+  testinghelpers::initone<T>( beta );
   // Call BLIS Gemm with a invalid value for lda.
-  gemm<T>( STORAGE, TRANS, TRANS, M, N, K, nullptr, nullptr, LDA - 1, nullptr, LDB, nullptr, nullptr, LDC );
+  gemm<T>( STORAGE, TRANS, TRANS, M, N, K, &alpha, a.data(), LDA - 1, b.data(), LDB, &beta, c.data(), LDC );
   // Use bitwise comparison (no threshold).
   computediff<T>( STORAGE, N, N, c.data(), c_ref.data(), LDC);
 }
@@ -159,11 +191,16 @@ TYPED_TEST(Gemm_IIT_ERS_Test, invalid_ldb)
   using T = TypeParam;
   // Defining the C matrix with values for debugging purposes
   std::vector<T> c = testinghelpers::get_random_matrix<T>(-10, 10, STORAGE, 'N', N, N, LDC);
-
+  std::vector<T> a = testinghelpers::get_random_matrix<T>(-10, 10, STORAGE, 'N', M, K, LDA);
+  std::vector<T> b = testinghelpers::get_random_matrix<T>(-10, 10, STORAGE, 'N', K, N, LDB);
   // Copy so that we check that the elements of C are not modified.
   std::vector<T> c_ref(c);
+  T alpha, beta;
+
+  testinghelpers::initone<T>( alpha );
+  testinghelpers::initone<T>( beta );
   // Call BLIS Gemm with a invalid value for ldb.
-  gemm<T>( STORAGE, TRANS, TRANS, M, N, K, nullptr, nullptr, LDA, nullptr, LDB - 1, nullptr, nullptr, LDC );
+  gemm<T>( STORAGE, TRANS, TRANS, M, N, K, &alpha, a.data(), LDA, b.data(), LDB - 1, &beta, c.data(), LDC );
   // Use bitwise comparison (no threshold).
   computediff<T>( STORAGE, N, N, c.data(), c_ref.data(), LDC);
 }
@@ -174,11 +211,16 @@ TYPED_TEST(Gemm_IIT_ERS_Test, invalid_ldc)
   using T = TypeParam;
   // Defining the C matrix with values for debugging purposes
   std::vector<T> c = testinghelpers::get_random_matrix<T>(-10, 10, STORAGE, 'N', N, N, LDC);
-
+  std::vector<T> a = testinghelpers::get_random_matrix<T>(-10, 10, STORAGE, 'N', M, K, LDA);
+  std::vector<T> b = testinghelpers::get_random_matrix<T>(-10, 10, STORAGE, 'N', K, N, LDB);
   // Copy so that we check that the elements of C are not modified.
   std::vector<T> c_ref(c);
+  T alpha, beta;
+
+  testinghelpers::initone<T>( alpha );
+  testinghelpers::initone<T>( beta );
   // Call BLIS Gemm with a invalid value for ldc.
-  gemm<T>( STORAGE, TRANS, TRANS, M, N, K, nullptr, nullptr, LDA, nullptr, LDB, nullptr, nullptr, LDC - 1 );
+  gemm<T>( STORAGE, TRANS, TRANS, M, N, K, &alpha, a.data(), LDA, b.data(), LDB, &beta, c.data(), LDC - 1 );
   // Use bitwise comparison (no threshold).
   computediff<T>( STORAGE, N, N, c.data(), c_ref.data(), LDC);
 }
@@ -200,10 +242,15 @@ TYPED_TEST(Gemm_IIT_ERS_Test, m_eq_zero)
   using T = TypeParam;
   // Defining the C matrix with values for debugging purposes
   std::vector<T> c = testinghelpers::get_random_matrix<T>(-10, 10, STORAGE, 'N', N, N, LDC);
-
+  std::vector<T> a = testinghelpers::get_random_matrix<T>(-10, 10, STORAGE, 'N', M, K, LDA);
+  std::vector<T> b = testinghelpers::get_random_matrix<T>(-10, 10, STORAGE, 'N', K, N, LDB);
   // Copy so that we check that the elements of C are not modified.
   std::vector<T> c_ref(c);
-  gemm<T>( STORAGE, TRANS, TRANS, 0, N, K, nullptr, nullptr, LDA, nullptr, LDB, nullptr, nullptr, LDC );
+  T alpha, beta;
+
+  testinghelpers::initone<T>( alpha );
+  testinghelpers::initone<T>( beta );
+  gemm<T>( STORAGE, TRANS, TRANS, 0, N, K, &alpha, a.data(), LDA, b.data(), LDB, &beta, c.data(), LDC );
   // Use bitwise comparison (no threshold).
   computediff<T>( STORAGE, N, N, c.data(), c_ref.data(), LDC);
 }
@@ -214,10 +261,15 @@ TYPED_TEST(Gemm_IIT_ERS_Test, n_eq_zero)
   using T = TypeParam;
   // Defining the C matrix with values for debugging purposes
   std::vector<T> c = testinghelpers::get_random_matrix<T>(-10, 10, STORAGE, 'N', N, N, LDC);
-
+  std::vector<T> a = testinghelpers::get_random_matrix<T>(-10, 10, STORAGE, 'N', M, K, LDA);
+  std::vector<T> b = testinghelpers::get_random_matrix<T>(-10, 10, STORAGE, 'N', K, N, LDB);
   // Copy so that we check that the elements of C are not modified.
   std::vector<T> c_ref(c);
-  gemm<T>( STORAGE, TRANS, TRANS, M, 0, K, nullptr, nullptr, LDA, nullptr, LDB, nullptr, nullptr, LDC );
+  T alpha, beta;
+
+  testinghelpers::initone<T>( alpha );
+  testinghelpers::initone<T>( beta );
+  gemm<T>( STORAGE, TRANS, TRANS, M, 0, K, &alpha, a.data(), LDA, b.data(), LDB, &beta, c.data(), LDC );
   // Use bitwise comparison (no threshold).
   computediff<T>( STORAGE, N, N, c.data(), c_ref.data(), LDC);
 }
@@ -227,8 +279,10 @@ TYPED_TEST(Gemm_IIT_ERS_Test, alpha_zero_beta_one)
 {
   using T = TypeParam;
   // Defining the C matrix with values for debugging purposes
+  // Defining the C matrix with values for debugging purposes
   std::vector<T> c = testinghelpers::get_random_matrix<T>(-10, 10, STORAGE, 'N', N, N, LDC);
-
+  std::vector<T> a = testinghelpers::get_random_matrix<T>(-10, 10, STORAGE, 'N', M, K, LDA);
+  std::vector<T> b = testinghelpers::get_random_matrix<T>(-10, 10, STORAGE, 'N', K, N, LDB);
   // Copy so that we check that the elements of C are not modified.
   std::vector<T> c_ref(c);
   T alpha, beta;
@@ -236,7 +290,7 @@ TYPED_TEST(Gemm_IIT_ERS_Test, alpha_zero_beta_one)
   testinghelpers::initzero<T>( alpha );
   testinghelpers::initone<T>( beta );
 
-  gemm<T>( STORAGE, TRANS, TRANS, M, N, K, &alpha, nullptr, LDA, nullptr, LDB, &beta, nullptr, LDC );
+  gemm<T>( STORAGE, TRANS, TRANS, M, N, K, &alpha, a.data(), LDA, b.data(), LDB, &beta, c.data(), LDC );
   // Use bitwise comparison (no threshold).
   computediff<T>( STORAGE, N, N, c.data(), c_ref.data(), LDC);
 }
@@ -246,8 +300,10 @@ TYPED_TEST(Gemm_IIT_ERS_Test, k_zero_beta_one)
 {
   using T = TypeParam;
   // Defining the C matrix with values for debugging purposes
+  // Defining the C matrix with values for debugging purposes
   std::vector<T> c = testinghelpers::get_random_matrix<T>(-10, 10, STORAGE, 'N', N, N, LDC);
-
+  std::vector<T> a = testinghelpers::get_random_matrix<T>(-10, 10, STORAGE, 'N', M, K, LDA);
+  std::vector<T> b = testinghelpers::get_random_matrix<T>(-10, 10, STORAGE, 'N', K, N, LDB);
   // Copy so that we check that the elements of C are not modified.
   std::vector<T> c_ref(c);
   T alpha, beta;
@@ -255,10 +311,54 @@ TYPED_TEST(Gemm_IIT_ERS_Test, k_zero_beta_one)
   testinghelpers::initone<T>( alpha );
   testinghelpers::initone<T>( beta );
 
-  gemm<T>( STORAGE, TRANS, TRANS, M, N, 0, &alpha, nullptr, LDA, nullptr, LDB, &beta, nullptr, LDC );
+  gemm<T>( STORAGE, TRANS, TRANS, M, N, 0, &alpha, a.data(), LDA, b.data(), LDB, &beta, c.data(), LDC );
   // Use bitwise comparison (no threshold).
   computediff<T>( STORAGE, N, N, c.data(), c_ref.data(), LDC);
 }
 
+#if 0
+/**
+ * These testcases are disabled as blis aborts for null buffers.
+ * Once respective blis framework changes are done to simply pass down
+ * the error to the top level these testcases can be enabled.
+*/
+// When a matrix is null
+TYPED_TEST(Gemm_IIT_ERS_Test, null_a_matrix)
+{
+  using T = TypeParam;
+  // Defining the C matrix with values for debugging purposes
+  std::vector<T> c = testinghelpers::get_random_matrix<T>(-10, 10, STORAGE, 'N', M, N, LDC);
+  std::vector<T> b = testinghelpers::get_random_matrix<T>(-10, 10, STORAGE, 'N', K, N, LDB);
+  // Copy so that we check that the elements of C are not modified.
+  std::vector<T> c_ref(c);
+  T alpha, beta;
 
+  testinghelpers::initone<T>( alpha );
+  testinghelpers::initone<T>( beta );
+
+  gemm<T>( STORAGE, TRANS, TRANS, M, N, K, &alpha, nullptr, LDA, b.data(), LDB, &beta, c.data(), LDC );
+  // Use bitwise comparison (no threshold).
+  computediff<T>( STORAGE, N, N, c.data(), c_ref.data(), LDC);
+}
+
+// When b matrix is null
+TYPED_TEST(Gemm_IIT_ERS_Test, null_b_matrix)
+{
+  using T = TypeParam;
+  // Defining the C matrix with values for debugging purposes
+  std::vector<T> c = testinghelpers::get_random_matrix<T>(-10, 10, STORAGE, 'N', M, N, LDC);
+  std::vector<T> a = testinghelpers::get_random_matrix<T>(-10, 10, STORAGE, 'N', M, K, LDA);
+  // Copy so that we check that the elements of C are not modified.
+  std::vector<T> c_ref(c);
+  T alpha, beta;
+
+  testinghelpers::initone<T>( alpha );
+  testinghelpers::initone<T>( beta );
+
+  gemm<T>( STORAGE, TRANS, TRANS, M, N, K, &alpha, a.data(), LDA, nullptr, LDB, &beta, c.data(), LDC );
+  // Use bitwise comparison (no threshold).
+  computediff<T>( STORAGE, N, N, c.data(), c_ref.data(), LDC);
+}
+#endif /* #IF 0 ENDS HERE */
 #endif
+
