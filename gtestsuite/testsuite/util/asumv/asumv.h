@@ -85,9 +85,9 @@ static RT typed_asumv(gtint_t n, T* x, gtint_t incx){
     else if constexpr (std::is_same<T, double>::value)
         bli_dasumv(n, x, incx, &asum);
     else if constexpr (std::is_same<T, scomplex>::value)
-        bli_scasumv(n, x, incx, &asum);
+        bli_casumv(n, x, incx, &asum);
     else if constexpr (std::is_same<T, dcomplex>::value)
-        bli_dzasumv(n, x, incx, &asum);
+        bli_zasumv(n, x, incx, &asum);
     else
       throw std::runtime_error("Error in testsuite/util/asumv.h: Invalid typename in cblas_asumv().");
     return asum;

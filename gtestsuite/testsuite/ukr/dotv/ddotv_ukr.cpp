@@ -42,6 +42,8 @@ class ddotvUkrTest :
                                                    gtint_t,
                                                    gtint_t,
                                                    gtint_t>> {};
+GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(ddotvUkrTest);
+
 
 // Tests using random integers as vector elements.
 TEST_P( ddotvUkrTest, RandomData )
@@ -104,7 +106,7 @@ public:
 // ----------------------------------------------
 // ----- Begin ZEN1/2/3 (AVX2) Kernel Tests -----
 // ----------------------------------------------
-#ifdef BLIS_KERNELS_ZEN
+#if defined(BLIS_KERNELS_ZEN) && defined(GTEST_AVX2FMA3)
 // Tests for bli_ddotv_zen_int (AVX2) kernel.
 /**
  * Loops:
@@ -260,7 +262,7 @@ INSTANTIATE_TEST_SUITE_P(
 // ----------------------------------------------
 // -----  Begin ZEN4 (AVX512) Kernel Tests  -----
 // ----------------------------------------------
-#ifdef BLIS_KERNELS_ZEN4
+#if defined(BLIS_KERNELS_ZEN4) && defined(GTEST_AVX512)
 // Tests for bli_ddotv_zen_int_avx512 (AVX512) kernel.
 /**
  * Loops & If conditions:

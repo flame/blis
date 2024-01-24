@@ -41,7 +41,7 @@ class dscalvUkrTest :
                                                    gtint_t,
                                                    gtint_t,
                                                    double>> {};
-
+GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(dscalvUkrTest);
 
 // Tests using random integers as vector elements.
 TEST_P( dscalvUkrTest, RandomData )
@@ -99,7 +99,7 @@ public:
 // ----------------------------------------------
 // ----- Begin ZEN1/2/3 (AVX2) Kernel Tests -----
 // ----------------------------------------------
-#ifdef BLIS_KERNELS_ZEN
+#if defined(BLIS_KERNELS_ZEN) && defined(GTEST_AVX2FMA3)
 // Tests for bli_ddotv_zen_int (AVX2) kernel.
 /**
  * Loops:
@@ -258,7 +258,7 @@ INSTANTIATE_TEST_SUITE_P(
 // ----------------------------------------------
 // -----  Begin ZEN4 (AVX512) Kernel Tests  -----
 // ----------------------------------------------
-#ifdef BLIS_KERNELS_ZEN4
+#if defined(BLIS_KERNELS_ZEN4) && defined(GTEST_AVX512)
 // Tests for bli_dscalv_zen_int_avx512 (AVX512) kernel.
 /**
  * Loops:
