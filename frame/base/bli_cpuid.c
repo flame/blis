@@ -487,6 +487,16 @@ bool bli_cpuid_is_bulldozer
 
 #elif defined(__aarch64__) || defined(__arm__) || defined(_M_ARM) || defined(_ARCH_PPC)
 
+	// courtesy OpenBSD
+#define ARM_CPU_PART_CORTEX_A5  0xc05
+#define ARM_CPU_PART_CORTEX_A7  0xc07
+#define ARM_CPU_PART_CORTEX_A8  0xc08
+#define ARM_CPU_PART_CORTEX_A9  0xc09
+#define ARM_CPU_PART_CORTEX_A12 0xc0d
+#define ARM_CPU_PART_CORTEX_A15 0xc0f
+#define ARM_CPU_PART_CORTEX_A17 0xc0e
+#define ARM_CPU_PART_CORTEX_A32 0xd01
+
 arch_t bli_cpuid_query_id( void )
 {
 	uint32_t vendor, model, part, features;
@@ -545,28 +555,28 @@ arch_t bli_cpuid_query_id( void )
 
 bool bli_cpuid_is_cortexa15
      (
-       uint32_t family,
        uint32_t model,
+       uint32_t part,
        uint32_t features
      )
 {
 	// Check for expected CPU features.
 	const uint32_t expected = FEATURE_NEON;
 
-	return bli_cpuid_has_features( features, expected ) && model == 0xc0f;
+	return bli_cpuid_has_features( features, expected ) && part == ARM_CPU_PART_CORTEX_A15;
 }
 
 bool bli_cpuid_is_cortexa9
      (
-       uint32_t family,
        uint32_t model,
+       uint32_t part,
        uint32_t features
      )
 {
 	// Check for expected CPU features.
 	const uint32_t expected = FEATURE_NEON;
 
-	return bli_cpuid_has_features( features, expected ) && model == 0xc09;
+	return bli_cpuid_has_features( features, expected ) && part == ARM_CPU_PART_CORTEX_A9;
 }
 
 #endif
@@ -1062,72 +1072,72 @@ static uint32_t get_coretype
 #endif //__APPLE__
 
 	// From Linux arch/arm64/include/asm/cputype.h
-#define  ARM_CPU_IMP_ARM 0x41
-#define  ARM_CPU_IMP_APM 0x50
-#define  ARM_CPU_IMP_CAVIUM 0x43
-#define  ARM_CPU_IMP_BRCM 0x42
-#define  ARM_CPU_IMP_QCOM 0x51
-#define  ARM_CPU_IMP_NVIDIA 0x4E
-#define  ARM_CPU_IMP_FUJITSU 0x46
-#define  ARM_CPU_IMP_HISI 0x48
-#define  ARM_CPU_IMP_APPLE 0x61
+#define ARM_CPU_IMP_ARM 0x41
+#define ARM_CPU_IMP_APM 0x50
+#define ARM_CPU_IMP_CAVIUM 0x43
+#define ARM_CPU_IMP_BRCM 0x42
+#define ARM_CPU_IMP_QCOM 0x51
+#define ARM_CPU_IMP_NVIDIA 0x4E
+#define ARM_CPU_IMP_FUJITSU 0x46
+#define ARM_CPU_IMP_HISI 0x48
+#define ARM_CPU_IMP_APPLE 0x61
 	//
-#define  ARM_CPU_PART_AEM_V8 0xD0F
-#define  ARM_CPU_PART_FOUNDATION 0xD00
-#define  ARM_CPU_PART_CORTEX_A57 0xD07
-#define  ARM_CPU_PART_CORTEX_A72 0xD08
-#define  ARM_CPU_PART_CORTEX_A53 0xD03
-#define  ARM_CPU_PART_CORTEX_A73 0xD09
-#define  ARM_CPU_PART_CORTEX_A75 0xD0A
-#define  ARM_CPU_PART_CORTEX_A35 0xD04
-#define  ARM_CPU_PART_CORTEX_A55 0xD05
-#define  ARM_CPU_PART_CORTEX_A76 0xD0B
-#define  ARM_CPU_PART_NEOVERSE_N1 0xD0C
-#define  ARM_CPU_PART_CORTEX_A77 0xD0D
+#define ARM_CPU_PART_AEM_V8 0xD0F
+#define ARM_CPU_PART_FOUNDATION 0xD00
+#define ARM_CPU_PART_CORTEX_A57 0xD07
+#define ARM_CPU_PART_CORTEX_A72 0xD08
+#define ARM_CPU_PART_CORTEX_A53 0xD03
+#define ARM_CPU_PART_CORTEX_A73 0xD09
+#define ARM_CPU_PART_CORTEX_A75 0xD0A
+#define ARM_CPU_PART_CORTEX_A35 0xD04
+#define ARM_CPU_PART_CORTEX_A55 0xD05
+#define ARM_CPU_PART_CORTEX_A76 0xD0B
+#define ARM_CPU_PART_NEOVERSE_N1 0xD0C
+#define ARM_CPU_PART_CORTEX_A77 0xD0D
 	//   from GCC:
-#define  ARM_CPU_PART_CORTEX_A78 0xd41
-#define  ARM_CPU_PART_CORTEX_X1 0xd44
-#define  ARM_CPU_PART_CORTEX_V1 0xd40
-#define  ARM_CPU_PART_CORTEX_N2 0xd49
-#define  ARM_CPU_PART_CORTEX_R82 0xd15
+#define ARM_CPU_PART_CORTEX_A78 0xd41
+#define ARM_CPU_PART_CORTEX_X1 0xd44
+#define ARM_CPU_PART_CORTEX_V1 0xd40
+#define ARM_CPU_PART_CORTEX_N2 0xd49
+#define ARM_CPU_PART_CORTEX_R82 0xd15
 	//
 	// APM_CPU_PART_POTENZA 0x000
 	//
-#define  CAVIUM_CPU_PART_THUNDERX 0x0A1
-#define  CAVIUM_CPU_PART_THUNDERX_81XX 0x0A2
-#define  CAVIUM_CPU_PART_THUNDERX_83XX 0x0A3
-#define  CAVIUM_CPU_PART_THUNDERX2 0x0AF
-#define  CAVIUM_CPU_PART_THUNDERX3 0x0B8  // taken from OpenBLAS
+#define CAVIUM_CPU_PART_THUNDERX 0x0A1
+#define CAVIUM_CPU_PART_THUNDERX_81XX 0x0A2
+#define CAVIUM_CPU_PART_THUNDERX_83XX 0x0A3
+#define CAVIUM_CPU_PART_THUNDERX2 0x0AF
+#define CAVIUM_CPU_PART_THUNDERX3 0x0B8  // taken from OpenBLAS
 	//
-#define  BRCM_CPU_PART_BRAHMA_B53 0x100
-#define  BRCM_CPU_PART_VULCAN 0x516
+#define BRCM_CPU_PART_BRAHMA_B53 0x100
+#define BRCM_CPU_PART_VULCAN 0x516
 	//
-#define  QCOM_CPU_PART_FALKOR_V1 0x800
-#define  QCOM_CPU_PART_FALKOR 0xC00
-#define  QCOM_CPU_PART_KRYO 0x200
-#define  QCOM_CPU_PART_KRYO_3XX_SILVER 0x803
-#define  QCOM_CPU_PART_KRYO_4XX_GOLD 0x804
-#define  QCOM_CPU_PART_KRYO_4XX_SILVER 0x805
+#define QCOM_CPU_PART_FALKOR_V1 0x800
+#define QCOM_CPU_PART_FALKOR 0xC00
+#define QCOM_CPU_PART_KRYO 0x200
+#define QCOM_CPU_PART_KRYO_3XX_SILVER 0x803
+#define QCOM_CPU_PART_KRYO_4XX_GOLD 0x804
+#define QCOM_CPU_PART_KRYO_4XX_SILVER 0x805
 	//
-#define  NVIDIA_CPU_PART_DENVER 0x003
-#define  NVIDIA_CPU_PART_CARMEL 0x004
+#define NVIDIA_CPU_PART_DENVER 0x003
+#define NVIDIA_CPU_PART_CARMEL 0x004
 	//
-#define  FUJITSU_CPU_PART_A64FX 0x001
+#define FUJITSU_CPU_PART_A64FX 0x001
 	//
-#define  HISI_CPU_PART_TSV110 0xD01
+#define HISI_CPU_PART_TSV110 0xD01
 	//  from OpenBSD
-#define  APPLE_CPU_PART_ICESTORM      0x022
-#define  APPLE_CPU_PART_FIRESTORM     0x023
-#define  APPLE_CPU_PART_ICESTORM_PRO  0x024
-#define  APPLE_CPU_PART_FIRESTORM_PRO 0x025
-#define  APPLE_CPU_PART_ICESTORM_MAX  0x028
-#define  APPLE_CPU_PART_FIRESTORM_MAX 0x029
-#define  APPLE_CPU_PART_BLIZZARD      0x032
-#define  APPLE_CPU_PART_AVALANCHE     0x033
-#define  APPLE_CPU_PART_BLIZZARD_PRO  0x034
-#define  APPLE_CPU_PART_AVALANCHE_PRO 0x035
-#define  APPLE_CPU_PART_BLIZZARD_MAX  0x038
-#define  APPLE_CPU_PART_AVALANCHE_MAX 0x039
+#define APPLE_CPU_PART_ICESTORM      0x022
+#define APPLE_CPU_PART_FIRESTORM     0x023
+#define APPLE_CPU_PART_ICESTORM_PRO  0x024
+#define APPLE_CPU_PART_FIRESTORM_PRO 0x025
+#define APPLE_CPU_PART_ICESTORM_MAX  0x028
+#define APPLE_CPU_PART_FIRESTORM_MAX 0x029
+#define APPLE_CPU_PART_BLIZZARD      0x032
+#define APPLE_CPU_PART_AVALANCHE     0x033
+#define APPLE_CPU_PART_BLIZZARD_PRO  0x034
+#define APPLE_CPU_PART_AVALANCHE_PRO 0x035
+#define APPLE_CPU_PART_BLIZZARD_MAX  0x038
+#define APPLE_CPU_PART_AVALANCHE_MAX 0x039
 
 
 	// Fixme:  After merging the vpu_count branch we could report the
