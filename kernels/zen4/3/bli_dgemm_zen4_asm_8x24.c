@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2023, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2023-24, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -155,15 +155,16 @@
     VMULPD(ZMM(R5), ZMM(R5), ZMM(0)) \
     VMULPD(ZMM(R6), ZMM(R6), ZMM(0)) \
     VMULPD(ZMM(R7), ZMM(R7), ZMM(0)) \
-    VMOVUPD(MEM(RCX, 0*8*8), ZMM(R0)) \
-    VMOVUPD(MEM(RCX, 1*8*8), ZMM(R1)) \
-    VMOVUPD(MEM(RCX, 2*8*8), ZMM(R2)) \
-    VMOVUPD(MEM(RCX, 3*8*8), ZMM(R3)) \
-    VMOVUPD(MEM(RCX, 4*8*8), ZMM(R4)) \
-    VMOVUPD(MEM(RCX, 5*8*8), ZMM(R5)) \
-    VMOVUPD(MEM(RCX, 6*8*8), ZMM(R6)) \
-    VMOVUPD(MEM(RCX, 7*8*8), ZMM(R7)) \
-    LEA(RCX, MEM(RCX,R10,1))
+    /*store c*/ \
+    VMOVUPD(MEM(RCX), ZMM(R0)) \
+    VMOVUPD(MEM(RCX, R10, 1), ZMM(R1)) /*R10 = cs_c*/ \
+    VMOVUPD(MEM(RCX, R10, 2), ZMM(R2)) \
+    VMOVUPD(MEM(RCX, R11, 1), ZMM(R3)) /*R11 = 3*cs_c*/\
+    VMOVUPD(MEM(RCX, R10, 4), ZMM(R4)) \
+    VMOVUPD(MEM(RCX, R12, 1), ZMM(R5)) /*R12 = 5*cs_c*/\
+    VMOVUPD(MEM(RCX, R11, 2), ZMM(R6)) \
+    VMOVUPD(MEM(RCX, R13, 1), ZMM(R7)) /*R13 = 7*cs_c*/\
+    LEA(RCX, MEM(RCX,R10,8))
 
 #define SUBITER(n) \
 \
