@@ -68,7 +68,7 @@ TYPED_TEST(Gemm_IIT_ERS_Test, invalid_transa)
 {
   using T = TypeParam;
   // Defining the C matrix with values for debugging purposes
-  std::vector<T> c = testinghelpers::get_random_matrix<T>(-10, 10, STORAGE, 'N', N, N, LDC, 'f');
+  std::vector<T> c = testinghelpers::get_random_matrix<T>(-10, 10, STORAGE, 'N', N, N, LDC);
 
   // Copy so that we check that the elements of C are not modified.
   std::vector<T> c_ref(c);
@@ -83,7 +83,7 @@ TYPED_TEST(Gemm_IIT_ERS_Test, invalid_transb)
 {
   using T = TypeParam;
   // Defining the C matrix with values for debugging purposes
-  std::vector<T> c = testinghelpers::get_random_matrix<T>(-10, 10, STORAGE, 'N', N, N, LDC, 'f');
+  std::vector<T> c = testinghelpers::get_random_matrix<T>(-10, 10, STORAGE, 'N', N, N, LDC);
 
   // Copy so that we check that the elements of C are not modified.
   std::vector<T> c_ref(c);
@@ -98,7 +98,7 @@ TYPED_TEST(Gemm_IIT_ERS_Test, m_lt_zero)
 {
   using T = TypeParam;
   // Defining the C matrix with values for debugging purposes
-  std::vector<T> c = testinghelpers::get_random_matrix<T>(-10, 10, STORAGE, 'N', N, N, LDC, 'f');
+  std::vector<T> c = testinghelpers::get_random_matrix<T>(-10, 10, STORAGE, 'N', N, N, LDC);
 
   // Copy so that we check that the elements of C are not modified.
   std::vector<T> c_ref(c);
@@ -113,7 +113,7 @@ TYPED_TEST(Gemm_IIT_ERS_Test, n_lt_zero)
 {
   using T = TypeParam;
   // Defining the C matrix with values for debugging purposes
-  std::vector<T> c = testinghelpers::get_random_matrix<T>(-10, 10, STORAGE, 'N', N, N, LDC, 'f');
+  std::vector<T> c = testinghelpers::get_random_matrix<T>(-10, 10, STORAGE, 'N', N, N, LDC);
 
   // Copy so that we check that the elements of C are not modified.
   std::vector<T> c_ref(c);
@@ -128,7 +128,7 @@ TYPED_TEST(Gemm_IIT_ERS_Test, k_lt_zero)
 {
   using T = TypeParam;
   // Defining the C matrix with values for debugging purposes
-  std::vector<T> c = testinghelpers::get_random_matrix<T>(-10, 10, STORAGE, 'N', N, N, LDC, 'f');
+  std::vector<T> c = testinghelpers::get_random_matrix<T>(-10, 10, STORAGE, 'N', N, N, LDC);
 
   // Copy so that we check that the elements of C are not modified.
   std::vector<T> c_ref(c);
@@ -143,7 +143,7 @@ TYPED_TEST(Gemm_IIT_ERS_Test, invalid_lda)
 {
   using T = TypeParam;
   // Defining the C matrix with values for debugging purposes
-  std::vector<T> c = testinghelpers::get_random_matrix<T>(-10, 10, STORAGE, 'N', N, N, LDC, 'f');
+  std::vector<T> c = testinghelpers::get_random_matrix<T>(-10, 10, STORAGE, 'N', N, N, LDC);
 
   // Copy so that we check that the elements of C are not modified.
   std::vector<T> c_ref(c);
@@ -158,7 +158,7 @@ TYPED_TEST(Gemm_IIT_ERS_Test, invalid_ldb)
 {
   using T = TypeParam;
   // Defining the C matrix with values for debugging purposes
-  std::vector<T> c = testinghelpers::get_random_matrix<T>(-10, 10, STORAGE, 'N', N, N, LDC, 'f');
+  std::vector<T> c = testinghelpers::get_random_matrix<T>(-10, 10, STORAGE, 'N', N, N, LDC);
 
   // Copy so that we check that the elements of C are not modified.
   std::vector<T> c_ref(c);
@@ -173,7 +173,7 @@ TYPED_TEST(Gemm_IIT_ERS_Test, invalid_ldc)
 {
   using T = TypeParam;
   // Defining the C matrix with values for debugging purposes
-  std::vector<T> c = testinghelpers::get_random_matrix<T>(-10, 10, STORAGE, 'N', N, N, LDC, 'f');
+  std::vector<T> c = testinghelpers::get_random_matrix<T>(-10, 10, STORAGE, 'N', N, N, LDC);
 
   // Copy so that we check that the elements of C are not modified.
   std::vector<T> c_ref(c);
@@ -199,7 +199,7 @@ TYPED_TEST(Gemm_IIT_ERS_Test, m_eq_zero)
 {
   using T = TypeParam;
   // Defining the C matrix with values for debugging purposes
-  std::vector<T> c = testinghelpers::get_random_matrix<T>(-10, 10, STORAGE, 'N', N, N, LDC, 'f');
+  std::vector<T> c = testinghelpers::get_random_matrix<T>(-10, 10, STORAGE, 'N', N, N, LDC);
 
   // Copy so that we check that the elements of C are not modified.
   std::vector<T> c_ref(c);
@@ -213,7 +213,7 @@ TYPED_TEST(Gemm_IIT_ERS_Test, n_eq_zero)
 {
   using T = TypeParam;
   // Defining the C matrix with values for debugging purposes
-  std::vector<T> c = testinghelpers::get_random_matrix<T>(-10, 10, STORAGE, 'N', N, N, LDC, 'f');
+  std::vector<T> c = testinghelpers::get_random_matrix<T>(-10, 10, STORAGE, 'N', N, N, LDC);
 
   // Copy so that we check that the elements of C are not modified.
   std::vector<T> c_ref(c);
@@ -227,7 +227,7 @@ TYPED_TEST(Gemm_IIT_ERS_Test, alpha_zero_beta_one)
 {
   using T = TypeParam;
   // Defining the C matrix with values for debugging purposes
-  std::vector<T> c = testinghelpers::get_random_matrix<T>(-10, 10, STORAGE, 'N', N, N, LDC, 'f');
+  std::vector<T> c = testinghelpers::get_random_matrix<T>(-10, 10, STORAGE, 'N', N, N, LDC);
 
   // Copy so that we check that the elements of C are not modified.
   std::vector<T> c_ref(c);
@@ -246,7 +246,7 @@ TYPED_TEST(Gemm_IIT_ERS_Test, k_zero_beta_one)
 {
   using T = TypeParam;
   // Defining the C matrix with values for debugging purposes
-  std::vector<T> c = testinghelpers::get_random_matrix<T>(-10, 10, STORAGE, 'N', N, N, LDC, 'f');
+  std::vector<T> c = testinghelpers::get_random_matrix<T>(-10, 10, STORAGE, 'N', N, N, LDC);
 
   // Copy so that we check that the elements of C are not modified.
   std::vector<T> c_ref(c);

@@ -102,6 +102,24 @@ For threaded MKL the following OpenMP runtimes are used:
 * To build the testsuite using BLAS interface, configure using `-DTEST_INTERFACE=BLAS`. [**Default**]
 * To build the testsuite using CBLAS interface, configure using `-DTEST_INTERFACE=CBLAS`.
 * To build the testsuite using BLIS-typed interface, configure using `-DTEST_INTERFACE=BLIS_TYPED`. Note that more tests are built for this option, due to the extended APIs.
+## Type of Data Generated in Testing
+* To generate floating-point numbers in the matrices and vectors that are used in testing, configure using `-DBLIS_ELEMENT_TYPE=f`. [**Default**]
+* To generate integers in the matrices and vectors that are used in testing, configure using `-DBLIS_ELEMENT_TYPE=i`. This can be useful for debugging since operating on integers should compute exact results. Note that "integer" here doesn't refer to `int` type, but on the mathematical set Z.
+
+This option is used to set a static constant variable `GenericET` of type `testinghelpers::datagenerators::ElementType` which is in turned used as the default argument in data generator functions such as `get_random_vector`, `get_random_matrix`, etc. To find a full list of APIs that can be used to generate random data we refer to `blis/gtestsuite/testinghelpers/inc/common/data_generators.h`.
+### Specifying Types of Data Independent of BLIS_ELEMENT_TYPE
+* To generate a vector x with random values in [-10, 10], depending on `BLIS_ELEMENT_TYPE` use
+```cpp
+std::vector<double> x = testinghelpers::get_random_vector<double>( -10, 10, n, incx );
+```
+* To generate a vector x with floating-point values in [-10, 10], independent of `BLIS_ELEMENT_TYPE` use
+```cpp
+std::vector<double> x = testinghelpers::get_random_vector<double>( -10, 10, n, incx, testinghelpers::datagenerators::ElementType::FP );
+```
+* To generate a vector x with integer values in [-10, 10], independent of `BLIS_ELEMENT_TYPE` use
+```cpp
+std::vector<double> x = testinghelpers::get_random_vector<double>( -10, 10, n, incx, testinghelpers::datagenerators::ElementType::INT );
+```
 
 # Building the Tests
 After the successful configuration of CMake, we can build the tests. The following steps are taken by the building process:

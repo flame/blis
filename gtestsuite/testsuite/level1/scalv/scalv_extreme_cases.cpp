@@ -46,7 +46,7 @@ TYPED_TEST(xscalv, zero_alpha_x_fp)
     gtint_t n = 10, incx = 1;
     std::vector<T> x(n);
     // Initialize x with random numbers.
-    testinghelpers::datagenerators::randomgenerators<T>( -10, 10, n, incx, x.data(), BLIS_ELEMENT_TYPE );
+    testinghelpers::datagenerators::randomgenerators<T>( -10, 10, n, incx, x.data() );
     std::vector<T> x_ref(x);
     T alpha = T{0};
 
@@ -70,7 +70,7 @@ TYPED_TEST(xscalv, zero_alpha_x_inf)
     gtint_t n = 10, incx = 1;
     std::vector<T> x(n);
     // Initialize x with random numbers.
-    testinghelpers::datagenerators::randomgenerators<T>( -10, 10, n, incx, x.data(), BLIS_ELEMENT_TYPE );
+    testinghelpers::datagenerators::randomgenerators<T>( -10, 10, n, incx, x.data() );
     x[3] = 1.0/0.0;
     std::vector<T> x_ref(x);
     T alpha = T{0};

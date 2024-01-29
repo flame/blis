@@ -106,7 +106,7 @@ foreach(dir ${DIRS})
         else() # BLIS_TYPED option
           target_compile_definitions(${target_name}.${dir}.${subdir} PUBLIC TEST_BLIS_TYPED)
         endif()
-        target_compile_definitions(${target_name}.${dir}.${subdir} PUBLIC BLIS_ELEMENT_TYPE='${BLIS_ELEMENT_TYPE}' ${UKR_DEFINES})
+        target_compile_definitions(${target_name}.${dir}.${subdir} PUBLIC ${UKR_DEFINES})
         add_test(NAME ${target_name}.${dir}.${subdir} COMMAND ${target_name}.${dir}.${subdir})
         if(REF_CBLAS STREQUAL "MKL")
           set_property(TEST ${target_name}.${dir}.${subdir} PROPERTY ENVIRONMENT ${MKL_ENV})
