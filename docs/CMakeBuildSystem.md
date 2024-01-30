@@ -159,6 +159,7 @@ The BLIS CMake system aims to be combatible with the current `make` system. For 
 | `testsuite`     | Same as `testblis`.                                |
 | `testblas`      | Run the BLAS test drivers with default parameters (runs for a few seconds). |
 | `checkbliscpp`  | Run the BLIS C++ tests (runs for a few seconds). |
+| `coverage`      | Run the code-coverage that generates html report (runs for 5-10 minutes). |
 
 **_NOTE:_**
 Using those targets sets the environment appropriately, so copying the input files and/or the DLL in case of Windows builds is not required.

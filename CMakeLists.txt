@@ -279,6 +279,9 @@ endif()
 set(ENABLE_SANDBOX "" CACHE STRING "Enable a separate sandbox implementation of gemm.")
 # Do not let ENABLE_SANDBOX appear on cmake-gui since the functionality is not yet implemented.
 mark_as_advanced(ENABLE_SANDBOX)
+if(NOT WIN32)
+    option(ENABLE_COVERAGE "Enable Code Coverage using gcov(only GCC/Debug build)" OFF)
+endif()
 
 #------------------------------------
 #           Check memkind
@@ -650,6 +653,28 @@ if(WIN32)
         message("   Export APIs with lowercase.")
     endif()
 endif()
+if(NOT WIN32)
+    cmake_print_variables(ENABLE_COVERAGE)
+    if(ENABLE_COVERAGE)
+        if(NOT (${CMAKE_C_COMPILER_ID} MATCHES "GNU"))
+            message(WARNING "Coverage is only supported for GNU/Linux GCC Debug build")
+            message("   Code Coverage is disabled.")
+            set(ENABLE_COVERAGE OFF)
+        endif()
+        if(NOT(ENABLE_DEBUG STREQUAL "noopt"))
+            message(WARNING "Coverage is only supported for debug builds, but ENABLE_DEBUG=noopt was set.\
+                             Disabling optimizations to generate the code coverage report.")
+            set(ENABLE_DEBUG "noopt")
+            set(DEBUG_TYPE ${ENABLE_DEBUG})
+        endif()
+    endif()
+    if(ENABLE_COVERAGE)
+        message("   Code Coverage is enabled.")
+    else()
+        cmake_print_variables(ENABLE_COVERAGE)
+        message("   Code Coverage is disabled.")
+    endif()
+endif()
 
 # Initialize threading model, using the corresponding cache variable.
 set(THREADING_MODEL ${ENABLE_THREADING})
@@ -819,6 +844,13 @@ endif()
 # Add libmemkind to the link-time flags, if it was enabled at configure-time.
 if(ENABLE_MEMKIND STREQUAL "yes")
     list(APPEND LDFLAGS ${LIBMEMKIND})
+endif()
+
+#--------------------------------------------
+#         Code-coverage flags
+#--------------------------------------------
+if(ENABLE_COVERAGE AND (NOT WIN32))
+    set(CMAKE_C_FLAGS "-fprofile-arcs -ftest-coverage")
 endif()
 
 #--------------------------------------------
@@ -1095,17 +1127,44 @@ if(ENABLE_BLAS)
     add_subdirectory(blastest EXCLUDE_FROM_ALL)
 endif()
 
+if(ENABLE_BLAS AND WIN32 AND BUILD_SHARED_LIBS)
+set(DETAILED_BLATEST_MESSAGE "Details: Level2 and level3 API tests define a custom version of xerbla_() to test the error codes. \
+On Linux and on Windows/static versions of BLIS library, the custom xerbla_() gets called inside the library\
+due to the linking process and all tests work. On Windows/shared version of the library, symbol resolution\
+happens at load-time so the blis implementation of xerbla_() gets called instead of the custom one. \
+That causes errors when the tests are run which are independent of the BLIS library. \
+Please use static builds only on Windows.")
+endif()
+
 # Add generic testing target `test`.
 set(available_testsuites checkblis)
 if(ENABLE_BLAS)
     list(APPEND available_testsuites checkblas)
 endif()
-add_custom_target(test DEPENDS ${available_testsuites})
+
+if(WIN32 AND BUILD_SHARED_LIBS)
+    if(ENABLE_BLAS)
+        set(TEST_WARNING "Target `test` depends only on target `checkblis` because `checkblas` target is not available on Windows for shared builds of BLIS. ")
+    endif()
+else()
+    if(ENABLE_BLAS)
+        list(APPEND available_testsuites checkblas)
+    endif()
+endif()
+add_custom_target(test
+                DEPENDS ${available_testsuites}
+                COMMENT "Running target `test`. ${TEST_WARNING} ${DETAILED_BLATEST_MESSAGE}")
 
 # Add generic testing target `check`.
 set(available_testsuites checkblis-fast)
-if(ENABLE_BLAS)
-    list(APPEND available_testsuites checkblas)
+if(WIN32 AND BUILD_SHARED_LIBS)
+    if(ENABLE_BLAS)
+        set(CHECK_WARNING "Target `check` depends only on target `checkblis-fast` because `checkblas` target is not available on Windows for shared builds of BLIS. ")
+    endif()
+else()
+    if(ENABLE_BLAS)
+        list(APPEND available_testsuites checkblas)
+    endif()
 endif()
 add_custom_target(check
                 DEPENDS ${available_testsuites}

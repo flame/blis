@@ -1,4 +1,4 @@
-##Copyright (C) 2022 - 2023, Advanced Micro Devices, Inc. All rights reserved.##
+##Copyright (C) 2023 - 2024, Advanced Micro Devices, Inc. All rights reserved.##
 
 # Comments:
 # - DIST_PATH is assumed to not exist if BLIS_INSTALL_PATH is given.
@@ -23,6 +23,10 @@ file(GLOB testsuite_sources LIST_DIRECTORIES false ${CMAKE_CURRENT_SOURCE_DIR}/s
 # get-user-cflags-for() is not cluttered up with include paths needed only
 # while building BLIS.
 set(CINFLAGS ${INC_PATH})
+if((NOT WIN32) AND ENABLE_COVERAGE)
+    include(coverage.cmake)
+    set(LDFLAGS "${LDFLAGS} -ftest-coverage")
+endif()
 
 # Create an executable using the sources above.
 add_executable(test_libblis.x ${testsuite_sources})
