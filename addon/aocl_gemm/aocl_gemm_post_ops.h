@@ -52,6 +52,7 @@ typedef enum
 	ELTWISE = 2,
 	BIAS = 3,
 	SCALE = 4,
+	MATRIX_ADD = 5,
 } AOCL_POST_OP_TYPE;
 
 typedef struct
@@ -86,9 +87,16 @@ typedef struct
 
 typedef struct
 {
+	void* matrix;
+	dim_t ldm;
+} aocl_post_op_matrix_add;
+
+typedef struct
+{
 	aocl_post_op_sum sum;
 	aocl_post_op_eltwise* eltwise; //Multiple eltwise allowed.
 	aocl_post_op_bias bias;
+	aocl_post_op_matrix_add matrix_add;
 
 	// eg: seq_length = 2
 	dim_t seq_length;

@@ -350,4 +350,108 @@
 \
 	reg = _mm256_min_epi16( _mm256_max_epi16( reg, min ), max ); \
 
+// Matrix Add post-ops helper macros
+#define S16_MATRIX_ADD_1COL(scr0,m_ind) \
+	c_int16_ ## m_ind ## p0 = _mm256_add_epi16( scr0, c_int16_ ## m_ind ## p0 ); \
+
+#define S16_MATRIX_ADD_2COL(scr0,scr1,m_ind) \
+	c_int16_ ## m_ind ## p0 = _mm256_add_epi16( scr0, c_int16_ ## m_ind ## p0 ); \
+	c_int16_ ## m_ind ## p1 = _mm256_add_epi16( scr1, c_int16_ ## m_ind ## p1 ); \
+
+#define S8_S16_MATRIX_ADD_LOAD(scr,m_ind,n_ind) \
+	scr = _mm256_cvtepi8_epi16 \
+			( \
+			  _mm_loadu_si128 \
+			  ( \
+				( __m128i const* ) \
+				( matptr + ( ( post_ops_attr.post_op_c_i + m_ind ) * ldm ) + \
+				post_ops_attr.post_op_c_j + ( n_ind * 16 ) ) \
+			  ) \
+			); \
+
+#define S8_S16_MATRIX_ADD_1COL_PAR(buf,scr0,m_ind,n_rem,OTYPE) \
+	memcpy \
+	( \
+	  ( OTYPE* )buf, \
+	  matptr + ( ( post_ops_attr.post_op_c_i + m_ind ) * ldm ) + \
+	  post_ops_attr.post_op_c_j + ( 0 * 16 ), \
+	  ( n_rem ) * sizeof(OTYPE) \
+	); \
+	scr0 = _mm256_cvtepi8_epi16 \
+			( \
+			  _mm_loadu_si128( ( __m128i const* )buf ) \
+			); \
+	S16_MATRIX_ADD_1COL(scr0,m_ind); \
+
+#define S8_S16_MATRIX_ADD_1COL(scr0,m_ind) \
+	S8_S16_MATRIX_ADD_LOAD(scr0,m_ind,0); \
+	S16_MATRIX_ADD_1COL(scr0,m_ind); \
+
+#define S8_S16_MATRIX_ADD_2COL(scr0,scr1,m_ind) \
+	S8_S16_MATRIX_ADD_LOAD(scr0,m_ind,0); \
+	S8_S16_MATRIX_ADD_LOAD(scr1,m_ind,1); \
+	S16_MATRIX_ADD_2COL(scr0,scr1,m_ind); \
+
+#define U8_S16_MATRIX_ADD_LOAD(scr,m_ind,n_ind) \
+	scr = _mm256_cvtepu8_epi16 \
+			( \
+			  _mm_loadu_si128 \
+			  ( \
+				( __m128i const* ) \
+				( matptr + ( ( post_ops_attr.post_op_c_i + m_ind ) * ldm ) + \
+				post_ops_attr.post_op_c_j + ( n_ind * 16 ) ) \
+			  ) \
+			); \
+
+#define U8_S16_MATRIX_ADD_1COL_PAR(buf,scr0,m_ind,n_rem,OTYPE) \
+	memcpy \
+	( \
+	  ( OTYPE* )buf, \
+	  matptr + ( ( post_ops_attr.post_op_c_i + m_ind ) * ldm ) + \
+	  post_ops_attr.post_op_c_j + ( 0 * 16 ), \
+	  ( n_rem ) * sizeof(OTYPE) \
+	); \
+	scr0 = _mm256_cvtepu8_epi16 \
+			( \
+			  _mm_loadu_si128( ( __m128i const* )buf ) \
+			); \
+	S16_MATRIX_ADD_1COL(scr0,m_ind); \
+
+#define U8_S16_MATRIX_ADD_1COL(scr0,m_ind) \
+	U8_S16_MATRIX_ADD_LOAD(scr0,m_ind,0); \
+	S16_MATRIX_ADD_1COL(scr0,m_ind); \
+
+#define U8_S16_MATRIX_ADD_2COL(scr0,scr1,m_ind) \
+	U8_S16_MATRIX_ADD_LOAD(scr0,m_ind,0); \
+	U8_S16_MATRIX_ADD_LOAD(scr1,m_ind,1); \
+	S16_MATRIX_ADD_2COL(scr0,scr1,m_ind); \
+
+#define S16_S16_MATRIX_ADD_LOAD(scr,m_ind,n_ind) \
+	scr = _mm256_loadu_si256 \
+			( \
+			  (__m256i const *) \
+			  ( matptr + ( ( post_ops_attr.post_op_c_i + m_ind ) * ldm ) + \
+			  post_ops_attr.post_op_c_j + ( n_ind * 16 ) ) \
+			); \
+
+#define S16_S16_MATRIX_ADD_1COL_PAR(buf,scr0,m_ind,n_rem,OTYPE) \
+	memcpy \
+	( \
+	  ( OTYPE* )buf, \
+	  matptr + ( ( post_ops_attr.post_op_c_i + m_ind ) * ldm ) + \
+	  post_ops_attr.post_op_c_j + ( 0 * 16 ), \
+	  ( n_rem ) * sizeof(OTYPE) \
+	); \
+	scr0 = _mm256_loadu_si256( ( __m256i const* )buf ); \
+	S16_MATRIX_ADD_1COL(scr0,m_ind); \
+
+#define S16_S16_MATRIX_ADD_1COL(scr0,m_ind) \
+	S16_S16_MATRIX_ADD_LOAD(scr0,m_ind,0); \
+	S16_MATRIX_ADD_1COL(scr0,m_ind); \
+
+#define S16_S16_MATRIX_ADD_2COL(scr0,scr1,m_ind) \
+	S16_S16_MATRIX_ADD_LOAD(scr0,m_ind,0); \
+	S16_S16_MATRIX_ADD_LOAD(scr1,m_ind,1); \
+	S16_MATRIX_ADD_2COL(scr0,scr1,m_ind); \
+
 #endif //LPGEMM_S16_KERN_MACROS_H

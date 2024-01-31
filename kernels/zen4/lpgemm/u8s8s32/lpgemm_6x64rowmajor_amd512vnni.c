@@ -53,7 +53,8 @@ LPGEMM_MAIN_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_6x64)
 				  &&POST_OPS_GELU_TANH_6x64,
 				  &&POST_OPS_GELU_ERF_6x64,
 				  &&POST_OPS_CLIP_6x64,
-				  &&POST_OPS_DOWNSCALE_6x64
+				  &&POST_OPS_DOWNSCALE_6x64,
+				  &&POST_OPS_MATRIX_ADD_6x64
 				};
 
 	const dim_t MR = 6;
@@ -890,7 +891,6 @@ POST_OPS_CLIP_6x64:
 
 			POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 		}
-
 POST_OPS_DOWNSCALE_6x64:
 		{
 			if ( post_ops_list_temp->scale_factor_len > 1 )
@@ -1025,6 +1025,56 @@ POST_OPS_DOWNSCALE_6x64:
 
 			// c[5, 48-63]
 			CVT_MULRND_CVT32(c_int32_5p3,a_int32_1,zero_point3);
+
+			POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+		}
+POST_OPS_MATRIX_ADD_6x64:
+		{
+			dim_t ldm = *( dim_t* )post_ops_list_temp->op_args3;
+			if ( post_ops_attr.c_stor_type == S8 )
+			{
+				int8_t* matptr = ( int8_t* )post_ops_list_temp->op_args1;
+
+				// c[0:0-15,16-31,32-47,48-63]
+				S8_S32_MATRIX_ADD_4COL(selector1,selector2,a_int32_0,a_int32_1,0);
+
+				// c[1:0-15,16-31,32-47,48-63]
+				S8_S32_MATRIX_ADD_4COL(selector1,selector2,a_int32_0,a_int32_1,1);
+
+				// c[2:0-15,16-31,32-47,48-63]
+				S8_S32_MATRIX_ADD_4COL(selector1,selector2,a_int32_0,a_int32_1,2);
+
+				// c[3:0-15,16-31,32-47,48-63]
+				S8_S32_MATRIX_ADD_4COL(selector1,selector2,a_int32_0,a_int32_1,3);
+
+				// c[4:0-15,16-31,32-47,48-63]
+				S8_S32_MATRIX_ADD_4COL(selector1,selector2,a_int32_0,a_int32_1,4);
+
+				// c[5:0-15,16-31,32-47,48-63]
+				S8_S32_MATRIX_ADD_4COL(selector1,selector2,a_int32_0,a_int32_1,5);
+			}
+			else
+			{
+				int32_t* matptr = ( int32_t* )post_ops_list_temp->op_args1;
+
+				// c[0:0-15,16-31,32-47,48-63]
+				S32_S32_MATRIX_ADD_4COL(selector1,selector2,a_int32_0,a_int32_1,0);
+
+				// c[1:0-15,16-31,32-47,48-63]
+				S32_S32_MATRIX_ADD_4COL(selector1,selector2,a_int32_0,a_int32_1,1);
+
+				// c[2:0-15,16-31,32-47,48-63]
+				S32_S32_MATRIX_ADD_4COL(selector1,selector2,a_int32_0,a_int32_1,2);
+
+				// c[3:0-15,16-31,32-47,48-63]
+				S32_S32_MATRIX_ADD_4COL(selector1,selector2,a_int32_0,a_int32_1,3);
+
+				// c[4:0-15,16-31,32-47,48-63]
+				S32_S32_MATRIX_ADD_4COL(selector1,selector2,a_int32_0,a_int32_1,4);
+
+				// c[5:0-15,16-31,32-47,48-63]
+				S32_S32_MATRIX_ADD_4COL(selector1,selector2,a_int32_0,a_int32_1,5);
+			}
 
 			POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 		}

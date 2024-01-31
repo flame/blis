@@ -53,7 +53,8 @@ LPGEMM_M_FRINGE_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_5x64)
 						  &&POST_OPS_GELU_TANH_5x64,
 						  &&POST_OPS_GELU_ERF_5x64,
 						  &&POST_OPS_CLIP_5x64,
-						  &&POST_OPS_DOWNSCALE_5x64
+						  &&POST_OPS_DOWNSCALE_5x64,
+						  &&POST_OPS_MATRIX_ADD_5x64
 						};
 	dim_t k_full_pieces = k0 / 4;
 	dim_t k_partial_pieces = k0 % 4;
@@ -737,7 +738,6 @@ POST_OPS_CLIP_5x64:
 
 		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 	}
-
 POST_OPS_DOWNSCALE_5x64:
 	{
 		if ( post_ops_list_temp->scale_factor_len > 1 )
@@ -860,6 +860,50 @@ POST_OPS_DOWNSCALE_5x64:
 
 		// c[4, 48-63]
 		CVT_MULRND_CVT32(c_int32_4p3,a_int32_1,zero_point3);
+
+		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+	}
+POST_OPS_MATRIX_ADD_5x64:
+	{
+		dim_t ldm = *( dim_t* )post_ops_list_temp->op_args3;
+		if ( post_ops_attr.c_stor_type == S8 )
+		{
+			int8_t* matptr = ( int8_t* )post_ops_list_temp->op_args1;
+
+			// c[0:0-15,16-31,32-47,48-63]
+			S8_S32_MATRIX_ADD_4COL(selector1,selector2,a_int32_0,a_int32_1,0);
+
+			// c[1:0-15,16-31,32-47,48-63]
+			S8_S32_MATRIX_ADD_4COL(selector1,selector2,a_int32_0,a_int32_1,1);
+
+			// c[2:0-15,16-31,32-47,48-63]
+			S8_S32_MATRIX_ADD_4COL(selector1,selector2,a_int32_0,a_int32_1,2);
+
+			// c[3:0-15,16-31,32-47,48-63]
+			S8_S32_MATRIX_ADD_4COL(selector1,selector2,a_int32_0,a_int32_1,3);
+
+			// c[4:0-15,16-31,32-47,48-63]
+			S8_S32_MATRIX_ADD_4COL(selector1,selector2,a_int32_0,a_int32_1,4);
+		}
+		else
+		{
+			int32_t* matptr = ( int32_t* )post_ops_list_temp->op_args1;
+
+			// c[0:0-15,16-31,32-47,48-63]
+			S32_S32_MATRIX_ADD_4COL(selector1,selector2,a_int32_0,a_int32_1,0);
+
+			// c[1:0-15,16-31,32-47,48-63]
+			S32_S32_MATRIX_ADD_4COL(selector1,selector2,a_int32_0,a_int32_1,1);
+
+			// c[2:0-15,16-31,32-47,48-63]
+			S32_S32_MATRIX_ADD_4COL(selector1,selector2,a_int32_0,a_int32_1,2);
+
+			// c[3:0-15,16-31,32-47,48-63]
+			S32_S32_MATRIX_ADD_4COL(selector1,selector2,a_int32_0,a_int32_1,3);
+
+			// c[4:0-15,16-31,32-47,48-63]
+			S32_S32_MATRIX_ADD_4COL(selector1,selector2,a_int32_0,a_int32_1,4);
+		}
 
 		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 	}
@@ -1011,7 +1055,8 @@ LPGEMM_M_FRINGE_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_4x64)
 						  &&POST_OPS_GELU_TANH_4x64,
 						  &&POST_OPS_GELU_ERF_4x64,
 						  &&POST_OPS_CLIP_4x64,
-						  &&POST_OPS_DOWNSCALE_4x64
+						  &&POST_OPS_DOWNSCALE_4x64,
+						  &&POST_OPS_MATRIX_ADD_4x64
 						};
 	dim_t k_full_pieces = k0 / 4;
 	dim_t k_partial_pieces = k0 % 4;
@@ -1580,7 +1625,6 @@ POST_OPS_CLIP_4x64:
 
 		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 	}
-
 POST_OPS_DOWNSCALE_4x64:
 	{
 		if ( post_ops_list_temp->scale_factor_len > 1 )
@@ -1691,6 +1735,44 @@ POST_OPS_DOWNSCALE_4x64:
 
 		// c[3, 48-63]
 		CVT_MULRND_CVT32(c_int32_3p3,a_int32_1,zero_point3);
+
+		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+	}
+POST_OPS_MATRIX_ADD_4x64:
+	{
+		dim_t ldm = *( dim_t* )post_ops_list_temp->op_args3;
+		if ( post_ops_attr.c_stor_type == S8 )
+		{
+			int8_t* matptr = ( int8_t* )post_ops_list_temp->op_args1;
+
+			// c[0:0-15,16-31,32-47,48-63]
+			S8_S32_MATRIX_ADD_4COL(selector1,selector2,a_int32_0,a_int32_1,0);
+
+			// c[1:0-15,16-31,32-47,48-63]
+			S8_S32_MATRIX_ADD_4COL(selector1,selector2,a_int32_0,a_int32_1,1);
+
+			// c[2:0-15,16-31,32-47,48-63]
+			S8_S32_MATRIX_ADD_4COL(selector1,selector2,a_int32_0,a_int32_1,2);
+
+			// c[3:0-15,16-31,32-47,48-63]
+			S8_S32_MATRIX_ADD_4COL(selector1,selector2,a_int32_0,a_int32_1,3);
+		}
+		else
+		{
+			int32_t* matptr = ( int32_t* )post_ops_list_temp->op_args1;
+
+			// c[0:0-15,16-31,32-47,48-63]
+			S32_S32_MATRIX_ADD_4COL(selector1,selector2,a_int32_0,a_int32_1,0);
+
+			// c[1:0-15,16-31,32-47,48-63]
+			S32_S32_MATRIX_ADD_4COL(selector1,selector2,a_int32_0,a_int32_1,1);
+
+			// c[2:0-15,16-31,32-47,48-63]
+			S32_S32_MATRIX_ADD_4COL(selector1,selector2,a_int32_0,a_int32_1,2);
+
+			// c[3:0-15,16-31,32-47,48-63]
+			S32_S32_MATRIX_ADD_4COL(selector1,selector2,a_int32_0,a_int32_1,3);
+		}
 
 		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 	}
@@ -1818,7 +1900,8 @@ LPGEMM_M_FRINGE_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_3x64)
 						  &&POST_OPS_GELU_TANH_3x64,
 						  &&POST_OPS_GELU_ERF_3x64,
 						  &&POST_OPS_CLIP_3x64,
-						  &&POST_OPS_DOWNSCALE_3x64
+						  &&POST_OPS_DOWNSCALE_3x64,
+						  &&POST_OPS_MATRIX_ADD_3x64
 						};
 	dim_t k_full_pieces = k0 / 4;
 	dim_t k_partial_pieces = k0 % 4;
@@ -2272,7 +2355,6 @@ POST_OPS_CLIP_3x64:
 
 		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 	}
-
 POST_OPS_DOWNSCALE_3x64:
 	{
 		if ( post_ops_list_temp->scale_factor_len > 1 )
@@ -2371,6 +2453,38 @@ POST_OPS_DOWNSCALE_3x64:
 
 		// c[2, 48-63]
 		CVT_MULRND_CVT32(c_int32_2p3,a_int32_1,zero_point3);
+
+		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+	}
+POST_OPS_MATRIX_ADD_3x64:
+	{
+		dim_t ldm = *( dim_t* )post_ops_list_temp->op_args3;
+		if ( post_ops_attr.c_stor_type == S8 )
+		{
+			int8_t* matptr = ( int8_t* )post_ops_list_temp->op_args1;
+
+			// c[0:0-15,16-31,32-47,48-63]
+			S8_S32_MATRIX_ADD_4COL(selector1,selector2,a_int32_0,a_int32_1,0);
+
+			// c[1:0-15,16-31,32-47,48-63]
+			S8_S32_MATRIX_ADD_4COL(selector1,selector2,a_int32_0,a_int32_1,1);
+
+			// c[2:0-15,16-31,32-47,48-63]
+			S8_S32_MATRIX_ADD_4COL(selector1,selector2,a_int32_0,a_int32_1,2);
+		}
+		else
+		{
+			int32_t* matptr = ( int32_t* )post_ops_list_temp->op_args1;
+
+			// c[0:0-15,16-31,32-47,48-63]
+			S32_S32_MATRIX_ADD_4COL(selector1,selector2,a_int32_0,a_int32_1,0);
+
+			// c[1:0-15,16-31,32-47,48-63]
+			S32_S32_MATRIX_ADD_4COL(selector1,selector2,a_int32_0,a_int32_1,1);
+
+			// c[2:0-15,16-31,32-47,48-63]
+			S32_S32_MATRIX_ADD_4COL(selector1,selector2,a_int32_0,a_int32_1,2);
+		}
 
 		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 	}
@@ -2474,7 +2588,8 @@ LPGEMM_M_FRINGE_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_2x64)
 						  &&POST_OPS_GELU_TANH_2x64,
 						  &&POST_OPS_GELU_ERF_2x64,
 						  &&POST_OPS_CLIP_2x64,
-						  &&POST_OPS_DOWNSCALE_2x64
+						  &&POST_OPS_DOWNSCALE_2x64,
+						  &&POST_OPS_MATRIX_ADD_2x64
 						};
 	dim_t k_full_pieces = k0 / 4;
 	dim_t k_partial_pieces = k0 % 4;
@@ -2814,7 +2929,6 @@ POST_OPS_CLIP_2x64:
 
 		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 	}
-
 POST_OPS_DOWNSCALE_2x64:
 	{
 		if ( post_ops_list_temp->scale_factor_len > 1 )
@@ -2904,6 +3018,32 @@ POST_OPS_DOWNSCALE_2x64:
 
 		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 	}
+POST_OPS_MATRIX_ADD_2x64:
+	{
+		dim_t ldm = *( dim_t* )post_ops_list_temp->op_args3;
+		if ( post_ops_attr.c_stor_type == S8 )
+		{
+			int8_t* matptr = ( int8_t* )post_ops_list_temp->op_args1;
+
+			// c[0:0-15,16-31,32-47,48-63]
+			S8_S32_MATRIX_ADD_4COL(selector1,selector2,a_int32_0,a_int32_1,0);
+
+			// c[1:0-15,16-31,32-47,48-63]
+			S8_S32_MATRIX_ADD_4COL(selector1,selector2,a_int32_0,a_int32_1,1);
+		}
+		else
+		{
+			int32_t* matptr = ( int32_t* )post_ops_list_temp->op_args1;
+
+			// c[0:0-15,16-31,32-47,48-63]
+			S32_S32_MATRIX_ADD_4COL(selector1,selector2,a_int32_0,a_int32_1,0);
+
+			// c[1:0-15,16-31,32-47,48-63]
+			S32_S32_MATRIX_ADD_4COL(selector1,selector2,a_int32_0,a_int32_1,1);
+		}
+
+		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+	}
 POST_OPS_2x64_DISABLE:
 	;
 
@@ -2980,7 +3120,8 @@ LPGEMM_M_FRINGE_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_1x64)
 						  &&POST_OPS_GELU_TANH_1x64,
 						  &&POST_OPS_GELU_ERF_1x64,
 						  &&POST_OPS_CLIP_1x64,
-						  &&POST_OPS_DOWNSCALE_1x64
+						  &&POST_OPS_DOWNSCALE_1x64,
+						  &&POST_OPS_MATRIX_ADD_1x64
 						};
 	dim_t k_full_pieces = k0 / 4;
 	dim_t k_partial_pieces = k0 % 4;
@@ -3204,7 +3345,6 @@ POST_OPS_CLIP_1x64:
 
 		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 	}
-
 POST_OPS_DOWNSCALE_1x64:
 	{
 		if ( post_ops_list_temp->scale_factor_len > 1 )
@@ -3279,6 +3419,26 @@ POST_OPS_DOWNSCALE_1x64:
 
 		// c[0, 48-63]
 		CVT_MULRND_CVT32(c_int32_0p3,a_int32_1,zero_point3);
+
+		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+	}
+POST_OPS_MATRIX_ADD_1x64:
+	{
+		dim_t ldm = *( dim_t* )post_ops_list_temp->op_args3;
+		if ( post_ops_attr.c_stor_type == S8 )
+		{
+			int8_t* matptr = ( int8_t* )post_ops_list_temp->op_args1;
+
+			// c[0:0-15,16-31,32-47,48-63]
+			S8_S32_MATRIX_ADD_4COL(selector1,selector2,a_int32_0,a_int32_1,0);
+		}
+		else
+		{
+			int32_t* matptr = ( int32_t* )post_ops_list_temp->op_args1;
+
+			// c[0:0-15,16-31,32-47,48-63]
+			S32_S32_MATRIX_ADD_4COL(selector1,selector2,a_int32_0,a_int32_1,0);
+		}
 
 		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 	}

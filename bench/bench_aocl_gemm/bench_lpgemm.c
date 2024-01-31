@@ -857,6 +857,18 @@ void mat_mul_accuracy_check_driver_ ## BLAS_SFX \
                         temp_accum = GEN_FUNC_NAME(mat_mul_accuracy_check_downscale_,BLAS_DOWNSCALE_SFX) \
                             (temp_accum, post_op, j); \
                     } \
+                    else if ( post_op->seq_vector[op_id] == MATRIX_ADD ) \
+                    { \
+                        dim_t rs_m = post_op->matrix_add.ldm; \
+                        dim_t cs_m = 1; \
+                        if ( ( stor_order == 'C' ) || ( stor_order == 'c' ) ) \
+                        { \
+                            cs_m = rs_m; \
+                            rs_m = 1; \
+                        } \
+                        temp_accum += ( *( ( C_type* )post_op->matrix_add.matrix + \
+                                           ( i * rs_m ) + ( j * cs_m ) ) ); \
+                    } \
                     else \
                     {} \
                 } \
@@ -920,6 +932,7 @@ void lpgemm_destroy_post_ops_struct( aocl_post_op* post_ops )
         free( post_ops->eltwise );
     }
 
+    free( post_ops->matrix_add.matrix );
     free( post_ops->sum.scale_factor );
     free( post_ops->sum.zero_point );
     free( post_ops->bias.bias );
@@ -932,7 +945,8 @@ aocl_post_op* lpgemm_create_post_ops_struct_ ## BLAS_SFX \
      ( \
        dim_t m, \
        dim_t n, \
-       char* post_ops_str \
+       char* post_ops_str, \
+       char  stor_order \
      ) \
 { \
     if ( ( ( post_ops_str == NULL ) || \
@@ -974,6 +988,8 @@ aocl_post_op* lpgemm_create_post_ops_struct_ ## BLAS_SFX \
     post_ops->sum.zero_point = NULL; \
     post_ops->sum.scale_factor_len = 0; \
     post_ops->sum.zero_point_len = 0; \
+    post_ops->matrix_add.matrix = NULL; \
+    post_ops->matrix_add.ldm = 0; \
  \
     bool is_bias = FALSE; \
     bool is_relu = FALSE; \
@@ -983,6 +999,7 @@ aocl_post_op* lpgemm_create_post_ops_struct_ ## BLAS_SFX \
     bool is_clip = FALSE; \
     bool is_scalar_scale = FALSE; \
     bool is_scalar_zp = FALSE; \
+    bool is_matrix_add = FALSE; \
     dim_t activator_idx = 0; \
     dim_t clip_idx = 0; \
  \
@@ -1070,6 +1087,12 @@ aocl_post_op* lpgemm_create_post_ops_struct_ ## BLAS_SFX \
                 { \
                     is_scalar_zp = TRUE; \
                 } \
+            } \
+            else if ( strcmp( ops_tok, "matrix_add" ) == 0 ) \
+            { \
+                post_ops->seq_vector[cur_op_index] = MATRIX_ADD; \
+                is_matrix_add = TRUE; \
+                cur_op_index++; \
             } \
  \
             ops_tok = strtok( NULL, ", =" ); \
@@ -1223,6 +1246,41 @@ aocl_post_op* lpgemm_create_post_ops_struct_ ## BLAS_SFX \
         } \
     } \
  \
+    if ( is_matrix_add == TRUE ) \
+    { \
+        /* Allocate bias buffer, return early if alloc fails.*/ \
+        dim_t ele_dsize = 0; \
+        if ( global_dscale_out == 'y' ) \
+        { \
+            ele_dsize = sizeof( C_DSCALE_type ); \
+        } \
+        else \
+        { \
+            ele_dsize = sizeof( C_type ); \
+        } \
+        post_ops->matrix_add.matrix = malloc( m * n * ele_dsize ); \
+        if ( post_ops->matrix_add.matrix == NULL ) \
+        { \
+            goto err_handler; \
+        } \
+        if ( global_dscale_out == 'y' ) \
+        { \
+            GEN_FUNC_NAME(fill_array_,C_DSCALE_type)( post_ops->matrix_add.matrix, ( m * n ) ); \
+        } \
+        else \
+        { \
+            GEN_FUNC_NAME(fill_array_,C_type)( post_ops->matrix_add.matrix, ( m * n ) ); \
+        } \
+        if ( ( stor_order == 'C' ) || ( stor_order == 'c' ) ) \
+        { \
+            post_ops->matrix_add.ldm = m; \
+        } \
+        else \
+        { \
+            post_ops->matrix_add.ldm = n; \
+        } \
+    } \
+ \
     post_ops->seq_length = cur_op_index; \
  \
     return post_ops; \
@@ -1319,7 +1377,7 @@ void mat_mul_bench_main_ ## BLAS_SFX \
            ( strcmp( post_ops_str, "none" ) != 0 ) ) || \
          ( global_dscale_out == 'y' ) ) \
     { \
-        post_op = GEN_FUNC_NAME(lpgemm_create_post_ops_struct_,REORDER_SFX)( m, n, post_ops_str ); \
+        post_op = GEN_FUNC_NAME(lpgemm_create_post_ops_struct_,REORDER_SFX)( m, n, post_ops_str, stor_order ); \
         if ( post_op == NULL ) \
         { \
             printf(" post op struct allocation failure, returning.\n"); \

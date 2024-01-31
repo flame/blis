@@ -195,6 +195,23 @@ err_t lpgemm_translate_to_post_ops_list
 					  FALSE
 					);
 					break;
+			case MATRIX_ADD:
+					if ( ( post_op_unparsed->matrix_add.matrix == NULL ) ||
+						 ( post_op_unparsed->matrix_add.ldm <= 0 ) )
+					{
+						bli_print_msg(" Post_op.matrix_add attributes are invalid. Exiting..",
+										__FILE__, __LINE__ );
+						return BLIS_NULL_POINTER;
+					}
+
+					lpgemm_set_node_params
+					(
+					  ( post_op_list + i ), POST_OPS_MATRIX_ADD,
+					  post_op_unparsed->matrix_add.matrix,
+					  meta_arg, &( post_op_unparsed->matrix_add.ldm ),
+					  NULL, 0, FALSE
+					);
+					break;
 			default:
 					break;
 		}

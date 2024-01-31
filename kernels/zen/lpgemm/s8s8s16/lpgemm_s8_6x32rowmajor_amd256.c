@@ -50,7 +50,8 @@ LPGEMM_MAIN_KERN(int8_t,int8_t,int16_t,s8s8s16o16_6x32)
 			&&POST_OPS_GELU_TANH_6x32,
 			&&POST_OPS_GELU_ERF_6x32,
 			&&POST_OPS_CLIP_6x32,
-			&&POST_OPS_DOWNSCALE_6x32
+			&&POST_OPS_DOWNSCALE_6x32,
+			&&POST_OPS_MATRIX_ADD_6x32
 		};
 
 	dim_t MR = 6;
@@ -865,6 +866,80 @@ POST_OPS_DOWNSCALE_6x32:
 			CVT_MULRND_CVT16(c_int16_3p1, scale_1, scale_2, zero_point_0)
 			CVT_MULRND_CVT16(c_int16_4p1, scale_1, scale_2, zero_point_0)
 			CVT_MULRND_CVT16(c_int16_5p1, scale_1, scale_2, zero_point_0)
+
+			POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+		}
+POST_OPS_MATRIX_ADD_6x32:
+		{
+			__m256i selector1, selector2;
+			dim_t ldm = *( dim_t* )post_ops_list_temp->op_args3;
+
+			if ( post_ops_attr.c_stor_type == S8 )
+			{
+				int8_t* matptr = ( int8_t* )post_ops_list_temp->op_args1;
+
+				// c[0:0-15,16-31]
+				S8_S16_MATRIX_ADD_2COL(selector1,selector2,0);
+
+				// c[1:0-15,16-31]
+				S8_S16_MATRIX_ADD_2COL(selector1,selector2,1);
+
+				// c[2:0-15,16-31]
+				S8_S16_MATRIX_ADD_2COL(selector1,selector2,2);
+
+				// c[3:0-15,16-31]
+				S8_S16_MATRIX_ADD_2COL(selector1,selector2,3);
+
+				// c[4:0-15,16-31]
+				S8_S16_MATRIX_ADD_2COL(selector1,selector2,4);
+
+				// c[5:0-15,16-31]
+				S8_S16_MATRIX_ADD_2COL(selector1,selector2,5);
+			}
+			else if ( post_ops_attr.c_stor_type == U8 )
+			{
+				uint8_t* matptr = ( uint8_t* )post_ops_list_temp->op_args1;
+
+				// c[0:0-15,16-31]
+				U8_S16_MATRIX_ADD_2COL(selector1,selector2,0);
+
+				// c[1:0-15,16-31]
+				U8_S16_MATRIX_ADD_2COL(selector1,selector2,1);
+
+				// c[2:0-15,16-31]
+				U8_S16_MATRIX_ADD_2COL(selector1,selector2,2);
+
+				// c[3:0-15,16-31]
+				U8_S16_MATRIX_ADD_2COL(selector1,selector2,3);
+
+				// c[4:0-15,16-31]
+				U8_S16_MATRIX_ADD_2COL(selector1,selector2,4);
+
+				// c[5:0-15,16-31]
+				U8_S16_MATRIX_ADD_2COL(selector1,selector2,5);
+			}
+			else
+			{
+				int16_t* matptr = ( int16_t* )post_ops_list_temp->op_args1;
+
+				// c[0:0-15,16-31]
+				S16_S16_MATRIX_ADD_2COL(selector1,selector2,0);
+
+				// c[1:0-15,16-31]
+				S16_S16_MATRIX_ADD_2COL(selector1,selector2,1);
+
+				// c[2:0-15,16-31]
+				S16_S16_MATRIX_ADD_2COL(selector1,selector2,2);
+
+				// c[3:0-15,16-31]
+				S16_S16_MATRIX_ADD_2COL(selector1,selector2,3);
+
+				// c[4:0-15,16-31]
+				S16_S16_MATRIX_ADD_2COL(selector1,selector2,4);
+
+				// c[5:0-15,16-31]
+				S16_S16_MATRIX_ADD_2COL(selector1,selector2,5);
+			}
 
 			POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 		}

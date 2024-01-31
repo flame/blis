@@ -53,7 +53,8 @@ LPGEMM_M_FRINGE_KERN(int8_t,int8_t,int16_t,s8s8s16o16_4x32)
 			&&POST_OPS_GELU_TANH_4x32,
 			&&POST_OPS_GELU_ERF_4x32,
 			&&POST_OPS_CLIP_4x32,
-			&&POST_OPS_DOWNSCALE_4x32
+			&&POST_OPS_DOWNSCALE_4x32,
+			&&POST_OPS_MATRIX_ADD_4x32
 		};
 
 	// The division is done by considering the vpmaddubsw instruction
@@ -622,6 +623,62 @@ POST_OPS_DOWNSCALE_4x32:
 
 		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 	}
+POST_OPS_MATRIX_ADD_4x32:
+	{
+		__m256i selector1, selector2;
+		dim_t ldm = *( dim_t* )post_ops_list_temp->op_args3;
+
+		if ( post_ops_attr.c_stor_type == S8 )
+		{
+			int8_t* matptr = ( int8_t* )post_ops_list_temp->op_args1;
+
+			// c[0:0-15,16-31]
+			S8_S16_MATRIX_ADD_2COL(selector1,selector2,0);
+
+			// c[1:0-15,16-31]
+			S8_S16_MATRIX_ADD_2COL(selector1,selector2,1);
+
+			// c[2:0-15,16-31]
+			S8_S16_MATRIX_ADD_2COL(selector1,selector2,2);
+
+			// c[3:0-15,16-31]
+			S8_S16_MATRIX_ADD_2COL(selector1,selector2,3);
+		}
+		else if ( post_ops_attr.c_stor_type == U8 )
+		{
+			uint8_t* matptr = ( uint8_t* )post_ops_list_temp->op_args1;
+
+			// c[0:0-15,16-31]
+			U8_S16_MATRIX_ADD_2COL(selector1,selector2,0);
+
+			// c[1:0-15,16-31]
+			U8_S16_MATRIX_ADD_2COL(selector1,selector2,1);
+
+			// c[2:0-15,16-31]
+			U8_S16_MATRIX_ADD_2COL(selector1,selector2,2);
+
+			// c[3:0-15,16-31]
+			U8_S16_MATRIX_ADD_2COL(selector1,selector2,3);
+		}
+		else
+		{
+			int16_t* matptr = ( int16_t* )post_ops_list_temp->op_args1;
+
+			// c[0:0-15,16-31]
+			S16_S16_MATRIX_ADD_2COL(selector1,selector2,0);
+
+			// c[1:0-15,16-31]
+			S16_S16_MATRIX_ADD_2COL(selector1,selector2,1);
+
+			// c[2:0-15,16-31]
+			S16_S16_MATRIX_ADD_2COL(selector1,selector2,2);
+
+			// c[3:0-15,16-31]
+			S16_S16_MATRIX_ADD_2COL(selector1,selector2,3);
+		}
+
+		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+	}
 POST_OPS_4x32_DISABLE:
 	;
 
@@ -689,7 +746,8 @@ LPGEMM_M_FRINGE_KERN(int8_t,int8_t,int16_t,s8s8s16o16_2x32)
 			&&POST_OPS_GELU_TANH_2x32,
 			&&POST_OPS_GELU_ERF_2x32,
 			&&POST_OPS_CLIP_2x32,
-			&&POST_OPS_DOWNSCALE_2x32
+			&&POST_OPS_DOWNSCALE_2x32,
+			&&POST_OPS_MATRIX_ADD_2x32
 		};
 
 	// The division is done by considering the vpmaddubsw instruction
@@ -1081,6 +1139,44 @@ POST_OPS_DOWNSCALE_2x32:
 
 		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 	}
+POST_OPS_MATRIX_ADD_2x32:
+	{
+		__m256i selector1, selector2;
+		dim_t ldm = *( dim_t* )post_ops_list_temp->op_args3;
+
+		if ( post_ops_attr.c_stor_type == S8 )
+		{
+			int8_t* matptr = ( int8_t* )post_ops_list_temp->op_args1;
+
+			// c[0:0-15,16-31]
+			S8_S16_MATRIX_ADD_2COL(selector1,selector2,0);
+
+			// c[1:0-15,16-31]
+			S8_S16_MATRIX_ADD_2COL(selector1,selector2,1);
+		}
+		else if ( post_ops_attr.c_stor_type == U8 )
+		{
+			uint8_t* matptr = ( uint8_t* )post_ops_list_temp->op_args1;
+
+			// c[0:0-15,16-31]
+			U8_S16_MATRIX_ADD_2COL(selector1,selector2,0);
+
+			// c[1:0-15,16-31]
+			U8_S16_MATRIX_ADD_2COL(selector1,selector2,1);
+		}
+		else
+		{
+			int16_t* matptr = ( int16_t* )post_ops_list_temp->op_args1;
+
+			// c[0:0-15,16-31]
+			S16_S16_MATRIX_ADD_2COL(selector1,selector2,0);
+
+			// c[1:0-15,16-31]
+			S16_S16_MATRIX_ADD_2COL(selector1,selector2,1);
+		}
+
+		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+	}
 POST_OPS_2x32_DISABLE:
 	;
 
@@ -1129,7 +1225,8 @@ LPGEMM_M_FRINGE_KERN(int8_t,int8_t,int16_t,s8s8s16o16_1x32)
 			&&POST_OPS_GELU_TANH_1x32,
 			&&POST_OPS_GELU_ERF_1x32,
 			&&POST_OPS_CLIP_1x32,
-			&&POST_OPS_DOWNSCALE_1x32
+			&&POST_OPS_DOWNSCALE_1x32,
+			&&POST_OPS_MATRIX_ADD_1x32
 		};
 
 	// The division is done by considering the vpmaddubsw instruction
@@ -1429,6 +1526,35 @@ POST_OPS_DOWNSCALE_1x32:
 
 		// Scale next 16 columns of the 4 rows.
 		CVT_MULRND_CVT16(c_int16_0p1, scale_1, scale_2, zero_point_0)
+
+		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+	}
+POST_OPS_MATRIX_ADD_1x32:
+	{
+		__m256i selector1, selector2;
+		dim_t ldm = *( dim_t* )post_ops_list_temp->op_args3;
+
+		if ( post_ops_attr.c_stor_type == S8 )
+		{
+			int8_t* matptr = ( int8_t* )post_ops_list_temp->op_args1;
+
+			// c[0:0-15,16-31]
+			S8_S16_MATRIX_ADD_2COL(selector1,selector2,0);
+		}
+		else if ( post_ops_attr.c_stor_type == U8 )
+		{
+			uint8_t* matptr = ( uint8_t* )post_ops_list_temp->op_args1;
+
+			// c[0:0-15,16-31]
+			U8_S16_MATRIX_ADD_2COL(selector1,selector2,0);
+		}
+		else
+		{
+			int16_t* matptr = ( int16_t* )post_ops_list_temp->op_args1;
+
+			// c[0:0-15,16-31]
+			S16_S16_MATRIX_ADD_2COL(selector1,selector2,0);
+		}
 
 		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 	}

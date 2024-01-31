@@ -1,4 +1,4 @@
-##Copyright (C) 2023, Advanced Micro Devices, Inc. All rights reserved. ##
+##Copyright (C) 2023 - 2024, Advanced Micro Devices, Inc. All rights reserved. ##
 
 # Include file containing common flags for all AMD architectures
 include(${CMAKE_SOURCE_DIR}/config/zen/amd_config.cmake)
@@ -29,6 +29,10 @@ if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
         list(APPEND CKOPTFLAGS -fno-tree-partial-pre -fno-tree-pre -fno-tree-loop-vectorize -fno-gcse)
     endif()
 endif()
+
+if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+    list(APPEND CKVECFLAGS -march=znver1)
+endif() # clang
 
 # Flags specific to reference kernels.
 set(CROPTFLAGS ${CKOPTFLAGS})

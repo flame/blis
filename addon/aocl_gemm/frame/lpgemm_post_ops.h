@@ -45,7 +45,8 @@ typedef enum
 	POST_OPS_GELU_ERF = 5,
 	POST_OPS_CLIP = 6,
 	POST_OPS_DOWNSCALE = 7,
-	POST_OPS_SUM = 8,
+	POST_OPS_MATRIX_ADD = 8,
+	POST_OPS_SUM = 9,
 } LPGEMM_POST_OP_CODE;
 
 // Used as an internal structure.
