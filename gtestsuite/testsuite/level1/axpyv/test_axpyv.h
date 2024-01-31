@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2023, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2023-2024, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -68,4 +68,38 @@ static void test_axpyv( char conjx, gtint_t n, gtint_t incx, gtint_t incy,
     //              Compute component-wise error.
     //----------------------------------------------------------
     computediff<T>( n, y.data(), y_ref.data(), incy, thresh );
+}
+
+template<typename T>
+static void test_axpyv( char conjx, gtint_t n, gtint_t incx, gtint_t incy,
+                        T alpha, gtint_t xi, T xexval, gtint_t yj, T yexval,
+                        double thresh )
+{
+    //----------------------------------------------------------
+    //        Initialize vectors with random numbers.
+    //----------------------------------------------------------
+    std::vector<T> x = testinghelpers::get_random_vector<T>( -10, 10, n, incx );
+    std::vector<T> y = testinghelpers::get_random_vector<T>( -10, 10, n, incy );
+
+    if( xi < n )  x[xi*incx] = xexval;
+    else          return;
+    if( yj < n )  y[yj*incy] = yexval;
+    else          return;
+
+    //----------------------------------------------------------
+    //    Call reference implementation to get ref results.
+    //----------------------------------------------------------
+    // Create a copy of y so that we can check reference results.
+    std::vector<T> y_ref(y);
+    testinghelpers::ref_axpyv<T>( conjx, n, alpha, x.data(), incx, y_ref.data(), incy );
+
+    //----------------------------------------------------------
+    //                  Call BLIS function.
+    //----------------------------------------------------------
+    axpyv<T>( conjx, n, alpha, x.data(), incx, y.data(), incy );
+
+    //----------------------------------------------------------
+    //              Compute component-wise error.
+    //----------------------------------------------------------
+    computediff<T>( n, y.data(), y_ref.data(), incy, thresh, true );
 }

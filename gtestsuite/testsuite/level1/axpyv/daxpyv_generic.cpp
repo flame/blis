@@ -69,15 +69,14 @@ TEST_P( daxpyvGenericTest, RandomData )
     test_axpyv<T>( conj_x, n, incx, incy, alpha, thresh );
 }
 
-// Used to generate a test case with a sensible name.
-// Beware that we cannot use fp numbers (e.g., 2.3) in the names,
-// so we are only printing int(2.3). This should be enough for debugging purposes.
-// If this poses an issue, please reach out.
+// Test-case logger : Used to print the test-case details when alpha/beta have exception value.
+// The string format is as follows :
+// n(vec_size)_(conjx/noconjx)_incx(m)(abs_incx)_incy(m)(abs_incy)_a(alpha_val)
 class daxpyvGenericTestPrint {
 public:
     std::string operator()(
         testing::TestParamInfo<std::tuple<char,gtint_t,gtint_t,gtint_t,double>> str) const {
-        char conj     = std::get<0>(str.param);
+        char conjx     = std::get<0>(str.param);
         gtint_t n     = std::get<1>(str.param);
         gtint_t incx  = std::get<2>(str.param);
         gtint_t incy  = std::get<3>(str.param);
@@ -89,12 +88,12 @@ public:
 #else  //#elif TEST_BLIS_TYPED
         std::string str_name = "bli_daxpyv";
 #endif
-        str_name += "_" + std::to_string(n);
-        str_name += "_" + std::string(&conj, 1);
+        str_name += "_n" + std::to_string(n);
+        str_name += ( conjx == 'n' )? "_noconjx" : "_conjx";
         std::string incx_str = ( incx > 0) ? std::to_string(incx) : "m" + std::to_string(std::abs(incx));
-        str_name += "_" + incx_str;
+        str_name += "_incx" + incx_str;
         std::string incy_str = ( incy > 0) ? std::to_string(incy) : "m" + std::to_string(std::abs(incy));
-        str_name += "_" + incy_str;
+        str_name += "_incy" + incy_str;
         std::string alpha_str = ( alpha > 0) ? std::to_string(int(alpha)) : "m" + std::to_string(int(std::abs(alpha)));
         str_name = str_name + "_a" + alpha_str;
         return str_name;
@@ -142,8 +141,8 @@ INSTANTIATE_TEST_SUITE_P(
         ::testing::Combine(
             ::testing::Values('n'),                                          // n: use x, not conj(x) (since it is real)
             ::testing::Values(gtint_t(3), gtint_t(30), gtint_t(112)),        // m size of vector
-            ::testing::Values(gtint_t(2)),                                   /*(gtint_t(-5), gtint_t(-17))*/// stride size for x
-            ::testing::Values(gtint_t(3)),                                   /*(gtint_t(-12), gtint_t(-4))*/// stride size for y
+            ::testing::Values(gtint_t(2)),                                   // stride size for x
+            ::testing::Values(gtint_t(3)),                                   // stride size for y
             ::testing::Values(double(4.1))                                   // alpha
         ),
         ::daxpyvGenericTestPrint()

@@ -108,8 +108,10 @@ public:
     Unit testing for functionality of bli_daxpyv_zen_int10 kernel.
     The code structure for bli_daxpyv_zen_int10( ... ) is as follows :
     For unit strides :
-        Main loop    :  In blocks of 40 --> L40
-        Fringe loops :  In blocks of 20 --> L20
+        Main loop    :  In blocks of 52 --> L52
+        Fringe loops :  In blocks of 40 --> L40
+                        In blocks of 20 --> L20
+                        In blocks of 16 --> L16
                         In blocks of 8  --> L8
                         In blocks of 4  --> L4
                         Element-wise loop --> LScalar
@@ -124,22 +126,28 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(bli_daxpyv_zen_int10),  // kernel address
             ::testing::Values('n'),                   // use x, not conj(x) (since it is real)
             ::testing::Values(// Testing the loops standalone
-                              gtint_t(40),            // size n, for L40
+                              gtint_t(52),            // size n, for L52
+                              gtint_t(40),            // L40
                               gtint_t(20),            // L20
+                              gtint_t(16),            // L16
                               gtint_t(8),             // L8
                               gtint_t(4),             // L4
                               gtint_t(2),             // LScalar
                               // Testing the loops with combination
-                              // 3*L40
-                              gtint_t(120),
-                              // 3*L40 + L20
-                              gtint_t(140),
-                              // 3*L40 + L20 + L8
-                              gtint_t(148),
-                              // 3*L40 + L20 + L8 + L4
-                              gtint_t(152),
-                              // 3*L40 + L20 + L8 + L4 + LScalar
-                              gtint_t(155)),
+                              // 3*L52
+                              gtint_t(156),
+                              // 3*L52 + L40
+                              gtint_t(196),
+                              // 3*L52 + L40 + L8
+                              gtint_t(204),
+                              // 3*L52 + L40 + L4 + LScalar(3)
+                              gtint_t(203),
+                              // 3*L52 + L20
+                              gtint_t(176),
+                              // 3*L52 + L20 + L16
+                              gtint_t(192),
+                              // 3*L52 + L20 + L8 + L4 + LScalar
+                              gtint_t(191)),
             ::testing::Values(gtint_t(1)),            // stride size for x
             ::testing::Values(gtint_t(1)),            // stride size for y
             ::testing::Values(double(2.2)) // alpha
