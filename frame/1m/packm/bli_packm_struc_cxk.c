@@ -37,7 +37,7 @@
 #undef  GENTFUNC2RO
 #define GENTFUNC2RO( ctypec_r, ctype_c, ctypep_r, ctypep, chc_r, chc, chp_r, chp, varname ) \
 GENTFUNC2RO_( ctypec_r, ctypec_r, ctypep_r, ctypep_r, chc_r, chc_r, chp_r, chp_r, varname ) \
-GENTFUNC2RO_( ctypec_r, ctypec, ctypep_r, ctypep, chc_r, chc, chp_r, chp, varname )
+GENTFUNC2RO_( ctypec_r, ctypec,   ctypep_r, ctypep,   chc_r, chc,   chp_r, chp,   varname )
 
 #undef  GENTFUNC2RO_
 #define GENTFUNC2RO_( ctypec_r, ctype_c, ctypep_r, ctypep, chc_r, chc, chp_r, chp, varname ) \

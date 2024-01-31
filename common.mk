@@ -750,7 +750,10 @@ ifeq ($(CC_VENDOR),clang)
 CWARNFLAGS +=
 else
 ifeq ($(CC_VENDOR),gcc)
-CWARNFLAGS += -Wno-maybe-uninitialized -Wno-comment
+# The '-Wno-maybe-uninitialized' option makes me nervous. Let's temporarily
+# disable for now. -FGVZ
+#CWARNFLAGS += -Wno-maybe-uninitialized -Wno-comment
+CWARNFLAGS += -Wno-comment
 endif
 endif
 

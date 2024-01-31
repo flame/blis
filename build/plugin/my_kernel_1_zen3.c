@@ -36,7 +36,7 @@
 
 void bli_dmy_kernel_1_zen3
      (
-             int    n,
+             int     n,
        const double* a,
              double* x
      )

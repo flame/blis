@@ -35,7 +35,10 @@
 #include "blis.h"
 #include STRINGIFY_INT(../../PASTEMAC(plugin,BLIS_PNAME_INFIX).h)
 
-void PASTEMAC(plugin_init,BLIS_PNAME_INFIX,BLIS_CNAME_INFIX)( PASTECH(plugin,BLIS_PNAME_INFIX,_params) )
+void PASTEMAC(plugin_init,BLIS_PNAME_INFIX,BLIS_CNAME_INFIX)
+     (
+       PASTECH(plugin,BLIS_PNAME_INFIX,_params)
+     )
 {
 	cntx_t* cntx = ( cntx_t* )bli_gks_lookup_id( PASTECH(BLIS_ARCH,BLIS_CNAME_UPPER_INFIX) );
 
