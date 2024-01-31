@@ -83,6 +83,20 @@ void getfp(T2 from, T3 to, gtint_t n, gtint_t incx, T1* x)
 {
     using real_T = typename testinghelpers::type_info<T1>::real_type;
     T1* chi;
+
+    if (incx != 1)
+    {
+        // First initialize all elements in vector to unusual value to help
+        // catch if intervening elements have been incorrectly used or modified.
+        for ( gtint_t i = 0; i < testinghelpers::buff_dim(n, incx); ++i )
+        {
+            chi = x + i;
+            *chi = T1{-1.2345e38};
+        }
+    }
+
+    // Generate the values from the uniform distribution that
+    // the BLAS routine should read and/or modify.
     std::mt19937                              generator(94);
     std::uniform_real_distribution<real_T>    distr(from, to);
     for ( gtint_t i = 0; i < n; ++i )
@@ -110,32 +124,52 @@ void getfp(T2 from, T3 to, char storage, gtint_t m, gtint_t n, T1* a, gtint_t ld
     std::mt19937                              generator(1994);
     std::uniform_real_distribution<real_T>    distr(from, to);
 
-    gtint_t inca;
-    gtint_t n_iter;
-    gtint_t n_elem;
-    gtint_t j;
-
-    // Initialize with optimal values for column-major storage.
-    inca   = 1;
-    n_iter = n;
-    n_elem = m;
-
-    // An optimization: if A is row-major, then let's access the matrix by
-    // rows instead of by columns for increased spatial locality.
-    if( (storage == 'r') || (storage == 'R') )
+    if((storage == 'c') || (storage == 'C'))
     {
-        swap_dims( &n_iter, &n_elem );
-        swap_dims( &lda, &inca );
-    }
-
-    for ( j = 0; j < n_iter; j++ )
-    {
-        for(gtint_t i=0; i<n_elem; i++)
+        for(gtint_t j=0; j<n; j++)
         {
             if constexpr (testinghelpers::type_info<T1>::is_real)
-                a[j+i*inca] = real_T(distr(generator));
+            {
+                for(gtint_t i=0; i<m; i++)
+                {
+                    a[i+j*lda] = real_T(distr(generator));
+                }
+            }
             else
-                a[j+i*inca] = {real_T(distr(generator)), real_T(distr(generator))};
+            {
+                for(gtint_t i=0; i<m; i++)
+                {
+                    a[i+j*lda] = {real_T(distr(generator)), real_T(distr(generator))};
+                }
+            }
+            for(gtint_t i=m; i<lda; i++)
+            {
+                a[i+j*lda] = T1{-1.2345e38};
+            }
+        }
+    }
+    else if( (storage == 'r') || (storage == 'R') )
+    {
+        for(gtint_t i=0; i<m; i++)
+        {
+            if constexpr (testinghelpers::type_info<T1>::is_real)
+            {
+                for(gtint_t j=0; j<n; j++)
+                {
+                    a[j+i*lda] = real_T(distr(generator));
+                }
+            }
+            else
+            {
+                for(gtint_t j=0; j<n; j++)
+                {
+                    a[j+i*lda] = {real_T(distr(generator)), real_T(distr(generator))};
+                }
+            }
+            for(gtint_t j=n; j<lda; j++)
+            {
+                a[j+i*lda] = T1{-1.2345e38};
+            }
         }
     }
 }
@@ -151,40 +185,10 @@ void getfp(T2 from, T3 to, char storage, gtint_t m, gtint_t n, T1* a, gtint_t ld
 template<typename T1, typename T2, typename T3>
 void getfp(T2 from, T3 to, char storage, gtint_t m, gtint_t n, T1* a, char transa, gtint_t lda )
 {
-    using real_T = typename testinghelpers::type_info<T1>::real_type;
-    std::mt19937                              generator(1994);
-    std::uniform_real_distribution<real_T>    distr(from, to);
-
     if( chktrans( transa )) {
        swap_dims( &m, &n );
     }
-
-    if((storage == 'c') || (storage == 'C'))
-    {
-        for(gtint_t i=0; i<m; i++)
-        {
-            for(gtint_t j=0; j<n; j++)
-            {
-                if constexpr (testinghelpers::type_info<T1>::is_real)
-                    a[i+j*lda] = real_T(distr(generator));
-                else
-                    a[i+j*lda] = {real_T(distr(generator)), real_T(distr(generator))};
-            }
-        }
-    }
-    else if( (storage == 'r') || (storage == 'R') )
-    {
-        for(gtint_t j=0; j<n; j++)
-        {
-            for(gtint_t i=0; i<m; i++)
-            {
-                if constexpr (testinghelpers::type_info<T1>::is_real)
-                    a[j+i*lda] = real_T(distr(generator));
-                else
-                    a[j+i*lda] = {real_T(distr(generator)), real_T(distr(generator))};
-            }
-        }
-    }
+    getfp<T1>( from, to, storage, m, n, a, lda);
 }
 
 /***************************************************
@@ -219,6 +223,20 @@ void getint(int from, int to, gtint_t n, gtint_t incx, T* x)
 {
     using real_T = typename testinghelpers::type_info<T>::real_type;
     T* chi;
+
+    if (incx != 1)
+    {
+        // First initialize all elements in vector to unusual value to help
+        // catch if intervening elements have been incorrectly used or modified.
+        for ( gtint_t i = 0; i < testinghelpers::buff_dim(n, incx); ++i )
+        {
+            chi = x + i;
+            *chi = T{-1.2345e38};
+        }
+    }
+
+    // Generate the values from the uniform distribution that
+    // the BLAS routine should read and/or modify.
     std::mt19937                          generator(94);
     std::uniform_int_distribution<int>    distr(from, to);
     for ( gtint_t i = 0; i < n; ++i )
@@ -246,32 +264,52 @@ void getint(int from, int to, char storage, gtint_t m, gtint_t n, T* a, gtint_t 
     std::mt19937                          generator(94);
     std::uniform_int_distribution<int>    distr(from, to);
 
-    gtint_t inca;
-    gtint_t n_iter;
-    gtint_t n_elem;
-    gtint_t j;
-
-    // Initialize with optimal values for column-major storage.
-    inca   = 1;
-    n_iter = n;
-    n_elem = m;
-
-    // An optimization: if A is row-major, then let's access the matrix by
-    // rows instead of by columns for increased spatial locality.
-    if( (storage == 'r') || (storage == 'R') )
+    if((storage == 'c') || (storage == 'C'))
     {
-        swap_dims( &n_iter, &n_elem );
-        swap_dims( &lda, &inca );
-    }
-
-    for ( j = 0; j < n_iter; j++ )
-    {
-        for(gtint_t i=0; i<n_elem; i++)
+        for(gtint_t j=0; j<n; j++)
         {
             if constexpr (testinghelpers::type_info<T>::is_real)
-                a[j+i*inca] = real_T(distr(generator));
+            {
+                for(gtint_t i=0; i<m; i++)
+                {
+                    a[i+j*lda] = real_T(distr(generator));
+                }
+            }
             else
-                a[j+i*inca] = {real_T(distr(generator)), real_T(distr(generator))};
+            {
+                for(gtint_t i=0; i<m; i++)
+                {
+                    a[i+j*lda] = {real_T(distr(generator)), real_T(distr(generator))};
+                }
+            }
+            for(gtint_t i=m; i<lda; i++)
+            {
+                a[i+j*lda] = T{-1.2345e38};
+            }
+        }
+    }
+    else if( (storage == 'r') || (storage == 'R') )
+    {
+        for(gtint_t i=0; i<m; i++)
+        {
+            if constexpr (testinghelpers::type_info<T>::is_real)
+            {
+                for(gtint_t j=0; j<n; j++)
+                {
+                    a[j+i*lda] = real_T(distr(generator));
+                }
+            }
+            else
+            {
+                for(gtint_t j=0; j<n; j++)
+                {
+                    a[j+i*lda] = {real_T(distr(generator)), real_T(distr(generator))};
+                }
+            }
+            for(gtint_t j=n; j<lda; j++)
+            {
+                a[j+i*lda] = T{-1.2345e38};
+            }
         }
     }
 }
@@ -288,40 +326,10 @@ void getint(int from, int to, char storage, gtint_t m, gtint_t n, T* a, gtint_t 
 template<typename T>
 void getint(int from, int to, char storage, gtint_t m, gtint_t n, T* a, char transa, gtint_t lda )
 {
-    using real_T = typename testinghelpers::type_info<T>::real_type;
-    std::mt19937                          generator(1994);
-    std::uniform_int_distribution<int>    distr(from, to);
-
     if( chktrans( transa )) {
        swap_dims( &m, &n );
     }
-
-    if((storage == 'c') || (storage == 'C'))
-    {
-        for(gtint_t i=0; i<m; i++)
-        {
-            for(gtint_t j=0; j<n; j++)
-            {
-                if constexpr (testinghelpers::type_info<T>::is_real)
-                    a[i+j*lda] = real_T(distr(generator));
-                else
-                    a[i+j*lda] = {real_T(distr(generator)), real_T(distr(generator))};
-            }
-        }
-    }
-    else if( (storage == 'r') || (storage == 'R') )
-    {
-        for(gtint_t j=0; j<n; j++)
-        {
-            for(gtint_t i=0; i<m; i++)
-            {
-                if constexpr (testinghelpers::type_info<T>::is_real)
-                    a[j+i*lda] = real_T(distr(generator));
-                else
-                    a[j+i*lda] = {real_T(distr(generator)), real_T(distr(generator))};
-            }
-        }
-    }
+    getint<T>( from, to, storage, m, n, a, lda);
 }
 
 template<typename T1, typename T2, typename T3>
@@ -365,11 +373,11 @@ void randomgenerators( T2 from, T3 to, char storage, char uplo, gtint_t k,
             {
                 if( (uplo=='u')||(uplo=='U') )
                 {
-                    if(i>j) a[i+j*lda] = T1{0};
+                    if(i>j) a[i+j*lda] = T1{2.987e38};
                 }
                 else if ( (uplo=='l')||(uplo=='L') )
                 {
-                    if (i<j) a[i+j*lda] = T1{0};
+                    if (i<j) a[i+j*lda] = T1{2.987e38};
                 }
                 else
                     throw std::runtime_error("Error in common/data_generators.cpp: side must be 'u' or 'l'.");
@@ -384,11 +392,11 @@ void randomgenerators( T2 from, T3 to, char storage, char uplo, gtint_t k,
             {
                 if( (uplo=='u')||(uplo=='U') )
                 {
-                    if(i>j) a[j+i*lda] = T1{0};
+                    if(i>j) a[j+i*lda] = T1{2.987e38};
                 }
                 else if ( (uplo=='l')||(uplo=='L') )
                 {
-                    if (i<j) a[j+i*lda] = T1{0};
+                    if (i<j) a[j+i*lda] = T1{2.987e38};
                 }
                 else
                     throw std::runtime_error("Error in common/data_generators.cpp: side must be 'u' or 'l'.");
@@ -430,6 +438,18 @@ template<typename T>
 void set_vector( gtint_t n, gtint_t incx, T* x, T value )
 {
     T* chi;
+
+    if (incx != 1)
+    {
+        // First initialize all elements in vector to unusual value to help
+        // catch if intervening elements have been incorrectly used or modified.
+        for ( gtint_t i = 0; i < testinghelpers::buff_dim(n, incx); ++i )
+        {
+            chi = x + i;
+            *chi = T{-1.2345e38};
+        }
+    }
+
     for ( gtint_t i = 0; i < n; ++i )
     {
         chi = x + i*std::abs(incx);
@@ -446,21 +466,29 @@ void set_matrix( char storage, gtint_t m, gtint_t n, T* a, char transa, gtint_t 
 
     if((storage == 'c') || (storage == 'C'))
     {
-        for( gtint_t i = 0 ; i < m ; i++ )
+        for( gtint_t j = 0 ; j < n ; j++ )
         {
-            for( gtint_t j = 0 ; j < n ; j++ )
+            for( gtint_t i = 0 ; i < m ; i++ )
             {
                 a[i+j*lda] = value ;
+            }
+            for(gtint_t i=m; i<lda; i++)
+            {
+                a[i+j*lda] = T{-1.2345e38};
             }
         }
     }
     else if( (storage == 'r') || (storage == 'R') )
     {
-        for( gtint_t j = 0 ; j < n ; j++ )
+        for( gtint_t i = 0 ; i < m ; i++ )
         {
-            for( gtint_t i = 0 ; i < m ; i++ )
+            for( gtint_t j = 0 ; j < n ; j++ )
             {
                 a[j+i*lda] = value ;
+            }
+            for(gtint_t j=n; j<lda; j++)
+            {
+                a[j+i*lda] = T{-1.2345e38};
             }
         }
     }
