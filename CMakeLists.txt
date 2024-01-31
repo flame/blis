@@ -773,7 +773,7 @@ add_custom_command(OUTPUT ${PROJECT_BINARY_DIR}/include/${BLIS_CONFIG_FAMILY}/bl
                 "${PROJECT_BINARY_DIR}/include/${BLIS_CONFIG_FAMILY}/blis.h"
                 "${PROJECT_BINARY_DIR}/include"
                 "${ALL_HEADER_PATHS_STRING}"
-                COMMENT "Generating monolithic blis header file: ${CMAKE_SOURCE_DIR}/include/${BLIS_CONFIG_FAMILY}/blis.h"
+                COMMENT "Generating monolithic blis header file: ${PROJECT_BINARY_DIR}/include/${BLIS_CONFIG_FAMILY}/blis.h"
                 DEPENDS ${ALL_HEADER_FILES_LIST}
                 )
 add_custom_target(flat-header DEPENDS ${PROJECT_BINARY_DIR}/include/${BLIS_CONFIG_FAMILY}/blis.h)
@@ -788,7 +788,7 @@ if(ENABLE_CBLAS)
                     "${PROJECT_BINARY_DIR}/include/${BLIS_CONFIG_FAMILY}/cblas.h"
                     "${PROJECT_BINARY_DIR}/${include}"
                     "${ALL_HEADER_PATHS_STRING}"
-                    COMMENT "Generating monolithic cblas header file: ${CMAKE_SOURCE_DIR}/include/${BLIS_CONFIG_FAMILY}/cblas.h"
+                    COMMENT "Generating monolithic cblas header file: ${PROJECT_BINARY_DIR}/include/${BLIS_CONFIG_FAMILY}/cblas.h"
                     DEPENDS ${ALL_HEADER_FILES_LIST}
                     )
     add_custom_target(flat-cblas-header DEPENDS ${PROJECT_BINARY_DIR}/include/${BLIS_CONFIG_FAMILY}/cblas.h)
