@@ -94,6 +94,7 @@ CC                := @CC@
 GCC_OT_4_9_0      := @gcc_older_than_4_9_0@
 GCC_OT_6_1_0      := @gcc_older_than_6_1_0@
 GCC_OT_9_1_0      := @gcc_older_than_9_1_0@
+GCC_OT_11_2_0      := @gcc_older_than_11_2_0@
 
 # The C++ compiler. NOTE: A C++ is typically not needed.
 CXX               := @CXX@

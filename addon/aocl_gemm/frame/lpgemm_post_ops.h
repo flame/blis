@@ -52,7 +52,7 @@ typedef enum
 // Used as an internal structure.
 typedef struct lpgemm_post_op_t
 {
-	LPGEMM_POST_OP_CODE op_code;
+	dim_t op_code;
 	void* op_args1; // zero_point, bias, sum_buff
 	void* op_args2; // alpha, storage order, sum_zero_point
 	void* op_args3; // beta, zero_point_len
@@ -72,7 +72,7 @@ typedef struct lpgemm_post_op_attr_t
 	void* buf_downscale;
 	bool is_first_k;
 	bool is_last_k;
-	AOCL_STORAGE_TYPE c_stor_type;
+	dim_t c_stor_type;
 	dim_t b_sum_offset;
 	int32_t* b_col_sum_vec;
 	int16_t* b_col_sum_vec_s16;

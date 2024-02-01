@@ -51,8 +51,17 @@ static lpgemm_cntx_t global_cntx_t_list[AOCL_OPERATION_TYPE_LEN] \
 static lpgemm_util_cntx_t global_util_cntx_t_list[AOCL_UTIL_OPERATION_TYPE_LEN] \
 					__attribute__((aligned(64))); //Only post-ops like utils.
 
-static bli_pthread_once_t once_check_lpgemm_func_map_init = BLIS_PTHREAD_ONCE_INIT;
+// This array is to store function pointers to jit generated kernels.
+static void* global_jit_kernels[ LPGEMM_BF16_MR ]
+                            [ ( LPGEMM_BF16_NR / NUM_F32_ELEMS_PER_ZMM ) + 1 ]
+                             __attribute__((aligned(64)));
 
+// Buffer size is chosen in order to accommodate the
+// worst-case scenario for MR=6 and NR=64.
+// The buffersize is chosen using bruteforce method.
+#define JIT_KERNEL_SIZE ( 7 * BLIS_PAGE_SIZE )
+
+static bli_pthread_once_t once_check_lpgemm_func_map_init = BLIS_PTHREAD_ONCE_INIT;
 static void _lpgemm_util_cntx_init_func_map()
 {
 #define UMACRO(ID,FUNC_PTR) global_util_cntx_t_list[ID].kern_fun_ptr = FUNC_PTR;
@@ -88,7 +97,7 @@ static void _lpgemm_cntx_init_func_map()
 #define KMACRO(ID,FUNC_PTR) global_cntx_t_list[ID].kern_fun_ptr = FUNC_PTR;
 #define PAMACRO(ID,FUNC_PTR) global_cntx_t_list[ID].packa_fun_ptr = FUNC_PTR;
 #define PBMACRO(ID,FUNC_PTR) global_cntx_t_list[ID].packb_fun_ptr = FUNC_PTR;
-
+#define JITMACRO(ID, FUNC_PTR) global_cntx_t_list[ID].jit_kernel = FUNC_PTR;
 	//TODO: Default initialize with reference kernels so that kernel pointer
 	// will be valid even in case none of the zen optimized kernels are
 	// available. This scenario could happen if the addon was built using
@@ -106,6 +115,36 @@ static void _lpgemm_cntx_init_func_map()
 		LPGEMM_KERN_FUNC_MAP_AVX512_VNNI_BF16
 		LPGEMM_PACKA_FUNC_MAP_AVX512_VNNI_BF16
 		LPGEMM_PACKB_FUNC_MAP_AVX512_VNNI_BF16
+
+#ifdef LPGEMM_BF16_JIT
+			lpgemm_jit_inputs_t inputs;
+			inputs.alpha_scale = TRUE;
+			inputs.beta_scale = BLIS_BETA_GEN;
+
+			err_t err;
+
+			dim_t num_N_vars = ( LPGEMM_BF16_NR / NUM_F32_ELEMS_PER_ZMM ) + 1;
+
+			for ( dim_t m = 0; m < LPGEMM_BF16_MR; m++ )
+			{
+				for( dim_t n = 0; n < num_N_vars; n++ )
+				{
+					inputs.MR = ( m == 0 ) ? LPGEMM_BF16_MR : m;
+					inputs.NR = n * 16;
+					inputs.m_loop = ( m == 0 ) ? TRUE: FALSE;
+					inputs.generate_mask = ( n == 0 ) ? TRUE: FALSE;
+					global_jit_kernels[m][n] = bli_malloc_user( JIT_KERNEL_SIZE,
+					                                            &err );
+					if( global_jit_kernels[m][n] != NULL )
+					{
+						get_jit_kernel( &inputs,
+						                global_jit_kernels[m][n],
+						                JIT_KERNEL_SIZE
+						              );
+					}
+				}
+			}
+#endif
 #endif
 	}
 	else if ( bli_cpuid_is_avx512vnni_supported() == TRUE )
@@ -139,6 +178,15 @@ static void _lpgemm_cntx_init_func_map()
 #undef KMACRO
 }
 
+ void lpgemm_set_jit_kernel( void* kernel_fp, dim_t m_index, dim_t n_index )
+{
+	global_jit_kernels[m_index][n_index] = kernel_fp;
+}
+
+ void* lpgemm_get_jit_kernel( dim_t m_index, dim_t n_index )
+{
+	return global_jit_kernels[m_index][n_index];
+}
 BLIS_INLINE void lpgemm_set_block_sizes_global_cntx
      (
        AOCL_OPERATION_TYPE op_type,

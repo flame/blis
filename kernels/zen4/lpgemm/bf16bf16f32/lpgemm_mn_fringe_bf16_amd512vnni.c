@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2022 - 2023, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2022 - 2024, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -40,7 +40,7 @@
 
 #include "lpgemm_f32_kern_macros.h"
 
-#ifndef LPGEMM_BF16_NOT_SUPPORTED
+#ifndef LPGEMM_BF16_JIT
 // 5xlt16 bf16 fringe kernel
 LPGEMM_MN_LT_NR0_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_5xlt16)
 {
@@ -629,7 +629,7 @@ LPGEMM_MN_LT_NR0_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_4xlt16)
 		// c[3,0-15] = a[3,kr:kr+2]*b[kr:kr+2,0-15]
 		c_float_3p0 = _mm512_dpbf16_ps( c_float_3p0, a_bf16_0, b0 );
 	}
-	
+
 	// Load alpha and beta
 	__m512 selector1 = _mm512_set1_ps( alpha );
 	__m512 selector2 = _mm512_set1_ps( beta );
@@ -2648,7 +2648,7 @@ POST_OPS_4x16_DISABLE:
 
 		// c[3,0-15]
 		CVT_STORE_F32_BF16_MASK(c_float_3p0,3,0);
-	}	
+	}
 
 	else
 	{
@@ -2802,7 +2802,7 @@ LPGEMM_MN_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_3x16)
 			F32_F32_BETA_OP(c_float_2p0, 0, 2, 0, \
 							selector1, selector2);
 		}
-		
+
 	}
 	// Post Ops
 	lpgemm_post_op* post_ops_list_temp = post_ops_list;
@@ -2994,7 +2994,7 @@ POST_OPS_3x16_DISABLE:
 
 		// c[2,0-15]
 		CVT_STORE_F32_BF16_MASK(c_float_2p0,2,0);
-	}	
+	}
 
 	else
 	{
@@ -3118,7 +3118,7 @@ LPGEMM_MN_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_2x16)
 			F32_F32_BETA_OP(c_float_1p0, 0, 1, 0, \
 							selector1, selector2);
 		}
-		
+
 	}
 	// Post Ops
 	lpgemm_post_op* post_ops_list_temp = post_ops_list;
@@ -3274,7 +3274,7 @@ POST_OPS_2x16_DISABLE:
 
 		// c[1,0-15]
 		CVT_STORE_F32_BF16_MASK(c_float_1p0,1,0);
-	}		
+	}
 
 	else
 	{
@@ -3368,7 +3368,7 @@ LPGEMM_MN_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_1x16)
 			F32_F32_BETA_OP(c_float_0p0, 0, 0, 0, \
 							selector1, selector2);
 		}
-		
+
 	}
 	// Post Ops
 	lpgemm_post_op* post_ops_list_temp = post_ops_list;
@@ -3488,7 +3488,7 @@ POST_OPS_1x16_DISABLE:
 		// Store the results in downscaled type (int8 instead of int32).
 		// c[0,0-15]
 		CVT_STORE_F32_BF16_MASK(c_float_0p0,0,0);
-	}		
+	}
 	else
 	{
 		// Store the results.
@@ -3697,7 +3697,7 @@ LPGEMM_MN_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_5x32)
 			// c[4, 16-31]
 			BF16_F32_BETA_OP( c_float_4p1, 0, 4, 1, selector1, selector2 );
 		}
-		else 
+		else
 		{
 			// c[0,0-15]
 			F32_F32_BETA_OP( c_float_0p0, 0, 0, 0, selector1, selector2 );
@@ -4338,7 +4338,7 @@ LPGEMM_MN_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_4x32)
 			// c[3, 16-31]
 			BF16_F32_BETA_OP( c_float_3p1, 0, 3, 1, selector1, selector2 );
 		}
-		else 
+		else
 		{
 			// c[0,0-15]
 			F32_F32_BETA_OP( c_float_0p0, 0, 0, 0, selector1, selector2 );
@@ -4702,7 +4702,7 @@ POST_OPS_4x32_DISABLE:
 
 		// c[3, 16-31]
 		CVT_STORE_F32_BF16_MASK(c_float_3p1,3,1);
-	}	
+	}
 
 	else
 	{
@@ -4875,7 +4875,7 @@ LPGEMM_MN_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_3x32)
 			// c[2, 16-31]
 			BF16_F32_BETA_OP( c_float_2p1, 0, 2, 1, selector1, selector2 );
 		}
-		else 
+		else
 		{
 			// c[0,0-15]
 			F32_F32_BETA_OP( c_float_0p0, 0, 0, 0, selector1, selector2 );
@@ -5308,7 +5308,7 @@ LPGEMM_MN_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_2x32)
 			// c[1, 16-31]
 			BF16_F32_BETA_OP( c_float_1p1, 0, 1, 1, selector1, selector2 );
 		}
-		else 
+		else
 		{
 			// c[0,0-15]
 			F32_F32_BETA_OP( c_float_0p0, 0, 0, 0, selector1, selector2 );
@@ -5636,7 +5636,7 @@ LPGEMM_MN_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_1x32)
 			// c[0, 16-31]
 			BF16_F32_BETA_OP( c_float_0p1, 0, 0, 1, selector1, selector2 );
 		}
-		else 
+		else
 		{
 			// c[0,0-15]
 			F32_F32_BETA_OP( c_float_0p0, 0, 0, 0, selector1, selector2 );
@@ -6587,7 +6587,7 @@ POST_OPS_5x48_DISABLE:
 		__m512i selector_a = _mm512_setzero_epi32();
 		__m512i selector_b = _mm512_set1_epi32( 10 );
 		__mmask16 mask_all1 = _mm512_cmplt_epi32_mask( selector_a, selector_b );
-		
+
 		// Store the results in downscaled type (bf16 instead of float).
 
 		// c[0, 0-15]
@@ -8683,7 +8683,7 @@ POST_OPS_CLIP_1x48:
 	{
 		__m512 min = _mm512_set1_ps( *( float* )post_ops_list_temp->op_args2 );
 		__m512 max = _mm512_set1_ps( *( float* )post_ops_list_temp->op_args3 );
-		
+
 		// c[0, 0-15]
 		CLIP_F32_AVX512(c_float_0p0, min, max)
 

@@ -5,7 +5,7 @@
 #  libraries.
 #
 #  Copyright (C) 2014, The University of Texas at Austin
-#  Copyright (C) 2020 - 2023, Advanced Micro Devices, Inc. All rights reserved.
+#  Copyright (C) 2020 - 2024, Advanced Micro Devices, Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -1719,7 +1719,7 @@ check_compiler_version_ranges()
 	gcc_older_than_4_9_0='no'
 	gcc_older_than_6_1_0='no'
 	gcc_older_than_9_1_0='no'
-
+	gcc_older_than_11_2_0='no'
 	echo "${script_name}: checking ${cc} ${cc_version} against known consequential version ranges."
 
 	# gcc
@@ -1743,6 +1743,19 @@ check_compiler_version_ranges()
 		if [ ${cc_major} -lt 9 ]; then
 			echo "${script_name}: note: found ${cc} version older than 9.1."
 			gcc_older_than_9_1_0='yes'
+		fi
+
+		# Check for gcc < 11.2.0 (ie: 11.2 or older).
+		if [ ${cc_major} -lt 11 ]; then
+			echo "${script_name}: note: found ${cc} version older than 11.2.0."
+			gcc_older_than_11_2_0='yes'
+		else
+			if [ ${cc_major} -eq 11 ]; then
+				if [ ${cc_minor} -lt 2 ]; then
+					echo "${script_name}: note: found ${cc} version older than 11.2.0."
+					gcc_older_than_11_2_0='yes'
+				fi
+			fi
 		fi
 	fi
 
@@ -2813,7 +2826,7 @@ main()
 
 	# Based on the number of sub-configurations, set default value for disable_blis_arch_type
 	# (if user hasn't set option). BLIS_ARCH_TYPE functionality only makes sense for use with
-	# processor families containing multiple sub-configurations, but user can force the 
+	# processor families containing multiple sub-configurations, but user can force the
 	# functionality to be enabled/disabled with --enable-blis-arch-type/--disable-blis-arch-type
 	# configure options.
 	if [ "x${disable_blis_arch_type}" = "xunset"  ]; then
@@ -3474,6 +3487,7 @@ main()
 		| sed -e "s/@gcc_older_than_4_9_0@/${gcc_older_than_4_9_0}/g" \
 		| sed -e "s/@gcc_older_than_6_1_0@/${gcc_older_than_6_1_0}/g" \
 		| sed -e "s/@gcc_older_than_9_1_0@/${gcc_older_than_9_1_0}/g" \
+		| sed -e "s/@gcc_older_than_11_2_0@/${gcc_older_than_11_2_0}/g" \
 		| sed -e "s/@CC@/${cc_esc}/g" \
 		| sed -e "s/@CXX@/${cxx_esc}/g" \
 		| sed -e "s/@RANLIB@/${ranlib_esc}/g" \

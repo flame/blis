@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2022 - 2023, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2022 - 2024, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -40,7 +40,7 @@
 
 #include "lpgemm_f32_kern_macros.h"
 
-#ifndef LPGEMM_BF16_NOT_SUPPORTED
+#ifndef LPGEMM_BF16_JIT
 // 5x64 bf16 kernel
 LPGEMM_M_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_5x64)
 {
@@ -1087,7 +1087,7 @@ POST_OPS_5x64_DISABLE:
 
 	}
 
-	// Case where the output C matrix is float 
+	// Case where the output C matrix is float
 	else
 	{
 		// Store the results.
@@ -2027,7 +2027,7 @@ POST_OPS_4x64_DISABLE:
 		// c[3, 48-63]
 		CVT_STORE_F32_BF16_MASK(c_float_3p3,3,3);
 	}
-	
+
 	// Case where the output C matrix is float
 	else
 	{
@@ -2778,7 +2778,7 @@ POST_OPS_3x64_DISABLE:
 		// c[2, 48-63]
 		CVT_STORE_F32_BF16_MASK(c_float_2p3,2,3);
 	}
-	
+
 	// Case where the output C matrix is float
 	else
 	{
@@ -3343,7 +3343,7 @@ POST_OPS_2x64_DISABLE:
 		// c[1, 48-63]
 		CVT_STORE_F32_BF16_MASK(c_float_1p3,1,3);
 	}
-	
+
 	// Case where the output C matrix is float
 	else
 	{
@@ -3697,7 +3697,7 @@ POST_OPS_1x64_DISABLE:
 		__m512i selector_a = _mm512_setzero_epi32();
 		__m512i selector_b = _mm512_set1_epi32( 10 );
 		__mmask16 mask_all1 = _mm512_cmplt_epi32_mask( selector_a, selector_b );
-		
+
 		// Store the results in downscaled type (bf16 instead of float).
 
 		// c[0, 0-15]
@@ -3712,7 +3712,7 @@ POST_OPS_1x64_DISABLE:
 		// c[0, 48-63]
 		CVT_STORE_F32_BF16_MASK(c_float_0p3,0,3);
 	}
-	
+
 	// Case where the output C matrix is float
 	else
 	{

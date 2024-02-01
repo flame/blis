@@ -51,5 +51,8 @@
 #include "lpgemm_packa_s8.h"
 #include "lpgemm_packb_s8.h"
 #include "lpgemm_packb_s8s16.h"
-
+#include "lpgemm_jit_typedefs.h"
+#ifdef LPGEMM_BF16_JIT
+#include "lpgemm_jit_c_connector.h"
+#endif
 #endif // BLIS_ADDON_LPGEMM

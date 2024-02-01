@@ -47,19 +47,6 @@ AOCL_GEMM_MATMUL(bfloat16,bfloat16,float,float,bf16bf16f32of32)
 	trans_t blis_transa;
 	trans_t blis_transb;
 
-	// There is this use case where lpgemm will be compiled using gcc9.4
-	// (where bf16 ISA is not supported), but deployed on a zen4+ sustem
-	// (which supports bf16 ISA). Here the bf16 kernels will be concealed
-	// and not compiled, and subsequently this api should error out and
-	// return early, even if bf16 ISA is supported by machine.
-#if defined( BLIS_GCC ) && ( __GNUC__ < 10 )
-	{
-		bli_print_msg("bf16bf16f32of32 compiled using a compiler not "
-				"supporting BF16 ISA.", __FILE__, __LINE__ );
-		return; // Error.
-	}
-#endif
-
 	// Check if avx512_vnni ISA is supported, lpgemm matmul only works with it.
 	if ( bli_cpuid_is_avx512bf16_supported() == FALSE )
 	{
@@ -84,6 +71,19 @@ AOCL_GEMM_MATMUL(bfloat16,bfloat16,float,float,bf16bf16f32of32)
 	  b, ldb, mem_format_b,
 	  c, ldc
 	);
+
+#ifdef LPGEMM_BF16_JIT
+	dim_t num_N_variants = ( LPGEMM_BF16_NR / NUM_F32_ELEMS_PER_ZMM ) + 1;
+	for( dim_t m = 0; m < LPGEMM_BF16_MR; m++ )
+		for( dim_t n = 0; n < num_N_variants; n++ )
+			if( lpgemm_get_jit_kernel(m, n) == NULL )
+			{
+				bli_print_msg(" Could not generate bf16bf16f32of32 "
+				" kernels using JIT.", __FILE__, __LINE__ );
+				return;
+			}
+#endif
+
 
 	/* Map BLAS chars to their corresponding BLIS enumerated type value. */
 	bli_param_map_netlib_to_blis_trans( transa, &blis_transa );

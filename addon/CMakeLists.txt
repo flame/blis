@@ -1,4 +1,4 @@
-##Copyright (C) 2023, Advanced Micro Devices, Inc. All rights reserved. ##
+##Copyright (C) 2023 - 2024, Advanced Micro Devices, Inc. All rights reserved. ##
 
 # Writing a function that will be used to generate the required object
 # libraries for the required addons.
@@ -59,6 +59,7 @@ function(generate_addon_targets addon_target)
                                     # in get-addon-c99flags-for
                                     ${CADDONINCFLAGS}
                                 )
+
         if(THREADING_MODEL STREQUAL "openmp")
             # Equivalent to CTHREADFLAGS in get-noopt-cflags-for
             target_link_libraries(${addon_target}_C99_ADDON PRIVATE OpenMP::OpenMP_C)
@@ -137,8 +138,10 @@ function(generate_addon_targets addon_target)
         set_target_properties(${addon_target}_C99_KERNEL_ADDON PROPERTIES FOLDER object-libs-targets)
     endif()
 
-    # Collect all subdirectory paths that have at least one file with suffix in ADDON_CXX_SUFS list.
-    get_filepaths_with_suffixes(LOCAL_SOURCE_CXX_FILES "${CMAKE_CURRENT_SOURCE_DIR}/${addon_target}" "${ADDON_CXX_SUFS}")
+    if(("${CMAKE_C_COMPILER_ID}" STREQUAL "GNU") AND (CMAKE_C_COMPILER_VERSION VERSION_LESS 11.2.0))
+        # Collect all subdirectory paths that have at least one file with suffix in ADDON_CXX_SUFS list.
+        get_filepaths_with_suffixes(LOCAL_SOURCE_CXX_FILES "${CMAKE_CURRENT_SOURCE_DIR}/${addon_target}" "${ADDON_CXX_SUFS}")
+    endif()
 
     # Only generate the object library if there is at least one source file.
     list(LENGTH LOCAL_SOURCE_CXX_FILES size)

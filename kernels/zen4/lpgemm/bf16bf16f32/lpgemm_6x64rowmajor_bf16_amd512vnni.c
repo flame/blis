@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2022 - 2023, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2022 - 2024, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -39,11 +39,176 @@
 
 #include "lpgemm_f32_kern_macros.h"
 
-#ifdef LPGEMM_BF16_NOT_SUPPORTED
+#ifdef LPGEMM_BF16_JIT
 
-// BF16 ISA is not supported by gcc < 10. Use a dummy kernel here.
+typedef void (*jit_kernel)(lpgemm_jit_params_t*, lpgemm_post_op_attr*, lpgemm_post_op*);
+
+// BF16 ISA is not supported by gcc < 10. Use a JIT-generated kernel here.
 LPGEMM_MAIN_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_6x64)
-{}
+{
+	jit_kernel kernel_fp;
+	dim_t MR = 6;
+	dim_t NR = 64;
+
+	dim_t post_op_temp_c_i = post_ops_attr.post_op_c_i;
+
+	dim_t m_full_pieces = m0 / MR;
+	dim_t m_full_pieces_loop_limit = m_full_pieces * MR;
+	dim_t m_partial_pieces = m0 % MR;
+
+	dim_t k_full_pieces = k0 / 2;
+	dim_t k_partial_pieces = k0 & 1;
+
+	dim_t value;
+
+	if(k_full_pieces > 40)
+	{
+		value = 40;
+	}
+	else
+	{
+		value = 0;
+	}
+
+	// Fill params_t struct with all the data that will be required
+	// during execution of the JIT kernel.
+	lpgemm_jit_params_t params;
+	params.m = m0; params.n = n0; params.k = k0;
+	params.rs_a = rs_a; params.cs_a = cs_a;
+	params.ps_a2 = ps_a * sizeof( bfloat16 ) * MR;
+	params.rs_b = rs_b; params.cs_b = cs_b;
+	params.rs_c = rs_c; params.cs_c = 1;
+	params.alpha = ( float* )&alpha;
+	params.beta = ( float* )&beta;
+	params.m_iter = m_full_pieces;
+	params.k_iter_before_prefetch = k_full_pieces - value;
+	params.k_iter_after_prefetch = value;
+	params.k_left = k_partial_pieces;
+	params.a = ( bfloat16* )a; params.b = ( bfloat16* )b; params.c = ( float* )c;
+
+
+	dim_t n0_16 = n0 / NUM_F32_ELEMS_PER_ZMM;
+
+	// n_fringe case
+	// if n < NR, handle them using n-fringe kernels.
+	if ( n0 < NR )
+	{
+		dim_t n0_rem = n0 % NUM_F32_ELEMS_PER_ZMM;
+
+		// KC when not multiple of 2 will have padding to make it multiple of
+		// 2 in packed buffer. Also the k0 cannot be passed as the updated
+		// value since A matrix is not packed and requires original k0.
+		dim_t k0_updated = k0;
+		k0_updated += ( k0_updated & 0x1 );
+
+
+		// Split dim_to multiple smaller fringe kernels, so as to maximize
+		// vectorization. Any n0 < NR(64) can be expressed as n0 = 48 + n`
+		// or n0 = 32 + n` or n0 = 16 + n`, where n` < 16.
+
+		// Handles case where n0 >=16.
+		if( n0 > n0_rem )
+		{
+			params.rs_b = ( ( rs_b / 4 ) * ( n0_16 ) );
+
+			// kernel with m_iter loop.
+			if( m0 >= MR )
+			{
+				kernel_fp = lpgemm_get_jit_kernel( 0, n0_16 );
+
+				( kernel_fp )(
+				               &params,
+				               &post_ops_attr,
+				               post_ops_list
+				             );
+			}
+			// Handle m_fringe case.
+			if( m_partial_pieces )
+			{
+				post_ops_attr.post_op_c_i += m_full_pieces_loop_limit;
+				params.a += m_full_pieces_loop_limit * ps_a;
+				params.c += m_full_pieces_loop_limit * rs_c;
+				kernel_fp = lpgemm_get_jit_kernel( m_partial_pieces, n0_16 );
+				( kernel_fp )(
+				               &params,
+				               &post_ops_attr,
+				               post_ops_list
+				             );
+			}
+			params.b = ( bfloat16* )b + (  n0 - n0_rem ) * k0_updated;
+			params.c = ( float* )c +  ( n0 - n0_rem );
+
+			post_ops_attr.post_op_c_j += n0 - n0_rem;
+		}
+
+		// Handles case where n0_rem < 16
+		// We use mask loads/stores in this case.
+		if ( n0_rem > 0 )
+		{
+			params.a = ( bfloat16* )a;
+
+			params.mask16 = 0xFFFFFFFF >> ( NUM_F32_ELEMS_PER_ZMM - n0_rem);
+			params.mask32 = 0xFFFF >> ( NUM_F32_ELEMS_PER_ZMM - n0_rem );
+
+			params.rs_b = ( ( rs_b / 4 ) * 1 );
+			post_ops_attr.post_op_c_i = post_op_temp_c_i;
+
+			// kernel with m_iter loop
+			if( m0 >= MR )
+			{
+				kernel_fp = lpgemm_get_jit_kernel( 0, 0 );
+				( kernel_fp )(
+				               &params,
+				               &post_ops_attr,
+				               post_ops_list
+				             );
+			}
+			// Handle m_fringe case.
+			if( m_partial_pieces )
+			{
+				post_ops_attr.post_op_c_i += m_full_pieces_loop_limit;
+				params.a += m_full_pieces_loop_limit * ps_a;
+				params.c += m_full_pieces_loop_limit * rs_c;
+				kernel_fp = lpgemm_get_jit_kernel( m_partial_pieces, 0 );
+				( kernel_fp )(
+				               &params,
+				               &post_ops_attr,
+				               post_ops_list
+				             );
+			}
+
+			// No leftover n-fringe after this point.
+		}
+		return;
+	}
+
+	// Main 6x64 kernel with m_iter loop.
+	if( m0 >= MR )
+	{
+		kernel_fp = lpgemm_get_jit_kernel( 0, n0_16 );
+		( kernel_fp )(
+		               &params,
+		               &post_ops_attr,
+		               post_ops_list
+		             );
+	}
+
+	// Handle m_fringe case here.
+	if( m_partial_pieces )
+	{
+		post_ops_attr.post_op_c_i += m_full_pieces_loop_limit;
+
+		params.a += m_full_pieces_loop_limit * ps_a;
+		params.c += m_full_pieces_loop_limit * rs_c;
+
+		kernel_fp = lpgemm_get_jit_kernel( m_partial_pieces, n0_16 );
+		( kernel_fp )(
+		               &params,
+		               &post_ops_attr,
+		               post_ops_list
+		             );
+	}
+}
 
 #else
 
@@ -1499,7 +1664,7 @@ POST_OPS_6x64_DISABLE:
 
 		}
 
-		// Case where the output C matrix is float 
+		// Case where the output C matrix is float
 		else
 		{
 			// Store the results.
@@ -1657,5 +1822,5 @@ POST_OPS_6x64_DISABLE:
 	}
 }
 
-#endif //LPGEMM_BF16_NOT_SUPPORTED
+#endif //LPGEMM_BF16_JIT
 #endif

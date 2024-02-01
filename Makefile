@@ -5,7 +5,7 @@
 #  libraries.
 #
 #  Copyright (C) 2014, The University of Texas at Austin
-#  Copyright (C) 2022 - 2023, Advanced Micro Devices, Inc. All rights reserved.
+#  Copyright (C) 2022 - 2024, Advanced Micro Devices, Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -220,10 +220,29 @@ MK_ADDON_KERS_SRC   := $(foreach addon, $(ADDON_LIST), \
                            $(filter $(ADDON_PATH)/$(addon)/$(KERNELS_DIR)/%, \
                                     $(MK_ADDON_SRC)) \
                         )
+
+# Generate non-kernel list for all addons except aocl_gemm
+# We process aocl_gemma addon separately.
 MK_ADDON_OTHER_SRC  := $(foreach addon, $(ADDON_LIST), \
-                           $(filter-out $(ADDON_PATH)/$(addon)/$(KERNELS_DIR)/%, \
-                                        $(MK_ADDON_SRC)) \
+                            $(if $(filter-out aocl_gemm,$(addon)), \
+                                $(filter-out $(ADDON_PATH)/$(addon)/$(KERNELS_DIR)/%, \
+                                             $(MK_ADDON_SRC))) \
                         )
+
+# Pick the .cpp files present in JIT folder only in the following conditions
+# 1. when gcc version is older than 11.2
+# 2. when aocl_gemm addon is enabled.
+ifeq ($(filter aocl_gemm, $(ADDON_LIST)), aocl_gemm)
+    ifeq ($(GCC_OT_11_2_0),no)
+        MK_AOCL_GEMM_OTHER_SRC := $(filter-out $(ADDON_PATH)/$(aocl_gemm)/$(KERNELS_DIR)/%, \
+                                               $(MK_ADDON_SRC))
+        MK_ADDON_OTHER_SRC  := $(filter %.c,$(MK_AOCL_GEMM_OTHER_SRC))
+    else
+        MK_ADDON_OTHER_SRC  := $(filter-out $(ADDON_PATH)/$(aocl_gemm)/$(KERNELS_DIR)/%, \
+                                            $(MK_ADDON_SRC))
+    endif
+endif
+
 MK_ADDON_KERS_OBJS  := $(call gen-obj-paths-from-src,$(ADDON_SRC_SUFS),$(MK_ADDON_KERS_SRC),$(ADDON_PATH),$(BASE_OBJ_ADDON_PATH))
 MK_ADDON_OTHER_OBJS := $(call gen-obj-paths-from-src,$(ADDON_SRC_SUFS),$(MK_ADDON_OTHER_SRC),$(ADDON_PATH),$(BASE_OBJ_ADDON_PATH))
 MK_ADDON_OBJS       := $(MK_ADDON_KERS_OBJS) $(MK_ADDON_OTHER_OBJS)

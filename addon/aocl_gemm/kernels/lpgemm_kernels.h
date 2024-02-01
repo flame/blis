@@ -38,6 +38,13 @@
 #include "lpgemm_post_ops.h"
 #include "aocl_bf16_type.h"
 
+// Disable BF16 kernel in cases where compilers support other avx 512
+// features except BF16 ISA.
+#if ( defined( BLIS_GCC ) && ( ( __GNUC__ < 11 ) || \
+	  ( ( __GNUC__ == 11 ) && ( __GNUC_MINOR__ < 2 ) ) ) )
+#define LPGEMM_BF16_JIT
+#endif
+
 typedef void (*lpgemm_m_fringe_f32_ker_ft)
     (
        const dim_t         k0,
@@ -52,7 +59,7 @@ typedef void (*lpgemm_m_fringe_f32_ker_ft)
        const float         alpha,
        const float         beta,
        lpgemm_post_op*     post_ops_list,
-       lpgemm_post_op_attr post_ops_attr 
+       lpgemm_post_op_attr post_ops_attr
     );
 
 #define LPGEMM_MAIN_KERN(A_type,B_type,C_type,LP_SFX) \

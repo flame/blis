@@ -5,7 +5,7 @@
 #  libraries.
 #
 #  Copyright (C) 2014, The University of Texas at Austin
-#  Copyright (C) 2020 - 2023, Advanced Micro Devices, Inc. All rights reserved.
+#  Copyright (C) 2020 - 2024, Advanced Micro Devices, Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -557,11 +557,19 @@ LIBM       := -lm
 endif
 LIBMEMKIND := -lmemkind
 
+# Linking standard c++ library for aocl_gemm addon.
+STDCXX :=
+ifeq ($(GCC_OT_11_2_0),yes)
+    ifeq ($(filter aocl_gemm, $(ADDON_LIST)), aocl_gemm)
+       STDCXX := -lstdc++
+    endif
+endif
+
 # Default linker flags.
 # NOTE: -lpthread is needed unconditionally because BLIS uses pthread_once()
 # to initialize itself in a thread-safe manner. The one exception to this
 # rule: if --disable-system is given at configure-time, LIBPTHREAD is empty.
-LDFLAGS    := $(LDFLAGS_PRESET) $(LIBM) $(LIBPTHREAD)
+LDFLAGS    := $(LDFLAGS_PRESET) $(LIBM) $(LIBPTHREAD) $(STDCXX)
 
 # Add libmemkind to the link-time flags, if it was enabled at configure-time.
 ifeq ($(MK_ENABLE_MEMKIND),yes)

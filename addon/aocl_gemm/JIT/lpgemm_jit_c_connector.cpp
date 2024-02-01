@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2022 - 2024, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2024, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -32,53 +32,41 @@
 
 */
 
-#ifndef LPGEMM_CONFIG_H
-#define LPGEMM_CONFIG_H
-
-#include "lpgemm_types.h"
-
-#define LPGEMM_BF16_MR 6
-#define LPGEMM_BF16_NR 64
-// num_f32_elems_per_zmm = zmm_width / sizeof( float )
-#define NUM_F32_ELEMS_PER_ZMM ( 64 / sizeof(float) )
-
-// equals to number of ops in enum AOCL_OPERATION_TYPE.
-extern lpgemm_cntx_t lpgemm_global_cntx_t_list[AOCL_OPERATION_TYPE_LEN];
-extern lpgemm_cntx_t lpgemm_util_global_cntx_t_list[AOCL_UTIL_OPERATION_TYPE_LEN];
+//#include "libjit_c_connector.h"
+#include "blis.h"
+#include "lpgemm_jit_bf16.h"
 
 
-void aocl_lpgemm_init_global_cntx();
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-lpgemm_cntx_t* lpgemm_get_global_cntx_obj( AOCL_OPERATION_TYPE op );
+static bli_lpgemm_jit *lpgemm_jit_objs[LPGEMM_BF16_MR][LPGEMM_BF16_NR];
 
-lpgemm_util_cntx_t* lpgemm_util_get_global_cntx_obj( AOCL_UTIL_OPERATION_TYPE op );
+void get_jit_kernel( lpgemm_jit_inputs_t *params,
+                     void* buffer,
+                     dim_t bufferSize
+                   )
+{
+    dim_t m_idx = ( params->MR ) % LPGEMM_BF16_MR;
+    dim_t n_idx = ( params->NR ) / NUM_F32_ELEMS_PER_ZMM;
+    lpgemm_jit_objs[m_idx][n_idx] = new bli_lpgemm_jit( buffer, bufferSize );
+    lpgemm_jit_objs[m_idx][n_idx]->generate_kernel( params );
+}
 
-dim_t lpgemm_get_block_size_MC_global_cntx( AOCL_OPERATION_TYPE op_type );
+void* get_jit_code( lpgemm_jit_inputs_t *params )
+{
+    dim_t m_idx = ( params->MR ) % LPGEMM_BF16_MR;
+    dim_t n_idx = ( params->NR ) / NUM_F32_ELEMS_PER_ZMM;
+    return ((void*) lpgemm_jit_objs[m_idx][n_idx]->get_code() );
+}
 
-dim_t lpgemm_get_block_size_NC_global_cntx( AOCL_OPERATION_TYPE op_type );
-
-dim_t lpgemm_get_block_size_KC_global_cntx( AOCL_OPERATION_TYPE op_type );
-
-dim_t lpgemm_get_block_size_NR_global_cntx( AOCL_OPERATION_TYPE op_type );
-
-dim_t lpgemm_get_block_size_MR_global_cntx( AOCL_OPERATION_TYPE op_type );
-
-void lpgemm_get_packa_strides( lpgemm_cntx_t* lcntx, dim_t* rs, dim_t* cs );
-
-void lpgemm_get_packb_strides( lpgemm_cntx_t* lcntx, dim_t* rs, dim_t* cs );
-
-void lpgemm_set_jit_kernel( void* kernel_fp, dim_t m_index, dim_t n_index );
-
-void* lpgemm_get_jit_kernel( dim_t m_index, dim_t n_index );
-
-void lpgemm_mod_block_size_s16
-     (
-       dim_t  m,
-       dim_t  n,
-       dim_t  k,
-       dim_t* MC,
-       dim_t* NC,
-       dim_t* KC
-     );
-
-#endif //LPGEMM_CONFIG_H
+dim_t get_kernel_size( lpgemm_jit_inputs_t *params )
+{
+    dim_t m_idx = ( params->MR ) % LPGEMM_BF16_MR;
+    dim_t n_idx = ( params->NR ) / NUM_F32_ELEMS_PER_ZMM;
+    return lpgemm_jit_objs[m_idx][n_idx]->get_size();
+}
+#ifdef __cplusplus
+}
+#endif
