@@ -2,7 +2,7 @@
    BLIS
    An object-based framework for developing high-performance BLAS-like
    libraries.
-   Copyright (C) 2023, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2023 - 2024, Advanced Micro Devices, Inc. All rights reserved.
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
    met:
@@ -6545,7 +6545,10 @@ else if ( n_remainder == 2)
         ymm0 = _mm256_broadcast_sd((double const *)(d11_pack));
         ymm3 = DTRSM_SMALL_DIV_OR_SCALE(ymm3, ymm0);
 
-        ymm0 = _mm256_loadu_pd((double const *)b11);
+        ymm0 = _mm256_broadcast_sd((double const *)b11 + 2);
+        xmm5 = _mm_loadu_pd((double *)(b11));
+        ymm0 = _mm256_insertf128_pd(ymm0, xmm5, 0);
+
         ymm3 = _mm256_blend_pd(ymm6, ymm3, 0x07);
 
         BLIS_POST_DTRSM_SMALL_1N_3M(b11, cs_b)
