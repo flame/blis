@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2022 - 2023, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2022 - 2024, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -87,8 +87,139 @@ void lpgemm_pack_b_f32f32f32of32
        cntx_t*      cntx
      );
 
-LPGEMM_5LOOP(float,float,float,f32f32f32of32)
+#ifdef BLIS_KERNELS_ZEN4
+LPGEMV(float, float, float, f32f32f32of32)
 {
+  cntx_t *cntx = bli_gks_query_cntx();
+  num_t dt = BLIS_FLOAT;
+
+  // Query the context for various blocksizes.
+  const dim_t NR = bli_cntx_get_l3_sup_blksz_def_dt(dt, BLIS_NR, cntx);
+  const dim_t NC = bli_cntx_get_l3_sup_blksz_def_dt(dt, BLIS_NC, cntx);
+  const dim_t KC = bli_cntx_get_l3_sup_blksz_def_dt(dt, BLIS_KC, cntx);
+  const dim_t MC = bli_cntx_get_l3_sup_blksz_def_dt(dt, BLIS_KC, cntx);
+
+  // Strides are updated based on matrix packing/reordering.
+  float *c_use = NULL;
+
+  lpgemm_post_op_attr post_ops_attr;
+  post_ops_attr.c_stor_type = c_downscale;
+  if (c_downscale < F32) post_ops_attr.buf_downscale = c;
+  else  post_ops_attr.buf_downscale = NULL;
+
+  // Generate thrinfo objects for jc and ic loops from lpgemm_thrinfo_t.
+  thrinfo_t thread_jc;
+  thrinfo_t thread_ic;
+  lpgemm_gen_thrinfo(thread, &thread_jc, &thread_ic);
+
+  if(n == 1)
+  {
+    //TODO: AVX2 support need to be added
+    // Increased MR from 6 to 16 to make use of 32 ZMM registers
+    dim_t MR = 16;
+
+    // Compute the IC loop thread range for the current thread.
+    dim_t ic_start, ic_end;
+    bli_thread_range_sub(&thread_ic, m, MR, FALSE, &ic_start, &ic_end);
+
+    for (dim_t ic = ic_start; ic < ic_end; ic += MC)
+    {
+      dim_t mc0 = bli_min((ic_end - ic), MC);
+      const float *a_use = a + ic * rs_a;
+      c_use = c + ic * rs_c;
+      post_ops_attr.post_op_c_i = ic;
+
+      // Call lpgemv_n_one kernel
+      lpgemv_n_one_kernel_f32_ker_ft
+      (
+          mc0, k,
+          a_use, rs_a, cs_a, mtag_a,
+          b, rs_b, cs_b, mtag_b,
+          c_use, rs_c, cs_c,
+          alpha, beta,
+          MR, KC,
+          post_op_list,
+          &post_ops_attr
+      );
+    }
+  }
+  else
+  {
+    // Compute the JC loop thread range for the current thread.
+    dim_t jc_start, jc_end;
+    bli_thread_range_sub(&thread_jc, n, NR, FALSE, &jc_start, &jc_end);
+
+    for (dim_t jc = jc_start; jc < jc_end; jc += NC)
+    {
+      dim_t nc0 = bli_min((jc_end - jc), NC);
+      c_use = c + jc;
+
+      dim_t jc_cur_loop = jc;
+      dim_t jc_cur_loop_rem = 0;
+      dim_t n_sub_updated = 0;
+      const float *b_use = NULL;
+
+      if (mtag_b == REORDERED)
+      {
+        get_B_panel_reordered_start_offset_width(
+            jc, n, NC, NR,
+            &jc_cur_loop, &jc_cur_loop_rem,
+            &nc0, &n_sub_updated);
+
+        b_use = b + (jc_cur_loop * k);
+      }else
+      {
+        b_use = b + jc;
+      }
+
+      //update post-op pointer
+      post_ops_attr.post_op_c_j = jc;
+
+      // Call kernel
+      lpgemv_m_one_kernel_f32_ker_ft
+      (
+          nc0, k, 
+          a, rs_a, cs_a, mtag_a,
+          b_use, rs_b, cs_b, mtag_b,
+          c_use, rs_c, cs_c,
+          alpha, beta,
+          NR, KC,
+          n_sub_updated,
+          jc_cur_loop_rem,
+          post_op_list,
+          &post_ops_attr
+      );
+
+      if (mtag_b == REORDERED)
+      {
+        adjust_B_panel_reordered_jc(&jc, jc_cur_loop);
+      }
+    } // jc loop
+  }
+}
+#endif
+
+LPGEMM_5LOOP(float, float, float, f32f32f32of32)
+{
+#ifdef BLIS_KERNELS_ZEN4
+  // Handle using LPGEMV when m or/and n equal to 1
+  // The avx512 check will be removed when avx2 kernels added in future
+  if ((m == 1 || n == 1) && (bli_cpuid_is_avx512_supported() == TRUE))
+  {
+    lpgemv_rowvar_f32f32f32of32(m, n, k,
+                                a, rs_a, cs_a, mtag_a,
+                                b, rs_b, cs_b, mtag_b,
+                                c, rs_c, cs_c,
+                                alpha,
+                                beta,
+                                rntm,
+                                thread,
+                                lcntx,
+                                post_op_list,
+                                c_downscale);
+    return;
+  }
+#endif
     // Query the global cntx.
     cntx_t* cntx = bli_gks_query_cntx();
 
@@ -101,8 +232,6 @@ LPGEMM_5LOOP(float,float,float,f32f32f32of32)
     const dim_t MC = bli_cntx_get_l3_sup_blksz_def_dt( dt, BLIS_MC, cntx );
     const dim_t KC = bli_cntx_get_l3_sup_blksz_def_dt( dt, BLIS_KC, cntx );
 
-    /*ToDo: Based on context kernel 6x64m or 6x16m will be picked here */    
-    
     // Strides are updated based on matrix packing/reordering.
     const float* a_use = NULL;
     dim_t rs_a_use = rs_a;
@@ -150,7 +279,7 @@ LPGEMM_5LOOP(float,float,float,f32f32f32of32)
     bool is_first_k = FALSE;
 
     lpgemm_post_op_attr post_ops_attr;
-	post_ops_attr.c_stor_type = c_downscale;
+    post_ops_attr.c_stor_type = c_downscale;
     if ( c_downscale < F32 )
     {
         post_ops_attr.buf_downscale = c;

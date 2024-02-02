@@ -153,8 +153,8 @@
 #define F32_F32_MATRIX_ADD_LOAD_XMM_2ELE(scr,m_ind,n_ind) \
 	scr = ( __m128 )_mm_load_sd \
 			( \
-			  matptr + ( ( post_ops_attr.post_op_c_i + m_ind ) * ldm ) + \
-			  post_ops_attr.post_op_c_j + ( n_ind * 2 ) \
+			  (double*)(matptr + ( ( post_ops_attr.post_op_c_i + m_ind ) * ldm ) + \
+			  post_ops_attr.post_op_c_j + ( n_ind * 2 )) \
 			); \
 
 #define F32_F32_MATRIX_ADD_1COL_XMM_2ELE(scr0,m_ind,r_ind0) \

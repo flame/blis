@@ -3831,8 +3831,9 @@ POST_OPS_BIAS_5x2F:
       if ( ( *( char* )post_ops_list_temp->op_args2 == 'r' ) ||
            ( *( char* )post_ops_list_temp->op_args2 == 'R' ) )
       {
-        xmm0 = ( __m128 )_mm_load_sd( ( float* )post_ops_list_temp->op_args1 +
-            post_ops_attr.post_op_c_j + ( 0 * 8 ) );
+        xmm0 = (__m128)_mm_load_sd((const double *)
+              ((float * )post_ops_list_temp->op_args1 +
+              post_ops_attr.post_op_c_j + (0 * 8)));
 
         // c[0,0-3]
         xmm4 = _mm_add_ps( xmm4, xmm0 );
@@ -4114,8 +4115,9 @@ POST_OPS_BIAS_4x2F:
       if ( ( *( char* )post_ops_list_temp->op_args2 == 'r' ) ||
            ( *( char* )post_ops_list_temp->op_args2 == 'R' ) )
       {
-        xmm0 = ( __m128 )_mm_load_sd( ( float* )post_ops_list_temp->op_args1 +
-            post_ops_attr.post_op_c_j + ( 0 * 8 ) );
+        xmm0 = (__m128)_mm_load_sd((const double *)
+              ((float *)post_ops_list_temp->op_args1 +
+              post_ops_attr.post_op_c_j + (0 * 8)));
 
         // c[0,0-3]
         xmm4 = _mm_add_ps( xmm4, xmm0 );
@@ -4360,8 +4362,9 @@ POST_OPS_BIAS_3x2F:
       if ( ( *( char* )post_ops_list_temp->op_args2 == 'r' ) ||
            ( *( char* )post_ops_list_temp->op_args2 == 'R' ) )
       {
-        xmm0 = ( __m128 )_mm_load_sd( ( float* )post_ops_list_temp->op_args1 +
-            post_ops_attr.post_op_c_j + ( 0 * 8 ) );
+        xmm0 = (__m128)_mm_load_sd( (const double *)
+              ((float *) post_ops_list_temp->op_args1 +
+              post_ops_attr.post_op_c_j + (0 * 8)));
 
         // c[0,0-3]
         xmm4 = _mm_add_ps( xmm4, xmm0 );
@@ -4575,8 +4578,9 @@ POST_OPS_BIAS_2x2F:
       if ( ( *( char* )post_ops_list_temp->op_args2 == 'r' ) ||
            ( *( char* )post_ops_list_temp->op_args2 == 'R' ) )
       {
-        xmm0 = ( __m128 )_mm_load_sd( ( float* )post_ops_list_temp->op_args1 +
-            post_ops_attr.post_op_c_j + ( 0 * 8 ) );
+        xmm0 = (__m128)_mm_load_sd((const double *)
+              ((float *)post_ops_list_temp->op_args1 +
+              post_ops_attr.post_op_c_j + (0 * 8)));
 
         // c[0,0-3]
         xmm4 = _mm_add_ps( xmm4, xmm0 );
@@ -4750,8 +4754,9 @@ POST_OPS_BIAS_1x2F:
       if ( ( *( char* )post_ops_list_temp->op_args2 == 'r' ) ||
            ( *( char* )post_ops_list_temp->op_args2 == 'R' ) )
       {
-        xmm0 = ( __m128 )_mm_load_sd( ( float* )post_ops_list_temp->op_args1 +
-            post_ops_attr.post_op_c_j + ( 0 * 8 ) );
+        xmm0 = (__m128)_mm_load_sd((const double *)
+              ((float*)post_ops_list_temp->op_args1 +
+              post_ops_attr.post_op_c_j + (0 * 8)));
 
         // c[0,0-3]
         xmm4 = _mm_add_ps( xmm4, xmm0 );

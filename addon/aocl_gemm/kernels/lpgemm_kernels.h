@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2022 - 2023, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2022 - 2024, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -365,5 +365,53 @@ LPGEMM_MN_LT_NR0_FRINGE_KERN(int8_t,int8_t,int32_t,s8s8s32os32_1xlt16);
 LPGEMM_MN_LT_NR0_FRINGE_KERN(int8_t,int8_t,int16_t,s8s8s16o16_4xlt16);
 LPGEMM_MN_LT_NR0_FRINGE_KERN(int8_t,int8_t,int16_t,s8s8s16o16_2xlt16);
 LPGEMM_MN_LT_NR0_FRINGE_KERN(int8_t,int8_t,int16_t,s8s8s16o16_1xlt16);
+
+void lpgemv_m_one_kernel_f32_ker_ft
+(
+	const dim_t           n0,
+	const dim_t           k,
+	const float           *a,
+	const dim_t           rs_a,
+	const dim_t           cs_a,
+	const AOCL_MEMORY_TAG mtag_a,
+	const float           *b,
+	const dim_t           rs_b,
+	const dim_t           cs_b,
+	const AOCL_MEMORY_TAG mtag_b,
+	float                 *c,
+	const dim_t           rs_c,
+	const dim_t           cs_c,
+	const float           alpha,
+	const float           beta,
+	const dim_t           NC,
+	const dim_t           KC,
+	const dim_t           n_sub_updated,
+	const dim_t           jc_cur_loop_rem,
+	lpgemm_post_op        *post_op,
+	lpgemm_post_op_attr   *post_op_attr
+);
+
+void lpgemv_n_one_kernel_f32_ker_ft
+(
+	const dim_t           m0,
+	const dim_t           k,
+	const float           *a,
+	const dim_t           rs_a,
+	const dim_t           cs_a,
+	const AOCL_MEMORY_TAG mtag_a,
+	const float           *b,
+	const dim_t           rs_b,
+	const dim_t           cs_b,
+	const AOCL_MEMORY_TAG mtag_b,
+	float                 *c,
+	const dim_t           rs_c,
+	const dim_t           cs_c,
+	const float           alpha,
+	const float           beta,
+	const dim_t           MR,
+	const dim_t           KC,
+	lpgemm_post_op        *post_op,
+	lpgemm_post_op_attr   *post_op_attr
+);
 
 #endif //BLIS_LPGEMM_KERN_H

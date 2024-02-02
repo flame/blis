@@ -204,7 +204,7 @@ void fill_array_ ## ctype ( void* arr, dim_t size ) \
     ctype* temp_arr = ( ctype* ) arr; \
     for ( dim_t i = 0; i < size; ++i ) \
     { \
-        temp_arr[i] = ( ctype )( i % 5 ); \
+        temp_arr[i] = ( ctype )( rand() % 5 ); \
     } \
 } \
 
@@ -221,7 +221,7 @@ void fill_array_bfloat16( void* arr, dim_t size )
     float* c_float = ( float* ) bli_malloc_user( sizeof( float ) * size, &bli_errors );
     for ( dim_t i = 0; i < size; ++i )
     {
-        c_float[i] = i % 5;
+        c_float[i] = (rand() % 5 );
     }
     convert_float_arr_to_bf16( c_float, arr, size );
     if ( c_float != NULL )
@@ -236,7 +236,7 @@ void fill_array_post_ops_ ## ctype ( void* arr, dim_t size ) \
     ctype* temp_arr = ( ctype* ) arr; \
     for ( dim_t i = 0; i < size; ++i ) \
     { \
-        temp_arr[i] = ( ctype )( i % 20 ); \
+        temp_arr[i] = ( ctype )( rand() % 20 ); \
     } \
 } \
 
@@ -1595,7 +1595,7 @@ int main( int argc, char** argv )
     int32_t stride_a, stride_b, stride_c;
 
     const dim_t len_list_omp_cores_for_testing = 2;
-    const dim_t list_omp_cores_for_testing[2] = { 80, 1 };
+    const dim_t list_omp_cores_for_testing[2] = { 64, 1 };
 
     dim_t core_index = 0;
     bool can_run = TRUE;

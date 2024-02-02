@@ -67,6 +67,13 @@
       zmm2 = _mm512_setzero_ps(); \
       zmm3 = _mm512_setzero_ps();
 
+// Zero-out the given ZMM accumulator registers
+#define ZERO_ACC_XMM_4_REG(xmm0, xmm1, xmm2, xmm3) \
+      xmm0 = _mm_setzero_ps(); \
+      xmm1 = _mm_setzero_ps(); \
+      xmm2 = _mm_setzero_ps(); \
+      xmm3 = _mm_setzero_ps();
+
 /*Multiply alpha with accumulator registers and store back*/
 #define ALPHA_MUL_ACC_ZMM_4_REG(zmm0,zmm1,zmm2,zmm3,alpha) \
       zmm0 = _mm512_mul_ps(zmm0,alpha); \
