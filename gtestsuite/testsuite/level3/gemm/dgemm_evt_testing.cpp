@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2023-2024, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2024, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -35,7 +35,7 @@
 #include <gtest/gtest.h>
 #include "test_gemm.h"
 
-class ZGEMMEVT :
+class DGEMMEVT :
         public ::testing::TestWithParam<std::tuple<char,       // storage format
                                                    char,       // transa
                                                    char,       // transb
@@ -44,23 +44,23 @@ class ZGEMMEVT :
                                                    gtint_t,    // k
                                                    gtint_t,    // MatrixA row index
                                                    gtint_t,    // MatrixA col index
-                                                   dcomplex,   // MatrixA Exception value
+                                                   double,     // MatrixA Exception value
                                                    gtint_t,    // MatrixB row index
                                                    gtint_t,    // MatrixB col index
-                                                   dcomplex,   // MatrixB Exception value
+                                                   double,     // MatrixB Exception value
                                                    gtint_t,    // MatrixC row index
                                                    gtint_t,    // MatrixC col index
-                                                   dcomplex,   // MatrixC Exception value
-                                                   dcomplex,   //alpha
-                                                   dcomplex,   //beta
+                                                   double,     // MatrixC Exception value
+                                                   double,     //alpha
+                                                   double,     //beta
                                                    gtint_t,    // inc to the lda
                                                    gtint_t,    // inc to the ldb
                                                    gtint_t     // inc to the ldc
                                                    >> {};
 
-TEST_P(ZGEMMEVT, ExceptionValueTest)
+TEST_P(DGEMMEVT, ExceptionValueTest)
 {
-    using T = dcomplex;
+    using T = double;
     //----------------------------------------------------------
     // Initialize values from the parameters passed through
     // test suite instantiation (INSTANTIATE_TEST_SUITE_P).
@@ -115,12 +115,12 @@ TEST_P(ZGEMMEVT, ExceptionValueTest)
 // These are mainly used to help with debugging, in case of failures
 
 // Utility to print the test-case in case of exception value on matrices
-class ZGEMMEVMatPrint {
+class DGEMMEVMatPrint {
 public:
     std::string operator()(
         testing::TestParamInfo<std::tuple<char, char, char, gtint_t, gtint_t, gtint_t, gtint_t,
-                                          gtint_t, dcomplex, gtint_t, gtint_t, dcomplex,
-                                          gtint_t, gtint_t, dcomplex, dcomplex, dcomplex,
+                                          gtint_t, double, gtint_t, gtint_t, double, gtint_t,
+                                          gtint_t, double, double, double,
                                           gtint_t, gtint_t, gtint_t>> str) const{
         char sfm        = std::get<0>(str.param);
         char tsa        = std::get<1>(str.param);
@@ -128,24 +128,26 @@ public:
         gtint_t m       = std::get<3>(str.param);
         gtint_t n       = std::get<4>(str.param);
         gtint_t k       = std::get<5>(str.param);
-        
-        gtint_t  ai     = std::get<6>(str.param);
-        gtint_t  aj     = std::get<7>(str.param);
-        dcomplex aex    = std::get<8>(str.param);
 
-        gtint_t  bi     = std::get<9>(str.param);
-        gtint_t  bj     = std::get<10>(str.param);
-        dcomplex bex    = std::get<11>(str.param);
+        gtint_t ai      = std::get<6>(str.param);
+        gtint_t aj      = std::get<7>(str.param);
+        double  aex     = std::get<8>(str.param);
 
-        gtint_t  ci     = std::get<12>(str.param);
-        gtint_t  cj     = std::get<13>(str.param);
-        dcomplex cex    = std::get<14>(str.param);
+        gtint_t bi      = std::get<9>(str.param);
+        gtint_t bj      = std::get<10>(str.param);
+        double  bex     = std::get<11>(str.param);
 
-        dcomplex alpha  = std::get<15>(str.param);
-        dcomplex beta   = std::get<16>(str.param);
+        gtint_t ci      = std::get<12>(str.param);
+        gtint_t cj      = std::get<13>(str.param);
+        double  cex     = std::get<14>(str.param);
+
+        double alpha    = std::get<15>(str.param);
+        double beta     = std::get<16>(str.param);
+
         gtint_t lda_inc = std::get<17>(str.param);
         gtint_t ldb_inc = std::get<18>(str.param);
         gtint_t ldc_inc = std::get<19>(str.param);
+
 #ifdef TEST_BLAS
         std::string str_name = "blas_";
 #elif TEST_CBLAS
@@ -178,7 +180,7 @@ public:
 
 /*
     It contains both the exception value testing(EVT) and the
-    positive accuracy testing of the bli_ZGEMM_4x4_avx2_k1_nn( ... ) computational
+    positive accuracy testing of the bli_DGEMM_4x4_avx2_k1_nn( ... ) computational
     kernel. This kernel is invoked from the BLAS layer, and inputs are given
     in a manner so as to avoid the other code-paths and test only the required
     kernel.
@@ -188,13 +190,12 @@ public:
 static double NaN = std::numeric_limits<double>::quiet_NaN();
 static double Inf = std::numeric_limits<double>::infinity();
 
-
 // Exception value testing(on matrices)
 
 /*
-    For the bli_ZGEMM_4x4_avx2_k1_nn kernel, the main and fringe dimensions are as follows:
-    For m : Main = { 4 }, fringe = { 2, 1 }
-    For n : Main = { 4 }, fringe = { 2, 1 }
+    For the bli_DGEMM_8x6_avx2_k1_nn & bli_DGEMM_24x8_avx512_k1_nn kernel, the main and fringe dimensions are as follows:
+    For m : Main = { 8, 24 }, fringe = { 7 to 1, 23 to 1 }
+    For n : Main = { 6, 8 },  fringe = { 4 to 1, 7 to 1 }
 
     Without any changes to the BLAS layer in BLIS, the fringe case of 1 cannot be touched
     separately, since if m/n is 1, the inputs are redirected to ZGEMV.
@@ -202,12 +203,10 @@ static double Inf = std::numeric_limits<double>::infinity();
 */
 
 // Testing for the main loop case for m and n
-// The kernel uses 2 loads and 4 broadcasts. The exception values
-// are induced at one index individually for each of the loads.
-// They are also induced in the broadcast direction at two places.
+// The exception values are induced in load and broadcast
 INSTANTIATE_TEST_SUITE_P(
         K1_transA_N_transB_N_main,
-        ZGEMMEVT,
+        DGEMMEVT,
         ::testing::Combine(
             ::testing::Values('c'
 #ifndef TEST_BLAS
@@ -216,38 +215,32 @@ INSTANTIATE_TEST_SUITE_P(
             ),                                                              // storage format
             ::testing::Values('n'),                                         // transa
             ::testing::Values('n'),                                         // transb
-            ::testing::Values(gtint_t(4)),                                  // m
-            ::testing::Values(gtint_t(4)),                                  // n
+            ::testing::Values(gtint_t(8),gtint_t(24)),                      // m
+            ::testing::Values(gtint_t(6),gtint_t(8)),                       // n
             ::testing::Values(gtint_t(1)),                                  // k
             ::testing::Values(gtint_t(1), gtint_t(3)),                      // ai
             ::testing::Values(gtint_t(0)),                                  // aj
-            ::testing::Values(dcomplex{NaN, 2.3}, dcomplex{Inf, 0.0},
-                              dcomplex{3.4, NaN}, dcomplex{NaN, -Inf}),     // aexval
+            ::testing::Values(NaN, Inf, -Inf),                              // aexval
             ::testing::Values(gtint_t(0)),                                  // bi
             ::testing::Values(gtint_t(0), gtint_t(2)),                      // bj
-            ::testing::Values(dcomplex{NaN, 2.3}, dcomplex{Inf, 0.0},
-                              dcomplex{3.4, NaN}, dcomplex{NaN, -Inf}),     // bexval
+            ::testing::Values(NaN, Inf, -Inf),                              // bexval
             ::testing::Values(gtint_t(0), gtint_t(2)),                      // ci
             ::testing::Values(gtint_t(1), gtint_t(3)),                      // cj
-            ::testing::Values(dcomplex{NaN, 2.3}, dcomplex{Inf, 0.0},
-                              dcomplex{3.4, NaN}, dcomplex{NaN, -Inf}),     // cexval
-            ::testing::Values(dcomplex{-2.2, 3.3}),                         // alpha
-            ::testing::Values(dcomplex{1.2, -2.3}),                         // beta
+            ::testing::Values(NaN, Inf, -Inf),                              // cexval
+            ::testing::Values(double(-2.2)),                                // alpha
+            ::testing::Values(double(1.2)),                                 // beta
             ::testing::Values(gtint_t(0)),                                  // increment to the leading dim of a
             ::testing::Values(gtint_t(0)),                                  // increment to the leading dim of b
             ::testing::Values(gtint_t(0))                                   // increment to the leading dim of c
         ),
-        ::ZGEMMEVMatPrint()
+        ::DGEMMEVMatPrint()
     );
 
 // Testing the fringe cases
-// Fringe case minimum size is 2 along both m and n.
-// Invloves only one load(AVX2 or (AVX2+SSE)). Thus,
-// the exception values are induced at the first and second indices of the
-// column vector A and row vector B.
+// Fringe case along both m and n.
 INSTANTIATE_TEST_SUITE_P(
         K1_transA_N_transB_N_fringe,
-        ZGEMMEVT,
+        DGEMMEVT,
         ::testing::Combine(
             ::testing::Values('c'
 #ifndef TEST_BLAS
@@ -256,35 +249,32 @@ INSTANTIATE_TEST_SUITE_P(
             ),                                                              // storage format
             ::testing::Values('n'),                                         // transa
             ::testing::Values('n'),                                         // transb
-            ::testing::Values(gtint_t(2), gtint_t(3)),                      // m
-            ::testing::Values(gtint_t(2), gtint_t(3)),                      // n
+            ::testing::Range(gtint_t(2), gtint_t(25), gtint_t(1)),          // m
+            ::testing::Range(gtint_t(2), gtint_t(9), gtint_t(1)),           // n
             ::testing::Values(gtint_t(1)),                                  // k
             ::testing::Values(gtint_t(0), gtint_t(1)),                      // ai
             ::testing::Values(gtint_t(0)),                                  // aj
-            ::testing::Values(dcomplex{NaN, 2.3}, dcomplex{Inf, 0.0},
-                              dcomplex{3.4, NaN}, dcomplex{NaN, -Inf}),     // aexval
+            ::testing::Values(double(NaN), double(Inf), double(-Inf)),      // aexval
             ::testing::Values(gtint_t(0)),                                  // bi
             ::testing::Values(gtint_t(0), gtint_t(1)),                      // bj
-            ::testing::Values(dcomplex{NaN, 2.3}, dcomplex{Inf, 0.0},
-                              dcomplex{3.4, NaN}, dcomplex{NaN, -Inf}),     // bexval
+            ::testing::Values(double(NaN), double(Inf), double(-Inf)),      // bexval
             ::testing::Values(gtint_t(0), gtint_t(1)),                      // ci
             ::testing::Values(gtint_t(0), gtint_t(1)),                      // cj
-            ::testing::Values(dcomplex{NaN, 2.3}, dcomplex{Inf, 0.0},
-                              dcomplex{3.4, NaN}, dcomplex{NaN, -Inf}),     // cexval
-            ::testing::Values(dcomplex{-2.2, 3.3}),                         // alpha
-            ::testing::Values(dcomplex{1.2, -2.3}),                         // beta
+            ::testing::Values(double(NaN), double(Inf), double(-Inf)),      // cexval
+            ::testing::Values(double(-2.2)),                                // alpha
+            ::testing::Values(double(1.2)),                                 // beta
             ::testing::Values(gtint_t(0)),                                  // increment to the leading dim of a
             ::testing::Values(gtint_t(0)),                                  // increment to the leading dim of b
             ::testing::Values(gtint_t(0))                                   // increment to the leading dim of c
         ),
-        ::ZGEMMEVMatPrint()
+        ::DGEMMEVMatPrint()
     );
 
 // Exception value testing(on alpha and beta)
 // Alpha and beta are set to exception values
 INSTANTIATE_TEST_SUITE_P(
-        K1_transA_N_transB_N_alphabeta,
-        ZGEMMEVT,
+        K1_transA_N_transB_N_alpha_beta,
+        DGEMMEVT,
         ::testing::Combine(
             ::testing::Values('c'
 #ifndef TEST_BLAS
@@ -293,27 +283,25 @@ INSTANTIATE_TEST_SUITE_P(
             ),                                                               // storage format
             ::testing::Values('n'),                                          // transa
             ::testing::Values('n'),                                          // transb
-            ::testing::Values(gtint_t(2), gtint_t(3), gtint_t(4)),           // m
-            ::testing::Values(gtint_t(2), gtint_t(3), gtint_t(4)),           // n
+            ::testing::Values(gtint_t(2), gtint_t(8), gtint_t(15),  gtint_t(24)), // m
+            ::testing::Values(gtint_t(2), gtint_t(6), gtint_t(11),  gtint_t(8)),  // n
             ::testing::Values(gtint_t(1)),                                   // k
             ::testing::Values(gtint_t(0)),                                   // ai
             ::testing::Values(gtint_t(0)),                                   // aj
-            ::testing::Values(dcomplex{0.0, 0.0}),
+            ::testing::Values(double(0.0)),
             ::testing::Values(gtint_t(0)),                                   // bi
             ::testing::Values(gtint_t(0)),                                   // bj
-            ::testing::Values(dcomplex{0.0, 0.0}),
+            ::testing::Values(double(0.0)),
             ::testing::Values(gtint_t(0)),                                   // ci
             ::testing::Values(gtint_t(0)),                                   // cj
-            ::testing::Values(dcomplex{0.0, 0.0}),
-            ::testing::Values(dcomplex{NaN, 2.3}, dcomplex{Inf, 0.0},
-                              dcomplex{3.4, NaN}, dcomplex{NaN, -Inf}),      // alpha
-            ::testing::Values(dcomplex{NaN, 2.3}, dcomplex{Inf, 0.0},
-                              dcomplex{3.4, NaN}, dcomplex{NaN, -Inf}),      // beta
+            ::testing::Values(double(0.0)),
+            ::testing::Values(double(NaN), double(Inf), double(-Inf)),       // alpha
+            ::testing::Values(double(NaN), double(Inf), double(-Inf)),       // beta
             ::testing::Values(gtint_t(0)),                                   // increment to the leading dim of a
             ::testing::Values(gtint_t(0)),                                   // increment to the leading dim of b
             ::testing::Values(gtint_t(0))                                    // increment to the leading dim of c
         ),
-        ::ZGEMMEVMatPrint()
+        ::DGEMMEVMatPrint()
     );
 
 /********************************************************/
@@ -322,8 +310,8 @@ INSTANTIATE_TEST_SUITE_P(
 /* Matrix A, B, C are filled with Infs and Nans         */
 /********************************************************/
 INSTANTIATE_TEST_SUITE_P(
-        Small_Matrix,
-        ZGEMMEVT,
+        SMALL_Matrix,
+        DGEMMEVT,
         ::testing::Combine(
             ::testing::Values('c'
 #ifndef TEST_BLAS
@@ -337,23 +325,20 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(gtint_t(10)),                                 // k
             ::testing::Values(gtint_t(1), gtint_t(3)),                      // ai
             ::testing::Values(gtint_t(0)),                                  // aj
-            ::testing::Values(dcomplex{NaN, 2.3}, /*dcomplex{Inf, 0.0},*/
-                              dcomplex{3.4, NaN}, dcomplex{NaN, -Inf}),     // aexval
+            ::testing::Values(NaN, Inf, -Inf),                              // aexval
             ::testing::Values(gtint_t(0)),                                  // bi
             ::testing::Values(gtint_t(0), gtint_t(2)),                      // bj
-            ::testing::Values(dcomplex{NaN, 2.3}, /*dcomplex{Inf, 0.0},*/   //Failures
-                              dcomplex{3.4, NaN}, dcomplex{NaN, -Inf}),     // bexval
+            ::testing::Values(NaN, Inf, -Inf),                              // bexval
             ::testing::Values(gtint_t(0), gtint_t(2)),                      // ci
             ::testing::Values(gtint_t(1), gtint_t(3)),                      // cj
-            ::testing::Values(dcomplex{NaN, 2.3}, dcomplex{Inf, 0.0},
-                              dcomplex{3.4, NaN}, dcomplex{NaN, -Inf}),     // cexval
-            ::testing::Values(dcomplex{-2.2, 3.3}),                         // alpha
-            ::testing::Values(dcomplex{1.2, -2.3}),                         // beta
+            ::testing::Values(NaN, Inf, -Inf),                              // cexval
+            ::testing::Values(double(-2.2)),                                // alpha
+            ::testing::Values(double(1.2)),                                 // beta
             ::testing::Values(gtint_t(0)),                                  // increment to the leading dim of a
             ::testing::Values(gtint_t(0)),                                  // increment to the leading dim of b
             ::testing::Values(gtint_t(0))                                   // increment to the leading dim of c
         ),
-        ::ZGEMMEVMatPrint()
+        ::DGEMMEVMatPrint()
     );
 
 /******************************************************/
@@ -363,7 +348,7 @@ INSTANTIATE_TEST_SUITE_P(
 /******************************************************/
 INSTANTIATE_TEST_SUITE_P(
         Skinny_Matrix,
-        ZGEMMEVT,
+        DGEMMEVT,
         ::testing::Combine(
             ::testing::Values('c'
 #ifndef TEST_BLAS
@@ -377,33 +362,30 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(gtint_t(1080)),                               // k
             ::testing::Values(gtint_t(1), gtint_t(3)),                      // ai
             ::testing::Values(gtint_t(0)),                                  // aj
-            ::testing::Values(dcomplex{NaN, 2.3}, /*dcomplex{Inf, 0.0},*/   //Failure
-                              dcomplex{3.4, NaN}, dcomplex{NaN, -Inf}),     // aexval
+            ::testing::Values(NaN, Inf, -Inf),                              // aexval
             ::testing::Values(gtint_t(0)),                                  // bi
             ::testing::Values(gtint_t(0), gtint_t(2)),                      // bj
-            ::testing::Values(dcomplex{NaN, 2.3}, /*dcomplex{Inf, 0.0},*/
-                              dcomplex{3.4, NaN}, dcomplex{NaN, -Inf}),     // bexval
+            ::testing::Values(NaN, Inf, -Inf),                              // bexval
             ::testing::Values(gtint_t(0), gtint_t(2)),                      // ci
             ::testing::Values(gtint_t(1), gtint_t(3)),                      // cj
-            ::testing::Values(dcomplex{NaN, 2.3}, dcomplex{Inf, 0.0},
-                              dcomplex{3.4, NaN}, dcomplex{NaN, -Inf}),     // cexval
-            ::testing::Values(dcomplex{3.6, -1.0}),                         // alpha
-            ::testing::Values(dcomplex{-5.7, 1.2}),                         // beta
+            ::testing::Values(NaN, Inf, -Inf),                              // cexval
+            ::testing::Values(double(3.6)),                                 // alpha
+            ::testing::Values(double(-5.)),                                 // beta
             ::testing::Values(gtint_t(0)),                                  // increment to the leading dim of a
             ::testing::Values(gtint_t(0)),                                  // increment to the leading dim of b
             ::testing::Values(gtint_t(0))                                   // increment to the leading dim of c
         ),
-        ::ZGEMMEVMatPrint()
+        ::DGEMMEVMatPrint()
     );
 
 /*********************************************************/
-/* Testing for Native code paths                         */
+/* Testing for native code paths                         */
 /* m,n,k is choosen such that Native code path is called */
 /* Matrix A, B, C are filled with Infs and Nans          */
 /*********************************************************/
 INSTANTIATE_TEST_SUITE_P(
         Large_Matrix,
-        ZGEMMEVT,
+        DGEMMEVT,
         ::testing::Combine(
             ::testing::Values('c'
 #ifndef TEST_BLAS
@@ -412,67 +394,100 @@ INSTANTIATE_TEST_SUITE_P(
             ),                                                              // storage format
             ::testing::Values('n'),                                         // transa
             ::testing::Values('n'),                                         // transb
-            ::testing::Values(gtint_t(200)),                                // m
-            ::testing::Values(gtint_t(200)),                                // n
-            ::testing::Values(gtint_t(130)),                                // k
-            ::testing::Values(gtint_t(1), gtint_t(3)),                      // ai
+            ::testing::Values(gtint_t(1001)),                               // m
+            ::testing::Values(gtint_t(1001)),                               // n
+            ::testing::Values(gtint_t(260)),                                // k
+            ::testing::Values(gtint_t(1)),                                  // ai
             ::testing::Values(gtint_t(0)),                                  // aj
-            ::testing::Values(dcomplex{NaN, 2.3}, /*dcomplex{Inf, 0.0},*/   //Failures
-                              dcomplex{3.4, NaN}, dcomplex{NaN, -Inf}),     // aexval
+            ::testing::Values(NaN, Inf, -Inf),                              // aexval
             ::testing::Values(gtint_t(0)),                                  // bi
-            ::testing::Values(gtint_t(0), gtint_t(2)),                      // bj
-            ::testing::Values(dcomplex{NaN, 2.3}, /*dcomplex{Inf, 0.0},*/
-                              dcomplex{3.4, NaN}, dcomplex{NaN, -Inf}),     // bexval
-            ::testing::Values(gtint_t(0), gtint_t(2)),                      // ci
-            ::testing::Values(gtint_t(1), gtint_t(3)),                      // cj
-            ::testing::Values(dcomplex{NaN, 2.3}, dcomplex{Inf, 0.0},
-                              dcomplex{3.4, NaN}, dcomplex{NaN, -Inf}),     // cexval
-            ::testing::Values(dcomplex{-2.2, 3.3}),                         // alpha
-            ::testing::Values(dcomplex{1.2, -2.3}),                         // beta
+            ::testing::Values(gtint_t(0)),                                  // bj
+            ::testing::Values(NaN, Inf, -Inf),                              // bexval
+            ::testing::Values(gtint_t(0)),                                  // ci
+            ::testing::Values(gtint_t(1)),                                  // cj
+            ::testing::Values(NaN, Inf, -Inf),                              // cexval
+            ::testing::Values(double(-2.2)),                                // alpha
+            ::testing::Values(double(1.2)),                                 // beta
             ::testing::Values(gtint_t(0)),                                  // increment to the leading dim of a
             ::testing::Values(gtint_t(0)),                                  // increment to the leading dim of b
             ::testing::Values(gtint_t(0))                                   // increment to the leading dim of c
         ),
-        ::ZGEMMEVMatPrint()
+        ::DGEMMEVMatPrint()
     );
 
-
 /********************************************************/
-/* Testing for all code paths                           */
-/* m,n,k is choosen such that all code path are covered */
+/* Testing for small & sup code paths                   */
+/* m,n,k is choosen such that small & sup code path     */
+/* are covered.                                         */
 /* Matrix A, B, C are filled valid integers or floats   */
 /* Alpha and beta are assigned with Infs and Nans       */
 /********************************************************/
 INSTANTIATE_TEST_SUITE_P(
         alpha_beta,
-        ZGEMMEVT,
+        DGEMMEVT,
         ::testing::Combine(
             ::testing::Values('c'
 #ifndef TEST_BLAS
-            ,'r'
+                             ,'r'
 #endif
             ),                                                              // storage format
             ::testing::Values('n'),                                         // transa
             ::testing::Values('n'),                                         // transb
-            ::testing::Values(gtint_t(14), gtint_t(100), gtint_t(200)),     // m
-            ::testing::Values(gtint_t(10), gtint_t(90), gtint_t(300)),      // n
-            ::testing::Values(gtint_t(20), gtint_t(1005), gtint_t(400)),     // k
+            ::testing::Values(gtint_t(14), gtint_t(100)),                   // m
+            ::testing::Values(gtint_t(10), gtint_t(90)),                    // n
+            ::testing::Values(gtint_t(20), gtint_t(1005)),                  // k
             ::testing::Values(gtint_t(0)),                                  // ai
             ::testing::Values(gtint_t(0)),                                  // aj
-            ::testing::Values(dcomplex{0.0, 0.0}),
+            ::testing::Values(double(0.0)),
             ::testing::Values(gtint_t(0)),                                  // bi
             ::testing::Values(gtint_t(0)),                                  // bj
-            ::testing::Values(dcomplex{0.0, 0.0}),
+            ::testing::Values(double(0.0)),
             ::testing::Values(gtint_t(0)),                                  // ci
             ::testing::Values(gtint_t(0)),                                  // cj
-            ::testing::Values(dcomplex{0.0, 0.0}),
-            ::testing::Values(dcomplex{NaN, 2.3}, /* dcomplex{Inf, 0.0}, */
-                              dcomplex{3.4, NaN}, dcomplex{NaN, -Inf}),     // alpha
-            ::testing::Values(dcomplex{NaN, 2.3}, /* dcomplex{Inf, 0.0}, */
-                              dcomplex{3.4, NaN}, dcomplex{NaN, -Inf}),     // beta
+            ::testing::Values(double(0.0)),
+            ::testing::Values(NaN), //Failures , Inf, -Inf),                // alpha
+            ::testing::Values(NaN, Inf, -Inf),                              // beta
             ::testing::Values(gtint_t(0)),                                  // increment to the leading dim of a
             ::testing::Values(gtint_t(0)),                                  // increment to the leading dim of b
             ::testing::Values(gtint_t(0))                                   // increment to the leading dim of c
         ),
-        ::ZGEMMEVMatPrint()
+        ::DGEMMEVMatPrint()
+    );
+
+/********************************************************/
+/* Testing for Native code paths                        */
+/* m,n,k is choosen such that nat code path are covered */
+/* Matrix A, B, C are filled valid integers or floats   */
+/* Alpha and beta are assigned with Infs and Nans       */
+/********************************************************/
+INSTANTIATE_TEST_SUITE_P(
+        Large_Matrix_alpha_beta,
+        DGEMMEVT,
+        ::testing::Combine(
+            ::testing::Values('c'
+#ifndef TEST_BLAS
+                             ,'r'
+#endif
+            ),                                                              // storage format
+            ::testing::Values('n'),                                         // transa
+            ::testing::Values('n'),                                         // transb
+            ::testing::Values(gtint_t(1001)),                               // m
+            ::testing::Values(gtint_t(1001)),                               // n
+            ::testing::Values(gtint_t(260)),                                // k
+            ::testing::Values(gtint_t(0)),                                  // ai
+            ::testing::Values(gtint_t(0)),                                  // aj
+            ::testing::Values(double(0.0)),
+            ::testing::Values(gtint_t(0)),                                  // bi
+            ::testing::Values(gtint_t(0)),                                  // bj
+            ::testing::Values(double(0.0)),
+            ::testing::Values(gtint_t(0)),                                  // ci
+            ::testing::Values(gtint_t(0)),                                  // cj
+            ::testing::Values(double(0.0)),
+            ::testing::Values(NaN), //Failures , Inf, -Inf),                // alpha
+            ::testing::Values(NaN, Inf, -Inf),                              // beta
+            ::testing::Values(gtint_t(0)),                                  // increment to the leading dim of a
+            ::testing::Values(gtint_t(0)),                                  // increment to the leading dim of b
+            ::testing::Values(gtint_t(0))                                   // increment to the leading dim of c
+        ),
+        ::DGEMMEVMatPrint()
     );
