@@ -33,6 +33,7 @@
 */
 
 #include <random>
+#include <type_traits>
 #include "common/testing_helpers.h"
 
 namespace testinghelpers {
@@ -114,7 +115,7 @@ void getfp(T2 from, T3 to, gtint_t n, gtint_t incx, T1* x)
  *        with elements that follow a uniform distribution in the range [from, to].
  * @param[in] storage storage type of matrix A, row or column major
  * @param[in] m, n dimentions of matrix A
- * @param[in, out] a the random fp matrix A 
+ * @param[in, out] a the random fp matrix A
  * @param[in] lda leading dimension of matrix A
  */
 template<typename T1, typename T2, typename T3>
@@ -177,7 +178,7 @@ void getfp(T2 from, T3 to, char storage, gtint_t m, gtint_t n, T1* a, gtint_t ld
  * @brief Returns a random fp vector (float, double, scomplex, dcomplex)
  *        with elements that follow a uniform distribution in the range [from, to].
  * @param[in] storage storage type of matrix A, row or column major
- * @param[in] m, n dimentions of matrix A 
+ * @param[in] m, n dimentions of matrix A
  * @param[in, out] a the random fp matrix A
  * @param[in] trans transposition of matrix A
  * @param[in] lda leading dimension of matrix A
@@ -254,7 +255,7 @@ void getint(int from, int to, gtint_t n, gtint_t incx, T* x)
  *        with elements that are integers and follow a uniform distribution in the range [from, to].
  * @param[in] storage storage type of matrix A, row or column major
  * @param[in] m, n dimentions of matrix A
- * @param[in, out] a the random fp matrix A 
+ * @param[in, out] a the random fp matrix A
  * @param[in] lda leading dimension of matrix A
  */
 template<typename T>
@@ -318,7 +319,7 @@ void getint(int from, int to, char storage, gtint_t m, gtint_t n, T* a, gtint_t 
  * @brief Returns a random fp matrix (float, double, scomplex, dcomplex)
  *        with elements that are integers and follow a uniform distribution in the range [from, to].
  * @param[in] storage storage type of matrix A, row or column major
- * @param[in] m, n dimentions of matrix A 
+ * @param[in] m, n dimentions of matrix A
  * @param[in, out] a the random fp matrix A
  * @param[in] trans transposition of matrix A
  * @param[in] lda leading dimension of matrix A
@@ -528,6 +529,98 @@ void set_ev_mat( char storage, char trns, gtint_t ld, gtint_t i, gtint_t j, T ex
         m[i*ld + j] = exval;
       else
         m[j*ld + i] = exval;
+    }
+}
+
+/*
+    Function to set few values of a matrix to values relative to DBL_MAX/DBL_MIN
+    These values are used to create overflow and underflow scenarios
+*/
+template<typename T>
+void set_overflow_underflow_mat(char storage, char trns, gtint_t ld, gtint_t i, gtint_t j, T* a, gtint_t mode, gtint_t input_range)
+{
+    /* Calculate index where overflow/underflow values need to be inserted */
+    gtint_t indexA = 0;
+
+    if ( storage == 'c' || storage == 'C' )
+    {
+      if ( trns == 'n' || trns == 'N' )
+      {
+        indexA = i + j*ld;
+      }
+      else
+      {
+        indexA = j + i*ld;
+      }
+    }
+    else
+    {
+      if ( trns == 'n' || trns == 'N' )
+      {
+        indexA = i*ld + j;
+      }
+      else
+      {
+        indexA = j*ld + i;
+      }
+    }
+
+    using RT = typename testinghelpers::type_info<T>::real_type;
+    std::vector<int> exponent(12);
+
+    if (std::is_same<RT, double>::value)
+    {
+      exponent = {23, 203, 18, 180, 123, 130, 185, 178, 108, 158, 185, 220};
+    }
+    else if (std::is_same<RT, float>::value)
+    {
+      exponent = {3, 20, 8, 2, 30, 28, 8, 10, 33, 24, 8, 22};
+    }
+
+    T limits_val;
+
+    /* When mode is set to 0, values relative to DBL_MAX are inserted into the input matrices */
+    if(mode == 0)
+    {
+        limits_val = (std::numeric_limits<RT>::max)();
+        switch(input_range)
+        {
+            case -1:
+                     a[0] = limits_val/ pow(10, exponent[0]);
+                     a[indexA] = limits_val/ pow(10, exponent[1]);
+                     break;
+
+            case 0:
+                     a[0] = -(limits_val/ pow(10, exponent[4]));
+                     a[indexA] = -(limits_val/ pow(10, exponent[5]));
+                     break;
+
+            case 1:
+                     a[0] = limits_val/ pow(10, exponent[8]);
+                     a[indexA] = limits_val/ pow(10, exponent[9]);
+        }
+    }
+    /* When mode is set to 1, values relative to DBL_MIN are inserted into the input matrices*/
+    else
+    {
+        limits_val = (std::numeric_limits<RT>::min)();
+        switch(input_range)
+        {
+            case -1:
+                     a[0] = limits_val * pow(10, exponent[0]);
+                     a[indexA] = limits_val * pow(10, exponent[1]);
+                     break;
+
+            case 0:
+                     a[0] = -(limits_val * pow(10, exponent[4]));
+                     a[indexA] = -(limits_val * pow(10, exponent[5]));
+                     break;
+
+            case 1:
+                     a[0] = limits_val * pow(10, exponent[8]);
+                     a[indexA] = limits_val * pow(10, exponent[9]);
+        }
+
     }
 }
 
