@@ -39,7 +39,9 @@
 #include "util/ref_asumv.h"
 #include "inc/check_error.h"
 
-// Used for generic tests with random values in x.
+/**
+ * @brief Used for generic tests with random values in x.
+ */
 template<typename T>
 void test_asumv( gtint_t n, gtint_t incx, double thresh )
 {
@@ -64,4 +66,42 @@ void test_asumv( gtint_t n, gtint_t incx, double thresh )
     //              Compute error.
     //----------------------------------------------------------
     computediff<RT>( asum, asum_ref, thresh );
+}
+
+/**
+ * @brief Used to insert Exception Values in x vector.
+ */
+template<typename T>
+void test_asumv( gtint_t n, gtint_t incx, gtint_t xi, double ix_exval,
+                 gtint_t xj, T jx_exval, double thresh )
+{
+    // Get real type from T.
+    using RT = typename testinghelpers::type_info<T>::real_type;
+    //----------------------------------------------------------
+    //        Initialize vectors with random numbers.
+    //----------------------------------------------------------
+    std::vector<T> x = testinghelpers::get_random_vector<T>( -10, 10, n, incx );
+
+    // Update the value at index xi to an extreme value, ix_exval.
+    if ( -1 < xi && xi < n ) x[xi * incx] = ix_exval;
+    else                     return;
+
+    // Update the value at index xj to an extreme value, jx_exval.
+    if ( -1 < xi && xi < n ) x[xj * incx] = jx_exval;
+    else                     return;
+
+    //----------------------------------------------------------
+    //    Call reference implementation to get ref results.
+    //----------------------------------------------------------
+    RT asum_ref = testinghelpers::ref_asumv<T>( n, x.data(), incx );
+
+    //----------------------------------------------------------
+    //                  Call BLIS function.
+    //----------------------------------------------------------
+    RT asum = asumv<T>(n, x.data(), incx);
+
+    //----------------------------------------------------------
+    //              Compute error.
+    //----------------------------------------------------------
+    computediff<RT>( asum, asum_ref, thresh, true );
 }

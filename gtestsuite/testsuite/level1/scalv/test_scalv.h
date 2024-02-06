@@ -67,3 +67,37 @@ static void test_scalv( char conja_alpha, gtint_t n, gtint_t incx, T alpha, doub
     //----------------------------------------------------------
     computediff<T>( n, x.data(), x_ref.data(), incx, thresh );
 }
+
+/**
+ * @brief Used to insert Exception Values in x vector.
+ */
+template<typename T>
+static void test_scalv( char conja_alpha, gtint_t n, gtint_t incx, gtint_t xi,
+                        T x_exval, T alpha, double thresh )
+{
+    //----------------------------------------------------------
+    //        Initialize vector with random numbers.
+    //----------------------------------------------------------
+    std::vector<T> x = testinghelpers::get_random_vector<T>( -10, 10, n, incx );
+
+    // Update the value at index xi to an extreme value, x_exval.
+    if ( -1 < xi && xi < n ) x[xi * incx] = x_exval;
+    else                     return;
+
+    //----------------------------------------------------------
+    //    Call reference implementation to get ref results.
+    //----------------------------------------------------------
+    // Create a copy of y so that we can check reference results.
+    std::vector<T> x_ref(x);
+    testinghelpers::ref_scalv<T>( conja_alpha, n, alpha, x_ref.data(), incx );
+
+    //----------------------------------------------------------
+    //                  Call BLIS function.
+    //----------------------------------------------------------
+    scalv<T>( conja_alpha, n, alpha, x.data(), incx );
+
+    //----------------------------------------------------------
+    //              Compute component-wise error.
+    //----------------------------------------------------------
+    computediff<T>( n, x.data(), x_ref.data(), incx, thresh, true );
+}
