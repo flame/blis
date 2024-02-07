@@ -178,6 +178,12 @@ INSERT_GENTCONF
 #include "bli_family_bgq.h"
 #endif
 
+// -- SiFive families --
+
+#ifdef BLIS_FAMILY_SIFIVE_X280
+#include "bli_family_sifive_x280.h"
+#endif
+
 // -- Generic --
 
 #ifdef BLIS_FAMILY_GENERIC
@@ -267,6 +273,12 @@ INSERT_GENTCONF
 #endif
 #ifdef BLIS_KERNELS_RVIV
 #include "bli_kernels_rviv.h"
+#endif
+
+// -- SiFive RISC-V architectures --
+
+#ifdef BLIS_KERNELS_SIFIVE_X280
+#include "bli_kernels_sifive_x280.h"
 #endif
 
 

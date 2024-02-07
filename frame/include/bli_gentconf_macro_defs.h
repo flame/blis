@@ -220,6 +220,14 @@
 #define INSERT_GENTCONF_RV64IV
 #endif
 
+// -- SiFive architectures ----------------------------------------------------
+
+#ifdef BLIS_CONFIG_SIFIVE_X280
+#define INSERT_GENTCONF_SIFIVE_X280 GENTCONF( SIFIVE_X280, sifive_x280 )
+#else
+#define INSERT_GENTCONF_SIFIVE_X280
+#endif
+
 // -- Generic architectures ----------------------------------------------------
 
 #ifdef BLIS_CONFIG_GENERIC
@@ -271,6 +279,8 @@ INSERT_GENTCONF_RV32I \
 INSERT_GENTCONF_RV64I \
 INSERT_GENTCONF_RV32IV \
 INSERT_GENTCONF_RV64IV \
+\
+INSERT_GENTCONF_SIFIVE_X280 \
 \
 INSERT_GENTCONF_GENERIC
 
