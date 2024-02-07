@@ -139,6 +139,9 @@ if( NOT ((BLIS_ELEMENT_TYPE STREQUAL "f") OR (BLIS_ELEMENT_TYPE STREQUAL "i")) )
             during CMake invokation: f, i")
 endif()
 
+# Option to enable testing with upper case character arguments in BLAS and BLIS calls.
+option(TEST_UPPERCASE_ARGS "Test upper case character arguments" OFF)
+
 if(LINUX)
     if(REF_LIB)
         get_filename_component(REFLIB_PATH ${REF_LIB}/.. ABSOLUTE)

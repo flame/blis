@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2023, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2023 - 2024, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -151,6 +151,13 @@ template<typename T>
 static void gemm( char storage, char transa, char transb, gtint_t m, gtint_t n, gtint_t k,
     T* alpha, T* ap, gtint_t lda, T* bp, gtint_t ldb, T* beta, T* cp, gtint_t ldc )
 {
+
+#ifdef TEST_UPPERCASE_ARGS
+    storage = static_cast<char>(std::toupper(static_cast<unsigned char>(storage)));
+    transa = static_cast<char>(std::toupper(static_cast<unsigned char>(transa)));
+    transb = static_cast<char>(std::toupper(static_cast<unsigned char>(transb)));
+#endif
+
 #ifdef TEST_BLAS
     if( storage == 'c' || storage == 'C' )
         gemm_<T>( transa, transb, m, n, k, alpha, ap, lda, bp, ldb, beta, cp, ldc );

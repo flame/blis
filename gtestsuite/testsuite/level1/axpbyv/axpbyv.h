@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2023, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2023 - 2024, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -102,6 +102,11 @@ static void typed_axpbyv(char conj_x, gtint_t n, T alpha, T* x, gtint_t incx, T 
 template<typename T>
 static void axpbyv(char conj_x, gtint_t n, T alpha, T* x, gtint_t incx, T beta, T* y, gtint_t incy)
 {
+
+#ifdef TEST_UPPERCASE_ARGS
+    conj_x = static_cast<char>(std::toupper(static_cast<unsigned char>(conj_x)));
+#endif
+
 #ifdef TEST_BLAS
     axpbyv_<T>( n, alpha, x, incx, beta, y, incy );
 #elif TEST_CBLAS

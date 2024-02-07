@@ -102,6 +102,8 @@ For threaded MKL the following OpenMP runtimes are used:
 * To build the testsuite using BLAS interface, configure using `-DTEST_INTERFACE=BLAS`. [**Default**]
 * To build the testsuite using CBLAS interface, configure using `-DTEST_INTERFACE=CBLAS`.
 * To build the testsuite using BLIS-typed interface, configure using `-DTEST_INTERFACE=BLIS_TYPED`. Note that more tests are built for this option, due to the extended APIs.
+## Test with upper case character arguments
+* To test with upper case character arguments, configure using `-DTEST_UPPERCASE_ARGS=ON`. [**OFF by default**]
 ## Type of Data Generated in Testing
 * To generate floating-point numbers in the matrices and vectors that are used in testing, configure using `-DBLIS_ELEMENT_TYPE=f`. [**Default**]
 * To generate integers in the matrices and vectors that are used in testing, configure using `-DBLIS_ELEMENT_TYPE=i`. This can be useful for debugging since operating on integers should compute exact results. Note that "integer" here doesn't refer to `int` type, but on the mathematical set Z.

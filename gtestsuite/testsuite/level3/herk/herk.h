@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2023, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2023 - 2024, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -132,6 +132,13 @@ template<typename T, typename RT = typename testinghelpers::type_info<T>::real_t
 static void herk( char storage, char uplo, char transa, gtint_t m, gtint_t k,
     RT* alpha, T* ap, gtint_t lda, RT* beta, T* cp, gtint_t ldc )
 {
+
+#ifdef TEST_UPPERCASE_ARGS
+    storage = static_cast<char>(std::toupper(static_cast<unsigned char>(storage)));
+    uplo = static_cast<char>(std::toupper(static_cast<unsigned char>(uplo)));
+    transa = static_cast<char>(std::toupper(static_cast<unsigned char>(transa)));
+#endif
+
 #ifdef TEST_BLAS
     if( storage == 'c' || storage == 'C' )
         herk_<T>( uplo, transa, m, k, alpha, ap, lda, beta, cp, ldc );

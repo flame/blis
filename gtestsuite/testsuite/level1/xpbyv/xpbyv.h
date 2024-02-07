@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2023, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2023 - 2024, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -70,6 +70,11 @@ static void typed_xpbyv(char conj_x, gtint_t n, T* x, gtint_t incx, T beta, T* y
 template<typename T>
 static void xpbyv(char conj_x, gtint_t n, T* x, gtint_t incx, T beta, T* y, gtint_t incy)
 {
+
+#ifdef TEST_UPPERCASE_ARGS
+    conj_x = static_cast<char>(std::toupper(static_cast<unsigned char>(conj_x)));
+#endif
+
 #ifdef TEST_BLAS
     throw std::runtime_error("Error in testsuite/level1/xpbyv.h: BLAS interface is not available.");
 #elif TEST_CBLAS

@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2023, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2023 - 2024, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -137,6 +137,13 @@ static void trsv( char storage, char uploa, char transa, char diaga,
 #if (defined TEST_BLAS || defined  TEST_CBLAS)
     T one;
     testinghelpers::initone(one);
+#endif
+
+#ifdef TEST_UPPERCASE_ARGS
+    storage = static_cast<char>(std::toupper(static_cast<unsigned char>(storage)));
+    uploa = static_cast<char>(std::toupper(static_cast<unsigned char>(uploa)));
+    transa = static_cast<char>(std::toupper(static_cast<unsigned char>(transa)));
+    diaga = static_cast<char>(std::toupper(static_cast<unsigned char>(diaga)));
 #endif
 
 #ifdef TEST_BLAS

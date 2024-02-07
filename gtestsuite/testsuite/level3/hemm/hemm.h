@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2023, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2023 - 2024, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -151,6 +151,15 @@ template<typename T>
 static void hemm( char storage, char side, char uplo, char conja, char transb, gtint_t m, gtint_t n,
     T* alpha, T* ap, gtint_t lda, T* bp, gtint_t ldb, T* beta, T* cp, gtint_t ldc )
 {
+
+#ifdef TEST_UPPERCASE_ARGS
+    storage = static_cast<char>(std::toupper(static_cast<unsigned char>(storage)));
+    side = static_cast<char>(std::toupper(static_cast<unsigned char>(side)));
+    uplo = static_cast<char>(std::toupper(static_cast<unsigned char>(uplo)));
+    conja = static_cast<char>(std::toupper(static_cast<unsigned char>(conja)));
+    transb = static_cast<char>(std::toupper(static_cast<unsigned char>(transb)));
+#endif
+
 #ifdef TEST_BLAS
     if( storage == 'c' || storage == 'C' )
         hemm_<T>( side, uplo, m, n, alpha, ap, lda, bp, ldb, beta, cp, ldc );
