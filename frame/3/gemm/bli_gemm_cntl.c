@@ -169,7 +169,7 @@ void bli_gemm_cntl_init
 	obj_t alpha_cast, beta_cast;
 	dom_t alpha_dom = bli_obj_is_complex( a ) ||
 	                  bli_obj_is_complex( b ) ||
-					  bli_obj_is_complex( c ) ? BLIS_COMPLEX : BLIS_REAL;
+	                  bli_obj_is_complex( c ) ? BLIS_COMPLEX : BLIS_REAL;
 	bli_obj_scalar_init_detached_copy_of( alpha_dom | comp_prec,
 	                                      BLIS_NO_CONJUGATE,
 	                                      alpha,

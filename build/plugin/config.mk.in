@@ -52,11 +52,11 @@ libdir            := @libdir@
 includedir        := @includedir@
 sharedir          := @sharedir@
 
-# Define the name of the config makefile.
-REAL_CONFIG_MK_FILE := $(sharedir)/blis/config.mk
+# Define the name of the global config.mk makefile.
+GLOB_CONFIG_MK_FILE := $(sharedir)/blis/config.mk
 
 # Include the configuration file.
-include $(REAL_CONFIG_MK_FILE)
+include $(GLOB_CONFIG_MK_FILE)
 
 # The name of the plugin.
 PLUGIN_NAME       := @plugin_name@

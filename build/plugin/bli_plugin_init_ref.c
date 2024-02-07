@@ -57,7 +57,10 @@ do { \
 
 // -----------------------------------------------------------------------------
 
-void PASTEMAC(plugin_init,BLIS_PNAME_INFIX,BLIS_CNAME_INFIX,BLIS_REF_SUFFIX)( PASTECH(plugin,BLIS_PNAME_INFIX,_params) )
+void PASTEMAC(plugin_init,BLIS_PNAME_INFIX,BLIS_CNAME_INFIX,BLIS_REF_SUFFIX)
+     (
+       PASTECH(plugin,BLIS_PNAME_INFIX,_params)
+     )
 {
 	cntx_t* cntx = ( cntx_t* )bli_gks_lookup_id( PASTECH(BLIS_ARCH,BLIS_CNAME_UPPER_INFIX) );
 
