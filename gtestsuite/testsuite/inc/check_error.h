@@ -122,10 +122,11 @@ testing::AssertionResult NumericalComparisonFPOnly(const char* blis_sol_char,
     else {
         double error = testinghelpers::getError(blis_sol,ref_sol);
         if (error <= comp_helper.threshold) return testing::AssertionSuccess();
+        using RT = typename testinghelpers::type_info<T>::real_type;
         return testing::AssertionFailure() << error_message
                                            << ",    thresh = " << comp_helper.threshold
                                            << ",    error = " << error
-                                           << " (" << error/testinghelpers::getEpsilon<T>() << " * eps)";
+                                           << " (" << error/std::numeric_limits<RT>::epsilon() << " * eps)";
     }
 }
 

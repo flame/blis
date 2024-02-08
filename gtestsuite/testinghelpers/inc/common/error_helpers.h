@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2023, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2023 - 2024, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -49,8 +49,12 @@ namespace testinghelpers {
 template<typename T>
 double getEpsilon()
 {
+#ifdef THRESHOLD_ZERO
+    double eps = 0.0;
+#else
     using RT = typename testinghelpers::type_info<T>::real_type;
     double eps = std::numeric_limits<RT>::epsilon();
+#endif
     return eps;
 }
 

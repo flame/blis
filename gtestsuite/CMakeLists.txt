@@ -142,6 +142,9 @@ endif()
 # Option to enable testing with upper case character arguments in BLAS and BLIS calls.
 option(TEST_UPPERCASE_ARGS "Test upper case character arguments" OFF)
 
+# Option to enable testing with thresholds set to zero.
+option(THRESHOLD_ZERO "Set thresholds to zero" OFF)
+
 if(LINUX)
     if(REF_LIB)
         get_filename_component(REFLIB_PATH ${REF_LIB}/.. ABSOLUTE)
