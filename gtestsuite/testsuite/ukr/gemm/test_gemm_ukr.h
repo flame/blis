@@ -339,7 +339,7 @@ static void test_gemmk1_ukr( FT ukr_fp, gtint_t m, gtint_t n, gtint_t k, char st
 
 
 template<typename T, typename FT>
-static void test_dgemmsup_ukr( FT ukr_fp, char trnsa, char trnsb, gtint_t m, gtint_t n, gtint_t k, T alpha, T beta, char storageC, gtint_t MR, bool row_pref, bool memory_test)
+static void test_gemmsup_ukr( FT ukr_fp, char trnsa, char trnsb, gtint_t m, gtint_t n, gtint_t k, T alpha, T beta, char storageC, gtint_t MR, bool row_pref, bool memory_test = false)
 {
     // Compute the leading dimensions of a, b, and c.
     char storage = storageC;
@@ -566,6 +566,7 @@ static void test_dgemmsup_ukr( FT ukr_fp, char trnsa, char trnsb, gtint_t m, gti
     // Check component-wise error
     computediff<T>( storage, m, n, buf_c, ref_c, ldc, thresh );
 }
+
 
 template<typename T, typename FT>
 static void test_zgemmsup_ukr( char storage, char trnsa, char trnsb, gtint_t m, gtint_t n, gtint_t k, T alpha, T beta, FT ukr_fp)

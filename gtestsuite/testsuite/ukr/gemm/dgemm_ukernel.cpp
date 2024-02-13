@@ -59,7 +59,7 @@ TEST_P(dgemmUkrSUP, sup_kernel)
     bool row_pref = std::get<10>(GetParam());
     bool memory_test = std::get<11>(GetParam());
 
-    test_dgemmsup_ukr(kern_ptr, transa, transb, m, n, k, alpha, beta, storageC, MR, row_pref, memory_test);
+    test_gemmsup_ukr(kern_ptr, transa, transb, m, n, k, alpha, beta, storageC, MR, row_pref, memory_test);
 
 }// end of function
 

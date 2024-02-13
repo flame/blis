@@ -35,7 +35,7 @@
 #include <gtest/gtest.h>
 #include "test_gemm.h"
 
-class SGemmTest :
+class SGemm :
         public ::testing::TestWithParam<std::tuple<char,
                                                    char,
                                                    char,
@@ -48,7 +48,9 @@ class SGemmTest :
                                                    gtint_t,
                                                    gtint_t>> {};
 
-TEST_P(SGemmTest, RandomData)
+//matrix storage format, transA, transB, m, n, k, alpha, beta, lda, ldb, ldc
+
+TEST_P(SGemm, FunctionalTest)
 {
     using T = float;
     //----------------------------------------------------------
@@ -87,7 +89,7 @@ TEST_P(SGemmTest, RandomData)
     test_gemm<T>( storage, transa, transb, m, n, k, lda_inc, ldb_inc, ldc_inc, alpha, beta, thresh );
 }
 
-class SGemmTestPrint {
+class SGemmPrint {
 public:
     std::string operator()(
         testing::TestParamInfo<std::tuple<char, char, char, gtint_t, gtint_t, gtint_t, float, float, gtint_t, gtint_t, gtint_t>> str) const {
@@ -109,66 +111,116 @@ public:
 #else  //#elif TEST_BLIS_TYPED
         std::string str_name = "bli_sgemm";
 #endif
-        str_name = str_name + "_" + sfm+sfm+sfm;
-        str_name = str_name + "_" + tsa + tsb;
-        str_name = str_name + "_" + std::to_string(m);
-        str_name = str_name + "_" + std::to_string(n);
-        str_name = str_name + "_" + std::to_string(k);
+        str_name = str_name + "storageC_" + sfm;
+        str_name = str_name + "_transA_" + tsa + tsb;
+        str_name = str_name + "_m_" + std::to_string(m);
+        str_name = str_name + "_n_" + std::to_string(n);
+        str_name = str_name + "_k_" + std::to_string(k);
         std::string alpha_str = ( alpha > 0) ? std::to_string(int(alpha)) : "m" + std::to_string(int(std::abs(alpha)));
-        str_name = str_name + "_a" + alpha_str;
+        str_name = str_name + "_alpha_" + alpha_str;
         std::string beta_str = ( beta > 0) ? std::to_string(int(beta)) : "m" + std::to_string(int(std::abs(beta)));
-        str_name = str_name + "_b" + beta_str;
-        str_name = str_name + "_" + std::to_string(lda_inc);
-        str_name = str_name + "_" + std::to_string(ldb_inc);
-        str_name = str_name + "_" + std::to_string(ldc_inc);
+        str_name = str_name + "_beta_" + beta_str;
+        gtint_t lda = testinghelpers::get_leading_dimension( sfm, tsa, m, k, lda_inc );
+        gtint_t ldb = testinghelpers::get_leading_dimension( sfm, tsb, k, n, ldb_inc );
+        gtint_t ldc = testinghelpers::get_leading_dimension( sfm, 'n', m, n, ldc_inc );
+        str_name = str_name + "_lda_" + std::to_string(lda);
+        str_name = str_name + "_ldb_" + std::to_string(ldb);
+        str_name = str_name + "_ldc_" + std::to_string(ldc);
         return str_name;
     }
 };
 
-/* Testing SUP kernel: bli_sgemmsup_rv_zen_asm_6x16m */
 INSTANTIATE_TEST_SUITE_P(
-        bli_sgemmsup_rv_zen_asm_6x16m,
-        SGemmTest,
+        expect_sgemv_path,
+        SGemm,
         ::testing::Combine(
             ::testing::Values('c'
 #ifndef TEST_BLAS
             ,'r'
 #endif
-            ),                                                   // storage format
-            ::testing::Values('n','t'),                          // transa
-            ::testing::Values('n','t'),                          // transb
-            ::testing::Range(gtint_t(1), gtint_t(17), 1),        // m
-            ::testing::Range(gtint_t(1), gtint_t(17), 1),        // n
-            ::testing::Range(gtint_t(1), gtint_t(17), 1),        // k
-            ::testing::Values(5.3),                              // alpha
-            ::testing::Values(6.4),                              // beta
-            ::testing::Values(gtint_t(0)),                       // increment to the leading dim of a
-            ::testing::Values(gtint_t(0)),                       // increment to the leading dim of b
-            ::testing::Values(gtint_t(0))                        // increment to the leading dim of c
+            ),                                                  // storage format
+            ::testing::Values('n','t'),                         // transa
+            ::testing::Values('n','t'),                         // transb
+            ::testing::Range(gtint_t(1), gtint_t(7), 1),        // m
+            ::testing::Range(gtint_t(1), gtint_t(7), 1),        // n
+            ::testing::Range(gtint_t(1), gtint_t(7), 1),        // k
+            ::testing::Values(5.3, -1.0, 1.0),                  // alpha
+            ::testing::Values(6.4, 1.0, -1.0, 0.0),             // beta
+            ::testing::Values(0, 13),                           // increment to the leading dim of a
+            ::testing::Values(0, 15),                           // increment to the leading dim of b
+            ::testing::Values(0, 17)                            // increment to the leading dim of c
         ),
-        ::SGemmTestPrint()
+        ::SGemmPrint()
     );
 
-/*Test for multiple alpha and beat values*/
+
+//----------------------------- sgemm_small kernel ------------------------------------
 INSTANTIATE_TEST_SUITE_P(
-        bli_sgemmsup_rv_zen_asm_6x16m_alpha_beta,
-        SGemmTest,
+        expect_sgemm_small_path,
+        SGemm,
         ::testing::Combine(
-            ::testing::Values('c'
-#ifndef TEST_BLAS
-            ,'r'
-#endif
-            ),                                                   // storage format
-            ::testing::Values('n','t'),                          // transa
-            ::testing::Values('n','t'),                          // transb
-            ::testing::Values(gtint_t(6), gtint_t(16)),          // m
-            ::testing::Values(gtint_t(6), gtint_t(16)),          // n
-            ::testing::Values(gtint_t(5)),                       // k
-            ::testing::Values(0.0, 1.0, -1.0, -10.0),       // alpha
-            ::testing::Values(0.0, 1.0, -1.0, -19.0),       // beta
-            ::testing::Values(gtint_t(2)),                       // increment to the leading dim of a
-            ::testing::Values(gtint_t(3)),                       // increment to the leading dim of b
-            ::testing::Values(gtint_t(7))                        // increment to the leading dim of c
+            // Test both storage types
+            ::testing::Values('c'),                                        // storage format
+            // Covers all possible combinations of storage schemes
+            ::testing::Values('n', 't'),                                   // transa
+            ::testing::Values('n', 't'),                                   // transb
+            ::testing::Values(5, 19, 20, 24, 28, 32, 48, 44, 40, 36, 35),  // m
+            ::testing::Range(gtint_t(25), gtint_t(43), gtint_t(1)),        // n
+            // k-unroll factor = KR = 1
+            ::testing::Range(gtint_t(2), gtint_t(25), 1),                  // k
+            // No condition based on alpha
+            ::testing::Values(0.0, -1.0, 1.0, 1.7),                        // alpha
+            // No condition based on betaa
+            ::testing::Values(0.0, -1.0, 1.0, 2.3),                        // beta
+            ::testing::Values(0, 13),                                      // increment to the leading dim of a
+            ::testing::Values(0, 15),                                      // increment to the leading dim of b
+            ::testing::Values(0, 17)                                       // increment to the leading dim of c
         ),
-        ::SGemmTestPrint()
+        ::SGemmPrint()
+    );
+
+// ----------------------------- SUP implementation --------------------------------------
+INSTANTIATE_TEST_SUITE_P(
+        expect_sgemm_sup_path,
+        SGemm,
+        ::testing::Combine(
+            // Storage of A and B is handled by packing
+            ::testing::Values('c'),                                                         // storage format
+            ::testing::Values('n', 't'),                                                    // transa
+            ::testing::Values('n', 't'),                                                    // transb
+            ::testing::Values(1002, 1025, 1054, 1083, 1112, 1111, 1327, 1333, 1338, 1378),  // m
+            ::testing::Values(453, 462, 471, 504, 513, 522, 531, 540, 549, 558, 567 ),      // n
+            ::testing::Range(gtint_t(250), gtint_t(261), 1),                                // k
+            // No condition based on alpha
+            ::testing::Values(0.0, -1.0, 1.0, 1.7),                                         // alpha
+            // No condition based on beta
+            ::testing::Values(0.0, -1.0, 1.0, 2.3),                                         // beta
+            ::testing::Values(0, 13),                                                       // increment to the leading dim of a
+            ::testing::Values(0, 15),                                                       // increment to the leading dim of b
+            ::testing::Values(0, 17)                                                        // increment to the leading dim of c
+        ),
+        ::SGemmPrint()
+    );
+
+// ----------------------------- Native implementation --------------------------------------
+INSTANTIATE_TEST_SUITE_P(
+        expect_sgemm_native_path,
+        SGemm,
+        ::testing::Combine(
+            // Storage of A and B is handled by packing
+            ::testing::Values('c'),                            // storage format
+            ::testing::Values('n', 't'),                       // transa
+            ::testing::Values('n', 't'),                       // transb
+            ::testing::Values(5017, 5025, 5061, 5327),         // m
+            ::testing::Values(1709, 1731, 5005, 5417 ),        // n
+            ::testing::Values(515, 527, 604),                  // k
+            // No condition based on alpha
+            ::testing::Values(0.0, -1.0, 1.0, 1.7),            // alpha
+            // No condition based on betaa
+            ::testing::Values(0.0, -1.0, 1.0, 2.3),            // beta
+            ::testing::Values(0, 13),                          // increment to the leading dim of a
+            ::testing::Values(0, 15),                          // increment to the leading dim of b
+            ::testing::Values(0, 17)                           // increment to the leading dim of c
+        ),
+        ::SGemmPrint()
     );
