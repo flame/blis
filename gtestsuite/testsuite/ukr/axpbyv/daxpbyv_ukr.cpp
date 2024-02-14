@@ -42,7 +42,8 @@ class daxpbyvUkrTest :
                                                    gtint_t,         // incx
                                                    gtint_t,         // incy
                                                    double,          // alpha
-                                                   double>> {};     // beta
+                                                   double,          // beta
+                                                   bool>> {};       // is_memory_test
 
 GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(daxpbyvUkrTest);
 
@@ -70,6 +71,8 @@ TEST_P( daxpbyvUkrTest, AccuracyCheck )
     T alpha = std::get<5>(GetParam());
     // beta
     T beta = std::get<6>(GetParam());
+    // is_memory_test
+    bool is_memory_test = std::get<7>(GetParam());
 
     // Set the threshold for the errors:
     double thresh = 3 * testinghelpers::getEpsilon<T>();
@@ -77,7 +80,7 @@ TEST_P( daxpbyvUkrTest, AccuracyCheck )
     //----------------------------------------------------------
     //     Call generic test body using those parameters
     //----------------------------------------------------------
-    test_axpbyv_ukr<T, daxpbyv_ker_ft>( ukr_fp, conj_x, n, incx, incy, alpha, beta, thresh );
+    test_axpbyv_ukr<T, daxpbyv_ker_ft>( ukr_fp, conj_x, n, incx, incy, alpha, beta, thresh, is_memory_test );
 }
 
 // Test-case logger : Used to print the test-case details for unit testing the kernels.
@@ -86,25 +89,27 @@ TEST_P( daxpbyvUkrTest, AccuracyCheck )
 class daxpbyvUkrTestPrint {
 public:
     std::string operator()(
-        testing::TestParamInfo<std::tuple<daxpbyv_ker_ft,char,gtint_t,gtint_t,gtint_t,double,double>> str) const {
+        testing::TestParamInfo<std::tuple<daxpbyv_ker_ft,char,gtint_t,gtint_t,gtint_t,double,double,bool>> str) const {
         char conjx     = std::get<1>(str.param);
         gtint_t n     = std::get<2>(str.param);
         gtint_t incx  = std::get<3>(str.param);
         gtint_t incy  = std::get<4>(str.param);
         double alpha  = std::get<5>(str.param);
         double beta   = std::get<6>(str.param);
+        bool is_memory_test = std::get<7>(str.param);
 
         std::string str_name = "daxpbyv_ukr";
         str_name += "_n" + std::to_string(n);
         str_name += ( conjx == 'n' )? "_noconjx" : "_conjx";
-        std::string incx_str = ( incx > 0) ? std::to_string(incx) : "m" + std::to_string(std::abs(incx));
+        std::string incx_str = ( incx >= 0) ? std::to_string(incx) : "m" + std::to_string(std::abs(incx));
         str_name += "_incx" + incx_str;
-        std::string incy_str = ( incy > 0) ? std::to_string(incy) : "m" + std::to_string(std::abs(incy));
+        std::string incy_str = ( incy >= 0) ? std::to_string(incy) : "m" + std::to_string(std::abs(incy));
         str_name += "_incy" + incy_str;
-        std::string alpha_str = ( alpha > 0) ? std::to_string(int(alpha)) : "m" + std::to_string(int(std::abs(alpha)));
-        str_name = str_name + "_a" + alpha_str;
-        std::string beta_str = ( beta > 0) ? std::to_string(int(beta)) : "m" + std::to_string(int(std::abs(beta)));
-        str_name = str_name + "_b" + beta_str;
+        std::string alpha_str = ( alpha >= 0) ? std::to_string(int(alpha)) : "m" + std::to_string(int(std::abs(alpha)));
+        str_name = str_name + "_alpha" + alpha_str;
+        std::string beta_str = ( beta >= 0) ? std::to_string(int(beta)) : "m" + std::to_string(int(std::abs(beta)));
+        str_name = str_name + "_beta" + beta_str;
+        str_name += ( is_memory_test ) ? "_mem_test_enabled" : "_mem_test_disabled";
         return str_name;
     }
 };
@@ -128,29 +133,29 @@ INSTANTIATE_TEST_SUITE_P(
         bli_daxpbyv_zen_int10_unitStrides,
         daxpbyvUkrTest,
         ::testing::Combine(
-            ::testing::Values(bli_daxpbyv_zen_int10), // kernel address
-            ::testing::Values('n'),                   // use x, not conj(x) (since it is real)
+            ::testing::Values(bli_daxpbyv_zen_int10),      // kernel address
+            ::testing::Values('n'),                        // use x, not conj(x) (since it is real)
             ::testing::Values(// Testing the loops standalone
-                              gtint_t(40),            // size n, for L40
-                              gtint_t(20),            // L20
-                              gtint_t(8),             // L8
-                              gtint_t(4),             // L4
-                              gtint_t(2),             // LScalar
+                              gtint_t(40),                 // size n, for L40
+                              gtint_t(20),                 // L20
+                              gtint_t(8),                  // L8
+                              gtint_t(4),                  // L4
+                              gtint_t(2),                  // LScalar
                               // Testing the loops with combination
-                              // 3*L40
-                              gtint_t(120),
-                              // 3*L40 + L20
-                              gtint_t(140),
-                              // 3*L40 + L20 + L8
-                              gtint_t(148),
-                              // 3*L40 + L20 + L8 + L4
-                              gtint_t(152),
-                              // 3*L40 + L20 + L8 + L4 + LScalar
-                              gtint_t(155)),
-            ::testing::Values(gtint_t(1)),            // stride size for x
-            ::testing::Values(gtint_t(1)),            // stride size for y
-            ::testing::Values(double(2.2)),  // alpha
-            ::testing::Values(double(-1.8))  // beta
+                              gtint_t(120),                // 3*L40
+                              gtint_t(140),                // 3*L40 + L20
+                              gtint_t(148),                // 3*L40 + L20 + L8
+                              gtint_t(152),                // 3*L40 + L20 + L8 + L4
+                              gtint_t(155)),               // 3*L40 + L20 + L8 + L4 + 3(LScalar)
+            ::testing::Values(gtint_t(1)),                 // stride size for x
+            ::testing::Values(gtint_t(1)),                 // stride size for y
+            ::testing::Values(double(1.0), double(-1.0),
+                              double(2.2), double(-4.1),
+                              double(0.0)),                // alpha
+            ::testing::Values(double(1.0), double(-1.0),
+                              double(2.2), double(-4.1), 
+                              double(0.0)),                // beta
+            ::testing::Values(false, true)                 // is_memory_test
         ),
         ::daxpbyvUkrTestPrint()
     );
@@ -160,14 +165,19 @@ INSTANTIATE_TEST_SUITE_P(
         bli_daxpbyv_zen_int10_nonUnitStrides,
         daxpbyvUkrTest,
         ::testing::Combine(
-            ::testing::Values(bli_daxpbyv_zen_int10), // kernel address
-            ::testing::Values('n'),                   // use x, not conj(x) (since it is real)
-            ::testing::Values(gtint_t(10),            // n, size of the vector
+            ::testing::Values(bli_daxpbyv_zen_int10),      // kernel address
+            ::testing::Values('n'),                        // use x, not conj(x) (since it is real)
+            ::testing::Values(gtint_t(10),                 // n, size of the vector
                               gtint_t(25)),
-            ::testing::Values(gtint_t(5)), // stride size for x
-            ::testing::Values(gtint_t(3)), // stride size for y
-            ::testing::Values(double(2.2)), // alpha
-            ::testing::Values(double(-1.8))  // beta
+            ::testing::Values(gtint_t(5)),                 // stride size for x
+            ::testing::Values(gtint_t(3)),                 // stride size for y
+            ::testing::Values(double(1.0), double(-1.0),
+                              double(2.2), double(-4.1),
+                              double(0.0)),                // alpha
+            ::testing::Values(double(1.0), double(-1.0),
+                              double(2.2), double(-4.1), 
+                              double(0.0)),                // beta
+            ::testing::Values(false, true)                 // is_memory_test
         ),
         ::daxpbyvUkrTestPrint()
     );
@@ -186,15 +196,20 @@ INSTANTIATE_TEST_SUITE_P(
         bli_daxpbyv_zen_int_unitStrides,
         daxpbyvUkrTest,
         ::testing::Combine(
-            ::testing::Values(bli_daxpbyv_zen_int),   // kernel address
-            ::testing::Values('n'),                   // use x, not conj(x) (since it is real)
-            ::testing::Values(gtint_t(16),            // size n, for L16
-                              gtint_t(48),            // 3*L16
-                              gtint_t(57)),           // 3*L16 + 9(LScalar)
-            ::testing::Values(gtint_t(1)),            // stride size for x
-            ::testing::Values(gtint_t(1)),            // stride size for y
-            ::testing::Values(double(2.2)),  // alpha
-            ::testing::Values(double(-1.8))  // beta
+            ::testing::Values(bli_daxpbyv_zen_int),        // kernel address
+            ::testing::Values('n'),                        // use x, not conj(x) (since it is real)
+            ::testing::Values(gtint_t(16),                 // size n, for L16
+                              gtint_t(48),                 // 3*L16
+                              gtint_t(57)),                // 3*L16 + 9(LScalar)
+            ::testing::Values(gtint_t(1)),                 // stride size for x
+            ::testing::Values(gtint_t(1)),                 // stride size for y
+            ::testing::Values(double(1.0), double(-1.0),
+                              double(2.2), double(-4.1),
+                              double(0.0)),                // alpha
+            ::testing::Values(double(1.0), double(-1.0),
+                              double(2.2), double(-4.1), 
+                              double(0.0)),                // beta
+            ::testing::Values(false, true)                 // is_memory_test
         ),
         ::daxpbyvUkrTestPrint()
     );
@@ -204,14 +219,19 @@ INSTANTIATE_TEST_SUITE_P(
         bli_daxpbyv_zen_int_nonUnitStrides,
         daxpbyvUkrTest,
         ::testing::Combine(
-            ::testing::Values(bli_daxpbyv_zen_int),   // kernel address
-            ::testing::Values('n'),                   // use x, not conj(x) (since it is real)
-            ::testing::Values(gtint_t(10),            // n, size of the vector
+            ::testing::Values(bli_daxpbyv_zen_int),        // kernel address
+            ::testing::Values('n'),                        // use x, not conj(x) (since it is real)
+            ::testing::Values(gtint_t(10),                 // n, size of the vector
                               gtint_t(25)),
-            ::testing::Values(gtint_t(5)), // stride size for x
-            ::testing::Values(gtint_t(3)), // stride size for y
-            ::testing::Values(double(-4.1)), // alpha
-            ::testing::Values(double(3.9))   // beta
+            ::testing::Values(gtint_t(5)),                 // stride size for x
+            ::testing::Values(gtint_t(3)),                 // stride size for y
+            ::testing::Values(double(1.0), double(-1.0),
+                              double(2.2), double(-4.1),
+                              double(0.0)),                // alpha
+            ::testing::Values(double(1.0), double(-1.0),
+                              double(2.2), double(-4.1), 
+                              double(0.0)),                // beta
+            ::testing::Values(false, true)                 // is_memory_test
         ),
         ::daxpbyvUkrTestPrint()
     );

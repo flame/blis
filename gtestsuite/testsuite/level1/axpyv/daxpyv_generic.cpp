@@ -71,31 +71,31 @@ TEST_P( daxpyvGenericTest, RandomData )
 
 // Test-case logger : Used to print the test-case details when alpha/beta have exception value.
 // The string format is as follows :
-// n(vec_size)_(conjx/noconjx)_incx(m)(abs_incx)_incy(m)(abs_incy)_a(alpha_val)
+// n(vec_size)_(conjx/noconjx)_incx(m)(abs_incx)_incy(m)(abs_incy)_alpha(alpha_val)
 class daxpyvGenericTestPrint {
 public:
     std::string operator()(
         testing::TestParamInfo<std::tuple<char,gtint_t,gtint_t,gtint_t,double>> str) const {
-        char conjx     = std::get<0>(str.param);
+        char conjx    = std::get<0>(str.param);
         gtint_t n     = std::get<1>(str.param);
         gtint_t incx  = std::get<2>(str.param);
         gtint_t incy  = std::get<3>(str.param);
         double alpha  = std::get<4>(str.param);
 #ifdef TEST_BLAS
-        std::string str_name = "daxpy_";
+        std::string str_name = "blas_";
 #elif TEST_CBLAS
-        std::string str_name = "cblas_daxpy";
+        std::string str_name = "cblas_";
 #else  //#elif TEST_BLIS_TYPED
-        std::string str_name = "bli_daxpyv";
+        std::string str_name = "bli_";
 #endif
         str_name += "_n" + std::to_string(n);
         str_name += ( conjx == 'n' )? "_noconjx" : "_conjx";
-        std::string incx_str = ( incx > 0) ? std::to_string(incx) : "m" + std::to_string(std::abs(incx));
+        std::string incx_str = ( incx >= 0) ? std::to_string(incx) : "m" + std::to_string(std::abs(incx));
         str_name += "_incx" + incx_str;
-        std::string incy_str = ( incy > 0) ? std::to_string(incy) : "m" + std::to_string(std::abs(incy));
+        std::string incy_str = ( incy >= 0) ? std::to_string(incy) : "m" + std::to_string(std::abs(incy));
         str_name += "_incy" + incy_str;
-        std::string alpha_str = ( alpha > 0) ? std::to_string(int(alpha)) : "m" + std::to_string(int(std::abs(alpha)));
-        str_name = str_name + "_a" + alpha_str;
+        std::string alpha_str = ( alpha >= 0) ? std::to_string(int(alpha)) : "m" + std::to_string(int(std::abs(alpha)));
+        str_name = str_name + "_alpha" + alpha_str;
         return str_name;
     }
 };
@@ -109,7 +109,8 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Range(gtint_t(10), gtint_t(101), 10),                 // m size of vector takes values from 10 to 100 with step size of 10.
             ::testing::Values(gtint_t(1)),                                   // stride size for x
             ::testing::Values(gtint_t(1)),                                   // stride size for y
-            ::testing::Values(double(2.3), double(-4.1))                     // alpha
+            ::testing::Values(double(0.0), double(1.0),
+                              double(-1.0), double(4.1))                     // alpha
         ),
         ::daxpyvGenericTestPrint()
     );
@@ -126,7 +127,8 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(gtint_t(3), gtint_t(30), gtint_t(112)),        // m size of vector
             ::testing::Values(gtint_t(1)),                                   // stride size for x
             ::testing::Values(gtint_t(1)),                                   // stride size for y
-            ::testing::Values(double(2.0))                                   // alpha
+            ::testing::Values(double(0.0), double(1.0),
+                              double(-1.0), double(4.1))                     // alpha
         ),
         ::daxpyvGenericTestPrint()
     );
@@ -143,7 +145,8 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(gtint_t(3), gtint_t(30), gtint_t(112)),        // m size of vector
             ::testing::Values(gtint_t(2)),                                   // stride size for x
             ::testing::Values(gtint_t(3)),                                   // stride size for y
-            ::testing::Values(double(4.1))                                   // alpha
+            ::testing::Values(double(0.0), double(1.0),
+                              double(-1.0), double(4.1))                     // alpha
         ),
         ::daxpyvGenericTestPrint()
     );
@@ -160,7 +163,8 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Range(gtint_t(10), gtint_t(101), 10),                 // m size of vector takes values from 10 to 100 with step size of 10.
             ::testing::Values(gtint_t(-4)),                                  // stride size for x
             ::testing::Values(gtint_t(-3)),                                  // stride size for y
-            ::testing::Values(double(4.1))                                   // alpha
+            ::testing::Values(double(0.0), double(1.0),
+                              double(-1.0), double(4.1))                     // alpha
         ),
         ::daxpyvGenericTestPrint()
     );
@@ -174,18 +178,19 @@ INSTANTIATE_TEST_SUITE_P(
         aoclDynamicThresholds_unitStrides,
         daxpyvGenericTest,
         ::testing::Combine(
-            ::testing::Values('n'),                 // n: use x, c: use conj(x)
+            ::testing::Values('n'),                         // n: use x, c: use conj(x)
             ::testing::Values(// Sizes are based on the thresholds
-                              gtint_t(4000),        // nt_ideal = 1
-                              gtint_t(11000),       // nt_ideal = 4
-                              gtint_t(300000),      // nt_ideal = 8
-                              gtint_t(750000),      // nt_ideal = 16
-                              gtint_t(2600000),     // nt_ideal = 32
-                              gtint_t(4000000)),    // nt_ideal = 64
+                              gtint_t(4000),                // nt_ideal = 1
+                              gtint_t(11000),               // nt_ideal = 4
+                              gtint_t(300000),              // nt_ideal = 8
+                              gtint_t(750000),              // nt_ideal = 16
+                              gtint_t(2600000),             // nt_ideal = 32
+                              gtint_t(4000000)),            // nt_ideal = 64
 
-            ::testing::Values(gtint_t(1)),          // stride size for x
-            ::testing::Values(gtint_t(1)),          // stride size for y
-            ::testing::Values(double(4.1))          // alpha
+            ::testing::Values(gtint_t(1)),                  // stride size for x
+            ::testing::Values(gtint_t(1)),                  // stride size for y
+            ::testing::Values(double(0.0), double(1.0),
+                              double(-1.0), double(4.1))    // alpha
         ),
         ::daxpyvGenericTestPrint()
     );
@@ -195,18 +200,19 @@ INSTANTIATE_TEST_SUITE_P(
         aoclDynamicThresholds_nonUnitStrides,
         daxpyvGenericTest,
         ::testing::Combine(
-            ::testing::Values('n'),                 // n: use x, c: use conj(x)
+            ::testing::Values('n'),                         // n: use x, c: use conj(x)
             ::testing::Values(// Sizes are based on the thresholds
-                              gtint_t(4000),        // nt_ideal = 1
-                              gtint_t(11000),       // nt_ideal = 4
-                              gtint_t(300000),      // nt_ideal = 8
-                              gtint_t(750000),      // nt_ideal = 16
-                              gtint_t(2600000),     // nt_ideal = 32
-                              gtint_t(4000000)),    // nt_ideal = 64
+                              gtint_t(4000),                // nt_ideal = 1
+                              gtint_t(11000),               // nt_ideal = 4
+                              gtint_t(300000),              // nt_ideal = 8
+                              gtint_t(750000),              // nt_ideal = 16
+                              gtint_t(2600000),             // nt_ideal = 32
+                              gtint_t(4000000)),            // nt_ideal = 64
 
-            ::testing::Values(gtint_t(3)),          // stride size for x
-            ::testing::Values(gtint_t(3)),          // stride size for y
-            ::testing::Values(double(4.1))          // alpha
+            ::testing::Values(gtint_t(3)),                  // stride size for x
+            ::testing::Values(gtint_t(3)),                  // stride size for y
+            ::testing::Values(double(0.0), double(1.0),
+                              double(-1.0), double(4.1))    // alpha
         ),
         ::daxpyvGenericTestPrint()
     );

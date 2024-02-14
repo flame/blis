@@ -87,22 +87,22 @@ public:
         double alpha  = std::get<4>(str.param);
         double beta   = std::get<5>(str.param);
 #ifdef TEST_BLAS
-        std::string str_name = "daxpby_";
+        std::string str_name = "blas_";
 #elif TEST_CBLAS
-        std::string str_name = "cblas_daxpby";
+        std::string str_name = "cblas_";
 #else  //#elif TEST_BLIS_TYPED
-        std::string str_name = "bli_daxpbyv";
+        std::string str_name = "bli_";
 #endif
         str_name += "_n" + std::to_string(n);
         str_name += ( conjx == 'n' )? "_noconjx" : "_conjx";
-        std::string incx_str = ( incx > 0) ? std::to_string(incx) : "m" + std::to_string(std::abs(incx));
+        std::string incx_str = ( incx >= 0) ? std::to_string(incx) : "m" + std::to_string(std::abs(incx));
         str_name += "_incx" + incx_str;
-        std::string incy_str = ( incy > 0) ? std::to_string(incy) : "m" + std::to_string(std::abs(incy));
+        std::string incy_str = ( incy >= 0) ? std::to_string(incy) : "m" + std::to_string(std::abs(incy));
         str_name += "_incy" + incy_str;
-        std::string alpha_str = ( alpha > 0) ? std::to_string(int(alpha)) : "m" + std::to_string(int(std::abs(alpha)));
-        str_name = str_name + "_a" + alpha_str;
-        std::string beta_str = ( beta > 0) ? std::to_string(int(beta)) : "m" + std::to_string(int(std::abs(beta)));
-        str_name = str_name + "_b" + beta_str;
+        std::string alpha_str = ( alpha >= 0) ? std::to_string(int(alpha)) : "m" + std::to_string(int(std::abs(alpha)));
+        str_name = str_name + "_alpha" + alpha_str;
+        std::string beta_str = ( beta >= 0) ? std::to_string(int(beta)) : "m" + std::to_string(int(std::abs(beta)));
+        str_name = str_name + "_beta" + beta_str;
         return str_name;
     }
 };
@@ -116,8 +116,10 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Range(gtint_t(10), gtint_t(101), 10),          // m size of vector takes values from 10 to 100 with step size of 10.
             ::testing::Values(gtint_t(1)),                            // stride size for x
             ::testing::Values(gtint_t(1)),                            // stride size for y
-            ::testing::Values(double(2.3), double(-3.7), double(0.0)), // alpha
-            ::testing::Values(double(-4.9), double(1.2), double(0.0))  // beta
+            ::testing::Values(double(2.3), double(1.0),
+                              double(-1.0), double(0.0)),             // alpha
+            ::testing::Values(double(-4.9), double(1.0),
+                              double(-1.0), double(0.0))              // beta
         ),
         ::daxpbyvGenericTestPrint()
     );
@@ -134,8 +136,10 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(gtint_t(3), gtint_t(30), gtint_t(112)),        // m size of vector
             ::testing::Values(gtint_t(1)),                                   // stride size for x
             ::testing::Values(gtint_t(1)),                                   // stride size for y
-            ::testing::Values(double(2.0)),                                  // alpha
-            ::testing::Values(double(1.0))                                   // beta
+            ::testing::Values(double(2.3), double(1.0),
+                              double(-1.0), double(0.0)),                    // alpha
+            ::testing::Values(double(-4.9), double(1.0),
+                              double(-1.0), double(0.0)),                    // beta
         ),
         ::daxpbyvGenericTestPrint()
     );
@@ -156,8 +160,10 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Range(gtint_t(10), gtint_t(31), 10),                  // m size of vector takes values from 10 to 100 with step size of 10.
             ::testing::Values(gtint_t(7)),                                   // stride size for x
             ::testing::Values(gtint_t(3)),                                   // stride size for y
-            ::testing::Values(double(4.3), double(0.0)),                     // alpha
-            ::testing::Values(double(-1.9), double(0.0))                     // beta
+            ::testing::Values(double(2.3), double(1.0),
+                              double(-1.0), double(0.0)),                    // alpha
+            ::testing::Values(double(-4.9), double(1.0),
+                              double(-1.0), double(0.0))                     // beta
         ),
         ::daxpbyvGenericTestPrint()
     );
@@ -174,8 +180,10 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Range(gtint_t(10), gtint_t(31), 10),                  // m size of vector takes values from 10 to 100 with step size of 10.
             ::testing::Values(gtint_t(11), gtint_t(-11)),                    // stride size for x
             ::testing::Values(gtint_t(-3), gtint_t(4)),                      // stride size for y
-            ::testing::Values(double(4.7)),                                  // alpha
-            ::testing::Values(double(-2.5))                                  // beta
+            ::testing::Values(double(2.3), double(1.0),
+                              double(-1.0), double(0.0)),                    // alpha
+            ::testing::Values(double(-4.9), double(1.0),
+                              double(-1.0), double(0.0))                     // beta
         ),
         ::daxpbyvGenericTestPrint()
     );

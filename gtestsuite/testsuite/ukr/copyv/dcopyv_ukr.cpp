@@ -36,11 +36,12 @@
 #include "test_copyv_ukr.h"
 
 class dcopyvUkrTest :
-        public ::testing::TestWithParam<std::tuple<dcopyv_ker_ft,
-                                                   char,
-                                                   gtint_t,
-                                                   gtint_t,
-                                                   gtint_t>> {};
+        public ::testing::TestWithParam<std::tuple<dcopyv_ker_ft,   // Function pointer type for dcopyv kernels
+                                                   char,            // conjx
+                                                   gtint_t,         // n            
+                                                   gtint_t,         // incx
+                                                   gtint_t,         // incy
+                                                   bool>> {};       // is_memory_test
 
 GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(dcopyvUkrTest);
 
@@ -61,6 +62,8 @@ TEST_P( dcopyvUkrTest, AccuracyCheck )
     gtint_t incx = std::get<3>(GetParam());
     // stride size for y:
     gtint_t incy = std::get<4>(GetParam());
+    // is_memory_test
+    bool is_memory_test = std::get<5>(GetParam());
 
     // Set the threshold for the errors:
     double thresh = testinghelpers::getEpsilon<T>();
@@ -68,7 +71,7 @@ TEST_P( dcopyvUkrTest, AccuracyCheck )
     //----------------------------------------------------------
     //     Call generic test body using those parameters
     //----------------------------------------------------------
-    test_copyv_ukr<T, dcopyv_ker_ft>( ukr_fp, conjx, n, incx, incy, thresh );
+    test_copyv_ukr<T, dcopyv_ker_ft>( ukr_fp, conjx, n, incx, incy, thresh, is_memory_test );
 }
 
 // Used to generate a test case with a sensible name.
@@ -78,19 +81,21 @@ TEST_P( dcopyvUkrTest, AccuracyCheck )
 class dcopyvUkrTestPrint {
 public:
     std::string operator()(
-        testing::TestParamInfo<std::tuple<dcopyv_ker_ft,char,gtint_t,gtint_t,gtint_t>> str) const {
+        testing::TestParamInfo<std::tuple<dcopyv_ker_ft,char,gtint_t,gtint_t,gtint_t,bool>> str) const {
         char conjx    = std::get<1>(str.param);
         gtint_t n     = std::get<2>(str.param);
         gtint_t incx  = std::get<3>(str.param);
         gtint_t incy  = std::get<4>(str.param);
+        bool is_memory_test = std::get<5>(str.param);
 
         std::string str_name = "dcopyv_ukr";
         str_name += "_n" + std::to_string(n);
         str_name += "_conjx" + std::string(&conjx, 1);
-        std::string incx_str = ( incx > 0) ? std::to_string(incx) : "m" + std::to_string(std::abs(incx));
+        std::string incx_str = ( incx >= 0) ? std::to_string(incx) : "m" + std::to_string(std::abs(incx));
         str_name += "_incx" + incx_str;
-        std::string incy_str = ( incy > 0) ? std::to_string(incy) : "m" + std::to_string(std::abs(incy));
+        std::string incy_str = ( incy >= 0) ? std::to_string(incy) : "m" + std::to_string(std::abs(incy));
         str_name += "_incy" + incy_str;
+        str_name += ( is_memory_test ) ? "_mem_test_enabled" : "_mem_test_disabled";
         return str_name;
     }
 };
@@ -124,20 +129,15 @@ INSTANTIATE_TEST_SUITE_P(
                               gtint_t(4),             // L4
                               gtint_t(3),             // LScalar
                               // Testing the loops with combinations
-                              // 5*L64
-                              gtint_t(320),
-                              // 3*L64 + L32
-                              gtint_t(352),
-                              // 3*L64 + L32 + L16
-                              gtint_t(368),
-                              // 3*L64 + L32 + L16 + L8
-                              gtint_t(376),
-                              // 3*L64 + L32 + L16 + L8 + L4
-                              gtint_t(380),
-                              // 3*L64 + L32 + L16 + L8 + L4 + LScalar
-                              gtint_t(383)),
-            ::testing::Values(gtint_t(1)),             // stride size for x
-            ::testing::Values(gtint_t(1))              // stride size for y
+                              gtint_t(320),           // 5*L64
+                              gtint_t(352),           // 5*L64 + L32
+                              gtint_t(368),           // 5*L64 + L32 + L16
+                              gtint_t(376),           // 5*L64 + L32 + L16 + L8
+                              gtint_t(380),           // 5*L64 + L32 + L16 + L8 + L4
+                              gtint_t(383)),          // 5*L64 + L32 + L16 + L8 + L4 + 3(LScalar)
+            ::testing::Values(gtint_t(1)),            // stride size for x
+            ::testing::Values(gtint_t(1)),            // stride size for y
+            ::testing::Values(false, true)            // is_memory_test
         ),
         ::dcopyvUkrTestPrint()
     );
@@ -148,10 +148,11 @@ INSTANTIATE_TEST_SUITE_P(
         dcopyvUkrTest,
         ::testing::Combine(
             ::testing::Values(bli_dcopyv_zen_int),
-            ::testing::Values('n'),                   // conjugate parameter, 'n' for dcopyv
+            ::testing::Values('n'),                      // conjugate parameter, 'n' for dcopyv
             ::testing::Values(gtint_t(25), gtint_t(37)), // size of the vector
-            ::testing::Values(gtint_t(5)), // stride size for x
-            ::testing::Values(gtint_t(3)) // stride size for y
+            ::testing::Values(gtint_t(5)),               // stride size for x
+            ::testing::Values(gtint_t(3)),               // stride size for y
+            ::testing::Values(false, true)               // is_memory_test
         ),
         ::dcopyvUkrTestPrint()
     );

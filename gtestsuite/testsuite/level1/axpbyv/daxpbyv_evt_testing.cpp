@@ -35,7 +35,7 @@
 #include <gtest/gtest.h>
 #include "test_axpbyv.h"
 
-class daxpbyvEVTTest :
+class daxpbyvEVT :
         public ::testing::TestWithParam<std::tuple<char,         // transpose
                                                    gtint_t,      // n, size of the vector
                                                    gtint_t,      // incx
@@ -48,7 +48,7 @@ class daxpbyvEVTTest :
                                                    double>> {};  // beta
 // Tests using random values as vector elements,
 // with exception values on the passed indices.
-TEST_P(daxpbyvEVTTest, ExceptionData)
+TEST_P(daxpbyvEVT, ExceptionData)
 {
     using T = double;
     //----------------------------------------------------------
@@ -88,7 +88,7 @@ TEST_P(daxpbyvEVTTest, ExceptionData)
 
 // Test-case logger : Used to print the test-case details when vectors have exception value.
 // The string format is as follows :
-// n(vec_size)_(conjx/noconjx)_incx(m)(abs_incx)_incy(m)(abs_incy)_X_(xi)_(xexval)_(yi)_(yexval)_a(alpha_val)_b(beta_val)
+// n(vec_size)_(conjx/noconjx)_incx(m)(abs_incx)_incy(m)(abs_incy)_X_(xi)_(xexval)_(yi)_(yexval)_alpha(alpha_val)_beta(beta_val)
 class daxpbyvEVTVecPrint
 {
 public:
@@ -106,17 +106,17 @@ public:
         double alpha = std::get<8>(str.param);
         double beta = std::get<9>(str.param);
 #ifdef TEST_BLAS
-        std::string str_name = "daxpby_";
+        std::string str_name = "blas_";
 #elif TEST_CBLAS
-        std::string str_name = "cblas_daxpby";
-#else // #elif TEST_BLIS_TYPED
-        std::string str_name = "bli_daxpbyv";
+        std::string str_name = "cblas_";
+#else  //#elif TEST_BLIS_TYPED
+        std::string str_name = "bli_";
 #endif
         str_name += "_n" + std::to_string(n);
         str_name += ( conjx == 'n' )? "_noconjx" : "_conjx";
-        std::string incx_str = ( incx > 0) ? std::to_string(incx) : "m" + std::to_string(std::abs(incx));
+        std::string incx_str = ( incx >= 0) ? std::to_string(incx) : "m" + std::to_string(std::abs(incx));
         str_name += "_incx" + incx_str;
-        std::string incy_str = ( incy > 0) ? std::to_string(incy) : "m" + std::to_string(std::abs(incy));
+        std::string incy_str = ( incy >= 0) ? std::to_string(incy) : "m" + std::to_string(std::abs(incy));
         str_name += "_incy" + incy_str;
         std::string xexval_str = testinghelpers::get_value_string(xexval);
         std::string yexval_str = testinghelpers::get_value_string(yexval);
@@ -126,15 +126,15 @@ public:
         str_name = str_name + "_" + yexval_str;
         std::string alpha_str = testinghelpers::get_value_string(alpha);
         std::string beta_str = testinghelpers::get_value_string(beta);
-        str_name = str_name + "_a" + alpha_str;
-        str_name = str_name + "_b" + beta_str;
+        str_name = str_name + "_alpha" + alpha_str;
+        str_name = str_name + "_beta" + beta_str;
         return str_name;
     }
 };
 
 // Test-case logger : Used to print the test-case details when alpha/beta have exception value.
 // The string format is as follows :
-// n(vec_size)_(conjx/noconjx)_incx(m)(abs_incx)_incy(m)(abs_incy)_a(alpha_val)_b(beta_val)
+// n(vec_size)_(conjx/noconjx)_incx(m)(abs_incx)_incy(m)(abs_incy)_alpha(alpha_val)_beta(beta_val)
 class daxpbyvAlphaBetaPrint
 {
 public:
@@ -156,14 +156,14 @@ public:
 #endif
         str_name += "_n" + std::to_string(n);
         str_name += ( conjx == 'n' )? "_noconjx" : "_conjx";
-        std::string incx_str = ( incx > 0) ? std::to_string(incx) : "m" + std::to_string(std::abs(incx));
+        std::string incx_str = ( incx >= 0) ? std::to_string(incx) : "m" + std::to_string(std::abs(incx));
         str_name += "_incx" + incx_str;
-        std::string incy_str = ( incy > 0) ? std::to_string(incy) : "m" + std::to_string(std::abs(incy));
+        std::string incy_str = ( incy >= 0) ? std::to_string(incy) : "m" + std::to_string(std::abs(incy));
         str_name += "_incy" + incy_str;
         std::string alpha_str = testinghelpers::get_value_string(alpha);
         std::string beta_str = testinghelpers::get_value_string(beta);
-        str_name = str_name + "_a" + alpha_str;
-        str_name = str_name + "_b" + beta_str;
+        str_name = str_name + "_alpha" + alpha_str;
+        str_name = str_name + "_beta" + beta_str;
         return str_name;
     }
 };
@@ -199,8 +199,8 @@ static double Inf = std::numeric_limits<double>::infinity();
 */
 // Exception value testing(on X vector alone) with unit strides
 INSTANTIATE_TEST_SUITE_P(
-    exceptionValue_vecX_unitStrides,
-    daxpbyvEVTTest,
+    vecX_unitStrides,
+    daxpbyvEVT,
     ::testing::Combine(
         ::testing::Values('n' // n: use x, c: use conj(x)
 #ifdef TEST_BLIS_TYPED
@@ -212,7 +212,7 @@ INSTANTIATE_TEST_SUITE_P(
         ::testing::Values(gtint_t(1)),                                              // stride size for x
         ::testing::Values(gtint_t(1)),                                              // stride size for y
         ::testing::Values(gtint_t(0), gtint_t(79), gtint_t(99),
-                          gtint_t(107), gtint_t(111), gtint_t(114)),                  // indices to set exception values on x
+                          gtint_t(107), gtint_t(111), gtint_t(114)),                // indices to set exception values on x
         ::testing::Values(NaN, -Inf, Inf),                                          // exception values to set on x
         ::testing::Values(gtint_t(0)),                                              // dummy index on y
         ::testing::Values(double(0.0)),                                             // dummy value on y
@@ -223,8 +223,8 @@ INSTANTIATE_TEST_SUITE_P(
 
 // Exception value testing(on Y vector alone) with unit strides
 INSTANTIATE_TEST_SUITE_P(
-    exceptionValue_vecY_unitStrides,
-    daxpbyvEVTTest,
+    vecY_unitStrides,
+    daxpbyvEVT,
     ::testing::Combine(
         ::testing::Values('n' // n: use x, c: use conj(x)
 #ifdef TEST_BLIS_TYPED
@@ -238,7 +238,7 @@ INSTANTIATE_TEST_SUITE_P(
         ::testing::Values(gtint_t(0)),                                              // dummy index on x
         ::testing::Values(double(0.0)),                                             // dummy value on x
         ::testing::Values(gtint_t(0), gtint_t(79), gtint_t(99),
-                          gtint_t(107), gtint_t(111), gtint_t(114)),                  // indices to set exception values on y
+                          gtint_t(107), gtint_t(111), gtint_t(114)),                // indices to set exception values on y
         ::testing::Values(NaN, -Inf, Inf),                                          // exception values to set on y
         ::testing::Values(double(0.0), double(1.0), double(-1.0), double(-3.3)),    // alpha
         ::testing::Values(double(0.0), double(1.0), double(-1.0), double(4.5))      // beta
@@ -247,8 +247,8 @@ INSTANTIATE_TEST_SUITE_P(
 
 // Exception value testing(on X and Y vectors) with unit strides
 INSTANTIATE_TEST_SUITE_P(
-    exceptionValue_vecXY_unitStrides,
-    daxpbyvEVTTest,
+    vecXY_unitStrides,
+    daxpbyvEVT,
     ::testing::Combine(
         ::testing::Values('n' // n: use x, c: use conj(x)
 #ifdef TEST_BLIS_TYPED
@@ -260,10 +260,10 @@ INSTANTIATE_TEST_SUITE_P(
         ::testing::Values(gtint_t(1)),                                              // stride size for x
         ::testing::Values(gtint_t(1)),                                              // stride size for y
         ::testing::Values(gtint_t(0), gtint_t(79), gtint_t(99),
-                          gtint_t(107), gtint_t(111), gtint_t(114)),                  // indices to set exception values on x
+                          gtint_t(107), gtint_t(111), gtint_t(114)),                // indices to set exception values on x
         ::testing::Values(NaN, -Inf, Inf),                                          // exception values to set on x
         ::testing::Values(gtint_t(0), gtint_t(79), gtint_t(99),
-                          gtint_t(107), gtint_t(111), gtint_t(114)),                  // indices to set exception values on y
+                          gtint_t(107), gtint_t(111), gtint_t(114)),                // indices to set exception values on y
         ::testing::Values(NaN, -Inf, Inf),                                          // exception values to set on y
         ::testing::Values(double(0.0), double(1.0), double(-1.0), double(-3.3)),    // alpha
         ::testing::Values(double(0.0), double(1.0), double(-1.0), double(4.5))      // beta
@@ -274,8 +274,8 @@ INSTANTIATE_TEST_SUITE_P(
 // We have to test a single scalar loop. The indices are such
 // that we cover _vecX_, _vecY_ and _vecXY_ cases together.
 INSTANTIATE_TEST_SUITE_P(
-    exceptionValue_vec_nonUnitStrides,
-    daxpbyvEVTTest,
+    vec_nonUnitStrides,
+    daxpbyvEVT,
     ::testing::Combine(
         ::testing::Values('n' // n: use x, c: use conj(x)
 #ifdef TEST_BLIS_TYPED
@@ -308,8 +308,8 @@ INSTANTIATE_TEST_SUITE_P(
 */
 // Exception value testing(on alpha/beta) with unit strided vectors
 INSTANTIATE_TEST_SUITE_P(
-    exceptionValue_alphaBeta_unitStrides,
-    daxpbyvEVTTest,
+    alphaBeta_unitStrides,
+    daxpbyvEVT,
     ::testing::Combine(
         ::testing::Values('n' // n: use x, c: use conj(x)
 #ifdef TEST_BLIS_TYPED
@@ -331,8 +331,8 @@ INSTANTIATE_TEST_SUITE_P(
 
 // Exception value testing(on alpha/beta) with non-unit strided vectors
 INSTANTIATE_TEST_SUITE_P(
-    exceptionValue_alphaBeta_nonUnitStrides,
-    daxpbyvEVTTest,
+    alphaBeta_nonUnitStrides,
+    daxpbyvEVT,
     ::testing::Combine(
         ::testing::Values('n' // n: use x, c: use conj(x)
 #ifdef TEST_BLIS_TYPED

@@ -34,9 +34,11 @@
 
 #pragma once
 
+#include <stdexcept>
 #include "level1/axpbyv/axpbyv.h"
 #include "level1/ref_axpbyv.h"
 #include "inc/check_error.h"
+#include "common/testing_helpers.h"
 
 /**
  * @brief Generic test body for axpby operation.
@@ -45,26 +47,76 @@
 // The function is templatized based on the datatype and function-pointer type to the kernel.
 template<typename T, typename FT>
 static void test_axpbyv_ukr( FT ukr_fp, char conjx, gtint_t n, gtint_t incx, gtint_t incy,
-                         T alpha, T beta, double thresh )
+                         T alpha, T beta, double thresh, bool is_memory_test = false )
 {
-    //----------------------------------------------------------
-    //        Allocate the fixed memory and initialize
-    //        vectors with random numbers.
-    //----------------------------------------------------------
+    // Pointers to obtain the required memory.
+    T *x, *y, *y_ref, *x_copy;
+    gtint_t size_x = testinghelpers::buff_dim( n, incx ) * sizeof( T );
+    gtint_t size_y = testinghelpers::buff_dim( n, incy ) * sizeof( T );
 
-    T *x, *y, *y_ref;
-    gtint_t size_x = testinghelpers::buff_dim( n, incx );
-    gtint_t size_y = testinghelpers::buff_dim( n, incy );
-    x = ( T* )malloc( sizeof( T ) * size_x );
-    y = ( T* )malloc( sizeof( T ) * size_y );
-    y_ref = ( T* )malloc( sizeof( T ) * size_y );
+    // Create the objects for the input and output operands
+    // The kernel does not expect the memory to be aligned
+    testinghelpers::ProtectedBuffer x_buffer( size_x, false, is_memory_test );
+    testinghelpers::ProtectedBuffer y_buffer( size_y, false, is_memory_test );
 
+    // For y_ref, we don't need different greenzones and any redzone.
+    // Thus, we pass is_memory_test as false
+    testinghelpers::ProtectedBuffer y_ref_buffer( size_y, false, false );
+    // Creating x_copy, to save the contents of x(without any redzones)
+    testinghelpers::ProtectedBuffer x_copy_buffer( size_x, false, false );
+
+    // Acquire the first set of greenzones for x and y
+    x = ( T* )x_buffer.greenzone_1;
+    y = ( T* )y_buffer.greenzone_1;
+    y_ref = ( T* )y_ref_buffer.greenzone_1; // For y_ref, there is no greenzone_2
+    x_copy = ( T* )x_copy_buffer.greenzone_1; // For x_copy, there is no greenzone_2
+
+    // Initiaize the memory with random data
     testinghelpers::datagenerators::randomgenerators( -10, 10, n, incx, x );
     testinghelpers::datagenerators::randomgenerators( -10, 10, n, incy, y );
 
-    // Copying y to y_ref, for comparision after computation
-    for( gtint_t i = 0; i < size_y; i += 1 )
-      *( y_ref + i ) = *( y + i );
+    // Copying the contents of y to y_ref and x to x_copy
+    memcpy( y_ref, y, size_y );
+    memcpy( x_copy, x, size_x );
+
+    // Char conjx to BLIS conjx conversion
+    conj_t blis_conjx;
+    testinghelpers::char_to_blis_conj( conjx, &blis_conjx );
+
+    // Add signal handler for segmentation fault
+    testinghelpers::ProtectedBuffer::start_signal_handler();
+    try
+    {
+        // Call the ukr function.
+        // This call is made irrespective of is_memory_test.
+        // This will check for out of bounds access with first redzone(if memory test is true)
+        // Else, it will just call the ukr function.
+        ukr_fp( blis_conjx, n, &alpha, x, incx, &beta, y, incy, nullptr );
+
+        if ( is_memory_test )
+        {
+            // Acquire the pointers near the second redzone
+            x = ( T* )x_buffer.greenzone_2;
+            y = ( T* )y_buffer.greenzone_2;
+
+            // Copy the data for x and y accordingly
+            memcpy( x, x_copy, size_x );
+            memcpy( y, y_ref, size_y );
+
+            // Call the ukr function, to check with the second redzone.
+            ukr_fp( blis_conjx, n, &alpha, x, incx, &beta, y, incy, nullptr );
+        }
+    }
+    catch(const std::exception& e)
+    {
+        // Reset to default signal handler
+        testinghelpers::ProtectedBuffer::stop_signal_handler();
+
+        // Show failure in case seg fault was detected
+        FAIL() << "Memory Test Failed";
+    }
+    // Reset to default signal handler
+    testinghelpers::ProtectedBuffer::stop_signal_handler();
 
     //----------------------------------------------------------
     //    Call reference implementation to get ref results.
@@ -72,19 +124,7 @@ static void test_axpbyv_ukr( FT ukr_fp, char conjx, gtint_t n, gtint_t incx, gti
     testinghelpers::ref_axpbyv<T>( conjx, n, alpha, x, incx, beta, y_ref, incy );
 
     //----------------------------------------------------------
-    //                  Call BLIS function.
-    //----------------------------------------------------------
-
-    conj_t blis_conjx;
-    testinghelpers::char_to_blis_conj( conjx, &blis_conjx );
-    ukr_fp( blis_conjx, n, &alpha, x, incx, &beta, y, incy, nullptr );
-
-    //----------------------------------------------------------
     //              Compute component-wise error.
     //----------------------------------------------------------
     computediff<T>( n, y, y_ref, incy, thresh );
-
-    free( x );
-    free( y );
-    free( y_ref );
 }

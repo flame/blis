@@ -80,17 +80,17 @@ public:
         gtint_t incx  = std::get<2>(str.param);
         gtint_t incy  = std::get<3>(str.param);
 #ifdef TEST_BLAS
-        std::string str_name = "dcopy_";
+        std::string str_name = "blas_";
 #elif TEST_CBLAS
-        std::string str_name = "cblas_dcopy";
+        std::string str_name = "cblas_";
 #else  //#elif TEST_BLIS_TYPED
-        std::string str_name = "bli_dcopyv";
+        std::string str_name = "bli_";
 #endif
         str_name += "_" + std::to_string(n);
         str_name += "_" + std::string(&conjx, 1);
-        std::string incx_str = ( incx > 0) ? std::to_string(incx) : "m" + std::to_string(std::abs(incx));
+        std::string incx_str = ( incx >= 0) ? std::to_string(incx) : "m" + std::to_string(std::abs(incx));
         str_name += "_" + incx_str;
-        std::string incy_str = ( incy > 0) ? std::to_string(incy) : "m" + std::to_string(std::abs(incy));
+        std::string incy_str = ( incy >= 0) ? std::to_string(incy) : "m" + std::to_string(std::abs(incy));
         str_name += "_" + incy_str;
         return str_name;
     }
