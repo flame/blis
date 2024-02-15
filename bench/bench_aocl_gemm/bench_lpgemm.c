@@ -680,6 +680,37 @@ GEN_GELU_ERF_POSTOP_FLOAT(f32f32f32of32)
 GEN_GELU_ERF_POSTOP_FLOAT(bf16bf16f32of32)
 GEN_GELU_ERF_POSTOP_FLOAT(bf16bf16f32obf16)
 
+static inline float get_matrix_add_post_op_val_bf16bf16f32obf16
+     (
+       bfloat16 val
+     )
+{
+	float ret_val = 0.0;
+	bfloat16_to_float( val, &ret_val );
+	return ret_val;
+}
+
+#define GEN_GET_MATRIX_ADD_POST_OP_VAL(C_type,ACCUM_type,BLAS_SFX) \
+static inline ACCUM_type get_matrix_add_post_op_val_ ## BLAS_SFX \
+     ( \
+       C_type val \
+     ) \
+{ \
+	return (ACCUM_type) val; \
+} \
+
+GEN_GET_MATRIX_ADD_POST_OP_VAL(int8_t,int32_t,u8s8s32os8)
+GEN_GET_MATRIX_ADD_POST_OP_VAL(int32_t,int32_t,u8s8s32os32)
+GEN_GET_MATRIX_ADD_POST_OP_VAL(int8_t,int16_t,u8s8s16os8)
+GEN_GET_MATRIX_ADD_POST_OP_VAL(uint8_t,int16_t,u8s8s16ou8)
+GEN_GET_MATRIX_ADD_POST_OP_VAL(int16_t,int16_t,u8s8s16os16)
+GEN_GET_MATRIX_ADD_POST_OP_VAL(int8_t,int32_t,s8s8s32os8)
+GEN_GET_MATRIX_ADD_POST_OP_VAL(int32_t,int32_t,s8s8s32os32)
+GEN_GET_MATRIX_ADD_POST_OP_VAL(int8_t,int16_t,s8s8s16os8)
+GEN_GET_MATRIX_ADD_POST_OP_VAL(int16_t,int16_t,s8s8s16os16)
+GEN_GET_MATRIX_ADD_POST_OP_VAL(float,float,f32f32f32of32)
+GEN_GET_MATRIX_ADD_POST_OP_VAL(float,float,bf16bf16f32of32)
+
 #define GEN_MAT_MUL_GET_OUTPUT_TYPE_VALUE(C_type, ACCUM_type) \
 void mat_mul_get_output_type_val ## ACCUM_type ## C_type \
      ( \
@@ -866,7 +897,8 @@ void mat_mul_accuracy_check_driver_ ## BLAS_SFX \
                             cs_m = rs_m; \
                             rs_m = 1; \
                         } \
-                        temp_accum += ( *( ( C_type* )post_op->matrix_add.matrix + \
+                        temp_accum += GEN_FUNC_NAME(get_matrix_add_post_op_val_,BLAS_SFX) \
+									( *( ( C_type* )post_op->matrix_add.matrix + \
                                            ( i * rs_m ) + ( j * cs_m ) ) ); \
                     } \
                     else \
@@ -1489,7 +1521,7 @@ int main( int argc, char** argv )
           "    1. u8s8s32os32 -d s8 = u8s8s32os8.\n" \
           "    2. u8s8s16os16 -d s8 = u8s8s16os8.\n" \
           "    3. u8s8s16os16 -d u8 = u8s8s16ou8.\n" \
-          "    4. bf16bf16f32obf32 -d bf16 = bf16bf16f32obf16.\n" \
+          "    4. bf16bf16f32of32 -d bf16 = bf16bf16f32obf16.\n" \
           "    5. s8s8s32os32 -d s8 = s8s8s32os8.\n" \
           "    6. s8s8s16os16 -d s8 = s8s8s16os8.\n" \
           "  Example: ./bench_lpgemm -m a -n 2 -o bias,relu -d bf16 -i input.txt\n" \

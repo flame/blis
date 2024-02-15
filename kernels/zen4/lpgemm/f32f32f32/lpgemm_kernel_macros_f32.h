@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-  Copyright (C) 2023, Advanced Micro Devices, Inc. All rights reserved.
+  Copyright (C) 2023-2024, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -73,6 +73,48 @@
       zmm1 = _mm512_mul_ps(zmm1,alpha); \
       zmm2 = _mm512_mul_ps(zmm2,alpha); \
       zmm3 = _mm512_mul_ps(zmm3,alpha);
+
+// Matrix Add post-ops helper macros
+#define F32_MATRIX_ADD_2COL(scr0,scr1,m_ind,r_ind0,r_ind1) \
+	zmm ## r_ind0 = _mm512_add_ps( scr0, zmm ## r_ind0 ); \
+	zmm ## r_ind1 = _mm512_add_ps( scr1, zmm ## r_ind1 ); \
+
+#define F32_MATRIX_ADD_3COL(scr0,scr1,scr2,m_ind,r_ind0,r_ind1,r_ind2) \
+	zmm ## r_ind0 = _mm512_add_ps( scr0, zmm ## r_ind0 ); \
+	zmm ## r_ind1 = _mm512_add_ps( scr1, zmm ## r_ind1 ); \
+	zmm ## r_ind2 = _mm512_add_ps( scr2, zmm ## r_ind2 ); \
+
+#define F32_MATRIX_ADD_4COL(scr0,scr1,scr2,scr3,m_ind,r_ind0,r_ind1,r_ind2,r_ind3) \
+	zmm ## r_ind0 = _mm512_add_ps( scr0, zmm ## r_ind0 ); \
+	zmm ## r_ind1 = _mm512_add_ps( scr1, zmm ## r_ind1 ); \
+	zmm ## r_ind2 = _mm512_add_ps( scr2, zmm ## r_ind2 ); \
+	zmm ## r_ind3 = _mm512_add_ps( scr3, zmm ## r_ind3 ); \
+
+#define F32_F32_MATRIX_ADD_LOAD(mask,scr,m_ind,n_ind) \
+	scr = _mm512_maskz_loadu_ps \
+			( \
+			  mask, \
+			  matptr + ( ( post_ops_attr.post_op_c_i + m_ind ) * ldm ) + \
+			  post_ops_attr.post_op_c_j + ( n_ind * 16 ) \
+			); \
+
+#define F32_F32_MATRIX_ADD_2COL(scr0,scr1,m_ind,r_ind0,r_ind1) \
+	F32_F32_MATRIX_ADD_LOAD(_cvtu32_mask16( 0xFFFF ),scr0,m_ind,0); \
+	F32_F32_MATRIX_ADD_LOAD(_cvtu32_mask16( 0xFFFF ),scr1,m_ind,1); \
+	F32_MATRIX_ADD_2COL(scr0,scr1,m_ind,r_ind0,r_ind1); \
+
+#define F32_F32_MATRIX_ADD_3COL(scr0,scr1,scr2,m_ind,r_ind0,r_ind1,r_ind2) \
+	F32_F32_MATRIX_ADD_LOAD(_cvtu32_mask16( 0xFFFF ),scr0,m_ind,0); \
+	F32_F32_MATRIX_ADD_LOAD(_cvtu32_mask16( 0xFFFF ),scr1,m_ind,1); \
+	F32_F32_MATRIX_ADD_LOAD(_cvtu32_mask16( 0xFFFF ),scr2,m_ind,2); \
+	F32_MATRIX_ADD_3COL(scr0,scr1,scr2,m_ind,r_ind0,r_ind1,r_ind2); \
+
+#define F32_F32_MATRIX_ADD_4COL(scr0,scr1,scr2,scr3,m_ind,r_ind0,r_ind1,r_ind2,r_ind3) \
+	F32_F32_MATRIX_ADD_LOAD(_cvtu32_mask16( 0xFFFF ),scr0,m_ind,0); \
+	F32_F32_MATRIX_ADD_LOAD(_cvtu32_mask16( 0xFFFF ),scr1,m_ind,1); \
+	F32_F32_MATRIX_ADD_LOAD(_cvtu32_mask16( 0xFFFF ),scr2,m_ind,2); \
+	F32_F32_MATRIX_ADD_LOAD(_cvtu32_mask16( 0xFFFF ),scr3,m_ind,3); \
+	F32_MATRIX_ADD_4COL(scr0,scr1,scr2,scr3,m_ind,r_ind0,r_ind1,r_ind2,r_ind3); \
  
 #endif //LPGEMM_F32_SGEMM_KERN_MACROS_H
 

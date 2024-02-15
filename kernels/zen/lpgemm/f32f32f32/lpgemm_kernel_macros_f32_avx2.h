@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-  Copyright (C) 2023, Advanced Micro Devices, Inc. All rights reserved.
+  Copyright (C) 2023-2024, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -127,5 +127,65 @@
 #define F32_C_BNZ_1(cbuf,rs_c,xmm0,beta,xmm2) \
       xmm0 = _mm_load_ss(cbuf); \
       xmm2 = _mm_fmadd_ps(xmm0, beta, xmm2); \
+
+// Matrix Add post-ops helper macros
+#define F32_MATRIX_ADD_1COL_XMM(scr0,m_ind,r_ind0) \
+	xmm ## r_ind0 = _mm_add_ps( scr0, xmm ## r_ind0 ); \
+
+#define F32_MATRIX_ADD_1COL_YMM(scr0,m_ind,r_ind0) \
+	ymm ## r_ind0 = _mm256_add_ps( scr0, ymm ## r_ind0 ); \
+
+#define F32_MATRIX_ADD_2COL_YMM(scr0,scr1,m_ind,r_ind0,r_ind1) \
+	ymm ## r_ind0 = _mm256_add_ps( scr0, ymm ## r_ind0 ); \
+	ymm ## r_ind1 = _mm256_add_ps( scr1, ymm ## r_ind1 ); \
+
+#define F32_F32_MATRIX_ADD_LOAD_XMM_1ELE(scr,m_ind,n_ind) \
+	scr = ( __m128 )_mm_load_ss \
+			( \
+			  matptr + ( ( post_ops_attr.post_op_c_i + m_ind ) * ldm ) + \
+			  post_ops_attr.post_op_c_j + ( n_ind * 2 ) \
+			); \
+
+#define F32_F32_MATRIX_ADD_1COL_XMM_1ELE(scr0,m_ind,r_ind0) \
+	F32_F32_MATRIX_ADD_LOAD_XMM_1ELE(scr0,m_ind,0); \
+	F32_MATRIX_ADD_1COL_XMM(scr0,m_ind,r_ind0); \
+
+#define F32_F32_MATRIX_ADD_LOAD_XMM_2ELE(scr,m_ind,n_ind) \
+	scr = ( __m128 )_mm_load_sd \
+			( \
+			  matptr + ( ( post_ops_attr.post_op_c_i + m_ind ) * ldm ) + \
+			  post_ops_attr.post_op_c_j + ( n_ind * 2 ) \
+			); \
+
+#define F32_F32_MATRIX_ADD_1COL_XMM_2ELE(scr0,m_ind,r_ind0) \
+	F32_F32_MATRIX_ADD_LOAD_XMM_2ELE(scr0,m_ind,0); \
+	F32_MATRIX_ADD_1COL_XMM(scr0,m_ind,r_ind0); \
+
+#define F32_F32_MATRIX_ADD_LOAD_XMM(scr,m_ind,n_ind) \
+	scr = _mm_loadu_ps \
+			( \
+			  matptr + ( ( post_ops_attr.post_op_c_i + m_ind ) * ldm ) + \
+			  post_ops_attr.post_op_c_j + ( n_ind * 4 ) \
+			); \
+
+#define F32_F32_MATRIX_ADD_1COL_XMM(scr0,m_ind,r_ind0) \
+	F32_F32_MATRIX_ADD_LOAD_XMM(scr0,m_ind,0); \
+	F32_MATRIX_ADD_1COL_XMM(scr0,m_ind,r_ind0); \
+
+#define F32_F32_MATRIX_ADD_LOAD_YMM(scr,m_ind,n_ind) \
+	scr = _mm256_loadu_ps \
+			( \
+			  matptr + ( ( post_ops_attr.post_op_c_i + m_ind ) * ldm ) + \
+			  post_ops_attr.post_op_c_j + ( n_ind * 8 ) \
+			); \
+
+#define F32_F32_MATRIX_ADD_1COL(scr0,m_ind,r_ind0) \
+	F32_F32_MATRIX_ADD_LOAD_YMM(scr0,m_ind,0); \
+	F32_MATRIX_ADD_1COL_YMM(scr0,m_ind,r_ind0); \
+
+#define F32_F32_MATRIX_ADD_2COL(scr0,scr1,m_ind,r_ind0,r_ind1) \
+	F32_F32_MATRIX_ADD_LOAD_YMM(scr0,m_ind,0); \
+	F32_F32_MATRIX_ADD_LOAD_YMM(scr1,m_ind,1); \
+	F32_MATRIX_ADD_2COL_YMM(scr0,scr1,m_ind,r_ind0,r_ind1); \
 
 #endif //LPGEMM_F32_SGEMM_AVX2_KERN_MACROS_H
