@@ -69,6 +69,8 @@ void bli_gemm_ker_var2
 	      char*  c_cast    = bli_obj_buffer_at_off( c );
 	const inc_t  rs_c      = bli_obj_row_stride( c );
 	const inc_t  cs_c      = bli_obj_col_stride( c );
+	const inc_t  off_m     = bli_obj_row_off( c );
+	const inc_t  off_n     = bli_obj_col_off( c );
 
 	// If any dimension is zero, return immediately.
 	if ( bli_zero_dim3( m, n, k ) ) return;
@@ -245,6 +247,11 @@ void bli_gemm_ker_var2
 			// object.
 			bli_auxinfo_set_next_a( a2, &aux );
 			bli_auxinfo_set_next_b( b2, &aux );
+
+			// Set the current offset into the C matrix in the auxinfo_t
+			// object.
+			bli_auxinfo_set_off_m( off_m + i, &aux );
+			bli_auxinfo_set_off_m( off_n + j, &aux );
 
 			// Edge case handling now occurs within the microkernel itself.
 			// Invoke the gemm micro-kernel.
