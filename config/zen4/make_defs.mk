@@ -4,7 +4,7 @@
 #  An object-based framework for developing high-performance BLAS-like
 #  libraries.
 #
-#  Copyright (C) 2022 - 2023, Advanced Micro Devices, Inc. All rights reserved.
+#  Copyright (C) 2022 - 2024, Advanced Micro Devices, Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -102,8 +102,12 @@ ifeq ($(CC_VENDOR),gcc)
     # gcc 8.0 or later
     CKVECFLAGS += -march=znver1 -mavx512f -mavx512dq -mavx512bw -mavx512vl -mavx512vnni
     CRVECFLAGS += -march=znver1
+  else ifeq ($(shell test $(GCC_VERSION) -ge 7; echo $$?),0)
+    # gcc 7.0 or later
+    CKVECFLAGS += -march=znver1 -mavx512f -mavx512dq -mavx512bw -mavx512vl
+    CRVECFLAGS += -march=znver1
   else
-    # If gcc is older than 8.0.0 but at least 6.1.0, then we can use -march=znver1
+    # If gcc is older than 7.0.0 but at least 6.1.0, then we can use -march=znver1
     # as the fallback option.
     CKVECFLAGS += -march=znver1 -mno-avx256-split-unaligned-store
     CRVECFLAGS += -march=znver1 -mno-avx256-split-unaligned-store

@@ -1,4 +1,4 @@
-##Copyright (C) 2023, Advanced Micro Devices, Inc. All rights reserved. ##
+##Copyright (C) 2023-2024, Advanced Micro Devices, Inc. All rights reserved. ##
 
 # FLAGS that are specific to the 'zen4' architecture are added here.
 # FLAGS that are common for all the AMD architectures are present in
@@ -52,8 +52,12 @@ if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
         # gcc 8.0 or later
         list(APPEND CKVECFLAGS -march=znver1 -mavx512f -mavx512dq -mavx512bw -mavx512vl -mavx512vnni)
         list(APPEND CRVECFLAGS -march=znver1)
+    elseif(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 7.0.0)
+        # gcc 7.0 or later
+        list(APPEND CKVECFLAGS -march=znver1 -mavx512f -mavx512dq -mavx512bw -mavx512vl)
+        list(APPEND CRVECFLAGS -march=znver1)
     else()
-        # If gcc is older than 8.0.0 but at least 6.1.0, then we can use -march=znver1
+        # If gcc is older than 7.0.0 but at least 6.1.0, then we can use -march=znver1
         # as the fallback option.
         list(APPEND CKVECFLAGS -march=znver1 -mno-avx256-split-unaligned-store)
         list(APPEND CRVECFLAGS -march=znver1 -mno-avx256-split-unaligned-store)
