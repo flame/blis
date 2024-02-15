@@ -73,7 +73,7 @@
 /**********************************************************************/
 
 template<typename T, typename FT>
-static void test_zgemmsup_ukr( char storage, char trnsa, char trnsb, gtint_t m, gtint_t n, gtint_t k, T alpha, T beta, double thresh, FT ukr_fp, bool is_memory_test = false )
+static void test_complex_gemmsup_ukr( char storage, char trnsa, char trnsb, gtint_t m, gtint_t n, gtint_t k, T alpha, T beta, double thresh, FT ukr_fp, bool is_memory_test = false )
 {
     // Compute the leading dimensions of a, b, and c.
     gtint_t lda = testinghelpers::get_leading_dimension( storage, trnsa, m, k, 0 );
@@ -96,26 +96,10 @@ static void test_zgemmsup_ukr( char storage, char trnsa, char trnsb, gtint_t m, 
     /* hence is_memory_test is set to false                            */
     testinghelpers::ProtectedBuffer buf_cref_ptrs( sizec, false , false );
 
-    /* GreenZone-1 and GreenZone-2 might overlap hence we need         */
-    /* additional buffer to copy contents of GreenZone-1 before        */
-    /* copying it to GreenZone-2                                       */
-    testinghelpers::ProtectedBuffer buf_aref_ptrs( sizea, false , false );
-    testinghelpers::ProtectedBuffer buf_bref_ptrs( sizeb, false , false );
-
-
     T* buf_a    = (T*)buf_a_ptrs.greenzone_1;
     T* buf_b    = (T*)buf_b_ptrs.greenzone_1;
     T* buf_c    = (T*)buf_c_ptrs.greenzone_1;
     T* buf_cref    = (T*)buf_cref_ptrs.greenzone_1;
-    T* buf_aref    = (T*)buf_aref_ptrs.greenzone_1;
-    T* buf_bref    = (T*)buf_bref_ptrs.greenzone_1;
-
-    // Check if the memory has been successfully allocated
-    if ((buf_a == NULL) || (buf_b == NULL) ||(buf_c == NULL) || (buf_cref == NULL)
-        || (buf_aref == NULL) || (buf_bref == NULL) ) {
-        printf("Memory not allocated for input or output Matrix.\n");
-        return ;
-    }
 
     testinghelpers::datagenerators::randomgenerators<T>( -2, 8, storage, m, k, (T*)(buf_a), trnsa, lda);
     testinghelpers::datagenerators::randomgenerators<T>( -5, 2, storage, k, n, (T*)(buf_b), trnsb, ldb);
@@ -123,9 +107,6 @@ static void test_zgemmsup_ukr( char storage, char trnsa, char trnsb, gtint_t m, 
 
     // Create a copy of c so that we can check reference results.
     memcpy(buf_cref, buf_c, sizec);
-
-    memcpy(buf_aref, buf_a, sizea);
-    memcpy(buf_bref, buf_b, sizeb);
 
     gtint_t rs_a = 1, cs_a = 1, rs_b = 1, cs_b = 1, rs_c = 1, cs_c = 1;
     gtint_t rs_a0 = 1, cs_a0 = 1, rs_b0 = 1, cs_b0 = 1;
@@ -174,7 +155,6 @@ static void test_zgemmsup_ukr( char storage, char trnsa, char trnsb, gtint_t m, 
         rs_a = cs_a0;
         cs_a = rs_a0;
     }
-
     // add signal handler for segmentation fault
     testinghelpers::ProtectedBuffer::start_signal_handler();
     try
@@ -206,15 +186,9 @@ static void test_zgemmsup_ukr( char storage, char trnsa, char trnsb, gtint_t m, 
             buf_b    = (T*)buf_b_ptrs.greenzone_2;
             buf_c    = (T*)buf_c_ptrs.greenzone_2;
 
-            // Check if the memory has been successfully allocated
-            if ((buf_a == NULL) || (buf_b == NULL) || (buf_c == NULL)) {
-                printf("Memory not allocated for input or output Matrix for memory test.\n");
-                return ;
-            }
-
             // copy data from 1st buffer of A and B to second buffer
-            memcpy(buf_a, buf_aref, sizea);
-            memcpy(buf_b, buf_bref, sizeb);
+            memcpy(buf_a, buf_a_ptrs.greenzone_1, sizea);
+            memcpy(buf_b, buf_b_ptrs.greenzone_1, sizeb);
 
             //buf_c_ptrs.greenzone_1 has been updated with output from previous
             // gemm call, hence use buf_cref
@@ -265,27 +239,31 @@ static void test_zgemmsup_ukr( char storage, char trnsa, char trnsb, gtint_t m, 
 template<typename T, typename FT>
 static void test_gemmnat_ukr( char storage, gtint_t m, gtint_t n, gtint_t k, T alpha, T beta, double thresh, FT ukr_fp, bool is_memory_test = false )
 {
-    // In case of memory test:
-    // Allocate packed buffer size for Matrix A, B native kernel works on packed buffer
-    // Native kernel has preload or prebroadcase design
-    // If we allocate size required by dimension then memtest fails
+    
+    /*************Memory requirement*****************************/
+    /* General requirement of memory allocation:                */
+    /*        Block                Microkernel                  */
+    /*     A = MC * KC            A = MR * k                    */
+    /*     B = NC * KC            B = NR * k                    */
+    /*     C = MC * NC            C = MR * NR                   */    
+    /* Native kernel works on packed buffer for A and B matrix  */
+    /* Memory requirement for input matrix for a block:         */
+    /*     A = (MC + max(MR, NR)) * (KC + max(MR, NR))          */
+    /*     B = (NC + max(MR, NR)) * (KC + max(MR, NR))          */
+    /* Memory requirement for input matrix for a microkernel:   */
+    /*     A = max(MR, NR) * (k + max(MR, NR))                  */
+    /*     B = max(MR, NR) * (k + max(MR, NR))                  */
+    /* MC, NC, KC - Cache block sizes                           */
+    /* MR, NR - Micro kernel sizes                              */
+    /* To support preloading feature inside microkernel,        */
+    /* allocation of extra memory is must                       */
+    /************************************************************/
+
     obj_t a, b;
-    obj_t ap, bp; // for packed buffers
-    cntx_t* cntx;
     num_t dt = BLIS_DCOMPLEX;
-    cntx = bli_gks_query_cntx();
+    gtint_t maxmn = std::max(m,n);
     bli_obj_create(dt, m, k, 1, m, &a);
     bli_obj_create(dt, k, n, n, 1, &b);
-
-    bli_obj_create(dt, m, k, 1, m, &ap);
-    bli_obj_create(dt, k, n, n, 1, &bp);
-
-    gtint_t sizea = bli_packm_init_pack( BLIS_NO_INVERT_DIAG, BLIS_GEMM, BLIS_PACKED_ROW_PANELS,
-                        BLIS_PACK_FWD_IF_UPPER, BLIS_PACK_FWD_IF_LOWER,
-                        BLIS_MR, BLIS_KR, &a, &ap, cntx) * sizeof(T);
-    gtint_t sizeb = bli_packm_init_pack( BLIS_NO_INVERT_DIAG, BLIS_GEMM, BLIS_PACKED_COL_PANELS,
-                             BLIS_PACK_FWD_IF_UPPER, BLIS_PACK_FWD_IF_LOWER,
-                             BLIS_KR, BLIS_NR, &b, &bp, cntx ) * sizeof(T);
 
     // Create test operands
     // matrix A will be in col-storage
@@ -296,13 +274,13 @@ static void test_gemmnat_ukr( char storage, gtint_t m, gtint_t n, gtint_t k, T a
     gtint_t rs = 1;
     gtint_t cs = m;
     gtint_t lda = cs;
-    //gtint_t sizea =  m * k * sizeof(T);
+    gtint_t sizea =  maxmn * (k+maxmn) * sizeof(T);
 
     // Set matrix B dimensions
     rs = n;
     cs = 1;
     gtint_t ldb = rs;
-    //gtint_t sizeb =  k * n * sizeof(T);
+    gtint_t sizeb =  (k+maxmn) * maxmn * sizeof(T);
 
     // Set matrix C dimensions
     gtint_t ldc  = m;
@@ -342,13 +320,6 @@ static void test_gemmnat_ukr( char storage, gtint_t m, gtint_t n, gtint_t k, T a
     T* buf_cref = (T*)buf_c_ref_ptrs.greenzone_1;
     T* buf_aref = (T*)buf_a_ref_ptrs.greenzone_1;
     T* buf_bref = (T*)buf_b_ref_ptrs.greenzone_1;
-
-    // Check if the memory has been successfully allocated
-    if (( buf_a == NULL ) || ( buf_b == NULL ) || ( buf_c == NULL ) || 
-        ( buf_cref == NULL ) || ( buf_aref == NULL ) || ( buf_bref == NULL )) {
-        printf("Matrix: Memory not allocated.\n");
-        return ;
-    }
 
     /* Initialize Matrices with random numbers */
     testinghelpers::datagenerators::randomgenerators<T>( -2, 8, 'c', m, k, (T*)(buf_a), 'n', lda);

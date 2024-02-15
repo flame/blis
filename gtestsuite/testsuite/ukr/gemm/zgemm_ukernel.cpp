@@ -29,7 +29,7 @@
 #include <gtest/gtest.h>
 #include "blis.h"
 #include "common/testing_helpers.h"
-#include "test_zgemm_ukr.h"
+#include "test_complex_gemm_ukr.h"
 
 /*******************************************************/
 /*                 SUP Kernel testing                  */
@@ -62,7 +62,7 @@ TEST_P(zgemmUkrSUP, FunctionalTest)
     char transb = std::get<8>(GetParam());                                  // transb
     bool is_memory_test = std::get<9>(GetParam());                          // is_memory_test
     double thresh = 30 * (std::max(k,10)) * testinghelpers::getEpsilon<T>(); // Set the threshold for the errors
-    test_zgemmsup_ukr(storageC, transa, transb, m, n, k, alpha, beta, thresh, kern_ptr, is_memory_test);
+    test_complex_gemmsup_ukr(storageC, transa, transb, m, n, k, alpha, beta, thresh, kern_ptr, is_memory_test);
 }// end of function
 
 class zgemmUkrSUPPrint {
