@@ -35,7 +35,7 @@
 // clang-format off
 #include "blis.h"
 #include "../../riscv_cmul_macros_asm.h"
-#include "../bli_kernels_sifive_x280.h"
+#include "../../bli_kernels_sifive_x280.h"
 #include <stdint.h>
 #include <riscv_vector.h>
 
