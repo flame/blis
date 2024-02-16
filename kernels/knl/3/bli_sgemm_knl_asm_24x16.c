@@ -190,7 +190,7 @@ void bli_sgemm_knl_asm_24x16
        const void*      b,
        const void*      beta,
              void*      c, inc_t rs_c_, inc_t cs_c_,
-             auxinfo_t* data,
+       const auxinfo_t* data,
        const cntx_t*    cntx
      )
 {

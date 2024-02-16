@@ -41,7 +41,7 @@
 #undef  GENFRONT
 #define GENFRONT( opname ) \
 \
-void PASTEMAC0(opname) \
+void PASTEMAC(opname) \
      ( \
        const obj_t* alpha, \
        const obj_t* a, \
@@ -60,11 +60,34 @@ GENFRONT( gemmt )
 GENFRONT( her2k )
 GENFRONT( syr2k )
 
+#undef  GENFRONT
+#define GENFRONT( opname ) \
+\
+void PASTEMAC(opname) \
+     ( \
+       const obj_t* alpha, \
+       const obj_t* a, \
+       const obj_t* d, \
+       const obj_t* b, \
+       const obj_t* beta, \
+       const obj_t* c  \
+     ) \
+{ \
+	/* Invoke the expert interface and request default cntx_t and rntm_t
+	   objects. */ \
+	PASTEMAC(opname,_ex)( alpha, a, d, b, beta, c, NULL, NULL ); \
+}
+
+GENFRONT( gemdm )
+GENFRONT( gemdmt )
+GENFRONT( her2kd )
+GENFRONT( syr2kd )
+
 
 #undef  GENFRONT
 #define GENFRONT( opname ) \
 \
-void PASTEMAC0(opname) \
+void PASTEMAC(opname) \
      ( \
              side_t side, \
        const obj_t* alpha, \
@@ -87,7 +110,7 @@ GENFRONT( trmm3 )
 #undef  GENFRONT
 #define GENFRONT( opname ) \
 \
-void PASTEMAC0(opname) \
+void PASTEMAC(opname) \
      ( \
        const obj_t* alpha, \
        const obj_t* a, \
@@ -107,7 +130,28 @@ GENFRONT( syrk )
 #undef  GENFRONT
 #define GENFRONT( opname ) \
 \
-void PASTEMAC0(opname) \
+void PASTEMAC(opname) \
+     ( \
+       const obj_t* alpha, \
+       const obj_t* a, \
+       const obj_t* d, \
+       const obj_t* beta, \
+       const obj_t* c  \
+     ) \
+{ \
+	/* Invoke the expert interface and request default cntx_t and rntm_t
+	   objects. */ \
+	PASTEMAC(opname,_ex)( alpha, a, d, beta, c, NULL, NULL ); \
+}
+
+GENFRONT( herkd )
+GENFRONT( syrkd )
+
+
+#undef  GENFRONT
+#define GENFRONT( opname ) \
+\
+void PASTEMAC(opname) \
      ( \
              side_t side, \
        const obj_t* alpha, \

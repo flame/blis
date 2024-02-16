@@ -43,7 +43,7 @@
 #undef  GENTFUNC
 #define GENTFUNC( ctype, ch, opname, auxker ) \
 \
-void PASTEMAC2(ch,opname,EX_SUF) \
+void PASTEMAC(ch,opname,EX_SUF) \
      ( \
              doff_t  diagoffx, \
              diag_t  diagx, \
@@ -67,7 +67,7 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 \
 	/* Invoke the helper variant, which loops over the appropriate kernel
 	   to implement the current operation. */ \
-	PASTEMAC2(ch,opname,_unb_var1) \
+	PASTEMAC(ch,opname,_unb_var1) \
 	( \
 	  diagoffx, \
 	  diagx, \
@@ -90,7 +90,7 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 	if ( bli_is_upper_or_lower( uplox ) && \
 	     bli_is_unit_diag( diagx ) ) \
 	{ \
-		PASTEMAC2(ch,auxker,BLIS_TAPI_EX_SUF) \
+		PASTEMAC(ch,auxker,BLIS_TAPI_EX_SUF) \
 		( \
 		  diagoffx, \
 		  diagx, \
@@ -113,7 +113,7 @@ INSERT_GENTFUNC_BASIC( subm, subd )
 #undef  GENTFUNC
 #define GENTFUNC( ctype, ch, opname ) \
 \
-void PASTEMAC2(ch,opname,EX_SUF) \
+void PASTEMAC(ch,opname,EX_SUF) \
      ( \
              doff_t  diagoffx, \
              diag_t  diagx, \
@@ -137,7 +137,7 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 \
 	/* Invoke the helper variant, which loops over the appropriate kernel
 	   to implement the current operation. */ \
-	PASTEMAC2(ch,opname,_unb_var1) \
+	PASTEMAC(ch,opname,_unb_var1) \
 	( \
 	  diagoffx, \
 	  diagx, \
@@ -166,7 +166,7 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 		if ( bli_does_trans( transx ) ) \
 			bli_negate_diag_offset( &diagoffy ); \
 \
-		PASTEMAC2(ch,setd,BLIS_TAPI_EX_SUF) \
+		PASTEMAC(ch,setd,BLIS_TAPI_EX_SUF) \
 		( \
 		  BLIS_NO_CONJUGATE, \
 		  diagoffy, \
@@ -187,7 +187,7 @@ INSERT_GENTFUNC_BASIC( copym )
 #undef  GENTFUNC
 #define GENTFUNC( ctype, ch, opname ) \
 \
-void PASTEMAC2(ch,opname,EX_SUF) \
+void PASTEMAC(ch,opname,EX_SUF) \
      ( \
              doff_t  diagoffx, \
              diag_t  diagx, \
@@ -215,7 +215,7 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 \
 	/* Invoke the helper variant, which loops over the appropriate kernel
 	   to implement the current operation. */ \
-	PASTEMAC2(ch,opname,_unb_var1) \
+	PASTEMAC(ch,opname,_unb_var1) \
 	( \
 	  diagoffx, \
 	  diagx, \
@@ -239,7 +239,7 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 	if ( bli_is_upper_or_lower( uplox ) && \
 	     bli_is_unit_diag( diagx ) ) \
 	{ \
-		PASTEMAC2(ch,axpyd,BLIS_TAPI_EX_SUF) \
+		PASTEMAC(ch,axpyd,BLIS_TAPI_EX_SUF) \
 		( \
 		  diagoffx, \
 		  diagx, \
@@ -262,7 +262,7 @@ INSERT_GENTFUNC_BASIC( axpym )
 #undef  GENTFUNC
 #define GENTFUNC( ctype, ch, opname ) \
 \
-void PASTEMAC2(ch,opname,EX_SUF) \
+void PASTEMAC(ch,opname,EX_SUF) \
      ( \
              doff_t  diagoffx, \
              diag_t  diagx, \
@@ -291,7 +291,7 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 	if ( PASTEMAC(ch,eq0)( *alpha ) ) \
 	{ \
 \
-		PASTEMAC2(ch,setm,BLIS_TAPI_EX_SUF) \
+		PASTEMAC(ch,setm,BLIS_TAPI_EX_SUF) \
 		( \
 		  BLIS_NO_CONJUGATE, \
 		  diagoffx, \
@@ -309,7 +309,7 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 \
 	/* Invoke the helper variant, which loops over the appropriate kernel
 	   to implement the current operation. */ \
-	PASTEMAC2(ch,opname,_unb_var1) \
+	PASTEMAC(ch,opname,_unb_var1) \
 	( \
 	  diagoffx, \
 	  diagx, \
@@ -338,7 +338,7 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 		if ( bli_does_trans( transx ) ) \
 			bli_negate_diag_offset( &diagoffy ); \
 \
-		PASTEMAC2(ch,setd,BLIS_TAPI_EX_SUF) \
+		PASTEMAC(ch,setd,BLIS_TAPI_EX_SUF) \
 		( \
 		  BLIS_NO_CONJUGATE, \
 		  diagoffy, \
@@ -359,7 +359,7 @@ INSERT_GENTFUNC_BASIC( scal2m )
 #undef  GENTFUNC
 #define GENTFUNC( ctype, ch, opname ) \
 \
-void PASTEMAC2(ch,opname,EX_SUF) \
+void PASTEMAC(ch,opname,EX_SUF) \
      ( \
              conj_t conjalpha, \
              doff_t diagoffx, \
@@ -383,7 +383,7 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 \
 	/* Invoke the helper variant, which loops over the appropriate kernel
 	   to implement the current operation. */ \
-	PASTEMAC2(ch,opname,_unb_var1) \
+	PASTEMAC(ch,opname,_unb_var1) \
 	( \
 	  conjalpha, \
 	  diagoffx, \
@@ -405,7 +405,7 @@ INSERT_GENTFUNC_BASIC( setm )
 #undef  GENTFUNC
 #define GENTFUNC( ctype, ch, opname ) \
 \
-void PASTEMAC2(ch,opname,EX_SUF) \
+void PASTEMAC(ch,opname,EX_SUF) \
      ( \
              doff_t  diagoffx, \
              diag_t  diagx, \
@@ -431,7 +431,7 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 	/* If beta is zero, then the operation reduces to copym. */ \
 	if ( PASTEMAC(ch,eq0)( *beta ) ) \
 	{ \
-		PASTEMAC2(ch,copym,_unb_var1) \
+		PASTEMAC(ch,copym,_unb_var1) \
 		( \
 		  diagoffx, \
 		  diagx, \
@@ -449,7 +449,7 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 \
 	/* Invoke the helper variant, which loops over the appropriate kernel
 	   to implement the current operation. */ \
-	PASTEMAC2(ch,opname,_unb_var1) \
+	PASTEMAC(ch,opname,_unb_var1) \
 	( \
 	  diagoffx, \
 	  diagx, \
@@ -473,7 +473,7 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 	if ( bli_is_upper_or_lower( uplox ) && \
 	     bli_is_unit_diag( diagx ) ) \
 	{ \
-		PASTEMAC2(ch,xpbyd,BLIS_TAPI_EX_SUF) \
+		PASTEMAC(ch,xpbyd,BLIS_TAPI_EX_SUF) \
 		( \
 		  diagoffx, \
 		  diagx, \
@@ -496,7 +496,7 @@ INSERT_GENTFUNC_BASIC( xpbym )
 #undef  GENTFUNC2
 #define GENTFUNC2( ctype_x, ctype_y, chx, chy, opname ) \
 \
-void PASTEMAC3(chx,chy,opname,EX_SUF) \
+void PASTEMAC(chx,chy,opname,EX_SUF) \
      ( \
              doff_t   diagoffx, \
              diag_t   diagx, \
@@ -522,7 +522,7 @@ void PASTEMAC3(chx,chy,opname,EX_SUF) \
 	/* If beta is zero, then the operation reduces to copym. */ \
 	if ( PASTEMAC(chy,eq0)( *beta ) ) \
 	{ \
-		PASTEMAC2(chx,chy,castm) \
+		PASTEMAC(chx,chy,castm) \
 		( \
 		  transx, \
 		  m, \
@@ -536,7 +536,7 @@ void PASTEMAC3(chx,chy,opname,EX_SUF) \
 \
 	/* Invoke the helper variant, which loops over the appropriate kernel
 	   to implement the current operation. */ \
-	PASTEMAC3(chx,chy,opname,_unb_var1) \
+	PASTEMAC(chx,chy,opname,_unb_var1) \
 	( \
 	  diagoffx, \
 	  diagx, \

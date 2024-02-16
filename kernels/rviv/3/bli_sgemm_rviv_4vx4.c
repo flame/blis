@@ -55,7 +55,7 @@ void bli_sgemm_rviv_4vx4
        const void*      b,
        const void*      beta,
              void*      c, inc_t rs_c, inc_t cs_c,
-             auxinfo_t* data,
+       const auxinfo_t* data,
        const cntx_t*    cntx
      )
 {

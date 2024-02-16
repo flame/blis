@@ -42,7 +42,7 @@
 #undef  GENTDEF
 #define GENTDEF( ctype, ch, opname, tsuf ) \
 \
-typedef void (*PASTECH3(ch,opname,EX_SUF,tsuf)) \
+typedef void (*PASTECH(ch,opname,EX_SUF,tsuf)) \
      ( \
              conj_t conjx, \
              conj_t conjy, \
@@ -62,7 +62,7 @@ INSERT_GENTDEF( axpy2v )
 #undef  GENTDEF
 #define GENTDEF( ctype, ch, opname, tsuf ) \
 \
-typedef void (*PASTECH3(ch,opname,EX_SUF,tsuf)) \
+typedef void (*PASTECH(ch,opname,EX_SUF,tsuf)) \
      ( \
              conj_t conja, \
              conj_t conjx, \
@@ -82,7 +82,7 @@ INSERT_GENTDEF( axpyf )
 #undef  GENTDEF
 #define GENTDEF( ctype, ch, opname, tsuf ) \
 \
-typedef void (*PASTECH3(ch,opname,EX_SUF,tsuf)) \
+typedef void (*PASTECH(ch,opname,EX_SUF,tsuf)) \
      ( \
              conj_t conjxt, \
              conj_t conjx, \
@@ -103,7 +103,7 @@ INSERT_GENTDEF( dotaxpyv )
 #undef  GENTDEF
 #define GENTDEF( ctype, ch, opname, tsuf ) \
 \
-typedef void (*PASTECH3(ch,opname,EX_SUF,tsuf)) \
+typedef void (*PASTECH(ch,opname,EX_SUF,tsuf)) \
      ( \
              conj_t conjat, \
              conj_t conjx, \
@@ -124,7 +124,7 @@ INSERT_GENTDEF( dotxf )
 #undef  GENTDEF
 #define GENTDEF( ctype, ch, opname, tsuf ) \
 \
-typedef void (*PASTECH3(ch,opname,EX_SUF,tsuf)) \
+typedef void (*PASTECH(ch,opname,EX_SUF,tsuf)) \
      ( \
              conj_t conjat, \
              conj_t conja, \

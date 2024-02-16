@@ -105,7 +105,7 @@ void bli_castv
 #undef  GENTFUNC2
 #define GENTFUNC2( ctype_x, ctype_y, chx, chy, opname ) \
 \
-void PASTEMAC2(chx,chy,opname) \
+void PASTEMAC(chx,chy,opname) \
      ( \
              conj_t conjx, \
              dim_t  n, \
@@ -123,14 +123,14 @@ void PASTEMAC2(chx,chy,opname) \
 		{ \
 			for ( i = 0; i < n; ++i ) \
 			{ \
-				PASTEMAC2(chx,chy,copyjs)( x1[i], y1[i] ); \
+				PASTEMAC(chx,chy,copyjs)( x1[i], y1[i] ); \
 			} \
 		} \
 		else \
 		{ \
 			for ( i = 0; i < n; ++i ) \
 			{ \
-				PASTEMAC2(chx,chy,copyjs)( *x1, *y1 ); \
+				PASTEMAC(chx,chy,copyjs)( *x1, *y1 ); \
 \
 				x1 += incx; \
 				y1 += incy; \
@@ -143,14 +143,14 @@ void PASTEMAC2(chx,chy,opname) \
 		{ \
 			for ( i = 0; i < n; ++i ) \
 			{ \
-				PASTEMAC2(chx,chy,copys)( x1[i], y1[i] ); \
+				PASTEMAC(chx,chy,copys)( x1[i], y1[i] ); \
 			} \
 		} \
 		else \
 		{ \
 			for ( i = 0; i < n; ++i ) \
 			{ \
-				PASTEMAC2(chx,chy,copys)( *x1, *y1 ); \
+				PASTEMAC(chx,chy,copys)( *x1, *y1 ); \
 \
 				x1 += incx; \
 				y1 += incy; \

@@ -34,6 +34,6 @@
 
 #if 1
 
-BLIS_EXPORT_BLAS BLIS_OVERRIDABLE int PASTEF770(xerbla)(const bla_character *srname, const bla_integer *info, ftnlen srname_len);
+BLIS_EXPORT_BLAS BLIS_OVERRIDABLE int PASTEF77(xerbla)(const bla_character *srname, const bla_integer *info, ftnlen srname_len);
 
 #endif

@@ -50,7 +50,7 @@ void PASTEMAC(ch,opname) \
        const ctype*     b, \
        const ctype*     beta, \
              ctype*     c, inc_t rs_c, inc_t cs_c, \
-             auxinfo_t* data, \
+       const auxinfo_t* data, \
        const cntx_t*    cntx  \
      );
 
@@ -71,7 +71,7 @@ void PASTEMAC(ch,opname) \
        const ctype*     bx1, \
              ctype*     b11, \
              ctype*     c11, inc_t rs_c, inc_t cs_c, \
-             auxinfo_t* data, \
+       const auxinfo_t* data, \
        const cntx_t*    cntx  \
      );
 
@@ -87,7 +87,7 @@ void PASTEMAC(ch,opname) \
        const ctype*     a, \
              ctype*     b, \
              ctype*     c, inc_t rs_c, inc_t cs_c, \
-             auxinfo_t* data, \
+       const auxinfo_t* data, \
        const cntx_t*    cntx  \
      );
 

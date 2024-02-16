@@ -35,6 +35,7 @@
 // clang-format off
 #include "blis.h"
 #include "../../riscv_cmul_macros_asm.h"
+#include "../../bli_kernels_sifive_x280.h"
 #include <stdint.h>
 #include <riscv_vector.h>
 
@@ -50,7 +51,7 @@
           T*         restrict c11_,   \
           inc_t               rsc,    \
           inc_t               csc,    \
-          auxinfo_t* restrict data,   \
+    const auxinfo_t* restrict data,   \
     const cntx_t*    restrict cntx    \
     )
 
@@ -66,7 +67,7 @@
           T*         restrict c11_,   \
           inc_t               rsc,    \
           inc_t               csc,    \
-          auxinfo_t* restrict data,   \
+    const auxinfo_t* restrict data,   \
     const cntx_t*    restrict cntx    \
     )
 

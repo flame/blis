@@ -408,12 +408,11 @@ pool_t* bli_apool_array_elem
 		// Each small block pool should contain blocks large enough to
 		// accommodate any of the data structures for which they will be
 		// used.
-		const siz_t n_sizes        = 4;
-		siz_t       sizes[4]       = { sizeof( cntl_t ),
-		                               sizeof( packm_params_t ),
-		                               sizeof( thrcomm_t ),
-		                               sizeof( thrinfo_t ) };
-		siz_t       block_size     = 0;
+		const siz_t sizes[]    = { sizeof( cntl_t ),
+		                           sizeof( thrcomm_t ),
+		                           sizeof( thrinfo_t ) };
+		const siz_t n_sizes    = sizeof( sizes ) / sizeof( sizes[0] );
+		      siz_t block_size = 0;
 
 		// Find the largest of the sizes above and use that as the block_size
 		// for the pool.

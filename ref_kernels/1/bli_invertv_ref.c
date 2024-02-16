@@ -37,7 +37,7 @@
 #undef  GENTFUNC
 #define GENTFUNC( ctype, ch, opname, arch, suf ) \
 \
-void PASTEMAC3(ch,opname,arch,suf) \
+void PASTEMAC(ch,opname,arch,suf) \
      ( \
              dim_t   n, \
              void*   x0, inc_t incx, \

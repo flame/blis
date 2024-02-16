@@ -57,7 +57,7 @@ void PASTEMAC(ch,opname) \
 { \
 	/* Invoke the expert interface and request default cntx_t and rntm_t
 	   objects. */ \
-	PASTEMAC2(ch,opname,BLIS_TAPI_EX_SUF) \
+	PASTEMAC(ch,opname,BLIS_TAPI_EX_SUF) \
 	( \
 	  transa, \
 	  transb, \
@@ -73,6 +73,44 @@ void PASTEMAC(ch,opname) \
 }
 
 INSERT_GENTFUNC_BASIC( gemm )
+
+#undef  GENTFUNC
+#define GENTFUNC( ctype, ch, opname ) \
+\
+void PASTEMAC(ch,opname) \
+     ( \
+             trans_t transa, \
+             trans_t transb, \
+             dim_t   m, \
+             dim_t   n, \
+             dim_t   k, \
+       const ctype*  alpha, \
+       const ctype*  a, inc_t rs_a, inc_t cs_a, \
+       const ctype*  d, inc_t inc_d, \
+       const ctype*  b, inc_t rs_b, inc_t cs_b, \
+       const ctype*  beta, \
+             ctype*  c, inc_t rs_c, inc_t cs_c  \
+     ) \
+{ \
+	/* Invoke the expert interface and request default cntx_t and rntm_t
+	   objects. */ \
+	PASTEMAC(ch,opname,BLIS_TAPI_EX_SUF) \
+	( \
+	  transa, \
+	  transb, \
+	  m, n, k, \
+	  alpha, \
+	  a, rs_a, cs_a, \
+	  d, inc_d, \
+	  b, rs_b, cs_b, \
+	  beta, \
+	  c, rs_c, cs_c, \
+	  NULL, \
+	  NULL  \
+	); \
+}
+
+INSERT_GENTFUNC_BASIC( gemdm )
 
 
 #undef  GENTFUNC
@@ -94,7 +132,7 @@ void PASTEMAC(ch,opname) \
 { \
 	/* Invoke the expert interface and request default cntx_t and rntm_t
 	   objects. */ \
-	PASTEMAC2(ch,opname,BLIS_TAPI_EX_SUF) \
+	PASTEMAC(ch,opname,BLIS_TAPI_EX_SUF) \
 	( \
 	  uploc, \
 	  transa, \
@@ -111,6 +149,46 @@ void PASTEMAC(ch,opname) \
 }
 
 INSERT_GENTFUNC_BASIC( gemmt )
+
+
+#undef  GENTFUNC
+#define GENTFUNC( ctype, ch, opname ) \
+\
+void PASTEMAC(ch,opname) \
+     ( \
+             uplo_t  uploc, \
+             trans_t transa, \
+             trans_t transb, \
+             dim_t   m, \
+             dim_t   k, \
+       const ctype*  alpha, \
+       const ctype*  a, inc_t rs_a, inc_t cs_a, \
+       const ctype*  d, inc_t inc_d, \
+       const ctype*  b, inc_t rs_b, inc_t cs_b, \
+       const ctype*  beta, \
+             ctype*  c, inc_t rs_c, inc_t cs_c  \
+     ) \
+{ \
+	/* Invoke the expert interface and request default cntx_t and rntm_t
+	   objects. */ \
+	PASTEMAC(ch,opname,BLIS_TAPI_EX_SUF) \
+	( \
+	  uploc, \
+	  transa, \
+	  transb, \
+	  m, k, \
+	  alpha, \
+	  a, rs_a, cs_a, \
+	  d, inc_d, \
+	  b, rs_b, cs_b, \
+	  beta, \
+	  c, rs_c, cs_c, \
+	  NULL, \
+	  NULL  \
+	); \
+}
+
+INSERT_GENTFUNC_BASIC( gemdmt )
 
 
 #undef  GENTFUNC
@@ -133,7 +211,7 @@ void PASTEMAC(ch,opname) \
 { \
 	/* Invoke the expert interface and request default cntx_t and rntm_t
 	   objects. */ \
-	PASTEMAC2(ch,opname,BLIS_TAPI_EX_SUF) \
+	PASTEMAC(ch,opname,BLIS_TAPI_EX_SUF) \
 	( \
 	  side, \
 	  uploa, \
@@ -171,7 +249,7 @@ void PASTEMAC(ch,opname) \
 { \
 	/* Invoke the expert interface and request default cntx_t and rntm_t
 	   objects. */ \
-	PASTEMAC2(ch,opname,BLIS_TAPI_EX_SUF) \
+	PASTEMAC(ch,opname,BLIS_TAPI_EX_SUF) \
 	( \
 	  uploc, \
 	  transa, \
@@ -207,7 +285,7 @@ void PASTEMAC(ch,opname) \
 { \
 	/* Invoke the expert interface and request default cntx_t and rntm_t
 	   objects. */ \
-	PASTEMAC2(ch,opname,BLIS_TAPI_EX_SUF) \
+	PASTEMAC(ch,opname,BLIS_TAPI_EX_SUF) \
 	( \
 	  uploc, \
 	  transa, \
@@ -243,7 +321,7 @@ void PASTEMAC(ch,opname) \
 { \
 	/* Invoke the expert interface and request default cntx_t and rntm_t
 	   objects. */ \
-	PASTEMAC2(ch,opname,BLIS_TAPI_EX_SUF) \
+	PASTEMAC(ch,opname,BLIS_TAPI_EX_SUF) \
 	( \
 	  uploc, \
 	  transa, \
@@ -279,7 +357,7 @@ void PASTEMAC(ch,opname) \
 { \
 	/* Invoke the expert interface and request default cntx_t and rntm_t
 	   objects. */ \
-	PASTEMAC2(ch,opname,BLIS_TAPI_EX_SUF) \
+	PASTEMAC(ch,opname,BLIS_TAPI_EX_SUF) \
 	( \
 	  uploc, \
 	  transa, \
@@ -296,6 +374,158 @@ void PASTEMAC(ch,opname) \
 }
 
 INSERT_GENTFUNC_BASIC( syr2k )
+
+
+#undef  GENTFUNCR
+#define GENTFUNCR( ctype, ctype_r, ch, chr, opname ) \
+\
+void PASTEMAC(ch,opname) \
+     ( \
+             uplo_t   uploc, \
+             trans_t  transa, \
+             dim_t    m, \
+             dim_t    k, \
+       const ctype_r* alpha, \
+       const ctype*   a, inc_t rs_a, inc_t cs_a, \
+       const ctype_r* d, inc_t inc_d, \
+       const ctype_r* beta, \
+             ctype*   c, inc_t rs_c, inc_t cs_c  \
+     ) \
+{ \
+	/* Invoke the expert interface and request default cntx_t and rntm_t
+	   objects. */ \
+	PASTEMAC(ch,opname,BLIS_TAPI_EX_SUF) \
+	( \
+	  uploc, \
+	  transa, \
+	  m, k, \
+	  alpha, \
+	  a, rs_a, cs_a, \
+	  d, inc_d, \
+	  beta, \
+	  c, rs_c, cs_c, \
+	  NULL, \
+	  NULL  \
+	); \
+}
+
+INSERT_GENTFUNCR_BASIC( herkd )
+
+
+#undef  GENTFUNCR
+#define GENTFUNCR( ctype, ctype_r, ch, chr, opname ) \
+\
+void PASTEMAC(ch,opname) \
+     ( \
+             uplo_t   uploc, \
+             trans_t  transa, \
+             trans_t  transb, \
+             dim_t    m, \
+             dim_t    k, \
+       const ctype*   alpha, \
+       const ctype*   a, inc_t rs_a, inc_t cs_a, \
+       const ctype*   d, inc_t inc_d, \
+       const ctype*   b, inc_t rs_b, inc_t cs_b, \
+       const ctype_r* beta, \
+             ctype*   c, inc_t rs_c, inc_t cs_c  \
+     ) \
+{ \
+	/* Invoke the expert interface and request default cntx_t and rntm_t
+	   objects. */ \
+	PASTEMAC(ch,opname,BLIS_TAPI_EX_SUF) \
+	( \
+	  uploc, \
+	  transa, \
+	  transb, \
+	  m, k, \
+	  alpha, \
+	  a, rs_a, cs_a, \
+	  d, inc_d, \
+	  b, rs_b, cs_b, \
+	  beta, \
+	  c, rs_c, cs_c, \
+	  NULL, \
+	  NULL  \
+	); \
+}
+
+INSERT_GENTFUNCR_BASIC( her2kd )
+
+
+#undef  GENTFUNC
+#define GENTFUNC( ctype, ch, opname ) \
+\
+void PASTEMAC(ch,opname) \
+     ( \
+             uplo_t  uploc, \
+             trans_t transa, \
+             dim_t   m, \
+             dim_t   k, \
+       const ctype*  alpha, \
+       const ctype*  a, inc_t rs_a, inc_t cs_a, \
+       const ctype*  d, inc_t inc_d, \
+       const ctype*  beta, \
+             ctype*  c, inc_t rs_c, inc_t cs_c  \
+     ) \
+{ \
+	/* Invoke the expert interface and request default cntx_t and rntm_t
+	   objects. */ \
+	PASTEMAC(ch,opname,BLIS_TAPI_EX_SUF) \
+	( \
+	  uploc, \
+	  transa, \
+	  m, k, \
+	  alpha, \
+	  a, rs_a, cs_a, \
+	  d, inc_d, \
+	  beta, \
+	  c, rs_c, cs_c, \
+	  NULL, \
+	  NULL  \
+	); \
+}
+
+INSERT_GENTFUNC_BASIC( syrkd )
+
+
+#undef  GENTFUNC
+#define GENTFUNC( ctype, ch, opname ) \
+\
+void PASTEMAC(ch,opname) \
+     ( \
+             uplo_t  uploc, \
+             trans_t transa, \
+             trans_t transb, \
+             dim_t   m, \
+             dim_t   k, \
+       const ctype*  alpha, \
+       const ctype*  a, inc_t rs_a, inc_t cs_a, \
+       const ctype*  d, inc_t inc_d, \
+       const ctype*  b, inc_t rs_b, inc_t cs_b, \
+       const ctype*  beta, \
+             ctype*  c, inc_t rs_c, inc_t cs_c  \
+     ) \
+{ \
+	/* Invoke the expert interface and request default cntx_t and rntm_t
+	   objects. */ \
+	PASTEMAC(ch,opname,BLIS_TAPI_EX_SUF) \
+	( \
+	  uploc, \
+	  transa, \
+	  transb, \
+	  m, k, \
+	  alpha, \
+	  a, rs_a, cs_a, \
+	  d, inc_d, \
+	  b, rs_b, cs_b, \
+	  beta, \
+	  c, rs_c, cs_c, \
+	  NULL, \
+	  NULL  \
+	); \
+}
+
+INSERT_GENTFUNC_BASIC( syr2kd )
 
 
 #undef  GENTFUNC
@@ -319,7 +549,7 @@ void PASTEMAC(ch,opname) \
 { \
 	/* Invoke the expert interface and request default cntx_t and rntm_t
 	   objects. */ \
-	PASTEMAC2(ch,opname,BLIS_TAPI_EX_SUF) \
+	PASTEMAC(ch,opname,BLIS_TAPI_EX_SUF) \
 	( \
 	  side, \
 	  uploa, \
@@ -358,7 +588,7 @@ void PASTEMAC(ch,opname) \
 { \
 	/* Invoke the expert interface and request default cntx_t and rntm_t
 	   objects. */ \
-	PASTEMAC2(ch,opname,BLIS_TAPI_EX_SUF) \
+	PASTEMAC(ch,opname,BLIS_TAPI_EX_SUF) \
 	( \
 	  side, \
 	  uploa, \

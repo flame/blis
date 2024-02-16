@@ -32,7 +32,5 @@
 
 */
 
-#include "bli_gemmt_front.h"
-
 #include "bli_gemmt_var.h"
 

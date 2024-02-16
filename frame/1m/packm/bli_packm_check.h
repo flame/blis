@@ -34,15 +34,13 @@
 
 void bli_packm_init_check
      (
-       const obj_t*  a,
-       const obj_t*  p,
-       const cntx_t* cntx
+       const obj_t* a,
+       const obj_t* p
      );
 
 void bli_packm_int_check
      (
-       const obj_t*  a,
-       const obj_t*  p,
-       const cntx_t* cntx
+       const obj_t* a,
+       const obj_t* p
      );
 

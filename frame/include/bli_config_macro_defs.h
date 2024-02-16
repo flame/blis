@@ -150,25 +150,6 @@
 #endif
 
 
-// -- MIXED DATATYPE SUPPORT ---------------------------------------------------
-
-// Enable mixed datatype support?
-#ifdef BLIS_DISABLE_MIXED_DT
-  #undef BLIS_ENABLE_GEMM_MD
-#else
-  // Default behavior is enabled.
-  #define BLIS_ENABLE_GEMM_MD
-#endif
-
-// Enable memory-intensive optimizations for mixed datatype support?
-#ifdef BLIS_DISABLE_MIXED_DT_EXTRA_MEM
-  #undef BLIS_ENABLE_GEMM_MD_EXTRA_MEM
-#else
-  // Default behavior is enabled.
-  #define BLIS_ENABLE_GEMM_MD_EXTRA_MEM
-#endif
-
-
 // -- MISCELLANEOUS OPTIONS ----------------------------------------------------
 
 // Do NOT require the cross-blocksize constraints. That is, do not enforce

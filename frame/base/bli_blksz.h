@@ -253,45 +253,10 @@ void bli_blksz_reduce_max_to
 
 dim_t bli_determine_blocksize
      (
-             dir_t   direct,
-             dim_t   i,
-             dim_t   dim,
-       const obj_t*  obj,
-             bszid_t bszid,
-       const cntx_t* cntx
-     );
-
-dim_t bli_determine_blocksize_f
-     (
-             dim_t   i,
-             dim_t   dim,
-       const obj_t*  obj,
-             bszid_t bszid,
-       const cntx_t* cntx
-     );
-
-dim_t bli_determine_blocksize_b
-     (
-             dim_t   i,
-             dim_t   dim,
-       const obj_t*  obj,
-             bszid_t bszid,
-       const cntx_t* cntx
-     );
-
-dim_t bli_determine_blocksize_f_sub
-     (
-       dim_t  i,
-       dim_t  dim,
-       dim_t  b_alg,
-       dim_t  b_max
-     );
-
-dim_t bli_determine_blocksize_b_sub
-     (
-       dim_t  i,
-       dim_t  dim,
-       dim_t  b_alg,
-       dim_t  b_max
+       dir_t direct,
+       dim_t i,
+       dim_t dim,
+       dim_t b_alg,
+       dim_t b_max
      );
 

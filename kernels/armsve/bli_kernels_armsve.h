@@ -46,8 +46,6 @@ GEMM_UKR_PROT( dcomplex, z, gemm_armsve_asm_2vx10_unindexed )
 
 // Use SVE intrinsics only for referred cases.
 #if !defined(BLIS_FAMILY_A64FX)
-PACKM_KER_PROT( double,   d, packm_armsve256_int_8xk )
-PACKM_KER_PROT( double,   d, packm_armsve512_int_12xk )
+PACKM_KER_PROT( double,   d, packm_armsve256_int_8x10 )
 #endif
-PACKM_KER_PROT( double,   d, packm_armsve512_asm_16xk )
-PACKM_KER_PROT( double,   d, packm_armsve512_asm_10xk )
+PACKM_KER_PROT( double,   d, packm_armsve512_asm_16x10 )

@@ -119,6 +119,7 @@ get-noopt-cxxflags-for   = $(strip $(CFLAGS_PRESET) \
 get-refinit-cflags-for   = $(strip $(call load-var-for,COPTFLAGS,$(1)) \
                                    $(call get-noopt-cflags-for,$(1)) \
                                    -DBLIS_CNAME=$(1) \
+                                   -DBLIS_CNAME_UPPER=$(shell echo $(1) | tr a-z A-Z) \
                                    $(BUILD_ASANFLAGS) \
                                    $(BUILD_CPPFLAGS) \
                                    $(BUILD_SYMFLAGS) \
@@ -131,6 +132,7 @@ get-refkern-cflags-for   = $(strip $(call load-var-for,CROPTFLAGS,$(1)) \
                                    $(call get-noopt-cflags-for,$(1)) \
                                    $(COMPSIMDFLAGS) \
                                    -DBLIS_CNAME=$(1) \
+                                   -DBLIS_CNAME_UPPER=$(shell echo $(1) | tr a-z A-Z) \
                                    $(BUILD_ASANFLAGS) \
                                    $(BUILD_CPPFLAGS) \
                                    $(BUILD_SYMFLAGS) \
@@ -140,6 +142,8 @@ get-refkern-cflags-for   = $(strip $(call load-var-for,CROPTFLAGS,$(1)) \
 
 get-config-cflags-for    = $(strip $(call load-var-for,COPTFLAGS,$(1)) \
                                    $(call get-noopt-cflags-for,$(1)) \
+                                   -DBLIS_CNAME=$(1) \
+                                   -DBLIS_CNAME_UPPER=$(shell echo $(1) | tr a-z A-Z) \
                                    $(BUILD_ASANFLAGS) \
                                    $(BUILD_CPPFLAGS) \
                                    $(BUILD_SYMFLAGS) \
@@ -162,6 +166,8 @@ get-frame-cxxflags-for   = $(strip $(call load-var-for,COPTFLAGS,$(1)) \
 get-kernel-cflags-for    = $(strip $(call load-var-for,CKOPTFLAGS,$(1)) \
                                    $(call load-var-for,CKVECFLAGS,$(1)) \
                                    $(call get-noopt-cflags-for,$(1)) \
+                                   -DBLIS_CNAME=$(1) \
+                                   -DBLIS_CNAME_UPPER=$(shell echo $(1) | tr a-z A-Z) \
                                    $(BUILD_CPPFLAGS) \
                                    $(BUILD_SYMFLAGS) \
                             )
@@ -337,7 +343,9 @@ FRAGMENT_MK        := .fragment.mk
 # Locations of important files.
 BUILD_DIR          := build
 CONFIG_DIR         := config
+ifeq ($(FRAME_DIR),)
 FRAME_DIR          := frame
+endif
 REFKERN_DIR        := ref_kernels
 KERNELS_DIR        := kernels
 ADDON_DIR          := addon
@@ -735,6 +743,18 @@ endif
 # Disable tautological comparision warnings in clang.
 ifeq ($(CC_VENDOR),clang)
 CWARNFLAGS += -Wno-tautological-compare -Wno-pass-failed
+endif
+
+# Disable other annoying warnings.
+ifeq ($(CC_VENDOR),clang)
+CWARNFLAGS +=
+else
+ifeq ($(CC_VENDOR),gcc)
+# The '-Wno-maybe-uninitialized' option makes me nervous. Let's temporarily
+# disable for now. -FGVZ
+#CWARNFLAGS += -Wno-maybe-uninitialized -Wno-comment
+CWARNFLAGS += -Wno-comment
+endif
 endif
 
 $(foreach c, $(CONFIG_LIST_FAM), $(eval $(call append-var-for,CWARNFLAGS,$(c))))
@@ -1280,6 +1300,12 @@ BLIS_CONFIG_H   := ./bli_config.h
 # get this cpp macro.)
 BUILD_CPPFLAGS := -DBLIS_IS_BUILDING_LIBRARY
 
+
+#
+# --- configure file location --------------------------------------------------
+#
+
+CONFIGURE_FILE := $(DIST_PATH)/configure
 
 
 # end of ifndef COMMON_MK_INCLUDED conditional block

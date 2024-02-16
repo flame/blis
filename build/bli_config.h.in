@@ -146,26 +146,6 @@
 #endif
 #endif
 
-#ifndef BLIS_ENABLE_MIXED_DT
-#ifndef BLIS_DISABLE_MIXED_DT
-#if @enable_mixed_dt@
-#define BLIS_ENABLE_MIXED_DT
-#else
-#define BLIS_DISABLE_MIXED_DT
-#endif
-#endif
-#endif
-
-#ifndef BLIS_ENABLE_MIXED_DT_EXTRA_MEM
-#ifndef BLIS_DISABLE_MIXED_DT_EXTRA_MEM
-#if @enable_mixed_dt_extra_mem@
-#define BLIS_ENABLE_MIXED_DT_EXTRA_MEM
-#else
-#define BLIS_DISABLE_MIXED_DT_EXTRA_MEM
-#endif
-#endif
-#endif
-
 #if @enable_sup_handling@
 #define BLIS_ENABLE_SUP_HANDLING
 #else

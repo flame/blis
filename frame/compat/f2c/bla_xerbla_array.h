@@ -34,6 +34,6 @@
 
 #if 1
 
-BLIS_EXPORT_BLAS int PASTEF770(xerbla_array)(const bla_character *srname, const bla_integer srname_len, const bla_integer *info);
+BLIS_EXPORT_BLAS int PASTEF77(xerbla_array)(const bla_character *srname, const bla_integer srname_len, const bla_integer *info);
 
 #endif

@@ -342,7 +342,7 @@ GENFRONT( amaxv, amaxv_test )
 #undef  GENFRONT
 #define GENFRONT( tname, opname ) \
 \
-void PASTEMAC0(opname) \
+void PASTEMAC(opname) \
      ( \
        obj_t*  x, \
        obj_t*  index  \
@@ -431,7 +431,7 @@ void PASTEMAC(ch,varname) \
 			ctype* chi1 = x + (i  )*incx; \
 \
 			/* Get the real and imaginary components of chi1. */ \
-			PASTEMAC2(ch,chr,gets)( *chi1, chi1_r, chi1_i ); \
+			PASTEMAC(ch,chr,gets)( *chi1, chi1_r, chi1_i ); \
 \
 			/* Replace chi1_r and chi1_i with their absolute values. */ \
 			PASTEMAC(chr,abval2s)( chi1_r, chi1_r ); \

@@ -36,39 +36,18 @@
 // Prototype BLAS-like interfaces to the variants.
 //
 
-#undef  GENTPROT
-#define GENTPROT( ctype, ch, varname ) \
-\
-void PASTECH2(bls_,ch,varname) \
-     ( \
-       conj_t           conjc, \
-       pack_t           schema, \
-       dim_t            m, \
-       dim_t            n, \
-       dim_t            m_max, \
-       dim_t            n_max, \
-       ctype*  restrict kappa, \
-       ctype*  restrict c, inc_t rs_c, inc_t cs_c, \
-       ctype*  restrict p, inc_t rs_p, inc_t cs_p, \
-                           dim_t pd_p, inc_t ps_p, \
-       cntx_t* restrict cntx, \
-       thrinfo_t* restrict thread  \
+void bls_packm_var1
+     (
+             num_t      dt,
+             conj_t     conjc,
+             dim_t      m,
+             dim_t      n,
+             dim_t      m_max,
+             dim_t      n_max,
+       const void*      kappa,
+       const void*      c, inc_t rs_c, inc_t cs_c,
+             void*      p, inc_t rs_p, inc_t cs_p,
+                           dim_t pd_p, inc_t ps_p,
+       const cntx_t*    cntx,
+             thrinfo_t* thread
      );
-
-//INSERT_GENTPROT_BASIC( packm_var1 )
-GENTPROT( float,    s, packm_var1 )
-GENTPROT( double,   d, packm_var1 )
-GENTPROT( scomplex, c, packm_var1 )
-GENTPROT( dcomplex, z, packm_var1 )
-
-//INSERT_GENTPROT_BASIC( packm_var2 )
-GENTPROT( float,    s, packm_var2 )
-GENTPROT( double,   d, packm_var2 )
-GENTPROT( scomplex, c, packm_var2 )
-GENTPROT( dcomplex, z, packm_var2 )
-
-//INSERT_GENTPROT_BASIC( packm_var3 )
-GENTPROT( float,    s, packm_var3 )
-GENTPROT( double,   d, packm_var3 )
-GENTPROT( scomplex, c, packm_var3 )
-GENTPROT( dcomplex, z, packm_var3 )

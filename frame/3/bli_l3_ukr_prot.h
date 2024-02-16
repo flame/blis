@@ -49,6 +49,8 @@ void PASTEMAC(ch,funcname) \
        BLIS_CNTX_PARAM  \
      );
 
+#define GEMM_UKR2_PROT( ctypeab, ctypec, chab, chc, fn ) L3TPROT( /* not used */, PASTECH(chab,chc), fn, gemm );
+
 #define GEMM_UKR_PROT(     ctype, ch, fn )  L3TPROT( ctype, ch, fn, gemm );
 #define GEMMTRSM_UKR_PROT( ctype, ch, fn )  L3TPROT( ctype, ch, fn, gemmtrsm );
 #define TRSM_UKR_PROT(     ctype, ch, fn )  L3TPROT( ctype, ch, fn, trsm );

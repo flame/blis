@@ -35,7 +35,7 @@
 
 #include "blis.h"
 
-typedef void (*xpbys_mxn_l_vft)
+typedef void (*xpbys_mxn_l_ft)
     (
             doff_t diagoff,
             dim_t  m,
@@ -62,7 +62,7 @@ BLIS_INLINE void PASTEMAC(ch,op) \
 	const ctype* restrict b_cast = b; \
 	      ctype* restrict y_cast = y; \
 \
-	PASTEMAC3(ch,ch,ch,xpbys_mxn_l) \
+	PASTEMAC(ch,ch,ch,xpbys_mxn_l) \
 	( \
 	  diagoff, \
 	  m, \
@@ -75,7 +75,7 @@ BLIS_INLINE void PASTEMAC(ch,op) \
 
 INSERT_GENTFUNC_BASIC(xpbys_mxn_l_fn);
 
-static xpbys_mxn_l_vft GENARRAY(xpbys_mxn_l, xpbys_mxn_l_fn);
+static xpbys_mxn_l_ft GENARRAY(xpbys_mxn_l, xpbys_mxn_l_fn);
 
 // -----------------------------------------------------------------------------
 
@@ -89,8 +89,14 @@ void bli_gemmt_l_ker_var2b
              thrinfo_t* thread_par
      )
 {
-	const num_t  dt_exec   = bli_obj_exec_dt( c );
+	const num_t  dt_comp   = bli_gemm_var_cntl_comp_dt( cntl );
+	const num_t  dt_a      = bli_obj_dt( a );
+	const num_t  dt_b      = bli_obj_dt( b );
 	const num_t  dt_c      = bli_obj_dt( c );
+
+	const siz_t  dt_a_size = bli_dt_size( dt_a );
+	const siz_t  dt_b_size = bli_dt_size( dt_b );
+	const siz_t  dt_c_size = bli_dt_size( dt_c );
 
 	      doff_t diagoffc  = bli_obj_diag_offset( c );
 
@@ -102,12 +108,10 @@ void bli_gemmt_l_ker_var2b
 	      dim_t  k         = bli_obj_width( a );
 
 	const void*  buf_a     = bli_obj_buffer_at_off( a );
-	const inc_t  is_a      = bli_obj_imag_stride( a );
 	const dim_t  pd_a      = bli_obj_panel_dim( a );
 	const inc_t  ps_a      = bli_obj_panel_stride( a );
 
 	const void*  buf_b     = bli_obj_buffer_at_off( b );
-	const inc_t  is_b      = bli_obj_imag_stride( b );
 	const dim_t  pd_b      = bli_obj_panel_dim( b );
 	const inc_t  ps_b      = bli_obj_panel_stride( b );
 
@@ -126,17 +130,15 @@ void bli_gemmt_l_ker_var2b
 	const void* buf_alpha = bli_obj_internal_scalar_buffer( &scalar_b );
 	const void* buf_beta  = bli_obj_internal_scalar_buffer( c );
 
-	const siz_t dt_size   = bli_dt_size( dt_exec );
-	const siz_t dt_c_size = bli_dt_size( dt_c );
-
 	// Alias some constants to simpler names.
 	const dim_t MR = pd_a;
 	const dim_t NR = pd_b;
 
 	// Query the context for the micro-kernel address and cast it to its
 	// function pointer type.
-	gemm_ukr_ft     gemm_ukr        = bli_cntx_get_l3_vir_ukr_dt( dt_exec, BLIS_GEMM_UKR, cntx );
-	xpbys_mxn_l_vft xpbys_mxn_l_ukr = xpbys_mxn_l[ dt_exec ];
+	gemm_ukr_ft    gemm_ukr        = bli_gemm_var_cntl_ukr( cntl );
+	const void*    params          = bli_gemm_var_cntl_params( cntl );
+	xpbys_mxn_l_ft xpbys_mxn_l_ukr = xpbys_mxn_l[ dt_c ];
 
 	// Temporary C buffer for edge cases. Note that the strides of this
 	// temporary buffer are set so that they match the storage of the
@@ -144,11 +146,11 @@ void bli_gemmt_l_ker_var2b
 	// column-stored as well.
 	      char  ct[ BLIS_STACK_BUF_MAX_SIZE ]
 	                __attribute__((aligned(BLIS_STACK_BUF_ALIGN_SIZE)));
-	const bool  col_pref    = bli_cntx_ukr_prefers_cols_dt( dt_exec, BLIS_GEMM_VIR_UKR, cntx );
-	const inc_t rs_ct       = ( col_pref ? 1 : NR );
-	const inc_t cs_ct       = ( col_pref ? MR : 1 );
+	const bool  row_pref    = bli_gemm_var_cntl_row_pref( cntl );
+	const inc_t rs_ct       = ( row_pref ? NR : 1 );
+	const inc_t cs_ct       = ( row_pref ? 1 : MR );
 
-	const void* zero       = bli_obj_buffer_for_const( dt_exec, &BLIS_ZERO );
+	const void* zero       = bli_obj_buffer_for_const( BLIS_COMPLEX | dt_comp, &BLIS_ZERO );
 	const char* a_cast     = buf_a;
 	const char* b_cast     = buf_b;
 	      char* c_cast     = buf_c;
@@ -190,7 +192,7 @@ void bli_gemmt_l_ker_var2b
 		m        = m - i;
 		diagoffc = diagoffc % MR;
 		c_cast   = c_cast + (i  )*rs_c*dt_c_size;
-		a_cast   = a_cast + (ip )*ps_a*dt_size;
+		a_cast   = a_cast + (ip )*ps_a*dt_a_size;
 	}
 
 	// If there is a zero region to the right of where the diagonal
@@ -210,9 +212,9 @@ void bli_gemmt_l_ker_var2b
 	const dim_t m_left = m % MR;
 
 	// Determine some increments used to step through A, B, and C.
-	const inc_t rstep_a = ps_a * dt_size;
+	const inc_t rstep_a = ps_a * dt_a_size;
 
-	const inc_t cstep_b = ps_b * dt_size;
+	const inc_t cstep_b = ps_b * dt_b_size;
 
 	const inc_t rstep_c = rs_c * MR * dt_c_size;
 	const inc_t cstep_c = cs_c * NR * dt_c_size;
@@ -223,15 +225,15 @@ void bli_gemmt_l_ker_var2b
 	bli_auxinfo_set_schema_a( schema_a, &aux );
 	bli_auxinfo_set_schema_b( schema_b, &aux );
 
-	// Save the imaginary stride of A and B to the auxinfo_t object.
-	bli_auxinfo_set_is_a( is_a, &aux );
-	bli_auxinfo_set_is_b( is_b, &aux );
+	// Save the virtual microkernel address and the params.
+	bli_auxinfo_set_ukr( gemm_ukr, &aux );
+	bli_auxinfo_set_params( params, &aux );
 
 	// The 'thread' argument points to the thrinfo_t node for the 2nd (jr)
 	// loop around the microkernel. Here we query the thrinfo_t node for the
 	// 1st (ir) loop around the microkernel.
-	thrinfo_t* thread = bli_thrinfo_sub_node( thread_par );
-	//thrinfo_t* caucus = bli_thrinfo_sub_node( thread );
+	thrinfo_t* thread = bli_thrinfo_sub_node( 0, thread_par );
+	//thrinfo_t* caucus = bli_thrinfo_sub_node( 0, thread );
 
 	const dim_t jr_nt  = bli_thrinfo_n_way( thread );
 	const dim_t jr_tid = bli_thrinfo_work_id( thread );
@@ -258,7 +260,7 @@ void bli_gemmt_l_ker_var2b
 	dim_t j = jr_st;
 
 	// Initialize a counter to track the number of microtiles computed by the
-    // current thread.
+	// current thread.
 	dim_t ut = 0;
 
 	// Loop over the n dimension (NR columns at a time).

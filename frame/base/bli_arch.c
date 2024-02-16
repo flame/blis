@@ -150,7 +150,7 @@ arch_t bli_arch_query_id_impl( void )
 		// initialized. Query the address of an internal context data structure
 		// corresponding to req_id. This pointer will be NULL if the associated
 		// subconfig is not available.
-		const cntx_t* const * req_cntx = bli_gks_lookup_id( req_id );
+		const cntx_t* req_cntx = bli_gks_lookup_id( req_id );
 
 		// This function checks the context pointer and aborts with a useful
 		// error message if the pointer is found to be NULL.

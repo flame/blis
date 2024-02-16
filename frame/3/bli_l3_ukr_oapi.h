@@ -40,7 +40,7 @@
 #undef  GENPROT
 #define GENPROT( opname ) \
 \
-BLIS_EXPORT_BLIS void PASTEMAC0(opname) \
+BLIS_EXPORT_BLIS void PASTEMAC(opname) \
      ( \
        obj_t*  alpha, \
        obj_t*  a, \
@@ -56,7 +56,7 @@ GENPROT( gemm_ukernel )
 #undef  GENPROT
 #define GENPROT( opname ) \
 \
-BLIS_EXPORT_BLIS void PASTEMAC0(opname) \
+BLIS_EXPORT_BLIS void PASTEMAC(opname) \
      ( \
        obj_t*  alpha, \
        obj_t*  a1x, \
@@ -73,7 +73,7 @@ GENPROT( gemmtrsm_ukernel )
 #undef  GENPROT
 #define GENPROT( opname ) \
 \
-BLIS_EXPORT_BLIS void PASTEMAC0(opname) \
+BLIS_EXPORT_BLIS void PASTEMAC(opname) \
      ( \
        obj_t*  a, \
        obj_t*  b, \

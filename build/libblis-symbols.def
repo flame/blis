@@ -629,7 +629,6 @@ bli_invscalv_ex
 bli_iprintm
 bli_iprintv
 bli_isetsc
-bli_l3_cntl_free
 bli_l3_thrinfo_create
 bli_ltesc
 bli_ltsc

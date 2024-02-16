@@ -42,14 +42,14 @@
 #undef  GENTFUNC
 #define GENTFUNC( ftype_x, chx, blasname, blisname ) \
 \
-void PASTEF773(i,chx,blasname,sub) \
+void PASTEF77(i,chx,blasname,sub) \
      ( \
        const f77_int* n, \
        const ftype_x* x, const f77_int* incx, \
              f77_int* rval  \
      ) \
 { \
-	*rval = PASTEF772(i,chx,blasname) \
+	*rval = PASTEF77(i,chx,blasname) \
 	( \
 	  n, \
 	  x, incx \

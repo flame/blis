@@ -53,10 +53,8 @@ void bli_cntx_init_firestorm( cntx_t* cntx )
 	  BLIS_GEMM_UKR, BLIS_DOUBLE, bli_dgemm_armv8a_asm_8x6r,
 
 	  // packm
-	  BLIS_PACKM_MRXK_KER, BLIS_FLOAT,  bli_spackm_armv8a_int_12xk,
-	  BLIS_PACKM_NRXK_KER, BLIS_FLOAT,  bli_spackm_armv8a_int_8xk,
-	  BLIS_PACKM_MRXK_KER, BLIS_DOUBLE, bli_dpackm_armv8a_int_8xk,
-	  BLIS_PACKM_NRXK_KER, BLIS_DOUBLE, bli_dpackm_armv8a_int_6xk,
+	  BLIS_PACKM_KER, BLIS_FLOAT,  bli_spackm_armv8a_int_8x12,
+	  BLIS_PACKM_KER, BLIS_DOUBLE, bli_dpackm_armv8a_int_6x8,
 
 	  // gemmsup
 	  BLIS_GEMMSUP_RRR_UKR, BLIS_DOUBLE, bli_dgemmsup_rv_armv8a_asm_6x8m,

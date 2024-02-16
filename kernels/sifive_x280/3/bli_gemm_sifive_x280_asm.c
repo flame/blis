@@ -35,6 +35,7 @@
 // clang-format off
 #include "blis.h"
 #include "../riscv_cmul_macros_asm.h"
+#include "../bli_kernels_sifive_x280.h"
 #include <math.h>
 #include <stddef.h>
 #include <stdbool.h>
@@ -120,9 +121,9 @@ void bli_sgemm_7m4
 
     rsc *= FLT_SIZE;
     csc *= FLT_SIZE;
-    
+
     __asm__(FLT_LOAD "ft10, (%0)" : : "r"(alpha));
-    
+
     // compute alpha*a*b + beta*c
     if (*beta == 0.f) {
         __asm__("vfmul.vf v0, v0, ft10");
@@ -313,9 +314,9 @@ void bli_sgemm_7m4_cleanup
     c += (M - 1) * rsc;
     rsc *= FLT_SIZE;
     csc *= FLT_SIZE;
-     
+
     __asm__(FLT_LOAD "ft10, (%0)" : : "r"(alpha));
-    
+
     // compute alpha*a*b + beta*c
     if (*beta == 0.f) {
         switch (M) {
@@ -513,7 +514,7 @@ void bli_sgemm_7m4_k0
                 __asm__("sub %0, %0, %1" : "+r"(c) : "r"(rsc));
             case 1:
                 __asm__(VSSE "v0, (%0), %1" : : "r"(c), "r"(csc));
-            }        
+            }
         } // end c non-unit column stride
     } // end beta == 0.f
     else { // beta != 0.f
@@ -554,7 +555,7 @@ void bli_sgemm_7m4_k0
                 __asm__(VLE "v0, (%0)" : : "r"(c));
                 __asm__("vfmul.vf v0, v0, ft0");
                 __asm__(VSE "v0, (%0)" : : "r"(c));
-                
+
             }
         } // end c unit column stride
         else { // c non-unit column stride
@@ -609,7 +610,7 @@ void bli_sgemm_sifive_x280_asm_7m4
        const void*      restrict b_,
        const void*      restrict beta_,
              void*      restrict c_, inc_t rsc, inc_t csc,
-             auxinfo_t* restrict data,
+       const auxinfo_t* restrict data,
        const cntx_t*    restrict cntx
      )
 {
@@ -650,7 +651,7 @@ void bli_sgemm_sifive_x280_asm_7m4
 #define VSE "vse64.v "
 #define VSSE "vsse64.v "
 #define PACKMR 8
-#define PACKNR 32 
+#define PACKNR 32
 
 void bli_dgemm_7m4
      (
@@ -722,9 +723,9 @@ void bli_dgemm_7m4
 
     rsc *= FLT_SIZE;
     csc *= FLT_SIZE;
-    
+
     __asm__(FLT_LOAD "ft10, (%0)" : : "r"(alpha));
-    
+
     // compute alpha*a*b + beta*c
     if (*beta == 0.) {
         __asm__("vfmul.vf v0, v0, ft10");
@@ -915,9 +916,9 @@ void bli_dgemm_7m4_cleanup
     c += (M - 1) * rsc;
     rsc *= FLT_SIZE;
     csc *= FLT_SIZE;
-     
+
     __asm__(FLT_LOAD "ft10, (%0)" : : "r"(alpha));
-    
+
     // compute alpha*a*b + beta*c
     if (*beta == 0.) {
         switch (M) {
@@ -1115,7 +1116,7 @@ void bli_dgemm_7m4_k0
                 __asm__("sub %0, %0, %1" : "+r"(c) : "r"(rsc));
             case 1:
                 __asm__(VSSE "v0, (%0), %1" : : "r"(c), "r"(csc));
-            }        
+            }
         } // end c non-unit column stride
     } // end beta == 0.
     else { // beta != 0.
@@ -1156,7 +1157,7 @@ void bli_dgemm_7m4_k0
                 __asm__(VLE "v0, (%0)" : : "r"(c));
                 __asm__("vfmul.vf v0, v0, ft0");
                 __asm__(VSE "v0, (%0)" : : "r"(c));
-                
+
             }
         } // end c unit column stride
         else { // c non-unit column stride
@@ -1211,7 +1212,7 @@ void bli_dgemm_sifive_x280_asm_7m4
        const void*      restrict b_,
        const void*      restrict beta_,
              void*      restrict c_, inc_t rsc, inc_t csc,
-             auxinfo_t* restrict data,
+       const auxinfo_t* restrict data,
        const cntx_t*    restrict cntx
      )
 {
@@ -1252,7 +1253,7 @@ void bli_dgemm_sifive_x280_asm_7m4
 #define VSSEG2 "vsseg2e32.v "
 #define VSSSEG2 "vssseg2e32.v "
 #define PACKMR 8
-#define PACKNR 32 
+#define PACKNR 32
 
 void bli_cgemm_6m2
      (
@@ -1384,9 +1385,9 @@ void bli_cgemm_6m2
     __asm__("vfmul.vf v30, v4, ft1");
 
     __asm__("vfmsub.vf v0, ft0, v24");
-    __asm__("vfmadd.vf v2, ft0, v26"); 
+    __asm__("vfmadd.vf v2, ft0, v26");
     __asm__("vfmsub.vf v4, ft0, v28");
-    __asm__("vfmadd.vf v6, ft0, v30"); 
+    __asm__("vfmadd.vf v6, ft0, v30");
 
     __asm__("vfmul.vf v24, v10, ft1");
     __asm__("vfmul.vf v26, v8, ft1");
@@ -1394,9 +1395,9 @@ void bli_cgemm_6m2
     __asm__("vfmul.vf v30, v12, ft1");
 
     __asm__("vfmsub.vf v8, ft0, v24");
-    __asm__("vfmadd.vf v10, ft0, v26"); 
+    __asm__("vfmadd.vf v10, ft0, v26");
     __asm__("vfmsub.vf v12, ft0, v28");
-    __asm__("vfmadd.vf v14, ft0, v30"); 
+    __asm__("vfmadd.vf v14, ft0, v30");
 
     __asm__("vfmul.vf v24, v18, ft1");
     __asm__("vfmul.vf v26, v16, ft1");
@@ -1404,9 +1405,9 @@ void bli_cgemm_6m2
     __asm__("vfmul.vf v30, v20, ft1");
 
     __asm__("vfmsub.vf v16, ft0, v24");
-    __asm__("vfmadd.vf v18, ft0, v26"); 
+    __asm__("vfmadd.vf v18, ft0, v26");
     __asm__("vfmsub.vf v20, ft0, v28");
-    __asm__("vfmadd.vf v22, ft0, v30"); 
+    __asm__("vfmadd.vf v22, ft0, v30");
 
     scomplex beta_cast = *beta;
     if (beta_cast.real != 0.f || beta_cast.imag != 0.f) {
@@ -1621,28 +1622,28 @@ void bli_cgemm_6m2_cleanup
             __asm__("vfmul.vf v24, v18, ft1");
             __asm__("vfmul.vf v26, v16, ft1");
             __asm__("vfmsub.vf v16, ft0, v24");
-            __asm__("vfmadd.vf v18, ft0, v26"); 
+            __asm__("vfmadd.vf v18, ft0, v26");
         case 4:
             __asm__("vfmul.vf v28, v14, ft1");
             __asm__("vfmul.vf v30, v12, ft1");
             __asm__("vfmsub.vf v12, ft0, v28");
-            __asm__("vfmadd.vf v14, ft0, v30"); 
+            __asm__("vfmadd.vf v14, ft0, v30");
         case 3:
             __asm__("vfmul.vf v24, v10, ft1");
             __asm__("vfmul.vf v26, v8, ft1");
             __asm__("vfmsub.vf v8, ft0, v24");
-            __asm__("vfmadd.vf v10, ft0, v26"); 
+            __asm__("vfmadd.vf v10, ft0, v26");
         case 2:
             __asm__("vfmul.vf v28, v6, ft1");
             __asm__("vfmul.vf v30, v4, ft1");
             __asm__("vfmsub.vf v4, ft0, v28");
-            __asm__("vfmadd.vf v6, ft0, v30"); 
+            __asm__("vfmadd.vf v6, ft0, v30");
         case 1:
             __asm__("vfmul.vf v24, v2, ft1");
             __asm__("vfmul.vf v26, v0, ft1");
             __asm__("vfmsub.vf v0, ft0, v24");
-            __asm__("vfmadd.vf v2, ft0, v26"); 
-    } 
+            __asm__("vfmadd.vf v2, ft0, v26");
+    }
 
     scomplex beta_cast = *beta;
     if (beta_cast.real != 0.f || beta_cast.imag != 0.f) {
@@ -1791,11 +1792,11 @@ void bli_cgemm_sifive_x280_asm_6m2
        const void*      restrict b_,
        const void*      restrict beta_,
              void*      restrict c_, inc_t rsc, inc_t csc,
-             auxinfo_t* restrict data,
+       const auxinfo_t* restrict data,
        const cntx_t*    restrict cntx
      )
 {
-    // M x N x K cgemm 
+    // M x N x K cgemm
     (void) data;
     (void) cntx;
     const scomplex* restrict alpha = alpha_;
@@ -1832,7 +1833,7 @@ void bli_cgemm_sifive_x280_asm_6m2
 #define VSSEG2 "vsseg2e64.v "
 #define VSSSEG2 "vssseg2e64.v "
 #define PACKMR 8
-#define PACKNR 16 
+#define PACKNR 16
 
 void bli_zgemm_6m2
      (
@@ -1964,9 +1965,9 @@ void bli_zgemm_6m2
     __asm__("vfmul.vf v30, v4, ft1");
 
     __asm__("vfmsub.vf v0, ft0, v24");
-    __asm__("vfmadd.vf v2, ft0, v26"); 
+    __asm__("vfmadd.vf v2, ft0, v26");
     __asm__("vfmsub.vf v4, ft0, v28");
-    __asm__("vfmadd.vf v6, ft0, v30"); 
+    __asm__("vfmadd.vf v6, ft0, v30");
 
     __asm__("vfmul.vf v24, v10, ft1");
     __asm__("vfmul.vf v26, v8, ft1");
@@ -1974,9 +1975,9 @@ void bli_zgemm_6m2
     __asm__("vfmul.vf v30, v12, ft1");
 
     __asm__("vfmsub.vf v8, ft0, v24");
-    __asm__("vfmadd.vf v10, ft0, v26"); 
+    __asm__("vfmadd.vf v10, ft0, v26");
     __asm__("vfmsub.vf v12, ft0, v28");
-    __asm__("vfmadd.vf v14, ft0, v30"); 
+    __asm__("vfmadd.vf v14, ft0, v30");
 
     __asm__("vfmul.vf v24, v18, ft1");
     __asm__("vfmul.vf v26, v16, ft1");
@@ -1984,9 +1985,9 @@ void bli_zgemm_6m2
     __asm__("vfmul.vf v30, v20, ft1");
 
     __asm__("vfmsub.vf v16, ft0, v24");
-    __asm__("vfmadd.vf v18, ft0, v26"); 
+    __asm__("vfmadd.vf v18, ft0, v26");
     __asm__("vfmsub.vf v20, ft0, v28");
-    __asm__("vfmadd.vf v22, ft0, v30"); 
+    __asm__("vfmadd.vf v22, ft0, v30");
 
     dcomplex beta_cast = *beta;
     if (beta_cast.real != 0. || beta_cast.imag != 0.) {
@@ -2201,28 +2202,28 @@ void bli_zgemm_6m2_cleanup
             __asm__("vfmul.vf v24, v18, ft1");
             __asm__("vfmul.vf v26, v16, ft1");
             __asm__("vfmsub.vf v16, ft0, v24");
-            __asm__("vfmadd.vf v18, ft0, v26"); 
+            __asm__("vfmadd.vf v18, ft0, v26");
         case 4:
             __asm__("vfmul.vf v28, v14, ft1");
             __asm__("vfmul.vf v30, v12, ft1");
             __asm__("vfmsub.vf v12, ft0, v28");
-            __asm__("vfmadd.vf v14, ft0, v30"); 
+            __asm__("vfmadd.vf v14, ft0, v30");
         case 3:
             __asm__("vfmul.vf v24, v10, ft1");
             __asm__("vfmul.vf v26, v8, ft1");
             __asm__("vfmsub.vf v8, ft0, v24");
-            __asm__("vfmadd.vf v10, ft0, v26"); 
+            __asm__("vfmadd.vf v10, ft0, v26");
         case 2:
             __asm__("vfmul.vf v28, v6, ft1");
             __asm__("vfmul.vf v30, v4, ft1");
             __asm__("vfmsub.vf v4, ft0, v28");
-            __asm__("vfmadd.vf v6, ft0, v30"); 
+            __asm__("vfmadd.vf v6, ft0, v30");
         case 1:
             __asm__("vfmul.vf v24, v2, ft1");
             __asm__("vfmul.vf v26, v0, ft1");
             __asm__("vfmsub.vf v0, ft0, v24");
-            __asm__("vfmadd.vf v2, ft0, v26"); 
-    } 
+            __asm__("vfmadd.vf v2, ft0, v26");
+    }
 
     dcomplex beta_cast = *beta;
     if (beta_cast.real != 0. || beta_cast.imag != 0.) {
@@ -2371,11 +2372,11 @@ void bli_zgemm_sifive_x280_asm_6m2
        const void*      restrict b_,
        const void*      restrict beta_,
              void*      restrict c_, inc_t rsc, inc_t csc,
-             auxinfo_t* restrict data,
+       const auxinfo_t* restrict data,
        const cntx_t*    restrict cntx
      )
 {
-    // M x N x K zgemm 
+    // M x N x K zgemm
     (void) data;
     (void) cntx;
     const dcomplex* restrict alpha = alpha_;

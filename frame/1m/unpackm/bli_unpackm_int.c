@@ -36,12 +36,11 @@
 
 void bli_unpackm_int
      (
-       const obj_t*  p,
-       const obj_t*  a,
-       const cntx_t* cntx,
-       const rntm_t* rntm,
-       const cntl_t* cntl,
-       const thrinfo_t* thread
+       const obj_t*     a,
+             obj_t*     p,
+       const cntx_t*    cntx,
+       const cntl_t*    cntl,
+             thrinfo_t* thread_par
      )
 {
 	bli_init_once();
@@ -57,21 +56,23 @@ void bli_unpackm_int
 	// necessary, so we return.
 	if ( bli_obj_is_alias_of( p, a ) ) return;
 
+	// Barrier so that we know threads are done with previous computation
+	// with the same packing buffer before starting to pack.
+	thrinfo_t* thread = bli_thrinfo_sub_node( 0, thread_par );
+	bli_thrinfo_barrier( thread );
+
 	// Extract the function pointer from the current control tree node.
 	f = bli_cntl_unpackm_params_var_func( cntl );
 
 	// Invoke the variant.
-	if ( bli_thrinfo_am_chief( thread ) )
-	{
-		f
-		(
-		  p,
-		  a,
-		  cntx,
-		  cntl,
-		  thread
-		);
-	}
+	f
+	(
+	  p,
+	  a,
+	  cntx,
+	  cntl,
+	  thread
+	);
 
 	// Barrier so that unpacking is done before computation.
 	bli_thrinfo_barrier( thread );

@@ -164,7 +164,7 @@ void libblis_test_trmm_experiment
 	double       time_min  = DBL_MAX;
 	double       time;
 
-	num_t        datatype;
+	num_t        dt_a, dt_b, dt_alpha, dt_comp;
 
 	dim_t        m, n;
 	dim_t        mn_side;
@@ -179,7 +179,10 @@ void libblis_test_trmm_experiment
 
 
 	// Use the datatype of the first char in the datatype combination string.
-	bli_param_map_char_to_blis_dt( dc_str[0], &datatype );
+	bli_param_map_char_to_blis_dt( dc_str[0], &dt_b );
+	bli_param_map_char_to_blis_dt( dc_str[1], &dt_a );
+	bli_param_map_char_to_blis_dt( dc_str[2], &dt_alpha );
+	bli_param_map_char_to_blis_dt( dc_str[3], &dt_comp );
 
 	// Map the dimension specifier to actual dimensions.
 	m = libblis_test_get_dim_from_prob_size( op->dim_spec[0], p_cur );
@@ -192,25 +195,23 @@ void libblis_test_trmm_experiment
 	bli_param_map_char_to_blis_diag( pc_str[3], &diaga );
 
 	// Create test scalars.
-	bli_obj_scalar_init_detached( datatype, &alpha );
+	bli_obj_scalar_init_detached( dt_alpha, &alpha );
 
 	// Create test operands (vectors and/or matrices).
 	bli_set_dim_with_side( side, m, n, &mn_side );
-	libblis_test_mobj_create( params, datatype, transa,
+	libblis_test_mobj_create( params, dt_a, transa,
 	                          sc_str[1], mn_side, mn_side, &a );
-	libblis_test_mobj_create( params, datatype, BLIS_NO_TRANSPOSE,
+	libblis_test_mobj_create( params, dt_b, BLIS_NO_TRANSPOSE,
 	                          sc_str[0], m,       n,       &b );
-	libblis_test_mobj_create( params, datatype, BLIS_NO_TRANSPOSE,
+	libblis_test_mobj_create( params, dt_b, BLIS_NO_TRANSPOSE,
 	                          sc_str[0], m,       n,       &b_save );
 
+	// Set the computation precision of C.
+	bli_obj_set_comp_prec( bli_dt_prec( dt_comp ), &b );
+
 	// Set alpha and beta.
-	if ( bli_obj_is_real( &b ) )
 	{
-		bli_setsc(  0.8,  0.0, &alpha );
-	}
-	else
-	{
-		bli_setsc(  0.8,  0.5, &alpha );
+		bli_setsc(  2.0,  0.2, &alpha );
 	}
 
 	// Set the structure and uplo properties of A.
@@ -229,7 +230,7 @@ void libblis_test_trmm_experiment
 	bli_obj_set_conjtrans( transa, &a );
 	bli_obj_set_diag( diaga, &a );
 
-	// Repeat the experiment n_repeats times and record results. 
+	// Repeat the experiment n_repeats times and record results.
 	for ( i = 0; i < n_repeats; ++i )
 	{
 		bli_copym( &b_save, &b );
@@ -242,8 +243,14 @@ void libblis_test_trmm_experiment
 	}
 
 	// Estimate the performance of the best experiment repeat.
-	*perf = ( 1.0 * mn_side * m * n ) / time_min / FLOPS_PER_UNIT_PERF;
-	if ( bli_obj_is_complex( &b ) ) *perf *= 4.0;
+	if ( bli_is_left( side ) )
+	{
+		*perf = libblis_test_l3_flops( BLIS_TRMM, &a, &b, &b ) / time_min / FLOPS_PER_UNIT_PERF;
+	}
+	else
+	{
+		*perf = libblis_test_l3_flops( BLIS_TRMM, &b, &a, &b ) / time_min / FLOPS_PER_UNIT_PERF;
+	}
 
 	// Perform checks.
 	libblis_test_trmm_check( params, side, &alpha, &a, &b, &b_save, resid );
@@ -295,11 +302,18 @@ void libblis_test_trmm_check
        double*        resid
      )
 {
-	num_t  dt      = bli_obj_dt( b );
-	num_t  dt_real = bli_obj_dt_proj_to_real( b );
+	uplo_t uploa   = bli_obj_uplo( a );
+	if ( bli_obj_has_trans( a ) )
+		bli_toggle_uplo( &uploa );
+
+	diag_t diaga   = bli_obj_diag( a );
+	num_t  dt_real = bli_obj_comp_prec( b ) | BLIS_REAL;
+	num_t  dt_comp = bli_obj_comp_prec( b ) | BLIS_COMPLEX;
+	num_t  dt;
 
 	dim_t  m       = bli_obj_length( b );
 	dim_t  n       = bli_obj_width( b );
+	dim_t  mn_side = bli_obj_length( a );
 
 	obj_t  norm;
 	obj_t  t, v, w, z;
@@ -335,6 +349,17 @@ void libblis_test_trmm_check
 	//     = alpha * B * transa(A) * t
 	//     = alpha * B * w
 
+	// Compute our reference checksum in the real domain if all operands
+	// are real, and in the complex domain otherwise.
+	if ( bli_obj_is_real( a ) &&
+	     bli_obj_is_real( b ) ) dt = dt_real;
+	else                        dt = dt_comp;
+
+	// Project a, b, and c into the appropriate domain and computational
+	// precision, and then proceed with the checking accordingly.
+
+	obj_t a2, b2, b0;
+
 	bli_obj_scalar_init_detached( dt_real, &norm );
 
 	if ( bli_is_left( side ) )
@@ -354,20 +379,41 @@ void libblis_test_trmm_check
 
 	libblis_test_vobj_randomize( params, TRUE, &t );
 
-	bli_gemv( &BLIS_ONE, b, &t, &BLIS_ZERO, &v );
+	// We need to zero out the imaginary part of t in order for our
+	// checks to work in all cases. Otherwise, the imaginary parts
+	// could affect intermediate products, depending on the order that
+	// they are executed.
+	bli_setiv( &BLIS_ZERO, &t );
+
+	// Create type-casted equivalents of a, b, c_orig, and c.
+	bli_obj_create( dt, mn_side, mn_side, 0, 0, &a2 );
+	bli_obj_create( dt, m, n, 0, 0, &b2 );
+	bli_obj_create( dt, m, n, 0, 0, &b0 );
+
+	// Cast a, b, c_orig, and c into the datatype of our temporary objects.
+	bli_castm( a,      &a2 );
+	bli_castm( b_orig, &b2 );
+	bli_castm( b,      &b0 );
+	bli_obj_set_struc( BLIS_TRIANGULAR, &a2 );
+	bli_obj_set_uplo( uploa, &a2 );
+	bli_obj_set_diag( diaga, &a2 );
+
+	bli_gemv( &BLIS_ONE, &b0, &t, &BLIS_ZERO, &v );
 
 	if ( bli_is_left( side ) )
 	{
-		bli_gemv( &BLIS_ONE, b_orig, &t, &BLIS_ZERO, &w );
-		bli_trmv( alpha, a, &w );
+		bli_gemv( &BLIS_ONE, &b2, &t, &BLIS_ZERO, &w );
+		bli_trmv( alpha, &a2, &w );
 		bli_copyv( &w, &z );
 	}
 	else
 	{
 		bli_copyv( &t, &w );
-		bli_trmv( &BLIS_ONE, a, &w );
-		bli_gemv( alpha, b_orig, &w, &BLIS_ZERO, &z );
+		bli_trmv( &BLIS_ONE, &a2, &w );
+		bli_gemv( alpha, &b2, &w, &BLIS_ZERO, &z );
 	}
+
+	if ( bli_obj_is_real( b ) ) bli_setiv( &BLIS_ZERO, &z );
 
 	bli_subv( &z, &v );
 	bli_normfv( &v, &norm );
@@ -377,5 +423,9 @@ void libblis_test_trmm_check
 	bli_obj_free( &v );
 	bli_obj_free( &w );
 	bli_obj_free( &z );
+
+	bli_obj_free( &a2 );
+	bli_obj_free( &b2 );
+	bli_obj_free( &b0 );
 }
 

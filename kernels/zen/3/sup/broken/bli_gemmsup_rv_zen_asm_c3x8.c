@@ -353,7 +353,7 @@ void bli_cgemmsup_rv_zen_asm_2x8
 	vmulps(ymm1, ymm3, ymm3)
 	vaddsubps(ymm3, ymm9, ymm9)
 
-	/* (ßr + ßi)x C + ((ar + ai) x AB) */
+	/* (ï¿½r + ï¿½i)x C + ((ar + ai) x AB) */
 	mov(var(beta), rbx)                // load address of beta
 	vbroadcastss(mem(rbx), ymm1)       // load beta_r and duplicate
 	vbroadcastss(mem(rbx, 4), ymm2)    // load beta_i and duplicate
@@ -417,7 +417,7 @@ void bli_cgemmsup_rv_zen_asm_2x8
 	CGEMM_INPUT_SCALE_CS_BETA_NZ
 	vaddps(ymm4, ymm0, ymm4)
 	add(rdi, rcx)
-	
+
 	CGEMM_INPUT_SCALE_CS_BETA_NZ
 	vaddps(ymm8, ymm0, ymm8)
 	add(rdi, rcx)
@@ -430,7 +430,7 @@ void bli_cgemmsup_rv_zen_asm_2x8
 
 	CGEMM_INPUT_SCALE_CS_BETA_NZ
 	vaddps(ymm9, ymm0, ymm9)
-	add(rdi, rcx) 
+	add(rdi, rcx)
 
 	mov(r12, rcx)                      // reset rcx to current utile of c.
 	vunpcklpd(ymm8, ymm4, ymm0)        //a0a1b0b1 a4a4b4b5 //gamma00-10 gamma02-12
@@ -505,8 +505,8 @@ void bli_cgemmsup_rv_zen_asm_2x8
 	lea(mem(rcx, rsi, 1), rcx)
 
 	/******************Transpose bottom tile 4x2***************************/
-	vunpcklpd(ymm9, ymm5, ymm0)  //a8a9b8b9     a12a13b12b13 
-	vunpckhpd(ymm9, ymm5, ymm2)  //a10a11b10b11 a14a15b14b15 
+	vunpcklpd(ymm9, ymm5, ymm0)  //a8a9b8b9     a12a13b12b13
+	vunpckhpd(ymm9, ymm5, ymm2)  //a10a11b10b11 a14a15b14b15
 
 	vmovups(xmm0, mem(rcx))
 	lea(mem(rcx, rsi, 1), rcx)
@@ -763,7 +763,7 @@ void bli_cgemmsup_rv_zen_asm_1x8
 	vmulps(ymm1, ymm3, ymm3)
 	vaddsubps(ymm3, ymm5, ymm5)
 
-	/* (ßr + ßi)x C + ((ar + ai) x AB) */
+	/* (ï¿½r + ï¿½i)x C + ((ar + ai) x AB) */
 	mov(var(beta), rbx) // load address of beta
 	vbroadcastss(mem(rbx), ymm1) // load beta_r and duplicate
 	vbroadcastss(mem(rbx, 4), ymm2) // load beta_i and duplicate
@@ -1151,7 +1151,7 @@ void bli_cgemmsup_rv_zen_asm_2x4
 	vaddsubps(ymm3, ymm8, ymm8)
 
 
-	/* (ßr + ßi)x C + ((ar + ai) x AB) */
+	/* (ï¿½r + ï¿½i)x C + ((ar + ai) x AB) */
 	mov(var(beta), rbx) // load address of beta
 	vbroadcastss(mem(rbx), ymm1) // load beta_r and duplicate
 	vbroadcastss(mem(rbx, 4), ymm2) // load beta_i and duplicate
@@ -1198,7 +1198,7 @@ void bli_cgemmsup_rv_zen_asm_2x4
 	CGEMM_INPUT_SCALE_CS_BETA_NZ
 	vaddps(ymm4, ymm0, ymm4)
 	add(rdi, rcx)
-	
+
 	CGEMM_INPUT_SCALE_CS_BETA_NZ
 	vaddps(ymm8, ymm0, ymm8)
 
@@ -1492,7 +1492,7 @@ void bli_cgemmsup_rv_zen_asm_1x4
 	vmulps(ymm1, ymm3, ymm3)
 	vaddsubps(ymm3, ymm4, ymm4)
 
-	/* (ßr + ßi)x C + ((ar + ai) x AB) */
+	/* (ï¿½r + ï¿½i)x C + ((ar + ai) x AB) */
 	mov(var(beta), rbx) // load address of beta
 	vbroadcastss(mem(rbx), ymm1) // load beta_r and duplicate
 	vbroadcastss(mem(rbx, 4), ymm2) // load beta_i and duplicate
@@ -1848,7 +1848,7 @@ void bli_cgemmsup_rv_zen_asm_2x2
 	vaddsubps(xmm3, xmm8, xmm8)
 
 
-	/* (ßr + ßi)x C + ((ar + ai) x AB) */
+	/* (ï¿½r + ï¿½i)x C + ((ar + ai) x AB) */
 	mov(var(beta), rbx) // load address of beta
 	vbroadcastss(mem(rbx), xmm1) // load beta_r and duplicate
 	vbroadcastss(mem(rbx, 4), xmm2) // load beta_i and duplicate
@@ -1913,7 +1913,7 @@ void bli_cgemmsup_rv_zen_asm_2x2
 	CGEMM_INPUT_SCALE_CS_BETA_NZ_128
 	vaddps(xmm4, xmm0, xmm4)
 	add(rdi, rcx)
-	
+
 	CGEMM_INPUT_SCALE_CS_BETA_NZ_128
 	vaddps(xmm8, xmm0, xmm8)
 
@@ -2033,7 +2033,7 @@ void bli_cgemmsup_rv_zen_asm_1x2
 
 	lea(mem(r8, r8, 2), r13)           // r13 = 3*rs_a
 	lea(mem(r8, r8, 4), r15)           // r15 = 5*rs_a
-	
+
 	mov(var(rs_b), r10)                // load rs_b
 	lea(mem(, r10, 8), r10)            // rs_b *= sizeof(dt)
 
@@ -2190,7 +2190,7 @@ void bli_cgemmsup_rv_zen_asm_1x2
 	vaddsubps(xmm3, xmm4, xmm4)
 
 
-	/* (ßr + ßi)x C + ((ar + ai) x AB) */
+	/* (ï¿½r + ï¿½i)x C + ((ar + ai) x AB) */
 	mov(var(beta), rbx) // load address of beta
 	vbroadcastss(mem(rbx), xmm1) // load beta_r and duplicate
 	vbroadcastss(mem(rbx, 4), xmm2) // load beta_i and duplicate

@@ -45,7 +45,7 @@
 #undef  GENTDEF
 #define GENTDEF( ctype, ch, opname, tsuf ) \
 \
-typedef void (*PASTECH3(ch,opname,_unb,tsuf)) \
+typedef void (*PASTECH(ch,opname,_unb,tsuf)) \
      ( \
        trans_t transa, \
        conj_t  conjx, \
@@ -66,7 +66,7 @@ INSERT_GENTDEF( gemv )
 #undef  GENTDEF
 #define GENTDEF( ctype, ch, opname, tsuf ) \
 \
-typedef void (*PASTECH3(ch,opname,_unb,tsuf)) \
+typedef void (*PASTECH(ch,opname,_unb,tsuf)) \
      ( \
        conj_t  conjx, \
        conj_t  conjy, \
@@ -86,7 +86,7 @@ INSERT_GENTDEF( ger )
 #undef  GENTDEF
 #define GENTDEF( ctype, ch, opname, tsuf ) \
 \
-typedef void (*PASTECH3(ch,opname,_unb,tsuf)) \
+typedef void (*PASTECH(ch,opname,_unb,tsuf)) \
      ( \
        uplo_t  uploa, \
        conj_t  conja, \
@@ -108,7 +108,7 @@ INSERT_GENTDEF( hemv )
 #undef  GENTDEFR
 #define GENTDEFR( ctype, ctype_r, ch, chr, opname, tsuf ) \
 \
-typedef void (*PASTECH3(ch,opname,_unb,tsuf)) \
+typedef void (*PASTECH(ch,opname,_unb,tsuf)) \
      ( \
        uplo_t   uploa, \
        conj_t   conjx, \
@@ -127,7 +127,7 @@ INSERT_GENTDEFR( her )
 #undef  GENTDEF
 #define GENTDEF( ctype, ch, opname, tsuf ) \
 \
-typedef void (*PASTECH3(ch,opname,_unb,tsuf)) \
+typedef void (*PASTECH(ch,opname,_unb,tsuf)) \
      ( \
        uplo_t  uploa, \
        conj_t  conjx, \
@@ -148,7 +148,7 @@ INSERT_GENTDEF( her2 )
 #undef  GENTDEF
 #define GENTDEF( ctype, ch, opname, tsuf ) \
 \
-typedef void (*PASTECH3(ch,opname,_unb,tsuf)) \
+typedef void (*PASTECH(ch,opname,_unb,tsuf)) \
      ( \
        uplo_t  uploa, \
        trans_t transa, \

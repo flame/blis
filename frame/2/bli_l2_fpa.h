@@ -39,8 +39,8 @@
 #undef  GENPROT
 #define GENPROT( opname ) \
 \
-PASTECH2(opname,BLIS_TAPI_EX_SUF,_vft) \
-PASTEMAC2(opname,BLIS_TAPI_EX_SUF,_qfp)( num_t dt );
+PASTECH(opname,BLIS_TAPI_EX_SUF,_vft) \
+PASTEMAC(opname,BLIS_TAPI_EX_SUF,_qfp)( num_t dt );
 
 GENPROT( gemv )
 GENPROT( ger )
@@ -60,7 +60,7 @@ GENPROT( trsv )
 #undef  GENPROT
 #define GENPROT( opname, varname ) \
 \
-PASTECH2(opname,_unb,_vft) \
+PASTECH(opname,_unb,_vft) \
 PASTEMAC(varname,_qfp)( num_t dt );
 
 GENPROT( gemv, gemv_unb_var1 )

@@ -164,7 +164,7 @@ void libblis_test_herk_experiment
 	double       time_min  = DBL_MAX;
 	double       time;
 
-	num_t        datatype;
+	num_t        dt_a, dt_c, dt_alpha, dt_beta, dt_comp;
 
 	dim_t        m, k;
 
@@ -176,7 +176,11 @@ void libblis_test_herk_experiment
 
 
 	// Use the datatype of the first char in the datatype combination string.
-	bli_param_map_char_to_blis_dt( dc_str[0], &datatype );
+	bli_param_map_char_to_blis_dt( dc_str[0], &dt_c );
+	bli_param_map_char_to_blis_dt( dc_str[1], &dt_a );
+	bli_param_map_char_to_blis_dt( dc_str[2], &dt_alpha );
+	bli_param_map_char_to_blis_dt( dc_str[3], &dt_beta );
+	bli_param_map_char_to_blis_dt( dc_str[4], &dt_comp );
 
 	// Map the dimension specifier to actual dimensions.
 	m = libblis_test_get_dim_from_prob_size( op->dim_spec[0], p_cur );
@@ -187,29 +191,26 @@ void libblis_test_herk_experiment
 	bli_param_map_char_to_blis_trans( pc_str[1], &transa );
 
 	// Create test scalars.
-	bli_obj_scalar_init_detached( datatype, &alpha );
-	bli_obj_scalar_init_detached( datatype, &beta );
+	bli_obj_scalar_init_detached( dt_alpha, &alpha );
+	bli_obj_scalar_init_detached( dt_beta, &beta );
 
 	// Create test operands (vectors and/or matrices).
-	libblis_test_mobj_create( params, datatype, transa,
+	libblis_test_mobj_create( params, dt_a, transa,
 	                          sc_str[1], m, k, &a );
-	libblis_test_mobj_create( params, datatype, BLIS_NO_TRANSPOSE,
+	libblis_test_mobj_create( params, dt_c, BLIS_NO_TRANSPOSE,
 	                          sc_str[0], m, m, &c );
-	libblis_test_mobj_create( params, datatype, BLIS_NO_TRANSPOSE,
+	libblis_test_mobj_create( params, dt_c, BLIS_NO_TRANSPOSE,
 	                          sc_str[0], m, m, &c_save );
 
+	// Set the computation precision of C.
+	bli_obj_set_comp_prec( bli_dt_prec( dt_comp ), &c );
+
 	// Set alpha and beta.
-	if ( bli_obj_is_real( &c ) )
-	{
-		bli_setsc(  1.2, 0.0, &alpha );
-		bli_setsc( -1.0, 0.0, &beta );
-	}
-	else
 	{
 		// For herk, alpha and beta must both be real-valued, even in the
 		// complex case (in order to preserve the Hermitian structure of C).
 		bli_setsc(  1.2, 0.0, &alpha );
-		bli_setsc( -1.0, 0.0, &beta );
+		bli_setsc( -1.5, 0.0, &beta );
 	}
 
 	// Randomize A.
@@ -233,7 +234,7 @@ void libblis_test_herk_experiment
 	// Apply the remaining parameters.
 	bli_obj_set_conjtrans( transa, &a );
 
-	// Repeat the experiment n_repeats times and record results. 
+	// Repeat the experiment n_repeats times and record results.
 	for ( i = 0; i < n_repeats; ++i )
 	{
 		bli_copym( &c_save, &c );
@@ -245,9 +246,11 @@ void libblis_test_herk_experiment
 		time_min = bli_clock_min_diff( time_min, time );
 	}
 
+	obj_t ah;
+	bli_obj_alias_with_trans( BLIS_CONJ_TRANSPOSE, &a, &ah );
+
 	// Estimate the performance of the best experiment repeat.
-	*perf = ( 1.0 * m * m * k ) / time_min / FLOPS_PER_UNIT_PERF;
-	if ( bli_obj_is_complex( &c ) ) *perf *= 4.0;
+	*perf = libblis_test_l3_flops( BLIS_HERK, &a, &ah, &c ) / time_min / FLOPS_PER_UNIT_PERF;
 
 	// Perform checks.
 	libblis_test_herk_check( params, &alpha, &a, &beta, &c, &c_save, resid );
@@ -296,13 +299,14 @@ void libblis_test_herk_check
        double*        resid
      )
 {
-	num_t  dt      = bli_obj_dt( c );
-	num_t  dt_real = bli_obj_dt_proj_to_real( c );
+	uplo_t uploc   = bli_obj_uplo( c );
+	num_t  dt_real = bli_obj_comp_prec( c ) | BLIS_REAL;
+	num_t  dt_comp = bli_obj_comp_prec( c ) | BLIS_COMPLEX;
+	num_t  dt;
 
 	dim_t  m       = bli_obj_length( c );
 	dim_t  k       = bli_obj_width_after_trans( a );
 
-	obj_t  ah;
 	obj_t  norm;
 	obj_t  t, v, w, z;
 
@@ -332,7 +336,16 @@ void libblis_test_herk_check
 	//     = beta * C_orig * t + z
 	//
 
-	bli_obj_alias_with_trans( BLIS_CONJ_TRANSPOSE, a, &ah );
+	// Compute our reference checksum in the real domain if all operands
+	// are real, and in the complex domain otherwise.
+	if ( bli_obj_is_real( a ) &&
+	     bli_obj_is_real( c ) ) dt = dt_real;
+	else                        dt = dt_comp;
+
+	// Project a, b, and c into the appropriate domain and computational
+	// precision, and then proceed with the checking accordingly.
+
+	obj_t a2, ah2, c2, c0;
 
 	bli_obj_scalar_init_detached( dt_real, &norm );
 
@@ -343,11 +356,34 @@ void libblis_test_herk_check
 
 	libblis_test_vobj_randomize( params, TRUE, &t );
 
-	bli_hemv( &BLIS_ONE, c, &t, &BLIS_ZERO, &v );
+	// We need to zero out the imaginary part of t in order for our
+	// checks to work in all cases. Otherwise, the imaginary parts
+	// could affect intermediate products, depending on the order that
+	// they are executed.
+	bli_setiv( &BLIS_ZERO, &t );
 
-	bli_gemv( &BLIS_ONE, &ah, &t, &BLIS_ZERO, &w );
-	bli_gemv( alpha, a, &w, &BLIS_ZERO, &z );
-	bli_hemv( beta, c_orig, &t, &BLIS_ONE, &z );
+	// Create type-casted equivalents of a, b, c_orig, and c.
+	bli_obj_create( dt, m, k, 0, 0, &a2 );
+	bli_obj_create( dt, m, m, 0, 0, &c2 );
+	bli_obj_create( dt, m, m, 0, 0, &c0 );
+	bli_obj_set_struc( BLIS_HERMITIAN, &c2 );
+	bli_obj_set_struc( BLIS_HERMITIAN, &c0 );
+	bli_obj_set_uplo( uploc, &c2 );
+	bli_obj_set_uplo( uploc, &c0 );
+
+	// Cast a, b, c_orig, and c into the datatype of our temporary objects.
+	bli_castm( a,      &a2 );
+	bli_castm( c_orig, &c2 );
+	bli_castm( c,      &c0 );
+
+	bli_obj_alias_with_trans( BLIS_CONJ_TRANSPOSE, &a2, &ah2 );
+
+	bli_hemv( &BLIS_ONE, &c0, &t, &BLIS_ZERO, &v );
+
+	bli_gemv( &BLIS_ONE, &ah2, &t, &BLIS_ZERO, &w );
+	bli_gemv( alpha, &a2, &w, &BLIS_ZERO, &z );
+	bli_hemv( beta, &c2, &t, &BLIS_ONE, &z );
+	if ( bli_obj_is_real( c ) ) bli_setiv( &BLIS_ZERO, &z );
 
 	bli_subv( &z, &v );
 	bli_normfv( &v, &norm );
@@ -357,5 +393,9 @@ void libblis_test_herk_check
 	bli_obj_free( &v );
 	bli_obj_free( &w );
 	bli_obj_free( &z );
+
+	bli_obj_free( &a2 );
+	bli_obj_free( &c2 );
+	bli_obj_free( &c0 );
 }
 

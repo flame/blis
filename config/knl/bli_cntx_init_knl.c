@@ -53,8 +53,7 @@ void bli_cntx_init_knl( cntx_t* cntx )
 	  BLIS_GEMM_UKR, BLIS_DOUBLE, bli_dgemm_knl_asm_24x8,
 
 	  // packm
-	  BLIS_PACKM_MRXK_KER, BLIS_DOUBLE, bli_dpackm_knl_asm_24xk,
-	  BLIS_PACKM_NRXK_KER, BLIS_DOUBLE, bli_dpackm_knl_asm_8xk,
+	  BLIS_PACKM_KER, BLIS_DOUBLE, bli_dpackm_knl_asm_24x8,
 
 	  // axpyf
 	  BLIS_AXPYF_KER, BLIS_FLOAT,  bli_saxpyf_zen_int_8,

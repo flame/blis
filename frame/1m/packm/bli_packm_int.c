@@ -45,31 +45,18 @@ void bli_packm_int
 {
 	bli_init_once();
 
-	// Extract the function pointer from the object.
-	packm_var_oft f = bli_obj_pack_fn( a );
-
 	// Barrier so that we know threads are done with previous computation
 	// with the same packing buffer before starting to pack.
-	thrinfo_t* thread = bli_thrinfo_sub_node( thread_par );
+	thrinfo_t* thread = bli_thrinfo_sub_node( 0, thread_par );
 	bli_thrinfo_barrier( thread );
 
-	// Invoke the packm variant.
-	// NOTE: The packing kernel uses two communicators: one which represents a
-	// single workgroup of many threads, and one which represents a group of
-	// many single-member workgroups. The former communicator is used for
-	// barriers and thread communication (i.e. broadcasting the pack buffer
-	// pointer), while the latter communicator is used for partitioning work.
-	// This is because all of the thread range functions rely on the work_id
-	// and number of workgroups (n_way). Thus, we pass along the parent
-	// thrinfo_t node which has these two communicators as the sub-node and
-	// sub-prenode, respectively.
-	f
+	bli_packm_cntl_variant( cntl )
 	(
 	  a,
 	  p,
 	  cntx,
 	  cntl,
-	  thread_par
+	  thread
 	);
 
 	// Barrier so that packing is done before computation.

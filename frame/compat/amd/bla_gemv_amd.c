@@ -118,7 +118,7 @@ void PASTEF77(ch,blasname) \
 	/* If alpha is zero, scale y by beta and return early. */ \
 	if ( PASTEMAC(ch,eq0)( *alpha ) ) \
 	{ \
-		PASTEMAC2(ch,scalv,BLIS_TAPI_EX_SUF) \
+		PASTEMAC(ch,scalv,BLIS_TAPI_EX_SUF) \
 		( \
 		  BLIS_NO_CONJUGATE, \
 		  m_y, \
@@ -135,7 +135,7 @@ void PASTEF77(ch,blasname) \
 	const inc_t cs_a = *lda; \
 \
 	/* Declare a void function pointer for the current operation. */ \
-	PASTECH2(ch,blisname,_unb_ft) f; \
+	PASTECH(ch,blisname,_unb_ft) f; \
 \
 	/* Choose the underlying implementation. */ \
 	if         ( bli_does_notrans( blis_transa ) )  f = PASTEMAC(ch,gemv_unf_var2); \

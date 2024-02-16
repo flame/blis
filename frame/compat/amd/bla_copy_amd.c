@@ -72,7 +72,7 @@ void PASTEF77(ch,blasname) \
 	   still need initialization so that they can query valid contexts from
 	   gks. However, the expert API will self-initialize before attempting
 	   to query a context, so the complex domain cases should work fine. */ \
-	PASTEMAC2(ch,blisname,isuf) \
+	PASTEMAC(ch,blisname,isuf) \
 	( \
 	  BLIS_NO_CONJUGATE, \
 	  n0, \
@@ -125,7 +125,7 @@ void PASTEF77(ch,blasname) \
 	   still need initialization so that they can query valid contexts from
 	   gks. However, the expert API will self-initialize before attempting
 	   to query a context, so the complex domain cases should work fine. */ \
-	PASTEMAC2(ch,blisname,isuf) \
+	PASTEMAC(ch,blisname,isuf) \
 	( \
 	  BLIS_NO_CONJUGATE, \
 	  n0, \

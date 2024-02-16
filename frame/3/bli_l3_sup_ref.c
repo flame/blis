@@ -50,31 +50,6 @@ err_t bli_gemmsup_ref
 	// register a different function pointer in the context in your
 	// sub-configuration's bli_cntx_init_*() function.
 
-	// Check parameters.
-	if ( bli_error_checking_is_enabled() )
-		bli_gemm_check( alpha, a, b, beta, c, cntx );
-
-#if 0
-	// NOTE: This special case handling is done within the variants.
-
-	// If alpha is zero, scale by beta and return.
-	if ( bli_obj_equals( alpha, &BLIS_ZERO ) )
-	{
-		bli_scalm( beta, c );
-		return;
-	}
-
-	// If A or B has a zero dimension, scale C by beta and return early.
-	if ( bli_obj_has_zero_dim( a ) ||
-	     bli_obj_has_zero_dim( b ) )
-	{
-		bli_scalm( beta, c );
-		return BLIS_SUCCESS;
-	}
-#endif
-
-	const stor3_t stor_id = bli_obj_stor3_from_strides( c, a, b );
-
 	// Don't use the small/unpacked implementation if one of the matrices
 	// uses general stride. NOTE: We check for this here, in bli_gemmsup_ref()
 	// (and not in the calling function, bli_gemmsup()), because we consider
@@ -85,6 +60,7 @@ err_t bli_gemmsup_ref
 	// want to have to manage the multiple return values from the threads,
 	// which we would have to process into a single return value and then
 	// return from the parallel/threaded region.
+	const stor3_t stor_id = bli_obj_stor3_from_strides( c, a, b );
 	if ( stor_id == BLIS_XXX ) return BLIS_FAILURE;
 
 	// Parse and interpret the contents of the rntm_t object to properly

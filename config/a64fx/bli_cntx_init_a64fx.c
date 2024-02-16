@@ -56,8 +56,7 @@ void bli_cntx_init_a64fx( cntx_t* cntx )
 	  BLIS_GEMM_UKR, BLIS_DCOMPLEX, bli_zgemm_armsve_asm_2vx10_unindexed,
 
 	  // packm
-	  BLIS_PACKM_MRXK_KER, BLIS_DOUBLE, bli_dpackm_armsve512_asm_16xk,
-	  BLIS_PACKM_NRXK_KER, BLIS_DOUBLE, bli_dpackm_armsve512_asm_10xk,
+	  BLIS_PACKM_KER, BLIS_DOUBLE, bli_dpackm_armsve512_asm_16x10,
 
 	  BLIS_VA_END
 	);

@@ -35,9 +35,9 @@
 #if 1
 
 #ifdef LAPACK_ILP64
-long PASTEF770(lsame)(const char *ca, const char *cb, long ca_len, long cb_len);
+long PASTEF77(lsame)(const char *ca, const char *cb, long ca_len, long cb_len);
 #else
-BLIS_EXPORT_BLAS int PASTEF770(lsame)(const char *ca, const char *cb, int ca_len, int cb_len);
+BLIS_EXPORT_BLAS int PASTEF77(lsame)(const char *ca, const char *cb, int ca_len, int cb_len);
 #endif
 
 #endif

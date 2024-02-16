@@ -33,38 +33,10 @@
 
 */
 
-
-void bli_packm_sup_init_mem
-     (
-       bool       will_pack,
-       packbuf_t  pack_buf_type,
-       num_t      dt,
-       dim_t      m,
-       dim_t      k,
-       dim_t      mr,
-       thrinfo_t* thread
-     );
-
 void bli_packm_sup_finalize_mem
      (
        bool       did_pack,
        thrinfo_t* thread
-     );
-
-void bli_packm_sup_init
-     (
-             bool       will_pack,
-             stor3_t    stor_id,
-             pack_t*    schema,
-             dim_t      m,
-             dim_t      k,
-             dim_t      mr,
-             dim_t*     m_max,
-             dim_t*     k_max,
-       const void*      x, inc_t  rs_x, inc_t  cs_x,
-             void**     p, inc_t* rs_p, inc_t* cs_p,
-                           dim_t* pd_p, inc_t* ps_p,
-             thrinfo_t* thread
      );
 
 void bli_packm_sup
@@ -72,10 +44,7 @@ void bli_packm_sup
              bool       will_pack,
              packbuf_t  pack_buf_type,
              stor3_t    stor_id,
-             trans_t    transc,
              num_t      dt,
-             dim_t      m_alloc,
-             dim_t      k_alloc,
              dim_t      m,
              dim_t      k,
              dim_t      mr,
