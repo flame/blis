@@ -109,7 +109,7 @@ void generate_NAN_INF( T* mat, char uploa, gtint_t m, gtint_t ld, EVT_TYPE type,
 }
 
 template<typename T>
-void init_mat( T* mat, char uploa, char storage, char trans, gtint_t from, gtint_t to, gtint_t m,
+void random_generator_with_INF_NAN( T* mat, char uploa, char storage, char trans, gtint_t from, gtint_t to, gtint_t m,
 gtint_t n, gtint_t ld, EVT_TYPE type = NO_EVT, bool is_a = false )
 {
     switch( type )
@@ -157,8 +157,8 @@ void test_trsm( char storage, char side, char uploa, char transa, char diaga,
     std::vector<T> a( testinghelpers::matsize(storage, transa, mn, mn, lda) );
     std::vector<T> b( testinghelpers::matsize(storage, 'n', m, n, ldb) );
     srand(time(0));
-    init_mat( a.data(), uploa, storage, transa, lower, upper, mn, mn, lda, NO_EVT, true);
-    init_mat( b.data(), uploa, storage, 'n', 3, 10, m, n, ldb, b_init, false);
+    random_generator_with_INF_NAN( a.data(), uploa, storage, transa, lower, upper, mn, mn, lda, NO_EVT, true);
+    random_generator_with_INF_NAN( b.data(), uploa, storage, 'n', 3, 10, m, n, ldb, b_init, false);
 
     bool nan_inf_check = false;
     // Setting the nan_inf_check boolean to true if alpa has
