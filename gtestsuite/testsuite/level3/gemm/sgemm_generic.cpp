@@ -153,7 +153,6 @@ INSTANTIATE_TEST_SUITE_P(
         ::SGemmPrint()
     );
 
-
 //----------------------------- sgemm_small kernel ------------------------------------
 INSTANTIATE_TEST_SUITE_P(
         expect_sgemm_small_path,
