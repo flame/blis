@@ -25,7 +25,10 @@ file(GLOB testsuite_sources LIST_DIRECTORIES false ${CMAKE_CURRENT_SOURCE_DIR}/s
 set(CINFLAGS ${INC_PATH})
 if((NOT WIN32) AND ENABLE_COVERAGE)
     include(coverage.cmake)
-    set(LDFLAGS "${LDFLAGS} -ftest-coverage")
+    list(APPEND LDFLAGS ${COVERAGE_FLAGS})
+endif()
+if((NOT WIN32) AND ENABLE_ASAN)
+    list(APPEND LDFLAGS ${ASAN_FLAGS})
 endif()
 
 # Create an executable using the sources above.

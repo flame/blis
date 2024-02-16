@@ -279,12 +279,13 @@ if(LINUX)
     add_compile_options(-g -Wall -Wno-unused-function -Wfatal-errors -fPIC )
 
     if(ENABLE_ASAN)
-       add_compile_options(-fsanitize=address)
-       add_definitions(-DENABLE_ASAN)
+        set(ASAN_FLAGS "-fsanitize=address")
+        list(APPEND CMAKE_C_FLAGS ${ASAN_FLAGS})
     endif()
 
     if(ENABLE_COVERAGE)
-        set(CMAKE_CXX_FLAGS "-O0 --coverage")
+        set(COVERAGE_FLAGS "-O0 --coverage")
+        list(APPEND CMAKE_C_FLAGS ${COVERAGE_FLAGS})
     endif()
 endif()
 
@@ -307,20 +308,23 @@ if(BLIS_LINKING_TYPE STREQUAL "static")
     if(ENABLE_THREADING STREQUAL "openmp")
         try_run(RUNRESULT COMPILERESULT "${CMAKE_BINARY_DIR}/temp" SOURCES ${CMAKE_SOURCE_DIR}/cmake/config_ukr_tests.cpp
             COMPILE_DEFINITIONS -I${BLIS_PATH}/include/ -I${BLIS_PATH}/include/blis
-            LINK_LIBRARIES ${BLIS_LIBRARY} ${COMMON_LIBS} OpenMP::OpenMP_CXX      
+            LINK_LIBRARIES ${BLIS_LIBRARY} ${COMMON_LIBS} OpenMP::OpenMP_CXX ${ASAN_FLAGS} ${COVERAGE_FLAGS}
             RUN_OUTPUT_VARIABLE UKR_CONFIG
             COMPILE_OUTPUT_VARIABLE COMP_VAR
         )
     else()
         try_run(RUNRESULT COMPILERESULT "${CMAKE_BINARY_DIR}/temp" SOURCES ${CMAKE_SOURCE_DIR}/cmake/config_ukr_tests.cpp
             COMPILE_DEFINITIONS -I${BLIS_PATH}/include/ -I${BLIS_PATH}/include/blis
-            LINK_LIBRARIES ${BLIS_LIBRARY} ${COMMON_LIBS}       
+            LINK_LIBRARIES ${BLIS_LIBRARY} ${COMMON_LIBS} ${ASAN_FLAGS} ${COVERAGE_FLAGS}
             RUN_OUTPUT_VARIABLE UKR_CONFIG
             COMPILE_OUTPUT_VARIABLE COMP_VAR
         )
     endif()
     # Uncomment this to debug this snippet above, if necessary.
-    #message("Build output: ${COMP_VAR}")
+    message("Build output: ${COMP_VAR}")
+    if(NOT COMPILERESULT)
+        message(FATAL_ERROR "Compiling config_ukr_tests.cpp failed with the following error ${COMP_VAR}.")
+    endif()
     # Remove all empty items from the list.
     list(REMOVE_ITEM UKR_CONFIG "")
     # We iterate through the list returned from the snippet above.

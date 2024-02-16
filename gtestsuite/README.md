@@ -86,7 +86,13 @@ For threaded MKL the following OpenMP runtimes are used:
 * For testing a 64-bit integer BLIS library, use `-DINT_SIZE=64`.
 ## Address Sanitizer (Linux Only)
 * To build using address sanitizer, configure using `-DENABLE_ASAN=ON`. [**OFF by default**]
-* An installation to BLIS which was build with ASAN flags[CFLAGS="-O0 -g -fsanitize=address"] needs to be provided.
+* An installation to BLIS which was build with ASAN flags needs to be provided.
+* Set -DENABLE_ASAN=ON when building BLIS with CMake, or set CFLAGS="-O0 -g -fsanitize=address" when building with make.
+* By default redzone size is 16 bytes and can redzone size can be increase to 2048 bytes.
+```console
+$ ASAN_OPTIONS=redzone=2048 <executable>
+```
+
 ## Code Coverage (Only GCC Compiler)
 * BLIS : Configure BLIS Library with code coverage flags[CFLAGS="-O0 -fprofile-arcs -ftest-coverage"], compile and install.
 * Gtestsuite : To build for code coverage, configure cmake with `-DENABLE_COVERAGE=ON`. [**OFF by default**] and then compile and run the executable.

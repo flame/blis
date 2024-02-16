@@ -282,6 +282,9 @@ mark_as_advanced(ENABLE_SANDBOX)
 if(NOT WIN32)
     option(ENABLE_COVERAGE "Enable Code Coverage using gcov(only GCC/Debug build)" OFF)
 endif()
+if(NOT WIN32)
+    option(ENABLE_ASAN "Enable Address Sanatizer (Debug build)" OFF)
+endif()
 
 #------------------------------------
 #           Check memkind
@@ -657,8 +660,7 @@ if(NOT WIN32)
     cmake_print_variables(ENABLE_COVERAGE)
     if(ENABLE_COVERAGE)
         if(NOT (${CMAKE_C_COMPILER_ID} MATCHES "GNU"))
-            message(WARNING "Coverage is only supported for GNU/Linux GCC Debug build")
-            message("   Code Coverage is disabled.")
+            message(FATAL_ERROR "Coverage is only supported for GNU/Linux GCC Debug build")
             set(ENABLE_COVERAGE OFF)
         endif()
         if(NOT(ENABLE_DEBUG STREQUAL "noopt"))
@@ -671,8 +673,21 @@ if(NOT WIN32)
     if(ENABLE_COVERAGE)
         message("   Code Coverage is enabled.")
     else()
-        cmake_print_variables(ENABLE_COVERAGE)
         message("   Code Coverage is disabled.")
+    endif()
+endif()
+
+if(NOT WIN32)
+    cmake_print_variables(ENABLE_ASAN)
+    if(ENABLE_ASAN)
+        if(NOT (${CMAKE_C_COMPILER_ID} MATCHES "Clang"))
+            message(FATAL_ERROR "ASAN is supported only for Clang/Linux" )
+        endif()
+    endif()
+    if(ENABLE_ASAN)
+        message("   Address Sanatizer is enabled.")
+    else()
+        message("   Address Sanatizer is disabled.")
     endif()
 endif()
 
@@ -852,7 +867,16 @@ endif()
 #         Code-coverage flags
 #--------------------------------------------
 if(ENABLE_COVERAGE AND (NOT WIN32))
-    set(CMAKE_C_FLAGS "-fprofile-arcs -ftest-coverage")
+    set(COVERAGE_FLAGS "-fprofile-arcs -ftest-coverage")
+    list(APPEND CMAKE_C_FLAGS ${COVERAGE_FLAGS})
+endif()
+
+#--------------------------------------------
+#         Address Sanatizer flags
+#--------------------------------------------
+if(ENABLE_ASAN AND (NOT WIN32))
+    set(ASAN_FLAGS "-g -fsanitize=address")
+    list(APPEND CMAKE_C_FLAGS ${ASAN_FLAGS})
 endif()
 
 #--------------------------------------------
