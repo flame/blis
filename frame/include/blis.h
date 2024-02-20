@@ -6,7 +6,7 @@
 
    Copyright (C) 2014, The University of Texas at Austin
    Copyright (C) 2016, Hewlett Packard Enterprise Development LP
-   Copyright (C) 2018 - 2023, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2018 - 2024, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -200,13 +200,7 @@ extern "C" {
 
 // -- addon definitions --
 
-// NOTE: These definitions should not be included much earlier since an addon
-// may wish to utilize other types and definitions provided by BLIS.
-// TODO: Disable addon header file inclusion for windows since configure
-// script is not executed, and subsequently the header file ie not generated.
-#if !defined(_WIN32) && !defined(__CYGWIN__)
 #include "bli_addon.h"
-#endif
 
 
 // -- sandbox implementation --

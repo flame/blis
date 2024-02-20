@@ -142,6 +142,8 @@ foreach(KERN ${KERNEL_LIST})
     set(KERNEL_LIST_DEFINES "${KERNEL_LIST_DEFINES}#define BLIS_KERNELS_${UCONF}\n")
 endforeach()
 
+
+
 #------------------------------------
 #           Option Setting
 #------------------------------------
@@ -273,8 +275,15 @@ else()
 endif()
 set(RENAME_BLIS_ARCH_TYPE "BLIS_ARCH_TYPE" CACHE STRING "BLIS_ARCH_TYPE env var renamed to supplied value")
 set(RENAME_BLIS_MODEL_TYPE "BLIS_MODEL_TYPE" CACHE STRING "BLIS_MODEL_TYPE env var renamed to supplied value")
-if(NOT WIN32)
-    set(ENABLE_ADDON "" CACHE STRING "Configure with specific addons using a ';'-separated list")
+if(ENABLE_ADDON)
+    execute_process(COMMAND ${CMAKE_C_COMPILER} --version OUTPUT_VARIABLE clang_full_version_string)
+    string(REGEX MATCH "^[^\n]*" CLANG_VERSION_STRING "${clang_full_version_string}")
+    if((NOT WIN32) OR
+       (WIN32 AND ("${CLANG_VERSION_STRING}" MATCHES "(AMD|AOCC)")))
+        set(ENABLE_ADDON "" CACHE STRING "Configure with specific addons using a ';'-separated list")
+    else()
+        message(FATAL_ERROR "On Windows, aocl_gemm addon requires AOCC clang compiler.")
+    endif()
 endif()
 set(ENABLE_SANDBOX "" CACHE STRING "Enable a separate sandbox implementation of gemm.")
 # Do not let ENABLE_SANDBOX appear on cmake-gui since the functionality is not yet implemented.
@@ -582,24 +591,22 @@ if((INT_TYPE_SIZE STREQUAL "32") AND (BLAS_INT_TYPE_SIZE STREQUAL "64"))
         To avoid the possibility of truncation, we do not allow use of 64-bit integers in the BLAS API with 32-bit integers in BLIS. \
         Please use a different configuration of integers.")
 endif()
-if(NOT WIN32)
-    cmake_print_variables(ENABLE_ADDON)
-    if(ENABLE_ADDON STREQUAL "")
-        message("   Configuring with no addons.")
-        set(ENABLE_ADDONS_01 0)
-    else()
-        # Remove duplicates in the addon list, if they exist.
-        list(REMOVE_DUPLICATES ENABLE_ADDON)
-        message("   Configuring with addons:")
-        foreach(ADDON ${ENABLE_ADDON})
-            message("   ${ADDON}")
-            if(NOT (EXISTS ${CMAKE_SOURCE_DIR}/addon/${ADDON}))
-                message(FATAL_ERROR "Requested addon sub-directory does not exist! Cannot continue. \
-                                        *** Please verify addon existence and name.")
-            endif()
-        endforeach()
-        set(ENABLE_ADDONS_01 1)
-    endif()
+cmake_print_variables(ENABLE_ADDON)
+if(ENABLE_ADDON STREQUAL "")
+    message("   Configuring with no addons.")
+    set(ENABLE_ADDONS_01 0)
+else()
+    # Remove duplicates in the addon list, if they exist.
+    list(REMOVE_DUPLICATES ENABLE_ADDON)
+    message("   Configuring with addons:")
+    foreach(ADDON ${ENABLE_ADDON})
+        message("   ${ADDON}")
+        if(NOT (EXISTS ${CMAKE_SOURCE_DIR}/addon/${ADDON}))
+            message(FATAL_ERROR "Requested addon sub-directory does not exist! Cannot continue. \
+                                    *** Please verify addon existence and name.")
+        endif()
+    endforeach()
+    set(ENABLE_ADDONS_01 1)
 endif()
 cmake_print_variables(ENABLE_SANDBOX)
 if(ENABLE_SANDBOX STREQUAL "")

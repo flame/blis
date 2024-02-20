@@ -38,7 +38,6 @@
 #include <immintrin.h>
 #include <time.h>
 #include <float.h>
-#include <unistd.h>
 #include <math.h>
 
 #include "blis.h"
@@ -365,10 +364,10 @@ void print_result
        dim_t       lda,
        dim_t       ldb,
        dim_t       ldc,
-       double      runtime
+       double      gflops
      )
 {
-    double gflops = get_gflops( m, n, k, runtime );
+    //double gflops = get_gflops( m, n, k, runtime );
     printf("%s transa:%c, transb:%c, m: %ld, n: %ld, k: %ld, lda: %ld, ldb: %ld, ldc: %ld," \
                     " Gops: %f, n_repeats: %d\n",
             msg, transa, transb, m, n, k, lda, ldb, ldc, gflops, n_repeats);
@@ -397,11 +396,12 @@ void mat_mul_bench_driver_ ## BLAS_SFX \
        aocl_post_op*  post_op\
      ) \
 { \
-    double min_time_diff = DBL_MAX; \
+    double   dtime;                 \
+    double   dtime_save = DBL_MAX;  \
+\
     for ( int32_t nr = 0; nr < n_repeats; ++nr ) \
     { \
-        struct timespec tstart={0,0}, tend={0,0}; \
-        clock_gettime(CLOCK_MONOTONIC, &tstart); \
+        dtime = bli_clock();            \
  \
         GEN_FUNC_NAME(mat_mul_,BLAS_SFX) \
         ( \
@@ -414,15 +414,12 @@ void mat_mul_bench_driver_ ## BLAS_SFX \
           post_op \
         ); \
  \
-        clock_gettime(CLOCK_MONOTONIC, &tend); \
+        dtime_save = bli_clock_min_diff( dtime_save, dtime ); \
  \
-        double diff = \
-            ( ( double ) tend.tv_sec + ( 1.0e-9 * tend.tv_nsec ) ) - \
-            ( ( double ) tstart.tv_sec + ( 1.0e-9 * tstart.tv_nsec ) ); \
-        min_time_diff = ( diff < min_time_diff ) ? diff : min_time_diff; \
     } \
+    double gflops = ( 2.0 * m * k * n ) / ( dtime_save * 1.0e9 ); \
  \
-    print_result( XSTR(BLAS_SFX), n_repeats, transa, transb, m, n, k, lda, ldb, ldc, min_time_diff); \
+    print_result( XSTR(BLAS_SFX), n_repeats, transa, transb, m, n, k, lda, ldb, ldc, gflops); \
 } \
 
 GEN_MAT_MUL_BENCH_DRV_FUNC(uint8_t,int8_t,int16_t,int16_t,u8s8s16os16)
@@ -438,6 +435,7 @@ GEN_MAT_MUL_BENCH_DRV_FUNC(int8_t,int8_t,int8_t,int32_t,s8s8s32os8)
 GEN_MAT_MUL_BENCH_DRV_FUNC(int8_t,int8_t,int16_t,int16_t,s8s8s16os16)
 GEN_MAT_MUL_BENCH_DRV_FUNC(int8_t,int8_t,int8_t,int16_t,s8s8s16os8)
 
+#ifndef WIN32
 int max (int a, int b)
 {
     return ( a > b ? a : b );
@@ -447,6 +445,7 @@ int min (int a, int b)
 {
     return ( a < b ? a : b );
 }
+#endif
 
 #define GEN_MAT_MUL_ACC_CHK_DOWNSCALE(C_type,ACCUM_type,SCALE_type,BLAS_DOWNSCALE_SFX) \
 static inline ACCUM_type mat_mul_accuracy_check_downscale_ ## BLAS_DOWNSCALE_SFX \
@@ -1536,20 +1535,26 @@ int main( int argc, char** argv )
 	char ops_input_str[OPS_INPUT_STR_LEN];
 
     // Parse CLI arguments.
-    opterr = 0;
-    int opt_val;
-    while ( ( opt_val = getopt( argc, argv, "i:m:n:" ) ) != -1 )
+     getopt_t state;
+     // Initialize the state for running bli_getopt(). Here, 0 is the
+     // initial value for opterr, which suppresses error messages.
+     bli_getopt_init_state( 0, &state );
+
+     int opt;
+     // Process all option arguments until we get a -1, which means we're done.
+     while( (opt = bli_getopt( argc, argv, "i:m:n:", &state )) != -1 )
     {
-        switch ( opt_val )
+        char opt_ch = ( char )opt;
+        switch( opt_ch )
         {
             case 'i':
-                    file_name = optarg;
+                    file_name = state.optarg;
                     break;
             case 'm':
-                    bench_mode = ( ( ( *optarg ) == 'a' ) || ( ( *optarg ) == 'p' ) ) ? ( *optarg ) : 'p';
+                    bench_mode = ( ( ( *state.optarg ) == 'a' ) || ( ( *state.optarg ) == 'p' ) ) ? ( *state.optarg ) : 'p';
                     break;
             case 'n':
-                    global_n_repeat = ( atoi( optarg ) > 0 ) ? atoi( optarg ) : 0;
+                    global_n_repeat = ( atoi( state.optarg ) > 0 ) ? atoi( state.optarg ) : 0;
                     break;
             default:
                     break;

@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2022 - 2023, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2022 - 2024, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -37,7 +37,6 @@
 #include <string.h>
 #include <time.h>
 #include <float.h>
-#include <unistd.h>
 #include <math.h>
 
 #include "blis.h"
@@ -89,11 +88,11 @@ void gelu_bench_driver_ ## GELU_SFX \
        inc_t   incx \
      ) \
 { \
-	double min_time_diff = DBL_MAX; \
+	double   dtime;                 \
+	double   dtime_save = DBL_MAX;  \
 	for ( int32_t nr = 0; nr < n_repeats; ++nr ) \
 	{ \
-		struct timespec tstart={0,0}, tend={0,0}; \
-		clock_gettime(CLOCK_MONOTONIC, &tstart); \
+		dtime = bli_clock();  \
  \
 		if ( bench_mode == 'a' ) \
 		{ \
@@ -105,15 +104,11 @@ void gelu_bench_driver_ ## GELU_SFX \
 		  n, x, incx \
 		); \
  \
-		clock_gettime(CLOCK_MONOTONIC, &tend); \
+		dtime_save = bli_clock_min_diff( dtime_save, dtime ); \
  \
-		double diff = \
-			( ( double ) tend.tv_sec + ( 1.0e-9 * tend.tv_nsec ) ) - \
-			( ( double ) tstart.tv_sec + ( 1.0e-9 * tstart.tv_nsec ) ); \
-		min_time_diff = ( diff < min_time_diff ) ? diff : min_time_diff; \
 	} \
  \
-	print_result( XSTR(GELU_SFX), n_repeats, n, incx, min_time_diff); \
+	print_result( XSTR(GELU_SFX), n_repeats, n, incx, dtime_save); \
 } \
 
 GEN_GELU_BENCH_DRV_FN(float,gelu_tanh_f32)
@@ -128,11 +123,11 @@ void softmax_bench_driver_ ## SOFTMAX_SFX \
        inc_t   incx \
      ) \
 { \
-	double min_time_diff = DBL_MAX; \
+	double   dtime;                 \
+	double   dtime_save = DBL_MAX;  \
 	for ( int32_t nr = 0; nr < n_repeats; ++nr ) \
 	{ \
-		struct timespec tstart={0,0}, tend={0,0}; \
-		clock_gettime(CLOCK_MONOTONIC, &tstart); \
+		dtime = bli_clock();  \
  \
 		if ( bench_mode == 'a' ) \
 		{ \
@@ -144,15 +139,10 @@ void softmax_bench_driver_ ## SOFTMAX_SFX \
 		  n, x, incx \
 		); \
  \
-		clock_gettime(CLOCK_MONOTONIC, &tend); \
- \
-		double diff = \
-			( ( double ) tend.tv_sec + ( 1.0e-9 * tend.tv_nsec ) ) - \
-			( ( double ) tstart.tv_sec + ( 1.0e-9 * tstart.tv_nsec ) ); \
-		min_time_diff = ( diff < min_time_diff ) ? diff : min_time_diff; \
+		dtime_save = bli_clock_min_diff( dtime_save, dtime ); \
 	} \
  \
-	print_result( XSTR(SOFTMAX_SFX), n_repeats, n, incx, min_time_diff); \
+	print_result( XSTR(SOFTMAX_SFX), n_repeats, n, incx, dtime_save); \
 } \
 
 GEN_SOFTMAX_BENCH_DRV_FN(float,softmax_f32)
@@ -323,22 +313,26 @@ int main( int argc, char** argv )
 	}
 
 	char* file_name = NULL;
+	getopt_t state;
+	// Initialize the state for running bli_getopt(). Here, 0 is the
+	// initial value for opterr, which suppresses error messages.
+	bli_getopt_init_state( 0, &state );
 
-	// Parse CLI arguments.
-	opterr = 0;
-	int opt_val;
-	while ( ( opt_val = getopt( argc, argv, "i:m:n:" ) ) != -1 )
+	int opt;
+	// Process all option arguments until we get a -1, which means we're done.
+	while( (opt = bli_getopt( argc, argv, "i:m:n:", &state )) != -1 )
 	{
-		switch ( opt_val )
+		char opt_ch = ( char )opt;
+		switch( opt_ch )
 		{
 			case 'i':
-					file_name = optarg;
+					file_name = state.optarg;
 					break;
 			case 'm':
-					bench_mode = ( ( ( *optarg ) == 'a' ) || ( ( *optarg ) == 'p' ) ) ? ( *optarg ) : 'p';
+					bench_mode = ( ( ( *state.optarg ) == 'a' ) || ( ( *state.optarg ) == 'p' ) ) ? ( *state.optarg ) : 'p';
 					break;
 			case 'n':
-					global_n_repeat = ( atoi( optarg ) > 0 ) ? atoi( optarg ) : 0;
+					global_n_repeat = ( atoi( state.optarg ) > 0 ) ? atoi( state.optarg ) : 0;
 					break;
 			default:
 					break;
