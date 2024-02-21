@@ -45,105 +45,148 @@
 
 // The function is templatized based on the datatype and function-pointer type to the kernel.
 template<typename T, typename FT>
-static void test_gemmnat_ukr( char storage, gtint_t m, gtint_t n, gtint_t k, T alpha, T beta, FT ukr_fp )
+static void test_gemmnat_ukr(
+    char storage, gtint_t m, gtint_t n, gtint_t k, T alpha, T beta, FT ukr_fp, bool is_memory_test = false )
 {
-    gtint_t ldc  = m; // initialization
+    // In case of memory test:
+    // Allocate packed buffer size for Matrix A, B native kernel works on packed buffer
+    // Native kernel has preload or prebroadcase design
+    // If we allocate size required by dimension then memtest fails
+    obj_t a, b;
+    obj_t ap, bp; // for packed buffers
+    cntx_t* cntx;
+    num_t dt = BLIS_DOUBLE;
+    cntx = bli_gks_query_cntx();
+    bli_obj_create(dt, m, k, 1, m, &a);
+    bli_obj_create(dt, k, n, n, 1, &b);
+
+    bli_obj_create(dt, m, k, 1, m, &ap);
+    bli_obj_create(dt, k, n, n, 1, &bp);
+
+    gtint_t sizea = bli_packm_init_pack( BLIS_NO_INVERT_DIAG, BLIS_GEMM, BLIS_PACKED_ROW_PANELS,
+                        BLIS_PACK_FWD_IF_UPPER, BLIS_PACK_FWD_IF_LOWER,
+                        BLIS_MR, BLIS_KR, &a, &ap, cntx) * sizeof(T);
+    gtint_t sizeb = bli_packm_init_pack( BLIS_NO_INVERT_DIAG, BLIS_GEMM, BLIS_PACKED_COL_PANELS,
+                             BLIS_PACK_FWD_IF_UPPER, BLIS_PACK_FWD_IF_LOWER,
+                             BLIS_KR, BLIS_NR, &b, &bp, cntx ) * sizeof(T);
 
     // Create test operands
     // matrix A will be in col-storage
     // matrix B will be in row-storage
     // column * row = matrix -- rank-k update
 
-    //Allocating aligned memory for A and B matrix as Native microkernel issues VMOVAPD which
-    //expects memory to be accessed to be aligned.
-
-    dim_t rs = 1;
-    dim_t cs = 1;
-
-    // create matrix A operand with col-storage
-    rs = 1;
-    cs = m;
+    // Set matrix A dimensions
+    gtint_t rs = 1;
+    gtint_t cs = m;
     gtint_t lda = cs;
-    gtint_t sizea =  m * k * sizeof(T);
-    T *buf_a = (T*)aligned_alloc(BLIS_HEAP_STRIDE_ALIGN_SIZE, sizea);
-    // Check if the memory has been successfully allocated
-    if (buf_a == NULL) {
-        printf("Matrix A: Memory not allocated.\n");
-        return ;
-    }
-    testinghelpers::datagenerators::randomgenerators<T>( -2, 8, 'c', m, k, (T*)(buf_a), 'n', cs);
+    //gtint_t sizea =  m * k * sizeof(T);
 
-    // Create matrix B with row-storage
+    // Set matrix B dimensions
     rs = n;
     cs = 1;
     gtint_t ldb = rs;
+    //gtint_t sizeb =  k * n * sizeof(T);
 
-    gtint_t sizeb =  k * n * sizeof(T);
-    T *buf_b = (T*)aligned_alloc(BLIS_HEAP_STRIDE_ALIGN_SIZE, sizeb);
-    // Check if the memory has been successfully allocated
-    if (buf_b == NULL) {
-        printf("Matrix B: Memory not allocated.\n");
-        return ;
-    }
-    testinghelpers::datagenerators::randomgenerators<T>( -5, 2, 'r', k, n, (T*)(buf_b), 'n', rs);
-
-    T *buf_c;
-    T *buf_cref;
-    gtint_t sizec;
-
+    // Set matrix C dimensions
+    gtint_t ldc  = m;
     if(storage == 'r' || storage == 'R')
     {
         rs = n;
         cs = 1;
         ldc = rs;
-        sizec =  m * n * sizeof(T);
-        buf_c = (T*)malloc(sizec);
-        testinghelpers::datagenerators::randomgenerators<T>( -5, 2, 'r', m, n, (T*)(buf_c), 'n', rs);
     }
     else
     {
         rs = 1;
         cs = m;
         ldc = cs;
-        sizec =  m * n * sizeof(T);
-        buf_c = (T*)malloc(sizec);
-        testinghelpers::datagenerators::randomgenerators<T>( -5, 2, 'c', m, n, (T*)(buf_c), 'n', cs);
     }
+    gtint_t sizec =  m * n * sizeof(T);
 
-    // Check if the memory has been successfully allocated
-    if (buf_c == NULL) {
-        printf("Matrix C: Memory not allocated.\n");
-        return ;
-    }
-    buf_cref = (T*)malloc(sizec);
-    // Check if the memory has been successfully allocated
-    if (buf_cref == NULL) {
-        printf("Matrix C Ref: Memory not allocated.\n");
-        return ;
-    }
+    // Allocating aligned memory for A and B matrix as Native microkernel issues
+    // VMOVAPD which expects memory to be accessed to be aligned.
+    // Matrix C need not be aligned
+    testinghelpers::ProtectedBuffer buf_a_ptrs( sizea, true, is_memory_test );
+    testinghelpers::ProtectedBuffer buf_b_ptrs( sizeb, true, is_memory_test );
+    testinghelpers::ProtectedBuffer buf_c_ptrs( sizec, false, is_memory_test );
+
+    // Allocate memory for C Matrix used for reference computation
+    testinghelpers::ProtectedBuffer buf_c_ref_ptrs( sizec, false , false );
+
+
+    T* buf_a    = (T*)buf_a_ptrs.greenzone_1;
+    T* buf_b    = (T*)buf_b_ptrs.greenzone_1;
+    T* buf_c    = (T*)buf_c_ptrs.greenzone_1;
+    T* buf_cref = (T*)buf_c_ref_ptrs.greenzone_1;
+
+    /* Initialize Matrices with random numbers */
+    testinghelpers::datagenerators::randomgenerators<T>( -2, 8, 'c', m, k, (T*)(buf_a), 'n', lda);
+    testinghelpers::datagenerators::randomgenerators<T>( -5, 2, 'r', k, n, (T*)(buf_b), 'n', ldb);
+    testinghelpers::datagenerators::randomgenerators<T>( -5, 2, storage , m, n, (T*)(buf_c), 'n', ldc);
+
+    // Create a copy of c so that we can check reference results.
     memcpy(buf_cref, buf_c, sizec);
 
-    // Invoke micro-kernel
-    auxinfo_t data;
     /* Fill the auxinfo_t struct in case the micro-kernel uses it. */
+    auxinfo_t data;
     bli_auxinfo_set_ps_a(0, &data);
 
-    // call micro-kernel
-    ukr_fp (
-            k,
-            &alpha,
-            buf_a,
-            buf_b,
-            &beta,
-            buf_c,
-            rs,
-            cs,
-            &data,
-            NULL
-        );
+    // add signal handler for segmentation fault
+    testinghelpers::ProtectedBuffer::start_signal_handler();
+    try
+    {
+        // call micro-kernel
+        ukr_fp (
+                k,
+                &alpha,
+                buf_a,
+                buf_b,
+                &beta,
+                buf_c,
+                rs,
+                cs,
+                &data,
+                NULL
+            );
+        if(is_memory_test)
+        {
+            // set pointers to second buffer
+            buf_a    = (T*)buf_a_ptrs.greenzone_2;
+            buf_b    = (T*)buf_b_ptrs.greenzone_2;
+            buf_c    = (T*)buf_c_ptrs.greenzone_2;
 
-    // Set the threshold for the errors:
-    double thresh = 10 * (std::max(k,1)) * testinghelpers::getEpsilon<T>();
+            // copy data from 1st buffer of A and B to second buffer
+            memcpy(buf_a, buf_a_ptrs.greenzone_1, sizea);
+            memcpy(buf_b, buf_b_ptrs.greenzone_1, sizeb);
+
+            //buf_c_ptrs.greenzone_1 has been updated with output from previous
+            // gemm call, hence use buf_cref
+            memcpy(buf_c, buf_cref, sizec);
+
+            ukr_fp (
+                    k,
+                    &alpha,
+                    buf_a,
+                    buf_b,
+                    &beta,
+                    buf_c,
+                    rs,
+                    cs,
+                    &data,
+                    NULL
+            );
+       }
+    }
+    catch(const std::exception& e)
+    {
+        // reset to default signal handler
+        testinghelpers::ProtectedBuffer::stop_signal_handler();
+
+        // show failure in case seg fault was detected
+        FAIL() << "Memory Test Failed";
+    }
+    // reset to default signal handler
+    testinghelpers::ProtectedBuffer::stop_signal_handler();
 
     // In native micro-kernel
     // op(A) = No transpose & op(B) = transpose
@@ -164,7 +207,7 @@ static void test_gemmnat_ukr( char storage, gtint_t m, gtint_t n, gtint_t k, T a
         // storage of all matrices A, B and C.
         // since A is col-storage, A' will be row-storage
     }
-
+    double thresh = 10 * (std::max(k,1)) * testinghelpers::getEpsilon<T>();
     // call reference implementation
     testinghelpers::ref_gemm<T>( storage, transa, transb, m, n, k, alpha,
                                 buf_a, lda, buf_b, ldb, beta, (T*)buf_cref, ldc);
@@ -172,16 +215,11 @@ static void test_gemmnat_ukr( char storage, gtint_t m, gtint_t n, gtint_t k, T a
     // Check component-wise error
     computediff<T>( storage, m, n, (T*)buf_c, (T*)buf_cref, ldc, thresh );
 
-    free(buf_a);
-    free(buf_b);
-    free(buf_c);
-    free(buf_cref);
 }
-
 
 // The function is templatized based on the datatype and function-pointer type to the kernel.
 template<typename T, typename FT>
-static void test_gemmk1_ukr( FT ukr_fp, gtint_t m, gtint_t n, gtint_t k, char storage, T alpha, T beta )
+static void test_gemmk1_ukr( FT ukr_fp, gtint_t m, gtint_t n, gtint_t k, char storage, T alpha, T beta, bool memory_test  = false )
 {
     // Compute the leading dimensions of a, b, and c.
     //char storage = storageC;
@@ -195,10 +233,18 @@ static void test_gemmk1_ukr( FT ukr_fp, gtint_t m, gtint_t n, gtint_t k, char st
     gtint_t sizea =  testinghelpers::matsize( storage, 'n', m, k, lda ) * sizeof(T);
     gtint_t sizeb =  testinghelpers::matsize( storage, 'n', k, n, ldb ) * sizeof(T);
     gtint_t sizec =  testinghelpers::matsize( storage, 'n', m, n, ldc ) * sizeof(T);
-    T *buf_a = (T*)malloc(sizea);
-    T *buf_b = (T*)malloc(sizeb);
-    T *buf_c = (T*)malloc(sizec);
-    T *buf_cref = (T*)malloc(sizec);
+
+    testinghelpers::ProtectedBuffer mat_a(sizea, false, memory_test);
+    testinghelpers::ProtectedBuffer mat_b(sizeb, false, memory_test);
+    testinghelpers::ProtectedBuffer mat_c(sizec, false, memory_test);
+    testinghelpers::ProtectedBuffer mat_cref(sizec, false, false);
+
+    T *buf_a = (T*)mat_a.greenzone_1;
+    T *buf_b = (T*)mat_b.greenzone_1;
+    T *buf_c = (T*)mat_c.greenzone_1;
+    T *buf_aref = (T*)mat_a.greenzone_1;
+    T *buf_bref = (T*)mat_b.greenzone_1;
+    T* buf_cref = (T*)mat_cref.greenzone_1;
 
     // Check if the memory has been successfully allocated
     if ((buf_a == NULL) ||(buf_b == NULL) ||(buf_c == NULL) ||(buf_cref == NULL)) {
@@ -211,20 +257,72 @@ static void test_gemmk1_ukr( FT ukr_fp, gtint_t m, gtint_t n, gtint_t k, char st
 
     // Create a copy of c so that we can check reference results.
     memcpy(buf_cref, buf_c, sizec);
-    // call micro-kernel
-    ukr_fp (
-        m,
-        n,
-        k,
-        &alpha,
-        buf_a,
-        lda,
-        buf_b,
-        ldb,
-        &beta,
-        buf_c,
-        ldc
-        );
+    // add signal handler for segmentation fault
+    testinghelpers::ProtectedBuffer::start_signal_handler();
+    try
+    {
+        // call micro-kernel
+        ukr_fp (
+            m,
+            n,
+            k,
+            &alpha,
+            buf_a,
+            lda,
+            buf_b,
+            ldb,
+            &beta,
+            buf_c,
+            ldc
+            );
+
+        if(memory_test == true)
+        {
+            // set pointers to second buffer
+            buf_a    = (T*)mat_a.greenzone_2;
+            buf_b    = (T*)mat_b.greenzone_2;
+            buf_c    = (T*)mat_c.greenzone_2;
+
+            // Check if the memory has been successfully allocated
+            if ((buf_a == NULL) || (buf_b == NULL) || (buf_c == NULL)) {
+                printf("Memory not allocated for input or output Matrix for memory test.\n");
+                return ;
+            }
+
+            // copy data from 1st buffer of A and B to second buffer
+            memcpy(buf_a, buf_aref, sizea);
+            memcpy(buf_b, buf_bref, sizeb);
+
+            //buf_c_ptrs.greenzone_1 has been updated with output from previous
+            // gemm call, hence use buf_cref
+            memcpy(buf_c, buf_cref, sizec);
+
+            // call micro-kernel
+            ukr_fp (
+                m,
+                n,
+                k,
+                &alpha,
+                buf_a,
+                lda,
+                buf_b,
+                ldb,
+                &beta,
+                buf_c,
+                ldc
+                );
+        }
+    }
+    catch(const std::exception& e)
+    {
+        // reset to default signal handler
+        testinghelpers::ProtectedBuffer::stop_signal_handler();
+
+        // show failure in case seg fault was detected
+        FAIL() << "Memory Test Failed";
+    }
+    // reset to default signal handler
+    testinghelpers::ProtectedBuffer::stop_signal_handler();
 
     // Set the threshold for the errors:
     double thresh = 10 * std::max(n,std::max(k,m)) * testinghelpers::getEpsilon<T>();
@@ -235,18 +333,13 @@ static void test_gemmk1_ukr( FT ukr_fp, gtint_t m, gtint_t n, gtint_t k, char st
 
     // Check component-wise error
     computediff<T>( storage, m, n, buf_c, buf_cref, ldc, thresh );
-
-    free(buf_a);
-    free(buf_b);
-    free(buf_c);
-    free(buf_cref);
 }
 
 
 
 
 template<typename T, typename FT>
-static void test_dgemmsup_ukr( FT ukr_fp, char trnsa, char trnsb, gtint_t m, gtint_t n, gtint_t k, T alpha, T beta, char storageC, gtint_t MR, bool row_pref)
+static void test_dgemmsup_ukr( FT ukr_fp, char trnsa, char trnsb, gtint_t m, gtint_t n, gtint_t k, T alpha, T beta, char storageC, gtint_t MR, bool row_pref, bool memory_test)
 {
     // Compute the leading dimensions of a, b, and c.
     char storage = storageC;
@@ -260,13 +353,21 @@ static void test_dgemmsup_ukr( FT ukr_fp, char trnsa, char trnsb, gtint_t m, gti
     gtint_t sizea =  testinghelpers::matsize( storage, trnsa, m, k, lda ) * sizeof(T);
     gtint_t sizeb =  testinghelpers::matsize( storage, trnsb, k, n, ldb ) * sizeof(T);
     gtint_t sizec =  testinghelpers::matsize( storage, 'n', m, n, ldc ) * sizeof(T);
-    T *buf_a = (T*)malloc(sizea);
-    T *buf_b = (T*)malloc(sizeb);
-    T *buf_c = (T*)malloc(sizec);
-    T *buf_cref = (T*)malloc(sizec);
+
+    testinghelpers::ProtectedBuffer mat_a(sizea, false, memory_test);
+    testinghelpers::ProtectedBuffer mat_b(sizeb, false, memory_test);
+    testinghelpers::ProtectedBuffer mat_c(sizec, false, memory_test);
+    testinghelpers::ProtectedBuffer mat_cref(sizec, false, false);
+
+    T *buf_a = (T*)mat_a.greenzone_1;
+    T *buf_b = (T*)mat_b.greenzone_1;
+    T *buf_c = (T*)mat_c.greenzone_1;
+    T *buf_aref = (T*)mat_a.greenzone_1;
+    T *buf_bref = (T*)mat_b.greenzone_1;
+    T *ref_c = (T*)mat_cref.greenzone_1;
 
     // Check if the memory has been successfully allocated
-    if ((buf_a == NULL) ||(buf_b == NULL) ||(buf_c == NULL) ||(buf_cref == NULL)) {
+    if ((buf_a == NULL) ||(buf_b == NULL) ||(buf_c == NULL) ||(ref_c == NULL)) {
         printf("Memory not allocated for input and output Matrix.\n");
         return ;
     }
@@ -275,7 +376,8 @@ static void test_dgemmsup_ukr( FT ukr_fp, char trnsa, char trnsb, gtint_t m, gti
     testinghelpers::datagenerators::randomgenerators<T>( -3, 5, storage, m, n, (T*)(buf_c), 'n', ldc);
 
     // Create a copy of c so that we can check reference results.
-    memcpy(buf_cref, buf_c, sizec);
+    memset(buf_c, 0, sizec);
+    memset(ref_c, 0, sizec);
     inc_t str_id = 0;
     gtint_t rs_a = 1, cs_a = 1, rs_b = 1, cs_b = 1, rs_c = 1, cs_c = 1;
     gtint_t rs_a0 = 1, cs_a0 = 1, rs_b0 = 1, cs_b0 = 1;
@@ -344,61 +446,125 @@ static void test_dgemmsup_ukr( FT ukr_fp, char trnsa, char trnsb, gtint_t m, gti
         is_primary = true;
     }
 
-    if(is_primary == false && row_pref == true)
+    auxinfo_t data;
+    inc_t ps_a_use = (MR * rs_a);
+    bli_auxinfo_set_ps_a( ps_a_use, &data );
+
+    testinghelpers::ProtectedBuffer::start_signal_handler();
+    try
     {
-        auxinfo_t data;
-        inc_t ps_a_use = (MR * rs_a);
-        bli_auxinfo_set_ps_a( ps_a_use, &data );
-        ukr_fp(
-            BLIS_NO_CONJUGATE,
-            BLIS_NO_CONJUGATE,
-            n,
-            m,
-            k,
-            &alpha,
-            buf_b, cs_b, rs_b,
-            buf_a, cs_a, rs_a,
-            &beta,
-            buf_c, cs_c, rs_c,
-            &data,
-            NULL
-          );
+        if(is_primary == false && row_pref == true)
+        {
+            ukr_fp(
+                BLIS_NO_CONJUGATE,
+                BLIS_NO_CONJUGATE,
+                n,
+                m,
+                k,
+                &alpha,
+                buf_b, cs_b, rs_b,
+                buf_a, cs_a, rs_a,
+                &beta,
+                buf_c, cs_c, rs_c,
+                &data,
+                NULL
+            );
+        }
+        else
+        {
+            ukr_fp(
+                BLIS_NO_CONJUGATE,
+                BLIS_NO_CONJUGATE,
+                m,
+                n,
+                k,
+                &alpha,
+                buf_a, rs_a, cs_a,
+                buf_b, rs_b, cs_b,
+                &beta,
+                buf_c, rs_c, cs_c,
+                &data,
+                NULL
+            );
+        }
+
+        if(memory_test)
+        {
+            // set pointers to second buffer
+            buf_a    = (T*)mat_a.greenzone_2;
+            buf_b    = (T*)mat_b.greenzone_2;
+            buf_c    = (T*)mat_c.greenzone_2;
+
+            // Check if the memory has been successfully allocated
+            if ((buf_a == NULL) || (buf_b == NULL) || (buf_c == NULL)) {
+                printf("Memory not allocated for input or output Matrix for memory test.\n");
+                return ;
+            }
+
+            // copy data from 1st buffer of A and B to second buffer
+            memcpy(buf_a, buf_aref, sizea);
+            memcpy(buf_b, buf_bref, sizeb);
+
+            //buf_c_ptrs.greenzone_1 has been updated with output from previous
+            // gemm call, hence use buf_cref
+            memcpy(buf_c, ref_c, sizec);
+
+            if(is_primary == false && row_pref == true)
+            {
+                ukr_fp(
+                    BLIS_NO_CONJUGATE,
+                    BLIS_NO_CONJUGATE,
+                    n,
+                    m,
+                    k,
+                    &alpha,
+                    buf_b, cs_b, rs_b,
+                    buf_a, cs_a, rs_a,
+                    &beta,
+                    buf_c, cs_c, rs_c,
+                    &data,
+                    NULL
+                );
+            }
+            else
+            {
+                ukr_fp(
+                    BLIS_NO_CONJUGATE,
+                    BLIS_NO_CONJUGATE,
+                    m,
+                    n,
+                    k,
+                    &alpha,
+                    buf_a, rs_a, cs_a,
+                    buf_b, rs_b, cs_b,
+                    &beta,
+                    buf_c, rs_c, cs_c,
+                    &data,
+                    NULL
+                );
+            }
+        }
     }
-    else
+    catch(const std::exception& e)
     {
-        auxinfo_t data;
-        inc_t ps_a_use = (MR * rs_a);
-        bli_auxinfo_set_ps_a( ps_a_use, &data );
-        ukr_fp(
-            BLIS_NO_CONJUGATE,
-            BLIS_NO_CONJUGATE,
-            m,
-            n,
-            k,
-            &alpha,
-            buf_a, rs_a, cs_a,
-            buf_b, rs_b, cs_b,
-            &beta,
-            buf_c, rs_c, cs_c,
-            &data,
-            NULL
-          );
+        // reset to default signal handler
+        testinghelpers::ProtectedBuffer::stop_signal_handler();
+
+        // show failure in case seg fault was detected
+        FAIL() << "Memory Test Failed";
     }
+    // reset to default signal handler
+    testinghelpers::ProtectedBuffer::stop_signal_handler();
 
     // Set the threshold for the errors:
     double thresh = 10 * (std::max(k,1)) * testinghelpers::getEpsilon<T>();
 
     // call reference implementation
     testinghelpers::ref_gemm<T>( storage, trnsa, trnsb, m, n, k, alpha,
-                                 buf_a, lda, buf_b, ldb, beta, buf_cref, ldc);
+                                 buf_a, lda, buf_b, ldb, beta, ref_c, ldc);
 
     // Check component-wise error
-    computediff<T>( storage, m, n, buf_c, buf_cref, ldc, thresh );
-
-    free(buf_a);
-    free(buf_b);
-    free(buf_c);
-    free(buf_cref);
+    computediff<T>( storage, m, n, buf_c, ref_c, ldc, thresh );
 }
 
 template<typename T, typename FT>
