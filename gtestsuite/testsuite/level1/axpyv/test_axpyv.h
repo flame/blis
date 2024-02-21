@@ -81,10 +81,13 @@ static void test_axpyv( char conjx, gtint_t n, gtint_t incx, gtint_t incy,
     std::vector<T> x = testinghelpers::get_random_vector<T>( -10, 10, n, incx );
     std::vector<T> y = testinghelpers::get_random_vector<T>( -10, 10, n, incy );
 
-    if( xi < n )  x[xi*incx] = xexval;
-    else          return;
-    if( yj < n )  y[yj*incy] = yexval;
-    else          return;
+    // Update the value at index xi to an extreme value, x_exval.
+    if ( -1 < xi && xi < n ) x[xi * abs(incx)] = xexval;
+    else                     return;
+
+    // Update the value at index yi to an extreme value, y_exval.
+    if ( -1 < yj && yj < n ) y[yj * abs(incy)] = yexval;
+    else                     return;
 
     //----------------------------------------------------------
     //    Call reference implementation to get ref results.
