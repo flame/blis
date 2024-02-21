@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2023, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2023 - 2024, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -39,11 +39,11 @@
 #include "inc/check_error.h"
 
 /**
- * @brief Generic test body for axpby operation.
+ * @brief Generic test body for scalv operation.
  */
 
-template<typename T>
-static void test_scalv( char conja_alpha, gtint_t n, gtint_t incx, T alpha, double thresh )
+template<typename T, typename U >
+static void test_scalv( char conja_alpha, gtint_t n, gtint_t incx, U alpha, double thresh )
 {
     //----------------------------------------------------------
     //        Initialize vector with random numbers.
@@ -55,12 +55,12 @@ static void test_scalv( char conja_alpha, gtint_t n, gtint_t incx, T alpha, doub
     //----------------------------------------------------------
     // Create a copy of y so that we can check reference results.
     std::vector<T> x_ref(x);
-    testinghelpers::ref_scalv<T>( conja_alpha, n, alpha, x_ref.data(), incx );
+    testinghelpers::ref_scalv<T, U>( conja_alpha, n, alpha, x_ref.data(), incx );
 
     //----------------------------------------------------------
     //                  Call BLIS function.
     //----------------------------------------------------------
-    scalv<T>( conja_alpha, n, alpha, x.data(), incx );
+    scalv<T, U>( conja_alpha, n, alpha, x.data(), incx );
 
     //----------------------------------------------------------
     //              Compute component-wise error.

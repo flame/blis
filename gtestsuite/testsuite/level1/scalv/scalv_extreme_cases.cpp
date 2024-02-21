@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2023, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2023 - 2024, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -50,7 +50,7 @@ TYPED_TEST(xscalv, zero_alpha_x_fp)
     std::vector<T> x_ref(x);
     T alpha = T{0};
 
-    testinghelpers::ref_scalv<T>('n', n, alpha, x_ref.data(), incx);
+    testinghelpers::ref_scalv<T, T>('n', n, alpha, x_ref.data(), incx);
     //----------------------------------------------------------
     //                  Call BLIS function.
     //----------------------------------------------------------
@@ -61,7 +61,7 @@ TYPED_TEST(xscalv, zero_alpha_x_fp)
     //----------------------------------------------------------
     // Set the threshold for the errors:
     double thresh = testinghelpers::getEpsilon<T>();
-    computediff<T>( n, x.data(), x_ref.data(), incx, thresh );
+    computediff<T>( n, x.data(), x_ref.data(), incx, thresh, true );
 }
 
 TYPED_TEST(xscalv, zero_alpha_x_inf)
@@ -74,7 +74,7 @@ TYPED_TEST(xscalv, zero_alpha_x_inf)
     x[3] = 1.0/0.0;
     std::vector<T> x_ref(x);
     T alpha = T{0};
-    testinghelpers::ref_scalv<T>('n', n, alpha, x_ref.data(), incx);
+    testinghelpers::ref_scalv<T, T>('n', n, alpha, x_ref.data(), incx);
 
     //----------------------------------------------------------
     //                  Call BLIS function.
@@ -86,5 +86,5 @@ TYPED_TEST(xscalv, zero_alpha_x_inf)
     //----------------------------------------------------------
     // Set the threshold for the errors:
     double thresh = testinghelpers::getEpsilon<T>();
-    computediff<T>( n, x.data(), x_ref.data(), incx, thresh );
+    computediff<T>( n, x.data(), x_ref.data(), incx, thresh, true );
 }

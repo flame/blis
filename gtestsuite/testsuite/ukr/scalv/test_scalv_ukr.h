@@ -41,8 +41,7 @@
 /**
  * @brief Microkernel test body for scalv operation.
  */
-
-template<typename T, typename FT>
+template<typename T, typename U, typename FT>
 static void test_scalv_ukr( FT ukr, char conja_alpha, gtint_t n, gtint_t incx, T alpha, double thresh, bool nan_inf_check )
 {
     //----------------------------------------------------------
@@ -57,15 +56,16 @@ static void test_scalv_ukr( FT ukr, char conja_alpha, gtint_t n, gtint_t incx, T
 
     testinghelpers::datagenerators::randomgenerators( -10, 10, n, incx, x );
 
-    // Copying y to y_ref, for comparision after computation
-    for( gtint_t i = 0; i < size_x; i += 1 )
-        *( x_ref + i ) = *( x + i );
+    // Copying x to x_ref, for comparision after computation
+    memcpy( x_ref, x, size_x * sizeof( T ) );
 
     //----------------------------------------------------------
     //    Call reference implementation to get ref results.
     //----------------------------------------------------------
-    // Create a copy of y so that we can check reference results.
-    testinghelpers::ref_scalv<T>( conja_alpha, n, alpha, x_ref, incx );
+    if constexpr ( testinghelpers::type_info<T>::is_complex && testinghelpers::type_info<U>::is_real )
+        testinghelpers::ref_scalv<T, U>( conja_alpha, n, alpha.real, x_ref, incx );
+    else    // if constexpr ( std::is_same<T,U>::value )
+        testinghelpers::ref_scalv<T, U>( conja_alpha, n, alpha, x_ref, incx );
 
     //----------------------------------------------------------
     //                  Call BLIS function.

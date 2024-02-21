@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2023 - 2024, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2024, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -35,17 +35,18 @@
 #include <gtest/gtest.h>
 #include "test_scalv.h"
 
-class zscalvGenericTest :
-        public ::testing::TestWithParam<std::tuple<char,            // conj_alpha
-                                                   gtint_t,         // n
-                                                   gtint_t,         // incx
-                                                   dcomplex>> {};   // alpha
+class zdscalvGenericTest :
+        public ::testing::TestWithParam<std::tuple<char,        // conj_alpha
+                                                   gtint_t,     // n
+                                                   gtint_t,     // incx
+                                                   double>> {}; // alpha
 
 
 // Tests using random integers as vector elements.
-TEST_P( zscalvGenericTest, RandomData )
+TEST_P( zdscalvGenericTest, RandomData )
 {
     using T = dcomplex;
+    using U = double;
     //----------------------------------------------------------
     // Initialize values from the parameters passed through
     // test suite instantiation (INSTANTIATE_TEST_SUITE_P).
@@ -57,28 +58,28 @@ TEST_P( zscalvGenericTest, RandomData )
     // stride size for x:
     gtint_t incx = std::get<2>(GetParam());
     // alpha
-    T alpha = std::get<3>(GetParam());
+    U alpha = std::get<3>(GetParam());
 
     // Set the threshold for the errors:
     double thresh = testinghelpers::getEpsilon<T>();
     //----------------------------------------------------------
     //     Call generic test body using those parameters
     //----------------------------------------------------------
-    test_scalv<T>( conj_alpha, n, incx, alpha, thresh );
+    test_scalv<T, U>( conj_alpha, n, incx, alpha, thresh );
 }
 
 // Used to generate a test case with a sensible name.
 // Beware that we cannot use fp numbers (e.g., 2.3) in the names,
 // so we are only printing int(2.3). This should be enough for debugging purposes.
 // If this poses an issue, please reach out.
-class zscalvGenericTestPrint {
+class zdscalvGenericTestPrint {
 public:
     std::string operator()(
-        testing::TestParamInfo<std::tuple<char, gtint_t, gtint_t, dcomplex>> str) const {
+        testing::TestParamInfo<std::tuple<char, gtint_t, gtint_t, double>> str) const {
         char conj_alpha = std::get<0>(str.param);
         gtint_t n = std::get<1>(str.param);
         gtint_t incx = std::get<2>(str.param);
-        dcomplex alpha = std::get<3>(str.param);
+        double alpha = std::get<3>(str.param);
 #ifdef TEST_BLAS
         std::string str_name = "blas_";
 #elif TEST_CBLAS
@@ -95,16 +96,16 @@ public:
     }
 };
 
-// Black box testing for zscal.
+// Black box testing for zdscal.
 // Tests with unit-positive increment.
 INSTANTIATE_TEST_SUITE_P(
         unitPositiveIncrement,
-        zscalvGenericTest,
+        zdscalvGenericTest,
         ::testing::Combine(
             // conj(alpha): uses n (no_conjugate) since it is real.
             ::testing::Values('n'
 #ifdef TEST_BLIS_TYPED
-            , 'c'                                                            // this option is BLIS-api specific.
+                            , 'c'       // this option is BLIS-api specific.
 #endif
             ),
             // m: size of vector.
@@ -113,25 +114,24 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(gtint_t(1)),
             // alpha: value of scalar.
             ::testing::Values(
-                                dcomplex{-5.1, -7.3},
-                                dcomplex{ 0.0,  0.0},
-                                dcomplex{ 1.0,  1.0},
-                                dcomplex{ 7.3,  5.1}
+                                double(-5.1),
+                                double( 0.0),
+                                double( 7.3)
             )
         ),
-        ::zscalvGenericTestPrint()
+        ::zdscalvGenericTestPrint()
     );
 
 
-// Test for non-unit increments.
+// Tests for non-unit increments.
 INSTANTIATE_TEST_SUITE_P(
         nonUnitPositiveIncrement,
-        zscalvGenericTest,
+        zdscalvGenericTest,
         ::testing::Combine(
             // conj(alpha): uses n (no_conjugate) since it is real.
             ::testing::Values('n'
 #ifdef TEST_BLIS_TYPED
-            , 'c'                                                            // this option is BLIS-api specific.
+                            , 'c'       // this option is BLIS-api specific.
 #endif
             ),
             // m: size of vector.
@@ -143,11 +143,10 @@ INSTANTIATE_TEST_SUITE_P(
             ),
             // alpha: value of scalar.
             ::testing::Values(
-                                dcomplex{-5.1, -7.3},
-                                dcomplex{ 0.0,  0.0},
-                                dcomplex{ 1.0,  1.0},
-                                dcomplex{ 7.3,  5.1}
+                                double(-5.1),
+                                double( 0.0),
+                                double( 7.3)
             )
         ),
-        ::zscalvGenericTestPrint()
+        ::zdscalvGenericTestPrint()
     );

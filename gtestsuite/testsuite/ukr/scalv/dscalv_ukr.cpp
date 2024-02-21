@@ -36,11 +36,11 @@
 #include "test_scalv_ukr.h"
 
 class dscalvUkrTest :
-        public ::testing::TestWithParam<std::tuple<dscalv_ker_ft,
-                                                   char,
-                                                   gtint_t,
-                                                   gtint_t,
-                                                   double>> {};
+        public ::testing::TestWithParam<std::tuple<dscalv_ker_ft,   // Function pointer for dscalv kernels
+                                                   char,            // conj_alpha
+                                                   gtint_t,         // n
+                                                   gtint_t,         // incx
+                                                   double>> {};     // alpha
 GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(dscalvUkrTest);
 
 // Tests using random integers as vector elements.
@@ -67,7 +67,7 @@ TEST_P( dscalvUkrTest, RandomData )
     //----------------------------------------------------------
     //     Call generic test body using those parameters
     //----------------------------------------------------------
-    test_scalv_ukr<T>( ukr, conj_alpha, n, incx, alpha, thresh, true );
+    test_scalv_ukr<T, T, dscalv_ker_ft>( ukr, conj_alpha, n, incx, alpha, thresh, true );
 }
 
 // Used to generate a test case with a sensible name.
@@ -100,7 +100,7 @@ public:
 // ----- Begin ZEN1/2/3 (AVX2) Kernel Tests -----
 // ----------------------------------------------
 #if defined(BLIS_KERNELS_ZEN) && defined(GTEST_AVX2FMA3)
-// Tests for bli_ddotv_zen_int (AVX2) kernel.
+// Tests for bli_dscalv_zen_int (AVX2) kernel.
 /**
  * Loops:
  * L16     - Main loop, handles 16 elements
@@ -165,7 +165,7 @@ INSTANTIATE_TEST_SUITE_P(
         ::dscalvUkrTestPrint()
     );
 
-// Tests for bli_ddotv_zen_int10 (AVX2) kernel.
+// Tests for bli_dscalv_zen_int10 (AVX2) kernel.
 /**
  * Cases and Loops:
  * C0 L64     - Main loop, handles 64 elements
