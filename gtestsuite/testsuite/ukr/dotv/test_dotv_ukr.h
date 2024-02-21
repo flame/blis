@@ -34,9 +34,11 @@
 
 #pragma once
 
+#include <stdexcept>
 #include "level1/dotv/dotv.h"
 #include "level1/ref_dotv.h"
 #include "inc/check_error.h"
+#include "common/testing_helpers.h"
 
 /**
  * @brief Microkernel test body for dotv operation.
@@ -44,52 +46,81 @@
 
 template<typename T, typename FT>
 static void test_dotv_ukr( FT ukr, char conjx, char conjy, gtint_t n, gtint_t incx,
-                       gtint_t incy, double thresh )
+                       gtint_t incy, double thresh, bool is_memory_test = false )
 {
-    //----------------------------------------------------------
-    //        Initialize vectors with random numbers.
-    //----------------------------------------------------------
+    // Obtain and allocate memory for vectors.
     T *x, *y, *y_ref;
 
     gtint_t size_x = testinghelpers::buff_dim( n, incx );
     gtint_t size_y = testinghelpers::buff_dim( n, incy );
 
-    x     = ( T* )malloc( sizeof( T ) * size_x );
-    y     = ( T* )malloc( sizeof( T ) * size_y );
-    y_ref = ( T* )malloc( sizeof( T ) * size_y );
+    testinghelpers::ProtectedBuffer x_buf( size_x * sizeof( T ), false, is_memory_test );
+    testinghelpers::ProtectedBuffer y_buf( size_y * sizeof( T ), false, is_memory_test );
 
+    // No redzones are required for y_ref buffer thus, we pass is_memory_test = false.
+    testinghelpers::ProtectedBuffer y_ref_buf( size_y * sizeof( T ), false, false );
+
+    // Acquire the first set of greenzones for x and y
+    x = ( T* )x_buf.greenzone_1;
+    y = ( T* )y_buf.greenzone_1;
+    y_ref = ( T* )y_ref_buf.greenzone_1; // For y_ref, there is no greenzone_2
+
+    // Initialize the vectors with random data.
     testinghelpers::datagenerators::randomgenerators( -10, 10, n, incx, x );
     testinghelpers::datagenerators::randomgenerators( -10, 10, n, incy, y );
 
-    // Copying y to y_ref, for comparision after computation
-    for( gtint_t i = 0; i < size_y; i += 1 )
-        *( y_ref + i ) = *( y + i );
+    // Copying the contents of y to y_ref, for comparision after computation.
+    memcpy( y_ref, y, size_y * sizeof( T ) );
 
-    //----------------------------------------------------------
-    //    Call reference implementation to get ref results.
-    //----------------------------------------------------------
-    // Create a copy of y so that we can check reference results.
+    T rho;
+    // Create a copy of rho so that we can check reference results.
     T rho_ref;
+
+    // conj? conversion to BLIS conjugate type.
+    conj_t blis_conjx, blis_conjy;
+    testinghelpers::char_to_blis_conj( conjx, &blis_conjx );
+    testinghelpers::char_to_blis_conj( conjy, &blis_conjy );
+
+    // Add signal handler for Segmentation Faults.
+    testinghelpers::ProtectedBuffer::start_signal_handler();
+    try
+    {
+        // Invoking BLIS ukr.
+        // This will check for out of bounds access within first redzone.
+        ukr( blis_conjx, blis_conjy, n, x, incx, y, incy, &rho, nullptr );
+
+        if ( is_memory_test )
+        {
+            // Acquire the pointers near the second redzone.
+            x = ( T* )x_buf.greenzone_2;
+            y = ( T* )y_buf.greenzone_2;
+
+            // Copy the data for x and y accordingly.
+            memcpy( x, x_buf.greenzone_1, size_x * sizeof( T ) );
+            memcpy( y, y_ref_buf.greenzone_1, size_y * sizeof( T ) );
+
+            // Inoking BLIS ukr to check with the second redzone.
+            ukr( blis_conjx, blis_conjy, n, x, incx, y, incy, &rho, nullptr );
+        }
+    }
+    catch( const std::exception& e )
+    {
+        // Reset to default signal handler.
+        testinghelpers::ProtectedBuffer::stop_signal_handler();
+
+        // Show failure in case Segmentation Fault was detected.
+        FAIL() << "Memory Test Failed";
+    }
+
+    // Reset to default signal handler.
+    testinghelpers::ProtectedBuffer::stop_signal_handler();
+
+    // Invoking the reference implementation to get reference results.
     if constexpr (testinghelpers::type_info<T>::is_real)
         testinghelpers::ref_dotv<T>( n, x, incx, y_ref, incy, &rho_ref );
     else
         testinghelpers::ref_dotv<T>( conjx, conjy, n, x, incx, y_ref, incy, &rho_ref );
 
-    //----------------------------------------------------------
-    //                  Call BLIS function.
-    //----------------------------------------------------------
-    T rho;
-    conj_t blis_conjx, blis_conjy;
-    testinghelpers::char_to_blis_conj( conjx, &blis_conjx );
-    testinghelpers::char_to_blis_conj( conjy, &blis_conjy );
-    ukr( blis_conjx, blis_conjy, n, x, incx, y, incy, &rho, nullptr );
-
-    //----------------------------------------------------------
-    //              Compute error.
-    //----------------------------------------------------------
+    // Compute component-wise error.
     computediff<T>( rho, rho_ref, thresh );
-
-    free( x );
-    free( y );
-    free( y_ref );
 }

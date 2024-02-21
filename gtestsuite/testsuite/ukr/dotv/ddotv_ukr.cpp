@@ -36,17 +36,18 @@
 #include "test_dotv_ukr.h"
 
 class ddotvUkrTest :
-        public ::testing::TestWithParam<std::tuple<ddotv_ker_ft,
-                                                   char,
-                                                   char,
-                                                   gtint_t,
-                                                   gtint_t,
-                                                   gtint_t>> {};
+        public ::testing::TestWithParam<std::tuple<ddotv_ker_ft,    // Function pointer for ddotv kernels
+                                                   char,            // conjx
+                                                   char,            // conjy
+                                                   gtint_t,         // n
+                                                   gtint_t,         // incx
+                                                   gtint_t,         // incy
+                                                   bool>> {};       // is_memory_test
 GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(ddotvUkrTest);
 
 
 // Tests using random integers as vector elements.
-TEST_P( ddotvUkrTest, RandomData )
+TEST_P( ddotvUkrTest, FunctionalTest )
 {
     using T = double;
     //----------------------------------------------------------
@@ -65,6 +66,8 @@ TEST_P( ddotvUkrTest, RandomData )
     gtint_t incx = std::get<4>(GetParam());
     // stride size for y:
     gtint_t incy = std::get<5>(GetParam());
+    // enable/disable memory test:
+    bool is_memory_test = std::get<6>(GetParam());
 
     // Set the threshold for the errors:
     double thresh = n*testinghelpers::getEpsilon<T>();
@@ -72,7 +75,7 @@ TEST_P( ddotvUkrTest, RandomData )
     //----------------------------------------------------------
     //     Call generic test body using those parameters
     //----------------------------------------------------------
-    test_dotv_ukr<T>( ukr, conjx, conjy, n, incx, incy, thresh );
+    test_dotv_ukr<T>( ukr, conjx, conjy, n, incx, incy, thresh, is_memory_test );
 }
 
 // Used to generate a test case with a sensible name.
@@ -82,21 +85,23 @@ TEST_P( ddotvUkrTest, RandomData )
 class ddotvUkrTestPrint {
 public:
     std::string operator()(
-        testing::TestParamInfo<std::tuple<ddotv_ker_ft,char,char,gtint_t,gtint_t,gtint_t>> str) const {
+        testing::TestParamInfo<std::tuple<ddotv_ker_ft,char,char,gtint_t,gtint_t,gtint_t, bool>> str) const {
         char conjx    = std::get<1>(str.param);
         char conjy    = std::get<2>(str.param);
         gtint_t n     = std::get<3>(str.param);
         gtint_t incx  = std::get<4>(str.param);
         gtint_t incy  = std::get<5>(str.param);
+        bool is_memory_test = std::get<6>(str.param);
 
-        std::string str_name = "ddotvUkrTest";
-        str_name += "_" + std::to_string(n);
-        str_name += "_" + std::string(&conjx, 1);
-        str_name += "_" + std::string(&conjy, 1);
+        std::string str_name = "ddotvUkr_";
+        str_name += "n_" + std::to_string(n);
+        str_name += "conjx_" + std::string(&conjx, 1);
+        str_name += "conjy_" + std::string(&conjy, 1);
         std::string incx_str = ( incx > 0) ? std::to_string(incx) : "m" + std::to_string(std::abs(incx));
-        str_name += "_" + incx_str;
+        str_name += "incx_" + incx_str;
         std::string incy_str = ( incy > 0) ? std::to_string(incy) : "m" + std::to_string(std::abs(incy));
-        str_name += "_" + incy_str;
+        str_name += "incy_" + incy_str;
+        str_name += ( is_memory_test ) ? "_mem_test_enabled" : "_mem_test_disabled";
 
         return str_name;
     }
@@ -142,7 +147,9 @@ INSTANTIATE_TEST_SUITE_P(
             // incy: stride of y vector.
             ::testing::Values(
                                gtint_t(1)       // unit stride
-            )
+            ),
+            // is_memory_test: enable/disable memory tests
+            ::testing::Values( false, true )
         ),
         ::ddotvUkrTestPrint()
     );
@@ -167,7 +174,9 @@ INSTANTIATE_TEST_SUITE_P(
             // incy: stride of y vector.
             ::testing::Values(
                                gtint_t(3), gtint_t(7)       // few non-unit strides for sanity check
-            )
+            ),
+            // is_memory_test: enable/disable memory tests
+            ::testing::Values( false, true )
         ),
         ::ddotvUkrTestPrint()
     );
@@ -224,7 +233,9 @@ INSTANTIATE_TEST_SUITE_P(
             // incy: stride of y vector.
             ::testing::Values(
                                gtint_t(1)       // unit stride
-            )
+            ),
+            // is_memory_test: enable/disable memory tests
+            ::testing::Values( false, true )
         ),
         ::ddotvUkrTestPrint()
     );
@@ -249,7 +260,9 @@ INSTANTIATE_TEST_SUITE_P(
             // incy: stride of y vector.
             ::testing::Values(
                                gtint_t(3), gtint_t(7)       // few non-unit strides for sanity check
-            )
+            ),
+            // is_memory_test: enable/disable memory tests
+            ::testing::Values( false, true )
         ),
         ::ddotvUkrTestPrint()
     );
@@ -309,7 +322,9 @@ INSTANTIATE_TEST_SUITE_P(
             // incy: stride of y vector.
             ::testing::Values(
                                gtint_t(1)       // unit stride
-            )
+            ),
+            // is_memory_test: enable/disable memory tests
+            ::testing::Values( false, true )
         ),
         ::ddotvUkrTestPrint()
     );
@@ -334,7 +349,9 @@ INSTANTIATE_TEST_SUITE_P(
             // incy: stride of y vector.
             ::testing::Values(
                                gtint_t(3), gtint_t(7)       // few non-unit strides for sanity check
-            )
+            ),
+            // is_memory_test: enable/disable memory tests
+            ::testing::Values( false, true )
         ),
         ::ddotvUkrTestPrint()
     );
