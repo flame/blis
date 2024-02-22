@@ -40224,8 +40224,8 @@ BLIS_INLINE void ctrsm_small_pack_diag_element
 		ymm18 = _mm256_setr_ps(-1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0);\
 		for(k = 0; k< k_iter; k++) \
 		{ \
-			ymm0 = _mm256_broadcast_ps(( __m128 const *)(b10));\
-			ymm0 = _mm256_permute_ps(ymm0, 0x44);\
+			xmm5 = _mm_loadl_pi(xmm5,(__m64 *)(b10));\
+			ymm0 = _mm256_insertf128_ps(ymm0, xmm5, 0);\
             \
 			ymm2 = _mm256_broadcast_ss(tptr + p_lda * 0 + 0);\
 			ymm3 = _mm256_broadcast_ss(tptr + p_lda * 0 + 1);\
@@ -40249,10 +40249,8 @@ BLIS_INLINE void ctrsm_small_pack_diag_element
 	else {\
 		for(k = 0; k< k_iter; k++) \
 		{ \
-			ymm0 = _mm256_broadcast_ps(( __m128 const *)(b10 + 2));\
-			ymm0 = _mm256_permute_ps(ymm0, 0x44);\
-            		xmm5 = _mm_loadu_ps((float const *)(b10));\
-            		ymm0 = _mm256_insertf128_ps(ymm0, xmm5, 0);\
+			xmm5 = _mm_loadl_pi(xmm5,(__m64 *)(b10));\
+			ymm0 = _mm256_insertf128_ps(ymm0, xmm5, 0);\
 			\
 			ymm2 = _mm256_broadcast_ss(tptr + p_lda * 0 + 0);\
 			ymm3 = _mm256_broadcast_ss(tptr + p_lda * 0 + 1);\
