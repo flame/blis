@@ -1,0 +1,67 @@
+{
+  "version": 6,
+  "configurePresets": [
+    {
+      "name": "lp64",
+      "hidden": true,
+      "cacheVariables": {
+        "INT_SIZE": "32"
+      }
+    },
+    {
+      "name": "ilp64",
+      "hidden": true,
+      "cacheVariables": {
+        "INT_SIZE": "64"
+      }
+    },
+    {
+      "name": "st",
+      "hidden": true,
+      "cacheVariables": {
+        "ENABLE_THREADING": "no"
+      }
+    },
+    {
+      "name": "mt",
+      "hidden": true,
+      "cacheVariables": {
+        "ENABLE_THREADING": "openmp"
+      }
+    },
+    {
+      "name": "amdzen",
+      "hidden": true
+    },
+    {
+      "name": "auto",
+      "hidden": true
+    },
+    {
+      "name": "static",
+      "hidden": true,
+      "cacheVariables": {
+        "BLIS_LINKING_TYPE": "static"
+      }
+    },
+    {
+      "name": "shared",
+      "hidden": true,
+      "cacheVariables": {
+        "BLIS_LINKING_TYPE": "shared"
+      }
+    },
+    {
+      "name": "base",
+      "hidden": true,
+      "binaryDir": "${sourceDir}/build-${presetName}"
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "base",
+      "configurePreset": "base",
+      "jobs": 0
+    }
+  ]
+}

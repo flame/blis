@@ -1,0 +1,80 @@
+{
+  "version": 6,
+  "configurePresets": [
+    {
+      "name": "lp64",
+      "hidden": true,
+      "cacheVariables": {
+        "INT_SIZE": "32",
+        "BLAS_INT_SIZE": "32"
+      }
+    },
+    {
+      "name": "ilp64",
+      "hidden": true,
+      "cacheVariables": {
+        "INT_SIZE": "64",
+        "BLAS_INT_SIZE": "64"
+      }
+    },
+    {
+      "name": "st",
+      "hidden": true,
+      "cacheVariables": {
+        "ENABLE_THREADING": "no"
+      }
+    },
+    {
+      "name": "mt",
+      "hidden": true,
+      "cacheVariables": {
+        "ENABLE_THREADING": "openmp"
+      }
+    },
+    {
+      "name": "amdzen",
+      "hidden": true,
+      "cacheVariables": {
+        "BLIS_CONFIG_FAMILY": "amdzen"
+      }
+    },
+    {
+      "name": "auto",
+      "hidden": true,
+      "cacheVariables": {
+        "BLIS_CONFIG_FAMILY": "auto"
+      }
+    },
+    {
+      "name": "static",
+      "hidden": true,
+      "cacheVariables": {
+        "BUILD_SHARED_LIBS": "OFF"
+      }
+    },
+    {
+      "name": "shared",
+      "hidden": true,
+      "cacheVariables": {
+        "BUILD_SHARED_LIBS": "ON"
+      }
+    },
+    {
+      "name": "base",
+      "hidden": true,
+      "cacheVariables": {
+        "ENABLE_CBLAS": "ON"
+      },
+      "binaryDir": "${sourceDir}/build-${presetName}"
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "base",
+      "configurePreset": "base",
+      "targets": "install",
+      "configuration": "Release",
+      "jobs": 0
+    }
+  ]
+}

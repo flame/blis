@@ -22,10 +22,13 @@ def check_blastest():
     if has_failure:
         print("\033[0;31m At least one BLAS test failed. :( \033[0m")
         print("\033[0;31m Please see the corresponding out.* for details. \033[0m")
+        exit(1)
     elif is_empty:
         print("\033[0;31m At least one BLAS test resulted without a PASS. :( \033[0m")
         print("\033[0;31m Please ensure that the corresponding out.* was generated correctly. \033[0m")
+        exit(1)
     else:
         print("\033[0;32m All BLAS tests passed! \033[0m")
+        exit(0)
 
 check_blastest()

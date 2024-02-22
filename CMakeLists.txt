@@ -1,6 +1,6 @@
-##Copyright (C) 2022 - 2023, Advanced Micro Devices, Inc. All rights reserved.##
+##Copyright (C) 2022 - 2024, Advanced Micro Devices, Inc. All rights reserved.##
 
-cmake_minimum_required(VERSION 3.15.0)
+cmake_minimum_required(VERSION 3.20.0)
 if(WIN32)
     project(AOCL-LibBlis LANGUAGES C CXX)
 else()
