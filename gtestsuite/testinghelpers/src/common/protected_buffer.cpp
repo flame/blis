@@ -39,6 +39,7 @@
 #include <sys/mman.h>
 #endif
 
+#include <stdlib.h>
 #include "blis.h"
 #include "common/protected_buffer.h"
 
@@ -47,11 +48,18 @@
 */
 void* testinghelpers::ProtectedBuffer::get_mem(dim_t size, bool is_aligned)
 {
+    void* mem = nullptr;
 #if defined(__linux__)
-    return is_aligned ? aligned_alloc(BLIS_HEAP_STRIDE_ALIGN_SIZE, size) : malloc(size);
+    mem = is_aligned ? aligned_alloc(BLIS_HEAP_STRIDE_ALIGN_SIZE, size) : malloc(size);
 #else
-    return is_aligned ? _aligned_malloc(BLIS_HEAP_STRIDE_ALIGN_SIZE, size) : malloc(size);
+    mem = is_aligned ? _aligned_malloc(BLIS_HEAP_STRIDE_ALIGN_SIZE, size) : malloc(size);
 #endif
+    if (mem == NULL)
+    {
+        printf("Protected Buffer: Memory not allocated.\n");
+        exit(EXIT_FAILURE);
+    }
+    return mem;
 }
 
 /**
@@ -71,7 +79,9 @@ testinghelpers::ProtectedBuffer::ProtectedBuffer(dim_t size, bool is_aligned, bo
         size_t page_size = sysconf(_SC_PAGESIZE);
 
         // calculate minimum number of pages needed for requested size
-        size_t buffer_size = ((size / page_size)+1) * page_size;
+        // we make buffer at least twice the requested size to make sure
+        // that greenzone_1 and greenzone_2 do not overlap
+        size_t buffer_size = ((( size * 2 ) / page_size) + 1) * page_size;
 
         // allocate memory (buffer_size + 1 page to ensure 1st redzone can be started at page bounday
         // + 2 * REDZONE_SIZE pages for 1 redzone on each end of buffer)

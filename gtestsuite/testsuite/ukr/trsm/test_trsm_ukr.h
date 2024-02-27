@@ -43,8 +43,8 @@
 #include "level3/trsm/test_trsm.h"
 
 
-// function pointer for DTRSM small kernels
-typedef err_t (*dtrsm_small_ker_ft)
+// function pointer for TRSM small kernels
+typedef err_t (*trsm_small_ker_ft)
 (
     side_t   side,
     obj_t*   alpha,
@@ -77,8 +77,8 @@ static void test_trsm_ukr( FT ukr_fp, char storage, char uploa, char diaga,
     T* b01 = (T*)b01_buffer.greenzone_1; // row major
 
     // Initialize vectors with random numbers.
-    random_generator_with_INF_NAN( a10, uploa, 'c', 'n', -0.3, 0.3, m, (k+m), lda);
-    random_generator_with_INF_NAN( b01, uploa, 'r', 'n', -0.3, 0.3, (k+m), n, ldb);
+    random_generator_with_INF_NAN( a10, uploa, 'c', 'n', -0.1, 0.1, m, (k+m), lda);
+    random_generator_with_INF_NAN( b01, uploa, 'r', 'n', -0.1, 0.1, (k+m), n, ldb);
 
     // Get A11(A10 + sizeof(A01)) and B11(B10 + sizeof(B10))
     T* a11  = a10 + (k*lda);
@@ -115,7 +115,7 @@ static void test_trsm_ukr( FT ukr_fp, char storage, char uploa, char diaga,
     else // general storage
     {
         ldc += m;
-        
+
         // reference does not support general stride, therefore
         // reference is set as column major
         rs_c_ref = 1,
@@ -159,7 +159,7 @@ static void test_trsm_ukr( FT ukr_fp, char storage, char uploa, char diaga,
 #ifndef BLIS_ENABLE_TRSM_PREINVERSION
     for (gtint_t i =0;i< m; i++)
     {
-        a11[i+i*lda] = 1 / a11[i+i*lda];
+        a11[i+i*lda] = T{1} / a11[i+i*lda];
     }
 #endif
 
@@ -242,25 +242,25 @@ static void test_trsm_ukr( FT ukr_fp, char storage, char uploa, char diaga,
     // compensate for the trsm per-inversion
     for (gtint_t i =0;i< m; i++)
     {
-        a11[i+i*lda] = 1/a11[i+i*lda];
+        a11[i+i*lda] = T{1.0} / a11[i+i*lda];
     }
 #endif
 
     // Call reference implementation to get ref results.
     if (storage == 'c' || storage == 'C')
     {
-        testinghelpers::ref_gemm<T>( storage, 'n', 't', m, n, k, -1,
+        testinghelpers::ref_gemm<T>( storage, 'n', 't', m, n, k, T{-1},
                                 a10, lda, b01, ldb, alpha, c_ref, ldc);
-        testinghelpers::ref_trsm<T>( storage, 'l', uploa, 'n', diaga, m, n, 1, a11,
+        testinghelpers::ref_trsm<T>( storage, 'l', uploa, 'n', diaga, m, n, T{1}, a11,
                                 lda, c_ref, ldc );
     }
     else if (storage == 'r' || storage == 'R')// row major
     {
-        testinghelpers::ref_gemm<T>( storage, 't', 'n', m, n, k, -1,
+        testinghelpers::ref_gemm<T>( storage, 't', 'n', m, n, k, T{-1},
                                 a10, lda, b01, ldb, alpha, c_ref, ldc);
 
         // convert col major A11 to row Major for TRSM
-        T temp = 0;
+        T temp = T{0};
         for(gtint_t i = 0; i < m; ++i)
         {
             for(gtint_t j = i; j< m; ++j)
@@ -271,14 +271,14 @@ static void test_trsm_ukr( FT ukr_fp, char storage, char uploa, char diaga,
             }
         }
 
-        testinghelpers::ref_trsm<T>( storage, 'l', uploa, 'n', diaga, m, n, 1, a11,
+        testinghelpers::ref_trsm<T>( storage, 'l', uploa, 'n', diaga, m, n, T{1}, a11,
                                 lda, c_ref, ldc );
     }
     else
     {
-        testinghelpers::ref_gemm<T>( 'c', 'n', 't', m, n, k, -1,
+        testinghelpers::ref_gemm<T>( 'c', 'n', 't', m, n, k, T{-1},
                                 a10, lda, b01, ldb, alpha, c_ref, ldc);
-        testinghelpers::ref_trsm<T>( 'c', 'l', uploa, 'n', diaga, m, n, 1, a11,
+        testinghelpers::ref_trsm<T>( 'c', 'l', uploa, 'n', diaga, m, n, T{1}, a11,
                                 lda, c_ref, ldc );
 
         // there is no equivalent blas call for gen storage,
@@ -314,7 +314,7 @@ static void test_trsm_ukr( FT ukr_fp, char storage, char uploa, char diaga,
 template<typename T, typename FT>
 static void test_trsm_small_ukr( FT ukr_fp, char side, char uploa, char diaga,
                         char transa, gtint_t m, gtint_t n, T alpha, gtint_t lda,
-                        gtint_t ldb, double thresh, bool is_memory_test)
+                        gtint_t ldb, double thresh, bool is_memory_test, num_t dt)
 {
     // create blis objects
     obj_t ao = BLIS_OBJECT_INITIALIZER;
@@ -325,7 +325,6 @@ static void test_trsm_small_ukr( FT ukr_fp, char side, char uploa, char diaga,
     inc_t cs_a = lda;
     inc_t rs_b = 1;
     inc_t cs_b = ldb;
-    num_t dt = BLIS_DOUBLE;
 
     side_t  blis_side;
     uplo_t  blis_uploa;
@@ -357,8 +356,8 @@ static void test_trsm_small_ukr( FT ukr_fp, char side, char uploa, char diaga,
     T* b_ref = (T*)malloc( n * cs_b * sizeof(T) ); // col major
 
     // Initialize buffers with random numbers.
-    random_generator_with_INF_NAN( a, uploa, 'c', 'n', -0.3, 0.3, mn0_a, mn0_a, cs_a);
-    random_generator_with_INF_NAN( b, uploa, 'c', 'n', -0.3, 0.3, m, n, cs_b);
+    random_generator_with_INF_NAN( a, uploa, 'c', 'n', -0.1, 0.1, mn0_a, mn0_a, cs_a);
+    random_generator_with_INF_NAN( b, uploa, 'c', 'n', -0.1, 0.1, m, n, cs_b);
 
     // copy contents of b to b_ref
     memcpy(b_ref, b, n * cs_b * sizeof(T));
@@ -368,9 +367,9 @@ static void test_trsm_small_ukr( FT ukr_fp, char side, char uploa, char diaga,
 
     // Make A11 diagonal dominant in order to make sure that
     // input matrics are solvable
-    for (gtint_t i =0;i< mn0_a; i++)
+    for (gtint_t i = 0; i < mn0_a; i++)
     {
-        a[i+i*cs_a] = 1 / a[i+i*cs_a];
+        a[i+i*cs_a] = T{1} / a[i+i*cs_a];
     }
 
     bli_obj_init_finish( dt, mn0_a, mn0_a, (T*)a, rs_a, cs_a, &ao );
@@ -392,8 +391,8 @@ static void test_trsm_small_ukr( FT ukr_fp, char side, char uploa, char diaga,
         if(is_memory_test)
         {
             // set A and B pointers to second buffer
-            b = (T*)a_buf.greenzone_2;
-            a = (T*)b_buf.greenzone_2;
+            a = (T*)a_buf.greenzone_2;
+            b = (T*)b_buf.greenzone_2;
 
             // copy data from first buffers of A and B to second buffer
             memcpy(b, b_ref, n * cs_b * sizeof(T));

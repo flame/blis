@@ -46,7 +46,9 @@ typedef enum
 {
     ZERO,
     NaN,
+    NEG_NaN,
     INF,
+    NEG_INF,
     NaN_INF,
     DIAG_NaN,
     DIAG_INF,
@@ -54,6 +56,18 @@ typedef enum
 } EVT_TYPE;
 
 
+/**
+ * @brief Insert NaN/Inf in the matrix for extreme value testing
+ *
+ * @tparam T
+ * @param mat     input matrix where NAN/Inf needs to be inserted
+ * @param uploa   specify if input matrix in uppper or lower triangular
+ * @param m       size of the input matrix
+ * @param ld      leading dimension of input matrix
+ * @param type    type of extreme value to be inserted ( EVT_TYPE )
+ * @param is_a    is the input matrix traingular( matrix A in TRSM )
+ * @param is_diag insert extreme value in diagonal element
+ */
 template<typename T>
 void generate_NAN_INF( T* mat, char uploa, gtint_t m, gtint_t ld, EVT_TYPE type, bool is_a, bool is_diag = false)
 {
@@ -62,6 +76,18 @@ void generate_NAN_INF( T* mat, char uploa, gtint_t m, gtint_t ld, EVT_TYPE type,
     if(type == INF)
     {
         inf_nan = std::numeric_limits<T>::infinity();
+    }
+    else if (type == NEG_INF)
+    {
+        inf_nan = T{-1} * std::numeric_limits<T>::infinity();
+    }
+    else if (type == NEG_NaN)
+    {
+        inf_nan = T{-1} * std::numeric_limits<T>::quiet_NaN();
+    }
+    else // type == NaN
+    {
+        inf_nan = std::numeric_limits<T>::quiet_NaN();
     }
     // Making A diagonally dominant so that the condition number is good and
     // the algorithm doesn't diverge.
@@ -108,8 +134,26 @@ void generate_NAN_INF( T* mat, char uploa, gtint_t m, gtint_t ld, EVT_TYPE type,
     */
 }
 
+/**
+ * @brief initialize a matrix with random values within a range with some extreme values for TRSM
+ *        From and to are set as double instead of int to make sure that the matrices can be
+ *        initialized to decimal values as well.
+ *
+ * @tparam T
+ * @param mat     // input matrix
+ * @param uploa   // upper of lower triangulat matrix
+ * @param storage // storage scheme of the matrix
+ * @param trans   // is matrix transposed
+ * @param from    // starting range for the random values to be inserted in input matrix
+ * @param to      // enduing range for the random values to be inserted in input matrix
+ * @param m       // m dim of input matrix
+ * @param n       // n dim of input matrix
+ * @param ld      // leading dimension of the matrix
+ * @param type    // type of extreme value (EVT_TYPE )
+ * @param is_a    // is input matrix a triangular matrix
+ */
 template<typename T>
-void random_generator_with_INF_NAN( T* mat, char uploa, char storage, char trans, gtint_t from, gtint_t to, gtint_t m,
+void random_generator_with_INF_NAN( T* mat, char uploa, char storage, char trans, double from, double to, gtint_t m,
 gtint_t n, gtint_t ld, EVT_TYPE type = NO_EVT, bool is_a = false )
 {
     switch( type )
@@ -160,6 +204,11 @@ void test_trsm( char storage, char side, char uploa, char transa, char diaga,
     random_generator_with_INF_NAN( a.data(), uploa, storage, transa, lower, upper, mn, mn, lda, NO_EVT, true);
     random_generator_with_INF_NAN( b.data(), uploa, storage, 'n', 3, 10, m, n, ldb, b_init, false);
 
+    // Make A matix diagonal dominant to make sure that algorithm doesn't diverge
+    for ( dim_t a_dim = 0; a_dim < mn; ++a_dim )
+    {
+        a[a_dim + (a_dim* lda)] = a[a_dim + (a_dim* lda)] * T{10};
+    }
     bool nan_inf_check = false;
     // Setting the nan_inf_check boolean to true if alpa has
     // Nan/Inf in it

@@ -56,6 +56,9 @@ dcomplex operator-(const dcomplex x, const dcomplex y);
 scomplex operator*(const scomplex x, const scomplex y);
 dcomplex operator*(const dcomplex x, const dcomplex y);
 
+scomplex operator/(const scomplex x, const scomplex y);
+dcomplex operator/(const dcomplex x, const dcomplex y);
+
 bool operator== (const scomplex x, const scomplex y);
 bool operator== (const dcomplex x, const dcomplex y);
 

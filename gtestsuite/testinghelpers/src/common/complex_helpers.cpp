@@ -87,6 +87,17 @@ dcomplex operator*(const dcomplex x, const dcomplex y)
     return dcomplex{(( x.real * y.real ) - ( x.imag * y.imag )),(( x.real * y.imag ) + ( x.imag * y.real ))};
 }
 
+scomplex operator/(const scomplex x, const scomplex y)
+{
+    return scomplex{(( x.real * y.real ) + ( x.imag * y.imag )) / (( y.real * y.real ) + ( y.imag * y.imag )),
+                    (( x.imag * y.real ) - ( x.real * y.imag )) / (( y.real * y.real ) + ( y.imag * y.imag ))};
+}
+dcomplex operator/(const dcomplex x, const dcomplex y)
+{
+    return dcomplex{(( x.real * y.real ) + ( x.imag * y.imag )) / (( y.real * y.real ) + ( y.imag * y.imag )),
+                    (( x.imag * y.real ) - ( x.real * y.imag )) / (( y.real * y.real ) + ( y.imag * y.imag ))};
+}
+
 bool operator== (const scomplex x, const scomplex y)
 {
     return ((x.real==y.real) && (x.imag==y.imag));

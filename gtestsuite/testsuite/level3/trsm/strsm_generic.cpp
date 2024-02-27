@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2023, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2023-2024, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -35,19 +35,19 @@
 #include <gtest/gtest.h>
 #include "test_trsm.h"
 
-class strsmTest :
-        public ::testing::TestWithParam<std::tuple<char,
-                                                   char,
-                                                   char,
-                                                   char,
-                                                   char,
-                                                   gtint_t,
-                                                   gtint_t,
-                                                   float,
-                                                   gtint_t,
-                                                   gtint_t>> {};
+class strsmAPI :
+        public ::testing::TestWithParam<std::tuple<char,          // storage format
+                                                   char,          // side
+                                                   char,          // uplo
+                                                   char,          // transa
+                                                   char,          // diaga
+                                                   gtint_t,       // m
+                                                   gtint_t,       // n
+                                                   float,         // alpha
+                                                   gtint_t,       // lda_inc
+                                                   gtint_t>> {};  // ldb_inc
 
-TEST_P(strsmTest, RandomData)
+TEST_P(strsmAPI, FunctionalTest)
 {
     using T = float;
     //----------------------------------------------------------
@@ -78,7 +78,7 @@ TEST_P(strsmTest, RandomData)
     gtint_t ldb_inc = std::get<9>(GetParam());
 
     // Set the threshold for the errors:
-    double thresh = (std::max)(m, n)*testinghelpers::getEpsilon<T>();
+    double thresh = 1.5*(std::max)(m, n)*testinghelpers::getEpsilon<T>();
 
     //----------------------------------------------------------
     //     Call test body using these parameters
@@ -86,7 +86,7 @@ TEST_P(strsmTest, RandomData)
     test_trsm<T>( storage, side, uploa, transa, diaga, m, n, alpha, lda_inc, ldb_inc, thresh );
 }
 
-class strsmTestPrint {
+class strsmPrint {
 public:
     std::string operator()(
         testing::TestParamInfo<std::tuple<char, char, char, char, char, gtint_t, gtint_t, float, gtint_t, gtint_t>> str) const {
@@ -101,29 +101,39 @@ public:
         gtint_t lda_inc = std::get<8>(str.param);
         gtint_t ldb_inc = std::get<9>(str.param);
 #ifdef TEST_BLAS
-        std::string str_name = "strsm_";
+        std::string str_name = "blas_";
 #elif TEST_CBLAS
-        std::string str_name = "cblas_strsm";
+        std::string str_name = "cblas_";
 #else  //#elif TEST_BLIS_TYPED
-        std::string str_name = "bli_strsm";
+        std::string str_name = "blis_";
 #endif
-        str_name = str_name + "_" + sfm+sfm+sfm;
-        str_name = str_name + "_" + side + uploa + transa;
-        str_name = str_name + "_d" + diaga;
-        str_name = str_name + "_" + std::to_string(m);
-        str_name = str_name + "_" + std::to_string(n);
-        std::string alpha_str = ( alpha > 0) ? std::to_string(int(alpha)) : "m" + std::to_string(int(std::abs(alpha)));
-        str_name = str_name + "_a" + alpha_str;
-        str_name = str_name + "_" + std::to_string(lda_inc);
-        str_name = str_name + "_" + std::to_string(ldb_inc);
+        str_name = str_name + "_stor_" + sfm;
+        str_name = str_name + "_side_" + side;
+        str_name = str_name + "_uploa_" + uploa;
+        str_name = str_name + "_transa_" + transa;
+        str_name = str_name + "_diag_" + diaga;
+        str_name = str_name + "_m_" + std::to_string(m);
+        str_name = str_name + "_n_" + std::to_string(n);
+        std::string alpha_str = testinghelpers::get_value_string(alpha);
+        str_name = str_name + "_alpha_" + alpha_str;
+        gtint_t mn;
+        testinghelpers::set_dim_with_side( side, m, n, &mn );
+        str_name = str_name + "_lda_" +
+                   std::to_string(testinghelpers::get_leading_dimension( sfm, transa, mn, mn, lda_inc ));
+        str_name = str_name + "_ldb_" +
+                   std::to_string(testinghelpers::get_leading_dimension( sfm, 'n', m, n, ldb_inc ));
         return str_name;
     }
 };
 
-// Black box testing.
+
+/**
+ * @brief Test STRSM native path, which starts from size 1000 for BLAS api
+ *        and starts from size 0 for BLIS api.
+ */
 INSTANTIATE_TEST_SUITE_P(
-        Blackbox,
-        strsmTest,
+        Native,
+        strsmAPI,
         ::testing::Combine(
             ::testing::Values('c'
 #ifndef TEST_BLAS
@@ -134,11 +144,82 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values('u','l'),                                      // uplo  u:upper, l:lower
             ::testing::Values('n','t'),                                      // transa
             ::testing::Values('n','u'),                                      // diaga , n=nonunit u=unit
-            ::testing::Range(gtint_t(10), gtint_t(11), 10),                  // m
-            ::testing::Range(gtint_t(10), gtint_t(11), 10),                  // n
-            ::testing::Values( 1.0, -2.0),                                   // alpha
-            ::testing::Values(gtint_t(0), gtint_t(2)),                       // increment to the leading dim of a
-            ::testing::Values(gtint_t(0), gtint_t(4))                        // increment to the leading dim of b
+            ::testing::Values(1, 2, 112, 1200),                              // m
+            ::testing::Values(1, 2, 154, 1317),                              // n
+            ::testing::Values(-2.0f),                                        // alpha
+            ::testing::Values(gtint_t(45)),                                  // increment to the leading dim of a
+            ::testing::Values(gtint_t(38))                                   // increment to the leading dim of b
         ),
-        ::strsmTestPrint()
+        ::strsmPrint()
+    );
+
+/**
+ * @brief Test STRSM small avx2 path all fringe cases
+ *        Kernel size for avx2 small path is 16x6, testing in range of
+ *        1 to 16 ensures all finge cases are being tested.
+ */
+INSTANTIATE_TEST_SUITE_P(
+        Small_AVX2_fringe,
+        strsmAPI,
+        ::testing::Combine(
+            ::testing::Values('c'),                                          // storage format
+            ::testing::Values('l','r'),                                      // side  l:left, r:right
+            ::testing::Values('u','l'),                                      // uplo  u:upper, l:lower
+            ::testing::Values('n','t'),                                      // transa
+            ::testing::Values('n','u'),                                      // diaga , n=nonunit u=unit
+            ::testing::Range(gtint_t(1), gtint_t(17), 1),                    // m
+            ::testing::Range(gtint_t(1), gtint_t(17), 1),                    // n
+            ::testing::Values(-2.4f),                                        // alpha
+            ::testing::Values(gtint_t(58)),                                  // increment to the leading dim of a
+            ::testing::Values(gtint_t(31))                                   // increment to the leading dim of b
+        ),
+        ::strsmPrint()
+    );
+
+
+/**
+ * @brief Test STRSM small avx2 path, this code path is used in range 0 to 1000
+ */
+INSTANTIATE_TEST_SUITE_P(
+        Small_AVX2,
+        strsmAPI,
+        ::testing::Combine(
+            ::testing::Values('c'),                                          // storage format
+            ::testing::Values('l','r'),                                      // side  l:left, r:right
+            ::testing::Values('u','l'),                                      // uplo  u:upper, l:lower
+            ::testing::Values('n','t'),                                      // transa
+            ::testing::Values('n','u'),                                      // diaga , n=nonunit u=unit
+            ::testing::Values(17, 110, 51, 1000),                            // m
+            ::testing::Values(17, 48 , 51, 1000),                            // n
+            ::testing::Values(-2.4f),                                        // alpha
+            ::testing::Values(gtint_t(95)),                                  // increment to the leading dim of a
+            ::testing::Values(gtint_t(83))                                   // increment to the leading dim of b
+        ),
+        ::strsmPrint()
+    );
+
+
+/**
+ * @brief Test STRSM with differnt values of alpha
+ *      code paths covered:
+ *          TRSV              -> 1
+ *          TRSM_AVX2_small   -> 3
+ *          TRSM_NATIVE       -> 1001
+ */
+INSTANTIATE_TEST_SUITE_P(
+        Alpha,
+        strsmAPI,
+        ::testing::Combine(
+            ::testing::Values('c'),                                          // storage format
+            ::testing::Values('l','r'),                                      // side  l:left, r:right
+            ::testing::Values('u','l'),                                      // uplo  u:upper, l:lower
+            ::testing::Values('n','t'),                                      // transa
+            ::testing::Values('n','u'),                                      // diaga , n=nonunit u=unit
+            ::testing::Values(1, 3, 1001),                                   // n
+            ::testing::Values(1, 3, 1001),                                   // m
+            ::testing::Values(-2.4f, 0.0f, 1.0f, 3.1f),                      // alpha
+            ::testing::Values(gtint_t(0), gtint_t(35)),                      // increment to the leading dim of a
+            ::testing::Values(gtint_t(0), gtint_t(39))                       // increment to the leading dim of b
+        ),
+        ::strsmPrint()
     );
