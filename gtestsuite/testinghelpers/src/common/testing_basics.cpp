@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2023, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2023 - 2024, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -643,44 +643,8 @@ std::string get_value_string(T exval)
   }
   else
   {
-    if(std::isnan(exval.real))
-    {
-      exval_str = "nan";
-      if(std::isinf(exval.imag))
-        exval_str = exval_str + "pi" + ((exval.imag >= 0) ? "inf" : "minus_inf");
-      else
-        exval_str = exval_str + "pi" + ((exval.imag >= 0)? std::to_string(int(exval.imag)) : "m" + std::to_string(int(std::abs(exval.imag))));
-    }
-    else if(std::isnan(exval.imag))
-    {
-      if(std::isinf(exval.real))
-        exval_str = ((exval.real >= 0) ? "inf" : "minus_inf");
-      else
-        exval_str = ((exval.real >= 0)? std::to_string(int(exval.real)) : "m" + std::to_string(int(std::abs(exval.real))));
-      exval_str = exval_str + "pinan";
-    }
-    else if(std::isinf(exval.real))
-    {
-      exval_str = ((exval.real >= 0) ? "inf" : "minus_inf");
-      if(std::isnan(exval.imag))
-        exval_str = exval_str + "pinan";
-      else
-        exval_str = exval_str + "pi" + ((exval.imag >= 0)? std::to_string(int(exval.imag)) : "m" + std::to_string(int(std::abs(exval.imag))));
-    }
-    else if(std::isinf(exval.imag))
-    {
-      if(std::isnan(exval.real))
-        exval_str = "nan";
-      else
-        exval_str = ((exval.real >= 0)? std::to_string(int(exval.real)) : "m" + std::to_string(int(std::abs(exval.real))));
-
-      exval_str = exval_str + ((exval.imag >= 0) ? "inf" : "minus_inf");
-    }
-    else
-    {
-        exval_str = ((exval.real >= 0)? std::to_string(int(exval.real)) : "m" + std::to_string(int(std::abs(exval.real))));
-        exval_str = exval_str + "pi" + ((exval.imag >= 0)? std::to_string(int(exval.imag)) : "m" + std::to_string(int(std::abs(exval.imag))));
-    }
+    using RT = typename testinghelpers::type_info<T>::real_type;
+    exval_str = get_value_string<RT>(exval.real) + std::string{"_pi_"} + get_value_string<RT>(exval.imag);
   }
   return exval_str;
 }
