@@ -18,7 +18,7 @@
           },
           {
             "name": "linux-make-gcc-st-lp64-amdzen-static",
-            "inherits": ["linux-make-gcc", "st", "lp64", "amdzen", "static"],
+            "inherits": ["linux-make-gcc", "st", "lp64", "amdzen", "linux-static"],
             "cacheVariables": {
               "CMAKE_INSTALL_PREFIX": "${sourceDir}/install-linux-lp64-amdzen"
             },
@@ -26,7 +26,7 @@
           },
           {
             "name": "linux-make-gcc-st-lp64-amdzen-shared",
-            "inherits": ["linux-make-gcc", "st", "lp64", "amdzen", "shared"],
+            "inherits": ["linux-make-gcc", "st", "lp64", "amdzen", "linux-shared"],
             "cacheVariables": {
               "CMAKE_INSTALL_PREFIX": "${sourceDir}/install-linux-lp64-amdzen"
             },
@@ -34,7 +34,7 @@
           },
           {
             "name": "linux-make-gcc-mt-lp64-amdzen-static", 
-            "inherits": ["linux-make-gcc", "mt", "lp64", "amdzen", "static"],
+            "inherits": ["linux-make-gcc", "mt", "lp64", "amdzen", "linux-static"],
             "cacheVariables": {
               "CMAKE_INSTALL_PREFIX": "${sourceDir}/install-linux-lp64-amdzen"
             },
@@ -42,7 +42,7 @@
           },
           {
             "name": "linux-make-gcc-mt-lp64-amdzen-shared",
-            "inherits": ["linux-make-gcc", "mt", "lp64", "amdzen", "shared"],
+            "inherits": ["linux-make-gcc", "mt", "lp64", "amdzen", "linux-shared"],
             "cacheVariables": {
               "CMAKE_INSTALL_PREFIX": "${sourceDir}/install-linux-lp64-amdzen"
             },
@@ -50,7 +50,7 @@
           },
           {
             "name": "linux-make-gcc-st-ilp64-amdzen-static",
-            "inherits": ["linux-make-gcc", "st", "ilp64", "amdzen", "static"],
+            "inherits": ["linux-make-gcc", "st", "ilp64", "amdzen", "linux-static"],
             "cacheVariables": {
               "CMAKE_INSTALL_PREFIX": "${sourceDir}/install-linux-ilp64-amdzen"
             },
@@ -58,7 +58,7 @@
           },
           {
             "name": "linux-make-gcc-st-ilp64-amdzen-shared",
-            "inherits": ["linux-make-gcc", "st", "ilp64", "amdzen", "shared"],
+            "inherits": ["linux-make-gcc", "st", "ilp64", "amdzen", "linux-shared"],
             "cacheVariables": {
               "CMAKE_INSTALL_PREFIX": "${sourceDir}/install-linux-ilp64-amdzen"
             },
@@ -66,7 +66,7 @@
           },
           {
             "name": "linux-make-gcc-mt-ilp64-amdzen-static",
-            "inherits": ["linux-make-gcc", "mt", "ilp64", "amdzen", "static"],
+            "inherits": ["linux-make-gcc", "mt", "ilp64", "amdzen", "linux-static"],
             "cacheVariables": {
               "CMAKE_INSTALL_PREFIX": "${sourceDir}/install-linux-ilp64-amdzen"
             },
@@ -74,7 +74,7 @@
           },
           {
             "name": "linux-make-gcc-mt-ilp64-amdzen-shared",
-            "inherits": ["linux-make-gcc", "mt", "ilp64", "amdzen", "shared"],
+            "inherits": ["linux-make-gcc", "mt", "ilp64", "amdzen", "linux-shared"],
             "cacheVariables": {
               "CMAKE_INSTALL_PREFIX": "${sourceDir}/install-linux-ilp64-amdzen"
             },
@@ -83,7 +83,7 @@
       
           {
             "name": "linux-make-gcc-st-lp64-auto-static",
-            "inherits": ["linux-make-gcc", "st", "lp64", "auto", "static"],
+            "inherits": ["linux-make-gcc", "st", "lp64", "auto", "linux-static"],
             "cacheVariables": {
               "CMAKE_INSTALL_PREFIX": "${sourceDir}/install-linux-lp64-auto"
             },
@@ -91,7 +91,7 @@
           },
           {
             "name": "linux-make-gcc-st-lp64-auto-shared",
-            "inherits": ["linux-make-gcc", "st", "lp64", "auto", "shared"],
+            "inherits": ["linux-make-gcc", "st", "lp64", "auto", "linux-shared"],
             "cacheVariables": {
               "CMAKE_INSTALL_PREFIX": "${sourceDir}/install-linux-lp64-auto"
             },
@@ -99,7 +99,7 @@
           },
           {
             "name": "linux-make-gcc-mt-lp64-auto-static",
-            "inherits": ["linux-make-gcc", "mt", "lp64", "auto", "static"],
+            "inherits": ["linux-make-gcc", "mt", "lp64", "auto", "linux-static"],
             "cacheVariables": {
               "CMAKE_INSTALL_PREFIX": "${sourceDir}/install-linux-lp64-auto"
             },
@@ -107,7 +107,7 @@
           },
           {
             "name": "linux-make-gcc-mt-lp64-auto-shared",
-            "inherits": ["linux-make-gcc", "mt", "lp64", "auto", "shared"],
+            "inherits": ["linux-make-gcc", "mt", "lp64", "auto", "linux-shared"],
             "cacheVariables": {
               "CMAKE_INSTALL_PREFIX": "${sourceDir}/install-linux-lp64-auto"
             },
@@ -115,7 +115,7 @@
           },
           {
             "name": "linux-make-gcc-st-ilp64-auto-static",
-            "inherits": ["linux-make-gcc", "st", "ilp64", "auto", "static"],
+            "inherits": ["linux-make-gcc", "st", "ilp64", "auto", "linux-static"],
             "cacheVariables": {
               "CMAKE_INSTALL_PREFIX": "${sourceDir}/install-linux-ilp64-auto"
             },
@@ -123,7 +123,7 @@
           },
           {
             "name": "linux-make-gcc-st-ilp64-auto-shared",
-            "inherits": ["linux-make-gcc", "st", "ilp64", "auto", "shared"],
+            "inherits": ["linux-make-gcc", "st", "ilp64", "auto", "linux-shared"],
             "cacheVariables": {
               "CMAKE_INSTALL_PREFIX": "${sourceDir}/install-linux-ilp64-auto"
             },
@@ -131,7 +131,7 @@
           },
           {
             "name": "linux-make-gcc-mt-ilp64-auto-static",
-            "inherits": ["linux-make-gcc", "mt", "ilp64", "auto", "static"],
+            "inherits": ["linux-make-gcc", "mt", "ilp64", "auto", "linux-static"],
             "cacheVariables": {
               "CMAKE_INSTALL_PREFIX": "${sourceDir}/install-linux-ilp64-auto"
             },
@@ -139,7 +139,7 @@
           },
           {
             "name": "linux-make-gcc-mt-ilp64-auto-shared",
-            "inherits": ["linux-make-gcc", "mt", "ilp64", "auto", "shared"],
+            "inherits": ["linux-make-gcc", "mt", "ilp64", "auto", "linux-shared"],
             "cacheVariables": {
               "CMAKE_INSTALL_PREFIX": "${sourceDir}/install-linux-ilp64-auto"
             },

@@ -62,10 +62,8 @@ function(generate_kernel_targets kernel_target)
             # in get-noopt-cflags-for
             target_compile_options(${kernel_target}_KERNELS PRIVATE ${CTHREADFLAGS})
         endif()
-        if(BUILD_SHARED_LIBS)
-            # Equivalent to CPICFLAGS in get-noopt-cflags-for
-            set_target_properties(${kernel_target}_KERNELS PROPERTIES POSITION_INDEPENDENT_CODE ON)
-        endif()
+        # Equivalent to CPICFLAGS in get-noopt-cflags-for
+        set_target_properties(${kernel_target}_KERNELS PROPERTIES POSITION_INDEPENDENT_CODE ON)
         add_dependencies(${kernel_target}_KERNELS flat-header)
         # Put all those targets under object-libs-targets folder name so that they appear all together in IDE.
         set_target_properties(${kernel_target}_KERNELS PROPERTIES FOLDER object-libs-targets)

@@ -50,10 +50,8 @@ elseif(THREADING_MODEL STREQUAL "pthreads")
     # in get-noopt-cflags-for
     target_compile_options(AOCL_DTL PRIVATE ${CTHREADFLAGS})
 endif()
-if(BUILD_SHARED_LIBS)
-    # Equivalent to CPICFLAGS in get-noopt-cflags-for
-    set_target_properties(AOCL_DTL PROPERTIES POSITION_INDEPENDENT_CODE ON)
-endif()
+# Equivalent to CPICFLAGS in get-noopt-cflags-for
+set_target_properties(AOCL_DTL PROPERTIES POSITION_INDEPENDENT_CODE ON)
 add_dependencies(AOCL_DTL flat-header)
 # Put all those targets under object-libs-targets folder name so that they appear all together in IDE.
 set_target_properties(AOCL_DTL PROPERTIES FOLDER object-libs-targets)

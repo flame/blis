@@ -51,7 +51,7 @@ foreach(source ${testcpp_sources})
                             ${CMAKE_CURRENT_SOURCE_DIR}
                             ${CMAKE_SOURCE_DIR}/vendor/cpp
                         )
-    target_link_libraries(${exec_name} PRIVATE ${LDFLAGS} libblis)
+    target_link_libraries(${exec_name} PRIVATE ${LDFLAGS} ${libblis_link})
     if(THREADING_MODEL STREQUAL "openmp")
         target_link_libraries(${exec_name} PRIVATE OpenMP::OpenMP_C)
     endif()

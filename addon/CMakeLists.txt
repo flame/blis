@@ -67,10 +67,8 @@ function(generate_addon_targets addon_target)
             # in get-noopt-cflags-for
             target_compile_options(${addon_target}_C99_ADDON PRIVATE ${CTHREADFLAGS})
         endif()
-        if(BUILD_SHARED_LIBS)
-            # Equivalent to CPICFLAGS in get-noopt-cflags-for
-            set_target_properties(${addon_target}_C99_ADDON PROPERTIES POSITION_INDEPENDENT_CODE ON)
-        endif()
+        # Equivalent to CPICFLAGS in get-noopt-cflags-for
+        set_target_properties(${addon_target}_C99_ADDON PROPERTIES POSITION_INDEPENDENT_CODE ON)
         add_dependencies(${addon_target}_C99_ADDON flat-header)
         # Put all those targets under object-libs-targets folder name so that they appear all together in IDE.
         set_target_properties(${addon_target}_C99_ADDON PROPERTIES FOLDER object-libs-targets)
@@ -129,10 +127,8 @@ function(generate_addon_targets addon_target)
             # in get-noopt-cflags-for
             target_compile_options(${addon_target}_C99_KERNEL_ADDON PRIVATE ${CTHREADFLAGS})
         endif()
-        if(BUILD_SHARED_LIBS)
-            # Equivalent to CPICFLAGS in get-noopt-cflags-for
-            set_target_properties(${addon_target}_C99_KERNEL_ADDON PROPERTIES POSITION_INDEPENDENT_CODE ON)
-        endif()
+        # Equivalent to CPICFLAGS in get-noopt-cflags-for
+        set_target_properties(${addon_target}_C99_KERNEL_ADDON PROPERTIES POSITION_INDEPENDENT_CODE ON)
         add_dependencies(${addon_target}_C99_KERNEL_ADDON flat-header)
         # Put all those targets under object-libs-targets folder name so that they appear all together in IDE.
         set_target_properties(${addon_target}_C99_KERNEL_ADDON PROPERTIES FOLDER object-libs-targets)
@@ -193,10 +189,8 @@ function(generate_addon_targets addon_target)
             # in get-noopt-cflags-for
             target_compile_options(${addon_target}_CXX_ADDON PRIVATE ${CTHREADFLAGS})
         endif()
-        if(BUILD_SHARED_LIBS)
-            # Equivalent to CPICFLAGS in get-noopt-cflags-for
-            set_target_properties(${addon_target}_CXX_ADDON PROPERTIES POSITION_INDEPENDENT_CODE ON)
-        endif()
+        # Equivalent to CPICFLAGS in get-noopt-cflags-for
+        set_target_properties(${addon_target}_CXX_ADDON PROPERTIES POSITION_INDEPENDENT_CODE ON)
         add_dependencies(${addon_target}_CXX_ADDON flat-header)
         # Put all those targets under object-libs-targets folder name so that they appear all together in IDE.
         set_target_properties(${addon_target}_CXX_ADDON PROPERTIES FOLDER object-libs-targets)

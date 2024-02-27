@@ -60,6 +60,22 @@
       }
     },
     {
+      "name": "linux-static",
+      "description": "Build both static and shared libs on Linux but test with static.",
+      "hidden": true,
+      "cacheVariables": {
+        "TEST_WITH_SHARED": "OFF"
+      }
+    },
+    {
+      "name": "linux-shared",
+      "description": "Build both static and shared libs on Linux but test with shared.",
+      "hidden": true,
+      "cacheVariables": {
+        "TEST_WITH_SHARED": "ON"
+      }
+    },
+    {
       "name": "base",
       "hidden": true,
       "cacheVariables": {

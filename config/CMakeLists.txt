@@ -52,10 +52,8 @@ function(generate_config_targets config_target)
         # in get-noopt-cflags-for
         target_compile_options(${config_target}_CONFIG PRIVATE ${CTHREADFLAGS})
     endif()
-    if(BUILD_SHARED_LIBS)
-        # Equivalent to CPICFLAGS in get-noopt-cflags-for
-        set_target_properties(${config_target}_CONFIG PROPERTIES POSITION_INDEPENDENT_CODE ON)
-    endif()
+    # Equivalent to CPICFLAGS in get-noopt-cflags-for
+    set_target_properties(${config_target}_CONFIG PROPERTIES POSITION_INDEPENDENT_CODE ON)
     add_dependencies(${config_target}_CONFIG flat-header)
     # Put all those targets under object-libs-targets folder name so that they appear all together in IDE.
     set_target_properties(${config_target}_CONFIG PROPERTIES FOLDER object-libs-targets)
@@ -108,10 +106,8 @@ function(generate_config_targets config_target)
         # in get-noopt-cflags-for
         target_compile_options(${config_target}_REFINIT PRIVATE ${CTHREADFLAGS})
     endif()
-    if(BUILD_SHARED_LIBS)
-        # Equivalent to CPICFLAGS in get-noopt-cflags-for
-        set_target_properties(${config_target}_REFINIT PROPERTIES POSITION_INDEPENDENT_CODE ON)
-    endif()
+    # Equivalent to CPICFLAGS in get-noopt-cflags-for
+    set_target_properties(${config_target}_REFINIT PROPERTIES POSITION_INDEPENDENT_CODE ON)
     add_dependencies(${config_target}_REFINIT flat-header)
     # Put all those targets under object-libs-targets folder name so that they appear all together in IDE.
     set_target_properties(${config_target}_REFINIT PROPERTIES FOLDER object-libs-targets)
@@ -172,10 +168,8 @@ function(generate_config_targets config_target)
         # in get-noopt-cflags-for
         target_compile_options(${config_target}_REFKERN PRIVATE ${CTHREADFLAGS})
     endif()
-    if(BUILD_SHARED_LIBS)
-        # Equivalent to CPICFLAGS in get-noopt-cflags-for
-        set_target_properties(${config_target}_REFKERN PROPERTIES POSITION_INDEPENDENT_CODE ON)
-    endif()
+    # Equivalent to CPICFLAGS in get-noopt-cflags-for
+    set_target_properties(${config_target}_REFKERN PROPERTIES POSITION_INDEPENDENT_CODE ON)
     add_dependencies(${config_target}_REFKERN flat-header)
     # Put all those targets under object-libs-targets folder name so that they appear all together in IDE.
     set_target_properties(${config_target}_REFKERN PROPERTIES FOLDER object-libs-targets)

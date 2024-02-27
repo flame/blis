@@ -91,10 +91,8 @@ elseif(THREADING_MODEL STREQUAL "pthreads")
     # in get-noopt-cflags-for
     target_compile_options(FRAME PRIVATE ${CTHREADFLAGS})
 endif()
-if(BUILD_SHARED_LIBS)
-    # Equivalent to CPICFLAGS in get-noopt-cflags-for
-    set_target_properties(FRAME PROPERTIES POSITION_INDEPENDENT_CODE ON)
-endif()
+# Equivalent to CPICFLAGS in get-noopt-cflags-for
+set_target_properties(FRAME PROPERTIES POSITION_INDEPENDENT_CODE ON)
 add_dependencies(FRAME flat-header)
 # Put all those targets under object-libs-targets folder name so that they appear all together in IDE.
 set_target_properties(FRAME PROPERTIES FOLDER object-libs-targets)

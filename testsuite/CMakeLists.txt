@@ -68,7 +68,7 @@ target_include_directories(test_libblis.x
                         # Add local header paths
                         ${CMAKE_CURRENT_SOURCE_DIR}/src
                     )
-target_link_libraries(test_libblis.x PRIVATE libblis ${LDFLAGS})
+target_link_libraries(test_libblis.x PRIVATE ${libblis_link} ${LDFLAGS})
 if(THREADING_MODEL STREQUAL "openmp")
     target_link_libraries(test_libblis.x PRIVATE OpenMP::OpenMP_C)
 endif()
@@ -87,7 +87,7 @@ function(add_testblis flavour)
                         COMMENT "Running test_libblis.x ${printflavour} with output redirected to ${CMAKE_CURRENT_BINARY_DIR}/output.testsuite${dotflavour}"
                         DEPENDS test_libblis.x ${CMAKE_CURRENT_SOURCE_DIR}/input.general${dotflavour} ${CMAKE_CURRENT_SOURCE_DIR}/input.operations${dotflavour}
                         BYPRODUCTS ${CMAKE_CURRENT_BINARY_DIR}/output.testsuite${dotflavour}
-                        WORKING_DIRECTORY $<TARGET_FILE_DIR:libblis>
+                        WORKING_DIRECTORY $<TARGET_FILE_DIR:${libblis_link}>
                         VERBATIM
                     )
     # Check the results of the BLIS testsuite.

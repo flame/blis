@@ -91,7 +91,7 @@ foreach(source ${blastest_sources})
                             # and the path to blis.h
                             ${INC_PATH}
                         )
-    target_link_libraries(${exec_name}.x PRIVATE f2c libblis ${LDFLAGS})
+    target_link_libraries(${exec_name}.x PRIVATE f2c ${libblis_link} ${LDFLAGS})
     if(THREADING_MODEL STREQUAL "openmp")
         target_link_libraries(${exec_name}.x PRIVATE OpenMP::OpenMP_C)
     endif()
@@ -105,7 +105,7 @@ foreach(source ${blastest_sources})
                             COMMENT "Running ${exec_name}.x with output redirected to out.${exec_name}"
                             DEPENDS ${exec_name}.x
                             BYPRODUCTS ${CMAKE_BINARY_DIR}/out.${exec_name}
-                            WORKING_DIRECTORY $<TARGET_FILE_DIR:libblis>
+                            WORKING_DIRECTORY $<TARGET_FILE_DIR:${libblis_link}>
                             VERBATIM
                             )
     else()# name has 2 or 3
@@ -114,7 +114,7 @@ foreach(source ${blastest_sources})
                             COMMENT "Running ${exec_name}.x with input ${CMAKE_CURRENT_SOURCE_DIR}/input/${exec_name}.in and output saved to out.${exec_name}"
                             DEPENDS ${exec_name}.x
                             BYPRODUCTS ${CMAKE_BINARY_DIR}/out.${exec_name}
-                            WORKING_DIRECTORY $<TARGET_FILE_DIR:libblis>
+                            WORKING_DIRECTORY $<TARGET_FILE_DIR:${libblis_link}>
                             VERBATIM
                         )
     endif()
@@ -125,7 +125,7 @@ endforeach()
 
 if(WIN32 AND BUILD_SHARED_LIBS)
     add_custom_target(testblas
-                     DEPENDS libblis
+                     DEPENDS ${libblis_link}
                      COMMENT "`testblas` target is not available on Windows for shared builds of BLIS.  ${DETAILED_BLATEST_MESSAGE}"
                      )
     add_custom_target(checkblas 
@@ -137,7 +137,7 @@ else()
     add_custom_target(checkblas
                         COMMAND ${Python_EXECUTABLE} ${CMAKE_SOURCE_DIR}/build/cmake/check-blastest.py "."
                         DEPENDS testblas
-                        WORKING_DIRECTORY $<TARGET_FILE_DIR:libblis>
+                        WORKING_DIRECTORY $<TARGET_FILE_DIR:${libblis_link}>
                     )
 endif()
 # Put all those targets under blastest-targets-targets folder name so that they appear all together in IDE.
