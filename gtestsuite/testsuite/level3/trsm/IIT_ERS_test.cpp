@@ -43,7 +43,7 @@
 
 template <typename T>
 class TRSM_IIT_ERS_Test : public ::testing::Test {};
-typedef ::testing::Types<float, double> TypeParam;
+typedef ::testing::Types<float, double, scomplex, dcomplex> TypeParam;
 TYPED_TEST_SUITE(TRSM_IIT_ERS_Test, TypeParam);
 
 
@@ -52,7 +52,7 @@ TYPED_TEST_SUITE(TRSM_IIT_ERS_Test, TypeParam);
 using namespace testinghelpers::IIT;
 
 /**
- * @brief Test s/d trsm when side argument is incorrect
+ * @brief Test TRSM when side argument is incorrect
  *        when info == 1
  */
 TYPED_TEST(TRSM_IIT_ERS_Test, invalid_side)
@@ -67,7 +67,7 @@ TYPED_TEST(TRSM_IIT_ERS_Test, invalid_side)
 }
 
 /**
- * @brief Test s/d trsm when UPLO argument is incorrect
+ * @brief Test TRSM when UPLO argument is incorrect
  *        when info == 2
  *
  */
@@ -83,7 +83,7 @@ TYPED_TEST(TRSM_IIT_ERS_Test, invalid_UPLO)
 }
 
 /**
- * @brief Test s/d trsm when TRANS argument is incorrect
+ * @brief Test TRSM when TRANS argument is incorrect
  *        when info == 3
  *
  */
@@ -99,7 +99,7 @@ TYPED_TEST(TRSM_IIT_ERS_Test, invalid_TRANS)
 }
 
 /**
- * @brief Test s/d trsm when DIAG argument is incorrect
+ * @brief Test TRSM when DIAG argument is incorrect
  *        when info == 4
  */
 TYPED_TEST(TRSM_IIT_ERS_Test, invalid_DIAG)
@@ -114,7 +114,7 @@ TYPED_TEST(TRSM_IIT_ERS_Test, invalid_DIAG)
 }
 
 /**
- * @brief Test s/d trsm when m is negative
+ * @brief Test TRSM when m is negative
  *        when info == 5
  */
 TYPED_TEST(TRSM_IIT_ERS_Test, invalid_m)
@@ -129,7 +129,7 @@ TYPED_TEST(TRSM_IIT_ERS_Test, invalid_m)
 }
 
 /**
- * @brief Test s/d trsm when n is negative
+ * @brief Test TRSM when n is negative
  *        when info == 6
  */
 TYPED_TEST(TRSM_IIT_ERS_Test, invalid_n)
@@ -144,7 +144,7 @@ TYPED_TEST(TRSM_IIT_ERS_Test, invalid_n)
 }
 
 /**
- * @brief Test s/d trsm when lda is incorrect
+ * @brief Test TRSM when lda is incorrect
  *        when info == 9
  */
 TYPED_TEST(TRSM_IIT_ERS_Test, invalid_lda)
@@ -159,7 +159,7 @@ TYPED_TEST(TRSM_IIT_ERS_Test, invalid_lda)
 }
 
 /**
- * @brief Test s/d trsm when ldb is incorrect
+ * @brief Test TRSM when ldb is incorrect
  *        when info == 11
  */
 TYPED_TEST(TRSM_IIT_ERS_Test, invalid_ldb)
@@ -185,7 +185,7 @@ TYPED_TEST(TRSM_IIT_ERS_Test, invalid_ldb)
 */
 
 /**
- * @brief Test s/d trsm when m is zero
+ * @brief Test TRSM when M is zero
  */
 TYPED_TEST(TRSM_IIT_ERS_Test, m_eq_zero)
 {
@@ -199,7 +199,7 @@ TYPED_TEST(TRSM_IIT_ERS_Test, m_eq_zero)
 }
 
 /**
- * @brief Test s/d trsm when m is zero
+ * @brief Test TRSM when N is zero
  */
 TYPED_TEST(TRSM_IIT_ERS_Test, n_eq_zero)
 {

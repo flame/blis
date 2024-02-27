@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2023-2024, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2024, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -35,19 +35,23 @@
 #include <gtest/gtest.h>
 #include "test_trsm.h"
 
-class ztrsmAPI :
-        public ::testing::TestWithParam<std::tuple<char,
-                                                   char,
-                                                   char,
-                                                   char,
-                                                   char,
-                                                   gtint_t,
-                                                   gtint_t,
-                                                   dcomplex,
-                                                   gtint_t,
-                                                   gtint_t>> {};
 
-TEST_P(ztrsmAPI, FunctionalTest)
+class ztrsmEVT :
+        public ::testing::TestWithParam<std::tuple<char,            // storage format
+                                                   char,            // side
+                                                   char,            // uplo
+                                                   char,            // transa
+                                                   char,            // diaga
+                                                   gtint_t,         // m
+                                                   gtint_t,         // n
+                                                   dcomplex,        // alpha
+                                                   gtint_t,         // lda_inc
+                                                   gtint_t,         // ldb_inc
+                                                   EVT_TYPE,        // EVT test for A
+                                                   EVT_TYPE>> {};   // EVT test for B
+
+
+TEST_P(ztrsmEVT, NaNInfCheck)
 {
     using T = dcomplex;
     //----------------------------------------------------------
@@ -77,35 +81,40 @@ TEST_P(ztrsmAPI, FunctionalTest)
     gtint_t lda_inc = std::get<8>(GetParam());
     gtint_t ldb_inc = std::get<9>(GetParam());
 
+    EVT_TYPE a_init = std::get<10>(GetParam());
+    EVT_TYPE b_init = std::get<11>(GetParam());
+
     // Set the threshold for the errors:
-    double thresh = 1.5*(std::max)(m, n)*testinghelpers::getEpsilon<T>();
+    double thresh = std::max(m, n)*testinghelpers::getEpsilon<T>();
 
     //----------------------------------------------------------
     //     Call test body using these parameters
     //----------------------------------------------------------
-    test_trsm<T>( storage, side, uploa, transa, diaga, m, n, alpha, lda_inc, ldb_inc, thresh );
+    test_trsm<T>( storage, side, uploa, transa, diaga, m, n, alpha, lda_inc, ldb_inc, thresh, a_init, b_init );
 }
 
-class ztrsmPrint {
+class ztrsmEVTPrint {
 public:
     std::string operator()(
-        testing::TestParamInfo<std::tuple<char, char, char, char, char, gtint_t, gtint_t, dcomplex, gtint_t, gtint_t>> str) const {
-        char sfm        = std::get<0>(str.param);
-        char side       = std::get<1>(str.param);
-        char uploa      = std::get<2>(str.param);
-        char transa     = std::get<3>(str.param);
-        char diaga      = std::get<4>(str.param);
-        gtint_t m       = std::get<5>(str.param);
-        gtint_t n       = std::get<6>(str.param);
-        dcomplex alpha  = std::get<7>(str.param);
-        gtint_t lda_inc = std::get<8>(str.param);
-        gtint_t ldb_inc = std::get<9>(str.param);
+        testing::TestParamInfo<std::tuple<char, char, char, char, char, gtint_t, gtint_t, dcomplex, gtint_t, gtint_t, EVT_TYPE, EVT_TYPE>> str) const {
+        char sfm         = std::get<0>(str.param);
+        char side        = std::get<1>(str.param);
+        char uploa       = std::get<2>(str.param);
+        char transa      = std::get<3>(str.param);
+        char diaga       = std::get<4>(str.param);
+        gtint_t m        = std::get<5>(str.param);
+        gtint_t n        = std::get<6>(str.param);
+        dcomplex alpha   = std::get<7>(str.param);
+        gtint_t lda_inc  = std::get<8>(str.param);
+        gtint_t ldb_inc  = std::get<9>(str.param);
+        EVT_TYPE a_encode = std::get<10>(str.param);
+        EVT_TYPE b_encode = std::get<11>(str.param);
 #ifdef TEST_BLAS
         std::string str_name = "blas_";
 #elif TEST_CBLAS
         std::string str_name = "cblas_";
 #else  //#elif TEST_BLIS_TYPED
-        std::string str_name = "bli_";
+        std::string str_name = "blis_";
 #endif
         str_name = str_name + "_stor_" + sfm;
         str_name = str_name + "_side_" + side;
@@ -122,17 +131,22 @@ public:
                    std::to_string(testinghelpers::get_leading_dimension( sfm, transa, mn, mn, lda_inc ));
         str_name = str_name + "_ldb_" +
                    std::to_string(testinghelpers::get_leading_dimension( sfm, 'n', m, n, ldb_inc ));
+        str_name = str_name + "_a_evt_" + std::to_string(a_encode);
+        str_name = str_name + "_b_evt_" + std::to_string(b_encode);
         return str_name;
     }
 };
 
 /**
- * @brief Test ZTRSM native path, which starts from size 501 for BLAS api
- *        and starts from size 0 for BLIS api.
+ * @brief Test ZTRSM for extreme values
+ * Code paths taken for:
+ *      TRSV         -> 1
+ *      AVX2 Small   -> 151, 82
+ *      Native       -> 503, 512
  */
 INSTANTIATE_TEST_SUITE_P(
-        Native,
-        ztrsmAPI,
+        evt,
+        ztrsmEVT,
         ::testing::Combine(
             ::testing::Values('c'
 #ifndef TEST_BLAS
@@ -141,59 +155,21 @@ INSTANTIATE_TEST_SUITE_P(
             ),                                                               // storage format
             ::testing::Values('l','r'),                                      // side  l:left, r:right
             ::testing::Values('u','l'),                                      // uplo  u:upper, l:lower
-            ::testing::Values('n','c','t'),                                  // transa
+            ::testing::Values('n','c', 't'),                                 // transa
             ::testing::Values('n','u'),                                      // diaga , n=nonunit u=unit
-            ::testing::Values(1, 53, 520),                                   // m
-            ::testing::Values(1, 38, 511),                                   // n
-            ::testing::Values(dcomplex{2.0,-1.0}),                           // alpha
-            ::testing::Values(gtint_t(20)),                                  // increment to the leading dim of a
-            ::testing::Values(gtint_t(33))                                   // increment to the leading dim of b
+            ::testing::Values(1, 151, 503),                                  // m
+            ::testing::Values(1, 82,  512),                                  // n
+            ::testing::Values(dcomplex{-2.4, 2.0},
+                              dcomplex{-0.0, 2.3},
+                              dcomplex{-2.4, 0.0},
+                              dcomplex{ 0.0, 0.0}),                          // alpha
+            ::testing::Values(gtint_t(0)),                                   // increment to the leading dim of a
+            ::testing::Values(gtint_t(0)),                                   // increment to the leading dim of b
+            ::testing::Values(NO_EVT, NaN, INF, NaN_INF, DIAG_NaN, DIAG_INF,
+                              NEG_INF, NEG_NaN),                             // EVT test for A
+            ::testing::Values(NO_EVT, NaN, INF, NaN_INF, NEG_INF, NEG_NaN)   // EVT test for B
         ),
-        ::ztrsmPrint()
-    );
-
-/**
- * @brief Test ZTRSM small avx2 path all fringe cases
- *        Kernel size for avx2 small path is 4x3, testing in range of
- *        1 to 4 ensures all finge cases are being tested.
- */
-INSTANTIATE_TEST_SUITE_P(
-        Small_AVX2_fringe,
-        ztrsmAPI,
-        ::testing::Combine(
-            ::testing::Values('c'),                                          // storage format
-            ::testing::Values('l','r'),                                      // side  l:left, r:right
-            ::testing::Values('u','l'),                                      // uplo  u:upper, l:lower
-            ::testing::Values('n', 'c', 't'),                                // transa
-            ::testing::Values('n','u'),                                      // diaga , n=nonunit u=unit
-            ::testing::Range(gtint_t(1), gtint_t(5), 1),                     // m
-            ::testing::Range(gtint_t(1), gtint_t(5), 1),                     // n
-            ::testing::Values(dcomplex{2.0,-3.4}),                           // alpha
-            ::testing::Values(gtint_t(56)),                                  // increment to the leading dim of a
-            ::testing::Values(gtint_t(33))                                   // increment to the leading dim of b
-        ),
-        ::ztrsmPrint()
-    );
-
-/**
- * @brief Test ZTRSM small avx2 path, this code path is used in range 0 to 500
- */
-INSTANTIATE_TEST_SUITE_P(
-        Small_AVX2,
-        ztrsmAPI,
-        ::testing::Combine(
-            ::testing::Values('c'),                                          // storage format
-            ::testing::Values('l','r'),                                      // side  l:left, r:right
-            ::testing::Values('u','l'),                                      // uplo  u:upper, l:lower
-            ::testing::Values('n', 'c', 't'),                                // transa
-            ::testing::Values('n','u'),                                      // diaga , n=nonunit u=unit
-            ::testing::Values(17, 500),                                      // m
-            ::testing::Values(48, 500),                                      // n
-            ::testing::Values(dcomplex{2.0,-3.4}),                           // alpha
-            ::testing::Values(gtint_t(54)),                                  // increment to the leading dim of a
-            ::testing::Values(gtint_t(37))                                   // increment to the leading dim of b
-        ),
-        ::ztrsmPrint()
+        ::ztrsmEVTPrint()
     );
 
 /**
@@ -205,7 +181,7 @@ INSTANTIATE_TEST_SUITE_P(
  */
 INSTANTIATE_TEST_SUITE_P(
         Alpha,
-        ztrsmAPI,
+        ztrsmEVT,
         ::testing::Combine(
             ::testing::Values('c'),                                          // storage format
             ::testing::Values('l','r'),                                      // side  l:left, r:right
@@ -214,10 +190,14 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values('n','u'),                                      // diaga , n=nonunit u=unit
             ::testing::Values(1, 3, 501),                                    // n
             ::testing::Values(1, 3, 501),                                    // m
-            ::testing::Values(dcomplex{2.0, 0.0}, dcomplex{0.0, -10.0},
-                              dcomplex{1.0, 0.0}, dcomplex{-1.0, 0.0}),      // alpha
-            ::testing::Values(gtint_t(0), gtint_t(65)),                      // increment to the leading dim of a
-            ::testing::Values(gtint_t(0), gtint_t(23))                       // increment to the leading dim of b
+            ::testing::Values(dcomplex{NAN, -2.0},
+                              dcomplex{-2.0, NAN},
+                              dcomplex{INFINITY, 3.1f},
+                              dcomplex{NAN, -INFINITY}),                     // alpha
+            ::testing::Values(gtint_t(0), gtint_t(5)),                       // increment to the leading dim of a
+            ::testing::Values(gtint_t(0), gtint_t(3)),                       // increment to the leading dim of b
+            ::testing::Values(NO_EVT),                                       // EVT test for A
+            ::testing::Values(NO_EVT)                                        // EVT test for B
         ),
-        ::ztrsmPrint()
+        ::ztrsmEVTPrint()
     );
