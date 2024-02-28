@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2023, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2023 - 2024, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -43,7 +43,7 @@
  */
 
 template<typename T>
-static void test_copyv( char conjx, gtint_t n, gtint_t incx, gtint_t incy, double thresh )
+static void test_copyv( char conjx, gtint_t n, gtint_t incx, gtint_t incy )
 {
     //----------------------------------------------------------
     //        Initialize vectors with random numbers.

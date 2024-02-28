@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2023, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2023 - 2024, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -57,7 +57,14 @@ TEST_P( daddvGenericTest, RandomData )
     gtint_t incy = std::get<3>(GetParam());
 
     // Set the threshold for the errors:
-    double thresh = testinghelpers::getEpsilon<T>();
+    // Check gtestsuite addv.h (no netlib version) for reminder of the
+    // functionality from which we estimate operation count per element
+    // of output, and hence the multipler for epsilon.
+    double thresh;
+    if (n == 0)
+        thresh = 0.0;
+    else
+        thresh = testinghelpers::getEpsilon<T>();
 
     //----------------------------------------------------------
     //     Call generic test body using those parameters

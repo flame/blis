@@ -66,7 +66,13 @@ TEST_P( dscalv_EVT, ExceptionData )
     T alpha = std::get<5>(GetParam());
 
     // Set the threshold for the errors:
-    double thresh = testinghelpers::getEpsilon<T>();
+    double thresh;
+    if (n == 0)
+        thresh = 0.0;
+    else if (alpha == testinghelpers::ZERO<T>() || alpha == testinghelpers::ONE<T>())
+        thresh = 0.0;
+    else
+        thresh = testinghelpers::getEpsilon<T>();
 
     //----------------------------------------------------------
     //     Call generic test body using those parameters

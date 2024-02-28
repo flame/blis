@@ -58,7 +58,14 @@ TEST_P( ssubvGenericTest, FunctionalTest )
     gtint_t incy = std::get<3>(GetParam());
 
     // Set the threshold for the errors:
-    double thresh = testinghelpers::getEpsilon<T>();
+    // Check gtestsuite subv.h (no netlib version) for reminder of the
+    // functionality from which we estimate operation count per element
+    // of output, and hence the multipler for epsilon.
+    double thresh;
+    if (n == 0)
+        thresh = 0.0;
+    else
+        thresh = testinghelpers::getEpsilon<T>();
 
     //----------------------------------------------------------
     //     Call generic test body using those parameters

@@ -75,7 +75,15 @@ TEST_P( saxpyvEVT, NaNInfCheck )
     T alpha = std::get<8>(GetParam());
 
     // Set the threshold for the errors:
-    double thresh = 20 * testinghelpers::getEpsilon<T>();
+    double thresh;
+    if (n == 0)
+        thresh = 0.0;
+    else if (alpha == testinghelpers::ZERO<T>())
+        thresh = 0.0;
+    else if (alpha == testinghelpers::ONE<T>())
+        thresh = testinghelpers::getEpsilon<T>();
+    else
+        thresh = 2*testinghelpers::getEpsilon<T>();
 
     //----------------------------------------------------------
     //     Call generic test body using those parameters

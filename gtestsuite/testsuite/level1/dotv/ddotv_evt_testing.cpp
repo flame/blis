@@ -74,7 +74,11 @@ TEST_P( ddotv_EVT, ExceptionData )
     double y_exval = std::get<8>(GetParam());
 
     // Set the threshold for the errors:
-    double thresh = n*testinghelpers::getEpsilon<T>();
+    double thresh;
+    if (n == 0)
+        thresh = 0.0;
+    else
+        thresh = 2*n*testinghelpers::getEpsilon<T>();
 
     //----------------------------------------------------------
     //     Call generic test body using those parameters

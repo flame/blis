@@ -61,7 +61,18 @@ TEST_P( daxpyvGenericTest, RandomData )
     T alpha = std::get<4>(GetParam());
 
     // Set the threshold for the errors:
-    double thresh = testinghelpers::getEpsilon<T>();
+    // Check gtestsuite axpyv.h or netlib source code for reminder of the
+    // functionality from which we estimate operation count per element
+    // of output, and hence the multipler for epsilon.
+    double thresh;
+    if (n == 0)
+        thresh = 0.0;
+    else if (alpha == testinghelpers::ZERO<T>())
+        thresh = 0.0;
+    else if (alpha == testinghelpers::ONE<T>())
+        thresh = testinghelpers::getEpsilon<T>();
+    else
+        thresh = 2*testinghelpers::getEpsilon<T>();
 
     //----------------------------------------------------------
     //     Call generic test body using those parameters

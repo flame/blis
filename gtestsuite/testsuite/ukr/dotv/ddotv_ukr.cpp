@@ -70,7 +70,14 @@ TEST_P( ddotvUkrTest, FunctionalTest )
     bool is_memory_test = std::get<6>(GetParam());
 
     // Set the threshold for the errors:
-    double thresh = n*testinghelpers::getEpsilon<T>();
+    // Check gtestsuite level1/dotv/dotv.h or netlib source code for reminder of the
+    // functionality from which we estimate operation count per element
+    // of output, and hence the multipler for epsilon.
+    double thresh;
+    if (n == 0)
+        thresh = 0.0;
+    else
+        thresh = 2*n*testinghelpers::getEpsilon<T>();
 
     //----------------------------------------------------------
     //     Call generic test body using those parameters

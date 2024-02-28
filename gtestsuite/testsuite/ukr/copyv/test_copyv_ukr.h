@@ -45,7 +45,7 @@
  */
 
 template<typename T, typename FT>
-static void test_copyv_ukr( FT ukr_fp, char conjx, gtint_t n, gtint_t incx, gtint_t incy, double thresh, bool is_memory_test = false )
+static void test_copyv_ukr( FT ukr_fp, char conjx, gtint_t n, gtint_t incx, gtint_t incy, bool is_memory_test = false )
 {
     // Pointers to obtain the required memory.
     T *x, *y, *y_ref;

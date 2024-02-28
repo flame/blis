@@ -50,7 +50,8 @@ static void test_dotxf(
                 gint_t lda_inc,
                 gint_t incx,
                 T *beta,
-                gint_t incy
+                gint_t incy,
+                double thresh
                 )
 {
     //----------------------------------------------------------
@@ -84,6 +85,5 @@ static void test_dotxf(
     //---------------------------------------------------------
     //              Compute component-wise error.
     //----------------------------------------------------------
-    double thresh = testinghelpers::getEpsilon<T>();
-    computediff<T>( m, y.data(), y_ref.data(), incy, thresh, true );
+    computediff<T>( m, y.data(), y_ref.data(), incy, thresh );
 }

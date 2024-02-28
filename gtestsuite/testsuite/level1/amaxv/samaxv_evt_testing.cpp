@@ -64,13 +64,10 @@ TEST_P( samaxvEVT, NaNInfCheck )
     // exval for index xj
     T xj_exval = std::get<5>(GetParam());
 
-    // Set the threshold for the errors
-    double thresh = testinghelpers::getEpsilon<T>();
-
     //----------------------------------------------------------
     //     Call generic test body using those parameters
     //----------------------------------------------------------
-    test_amaxv<T>( n, incx, xi, xi_exval, xj, xj_exval, thresh );
+    test_amaxv<T>( n, incx, xi, xi_exval, xj, xj_exval );
 }
 
 // Test-case logger : Used to print the test-case details when vectors have exception value.

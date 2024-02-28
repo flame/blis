@@ -51,7 +51,15 @@ TEST_P( scnrm2Test, RandomData )
     gtint_t incx = std::get<1>(GetParam());
 
     // Set the threshold for the errors:
-    double thresh = std::sqrt(n)*testinghelpers::getEpsilon<T>();
+    // Check gtestsuite asumv.h or netlib source code for reminder of the
+    // functionality from which we estimate operation count per element
+    // of output, and hence the multipler for epsilon.
+    // No adjustment applied yet for complex data.
+    double thresh;
+    if (n == 0)
+        thresh = 0.0;
+    else
+        thresh = std::sqrt(n)*testinghelpers::getEpsilon<T>();
 
     //----------------------------------------------------------
     //     Call test body using these parameters

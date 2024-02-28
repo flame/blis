@@ -65,13 +65,10 @@ TEST_P( dcopyvUkrTest, AccuracyCheck )
     // is_memory_test
     bool is_memory_test = std::get<5>(GetParam());
 
-    // Set the threshold for the errors:
-    double thresh = testinghelpers::getEpsilon<T>();
-
     //----------------------------------------------------------
     //     Call generic test body using those parameters
     //----------------------------------------------------------
-    test_copyv_ukr<T, dcopyv_ker_ft>( ukr_fp, conjx, n, incx, incy, thresh, is_memory_test );
+    test_copyv_ukr<T, dcopyv_ker_ft>( ukr_fp, conjx, n, incx, incy, is_memory_test );
 }
 
 // Used to generate a test case with a sensible name.

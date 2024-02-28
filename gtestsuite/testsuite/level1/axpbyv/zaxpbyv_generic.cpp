@@ -64,7 +64,41 @@ TEST_P(zaxpbyvAccTest, RandomData)
     T beta = std::get<5>(GetParam());
 
     // Set the threshold for the errors:
-    double thresh = 20 * testinghelpers::getEpsilon<T>();
+    // Check gtestsuite axpbyv.h (no netlib version) for reminder of the
+    // functionality from which we estimate operation count per element
+    // of output, and hence the multipler for epsilon.
+    // No adjustment applied yet for complex data.
+    double thresh;
+    if (n == 0)
+        thresh = 0.0;
+    else if (alpha == testinghelpers::ZERO<T>())
+    {
+        // Like SCALV
+        if (beta == testinghelpers::ZERO<T>() || beta == testinghelpers::ONE<T>())
+            thresh = 0.0;
+        else
+            thresh = testinghelpers::getEpsilon<T>();
+    }
+    else if (beta == testinghelpers::ZERO<T>())
+    {
+        // Like SCAL2V
+        if (alpha == testinghelpers::ZERO<T>() || alpha == testinghelpers::ONE<T>())
+            thresh = 0.0;
+        else
+            thresh = testinghelpers::getEpsilon<T>();
+    }
+    else if (beta == testinghelpers::ONE<T>())
+    {
+        // Like AXPYV
+        if (alpha == testinghelpers::ZERO<T>())
+            thresh = 0.0;
+        else
+            thresh = 2*testinghelpers::getEpsilon<T>();
+    }
+    else if (alpha == testinghelpers::ONE<T>())
+        thresh = 2*testinghelpers::getEpsilon<T>();
+    else
+        thresh = 3*testinghelpers::getEpsilon<T>();
 
     //----------------------------------------------------------
     //     Call generic test body using those parameters

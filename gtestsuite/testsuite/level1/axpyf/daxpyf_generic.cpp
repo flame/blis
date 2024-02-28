@@ -61,8 +61,8 @@ TEST_P( daxpyfGenericTest, FunctionalTest )
     char conj_a = std::get<1>(GetParam());
     conj_t conja;
     testinghelpers::char_to_blis_conj( conj_a, &conja );
-    gint_t m = std::get<2>(GetParam());
-    gint_t b = std::get<3>(GetParam());
+    gtint_t m = std::get<2>(GetParam());
+    gtint_t b = std::get<3>(GetParam());
     T alpha = std::get<4>(GetParam());
 
     // stride size for x:
@@ -72,10 +72,24 @@ TEST_P( daxpyfGenericTest, FunctionalTest )
     gtint_t incx = std::get<7>(GetParam());
     gtint_t incy = std::get<8>(GetParam());
 
+    // Set the threshold for the errors:
+    // Check gtestsuite axpyf.h (no netlib version) for reminder of the
+    // functionality from which we estimate operation count per element
+    // of output, and hence the multipler for epsilon.
+    double thresh;
+    if (m == 0)
+        thresh = 0.0;
+    else if (alpha == testinghelpers::ZERO<T>())
+        thresh = 0.0;
+    else if (alpha == testinghelpers::ONE<T>())
+        thresh = (b+1)*testinghelpers::getEpsilon<T>();
+    else
+        thresh = (2*b+1)*testinghelpers::getEpsilon<T>();
+
     //----------------------------------------------------------
     //     Call generic test body using those parameters
     //----------------------------------------------------------
-    test_axpyf<T>( conjx, conja, m, b, &alpha, inca, lda, incx, incy );
+    test_axpyf<T>( conjx, conja, m, b, &alpha, inca, lda, incx, incy, thresh );
 }
 
 // Test-case logger : Used to print the test-case details

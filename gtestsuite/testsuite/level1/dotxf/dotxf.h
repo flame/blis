@@ -95,7 +95,7 @@ static void dotxf(
 
 /**
  * dotxf operation is defined as :
- * y := y + alpha * conja(A) * conjx(x)
+ * y := beta * y + alpha * conja(A) * conjx(x)
  * where A is an m x b matrix, and y and x are vectors.
  */
     typed_dotxf<T>(       

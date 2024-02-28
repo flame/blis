@@ -64,7 +64,14 @@ TEST_P( dasumv_EVT, ExceptionData )
     double jx_exval = std::get<5>(GetParam());
 
     // Set the threshold for the errors:
-    double thresh = n*testinghelpers::getEpsilon<T>();
+    // Check gtestsuite asumv.h or netlib source code for reminder of the
+    // functionality from which we estimate operation count per element
+    // of output, and hence the multipler for epsilon.
+    double thresh;
+    if (n == 0 || incx <= 0)
+        thresh = 0.0;
+    else
+        thresh = n*testinghelpers::getEpsilon<T>();
 
     //----------------------------------------------------------
     //     Call test body using these parameters

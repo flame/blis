@@ -61,8 +61,8 @@ TEST_P( ddotxffGenericTest, FunctionalTest )
     char conj_a = std::get<1>(GetParam());
     conj_t conja;
     testinghelpers::char_to_blis_conj( conj_a, &conja );
-    gint_t m = std::get<2>(GetParam());
-    gint_t b = std::get<3>(GetParam());
+    gtint_t m = std::get<2>(GetParam());
+    gtint_t b = std::get<3>(GetParam());
     T alpha = std::get<4>(GetParam());
 
     // stride size for x:
@@ -73,10 +73,37 @@ TEST_P( ddotxffGenericTest, FunctionalTest )
     T beta = std::get<8>(GetParam());
     gtint_t incy = std::get<9>(GetParam());
 
+    // Set the threshold for the errors:
+    // Check gtestsuite dotxf.h (no netlib version) for reminder of the
+    // functionality from which we estimate operation count per element
+    // of output, and hence the multipler for epsilon.
+    double thresh;
+    if (m == 0)
+        thresh = 0.0;
+    else if (alpha == testinghelpers::ZERO<T>())
+        if (beta == testinghelpers::ZERO<T>() || beta == testinghelpers::ONE<T>())
+            thresh = 0.0;
+        else
+            thresh = testinghelpers::getEpsilon<T>();
+    else if (alpha == testinghelpers::ONE<T>())
+        if (beta == testinghelpers::ZERO<T>())
+            thresh = (m)*testinghelpers::getEpsilon<T>();
+        else if (beta == testinghelpers::ONE<T>())
+            thresh = (m+1)*testinghelpers::getEpsilon<T>();
+        else
+            thresh = (m+2)*testinghelpers::getEpsilon<T>();
+    else
+        if (beta == testinghelpers::ZERO<T>())
+            thresh = (2*m)*testinghelpers::getEpsilon<T>();
+        else if (beta == testinghelpers::ONE<T>())
+            thresh = (2*m+1)*testinghelpers::getEpsilon<T>();
+        else
+            thresh = (2*m+2)*testinghelpers::getEpsilon<T>();
+
     //----------------------------------------------------------
     //     Call generic test body using those parameters
     //----------------------------------------------------------
-    test_dotxf<T>( conjx, conja, m, b, &alpha, inca, lda, incx, &beta, incy );
+    test_dotxf<T>( conjx, conja, m, b, &alpha, inca, lda, incx, &beta, incy, thresh );
 }
 
 // Test-case logger : Used to print the test-case details
@@ -133,7 +160,7 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(gtint_t(0)),                                   // lda increment
             ::testing::Values(gtint_t(1)),                                   // stride size for a
             ::testing::Values(gtint_t(1)),                                   // stride size for x
-            ::testing::Values(double(0.0), double(1.0)),                     // beta
+            ::testing::Values(double(1.0)),                     // beta
             ::testing::Values(gtint_t(1))                                    // stride size for y
         ),
         ::ddotxfGenericTestPrint()

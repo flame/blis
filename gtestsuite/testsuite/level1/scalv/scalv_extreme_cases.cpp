@@ -60,7 +60,20 @@ TYPED_TEST(xscalv, zero_alpha_x_fp)
     //              Compute component-wise error.
     //----------------------------------------------------------
     // Set the threshold for the errors:
-    double thresh = testinghelpers::getEpsilon<T>();
+    // Check gtestsuite scalv.h or netlib source code for reminder of the
+    // functionality from which we estimate operation count per element
+    // of output, and hence the multipler for epsilon.
+    double thresh;
+    if (n == 0)
+        thresh = 0.0;
+    else if (alpha == testinghelpers::ZERO<T>() || alpha == testinghelpers::ONE<T>())
+        thresh = 0.0;
+    else
+        thresh = testinghelpers::getEpsilon<T>();
+
+    //----------------------------------------------------------
+    //     Call generic test body using those parameters
+    //----------------------------------------------------------
     computediff<T>( n, x.data(), x_ref.data(), incx, thresh, true );
 }
 
@@ -85,6 +98,20 @@ TYPED_TEST(xscalv, zero_alpha_x_inf)
     //              Compute component-wise error.
     //----------------------------------------------------------
     // Set the threshold for the errors:
-    double thresh = testinghelpers::getEpsilon<T>();
+    // Check gtestsuite scalv.h or netlib source code for reminder of the
+    // functionality from which we estimate operation count per element
+    // of output, and hence the multipler for epsilon.
+    // No adjustment applied yet for complex data.
+    double thresh;
+    if (n == 0)
+        thresh = 0.0;
+    else if (alpha == testinghelpers::ZERO<T>() || alpha == testinghelpers::ONE<T>())
+        thresh = 0.0;
+    else
+        thresh = testinghelpers::getEpsilon<T>();
+
+    //----------------------------------------------------------
+    //     Call generic test body using those parameters
+    //----------------------------------------------------------
     computediff<T>( n, x.data(), x_ref.data(), incx, thresh, true );
 }

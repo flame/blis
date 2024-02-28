@@ -43,7 +43,7 @@
  */
 
 template<typename T>
-static void test_amaxv( gtint_t n, gtint_t incx, double thresh )
+static void test_amaxv( gtint_t n, gtint_t incx )
 {
     //----------------------------------------------------------
     //        Initialize vectors with random numbers.
@@ -63,7 +63,7 @@ static void test_amaxv( gtint_t n, gtint_t incx, double thresh )
     //----------------------------------------------------------
     //              Compute component-wise error.
     //----------------------------------------------------------
-	EXPECT_EQ(idx, idx_ref) << "Values are different : act_val : " << idx << "   ref_val :" << idx_ref;
+    EXPECT_EQ(idx, idx_ref) << "Values are different : act_val : " << idx << "   ref_val :" << idx_ref;
 }
 
 /**
@@ -71,7 +71,7 @@ static void test_amaxv( gtint_t n, gtint_t incx, double thresh )
  */
 template<typename T>
 static void test_amaxv( gtint_t n, gtint_t incx, gtint_t xi, T xi_exval,
-                      gtint_t xj, T xj_exval, double thresh )
+                      gtint_t xj, T xj_exval )
 {
     //----------------------------------------------------------
     //        Initialize vectors with random numbers.
@@ -99,5 +99,5 @@ static void test_amaxv( gtint_t n, gtint_t incx, gtint_t xi, T xi_exval,
     //----------------------------------------------------------
     //              Compute component-wise error.
     //----------------------------------------------------------
-	EXPECT_EQ(idx, idx_ref) << "Values are different : act_val : " << idx << "   ref_val :" << idx_ref;	
+    EXPECT_EQ(idx, idx_ref) << "Values are different : act_val : " << idx << "   ref_val :" << idx_ref;	
 }

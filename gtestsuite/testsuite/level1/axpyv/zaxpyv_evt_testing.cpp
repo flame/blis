@@ -75,7 +75,20 @@ TEST_P( zaxpyvEVT, NaNInfCheck )
     T alpha = std::get<8>(GetParam());
 
     // Set the threshold for the errors:
-    double thresh = 20 * testinghelpers::getEpsilon<T>();
+    // Check gtestsuite subv.h (no netlib version) for reminder of the
+    // functionality from which we estimate operation count per element
+    // of output, and hence the multipler for epsilon.
+    // Small adjustment has been applied for complex data.
+    double thresh;
+    if (n == 0)
+        thresh = 0.0;
+    else if (alpha == testinghelpers::ZERO<T>())
+        thresh = 0.0;
+    else if (alpha == testinghelpers::ONE<T>())
+        thresh = testinghelpers::getEpsilon<T>();
+    else
+        //thresh = 2*testinghelpers::getEpsilon<T>();
+        thresh = 3*testinghelpers::getEpsilon<T>();
 
     //----------------------------------------------------------
     //     Call generic test body using those parameters

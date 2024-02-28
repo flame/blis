@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2023, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2023 - 2024, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -58,13 +58,10 @@ TEST_P( scopyvGenericTest, RandomData )
     // stride size for y:
     gtint_t incy = std::get<3>(GetParam());
 
-    // Set the threshold for the errors:
-    double thresh = testinghelpers::getEpsilon<T>();
-
     //----------------------------------------------------------
     //     Call generic test body using those parameters
     //----------------------------------------------------------
-    test_copyv<T>( conjx, n, incx, incy, thresh );
+    test_copyv<T>( conjx, n, incx, incy );
 }
 
 // Used to generate a test case with a sensible name.

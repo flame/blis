@@ -52,13 +52,10 @@ TEST_P( samaxvGeneric, FunctionalTest )
     // stride size for x
     gtint_t incx = std::get<1>(GetParam());
 
-    // Set the threshold for the errors:
-    double thresh = testinghelpers::getEpsilon<T>();
-
     //----------------------------------------------------------
     //     Call generic test body using those parameters
     //----------------------------------------------------------
-    test_amaxv<T>( n, incx, thresh );
+    test_amaxv<T>( n, incx );
 }
 
 // Test-case logger : Used to print the test-case details when vectors have exception value.
