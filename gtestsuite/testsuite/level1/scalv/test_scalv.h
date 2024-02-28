@@ -41,8 +41,7 @@
 /**
  * @brief Generic test body for scalv operation.
  */
-
-template<typename T, typename U >
+template<typename T, typename U>
 static void test_scalv( char conja_alpha, gtint_t n, gtint_t incx, U alpha, double thresh )
 {
     //----------------------------------------------------------
@@ -71,9 +70,9 @@ static void test_scalv( char conja_alpha, gtint_t n, gtint_t incx, U alpha, doub
 /**
  * @brief Used to insert Exception Values in x vector.
  */
-template<typename T>
+template<typename T, typename U>
 static void test_scalv( char conja_alpha, gtint_t n, gtint_t incx, gtint_t xi,
-                        T x_exval, T alpha, double thresh )
+                        T x_exval, U alpha, double thresh )
 {
     //----------------------------------------------------------
     //        Initialize vector with random numbers.
@@ -89,12 +88,12 @@ static void test_scalv( char conja_alpha, gtint_t n, gtint_t incx, gtint_t xi,
     //----------------------------------------------------------
     // Create a copy of y so that we can check reference results.
     std::vector<T> x_ref(x);
-    testinghelpers::ref_scalv<T>( conja_alpha, n, alpha, x_ref.data(), incx );
+    testinghelpers::ref_scalv<T, U>( conja_alpha, n, alpha, x_ref.data(), incx );
 
     //----------------------------------------------------------
     //                  Call BLIS function.
     //----------------------------------------------------------
-    scalv<T>( conja_alpha, n, alpha, x.data(), incx );
+    scalv<T, U>( conja_alpha, n, alpha, x.data(), incx );
 
     //----------------------------------------------------------
     //              Compute component-wise error.
