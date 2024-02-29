@@ -40,7 +40,15 @@
 
 template <typename T>
 class scalv_IIT_ERS_Test : public ::testing::Test {};
-typedef ::testing::Types<float, double, scomplex, dcomplex> TypeParam;
+typedef ::testing::Types<
+                    // std::pair<type, real_type>
+                    std::pair<   float,    float>,
+                    std::pair<  double,   double>,
+                    std::pair<scomplex, scomplex>,
+                    std::pair<dcomplex, dcomplex>,
+                    std::pair<scomplex,    float>,
+                    std::pair<dcomplex,   double>
+                    > TypeParam;
 TYPED_TEST_SUITE(scalv_IIT_ERS_Test, TypeParam);
 
 using namespace testinghelpers::IIT;
@@ -59,7 +67,8 @@ using namespace testinghelpers::IIT;
 // n < 0, with non-unit stride
 TYPED_TEST(scalv_IIT_ERS_Test, n_lt_zero_nonUnitStride)
 {
-    using T = TypeParam;
+    using  T = typename TypeParam::first_type;
+    using RT = typename TypeParam::second_type;
     gtint_t invalid_n = -1;
     gtint_t inc = 5;
 
@@ -69,10 +78,10 @@ TYPED_TEST(scalv_IIT_ERS_Test, n_lt_zero_nonUnitStride)
 
     // Using alpha = 3 as a valid input since BLAS expects SCALV to return early
     // for alpha = 1.
-    T alpha = T{3};
+    RT alpha = RT{3};
 
     // Invoking SCALV with an invalid value of n.
-    scalv<T>( 'n', invalid_n, alpha, x.data(), inc );
+    scalv<T, RT>( 'n', invalid_n, alpha, x.data(), inc );
 
     // Computing bitwise difference.
     computediff<T>( N, x.data(), x_ref.data(), inc );
@@ -81,7 +90,8 @@ TYPED_TEST(scalv_IIT_ERS_Test, n_lt_zero_nonUnitStride)
 // n == 0, with non-unit stride
 TYPED_TEST(scalv_IIT_ERS_Test, n_eq_zero_nonUnitStride)
 {
-    using T = TypeParam;
+    using  T = typename TypeParam::first_type;
+    using RT = typename TypeParam::second_type;
     gtint_t invalid_n = 0;
     gtint_t inc = 5;
 
@@ -91,10 +101,10 @@ TYPED_TEST(scalv_IIT_ERS_Test, n_eq_zero_nonUnitStride)
 
     // Using alpha = 3 as a valid input since BLAS expects SCALV to return early
     // for alpha = 1.
-    T alpha = T{3};
+    RT alpha = RT{3};
 
     // Invoking SCALV with an invalid value of n.
-    scalv<T>( 'n', invalid_n, alpha, x.data(), inc );
+    scalv<T, RT>( 'n', invalid_n, alpha, x.data(), inc );
 
     // Computing bitwise difference.
     computediff<T>( N, x.data(), x_ref.data(), inc );
@@ -103,7 +113,8 @@ TYPED_TEST(scalv_IIT_ERS_Test, n_eq_zero_nonUnitStride)
 // n < 0, with unit stride
 TYPED_TEST(scalv_IIT_ERS_Test, n_lt_zero_unitStride)
 {
-    using T = TypeParam;
+    using  T = typename TypeParam::first_type;
+    using RT = typename TypeParam::second_type;
     gtint_t invalid_n = -1;
     gtint_t unit_inc = 1;
 
@@ -113,10 +124,10 @@ TYPED_TEST(scalv_IIT_ERS_Test, n_lt_zero_unitStride)
 
     // Using alpha = 3 as a valid input since BLAS expects SCALV to return early
     // for alpha = 1.
-    T alpha = T{3};
+    RT alpha = RT{3};
 
     // Invoking SCALV with an invalid value of n.
-    scalv<T>( 'n', invalid_n, alpha, x.data(), unit_inc );
+    scalv<T, RT>( 'n', invalid_n, alpha, x.data(), unit_inc );
 
     // Computing bitwise difference.
     computediff<T>( N, x.data(), x_ref.data(), unit_inc );
@@ -125,7 +136,8 @@ TYPED_TEST(scalv_IIT_ERS_Test, n_lt_zero_unitStride)
 // n == 0, with unit stride
 TYPED_TEST(scalv_IIT_ERS_Test, n_eq_zero_unitStride)
 {
-    using T = TypeParam;
+    using  T = typename TypeParam::first_type;
+    using RT = typename TypeParam::second_type;
     gtint_t invalid_n = 0;
     gtint_t unit_inc = 1;
 
@@ -135,10 +147,10 @@ TYPED_TEST(scalv_IIT_ERS_Test, n_eq_zero_unitStride)
 
     // Using alpha = 3 as a valid input since BLAS expects SCALV to return early
     // for alpha = 1.
-    T alpha = T{3};
+    RT alpha = RT{3};
 
     // Invoking SCALV with an invalid value of n.
-    scalv<T>( 'n', invalid_n, alpha, x.data(), unit_inc );
+    scalv<T, RT>( 'n', invalid_n, alpha, x.data(), unit_inc );
 
     // Computing bitwise difference.
     computediff<T>( N, x.data(), x_ref.data(), unit_inc );
@@ -147,7 +159,8 @@ TYPED_TEST(scalv_IIT_ERS_Test, n_eq_zero_unitStride)
 // inc < 0
 TYPED_TEST(scalv_IIT_ERS_Test, inc_lt_0)
 {
-    using T = TypeParam;
+    using  T = typename TypeParam::first_type;
+    using RT = typename TypeParam::second_type;
     gtint_t invalid_inc = -1;
 
     // Initialize x vector with random numbers.
@@ -156,10 +169,10 @@ TYPED_TEST(scalv_IIT_ERS_Test, inc_lt_0)
 
     // Using alpha = 3 as a valid input since BLAS expects SCALV to return early
     // for alpha = 1.
-    T alpha = T{3};
+    RT alpha = RT{3};
 
     // Invoking SCALV with an invalid value of n.
-    scalv<T>( 'n', N, alpha, x.data(), invalid_inc );
+    scalv<T, RT>( 'n', N, alpha, x.data(), invalid_inc );
 
     // Computing bitwise difference.
     computediff<T>( N, x.data(), x_ref.data(), INC );
@@ -168,7 +181,8 @@ TYPED_TEST(scalv_IIT_ERS_Test, inc_lt_0)
 // inc == 0
 TYPED_TEST(scalv_IIT_ERS_Test, inc_eq_0)
 {
-    using T = TypeParam;
+    using  T = typename TypeParam::first_type;
+    using RT = typename TypeParam::second_type;
     gtint_t invalid_inc = 0;
 
     // Initialize x vector with random numbers.
@@ -177,10 +191,10 @@ TYPED_TEST(scalv_IIT_ERS_Test, inc_eq_0)
 
     // Using alpha = 3 as a valid input since BLAS expects SCALV to return early
     // for alpha = 1.
-    T alpha = T{3};
+    RT alpha = RT{3};
 
     // Invoking SCALV with an invalid value of n.
-    scalv<T>( 'n', N, alpha, x.data(), invalid_inc );
+    scalv<T, RT>( 'n', N, alpha, x.data(), invalid_inc );
 
     // Computing bitwise difference.
     computediff<T>( N, x.data(), x_ref.data(), INC );
@@ -189,18 +203,19 @@ TYPED_TEST(scalv_IIT_ERS_Test, inc_eq_0)
 // alpha == 1, with non-unit stride
 TYPED_TEST(scalv_IIT_ERS_Test, alpha_eq_one_nonUnitStride)
 {
-    using T = TypeParam;
+    using  T = typename TypeParam::first_type;
+    using RT = typename TypeParam::second_type;
     gtint_t inc = 5;
 
     // Initialize x vector with random numbers.
     std::vector<T> x = testinghelpers::get_random_vector<T>( -10, 10, N, inc );
     std::vector<T> x_ref(x);    // copy x to x_ref to verify elements of x are not modified.
 
-    T invalid_alpha;
-    testinghelpers::initone<T>(invalid_alpha);
+    RT invalid_alpha;
+    testinghelpers::initone<RT>(invalid_alpha);
 
     // Invoking SCALV with an invalid value of n.
-    scalv<T>( 'n', N, invalid_alpha, x.data(), inc );
+    scalv<T, RT>( 'n', N, invalid_alpha, x.data(), inc );
 
     // Computing bitwise difference.
     computediff<T>( N, x.data(), x_ref.data(), inc );
@@ -209,18 +224,19 @@ TYPED_TEST(scalv_IIT_ERS_Test, alpha_eq_one_nonUnitStride)
 // alpha == 1, with unit stride
 TYPED_TEST(scalv_IIT_ERS_Test, alpha_eq_one_unitStride)
 {
-    using T = TypeParam;
+    using  T = typename TypeParam::first_type;
+    using RT = typename TypeParam::second_type;
     gtint_t unit_inc = 1;
 
     // Initialize x vector with random numbers.
     std::vector<T> x = testinghelpers::get_random_vector<T>( -10, 10, N, unit_inc );
     std::vector<T> x_ref(x);    // copy x to x_ref to verify elements of x are not modified.
 
-    T invalid_alpha;
-    testinghelpers::initone<T>(invalid_alpha);
+    RT invalid_alpha;
+    testinghelpers::initone<RT>(invalid_alpha);
 
     // Invoking SCALV with an invalid value of n.
-    scalv<T>( 'n', N, invalid_alpha, x.data(), unit_inc );
+    scalv<T, RT>( 'n', N, invalid_alpha, x.data(), unit_inc );
 
     // Computing bitwise difference.
     computediff<T>( N, x.data(), x_ref.data(), unit_inc );
