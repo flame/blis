@@ -398,8 +398,14 @@ def main():
 		                  % output_name, verbose_flag )
 		sys.exit()
 
-	# Print usage if we don't have exactly four arguments.
-	if len( args ) != 4:
+	# Print usage if we don't have minimum four arguments.
+	if len( args ) < 4:
+		print_usage()
+		sys.exit()
+	elif "||" in args[:4] or "'(set', 'FAIL_LINE=3&', 'goto', ':ABORT)'" in args[:4]:
+		print('\n==============================================')
+		print(sys.argv)
+		print('==============================================\n')
 		print_usage()
 		sys.exit()
 

@@ -800,6 +800,7 @@ add_custom_command(OUTPUT ${PROJECT_BINARY_DIR}/include/${BLIS_CONFIG_FAMILY}/bl
                 "${ALL_HEADER_PATHS_STRING}"
                 COMMENT "Generating monolithic blis header file: ${PROJECT_BINARY_DIR}/include/${BLIS_CONFIG_FAMILY}/blis.h"
                 DEPENDS ${ALL_HEADER_FILES_LIST}
+                VERBATIM
                 )
 add_custom_target(flat-header DEPENDS ${PROJECT_BINARY_DIR}/include/${BLIS_CONFIG_FAMILY}/blis.h)
 #--------------------------------------------
@@ -815,6 +816,7 @@ if(ENABLE_CBLAS)
                     "${ALL_HEADER_PATHS_STRING}"
                     COMMENT "Generating monolithic cblas header file: ${PROJECT_BINARY_DIR}/include/${BLIS_CONFIG_FAMILY}/cblas.h"
                     DEPENDS ${ALL_HEADER_FILES_LIST}
+                    VERBATIM
                     )
     add_custom_target(flat-cblas-header DEPENDS ${PROJECT_BINARY_DIR}/include/${BLIS_CONFIG_FAMILY}/cblas.h)
 endif()
