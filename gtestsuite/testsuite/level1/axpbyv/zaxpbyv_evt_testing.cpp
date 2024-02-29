@@ -35,19 +35,19 @@
 #include <gtest/gtest.h>
 #include "test_axpbyv.h"
 
-class zaxpbyvEVTTest :
-        public ::testing::TestWithParam<std::tuple<char,
-                                                   gtint_t,
-                                                   gtint_t,
-                                                   gtint_t,
-                                                   gtint_t,
-                                                   dcomplex,
-                                                   gtint_t,
-                                                   dcomplex,
-                                                   dcomplex,
-                                                   dcomplex>> {};
+class zaxpbyvEVT :
+        public ::testing::TestWithParam<std::tuple<char,          // transpose
+                                                   gtint_t,       // n, size of the vector
+                                                   gtint_t,       // incx
+                                                   gtint_t,       // incy
+                                                   gtint_t,       // xi, index for exval in x
+                                                   dcomplex,      // xexval
+                                                   gtint_t,       // yi, index for exval in y
+                                                   dcomplex,      // yexval
+                                                   dcomplex,      // alpha
+                                                   dcomplex>> {}; // beta
 // Tests using random integers as vector elements.
-TEST_P(zaxpbyvEVTTest, RandomData)
+TEST_P( zaxpbyvEVT, NaNInfCheck )
 {
     using T = dcomplex;
     //----------------------------------------------------------
@@ -85,17 +85,16 @@ TEST_P(zaxpbyvEVTTest, RandomData)
                    yj, yexval, thresh);
 }
 
-// Used to generate a test case with a sensible name.
-// Beware that we cannot use fp numbers (e.g., 2.3) in the names,
-// so we are only printing int(2.3). This should be enough for debugging purposes.
-// If this poses an issue, please reach out.
+// Test-case logger : Used to print the test-case details when vectors have exception value.
+// The string format is as follows :
+// {blas/cblas/blis}_n(vec_size)_(conjx/noconjx)_incx(m)(abs_incx)_incy(m)(abs_incy)_X_(xi)_(xexval)_Y_(yi)_(yexval)_alpha(alpha_val)_beta(beta_val)
 class zaxpbyvEVTVecPrint
 {
 public:
     std::string operator()(
         testing::TestParamInfo<std::tuple<char, gtint_t, gtint_t, gtint_t, gtint_t, dcomplex, gtint_t, dcomplex, dcomplex, dcomplex>> str) const
     {
-        char conj = std::get<0>(str.param);
+        char conjx = std::get<0>(str.param);
         gtint_t n = std::get<1>(str.param);
         gtint_t incx = std::get<2>(str.param);
         gtint_t incy = std::get<3>(str.param);
@@ -106,18 +105,18 @@ public:
         dcomplex alpha = std::get<8>(str.param);
         dcomplex beta = std::get<9>(str.param);
 #ifdef TEST_BLAS
-        std::string str_name = "zaxpby_";
+        std::string str_name = "blas_";
 #elif TEST_CBLAS
-        std::string str_name = "cblas_zaxpby";
-#else // #elif TEST_BLIS_TYPED
-        std::string str_name = "bli_zaxpbyv";
+        std::string str_name = "cblas_";
+#else  //#elif TEST_BLIS_TYPED
+        std::string str_name = "bli_";
 #endif
-        str_name += "_" + std::to_string(n);
-        str_name += "_" + std::string(&conj, 1);
-        std::string incx_str = (incx > 0) ? std::to_string(incx) : "m" + std::to_string(std::abs(incx));
-        str_name += "_" + incx_str;
-        std::string incy_str = (incy > 0) ? std::to_string(incy) : "m" + std::to_string(std::abs(incy));
-        str_name += "_" + incy_str;
+        str_name += "n" + std::to_string(n);
+        str_name += ( conjx == 'n' )? "_noconjx" : "_conjx";
+        std::string incx_str = (incx >= 0) ? std::to_string(incx) : "m" + std::to_string(std::abs(incx));
+        str_name += "_incx" + incx_str;
+        std::string incy_str = (incy >= 0) ? std::to_string(incy) : "m" + std::to_string(std::abs(incy));
+        str_name += "_incy" + incy_str;
         std::string xexval_str = testinghelpers::get_value_string(xexval);
         std::string yexval_str = testinghelpers::get_value_string(yexval);
         str_name = str_name + "_X_" + std::to_string(xi);
@@ -126,41 +125,44 @@ public:
         str_name = str_name + "_" + yexval_str;
         std::string alpha_str = testinghelpers::get_value_string(alpha);
         std::string beta_str = testinghelpers::get_value_string(beta);
-        str_name = str_name + "_a" + alpha_str;
-        str_name = str_name + "_b" + beta_str;
+        str_name = str_name + "_alpha" + alpha_str;
+        str_name = str_name + "_beta" + beta_str;
         return str_name;
     }
 };
 
+// Test-case logger : Used to print the test-case details when alpha and/or beta have exception value.
+// The string format is as follows :
+// {blas/cblas/blis}_n(vec_size)_(conjx/noconjx)_incx(m)(abs_incx)_incy(m)(abs_incy)_alpha(alpha_val)_beta(beta_val)
 class zaxpbyvAlphaBetaPrint
 {
 public:
     std::string operator()(
         testing::TestParamInfo<std::tuple<char, gtint_t, gtint_t, gtint_t, gtint_t, dcomplex, gtint_t, dcomplex, dcomplex, dcomplex>> str) const
     {
-        char conj = std::get<0>(str.param);
+        char conjx = std::get<0>(str.param);
         gtint_t n = std::get<1>(str.param);
         gtint_t incx = std::get<2>(str.param);
         gtint_t incy = std::get<3>(str.param);
         dcomplex alpha = std::get<8>(str.param);
         dcomplex beta = std::get<9>(str.param);
 #ifdef TEST_BLAS
-        std::string str_name = "zaxpby_";
+        std::string str_name = "blas_";
 #elif TEST_CBLAS
-        std::string str_name = "cblas_zaxpby";
-#else // #elif TEST_BLIS_TYPED
-        std::string str_name = "bli_zaxpbyv";
+        std::string str_name = "cblas_";
+#else  //#elif TEST_BLIS_TYPED
+        std::string str_name = "bli_";
 #endif
-        str_name += "_" + std::to_string(n);
-        str_name += "_" + std::string(&conj, 1);
-        std::string incx_str = (incx > 0) ? std::to_string(incx) : "m" + std::to_string(std::abs(incx));
-        str_name += "_" + incx_str;
-        std::string incy_str = (incy > 0) ? std::to_string(incy) : "m" + std::to_string(std::abs(incy));
-        str_name += "_" + incy_str;
+        str_name += "n" + std::to_string(n);
+        str_name += ( conjx == 'n' )? "_noconjx" : "_conjx";
+        std::string incx_str = (incx >= 0) ? std::to_string(incx) : "m" + std::to_string(std::abs(incx));
+        str_name += "_incx" + incx_str;
+        std::string incy_str = (incy >= 0) ? std::to_string(incy) : "m" + std::to_string(std::abs(incy));
+        str_name += "_incy" + incy_str;
         std::string alpha_str = testinghelpers::get_value_string(alpha);
         std::string beta_str = testinghelpers::get_value_string(beta);
-        str_name = str_name + "_a" + alpha_str;
-        str_name = str_name + "_b" + beta_str;
+        str_name = str_name + "_alpha" + alpha_str;
+        str_name = str_name + "_beta" + beta_str;
         return str_name;
     }
 };
@@ -180,17 +182,35 @@ static double Inf = std::numeric_limits<double>::infinity();
     NOTE : Any size, requiring the fringe case of 1 with unit stride falls to
            the non-unit stride loop and executes it once for just the last element.
 
-    With regards to exception value testing, every loop is tested separately.
-    The indices for setting exception values on the vectors are such that
-    every load associated with the loop has an exception value in it. Thus,
-    every arithmetic instruction associated with each load will be tested
-    for exception value handling.
+    The sizes chosen are as follows :
+    59 - 7*L8 + L2 + 1(LScalar)
+    60 - 7*L8 + L4
+    62 - 7*L8 + L6
+
+    For size 59  :  7*L8 + L2 + 1(LScalar)
+    Indices are  :  0, 55 -> In L8
+                    57    -> In L2
+                    58    -> In LScalar
+
+    For size 60  :  7*L8 + L4
+    Indices are  :  0, 55 -> In L8
+                    59    -> In L4
+
+    For size 62  :  7*L8 + L6
+    Indices are  :  0, 55 -> In L8
+                    61    -> In L6
+
+    The alpha and beta values are such that they check for compliance against possible
+    optimizations that might have been done.
+
+    P.S : Some test cases also check whether NaN has to be induced in the computation
+          such as 0.0 * { {NaN, 0}, {+Inf, 0}, {-Inf, 0}, ... }, and a few more.
 */
 
-// Exception value testing(on vectors) for L8
+// Exception value testing(on X vector alone) with unit strides
 INSTANTIATE_TEST_SUITE_P(
-    bli_zaxpbyv_zen_int_evt_vec_L8,
-    zaxpbyvEVTTest,
+    vecX_unitStrides,
+    zaxpbyvEVT,
     ::testing::Combine(
         ::testing::Values('n' // n: use x, c: use conj(x)
 #ifdef TEST_BLIS_TYPED
@@ -198,26 +218,29 @@ INSTANTIATE_TEST_SUITE_P(
                           'c' // this option is BLIS-api specific.
 #endif
                           ),
-        ::testing::Values(gtint_t(8)), // m, size of vector to enter L8 directly.
-        ::testing::Values(gtint_t(1)), // stride size for x
-        ::testing::Values(gtint_t(1)), // stride size for y
-        ::testing::Values(gtint_t(1), gtint_t(3), gtint_t(4), gtint_t(7)), // indices to set exception values on x
-        ::testing::Values(dcomplex{0.0, 0.0}, dcomplex{NaN, 2.3},
-                          dcomplex{-Inf, 0.0}, dcomplex{Inf, NaN},
-                          dcomplex{NaN, -Inf}), // exception values to set on x
-        ::testing::Values(gtint_t(0), gtint_t(2), gtint_t(5), gtint_t(6)), // indices to set exception values on y
-        ::testing::Values(dcomplex{0.0, 0.0}, dcomplex{NaN, 2.3},
-                          dcomplex{-Inf, 0.0}, dcomplex{Inf, NaN},
-                          dcomplex{NaN, -Inf}), // exception values to set on y
-        ::testing::Values(dcomplex{0.0, 0.0}, dcomplex{1.0, 0.0}, dcomplex{2.2, -3.3}), // alpha
-        ::testing::Values(dcomplex{0.0, 0.0}, dcomplex{1.0, 0.0}, dcomplex{0.9, 4.5}) // beta
+        ::testing::Values(gtint_t(59), gtint_t(60), gtint_t(62)),       // n, size of vectors with unit-stride
+        ::testing::Values(gtint_t(1)),                                  // stride size for x
+        ::testing::Values(gtint_t(1)),                                  // stride size for y
+        ::testing::Values(gtint_t(0), gtint_t(55), gtint_t(57),
+                          gtint_t(58), gtint_t(59), gtint_t(61)),       // indices to set exception values on x
+        ::testing::Values(dcomplex{NaN, 0.0}, dcomplex{-Inf, 0.0},
+                          dcomplex{0.0, Inf}, dcomplex{-2.3, NaN},
+                          dcomplex{4.5, -Inf}, dcomplex{NaN, Inf}),     // exception values to set on x
+        ::testing::Values(gtint_t(0)),                                  // dummy index on y
+        ::testing::Values(dcomplex{0.0, 0.0}),                          // dummy value on y
+        ::testing::Values(dcomplex{0.0, 0.0}, dcomplex{1.0, 0.0},
+                          dcomplex{-1.0, 0.0}, dcomplex{0.0, 1.0},
+                          dcomplex{0.0, -1.0}, dcomplex{-3.3, 1.7}),    // alpha
+        ::testing::Values(dcomplex{0.0, 0.0}, dcomplex{1.0, 0.0},
+                          dcomplex{-1.0, 0.0}, dcomplex{0.0, 1.0},
+                          dcomplex{0.0, -1.0}, dcomplex{-3.3, 1.7})     // beta
         ),
     ::zaxpbyvEVTVecPrint());
 
-// Exception value testing(on vectors) for L6
+// Exception value testing(on Y vector alone) with unit strides
 INSTANTIATE_TEST_SUITE_P(
-    bli_zaxpbyv_zen_int_evt_vec_L6,
-    zaxpbyvEVTTest,
+    vecY_unitStrides,
+    zaxpbyvEVT,
     ::testing::Combine(
         ::testing::Values('n' // n: use x, c: use conj(x)
 #ifdef TEST_BLIS_TYPED
@@ -225,26 +248,29 @@ INSTANTIATE_TEST_SUITE_P(
                           'c' // this option is BLIS-api specific.
 #endif
                           ),
-        ::testing::Values(gtint_t(6)), // m, size of vector to enter L8 directly.
-        ::testing::Values(gtint_t(1)), // stride size for x
-        ::testing::Values(gtint_t(1)), // stride size for y
-        ::testing::Values(gtint_t(1), gtint_t(3), gtint_t(4)), // indices to set exception values on x
-        ::testing::Values(dcomplex{0.0, 0.0}, dcomplex{NaN, 2.3},
-                          dcomplex{-Inf, 0.0}, dcomplex{Inf, NaN},
-                          dcomplex{NaN, -Inf}), // exception values to set on x
-        ::testing::Values(gtint_t(0), gtint_t(2), gtint_t(5)), // indices to set exception values on y
-        ::testing::Values(dcomplex{0.0, 0.0}, dcomplex{NaN, 2.3},
-                          dcomplex{-Inf, 0.0}, dcomplex{Inf, NaN},
-                          dcomplex{NaN, -Inf}), // exception values to set on y
-        ::testing::Values(dcomplex{0.0, 0.0}, dcomplex{1.0, 0.0}, dcomplex{2.2, -3.3}), // alpha
-        ::testing::Values(dcomplex{0.0, 0.0}, dcomplex{1.0, 0.0}, dcomplex{0.9, 4.5}) // beta
+        ::testing::Values(gtint_t(59), gtint_t(60), gtint_t(62)),       // n, size of vectors with unit-stride
+        ::testing::Values(gtint_t(1)),                                  // stride size for x
+        ::testing::Values(gtint_t(1)),                                  // stride size for y
+        ::testing::Values(gtint_t(0)),                                  // dummy index on x
+        ::testing::Values(dcomplex{0.0, 0.0}),                          // dummy value on x
+        ::testing::Values(gtint_t(0), gtint_t(55), gtint_t(57),
+                          gtint_t(58), gtint_t(59), gtint_t(61)),       // indices to set exception values on y
+        ::testing::Values(dcomplex{NaN, 0.0}, dcomplex{-Inf, 0.0},
+                          dcomplex{0.0, Inf}, dcomplex{-2.3, NaN},
+                          dcomplex{4.5, -Inf}, dcomplex{NaN, Inf}),     // exception values to set on y
+        ::testing::Values(dcomplex{0.0, 0.0}, dcomplex{1.0, 0.0},
+                          dcomplex{-1.0, 0.0}, dcomplex{0.0, 1.0},
+                          dcomplex{0.0, -1.0}, dcomplex{-3.3, 1.7}),    // alpha
+        ::testing::Values(dcomplex{0.0, 0.0}, dcomplex{1.0, 0.0},
+                          dcomplex{-1.0, 0.0}, dcomplex{0.0, 1.0},
+                          dcomplex{0.0, -1.0}, dcomplex{-3.3, 1.7})     // beta
         ),
     ::zaxpbyvEVTVecPrint());
 
-// Exception value testing(on vectors) for L4
+// Exception value testing(on X and Y vectors) with unit strides
 INSTANTIATE_TEST_SUITE_P(
-    bli_zaxpbyv_zen_int_evt_vec_L4,
-    zaxpbyvEVTTest,
+    vecXY_unitStrides,
+    zaxpbyvEVT,
     ::testing::Combine(
         ::testing::Values('n' // n: use x, c: use conj(x)
 #ifdef TEST_BLIS_TYPED
@@ -252,26 +278,34 @@ INSTANTIATE_TEST_SUITE_P(
                           'c' // this option is BLIS-api specific.
 #endif
                           ),
-        ::testing::Values(gtint_t(4)), // m, size of vector to enter L8 directly.
-        ::testing::Values(gtint_t(1)), // stride size for x
-        ::testing::Values(gtint_t(1)), // stride size for y
-        ::testing::Values(gtint_t(1), gtint_t(3)), // indices to set exception values on x
-        ::testing::Values(dcomplex{0.0, 0.0}, dcomplex{NaN, 2.3},
-                          dcomplex{-Inf, 0.0}, dcomplex{Inf, NaN},
-                          dcomplex{NaN, -Inf}), // exception values to set on x
-        ::testing::Values(gtint_t(0), gtint_t(2)), // indices to set exception values on y
-        ::testing::Values(dcomplex{0.0, 0.0}, dcomplex{NaN, 2.3},
-                          dcomplex{-Inf, 0.0}, dcomplex{Inf, NaN},
-                          dcomplex{NaN, -Inf}), // exception values to set on y
-        ::testing::Values(dcomplex{0.0, 0.0}, dcomplex{1.0, 0.0}, dcomplex{2.2, -3.3}), // alpha
-        ::testing::Values(dcomplex{0.0, 0.0}, dcomplex{1.0, 0.0}, dcomplex{0.9, 4.5}) // beta
+        ::testing::Values(gtint_t(59), gtint_t(60), gtint_t(62)),       // n, size of vectors with unit-stride
+        ::testing::Values(gtint_t(1)),                                  // stride size for x
+        ::testing::Values(gtint_t(1)),                                  // stride size for y
+        ::testing::Values(gtint_t(0), gtint_t(55), gtint_t(57),
+                          gtint_t(58), gtint_t(59), gtint_t(61)),       // indices to set exception values on x
+        ::testing::Values(dcomplex{NaN, 0.0}, dcomplex{-Inf, 0.0},
+                          dcomplex{0.0, Inf}, dcomplex{-2.3, NaN},
+                          dcomplex{4.5, -Inf}, dcomplex{NaN, Inf}),     // exception values to set on x
+        ::testing::Values(gtint_t(0), gtint_t(55), gtint_t(57),
+                          gtint_t(58), gtint_t(59), gtint_t(61)),       // indices to set exception values on y
+        ::testing::Values(dcomplex{NaN, 0.0}, dcomplex{-Inf, 0.0},
+                          dcomplex{0.0, Inf}, dcomplex{-2.3, NaN},
+                          dcomplex{4.5, -Inf}, dcomplex{NaN, Inf}),     // exception values to set on y
+        ::testing::Values(dcomplex{0.0, 0.0}, dcomplex{1.0, 0.0},
+                          dcomplex{-1.0, 0.0}, dcomplex{0.0, 1.0},
+                          dcomplex{0.0, -1.0}, dcomplex{-3.3, 1.7}),    // alpha
+        ::testing::Values(dcomplex{0.0, 0.0}, dcomplex{1.0, 0.0},
+                          dcomplex{-1.0, 0.0}, dcomplex{0.0, 1.0},
+                          dcomplex{0.0, -1.0}, dcomplex{-3.3, 1.7})     // beta
         ),
     ::zaxpbyvEVTVecPrint());
 
-// Exception value testing(on vectors) for L2
+// Exception value testing(on vectors) with non-unit strides
+// We have to test a single scalar loop. The indices are such
+// that we cover _vecX_, _vecY_ and _vecXY_ cases together.
 INSTANTIATE_TEST_SUITE_P(
-    bli_zaxpbyv_zen_int_evt_vec_L2,
-    zaxpbyvEVTTest,
+    vecXY_nonUnitStrides,
+    zaxpbyvEVT,
     ::testing::Combine(
         ::testing::Values('n' // n: use x, c: use conj(x)
 #ifdef TEST_BLIS_TYPED
@@ -279,56 +313,37 @@ INSTANTIATE_TEST_SUITE_P(
                           'c' // this option is BLIS-api specific.
 #endif
                           ),
-        ::testing::Values(gtint_t(2)), // m, size of vector to enter L8 directly.
-        ::testing::Values(gtint_t(1)), // stride size for x
-        ::testing::Values(gtint_t(1)), // stride size for y
-        ::testing::Values(gtint_t(1)), // indices to set exception values on x
-        ::testing::Values(dcomplex{0.0, 0.0}, dcomplex{NaN, 2.3},
-                          dcomplex{-Inf, 0.0}, dcomplex{Inf, NaN},
-                          dcomplex{NaN, -Inf}), // exception values to set on x
-        ::testing::Values(gtint_t(0)), // indices to set exception values on y
-        ::testing::Values(dcomplex{0.0, 0.0}, dcomplex{NaN, 2.3},
-                          dcomplex{-Inf, 0.0}, dcomplex{Inf, NaN},
-                          dcomplex{NaN, -Inf}), // exception values to set on y
-        ::testing::Values(dcomplex{0.0, 0.0}, dcomplex{1.0, 0.0}, dcomplex{2.2, -3.3}), // alpha
-        ::testing::Values(dcomplex{0.0, 0.0}, dcomplex{1.0, 0.0}, dcomplex{0.9, 4.5}) // beta
+        ::testing::Values(gtint_t(50)),                                 // n, size of vectors with non-unit strides
+        ::testing::Values(gtint_t(3)),                                  // stride size for x
+        ::testing::Values(gtint_t(5)),                                  // stride size for y
+        ::testing::Values(gtint_t(1), gtint_t(27), gtint_t(49)),        // indices to set exception values on x
+        ::testing::Values(dcomplex{NaN, 0.0}, dcomplex{-Inf, 0.0},
+                          dcomplex{0.0, Inf}, dcomplex{-2.3, NaN},
+                          dcomplex{4.5, -Inf}, dcomplex{NaN, Inf},
+                          dcomplex{2.3, -3.5}),                         // exception values to set on x
+        ::testing::Values(gtint_t(0), gtint_t(26), gtint_t(49)),        // indices to set exception values on y
+        ::testing::Values(dcomplex{NaN, 0.0}, dcomplex{-Inf, 0.0},
+                          dcomplex{0.0, Inf}, dcomplex{-2.3, NaN},
+                          dcomplex{4.5, -Inf}, dcomplex{NaN, Inf},
+                          dcomplex{2.3, -3.5}),                         // exception values to set on y
+        ::testing::Values(dcomplex{0.0, 0.0}, dcomplex{1.0, 0.0},
+                          dcomplex{-1.0, 0.0}, dcomplex{0.0, 1.0},
+                          dcomplex{0.0, -1.0}, dcomplex{-3.3, 1.7}),    // alpha
+        ::testing::Values(dcomplex{0.0, 0.0}, dcomplex{1.0, 0.0},
+                          dcomplex{-1.0, 0.0}, dcomplex{0.0, 1.0},
+                          dcomplex{0.0, -1.0}, dcomplex{-3.3, 1.7})     // beta
         ),
     ::zaxpbyvEVTVecPrint());
 
-// Exception value testing(on vectors) with non unit strides
-INSTANTIATE_TEST_SUITE_P(
-    bli_zaxpbyv_zen_int_evt_vec_nonUnitStrides,
-    zaxpbyvEVTTest,
-    ::testing::Combine(
-        ::testing::Values('n' // n: use x, c: use conj(x)
-#ifdef TEST_BLIS_TYPED
-                          ,
-                          'c' // this option is BLIS-api specific.
-#endif
-                          ),
-        ::testing::Values(gtint_t(1), gtint_t(5)), // m, size of vector to enter NUS loop directly.
-        ::testing::Values(gtint_t(3)), // stride size for x
-        ::testing::Values(gtint_t(5)), // stride size for y
-        ::testing::Values(gtint_t(0)), // indices to set exception values on x
-        ::testing::Values(dcomplex{0.0, 0.0}, dcomplex{NaN, 2.3},
-                          dcomplex{-Inf, 0.0}, dcomplex{Inf, NaN}), // exception values to set on x
-        ::testing::Values(gtint_t(0)), // indices to set exception values on y
-        ::testing::Values(dcomplex{0.0, 0.0}, dcomplex{NaN, 2.3},
-                          dcomplex{-Inf, 0.0}, dcomplex{Inf, NaN}), // exception values to set on y
-        ::testing::Values(dcomplex{0.0, 0.0}, dcomplex{1.0, 0.0}, dcomplex{2.2, -3.3}), // alpha
-        ::testing::Values(dcomplex{0.0, 0.0}, dcomplex{1.0, 0.0}, dcomplex{0.9, 4.5}) // beta
-        ),
-    ::zaxpbyvEVTVecPrint());
-
-// Exception value testing(on alpha/beta) with unit stride
 /*
-    NOTE : Here, every loop is tested for, with alpha and beta having exception values
-           Furthermore, the first element of x and second element of y are set to 0, which
-           includes testing that cover cases where NaN might be induced due to 0 * (Inf or -Inf).
+    Exception value testing on alpha and beta :
+    Alpha values are set to Nan, +Inf or -Inf. A dummy
+    value of 0.0 is induced in X and Y vectors, to further
+    verify the propagation.
 */
 INSTANTIATE_TEST_SUITE_P(
-    bli_zaxpbyv_zen_int_evt_alphabeta_unitStrides,
-    zaxpbyvEVTTest,
+    alphaBeta_unitStrides,
+    zaxpbyvEVT,
     ::testing::Combine(
         ::testing::Values('n' // n: use x, c: use conj(x)
 #ifdef TEST_BLIS_TYPED
@@ -336,22 +351,28 @@ INSTANTIATE_TEST_SUITE_P(
                           'c' // this option is BLIS-api specific.
 #endif
                           ),
-        ::testing::Values(gtint_t(8), gtint_t(6), gtint_t(4), gtint_t(2)), // m size of vector to enter L8, L6, L4 and L2 respectively.
-        ::testing::Values(gtint_t(1)), // stride size for x
-        ::testing::Values(gtint_t(1)), // stride size for y
-        ::testing::Values(gtint_t(0)), // indices to set exception values on x
-        ::testing::Values(dcomplex{0.0, 0.0}), // exception values to set on x
-        ::testing::Values(gtint_t(1)), // indices to set exception values on y
-        ::testing::Values(dcomplex{0.0, 0.0}), // exception values to set on y
-        ::testing::Values(dcomplex{NaN, 2.3}, dcomplex{Inf, 0.0}, dcomplex{-Inf, NaN}), // alpha
-        ::testing::Values(dcomplex{-0.9, NaN}, dcomplex{0.0, -Inf}, dcomplex{NaN, Inf}) // beta
+        ::testing::Values(gtint_t(59), gtint_t(60), gtint_t(62)),       // n, size of vectors with unit-stride
+        ::testing::Values(gtint_t(1)),                                  // stride size for x
+        ::testing::Values(gtint_t(1)),                                  // stride size for y
+        ::testing::Values(gtint_t(0)),                                  // indices to set zero on x
+        ::testing::Values(dcomplex{0.0, 0.0}),
+        ::testing::Values(gtint_t(0)),                                  // indices to set zero on y
+        ::testing::Values(dcomplex{0.0, 0.0}),
+        ::testing::Values(dcomplex{NaN, 0.0}, dcomplex{-Inf, 0.0},
+                          dcomplex{0.0, Inf}, dcomplex{-2.3, NaN},
+                          dcomplex{4.5, -Inf}, dcomplex{NaN, Inf},
+                          dcomplex{2.3, -3.7}),                         // alpha
+        ::testing::Values(dcomplex{NaN, 0.0}, dcomplex{-Inf, 0.0},
+                          dcomplex{0.0, Inf}, dcomplex{-2.3, NaN},
+                          dcomplex{4.5, -Inf}, dcomplex{NaN, Inf},
+                          dcomplex{2.3, -3.7})                          // beta
         ),
     ::zaxpbyvEVTVecPrint());
 
-// Exception value testing(on alpha/beta) with non-unit stride
+// Exception value testing(on alpha) with non-unit strided vectors
 INSTANTIATE_TEST_SUITE_P(
-    bli_zaxpbyv_zen_int_evt_alphabeta_nonUnitStrides,
-    zaxpbyvEVTTest,
+    alphaBeta_nonUnitStrides,
+    zaxpbyvEVT,
     ::testing::Combine(
         ::testing::Values('n' // n: use x, c: use conj(x)
 #ifdef TEST_BLIS_TYPED
@@ -359,14 +380,20 @@ INSTANTIATE_TEST_SUITE_P(
                           'c' // this option is BLIS-api specific.
 #endif
                           ),
-        ::testing::Values(gtint_t(5)), // m, size of vector to enter NUS loop directly.
-        ::testing::Values(gtint_t(3)), // stride size for x
-        ::testing::Values(gtint_t(5)), // stride size for y
-        ::testing::Values(gtint_t(0)), // indices to set exception values on x
-        ::testing::Values(dcomplex{0.0, 0.0}), // exception values to set on x
-        ::testing::Values(gtint_t(0)), // indices to set exception values on y
-        ::testing::Values(dcomplex{0.0, 0.0}), // exception values to set on y
-        ::testing::Values(dcomplex{NaN, 2.3}, dcomplex{Inf, 0.0}, dcomplex{-Inf, NaN}), // alpha
-        ::testing::Values(dcomplex{-0.9, NaN}, dcomplex{0.0, -Inf}, dcomplex{NaN, Inf}) // beta
+        ::testing::Values(gtint_t(50)),                                         // n, size of vectors with non-unit strides
+        ::testing::Values(gtint_t(3)),                                          // stride size for x
+        ::testing::Values(gtint_t(5)),                                          // stride size for y
+        ::testing::Values(gtint_t(0), gtint_t(25)),                             // indices to set zero on x
+        ::testing::Values(dcomplex{0.0, 0.0}),
+        ::testing::Values(gtint_t(0), gtint_t(40)),                             // indices to set zero on y
+        ::testing::Values(dcomplex{0.0, 0.0}),
+        ::testing::Values(dcomplex{NaN, 0.0}, dcomplex{-Inf, 0.0},
+                          dcomplex{0.0, Inf}, dcomplex{-2.3, NaN},
+                          dcomplex{4.5, -Inf}, dcomplex{NaN, Inf},
+                          dcomplex{2.3, -3.7}),                         // alpha
+        ::testing::Values(dcomplex{NaN, 0.0}, dcomplex{-Inf, 0.0},
+                          dcomplex{0.0, Inf}, dcomplex{-2.3, NaN},
+                          dcomplex{4.5, -Inf}, dcomplex{NaN, Inf},
+                          dcomplex{2.3, -3.7})                          // beta
         ),
     ::zaxpbyvEVTVecPrint());
