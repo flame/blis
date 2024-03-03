@@ -36,16 +36,16 @@
 #include "test_gemv.h"
 
 class sgemvTest :
-        public ::testing::TestWithParam<std::tuple<char,
-                                                   char,
-                                                   char,
-                                                   gtint_t,
-                                                   gtint_t,
-                                                   float,
-                                                   float,
-                                                   gtint_t,
-                                                   gtint_t,
-                                                   gtint_t>> {};
+        public ::testing::TestWithParam<std::tuple<char,            // storage format
+                                                   char,            // transa
+                                                   char,            // conjx
+                                                   gtint_t,         // m
+                                                   gtint_t,         // n
+                                                   float,           // alpha
+                                                   float,           // beta 
+                                                   gtint_t,         // stride size for x
+                                                   gtint_t,         // stride size for y
+                                                   gtint_t>> {};    // increment to the leading dim of a
 
 TEST_P(sgemvTest, RandomData)
 {
@@ -158,5 +158,93 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(gtint_t(1)),                                   // stride size for y
             ::testing::Values(gtint_t(0))                                    // increment to the leading dim of a
         ),
+        ::sgemvTestPrint()
+    );
+
+INSTANTIATE_TEST_SUITE_P(
+        Blackbox_Tiny_Matrixsizes,
+        sgemvTest,
+        ::testing::Combine(
+            ::testing::Values('c'
+#ifndef TEST_BLAS
+            ,'r'
+#endif
+            ),                                                               // storage format
+            ::testing::Values('n','c'),                                      // transa
+            ::testing::Values('n'),                                          // conjx
+            ::testing::Range(gtint_t(1), gtint_t(9), 1),                     // m
+            ::testing::Range(gtint_t(1), gtint_t(9), 1),                     // n
+            ::testing::Values( 1.0 ),                                        // alpha
+            ::testing::Values(-1.0 ),                                        // beta
+            ::testing::Values(gtint_t(1)),                                   // stride size for x
+            ::testing::Values(gtint_t(1)),                                   // stride size for y
+            ::testing::Values(gtint_t(7), gtint_t(3))                        // increment to the leading dim of a
+        ),
+        ::sgemvTestPrint()
+    );
+
+INSTANTIATE_TEST_SUITE_P(
+        Blackbox_Average_Matrixsizes,
+        sgemvTest,
+        ::testing::Combine(
+            ::testing::Values('c'
+#ifndef TEST_BLAS
+            ,'r'
+#endif
+            ),                                                               // storage format
+            ::testing::Values('c','t'),                                      // transa
+            ::testing::Values('n'),                                          // conjx
+            ::testing::Range(gtint_t(128), gtint_t(512), 31),                // m
+            ::testing::Range(gtint_t(512), gtint_t(128), -31),               // n
+            ::testing::Values(-1.0, 2.2 ),                                   // alpha
+            ::testing::Values(-1.0, -3.1 ),                                  // beta
+            ::testing::Values(gtint_t(1)),                                   // stride size for x
+            ::testing::Values(gtint_t(1)),                                   // stride size for y
+            ::testing::Values(gtint_t(1))                                    // increment to the leading dim of a
+        ),
+        ::sgemvTestPrint()
+    );
+
+INSTANTIATE_TEST_SUITE_P(
+        Blackbox_Large_Matrixsizes,
+        sgemvTest,
+        ::testing::Combine(
+            ::testing::Values('c'
+#ifndef TEST_BLAS
+            ,'r'
+#endif
+            ),                                                               // storage format
+            ::testing::Values('n','t'),                                      // transa
+            ::testing::Values('n'),                                          // conjx
+            ::testing::Range(gtint_t(1024), gtint_t(32767), 1023),           // m
+            ::testing::Range(gtint_t(1024), gtint_t(32767), 1023),           // n
+            ::testing::Values(1.0),                                          // alpha
+            ::testing::Values(1.0),                                          // beta
+            ::testing::Values(gtint_t(11), gtint_t(119), gtint_t(211)),      // stride size for x
+            ::testing::Values(gtint_t(211), gtint_t(119), gtint_t(11)),      // stride size for y
+            ::testing::Values(gtint_t(1), gtint_t(252))                      // increment to the leading dim of a
+        ),
+        ::sgemvTestPrint()
+    );
+
+INSTANTIATE_TEST_SUITE_P(
+        Blackbox_Unit_MN,
+        sgemvTest,
+        ::testing::Combine(
+            ::testing::Values('c'
+#ifndef TEST_BLAS
+            ,'r'
+#endif
+            ),                                                               // storage format
+            ::testing::Values('n','c','t'),                                  // transa
+            ::testing::Values('n'),                                          // conjx
+            ::testing::Values(gtint_t(1)),		 	             // m
+            ::testing::Values(gtint_t(1)),                    		     // n
+            ::testing::Values(1.0, 2.0),                                     // alpha
+            ::testing::Values(1.0, -1.1),                                    // beta
+            ::testing::Values(gtint_t(1)),                                   // stride size for x
+            ::testing::Values(gtint_t(1)),                                   // stride size for y
+            ::testing::Values(gtint_t(0))				     // zero increment to the leading dim of a
+                            ),
         ::sgemvTestPrint()
     );

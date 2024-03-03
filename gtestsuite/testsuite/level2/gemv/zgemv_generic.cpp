@@ -36,16 +36,16 @@
 #include "test_gemv.h"
 
 class zgemvTest :
-        public ::testing::TestWithParam<std::tuple<char,
-                                                   char,
-                                                   char,
-                                                   gtint_t,
-                                                   gtint_t,
-                                                   dcomplex,
-                                                   dcomplex,
-                                                   gtint_t,
-                                                   gtint_t,
-                                                   gtint_t>> {};
+        public ::testing::TestWithParam<std::tuple<char,               // storage format 
+                                                   char,               // transa
+                                                   char,               // conjx
+                                                   gtint_t,            // m
+                                                   gtint_t,            // n
+                                                   dcomplex,           // alpha
+                                                   dcomplex,           // beta
+                                                   gtint_t,            // stride size for x
+                                                   gtint_t,            // stride size for y 
+                                                   gtint_t>> {};       // increment to the leading dim of a
 
 TEST_P(zgemvTest, RandomData) 
 {
@@ -158,7 +158,97 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(dcomplex{-1.0, 1.0}),                          // beta
             ::testing::Values(gtint_t(1)),                                   // stride size for x
             ::testing::Values(gtint_t(1)),                                   // stride size for y
-            ::testing::Values(gtint_t(0))                                    // increment to the leading dim of a
+            ::testing::Values(gtint_t(1))                                    // increment to the leading dim of a
         ),
+        ::zgemvTestPrint()
+    );
+
+INSTANTIATE_TEST_SUITE_P(
+        Blackbox_Tiny_Matrixsizes,
+        zgemvTest,
+        ::testing::Combine(
+            ::testing::Values('c'
+#ifndef TEST_BLAS
+            ,'r'
+#endif
+            ),                                                               // storage format
+            ::testing::Values('n','c'),                                      // transa
+            ::testing::Values('n'),                                          // conjx
+            ::testing::Range(gtint_t(1), gtint_t(9), 1),                     // m
+            ::testing::Range(gtint_t(1), gtint_t(9), 1),                     // n
+            ::testing::Values(dcomplex{1.0, -2.0}),                          // alpha
+            ::testing::Values(dcomplex{1.0, -2.0}),                          // beta
+            ::testing::Values(gtint_t(1)),                                   // stride size for x
+            ::testing::Values(gtint_t(1)),                                   // stride size for y
+            ::testing::Values(gtint_t(7), gtint_t(3))                        // increment to the leading dim of a
+        ),
+        ::zgemvTestPrint()
+    );
+
+INSTANTIATE_TEST_SUITE_P(
+        Blackbox_Average_Matrixsizes,
+        zgemvTest,
+        ::testing::Combine(
+            ::testing::Values('c'
+#ifndef TEST_BLAS
+            ,'r'
+#endif
+            ),                                                               // storage format
+            ::testing::Values('t','c'),                                      // transa
+            ::testing::Values('n'),                                          // conjx
+            ::testing::Range(gtint_t(128), gtint_t(512), 31),                // m
+            ::testing::Range(gtint_t(512), gtint_t(128), -31),               // n
+            ::testing::Values(dcomplex{-1.0, 2.0}, dcomplex{-2.0, 1.0}),                          // alpha
+            ::testing::Values(dcomplex{-1.0, -3.1}),                         // beta
+            ::testing::Values(gtint_t(1)),                                   // stride size for x
+            ::testing::Values(gtint_t(1)),                                   // stride size for y
+            ::testing::Values(gtint_t(1))                                    // increment to the leading dim of a
+        ),
+        ::zgemvTestPrint()
+    );
+
+INSTANTIATE_TEST_SUITE_P(
+        Blackbox_Large_Matrixsizes,
+        zgemvTest,
+        ::testing::Combine(
+            ::testing::Values('c'
+#ifndef TEST_BLAS
+            ,'r'
+#endif
+            ),                                                               // storage format
+            ::testing::Values('n','t'),                                      // transa
+            ::testing::Values('n'),                                          // conjx
+            ::testing::Range(gtint_t(1024), gtint_t(32767), 1023),           // m
+            ::testing::Range(gtint_t(1024), gtint_t(32767), 1023),           // n
+            ::testing::Values(dcomplex{1.1, 2.1}),                           // alpha
+            ::testing::Values(dcomplex{1.1, 2.1}),                           // beta
+            ::testing::Values(gtint_t(11), gtint_t(119), gtint_t(211)),      // stride size for x
+            ::testing::Values(gtint_t(211), gtint_t(119), gtint_t(11)),      // stride size for y
+            ::testing::Values(gtint_t(1), gtint_t(252))                      // increment to the leading dim of a
+        ),
+
+      ::zgemvTestPrint()
+    );
+
+INSTANTIATE_TEST_SUITE_P(
+        Blackbox_Unit_MN,
+        zgemvTest,
+        ::testing::Combine(
+            ::testing::Values('c'
+#ifndef TEST_BLAS
+            ,'r'
+#endif
+            ),                                                               // storage format
+            ::testing::Values('n','c','t'),                                  // transa
+            ::testing::Values('n'),                                          // conjx
+            ::testing::Values(gtint_t(1)),                                   // m
+            ::testing::Values(gtint_t(1)),                                   // n
+            ::testing::Values(dcomplex{1.0, -0.1}),                          // alpha
+            ::testing::Values(dcomplex{0.1, 1.0}, dcomplex{-2.0, 1.0},
+		              dcomplex{-3.0, 2.0}, dcomplex{-1.0, -2.0}),    // beta
+            ::testing::Values(gtint_t(1)),                                   // stride size for x
+            ::testing::Values(gtint_t(1)),                                   // stride size for y
+            ::testing::Values(gtint_t(0))                                    // increment to the leading dim of a
+                            ),
         ::zgemvTestPrint()
     );

@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2023, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2023 - 2024, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -72,7 +72,7 @@ void test_gemv( char storage, char trnsa, char conjx, gtint_t m, gtint_t n,
     //----------------------------------------------------------
     testinghelpers::ref_gemv<T>( storage, trnsa, conjx, m, n, alpha, a.data(),
                          lda, x.data(), incx, beta, y_ref.data(), incy );
-
+    
     //----------------------------------------------------------
     //              check component-wise error.
     //----------------------------------------------------------
