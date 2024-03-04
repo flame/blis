@@ -24,8 +24,8 @@ else()
 endif()
 
 # gcc or clang version must be at least 4.0
-if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
-    if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL  9.0.0)
+if("${CMAKE_C_COMPILER_ID}" STREQUAL "GNU")
+    if(CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL  9.0.0)
         # gcc 9.0 or later
         list(APPEND CKVECFLAGS -march=znver2)
         list(APPEND CKOPTFLAGS -fno-tree-partial-pre -fno-tree-pre -fno-tree-loop-vectorize -fno-gcse)
@@ -37,7 +37,7 @@ if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
     endif()
 endif() # gcc
 
-if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+if("${CMAKE_C_COMPILER_ID}" STREQUAL "Clang")
     # AOCC clang has various formats for the version line
     # AOCC.LLVM.2.0.0.B191.2019_07_19 clang version 8.0.0 (CLANG: Jenkins AOCC_2_0_0-Build#191) (based on LLVM AOCC.LLVM.2.0.0.B191.2019_07_19)
     # AOCC.LLVM.2.1.0.B1030.2019_11_12 clang version 9.0.0 (CLANG: Build#1030) (based on LLVM AOCC.LLVM.2.1.0.B1030.2019_11_12)
@@ -49,7 +49,7 @@ if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
     # For our purpose we just want to know if it version 2x or 3x or 4x
 
     # But also set these in case we are using upstream LLVM clang
-    execute_process(COMMAND ${CMAKE_CXX_COMPILER} --version OUTPUT_VARIABLE clang_full_version_string)
+    execute_process(COMMAND ${CMAKE_C_COMPILER} --version OUTPUT_VARIABLE clang_full_version_string)
     string(REGEX MATCH "^[^\n]*" CLANG_VERSION_STRING "${clang_full_version_string}")
     string(REGEX MATCHALL "(AOCC_2|AOCC_3|AOCC_4|AOCC|LLVM|clang)" CLANG_STRING "${CLANG_VERSION_STRING}")
     string(REGEX REPLACE ".*clang version ([0-9]+\\.[0-9]+).*" "\\1" CLANG_VERSION "${CLANG_VERSION_STRING}")
@@ -63,7 +63,7 @@ if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
     elseif("${CLANG_STRING}" MATCHES "(AOCC_2|LLVM)")
         # AOCC version 2x we will enable znver2
         list(APPEND CKVECFLAGS -march=znver2)
-    elseif(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 9.0.0)
+    elseif(CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 9.0.0)
         # LLVM clang 9.0 or later
         list(APPEND CKVECFLAGS -march=znver2)
     else()

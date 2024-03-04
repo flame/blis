@@ -27,8 +27,8 @@ else()
     set(CKOPTFLAGS ${COPTFLAGS} -fomit-frame-pointer)
 endif()
 
-if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
-    if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 13.0.0)
+if("${CMAKE_C_COMPILER_ID}" STREQUAL "GNU")
+    if(CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 13.0.0)
         # gcc 13.0 or later
         list(APPEND CKVECFLAGS -march=znver4)
         list(APPEND CRVECFLAGS -march=znver4)
@@ -38,21 +38,21 @@ if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
         # The -ftree-loop-vectorize results in inefficient code gen
         # for amd optimized l1 kernels based on instrinsics.
         list(APPEND CKOPTFLAGS -fno-tree-partial-pre -fno-tree-pre -fno-tree-loop-vectorize)
-    elseif(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 11.0.0)
+    elseif(CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 11.0.0)
         # gcc 11.0 or later
         list(APPEND CKVECFLAGS -march=znver3 -mavx512f -mavx512dq -mavx512bw -mavx512vl -mavx512vnni -mavx512bf16)
         list(APPEND CRVECFLAGS -march=znver3)
         list(APPEND CKOPTFLAGS -fno-tree-partial-pre -fno-tree-pre -fno-tree-loop-vectorize)
-    elseif(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 9.0.0)
+    elseif(CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 9.0.0)
         # gcc 9.0 or later
         list(APPEND CKVECFLAGS -march=znver2 -mavx512f -mavx512dq -mavx512bw -mavx512vl -mavx512vnni)
         list(APPEND CRVECFLAGS -march=znver2)
         list(APPEND CKOPTFLAGS -fno-tree-partial-pre -fno-tree-pre -fno-tree-loop-vectorize)
-    elseif(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 8.0.0)
+    elseif(CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 8.0.0)
         # gcc 8.0 or later
         list(APPEND CKVECFLAGS -march=znver1 -mavx512f -mavx512dq -mavx512bw -mavx512vl -mavx512vnni)
         list(APPEND CRVECFLAGS -march=znver1)
-    elseif(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 7.0.0)
+    elseif(CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 7.0.0)
         # gcc 7.0 or later
         list(APPEND CKVECFLAGS -march=znver1 -mavx512f -mavx512dq -mavx512bw -mavx512vl)
         list(APPEND CRVECFLAGS -march=znver1)
@@ -64,7 +64,7 @@ if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
     endif()
 endif() # gcc
 
-if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+if("${CMAKE_C_COMPILER_ID}" STREQUAL "Clang")
     # AOCC clang has various formats for the version line
 
     # AOCC.LLVM.2.0.0.B191.2019_07_19 clang version 8.0.0 (CLANG: Jenkins AOCC_2_0_0-Build#191) (based on LLVM AOCC.LLVM.2.0.0.B191.2019_07_19)
@@ -76,7 +76,7 @@ if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
     # For our purpose we just want to know if it version 2x or 3x or 4x
 
     # But also set these in case we are using upstream LLVM clang
-    execute_process(COMMAND ${CMAKE_CXX_COMPILER} --version OUTPUT_VARIABLE clang_full_version_string)
+    execute_process(COMMAND ${CMAKE_C_COMPILER} --version OUTPUT_VARIABLE clang_full_version_string)
     string(REGEX MATCH "^[^\n]*" CLANG_VERSION_STRING "${clang_full_version_string}")
     string(REGEX MATCHALL "(AOCC_2|AOCC_3|AOCC_4|AOCC|LLVM|clang)" CLANG_STRING "${CLANG_VERSION_STRING}")
     string(REGEX REPLACE ".*clang version ([0-9]+\\.[0-9]+).*" "\\1" CLANG_VERSION "${CLANG_VERSION_STRING}")
@@ -93,15 +93,15 @@ if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
       # AOCC version 2x we will enable znver2
       list(APPEND CKVECFLAGS -march=znver2 -mavx512f -mavx512dq -mavx512bw -mavx512vl -mavx512vnni)
       list(APPEND CRVECFLAGS -march=znver2)
-    elseif(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 16.0.0)
+    elseif(CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 16.0.0)
       # LLVM clang 16.0 or later
       list(APPEND CKVECFLAGS -march=znver4 -falign-loops=64)
       list(APPEND CRVECFLAGS -march=znver4)
-    elseif(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 13.0.0)
+    elseif(CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 13.0.0)
       # LLVM clang 13.0 or later
       list(APPEND CKVECFLAGS -march=znver3 -mavx512f -mavx512dq -mavx512bw -mavx512vl -mavx512vnni -mavx512bf16 -falign-loops=64)
       list(APPEND CRVECFLAGS -march=znver3)
-    elseif(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 9.0.0)
+    elseif(CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 9.0.0)
       # LLVM clang 9.0 or later
       list(APPEND CKVECFLAGS -march=znver2 -mavx512f -mavx512dq -mavx512bw -mavx512vl -mavx512vnni -mavx512bf16 -falign-loops=64)
       list(APPEND CRVECFLAGS -march=znver2)

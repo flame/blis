@@ -23,20 +23,20 @@ else()
     set(CKOPTFLAGS ${COPTFLAGS} -fomit-frame-pointer)
 endif()
 
-if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+if("${CMAKE_C_COMPILER_ID}" STREQUAL "GNU")
     list(APPEND CKVECFLAGS -march=znver1)
-    if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 9.0.0)
+    if(CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 9.0.0)
         list(APPEND CKOPTFLAGS -fno-tree-partial-pre -fno-tree-pre -fno-tree-loop-vectorize -fno-gcse)
     endif()
 endif()
 
-if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+if("${CMAKE_C_COMPILER_ID}" STREQUAL "Clang")
     list(APPEND CKVECFLAGS -march=znver1)
 endif() # clang
 
 # Flags specific to reference kernels.
 set(CROPTFLAGS ${CKOPTFLAGS})
-if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+if("${CMAKE_C_COMPILER_ID}" STREQUAL "GNU")
     set(CRVECFLAGS ${CKVECFLAGS})
 else()
     set(CRVECFLAGS ${CKVECFLAGS})

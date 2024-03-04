@@ -153,7 +153,7 @@ if(WIN32)
     set(OpenMP_libomp_LIBRARY "C:/Program Files/LLVM/lib/libomp.lib" CACHE STRING "openmp library path")
 endif()
 # Debug & Release flags option setting is only available for Linux. On Windows the default flags are used.
-if(NOT WIN32)
+if(NOT MSVC)
     set(ENABLE_DEBUG "off" CACHE STRING "Enable debugging symbols in the library.")
     set_property(CACHE ENABLE_DEBUG PROPERTY STRINGS "off" "noopt" "opt")
     if( NOT ((ENABLE_DEBUG STREQUAL "off") OR (ENABLE_DEBUG STREQUAL "noopt") OR (ENABLE_DEBUG STREQUAL "opt")) )
@@ -343,15 +343,17 @@ list(GET SO_VERSION 1 SO_VERSION_MINOR)
 #------------------------------------
 include(CMakePrintHelpers)
 message(STATUS "Printing CMake Configuration Options...")
-cmake_print_variables(ENABLE_DEBUG)
-# Initialize debug type, using the corresponding cache variable.
-set(DEBUG_TYPE ${ENABLE_DEBUG})
-if(ENABLE_DEBUG STREQUAL "off")
-    message("   Debug symbols disabled.")
-elseif(ENABLE_DEBUG STREQUAL "opt")
-    message("   Enabling debug symbols with optimizations.")
-else() #ENABLE_DEBUG=noopt
-    message("   Enabling debug symbols; optimizations disabled.")
+if(NOT MSVC)
+    cmake_print_variables(ENABLE_DEBUG)
+    # Initialize debug type, using the corresponding cache variable.
+    set(DEBUG_TYPE ${ENABLE_DEBUG})
+    if(ENABLE_DEBUG STREQUAL "off")
+        message("   Debug symbols disabled.")
+    elseif(ENABLE_DEBUG STREQUAL "opt")
+        message("   Enabling debug symbols with optimizations.")
+    else() #ENABLE_DEBUG=noopt
+        message("   Enabling debug symbols; optimizations disabled.")
+    endif()
 endif()
 cmake_print_variables(BUILD_SHARED_LIBS)
 if(BUILD_SHARED_LIBS)
@@ -841,7 +843,7 @@ endif()
 
 # Define the external libraries we may potentially need at link-time.
 # Add libm only on Linux and only if Intel compiler is not used.
-if((NOT WIN32) AND (NOT ("${CMAKE_CXX_COMPILER_ID}" MATCHES "Intel")))
+if((NOT WIN32) AND (NOT ("${CMAKE_C_COMPILER_ID}" MATCHES "Intel")))
     set(LIBM -lm)
 endif()
 set(LIBMEMKIND -lmemkind)
@@ -887,7 +889,7 @@ if(NOT WIN32)
 endif()
 
 # Disable tautological comparision warnings in clang.
-if("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
+if("${CMAKE_C_COMPILER_ID}" MATCHES "Clang")
     list(APPEND CWARNFLAGS -Wno-tautological-compare -Wno-pass-failed)
 endif()
 
