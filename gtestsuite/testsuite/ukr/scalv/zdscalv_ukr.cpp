@@ -40,11 +40,12 @@ class zdscalvUkrTest :
                                                    char,            // conj_alpha
                                                    gtint_t,         // n
                                                    gtint_t,         // incx
-                                                   dcomplex>> {};   // alpha
+                                                   dcomplex,        // alpha
+                                                   bool>> {};       // is_memory_test
 GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(zdscalvUkrTest);
 
 // Tests using random integers as vector elements.
-TEST_P( zdscalvUkrTest, RandomData )
+TEST_P( zdscalvUkrTest, FunctionalTest )
 {
     using T = dcomplex;
     using U = double;
@@ -62,8 +63,10 @@ TEST_P( zdscalvUkrTest, RandomData )
     gtint_t n = std::get<2>(GetParam());
     // stride size for x:
     gtint_t incx = std::get<3>(GetParam());
-    // alpha
+    // alpha:
     T alpha = std::get<4>(GetParam());
+    // is_memory_test:
+    bool is_memory_test = std::get<5>(GetParam());
 
     // Set the threshold for the errors:
     double thresh = testinghelpers::getEpsilon<T>();
@@ -71,7 +74,7 @@ TEST_P( zdscalvUkrTest, RandomData )
     //----------------------------------------------------------
     //     Call generic test body using those parameters
     //----------------------------------------------------------
-    test_scalv_ukr<T, U, zscalv_ker_ft>( ukr, conj_alpha, n, incx, alpha, thresh, true );
+    test_scalv_ukr<T, U, zscalv_ker_ft>( ukr, conj_alpha, n, incx, alpha, thresh, is_memory_test );
 }
 
 // Used to generate a test case with a sensible name.
@@ -81,20 +84,20 @@ TEST_P( zdscalvUkrTest, RandomData )
 class zdscalvUkrTestPrint {
 public:
     std::string operator()(
-        testing::TestParamInfo<std::tuple<zscalv_ker_ft, char, gtint_t, gtint_t, dcomplex>> str) const {
+        testing::TestParamInfo<std::tuple<zscalv_ker_ft, char, gtint_t, gtint_t, dcomplex, bool>> str) const {
         char conjx = std::get<1>(str.param);
         gtint_t n = std::get<2>(str.param);
         gtint_t incx = std::get<3>(str.param);
         dcomplex alpha = std::get<4>(str.param);
+        bool is_memory_test = std::get<5>(str.param);
 
-        std::string str_name = "zdscalvUkrTest";
+        std::string str_name = "zd";
         str_name += "_n" + std::to_string(n);
         str_name += (conjx == 'n') ? "_noconjalpha" : "_conjalpha";
         std::string incx_str = ( incx > 0) ? std::to_string(incx) : "m" + std::to_string(std::abs(incx));
         str_name += "_incx" + incx_str;
-        std::string alpha_str = ( alpha.real > 0) ? std::to_string(int(alpha.real)) : ("m" + std::to_string(int(std::abs(alpha.real))));
-                    alpha_str = alpha_str + "pi" + (( alpha.imag > 0) ? std::to_string(int(alpha.imag)) : ("m" + std::to_string(int(std::abs(alpha.imag)))));
-        str_name = str_name + "_a" + alpha_str;
+        str_name += "_alpha" + testinghelpers::get_value_string(alpha);
+        str_name += ( is_memory_test ) ? "_mem_test_enabled" : "_mem_test_disabled";
 
         return str_name;
     }
@@ -151,7 +154,8 @@ INSTANTIATE_TEST_SUITE_P(
                                 dcomplex{ 0.0,  0.0},
                                 dcomplex{ 1.0,  1.0},       // ZDSCAL is expected to return early for unit alpha.
                                 dcomplex{ 7.3,  5.1}
-            )
+            ),
+            ::testing::Values(false, true)                 // is_memory_test
         ),
         ::zdscalvUkrTestPrint()
     );
@@ -181,7 +185,8 @@ INSTANTIATE_TEST_SUITE_P(
                                 dcomplex{ 0.0,  0.0},
                                 dcomplex{ 1.0,  1.0},       // ZDSCAL is expected to return early for unit alpha.
                                 dcomplex{ 7.3,  5.1}
-            )
+            ),
+            ::testing::Values(false, true)                 // is_memory_test
         ),
         ::zdscalvUkrTestPrint()
     );
@@ -234,7 +239,8 @@ INSTANTIATE_TEST_SUITE_P(
                                 dcomplex{ 0.0,  0.0},
                                 dcomplex{ 1.0,  1.0},       // ZDSCAL is expected to return early for unit alpha.
                                 dcomplex{ 7.3,  5.1}
-            )
+            ),
+            ::testing::Values(false, true)                 // is_memory_test
         ),
         ::zdscalvUkrTestPrint()
     );
@@ -264,7 +270,8 @@ INSTANTIATE_TEST_SUITE_P(
                                 dcomplex{ 0.0,  0.0},
                                 dcomplex{ 1.0,  1.0},       // ZDSCAL is expected to return early for unit alpha.
                                 dcomplex{ 7.3,  5.1}
-            )
+            ),
+            ::testing::Values(false, true)                 // is_memory_test
         ),
         ::zdscalvUkrTestPrint()
     );

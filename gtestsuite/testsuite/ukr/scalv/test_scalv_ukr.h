@@ -34,51 +34,84 @@
 
 #pragma once
 
+#include <stdexcept>
+
 #include "level1/scalv/scalv.h"
 #include "level1/ref_scalv.h"
 #include "inc/check_error.h"
+#include "common/testing_helpers.h"
 
 /**
  * @brief Microkernel test body for scalv operation.
  */
 template<typename T, typename U, typename FT>
-static void test_scalv_ukr( FT ukr, char conja_alpha, gtint_t n, gtint_t incx, T alpha, double thresh, bool nan_inf_check )
+static void test_scalv_ukr( FT ukr, char conja_alpha, gtint_t n, gtint_t incx,
+                            T alpha, double thresh, bool is_memory_test = false )
 {
-    //----------------------------------------------------------
-    //        Initialize vector with random numbers.
-    //----------------------------------------------------------
+    // Obtain and allocate memory for vectors.
     T *x, *x_ref;
 
-    gtint_t size_x = testinghelpers::buff_dim( n, incx );
+    gtint_t size_x = testinghelpers::buff_dim( n, incx ) * sizeof( T );
 
-    x     = ( T* )malloc( sizeof( T ) * size_x );
-    x_ref = ( T* )malloc( sizeof( T ) * size_x );
+    testinghelpers::ProtectedBuffer x_buffer( size_x, false, is_memory_test );
 
+    // is_memory_test = false for x_ref since we don't require different green
+    // or red zones.
+    testinghelpers::ProtectedBuffer x_ref_buffer( size_x, false, false );
+
+    // Acquire the first set of greenzones for x.
+    x = ( T* )x_buffer.greenzone_1;
+    // There is no greenzone_2 for x_ref.
+    x_ref = ( T* )x_ref_buffer.greenzone_1;
+
+    // Initialize x with random data.
     testinghelpers::datagenerators::randomgenerators( -10, 10, n, incx, x );
 
     // Copying x to x_ref, for comparision after computation
-    memcpy( x_ref, x, size_x * sizeof( T ) );
+    memcpy( x_ref, x, size_x );
 
-    //----------------------------------------------------------
-    //    Call reference implementation to get ref results.
-    //----------------------------------------------------------
-    if constexpr ( testinghelpers::type_info<T>::is_complex && testinghelpers::type_info<U>::is_real )
+    // Char conjx to BLIS conjx conversion
+    conj_t blis_conjalpha;
+    testinghelpers::char_to_blis_conj( conja_alpha, &blis_conjalpha );
+
+    testinghelpers::ProtectedBuffer::start_signal_handler();
+    try
+    {
+        // Invoking BLIS ukr.
+        // This will check for out of bounds access within first redzone.
+        ukr( blis_conjalpha, n, &alpha, x, incx, nullptr );
+
+        if ( is_memory_test )
+        {
+            // Acquire the pointers near the second redzone.
+            x = ( T* )x_buffer.greenzone_2;
+
+            // Copy the data for x accordingly
+            memcpy( x, x_ref, size_x );
+
+            // Inoking BLIS ukr to check with the second redzone.
+            ukr( blis_conjalpha, n, &alpha, x, incx, nullptr );
+        }
+    }
+    catch(const std::exception& e)
+    {
+        // Reset to default signal handler
+        testinghelpers::ProtectedBuffer::stop_signal_handler();
+
+        // Show failure in case seg fault was detected
+        FAIL() << "Memory Test Failed";
+    }
+
+    // Reset to default signal handler
+    testinghelpers::ProtectedBuffer::stop_signal_handler();
+
+    // Invoking the reference implementation to get reference results.
+    if constexpr ( testinghelpers::type_info<T>::is_complex &&
+                   testinghelpers::type_info<U>::is_real )
         testinghelpers::ref_scalv<T, U>( conja_alpha, n, alpha.real, x_ref, incx );
     else    // if constexpr ( std::is_same<T,U>::value )
         testinghelpers::ref_scalv<T, U>( conja_alpha, n, alpha, x_ref, incx );
 
-    //----------------------------------------------------------
-    //                  Call BLIS function.
-    //----------------------------------------------------------
-    conj_t blis_conjalpha;
-    testinghelpers::char_to_blis_conj( conja_alpha, &blis_conjalpha );
-    ukr( blis_conjalpha, n, &alpha, x, incx, nullptr );
-
-    //----------------------------------------------------------
-    //              Compute component-wise error.
-    //----------------------------------------------------------
-    computediff<T>( n, x, x_ref, incx, thresh, nan_inf_check );
-
-    free( x );
-    free( x_ref );
+    // Compute component-wise error.
+    computediff<T>( n, x, x_ref, incx, thresh );
 }

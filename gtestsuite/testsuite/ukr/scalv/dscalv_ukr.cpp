@@ -40,11 +40,12 @@ class dscalvUkrTest :
                                                    char,            // conj_alpha
                                                    gtint_t,         // n
                                                    gtint_t,         // incx
-                                                   double>> {};     // alpha
+                                                   double,          // alpha
+                                                   bool>> {};       // is_memory_test
 GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(dscalvUkrTest);
 
 // Tests using random integers as vector elements.
-TEST_P( dscalvUkrTest, RandomData )
+TEST_P( dscalvUkrTest, FunctionalTest )
 {
     using T = double;
     //----------------------------------------------------------
@@ -59,37 +60,37 @@ TEST_P( dscalvUkrTest, RandomData )
     gtint_t n = std::get<2>(GetParam());
     // stride size for x:
     gtint_t incx = std::get<3>(GetParam());
-    // alpha
+    // alpha:
     T alpha = std::get<4>(GetParam());
+    // is_memory_test:
+    bool is_memory_test = std::get<5>(GetParam());
 
     // Set the threshold for the errors:
     double thresh = testinghelpers::getEpsilon<T>();
     //----------------------------------------------------------
     //     Call generic test body using those parameters
     //----------------------------------------------------------
-    test_scalv_ukr<T, T, dscalv_ker_ft>( ukr, conj_alpha, n, incx, alpha, thresh, true );
+    test_scalv_ukr<T, T, dscalv_ker_ft>( ukr, conj_alpha, n, incx, alpha, thresh, is_memory_test );
 }
 
-// Used to generate a test case with a sensible name.
-// Beware that we cannot use fp numbers (e.g., 2.3) in the names,
-// so we are only printing int(2.3). This should be enough for debugging purposes.
-// If this poses an issue, please reach out.
+// Test-case logger : Used to print the test-case details.
 class dscalvUkrTestPrint {
 public:
     std::string operator()(
-        testing::TestParamInfo<std::tuple<dscalv_ker_ft, char, gtint_t, gtint_t, double>> str) const {
+        testing::TestParamInfo<std::tuple<dscalv_ker_ft, char, gtint_t, gtint_t, double, bool>> str) const {
         char conjx = std::get<1>(str.param);
         gtint_t n = std::get<2>(str.param);
         gtint_t incx = std::get<3>(str.param);
         double alpha = std::get<4>(str.param);
+        bool is_memory_test = std::get<5>(str.param);
 
-        std::string str_name = "dscalvUkrTest";
+        std::string str_name = "d";
         str_name += "_n" + std::to_string(n);
         str_name += (conjx == 'n') ? "_noconjx" : "_conjx";
         std::string incx_str = ( incx > 0) ? std::to_string(incx) : "m" + std::to_string(std::abs(incx));
         str_name += "_incx" + incx_str;
-        std::string alpha_str = ( alpha > 0) ? std::to_string(int(alpha)) : "m" + std::to_string(int(std::abs(alpha)));
-        str_name = str_name + "_a" + alpha_str;
+        str_name = str_name + "_alpha" + testinghelpers::get_value_string(alpha);
+        str_name += ( is_memory_test ) ? "_mem_test_enabled" : "_mem_test_disabled";
 
         return str_name;
     }
@@ -132,7 +133,8 @@ INSTANTIATE_TEST_SUITE_P(
                                 // double( 0.0),
                                 double( 7.0),
                                 double(-3.0)
-            )
+            ),
+            ::testing::Values(false, true)                 // is_memory_test
         ),
         ::dscalvUkrTestPrint()
     );
@@ -160,7 +162,8 @@ INSTANTIATE_TEST_SUITE_P(
                                 // double( 0.0),
                                 double( 7.0),
                                 double(-3.0)
-            )
+            ),
+            ::testing::Values(false, true)                 // is_memory_test
         ),
         ::dscalvUkrTestPrint()
     );
@@ -220,7 +223,8 @@ INSTANTIATE_TEST_SUITE_P(
                                 double( 0.0),
                                 double( 7.0),
                                 double(-3.0)
-            )
+            ),
+            ::testing::Values(false, true)                 // is_memory_test
         ),
         ::dscalvUkrTestPrint()
     );
@@ -245,7 +249,8 @@ INSTANTIATE_TEST_SUITE_P(
                                 double( 0.0),
                                 double( 7.0),
                                 double(-3.0)
-            )
+            ),
+            ::testing::Values(false, true)                 // is_memory_test
         ),
         ::dscalvUkrTestPrint()
     );
@@ -326,7 +331,8 @@ INSTANTIATE_TEST_SUITE_P(
                                 double( 0.0),
                                 double( 7.0),
                                 double(-3.0)
-            )
+            ),
+            ::testing::Values(false, true)                 // is_memory_test
         ),
         ::dscalvUkrTestPrint()
     );
@@ -351,7 +357,8 @@ INSTANTIATE_TEST_SUITE_P(
                                 double( 0.0),
                                 double( 7.0),
                                 double(-3.0)
-            )
+            ),
+            ::testing::Values(false, true)                 // is_memory_test
         ),
         ::dscalvUkrTestPrint()
     );

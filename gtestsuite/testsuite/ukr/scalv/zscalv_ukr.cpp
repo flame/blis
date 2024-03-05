@@ -40,11 +40,12 @@ class zscalvUkrTest :
                                                    char,            // conj_alpha
                                                    gtint_t,         // n
                                                    gtint_t,         // incx
-                                                   dcomplex>> {};   // alpha
+                                                   dcomplex,        // alpha
+                                                   bool>> {};       // is_memory_test
 GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(zscalvUkrTest);
 
 // Tests using random integers as vector elements.
-TEST_P( zscalvUkrTest, RandomData )
+TEST_P( zscalvUkrTest, FunctionalTest )
 {
     using T = dcomplex;
 
@@ -61,8 +62,10 @@ TEST_P( zscalvUkrTest, RandomData )
     gtint_t n = std::get<2>(GetParam());
     // stride size for x:
     gtint_t incx = std::get<3>(GetParam());
-    // alpha
+    // alpha:
     T alpha = std::get<4>(GetParam());
+    // is_memory_test:
+    bool is_memory_test = std::get<5>(GetParam());
 
     // Set the threshold for the errors:
     double thresh = testinghelpers::getEpsilon<T>();
@@ -70,30 +73,27 @@ TEST_P( zscalvUkrTest, RandomData )
     //----------------------------------------------------------
     //     Call generic test body using those parameters
     //----------------------------------------------------------
-    test_scalv_ukr<T, T, zscalv_ker_ft>( ukr, conj_alpha, n, incx, alpha, thresh, true );
+    test_scalv_ukr<T, T, zscalv_ker_ft>( ukr, conj_alpha, n, incx, alpha, thresh, is_memory_test );
 }
 
-// Used to generate a test case with a sensible name.
-// Beware that we cannot use fp numbers (e.g., 2.3) in the names,
-// so we are only printing int(2.3). This should be enough for debugging purposes.
-// If this poses an issue, please reach out.
+// Test-case logger : Used to print the test-case details.
 class zscalvUkrTestPrint {
 public:
     std::string operator()(
-        testing::TestParamInfo<std::tuple<zscalv_ker_ft, char, gtint_t, gtint_t, dcomplex>> str) const {
+        testing::TestParamInfo<std::tuple<zscalv_ker_ft, char, gtint_t, gtint_t, dcomplex, bool>> str) const {
         char conjx = std::get<1>(str.param);
         gtint_t n = std::get<2>(str.param);
         gtint_t incx = std::get<3>(str.param);
         dcomplex alpha = std::get<4>(str.param);
+        bool is_memory_test = std::get<5>(str.param);
 
-        std::string str_name = "zscalvUkrTest";
+        std::string str_name = "z";
         str_name += "_n" + std::to_string(n);
         str_name += (conjx == 'n') ? "_noconjx" : "_conjx";
         std::string incx_str = ( incx > 0) ? std::to_string(incx) : "m" + std::to_string(std::abs(incx));
         str_name += "_incx" + incx_str;
-        std::string alpha_str = ( alpha.real > 0) ? std::to_string(int(alpha.real)) : ("m" + std::to_string(int(std::abs(alpha.real))));
-                    alpha_str = alpha_str + "pi" + (( alpha.imag > 0) ? std::to_string(int(alpha.imag)) : ("m" + std::to_string(int(std::abs(alpha.imag)))));
-        str_name = str_name + "_a" + alpha_str;
+        str_name += "_alpha" + testinghelpers::get_value_string(alpha);
+        str_name += ( is_memory_test ) ? "_mem_test_enabled" : "_mem_test_disabled";
 
         return str_name;
     }
@@ -137,7 +137,8 @@ INSTANTIATE_TEST_SUITE_P(
                                 dcomplex{-5.1, -7.3},
                                 dcomplex{ 0.0,  0.0},
                                 dcomplex{ 7.3,  5.1}
-            )
+            ),
+            ::testing::Values(false, true)                 // is_memory_test
         ),
         ::zscalvUkrTestPrint()
     );
@@ -162,7 +163,8 @@ INSTANTIATE_TEST_SUITE_P(
                                 dcomplex{-5.1, -7.3},
                                 dcomplex{ 0.0,  0.0},
                                 dcomplex{ 7.3,  5.1}
-            )
+            ),
+            ::testing::Values(false, true)                 // is_memory_test
         ),
         ::zscalvUkrTestPrint()
     );
