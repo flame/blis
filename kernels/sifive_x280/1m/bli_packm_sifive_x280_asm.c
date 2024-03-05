@@ -80,7 +80,7 @@ void bli_spackm_sifive_x280_asm_7m4
     float kappa_cast = *kappa;
 
     // MRxk kernel
-    if (cdim == 7 && cdim_max == 7 && cdim_bcast == 1)
+    if (cdim <= 7 && cdim_max == 7 && cdim_bcast == 1)
     {
         if (lda == 1) {
             __asm__ volatile("vsetvli zero, %0, e%1, m1, ta, ma" : : "r"(n), "i"(8 * FLT_SIZE));
@@ -173,7 +173,7 @@ void bli_spackm_sifive_x280_asm_7m4
         }
     }
     // NRxk kernel
-    else if (cdim == 64 && cdim_max == 64 && cdim_bcast == 1)
+    else if (cdim <= 64 && cdim_max == 64 && cdim_bcast == 1)
     {
         if (lda == 1) {
             __asm__ volatile("vsetvli zero, %0, e%1, m4, ta, ma" : : "r"(NR), "i"(8 * FLT_SIZE));
@@ -395,7 +395,7 @@ void bli_dpackm_sifive_x280_asm_7m4
     double kappa_cast = *kappa;
 
     // MRxk kernel
-    if (cdim == 7 && cdim_max == 7 && cdim_bcast == 1)
+    if (cdim <= 7 && cdim_max == 7 && cdim_bcast == 1)
     {
         if (lda == 1) {
             __asm__ volatile("vsetvli zero, %0, e%1, m1, ta, ma" : : "r"(n), "i"(8 * FLT_SIZE));
@@ -488,7 +488,7 @@ void bli_dpackm_sifive_x280_asm_7m4
         }
     }
     // NRxk kernel
-    else if (cdim == 32 && cdim_max == 32 && cdim_bcast == 1)
+    else if (cdim <= 32 && cdim_max == 32 && cdim_bcast == 1)
     {
         if (lda == 1) {
             __asm__ volatile("vsetvli zero, %0, e%1, m4, ta, ma" : : "r"(NR), "i"(8 * FLT_SIZE));
@@ -704,7 +704,7 @@ void bli_cpackm_sifive_x280_asm_6m2
     scomplex kappa_cast = *kappa;
 
     // MRxk kernel
-    if (cdim == 6 && cdim_max == 6 && cdim_bcast == 1)
+    if (cdim <= 6 && cdim_max == 6 && cdim_bcast == 1)
     {
         if (lda == 1) {
             __asm__ volatile("vsetvli zero, %0, e%1, m1, ta, ma" : : "r"(n), "i"(8 * FLT_SIZE));
@@ -872,7 +872,7 @@ void bli_cpackm_sifive_x280_asm_6m2
         }
     }
     // NRxk kernel
-    else if (cdim == 32 && cdim_max == 32 && cdim_bcast == 1)
+    else if (cdim <= 32 && cdim_max == 32 && cdim_bcast == 1)
     {
         if (lda == 1) {
             __asm__ volatile("vsetvli zero, %0, e%1, m2, ta, ma" : : "r"(NR), "i"(8 * FLT_SIZE));
@@ -1106,7 +1106,7 @@ void bli_zpackm_sifive_x280_asm_6m2
     dcomplex kappa_cast = *kappa;
 
     // MRxk kernel
-    if (cdim == 6 && cdim_max == 6 && cdim_bcast == 1)
+    if (cdim <= 6 && cdim_max == 6 && cdim_bcast == 1)
     {
         if (lda == 1) {
             __asm__ volatile("vsetvli zero, %0, e%1, m1, ta, ma" : : "r"(n), "i"(8 * FLT_SIZE));
@@ -1274,7 +1274,7 @@ void bli_zpackm_sifive_x280_asm_6m2
         }
     }
     // NRxk kernel
-    else if (cdim == 16 && cdim_max == 16 && cdim_bcast == 1)
+    else if (cdim <= 16 && cdim_max == 16 && cdim_bcast == 1)
     {
         if (lda == 1) {
             __asm__ volatile("vsetvli zero, %0, e%1, m2, ta, ma" : : "r"(NR), "i"(8 * FLT_SIZE));
