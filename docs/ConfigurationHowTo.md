@@ -691,8 +691,8 @@ Adding support for a new-subconfiguration to BLIS is similar to adding support f
 
 
    * **`frame/include/bli_gentconf_macro_defs.h`**. We must also update the macro which automatically generates code which
-   should be executed for each enabled sub-configuration. This macro work in two parts: first we conditionally define a
-   macro for our new sub-configuration, and then call that macro from the generic `INSERT_GENTCONF` macro. For `knl`, the
+   should be executed for each enabled sub-configuration. This macro update requires changes in two places: first we must conditionally define a
+   macro for our new sub-configuration, and then we can invoke (call) that macro from the generic `INSERT_GENTCONF` macro. For `knl`, the
    first, sub-configuration-specific macro takes the form,
       ```c
       // -- KNL microarchitecture --
