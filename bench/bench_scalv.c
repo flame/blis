@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2021 - 2023, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2021 - 2024, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -63,8 +63,8 @@ int main( int argc, char** argv )
     obj_t x, x_save;
     obj_t alpha;
     dim_t p_inc = 0; // to keep track of number of inputs
-    num_t dt;
-    char  dt_ch;
+    num_t dt_x, dt_alpha;
+    char  dt_ch_x, dt_ch_alpha;
     int   r, n_repeats;
 
     double   dtime;
@@ -76,7 +76,8 @@ int main( int argc, char** argv )
 
     n_repeats = N_REPEAT;  // This macro will get from Makefile.
 
-    dt = DT;
+    dt_x = DT;
+    dt_alpha = DT;
 
     if (argc < 3)
       {
@@ -101,26 +102,39 @@ int main( int argc, char** argv )
     dim_t n;
     double alpha_r, alpha_i;
     inc_t incx;
+    char dt_ch[3]; // to store the API datatype
     char tmp[256]; // to store function name, line no present in logs.
 
-
     // {S,D,C,Z} {alpha n incx}
-    while (fscanf(fin, "%s %c %lf %lf " INT_FS INT_FS "\n",
-        tmp, &dt_ch, &alpha_r, &alpha_i, &n, &incx) == 6)
+    while (fscanf(fin, "%s %s %lf %lf " INT_FS INT_FS "\n",
+        tmp, dt_ch, &alpha_r, &alpha_i, &n, &incx) == 6)
       {
 
+       dt_ch[2] = '\0'; // Null terminating the string for logging purpose
 #ifdef PRINT
-        fprintf (stdout, "Input = %s %c %lf %lf %ld %ld\n",
+        fprintf (stdout, "Input = %s %s %lf %lf %ld %ld\n",
                  tmp, dt_ch, alpha_r, alpha_i, n, incx);
 #endif
-
-        if (dt_ch == 'D' || dt_ch == 'd') dt = BLIS_DOUBLE;
-        else if (dt_ch == 'Z' || dt_ch == 'z') dt = BLIS_DCOMPLEX;
-        else if (dt_ch == 'S' || dt_ch == 's') dt = BLIS_FLOAT;
-        else if (dt_ch == 'C' || dt_ch == 'c') dt = BLIS_SCOMPLEX;
+        // Acquiring the datatype of input vector x
+        dt_ch_x = dt_ch[0];
+        if (dt_ch_x == 'D' || dt_ch_x == 'd') dt_x = BLIS_DOUBLE;
+        else if (dt_ch_x == 'Z' || dt_ch_x == 'z') dt_x = BLIS_DCOMPLEX;
+        else if (dt_ch_x == 'S' || dt_ch_x == 's') dt_x = BLIS_FLOAT;
+        else if (dt_ch_x == 'C' || dt_ch_x == 'c') dt_x = BLIS_SCOMPLEX;
         else
           {
-            printf("Invalid data type %c\n", dt_ch);
+            printf("Invalid data type %c\n", dt_ch_x);
+            continue;
+          }
+        
+        // Acquiring the datatype of input scalar alpha
+        dt_ch_alpha = dt_ch[1];
+        if (dt_ch_alpha == 'D' || dt_ch_alpha == 'd') dt_alpha = BLIS_DOUBLE;
+        else if (dt_ch_alpha == 'S' || dt_ch_alpha == 's') dt_alpha = BLIS_FLOAT;
+        else if(dt_ch_alpha == '\0')  dt_alpha = dt_x;
+        else
+          {
+            printf("Invalid data type %c\n", dt_ch_alpha);
             continue;
           }
 
@@ -135,14 +149,14 @@ int main( int argc, char** argv )
         //      a is a scalar
         //      X is an n-element vector.
 
-        bli_obj_create( dt, n, 1, incx, 1, &x );
-        bli_obj_create( dt, n, 1, incx, 1, &x_save );
+        bli_obj_create( dt_x, n, 1, incx, 1, &x );
+        bli_obj_create( dt_x, n, 1, incx, 1, &x_save );
 
 #ifdef AOCL_MATRIX_INITIALISATION
         bli_randm( &x );
 #endif
 
-        bli_obj_create( dt, 1, 1, 0, 0, &alpha );
+        bli_obj_create( dt_alpha, 1, 1, 0, 0, &alpha );
         bli_setsc( alpha_r, alpha_i, &alpha );
 
         bli_copym( &x, &x_save );
@@ -168,19 +182,19 @@ int main( int argc, char** argv )
             f77_int nn     = bli_obj_length( &x );
             f77_int blas_incx   = bli_obj_vector_inc( &x );
 
-            if ( bli_is_float( dt ) ){
+            if ( bli_is_float( dt_x ) && bli_is_float( dt_alpha ) ){
                 float*  xp     = bli_obj_buffer( &x );
                 float*  scalar = bli_obj_buffer( &alpha );
 #ifdef CBLAS
                 cblas_sscal( nn,
                             *scalar,
                             xp, blas_incx );
-#else // cblas scal
+#else // cblas sscal
                 sscal_( &nn, scalar,
                         xp, &blas_incx );
-#endif // cblas scal
+#endif // cblas sscal
             }
-            else if ( bli_is_double( dt ) )
+            else if ( bli_is_double( dt_x ) && bli_is_double( dt_alpha ) )
             {
 
                 double*  xp     = bli_obj_buffer( &x );
@@ -195,7 +209,7 @@ int main( int argc, char** argv )
                         xp, &blas_incx );
 #endif // cblas dscal
             }
-            else if ( bli_is_scomplex( dt ) )
+            else if ( bli_is_scomplex( dt_x ) && bli_is_scomplex( dt_alpha ) )
             {
                 scomplex*  xp     = bli_obj_buffer( &x );
                 scomplex*  scalar = bli_obj_buffer( &alpha );
@@ -209,7 +223,7 @@ int main( int argc, char** argv )
                         xp, &blas_incx );
 #endif // cblas cscal
             }
-            else if ( bli_is_dcomplex( dt ) )
+            else if ( bli_is_dcomplex( dt_x ) && bli_is_dcomplex( dt_alpha ) )
             {
                 dcomplex*  xp     = bli_obj_buffer( &x );
                 dcomplex*  scalar = bli_obj_buffer( &alpha );
@@ -220,7 +234,33 @@ int main( int argc, char** argv )
 #else // cblas zscal
                 zscal_( &nn, scalar,
                         xp, &blas_incx );
-#endif // cblas zcscal
+#endif // cblas zscal
+            }
+            else if ( bli_is_scomplex( dt_x ) && bli_is_float( dt_alpha ) )
+            {
+                scomplex*  xp     = bli_obj_buffer( &x );
+                float*  scalar   = bli_obj_buffer( &alpha );
+#ifdef CBLAS
+                cblas_csscal( nn,
+                            *scalar,
+                            xp, blas_incx );
+#else // cblas csscal
+                csscal_( &nn, scalar,
+                        xp, &blas_incx );
+#endif // cblas csscal
+            }
+            else if ( bli_is_dcomplex( dt_x ) && bli_is_double( dt_alpha ) )
+            {
+                dcomplex*  xp     = bli_obj_buffer( &x );
+                double*  scalar   = bli_obj_buffer( &alpha );
+#ifdef CBLAS
+                cblas_zdscal( nn,
+                            *scalar,
+                            xp, blas_incx );
+#else // cblas zdscal
+                zdscal_( &nn, scalar,
+                        xp, &blas_incx );
+#endif // cblas zdscal
             }
 
 #endif // BLIS Interface
@@ -235,7 +275,11 @@ int main( int argc, char** argv )
 
         gflops = n / ( dtime_save * 1.0e9 );
 
-        if ( bli_is_complex( dt ) ) gflops *= 4.0;
+        if ( bli_is_complex( dt_x ) ) 
+        {
+          if( bli_is_complex( dt_alpha ) )    gflops *= 4.0;
+          else if( bli_is_real( dt_alpha ) )  gflops *= 2.0;
+        }
 
         printf( "data_scalv_%s", BLAS );
 
@@ -245,7 +289,7 @@ int main( int argc, char** argv )
                (unsigned long)n,
                 gflops);
 
-        fprintf (fout, "%s %c %lf %lf %ld %ld %6.3f\n",
+        fprintf (fout, "%s %s %lf %lf %ld %ld %6.3f\n",
                  tmp, dt_ch, alpha_r, alpha_i, n, incx, gflops);
 
         fflush(fout);
