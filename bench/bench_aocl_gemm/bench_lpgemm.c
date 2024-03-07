@@ -236,7 +236,7 @@ void fill_array_post_ops_ ## ctype ( void* arr, dim_t size ) \
     ctype* temp_arr = ( ctype* ) arr; \
     for ( dim_t i = 0; i < size; ++i ) \
     { \
-        temp_arr[i] = ( ctype )( rand() % 20 ); \
+        temp_arr[i] = ( ctype )( rand() % 5 ); \
     } \
 } \
 
@@ -400,12 +400,6 @@ void mat_mul_bench_driver_ ## BLAS_SFX \
     double min_time_diff = DBL_MAX; \
     for ( int32_t nr = 0; nr < n_repeats; ++nr ) \
     { \
-        if ( bench_mode == 'a' ) \
-        { \
-            int32_t size_C = ( ( stor_order == 'r') || ( stor_order == 'R' ) )? m * ldc : n * ldc; \
-            GEN_FUNC_NAME(fill_array_,C_type)( c, ( size_C ) ); \
-        } \
- \
         struct timespec tstart={0,0}, tend={0,0}; \
         clock_gettime(CLOCK_MONOTONIC, &tstart); \
  \
@@ -1382,7 +1376,7 @@ void mat_mul_bench_main_ ## BLAS_SFX \
     if ( bench_mode == 'a' ) \
     { \
         GEN_FUNC_NAME(fill_array_,C_type)( c, ( size_C ) ); \
-        GEN_FUNC_NAME(fill_array_,C_type)( c_ref, ( size_C ) ); \
+        memcpy(c_ref, c , (size_C * sizeof(C_type))); \
     } \
     else \
     { \

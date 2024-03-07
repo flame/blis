@@ -158,8 +158,6 @@ void lpgemv_n_one_kernel_f32_ker_ft
     ZERO_ACC_ZMM_4_REG(zmm28, zmm29, zmm30, zmm31);
     ZERO_ACC_XMM_4_REG (xmm0,xmm1,xmm2,xmm3)
 
-    _mm256_zeroupper();
-
     //update pointers
     a_use = a + mr * rs_a;
     b_use = b;
@@ -379,7 +377,7 @@ void lpgemv_n_one_kernel_f32_ker_ft
           {
             zmm6 = _mm512_mask_loadu_ps(zmm7, k1, b_use);
             zmm0 = _mm512_mask_loadu_ps(zmm7, k1, a_use);
-            zmm22 = _mm512_fmadd_ps(zmm22, zmm6, zmm0);
+            zmm22 = _mm512_fmadd_ps(zmm0, zmm6, zmm22);
           }
           // When only fringe 1, update the registers to store in order
           if (!(mr0 & 0x2))  zmm20 = zmm22;

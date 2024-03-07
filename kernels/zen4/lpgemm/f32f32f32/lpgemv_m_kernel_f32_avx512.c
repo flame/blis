@@ -131,8 +131,6 @@ void lpgemv_m_one_kernel_f32_ker_ft
 		ZERO_ACC_ZMM_4_REG(zmm24, zmm25, zmm26, zmm27);
 		ZERO_ACC_ZMM_4_REG(zmm28, zmm29, zmm30, zmm31);
 
-		_mm256_zeroupper();
-
 		//_mm_prefetch( (MR X NR) from C
 		_mm_prefetch((c_use + 0 * rs_c), _MM_HINT_T0);
 		_mm_prefetch((c_use + 16 * rs_c), _MM_HINT_T0);
