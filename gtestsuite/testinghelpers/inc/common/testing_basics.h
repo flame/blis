@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2023, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2023-2024, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -173,7 +173,9 @@ static void alphax( gtint_t n, T alpha, T *xp, gtint_t incx )
     gtint_t ix = 0;
     for(i = 0 ; i < n ; i++) {
         xp[ix] = (alpha * xp[ix]);
-        ix = ix + incx;
+        // use absolute value of incx to ensure
+        // correctness when incx < 0
+        ix = ix + std::abs(incx);
     }
 }
 
