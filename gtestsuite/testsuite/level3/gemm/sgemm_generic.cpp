@@ -116,10 +116,8 @@ public:
         str_name = str_name + "_m_" + std::to_string(m);
         str_name = str_name + "_n_" + std::to_string(n);
         str_name = str_name + "_k_" + std::to_string(k);
-        std::string alpha_str = ( alpha > 0) ? std::to_string(int(alpha)) : "m" + std::to_string(int(std::abs(alpha)));
-        str_name = str_name + "_alpha_" + alpha_str;
-        std::string beta_str = ( beta > 0) ? std::to_string(int(beta)) : "m" + std::to_string(int(std::abs(beta)));
-        str_name = str_name + "_beta_" + beta_str;
+        str_name = str_name + "_alpha_" + testinghelpers::get_value_string(alpha);
+        str_name = str_name + "_beta_" + testinghelpers::get_value_string(beta);
         gtint_t lda = testinghelpers::get_leading_dimension( sfm, tsa, m, k, lda_inc );
         gtint_t ldb = testinghelpers::get_leading_dimension( sfm, tsb, k, n, ldb_inc );
         gtint_t ldc = testinghelpers::get_leading_dimension( sfm, 'n', m, n, ldc_inc );

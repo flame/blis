@@ -627,30 +627,42 @@ template void print_matrix<dcomplex>( const char *mat, char, gtint_t, gtint_t, d
     If the datatype is complex : The string is concatenated with both the real and
     imaginary components values, based on analysis done separately to each of them
     (similar to real datatype).
+
+    Also handles values of datatype gtint_t.
 */
 template<typename T>
 std::string get_value_string(T exval)
 {
   std::string exval_str;
-  if constexpr (testinghelpers::type_info<T>::is_real)
+  if constexpr (std::is_integral<T>::value)
+  {
+    exval_str = ( exval >= 0) ? std::to_string(exval) : "m" + std::to_string(std::abs(exval));
+  }
+  else if constexpr (testinghelpers::type_info<T>::is_real)
   {
     if(std::isnan(exval))
       exval_str = "nan";
     else if(std::isinf(exval))
-      exval_str = (exval >= 0) ? "inf" : "minus_inf";
+      exval_str = (exval >= testinghelpers::ZERO<T>()) ? "inf" : "minus_inf";
     else
-      exval_str = ( exval >= 0) ? std::to_string(int(exval)) : "minus_" + std::to_string(int(std::abs(exval)));
+    {
+      exval_str = ( exval >= testinghelpers::ZERO<T>()) ? std::to_string(exval) : "m" + std::to_string(std::abs(exval));
+      exval_str = exval_str.substr(0, exval_str.find(".")+2);
+      exval_str = exval_str.replace(exval_str.find("."),1,"p");
+    }
   }
-  else
+  else if constexpr (testinghelpers::type_info<T>::is_complex)
   {
     using RT = typename testinghelpers::type_info<T>::real_type;
-    exval_str = get_value_string<RT>(exval.real) + std::string{"_pi_"} + get_value_string<RT>(exval.imag);
+    exval_str = get_value_string<RT>(exval.real) + std::string{"_"} + get_value_string<RT>(exval.imag) + std::string{"i"};
   }
+
   return exval_str;
 }
 template std::string testinghelpers::get_value_string( float );
 template std::string testinghelpers::get_value_string( double );
 template std::string testinghelpers::get_value_string( scomplex );
 template std::string testinghelpers::get_value_string( dcomplex );
+template std::string testinghelpers::get_value_string( gtint_t );
 
 } //end of namespace testinghelpers

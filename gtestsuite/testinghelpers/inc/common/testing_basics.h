@@ -393,7 +393,7 @@ void print_matrix( const char *mat, char storage, gtint_t m, gtint_t n, T *a, gt
 /**
  * @brief returns a string with the correct NaN/Inf for printing
  *
- * @tparam T float, double, scomplex, dcomplex.
+ * @tparam T gtint_t, float, double, scomplex, dcomplex.
  * @param exval exception value for setting the string.
  */
 template<typename T>
