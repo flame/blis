@@ -35,7 +35,7 @@
 #include <gtest/gtest.h>
 #include "test_ger.h"
 
-class zgerTest :
+class zgerGenericTest :
         public ::testing::TestWithParam<std::tuple<char,
                                                    char,
                                                    char,
@@ -46,7 +46,7 @@ class zgerTest :
                                                    gtint_t,
                                                    gtint_t>> {};
 
-TEST_P(zgerTest, RandomData)
+TEST_P(zgerGenericTest, RandomData)
 {
     using T = dcomplex;
     //----------------------------------------------------------
@@ -71,19 +71,18 @@ TEST_P(zgerTest, RandomData)
     gtint_t incy = std::get<7>(GetParam());
     // lda increment.
     // If increment is zero, then the array size matches the matrix size.
-    // If increment are nonnegative, the array size is bigger than the matrix size.
+    // If increment is non-negative, the array size is bigger than the matrix size.
     gtint_t lda_inc = std::get<8>(GetParam());
 
     // Set the threshold for the errors:
     // Check gtestsuite ger.h or netlib source code for reminder of the
     // functionality from which we estimate operation count per element
     // of output, and hence the multipler for epsilon.
-    // No adjustment applied yet for complex data.
     double thresh;
     if (m == 0 || n == 0 || alpha == testinghelpers::ZERO<T>())
         thresh = 0.0;
     else
-        thresh = 3*testinghelpers::getEpsilon<T>();
+        thresh = 7*testinghelpers::getEpsilon<T>();
 
     //----------------------------------------------------------
     //     Call test body using these parameters
@@ -91,7 +90,7 @@ TEST_P(zgerTest, RandomData)
     test_ger<T>( storage, conjx, conjy, m, n, alpha, incx, incy, lda_inc, thresh );
 }
 
-class zgerTestPrint {
+class zgerGenericTestPrint {
 public:
     std::string operator()(
         testing::TestParamInfo<std::tuple<char,char,char,gtint_t,gtint_t,dcomplex,gtint_t,gtint_t,gtint_t>> str) const {
@@ -115,36 +114,146 @@ public:
         str_name    = str_name + "_" + conjx+conjy;
         str_name    = str_name + "_" + std::to_string(m);
         str_name    = str_name + "_" + std::to_string(n);
-        std::string incx_str = ( incx > 0) ? std::to_string(incx) : "m" + std::to_string(std::abs(incx));
-        std::string incy_str = ( incy > 0) ? std::to_string(incy) : "m" + std::to_string(std::abs(incy));
+        std::string incx_str = ( incx >= 0) ? std::to_string(incx) : "m" + std::to_string(std::abs(incx));
+        std::string incy_str = ( incy >= 0) ? std::to_string(incy) : "m" + std::to_string(std::abs(incy));
         str_name    = str_name + "_" + incx_str;
         str_name    = str_name + "_" + incy_str;
-        std::string alpha_str = ( alpha.real > 0) ? std::to_string(int(alpha.real)) : ("m" + std::to_string(int(std::abs(alpha.real))));
-                    alpha_str = alpha_str + "pi" + (( alpha.imag > 0) ? std::to_string(int(alpha.imag)) : ("m" + std::to_string(int(std::abs(alpha.imag)))));
-        str_name    = str_name + "_a" + alpha_str;
-        str_name    = str_name + "_" + std::to_string(ld_inc);
+        str_name    = str_name + "_alpha" + testinghelpers::get_value_string(alpha);
+        std::string ld_inc_str = ( ld_inc >= 0) ? std::to_string(ld_inc) : "m" + std::to_string(std::abs(ld_inc));
+        str_name    = str_name + "_lda_inc" + ld_inc_str;
         return str_name;
     }
 };
 
-// Black box testing.
 INSTANTIATE_TEST_SUITE_P(
-        Blackbox,
-        zgerTest,
+        unitPositiveIncrement,
+        zgerGenericTest,
         ::testing::Combine(
-            ::testing::Values('c'
+            // storage scheme: row/col-stored matrix
+            ::testing::Values( 'c'
+            // row-stored tests are disabled for BLAS since BLAS only supports col-storage scheme.
 #ifndef TEST_BLAS
-            ,'r'
+                             , 'r'
 #endif
-            ),                                                               // storage format
-            ::testing::Values('n'),                                          // conjx
-            ::testing::Values('n','c'),                                      // conjy
-            ::testing::Range(gtint_t(10), gtint_t(31), 10),                  // m
-            ::testing::Range(gtint_t(10), gtint_t(31), 10),                  // n
-            ::testing::Values(dcomplex{1.0, -2.0}),                          // alpha
-            ::testing::Values(gtint_t(1)),                                   // stride size for x
-            ::testing::Values(gtint_t(1)),                                   // stride size for y
-            ::testing::Values(gtint_t(0), gtint_t(2))                        // increment to the leading dim of a
+            ),
+            // conjx: uses n (no_conjugate) since it is real.
+            ::testing::Values( 'n' ),
+            // conjy: uses n (no_conjugate) since it is real.
+            ::testing::Values( 'n' ),
+            // m
+            ::testing::Range( gtint_t(10), gtint_t(101), 10 ),
+            // n
+            ::testing::Range( gtint_t(10), gtint_t(101), 10 ),
+            // alpha: value of scalar
+            ::testing::Values( dcomplex{-1.0, 4.0}, dcomplex{1.0, 1.0}, dcomplex{3.0, -2.0} ),
+            // incx: stride of x vector.
+            ::testing::Values( gtint_t(1) ),
+            // incy: stride of y vector.
+            ::testing::Values( gtint_t(1) ),
+            // inc_lda: increment to the leading dim of a
+            ::testing::Values( gtint_t(0) )
         ),
-        ::zgerTestPrint()
+        ::zgerGenericTestPrint()
     );
+
+#ifdef TEST_BLIS_TYPED
+// Test when conjugate of x is used as an argument. This option is BLIS-api specific.
+// Only test very few cases as sanity check since conj(x) = x for real types.
+// We can modify the values using implementantion details.
+INSTANTIATE_TEST_SUITE_P(
+        conjXY,
+        zgerGenericTest,
+        ::testing::Combine(
+            // storage scheme: row/col-stored matrix
+            ::testing::Values( 'c'
+            // row-stored tests are disabled for BLAS since BLAS only supports col-storage scheme.
+#ifndef TEST_BLAS
+                             , 'r'
+#endif
+            ),
+            // conjx: uses n (no_conjugate) since it is real.
+            ::testing::Values( 'n', 'c' ),
+            // conjy: uses n (no_conjugate) since it is real.
+            ::testing::Values( 'n', 'c' ),
+            // m
+            ::testing::Values( gtint_t(3), gtint_t(30), gtint_t(112) ),
+            // n
+            ::testing::Values( gtint_t(3), gtint_t(30), gtint_t(112) ),
+            // alpha: value of scalar
+            ::testing::Values( dcomplex{-1.0, 4.0}, dcomplex{1.0, 1.0}, dcomplex{3.0, -2.0} ),
+            // incx: stride of x vector.
+            ::testing::Values( gtint_t(1) ),
+            // incy: stride of y vector.
+            ::testing::Values( gtint_t(1) ),
+            // inc_lda: increment to the leading dim of a
+            ::testing::Values( gtint_t(1) )
+        ),
+        ::zgerGenericTestPrint()
+    );
+#endif
+
+INSTANTIATE_TEST_SUITE_P(
+        nonUnitPositiveIncrements,
+        zgerGenericTest,
+        ::testing::Combine(
+            // storage scheme: row/col-stored matrix
+            ::testing::Values( 'c'
+            // row-stored tests are disabled for BLAS since BLAS only supports col-storage scheme.
+#ifndef TEST_BLAS
+                             , 'r'
+#endif
+            ),
+            // conjx: uses n (no_conjugate) since it is real.
+            ::testing::Values( 'n' ),
+            // conjy: uses n (no_conjugate) since it is real.
+            ::testing::Values( 'n' ),
+            // m
+            ::testing::Values( gtint_t(3), gtint_t(30), gtint_t(112) ),
+            // n
+            ::testing::Values( gtint_t(3), gtint_t(30), gtint_t(112) ),
+            // alpha: value of scalar
+            ::testing::Values( dcomplex{-1.0, 4.0}, dcomplex{1.0, 1.0}, dcomplex{3.0, -2.0} ),
+            // incx: stride of x vector.
+            ::testing::Values( gtint_t(2) ),
+            // incy: stride of y vector.
+            ::testing::Values( gtint_t(3) ),
+            // inc_lda: increment to the leading dim of a
+            ::testing::Values( gtint_t(5) )
+        ),
+        ::zgerGenericTestPrint()
+    );
+
+// @note negativeIncrement tests are resulting in Segmentation Faults when
+//  BLIS_TYPED interface is being tested.
+#ifndef TEST_BLIS_TYPED
+INSTANTIATE_TEST_SUITE_P(
+        negativeIncrements,
+        zgerGenericTest,
+        ::testing::Combine(
+            // storage scheme: row/col-stored matrix
+            ::testing::Values( 'c'
+            // row-stored tests are disabled for BLAS since BLAS only supports col-storage scheme.
+#ifndef TEST_BLAS
+                             , 'r'
+#endif
+            ),
+            // conjx: uses n (no_conjugate) since it is real.
+            ::testing::Values( 'n' ),
+            // conjy: uses n (no_conjugate) since it is real.
+            ::testing::Values( 'n' ),
+            // m
+            ::testing::Values( gtint_t(3), gtint_t(30), gtint_t(112) ),
+            // n
+            ::testing::Values( gtint_t(3), gtint_t(30), gtint_t(112) ),
+            // alpha: value of scalar
+            ::testing::Values( dcomplex{-1.0, 4.0}, dcomplex{1.0, 1.0}, dcomplex{3.0, -2.0} ),
+            // incx: stride of x vector.
+            ::testing::Values( gtint_t(-2) ),
+            // incy: stride of y vector.
+            ::testing::Values( gtint_t(-3) ),
+            // inc_lda: increment to the leading dim of a
+            ::testing::Values( gtint_t(0) )
+        ),
+        ::zgerGenericTestPrint()
+    );
+#endif

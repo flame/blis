@@ -41,7 +41,6 @@
 #include <algorithm>
 
 template<typename T>
-
 void test_ger( char storage, char conjx, char conjy, gtint_t m, gtint_t n,
     T alpha, gtint_t incx, gtint_t incy, gtint_t lda_inc, double thresh )
 {
@@ -73,4 +72,49 @@ void test_ger( char storage, char conjx, char conjy, gtint_t m, gtint_t n,
     //              check component-wise error.
     //----------------------------------------------------------
     computediff<T>( storage, m, n, a.data(), a_ref.data(), lda, thresh );
+}
+
+template<typename T>
+void test_ger( char storage, char conjx, char conjy, gtint_t m, gtint_t n,
+               T alpha, gtint_t incx, gtint_t incy, gtint_t lda_inc, gtint_t ai,
+               gtint_t aj, T a_exval, gtint_t xi, T x_exval, gtint_t yi,
+               T y_exval, double thresh )
+{
+    // Compute the leading dimensions for matrix size calculation.
+    gtint_t lda = testinghelpers::get_leading_dimension( storage, 'n', m, n, lda_inc );
+
+    //----------------------------------------------------------
+    //        Initialize matrics with random integer numbers.
+    //----------------------------------------------------------
+    std::vector<T> a = testinghelpers::get_random_matrix<T>( -2, 5, storage, 'n', m, n, lda );
+    std::vector<T> x = testinghelpers::get_random_vector<T>( -3, 3, m, incx );
+    std::vector<T> y = testinghelpers::get_random_vector<T>( -3, 3, n, incy );
+
+    testinghelpers::set_ev_mat( storage, 'n', lda, ai, aj, a_exval, a.data() );
+    // Update the value at index xi to an extreme value, x_exval.
+    if ( -1 < xi && xi < n ) x[xi * abs(incx)] = x_exval;
+    else                     return;
+
+    // Update the value at index yi to an extreme value, y_exval.
+    if ( -1 < yi && yi < n ) y[yi * abs(incy)] = y_exval;
+    else                     return;
+
+    // Create a copy of c so that we can check reference results.
+    std::vector<T> a_ref(a);
+    //----------------------------------------------------------
+    //                  Call BLIS function
+    //----------------------------------------------------------
+    ger<T>( storage, conjx, conjy, m, n, &alpha, x.data(), incx,
+                                              y.data(), incy, a.data(), lda );
+
+    //----------------------------------------------------------
+    //                  Call reference implementation.
+    //----------------------------------------------------------
+    testinghelpers::ref_ger<T>( storage, conjx, conjy, m, n, alpha,
+                          x.data(), incx, y.data(), incy, a_ref.data(), lda );
+
+    //----------------------------------------------------------
+    //              check component-wise error.
+    //----------------------------------------------------------
+    computediff<T>( storage, m, n, a.data(), a_ref.data(), lda, thresh, true );
 }
