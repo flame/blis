@@ -359,36 +359,24 @@ template<typename T>
 void make_diag( char storage, gtint_t m, gtint_t n, T alpha, T *a, gtint_t ld );
 
 /**
- * print scalar value
- * @param[in] x    specifies the value.
- * @param[in] spec specifies the format specifer.
- */
-template<typename T>
-void print_scalar( T x, const char *spec );
-
-/**
  * print vector of length  n
- * @param[in] vec  specifies the vector name
  * @param[in] n    specifies the length of the given vector.
  * @param[in] a    specifies pointer which points to the first element of a.
  * @param[in] incx specifies storage spacing between elements of a.
- * @param[in] spec specifies the format specifer.
  */
 template<typename T>
-void print_vector( const char *vec, gtint_t n, T *x, gtint_t incx, const char *spec );
+void print_vector( gtint_t n, T *x, gtint_t incx);
 
 /**
  * print matrix of size m x n
- * @param[in] mat     specifies the matrix name
  * @param[in] storage specifies the storage format of matrix in memory.
  * @param[in] m       specifies the number of rows of given matrix.
  * @param[in] n       specifies the number of columns of given matrix.
  * @param[in] a       specifies pointer which points to the first element of a.
  * @param[in] ld      specifies leading dimension for a given matrix.
- * @param[in] spec    specifies the format specifer.
  */
 template<typename T>
-void print_matrix( const char *mat, char storage, gtint_t m, gtint_t n, T *a, gtint_t ld, const char *spec );
+void print_matrix( char storage, gtint_t m, gtint_t n, T *a, gtint_t ld);
 
 /**
  * @brief returns a string with the correct NaN/Inf for printing

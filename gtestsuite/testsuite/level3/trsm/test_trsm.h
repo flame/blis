@@ -107,7 +107,7 @@ void generate_NAN_INF( T* mat, char uploa, gtint_t m, gtint_t ld, EVT_TYPE type,
     else
     {
         // get a random number in range of 1 to m;
-        gtint_t mn = std::max(1, rand() % m);
+        gtint_t mn = std::max(gtint_t(1), gtint_t(rand()) % m);
         if( uploa == 'l' || uploa == 'L')
         {
             // set one element to inf/nan in lower half of matrix

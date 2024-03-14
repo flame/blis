@@ -528,67 +528,38 @@ template void make_diag<scomplex>( char, gtint_t, gtint_t, scomplex, scomplex *,
 template void make_diag<dcomplex>( char, gtint_t, gtint_t, dcomplex, dcomplex *, gtint_t );
 
 /**
- * print scalar value
- * @param[in] x    specifies the value.
- * @param[in] spec specifies the format specifer.
- */
-template<typename T>
-void print_scalar( T x, const char *spec ) {
-    if constexpr (testinghelpers::type_info<T>::is_real)
-        printf(spec, x);
-    else {
-        printf( spec, x.real );
-        if(x.imag < 0)    printf( "-" );
-        else              printf( "+" );
-        printf( spec, abs(x.imag) );
-        printf( " " );
-    }
-}
-template void print_scalar<float>( float x, const char * );
-template void print_scalar<double>( double x, const char * );
-template void print_scalar<scomplex>( scomplex x, const char * );
-template void print_scalar<dcomplex>( dcomplex x, const char * );
-
-/**
  * print vector of length  n
- * @param[in] vec  specifies the vector name
  * @param[in] n    specifies the length of the given vector.
  * @param[in] a    specifies pointer which points to the first element of a.
  * @param[in] incx specifies storage spacing between elements of a.
- * @param[in] spec specifies the format specifer.
  */
 template<typename T>
-void print_vector( const char *vec, gtint_t n, T *x, gtint_t incx, const char *spec )
+void print_vector( gtint_t n, T *x, gtint_t incx)
 {
     gtint_t i, idx;
     T val;
-    std::cout << "Vector " << vec << std::endl;
     for ( i = 0; i < n; i++ )
     {
         idx = (incx > 0) ? (i * incx) : ( - ( n - i - 1 ) * incx );
         val = x[idx];
-        print_scalar<T>(val,spec);
-        printf( " " );
+        std::cout<<val<<" ";
     }
-    printf( "\n\n" );
 }
-template void print_vector<float>( const char *vec, gtint_t, float *, gtint_t, const char * );
-template void print_vector<double>( const char *vec, gtint_t, double *, gtint_t, const char * );
-template void print_vector<scomplex>( const char *vec, gtint_t, scomplex *, gtint_t, const char * );
-template void print_vector<dcomplex>( const char *vec, gtint_t, dcomplex *, gtint_t, const char * );
+template void print_vector<float>( gtint_t, float *, gtint_t);
+template void print_vector<double>( gtint_t, double *, gtint_t);
+template void print_vector<scomplex>( gtint_t, scomplex *, gtint_t);
+template void print_vector<dcomplex>( gtint_t, dcomplex *, gtint_t);
 
 /**
  * print matrix of size m x n
- * @param[in] mat     specifies the matrix name
  * @param[in] storage specifies the storage format of matrix in memory.
  * @param[in] m       specifies the number of rows of given matrix.
  * @param[in] n       specifies the number of columns of given matrix.
  * @param[in] a       specifies pointer which points to the first element of a.
  * @param[in] ld      specifies leading dimension for a given matrix.
- * @param[in] spec    specifies the format specifer.
  */
 template<typename T>
-void print_matrix( const char *mat, char storage, gtint_t m, gtint_t n, T *a, gtint_t ld, const char *spec )
+void print_matrix( char storage, gtint_t m, gtint_t n, T *a, gtint_t ld)
 {
     gtint_t rs,cs;
     rs=cs=1;
@@ -599,25 +570,20 @@ void print_matrix( const char *mat, char storage, gtint_t m, gtint_t n, T *a, gt
         rs = ld ;
 
     gtint_t i, j;
-    std::cout << "Matrix " << mat << std::endl;
     for ( i = 0; i < m; i++ )
     {
         for ( j = 0; j < n; j++ )
         {
             val = a[i*rs + j*cs];
-            print_scalar<T>(val,spec);
-            printf( " " );
+            std::cout<<val<<" ";
         }
-        printf( "\n" );
+        std::cout<<"\n";
     }
-    printf( "\n" );
 }
-template void print_matrix<float>( const char *mat, char, gtint_t, gtint_t, float *, gtint_t, const char * );
-template void print_matrix<double>( const char *mat, char, gtint_t, gtint_t, double *, gtint_t, const char * );
-template void print_matrix<scomplex>( const char *mat, char, gtint_t, gtint_t, scomplex *, gtint_t, const char * );
-template void print_matrix<dcomplex>( const char *mat, char, gtint_t, gtint_t, dcomplex *, gtint_t, const char * );
-
-
+template void print_matrix<float>( char, gtint_t, gtint_t, float *, gtint_t);
+template void print_matrix<double>( char, gtint_t, gtint_t, double *, gtint_t);
+template void print_matrix<scomplex>( char, gtint_t, gtint_t, scomplex *, gtint_t);
+template void print_matrix<dcomplex>( char, gtint_t, gtint_t, dcomplex *, gtint_t);
 /*
     Helper function that returns a string based on the value that is passed
     The return values are as follows :

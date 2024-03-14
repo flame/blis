@@ -462,6 +462,7 @@ INSTANTIATE_TEST_SUITE_P (
 
 #ifdef BLIS_ENABLE_SMALL_MATRIX
 
+#if defined(BLIS_KERNELS_ZEN) && defined(GTEST_AVX2FMA3)
 class dgemmSmallUkernel :
         public ::testing::TestWithParam<std::tuple<gtint_t, gtint_t, gtint_t, double, double, char, bool>> {};
 
@@ -648,7 +649,6 @@ public:
     }
 };
 
-
 INSTANTIATE_TEST_SUITE_P (
         bli_dgemm_small,
         dgemmSmallUkernel,
@@ -663,5 +663,6 @@ INSTANTIATE_TEST_SUITE_P (
         ),
         ::dgemmSmallUkernelPrint()
     );
+#endif
 
 #endif

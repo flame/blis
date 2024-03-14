@@ -207,7 +207,7 @@ static void test_gemmnat_ukr(
         // storage of all matrices A, B and C.
         // since A is col-storage, A' will be row-storage
     }
-    double thresh = 10 * (std::max(k,1)) * testinghelpers::getEpsilon<T>();
+    double thresh = 10 * (std::max(k,gtint_t(1))) * testinghelpers::getEpsilon<T>();
     // call reference implementation
     testinghelpers::ref_gemm<T>( storage, transa, transb, m, n, k, alpha,
                                 buf_a, lda, buf_b, ldb, beta, (T*)buf_cref, ldc);
@@ -554,7 +554,7 @@ static void test_gemmsup_ukr( FT ukr_fp, char trnsa, char trnsb, gtint_t m, gtin
     testinghelpers::ProtectedBuffer::stop_signal_handler();
 
     // Set the threshold for the errors:
-    double thresh = 10 * (std::max(k,1)) * testinghelpers::getEpsilon<T>();
+    double thresh = 10 * (std::max(k,gtint_t(1))) * testinghelpers::getEpsilon<T>();
 
     // call reference implementation
     testinghelpers::ref_gemm<T>( storage, trnsa, trnsb, m, n, k, alpha,
