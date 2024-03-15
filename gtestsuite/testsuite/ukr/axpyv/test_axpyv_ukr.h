@@ -50,7 +50,7 @@ static void test_axpyv_ukr( FT ukr_fp, char conjx, gtint_t n, gtint_t incx, gtin
                          T alpha, double thresh, bool is_memory_test = false )
 {
     // Pointers to obtain the required memory.
-    T *x, *y, *y_ref, *x_copy;
+    T *x, *y, *y_ref;
     gtint_t size_x = testinghelpers::buff_dim( n, incx ) * sizeof( T );
     gtint_t size_y = testinghelpers::buff_dim( n, incy ) * sizeof( T );
 
@@ -62,22 +62,18 @@ static void test_axpyv_ukr( FT ukr_fp, char conjx, gtint_t n, gtint_t incx, gtin
     // For y_ref, we don't need different greenzones and any redzone.
     // Thus, we pass is_memory_test as false
     testinghelpers::ProtectedBuffer y_ref_buffer( size_y, false, false );
-    // Creating x_copy, to save the contents of x(without any redzones)
-    testinghelpers::ProtectedBuffer x_copy_buffer( size_x, false, false );
 
     // Acquire the first set of greenzones for x and y
     x = ( T* )x_buffer.greenzone_1;
     y = ( T* )y_buffer.greenzone_1;
     y_ref = ( T* )y_ref_buffer.greenzone_1; // For y_ref, there is no greenzone_2
-    x_copy = ( T* )x_copy_buffer.greenzone_1; // For x_copy, there is no greenzone_2
 
     // Initiaize the memory with random data
     testinghelpers::datagenerators::randomgenerators( -10, 10, n, incx, x );
     testinghelpers::datagenerators::randomgenerators( -10, 10, n, incy, y );
 
-    // Copying the contents of y to y_ref and x to x_copy
+    // Copying the contents of y to y_ref
     memcpy( y_ref, y, size_y );
-    memcpy( x_copy, x, size_x );
 
     // Char conjx to BLIS conjx conversion
     conj_t blis_conjx;
@@ -100,7 +96,7 @@ static void test_axpyv_ukr( FT ukr_fp, char conjx, gtint_t n, gtint_t incx, gtin
             y = ( T* )y_buffer.greenzone_2;
 
             // Copy the data for x and y accordingly
-            memcpy( x, x_copy, size_x );
+            memcpy( x, x_buffer.greenzone_1, size_x );
             memcpy( y, y_ref, size_y );
 
             // Call the ukr function, to check with the second redzone.

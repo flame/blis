@@ -52,6 +52,7 @@ class ctrsmUkrSmall :
                                                 gtint_t,            // ldb_inc
                                                 bool      >> {};    // is_memory_test
 
+GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(ctrsmUkrSmall);
 
 TEST_P(ctrsmUkrSmall, AccuracyCheck)
 {

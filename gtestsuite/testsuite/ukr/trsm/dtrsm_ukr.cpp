@@ -64,6 +64,9 @@ class DTRSMSmallUkrTest :
                                                 gtint_t,            // ldb_inc
                                                 bool      >> {};    // is_memory_test
 
+GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(DTRSMUkrTest);
+GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(DTRSMSmallUkrTest);
+
 TEST_P(DTRSMUkrTest, native_kernel)
 {
     using   T = double;
@@ -214,7 +217,7 @@ INSTANTIATE_TEST_SUITE_P (
 #endif
 
 
-#if defined(BLIS_KERNELS_ZEN) && defined(GTEST_AVX2FMA3)
+#if defined(BLIS_KERNELS_HASWELL) && defined(GTEST_AVX2FMA3)
 INSTANTIATE_TEST_SUITE_P (
     bli_dgemmtrsm_l_haswell_asm_6x8,
     DTRSMUkrTest,
@@ -250,7 +253,9 @@ INSTANTIATE_TEST_SUITE_P (
     ),
     ::DTRSMUkrTestPrint()
 );
+#endif
 
+#if defined(BLIS_KERNELS_ZEN) && defined(GTEST_AVX2FMA3)
 INSTANTIATE_TEST_SUITE_P (
     bli_trsm_small,
     DTRSMSmallUkrTest,

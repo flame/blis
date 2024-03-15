@@ -39,9 +39,9 @@
 
 /**
  * @brief Performs the operation:
- *        op( A )*X = alpha*B,   or   X*op( A ) = alpha*B,
+ *        B := alpha*op( A )*B,   or   B := alpha*B*op( A )
  * where  op( A ) is one of
- *        op( A ) = A   or   op( A ) = A**T,
+ *        op( A ) = A   or   op( A ) = A**T   or   op( A ) = A**H,
  * @param[in]     storage specifies storage format used for the matrices
  * @param[in]     side   specifies if the symmetric matrix A appears left or right in
                          the matrix multiplication

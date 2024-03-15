@@ -124,7 +124,7 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Range(gtint_t(10), gtint_t(101), 10),                 // m size of matrix
             ::testing::Range(gtint_t(6), gtint_t(10), 1),                    // b size of matrix
             ::testing::Values(double(0.0), double(1.0), double(2.3)),        // alpha
-            ::testing::Values(gtint_t(0)),                                   // lda increament
+            ::testing::Values(gtint_t(0)),                                   // lda increment
             ::testing::Values(gtint_t(1)),                                   // stride size for a
             ::testing::Values(gtint_t(1)),                                   // stride size for x
             ::testing::Values(gtint_t(1))                                    // stride size for y

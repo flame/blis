@@ -60,25 +60,18 @@ static void test_nrm2_ukr( nrm2_ker_ft<T, RT> ukr_fp, gtint_t n, gtint_t incx, d
                         bool is_memory_test = false)
 {
     // Pointers to obtain the required memory.
-    T *x, *x_copy;
+    T *x;
     gtint_t size_x = testinghelpers::buff_dim( n, incx ) * sizeof( T );
 
     // Create the objects for the input and output operands
     // The kernel does not expect the memory to be aligned
     testinghelpers::ProtectedBuffer x_buffer( size_x, false, is_memory_test );
 
-    // Creating x_copy, to save the contents of x
-    testinghelpers::ProtectedBuffer x_copy_buffer( size_x, false, false );
-
     // Acquire the first greenzone for x
     x = ( T* )x_buffer.greenzone_1;
-    x_copy = ( T* )x_copy_buffer.greenzone_1; // For x_copy, there is no greenzone_2
 
     // Initiaize the memory with random data
     testinghelpers::datagenerators::randomgenerators( -10, 10, n, incx, x );
-
-    // Copying the contents of x to x_copy
-    memcpy( x_copy, x, size_x );
 
     RT norm = 0.0;
     // Add signal handler for segmentation fault
@@ -96,8 +89,8 @@ static void test_nrm2_ukr( nrm2_ker_ft<T, RT> ukr_fp, gtint_t n, gtint_t incx, d
             // Acquire the pointers near the second redzone
             x = ( T* )x_buffer.greenzone_2;
 
-            // Copy the data for x from x_copy accordingly
-            memcpy( x, x_copy, size_x );
+            // copy data from 1st buffer of x to second buffer
+            memcpy( x, x_buffer.greenzone_1, size_x );
 
             norm = 0.0;
             ukr_fp( n, x, incx, &norm, NULL );

@@ -99,7 +99,7 @@ static void test_complex_gemmsup_ukr( char storage, char trnsa, char trnsb, gtin
     T* buf_a    = (T*)buf_a_ptrs.greenzone_1;
     T* buf_b    = (T*)buf_b_ptrs.greenzone_1;
     T* buf_c    = (T*)buf_c_ptrs.greenzone_1;
-    T* buf_cref    = (T*)buf_cref_ptrs.greenzone_1;
+    T* buf_cref = (T*)buf_cref_ptrs.greenzone_1;
 
     testinghelpers::datagenerators::randomgenerators<T>( -2, 8, storage, m, k, (T*)(buf_a), trnsa, lda);
     testinghelpers::datagenerators::randomgenerators<T>( -5, 2, storage, k, n, (T*)(buf_b), trnsb, ldb);
@@ -308,18 +308,11 @@ static void test_gemmnat_ukr( char storage, gtint_t m, gtint_t n, gtint_t k, T a
     // Allocate memory for C Matrix used for reference computation
     testinghelpers::ProtectedBuffer buf_c_ref_ptrs( sizec, false , false );
 
-    /* GreenZone-1 and GreenZone-2 might overlap hence we need         */
-    /* additional buffer to copy contents of GreenZone-1 before        */
-    /* copying it to GreenZone-2                                       */
-    testinghelpers::ProtectedBuffer buf_a_ref_ptrs( sizea, false , false );
-    testinghelpers::ProtectedBuffer buf_b_ref_ptrs( sizeb, false , false );
 
     T* buf_a    = (T*)buf_a_ptrs.greenzone_1;
     T* buf_b    = (T*)buf_b_ptrs.greenzone_1;
     T* buf_c    = (T*)buf_c_ptrs.greenzone_1;
     T* buf_cref = (T*)buf_c_ref_ptrs.greenzone_1;
-    T* buf_aref = (T*)buf_a_ref_ptrs.greenzone_1;
-    T* buf_bref = (T*)buf_b_ref_ptrs.greenzone_1;
 
     /* Initialize Matrices with random numbers */
     testinghelpers::datagenerators::randomgenerators<T>( -2, 8, 'c', m, k, (T*)(buf_a), 'n', lda);
@@ -328,9 +321,6 @@ static void test_gemmnat_ukr( char storage, gtint_t m, gtint_t n, gtint_t k, T a
 
     // Create a copy of c so that we can check reference results.
     memcpy(buf_cref, buf_c, sizec);
-
-    memcpy(buf_aref, buf_a, sizea);
-    memcpy(buf_bref, buf_b, sizeb);
 
     /* Fill the auxinfo_t struct in case the micro-kernel uses it. */
     auxinfo_t data;
@@ -361,8 +351,8 @@ static void test_gemmnat_ukr( char storage, gtint_t m, gtint_t n, gtint_t k, T a
             buf_c    = (T*)buf_c_ptrs.greenzone_2;
 
             // copy data from 1st buffer of A and B to second buffer
-            memcpy(buf_a, buf_aref, sizea);
-            memcpy(buf_b, buf_bref, sizeb);
+            memcpy(buf_a, buf_a_ptrs.greenzone_1, sizea);
+            memcpy(buf_b, buf_b_ptrs.greenzone_1, sizeb);
 
             //buf_c_ptrs.greenzone_1 has been updated with output from previous
             // gemm call, hence use buf_cref

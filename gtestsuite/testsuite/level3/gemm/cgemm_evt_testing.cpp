@@ -275,7 +275,7 @@ INSTANTIATE_TEST_SUITE_P(
     );
 
 INSTANTIATE_TEST_SUITE_P(
-        Skinny_Matrix_zeros_And_ExcpetionValues,
+        Skinny_Matrix_zeros_And_ExceptionValues,
         cgemmEVT,
         ::testing::Combine(
             ::testing::Values('c'

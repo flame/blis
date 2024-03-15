@@ -64,6 +64,9 @@ class strsmUkrSmall :
                                                 gtint_t,            // ldb_inc
                                                 bool      >> {};    // is_memory_test
 
+GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(strsmUkrNat);
+GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(strsmUkrSmall);
+
 TEST_P(strsmUkrNat, AccuracyCheck)
 {
     using   T = float;
@@ -163,7 +166,7 @@ public:
     }
 };
 
-#if defined(BLIS_KERNELS_ZEN) && defined(GTEST_AVX2FMA3)
+#if defined(BLIS_KERNELS_HASWELL) && defined(GTEST_AVX2FMA3)
 INSTANTIATE_TEST_SUITE_P (
     bli_sgemmtrsm_l_haswell_asm_6x16,
     strsmUkrNat,
@@ -199,7 +202,9 @@ INSTANTIATE_TEST_SUITE_P (
     ),
     ::strsmUkrNatPrint()
 );
+#endif
 
+#if defined(BLIS_KERNELS_ZEN) && defined(GTEST_AVX2FMA3)
 INSTANTIATE_TEST_SUITE_P (
     bli_trsm_small,
     strsmUkrSmall,

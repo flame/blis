@@ -147,7 +147,7 @@ public:
 /*  2. bli_cgemmsup_rv_zen_asm_3x8n: N preferred kernel             */
 /********************************************************************/
 /************************** NATIVE***********************************/
-/*  When SUP method doesnot for given input arguments,              */
+/*  When SUP method does not support given input arguments,         */
 /*  Native implmentation will be invoked, it is well suited for     */
 /*  square, large sizes                                             */
 /* API Name: bli_cgemm_haswell_asm_3x8                              */

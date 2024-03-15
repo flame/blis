@@ -384,7 +384,7 @@ INSTANTIATE_TEST_SUITE_P (
 
 #endif
 
-#if defined(BLIS_KERNELS_ZEN) && defined(GTEST_AVX2FMA3)
+#if defined(BLIS_KERNELS_HASWELL) && defined(GTEST_AVX2FMA3)
 INSTANTIATE_TEST_SUITE_P (
     bli_sgemm_haswell_asm_6x16,
     sgemmUkrNat,

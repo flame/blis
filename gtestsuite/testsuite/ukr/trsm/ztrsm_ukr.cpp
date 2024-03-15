@@ -64,6 +64,9 @@ class ztrsmUkrSmall :
                                                 gtint_t,            // ldb_inc
                                                 bool      >> {};    // is_memory_test
 
+GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(ztrsmUkrNat);
+GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(ztrsmUkrSmall);
+
 TEST_P(ztrsmUkrNat, AccuracyCheck)
 {
     using   T = dcomplex;

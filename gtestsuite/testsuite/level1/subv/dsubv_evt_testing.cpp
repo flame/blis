@@ -113,10 +113,11 @@ public:
     }
 };
 
+#ifdef TEST_BLIS_TYPED
+
 static double NaN = std::numeric_limits<double>::quiet_NaN();
 static double Inf = std::numeric_limits<double>::infinity();
 
-#ifdef TEST_BLIS_TYPED
 // Exception value testing(on X vector alone) with unit strides on zen3
 INSTANTIATE_TEST_SUITE_P(
         vecX_unitStrides,

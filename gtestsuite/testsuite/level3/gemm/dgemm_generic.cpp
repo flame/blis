@@ -128,7 +128,7 @@ public:
 };
 
 INSTANTIATE_TEST_SUITE_P(
-        expat_dgemm_k1_path,
+        expect_dgemm_k1_path,
         DGEMMTest,
         ::testing::Combine(
             // No condition based on storage scheme of matrices
@@ -141,7 +141,7 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(1),                                        // k
             // No condition based on alpha
             ::testing::Values(0.0, -1.0, 1.7),                           // alpha
-            // No condition based on betaa
+            // No condition based on beta
             ::testing::Values(0.0, -1.0, 1.0, 2.3),                      // beta
             ::testing::Values(0, 3),                                     // increment to the leading dim of a
             ::testing::Values(0, 3),                                     // increment to the leading dim of b
@@ -152,7 +152,7 @@ INSTANTIATE_TEST_SUITE_P(
 
 //----------------------------- bli_dgemm_tiny kernel ------------------------------------
 INSTANTIATE_TEST_SUITE_P(
-        expat_dgemm_tiny_path,
+        expect_dgemm_tiny_path,
         DGEMMTest,
         ::testing::Combine(
             // No condition based on storage scheme of matrices
@@ -165,7 +165,7 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Range(gtint_t(5), gtint_t(25), 1),                // k
             // No condition based on alpha
             ::testing::Values(0.0, -1.0, 1.7),                           // alpha
-            // No condition based on betaa
+            // No condition based on beta
             ::testing::Values(0.0, -1.0, 1.0, 2.3),                      // beta
             ::testing::Values(0, 3),                                     // increment to the leading dim of a
             ::testing::Values(0, 3),                                     // increment to the leading dim of b
@@ -179,7 +179,7 @@ INSTANTIATE_TEST_SUITE_P(
 
 // Tests both bli_dgemm_small and bli_dgemm_small_At
 INSTANTIATE_TEST_SUITE_P(
-        expat_dgemm_small_path,
+        expect_dgemm_small_path,
         DGEMMTest,
         ::testing::Combine(
             // Test both storage types
@@ -193,7 +193,7 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Range(gtint_t(5), gtint_t(25), 1),                  // k
             // No condition based on alpha
             ::testing::Values(0.0, -1.0, 1.7),                             // alpha
-            // No condition based on betaa
+            // No condition based on beta
             ::testing::Values(0.0, -1.0, 1.0, 2.3),                        // beta
             ::testing::Values(0, 3),                                       // increment to the leading dim of a
             ::testing::Values(0, 3),                                       // increment to the leading dim of b
@@ -204,7 +204,7 @@ INSTANTIATE_TEST_SUITE_P(
 
 // ----------------------------- SUP implementation --------------------------------------
 INSTANTIATE_TEST_SUITE_P(
-        expat_dgemm_sup_path,
+        expect_dgemm_sup_path,
         DGEMMTest,
         ::testing::Combine(
             // Storage of A and B is handled by packing
@@ -227,7 +227,7 @@ INSTANTIATE_TEST_SUITE_P(
 
 // ----------------------------- Native implementation --------------------------------------
 INSTANTIATE_TEST_SUITE_P(
-        expat_dgemm_native_path,
+        expect_dgemm_native_path,
         DGEMMTest,
         ::testing::Combine(
             // Storage of A and B is handled by packing
@@ -240,7 +240,7 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(515, 527, 604),                  // k
             // No condition based on alpha
             ::testing::Values(0.0, -1.0, 1.7),                 // alpha
-            // No condition based on betaa
+            // No condition based on beta
             ::testing::Values(0.0, -1.0, 1.0, 2.3),            // beta
             ::testing::Values(0, 3),                           // increment to the leading dim of a
             ::testing::Values(0, 3),                           // increment to the leading dim of b

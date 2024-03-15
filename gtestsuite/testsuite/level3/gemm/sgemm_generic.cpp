@@ -167,7 +167,7 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Range(gtint_t(2), gtint_t(25), 1),                  // k
             // No condition based on alpha
             ::testing::Values(0.0, -1.0, 1.0, 1.7),                        // alpha
-            // No condition based on betaa
+            // No condition based on beta
             ::testing::Values(0.0, -1.0, 1.0, 2.3),                        // beta
             ::testing::Values(0, 13),                                      // increment to the leading dim of a
             ::testing::Values(0, 15),                                      // increment to the leading dim of b
@@ -213,7 +213,7 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(515, 527, 604),                  // k
             // No condition based on alpha
             ::testing::Values(0.0, -1.0, 1.0, 1.7),            // alpha
-            // No condition based on betaa
+            // No condition based on beta
             ::testing::Values(0.0, -1.0, 1.0, 2.3),            // beta
             ::testing::Values(0, 13),                          // increment to the leading dim of a
             ::testing::Values(0, 15),                          // increment to the leading dim of b

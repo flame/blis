@@ -1087,7 +1087,7 @@ INSTANTIATE_TEST_SUITE_P (
 );
 #endif
 
-#if defined(BLIS_KERNELS_ZEN) && defined(GTEST_AVX2FMA3)
+#if defined(BLIS_KERNELS_HASWELL) && defined(GTEST_AVX2FMA3)
 INSTANTIATE_TEST_SUITE_P (
     bli_zgemm_haswell_asm_3x4,
     zgemmUkrNat,
@@ -1120,7 +1120,9 @@ INSTANTIATE_TEST_SUITE_P (
     ),
     ::zgemmUkrNativePrint()
 );
+#endif
 
+#if defined(BLIS_KERNELS_ZEN) && defined(GTEST_AVX2FMA3)
 /*Kernel reqired for trsm computation*/
 INSTANTIATE_TEST_SUITE_P (
     bli_zgemm_zen_asm_2x6,

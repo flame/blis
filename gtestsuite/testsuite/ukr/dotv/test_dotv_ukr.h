@@ -99,7 +99,7 @@ static void test_dotv_ukr( FT ukr, char conjx, char conjy, gtint_t n, gtint_t in
             memcpy( x, x_buf.greenzone_1, size_x * sizeof( T ) );
             memcpy( y, y_ref_buf.greenzone_1, size_y * sizeof( T ) );
 
-            // Inoking BLIS ukr to check with the second redzone.
+            // Invoking BLIS ukr to check with the second redzone.
             ukr( blis_conjx, blis_conjy, n, x, incx, y, incy, &rho, nullptr );
         }
     }

@@ -612,7 +612,11 @@ std::string get_value_string(T exval)
       exval_str = (exval >= testinghelpers::ZERO<T>()) ? "inf" : "minus_inf";
     else
     {
-      exval_str = ( exval >= testinghelpers::ZERO<T>()) ? std::to_string(exval) : "m" + std::to_string(std::abs(exval));
+      // Handle -0.0 separately
+      if (exval == -testinghelpers::ZERO<T>())
+          exval_str = "m" + std::to_string(std::abs(exval));
+      else
+          exval_str = ( exval >= testinghelpers::ZERO<T>()) ? std::to_string(exval) : "m" + std::to_string(std::abs(exval));
       exval_str = exval_str.substr(0, exval_str.find(".")+2);
       exval_str = exval_str.replace(exval_str.find("."),1,"p");
     }

@@ -89,7 +89,7 @@ static void test_scalv_ukr( FT ukr, char conja_alpha, gtint_t n, gtint_t incx,
             // Copy the data for x accordingly
             memcpy( x, x_ref, size_x );
 
-            // Inoking BLIS ukr to check with the second redzone.
+            // Invoking BLIS ukr to check with the second redzone.
             ukr( blis_conjalpha, n, &alpha, x, incx, nullptr );
         }
     }

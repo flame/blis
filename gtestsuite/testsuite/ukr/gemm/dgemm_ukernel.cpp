@@ -94,7 +94,7 @@ public:
     }
 };
 
-#if defined(BLIS_KERNELS_ZEN) && defined(GTEST_AVX2FMA3)
+#if defined(BLIS_KERNELS_HASWELL) && defined(GTEST_AVX2FMA3)
 
 INSTANTIATE_TEST_SUITE_P (
         bli_dgemmsup_rv_haswell_asm_6x8m_row_stored_c,
@@ -505,7 +505,7 @@ TEST_P(dgemmSmallUkernel, gemm_small)
     if(memory_test == true)
     {
         srand(time(NULL));
-        double *a, *b, *c, *cref, *a_ref, *b_ref = NULL;
+        double *a, *b, *c, *cref = NULL;
         // Allocate memory for A
         testinghelpers::ProtectedBuffer a_buf( m * k * lda * sizeof(double), false, memory_test );
         // Allocate memory for B

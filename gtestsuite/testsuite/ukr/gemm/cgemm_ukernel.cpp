@@ -671,7 +671,7 @@ public:
     }
 };
 
-#if defined(BLIS_KERNELS_ZEN) && defined(GTEST_AVX2FMA3)
+#if defined(BLIS_KERNELS_HASWELL) && defined(GTEST_AVX2FMA3)
 INSTANTIATE_TEST_SUITE_P (
     bli_cgemm_haswell_asm_3x8,
     cgemmUkrNat,

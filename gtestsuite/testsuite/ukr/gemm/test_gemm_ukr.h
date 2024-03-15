@@ -242,8 +242,6 @@ static void test_gemmk1_ukr( FT ukr_fp, gtint_t m, gtint_t n, gtint_t k, char st
     T *buf_a = (T*)mat_a.greenzone_1;
     T *buf_b = (T*)mat_b.greenzone_1;
     T *buf_c = (T*)mat_c.greenzone_1;
-    T *buf_aref = (T*)mat_a.greenzone_1;
-    T *buf_bref = (T*)mat_b.greenzone_1;
     T* buf_cref = (T*)mat_cref.greenzone_1;
 
     // Check if the memory has been successfully allocated
@@ -257,6 +255,7 @@ static void test_gemmk1_ukr( FT ukr_fp, gtint_t m, gtint_t n, gtint_t k, char st
 
     // Create a copy of c so that we can check reference results.
     memcpy(buf_cref, buf_c, sizec);
+
     // add signal handler for segmentation fault
     testinghelpers::ProtectedBuffer::start_signal_handler();
     try
@@ -290,8 +289,8 @@ static void test_gemmk1_ukr( FT ukr_fp, gtint_t m, gtint_t n, gtint_t k, char st
             }
 
             // copy data from 1st buffer of A and B to second buffer
-            memcpy(buf_a, buf_aref, sizea);
-            memcpy(buf_b, buf_bref, sizeb);
+            memcpy(buf_a, mat_a.greenzone_1, sizea);
+            memcpy(buf_b, mat_b.greenzone_1, sizeb);
 
             //buf_c_ptrs.greenzone_1 has been updated with output from previous
             // gemm call, hence use buf_cref
@@ -359,8 +358,6 @@ static void test_gemmsup_ukr( FT ukr_fp, char trnsa, char trnsb, gtint_t m, gtin
     T *buf_a = (T*)mat_a.greenzone_1;
     T *buf_b = (T*)mat_b.greenzone_1;
     T *buf_c = (T*)mat_c.greenzone_1;
-    T *buf_aref = (T*)mat_a.greenzone_1;
-    T *buf_bref = (T*)mat_b.greenzone_1;
     T *ref_c = (T*)mat_cref.greenzone_1;
 
     // Check if the memory has been successfully allocated
@@ -499,8 +496,8 @@ static void test_gemmsup_ukr( FT ukr_fp, char trnsa, char trnsb, gtint_t m, gtin
             }
 
             // copy data from 1st buffer of A and B to second buffer
-            memcpy(buf_a, buf_aref, sizea);
-            memcpy(buf_b, buf_bref, sizeb);
+            memcpy(buf_a, mat_a.greenzone_1, sizea);
+            memcpy(buf_b, mat_b.greenzone_1, sizeb);
 
             //buf_c_ptrs.greenzone_1 has been updated with output from previous
             // gemm call, hence use buf_cref
