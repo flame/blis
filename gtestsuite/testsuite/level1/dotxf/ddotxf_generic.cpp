@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2024, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2024 - 2025, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -123,7 +123,32 @@ TEST_P( ddotxfGeneric, API )
     //----------------------------------------------------------
     //     Call generic test body using those parameters
     //----------------------------------------------------------
-    test_dotxf<T>( conj_x, conj_a, m, b, &alpha, inca, lda_inc, incx, &beta, incy, thresh );
+#ifdef OPENMP_NESTED_1diff
+    #pragma omp parallel default(shared)
+    {
+	vary_num_threads();
+        //std::cout << "Inside 1diff parallel regions\n";
+        test_dotxf<T>( conj_x, conj_a, m, b, &alpha, inca, lda_inc, incx, &beta, incy, thresh );
+    }
+#elif OPENMP_NESTED_2
+    #pragma omp parallel default(shared)
+    {
+    #pragma omp parallel default(shared)
+    {
+        //std::cout << "Inside 2 parallel regions\n";
+        test_dotxf<T>( conj_x, conj_a, m, b, &alpha, inca, lda_inc, incx, &beta, incy, thresh );
+    }
+    }
+#elif OPENMP_NESTED_1
+    #pragma omp parallel default(shared)
+    {
+        //std::cout << "Inside 1 parallel region\n";
+        test_dotxf<T>( conj_x, conj_a, m, b, &alpha, inca, lda_inc, incx, &beta, incy, thresh );
+    }
+#else
+        //std::cout << "Not inside parallel region\n";
+        test_dotxf<T>( conj_x, conj_a, m, b, &alpha, inca, lda_inc, incx, &beta, incy, thresh );
+#endif
 }
 
 // Black box testing for generic and main use of ddotxf.

@@ -90,8 +90,22 @@ if(WIN32)
    set(OpenMP_libomp_LIBRARY "C:/Program Files/LLVM/lib/libomp.lib" CACHE STRING "openmp library path")
 endif()
 
+# Use OPENMP_NESTED to set whether to call BLIS function within OpenMP nested parallel region(s).
+# Value indicates number of OpenMP parallel regions in the gtest application, with 1 and 2
+# implemented, otherwise don't use any OpenMP parallel region in gtestsuite (default).
+set(OPENMP_NESTED "0" CACHE STRING "OpenMP parallelism in gtest program.")
+# Set the possible values of nested parallelism for cmake-gui
+set_property(CACHE OPENMP_NESTED PROPERTY STRINGS "0" "1" "2" "1diff")
+if( NOT ((OPENMP_NESTED STREQUAL "0") OR (OPENMP_NESTED STREQUAL "1") OR (OPENMP_NESTED STREQUAL "2") OR (OPENMP_NESTED STREQUAL "1diff")) )
+    message(FATAL_ERROR "OPENMP_NESTED option '${OPENMP_NESTED}' is not supported. Please use one of the following options \
+            during CMake invokation: 0, 1, 2, 1diff")
+endif()
+# Add OpenMP flag for compiling gtest programs
+if(NOT(OPENMP_NESTED STREQUAL "0"))
+    add_compile_options(-fopenmp)
+endif()
 # Set up OpenMP flags correctly if it's required.
-if( (ENABLE_THREADING STREQUAL "openmp") OR (MKL_ENABLE_THREADING STREQUAL "openmp") )
+if( (ENABLE_THREADING STREQUAL "openmp") OR (MKL_ENABLE_THREADING STREQUAL "openmp") OR (NOT(OPENMP_NESTED STREQUAL "0")))
     find_package(OpenMP)
     if(NOT OPENMP_FOUND)
         message (FATAL_ERROR "Openmp Not Found, please provide an OpenMP library using -DOpenMP_libomp_LIBRARY=path_to_omp_lib.")

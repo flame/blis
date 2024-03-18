@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2023 - 2024, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2023 - 2025, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -122,7 +122,7 @@ foreach(dir ${test_files})
     target_include_directories(${exec_name} PUBLIC ${BLIS_INCLUDE} ${CMAKE_SOURCE_DIR}/testinghelpers/inc ${CMAKE_SOURCE_DIR}/testsuite/)
     target_link_libraries(${exec_name} gtest gtest_main testinghelpers ${BLIS_LIBRARY} ${COMMON_LIBS})
     # if we test serial BLIS, but MKL is used as a reference we still need to set up OpenMP.
-    if( (ENABLE_THREADING STREQUAL "openmp") OR (MKL_ENABLE_THREADING STREQUAL "openmp"))
+    if( (ENABLE_THREADING STREQUAL "openmp") OR (MKL_ENABLE_THREADING STREQUAL "openmp") OR (NOT(OPENMP_NESTED STREQUAL "0")))
       target_link_libraries(${exec_name} OpenMP::OpenMP_CXX)
     endif()
     target_link_libraries(${exec_name} ${ASAN_FLAGS} ${COVERAGE_FLAGS})
@@ -149,6 +149,15 @@ foreach(dir ${test_files})
     if(TEST_INPUT_ARGS)
       target_compile_definitions(${exec_name} PUBLIC TEST_INPUT_ARGS)
     endif()
+
+    if(OPENMP_NESTED STREQUAL "1")
+      target_compile_definitions(testinghelpers PUBLIC OPENMP_NESTED_1)
+    elseif(OPENMP_NESTED STREQUAL "2")
+      target_compile_definitions(testinghelpers PUBLIC OPENMP_NESTED_2)
+    elseif(OPENMP_NESTED STREQUAL "1diff")
+      target_compile_definitions(testinghelpers PUBLIC OPENMP_NESTED_1diff)
+    endif()
+
     add_test(NAME ${exec_name} COMMAND ${exec_name})
     if(REF_CBLAS STREQUAL "MKL")
       set_property(TEST ${exec_name} PROPERTY ENVIRONMENT ${MKL_ENV})
