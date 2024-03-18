@@ -36,6 +36,7 @@
 
 #include "blis.h"
 #include "common/testing_helpers.h"
+#include "inc/check_error.h"
 
 /**
  * @brief Performs the operation:
@@ -126,6 +127,36 @@ static void symv( char storage, char uploa, char conja, char conjx, gtint_t n,
     conjx = static_cast<char>(std::toupper(static_cast<unsigned char>(conjx)));
 #endif
 
+#ifdef TEST_INPUT_ARGS
+    // Create copy of scalar input values so we can check that they are not altered.
+    char storage_cpy = storage;
+    char uploa_cpy = uploa;
+    char conja_cpy = conja;
+    char conjx_cpy = conjx;
+    gtint_t n_cpy = n;
+    T* alpha_cpy = alpha;
+    gtint_t lda_cpy = lda;
+    gtint_t incx_cpy = incx;
+    T* beta_cpy = beta;
+    gtint_t incy_cpy = incy;
+
+    // Create copy of input arrays so we can check that they are not altered.
+    T* ap_cpy = nullptr;
+    gtint_t size_ap = testinghelpers::matsize( storage, 'n', n, n, lda );
+    if (ap && size_ap > 0)
+    {
+        ap_cpy = new T[size_ap];
+        memcpy( ap_cpy, ap, size_ap * sizeof( T ) );
+    }
+    T* xp_cpy = nullptr;
+    gtint_t size_xp;
+    size_xp = testinghelpers::buff_dim( n, incx );
+    {
+        xp_cpy = new T[size_xp];
+        memcpy( xp_cpy, xp, size_xp * sizeof( T ) );
+    }
+#endif
+
 #ifdef TEST_BLAS
     if( storage == 'c' || storage == 'C' )
         symv_<T>( uploa, n, alpha, ap, lda, xp, incx, beta, yp, incy );
@@ -137,5 +168,38 @@ static void symv( char storage, char uploa, char conja, char conjx, gtint_t n,
     typed_symv<T>( storage, uploa, conja, conjx, n, alpha, ap, lda, xp, incx, beta, yp, incy );
 #else
     throw std::runtime_error("Error in testsuite/level2/symv.h: No interfaces are set to be tested.");
+#endif
+
+#ifdef TEST_INPUT_ARGS
+    //----------------------------------------------------------
+    // Check scalar inputs have not been modified.
+    //----------------------------------------------------------
+
+    computediff<char>( "storage", storage, storage_cpy );
+    computediff<char>( "uploa", uploa, uploa_cpy );
+    computediff<char>( "conja", conja, conja_cpy );
+    computediff<char>( "conjx", conjx, conjx_cpy );
+    computediff<gtint_t>( "n", n, n_cpy );
+    computediff<T>( "alpha", *alpha, *alpha_cpy );
+    computediff<gtint_t>( "lda", lda, lda_cpy );
+    computediff<gtint_t>( "incx", incx, incx_cpy );
+    computediff<T>( "beta", *beta, *beta_cpy );
+    computediff<gtint_t>( "incy", incy, incy_cpy );
+
+    //----------------------------------------------------------
+    // Bitwise-wise check array inputs have not been modified.
+    //----------------------------------------------------------
+
+    if (ap && size_ap > 0)
+    {
+        computediff<T>( "A", storage, n, n, ap, ap_cpy, lda, true );
+        delete[] ap_cpy;
+    }
+
+    if (xp && size_xp > 0)
+    {
+        computediff<T>( "x", n, xp, xp_cpy, incx, true );
+        delete[] xp_cpy;
+    }
 #endif
 }

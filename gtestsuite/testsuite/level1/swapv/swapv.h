@@ -36,6 +36,7 @@
 
 #include "blis.h"
 #include "common/testing_helpers.h"
+#include "inc/check_error.h"
 
 /**
  * @brief Performs the operation:
@@ -98,6 +99,14 @@ static void typed_swapv(gtint_t n, T* x, gtint_t incx, T* y, gtint_t incy)
 template<typename T>
 static void swapv(gtint_t n, T* x, gtint_t incx, T* y, gtint_t incy)
 {
+
+#ifdef TEST_INPUT_ARGS
+    // Create copy of scalar input values so we can check that they are not altered.
+    gtint_t n_cpy = n;
+    gtint_t incx_cpy = incx;
+    gtint_t incy_cpy = incy;
+#endif
+
 #ifdef TEST_BLAS
     swapv_<T>( n, x, incx, y, incy );
 #elif TEST_CBLAS
@@ -106,6 +115,16 @@ static void swapv(gtint_t n, T* x, gtint_t incx, T* y, gtint_t incy)
     typed_swapv<T>( n, x, incx, y, incy );
 #else
     throw std::runtime_error("Error in testsuite/level1/swapv.h: No interfaces are set to be tested.");
+#endif
+
+#ifdef TEST_INPUT_ARGS
+    //----------------------------------------------------------
+    // Check scalar inputs have not been modified.
+    //----------------------------------------------------------
+
+    computediff<gtint_t>( "n", n, n_cpy );
+    computediff<gtint_t>( "incx", incx, incx_cpy );
+    computediff<gtint_t>( "incy", incy, incy_cpy );
 #endif
 }
 

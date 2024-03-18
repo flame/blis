@@ -36,6 +36,7 @@
 
 #include "blis.h"
 #include "common/testing_helpers.h"
+#include "inc/check_error.h"
 
 /**
  * @brief Performs the operation
@@ -73,6 +74,14 @@ static void setv(char conjalpha, gtint_t n, T* alpha, T* x, gtint_t incx)
     conjalpha = static_cast<char>(std::toupper(static_cast<unsigned char>(conjalpha)));
 #endif
 
+#ifdef TEST_INPUT_ARGS
+    // Create copy of scalar input values so we can check that they are not altered.
+    char conjalpha_cpy = conjalpha;
+    gtint_t n_cpy = n;
+    T* alpha_cpy = alpha;
+    gtint_t incx_cpy = incx;
+#endif
+
 #ifdef TEST_BLAS
     throw std::runtime_error("Error in testsuite/level1/setv.h: BLAS interface is not available.");
 #elif TEST_CBLAS
@@ -81,5 +90,16 @@ static void setv(char conjalpha, gtint_t n, T* alpha, T* x, gtint_t incx)
     typed_setv(conjalpha, n, alpha, x, incx);
 #else
     throw std::runtime_error("Error in testsuite/level1/setv.h: No interfaces are set to be tested.");
+#endif
+
+#ifdef TEST_INPUT_ARGS
+    //----------------------------------------------------------
+    // Check scalar inputs have not been modified.
+    //----------------------------------------------------------
+
+    computediff<char>( "conjalpha", conjalpha, conjalpha_cpy );
+    computediff<gtint_t>( "n", n, n_cpy );
+    computediff<T>( "alpha", *alpha, *alpha_cpy );
+    computediff<gtint_t>( "incx", incx, incx_cpy );
 #endif
 }

@@ -166,6 +166,10 @@ if( NOT ((EXT_VAL STREQUAL "NaN") OR (EXT_VAL STREQUAL "Inf")) )
             during CMake invokation: NaN, Inf")
 endif()
 
+# Option to enable testing of input arguments to BLAS APIs.
+# Note: This imposes a significant runtime overhead.
+option(TEST_INPUT_ARGS "Test input arguments" OFF)
+
 if(REF_LIB)
     get_filename_component(REFLIB_PATH ${REF_LIB}/.. ABSOLUTE)
     get_filename_component(library ${REF_LIB} NAME)

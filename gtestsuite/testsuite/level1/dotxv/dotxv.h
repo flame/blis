@@ -36,6 +36,7 @@
 
 #include "blis.h"
 #include "common/testing_helpers.h"
+#include "inc/check_error.h"
 
 /**
  * @brief Performs the operation:
@@ -82,6 +83,26 @@ static void dotxv( char conjx, char conjy, gtint_t n, T* alpha,
     conjy = static_cast<char>(std::toupper(static_cast<unsigned char>(conjy)));
 #endif
 
+#ifdef TEST_INPUT_ARGS
+    // Create copy of scalar input values so we can check that they are not altered.
+    char conjx_cpy = conjx;
+    char conjy_cpy = conjy;
+    gtint_t n_cpy = n;
+    T* alpha_cpy = alpha;
+    gtint_t incx_cpy = incx;
+    gtint_t incy_cpy = incy;
+    T* beta_cpy = beta;
+
+    // Create copy of input arrays so we can check that they are not altered.
+    T* x_cpy = nullptr;
+    gtint_t size_x = testinghelpers::buff_dim( n, incx );
+    if (x && size_x > 0)
+    {
+        x_cpy = new T[size_x];
+        memcpy( x_cpy, x, size_x * sizeof( T ) );
+    }
+#endif
+
 #ifdef TEST_BLAS
     throw std::runtime_error("Error in testsuite/level1/dotxv.h: BLAS interface is not available.");
 #elif TEST_CBLAS
@@ -90,5 +111,29 @@ static void dotxv( char conjx, char conjy, gtint_t n, T* alpha,
    typed_dotxv<T>( conjx, conjy, n, alpha, x, incx, y, incy, beta, rho );
 #else
     throw std::runtime_error("Error in testsuite/level1/dotxv.h: No interfaces are set to be tested.");
+#endif
+
+#ifdef TEST_INPUT_ARGS
+    //----------------------------------------------------------
+    // Check scalar inputs have not been modified.
+    //----------------------------------------------------------
+
+    computediff<char>( "conjx", conjx, conjx_cpy );
+    computediff<char>( "conjy", conjy, conjy_cpy );
+    computediff<gtint_t>( "n", n, n_cpy );
+    computediff<T>( "alpha", *alpha, *alpha_cpy );
+    computediff<gtint_t>( "incx", incx, incx_cpy );
+    computediff<gtint_t>( "incy", incy, incy_cpy );
+    computediff<T>( "beta", *beta, *beta_cpy );
+
+    //----------------------------------------------------------
+    // Bitwise-wise check array inputs have not been modified.
+    //----------------------------------------------------------
+
+    if (x && size_x > 0)
+    {
+        computediff<T>( "x", n, x, x_cpy, incx, true );
+        delete[] x_cpy;
+    }
 #endif
 }

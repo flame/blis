@@ -36,6 +36,7 @@
 
 #include "blis.h"
 #include "common/testing_helpers.h"
+#include "inc/check_error.h"
 
 /**
  * @brief Computes the Euclidean norm of x.
@@ -101,6 +102,22 @@ static RT typed_nrm2(gtint_t n, T* x, gtint_t incx){
 template<typename T, typename RT = typename testinghelpers::type_info<T>::real_type>
 static RT nrm2(gtint_t n, T* x, gtint_t incx)
 {
+
+#ifdef TEST_INPUT_ARGS
+    // Create copy of scalar input values so we can check that they are not altered.
+    gtint_t n_cpy = n;
+    gtint_t incx_cpy = incx;
+
+    // Create copy of input arrays so we can check that they are not altered.
+    T* x_cpy = nullptr;
+    gtint_t size_x = testinghelpers::buff_dim( n, incx );
+    if (x && size_x > 0)
+    {
+        x_cpy = new T[size_x];
+        memcpy( x_cpy, x, size_x * sizeof( T ) );
+    }
+#endif
+
 #ifdef TEST_BLAS
     return nrm2_<T>(n, x, incx);
 #elif TEST_CBLAS
@@ -109,5 +126,24 @@ static RT nrm2(gtint_t n, T* x, gtint_t incx)
     return typed_nrm2<T>(n, x, incx);
 #else
     throw std::runtime_error("Error in testsuite/level1/axpyv.h: No interfaces are set to be tested.");
+#endif
+
+#ifdef TEST_INPUT_ARGS
+    //----------------------------------------------------------
+    // Check scalar inputs have not been modified.
+    //----------------------------------------------------------
+
+    computediff<gtint_t>( "n", n, n_cpy );
+    computediff<gtint_t>( "incx", incx, incx_cpy );
+
+    //----------------------------------------------------------
+    // Bitwise-wise check array inputs have not been modified.
+    //----------------------------------------------------------
+
+    if (x && size_x > 0)
+    {
+        computediff<T>( "x", n, x, x_cpy, incx, true );
+        delete[] x_cpy;
+    }
 #endif
 }

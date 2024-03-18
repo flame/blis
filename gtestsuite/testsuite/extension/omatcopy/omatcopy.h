@@ -36,6 +36,7 @@
 
 #include "blis.h"
 #include "common/testing_helpers.h"
+#include "inc/check_error.h"
 
 /**
  * @brief Performs the operation:
@@ -72,10 +73,53 @@ static void omatcopy( char trans, gtint_t m, gtint_t n, T alpha, T* A, gtint_t l
     trans = static_cast<char>(std::toupper(static_cast<unsigned char>(trans)));
 #endif
 
+#ifdef TEST_INPUT_ARGS
+    // Create copy of scalar input values so we can check that they are not altered.
+    char trans_cpy = trans;
+    gtint_t m_cpy = m;
+    gtint_t n_cpy = n;
+    T alpha_cpy = alpha;
+    gtint_t lda_cpy = lda;
+    gtint_t ldb_cpy = ldb;
+
+    // Create copy of input arrays so we can check that they are not altered.
+    T* A_cpy = nullptr;
+    gtint_t size_A = testinghelpers::matsize( 'c', 'n', m, n, lda );
+
+    if (A && size_A > 0)
+    {
+        A_cpy = new T[size_A];
+        memcpy( A_cpy, A, size_A * sizeof( T ) );
+    }
+#endif
+
 #ifdef TEST_BLAS
     omatcopy_<T>( trans, m, n, alpha, A, lda, B, ldb );
 #else
     throw std::runtime_error("Error in testsuite/extension/omatcopy.h: No interfaces are set to be tested.");
+#endif
+
+#ifdef TEST_INPUT_ARGS
+    //----------------------------------------------------------
+    // Check scalar inputs have not been modified.
+    //----------------------------------------------------------
+
+    computediff<char>( "trans", trans, trans_cpy );
+    computediff<gtint_t>( "m", m, m_cpy );
+    computediff<gtint_t>( "n", n, n_cpy );
+    computediff<T>( "alpha", alpha, alpha_cpy );
+    computediff<gtint_t>( "lda", lda, lda_cpy );
+    computediff<gtint_t>( "ldb", ldb, ldb_cpy );
+
+    //----------------------------------------------------------
+    // Bitwise-wise check array inputs have not been modified.
+    //----------------------------------------------------------
+
+    if (A && size_A > 0)
+    {
+        computediff<T>( "A", 'c', m, n, A, A_cpy, lda, true );
+        delete[] A_cpy;
+    }
 #endif
 }
 

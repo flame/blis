@@ -36,6 +36,7 @@
 
 #include "blis.h"
 #include "common/testing_helpers.h"
+#include "inc/check_error.h"
 
 /**
  * @brief Performs the operation:
@@ -146,6 +147,27 @@ static void trsv( char storage, char uploa, char transa, char diaga,
     diaga = static_cast<char>(std::toupper(static_cast<unsigned char>(diaga)));
 #endif
 
+#ifdef TEST_INPUT_ARGS
+    // Create copy of scalar input values so we can check that they are not altered.
+    char storage_cpy = storage;
+    char uploa_cpy = uploa;
+    char transa_cpy = transa;
+    char diaga_cpy = diaga;
+    gtint_t n_cpy = n;
+    T* alpha_cpy = alpha;
+    gtint_t lda_cpy = lda;
+    gtint_t incx_cpy = incx;
+
+    // Create copy of input arrays so we can check that they are not altered.
+    T* ap_cpy = nullptr;
+    gtint_t size_ap = testinghelpers::matsize( storage, transa, n, n, lda );
+    if (ap && size_ap > 0)
+    {
+        ap_cpy = new T[size_ap];
+        memcpy( ap_cpy, ap, size_ap * sizeof( T ) );
+    }
+#endif
+
 #ifdef TEST_BLAS
     if(( storage == 'c' || storage == 'C' ))
         if( *alpha == one )
@@ -163,5 +185,30 @@ static void trsv( char storage, char uploa, char transa, char diaga,
     typed_trsv<T>( storage, uploa, transa, diaga, n, alpha, ap, lda, xp, incx );
 #else
     throw std::runtime_error("Error in testsuite/level2/trsv.h: No interfaces are set to be tested.");
+#endif
+
+#ifdef TEST_INPUT_ARGS
+    //----------------------------------------------------------
+    // Check scalar inputs have not been modified.
+    //----------------------------------------------------------
+
+    computediff<char>( "storage", storage, storage_cpy );
+    computediff<char>( "uploa", uploa, uploa_cpy );
+    computediff<char>( "transa", transa, transa_cpy );
+    computediff<char>( "diaga", diaga, diaga_cpy );
+    computediff<gtint_t>( "n", n, n_cpy );
+    computediff<T>( "alpha", *alpha, *alpha_cpy );
+    computediff<gtint_t>( "lda", lda, lda_cpy );
+    computediff<gtint_t>( "incx", incx, incx_cpy );
+
+    //----------------------------------------------------------
+    // Bitwise-wise check array inputs have not been modified.
+    //----------------------------------------------------------
+
+    if (ap && size_ap > 0)
+    {
+        computediff<T>( "A", storage, n, n, ap, ap_cpy, lda, true );
+        delete[] ap_cpy;
+    }
 #endif
 }

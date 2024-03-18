@@ -136,6 +136,10 @@ std::vector<double> x = testinghelpers::get_random_vector<double>( -10, 10, n, i
 ## Testing value of INFO set within BLIS. This is not returned by BLAS or CBLAS APIs, but AMD BLAS 4.2 and later includes a function bli_info_get_info_value to return this value.
 * If using an older version of BLIS, configure using `-DCAN_TEST_INFO_VALUE=OFF`. [**ON by default**]
 
+## Test BLAS input arguments
+* To check input arguments have not been changed by the BLAS routines, configure using `-DTEST_INPUT_ARGS=ON`. [**OFF by default**]
+* Note: this will substantially increase the runtime of the tests.
+
 # Building the Tests
 After the successful configuration of CMake, we can build the tests. The following steps are taken by the building process:
 1. Building testinghelpers.a.

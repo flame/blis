@@ -36,6 +36,7 @@
 
 #include "blis.h"
 #include "common/testing_helpers.h"
+#include "inc/check_error.h"
 
 /**
  * @brief Performs the operation:
@@ -59,20 +60,20 @@
  */
 
 template<typename T, typename RT = typename testinghelpers::type_info<T>::real_type>
-static void herk_(char uplo, char transa, gtint_t m, gtint_t k, RT* alpha,
+static void herk_(char uplo, char transa, gtint_t n, gtint_t k, RT* alpha,
                     T* ap, gtint_t lda,  RT* beta, T* cp, gtint_t ldc )
 {
     if constexpr (std::is_same<T, scomplex>::value)
-        cherk_( &uplo, &transa, &m, &k, alpha, ap, &lda, beta, cp, &ldc );
+        cherk_( &uplo, &transa, &n, &k, alpha, ap, &lda, beta, cp, &ldc );
     else if constexpr (std::is_same<T, dcomplex>::value)
-        zherk_( &uplo, &transa, &m, &k, alpha, ap, &lda, beta, cp, &ldc );
+        zherk_( &uplo, &transa, &n, &k, alpha, ap, &lda, beta, cp, &ldc );
     else
         throw std::runtime_error("Error in testsuite/level3/herk.h: Invalid typename in herk_().");
 }
 
 template<typename T, typename RT = typename testinghelpers::type_info<T>::real_type>
 static void cblas_herk(char storage, char uplo, char trnsa,
-    gtint_t m, gtint_t k, RT* alpha, T* ap, gtint_t lda,
+    gtint_t n, gtint_t k, RT* alpha, T* ap, gtint_t lda,
     RT* beta, T* cp, gtint_t ldc)
 {
     enum CBLAS_ORDER cblas_order;
@@ -84,16 +85,16 @@ static void cblas_herk(char storage, char uplo, char trnsa,
     testinghelpers::char_to_cblas_trans( trnsa, &cblas_transa );
 
     if constexpr (std::is_same<T, scomplex>::value)
-        cblas_cherk( cblas_order, cblas_uplo, cblas_transa, m, k, *alpha, ap, lda, *beta, cp, ldc );
+        cblas_cherk( cblas_order, cblas_uplo, cblas_transa, n, k, *alpha, ap, lda, *beta, cp, ldc );
     else if constexpr (std::is_same<T, dcomplex>::value)
-        cblas_zherk( cblas_order, cblas_uplo, cblas_transa, m, k, *alpha, ap, lda, *beta, cp, ldc );
+        cblas_zherk( cblas_order, cblas_uplo, cblas_transa, n, k, *alpha, ap, lda, *beta, cp, ldc );
     else
         throw std::runtime_error("Error in testsuite/level3/herk.h: Invalid typename in cblas_herk().");
 }
 
 template<typename T, typename RT = typename testinghelpers::type_info<T>::real_type>
 static void typed_herk(char storage, char uplo, char trnsa,
-    gtint_t m, gtint_t k, RT* alpha, T* ap, gtint_t lda,
+    gtint_t n, gtint_t k, RT* alpha, T* ap, gtint_t lda,
     RT* beta, T* cp, gtint_t ldc)
 {
     trans_t transa;
@@ -106,7 +107,7 @@ static void typed_herk(char storage, char uplo, char trnsa,
 
     rsa=rsc=1;
     csa=csc=1;
-    /* a = m x k   c = m x m    */
+    /* a = n x k   c = n x n    */
     if( (storage == 'c') || (storage == 'C') ) {
         csa = lda ;
         csc = ldc ;
@@ -117,19 +118,19 @@ static void typed_herk(char storage, char uplo, char trnsa,
     }
 
     if constexpr (std::is_same<T, float>::value)
-        bli_sherk( blis_uplo, transa, m, k, alpha, ap, rsa, csa, beta, cp, rsc, csc );
+        bli_sherk( blis_uplo, transa, n, k, alpha, ap, rsa, csa, beta, cp, rsc, csc );
     else if constexpr (std::is_same<T, double>::value)
-        bli_dherk( blis_uplo, transa, m, k, alpha, ap, rsa, csa, beta, cp, rsc, csc );
+        bli_dherk( blis_uplo, transa, n, k, alpha, ap, rsa, csa, beta, cp, rsc, csc );
     else if constexpr (std::is_same<T, scomplex>::value)
-        bli_cherk( blis_uplo, transa, m, k, alpha, ap, rsa, csa, beta, cp, rsc, csc );
+        bli_cherk( blis_uplo, transa, n, k, alpha, ap, rsa, csa, beta, cp, rsc, csc );
     else if constexpr (std::is_same<T, dcomplex>::value)
-        bli_zherk( blis_uplo, transa, m, k, alpha, ap, rsa, csa, beta, cp, rsc, csc );
+        bli_zherk( blis_uplo, transa, n, k, alpha, ap, rsa, csa, beta, cp, rsc, csc );
     else
         throw std::runtime_error("Error in testsuite/level3/herk.h: Invalid typename in typed_herk().");
 }
 
 template<typename T, typename RT = typename testinghelpers::type_info<T>::real_type>
-static void herk( char storage, char uplo, char transa, gtint_t m, gtint_t k,
+static void herk( char storage, char uplo, char transa, gtint_t n, gtint_t k,
     RT* alpha, T* ap, gtint_t lda, RT* beta, T* cp, gtint_t ldc )
 {
 
@@ -139,16 +140,67 @@ static void herk( char storage, char uplo, char transa, gtint_t m, gtint_t k,
     transa = static_cast<char>(std::toupper(static_cast<unsigned char>(transa)));
 #endif
 
+#ifdef TEST_INPUT_ARGS
+    // Create copy of scalar input values so we can check that they are not altered.
+    char storage_cpy = storage;
+    char uplo_cpy = uplo;
+    char transa_cpy = transa;
+    gtint_t n_cpy = n;
+    gtint_t k_cpy = k;
+    RT* alpha_cpy = alpha;
+    gtint_t lda_cpy = lda;
+    RT* beta_cpy = beta;
+    gtint_t ldc_cpy = ldc;
+
+    // Create copy of input arrays so we can check that they are not altered.
+    T* ap_cpy = nullptr;
+    gtint_t size_ap = testinghelpers::matsize( storage, transa, n, k, lda );
+    if (ap && size_ap > 0)
+    {
+        ap_cpy = new T[size_ap];
+        memcpy( ap_cpy, ap, size_ap * sizeof( T ) );
+    }
+#endif
+
 #ifdef TEST_BLAS
     if( storage == 'c' || storage == 'C' )
-        herk_<T>( uplo, transa, m, k, alpha, ap, lda, beta, cp, ldc );
+        herk_<T>( uplo, transa, n, k, alpha, ap, lda, beta, cp, ldc );
     else
         throw std::runtime_error("Error in testsuite/level3/herk.h: BLAS interface cannot be tested for row-major order.");
 #elif TEST_CBLAS
-    cblas_herk<T>( storage, uplo, transa, m, k, alpha, ap, lda, beta, cp, ldc );
+    cblas_herk<T>( storage, uplo, transa, n, k, alpha, ap, lda, beta, cp, ldc );
 #elif TEST_BLIS_TYPED
-    typed_herk<T>( storage, uplo, transa, m, k, alpha, ap, lda, beta, cp, ldc );
+    typed_herk<T>( storage, uplo, transa, n, k, alpha, ap, lda, beta, cp, ldc );
 #else
     throw std::runtime_error("Error in testsuite/level3/herk.h: No interfaces are set to be tested.");
+#endif
+
+#ifdef TEST_INPUT_ARGS
+    //----------------------------------------------------------
+    // Check scalar inputs have not been modified.
+    //----------------------------------------------------------
+
+    computediff<char>( "storage", storage, storage_cpy );
+    computediff<char>( "uplo", uplo, uplo_cpy );
+    computediff<char>( "transa", transa, transa_cpy );
+    computediff<gtint_t>( "n", n, n_cpy );
+    computediff<gtint_t>( "k", k, k_cpy );
+    computediff<RT>( "alpha", *alpha, *alpha_cpy );
+    computediff<gtint_t>( "lda", lda, lda_cpy );
+    computediff<RT>( "beta", *beta, *beta_cpy );
+    computediff<gtint_t>( "ldc", ldc, ldc_cpy );
+
+    //----------------------------------------------------------
+    // Bitwise-wise check array inputs have not been modified.
+    //----------------------------------------------------------
+
+    if (ap && size_ap > 0)
+    {
+        if(( transa == 'n' ) || ( transa == 'N' ))
+            computediff<T>( "A", storage, n, k, ap, ap_cpy, lda, true );
+        else
+            computediff<T>( "A", storage, k, n, ap, ap_cpy, lda, true );
+        delete[] ap_cpy;
+    }
 #endif
 }

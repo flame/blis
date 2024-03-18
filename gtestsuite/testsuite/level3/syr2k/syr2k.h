@@ -36,6 +36,7 @@
 
 #include "blis.h"
 #include "common/testing_helpers.h"
+#include "inc/check_error.h"
 
 /**
  * @brief Performs the operation:
@@ -158,6 +159,36 @@ static void syr2k( char storage, char uplo, char transa, char transb, gtint_t n,
     transb = static_cast<char>(std::toupper(static_cast<unsigned char>(transb)));
 #endif
 
+#ifdef TEST_INPUT_ARGS
+    // Create copy of scalar input values so we can check that they are not altered.
+    char storage_cpy = storage;
+    char uplo_cpy = uplo;
+    char transa_cpy = transa;
+    gtint_t n_cpy = n;
+    gtint_t k_cpy = k;
+    T* alpha_cpy = alpha;
+    gtint_t lda_cpy = lda;
+    gtint_t ldb_cpy = ldb;
+    T* beta_cpy = beta;
+    gtint_t ldc_cpy = ldc;
+
+    // Create copy of input arrays so we can check that they are not altered.
+    T* ap_cpy = nullptr;
+    gtint_t size_ap = testinghelpers::matsize( storage, transa, n, k, lda );
+    if (ap && size_ap > 0)
+    {
+        ap_cpy = new T[size_ap];
+        memcpy( ap_cpy, ap, size_ap * sizeof( T ) );
+    }
+    T* bp_cpy = nullptr;
+    gtint_t size_bp = testinghelpers::matsize( storage, transb, n, k, ldb );
+    if (bp && size_bp > 0)
+    {
+        bp_cpy = new T[size_bp];
+        memcpy( bp_cpy, bp, size_bp * sizeof( T ) );
+    }
+#endif
+
 #ifdef TEST_BLAS
     if( storage == 'c' || storage == 'C' )
         syr2k_<T>( uplo, transa, n, k, alpha, ap, lda, bp, ldb, beta, cp, ldc );
@@ -170,5 +201,44 @@ static void syr2k( char storage, char uplo, char transa, char transb, gtint_t n,
     typed_syr2k<T>( storage, uplo, transa, transb, n, k, alpha, ap, lda, bp, ldb, beta, cp, ldc );
 #else
     throw std::runtime_error("Error in testsuite/level3/syr2k.h: No interfaces are set to be tested.");
+#endif
+
+#ifdef TEST_INPUT_ARGS
+    //----------------------------------------------------------
+    // Check scalar inputs have not been modified.
+    //----------------------------------------------------------
+
+    computediff<char>( "storage", storage, storage_cpy );
+    computediff<char>( "uplo", uplo, uplo_cpy );
+    computediff<char>( "transa", transa, transa_cpy );
+    computediff<gtint_t>( "n", n, n_cpy );
+    computediff<gtint_t>( "k", k, k_cpy );
+    computediff<T>( "alpha", *alpha, *alpha_cpy );
+    computediff<gtint_t>( "lda", lda, lda_cpy );
+    computediff<gtint_t>( "ldb", ldb, ldb_cpy );
+    computediff<T>( "beta", *beta, *beta_cpy );
+    computediff<gtint_t>( "ldc", ldc, ldc_cpy );
+
+    //----------------------------------------------------------
+    // Bitwise-wise check array inputs have not been modified.
+    //----------------------------------------------------------
+
+    if (ap && size_ap > 0)
+    {
+        if(( transa == 'n' ) || ( transa == 'N' ))
+            computediff<T>( "A", storage, n, k, ap, ap_cpy, lda, true );
+        else
+            computediff<T>( "A", storage, k, n, ap, ap_cpy, lda, true );
+        delete[] ap_cpy;
+    }
+
+    if (bp && size_bp > 0)
+    {
+        if(( transb == 'n' ) || ( transb == 'N' ))
+            computediff<T>( "B", storage, n, k, bp, bp_cpy, ldb, true );
+        else
+            computediff<T>( "B", storage, k, n, bp, bp_cpy, ldb, true );
+        delete[] bp_cpy;
+    }
 #endif
 }

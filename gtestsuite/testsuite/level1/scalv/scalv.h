@@ -36,6 +36,7 @@
 
 #include "blis.h"
 #include "common/testing_helpers.h"
+#include "inc/check_error.h"
 
 /**
  * @brief Performs the operation:
@@ -136,6 +137,14 @@ static void scalv(char conj_alpha, gtint_t n, U alpha, T* x, gtint_t incx)
     conj_alpha = static_cast<char>(std::toupper(static_cast<unsigned char>(conj_alpha)));
 #endif
 
+#ifdef TEST_INPUT_ARGS
+    // Create copy of scalar input values so we can check that they are not altered.
+    char conj_alpha_cpy = conj_alpha;
+    gtint_t n_cpy = n;
+    U alpha_cpy = alpha;
+    gtint_t incx_cpy = incx;
+#endif
+
 #ifdef TEST_BLAS
     scalv_<T, U>( n, alpha, x, incx );
 #elif TEST_CBLAS
@@ -144,5 +153,16 @@ static void scalv(char conj_alpha, gtint_t n, U alpha, T* x, gtint_t incx)
     typed_scalv<T, U>( conj_alpha, n, alpha, x, incx );
 #else
     throw std::runtime_error("Error in testsuite/level1/scalv.h: No interfaces are set to be tested.");
+#endif
+
+#ifdef TEST_INPUT_ARGS
+    //----------------------------------------------------------
+    // Check scalar inputs have not been modified.
+    //----------------------------------------------------------
+
+    computediff<char>( "conj_alpha", conj_alpha, conj_alpha_cpy );
+    computediff<gtint_t>( "n", n, n_cpy );
+    computediff<U>( "alpha", alpha, alpha_cpy );
+    computediff<gtint_t>( "incx", incx, incx_cpy );
 #endif
 }

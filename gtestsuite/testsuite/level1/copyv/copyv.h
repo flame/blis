@@ -36,6 +36,7 @@
 
 #include "blis.h"
 #include "common/testing_helpers.h"
+#include "inc/check_error.h"
 
 /**
  * @brief Performs the operation:
@@ -105,6 +106,23 @@ static void copyv(char conjx, gtint_t n, T* x, gtint_t incx, T* y, gtint_t incy)
     conjx = static_cast<char>(std::toupper(static_cast<unsigned char>(conjx)));
 #endif
 
+#ifdef TEST_INPUT_ARGS
+    // Create copy of scalar input values so we can check that they are not altered.
+    char conjx_cpy = conjx;
+    gtint_t n_cpy = n;
+    gtint_t incx_cpy = incx;
+    gtint_t incy_cpy = incy;
+
+    // Create copy of input arrays so we can check that they are not altered.
+    T* x_cpy = nullptr;
+    gtint_t size_x = testinghelpers::buff_dim( n, incx );
+    if (x && size_x > 0)
+    {
+        x_cpy = new T[size_x];
+        memcpy( x_cpy, x, size_x * sizeof( T ) );
+    }
+#endif
+
 #ifdef TEST_BLAS
     copyv_<T>(n, x, incx, y, incy);
 #elif TEST_CBLAS
@@ -113,5 +131,26 @@ static void copyv(char conjx, gtint_t n, T* x, gtint_t incx, T* y, gtint_t incy)
     typed_copyv<T>(conjx, n, x, incx, y, incy);
 #else
     throw std::runtime_error("Error in testsuite/level1/copyv.h: No interfaces are set to be tested.");
+#endif
+
+#ifdef TEST_INPUT_ARGS
+    //----------------------------------------------------------
+    // Check scalar inputs have not been modified.
+    //----------------------------------------------------------
+
+    computediff<char>( "conjx", conjx, conjx_cpy );
+    computediff<gtint_t>( "n", n, n_cpy );
+    computediff<gtint_t>( "incx", incx, incx_cpy );
+    computediff<gtint_t>( "incy", incy, incy_cpy );
+
+    //----------------------------------------------------------
+    // Bitwise-wise check array inputs have not been modified.
+    //----------------------------------------------------------
+
+    if (x && size_x > 0)
+    {
+        computediff<T>( "x", n, x, x_cpy, incx, true );
+        delete[] x_cpy;
+    }
 #endif
 }

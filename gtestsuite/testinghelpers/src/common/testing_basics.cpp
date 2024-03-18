@@ -132,16 +132,21 @@ gtint_t buff_dim( gtint_t n, gtint_t incx ) {
 
 gtint_t matsize( char storage, char trans, gtint_t m, gtint_t n, gtint_t ldm )
 {
-    gtint_t km;
+    gtint_t km, lm;
     if( (storage == 'c') || (storage == 'C') ) {
         /*Column_Major*/
         km  = chktrans( trans ) ? m : n ;
+        lm  = chktrans( trans ) ? n : m ;
     }
     else {
         /*Row_Major*/
         km  = chktrans( trans ) ? n : m ;
+        lm  = chktrans( trans ) ? m : n ;
     }
-    return (km*ldm);
+    if ( m <= 0 || n <= 0 || ldm <= 0 || ldm < lm )
+        return 0;
+    else
+        return (km*ldm);
 }
 
 /**
@@ -271,7 +276,9 @@ template dcomplex aocl_extreme<dcomplex>();
 
 bool chktrans( char trns )
 {
-    return (!(trns=='n'));
+    trans_t trans;
+    char_to_blis_trans( trns, &trans );
+    return ( bool ) !( trans == BLIS_NO_TRANSPOSE );
 }
 
 bool chknotrans( char trns )

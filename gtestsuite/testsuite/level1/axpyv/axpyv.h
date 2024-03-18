@@ -36,6 +36,7 @@
 
 #include "blis.h"
 #include "common/testing_helpers.h"
+#include "inc/check_error.h"
 
 /**
  * @brief Performs the operation:
@@ -106,6 +107,24 @@ static void axpyv(char conj_x, gtint_t n, T alpha, T* x, gtint_t incx, T* y, gti
     conj_x = static_cast<char>(std::toupper(static_cast<unsigned char>(conj_x)));
 #endif
 
+#ifdef TEST_INPUT_ARGS
+    // Create copy of scalar input values so we can check that they are not altered.
+    char conj_x_cpy = conj_x;
+    gtint_t n_cpy = n;
+    T alpha_cpy = alpha;
+    gtint_t incx_cpy = incx;
+    gtint_t incy_cpy = incy;
+
+    // Create copy of input arrays so we can check that they are not altered.
+    T* x_cpy = nullptr;
+    gtint_t size_x = testinghelpers::buff_dim( n, incx );
+    if (x && size_x > 0)
+    {
+        x_cpy = new T[size_x];
+        memcpy( x_cpy, x, size_x * sizeof( T ) );
+    }
+#endif
+
 #ifdef TEST_BLAS
     axpyv_<T>( n, alpha, x, incx, y, incy );
 #elif TEST_CBLAS
@@ -114,5 +133,27 @@ static void axpyv(char conj_x, gtint_t n, T alpha, T* x, gtint_t incx, T* y, gti
     typed_axpyv<T>( conj_x, n, alpha, x, incx, y, incy );
 #else
     throw std::runtime_error("Error in testsuite/level1/axpyv.h: No interfaces are set to be tested.");
+#endif
+
+#ifdef TEST_INPUT_ARGS
+    //----------------------------------------------------------
+    // Check scalar inputs have not been modified.
+    //----------------------------------------------------------
+
+    computediff<char>( "conj_x", conj_x, conj_x_cpy );
+    computediff<gtint_t>( "n", n, n_cpy );
+    computediff<T>( "alpha", alpha, alpha_cpy );
+    computediff<gtint_t>( "incx", incx, incx_cpy );
+    computediff<gtint_t>( "incy", incy, incy_cpy );
+
+    //----------------------------------------------------------
+    // Bitwise-wise check array inputs have not been modified.
+    //----------------------------------------------------------
+
+    if (x && size_x > 0)
+    {
+        computediff<T>( "x", n, x, x_cpy, incx, true );
+        delete[] x_cpy;
+    }
 #endif
 }

@@ -36,6 +36,7 @@
 
 #include "blis.h"
 #include "common/testing_helpers.h"
+#include "inc/check_error.h"
 
 /**
  * @brief Performs the operation:
@@ -71,9 +72,32 @@ static void imatcopy( char trans, gtint_t m, gtint_t n, T alpha, T* A, gtint_t l
     trans = static_cast<char>(std::toupper(static_cast<unsigned char>(trans)));
 #endif
 
+#ifdef TEST_INPUT_ARGS
+    // Create copy of scalar input values so we can check that they are not altered.
+    char trans_cpy = trans;
+    gtint_t m_cpy = m;
+    gtint_t n_cpy = n;
+    T alpha_cpy = alpha;
+    gtint_t lda_in_cpy = lda_in;
+    gtint_t lda_out_cpy = lda_out;
+#endif
+
 #ifdef TEST_BLAS
     imatcopy_<T>( trans, m, n, alpha, A, lda_in, lda_out );
 #else
     throw std::runtime_error("Error in testsuite/level1/imatcopy.h: No interfaces are set to be tested.");
+#endif
+
+#ifdef TEST_INPUT_ARGS
+    //----------------------------------------------------------
+    // Check scalar inputs have not been modified.
+    //----------------------------------------------------------
+
+    computediff<char>( "trans", trans, trans_cpy );
+    computediff<gtint_t>( "m", m, m_cpy );
+    computediff<gtint_t>( "n", n, n_cpy );
+    computediff<T>( "alpha", alpha, alpha_cpy );
+    computediff<gtint_t>( "lda_in", lda_in, lda_in_cpy );
+    computediff<gtint_t>( "lda_out", lda_out, lda_out_cpy );
 #endif
 }

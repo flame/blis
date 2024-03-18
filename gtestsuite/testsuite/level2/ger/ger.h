@@ -36,6 +36,7 @@
 
 #include "blis.h"
 #include "common/testing_helpers.h"
+#include "inc/check_error.h"
 
 /**
  * @brief Performs the operation:
@@ -150,6 +151,35 @@ static void ger( char storage, char conjx, char conjy, gtint_t m, gtint_t n,
     conjy = static_cast<char>(std::toupper(static_cast<unsigned char>(conjy)));
 #endif
 
+#ifdef TEST_INPUT_ARGS
+    // Create copy of scalar input values so we can check that they are not altered.
+    char storage_cpy = storage;
+    char conjx_cpy = conjx;
+    char conjy_cpy = conjy;
+    gtint_t m_cpy = m;
+    gtint_t n_cpy = n;
+    T* alpha_cpy = alpha;
+    gtint_t incx_cpy = incx;
+    gtint_t incy_cpy = incy;
+    gtint_t lda_cpy = lda;
+
+    // Create copy of input arrays so we can check that they are not altered.
+    T* xp_cpy = nullptr;
+    gtint_t size_xp;
+    size_xp = testinghelpers::buff_dim( m, incx );
+    {
+        xp_cpy = new T[size_xp];
+        memcpy( xp_cpy, xp, size_xp * sizeof( T ) );
+    }
+    T* yp_cpy = nullptr;
+    gtint_t size_yp;
+    size_yp = testinghelpers::buff_dim( n, incy );
+    {
+        yp_cpy = new T[size_yp];
+        memcpy( yp_cpy, yp, size_yp * sizeof( T ) );
+    }
+#endif
+
 #ifdef TEST_BLAS
     if( storage == 'c' || storage == 'C' )
         ger_<T>( conjy, m, n, alpha, xp, incx, yp, incy, ap, lda );
@@ -161,5 +191,37 @@ static void ger( char storage, char conjx, char conjy, gtint_t m, gtint_t n,
     typed_ger<T>( storage, conjx, conjy, m, n, alpha, xp, incx, yp, incy, ap, lda );
 #else
     throw std::runtime_error("Error in testsuite/level2/ger.h: No interfaces are set to be tested.");
+#endif
+
+#ifdef TEST_INPUT_ARGS
+    //----------------------------------------------------------
+    // Check scalar inputs have not been modified.
+    //----------------------------------------------------------
+
+    computediff<char>( "storage", storage, storage_cpy );
+    computediff<char>( "conjx", conjx, conjx_cpy );
+    computediff<char>( "conjy", conjy, conjy_cpy );
+    computediff<gtint_t>( "m", m, m_cpy );
+    computediff<gtint_t>( "n", n, n_cpy );
+    computediff<T>( "alpha", *alpha, *alpha_cpy );
+    computediff<gtint_t>( "lda", lda, lda_cpy );
+    computediff<gtint_t>( "incx", incx, incx_cpy );
+    computediff<gtint_t>( "incy", incy, incy_cpy );
+
+    //----------------------------------------------------------
+    // Bitwise-wise check array inputs have not been modified.
+    //----------------------------------------------------------
+
+    if (xp && size_xp > 0)
+    {
+        computediff<T>( "x", m, xp, xp_cpy, incx, true );
+        delete[] xp_cpy;
+    }
+
+    if (yp && size_yp > 0)
+    {
+        computediff<T>( "y", n, yp, yp_cpy, incy, true );
+        delete[] yp_cpy;
+    }
 #endif
 }

@@ -36,6 +36,7 @@
 
 #include "blis.h"
 #include "common/testing_helpers.h"
+#include "inc/check_error.h"
 
 /**
  * @brief Performs the operation:
@@ -148,6 +149,28 @@ static void syrk( char storage, char uplo, char transa, gtint_t n, gtint_t k,
     transa = static_cast<char>(std::toupper(static_cast<unsigned char>(transa)));
 #endif
 
+#ifdef TEST_INPUT_ARGS
+    // Create copy of scalar input values so we can check that they are not altered.
+    char storage_cpy = storage;
+    char uplo_cpy = uplo;
+    char transa_cpy = transa;
+    gtint_t n_cpy = n;
+    gtint_t k_cpy = k;
+    T* alpha_cpy = alpha;
+    gtint_t lda_cpy = lda;
+    T* beta_cpy = beta;
+    gtint_t ldc_cpy = ldc;
+
+    // Create copy of input arrays so we can check that they are not altered.
+    T* ap_cpy = nullptr;
+    gtint_t size_ap = testinghelpers::matsize( storage, transa, n, k, lda );
+    if (ap && size_ap > 0)
+    {
+        ap_cpy = new T[size_ap];
+        memcpy( ap_cpy, ap, size_ap * sizeof( T ) );
+    }
+#endif
+
 #ifdef TEST_BLAS
     if( storage == 'c' || storage == 'C' )
         syrk_<T>( uplo, transa, n, k, alpha, ap, lda, beta, cp, ldc );
@@ -159,5 +182,34 @@ static void syrk( char storage, char uplo, char transa, gtint_t n, gtint_t k,
     typed_syrk<T>( storage, uplo, transa, n, k, alpha, ap, lda, beta, cp, ldc );
 #else
     throw std::runtime_error("Error in testsuite/level3/syrk.h: No interfaces are set to be tested.");
+#endif
+
+#ifdef TEST_INPUT_ARGS
+    //----------------------------------------------------------
+    // Check scalar inputs have not been modified.
+    //----------------------------------------------------------
+
+    computediff<char>( "storage", storage, storage_cpy );
+    computediff<char>( "uplo", uplo, uplo_cpy );
+    computediff<char>( "transa", transa, transa_cpy );
+    computediff<gtint_t>( "n", n, n_cpy );
+    computediff<gtint_t>( "k", k, k_cpy );
+    computediff<T>( "alpha", *alpha, *alpha_cpy );
+    computediff<gtint_t>( "lda", lda, lda_cpy );
+    computediff<T>( "beta", *beta, *beta_cpy );
+    computediff<gtint_t>( "ldc", ldc, ldc_cpy );
+
+    //----------------------------------------------------------
+    // Bitwise-wise check array inputs have not been modified.
+    //----------------------------------------------------------
+
+    if (ap && size_ap > 0)
+    {
+        if(( transa == 'n' ) || ( transa == 'N' ))
+            computediff<T>( "A", storage, n, k, ap, ap_cpy, lda, true );
+        else
+            computediff<T>( "A", storage, k, n, ap, ap_cpy, lda, true );
+        delete[] ap_cpy;
+    }
 #endif
 }
