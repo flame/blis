@@ -52,6 +52,15 @@ libdir            := @libdir@
 includedir        := @includedir@
 sharedir          := @sharedir@
 
+# Override SHARE_PATH from common.mk so that e.g. make_defs.mk files from
+# configurations are loaded from the installed share directory.
+SHARE_PATH        := @sharedir@/blis
+
+# Override the source path locations to point to the plugin source, rather
+# than the default values which assume the BLIS builtin source tree.
+FRAME_DIR         := .
+DIST_PATH         := @plugin_dir@
+
 # Define the name of the global config.mk makefile.
 GLOB_CONFIG_MK_FILE := $(sharedir)/blis/config.mk
 
@@ -92,12 +101,13 @@ RANLIB            := @RANLIB@
 # Archiver.
 AR                := @AR@
 
-# Preset (required) CFLAGS and LDFLAGS. These variables capture the value
-# of the CFLAGS and LDFLAGS environment variables at configure-time (and/or
-# the value of CFLAGS/LDFLAGS if either was specified on the command line).
+# Preset (required) CFLAGS, CXXFLAGS, and LDFLAGS. These variables capture the value
+# of the CFLAGS, CXXFLAGS, and LDFLAGS environment variables at configure-time (and/or
+# the value of CFLAGS/CXXFLAGS/LDFLAGS if any was specified on the command line).
 # These flags are used in addition to the flags automatically determined
 # by the build system.
 CFLAGS_PRESET     := @cflags_preset@
+CXXFLAGS_PRESET   := @cxxflags_preset@
 LDFLAGS_PRESET    := @ldflags_preset@
 
 # The level of debugging info to generate.

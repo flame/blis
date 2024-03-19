@@ -2222,8 +2222,18 @@ select_tool_w_env()
 
 		echo "${script_name}: user specified a ${tool_str} via ${env_str} (${env_var})."
 
-		# See if the binary specified by env_var exists.
-		_the_tool=$(select_tool "${env_var}" "${env_str}")
+		# Map the tool (via its canonical environment variable form) to the set
+		# of options we should use to check that it is working and available.
+		the_flags=$(get_tool_checkflags "${env_str}")
+
+		# Check that the tool works with at least one of the flags in the_flags
+		# the_flags (or, if the_flags is empty, check that the tool exists).
+		rval=$(check_tool "${env_var}" "${the_flags}")
+
+		# If check_tool() returns 0, we're done.
+		if [ "${rval}" == "0" ]; then
+			_the_tool="${env_var}"
+		fi
 
 		# Copy the result into the variable specified by found_var.
 		eval "${found_var}=\"${_the_tool}\""
@@ -2388,7 +2398,7 @@ check_tool()
 		for opt in ${the_flags}; do
 
 			# See if the tool responds to the current flag.
-			"${tool}" "${opt}" > /dev/null 2>&1
+			${tool} ${opt} > /dev/null 2>&1
 
 			# If the tool responded to the flag with a nominal error code of
 			# 0, we found one that works and set rval accoringly.
@@ -2951,9 +2961,10 @@ blis_main()
 	sharedir='\\\${prefix}/share'
 	sharedir_flag=''
 
-	# The preset value of CFLAGS and LDFLAGS (ie: compiler and linker flags
+	# The preset value of CFLAGS, CXXFLAGS, and LDFLAGS (ie: compiler and linker flags
 	# to use in addition to those determined by the build system).
 	cflags_preset=''
+	cxxflags_preset=''
 	ldflags_preset=''
 
 	# The user-given debug type and a flag indicating it was given.
@@ -3555,6 +3566,16 @@ blis_main()
 	else
 		cflags_preset=''
 		echo "${script_name}: no preset CFLAGS detected."
+	fi
+
+	# Check if CXXFLAGS is non-empty.
+	if [ -n "${CXXFLAGS}" ]; then
+		cxxflags_preset="${CXXFLAGS}"
+		echo "${script_name}: detected preset CXXFLAGS; prepending:"
+		echo "${script_name}:   ${cxxflags_preset}"
+	else
+		cxxflags_preset=''
+		echo "${script_name}: no preset CXXFLAGS detected."
 	fi
 
 	# Check if LDFLAGS is non-empty.
@@ -4234,6 +4255,7 @@ blis_main()
 	add_config_var PYTHON                    found_python
 	add_config_var libpthread
 	add_config_var cflags_preset
+	add_config_var cxxflags_preset
 	add_config_var ldflags_preset
 	add_config_var enable_asan
 	add_config_var debug_type
@@ -4586,18 +4608,18 @@ print_usage_plugin()
 
    --disable-examples, --enable-examples
 
-                 Do not include (included by default) example code for plugin
+                 Do not include (created by default) example code for plugin
                  registration, kernels, etc.
 
    --disable-templates, --enable-templates
 
-                 Do not create (included by default) files which make up the
+                 Do not create (created by default) files which make up the
                  basic plug-in file structure, for example if the plugin has
                  already been created and only build files need to be generated.
 
    --disable-build, --enable-build
 
-                 Do not create (included by default) files necessary for
+                 Do not create (created by default) files necessary for
                  actually building the plugin. ${script_name} can be re-run
                  later to generate these files if desired.
 
@@ -4664,6 +4686,13 @@ print_usage_plugin()
                  WARNING: ENABLING THIS OPTION WILL NEGATIVELY IMPACT
                  PERFORMANCE. Please use only for informational/debugging
                  purposes.
+
+   -p PATH, --path=PATH
+
+                 Look for the plugin source in PATH instead of the current
+                 directory. This option is used to build the plugin
+                 out-of-tree. In this case, only '--enable-build' (== '--build')
+                 may be specified.
 
    -q, --quiet   Suppress informational output.
 
@@ -4767,23 +4796,6 @@ plugin_main()
 	add_config_var aocc_older_than_2_0_0
 	add_config_var aocc_older_than_3_0_0
 
-	# The path to the directory in which we are building. We do this to
-	# make explicit that we distinguish between the top-level directory
-	# of the distribution and the directory in which we are building.
-	cur_dirpath="."
-
-	# The name of the (top-level) configuration directory.
-	config_dir='config'
-	config_dirpath="${config_dir}"
-
-	# The name of the (top-level) kernels directory.
-	kernels_dir='kernels'
-	kernels_dirpath="${kernels_dir}"
-
-	# The name of the (top-level) reference kernels directory.
-	refkern_dir='ref_kernels'
-	refkern_dirpath="${refkern_dir}"
-
 	asm_dir="${sharedir}/blis"
 	omp_simd_path="${sharedir}/blis"
 
@@ -4801,10 +4813,11 @@ plugin_main()
 	# The preset value of CFLAGS and LDFLAGS (ie: compiler and linker flags
 	# to use in addition to those determined by the build system).
 	cflags_preset=$(get_config_var CFLAGS_PRESET)
+	cxxflags_preset=$(get_config_var CXXFLAGS_PRESET)
 	ldflags_preset=$(get_config_var LDFLAGS_PRESET)
 	add_config_var cflags_preset
+	add_config_var cxxflags_preset
 	add_config_var ldflags_preset
-
 
 	# Option variables.
 	quiet_flag='0'
@@ -4863,12 +4876,15 @@ plugin_main()
 
 	# -- Command line option/argument parsing ----------------------------------
 
+	# By default build in-tree
+	plugin_dir="."
+
 	found=true
 	while [[ $found = true ]]; do
 
 		# Process our command line options.
 		unset OPTIND
-		while getopts ":hcd:e:qf-:" opt; do
+		while getopts ":hcd:e:p:qf-:" opt; do
 			case $opt in
 				-)
 					case "$OPTARG" in
@@ -4916,6 +4932,10 @@ plugin_main()
 							;;
 						disable-build)
 							buildfiles_flag=0
+							;;
+
+						path=*)
+							plugin_dir=${OPTARG#*=}
 							;;
 
 						enable-debug)
@@ -4991,6 +5011,9 @@ plugin_main()
 				e)
 					export_shared=$OPTARG
 					;;
+				p)
+					plugin_dir=$OPTARG
+					;;
 				q)
 					quiet_flag=1
 					;;
@@ -5025,15 +5048,34 @@ plugin_main()
 		done
 	done
 
+	# The path to the directory in which we are building. We do this to
+	# make explicit that we distinguish between the top-level directory
+	# of the distribution and the directory in which we are building.
+	cur_dirpath="."
+
+	# The name of the (top-level) configuration directory.
+	config_dir='config'
+	config_dirpath="${plugin_dir}/${config_dir}"
+
+	# The name of the (top-level) kernels directory.
+	kernels_dir='kernels'
+	kernels_dirpath="${plugin_dir}/${kernels_dir}"
+
+	# The name of the (top-level) reference kernels directory.
+	refkern_dir='ref_kernels'
+	refkern_dirpath="${plugin_dir}/${refkern_dir}"
+
+	add_config_var plugin_dir
+
 	# Get the name of the plugin to build.
 	if [ $# -gt "1" ]; then   # more than one configuration argument given.
 		print_usage_plugin
 	elif [ $# == "0" ]; then   # try to guess the plugin name.
-		plugin_h=$(ls bli_plugin_*.h 2>/dev/null)
+		plugin_h=$(ls ${plugin_dir}/bli_plugin_*.h 2>/dev/null)
 		if [ -z ${plugin_h} ]; then
 			print_usage_plugin
 		else
-			plugin_name=$(echo ${plugin_h} | sed -e 's/bli_plugin_//' -e 's/\.h//')
+			plugin_name=$(echo ${plugin_h} | sed -e 's/.*bli_plugin_//' -e 's/\.h//')
 		fi
 	else
 		plugin_name="${1}"
@@ -5041,6 +5083,15 @@ plugin_main()
 	add_config_var plugin_name
 
 	maybe_echo "${script_name}: configuring BLIS plugin '${plugin_name}'"
+
+	if [[ ${plugin_dir} != . ]]; then
+		if [ ${templates_flag} == '1' ] ||
+		   [ ${examples_flag}  == '1' ]; then
+			echo "${script_name}: *** Only --enable-build may be specified when configuring out-of-tree."
+			echo "${script_name}: *** Please use '--build' with '-p' or '--path'."
+			exit 1
+		fi
+	fi
 
 	# Check if CFLAGS is non-empty.
 	if [ -n "${CFLAGS}" ]; then
@@ -5050,6 +5101,16 @@ plugin_main()
 	else
 		cflags_preset=''
 		maybe_echo "${script_name}: no preset CFLAGS detected."
+	fi
+
+	# Check if CXXFLAGS is non-empty.
+	if [ -n "${CXXFLAGS}" ]; then
+		cxxflags_preset="${CXXFLAGS}"
+		maybe_echo "${script_name}: detected preset CXXFLAGS; prepending:"
+		maybe_echo "${script_name}:   ${cxxflags_preset}"
+	else
+		cxxflags_preset=''
+		maybe_echo "${script_name}: no preset CXXFLAGS detected."
 	fi
 
 	# Check if LDFLAGS is non-empty.
@@ -5135,6 +5196,8 @@ plugin_main()
 
 	if [ ${templates_flag} == '1' ]; then
 
+		plugin_h="\"bli_plugin_${plugin_name}.h\""
+
 		# -- config_registry --
 
 		maybe_echo -n "${script_name}: copying the configuration registry..."
@@ -5158,6 +5221,7 @@ plugin_main()
 			else
 				strip_examples ${sharedir}/blis/plugin/bli_plugin_register.c bli_plugin_register.c
 			fi
+			perl -pi -e "s|\@PLUGIN_HEADER\@|${plugin_h}|" bli_plugin_register.c
 			maybe_echo "done"
 		fi
 
@@ -5193,6 +5257,7 @@ plugin_main()
 				else
 					strip_examples ${sharedir}/blis/plugin/${file} ref_kernels/${file}
 				fi
+				perl -pi -e "s|\@PLUGIN_HEADER\@|${plugin_h}|" ref_kernels/${file}
 				done="false"
 			fi
 		done
@@ -5227,6 +5292,7 @@ plugin_main()
 				else
 					cp ${sharedir}/blis/plugin/bli_plugin_init_zen3.c config/${config}/bli_plugin_init_${config}.c
 				fi
+				perl -pi -e "s|\@PLUGIN_HEADER\@|${plugin_h}|" config/${config}/bli_plugin_init_${config}.c
 			fi
 
 			if [ ! -e config/${config}/bli_kernel_defs_${config}.h ] || [ ${force_flag} == '1' ]; then
@@ -5252,6 +5318,7 @@ plugin_main()
 		if [ ${examples_flag} == '1' ]; then
 			if [ ! -e kernels/zen3/my_kernel_1_zen3.c ] || [ ${force_flag} == '1' ]; then
 				cp ${sharedir}/blis/plugin/my_kernel_1_zen3.c kernels/zen3
+				perl -pi -e "s|\@PLUGIN_HEADER\@|${plugin_h}|" kernels/zen3/my_kernel_1_zen3.c
 			fi
 		fi
 
@@ -5280,7 +5347,7 @@ plugin_main()
 
 		# The name/path to the registry (master list) of supported configurations.
 		registry_file="config_registry"
-		registry_filepath=${registry_file}
+		registry_filepath=${plugin_dir}/${registry_file}
 
 		# Read the registered configuration names and lists into associative
 		# arrays.
@@ -5294,10 +5361,12 @@ plugin_main()
 
 		# -- Makefile fragments --
 
-		create_makefile_fragment FRAME . obj/${config_name} false
-		create_makefile_fragment CONFIG config obj/${config_name}/config
-		create_makefile_fragment KERNELS kernels obj/${config_name}/kernels
-		create_makefile_fragment REFKERN ref_kernels obj/${config_name}/ref_kernels
+		# The extra '/.' on the FRAME call is necessary to trick create_makefile_fragments
+		# into not taking the last entry in ${plugin_dir} as the 'current directory name'.
+		create_makefile_fragment FRAME ${plugin_dir}/. obj/${config_name} false
+		create_makefile_fragment CONFIG ${config_dirpath} obj/${config_name}/config
+		create_makefile_fragment KERNELS ${kernels_dirpath} obj/${config_name}/kernels
+		create_makefile_fragment REFKERN ${refkern_dirpath} obj/${config_name}/ref_kernels
 
 	fi
 

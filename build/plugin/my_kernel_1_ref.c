@@ -32,8 +32,7 @@
 
 */
 
-#include "blis.h"
-#include STRINGIFY_INT(../PASTEMAC(plugin,BLIS_PNAME_INFIX).h)
+#include @PLUGIN_HEADER@
 
 #undef  GENTFUNC
 #define GENTFUNC( ctype, ch, opname, arch, suf ) \

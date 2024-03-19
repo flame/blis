@@ -32,7 +32,7 @@
 
 */
 
-#include "blis.h"
+#include @PLUGIN_HEADER@
 
 void bli_dmy_kernel_1_zen3
      (

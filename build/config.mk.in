@@ -119,12 +119,13 @@ AR                := @AR@
 # Python Interpreter
 PYTHON            := @PYTHON@
 
-# Preset (required) CFLAGS and LDFLAGS. These variables capture the value
-# of the CFLAGS and LDFLAGS environment variables at configure-time (and/or
-# the value of CFLAGS/LDFLAGS if either was specified on the command line).
+# Preset (required) CFLAGS, CXXFLAGS, and LDFLAGS. These variables capture the value
+# of the CFLAGS, CXXFLAGS, and LDFLAGS environment variables at configure-time (and/or
+# the value of CFLAGS/CXXFLAGS/LDFLAGS if any was specified on the command line).
 # These flags are used in addition to the flags automatically determined
 # by the build system.
 CFLAGS_PRESET     := @cflags_preset@
+CXXFLAGS_PRESET   := @cxxflags_preset@
 LDFLAGS_PRESET    := @ldflags_preset@
 
 # The level of debugging info to generate.

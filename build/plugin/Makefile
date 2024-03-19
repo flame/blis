@@ -61,8 +61,6 @@ CONFIG_MK_FILE := config.mk
 #
 
 INC_PATH           := $(includedir)/blis
-DIST_PATH          := .
-FRAME_DIR          := .
 
 # Define the name of the common makefile.
 COMMON_MK_FILE := $(sharedir)/blis/common.mk
@@ -77,6 +75,15 @@ COMMON_MK_PRESENT := yes
 else
 COMMON_MK_PRESENT := no
 endif
+
+# Source suffixes.
+CONFIG_SRC_SUFS   := c cxx cpp
+KERNELS_SRC_SUFS  := c cxx cpp s S
+REFKERN_SRC_SUFS  := c cxx cpp
+FRAME_SRC_SUFS    := c cxx cpp
+
+# Make sure the plugin path is included when searching for headers (e.g. bli_plugin_<name>.h).
+CINCFLAGS         += -I$(DIST_PATH)
 
 PLUGIN_A_PATH     := $(BASE_LIB_PATH)/libblis_$(PLUGIN_NAME).a
 PLUGIN_SO_PATH    := $(BASE_LIB_PATH)/libblis_$(PLUGIN_NAME).$(SHLIB_EXT)
@@ -148,11 +155,12 @@ MK_KERNELS_OBJS     := $(call gen-obj-paths-from-src,$(KERNELS_SRC_SUFS),$(MK_KE
 # files for each sub-configuration in CONFIG_LIST. Note that due to the
 # nuances of naming the reference kernel files, we can't use the function
 # gen-obj-paths-from-src as we do above and below.
-MK_REFKERN_C        := $(filter %.c, $(MK_REFKERN_SRC))
-MK_REFKERN_OBJS     := $(foreach arch, $(CONFIG_LIST), \
-                           $(patsubst $(REFKERN_PATH)/%_$(REFNM).c, \
-                                 $(BASE_OBJ_REFKERN_PATH)/$(arch)/%_$(arch)_$(REFNM).o, \
-                                 $(MK_REFKERN_C) \
+MK_REFKERN_OBJS     := $(foreach suf, $(REFKERN_SRC_SUFS), \
+                           $(foreach arch, $(CONFIG_LIST), \
+                               $(patsubst $(REFKERN_PATH)/%_$(REFNM).$(suf), \
+                                     $(BASE_OBJ_REFKERN_PATH)/$(arch)/%_$(arch)_$(REFNM).o, \
+                                     $(filter %.$(suf), $(MK_REFKERN_SRC)) \
+                                ) \
                             ) \
                         )
 
@@ -216,6 +224,24 @@ else
 	@echo "Compiling $$@" $(call get-config-text-for,$(1))
 	@$(CC) $(call get-config-cflags-for,$(1)) -DBLIS_PNAME=$(PLUGIN_NAME) -c $$< -o $$@
 endif
+
+$(BASE_OBJ_CONFIG_PATH)/$(1)/%.o: $(CONFIG_PATH)/$(1)/%.cxx $(BLIS_H_FLAT) $(MAKE_DEFS_MK_PATHS)
+	@mkdir -p $$(dir $$@)
+ifeq ($(ENABLE_VERBOSE),yes)
+	$(CXX) $(call get-config-cxxflags-for,$(1)) -DBLIS_PNAME=$(PLUGIN_NAME) -c $$< -o $$@
+else
+	@echo "Compiling $$@" $(call get-config-cxxtext-for,$(1))
+	@$(CXX) $(call get-config-cxxflags-for,$(1)) -DBLIS_PNAME=$(PLUGIN_NAME) -c $$< -o $$@
+endif
+
+$(BASE_OBJ_CONFIG_PATH)/$(1)/%.o: $(CONFIG_PATH)/$(1)/%.cpp $(BLIS_H_FLAT) $(MAKE_DEFS_MK_PATHS)
+	@mkdir -p $$(dir $$@)
+ifeq ($(ENABLE_VERBOSE),yes)
+	$(CXX) $(call get-config-cxxflags-for,$(1)) -DBLIS_PNAME=$(PLUGIN_NAME) -c $$< -o $$@
+else
+	@echo "Compiling $$@" $(call get-config-cxxtext-for,$(1))
+	@$(CXX) $(call get-config-cxxflags-for,$(1)) -DBLIS_PNAME=$(PLUGIN_NAME) -c $$< -o $$@
+endif
 endef
 
 # first argument: a kernel set (name) being targeted (e.g. haswell).
@@ -228,6 +254,24 @@ else
 	@echo "Compiling $$@" $(call get-refinit-text-for,$(1))
 	@$(CC) $(call get-refinit-cflags-for,$(1)) -DBLIS_PNAME=$(PLUGIN_NAME) -c $$< -o $$@
 endif
+
+$(BASE_OBJ_REFKERN_PATH)/$(1)/bli_cntx_$(1)_ref.o: $(REFKERN_PATH)/bli_cntx_ref.cpp $(BLIS_H_FLAT) $(MAKE_DEFS_MK_PATHS)
+	@mkdir -p $$(dir $$@)
+ifeq ($(ENABLE_VERBOSE),yes)
+	$(CXX) $(call get-refinit-cxxflags-for,$(1)) -DBLIS_PNAME=$(PLUGIN_NAME) -c $$< -o $$@
+else
+	@echo "Compiling $$@" $(call get-refinit-cxxtext-for,$(1))
+	@$(CXX) $(call get-refinit-cxxflags-for,$(1)) -DBLIS_PNAME=$(PLUGIN_NAME) -c $$< -o $$@
+endif
+
+$(BASE_OBJ_REFKERN_PATH)/$(1)/bli_cntx_$(1)_ref.o: $(REFKERN_PATH)/bli_cntx_ref.cxx $(BLIS_H_FLAT) $(MAKE_DEFS_MK_PATHS)
+	@mkdir -p $$(dir $$@)
+ifeq ($(ENABLE_VERBOSE),yes)
+	$(CXX) $(call get-refinit-cxxflags-for,$(1)) -DBLIS_PNAME=$(PLUGIN_NAME) -c $$< -o $$@
+else
+	@echo "Compiling $$@" $(call get-refinit-cxxtext-for,$(1))
+	@$(CXX) $(call get-refinit-cxxflags-for,$(1)) -DBLIS_PNAME=$(PLUGIN_NAME) -c $$< -o $$@
+endif
 endef
 
 # first argument: a kernel set (name) being targeted (e.g. haswell).
@@ -239,6 +283,24 @@ ifeq ($(ENABLE_VERBOSE),yes)
 else
 	@echo "Compiling $$@" $(call get-refkern-text-for,$(1))
 	@$(CC) $(call get-refkern-cflags-for,$(1)) -DBLIS_PNAME=$(PLUGIN_NAME) -c $$< -o $$@
+endif
+
+$(BASE_OBJ_REFKERN_PATH)/$(1)/%_$(1)_ref.o: $(REFKERN_PATH)/%_ref.cpp $(BLIS_H_FLAT) $(MAKE_DEFS_MK_PATHS)
+	@mkdir -p $$(dir $$@)
+ifeq ($(ENABLE_VERBOSE),yes)
+	$(CXX) $(call get-refkern-cxxflags-for,$(1)) -DBLIS_PNAME=$(PLUGIN_NAME) -c $$< -o $$@
+else
+	@echo "Compiling $$@" $(call get-refkern-cxxtext-for,$(1))
+	@$(CXX) $(call get-refkern-cxxflags-for,$(1)) -DBLIS_PNAME=$(PLUGIN_NAME) -c $$< -o $$@
+endif
+
+$(BASE_OBJ_REFKERN_PATH)/$(1)/%_$(1)_ref.o: $(REFKERN_PATH)/%_ref.cxx $(BLIS_H_FLAT) $(MAKE_DEFS_MK_PATHS)
+	@mkdir -p $$(dir $$@)
+ifeq ($(ENABLE_VERBOSE),yes)
+	$(CXX) $(call get-refkern-cxxflags-for,$(1)) -DBLIS_PNAME=$(PLUGIN_NAME) -c $$< -o $$@
+else
+	@echo "Compiling $$@" $(call get-refkern-cxxtext-for,$(1))
+	@$(CXX) $(call get-refkern-cxxflags-for,$(1)) -DBLIS_PNAME=$(PLUGIN_NAME) -c $$< -o $$@
 endif
 endef
 
@@ -253,6 +315,24 @@ else
 	@echo "Compiling $$@" $(call get-frame-text-for,$(1))
 	@$(CC) $(call get-frame-cflags-for,$(1)) -DBLIS_PNAME=$(PLUGIN_NAME) -c $$< -o $$@
 endif
+
+$(BASE_OBJ_FRAME_PATH)/%.o: $(FRAME_PATH)/%.cxx $(BLIS_H_FLAT) $(MAKE_DEFS_MK_PATHS)
+	@mkdir -p $$(dir $$@)
+ifeq ($(ENABLE_VERBOSE),yes)
+	$(CXX) $(call get-frame-cxxflags-for,$(1)) -DBLIS_PNAME=$(PLUGIN_NAME) -c $$< -o $$@
+else
+	@echo "Compiling $$@" $(call get-frame-cxxtext-for,$(1))
+	@$(CXX) $(call get-frame-cxxflags-for,$(1)) -DBLIS_PNAME=$(PLUGIN_NAME) -c $$< -o $$@
+endif
+
+$(BASE_OBJ_FRAME_PATH)/%.o: $(FRAME_PATH)/%.cpp $(BLIS_H_FLAT) $(MAKE_DEFS_MK_PATHS)
+	@mkdir -p $$(dir $$@)
+ifeq ($(ENABLE_VERBOSE),yes)
+	$(CXX) $(call get-frame-cxxflags-for,$(1)) -DBLIS_PNAME=$(PLUGIN_NAME) -c $$< -o $$@
+else
+	@echo "Compiling $$@" $(call get-frame-cxxtext-for,$(1))
+	@$(CXX) $(call get-frame-cxxflags-for,$(1)) -DBLIS_PNAME=$(PLUGIN_NAME) -c $$< -o $$@
+endif
 endef
 
 # first argument: a kernel set (name) being targeted (e.g. haswell).
@@ -261,11 +341,20 @@ endef
 define make-kernels-rule
 $(BASE_OBJ_KERNELS_PATH)/$(1)/%.o: $(KERNELS_PATH)/$(1)/%.$(3) $(BLIS_H_FLAT) $(MAKE_DEFS_MK_PATHS)
 	@mkdir -p $$(dir $$@)
+ifeq ($(3),$(filter cxx cpp,$(3)))
+ifeq ($(ENABLE_VERBOSE),yes)
+	$(CXX) $(call get-kernel-cxxflags-for,$(2)) -DBLIS_PNAME=$(PLUGIN_NAME) -c $$< -o $$@
+else
+	@echo "Compiling $$@" $(call get-kernel-cxxtext-for,$(2))
+	@$(CXX) $(call get-kernel-cxxflags-for,$(2)) -DBLIS_PNAME=$(PLUGIN_NAME) -c $$< -o $$@
+endif
+else
 ifeq ($(ENABLE_VERBOSE),yes)
 	$(CC) $(call get-kernel-cflags-for,$(2)) -DBLIS_PNAME=$(PLUGIN_NAME) -c $$< -o $$@
 else
 	@echo "Compiling $$@" $(call get-kernel-text-for,$(2))
 	@$(CC) $(call get-kernel-cflags-for,$(2)) -DBLIS_PNAME=$(PLUGIN_NAME) -c $$< -o $$@
+endif
 endif
 endef
 

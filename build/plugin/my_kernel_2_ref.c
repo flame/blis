@@ -32,8 +32,7 @@
 
 */
 
-#include "blis.h"
-#include STRINGIFY_INT(../PASTEMAC(plugin,BLIS_PNAME_INFIX).h)
+#include @PLUGIN_HEADER@
 
 #ifndef MY_KERNEL_2_ROW_MAJOR
 #define MY_KERNEL_2_ROW_MAJOR 0

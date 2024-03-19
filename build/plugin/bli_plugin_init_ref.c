@@ -32,8 +32,7 @@
 
 */
 
-#include "blis.h"
-#include STRINGIFY_INT(../PASTEMAC(plugin,BLIS_PNAME_INFIX).h)
+#include @PLUGIN_HEADER@
 
 // -- Macros to help concisely instantiate bli_func_init() ---------------------
 
@@ -63,6 +62,7 @@ void PASTEMAC(plugin_init,BLIS_PNAME_INFIX,BLIS_CNAME_INFIX,BLIS_REF_SUFFIX)
      )
 {
 	cntx_t* cntx = ( cntx_t* )bli_gks_lookup_id( PASTECH(BLIS_ARCH,BLIS_CNAME_UPPER_INFIX) );
+	( void )cntx;
 
     // ------------------------------------------------------------------------>
 	// -- Example Initialization ---------------------------------------------->
