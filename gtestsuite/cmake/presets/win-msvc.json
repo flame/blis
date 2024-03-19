@@ -1,0 +1,262 @@
+{
+    "version": 6,
+    "include": [
+        "base.json"
+    ],
+    "configurePresets": [
+        {
+            "name": "win-msvc",
+            "inherits": "base",
+            "hidden": true,
+            "generator": "Visual Studio 17 2022",
+            "condition": {
+              "type": "equals",
+              "lhs": "${hostSystemName}",
+              "rhs": "Windows"
+            },
+            "toolset": "ClangCl"
+        },
+        {
+          "name": "win-msvc-st-lp64-amdzen-static",
+          "inherits": ["win-msvc", "st", "lp64", "amdzen", "static"],            
+          "hidden": false,
+          "cacheVariables": {
+              "BLIS_PATH": "${sourceParentDir}//install-win-lp64-amdzen",
+              "BLIS_LINKING_TYPE": "static",
+              "REF_CBLAS": "MKL"
+          }
+        },
+        {
+            "name": "win-msvc-st-lp64-amdzen-shared",
+            "inherits": ["win-msvc", "st", "lp64", "amdzen", "shared"],
+            "hidden": false,
+            "cacheVariables": {
+                "BLIS_PATH": "${sourceParentDir}//install-win-lp64-amdzen",
+                "BLIS_LINKING_TYPE": "shared",
+                "REF_CBLAS": "MKL"
+            }
+          },
+          {
+            "name": "win-msvc-mt-lp64-amdzen-static",
+            "inherits": ["win-msvc", "mt", "lp64", "amdzen", "static"],            
+            "hidden": false,
+            "cacheVariables": {
+                "BLIS_PATH": "${sourceParentDir}//install-win-lp64-amdzen",
+                "BLIS_LINKING_TYPE": "static",
+                "REF_CBLAS": "MKL"
+            }
+          },
+          {
+            "name": "win-msvc-mt-lp64-amdzen-shared",
+            "inherits": ["win-msvc", "mt", "lp64", "amdzen", "shared"],
+            "hidden": false,
+            "cacheVariables": {
+                "BLIS_PATH": "${sourceParentDir}//install-win-lp64-amdzen",
+                "BLIS_LINKING_TYPE": "shared",
+                "REF_CBLAS": "MKL"
+            }
+          },
+          {
+            "name": "win-msvc-st-ilp64-amdzen-static",
+            "inherits": ["win-msvc", "st", "ilp64", "amdzen", "static"],            
+            "hidden": false,
+            "cacheVariables": {
+                "BLIS_PATH": "${sourceParentDir}//install-win-ilp64-amdzen",
+                "BLIS_LINKING_TYPE": "static",
+                "REF_CBLAS": "MKL"
+            }
+          },
+          {
+            "name": "win-msvc-st-ilp64-amdzen-shared",
+            "inherits": ["win-msvc", "st", "ilp64", "amdzen", "shared"],
+            "hidden": false,
+            "cacheVariables": {
+                "BLIS_PATH": "${sourceParentDir}//install-win-ilp64-amdzen",
+                "BLIS_LINKING_TYPE": "shared",
+                "REF_CBLAS": "MKL"
+            }
+          },
+          {
+            "name": "win-msvc-mt-ilp64-amdzen-static",
+            "inherits": ["win-msvc", "mt", "ilp64", "amdzen", "static"],            
+            "hidden": false,
+            "cacheVariables": {
+                "BLIS_PATH": "${sourceParentDir}//install-win-ilp64-amdzen",
+                "BLIS_LINKING_TYPE": "static",
+                "REF_CBLAS": "MKL"
+            }
+          },
+          {
+            "name": "win-msvc-mt-ilp64-amdzen-shared",
+            "inherits": ["win-msvc", "mt", "ilp64", "amdzen", "shared"],
+            "hidden": false,
+            "cacheVariables": {
+                "BLIS_PATH": "${sourceParentDir}//install-win-ilp64-amdzen",
+                "BLIS_LINKING_TYPE": "shared",
+                "REF_CBLAS": "MKL"
+            }
+          },
+          {
+            "name": "win-msvc-st-lp64-auto-static",
+            "inherits": ["win-msvc", "st", "lp64", "auto", "static"],            
+            "hidden": false,
+            "cacheVariables": {
+                "BLIS_PATH": "${sourceParentDir}//install-win-lp64-auto",
+                "BLIS_LINKING_TYPE": "static",
+                "REF_CBLAS": "MKL"
+            }
+          },
+          {
+            "name": "win-msvc-st-lp64-auto-shared",
+            "inherits": ["win-msvc", "st", "lp64", "auto", "shared"],
+            "hidden": false,
+            "cacheVariables": {
+                "BLIS_PATH": "${sourceParentDir}//install-win-lp64-auto",
+                "BLIS_LINKING_TYPE": "shared",
+                "REF_CBLAS": "MKL"
+            }
+          },
+          {
+            "name": "win-msvc-mt-lp64-auto-static",
+            "inherits": ["win-msvc", "mt", "lp64", "auto", "static"],            
+            "hidden": false,
+            "cacheVariables": {
+                "BLIS_PATH": "${sourceParentDir}//install-win-lp64-auto",
+                "BLIS_LINKING_TYPE": "static",
+                "REF_CBLAS": "MKL"
+            }
+          },
+          {
+            "name": "win-msvc-mt-lp64-auto-shared",
+            "inherits": ["win-msvc", "mt", "lp64", "auto", "shared"],
+            "hidden": false,
+            "cacheVariables": {
+                "BLIS_PATH": "${sourceParentDir}//install-win-lp64-auto",
+                "BLIS_LINKING_TYPE": "shared",
+                "REF_CBLAS": "MKL"
+            }
+          },
+          {
+            "name": "win-msvc-st-ilp64-auto-static",
+            "inherits": ["win-msvc", "st", "ilp64", "auto", "static"],            
+            "hidden": false,
+            "cacheVariables": {
+                "BLIS_PATH": "${sourceParentDir}//install-win-ilp64-auto",
+                "BLIS_LINKING_TYPE": "static",
+                "REF_CBLAS": "MKL"
+            }
+          },
+          {
+            "name": "win-msvc-st-ilp64-auto-shared",
+            "inherits": ["win-msvc", "st", "ilp64", "auto", "shared"],
+            "hidden": false,
+            "cacheVariables": {
+                "BLIS_PATH": "${sourceParentDir}//install-win-ilp64-auto",
+                "BLIS_LINKING_TYPE": "shared",
+                "REF_CBLAS": "MKL"
+            }
+          },
+          {
+            "name": "win-msvc-mt-ilp64-auto-static",
+            "inherits": ["win-msvc", "mt", "ilp64", "auto", "static"],            
+            "hidden": false,
+            "cacheVariables": {
+                "BLIS_PATH": "${sourceParentDir}//install-win-ilp64-auto",
+                "BLIS_LINKING_TYPE": "static",
+                "REF_CBLAS": "MKL"
+            }
+          },
+          {
+            "name": "win-msvc-mt-ilp64-auto-shared",
+            "inherits": ["win-msvc", "mt", "ilp64", "auto", "shared"],
+            "hidden": false,
+            "cacheVariables": {
+                "BLIS_PATH": "${sourceParentDir}//install-win-ilp64-auto",
+                "BLIS_LINKING_TYPE": "shared",
+                "REF_CBLAS": "MKL"
+            }
+          }
+    ],
+    "buildPresets": [
+        {
+            "name": "win-msvc-st-lp64-amdzen-static",
+            "configurePreset": "win-msvc-st-lp64-amdzen-static",
+            "inherits": "base"
+        },
+        {
+            "name": "win-msvc-st-lp64-amdzen-shared",
+            "configurePreset": "win-msvc-st-lp64-amdzen-shared",
+            "inherits": "base"
+        },
+        {
+            "name": "win-msvc-mt-lp64-amdzen-static",
+            "configurePreset": "win-msvc-mt-lp64-amdzen-static",
+            "inherits": "base"
+        },
+        {
+            "name": "win-msvc-mt-lp64-amdzen-shared",
+            "configurePreset": "win-msvc-mt-lp64-amdzen-shared",
+            "inherits": "base"
+        },
+        {
+            "name": "win-msvc-st-ilp64-amdzen-static",
+            "configurePreset": "win-msvc-st-ilp64-amdzen-static",
+            "inherits": "base"
+        },
+        {
+            "name": "win-msvc-st-ilp64-amdzen-shared",
+            "configurePreset": "win-msvc-st-ilp64-amdzen-shared",
+            "inherits": "base"
+        },
+        {
+            "name": "win-msvc-mt-ilp64-amdzen-static",
+            "configurePreset": "win-msvc-mt-ilp64-amdzen-static",
+            "inherits": "base"
+        },
+        {
+            "name": "win-msvc-mt-ilp64-amdzen-shared",
+            "configurePreset": "win-msvc-mt-ilp64-amdzen-shared",
+            "inherits": "base"
+        },
+        {
+            "name": "win-msvc-st-lp64-auto-static",
+            "configurePreset": "win-msvc-st-lp64-auto-static",
+            "inherits": "base"
+        },
+        {
+            "name": "win-msvc-st-lp64-auto-shared",
+            "configurePreset": "win-msvc-st-lp64-auto-shared",
+            "inherits": "base"
+        },
+        {
+            "name": "win-msvc-mt-lp64-auto-static",
+            "configurePreset": "win-msvc-mt-lp64-auto-static",
+            "inherits": "base"
+        },
+        {
+            "name": "win-msvc-mt-lp64-auto-shared",
+            "configurePreset": "win-msvc-mt-lp64-auto-shared",
+            "inherits": "base"
+        },
+        {
+            "name": "win-msvc-st-ilp64-auto-static",
+            "configurePreset": "win-msvc-st-lp64-auto-static",
+            "inherits": "base"
+        },
+        {
+            "name": "win-msvc-st-ilp64-auto-shared",
+            "configurePreset": "win-msvc-st-lp64-auto-shared",
+            "inherits": "base"
+        },
+        {
+            "name": "win-msvc-mt-ilp64-auto-static",
+            "configurePreset": "win-msvc-mt-lp64-auto-static",
+            "inherits": "base"
+        },
+        {
+            "name": "win-msvc-mt-ilp64-auto-shared",
+            "configurePreset": "win-msvc-mt-lp64-auto-shared",
+            "inherits": "base"
+        }
+    ]
+}

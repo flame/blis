@@ -14,6 +14,11 @@
               "OpenMP_libomp_LIBRARY": "$env{OpenMP_lib_path}/libiomp5md.lib"
             },
             "generator": "Visual Studio 17 2022",
+            "condition": {
+              "type": "equals",
+              "lhs": "${hostSystemName}",
+              "rhs": "Windows"
+            },
             "toolset": "ClangCl"
           },
           {

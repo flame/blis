@@ -5,17 +5,22 @@
     ],
     "configurePresets": [
         {
-            "name": "linux-make-clang",
-            "inherits": "base",
-            "hidden": true,
-            "cacheVariables": {
-              "ENABLE_ADDON": "aocl_gemm",
-              "COMPLEX_RETURN": "intel",
-              "CMAKE_C_COMPILER": "clang",
-              "CMAKE_CXX_COMPILER": "clang++"
-            },
-            "generator": "Unix Makefiles"
+          "name": "linux-make-clang",
+          "inherits": "base",
+          "hidden": true,
+          "cacheVariables": {
+            "ENABLE_ADDON": "aocl_gemm",
+            "COMPLEX_RETURN": "intel",
+            "CMAKE_C_COMPILER": "clang",
+            "CMAKE_CXX_COMPILER": "clang++"
           },
+          "generator": "Unix Makefiles",
+          "condition": {
+            "type": "notEquals",
+            "lhs": "${hostSystemName}",
+            "rhs": "Windows"
+          }
+        },
           {
             "name": "linux-make-clang-st-lp64-amdzen-static",
             "inherits": ["linux-make-clang", "st", "lp64", "amdzen", "linux-static"],

@@ -8,7 +8,15 @@
             "name": "linux-ninja",
             "inherits": "base",
             "hidden": true,
-            "generator": "Ninja"
+            "cacheVariables": {
+              "ENABLE_ADDON": "aocl_gemm"
+            },
+            "generator": "Ninja",
+            "condition": {
+              "type": "notEquals",
+              "lhs": "${hostSystemName}",
+              "rhs": "Windows"
+            }
           },
           {
             "name": "linux-ninja-st-lp64-amdzen-static",

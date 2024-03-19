@@ -11,7 +11,12 @@
             "cacheVariables": {
               "ENABLE_ADDON": "aocl_gemm"
             },
-            "generator": "Unix Makefiles"
+            "generator": "Unix Makefiles",
+            "condition": {
+              "type": "notEquals",
+              "lhs": "${hostSystemName}",
+              "rhs": "Windows"
+            }
           },
           {
             "name": "linux-make-st-lp64-amdzen-static",

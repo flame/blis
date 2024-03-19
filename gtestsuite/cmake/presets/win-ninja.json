@@ -5,19 +5,19 @@
     ],
     "configurePresets": [
         {
-            "name": "linux-make",
+            "name": "win-ninja",
             "inherits": "base",
             "hidden": true,
-            "generator": "Unix Makefiles",
+            "generator": "Ninja",
             "condition": {
-              "type": "notEquals",
+              "type": "equals",
               "lhs": "${hostSystemName}",
               "rhs": "Windows"
             }
         },
         {
-          "name": "linux-make-st-lp64-amdzen-static",
-          "inherits": ["linux-make", "st", "lp64", "amdzen", "static"],            
+          "name": "win-ninja-st-lp64-amdzen-static",
+          "inherits": ["win-ninja", "st", "lp64", "amdzen", "static"],            
           "hidden": false,
           "cacheVariables": {
               "BLIS_PATH": "${sourceParentDir}//install-linux-lp64-amdzen",
@@ -26,8 +26,8 @@
           }
         },
         {
-            "name": "linux-make-st-lp64-amdzen-shared",
-            "inherits": ["linux-make", "st", "lp64", "amdzen", "shared"],
+            "name": "win-ninja-st-lp64-amdzen-shared",
+            "inherits": ["win-ninja", "st", "lp64", "amdzen", "shared"],
             "hidden": false,
             "cacheVariables": {
                 "BLIS_PATH": "${sourceParentDir}//install-linux-lp64-amdzen",
@@ -36,8 +36,8 @@
             }
           },
           {
-            "name": "linux-make-mt-lp64-amdzen-static",
-            "inherits": ["linux-make", "mt", "lp64", "amdzen", "static"],            
+            "name": "win-ninja-mt-lp64-amdzen-static",
+            "inherits": ["win-ninja", "mt", "lp64", "amdzen", "static"],            
             "hidden": false,
             "cacheVariables": {
                 "BLIS_PATH": "${sourceParentDir}//install-linux-lp64-amdzen",
@@ -46,8 +46,8 @@
             }
           },
           {
-            "name": "linux-make-mt-lp64-amdzen-shared",
-            "inherits": ["linux-make", "mt", "lp64", "amdzen", "shared"],
+            "name": "win-ninja-mt-lp64-amdzen-shared",
+            "inherits": ["win-ninja", "mt", "lp64", "amdzen", "shared"],
             "hidden": false,
             "cacheVariables": {
                 "BLIS_PATH": "${sourceParentDir}//install-linux-lp64-amdzen",
@@ -56,8 +56,8 @@
             }
           },
           {
-            "name": "linux-make-st-ilp64-amdzen-static",
-            "inherits": ["linux-make", "st", "ilp64", "amdzen", "static"],            
+            "name": "win-ninja-st-ilp64-amdzen-static",
+            "inherits": ["win-ninja", "st", "ilp64", "amdzen", "static"],            
             "hidden": false,
             "cacheVariables": {
                 "BLIS_PATH": "${sourceParentDir}//install-linux-ilp64-amdzen",
@@ -66,8 +66,8 @@
             }
           },
           {
-            "name": "linux-make-st-ilp64-amdzen-shared",
-            "inherits": ["linux-make", "st", "ilp64", "amdzen", "shared"],
+            "name": "win-ninja-st-ilp64-amdzen-shared",
+            "inherits": ["win-ninja", "st", "ilp64", "amdzen", "shared"],
             "hidden": false,
             "cacheVariables": {
                 "BLIS_PATH": "${sourceParentDir}//install-linux-ilp64-amdzen",
@@ -76,8 +76,8 @@
             }
           },
           {
-            "name": "linux-make-mt-ilp64-amdzen-static",
-            "inherits": ["linux-make", "mt", "ilp64", "amdzen", "static"],            
+            "name": "win-ninja-mt-ilp64-amdzen-static",
+            "inherits": ["win-ninja", "mt", "ilp64", "amdzen", "static"],            
             "hidden": false,
             "cacheVariables": {
                 "BLIS_PATH": "${sourceParentDir}//install-linux-ilp64-amdzen",
@@ -86,8 +86,8 @@
             }
           },
           {
-            "name": "linux-make-mt-ilp64-amdzen-shared",
-            "inherits": ["linux-make", "mt", "ilp64", "amdzen", "shared"],
+            "name": "win-ninja-mt-ilp64-amdzen-shared",
+            "inherits": ["win-ninja", "mt", "ilp64", "amdzen", "shared"],
             "hidden": false,
             "cacheVariables": {
                 "BLIS_PATH": "${sourceParentDir}//install-linux-ilp64-amdzen",
@@ -96,8 +96,8 @@
             }
           },
           {
-            "name": "linux-make-st-lp64-auto-static",
-            "inherits": ["linux-make", "st", "lp64", "auto", "static"],            
+            "name": "win-ninja-st-lp64-auto-static",
+            "inherits": ["win-ninja", "st", "lp64", "auto", "static"],            
             "hidden": false,
             "cacheVariables": {
                 "BLIS_PATH": "${sourceParentDir}//install-linux-lp64-auto",
@@ -106,8 +106,8 @@
             }
           },
           {
-            "name": "linux-make-st-lp64-auto-shared",
-            "inherits": ["linux-make", "st", "lp64", "auto", "shared"],
+            "name": "win-ninja-st-lp64-auto-shared",
+            "inherits": ["win-ninja", "st", "lp64", "auto", "shared"],
             "hidden": false,
             "cacheVariables": {
                 "BLIS_PATH": "${sourceParentDir}//install-linux-lp64-auto",
@@ -116,8 +116,8 @@
             }
           },
           {
-            "name": "linux-make-mt-lp64-auto-static",
-            "inherits": ["linux-make", "mt", "lp64", "auto", "static"],            
+            "name": "win-ninja-mt-lp64-auto-static",
+            "inherits": ["win-ninja", "mt", "lp64", "auto", "static"],            
             "hidden": false,
             "cacheVariables": {
                 "BLIS_PATH": "${sourceParentDir}//install-linux-lp64-auto",
@@ -126,8 +126,8 @@
             }
           },
           {
-            "name": "linux-make-mt-lp64-auto-shared",
-            "inherits": ["linux-make", "mt", "lp64", "auto", "shared"],
+            "name": "win-ninja-mt-lp64-auto-shared",
+            "inherits": ["win-ninja", "mt", "lp64", "auto", "shared"],
             "hidden": false,
             "cacheVariables": {
                 "BLIS_PATH": "${sourceParentDir}//install-linux-lp64-auto",
@@ -136,8 +136,8 @@
             }
           },
           {
-            "name": "linux-make-st-ilp64-auto-static",
-            "inherits": ["linux-make", "st", "ilp64", "auto", "static"],            
+            "name": "win-ninja-st-ilp64-auto-static",
+            "inherits": ["win-ninja", "st", "ilp64", "auto", "static"],            
             "hidden": false,
             "cacheVariables": {
                 "BLIS_PATH": "${sourceParentDir}//install-linux-ilp64-auto",
@@ -146,8 +146,8 @@
             }
           },
           {
-            "name": "linux-make-st-ilp64-auto-shared",
-            "inherits": ["linux-make", "st", "ilp64", "auto", "shared"],
+            "name": "win-ninja-st-ilp64-auto-shared",
+            "inherits": ["win-ninja", "st", "ilp64", "auto", "shared"],
             "hidden": false,
             "cacheVariables": {
                 "BLIS_PATH": "${sourceParentDir}//install-linux-ilp64-auto",
@@ -156,8 +156,8 @@
             }
           },
           {
-            "name": "linux-make-mt-ilp64-auto-static",
-            "inherits": ["linux-make", "mt", "ilp64", "auto", "static"],            
+            "name": "win-ninja-mt-ilp64-auto-static",
+            "inherits": ["win-ninja", "mt", "ilp64", "auto", "static"],            
             "hidden": false,
             "cacheVariables": {
                 "BLIS_PATH": "${sourceParentDir}//install-linux-ilp64-auto",
@@ -166,8 +166,8 @@
             }
           },
           {
-            "name": "linux-make-mt-ilp64-auto-shared",
-            "inherits": ["linux-make", "mt", "ilp64", "auto", "shared"],
+            "name": "win-ninja-mt-ilp64-auto-shared",
+            "inherits": ["win-ninja", "mt", "ilp64", "auto", "shared"],
             "hidden": false,
             "cacheVariables": {
                 "BLIS_PATH": "${sourceParentDir}//install-linux-ilp64-auto",
@@ -178,83 +178,83 @@
     ],
     "buildPresets": [
         {
-            "name": "linux-make-st-lp64-amdzen-static",
-            "configurePreset": "linux-make-st-lp64-amdzen-static",
+            "name": "win-ninja-st-lp64-amdzen-static",
+            "configurePreset": "win-ninja-st-lp64-amdzen-static",
             "inherits": "base"
         },
         {
-            "name": "linux-make-st-lp64-amdzen-shared",
-            "configurePreset": "linux-make-st-lp64-amdzen-shared",
+            "name": "win-ninja-st-lp64-amdzen-shared",
+            "configurePreset": "win-ninja-st-lp64-amdzen-shared",
             "inherits": "base"
         },
         {
-            "name": "linux-make-mt-lp64-amdzen-static",
-            "configurePreset": "linux-make-mt-lp64-amdzen-static",
+            "name": "win-ninja-mt-lp64-amdzen-static",
+            "configurePreset": "win-ninja-mt-lp64-amdzen-static",
             "inherits": "base"
         },
         {
-            "name": "linux-make-mt-lp64-amdzen-shared",
-            "configurePreset": "linux-make-mt-lp64-amdzen-shared",
+            "name": "win-ninja-mt-lp64-amdzen-shared",
+            "configurePreset": "win-ninja-mt-lp64-amdzen-shared",
             "inherits": "base"
         },
         {
-            "name": "linux-make-st-ilp64-amdzen-static",
-            "configurePreset": "linux-make-st-ilp64-amdzen-static",
+            "name": "win-ninja-st-ilp64-amdzen-static",
+            "configurePreset": "win-ninja-st-ilp64-amdzen-static",
             "inherits": "base"
         },
         {
-            "name": "linux-make-st-ilp64-amdzen-shared",
-            "configurePreset": "linux-make-st-ilp64-amdzen-shared",
+            "name": "win-ninja-st-ilp64-amdzen-shared",
+            "configurePreset": "win-ninja-st-ilp64-amdzen-shared",
             "inherits": "base"
         },
         {
-            "name": "linux-make-mt-ilp64-amdzen-static",
-            "configurePreset": "linux-make-mt-ilp64-amdzen-static",
+            "name": "win-ninja-mt-ilp64-amdzen-static",
+            "configurePreset": "win-ninja-mt-ilp64-amdzen-static",
             "inherits": "base"
         },
         {
-            "name": "linux-make-mt-ilp64-amdzen-shared",
-            "configurePreset": "linux-make-mt-ilp64-amdzen-shared",
+            "name": "win-ninja-mt-ilp64-amdzen-shared",
+            "configurePreset": "win-ninja-mt-ilp64-amdzen-shared",
             "inherits": "base"
         },
         {
-            "name": "linux-make-st-lp64-auto-static",
-            "configurePreset": "linux-make-st-lp64-auto-static",
+            "name": "win-ninja-st-lp64-auto-static",
+            "configurePreset": "win-ninja-st-lp64-auto-static",
             "inherits": "base"
         },
         {
-            "name": "linux-make-st-lp64-auto-shared",
-            "configurePreset": "linux-make-st-lp64-auto-shared",
+            "name": "win-ninja-st-lp64-auto-shared",
+            "configurePreset": "win-ninja-st-lp64-auto-shared",
             "inherits": "base"
         },
         {
-            "name": "linux-make-mt-lp64-auto-static",
-            "configurePreset": "linux-make-mt-lp64-auto-static",
+            "name": "win-ninja-mt-lp64-auto-static",
+            "configurePreset": "win-ninja-mt-lp64-auto-static",
             "inherits": "base"
         },
         {
-            "name": "linux-make-mt-lp64-auto-shared",
-            "configurePreset": "linux-make-mt-lp64-auto-shared",
+            "name": "win-ninja-mt-lp64-auto-shared",
+            "configurePreset": "win-ninja-mt-lp64-auto-shared",
             "inherits": "base"
         },
         {
-            "name": "linux-make-st-ilp64-auto-static",
-            "configurePreset": "linux-make-st-lp64-auto-static",
+            "name": "win-ninja-st-ilp64-auto-static",
+            "configurePreset": "win-ninja-st-lp64-auto-static",
             "inherits": "base"
         },
         {
-            "name": "linux-make-st-ilp64-auto-shared",
-            "configurePreset": "linux-make-st-lp64-auto-shared",
+            "name": "win-ninja-st-ilp64-auto-shared",
+            "configurePreset": "win-ninja-st-lp64-auto-shared",
             "inherits": "base"
         },
         {
-            "name": "linux-make-mt-ilp64-auto-static",
-            "configurePreset": "linux-make-mt-lp64-auto-static",
+            "name": "win-ninja-mt-ilp64-auto-static",
+            "configurePreset": "win-ninja-mt-lp64-auto-static",
             "inherits": "base"
         },
         {
-            "name": "linux-make-mt-ilp64-auto-shared",
-            "configurePreset": "linux-make-mt-lp64-auto-shared",
+            "name": "win-ninja-mt-ilp64-auto-shared",
+            "configurePreset": "win-ninja-mt-lp64-auto-shared",
             "inherits": "base"
         }
     ]

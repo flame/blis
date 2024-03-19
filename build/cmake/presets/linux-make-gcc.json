@@ -14,7 +14,12 @@
               "CMAKE_C_COMPILER": "gcc",
               "CMAKE_CXX_COMPILER": "g++"
             },
-            "generator": "Unix Makefiles"
+            "generator": "Unix Makefiles",
+            "condition": {
+              "type": "notEquals",
+              "lhs": "${hostSystemName}",
+              "rhs": "Windows"
+            }
           },
           {
             "name": "linux-make-gcc-st-lp64-amdzen-static",

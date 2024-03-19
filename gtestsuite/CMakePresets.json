@@ -2,7 +2,10 @@
     "version": 6,
     "include": [
       "cmake/presets/base.json",
-      "cmake/presets/linux-make.json"
+      "cmake/presets/linux-make.json",
+      "cmake/presets/linux-ninja.json",
+      "cmake/presets/win-msvc.json",
+      "cmake/presets/win-ninja.json"
   ],
     "configurePresets": [
       {

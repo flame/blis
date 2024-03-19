@@ -49,9 +49,10 @@ if(APPLE)
 endif()
 
 # Set the path to the BLIS installation.
-set(BLIS_PATH "undefined" CACHE STRING "Setting the path to a BLIS installation that needs testing.")
-if(BLIS_PATH STREQUAL "undefined")
-    message(FATAL_ERROR "Need to provide a BLIS installation path during CMake invocation. Please use \
+set(BLIS_PATH $ENV{AOCL_BLAS_PATH} CACHE STRING "Setting the path to a BLIS installation that needs testing.")
+if(BLIS_PATH STREQUAL "")
+    message(FATAL_ERROR "Need to provide a BLIS installation path during CMake invocation.\
+    Set environment variable \$AOCL_BLAS_PATH or set the cmake variable directly using\
     $ cmake .. -DBLIS_PATH=/home/username/blis_installation")
 endif()
 
@@ -59,6 +60,11 @@ endif()
 # Adding both paths so that testing works with installation using configure/Make or CMake.
 set(BLIS_INCLUDE ${BLIS_PATH}/include/ ${BLIS_PATH}/include/blis CACHE STRING "Setting the path to the BLIS headers.")
 set(BLIS_LIB_PATH ${BLIS_PATH}/lib CACHE STRING "Setting the path to the BLIS library.")
+
+# Use REF_BLAS to set the library that will be used for reference results.
+set(REF_CBLAS "Netlib" CACHE STRING "Library used to compute reference results.")
+# Use REF_LIB to set the library that will be used for reference results.
+set(REF_LIB $ENV{CBLAS_REF_LIB} CACHE STRING "Path to a shared library that will be used as a reference.")
 
 # Set OpenMP as the default option
 set(ENABLE_THREADING "openmp" CACHE STRING "the threading flag")
@@ -156,8 +162,6 @@ if(LINUX)
             message(STATUS "Found Reference Library : " ${reflib})
         endif()
     else()
-        # Use REF_BLAS to set the library that will be used for reference results.
-        set(REF_CBLAS CACHE STRING "Library used to compute reference results.")
         # Set the possible values of theading libraries for cmake-gui
         set_property(CACHE REF_CBLAS PROPERTY STRINGS "OpenBLAS" "Netlib" "MKL")
         if(NOT ((REF_CBLAS STREQUAL "OpenBLAS") OR (REF_CBLAS STREQUAL "Netlib") OR(REF_CBLAS STREQUAL "MKL")))
@@ -321,7 +325,6 @@ if(BLIS_LINKING_TYPE STREQUAL "static")
         )
     endif()
     # Uncomment this to debug this snippet above, if necessary.
-    message("Build output: ${COMP_VAR}")
     if(NOT COMPILERESULT)
         message(FATAL_ERROR "Compiling config_ukr_tests.cpp failed with the following error ${COMP_VAR}.")
     endif()
