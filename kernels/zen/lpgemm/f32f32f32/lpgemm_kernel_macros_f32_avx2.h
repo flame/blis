@@ -110,12 +110,12 @@
  
 /*Load C, Multiply with beta and add with A*B and store*/
 #define F32_C_BNZ_8(cbuf,rs_c,ymm0,beta,ymm2) \
-      ymm0 = _mm256_load_ps(cbuf); \
+      ymm0 = _mm256_loadu_ps(cbuf); \
       ymm2 = _mm256_fmadd_ps(ymm0, beta, ymm2); \
 
 /*Load C, Multiply with beta and add with A*B and store*/
 #define F32_C_BNZ_4(cbuf,rs_c,xmm0,beta,xmm2) \
-      xmm0 = _mm_load_ps(cbuf); \
+      xmm0 = _mm_loadu_ps(cbuf); \
       xmm2 = _mm_fmadd_ps(xmm0, beta, xmm2); \
 
 /*Load C, Multiply with beta and add with A*B and store*/

@@ -297,68 +297,68 @@ LPGEMM_MAIN_KERN(float,float,float,f32f32f32of32_avx512_6x64m)
         //add to accumulator and store back
         zmm3 = _mm512_set1_ps(beta);        
 
-        zmm0 = _mm512_load_ps(_cbuf);
-        zmm1 = _mm512_load_ps(_cbuf + 16);
+        zmm0 = _mm512_loadu_ps(_cbuf);
+        zmm1 = _mm512_loadu_ps(_cbuf + 16);
         zmm8 = _mm512_fmadd_ps(zmm0, zmm3, zmm8);
         zmm9 = _mm512_fmadd_ps(zmm1, zmm3, zmm9);
 
-        zmm0 = _mm512_load_ps(_cbuf + 32);
-        zmm1 = _mm512_load_ps(_cbuf + 48);
+        zmm0 = _mm512_loadu_ps(_cbuf + 32);
+        zmm1 = _mm512_loadu_ps(_cbuf + 48);
         zmm10 = _mm512_fmadd_ps(zmm0, zmm3, zmm10);
         zmm11 = _mm512_fmadd_ps(zmm1, zmm3, zmm11);
         _cbuf += rs_c;
 
-        zmm0 = _mm512_load_ps(_cbuf);
-        zmm1 = _mm512_load_ps(_cbuf + 16);
+        zmm0 = _mm512_loadu_ps(_cbuf);
+        zmm1 = _mm512_loadu_ps(_cbuf + 16);
         zmm12 = _mm512_fmadd_ps(zmm0, zmm3, zmm12);
         zmm13 = _mm512_fmadd_ps(zmm1, zmm3, zmm13);
 
-        zmm0 = _mm512_load_ps(_cbuf + 32);
-        zmm1 = _mm512_load_ps(_cbuf + 48);
+        zmm0 = _mm512_loadu_ps(_cbuf + 32);
+        zmm1 = _mm512_loadu_ps(_cbuf + 48);
         zmm14 = _mm512_fmadd_ps(zmm0, zmm3, zmm14);
         zmm15 = _mm512_fmadd_ps(zmm1, zmm3, zmm15);
         _cbuf += rs_c;
 
-        zmm0 = _mm512_load_ps(_cbuf);
-        zmm1 = _mm512_load_ps(_cbuf + 16);
+        zmm0 = _mm512_loadu_ps(_cbuf);
+        zmm1 = _mm512_loadu_ps(_cbuf + 16);
         zmm16 = _mm512_fmadd_ps(zmm0, zmm3, zmm16);
         zmm17 = _mm512_fmadd_ps(zmm1, zmm3, zmm17);
 
-        zmm0 = _mm512_load_ps(_cbuf + 32);
-        zmm1 = _mm512_load_ps(_cbuf + 48);
+        zmm0 = _mm512_loadu_ps(_cbuf + 32);
+        zmm1 = _mm512_loadu_ps(_cbuf + 48);
         zmm18 = _mm512_fmadd_ps(zmm0, zmm3, zmm18);
         zmm19 = _mm512_fmadd_ps(zmm1, zmm3, zmm19);
         _cbuf += rs_c;
 
-        zmm0 = _mm512_load_ps(_cbuf);
-        zmm1 = _mm512_load_ps(_cbuf + 16);
+        zmm0 = _mm512_loadu_ps(_cbuf);
+        zmm1 = _mm512_loadu_ps(_cbuf + 16);
         zmm20 = _mm512_fmadd_ps(zmm0, zmm3, zmm20);
         zmm21 = _mm512_fmadd_ps(zmm1, zmm3, zmm21);
 
-        zmm0 = _mm512_load_ps(_cbuf + 32);
-        zmm1 = _mm512_load_ps(_cbuf + 48);
+        zmm0 = _mm512_loadu_ps(_cbuf + 32);
+        zmm1 = _mm512_loadu_ps(_cbuf + 48);
         zmm22 = _mm512_fmadd_ps(zmm0, zmm3, zmm22);
         zmm23 = _mm512_fmadd_ps(zmm1, zmm3, zmm23);
         _cbuf += rs_c;
 
-        zmm0 = _mm512_load_ps(_cbuf);
-        zmm1 = _mm512_load_ps(_cbuf + 16);
+        zmm0 = _mm512_loadu_ps(_cbuf);
+        zmm1 = _mm512_loadu_ps(_cbuf + 16);
         zmm24 = _mm512_fmadd_ps(zmm0, zmm3, zmm24);
         zmm25 = _mm512_fmadd_ps(zmm1, zmm3, zmm25);
 
-        zmm0 = _mm512_load_ps(_cbuf + 32);
-        zmm1 = _mm512_load_ps(_cbuf + 48);
+        zmm0 = _mm512_loadu_ps(_cbuf + 32);
+        zmm1 = _mm512_loadu_ps(_cbuf + 48);
         zmm26 = _mm512_fmadd_ps(zmm0, zmm3, zmm26);
         zmm27 = _mm512_fmadd_ps(zmm1, zmm3, zmm27);
         _cbuf += rs_c;
 
-        zmm0 = _mm512_load_ps(_cbuf);
-        zmm1 = _mm512_load_ps(_cbuf + 16);
+        zmm0 = _mm512_loadu_ps(_cbuf);
+        zmm1 = _mm512_loadu_ps(_cbuf + 16);
         zmm28 = _mm512_fmadd_ps(zmm0, zmm3, zmm28);
         zmm29 = _mm512_fmadd_ps(zmm1, zmm3, zmm29);
 
-        zmm0 = _mm512_load_ps(_cbuf + 32);
-        zmm1 = _mm512_load_ps(_cbuf + 48);
+        zmm0 = _mm512_loadu_ps(_cbuf + 32);
+        zmm1 = _mm512_loadu_ps(_cbuf + 48);
         zmm30 = _mm512_fmadd_ps(zmm0, zmm3, zmm30);
         zmm31 = _mm512_fmadd_ps(zmm1, zmm3, zmm31);
       }
@@ -1163,57 +1163,57 @@ LPGEMM_N_FRINGE_KERN(float,float,float,f32f32f32of32_avx512_6x48m)
         //add to accumulator and store back
         zmm3 = _mm512_set1_ps(beta);
 
-        zmm0 = _mm512_load_ps(_cbuf);
-        zmm1 = _mm512_load_ps(_cbuf + 16);
+        zmm0 = _mm512_loadu_ps(_cbuf);
+        zmm1 = _mm512_loadu_ps(_cbuf + 16);
         zmm8 = _mm512_fmadd_ps(zmm0, zmm3, zmm8);
         zmm9 = _mm512_fmadd_ps(zmm1, zmm3, zmm9);
 
-        zmm0 = _mm512_load_ps(_cbuf + 32);
+        zmm0 = _mm512_loadu_ps(_cbuf + 32);
         zmm10 = _mm512_fmadd_ps(zmm0, zmm3, zmm10);
         _cbuf += rs_c;
 
-        zmm0 = _mm512_load_ps(_cbuf);
-        zmm1 = _mm512_load_ps(_cbuf + 16);
+        zmm0 = _mm512_loadu_ps(_cbuf);
+        zmm1 = _mm512_loadu_ps(_cbuf + 16);
         zmm12 = _mm512_fmadd_ps(zmm0, zmm3, zmm12);
         zmm13 = _mm512_fmadd_ps(zmm1, zmm3, zmm13);
 
-        zmm0 = _mm512_load_ps(_cbuf + 32);
+        zmm0 = _mm512_loadu_ps(_cbuf + 32);
         zmm14 = _mm512_fmadd_ps(zmm0, zmm3, zmm14);
         _cbuf += rs_c;
 
-        zmm0 = _mm512_load_ps(_cbuf);
-        zmm1 = _mm512_load_ps(_cbuf + 16);
+        zmm0 = _mm512_loadu_ps(_cbuf);
+        zmm1 = _mm512_loadu_ps(_cbuf + 16);
         zmm16 = _mm512_fmadd_ps(zmm0, zmm3, zmm16);
         zmm17 = _mm512_fmadd_ps(zmm1, zmm3, zmm17);
 
-        zmm0 = _mm512_load_ps(_cbuf + 32);
+        zmm0 = _mm512_loadu_ps(_cbuf + 32);
         zmm18 = _mm512_fmadd_ps(zmm0, zmm3, zmm18);
         _cbuf += rs_c;
 
-        zmm0 = _mm512_load_ps(_cbuf);
-        zmm1 = _mm512_load_ps(_cbuf + 16);
+        zmm0 = _mm512_loadu_ps(_cbuf);
+        zmm1 = _mm512_loadu_ps(_cbuf + 16);
         zmm20 = _mm512_fmadd_ps(zmm0, zmm3, zmm20);
         zmm21 = _mm512_fmadd_ps(zmm1, zmm3, zmm21);
 
-        zmm0 = _mm512_load_ps(_cbuf + 32);
+        zmm0 = _mm512_loadu_ps(_cbuf + 32);
         zmm22 = _mm512_fmadd_ps(zmm0, zmm3, zmm22);
         _cbuf += rs_c;
 
-        zmm0 = _mm512_load_ps(_cbuf);
-        zmm1 = _mm512_load_ps(_cbuf + 16);
+        zmm0 = _mm512_loadu_ps(_cbuf);
+        zmm1 = _mm512_loadu_ps(_cbuf + 16);
         zmm24 = _mm512_fmadd_ps(zmm0, zmm3, zmm24);
         zmm25 = _mm512_fmadd_ps(zmm1, zmm3, zmm25);
 
-        zmm0 = _mm512_load_ps(_cbuf + 32);
+        zmm0 = _mm512_loadu_ps(_cbuf + 32);
         zmm26 = _mm512_fmadd_ps(zmm0, zmm3, zmm26);
         _cbuf += rs_c;
 
-        zmm0 = _mm512_load_ps(_cbuf);
-        zmm1 = _mm512_load_ps(_cbuf + 16);
+        zmm0 = _mm512_loadu_ps(_cbuf);
+        zmm1 = _mm512_loadu_ps(_cbuf + 16);
         zmm28 = _mm512_fmadd_ps(zmm0, zmm3, zmm28);
         zmm29 = _mm512_fmadd_ps(zmm1, zmm3, zmm29);
 
-        zmm0 = _mm512_load_ps(_cbuf + 32);
+        zmm0 = _mm512_loadu_ps(_cbuf + 32);
         zmm30 = _mm512_fmadd_ps(zmm0, zmm3, zmm30);
       }
 
@@ -1862,38 +1862,38 @@ LPGEMM_N_FRINGE_KERN(float,float,float,f32f32f32of32_avx512_6x32m)
         //add to accumulator and store back
         zmm3 = _mm512_set1_ps(beta);
 
-        zmm0 = _mm512_load_ps(_cbuf);
-        zmm1 = _mm512_load_ps(_cbuf + 16);
+        zmm0 = _mm512_loadu_ps(_cbuf);
+        zmm1 = _mm512_loadu_ps(_cbuf + 16);
         zmm8 = _mm512_fmadd_ps(zmm0, zmm3, zmm8);
         zmm9 = _mm512_fmadd_ps(zmm1, zmm3, zmm9);
         _cbuf += rs_c;
 
-        zmm0 = _mm512_load_ps(_cbuf);
-        zmm1 = _mm512_load_ps(_cbuf + 16);
+        zmm0 = _mm512_loadu_ps(_cbuf);
+        zmm1 = _mm512_loadu_ps(_cbuf + 16);
         zmm12 = _mm512_fmadd_ps(zmm0, zmm3, zmm12);
         zmm13 = _mm512_fmadd_ps(zmm1, zmm3, zmm13);
         _cbuf += rs_c;
 
-        zmm0 = _mm512_load_ps(_cbuf);
-        zmm1 = _mm512_load_ps(_cbuf + 16);
+        zmm0 = _mm512_loadu_ps(_cbuf);
+        zmm1 = _mm512_loadu_ps(_cbuf + 16);
         zmm16 = _mm512_fmadd_ps(zmm0, zmm3, zmm16);
         zmm17 = _mm512_fmadd_ps(zmm1, zmm3, zmm17);
         _cbuf += rs_c;
 
-        zmm0 = _mm512_load_ps(_cbuf);
-        zmm1 = _mm512_load_ps(_cbuf + 16);
+        zmm0 = _mm512_loadu_ps(_cbuf);
+        zmm1 = _mm512_loadu_ps(_cbuf + 16);
         zmm20 = _mm512_fmadd_ps(zmm0, zmm3, zmm20);
         zmm21 = _mm512_fmadd_ps(zmm1, zmm3, zmm21);
         _cbuf += rs_c;
 
-        zmm0 = _mm512_load_ps(_cbuf);
-        zmm1 = _mm512_load_ps(_cbuf + 16);
+        zmm0 = _mm512_loadu_ps(_cbuf);
+        zmm1 = _mm512_loadu_ps(_cbuf + 16);
         zmm24 = _mm512_fmadd_ps(zmm0, zmm3, zmm24);
         zmm25 = _mm512_fmadd_ps(zmm1, zmm3, zmm25);
         _cbuf += rs_c;
 
-        zmm0 = _mm512_load_ps(_cbuf);
-        zmm1 = _mm512_load_ps(_cbuf + 16);
+        zmm0 = _mm512_loadu_ps(_cbuf);
+        zmm1 = _mm512_loadu_ps(_cbuf + 16);
         zmm28 = _mm512_fmadd_ps(zmm0, zmm3, zmm28);
         zmm29 = _mm512_fmadd_ps(zmm1, zmm3, zmm29);
       }
