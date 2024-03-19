@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2018 - 2023, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2018 - 2024, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -61,7 +61,7 @@ ftype PASTEF772S(ch,blasname,chc) \
      ) \
 { \
     AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1); \
-    AOCL_DTL_LOG_DOTV_INPUTS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(ch), *n, *incx, *incy); \
+    AOCL_DTL_LOG_DOTV_INPUTS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(ch), *MKSTR(blis_conjx), *n, *incx, *incy); \
     dim_t  n0; \
     ftype* x0; \
     ftype* y0; \
@@ -120,7 +120,7 @@ float sdot_blis_impl
      )
 {
     AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1);
-    AOCL_DTL_LOG_DOTV_INPUTS(AOCL_DTL_LEVEL_TRACE_1, 'S', *n, *incx, *incy);
+    AOCL_DTL_LOG_DOTV_INPUTS(AOCL_DTL_LEVEL_TRACE_1, 'S', 'N', *n, *incx, *incy);
     dim_t  n0;
     float* x0;
     float* y0;
@@ -258,7 +258,7 @@ double ddot_blis_impl
      )
 {
     AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1);
-    AOCL_DTL_LOG_DOTV_INPUTS(AOCL_DTL_LEVEL_TRACE_1, 'D', *n, *incx, *incy);
+    AOCL_DTL_LOG_DOTV_INPUTS(AOCL_DTL_LEVEL_TRACE_1, 'D', 'N', *n, *incx, *incy);
     dim_t  n_elem;
     double* x0;
     double* y0;
@@ -553,7 +553,7 @@ scomplex cdotu_blis_impl
      )
 {
     AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1);
-    AOCL_DTL_LOG_DOTV_INPUTS(AOCL_DTL_LEVEL_TRACE_1, 'C', *n, *incx, *incy);
+    AOCL_DTL_LOG_DOTV_INPUTS(AOCL_DTL_LEVEL_TRACE_1, 'C', 'N', *n, *incx, *incy);
     dim_t  n0;
     scomplex* x0;
     scomplex* y0;
@@ -671,7 +671,7 @@ dcomplex zdotu_blis_impl
     dcomplex  rho;
 
     AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1);
-    AOCL_DTL_LOG_DOTV_INPUTS(AOCL_DTL_LEVEL_TRACE_1, 'Z', *n, *incx, *incy);
+    AOCL_DTL_LOG_DOTV_INPUTS(AOCL_DTL_LEVEL_TRACE_1, 'Z', 'N', *n, *incx, *incy);
 
     /* Initialize BLIS. */
 //  bli_init_auto();
@@ -785,7 +785,7 @@ scomplex cdotc_blis_impl
     scomplex  rho;
 
     AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1);
-    AOCL_DTL_LOG_DOTV_INPUTS(AOCL_DTL_LEVEL_TRACE_1, 'C', *n, *incx, *incy);
+    AOCL_DTL_LOG_DOTV_INPUTS(AOCL_DTL_LEVEL_TRACE_1, 'C', 'C', *n, *incx, *incy);
 
     /* Initialize BLIS. */
 //  bli_init_auto();
@@ -891,7 +891,7 @@ dcomplex zdotc_blis_impl
      )
 {
     AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1);
-    AOCL_DTL_LOG_DOTV_INPUTS(AOCL_DTL_LEVEL_TRACE_1, 'Z', *n, *incx, *incy);
+    AOCL_DTL_LOG_DOTV_INPUTS(AOCL_DTL_LEVEL_TRACE_1, 'Z', 'C', *n, *incx, *incy);
     dim_t  n0;
     dcomplex* x0;
     dcomplex* y0;
@@ -1011,7 +1011,7 @@ void PASTEF772S(ch,blasname,chc) \
      ) \
 { \
   AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1); \
-  AOCL_DTL_LOG_DOTV_INPUTS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(ch), *n, *incx, *incy); \
+  AOCL_DTL_LOG_DOTV_INPUTS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(ch), *MKSTR(blis_conjx), *n, *incx, *incy); \
         dim_t  n0; \
         ftype* x0; \
         ftype* y0; \
@@ -1120,7 +1120,7 @@ double PASTEF77S(d,sdot)
     dim_t   i;
 
     AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1);
-    AOCL_DTL_LOG_DOTV_INPUTS(AOCL_DTL_LEVEL_TRACE_1, 'D', *n, *incx, *incy);
+    AOCL_DTL_LOG_DOTV_INPUTS(AOCL_DTL_LEVEL_TRACE_1, 'D', 'N', *n, *incx, *incy);
     /* Initialization of BLIS is not required. */
 
     /* Convert/typecast negative values of n to zero. */

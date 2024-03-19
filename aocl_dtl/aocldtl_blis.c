@@ -3,7 +3,7 @@
  *
  * Description : BLIS library specific debug helpes.
  *
- * Copyright (C) 2020 - 2023, Advanced Micro Devices, Inc. All rights reserved.
+ * Copyright (C) 2020 - 2024, Advanced Micro Devices, Inc. All rights reserved.
  *
  *==================================================================*/
 
@@ -503,6 +503,7 @@ void AOCL_DTL_log_her_sizes(int8 loglevel,
 
 void AOCL_DTL_log_dotv_sizes(int8 loglevel,
                              char dt_type,
+                             const f77_char conjx,
                              const f77_int n,
                              const f77_int incx,
                              const f77_int incy,
@@ -512,8 +513,8 @@ void AOCL_DTL_log_dotv_sizes(int8 loglevel,
 {
     char buffer[256];
 
-    // { n, incx, incy}
-    sprintf(buffer, "%c %ld %ld %ld\n", dt_type, (dim_t)n, (dim_t)incx, (dim_t)incy);
+    // { conjx, n, incx, incy}
+    sprintf(buffer, "%c %c %ld %ld %ld\n", dt_type, conjx, (dim_t)n, (dim_t)incx, (dim_t)incy);
 
     DTL_Trace(loglevel, TRACE_TYPE_LOG, function_name, function_name, line, buffer);
 }

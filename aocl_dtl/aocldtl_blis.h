@@ -3,7 +3,7 @@
  *
  * Description : BLIS library specific debug helpes.
  *
- * Copyright (C) 2020 - 2023, Advanced Micro Devices, Inc. All rights reserved.
+ * Copyright (C) 2020 - 2024, Advanced Micro Devices, Inc. All rights reserved.
  *
  *==================================================================*/
 
@@ -298,6 +298,7 @@ void AOCL_DTL_log_axpy_sizes ( int8 loglevel,
 
 void AOCL_DTL_log_dotv_sizes( int8 loglevel,
                               char dt_type,
+                              const f77_char conjx,
                               const f77_int  n,
                               const f77_int incx,
                               const f77_int incy,
@@ -517,9 +518,9 @@ void AOCL_DTL_log_trmm_sizes(int8 loglevel,
         AOCL_DTL_log_axpy_sizes(loglevel, dt_type, n, alpha, incx, incy, __FILE__,\
                                 __FUNCTION__, __LINE__);
 
-#define AOCL_DTL_LOG_DOTV_INPUTS(loglevel, dt_type, n, incx, incy) \
+#define AOCL_DTL_LOG_DOTV_INPUTS(loglevel, dt_type, conjx, n, incx, incy) \
     if (gbIsLoggingEnabled) \
-        AOCL_DTL_log_dotv_sizes(loglevel, dt_type, n, incx, incy, __FILE__, __FUNCTION__, __LINE__); \
+        AOCL_DTL_log_dotv_sizes(loglevel, dt_type, conjx, n, incx, incy, __FILE__, __FUNCTION__, __LINE__); \
 
 #define AOCL_DTL_LOG_SYR2_INPUTS(loglevel, dt_type, uploa, m, alpha, incx, incy, lda) \
     if (gbIsLoggingEnabled) \
@@ -607,7 +608,7 @@ void AOCL_DTL_log_trmm_sizes(int8 loglevel,
 
 #define AOCL_DTL_LOG_AXPY_INPUTS(loglevel, dt_type, n, alpha, incx, incy)
 
-#define AOCL_DTL_LOG_DOTV_INPUTS(loglevel, dt_type, n, incx, incy)
+#define AOCL_DTL_LOG_DOTV_INPUTS(loglevel, dt_type, conjx, n, incx, incy)
 
 #define AOCL_DTL_LOG_SYR2_INPUTS(loglevel, dt_type, uploa, m, alpha, incx, incy, lda)
 

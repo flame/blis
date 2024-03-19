@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2021 - 2023, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2021 - 2024, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -45,7 +45,6 @@
 #define DT BLIS_DOUBLE
 #endif
 
-
 #define AOCL_MATRIX_INITIALISATION
 
 //#define BLIS_ENABLE_CBLAS
@@ -63,7 +62,7 @@ int main( int argc, char** argv )
     obj_t x, y, res;
     dim_t p_inc = 0; // to keep track of number of inputs
     num_t dt;
-    char  dt_ch;
+    char  dt_ch, conjx_ch;
     int   r, n_repeats;
 
     double   dtime;
@@ -100,17 +99,18 @@ int main( int argc, char** argv )
     dim_t n;
     inc_t incx;
     inc_t incy;
+    conj_t conjx;
     char tmp[256]; // to store function name, line no present in logs.
 
 
-    // {S,D,C,Z} {n incx incy}
-    while (fscanf(fin, "%s %c " INT_FS INT_FS INT_FS "\n",
-        tmp, &dt_ch, &n, &incx, &incy) == 5)
+    // {S,D,C,Z} {conjx n incx incy}
+    while (fscanf(fin, "%s %c %c " INT_FS INT_FS INT_FS "\n",
+        tmp, &dt_ch, &conjx_ch, &n, &incx, &incy) == 6)
       {
 
 #ifdef PRINT
-        fprintf (stdout, "Input = %s %c %ld %ld %ld %6.3f\n",
-                 tmp, dt_ch, n, incx, incy, gflops);
+        fprintf (stdout, "Input = %s %c %c %ld %ld %ld %6.3f\n",
+                 tmp, dt_ch, conjx_ch, n, incx, incy, gflops);
 #endif
 
         if (dt_ch == 'D' || dt_ch == 'd') dt = BLIS_DOUBLE;
@@ -122,6 +122,14 @@ int main( int argc, char** argv )
             printf("Invalid data type %c\n", dt_ch);
             continue;
           }
+
+        if      ( conjx_ch == 'C' || conjx_ch == 'c' ) conjx = BLIS_CONJUGATE;
+        else if ( conjx_ch == 'N' || conjx_ch == 'n' ) conjx = BLIS_NO_CONJUGATE;
+        else
+        {
+            printf("Invalid conjugate value %c\n", conjx_ch);
+            continue;
+        }
 
         // Create objects with required sizes and strides.
         //
@@ -196,34 +204,61 @@ int main( int argc, char** argv )
                                yp, &incy );
 #endif
             }
-            else if ( bli_is_scomplex( dt ) )
+            else if ( bli_is_scomplex( dt ) && !bli_is_conj( conjx ) )
             {
                     scomplex*  xp     = bli_obj_buffer( &x );
                     scomplex*  yp     = bli_obj_buffer( &y );
                     scomplex*  resp   = bli_obj_buffer( &res );
 
 #ifdef CBLAS
-                     cblas_cdotu_sub(nn,
-                                     xp, incx,
-                                     yp, incy, resp );
+                     cblas_cdotu_sub( nn,
+                                      xp, incx,
+                                      yp, incy, resp );
 #else
 
 #ifdef BLIS_DISABLE_COMPLEX_RETURN_INTEL
-                     *resp = cdotu_(&nn,
-                                    xp, &incx,
-                                    yp, &incy );
+                     *resp = cdotu_( &nn,
+                                     xp, &incx,
+                                     yp, &incy );
 
 #else
-                     cdotu_(resp, &nn,
-                                    xp, &incx,
-                                    yp, &incy );
+                     cdotu_( resp, &nn,
+                             xp, &incx,
+                             yp, &incy );
 
 
-#endif // BLIS_DISABLE_COMPLEX_RETURN_INTEL ...
+#endif // BLIS_DISABLE_COMPLEX_RETURN_INTEL
 
 #endif
             }
-            else if ( bli_is_dcomplex( dt ) )
+            else if ( bli_is_scomplex( dt ) && bli_is_conj( conjx ) )
+            {
+                    scomplex*  xp     = bli_obj_buffer( &x );
+                    scomplex*  yp     = bli_obj_buffer( &y );
+                    scomplex*  resp   = bli_obj_buffer( &res );
+
+#ifdef CBLAS
+                     cblas_cdotc_sub( nn,
+                                      xp, incx,
+                                      yp, incy, resp );
+#else
+
+#ifdef BLIS_DISABLE_COMPLEX_RETURN_INTEL
+                     *resp = cdotc_( &nn,
+                                     xp, &incx,
+                                     yp, &incy );
+
+#else
+                     cdotc_( resp, &nn,
+                             xp, &incx,
+                             yp, &incy );
+
+
+#endif // BLIS_DISABLE_COMPLEX_RETURN_INTEL
+
+#endif
+            }
+            else if ( bli_is_dcomplex( dt ) && !bli_is_conj( conjx ) )
             {
                     dcomplex*  xp     = bli_obj_buffer( &x );
                     dcomplex*  yp     = bli_obj_buffer( &y );
@@ -242,19 +277,47 @@ int main( int argc, char** argv )
 
 #else
                      zdotu_( resp, &nn,
-                                     xp, &incx,
-                                     yp, &incy );
+                             xp, &incx,
+                             yp, &incy );
 
 
 #endif // BLIS_DISABLE_COMPLEX_RETURN_INTEL
 
 #endif
             }
+            else if ( bli_is_dcomplex( dt ) && bli_is_conj( conjx ) )
+            {
+                    dcomplex*  xp     = bli_obj_buffer( &x );
+                    dcomplex*  yp     = bli_obj_buffer( &y );
+                    dcomplex*  resp   = bli_obj_buffer( &res );
+
+#ifdef CBLAS
+                     cblas_zdotc_sub( nn,
+                                      xp, incx,
+                                      yp, incy, resp );
+#else
+
+#ifdef BLIS_DISABLE_COMPLEX_RETURN_INTEL
+                     *resp = zdotc_( &nn,
+                                     xp, &incx,
+                                     yp, &incy );
+
+#else
+                     zdotc_( resp, &nn,
+                             xp, &incx,
+                             yp, &incy );
+
+
+#endif // BLIS_DISABLE_COMPLEX_RETURN_INTEL
+
+#endif
+
+            }
 
 #endif // BLIS Interface
 
 #ifdef PRINT
-            bli_printm( "a after", &a, "%4.1f", "" );
+            bli_printm( "res", &res, "%4.1f", "" );
             exit(1);
 #endif
 
@@ -272,7 +335,7 @@ int main( int argc, char** argv )
                (unsigned long)n,
                 gflops);
 
-        fprintf (fout, "%s %c %ld %ld %ld %6.3f\n", tmp, dt_ch, n, incx, incy, gflops);
+        fprintf (fout, "%s %c %c %ld %ld %ld %6.3f\n", tmp, dt_ch, conjx_ch, n, incx, incy, gflops);
 
         fflush(fout);
 

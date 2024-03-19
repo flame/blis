@@ -1,32 +1,56 @@
-ddot_:183: D 0 100 1
-ddot_:183: D 1 100 1
-ddot_:183: D 10 100 1
-ddot_:183: D 11 100 1
-ddot_:183: D 12 100 1
-ddot_:183: D 13 100 1
-ddot_:183: D 14 100 1
-ddot_:183: D 15 100 1
-ddot_:183: D 2 100 1
-ddot_:183: D 3 100 1
-ddot_:183: D 4 100 1
-ddot_:183: D 5 100 1
-ddot_:183: D 6 100 1
-ddot_:183: D 7 100 1
-ddot_:183: D 8 100 1
-ddot_:183: D 9 100 1
-ddot_:183: D 100 100 100
-ddot_:183: D 100 1 100
-ddot_:183: D 100 100 1
-ddot_:183: D 100 1 1
-sdot_:102: S 4000 1 1
-sdot_:102: S 4000 1 1
-sdot_:102: S 4000 1 1
-sdot_:102: S 3960 1 1
-sdot_:102: S 3960 1 1
-sdot_:102: S 3960 1 1
-sdot_:102: S 3920 1 1
-sdot_:102: S 3920 1 1
-sdot_:102: S 3920 1 1
-sdot_:102: S 3880 1 1
-sdot_:102: S 3880 1 1
-sdot_:102: S 3880 1 1
+ddot_:183: D N 0 100 1
+ddot_:183: D N 1 100 1
+ddot_:183: D N 10 100 1
+ddot_:183: D N 11 100 1
+ddot_:183: D N 12 100 1
+ddot_:183: D N 13 100 1
+ddot_:183: D N 14 100 1
+ddot_:183: D N 15 100 1
+ddot_:183: D N 2 100 1
+ddot_:183: D N 3 100 1
+ddot_:183: D N 4 100 1
+ddot_:183: D N 5 100 1
+ddot_:183: D N 6 100 1
+ddot_:183: D N 7 100 1
+ddot_:183: D N 8 100 1
+ddot_:183: D N 9 100 1
+ddot_:183: D N 100 100 100
+ddot_:183: D N 100 1 100
+ddot_:183: D N 100 100 1
+ddot_:183: D N 100 1 1
+sdot_:102: S N 4000 1 1
+sdot_:102: S N 4000 1 1
+sdot_:102: S N 4000 1 1
+sdot_:102: S N 3960 1 1
+sdot_:102: S N 3960 1 1
+sdot_:102: S N 3960 1 1
+sdot_:102: S N 3920 1 1
+sdot_:102: S N 3920 1 1
+sdot_:102: S N 3920 1 1
+sdot_:102: S N 3880 1 1
+sdot_:102: S N 3880 1 1
+sdot_:102: S N 3880 1 1
+cdot_      C N 4000 1 1
+cdot_      C N 4000 1 1
+cdot_      C N 4000 1 1
+cdot_      C N 3960 1 1
+cdot_      C N 3960 1 1
+cdot_      C N 3960 1 1
+cdot_      C C 3920 1 1
+cdot_      C C 3920 1 1
+cdot_      C C 3920 1 1
+cdot_      C C 3880 1 1
+cdot_      C C 3880 1 1
+cdot_      C C 3880 1 1
+zdot_      Z N 4000 1 1
+zdot_      Z N 4000 1 1
+zdot_      Z N 4000 1 1
+zdot_      Z N 3960 1 1
+zdot_      Z N 3960 1 1
+zdot_      Z N 3960 1 1
+zdot_      Z C 3920 1 1
+zdot_      Z C 3920 1 1
+zdot_      Z C 3920 1 1
+zdot_      Z C 3880 1 1
+zdot_      Z C 3880 1 1
+zdot_      Z C 3880 1 1
