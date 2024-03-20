@@ -346,6 +346,46 @@ void computediff( gtint_t n, T *blis_sol, T *ref_sol, gtint_t inc, bool nan_inf_
 }
 
 /**
+ * Binary comparison of two vectors with length n and increment inc.
+ */
+template <typename T>
+void computediff( gtint_t n, T *blis_x, T *blis_x_ref, T *blis_y, T *blis_y_ref, gtint_t incx, gtint_t incy, bool nan_inf_check = false )
+{
+    gtint_t abs_incx = std::abs(incx);
+    gtint_t abs_incy = std::abs(incy);
+    int idx, idy;
+    ComparisonHelper comp_helper(VECTOR);
+    comp_helper.nan_inf_check = nan_inf_check;
+    comp_helper.binary_comparison = true;
+
+    // In case inc is negative in a call to BLIS APIs, we just access it from the end to the beginning,
+    // so practically nothing changes. Access from beginning to end to optimize memory operations.
+    for (gtint_t i = 0; i < n; i++)
+    {
+        comp_helper.i = i;
+        idx = (incx > 0) ? (i * incx) : ( - ( n - i - 1 ) * incx );
+        idy = (incy > 0) ? (i * incy) : ( - ( n - i - 1 ) * incy );
+        ASSERT_PRED_FORMAT3(NumericalComparison<T>, blis_x[idx], blis_y_ref[idy], comp_helper) << "incx = " << incx ;
+        ASSERT_PRED_FORMAT3(NumericalComparison<T>, blis_y[idy], blis_x_ref[idx], comp_helper) << "incy = " << incy;        // Go through elements that are part of the array that should not have been modified by the
+        // call to a BLIS API. Use the bitwise comparison for this case.
+        // Random generator fills vector with T{-1.2345e38}
+        if (i < n-1)
+        {
+            for (gtint_t j = 1; j < abs_incx; j++)
+            {
+                idx = (incx > 0) ? (i * incx) : ( - ( n - i - 1 ) * incx );
+                ASSERT_PRED_FORMAT3(NumericalComparison<T>, blis_x[i*abs_incx + j], T{-1.2345e38}, comp_helper) << "incx = " << incx << " This element is expected to not be modified.";
+            }
+            for (gtint_t j = 1; j < abs_incy; j++)
+            {
+                idy = (incy > 0) ? (i * incy) : ( - ( n - i - 1 ) * incy );
+                ASSERT_PRED_FORMAT3(NumericalComparison<T>, blis_y[i*abs_incy + j], T{-1.2345e38}, comp_helper) << "incy = " << incy << " This element is expected to not be modified.";
+            }
+        }
+    }
+}
+
+/**
  * Relative comparison of two vectors with length n and increment inc.
  */
 template <typename T>
