@@ -245,8 +245,10 @@ endif
 endef
 
 # first argument: a kernel set (name) being targeted (e.g. haswell).
+# The 'trailing' % is important so that these are technically pattern rules and the appropriate one can be
+# selected based on the suffix of bli_cntx_ref.
 define make-refinit-rule
-$(BASE_OBJ_REFKERN_PATH)/$(1)/bli_cntx_$(1)_ref.o: $(REFKERN_PATH)/bli_cntx_ref.c $(BLIS_H_FLAT) $(MAKE_DEFS_MK_PATHS)
+$(BASE_OBJ_REFKERN_PATH)/$(1)/bli_cntx_$(1)_ref%.o: $(REFKERN_PATH)/bli_cntx_ref%.c $(BLIS_H_FLAT) $(MAKE_DEFS_MK_PATHS)
 	@mkdir -p $$(dir $$@)
 ifeq ($(ENABLE_VERBOSE),yes)
 	$(CC) $(call get-refinit-cflags-for,$(1)) -DBLIS_PNAME=$(PLUGIN_NAME) -c $$< -o $$@
@@ -255,7 +257,7 @@ else
 	@$(CC) $(call get-refinit-cflags-for,$(1)) -DBLIS_PNAME=$(PLUGIN_NAME) -c $$< -o $$@
 endif
 
-$(BASE_OBJ_REFKERN_PATH)/$(1)/bli_cntx_$(1)_ref.o: $(REFKERN_PATH)/bli_cntx_ref.cpp $(BLIS_H_FLAT) $(MAKE_DEFS_MK_PATHS)
+$(BASE_OBJ_REFKERN_PATH)/$(1)/bli_cntx_$(1)_ref%.o: $(REFKERN_PATH)/bli_cntx_ref%.cpp $(BLIS_H_FLAT) $(MAKE_DEFS_MK_PATHS)
 	@mkdir -p $$(dir $$@)
 ifeq ($(ENABLE_VERBOSE),yes)
 	$(CXX) $(call get-refinit-cxxflags-for,$(1)) -DBLIS_PNAME=$(PLUGIN_NAME) -c $$< -o $$@
@@ -264,7 +266,7 @@ else
 	@$(CXX) $(call get-refinit-cxxflags-for,$(1)) -DBLIS_PNAME=$(PLUGIN_NAME) -c $$< -o $$@
 endif
 
-$(BASE_OBJ_REFKERN_PATH)/$(1)/bli_cntx_$(1)_ref.o: $(REFKERN_PATH)/bli_cntx_ref.cxx $(BLIS_H_FLAT) $(MAKE_DEFS_MK_PATHS)
+$(BASE_OBJ_REFKERN_PATH)/$(1)/bli_cntx_$(1)_ref%.o: $(REFKERN_PATH)/bli_cntx_ref%.cxx $(BLIS_H_FLAT) $(MAKE_DEFS_MK_PATHS)
 	@mkdir -p $$(dir $$@)
 ifeq ($(ENABLE_VERBOSE),yes)
 	$(CXX) $(call get-refinit-cxxflags-for,$(1)) -DBLIS_PNAME=$(PLUGIN_NAME) -c $$< -o $$@
