@@ -164,7 +164,7 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(gtint_t(-2), gtint_t(-1),
                               gtint_t( 1), gtint_t( 2)),                       // stride size for x
             ::testing::Values(AOCL_NAN, -AOCL_INF, AOCL_INF, 1 /*,0  <-fail*/),// exception value for x
-            ::testing::Values(AOCL_NAN, -AOCL_INF, AOCL_INF 0),                // exception value for A
+            ::testing::Values(AOCL_NAN, -AOCL_INF, AOCL_INF, 0),               // exception value for A
             ::testing::Values(gtint_t(0), gtint_t(10))                         // increment to the leading dim of a
         ),
         ::dtrsvEVTPrint()
