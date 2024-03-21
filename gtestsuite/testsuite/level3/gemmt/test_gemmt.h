@@ -39,11 +39,13 @@
 #include "inc/check_error.h"
 #include <stdexcept>
 #include <algorithm>
+#include "common/testing_helpers.h"
 
 template<typename T>
 void test_gemmt( char storage, char uplo, char trnsa, char trnsb, gtint_t n,
     gtint_t k, gtint_t lda_inc, gtint_t ldb_inc, gtint_t ldc_inc, T alpha,
-    T beta, double thresh )
+    T beta, double thresh, bool is_mem_test=false, bool is_evt_test=false,
+    T evt_a=T{0.0}, T evt_b=T{0.0}, T evt_c=T{0.0} )
 {
     // Compute the leading dimensions of a, b, and c.
     gtint_t lda = testinghelpers::get_leading_dimension( storage, trnsa, n, k, lda_inc );
@@ -53,27 +55,86 @@ void test_gemmt( char storage, char uplo, char trnsa, char trnsb, gtint_t n,
     //----------------------------------------------------------
     //         Initialize matrics with random numbers
     //----------------------------------------------------------
-    std::vector<T> a = testinghelpers::get_random_matrix<T>( -2, 8, storage, trnsa, n, k, lda );
-    std::vector<T> b = testinghelpers::get_random_matrix<T>( -5, 2, storage, trnsb, k, n, ldb );
-    std::vector<T> c = testinghelpers::get_random_matrix<T>( -3, 5, storage, 'n', n, n, ldc );
+    T *a_ptr, *b_ptr, *c_ptr;
+    dim_t size_a = testinghelpers::matsize(storage, trnsa, n, k, lda) * sizeof(T);
+    testinghelpers::ProtectedBuffer a(size_a, false, is_mem_test );
+    a_ptr = (T*)a.greenzone_1;
+    testinghelpers::datagenerators::randomgenerators<T>( -2, 8, storage, n, k, a_ptr, trnsa, lda);
+
+    dim_t size_b = testinghelpers::matsize(storage, trnsb, k, n, ldb) * sizeof(T);
+    testinghelpers::ProtectedBuffer b(size_b, false, is_mem_test );
+    b_ptr = (T*)b.greenzone_1;
+    testinghelpers::datagenerators::randomgenerators<T>( -5, 2, storage, k, n, b_ptr, trnsb, ldb);
+
+    dim_t size_c = testinghelpers::matsize(storage, 'n', n, n, ldc) * sizeof(T);
+    testinghelpers::ProtectedBuffer c(size_c, false, is_mem_test );
+    c_ptr = (T*)c.greenzone_1;
+    testinghelpers::datagenerators::randomgenerators<T>( -3, 5, storage, n, n, c_ptr, 'n', ldc);
+
+    if ( is_evt_test )
+    {
+        dim_t n_rand = rand() % std::min(n, k);
+        dim_t k_rand = rand() % std::min(n, k);
+        a_ptr[n_rand + k_rand * lda] = evt_a;
+    }
+
+    if ( is_evt_test )
+    {
+        dim_t n_rand = rand() % std::min(n, k);
+        dim_t k_rand = rand() % std::min(n, k);
+        b_ptr[n_rand + k_rand * lda] = evt_a;
+    }
+
+    if ( is_evt_test )
+    {
+        dim_t n_rand = rand() % std::min(n, k);
+        dim_t k_rand = rand() % std::min(n, k);
+        b_ptr[n_rand + k_rand * lda] = evt_a;
+    }
 
     // Create a copy of c so that we can check reference results.
-    std::vector<T> c_ref(c);
+    std::vector<T> c_ref(testinghelpers::matsize(storage, 'n', n, n, ldc));
+    memcpy(c_ref.data(), c_ptr, size_c);
 
-    //----------------------------------------------------------
-    //                  Call BLIS function
-    //----------------------------------------------------------
-    gemmt<T>( storage, uplo, trnsa, trnsb, n, k, &alpha, a.data(), lda,
-                                b.data(), ldb, &beta, c.data(), ldc );
+    // add signal handler for segmentation fault
+    testinghelpers::ProtectedBuffer::start_signal_handler();
+    try
+    {
+        //----------------------------------------------------------
+        //                  Call BLIS function
+        //----------------------------------------------------------
+        gemmt<T>( storage, uplo, trnsa, trnsb, n, k, &alpha, a_ptr, lda,
+                  b_ptr, ldb, &beta, c_ptr, ldc );
+        if (is_mem_test)
+        {
+            memcpy(a.greenzone_2, a.greenzone_1, size_a);
+            memcpy(b.greenzone_2, b.greenzone_1, size_b);
+            memcpy(c.greenzone_2, c_ref.data(), size_c);
+
+            gemmt<T>( storage, uplo, trnsa, trnsb, n, k, &alpha, (T*)a.greenzone_2, lda,
+                      (T*)b.greenzone_2, ldb, &beta, (T*)c.greenzone_2, ldc );
+        }
+
+    }
+    catch(const std::exception& e)
+    {
+        // reset to default signal handler
+        testinghelpers::ProtectedBuffer::stop_signal_handler();
+
+        // show failure in case seg fault was detected
+        FAIL() << "Memory Test Failed";
+    }
+    // reset to default signal handler
+    testinghelpers::ProtectedBuffer::stop_signal_handler();
 
     //----------------------------------------------------------
     //                  Call reference implementation.
     //----------------------------------------------------------
     testinghelpers::ref_gemmt<T>( storage, uplo, trnsa, trnsb, n, k, alpha,
-               a.data(), lda, b.data(), ldb, beta, c_ref.data(), ldc );
+               a_ptr, lda, b_ptr, ldb, beta, c_ref.data(), ldc );
 
     //----------------------------------------------------------
     //              check component-wise error.
     //----------------------------------------------------------
-    computediff<T>( storage, n, n, c.data(), c_ref.data(), ldc, thresh );
+    computediff<T>( storage, n, n, c_ptr, c_ref.data(), ldc, thresh, is_evt_test );
 }

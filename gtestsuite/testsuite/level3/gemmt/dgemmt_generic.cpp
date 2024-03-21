@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2023, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2023-2024, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -35,22 +35,23 @@
 #include <gtest/gtest.h>
 #include "test_gemmt.h"
 
-class dgemmtTest :
-        public ::testing::TestWithParam<std::tuple<char,
-                                                   char,
-                                                   char,
-                                                   char,
-                                                   gtint_t,
-                                                   gtint_t,
-                                                   double,
-                                                   double,
-                                                   gtint_t,
-                                                   gtint_t,
-                                                   gtint_t>> {};
+class dgemmtAPI :
+        public ::testing::TestWithParam<std::tuple<char,         // storage
+                                                   char,         // uplo
+                                                   char,         // transa
+                                                   char,         // transb
+                                                   gtint_t,      // n
+                                                   gtint_t,      // k
+                                                   double,       // alpha
+                                                   double,       // beta
+                                                   gtint_t,      // lda_inc
+                                                   gtint_t,      // ldb_inc
+                                                   gtint_t,      // ldc_inc
+                                                   bool>> {};    // is memory test
 
-GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(dgemmtTest);
+GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(dgemmtAPI);
 
-TEST_P(dgemmtTest, RandomData)
+TEST_P(dgemmtAPI, FunctionalTest)
 {
     using T = double;
     //----------------------------------------------------------
@@ -79,6 +80,7 @@ TEST_P(dgemmtTest, RandomData)
     gtint_t lda_inc = std::get<8>(GetParam());
     gtint_t ldb_inc = std::get<9>(GetParam());
     gtint_t ldc_inc = std::get<10>(GetParam());
+    bool is_mem_test = std::get<11>(GetParam());
 
     // Set the threshold for the errors:
     double thresh = 10*n*k*testinghelpers::getEpsilon<T>();
@@ -86,17 +88,17 @@ TEST_P(dgemmtTest, RandomData)
     //----------------------------------------------------------
     //     Call test body using these parameters
     //----------------------------------------------------------
-    test_gemmt<T>( storage, uplo, transa, transb, n, k, lda_inc, ldb_inc, ldc_inc, alpha, beta, thresh );
+    test_gemmt<T>( storage, uplo, transa, transb, n, k, lda_inc, ldb_inc, ldc_inc, alpha, beta, thresh, is_mem_test );
 }
 
-class dgemmtTestPrint {
+class dgemmtPrint {
 public:
     std::string operator()(
-        testing::TestParamInfo<std::tuple<char,char,char,char,gtint_t,gtint_t,double,double,gtint_t,gtint_t,gtint_t>> str) const {
+        testing::TestParamInfo<std::tuple<char,char,char,char,gtint_t,gtint_t,double,double,gtint_t,gtint_t,gtint_t,bool>> str) const {
         char sfm        = std::get<0>(str.param);
-        char tsa        = std::get<1>(str.param);
-        char tsb        = std::get<2>(str.param);
-        char uplo       = std::get<3>(str.param);
+        char uplo       = std::get<1>(str.param);
+        char tsa        = std::get<2>(str.param);
+        char tsb        = std::get<3>(str.param);
         gtint_t n       = std::get<4>(str.param);
         gtint_t k       = std::get<5>(str.param);
         double alpha    = std::get<6>(str.param);
@@ -104,51 +106,105 @@ public:
         gtint_t lda_inc = std::get<8>(str.param);
         gtint_t ldb_inc = std::get<9>(str.param);
         gtint_t ldc_inc = std::get<10>(str.param);
+        bool is_mem_test = std::get<11>(str.param);
 #ifdef TEST_BLAS
-        std::string str_name = "dgemmt_";
+        std::string str_name = "blas_";
 #elif TEST_CBLAS
-        std::string str_name = "cblas_dgemmt";
+        std::string str_name = "cblas_";
 #else  //#elif TEST_BLIS_TYPED
-        std::string str_name = "bli_dgemmt";
+        std::string str_name = "bli_";
 #endif
-        str_name = str_name + "_" + sfm+sfm+sfm;
-        str_name = str_name + "_" + tsa + tsb;
-        str_name = str_name + "_" + uplo;
-        str_name = str_name + "_" + std::to_string(n);
-        str_name = str_name + "_" + std::to_string(k);
-        std::string alpha_str = ( alpha > 0) ? std::to_string(int(alpha)) : "m" + std::to_string(int(std::abs(alpha)));
-        str_name = str_name + "_a" + alpha_str;
-        std::string beta_str = ( beta > 0) ? std::to_string(int(beta)) : "m" + std::to_string(int(std::abs(beta)));
-        str_name = str_name + "_b" + beta_str;
-        str_name = str_name + "_" + std::to_string(lda_inc);
-        str_name = str_name + "_" + std::to_string(ldb_inc);
-        str_name = str_name + "_" + std::to_string(ldc_inc);
+        str_name = str_name + "_storage_" + sfm;
+        str_name = str_name + "_transa_" + tsa;
+        str_name = str_name + "_transb_" + tsb;
+        str_name = str_name + "_uploa_" + uplo;
+        str_name = str_name + "_n_" + std::to_string(n);
+        str_name = str_name + "_k_" + std::to_string(k);
+        std::string alpha_str = testinghelpers::get_value_string(alpha);
+        str_name = str_name + "_alpha_" + alpha_str;
+        std::string beta_str = testinghelpers::get_value_string(beta);
+        str_name = str_name + "_beta_" + beta_str;
+        gtint_t lda = testinghelpers::get_leading_dimension( sfm, tsa, n, k, lda_inc );
+        gtint_t ldb = testinghelpers::get_leading_dimension( sfm, tsb, k, n, ldb_inc );
+        gtint_t ldc = testinghelpers::get_leading_dimension( sfm, 'n', n, n, ldc_inc );
+        str_name = str_name + "_lda_" + std::to_string(lda);
+        str_name = str_name + "_ldb_" + std::to_string(ldb);
+        str_name = str_name + "_ldc_" + std::to_string(ldc);
+        str_name = str_name + (is_mem_test ? "_mem_test_enabled" : "_mem_test_disabled");
         return str_name;
     }
 };
-// Disable tests for BLIS_TYPED case due to compiler errors.
+
 #ifndef TEST_BLIS_TYPED
-// Black box testing.
 INSTANTIATE_TEST_SUITE_P(
-        Blackbox,
-        dgemmtTest,
+        skinny_fringe_cases,
+        dgemmtAPI,
         ::testing::Combine(
             ::testing::Values('c'
 #ifndef TEST_BLAS
-            ,'r'
+                             ,'r'
 #endif
             ),                                                               // storage format
             ::testing::Values('u','l'),                                      // uplo u:upper, l:lower
-            ::testing::Values('n','c','t'),                                  // transa
-            ::testing::Values('n','c','t'),                                  // transb
-            ::testing::Range(gtint_t(10), gtint_t(31), 10),                  // n
-            ::testing::Range(gtint_t(10), gtint_t(31), 10),                  // k
-            ::testing::Values(2.0),                                          // alpha
-            ::testing::Values(3.0),                                          // beta
-            ::testing::Values(gtint_t(0), gtint_t(4)),                       // increment to the leading dim of a
-            ::testing::Values(gtint_t(0), gtint_t(1)),                       // increment to the leading dim of b
-            ::testing::Values(gtint_t(0), gtint_t(2))                       // increment to the leading dim of c
+            ::testing::Values('n','t'),                                      // transa
+            ::testing::Values('n','t'),                                      // transb
+            ::testing::Range(gtint_t(1), gtint_t(30), 1),                    // n
+            ::testing::Range(gtint_t(1), gtint_t(30), 1),                    // k
+            ::testing::Values(1.0, 0.0, -2.4, 3.1),                          // alpha
+            ::testing::Values(1.0, 0.0, -2.4, 3.1),                          // beta
+            ::testing::Values(gtint_t(0), gtint_t(153)),                     // increment to the leading dim of a
+            ::testing::Values(gtint_t(0), gtint_t(122)),                     // increment to the leading dim of b
+            ::testing::Values(gtint_t(0), gtint_t(195)),                     // increment to the leading dim of c
+            ::testing::Values(true, false)                                   // is memory test
         ),
-        ::dgemmtTestPrint()
+        ::dgemmtPrint()
+    );
+
+INSTANTIATE_TEST_SUITE_P(
+        skinny,
+        dgemmtAPI,
+        ::testing::Combine(
+            ::testing::Values('c'
+#ifndef TEST_BLAS
+                             ,'r'
+#endif
+            ),                                                               // storage format
+            ::testing::Values('u','l'),                                      // uplo u:upper, l:lower
+            ::testing::Values('n','t'),                                      // transa
+            ::testing::Values('n','t'),                                      // transb
+            ::testing::Values(35, 537, 799),                                 // n
+            ::testing::Values(35, 537, 799),                                 // k
+            ::testing::Values(1.0, 0.0, -2.4, 3.1),                          // alpha
+            ::testing::Values(1.0, 0.0, -2.4, 3.1),                          // beta
+            ::testing::Values(gtint_t(0), gtint_t(153)),                     // increment to the leading dim of a
+            ::testing::Values(gtint_t(0), gtint_t(122)),                     // increment to the leading dim of b
+            ::testing::Values(gtint_t(0), gtint_t(195)),                     // increment to the leading dim of c
+            ::testing::Values(true, false)                                   // is memory test
+        ),
+        ::dgemmtPrint()
+    );
+
+INSTANTIATE_TEST_SUITE_P(
+        large,
+        dgemmtAPI,
+        ::testing::Combine(
+            ::testing::Values('c'
+#ifndef TEST_BLAS
+                             ,'r'
+#endif
+            ),                                                               // storage format
+            ::testing::Values('u','l'),                                      // uplo u:upper, l:lower
+            ::testing::Values('n','t'),                                      // transa
+            ::testing::Values('n','t'),                                      // transb
+            ::testing::Values(800, 1500),                                    // n
+            ::testing::Values(800, 1500),                                    // k
+            ::testing::Values(1.0, 0.0, -2.4, 3.1),                          // alpha
+            ::testing::Values(1.0, 0.0, -2.4, 3.1),                          // beta
+            ::testing::Values(gtint_t(0), gtint_t(153)),                     // increment to the leading dim of a
+            ::testing::Values(gtint_t(0), gtint_t(122)),                     // increment to the leading dim of b
+            ::testing::Values(gtint_t(0), gtint_t(195)),                     // increment to the leading dim of c
+            ::testing::Values(true, false)                                   // is memory test
+        ),
+        ::dgemmtPrint()
     );
 #endif
