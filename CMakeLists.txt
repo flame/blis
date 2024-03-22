@@ -1315,7 +1315,7 @@ else()
         list(APPEND available_testsuites checkblas)
     endif()
 endif()
-add_custom_target(test
+add_custom_target(tests
                 DEPENDS ${available_testsuites}
                 COMMENT "Running target `test`. ${TEST_WARNING} ${DETAILED_BLATEST_MESSAGE}")
 
@@ -1335,3 +1335,5 @@ add_custom_target(check
                 COMMENT "Running target `check`. ${CHECK_WARNING} ${DETAILED_BLATEST_MESSAGE}")
 
 add_subdirectory(bench EXCLUDE_FROM_ALL)
+
+add_subdirectory(test EXCLUDE_FROM_ALL)

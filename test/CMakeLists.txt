@@ -1,205 +1,142 @@
-#[=[
-
-   BLIS
-   An object-based framework for developing high-performance BLAS-like
-   libraries.
-
-   Copyright (C) 2022 - 2024, Advanced Micro Devices, Inc. All rights reserved.
-
-   Redistribution and use in source and binary forms, with or without
-   modification, are permitted provided that the following conditions are
-   met:
-    - Redistributions of source code must retain the above copyright
-      notice, this list of conditions and the following disclaimer.
-    - Redistributions in binary form must reproduce the above copyright
-      notice, this list of conditions and the following disclaimer in the
-      documentation and/or other materials provided with the distribution.
-    - Neither the name(s) of the copyright holder(s) nor the names of its
-      contributors may be used to endorse or promote products derived
-      from this software without specific prior written permission.
-
-   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-   "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-   LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-   A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
-   HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-   SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-   LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-   DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-   THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
-]=]
-
-add_definitions(-DBLAS="AOCL")
-
-add_executable(TestAminv test_aminv.c)
-target_link_libraries(TestAminv debug "${LIB_NAME}.lib")
-if(ENABLE_OPENMP)
-    target_link_libraries(TestAminv OpenMP::OpenMP_CXX)
+##Copyright (C) 2022-2024, Advanced Micro Devices, Inc. All rights reserved.##
+# Comments:
+# Set the path to the BLIS installation.
+set(BLIS_INSTALL_PATH "" CACHE STRING "Setting the path to a BLIS installation that needs testing.")
+if(BLIS_INSTALL_PATH)
+    message(STATUS "BLIS_INSTALL_PATH :" ${BLIS_INSTALL_PATH})
 endif()
-target_link_libraries(TestAminv optimized "${LIB_NAME}.lib")
 
-add_executable(TestAxpyv test_axpyv.c)
-target_link_libraries(TestAxpyv debug "${LIB_NAME}.lib")
-if(ENABLE_OPENMP)
-    target_link_libraries(TestAxpyv OpenMP::OpenMP_CXX)
+# - DIST_PATH is assumed to not exist if BLIS_INSTALL_PATH is given.
+# - We must use recursively expanded assignment for LIB_PATH and INC_PATH in
+#   the second case because CONFIG_NAME is not yet set.
+# Override the value of CINCFLAGS so that the value of CFLAGS returned by
+# get-user-cflags-for() is not cluttered up with include paths needed only
+# while building BLIS.
+
+#if(NOT DEFINED BLIS_INSTALL_PATH)
+if(BLIS_INSTALL_PATH STREQUAL "")
+    set(DIST_PATH ${CMAKE_BINARY_DIR})
+    set(LIB_PATH ${DIST_PATH}/lib/${BLIS_CONFIG_FAMILY})
+    set(INC_PATH ${DIST_PATH}/include/${BLIS_CONFIG_FAMILY})
+    set(CINFLAGS ${INC_PATH})
+    set(LIBBLIS  ${libblis_link})
+else()
+    set(LIB_PATH ${BLIS_INSTALL_PATH}/lib)
+    set(INC_PATH ${BLIS_INSTALL_PATH}/include)
+    set(CINFLAGS ${INC_PATH})
+    # Set up the library name.
+    if(WIN32)
+        set(LIB_BLIS AOCL-LibBlis-Win)
+    else()
+        set(LIB_BLIS ${libblis_link})
+    endif()
+    # Append if threading is required.
+    if(NOT (ENABLE_THREADING STREQUAL "no"))
+        if(WIN32)
+            string(APPEND LIB_BLIS -MT)
+        else()
+            string(APPEND LIB_BLIS -mt)
+        endif()
+    endif()
+    # Append for dll if necessary.
+    if(WIN32 AND BUILD_SHARED_LIBS)
+        string(APPEND LIB_BLIS -dll)
+    endif()
+    # Setting the suffix for find_library().
+    if(WIN32)
+        string(APPEND LIB_BLIS .lib)
+    else()
+        if(BUILD_SHARED_LIBS)
+            string(APPEND LIB_BLIS .so)
+        else()
+            string(APPEND LIB_BLIS .a)
+        endif()
+    endif()
+    set(LIBBLIS  ${LIB_PATH}/${LIB_BLIS})
+    message(STATUS "BLIS_INSTALL_PATH : " ${LIBBLIS})
 endif()
-target_link_libraries(TestAxpyv optimized "${LIB_NAME}.lib")
 
-add_executable(TestAxpbyv test_axpbyv.c)
-target_link_libraries(TestAxpbyv debug "${LIB_NAME}.lib")
-if(ENABLE_OPENMP)
-    target_link_libraries(TestAxpbyv OpenMP::OpenMP_CXX)
+if(WIN32)
+    set(LIBSUFFIX lib)
+else()
+    set(LIBSUFFIX so)
 endif()
-target_link_libraries(TestAxpbyv optimized "${LIB_NAME}.lib")
-
-add_executable(TestCopyv test_copyv.c)
-target_link_libraries(TestCopyv debug "${LIB_NAME}.lib")
-if(ENABLE_OPENMP)
-    target_link_libraries(TestCopyv OpenMP::OpenMP_CXX)
+set(CMAKE_EXECUTABLE_SUFFIX ".x")
+set(MKL_PATH $ENV{MKLROOT} CACHE STRING "Set MKL_PATH.")
+if(WIN32)
+    set(mkllib "${MKL_PATH}\\mkl_rt.lib" CACHE STRING "Set MKL_PATH.")
+else()
+    set(mkllib "${MKL_PATH}/libmkl_rt.so" CACHE STRING "Set MKL_PATH.")
 endif()
-target_link_libraries(TestCopyv optimized "${LIB_NAME}.lib")
-
-add_executable(TestCabs1 test_cabs1.c)
-target_link_libraries(TestCabs1 debug "${LIB_NAME}.lib")
-if(ENABLE_OPENMP)
-    target_link_libraries(TestCabs1 OpenMP::OpenMP_CXX)
-endif()
-target_link_libraries(TestCabs1 optimized "${LIB_NAME}.lib")
-
-add_executable(TestDotv test_dotv.c)
-target_link_libraries(TestDotv debug "${LIB_NAME}.lib")
-if(ENABLE_OPENMP)
-    target_link_libraries(TestDotv OpenMP::OpenMP_CXX)
-endif()
-target_link_libraries(TestDotv optimized "${LIB_NAME}.lib")
-
-add_executable(TestGemm test_gemm.c)
-target_link_libraries(TestGemm debug "${LIB_NAME}.lib")
-if(ENABLE_OPENMP)
-    target_link_libraries(TestGemm OpenMP::OpenMP_CXX)
-endif()
-target_link_libraries(TestGemm optimized "${LIB_NAME}.lib")
-
-add_executable(TestGemmBatch test_gemm_batch.c)
-target_link_libraries(TestGemmBatch debug "${LIB_NAME}.lib")
-if(ENABLE_OPENMP)
-    target_link_libraries(TestGemmBatch OpenMP::OpenMP_CXX)
-endif()
-target_link_libraries(TestGemmBatch optimized "${LIB_NAME}.lib")
-
-add_executable(TestGemm3m test_gemm3m.c)
-target_link_libraries(TestGemm3m debug "${LIB_NAME}.lib")
-if(ENABLE_OPENMP)
-    target_link_libraries(TestGemm3m OpenMP::OpenMP_CXX)
-endif()
-target_link_libraries(TestGemm3m optimized "${LIB_NAME}.lib")
-
-add_executable(TestGemmt test_gemmt.c)
-target_link_libraries(TestGemmt debug "${LIB_NAME}.lib")
-if(ENABLE_OPENMP)
-    target_link_libraries(TestGemmt OpenMP::OpenMP_CXX)
-endif()
-target_link_libraries(TestGemmt optimized "${LIB_NAME}.lib")
-
-add_executable(TestGemv test_gemv.c)
-target_link_libraries(TestGemv debug "${LIB_NAME}.lib")
-if(ENABLE_OPENMP)
-    target_link_libraries(TestGemv OpenMP::OpenMP_CXX)
-endif()
-target_link_libraries(TestGemv optimized "${LIB_NAME}.lib")
-
-add_executable(TestGer test_ger.c)
-target_link_libraries(TestGer debug "${LIB_NAME}.lib")
-if(ENABLE_OPENMP)
-    target_link_libraries(TestGer OpenMP::OpenMP_CXX)
-endif()
-target_link_libraries(TestGer optimized "${LIB_NAME}.lib")
-
-add_executable(TestHemm test_hemm.c)
-target_link_libraries(TestHemm debug "${LIB_NAME}.lib")
-if(ENABLE_OPENMP)
-    target_link_libraries(TestHemm OpenMP::OpenMP_CXX)
-endif()
-target_link_libraries(TestHemm optimized "${LIB_NAME}.lib")
-
-add_executable(TestHemv test_hemv.c)
-target_link_libraries(TestHemv debug "${LIB_NAME}.lib")
-if(ENABLE_OPENMP)
-    target_link_libraries(TestHemv OpenMP::OpenMP_CXX)
-endif()
-target_link_libraries(TestHemv optimized "${LIB_NAME}.lib")
-
-add_executable(TestHer test_her.c)
-target_link_libraries(TestHer debug "${LIB_NAME}.lib")
-if(ENABLE_OPENMP)
-    target_link_libraries(TestHer OpenMP::OpenMP_CXX)
-endif()
-target_link_libraries(TestHer optimized "${LIB_NAME}.lib")
-
-add_executable(TestHer2 test_her2.c)
-target_link_libraries(TestHer2 debug "${LIB_NAME}.lib")
-if(ENABLE_OPENMP)
-    target_link_libraries(TestHer2 OpenMP::OpenMP_CXX)
-endif()
-target_link_libraries(TestHer2 optimized "${LIB_NAME}.lib")
-
-add_executable(TestHer2k test_her2k.c)
-target_link_libraries(TestHer2k debug "${LIB_NAME}.lib")
-if(ENABLE_OPENMP)
-    target_link_libraries(TestHer2k OpenMP::OpenMP_CXX)
-endif()
-target_link_libraries(TestHer2k optimized "${LIB_NAME}.lib")
-
-add_executable(TestHerk test_herk.c)
-target_link_libraries(TestHerk debug "${LIB_NAME}.lib")
-if(ENABLE_OPENMP)
-    target_link_libraries(TestHerk OpenMP::OpenMP_CXX)
-endif()
-target_link_libraries(TestHerk optimized "${LIB_NAME}.lib")
-
-add_executable(TestScalv test_scalv.c)
-target_link_libraries(TestScalv debug "${LIB_NAME}.lib")
-if(ENABLE_OPENMP)
-    target_link_libraries(TestScalv OpenMP::OpenMP_CXX)
-endif()
-target_link_libraries(TestScalv optimized "${LIB_NAME}.lib")
-
-add_executable(TestSwapv test_swapv.c)
-target_link_libraries(TestSwapv debug "${LIB_NAME}.lib")
-if(ENABLE_OPENMP)
-    target_link_libraries(TestSwapv OpenMP::OpenMP_CXX)
-endif()
-target_link_libraries(TestSwapv optimized "${LIB_NAME}.lib")
-
-add_executable(TestTrmm test_trmm.c)
-target_link_libraries(TestTrmm debug "${LIB_NAME}.lib")
-if(ENABLE_OPENMP)
-    target_link_libraries(TestTrmm OpenMP::OpenMP_CXX)
-endif()
-target_link_libraries(TestTrmm optimized "${LIB_NAME}.lib")
-
-add_executable(TestTrmv test_trmv.c)
-target_link_libraries(TestTrmv debug "${LIB_NAME}.lib")
-if(ENABLE_OPENMP)
-    target_link_libraries(TestTrmv OpenMP::OpenMP_CXX)
-endif()
-target_link_libraries(TestTrmv optimized "${LIB_NAME}.lib")
-
-add_executable(TestTrsm test_trsm.c)
-target_link_libraries(TestTrsm debug "${LIB_NAME}.lib")
-if(ENABLE_OPENMP)
-    target_link_libraries(TestTrsm OpenMP::OpenMP_CXX)
-endif()
-target_link_libraries(TestTrsm optimized "${LIB_NAME}.lib")
-
-add_executable(TestTrsv test_trsv.c)
-target_link_libraries(TestTrsv debug "${LIB_NAME}.lib")
-if(ENABLE_OPENMP)
-    target_link_libraries(TestTrsv OpenMP::OpenMP_CXX)
-endif()
-target_link_libraries(TestTrsv optimized "${LIB_NAME}.lib")
+set(MKL_LIB ${mkllib})
+set(OPENBLAS_PATH "/home/amd/mylibs/openblas" CACHE STRING "Set OPENBLAS_PATH.")
+set(OPENBLAS_LIB "${OPENBLAS_PATH}/libopenblas.${LIBSUFFIX}")
 
 
+# Include the corresponding make_defs.cmake that holds the required compiler options.
+include(${CMAKE_SOURCE_DIR}/config/${BLIS_CONFIG_FAMILY}/make_defs.cmake)
+
+# Gather all local source files.
+file(GLOB file_list LIST_DIRECTORIES false RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}/" "*.c")
+
+# Create an executable using the sources above.
+function(testexe extn)
+    set(dblas "aocl")
+    if(extn STREQUAL "mkl")
+        set(BLAS_LIBS ${MKL_LIB})
+        set(dblas ${extn})
+    elseif(extn STREQUAL "openblas")
+        set(BLAS_LIBS ${OPENBLAS_LIB})
+        set(dblas ${extn})
+    endif()
+    set(TEST_FLAGS -DBLAS="${dblas}")
+    foreach(src ${file_list})
+        string(REGEX REPLACE ".c$" "" exec_name ${src})
+        set(exec_name "${exec_name}_${extn}")
+        add_executable(${exec_name} ${src})
+        target_compile_options(${exec_name}
+                                PRIVATE
+                                # load-var-for,COPTFLAGS
+                                ${COPTFLAGS}
+                            )
+        if(WIN32 AND BUILD_SHARED_LIBS)
+            target_compile_definitions(${exec_name}
+                                        PRIVATE
+                                        # in get-noopt-cflags-for
+                                        ${VERS_DEF}
+                                        "-DBLIS_EXPORT=__declspec(dllimport)"
+                                        ${TEST_FLAGS}
+                                    )
+        else()
+            target_compile_definitions(${exec_name}
+                                        PRIVATE
+                                        # in get-noopt-cflags-for
+                                        ${VERS_DEF}
+                                        ${TEST_FLAGS}
+                                    )
+        endif()
+        target_include_directories(${exec_name}
+                                BEFORE
+                                PRIVATE
+                                # in get-noopt-cflags-for
+                                ${CINFLAGS}
+                            )
+        target_link_libraries(${exec_name} PRIVATE ${BLAS_LIBS} ${LIBBLIS} ${LDFLAGS})
+        if(THREADING_MODEL STREQUAL "openmp")
+            target_link_libraries(${exec_name} PRIVATE OpenMP::OpenMP_C)
+        endif()
+        list(APPEND temp_executables ${exec_name})
+    endforeach()
+     set(test_executables ${temp_executables} PARENT_SCOPE)
+endfunction()
+
+testexe("blas")
+add_custom_target(test_blis DEPENDS ${test_executables})
+testexe("mkl")
+add_custom_target(test_mkl DEPENDS ${test_executables})
+testexe("openblas")
+add_custom_target(test_openblas DEPENDS ${test_executables})
+add_custom_target(testall DEPENDS test_blis test_mkl test_openblas)
+
+# Put all those targets under test-targets folder name so that they appear all together in IDE.
+set_target_properties(testall test_blis test_mkl test_openblas PROPERTIES FOLDER test-targets)
