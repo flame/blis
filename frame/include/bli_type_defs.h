@@ -1292,68 +1292,68 @@ typedef struct obj_s
 
 #define BLIS_OBJECT_INITIALIZER \
 { \
-	.root        = NULL, \
+	NULL, \
 \
-	.off         = { 0, 0 }, \
-	.dim         = { 0, 0 }, \
-	.diag_off    = 0, \
+	{ 0, 0 }, \
+	{ 0, 0 }, \
+	0, \
 \
-	.info        = 0x0 | BLIS_BITVAL_DENSE      | \
-	                     BLIS_BITVAL_GENERAL, \
-	.info2       = 0x0, \
-	.elem_size   = sizeof( float ), /* this is changed later. */ \
+	0x0 | BLIS_BITVAL_DENSE      | \
+	      BLIS_BITVAL_GENERAL, \
+	0x0, \
+	sizeof( float ), /* this is changed later. */ \
 \
-	.buffer      = NULL, \
-	.rs          = 0, \
-	.cs          = 0, \
-	.is          = 1,  \
+	NULL, \
+	0, \
+	0, \
+	1,  \
 \
-	.scalar      = { 0.0, 0.0 }, \
+	{ 0.0, 0.0 }, \
 \
-	.m_padded    = 0, \
-	.n_padded    = 0, \
-	.ps          = 0, \
-	.pd          = 0, \
-	.m_panel     = 0, \
-	.n_panel     = 0, \
+	0, \
+	0, \
+	0, \
+	0, \
+	0, \
+	0, \
 \
-	.pack_fn     = NULL, \
-	.pack_params = NULL, \
-	.ker_fn      = NULL, \
-	.ker_params  = NULL  \
+	NULL, \
+	NULL, \
+	NULL, \
+	NULL  \
 }
 
 #define BLIS_OBJECT_INITIALIZER_1X1 \
 { \
-	.root        = NULL, \
+	NULL, \
 \
-	.off         = { 0, 0 }, \
-	.dim         = { 1, 1 }, \
-	.diag_off    = 0, \
+	{ 0, 0 }, \
+	{ 1, 1 }, \
+	0, \
 \
-	.info        = 0x0 | BLIS_BITVAL_DENSE      | \
-	                     BLIS_BITVAL_GENERAL, \
-	.info2       = 0x0, \
-	.elem_size   = sizeof( float ), /* this is changed later. */ \
+	0x0 | BLIS_BITVAL_DENSE      | \
+	      BLIS_BITVAL_GENERAL, \
+	0x0, \
+	sizeof( float ), /* this is changed later. */ \
 \
-	.buffer      = NULL, \
-	.rs          = 0, \
-	.cs          = 0, \
-	.is          = 1,  \
+	NULL, \
+	0, \
+	0, \
+	1,  \
 \
-	.scalar      = { 0.0, 0.0 }, \
+	{ 0.0, 0.0 }, \
 \
-	.m_padded    = 0, \
-	.n_padded    = 0, \
-	.ps          = 0, \
-	.pd          = 0, \
-	.m_panel     = 0, \
-	.n_panel     = 0, \
+	0, \
+	0, \
+	0, \
+	0, \
+	0, \
+	0, \
 \
-	.pack_fn     = NULL, \
-	.pack_params = NULL, \
-	.ker_fn      = NULL, \
-	.ker_params  = NULL  \
+	NULL, \
+	NULL, \
+	NULL, \
+	NULL  \
 }
 
 // Define these macros here since they must be updated if contents of

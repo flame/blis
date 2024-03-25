@@ -258,13 +258,15 @@ BLIS_INLINE void bli_rntm_clear_l3_sup( rntm_t* rntm )
 
 #define BLIS_RNTM_INITIALIZER \
         { \
-          .thread_impl = BLIS_SINGLE, \
-          .num_threads = 1, \
-          .thrloop     = { 1, 1, 1, 1, 1, 1 }, \
-          .auto_factor = FALSE, \
-          .pack_a      = FALSE, \
-          .pack_b      = FALSE, \
-          .l3_sup      = TRUE, \
+          BLIS_SINGLE, \
+\
+          FALSE, \
+\
+          1, \
+          { 1, 1, 1, 1, 1, 1 }, \
+          FALSE, \
+          FALSE, \
+          TRUE, \
         }  \
 
 #if 0
