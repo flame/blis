@@ -59,280 +59,213 @@ TYPED_TEST(gemv_IIT_ERS_Test, n_eq_zero_Unitalphabeta)
 {
     using T = TypeParam;
     gtint_t invalid_n = 0;
-    gtint_t m = 3;
     gtint_t incx = 1;
     gtint_t incy = 1;
-  
 
-     // Get correct vector lengths.
-   // gtint_t lenx = ( testinghelpers::chknotrans( trnsa ) ) ? n : m ;
-   // gtint_t leny = ( testinghelpers::chknotrans( trnsa ) ) ? m : n ;
+    // Get correct vector lengths.
+    // gtint_t lenx = ( testinghelpers::chknotrans( trnsa ) ) ? n : m ;
+    // gtint_t leny = ( testinghelpers::chknotrans( trnsa ) ) ? m : n ;
 
     T alpha, beta;
-   testinghelpers::initone<T>( alpha );
-   testinghelpers::initone<T>( beta );
+    testinghelpers::initone<T>( alpha );
+    testinghelpers::initone<T>( beta );
 
-     //----------------------------------------------------------
+    //----------------------------------------------------------
     //        Initialize matrics with random integer numbers.
     //----------------------------------------------------------
-   // std::vector<T> a = testinghelpers::get_random_matrix<T>( 1, 5, storage, 'n', m, n, LDA );
     std::vector<T> x = testinghelpers::get_random_vector<T>( 1, 3, M, incx );
     std::vector<T> y = testinghelpers::get_random_vector<T>( 1, 3, N, incy );
 
-
-   // Create a copy of c so that we can check reference results.
+    // Create a copy of c so that we can check reference results.
     std::vector<T> y_ref(y);
     //----------------------------------------------------------
     //                  Call BLIS function
     //----------------------------------------------------------
-    gemv<T>( STORAGE, TRANS, CONJ, m, invalid_n, &alpha, nullptr, LDA,
+    gemv<T>( STORAGE, TRANS, CONJ, M, invalid_n, &alpha, nullptr, LDA,
                          x.data(), incx, &beta, y.data(), incy );
 
     //----------------------------------------------------------
     //              check component-wise error.
     //----------------------------------------------------------
     computediff<T>( N, y.data(), y_ref.data(), incy);
-
 }
 
 TYPED_TEST(gemv_IIT_ERS_Test, ZeroBeta_Unitalpha)
 {
     using T = TypeParam;
-    gtint_t n = 4;
-    gtint_t m = 3;
     gtint_t incx = 1;
     gtint_t incy = 1;
 
-
-     // Get correct vector lengths.
-   // gtint_t lenx = ( testinghelpers::chknotrans( trnsa ) ) ? n : m ;
-   // gtint_t leny = ( testinghelpers::chknotrans( trnsa ) ) ? m : n ;
+    // Get correct vector lengths.
+    // gtint_t lenx = ( testinghelpers::chknotrans( trnsa ) ) ? n : m ;
+    // gtint_t leny = ( testinghelpers::chknotrans( trnsa ) ) ? m : n ;
 
     T alpha, beta;
-   testinghelpers::initone<T>( alpha );
-   testinghelpers::initzero<T>( beta );
+    testinghelpers::initzero<T>( alpha );
+    testinghelpers::initone<T>( beta );
 
-     //----------------------------------------------------------
+    //----------------------------------------------------------
     //        Initialize matrics with random integer numbers.
     //----------------------------------------------------------
-   // std::vector<T> a = testinghelpers::get_random_matrix<T>( 1, 5, storage, 'n', m, n, LDA );
     std::vector<T> x = testinghelpers::get_random_vector<T>( 1, 3, M, incx );
     std::vector<T> y = testinghelpers::get_random_vector<T>( 1, 3, N, incy );
 
-
-   // Create a copy of c so that we can check reference results.
+    // Create a copy of c so that we can check reference results.
     std::vector<T> y_ref(y);
     //----------------------------------------------------------
     //                  Call BLIS function
     //----------------------------------------------------------
-    gemv<T>( STORAGE, TRANS, CONJ, m, n, &alpha, nullptr, LDA,
+    gemv<T>( STORAGE, TRANS, CONJ, M, N, &alpha, nullptr, LDA,
                          x.data(), incx, &beta, y.data(), incy );
 
     //----------------------------------------------------------
     //              check component-wise error.
     //----------------------------------------------------------
     computediff<T>( N, y.data(), y_ref.data(), incy);
-
 }
 
 TYPED_TEST(gemv_IIT_ERS_Test, m_eq_zero_Unitbeta)
 {
     using T = TypeParam;
     gtint_t invalid_m = 0;
-    gtint_t n = 1;
     gtint_t incx = 2;
     gtint_t incy = 3;
 
-
-     // Get correct vector lengths.
-   // gtint_t lenx = ( testinghelpers::chknotrans( trnsa ) ) ? n : m ;
-   // gtint_t leny = ( testinghelpers::chknotrans( trnsa ) ) ? m : n ;
+    // Get correct vector lengths.
+    // gtint_t lenx = ( testinghelpers::chknotrans( trnsa ) ) ? n : m ;
+    // gtint_t leny = ( testinghelpers::chknotrans( trnsa ) ) ? m : n ;
 
     T alpha, beta;
-   testinghelpers::initzero<T>( alpha );
-   testinghelpers::initone<T>( beta );
+    testinghelpers::initzero<T>( alpha );
+    testinghelpers::initone<T>( beta );
 
-     //----------------------------------------------------------
+    //----------------------------------------------------------
     //        Initialize matrics with random integer numbers.
     //----------------------------------------------------------
-   // std::vector<T> a = testinghelpers::get_random_matrix<T>( 1, 5, storage, 'n', m, n, LDA );
+    // std::vector<T> a = testinghelpers::get_random_matrix<T>( 1, 5, storage, 'n', m, n, LDA );
     std::vector<T> x = testinghelpers::get_random_vector<T>( 1, 3, M, incx );
     std::vector<T> y = testinghelpers::get_random_vector<T>( 1, 3, N, incy );
 
-
-   // Create a copy of c so that we can check reference results.
+    // Create a copy of c so that we can check reference results.
     std::vector<T> y_ref(y);
     //----------------------------------------------------------
     //                  Call BLIS function
     //----------------------------------------------------------
-    gemv<T>( STORAGE, TRANS, CONJ, invalid_m, n, &alpha, nullptr, LDA,
+    gemv<T>( STORAGE, TRANS, CONJ, invalid_m, N, &alpha, nullptr, LDA,
                          x.data(), incx, &beta, y.data(), incy );
 
     //----------------------------------------------------------
     //              check component-wise error.
     //----------------------------------------------------------
     computediff<T>( N, y.data(), y_ref.data(), incy);
-
 }
 
 TYPED_TEST(gemv_IIT_ERS_Test, m_lt_zero_Unitscalar)
 {
     using T = TypeParam;
     gtint_t invalid_m = -1;
-    gtint_t n = 5;
     gtint_t incx = 3;
     gtint_t incy = 3;
 
-
-     // Get correct vector lengths.
-   // gtint_t lenx = ( testinghelpers::chknotrans( trnsa ) ) ? n : m ;
-   // gtint_t leny = ( testinghelpers::chknotrans( trnsa ) ) ? m : n ;
+    // Get correct vector lengths.
+    // gtint_t lenx = ( testinghelpers::chknotrans( trnsa ) ) ? n : m ;
+    // gtint_t leny = ( testinghelpers::chknotrans( trnsa ) ) ? m : n ;
 
     T alpha, beta;
-   testinghelpers::initone<T>( alpha );
-   testinghelpers::initone<T>( beta );
+    testinghelpers::initone<T>( alpha );
+    testinghelpers::initone<T>( beta );
 
-     //----------------------------------------------------------
+    //----------------------------------------------------------
     //        Initialize matrics with random integer numbers.
     //----------------------------------------------------------
-   // std::vector<T> a = testinghelpers::get_random_matrix<T>( 1, 5, storage, 'n', m, n, LDA );
     std::vector<T> x = testinghelpers::get_random_vector<T>( 1, 3, M, incx );
     std::vector<T> y = testinghelpers::get_random_vector<T>( 1, 3, N, incy );
 
 
-   // Create a copy of c so that we can check reference results.
+    // Create a copy of c so that we can check reference results.
     std::vector<T> y_ref(y);
     //----------------------------------------------------------
     //                  Call BLIS function
     //----------------------------------------------------------
-    gemv<T>( STORAGE, TRANS, CONJ, invalid_m, n, &alpha, nullptr, LDA,
+    gemv<T>( STORAGE, TRANS, CONJ, invalid_m, N, &alpha, nullptr, LDA,
                          x.data(), incx, &beta, y.data(), incy );
 
     //----------------------------------------------------------
     //              check component-wise error.
     //----------------------------------------------------------
     computediff<T>( N, y.data(), y_ref.data(), incy);
-
 }
 
 TYPED_TEST(gemv_IIT_ERS_Test, n_lt_zero_Unitscalar)
 {
     using T = TypeParam;
     gtint_t invalid_n = -1;
-    gtint_t m = 1;
     gtint_t incx = 3;
     gtint_t incy = 3;
 
-
-     // Get correct vector lengths.
-   // gtint_t lenx = ( testinghelpers::chknotrans( trnsa ) ) ? n : m ;
-   // gtint_t leny = ( testinghelpers::chknotrans( trnsa ) ) ? m : n ;
+    // Get correct vector lengths.
+    // gtint_t lenx = ( testinghelpers::chknotrans( trnsa ) ) ? n : m ;
+    // gtint_t leny = ( testinghelpers::chknotrans( trnsa ) ) ? m : n ;
 
     T alpha, beta;
-   testinghelpers::initone<T>( alpha );
-   testinghelpers::initone<T>( beta );
+    testinghelpers::initone<T>( alpha );
+    testinghelpers::initone<T>( beta );
 
-     //----------------------------------------------------------
+    //----------------------------------------------------------
     //        Initialize matrics with random integer numbers.
     //----------------------------------------------------------
-   // std::vector<T> a = testinghelpers::get_random_matrix<T>( 1, 5, storage, 'n', m, n, LDA );
     std::vector<T> x = testinghelpers::get_random_vector<T>( 1, 3, M, incx );
     std::vector<T> y = testinghelpers::get_random_vector<T>( 1, 3, N, incy );
 
-
-   // Create a copy of c so that we can check reference results.
+    // Create a copy of y so that we can check reference results.
     std::vector<T> y_ref(y);
+
     //----------------------------------------------------------
     //                  Call BLIS function
     //----------------------------------------------------------
-    gemv<T>( STORAGE, TRANS, CONJ, m, invalid_n, &alpha, nullptr, LDA,
+    gemv<T>( STORAGE, TRANS, CONJ, M, invalid_n, &alpha, nullptr, LDA,
                          x.data(), incx, &beta, y.data(), incy );
 
     //----------------------------------------------------------
     //              check component-wise error.
     //----------------------------------------------------------
     computediff<T>( N, y.data(), y_ref.data(), incy);
-
 }
 
 TYPED_TEST(gemv_IIT_ERS_Test, Zero_scalar)
 {
     using T = TypeParam;
-    gtint_t n = 2;
-    gtint_t m = 2;
     gtint_t incx = 3;
     gtint_t incy = 3;
 
-
-     // Get correct vector lengths.
-   // gtint_t lenx = ( testinghelpers::chknotrans( trnsa ) ) ? n : m ;
-   // gtint_t leny = ( testinghelpers::chknotrans( trnsa ) ) ? m : n ;
+    // Get correct vector lengths.
+    // gtint_t lenx = ( testinghelpers::chknotrans( trnsa ) ) ? n : m ;
+    // gtint_t leny = ( testinghelpers::chknotrans( trnsa ) ) ? m : n ;
 
     T alpha, beta;
-   testinghelpers::initzero<T>( alpha );
-   testinghelpers::initzero<T>( beta );
+    testinghelpers::initzero<T>( alpha );
+    testinghelpers::initzero<T>( beta );
 
-     //----------------------------------------------------------
+    //----------------------------------------------------------
     //        Initialize matrics with random integer numbers.
     //----------------------------------------------------------
-   // std::vector<T> a = testinghelpers::get_random_matrix<T>( 1, 5, storage, 'n', m, n, LDA );
+    // std::vector<T> a = testinghelpers::get_random_matrix<T>( 1, 5, storage, 'n', m, n, LDA );
     std::vector<T> x = testinghelpers::get_random_vector<T>( 0, 1, M, incx );
     std::vector<T> y = testinghelpers::get_random_vector<T>( 0, 1, N, incy );
 
+    // Create a zero vector, since the output for alpha = beta = 0 should be a
+    // zero vector.
+    std::vector<T> zero_vec = testinghelpers::get_random_vector<T>( 0, 0, N, incy );;
 
-   // Create a copy of c so that we can check reference results.
-    std::vector<T> y_ref(y);
     //----------------------------------------------------------
     //                  Call BLIS function
     //----------------------------------------------------------
-    gemv<T>( STORAGE, TRANS, CONJ, m, n, &alpha, nullptr, LDA,
+    gemv<T>( STORAGE, TRANS, CONJ, M, N, &alpha, nullptr, LDA,
                          x.data(), incx, &beta, y.data(), incy );
 
     //----------------------------------------------------------
     //              check component-wise error.
     //----------------------------------------------------------
-    computediff<T>( N, y.data(), y_ref.data(), incy);
-
+    computediff<T>( N, y.data(), zero_vec.data(), incy);
 }
-
-TYPED_TEST(gemv_IIT_ERS_Test, invalid_inc)
-{
-    using T = TypeParam;
-    gtint_t n = 2;
-    gtint_t m = 2;
-    gtint_t incx = -1;
-    gtint_t incy = -1;
-
-
-     // Get correct vector lengths.
-   // gtint_t lenx = ( testinghelpers::chknotrans( trnsa ) ) ? n : m ;
-   // gtint_t leny = ( testinghelpers::chknotrans( trnsa ) ) ? m : n ;
-
-    T alpha, beta;
-   testinghelpers::initone<T>( alpha );
-   testinghelpers::initone<T>( beta );
-
-     //----------------------------------------------------------
-    //        Initialize matrics with random integer numbers.
-    //----------------------------------------------------------
-   // std::vector<T> a = testinghelpers::get_random_matrix<T>( 1, 5, storage, 'n', m, n, LDA );
-    std::vector<T> x = testinghelpers::get_random_vector<T>( 1, 5, M, incx );
-    std::vector<T> y = testinghelpers::get_random_vector<T>( 1, 5, N, incy );
-
-
-   // Create a copy of c so that we can check reference results.
-    std::vector<T> y_ref(y);
-    //----------------------------------------------------------
-    //                  Call BLIS function
-    //----------------------------------------------------------
-    gemv<T>( STORAGE, TRANS, CONJ, m, n, &alpha, nullptr, LDA ,
-                         x.data(), incx, &beta, y.data(), incy );
-
-    //----------------------------------------------------------
-    //              check component-wise error.
-    //----------------------------------------------------------
-    computediff<T>( N, y.data(), y_ref.data(), incy);
-
-}
-
 #endif

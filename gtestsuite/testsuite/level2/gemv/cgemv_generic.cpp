@@ -35,21 +35,23 @@
 #include <gtest/gtest.h>
 #include "test_gemv.h"
 
-class cgemvTest :
-        public ::testing::TestWithParam<std::tuple<char,              // storage format
-                                                   char,              // transa
-						   char,	      // conjx	
-                                                   gtint_t,           // m
-                                                   gtint_t,           // n
-                                                   scomplex,          // alpha
-                                                   scomplex,          // beta
-                                                   gtint_t,           // stride size for x
-                                                   gtint_t,           // stride size for y
-                                                   gtint_t>> {};      // increment to the leading dim of a
+using T = scomplex;
 
-TEST_P(cgemvTest, RandomData)
+class cgemvGeneric :
+        public ::testing::TestWithParam<std::tuple<char,        // storage format
+                                                   char,        // transa
+                                                   char,        // conjx
+                                                   gtint_t,     // m
+                                                   gtint_t,     // n
+                                                   T,           // alpha
+                                                   T,           // beta
+                                                   gtint_t,     // incx
+                                                   gtint_t,     // incy
+                                                   gtint_t,     // lda_inc
+                                                   bool>> {};   // is_memory_test
+
+TEST_P(cgemvGeneric, FunctionalTest)
 {
-    using T = scomplex;
     //----------------------------------------------------------
     // Initialize values from the parameters passed through
     // test suite instantiation (INSTANTIATE_TEST_SUITE_P).
@@ -76,6 +78,8 @@ TEST_P(cgemvTest, RandomData)
     // If increment is zero, then the array size matches the matrix size.
     // If increment are nonnegative, the array size is bigger than the matrix size.
     gtint_t lda_inc = std::get<9>(GetParam());
+    // is_memory_test:
+    bool is_memory_test = std::get<10>(GetParam());
 
     // Set the threshold for the errors:
     // Check gtestsuite gemv.h or netlib source code for reminder of the
@@ -98,75 +102,73 @@ TEST_P(cgemvTest, RandomData)
     //----------------------------------------------------------
     //     Call test body using these parameters
     //----------------------------------------------------------
-    test_gemv<T>( storage, transa, conjx, m, n, alpha, lda_inc, incx, beta, incy, thresh );
+    test_gemv<T>( storage, transa, conjx, m, n, alpha, lda_inc, incx, beta, incy, thresh, is_memory_test );
 }
 
-class cgemvTestPrint {
+class cgemvGenericPrint {
 public:
     std::string operator()(
-        testing::TestParamInfo<std::tuple<char,char,char,gtint_t,gtint_t,scomplex,scomplex,gtint_t,gtint_t,gtint_t>> str) const {
-        char sfm       = std::get<0>(str.param);
-        char transa    = std::get<1>(str.param);
-        char conjx     = std::get<2>(str.param);
-        gtint_t m      = std::get<3>(str.param);
-        gtint_t n      = std::get<4>(str.param);
-        scomplex alpha = std::get<5>(str.param);
-        scomplex beta  = std::get<6>(str.param);
-        gtint_t incx   = std::get<7>(str.param);
-        gtint_t incy   = std::get<8>(str.param);
-        gtint_t ld_inc = std::get<9>(str.param);
+        testing::TestParamInfo<std::tuple<char,char,char,gtint_t,gtint_t,T,T,gtint_t,gtint_t,gtint_t,bool>> str) const {
+        char sfm            = std::get<0>(str.param);
+        char transa         = std::get<1>(str.param);
+        char conjx          = std::get<2>(str.param);
+        gtint_t m           = std::get<3>(str.param);
+        gtint_t n           = std::get<4>(str.param);
+        T alpha             = std::get<5>(str.param);
+        T beta              = std::get<6>(str.param);
+        gtint_t incx        = std::get<7>(str.param);
+        gtint_t incy        = std::get<8>(str.param);
+        gtint_t ld_inc      = std::get<9>(str.param);
+        bool is_memory_test = std::get<10>(str.param);
+
 #ifdef TEST_BLAS
-        std::string str_name = "cgemv_";
+        std::string str_name = "blas_";
 #elif TEST_CBLAS
-        std::string str_name = "cblas_cgemv";
+        std::string str_name = "cblas_";
 #else  //#elif TEST_BLIS_TYPED
-        std::string str_name = "bli_cgemv";
+        std::string str_name = "bli_";
 #endif
-        str_name    = str_name + "_" + sfm;
-        str_name    = str_name + "_" + transa+conjx;
-        str_name    = str_name + "_" + std::to_string(m);
-        str_name    = str_name + "_" + std::to_string(n);
-        std::string incx_str = ( incx > 0) ? std::to_string(incx) : "m" + std::to_string(std::abs(incx));
-        std::string incy_str = ( incy > 0) ? std::to_string(incy) : "m" + std::to_string(std::abs(incy));
-        str_name    = str_name + "_" + incx_str;
-        str_name    = str_name + "_" + incy_str;
-        std::string alpha_str = ( alpha.real > 0) ? std::to_string(int(alpha.real)) : ("m" + std::to_string(int(std::abs(alpha.real))));
-                    alpha_str = alpha_str + "pi" + (( alpha.imag > 0) ? std::to_string(int(alpha.imag)) : ("m" + std::to_string(int(std::abs(alpha.imag)))));
-        std::string beta_str = ( beta.real > 0) ? std::to_string(int(beta.real)) : ("m" + std::to_string(int(std::abs(beta.real))));
-                    beta_str = beta_str + "pi" + (( beta.imag > 0) ? std::to_string(int(beta.imag)) : ("m" + std::to_string(int(std::abs(beta.imag)))));
-        str_name    = str_name + "_a" + alpha_str;
-        str_name    = str_name + "_b" + beta_str;
-        str_name    = str_name + "_" + std::to_string(ld_inc);
+        str_name = str_name + "stor_" + sfm;
+        str_name = str_name + "_transa_" + transa;
+        str_name = str_name + "_conjx_" + conjx;
+        str_name = str_name + "_m_" + std::to_string(m);
+        str_name = str_name + "_n_" + std::to_string(n);
+        str_name = str_name + "_incx_" + testinghelpers::get_value_string(incx);;
+        str_name = str_name + "_incy_" + testinghelpers::get_value_string(incy);;
+        str_name = str_name + "_alpha_" + testinghelpers::get_value_string(alpha);
+        str_name = str_name + "_beta_" + testinghelpers::get_value_string(beta);
+        str_name = str_name + "_lda_" + std::to_string(testinghelpers::get_leading_dimension( sfm, 'n', m, n, ld_inc ));
+        str_name = str_name + (( is_memory_test ) ? "_mem_test_enabled" : "_mem_test_disabled");
         return str_name;
     }
 };
 
-// Black box testing.
 INSTANTIATE_TEST_SUITE_P(
         Blackbox,
-        cgemvTest,
+        cgemvGeneric,
         ::testing::Combine(
             ::testing::Values('c'
 #ifndef TEST_BLAS
-            ,'r'
+                             ,'r'
 #endif
-            ),                                                               // storage format
-            ::testing::Values('n','c','t'),                                  // transa
-            ::testing::Values('n'),                                          // conjx
-            ::testing::Range(gtint_t(10), gtint_t(31), 10),                  // m
-            ::testing::Range(gtint_t(10), gtint_t(31), 10),                  // n
-            ::testing::Values(scomplex{1.0, -2.0}),                          // alpha
-            ::testing::Values(scomplex{-1.0, 1.0}),                          // beta
-            ::testing::Values(gtint_t(1)),                                   // stride size for x
-            ::testing::Values(gtint_t(1)),                                   // stride size for y
-            ::testing::Values(gtint_t(0))                                    // increment to the leading dim of a
+            ),                                                  // storage format
+            ::testing::Values('n','c','t'),                     // transa
+            ::testing::Values('n'),                             // conjx
+            ::testing::Range(gtint_t(10), gtint_t(31), 10),     // m
+            ::testing::Range(gtint_t(10), gtint_t(31), 10),     // n
+            ::testing::Values(T{1.0, -2.0}),                    // alpha
+            ::testing::Values(T{-1.0, 1.0}),                    // beta
+            ::testing::Values(gtint_t(1)),                      // stride size for x
+            ::testing::Values(gtint_t(1)),                      // stride size for y
+            ::testing::Values(gtint_t(0)),                      // increment to the leading dim of a
+            ::testing::Values(false, true)                      // is_memory_test
         ),
-        ::cgemvTestPrint()
+        ::cgemvGenericPrint()
     );
 
 INSTANTIATE_TEST_SUITE_P(
         Blackbox_Tiny_Matixsizes,
-        cgemvTest,
+        cgemvGeneric,
         ::testing::Combine(
             ::testing::Values('c'
 #ifndef TEST_BLAS
@@ -177,18 +179,19 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values('n'),                                          // conjx
             ::testing::Range(gtint_t(1), gtint_t(9), 1),                     // m
             ::testing::Range(gtint_t(1), gtint_t(9), 1),                     // n
-            ::testing::Values(scomplex{1.0 , 2.0}),                          // alpha
-            ::testing::Values(scomplex{-1.0, -1.0}),                         // beta
+            ::testing::Values(T{1.0 , 2.0}),                                 // alpha
+            ::testing::Values(T{-1.0, -1.0}),                                // beta
             ::testing::Values(gtint_t(1)),                                   // stride size for x
             ::testing::Values(gtint_t(1)),                                   // stride size for y
-            ::testing::Values(gtint_t(0))                                    // increment to the leading dim of a
+            ::testing::Values(gtint_t(0)),                                   // increment to the leading dim of a
+            ::testing::Values(false, true)                                   // is_memory_test
         ),
-        ::cgemvTestPrint()
+        ::cgemvGenericPrint()
     );
 
 INSTANTIATE_TEST_SUITE_P(
         Blackbox_Average_Matrixsizes,
-        cgemvTest,
+        cgemvGeneric,
         ::testing::Combine(
             ::testing::Values('c'
 #ifndef TEST_BLAS
@@ -199,19 +202,20 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values('n'),                                          // conjx
             ::testing::Range(gtint_t(128), gtint_t(512), 7),                 // m
             ::testing::Range(gtint_t(512), gtint_t(128), -7),                // n
-            ::testing::Values(scomplex{-1.0, -2.0}),                         // alpha
-            ::testing::Values(scomplex{-2.0, 1.0}),                          // beta
+            ::testing::Values(T{-1.0, -2.0}),                                // alpha
+            ::testing::Values(T{-2.0, 1.0}),                                 // beta
             ::testing::Values(gtint_t(1)),                                   // stride size for x
             ::testing::Values(gtint_t(1)),                                   // stride size for y
-            ::testing::Values(gtint_t(1))                                    // increment to the leading dim of a
+            ::testing::Values(gtint_t(1)),                                   // increment to the leading dim of a
+            ::testing::Values(false, true)                                   // is_memory_test
         ),
-        ::cgemvTestPrint()
+        ::cgemvGenericPrint()
     );
 
 
 INSTANTIATE_TEST_SUITE_P(
         Blackbox_Large_Matrixsizes,
-        cgemvTest,
+        cgemvGeneric,
         ::testing::Combine(
             ::testing::Values('c'
 #ifndef TEST_BLAS
@@ -222,19 +226,20 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values('n'),                                          // conjx
             ::testing::Range(gtint_t(1024), gtint_t(32767), 1023),           // m
             ::testing::Range(gtint_t(1024), gtint_t(32767), 1023),           // n
-            ::testing::Values(scomplex{1.0, 1.0}),                           // alpha
-            ::testing::Values(scomplex{1.0, 1.0}),                           // beta
+            ::testing::Values(T{1.0, 1.0}),                                  // alpha
+            ::testing::Values(T{1.0, 1.0}),                                  // beta
             ::testing::Values(gtint_t(2)),                                   // stride size for x
             ::testing::Values(gtint_t(2)),                                   // stride size for y
-            ::testing::Values(gtint_t(4))                                    // increment to the leading dim of a
+            ::testing::Values(gtint_t(4)),                                   // increment to the leading dim of a
+            ::testing::Values(false, true)                                   // is_memory_test
         ),
 
-      ::cgemvTestPrint()
+      ::cgemvGenericPrint()
     );
 
 INSTANTIATE_TEST_SUITE_P(
         Blackbox_Large_Scalar_Stride,
-        cgemvTest,
+        cgemvGeneric,
         ::testing::Combine(
             ::testing::Values('c'
 #ifndef TEST_BLAS
@@ -245,19 +250,20 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values('n'),                                          // conjx
             ::testing::Range(gtint_t(10), gtint_t(50), 10),                  // m
             ::testing::Range(gtint_t(10), gtint_t(50), 10),                  // n
-            ::testing::Values(scomplex{3.0, -3.0}),                          // alpha
-            ::testing::Values(scomplex{-3.0, 4.0}),                          // beta
+            ::testing::Values(T{3.0, -3.0}),                                 // alpha
+            ::testing::Values(T{-3.0, 4.0}),                                 // beta
             ::testing::Values(gtint_t(10)),                                  // stride size for x
             ::testing::Values(gtint_t(10)),                                  // stride size for y
-            ::testing::Values(gtint_t(1))				     // increment to the leading dim of a	
-			    ),
-        ::cgemvTestPrint()
+            ::testing::Values(gtint_t(1)),                                   // increment to the leading dim of a
+            ::testing::Values(false, true)                                   // is_memory_test
+        ),
+        ::cgemvGenericPrint()
     );
 
 
 INSTANTIATE_TEST_SUITE_P(
         Blackbox_Nonunit_Incx,
-        cgemvTest,
+        cgemvGeneric,
         ::testing::Combine(
             ::testing::Values('c'
 #ifndef TEST_BLAS
@@ -268,18 +274,19 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values('n'),                                          // conjx
             ::testing::Range(gtint_t(10), gtint_t(50), 10),                  // m
             ::testing::Range(gtint_t(0), gtint_t(0), 0),                     // n
-            ::testing::Values(scomplex{-1.0, -2.0}),                         // alpha
-            ::testing::Values(scomplex{1.0, 2.0}),                           // beta
+            ::testing::Values(T{-1.0, -2.0}),                                // alpha
+            ::testing::Values(T{1.0, 2.0}),                                  // beta
             ::testing::Values(gtint_t(1)),                                   // stride size for x
             ::testing::Values(gtint_t(1)),                                   // stride size for y
-            ::testing::Values(gtint_t(5))				     // increment to the leading dim of a	
-                            ),
-        ::cgemvTestPrint()
+            ::testing::Values(gtint_t(5)),                                   // increment to the leading dim of a
+            ::testing::Values(false, true)                                   // is_memory_test
+        ),
+        ::cgemvGenericPrint()
     );
 
 INSTANTIATE_TEST_SUITE_P(
         Blackbox_Unit_MN,
-        cgemvTest,
+        cgemvGeneric,
         ::testing::Combine(
             ::testing::Values('c'
 #ifndef TEST_BLAS
@@ -290,18 +297,19 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values('n'),                                          // conjx
             ::testing::Values(gtint_t(1)),                                   // m
             ::testing::Values(gtint_t(1)),                                   // n
-            ::testing::Values(scomplex{-1.0, -2.0}, scomplex{2.0, -1.0}),    // alpha
-            ::testing::Values(scomplex{1.0, 2.0}),                           // beta
+            ::testing::Values(T{-1.0, -2.0}, T{2.0, -1.0}),                  // alpha
+            ::testing::Values(T{1.0, 2.0}),                                  // beta
             ::testing::Values(gtint_t(7)),                                   // stride size for x
             ::testing::Values(gtint_t(13)),                                  // stride size for y
-            ::testing::Values(gtint_t(57), gtint_t(119))                     // increment to the leading dim of a  
-                            ),
-        ::cgemvTestPrint()
+            ::testing::Values(gtint_t(57), gtint_t(119)),                    // increment to the leading dim of a
+            ::testing::Values(false, true)                                   // is_memory_test
+        ),
+        ::cgemvGenericPrint()
     );
 
 INSTANTIATE_TEST_SUITE_P(
-        Blackbox_More_Scalar,
-        cgemvTest,
+        More_Scalar,
+        cgemvGeneric,
         ::testing::Combine(
             ::testing::Values('c'
 #ifndef TEST_BLAS
@@ -312,12 +320,13 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values('n'),                                          // conjx
             ::testing::Values(gtint_t(1)),                                   // m
             ::testing::Values(gtint_t(1)),                                   // n
-            ::testing::Values(scomplex{-1.0, -2.0}),    		     // alpha
-            ::testing::Values(scomplex{1.0, 2.0}, scomplex{-2.0, 1.0},                          
-	    		      scomplex{-3.0, 2.0}, scomplex{-1.0, -2.0}),    // beta
+            ::testing::Values(T{-1.0, -2.0}),                                // alpha
+            ::testing::Values(T{1.0, 2.0}, T{-2.0, 1.0},
+	    		              T{-3.0, 2.0}, T{-1.0, -2.0}),                  // beta
             ::testing::Values(gtint_t(7)),                                   // stride size for x
             ::testing::Values(gtint_t(13)),                                  // stride size for y
-            ::testing::Values(gtint_t(0), gtint_t(190))                      // increment to the leading dim of a
-                            ),
-        ::cgemvTestPrint()
+            ::testing::Values(gtint_t(0), gtint_t(190)),                     // increment to the leading dim of a
+            ::testing::Values(false, true)                                   // is_memory_test
+            ),
+        ::cgemvGenericPrint()
     );
