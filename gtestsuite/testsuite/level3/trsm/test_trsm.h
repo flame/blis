@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2023-24, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2023 - 2024, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -71,38 +71,38 @@ typedef enum
 template<typename T>
 void generate_NAN_INF( T* mat, char uploa, gtint_t m, gtint_t ld, EVT_TYPE type, bool is_a, bool is_diag = false)
 {
+    // RT contains the real type of T.
+    using RT = typename testinghelpers::type_info<T>::real_type;
     // inf_nan will contain either inf or nan depending on requirement
-    T inf_nan = std::numeric_limits<T>::quiet_NaN();
+    RT inf_nan = std::numeric_limits<RT>::quiet_NaN();
+
     if(type == INF)
     {
-        inf_nan = std::numeric_limits<T>::infinity();
+        inf_nan = std::numeric_limits<RT>::infinity();
     }
     else if (type == NEG_INF)
     {
-        inf_nan = T{-1} * std::numeric_limits<T>::infinity();
+        inf_nan = RT{-1} * std::numeric_limits<RT>::infinity();
     }
     else if (type == NEG_NaN)
     {
-        inf_nan = T{-1} * std::numeric_limits<T>::quiet_NaN();
+        inf_nan = RT{-1} * std::numeric_limits<RT>::quiet_NaN();
     }
     else // type == NaN
     {
-        inf_nan = std::numeric_limits<T>::quiet_NaN();
+        inf_nan = std::numeric_limits<RT>::quiet_NaN();
     }
-    // Making A diagonally dominant so that the condition number is good and
-    // the algorithm doesn't diverge.
-    if (is_a)
-    {
-        for (gtint_t i=0; i<m; i++)
-        {
-                mat[i+i*ld] = T{float(m)}*mat[i+i*ld];
-        }
-    }
+
+    // exval will contain the exception value to be injected in the matrix.
+    T exval;
+    if constexpr ( testinghelpers::type_info<T>::is_real ) exval = T{inf_nan};
+    else exval = T{inf_nan, inf_nan};
+
     // if size is one, then set the only element in matrix
     // to inf or nan
     if (m <= 1)
     {
-        *(mat) = inf_nan;
+        *(mat) = exval;
     }
     else
     {
@@ -111,14 +111,15 @@ void generate_NAN_INF( T* mat, char uploa, gtint_t m, gtint_t ld, EVT_TYPE type,
         if( uploa == 'l' || uploa == 'L')
         {
             // set one element to inf/nan in lower half of matrix
-            *(mat + mn + ((mn - (!is_diag)) * ld) ) = inf_nan;
+            *(mat + mn + ((mn - (!is_diag)) * ld) ) = exval;
         }
         else
         {
             // set one element to inf/nan in upper half of matrix
-            *(mat + (mn - (!is_diag)) + (mn * ld) ) = inf_nan;
+            *(mat + (mn - (!is_diag)) + (mn * ld) ) = exval;
         }
     }
+
     /*  // Make All elements NaN\INF
         // This test is commented out inorder to reduce the
         // testing time.
