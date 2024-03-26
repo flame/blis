@@ -102,8 +102,8 @@ BLIS_INLINE void bli_pblk_set_block_size( siz_t block_size, pblk_t* pblk )
 
 #define BLIS_PBLK_INITIALIZER \
         { \
-          .buf        = NULL, \
-          .block_size = 0, \
+          /* .buf        = */ NULL, \
+          /* .block_size = */ 0, \
         }  \
 
 BLIS_INLINE void bli_pblk_clear( pblk_t* pblk )
