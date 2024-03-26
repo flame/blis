@@ -35,14 +35,14 @@
 #include "blis.h"
 
 #undef  GENTFUNC2RO
-#define GENTFUNC2RO( ctype_ab, ctype_abc, ctype_c, ctype_cc, chab, chabc, chc, chcc, opname, arch, suf ) \
+#define GENTFUNC2RO( ctype_abr, ctype_ab, ctype_cr, ctype_c, chabr, chab, chcr, chc, opname, arch, suf ) \
 \
-void PASTEMAC(chab,chc,opname,arch,suf) \
+void PASTEMAC(chabr,chcr,opname,arch,suf) \
      ( \
              dim_t      m, \
              dim_t      n, \
              dim_t      k, \
-       const void*      alpha, \
+       const void*      alpha0, \
        const void*      a, \
        const void*      b, \
        const void*      beta0, \
@@ -51,6 +51,7 @@ void PASTEMAC(chab,chc,opname,arch,suf) \
        const cntx_t*    cntx  \
      ) \
 { \
+	const ctype_ab*   alpha     = alpha0; \
 	const ctype_c*    beta      = beta0; \
 	      ctype_c*    c         = c0; \
 \
@@ -63,45 +64,74 @@ void PASTEMAC(chab,chc,opname,arch,suf) \
 	const dim_t       mr        = bli_gemm_var_cntl_mr( params ); \
 	const dim_t       nr        = bli_gemm_var_cntl_nr( params ); \
 \
+	const dim_t       mr_r      = row_pref ? mr : 2 * mr; \
+	const dim_t       nr_r      = row_pref ? 2 * nr : nr; \
+\
+	/* Convert the micro-tile dimensions from being in units of complex elements to
+	   be in units of real elements. */ \
+	const dim_t       m_r        = row_pref ? m : 2 * m; \
+	const dim_t       n_r        = row_pref ? 2 * n : n; \
+\
 	      ctype_ab    ct[ BLIS_STACK_BUF_MAX_SIZE / sizeof( ctype_ab ) ] \
 	                  __attribute__((aligned(BLIS_STACK_BUF_ALIGN_SIZE))); \
 	      inc_t       rs_ct; \
 	      inc_t       cs_ct; \
 \
-	const ctype_ab* restrict zero_r = PASTEMAC(chab,0); \
+	const ctype_abr* restrict one_r   = PASTEMAC(chabr,1); \
+	const ctype_abr* restrict zero_r  = PASTEMAC(chabr,0); \
+\
+	const ctype_abr* restrict alpha_r = &PASTEMAC(chab,real)( *alpha ); \
+	const ctype_abr* restrict alpha_i = &PASTEMAC(chab,imag)( *alpha ); \
+\
+	const ctype_cr*  restrict beta_r  = &PASTEMAC(chc,real)( *beta ); \
+	const ctype_cr*  restrict beta_i  = &PASTEMAC(chc,imag)( *beta ); \
 \
 	auxinfo_t auxinfo_r = *auxinfo; \
 	bli_auxinfo_set_params( params_r, &auxinfo_r ); \
 \
-	if ( !PASTEMAC(chab,chc,same) ) \
+	if ( !PASTEMAC(chabr,eq0)( *alpha_i ) || \
+	     !PASTEMAC(chcr,eq0)( *beta_i ) || \
+	     !bli_is_preferentially_stored( rs_c, cs_c, row_pref ) || \
+	     !PASTEMAC(chab,chc,same) ) \
 	{ \
 		/* In the atypical cases, we compute the result into temporary
 		   workspace ct and then accumulated it back to c at the end. */ \
 \
 		/* Set the strides of ct based on the preference of the underlying
-		   native real domain gemm micro-kernel. */ \
+		   native real domain gemm micro-kernel. Note that we set the ct
+		   strides in units of complex elements. */ \
 		if ( !row_pref ) { rs_ct = 1;  cs_ct = mr; } \
 		else             { rs_ct = nr; cs_ct = 1; } \
 \
-		/* Complex values of alpha will have already been applied during packing */ \
+		inc_t rs_c_use = rs_ct; \
+		inc_t cs_c_use = cs_ct; \
+\
+		/* Convert the strides from being in units of complex elements to
+		   be in units of real elements. Note that we don't need to check for
+		   general storage here because that case corresponds to the scenario
+		   where we are using the ct buffer and its rs_ct/cs_ct strides. */ \
+		if ( !row_pref ) cs_c_use *= 2; \
+		else             rs_c_use *= 2; \
+\
 		/* c = beta * c + alpha_r * a * b; */ \
 		rgemm_ukr \
 		( \
-		  mr, \
-		  nr, \
-		  2*k, \
-		  alpha, \
+		  mr_r, \
+		  nr_r, \
+		  k, \
+		  one_r, \
 		  a, \
 		  b, \
 		  zero_r, \
-		  ct, rs_ct, cs_ct, \
+		  ct, rs_c_use, cs_c_use, \
 		  &auxinfo_r, \
 		  cntx  \
 		); \
 \
-		PASTEMAC(chab,chc,chc,xpbys_mxn) \
+		PASTEMAC(chab,chab,chc,chc,axpbys_mxn) \
 		( \
 		  m, n, \
+		  alpha, \
 		  ct, rs_ct, cs_ct, \
 		  beta, \
 		  c, rs_c, cs_c \
@@ -109,24 +139,36 @@ void PASTEMAC(chab,chc,opname,arch,suf) \
 	} \
 	else \
 	{ \
-		/* Complex values of alpha will have already been applied during packing */ \
+		/* In the typical cases, we use the real part of beta and
+		   accumulate directly into the output matrix c. */ \
+\
+		inc_t rs_c_use = rs_c; \
+		inc_t cs_c_use = cs_c; \
+\
+		/* Convert the strides from being in units of complex elements to
+		   be in units of real elements. Note that we don't need to check for
+		   general storage here because that case corresponds to the scenario
+		   where we are using the ct buffer and its rs_ct/cs_ct strides. */ \
+		if ( !row_pref ) cs_c_use *= 2; \
+		else             rs_c_use *= 2; \
+\
 		/* c = beta * c + alpha_r * a * b; */ \
 		rgemm_ukr \
 		( \
-		  m, \
-		  n, \
-		  2*k, \
-		  alpha, \
+		  m_r, \
+		  n_r, \
+		  k, \
+		  alpha_r, \
 		  a, \
 		  b, \
-		  beta, \
-		  c, rs_c, cs_c, \
+		  beta_r, \
+		  c, rs_c_use, cs_c_use, \
 		  &auxinfo_r, \
 		  cntx  \
 		); \
 	} \
 }
 
-INSERT_GENTFUNC2RO( gemm_rcc, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX )
-INSERT_GENTFUNC2RO_MIX_P( gemm_rcc, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX )
+INSERT_GENTFUNC2RO( gemm_ccr, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX )
+INSERT_GENTFUNC2RO_MIX_P( gemm_ccr, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX )
 
