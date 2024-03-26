@@ -198,6 +198,7 @@ float sdot_blis_impl
     // Pick the kernel based on the architecture ID
     switch (arch_id)
     {
+        case BLIS_ARCH_ZEN5:
         case BLIS_ARCH_ZEN4:
 #if defined(BLIS_KERNELS_ZEN4)
 
@@ -328,6 +329,7 @@ double ddot_blis_impl
     // Pick the kernel based on the architecture ID
     switch (arch_id_local)
     {
+      case BLIS_ARCH_ZEN5:
       case BLIS_ARCH_ZEN4:
 #if defined(BLIS_KERNELS_ZEN4)
 

@@ -905,15 +905,10 @@ err_t bli_check_valid_model_id( arch_t arch_id, model_t model_id )
 		{
 			e_val = BLIS_SUCCESS;
 		}
-		if ( ( gint_t )model_id >= BLIS_MODEL_GENOA &&
-		     ( gint_t )model_id <= BLIS_MODEL_GENOA_X )
-		{
-			e_val = BLIS_SUCCESS;
-		}
 	}
 	if ( arch_id == BLIS_ARCH_ZEN4 )
 	{
-		if ( ( gint_t )model_id >= BLIS_MODEL_TURIN &&
+		if ( ( gint_t )model_id >= BLIS_MODEL_GENOA &&
 		     ( gint_t )model_id <= BLIS_MODEL_GENOA_X )
 		{
 			e_val = BLIS_SUCCESS;

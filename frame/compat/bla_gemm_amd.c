@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2019 - 2023, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2019 - 2024, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -43,7 +43,7 @@
     #define GEMM_BLIS_IMPL(ch, blasname) \
         PASTEF77S(ch,blasname) ( transa, transb, m, n, k, alpha, a, lda, b, ldb, beta, c, ldc ); \
         arch_t id = bli_arch_query_id(); \
-        if (id == BLIS_ARCH_ZEN4) \
+        if (id == BLIS_ARCH_ZEN5 || id == BLIS_ARCH_ZEN4) \
         { \
             bli_zero_zmm(); \
         } \
@@ -602,8 +602,8 @@ void dgemm_blis_impl
                      c, *ldc
                     );
 	}
-#if defined(BLIS_FAMILY_ZEN4) || defined(BLIS_FAMILY_AMDZEN) || defined(BLIS_FAMILY_X86_64)
-	else if( arch_id == BLIS_ARCH_ZEN4 )
+#if defined(BLIS_FAMILY_ZEN5) || defined(BLIS_FAMILY_ZEN4) || defined(BLIS_FAMILY_AMDZEN) || defined(BLIS_FAMILY_X86_64)
+	else if( arch_id == BLIS_ARCH_ZEN5 || arch_id == BLIS_ARCH_ZEN4 )
 	{
            ret = bli_dgemm_24x8_avx512_k1_nn( m0, n0, k0,
                      (double*)alpha,
@@ -876,7 +876,7 @@ void dgemm_
     dgemm_blis_impl(transa, transb, m, n, k, alpha, a, lda, b, ldb, beta, c, ldc);
 #if defined(BLIS_KERNELS_ZEN4)
     arch_t id = bli_arch_query_id();
-    if (id == BLIS_ARCH_ZEN4)
+    if (id == BLIS_ARCH_ZEN5 || id == BLIS_ARCH_ZEN4)
     {
         bli_zero_zmm();
     }
@@ -1237,7 +1237,7 @@ void zgemm_
     zgemm_blis_impl(transa, transb, m, n, k, alpha, a, lda, b, ldb, beta, c, ldc);
 #if defined(BLIS_KERNELS_ZEN4)
     arch_t id = bli_arch_query_id();
-    if (id == BLIS_ARCH_ZEN4)
+    if (id == BLIS_ARCH_ZEN5 || id == BLIS_ARCH_ZEN4)
     {
         bli_zero_zmm();
     }
@@ -1392,7 +1392,7 @@ void dzgemm_
     dzgemm_blis_impl( transa, transb, m, n, k, alpha, a, lda, b, ldb, beta, c, ldc );
 #if defined(BLIS_KERNELS_ZEN4)
     arch_t id = bli_arch_query_id();
-    if (id == BLIS_ARCH_ZEN4)
+    if (id == BLIS_ARCH_ZEN5 || id == BLIS_ARCH_ZEN4)
     {
         bli_zero_zmm();
     }

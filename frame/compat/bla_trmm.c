@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin.
-   Copyright (C) 2019 - 2023, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2019 - 2024, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -44,7 +44,7 @@
     #define TRMM_BLIS_IMPL(ch, blasname) \
         PASTEF77S(ch,blasname) ( side, uploa, transa, diaga, m, n, alpha, a, lda, b, ldb ); \
         arch_t id = bli_arch_query_id(); \
-        if (id == BLIS_ARCH_ZEN4) \
+        if (id == BLIS_ARCH_ZEN5 || id == BLIS_ARCH_ZEN4) \
         { \
             bli_zero_zmm(); \
         } \

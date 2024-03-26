@@ -187,13 +187,15 @@ arch_t bli_cpuid_query_id( void )
 	{
 		// Check for each AMD configuration that is enabled, check for that
 		// microarchitecture. We check from most recent to most dated.
-#ifdef BLIS_CONFIG_ZEN4
+#ifdef BLIS_CONFIG_ZEN5
 		if ( bli_cpuid_is_zen5( family, model, features ) )
-			return BLIS_ARCH_ZEN4;
-		if ( bli_cpuid_is_zen4( family, model, features ) )
-			return BLIS_ARCH_ZEN4;
+			return BLIS_ARCH_ZEN5;
 		// Fallback test for future AMD processors
 		if ( is_avx512_supported )
+			return BLIS_ARCH_ZEN5;
+#endif
+#ifdef BLIS_CONFIG_ZEN4
+		if ( bli_cpuid_is_zen4( family, model, features ) )
 			return BLIS_ARCH_ZEN4;
 #endif
 #ifdef BLIS_CONFIG_ZEN3
@@ -269,16 +271,8 @@ model_t bli_cpuid_query_model_id( arch_t arch_id )
 
 		vendor = bli_cpuid_query( &family, &model, &features );
 
-		// For now, zen4 code path is also used for zen5 so check
-		// for zen5 models here too.
-		if ( family == 0x19 )
-		{
-			cpuid_model = bli_cpuid_get_zen4_cpuid_model( family, model, features );
-		}
-		else if ( family == 0x1A )
-		{
-			cpuid_model = bli_cpuid_get_zen5_cpuid_model( family, model, features );
-		}
+		// Check CPU model.
+		cpuid_model = bli_cpuid_get_zen4_cpuid_model( family, model, features );
 	}
 #endif
 #ifdef BLIS_CONFIG_ZEN3

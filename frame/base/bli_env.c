@@ -152,7 +152,7 @@ gint_t bli_env_get_var_arch_type( const char* env, gint_t fallback )
 			// AMD
 			else if (strcmp(str, "zen5") == 0)
 			{
-				r_val = BLIS_ARCH_ZEN4;
+				r_val = BLIS_ARCH_ZEN5;
 			}
 			else if (strcmp(str, "zen4") == 0)
 			{
@@ -189,7 +189,7 @@ gint_t bli_env_get_var_arch_type( const char* env, gint_t fallback )
 			}
 			// Some aliases for mapping AMD and Intel ISA
 			// names to a suitable sub-configuration.
-#if defined(BLIS_FAMILY_AMDZEN) || defined(BLIS_FAMILY_X86_64) || defined(BLIS_FAMILY_ZEN4) || defined(BLIS_FAMILY_ZEN3) || defined(BLIS_FAMILY_ZEN2) || defined(BLIS_FAMILY_ZEN)
+#if defined(BLIS_FAMILY_AMDZEN) || defined(BLIS_FAMILY_X86_64) || defined(BLIS_FAMILY_ZEN5) || defined(BLIS_FAMILY_ZEN4) || defined(BLIS_FAMILY_ZEN3) || defined(BLIS_FAMILY_ZEN2) || defined(BLIS_FAMILY_ZEN)
 			else if (strcmp(str, "avx512") == 0)
 			{
 				r_val = BLIS_ARCH_ZEN4;
@@ -201,7 +201,7 @@ gint_t bli_env_get_var_arch_type( const char* env, gint_t fallback )
 				r_val = BLIS_ARCH_SKX;
 			}
 #endif
-#if defined(BLIS_FAMILY_AMDZEN) || defined(BLIS_FAMILY_X86_64) || defined(BLIS_FAMILY_ZEN4) ||defined(BLIS_FAMILY_ZEN3)
+#if defined(BLIS_FAMILY_AMDZEN) || defined(BLIS_FAMILY_X86_64) || defined(BLIS_FAMILY_ZEN5) || defined(BLIS_FAMILY_ZEN4) ||defined(BLIS_FAMILY_ZEN3)
 			else if (strcmp(str, "avx2") == 0)
 			{
 				r_val = BLIS_ARCH_ZEN3;

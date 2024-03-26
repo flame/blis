@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2019 - 2023, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2019 - 2024, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -45,7 +45,7 @@
     #define TRSM_BLIS_IMPL(ch, blasname) \
         PASTEF77S(ch,blasname) ( side, uploa, transa, diaga, m, n, alpha, a, lda, b, ldb ); \
         arch_t id = bli_arch_query_id(); \
-        if (id == BLIS_ARCH_ZEN4) \
+        if (id == BLIS_ARCH_ZEN5 || id == BLIS_ARCH_ZEN4) \
         { \
             bli_zero_zmm(); \
         } \
@@ -814,7 +814,7 @@ void strsm_
     strsm_blis_impl ( side, uploa, transa, diaga, m, n, alpha, a, lda, b, ldb );
 #if defined(BLIS_KERNELS_ZEN4)
     arch_t id = bli_arch_query_id();
-    if (id == BLIS_ARCH_ZEN4)
+    if (id == BLIS_ARCH_ZEN5 || id == BLIS_ARCH_ZEN4)
     {
         bli_zero_zmm();
     }
@@ -1115,6 +1115,7 @@ void dtrsm_blis_impl
         {
             switch(id)
             {
+                case BLIS_ARCH_ZEN5:
                 case BLIS_ARCH_ZEN4:
 #if defined(BLIS_KERNELS_ZEN4)
                     /* For sizes where m and n < 50,avx2 kernels are performing better,
@@ -1144,6 +1145,7 @@ void dtrsm_blis_impl
         {
             switch(id)
             {
+                case BLIS_ARCH_ZEN5:
                 case BLIS_ARCH_ZEN4:
 #if defined(BLIS_KERNELS_ZEN4)
                     ker_ft = bli_trsm_small_mt_AVX512;
@@ -1205,7 +1207,7 @@ void dtrsm_
     dtrsm_blis_impl ( side, uploa, transa, diaga, m, n, alpha, a, lda, b, ldb );
 #if defined(BLIS_KERNELS_ZEN4)
     arch_t id = bli_arch_query_id();
-    if (id == BLIS_ARCH_ZEN4)
+    if (id == BLIS_ARCH_ZEN5 || id == BLIS_ARCH_ZEN4)
     {
         bli_zero_zmm();
     }
@@ -1597,7 +1599,7 @@ void ztrsm_
     ztrsm_blis_impl ( side, uploa, transa, diaga, m, n, alpha, a, lda, b, ldb );
 #if defined(BLIS_KERNELS_ZEN4)
     arch_t id = bli_arch_query_id();
-    if (id == BLIS_ARCH_ZEN4)
+    if (id == BLIS_ARCH_ZEN5 || id == BLIS_ARCH_ZEN4)
     {
         bli_zero_zmm();
     }
@@ -1981,7 +1983,7 @@ void ctrsm_
     ctrsm_blis_impl ( side, uploa, transa, diaga, m, n, alpha, a, lda, b, ldb );
 #if defined(BLIS_KERNELS_ZEN4)
     arch_t id = bli_arch_query_id();
-    if (id == BLIS_ARCH_ZEN4)
+    if (id == BLIS_ARCH_ZEN5 || id == BLIS_ARCH_ZEN4)
     {
         bli_zero_zmm();
     }

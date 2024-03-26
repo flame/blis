@@ -108,9 +108,9 @@ void bli_gks_init( void )
 
 		// AMD architectures
 #ifdef BLIS_CONFIG_ZEN5
-		bli_gks_register_cntx( BLIS_ARCH_ZEN4,        bli_cntx_init_zen4,
-		                                              bli_cntx_init_zen4_ref,
-		                                              bli_cntx_init_zen4_ind );
+		bli_gks_register_cntx( BLIS_ARCH_ZEN5,        bli_cntx_init_zen5,
+		                                              bli_cntx_init_zen5_ref,
+		                                              bli_cntx_init_zen5_ind );
 #endif
 #ifdef BLIS_CONFIG_ZEN4
 		bli_gks_register_cntx( BLIS_ARCH_ZEN4,        bli_cntx_init_zen4,

@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2020 - 2023, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2020 - 2024, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -181,6 +181,7 @@ void sscal_blis_impl
     // Pick the kernel based on the architecture ID
     switch (id)
     {
+      case BLIS_ARCH_ZEN5:
       case BLIS_ARCH_ZEN4:
 #if defined(BLIS_KERNELS_ZEN4)
         scalv_ker_ptr = bli_sscalv_zen_int_avx512;
@@ -279,6 +280,7 @@ void dscal_blis_impl
     // Pick the kernel based on the architecture ID
     switch (arch_id_local)
     {
+      case BLIS_ARCH_ZEN5:
       case BLIS_ARCH_ZEN4:
 #if defined(BLIS_KERNELS_ZEN4)
         scalv_ker_ptr = bli_dscalv_zen_int_avx512;
@@ -439,9 +441,10 @@ void zdscal_blis_impl
     // Pick the kernel based on the architecture ID
     switch (arch_id_local)
     {
+      case BLIS_ARCH_ZEN5:
       case BLIS_ARCH_ZEN4:
 #if defined(BLIS_KERNELS_ZEN4)
-          // AVX2 Kernel
+          // AVX512 Kernel
           scalv_ker_ptr = bli_zdscalv_zen_int_avx512;
           break;
 #endif
@@ -593,6 +596,7 @@ void zscal_blis_impl
     // Pick the kernel based on the architecture ID
     switch (id)
     {
+        case BLIS_ARCH_ZEN5:
         case BLIS_ARCH_ZEN4:
         case BLIS_ARCH_ZEN:
         case BLIS_ARCH_ZEN2:

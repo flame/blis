@@ -45,7 +45,7 @@
     #define HEMM_BLIS_IMPL(ch, blasname) \
         PASTEF77S(ch,blasname) ( side, uploa, m, n, alpha, a, lda, b, ldb, beta, c, ldc ); \
         arch_t id = bli_arch_query_id(); \
-        if (id == BLIS_ARCH_ZEN4) \
+        if (id == BLIS_ARCH_ZEN5 || id == BLIS_ARCH_ZEN4) \
         { \
             bli_zero_zmm(); \
         } \

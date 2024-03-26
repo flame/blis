@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2023, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2023 - 2024, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -47,7 +47,7 @@ static dgemmsup_ker_ft kern_fp[] =
     bli_dgemmsup_rv_haswell_asm_6x8n
 };
 
-#if defined(BLIS_FAMILY_ZEN4) || defined(BLIS_FAMILY_AMDZEN) || defined(BLIS_FAMILY_X86_64)
+#if defined(BLIS_FAMILY_ZEN5) || defined(BLIS_FAMILY_ZEN4) || defined(BLIS_FAMILY_AMDZEN) || defined(BLIS_FAMILY_X86_64)
 static err_t bli_dgemm_tiny_24x8_kernel
      (
         conj_t              conja,
@@ -521,12 +521,13 @@ err_t bli_dgemm_tiny
         (BLIS_ARCH_ZEN == arch_id ||
         BLIS_ARCH_ZEN2 == arch_id ||
         BLIS_ARCH_ZEN3 == arch_id ||
-        BLIS_ARCH_ZEN4 == arch_id)
+        BLIS_ARCH_ZEN4 == arch_id ||
+        BLIS_ARCH_ZEN5 == arch_id)
       )
     {
         bool ret = bli_aocl_enable_instruction_query();
         if((ret == FALSE) ||
-           (arch_id != BLIS_ARCH_ZEN4)
+           (arch_id != BLIS_ARCH_ZEN5 && arch_id != BLIS_ARCH_ZEN4)
           )
         {
                 return bli_dgemm_tiny_6x8_kernel
@@ -545,8 +546,8 @@ err_t bli_dgemm_tiny
                             c, rs_c0, cs_c0
                         );
         }
-#if defined(BLIS_FAMILY_ZEN4) || defined(BLIS_FAMILY_AMDZEN) || defined(BLIS_FAMILY_X86_64)
-        else if(BLIS_ARCH_ZEN4 == arch_id)
+#if defined(BLIS_FAMILY_ZEN5) || defined(BLIS_FAMILY_ZEN4) || defined(BLIS_FAMILY_AMDZEN) || defined(BLIS_FAMILY_X86_64)
+        else if(arch_id == BLIS_ARCH_ZEN5 || arch_id == BLIS_ARCH_ZEN4)
         {
                 return bli_dgemm_tiny_24x8_kernel
                         (
@@ -593,8 +594,8 @@ err_t bli_dgemm_tiny
                         );
             }
         }
-#if defined(BLIS_FAMILY_ZEN4) || defined(BLIS_FAMILY_AMDZEN) || defined(BLIS_FAMILY_X86_64)
-        else if(BLIS_ARCH_ZEN4 == arch_id)
+#if defined(BLIS_FAMILY_ZEN5) || defined(BLIS_FAMILY_ZEN4) || defined(BLIS_FAMILY_AMDZEN) || defined(BLIS_FAMILY_X86_64)
+        else if(BLIS_ARCH_ZEN5 == arch_id || BLIS_ARCH_ZEN4 == arch_id)
         {
             if(((m == n) && (m < 400) && (k < 1000)) ||
             ( (m != n) && (( ((m + n -k) < 1500) &&

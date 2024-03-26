@@ -234,6 +234,9 @@ void bli_arch_set_id( void )
 		#endif
 
 		// AMD microarchitectures.
+		#ifdef BLIS_FAMILY_ZEN5
+		arch_id = BLIS_ARCH_ZEN5;
+		#endif
 		#ifdef BLIS_FAMILY_ZEN4
 		arch_id = BLIS_ARCH_ZEN4;
 		#endif
@@ -410,7 +413,7 @@ void bli_arch_check_id( void )
 #if defined(__x86_64__) || defined(_M_X64) || defined(__i386) || defined(_M_IX86)
 
 				// If AVX2 test fails here we assume either:
-				// 1. Config was either zen, zen2, zen3, zen4, haswell or skx,
+				// 1. Config was either zen, zen2, zen3, zen4, zen5, haswell or skx,
 				//    so there is no fallback code path, hence error checking
 				//    above will fail.
 				// 2. Config was amdzen, intel64 or x86_64, and will have 
@@ -419,6 +422,7 @@ void bli_arch_check_id( void )
 				{
 					switch (req_id)
 					{
+						case BLIS_ARCH_ZEN5:
 						case BLIS_ARCH_ZEN4:
 						case BLIS_ARCH_ZEN3:
 						case BLIS_ARCH_ZEN2:
@@ -434,7 +438,7 @@ void bli_arch_check_id( void )
 					}
 				}
 				// If AVX512 test fails here we assume either:
-				// 1. Config was either zen4 or skx, so there is
+				// 1. Config was either zen5, zen4 or skx, so there is
 				//    no fallback code path, hence error checking
 				//    above will fail.
 				// 2. Config was amdzen, intel64 or x86_64, and will have 
@@ -443,6 +447,12 @@ void bli_arch_check_id( void )
 				{
 					switch (req_id)
 					{
+						case BLIS_ARCH_ZEN5:
+							arch_reset = TRUE;
+							req_id = BLIS_ARCH_ZEN3;
+							model_id = BLIS_MODEL_DEFAULT;
+							continue;
+							break;
 						case BLIS_ARCH_ZEN4:
 							arch_reset = TRUE;
 							req_id = BLIS_ARCH_ZEN3;

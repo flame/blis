@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2021 - 2023, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2021 - 2024, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -575,7 +575,10 @@ void bli_nthreads_optimum(
 		dim_t n = bli_obj_width(c);
 		dim_t k = bli_obj_width_after_trans(a);
 
-		if(bli_arch_query_id() == BLIS_ARCH_ZEN4)
+
+		// Query the architecture ID
+		arch_t id = bli_arch_query_id();
+		if(id == BLIS_ARCH_ZEN5 || id == BLIS_ARCH_ZEN4)
 		{
 			if(n < m)
 			{
@@ -1138,7 +1141,7 @@ void bli_nthreads_optimum(
 				}
 			}
 		}
-		else
+		else // Not BLIS_ARCH_ZEN5 or BLIS_ARCH_ZEN4
 		{
 			if( k >= 128)
 			{
@@ -1601,6 +1604,7 @@ static void aocl_dscalv_dynamic
 	*/
 	switch (arch_id)
 	{
+		case BLIS_ARCH_ZEN5:
 		case BLIS_ARCH_ZEN4:
 		case BLIS_ARCH_ZEN:
 		case BLIS_ARCH_ZEN2:
@@ -1675,6 +1679,7 @@ static void aocl_zdscalv_dynamic
 	*/
 	switch (arch_id)
 	{
+		case BLIS_ARCH_ZEN5:
 		case BLIS_ARCH_ZEN4:
 		case BLIS_ARCH_ZEN:
 		case BLIS_ARCH_ZEN2:
@@ -1744,6 +1749,7 @@ static void aocl_daxpyv_dynamic
 	*/
 	switch (arch_id)
 	{
+		case BLIS_ARCH_ZEN5:
 		case BLIS_ARCH_ZEN4:
 		case BLIS_ARCH_ZEN:
 		case BLIS_ARCH_ZEN2:
@@ -1816,6 +1822,7 @@ static void aocl_ddotv_dynamic
 	*/
 	switch (arch_id)
 	{
+		case BLIS_ARCH_ZEN5:
 		case BLIS_ARCH_ZEN4:
 		case BLIS_ARCH_ZEN:
 		case BLIS_ARCH_ZEN2:

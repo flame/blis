@@ -282,9 +282,15 @@ CNTX_INIT_PROTS( generic )
 #endif
 
 // -- AMD64 architectures --
+//#ifdef BLIS_KERNELS_ZEN5
+//#include "bli_kernels_zen5.h"
+//#endif
 #ifdef BLIS_KERNELS_ZEN4
 #include "bli_kernels_zen4.h"
 #endif
+//#ifdef BLIS_KERNELS_ZEN3
+//#include "bli_kernels_zen3.h"
+//#endif
 #ifdef BLIS_KERNELS_ZEN2
 #include "bli_kernels_zen2.h"
 #endif
