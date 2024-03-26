@@ -151,6 +151,28 @@ BLIS_INLINE void bli_toggle_bool( bool* b )
 #define bli_cctyper  float
 #define bli_zctyper  double
 
+// return whether or not two types are the same
+
+#define bli_sssame 1
+#define bli_sdsame 0
+#define bli_scsame 0
+#define bli_szsame 0
+
+#define bli_dssame 0
+#define bli_ddsame 1
+#define bli_dcsame 0
+#define bli_dzsame 0
+
+#define bli_cssame 0
+#define bli_cdsame 0
+#define bli_ccsame 1
+#define bli_czsame 0
+
+#define bli_zssame 0
+#define bli_zdsame 0
+#define bli_zcsame 0
+#define bli_zzsame 1
+
 
 // return default format specifier for char
 

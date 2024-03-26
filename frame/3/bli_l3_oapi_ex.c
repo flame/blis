@@ -34,15 +34,18 @@
 
 #include "blis.h"
 
+
 //
 // Define object-based interfaces (expert).
 //
 
 // If a sandbox was enabled, we forgo defining bli_gemm_ex() since it will be
 // defined in the sandbox environment.
-#ifndef BLIS_ENABLE_SANDBOX
-
+#ifdef BLIS_ENABLE_SANDBOX
+void PASTEMAC(gemm_def,BLIS_OAPI_EX_SUF)
+#else
 void PASTEMAC(gemm,BLIS_OAPI_EX_SUF)
+#endif
      (
        const obj_t*  alpha,
        const obj_t*  a,
@@ -55,43 +58,22 @@ void PASTEMAC(gemm,BLIS_OAPI_EX_SUF)
 {
 	bli_init_once();
 
-	// If C has a zero dimension, return early.
-	if ( bli_obj_has_zero_dim( c ) ) return;
+	// Check the operands.
+	if ( bli_error_checking_is_enabled() )
+		bli_gemm_check( alpha, a, b, beta, c, cntx );
 
-	// If alpha is zero, or if A or B has a zero dimension, scale C by beta
-	// and return early.
-	if ( bli_obj_equals( alpha, &BLIS_ZERO ) ||
-	     bli_obj_has_zero_dim( a ) ||
-	     bli_obj_has_zero_dim( b ) )
-	{
-		bli_scalm( beta, c );
+	// Check for zero dimensions, alpha == 0, or other conditions which
+	// mean that we don't actually have to perform a full l3 operation.
+	if ( bli_l3_return_early_if_trivial( alpha, a, b, beta, c ) == BLIS_SUCCESS )
 		return;
-	}
 
-	// If the rntm is non-NULL, it may indicate that we should forgo sup
-	// handling altogether.
-	bool enable_sup = TRUE;
-	if ( rntm != NULL ) enable_sup = bli_rntm_l3_sup( rntm );
-
-	if ( enable_sup )
-	{
-		// Execute the small/unpacked oapi handler. If it finds that the problem
-		// does not fall within the thresholds that define "small", or for some
-		// other reason decides not to use the small/unpacked implementation,
-		// the function returns with BLIS_FAILURE, which causes execution to
-		// proceed towards the conventional implementation.
-		err_t result = bli_gemmsup( alpha, a, b, beta, c, cntx, rntm );
-		if ( result == BLIS_SUCCESS )
-		{
-			return;
-		}
-	}
-
-	// Initialize a local runtime with global settings if necessary. Note
-	// that in the case that a runtime is passed in, we make a local copy.
-	rntm_t rntm_l;
-	if ( rntm == NULL ) { bli_rntm_init_from_global( &rntm_l ); }
-	else                { rntm_l = *rntm;                       }
+	// Execute the small/unpacked oapi handler. If it finds that the problem
+	// does not fall within the thresholds that define "small", or for some
+	// other reason decides not to use the small/unpacked implementation,
+	// the function returns with BLIS_FAILURE, which causes execution to
+	// proceed towards the conventional implementation.
+	if ( bli_gemmsup( alpha, a, b, beta, c, cntx, rntm ) == BLIS_SUCCESS )
+		return;
 
 	// Default to using native execution.
 	num_t dt = bli_obj_dt( c );
@@ -115,17 +97,54 @@ void PASTEMAC(gemm,BLIS_OAPI_EX_SUF)
 
 	// If necessary, obtain a valid context from the gks using the induced
 	// method id determined above.
-	if ( cntx == NULL ) cntx = bli_gks_query_ind_cntx( im );
+	if ( cntx == NULL ) cntx = bli_gks_query_cntx();
 
-	// Check the operands.
-	if ( bli_error_checking_is_enabled() )
-		bli_gemm_check( alpha, a, b, beta, c, cntx );
-
-	// Invoke the operation's front-end and request the default control tree.
-	bli_gemm_front( alpha, a, b, beta, c, cntx, &rntm_l );
-}
-
+#if 0
+#ifdef BLIS_ENABLE_SMALL_MATRIX
+	// Only handle small problems separately for homogeneous datatypes.
+	if ( bli_obj_dt( a ) == bli_obj_dt( b ) &&
+	     bli_obj_dt( a ) == bli_obj_dt( c ) &&
+	     bli_obj_comp_prec( c ) == bli_obj_prec( c ) )
+	{
+		err_t status = bli_gemm_small( alpha, a, b, beta, c, cntx, cntl );
+		if ( status == BLIS_SUCCESS ) return;
+	}
 #endif
+#endif
+
+	// Alias A, B, and C in case we need to apply transformations.
+	obj_t a_local;
+	obj_t b_local;
+	obj_t c_local;
+	bli_obj_alias_submatrix( a, &a_local );
+	bli_obj_alias_submatrix( b, &b_local );
+	bli_obj_alias_submatrix( c, &c_local );
+
+	gemm_cntl_t cntl;
+	bli_gemm_cntl_init
+	(
+	  im,
+	  BLIS_GEMM,
+	  alpha,
+	  &a_local,
+	  &b_local,
+	  beta,
+	  &c_local,
+	  cntx,
+	  &cntl
+	);
+
+	// Invoke the internal back-end via the thread handler.
+	bli_l3_thread_decorator
+	(
+	  &a_local,
+	  &b_local,
+	  &c_local,
+	  cntx,
+	  ( cntl_t* )&cntl,
+	  rntm
+	);
+}
 
 
 void PASTEMAC(gemmt,BLIS_OAPI_EX_SUF)
@@ -141,24 +160,14 @@ void PASTEMAC(gemmt,BLIS_OAPI_EX_SUF)
 {
 	bli_init_once();
 
-	// If C has a zero dimension, return early.
-	if ( bli_obj_has_zero_dim( c ) ) return;
+	// Check the operands.
+	if ( bli_error_checking_is_enabled() )
+		bli_gemmt_check( alpha, a, b, beta, c, cntx );
 
-	// If alpha is zero, or if A or B has a zero dimension, scale C by beta
-	// and return early.
-	if ( bli_obj_equals( alpha, &BLIS_ZERO ) ||
-	     bli_obj_has_zero_dim( a ) ||
-	     bli_obj_has_zero_dim( b ) )
-	{
-		bli_scalm( beta, c );
+	// Check for zero dimensions, alpha == 0, or other conditions which
+	// mean that we don't actually have to perform a full l3 operation.
+	if ( bli_l3_return_early_if_trivial( alpha, a, b, beta, c ) == BLIS_SUCCESS )
 		return;
-	}
-
-	// Initialize a local runtime with global settings if necessary. Note
-	// that in the case that a runtime is passed in, we make a local copy.
-	rntm_t rntm_l;
-	if ( rntm == NULL ) { bli_rntm_init_from_global( &rntm_l ); }
-	else                { rntm_l = *rntm;                       }
 
 	// Default to using native execution.
 	num_t dt = bli_obj_dt( c );
@@ -179,14 +188,40 @@ void PASTEMAC(gemmt,BLIS_OAPI_EX_SUF)
 
 	// If necessary, obtain a valid context from the gks using the induced
 	// method id determined above.
-	if ( cntx == NULL ) cntx = bli_gks_query_ind_cntx( im );
+	if ( cntx == NULL ) cntx = bli_gks_query_cntx();
 
-	// Check the operands.
-	if ( bli_error_checking_is_enabled() )
-		bli_gemmt_check( alpha, a, b, beta, c, cntx );
+	// Alias A, B, and C in case we need to apply transformations.
+	obj_t a_local;
+	obj_t b_local;
+	obj_t c_local;
+	bli_obj_alias_submatrix( a, &a_local );
+	bli_obj_alias_submatrix( b, &b_local );
+	bli_obj_alias_submatrix( c, &c_local );
 
-	// Invoke the operation's front-end and request the default control tree.
-	bli_gemmt_front( alpha, a, b, beta, c, cntx, &rntm_l );
+	gemm_cntl_t cntl;
+	bli_gemm_cntl_init
+	(
+	  im,
+	  BLIS_GEMMT,
+	  alpha,
+	  &a_local,
+	  &b_local,
+	  beta,
+	  &c_local,
+	  cntx,
+	  &cntl
+	);
+
+	// Invoke the internal back-end via the thread handler.
+	bli_l3_thread_decorator
+	(
+	  &a_local,
+	  &b_local,
+	  &c_local,
+	  cntx,
+	  ( cntl_t* )&cntl,
+	  rntm
+	);
 }
 
 
@@ -203,24 +238,16 @@ void PASTEMAC(her2k,BLIS_OAPI_EX_SUF)
 {
 	bli_init_once();
 
-	obj_t ah;
-	obj_t bh;
-	obj_t alphah;
-
 	// Check parameters.
 	if ( bli_error_checking_is_enabled() )
 		bli_her2k_check( alpha, a, b, beta, c, cntx );
 
-	bli_obj_alias_to( alpha, &alphah );
-	bli_obj_toggle_conj( &alphah );
-
-	bli_obj_alias_to( a, &ah );
-	bli_obj_toggle_trans( &ah );
-	bli_obj_toggle_conj( &ah );
-
-	bli_obj_alias_to( b, &bh );
-	bli_obj_toggle_trans( &bh );
-	bli_obj_toggle_conj( &bh );
+	obj_t alphah;
+	obj_t ah;
+	obj_t bh;
+	bli_obj_alias_with_conj( BLIS_CONJUGATE, alpha, &alphah );
+	bli_obj_alias_with_trans( BLIS_CONJ_TRANSPOSE, a, &ah );
+	bli_obj_alias_with_trans( BLIS_CONJ_TRANSPOSE, b, &bh );
 
 	// Invoke gemmt twice, using beta only the first time.
 	PASTEMAC(gemmt,BLIS_OAPI_EX_SUF)(   alpha, a, &bh,      beta, c, cntx, rntm );
@@ -249,172 +276,18 @@ void PASTEMAC(syr2k,BLIS_OAPI_EX_SUF)
 {
 	bli_init_once();
 
-	obj_t at;
-	obj_t bt;
-
 	// Check parameters.
 	if ( bli_error_checking_is_enabled() )
 		bli_syr2k_check( alpha, a, b, beta, c, cntx );
 
-	bli_obj_alias_to( b, &bt );
-	bli_obj_toggle_trans( &bt );
-
-	bli_obj_alias_to( a, &at );
-	bli_obj_toggle_trans( &at );
+	obj_t at;
+	obj_t bt;
+	bli_obj_alias_with_trans( BLIS_TRANSPOSE, a, &at );
+	bli_obj_alias_with_trans( BLIS_TRANSPOSE, b, &bt );
 
 	// Invoke gemmt twice, using beta only the first time.
 	PASTEMAC(gemmt,BLIS_OAPI_EX_SUF)( alpha, a, &bt,      beta, c, cntx, rntm );
 	PASTEMAC(gemmt,BLIS_OAPI_EX_SUF)( alpha, b, &at, &BLIS_ONE, c, cntx, rntm );
-}
-
-
-void PASTEMAC(hemm,BLIS_OAPI_EX_SUF)
-     (
-             side_t  side,
-       const obj_t*  alpha,
-       const obj_t*  a,
-       const obj_t*  b,
-       const obj_t*  beta,
-       const obj_t*  c,
-       const cntx_t* cntx,
-       const rntm_t* rntm
-     )
-{
-	bli_init_once();
-
-	// Initialize a local runtime with global settings if necessary. Note
-	// that in the case that a runtime is passed in, we make a local copy.
-	rntm_t rntm_l;
-	if ( rntm == NULL ) { bli_rntm_init_from_global( &rntm_l ); }
-	else                { rntm_l = *rntm;                       }
-
-	// Default to using native execution.
-	num_t dt = bli_obj_dt( c );
-	ind_t im = BLIS_NAT;
-
-	// If all matrix operands are complex and of the same storage datatype, try
-	// to get an induced method (if one is available and enabled).
-	if ( bli_obj_dt( a ) == bli_obj_dt( c ) &&
-	     bli_obj_dt( b ) == bli_obj_dt( c ) &&
-	     bli_obj_is_complex( c ) )
-	{
-		// Find the highest priority induced method that is both enabled and
-		// available for the current operation. (If an induced method is
-		// available but not enabled, or simply unavailable, BLIS_NAT will
-		// be returned here.)
-		im = bli_hemmind_find_avail( dt );
-	}
-
-	// If necessary, obtain a valid context from the gks using the induced
-	// method id determined above.
-	if ( cntx == NULL ) cntx = bli_gks_query_ind_cntx( im );
-
-	// Check the operands.
-	if ( bli_error_checking_is_enabled() )
-		bli_hemm_check( side, alpha, a, b, beta, c, cntx );
-
-	// Invoke the operation's front-end and request the default control tree.
-	bli_hemm_front( side, alpha, a, b, beta, c, cntx, &rntm_l );
-}
-
-
-void PASTEMAC(symm,BLIS_OAPI_EX_SUF)
-     (
-             side_t  side,
-       const obj_t*  alpha,
-       const obj_t*  a,
-       const obj_t*  b,
-       const obj_t*  beta,
-       const obj_t*  c,
-       const cntx_t* cntx,
-       const rntm_t* rntm
-     )
-{
-	bli_init_once();
-
-	// Initialize a local runtime with global settings if necessary. Note
-	// that in the case that a runtime is passed in, we make a local copy.
-	rntm_t rntm_l;
-	if ( rntm == NULL ) { bli_rntm_init_from_global( &rntm_l ); }
-	else                { rntm_l = *rntm;                       }
-
-	// Default to using native execution.
-	num_t dt = bli_obj_dt( c );
-	ind_t im = BLIS_NAT;
-
-	// If all matrix operands are complex and of the same storage datatype, try
-	// to get an induced method (if one is available and enabled).
-	if ( bli_obj_dt( a ) == bli_obj_dt( c ) &&
-	     bli_obj_dt( b ) == bli_obj_dt( c ) &&
-	     bli_obj_is_complex( c ) )
-	{
-		// Find the highest priority induced method that is both enabled and
-		// available for the current operation. (If an induced method is
-		// available but not enabled, or simply unavailable, BLIS_NAT will
-		// be returned here.)
-		im = bli_symmind_find_avail( dt );
-	}
-
-	// If necessary, obtain a valid context from the gks using the induced
-	// method id determined above.
-	if ( cntx == NULL ) cntx = bli_gks_query_ind_cntx( im );
-
-	// Check the operands.
-	if ( bli_error_checking_is_enabled() )
-		bli_symm_check( side, alpha, a, b, beta, c, cntx );
-
-	// Invoke the operation's front-end and request the default control tree.
-	bli_symm_front( side, alpha, a, b, beta, c, cntx, &rntm_l );
-}
-
-
-void PASTEMAC(trmm3,BLIS_OAPI_EX_SUF)
-     (
-             side_t  side,
-       const obj_t*  alpha,
-       const obj_t*  a,
-       const obj_t*  b,
-       const obj_t*  beta,
-       const obj_t*  c,
-       const cntx_t* cntx,
-       const rntm_t* rntm
-     )
-{
-	bli_init_once();
-
-	// Initialize a local runtime with global settings if necessary. Note
-	// that in the case that a runtime is passed in, we make a local copy.
-	rntm_t rntm_l;
-	if ( rntm == NULL ) { bli_rntm_init_from_global( &rntm_l ); }
-	else                { rntm_l = *rntm;                       }
-
-	// Default to using native execution.
-	num_t dt = bli_obj_dt( c );
-	ind_t im = BLIS_NAT;
-
-	// If all matrix operands are complex and of the same storage datatype, try
-	// to get an induced method (if one is available and enabled).
-	if ( bli_obj_dt( a ) == bli_obj_dt( c ) &&
-	     bli_obj_dt( b ) == bli_obj_dt( c ) &&
-	     bli_obj_is_complex( c ) )
-	{
-		// Find the highest priority induced method that is both enabled and
-		// available for the current operation. (If an induced method is
-		// available but not enabled, or simply unavailable, BLIS_NAT will
-		// be returned here.)
-		im = bli_trmm3ind_find_avail( dt );
-	}
-
-	// If necessary, obtain a valid context from the gks using the induced
-	// method id determined above.
-	if ( cntx == NULL ) cntx = bli_gks_query_ind_cntx( im );
-
-	// Check the operands.
-	if ( bli_error_checking_is_enabled() )
-		bli_trmm3_check( side, alpha, a, b, beta, c, cntx );
-
-	// Invoke the operation's front-end and request the default control tree.
-	bli_trmm3_front( side, alpha, a, b, beta, c, cntx, &rntm_l );
 }
 
 
@@ -430,15 +303,12 @@ void PASTEMAC(herk,BLIS_OAPI_EX_SUF)
 {
 	bli_init_once();
 
-	obj_t ah;
-
 	// Check parameters.
 	if ( bli_error_checking_is_enabled() )
 		bli_herk_check( alpha, a, beta, c, cntx );
 
-	bli_obj_alias_to( a, &ah );
-	bli_obj_toggle_trans( &ah );
-	bli_obj_toggle_conj( &ah );
+	obj_t ah;
+	bli_obj_alias_with_trans( BLIS_CONJ_TRANSPOSE, a, &ah );
 
 	PASTEMAC(gemmt,BLIS_OAPI_EX_SUF)( alpha, a, &ah, beta, c, cntx, rntm );
 
@@ -464,16 +334,274 @@ void PASTEMAC(syrk,BLIS_OAPI_EX_SUF)
 {
 	bli_init_once();
 
-	obj_t at;
-
 	// Check parameters.
 	if ( bli_error_checking_is_enabled() )
 		bli_syrk_check( alpha, a, beta, c, cntx );
 
-	bli_obj_alias_to( a, &at );
-	bli_obj_toggle_trans( &at );
+	obj_t at;
+	bli_obj_alias_with_trans( BLIS_TRANSPOSE, a, &at );
 
 	PASTEMAC(gemmt,BLIS_OAPI_EX_SUF)( alpha, a, &at, beta, c, cntx, rntm );
+}
+
+
+void PASTEMAC(hemm,BLIS_OAPI_EX_SUF)
+     (
+             side_t  side,
+       const obj_t*  alpha,
+       const obj_t*  a,
+       const obj_t*  b,
+       const obj_t*  beta,
+       const obj_t*  c,
+       const cntx_t* cntx,
+       const rntm_t* rntm
+     )
+{
+	bli_init_once();
+
+	// Check the operands.
+	if ( bli_error_checking_is_enabled() )
+		bli_hemm_check( side, alpha, a, b, beta, c, cntx );
+
+	// Check for zero dimensions, alpha == 0, or other conditions which
+	// mean that we don't actually have to perform a full l3 operation.
+	if ( bli_l3_return_early_if_trivial( alpha, a, b, beta, c ) == BLIS_SUCCESS )
+		return;
+
+	// Default to using native execution.
+	num_t dt = bli_obj_dt( c );
+	ind_t im = BLIS_NAT;
+
+	// If all matrix operands are complex and of the same storage datatype, try
+	// to get an induced method (if one is available and enabled).
+	if ( bli_obj_dt( a ) == bli_obj_dt( c ) &&
+	     bli_obj_dt( b ) == bli_obj_dt( c ) &&
+	     bli_obj_is_complex( c ) )
+	{
+		// Find the highest priority induced method that is both enabled and
+		// available for the current operation. (If an induced method is
+		// available but not enabled, or simply unavailable, BLIS_NAT will
+		// be returned here.)
+		im = bli_hemmind_find_avail( dt );
+	}
+
+	// If necessary, obtain a valid context from the gks using the induced
+	// method id determined above.
+	if ( cntx == NULL ) cntx = bli_gks_query_cntx();
+
+	// Alias A, B, and C in case we need to apply transformations.
+	obj_t a_local;
+	obj_t b_local;
+	obj_t c_local;
+	bli_obj_alias_submatrix( a, &a_local );
+	bli_obj_alias_submatrix( b, &b_local );
+	bli_obj_alias_submatrix( c, &c_local );
+
+	// If the Hermitian/symmetric matrix A is being multiplied from the right,
+	// swap A and B so that the Hermitian/symmetric matrix will actually be on
+	// the right.
+	if ( bli_is_right( side ) )
+	{
+		bli_obj_swap( &a_local, &b_local );
+	}
+
+	gemm_cntl_t cntl;
+	bli_gemm_cntl_init
+	(
+	  im,
+	  BLIS_HEMM,
+	  alpha,
+	  &a_local,
+	  &b_local,
+	  beta,
+	  &c_local,
+	  cntx,
+	  &cntl
+	);
+
+	// Invoke the internal back-end.
+	bli_l3_thread_decorator
+	(
+	  &a_local,
+	  &b_local,
+	  &c_local,
+	  cntx,
+	  ( cntl_t* )&cntl,
+	  rntm
+	);
+}
+
+
+void PASTEMAC(symm,BLIS_OAPI_EX_SUF)
+     (
+             side_t  side,
+       const obj_t*  alpha,
+       const obj_t*  a,
+       const obj_t*  b,
+       const obj_t*  beta,
+       const obj_t*  c,
+       const cntx_t* cntx,
+       const rntm_t* rntm
+     )
+{
+	bli_init_once();
+
+	// Check the operands.
+	if ( bli_error_checking_is_enabled() )
+		bli_symm_check( side, alpha, a, b, beta, c, cntx );
+
+	// Check for zero dimensions, alpha == 0, or other conditions which
+	// mean that we don't actually have to perform a full l3 operation.
+	if ( bli_l3_return_early_if_trivial( alpha, a, b, beta, c ) == BLIS_SUCCESS )
+		return;
+
+	// Default to using native execution.
+	num_t dt = bli_obj_dt( c );
+	ind_t im = BLIS_NAT;
+
+	// If all matrix operands are complex and of the same storage datatype, try
+	// to get an induced method (if one is available and enabled).
+	if ( bli_obj_dt( a ) == bli_obj_dt( c ) &&
+	     bli_obj_dt( b ) == bli_obj_dt( c ) &&
+	     bli_obj_is_complex( c ) )
+	{
+		// Find the highest priority induced method that is both enabled and
+		// available for the current operation. (If an induced method is
+		// available but not enabled, or simply unavailable, BLIS_NAT will
+		// be returned here.)
+		im = bli_symmind_find_avail( dt );
+	}
+
+	// If necessary, obtain a valid context from the gks using the induced
+	// method id determined above.
+	if ( cntx == NULL ) cntx = bli_gks_query_cntx();
+
+	// Alias A, B, and C in case we need to apply transformations.
+	obj_t a_local;
+	obj_t b_local;
+	obj_t c_local;
+	bli_obj_alias_submatrix( a, &a_local );
+	bli_obj_alias_submatrix( b, &b_local );
+	bli_obj_alias_submatrix( c, &c_local );
+
+	// If the Hermitian/symmetric matrix A is being multiplied from the right,
+	// swap A and B so that the Hermitian/symmetric matrix will actually be on
+	// the right.
+	if ( bli_is_right( side ) )
+	{
+		bli_obj_swap( &a_local, &b_local );
+	}
+
+	gemm_cntl_t cntl;
+	bli_gemm_cntl_init
+	(
+	  im,
+	  BLIS_SYMM,
+	  alpha,
+	  &a_local,
+	  &b_local,
+	  beta,
+	  &c_local,
+	  cntx,
+	  &cntl
+	);
+
+	// Invoke the internal back-end.
+	bli_l3_thread_decorator
+	(
+	  &a_local,
+	  &b_local,
+	  &c_local,
+	  cntx,
+	  ( cntl_t* )&cntl,
+	  rntm
+	);
+}
+
+
+void PASTEMAC(trmm3,BLIS_OAPI_EX_SUF)
+     (
+             side_t  side,
+       const obj_t*  alpha,
+       const obj_t*  a,
+       const obj_t*  b,
+       const obj_t*  beta,
+       const obj_t*  c,
+       const cntx_t* cntx,
+       const rntm_t* rntm
+     )
+{
+	bli_init_once();
+
+	// Check the operands.
+	if ( bli_error_checking_is_enabled() )
+		bli_trmm3_check( side, alpha, a, b, beta, c, cntx );
+
+	// Check for zero dimensions, alpha == 0, or other conditions which
+	// mean that we don't actually have to perform a full l3 operation.
+	if ( bli_l3_return_early_if_trivial( alpha, a, b, beta, c ) == BLIS_SUCCESS )
+		return;
+
+	// Default to using native execution.
+	num_t dt = bli_obj_dt( c );
+	ind_t im = BLIS_NAT;
+
+	// If all matrix operands are complex and of the same storage datatype, try
+	// to get an induced method (if one is available and enabled).
+	if ( bli_obj_dt( a ) == bli_obj_dt( c ) &&
+	     bli_obj_dt( b ) == bli_obj_dt( c ) &&
+	     bli_obj_is_complex( c ) )
+	{
+		// Find the highest priority induced method that is both enabled and
+		// available for the current operation. (If an induced method is
+		// available but not enabled, or simply unavailable, BLIS_NAT will
+		// be returned here.)
+		im = bli_trmm3ind_find_avail( dt );
+	}
+
+	// If necessary, obtain a valid context from the gks using the induced
+	// method id determined above.
+	if ( cntx == NULL ) cntx = bli_gks_query_cntx();
+
+	// Alias A, B, and C so we can tweak the objects if necessary.
+	obj_t a_local;
+	obj_t b_local;
+	obj_t c_local;
+	bli_obj_alias_submatrix( a, &a_local );
+	bli_obj_alias_submatrix( b, &b_local );
+	bli_obj_alias_submatrix( c, &c_local );
+
+	// If A is being multiplied from the right, swap A and B so that
+	// the matrix will actually be on the right.
+	if ( bli_is_right( side ) )
+	{
+		bli_obj_swap( &a_local, &b_local );
+	}
+
+	gemm_cntl_t cntl;
+	bli_gemm_cntl_init
+	(
+	  im,
+	  BLIS_TRMM3,
+	  alpha,
+	  &a_local,
+	  &b_local,
+	  beta,
+	  &c_local,
+	  cntx,
+	  &cntl
+	);
+
+	// Invoke the internal back-end.
+	bli_l3_thread_decorator
+	(
+	  &a_local,
+	  &b_local,
+	  &c_local,
+	  cntx,
+	  ( cntl_t* )&cntl,
+	  rntm
+	);
 }
 
 
@@ -489,11 +617,14 @@ void PASTEMAC(trmm,BLIS_OAPI_EX_SUF)
 {
 	bli_init_once();
 
-	// Initialize a local runtime with global settings if necessary. Note
-	// that in the case that a runtime is passed in, we make a local copy.
-	rntm_t rntm_l;
-	if ( rntm == NULL ) { bli_rntm_init_from_global( &rntm_l ); }
-	else                { rntm_l = *rntm;                       }
+	// Check the operands.
+	if ( bli_error_checking_is_enabled() )
+		bli_trmm_check( side, alpha, a, b, cntx );
+
+	// Check for zero dimensions, alpha == 0, or other conditions which
+	// mean that we don't actually have to perform a full l3 operation.
+	if ( bli_l3_return_early_if_trivial( alpha, a, b, &BLIS_ZERO, b ) == BLIS_SUCCESS )
+		return;
 
 	// Default to using native execution.
 	num_t dt = bli_obj_dt( b );
@@ -513,14 +644,47 @@ void PASTEMAC(trmm,BLIS_OAPI_EX_SUF)
 
 	// If necessary, obtain a valid context from the gks using the induced
 	// method id determined above.
-	if ( cntx == NULL ) cntx = bli_gks_query_ind_cntx( im );
+	if ( cntx == NULL ) cntx = bli_gks_query_cntx();
 
-	// Check the operands.
-	if ( bli_error_checking_is_enabled() )
-		bli_trmm_check( side, alpha, a, b, cntx );
+	// Alias A and B so we can tweak the objects if necessary.
+	obj_t a_local;
+	obj_t b_local;
+	obj_t c_local;
+	bli_obj_alias_submatrix( a, &a_local );
+	bli_obj_alias_submatrix( b, &b_local );
+	bli_obj_alias_submatrix( b, &c_local );
 
-	// Invoke the operation's front-end and request the default control tree.
-	bli_trmm_front( side, alpha, a, b, cntx, &rntm_l );
+	// If A is being multiplied from the right, swap A and B so that
+	// the matrix will actually be on the right.
+	if ( bli_is_right( side ) )
+	{
+		bli_obj_swap( &a_local, &b_local );
+	}
+
+	gemm_cntl_t cntl;
+	bli_gemm_cntl_init
+	(
+	  im,
+	  BLIS_TRMM,
+	  alpha,
+	  &a_local,
+	  &b_local,
+	  &BLIS_ZERO,
+	  &c_local,
+	  cntx,
+	  &cntl
+	);
+
+	// Invoke the internal back-end.
+	bli_l3_thread_decorator
+	(
+	  &a_local,
+	  &b_local,
+	  &c_local,
+	  cntx,
+	  ( cntl_t* )&cntl,
+	  rntm
+	);
 }
 
 
@@ -536,11 +700,14 @@ void PASTEMAC(trsm,BLIS_OAPI_EX_SUF)
 {
 	bli_init_once();
 
-	// Initialize a local runtime with global settings if necessary. Note
-	// that in the case that a runtime is passed in, we make a local copy.
-	rntm_t rntm_l;
-	if ( rntm == NULL ) { bli_rntm_init_from_global( &rntm_l ); }
-	else                { rntm_l = *rntm;                       }
+	// Check the operands.
+	if ( bli_error_checking_is_enabled() )
+		bli_trsm_check( side, alpha, a, b, cntx );
+
+	// Check for zero dimensions, alpha == 0, or other conditions which
+    // mean that we don't actually have to perform a full l3 operation.
+	if ( bli_l3_return_early_if_trivial( alpha, a, b, &BLIS_ZERO, b ) == BLIS_SUCCESS )
+		return;
 
 	// Default to using native execution.
 	num_t dt = bli_obj_dt( b );
@@ -560,12 +727,74 @@ void PASTEMAC(trsm,BLIS_OAPI_EX_SUF)
 
 	// If necessary, obtain a valid context from the gks using the induced
 	// method id determined above.
-	if ( cntx == NULL ) cntx = bli_gks_query_ind_cntx( im );
+	if ( cntx == NULL ) cntx = bli_gks_query_cntx();
 
-	// Check the operands.
-	if ( bli_error_checking_is_enabled() )
-		bli_trsm_check( side, alpha, a, b, cntx );
+#if 0
+#ifdef BLIS_ENABLE_SMALL_MATRIX_TRSM
+	gint_t status = bli_trsm_small( side, alpha, a, b, cntx, cntl );
+	if ( status == BLIS_SUCCESS ) return;
+#endif
+#endif
 
-	// Invoke the operation's front-end and request the default control tree.
-	bli_trsm_front( side, alpha, a, b, cntx, &rntm_l );
+	// Alias A and B so we can tweak the objects if necessary.
+	obj_t a_local;
+	obj_t b_local;
+	obj_t c_local;
+	bli_obj_alias_submatrix( a, &a_local );
+	bli_obj_alias_submatrix( b, &b_local );
+	bli_obj_alias_submatrix( b, &c_local );
+
+#if 1
+
+	// If A is being solved against from the right, transpose all operands
+	// so that we can perform the computation as if A were being solved
+	// from the left.
+	if ( bli_is_right( side ) )
+	{
+		bli_toggle_side( &side );
+		bli_obj_induce_trans( &a_local );
+		bli_obj_induce_trans( &b_local );
+		bli_obj_induce_trans( &c_local );
+	}
+
+#else
+
+	// NOTE: Enabling this code requires that BLIS NOT be configured with
+	// BLIS_RELAX_MCNR_NCMR_CONSTRAINTS defined.
+#ifdef BLIS_RELAX_MCNR_NCMR_CONSTRAINTS
+	#error "BLIS_RELAX_MCNR_NCMR_CONSTRAINTS must not be defined for current trsm_r implementation."
+#endif
+
+	// If A is being solved against from the right, swap A and B so that
+	// the triangular matrix will actually be on the right.
+	if ( bli_is_right( side ) )
+	{
+		bli_obj_swap( &a_local, &b_local );
+	}
+
+#endif
+
+	trsm_cntl_t cntl;
+	bli_trsm_cntl_init
+	(
+	  im,
+	  alpha,
+	  &a_local,
+	  &b_local,
+	  alpha,
+	  &c_local,
+	  cntx,
+	  &cntl
+	);
+
+	// Invoke the internal back-end.
+	bli_l3_thread_decorator
+	(
+	  &a_local,
+	  &b_local,
+	  &c_local,
+	  cntx,
+	  ( cntl_t* )&cntl,
+	  rntm
+	);
 }

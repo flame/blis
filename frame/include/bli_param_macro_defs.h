@@ -569,6 +569,12 @@ BLIS_INLINE bool bli_is_gen_stored( inc_t rs, inc_t cs )
 	         bli_abs( cs ) != 1 );
 }
 
+BLIS_INLINE bool bli_is_preferentially_stored( inc_t rs, inc_t cs, bool row_pref )
+{
+	return ( bli_is_row_stored( rs, cs ) &&  row_pref ) ||
+	       ( bli_is_col_stored( rs, cs ) && !row_pref );
+}
+
 BLIS_INLINE bool bli_is_row_tilted( dim_t m, dim_t n, inc_t rs, inc_t cs )
 {
 	return ( bool )
@@ -1035,20 +1041,6 @@ BLIS_INLINE bool bli_is_packed( pack_t schema )
 	       ( schema & BLIS_PACK_BIT );
 }
 
-BLIS_INLINE bool bli_is_row_packed( pack_t schema )
-{
-	return ( bool )
-	       ( ( schema & BLIS_PACK_RC_BIT ) == ( BLIS_BITVAL_PACKED_UNSPEC ^
-	                                            BLIS_BITVAL_PACKED_ROWS ) );
-}
-
-BLIS_INLINE bool bli_is_col_packed( pack_t schema )
-{
-	return ( bool )
-	       ( ( schema & BLIS_PACK_RC_BIT ) == ( BLIS_BITVAL_PACKED_UNSPEC ^
-	                                            BLIS_BITVAL_PACKED_COLUMNS ) );
-}
-
 BLIS_INLINE bool bli_is_panel_packed( pack_t schema )
 {
 	return ( bool )
@@ -1072,6 +1064,12 @@ BLIS_INLINE bool bli_is_1m_packed( pack_t schema )
 	return ( bool )
 	       ( bli_is_1r_packed( schema ) ||
 	         bli_is_1e_packed( schema ) );
+}
+
+BLIS_INLINE bool bli_is_ro_packed( pack_t schema )
+{
+	return ( bool )
+	       ( ( schema & BLIS_PACK_FORMAT_BITS ) == BLIS_BITVAL_RO );
 }
 
 BLIS_INLINE bool bli_is_nat_packed( pack_t schema )

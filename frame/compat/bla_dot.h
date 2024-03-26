@@ -40,7 +40,7 @@
 #undef  GENTPROTDOT
 #define GENTPROTDOT( ftype, ch, chc, blasname ) \
 \
-BLIS_EXPORT_BLAS ftype PASTEF772(ch,blasname,chc) \
+BLIS_EXPORT_BLAS ftype PASTEF77(ch,blasname,chc) \
      ( \
        const f77_int* n, \
        const ftype*   x, const f77_int* incx, \
@@ -60,7 +60,7 @@ INSERT_GENTPROTDOTC_BLAS( dot )
 #undef  GENTPROTDOT
 #define GENTPROTDOT( ftype, ch, chc, blasname ) \
 \
-BLIS_EXPORT_BLAS void PASTEF772(ch,blasname,chc) \
+BLIS_EXPORT_BLAS void PASTEF77(ch,blasname,chc) \
      ( \
        ftype*         rhop, \
        const f77_int* n, \

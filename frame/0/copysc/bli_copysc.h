@@ -40,7 +40,7 @@
 #undef  GENFRONT
 #define GENFRONT( opname ) \
 \
-BLIS_EXPORT_BLIS void PASTEMAC0(opname) \
+BLIS_EXPORT_BLIS void PASTEMAC(opname) \
      ( \
        const obj_t* chi, \
        const obj_t* psi  \
@@ -55,7 +55,7 @@ GENFRONT( copysc )
 #undef  GENTPROT2
 #define GENTPROT2( ctype_x, ctype_y, chx, chy, varname ) \
 \
-BLIS_EXPORT_BLIS void PASTEMAC2(chx,chy,varname) \
+BLIS_EXPORT_BLIS void PASTEMAC(chx,chy,varname) \
      ( \
              conj_t conjchi, \
        const void*  chi, \

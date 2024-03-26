@@ -37,79 +37,14 @@
 // Prototype the object-based variant interfaces.
 //
 
-#undef  GENPROT
-#define GENPROT( opname ) \
-\
-void PASTECH(bls_,opname) \
-     ( \
-       const obj_t*     alpha, \
-       const obj_t*     a, \
-       const obj_t*     b, \
-       const obj_t*     beta, \
-       const obj_t*     c, \
-       const cntx_t*    cntx, \
-             thrinfo_t* thread  \
+void bls_gemm_bp_var1
+     (
+       const obj_t*     alpha,
+       const obj_t*     a,
+       const obj_t*     b,
+       const obj_t*     beta,
+       const obj_t*     c,
+       const cntx_t*    cntx,
+             thrinfo_t* thread
      );
-
-GENPROT( gemm_bp_var1 )
-
-
-//
-// Prototype the typed variant interfaces.
-//
-
-#undef  GENTPROT
-#define GENTPROT( ctype, ch, varname ) \
-\
-void PASTECH2(bls_,ch,varname) \
-     ( \
-       conj_t           conja, \
-       conj_t           conjb, \
-       dim_t            m, \
-       dim_t            n, \
-       dim_t            k, \
-       void*   restrict alpha, \
-       void*   restrict a, inc_t rs_a, inc_t cs_a, \
-       void*   restrict b, inc_t rs_b, inc_t cs_b, \
-       void*   restrict beta, \
-       void*   restrict c, inc_t rs_c, inc_t cs_c, \
-       cntx_t* restrict cntx, \
-       thrinfo_t* restrict thread  \
-     );
-
-//INSERT_GENTPROT_BASIC( gemm_bp_var1 )
-GENTPROT( float,    s, gemm_bp_var1 )
-GENTPROT( double,   d, gemm_bp_var1 )
-GENTPROT( scomplex, c, gemm_bp_var1 )
-GENTPROT( dcomplex, z, gemm_bp_var1 )
-
-
-//
-// Prototype the typed kernel interfaces.
-//
-
-#undef  GENTPROT
-#define GENTPROT( ctype, ch, varname ) \
-\
-void PASTECH2(bls_,ch,varname) \
-     ( \
-       const dim_t         MR, \
-       const dim_t         NR, \
-       dim_t               mr_cur, \
-       dim_t               nr_cur, \
-       dim_t               k, \
-       ctype*     restrict alpha, \
-       ctype*     restrict a, inc_t rs_a, inc_t cs_a, \
-       ctype*     restrict b, inc_t rs_b, inc_t cs_b, \
-       ctype*     restrict beta, \
-       ctype*     restrict c, inc_t rs_c, inc_t cs_c, \
-       auxinfo_t* restrict aux, \
-       cntx_t*    restrict cntx  \
-     );
-
-//INSERT_GENTPROT_BASIC( gemm_kernel )
-GENTPROT( float,    s, gemm_kernel )
-GENTPROT( double,   d, gemm_kernel )
-GENTPROT( scomplex, c, gemm_kernel )
-GENTPROT( dcomplex, z, gemm_kernel )
 

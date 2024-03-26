@@ -321,7 +321,31 @@ endif
 
 # Define a list of makefile fragments to install.
 FRAGS_TO_INSTALL := $(CONFIG_MK_FILE) \
-                    $(COMMON_MK_FILE)
+                    $(COMMON_MK_FILE) \
+                    $(DIST_PATH)/build/gen-make-frags/gen-make-frag.sh \
+                    $(DIST_PATH)/build/gen-make-frags/fragment.mk \
+                    $(DIST_PATH)/build/gen-make-frags/ignore_list \
+                    $(DIST_PATH)/build/gen-make-frags/special_list \
+                    $(DIST_PATH)/build/gen-make-frags/suffix_list \
+                    $(DIST_PATH)/build/flatten-headers.py \
+                    $(DIST_PATH)/build/mirror-tree.sh \
+                    $(DIST_PATH)/config_registry \
+                    $(DIST_PATH)/build/detect/iset/avx.s \
+                    $(DIST_PATH)/build/detect/iset/avx512dq.s \
+                    $(DIST_PATH)/build/detect/iset/avx512f.s \
+                    $(DIST_PATH)/build/detect/iset/fma3.s \
+                    $(DIST_PATH)/build/detect/iset/fma4.s
+
+# Define a list of plugin makefile fragments to install.
+PLUGIN_FRAGS_TO_INSTALL := $(DIST_PATH)/build/plugin/bli_plugin_init_ref.c \
+                           $(DIST_PATH)/build/plugin/bli_plugin_init_zen3.c \
+                           $(DIST_PATH)/build/plugin/bli_plugin_register.c \
+                           $(DIST_PATH)/build/plugin/my_kernel_1_ref.c \
+                           $(DIST_PATH)/build/plugin/my_kernel_2_ref.c \
+                           $(DIST_PATH)/build/plugin/my_kernel_1_zen3.c \
+                           $(DIST_PATH)/build/plugin/bli_plugin.h.in \
+                           $(DIST_PATH)/build/plugin/config.mk.in \
+                           $(DIST_PATH)/build/plugin/Makefile
 
 PC_IN_FILE  := blis.pc.in
 PC_OUT_FILE := blis.pc
@@ -1085,21 +1109,47 @@ $(foreach h, $(HELP_HEADERS_TO_INSTALL), $(eval $(call make-helper-header-rule,$
 
 install-share: check-env $(MK_SHARE_DIR_INST) $(PC_SHARE_DIR_INST)
 
-$(MK_SHARE_DIR_INST): $(FRAGS_TO_INSTALL) $(CONFIG_MK_FILE)
+$(MK_SHARE_DIR_INST): $(CONFIGURE_FILE) $(FRAGS_TO_INSTALL) $(PLUGIN_FRAGS_TO_INSTALL) $(CONFIG_DIR)/$(CONFIG_NAME)/$(MAKE_DEFS_FILE)
 ifeq ($(ENABLE_VERBOSE),yes)
 	$(MKDIR) $(@)
-	$(INSTALL) -m 0644 $(FRAGS_TO_INSTALL) $(@)
-	$(MKDIR) -p $(@)/$(CONFIG_DIR)/$(CONFIG_NAME)
-	$(INSTALL) -m 0644 $(CONFIG_DIR)/$(CONFIG_NAME)/$(MAKE_DEFS_FILE) \
-	              $(@)/$(CONFIG_DIR)/$(CONFIG_NAME)
+	$(MKDIR) $(@)/plugin
+	$(INSTALL) -m 0755 $(filter %.sh,$(FRAGS_TO_INSTALL)) $(@)
+	$(INSTALL) -m 0644 $(filter-out %.sh,$(FRAGS_TO_INSTALL)) $(@)
+	$(INSTALL) -m 0644 $(PLUGIN_FRAGS_TO_INSTALL) $(@)/plugin
+	$(INSTALL) -m 0755 $(CONFIGURE_FILE) $(@)/configure-plugin
+#	$(MKDIR) -p $(@)/$(CONFIG_DIR)/$(CONFIG_NAME)
+#	$(INSTALL) -m 0644 $(CONFIG_DIR)/$(CONFIG_NAME)/$(MAKE_DEFS_FILE) \
+#	              $(@)/$(CONFIG_DIR)/$(CONFIG_NAME)
+	for THIS_CONFIG in $(FULL_CONFIG_LIST); do \
+		$(MKDIR) -p $(@)/$(CONFIG_DIR)/$$THIS_CONFIG; \
+		$(INSTALL) -m 0644 $(CONFIG_DIR)/$$THIS_CONFIG/$(MAKE_DEFS_FILE) \
+		              $(@)/$(CONFIG_DIR)/$$THIS_CONFIG; \
+		$(INSTALL) -m 0644 $(CONFIG_DIR)/$$THIS_CONFIG/bli_kernel_defs_$$THIS_CONFIG.h \
+		              $(@)/$(CONFIG_DIR)/$$THIS_CONFIG; \
+	done
 else
 	@$(MKDIR) $(@)
+	@$(MKDIR) $(@)/plugin
 	@echo "Installing $(notdir $(FRAGS_TO_INSTALL)) into $(@)/"
-	@$(INSTALL) -m 0644 $(FRAGS_TO_INSTALL) $(@)
-	@$(MKDIR) -p $(@)/$(CONFIG_DIR)/$(CONFIG_NAME)
-	@echo "Installing $(CONFIG_DIR)/$(CONFIG_NAME)/$(MAKE_DEFS_FILE) into $(@)/$(CONFIG_DIR)/$(CONFIG_NAME)"
-	@$(INSTALL) -m 0644 $(CONFIG_DIR)/$(CONFIG_NAME)/$(MAKE_DEFS_FILE) \
-	               $(@)/$(CONFIG_DIR)/$(CONFIG_NAME)/
+	@$(INSTALL) -m 0755 $(filter %.sh,$(FRAGS_TO_INSTALL)) $(@)
+	@$(INSTALL) -m 0644 $(filter-out %.sh,$(FRAGS_TO_INSTALL)) $(@)
+	@echo "Installing $(notdir $(PLUGIN_FRAGS_TO_INSTALL)) into $(@)/plugin/"
+	@$(INSTALL) -m 0644 $(PLUGIN_FRAGS_TO_INSTALL) $(@)/plugin
+	@echo "Installing $(CONFIGURE_FILE) into $(@)/configure-plugin"
+	@$(INSTALL) -m 0755 $(CONFIGURE_FILE) $(@)/configure-plugin
+#	@$(MKDIR) -p $(@)/$(CONFIG_DIR)/$(CONFIG_NAME)#\
+#	@echo "Installing $(CONFIG_DIR)/$(CONFIG_NAME)/$(MAKE_DEFS_FILE) into $(@)/$(CONFIG_DIR)/$(CONFIG_NAME)"
+#	@$(INSTALL) -m 0644 $(CONFIG_DIR)/$(CONFIG_NAME)/$(MAKE_DEFS_FILE) \
+#	               $(@)/$(CONFIG_DIR)/$(CONFIG_NAME)/
+	@for THIS_CONFIG in $(FULL_CONFIG_LIST); do \
+		$(MKDIR) -p $(@)/$(CONFIG_DIR)/$$THIS_CONFIG; \
+		echo "Installing $(CONFIG_DIR)/$$THIS_CONFIG/$(MAKE_DEFS_FILE) into $(@)/$(CONFIG_DIR)/$$THIS_CONFIG"; \
+		$(INSTALL) -m 0644 $(CONFIG_DIR)/$$THIS_CONFIG/$(MAKE_DEFS_FILE) \
+		              $(@)/$(CONFIG_DIR)/$$THIS_CONFIG; \
+		echo "Installing $(CONFIG_DIR)/$$THIS_CONFIG/bli_kernel_defs_$$THIS_CONFIG.h into $(@)/$(CONFIG_DIR)/$$THIS_CONFIG"; \
+		$(INSTALL) -m 0644 $(CONFIG_DIR)/$$THIS_CONFIG/bli_kernel_defs_$$THIS_CONFIG.h \
+		              $(@)/$(CONFIG_DIR)/$$THIS_CONFIG; \
+	done
 endif
 
 $(PC_SHARE_DIR_INST): $(PC_IN_FILE)

@@ -40,29 +40,30 @@ int                            bli_gks_finalize( void );
 
 void                           bli_gks_init_index( void );
 
-const cntx_t*                  bli_gks_lookup_nat_cntx( arch_t id );
-const cntx_t*                  bli_gks_lookup_ind_cntx( arch_t id, ind_t ind );
-const cntx_t* const *          bli_gks_lookup_id( arch_t id );
-void                           bli_gks_register_cntx( arch_t id, void_fp nat_fp, void_fp ref_fp, void_fp ind_fp );
+BLIS_EXPORT_BLIS const cntx_t* bli_gks_lookup_id( arch_t id );
+void                           bli_gks_register_cntx( arch_t id, void_fp nat_fp, void_fp ref_fp );
 
 BLIS_EXPORT_BLIS const cntx_t* bli_gks_query_cntx( void );
-
-BLIS_EXPORT_BLIS const cntx_t* bli_gks_query_nat_cntx( void );
-const cntx_t*                  bli_gks_query_nat_cntx_noinit( void );
-const cntx_t*                  bli_gks_query_nat_cntx_impl( void );
-
-BLIS_EXPORT_BLIS const cntx_t* bli_gks_query_ind_cntx( ind_t ind );
-const cntx_t*                  bli_gks_query_ind_cntx_noinit( ind_t ind );
-const cntx_t*                  bli_gks_query_ind_cntx_impl( ind_t ind );
+const cntx_t*                  bli_gks_query_cntx_noinit( void );
+const cntx_t*                  bli_gks_query_cntx_impl( void );
 
 BLIS_EXPORT_BLIS void          bli_gks_init_ref_cntx( cntx_t* cntx );
 
-bool                           bli_gks_cntx_l3_nat_ukr_is_ref( num_t dt, ukr_t ukr_id, const cntx_t* cntx );
+bool                           bli_gks_cntx_ukr_is_ref( num_t dt, ukr_t ukr_id, const cntx_t* cntx );
+bool                           bli_gks_cntx_ukr2_is_ref( num_t dt1, num_t dt2, ukr_t ukr_id, const cntx_t* cntx );
 
 BLIS_EXPORT_BLIS const char*   bli_gks_l3_ukr_impl_string( ukr_t ukr, ind_t method, num_t dt );
 BLIS_EXPORT_BLIS kimpl_t       bli_gks_l3_ukr_impl_type( ukr_t ukr, ind_t method, num_t dt );
 
 //char*                          bli_gks_l3_ukr_avail_impl_string( ukr_t ukr, num_t dt );
+
+BLIS_EXPORT_BLIS err_t bli_gks_register_blksz( siz_t* bs_id );
+
+BLIS_EXPORT_BLIS err_t bli_gks_register_ukr( siz_t* ukr_id );
+
+BLIS_EXPORT_BLIS err_t bli_gks_register_ukr2( siz_t* ukr_id );
+
+BLIS_EXPORT_BLIS err_t bli_gks_register_ukr_pref( siz_t* ukr_pref_id );
 
 #endif
 

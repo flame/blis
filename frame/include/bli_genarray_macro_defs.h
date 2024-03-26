@@ -69,10 +69,10 @@ static tname PASTECH(opname,_fpa)[BLIS_NUM_FP_TYPES+1] = \
 \
 static tname PASTECH(op,_fpa2)[BLIS_NUM_FP_TYPES][BLIS_NUM_FP_TYPES] = \
 { \
-	{ ( tname )PASTEMAC2(s,s,op), ( tname )PASTEMAC2(s,c,op), ( tname )PASTEMAC2(s,d,op), ( tname )PASTEMAC2(s,z,op) }, \
-	{ ( tname )PASTEMAC2(c,s,op), ( tname )PASTEMAC2(c,c,op), ( tname )PASTEMAC2(c,d,op), ( tname )PASTEMAC2(c,z,op) }, \
-	{ ( tname )PASTEMAC2(d,s,op), ( tname )PASTEMAC2(d,c,op), ( tname )PASTEMAC2(d,d,op), ( tname )PASTEMAC2(d,z,op) }, \
-	{ ( tname )PASTEMAC2(z,s,op), ( tname )PASTEMAC2(z,c,op), ( tname )PASTEMAC2(z,d,op), ( tname )PASTEMAC2(z,z,op) }  \
+	{ ( tname )PASTEMAC(s,s,op), ( tname )PASTEMAC(s,c,op), ( tname )PASTEMAC(s,d,op), ( tname )PASTEMAC(s,z,op) }, \
+	{ ( tname )PASTEMAC(c,s,op), ( tname )PASTEMAC(c,c,op), ( tname )PASTEMAC(c,d,op), ( tname )PASTEMAC(c,z,op) }, \
+	{ ( tname )PASTEMAC(d,s,op), ( tname )PASTEMAC(d,c,op), ( tname )PASTEMAC(d,d,op), ( tname )PASTEMAC(d,z,op) }, \
+	{ ( tname )PASTEMAC(z,s,op), ( tname )PASTEMAC(z,c,op), ( tname )PASTEMAC(z,d,op), ( tname )PASTEMAC(z,z,op) }  \
 }
 
 // -- "Smart" two-operand macro --
@@ -82,10 +82,10 @@ static tname PASTECH(op,_fpa2)[BLIS_NUM_FP_TYPES][BLIS_NUM_FP_TYPES] = \
 \
 arrayname[BLIS_NUM_FP_TYPES][BLIS_NUM_FP_TYPES] = \
 { \
-	{ PASTEMAC2(s,s,op), PASTEMAC2(s,c,op), PASTEMAC2(s,d,op), PASTEMAC2(s,z,op) }, \
-	{ PASTEMAC2(c,s,op), PASTEMAC2(c,c,op), PASTEMAC2(c,d,op), PASTEMAC2(c,z,op) }, \
-	{ PASTEMAC2(d,s,op), PASTEMAC2(d,c,op), PASTEMAC2(d,d,op), PASTEMAC2(d,z,op) }, \
-	{ PASTEMAC2(z,s,op), PASTEMAC2(z,c,op), PASTEMAC2(z,d,op), PASTEMAC2(z,z,op) }  \
+	{ PASTEMAC(s,s,op), PASTEMAC(s,c,op), PASTEMAC(s,d,op), PASTEMAC(s,z,op) }, \
+	{ PASTEMAC(c,s,op), PASTEMAC(c,c,op), PASTEMAC(c,d,op), PASTEMAC(c,z,op) }, \
+	{ PASTEMAC(d,s,op), PASTEMAC(d,c,op), PASTEMAC(d,d,op), PASTEMAC(d,z,op) }, \
+	{ PASTEMAC(z,s,op), PASTEMAC(z,c,op), PASTEMAC(z,d,op), PASTEMAC(z,z,op) }  \
 }
 */
 
@@ -119,10 +119,10 @@ arrayname[BLIS_NUM_FP_TYPES+1] = \
 \
 arrayname[BLIS_NUM_FP_TYPES][BLIS_NUM_FP_TYPES] = \
 { \
-	{ PASTEMAC2(s,s,op), NULL,              PASTEMAC2(s,d,op), NULL,             }, \
-	{ PASTEMAC2(c,s,op), NULL,              PASTEMAC2(c,d,op), NULL,             }, \
-	{ PASTEMAC2(d,s,op), NULL,              PASTEMAC2(d,d,op), NULL,             }, \
-	{ PASTEMAC2(z,s,op), NULL,              PASTEMAC2(z,d,op), NULL,             }  \
+	{ PASTEMAC(s,s,op), NULL,              PASTEMAC(s,d,op), NULL,             }, \
+	{ PASTEMAC(c,s,op), NULL,              PASTEMAC(c,d,op), NULL,             }, \
+	{ PASTEMAC(d,s,op), NULL,              PASTEMAC(d,d,op), NULL,             }, \
+	{ PASTEMAC(z,s,op), NULL,              PASTEMAC(z,d,op), NULL,             }  \
 }
 */
 
@@ -134,10 +134,10 @@ arrayname[BLIS_NUM_FP_TYPES][BLIS_NUM_FP_TYPES] = \
 \
 arrayname[BLIS_NUM_FP_TYPES] = \
 { \
-	PASTECH2(prefix,s,op), \
-	PASTECH2(prefix,c,op), \
-	PASTECH2(prefix,d,op), \
-	PASTECH2(prefix,z,op)  \
+	PASTECH(prefix,s,op), \
+	PASTECH(prefix,c,op), \
+	PASTECH(prefix,d,op), \
+	PASTECH(prefix,z,op)  \
 }
 
 
@@ -149,10 +149,21 @@ arrayname[BLIS_NUM_FP_TYPES] = \
 \
 arrayname[BLIS_NUM_FP_TYPES][BLIS_NUM_FP_TYPES] = \
 { \
-	{ PASTEMAC2(s,s,op), PASTEMAC2(s,c,op), PASTEMAC2(s,d,op), PASTEMAC2(s,z,op) }, \
-	{ PASTEMAC2(c,s,op), PASTEMAC2(c,c,op), PASTEMAC2(c,d,op), PASTEMAC2(c,z,op) }, \
-	{ PASTEMAC2(d,s,op), PASTEMAC2(d,c,op), PASTEMAC2(d,d,op), PASTEMAC2(d,z,op) }, \
-	{ PASTEMAC2(z,s,op), PASTEMAC2(z,c,op), PASTEMAC2(z,d,op), PASTEMAC2(z,z,op) }  \
+	{ PASTEMAC(s,s,op), PASTEMAC(s,c,op), PASTEMAC(s,d,op), PASTEMAC(s,z,op) }, \
+	{ PASTEMAC(c,s,op), PASTEMAC(c,c,op), PASTEMAC(c,d,op), PASTEMAC(c,z,op) }, \
+	{ PASTEMAC(d,s,op), PASTEMAC(d,c,op), PASTEMAC(d,d,op), PASTEMAC(d,z,op) }, \
+	{ PASTEMAC(z,s,op), PASTEMAC(z,c,op), PASTEMAC(z,d,op), PASTEMAC(z,z,op) }  \
+}
+
+
+#define GENARRAY2_MIXP(arrayname,op) \
+\
+arrayname[BLIS_NUM_FP_TYPES][BLIS_NUM_FP_TYPES] = \
+{ \
+	{ PASTEMAC(s,s,op), NULL,              PASTEMAC(s,d,op), NULL,             }, \
+	{ NULL,              PASTEMAC(c,c,op), NULL,              PASTEMAC(c,z,op) }, \
+	{ PASTEMAC(d,s,op), NULL,              PASTEMAC(d,d,op), NULL,             }, \
+	{ NULL,              PASTEMAC(z,c,op), NULL,              PASTEMAC(z,z,op) }  \
 }
 
 
@@ -160,10 +171,10 @@ arrayname[BLIS_NUM_FP_TYPES][BLIS_NUM_FP_TYPES] = \
 \
 arrayname[BLIS_NUM_FP_TYPES][BLIS_NUM_FP_TYPES] = \
 { \
-	{ PASTEMAC2(s,s,op), PASTEMAC2(s,c,op), NULL,              NULL,             }, \
-	{ PASTEMAC2(c,s,op), PASTEMAC2(c,c,op), NULL,              NULL,             }, \
-	{ NULL,              NULL,              PASTEMAC2(d,d,op), PASTEMAC2(d,z,op) }, \
-	{ NULL,              NULL,              PASTEMAC2(z,d,op), PASTEMAC2(z,z,op) }  \
+	{ PASTEMAC(s,s,op), PASTEMAC(s,c,op), NULL,              NULL,             }, \
+	{ PASTEMAC(c,s,op), PASTEMAC(c,c,op), NULL,              NULL,             }, \
+	{ NULL,              NULL,              PASTEMAC(d,d,op), PASTEMAC(d,z,op) }, \
+	{ NULL,              NULL,              PASTEMAC(z,d,op), PASTEMAC(z,z,op) }  \
 }
 
 
@@ -171,10 +182,10 @@ arrayname[BLIS_NUM_FP_TYPES][BLIS_NUM_FP_TYPES] = \
 \
 arrayname[BLIS_NUM_FP_TYPES][BLIS_NUM_FP_TYPES] = \
 { \
-	{ PASTEMAC2(s,s,op), NULL,              NULL,              NULL,             }, \
-	{ NULL,              PASTEMAC2(c,c,op), NULL,              NULL,             }, \
-	{ NULL,              NULL,              PASTEMAC2(d,d,op), NULL,             }, \
-	{ NULL,              NULL,              NULL,              PASTEMAC2(z,z,op) }  \
+	{ PASTEMAC(s,s,op), NULL,              NULL,              NULL,             }, \
+	{ NULL,              PASTEMAC(c,c,op), NULL,              NULL,             }, \
+	{ NULL,              NULL,              PASTEMAC(d,d,op), NULL,             }, \
+	{ NULL,              NULL,              NULL,              PASTEMAC(z,z,op) }  \
 }
 
 
@@ -186,28 +197,28 @@ arrayname[BLIS_NUM_FP_TYPES][BLIS_NUM_FP_TYPES] = \
 arrayname[BLIS_NUM_FP_TYPES][BLIS_NUM_FP_TYPES][BLIS_NUM_FP_TYPES] = \
 { \
 	{ \
-	{ PASTEMAC3(s,s,s,op), PASTEMAC3(s,s,c,op), PASTEMAC3(s,s,d,op), PASTEMAC3(s,s,z,op) }, \
-	{ PASTEMAC3(s,c,s,op), PASTEMAC3(s,c,c,op), PASTEMAC3(s,c,d,op), PASTEMAC3(s,c,z,op) }, \
-	{ PASTEMAC3(s,d,s,op), PASTEMAC3(s,d,c,op), PASTEMAC3(s,d,d,op), PASTEMAC3(s,d,z,op) }, \
-	{ PASTEMAC3(s,z,s,op), PASTEMAC3(s,z,c,op), PASTEMAC3(s,z,d,op), PASTEMAC3(s,z,z,op) }  \
+	{ PASTEMAC(s,s,s,op), PASTEMAC(s,s,c,op), PASTEMAC(s,s,d,op), PASTEMAC(s,s,z,op) }, \
+	{ PASTEMAC(s,c,s,op), PASTEMAC(s,c,c,op), PASTEMAC(s,c,d,op), PASTEMAC(s,c,z,op) }, \
+	{ PASTEMAC(s,d,s,op), PASTEMAC(s,d,c,op), PASTEMAC(s,d,d,op), PASTEMAC(s,d,z,op) }, \
+	{ PASTEMAC(s,z,s,op), PASTEMAC(s,z,c,op), PASTEMAC(s,z,d,op), PASTEMAC(s,z,z,op) }  \
 	}, \
 	{ \
-	{ PASTEMAC3(c,s,s,op), PASTEMAC3(c,s,c,op), PASTEMAC3(c,s,d,op), PASTEMAC3(c,s,z,op) }, \
-	{ PASTEMAC3(c,c,s,op), PASTEMAC3(c,c,c,op), PASTEMAC3(c,c,d,op), PASTEMAC3(c,c,z,op) }, \
-	{ PASTEMAC3(c,d,s,op), PASTEMAC3(c,d,c,op), PASTEMAC3(c,d,d,op), PASTEMAC3(c,d,z,op) }, \
-	{ PASTEMAC3(c,z,s,op), PASTEMAC3(c,z,c,op), PASTEMAC3(c,z,d,op), PASTEMAC3(c,z,z,op) }  \
+	{ PASTEMAC(c,s,s,op), PASTEMAC(c,s,c,op), PASTEMAC(c,s,d,op), PASTEMAC(c,s,z,op) }, \
+	{ PASTEMAC(c,c,s,op), PASTEMAC(c,c,c,op), PASTEMAC(c,c,d,op), PASTEMAC(c,c,z,op) }, \
+	{ PASTEMAC(c,d,s,op), PASTEMAC(c,d,c,op), PASTEMAC(c,d,d,op), PASTEMAC(c,d,z,op) }, \
+	{ PASTEMAC(c,z,s,op), PASTEMAC(c,z,c,op), PASTEMAC(c,z,d,op), PASTEMAC(c,z,z,op) }  \
 	}, \
 	{ \
-	{ PASTEMAC3(d,s,s,op), PASTEMAC3(d,s,c,op), PASTEMAC3(d,s,d,op), PASTEMAC3(d,s,z,op) }, \
-	{ PASTEMAC3(d,c,s,op), PASTEMAC3(d,c,c,op), PASTEMAC3(d,c,d,op), PASTEMAC3(d,c,z,op) }, \
-	{ PASTEMAC3(d,d,s,op), PASTEMAC3(d,d,c,op), PASTEMAC3(d,d,d,op), PASTEMAC3(d,d,z,op) }, \
-	{ PASTEMAC3(d,z,s,op), PASTEMAC3(d,z,c,op), PASTEMAC3(d,z,d,op), PASTEMAC3(d,z,z,op) }  \
+	{ PASTEMAC(d,s,s,op), PASTEMAC(d,s,c,op), PASTEMAC(d,s,d,op), PASTEMAC(d,s,z,op) }, \
+	{ PASTEMAC(d,c,s,op), PASTEMAC(d,c,c,op), PASTEMAC(d,c,d,op), PASTEMAC(d,c,z,op) }, \
+	{ PASTEMAC(d,d,s,op), PASTEMAC(d,d,c,op), PASTEMAC(d,d,d,op), PASTEMAC(d,d,z,op) }, \
+	{ PASTEMAC(d,z,s,op), PASTEMAC(d,z,c,op), PASTEMAC(d,z,d,op), PASTEMAC(d,z,z,op) }  \
 	}, \
 	{ \
-	{ PASTEMAC3(z,s,s,op), PASTEMAC3(z,s,c,op), PASTEMAC3(z,s,d,op), PASTEMAC3(z,s,z,op) }, \
-	{ PASTEMAC3(z,c,s,op), PASTEMAC3(z,c,c,op), PASTEMAC3(z,c,d,op), PASTEMAC3(z,c,z,op) }, \
-	{ PASTEMAC3(z,d,s,op), PASTEMAC3(z,d,c,op), PASTEMAC3(z,d,d,op), PASTEMAC3(z,d,z,op) }, \
-	{ PASTEMAC3(z,z,s,op), PASTEMAC3(z,z,c,op), PASTEMAC3(z,z,d,op), PASTEMAC3(z,z,z,op) }  \
+	{ PASTEMAC(z,s,s,op), PASTEMAC(z,s,c,op), PASTEMAC(z,s,d,op), PASTEMAC(z,s,z,op) }, \
+	{ PASTEMAC(z,c,s,op), PASTEMAC(z,c,c,op), PASTEMAC(z,c,d,op), PASTEMAC(z,c,z,op) }, \
+	{ PASTEMAC(z,d,s,op), PASTEMAC(z,d,c,op), PASTEMAC(z,d,d,op), PASTEMAC(z,d,z,op) }, \
+	{ PASTEMAC(z,z,s,op), PASTEMAC(z,z,c,op), PASTEMAC(z,z,d,op), PASTEMAC(z,z,z,op) }  \
 	} \
 }
 
@@ -217,28 +228,28 @@ arrayname[BLIS_NUM_FP_TYPES][BLIS_NUM_FP_TYPES][BLIS_NUM_FP_TYPES] = \
 arrayname[BLIS_NUM_FP_TYPES][BLIS_NUM_FP_TYPES][BLIS_NUM_FP_TYPES] = \
 { \
 	{ \
-	{ PASTEMAC3(s,s,s,op), PASTEMAC3(s,s,c,op), NULL,                NULL,               }, \
-	{ PASTEMAC3(s,c,s,op), PASTEMAC3(s,c,c,op), NULL,                NULL,               }, \
+	{ PASTEMAC(s,s,s,op), PASTEMAC(s,s,c,op), NULL,                NULL,               }, \
+	{ PASTEMAC(s,c,s,op), PASTEMAC(s,c,c,op), NULL,                NULL,               }, \
 	{ NULL,                NULL,                NULL,                NULL,               }, \
 	{ NULL,                NULL,                NULL,                NULL,               }  \
 	}, \
 	{ \
-	{ PASTEMAC3(c,s,s,op), PASTEMAC3(c,s,c,op), NULL,                NULL,               }, \
-	{ PASTEMAC3(c,c,s,op), PASTEMAC3(c,c,c,op), NULL,                NULL,               }, \
+	{ PASTEMAC(c,s,s,op), PASTEMAC(c,s,c,op), NULL,                NULL,               }, \
+	{ PASTEMAC(c,c,s,op), PASTEMAC(c,c,c,op), NULL,                NULL,               }, \
 	{ NULL,                NULL,                NULL,                NULL,               }, \
 	{ NULL,                NULL,                NULL,                NULL,               }  \
 	}, \
 	{ \
 	{ NULL,                NULL,                NULL,                NULL,               }, \
 	{ NULL,                NULL,                NULL,                NULL,               }, \
-	{ NULL,                NULL,                PASTEMAC3(d,d,d,op), PASTEMAC3(d,d,z,op) }, \
-	{ NULL,                NULL,                PASTEMAC3(d,z,d,op), PASTEMAC3(d,z,z,op) }  \
+	{ NULL,                NULL,                PASTEMAC(d,d,d,op), PASTEMAC(d,d,z,op) }, \
+	{ NULL,                NULL,                PASTEMAC(d,z,d,op), PASTEMAC(d,z,z,op) }  \
 	}, \
 	{ \
 	{ NULL,                NULL,                NULL,                NULL,               }, \
 	{ NULL,                NULL,                NULL,                NULL,               }, \
-	{ NULL,                NULL,                PASTEMAC3(z,d,d,op), PASTEMAC3(z,d,z,op) }, \
-	{ NULL,                NULL,                PASTEMAC3(z,z,d,op), PASTEMAC3(z,z,z,op) }  \
+	{ NULL,                NULL,                PASTEMAC(z,d,d,op), PASTEMAC(z,d,z,op) }, \
+	{ NULL,                NULL,                PASTEMAC(z,z,d,op), PASTEMAC(z,z,z,op) }  \
 	} \
 }
 
@@ -248,28 +259,28 @@ arrayname[BLIS_NUM_FP_TYPES][BLIS_NUM_FP_TYPES][BLIS_NUM_FP_TYPES] = \
 arrayname[BLIS_NUM_FP_TYPES][BLIS_NUM_FP_TYPES][BLIS_NUM_FP_TYPES] = \
 { \
 	{ \
-	{ PASTEMAC3(s,s,s,op), NULL,                NULL,                NULL,               }, \
+	{ PASTEMAC(s,s,s,op), NULL,                NULL,                NULL,               }, \
 	{ NULL,                NULL,                NULL,                NULL,               }, \
 	{ NULL,                NULL,                NULL,                NULL,               }, \
 	{ NULL,                NULL,                NULL,                NULL,               }  \
 	}, \
 	{ \
 	{ NULL,                NULL,                NULL,                NULL,               }, \
-	{ NULL,                PASTEMAC3(c,c,c,op), NULL,                NULL,               }, \
+	{ NULL,                PASTEMAC(c,c,c,op), NULL,                NULL,               }, \
 	{ NULL,                NULL,                NULL,                NULL,               }, \
 	{ NULL,                NULL,                NULL,                NULL,               }  \
 	}, \
 	{ \
 	{ NULL,                NULL,                NULL,                NULL,               }, \
 	{ NULL,                NULL,                NULL,                NULL,               }, \
-	{ NULL,                NULL,                PASTEMAC3(d,d,d,op), NULL,               }, \
+	{ NULL,                NULL,                PASTEMAC(d,d,d,op), NULL,               }, \
 	{ NULL,                NULL,                NULL,                NULL,               }  \
 	}, \
 	{ \
 	{ NULL,                NULL,                NULL,                NULL,               }, \
 	{ NULL,                NULL,                NULL,                NULL,               }, \
 	{ NULL,                NULL,                NULL,                NULL,               }, \
-	{ NULL,                NULL,                NULL,                PASTEMAC3(z,z,z,op) }  \
+	{ NULL,                NULL,                NULL,                PASTEMAC(z,z,z,op) }  \
 	} \
 }
 

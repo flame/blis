@@ -45,31 +45,37 @@ void bli_trmm_ru_ker_var2
              thrinfo_t* thread_par
      )
 {
-	const num_t     dt        = bli_obj_exec_dt( c );
-	const dim_t     dt_size   = bli_dt_size( dt );
+	const num_t  dt_comp   = bli_gemm_var_cntl_comp_dt( cntl );
+	const num_t  dt_a      = bli_obj_dt( a );
+	const num_t  dt_b      = bli_obj_dt( b );
+	const num_t  dt_c      = bli_obj_dt( c );
 
-	      doff_t    diagoffb  = bli_obj_diag_offset( b );
+	const siz_t  dt_a_size = bli_dt_size( dt_a );
+	const siz_t  dt_b_size = bli_dt_size( dt_b );
+	const siz_t  dt_c_size = bli_dt_size( dt_c );
 
-	const pack_t    schema_a  = bli_obj_pack_schema( a );
-	const pack_t    schema_b  = bli_obj_pack_schema( b );
+	      doff_t diagoffb  = bli_obj_diag_offset( b );
 
-	      dim_t     m         = bli_obj_length( c );
-	      dim_t     n         = bli_obj_width( c );
-	      dim_t     k         = bli_obj_width( a );
+	const pack_t schema_a  = bli_obj_pack_schema( a );
+	const pack_t schema_b  = bli_obj_pack_schema( b );
 
-	const void*     buf_a     = bli_obj_buffer_at_off( a );
-	const inc_t     cs_a      = bli_obj_col_stride( a );
-	const dim_t     pd_a      = bli_obj_panel_dim( a );
-	const inc_t     ps_a      = bli_obj_panel_stride( a );
+	      dim_t  m         = bli_obj_length( c );
+	      dim_t  n         = bli_obj_width( c );
+	      dim_t  k         = bli_obj_width( a );
 
-	const void*     buf_b     = bli_obj_buffer_at_off( b );
-	const inc_t     rs_b      = bli_obj_row_stride( b );
-	const dim_t     pd_b      = bli_obj_panel_dim( b );
-	const inc_t     ps_b      = bli_obj_panel_stride( b );
+	const void*  buf_a     = bli_obj_buffer_at_off( a );
+	const inc_t  cs_a      = bli_obj_col_stride( a );
+	const dim_t  pd_a      = bli_obj_panel_dim( a );
+	const inc_t  ps_a      = bli_obj_panel_stride( a );
 
-	      void*     buf_c     = bli_obj_buffer_at_off( c );
-	const inc_t     rs_c      = bli_obj_row_stride( c );
-	const inc_t     cs_c      = bli_obj_col_stride( c );
+	const void*  buf_b     = bli_obj_buffer_at_off( b );
+	const inc_t  rs_b      = bli_obj_row_stride( b );
+	const dim_t  pd_b      = bli_obj_panel_dim( b );
+	const inc_t  ps_b      = bli_obj_panel_stride( b );
+
+	      void*  buf_c     = bli_obj_buffer_at_off( c );
+	const inc_t  rs_c      = bli_obj_row_stride( c );
+	const inc_t  cs_c      = bli_obj_col_stride( c );
 
 	// Detach and multiply the scalars attached to A and B.
 	obj_t scalar_a, scalar_b;
@@ -90,9 +96,10 @@ void bli_trmm_ru_ker_var2
 
 	// Query the context for the micro-kernel address and cast it to its
 	// function pointer type.
-	gemm_ukr_ft gemm_ukr = bli_cntx_get_l3_vir_ukr_dt( dt, BLIS_GEMM_UKR, cntx );
+	gemm_ukr_ft gemm_ukr   = bli_gemm_var_cntl_ukr( cntl );
+	const void* params     = bli_gemm_var_cntl_params( cntl );
 
-	const void* one        = bli_obj_buffer_for_const( dt, &BLIS_ONE );
+	const void* one        = bli_obj_buffer_for_const( dt_comp, &BLIS_ONE );
 	const char* a_cast     = buf_a;
 	const char* b_cast     = buf_b;
 	      char* c_cast     = buf_c;
@@ -134,7 +141,7 @@ void bli_trmm_ru_ker_var2
 	if ( diagoffb > 0 )
 	{
 		n        -= diagoffb;
-		c_cast   += diagoffb * cs_c * dt_size;
+		c_cast   += diagoffb * cs_c * dt_c_size;
 		diagoffb  = 0;
 	}
 
@@ -149,18 +156,18 @@ void bli_trmm_ru_ker_var2
 	// Compute number of primary and leftover components of the m and n
 	// dimensions.
 	const dim_t n_iter = n / NR + ( n % NR ? 1 : 0 );
-    const dim_t n_left = n % NR;
+	const dim_t n_left = n % NR;
 
-    const dim_t m_iter = m / MR + ( m % MR ? 1 : 0 );
-    const dim_t m_left = m % MR;
+	const dim_t m_iter = m / MR + ( m % MR ? 1 : 0 );
+	const dim_t m_left = m % MR;
 
 	// Determine some increments used to step through A, B, and C.
-	const inc_t rstep_a = ps_a * dt_size;
+	const inc_t rstep_a = ps_a * dt_a_size;
 
-	const inc_t cstep_b = ps_b * dt_size;
+	const inc_t cstep_b = ps_b * dt_b_size;
 
-	const inc_t rstep_c = rs_c * MR * dt_size;
-	const inc_t cstep_c = cs_c * NR * dt_size;
+	const inc_t rstep_c = rs_c * MR * dt_c_size;
+	const inc_t cstep_c = cs_c * NR * dt_c_size;
 
 	auxinfo_t aux;
 
@@ -168,15 +175,19 @@ void bli_trmm_ru_ker_var2
 	bli_auxinfo_set_schema_a( schema_a, &aux );
 	bli_auxinfo_set_schema_b( schema_b, &aux );
 
+	// Save the virtual microkernel address and the params.
+	bli_auxinfo_set_ukr( gemm_ukr, &aux );
+	bli_auxinfo_set_params( params, &aux );
+
 	// The 'thread' argument points to the thrinfo_t node for the 2nd (jr)
 	// loop around the microkernel. Here we query the thrinfo_t node for the
 	// 1st (ir) loop around the microkernel.
-	thrinfo_t* thread = bli_thrinfo_sub_node( thread_par );
-	thrinfo_t* caucus = bli_thrinfo_sub_node( thread );
+	thrinfo_t* thread = bli_thrinfo_sub_node( 0, thread_par );
+	thrinfo_t* caucus = bli_thrinfo_sub_node( 0, thread );
 
 	// Query the number of threads and thread ids for each loop.
-	//const dim_t jr_nt  = bli_thrinfo_n_way( thread );
-	//const dim_t jr_tid = bli_thrinfo_work_id( thread );
+	const dim_t jr_nt  = bli_thrinfo_n_way( thread );
+	const dim_t jr_tid = bli_thrinfo_work_id( thread );
 	const dim_t ir_nt  = bli_thrinfo_n_way( caucus );
 	const dim_t ir_tid = bli_thrinfo_work_id( caucus );
 
@@ -245,7 +256,7 @@ void bli_trmm_ru_ker_var2
 			// intersecting micro-panel.
 			inc_t ps_b_cur  = k_b0111 * PACKNR;
 			      ps_b_cur += ( bli_is_odd( ps_b_cur ) ? 1 : 0 );
-			      ps_b_cur *= dt_size;
+			      ps_b_cur *= dt_b_size;
 
 			if ( bli_trmm_my_iter_rr( j, thread ) ) {
 
@@ -257,7 +268,7 @@ void bli_trmm_ru_ker_var2
 				const dim_t m_cur = ( bli_is_not_edge_f( i, m_iter, m_left )
 				                      ? MR : m_left );
 
-				const char* a1_i = a1 + off_b0111 * PACKMR * dt_size;
+				const char* a1_i = a1 + off_b0111 * PACKMR * dt_a_size;
 
 				// Compute the addresses of the next panels of A and B.
 				const char* a2 = a1;
@@ -307,8 +318,8 @@ void bli_trmm_ru_ker_var2
 	// NOTE: The definition of bli_thread_range_slrr() will depend on whether
 	// slab or round-robin partitioning was requested at configure-time.
 	// NOTE: Parallelism in the 1st loop is disabled for now.
-	bli_thread_range_slrr( thread, n_iter_rct, 1, FALSE, &jr_start, &jr_end, &jr_inc );
-	bli_thread_range_slrr( caucus, m_iter,     1, FALSE, &ir_start, &ir_end, &ir_inc );
+	bli_thread_range_slrr( jr_tid, jr_nt, n_iter_rct, 1, FALSE, &jr_start, &jr_end, &jr_inc );
+	bli_thread_range_slrr( ir_tid, ir_nt, m_iter,     1, FALSE, &ir_start, &ir_end, &ir_inc );
 
 	// Advance the start and end iteration offsets for the rectangular region
 	// by the number of iterations used for the triangular region.

@@ -49,7 +49,7 @@ BLIS_EXPORT_BLIS void bli_castnzm
 #undef  GENTPROT2
 #define GENTPROT2( ctype_a, ctype_b, cha, chb, opname ) \
 \
-BLIS_EXPORT_BLIS void PASTEMAC2(cha,chb,opname) \
+BLIS_EXPORT_BLIS void PASTEMAC(cha,chb,opname) \
      ( \
              trans_t transa, \
              dim_t   m, \

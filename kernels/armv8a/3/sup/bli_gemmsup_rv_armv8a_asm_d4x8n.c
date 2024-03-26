@@ -116,7 +116,7 @@ void bli_dgemmsup_rv_armv8a_asm_4x8n
        const void*      b, inc_t rs_b0, inc_t cs_b0,
        const void*      beta,
              void*      c, inc_t rs_c0, inc_t cs_c0,
-             auxinfo_t* data,
+       const auxinfo_t* data,
        const cntx_t*    cntx
      )
 {

@@ -333,12 +333,12 @@ void PASTEMAC(ch,varname)( \
 		{ \
 			ctype* chi1 = x_cast + (i  )*rs_x + (j  )*cs_x; \
 \
-			PASTEMAC2(ch,chr,abval2s)( *chi1, abs_chi1 ); \
-			PASTEMAC2(chr,chr,adds)( abs_chi1, sum ); \
+			PASTEMAC(ch,chr,abval2s)( *chi1, abs_chi1 ); \
+			PASTEMAC(chr,chr,adds)( abs_chi1, sum ); \
 		} \
 	} \
 \
-	PASTEMAC2(chr,chr,copys)( sum, *sum_x_cast ); \
+	PASTEMAC(chr,chr,copys)( sum, *sum_x_cast ); \
 }
 
 INSERT_GENTFUNCR_BASIC( absumm )

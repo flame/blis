@@ -498,7 +498,7 @@ INSERT_GENTFUNC_BASIC( xpbym_unb_var1,  xpbyv,  BLIS_XPBYV_KER )
 #undef  GENTFUNC2
 #define GENTFUNC2( ctype_x, ctype_y, chx, chy, opname ) \
 \
-void PASTEMAC2(chx,chy,opname) \
+void PASTEMAC(chx,chy,opname) \
      ( \
        doff_t   diagoffx, \
        diag_t   diagx, \
@@ -545,7 +545,7 @@ void PASTEMAC2(chx,chy,opname) \
 \
 				for ( dim_t i = 0; i < n_elem; ++i ) \
 				{ \
-					PASTEMAC2(chx,chy,adds)( x1[i], y1[i] ); \
+					PASTEMAC(chx,chy,adds)( x1[i], y1[i] ); \
 				} \
 			} \
 		} \
@@ -563,7 +563,7 @@ void PASTEMAC2(chx,chy,opname) \
 \
 				for ( dim_t i = 0; i < n_elem; ++i ) \
 				{ \
-					PASTEMAC2(chx,chy,adds)( *chi1, *psi1 ); \
+					PASTEMAC(chx,chy,adds)( *chi1, *psi1 ); \
 \
 					chi1 += incx; \
 					psi1 += incy; \
@@ -584,7 +584,7 @@ void PASTEMAC2(chx,chy,opname) \
 \
 				for ( dim_t i = 0; i < n_elem; ++i ) \
 				{ \
-					PASTEMAC3(chx,chy,chy,xpbys)( x1[i], *beta, y1[i] ); \
+					PASTEMAC(chx,chy,chy,xpbys)( x1[i], *beta, y1[i] ); \
 				} \
 			} \
 		} \
@@ -602,7 +602,7 @@ void PASTEMAC2(chx,chy,opname) \
 \
 				for ( dim_t i = 0; i < n_elem; ++i ) \
 				{ \
-					PASTEMAC3(chx,chy,chy,xpbys)( *chi1, *beta, *psi1 ); \
+					PASTEMAC(chx,chy,chy,xpbys)( *chi1, *beta, *psi1 ); \
 \
 					chi1 += incx; \
 					psi1 += incy; \

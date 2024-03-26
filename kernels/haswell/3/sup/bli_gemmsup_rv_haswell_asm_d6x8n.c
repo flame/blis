@@ -93,7 +93,7 @@ void bli_dgemmsup_rv_haswell_asm_6x8n
        const void*      b, inc_t rs_b0, inc_t cs_b0,
        const void*      beta,
              void*      c, inc_t rs_c0, inc_t cs_c0,
-             auxinfo_t* data,
+       const auxinfo_t* data,
        const cntx_t*    cntx
      )
 {
@@ -959,7 +959,7 @@ void bli_dgemmsup_rv_haswell_asm_5x8n
        const void*      b, inc_t rs_b0, inc_t cs_b0,
        const void*      beta,
              void*      c, inc_t rs_c0, inc_t cs_c0,
-             auxinfo_t* data,
+       const auxinfo_t* data,
        const cntx_t*    cntx
      )
 {
@@ -1707,7 +1707,7 @@ void bli_dgemmsup_rv_haswell_asm_4x8n
        const void*      b, inc_t rs_b0, inc_t cs_b0,
        const void*      beta,
              void*      c, inc_t rs_c0, inc_t cs_c0,
-             auxinfo_t* data,
+       const auxinfo_t* data,
        const cntx_t*    cntx
      )
 {
@@ -2355,7 +2355,7 @@ void bli_dgemmsup_rv_haswell_asm_3x8n
        const void*      b, inc_t rs_b0, inc_t cs_b0,
        const void*      beta,
              void*      c, inc_t rs_c0, inc_t cs_c0,
-             auxinfo_t* data,
+       const auxinfo_t* data,
        const cntx_t*    cntx
      )
 {
@@ -3033,7 +3033,7 @@ void bli_dgemmsup_rv_haswell_asm_2x8n
        const void*      b, inc_t rs_b0, inc_t cs_b0,
        const void*      beta,
              void*      c, inc_t rs_c0, inc_t cs_c0,
-             auxinfo_t* data,
+       const auxinfo_t* data,
        const cntx_t*    cntx
      )
 {
@@ -3592,7 +3592,7 @@ void bli_dgemmsup_rv_haswell_asm_1x8n
        const void*      b, inc_t rs_b0, inc_t cs_b0,
        const void*      beta,
              void*      c, inc_t rs_c0, inc_t cs_c0,
-             auxinfo_t* data,
+       const auxinfo_t* data,
        const cntx_t*    cntx
      )
 {

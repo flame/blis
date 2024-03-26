@@ -194,8 +194,8 @@ void bli_gemmsup_ref_var1n
 	// Nudge NC up to a multiple of MR and MC up to a multiple of NR.
 	// NOTE: This is unique to variant 1 (ie: not performed in variant 2)
 	// because MC % MR == 0 and NC % NR == 0 is already enforced at runtime.
-	const dim_t NC  = bli_align_dim_to_mult( NC0, MR );
-	const dim_t MC  = bli_align_dim_to_mult( MC0, NR );
+	const dim_t NC  = bli_align_dim_to_mult( NC0, MR, true );
+	const dim_t MC  = bli_align_dim_to_mult( MC0, NR, true );
 
 	// Query the maximum blocksize for MR, which implies a maximum blocksize
 	// extension for the final iteration.
@@ -234,16 +234,18 @@ void bli_gemmsup_ref_var1n
 	// Determine whether we are using more than one thread.
 	const bool is_mt = ( bli_rntm_calc_num_threads( rntm ) > 1 );
 
-	thrinfo_t* thread_jc = bli_thrinfo_sub_node( thread );
-	thrinfo_t* thread_pc = bli_thrinfo_sub_node( thread_jc );
-	thrinfo_t* thread_pa = bli_thrinfo_sub_node( thread_pc );
-	thrinfo_t* thread_ic = bli_thrinfo_sub_node( thread_pa );
-	thrinfo_t* thread_pb = bli_thrinfo_sub_node( thread_ic );
-	thrinfo_t* thread_jr = bli_thrinfo_sub_node( thread_pb );
+	thrinfo_t* thread_jc = bli_thrinfo_sub_node( 0, thread );
+	thrinfo_t* thread_pc = bli_thrinfo_sub_node( 0, thread_jc );
+	thrinfo_t* thread_pa = bli_thrinfo_sub_node( 0, thread_pc );
+	thrinfo_t* thread_ic = bli_thrinfo_sub_node( 0, thread_pa );
+	thrinfo_t* thread_pb = bli_thrinfo_sub_node( 0, thread_ic );
+	thrinfo_t* thread_jr = bli_thrinfo_sub_node( 0, thread_pb );
 
 	// Compute the JC loop thread range for the current thread.
 	dim_t jc_start, jc_end;
-	bli_thread_range_sub( thread_jc, m, MR, FALSE, &jc_start, &jc_end );
+	dim_t jc_tid = bli_thrinfo_work_id( thread_jc );
+	dim_t jc_nt  = bli_thrinfo_n_way( thread_jc );
+	bli_thread_range_sub( jc_tid, jc_nt, m, MR, FALSE, &jc_start, &jc_end );
 	const dim_t m_local = jc_end - jc_start;
 
 	// Compute number of primary and leftover components of the JC loop.
@@ -296,9 +298,7 @@ void bli_gemmsup_ref_var1n
 			  packa,
 			  BLIS_BUFFER_FOR_B_PANEL, // This algorithm packs matrix A to
 			  stor_id,                 // a "panel of B".
-			  BLIS_NO_TRANSPOSE,
 			  dt,
-			  NC,     KC,       // This "panel of B" is (at most) NC x KC.
 			  nc_cur, kc_cur, MR,
 			  one,
 			  a_pc,   rs_a,      cs_a,
@@ -320,7 +320,9 @@ void bli_gemmsup_ref_var1n
 
 			// Compute the IC loop thread range for the current thread.
 			dim_t ic_start, ic_end;
-			bli_thread_range_sub( thread_ic, n, NR, FALSE, &ic_start, &ic_end );
+			dim_t ic_tid = bli_thrinfo_work_id( thread_ic );
+			dim_t ic_nt  = bli_thrinfo_n_way( thread_ic );
+			bli_thread_range_sub( ic_tid, ic_nt, n, NR, FALSE, &ic_start, &ic_end );
 			const dim_t n_local = ic_end - ic_start;
 
 			// Compute number of primary and leftover components of the IC loop.
@@ -352,9 +354,7 @@ void bli_gemmsup_ref_var1n
 				  packb,
 				  BLIS_BUFFER_FOR_A_BLOCK, // This algorithm packs matrix B to
 				  stor_id,                 // a "block of A".
-				  BLIS_NO_TRANSPOSE,
 				  dt,
-				  MC,     KC,       // This "block of A" is (at most) KC x MC.
 				  mc_cur, kc_cur, NR,
 				  one,
 				  b_ic,   cs_b,      rs_b,
@@ -390,7 +390,9 @@ void bli_gemmsup_ref_var1n
 
 				// Compute the JR loop thread range for the current thread.
 				dim_t jr_start, jr_end;
-				bli_thread_range_sub( thread_jr, jr_iter, 1, FALSE, &jr_start, &jr_end );
+				dim_t jr_tid = bli_thrinfo_work_id( thread_jr );
+				dim_t jr_nt  = bli_thrinfo_n_way( thread_jr );
+				bli_thread_range_sub( jr_tid, jr_nt, jr_iter, 1, FALSE, &jr_start, &jr_end );
 
 				// Loop over the m dimension (NR columns at a time).
 				//for ( dim_t j = 0; j < jr_iter; j += 1 )
@@ -636,16 +638,18 @@ void bli_gemmsup_ref_var2m
 	// Determine whether we are using more than one thread.
 	const bool is_mt = ( bli_rntm_calc_num_threads( rntm ) > 1 );
 
-	thrinfo_t* thread_jc = bli_thrinfo_sub_node( thread );
-	thrinfo_t* thread_pc = bli_thrinfo_sub_node( thread_jc );
-	thrinfo_t* thread_pb = bli_thrinfo_sub_node( thread_pc );
-	thrinfo_t* thread_ic = bli_thrinfo_sub_node( thread_pb );
-	thrinfo_t* thread_pa = bli_thrinfo_sub_node( thread_ic );
-	thrinfo_t* thread_jr = bli_thrinfo_sub_node( thread_pa );
+	thrinfo_t* thread_jc = bli_thrinfo_sub_node( 0, thread );
+	thrinfo_t* thread_pc = bli_thrinfo_sub_node( 0, thread_jc );
+	thrinfo_t* thread_pb = bli_thrinfo_sub_node( 0, thread_pc );
+	thrinfo_t* thread_ic = bli_thrinfo_sub_node( 0, thread_pb );
+	thrinfo_t* thread_pa = bli_thrinfo_sub_node( 0, thread_ic );
+	thrinfo_t* thread_jr = bli_thrinfo_sub_node( 0, thread_pa );
 
 	// Compute the JC loop thread range for the current thread.
 	dim_t jc_start, jc_end;
-	bli_thread_range_sub( thread_jc, n, NR, FALSE, &jc_start, &jc_end );
+	dim_t jc_tid = bli_thrinfo_work_id( thread_jc );
+	dim_t jc_nt  = bli_thrinfo_n_way( thread_jc );
+	bli_thread_range_sub( jc_tid, jc_nt, n, NR, FALSE, &jc_start, &jc_end );
 	const dim_t n_local = jc_end - jc_start;
 
 	// Compute number of primary and leftover components of the JC loop.
@@ -696,9 +700,7 @@ void bli_gemmsup_ref_var2m
 			  packb,
 			  BLIS_BUFFER_FOR_B_PANEL, // This algorithm packs matrix B to
 			  stor_id,                 // a "panel of B."
-			  BLIS_NO_TRANSPOSE,
 			  dt,
-			  NC,     KC,       // This "panel of B" is (at most) KC x NC.
 			  nc_cur, kc_cur, NR,
 			  one,
 			  b_pc,   cs_b,      rs_b,
@@ -720,7 +722,9 @@ void bli_gemmsup_ref_var2m
 
 			// Compute the IC loop thread range for the current thread.
 			dim_t ic_start, ic_end;
-			bli_thread_range_sub( thread_ic, m, MR, FALSE, &ic_start, &ic_end );
+			dim_t ic_tid = bli_thrinfo_work_id( thread_ic );
+			dim_t ic_nt  = bli_thrinfo_n_way( thread_ic );
+			bli_thread_range_sub( ic_tid, ic_nt, m, MR, FALSE, &ic_start, &ic_end );
 			const dim_t m_local = ic_end - ic_start;
 
 			// Compute number of primary and leftover components of the IC loop.
@@ -750,9 +754,7 @@ void bli_gemmsup_ref_var2m
 				  packa,
 				  BLIS_BUFFER_FOR_A_BLOCK, // This algorithm packs matrix A to
 				  stor_id,                 // a "block of A."
-				  BLIS_NO_TRANSPOSE,
 				  dt,
-				  MC,     KC,       // This "block of A" is (at most) MC x KC.
 				  mc_cur, kc_cur, MR,
 				  one,
 				  a_ic,   rs_a,      cs_a,
@@ -788,7 +790,9 @@ void bli_gemmsup_ref_var2m
 
 				// Compute the JR loop thread range for the current thread.
 				dim_t jr_start, jr_end;
-				bli_thread_range_sub( thread_jr, jr_iter, 1, FALSE, &jr_start, &jr_end );
+				dim_t jr_tid = bli_thrinfo_work_id( thread_jr );
+				dim_t jr_nt  = bli_thrinfo_n_way( thread_jr );
+				bli_thread_range_sub( jr_tid, jr_nt, jr_iter, 1, FALSE, &jr_start, &jr_end );
 
 				// Loop over the n dimension (NR columns at a time).
 				//for ( dim_t j = 0; j < jr_iter; j += 1 )

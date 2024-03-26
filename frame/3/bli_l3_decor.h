@@ -36,30 +36,14 @@
 #ifndef BLIS_L3_DECOR_H
 #define BLIS_L3_DECOR_H
 
-// Level-3 internal function type.
-typedef void (*l3int_ft)
-     (
-       const obj_t*     alpha,
-       const obj_t*     a,
-       const obj_t*     b,
-       const obj_t*     beta,
-       const obj_t*     c,
-       const cntx_t*    cntx,
-       const cntl_t*    cntl,
-             thrinfo_t* thread
-     );
-
 // Level-3 thread decorator prototype.
 void bli_l3_thread_decorator
      (
-             l3int_ft func,
-             opid_t   family,
-       const obj_t*   alpha,
        const obj_t*   a,
        const obj_t*   b,
-       const obj_t*   beta,
        const obj_t*   c,
        const cntx_t*  cntx,
+       const cntl_t*  cntl,
        const rntm_t*  rntm
      );
 

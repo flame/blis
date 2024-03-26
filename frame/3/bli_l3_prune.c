@@ -39,32 +39,26 @@ void bli_l3_prune_unref_mparts_m
      (
              obj_t*  a,
        const obj_t*  b,
-             obj_t*  c,
-       const cntl_t* cntl
+             obj_t*  c
      )
 {
-	/* Query the operation family. */
-	opid_t family = bli_cntl_family( cntl );
-
-	if      ( family == BLIS_GEMM )
-	{
-		/* No pruning is necessary for gemm. */
-		return;
-	}
-	else if ( family == BLIS_GEMMT )
+	if ( bli_obj_is_upper_or_lower( c ) )
 	{
 		/* Prune any unreferenced part from the subpartition of C (that would
 		   be encountered from partitioning in the m dimension) and adjust the
 		   subpartition of A accordingly. */
 		bli_prune_unref_mparts( c, BLIS_M, a, BLIS_M );
 	}
-	else if ( family == BLIS_TRMM ||
-	          family == BLIS_TRSM )
+	else if ( bli_obj_is_triangular( a ) )
 	{
 		/* Prune any unreferenced part from the subpartition of A (that would
 		   be encountered from partitioning in the m dimension) and adjust the
 		   subpartition of C accordingly. */
 		bli_prune_unref_mparts( a, BLIS_M, c, BLIS_M );
+	}
+	else
+	{
+		/* No pruning is necessary. */
 	}
 }
 
@@ -72,32 +66,26 @@ void bli_l3_prune_unref_mparts_n
      (
        const obj_t*  a,
              obj_t*  b,
-             obj_t*  c,
-       const cntl_t* cntl
+             obj_t*  c
      )
 {
-	/* Query the operation family. */
-	opid_t family = bli_cntl_family( cntl );
-
-	if      ( family == BLIS_GEMM )
-	{
-		/* No pruning is necessary for gemm. */
-		return;
-	}
-	else if ( family == BLIS_GEMMT )
+	if ( bli_obj_is_upper_or_lower( c ) )
 	{
 		/* Prune any unreferenced part from the subpartition of C (that would
-		   be encountered from partitioning in the m dimension) and adjust the
+		   be encountered from partitioning in the n dimension) and adjust the
 		   subpartition of B accordingly. */
 		bli_prune_unref_mparts( c, BLIS_N, b, BLIS_N );
 	}
-	else if ( family == BLIS_TRMM ||
-	          family == BLIS_TRSM )
+	else if ( bli_obj_is_triangular( b ) )
 	{
 		/* Prune any unreferenced part from the subpartition of B (that would
-		   be encountered from partitioning in the m dimension) and adjust the
+		   be encountered from partitioning in the n dimension) and adjust the
 		   subpartition of C accordingly. */
 		bli_prune_unref_mparts( b, BLIS_N, c, BLIS_N );
+	}
+	else
+	{
+		/* No pruning is necessary. */
 	}
 }
 
@@ -105,35 +93,26 @@ void bli_l3_prune_unref_mparts_k
      (
              obj_t*  a,
              obj_t*  b,
-       const obj_t*  c,
-       const cntl_t* cntl
+       const obj_t*  c
      )
 {
-	/* Query the operation family. */
-	opid_t family = bli_cntl_family( cntl );
-
-	if      ( family == BLIS_GEMM )
-	{
-		/* No pruning is necessary for gemm. */
-		return;
-	}
-	else if ( family == BLIS_GEMMT )
-	{
-		/* No pruning is necessary for gemmt. */
-		return;
-	}
-	else if ( family == BLIS_TRMM ||
-	          family == BLIS_TRSM )
+	if ( bli_obj_is_triangular( a ) )
 	{
 		/* Prune any unreferenced part from the subpartition of A (that would
 		   be encountered from partitioning in the k dimension) and adjust the
 		   subpartition of B accordingly. */
 		bli_prune_unref_mparts( a, BLIS_N, b, BLIS_M );
-
+	}
+	else if ( bli_obj_is_triangular( b ) )
+	{
 		/* Prune any unreferenced part from the subpartition of B (that would
 		   be encountered from partitioning in the k dimension) and adjust the
 		   subpartition of A accordingly. */
 		bli_prune_unref_mparts( b, BLIS_M, a, BLIS_N );
+	}
+	else
+	{
+		/* No pruning is necessary. */
 	}
 }
 

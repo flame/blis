@@ -264,7 +264,7 @@ void bli_dgemm_knc_asm_30x8
        const void*      b,
        const void*      beta,
              void*      c, inc_t rs_c, inc_t cs_c,
-             auxinfo_t* data,
+       const auxinfo_t* data,
        const cntx_t*    cntx
      )
 {

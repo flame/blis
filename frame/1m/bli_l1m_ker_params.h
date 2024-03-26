@@ -58,10 +58,10 @@
              dim_t   panel_len_max, \
              dim_t   panel_dim_off, \
              dim_t   panel_len_off, \
+             dim_t   panel_bcast, \
        const void*   kappa, \
        const void*   c, inc_t incc, inc_t ldc, \
              void*   p,             inc_t ldp, \
-                        inc_t is_p, \
        const void*   params  \
 
 
@@ -72,11 +72,14 @@
              conj_t  conja, \
              pack_t  schema, \
              dim_t   cdim, \
+             dim_t   cdim_max, \
+             dim_t   cdim_bcast, \
              dim_t   n, \
              dim_t   n_max, \
        const void*   kappa, \
        const void*   a, inc_t inca, inc_t lda, \
-             void*   p,             inc_t ldp  \
+             void*   p,             inc_t ldp, \
+       const void*   params  \
 
 
 // unpackm_cxk kernel
@@ -86,10 +89,12 @@
              conj_t  conja, \
              pack_t  schema, \
              dim_t   cdim, \
+             dim_t   cdim_bcast, \
              dim_t   n, \
        const void*   kappa, \
        const void*   p,             inc_t ldp, \
-             void*   a, inc_t inca, inc_t lda  \
+             void*   a, inc_t inca, inc_t lda, \
+       const void*   params  \
 
 
 // packm_cxc_diag kernel
@@ -103,10 +108,13 @@
              pack_t  schema, \
              bool    invdiag, \
              dim_t   cdim, \
+             dim_t   cdim_max, \
+             dim_t   cdim_bcast, \
              dim_t   n_max, \
        const void*   kappa, \
        const void*   a, inc_t inca, inc_t lda, \
-             void*   p,             inc_t ldp  \
+             void*   p,             inc_t ldp, \
+       const void*   params  \
 
 
 #endif

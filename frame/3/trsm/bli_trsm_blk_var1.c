@@ -52,10 +52,10 @@ void bli_trsm_blk_var1
 	bli_obj_alias_to( c, &cp );
 
 	// Determine the direction in which to partition (forwards or backwards).
-	dir_t direct = bli_l3_direct( &ap, b, &cp, cntl );
+	const dir_t direct = bli_part_cntl_direct( cntl );
 
 	// Prune any zero region that exists along the partitioning dimension.
-	bli_l3_prune_unref_mparts_m( &ap, b, &cp, cntl );
+	bli_l3_prune_unref_mparts_m( &ap, b, &cp );
 
 	// Isolate the diagonal block A11 and its corresponding row panel C1.
 	const dim_t kc = bli_obj_width_after_trans( &ap );
@@ -66,13 +66,8 @@ void bli_trsm_blk_var1
 	                        0, kc, &cp, &c1 );
 
 	// All threads iterate over the entire diagonal block A11.
-	thrinfo_t* thread_pre = bli_thrinfo_sub_prenode( thread_par );
+	thrinfo_t* thread_pre = bli_thrinfo_sub_node( 0, thread_par );
 	dim_t my_start = 0, my_end = kc;
-	//bli_thread_range_mdim
-	//(
-	//  direct, thread_pre, &a11, b, &c1, cntl, cntx,
-	//  &my_start, &my_end
-	//);
 
 #ifdef PRINT
 	printf( "bli_trsm_blk_var1(): a11 is %d x %d at offsets (%3d, %3d)\n",
@@ -85,8 +80,9 @@ void bli_trsm_blk_var1
 	dim_t b_alg;
 	for ( dim_t i = my_start; i < my_end; i += b_alg )
 	{
-		b_alg = bli_determine_blocksize( direct, i, my_end, &a11,
-		                                 bli_cntl_bszid( cntl ), cntx );
+		b_alg = bli_determine_blocksize( direct, i, my_end,
+		                                 bli_part_cntl_blksz_alg( cntl ),
+		                                 bli_part_cntl_blksz_max( cntl ) );
 
 		// Acquire partitions for A1 and C1.
 		obj_t a11_1, c1_1;
@@ -104,13 +100,11 @@ void bli_trsm_blk_var1
 		// Perform trsm subproblem.
 		bli_l3_int
 		(
-		  &BLIS_ONE,
 		  &a11_1,
 		  b,
-		  &BLIS_ONE,
 		  &c1_1,
 		  cntx,
-		  bli_cntl_sub_prenode( cntl ),
+		  bli_cntl_sub_node( 0, cntl ),
 		  thread_pre
 		);
 	}
@@ -141,10 +135,13 @@ void bli_trsm_blk_var1
 
 	// Determine the current thread's subpartition range for the gemm
 	// subproblem over Ax1.
-	thrinfo_t* thread = bli_thrinfo_sub_node( thread_par );
+	thrinfo_t* thread = bli_thrinfo_sub_node( 1, thread_par );
 	bli_thread_range_mdim
 	(
-	  direct, thread, &ax1, b, &cx1, cntl, cntx,
+	  direct,
+	  bli_part_cntl_blksz_mult( cntl ),
+	  bli_part_cntl_use_weighted( cntl ),
+	  thread, &ax1, b, &cx1,
 	  &my_start, &my_end
 	);
 
@@ -156,8 +153,9 @@ void bli_trsm_blk_var1
 	for ( dim_t i = my_start; i < my_end; i += b_alg )
 	{
 		// Determine the current algorithmic blocksize.
-		b_alg = bli_determine_blocksize( direct, i, my_end, &ax1,
-		                                 bli_cntl_bszid( cntl ), cntx );
+		b_alg = bli_determine_blocksize( direct, i, my_end,
+		                                 bli_part_cntl_blksz_alg( cntl ),
+		                                 bli_part_cntl_blksz_max( cntl ) );
 
 		// Acquire partitions for A1 and C1.
 		obj_t a11, c1;
@@ -176,13 +174,11 @@ void bli_trsm_blk_var1
 		// function as before, since we're calling the same macrokernel.)
 		bli_l3_int
 		(
-		  &BLIS_ONE,
 		  &a11,
 		  b,
-		  &BLIS_ONE,
 		  &c1,
 		  cntx,
-		  bli_cntl_sub_node( cntl ),
+		  bli_cntl_sub_node( 1, cntl ),
 		  thread
 		);
 	}

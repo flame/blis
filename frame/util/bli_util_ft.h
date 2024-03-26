@@ -42,7 +42,7 @@
 #undef  GENTDEFR
 #define GENTDEFR( ctype, ctype_r, ch, chr, opname, tsuf ) \
 \
-typedef void (*PASTECH3(ch,opname,EX_SUF,tsuf)) \
+typedef void (*PASTECH(ch,opname,EX_SUF,tsuf)) \
      ( \
              dim_t    n, \
        const ctype*   x, inc_t incx, \
@@ -57,7 +57,7 @@ INSERT_GENTDEFR( asumv )
 #undef  GENTDEF
 #define GENTDEF( ctype, ch, opname, tsuf ) \
 \
-typedef void (*PASTECH3(ch,opname,EX_SUF,tsuf)) \
+typedef void (*PASTECH(ch,opname,EX_SUF,tsuf)) \
      ( \
        uplo_t  uploa, \
        dim_t   m, \
@@ -74,7 +74,7 @@ INSERT_GENTDEF( mktrim )
 #undef  GENTDEFR
 #define GENTDEFR( ctype, ctype_r, ch, chr, opname, tsuf ) \
 \
-typedef void (*PASTECH3(ch,opname,EX_SUF,tsuf)) \
+typedef void (*PASTECH(ch,opname,EX_SUF,tsuf)) \
      ( \
              dim_t    n, \
        const ctype*   x, inc_t incx, \
@@ -91,7 +91,7 @@ INSERT_GENTDEFR( normiv )
 #undef  GENTDEFR
 #define GENTDEFR( ctype, ctype_r, ch, chr, opname, tsuf ) \
 \
-typedef void (*PASTECH3(ch,opname,EX_SUF,tsuf)) \
+typedef void (*PASTECH(ch,opname,EX_SUF,tsuf)) \
      ( \
              doff_t   diagoffx, \
              diag_t   diagx, \
@@ -112,7 +112,7 @@ INSERT_GENTDEFR( normim )
 #undef  GENTDEF
 #define GENTDEF( ctype, ch, opname, tsuf ) \
 \
-typedef void (*PASTECH3(ch,opname,EX_SUF,tsuf)) \
+typedef void (*PASTECH(ch,opname,EX_SUF,tsuf)) \
      ( \
              FILE*  file, \
        const char*  s1, \
@@ -129,7 +129,7 @@ INSERT_GENTDEF( fprintv )
 #undef  GENTDEF
 #define GENTDEF( ctype, ch, opname, tsuf ) \
 \
-typedef void (*PASTECH3(ch,opname,EX_SUF,tsuf)) \
+typedef void (*PASTECH(ch,opname,EX_SUF,tsuf)) \
      ( \
              FILE*  file, \
        const char*  s1, \
@@ -147,7 +147,7 @@ INSERT_GENTDEF( fprintm )
 #undef  GENTDEF
 #define GENTDEF( ctype, ch, opname, tsuf ) \
 \
-typedef void (*PASTECH3(ch,opname,EX_SUF,tsuf)) \
+typedef void (*PASTECH(ch,opname,EX_SUF,tsuf)) \
      ( \
        dim_t   n, \
        ctype*  x, inc_t incx  \
@@ -162,7 +162,7 @@ INSERT_GENTDEF( randnv )
 #undef  GENTDEF
 #define GENTDEF( ctype, ch, opname, tsuf ) \
 \
-typedef void (*PASTECH3(ch,opname,EX_SUF,tsuf)) \
+typedef void (*PASTECH(ch,opname,EX_SUF,tsuf)) \
      ( \
        doff_t  diagoffx, \
        uplo_t  uplox, \
@@ -180,7 +180,7 @@ INSERT_GENTDEF( randnm )
 #undef  GENTDEFR
 #define GENTDEFR( ctype, ctype_r, ch, chr, opname, tsuf ) \
 \
-typedef void (*PASTECH3(ch,opname,EX_SUF,tsuf)) \
+typedef void (*PASTECH(ch,opname,EX_SUF,tsuf)) \
      ( \
              dim_t    n, \
        const ctype*   x, inc_t incx, \
@@ -202,7 +202,7 @@ INSERT_GENTDEFR( sumsqv )
 #undef  GENTDEF
 #define GENTDEF( ctype, ch, opname, tsuf ) \
 \
-typedef void (*PASTECH2(ch,opname,tsuf)) \
+typedef void (*PASTECH(ch,opname,tsuf)) \
      ( \
              conj_t conjchi, \
        const ctype* chi, \
@@ -217,7 +217,7 @@ INSERT_GENTDEF( eqsc )
 #undef  GENTDEF
 #define GENTDEF( ctype, ch, opname, tsuf ) \
 \
-typedef void (*PASTECH2(ch,opname,tsuf)) \
+typedef void (*PASTECH(ch,opname,tsuf)) \
      ( \
              conj_t conjx, \
              dim_t  n, \
@@ -233,7 +233,7 @@ INSERT_GENTDEF( eqv )
 #undef  GENTDEF
 #define GENTDEF( ctype, ch, opname, tsuf ) \
 \
-typedef void (*PASTECH2(ch,opname,tsuf)) \
+typedef void (*PASTECH(ch,opname,tsuf)) \
      ( \
              doff_t  diagoffx, \
              diag_t  diagx, \
@@ -253,7 +253,7 @@ INSERT_GENTDEF( eqm )
 #undef  GENTDEF
 #define GENTDEF( ctype, ch, opname, tsuf ) \
 \
-typedef void (*PASTECH2(ch,opname,tsuf)) \
+typedef void (*PASTECH(ch,opname,tsuf)) \
      ( \
        const ctype* chi, \
        const ctype* psi, \

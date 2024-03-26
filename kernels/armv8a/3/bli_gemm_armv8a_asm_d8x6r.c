@@ -44,15 +44,15 @@
 
 /* Order of row-major SGEMM_12x8's execution in 4x5 blocks:
  *
- * +---+ +---+ 
- * | 0 | | 1 | 
- * +---+ +---+ 
- * +---+ +---+ 
- * | 2 | | 3 | 
- * +---+ +---+ 
- * +---+ +---+ 
- * | 4 | | 5 | 
- * +---+ +---+ 
+ * +---+ +---+
+ * | 0 | | 1 |
+ * +---+ +---+
+ * +---+ +---+
+ * | 2 | | 3 |
+ * +---+ +---+
+ * +---+ +---+
+ * | 4 | | 5 |
+ * +---+ +---+
  */
 #define SGEMM_12X8_MKER_LOOP_PLAIN(C00,C01,C10,C11,C20,C21,C30,C31,C40,C41,C50,C51,C60,C61,C70,C71,C80,C81,C90,C91,CA0,CA1,CB0,CB1,A0,A1,A2,B0,B1,AADDR,ASHIFT,BADDR,BSHIFT,LOADNEXT) \
   SGEMM_4X4_NANOKERNEL(C00,C10,C20,C30,B0,A0) \
@@ -142,7 +142,7 @@ void bli_sgemm_armv8a_asm_12x8r
        const void*      b,
        const void*      beta,
              void*      c, inc_t rs_c0, inc_t cs_c0,
-             auxinfo_t* data,
+       const auxinfo_t* data,
        const cntx_t*    cntx
      )
 {
@@ -387,7 +387,7 @@ void bli_dgemm_armv8a_asm_8x6r
        const void*      b,
        const void*      beta,
              void*      c, inc_t rs_c0, inc_t cs_c0,
-             auxinfo_t* data,
+       const auxinfo_t* data,
        const cntx_t*    cntx
      )
 {

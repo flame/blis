@@ -89,7 +89,7 @@ void PASTEF77(ch,blasname) \
 	const inc_t cs_a = *lda; \
 \
 	/* Call BLIS interface. */ \
-	PASTEMAC2(ch,blisname,BLIS_TAPI_EX_SUF) \
+	PASTEMAC(ch,blisname,BLIS_TAPI_EX_SUF) \
 	( \
 	  blis_uploa, \
 	  BLIS_NO_CONJUGATE, \

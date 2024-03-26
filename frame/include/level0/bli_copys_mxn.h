@@ -49,7 +49,7 @@
 #undef  GENTFUNC2
 #define GENTFUNC2( ctypex, ctypey, chx, chy, opname, kername ) \
 \
-BLIS_INLINE void PASTEMAC2(chx,chy,opname) \
+BLIS_INLINE void PASTEMAC(chx,chy,opname) \
      ( \
        const dim_t   m, \
        const dim_t   n, \
@@ -61,21 +61,21 @@ BLIS_INLINE void PASTEMAC2(chx,chy,opname) \
 	{ \
 		for ( dim_t jj = 0; jj < n; ++jj ) \
 		for ( dim_t ii = 0; ii < m; ++ii ) \
-		PASTEMAC2(chx,chy,kername)( *(x + ii + jj*cs_x), \
+		PASTEMAC(chx,chy,kername)( *(x + ii + jj*cs_x), \
 		                            *(y + ii + jj*cs_y) ); \
 	} \
 	else if ( BLIS_ENABLE_CR_CASES && cs_x == 1 && cs_y == 1 ) \
 	{ \
 		for ( dim_t ii = 0; ii < m; ++ii ) \
 		for ( dim_t jj = 0; jj < n; ++jj ) \
-		PASTEMAC2(chx,chy,kername)( *(x + ii*rs_x + jj), \
+		PASTEMAC(chx,chy,kername)( *(x + ii*rs_x + jj), \
 		                            *(y + ii*rs_y + jj) ); \
 	} \
 	else \
 	{ \
 		for ( dim_t jj = 0; jj < n; ++jj ) \
 		for ( dim_t ii = 0; ii < m; ++ii ) \
-		PASTEMAC2(chx,chy,kername)( *(x + ii*rs_x + jj*cs_x), \
+		PASTEMAC(chx,chy,kername)( *(x + ii*rs_x + jj*cs_x), \
 		                            *(y + ii*rs_y + jj*cs_y) ); \
 	} \
 }
@@ -97,7 +97,7 @@ BLIS_INLINE void PASTEMAC(ch,opname) \
              ctype* y, inc_t rs_y, inc_t cs_y  \
      ) \
 { \
-	PASTEMAC2(ch,ch,opname)( m, n, x, rs_x, cs_x, y, rs_y, cs_y ); \
+	PASTEMAC(ch,ch,opname)( m, n, x, rs_x, cs_x, y, rs_y, cs_y ); \
 }
 
 INSERT_GENTFUNC_BASIC( copys_mxn )

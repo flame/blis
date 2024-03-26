@@ -42,7 +42,7 @@
 #undef  GENTDEF
 #define GENTDEF( ctype, ch, opname, tsuf ) \
 \
-typedef void (*PASTECH3(ch,opname,EX_SUF,tsuf)) \
+typedef void (*PASTECH(ch,opname,EX_SUF,tsuf)) \
      ( \
              conj_t conjx, \
              dim_t  n, \
@@ -60,7 +60,7 @@ INSERT_GENTDEF( subv )
 #undef  GENTDEF
 #define GENTDEF( ctype, ch, opname, tsuf ) \
 \
-typedef void (*PASTECH3(ch,opname,EX_SUF,tsuf)) \
+typedef void (*PASTECH(ch,opname,EX_SUF,tsuf)) \
      ( \
              dim_t  n, \
        const ctype* x, inc_t incx, \
@@ -75,7 +75,7 @@ INSERT_GENTDEF( amaxv )
 #undef  GENTDEF
 #define GENTDEF( ctype, ch, opname, tsuf ) \
 \
-typedef void (*PASTECH3(ch,opname,EX_SUF,tsuf)) \
+typedef void (*PASTECH(ch,opname,EX_SUF,tsuf)) \
      ( \
              conj_t conjx, \
              dim_t  n, \
@@ -93,7 +93,7 @@ INSERT_GENTDEF( axpbyv )
 #undef  GENTDEF
 #define GENTDEF( ctype, ch, opname, tsuf ) \
 \
-typedef void (*PASTECH3(ch,opname,EX_SUF,tsuf)) \
+typedef void (*PASTECH(ch,opname,EX_SUF,tsuf)) \
      ( \
              conj_t conjx, \
              dim_t  n, \
@@ -111,7 +111,7 @@ INSERT_GENTDEF( scal2v )
 #undef  GENTDEF
 #define GENTDEF( ctype, ch, opname, tsuf ) \
 \
-typedef void (*PASTECH3(ch,opname,EX_SUF,tsuf)) \
+typedef void (*PASTECH(ch,opname,EX_SUF,tsuf)) \
      ( \
              conj_t conjx, \
              conj_t conjy, \
@@ -129,7 +129,7 @@ INSERT_GENTDEF( dotv )
 #undef  GENTDEF
 #define GENTDEF( ctype, ch, opname, tsuf ) \
 \
-typedef void (*PASTECH3(ch,opname,EX_SUF,tsuf)) \
+typedef void (*PASTECH(ch,opname,EX_SUF,tsuf)) \
      ( \
              conj_t conjx, \
              conj_t conjy, \
@@ -149,7 +149,7 @@ INSERT_GENTDEF( dotxv )
 #undef  GENTDEF
 #define GENTDEF( ctype, ch, opname, tsuf ) \
 \
-typedef void (*PASTECH3(ch,opname,EX_SUF,tsuf)) \
+typedef void (*PASTECH(ch,opname,EX_SUF,tsuf)) \
      ( \
        dim_t  n, \
        ctype* x, inc_t incx  \
@@ -163,7 +163,7 @@ INSERT_GENTDEF( invertv )
 #undef  GENTDEF
 #define GENTDEF( ctype, ch, opname, tsuf ) \
 \
-typedef void (*PASTECH3(ch,opname,EX_SUF,tsuf)) \
+typedef void (*PASTECH(ch,opname,EX_SUF,tsuf)) \
      ( \
              conj_t conjalpha, \
              dim_t  n, \
@@ -181,7 +181,7 @@ INSERT_GENTDEF( setv )
 #undef  GENTDEF
 #define GENTDEF( ctype, ch, opname, tsuf ) \
 \
-typedef void (*PASTECH3(ch,opname,EX_SUF,tsuf)) \
+typedef void (*PASTECH(ch,opname,EX_SUF,tsuf)) \
      ( \
        dim_t  n, \
        ctype* x, inc_t incx, \
@@ -196,7 +196,7 @@ INSERT_GENTDEF( swapv )
 #undef  GENTDEF
 #define GENTDEF( ctype, ch, opname, tsuf ) \
 \
-typedef void (*PASTECH3(ch,opname,EX_SUF,tsuf)) \
+typedef void (*PASTECH(ch,opname,EX_SUF,tsuf)) \
      ( \
              conj_t conjx, \
              dim_t  n, \

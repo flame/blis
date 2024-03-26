@@ -40,7 +40,7 @@
 #undef  GENTPROTSCAL
 #define GENTPROTSCAL( ftype_a, ftype_x, cha, chx, blasname ) \
 \
-BLIS_EXPORT_BLAS void PASTEF772(chx,cha,blasname) \
+BLIS_EXPORT_BLAS void PASTEF77(chx,cha,blasname) \
      ( \
        const f77_int* n, \
        const ftype_a* alpha, \

@@ -110,12 +110,12 @@ void bli_obj_scalar_attach
 
 	// Use the target datatype of A as the datatype to which we cast
 	// alpha locally.
-	const num_t dt_targ = bli_obj_target_dt( a );
+	const num_t dt = bli_obj_dt( alpha );
 
 	// Make a copy-cast of alpha to the target datatype of A, queried
 	// above. This step gives us the opportunity to conjugate and/or
 	// typecast alpha.
-	bli_obj_scalar_init_detached_copy_of( dt_targ,
+	bli_obj_scalar_init_detached_copy_of( dt,
 	                                      conj,
 	                                      alpha,
 	                                      &alpha_cast );
@@ -124,7 +124,7 @@ void bli_obj_scalar_attach
 	bli_obj_copy_internal_scalar( &alpha_cast, a );
 
 	// Update the scalar datatype of A.
-	bli_obj_set_scalar_dt( dt_targ, a );
+	bli_obj_set_scalar_dt( dt, a );
 }
 
 void bli_obj_scalar_cast_to

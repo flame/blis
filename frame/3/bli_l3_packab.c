@@ -36,12 +36,12 @@
 
 void bli_l3_packa
      (
-       const obj_t*  a,
-       const obj_t*  b,
-       const obj_t*  c,
-       const cntx_t* cntx,
-       const cntl_t* cntl,
-             thrinfo_t* thread
+       const obj_t*     a,
+       const obj_t*     b,
+       const obj_t*     c,
+       const cntx_t*    cntx,
+       const cntl_t*    cntl,
+             thrinfo_t* thread_par
      )
 {
 	obj_t a_local, a_pack;
@@ -60,20 +60,18 @@ void bli_l3_packa
 	  &a_pack,
 	  cntx,
 	  cntl,
-	  thread
+	  thread_par
 	);
 
 	// Proceed with execution using packed matrix A.
 	bli_l3_int
 	(
-	  &BLIS_ONE,
 	  &a_pack,
 	  b,
-	  &BLIS_ONE,
 	  c,
 	  cntx,
-	  bli_cntl_sub_node( cntl ),
-	  bli_thrinfo_sub_node( thread )
+	  bli_cntl_sub_node( 0, cntl ),
+	  bli_thrinfo_sub_node( 0, thread_par )
 	);
 }
 
@@ -81,12 +79,12 @@ void bli_l3_packa
 
 void bli_l3_packb
      (
-       const obj_t*  a,
-       const obj_t*  b,
-       const obj_t*  c,
-       const cntx_t* cntx,
-       const cntl_t* cntl,
-             thrinfo_t* thread
+       const obj_t*     a,
+       const obj_t*     b,
+       const obj_t*     c,
+       const cntx_t*    cntx,
+       const cntl_t*    cntl,
+             thrinfo_t* thread_par
      )
 {
 	obj_t bt_local, bt_pack;
@@ -109,7 +107,7 @@ void bli_l3_packb
 	  &bt_pack,
 	  cntx,
 	  cntl,
-	  thread
+	  thread_par
 	);
 
 	// Transpose packed object back to B.
@@ -118,14 +116,12 @@ void bli_l3_packb
 	// Proceed with execution using packed matrix B.
 	bli_l3_int
 	(
-	  &BLIS_ONE,
 	  a,
 	  &bt_pack,
-	  &BLIS_ONE,
 	  c,
 	  cntx,
-	  bli_cntl_sub_node( cntl ),
-	  bli_thrinfo_sub_node( thread )
+	  bli_cntl_sub_node( 0, cntl ),
+	  bli_thrinfo_sub_node( 0, thread_par )
 	);
 }
 

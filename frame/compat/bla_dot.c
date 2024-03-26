@@ -42,7 +42,7 @@
 #undef  GENTFUNCDOT
 #define GENTFUNCDOT( ftype, ch, chc, blis_conjx, blasname, blisname ) \
 \
-ftype PASTEF772(ch,blasname,chc) \
+ftype PASTEF77(ch,blasname,chc) \
      ( \
        const f77_int* n, \
        const ftype*   x, const f77_int* incx, \
@@ -68,7 +68,7 @@ ftype PASTEF772(ch,blasname,chc) \
 	bli_convert_blas_incv( n0, (ftype*)y, *incy, y0, incy0 ); \
 \
 	/* Call BLIS interface. */ \
-	PASTEMAC2(ch,blisname,BLIS_TAPI_EX_SUF) \
+	PASTEMAC(ch,blisname,BLIS_TAPI_EX_SUF) \
 	( \
 	  blis_conjx, \
 	  BLIS_NO_CONJUGATE, \
@@ -99,7 +99,7 @@ INSERT_GENTFUNCDOTC_BLAS( dot, dotv )
 #undef  GENTFUNCDOT
 #define GENTFUNCDOT( ftype, ch, chc, blis_conjx, blasname, blisname ) \
 \
-void PASTEF772(ch,blasname,chc) \
+void PASTEF77(ch,blasname,chc) \
      ( \
        ftype*         rhop, \
        const f77_int* n, \
@@ -126,7 +126,7 @@ void PASTEF772(ch,blasname,chc) \
 	bli_convert_blas_incv( n0, (ftype*)y, *incy, y0, incy0 ); \
 \
 	/* Call BLIS interface. */ \
-	PASTEMAC2(ch,blisname,BLIS_TAPI_EX_SUF) \
+	PASTEMAC(ch,blisname,BLIS_TAPI_EX_SUF) \
 	( \
 	  blis_conjx, \
 	  BLIS_NO_CONJUGATE, \

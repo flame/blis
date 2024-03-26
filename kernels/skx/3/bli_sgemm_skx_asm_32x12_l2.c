@@ -329,7 +329,7 @@ void bli_sgemm_skx_asm_32x12_l2
        const void*      b,
        const void*      beta,
              void*      c, inc_t rs_c_, inc_t cs_c_,
-             auxinfo_t* data,
+       const auxinfo_t* data,
        const cntx_t*    cntx
      )
 {

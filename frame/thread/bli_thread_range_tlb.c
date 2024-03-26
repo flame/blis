@@ -1230,6 +1230,8 @@ dim_t bli_thread_range_tlb_trmm_rl_impl
              inc_t* i_en_p
      )
 {
+	( void )mr;
+
 	// Assumption: 0 <= diagoff. Make sure to prune leading rows beforehand!
 	if ( diagoff < 0 ) bli_abort();
 

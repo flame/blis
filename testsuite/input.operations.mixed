@@ -88,12 +88,12 @@
 
 # --- Section overrides ----------------------------------------------------
 
-1        # Utility
-1        # Level-1v kernels
-1        # Level-1m
-1        # Level-1f kernels
-1        # Level-2
-1        # Level-3 micro-kernels
+0        # Utility
+0        # Level-1v kernels
+0        # Level-1m
+0        # Level-1f kernels
+0        # Level-2
+0        # Level-3 micro-kernels
 1        # Level-3
 
 
@@ -284,47 +284,47 @@
 
 # --- Level-3 --------------------------------------------------------------
 
-2        # gemm
+1        # gemm
 -1 -1 -1 #   dimensions: m n k
 nn       #   parameters: transa transb
 
 1        # gemmt
 -1 -1    #   dimensions: m k
-???      #   parameters: uploc transa transb
+?nn      #   parameters: uploc transa transb
 
 1        # hemm
 -1 -1    #   dimensions: m n
-????     #   parameters: side uploa conja transb
+??nn     #   parameters: side uploa conja transb
 
 1        # herk
 -1 -1    #   dimensions: m k
-??       #   parameters: uploc transa
+?n       #   parameters: uploc transa
 
 1        # her2k
 -1 -1    #   dimensions: m k
-???      #   parameters: uploc transa transb
+?nn      #   parameters: uploc transa transb
 
 1        # symm
 -1 -1    #   dimensions: m n
-????     #   parameters: side uploa conja transb
+??nn     #   parameters: side uploa conja transb
 
 1        # syrk
 -1 -1    #   dimensions: m k
-??       #   parameters: uploc transa
+?n       #   parameters: uploc transa
 
 1        # syr2k
 -1 -1    #   dimensions: m k
-???      #   parameters: uploc transa transb
+?nn      #   parameters: uploc transa transb
 
 1        # trmm
 -1 -1    #   dimensions: m n
-????     #   parameters: side uploa transa diaga
+??n?     #   parameters: side uploa transa diaga
 
 1        # trmm3
 -1 -1    #   dimensions: m n
-????n    #   parameters: side uploa transa diaga transb
+??n?n    #   parameters: side uploa transa diaga transb
 
 1        # trsm
 -1 -1    #   dimensions: m n
-????     #   parameters: side uploa transa diaga
+??n?     #   parameters: side uploa transa diaga
 

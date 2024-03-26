@@ -41,10 +41,10 @@
 	f77_int lower, upper; \
 	f77_int nrowa; \
 \
-	nota  = PASTEF770(lsame)( transa, "N", (ftnlen)1, (ftnlen)1 ); \
-	conja = PASTEF770(lsame)( transa, "C", (ftnlen)1, (ftnlen)1 ); \
-	lower = PASTEF770(lsame)( uploc,  "L", (ftnlen)1, (ftnlen)1 ); \
-	upper = PASTEF770(lsame)( uploc,  "U", (ftnlen)1, (ftnlen)1 ); \
+	nota  = PASTEF77(lsame)( transa, "N", (ftnlen)1, (ftnlen)1 ); \
+	conja = PASTEF77(lsame)( transa, "C", (ftnlen)1, (ftnlen)1 ); \
+	lower = PASTEF77(lsame)( uploc,  "L", (ftnlen)1, (ftnlen)1 ); \
+	upper = PASTEF77(lsame)( uploc,  "U", (ftnlen)1, (ftnlen)1 ); \
 \
 	if ( nota ) { nrowa = *m; } \
 	else        { nrowa = *k; } \
@@ -70,7 +70,7 @@
 \
 		bli_string_mkupper( func_str ); \
 \
-		PASTEF770(xerbla)( func_str, &info, (ftnlen)6 ); \
+		PASTEF77(xerbla)( func_str, &info, (ftnlen)6 ); \
 \
 		return; \
 	} \

@@ -39,13 +39,11 @@
 
 // Define macros to construct the full symbol name from the operation name.
 #undef  GENARNAME             // opname, architecture, _ref (no bli_)
-#define GENARNAME(opname)     PASTECH2(opname,BLIS_CNAME_INFIX,BLIS_REF_SUFFIX)
+#define GENARNAME(opname)     PASTECH(opname,BLIS_CNAME_INFIX,BLIS_REF_SUFFIX)
 #undef  GENTARNAME            // bli, ch, opname, architecture, _ref
-#define GENTARNAME(ch,opname) PASTEMAC3(ch,opname,BLIS_CNAME_INFIX,BLIS_REF_SUFFIX)
+#define GENTARNAME(ch,opname) PASTEMAC(ch,opname,BLIS_CNAME_INFIX,BLIS_REF_SUFFIX)
 #undef  GENBARNAME            // bli_, opname, architecture, _ref
-#define GENBARNAME(opname)    PASTEMAC2(opname,BLIS_CNAME_INFIX,BLIS_REF_SUFFIX)
-#undef  GENBAINAME            // bli_, opname, architecture, _ind
-#define GENBAINAME(opname)    PASTEMAC2(opname,BLIS_CNAME_INFIX,BLIS_IND_SUFFIX)
+#define GENBARNAME(opname)    PASTEMAC(opname,BLIS_CNAME_INFIX,BLIS_REF_SUFFIX)
 
 // Define a prototype-inserting template that uses an arbitrary prototype-
 // generating macro.
@@ -57,6 +55,64 @@ protmac( float,    s, kername ) \
 protmac( double,   d, kername ) \
 protmac( scomplex, c, kername ) \
 protmac( dcomplex, z, kername )
+
+#undef  INSERT_PROTMAC_BASIC_CO
+#define INSERT_PROTMAC_BASIC_CO( protmac, kername ) \
+\
+protmac( scomplex, c, kername ) \
+protmac( dcomplex, z, kername )
+
+#undef  INSERT_PROTMAC_MIX_RO
+#define INSERT_PROTMAC_MIX_RO( protmac, kername ) \
+\
+protmac( float,  float,  s, s, kername ) \
+protmac( double, float,  d, s, kername ) \
+protmac( float,  double, s, d, kername ) \
+protmac( double, double, d, d, kername )
+
+#undef  INSERT_PROTMAC_MIX_CO
+#define INSERT_PROTMAC_MIX_CO( protmac, kername ) \
+\
+protmac( scomplex, scomplex, c, c, kername ) \
+protmac( dcomplex, scomplex, z, c, kername ) \
+protmac( scomplex, dcomplex, c, z, kername ) \
+protmac( dcomplex, dcomplex, z, z, kername )
+
+#undef  INSERT_PROTMAC_MIX_P
+#define INSERT_PROTMAC_MIX_P( protmac, kername ) \
+\
+protmac( float,    float,    s, s, kername ) \
+protmac( double,   float,    d, s, kername ) \
+protmac( float,    double,   s, d, kername ) \
+protmac( double,   double,   d, d, kername ) \
+\
+protmac( scomplex, scomplex, c, c, kername ) \
+protmac( dcomplex, scomplex, z, c, kername ) \
+protmac( scomplex, dcomplex, c, z, kername ) \
+protmac( dcomplex, dcomplex, z, z, kername )
+
+#undef  INSERT_PROTMAC_MIX_DP
+#define INSERT_PROTMAC_MIX_DP( protmac, kername ) \
+\
+protmac( float,    float,    s, s, kername ) \
+protmac( double,   float,    d, s, kername ) \
+protmac( scomplex, float,    c, s, kername ) \
+protmac( dcomplex, float,    z, s, kername ) \
+\
+protmac( float,    double,   s, d, kername ) \
+protmac( double,   double,   d, d, kername ) \
+protmac( scomplex, double,   c, d, kername ) \
+protmac( dcomplex, double,   z, d, kername ) \
+\
+protmac( float,    scomplex, s, c, kername ) \
+protmac( double,   scomplex, d, c, kername ) \
+protmac( scomplex, scomplex, c, c, kername ) \
+protmac( dcomplex, scomplex, z, c, kername ) \
+\
+protmac( float,    dcomplex, s, z, kername ) \
+protmac( double,   dcomplex, d, z, kername ) \
+protmac( scomplex, dcomplex, c, z, kername ) \
+protmac( dcomplex, dcomplex, z, z, kername )
 
 
 // -- Level-3 native micro-kernel prototype redefinitions ----------------------
@@ -72,7 +128,7 @@ protmac( dcomplex, z, kername )
 // Instantiate prototypes for above functions using the pre-defined level-3
 // microkernel prototype-generating macros.
 
-INSERT_PROTMAC_BASIC( GEMM_UKR_PROT,     gemm_ukr_name )
+INSERT_PROTMAC_MIX_P( GEMM_UKR2_PROT,    gemm_ukr_name )
 INSERT_PROTMAC_BASIC( GEMMTRSM_UKR_PROT, gemmtrsm_l_ukr_name )
 INSERT_PROTMAC_BASIC( GEMMTRSM_UKR_PROT, gemmtrsm_u_ukr_name )
 INSERT_PROTMAC_BASIC( TRSM_UKR_PROT,     trsm_l_ukr_name )
@@ -83,24 +139,24 @@ INSERT_PROTMAC_BASIC( TRSM_UKR_PROT,     trsm_u_ukr_name )
 
 // -- Construct arch-specific names for reference virtual level-3 microkernels --
 
-// -- 1m --
-
 #define gemm1m_ukr_name        GENARNAME(gemm1m)
+#define gemm_ccr_ukr_name       GENARNAME(gemm_ccr)
+#define gemm_rcc_ukr_name       GENARNAME(gemm_rcc)
+#define gemm_crr_ukr_name        GENARNAME(gemm_crr)
 #define gemmtrsm1m_l_ukr_name  GENARNAME(gemmtrsm1m_l)
 #define gemmtrsm1m_u_ukr_name  GENARNAME(gemmtrsm1m_u)
-#define trsm1m_l_ukr_name      GENARNAME(trsm1m_l)
-#define trsm1m_u_ukr_name      GENARNAME(trsm1m_u)
 
 // Instantiate prototypes for above functions using the pre-defined level-3
 // microkernel prototype-generating macros.
 
-// -- 1m --
-
-INSERT_PROTMAC_BASIC( GEMM_UKR_PROT,     gemm1m_ukr_name )
-INSERT_PROTMAC_BASIC( GEMMTRSM_UKR_PROT, gemmtrsm1m_l_ukr_name )
-INSERT_PROTMAC_BASIC( GEMMTRSM_UKR_PROT, gemmtrsm1m_u_ukr_name )
-INSERT_PROTMAC_BASIC( TRSM_UKR_PROT,     trsm1m_l_ukr_name )
-INSERT_PROTMAC_BASIC( TRSM_UKR_PROT,     trsm1m_u_ukr_name )
+INSERT_PROTMAC_MIX_RO( GEMM_UKR2_PROT,    gemm1m_ukr_name )
+INSERT_PROTMAC_MIX_RO( GEMM_UKR2_PROT,    gemm_ccr_ukr_name )
+INSERT_PROTMAC_MIX_RO( GEMM_UKR2_PROT,    gemm_rcc_ukr_name )
+INSERT_PROTMAC_MIX_RO( GEMM_UKR2_PROT,    gemm_crr_ukr_name )
+INSERT_PROTMAC_BASIC(  GEMMTRSM_UKR_PROT, gemmtrsm1m_l_ukr_name )
+INSERT_PROTMAC_BASIC(  GEMMTRSM_UKR_PROT, gemmtrsm1m_u_ukr_name )
+INSERT_PROTMAC_BASIC(  TRSM_UKR_PROT,     trsm1m_l_ukr_name )
+INSERT_PROTMAC_BASIC(  TRSM_UKR_PROT,     trsm1m_u_ukr_name )
 
 
 // -- Level-3 small/unpacked micro-kernel prototype definitions ----------------
@@ -127,30 +183,24 @@ INSERT_PROTMAC_BASIC( GEMMSUP_KER_PROT, gemmsup_gx_ukr_name )
 
 // -- Construct arch-specific names for reference packm kernels --
 
-#define packm_mrxk_ker_name            GENARNAME(packm_mrxk)
-#define packm_nrxk_ker_name            GENARNAME(packm_nrxk)
-#define packm_mrxk_1er_ker_name        GENARNAME(packm_mrxk_1er)
-#define packm_nrxk_1er_ker_name        GENARNAME(packm_nrxk_1er)
-#define packm_mrxmr_diag_ker_name      GENARNAME(packm_mrxmr_diag)
-#define packm_nrxnr_diag_ker_name      GENARNAME(packm_nrxnr_diag)
-#define packm_mrxmr_diag_1er_ker_name  GENARNAME(packm_mrxmr_diag_1er)
-#define packm_nrxnr_diag_1er_ker_name  GENARNAME(packm_nrxnr_diag_1er)
-#define unpackm_mrxk_ker_name          GENARNAME(unpackm_mrxk)
-#define unpackm_nrxk_ker_name          GENARNAME(unpackm_nrxk)
+#define packm_ker_name           GENARNAME(packm)
+#define packm_1er_ker_name       GENARNAME(packm_1er)
+#define packm_ro_ker_name       GENARNAME(packm_ro)
+#define packm_diag_ker_name      GENARNAME(packm_diag)
+#define packm_diag_1er_ker_name  GENARNAME(packm_diag_1er)
+#define packm_diag_ro_ker_name  GENARNAME(packm_diag_ro)
+#define unpackm_ker_name         GENARNAME(unpackm)
 
 // Instantiate prototypes for above functions using the pre-defined packm
 // kernel prototype-generating macros.
 
-INSERT_PROTMAC_BASIC( PACKM_KER_PROT,      packm_mrxk_ker_name )
-INSERT_PROTMAC_BASIC( PACKM_KER_PROT,      packm_nrxk_ker_name )
-INSERT_PROTMAC_BASIC( PACKM_KER_PROT,      packm_mrxk_1er_ker_name )
-INSERT_PROTMAC_BASIC( PACKM_KER_PROT,      packm_nrxk_1er_ker_name )
-INSERT_PROTMAC_BASIC( PACKM_DIAG_KER_PROT, packm_mrxmr_diag_ker_name )
-INSERT_PROTMAC_BASIC( PACKM_DIAG_KER_PROT, packm_nrxnr_diag_ker_name )
-INSERT_PROTMAC_BASIC( PACKM_DIAG_KER_PROT, packm_mrxmr_diag_1er_ker_name )
-INSERT_PROTMAC_BASIC( PACKM_DIAG_KER_PROT, packm_nrxnr_diag_1er_ker_name )
-INSERT_PROTMAC_BASIC( UNPACKM_KER_PROT,    unpackm_mrxk_ker_name )
-INSERT_PROTMAC_BASIC( UNPACKM_KER_PROT,    unpackm_nrxk_ker_name )
+INSERT_PROTMAC_MIX_P ( PACKM_KER_PROT2,      packm_ker_name )
+INSERT_PROTMAC_MIX_CO( PACKM_KER_PROT2,      packm_1er_ker_name )
+INSERT_PROTMAC_MIX_CO( PACKM_KER_PROT2,      packm_ro_ker_name )
+INSERT_PROTMAC_MIX_P ( PACKM_DIAG_KER_PROT2, packm_diag_ker_name )
+INSERT_PROTMAC_MIX_CO( PACKM_DIAG_KER_PROT2, packm_diag_1er_ker_name )
+INSERT_PROTMAC_MIX_CO( PACKM_DIAG_KER_PROT2, packm_diag_ro_ker_name )
+INSERT_PROTMAC_MIX_P ( UNPACKM_KER_PROT2,    unpackm_ker_name )
 
 
 // -- Level-1f kernel prototype redefinitions ----------------------------------
@@ -216,34 +266,79 @@ INSERT_PROTMAC_BASIC( XPBYV_KER_PROT,    xpbyv_ker_name )
 
 // -- Macros to help concisely instantiate bli_func_init() ---------------------
 
+#define gen_func_init_ro( func_p, opname ) \
+do { \
+	bli_func_init( func_p, PASTEMAC(s,opname), PASTEMAC(d,opname), \
+	                       NULL,               NULL ); \
+} while (0)
+
 #define gen_func_init_co( func_p, opname ) \
-{ \
+do { \
 	bli_func_init( func_p, NULL,               NULL, \
 	                       PASTEMAC(c,opname), PASTEMAC(z,opname) ); \
-}
+} while (0)
+
+#define gen_func_init_mix_co( func_p, opname ) \
+do { \
+	bli_func2_init( func_p, NULL,                  NULL, \
+	                        NULL,                  NULL, \
+	                        NULL,                  NULL, \
+	                        NULL,                  NULL, \
+	                        NULL,                  NULL, \
+	                        PASTEMAC(c,c,opname), PASTEMAC(c,z,opname), \
+	                        NULL,                  NULL, \
+	                        PASTEMAC(z,c,opname), PASTEMAC(z,z,opname) ); \
+} while (0)
 
 #define gen_func_init( func_p, opname ) \
-{ \
+do { \
 	bli_func_init( func_p, PASTEMAC(s,opname), PASTEMAC(d,opname), \
 	                       PASTEMAC(c,opname), PASTEMAC(z,opname) ); \
-}
+} while (0)
+
+#define gen_func_init_ro_mix_p( func_p, opname ) \
+do { \
+	bli_func2_init( func_p, PASTEMAC(s,s,opname), PASTEMAC(s,d,opname), \
+	                        NULL,                  NULL, \
+	                        PASTEMAC(d,s,opname), PASTEMAC(d,d,opname), \
+	                        NULL,                  NULL, \
+	                        NULL,                  NULL, \
+	                        NULL,                  NULL, \
+	                        NULL,                  NULL, \
+	                        NULL,                  NULL ); \
+} while (0)
+
+#define gen_func_init_mix_p( func_p, opname ) \
+do { \
+	bli_func2_init( func_p, PASTEMAC(s,s,opname), PASTEMAC(s,d,opname), \
+	                        NULL,                  NULL, \
+	                        PASTEMAC(d,s,opname), PASTEMAC(d,d,opname), \
+	                        NULL,                  NULL, \
+	                        NULL,                  NULL, \
+	                        PASTEMAC(c,c,opname), PASTEMAC(c,z,opname), \
+	                        NULL,                  NULL, \
+	                        PASTEMAC(z,c,opname), PASTEMAC(z,z,opname) ); \
+} while (0)
+
+#define gen_func_init_mix_dp( func_p, opname ) \
+do { \
+	bli_func2_init( func_p, PASTEMAC(s,s,opname), PASTEMAC(s,d,opname), \
+	                        PASTEMAC(s,c,opname), PASTEMAC(s,z,opname), \
+	                        PASTEMAC(d,s,opname), PASTEMAC(d,d,opname), \
+	                        PASTEMAC(d,c,opname), PASTEMAC(d,z,opname), \
+	                        PASTEMAC(c,s,opname), PASTEMAC(c,d,opname), \
+	                        PASTEMAC(c,c,opname), PASTEMAC(c,z,opname), \
+	                        PASTEMAC(z,s,opname), PASTEMAC(z,d,opname), \
+	                        PASTEMAC(z,c,opname), PASTEMAC(z,z,opname) ); \
+} while (0)
 
 #define gen_sup_func_init( func0_p, func1_p, opname ) \
-{ \
+do { \
 	bli_func_init( func0_p, PASTEMAC(s,opname), PASTEMAC(d,opname), \
 	                        PASTEMAC(c,opname), PASTEMAC(z,opname) ); \
 	bli_func_init( func1_p, PASTEMAC(s,opname), PASTEMAC(d,opname), \
 	                        PASTEMAC(c,opname), PASTEMAC(z,opname) ); \
-}
-
-// -- Helper function for 1m ---------------------------------------------------
-
-void GENBAINAME(cntx_init_blkszs)
-     (
-       ind_t   method,
-       num_t   dt,
-       cntx_t* cntx
-     );
+} while (0)
 
 // -----------------------------------------------------------------------------
 
@@ -252,16 +347,22 @@ void GENBARNAME(cntx_init)
        cntx_t* cntx
      )
 {
-	blksz_t  blkszs[ BLIS_NUM_BLKSZS ];
-	func_t*  funcs;
-	mbool_t* mbools;
-	dim_t    i;
-	void_fp* vfuncs;
+	blksz_t blkszs[ BLIS_NUM_BLKSZS ];
+	func_t  funcs [ BLIS_NUM_UKRS ];
+	func2_t func2s[ BLIS_NUM_UKR2S ];
+	mbool_t mbools[ BLIS_NUM_UKR_PREFS ];
+	void_fp vfuncs[ BLIS_NUM_LEVEL3_OPS ];
 
+	// Make sure any unset function pointers or block sizes are NULL/0
+	memset( blkszs, 0, sizeof(blkszs) );
+	memset( funcs,  0, sizeof(funcs)  );
+	memset( func2s, 0, sizeof(func2s) );
+	memset( mbools, 0, sizeof(mbools) );
+	memset( vfuncs, 0, sizeof(vfuncs) );
 
-	// -- Clear the context ----------------------------------------------------
+	// -- Initialize the context -----------------------------------------------
 
-	bli_cntx_clear( cntx );
+	bli_cntx_init( cntx );
 
 
 	// -- Set blocksizes -------------------------------------------------------
@@ -328,31 +429,22 @@ void GENBARNAME(cntx_init)
 	);
 
 
-	// -- Set level-3 virtual micro-kernels ------------------------------------
-
-	funcs = cntx->ukrs;
-
-	// NOTE: We set the virtual micro-kernel slots to contain the addresses
-	// of the native micro-kernels. In general, the ukernels in the virtual
-	// ukernel slots are always called, and if the function called happens to
-	// be a virtual micro-kernel, it will then know to find its native ukernel
-	// (i.e., in the native ukernel slots).
-	gen_func_init( &funcs[ BLIS_GEMM_VIR_UKR ],       gemm_ukr_name       );
-	gen_func_init( &funcs[ BLIS_GEMMTRSM_L_VIR_UKR ], gemmtrsm_l_ukr_name );
-	gen_func_init( &funcs[ BLIS_GEMMTRSM_U_VIR_UKR ], gemmtrsm_u_ukr_name );
-	gen_func_init( &funcs[ BLIS_TRSM_L_VIR_UKR ],     trsm_l_ukr_name     );
-	gen_func_init( &funcs[ BLIS_TRSM_U_VIR_UKR ],     trsm_u_ukr_name     );
-
-
 	// -- Set level-3 native micro-kernels and preferences ---------------------
 
-	mbools = cntx->ukr_prefs;
+	gen_func_init_mix_p( &func2s[ bli_ker_idx( BLIS_GEMM_UKR ) ], gemm_ukr_name );
 
-	gen_func_init( &funcs[ BLIS_GEMM_UKR ],       gemm_ukr_name       );
-	gen_func_init( &funcs[ BLIS_GEMMTRSM_L_UKR ], gemmtrsm_l_ukr_name );
-	gen_func_init( &funcs[ BLIS_GEMMTRSM_U_UKR ], gemmtrsm_u_ukr_name );
-	gen_func_init( &funcs[ BLIS_TRSM_L_UKR ],     trsm_l_ukr_name     );
-	gen_func_init( &funcs[ BLIS_TRSM_U_UKR ],     trsm_u_ukr_name     );
+	gen_func_init_ro_mix_p( &func2s[ bli_ker_idx( BLIS_GEMM1M_UKR ) ],  gemm1m_ukr_name  );
+	gen_func_init_ro_mix_p( &func2s[ bli_ker_idx( BLIS_GEMM_CCR_UKR ) ], gemm_ccr_ukr_name );
+	gen_func_init_ro_mix_p( &func2s[ bli_ker_idx( BLIS_GEMM_RCC_UKR ) ], gemm_rcc_ukr_name );
+	gen_func_init_ro_mix_p( &func2s[ bli_ker_idx( BLIS_GEMM_CRR_UKR ) ],  gemm_crr_ukr_name  );
+
+	gen_func_init( &funcs[ bli_ker_idx( BLIS_GEMMTRSM_L_UKR ) ], gemmtrsm_l_ukr_name );
+	gen_func_init( &funcs[ bli_ker_idx( BLIS_GEMMTRSM_U_UKR ) ], gemmtrsm_u_ukr_name );
+	gen_func_init( &funcs[ bli_ker_idx( BLIS_TRSM_L_UKR ) ],     trsm_l_ukr_name     );
+	gen_func_init( &funcs[ bli_ker_idx( BLIS_TRSM_U_UKR ) ],     trsm_u_ukr_name     );
+
+	gen_func_init_ro( &funcs[ bli_ker_idx( BLIS_GEMMTRSM1M_L_UKR ) ], gemmtrsm1m_l_ukr_name );
+	gen_func_init_ro( &funcs[ bli_ker_idx( BLIS_GEMMTRSM1M_U_UKR ) ], gemmtrsm1m_u_ukr_name );
 
 	//                                                           s      d      c      z
 	bli_mbool_init( &mbools[ BLIS_GEMM_UKR_ROW_PREF ],        TRUE,  TRUE,  TRUE,  TRUE );
@@ -364,19 +456,19 @@ void GENBARNAME(cntx_init)
 
 	// -- Set level-3 small/unpacked micro-kernels and preferences -------------
 
-	gen_func_init( &funcs[ BLIS_GEMMSUP_RRR_UKR ], gemmsup_rv_ukr_name );
-	gen_func_init( &funcs[ BLIS_GEMMSUP_RRC_UKR ], gemmsup_rv_ukr_name );
-	gen_func_init( &funcs[ BLIS_GEMMSUP_RCR_UKR ], gemmsup_rv_ukr_name );
-	gen_func_init( &funcs[ BLIS_GEMMSUP_RCC_UKR ], gemmsup_rv_ukr_name );
-	gen_func_init( &funcs[ BLIS_GEMMSUP_CRR_UKR ], gemmsup_rv_ukr_name );
-	gen_func_init( &funcs[ BLIS_GEMMSUP_CRC_UKR ], gemmsup_rv_ukr_name );
-	gen_func_init( &funcs[ BLIS_GEMMSUP_CCR_UKR ], gemmsup_rv_ukr_name );
-	gen_func_init( &funcs[ BLIS_GEMMSUP_CCC_UKR ], gemmsup_rv_ukr_name );
+	gen_func_init( &funcs[ bli_ker_idx( BLIS_GEMMSUP_RRR_UKR ) ], gemmsup_rv_ukr_name );
+	gen_func_init( &funcs[ bli_ker_idx( BLIS_GEMMSUP_RRC_UKR ) ], gemmsup_rv_ukr_name );
+	gen_func_init( &funcs[ bli_ker_idx( BLIS_GEMMSUP_RCR_UKR ) ], gemmsup_rv_ukr_name );
+	gen_func_init( &funcs[ bli_ker_idx( BLIS_GEMMSUP_RCC_UKR ) ], gemmsup_rv_ukr_name );
+	gen_func_init( &funcs[ bli_ker_idx( BLIS_GEMMSUP_CRR_UKR ) ], gemmsup_rv_ukr_name );
+	gen_func_init( &funcs[ bli_ker_idx( BLIS_GEMMSUP_CRC_UKR ) ], gemmsup_rv_ukr_name );
+	gen_func_init( &funcs[ bli_ker_idx( BLIS_GEMMSUP_CCR_UKR ) ], gemmsup_rv_ukr_name );
+	gen_func_init( &funcs[ bli_ker_idx( BLIS_GEMMSUP_CCC_UKR ) ], gemmsup_rv_ukr_name );
 
 	// Register the general-stride/generic ukernel to the "catch-all" slot
 	// associated with the BLIS_XXX enum value. This slot will be queried if
 	// *any* operand is stored with general stride.
-	gen_func_init( &funcs[ BLIS_GEMMSUP_XXX_UKR ], gemmsup_gx_ukr_name );
+	gen_func_init( &funcs[ bli_ker_idx( BLIS_GEMMSUP_XXX_UKR ) ], gemmsup_gx_ukr_name );
 
 
 	// Set the l3 sup ukernel storage preferences.
@@ -395,56 +487,60 @@ void GENBARNAME(cntx_init)
 
 	// -- Set level-1f kernels -------------------------------------------------
 
-	gen_func_init( &funcs[ BLIS_AXPY2V_KER ],    axpy2v_ker_name    );
-	gen_func_init( &funcs[ BLIS_DOTAXPYV_KER ],  dotaxpyv_ker_name  );
-	gen_func_init( &funcs[ BLIS_AXPYF_KER ],     axpyf_ker_name     );
-	gen_func_init( &funcs[ BLIS_DOTXF_KER ],     dotxf_ker_name     );
-	gen_func_init( &funcs[ BLIS_DOTXAXPYF_KER ], dotxaxpyf_ker_name );
+	gen_func_init( &funcs[ bli_ker_idx( BLIS_AXPY2V_KER ) ],    axpy2v_ker_name    );
+	gen_func_init( &funcs[ bli_ker_idx( BLIS_DOTAXPYV_KER ) ],  dotaxpyv_ker_name  );
+	gen_func_init( &funcs[ bli_ker_idx( BLIS_AXPYF_KER ) ],     axpyf_ker_name     );
+	gen_func_init( &funcs[ bli_ker_idx( BLIS_DOTXF_KER ) ],     dotxf_ker_name     );
+	gen_func_init( &funcs[ bli_ker_idx( BLIS_DOTXAXPYF_KER ) ], dotxaxpyf_ker_name );
 
 
 	// -- Set level-1v kernels -------------------------------------------------
 
-	gen_func_init( &funcs[ BLIS_ADDV_KER ],     addv_ker_name     );
-	gen_func_init( &funcs[ BLIS_AMAXV_KER ],    amaxv_ker_name    );
-	gen_func_init( &funcs[ BLIS_AXPBYV_KER ],   axpbyv_ker_name   );
-	gen_func_init( &funcs[ BLIS_AXPYV_KER ],    axpyv_ker_name    );
-	gen_func_init( &funcs[ BLIS_COPYV_KER ],    copyv_ker_name    );
-	gen_func_init( &funcs[ BLIS_DOTV_KER ],     dotv_ker_name     );
-	gen_func_init( &funcs[ BLIS_DOTXV_KER ],    dotxv_ker_name    );
-	gen_func_init( &funcs[ BLIS_INVERTV_KER ],  invertv_ker_name  );
-	gen_func_init( &funcs[ BLIS_INVSCALV_KER ], invscalv_ker_name );
-	gen_func_init( &funcs[ BLIS_SCALV_KER ],    scalv_ker_name    );
-	gen_func_init( &funcs[ BLIS_SCAL2V_KER ],   scal2v_ker_name   );
-	gen_func_init( &funcs[ BLIS_SETV_KER ],     setv_ker_name     );
-	gen_func_init( &funcs[ BLIS_SUBV_KER ],     subv_ker_name     );
-	gen_func_init( &funcs[ BLIS_SWAPV_KER ],    swapv_ker_name    );
-	gen_func_init( &funcs[ BLIS_XPBYV_KER ],    xpbyv_ker_name    );
+	gen_func_init( &funcs[ bli_ker_idx( BLIS_ADDV_KER ) ],     addv_ker_name     );
+	gen_func_init( &funcs[ bli_ker_idx( BLIS_AMAXV_KER ) ],    amaxv_ker_name    );
+	gen_func_init( &funcs[ bli_ker_idx( BLIS_AXPBYV_KER ) ],   axpbyv_ker_name   );
+	gen_func_init( &funcs[ bli_ker_idx( BLIS_AXPYV_KER ) ],    axpyv_ker_name    );
+	gen_func_init( &funcs[ bli_ker_idx( BLIS_COPYV_KER ) ],    copyv_ker_name    );
+	gen_func_init( &funcs[ bli_ker_idx( BLIS_DOTV_KER ) ],     dotv_ker_name     );
+	gen_func_init( &funcs[ bli_ker_idx( BLIS_DOTXV_KER ) ],    dotxv_ker_name    );
+	gen_func_init( &funcs[ bli_ker_idx( BLIS_INVERTV_KER ) ],  invertv_ker_name  );
+	gen_func_init( &funcs[ bli_ker_idx( BLIS_INVSCALV_KER ) ], invscalv_ker_name );
+	gen_func_init( &funcs[ bli_ker_idx( BLIS_SCALV_KER ) ],    scalv_ker_name    );
+	gen_func_init( &funcs[ bli_ker_idx( BLIS_SCAL2V_KER ) ],   scal2v_ker_name   );
+	gen_func_init( &funcs[ bli_ker_idx( BLIS_SETV_KER ) ],     setv_ker_name     );
+	gen_func_init( &funcs[ bli_ker_idx( BLIS_SUBV_KER ) ],     subv_ker_name     );
+	gen_func_init( &funcs[ bli_ker_idx( BLIS_SWAPV_KER ) ],    swapv_ker_name    );
+	gen_func_init( &funcs[ bli_ker_idx( BLIS_XPBYV_KER ) ],    xpbyv_ker_name    );
 
 
 	// -- Set level-1m (packm/unpackm) kernels ---------------------------------
 
-	gen_func_init( &funcs[ BLIS_PACKM_MRXK_KER ],  packm_mrxk_ker_name );
-	gen_func_init( &funcs[ BLIS_PACKM_NRXK_KER ],  packm_nrxk_ker_name );
+	gen_func_init_mix_p ( &func2s[ bli_ker_idx( BLIS_PACKM_KER ) ],           packm_ker_name );
+	gen_func_init_mix_co( &func2s[ bli_ker_idx( BLIS_PACKM_1ER_KER ) ],       packm_1er_ker_name );
+	gen_func_init_mix_co( &func2s[ bli_ker_idx( BLIS_PACKM_RO_KER ) ],        packm_ro_ker_name );
+	gen_func_init_mix_p ( &func2s[ bli_ker_idx( BLIS_PACKM_DIAG_KER ) ],      packm_diag_ker_name );
+	gen_func_init_mix_co( &func2s[ bli_ker_idx( BLIS_PACKM_DIAG_1ER_KER ) ],  packm_diag_1er_ker_name );
+	gen_func_init_mix_co( &func2s[ bli_ker_idx( BLIS_PACKM_DIAG_RO_KER ) ],   packm_diag_ro_ker_name );
+	gen_func_init_mix_p ( &func2s[ bli_ker_idx( BLIS_UNPACKM_KER ) ],         unpackm_ker_name );
 
-	gen_func_init_co( &funcs[ BLIS_PACKM_MRXK_1ER_KER ],  packm_mrxk_1er_ker_name );
-	gen_func_init_co( &funcs[ BLIS_PACKM_NRXK_1ER_KER ],  packm_nrxk_1er_ker_name );
 
-	gen_func_init( &funcs[ BLIS_PACKM_MRXMR_DIAG_KER ],  packm_mrxmr_diag_ker_name );
-	gen_func_init( &funcs[ BLIS_PACKM_NRXNR_DIAG_KER ],  packm_nrxnr_diag_ker_name );
+	// -- Put the default kernels and their preferences into the context -------
 
-	gen_func_init_co( &funcs[ BLIS_PACKM_MRXMR_DIAG_1ER_KER ],  packm_mrxmr_diag_1er_ker_name );
-	gen_func_init_co( &funcs[ BLIS_PACKM_NRXNR_DIAG_1ER_KER ],  packm_nrxnr_diag_1er_ker_name );
+	for ( dim_t i = 0; i < BLIS_NUM_UKRS; i++ )
+		bli_cntx_set_ukr( BLIS_1TYPE_KER + i, &funcs[ i ], cntx );
 
-	gen_func_init( &funcs[ BLIS_UNPACKM_MRXK_KER ],  unpackm_mrxk_ker_name );
-	gen_func_init( &funcs[ BLIS_UNPACKM_NRXK_KER ],  unpackm_nrxk_ker_name );
+	for ( dim_t i = 0; i < BLIS_NUM_UKR2S; i++ )
+		bli_cntx_set_ukr2( BLIS_2TYPE_KER + i, &func2s[ i ], cntx );
+
+	for ( dim_t i = 0; i < BLIS_NUM_UKR_PREFS; i++ )
+		bli_cntx_set_ukr_pref( i, &mbools[ i ], cntx );
 
 
 	// -- Set level-3 small/unpacked handlers ----------------------------------
 
-	vfuncs = cntx->l3_sup_handlers;
-
 	// Initialize all of the function pointers to NULL;
-	for ( i = 0; i < BLIS_NUM_LEVEL3_OPS; ++i ) vfuncs[ i ] = NULL;
+	for ( dim_t i = 0; i < BLIS_NUM_LEVEL3_OPS; ++i )
+		vfuncs[ i ] = NULL;
 
 	// The level-3 sup handlers are oapi-based, so we only set one slot per
 	// operation.
@@ -453,156 +549,7 @@ void GENBARNAME(cntx_init)
 	vfuncs[ BLIS_GEMM ]  = bli_gemmsup_ref;
 	vfuncs[ BLIS_GEMMT ] = bli_gemmtsup_ref;
 
-
-	// -- Set miscellaneous fields ---------------------------------------------
-
-	bli_cntx_set_method( BLIS_NAT, cntx );
-}
-
-// -----------------------------------------------------------------------------
-
-void GENBAINAME(cntx_init)
-     (
-       ind_t   method,
-       cntx_t* cntx
-     )
-{
-	func_t* funcs;
-
-	// This function is designed to modify a copy of an existing native
-	// context to enable computation via an induced method for complex
-	// domain level-3 operations. It is called by bli_gks_query_ind_cntx()
-	// on a context after its contexts are set by copying from the
-	// architecture's native context.
-
-	// -- Set induced method level-3 virtual micro-kernels ---------------------
-
-	funcs = cntx->ukrs;
-
-	if ( method == BLIS_1M )
-	{
-		gen_func_init_co( &funcs[ BLIS_GEMM_VIR_UKR ],       gemm1m_ukr_name       );
-		gen_func_init_co( &funcs[ BLIS_GEMMTRSM_L_VIR_UKR ], gemmtrsm1m_l_ukr_name );
-		gen_func_init_co( &funcs[ BLIS_GEMMTRSM_U_VIR_UKR ], gemmtrsm1m_u_ukr_name );
-		gen_func_init_co( &funcs[ BLIS_TRSM_L_VIR_UKR ],     trsm1m_l_ukr_name     );
-		gen_func_init_co( &funcs[ BLIS_TRSM_U_VIR_UKR ],     trsm1m_u_ukr_name     );
-	}
-	else // if ( method == BLIS_NAT )
-	{
-		gen_func_init_co( &funcs[ BLIS_GEMM_VIR_UKR ],       gemm_ukr_name       );
-		gen_func_init_co( &funcs[ BLIS_GEMMTRSM_L_VIR_UKR ], gemmtrsm_l_ukr_name );
-		gen_func_init_co( &funcs[ BLIS_GEMMTRSM_U_VIR_UKR ], gemmtrsm_u_ukr_name );
-		gen_func_init_co( &funcs[ BLIS_TRSM_L_VIR_UKR ],     trsm_l_ukr_name     );
-		gen_func_init_co( &funcs[ BLIS_TRSM_U_VIR_UKR ],     trsm_u_ukr_name     );
-	}
-
-	// For 1m, we employ an optimization which requires that we copy the native
-	// real domain gemm ukernel function pointers to the corresponding real
-	// domain slots in the virtual gemm ukernel func_t. This optimization allows
-	// us to, under certain conditions, adjust various parameters within the gemm
-	// macrokernel so that the real-domain macrokernel (which will query and use
-	// the real-domain virtual gemm ukernel) can be called instead of calling the
-	// complex-domain macrokernel and the corresponding complex-domain virtual
-	// microkernel. The non-optimized code path would require an extra level of
-	// function call overhead, which can be avoided in most cases (i.e., when
-	// beta has a zero imaginary component and C is either row- or column-stored).
-	if ( method == BLIS_1M )
-	{
-		func_t* gemm_nat_ukrs = ( func_t* )bli_cntx_get_ukrs( BLIS_GEMM_UKR, cntx );
-		func_t* gemm_vir_ukrs = ( func_t* )bli_cntx_get_ukrs( BLIS_GEMM_VIR_UKR, cntx );
-
-		bli_func_copy_dt( BLIS_FLOAT,  gemm_nat_ukrs, BLIS_FLOAT,  gemm_vir_ukrs );
-		bli_func_copy_dt( BLIS_DOUBLE, gemm_nat_ukrs, BLIS_DOUBLE, gemm_vir_ukrs );
-	}
-
-
-	// -- Set induced method packm kernels -------------------------------------
-
-	if ( method == BLIS_1M )
-	{
-		gen_func_init_co( &funcs[ BLIS_PACKM_MRXK_KER ],  packm_mrxk_1er_ker_name );
-		gen_func_init_co( &funcs[ BLIS_PACKM_NRXK_KER ],  packm_nrxk_1er_ker_name );
-	}
-	else // if ( method == BLIS_NAT )
-	{
-		gen_func_init( &funcs[ BLIS_PACKM_MRXK_KER ],  packm_mrxk_ker_name );
-		gen_func_init( &funcs[ BLIS_PACKM_NRXK_KER ],  packm_nrxk_ker_name );
-	}
-
-	gen_func_init_co( &funcs[ BLIS_PACKM_MRXK_1ER_KER ],  packm_mrxk_1er_ker_name );
-	gen_func_init_co( &funcs[ BLIS_PACKM_NRXK_1ER_KER ],  packm_nrxk_1er_ker_name );
-
-	gen_func_init( &funcs[ BLIS_UNPACKM_MRXK_KER ],  unpackm_mrxk_ker_name );
-	gen_func_init( &funcs[ BLIS_UNPACKM_NRXK_KER ],  unpackm_nrxk_ker_name );
-
-
-	// -- Set induced method cache and register blocksizes ---------------------
-
-	// Modify the context with cache and register blocksizes (and multiples)
-	// appropriate for the current induced method.
-	if ( method == BLIS_1M )
-	{
-		//const bool is_pb = FALSE;
-
-		// Call a helper function to initialize blocksizes for each complex
-		// datatype.
-		GENBAINAME(cntx_init_blkszs)( method, BLIS_SCOMPLEX, cntx );
-		GENBAINAME(cntx_init_blkszs)( method, BLIS_DCOMPLEX, cntx );
-	}
-	else // if ( method == BLIS_NAT )
-	{
-		// No change in blocksizes needed for native execution.
-	}
-}
-
-// -----------------------------------------------------------------------------
-
-void GENBAINAME(cntx_init_blkszs)
-     (
-       ind_t   method,
-       num_t   dt,
-       cntx_t* cntx
-     )
-{
-	// Set the induced method in the context.
-	bli_cntx_set_method( method, cntx );
-
-	num_t dt_r = bli_dt_proj_to_real( dt );
-
-	// Initialize the blocksizes according to the micro-kernel preference as
-	// well as the algorithm.
-	//if ( bli_cntx_ukr_prefers_cols_dt( dt, BLIS_GEMM_UKR, cntx ) )
-	if ( ! bli_cntx_get_ukr_prefs_dt( dt_r, BLIS_GEMM_UKR_ROW_PREF, cntx ) )
-	{
-		// This branch is used for algorithm 1m_c_bp.
-
-		bli_cntx_set_ind_blkszs
-		(
-		  method, dt, cntx,
-		  BLIS_NC, 1.0, 1.0,
-		  BLIS_KC, 2.0, 2.0, // halve kc...
-		  BLIS_MC, 2.0, 2.0, // halve mc...
-		  BLIS_NR, 1.0, 1.0,
-		  BLIS_MR, 2.0, 1.0, // ...and mr (but NOT packmr)
-		  BLIS_KR, 1.0, 1.0,
-		  BLIS_VA_END
-		);
-	}
-	else // if ( bli_cntx_get_ukr_prefs_dt( dt, BLIS_GEMM_UKR_ROW_PREF, cntx ) )
-	{
-		// This branch is used for algorithm 1m_r_bp.
-
-		bli_cntx_set_ind_blkszs
-		(
-		  method, dt, cntx,
-		  BLIS_NC, 2.0, 2.0, // halve nc...
-		  BLIS_KC, 2.0, 2.0, // halve kc...
-		  BLIS_MC, 1.0, 1.0,
-		  BLIS_NR, 2.0, 1.0, // ...and nr (but NOT packnr)
-		  BLIS_MR, 1.0, 1.0,
-		  BLIS_KR, 1.0, 1.0,
-		  BLIS_VA_END
-		);
-	}
+	for ( dim_t i = 0; i < BLIS_NUM_LEVEL3_OPS; i++ )
+		bli_cntx_set_l3_sup_handler( i, vfuncs[ i ], cntx );
 }
 

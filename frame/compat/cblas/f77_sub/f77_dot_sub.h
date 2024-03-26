@@ -39,7 +39,7 @@
 #undef  GENTPROTDOT
 #define GENTPROTDOT( ftype, ch, chc, blasname ) \
 \
-BLIS_EXPORT_BLAS void PASTEF773(ch,blasname,chc,sub) \
+BLIS_EXPORT_BLAS void PASTEF77(ch,blasname,chc,sub) \
      ( \
        const f77_int* n, \
        const ftype*   x, const f77_int* incx, \
@@ -53,7 +53,7 @@ INSERT_GENTPROTDOT_BLAS( dot )
 
 // -- "Black sheep" dot product function prototypes --
 
-BLIS_EXPORT_BLAS void PASTEF772(sds,dot,sub)
+BLIS_EXPORT_BLAS void PASTEF77(sds,dot,sub)
      (
        const f77_int* n,
        const float*  sb,
@@ -62,7 +62,7 @@ BLIS_EXPORT_BLAS void PASTEF772(sds,dot,sub)
              float*   rval
      );
 
-BLIS_EXPORT_BLAS void PASTEF772(ds,dot,sub)
+BLIS_EXPORT_BLAS void PASTEF77(ds,dot,sub)
      (
        const f77_int* n,
        const float*   x, const f77_int* incx,

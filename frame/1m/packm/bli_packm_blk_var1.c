@@ -36,57 +36,44 @@
 #include "blis.h"
 
 
-static func_t packm_struc_cxk_kers[BLIS_NUM_PACK_SCHEMA_TYPES] =
-{
-    /* float (0)  scomplex (1)  double (2)  dcomplex (3) */
-// 0000 row/col panels
-    { { bli_spackm_struc_cxk,      bli_cpackm_struc_cxk,
-        bli_dpackm_struc_cxk,      bli_zpackm_struc_cxk,      } },
-// 0001 row/col panels: 1m-expanded (1e)
-    { { NULL,                      bli_cpackm_struc_cxk,
-        NULL,                      bli_zpackm_struc_cxk,  } },
-// 0010 row/col panels: 1m-reordered (1r)
-    { { NULL,                      bli_cpackm_struc_cxk,
-        NULL,                      bli_zpackm_struc_cxk,  } },
-};
-
-static void_fp GENARRAY2_ALL(packm_struc_cxk_md,packm_struc_cxk_md);
-
 void bli_packm_blk_var1
      (
        const obj_t*     c,
              obj_t*     p,
        const cntx_t*    cntx,
        const cntl_t*    cntl,
-             thrinfo_t* thread_par
+             thrinfo_t* thread
      )
 {
 	// Extract various fields from the control tree.
-	pack_t schema  = bli_cntl_packm_params_pack_schema( cntl );
-	bool   invdiag = bli_cntl_packm_params_does_invert_diag( cntl );
-	bool   revifup = bli_cntl_packm_params_rev_iter_if_upper( cntl );
-	bool   reviflo = bli_cntl_packm_params_rev_iter_if_lower( cntl );
+	pack_t schema    = bli_packm_def_cntl_pack_schema( cntl );
+	bool   invdiag   = bli_packm_def_cntl_does_invert_diag( cntl );
+	bool   revifup   = bli_packm_def_cntl_rev_iter_if_upper( cntl );
+	bool   reviflo   = bli_packm_def_cntl_rev_iter_if_lower( cntl );
+	num_t  dt_p      = bli_packm_def_cntl_target_dt( cntl );
 
 	// Every thread initializes p and determines the size of memory block
 	// needed (which gets embedded into the otherwise "blank" mem_t entry
 	// in the control tree node). Return early if no packing is required.
-	if ( !bli_packm_init( c, p, cntx, cntl, bli_thrinfo_sub_node( thread_par ) ) )
+	// If the requested size is zero, then we don't need to do any allocation.
+	siz_t size_p = bli_packm_init( dt_p, c, p, cntl );
+	if ( size_p == 0 )
 		return;
 
-	// Use the sub-prenode. In bli_l3_thrinfo_grow(), this node was created to
-	// represent the team of threads as a group of single-member thread teams.
-	// This is necessary since the all of the work distribution function depend
-	// on the work_id and n_way fields.
-	thrinfo_t* thread = bli_thrinfo_sub_prenode( thread_par );
+	// Update the buffer address in p to point to the buffer associated
+	// with the mem_t entry acquired from the memory broker (now cached in
+	// the control tree node).
+	void* buffer = bli_packm_alloc( size_p, cntl, thread );
+	bli_obj_set_buffer( buffer, p );
 
 	// Check parameters.
 	if ( bli_error_checking_is_enabled() )
-		bli_packm_int_check( c, p, cntx );
+		bli_packm_int_check( c, p );
 
+	// dt_p is updated by bli_packm_init for real-only packing
 	num_t   dt_c           = bli_obj_dt( c );
+	        dt_p           = bli_obj_dt( p );
 	dim_t   dt_c_size      = bli_dt_size( dt_c );
-
-	num_t   dt_p           = bli_obj_dt( p );
 	dim_t   dt_p_size      = bli_dt_size( dt_p );
 
 	struc_t strucc         = bli_obj_struc( c );
@@ -107,38 +94,18 @@ void bli_packm_blk_var1
 
 	char*   p_cast         = bli_obj_buffer( p );
 	inc_t   ldp            = bli_obj_col_stride( p );
-	inc_t   is_p           = bli_obj_imag_stride( p );
 	dim_t   panel_dim_max  = bli_obj_panel_dim( p );
 	inc_t   ps_p           = bli_obj_panel_stride( p );
+	dim_t   bcast_p        = bli_packm_def_cntl_bmult_m_bcast( cntl );
 
 	doff_t  diagoffc_inc   = ( doff_t )panel_dim_max;
 
 	obj_t   kappa_local;
 	char*   kappa_cast     = bli_packm_scalar( &kappa_local, p );
 
-	// we use the default lookup table to determine the right func_t
-	// for the current schema.
-	func_t* packm_kers = &packm_struc_cxk_kers[ bli_pack_schema_index( schema ) ];
-
-	// Query the datatype-specific function pointer from the func_t object.
-	packm_ker_ft packm_ker_cast = bli_func_get_dt( dt_p, packm_kers );
-
-	// For mixed-precision gemm, select the proper kernel (only dense panels).
-	if ( dt_c != dt_p )
-	{
-		packm_ker_cast = packm_struc_cxk_md[ dt_c ][ dt_p ];
-	}
-
-	// Query the address of the packm params field of the obj_t. The user might
-	// have set this field in order to specify a custom packm kernel.
-	packm_blk_var1_params_t* params = bli_obj_pack_params( c );
-
-	if ( params && params->ukr_fn[ dt_c ][ dt_p ] )
-	{
-		// Query the user-provided packing kernel from the obj_t. If provided,
-		// this overrides the kernel determined above.
-		packm_ker_cast = params->ukr_fn[ dt_c ][ dt_p ];
-	}
+	// Query the datatype-specific function pointer from the control tree.
+	packm_ker_ft packm_ker_cast = bli_packm_def_cntl_ukr( cntl );
+	const void*  params         = bli_packm_def_cntl_ukr_params( cntl );
 
 	// Compute the total number of iterations we'll need.
 	dim_t n_iter = iter_dim / panel_dim_max + ( iter_dim % panel_dim_max ? 1 : 0 );
@@ -166,15 +133,15 @@ void bli_packm_blk_var1
 
 	// Query the number of threads (single-member thread teams) and the thread
 	// team ids from the current thread's packm thrinfo_t node.
-	const dim_t nt  = bli_thrinfo_n_way( thread );
-	const dim_t tid = bli_thrinfo_work_id( thread );
+	const dim_t nt  = bli_thrinfo_num_threads( thread );
+	const dim_t tid = bli_thrinfo_thread_id( thread );
 
 	// Determine the thread range and increment using the current thread's
 	// packm thrinfo_t node. NOTE: The definition of bli_thread_range_slrr()
 	// will depend on whether slab or round-robin partitioning was requested
 	// at configure-time.
 	dim_t it_start, it_end, it_inc;
-	bli_thread_range_slrr( thread, n_iter, 1, FALSE, &it_start, &it_end, &it_inc );
+	bli_thread_range_slrr( tid, nt, n_iter, 1, FALSE, &it_start, &it_end, &it_inc );
 
 	char* p_begin = p_cast;
 
@@ -214,11 +181,12 @@ void bli_packm_blk_var1
 				  panel_len_max,
 				  panel_dim_off_i,
 				  panel_len_off,
+				  bcast_p,
 				  kappa_cast,
 				  c_begin, incc, ldc,
-				  p_begin,       ldp, is_p,
+				  p_begin,       ldp,
 				  params,
-				  ( cntx_t* )cntx
+				  cntx
 				);
 			}
 
@@ -307,12 +275,12 @@ void bli_packm_blk_var1
 				  panel_len_max_i,
 				  panel_dim_off_i,
 				  panel_len_off_i,
+				  bcast_p,
 				  kappa_cast,
 				  c_use, incc, ldc,
 				  p_use,       ldp,
-				         is_p_use,
 				  params,
-				  ( cntx_t* )cntx
+				  cntx
 				);
 			}
 

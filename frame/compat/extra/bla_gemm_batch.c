@@ -109,7 +109,7 @@ void PASTEF77(ch,blasname) \
 		for ( f77_int j = 0; j < group_size[i]; j++ ) \
 		{ \
 			/* Call BLIS interface. */ \
-			PASTEMAC2(ch,blisname,BLIS_TAPI_EX_SUF) \
+			PASTEMAC(ch,blisname,BLIS_TAPI_EX_SUF) \
 			( \
 			  blis_transa, \
 			  blis_transb, \

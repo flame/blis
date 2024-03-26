@@ -41,7 +41,7 @@
 #undef  GENPROT
 #define GENPROT( opname ) \
 \
-BLIS_EXPORT_BLIS void PASTEMAC0(opname) \
+BLIS_EXPORT_BLIS void PASTEMAC(opname) \
      ( \
        const obj_t* alpha, \
        const obj_t* a, \
@@ -59,7 +59,7 @@ GENPROT( syr2k )
 #undef  GENPROT
 #define GENPROT( opname ) \
 \
-BLIS_EXPORT_BLIS void PASTEMAC0(opname) \
+BLIS_EXPORT_BLIS void PASTEMAC(opname) \
      ( \
              side_t side, \
        const obj_t* alpha, \
@@ -77,7 +77,7 @@ GENPROT( trmm3 )
 #undef  GENPROT
 #define GENPROT( opname ) \
 \
-BLIS_EXPORT_BLIS void PASTEMAC0(opname) \
+BLIS_EXPORT_BLIS void PASTEMAC(opname) \
      ( \
        const obj_t* alpha, \
        const obj_t* a, \
@@ -92,7 +92,7 @@ GENPROT( syrk )
 #undef  GENPROT
 #define GENPROT( opname ) \
 \
-BLIS_EXPORT_BLIS void PASTEMAC0(opname) \
+BLIS_EXPORT_BLIS void PASTEMAC(opname) \
      ( \
              side_t side, \
        const obj_t* alpha, \

@@ -32,15 +32,29 @@
 
 */
 
-void bli_l3_int
+
+BLIS_INLINE void bli_l3_int
      (
-       const obj_t*  alpha,
        const obj_t*  a,
        const obj_t*  b,
-       const obj_t*  beta,
        const obj_t*  c,
        const cntx_t* cntx,
        const cntl_t* cntl,
              thrinfo_t* thread
-     );
+     )
+{
+	// Extract the function pointer from the current control tree node.
+	l3_var_oft f = ( l3_var_oft )bli_cntl_var_func( cntl );
+
+	// Invoke the variant.
+	f
+	(
+	  a,//&a_local,
+	  b,//&b_local,
+	  c,//&c_local,
+	  cntx,
+	  cntl,
+	  thread
+	);
+}
 

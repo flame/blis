@@ -42,12 +42,12 @@
 \
 BLIS_INLINE void PASTEMAC(ch,opname) \
      ( \
-       const conj_t       conjx, \
-       const dim_t        m, \
-       const dim_t        n, \
-       ctype*    restrict alpha, \
-       ctype*    restrict x, const inc_t incx, const inc_t ldx, \
-       ctype*    restrict y, const inc_t incy, const inc_t ldy  \
+       const conj_t          conjx, \
+       const dim_t           m, \
+       const dim_t           n, \
+       const ctype* restrict alpha, \
+       const ctype* restrict x, const inc_t incx, const inc_t ldx, \
+             ctype* restrict y, const inc_t incy, const inc_t ldy  \
      ) \
 { \
 	/* Assume that the duplication factor is the row stride of y. */ \
@@ -58,13 +58,13 @@ BLIS_INLINE void PASTEMAC(ch,opname) \
 	{ \
 		for ( dim_t j = 0; j < n; ++j ) \
 		{ \
-			ctype* restrict xj = x + j*ldx; \
-			ctype* restrict yj = y + j*ldy; \
+			const ctype* restrict xj = x + j*ldx; \
+			      ctype* restrict yj = y + j*ldy; \
 \
 			for ( dim_t i = 0; i < m; ++i ) \
 			{ \
-				ctype* restrict xij = xj + i*incx; \
-				ctype* restrict yij = yj + i*incy; \
+				const ctype* restrict xij = xj + i*incx; \
+				      ctype* restrict yij = yj + i*incy; \
 \
 				PASTEMAC(ch,scal2js)( *alpha, *xij, *yij ); \
 \
@@ -81,13 +81,13 @@ BLIS_INLINE void PASTEMAC(ch,opname) \
 	{ \
 		for ( dim_t j = 0; j < n; ++j ) \
 		{ \
-			ctype* restrict xj = x + j*ldx; \
-			ctype* restrict yj = y + j*ldy; \
+			const ctype* restrict xj = x + j*ldx; \
+			      ctype* restrict yj = y + j*ldy; \
 \
 			for ( dim_t i = 0; i < m; ++i ) \
 			{ \
-				ctype* restrict xij = xj + i*incx; \
-				ctype* restrict yij = yj + i*incy; \
+				const ctype* restrict xij = xj + i*incx; \
+				      ctype* restrict yij = yj + i*incy; \
 \
 				PASTEMAC(ch,scal2s)( *alpha, *xij, *yij ); \
 \
@@ -110,12 +110,12 @@ INSERT_GENTFUNCRO_BASIC( scal2bbs_mxn )
 \
 BLIS_INLINE void PASTEMAC(ch,opname) \
      ( \
-       const conj_t       conjx, \
-       const dim_t        m, \
-       const dim_t        n, \
-       ctype*    restrict alpha, \
-       ctype*    restrict x, const inc_t incx, const inc_t ldx, \
-       ctype*    restrict y, const inc_t incy, const inc_t ldy  \
+       const conj_t          conjx, \
+       const dim_t           m, \
+       const dim_t           n, \
+       const ctype* restrict alpha, \
+       const ctype* restrict x, const inc_t incx, const inc_t ldx, \
+             ctype* restrict y, const inc_t incy, const inc_t ldy  \
      ) \
 { \
 	/* Assume that the duplication factor is the row stride of y. */ \

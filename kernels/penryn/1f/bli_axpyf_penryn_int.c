@@ -144,10 +144,10 @@ void bli_daxpyf_penryn_int
 	chi2 = *(x_cast + 2*incx);
 	chi3 = *(x_cast + 3*incx);
 
-	PASTEMAC2(d,d,scals)( *alpha_cast, chi0 );
-	PASTEMAC2(d,d,scals)( *alpha_cast, chi1 );
-	PASTEMAC2(d,d,scals)( *alpha_cast, chi2 );
-	PASTEMAC2(d,d,scals)( *alpha_cast, chi3 );
+	PASTEMAC(d,d,scals)( *alpha_cast, chi0 );
+	PASTEMAC(d,d,scals)( *alpha_cast, chi1 );
+	PASTEMAC(d,d,scals)( *alpha_cast, chi2 );
+	PASTEMAC(d,d,scals)( *alpha_cast, chi3 );
 
 	if ( m_pre == 1 )
 	{

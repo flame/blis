@@ -37,23 +37,20 @@ void bli_l3_prune_unref_mparts_m
      (
              obj_t*  a,
        const obj_t*  b,
-             obj_t*  c,
-       const cntl_t* cntl
+             obj_t*  c
      );
 
 void bli_l3_prune_unref_mparts_n
      (
        const obj_t*  a,
              obj_t*  b,
-             obj_t*  c,
-       const cntl_t* cntl
+             obj_t*  c
      );
 
 void bli_l3_prune_unref_mparts_k
      (
              obj_t*  a,
              obj_t*  b,
-       const obj_t*  c,
-       const cntl_t* cntl
+       const obj_t*  c
      );
 

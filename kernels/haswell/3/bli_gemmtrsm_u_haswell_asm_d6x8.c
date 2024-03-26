@@ -67,7 +67,7 @@ void bli_sgemmtrsm_u_haswell_asm_6x16
        const void*      b21, \
              void*      b11, \
              void*      c11, inc_t rs_c0, inc_t cs_c0, \
-             auxinfo_t* data, \
+       const auxinfo_t* data, \
        const cntx_t*    cntx  \
      )
 {
@@ -863,7 +863,7 @@ void bli_dgemmtrsm_u_haswell_asm_6x8
        const void*      b21, \
              void*      b11, \
              void*      c11, inc_t rs_c0, inc_t cs_c0, \
-             auxinfo_t* data, \
+       const auxinfo_t* data, \
        const cntx_t*    cntx  \
      )
 {
