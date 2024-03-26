@@ -1252,58 +1252,58 @@ typedef struct obj_s
 
 #define BLIS_OBJECT_INITIALIZER \
 { \
-	NULL, \
+	/* .root        */ = NULL, \
 \
-	{ 0, 0 }, \
-	{ 0, 0 }, \
-	0, \
+	/* .off         */ = { 0, 0 }, \
+	/* .dim         */ = { 0, 0 }, \
+	/* .diag_off    */ = 0, \
 \
-	0x0 | BLIS_BITVAL_DENSE      | \
-	      BLIS_BITVAL_GENERAL, \
-	0x0, \
-	sizeof( float ), /* this is changed later. */ \
+	/* .info        */ = 0x0 | BLIS_BITVAL_DENSE      | \
+	/*              */         BLIS_BITVAL_GENERAL, \
+	/* .info2       */ = 0x0, \
+	/* .elem_size   */ = sizeof( float ), /* this is changed later. */ \
 \
-	NULL, \
-	0, \
-	0, \
-	1,  \
+	/* .buffer      */ = NULL, \
+	/* .rs          */ = 0, \
+	/* .cs          */ = 0, \
+	/* .is          */ = 1,  \
 \
-	{ 0.0, 0.0 }, \
+	/* .scalar      */ = { 0.0, 0.0 }, \
 \
-	0, \
-	0, \
-	0, \
-	0, \
-	0, \
-	0, \
+	/* .m_padded    */ = 0, \
+	/* .n_padded    */ = 0, \
+	/* .ps          */ = 0, \
+	/* .pd          */ = 0, \
+	/* .m_panel     */ = 0, \
+	/* .n_panel     */ = 0, \
 }
 
 #define BLIS_OBJECT_INITIALIZER_1X1 \
 { \
-	NULL, \
+	/* .root        */ = NULL, \
 \
-	{ 0, 0 }, \
-	{ 1, 1 }, \
-	0, \
+	/* .off         */ = { 0, 0 }, \
+	/* .dim         */ = { 1, 1 }, \
+	/* .diag_off    */ = 0, \
 \
-	0x0 | BLIS_BITVAL_DENSE      | \
-	      BLIS_BITVAL_GENERAL, \
-	0x0, \
-	sizeof( float ), /* this is changed later. */ \
+	/* .info        */ = 0x0 | BLIS_BITVAL_DENSE      | \
+	/*              */         BLIS_BITVAL_GENERAL, \
+	/* .info2       */ = 0x0, \
+	/* .elem_size   */ = sizeof( float ), /* this is changed later. */ \
 \
-	NULL, \
-	0, \
-	0, \
-	1,  \
+	/* .buffer      */ = NULL, \
+	/* .rs          */ = 0, \
+	/* .cs          */ = 0, \
+	/* .is          */ = 1,  \
 \
-	{ 0.0, 0.0 }, \
+	/* .scalar      */ = { 0.0, 0.0 }, \
 \
-	0, \
-	0, \
-	0, \
-	0, \
-	0, \
-	0, \
+	/* .m_padded    */ = 0, \
+	/* .n_padded    */ = 0, \
+	/* .ps          */ = 0, \
+	/* .pd          */ = 0, \
+	/* .m_panel     */ = 0, \
+	/* .n_panel     */ = 0, \
 }
 
 // Define these macros here since they must be updated if contents of
