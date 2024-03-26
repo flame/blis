@@ -32,16 +32,23 @@
 
 */
 
-#ifndef BLIS_SBX_L3_DECOR_PTHREADS_H
-#define BLIS_SBX_L3_DECOR_PTHREADS_H
+#ifndef BLIS_SBX_L3_DECOR_H
+#define BLIS_SBX_L3_DECOR_H
 
-// Definitions specific to situations when POSIX multithreading is enabled.
-#ifdef BLIS_ENABLE_PTHREADS
+// Level-3 sup internal function type.
+typedef void (*l3sbxint_ft)
+     (
+       obj_t*     alpha,
+       obj_t*     a,
+       obj_t*     b,
+       obj_t*     beta,
+       obj_t*     c,
+       cntx_t*    cntx,
+       rntm_t*    rntm,
+       thrinfo_t* thread
+     );
 
-// Thread entry point prototype.
-void* bls_l3_thread_entry( void* data_void );
-
-void bls_l3_thread_decorator_pthreads
+void bls_l3_thread_decorator
      (
        l3sbxint_ft func,
        opid_t      family,
@@ -53,8 +60,6 @@ void bls_l3_thread_decorator_pthreads
        cntx_t*     cntx,
        rntm_t*     rntm
      );
-
-#endif
 
 #endif
 

@@ -60,17 +60,17 @@ BLIS_INLINE dim_t bli_chol_params_depth( const chol_params_t* params )
 
 // -----------------------------------------------------------------------------
 
-cntl_t* bli_chol_cntl_create( uplo_t uplo, rntm_t* rntm );
+cntl_t* bli_chol_cntl_create( uplo_t uplo, pool_t* pool );
 
 // -----------------------------------------------------------------------------
 
-void bli_chol_cntl_free( rntm_t* rntm, cntl_t* cntl, thrinfo_t* thread );
+void bli_chol_cntl_free( pool_t* pool, cntl_t* cntl );
 
 // -----------------------------------------------------------------------------
 
 cntl_t* bli_chol_cntl_create_node
      (
-       rntm_t* rntm,
+       pool_t* pool,
        bszid_t bszid,
        dim_t   scale_num,
        dim_t   scale_den,

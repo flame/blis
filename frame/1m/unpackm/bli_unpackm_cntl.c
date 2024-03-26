@@ -37,10 +37,10 @@
 
 cntl_t* bli_unpackm_cntl_create_node
      (
-       rntm_t*   rntm,
-       void_fp   var_func,
-       void_fp   unpackm_var_func,
-       cntl_t*   sub_node
+       pool_t* pool,
+       void_fp var_func,
+       void_fp unpackm_var_func,
+       cntl_t* sub_node
      )
 {
 	cntl_t*           cntl;
@@ -64,7 +64,7 @@ cntl_t* bli_unpackm_cntl_create_node
 	// sync with the cntl_t tree.
 	cntl = bli_cntl_create_node
 	(
-	  rntm,
+	  pool,
 	  BLIS_NOID,
 	  BLIS_NO_PART,
 	  var_func,

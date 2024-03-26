@@ -69,7 +69,7 @@
 // to be 32 bits, since explicit selection of 32 bits is prohibited at
 // configure-time (and explicit or automatic selection of 64 bits is fine
 // and would have had the same result).
-#if BLIS_BLAS_INT_SIZE == 64
+#if BLIS_BLAS_INT_TYPE_SIZE == 64
   #undef  BLIS_INT_TYPE_SIZE
   #define BLIS_INT_TYPE_SIZE 64
 #endif
@@ -1076,14 +1076,7 @@ struct cntl_s
 	void_fp        var_func;
 	struct cntl_s* sub_prenode;
 	struct cntl_s* sub_node;
-
-	// Optional fields (needed only by some operations such as packm).
-	// NOTE: first field of params must be a uint64_t containing the size
-	// of the struct.
 	void*          params;
-
-	// Internal fields that track "cached" data.
-	mem_t          pack_mem;
 };
 typedef struct cntl_s cntl_t;
 
@@ -1188,9 +1181,8 @@ typedef void (*obj_pack_fn_t)
       const struct obj_s*     a,
             struct obj_s*     ap,
       const struct cntx_s*    cntx,
-            struct rntm_s*    rntm,
-            struct cntl_s*    cntl,
-      const struct thrinfo_s* thread
+      const struct cntl_s*    cntl,
+            struct thrinfo_s* thread
     );
 
 typedef void (*obj_ker_fn_t)
@@ -1199,9 +1191,8 @@ typedef void (*obj_ker_fn_t)
       const struct obj_s*     b,
       const struct obj_s*     c,
       const struct cntx_s*    cntx,
-            struct rntm_s*    rntm,
-            struct cntl_s*    cntl,
-      const struct thrinfo_s* thread
+      const struct cntl_s*    cntl,
+            struct thrinfo_s* thread
     );
 
 typedef struct obj_s
@@ -1461,15 +1452,6 @@ typedef struct rntm_s
 	bool      pack_a; // enable/disable packing of left-hand matrix A.
 	bool      pack_b; // enable/disable packing of right-hand matrix B.
 	bool      l3_sup; // enable/disable small matrix handling in level-3 ops.
-
-	// "Internal" fields: these should not be exposed to the end-user.
-
-	// The small block pool, which is attached in the l3 thread decorator.
-	pool_t*   sba_pool;
-
-	// The packing block allocator, which is attached in the l3 thread decorator.
-	pba_t*    pba;
-
 } rntm_t;
 
 

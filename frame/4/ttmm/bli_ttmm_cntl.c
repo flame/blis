@@ -43,7 +43,7 @@ static void_fp blk_vars[2] = { bli_ttmm_l_blk_var1, bli_ttmm_u_blk_var1 };
 cntl_t* bli_ttmm_cntl_create
      (
        uplo_t  uplo,
-       rntm_t* rntm
+       pool_t* pool
      )
 {
 	dim_t uplo_i;
@@ -56,7 +56,7 @@ cntl_t* bli_ttmm_cntl_create
 
 	cntl_t* ttmm_x_leaf = bli_ttmm_cntl_create_node
 	(
-	  rntm,
+	  pool,
 	  BLIS_NO_PART,
 	  1, 1,
 	  2,
@@ -66,7 +66,7 @@ cntl_t* bli_ttmm_cntl_create
 
 	cntl_t* ttmm_x_inner = bli_ttmm_cntl_create_node
 	(
-	  rntm,
+	  pool,
 	  BLIS_KC,
 	  1, 1,
 	  1,
@@ -76,7 +76,7 @@ cntl_t* bli_ttmm_cntl_create
 
 	cntl_t* ttmm_x_outer = bli_ttmm_cntl_create_node
 	(
-	  rntm,
+	  pool,
 	  BLIS_KC,
 	  4, 1,
 	  0,
@@ -91,19 +91,18 @@ cntl_t* bli_ttmm_cntl_create
 
 void bli_ttmm_cntl_free
      (
-       rntm_t*    rntm,
-       cntl_t*    cntl,
-       thrinfo_t* thread
+       pool_t* pool,
+       cntl_t* cntl
      )
 {
-	bli_cntl_free( rntm, cntl, thread );
+	bli_cntl_free( pool, cntl );
 }
 
 // -----------------------------------------------------------------------------
 
 cntl_t* bli_ttmm_cntl_create_node
      (
-       rntm_t* rntm,
+       pool_t* pool,
        bszid_t bszid,
        dim_t   scale_num,
        dim_t   scale_den,
@@ -112,7 +111,7 @@ cntl_t* bli_ttmm_cntl_create_node
        cntl_t* sub_node
      )
 {
-	ttmm_params_t* params = bli_sba_acquire( rntm, sizeof( ttmm_params_t ) );
+	ttmm_params_t* params = bli_sba_acquire( pool, sizeof( ttmm_params_t ) );
 
 	params->size      = sizeof( ttmm_params_t );
 	params->scale_num = scale_num;
@@ -121,7 +120,7 @@ cntl_t* bli_ttmm_cntl_create_node
 
 	return bli_cntl_create_node
 	(
-	  rntm,
+	  pool,
 	  BLIS_NOID,
 	  bszid,
 	  var_func,

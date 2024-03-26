@@ -40,11 +40,13 @@
 #define bli_scopyris( ar, ai, br, bi ) \
 { \
 	(br) = (ar); \
+    ( void )ai; ( void )bi; \
 }
 
 #define bli_dcopyris( ar, ai, br, bi ) \
 { \
 	(br) = (ar); \
+    ( void )ai; ( void )bi; \
 }
 
 #define bli_ccopyris( ar, ai, br, bi ) \
@@ -59,23 +61,23 @@
 	(bi) = (ai); \
 }
 
-#define bli_sscopyris( ar, ai, br, bi )  bli_scopyris( ar, 0.0F, br, bi )
-#define bli_dscopyris( ar, ai, br, bi )  bli_scopyris( ar, 0.0,  br, bi )
+#define bli_sscopyris( ar, ai, br, bi )  { bli_scopyris( ar, 0.0F, br, bi ); ( void )ai; }
+#define bli_dscopyris( ar, ai, br, bi )  { bli_scopyris( ar, 0.0,  br, bi ); ( void )ai; }
 #define bli_cscopyris( ar, ai, br, bi )  bli_scopyris( ar, ai,   br, bi )
 #define bli_zscopyris( ar, ai, br, bi )  bli_scopyris( ar, ai,   br, bi )
 
-#define bli_sdcopyris( ar, ai, br, bi )  bli_dcopyris( ar, 0.0F, br, bi )
-#define bli_ddcopyris( ar, ai, br, bi )  bli_dcopyris( ar, 0.0,  br, bi )
+#define bli_sdcopyris( ar, ai, br, bi )  { bli_dcopyris( ar, 0.0F, br, bi ); ( void )ai; }
+#define bli_ddcopyris( ar, ai, br, bi )  { bli_dcopyris( ar, 0.0,  br, bi ); ( void )ai; }
 #define bli_cdcopyris( ar, ai, br, bi )  bli_dcopyris( ar, ai,   br, bi )
 #define bli_zdcopyris( ar, ai, br, bi )  bli_dcopyris( ar, ai,   br, bi )
 
-#define bli_sccopyris( ar, ai, br, bi )  bli_ccopyris( ar, 0.0F, br, bi )
-#define bli_dccopyris( ar, ai, br, bi )  bli_ccopyris( ar, 0.0,  br, bi )
+#define bli_sccopyris( ar, ai, br, bi )  { bli_ccopyris( ar, 0.0F, br, bi ); ( void )ai; }
+#define bli_dccopyris( ar, ai, br, bi )  { bli_ccopyris( ar, 0.0,  br, bi ); ( void )ai; }
 #define bli_cccopyris( ar, ai, br, bi )  bli_ccopyris( ar, ai,   br, bi )
 #define bli_zccopyris( ar, ai, br, bi )  bli_ccopyris( ar, ai,   br, bi )
 
-#define bli_szcopyris( ar, ai, br, bi )  bli_zcopyris( ar, 0.0F, br, bi )
-#define bli_dzcopyris( ar, ai, br, bi )  bli_zcopyris( ar, 0.0,  br, bi )
+#define bli_szcopyris( ar, ai, br, bi )  { bli_zcopyris( ar, 0.0F, br, bi ); ( void )ai; }
+#define bli_dzcopyris( ar, ai, br, bi )  { bli_zcopyris( ar, 0.0,  br, bi ); ( void )ai; }
 #define bli_czcopyris( ar, ai, br, bi )  bli_zcopyris( ar, ai,   br, bi )
 #define bli_zzcopyris( ar, ai, br, bi )  bli_zcopyris( ar, ai,   br, bi )
 

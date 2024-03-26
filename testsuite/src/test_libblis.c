@@ -2675,17 +2675,20 @@ void libblis_test_mobj_create( test_params_t* params, num_t dt, trans_t trans, c
 }
 
 
-cntl_t* libblis_test_pobj_create( bszid_t bmult_id_m, bszid_t bmult_id_n, invdiag_t inv_diag, pack_t pack_schema, packbuf_t pack_buf, obj_t* a, obj_t* p, cntx_t* cntx, rntm_t* rntm )
+thrinfo_t* libblis_test_pobj_create( bszid_t bmult_id_m, bszid_t bmult_id_n, invdiag_t inv_diag, pack_t pack_schema, packbuf_t pack_buf, obj_t* a, obj_t* p, cntx_t* cntx )
 {
-	bool   does_inv_diag;
+	bool does_inv_diag;
 
 	if ( inv_diag == BLIS_NO_INVERT_DIAG ) does_inv_diag = FALSE;
 	else                                   does_inv_diag = TRUE;
 
+	rntm_t rntm;
+	bli_rntm_init( &rntm );
+
 	// Create a control tree node for the packing operation.
 	cntl_t* cntl = bli_packm_cntl_create_node
 	(
-	  NULL, // we don't need the small block allocator from the runtime.
+	  NULL, // pass NULL as the pool so that malloc() is used.
 	  NULL, // func ptr is not referenced b/c we don't call via l3 _int().
 	  bmult_id_m,
 	  bmult_id_n,
@@ -2697,12 +2700,17 @@ cntl_t* libblis_test_pobj_create( bszid_t bmult_id_m, bszid_t bmult_id_n, invdia
 	  NULL  // no child node needed
 	);
 
-	// Pack the contents of A to P.
-	bli_packm_blk_var1( a, p, cntx, rntm, cntl, &BLIS_PACKM_SINGLE_THREADED );
+	thrinfo_t* thread = bli_l3_thrinfo_create( 0, &BLIS_SINGLE_COMM, NULL, &rntm, cntl );
 
-	// Return the control tree pointer so the caller can free the cntl_t and its
+	// Pack the contents of A to P.
+	bli_packm_blk_var1( a, p, cntx, cntl, thread );
+
+	// Free the control tree.
+	bli_l3_cntl_free( NULL, cntl );
+
+	// Return the thread control tree pointer so the caller can free the thrinfo_t and its
 	// mem_t entry later on.
-	return cntl;
+	return thread;
 }
 
 

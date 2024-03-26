@@ -40,9 +40,8 @@ bool bli_packm_init
        const obj_t*  c,
              obj_t*  p,
        const cntx_t* cntx,
-             rntm_t* rntm,
-             cntl_t* cntl,
-       const thrinfo_t* thread
+       const cntl_t* cntl,
+             thrinfo_t* thread
      )
 {
 	bli_init_once();
@@ -179,7 +178,7 @@ bool bli_packm_init
 	// Update the buffer address in p to point to the buffer associated
 	// with the mem_t entry acquired from the memory broker (now cached in
 	// the control tree node).
-	void* buffer = bli_packm_alloc( size_p, rntm, cntl, thread );
+	void* buffer = bli_packm_alloc( size_p, cntl, thread );
 	bli_obj_set_buffer( buffer, p );
 
 	return true;

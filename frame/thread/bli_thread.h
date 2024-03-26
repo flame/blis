@@ -42,29 +42,30 @@
 
 // Include thread info (thrinfo_t) object definitions and prototypes.
 #include "bli_thrinfo.h"
-#include "bli_thrinfo_sup.h"
 
-// Include some operation-specific thrinfo_t prototypes.
-// Note that the bli_packm_thrinfo.h must be included before the others!
-#include "bli_packm_thrinfo.h"
-#include "bli_l3_thrinfo.h"
+// Thread lanuch prototypes. Must go before including implementation headers.
+typedef void (*thread_func_t)( thrcomm_t* gl_comm, dim_t tid, const void* params );
 
-// Include the level-3 thread decorator and related definitions and prototypes
-// for the conventional code path.
-#include "bli_l3_decor.h"
-
-// Include the level-3 thread decorator and related definitions and prototypes
-// for the sup code path.
-#include "bli_l3_sup_decor.h"
+// Include threading implementations.
+#include "bli_thread_openmp.h"
+#include "bli_thread_pthreads.h"
+#include "bli_thread_single.h"
 
 // Initialization-related prototypes.
 void bli_thread_init( void );
 void bli_thread_finalize( void );
 
+BLIS_EXPORT_BLIS void bli_thread_launch
+     (
+             timpl_t       ti,
+             dim_t         nt,
+             thread_func_t func,
+       const void*         params
+     );
+
 // Thread range-related prototypes.
 
-BLIS_EXPORT_BLIS
-void bli_thread_range_sub
+BLIS_EXPORT_BLIS void bli_thread_range_sub
      (
        const thrinfo_t* thread,
              dim_t      n,
@@ -224,8 +225,8 @@ BLIS_INLINE void bli_thread_range_jrir_rr
      )
 {
 	// Use interleaved partitioning of jr/ir loops.
-	*start = bli_thread_work_id( thread );
-	*inc   = bli_thread_n_way( thread );
+	*start = bli_thrinfo_work_id( thread );
+	*inc   = bli_thrinfo_n_way( thread );
 	*end   = n;
 }
 
@@ -295,8 +296,8 @@ BLIS_INLINE void bli_thread_range_weighted_jrir
 #else
 
 	// Use interleaved partitioning of jr/ir loops.
-	*start = bli_thread_work_id( thread );
-	*inc   = bli_thread_n_way( thread );
+	*start = bli_thrinfo_work_id( thread );
+	*inc   = bli_thrinfo_n_way( thread );
 	*end   = n;
 
 #endif

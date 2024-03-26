@@ -46,20 +46,18 @@ void bli_gemmt_x_ker_var2
        const obj_t*  ah,
        const obj_t*  c,
        const cntx_t* cntx,
-             rntm_t* rntm,
-             cntl_t* cntl,
+       const cntl_t* cntl,
              thrinfo_t* thread
      )
 {
-	dim_t      uplo;
-	l3_var_oft f;
+	dim_t uplo;
 
 	// Set a bool based on the uplo field of C's root object.
 	if ( bli_obj_root_is_lower( c ) ) uplo = 0;
 	else                              uplo = 1;
 
 	// Index into the variant array to extract the correct function pointer.
-	f = vars[uplo];
+	l3_var_oft f = vars[uplo];
 
 	// Call the macrokernel.
 	f
@@ -68,7 +66,6 @@ void bli_gemmt_x_ker_var2
 	  ah,
 	  c,
 	  cntx,
-	  rntm,
 	  cntl,
 	  thread
 	);

@@ -53,12 +53,11 @@ typedef struct
 \
 void PASTEMAC0(opname) \
      ( \
-       const obj_t*  a, \
-       const obj_t*  b, \
-       const obj_t*  c, \
-       const cntx_t* cntx, \
-             rntm_t* rntm, \
-             cntl_t* cntl, \
+       const obj_t*     a, \
+       const obj_t*     b, \
+       const obj_t*     c, \
+       const cntx_t*    cntx, \
+       const cntl_t*    cntl, \
              thrinfo_t* thread  \
      );
 

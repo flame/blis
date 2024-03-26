@@ -67,7 +67,7 @@ void bls_gemm_ex
        const obj_t*  beta,
        const obj_t*  c,
        const cntx_t* cntx,
-             rntm_t* rntm
+       const rntm_t* rntm
      )
 {
 	bli_init_once();
@@ -75,8 +75,8 @@ void bls_gemm_ex
 	// Initialize a local runtime with global settings if necessary. Note
 	// that in the case that a runtime is passed in, we make a local copy.
 	rntm_t rntm_l;
-	if ( rntm == NULL ) { bli_rntm_init_from_global( &rntm_l ); rntm = &rntm_l; }
-	else                { rntm_l = *rntm;                       rntm = &rntm_l; }
+	if ( rntm == NULL ) { bli_rntm_init_from_global( &rntm_l ); }
+	else                { rntm_l = *rntm;                       }
 
 	// Set the .pack_a and .pack_b fields to TRUE. This is only needed because
 	// this sandbox uses bli_thrinfo_sup_grow(), which calls
@@ -87,8 +87,8 @@ void bls_gemm_ex
 	// while this sandbox implementation executes (and it also reinforces the
 	// fact that we *are* indeed packing A and B, albeit not in the sup context
 	// originally envisioned for the .pack_a and .pack_b fields).
-	bli_rntm_set_pack_a( TRUE, rntm );
-	bli_rntm_set_pack_b( TRUE, rntm );
+	bli_rntm_set_pack_a( TRUE, &rntm_l );
+	bli_rntm_set_pack_b( TRUE, &rntm_l );
 
 	// Obtain a valid (native) context from the gks if necessary.
 	// NOTE: This must be done before calling the _check() function, since
@@ -166,7 +166,7 @@ void bls_gemm_ex
 	  bli_obj_length( &c_local ),
 	  bli_obj_width( &c_local ),
 	  bli_obj_width( &a_local ),
-	  rntm
+	  &rntm_l
 	);
 
 	// Spawn threads (if applicable), where bls_gemm_int() is the thread entry
@@ -182,7 +182,7 @@ void bls_gemm_ex
 	  ( obj_t* )beta,
 	  ( obj_t* )&c_local,
 	  ( cntx_t* )cntx,
-	  rntm
+	  &rntm_l
 	);
 }
 

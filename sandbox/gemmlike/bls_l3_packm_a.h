@@ -41,8 +41,6 @@ void PASTECH2(bls_,ch,opname) \
        dim_t            k, \
        dim_t            mr, \
        cntx_t* restrict cntx, \
-       rntm_t* restrict rntm, \
-       mem_t*  restrict mem, \
        thrinfo_t* restrict thread  \
      ); \
 
@@ -51,23 +49,6 @@ GENTPROT( float,    s, packm_init_mem_a )
 GENTPROT( double,   d, packm_init_mem_a )
 GENTPROT( scomplex, c, packm_init_mem_a )
 GENTPROT( dcomplex, z, packm_init_mem_a )
-
-
-#undef  GENTPROT
-#define GENTPROT( ctype, ch, opname ) \
-\
-void PASTECH2(bls_,ch,opname) \
-     ( \
-       rntm_t* restrict rntm, \
-       mem_t*  restrict mem, \
-       thrinfo_t* restrict thread  \
-     ); \
-
-//INSERT_GENTPROT_BASIC0( packm_finalize_mem_a )
-GENTPROT( float,    s, packm_finalize_mem_a )
-GENTPROT( double,   d, packm_finalize_mem_a )
-GENTPROT( scomplex, c, packm_finalize_mem_a )
-GENTPROT( dcomplex, z, packm_finalize_mem_a )
 
 
 #undef  GENTPROT
@@ -109,8 +90,6 @@ void PASTECH2(bls_,ch,opname) \
        ctype** restrict p, inc_t* restrict rs_p, inc_t* restrict cs_p, \
                                                  inc_t* restrict ps_p, \
        cntx_t* restrict cntx, \
-       rntm_t* restrict rntm, \
-       mem_t*  restrict mem, \
        thrinfo_t* restrict thread  \
      ); \
 

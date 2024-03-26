@@ -40,8 +40,7 @@ void bli_gemm_front
        const obj_t*  beta,
        const obj_t*  c,
        const cntx_t* cntx,
-             rntm_t* rntm,
-             cntl_t* cntl
+             rntm_t* rntm
      );
 
 #ifdef BLIS_ENABLE_SMALL_MATRIX
@@ -53,7 +52,7 @@ err_t bli_gemm_small
        const obj_t*  beta,
        const obj_t*  c,
        const cntx_t* cntx,
-             cntl_t* cntl
+       const cntl_t* cntl
      );
 #endif
 

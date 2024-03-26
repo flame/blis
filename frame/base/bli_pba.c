@@ -37,13 +37,13 @@
 #include "blis.h"
 
 // Statically initialize the mutex within the packing block allocator object.
-static pba_t pba = { .mutex = BLIS_PTHREAD_MUTEX_INITIALIZER };
+static pba_t global_pba = { .mutex = BLIS_PTHREAD_MUTEX_INITIALIZER };
 
 // -----------------------------------------------------------------------------
 
 pba_t* bli_pba_query( void )
 {
-    return &pba;
+    return &global_pba;
 }
 
 void bli_pba_init
@@ -92,17 +92,12 @@ void bli_pba_finalize
 
 void bli_pba_acquire_m
      (
-       rntm_t*   rntm,
+       pba_t*    pba,
        siz_t     req_size,
        packbuf_t buf_type,
        mem_t*    mem
      )
 {
-	pool_t* pool;
-	pblk_t* pblk;
-	dim_t   pi;
-	err_t   r_val;
-
 	// If the internal memory pools for packing block allocator are disabled,
 	// we spoof the buffer type as BLIS_BUFFER_FOR_GEN_USE to induce the
 	// immediate usage of bli_pba_malloc().
@@ -115,10 +110,6 @@ void bli_pba_acquire_m
 	#endif
 #endif
 
-	// Query the memory broker from the runtime.
-	pba_t* pba = bli_rntm_pba( rntm );
-
-
 	if ( buf_type == BLIS_BUFFER_FOR_GEN_USE )
 	{
 		malloc_ft malloc_fp  = bli_pba_malloc_fp( pba );
@@ -126,6 +117,7 @@ void bli_pba_acquire_m
 
 		// For general-use buffer requests, dynamically allocating memory
 		// is assumed to be sufficient.
+		err_t r_val;
 		void* buf = bli_fmalloc_align( malloc_fp, req_size, align_size, &r_val );
 
 		// Initialize the mem_t object with:
@@ -148,11 +140,11 @@ void bli_pba_acquire_m
 
 		// Map the requested packed buffer type to a zero-based index, which
 		// we then use to select the corresponding memory pool.
-		pi   = bli_packbuf_index( buf_type );
-		pool = bli_pba_pool( pi, pba );
+		dim_t   pi   = bli_packbuf_index( buf_type );
+		pool_t* pool = bli_pba_pool( pi, pba );
 
 		// Extract the address of the pblk_t struct within the mem_t.
-		pblk = bli_mem_pblk( mem );
+		pblk_t* pblk = bli_mem_pblk( mem );
 
 		// Acquire the mutex associated with the pba object.
 		bli_pba_lock( pba );
@@ -197,13 +189,10 @@ void bli_pba_acquire_m
 
 void bli_pba_release
      (
-       rntm_t* rntm,
-       mem_t*  mem
+       pba_t* pba,
+       mem_t* mem
      )
 {
-	// Query the memory broker from the runtime.
-	pba_t* pba = bli_rntm_pba( rntm );
-
 	// Extract the buffer type so we know what kind of memory was allocated.
 	packbuf_t buf_type = bli_mem_buf_type( mem );
 

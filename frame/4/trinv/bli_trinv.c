@@ -69,6 +69,18 @@ err_t bli_trinv_ex
 	if ( rntm == NULL ) { bli_rntm_init_from_global( &rntm_l ); rntm = &rntm_l; }
 	else                { rntm_l = *rntm;                       rntm = &rntm_l; }
 
+	// Check out an array_t from the small block allocator. This is done
+	// with an internal lock to ensure only one application thread accesses
+	// the sba at a time. bli_sba_checkout_array() will also automatically
+	// resize the array_t, if necessary.
+	// NOTE: We use 1 for the number of thread slots in the array_t because
+	// this front-end function does not use a thread decorator, so we'll only
+	// need a small block pool for one thread.
+	const dim_t nt  = 1;
+	const dim_t tid = 0;
+	array_t* array    = bli_sba_checkout_array( nt );
+	pool_t*  sba_pool = bli_apool_array_elem( tid, array );
+
 	// Alias matrix A in case we need to apply any transformations.
 	bli_obj_alias_to( a, &a_local );
 
@@ -86,13 +98,18 @@ err_t bli_trinv_ex
 	const diag_t diaga = bli_obj_diag( &a_local );
 
 	// Create a control tree for the uplo and diag encoded in A.
-	cntl_t* cntl = bli_trinv_cntl_create( uploa, diaga, rntm );
+	cntl_t* cntl = bli_trinv_cntl_create( uploa, diaga, sba_pool );
 
 	// Pass the control tree into the internal back-end.
 	err_t r_val = bli_trinv_int( &a_local, cntx, rntm, cntl );
 
 	// Free the control tree.
-	bli_trinv_cntl_free( rntm, cntl, NULL );
+	bli_trinv_cntl_free( sba_pool, cntl );
+
+	// Check the array_t back into the small block allocator. Similar to the
+	// check-out, this is done using a lock embedded within the sba to ensure
+	// mutual exclusion.
+	bli_sba_checkin_array( array );
 
 	return r_val;
 }

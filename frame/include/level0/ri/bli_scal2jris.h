@@ -40,6 +40,7 @@
 #define bli_rxscal2jris( ar, ai, xr, xi, yr, yi ) \
 { \
 	(yr) = (ar) * (xr); \
+    ( void )ai; ( void )xi; ( void )yi; \
 }
 
 #define bli_cxscal2jris( ar, ai, xr, xi, yr, yi ) \
@@ -51,18 +52,21 @@
 #define bli_roscal2jris( ar, ai, xr, xi, yr, yi ) \
 { \
 	(yr) = (ar) * (xr) + (ai) * (xi); \
+    ( void )yi; \
 }
 
 #define bli_crscal2jris( ar, ai, xr, xi, yr, yi ) \
 { \
 	(yr) = (ar) *  (xr); \
 	(yi) = (ar) * -(xi); \
+    ( void )ai; \
 }
 
 #define bli_rcscal2jris( ar, ai, xr, xi, yr, yi ) \
 { \
 	(yr) = (ar) * (xr); \
 	(yi) = (ai) * (xr); \
+    ( void )xi; \
 }
 
 // Notes:

@@ -81,9 +81,8 @@ void bli_gemm_ker_var2
        const obj_t*  b,
        const obj_t*  c,
        const cntx_t* cntx,
-             rntm_t* rntm,
-             cntl_t* cntl,
-             thrinfo_t* thread
+       const cntl_t* cntl,
+             thrinfo_t* thread_par
      )
 {
 	      num_t  dt_exec   = bli_obj_exec_dt( c );
@@ -254,13 +253,14 @@ void bli_gemm_ker_var2
 	// The 'thread' argument points to the thrinfo_t node for the 2nd (jr)
 	// loop around the microkernel. Here we query the thrinfo_t node for the
 	// 1st (ir) loop around the microkernel.
+	thrinfo_t* thread = bli_thrinfo_sub_node( thread_par );
 	thrinfo_t* caucus = bli_thrinfo_sub_node( thread );
 
 	// Query the number of threads and thread ids for each loop.
-	dim_t jr_nt  = bli_thread_n_way( thread );
-	dim_t jr_tid = bli_thread_work_id( thread );
-	dim_t ir_nt  = bli_thread_n_way( caucus );
-	dim_t ir_tid = bli_thread_work_id( caucus );
+	dim_t jr_nt  = bli_thrinfo_n_way( thread );
+	dim_t jr_tid = bli_thrinfo_work_id( thread );
+	dim_t ir_nt  = bli_thrinfo_n_way( caucus );
+	dim_t ir_tid = bli_thrinfo_work_id( caucus );
 
 	dim_t jr_start, jr_end;
 	dim_t ir_start, ir_end;

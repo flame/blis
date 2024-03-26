@@ -40,8 +40,7 @@ void bli_l3_packa
        const obj_t*  b,
        const obj_t*  c,
        const cntx_t* cntx,
-             rntm_t* rntm,
-             cntl_t* cntl,
+       const cntl_t* cntl,
              thrinfo_t* thread
      )
 {
@@ -60,7 +59,6 @@ void bli_l3_packa
 	  &a_local,
 	  &a_pack,
 	  cntx,
-	  rntm,
 	  cntl,
 	  thread
 	);
@@ -74,7 +72,6 @@ void bli_l3_packa
 	  &BLIS_ONE,
 	  c,
 	  cntx,
-	  rntm,
 	  bli_cntl_sub_node( cntl ),
 	  bli_thrinfo_sub_node( thread )
 	);
@@ -88,8 +85,7 @@ void bli_l3_packb
        const obj_t*  b,
        const obj_t*  c,
        const cntx_t* cntx,
-             rntm_t* rntm,
-             cntl_t* cntl,
+       const cntl_t* cntl,
              thrinfo_t* thread
      )
 {
@@ -112,7 +108,6 @@ void bli_l3_packb
 	  &bt_local,
 	  &bt_pack,
 	  cntx,
-	  rntm,
 	  cntl,
 	  thread
 	);
@@ -129,7 +124,6 @@ void bli_l3_packb
 	  &BLIS_ONE,
 	  c,
 	  cntx,
-	  rntm,
 	  bli_cntl_sub_node( cntl ),
 	  bli_thrinfo_sub_node( thread )
 	);

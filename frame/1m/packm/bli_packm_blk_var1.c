@@ -54,12 +54,11 @@ static void_fp GENARRAY2_ALL(packm_struc_cxk_md,packm_struc_cxk_md);
 
 void bli_packm_blk_var1
      (
-       const obj_t*   c,
-             obj_t*   p,
-       const cntx_t*  cntx,
-             rntm_t*  rntm,
-             cntl_t*  cntl,
-       const thrinfo_t* thread
+       const obj_t*     c,
+             obj_t*     p,
+       const cntx_t*    cntx,
+       const cntl_t*    cntl,
+             thrinfo_t* thread_par
      )
 {
 	// Extract various fields from the control tree.
@@ -68,11 +67,17 @@ void bli_packm_blk_var1
 	bool   revifup = bli_cntl_packm_params_rev_iter_if_upper( cntl );
 	bool   reviflo = bli_cntl_packm_params_rev_iter_if_lower( cntl );
 
-	// Every thread initializes p and determines the size of memory
-	// block needed (which gets embedded into the otherwise "blank" mem_t
-	// entry in the control tree node). Return early if no packing is required.
-	if ( !bli_packm_init( c, p, cntx, rntm, cntl, thread ) )
+	// Every thread initializes p and determines the size of memory block
+	// needed (which gets embedded into the otherwise "blank" mem_t entry
+	// in the control tree node). Return early if no packing is required.
+	if ( !bli_packm_init( c, p, cntx, cntl, bli_thrinfo_sub_node( thread_par ) ) )
 		return;
+
+	// Use the sub-prenode. In bli_l3_thrinfo_grow(), this node was created to
+	// represent the team of threads as a group of single-member thread teams.
+	// This is necessary since the all of the work distribution function depend
+	// on the work_id and n_way fields.
+	thrinfo_t* thread = bli_thrinfo_sub_prenode( thread_par );
 
 	// Check parameters.
 	if ( bli_error_checking_is_enabled() )
@@ -135,11 +140,11 @@ void bli_packm_blk_var1
 		packm_ker_cast = params->ukr_fn[ dt_c ][ dt_p ];
 	}
 
-	/* Compute the total number of iterations we'll need. */
+	// Compute the total number of iterations we'll need.
 	dim_t n_iter = iter_dim / panel_dim_max + ( iter_dim % panel_dim_max ? 1 : 0 );
 
-	/* Set the initial values and increments for indices related to C and P
-	   based on whether reverse iteration was requested. */
+	// Set the initial values and increments for indices related to C and P
+	// based on whether reverse iteration was requested.
 	dim_t  ic0, ip0;
 	doff_t ic_inc, ip_inc;
 
@@ -159,10 +164,10 @@ void bli_packm_blk_var1
 		ip_inc = 1;
 	}
 
-	// Query the number of threads and thread ids from the current thread's
-	// packm thrinfo_t node.
-	const dim_t nt  = bli_thread_n_way( thread );
-	const dim_t tid = bli_thread_work_id( thread );
+	// Query the number of threads (single-member thread teams) and the thread
+	// team ids from the current thread's packm thrinfo_t node.
+	const dim_t nt  = bli_thrinfo_n_way( thread );
+	const dim_t tid = bli_thrinfo_work_id( thread );
 
 	// Determine the thread range and increment using the current thread's
 	// packm thrinfo_t node. NOTE: The definition of bli_thread_range_jrir()

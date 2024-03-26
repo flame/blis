@@ -44,7 +44,7 @@ cntl_t* bli_trinv_cntl_create
      (
        uplo_t  uploa,
        diag_t  diaga,
-       rntm_t* rntm
+       pool_t* pool
      )
 {
 	dim_t uplo_i;
@@ -57,7 +57,7 @@ cntl_t* bli_trinv_cntl_create
 
 	cntl_t* trinv_xx_leaf = bli_trinv_cntl_create_node
 	(
-	  rntm,
+	  pool,
 	  BLIS_NO_PART,
 	  1, 1,
 	  2,
@@ -67,7 +67,7 @@ cntl_t* bli_trinv_cntl_create
 
 	cntl_t* trinv_xx_inner = bli_trinv_cntl_create_node
 	(
-	  rntm,
+	  pool,
 	  BLIS_KC,
 	  1, 1,
 	  1,
@@ -77,7 +77,7 @@ cntl_t* bli_trinv_cntl_create
 
 	cntl_t *trinv_xx_outer = bli_trinv_cntl_create_node
 	(
-	  rntm,
+	  pool,
 	  BLIS_KC,
 	  4, 1,
 	  0,
@@ -92,19 +92,18 @@ cntl_t* bli_trinv_cntl_create
 
 void bli_trinv_cntl_free
      (
-       rntm_t*    rntm,
-       cntl_t*    cntl,
-       thrinfo_t* thread
+       pool_t* pool,
+       cntl_t* cntl
      )
 {
-	bli_cntl_free( rntm, cntl, thread );
+	bli_cntl_free( pool, cntl );
 }
 
 // -----------------------------------------------------------------------------
 
 cntl_t* bli_trinv_cntl_create_node
      (
-       rntm_t* rntm,
+       pool_t* pool,
        bszid_t bszid,
        dim_t   scale_num,
        dim_t   scale_den,
@@ -113,7 +112,7 @@ cntl_t* bli_trinv_cntl_create_node
        cntl_t* sub_node
      )
 {
-	trinv_params_t* params = bli_sba_acquire( rntm, sizeof( trinv_params_t ) );
+	trinv_params_t* params = bli_sba_acquire( pool, sizeof( trinv_params_t ) );
 
 	params->size      = sizeof( trinv_params_t );
 	params->scale_num = scale_num;
@@ -122,7 +121,7 @@ cntl_t* bli_trinv_cntl_create_node
 
 	return bli_cntl_create_node
 	(
-	  rntm,
+	  pool,
 	  BLIS_NOID,
 	  bszid,
 	  var_func,

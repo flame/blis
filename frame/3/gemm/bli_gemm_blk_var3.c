@@ -36,19 +36,20 @@
 
 void bli_gemm_blk_var3
      (
-       const obj_t*  a,
-       const obj_t*  b,
-       const obj_t*  c,
-       const cntx_t* cntx,
-             rntm_t* rntm,
-             cntl_t* cntl,
-             thrinfo_t* thread
+       const obj_t*     a,
+       const obj_t*     b,
+       const obj_t*     c,
+       const cntx_t*    cntx,
+       const cntl_t*    cntl,
+             thrinfo_t* thread_par
      )
 {
 	obj_t ap, bp, cs;
 	bli_obj_alias_to( a, &ap );
 	bli_obj_alias_to( b, &bp );
 	bli_obj_alias_to( c, &cs );
+
+	thrinfo_t* thread = bli_thrinfo_sub_node( thread_par );
 
 	// Determine the direction in which to partition (forwards or backwards).
 	dir_t direct = bli_l3_direct( &ap, &bp, &cs, cntl );
@@ -83,12 +84,9 @@ void bli_gemm_blk_var3
 		  &BLIS_ONE,
 		  &cs,
 		  cntx,
-		  rntm,
 		  bli_cntl_sub_node( cntl ),
-		  bli_thrinfo_sub_node( thread )
+		  thread
 		);
-
-		bli_thread_barrier( rntm, bli_thrinfo_sub_node( thread ) );
 
 		// This variant executes multiple rank-k updates. Therefore, if the
 		// internal beta scalar on matrix C is non-zero, we must use it
