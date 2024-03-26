@@ -138,10 +138,10 @@ BLIS_INLINE void bli_mem_set_size( siz_t size, mem_t* mem )
 
 #define BLIS_MEM_INITIALIZER \
         { \
-          BLIS_PBLK_INITIALIZER, \
-          BLIS_BUFFER_FOR_GEN_USE, \
-          NULL, \
-          0, \
+          /* .pblk     = */ BLIS_PBLK_INITIALIZER, \
+          /* .buf_type = */ BLIS_BUFFER_FOR_GEN_USE, \
+          /* .pool     = */ NULL, \
+          /* .size     = */ 0, \
         }
 
 
