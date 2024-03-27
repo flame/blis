@@ -10,7 +10,7 @@ if(NOT DEFINED BLIS_INSTALL_PATH)
     set(INC_PATH ${DIST_PATH}/include/${BLIS_CONFIG_FAMILY})
 else()
     set(LIB_PATH ${BLIS_INSTALL_PATH}/lib)
-    set(INC_PATH ${BLIS_INSTALL_PATH}/include/blis)
+    set(INC_PATH ${BLIS_INSTALL_PATH}/include/${BLIS_CONFIG_FAMILY})
 endif()
 
 # Include the corresponding make_defs.cmake that holds the required compiler options.

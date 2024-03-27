@@ -1034,7 +1034,7 @@ L40:
 
     /* Local variables */
     real sd;
-    extern real s_epsilon_();
+    extern real s_epsilon_(real *);
 
     /* Fortran I/O blocks */
     static cilist io___125 = { 0, 6, 0, fmt_99999, 0 };

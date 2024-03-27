@@ -10,7 +10,7 @@ if(NOT DEFINED BLIS_INSTALL_PATH)
     set(INC_PATH ${DIST_PATH}/include/${BLIS_CONFIG_FAMILY})
 else()
     set(LIB_PATH ${BLIS_INSTALL_PATH}/lib)
-    set(INC_PATH ${BLIS_INSTALL_PATH}/include/blis)
+    set(INC_PATH ${BLIS_INSTALL_PATH}/include/${BLIS_CONFIG_FAMILY})
 endif()
 
 # Include the corresponding make_defs.cmake that holds the required compiler options.
@@ -30,7 +30,7 @@ target_compile_options(f2c
                         ${CMISCFLAGS}
                         ${CLANGFLAGS}
                         # Suppress warnings about uninitialized functions
-                        -Wno-maybe-uninitialized -Wno-parentheses -Wfatal-errors
+                        -Wno-uninitialized -Wno-parentheses -Wfatal-errors
                     )
 target_compile_definitions(f2c
                             PRIVATE
@@ -74,7 +74,7 @@ foreach(source ${blastest_sources})
                             ${CMISCFLAGS}
                             ${CLANGFLAGS}
                             # Suppress warnings about uninitialized functions
-                            -Wno-parentheses -Wno-maybe-uninitialized 
+                            -Wno-parentheses -Wno-uninitialized
                         )
     target_compile_definitions(${exec_name}.x
                                 PRIVATE
@@ -128,7 +128,7 @@ if(WIN32 AND BUILD_SHARED_LIBS)
                      DEPENDS ${libblis_link}
                      COMMENT "`testblas` target is not available on Windows for shared builds of BLIS.  ${DETAILED_BLATEST_MESSAGE}"
                      )
-    add_custom_target(checkblas 
+    add_custom_target(checkblas
                       DEPENDS testblas
                       COMMENT "`checkblas` target is not available on Windows for shared builds of BLIS.  ${DETAILED_BLATEST_MESSAGE}"
                     )
