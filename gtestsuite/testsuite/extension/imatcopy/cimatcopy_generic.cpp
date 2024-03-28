@@ -33,24 +33,24 @@
 */
 
 #include <gtest/gtest.h>
-#include "test_omatcopy.h"
+#include "test_imatcopy.h"
 
-class somatcopyAPI :
+class cimatcopyAPI :
         public ::testing::TestWithParam<std::tuple<char,        // storage
                                                    char,        // trans
                                                    gtint_t,     // m
                                                    gtint_t,     // n
-                                                   float,       // alpha
-                                                   gtint_t,     // lda_inc
-                                                   gtint_t,     // ldb_inc
+                                                   scomplex,    // alpha
+                                                   gtint_t,     // lda_in_inc
+                                                   gtint_t,     // lda_out_inc
                                                    bool>> {};   // is_memory_test
 
-GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(somatcopyAPI);
+GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(cimatcopyAPI);
 
 // Tests using random numbers as vector elements.
-TEST_P( somatcopyAPI, FunctionalTest )
+TEST_P( cimatcopyAPI, FunctionalTest )
 {
-    using T = float;
+    using T = scomplex;
     //----------------------------------------------------------
     // Initialize values from the parameters passed through
     // test suite instantiation (INSTANTIATE_TEST_SUITE_P).
@@ -65,36 +65,36 @@ TEST_P( somatcopyAPI, FunctionalTest )
     gtint_t n = std::get<3>(GetParam());
     // alpha
     T alpha = std::get<4>(GetParam());
-    // lda_inc for A
-    gtint_t lda_inc = std::get<5>(GetParam());
-    // ldb_inc for B
-    gtint_t ldb_inc = std::get<6>(GetParam());
+    // lda_in_inc for A
+    gtint_t lda_in_inc = std::get<5>(GetParam());
+    // ldb_out_inc for A
+    gtint_t lda_out_inc = std::get<6>(GetParam());
     // is_memory_test
     bool is_memory_test = std::get<7>(GetParam());
 
     double thresh = 0.0;
     // Set the threshold for the errors
     if( ( alpha != testinghelpers::ZERO<T>() || alpha != testinghelpers::ONE<T>() ) )
-      thresh = testinghelpers::getEpsilon<T>();
+      thresh = 3 * testinghelpers::getEpsilon<T>();
 
     //----------------------------------------------------------
     //     Call generic test body using those parameters
     //----------------------------------------------------------
-    test_omatcopy<T>( storage, trans, m, n, alpha, lda_inc, ldb_inc, thresh, is_memory_test );
+    test_imatcopy<T>( storage, trans, m, n, alpha, lda_in_inc, lda_out_inc, thresh, is_memory_test );
 }
 
 // Test-case logger : Used to print the test-case details based on parameters
 // The string format is as follows :
-// {blas_/cblas_/bli_}_storage_trans_m_n_alpha_lda_ldb_{mem_test_enabled/mem_test_disabled}
-class somatcopyAPIPrint {
+// {blas_/cblas_/bli_}_storage_trans_m_n_alpha_lda_in_lda_out_{mem_test_enabled/mem_test_disabled}
+class cimatcopyAPIPrint {
 public:
     std::string operator()(
-        testing::TestParamInfo<std::tuple<char,char,gtint_t,gtint_t,float,gtint_t,gtint_t,bool>> str) const {
+        testing::TestParamInfo<std::tuple<char,char,gtint_t,gtint_t,scomplex,gtint_t,gtint_t,bool>> str) const {
         char storage   = std::get<0>(str.param);
         char trans     = std::get<1>(str.param);
         gtint_t m      = std::get<2>(str.param);
         gtint_t n      = std::get<3>(str.param);
-        float alpha    = std::get<4>(str.param);
+        scomplex alpha    = std::get<4>(str.param);
         gtint_t lda_inc = std::get<5>(str.param);
         gtint_t ldb_inc = std::get<6>(str.param);
         bool is_memory_test = std::get<7>(str.param);
@@ -108,16 +108,18 @@ public:
 #else  //#elif TEST_BLIS_TYPED
         std::string str_name = "bli_";
 #endif
-        str_name += std::string(&storage, 1);
+        str_name += "_" + std::string(&storage, 1);
         str_name += "_" + std::string(&trans, 1);
         str_name += "_" + std::to_string(m);
         str_name += "_" + std::to_string(n);
-        std::string alpha_str = ( alpha >= 0) ? std::to_string(int(alpha)) : ("m" + std::to_string(int(std::abs(alpha))));
+        std::string alpha_str = ( alpha.real >= 0) ? std::to_string(int(alpha.real)) : ("m" + std::to_string(int(std::abs(alpha.real))));
+        alpha_str += "pi" + (( alpha.imag >= 0) ? std::to_string(int(alpha.imag)) : ("m" + std::to_string(int(std::abs(alpha.imag)))));
         str_name = str_name + "_a" + alpha_str;
-        gtint_t lda = testinghelpers::get_leading_dimension( storage, 'n', m, n, lda_inc );
-        gtint_t ldb = testinghelpers::get_leading_dimension( storage, trans, m, n, ldb_inc );
-        str_name += "_lda" + std::to_string(lda);
-        str_name += "_ldb" + std::to_string(ldb);
+        char mat_trans = ( ( trans == 'n' ) || ( trans == 'r' ) )? 'n' : 't';
+        gtint_t lda_in = testinghelpers::get_leading_dimension( storage, 'n', m, n, lda_inc );
+        gtint_t lda_out = testinghelpers::get_leading_dimension( storage, mat_trans, m, n, ldb_inc );
+        str_name += "_lda_in_" + std::to_string(lda_in);
+        str_name += "_lda_out_" + std::to_string(lda_out);
         str_name += ( is_memory_test )? "_mem_test_enabled" : "_mem_test_disabled";
 
         return str_name;
@@ -125,10 +127,10 @@ public:
 };
 
 #if defined(TEST_BLAS) && (defined(REF_IS_MKL) || defined(REF_IS_OPENBLAS))
-// Black box testing for generic and main use of somatcopy.
+// Black box testing for generic and main use of cimatcopy.
 INSTANTIATE_TEST_SUITE_P(
         Blackbox,
-        somatcopyAPI,
+        cimatcopyAPI,
         ::testing::Combine(
             ::testing::Values('c'),                                          // storage format(currently only for BLAS testing)
             ::testing::Values('n', 't', 'r', 'c'),                           // trans(and/or conj) value
@@ -136,11 +138,12 @@ INSTANTIATE_TEST_SUITE_P(
                                                                              // 'r' - conjugate,    'c' - conjugate-transpose
             ::testing::Values(gtint_t(10), gtint_t(55), gtint_t(243)),       // m
             ::testing::Values(gtint_t(10), gtint_t(55), gtint_t(243)),       // n
-            ::testing::Values(2.0f, -3.0f, 1.0f, 0.0f),                      // alpha
+            ::testing::Values(scomplex{2.3, -3.5}, scomplex{-3.1, 1.7},
+                              scomplex{1.0, 0.0}, scomplex{0.0, 0.0}),       // alpha
             ::testing::Values(gtint_t(0), gtint_t(25)),                      // increment of lda
             ::testing::Values(gtint_t(0), gtint_t(17)),                      // increment of ldb
             ::testing::Values(false, true)                                   // is_memory_test
         ),
-        ::somatcopyAPIPrint()
+        ::cimatcopyAPIPrint()
     );
 #endif

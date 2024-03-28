@@ -33,25 +33,25 @@
 */
 
 #include <gtest/gtest.h>
-#include "test_omatcopy.h"
+#include "test_imatcopy.h"
 
-class somatcopyEVT :
+class dimatcopyEVT :
         public ::testing::TestWithParam<std::tuple<char,        // storage
                                                    char,        // trans
                                                    gtint_t,     // m
                                                    gtint_t,     // n
-                                                   float,       // alpha
+                                                   double,      // alpha
                                                    gtint_t,     // lda_inc
                                                    gtint_t,     // ldb_inc
-                                                   float,       // exval
+                                                   double,      // exval
                                                    bool>> {};   // is_nan_inf_test
 
-GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(somatcopyEVT);
+GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(dimatcopyEVT);
 
 // Tests using random numbers as vector elements.
-TEST_P( somatcopyEVT, NanInfCheck )
+TEST_P( dimatcopyEVT, NanInfCheck )
 {
-    using T = float;
+    using T = double;
     //----------------------------------------------------------
     // Initialize values from the parameters passed through
     // test suite instantiation (INSTANTIATE_TEST_SUITE_P).
@@ -84,24 +84,24 @@ TEST_P( somatcopyEVT, NanInfCheck )
     //     Call generic test body using those parameters
     //----------------------------------------------------------
     // Note: is_memory_test is passed as false(hard-coded), since memory tests are done in _generic.cpp files
-    test_omatcopy<T>( storage, trans, m, n, alpha, lda_inc, ldb_inc, thresh, false, is_nan_inf_test, exval );
+    test_imatcopy<T>( storage, trans, m, n, alpha, lda_inc, ldb_inc, thresh, false, is_nan_inf_test, exval );
 }
 
 // Test-case logger : Used to print the test-case details based on parameters
 // The string format is as follows :
 // {blas_/cblas_/bli_}_storage_trans_m_n_alpha_lda_ldb_{mem_test_enabled/mem_test_disabled}
-class somatcopyEVTPrint {
+class dimatcopyEVTPrint {
 public:
     std::string operator()(
-        testing::TestParamInfo<std::tuple<char,char,gtint_t,gtint_t,float,gtint_t,gtint_t,float,bool>> str) const {
+        testing::TestParamInfo<std::tuple<char,char,gtint_t,gtint_t,double,gtint_t,gtint_t,double,bool>> str) const {
         char storage    = std::get<0>(str.param);
         char trans      = std::get<1>(str.param);
         gtint_t m       = std::get<2>(str.param);
         gtint_t n       = std::get<3>(str.param);
-        float alpha  = std::get<4>(str.param);
+        double alpha  = std::get<4>(str.param);
         gtint_t lda_inc = std::get<5>(str.param);
         gtint_t ldb_inc = std::get<6>(str.param);
-        float exval  = std::get<7>(str.param);
+        double exval  = std::get<7>(str.param);
 // Currently, BLIS only has the BLAS standard wrapper for this API.
 // The CBLAS and BLIS strings are also added here(with macro guards),
 // in case we add the CBLAS and BLIS wrappers to the library in future.
@@ -129,13 +129,13 @@ public:
 
 #if defined(TEST_BLAS) && (defined(REF_IS_MKL) || defined(REF_IS_OPENBLAS))
 
-static float AOCL_NAN = std::numeric_limits<float>::quiet_NaN();
-static float AOCL_INF = std::numeric_limits<float>::infinity();
+static double AOCL_NAN = std::numeric_limits<double>::quiet_NaN();
+static double AOCL_INF = std::numeric_limits<double>::infinity();
 
-// EVT testing for somatcopy, with exception values in A matrix
+// EVT testing for dimatcopy, with exception values in A matrix
 INSTANTIATE_TEST_SUITE_P(
         matrixA,
-        somatcopyEVT,
+        dimatcopyEVT,
         ::testing::Combine(
             ::testing::Values('c'),                                                   // storage format(currently only for BLAS testing)
             ::testing::Values('n', 't', 'r', 'c'),                                    // trans(and/or conj) value
@@ -143,19 +143,19 @@ INSTANTIATE_TEST_SUITE_P(
                                                                                       // 'r' - conjugate,    'c' - conjugate-transpose
             ::testing::Values(gtint_t(10), gtint_t(55), gtint_t(243)),                // m
             ::testing::Values(gtint_t(10), gtint_t(55), gtint_t(243)),                // n
-            ::testing::Values(2.0f, -3.0f, 1.0f, 0.0f),                               // alpha
+            ::testing::Values(2.0, -3.0, 1.0, 0.0),                                   // alpha
             ::testing::Values(gtint_t(0), gtint_t(25)),                               // increment of lda
             ::testing::Values(gtint_t(0), gtint_t(17)),                               // increment of ldb
             ::testing::Values(AOCL_NAN, AOCL_INF, -AOCL_INF),                         // exval
             ::testing::Values(true)                                                   // is_nan_inf_test
         ),
-        ::somatcopyEVTPrint()
+        ::dimatcopyEVTPrint()
     );
 
-// EVT testing for somatcopy, with exception values in alpha
+// EVT testing for dimatcopy, with exception values in alpha
 INSTANTIATE_TEST_SUITE_P(
         alpha,
-        somatcopyEVT,
+        dimatcopyEVT,
         ::testing::Combine(
             ::testing::Values('c'),                                                   // storage format(currently only for BLAS testing)
             ::testing::Values('n', 't', 'r', 'c'),                                    // trans(and/or conj) value
@@ -166,9 +166,9 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(AOCL_NAN, AOCL_INF, -AOCL_INF),                         // alpha
             ::testing::Values(gtint_t(0), gtint_t(25)),                               // increment of lda
             ::testing::Values(gtint_t(0), gtint_t(17)),                               // increment of ldb
-            ::testing::Values(0.0f),                                                  // exval
+            ::testing::Values(0.0),                                                   // exval
             ::testing::Values(true)                                                   // is_nan_inf_test
         ),
-        ::somatcopyEVTPrint()
+        ::dimatcopyEVTPrint()
     );
 #endif

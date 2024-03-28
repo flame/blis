@@ -33,15 +33,15 @@
 */
 
 #include <gtest/gtest.h>
-#include "test_omatcopy.h"
+#include "test_omatcopy2.h"
 #include "common/wrong_inputs_helpers.h"
 #include "common/testing_helpers.h"
 #include "inc/check_error.h"
 
 template <typename T>
-class omatcopy_IIT_ERS : public ::testing::Test {};
+class omatcopy2_IIT_ERS : public ::testing::Test {};
 typedef ::testing::Types<float, double, scomplex, dcomplex> TypeParam;
-TYPED_TEST_SUITE(omatcopy_IIT_ERS, TypeParam);
+TYPED_TEST_SUITE(omatcopy2_IIT_ERS, TypeParam);
 
 using namespace testinghelpers::IIT;
 
@@ -55,11 +55,13 @@ using namespace testinghelpers::IIT;
     2. When m < 0
     3. When n < 0
     4. When lda < max(1, m).
-    5. When ldb < max(1, thresh), thresh set based on TRANS value
+    5. When stridea < 1.
+    6. When ldb < max(1, thresh), thresh set based on TRANS value
+    7. When strideb < 1.
 */
 
 // When TRANS is invalid
-TYPED_TEST(omatcopy_IIT_ERS, invalid_transa)
+TYPED_TEST(omatcopy2_IIT_ERS, invalid_transa)
 {
   using T = TypeParam;
   // Defining the A and B matrices with values for debugging purposes
@@ -71,14 +73,14 @@ TYPED_TEST(omatcopy_IIT_ERS, invalid_transa)
   T alpha;
   testinghelpers::initone<T>( alpha );
 
-  // Call OMATCOPY with a invalid value for TRANS value for the operation.
-  omatcopy<T>( 'Q', M, N, alpha, A.data(), LDA, B.data(), LDB);
+  // Call OMATCOPY2 with a invalid value for TRANS value for the operation.
+  omatcopy2<T>( 'Q', M, N, alpha, A.data(), LDA, 1, B.data(), LDB, 1 );
   // Use bitwise comparison (no threshold).
   computediff<T>( 'c', M, N, B.data(), B_ref.data(), LDB );
 }
 
 // When m < 0
-TYPED_TEST(omatcopy_IIT_ERS, m_lt_zero)
+TYPED_TEST(omatcopy2_IIT_ERS, m_lt_zero)
 {
   using T = TypeParam;
   // Defining the A and B matrices with values for debugging purposes
@@ -90,14 +92,14 @@ TYPED_TEST(omatcopy_IIT_ERS, m_lt_zero)
   T alpha;
   testinghelpers::initone<T>( alpha );
 
-  // Call OMATCOPY with a invalid m for the operation.
-  omatcopy<T>( TRANS, -1, N, alpha, A.data(), LDA, B.data(), LDB);
+  // Call OMATCOPY2 with a invalid m for the operation.
+  omatcopy2<T>( TRANS, -1, N, alpha, A.data(), LDA, 1, B.data(), LDB, 1 );
   // Use bitwise comparison (no threshold).
   computediff<T>( 'c', M, N, B.data(), B_ref.data(), LDB );
 }
 
 // When n < 0
-TYPED_TEST(omatcopy_IIT_ERS, n_lt_zero)
+TYPED_TEST(omatcopy2_IIT_ERS, n_lt_zero)
 {
   using T = TypeParam;
   // Defining the A and B matrices with values for debugging purposes
@@ -109,14 +111,14 @@ TYPED_TEST(omatcopy_IIT_ERS, n_lt_zero)
   T alpha;
   testinghelpers::initone<T>( alpha );
 
-  // Call OMATCOPY with a invalid n for the operation.
-  omatcopy<T>( TRANS, M, -1, alpha, A.data(), LDA, B.data(), LDB);
+  // Call OMATCOPY2 with a invalid n for the operation.
+  omatcopy2<T>( TRANS, M, -1, alpha, A.data(), LDA, 1, B.data(), LDB, 1 );
   // Use bitwise comparison (no threshold).
   computediff<T>( 'c', M, N, B.data(), B_ref.data(), LDB );
 }
 
 // When lda < m
-TYPED_TEST(omatcopy_IIT_ERS, invalid_lda)
+TYPED_TEST(omatcopy2_IIT_ERS, invalid_lda)
 {
   using T = TypeParam;
 
@@ -133,14 +135,33 @@ TYPED_TEST(omatcopy_IIT_ERS, invalid_lda)
   T alpha;
   testinghelpers::initone<T>( alpha );
 
-  // Call OMATCOPY with a invalid lda for the operation.
-  omatcopy<T>( 'n', m, n, alpha, A.data(), m - 1, B.data(), m);
+  // Call OMATCOPY2 with a invalid lda for the operation.
+  omatcopy2<T>( 'n', m, n, alpha, A.data(), m - 1, 1, B.data(), m, 1 );
   // Use bitwise comparison (no threshold).
   computediff<T>( 'c', m, n, B.data(), B_ref.data(), m );
 }
 
+// When stridea < 1
+TYPED_TEST(omatcopy2_IIT_ERS, invalid_stridea)
+{
+  using T = TypeParam;
+  // Defining the A and B matrices with values for debugging purposes
+  std::vector<T> A = testinghelpers::get_random_matrix<T>(-10, 10, 'c', 'n', M, N, LDA );
+  std::vector<T> B = testinghelpers::get_random_matrix<T>(-10, 10, 'c', 'n', M, N, LDB );
+  // Copy so that we check that the elements of B are not modified.
+  std::vector<T> B_ref(B);
+
+  T alpha;
+  testinghelpers::initone<T>( alpha );
+
+  // Call OMATCOPY2 with a invalid n for the operation.
+  omatcopy2<T>( TRANS, M, N, alpha, A.data(), LDA, 0, B.data(), LDB, 1 );
+  // Use bitwise comparison (no threshold).
+  computediff<T>( 'c', M, N, B.data(), B_ref.data(), LDB );
+}
+
 // When ldb < m, with trans == 'n'
-TYPED_TEST(omatcopy_IIT_ERS, invalid_ldb_no_transpose)
+TYPED_TEST(omatcopy2_IIT_ERS, invalid_ldb_no_transpose)
 {
   using T = TypeParam;
 
@@ -158,14 +179,14 @@ TYPED_TEST(omatcopy_IIT_ERS, invalid_ldb_no_transpose)
   T alpha;
   testinghelpers::initone<T>( alpha );
 
-  // Call OMATCOPY with a invalid ldb for the operation.
-  omatcopy<T>( trans, m, n, alpha, A.data(), m, B.data(), m - 1 );
+  // Call OMATCOPY2 with a invalid ldb for the operation.
+  omatcopy2<T>( trans, m, n, alpha, A.data(), m, 1, B.data(), m - 1, 1 );
   // Use bitwise comparison (no threshold).
   computediff<T>( 'c', m, n, B.data(), B_ref.data(), m );
 }
 
 // When ldb < m, with trans == 'r'
-TYPED_TEST(omatcopy_IIT_ERS, invalid_ldb_conjugate)
+TYPED_TEST(omatcopy2_IIT_ERS, invalid_ldb_conjugate)
 {
   using T = TypeParam;
 
@@ -183,14 +204,14 @@ TYPED_TEST(omatcopy_IIT_ERS, invalid_ldb_conjugate)
   T alpha;
   testinghelpers::initone<T>( alpha );
 
-  // Call OMATCOPY with a invalid ldb for the operation.
-  omatcopy<T>( trans, m, n, alpha, A.data(), m, B.data(), m - 1 );
+  // Call OMATCOPY2 with a invalid ldb for the operation.
+  omatcopy2<T>( trans, m, n, alpha, A.data(), m, 1, B.data(), m - 1, 1 );
   // Use bitwise comparison (no threshold).
   computediff<T>( 'c', m, n, B.data(), B_ref.data(), m );
 }
 
 // When ldb < m, with trans == 't'
-TYPED_TEST(omatcopy_IIT_ERS, invalid_ldb_transpose)
+TYPED_TEST(omatcopy2_IIT_ERS, invalid_ldb_transpose)
 {
   using T = TypeParam;
 
@@ -208,14 +229,14 @@ TYPED_TEST(omatcopy_IIT_ERS, invalid_ldb_transpose)
   T alpha;
   testinghelpers::initone<T>( alpha );
 
-  // Call OMATCOPY with a invalid ldb for the operation.
-  omatcopy<T>( trans, m, n, alpha, A.data(), m, B.data(), n - 1 );
+  // Call OMATCOPY2 with a invalid ldb for the operation.
+  omatcopy2<T>( trans, m, n, alpha, A.data(), m, 1, B.data(), n - 1, 1 );
   // Use bitwise comparison (no threshold).
   computediff<T>( 'c', n, m, B.data(), B_ref.data(), n );
 }
 
 // When ldb < m, with trans == 'c'
-TYPED_TEST(omatcopy_IIT_ERS, invalid_ldb_conjugate_transpose)
+TYPED_TEST(omatcopy2_IIT_ERS, invalid_ldb_conjugate_transpose)
 {
   using T = TypeParam;
 
@@ -233,9 +254,28 @@ TYPED_TEST(omatcopy_IIT_ERS, invalid_ldb_conjugate_transpose)
   T alpha;
   testinghelpers::initone<T>( alpha );
 
-  // Call OMATCOPY with a invalid ldb for the operation.
-  omatcopy<T>( trans, m, n, alpha, A.data(), m, B.data(), n - 1 );
+  // Call OMATCOPY2 with a invalid ldb for the operation.
+  omatcopy2<T>( trans, m, n, alpha, A.data(), m, 1, B.data(), n - 1, 1 );
   // Use bitwise comparison (no threshold).
   computediff<T>( 'c', n, m, B.data(), B_ref.data(), n );
+}
+
+// When strideb < 1
+TYPED_TEST(omatcopy2_IIT_ERS, invalid_strideb)
+{
+  using T = TypeParam;
+  // Defining the A and B matrices with values for debugging purposes
+  std::vector<T> A = testinghelpers::get_random_matrix<T>(-10, 10, 'c', 'n', M, N, LDA );
+  std::vector<T> B = testinghelpers::get_random_matrix<T>(-10, 10, 'c', 'n', M, N, LDB );
+  // Copy so that we check that the elements of B are not modified.
+  std::vector<T> B_ref(B);
+
+  T alpha;
+  testinghelpers::initone<T>( alpha );
+
+  // Call OMATCOPY2 with a invalid n for the operation.
+  omatcopy2<T>( TRANS, M, N, alpha, A.data(), LDA, 1, B.data(), LDB, 0 );
+  // Use bitwise comparison (no threshold).
+  computediff<T>( 'c', M, N, B.data(), B_ref.data(), LDB );
 }
 #endif

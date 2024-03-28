@@ -78,7 +78,7 @@ TEST_P( domatcopyEVT, NanInfCheck )
     double thresh = 0.0;
     // Set the threshold for the errors
     if( ( alpha != testinghelpers::ZERO<T>() || alpha != testinghelpers::ONE<T>() ) && !(std::isnan(alpha)) )
-      thresh = 3 * testinghelpers::getEpsilon<T>();
+      thresh = testinghelpers::getEpsilon<T>();
 
     //----------------------------------------------------------
     //     Call generic test body using those parameters
@@ -127,10 +127,11 @@ public:
     }
 };
 
+#if defined(TEST_BLAS) && (defined(REF_IS_MKL) || defined(REF_IS_OPENBLAS))
+
 static double AOCL_NAN = std::numeric_limits<double>::quiet_NaN();
 static double AOCL_INF = std::numeric_limits<double>::infinity();
 
-#if defined(TEST_BLAS) && (defined(REF_IS_MKL) || defined(REF_IS_OPENBLAS))
 // EVT testing for domatcopy, with exception values in A matrix
 INSTANTIATE_TEST_SUITE_P(
         matrixA,

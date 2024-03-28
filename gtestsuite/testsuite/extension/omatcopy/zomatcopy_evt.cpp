@@ -127,10 +127,11 @@ public:
     }
 };
 
+#if defined(TEST_BLAS) && (defined(REF_IS_MKL) || defined(REF_IS_OPENBLAS))
+
 static double AOCL_NAN = std::numeric_limits<double>::quiet_NaN();
 static double AOCL_INF = std::numeric_limits<double>::infinity();
 
-#if defined(TEST_BLAS) && (defined(REF_IS_MKL) || defined(REF_IS_OPENBLAS))
 // EVT testing for zomatcopy, with exception values in A matrix
 INSTANTIATE_TEST_SUITE_P(
         matrixA,

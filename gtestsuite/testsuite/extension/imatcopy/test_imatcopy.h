@@ -34,60 +34,60 @@
 
 #pragma once
 
-#include "omatcopy.h"
-#include "extension/ref_omatcopy.h"
+#include "imatcopy.h"
+#include "extension/ref_imatcopy.h"
 #include "inc/check_error.h"
-#include<cstdlib>
 
 /**
- * @brief Generic test body for omatcopy operation.
+ * @brief Generic test body for imatcopy operation.
  */
 
 template<typename T>
-static void test_omatcopy( char storage, char trans, gtint_t m, gtint_t n, T alpha, gtint_t lda_inc, gtint_t ldb_inc,
+static void test_imatcopy( char storage, char trans, gtint_t m, gtint_t n, T alpha, gtint_t lda_in_inc, gtint_t lda_out_inc,
                           double thresh, bool is_memory_test = false, bool is_nan_inf_test = false, T exval = T{0.0} )
 {
     // Set an alternative trans value that corresponds to only
-    // whether the B matrix should be mxn or nxm(only transposing)
-    char B_trans;
-    B_trans = ( ( trans == 'n' ) || ( trans == 'r' ) )? 'n' : 't';
+    // whether the A matrix(output) should be mxn or nxm(only transposing)
+    char A_out_trans;
+    A_out_trans = ( ( trans == 'n' ) || ( trans == 'r' ) )? 'n' : 't';
 
-    // Compute the leading dimensions of A and B.
-    gtint_t lda = testinghelpers::get_leading_dimension( storage, 'n', m, n, lda_inc );
-    gtint_t ldb = testinghelpers::get_leading_dimension( storage, B_trans, m, n, ldb_inc );
+    // Compute the leading dimensions of A(input) and A(output).
+    gtint_t lda_in = testinghelpers::get_leading_dimension( storage, 'n', m, n, lda_in_inc );
+    gtint_t lda_out = testinghelpers::get_leading_dimension( storage, A_out_trans, m, n, lda_out_inc );
 
-    // Compute sizes of A and B, in bytes
-    gtint_t size_a = testinghelpers::matsize( storage, 'n', m, n, lda ) * sizeof( T );
-    gtint_t size_b = testinghelpers::matsize( storage, B_trans, m, n, ldb ) * sizeof( T );
+    // Compute sizes of A(input) and A(output), in bytes
+    gtint_t size_a_in = testinghelpers::matsize( storage, 'n', m, n, lda_in ) * sizeof( T );
+    gtint_t size_a_out = testinghelpers::matsize( storage, A_out_trans, m, n, lda_out ) * sizeof( T );
+
+    // A has to allocated the maximum of input and output sizes, for API compatibility
+    gtint_t size_a = std::max( size_a_in, size_a_out );
 
     // Create the objects for the input and output operands
     // The API does not expect the memory to be aligned
     testinghelpers::ProtectedBuffer A_buf( size_a, false, is_memory_test );
-    testinghelpers::ProtectedBuffer B_buf( size_b, false, is_memory_test );
-    testinghelpers::ProtectedBuffer B_ref_buf( size_b, false, false );
+    testinghelpers::ProtectedBuffer A_ref_buf( size_a, false, false );
 
     // Pointers to access the memory chunks
-    T *A, *B, *B_ref;
+    T *A, *A_ref;
 
-    // Acquire the first set of greenzones for A and B
+    // Acquire the first set of greenzones for A and A_ref
     A = ( T* )A_buf.greenzone_1;
-    B = ( T* )B_buf.greenzone_1;
-    B_ref = ( T* )B_ref_buf.greenzone_1; // For B_ref, there is no greenzone_2
+    A_ref = ( T* )A_ref_buf.greenzone_1; // For A_ref, there is no greenzone_2
 
     // Initiaize the memory with random data
-    testinghelpers::datagenerators::randomgenerators( -10, 10, storage, m, n, A, 'n', lda );
-    testinghelpers::datagenerators::randomgenerators( -10, 10, storage, m, n, B, B_trans, ldb );
+    testinghelpers::datagenerators::randomgenerators( -10, 10, storage, m, n, A, 'n', lda_in );
 
     if( is_nan_inf_test )
     {
       gtint_t rand_m = rand() % m;
       gtint_t rand_n = rand() % n;
-      gtint_t idx = ( storage == 'c' || storage == 'C' )? ( rand_m + rand_n * lda ) : ( rand_n + rand_m * lda );
+      gtint_t idx = ( storage == 'c' || storage == 'C' )? ( rand_m + rand_n * lda_in ) : ( rand_n + rand_m * lda_in );
 
       A[idx] = exval;
     }
-    // Copying the contents of B to B_ref
-    memcpy( B_ref, B, size_b );
+
+    // Copying the contents of A to A_ref
+    memcpy( A_ref, A, size_a );
 
     // Add signal handler for segmentation fault
     testinghelpers::ProtectedBuffer::start_signal_handler();
@@ -97,22 +97,20 @@ static void test_omatcopy( char storage, char trans, gtint_t m, gtint_t n, T alp
         // This call is made irrespective of is_memory_test.
         // This will check for out of bounds access with first redzone(if memory test is true)
         // Else, it will just call the ukr function.
-        omatcopy<T>( trans, m, n, alpha, A, lda, B, ldb);
+        imatcopy<T>( trans, m, n, alpha, A, lda_in, lda_out );
 
         if ( is_memory_test )
         {
             // Acquire the pointers near the second redzone
             A = ( T* )A_buf.greenzone_2;
-            B = ( T* )B_buf.greenzone_2;
 
-            // Copy the data for A and B accordingly
-            // NOTE : The objects for A and B will have acquired enough memory
+            // Copy the data for A accordingly
+            // NOTE : The object for A will have acquired enough memory
             //        such that the greenzones in each do not overlap.
-            memcpy( A, A_buf.greenzone_1, size_a );
-            memcpy( B, B_buf.greenzone_1, size_b );
+            memcpy( A, A_ref, size_a );
 
             // Call the API, to check with the second redzone.
-            omatcopy<T>( trans, m, n, alpha, A, lda, B, ldb);
+            imatcopy<T>( trans, m, n, alpha, A, lda_in, lda_out );
         }
     }
     catch(const std::exception& e)
@@ -129,16 +127,15 @@ static void test_omatcopy( char storage, char trans, gtint_t m, gtint_t n, T alp
     //----------------------------------------------------------
     //    Call reference implementation to get ref results.
     //----------------------------------------------------------
-    testinghelpers::ref_omatcopy<T>( storage, trans, m, n, alpha, A, lda, B_ref, ldb );
+    testinghelpers::ref_imatcopy<T>( storage, trans, m, n, alpha, A_ref, lda_in, lda_out );
 
     //----------------------------------------------------------
     //              Compute component-wise error.
     //----------------------------------------------------------
 
-    if( B_trans == 'n' )
-      computediff<T>( storage, m, n, B, B_ref, ldb, thresh, is_nan_inf_test );
+    if( A_out_trans == 'n' )
+      computediff<T>( storage, m, n, A, A_ref, lda_out, thresh, is_nan_inf_test );
     else
-      computediff<T>( storage, n, m, B, B_ref, ldb, thresh, is_nan_inf_test );
+      computediff<T>( storage, n, m, A, A_ref, lda_out, thresh, is_nan_inf_test );
 
 }
-

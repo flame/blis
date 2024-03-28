@@ -33,9 +33,9 @@
 */
 
 #include <gtest/gtest.h>
-#include "test_omatcopy.h"
+#include "test_imatcopy.h"
 
-class somatcopyEVT :
+class simatcopyEVT :
         public ::testing::TestWithParam<std::tuple<char,        // storage
                                                    char,        // trans
                                                    gtint_t,     // m
@@ -46,10 +46,10 @@ class somatcopyEVT :
                                                    float,       // exval
                                                    bool>> {};   // is_nan_inf_test
 
-GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(somatcopyEVT);
+GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(simatcopyEVT);
 
 // Tests using random numbers as vector elements.
-TEST_P( somatcopyEVT, NanInfCheck )
+TEST_P( simatcopyEVT, NanInfCheck )
 {
     using T = float;
     //----------------------------------------------------------
@@ -84,13 +84,13 @@ TEST_P( somatcopyEVT, NanInfCheck )
     //     Call generic test body using those parameters
     //----------------------------------------------------------
     // Note: is_memory_test is passed as false(hard-coded), since memory tests are done in _generic.cpp files
-    test_omatcopy<T>( storage, trans, m, n, alpha, lda_inc, ldb_inc, thresh, false, is_nan_inf_test, exval );
+    test_imatcopy<T>( storage, trans, m, n, alpha, lda_inc, ldb_inc, thresh, false, is_nan_inf_test, exval );
 }
 
 // Test-case logger : Used to print the test-case details based on parameters
 // The string format is as follows :
 // {blas_/cblas_/bli_}_storage_trans_m_n_alpha_lda_ldb_{mem_test_enabled/mem_test_disabled}
-class somatcopyEVTPrint {
+class simatcopyEVTPrint {
 public:
     std::string operator()(
         testing::TestParamInfo<std::tuple<char,char,gtint_t,gtint_t,float,gtint_t,gtint_t,float,bool>> str) const {
@@ -132,10 +132,10 @@ public:
 static float AOCL_NAN = std::numeric_limits<float>::quiet_NaN();
 static float AOCL_INF = std::numeric_limits<float>::infinity();
 
-// EVT testing for somatcopy, with exception values in A matrix
+// EVT testing for simatcopy, with exception values in A matrix
 INSTANTIATE_TEST_SUITE_P(
         matrixA,
-        somatcopyEVT,
+        simatcopyEVT,
         ::testing::Combine(
             ::testing::Values('c'),                                                   // storage format(currently only for BLAS testing)
             ::testing::Values('n', 't', 'r', 'c'),                                    // trans(and/or conj) value
@@ -149,13 +149,13 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(AOCL_NAN, AOCL_INF, -AOCL_INF),                         // exval
             ::testing::Values(true)                                                   // is_nan_inf_test
         ),
-        ::somatcopyEVTPrint()
+        ::simatcopyEVTPrint()
     );
 
-// EVT testing for somatcopy, with exception values in alpha
+// EVT testing for simatcopy, with exception values in alpha
 INSTANTIATE_TEST_SUITE_P(
         alpha,
-        somatcopyEVT,
+        simatcopyEVT,
         ::testing::Combine(
             ::testing::Values('c'),                                                   // storage format(currently only for BLAS testing)
             ::testing::Values('n', 't', 'r', 'c'),                                    // trans(and/or conj) value
@@ -169,6 +169,6 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(0.0f),                                                  // exval
             ::testing::Values(true)                                                   // is_nan_inf_test
         ),
-        ::somatcopyEVTPrint()
+        ::simatcopyEVTPrint()
     );
 #endif

@@ -33,22 +33,22 @@
 */
 
 #include <gtest/gtest.h>
-#include "test_omatcopy.h"
+#include "test_imatcopy.h"
 
-class somatcopyAPI :
+class simatcopyAPI :
         public ::testing::TestWithParam<std::tuple<char,        // storage
                                                    char,        // trans
                                                    gtint_t,     // m
                                                    gtint_t,     // n
                                                    float,       // alpha
-                                                   gtint_t,     // lda_inc
-                                                   gtint_t,     // ldb_inc
+                                                   gtint_t,     // lda_in_inc
+                                                   gtint_t,     // lda_out_inc
                                                    bool>> {};   // is_memory_test
 
-GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(somatcopyAPI);
+GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(simatcopyAPI);
 
 // Tests using random numbers as vector elements.
-TEST_P( somatcopyAPI, FunctionalTest )
+TEST_P( simatcopyAPI, FunctionalTest )
 {
     using T = float;
     //----------------------------------------------------------
@@ -65,10 +65,10 @@ TEST_P( somatcopyAPI, FunctionalTest )
     gtint_t n = std::get<3>(GetParam());
     // alpha
     T alpha = std::get<4>(GetParam());
-    // lda_inc for A
-    gtint_t lda_inc = std::get<5>(GetParam());
-    // ldb_inc for B
-    gtint_t ldb_inc = std::get<6>(GetParam());
+    // lda_in_inc for A
+    gtint_t lda_in_inc = std::get<5>(GetParam());
+    // ldb_out_inc for A
+    gtint_t lda_out_inc = std::get<6>(GetParam());
     // is_memory_test
     bool is_memory_test = std::get<7>(GetParam());
 
@@ -80,13 +80,13 @@ TEST_P( somatcopyAPI, FunctionalTest )
     //----------------------------------------------------------
     //     Call generic test body using those parameters
     //----------------------------------------------------------
-    test_omatcopy<T>( storage, trans, m, n, alpha, lda_inc, ldb_inc, thresh, is_memory_test );
+    test_imatcopy<T>( storage, trans, m, n, alpha, lda_in_inc, lda_out_inc, thresh, is_memory_test );
 }
 
 // Test-case logger : Used to print the test-case details based on parameters
 // The string format is as follows :
-// {blas_/cblas_/bli_}_storage_trans_m_n_alpha_lda_ldb_{mem_test_enabled/mem_test_disabled}
-class somatcopyAPIPrint {
+// {blas_/cblas_/bli_}_storage_trans_m_n_alpha_lda_in_lda_out_{mem_test_enabled/mem_test_disabled}
+class simatcopyAPIPrint {
 public:
     std::string operator()(
         testing::TestParamInfo<std::tuple<char,char,gtint_t,gtint_t,float,gtint_t,gtint_t,bool>> str) const {
@@ -108,39 +108,40 @@ public:
 #else  //#elif TEST_BLIS_TYPED
         std::string str_name = "bli_";
 #endif
-        str_name += std::string(&storage, 1);
+        str_name += "_" + std::string(&storage, 1);
         str_name += "_" + std::string(&trans, 1);
         str_name += "_" + std::to_string(m);
         str_name += "_" + std::to_string(n);
         std::string alpha_str = ( alpha >= 0) ? std::to_string(int(alpha)) : ("m" + std::to_string(int(std::abs(alpha))));
         str_name = str_name + "_a" + alpha_str;
-        gtint_t lda = testinghelpers::get_leading_dimension( storage, 'n', m, n, lda_inc );
-        gtint_t ldb = testinghelpers::get_leading_dimension( storage, trans, m, n, ldb_inc );
-        str_name += "_lda" + std::to_string(lda);
-        str_name += "_ldb" + std::to_string(ldb);
+        char mat_trans = ( ( trans == 'n' ) || ( trans == 'r' ) )? 'n' : 't';
+        gtint_t lda_in = testinghelpers::get_leading_dimension( storage, 'n', m, n, lda_inc );
+        gtint_t lda_out = testinghelpers::get_leading_dimension( storage, mat_trans, m, n, ldb_inc );
+        str_name += "_lda_in_" + std::to_string(lda_in);
+        str_name += "_lda_out_" + std::to_string(lda_out);
         str_name += ( is_memory_test )? "_mem_test_enabled" : "_mem_test_disabled";
 
         return str_name;
     }
 };
 
-#if defined(TEST_BLAS) && (defined(REF_IS_MKL) || defined(REF_IS_OPENBLAS))
-// Black box testing for generic and main use of somatcopy.
+#ifdef TEST_BLAS
+// Black box testing for generic and main use of simatcopy.
 INSTANTIATE_TEST_SUITE_P(
         Blackbox,
-        somatcopyAPI,
+        simatcopyAPI,
         ::testing::Combine(
             ::testing::Values('c'),                                          // storage format(currently only for BLAS testing)
-            ::testing::Values('n', 't', 'r', 'c'),                           // trans(and/or conj) value
+            ::testing::Values('n', 't', 'c', 'r'),                           // trans(and/or conj) value
                                                                              // 'n' - no-transpose, 't' - transpose
                                                                              // 'r' - conjugate,    'c' - conjugate-transpose
             ::testing::Values(gtint_t(10), gtint_t(55), gtint_t(243)),       // m
             ::testing::Values(gtint_t(10), gtint_t(55), gtint_t(243)),       // n
             ::testing::Values(2.0f, -3.0f, 1.0f, 0.0f),                      // alpha
-            ::testing::Values(gtint_t(0), gtint_t(25)),                      // increment of lda
-            ::testing::Values(gtint_t(0), gtint_t(17)),                      // increment of ldb
+            ::testing::Values(gtint_t(0), gtint_t(25)),                      // increment of lda_in
+            ::testing::Values(gtint_t(0), gtint_t(17)),                      // increment of lda_out
             ::testing::Values(false, true)                                   // is_memory_test
         ),
-        ::somatcopyAPIPrint()
+        ::simatcopyAPIPrint()
     );
 #endif

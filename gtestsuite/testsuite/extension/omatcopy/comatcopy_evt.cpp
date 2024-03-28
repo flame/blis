@@ -127,10 +127,11 @@ public:
     }
 };
 
+#if defined(TEST_BLAS) && (defined(REF_IS_MKL) || defined(REF_IS_OPENBLAS))
+
 static float AOCL_NAN = std::numeric_limits<float>::quiet_NaN();
 static float AOCL_INF = std::numeric_limits<float>::infinity();
 
-#if defined(TEST_BLAS) && (defined(REF_IS_MKL) || defined(REF_IS_OPENBLAS))
 // EVT testing for comatcopy, with exception values in A matrix
 INSTANTIATE_TEST_SUITE_P(
         matrixA,

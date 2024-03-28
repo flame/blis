@@ -34,44 +34,22 @@
 
 #pragma once
 
-#include "blis.h"
 #include "common/testing_helpers.h"
 
-/**
- * @brief Performs the operation:
- *             B := alpha * op(A),
- *             where op(A) could be A, A(transpose), A(conjugate), A(conjugate-transpose)
- * @param[in] m number of rows in A, number of rows/columns in B
- * @param[in] n number of columns in A, number of columns/rows in B
- * @param[in] alpha scalar
- * @param[in] A pointer which points to the first element of A matrix
- * @param[in] lda leading dimension of A matrix
- * @param[in, out] B pointer which points to the first element of B matrix
- * @param[in] ldb leading dimension of B matrix
- */
+/*
+ *  ==========================================================================
+ *  OMATCOPY performs vector operations
+ *     A := alpha * op(A)
+ *     where A is both the input and output matrix, and alpha is the scaling factor.
+ *     op(A) could be one of the following operations : no-transpose('n'), transpose('t'),
+ *                                                      conjugate('c'), conjugate-transpose('r').
+ *  ==========================================================================
+**/
+
+namespace testinghelpers {
 
 template<typename T>
-static void omatcopy_( char trans, gtint_t m, gtint_t n, T alpha, T* A, gtint_t lda, T* B, gtint_t ldb )
-{
-    if constexpr (std::is_same<T, float>::value)
-        somatcopy_( &trans, &m, &n, (const float *)&alpha, A, &lda, B, &ldb );
-    else if constexpr (std::is_same<T, double>::value)
-        domatcopy_( &trans, &m, &n, (const double *)&alpha, A, &lda, B, &ldb );
-    else if constexpr (std::is_same<T, scomplex>::value)
-        comatcopy_( &trans, &m, &n, (const scomplex *)&alpha, A, &lda, B, &ldb );
-    else if constexpr (std::is_same<T, dcomplex>::value)
-        zomatcopy_( &trans, &m, &n, (const dcomplex *)&alpha, A, &lda, B, &ldb );
-    else
-        throw std::runtime_error("Error in testsuite/extension/omatcopy.h: Invalid typename in omatcopy_().");
-}
+void ref_imatcopy( char storage, char trans, gtint_t m, gtint_t n, T alpha, T* A,
+                    gtint_t lda_in, gtint_t lda_out );
 
-template<typename T>
-static void omatcopy( char trans, gtint_t m, gtint_t n, T alpha, T* A, gtint_t lda, T* B, gtint_t ldb )
-{
-#ifdef TEST_BLAS
-    omatcopy_<T>( trans, m, n, alpha, A, lda, B, ldb );
-#else
-    throw std::runtime_error("Error in testsuite/extension/omatcopy.h: No interfaces are set to be tested.");
-#endif
-}
-
+} //end of namespace testinghelpers

@@ -211,11 +211,11 @@ void test_gemm( char storage, char trnsa, char trnsb, gtint_t over_under, gtint_
       ********************************************************************
 
     */
-    a = testinghelpers::get_random_matrix<T>( 5.5, 10.5, storage, trnsa, m, k, lda,
+    a = testinghelpers::get_random_matrix<T>( 5.5, 10.5, storage, trnsa, m, k, lda, 1,
                                               testinghelpers::datagenerators::ElementType::FP );
-    b = testinghelpers::get_random_matrix<T>( 3.2, 5.6, storage, trnsb, k, n, ldb,
+    b = testinghelpers::get_random_matrix<T>( 3.2, 5.6, storage, trnsb, k, n, ldb, 1,
                                               testinghelpers::datagenerators::ElementType::FP );
-    c = testinghelpers::get_random_matrix<T>( -5, -2, storage, 'n', m, n, ldc,
+    c = testinghelpers::get_random_matrix<T>( -5, -2, storage, 'n', m, n, ldc, 1,
                                               testinghelpers::datagenerators::ElementType::FP );
     /*
       Based on the value of over_under, overflow/underflow values are inserted to the input matrices

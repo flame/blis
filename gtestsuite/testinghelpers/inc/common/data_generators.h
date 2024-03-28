@@ -117,9 +117,10 @@ void getfp(T2 from, T3 to, gtint_t n, gtint_t incx, T1* x)
  * @param[in] m, n dimentions of matrix A
  * @param[in, out] a the random fp matrix A
  * @param[in] lda leading dimension of matrix A
+ * @param[in] stridea stride between two "continuous" elements in matrix A
  */
 template<typename T1, typename T2, typename T3>
-void getfp(T2 from, T3 to, char storage, gtint_t m, gtint_t n, T1* a, gtint_t lda )
+void getfp(T2 from, T3 to, char storage, gtint_t m, gtint_t n, T1* a, gtint_t lda, gtint_t stridea = 1 )
 {
     using real_T = typename testinghelpers::type_info<T1>::real_type;
     std::mt19937                              generator(1994);
@@ -131,19 +132,27 @@ void getfp(T2 from, T3 to, char storage, gtint_t m, gtint_t n, T1* a, gtint_t ld
         {
             if constexpr (testinghelpers::type_info<T1>::is_real)
             {
-                for(gtint_t i=0; i<m; i++)
+                for(gtint_t i=0; i<m-1; i++)
                 {
-                    a[i+j*lda] = real_T(distr(generator));
+                    for(gtint_t p=1; p<stridea; p++)
+                        a[i*stridea+p+j*lda] = T1{-1.2345e38};
+
+                    a[i*stridea+j*lda] = real_T(distr(generator));
                 }
+                a[(m-1)*stridea+j*lda] = real_T(distr(generator));
             }
             else
             {
-                for(gtint_t i=0; i<m; i++)
+                for(gtint_t i=0; i<m-1; i++)
                 {
-                    a[i+j*lda] = {real_T(distr(generator)), real_T(distr(generator))};
+                    for(gtint_t p=1; p<stridea; p++)
+                        a[i*stridea+p+j*lda] = T1{-1.2345e38};
+
+                    a[i*stridea+j*lda] = {real_T(distr(generator)), real_T(distr(generator))};
                 }
+                a[(m-1)*stridea+j*lda] = {real_T(distr(generator)), real_T(distr(generator))};
             }
-            for(gtint_t i=m; i<lda; i++)
+            for(gtint_t i=(m-1)*stridea+1; i<lda; i++)
             {
                 a[i+j*lda] = T1{-1.2345e38};
             }
@@ -155,19 +164,27 @@ void getfp(T2 from, T3 to, char storage, gtint_t m, gtint_t n, T1* a, gtint_t ld
         {
             if constexpr (testinghelpers::type_info<T1>::is_real)
             {
-                for(gtint_t j=0; j<n; j++)
+                for(gtint_t j=0; j<n-1; j++)
                 {
-                    a[j+i*lda] = real_T(distr(generator));
+                    for(gtint_t p=1; p<stridea; p++)
+                        a[j*stridea+p+i*lda] = T1{-1.2345e38};
+
+                    a[j*stridea+i*lda] = real_T(distr(generator));
                 }
+                a[(n-1)*stridea+i*lda] = real_T(distr(generator));
             }
             else
             {
-                for(gtint_t j=0; j<n; j++)
+                for(gtint_t j=0; j<n-1; j++)
                 {
-                    a[j+i*lda] = {real_T(distr(generator)), real_T(distr(generator))};
+                    for(gtint_t p=1; p<stridea; p++)
+                        a[j*stridea+p+i*lda] = T1{-1.2345e38};
+
+                    a[j*stridea+i*lda] = {real_T(distr(generator)), real_T(distr(generator))};
                 }
+                a[(n-1)*stridea+i*lda] = {real_T(distr(generator)), real_T(distr(generator))};
             }
-            for(gtint_t j=n; j<lda; j++)
+            for(gtint_t j=(n-1)*stridea+1; j<lda; j++)
             {
                 a[j+i*lda] = T1{-1.2345e38};
             }
@@ -182,14 +199,15 @@ void getfp(T2 from, T3 to, char storage, gtint_t m, gtint_t n, T1* a, gtint_t ld
  * @param[in, out] a the random fp matrix A
  * @param[in] trans transposition of matrix A
  * @param[in] lda leading dimension of matrix A
+ * @param[in] stridea stride between two "continuous" elements in matrix A
  */
 template<typename T1, typename T2, typename T3>
-void getfp(T2 from, T3 to, char storage, gtint_t m, gtint_t n, T1* a, char transa, gtint_t lda )
+void getfp(T2 from, T3 to, char storage, gtint_t m, gtint_t n, T1* a, char transa, gtint_t lda, gtint_t stridea = 1 )
 {
     if( chktrans( transa )) {
        swap_dims( &m, &n );
     }
-    getfp<T1>( from, to, storage, m, n, a, lda);
+    getfp<T1>( from, to, storage, m, n, a, lda, stridea );
 }
 
 /***************************************************
@@ -257,9 +275,10 @@ void getint(int from, int to, gtint_t n, gtint_t incx, T* x)
  * @param[in] m, n dimentions of matrix A
  * @param[in, out] a the random fp matrix A
  * @param[in] lda leading dimension of matrix A
+ * @param[in] stridea stride between two "continuous" elements in matrix A
  */
 template<typename T>
-void getint(int from, int to, char storage, gtint_t m, gtint_t n, T* a, gtint_t lda )
+void getint(int from, int to, char storage, gtint_t m, gtint_t n, T* a, gtint_t lda, gtint_t stridea = 1 )
 {
     using real_T = typename testinghelpers::type_info<T>::real_type;
     std::mt19937                          generator(94);
@@ -271,19 +290,27 @@ void getint(int from, int to, char storage, gtint_t m, gtint_t n, T* a, gtint_t 
         {
             if constexpr (testinghelpers::type_info<T>::is_real)
             {
-                for(gtint_t i=0; i<m; i++)
+                for(gtint_t i=0; i<m-1; i++)
                 {
-                    a[i+j*lda] = real_T(distr(generator));
+                    for(gtint_t p=1; p<stridea; p++)
+                        a[i*stridea+p+j*lda] = T{-1.2345e38};
+
+                    a[i*stridea+j*lda] = real_T(distr(generator));
                 }
+                a[(m-1)*stridea+j*lda] = real_T(distr(generator));
             }
             else
             {
-                for(gtint_t i=0; i<m; i++)
+                for(gtint_t i=0; i<m-1; i++)
                 {
-                    a[i+j*lda] = {real_T(distr(generator)), real_T(distr(generator))};
+                    for(gtint_t p=1; p<stridea; p++)
+                        a[i*stridea+p+j*lda] = T{-1.2345e38};
+
+                    a[i*stridea+j*lda] = {real_T(distr(generator)), real_T(distr(generator))};
                 }
+                a[(m-1)*stridea+j*lda] = {real_T(distr(generator)), real_T(distr(generator))};
             }
-            for(gtint_t i=m; i<lda; i++)
+            for(gtint_t i=(m-1)*stridea+1; i<lda; i++)
             {
                 a[i+j*lda] = T{-1.2345e38};
             }
@@ -295,19 +322,27 @@ void getint(int from, int to, char storage, gtint_t m, gtint_t n, T* a, gtint_t 
         {
             if constexpr (testinghelpers::type_info<T>::is_real)
             {
-                for(gtint_t j=0; j<n; j++)
+                for(gtint_t j=0; j<n-1; j++)
                 {
-                    a[j+i*lda] = real_T(distr(generator));
+                    for(gtint_t p=1; p<stridea; p++)
+                        a[j*stridea+p+i*lda] = T{-1.2345e38};
+
+                    a[j*stridea+i*lda] = real_T(distr(generator));
                 }
+                a[(n-1)*stridea+i*lda] = real_T(distr(generator));
             }
             else
             {
-                for(gtint_t j=0; j<n; j++)
+                for(gtint_t j=0; j<n-1; j++)
                 {
-                    a[j+i*lda] = {real_T(distr(generator)), real_T(distr(generator))};
+                    for(gtint_t p=1; p<stridea; p++)
+                        a[j*stridea+p+i*lda] = T{-1.2345e38};
+
+                    a[j*stridea+i*lda] = {real_T(distr(generator)), real_T(distr(generator))};
                 }
+                a[(n-1)*stridea+i*lda] = {real_T(distr(generator)), real_T(distr(generator))};
             }
-            for(gtint_t j=n; j<lda; j++)
+            for(gtint_t j=(n-1)*stridea+1; j<lda; j++)
             {
                 a[j+i*lda] = T{-1.2345e38};
             }
@@ -323,14 +358,15 @@ void getint(int from, int to, char storage, gtint_t m, gtint_t n, T* a, gtint_t 
  * @param[in, out] a the random fp matrix A
  * @param[in] trans transposition of matrix A
  * @param[in] lda leading dimension of matrix A
+ * @param[in] stridea stride between two "continuous" elements in matrix A
  */
 template<typename T>
-void getint(int from, int to, char storage, gtint_t m, gtint_t n, T* a, char transa, gtint_t lda )
+void getint(int from, int to, char storage, gtint_t m, gtint_t n, T* a, char transa, gtint_t lda, gtint_t stridea = 1 )
 {
     if( chktrans( transa )) {
        swap_dims( &m, &n );
     }
-    getint<T>( from, to, storage, m, n, a, lda);
+    getint<T>( from, to, storage, m, n, a, lda, stridea );
 }
 
 template<typename T1, typename T2, typename T3>
@@ -344,22 +380,22 @@ void randomgenerators(T2 from, T3 to, gtint_t n, gtint_t incx, T1* x, ElementTyp
 
 template<typename T1, typename T2, typename T3>
 void randomgenerators( T2 from, T3 to, char storage, gtint_t m, gtint_t n,
-     T1* a, gtint_t lda, ElementType datatype = GenericET ) {
+     T1* a, gtint_t lda, gtint_t stridea = 1, ElementType datatype = GenericET ) {
 
     if( datatype == ElementType::INT )
-        getint<T1>( from, to, storage, m, n, a, lda );
+        getint<T1>( from, to, storage, m, n, a, lda, stridea );
     else
-        getfp<T1>( from, to, storage, m, n, a, lda );
+        getfp<T1>( from, to, storage, m, n, a, lda, stridea );
 }
 
 template<typename T1, typename T2, typename T3>
 void randomgenerators( T2 from, T3 to, char storage, gtint_t m, gtint_t n,
-     T1* a, char transa, gtint_t lda, ElementType datatype = GenericET ) {
+     T1* a, char transa, gtint_t lda, gtint_t stridea = 1, ElementType datatype = GenericET ) {
 
     if( datatype == ElementType::INT )
-        getint<T1>( from, to, storage, m, n, a, transa, lda );
+        getint<T1>( from, to, storage, m, n, a, transa, lda, stridea );
     else
-        getfp<T1>( from, to, storage, m, n, a, transa, lda );
+        getfp<T1>( from, to, storage, m, n, a, transa, lda, stridea );
 }
 
 template<typename T1, typename T2, typename T3>
@@ -410,10 +446,10 @@ void randomgenerators( T2 from, T3 to, char storage, char uplo, gtint_t k,
 
 template<typename T1, typename T2, typename T3>
 std::vector<T1> get_random_matrix(T2 from, T3 to, char storage, char trans, gtint_t m, gtint_t n,
-                    gtint_t lda, datagenerators::ElementType datatype = datagenerators::GenericET)
+                    gtint_t lda, gtint_t stridea = 1, datagenerators::ElementType datatype = datagenerators::GenericET)
 {
     std::vector<T1> a(matsize(storage, trans, m, n, lda));
-    testinghelpers::datagenerators::randomgenerators<T1>( from, to, storage, m, n, a.data(), trans, lda, datatype );
+    testinghelpers::datagenerators::randomgenerators<T1>( from, to, storage, m, n, a.data(), trans, lda, stridea, datatype );
     return a;
 }
 

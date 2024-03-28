@@ -39,39 +39,37 @@
 
 /**
  * @brief Performs the operation:
- *             B := alpha * op(A),
+ *             A := alpha * op(A),
  *             where op(A) could be A, A(transpose), A(conjugate), A(conjugate-transpose)
  * @param[in] m number of rows in A, number of rows/columns in B
- * @param[in] n number of columns in A, number of columns/rows in B
+ * @param[in] m number of columns in A, number of columns/rows in B
  * @param[in] alpha scalar
  * @param[in] A pointer which points to the first element of A matrix
- * @param[in] lda leading dimension of A matrix
- * @param[in, out] B pointer which points to the first element of B matrix
- * @param[in] ldb leading dimension of B matrix
+ * @param[in] lda_in leading dimension of A(input) matrix
+ * @param[in] lda_out leading dimension of A(output) matrix
  */
 
 template<typename T>
-static void omatcopy_( char trans, gtint_t m, gtint_t n, T alpha, T* A, gtint_t lda, T* B, gtint_t ldb )
+static void imatcopy_( char trans, gtint_t m, gtint_t n, T alpha, T* A, gtint_t lda_in, gtint_t lda_out )
 {
     if constexpr (std::is_same<T, float>::value)
-        somatcopy_( &trans, &m, &n, (const float *)&alpha, A, &lda, B, &ldb );
+        simatcopy_( &trans, &m, &n, (const float *)&alpha, A, &lda_in, &lda_out );
     else if constexpr (std::is_same<T, double>::value)
-        domatcopy_( &trans, &m, &n, (const double *)&alpha, A, &lda, B, &ldb );
+        dimatcopy_( &trans, &m, &n, (const double *)&alpha, A, &lda_in, &lda_out );
     else if constexpr (std::is_same<T, scomplex>::value)
-        comatcopy_( &trans, &m, &n, (const scomplex *)&alpha, A, &lda, B, &ldb );
+        cimatcopy_( &trans, &m, &n, (const scomplex *)&alpha, A, &lda_in, &lda_out );
     else if constexpr (std::is_same<T, dcomplex>::value)
-        zomatcopy_( &trans, &m, &n, (const dcomplex *)&alpha, A, &lda, B, &ldb );
+        zimatcopy_( &trans, &m, &n, (const dcomplex *)&alpha, A, &lda_in, &lda_out );
     else
-        throw std::runtime_error("Error in testsuite/extension/omatcopy.h: Invalid typename in omatcopy_().");
+        throw std::runtime_error("Error in testsuite/level1/imatcopy.h: Invalid typename in imatcopy_().");
 }
 
 template<typename T>
-static void omatcopy( char trans, gtint_t m, gtint_t n, T alpha, T* A, gtint_t lda, T* B, gtint_t ldb )
+static void imatcopy( char trans, gtint_t m, gtint_t n, T alpha, T* A, gtint_t lda_in, gtint_t lda_out )
 {
 #ifdef TEST_BLAS
-    omatcopy_<T>( trans, m, n, alpha, A, lda, B, ldb );
+    imatcopy_<T>( trans, m, n, alpha, A, lda_in, lda_out );
 #else
-    throw std::runtime_error("Error in testsuite/extension/omatcopy.h: No interfaces are set to be tested.");
+    throw std::runtime_error("Error in testsuite/level1/imatcopy.h: No interfaces are set to be tested.");
 #endif
 }
-

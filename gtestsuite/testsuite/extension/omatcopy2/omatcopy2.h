@@ -46,32 +46,34 @@
  * @param[in] alpha scalar
  * @param[in] A pointer which points to the first element of A matrix
  * @param[in] lda leading dimension of A matrix
+ * @param[in] stridea stride between two "continuous" elements in A
  * @param[in, out] B pointer which points to the first element of B matrix
  * @param[in] ldb leading dimension of B matrix
+ * @param[in] strideb stride between two "continuous" elements in B
  */
 
 template<typename T>
-static void omatcopy_( char trans, gtint_t m, gtint_t n, T alpha, T* A, gtint_t lda, T* B, gtint_t ldb )
+static void omatcopy2_( char trans, gtint_t m, gtint_t n, T alpha, T* A, gtint_t lda, gtint_t stridea, T* B, gtint_t ldb, gtint_t strideb )
 {
     if constexpr (std::is_same<T, float>::value)
-        somatcopy_( &trans, &m, &n, (const float *)&alpha, A, &lda, B, &ldb );
+        somatcopy2_( &trans, &m, &n, (const float *)&alpha, A, &lda, &stridea, B, &ldb, &strideb );
     else if constexpr (std::is_same<T, double>::value)
-        domatcopy_( &trans, &m, &n, (const double *)&alpha, A, &lda, B, &ldb );
+        domatcopy2_( &trans, &m, &n, (const double *)&alpha, A, &lda, &stridea, B, &ldb, &strideb );
     else if constexpr (std::is_same<T, scomplex>::value)
-        comatcopy_( &trans, &m, &n, (const scomplex *)&alpha, A, &lda, B, &ldb );
+        comatcopy2_( &trans, &m, &n, (const scomplex *)&alpha, A, &lda, &stridea, B, &ldb, &strideb );
     else if constexpr (std::is_same<T, dcomplex>::value)
-        zomatcopy_( &trans, &m, &n, (const dcomplex *)&alpha, A, &lda, B, &ldb );
+        zomatcopy2_( &trans, &m, &n, (const dcomplex *)&alpha, A, &lda, &stridea, B, &ldb, &strideb );
     else
-        throw std::runtime_error("Error in testsuite/extension/omatcopy.h: Invalid typename in omatcopy_().");
+        throw std::runtime_error("Error in testsuite/extension/omatcopy2.h: Invalid typename in omatcopy2_().");
 }
 
 template<typename T>
-static void omatcopy( char trans, gtint_t m, gtint_t n, T alpha, T* A, gtint_t lda, T* B, gtint_t ldb )
+static void omatcopy2( char trans, gtint_t m, gtint_t n, T alpha, T* A, gtint_t lda, gtint_t stridea, T* B, gtint_t ldb, gtint_t strideb )
 {
 #ifdef TEST_BLAS
-    omatcopy_<T>( trans, m, n, alpha, A, lda, B, ldb );
+    omatcopy2_<T>( trans, m, n, alpha, A, lda, stridea, B, ldb, strideb );
 #else
-    throw std::runtime_error("Error in testsuite/extension/omatcopy.h: No interfaces are set to be tested.");
+    throw std::runtime_error("Error in testsuite/extension/omatcopy2.h: No interfaces are set to be tested.");
 #endif
 }
 

@@ -146,30 +146,33 @@ gtint_t matsize( char storage, char trans, gtint_t m, gtint_t n, gtint_t ldm )
 
 /**
  * Returns the leading dimension of a matrix depending on the storage type,
- * whether it is transpose or not, and the size of rows and columns.
+ * whether it is transpose or not, and the size of rows and columns, and the stride.
  *
  * @param storage specifies the storage format of matrix in memory.
  * @param trns    specifies the form of given matrix.
  * @param m       specifies the number of rows of given matrix.
  * @param n       specifies the number of columns of given matrix.
  * @param inc     specifies the increment of the leading dimension.
+ * @param stride  specifies the stride between two "continuous" elements in the matrix.
 */
-gtint_t get_leading_dimension( char storage, char trans, gtint_t m, gtint_t n, gtint_t inc )
+gtint_t get_leading_dimension( char storage, char trans, gtint_t m, gtint_t n, gtint_t inc, gtint_t stride )
 {
     gtint_t lda;
+    gtint_t m_max = (std::max)(gtint_t(1),m);
+    gtint_t n_max = (std::max)(gtint_t(1),n);
     if( (storage == 'c') || (storage == 'C') ) //column-major order
     {
         if ((trans == 'n')||(trans == 'N'))
-            lda = (std::max)(gtint_t(1),m) + inc;
+            lda = ( ( m_max - 1 ) * stride + 1 ) + inc;
         else
-            lda = (std::max)(gtint_t(1),n) + inc;
+            lda = ( ( n_max - 1 ) * stride + 1 ) + inc;
     }
     else //row-major order
     {
         if ((trans == 'n')||(trans == 'N'))
-            lda = (std::max)(gtint_t(1),n) + inc;
+            lda = ( ( n_max - 1 ) * stride + 1 ) + inc;
         else
-            lda = (std::max)(gtint_t(1),m) + inc;
+            lda = ( ( m_max - 1 ) * stride + 1 ) + inc;
     }
     return lda;
 }

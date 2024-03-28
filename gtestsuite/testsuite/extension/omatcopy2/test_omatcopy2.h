@@ -34,18 +34,18 @@
 
 #pragma once
 
-#include "omatcopy.h"
-#include "extension/ref_omatcopy.h"
+#include "omatcopy2.h"
+#include "extension/ref_omatcopy2.h"
 #include "inc/check_error.h"
 #include<cstdlib>
 
 /**
- * @brief Generic test body for omatcopy operation.
+ * @brief Generic test body for omatcopy2 operation.
  */
 
 template<typename T>
-static void test_omatcopy( char storage, char trans, gtint_t m, gtint_t n, T alpha, gtint_t lda_inc, gtint_t ldb_inc,
-                          double thresh, bool is_memory_test = false, bool is_nan_inf_test = false, T exval = T{0.0} )
+static void test_omatcopy2( char storage, char trans, gtint_t m, gtint_t n, T alpha, gtint_t lda_inc, gtint_t stridea, gtint_t ldb_inc,
+                          gtint_t strideb, double thresh, bool is_memory_test = false, bool is_nan_inf_test = false, T exval = T{0.0} )
 {
     // Set an alternative trans value that corresponds to only
     // whether the B matrix should be mxn or nxm(only transposing)
@@ -53,8 +53,8 @@ static void test_omatcopy( char storage, char trans, gtint_t m, gtint_t n, T alp
     B_trans = ( ( trans == 'n' ) || ( trans == 'r' ) )? 'n' : 't';
 
     // Compute the leading dimensions of A and B.
-    gtint_t lda = testinghelpers::get_leading_dimension( storage, 'n', m, n, lda_inc );
-    gtint_t ldb = testinghelpers::get_leading_dimension( storage, B_trans, m, n, ldb_inc );
+    gtint_t lda = testinghelpers::get_leading_dimension( storage, 'n', m, n, lda_inc, stridea );
+    gtint_t ldb = testinghelpers::get_leading_dimension( storage, B_trans, m, n, ldb_inc, strideb );
 
     // Compute sizes of A and B, in bytes
     gtint_t size_a = testinghelpers::matsize( storage, 'n', m, n, lda ) * sizeof( T );
@@ -75,14 +75,14 @@ static void test_omatcopy( char storage, char trans, gtint_t m, gtint_t n, T alp
     B_ref = ( T* )B_ref_buf.greenzone_1; // For B_ref, there is no greenzone_2
 
     // Initiaize the memory with random data
-    testinghelpers::datagenerators::randomgenerators( -10, 10, storage, m, n, A, 'n', lda );
-    testinghelpers::datagenerators::randomgenerators( -10, 10, storage, m, n, B, B_trans, ldb );
+    testinghelpers::datagenerators::randomgenerators( -10, 10, storage, m, n, A, 'n', lda, stridea );
+    testinghelpers::datagenerators::randomgenerators( -10, 10, storage, m, n, B, B_trans, ldb, strideb );
 
     if( is_nan_inf_test )
     {
       gtint_t rand_m = rand() % m;
       gtint_t rand_n = rand() % n;
-      gtint_t idx = ( storage == 'c' || storage == 'C' )? ( rand_m + rand_n * lda ) : ( rand_n + rand_m * lda );
+      gtint_t idx = ( storage == 'c' || storage == 'C' )? ( rand_m * stridea + rand_n * lda ) : ( rand_n * stridea + rand_m * lda );
 
       A[idx] = exval;
     }
@@ -97,7 +97,7 @@ static void test_omatcopy( char storage, char trans, gtint_t m, gtint_t n, T alp
         // This call is made irrespective of is_memory_test.
         // This will check for out of bounds access with first redzone(if memory test is true)
         // Else, it will just call the ukr function.
-        omatcopy<T>( trans, m, n, alpha, A, lda, B, ldb);
+        omatcopy2<T>( trans, m, n, alpha, A, lda, stridea, B, ldb, strideb );
 
         if ( is_memory_test )
         {
@@ -112,7 +112,7 @@ static void test_omatcopy( char storage, char trans, gtint_t m, gtint_t n, T alp
             memcpy( B, B_buf.greenzone_1, size_b );
 
             // Call the API, to check with the second redzone.
-            omatcopy<T>( trans, m, n, alpha, A, lda, B, ldb);
+            omatcopy2<T>( trans, m, n, alpha, A, lda, stridea, B, ldb, strideb );
         }
     }
     catch(const std::exception& e)
@@ -129,7 +129,7 @@ static void test_omatcopy( char storage, char trans, gtint_t m, gtint_t n, T alp
     //----------------------------------------------------------
     //    Call reference implementation to get ref results.
     //----------------------------------------------------------
-    testinghelpers::ref_omatcopy<T>( storage, trans, m, n, alpha, A, lda, B_ref, ldb );
+    testinghelpers::ref_omatcopy2<T>( storage, trans, m, n, alpha, A, lda, stridea, B_ref, ldb, strideb );
 
     //----------------------------------------------------------
     //              Compute component-wise error.

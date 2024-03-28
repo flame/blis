@@ -77,15 +77,16 @@ gtint_t matsize(char storage, char trans, gtint_t m, gtint_t n, gtint_t ldm );
 
 /**
  * Returns the leading dimension of a matrix depending on the storage type,
- * whether it is transpose or not, and the size of rows and columns.
+ * whether it is transpose or not, and the size of rows and columns, and the stride.
  *
  * @param storage specifies the storage format of matrix in memory.
  * @param trns    specifies the form of given matrix.
  * @param m       specifies the number of rows of given matrix.
  * @param n       specifies the number of columns of given matrix.
  * @param inc     specifies the increment of the leading dimension.
+ * @param stride  specifies the stride between two "continuous" elements in the matrix.
 */
-gtint_t get_leading_dimension(char storage, char trans, gtint_t m, gtint_t n, gtint_t inc);
+gtint_t get_leading_dimension( char storage, char trans, gtint_t m, gtint_t n, gtint_t inc, gtint_t stride = 1 );
 
 /**
  * If T is real, returns NaN.

@@ -75,7 +75,7 @@ TEST_P( domatcopyAPI, FunctionalTest )
     double thresh = 0.0;
     // Set the threshold for the errors
     if( ( alpha != testinghelpers::ZERO<T>() || alpha != testinghelpers::ONE<T>() ) )
-      thresh = 3 * testinghelpers::getEpsilon<T>();
+      thresh = testinghelpers::getEpsilon<T>();
 
     //----------------------------------------------------------
     //     Call generic test body using those parameters
