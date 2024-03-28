@@ -1865,6 +1865,54 @@ static void aocl_ddotv_dynamic
 	}
 }
 
+static void aocl_zdotv_dynamic
+     (
+       arch_t arch_id,
+       dim_t  n_elem,
+       dim_t* nt_ideal
+     )
+{
+	/*
+		Pick the AOCL dynamic logic based on the
+		architecture ID
+	*/
+	switch (arch_id)
+	{
+		case BLIS_ARCH_ZEN5:
+		case BLIS_ARCH_ZEN4:
+		case BLIS_ARCH_ZEN:
+		case BLIS_ARCH_ZEN2:
+		case BLIS_ARCH_ZEN3:
+			// @note: Further tuning can be done.
+			if ( n_elem <= 2080 )
+				*nt_ideal = 1;
+			else if (n_elem <= 3328 )
+				*nt_ideal = 4;
+			else if (n_elem <= 98304)
+				*nt_ideal = 8;
+			else if (n_elem <= 262144)
+				*nt_ideal = 32;
+			else if (n_elem <= 524288)
+				*nt_ideal = 64;
+			else
+				// For sizes in this range, AOCL dynamic does not make any change
+				*nt_ideal = -1;
+
+			break;
+
+		default:
+			/*
+				Without this default condition, compiler will throw
+				a warning saying other conditions are not handled
+			*/
+
+			/*
+				For other architectures, AOCL dynamic does not make any change
+			*/
+			*nt_ideal = -1;
+	}
+}
+
 /*
 	Functionality:
 	--------------
@@ -2121,8 +2169,16 @@ void bli_nthreads_l1
 
 		case BLIS_DOTV_KER:
 
-			// Function for DDOTV
-			aocl_dynamic_func_l1 = aocl_ddotv_dynamic;
+			if ( data_type_a == BLIS_DOUBLE )
+			{
+				// Function for DDOTV
+				aocl_dynamic_func_l1 = aocl_ddotv_dynamic;
+			}
+			else if ( data_type_a == BLIS_DCOMPLEX )
+			{
+				// Function for ZDOTV
+				aocl_dynamic_func_l1 = aocl_zdotv_dynamic;
+			}
 
 			break;
 

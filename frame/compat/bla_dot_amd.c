@@ -564,11 +564,11 @@ scomplex cdotu_blis_impl
     scomplex  rho;
 
     /* Initialize BLIS. */
-//  bli_init_auto();
+    //  bli_init_auto();
 
     /* Convert/typecast negative values of n to zero. */
     if ( *n < 0 ) n0 = ( dim_t )0;
-    else              n0 = ( dim_t )(*n);
+    else          n0 = ( dim_t )(*n);
 
     /* If the input increments are negative, adjust the pointers so we can
        use positive increments instead. */
@@ -643,7 +643,7 @@ scomplex cdotu_blis_impl
     }
 
     /* Finalize BLIS. */
-//  bli_finalize_auto();
+    //  bli_finalize_auto();
     AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
     return rho;
 }
@@ -672,15 +672,17 @@ dcomplex zdotu_blis_impl
     inc_t  incy0;
     dcomplex  rho;
 
+    PASTEMAC(z,set0s)( rho );   // Initializing rho to 0.
+
     AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1);
     AOCL_DTL_LOG_DOTV_INPUTS(AOCL_DTL_LEVEL_TRACE_1, 'Z', 'N', *n, *incx, *incy);
 
     /* Initialize BLIS. */
-//  bli_init_auto();
+    //  bli_init_auto();
 
     /* Convert/typecast negative values of n to zero. */
     if ( *n < 0 ) n0 = ( dim_t )0;
-    else              n0 = ( dim_t )(*n);
+    else          n0 = ( dim_t )(*n);
 
     /* If the input increments are negative, adjust the pointers so we can
        use positive increments instead. */
@@ -722,40 +724,210 @@ dcomplex zdotu_blis_impl
         incy0 = ( inc_t )(*incy);
     }
 
-    // This function is invoked on all architectures including 'generic'.
-    // Non-AVX2+FMA3 platforms will use the kernels derived from the context.
-    if (bli_cpuid_is_avx2fma3_supported() == TRUE)
+    cntx_t *cntx = NULL;
+
+    // Query the architecture ID
+    arch_t arch_id_local = bli_arch_query_id();
+    zdotv_ker_ft zdotv_ker_ptr;
+
+    switch ( arch_id_local )
     {
-        /* Call BLIS kernel. */
-        bli_zdotv_zen_int5
+        case BLIS_ARCH_ZEN5:
+        case BLIS_ARCH_ZEN4:
+#if defined(BLIS_KERNELS_ZEN4)
+            zdotv_ker_ptr = bli_zdotv_zen_int_avx512;
+            break;
+#endif
+
+        case BLIS_ARCH_ZEN3:
+        case BLIS_ARCH_ZEN2:
+        case BLIS_ARCH_ZEN:
+            zdotv_ker_ptr = bli_zdotv_zen_int5;
+            break;
+
+        default:
+            // For non-Zen architectures, query the context
+            cntx = bli_gks_query_cntx();
+
+            // Query the context for the kernel function pointers for zdotv
+            zdotv_ker_ptr = bli_cntx_get_l1v_ker_dt(BLIS_DCOMPLEX, BLIS_DOTV_KER, cntx);
+            break;
+    }
+
+#ifdef BLIS_ENABLE_OPENMP
+    // Initialize number of threads to one.
+    dim_t nt = 1;
+
+    bli_nthreads_l1
+    (
+      BLIS_DOTV_KER,
+      BLIS_DCOMPLEX,
+      BLIS_DCOMPLEX,
+      arch_id_local,
+      n0,
+      &nt
+    );
+
+    /*
+      If the number of optimum threads is 1, the OpenMP overhead
+      is avoided by calling the function directly
+    */
+    if (nt == 1)
+    {
+#endif
+        zdotv_ker_ptr
         (
-        BLIS_NO_CONJUGATE,
-        BLIS_NO_CONJUGATE,
-        n0,
-        x0, incx0,
-        y0, incy0,
-        &rho,
-        NULL
+          BLIS_NO_CONJUGATE,
+          BLIS_NO_CONJUGATE,
+          n0,
+          x0, incx0,
+          y0, incy0,
+          &rho,
+          cntx
         );
+
+        AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1)
+
+        return rho;
+#ifdef BLIS_ENABLE_OPENMP
+    }
+
+    /*
+      Here we know that more than one thread needs to be spawned.
+
+      In such a case, each thread will need its own rho value to
+      do the accumulation. These temporary rho's will be accumulated
+      in the end.
+    */
+    rntm_t rntm_l;
+    bli_rntm_init_from_global( &rntm_l );
+
+    dcomplex *rho_temp = NULL;
+
+    /*
+      Initialize mem pool buffer to NULL and size to 0
+      "buf" and "size" fields are assigned once memory
+      is allocated from the pool in bli_pba_acquire_m().
+      This will ensure bli_mem_is_alloc() will be passed on
+      an allocated memory if created or a NULL .
+    */
+    mem_t mem_buf_rho;
+    mem_buf_rho.pblk.buf = NULL;
+    mem_buf_rho.pblk.block_size = 0;
+    mem_buf_rho.buf_type = 0;
+    mem_buf_rho.size = 0;
+    mem_buf_rho.pool = NULL;
+
+    /*
+        In order to get the buffer from pool via rntm access to
+        memory broker is needed.Following are initializations
+        for rntm.
+    */
+    bli_rntm_set_num_threads_only(1, &rntm_l);
+    bli_pba_rntm_set_pba(&rntm_l);
+
+    // Calculate the size required for rho buffer.
+    size_t buffer_size = nt * sizeof(dcomplex);
+
+#ifdef BLIS_ENABLE_MEM_TRACING
+    printf("bli_zdotu(): get mem pool block\n");
+#endif
+
+    /*
+      Acquire a buffer (nt * size(dcomplex)) from the memory broker
+      and save the associated mem_t entry to mem_buf_rho.
+    */
+    bli_pba_acquire_m
+    (
+      &rntm_l,
+      buffer_size,
+      BLIS_BITVAL_BUFFER_FOR_A_BLOCK,
+      &mem_buf_rho
+    );
+
+    /* Continue if rho buffer memory is allocated*/
+    if ( bli_mem_is_alloc( &mem_buf_rho ) )
+    {
+        rho_temp = bli_mem_buffer( &mem_buf_rho );
+
+        /*
+          Initializing rho_temp buffer to zeros.
+
+          This is done to handle cases when the
+          number of threads launched is not equal
+          to the number of threads requested. In
+          such cases, the garbage value in the created
+          buffer will not be overwritten by valid values.
+
+          This will ensure that garbage values will
+          not get accumulated with the final result.
+        */
+        for ( dim_t i = 0; i < nt; ++i )
+            PASTEMAC(z,set0s)( *(rho_temp + i) );
     }
     else
     {
-        /* Call BLIS interface. */
-        PASTEMAC2(z,dotv,BLIS_TAPI_EX_SUF)
+        nt = 1;
+        rho_temp = &rho;
+    }
+
+    _Pragma("omp parallel num_threads(nt)")
+    {
+        dim_t start, length;
+
+        // Get the thread ID
+        dim_t thread_id = omp_get_thread_num();
+
+        // Get the actual number of threads spawned
+        dim_t nt_use = omp_get_num_threads();
+
+        /*
+          Calculate the compute range for the current thread
+          based on the actual number of threads spawned
+        */
+        bli_thread_vector_partition
         (
-        BLIS_NO_CONJUGATE,
-        BLIS_NO_CONJUGATE,
-        n0,
-        x0, incx0,
-        y0, incy0,
-        &rho,
-        NULL,
-        NULL
+          n0,
+          nt_use,
+          &start, &length,
+          thread_id
+        );
+
+        // Adjust the local pointer for computation
+        dcomplex *x_thread_local = x0 + (start * incx0);
+        dcomplex *y_thread_local = y0 + (start * incy0);
+
+        // Invoke the function based on the kernel function pointer
+        zdotv_ker_ptr
+        (
+          BLIS_NO_CONJUGATE,
+          BLIS_NO_CONJUGATE,
+          length,
+          x_thread_local, incx0,
+          y_thread_local, incy0,
+          rho_temp + thread_id,
+          cntx
         );
     }
 
+    /*
+      Accumulate the values in rho_temp only when mem is allocated.
+      When the memory cannot be allocated rho_temp will point to
+      rho
+    */
+    if ( bli_mem_is_alloc( &mem_buf_rho ) )
+    {
+        // Accumulating the nt thread outputs to rho
+        for ( dim_t i = 0; i < nt; ++i )
+            PASTEMAC(z,adds)( *(rho_temp + i), rho );
+
+        // Releasing the allocated memory if it was allocated
+        bli_pba_release( &rntm_l, &mem_buf_rho );
+    }
+#endif
+
     /* Finalize BLIS. */
-//  bli_finalize_auto();
+    //  bli_finalize_auto();
 
     AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
 
@@ -790,11 +962,11 @@ scomplex cdotc_blis_impl
     AOCL_DTL_LOG_DOTV_INPUTS(AOCL_DTL_LEVEL_TRACE_1, 'C', 'C', *n, *incx, *incy);
 
     /* Initialize BLIS. */
-//  bli_init_auto();
+    //  bli_init_auto();
 
     /* Convert/typecast negative values of n to zero. */
     if ( *n < 0 ) n0 = ( dim_t )0;
-    else              n0 = ( dim_t )(*n);
+    else          n0 = ( dim_t )(*n);
 
     /* If the input increments are negative, adjust the pointers so we can
        use positive increments instead. */
@@ -869,7 +1041,7 @@ scomplex cdotc_blis_impl
     }
 
     /* Finalize BLIS. */
-//  bli_finalize_auto();
+    //  bli_finalize_auto();
     AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
 
     return rho;
@@ -901,12 +1073,14 @@ dcomplex zdotc_blis_impl
     inc_t  incy0;
     dcomplex  rho;
 
+    PASTEMAC(z,set0s)( rho );   // Initializing rho to 0.
+
     /* Initialize BLIS. */
-//  bli_init_auto();
+    //  bli_init_auto();
 
     /* Convert/typecast negative values of n to zero. */
     if ( *n < 0 ) n0 = ( dim_t )0;
-    else              n0 = ( dim_t )(*n);
+    else          n0 = ( dim_t )(*n);
 
     /* If the input increments are negative, adjust the pointers so we can
        use positive increments instead. */
@@ -948,40 +1122,212 @@ dcomplex zdotc_blis_impl
         incy0 = ( inc_t )(*incy);
     }
 
-    // This function is invoked on all architectures including 'generic'.
-    // Non-AVX2+FMA3 platforms will use the kernels derived from the context.
-    if (bli_cpuid_is_avx2fma3_supported() == TRUE)
+    cntx_t *cntx = NULL;
+
+    // Query the architecture ID
+    arch_t arch_id_local = bli_arch_query_id();
+    zdotv_ker_ft zdotv_ker_ptr;
+
+    switch ( arch_id_local )
     {
-        /* Call BLIS kernel. */
-        bli_zdotv_zen_int5
+        case BLIS_ARCH_ZEN5:
+        case BLIS_ARCH_ZEN4:
+#if defined(BLIS_KERNELS_ZEN4)
+            // Currently only the AVX512 intrinsic kernel is enabled.
+            zdotv_ker_ptr = bli_zdotv_zen_int_avx512;
+            // zdotv_ker_ptr = bli_zdotv_zen4_asm_avx512;
+            break;
+#endif
+
+        case BLIS_ARCH_ZEN3:
+        case BLIS_ARCH_ZEN2:
+        case BLIS_ARCH_ZEN:
+            zdotv_ker_ptr = bli_zdotv_zen_int5;
+            break;
+        
+        default:
+            // For non-Zen architectures, query the context
+            cntx = bli_gks_query_cntx();
+
+            // Query the context for the kernel function pointers for zdotv
+            zdotv_ker_ptr = bli_cntx_get_l1v_ker_dt(BLIS_DCOMPLEX, BLIS_DOTV_KER, cntx);
+            break;
+    }
+
+#ifdef BLIS_ENABLE_OPENMP
+    // Initialize number of threads to one.
+    dim_t nt = 1;
+
+    bli_nthreads_l1
+    (
+      BLIS_DOTV_KER,
+      BLIS_DCOMPLEX,
+      BLIS_DCOMPLEX,
+      arch_id_local,
+      n0,
+      &nt
+    );
+
+    /*
+      If the number of optimum threads is 1, the OpenMP overhead
+      is avoided by calling the function directly
+    */
+    if (nt == 1)
+    {
+#endif
+        zdotv_ker_ptr
         (
-        BLIS_CONJUGATE,
-        BLIS_NO_CONJUGATE,
-        n0,
-        x0, incx0,
-        y0, incy0,
-        &rho,
-        NULL
+          BLIS_CONJUGATE,
+          BLIS_NO_CONJUGATE,
+          n0,
+          x0, incx0,
+          y0, incy0,
+          &rho,
+          cntx
         );
+
+        AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1)
+
+        return rho;
+#ifdef BLIS_ENABLE_OPENMP
+    }
+
+    /*
+      Here we know that more than one thread needs to be spawned.
+
+      In such a case, each thread will need its own rho value to
+      do the accumulation. These temporary rho's will be accumulated
+      in the end.
+    */
+    rntm_t rntm_l;
+    bli_rntm_init_from_global( &rntm_l );
+
+    dcomplex *rho_temp = NULL;
+
+    /*
+      Initialize mem pool buffer to NULL and size to 0
+      "buf" and "size" fields are assigned once memory
+      is allocated from the pool in bli_pba_acquire_m().
+      This will ensure bli_mem_is_alloc() will be passed on
+      an allocated memory if created or a NULL .
+    */
+    mem_t mem_buf_rho;
+    mem_buf_rho.pblk.buf = NULL;
+    mem_buf_rho.pblk.block_size = 0;
+    mem_buf_rho.buf_type = 0;
+    mem_buf_rho.size = 0;
+    mem_buf_rho.pool = NULL;
+
+    /*
+        In order to get the buffer from pool via rntm access to
+        memory broker is needed.Following are initializations
+        for rntm.
+    */
+    bli_rntm_set_num_threads_only(1, &rntm_l);
+    bli_pba_rntm_set_pba(&rntm_l);
+
+    // Calculate the size required for rho buffer.
+    size_t buffer_size = nt * sizeof(dcomplex);
+
+#ifdef BLIS_ENABLE_MEM_TRACING
+    printf("bli_zdotc(): get mem pool block\n");
+#endif
+
+    /*
+      Acquire a buffer (nt * size(dcomplex)) from the memory broker
+      and save the associated mem_t entry to mem_buf_rho.
+    */
+    bli_pba_acquire_m
+    (
+      &rntm_l,
+      buffer_size,
+      BLIS_BITVAL_BUFFER_FOR_A_BLOCK,
+      &mem_buf_rho
+    );
+
+    /* Continue if rho buffer memory is allocated*/
+    if ( bli_mem_is_alloc( &mem_buf_rho ) )
+    {
+        rho_temp = bli_mem_buffer( &mem_buf_rho );
+
+        /*
+          Initializing rho_temp buffer to zeros.
+
+          This is done to handle cases when the
+          number of threads launched is not equal
+          to the number of threads requested. In
+          such cases, the garbage value in the created
+          buffer will not be overwritten by valid values.
+
+          This will ensure that garbage values will
+          not get accumulated with the final result.
+        */
+        for ( dim_t i = 0; i < nt; ++i )
+            PASTEMAC(z,set0s)( *(rho_temp + i) );
     }
     else
     {
-        /* Call BLIS interface. */
-        PASTEMAC2(z,dotv,BLIS_TAPI_EX_SUF)
+        nt = 1;
+        rho_temp = &rho;
+    }
+
+    _Pragma("omp parallel num_threads(nt)")
+    {
+        dim_t start, length;
+
+        // Get the thread ID
+        dim_t thread_id = omp_get_thread_num();
+
+        // Get the actual number of threads spawned
+        dim_t nt_use = omp_get_num_threads();
+
+        /*
+          Calculate the compute range for the current thread
+          based on the actual number of threads spawned
+        */
+        bli_thread_vector_partition
         (
-        BLIS_CONJUGATE,
-        BLIS_NO_CONJUGATE,
-        n0,
-        x0, incx0,
-        y0, incy0,
-        &rho,
-        NULL,
-        NULL
+          n0,
+          nt_use,
+          &start, &length,
+          thread_id
+        );
+
+        // Adjust the local pointer for computation
+        dcomplex *x_thread_local = x0 + (start * incx0);
+        dcomplex *y_thread_local = y0 + (start * incy0);
+
+        // Invoke the function based on the kernel function pointer
+        zdotv_ker_ptr
+        (
+          BLIS_CONJUGATE,
+          BLIS_NO_CONJUGATE,
+          length,
+          x_thread_local, incx0,
+          y_thread_local, incy0,
+          rho_temp + thread_id,
+          cntx
         );
     }
 
+    /*
+      Accumulate the values in rho_temp only when mem is allocated.
+      When the memory cannot be allocated rho_temp will point to
+      rho
+    */
+    if ( bli_mem_is_alloc( &mem_buf_rho ) )
+    {
+        // Accumulating the nt thread outputs to rho
+        for ( dim_t i = 0; i < nt; ++i )
+            PASTEMAC(z,adds)( *(rho_temp + i), rho );
+
+        // Releasing the allocated memory if it was allocated
+        bli_pba_release( &rntm_l, &mem_buf_rho );
+    }
+#endif
+
     /* Finalize BLIS. */
-//  bli_finalize_auto();
+    //  bli_finalize_auto();
 
     AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
 

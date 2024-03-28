@@ -52,6 +52,8 @@ SETV_KER_PROT(dcomplex, z, setv_zen_int_avx512)
 // dotv (intrinsics)
 DOTV_KER_PROT( float,    s, dotv_zen_int_avx512 )
 DOTV_KER_PROT( double,   d, dotv_zen_int_avx512 )
+DOTV_KER_PROT( dcomplex, z, dotv_zen_int_avx512 )
+DOTV_KER_PROT( dcomplex, z, dotv_zen4_asm_avx512 )
 
 // axpyv (intrinsics)
 AXPYV_KER_PROT( float,    s, axpyv_zen_int_avx512 )

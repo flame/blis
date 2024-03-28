@@ -177,7 +177,7 @@ void bli_cntx_init_zen5( cntx_t* cntx )
 	  BLIS_DOTV_KER,   BLIS_FLOAT,    bli_sdotv_zen_int_avx512,
 	  BLIS_DOTV_KER,   BLIS_DOUBLE,   bli_ddotv_zen_int_avx512,
 	  BLIS_DOTV_KER,   BLIS_SCOMPLEX, bli_cdotv_zen_int5,
-	  BLIS_DOTV_KER,   BLIS_DCOMPLEX, bli_zdotv_zen_int5,
+	  BLIS_DOTV_KER,   BLIS_DCOMPLEX, bli_zdotv_zen_int_avx512,
 
 	  // dotxv
 	  BLIS_DOTXV_KER,  BLIS_FLOAT,    bli_sdotxv_zen_int,
