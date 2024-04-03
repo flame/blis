@@ -66,7 +66,7 @@ TEST_P(cgemmUkrSUP, FunctionalTest)
     char transa    = std::get<7>(GetParam());                               // transa
     char transb    = (storage == 'r')? 'n' : 't';                           // transb
     bool is_memory_test = std::get<8>(GetParam());                          // is_memory_test
-    double thresh = 40 * (std::max(k,gtint_t(1))) * testinghelpers::getEpsilon<T>(); // Set the threshold for the errors
+    double thresh = 40 * ((std::max)(k,gtint_t(1))) * testinghelpers::getEpsilon<T>(); // Set the threshold for the errors
     test_complex_gemmsup_ukr<scomplex, cgemmsup_ker_ft> (storage, transa, transb, m, n, k, alpha, beta, thresh, kern_ptr, is_memory_test);
 }// end of function
 
@@ -646,7 +646,7 @@ TEST_P(cgemmUkrNat, FunctionalTest)
     gtint_t n = std::get<5>(GetParam());                                    // n
     cgemm_ukr_ft kern_ptr = std::get<6>(GetParam());                        // pointer to the gemm kernel
     bool is_memory_test   = std::get<7>(GetParam());                        // is_memory_test
-    double thresh = 20 * (std::max(k,gtint_t(1))) * testinghelpers::getEpsilon<T>(); // Set the threshold for the errors
+    double thresh = 20 * ((std::max)(k,gtint_t(1))) * testinghelpers::getEpsilon<T>(); // Set the threshold for the errors
 
     test_gemmnat_ukr(storage, m, n, k, alpha, beta, thresh, kern_ptr, is_memory_test);
 }// end of function

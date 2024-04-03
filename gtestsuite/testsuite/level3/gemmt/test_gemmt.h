@@ -73,22 +73,22 @@ void test_gemmt( char storage, char uplo, char trnsa, char trnsb, gtint_t n,
 
     if ( is_evt_test )
     {
-        dim_t n_rand = rand() % std::min(n, k);
-        dim_t k_rand = rand() % std::min(n, k);
+        dim_t n_rand = rand() % (std::min)(n, k);
+        dim_t k_rand = rand() % (std::min)(n, k);
         a_ptr[n_rand + k_rand * lda] = evt_a;
     }
 
     if ( is_evt_test )
     {
-        dim_t n_rand = rand() % std::min(n, k);
-        dim_t k_rand = rand() % std::min(n, k);
+        dim_t n_rand = rand() % (std::min)(n, k);
+        dim_t k_rand = rand() % (std::min)(n, k);
         b_ptr[n_rand + k_rand * lda] = evt_a;
     }
 
     if ( is_evt_test )
     {
-        dim_t n_rand = rand() % std::min(n, k);
-        dim_t k_rand = rand() % std::min(n, k);
+        dim_t n_rand = rand() % (std::min)(n, k);
+        dim_t k_rand = rand() % (std::min)(n, k);
         b_ptr[n_rand + k_rand * lda] = evt_a;
     }
 

@@ -85,7 +85,7 @@ TEST_P(dtrsmEVTTest, Unit_Tester)
     EVT_TYPE b_init = std::get<11>(GetParam());
 
     // Set the threshold for the errors:
-    double thresh = std::max(m, n)*testinghelpers::getEpsilon<T>();
+    double thresh = (std::max)(m, n)*testinghelpers::getEpsilon<T>();
 
     //----------------------------------------------------------
     //     Call test body using these parameters

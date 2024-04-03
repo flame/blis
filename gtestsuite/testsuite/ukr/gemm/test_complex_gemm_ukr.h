@@ -261,7 +261,7 @@ static void test_gemmnat_ukr( char storage, gtint_t m, gtint_t n, gtint_t k, T a
 
     obj_t a, b;
     num_t dt = BLIS_DCOMPLEX;
-    gtint_t maxmn = std::max(m,n);
+    gtint_t maxmn = (std::max)(m,n);
     bli_obj_create(dt, m, k, 1, m, &a);
     bli_obj_create(dt, k, n, n, 1, &b);
 

@@ -95,7 +95,7 @@ void test_trsv(
     if ( is_evt_test )
     {
         dim_t n_idx = rand() % n;
-        dim_t m_idx = std::max((dim_t)0, n_idx - 1);
+        dim_t m_idx = (std::max)((dim_t)0, n_idx - 1);
         a_ptr[ m_idx + (n_idx * lda) ] = evt_a;
         a_ptr[ m_idx + (m_idx *lda) ] = evt_a;
     }

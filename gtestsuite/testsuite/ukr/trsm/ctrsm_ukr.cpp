@@ -69,7 +69,7 @@ TEST_P(ctrsmUkrSmall, AccuracyCheck)
     gtint_t ldb               = std::get<9>(GetParam());
     bool is_memory_test       = std::get<10>(GetParam());
 
-    double thresh = 2 * std::max(std::max(m, n), gtint_t(3)) * testinghelpers::getEpsilon<T>();
+    double thresh = 2 * (std::max)((std::max)(m, n), gtint_t(3)) * testinghelpers::getEpsilon<T>();
     test_trsm_small_ukr<T, trsm_small_ker_ft>( ukr_fp, side, uploa, diaga, transa, m, n, alpha, lda, ldb, thresh, is_memory_test, BLIS_SCOMPLEX);
 }
 

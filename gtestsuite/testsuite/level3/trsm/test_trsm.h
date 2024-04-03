@@ -107,7 +107,7 @@ void generate_NAN_INF( T* mat, char uploa, gtint_t m, gtint_t ld, EVT_TYPE type,
     else
     {
         // get a random number in range of 1 to m;
-        gtint_t mn = std::max(gtint_t(1), gtint_t(rand()) % m);
+        gtint_t mn = (std::max)(gtint_t(1), gtint_t(rand()) % m);
         if( uploa == 'l' || uploa == 'L')
         {
             // set one element to inf/nan in lower half of matrix
@@ -165,17 +165,17 @@ gtint_t n, gtint_t ld, EVT_TYPE type = NO_EVT, bool is_a = false )
         case NaN:
         case INF:
             testinghelpers::datagenerators::randomgenerators<T>( from, to, storage, m, n, mat, ld);
-            generate_NAN_INF(mat, uploa, std::min(m, n), ld, type, is_a);
+            generate_NAN_INF(mat, uploa, (std::min)(m, n), ld, type, is_a);
             break;
         case DIAG_INF:
         case DIAG_NaN:
             testinghelpers::datagenerators::randomgenerators<T>( from, to, storage, m, n, mat, ld);
-            generate_NAN_INF(mat, uploa, std::min(m, n), ld, type, is_a, true);
+            generate_NAN_INF(mat, uploa, (std::min)(m, n), ld, type, is_a, true);
             break;
         case NaN_INF:
             testinghelpers::datagenerators::randomgenerators<T>( from, to, storage, m, n, mat, ld);
-            generate_NAN_INF(mat, uploa, std::min(m, n), ld, type, is_a);
-            generate_NAN_INF(mat, uploa, std::min(m, n), ld, INF, is_a);
+            generate_NAN_INF(mat, uploa, (std::min)(m, n), ld, type, is_a);
+            generate_NAN_INF(mat, uploa, (std::min)(m, n), ld, INF, is_a);
             break;
         case NO_EVT:
             testinghelpers::datagenerators::randomgenerators<T>( from, to, storage, m, n, mat, ld);

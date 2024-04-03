@@ -78,7 +78,7 @@ TEST_P(dtrsmTest, Accuracy_test)
     gtint_t ldb_inc = std::get<9>(GetParam());
 
     // Set the threshold for the errors:
-    double thresh = 1.5*std::max(m, n)*testinghelpers::getEpsilon<T>();
+    double thresh = 1.5*(std::max)(m, n)*testinghelpers::getEpsilon<T>();
 
     //----------------------------------------------------------
     //     Call test body using these parameters
