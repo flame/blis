@@ -401,7 +401,7 @@ void randomgenerators( T2 from, T3 to, char storage, gtint_t m, gtint_t n,
 template<typename T1, typename T2, typename T3>
 void randomgenerators( T2 from, T3 to, char storage, char uplo, gtint_t k,
                     T1* a, gtint_t lda, ElementType datatype = GenericET ) {
-    randomgenerators<T1>(from, to, storage, k, k, a, lda, datatype);
+    testinghelpers::datagenerators::randomgenerators<T1>(from, to, storage, k, k, a, lda, 1, datatype);
     if( (storage=='c')||(storage=='C') )
     {
         for(gtint_t j=0; j<k; j++)
