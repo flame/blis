@@ -113,5 +113,5 @@ static void test_scalv_ukr( FT ukr, char conja_alpha, gtint_t n, gtint_t incx,
         testinghelpers::ref_scalv<T, U>( conja_alpha, n, alpha, x_ref, incx );
 
     // Compute component-wise error.
-    computediff<T>( n, x, x_ref, incx, thresh );
+    computediff<T>( "x", n, x, x_ref, incx, thresh );
 }

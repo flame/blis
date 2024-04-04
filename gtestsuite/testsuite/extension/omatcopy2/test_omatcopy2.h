@@ -136,9 +136,9 @@ static void test_omatcopy2( char storage, char trans, gtint_t m, gtint_t n, T al
     //----------------------------------------------------------
 
     if( B_trans == 'n' )
-      computediff<T>( storage, m, n, B, B_ref, ldb, thresh, is_nan_inf_test );
+      computediff<T>( "B", storage, m, n, B, B_ref, ldb, thresh, is_nan_inf_test );
     else
-      computediff<T>( storage, n, m, B, B_ref, ldb, thresh, is_nan_inf_test );
+      computediff<T>( "B", storage, n, m, B, B_ref, ldb, thresh, is_nan_inf_test );
 
 }
 

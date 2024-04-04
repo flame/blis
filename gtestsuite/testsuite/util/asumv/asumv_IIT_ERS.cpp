@@ -77,7 +77,7 @@ TYPED_TEST(asumv_IIT_ERS_Test, n_lt_zero_nonUnitStride)
     asum = asumv<T>( invalid_n, x.data(), inc );
 
     // Computing the difference.
-    computediff<RT>( asum, asum_ref );
+    computediff<RT>( "asum", asum, asum_ref );
 }
 
 // n == 0, with non-unit stride
@@ -102,7 +102,7 @@ TYPED_TEST(asumv_IIT_ERS_Test, n_eq_zero_nonUnitStride)
     asum = asumv<T>( invalid_n, x.data(), inc );
 
     // Computing the difference.
-    computediff<RT>( asum, asum_ref );
+    computediff<RT>( "asum", asum, asum_ref );
 }
 
 // n < 0, with unit stride
@@ -127,7 +127,7 @@ TYPED_TEST(asumv_IIT_ERS_Test, n_lt_zero_unitStride)
     asum = asumv<T>( invalid_n, x.data(), unit_inc );
 
     // Computing the difference.
-    computediff<RT>( asum, asum_ref );
+    computediff<RT>( "asum", asum, asum_ref );
 }
 
 // n == 0, with unit stride
@@ -152,7 +152,7 @@ TYPED_TEST(asumv_IIT_ERS_Test, n_eq_zero_unitStride)
     asum = asumv<T>( invalid_n, x.data(), unit_inc );
 
     // Computing the difference.
-    computediff<RT>( asum, asum_ref );
+    computediff<RT>( "asum", asum, asum_ref );
 }
 
 // inc < 0
@@ -176,7 +176,7 @@ TYPED_TEST(asumv_IIT_ERS_Test, inc_lt_0)
     asum = asumv<T>( N, x.data(), invalid_inc );
 
     // Computing the difference.
-    computediff<RT>( asum, asum_ref );
+    computediff<RT>( "asum", asum, asum_ref );
 }
 
 // inc == 0
@@ -200,6 +200,6 @@ TYPED_TEST(asumv_IIT_ERS_Test, inc_eq_0)
     asum = asumv<T>( N, x.data(), invalid_inc );
 
     // Computing the difference.
-    computediff<RT>( asum, asum_ref );
+    computediff<RT>( "asum", asum, asum_ref );
 }
 #endif

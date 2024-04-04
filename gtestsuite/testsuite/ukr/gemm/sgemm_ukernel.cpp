@@ -484,7 +484,7 @@ TEST_P(SGemmSmallUkernelTest, gemm_small)
                                  a.data(), lda, b.data(), ldb, beta, c_ref.data(), ldc);
 
     // Check component-wise error
-    computediff<T>( storage, m, n, c.data(), c_ref.data(), ldc, thresh );
+    computediff<T>( "C", storage, m, n, c.data(), c_ref.data(), ldc, thresh );
 
 }// end of function
 

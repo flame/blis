@@ -144,5 +144,5 @@ void test_trsv(
     //----------------------------------------------------------
     //              check component-wise error.
     //----------------------------------------------------------
-    computediff<T>( n, x_ptr, x_ref.data(), incx, thresh, is_evt_test );
+    computediff<T>( "x", n, x_ptr, x_ref.data(), incx, thresh, is_evt_test );
 }

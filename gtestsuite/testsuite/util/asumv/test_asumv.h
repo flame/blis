@@ -65,7 +65,7 @@ void test_asumv( gtint_t n, gtint_t incx, double thresh )
     //----------------------------------------------------------
     //              Compute error.
     //----------------------------------------------------------
-    computediff<RT>( asum, asum_ref, thresh );
+    computediff<RT>( "asum", asum, asum_ref, thresh );
 }
 
 /**
@@ -103,5 +103,5 @@ void test_asumv( gtint_t n, gtint_t incx, gtint_t xi, double ix_exval,
     //----------------------------------------------------------
     //              Compute error.
     //----------------------------------------------------------
-    computediff<RT>( asum, asum_ref, thresh, true );
+    computediff<RT>( "asum", asum, asum_ref, thresh, true );
 }

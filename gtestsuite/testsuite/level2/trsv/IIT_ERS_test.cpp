@@ -77,7 +77,7 @@ TYPED_TEST(TRSV_IIT_ERS_Test, invalid_UPLO)
     std::vector<T> x_ref(x);
 
     trsv<T>( STORAGE, 'A', TRANS, DIAG, N, &alpha, nullptr, LDA, x.data(), INC);
-    computediff<T>( N, x.data(), x_ref.data(), INC );
+    computediff<T>( "x", N, x.data(), x_ref.data(), INC );
 }
 
 /**
@@ -94,7 +94,7 @@ TYPED_TEST(TRSV_IIT_ERS_Test, invalid_TRANS)
     std::vector<T> x_ref(x);
 
     trsv<T>( STORAGE, UPLO, 'A', DIAG, N, &alpha, nullptr, LDA, x.data(), INC);
-    computediff<T>( N, x.data(), x_ref.data(), INC );
+    computediff<T>( "x", N, x.data(), x_ref.data(), INC );
 }
 
 /**
@@ -110,7 +110,7 @@ TYPED_TEST(TRSV_IIT_ERS_Test, invalid_DIAG)
     std::vector<T> x_ref(x);
 
     trsv<T>( STORAGE, UPLO, TRANS, 'A', N, &alpha, nullptr, LDA, x.data(), INC);
-    computediff<T>( N, x.data(), x_ref.data(), INC );
+    computediff<T>( "x", N, x.data(), x_ref.data(), INC );
 }
 
 /**
@@ -126,7 +126,7 @@ TYPED_TEST(TRSV_IIT_ERS_Test, invalid_n)
     std::vector<T> x_ref(x);
 
     trsv<T>( STORAGE, UPLO, TRANS, DIAG, -1, &alpha, nullptr, LDA, x.data(), INC);
-    computediff<T>( N, x.data(), x_ref.data(), INC );
+    computediff<T>( "x", N, x.data(), x_ref.data(), INC );
 }
 
 
@@ -143,7 +143,7 @@ TYPED_TEST(TRSV_IIT_ERS_Test, invalid_lda)
     std::vector<T> x_ref(x);
 
     trsv<T>( STORAGE, UPLO, TRANS, DIAG, N, &alpha, nullptr, LDA - 1, x.data(), INC);
-    computediff<T>( N, x.data(), x_ref.data(), INC );
+    computediff<T>( "x", N, x.data(), x_ref.data(), INC );
 }
 
 /**
@@ -159,7 +159,7 @@ TYPED_TEST(TRSV_IIT_ERS_Test, invalid_incx)
     std::vector<T> x_ref(x);
 
     trsv<T>( STORAGE, UPLO, TRANS, DIAG, N, &alpha, nullptr, LDA, x.data(), 0);
-    computediff<T>( N, x.data(), x_ref.data(), INC );
+    computediff<T>( "x", N, x.data(), x_ref.data(), INC );
 }
 
 
@@ -184,7 +184,7 @@ TYPED_TEST(TRSV_IIT_ERS_Test, n_eq_zero)
     std::vector<T> x_ref(x);
 
     trsv<T>( STORAGE, UPLO, TRANS, DIAG, 0, &alpha, nullptr, LDA, x.data(), INC);
-    computediff<T>( N, x.data(), x_ref.data(), INC );
+    computediff<T>( "x", N, x.data(), x_ref.data(), INC );
 }
 
 #endif

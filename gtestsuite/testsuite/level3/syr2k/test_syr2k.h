@@ -78,5 +78,5 @@ void test_syr2k( char storage, char uplo, char transa, char transb, gtint_t n,
     //----------------------------------------------------------
     //              check component-wise error.
     //----------------------------------------------------------
-    computediff<T>( storage, n, n, c.data(), c_ref.data(), ldc, thresh );
+    computediff<T>( "C", storage, n, n, c.data(), c_ref.data(), ldc, thresh );
 }

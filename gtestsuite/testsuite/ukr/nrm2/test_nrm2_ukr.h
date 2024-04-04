@@ -115,6 +115,6 @@ static void test_nrm2_ukr( nrm2_ker_ft<T, RT> ukr_fp, gtint_t n, gtint_t incx, d
     //----------------------------------------------------------
     //              Compute error.
     //----------------------------------------------------------
-    computediff<RT>( norm, norm_ref, thresh );
+    computediff<RT>( "norm", norm, norm_ref, thresh );
 
 }

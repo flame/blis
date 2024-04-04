@@ -136,5 +136,5 @@ void test_gemmt( char storage, char uplo, char trnsa, char trnsb, gtint_t n,
     //----------------------------------------------------------
     //              check component-wise error.
     //----------------------------------------------------------
-    computediff<T>( storage, n, n, c_ptr, c_ref.data(), ldc, thresh, is_evt_test );
+    computediff<T>( "C", storage, n, n, c_ptr, c_ref.data(), ldc, thresh, is_evt_test );
 }

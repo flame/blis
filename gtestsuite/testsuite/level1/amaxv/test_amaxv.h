@@ -63,7 +63,7 @@ static void test_amaxv( gtint_t n, gtint_t incx )
     //----------------------------------------------------------
     //              Compute component-wise error.
     //----------------------------------------------------------
-    EXPECT_EQ(idx, idx_ref) << "Values are different : act_val : " << idx << "   ref_val :" << idx_ref;
+    computediff<gtint_t>( "idx", idx, idx_ref );
 }
 
 /**
@@ -99,5 +99,5 @@ static void test_amaxv( gtint_t n, gtint_t incx, gtint_t xi, T xi_exval,
     //----------------------------------------------------------
     //              Compute component-wise error.
     //----------------------------------------------------------
-    EXPECT_EQ(idx, idx_ref) << "Values are different : act_val : " << idx << "   ref_val :" << idx_ref;	
+    computediff<gtint_t>( "idx", idx, idx_ref );
 }

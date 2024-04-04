@@ -72,7 +72,7 @@ TYPED_TEST(swapv_IIT_ERS_Test, n_lt_zero_nonUnitStride)
   swapv<T>( invalid_n,  x.data(), inc, y.data(), inc );
 
   // Use bitwise comparison (no threshold).
-  computediff<T>( N, y.data(), y_ref.data(), inc );
+  computediff<T>( "y", N, y.data(), y_ref.data(), inc );
 }
 
 // n < 0, with unit stride
@@ -93,7 +93,7 @@ TYPED_TEST(swapv_IIT_ERS_Test, n_lt_zero_unitStride)
   swapv<T>( invalid_n, x.data(), inc, y.data(), inc );
 
   // Use bitwise comparison (no threshold).
-  computediff<T>( N, y.data(), y_ref.data(), inc );
+  computediff<T>( "y", N, y.data(), y_ref.data(), inc );
 }
 
 // n == 0, with non-unit stride
@@ -114,7 +114,7 @@ TYPED_TEST(swapv_IIT_ERS_Test, n_eq_zero_nonUnitStride)
   swapv<T>( invalid_n, x.data(), inc, y.data(), inc );
 
   // Use bitwise comparison (no threshold).
-  computediff<T>( N, y.data(), y_ref.data(), inc );
+  computediff<T>( "y", N, y.data(), y_ref.data(), inc );
 }
 
 // n == 0, with unit stride
@@ -135,7 +135,7 @@ TYPED_TEST(swapv_IIT_ERS_Test, n_eq_zero_unitStride)
   swapv<T>( invalid_n, x.data(), inc, y.data(), inc );
 
   // Use bitwise comparison (no threshold).
-  computediff<T>( N, y.data(), y_ref.data(), inc );
+  computediff<T>( "y", N, y.data(), y_ref.data(), inc );
 }
 
 #endif

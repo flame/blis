@@ -80,7 +80,7 @@ TYPED_TEST(GEMMT_IIT_ERS, invalid_uploa)
     testinghelpers::initone<T>( beta );
 
     gemmt<T>( STORAGE, 'A', TRANS, TRANS, N, K, &alpha, a.data(), LDA, b.data(), LDB, &beta, c.data(), LDC );
-    computediff<T>( STORAGE, N, N, c.data(), c_ref.data(), LDC );
+    computediff<T>( "C", STORAGE, N, N, c.data(), c_ref.data(), LDC );
 }
 
 // When info == 2
@@ -100,7 +100,7 @@ TYPED_TEST(GEMMT_IIT_ERS, invalid_transa)
     testinghelpers::initone<T>( beta );
 
     gemmt<T>( STORAGE, UPLO, 'A', TRANS, N, K, &alpha, a.data(), LDA, b.data(), LDB, &beta, c.data(), LDC );
-    computediff<T>( STORAGE, N, N, c.data(), c_ref.data(), LDC );
+    computediff<T>( "C", STORAGE, N, N, c.data(), c_ref.data(), LDC );
 }
 
 // When info == 3
@@ -120,7 +120,7 @@ TYPED_TEST(GEMMT_IIT_ERS, invalid_transb)
     testinghelpers::initone<T>( beta );
 
     gemmt<T>( STORAGE, UPLO, TRANS, 'A', N, K, &alpha, a.data(), LDA, b.data(), LDB, &beta, c.data(), LDC );
-    computediff<T>( STORAGE, N, N, c.data(), c_ref.data(), LDC );
+    computediff<T>( "C", STORAGE, N, N, c.data(), c_ref.data(), LDC );
 }
 
 // When info == 4
@@ -140,7 +140,7 @@ TYPED_TEST(GEMMT_IIT_ERS, n_lt_zero)
     testinghelpers::initone<T>( beta );
 
     gemmt<T>( STORAGE, UPLO, TRANS, TRANS, -1, K, &alpha, a.data(), LDA, b.data(), LDB, &beta, c.data(), LDC );
-    computediff<T>( STORAGE, N, N, c.data(), c_ref.data(), LDC );
+    computediff<T>( "C", STORAGE, N, N, c.data(), c_ref.data(), LDC );
 }
 
 // When info == 5
@@ -160,7 +160,7 @@ TYPED_TEST(GEMMT_IIT_ERS, k_lt_zero)
     testinghelpers::initone<T>( beta );
 
     gemmt<T>( STORAGE, UPLO, TRANS, TRANS, N, -1, &alpha, a.data(), LDA, b.data(), LDB, &beta, c.data(), LDC );
-    computediff<T>( STORAGE, N, N, c.data(), c_ref.data(), LDC );
+    computediff<T>( "C", STORAGE, N, N, c.data(), c_ref.data(), LDC );
 }
 
 // When info == 8
@@ -180,7 +180,7 @@ TYPED_TEST(GEMMT_IIT_ERS, invalid_lda)
     testinghelpers::initone<T>( beta );
 
     gemmt<T>( STORAGE, UPLO, TRANS, TRANS, N, K, &alpha, a.data(), LDA-1, b.data(), LDB, &beta, c.data(), LDC );
-    computediff<T>( STORAGE, N, N, c.data(), c_ref.data(), LDC );
+    computediff<T>( "C", STORAGE, N, N, c.data(), c_ref.data(), LDC );
 }
 
 // When info == 10
@@ -200,7 +200,7 @@ TYPED_TEST(GEMMT_IIT_ERS, invalid_ldb)
     testinghelpers::initone<T>( beta );
 
     gemmt<T>( STORAGE, UPLO, TRANS, TRANS, N, K, &alpha, a.data(), LDA, b.data(), LDB-1, &beta, c.data(), LDC );
-    computediff<T>( STORAGE, N, N, c.data(), c_ref.data(), LDC );
+    computediff<T>( "C", STORAGE, N, N, c.data(), c_ref.data(), LDC );
 }
 
 // When info == 13
@@ -220,7 +220,7 @@ TYPED_TEST(GEMMT_IIT_ERS, invalid_ldc)
     testinghelpers::initone<T>( beta );
 
     gemmt<T>( STORAGE, UPLO, TRANS, TRANS, N, K, &alpha, a.data(), LDA, b.data(), LDB, &beta, c.data(), LDC-1 );
-    computediff<T>( STORAGE, N, N, c.data(), c_ref.data(), LDC );
+    computediff<T>( "C", STORAGE, N, N, c.data(), c_ref.data(), LDC );
 }
 
 /*
@@ -250,7 +250,7 @@ TYPED_TEST(GEMMT_IIT_ERS, n_eq_zero)
     testinghelpers::initone<T>( beta );
 
     gemmt<T>( STORAGE, UPLO, TRANS, TRANS, 0, K, &alpha, a.data(), LDA, b.data(), LDB, &beta, c.data(), LDC );
-    computediff<T>( STORAGE, N, N, c.data(), c_ref.data(), LDC );
+    computediff<T>( "C", STORAGE, N, N, c.data(), c_ref.data(), LDC );
 }
 
 // When alpha is 0 and beta is 1
@@ -270,7 +270,7 @@ TYPED_TEST(GEMMT_IIT_ERS, alpha_zero_beta_one)
     testinghelpers::initone<T>( beta );
 
     gemmt<T>( STORAGE, UPLO, TRANS, TRANS, N, K, &alpha, a.data(), LDA, b.data(), LDB, &beta, c.data(), LDC );
-    computediff<T>( STORAGE, N, N, c.data(), c_ref.data(), LDC );
+    computediff<T>( "C", STORAGE, N, N, c.data(), c_ref.data(), LDC );
 }
 
 // When k is 0 and beta is 1
@@ -290,7 +290,7 @@ TYPED_TEST(GEMMT_IIT_ERS, k_zero_beta_one)
     testinghelpers::initone<T>( beta );
 
     gemmt<T>( STORAGE, UPLO, TRANS, TRANS, N, 0, &alpha, a.data(), LDA, b.data(), LDB, &beta, c.data(), LDC );
-    computediff<T>( STORAGE, N, N, c.data(), c_ref.data(), LDC );
+    computediff<T>( "C", STORAGE, N, N, c.data(), c_ref.data(), LDC );
 }
 
 #endif

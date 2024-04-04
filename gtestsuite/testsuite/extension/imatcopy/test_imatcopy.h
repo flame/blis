@@ -134,8 +134,8 @@ static void test_imatcopy( char storage, char trans, gtint_t m, gtint_t n, T alp
     //----------------------------------------------------------
 
     if( A_out_trans == 'n' )
-      computediff<T>( storage, m, n, A, A_ref, lda_out, thresh, is_nan_inf_test );
+      computediff<T>( "A", storage, m, n, A, A_ref, lda_out, thresh, is_nan_inf_test );
     else
-      computediff<T>( storage, n, m, A, A_ref, lda_out, thresh, is_nan_inf_test );
+      computediff<T>( "A", storage, n, m, A, A_ref, lda_out, thresh, is_nan_inf_test );
 
 }

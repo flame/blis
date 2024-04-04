@@ -67,7 +67,7 @@ static void test_axpbyv( char conjx, gtint_t n, gtint_t incx, gtint_t incy,
     //----------------------------------------------------------
     //              Compute component-wise error.
     //----------------------------------------------------------
-    computediff<T>( n, y.data(), y_ref.data(), incy, thresh );
+    computediff<T>( "y", n, y.data(), y_ref.data(), incy, thresh );
 }
 
 template<typename T>
@@ -104,5 +104,5 @@ static void test_axpbyv( char conjx, gtint_t n, gtint_t incx, gtint_t incy,
     //----------------------------------------------------------
     //              Compute component-wise error.
     //----------------------------------------------------------
-    computediff<T>( n, y.data(), y_ref.data(), incy, thresh, true );
+    computediff<T>( "y", n, y.data(), y_ref.data(), incy, thresh, true );
 }

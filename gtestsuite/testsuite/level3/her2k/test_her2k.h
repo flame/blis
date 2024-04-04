@@ -78,5 +78,5 @@ void test_her2k( char storage, char uplo, char transa, char transb,
     //----------------------------------------------------------
     //              check component-wise error.
     //----------------------------------------------------------
-    computediff<T>( storage, n, n, c.data(), c_ref.data(), ldc, thresh );
+    computediff<T>( "C", storage, n, n, c.data(), c_ref.data(), ldc, thresh );
 }

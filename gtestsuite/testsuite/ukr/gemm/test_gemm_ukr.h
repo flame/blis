@@ -226,7 +226,7 @@ static void test_gemmnat_ukr(
                                 buf_a, lda, buf_b, ldb, beta, (T*)buf_cref, ldc);
 
     // Check component-wise error
-    computediff<T>( storage, m, n, (T*)buf_c, (T*)buf_cref, ldc, thresh );
+    computediff<T>( "C", storage, m, n, (T*)buf_c, (T*)buf_cref, ldc, thresh );
 
 }
 
@@ -354,7 +354,7 @@ static void test_gemmk1_ukr( FT ukr_fp, gtint_t m, gtint_t n, gtint_t k, char st
                                  buf_a, lda, buf_b, ldb, beta, buf_cref, ldc);
 
     // Check component-wise error
-    computediff<T>( storage, m, n, buf_c, buf_cref, ldc, thresh );
+    computediff<T>( "C", storage, m, n, buf_c, buf_cref, ldc, thresh );
 }
 
 template<typename T, typename FT>
@@ -591,5 +591,5 @@ static void test_gemmsup_ukr( FT ukr_fp, char trnsa, char trnsb, gtint_t m, gtin
                                  buf_a, lda, buf_b, ldb, beta, ref_c, ldc);
 
     // Check component-wise error
-    computediff<T>( storage, m, n, buf_c, ref_c, ldc, thresh );
+    computediff<T>( "C", storage, m, n, buf_c, ref_c, ldc, thresh );
 }

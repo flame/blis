@@ -59,7 +59,7 @@ TYPED_TEST(nrm2_ERS, zero_n) {
     // If "x" is accessed before return then nrm2 would segfault.
     blis_norm = nrm2<T>(n, nullptr, incx);
     RT ref_norm = testinghelpers::ref_nrm2<T>(n, nullptr, incx);
-    computediff<RT>(blis_norm, ref_norm);
+    computediff<RT>("norm", blis_norm, ref_norm);
 }
 
 // Edge case where it actually does not return early.
@@ -85,7 +85,7 @@ TYPED_TEST(nrm2_EIC, zero_incx_scalar) {
     RT blis_norm = 19.0;
     blis_norm = nrm2<T>(n, x.data(), incx);
     RT ref_norm = testinghelpers::ref_nrm2<T>(n, x.data(), incx);
-    computediff<RT>(blis_norm, ref_norm);
+    computediff<RT>("norm", blis_norm, ref_norm);
 }
 
 TYPED_TEST(nrm2_EIC, zero_incx_vectorized) {
@@ -103,7 +103,7 @@ TYPED_TEST(nrm2_EIC, zero_incx_vectorized) {
     RT blis_norm = 19.0;
     blis_norm = nrm2<T>(n, x.data(), incx);
     RT ref_norm = testinghelpers::ref_nrm2<T>(n, x.data(), incx);
-    computediff<RT>(blis_norm, ref_norm);
+    computediff<RT>("norm", blis_norm, ref_norm);
 }
 
 /*
@@ -126,5 +126,5 @@ TYPED_TEST( nrm2_EIC, zero_incx_MT ) {
     x[0] = T{2.0}*x[0];
     RT blis_norm = nrm2<T>(n, x.data(), incx);
     RT ref_norm = testinghelpers::ref_nrm2<T>(n, x.data(), incx);
-    computediff<RT>(blis_norm, ref_norm);
+    computediff<RT>("norm", blis_norm, ref_norm);
 }

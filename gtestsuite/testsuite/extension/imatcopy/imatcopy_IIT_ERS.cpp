@@ -73,7 +73,7 @@ TYPED_TEST(imatcopy_IIT_ERS, invalid_transa)
   // Call imatcopy with a invalid value for TRANS value for the operation.
   imatcopy<T>( 'Q', M, N, alpha, A.data(), LDA, LDA );
   // Use bitwise comparison (no threshold).
-  computediff<T>( 'c', M, N, A.data(), A_ref.data(), LDA );
+  computediff<T>( "A", 'c', M, N, A.data(), A_ref.data(), LDA );
 }
 
 // When m < 0
@@ -91,7 +91,7 @@ TYPED_TEST(imatcopy_IIT_ERS, m_lt_zero)
   // Call imatcopy with a invalid m for the operation.
   imatcopy<T>( TRANS, -1, N, alpha, A.data(), LDA, LDA );
   // Use bitwise comparison (no threshold).
-  computediff<T>( 'c', M, N, A.data(), A_ref.data(), LDA );
+  computediff<T>( "A", 'c', M, N, A.data(), A_ref.data(), LDA );
 }
 
 // When n < 0
@@ -109,7 +109,7 @@ TYPED_TEST(imatcopy_IIT_ERS, n_lt_zero)
   // Call imatcopy with a invalid n for the operation.
   imatcopy<T>( TRANS, M, -1, alpha, A.data(), LDA, LDA );
   // Use bitwise comparison (no threshold).
-  computediff<T>( 'c', M, N, A.data(), A_ref.data(), LDA );
+  computediff<T>( "A", 'c', M, N, A.data(), A_ref.data(), LDA );
 }
 
 // When lda < m
@@ -131,7 +131,7 @@ TYPED_TEST(imatcopy_IIT_ERS, invalid_lda_in)
   // Call imatcopy with a invalid lda for the operation.
   imatcopy<T>( 'n', m, n, alpha, A.data(), m - 1, m );
   // Use bitwise comparison (no threshold).
-  computediff<T>( 'c', m, n, A.data(), A_ref.data(), m );
+  computediff<T>( "A", 'c', m, n, A.data(), A_ref.data(), m );
 }
 
 // When lda_out < m, with trans == 'n'
@@ -153,7 +153,7 @@ TYPED_TEST(imatcopy_IIT_ERS, invalid_lda_out_no_transpose)
   // Call imatcopy with a invalid lda for the operation.
   imatcopy<T>( 'n', m, n, alpha, A.data(), m, m-1 );
   // Use bitwise comparison (no threshold).
-  computediff<T>( 'c', m, n, A.data(), A_ref.data(), m );
+  computediff<T>( "A", 'c', m, n, A.data(), A_ref.data(), m );
 }
 
 // When lda_out < m, with trans == 'r'
@@ -175,7 +175,7 @@ TYPED_TEST(imatcopy_IIT_ERS, invalid_lda_out_conjugate)
   // Call imatcopy with a invalid lda for the operation.
   imatcopy<T>( 'r', m, n, alpha, A.data(), m, m-1 );
   // Use bitwise comparison (no threshold).
-  computediff<T>( 'c', m, n, A.data(), A_ref.data(), m );
+  computediff<T>( "A", 'c', m, n, A.data(), A_ref.data(), m );
 }
 
 // When lda_out < m, with trans == 't'
@@ -197,7 +197,7 @@ TYPED_TEST(imatcopy_IIT_ERS, invalid_lda_out_transpose)
   // Call imatcopy with a invalid lda for the operation.
   imatcopy<T>( 'n', m, n, alpha, A.data(), m, n-1 );
   // Use bitwise comparison (no threshold).
-  computediff<T>( 'c', m, n, A.data(), A_ref.data(), m );
+  computediff<T>( "A", 'c', m, n, A.data(), A_ref.data(), m );
 }
 
 // When lda_out < m, with trans == 'c'
@@ -219,6 +219,6 @@ TYPED_TEST(imatcopy_IIT_ERS, invalid_lda_out_conjugate_transpose)
   // Call imatcopy with a invalid lda for the operation.
   imatcopy<T>( 'n', m, n, alpha, A.data(), m, n-1 );
   // Use bitwise comparison (no threshold).
-  computediff<T>( 'c', m, n, A.data(), A_ref.data(), m );
+  computediff<T>( "A", 'c', m, n, A.data(), A_ref.data(), m );
 }
 #endif

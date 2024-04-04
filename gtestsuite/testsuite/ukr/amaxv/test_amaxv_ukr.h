@@ -111,5 +111,5 @@ void test_amaxv_ukr( FT ukr_fp, gtint_t n, gtint_t incx, double thresh, bool is_
     //----------------------------------------------------------
     //              Compute component-wise error.
     //----------------------------------------------------------
-    EXPECT_EQ( idx, idx_ref );
+    computediff<gtint_t>( "idx", idx, idx_ref );
 }

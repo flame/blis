@@ -59,18 +59,21 @@ void test_syrk( char storage, char uplo, char transa, gtint_t n, gtint_t k,
 
     // Create a copy of c so that we can check reference results.
     std::vector<T> c_ref(c);
+
     //----------------------------------------------------------
     //                  Call BLIS function
     //----------------------------------------------------------
     syrk<T>( storage, uplo, transa, n, k, &alpha, a.data(), lda,
                 &beta, c.data(), ldc );
+
     //----------------------------------------------------------
     //                  Call reference implementation.
     //----------------------------------------------------------
     testinghelpers::ref_syrk<T>( storage, uplo, transa, n, k, alpha,
                a.data(), lda, beta, c_ref.data(), ldc );
+
     //----------------------------------------------------------
     //              check component-wise error.
     //----------------------------------------------------------
-    computediff<T>( storage, n, n, c.data(), c_ref.data(), ldc, thresh );
+    computediff<T>( "C", storage, n, n, c.data(), c_ref.data(), ldc, thresh );
 }

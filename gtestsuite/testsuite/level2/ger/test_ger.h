@@ -71,7 +71,7 @@ void test_ger( char storage, char conjx, char conjy, gtint_t m, gtint_t n,
     //----------------------------------------------------------
     //              check component-wise error.
     //----------------------------------------------------------
-    computediff<T>( storage, m, n, a.data(), a_ref.data(), lda, thresh );
+    computediff<T>( "a", storage, m, n, a.data(), a_ref.data(), lda, thresh );
 }
 
 template<typename T>
@@ -116,5 +116,5 @@ void test_ger( char storage, char conjx, char conjy, gtint_t m, gtint_t n,
     //----------------------------------------------------------
     //              check component-wise error.
     //----------------------------------------------------------
-    computediff<T>( storage, m, n, a.data(), a_ref.data(), lda, thresh, true );
+    computediff<T>( "A", storage, m, n, a.data(), a_ref.data(), lda, thresh, true );
 }

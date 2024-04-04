@@ -122,5 +122,5 @@ static void test_axpbyv_ukr( FT ukr_fp, char conjx, gtint_t n, gtint_t incx, gti
     //----------------------------------------------------------
     //              Compute component-wise error.
     //----------------------------------------------------------
-    computediff<T>( n, y, y_ref, incy, thresh );
+    computediff<T>( "y", n, y, y_ref, incy, thresh );
 }

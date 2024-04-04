@@ -89,5 +89,5 @@ static void test_axpyf(
     //---------------------------------------------------------
     //              Compute component-wise error.
     //----------------------------------------------------------
-    computediff<T>( m, y.data(), y_ref.data(), incy, thresh );
+    computediff<T>( "y", m, y.data(), y_ref.data(), incy, thresh, true );
 }

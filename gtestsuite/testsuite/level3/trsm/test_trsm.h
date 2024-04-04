@@ -243,5 +243,5 @@ void test_trsm( char storage, char side, char uploa, char transa, char diaga,
     //----------------------------------------------------------
     //              check component-wise error.
     //----------------------------------------------------------
-    computediff<T>( storage, m, n, b.data(), b_ref.data(), ldb, thresh, nan_inf_check );
+    computediff<T>( "B", storage, m, n, b.data(), b_ref.data(), ldb, thresh, nan_inf_check );
 }

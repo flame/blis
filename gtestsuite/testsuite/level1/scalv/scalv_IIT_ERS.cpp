@@ -84,7 +84,7 @@ TYPED_TEST(scalv_IIT_ERS_Test, n_lt_zero_nonUnitStride)
     scalv<T, RT>( 'n', invalid_n, alpha, x.data(), inc );
 
     // Computing bitwise difference.
-    computediff<T>( N, x.data(), x_ref.data(), inc );
+    computediff<T>( "x", N, x.data(), x_ref.data(), inc );
 }
 
 // n == 0, with non-unit stride
@@ -107,7 +107,7 @@ TYPED_TEST(scalv_IIT_ERS_Test, n_eq_zero_nonUnitStride)
     scalv<T, RT>( 'n', invalid_n, alpha, x.data(), inc );
 
     // Computing bitwise difference.
-    computediff<T>( N, x.data(), x_ref.data(), inc );
+    computediff<T>( "x", N, x.data(), x_ref.data(), inc );
 }
 
 // n < 0, with unit stride
@@ -130,7 +130,7 @@ TYPED_TEST(scalv_IIT_ERS_Test, n_lt_zero_unitStride)
     scalv<T, RT>( 'n', invalid_n, alpha, x.data(), unit_inc );
 
     // Computing bitwise difference.
-    computediff<T>( N, x.data(), x_ref.data(), unit_inc );
+    computediff<T>( "x", N, x.data(), x_ref.data(), unit_inc );
 }
 
 // n == 0, with unit stride
@@ -153,7 +153,7 @@ TYPED_TEST(scalv_IIT_ERS_Test, n_eq_zero_unitStride)
     scalv<T, RT>( 'n', invalid_n, alpha, x.data(), unit_inc );
 
     // Computing bitwise difference.
-    computediff<T>( N, x.data(), x_ref.data(), unit_inc );
+    computediff<T>( "x", N, x.data(), x_ref.data(), unit_inc );
 }
 
 // inc < 0
@@ -175,7 +175,7 @@ TYPED_TEST(scalv_IIT_ERS_Test, inc_lt_0)
     scalv<T, RT>( 'n', N, alpha, x.data(), invalid_inc );
 
     // Computing bitwise difference.
-    computediff<T>( N, x.data(), x_ref.data(), INC );
+    computediff<T>( "x", N, x.data(), x_ref.data(), INC );
 }
 
 // inc == 0
@@ -197,7 +197,7 @@ TYPED_TEST(scalv_IIT_ERS_Test, inc_eq_0)
     scalv<T, RT>( 'n', N, alpha, x.data(), invalid_inc );
 
     // Computing bitwise difference.
-    computediff<T>( N, x.data(), x_ref.data(), INC );
+    computediff<T>( "x", N, x.data(), x_ref.data(), INC );
 }
 
 // alpha == 1, with non-unit stride
@@ -218,7 +218,7 @@ TYPED_TEST(scalv_IIT_ERS_Test, alpha_eq_one_nonUnitStride)
     scalv<T, RT>( 'n', N, invalid_alpha, x.data(), inc );
 
     // Computing bitwise difference.
-    computediff<T>( N, x.data(), x_ref.data(), inc );
+    computediff<T>( "x", N, x.data(), x_ref.data(), inc );
 }
 
 // alpha == 1, with unit stride
@@ -239,6 +239,6 @@ TYPED_TEST(scalv_IIT_ERS_Test, alpha_eq_one_unitStride)
     scalv<T, RT>( 'n', N, invalid_alpha, x.data(), unit_inc );
 
     // Computing bitwise difference.
-    computediff<T>( N, x.data(), x_ref.data(), unit_inc );
+    computediff<T>( "x", N, x.data(), x_ref.data(), unit_inc );
 }
 #endif

@@ -227,17 +227,21 @@ testing::AssertionResult NumericalComparisonInf(const char* blis_sol_char,
     return testing::AssertionFailure() << error_message;
 }
 
-// Comparisons that take into account the presence of NaNs and Infs:
+// Comparisons that take into account the presence of NaNs and Infs, printing variable name:
 template<typename T, typename RT = typename testinghelpers::type_info<T>::real_type>
-testing::AssertionResult NumericalComparison(const char* blis_sol_char,
+testing::AssertionResult NumericalComparison(const char* var_name_char,
+                                             const char* blis_sol_char,
                                              const char* ref_sol_char,
                                              const char* comp_helper_char,
+                                             std::string var_name,
                                              const T blis_sol,
                                              const T ref_sol,
                                              const ComparisonHelper comp_helper)
 {
     // Base error message used for scalar values
-    std::string error_message = blis_sol_char;
+    std::string error_message = var_name_char;
+                error_message += " = " + var_name + ",   ";
+                error_message += blis_sol_char;
                 error_message += " = " + testinghelpers::to_string(blis_sol) + ",   ";
                 error_message += ref_sol_char;
                 error_message += " = " + testinghelpers::to_string(ref_sol);
@@ -293,34 +297,34 @@ testing::AssertionResult NumericalComparison(const char* blis_sol_char,
 }
 
 /**
- * Binary comparison of two scalars.
+ * Binary comparison of two scalars, printing variable name.
  */
 template <typename T>
-void computediff( T blis_sol, T ref_sol, bool nan_inf_check = false )
+void computediff( std::string var_name, T blis_sol, T ref_sol, bool nan_inf_check = false )
 {
     ComparisonHelper comp_helper(SCALAR);
     comp_helper.binary_comparison = true;
     comp_helper.nan_inf_check = nan_inf_check;
 
-    ASSERT_PRED_FORMAT3(NumericalComparison<T>, blis_sol, ref_sol, comp_helper);
+    ASSERT_PRED_FORMAT4(NumericalComparison<T>, var_name, blis_sol, ref_sol, comp_helper);
 }
 
 /**
- * Relative comparison of two scalars, using a threshold.
+ * Relative comparison of two scalars, using a threshold, printing variable name.
  */
 template <typename T>
-void computediff( T blis_sol, T ref_sol, double thresh, bool nan_inf_check = false )
+void computediff( std::string var_name, T blis_sol, T ref_sol, double thresh, bool nan_inf_check = false )
 {
     ComparisonHelper comp_helper(SCALAR, thresh);    
     comp_helper.nan_inf_check = nan_inf_check;
-    ASSERT_PRED_FORMAT3(NumericalComparison<T>, blis_sol, ref_sol, comp_helper);
+    ASSERT_PRED_FORMAT4(NumericalComparison<T>, var_name, blis_sol, ref_sol, comp_helper);
 }
 
 /**
- * Binary comparison of two vectors with length n and increment inc.
+ * Binary comparison of two vectors with length n and increment inc, printing variable name.
  */
 template <typename T>
-void computediff( gtint_t n, T *blis_sol, T *ref_sol, gtint_t inc, bool nan_inf_check = false )
+void computediff( std::string var_name, gtint_t n, T *blis_sol, T *ref_sol, gtint_t inc, bool nan_inf_check = false )
 {
     gtint_t abs_inc = std::abs(inc);
     ComparisonHelper comp_helper(VECTOR);
@@ -332,21 +336,22 @@ void computediff( gtint_t n, T *blis_sol, T *ref_sol, gtint_t inc, bool nan_inf_
     for (gtint_t i = 0; i < n; i++)
     {
         comp_helper.i = i;
-        ASSERT_PRED_FORMAT3(NumericalComparison<T>, blis_sol[i*abs_inc], ref_sol[i*abs_inc], comp_helper) << "inc = " << inc;
+        ASSERT_PRED_FORMAT4(NumericalComparison<T>, var_name, blis_sol[i*abs_inc], ref_sol[i*abs_inc], comp_helper) << "inc = " << inc;
         // Go through elements that are part of the array that should not have been modified by the
         // call to a BLIS API. Use the bitwise comparison for this case.
         if (i < n-1)
         {
             for (gtint_t j = 1; j < abs_inc; j++)
             {
-                ASSERT_PRED_FORMAT3(NumericalComparison<T>, blis_sol[i*abs_inc + j], ref_sol[i*abs_inc + j], comp_helper) << "inc = " << inc << " This element is expected to not be modified.";
+                ASSERT_PRED_FORMAT4(NumericalComparison<T>, var_name, blis_sol[i*abs_inc + j], ref_sol[i*abs_inc + j], comp_helper) << "inc = " << inc << " This element is expected to not be modified.";
             }
         }
     }
 }
 
+
 /**
- * Binary comparison of two vectors with length n and increment inc.
+ * Binary comparison of two vectors with length n and increment inc, printing variable names.
  */
 template <typename T>
 void computediff( gtint_t n, T *blis_x, T *blis_x_ref, T *blis_y, T *blis_y_ref, gtint_t incx, gtint_t incy, bool nan_inf_check = false )
@@ -365,8 +370,8 @@ void computediff( gtint_t n, T *blis_x, T *blis_x_ref, T *blis_y, T *blis_y_ref,
         comp_helper.i = i;
         idx = (incx > 0) ? (i * incx) : ( - ( n - i - 1 ) * incx );
         idy = (incy > 0) ? (i * incy) : ( - ( n - i - 1 ) * incy );
-        ASSERT_PRED_FORMAT3(NumericalComparison<T>, blis_x[idx], blis_y_ref[idy], comp_helper) << "incx = " << incx ;
-        ASSERT_PRED_FORMAT3(NumericalComparison<T>, blis_y[idy], blis_x_ref[idx], comp_helper) << "incy = " << incy;        // Go through elements that are part of the array that should not have been modified by the
+        ASSERT_PRED_FORMAT4(NumericalComparison<T>, "x", blis_x[idx], blis_y_ref[idy], comp_helper) << "incx = " << incx ;
+        ASSERT_PRED_FORMAT4(NumericalComparison<T>, "y", blis_y[idy], blis_x_ref[idx], comp_helper) << "incy = " << incy;        // Go through elements that are part of the array that should not have been modified by the
         // call to a BLIS API. Use the bitwise comparison for this case.
         // Random generator fills vector with T{-1.2345e38}
         if (i < n-1)
@@ -374,22 +379,22 @@ void computediff( gtint_t n, T *blis_x, T *blis_x_ref, T *blis_y, T *blis_y_ref,
             for (gtint_t j = 1; j < abs_incx; j++)
             {
                 idx = (incx > 0) ? (i * incx) : ( - ( n - i - 1 ) * incx );
-                ASSERT_PRED_FORMAT3(NumericalComparison<T>, blis_x[i*abs_incx + j], T{-1.2345e38}, comp_helper) << "incx = " << incx << " This element is expected to not be modified.";
+                ASSERT_PRED_FORMAT4(NumericalComparison<T>, "x", blis_x[i*abs_incx + j], T{-1.2345e38}, comp_helper) << "incx = " << incx << " This element is expected to not be modified.";
             }
             for (gtint_t j = 1; j < abs_incy; j++)
             {
                 idy = (incy > 0) ? (i * incy) : ( - ( n - i - 1 ) * incy );
-                ASSERT_PRED_FORMAT3(NumericalComparison<T>, blis_y[i*abs_incy + j], T{-1.2345e38}, comp_helper) << "incy = " << incy << " This element is expected to not be modified.";
+                ASSERT_PRED_FORMAT4(NumericalComparison<T>, "y", blis_y[i*abs_incy + j], T{-1.2345e38}, comp_helper) << "incy = " << incy << " This element is expected to not be modified.";
             }
         }
     }
 }
 
 /**
- * Relative comparison of two vectors with length n and increment inc.
+ * Relative comparison of two vectors with length n and increment inc, printing variable name.
  */
 template <typename T>
-void computediff( gtint_t n, T *blis_sol, T *ref_sol, gtint_t inc, double thresh, bool nan_inf_check = false )
+void computediff( std::string var_name, gtint_t n, T *blis_sol, T *ref_sol, gtint_t inc, double thresh, bool nan_inf_check = false )
 {
     gtint_t abs_inc = std::abs(inc);
     ComparisonHelper comp_helper(VECTOR, thresh);
@@ -400,7 +405,7 @@ void computediff( gtint_t n, T *blis_sol, T *ref_sol, gtint_t inc, double thresh
     for (gtint_t i = 0; i < n; i++)
     {
         comp_helper.i = i;
-        ASSERT_PRED_FORMAT3(NumericalComparison<T>, blis_sol[i*abs_inc], ref_sol[i*abs_inc], comp_helper) << "inc = " << inc;
+        ASSERT_PRED_FORMAT4(NumericalComparison<T>, var_name, blis_sol[i*abs_inc], ref_sol[i*abs_inc], comp_helper) << "inc = " << inc;
         // Go through elements that are part of the array that should not have been modified by the
         // call to a BLIS API. Use the bitwise comparison for this case.
         if (i < n-1)
@@ -408,7 +413,7 @@ void computediff( gtint_t n, T *blis_sol, T *ref_sol, gtint_t inc, double thresh
             for (gtint_t j = 1; j < abs_inc; j++)
             {
                 comp_helper.binary_comparison = true;
-                ASSERT_PRED_FORMAT3(NumericalComparison<T>, blis_sol[i*abs_inc + j], ref_sol[i*abs_inc + j], comp_helper) << "inc = " << inc << " This element is expected to not be modified.";
+                ASSERT_PRED_FORMAT4(NumericalComparison<T>, var_name, blis_sol[i*abs_inc + j], ref_sol[i*abs_inc + j], comp_helper) << "inc = " << inc << " This element is expected to not be modified.";
             }
             comp_helper.binary_comparison = false;
         }
@@ -416,10 +421,10 @@ void computediff( gtint_t n, T *blis_sol, T *ref_sol, gtint_t inc, double thresh
 }
 
 /**
- * Binary comparison of two matrices with dimensions m-by-n and leading dimension ld.
+ * Binary comparison of two matrices with dimensions m-by-n and leading dimension ld, printing variable name.
  */
 template <typename T>
-void computediff(char storage, gtint_t m, gtint_t n, T *blis_sol, T *ref_sol, gtint_t ld, bool nan_inf_check = false )
+void computediff(std::string var_name, char storage, gtint_t m, gtint_t n, T *blis_sol, T *ref_sol, gtint_t ld, bool nan_inf_check = false )
 {
     gtint_t i,j;
     ComparisonHelper comp_helper(MATRIX);
@@ -436,7 +441,7 @@ void computediff(char storage, gtint_t m, gtint_t n, T *blis_sol, T *ref_sol, gt
             {
                 comp_helper.i = i;
                 comp_helper.j = j;
-                ASSERT_PRED_FORMAT3(NumericalComparison<T>, blis_sol[i + j*ld], ref_sol[i + j*ld], comp_helper);
+                ASSERT_PRED_FORMAT4(NumericalComparison<T>, var_name, blis_sol[i + j*ld], ref_sol[i + j*ld], comp_helper);
             }
             // Now iterate through the rest of elements in memory space that are not part of the matrix,
             // so we use binary comparison to verify that are exactly the same as the reference.
@@ -444,7 +449,7 @@ void computediff(char storage, gtint_t m, gtint_t n, T *blis_sol, T *ref_sol, gt
             // elements are expected to identical.
             for (i = m; i < ld; i++)
             {
-                ASSERT_PRED_FORMAT3(NumericalComparison<T>, blis_sol[i + j*ld], ref_sol[i + j*ld], comp_helper) << "This element is expected to not be modified.";
+                ASSERT_PRED_FORMAT4(NumericalComparison<T>, var_name, blis_sol[i + j*ld], ref_sol[i + j*ld], comp_helper) << "This element is expected to not be modified.";
             }
         }
     }
@@ -459,7 +464,7 @@ void computediff(char storage, gtint_t m, gtint_t n, T *blis_sol, T *ref_sol, gt
             {
                 comp_helper.i = i;
                 comp_helper.j = j;
-                ASSERT_PRED_FORMAT3(NumericalComparison<T>, blis_sol[i*ld + j], ref_sol[i*ld + j], comp_helper);
+                ASSERT_PRED_FORMAT4(NumericalComparison<T>, var_name, blis_sol[i*ld + j], ref_sol[i*ld + j], comp_helper);
             }
             // Now iterate through the rest of elements in memory space that are not part of the matrix,
             // so we use binary comparison to verify that are exactly the same as the reference.
@@ -467,17 +472,17 @@ void computediff(char storage, gtint_t m, gtint_t n, T *blis_sol, T *ref_sol, gt
             // elements are expected to identical.
             for (j = n; j < ld; j++)
             {
-                ASSERT_PRED_FORMAT3(NumericalComparison<T>, blis_sol[i*ld + j], ref_sol[i*ld + j], comp_helper) << "This element is expected to not be modified.";
+                ASSERT_PRED_FORMAT4(NumericalComparison<T>, var_name, blis_sol[i*ld + j], ref_sol[i*ld + j], comp_helper) << "This element is expected to not be modified.";
             }
         }
     }
 }
 
 /**
- * Relative comparison of two matrices with dimensions m-by-n and leading dimension ld.
+ * Relative comparison of two matrices with dimensions m-by-n and leading dimension ld, printing variable name.
  */
 template <typename T>
-void computediff(char storage, gtint_t m, gtint_t n, T *blis_sol, T *ref_sol, gtint_t ld, double thresh, bool nan_inf_check = false )
+void computediff(std::string var_name, char storage, gtint_t m, gtint_t n, T *blis_sol, T *ref_sol, gtint_t ld, double thresh, bool nan_inf_check = false )
 {
     gtint_t i,j;
     ComparisonHelper comp_helper(MATRIX, thresh);
@@ -494,7 +499,7 @@ void computediff(char storage, gtint_t m, gtint_t n, T *blis_sol, T *ref_sol, gt
             {
                 comp_helper.i = i;
                 comp_helper.j = j;
-                ASSERT_PRED_FORMAT3(NumericalComparison<T>, blis_sol[i + j*ld], ref_sol[i + j*ld], comp_helper);
+                ASSERT_PRED_FORMAT4(NumericalComparison<T>, var_name, blis_sol[i + j*ld], ref_sol[i + j*ld], comp_helper);
             }
             // Now iterate through the rest of elements in memory space that are not part of the matrix,
             // so we use binary comparison to verify that are exactly the same as the reference.
@@ -503,7 +508,7 @@ void computediff(char storage, gtint_t m, gtint_t n, T *blis_sol, T *ref_sol, gt
             comp_helper.binary_comparison = true;
             for (i = m; i < ld; i++)
             {
-                ASSERT_PRED_FORMAT3(NumericalComparison<T>, blis_sol[i + j*ld], ref_sol[i + j*ld], comp_helper) << "This element is expected to not be modified.";
+                ASSERT_PRED_FORMAT4(NumericalComparison<T>, var_name, blis_sol[i + j*ld], ref_sol[i + j*ld], comp_helper) << "This element is expected to not be modified.";
             }
             // Disable binary comparison before we go through the next column.
             comp_helper.binary_comparison = false;
@@ -520,7 +525,7 @@ void computediff(char storage, gtint_t m, gtint_t n, T *blis_sol, T *ref_sol, gt
             {
                 comp_helper.i = i;
                 comp_helper.j = j;
-                ASSERT_PRED_FORMAT3(NumericalComparison<T>, blis_sol[i*ld + j], ref_sol[i*ld + j], comp_helper);
+                ASSERT_PRED_FORMAT4(NumericalComparison<T>, var_name, blis_sol[i*ld + j], ref_sol[i*ld + j], comp_helper);
             }
             // Now iterate through the rest of elements in memory space that are not part of the matrix,
             // so we use binary comparison to verify that are exactly the same as the reference.
@@ -529,10 +534,54 @@ void computediff(char storage, gtint_t m, gtint_t n, T *blis_sol, T *ref_sol, gt
             comp_helper.binary_comparison = true;
             for (j = n; j < ld; j++)
             {
-                ASSERT_PRED_FORMAT3(NumericalComparison<T>, blis_sol[i*ld + j], ref_sol[i*ld + j], comp_helper) << "This element is expected to not be modified.";
+                ASSERT_PRED_FORMAT4(NumericalComparison<T>, var_name, blis_sol[i*ld + j], ref_sol[i*ld + j], comp_helper) << "This element is expected to not be modified.";
             }
             // Disable binary comparison before we go through the next column.
             comp_helper.binary_comparison = false;
         }
     }
 }
+
+// Generic comparison of integer numbers, printing variable name:
+template<typename T>
+testing::AssertionResult EqualityComparison(const char* var_name_char,
+                                            const char* blis_sol_char,
+                                            const char* ref_sol_char,
+                                            const char* comp_helper_char,
+                                            std::string var_name,
+                                            const T blis_sol,
+                                            const T ref_sol,
+                                            const ComparisonHelper comp_helper)
+{
+    // Base error message used for scalar values
+    std::string error_message = var_name_char;
+                error_message += " = " + var_name + ",   ";
+                error_message += blis_sol_char;
+                error_message += " = " + testinghelpers::to_string(blis_sol) + ",   ";
+                error_message += ref_sol_char;
+                error_message += " = " + testinghelpers::to_string(ref_sol);
+
+    if (blis_sol == ref_sol) return testing::AssertionSuccess();
+    return testing::AssertionFailure() << error_message;
+}
+ 
+/**
+ * Comparison of two integers, printing variable name.
+ */
+template <>
+inline void computediff<gtint_t>( std::string var_name, gtint_t blis_sol, gtint_t ref_sol, bool nan_inf_check )
+{
+    ComparisonHelper comp_helper(SCALAR);
+    ASSERT_PRED_FORMAT4(EqualityComparison<gtint_t>, var_name, blis_sol, ref_sol, comp_helper);
+}
+
+/**
+ * Comparison of two characters, printing variable name.
+ */
+template <>
+inline void computediff<char>( std::string var_name, char blis_sol, char ref_sol, bool nan_inf_check )
+{
+    ComparisonHelper comp_helper(SCALAR);
+    ASSERT_PRED_FORMAT4(EqualityComparison<char>, var_name, blis_sol, ref_sol, comp_helper);
+}
+

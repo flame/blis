@@ -72,7 +72,7 @@ static void test_dotv( char conjx, char conjy, gtint_t n, gtint_t incx,
     //----------------------------------------------------------
     //              Compute error.
     //----------------------------------------------------------
-    computediff<T>( rho, rho_ref, thresh );
+    computediff<T>( "rho", rho, rho_ref, thresh );
 }
 
 
@@ -119,5 +119,5 @@ static void test_dotv( char conjx, char conjy, gtint_t n,
     //----------------------------------------------------------
     //              Compute error.
     //----------------------------------------------------------
-    computediff<T>( rho, rho_ref, thresh, true);
+    computediff<T>( "rho", rho, rho_ref, thresh, true);
 }

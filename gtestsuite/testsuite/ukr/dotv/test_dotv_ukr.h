@@ -122,5 +122,5 @@ static void test_dotv_ukr( FT ukr, char conjx, char conjy, gtint_t n, gtint_t in
         testinghelpers::ref_dotv<T>( conjx, conjy, n, x, incx, y_ref, incy, &rho_ref );
 
     // Compute component-wise error.
-    computediff<T>( rho, rho_ref, thresh );
+    computediff<T>( "rho", rho, rho_ref, thresh );
 }

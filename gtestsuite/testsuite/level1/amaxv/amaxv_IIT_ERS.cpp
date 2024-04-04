@@ -81,7 +81,7 @@ TYPED_TEST(amaxv_IIT_ERS_Test, n_lt_one_nonUnitStride)
 #endif
  
   // Computing the difference.
-  EXPECT_EQ( idx, gtint_t(0) );
+  computediff<gtint_t>( "idx", idx, gtint_t(0) );
 }
 
 // inc == 0, with non-unit stride
@@ -101,7 +101,7 @@ TYPED_TEST(amaxv_IIT_ERS_Test, incx_eq_zero)
 #endif
 
  // Computing the difference.
- EXPECT_EQ( idx, gtint_t(0) );
+ computediff<gtint_t>( "idx", idx, gtint_t(0) );
 }
 
 // n < 1, with unit stride
@@ -122,7 +122,7 @@ TYPED_TEST(amaxv_IIT_ERS_Test, n_lt_one_unitStride)
 #endif
 
  // Computing the difference.
- EXPECT_EQ( idx, gtint_t(0) );
+ computediff<gtint_t>( "idx", idx, gtint_t(0) );
 }
 
 // n == 1, with unit stride
@@ -138,10 +138,10 @@ TYPED_TEST(amaxv_IIT_ERS_Test, n_eq_one_unitStride)
 // Invoking AMAXV with an value of n.
 #ifdef TEST_BLAS
   gtint_t idx = amaxv_<T>( n, x.data(), unit_inc );
-  EXPECT_EQ( idx, gtint_t(1) );
+  computediff<gtint_t>( "idx", idx, gtint_t(1) );
 #else
   gtint_t idx = cblas_amaxv<T>( n, x.data(), unit_inc );
-  EXPECT_EQ( idx, gtint_t(0) );
+  computediff<gtint_t>( "idx", idx, gtint_t(0) );
 #endif
 
 }
@@ -156,10 +156,10 @@ TYPED_TEST(amaxv_IIT_ERS_Test, n_eq_one_nonUnitStrides)
   
 #ifdef TEST_BLAS
   gtint_t idx = amaxv_<T>( n, x.data(), inc );
-  EXPECT_EQ( idx, gtint_t(1) );
+  computediff<gtint_t>( "idx", idx, gtint_t(1) );
 #else
   gtint_t idx = cblas_amaxv<T>( n, x.data(), inc );
-  EXPECT_EQ( idx, gtint_t(0) );
+  computediff<gtint_t>( "idx", idx, gtint_t(0) );
 #endif
 }
 

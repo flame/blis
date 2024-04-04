@@ -66,5 +66,5 @@ static void test_scal2v(char conjx, gtint_t n, gtint_t incx, gtint_t incy, T alp
     //----------------------------------------------------------
     //              Compute component-wise error.
     //----------------------------------------------------------
-    computediff<T>( n, y.data(), y_ref.data(), incy, thresh );
+    computediff<T>( "y", n, y.data(), y_ref.data(), incy, thresh );
 }

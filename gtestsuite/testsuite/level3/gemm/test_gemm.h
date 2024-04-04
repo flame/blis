@@ -76,7 +76,7 @@ void test_gemm( char storage, char trnsa, char trnsb, gtint_t m, gtint_t n,
     //----------------------------------------------------------
     //              check component-wise error.
     //----------------------------------------------------------
-    computediff<T>( storage, m, n, c.data(), c_ref.data(), ldc, thresh );
+    computediff<T>( "c", storage, m, n, c.data(), c_ref.data(), ldc, thresh );
 }
 
 // Test body used for exception value testing, by inducing an exception value
@@ -135,7 +135,7 @@ void test_gemm( char storage, char trnsa, char trnsb, gtint_t m, gtint_t n,
     //----------------------------------------------------------
     //              check component-wise error.
     //----------------------------------------------------------
-    computediff<T>( storage, m, n, c.data(), c_ref.data(), ldc, thresh, true );
+    computediff<T>( "c", storage, m, n, c.data(), c_ref.data(), ldc, thresh, true );
 }
 
 // Test body used for overflow and underflow checks
@@ -242,5 +242,5 @@ void test_gemm( char storage, char trnsa, char trnsb, gtint_t over_under, gtint_
     //----------------------------------------------------------
     //              check component-wise error.
     //----------------------------------------------------------
-    computediff<T>( storage, m, n, c.data(), c_ref.data(), ldc, thresh, true );
+    computediff<T>( "C", storage, m, n, c.data(), c_ref.data(), ldc, thresh, true );
 }

@@ -63,7 +63,7 @@ void test_nrm2( gtint_t n, gtint_t incx, double thresh )
     //----------------------------------------------------------
     //              Compute error.
     //----------------------------------------------------------
-    computediff<RT>( norm, norm_ref, thresh );
+    computediff<RT>( "norm", norm, norm_ref, thresh );
 }
 
 // Test body used for extreme value testing, where we want to test
@@ -97,5 +97,5 @@ void test_nrm2( gtint_t n, gtint_t incx, gtint_t i, T iexval, gtint_t j = 0, T j
     //              Compute error.
     //----------------------------------------------------------
     // Compare using NaN/Inf checks.
-    computediff<RT>( norm, norm_ref, true );
+    computediff<RT>( "norm", norm, norm_ref, true );
 }

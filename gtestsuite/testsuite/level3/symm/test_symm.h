@@ -80,5 +80,5 @@ void test_symm( char storage, char side, char uplo, char conja, char transb,
     //----------------------------------------------------------
     //              check component-wise error.
     //----------------------------------------------------------
-    computediff<T>( storage, m, n, c.data(), c_ref.data(), ldc, thresh );
+    computediff<T>( "C", storage, m, n, c.data(), c_ref.data(), ldc, thresh );
 }

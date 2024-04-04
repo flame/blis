@@ -15,7 +15,7 @@ TYPED_TEST(OUT_nrm2, maxFP_scalar) {
     T x = T{maxval};
 
     RT norm = nrm2<T>(1, &x, 1);
-    computediff<RT>(maxval, norm);
+    computediff<RT>("norm", norm, maxval);
 }
 TYPED_TEST(OUT_nrm2, maxFP_vectorized) {
     using T = TypeParam;
@@ -25,7 +25,7 @@ TYPED_TEST(OUT_nrm2, maxFP_vectorized) {
     RT maxval = (std::numeric_limits<RT>::max)();
     x[17] = T{maxval};
     RT norm = nrm2<T>(n, x.data(), 1);
-    computediff<RT>(maxval, norm);
+    computediff<RT>("norm", norm, maxval);
 }
 
 // Testing for min representable number to see if underflow is handled correctly.
@@ -36,7 +36,7 @@ TYPED_TEST(OUT_nrm2, minFP_scalar) {
     RT minval = (std::numeric_limits<RT>::min)();
     T x = T{minval};
     RT norm = nrm2<T>(1, &x, 1);
-    computediff<RT>(minval, norm);
+    computediff<RT>("norm", norm, minval);
 }
 TYPED_TEST(OUT_nrm2, minFP_vectorized) {
     using T = TypeParam;
@@ -46,7 +46,7 @@ TYPED_TEST(OUT_nrm2, minFP_vectorized) {
     RT minval = (std::numeric_limits<RT>::min)();
     x[17] = T{minval};
     RT norm = nrm2<T>(n, x.data(), 1);
-    computediff<RT>(minval, norm);
+    computediff<RT>("norm", norm, minval);
 }
 
 // Since there are 2 different paths, vectorized and scalar,
@@ -57,7 +57,7 @@ TYPED_TEST(OUT_nrm2, zeroFP_scalar) {
     T x = T{0};
 
     RT norm = nrm2<T>(1, &x, 1);
-    computediff<RT>(0, norm);
+    computediff<RT>("norm", norm, 0);
 }
 TYPED_TEST(OUT_nrm2, zeroFP_vectorized) {
     using T = TypeParam;
@@ -66,7 +66,7 @@ TYPED_TEST(OUT_nrm2, zeroFP_vectorized) {
     std::vector<T> x(n, T{0});
 
     RT norm = nrm2<T>(n, x.data(), 1);
-    computediff<RT>(0, norm);
+    computediff<RT>("norm", norm, 0);
 }
 
 /*
@@ -101,7 +101,7 @@ TYPED_TEST( OUT_nrm2, OFlow_MT ) {
 
     RT norm = nrm2<T>( n, x.data(), 1 );
     RT ref_norm = testinghelpers::ref_nrm2<T>( n, x.data(), 1 );
-    computediff<RT>( norm, ref_norm, thresh );
+    computediff<RT>( "norm", norm, ref_norm, thresh );
 }
 
 // Checking only for underflow, based on the threshold
@@ -129,7 +129,7 @@ TYPED_TEST( OUT_nrm2, UFlow_MT ) {
 
     RT norm = nrm2<T>( n, x.data(), 1 );
     RT ref_norm = testinghelpers::ref_nrm2<T>( n, x.data(), 1 );
-    computediff<RT>( norm, ref_norm, thresh );
+    computediff<RT>( "norm", norm, ref_norm, thresh );
 }
 
 // Checking for both overflow and underflow, based on the thresholds
@@ -159,7 +159,7 @@ TYPED_TEST( OUT_nrm2, OUFlow_MT ) {
 
     RT norm = nrm2<T>( n, x.data(), 1 );
     RT ref_norm = testinghelpers::ref_nrm2<T>( n, x.data(), 1 );
-    computediff<RT>( norm, ref_norm, thresh );
+    computediff<RT>( "norm", norm, ref_norm, thresh );
 }
 
 // Specific test case used by an ISV.
@@ -170,8 +170,8 @@ TEST(dnrm2, largeDouble) {
     std::vector<T> x{3e300, 4e300}, y{-4e300, -3e300};
 
     T norm = nrm2<T>(n, x.data(), 1);
-    computediff<T>(5e300, norm);
+    computediff<T>( "norm", norm, 5e300 );
 
     norm = nrm2<T>(n, y.data(), 1);
-    computediff<T>(5e300, norm);
+    computediff<T>( "norm", norm, 5e300 );
 }

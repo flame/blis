@@ -76,7 +76,7 @@ TYPED_TEST(dotv_IIT_ERS_Test, n_lt_zero_nonUnitStride)
     dotv<T>( CONJ, CONJ, invalid_n, x.data(), inc, y.data(), inc, &rho );
 
     // Computing the difference.
-    computediff<T>( rho, rho_ref );
+    computediff<T>( "rho", rho, rho_ref );
 }
 
 // n == 0, with non-unit stride
@@ -101,7 +101,7 @@ TYPED_TEST(dotv_IIT_ERS_Test, n_eq_zero_nonUnitStride)
     dotv<T>( CONJ, CONJ, invalid_n, x.data(), inc, y.data(), inc, &rho );
 
     // Computing the difference.
-    computediff<T>( rho, rho_ref );
+    computediff<T>( "rho", rho, rho_ref );
 }
 
 // n < 0, with unit stride
@@ -126,7 +126,7 @@ TYPED_TEST(dotv_IIT_ERS_Test, n_lt_zero_unitStride)
     dotv<T>( CONJ, CONJ, invalid_n, x.data(), unit_inc, y.data(), unit_inc, &rho );
 
     // Computing the difference.
-    computediff<T>( rho, rho_ref );
+    computediff<T>( "rho", rho, rho_ref );
 }
 
 // n == 0, with unit stride
@@ -151,6 +151,6 @@ TYPED_TEST(dotv_IIT_ERS_Test, n_eq_zero_unitStride)
     dotv<T>( CONJ, CONJ, invalid_n, x.data(), unit_inc, y.data(), unit_inc, &rho );
 
     // Computing the difference.
-    computediff<T>( rho, rho_ref );
+    computediff<T>( "rho", rho, rho_ref );
 }
 #endif

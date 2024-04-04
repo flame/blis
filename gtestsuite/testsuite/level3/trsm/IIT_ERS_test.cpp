@@ -63,7 +63,7 @@ TYPED_TEST(TRSM_IIT_ERS_Test, invalid_side)
     std::vector<T> b_ref(b);
 
     trsm<T>( STORAGE, 'a', UPLO, TRANS, DIAG, M, N, nullptr, nullptr, LDA, b.data(), LDB);
-    computediff<T>( STORAGE, M, N, b.data(), b_ref.data(), LDB );
+    computediff<T>( "B", STORAGE, M, N, b.data(), b_ref.data(), LDB );
 }
 
 /**
@@ -79,7 +79,7 @@ TYPED_TEST(TRSM_IIT_ERS_Test, invalid_UPLO)
     std::vector<T> b_ref(b);
 
     trsm<T>( STORAGE, SIDE, 'a', TRANS, DIAG, M, N, nullptr, nullptr, LDA, b.data(), LDB);
-    computediff<T>( STORAGE, M, N, b.data(), b_ref.data(), LDB );
+    computediff<T>( "B", STORAGE, M, N, b.data(), b_ref.data(), LDB );
 }
 
 /**
@@ -95,7 +95,7 @@ TYPED_TEST(TRSM_IIT_ERS_Test, invalid_TRANS)
     std::vector<T> b_ref(b);
 
     trsm<T>( STORAGE, SIDE, UPLO, 'a', DIAG, M, N, nullptr, nullptr, LDA, b.data(), LDB);
-    computediff<T>( STORAGE, M, N, b.data(), b_ref.data(), LDB );
+    computediff<T>( "B", STORAGE, M, N, b.data(), b_ref.data(), LDB );
 }
 
 /**
@@ -110,7 +110,7 @@ TYPED_TEST(TRSM_IIT_ERS_Test, invalid_DIAG)
     std::vector<T> b_ref(b);
 
     trsm<T>( STORAGE, SIDE, UPLO, TRANS, 'a', M, N, nullptr, nullptr, LDA, b.data(), LDB);
-    computediff<T>( STORAGE, M, N, b.data(), b_ref.data(), LDB );
+    computediff<T>( "B", STORAGE, M, N, b.data(), b_ref.data(), LDB );
 }
 
 /**
@@ -125,7 +125,7 @@ TYPED_TEST(TRSM_IIT_ERS_Test, invalid_m)
     std::vector<T> b_ref(b);
 
     trsm<T>( STORAGE, SIDE, UPLO, TRANS, DIAG, -2, N, nullptr, nullptr, LDA, b.data(), LDB);
-    computediff<T>( STORAGE, M, N, b.data(), b_ref.data(), LDB );
+    computediff<T>( "B", STORAGE, M, N, b.data(), b_ref.data(), LDB );
 }
 
 /**
@@ -140,7 +140,7 @@ TYPED_TEST(TRSM_IIT_ERS_Test, invalid_n)
     std::vector<T> b_ref(b);
 
     trsm<T>( STORAGE, SIDE, UPLO, TRANS, DIAG, M, -2, nullptr, nullptr, LDA, b.data(), LDB);
-    computediff<T>( STORAGE, M, N, b.data(), b_ref.data(), LDB );
+    computediff<T>( "B", STORAGE, M, N, b.data(), b_ref.data(), LDB );
 }
 
 /**
@@ -155,7 +155,7 @@ TYPED_TEST(TRSM_IIT_ERS_Test, invalid_lda)
     std::vector<T> b_ref(b);
 
     trsm<T>( STORAGE, SIDE, UPLO, TRANS, DIAG, M, N, nullptr, nullptr, LDA - 1, b.data(), LDB);
-    computediff<T>( STORAGE, M, N, b.data(), b_ref.data(), LDB );
+    computediff<T>( "B", STORAGE, M, N, b.data(), b_ref.data(), LDB );
 }
 
 /**
@@ -170,7 +170,7 @@ TYPED_TEST(TRSM_IIT_ERS_Test, invalid_ldb)
     std::vector<T> b_ref(b);
 
     trsm<T>( STORAGE, SIDE, UPLO, TRANS, DIAG, M, N, nullptr, nullptr, LDA, b.data(), LDB - 1);
-    computediff<T>( STORAGE, M, N, b.data(), b_ref.data(), LDB );
+    computediff<T>( "B", STORAGE, M, N, b.data(), b_ref.data(), LDB );
 }
 
 
@@ -195,7 +195,7 @@ TYPED_TEST(TRSM_IIT_ERS_Test, m_eq_zero)
     std::vector<T> b_ref(b);
 
     trsm<T>( STORAGE, SIDE, UPLO, TRANS, DIAG, 0, N, nullptr, nullptr, LDA, b.data(), LDB );
-    computediff<T>( STORAGE, M, N, b.data(), b_ref.data(), LDB );
+    computediff<T>( "B", STORAGE, M, N, b.data(), b_ref.data(), LDB );
 }
 
 /**
@@ -209,7 +209,7 @@ TYPED_TEST(TRSM_IIT_ERS_Test, n_eq_zero)
     std::vector<T> b_ref(b);
 
     trsm<T>( STORAGE, SIDE, UPLO, TRANS, DIAG, M, 0, nullptr, nullptr, LDA, b.data(), LDB );
-    computediff<T>( STORAGE, M, N, b.data(), b_ref.data(), LDB );
+    computediff<T>( "B", STORAGE, M, N, b.data(), b_ref.data(), LDB );
 }
 
 #endif

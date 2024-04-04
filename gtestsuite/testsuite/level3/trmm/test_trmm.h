@@ -72,5 +72,5 @@ void test_trmm( char storage, char side, char uploa, char transa, char diaga,
     //----------------------------------------------------------
     //              check component-wise error.
     //----------------------------------------------------------
-    computediff<T>( storage, m, n, b.data(), b_ref.data(), ldb, thresh );
+    computediff<T>( "B", storage, m, n, b.data(), b_ref.data(), ldb, thresh );
 }

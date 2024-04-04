@@ -73,7 +73,7 @@ TYPED_TEST(GEMM_Compute_IIT_ERS_Test, invalid_transa)
   // Call BLIS Gemm with a invalid value for TRANS value for A.
   gemm_compute<T>( STORAGE, 'x', TRANS, 'U', 'U', M, N, K, nullptr, nullptr, LDA, nullptr, LDB, nullptr, nullptr, LDC );
   // Use bitwise comparison (no threshold).
-  computediff<T>( STORAGE, N, N, c.data(), c_ref.data(), LDC);
+  computediff<T>( "C", STORAGE, N, N, c.data(), c_ref.data(), LDC);
 }
 
 // When info == 2
@@ -88,7 +88,7 @@ TYPED_TEST(GEMM_Compute_IIT_ERS_Test, invalid_transb)
   // Call BLIS Gemm with a invalid value for TRANS value for A.
   gemm_compute<T>( STORAGE, TRANS, 'x', 'U', 'U', M, N, K, nullptr, nullptr, LDA, nullptr, LDB, nullptr, nullptr, LDC );
   // Use bitwise comparison (no threshold).
-  computediff<T>( STORAGE, N, N, c.data(), c_ref.data(), LDC);
+  computediff<T>( "C", STORAGE, N, N, c.data(), c_ref.data(), LDC);
 }
 
 // When info == 3
@@ -103,7 +103,7 @@ TYPED_TEST(GEMM_Compute_IIT_ERS_Test, m_lt_zero)
   // Call BLIS Gemm with a invalid value for m.
   gemm_compute<T>( STORAGE, TRANS, TRANS, 'U', 'U', -1, N, K, nullptr, nullptr, LDA, nullptr, LDB, nullptr, nullptr, LDC );
   // Use bitwise comparison (no threshold).
-  computediff<T>( STORAGE, N, N, c.data(), c_ref.data(), LDC);
+  computediff<T>( "C", STORAGE, N, N, c.data(), c_ref.data(), LDC);
 }
 
 // When info == 4
@@ -118,7 +118,7 @@ TYPED_TEST(GEMM_Compute_IIT_ERS_Test, n_lt_zero)
   // Call BLIS Gemm with a invalid value for m.
   gemm_compute<T>( STORAGE, TRANS, TRANS, 'U', 'U', M, -1, K, nullptr, nullptr, LDA, nullptr, LDB, nullptr, nullptr, LDC );
   // Use bitwise comparison (no threshold).
-  computediff<T>( STORAGE, N, N, c.data(), c_ref.data(), LDC);
+  computediff<T>( "C", STORAGE, N, N, c.data(), c_ref.data(), LDC);
 }
 
 // When info == 5
@@ -133,7 +133,7 @@ TYPED_TEST(GEMM_Compute_IIT_ERS_Test, k_lt_zero)
   // Call BLIS Gemm with a invalid value for m.
   gemm_compute<T>( STORAGE, TRANS, TRANS, 'U', 'U', M, N, -1, nullptr, nullptr, LDA, nullptr, LDB, nullptr, nullptr, LDC );
   // Use bitwise comparison (no threshold).
-  computediff<T>( STORAGE, N, N, c.data(), c_ref.data(), LDC);
+  computediff<T>( "C", STORAGE, N, N, c.data(), c_ref.data(), LDC);
 }
 
 // When info == 7
@@ -148,7 +148,7 @@ TYPED_TEST(GEMM_Compute_IIT_ERS_Test, invalid_lda)
   // Call BLIS Gemm with a invalid value for m.
   gemm_compute<T>( STORAGE, TRANS, TRANS, 'U', 'U', M, N, K, nullptr, nullptr, LDA - 1, nullptr, LDB, nullptr, nullptr, LDC );
   // Use bitwise comparison (no threshold).
-  computediff<T>( STORAGE, N, N, c.data(), c_ref.data(), LDC);
+  computediff<T>( "C", STORAGE, N, N, c.data(), c_ref.data(), LDC);
 }
 
 // When info == 9
@@ -163,7 +163,7 @@ TYPED_TEST(GEMM_Compute_IIT_ERS_Test, invalid_ldb)
   // Call BLIS Gemm with a invalid value for m.
   gemm_compute<T>( STORAGE, TRANS, TRANS, 'U', 'U', M, N, K, nullptr, nullptr, LDA, nullptr, LDB - 1, nullptr, nullptr, LDC );
   // Use bitwise comparison (no threshold).
-  computediff<T>( STORAGE, N, N, c.data(), c_ref.data(), LDC);
+  computediff<T>( "C", STORAGE, N, N, c.data(), c_ref.data(), LDC);
 }
 
 // When info == 12
@@ -178,7 +178,7 @@ TYPED_TEST(GEMM_Compute_IIT_ERS_Test, invalid_ldc_lt_zero)
   // Call BLIS Gemm with a invalid value for m.
   gemm_compute<T>( STORAGE, TRANS, TRANS, 'U', 'U', M, N, K, nullptr, nullptr, LDA, nullptr, LDB, nullptr, nullptr, -1 );
   // Use bitwise comparison (no threshold).
-  computediff<T>( STORAGE, N, N, c.data(), c_ref.data(), LDC);
+  computediff<T>( "C", STORAGE, N, N, c.data(), c_ref.data(), LDC);
 }
 
 // When info == 12
@@ -193,7 +193,7 @@ TYPED_TEST(GEMM_Compute_IIT_ERS_Test, invalid_ldc)
   // Call BLIS Gemm with a invalid value for m.
   gemm_compute<T>( STORAGE, TRANS, TRANS, 'U', 'U', M, N, K, nullptr, nullptr, LDA, nullptr, LDB, nullptr, nullptr, LDC - 1 );
   // Use bitwise comparison (no threshold).
-  computediff<T>( STORAGE, N, N, c.data(), c_ref.data(), LDC);
+  computediff<T>( "C", STORAGE, N, N, c.data(), c_ref.data(), LDC);
 }
 
 /*
@@ -217,7 +217,7 @@ TYPED_TEST(GEMM_Compute_IIT_ERS_Test, m_eq_zero)
   // Call BLIS Gemm with a invalid value for m.
   gemm_compute<T>( STORAGE, TRANS, TRANS, 'U', 'U', 0, N, K, nullptr, nullptr, LDA, nullptr, LDB, nullptr, nullptr, LDC );
   // Use bitwise comparison (no threshold).
-  computediff<T>( STORAGE, N, N, c.data(), c_ref.data(), LDC);
+  computediff<T>( "C", STORAGE, N, N, c.data(), c_ref.data(), LDC);
 }
 
 // When n = 0
@@ -232,6 +232,6 @@ TYPED_TEST(GEMM_Compute_IIT_ERS_Test, n_eq_zero)
   // Call BLIS Gemm with a invalid value for m.
   gemm_compute<T>( STORAGE, TRANS, TRANS, 'U', 'U', M, 0, K, nullptr, nullptr, LDA, nullptr, LDB, nullptr, nullptr, LDC );
   // Use bitwise comparison (no threshold).
-  computediff<T>( STORAGE, N, N, c.data(), c_ref.data(), LDC);
+  computediff<T>( "C", STORAGE, N, N, c.data(), c_ref.data(), LDC);
 }
 #endif

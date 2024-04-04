@@ -57,5 +57,5 @@ TYPED_TEST(nrm2_IIT, negative_n) {
     RT blis_norm = -4.2;
     blis_norm = nrm2<T>(-2, &x, INC);
 
-    computediff<RT>(blis_norm, 0.0);
+    computediff<RT>("norm", blis_norm, 0.0);
 }

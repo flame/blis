@@ -70,5 +70,5 @@ void test_trmv( char storage, char uploa, char transa, char diaga, gtint_t n,
     //----------------------------------------------------------
     //              check component-wise error.
     //----------------------------------------------------------
-    computediff<T>( n, x.data(), x_ref.data(), incx, thresh );
+    computediff<T>( "x", n, x.data(), x_ref.data(), incx, thresh );
 }

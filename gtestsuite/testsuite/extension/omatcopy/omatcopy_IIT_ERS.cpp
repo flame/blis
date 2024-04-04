@@ -74,7 +74,7 @@ TYPED_TEST(omatcopy_IIT_ERS, invalid_transa)
   // Call OMATCOPY with a invalid value for TRANS value for the operation.
   omatcopy<T>( 'Q', M, N, alpha, A.data(), LDA, B.data(), LDB);
   // Use bitwise comparison (no threshold).
-  computediff<T>( 'c', M, N, B.data(), B_ref.data(), LDB );
+  computediff<T>( "B", 'c', M, N, B.data(), B_ref.data(), LDB );
 }
 
 // When m < 0
@@ -93,7 +93,7 @@ TYPED_TEST(omatcopy_IIT_ERS, m_lt_zero)
   // Call OMATCOPY with a invalid m for the operation.
   omatcopy<T>( TRANS, -1, N, alpha, A.data(), LDA, B.data(), LDB);
   // Use bitwise comparison (no threshold).
-  computediff<T>( 'c', M, N, B.data(), B_ref.data(), LDB );
+  computediff<T>( "B", 'c', M, N, B.data(), B_ref.data(), LDB );
 }
 
 // When n < 0
@@ -112,7 +112,7 @@ TYPED_TEST(omatcopy_IIT_ERS, n_lt_zero)
   // Call OMATCOPY with a invalid n for the operation.
   omatcopy<T>( TRANS, M, -1, alpha, A.data(), LDA, B.data(), LDB);
   // Use bitwise comparison (no threshold).
-  computediff<T>( 'c', M, N, B.data(), B_ref.data(), LDB );
+  computediff<T>( "B", 'c', M, N, B.data(), B_ref.data(), LDB );
 }
 
 // When lda < m
@@ -136,7 +136,7 @@ TYPED_TEST(omatcopy_IIT_ERS, invalid_lda)
   // Call OMATCOPY with a invalid lda for the operation.
   omatcopy<T>( 'n', m, n, alpha, A.data(), m - 1, B.data(), m);
   // Use bitwise comparison (no threshold).
-  computediff<T>( 'c', m, n, B.data(), B_ref.data(), m );
+  computediff<T>( "B", 'c', m, n, B.data(), B_ref.data(), m );
 }
 
 // When ldb < m, with trans == 'n'
@@ -161,7 +161,7 @@ TYPED_TEST(omatcopy_IIT_ERS, invalid_ldb_no_transpose)
   // Call OMATCOPY with a invalid ldb for the operation.
   omatcopy<T>( trans, m, n, alpha, A.data(), m, B.data(), m - 1 );
   // Use bitwise comparison (no threshold).
-  computediff<T>( 'c', m, n, B.data(), B_ref.data(), m );
+  computediff<T>( "B", 'c', m, n, B.data(), B_ref.data(), m );
 }
 
 // When ldb < m, with trans == 'r'
@@ -186,7 +186,7 @@ TYPED_TEST(omatcopy_IIT_ERS, invalid_ldb_conjugate)
   // Call OMATCOPY with a invalid ldb for the operation.
   omatcopy<T>( trans, m, n, alpha, A.data(), m, B.data(), m - 1 );
   // Use bitwise comparison (no threshold).
-  computediff<T>( 'c', m, n, B.data(), B_ref.data(), m );
+  computediff<T>( "B", 'c', m, n, B.data(), B_ref.data(), m );
 }
 
 // When ldb < m, with trans == 't'
@@ -211,7 +211,7 @@ TYPED_TEST(omatcopy_IIT_ERS, invalid_ldb_transpose)
   // Call OMATCOPY with a invalid ldb for the operation.
   omatcopy<T>( trans, m, n, alpha, A.data(), m, B.data(), n - 1 );
   // Use bitwise comparison (no threshold).
-  computediff<T>( 'c', n, m, B.data(), B_ref.data(), n );
+  computediff<T>( "B", 'c', n, m, B.data(), B_ref.data(), n );
 }
 
 // When ldb < m, with trans == 'c'
@@ -236,6 +236,6 @@ TYPED_TEST(omatcopy_IIT_ERS, invalid_ldb_conjugate_transpose)
   // Call OMATCOPY with a invalid ldb for the operation.
   omatcopy<T>( trans, m, n, alpha, A.data(), m, B.data(), n - 1 );
   // Use bitwise comparison (no threshold).
-  computediff<T>( 'c', n, m, B.data(), B_ref.data(), n );
+  computediff<T>( "B", 'c', n, m, B.data(), B_ref.data(), n );
 }
 #endif

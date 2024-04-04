@@ -78,7 +78,7 @@ TYPED_TEST(ger_IIT_ERS_Test, m_eq_zero_unitStride)
             y.data(), unit_inc, a.data(), LDA );
 
     // Computing bitwise difference.
-    computediff<T>( STORAGE, M, N, a.data(), a_ref.data(), LDA );
+    computediff<T>( "A", STORAGE, M, N, a.data(), a_ref.data(), LDA );
 }
 
 // m == 0, with non-unit stride
@@ -103,7 +103,7 @@ TYPED_TEST(ger_IIT_ERS_Test, m_eq_zero_nonUnitStride)
             y.data(), inc, a.data(), LDA );
 
     // Computing bitwise difference.
-    computediff<T>( STORAGE, M, N, a.data(), a_ref.data(), LDA );
+    computediff<T>( "A", STORAGE, M, N, a.data(), a_ref.data(), LDA );
 }
 
 // n == 0, with unit stride
@@ -128,7 +128,7 @@ TYPED_TEST(ger_IIT_ERS_Test, n_eq_zero_unitStride)
             y.data(), unit_inc, a.data(), LDA );
 
     // Computing bitwise difference.
-    computediff<T>( STORAGE, M, N, a.data(), a_ref.data(), LDA );
+    computediff<T>( "A", STORAGE, M, N, a.data(), a_ref.data(), LDA );
 }
 
 // n == 0, with non-unit stride
@@ -153,7 +153,7 @@ TYPED_TEST(ger_IIT_ERS_Test, n_eq_zero_nonUnitStride)
             y.data(), inc, a.data(), LDA );
 
     // Computing bitwise difference.
-    computediff<T>( STORAGE, M, N, a.data(), a_ref.data(), LDA );
+    computediff<T>( "A", STORAGE, M, N, a.data(), a_ref.data(), LDA );
 }
 
 // alpha == 0, with unit stride
@@ -176,7 +176,7 @@ TYPED_TEST(ger_IIT_ERS_Test, alpha_eq_zero_unitStride)
             y.data(), unit_inc, a.data(), LDA );
 
     // Computing bitwise difference.
-    computediff<T>( STORAGE, M, N, a.data(), a_ref.data(), LDA );
+    computediff<T>( "A", STORAGE, M, N, a.data(), a_ref.data(), LDA );
 }
 
 // alpha == 0, with non-unit stride
@@ -199,7 +199,7 @@ TYPED_TEST(ger_IIT_ERS_Test, alpha_eq_zero_nonUnitStride)
             y.data(), inc, a.data(), LDA );
 
     // Computing bitwise difference.
-    computediff<T>( STORAGE, M, N, a.data(), a_ref.data(), LDA );
+    computediff<T>( "A", STORAGE, M, N, a.data(), a_ref.data(), LDA );
 }
 
 
@@ -235,7 +235,7 @@ TYPED_TEST(ger_IIT_ERS_Test, m_lt_zero_unitStride)
             y.data(), unit_inc, a.data(), LDA );
 
     // Computing bitwise difference.
-    computediff<T>( STORAGE, M, N, a.data(), a_ref.data(), LDA );
+    computediff<T>( "A", STORAGE, M, N, a.data(), a_ref.data(), LDA );
 }
 
 // m < 0, with non-unit stride
@@ -260,7 +260,7 @@ TYPED_TEST(ger_IIT_ERS_Test, m_lt_zero_nonUnitStride)
             y.data(), inc, a.data(), LDA );
 
     // Computing bitwise difference.
-    computediff<T>( STORAGE, M, N, a.data(), a_ref.data(), LDA );
+    computediff<T>( "A", STORAGE, M, N, a.data(), a_ref.data(), LDA );
 }
 
 // n < 0, with unit stride
@@ -285,7 +285,7 @@ TYPED_TEST(ger_IIT_ERS_Test, n_lt_zero_unitStride)
             y.data(), unit_inc, a.data(), LDA );
 
     // Computing bitwise difference.
-    computediff<T>( STORAGE, M, N, a.data(), a_ref.data(), LDA );
+    computediff<T>( "A", STORAGE, M, N, a.data(), a_ref.data(), LDA );
 }
 
 // n < 0, with non-unit stride
@@ -310,7 +310,7 @@ TYPED_TEST(ger_IIT_ERS_Test, n_lt_zero_nonUnitStride)
             y.data(), inc, a.data(), LDA );
 
     // Computing bitwise difference.
-    computediff<T>( STORAGE, M, N, a.data(), a_ref.data(), LDA );
+    computediff<T>( "A", STORAGE, M, N, a.data(), a_ref.data(), LDA );
 }
 
 // incx = 0, with unit incy
@@ -335,7 +335,7 @@ TYPED_TEST(ger_IIT_ERS_Test, incx_eq_zero_unitStride)
             y.data(), unit_inc, a.data(), LDA );
 
     // Computing bitwise difference.
-    computediff<T>( STORAGE, M, N, a.data(), a_ref.data(), LDA );
+    computediff<T>( "A", STORAGE, M, N, a.data(), a_ref.data(), LDA );
 }
 
 // incx = 0, with non-unit incy
@@ -360,7 +360,7 @@ TYPED_TEST(ger_IIT_ERS_Test, incx_eq_zero_nonUnitStride)
             y.data(), inc, a.data(), LDA );
 
     // Computing bitwise difference.
-    computediff<T>( STORAGE, M, N, a.data(), a_ref.data(), LDA );
+    computediff<T>( "A", STORAGE, M, N, a.data(), a_ref.data(), LDA );
 }
 
 // incy = 0, with unit incy
@@ -385,7 +385,7 @@ TYPED_TEST(ger_IIT_ERS_Test, incy_eq_zero_unitStride)
             y.data(), invalid_incy, a.data(), LDA );
 
     // Computing bitwise difference.
-    computediff<T>( STORAGE, M, N, a.data(), a_ref.data(), LDA );
+    computediff<T>( "A", STORAGE, M, N, a.data(), a_ref.data(), LDA );
 }
 
 // incy = 0, with non-unit incy
@@ -410,7 +410,7 @@ TYPED_TEST(ger_IIT_ERS_Test, incy_eq_zero_nonUnitStride)
             y.data(), invalid_incy, a.data(), LDA );
 
     // Computing bitwise difference.
-    computediff<T>( STORAGE, M, N, a.data(), a_ref.data(), LDA );
+    computediff<T>( "A", STORAGE, M, N, a.data(), a_ref.data(), LDA );
 }
 
 // lda < max(1, M), with unit stride
@@ -435,7 +435,7 @@ TYPED_TEST(ger_IIT_ERS_Test, lda_lt_max_1_m_unitStride)
             y.data(), unit_inc, a.data(), invalid_lda );
 
     // Computing bitwise difference.
-    computediff<T>( STORAGE, M, N, a.data(), a_ref.data(), LDA );
+    computediff<T>( "A", STORAGE, M, N, a.data(), a_ref.data(), LDA );
 }
 
 // lda < max(1, M), with non-unit stride
@@ -460,6 +460,6 @@ TYPED_TEST(ger_IIT_ERS_Test, lda_lt_max_1_m_nonUnitStride)
             y.data(), inc, a.data(), invalid_lda );
 
     // Computing bitwise difference.
-    computediff<T>( STORAGE, M, N, a.data(), a_ref.data(), LDA );
+    computediff<T>( "A", STORAGE, M, N, a.data(), a_ref.data(), LDA );
 }
 #endif

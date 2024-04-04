@@ -72,7 +72,7 @@ TYPED_TEST(Axpyv_IIT_ERS_Test, n_lt_zero_nonUnitStrides)
 
   axpyv<T>( CONJ, -1, alpha, x.data(), 5, y.data(), 5 );
   // Use bitwise comparison (no threshold).
-  computediff( N, y.data(), y_ref.data(), 5 );
+  computediff( "y", N, y.data(), y_ref.data(), 5 );
 }
 
 // When n = 0
@@ -91,7 +91,7 @@ TYPED_TEST(Axpyv_IIT_ERS_Test, n_eq_zero_nonUnitStrides)
 
   axpyv<T>( CONJ, 0, alpha, x.data(), 5, y.data(), 5 );
   // Use bitwise comparison (no threshold).
-  computediff( N, y.data(), y_ref.data(), 5 );
+  computediff( "y", N, y.data(), y_ref.data(), 5 );
 }
 
 // When alpha = 0
@@ -110,7 +110,7 @@ TYPED_TEST(Axpyv_IIT_ERS_Test, alpha_eq_zero_nonUnitStrides)
 
   axpyv<T>( CONJ, N, alpha, x.data(), 5, y.data(), 5 );
   // Use bitwise comparison (no threshold).
-  computediff( N, y.data(), y_ref.data(), 5 );
+  computediff( "y", N, y.data(), y_ref.data(), 5 );
 }
 
 // Early return cases with unit strides on vectors
@@ -130,7 +130,7 @@ TYPED_TEST(Axpyv_IIT_ERS_Test, n_lt_zero_unitStrides)
 
   axpyv<T>( CONJ, -1, alpha, x.data(), 1, y.data(), 1 );
   // Use bitwise comparison (no threshold).
-  computediff( N, y.data(), y_ref.data(), 1 );
+  computediff( "y", N, y.data(), y_ref.data(), 1 );
 }
 
 // When n = 0
@@ -149,7 +149,7 @@ TYPED_TEST(Axpyv_IIT_ERS_Test, n_eq_zero_unitStrides)
 
   axpyv<T>( CONJ, 0, alpha, x.data(), 1, y.data(), 1 );
   // Use bitwise comparison (no threshold).
-  computediff( N, y.data(), y_ref.data(), 1 );
+  computediff( "y", N, y.data(), y_ref.data(), 1 );
 }
 
 // When alpha = 0
@@ -168,7 +168,7 @@ TYPED_TEST(Axpyv_IIT_ERS_Test, alpha_eq_zero_unitStrides)
 
   axpyv<T>( CONJ, N, alpha, x.data(), 1, y.data(), 1 );
   // Use bitwise comparison (no threshold).
-  computediff( N, y.data(), y_ref.data(), 1 );
+  computediff( "y", N, y.data(), y_ref.data(), 1 );
 }
 #endif
 

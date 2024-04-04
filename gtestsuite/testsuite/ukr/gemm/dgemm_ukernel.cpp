@@ -592,7 +592,7 @@ TEST_P(dgemmSmallUkernel, gemm_small)
         testinghelpers::ref_gemm<T>( storage, 'n', 'n', m, n, k, alpha,
                                     a, lda, b, ldb, beta, cref, ldc);
         // Check component-wise error
-        computediff<T>( storage, m, n, c, cref, ldc, thresh );
+        computediff<T>( "C", storage, m, n, c, cref, ldc, thresh );
 
         free(cref);
     }
@@ -641,7 +641,7 @@ TEST_P(dgemmSmallUkernel, gemm_small)
         testinghelpers::ref_gemm<T>( storage, 'n', 'n', m, n, k, alpha,
                                     a.data(), lda, b.data(), ldb, beta, c_ref.data(), ldc);
         // Check component-wise error
-        computediff<T>( storage, m, n, c.data(), c_ref.data(), ldc, thresh );
+        computediff<T>( "C", storage, m, n, c.data(), c_ref.data(), ldc, thresh );
     }
 
 }// end of function

@@ -64,7 +64,7 @@ static void test_scalv( char conja_alpha, gtint_t n, gtint_t incx, U alpha, doub
     //----------------------------------------------------------
     //              Compute component-wise error.
     //----------------------------------------------------------
-    computediff<T>( n, x.data(), x_ref.data(), incx, thresh );
+    computediff<T>( "x", n, x.data(), x_ref.data(), incx, thresh );
 }
 
 /**
@@ -98,5 +98,5 @@ static void test_scalv( char conja_alpha, gtint_t n, gtint_t incx, gtint_t xi,
     //----------------------------------------------------------
     //              Compute component-wise error.
     //----------------------------------------------------------
-    computediff<T>( n, x.data(), x_ref.data(), incx, thresh, true );
+    computediff<T>( "x", n, x.data(), x_ref.data(), incx, thresh, true );
 }

@@ -71,5 +71,5 @@ static void test_dotxv( gtint_t n, char conjx, char conjy, T alpha,
     //----------------------------------------------------------
     //              Compute error.
     //----------------------------------------------------------
-    computediff<T>( rho, rho_ref, thresh );
+    computediff<T>( "rho", rho, rho_ref, thresh );
 }

@@ -60,6 +60,7 @@ void test_herk( char storage, char uplo, char transa, gtint_t n, gtint_t k,
 
     // Create a copy of c so that we can check reference results.
     std::vector<T> c_ref(c);
+
     //----------------------------------------------------------
     //                  Call BLIS function
     //----------------------------------------------------------
@@ -75,5 +76,5 @@ void test_herk( char storage, char uplo, char transa, gtint_t n, gtint_t k,
     //----------------------------------------------------------
     //              check component-wise error.
     //----------------------------------------------------------
-    computediff<T>( storage, n, n, c.data(), c_ref.data(), ldc, thresh );
+    computediff<T>( "C", storage, n, n, c.data(), c_ref.data(), ldc, thresh );
 }

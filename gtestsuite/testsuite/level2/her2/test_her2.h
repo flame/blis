@@ -74,5 +74,5 @@ void test_her2( char storage, char uploa, char conjx, char conjy, gtint_t n,
     //----------------------------------------------------------
     //              check component-wise error.
     //----------------------------------------------------------
-    computediff<T>( storage, n, n, a.data(), a_ref.data(), lda, thresh );
+    computediff<T>( "A", storage, n, n, a.data(), a_ref.data(), lda, thresh );
 }

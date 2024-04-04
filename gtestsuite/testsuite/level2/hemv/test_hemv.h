@@ -74,5 +74,5 @@ void test_hemv( char storage, char uploa, char conja, char conjx, gtint_t n,
     //----------------------------------------------------------
     //              check component-wise error.
     //----------------------------------------------------------
-    computediff<T>( n, y.data(), y_ref.data(), incy, thresh );
+    computediff<T>( "y", n, y.data(), y_ref.data(), incy, thresh );
 }

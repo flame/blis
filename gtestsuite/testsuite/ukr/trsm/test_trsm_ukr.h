@@ -299,7 +299,7 @@ static void test_trsm_ukr( FT ukr_fp, char storage, char uploa, char diaga,
     }
 
     // Compute component-wise error.
-    computediff<T>( storage, m, n, c, c_ref, ldc, thresh );
+    computediff<T>( "C", storage, m, n, c, c_ref, ldc, thresh );
 
     if(storage != 'r' && storage != 'R' && storage != 'c' && storage != 'C')
     {
@@ -419,7 +419,7 @@ static void test_trsm_small_ukr( FT ukr_fp, char side, char uploa, char diaga,
     testinghelpers::ref_trsm<T>( 'c', side, uploa, transa, diaga, m, n, alpha, a,
                                 cs_a, b_ref, cs_b );
 
-    computediff<T>( 'c', m, n, b, b_ref, cs_b, thresh );
+    computediff<T>( "B", 'c', m, n, b, b_ref, cs_b, thresh );
 
     // free memory
     free(b_ref);

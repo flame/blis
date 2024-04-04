@@ -74,7 +74,7 @@ TYPED_TEST(xscalv, zero_alpha_x_fp)
     //----------------------------------------------------------
     //     Call generic test body using those parameters
     //----------------------------------------------------------
-    computediff<T>( n, x.data(), x_ref.data(), incx, thresh, true );
+    computediff<T>( "x", n, x.data(), x_ref.data(), incx, thresh, true );
 }
 
 TYPED_TEST(xscalv, zero_alpha_x_inf)
@@ -113,5 +113,5 @@ TYPED_TEST(xscalv, zero_alpha_x_inf)
     //----------------------------------------------------------
     //     Call generic test body using those parameters
     //----------------------------------------------------------
-    computediff<T>( n, x.data(), x_ref.data(), incx, thresh, true );
+    computediff<T>( "x", n, x.data(), x_ref.data(), incx, thresh, true );
 }

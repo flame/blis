@@ -231,7 +231,7 @@ static void test_complex_gemmsup_ukr( char storage, char trnsa, char trnsb, gtin
                                  buf_a, lda, buf_b, ldb, beta, buf_cref, ldc);
 
     // Check component-wise error
-    computediff<T>( storage, m, n, buf_c, buf_cref, ldc, thresh );
+    computediff<T>( "C", storage, m, n, buf_c, buf_cref, ldc, thresh );
 
 }
 
@@ -408,6 +408,6 @@ static void test_gemmnat_ukr( char storage, gtint_t m, gtint_t n, gtint_t k, T a
                                 buf_a, lda, buf_b, ldb, beta, (T*)buf_cref, ldc);
 
     // Check component-wise error
-    computediff<T>( storage, m, n, (T*)buf_c, (T*)buf_cref, ldc, thresh );
+    computediff<T>( "C", storage, m, n, (T*)buf_c, (T*)buf_cref, ldc, thresh );
 
 }

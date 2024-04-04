@@ -121,5 +121,5 @@ static void test_copyv_ukr( FT ukr_fp, char conjx, gtint_t n, gtint_t incx, gtin
     //----------------------------------------------------------
     //              Compute error.
     //----------------------------------------------------------
-    computediff<T>( n, y, y_ref, incy );
+    computediff<T>( "y", n, y, y_ref, incy );
 }
