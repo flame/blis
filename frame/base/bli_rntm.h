@@ -79,17 +79,6 @@ BLIS_INLINE dim_t bli_rntm_ways_for( bszid_t bszid, const rntm_t* rntm )
 	return ( bszid == BLIS_NO_PART ? 1 : rntm->thrloop[ bszid ] );
 }
 
-BLIS_INLINE dim_t bli_rntm_total_ways_for( dim_t thread_by, const rntm_t* rntm )
-{
-    dim_t n_way = 1;
-    for ( dim_t i = 0; i < BLIS_NUM_LOOPS; i++ )
-	{
-        if ( thread_by & (1 << i) )
-            n_way *= bli_rntm_ways_for( (bszid_t)i, rntm );
-    }
-    return n_way;
-}
-
 BLIS_INLINE dim_t bli_rntm_jc_ways( const rntm_t* rntm )
 {
 	return bli_rntm_ways_for( BLIS_NC, rntm );
@@ -269,15 +258,15 @@ BLIS_INLINE void bli_rntm_clear_l3_sup( rntm_t* rntm )
 
 #define BLIS_RNTM_INITIALIZER \
         { \
-          /* .thread_impl */ = BLIS_SINGLE, \
+          /* .thread_impl = */ BLIS_SINGLE, \
 \
-          /* .auto_factor */ = FALSE, \
+          /* .auto_factor = */ FALSE, \
 \
-          /* .num_threads */ = 1, \
-          /* .thrloop     */ = { 1, 1, 1, 1, 1, 1 }, \
-          /* .pack_a      */ = FALSE, \
-          /* .pack_b      */ = FALSE, \
-          /* .l3_sup      */ = TRUE, \
+          /* .num_threads = */ 1, \
+          /* .thrloop     = */ { 1, 1, 1, 1, 1, 1 }, \
+          /* .pack_a      = */ FALSE, \
+          /* .pack_b      = */ FALSE, \
+          /* .l3_sup      = */ TRUE, \
         }  \
 
 #if 0
@@ -343,6 +332,16 @@ BLIS_EXPORT_BLIS void bli_rntm_set_ways
        dim_t   ic,
        dim_t   jr,
        dim_t   ir,
+       rntm_t* rntm
+     );
+
+BLIS_EXPORT_BLIS void bli_rntm_set_ways_for_op
+     (
+       opid_t  l3_op,
+       side_t  side,
+       dim_t   m,
+       dim_t   n,
+       dim_t   k,
        rntm_t* rntm
      );
 
