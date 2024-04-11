@@ -187,6 +187,20 @@ GENTFUNC(scomplex,    c, opname, u, funcname) \
 GENTFUNC(dcomplex,    z, opname, u, funcname)
 
 
+#define INSERT_GENTFUNC_L_SDC( opname, funcname ) \
+\
+GENTFUNC(float,       s, opname, l, funcname) \
+GENTFUNC(double,      d, opname, l, funcname) \
+GENTFUNC(scomplex,    c, opname, l, funcname)
+
+
+#define INSERT_GENTFUNC_U_SDC( opname, funcname ) \
+\
+GENTFUNC(float,       s, opname, u, funcname) \
+GENTFUNC(double,      d, opname, u, funcname) \
+GENTFUNC(scomplex,    c, opname, u, funcname)
+
+
 
 // -- Macros for functions with one operand ------------------------------------
 

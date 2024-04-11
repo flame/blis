@@ -201,6 +201,10 @@ GEMMSUP_KER_PROT( double,  d, gemmsup_rv_zen4_asm_8x8m)
 GEMMSUP_KER_PROT( double,  d, gemmsup_rv_zen4_asm_8x8m_lower)
 GEMMSUP_KER_PROT( double,  d, gemmsup_rv_zen4_asm_8x8m_upper)
 
+GEMMSUP_KER_PROT( dcomplex,  z, gemmsup_rv_zen4_asm_4x4m)
+GEMMSUP_KER_PROT( dcomplex,  z, gemmsup_rv_zen4_asm_4x4m_lower)
+GEMMSUP_KER_PROT( dcomplex,  z, gemmsup_rv_zen4_asm_4x4m_upper)
+
 GEMMSUP_KER_PROT( double,  d, gemmsup_rv_zen4_asm_24x7)
 GEMMSUP_KER_PROT( double,  d, gemmsup_rv_zen4_asm_16x7)
 GEMMSUP_KER_PROT( double,  d, gemmsup_rv_zen4_asm_8x7)

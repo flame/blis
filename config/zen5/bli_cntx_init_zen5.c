@@ -360,10 +360,10 @@ void bli_cntx_init_zen5( cntx_t* cntx )
 	// triangular objects with architecture-specific values.
 	//
 	//                                           s      d      c      z
-	bli_blksz_init     ( &blkszs[ BLIS_MR ],     6,     8,     3,     3,
+	bli_blksz_init     ( &blkszs[ BLIS_MR ],     6,     8,     3,     4,
 	                                             9,     9,     3,     3 );
 	bli_blksz_init_easy( &blkszs[ BLIS_NR ],    16,     8,     8,     4 );
-	bli_blksz_init_easy( &blkszs[ BLIS_MC ],   144,    96,    72,    36 );
+	bli_blksz_init_easy( &blkszs[ BLIS_MC ],   144,    96,    72,    48 );
 	bli_blksz_init_easy( &blkszs[ BLIS_KC ],   512,   256,   128,    64 );
 	bli_blksz_init_easy( &blkszs[ BLIS_NC ],  8160,  4080,  2040,  1020 );
 
@@ -409,14 +409,14 @@ void bli_cntx_init_zen5( cntx_t* cntx )
 	  BLIS_CCR, BLIS_SCOMPLEX, bli_cgemmsup_rv_zen_asm_3x8n, TRUE,
 	  BLIS_CCC, BLIS_SCOMPLEX, bli_cgemmsup_rv_zen_asm_3x8n, TRUE,
 
-	  BLIS_RRR, BLIS_DCOMPLEX, bli_zgemmsup_rv_zen_asm_3x4m, TRUE,
+	  BLIS_RRR, BLIS_DCOMPLEX, bli_zgemmsup_rv_zen4_asm_4x4m, TRUE,
 	  BLIS_RRC, BLIS_DCOMPLEX, bli_zgemmsup_rd_zen_asm_3x4m, TRUE,
-	  BLIS_RCR, BLIS_DCOMPLEX, bli_zgemmsup_rv_zen_asm_3x4m, TRUE,
-	  BLIS_RCC, BLIS_DCOMPLEX, bli_zgemmsup_rv_zen_asm_3x4n, TRUE,
+	  BLIS_RCR, BLIS_DCOMPLEX, bli_zgemmsup_rv_zen4_asm_4x4m, TRUE,
+	  BLIS_RCC, BLIS_DCOMPLEX, bli_zgemmsup_rv_zen4_asm_4x4m, TRUE,
 	  BLIS_CRR, BLIS_DCOMPLEX, bli_zgemmsup_rv_zen_asm_3x4m, TRUE,
 	  BLIS_CRC, BLIS_DCOMPLEX, bli_zgemmsup_rd_zen_asm_3x4n, TRUE,
-	  BLIS_CCR, BLIS_DCOMPLEX, bli_zgemmsup_rv_zen_asm_3x4n, TRUE,
-	  BLIS_CCC, BLIS_DCOMPLEX, bli_zgemmsup_rv_zen_asm_3x4n, TRUE,
+	  BLIS_CCR, BLIS_DCOMPLEX, bli_zgemmsup_rv_zen4_asm_4x4m, TRUE,
+	  BLIS_CCC, BLIS_DCOMPLEX, bli_zgemmsup_rv_zen4_asm_4x4m, TRUE,
 	  cntx
 	);
 }

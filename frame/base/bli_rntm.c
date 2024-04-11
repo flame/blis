@@ -1300,7 +1300,7 @@ void bli_nthreads_optimum(
 		}
 #endif
 	}
-	else if( family == BLIS_GEMMT && bli_obj_is_double(c)  )
+	else if( family == BLIS_GEMMT && ( bli_obj_is_double(c) || bli_obj_is_dcomplex(c) ) )
 	{
 		dim_t n = bli_obj_length(c);
 		dim_t k = bli_obj_width_after_trans(a);
