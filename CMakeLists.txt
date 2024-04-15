@@ -34,7 +34,7 @@ if(WIN32)
 else()
     set(BLIS_CONFIG_FAMILY "" CACHE STRING "Set the configuration family for which the BLIS library will be built.")
 endif()
-set_property(CACHE BLIS_CONFIG_FAMILY PROPERTY STRINGS "auto" "generic" "zen" "zen2" "zen3" "zen4" "amdzen")
+set_property(CACHE BLIS_CONFIG_FAMILY PROPERTY STRINGS "auto" "generic" "zen" "zen2" "zen3" "zen4" "zen5" "amdzen")
 # Throw an error if CMake was configured with a configuration which is not enabled yet.
 if(NOT ((BLIS_CONFIG_FAMILY STREQUAL auto) OR
         (BLIS_CONFIG_FAMILY STREQUAL generic) OR
@@ -42,10 +42,11 @@ if(NOT ((BLIS_CONFIG_FAMILY STREQUAL auto) OR
         (BLIS_CONFIG_FAMILY STREQUAL zen2) OR
         (BLIS_CONFIG_FAMILY STREQUAL zen3) OR
         (BLIS_CONFIG_FAMILY STREQUAL zen4) OR
+        (BLIS_CONFIG_FAMILY STREQUAL zen5) OR
         (BLIS_CONFIG_FAMILY STREQUAL amdzen)))
     message(FATAL_ERROR "Configuration for ${BLIS_CONFIG_FAMILY} is not supported. \
         Please re-run cmake and specify one of the following configurations for BLIS_CONFIG_FAMILY: \
-        auto, zen, zen2, zen3, zen4, amdzen, generic.")
+        auto, zen, zen2, zen3, zen4, zen5, amdzen, generic.")
 endif()
 
 # automatic hardware detection
@@ -69,7 +70,7 @@ if(BLIS_CONFIG_FAMILY STREQUAL "auto")
             COMPILE_DEFINITIONS -I${frame_include} -I${base_include} -I${thread_include}
                                -DBLIS_CONFIGURETIME_CPUID -DBLIS_CONFIG_SKX -DBLIS_CONFIG_KNL
                                -DBLIS_CONFIG_HASWELL -DBLIS_CONFIG_SANDYBRIDGE -DBLIS_CONFIG_PENRYN
-                               -DBLIS_CONFIG_ZEN4 -DBLIS_CONFIG_ZEN3 -DBLIS_CONFIG_ZEN2 -DBLIS_CONFIG_ZEN
+                               -DBLIS_CONFIG_ZEN5 -DBLIS_CONFIG_ZEN4 -DBLIS_CONFIG_ZEN3 -DBLIS_CONFIG_ZEN2 -DBLIS_CONFIG_ZEN
                                -DBLIS_CONFIG_EXCAVATOR -DBLIS_CONFIG_STEAMROLLER -DBLIS_CONFIG_PILEDRIVER
                                -DBLIS_CONFIG_BULLDOZER -DBLIS_CONFIG_THUNDERX2 -DBLIS_CONFIG_CORTEXA57
                                -DBLIS_CONFIG_CORTEXA15 -DBLIS_CONFIG_CORTEXA9
@@ -81,7 +82,8 @@ if(BLIS_CONFIG_FAMILY STREQUAL "auto")
     if( NOT(${HARDWARE_ARCH} STREQUAL zen OR
             ${HARDWARE_ARCH} STREQUAL zen2 OR
             ${HARDWARE_ARCH} STREQUAL zen3 OR
-            ${HARDWARE_ARCH} STREQUAL zen4) )
+            ${HARDWARE_ARCH} STREQUAL zen4 OR
+            ${HARDWARE_ARCH} STREQUAL zen5) )
            set(BLIS_CONFIG_FAMILY "generic")
            message(WARNING "Only AMD zen architectures are supported. \
            Detected ${HARDWARE_ARCH} hardware. Defaulting to generic configuration.")

@@ -1,4 +1,4 @@
-##Copyright (C) 2023, Advanced Micro Devices, Inc. All rights reserved.##
+##Copyright (C) 2023 - 2024, Advanced Micro Devices, Inc. All rights reserved.##
 
 # Import modules
 import os
@@ -21,7 +21,7 @@ def main():
 	print(" ")
 	print("   confname      The name of the sub-directory inside of the 'config'")
 	print("                 directory containing the desired BLIS configuration.")
-	print("                 Currently, only amdzen, zen, zen2, zen3, zen4 and generic")
+	print("                 Currently, only amdzen, zen, zen2, zen3, zen4, zen5 and generic")
 	print("                 configuration options are supported.")
 	print("                 Note that confname MUST be specified; if it is not,")
 	print("                 configure will complain. To build a completely generic")
