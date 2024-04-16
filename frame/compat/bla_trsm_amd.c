@@ -1345,15 +1345,19 @@ void ztrsm_blis_impl
         }
         else if( ( blis_side == BLIS_RIGHT ) && ( m0 != 1 ) )
         {
-            bli_zscalv_ex
-            (
-                conja,
-                m0,
-                (dcomplex*)alpha,
-                (dcomplex*)b, rs_b,
-                NULL,
-                NULL
-            );
+            /* Avoid alpha scaling when alpha is one */
+            if ( !PASTEMAC(z, eq1)(*alpha) )
+            {
+                bli_zscalv_ex
+                (
+                    conja,
+                    m0,
+                    (dcomplex*)alpha,
+                    (dcomplex*)b, rs_b,
+                    NULL,
+                    NULL
+                );
+            }   
 	    if(blis_diaga == BLIS_NONUNIT_DIAG)
 	    {
 		    dcomplex inva = {1.0, 0.0};
@@ -1449,15 +1453,19 @@ void ztrsm_blis_impl
         }
         else if(( blis_side == BLIS_LEFT ) && ( n0 != 1 ))
         {
-            bli_zscalv_ex
-            (
-                conja,
-                n0,
-                (dcomplex*)alpha,
-                (dcomplex*)b, cs_b,
-                NULL,
-                NULL
-            );
+            /* Avoid alpha scaling when alpha is one */
+            if ( !PASTEMAC(z, eq1)(*alpha) )
+            {
+                bli_zscalv_ex
+                (
+                    conja,
+                    n0,
+                    (dcomplex*)alpha,
+                    (dcomplex*)b, cs_b,
+                    NULL,
+                    NULL
+                );
+            }
             if(blis_diaga == BLIS_NONUNIT_DIAG)
             {
                 dcomplex inva = {1.0, 0.0};

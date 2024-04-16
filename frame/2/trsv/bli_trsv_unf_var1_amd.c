@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2019 - 2023, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2019 - 2024, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -77,15 +77,19 @@ void PASTEMAC(ch,varname) \
     conj_t  conja; \
 \
     /* x = alpha * x; */ \
-    PASTEMAC2(ch,scalv,BLIS_TAPI_EX_SUF) \
-    ( \
-      BLIS_NO_CONJUGATE, \
-      m, \
-      alpha, \
-      x, incx, \
-      cntx, \
-      NULL  \
-    ); \
+    /* Avoid alpha scaling when alpha is one */ \
+    if      ( !PASTEMAC(ch, eq1)(*alpha) ) \
+    { \
+        PASTEMAC2(ch,scalv,BLIS_TAPI_EX_SUF) \
+        ( \
+        BLIS_NO_CONJUGATE, \
+        m, \
+        alpha, \
+        x, incx, \
+        cntx, \
+        NULL  \
+        ); \
+    } \
 \
     if      ( bli_does_notrans( transa ) ) \
     { \
