@@ -257,3 +257,94 @@ INSTANTIATE_TEST_SUITE_P(
         ::sgerGenericTestPrint()
     );
 #endif
+
+INSTANTIATE_TEST_SUITE_P(
+        scalarCombinations,
+        sgerGenericTest,
+        ::testing::Combine(
+            // storage scheme: row/col-stored matrix
+            ::testing::Values( 'c'
+            // row-stored tests are disabled for BLAS since BLAS only supports col-storage scheme.
+#ifndef TEST_BLAS
+                             , 'r'
+#endif
+            ),
+            // conjx: uses n (no_conjugate) since it is real.
+            ::testing::Values( 'n' ),
+            // conjy: uses n (no_conjugate) since it is real.
+            ::testing::Values( 'n' ),
+            // m
+            ::testing::Values( gtint_t(5) ),
+            // n
+            ::testing::Values( gtint_t(4) ),
+            // alpha: value of scalar
+            ::testing::Values( float(-401.1), float(100.0), float(3.4)),
+            // incx: stride of x vector.
+            ::testing::Values( gtint_t(2) ),
+            // incy: stride of y vector.
+            ::testing::Values( gtint_t(3) ),
+            // inc_lda: increment to the leading dim of a
+            ::testing::Values( gtint_t(1) )
+        ),
+        ::sgerGenericTestPrint()
+    );
+INSTANTIATE_TEST_SUITE_P(
+        largeSize,
+        sgerGenericTest,
+        ::testing::Combine(
+            // storage scheme: row/col-stored matrix
+            ::testing::Values( 'c'
+            // row-stored tests are disabled for BLAS since BLAS only supports col-storage scheme.
+#ifndef TEST_BLAS
+                             , 'r'
+#endif
+            ),
+            // conjx: uses n (no_conjugate) since it is real.
+            ::testing::Values( 'n' ),
+            // conjy: uses n (no_conjugate) since it is real.
+            ::testing::Values( 'n' ),
+            // m
+            ::testing::Values( gtint_t(5000) ),
+            // n
+            ::testing::Values( gtint_t(4000) ),
+            // alpha: value of scalar
+            ::testing::Values( float(3.4) ),
+            // incx: stride of x vector.
+            ::testing::Values( gtint_t(2), gtint_t(1) ),
+            // incy: stride of y vector.
+            ::testing::Values( gtint_t(3), gtint_t(1) ),
+            // inc_lda: increment to the leading dim of a
+            ::testing::Values( gtint_t(1) )
+        ),
+        ::sgerGenericTestPrint()
+    );
+INSTANTIATE_TEST_SUITE_P(
+        strideGreaterThanSize,
+        sgerGenericTest,
+        ::testing::Combine(
+            // storage scheme: row/col-stored matrix
+            ::testing::Values( 'c'
+            // row-stored tests are disabled for BLAS since BLAS only supports col-storage scheme.
+#ifndef TEST_BLAS
+                             , 'r'
+#endif
+            ),
+            // conjx: uses n (no_conjugate) since it is real.
+            ::testing::Values( 'n' ),
+            // conjy: uses n (no_conjugate) since it is real.
+            ::testing::Values( 'n' ),
+            // m
+            ::testing::Values( gtint_t(2) ),
+            // n
+            ::testing::Values( gtint_t(4) ),
+            // alpha: value of scalar
+            ::testing::Values( float(3.4)),
+            // incx: stride of x vector.
+            ::testing::Values( gtint_t(10) ),
+            // incy: stride of y vector.
+            ::testing::Values( gtint_t(15) ),
+            // inc_lda: increment to the leading dim of a
+            ::testing::Values( gtint_t(9) )
+        ),
+        ::sgerGenericTestPrint()
+    );
