@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2023, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2023 - 2024, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -51,13 +51,20 @@ void test_hemv( char storage, char uploa, char conja, char conjx, gtint_t n,
     //        Initialize matrics with random integer numbers.
     //----------------------------------------------------------
     std::vector<T> a = testinghelpers::get_random_matrix<T>( -2, 5, storage, 'n', n, n, lda );
-    std::vector<T> x = testinghelpers::get_random_vector<T>( -3, 3, n, incx );
-    std::vector<T> y = testinghelpers::get_random_vector<T>( -3, 3, n, incy );
-
     testinghelpers::make_herm<T>( storage, uploa, n, a.data(), lda );
     testinghelpers::make_triangular<T>( storage, uploa, n, a.data(), lda );
 
-    // Create a copy of c so that we can check reference results.
+    std::vector<T> x = testinghelpers::get_random_vector<T>( -3, 3, n, incx );
+    std::vector<T> y;
+    if (beta != testinghelpers::ZERO<T>())
+        y = testinghelpers::get_random_vector<T>( -3, 3, n, incy );
+    else
+    {
+        // Vector Y should not be read, only set.
+        testinghelpers::set_vector( n, incy, y.data(), testinghelpers::aocl_extreme<T>() );
+    }
+
+    // Create a copy of y so that we can check reference results.
     std::vector<T> y_ref(y);
     //----------------------------------------------------------
     //                  Call BLIS function

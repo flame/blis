@@ -56,7 +56,14 @@ void test_gemm( char storage, char trnsa, char trnsb, gtint_t m, gtint_t n,
     //----------------------------------------------------------
     std::vector<T> a = testinghelpers::get_random_matrix<T>( -2, 8, storage, trnsa, m, k, lda );
     std::vector<T> b = testinghelpers::get_random_matrix<T>( -5, 2, storage, trnsb, k, n, ldb );
-    std::vector<T> c = testinghelpers::get_random_matrix<T>( -3, 5, storage, 'n', m, n, ldc );
+    std::vector<T> c;
+    if (beta != testinghelpers::ZERO<T>())
+        c = testinghelpers::get_random_matrix<T>( -3, 5, storage, 'n', m, n, ldc );
+    else
+    {
+        // Matrix C should not be read, only set.
+        testinghelpers::set_matrix( storage, m, n, c.data(), 'n', ldc, testinghelpers::aocl_extreme<T>() );
+    }
 
     // Create a copy of c so that we can check reference results.
     std::vector<T> c_ref(c);

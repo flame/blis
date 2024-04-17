@@ -196,6 +196,24 @@ template scomplex getNaN<scomplex>();
 template dcomplex getNaN<dcomplex>();
 
 /**
+ * If T is real, returns NaN.
+ * If T is complex, returns {NaN, NaN}
+*/
+template<typename T>
+T getNaNNaN()
+{
+    using RT = typename testinghelpers::type_info<T>::real_type;
+    if constexpr (testinghelpers::type_info<T>::is_real)
+        return std::numeric_limits<RT>::quiet_NaN();
+    else
+        return T{std::numeric_limits<RT>::quiet_NaN(), std::numeric_limits<RT>::quiet_NaN()};
+}
+template float getNaNNaN<float>();
+template double getNaNNaN<double>();
+template scomplex getNaNNaN<scomplex>();
+template dcomplex getNaNNaN<dcomplex>();
+
+/**
  * If T is real, returns inf.
  * If T is complex, returns {inf, 0.0}
 */
@@ -213,6 +231,42 @@ template double getInf<double>();
 template scomplex getInf<scomplex>();
 template dcomplex getInf<dcomplex>();
 
+/**
+ * If T is real, returns inf.
+ * If T is complex, returns {inf, inf}
+*/
+template<typename T>
+T getInfInf()
+{
+    using RT = typename testinghelpers::type_info<T>::real_type;
+    if constexpr (testinghelpers::type_info<T>::is_real)
+        return std::numeric_limits<RT>::infinity();
+    else
+        return T{std::numeric_limits<RT>::infinity(), std::numeric_limits<RT>::infinity()};
+}
+template float getInfInf<float>();
+template double getInfInf<double>();
+template scomplex getInfInf<scomplex>();
+template dcomplex getInfInf<dcomplex>();
+
+/**
+ * If T is real, returns extval.
+ * If T is complex, returns {extval, extval}
+ * where extval = NaN or Inf
+*/
+template<typename T>
+T aocl_extreme()
+{
+#if EXT_VAL == NaN
+    return getNaNNaN<T>();
+#else
+    return getInfInf<T>();
+#endif
+}
+template float aocl_extreme<float>();
+template double aocl_extreme<double>();
+template scomplex aocl_extreme<scomplex>();
+template dcomplex aocl_extreme<dcomplex>();
 
 
 bool chktrans( char trns )

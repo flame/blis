@@ -69,7 +69,13 @@ void test_gemv( char storage, char transa, char conjx, gtint_t m, gtint_t n,
     testinghelpers::ProtectedBuffer y_ref_buffer( size_y, false, false );
 
     testinghelpers::datagenerators::randomgenerators<T>( 1, 3, lenx, incx, (T*)(x_buf.greenzone_1) );
-    testinghelpers::datagenerators::randomgenerators<T>( 1, 3, leny, incy, (T*)(y_buf.greenzone_1) );
+    if (beta != testinghelpers::ZERO<T>())
+        testinghelpers::datagenerators::randomgenerators<T>( 1, 3, leny, incy, (T*)(y_buf.greenzone_1) );
+    else
+    {
+        // Vector Y should not be read, only set.
+        testinghelpers::set_vector( leny, incy, (T*)(y_buf.greenzone_1), testinghelpers::aocl_extreme<T>() );
+    }
 
     T* a = (T*)(a_buf.greenzone_1);
     T* x = (T*)(x_buf.greenzone_1);

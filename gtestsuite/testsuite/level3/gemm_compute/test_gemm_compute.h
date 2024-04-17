@@ -4,19 +4,19 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2023, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2023 - 2024, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
    met:
-  - Redistributions of source code must retain the above copyright
-    notice, this list of conditions and the following disclaimer.
-  - Redistributions in binary form must reproduce the above copyright
-    notice, this list of conditions and the following disclaimer in the
-    documentation and/or other materials provided with the distribution.
-  - Neither the name(s) of the copyright holder(s) nor the names of its
-    contributors may be used to endorse or promote products derived
-    from this software without specific prior written permission.
+	- Redistributions of source code must retain the above copyright
+	  notice, this list of conditions and the following disclaimer.
+	- Redistributions in binary form must reproduce the above copyright
+	  notice, this list of conditions and the following disclaimer in the
+	  documentation and/or other materials provided with the distribution.
+	- Neither the name(s) of the copyright holder(s) nor the names of its
+	  contributors may be used to endorse or promote products derived
+	  from this software without specific prior written permission.
 
    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
    "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -55,7 +55,14 @@ void test_gemm_compute( char storage, char trnsa, char trnsb, char pcka, char pc
     //----------------------------------------------------------
     std::vector<T> a = testinghelpers::get_random_matrix<T>( -2, 8, storage, trnsa, m, k, lda );
     std::vector<T> b = testinghelpers::get_random_matrix<T>( -5, 2, storage, trnsb, k, n, ldb );
-    std::vector<T> c = testinghelpers::get_random_matrix<T>( -3, 5, storage, 'n', m, n, ldc );
+    std::vector<T> c;
+    if (beta != testinghelpers::ZERO<T>())
+        c = testinghelpers::get_random_matrix<T>( -3, 5, storage, 'n', m, n, ldc );
+    else
+    {
+        // Matrix C should not be read, only set.
+        testinghelpers::set_matrix( storage, m, n, c.data(), 'n', ldc, testinghelpers::aocl_extreme<T>() );
+    }
 
     // Create a copy of c so that we can check reference results.
     std::vector<T> c_ref(c);

@@ -115,6 +115,9 @@ $ ASAN_OPTIONS=redzone=2048 <executable>
 ## Type of Data Generated in Testing
 * To generate floating-point numbers in the matrices and vectors that are used in testing, configure using `-DBLIS_ELEMENT_TYPE=f`. [**Default**]
 * To generate integers in the matrices and vectors that are used in testing, configure using `-DBLIS_ELEMENT_TYPE=i`. This can be useful for debugging since operating on integers should compute exact results. Note that "integer" here doesn't refer to `int` type, but on the mathematical set Z.
+## Extreme value used for testing data that shouldn't be read.
+* To test with Inf, configure using `-DEXT_VAL=Inf`. [**Default**]
+* To test with NaN, configure using `-DEXT_VAL=NaN`.
 
 This option is used to set a static constant variable `GenericET` of type `testinghelpers::datagenerators::ElementType` which is in turned used as the default argument in data generator functions such as `get_random_vector`, `get_random_matrix`, etc. To find a full list of APIs that can be used to generate random data we refer to `blis/gtestsuite/testinghelpers/inc/common/data_generators.h`.
 ### Specifying Types of Data Independent of BLIS_ELEMENT_TYPE

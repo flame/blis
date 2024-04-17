@@ -52,10 +52,17 @@ void test_syrk( char storage, char uplo, char transa, gtint_t n, gtint_t k,
     //        Initialize matrics with random integer numbers.
     //----------------------------------------------------------
     std::vector<T> a = testinghelpers::get_random_matrix<T>( -2, 8, storage, transa, n, k, lda );
-    // Since matrix C, stored in c, is symmetric, we only use the upper or lower
-    // part in the computation of syrk and zero-out the rest to ensure
-    // that code operates as expected.
-    std::vector<T> c = testinghelpers::get_random_matrix<T>( -3, 5, storage, uplo, n, ldc );
+    std::vector<T> c;
+    if (beta != testinghelpers::ZERO<T>())
+        // Since matrix C, stored in c, is symmetric, we only use the upper or lower
+        // part in the computation of syrk and zero-out the rest to ensure
+        // that code operates as expected.
+        c = testinghelpers::get_random_matrix<T>( -3, 5, storage, uplo, n, ldc );
+    else
+    {
+        // Matrix C should not be read, only set.
+        testinghelpers::set_matrix( storage, n, n, c.data(), 'n', ldc, testinghelpers::aocl_extreme<T>() );
+    }
 
     // Create a copy of c so that we can check reference results.
     std::vector<T> c_ref(c);

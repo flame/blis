@@ -155,6 +155,15 @@ option(THRESHOLD_ZERO "Set thresholds to zero" OFF)
 # bli_info_get_info_value (introduced at AMD BLAS 4.2).
 option(CAN_TEST_INFO_VALUE "Can test value of info" ON)
 
+# Use EXT_VAL to get the extreme value (NaN or Inf) used for testing data that shouldn't be read.
+set(EXT_VAL "Inf" CACHE STRING "Extreme value (NaN or Inf) used for testing data that shouldn't be read")
+# Set the possible values of reference CBLAS for cmake-gui
+set_property(CACHE EXT_VAL PROPERTY STRINGS "NaN" "Inf")
+if( NOT ((EXT_VAL STREQUAL "NaN") OR (EXT_VAL STREQUAL "Inf")) )
+    message(FATAL_ERROR "EXT_VAL option '${EXT_VAL}' is not supported. Please use one of the following options \
+            during CMake invokation: NaN, Inf")
+endif()
+
 if(REF_LIB)
     get_filename_component(REFLIB_PATH ${REF_LIB}/.. ABSOLUTE)
     get_filename_component(library ${REF_LIB} NAME)

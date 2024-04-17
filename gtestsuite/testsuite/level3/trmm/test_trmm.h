@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2023, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2023 - 2024, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -53,9 +53,16 @@ void test_trmm( char storage, char side, char uploa, char transa, char diaga,
     //        Initialize matrics with random values.
     //----------------------------------------------------------
     std::vector<T> a = testinghelpers::get_random_matrix<T>( -2, 8, storage, transa, mn, mn, lda );
-    std::vector<T> b = testinghelpers::get_random_matrix<T>( -5, 2, storage, 'n', m, n, ldb );
+    std::vector<T> b;
+    if (alpha != testinghelpers::ZERO<T>())
+        b = testinghelpers::get_random_matrix<T>( -5, 2, storage, 'n', m, n, ldb );
+    else
+    {
+        // Matrix B should not be read, only set.
+        testinghelpers::set_matrix( storage, m, n, b.data(), 'n', ldb, testinghelpers::aocl_extreme<T>() );
+    }
 
-    // Create a copy of v so that we can check reference results.
+    // Create a copy of b so that we can check reference results.
     std::vector<T> b_ref(b);
 
     testinghelpers::make_triangular<T>( storage, uploa, mn, a.data(), lda );

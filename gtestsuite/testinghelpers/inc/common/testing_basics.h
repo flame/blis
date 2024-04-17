@@ -96,11 +96,33 @@ template<typename T>
 T getNaN();
 
 /**
+ * If T is real, returns NaN.
+ * If T is complex, returns {NaN, NaN}
+*/
+template<typename T>
+T getNaNNaN();
+
+/**
  * If T is real, returns inf.
  * If T is complex, returns {inf, 0.0}
 */
 template<typename T>
 T getInf();
+
+/**
+ * If T is real, returns inf.
+ * If T is complex, returns {inf, inf}
+*/
+template<typename T>
+T getInfInf();
+
+/**
+ * If T is real, returns extval.
+ * If T is complex, returns {extval, extval}
+ * where extval = NaN or Inf
+*/
+template<typename T>
+T aocl_extreme();
 
 /**
  * @brief Returns the conjugate of a scalar x.

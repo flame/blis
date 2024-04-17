@@ -122,7 +122,14 @@ static void test_gemmnat_ukr(
     /* Initialize Matrices with random numbers */
     testinghelpers::datagenerators::randomgenerators<T>( -2, 8, 'c', m, k, (T*)(buf_a), 'n', lda);
     testinghelpers::datagenerators::randomgenerators<T>( -5, 2, 'r', k, n, (T*)(buf_b), 'n', ldb);
-    testinghelpers::datagenerators::randomgenerators<T>( -5, 2, storage , m, n, (T*)(buf_c), 'n', ldc);
+
+    if (beta != testinghelpers::ZERO<T>())
+        testinghelpers::datagenerators::randomgenerators<T>( -5, 2, storage , m, n, (T*)(buf_c), 'n', ldc);
+    else
+    {
+        // Matrix C should not be read, only set.
+        testinghelpers::set_matrix( storage, m, n, (T*)(buf_c), 'n', ldc, testinghelpers::aocl_extreme<T>() );
+    }
 
     // Create a copy of c so that we can check reference results.
     memcpy(buf_cref, buf_c, sizec);
@@ -264,7 +271,14 @@ static void test_gemmk1_ukr( FT ukr_fp, gtint_t m, gtint_t n, gtint_t k, char st
     }
     testinghelpers::datagenerators::randomgenerators<T>( -2, 8, storage, m, k, (T*)(buf_a), 'n', lda);
     testinghelpers::datagenerators::randomgenerators<T>( -5, 2, storage, k, n, (T*)(buf_b), 'n', ldb);
-    testinghelpers::datagenerators::randomgenerators<T>( -3, 5, storage, m, n, (T*)(buf_c), 'n', ldc);
+
+    if (beta != testinghelpers::ZERO<T>())
+        testinghelpers::datagenerators::randomgenerators<T>( -3, 5, storage , m, n, (T*)(buf_c), 'n', ldc);
+    else
+    {
+        // Matrix C should not be read, only set.
+        testinghelpers::set_matrix( storage, m, n, (T*)(buf_c), 'n', ldc, testinghelpers::aocl_extreme<T>() );
+    }
 
     // Create a copy of c so that we can check reference results.
     memcpy(buf_cref, buf_c, sizec);
@@ -390,7 +404,14 @@ static void test_gemmsup_ukr( FT ukr_fp, char trnsa, char trnsb, gtint_t m, gtin
     }
     testinghelpers::datagenerators::randomgenerators<T>( -2, 8, storage, m, k, (T*)(buf_a), trnsa, lda);
     testinghelpers::datagenerators::randomgenerators<T>( -5, 2, storage, k, n, (T*)(buf_b), trnsb, ldb);
-    testinghelpers::datagenerators::randomgenerators<T>( -3, 5, storage, m, n, (T*)(buf_c), 'n', ldc);
+
+    if (beta != testinghelpers::ZERO<T>())
+        testinghelpers::datagenerators::randomgenerators<T>( -3, 5, storage , m, n, (T*)(buf_c), 'n', ldc);
+    else
+    {
+        // Matrix C should not be read, only set.
+        testinghelpers::set_matrix( storage, m, n, (T*)(buf_c), 'n', ldc, testinghelpers::aocl_extreme<T>() );
+    }
 
     // Create a copy of c so that we can check reference results.
     memset(buf_c, 0, sizec);

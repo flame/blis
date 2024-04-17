@@ -203,15 +203,26 @@ void test_trsm( char storage, char side, char uploa, char transa, char diaga,
     std::vector<T> b( testinghelpers::matsize(storage, 'n', m, n, ldb) );
     srand(time(0));
     random_generator_with_INF_NAN( a.data(), uploa, storage, transa, lower, upper, mn, mn, lda, NO_EVT, true);
-    random_generator_with_INF_NAN( b.data(), uploa, storage, 'n', 3, 10, m, n, ldb, b_init, false);
 
     // Make A matix diagonal dominant to make sure that algorithm doesn't diverge
     for ( dim_t a_dim = 0; a_dim < mn; ++a_dim )
     {
         a[a_dim + (a_dim* lda)] = a[a_dim + (a_dim* lda)] * T{10};
     }
+
+    if (alpha != testinghelpers::ZERO<T>())
+        random_generator_with_INF_NAN( b.data(), uploa, storage, 'n', 3, 10, m, n, ldb, b_init, false);
+    else
+    {
+        // Matrix B should not be read, only set.
+        testinghelpers::set_matrix( storage, m, n, b.data(), 'n', ldb, testinghelpers::aocl_extreme<T>() );
+    }
+
+    // Create a copy of b so that we can check reference results.
+    std::vector<T> b_ref(b);
+
     bool nan_inf_check = false;
-    // Setting the nan_inf_check boolean to true if alpa has
+    // Setting the nan_inf_check boolean to true if alpha has
     // Nan/Inf in it
     if constexpr (testinghelpers::type_info<T>::is_real)
     {
@@ -224,9 +235,6 @@ void test_trsm( char storage, char side, char uploa, char transa, char diaga,
     nan_inf_check = ( nan_inf_check ||
                      ((a_init != NO_EVT) && (a_init != ZERO)) ||
                      ((b_init != NO_EVT) && (a_init != ZERO)) );
-
-    // Create a copy of v so that we can check reference results.
-    std::vector<T> b_ref(b);
 
     testinghelpers::make_triangular<T>( storage, uploa, mn, a.data(), lda );
     //----------------------------------------------------------

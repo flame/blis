@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2023, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2023 - 2024, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -61,16 +61,6 @@ void test_gemmt( char storage, char uplo, char trnsa, char trnsb, gtint_t n,
     a_ptr = (T*)a.greenzone_1;
     testinghelpers::datagenerators::randomgenerators<T>( -2, 8, storage, n, k, a_ptr, trnsa, lda);
 
-    dim_t size_b = testinghelpers::matsize(storage, trnsb, k, n, ldb) * sizeof(T);
-    testinghelpers::ProtectedBuffer b(size_b, false, is_mem_test );
-    b_ptr = (T*)b.greenzone_1;
-    testinghelpers::datagenerators::randomgenerators<T>( -5, 2, storage, k, n, b_ptr, trnsb, ldb);
-
-    dim_t size_c = testinghelpers::matsize(storage, 'n', n, n, ldc) * sizeof(T);
-    testinghelpers::ProtectedBuffer c(size_c, false, is_mem_test );
-    c_ptr = (T*)c.greenzone_1;
-    testinghelpers::datagenerators::randomgenerators<T>( -3, 5, storage, n, n, c_ptr, 'n', ldc);
-
     if ( is_evt_test )
     {
         dim_t n_rand = rand() % (std::min)(n, k);
@@ -78,18 +68,35 @@ void test_gemmt( char storage, char uplo, char trnsa, char trnsb, gtint_t n,
         a_ptr[n_rand + k_rand * lda] = evt_a;
     }
 
-    if ( is_evt_test )
-    {
-        dim_t n_rand = rand() % (std::min)(n, k);
-        dim_t k_rand = rand() % (std::min)(n, k);
-        b_ptr[n_rand + k_rand * lda] = evt_a;
-    }
+    dim_t size_b = testinghelpers::matsize(storage, trnsb, k, n, ldb) * sizeof(T);
+    testinghelpers::ProtectedBuffer b(size_b, false, is_mem_test );
+    b_ptr = (T*)b.greenzone_1;
+    testinghelpers::datagenerators::randomgenerators<T>( -5, 2, storage, k, n, b_ptr, trnsb, ldb);
 
     if ( is_evt_test )
     {
-        dim_t n_rand = rand() % (std::min)(n, k);
-        dim_t k_rand = rand() % (std::min)(n, k);
-        b_ptr[n_rand + k_rand * lda] = evt_a;
+        dim_t n_rand = rand() % (std::min)(k, n);
+        dim_t k_rand = rand() % (std::min)(k, n);
+        b_ptr[n_rand + k_rand * ldb] = evt_b;
+    }
+
+    dim_t size_c = testinghelpers::matsize(storage, 'n', n, n, ldc) * sizeof(T);
+    testinghelpers::ProtectedBuffer c(size_c, false, is_mem_test );
+    c_ptr = (T*)c.greenzone_1;
+    if (beta != testinghelpers::ZERO<T>())
+    {
+        testinghelpers::datagenerators::randomgenerators<T>( -3, 5, storage, n, n, c_ptr, 'n', ldc);
+        if ( is_evt_test )
+        {
+            dim_t n_rand = rand() % n;
+            dim_t k_rand = rand() % n;
+            c_ptr[n_rand + k_rand * ldc] = evt_c;
+        }
+    }
+    else
+    {
+        // Matrix C should not be read, only set.
+        testinghelpers::set_matrix( storage, n, n, c_ptr, 'n', ldc, testinghelpers::aocl_extreme<T>() );
     }
 
     // Create a copy of c so that we can check reference results.
