@@ -166,8 +166,8 @@ public:
         str_name = str_name + "_" + testinghelpers::get_value_string(bex);
         str_name = str_name + "_C" + std::to_string(ci) + std::to_string(cj);
         str_name = str_name + "_" + testinghelpers::get_value_string(cex);
-        str_name = str_name + "_alpha" + testinghelpers::get_value_string(alpha);
-        str_name = str_name + "_beta" + testinghelpers::get_value_string(beta);
+        str_name += "_alpha_" + testinghelpers::get_value_string(alpha);
+        str_name += "_beta_" + testinghelpers::get_value_string(beta);
         gtint_t lda = testinghelpers::get_leading_dimension( sfm, tsa, m, k, lda_inc );
         gtint_t ldb = testinghelpers::get_leading_dimension( sfm, tsb, k, n, ldb_inc );
         gtint_t ldc = testinghelpers::get_leading_dimension( sfm, 'n', m, n, ldc_inc );

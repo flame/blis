@@ -106,10 +106,8 @@ public:
         str_name    = str_name + "_" + sfm;
         str_name    = str_name + "_" + uploa+conjx;
         str_name    = str_name + "_" + std::to_string(n);
-        std::string incx_str = ( incx > 0) ? std::to_string(incx) : "m" + std::to_string(std::abs(incx));
-        str_name    = str_name + "_" + incx_str;
-        std::string alpha_str = ( alpha > 0) ? std::to_string(int(alpha)) : ("m" + std::to_string(int(std::abs(alpha))));
-        str_name    = str_name + "_a" + alpha_str;
+        str_name += "_incx_" + testinghelpers::get_value_string(incx);
+        str_name += "_alpha_" + testinghelpers::get_value_string(alpha);
         str_name    = str_name + "_" + std::to_string(ld_inc);
         return str_name;
     }

@@ -103,10 +103,7 @@ public:
         + "_diag_" +  diaga
         + "_uplo_" + uploa
         + "_trana_" + transa
-        + "_alpha_" + (alpha.real > 0 ? std::to_string(int(alpha.real)) :
-                        std::string("m") + std::to_string(int(alpha.real*-1)))
-        + "pi" + (alpha.imag > 0 ? std::to_string(int(alpha.imag)) :
-                        std::string("m") + std::to_string(int(alpha.imag*-1)));
+        + "_alpha_" + testinghelpers::get_value_string(alpha);
         gtint_t mn;
         testinghelpers::set_dim_with_side( side, m, n, &mn );
         res += "_lda_" + std::to_string( lda_inc + mn);

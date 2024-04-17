@@ -104,9 +104,8 @@ public:
         std::string str_name = "zd";
         str_name += "_n" + std::to_string(n);
         str_name += (conjx == 'n') ? "_noconjalpha" : "_conjalpha";
-        std::string incx_str = ( incx > 0) ? std::to_string(incx) : "m" + std::to_string(std::abs(incx));
-        str_name += "_incx" + incx_str;
-        str_name += "_alpha" + testinghelpers::get_value_string(alpha);
+        str_name += "_incx_" + testinghelpers::get_value_string(incx);
+        str_name += "_alpha_" + testinghelpers::get_value_string(alpha);
         str_name += ( is_memory_test ) ? "_mem_test_enabled" : "_mem_test_disabled";
 
         return str_name;

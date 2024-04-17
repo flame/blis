@@ -133,12 +133,8 @@ public:
         str_name = str_name + "_" + conja + tsb;
         str_name = str_name + "_" + std::to_string(m);
         str_name = str_name + "_" + std::to_string(n);
-        std::string alpha_str = ( alpha.real > 0) ? std::to_string(int(alpha.real)) : ("m" + std::to_string(int(std::abs(alpha.real))));
-                    alpha_str = alpha_str + "pi" + (( alpha.imag > 0) ? std::to_string(int(alpha.imag)) : ("m" + std::to_string(int(std::abs(alpha.imag)))));
-        str_name = str_name + "_a" + alpha_str;
-        std::string beta_str = ( beta.real > 0) ? std::to_string(int(beta.real)) : ("m" + std::to_string(int(std::abs(beta.real))));
-                    beta_str = beta_str + "pi" + (( beta.imag > 0) ? std::to_string(int(beta.imag)) : ("m" + std::to_string(int(std::abs(beta.imag)))));
-        str_name = str_name + "_b" + beta_str;
+        str_name += "_alpha_" + testinghelpers::get_value_string(alpha);
+        str_name += "_beta_" + testinghelpers::get_value_string(beta);
         str_name = str_name + "_" + std::to_string(lda_inc);
         str_name = str_name + "_" + std::to_string(ldb_inc);
         str_name = str_name + "_" + std::to_string(ldc_inc);

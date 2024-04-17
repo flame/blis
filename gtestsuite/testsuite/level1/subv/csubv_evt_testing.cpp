@@ -107,10 +107,8 @@ public:
         std::string str_name = "bli_";
         str_name += "n_" + std::to_string(n);
         str_name += ( conjx == 'n' )? "_noconjx" : "_conjx";
-        std::string incx_str = ( incx > 0) ? std::to_string(incx) : "m" + std::to_string(std::abs(incx));
-        str_name += "_incx_" + incx_str;
-        std::string incy_str = ( incy > 0) ? std::to_string(incy) : "m" + std::to_string(std::abs(incy));
-        str_name += "_incy_" + incy_str;
+        str_name += "_incx_" + testinghelpers::get_value_string(incx);
+        str_name += "_incy_" + testinghelpers::get_value_string(incy);
         std::string xexval_str = testinghelpers::get_value_string(xexval);
         std::string yexval_str = testinghelpers::get_value_string(yexval);
         str_name = str_name + "_X_" + std::to_string(xi);

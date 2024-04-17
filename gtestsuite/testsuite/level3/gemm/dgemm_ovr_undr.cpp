@@ -159,10 +159,8 @@ class DGEMMOUTestPrint {
         str_name = str_name + "_k_" + std::to_string(k);
         str_name = str_name + "_A_" + std::to_string(ai) + "_" + std::to_string(aj);
         str_name = str_name + "_B_" + std::to_string(bi) + "_" + std::to_string(bj);
-        std::string alpha_str = ( alpha > 0) ? std::to_string(int(alpha)) : "m" + std::to_string(int(std::abs(alpha)));
-        str_name = str_name + "_alpha_" + alpha_str;
-        std::string beta_str = ( beta > 0) ? std::to_string(int(beta)) : "m" + std::to_string(int(std::abs(beta)));
-        str_name = str_name + "_beta_" + beta_str;
+        str_name += "_alpha_" + testinghelpers::get_value_string(alpha);
+        str_name += "_beta_" + testinghelpers::get_value_string(beta);
         str_name = str_name + "_lda_" + std::to_string(lda);
         str_name = str_name + "_ldb_" + std::to_string(ldb);
         str_name = str_name + "_ldc_" + std::to_string(ldc);

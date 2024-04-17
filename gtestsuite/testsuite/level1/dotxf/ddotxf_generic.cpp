@@ -135,14 +135,10 @@ public:
         str_name += ( conjx == 'n' )? "_conjx_n" : "_conjx_t";
         str_name += "_m" + std::to_string(m);
         str_name += "_b" + std::to_string(b);
-        std::string alpha_str = ( alpha >= 0) ? std::to_string(int(alpha)) : "m" + std::to_string(int(std::abs(alpha)));
-        str_name = str_name + "_alpha" + alpha_str;
-        std::string beta_str = ( beta >= 0) ? std::to_string(int(beta)) : "m" + std::to_string(int(std::abs(beta)));
-        str_name = str_name + "_beta" + beta_str;
-        std::string incx_str = ( incx >= 0) ? std::to_string(incx) : "m" + std::to_string(std::abs(incx));
-        str_name += "_incx" + incx_str;
-        std::string incy_str = ( incy >= 0) ? std::to_string(incy) : "m" + std::to_string(std::abs(incy));
-        str_name += "_incy" + incy_str;
+        str_name += "_alpha_" + testinghelpers::get_value_string(alpha);
+        str_name += "_beta_" + testinghelpers::get_value_string(beta);
+        str_name += "_incx_" + testinghelpers::get_value_string(incx);
+        str_name += "_incy_" + testinghelpers::get_value_string(incy);
         return str_name;
     }
 };

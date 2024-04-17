@@ -130,10 +130,8 @@ public:
         str_name = str_name + "_uploa_" + uplo;
         str_name = str_name + "_n_" + std::to_string(n);
         str_name = str_name + "_k_" + std::to_string(k);
-        std::string alpha_str = testinghelpers::get_value_string(alpha);
-        str_name = str_name + "_alpha_" + alpha_str;
-        std::string beta_str = testinghelpers::get_value_string(beta);
-        str_name = str_name + "_beta_" + beta_str;
+        str_name += "_alpha_" + testinghelpers::get_value_string(alpha);
+        str_name += "_beta_" + testinghelpers::get_value_string(beta);
         gtint_t lda = testinghelpers::get_leading_dimension( sfm, tsa, n, k, lda_inc );
         gtint_t ldb = testinghelpers::get_leading_dimension( sfm, tsb, k, n, ldb_inc );
         gtint_t ldc = testinghelpers::get_leading_dimension( sfm, 'n', n, n, ldc_inc );

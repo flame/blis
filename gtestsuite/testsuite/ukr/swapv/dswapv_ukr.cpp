@@ -87,10 +87,8 @@ public:
         std::string str_name = "blis";
 #endif
         str_name += "_n_" + std::to_string(n);
-        std::string incx_str = ( incx >= 0) ? std::to_string(incx) : "m" + std::to_string(std::abs(incx));
-        str_name += "_incx_" + incx_str;
-        std::string incy_str = ( incy >= 0) ? std::to_string(incy) : "m" + std::to_string(std::abs(incy));
-        str_name += "_incy_" + incy_str;
+        str_name += "_incx_" + testinghelpers::get_value_string(incx);
+        str_name += "_incy_" + testinghelpers::get_value_string(incy);
         str_name += ( is_memory_test ) ? "_mem_test_enabled" : "_mem_test_disabled";
         return str_name;
     }

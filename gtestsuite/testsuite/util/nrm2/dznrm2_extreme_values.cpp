@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2023, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2023 - 2024, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -85,8 +85,7 @@ public:
         std::string str_name = "bli_znormfv";
 #endif
         str_name    = str_name + "_" + std::to_string(n);
-        std::string incx_str = ( incx > 0) ? std::to_string(incx) : "m" + std::to_string(std::abs(incx));
-        str_name    = str_name + "_" + incx_str;
+        str_name += "_incx_" + testinghelpers::get_value_string(incx);
         str_name    = str_name + "_i" + std::to_string(i);
         std::string iexval_str = "_Re_" + testinghelpers::get_value_string(iexval.real) + "_Im_" + testinghelpers::get_value_string(iexval.imag);
         str_name    = str_name + iexval_str;

@@ -123,12 +123,8 @@ public:
         str_name = str_name + "_m_" + std::to_string(m);
         str_name = str_name + "_n_" + std::to_string(n);
         str_name = str_name + "_k_" + std::to_string(k);
-        std::string alpha_str = (alpha.real < 0) ? ("m" + std::to_string(int(std::abs(alpha.real)))) : std::to_string(int(alpha.real));
-        alpha_str = alpha_str + ((alpha.imag < 0) ? ("m" + std::to_string(int(std::abs(alpha.imag)))) : "i" + std::to_string(int(alpha.imag)));
-        std::string beta_str = (beta.real < 0) ? ("m" + std::to_string(int(std::abs(beta.real)))) : std::to_string(int(beta.real));
-        beta_str = beta_str + ((beta.imag < 0) ?  ("m" + std::to_string(int(std::abs(beta.imag)))) : "i" + std::to_string(int(beta.imag)));
-        str_name = str_name + "_alpha_" + alpha_str;
-        str_name = str_name + "_beta_" + beta_str;
+        str_name += "_alpha_" + testinghelpers::get_value_string(alpha);
+        str_name += "_beta_" + testinghelpers::get_value_string(beta);
         gtint_t lda = testinghelpers::get_leading_dimension( sfm, tsa, m, k, lda_inc );
         gtint_t ldb = testinghelpers::get_leading_dimension( sfm, tsb, k, n, ldb_inc );
         gtint_t ldc = testinghelpers::get_leading_dimension( sfm, 'n', m, n, ldc_inc );

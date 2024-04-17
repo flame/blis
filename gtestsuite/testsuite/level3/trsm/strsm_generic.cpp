@@ -124,8 +124,7 @@ public:
         str_name = str_name + "_diag_" + diaga;
         str_name = str_name + "_m_" + std::to_string(m);
         str_name = str_name + "_n_" + std::to_string(n);
-        std::string alpha_str = testinghelpers::get_value_string(alpha);
-        str_name = str_name + "_alpha_" + alpha_str;
+        str_name += "_alpha_" + testinghelpers::get_value_string(alpha);
         gtint_t mn;
         testinghelpers::set_dim_with_side( side, m, n, &mn );
         str_name = str_name + "_lda_" +

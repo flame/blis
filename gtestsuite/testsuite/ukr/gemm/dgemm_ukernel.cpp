@@ -85,8 +85,8 @@ public:
         str_name = str_name + "_m" + std::to_string(m);
         str_name = str_name + "_n" + std::to_string(n);
         str_name = str_name + "_k" + std::to_string(k);
-        str_name = str_name + "_alpha" + testinghelpers::get_value_string(alpha);
-        str_name = str_name + "_beta" + testinghelpers::get_value_string(beta);
+        str_name += "_alpha_" + testinghelpers::get_value_string(alpha);
+        str_name += "_beta_" + testinghelpers::get_value_string(beta);
         str_name = str_name + "_" + storageC;
         str_name += ( memory_test ) ? "_mem_test_enabled" : "_mem_test_disabled";
 
@@ -296,8 +296,8 @@ public:
 
         std::string str_name;
         str_name = str_name + "_k" + std::to_string(k);
-               str_name = str_name + "_alpha_" + testinghelpers::get_value_string(alpha);;
-        str_name = str_name + "_beta_" + testinghelpers::get_value_string(beta);;
+               str_name += "_alpha_" + testinghelpers::get_value_string(alpha);;
+        str_name += "_beta_" + testinghelpers::get_value_string(beta);;
         str_name = str_name + "_storage_" + storage;
         str_name += ( memory_test ) ? "_mem_test_enabled" : "_mem_test_disabled";
 
@@ -412,8 +412,8 @@ public:
 
         std::string str_name;
         str_name = str_name + "_" + std::to_string(k);
-        str_name = str_name + "_alpha" + testinghelpers::get_value_string(alpha);
-        str_name = str_name + "_beta" + testinghelpers::get_value_string(beta);
+        str_name += "_alpha_" + testinghelpers::get_value_string(alpha);
+        str_name += "_beta_" + testinghelpers::get_value_string(beta);
         str_name = str_name + "_m" + std::to_string(m);
         str_name = str_name + "_n" + std::to_string(n);
         str_name = str_name + "_" + storage;
@@ -664,8 +664,8 @@ public:
         str_name = str_name + "_m" + std::to_string(m);
         str_name = str_name + "_n" + std::to_string(n);
         str_name = str_name + "_k" + std::to_string(k);
-        str_name = str_name + "_alpha" + testinghelpers::get_value_string(alpha);
-        str_name = str_name + "_beta" + testinghelpers::get_value_string(beta);
+        str_name += "_alpha_" + testinghelpers::get_value_string(alpha);
+        str_name += "_beta_" + testinghelpers::get_value_string(beta);
         str_name = str_name + "_" + storage;
         str_name += ( memory_test ) ? "_mem_test_enabled" : "_mem_test_disabled";
 

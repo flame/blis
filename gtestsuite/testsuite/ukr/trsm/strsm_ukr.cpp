@@ -142,8 +142,7 @@ public:
         + "_diag_" + diaga
         + "_uplo_" + uploa
         + "_k" + std::to_string(k)
-        + "_alpha_" + (alpha > 0 ? std::to_string(int(alpha)) :
-                       std::string("m") + std::to_string(int(alpha*-1)));
+        + "_alpha_" + testinghelpers::get_value_string(alpha);
         ldc += (storage == 'r' || storage == 'R') ? n : m;
         res += "_ldc_" + std::to_string(ldc);
         res += is_memory_test ? "_mem_test_enabled" : "_mem_test_disabled";
@@ -171,8 +170,7 @@ public:
         + "_diag_" +  diaga
         + "_uplo_" + uploa
         + "_trana_" + transa
-        + "_alpha_" + (alpha > 0 ? std::to_string(int(alpha)) :
-                   std::string("m") + std::to_string(int(alpha*-1)));
+        + "_alpha_" + testinghelpers::get_value_string(alpha);
         gtint_t mn;
         testinghelpers::set_dim_with_side( side, m, n, &mn );
         res += "_lda_" + std::to_string( lda_inc + mn);

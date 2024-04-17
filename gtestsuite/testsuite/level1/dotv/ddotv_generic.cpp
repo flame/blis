@@ -100,10 +100,8 @@ public:
         str_name += "_n" + std::to_string(n);
         str_name += (conjx == 'n') ? "_noconjx" : "_conjx";
         str_name += (conjy == 'n') ? "_noconjy" : "_conjy";
-        std::string incx_str = ( incx > 0) ? std::to_string(incx) : "m" + std::to_string(std::abs(incx));
-        str_name += "_incx" + incx_str;
-        std::string incy_str = ( incy > 0) ? std::to_string(incy) : "m" + std::to_string(std::abs(incy));
-        str_name += "_incy" + incy_str;
+        str_name += "_incx_" + testinghelpers::get_value_string(incx);
+        str_name += "_incy_" + testinghelpers::get_value_string(incy);
         return str_name;
     }
 };

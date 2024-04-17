@@ -115,10 +115,8 @@ public:
         str_name    = str_name + "_transa_" + transa;
         str_name    = str_name + "_diaga_" + diaga;
         str_name    = str_name + "_n_" + std::to_string(n);
-        std::string alpha_str = testinghelpers::get_value_string(alpha);
-        str_name    = str_name + "_alpha_" + alpha_str;
-        std::string incx_str = ( incx >= 0) ? std::to_string(incx) : "m" + std::to_string(std::abs(incx));
-        str_name    = str_name + "_incx_" + incx_str;
+        str_name += "_alpha_" + testinghelpers::get_value_string(alpha);
+        str_name += "_incx_" + testinghelpers::get_value_string(incx);
         str_name    = str_name + "_lda_" + std::to_string(
                     testinghelpers::get_leading_dimension( sfm, transa, n, n, ld_inc )
                 );

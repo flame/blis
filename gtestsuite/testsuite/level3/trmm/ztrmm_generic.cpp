@@ -123,9 +123,7 @@ public:
         str_name = str_name + "_d" + diaga;
         str_name = str_name + "_" + std::to_string(m);
         str_name = str_name + "_" + std::to_string(n);
-        std::string alpha_str = ( alpha.real > 0) ? std::to_string(int(alpha.real)) : ("m" + std::to_string(int(std::abs(alpha.real))));
-                    alpha_str = alpha_str + "pi" + (( alpha.imag > 0) ? std::to_string(int(alpha.imag)) : ("m" + std::to_string(int(std::abs(alpha.imag)))));
-        str_name = str_name + "_a" + alpha_str;
+        str_name += "_alpha_" + testinghelpers::get_value_string(alpha);
         str_name = str_name + "_" + std::to_string(lda_inc);
         str_name = str_name + "_" + std::to_string(ldb_inc);
         return str_name;

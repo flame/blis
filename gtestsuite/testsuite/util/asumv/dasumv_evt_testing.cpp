@@ -98,8 +98,7 @@ public:
         std::string str_name = "bli_dasumv";
 #endif
         str_name    = str_name + "_n" + std::to_string(n);
-        std::string incx_str = ( incx >= 0) ? std::to_string(incx) : "m" + std::to_string(std::abs(incx));
-        str_name = str_name + "_incx" + incx_str;
+        str_name += "_incx_" + testinghelpers::get_value_string(incx);
         str_name = str_name + "_X_" + std::to_string(xi);
         str_name = str_name + "_" + testinghelpers::get_value_string(ix_exval);
         str_name = str_name + "_X_" + std::to_string(xj);

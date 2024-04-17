@@ -103,13 +103,10 @@ public:
 #endif
         str_name += "_n" + std::to_string(n);
         str_name += (conjx == 'n') ? "_noconjx" : "_conjx";
-        std::string incx_str = ( incx >= 0) ? std::to_string(incx) : "m" + std::to_string(std::abs(incx));
-        str_name += "_incx" + incx_str;
+        str_name += "_incx_" + testinghelpers::get_value_string(incx);
         str_name = str_name + "_X_" + std::to_string(xi);
         str_name = str_name + "_" + testinghelpers::get_value_string(x_exval);
-        std::string alpha_str = testinghelpers::get_value_string(alpha);// ( alpha >= 0) ? std::to_string(int(alpha)) : "m" + std::to_string(int(std::abs(alpha)));
-        str_name = str_name + "_a" + alpha_str;
-
+        str_name += "_alpha_" + testinghelpers::get_value_string(alpha);
         return str_name;
     }
 };

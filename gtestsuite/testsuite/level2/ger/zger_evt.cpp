@@ -152,10 +152,8 @@ public:
         str_name    = str_name + "_" + conjx+conjy;
         str_name    = str_name + "_" + std::to_string(m);
         str_name    = str_name + "_" + std::to_string(n);
-        std::string incx_str = ( incx >= 0) ? std::to_string(incx) : "m" + std::to_string(std::abs(incx));
-        std::string incy_str = ( incy >= 0) ? std::to_string(incy) : "m" + std::to_string(std::abs(incy));
-        str_name    = str_name + "_" + incx_str;
-        str_name    = str_name + "_" + incy_str;
+        str_name += "_incx_" + testinghelpers::get_value_string(incx);
+        str_name += "_incy_" + testinghelpers::get_value_string(incy);
         str_name    = str_name + "_alpha_" + testinghelpers::get_value_string(alpha);
         str_name    = str_name + "_lda" + std::to_string(lda);
         str_name    = str_name + "_ai" + std::to_string(ai);

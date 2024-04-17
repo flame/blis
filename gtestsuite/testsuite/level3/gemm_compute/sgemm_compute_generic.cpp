@@ -136,10 +136,8 @@ public:
         str_name = str_name + "_" + std::to_string(m);
         str_name = str_name + "_" + std::to_string(n);
         str_name = str_name + "_" + std::to_string(k);
-        std::string alpha_str = ( alpha > 0) ? std::to_string(int(alpha)) : "m" + std::to_string(int(std::abs(alpha)));
-        str_name = str_name + "_a" + alpha_str;
-        std::string beta_str = ( beta > 0) ? std::to_string(int(beta)) : "m" + std::to_string(int(std::abs(beta)));
-        str_name = str_name + "_b" + beta_str;
+        str_name += "_alpha_" + testinghelpers::get_value_string(alpha);
+        str_name += "_beta_" + testinghelpers::get_value_string(beta);
         str_name = str_name + "_" + std::to_string(lda_inc);
         str_name = str_name + "_" + std::to_string(ldb_inc);
         str_name = str_name + "_" + std::to_string(ldc_inc);

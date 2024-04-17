@@ -121,14 +121,10 @@ public:
         str_name    = str_name + "_" + sfm;
         str_name    = str_name + "_" + uploa+conja+conjx;
         str_name    = str_name + "_" + std::to_string(n);
-        std::string alpha_str = ( alpha > 0) ? std::to_string(int(alpha)) : ("m" + std::to_string(int(std::abs(alpha))));
-        std::string beta_str = ( beta > 0) ? std::to_string(int(beta)) : ("m" + std::to_string(int(std::abs(beta))));
-        str_name    = str_name + "_a" + alpha_str;
-        str_name    = str_name + "_a" + beta_str;
-        std::string incx_str = ( incx > 0) ? std::to_string(incx) : "m" + std::to_string(std::abs(incx));
-        std::string incy_str = ( incy > 0) ? std::to_string(incy) : "m" + std::to_string(std::abs(incy));
-        str_name    = str_name + "_" + incx_str;
-        str_name    = str_name + "_" + incy_str;
+        str_name += "_alpha_" + testinghelpers::get_value_string(alpha);
+        str_name += "_beta_" + testinghelpers::get_value_string(beta);
+        str_name += "_incx_" + testinghelpers::get_value_string(incx);
+        str_name += "_incy_" + testinghelpers::get_value_string(incy);
         str_name    = str_name + "_" + std::to_string(ld_inc);
         return str_name;
     }

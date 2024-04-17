@@ -83,8 +83,7 @@ public:
         bool is_memory_test = std::get<3>(str.param);
 
         std::string str_name = "n" + std::to_string(n);
-        std::string incx_str = ( incx >= 0) ? std::to_string(incx) : "m" + std::to_string(std::abs(incx));
-        str_name += "_incx" + incx_str;
+        str_name += "_incx_" + testinghelpers::get_value_string(incx);
         str_name += ( is_memory_test ) ? "_mem_test_enabled" : "_mem_test_disabled";
         return str_name;
     }

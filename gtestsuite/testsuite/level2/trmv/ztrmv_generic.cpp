@@ -111,11 +111,8 @@ public:
         str_name    = str_name + "_" + uploa+transa;
         str_name    = str_name + "_d" + diaga;
         str_name    = str_name + "_" + std::to_string(n);
-        std::string alpha_str = ( alpha.real > 0) ? std::to_string(int(alpha.real)) : ("m" + std::to_string(int(std::abs(alpha.real))));
-                    alpha_str = alpha_str + "pi" + (( alpha.imag > 0) ? std::to_string(int(alpha.imag)) : ("m" + std::to_string(int(std::abs(alpha.imag)))));
-        str_name    = str_name + "_a" + alpha_str;
-        std::string incx_str = ( incx > 0) ? std::to_string(incx) : "m" + std::to_string(std::abs(incx));
-        str_name    = str_name + "_" + incx_str;
+        str_name += "_alpha_" + testinghelpers::get_value_string(alpha);
+        str_name += "_incx_" + testinghelpers::get_value_string(incx);
         str_name    = str_name + "_" + std::to_string(ld_inc);
         return str_name;
     }

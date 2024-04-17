@@ -119,18 +119,15 @@ public:
 #endif
         str_name += "n" + std::to_string(n);
         str_name += ( conjx == 'n' )? "_noconjx" : "_conjx";
-        std::string incx_str = ( incx > 0) ? std::to_string(incx) : "m" + std::to_string(std::abs(incx));
-        str_name += "_incx" + incx_str;
-        std::string incy_str = ( incy > 0) ? std::to_string(incy) : "m" + std::to_string(std::abs(incy));
-        str_name += "_incy" + incy_str;
+        str_name += "_incx_" + testinghelpers::get_value_string(incx);
+        str_name += "_incy_" + testinghelpers::get_value_string(incy);
         std::string xexval_str = testinghelpers::get_value_string(xexval);
         std::string yexval_str = testinghelpers::get_value_string(yexval);
         str_name = str_name + "_X_" + std::to_string(xi);
         str_name = str_name + "_" + xexval_str;
         str_name = str_name + "_Y_" + std::to_string(yj);
         str_name = str_name + "_" + yexval_str;
-        std::string alpha_str = testinghelpers::get_value_string(alpha);
-        str_name = str_name + "_alpha" + alpha_str;
+        str_name += "_alpha_" + testinghelpers::get_value_string(alpha);
         return str_name;
     }
 };
@@ -158,12 +155,9 @@ public:
 #endif
         str_name += "n" + std::to_string(n);
         str_name += ( conjx == 'n' )? "_noconjx" : "_conjx";
-        std::string incx_str = ( incx > 0) ? std::to_string(incx) : "m" + std::to_string(std::abs(incx));
-        str_name += "_incx" + incx_str;
-        std::string incy_str = ( incy > 0) ? std::to_string(incy) : "m" + std::to_string(std::abs(incy));
-        str_name += "_incy" + incy_str;
-        std::string alpha_str = testinghelpers::get_value_string(alpha);
-        str_name = str_name + "_alpha" + alpha_str;
+        str_name += "_incx_" + testinghelpers::get_value_string(incx);
+        str_name += "_incy_" + testinghelpers::get_value_string(incy);
+        str_name += "_alpha_" + testinghelpers::get_value_string(alpha);
         return str_name;
     }
 };

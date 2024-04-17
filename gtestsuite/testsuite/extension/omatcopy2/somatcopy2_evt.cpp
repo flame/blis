@@ -124,7 +124,7 @@ public:
         str_name += "_" + std::string(&trans, 1);
         str_name += "_" + std::to_string(m);
         str_name += "_" + std::to_string(n);
-        str_name = str_name + "_alpha_exval" + testinghelpers::get_value_string(alpha);
+        str_name += "_alpha_" + testinghelpers::get_value_string(alpha);
         str_name = str_name + "_A_exval" + testinghelpers::get_value_string(exval);
         gtint_t lda = testinghelpers::get_leading_dimension( storage, 'n', m, n, lda_inc );
         gtint_t ldb = testinghelpers::get_leading_dimension( storage, trans, m, n, ldb_inc );

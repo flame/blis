@@ -146,10 +146,10 @@ public:
         str_name = str_name + "_conjx_" + conjx;
         str_name = str_name + "_m_" + std::to_string(m);
         str_name = str_name + "_n_" + std::to_string(n);
-        str_name = str_name + "_incx_" + testinghelpers::get_value_string(incx);;
-        str_name = str_name + "_incy_" + testinghelpers::get_value_string(incy);;
-        str_name = str_name + "_alpha_" + testinghelpers::get_value_string(alpha);
-        str_name = str_name + "_beta_" + testinghelpers::get_value_string(beta);
+        str_name += "_incx_" + testinghelpers::get_value_string(incx);
+        str_name += "_incy_" + testinghelpers::get_value_string(incy);
+        str_name += "_alpha_" + testinghelpers::get_value_string(alpha);
+        str_name += "_beta_" + testinghelpers::get_value_string(beta);
         str_name = str_name + "_lda_" + std::to_string(testinghelpers::get_leading_dimension( sfm, 'n', m, n, ld_inc ));
         str_name = str_name + "_a_exval_" + testinghelpers::get_value_string(a_exval);
         str_name = str_name + "_x_exval_" + testinghelpers::get_value_string(x_exval);

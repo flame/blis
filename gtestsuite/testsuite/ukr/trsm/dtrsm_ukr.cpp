@@ -139,8 +139,7 @@ public:
         + "_diag_" +  diaga
         + "_uplo_" + uploa
         + "_k_" + std::to_string(k)
-        + "_alpha_" + (alpha > 0 ? std::to_string(int(alpha)) :
-                        std::string("m") + std::to_string(int(alpha*-1)))
+        + "_alpha_" + testinghelpers::get_value_string(alpha)
         + "_ldc_" + std::to_string(ldc);
         res += is_memory_test ? "_mem_test_enabled" : "_mem_test_disabled";
         return res;
@@ -167,8 +166,7 @@ public:
         + "_diag_" +  diaga
         + "_uplo_" + uploa
         + "_trana_" + transa
-        + "_alpha_" + (alpha > 0 ? std::to_string(int(alpha)) :
-                        std::string("m") + std::to_string(int(alpha*-1)))
+        + "_alpha_" + testinghelpers::get_value_string(alpha)
         + "_lda_" + std::to_string(lda)
         + "_ldb_" + std::to_string(ldb)
         + "_m_" + std::to_string(m)

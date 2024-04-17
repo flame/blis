@@ -75,8 +75,7 @@ public:
         std::string str_name = "bli_";
 #endif
 	str_name += "_" + std::to_string(n);
-	std::string incx_str = ( incx >= 0) ? std::to_string(incx) : "m" + std::to_string(std::abs(incx));
-	str_name += "_" + incx_str;
+        str_name += "_incx_" + testinghelpers::get_value_string(incx);
         return str_name;
     }
 };
