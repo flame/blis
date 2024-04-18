@@ -39,30 +39,7 @@
 
 #include "lpgemm_kernel_macros_f32.h"
 
-void lpgemv_m_one_kernel_f32_ker_ft 
-(
-	const dim_t n0,
-	const dim_t k,
-	const float *a,
-	const dim_t rs_a,
-	const dim_t cs_a,
-	const AOCL_MEMORY_TAG mtag_a,
-	const float *b,
-	const dim_t rs_b,
-	const dim_t cs_b,
-	const AOCL_MEMORY_TAG mtag_b,
-	float *c,
-	const dim_t rs_c,
-	const dim_t cs_c,
-	const float alpha,
-	const float beta,
-	const dim_t NR,
-	const dim_t KC,
-	const dim_t n_sub_updated,
-	const dim_t jc_cur_loop_rem,
-	lpgemm_post_op *post_op_list,
-	lpgemm_post_op_attr *post_op_attr
-)
+LPGEMV_M_EQ1_KERN( float, float, float, f32f32f32of32 )
 {
 	static void *post_ops_labels[] =
 		{
@@ -294,7 +271,7 @@ void lpgemv_m_one_kernel_f32_ker_ft
 
 		// Post Ops
 		post_ops_attr.is_last_k = TRUE;
-		lpgemm_post_op *post_ops_list_temp = post_op_list;
+		lpgemm_post_op *post_ops_list_temp = post_op;
 		POST_OP_LABEL_LASTK_SAFE_JUMP
 
 	POST_OPS_BIAS_6x64F:
@@ -302,8 +279,8 @@ void lpgemv_m_one_kernel_f32_ker_ft
 		if ((*(char *)post_ops_list_temp->op_args2 == 'r') ||
 			(*(char *)post_ops_list_temp->op_args2 == 'R'))
 		{
-			float* bias_ptr = (float *)post_ops_list_temp->op_args1 + 
-										post_ops_attr.post_op_c_j;
+			float* bias_ptr = (float *)post_ops_list_temp->op_args1 +
+			                           post_ops_attr.post_op_c_j;
 			zmm9 = _mm512_maskz_loadu_ps(k1, bias_ptr + (0 * 16));
 
 			zmm10 =	_mm512_maskz_loadu_ps(k2, bias_ptr + (1 * 16));

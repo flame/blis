@@ -208,4 +208,11 @@
 	F32_F32_MATRIX_ADD_LOAD(_cvtu32_mask16( 0xFFFF ),scr3,m_ind,3); \
 	F32_MATRIX_ADD_4COL(scr0,scr1,scr2,scr3,m_ind); \
 
+//Zero-out the given ZMM accumulator registers
+#define ZERO_ACC_ZMM_4_REG(zmm0,zmm1,zmm2,zmm3) \
+	zmm0 = _mm512_setzero_ps(); \
+	zmm1 = _mm512_setzero_ps(); \
+	zmm2 = _mm512_setzero_ps(); \
+	zmm3 = _mm512_setzero_ps();
+
 #endif // LPGEMM_F32_KERN_MACROS_H

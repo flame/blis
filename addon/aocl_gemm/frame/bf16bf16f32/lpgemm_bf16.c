@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2022 - 2023, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2022 - 2024, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -64,9 +64,268 @@ typedef void (*lpgemm_rowvar_bf16)
        lpgemm_post_op_attr
      );
 
+#ifdef BLIS_KERNELS_ZEN4
+LPGEMV(bfloat16, bfloat16, float, bf16bf16f32of32)
+{
+	dim_t NC = lcntx->blksz.NC;
+	dim_t KC = lcntx->blksz.KC;
+	dim_t MC = lcntx->blksz.MC;
+	dim_t NR = lcntx->blksz.NR;
+
+	// Strides are updated based on matrix packing/reordering.
+	bfloat16* a_use = ( bfloat16* )a;
+	dim_t rs_a_use = rs_a;
+	dim_t cs_a_use = cs_a;
+
+	float *c_use = NULL;
+	bfloat16* pack_a_buffer_bf16;
+
+	lpgemm_post_op_attr post_ops_attr;
+	post_ops_attr.c_stor_type = c_downscale;
+	if (c_downscale < F32) post_ops_attr.buf_downscale = c;
+	else  post_ops_attr.buf_downscale = NULL;
+
+	siz_t mem_a_size_req = 0;
+	siz_t mem_b_size_req = 0;
+
+	mem_t mem_a = BLIS_MEM_INITIALIZER;
+	mem_t mem_b = BLIS_MEM_INITIALIZER;
+
+	bfloat16* pack_b_buffer_bf16;
+
+	// Generate thrinfo objects for jc and ic loops from lpgemm_thrinfo_t.
+	thrinfo_t thread_jc;
+	thrinfo_t thread_ic;
+
+	lpgemm_gen_thrinfo( thread, &thread_jc, &thread_ic );
+
+	if( n == 1 )
+	{
+		// Increased MR from 6 to 16 to make use of 32 ZMM registers
+		dim_t MR = 16;
+
+		// Compute the IC loop thread range for the current thread.
+		dim_t ic_start, ic_end;
+		bli_thread_range_sub(&thread_ic, m, MR, FALSE, &ic_start, &ic_end);
+
+		for (dim_t ic = ic_start; ic < ic_end; ic += MC)
+		{
+			dim_t mc0 = bli_min((ic_end - ic), MC);
+			const bfloat16 *a_use = a + ic * rs_a;
+			c_use = c + ic * rs_c;
+			post_ops_attr.post_op_c_i = ic;
+			post_ops_attr.post_op_c_j = 0;
+			post_ops_attr.rs_c_downscale = rs_c;
+
+			if( mtag_a == PACK )
+			{
+				mem_a_size_req = sizeof( bfloat16 ) * mc0 * k;
+
+				lpgemm_alloc_mem_panel
+				(
+				  mem_a_size_req, BLIS_BUFFER_FOR_GEN_USE,
+				  &mem_a, rntm
+				);
+
+				pack_a_buffer_bf16 = ( bfloat16* ) bli_mem_buffer( &mem_a );
+
+				( ( pack_bf16 ) lcntx->packa_fun_ptr )
+				(
+				  pack_a_buffer_bf16,
+				  ( a + ( rs_a * ic )), rs_a, cs_a,
+				  mc0, k,
+				  &rs_a_use, &cs_a_use
+				);
+				a_use = pack_a_buffer_bf16;
+			}
+			// Call lpgemv_n_one kernel
+			lpgemv_n_one_bf16bf16f32of32
+			(
+			  mc0, k,
+			  a_use, rs_a_use, cs_a_use, mtag_a,
+			  b, rs_b, cs_b, mtag_b,
+			  c_use, rs_c, cs_c,
+			  alpha, beta,
+			  MR, KC,
+			  post_op_list,
+			  &post_ops_attr
+			);
+		}
+
+		// Release pack buffers
+		if( mtag_a == PACK && bli_mem_is_alloc( &mem_a ) )
+		{
+			bli_pba_release(rntm, &mem_a);
+		}
+	}
+	else
+	{
+
+		// Compute the JC loop thread range for the current thread.
+		dim_t jc_start, jc_end;
+		bli_thread_range_sub(&thread_jc, n, NR, FALSE, &jc_start, &jc_end);
+
+		dim_t packb_min_NR = 16;
+
+		dim_t rs_b_use = 0, cs_b_use = 0;
+
+		dim_t k_updated = k;
+		k_updated += ( k_updated & 0x1 );
+
+		dim_t kc0 = bli_min( k, KC );
+
+		kc0 +=  ( kc0 & 0x1 );
+
+		inc_t rs_a_use = rs_a;
+		inc_t cs_a_use = 2;
+
+		if ( mtag_a == PACK )
+		{
+			mem_a_size_req = sizeof( bfloat16 ) * k;
+
+			lpgemm_alloc_mem_panel
+			(
+			  mem_a_size_req, BLIS_BUFFER_FOR_GEN_USE,
+			  &mem_a, rntm
+			);
+
+			pack_a_buffer_bf16 =
+			    ( bfloat16* ) bli_mem_buffer( &mem_a );
+
+			( ( pack_bf16 )lcntx->packa_fun_ptr )
+			(
+			  pack_a_buffer_bf16,
+			  a, rs_a, cs_a,
+			  1, k,
+			  &rs_a_use, &cs_a_use
+			);
+
+			a_use = pack_a_buffer_bf16;
+		}
+
+		for (dim_t jc = jc_start; jc < jc_end; jc += NC)
+		{
+			dim_t nc0 = bli_min((jc_end - jc), NC);
+			c_use = c + jc * cs_c;
+
+			dim_t jc_cur_loop = jc;
+			dim_t jc_cur_loop_rem = 0;
+			dim_t n_sub_updated = 0;
+			bfloat16 *b_use = NULL;
+
+			if (mtag_b == REORDERED)
+			{
+
+				get_B_panel_reordered_start_offset_width(
+				    jc, n, NC, packb_min_NR,
+				    &jc_cur_loop, &jc_cur_loop_rem,
+				    &nc0, &n_sub_updated);
+
+				b_use = (bfloat16*) ( b + (jc_cur_loop * k_updated ) );
+
+				lpgemm_get_packb_strides( lcntx, &rs_b_use, &cs_b_use );
+			}
+			else if( mtag_b == PACK )
+			{
+
+				dim_t nc0_updated = make_multiple_of_n( nc0, packb_min_NR );
+				mem_b_size_req = sizeof( bfloat16 ) * nc0_updated * k_updated;
+
+				n_sub_updated = nc0_updated;
+
+				lpgemm_alloc_mem_panel
+				(
+				  mem_b_size_req, BLIS_BUFFER_FOR_B_PANEL,
+				  &mem_b, rntm
+				);
+
+				pack_b_buffer_bf16 =
+				        ( bfloat16* ) bli_mem_buffer( &mem_b );
+
+				for ( dim_t pc = 0; pc < k; pc += KC )
+				{
+					dim_t kc0 = bli_min( ( k - pc ), KC );
+
+					dim_t kc0_updated = kc0;
+					kc0_updated += ( kc0_updated & 0x1 );
+
+					( ( pack_bf16 )lcntx->packb_fun_ptr )
+					(
+					  ( ( bfloat16* )pack_b_buffer_bf16 ) +
+					  ( n_sub_updated * pc ),
+					  ( ( ( bfloat16* )b ) +
+					  ( rs_b * pc ) + ( jc * cs_b ) ),
+					  rs_b, cs_b, nc0, kc0, &rs_b_use, &cs_b_use
+					);
+				}
+
+				b_use = pack_b_buffer_bf16;
+			}
+
+			post_ops_attr.post_op_c_i = 0;
+			post_ops_attr.post_op_c_j = jc;
+			post_ops_attr.rs_c_downscale = rs_c;
+
+			lpgemv_m_one_bf16bf16f32of32
+			(
+			  nc0, k,
+			  a_use, rs_a_use, cs_a_use, mtag_a,
+			  b_use, rs_b_use, cs_b_use, mtag_b,
+			  c_use, rs_c, cs_c,
+			  alpha, beta,
+			  NR, KC,
+			  n_sub_updated,
+			  jc_cur_loop_rem,
+			  post_op_list,
+			  &post_ops_attr
+			);
+
+			if (mtag_b == REORDERED)
+			{
+				adjust_B_panel_reordered_jc(&jc, jc_cur_loop);
+			}
+		} // jc loop
+
+		// Release pack buffers.
+		if ( mtag_b == PACK && bli_mem_is_alloc( &mem_b ) )
+		{
+			bli_pba_release( rntm, &mem_b );
+		}
+		if( mtag_a == PACK && bli_mem_is_alloc( &mem_a ) )
+		{
+			bli_pba_release(rntm, &mem_a);
+		}
+	}
+}
+#endif
+
+
 // B should always be packed.
 LPGEMM_5LOOP(bfloat16,bfloat16,float,bf16bf16f32of32)
 {
+
+#ifdef BLIS_KERNELS_ZEN4
+#ifndef LPGEMM_BF16_JIT
+	// Handle using LPGEMV when m or/and n equal to 1
+	// The avx512 check will be removed when avx2 kernels added in future
+	if ( (n == 1) || ( m == 1 ) )
+	{
+		lpgemv_rowvar_bf16bf16f32of32( m, n, k,
+		                               a, rs_a, cs_a, mtag_a,
+		                               b, rs_b, cs_b, mtag_b,
+		                               c, rs_c, cs_c,
+		                               alpha,
+		                               beta,
+		                               rntm,
+		                               thread,
+		                               lcntx,
+		                               post_op_list,
+		                               c_downscale);
+		return;
+	}
+#endif
+#endif
+
 	dim_t NC = lcntx->blksz.NC;
 	dim_t KC = lcntx->blksz.KC;
 	dim_t MC = lcntx->blksz.MC;

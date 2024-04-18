@@ -130,7 +130,7 @@ LPGEMV(float, float, float, f32f32f32of32)
       post_ops_attr.post_op_c_i = ic;
 
       // Call lpgemv_n_one kernel
-      lpgemv_n_one_kernel_f32_ker_ft
+      lpgemv_n_one_f32f32f32of32
       (
           mc0, k,
           a_use, rs_a, cs_a, mtag_a,
@@ -176,9 +176,9 @@ LPGEMV(float, float, float, f32f32f32of32)
       post_ops_attr.post_op_c_j = jc;
 
       // Call kernel
-      lpgemv_m_one_kernel_f32_ker_ft
+      lpgemv_m_one_f32f32f32of32
       (
-          nc0, k, 
+          nc0, k,
           a, rs_a, cs_a, mtag_a,
           b_use, rs_b, cs_b, mtag_b,
           c_use, rs_c, cs_c,

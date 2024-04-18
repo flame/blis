@@ -373,52 +373,60 @@ LPGEMM_MN_LT_NR0_FRINGE_KERN(int8_t,int8_t,int16_t,s8s8s16o16_4xlt16);
 LPGEMM_MN_LT_NR0_FRINGE_KERN(int8_t,int8_t,int16_t,s8s8s16o16_2xlt16);
 LPGEMM_MN_LT_NR0_FRINGE_KERN(int8_t,int8_t,int16_t,s8s8s16o16_1xlt16);
 
-void lpgemv_m_one_kernel_f32_ker_ft
-(
-	const dim_t           n0,
-	const dim_t           k,
-	const float           *a,
-	const dim_t           rs_a,
-	const dim_t           cs_a,
-	const AOCL_MEMORY_TAG mtag_a,
-	const float           *b,
-	const dim_t           rs_b,
-	const dim_t           cs_b,
-	const AOCL_MEMORY_TAG mtag_b,
-	float                 *c,
-	const dim_t           rs_c,
-	const dim_t           cs_c,
-	const float           alpha,
-	const float           beta,
-	const dim_t           NC,
-	const dim_t           KC,
-	const dim_t           n_sub_updated,
-	const dim_t           jc_cur_loop_rem,
-	lpgemm_post_op        *post_op,
-	lpgemm_post_op_attr   *post_op_attr
-);
+#define LPGEMV_M_EQ1_KERN(A_type,B_type,C_type,LP_SFX) \
+void lpgemv_m_one_ ## LP_SFX \
+( \
+	const dim_t           n0, \
+	const dim_t           k, \
+	const A_type          *a, \
+	const dim_t           rs_a, \
+	const dim_t           cs_a, \
+	const AOCL_MEMORY_TAG mtag_a, \
+	const B_type          *b, \
+	dim_t                 rs_b, \
+	const dim_t           cs_b, \
+	const AOCL_MEMORY_TAG mtag_b, \
+	C_type                *c, \
+	const dim_t           rs_c, \
+	const dim_t           cs_c, \
+	const C_type          alpha, \
+	const C_type          beta, \
+	dim_t                 NR, \
+	const dim_t           KC, \
+	const dim_t           n_sub_updated, \
+	const dim_t           jc_cur_loop_rem, \
+	lpgemm_post_op        *post_op, \
+	lpgemm_post_op_attr   *post_op_attr \
+  ) \
 
-void lpgemv_n_one_kernel_f32_ker_ft
-(
-	const dim_t           m0,
-	const dim_t           k,
-	const float           *a,
-	const dim_t           rs_a,
-	const dim_t           cs_a,
-	const AOCL_MEMORY_TAG mtag_a,
-	const float           *b,
-	const dim_t           rs_b,
-	const dim_t           cs_b,
-	const AOCL_MEMORY_TAG mtag_b,
-	float                 *c,
-	const dim_t           rs_c,
-	const dim_t           cs_c,
-	const float           alpha,
-	const float           beta,
-	const dim_t           MR,
-	const dim_t           KC,
-	lpgemm_post_op        *post_op,
-	lpgemm_post_op_attr   *post_op_attr
-);
+LPGEMV_M_EQ1_KERN(float, float, float,f32f32f32of32);
+LPGEMV_M_EQ1_KERN(bfloat16,bfloat16,float,bf16bf16f32of32);
+
+#define LPGEMV_N_EQ1_KERN(A_type,B_type,C_type,LP_SFX) \
+void lpgemv_n_one_ ## LP_SFX \
+( \
+	const dim_t           m0, \
+	const dim_t           k, \
+	const A_type          *a, \
+	const dim_t           rs_a, \
+	const dim_t           cs_a, \
+	const AOCL_MEMORY_TAG mtag_a, \
+	const B_type          *b, \
+	const dim_t           rs_b, \
+	const dim_t           cs_b, \
+	const AOCL_MEMORY_TAG mtag_b, \
+	C_type                *c, \
+	const dim_t           rs_c, \
+	const dim_t           cs_c, \
+	const C_type          alpha, \
+	const C_type          beta, \
+	const dim_t           MR, \
+	const dim_t           KC, \
+	lpgemm_post_op        *post_op, \
+	lpgemm_post_op_attr   *post_op_attr \
+) \
+
+LPGEMV_N_EQ1_KERN(float, float, float,f32f32f32of32);
+LPGEMV_N_EQ1_KERN(bfloat16, bfloat16, float,bf16bf16f32of32);
 
 #endif //BLIS_LPGEMM_KERN_H

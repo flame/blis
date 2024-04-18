@@ -75,28 +75,7 @@
 //  to produce C output of MRX1. The vectorization is done in k loop and
 //  the horizontal reduction done to produce one output from each
 //  accumulator register
-void lpgemv_n_one_kernel_f32_ker_ft
-(
-    const dim_t           m0,
-    const dim_t           k,
-    const float           *a,
-    const dim_t           rs_a,
-    const dim_t           cs_a,
-    const AOCL_MEMORY_TAG mtag_a,
-    const float           *b,
-    const dim_t           rs_b,
-    const dim_t           cs_b,
-    const AOCL_MEMORY_TAG mtag_b,
-    float                 *c,
-    const dim_t           rs_c,
-    const dim_t           cs_c,
-    const float           alpha,
-    const float           beta,
-    const dim_t           MR,
-    const dim_t           KC,
-    lpgemm_post_op        *post_op_list,
-    lpgemm_post_op_attr   *post_op_attr
-)
+LPGEMV_N_EQ1_KERN( float, float, float, f32f32f32of32 )
 {
   static void *post_ops_labels[] =
       {
@@ -286,7 +265,7 @@ void lpgemv_n_one_kernel_f32_ker_ft
         //Horizontal add 8 zmm registers and get output into 2 xmm registers
         LPGEMV_ZMM2XMM(zmm8, zmm9, zmm10, zmm11, ymm0, ymm1, ymm2, ymm3, xmm0)
         LPGEMV_ZMM2XMM(zmm12, zmm13, zmm14, zmm15, ymm4, ymm1, ymm2, ymm3, xmm1)
-        
+
         //insert xmm outputs into final output zmm8 reg
         zmm8 = _mm512_insertf32x4(zmm8, xmm0, 0);
         zmm8 = _mm512_insertf32x4(zmm8, xmm1, 1);
@@ -315,14 +294,14 @@ void lpgemv_n_one_kernel_f32_ker_ft
           LPGEMV_N_KERNEL_4_MASKLOADS(zmm0, zmm1, zmm2, zmm3, zmm7, k1, a_use, rs_a)
           LPGEMV_N_KERNEL_4_FMA(zmm16, zmm17, zmm18, zmm19, zmm6, zmm0, zmm1, zmm2, zmm3)
         }
-        
+
         //update pointers
         mr0_use -= 4;
         a_use = a_use_fringe + 4 * rs_a;
         a_use_fringe = a_use;
         b_use = b;
 
-        //Horizontal add 4 zmm reg and get the output into one xmm        
+        //Horizontal add 4 zmm reg and get the output into one xmm
         LPGEMV_ZMM2XMM(zmm16, zmm17, zmm18, zmm19, ymm5, ymm1, ymm2, ymm3, xmm2)
 
         //insert xmm outputs into final output zmm8 reg based on regidx
@@ -394,7 +373,7 @@ void lpgemv_n_one_kernel_f32_ker_ft
         else zmm8 = _mm512_insertf32x4(zmm8, xmm3, 3);
       }
     }
-   
+
     //Scale accumulated output with alpha
     zmm0 = _mm512_set1_ps(alpha);
     zmm8 = _mm512_mul_ps(zmm0, zmm8);
@@ -423,7 +402,7 @@ void lpgemv_n_one_kernel_f32_ker_ft
 
     // Post Ops
     post_ops_attr.is_last_k = TRUE;
-    lpgemm_post_op *post_ops_list_temp = post_op_list;
+    lpgemm_post_op *post_ops_list_temp = post_op;
     POST_OP_LABEL_LASTK_SAFE_JUMP
 
   POST_OPS_BIAS_6x64F:
