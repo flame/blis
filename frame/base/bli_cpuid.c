@@ -190,12 +190,21 @@ arch_t bli_cpuid_query_id( void )
 #ifdef BLIS_CONFIG_ZEN5
 		if ( bli_cpuid_is_zen5( family, model, features ) )
 			return BLIS_ARCH_ZEN5;
+#endif
+#ifdef BLIS_CONFIG_ZEN4
+		if ( bli_cpuid_is_zen4( family, model, features ) )
+			return BLIS_ARCH_ZEN4;
+#endif
+#ifdef BLIS_CONFIG_ZEN5
 		// Fallback test for future AMD processors
+		// Assume zen5 (if available) is preferable to zen4.
 		if ( is_avx512_supported )
 			return BLIS_ARCH_ZEN5;
 #endif
 #ifdef BLIS_CONFIG_ZEN4
-		if ( bli_cpuid_is_zen4( family, model, features ) )
+		// Fallback test for future AMD processors
+		// Use zen4 if zen5 is not available.
+		if ( is_avx512_supported )
 			return BLIS_ARCH_ZEN4;
 #endif
 #ifdef BLIS_CONFIG_ZEN3
