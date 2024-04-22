@@ -738,6 +738,19 @@ void bli_zgemv_unf_var1
     {
       case BLIS_ARCH_ZEN5:
       case BLIS_ARCH_ZEN4:
+#if defined(BLIS_KERNELS_ZEN4)
+        /*
+          Assign the AVX2 based kernel function pointers for
+          DOTXF, SCAL2Vand corresponding fusing
+          factor of DOTXF kernel
+        */
+
+        dotxf_kr_ptr = bli_zdotxf_zen_int_8_avx512;
+        b_fuse = 8;
+
+        scal2v_kr_ptr = bli_zscal2v_zen_int;
+        break;
+#endif
       case BLIS_ARCH_ZEN:
       case BLIS_ARCH_ZEN2:
       case BLIS_ARCH_ZEN3:

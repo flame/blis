@@ -72,6 +72,13 @@ AXPYF_KER_PROT( dcomplex, z, axpyf_zen_int_8_avx512 )
 COPYV_KER_PROT( float,    s, copyv_zen4_asm_avx512 )
 COPYV_KER_PROT( double,   d, copyv_zen4_asm_avx512 )
 COPYV_KER_PROT( dcomplex, z, copyv_zen4_asm_avx512 )
+// dotxv (intrinsics)
+DOTXV_KER_PROT( dcomplex, z, dotxv_zen_int_avx512 )
+
+// dotxf (intrinsics)
+DOTXF_KER_PROT( dcomplex, z, dotxf_zen_int_8_avx512 )
+DOTXF_KER_PROT( dcomplex, z, dotxf_zen_int_4_avx512 )
+DOTXF_KER_PROT( dcomplex, z, dotxf_zen_int_2_avx512 )
 
 GEMMTRSM_UKR_PROT( double,   d, gemmtrsm_l_zen_asm_16x14)
 GEMMTRSM_UKR_PROT( double,   d, gemmtrsm_u_zen_asm_16x14)
