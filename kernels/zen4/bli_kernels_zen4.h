@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2022 - 2023, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2022 - 2024, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -41,7 +41,13 @@ AMAXV_KER_PROT( double,   d, amaxv_zen_int_avx512 )
 // scalv (AVX512 intrinsics)
 SCALV_KER_PROT( float,     s, scalv_zen_int_avx512 )
 SCALV_KER_PROT( double,    d, scalv_zen_int_avx512 )
+SCALV_KER_PROT( dcomplex,  z, scalv_zen_int_avx512 )
 SCALV_KER_PROT( dcomplex,  z, dscalv_zen_int_avx512) // ZDSCAL kernel
+
+// setv (intrinsics)
+SETV_KER_PROT(float,    s, setv_zen_int_avx512)
+SETV_KER_PROT(double,   d, setv_zen_int_avx512)
+SETV_KER_PROT(dcomplex, z, setv_zen_int_avx512)
 
 // dotv (intrinsics)
 DOTV_KER_PROT( float,    s, dotv_zen_int_avx512 )
@@ -50,6 +56,12 @@ DOTV_KER_PROT( double,   d, dotv_zen_int_avx512 )
 // axpyv (intrinsics)
 AXPYV_KER_PROT( float,    s, axpyv_zen_int_avx512 )
 AXPYV_KER_PROT( double,   d, axpyv_zen_int_avx512 )
+AXPYV_KER_PROT( dcomplex, z, axpyv_zen_int_avx512 )
+
+// axpyf (intrinsics)
+AXPYF_KER_PROT( dcomplex, z, axpyf_zen_int_2_avx512 )
+AXPYF_KER_PROT( dcomplex, z, axpyf_zen_int_4_avx512 )
+AXPYF_KER_PROT( dcomplex, z, axpyf_zen_int_8_avx512 )
 
 // copyv (intrinsics)
 // COPYV_KER_PROT( float,    s, copyv_zen_int_avx512 )

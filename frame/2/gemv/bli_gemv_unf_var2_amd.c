@@ -691,10 +691,11 @@ void bli_zgemv_unf_var2
     Function pointer declaration for the functions
     that will be used by this API
   */
-  zaxpyf_ker_ft   axpyf_kr_ptr; // ZAXPYF
+  zaxpyf_ker_ft   axpyf_kr_ptr;  // ZAXPYF
   zscal2v_ker_ft  scal2v_kr_ptr; // ZSCAL2V
-  zscalv_ker_ft   scalv_kr_ptr; // ZSCALV
-  zcopyv_ker_ft   copyv_kr_ptr; // ZCOPYV
+  zscalv_ker_ft   scalv_kr_ptr;  // ZSCALV
+  zcopyv_ker_ft   copyv_kr_ptr;  // ZCOPYV
+  zsetv_ker_ft    setv_kr_ptr;   // ZSETV
 
   /*
     Boolean to check if the y has been packed
@@ -706,6 +707,19 @@ void bli_zgemv_unf_var2
   {
     case BLIS_ARCH_ZEN5:
     case BLIS_ARCH_ZEN4:
+#if defined(BLIS_KERNELS_ZEN4)
+      axpyf_kr_ptr = bli_zaxpyf_zen_int_8_avx512;
+      b_fuse = 8;
+
+      scal2v_kr_ptr = bli_zscal2v_zen_int;
+
+      scalv_kr_ptr = bli_zscalv_zen_int;
+
+      copyv_kr_ptr = bli_zcopyv_zen_int;
+
+      setv_kr_ptr = bli_zsetv_zen_int_avx512;
+      break;
+#endif
     case BLIS_ARCH_ZEN:
     case BLIS_ARCH_ZEN2:
     case BLIS_ARCH_ZEN3:
@@ -725,6 +739,7 @@ void bli_zgemv_unf_var2
 
       copyv_kr_ptr = bli_zcopyv_zen_int;
 
+      setv_kr_ptr = bli_zsetv_zen_int;
       break;
     default:
       // For non-Zen architectures, query the context if it is NULL
@@ -743,6 +758,8 @@ void bli_zgemv_unf_var2
       scalv_kr_ptr = bli_cntx_get_l1v_ker_dt(BLIS_DCOMPLEX, BLIS_SCALV_KER, cntx);
 
       copyv_kr_ptr = bli_cntx_get_l1v_ker_dt(BLIS_DCOMPLEX, BLIS_COPYV_KER, cntx);
+
+      setv_kr_ptr = bli_cntx_get_l1v_ker_dt(BLIS_DCOMPLEX, BLIS_SETV_KER, cntx);
   }
 
   /*
@@ -817,10 +834,25 @@ void bli_zgemv_unf_var2
   else
   {
     /*
-      Invoke the ZSCALV function using the function
-      pointer only when alpha is not 1.
+      Invoke the ZSETV function using the function
+      pointer only when beta is 0.
     */
-    if(!PASTEMAC(z, eq1)(*beta))
+    if(PASTEMAC(z, eq0)(*beta))
+    {
+      setv_kr_ptr
+      (
+        BLIS_NO_CONJUGATE,
+        n_elem,
+        beta,
+        y_buf, buf_incy,
+        cntx
+      );
+    }
+    /*
+      Invoke the ZSCALV function using the function
+      pointer only when beta is not 1.
+    */
+    else if(!PASTEMAC(z, eq1)(*beta))
     {
       scalv_kr_ptr
       (
