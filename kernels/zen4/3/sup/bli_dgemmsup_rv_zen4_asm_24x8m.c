@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2023, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2023 - 2024, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -1780,10 +1780,8 @@ void bli_dgemmsup_rv_zen4_asm_24x8m
             [beta]   "m" (beta),
             [c]      "m" (c),
             [rs_c]   "m" (rs_c),
-            [cs_c]   "m" (cs_c),
-            [n0]     "m" (n0),
-            [m0]     "m" (m0)
-          : // register clobber list
+            [cs_c]   "m" (cs_c)
+            : // register clobber list
             "rax", "rbx", "rcx", "rdx", "rsi", "rdi",
             "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15",
             "xmm2", "xmm31",
@@ -3277,8 +3275,6 @@ void bli_dgemmsup_rv_zen4_asm_24x7m
             [c]      "m" (c),
             [rs_c]   "m" (rs_c),
             [cs_c]   "m" (cs_c),
-            [n0]     "m" (n0),
-            [m0]     "m" (m0),
             [mask]   "m" (mask)
           : // register clobber list
             "rax", "rbx", "rcx", "rdx", "rsi", "rdi",
@@ -4662,8 +4658,6 @@ void bli_dgemmsup_rv_zen4_asm_24x6m
             [c]      "m" (c),
             [rs_c]   "m" (rs_c),
             [cs_c]   "m" (cs_c),
-            [n0]     "m" (n0),
-            [m0]     "m" (m0),
             [mask]   "m" (mask)
           : // register clobber list
             "rax", "rbx", "rcx", "rdx", "rsi", "rdi",
@@ -5930,8 +5924,6 @@ void bli_dgemmsup_rv_zen4_asm_24x5m
             [c]      "m" (c),
             [rs_c]   "m" (rs_c),
             [cs_c]   "m" (cs_c),
-            [n0]     "m" (n0),
-            [m0]     "m" (m0),
             [mask]   "m" (mask)
           : // register clobber list
             "rax", "rbx", "rcx", "rdx", "rsi", "rdi",
@@ -7071,8 +7063,6 @@ void bli_dgemmsup_rv_zen4_asm_24x4m
             [c]      "m" (c),
             [rs_c]   "m" (rs_c),
             [cs_c]   "m" (cs_c),
-            [n0]     "m" (n0),
-            [m0]     "m" (m0),
             [mask]   "m" (mask)
           : // register clobber list
             "rax", "rbx", "rcx", "rdx", "rsi", "rdi",
@@ -8088,8 +8078,6 @@ void bli_dgemmsup_rv_zen4_asm_24x3m
             [c]      "m" (c),
             [rs_c]   "m" (rs_c),
             [cs_c]   "m" (cs_c),
-            [n0]     "m" (n0),
-            [m0]     "m" (m0),
             [mask]   "m" (mask)
           : // register clobber list
             "rax", "rbx", "rcx", "rdx", "rsi", "rdi",
@@ -8983,8 +8971,6 @@ void bli_dgemmsup_rv_zen4_asm_24x2m
             [c]      "m" (c),
             [rs_c]   "m" (rs_c),
             [cs_c]   "m" (cs_c),
-            [n0]     "m" (n0),
-            [m0]     "m" (m0),
             [mask]   "m" (mask)
           : // register clobber list
             "rax", "rbx", "rcx", "rdx", "rsi", "rdi",
@@ -9754,8 +9740,6 @@ void bli_dgemmsup_rv_zen4_asm_24x1m
             [c]      "m" (c),
             [rs_c]   "m" (rs_c),
             [cs_c]   "m" (cs_c),
-            [n0]     "m" (n0),
-            [m0]     "m" (m0),
             [mask]   "m" (mask)
           : // register clobber list
             "rax", "rbx", "rcx", "rdx", "rsi", "rdi",

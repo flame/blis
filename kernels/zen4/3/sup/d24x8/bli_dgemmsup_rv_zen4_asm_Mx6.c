@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2023, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2023 - 2024, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -418,6 +418,8 @@ void bli_dgemmsup_rv_zen4_asm_24x6
     uint64_t cs_b   = cs_b0;
     uint64_t rs_c   = rs_c0;
     uint64_t cs_c   = cs_c0;
+
+    uint64_t m = m0;
 
     uint64_t ps_a = bli_auxinfo_ps_a( data );
     uint64_t ps_a8  = ps_a * sizeof( double );
@@ -1509,7 +1511,7 @@ void bli_dgemmsup_rv_zen4_asm_24x6
     SHUFFLE_DATA(6, 4, 0, 1, 8, 5, 2, 3)
     SHUFFLE_DATA(10, 7, 4, 5, 12, 9, 6, 8)
 
-    mov(var(m0), rdi)
+    mov(var(m), rdi)
     sub(imm(16), rdi)
     cmp(imm(8), rdi)
     JZ(.UPDATE8)
@@ -1635,7 +1637,7 @@ void bli_dgemmsup_rv_zen4_asm_24x6
     SHUFFLE_DATA(6, 4, 0, 1, 8, 5, 2, 3)
     SHUFFLE_DATA(10, 7, 4, 5, 12, 9, 6, 8)
 
-    mov(var(m0), rdi)
+    mov(var(m), rdi)
     sub(imm(16), rdi)
     cmp(imm(8), rdi)
     JZ(.UPDATE8BZ)
@@ -1711,8 +1713,7 @@ void bli_dgemmsup_rv_zen4_asm_24x6
         [c]      "m" (c),
         [rs_c]   "m" (rs_c),
         [cs_c]   "m" (cs_c),
-        [n0]     "m" (n0),
-        [m0]     "m" (m0),
+        [m]      "m" (m),
         [mask]   "m" (mask),
         [mask_n0]   "m" (mask_n0)
       : // register clobber list
@@ -1757,6 +1758,8 @@ void bli_dgemmsup_rv_zen4_asm_16x6
     uint64_t cs_b   = cs_b0;
     uint64_t rs_c   = rs_c0;
     uint64_t cs_c   = cs_c0;
+
+    uint64_t m = m0;
 
     uint64_t ps_a = bli_auxinfo_ps_a( data );
     uint64_t ps_a8  = ps_a * sizeof( double );
@@ -2674,7 +2677,7 @@ void bli_dgemmsup_rv_zen4_asm_16x6
     SHUFFLE_DATA(6, 4, 0, 1, 8, 5, 2, 3)
     SHUFFLE_DATA(10, 7, 4, 5, 12, 9, 6, 8)
 
-    mov(var(m0), rdi)
+    mov(var(m), rdi)
     sub(imm(8), rdi)
     cmp(imm(8), rdi)
     JZ(.UPDATE8)
@@ -2784,7 +2787,7 @@ void bli_dgemmsup_rv_zen4_asm_16x6
     SHUFFLE_DATA(6, 4, 0, 1, 8, 5, 2, 3)
     SHUFFLE_DATA(10, 7, 4, 5, 12, 9, 6, 8)
 
-    mov(var(m0), rdi)
+    mov(var(m), rdi)
     sub(imm(8), rdi)
     cmp(imm(8), rdi)
     JZ(.UPDATE8BZ)
@@ -2860,8 +2863,7 @@ void bli_dgemmsup_rv_zen4_asm_16x6
         [c]      "m" (c),
         [rs_c]   "m" (rs_c),
         [cs_c]   "m" (cs_c),
-        [n0]     "m" (n0),
-        [m0]     "m" (m0),
+        [m]      "m" (m),
         [mask]   "m" (mask),
         [mask_n0]   "m" (mask_n0)
       : // register clobber list
@@ -2906,6 +2908,8 @@ void bli_dgemmsup_rv_zen4_asm_8x6
     uint64_t cs_b   = cs_b0;
     uint64_t rs_c   = rs_c0;
     uint64_t cs_c   = cs_c0;
+
+    uint64_t m = m0;
 
     uint64_t ps_a = bli_auxinfo_ps_a( data );
     uint64_t ps_a8  = ps_a * sizeof( double );
@@ -3590,7 +3594,7 @@ void bli_dgemmsup_rv_zen4_asm_8x6
 
     vbroadcastsd(mem(rax), zmm31)
 
-    mov(var(m0), rdi)
+    mov(var(m), rdi)
     cmp(imm(8), rdi)
     JZ(.UPDATE8)
     cmp(imm(7), rdi)
@@ -3680,7 +3684,7 @@ void bli_dgemmsup_rv_zen4_asm_8x6
     SHUFFLE_DATA(6, 4, 0, 1, 8, 5, 2, 3)
     SHUFFLE_DATA(10, 30, 4, 5, 12, 31, 6, 8)
 
-    mov(var(m0), rdi)
+    mov(var(m), rdi)
     cmp(imm(8), rdi)
     JZ(.UPDATE8BZ)
     cmp(imm(7), rdi)
@@ -3755,8 +3759,7 @@ void bli_dgemmsup_rv_zen4_asm_8x6
         [c]      "m" (c),
         [rs_c]   "m" (rs_c),
         [cs_c]   "m" (cs_c),
-        [n0]     "m" (n0),
-        [m0]     "m" (m0),
+        [m]      "m" (m),
         [mask]   "m" (mask),
         [mask_n0]   "m" (mask_n0)
       : // register clobber list
