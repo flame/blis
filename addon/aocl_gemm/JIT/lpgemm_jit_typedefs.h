@@ -46,23 +46,23 @@ typedef struct
 } lpgemm_jit_inputs_t;
 
 typedef struct {
-    dim_t m;
-    dim_t n;
-    dim_t k;
-    dim_t rs_a;
-    dim_t cs_a;
-    dim_t rs_b;
-    dim_t cs_b;
-    dim_t rs_c;
-    dim_t cs_c;
+    uint64_t m;
+    uint64_t n;
+    uint64_t k;
+    uint64_t rs_a;
+    uint64_t cs_a;
+    uint64_t rs_b;
+    uint64_t cs_b;
+    uint64_t rs_c;
+    uint64_t cs_c;
     bfloat16* a;
     bfloat16* b;
     float*    c;
-    dim_t ps_a2;
-    dim_t m_iter;
-    dim_t k_iter_before_prefetch;
-    dim_t k_iter_after_prefetch;
-    dim_t k_left;
+    uint64_t ps_a2;
+    uint64_t m_iter;
+    uint64_t k_iter_before_prefetch;
+    uint64_t k_iter_after_prefetch;
+    uint64_t k_left;
     float* alpha;
     float* beta;
     uint32_t mask16;
