@@ -125,7 +125,7 @@ public:
     }
 };
 
-#ifdef TEST_BLAS
+#if defined(TEST_BLAS) && (defined(REF_IS_MKL) || defined(REF_IS_OPENBLAS))
 // Black box testing for generic and main use of simatcopy.
 INSTANTIATE_TEST_SUITE_P(
         Blackbox,

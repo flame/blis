@@ -76,9 +76,6 @@ void test_gemv( char storage, char transa, char conjx, gtint_t m, gtint_t n,
     T* y = (T*)(y_buf.greenzone_1);
     T* y_ref = ( T* )y_ref_buffer.greenzone_1; // For y_ref, there is no greenzone_2
 
-    // Copying the contents of y to y_ref
-    memcpy( y_ref, y, size_y );
-
     if ( is_evt_test )
     {
         // Add extreme value to A matrix
@@ -92,6 +89,9 @@ void test_gemv( char storage, char transa, char conjx, gtint_t m, gtint_t n,
         // Add extreme value to y vector
         y[ (rand() % leny) * std::abs(incy) ] = y_exval;
     }
+
+    // Copying the contents of y to y_ref
+    memcpy( y_ref, y, size_y );
 
     //----------------------------------------------------------
     //                  Call BLIS function
