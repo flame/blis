@@ -35,13 +35,12 @@
 
 #include "blis.h"
 
-bool bli_packm_init
+siz_t bli_packm_init
      (
+             num_t   dt_p,
        const obj_t*  c,
              obj_t*  p,
-       const cntx_t* cntx,
-       const cntl_t* cntl,
-             thrinfo_t* thread
+       const cntl_t* cntl
      )
 {
 	bli_init_once();
@@ -54,7 +53,7 @@ bool bli_packm_init
 
 	// Check parameters.
 	if ( bli_error_checking_is_enabled() )
-		bli_packm_init_check( c, p, cntx );
+		bli_packm_init_check( c, p );
 
 	// We begin by copying the fields of A.
 	bli_obj_alias_to( c, p );
@@ -65,26 +64,28 @@ bool bli_packm_init
 		return false;
 
 	// Extract various fields from the control tree.
-	bszid_t bmult_id_m   = bli_cntl_packm_params_bmid_m( cntl );
-	bszid_t bmult_id_n   = bli_cntl_packm_params_bmid_n( cntl );
-	pack_t  schema       = bli_cntl_packm_params_pack_schema( cntl );
-	num_t   dt_tar       = bli_obj_target_dt( c );
+	pack_t  schema       = bli_packm_def_cntl_pack_schema( cntl );
 	num_t   dt_scalar    = bli_obj_scalar_dt( c );
-	dim_t   bmult_m_def  = bli_cntx_get_blksz_def_dt( dt_tar, bmult_id_m, cntx );
-	dim_t   bmult_m_pack = bli_cntx_get_blksz_max_dt( dt_tar, bmult_id_m, cntx );
-	dim_t   bmult_n_def  = bli_cntx_get_blksz_def_dt( dt_tar, bmult_id_n, cntx );
+	dim_t   bmult_m_def  = bli_packm_def_cntl_bmult_m_def( cntl );
+	dim_t   bmult_m_pack = bli_packm_def_cntl_bmult_m_pack( cntl );
+	dim_t   bmult_n_def  = bli_packm_def_cntl_bmult_n_def( cntl );
 
 	// Typecast the internal scalar value to the target datatype.
 	// Note that if the typecasting is needed, this must happen BEFORE we
 	// change the datatype of P to reflect the target_dt.
-	if ( dt_scalar != dt_tar )
+	if ( dt_scalar != dt_p )
 	{
-		bli_obj_scalar_cast_to( dt_tar, p );
+		bli_obj_scalar_cast_to( bli_dt_domain( dt_scalar ) | bli_dt_prec( dt_p ), p );
 	}
 
+	// If we are only packing the real part of a complex matrix, use the
+	// real datatype for the packed matrix.
+	if ( schema == BLIS_PACKED_PANELS_RO )
+		dt_p = bli_dt_proj_to_real( dt_p );
+
 	// Update the storage datatype of P to be the target datatype of A.
-	bli_obj_set_dt( dt_tar, p );
-	bli_obj_set_elem_size( bli_dt_size( dt_tar ), p );
+	bli_obj_set_dt( dt_p, p );
+	bli_obj_set_elem_size( bli_dt_size( dt_p ), p );
 
 	// Store the pack schema to the object.
 	bli_obj_set_pack_schema( schema, p );
@@ -108,8 +109,8 @@ bool bli_packm_init
 	// level-2 operations, but that's okay with us.
 	dim_t m_p     = bli_obj_length( p );
 	dim_t n_p     = bli_obj_width( p );
-	dim_t m_p_pad = bli_align_dim_to_mult( m_p, bmult_m_def );
-	dim_t n_p_pad = bli_align_dim_to_mult( n_p, bmult_n_def );
+	dim_t m_p_pad = bli_align_dim_to_mult( m_p, bmult_m_def, true );
+	dim_t n_p_pad = bli_align_dim_to_mult( n_p, bmult_n_def, true );
 
 	// Save the padded dimensions into the packed object. It is important
 	// to save these dimensions since they represent the actual dimensions
@@ -170,17 +171,6 @@ bool bli_packm_init
 
 	// Compute the size of the packed buffer.
 	siz_t size_p = ps_p * ( m_p_pad / m_panel ) * elem_size_p;
-
-	// If the requested size is zero, then we don't need to do any allocation.
-	if ( size_p == 0 )
-		return false;
-
-	// Update the buffer address in p to point to the buffer associated
-	// with the mem_t entry acquired from the memory broker (now cached in
-	// the control tree node).
-	void* buffer = bli_packm_alloc( size_p, cntl, thread );
-	bli_obj_set_buffer( buffer, p );
-
-	return true;
+	return size_p;
 }
 

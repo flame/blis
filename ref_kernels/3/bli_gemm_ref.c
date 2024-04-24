@@ -40,7 +40,7 @@
 #undef  GENTFUNC
 #define GENTFUNC( ctype, ch, opname, arch, suf ) \
 \
-static void PASTEMAC3(ch,opname,arch,suf) \
+static void PASTEMAC(ch,ch,opname,arch,suf) \
      ( \
              dim_t      m, \
              dim_t      n, \
@@ -50,7 +50,7 @@ static void PASTEMAC3(ch,opname,arch,suf) \
        const void*      b0, \
        const void*      beta0, \
              void*      c0, inc_t rs_c, inc_t cs_c, \
-             auxinfo_t* data, \
+       const auxinfo_t* data, \
        const cntx_t*    cntx  \
      ) \
 { \
@@ -149,7 +149,7 @@ INSERT_GENTFUNC_BASIC( gemm_gen, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX )
 #undef  GENTFUNC
 #define GENTFUNC( ctype, ch, opname, arch, suf ) \
 \
-void PASTEMAC3(ch,opname,arch,suf) \
+void PASTEMAC(ch,ch,opname,arch,suf) \
      ( \
              dim_t      m, \
              dim_t      n, \
@@ -159,7 +159,7 @@ void PASTEMAC3(ch,opname,arch,suf) \
        const void*      b0, \
        const void*      beta0, \
              void*      c0, inc_t rs_c, inc_t cs_c, \
-             auxinfo_t* data, \
+       const auxinfo_t* data, \
        const cntx_t*    cntx  \
      ) \
 { \
@@ -178,7 +178,7 @@ void PASTEMAC3(ch,opname,arch,suf) \
 	   purpose implementation instead. */ \
 	if ( mr == -1 || nr == -1 ) \
 	{ \
-		PASTEMAC3(ch,gemm_gen,arch,suf) \
+		PASTEMAC(ch,ch,gemm_gen,arch,suf) \
 		( \
 		  m, \
 		  n, \
@@ -298,5 +298,72 @@ void PASTEMAC3(ch,opname,arch,suf) \
 }
 
 INSERT_GENTFUNC_BASIC( gemm, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX )
+
+// Mixed-precision implementation (does not handle mixed-domain cases)
+
+#undef  GENTFUNC2
+#define GENTFUNC2( ctype_ab, ctype_c, chab, chc, opname, arch, suf ) \
+\
+void PASTEMAC(chab,chc,opname,arch,suf) \
+     ( \
+             dim_t      m, \
+             dim_t      n, \
+             dim_t      k, \
+       const void*      alpha, \
+       const void*      a, \
+       const void*      b, \
+       const void*      beta0, \
+             void*      c0, inc_t rs_c, inc_t cs_c, \
+       const auxinfo_t* auxinfo, \
+       const cntx_t*    cntx  \
+     ) \
+{ \
+	const ctype_c*    beta      = beta0; \
+	      ctype_c*    c         = c0; \
+\
+	const cntl_t*     params    = bli_auxinfo_params( auxinfo ); \
+\
+	const gemm_ukr_ft rgemm_ukr = bli_gemm_var_cntl_real_ukr( params ); \
+	const bool        row_pref  = bli_gemm_var_cntl_row_pref( params ); \
+	const void*       params_r  = bli_gemm_var_cntl_real_params( params ); \
+\
+	const dim_t       mr        = bli_gemm_var_cntl_mr( params ); \
+	const dim_t       nr        = bli_gemm_var_cntl_nr( params ); \
+\
+	      ctype_ab    ct[ BLIS_STACK_BUF_MAX_SIZE / sizeof( ctype_ab ) ] \
+	                  __attribute__((aligned(BLIS_STACK_BUF_ALIGN_SIZE))); \
+	const inc_t       rs_ct     = row_pref ? nr : 1; \
+	const inc_t       cs_ct     = row_pref ? 1 : mr; \
+\
+	const ctype_ab*   zero      = PASTEMAC(chab,0); \
+\
+	auxinfo_t auxinfo_r = *auxinfo; \
+	bli_auxinfo_set_params( params_r, &auxinfo_r ); \
+\
+	/* ab = alpha * a * b; */ \
+	rgemm_ukr \
+	( \
+	  mr, \
+	  nr, \
+	  k, \
+	  alpha, \
+	  a, \
+	  b, \
+	  zero, \
+	  ct, rs_ct, cs_ct, \
+	  &auxinfo_r, \
+	  cntx  \
+	); \
+\
+	PASTEMAC(chab,chc,chc,xpbys_mxn) \
+	( \
+	  m, n, \
+	  ct, rs_ct, cs_ct, \
+	  beta, \
+	  c, rs_c, cs_c \
+	); \
+}
+
+INSERT_GENTFUNC2_MIX_P( gemm, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX )
 
 

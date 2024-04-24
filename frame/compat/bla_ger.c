@@ -41,7 +41,7 @@
 #undef  GENTFUNCDOT
 #define GENTFUNCDOT( ftype, ch, chc, blis_conjy, blasname, blisname ) \
 \
-void PASTEF772(ch,blasname,chc) \
+void PASTEF77(ch,blasname,chc) \
      ( \
        const f77_int* m, \
        const f77_int* n, \
@@ -87,7 +87,7 @@ void PASTEF772(ch,blasname,chc) \
 	const inc_t cs_a = *lda; \
 \
 	/* Call BLIS interface. */ \
-	PASTEMAC2(ch,blisname,BLIS_TAPI_EX_SUF) \
+	PASTEMAC(ch,blisname,BLIS_TAPI_EX_SUF) \
 	( \
 	  BLIS_NO_CONJUGATE, \
 	  blis_conjy, \

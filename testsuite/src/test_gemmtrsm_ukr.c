@@ -290,7 +290,7 @@ void libblis_test_gemmtrsm_ukr_experiment
 	  BLIS_MR,
 	  BLIS_MR,
 	  BLIS_INVERT_DIAG,
-	  BLIS_PACKED_ROW_PANELS,
+	  BLIS_PACKED_PANELS,
 	  BLIS_BUFFER_FOR_A_BLOCK,
 	  &a, &ap,
 	  cntx
@@ -325,7 +325,7 @@ bli_printm( "ap", &ap, "%5.2f", "" );
 		  BLIS_NR,
 		  BLIS_MR,
 		  BLIS_NO_INVERT_DIAG,
-		  BLIS_PACKED_COL_PANELS,
+		  BLIS_PACKED_PANELS,
 		  BLIS_BUFFER_FOR_B_PANEL,
 		  &b, &bp,
 		  cntx

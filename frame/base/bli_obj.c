@@ -108,17 +108,10 @@ void bli_obj_create_without_buffer
 	bli_obj_set_buffer( NULL, obj );
 	bli_obj_set_dt( dt, obj );
 	bli_obj_set_elem_size( elem_size, obj );
-	bli_obj_set_target_dt( dt, obj );
-	bli_obj_set_exec_dt( dt, obj );
-	bli_obj_set_comp_dt( dt, obj );
+	bli_obj_set_comp_prec( bli_dt_prec( dt ), obj );
 	bli_obj_set_dims( m, n, obj );
 	bli_obj_set_offs( 0, 0, obj );
 	bli_obj_set_diag_offset( 0, obj );
-
-	bli_obj_set_pack_fn( NULL, obj );
-	bli_obj_set_pack_params( NULL, obj );
-	bli_obj_set_ker_fn( NULL, obj );
-	bli_obj_set_ker_params( NULL, obj );
 
 	// Set the internal scalar to 1.0.
 	bli_obj_set_scalar_dt( dt, obj );
@@ -559,18 +552,19 @@ const char* bli_dt_string
 dim_t bli_align_dim_to_mult
      (
        dim_t dim,
-       dim_t dim_mult
+       dim_t dim_mult,
+       bool  round_up
      )
 {
 	// We return the dimension unmodified if the multiple is zero
 	// (to avoid division by zero).
 	if ( dim_mult == 0 ) return dim;
 
-	dim = ( ( dim + dim_mult - 1 ) /
-	        dim_mult ) *
-	        dim_mult;
+	if ( round_up )
+		dim += dim_mult - 1;
 
-	return dim;
+	// Avoid rounding down to zero.
+	return bli_max( dim_mult, ( dim / dim_mult ) * dim_mult );
 }
 
 dim_t bli_align_dim_to_size
@@ -664,9 +658,7 @@ void bli_obj_print
 	fprintf( file, " - is complex    %lu\n", ( unsigned long )bli_obj_is_complex( obj ) );
 	fprintf( file, " - is d. prec    %lu\n", ( unsigned long )bli_obj_is_double_prec( obj ) );
 	fprintf( file, " - datatype      %lu\n", ( unsigned long )bli_obj_dt( obj ) );
-	fprintf( file, " - target dt     %lu\n", ( unsigned long )bli_obj_target_dt( obj ) );
-	fprintf( file, " - exec dt       %lu\n", ( unsigned long )bli_obj_exec_dt( obj ) );
-	fprintf( file, " - comp dt       %lu\n", ( unsigned long )bli_obj_comp_dt( obj ) );
+	fprintf( file, " - comp prec     %lu\n", ( unsigned long )bli_obj_comp_prec( obj ) );
 	fprintf( file, " - scalar dt     %lu\n", ( unsigned long )bli_obj_scalar_dt( obj ) );
 	fprintf( file, " - has trans     %lu\n", ( unsigned long )bli_obj_has_trans( obj ) );
 	fprintf( file, " - has conj      %lu\n", ( unsigned long )bli_obj_has_conj( obj ) );

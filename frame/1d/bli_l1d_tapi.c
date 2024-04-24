@@ -43,7 +43,7 @@
 #undef  GENTFUNC
 #define GENTFUNC( ctype, ch, opname, kername, kerid ) \
 \
-void PASTEMAC2(ch,opname,EX_SUF) \
+void PASTEMAC(ch,opname,EX_SUF) \
      ( \
              doff_t  diagoffx, \
              diag_t  diagx, \
@@ -122,7 +122,7 @@ INSERT_GENTFUNC_BASIC( subd,  subv,  BLIS_SUBV_KER )
 #undef  GENTFUNC
 #define GENTFUNC( ctype, ch, opname, kername, kerid ) \
 \
-void PASTEMAC2(ch,opname,EX_SUF) \
+void PASTEMAC(ch,opname,EX_SUF) \
      ( \
              doff_t  diagoffx, \
              diag_t  diagx, \
@@ -202,7 +202,7 @@ INSERT_GENTFUNC_BASIC( scal2d, scal2v, BLIS_SCAL2V_KER )
 #undef  GENTFUNC
 #define GENTFUNC( ctype, ch, opname, kername, kerid ) \
 \
-void PASTEMAC2(ch,opname,EX_SUF) \
+void PASTEMAC(ch,opname,EX_SUF) \
      ( \
        doff_t diagoffx, \
        dim_t  m, \
@@ -258,7 +258,7 @@ INSERT_GENTFUNC_BASIC( invertd, invertv, BLIS_INVERTV_KER )
 #undef  GENTFUNC
 #define GENTFUNC( ctype, ch, opname, kername, kerid ) \
 \
-void PASTEMAC2(ch,opname,EX_SUF) \
+void PASTEMAC(ch,opname,EX_SUF) \
      ( \
              conj_t conjalpha, \
              doff_t diagoffx, \
@@ -320,7 +320,7 @@ INSERT_GENTFUNC_BASIC( setd,  setv,  BLIS_SETV_KER )
 #undef  GENTFUNCR
 #define GENTFUNCR( ctype, ctype_r, ch, chr, opname, kername, kerid ) \
 \
-void PASTEMAC2(ch,opname,EX_SUF) \
+void PASTEMAC(ch,opname,EX_SUF) \
      ( \
              doff_t   diagoffx, \
              dim_t    m, \
@@ -396,7 +396,7 @@ INSERT_GENTFUNCR_BASIC( setid, setv, BLIS_SETV_KER )
 #undef  GENTFUNC
 #define GENTFUNC( ctype, ch, opname, kername, kerid ) \
 \
-void PASTEMAC2(ch,opname,EX_SUF) \
+void PASTEMAC(ch,opname,EX_SUF) \
      ( \
              doff_t diagoffx, \
              dim_t  m, \
@@ -455,7 +455,7 @@ INSERT_GENTFUNC_BASIC( shiftd, addv, BLIS_ADDV_KER )
 #undef  GENTFUNC
 #define GENTFUNC( ctype, ch, opname, kername, kerid ) \
 \
-void PASTEMAC2(ch,opname,EX_SUF) \
+void PASTEMAC(ch,opname,EX_SUF) \
      ( \
              doff_t  diagoffx, \
              diag_t  diagx, \

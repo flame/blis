@@ -269,15 +269,15 @@ void bli_ddotxf_penryn_int
 		}
 	}
 /*
-	PASTEMAC2(d,d,scals)( *beta_cast, *(y_cast  ) ); \
-	PASTEMAC2(d,d,scals)( *beta_cast, *(y_cast+1) ); \
-	PASTEMAC2(d,d,scals)( *beta_cast, *(y_cast+2) ); \
-	PASTEMAC2(d,d,scals)( *beta_cast, *(y_cast+3) ); \
+	PASTEMAC(d,d,scals)( *beta_cast, *(y_cast  ) ); \
+	PASTEMAC(d,d,scals)( *beta_cast, *(y_cast+1) ); \
+	PASTEMAC(d,d,scals)( *beta_cast, *(y_cast+2) ); \
+	PASTEMAC(d,d,scals)( *beta_cast, *(y_cast+3) ); \
 
-	PASTEMAC3(d,d,d,axpys)( *alpha_cast, rho1, *(y_cast  ) ); \
-	PASTEMAC3(d,d,d,axpys)( *alpha_cast, rho2, *(y_cast+1) ); \
-	PASTEMAC3(d,d,d,axpys)( *alpha_cast, rho3, *(y_cast+2) ); \
-	PASTEMAC3(d,d,d,axpys)( *alpha_cast, rho4, *(y_cast+3) ); \
+	PASTEMAC(d,d,d,axpys)( *alpha_cast, rho1, *(y_cast  ) ); \
+	PASTEMAC(d,d,d,axpys)( *alpha_cast, rho2, *(y_cast+1) ); \
+	PASTEMAC(d,d,d,axpys)( *alpha_cast, rho3, *(y_cast+2) ); \
+	PASTEMAC(d,d,d,axpys)( *alpha_cast, rho4, *(y_cast+3) ); \
 */
 
 	rho1v.d[0] = rho0;

@@ -690,25 +690,32 @@ Adding support for a new-subconfiguration to BLIS is similar to adding support f
 
 
 
-   * **`frame/base/bli_gks.c`**. We must also update the global kernel structure, or gks, to register the new sub-configuration during library initialization. Sub-configuration registration occurs in `bli_gks_init()`. For `knl`, updating this function amounts to inserting the following lines
+   * **`frame/include/bli_gentconf_macro_defs.h`**. We must also update the macro which automatically generates code which
+   should be executed for each enabled sub-configuration. This macro update requires changes in two places: first we must conditionally define a
+   macro for our new sub-configuration, and then we can invoke (call) that macro from the generic `INSERT_GENTCONF` macro. For `knl`, the
+   first, sub-configuration-specific macro takes the form,
       ```c
+      // -- KNL microarchitecture --
       #ifdef BLIS_CONFIG_KNL
-              bli_gks_register_cntx( BLIS_ARCH_KNL, bli_cntx_init_knl,
-                                                    bli_cntx_init_knl_ref,
-                                                    bli_cntx_init_knl_ind );
+      #define INSERT_GENTCONF_KNL GENTCONF( KNL, knl )
+      #else
+      #define INSERT_GENTCONF_KNL
       #endif
       ```
-      This function submits pointers to various context initialization functions to the global kernel structure, which are then stored and called at the appropriate time. The functions **must** be named strictly according to the format shown in the example above, with `knl` replaced with the sub-configuration name. Also, note the call to `bli_gks_register_cntx` is guarded by `BLIS_CONFIG_KNL`. This macro is automatically `#defined` by the build system if and when the `knl` sub-configuration is enabled at configure-time, either directly as a singleton family or indirectly via an umbrella family.
-
-
-
-   * **`frame/include/bli_arch_config.h`**. This file must be updated in two places. First, we must modify it to generate prototypes for the `bli_cntx_init_*()` functions, including the developer-provided function `bli_cntx_init_knl()` (defined in `config/knl/bli_cntx_init_knl.c`), by inserting:
+      Note the upper-case `KNL` tag which is used in various pre-defined macros such as `BLIS_CONFIG_KNL`, and the lower-case
+      tag `knl` which is used in generating function names such as `bli_cntx_init_knl_ref`. The second modification to make is
+      to add a call to this macro from `INSERT_GENTCONF`,
       ```c
-      #ifdef BLIS_CONFIG_KNL
-      CNTX_INIT_PROTS( knl )
-      #endif
+      #define INSERT_GENTCONF \
+      ...
+      INSERT_GENTCONF_KNL \
+      ...
       ```
-      Here, the `CNTX_INIT_PROTS` macro generates the appropriate prototypes based on the name of the sub-configuration. Next, we must `#include` the `bli_family_knl.h` header file, just as we would if we were adding support for an umbrella family:
+      This will automatically handle most code fragments which depend on a specific sub-configuration, such as creating
+      reference contexts in the global kernel structure.
+
+   * **`frame/include/bli_arch_config.h`**. This file must be modified by adding an `#include` to the `bli_family_knl.h`
+   header file, just as we would if we were adding support for an umbrella family:
       ```c
       #ifdef BLIS_FAMILY_KNL
       #include "bli_family_knl.h"
@@ -759,7 +766,6 @@ Adding support for a new-subconfiguration to BLIS is similar to adding support f
 
           "generic"
       };
-
       ```
       This array is used by `bli_arch_string()` when mapping `arch_t` values to the strings associated with that architecture ID. Because the `arch_t` value is used as the index of each string, **the relative order of the strings in this array is important**. Be sure to insert the new string (in our case, `"knl"`) at the **same relative location** as the `arch_t` value inserted in `bli_type_defs.h`. This will ensure that each `arch_t` value will map to its corresponding string in the `config_name` array.
 

@@ -41,7 +41,7 @@
 #undef  GENPROT
 #define GENPROT( opname ) \
 \
-void PASTEMAC0(opname) \
+void PASTEMAC(opname) \
      ( \
        const obj_t*     a, \
        const obj_t*     ah, \
@@ -51,11 +51,9 @@ void PASTEMAC0(opname) \
              thrinfo_t* thread_par  \
      );
 
-GENPROT( gemmt_x_ker_var2 )
 GENPROT( gemmt_l_ker_var2 )
 GENPROT( gemmt_u_ker_var2 )
 
-GENPROT( gemmt_x_ker_var2b )
 GENPROT( gemmt_l_ker_var2b )
 GENPROT( gemmt_u_ker_var2b )
 

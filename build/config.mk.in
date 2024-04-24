@@ -53,7 +53,9 @@ CONFIG_NAME       := @config_name@
 # sub-configuration in CONFIG_LIST corresponds to a configuration
 # sub-directory in the 'config' directory. See the 'config_registry'
 # file for the full list of registered configurations.
-CONFIG_LIST       := @config_list@
+CONFIG_LIST         := @config_list@
+FULL_CONFIG_LIST    := @full_config_list@
+FULL_SUBCONFIG_LIST := @full_subconfig_list@
 
 # This list of kernels needed for the configurations in CONFIG_LIST.
 # Each item in this list corresponds to a sub-directory in the top-level
@@ -62,6 +64,7 @@ CONFIG_LIST       := @config_list@
 # kernel set X, and configuration W uses kernel set Q, and the CONFIG_LIST
 # might contained "X Y Z W", then the KERNEL_LIST would contain "X Z Q".
 KERNEL_LIST       := @kernel_list@
+FULL_KERNEL_LIST  := @full_kernel_list@
 
 # This list contains some number of "kernel:config" pairs, where "config"
 # specifies which configuration's compilation flags (CFLAGS) should be
@@ -101,8 +104,11 @@ CLANG_OT_12_0_0   := @clang_older_than_12_0_0@
 AOCC_OT_2_0_0     := @aocc_older_than_2_0_0@
 AOCC_OT_3_0_0     := @aocc_older_than_3_0_0@
 
-# The C++ compiler. NOTE: A C++ is typically not needed.
+# The C++ compiler. NOTE: A C++ compiler is typically not needed.
 CXX               := @CXX@
+
+# The Fortran compiler. NOTE: A Fortran compiler is typically not needed.
+FC                := @FC@
 
 # Static library indexer.
 RANLIB            := @RANLIB@
@@ -113,12 +119,13 @@ AR                := @AR@
 # Python Interpreter
 PYTHON            := @PYTHON@
 
-# Preset (required) CFLAGS and LDFLAGS. These variables capture the value
-# of the CFLAGS and LDFLAGS environment variables at configure-time (and/or
-# the value of CFLAGS/LDFLAGS if either was specified on the command line).
+# Preset (required) CFLAGS, CXXFLAGS, and LDFLAGS. These variables capture the value
+# of the CFLAGS, CXXFLAGS, and LDFLAGS environment variables at configure-time (and/or
+# the value of CFLAGS/CXXFLAGS/LDFLAGS if any was specified on the command line).
 # These flags are used in addition to the flags automatically determined
 # by the build system.
 CFLAGS_PRESET     := @cflags_preset@
+CXXFLAGS_PRESET   := @cxxflags_preset@
 LDFLAGS_PRESET    := @ldflags_preset@
 
 # The level of debugging info to generate.
@@ -129,7 +136,7 @@ ENABLE_DEBUG      := @enable_debug@
 MK_ENABLE_ASAN    := @enable_asan@
 
 # Whether operating system support was requested via --enable-system.
-ENABLE_SYSTEM     := @enable_system@
+ENABLE_SYSTEM     := @mk_enable_system@
 
 # The requested threading model(s).
 THREADING_MODEL   := @threading_model@
@@ -179,8 +186,8 @@ ARG_MAX_HACK      := @enable_arg_max_hack@
 # Whether to build the static and shared libraries.
 # NOTE: The "MK_" prefix, which helps differentiate these variables from
 # their corresonding cpp macros that use the BLIS_ prefix.
-MK_ENABLE_STATIC  := @enable_static@
-MK_ENABLE_SHARED  := @enable_shared@
+MK_ENABLE_STATIC  := @mk_enable_static@
+MK_ENABLE_SHARED  := @mk_enable_shared@
 
 # Whether to use an install_name based on @rpath.
 MK_ENABLE_RPATH   := @enable_rpath@
@@ -190,11 +197,11 @@ MK_ENABLE_RPATH   := @enable_rpath@
 EXPORT_SHARED     := @export_shared@
 
 # Whether to enable either the BLAS or CBLAS compatibility layers.
-MK_ENABLE_BLAS    := @enable_blas@
-MK_ENABLE_CBLAS   := @enable_cblas@
+MK_ENABLE_BLAS    := @mk_enable_blas@
+MK_ENABLE_CBLAS   := @mk_enable_cblas@
 
 # Whether libblis will depend on libmemkind for certain memory allocations.
-MK_ENABLE_MEMKIND := @enable_memkind@
+MK_ENABLE_MEMKIND := @mk_enable_memkind@
 
 # The names of the addons to include when building BLIS. If empty, no addons
 # will be included.

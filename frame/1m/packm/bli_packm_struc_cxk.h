@@ -32,30 +32,31 @@
 
 */
 
-#undef  GENTPROT
-#define GENTPROT( ctype, ch, varname ) \
+#undef  GENTPROT2
+#define GENTPROT2( ctypec, ctypep, chc, chp, varname ) \
 \
-void PASTEMAC(ch,varname) \
+BLIS_EXPORT_BLIS void PASTEMAC(chc,chp,varname) \
      ( \
-       struc_t strucc, \
-       diag_t  diagc, \
-       uplo_t  uploc, \
-       conj_t  conjc, \
-       pack_t  schema, \
-       bool    invdiag, \
-       dim_t   panel_dim, \
-       dim_t   panel_len, \
-       dim_t   panel_dim_max, \
-       dim_t   panel_len_max, \
-       dim_t   panel_dim_off, \
-       dim_t   panel_len_off, \
-       ctype*  kappa, \
-       ctype*  c, inc_t incc, inc_t ldc, \
-       ctype*  p,             inc_t ldp, \
-                  inc_t is_p, \
-       void*   params, \
-       cntx_t* cntx  \
+             struc_t strucc, \
+             diag_t  diagc, \
+             uplo_t  uploc, \
+             conj_t  conjc, \
+             pack_t  schema, \
+             bool    invdiag, \
+             dim_t   panel_dim, \
+             dim_t   panel_len, \
+             dim_t   panel_dim_max, \
+             dim_t   panel_len_max, \
+             dim_t   panel_dim_off, \
+             dim_t   panel_len_off, \
+             dim_t   panel_bcast, \
+       const void*   kappa, \
+       const void*   c, inc_t incc, inc_t ldc, \
+             void*   p,             inc_t ldp, \
+       const void*   params, \
+       const cntx_t* cntx \
      );
 
-INSERT_GENTPROT_BASIC( packm_struc_cxk )
+INSERT_GENTPROT2_BASIC( packm_struc_cxk )
+INSERT_GENTPROT2_MIX_P( packm_struc_cxk )
 

@@ -58,7 +58,7 @@ void bli_sgemm_power7_int_8x4
         const void*      b0,
         const void*      beta0,
               void*      c0, inc_t rs_c, inc_t cs_c,
-              auxinfo_t* data,
+        const auxinfo_t* data,
         const cntx_t*    cntx
      )
 {
@@ -106,7 +106,7 @@ void bli_dgemm_power7_int_8x4
        const void*      b0,
        const void*      beta0,
              void*      c0, inc_t rs_c, inc_t cs_c,
-             auxinfo_t* data,
+       const auxinfo_t* data,
        const cntx_t*    cntx
      )
 {
@@ -469,7 +469,7 @@ void bli_cgemm_power7_int_8x4
        const void*      b0,
        const void*      beta0,
              void*      c0, inc_t rs_c0, inc_t cs_c0,
-             auxinfo_t* data,
+       const auxinfo_t* data,
        const cntx_t*    cntx
      )
 {
@@ -528,7 +528,7 @@ void bli_zgemm_power7_int_8x4
        const void*      b0,
        const void*      beta0,
              void*      c0, inc_t rs_c0, inc_t cs_c0,
-             auxinfo_t* data,
+       const auxinfo_t* data,
        const cntx_t*    cntx
      )
 {

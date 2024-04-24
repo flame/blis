@@ -42,7 +42,7 @@
 #undef  GENTFUNC
 #define GENTFUNC( ctype, ch, opname ) \
 \
-void PASTEMAC2(ch,opname,BLIS_OAPI_EX_SUF) \
+void PASTEMAC(ch,opname,BLIS_OAPI_EX_SUF) \
      ( \
              trans_t transa, \
              trans_t transb, \
@@ -101,7 +101,7 @@ INSERT_GENTFUNC_BASIC( gemm )
 #undef  GENTFUNC
 #define GENTFUNC( ctype, ch, opname, struca ) \
 \
-void PASTEMAC2(ch,opname,BLIS_OAPI_EX_SUF) \
+void PASTEMAC(ch,opname,BLIS_OAPI_EX_SUF) \
      ( \
              side_t  side, \
              uplo_t  uploa, \
@@ -167,7 +167,7 @@ INSERT_GENTFUNC_BASIC( symm, BLIS_SYMMETRIC )
 #undef  GENTFUNCR
 #define GENTFUNCR( ctype, ctype_r, ch, chr, opname ) \
 \
-void PASTEMAC2(ch,opname,BLIS_OAPI_EX_SUF) \
+void PASTEMAC(ch,opname,BLIS_OAPI_EX_SUF) \
      ( \
              uplo_t   uploc, \
              trans_t  transa, \
@@ -223,7 +223,7 @@ INSERT_GENTFUNCR_BASIC( herk )
 #undef  GENTFUNCR
 #define GENTFUNCR( ctype, ctype_r, ch, chr, opname ) \
 \
-void PASTEMAC2(ch,opname,BLIS_OAPI_EX_SUF) \
+void PASTEMAC(ch,opname,BLIS_OAPI_EX_SUF) \
      ( \
              uplo_t   uploc, \
              trans_t  transa, \
@@ -287,7 +287,7 @@ INSERT_GENTFUNCR_BASIC( her2k )
 #undef  GENTFUNC
 #define GENTFUNC( ctype, ch, opname ) \
 \
-void PASTEMAC2(ch,opname,BLIS_OAPI_EX_SUF) \
+void PASTEMAC(ch,opname,BLIS_OAPI_EX_SUF) \
      ( \
              uplo_t  uploc, \
              trans_t transa, \
@@ -342,7 +342,7 @@ INSERT_GENTFUNC_BASIC( syrk )
 #undef  GENTFUNC
 #define GENTFUNC( ctype, ch, opname ) \
 \
-void PASTEMAC2(ch,opname,BLIS_OAPI_EX_SUF) \
+void PASTEMAC(ch,opname,BLIS_OAPI_EX_SUF) \
      ( \
              uplo_t  uploc, \
              trans_t transa, \
@@ -405,7 +405,7 @@ INSERT_GENTFUNC_BASIC( syr2k )
 #undef  GENTFUNC
 #define GENTFUNC( ctype, ch, opname ) \
 \
-void PASTEMAC2(ch,opname,BLIS_OAPI_EX_SUF) \
+void PASTEMAC(ch,opname,BLIS_OAPI_EX_SUF) \
      ( \
              uplo_t  uploc, \
              trans_t transa, \
@@ -466,7 +466,7 @@ INSERT_GENTFUNC_BASIC( gemmt )
 #undef  GENTFUNC
 #define GENTFUNC( ctype, ch, opname ) \
 \
-void PASTEMAC2(ch,opname,BLIS_OAPI_EX_SUF) \
+void PASTEMAC(ch,opname,BLIS_OAPI_EX_SUF) \
      ( \
              side_t  side, \
              uplo_t  uploa, \
@@ -533,7 +533,7 @@ INSERT_GENTFUNC_BASIC( trmm3 )
 #undef  GENTFUNC
 #define GENTFUNC( ctype, ch, opname ) \
 \
-void PASTEMAC2(ch,opname,BLIS_OAPI_EX_SUF) \
+void PASTEMAC(ch,opname,BLIS_OAPI_EX_SUF) \
      ( \
              side_t  side, \
              uplo_t  uploa, \

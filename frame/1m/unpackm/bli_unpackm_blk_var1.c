@@ -186,7 +186,7 @@ void PASTEMAC(ch,varname) \
 	if ( bli_is_row_stored_f( m_panel, n_panel, rs_p, cs_p ) ) \
 	{ \
 		/* Prepare to unpack from column panels. */ \
-		schema        = BLIS_PACKED_COL_PANELS; \
+		schema        = BLIS_PACKED_PANELS; \
 		iter_dim      = n; \
 		panel_len     = m; \
 		panel_dim_max = pd_p; \
@@ -201,7 +201,7 @@ void PASTEMAC(ch,varname) \
 	else /* if ( bli_is_col_stored_f( m_panel, n_panel, rs_p, cs_p ) ) */ \
 	{ \
 		/* Prepare to unpack from row panels. */ \
-		schema        = BLIS_PACKED_ROW_PANELS; \
+		schema        = BLIS_PACKED_PANELS; \
 		iter_dim      = m; \
 		panel_len     = n; \
 		panel_dim_max = pd_p; \
@@ -214,13 +214,12 @@ void PASTEMAC(ch,varname) \
 		n_panel_full  = &n; \
 	} \
 \
-	num_t dt     = PASTEMAC(ch,type); \
-	ukr_t ker_id = bli_is_col_packed( schema ) ? BLIS_UNPACKM_NRXK_KER \
-	                                           : BLIS_UNPACKM_MRXK_KER; \
+	num_t  dt    = PASTEMAC(ch,type); \
+	ukr_t ker_id = BLIS_UNPACKM_KER; \
 \
 	/* Query the context for the unpackm kernel corresponding to the current
 	   panel dimension, or kernel id. */ \
-	PASTECH(unpackm_cxk,_ker_ft) f = bli_cntx_get_ukr_dt( dt, ker_id, cntx ); \
+	unpackm_cxk_ker_ft f = bli_cntx_get_ukr2_dt( dt, dt, ker_id, cntx ); \
 \
 	/* Compute the total number of iterations we'll need. */ \
 	num_iter = iter_dim / panel_dim_max + ( iter_dim % panel_dim_max ? 1 : 0 ); \
@@ -249,7 +248,7 @@ void PASTEMAC(ch,varname) \
 		if ( bli_intersects_diag_n( diagoffc_i, *m_panel_full, *n_panel_full ) && \
 		     bli_is_upper_or_lower( uploc ) ) \
 		{ \
-			PASTEMAC2(ch,scal2m,BLIS_TAPI_EX_SUF) \
+			PASTEMAC(ch,scal2m,BLIS_TAPI_EX_SUF) \
 			( \
 			  diagoffc_i, \
 			  diagc, \
@@ -272,11 +271,13 @@ void PASTEMAC(ch,varname) \
 			  BLIS_NO_CONJUGATE, \
 			  schema, \
 			  panel_dim_i, \
+			  1, \
 			  panel_len, \
 			  one, \
 			  p_begin,       ldp, \
 			  c_begin, incc, ldc, \
-			  ( cntx_t* )cntx  \
+			  NULL, \
+			  cntx \
 			); \
 		} \
 \

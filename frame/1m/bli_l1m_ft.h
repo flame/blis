@@ -34,7 +34,7 @@
 
 
 //
-// -- Level-1v function types --------------------------------------------------
+// -- Level-1m function types --------------------------------------------------
 //
 
 // addm, subm
@@ -42,7 +42,7 @@
 #undef  GENTDEF
 #define GENTDEF( ctype, ch, opname, tsuf ) \
 \
-typedef void (*PASTECH3(ch,opname,EX_SUF,tsuf)) \
+typedef void (*PASTECH(ch,opname,EX_SUF,tsuf)) \
      ( \
              doff_t  diagoffx, \
              diag_t  diagx, \
@@ -64,7 +64,7 @@ INSERT_GENTDEF( copym )
 #undef  GENTDEF
 #define GENTDEF( ctype, ch, opname, tsuf ) \
 \
-typedef void (*PASTECH3(ch,opname,EX_SUF,tsuf)) \
+typedef void (*PASTECH(ch,opname,EX_SUF,tsuf)) \
      ( \
              doff_t  diagoffx, \
              diag_t  diagx, \
@@ -85,7 +85,7 @@ INSERT_GENTDEF( axpym )
 #undef  GENTDEF
 #define GENTDEF( ctype, ch, opname, tsuf ) \
 \
-typedef void (*PASTECH3(ch,opname,EX_SUF,tsuf)) \
+typedef void (*PASTECH(ch,opname,EX_SUF,tsuf)) \
      ( \
              doff_t  diagoffx, \
              diag_t  diagx, \
@@ -106,7 +106,7 @@ INSERT_GENTDEF( scal2m )
 #undef  GENTDEF
 #define GENTDEF( ctype, ch, opname, tsuf ) \
 \
-typedef void (*PASTECH3(ch,opname,EX_SUF,tsuf)) \
+typedef void (*PASTECH(ch,opname,EX_SUF,tsuf)) \
      ( \
              conj_t conjalpha, \
              doff_t diagoffx, \
@@ -128,7 +128,7 @@ INSERT_GENTDEF( setm )
 #undef  GENTDEF
 #define GENTDEF( ctype, ch, opname, tsuf ) \
 \
-typedef void (*PASTECH3(ch,opname,EX_SUF,tsuf)) \
+typedef void (*PASTECH(ch,opname,EX_SUF,tsuf)) \
      ( \
              doff_t  diagoffx, \
              diag_t  diagx, \

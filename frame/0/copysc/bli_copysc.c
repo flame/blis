@@ -55,7 +55,7 @@ static FUNCPTR_T GENARRAY2_ALL(ftypes,copysc);
 #undef  GENFRONT
 #define GENFRONT( opname ) \
 \
-void PASTEMAC0(opname) \
+void PASTEMAC(opname) \
      ( \
        const obj_t* chi, \
        const obj_t* psi  \
@@ -103,7 +103,7 @@ GENFRONT( copysc )
 #undef  GENTFUNC2
 #define GENTFUNC2( ctype_x, ctype_y, chx, chy, varname ) \
 \
-void PASTEMAC2(chx,chy,varname) \
+void PASTEMAC(chx,chy,varname) \
      ( \
              conj_t conjchi, \
        const void*  chi, \
@@ -117,15 +117,14 @@ void PASTEMAC2(chx,chy,varname) \
 \
 	if ( bli_is_conj( conjchi ) ) \
 	{ \
-		PASTEMAC2(chx,chy,copyjs)( *chi_cast, *psi_cast ); \
+		PASTEMAC(chx,chy,copyjs)( *chi_cast, *psi_cast ); \
 	} \
 	else \
 	{ \
-		PASTEMAC2(chx,chy,copys)( *chi_cast, *psi_cast ); \
+		PASTEMAC(chx,chy,copys)( *chi_cast, *psi_cast ); \
 	} \
 }
 
 INSERT_GENTFUNC2_BASIC( copysc )
-INSERT_GENTFUNC2_MIX_D( copysc )
-INSERT_GENTFUNC2_MIX_P( copysc )
+INSERT_GENTFUNC2_MIX_DP( copysc )
 

@@ -60,16 +60,16 @@ err_t bli_gemmsup
 	// that function assumes the context pointer is valid.
 	if ( cntx == NULL ) cntx = bli_gks_query_cntx();
 
+	const num_t dt = bli_obj_dt( c );
+	const dim_t m  = bli_obj_length( c );
+	const dim_t n  = bli_obj_width( c );
+	const dim_t k  = bli_obj_width_after_trans( a );
+
 	// Return early if a microkernel preference-induced transposition would
 	// have been performed and shifted the dimensions outside of the space
 	// of sup-handled problems.
-	if ( bli_cntx_dislikes_storage_of( c, BLIS_GEMM_VIR_UKR, cntx ) )
+	if ( bli_cntx_dislikes_storage_of( c, BLIS_GEMM_UKR, cntx ) )
 	{
-		const num_t dt = bli_obj_dt( c );
-		const dim_t m  = bli_obj_length( c );
-		const dim_t n  = bli_obj_width( c );
-		const dim_t k  = bli_obj_width_after_trans( a );
-
 		// Pass in m and n reversed, which simulates a transposition of the
 		// entire operation pursuant to the microkernel storage preference.
 		if ( !bli_cntx_l3_sup_thresh_is_met( dt, n, m, k, cntx ) )
@@ -77,11 +77,6 @@ err_t bli_gemmsup
 	}
 	else // ukr_prefers_storage_of( c, ... )
 	{
-		const num_t dt = bli_obj_dt( c );
-		const dim_t m  = bli_obj_length( c );
-		const dim_t n  = bli_obj_width( c );
-		const dim_t k  = bli_obj_width_after_trans( a );
-
 		if ( !bli_cntx_l3_sup_thresh_is_met( dt, m, n, k, cntx ) )
 			return BLIS_FAILURE;
 	}
@@ -91,6 +86,9 @@ err_t bli_gemmsup
 	rntm_t rntm_l;
 	if ( rntm == NULL ) { bli_rntm_init_from_global( &rntm_l ); }
 	else                { rntm_l = *rntm;                       }
+
+	if ( !bli_rntm_l3_sup( &rntm_l ) )
+		return BLIS_FAILURE;
 
 #if 0
 const num_t dt = bli_obj_dt( c );
@@ -118,13 +116,18 @@ printf( "dims: %d %d %d (threshs: %d %d %d)\n",
 	// Query the small/unpacked handler from the context and invoke it.
 	gemmsup_oft gemmsup_fp = bli_cntx_get_l3_sup_handler( BLIS_GEMM, cntx );
 
+	// Typecast alpha and beta to the correct type
+	obj_t alpha_cast, beta_cast;
+	bli_obj_scalar_init_detached_copy_of( dt, BLIS_NO_CONJUGATE, alpha, &alpha_cast );
+	bli_obj_scalar_init_detached_copy_of( dt, BLIS_NO_CONJUGATE, beta, &beta_cast );
+
 	return
 	gemmsup_fp
 	(
-	  alpha,
+	  &alpha_cast,
 	  a,
 	  b,
-	  beta,
+	  &beta_cast,
 	  c,
 	  cntx,
 	  &rntm_l
@@ -162,14 +165,12 @@ err_t bli_gemmtsup
 	// Notice that we do not bother to check whether the microkernel
 	// prefers or dislikes the storage of C, since the same check is called
 	// for either way.
-	{
-		const num_t dt = bli_obj_dt( c );
-		const dim_t m  = bli_obj_length( c );
-		const dim_t k  = bli_obj_width_after_trans( a );
+	const num_t dt = bli_obj_dt( c );
+	const dim_t m  = bli_obj_length( c );
+	const dim_t k  = bli_obj_width_after_trans( a );
 
-		if ( !bli_cntx_l3_sup_thresh_is_met( dt, m, m, k, cntx ) )
-			return BLIS_FAILURE;
-	}
+	if ( !bli_cntx_l3_sup_thresh_is_met( dt, m, m, k, cntx ) )
+		return BLIS_FAILURE;
 
 	// Initialize a local runtime with global settings if necessary. Note
 	// that in the case that a runtime is passed in, we make a local copy.
@@ -187,13 +188,18 @@ err_t bli_gemmtsup
 	// Query the small/unpacked handler from the context and invoke it.
 	gemmtsup_oft gemmtsup_fp = bli_cntx_get_l3_sup_handler( BLIS_GEMMT, cntx );
 
+	// Typecast alpha and beta to the correct type
+	obj_t alpha_cast, beta_cast;
+	bli_obj_scalar_init_detached_copy_of( dt, BLIS_NO_CONJUGATE, alpha, &alpha_cast );
+	bli_obj_scalar_init_detached_copy_of( dt, BLIS_NO_CONJUGATE, beta, &beta_cast );
+
 	return
 	gemmtsup_fp
 	(
-	  alpha,
+	  &alpha_cast,
 	  a,
 	  b,
-	  beta,
+	  &beta_cast,
 	  c,
 	  cntx,
 	  &rntm_l

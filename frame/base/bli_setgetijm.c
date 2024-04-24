@@ -101,7 +101,7 @@ void PASTEMAC(ch,opname) \
 \
 	ctype* b_ij = b_cast + (i  )*rs + (j  )*cs; \
 \
-	PASTEMAC2(z,ch,sets)( ar, ai, *b_ij ); \
+	PASTEMAC(z,ch,sets)( ar, ai, *b_ij ); \
 }
 
 INSERT_GENTFUNC_BASIC( setijm )
@@ -175,7 +175,7 @@ void PASTEMAC(ch,opname) \
 \
 	const ctype* b_ij = b_cast + (i  )*rs + (j  )*cs; \
 \
-	PASTEMAC2(ch,z,gets)( *b_ij, *ar, *ai ); \
+	PASTEMAC(ch,z,gets)( *b_ij, *ar, *ai ); \
 }
 
 INSERT_GENTFUNC_BASIC( getijm )

@@ -1035,7 +1035,7 @@ static uint32_t get_coretype
 {
 	int implementer = 0x00, part = 0x000;
 	*features = FEATURE_NEON;
-    bool has_sve = FALSE;
+	bool has_sve = FALSE; ( void )has_sve;
 
 #ifdef __linux__
 	if ( getauxval( AT_HWCAP ) & HWCAP_CPUID )

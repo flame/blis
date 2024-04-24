@@ -77,14 +77,14 @@ void bli_sgemm_armv8a_asm_8x12
        const void*      b,
        const void*      beta,
              void*      c, inc_t rs_c0, inc_t cs_c0,
-             auxinfo_t* data,
+       const auxinfo_t* data,
        const cntx_t*    cntx
      )
 {
 
 
-	void* a_next = bli_auxinfo_next_a( data );
-	void* b_next = bli_auxinfo_next_b( data );
+	const void* a_next = bli_auxinfo_next_a( data );
+	const void* b_next = bli_auxinfo_next_b( data );
 
 	// Typecast local copies of integers in case dim_t and inc_t are a
 	// different size than is expected by load instructions.
@@ -1157,7 +1157,7 @@ void bli_dgemm_armv8a_asm_6x8
        const void*      b,
        const void*      beta,
              void*      c, inc_t rs_c0, inc_t cs_c0,
-             auxinfo_t* data,
+       const auxinfo_t* data,
        const cntx_t*    cntx
      )
 {
@@ -1175,8 +1175,8 @@ void bli_dgemm_armv8a_asm_6x8
 
 #endif
 
-	void* a_next = bli_auxinfo_next_a( data );
-	void* b_next = bli_auxinfo_next_b( data );
+	const void* a_next = bli_auxinfo_next_a( data );
+	const void* b_next = bli_auxinfo_next_b( data );
 
 	// Typecast local copies of integers in case dim_t and inc_t are a
 	// different size than is expected by load instructions.

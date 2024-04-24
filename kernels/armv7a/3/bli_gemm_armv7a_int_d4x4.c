@@ -45,7 +45,7 @@ void bli_sgemm_armv7a_int_4x4
        const void*      b0,
        const void*      beta0,
              void*      c0, inc_t rs_c0, inc_t cs_c0,
-             auxinfo_t* data,
+       const auxinfo_t* data,
        const cntx_t*    cntx
      )
 {
@@ -257,7 +257,7 @@ void bli_dgemm_armv7a_int_4x4
        const void*      b_,
        const void*      beta_,
              void*      c_, inc_t rs_c0, inc_t cs_c0,
-             auxinfo_t* data,
+       const auxinfo_t* data,
        const cntx_t*    cntx
      )
 {

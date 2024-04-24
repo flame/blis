@@ -43,7 +43,7 @@
 #undef  GENTFUNCDOT
 #define GENTFUNCDOT( ftype, ch, chc, blis_conjx, blasname, blisname ) \
 \
-void PASTEF773(ch,blasname,chc,sub) \
+void PASTEF77(ch,blasname,chc,sub) \
      ( \
        const f77_int* n, \
        const ftype*   x, const f77_int* incx, \
@@ -51,7 +51,7 @@ void PASTEF773(ch,blasname,chc,sub) \
              ftype*   rval  \
      ) \
 { \
-	*rval = PASTEF772(ch,blasname,chc) \
+	*rval = PASTEF77(ch,blasname,chc) \
 	( \
 	  n, \
 	  x, incx, \
@@ -75,7 +75,7 @@ INSERT_GENTFUNCDOTC_BLAS( dot, NULL )
 #undef  GENTFUNCDOT
 #define GENTFUNCDOT( ftype, ch, chc, blis_conjx, blasname, blisname ) \
 \
-void PASTEF773(ch,blasname,chc,sub) \
+void PASTEF77(ch,blasname,chc,sub) \
      ( \
        const f77_int* n, \
        const ftype*   x, const f77_int* incx, \
@@ -83,7 +83,7 @@ void PASTEF773(ch,blasname,chc,sub) \
              ftype*   rval  \
      ) \
 { \
-	PASTEF772(ch,blasname,chc) \
+	PASTEF77(ch,blasname,chc) \
 	( \
 	  rval, \
 	  n, \
@@ -100,7 +100,7 @@ INSERT_GENTFUNCDOTC_BLAS( dot, NULL )
 
 // Input vectors stored in single precision, computed in double precision,
 // with result returned in single precision.
-void PASTEF772(sds,dot,sub)
+void PASTEF77(sds,dot,sub)
      (
        const f77_int* n,
        const float*  sb,
@@ -120,7 +120,7 @@ void PASTEF772(sds,dot,sub)
 
 // Input vectors stored in single precision, computed in double precision,
 // with result returned in double precision.
-void PASTEF772(ds,dot,sub)
+void PASTEF77(ds,dot,sub)
      (
        const f77_int* n,
        const float*   x, const f77_int* incx,

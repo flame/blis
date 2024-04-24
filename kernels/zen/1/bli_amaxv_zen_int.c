@@ -462,7 +462,7 @@ void PASTEMAC(ch,varname) \
 		for ( i = 0; i < n; ++i ) \
 		{ \
 			/* Get the real and imaginary components of chi1. */ \
-			PASTEMAC2(ch,chr,gets)( x[i], chi1_r, chi1_i ); \
+			PASTEMAC(ch,chr,gets)( x[i], chi1_r, chi1_i ); \
 \
 			/* Replace chi1_r and chi1_i with their absolute values. */ \
 			PASTEMAC(chr,abval2s)( chi1_r, chi1_r ); \
@@ -492,7 +492,7 @@ void PASTEMAC(ch,varname) \
 			ctype* chi1 = x + (i  )*incx; \
 \
 			/* Get the real and imaginary components of chi1. */ \
-			PASTEMAC2(ch,chr,gets)( *chi1, chi1_r, chi1_i ); \
+			PASTEMAC(ch,chr,gets)( *chi1, chi1_r, chi1_i ); \
 \
 			/* Replace chi1_r and chi1_i with their absolute values. */ \
 			PASTEMAC(chr,abval2s)( chi1_r, chi1_r ); \

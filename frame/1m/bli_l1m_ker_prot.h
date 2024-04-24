@@ -48,9 +48,22 @@ void PASTEMAC(ch,funcname) \
        BLIS_CNTX_PARAM  \
      );
 
+#undef  L1MTPROT2
+#define L1MTPROT2( ctypex, ctypey, chx, chy, funcname, opname ) \
+\
+void PASTEMAC(chx,chy,funcname) \
+     ( \
+       PASTECH(opname,_params), \
+       BLIS_CNTX_PARAM  \
+     );
+
 #define PACKM_KER_PROT(      ctype, ch, fn )  L1MTPROT( ctype, ch, fn, packm_cxk );
 #define UNPACKM_KER_PROT(    ctype, ch, fn )  L1MTPROT( ctype, ch, fn, unpackm_cxk );
 #define PACKM_DIAG_KER_PROT( ctype, ch, fn )  L1MTPROT( ctype, ch, fn, packm_cxc_diag );
+
+#define PACKM_KER_PROT2(      ctypex, ctypey, chx, chy, fn )  L1MTPROT2( ctypex, ctypey, chx, chy, fn, packm_cxk );
+#define UNPACKM_KER_PROT2(    ctypex, ctypey, chx, chy, fn )  L1MTPROT2( ctypex, ctypey, chx, chy, fn, unpackm_cxk );
+#define PACKM_DIAG_KER_PROT2( ctypex, ctypey, chx, chy, fn )  L1MTPROT2( ctypex, ctypey, chx, chy, fn, packm_cxc_diag );
 
 
 #endif

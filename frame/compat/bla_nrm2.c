@@ -41,7 +41,7 @@
 #undef  GENTFUNCR2
 #define GENTFUNCR2( ftype_x, ftype_r, chx, chr, blasname, blisname ) \
 \
-ftype_r PASTEF772(chr,chx,blasname) \
+ftype_r PASTEF77(chr,chx,blasname) \
      ( \
        const f77_int* n, \
        const ftype_x* x, const f77_int* incx  \
@@ -63,7 +63,7 @@ ftype_r PASTEF772(chr,chx,blasname) \
 	bli_convert_blas_incv( n0, (ftype_x*)x, *incx, x0, incx0 ); \
 \
 	/* Call BLIS interface. */ \
-	PASTEMAC2(chx,blisname,BLIS_TAPI_EX_SUF) \
+	PASTEMAC(chx,blisname,BLIS_TAPI_EX_SUF) \
 	( \
 	  n0, \
 	  x0, incx0, \

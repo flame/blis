@@ -43,7 +43,7 @@ void* bli_packm_alloc
      )
 {
 	// Query the pack buffer type from the control tree node.
-	packbuf_t pack_buf_type = bli_cntl_packm_params_pack_buf_type( cntl );
+	packbuf_t pack_buf_type = bli_packm_def_cntl_pack_buf_type( cntl );
 
 	return bli_packm_alloc_ex
 	(

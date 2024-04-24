@@ -49,12 +49,11 @@ void bli_thread_range_quad
              dim_t*     inc
      )
 {
+	const dim_t tid   = bli_thrinfo_work_id( thread );
+	const dim_t jr_nt = bli_thrinfo_n_way( thread );
+	const dim_t n_iter = n / bf + ( n % bf ? 1 : 0 );
 
 #ifdef BLIS_ENABLE_JRIR_RR
-
-	const dim_t tid    = bli_thrinfo_work_id( thread );
-	const dim_t jr_nt  = bli_thrinfo_n_way( thread );
-	const dim_t n_iter = n / bf + ( n % bf ? 1 : 0 );
 
 	// Use round-robin (interleaved) partitioning of jr/ir loops.
 	*start = tid;
@@ -68,9 +67,6 @@ void bli_thread_range_quad
 	// cases, this *function* should never be called when BLIS_ENABLE_JRIR_TLB
 	// is defined, since the function is only called from macrokernels that were
 	// designed for slab/rr partitioning.
-
-	const dim_t jr_nt = bli_thrinfo_n_way( thread );
-	const dim_t n_iter = n / bf + ( n % bf ? 1 : 0 );
 
 	// If there is no parallelism in this loop, set the output variables
 	// and return early.
@@ -99,7 +95,7 @@ void bli_thread_range_quad
 
 		bli_thread_range_sub
 		(
-		  thread, n, bf,
+		  tid, jr_nt, n, bf,
 		  handle_edge_low, &st, &en
 		);
 		in = bf;

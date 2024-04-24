@@ -135,14 +135,16 @@ DOTXAXPYF_KER_PROT(scomplex,c, dotxaxpyf_sifive_x280_asm)
 DOTXAXPYF_KER_PROT(dcomplex,z, dotxaxpyf_sifive_x280_asm)
 
 // Level 1m
-PACKM_KER_PROT(float,       s, packm_sifive_x280_asm_7xk)
-PACKM_KER_PROT(double,      d, packm_sifive_x280_asm_7xk)
-PACKM_KER_PROT(scomplex,    c, packm_sifive_x280_asm_6xk)
-PACKM_KER_PROT(dcomplex,    z, packm_sifive_x280_asm_6xk)
-PACKM_KER_PROT(float,       s, packm_sifive_x280_asm_64xk)
-PACKM_KER_PROT(double,      d, packm_sifive_x280_asm_32xk)
-PACKM_KER_PROT(scomplex,    c, packm_sifive_x280_asm_32xk)
-PACKM_KER_PROT(dcomplex,    z, packm_sifive_x280_asm_16xk)
+PACKM_KER_PROT(float,       s, packm_sifive_x280_asm_7m4)
+PACKM_KER_PROT(double,      d, packm_sifive_x280_asm_7m4)
+PACKM_KER_PROT(scomplex,    c, packm_sifive_x280_asm_6m2)
+PACKM_KER_PROT(dcomplex,    z, packm_sifive_x280_asm_6m2)
+
+// Reference 1m
+PACKM_KER_PROT(float,       ss, packm_sifive_x280_ref)
+PACKM_KER_PROT(double,      dd, packm_sifive_x280_ref)
+PACKM_KER_PROT(scomplex,    cc, packm_sifive_x280_ref)
+PACKM_KER_PROT(dcomplex,    zz, packm_sifive_x280_ref)
 
 // Level 3
 GEMM_UKR_PROT(float,        s, gemm_sifive_x280_asm_7m4)

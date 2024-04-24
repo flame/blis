@@ -38,7 +38,7 @@
 
 #define MAX_NUM_CHARS 32
 
-int PASTEF770(xerbla_array)(const bla_character *srname_array, const bla_integer srname_len, const bla_integer *info)
+int PASTEF77(xerbla_array)(const bla_character *srname_array, const bla_integer srname_len, const bla_integer *info)
 {
 	int  i;
 #if 1
@@ -65,7 +65,7 @@ int PASTEF770(xerbla_array)(const bla_character *srname_array, const bla_integer
 	srname[i] = '\0';
 
 	// Call xerbla_().
-	PASTEF770(xerbla)( srname, info, ( ftnlen )srname_len );
+	PASTEF77(xerbla)( srname, info, ( ftnlen )srname_len );
 
 	return 0;
 }

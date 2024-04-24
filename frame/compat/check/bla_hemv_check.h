@@ -39,8 +39,8 @@
 	f77_int info = 0; \
 	f77_int lower, upper; \
 \
-	lower = PASTEF770(lsame)( uploa, "L", (ftnlen)1, (ftnlen)1 ); \
-	upper = PASTEF770(lsame)( uploa, "U", (ftnlen)1, (ftnlen)1 ); \
+	lower = PASTEF77(lsame)( uploa, "L", (ftnlen)1, (ftnlen)1 ); \
+	upper = PASTEF77(lsame)( uploa, "U", (ftnlen)1, (ftnlen)1 ); \
 \
 	if      ( !lower && !upper ) \
 		info = 1; \
@@ -61,7 +61,7 @@
 \
 		bli_string_mkupper( func_str ); \
 \
-		PASTEF770(xerbla)( func_str, &info, (ftnlen)6 ); \
+		PASTEF77(xerbla)( func_str, &info, (ftnlen)6 ); \
 \
 		return; \
 	} \

@@ -34,10 +34,400 @@
 
 #include "blis.h"
 
-#undef  GENTFUNCCO
-#define GENTFUNCCO( ctype, ctype_r, ch, chr, opname, arch, suf, trsmkerid ) \
+
+#undef  GENTFUNCRO
+#define GENTFUNCRO( ctype_r, ctype, chr, ch, opname, arch, suf, diagop ) \
 \
-void PASTEMAC3(ch,opname,arch,suf) \
+static void PASTEMAC(chr,opname,arch,suf) \
+     ( \
+             dim_t           m, \
+             dim_t           n, \
+       const ctype* restrict a, inc_t rs_a, inc_t cs_a, \
+       const ctype* restrict b, inc_t rs_b, inc_t cs_b, \
+             ctype* restrict c, inc_t rs_c, inc_t cs_c, \
+             pack_t          schema_b \
+     ) \
+{ \
+	const inc_t ld_a  = cs_a; \
+	const inc_t ld_b  = rs_b; \
+\
+	if ( bli_is_1e_packed( schema_b ) ) \
+	{ \
+		const inc_t       rs_a2 = 1 * rs_a; \
+		const inc_t       cs_a2 = 2 * cs_a; \
+		const inc_t       rs_b2 = 2 * rs_b; \
+		const inc_t       cs_b2 = 2 * cs_b; \
+\
+		ctype_r* restrict a_r   = ( ctype_r* )a; \
+		ctype_r* restrict a_i   = ( ctype_r* )a + ld_a; \
+\
+		ctype_r* restrict b_ri  = ( ctype_r* )b; \
+		ctype_r* restrict b_ir  = ( ctype_r* )b + ld_b; \
+\
+		for ( dim_t iter = 0; iter < m; ++iter ) \
+		{ \
+			dim_t i         = iter; \
+			dim_t n_behind  = i; \
+\
+			ctype_r* restrict alpha11_r = a_r  + (i  )*rs_a2 + (i  )*cs_a2; \
+			ctype_r* restrict alpha11_i = a_i  + (i  )*rs_a2 + (i  )*cs_a2; \
+			ctype_r* restrict a10t_r    = a_r  + (i  )*rs_a2 + (0  )*cs_a2; \
+			ctype_r* restrict a10t_i    = a_i  + (i  )*rs_a2 + (0  )*cs_a2; \
+			ctype_r* restrict b1_ri     = b_ri + (i  )*rs_b2 + (0  )*cs_b2; \
+			ctype_r* restrict b1_ir     = b_ir + (i  )*rs_b2 + (0  )*cs_b2; \
+			ctype_r* restrict B0_ri     = b_ri + (0  )*rs_b2 + (0  )*cs_b2; \
+\
+			/* b1 = b1 - a10t * B0; */ \
+			/* b1 = b1 / alpha11; */ \
+			for ( dim_t j = 0; j < n; ++j ) \
+			{ \
+				ctype_r* restrict beta11_ri_r = b1_ri + (0  )*rs_b2 + (j  )*cs_b2 + 0*cs_b; \
+				ctype_r* restrict beta11_ri_i = b1_ri + (0  )*rs_b2 + (j  )*cs_b2 + 1*cs_b; \
+				ctype_r* restrict beta11_ir_r = b1_ir + (0  )*rs_b2 + (j  )*cs_b2 + 0*cs_b; \
+				ctype_r* restrict beta11_ir_i = b1_ir + (0  )*rs_b2 + (j  )*cs_b2 + 1*cs_b; \
+				ctype_r* restrict b01_ri      = B0_ri + (0  )*rs_b2 + (j  )*cs_b2; \
+				ctype*   restrict gamma11     = c     + (i  )*rs_c  + (j  )*cs_c; \
+				ctype_r           beta11c_r   = *beta11_ri_r; \
+				ctype_r           beta11c_i   = *beta11_ri_i; \
+				ctype_r           rho11_r; \
+				ctype_r           rho11_i; \
+\
+				/* beta11 = beta11 - a10t * b01; */ \
+				PASTEMAC(ch,set0ris)( rho11_r, \
+				                      rho11_i ); \
+				for ( dim_t l = 0; l < n_behind; ++l ) \
+				{ \
+					ctype_r* restrict alpha10_r = a10t_r  + (l  )*cs_a2; \
+					ctype_r* restrict alpha10_i = a10t_i  + (l  )*cs_a2; \
+					ctype_r* restrict beta01_r  = b01_ri  + (l  )*rs_b2 + 0*cs_b; \
+					ctype_r* restrict beta01_i  = b01_ri  + (l  )*rs_b2 + 1*cs_b; \
+\
+					PASTEMAC(ch,axpyris)( *alpha10_r, \
+					                      *alpha10_i, \
+					                      *beta01_r, \
+					                      *beta01_i, \
+					                      rho11_r, \
+					                      rho11_i ); \
+				} \
+				PASTEMAC(ch,subris)( rho11_r, \
+				                     rho11_i, \
+				                     beta11c_r, \
+				                     beta11c_i ); \
+\
+				/* beta11 = beta11 / alpha11; */ \
+				/* NOTE: When preinversion is enabled, the INVERSE of alpha11
+				   (1.0/alpha11) is stored during packing instead alpha11 so we
+				   can multiply rather than divide. When preinversion is disabled,
+				   alpha11 is stored and division happens below explicitly. */ \
+				PASTEMAC(ch,diagop)( *alpha11_r, \
+				                     *alpha11_i, \
+				                     beta11c_r, \
+				                     beta11c_i ); \
+\
+				/* Output final result to matrix c. */ \
+				PASTEMAC(ch,sets)(  beta11c_r, beta11c_i, *gamma11 ); \
+\
+				/* Store the local values back to b11. */ \
+				for ( dim_t d = 0; d < cs_b; ++d ) \
+				{ \
+					PASTEMAC(ch,copyris)(  beta11c_r, beta11c_i, *(beta11_ri_r + d), *(beta11_ri_i + d) ); \
+					PASTEMAC(ch,copyris)( -beta11c_i, beta11c_r, *(beta11_ir_r + d), *(beta11_ir_i + d) ); \
+                } \
+			} \
+		} \
+	} \
+	else /* ( bli_is_1r_packed( schema_b ) ) */ \
+	{ \
+		const inc_t       rs_b2 = 2 * rs_b; \
+		const inc_t       cs_b2 = 1 * cs_b; \
+\
+		ctype*   restrict a_ri  = ( ctype*   )a; \
+		/*ctype*   restrict a_ir  = ( ctype*   )a + ld_a/2;*/ \
+\
+		ctype_r* restrict b_r   = ( ctype_r* )b; \
+		ctype_r* restrict b_i   = ( ctype_r* )b + ld_b; \
+\
+		for ( dim_t iter = 0; iter < m; ++iter ) \
+		{ \
+			dim_t i         = iter; \
+			dim_t n_behind  = i; \
+\
+			ctype*   restrict alpha11_ri = a_ri + (i  )*rs_a  + (i  )*cs_a; \
+			ctype_r* restrict alpha11_r  = &PASTEMAC(ch,real)( *alpha11_ri ); \
+			ctype_r* restrict alpha11_i  = &PASTEMAC(ch,imag)( *alpha11_ri ); \
+			ctype*   restrict a10t_ri    = a_ri + (i  )*rs_a  + (0  )*cs_a; \
+			ctype_r* restrict b1_r       = b_r  + (i  )*rs_b2 + (0  )*cs_b2; \
+			ctype_r* restrict b1_i       = b_i  + (i  )*rs_b2 + (0  )*cs_b2; \
+			ctype_r* restrict B0_r       = b_r  + (0  )*rs_b2 + (0  )*cs_b2; \
+			ctype_r* restrict B0_i       = b_i  + (0  )*rs_b2 + (0  )*cs_b2; \
+\
+			/* b1 = b1 - a10t * B0; */ \
+			/* b1 = b1 / alpha11; */ \
+			for ( dim_t j = 0; j < n; ++j ) \
+			{ \
+				ctype_r* restrict beta11_r  = b1_r + (0  )*rs_b2 + (j  )*cs_b2; \
+				ctype_r* restrict beta11_i  = b1_i + (0  )*rs_b2 + (j  )*cs_b2; \
+				ctype_r* restrict b01_r     = B0_r + (0  )*rs_b2 + (j  )*cs_b2; \
+				ctype_r* restrict b01_i     = B0_i + (0  )*rs_b2 + (j  )*cs_b2; \
+				ctype*   restrict gamma11   = c    + (i  )*rs_c  + (j  )*cs_c; \
+				ctype_r           beta11c_r = *beta11_r; \
+				ctype_r           beta11c_i = *beta11_i; \
+				ctype_r           rho11_r; \
+				ctype_r           rho11_i; \
+\
+				/* beta11 = beta11 - a10t * b01; */ \
+				PASTEMAC(ch,set0ris)( rho11_r, \
+				                      rho11_i ); \
+				for ( dim_t l = 0; l < n_behind; ++l ) \
+				{ \
+					ctype*   restrict alpha10_ri = a10t_ri + (l  )*cs_a; \
+					ctype_r* restrict alpha10_r  = &PASTEMAC(ch,real)( *alpha10_ri ); \
+					ctype_r* restrict alpha10_i  = &PASTEMAC(ch,imag)( *alpha10_ri ); \
+					ctype_r* restrict beta01_r   = b01_r   + (l  )*rs_b2; \
+					ctype_r* restrict beta01_i   = b01_i   + (l  )*rs_b2; \
+\
+					PASTEMAC(ch,axpyris)( *alpha10_r, \
+					                      *alpha10_i, \
+					                      *beta01_r, \
+					                      *beta01_i, \
+					                      rho11_r, \
+					                      rho11_i ); \
+				} \
+				PASTEMAC(ch,subris)( rho11_r, \
+				                     rho11_i, \
+				                     beta11c_r, \
+				                     beta11c_i ); \
+\
+				/* beta11 = beta11 / alpha11; */ \
+				/* NOTE: When preinversion is enabled, the INVERSE of alpha11
+				   (1.0/alpha11) is stored during packing instead alpha11 so we
+				   can multiply rather than divide. When preinversion is disabled,
+				   alpha11 is stored and division happens below explicitly. */ \
+				PASTEMAC(ch,diagop)( *alpha11_r, \
+				                     *alpha11_i, \
+				                     beta11c_r, \
+				                     beta11c_i ); \
+\
+				/* Output final result to matrix c. */ \
+				PASTEMAC(ch,sets)( beta11c_r, \
+				                   beta11c_i, *gamma11 ); \
+\
+				/* Store the local values back to b11. */ \
+				for ( dim_t d = 0; d < cs_b; ++d ) \
+					PASTEMAC(ch,copyris)( beta11c_r, \
+					                      beta11c_i, \
+					                      *(beta11_r + d), \
+					                      *(beta11_i + d) ); \
+			} \
+		} \
+	} \
+}
+
+#ifdef BLIS_ENABLE_TRSM_PREINVERSION
+INSERT_GENTFUNCRO( trsm1m_l, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX, scalris )
+#else
+INSERT_GENTFUNCRO( trsm1m_l, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX, invscalris )
+#endif
+
+
+#undef  GENTFUNCRO
+#define GENTFUNCRO( ctype_r, ctype, chr, ch, opname, arch, suf, diagop ) \
+\
+static void PASTEMAC(chr,opname,arch,suf) \
+     ( \
+             dim_t           m, \
+             dim_t           n, \
+       const ctype* restrict a, inc_t rs_a, inc_t cs_a, \
+       const ctype* restrict b, inc_t rs_b, inc_t cs_b, \
+             ctype* restrict c, inc_t rs_c, inc_t cs_c, \
+             pack_t          schema_b \
+     ) \
+{ \
+	const inc_t ld_a  = cs_a; \
+	const inc_t ld_b  = rs_b; \
+\
+	if ( bli_is_1e_packed( schema_b ) ) \
+	{ \
+		const inc_t       rs_a2 = 1 * rs_a; \
+		const inc_t       cs_a2 = 2 * cs_a; \
+		const inc_t       rs_b2 = 2 * rs_b; \
+		const inc_t       cs_b2 = 2 * cs_b; \
+\
+		ctype_r* restrict a_r   = ( ctype_r* )a; \
+		ctype_r* restrict a_i   = ( ctype_r* )a + ld_a; \
+\
+		ctype_r* restrict b_ri  = ( ctype_r* )b; \
+		ctype_r* restrict b_ir  = ( ctype_r* )b + ld_b; \
+\
+		for ( dim_t iter = 0; iter < m; ++iter ) \
+		{ \
+			dim_t i         = m - iter - 1; \
+			dim_t n_behind  = iter; \
+\
+			ctype_r* restrict alpha11_r  = a_r  + (i  )*rs_a2 + (i  )*cs_a2; \
+			ctype_r* restrict alpha11_i  = a_i  + (i  )*rs_a2 + (i  )*cs_a2; \
+			ctype_r* restrict a12t_r     = a_r  + (i  )*rs_a2 + (i+1)*cs_a2; \
+			ctype_r* restrict a12t_i     = a_i  + (i  )*rs_a2 + (i+1)*cs_a2; \
+			ctype_r* restrict b1_ri      = b_ri + (i  )*rs_b2 + (0  )*cs_b2; \
+			ctype_r* restrict b1_ir      = b_ir + (i  )*rs_b2 + (0  )*cs_b2; \
+			ctype_r* restrict B2_ri      = b_ri + (i+1)*rs_b2 + (0  )*cs_b2; \
+\
+			/* b1 = b1 - a12t * B2; */ \
+			/* b1 = b1 / alpha11; */ \
+			for ( dim_t j = 0; j < n; ++j ) \
+			{ \
+				ctype_r* restrict beta11_ri_r = b1_ri + (0  )*rs_b2 + (j  )*cs_b2 + 0*cs_b; \
+				ctype_r* restrict beta11_ri_i = b1_ri + (0  )*rs_b2 + (j  )*cs_b2 + 1*cs_b; \
+				ctype_r* restrict beta11_ir_r = b1_ir + (0  )*rs_b2 + (j  )*cs_b2 + 0*cs_b; \
+				ctype_r* restrict beta11_ir_i = b1_ir + (0  )*rs_b2 + (j  )*cs_b2 + 1*cs_b; \
+				ctype_r* restrict b21_ri      = B2_ri + (0  )*rs_b2 + (j  )*cs_b2; \
+				ctype*   restrict gamma11     = c     + (i  )*rs_c + (j  )*cs_c; \
+				ctype_r           beta11c_r   = *beta11_ri_r; \
+				ctype_r           beta11c_i   = *beta11_ri_i; \
+				ctype_r           rho11_r; \
+				ctype_r           rho11_i; \
+\
+				/* beta11 = beta11 - a10t * b01; */ \
+				PASTEMAC(ch,set0ris)( rho11_r, \
+				                      rho11_i ); \
+				for ( dim_t l = 0; l < n_behind; ++l ) \
+				{ \
+					ctype_r* restrict alpha12_r = a12t_r + (l  )*cs_a2; \
+					ctype_r* restrict alpha12_i = a12t_i + (l  )*cs_a2; \
+					ctype_r* restrict beta21_r  = b21_ri + (l  )*rs_b2 + 0*cs_b; \
+					ctype_r* restrict beta21_i  = b21_ri + (l  )*rs_b2 + 1*cs_b; \
+\
+					PASTEMAC(ch,axpyris)( *alpha12_r, \
+					                      *alpha12_i, \
+					                      *beta21_r, \
+					                      *beta21_i, \
+					                      rho11_r, \
+					                      rho11_i ); \
+				} \
+				PASTEMAC(ch,subris)( rho11_r, \
+				                     rho11_i, \
+				                     beta11c_r, \
+				                     beta11c_i ); \
+\
+				/* beta11 = beta11 / alpha11; */ \
+				/* NOTE: When preinversion is enabled, the INVERSE of alpha11
+				   (1.0/alpha11) is stored during packing instead alpha11 so we
+				   can multiply rather than divide. When preinversion is disabled,
+				   alpha11 is stored and division happens below explicitly. */ \
+				PASTEMAC(ch,diagop)( *alpha11_r, \
+				                     *alpha11_i, \
+				                     beta11c_r, \
+				                     beta11c_i ); \
+\
+				/* Output final result to matrix c. */ \
+				PASTEMAC(ch,sets)(  beta11c_r, beta11c_i, *gamma11 ); \
+\
+				/* Store the local values back to b11. */ \
+				for ( dim_t d = 0; d < cs_b; ++d ) \
+				{ \
+					PASTEMAC(ch,copyris)(  beta11c_r, beta11c_i, *(beta11_ri_r + d), *(beta11_ri_i + d) ); \
+					PASTEMAC(ch,copyris)( -beta11c_i, beta11c_r, *(beta11_ir_r + d), *(beta11_ir_i + d) ); \
+                } \
+			} \
+		} \
+	} \
+	else /* if ( bli_is_1r_packed( schema_b ) ) */ \
+	{ \
+		const inc_t       rs_b2 = 2 * rs_b; \
+		const inc_t       cs_b2 = 1 * cs_b; \
+\
+		ctype*   restrict a_ri  = ( ctype*   )a; \
+		/*ctype*   restrict a_ir  = ( ctype*   )a + ld_a/2;*/ \
+\
+		ctype_r* restrict b_r   = ( ctype_r* )b; \
+		ctype_r* restrict b_i   = ( ctype_r* )b + ld_b; \
+\
+		for ( dim_t iter = 0; iter < m; ++iter ) \
+		{ \
+			dim_t i         = m - iter - 1; \
+			dim_t n_behind  = iter; \
+\
+			ctype*   restrict alpha11_ri = a_ri + (i  )*rs_a  + (i  )*cs_a; \
+			ctype_r* restrict alpha11_r  = &PASTEMAC(ch,real)( *alpha11_ri ); \
+			ctype_r* restrict alpha11_i  = &PASTEMAC(ch,imag)( *alpha11_ri ); \
+			ctype*   restrict a12t_ri    = a_ri + (i  )*rs_a  + (i+1)*cs_a; \
+			ctype_r* restrict b1_r       = b_r  + (i  )*rs_b2 + (0  )*cs_b2; \
+			ctype_r* restrict b1_i       = b_i  + (i  )*rs_b2 + (0  )*cs_b2; \
+			ctype_r* restrict B2_r       = b_r  + (i+1)*rs_b2 + (0  )*cs_b2; \
+			ctype_r* restrict B2_i       = b_i  + (i+1)*rs_b2 + (0  )*cs_b2; \
+\
+			/* b1 = b1 - a12t * B2; */ \
+			/* b1 = b1 / alpha11; */ \
+			for ( dim_t j = 0; j < n; ++j ) \
+			{ \
+				ctype_r* restrict beta11_r  = b1_r + (0  )*rs_b2 + (j  )*cs_b2; \
+				ctype_r* restrict beta11_i  = b1_i + (0  )*rs_b2 + (j  )*cs_b2; \
+				ctype_r* restrict b21_r     = B2_r + (0  )*rs_b2 + (j  )*cs_b2; \
+				ctype_r* restrict b21_i     = B2_i + (0  )*rs_b2 + (j  )*cs_b2; \
+				ctype*   restrict gamma11   = c    + (i  )*rs_c  + (j  )*cs_c; \
+				ctype_r           beta11c_r = *beta11_r; \
+				ctype_r           beta11c_i = *beta11_i; \
+				ctype_r           rho11_r; \
+				ctype_r           rho11_i; \
+\
+				/* beta11 = beta11 - a10t * b01; */ \
+				PASTEMAC(ch,set0ris)( rho11_r, \
+				                      rho11_i ); \
+				for ( dim_t l = 0; l < n_behind; ++l ) \
+				{ \
+					ctype*   restrict alpha12_ri = a12t_ri + (l  )*cs_a; \
+					ctype_r* restrict alpha12_r  = &PASTEMAC(ch,real)( *alpha12_ri ); \
+					ctype_r* restrict alpha12_i  = &PASTEMAC(ch,imag)( *alpha12_ri ); \
+					ctype_r* restrict beta21_r   = b21_r   + (l  )*rs_b2; \
+					ctype_r* restrict beta21_i   = b21_i   + (l  )*rs_b2; \
+\
+					PASTEMAC(ch,axpyris)( *alpha12_r, \
+					                      *alpha12_i, \
+					                      *beta21_r, \
+					                      *beta21_i, \
+					                      rho11_r, \
+					                      rho11_i ); \
+				} \
+				PASTEMAC(ch,subris)( rho11_r, \
+				                     rho11_i, \
+				                     beta11c_r, \
+				                     beta11c_i ); \
+\
+				/* beta11 = beta11 / alpha11; */ \
+				/* NOTE: When preinversion is enabled, the INVERSE of alpha11
+				   (1.0/alpha11) is stored during packing instead alpha11 so we
+				   can multiply rather than divide. When preinversion is disabled,
+				   alpha11 is stored and division happens below explicitly. */ \
+				PASTEMAC(ch,diagop)( *alpha11_r, \
+				                     *alpha11_i, \
+				                     beta11c_r, \
+				                     beta11c_i ); \
+\
+				/* Output final result to matrix c. */ \
+				PASTEMAC(ch,sets)( beta11c_r, \
+				                   beta11c_i, *gamma11 ); \
+\
+				/* Store the local values back to b11. */ \
+				for ( dim_t d = 0; d < cs_b; ++d ) \
+					PASTEMAC(ch,copyris)( beta11c_r, \
+					                      beta11c_i, \
+					                      *(beta11_r + d), \
+					                      *(beta11_i + d) ); \
+			} \
+		} \
+	} \
+}
+
+#ifdef BLIS_ENABLE_TRSM_PREINVERSION
+INSERT_GENTFUNCRO( trsm1m_u, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX, scalris )
+#else
+INSERT_GENTFUNCRO( trsm1m_u, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX, invscalris )
+#endif
+
+#undef  GENTFUNCRO
+#define GENTFUNCRO( ctype_r, ctype, chr, ch, opname, arch, suf, trsmname ) \
+\
+void PASTEMAC(chr,opname,arch,suf) \
      ( \
              dim_t      m, \
              dim_t      n, \
@@ -48,7 +438,7 @@ void PASTEMAC3(ch,opname,arch,suf) \
        const void*      bx10, \
              void*      b110, \
              void*      c110, inc_t rs_c, inc_t cs_c, \
-             auxinfo_t* data, \
+       const auxinfo_t* auxinfo, \
        const cntx_t*    cntx  \
      ) \
 { \
@@ -59,119 +449,51 @@ void PASTEMAC3(ch,opname,arch,suf) \
 	      ctype*      b11         = b110; \
 	      ctype*      c11         = c110; \
 \
-	const num_t       dt          = PASTEMAC(ch,type); \
-	const num_t       dt_r        = PASTEMAC(chr,type); \
+	const cntl_t*     params     = bli_auxinfo_params( auxinfo ); \
 \
-	      gemm_ukr_ft rgemm_ukr   = bli_cntx_get_ukr_dt( dt_r, BLIS_GEMM_UKR, cntx ); \
+	const gemm_ukr_ft rgemm_ukr  = bli_trsm_var_cntl_real_gemm_ukr( params ); \
+	const bool        row_pref   = bli_trsm_var_cntl_row_pref( params ); \
+	const void*       params_r   = bli_trsm_var_cntl_real_params( params ); \
 \
-	      trsm_ukr_ft ctrsm_vukr  = bli_cntx_get_l3_vir_ukr_dt( dt, trsmkerid, cntx ); \
+	const dim_t       mr         = bli_trsm_var_cntl_mr( params ); \
+	const dim_t       nr         = bli_trsm_var_cntl_nr( params ); \
 \
-	const bool        col_pref_r  = bli_cntx_ukr_prefers_cols_dt( dt_r, BLIS_GEMM_UKR, cntx ); \
+	const dim_t       mr_r       = row_pref ? mr : 2 * mr; \
+	const dim_t       nr_r       = row_pref ? 2 * nr : nr; \
 \
-	const dim_t       mr          = bli_cntx_get_blksz_def_dt( dt, BLIS_MR, cntx ); \
-	const dim_t       nr          = bli_cntx_get_blksz_def_dt( dt, BLIS_NR, cntx ); \
+	/* Convert the micro-tile dimensions from being in units of complex elements to
+	   be in units of real elements. */ \
+	const dim_t       k_r         = 2 * k; \
 \
-	const dim_t       mr_r        = bli_cntx_get_blksz_def_dt( dt_r, BLIS_MR, cntx ); \
-	const dim_t       nr_r        = bli_cntx_get_blksz_def_dt( dt_r, BLIS_NR, cntx ); \
-\
-	      ctype       bt[ BLIS_STACK_BUF_MAX_SIZE \
+	ctype             bt[ BLIS_STACK_BUF_MAX_SIZE \
 	                      / sizeof( ctype ) ] \
 	                      __attribute__((aligned(BLIS_STACK_BUF_ALIGN_SIZE))); \
-	      inc_t       rs_bt; \
-	      inc_t       cs_bt; \
+	inc_t             rs_bt       = row_pref ? nr : 1; \
+	inc_t             cs_bt       = row_pref ? 1 : mr; \
 \
-	      inc_t       rs_bt_r; \
-	      inc_t       cs_bt_r; \
+	inc_t             rs_bt_r     = row_pref ? nr_r : 1; \
+	inc_t             cs_bt_r     = row_pref ? 1 : mr_r; \
 \
-	const dim_t       packnr      = bli_cntx_get_blksz_max_dt( dt, BLIS_NR, cntx ); \
+	const pack_t      schema_b    = bli_auxinfo_schema_b( auxinfo ); \
 \
-	const pack_t      schema_b    = bli_auxinfo_schema_b( data ); \
+	ctype_r* restrict a1x_r       = ( ctype_r* )a1x; \
 \
-	const dim_t       k2          = 2 * k; \
+	const inc_t       rs_a        = bli_trsm_var_cntl_mr_bcast( params ); \
+	const inc_t       cs_a        = bli_trsm_var_cntl_mr_pack( params ); \
 \
-	const ctype_r*    a1x_r       = ( ctype_r* )a1x; \
+	ctype_r* restrict bx1_r       = ( ctype_r* )bx1; \
 \
-	      ctype_r*    bx1_r       = ( ctype_r* )bx1; \
+	const inc_t       rs_b        = bli_trsm_var_cntl_nr_pack( params ); \
+	const inc_t       cs_b        = bli_trsm_var_cntl_nr_bcast( params ); \
 \
-	const inc_t       rs_b        = packnr; \
-	const inc_t       cs_b        = bli_cntx_get_blksz_def_dt( dt_r, BLIS_BBN, cntx ); \
-\
-	const ctype_r*    zero_r      = PASTEMAC(chr,0); \
-	const ctype_r*    minus_one_r = PASTEMAC(chr,m1); \
+	ctype_r* restrict zero_r      = PASTEMAC(chr,0); \
+	ctype_r* restrict minus_one_r = PASTEMAC(chr,m1); \
 \
 	const ctype_r     alpha_r     = PASTEMAC(ch,real)( *alpha ); \
-	const ctype_r     alpha_i     = PASTEMAC(ch,imag)( *alpha ); \
+	const ctype_r     alpha_i     = PASTEMAC(ch,imag)( *alpha ); ( void ) alpha_i; \
 \
-	      ctype_r*    b_use; \
-\
-	      inc_t       rs_b_use; \
-	      inc_t       cs_b_use; \
-\
-	      ctype       ct[ BLIS_STACK_BUF_MAX_SIZE \
-	                      / sizeof( ctype ) ] \
-	                      __attribute__((aligned(BLIS_STACK_BUF_ALIGN_SIZE))); \
-	/* FGVZ: Should we be querying the preference of BLIS_GEMMTRSM_?_UKR
-	   instead? */ \
-	const bool        col_pref    = bli_cntx_ukr_prefers_cols_dt( dt, BLIS_GEMM_VIR_UKR, cntx ); \
-	const inc_t       rs_ct       = ( col_pref ? 1 : nr ); \
-	const inc_t       cs_ct       = ( col_pref ? mr : 1 ); \
-\
-	const bool        use_ct      = ( m < mr || n < nr ); \
-\
-	      ctype*      c11_use     = c11; \
-\
-	      inc_t       rs_c_use    = rs_c; \
-	      inc_t       cs_c_use    = cs_c; \
-\
-	if ( use_ct ) \
-	{ \
-		c11_use  = ct; \
-		rs_c_use = rs_ct; \
-		cs_c_use = cs_ct; \
-	} \
-\
-\
-	/* Handle alphas with non-zero imaginary components. */ \
-	/* NOTE: This branch should never execute because alphas with
-	   non-zero imaginary components should be applied during
-	   packing, and so the only alphas we should see here are
-	   those exclusively in the real domain, either because the
-	   value originally had no imaginary compoent (e.g. 4.0) or
-	   because a 1.0 was sent in as a placeholder since the alpha
-	   was applied during packing. */ \
-	if ( 0 ) \
-	if ( !PASTEMAC(chr,eq0)( alpha_i ) ) \
-	{ \
-		bli_abort(); \
-\
-		/*
-		ctype_r* restrict one_r = PASTEMAC(chr,1); \
-\
-		const inc_t ld_b = rs_b; \
-\
-		PASTEMAC(ch,scal1ms_mxn)( schema_b, \
-		                          mr, \
-		                          nr, \
-		                          alpha, \
-		                          b11, rs_b, cs_b, ld_b ); \
-\
-		alpha_r = *one_r; \
-		*/ \
-	} \
-\
-\
-	{ \
-		/* Set the strides for the temporary bt matrix based on the native
-		   real domain micro-kernel storage preferences. */ \
-		if ( col_pref_r ) { rs_bt   = 1;    cs_bt   = mr;     \
-		                    rs_bt_r = 1;    cs_bt_r = mr_r; } \
-		else              { rs_bt   = nr;   cs_bt   = 1;      \
-		                    rs_bt_r = nr_r; cs_bt_r = 1;    } \
-\
-		b_use    = ( ctype_r* )bt; \
-		rs_b_use = rs_bt_r; \
-		cs_b_use = cs_bt_r; \
-	} \
+	auxinfo_t auxinfo_r = *auxinfo; \
+	bli_auxinfo_set_params( params_r, &auxinfo_r ); \
 \
 \
 	/* Since b11 is stored in the 1e or 1r schema, we cannot update it
@@ -179,29 +501,27 @@ void PASTEMAC3(ch,opname,arch,suf) \
 	   temporary microtile and then accumulate it into b11 according to
 	   its schema. */ \
 \
-\
 	/* lower: bt = -1.0 * a10 * b01;
 	   upper: bt = -1.0 * a12 * b21; */ \
 	rgemm_ukr \
 	( \
 	  mr_r, \
 	  nr_r, \
-	  k2, \
+	  k_r, \
 	  minus_one_r, \
 	  a1x_r, \
 	  bx1_r, \
 	  zero_r, \
-	  b_use, rs_b_use, cs_b_use, \
-	  data, \
+	  bt, rs_bt_r, cs_bt_r, \
+	  &auxinfo_r, \
 	  cntx  \
 	); \
 \
-\
 	if ( bli_is_1e_packed( schema_b ) ) \
 	{ \
-		const inc_t ld_b  =     rs_b; \
-		const inc_t rs_b2 = 2 * rs_b; \
-		const inc_t cs_b2 = 2 * cs_b; \
+		const inc_t       ld_b   =     rs_b; \
+		const inc_t       rs_b2  = 2 * rs_b; \
+		const inc_t       cs_b2  = 2 * cs_b; \
 \
 		ctype_r* restrict b11_ri = ( ctype_r* )b11; \
 		ctype_r* restrict b11_ir = ( ctype_r* )b11 + ld_b; \
@@ -220,7 +540,7 @@ void PASTEMAC3(ch,opname,arch,suf) \
 			ctype_r* restrict beta11_ir_r = b11_ir + i*rs_b2 + j*cs_b2 + 0*cs_b + d; \
 			ctype_r* restrict beta11_ir_i = b11_ir + i*rs_b2 + j*cs_b2 + 1*cs_b + d; \
 \
-			PASTEMAC3(ch,chr,ch,xpbyris) \
+			PASTEMAC(ch,chr,ch,xpbyris) \
 			( \
 			  *beta11t_r, \
 			  *beta11t_i, \
@@ -236,9 +556,9 @@ void PASTEMAC3(ch,opname,arch,suf) \
 	} \
 	else /* if ( bli_is_1r_packed( schema_b ) ) */ \
 	{ \
-		const inc_t ld_b  =     rs_b; \
-		const inc_t rs_b2 = 2 * rs_b; \
-		const inc_t cs_b2 =     cs_b; \
+		const inc_t       ld_b  =     rs_b; \
+		const inc_t       rs_b2 = 2 * rs_b; \
+		const inc_t       cs_b2 =     cs_b; \
 \
 		ctype_r* restrict b11_r = ( ctype_r* )b11; \
 		ctype_r* restrict b11_i = ( ctype_r* )b11 + ld_b; \
@@ -255,7 +575,7 @@ void PASTEMAC3(ch,opname,arch,suf) \
 			ctype_r* restrict beta11_r  = b11_r + i*rs_b2 + j*cs_b2 + d; \
 			ctype_r* restrict beta11_i  = b11_i + i*rs_b2 + j*cs_b2 + d; \
 \
-			PASTEMAC3(ch,chr,ch,xpbyris) \
+			PASTEMAC(ch,chr,ch,xpbyris) \
 			( \
 			  *beta11t_r, \
 			  *beta11t_i, \
@@ -267,28 +587,17 @@ void PASTEMAC3(ch,opname,arch,suf) \
 		} \
 	} \
 \
-\
 	/* b11 = inv(a11) * b11;
 	   c11 = b11; */ \
-	ctrsm_vukr \
+	PASTEMAC(chr,trsmname,arch,suf) \
 	( \
-	  a11, \
-	  b11, \
-	  c11_use, rs_c_use, cs_c_use, \
-	  data, \
-	  cntx  \
+	  m, n, \
+	  a11, rs_a, cs_a, \
+	  b11, rs_b, cs_b, \
+	  c11, rs_c, cs_c, \
+	  schema_b  \
 	); \
-\
-	if ( use_ct ) \
-	{ \
-		PASTEMAC(ch,copys_mxn) \
-		( \
-		  m, n, \
-		  ct,  rs_ct, cs_ct, \
-		  c11, rs_c,  cs_c  \
-		); \
-	} \
 }
 
-INSERT_GENTFUNCCO( gemmtrsm1m_l, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX, BLIS_TRSM_L_UKR )
-INSERT_GENTFUNCCO( gemmtrsm1m_u, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX, BLIS_TRSM_U_UKR )
+INSERT_GENTFUNCRO( gemmtrsm1m_l, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX, trsm1m_l )
+INSERT_GENTFUNCRO( gemmtrsm1m_u, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX, trsm1m_u )

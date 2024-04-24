@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-#  BLIS    
+#  BLIS
 #  An object-based framework for developing high-performance BLAS-like
 #  libraries.
 #
@@ -42,10 +42,10 @@
 print_usage()
 {
 	#local script_name
-	
+
 	# Get the script name
 	#script_name=${0##*/}
-	
+
 	# Echo usage info
 	echo " "
 	echo " "$script_name
@@ -100,7 +100,7 @@ print_usage()
 	echo "                 level 1: default (one line per directory)"
 	echo "                 level 2: verbose (several lines per directory)."
 	echo " "
-	
+
 	# Exit with non-zero exit status
 	exit 1
 }
@@ -123,24 +123,28 @@ gen_mkfile()
 	local mkfile_frag_var_name
 	local this_dir
 	local this_frag_dir
-	local mkfile_frag_tmpl_name 
-	local mkfile_name 
+	local mkfile_frag_tmpl_name
+	local mkfile_name
 	local mkfile_frag_path
-	local cur_frag_dir 
+	local cur_frag_dir
 	local cur_frag_path
 	local local_src_files
 	local sub_items
 	local item_path
 	local item_suffix
 	local cur_frag_sub_dirs
-	
-	
+
+
 	# Extract our arguments to local variables
 	mkfile_frag_var_name=$1
 	this_dir=$2
 	this_frag_dir=$3
-	
-	
+
+
+	# Make sure the target directory exists
+	mkdir -p $this_frag_dir
+
+
 	# Strip the leading path from the template makefile path to get its
 	# simple filename. Hide the output makefile fragment filename, if
 	# requested.
@@ -150,62 +154,62 @@ gen_mkfile()
 	else
 		mkfile_frag_path=$this_frag_dir/$mkfile_frag_tmpl_name
 	fi
-	
-	
+
+
 	# Determine the directory in which the fragment will reside.
 	cur_frag_path=$this_dir
 	cur_frag_dir=${this_dir##*/}
-	
-	
+
+
 	# Initialize the local source list to empty
 	local_src_files=""
-	
+
 	# Get a listing of the items in $this_dir
 	sub_items=$(ls $this_dir)
-	
+
 	# Generate a list of the source files we've chosen
 	for item in $sub_items; do
-		
+
 		# Prepend the directory to the item to get a relative path
 		item_path=$this_dir/$item
-		
+
 		# Acquire the item's suffix, if it has one
 		item_suffix=${item_path##*.}
-		
+
 		# If the suffix matches, then add it to our list
 		if is_in_list $item_suffix "$src_file_suffixes"
 		then
 			local_src_files="$local_src_files $item"
 		fi
 	done
-	
+
 	# Delete the leading " " space character in the local source files list.
 	local_src_files=${local_src_files##" "}
-	
-	
+
+
 	# Initialize the fragment subdirectory list to empty
 	cur_frag_sub_dirs=""
-	
+
 	# Capture the relative path listing of items in $this_dir.
 	sub_items=$(ls $this_dir)
-	
+
 	# Determine the fragment's subdirectory names, if any exist
 	for item in $sub_items; do
-		
+
 		# Prepend the directory to the item to get a relative path
 		item_path=$this_dir/$item
-		
+
 		# If item is a directory, and it's not in the ignore list, descend into it.
 		#if [ -d $item_path ] && ! should_ignore $item; then
-		if [ -d $item_path ] && ! is_in_list $item "$ignore_dirs" ; then
+		if [ "$recursive_flag" = "1" ] && [ -d $item_path ] && ! is_in_list $item "$ignore_dirs" ; then
 			cur_frag_sub_dirs=$cur_frag_sub_dirs" "$item
 		fi
 	done
-	
+
 	# Delete the leading " " space character in fragment's subdirectory list.
 	cur_frag_sub_dirs=${cur_frag_sub_dirs##" "}
-	
-	
+
+
 	# Be verbose, if level 2 was requested.
 	if [ "$verbose_flag" = "2" ]; then
 		echo "mkf frag tmpl path: $mkfile_frag_tmpl_path"
@@ -218,8 +222,8 @@ gen_mkfile()
 		echo "mkf frag var name:  $mkfile_frag_var_name"
 		echo "--------------------------------------------------"
 	fi
-	
-	
+
+
 	# Copy the template makefile to the directory given, using the new
 	# makefile name we just created above.
 	if [ -z "$dry_run_flag" ]; then
@@ -229,8 +233,8 @@ gen_mkfile()
 		                           | sed -e s/"$mkfile_fragment_src_var_name_anchor"/"$mkfile_frag_var_name"/g \
 		                           > $mkfile_frag_path
 	fi
-	
-	
+
+
 	# Return peacefully.
 	return 0
 }
@@ -239,59 +243,59 @@ gen_mkfile()
 #
 # gen_mkfiles
 #
-# Recursively generates makefile fragments for a directory and all 
+# Recursively generates makefile fragments for a directory and all
 # subdirectories. All of the actual work happens in gen_mkfile().
 #
 gen_mkfiles()
 {
 	# Local variable declarations
 	local item sub_items cur_dir this_frag_dir this_dir
-	
-	
+
+
 	# Extract our argument
 	cur_dir=$1
 	this_frag_dir=$2
-	
-	
+
+
 	# Append a relevant suffix to the makefile variable name, if necesary
 	# NOTE: This step is disabled because special directories are presently
 	# ignored when generating makefile variable names.
 	#all_add_src_var_name "$cur_dir"
-	
-	
+
+
 	# Be verbose if level 2 was requested
 	if   [ "$verbose_flag" = "2" ]; then
 		echo ">>>" $script_name ${src_var_name}_$SRC $cur_dir $this_frag_dir
 	elif [ "$verbose_flag" = "1" ]; then
 		echo "$script_name: creating makefile fragment in $this_frag_dir from $cur_dir"
 	fi
-	
-	
+
+
 	# Call our function to generate a makefile in the directory given.
 	gen_mkfile "${src_var_name}_$SRC" $cur_dir $this_frag_dir
-	
-	
+
+
 	# Get a listing of the directories in $directory
 	sub_items=$(ls $cur_dir)
-	
+
 	# Descend into the contents of root_dir to generate the subdirectories'
 	# makefile fragments.
 	for item in $sub_items; do
-		
+
 		# If item is a directory, and it's not in the ignore list, descend into it.
 		#if [ -d "$cur_dir/$item" ] && ! should_ignore $item; then
 		if [ -d "$cur_dir/$item" ] && ! is_in_list $item "$ignore_dirs" ; then
 			gen_mkfiles $cur_dir/$item $this_frag_dir/$item
 		fi
 	done
-	
-	
+
+
 	# Remove a relevant suffix from the makefile variable name, if necesary
 	# NOTE: This step is disabled because special directories are presently
 	# ignored when generating makefile variable names.
 	#all_del_src_var_name "$cur_dir"
-	
-	
+
+
 	# Return peacefully
 	return 0
 }
@@ -301,28 +305,28 @@ gen_mkfiles()
 #update_src_var_name_special()
 #{
 #	local dir act i name var_suffix
-#	
+#
 #	# Extract arguments.
 #	act="$1"
 #	dir="$2"
-#	
+#
 #	# Strip / from end of directory path, if there is one, and then strip
 #	# path from directory name.
 #	dir=${dir%/}
 #	dir=${dir##*/}
-#	
+#
 #	# Run through our list.
 #	# NOTE: CURRENTLY, SPECIAL DIRECTORY NAMES ARE IGNORED. In order to
 #	#       re-enable them, remove the quotes from "${special_dirs}".
 #	for specdir in "${special_dirs}"; do
-#		
+#
 #		# If the current item matches sdir, then we'll have
 #		# to make a modification of some form.
 #		if [ "$dir" = "$specdir" ]; then
-#			
+#
 #			# Convert the directory name to uppercase.
 #			var_suffix=$(echo "$dir" | tr '[:lower:]' '[:upper:]')
-#			
+#
 #			# Either add or remove the suffix, and also update the
 #			# source file suffix variable.
 #			if [ "$act" == "+" ]; then
@@ -330,7 +334,7 @@ gen_mkfiles()
 #			else
 #				src_var_name=${src_var_name%_$var_suffix}
 #			fi
-#			
+#
 #			# No need to continue iterating.
 #			break;
 #		fi
@@ -340,17 +344,17 @@ gen_mkfiles()
 #init_src_var_name()
 #{
 #	local dir="$1"
-#	
+#
 #	# Strip off the leading / if there is one
 #	dir=${dir%%/}
-#	
-#	# Convert the / directory separators into spaces to make a list of 
+#
+#	# Convert the / directory separators into spaces to make a list of
 #	# directories.
 #	list=${dir//\// }
-#	
+#
 #	# Inspect each item in $list
 #	for item in $list; do
-#		
+#
 #		# Try to initialize the source variable name
 #		all_add_src_var_name $item
 #	done
@@ -359,7 +363,7 @@ gen_mkfiles()
 #all_add_src_var_name()
 #{
 #	local dir="$1"
-#	
+#
 #	update_src_var_name_special "+" "$dir"
 #
 #}
@@ -367,7 +371,7 @@ gen_mkfiles()
 #all_del_src_var_name()
 #{
 #	local dir="$1"
-#	
+#
 #	update_src_var_name_special "-" "$dir"
 #}
 
@@ -384,7 +388,7 @@ read_mkfile_config()
 	src_file_suffixes=$(echo ${src_file_suffixes} | sed "s/\n/ /g")
 	ignore_dirs=$(echo ${ignore_dirs} | sed "s/\n/ /g")
 
-}	
+}
 
 main()
 {
@@ -395,26 +399,26 @@ main()
 	mkfile_fragment_sub_dir_names_anchor="_mkfile_fragment_sub_dir_names_"
 	mkfile_fragment_local_src_files_anchor="_mkfile_fragment_local_src_files_"
 	mkfile_fragment_src_var_name_anchor="_mkfile_fragment_src_var_name_"
-	
+
 	# The name of the script, stripped of any preceeding path.
 	script_name=${0##*/}
-	
+
 	# The prefix for all makefile variables.
 	src_var_name_prefix='MK'
 
 	# The variable that always holds the string that will be passed to
 	# gen_mkfile() as the source variable to insert into the fragment.mk.
 	src_var_name=''
-	
+
 	# The suffix appended to all makefile fragment source variables.
 	SRC='SRC'
-	
+
 	# The list of source file suffixes to add to the makefile variables.
 	src_file_suffixes=''
 
 	# The lists of directories to ignore.
 	ignore_dirs=''
-	
+
 	# The arguments to this function. They'll get assigned meaningful
 	# values after getopts.
 	root_dir=""
@@ -422,22 +426,22 @@ main()
 	mkfile_frag_tmpl_path=""
 	suffix_file=""
 	ignore_file=""
-	
+
 	# Flags set by getopts.
-	dry_run_flag=""	
+	dry_run_flag=""
 	hide_flag=""
 	recursive_flag=""
 	output_name=""
 	prefix_flag=""
 	verbose_flag=""
-	
+
 	# -- END GLOBAL VARIABLE DECLARATIONS --
 
 
 	# Local variable declarations.
 	local item sub_items this_dir
-	
-	
+
+
 	# Process our command line options.
 	while getopts ":dho:p:rv:" opt; do
 		case $opt in
@@ -451,15 +455,15 @@ main()
 		esac
 	done
 	shift $(($OPTIND - 1))
-	
-	
+
+
 	# Make sure that verboseness level is valid.
-	if [ "$verbose_flag" != "0" ] && 
-	   [ "$verbose_flag" != "1" ] && 
+	if [ "$verbose_flag" != "0" ] &&
+	   [ "$verbose_flag" != "1" ] &&
 	   [ "$verbose_flag" != "2" ]; then
 		verbose_flag="1"
 	fi
-	
+
 	# Check the number of arguments after command line option processing.
 	if [ $# != "5" ]; then
 		print_usage
@@ -469,25 +473,25 @@ main()
 	if [ -n "${output_name}" ]; then
 		script_name="${output_name}"
 	fi
-	
-	
+
+
 	# Extract our arguments.
 	root_dir=$1
 	frag_dir=$2
 	mkfile_frag_tmpl_path=$3
 	suffix_file=$4
 	ignore_file=$5
-	
-	
+
+
 	# Read the makefile config files to be used in the makefile fragment
 	# generation.
 	read_mkfile_config
-	
-	
+
+
 	# Strip / from end of directory path, if there is one.
 	root_dir=${root_dir%/}
 	frag_dir=${frag_dir%/}
-	
+
 
 	# Initialize the name of the makefile source variable.
 	if [ -n "$prefix_flag" ]; then
@@ -509,41 +513,41 @@ main()
 		root_dir_upper=$(echo "$root_dir_upper" | tr '/' '_')
 		src_var_name="${src_var_name_prefix}_${root_dir_upper}"
 	fi
-	
-	
+
+
 	# Be verbose if level 2 was requested.
 	if   [ "$verbose_flag" = "2" ]; then
 		echo ">>>" $script_name ${src_var_name}_$SRC $root_dir $frag_dir
 	elif [ "$verbose_flag" = "1" ]; then
 		echo "$script_name: creating makefile fragment in $frag_dir from $root_dir"
 	fi
-	
-	
+
+
 	# Call our function to generate a makefile in the root directory given.
 	gen_mkfile "${src_var_name}_$SRC" $root_dir $frag_dir
-	
-	
+
+
 	# If we were asked to act recursively, then continue processing
 	# root_dir's contents.
 	if [ -n "$recursive_flag" ]; then
-		
+
 		# Get a listing of the directories in $directory.
 		sub_items=$(ls $root_dir)
-		
+
 		# Descend into the contents of root_dir to generate the makefile
 		# fragments.
 		for item in $sub_items; do
-			
+
 			# If item is a directory, and it's not in the ignore list, descend into it.
 			#if [ -d "$root_dir/$item" ] && ! should_ignore $item ; then
 			if [ -d "$root_dir/$item" ] && ! is_in_list $item "$ignore_dirs" ; then
-				
+
 				gen_mkfiles $root_dir/$item $frag_dir/$item
 			fi
 		done
 	fi
-	
-	
+
+
 	# Exit peacefully.
 	return 0
 }
@@ -551,22 +555,22 @@ main()
 is_in_list()
 {
 	local cur_item the_item item_list
-	
+
 	# Extract argument.
 	the_item="$1"
 	item_list="$2"
-	
+
 	# Check each item in the list against the item of interest.
 	for cur_item in ${item_list}; do
-		
+
 		# If the current item in the list matches the one of interest.
 		if [ "${cur_item}" = "${the_item}" ]; then
-			
+
 			# Return success (ie: item was found).
 			return 0
 		fi
 	done
-	
+
 	# If we made it this far, return failure (ie: item not found).
 	return 1
 }

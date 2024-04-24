@@ -143,7 +143,7 @@ GENPROT( sumsqv )
 #undef  GENPROT
 #define GENPROT( opname ) \
 \
-BLIS_EXPORT_BLIS void PASTEMAC0(opname) \
+BLIS_EXPORT_BLIS void PASTEMAC(opname) \
      ( \
        const obj_t* x, \
        const obj_t* y, \
@@ -162,7 +162,7 @@ GENPROT( gtesc )
 #undef  GENPROT
 #define GENPROT( opname ) \
 \
-BLIS_EXPORT_BLIS void PASTEMAC0(opname) \
+BLIS_EXPORT_BLIS void PASTEMAC(opname) \
      ( \
              FILE*  file, \
        const char*  s1, \
@@ -178,7 +178,7 @@ GENPROT( fprintm )
 #undef  GENPROT
 #define GENPROT( opname ) \
 \
-BLIS_EXPORT_BLIS void PASTEMAC0(opname) \
+BLIS_EXPORT_BLIS void PASTEMAC(opname) \
      ( \
        const char*  s1, \
        const obj_t* x, \

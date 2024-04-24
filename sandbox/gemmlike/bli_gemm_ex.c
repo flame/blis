@@ -70,27 +70,14 @@ void bli_gemm_ex
 		  ( obj_t* )alpha, ( obj_t* )a, ( obj_t* )b, ( obj_t* )beta, ( obj_t* )c,
 		  ( cntx_t* )cntx, ( rntm_t* )rntm
 		);
-		return;
 	}
-
-	// Initialize a local runtime with global settings if necessary. Note
-	// that in the case that a runtime is passed in, we make a local copy.
-	rntm_t rntm_l;
-	if ( rntm == NULL ) { bli_rntm_init_from_global( &rntm_l ); rntm = &rntm_l; }
-	else                { rntm_l = *rntm;                       rntm = &rntm_l; }
-
-	// Obtain a valid (native) context from the gks if necessary.
-	if ( cntx == NULL ) cntx = bli_gks_query_cntx();
-
-	// Check the operands.
-	if ( bli_error_checking_is_enabled() )
-		bli_gemm_check( alpha, a, b, beta, c, cntx );
-
-	// Invoke the operation's front end.
-	bli_gemm_front
-	(
-	  ( obj_t* )alpha, ( obj_t* )a, ( obj_t* )b, ( obj_t* )beta, ( obj_t* )c,
-	  ( cntx_t* )cntx, ( rntm_t* )rntm
-	);
+	else
+	{
+		bli_gemm_def_ex
+		(
+		  ( obj_t* )alpha, ( obj_t* )a, ( obj_t* )b, ( obj_t* )beta, ( obj_t* )c,
+		  ( cntx_t* )cntx, ( rntm_t* )rntm
+		);
+	}
 }
 

@@ -37,32 +37,43 @@
 
 // scal2s_mxn
 
-#undef  GENTFUNC
-#define GENTFUNC( ctype, ch, opname ) \
+// Notes:
+// - The first char encodes the type of a.
+// - The second char encodes the type of x.
+// - The third char encodes the type of y.
+// - We only implement cases where typeof(a) == type(x).
+
+#undef  BLIS_ENABLE_CR_CASES
+#define BLIS_ENABLE_CR_CASES 0
+
+// -- bli_???scal2s_mxn --
+
+#undef  GENTFUNC2
+#define GENTFUNC2( ctypex, ctypey, chx, chy, opname, kername ) \
 \
-BLIS_INLINE void PASTEMAC(ch,opname) \
+BLIS_INLINE void PASTEMAC(chx,chx,chy,opname) \
      ( \
-       const conj_t       conjx, \
-       const dim_t        m, \
-       const dim_t        n, \
-       ctype*    restrict alpha, \
-       ctype*    restrict x, const inc_t rs_x, const inc_t cs_x, \
-       ctype*    restrict y, const inc_t rs_y, const inc_t cs_y  \
+       const conj_t  conjx, \
+       const dim_t   m, \
+       const dim_t   n, \
+       const ctypex* alpha, \
+       const ctypex* x, inc_t rs_x, inc_t cs_x, \
+             ctypey* y, inc_t rs_y, inc_t cs_y  \
      ) \
 { \
 	if ( bli_is_conj( conjx ) ) \
 	{ \
 		for ( dim_t j = 0; j < n; ++j ) \
 		{ \
-			ctype* restrict xj = x + j*cs_x; \
-			ctype* restrict yj = y + j*cs_y; \
+			const ctypex* restrict xj = x + j*cs_x; \
+			      ctypey* restrict yj = y + j*cs_y; \
 \
 			for ( dim_t i = 0; i < m; ++i ) \
 			{ \
-				ctype* restrict xij = xj + i*rs_x; \
-				ctype* restrict yij = yj + i*rs_y; \
+				const ctypex* restrict xij = xj + i*rs_x; \
+				      ctypey* restrict yij = yj + i*rs_y; \
 \
-				PASTEMAC(ch,scal2js)( *alpha, *xij, *yij ); \
+				PASTEMAC(chx,chx,chy,scal2js)( *alpha, *xij, *yij ); \
 			} \
 		} \
 	} \
@@ -70,18 +81,40 @@ BLIS_INLINE void PASTEMAC(ch,opname) \
 	{ \
 		for ( dim_t j = 0; j < n; ++j ) \
 		{ \
-			ctype* restrict xj = x + j*cs_x; \
-			ctype* restrict yj = y + j*cs_y; \
+			const ctypex* restrict xj = x + j*cs_x; \
+			      ctypey* restrict yj = y + j*cs_y; \
 \
 			for ( dim_t i = 0; i < m; ++i ) \
 			{ \
-				ctype* restrict xij = xj + i*rs_x; \
-				ctype* restrict yij = yj + i*rs_y; \
+				const ctypex* restrict xij = xj + i*rs_x; \
+				      ctypey* restrict yij = yj + i*rs_y; \
 \
-				PASTEMAC(ch,scal2s)( *alpha, *xij, *yij ); \
+				PASTEMAC(chx,chx,chy,scal2s)( *alpha, *xij, *yij ); \
 			} \
 		} \
 	} \
+}
+
+INSERT_GENTFUNC2_BASIC ( scal2s_mxn, scal2s )
+INSERT_GENTFUNC2_MIX_DP( scal2s_mxn, scal2s )
+
+
+// -- bli_?scal2s_mxn --
+
+#undef  GENTFUNC
+#define GENTFUNC( ctype, ch, opname ) \
+\
+BLIS_INLINE void PASTEMAC(ch,opname) \
+     ( \
+       const conj_t conjx, \
+       const dim_t  m, \
+       const dim_t  n, \
+       const ctype* alpha, \
+       const ctype* x, inc_t rs_x, inc_t cs_x, \
+             ctype* y, inc_t rs_y, inc_t cs_y  \
+     ) \
+{ \
+	PASTEMAC(ch,ch,ch,opname)( conjx, m, n, alpha, x, rs_x, cs_x, y, rs_y, cs_y ); \
 }
 
 INSERT_GENTFUNC_BASIC( scal2s_mxn )

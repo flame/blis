@@ -151,14 +151,10 @@ void bli_cntx_init_sifive_x280( cntx_t* cntx )
 	  BLIS_DOTXAXPYF_KER,  BLIS_DCOMPLEX, bli_zdotxaxpyf_sifive_x280_asm,
 
 	  // Level 1m
-	  BLIS_PACKM_MRXK_KER, BLIS_FLOAT,    bli_spackm_sifive_x280_asm_7xk,
-	  BLIS_PACKM_MRXK_KER, BLIS_DOUBLE,   bli_dpackm_sifive_x280_asm_7xk,
-	  BLIS_PACKM_MRXK_KER, BLIS_SCOMPLEX, bli_cpackm_sifive_x280_asm_6xk,
-	  BLIS_PACKM_MRXK_KER, BLIS_DCOMPLEX, bli_zpackm_sifive_x280_asm_6xk,
-	  BLIS_PACKM_NRXK_KER, BLIS_FLOAT,    bli_spackm_sifive_x280_asm_64xk,
-	  BLIS_PACKM_NRXK_KER, BLIS_DOUBLE,   bli_dpackm_sifive_x280_asm_32xk,
-	  BLIS_PACKM_NRXK_KER, BLIS_SCOMPLEX, bli_cpackm_sifive_x280_asm_32xk,
-	  BLIS_PACKM_NRXK_KER, BLIS_DCOMPLEX, bli_zpackm_sifive_x280_asm_16xk,
+	  BLIS_PACKM_KER,      BLIS_FLOAT,    bli_spackm_sifive_x280_asm_7m4,
+	  BLIS_PACKM_KER,      BLIS_DOUBLE,   bli_dpackm_sifive_x280_asm_7m4,
+	  BLIS_PACKM_KER,      BLIS_SCOMPLEX, bli_cpackm_sifive_x280_asm_6m2,
+	  BLIS_PACKM_KER,      BLIS_DCOMPLEX, bli_zpackm_sifive_x280_asm_6m2,
 
 	  // Level 3
 	  BLIS_GEMM_UKR,       BLIS_FLOAT,    bli_sgemm_sifive_x280_asm_7m4,

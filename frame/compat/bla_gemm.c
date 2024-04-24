@@ -99,7 +99,7 @@ void PASTEF77(ch,blasname) \
 	const inc_t cs_c = *ldc; \
 \
 	/* Call BLIS interface. */ \
-	PASTEMAC2(ch,blisname,BLIS_TAPI_EX_SUF) \
+	PASTEMAC(ch,blisname,BLIS_TAPI_EX_SUF) \
 	( \
 	  blis_transa, \
 	  blis_transb, \
@@ -183,7 +183,7 @@ void PASTEF77(ch,blasname) \
 		dim_t m0t, k0t; \
 		bli_set_dims_with_trans( blis_transa, m0, k0, &m0t, &k0t ); \
 \
-		PASTEMAC2(ch,gemv,BLIS_TAPI_EX_SUF) \
+		PASTEMAC(ch,gemv,BLIS_TAPI_EX_SUF) \
 		( \
 		  blis_transa, \
 		  bli_extract_conj( blis_transb ), \
@@ -203,7 +203,7 @@ void PASTEF77(ch,blasname) \
 		dim_t n0t, k0t; \
 		bli_set_dims_with_trans( blis_transb, n0, k0, &n0t, &k0t ); \
 \
-		PASTEMAC2(ch,gemv,BLIS_TAPI_EX_SUF) \
+		PASTEMAC(ch,gemv,BLIS_TAPI_EX_SUF) \
 		( \
 		  blis_transb, \
 		  bli_extract_conj( blis_transa ), \

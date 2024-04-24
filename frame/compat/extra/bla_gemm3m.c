@@ -114,7 +114,7 @@ void PASTEF77(ch,blasname) \
 		bli_rntm_disable_l3_sup( rntm ); \
 \
 		/* Call BLIS interface. */ \
-		PASTEMAC2(ch,blisname,BLIS_TAPI_EX_SUF) \
+		PASTEMAC(ch,blisname,BLIS_TAPI_EX_SUF) \
 		( \
 		  blis_transa, \
 		  blis_transb, \
@@ -217,34 +217,17 @@ void PASTEF77(ch,blasname) \
 	bli_obj_set_conjtrans( blis_transa, &ao ); \
 	bli_obj_set_conjtrans( blis_transb, &bo ); \
 \
-	/* As a placeholder, invoke 1m since BLIS does no longer contains an
-	   official 3m implementation. Note that we do this by inlining an
-	   abbreviated version of bli_gemm_ex() so that we can bypass
-	   consideration of sup, which doesn't make sense in this context. */ \
-	{ \
-		cntx_t* cntx = ( cntx_t* )bli_gks_query_ind_cntx( BLIS_1M ); \
-\
-		rntm_t  rntm_l; \
-		rntm_t* rntm = &rntm_l; \
-		bli_rntm_init_from_global( &rntm_l ); \
-\
-		/* This is probably not needed given that we performed BLAS-style
-		   parameter checking above, but bli_gemm_check() is normally called
-		   in the normal course of bli_gemm_ex(). */ \
-		if ( bli_error_checking_is_enabled() ) \
-			bli_gemm_check( &alphao, &ao, &bo, &betao, &co, cntx ); \
-\
-		PASTEMAC(blisname,_front) \
-		( \
-		  &alphao, \
-		  &ao, \
-		  &bo, \
-		  &betao, \
-		  &co, \
-		  cntx, \
-		  rntm \
-		); \
-	} \
+	/* As a placeholder, invoke bli_gemm_ex(). */ \
+	PASTEMAC(blisname,BLIS_OAPI_EX_SUF) \
+	( \
+	  &alphao, \
+	  &ao, \
+	  &bo, \
+	  &betao, \
+	  &co, \
+	  NULL, \
+	  NULL \
+	); \
 \
 	/* Finalize BLIS. */ \
 	bli_finalize_auto(); \

@@ -78,7 +78,6 @@ void PASTEMAC(ch,varname) \
 	inc_t  ldp, p_inc; \
 	conj_t conjc; \
 \
-\
 	/* Extract the conjugation bit from the transposition argument. */ \
 	conjc = bli_extract_conj( transc ); \
 \
@@ -90,46 +89,21 @@ void PASTEMAC(ch,varname) \
 		bli_toggle_trans( &transc ); \
 	} \
 \
-	/* Create flags to incidate row or column storage. Note that the
-	   schema bit that encodes row or column is describing the form of
-	   micro-panel, not the storage in the micro-panel. Hence the
-	   mismatch in "row" and "column" semantics. */ \
-	bool row_stored = bli_is_col_packed( schema ); \
-	/*bool col_stored = bli_is_row_packed( schema );*/ \
+	/* Prepare to pack to row-stored column panels. */ \
+	iter_dim       = n; \
+	panel_len_full = m; \
+	panel_len_max  = m_max; \
+	panel_dim_max  = pd_p; \
+	vs_c           = cs_c; \
+	ldc            = rs_c; \
+	ldp            = rs_p; \
 \
-	/* If the row storage flag indicates row storage, then we are packing
-	   to column panels; otherwise, if the strides indicate column storage,
-	   we are packing to row panels. */ \
-	if ( row_stored ) \
-	{ \
-		/* Prepare to pack to row-stored column panels. */ \
-		iter_dim       = n; \
-		panel_len_full = m; \
-		panel_len_max  = m_max; \
-		panel_dim_max  = pd_p; \
-		vs_c           = cs_c; \
-		ldc            = rs_c; \
-		ldp            = rs_p; \
-	} \
-	else /* if ( col_stored ) */ \
-	{ \
-		/* Prepare to pack to column-stored row panels. */ \
-		iter_dim       = m; \
-		panel_len_full = n; \
-		panel_len_max  = n_max; \
-		panel_dim_max  = pd_p; \
-		vs_c           = rs_c; \
-		ldc            = cs_c; \
-		ldp            = cs_p; \
-	} \
-\
-	num_t dt     = PASTEMAC(ch,type); \
-	ukr_t ker_id = bli_is_col_packed( schema ) ? BLIS_PACKM_NRXK_KER \
-	                                           : BLIS_PACKM_MRXK_KER; \
+	num_t  dt      = PASTEMAC(ch,type); \
+	ukr_t ker_id   = BLIS_PACKM_KER; \
 \
 	/* Query the context for the unpackm kernel corresponding to the current
 	   panel dimension, or kernel id. */ \
-	PASTECH(packm_cxk,_ker_ft) f = bli_cntx_get_ukr_dt( dt, ker_id, cntx ); \
+	packm_cxk_ker_ft f = bli_cntx_get_ukr2_dt( dt, dt, ker_id, cntx ); \
 \
 	/* Compute the total number of iterations we'll need. */ \
 	n_iter = iter_dim / panel_dim_max + ( iter_dim % panel_dim_max ? 1 : 0 ); \
@@ -158,7 +132,7 @@ void PASTEMAC(ch,varname) \
 	   packm thrinfo_t node. NOTE: The definition of bli_thread_range_slrr()
 	   will depend on whether slab or round-robin partitioning was requested
 	   at configure-time. */ \
-	bli_thread_range_slrr( thread, n_iter, 1, FALSE, &it_start, &it_end, &it_inc ); \
+	bli_thread_range_slrr( tid, nt, n_iter, 1, FALSE, &it_start, &it_end, &it_inc ); \
 \
 	/* Iterate over every logical micropanel in the source matrix. */ \
 	for ( ic  = ic0,    it  = 0; it < n_iter; \
@@ -184,11 +158,14 @@ void PASTEMAC(ch,varname) \
 				  conjc, \
 				  schema, \
 				  panel_dim_i, \
+				  panel_dim_max, \
+				  1, /* this shouldn't be hard-coded */ \
 				  panel_len_i, \
 				  panel_len_max_i, \
 				  kappa_cast, \
 				  c_use, vs_c, ldc, \
 				  p_use,       ldp, \
+				  NULL, \
 				  cntx  \
 				); \
 			} \
@@ -340,7 +317,6 @@ void PASTEMAC(ch,varname) \
 	inc_t  incp, ldp; \
 	conj_t conjc; \
 \
-\
 	/* Extract the conjugation bit from the transposition argument. */ \
 	conjc = bli_extract_conj( transc ); \
 \
@@ -352,37 +328,16 @@ void PASTEMAC(ch,varname) \
 		bli_toggle_trans( &transc ); \
 	} \
 \
-	/* Create flags to incidate row or column storage. Note that the
-	   schema bit that encodes row or column is describing the form of
-	   micro-panel, not the storage in the micro-panel. Hence the
-	   mismatch in "row" and "column" semantics. */ \
-	bool col_stored = bli_is_col_packed( schema ); \
-	/*bool row_stored = bli_is_row_packed( schema );*/ \
-\
-	if ( col_stored ) \
-	{ \
-		/* Prepare to pack to a column-stored matrix. */ \
-		iter_dim       = n; \
-		vector_len     = m; \
-		incc           = rs_c; \
-		ldc            = cs_c; \
-		incp           = 1; \
-		ldp            = cs_p; \
-	} \
-	else /* if ( row_stored ) */ \
-	{ \
-		/* Prepare to pack to a row-stored matrix. */ \
-		iter_dim       = m; \
-		vector_len     = n; \
-		incc           = cs_c; \
-		ldc            = rs_c; \
-		incp           = 1; \
-		ldp            = rs_p; \
-	} \
+	/* Prepare to pack to a column-stored matrix. */ \
+	iter_dim       = n; \
+	vector_len     = m; \
+	incc           = rs_c; \
+	ldc            = cs_c; \
+	incp           = 1; \
+	ldp            = cs_p; \
 \
 	/* Compute the total number of iterations we'll need. */ \
 	n_iter = iter_dim; \
-\
 \
 	ctype* p_begin = p_cast; \
 \
@@ -401,7 +356,7 @@ void PASTEMAC(ch,varname) \
 	   packm thrinfo_t node. NOTE: The definition of bli_thread_range_slrr()
 	   will depend on whether slab or round-robin partitioning was requested
 	   at configure-time. */ \
-	bli_thread_range_slrr( thread, n_iter, 1, FALSE, &it_start, &it_end, &it_inc ); \
+	bli_thread_range_slrr( tid, nt, n_iter, 1, FALSE, &it_start, &it_end, &it_inc ); \
 \
 	/* Iterate over every logical micropanel in the source matrix. */ \
 	for ( it = 0; it < n_iter; it += 1 ) \
@@ -416,7 +371,7 @@ void PASTEMAC(ch,varname) \
 			   or round-robin partitioning was requested at configure-time. */ \
 			if ( bli_is_my_iter( it, it_start, it_end, tid, nt ) ) \
 			{ \
-				PASTEMAC2(ch,scal2v,BLIS_TAPI_EX_SUF) \
+				PASTEMAC(ch,scal2v,BLIS_TAPI_EX_SUF) \
 				( \
 				  conjc, \
 				  vector_len, \
