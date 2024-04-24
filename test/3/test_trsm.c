@@ -174,9 +174,14 @@ int main( int argc, char** argv )
 		bli_copym( &c, &c_save );
 
 #ifdef BLIS
-		// Switch to the induced method specified by ind.
-		bli_ind_disable_all_dt( dt );
-		bli_ind_enable_dt( ind, dt );
+		// Switch to the induced method specified by ind, unless the 'auto'
+		// option was given, in which case we leave the induced method
+		// unchanged.
+		if ( params.im_is_auto == FALSE )
+		{
+			bli_ind_disable_all_dt( dt );
+			bli_ind_enable_dt( ind, dt );
+		}
 #endif
 
 		dtime_save = DBL_MAX;
