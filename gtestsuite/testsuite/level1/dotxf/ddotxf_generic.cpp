@@ -133,8 +133,8 @@ public:
 
         str_name += ( conja == 'n' )? "_conja_n" : "_conja_t";
         str_name += ( conjx == 'n' )? "_conjx_n" : "_conjx_t";
-        str_name += "_m" + std::to_string(m);
-        str_name += "_b" + std::to_string(b);
+        str_name += "_m_" + std::to_string(m);
+        str_name += "_b_" + std::to_string(b);
         str_name += "_alpha_" + testinghelpers::get_value_string(alpha);
         str_name += "_beta_" + testinghelpers::get_value_string(beta);
         str_name += "_incx_" + testinghelpers::get_value_string(incx);

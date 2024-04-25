@@ -122,7 +122,7 @@ public:
         float beta   = std::get<6>(str.param);
 
         std::string str_name = "saxpbyv_ukr";
-        str_name += "_n" + std::to_string(n);
+        str_name += "_n_" + std::to_string(n);
         str_name += ( conjx == 'n' )? "_noconjx" : "_conjx";
         str_name += "_incx_" + testinghelpers::get_value_string(incx);
         str_name += "_incy_" + testinghelpers::get_value_string(incy);

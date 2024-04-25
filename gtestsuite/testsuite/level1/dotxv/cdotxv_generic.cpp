@@ -121,7 +121,7 @@ public:
         scomplex alpha = std::get<5>(str.param);
         scomplex beta  = std::get<6>(str.param);
         std::string str_name = "bli_cdotxv";
-        str_name += "_" + std::to_string(n);
+        str_name += "_n_" + std::to_string(n);
         str_name += "_" + std::string(&conjx, 1);
         str_name += "_" + std::string(&conjy, 1);
         str_name += "_incx_" + testinghelpers::get_value_string(incx);

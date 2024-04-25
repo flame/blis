@@ -134,8 +134,8 @@ public:
         str_name = str_name + "_transa_" + tsa;
         str_name = str_name + "_transb_" + tsb;
         str_name = str_name + "_uploa_" + uplo;
-        str_name = str_name + "_n_" + std::to_string(n);
-        str_name = str_name + "_k_" + std::to_string(k);
+        str_name += "_n_" + std::to_string(n);
+        str_name += "_k_" + std::to_string(k);
         str_name += "_alpha_" + testinghelpers::get_value_string(alpha);
         str_name += "_beta_" + testinghelpers::get_value_string(beta);
         gtint_t lda = testinghelpers::get_leading_dimension( sfm, tsa, n, k, lda_inc );

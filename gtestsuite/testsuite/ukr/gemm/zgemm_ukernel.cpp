@@ -98,9 +98,9 @@ public:
         str_name = str_name + "StorageOfCMatrix_" + storageC;
         str_name = str_name + "_transA_" + trnsa;
         str_name = str_name + "_transB_" + trnsb;
-        str_name = str_name + "_m_" + std::to_string(m);
-        str_name = str_name + "_n_" + std::to_string(n);
-        str_name = str_name + "_k_" + std::to_string(k);
+        str_name += "_m_" + std::to_string(m);
+        str_name += "_n_" + std::to_string(n);
+        str_name += "_k_" + std::to_string(k);
         str_name += "_alpha_" + testinghelpers::get_value_string(alpha);
         str_name += "_beta_" + testinghelpers::get_value_string(beta);
          str_name = str_name + (is_memory_test ? "_mem_test_enabled" : "_mem_test_disabled");
@@ -1035,7 +1035,7 @@ public:
         std::string str_name ;
 
         str_name = str_name + "StorageOfCMatrix_" + storage;
-        str_name = str_name + "_k_" + std::to_string(k);
+        str_name += "_k_" + std::to_string(k);
         str_name += "_alpha_" + testinghelpers::get_value_string(alpha);
         str_name += "_beta_" + testinghelpers::get_value_string(beta);
         str_name = str_name + (is_memory_test ? "_mem_test_enabled" : "_mem_test_disabled");

@@ -101,7 +101,7 @@ public:
         bool is_memory_test = std::get<6>(str.param);
 
         std::string str_name = "ddotvUkr_";
-        str_name += "n_" + std::to_string(n);
+        str_name += "_n_" + std::to_string(n);
         str_name += "conjx_" + std::string(&conjx, 1);
         str_name += "conjy_" + std::string(&conjy, 1);
         str_name += "_incx_" + testinghelpers::get_value_string(incx);

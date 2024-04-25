@@ -97,7 +97,7 @@ public:
 #else  //#elif TEST_BLIS_TYPED
         std::string str_name = "bli_dasumv";
 #endif
-        str_name    = str_name + "_n" + std::to_string(n);
+        str_name += "_n_" + std::to_string(n);
         str_name += "_incx_" + testinghelpers::get_value_string(incx);
         str_name = str_name + "_X_" + std::to_string(xi);
         str_name = str_name + "_" + testinghelpers::get_value_string(ix_exval);

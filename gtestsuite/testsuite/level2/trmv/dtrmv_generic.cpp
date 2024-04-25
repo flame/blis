@@ -109,7 +109,7 @@ public:
         str_name    = str_name + "_" + sfm;
         str_name    = str_name + "_" + uploa+transa;
         str_name    = str_name + "_d" + diaga;
-        str_name    = str_name + "_" + std::to_string(n);
+        str_name += "_n_" + std::to_string(n);
         str_name += "_alpha_" + testinghelpers::get_value_string(alpha);
         str_name += "_incx_" + testinghelpers::get_value_string(incx);
         str_name    = str_name + "_" + std::to_string(ld_inc);

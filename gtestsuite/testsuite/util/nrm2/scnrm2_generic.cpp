@@ -81,7 +81,7 @@ public:
 #else  //#elif TEST_BLIS_TYPED
         std::string str_name = "bli_cnormfv";
 #endif
-        str_name    = str_name + "_" + std::to_string(n);
+        str_name += "_n_" + std::to_string(n);
         str_name += "_incx_" + testinghelpers::get_value_string(incx);
         return str_name;
     }

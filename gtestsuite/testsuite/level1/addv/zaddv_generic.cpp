@@ -83,7 +83,7 @@ public:
         gtint_t incx   = std::get<2>(str.param);
         gtint_t incy   = std::get<3>(str.param);
         std::string str_name = "bli_zaddv";
-        str_name += "_" + std::to_string(n);
+        str_name += "_n_" + std::to_string(n);
         str_name += "_" + std::string(&conj, 1);
         str_name += "_incx_" + testinghelpers::get_value_string(incx);
         str_name += "_incy_" + testinghelpers::get_value_string(incy);

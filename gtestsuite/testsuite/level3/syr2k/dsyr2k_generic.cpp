@@ -122,8 +122,8 @@ public:
         str_name = str_name + "_" + sfm+sfm+sfm;
         str_name = str_name + "_" + uplo;
         str_name = str_name + "_" + tsa + tsb;
-        str_name = str_name + "_" + std::to_string(n);
-        str_name = str_name + "_" + std::to_string(k);
+        str_name += "_n_" + std::to_string(n);
+        str_name += "_k_" + std::to_string(k);
         str_name += "_alpha_" + testinghelpers::get_value_string(alpha);
         str_name += "_beta_" + testinghelpers::get_value_string(beta);
         str_name = str_name + "_" + std::to_string(lda_inc);

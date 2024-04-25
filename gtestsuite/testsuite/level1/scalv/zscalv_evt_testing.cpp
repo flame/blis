@@ -105,7 +105,7 @@ public:
 #else  //#elif TEST_BLIS_TYPED
         std::string str_name = "blis_";
 #endif
-        str_name += "n" + std::to_string(n);
+        str_name += "_n_" + std::to_string(n);
         str_name += (conj  == 'n') ? "_noconj" : "_conj";
         str_name += "_incx_" + testinghelpers::get_value_string(incx);
         str_name = str_name + "_X_" + std::to_string(xi);

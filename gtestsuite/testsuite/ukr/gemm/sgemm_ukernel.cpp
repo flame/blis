@@ -81,9 +81,9 @@ public:
         std::string str_name;
         str_name = str_name + "_transa" + trnsa;
         str_name = str_name + "_transb" + trnsb;
-        str_name = str_name + "_m" + std::to_string(m);
-        str_name = str_name + "_n" + std::to_string(n);
-        str_name = str_name + "_k" + std::to_string(k);
+        str_name += "_m_" + std::to_string(m);
+        str_name += "_n_" + std::to_string(n);
+        str_name += "_k_" + std::to_string(k);
         str_name += "_alpha_" + testinghelpers::get_value_string(alpha);
         str_name += "_beta_" + testinghelpers::get_value_string(beta);
         str_name = str_name + "_storage" + storageC;
@@ -354,7 +354,7 @@ public:
         char storage = std::get<4>(str.param);
         bool memory_test = std::get<7>(str.param);
         std::string str_name;
-        str_name = str_name + "_k" + std::to_string(k);
+        str_name += "_k_" + std::to_string(k);
         str_name += "_alpha_" + testinghelpers::get_value_string(alpha);
         str_name += "_beta_" + testinghelpers::get_value_string(beta);
         str_name = str_name + "_storage" + storage;
@@ -501,9 +501,9 @@ public:
         float beta    = std::get<4>(str.param);
         char storage  = std::get<5>(str.param);
         std::string str_name;
-        str_name = str_name + "_m" + std::to_string(m);
-        str_name = str_name + "_n" + std::to_string(n);
-        str_name = str_name + "_k" + std::to_string(k);
+        str_name += "_m_" + std::to_string(m);
+        str_name += "_n_" + std::to_string(n);
+        str_name += "_k_" + std::to_string(k);
         str_name += "_alpha_" + testinghelpers::get_value_string(alpha);
         str_name += "_beta_" + testinghelpers::get_value_string(beta);
         str_name = str_name + "_storage" + storage;

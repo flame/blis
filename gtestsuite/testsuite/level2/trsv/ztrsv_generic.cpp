@@ -114,7 +114,7 @@ public:
         str_name    = str_name + "_uplo_" + uploa;
         str_name    = str_name + "_transa_" + transa;
         str_name    = str_name + "_diaga_" + diaga;
-        str_name    = str_name + "_n_" + std::to_string(n);
+        str_name += "_n_" + std::to_string(n);
         str_name += "_alpha_" + testinghelpers::get_value_string(alpha);
         str_name += "_incx_" + testinghelpers::get_value_string(incx);
         str_name    = str_name + "_lda_" + std::to_string(

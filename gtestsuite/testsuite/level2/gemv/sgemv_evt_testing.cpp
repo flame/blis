@@ -143,8 +143,8 @@ public:
         str_name = str_name + "stor_" + sfm;
         str_name = str_name + "_transa_" + transa;
         str_name = str_name + "_conjx_" + conjx;
-        str_name = str_name + "_m_" + std::to_string(m);
-        str_name = str_name + "_n_" + std::to_string(n);
+        str_name += "_m_" + std::to_string(m);
+        str_name += "_n_" + std::to_string(n);
         str_name += "_incx_" + testinghelpers::get_value_string(incx);
         str_name += "_incy_" + testinghelpers::get_value_string(incy);
         str_name += "_alpha_" + testinghelpers::get_value_string(alpha);

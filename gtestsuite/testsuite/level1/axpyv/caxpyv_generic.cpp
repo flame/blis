@@ -101,7 +101,7 @@ public:
 #else  //#elif TEST_BLIS_TYPED
         std::string str_name = "bli_caxpyv";
 #endif
-        str_name += "_" + std::to_string(n);
+        str_name += "_n_" + std::to_string(n);
         str_name += "_" + std::string(&conj, 1);
         str_name += "_incx_" + testinghelpers::get_value_string(incx);
         str_name += "_incy_" + testinghelpers::get_value_string(incy);

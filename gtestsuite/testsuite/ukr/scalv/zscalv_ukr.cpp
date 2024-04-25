@@ -98,7 +98,7 @@ public:
         bool is_memory_test = std::get<5>(str.param);
 
         std::string str_name = "z";
-        str_name += "_n" + std::to_string(n);
+        str_name += "_n_" + std::to_string(n);
         str_name += (conjx == 'n') ? "_noconjx" : "_conjx";
         str_name += "_incx_" + testinghelpers::get_value_string(incx);
         str_name += "_alpha_" + testinghelpers::get_value_string(alpha);

@@ -98,7 +98,7 @@ public:
 #else  //#elif TEST_BLIS_TYPED
         std::string str_name = "bli_";
 #endif
-        str_name += "_n" + std::to_string(n);
+        str_name += "_n_" + std::to_string(n);
         str_name += (conj_alpha == 'n') ? "_noconjalpha" : "_conjalpha";
         str_name += "_incx_" + testinghelpers::get_value_string(incx);
         str_name += "_alpha_" + testinghelpers::get_value_string(alpha);

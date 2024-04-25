@@ -110,8 +110,8 @@ public:
 #endif
         str_name += std::string(&storage, 1);
         str_name += "_" + std::string(&trans, 1);
-        str_name += "_" + std::to_string(m);
-        str_name += "_" + std::to_string(n);
+        str_name += "_m_" + std::to_string(m);
+        str_name += "_n_" + std::to_string(n);
         str_name += "_alpha_" + testinghelpers::get_value_string(alpha);
         gtint_t lda = testinghelpers::get_leading_dimension( storage, 'n', m, n, lda_inc );
         gtint_t ldb = testinghelpers::get_leading_dimension( storage, trans, m, n, ldb_inc );

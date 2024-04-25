@@ -90,7 +90,7 @@ public:
 #else  //#elif TEST_BLIS_TYPED
         std::string str_name = "bli_";
 #endif
-        str_name += "_" + std::to_string(n);
+        str_name += "_n_" + std::to_string(n);
         str_name += "_incx_" + testinghelpers::get_value_string(incx);
         str_name = str_name + "_X_" + std::to_string(xi) + "_" + testinghelpers::get_value_string(xi_exval);
         str_name = str_name + "_" + std::to_string(xj) + "_" + testinghelpers::get_value_string(xj_exval);

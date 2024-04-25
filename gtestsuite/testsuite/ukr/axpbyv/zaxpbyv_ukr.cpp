@@ -126,7 +126,7 @@ public:
         dcomplex beta   = std::get<6>(str.param);
         bool is_memory_test = std::get<7>(str.param);
 
-        std::string str_name = "n" + std::to_string(n);
+        std::string str_name = "_n_" + std::to_string(n);
         str_name += ( conjx == 'n' )? "_noconj_x" : "_conj_x";
         str_name += "_incx_" + testinghelpers::get_value_string(incx);
         str_name += "_incy_" + testinghelpers::get_value_string(incy);

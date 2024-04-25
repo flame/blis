@@ -84,7 +84,7 @@ public:
 #else  //#elif TEST_BLIS_TYPED
         std::string str_name = "bli_znormfv";
 #endif
-        str_name    = str_name + "_" + std::to_string(n);
+        str_name += "_n_" + std::to_string(n);
         str_name += "_incx_" + testinghelpers::get_value_string(incx);
         str_name    = str_name + "_i" + std::to_string(i);
         std::string iexval_str = "_Re_" + testinghelpers::get_value_string(iexval.real) + "_Im_" + testinghelpers::get_value_string(iexval.imag);

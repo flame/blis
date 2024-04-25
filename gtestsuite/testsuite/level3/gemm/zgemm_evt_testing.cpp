@@ -170,9 +170,9 @@ public:
 #endif
         str_name = str_name + "C_matrix_storage_" + sfm;
         str_name = str_name + "_transA_" + tsa + "_transB_" + tsb;
-        str_name = str_name + "_m_" + std::to_string(m);
-        str_name = str_name + "_n_" + std::to_string(n);
-        str_name = str_name + "_k_" + std::to_string(k);
+        str_name += "_m_" + std::to_string(m);
+        str_name += "_n_" + std::to_string(n);
+        str_name += "_k_" + std::to_string(k);
         str_name = str_name + "_A" + std::to_string(ai) + std::to_string(aj);
         str_name = str_name + "_" + testinghelpers::get_value_string(aex);
         str_name = str_name + "_B" + std::to_string(bi) + std::to_string(bj);

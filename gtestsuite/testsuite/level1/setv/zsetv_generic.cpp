@@ -70,7 +70,7 @@ public:
         gtint_t n      = std::get<1>(str.param);
         gtint_t incx   = std::get<2>(str.param);
         std::string str_name = "bli_zsetv";
-        str_name += "_" + std::to_string(n);
+        str_name += "_n_" + std::to_string(n);
         str_name += "_" + std::string(&conj, 1);
         str_name += "_incx_" + testinghelpers::get_value_string(incx);
         return str_name;
