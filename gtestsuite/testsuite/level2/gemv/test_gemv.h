@@ -135,5 +135,5 @@ void test_gemv( char storage, char transa, char conjx, gtint_t m, gtint_t n,
     //----------------------------------------------------------
     //              check component-wise error.
     //----------------------------------------------------------
-    computediff<T>( "y", leny, y, y_ref, incy, thresh );
+    computediff<T>( "y", leny, y, y_ref, incy, thresh, is_evt_test );
 }
