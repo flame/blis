@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2021 - 2023, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2021 - 2024, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -1853,19 +1853,19 @@ void STRSV_(const char   *uplo,const char   *trans,const char   *diag,const f77_
     strsv_blis_impl( uplo, trans, diag, n, a, lda, x, incx);
 }
 
-int XERBLA(const char   *srname,const f77_int *info, ftnlen n)
+void XERBLA(const char   *srname,const f77_int *info, ftnlen n)
 {
-    return xerbla_blis_impl( srname, info, n);
+    xerbla_blis_impl( srname, info, n);
 }
 
-int XERBLA_(const char   *srname,const f77_int *info, ftnlen n)
+void XERBLA_(const char   *srname,const f77_int *info, ftnlen n)
 {
-    return xerbla_blis_impl( srname, info, n);
+    xerbla_blis_impl( srname, info, n);
 }
 
-int xerbla(const char   *srname,const f77_int *info, ftnlen n)
+void xerbla(const char   *srname,const f77_int *info, ftnlen n)
 {
-    return xerbla_blis_impl( srname, info, n);
+    xerbla_blis_impl( srname, info, n);
 }
 
 void ZAXPY(const f77_int *n,const dcomplex *za,const dcomplex *zx,const f77_int *incx,dcomplex *zy,const f77_int *incy)

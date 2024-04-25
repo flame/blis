@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2024, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -36,7 +37,7 @@
 
 #define MAX_NUM_CHARS 32
 
-int xerbla_array_blis_impl(const bla_character *srname_array, const bla_integer srname_len, const bla_integer *info)
+void xerbla_array_blis_impl(const bla_character *srname_array, const bla_integer srname_len, const bla_integer *info)
 {
 	int  i;
 #if 1
@@ -65,14 +66,15 @@ int xerbla_array_blis_impl(const bla_character *srname_array, const bla_integer 
 	// Call xerbla_().
 	PASTE_XERBLA( srname, info, ( ftnlen )srname_len );
 
-	return 0;
+	return;
 }
 
 
 #ifdef BLIS_ENABLE_BLAS
-int PASTEF770(xerbla_array)(const bla_character *srname_array, const bla_integer srname_len, const bla_integer *info)
+void PASTEF770(xerbla_array)(const bla_character *srname_array, const bla_integer srname_len, const bla_integer *info)
 {
-  return xerbla_array_blis_impl(srname_array, srname_len, info);
+  xerbla_array_blis_impl(srname_array, srname_len, info);
+  return;
 }
 #endif
 

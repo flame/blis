@@ -1,4 +1,7 @@
 /* cblat3.f -- translated by f2c (version 20100827).
+
+	Copyright (C) 2024, Advanced Micro Devices, Inc. All rights reserved.
+	
    You must link the resulting object file with libf2c:
 	on Microsoft Windows system, link with libf2c.lib;
 	on Linux or Unix systems, link with .../path/to/libf2c.a -lm
@@ -5815,7 +5818,7 @@ real sdiff_(real *x, real *y)
 
 } /* chkxer_ */
 
-/* Subroutine */ int xerbla_(char *srname, integer *info, ftnlen srname_len)
+/* Subroutine */ void xerbla_(char *srname, integer *info, ftnlen srname_len)
 {
     /* Format strings */
     static char fmt_9999[] = "(\002 ******* XERBLA WAS CALLED WITH INFO ="
@@ -5881,7 +5884,7 @@ real sdiff_(real *x, real *y)
 	e_wsfe();
 	infoc_2.ok = FALSE_;
     }
-    return 0;
+    return;
 
 
 /*     End of XERBLA */

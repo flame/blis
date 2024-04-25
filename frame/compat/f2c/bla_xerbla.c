@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2023, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2024, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -49,7 +49,7 @@ extern BLIS_THREAD_LOCAL rntm_t tl_rntm;
 
 /* Table of constant values */
 
-/* Subroutine */ int xerbla_blis_impl(const bla_character *srname, const bla_integer *info, ftnlen srname_len)
+/* Subroutine */ void xerbla_blis_impl(const bla_character *srname, const bla_integer *info, ftnlen srname_len)
 {
 /*  -- LAPACK auxiliary routine (preliminary version) -- */
 /*     Univ. of Tennessee, Univ. of California Berkeley, NAG Ltd., */
@@ -105,15 +105,15 @@ extern BLIS_THREAD_LOCAL rntm_t tl_rntm;
 
 /*     End of XERBLA */
 
-    return 0;
+    return;
 } /* xerbla_blis_impl */
 
 
 #ifdef BLIS_ENABLE_BLAS
-/* Subroutine */ int PASTEF770(xerbla)(const bla_character *srname, const bla_integer *info, ftnlen srname_len)
+/* Subroutine */ void PASTEF770(xerbla)(const bla_character *srname, const bla_integer *info, ftnlen srname_len)
 {
     xerbla_blis_impl(srname, info, srname_len);
-    return 0;
+    return;
 } /* xerbla */
 #endif
 
