@@ -72,6 +72,11 @@ void test_syr( char storage, char uploa, char conjx, gtint_t n, T alpha,
     //              check component-wise error.
     //----------------------------------------------------------
     computediff<T>( "A", storage, n, n, a.data(), a_ref.data(), lda, thresh );
+
+#ifdef CAN_TEST_INFO_VALUE
+    gtint_t info = bli_info_get_info_value();
+    computediff<gtint_t>( "info", info, 0 );
+#endif
 }
 
 // Test-case logger : Used to print the test-case details based on parameters

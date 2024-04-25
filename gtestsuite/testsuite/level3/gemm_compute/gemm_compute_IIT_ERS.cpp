@@ -74,6 +74,11 @@ TYPED_TEST(GEMM_Compute_IIT_ERS_Test, invalid_transa)
   gemm_compute<T>( STORAGE, 'x', TRANS, 'U', 'U', M, N, K, nullptr, nullptr, LDA, nullptr, LDB, nullptr, nullptr, LDC );
   // Use bitwise comparison (no threshold).
   computediff<T>( "C", STORAGE, N, N, c.data(), c_ref.data(), LDC);
+
+#ifdef CAN_TEST_INFO_VALUE
+    gtint_t info = bli_info_get_info_value();
+    computediff<gtint_t>( "info", info, 1 );
+#endif
 }
 
 // When info == 2
@@ -89,6 +94,11 @@ TYPED_TEST(GEMM_Compute_IIT_ERS_Test, invalid_transb)
   gemm_compute<T>( STORAGE, TRANS, 'x', 'U', 'U', M, N, K, nullptr, nullptr, LDA, nullptr, LDB, nullptr, nullptr, LDC );
   // Use bitwise comparison (no threshold).
   computediff<T>( "C", STORAGE, N, N, c.data(), c_ref.data(), LDC);
+
+#ifdef CAN_TEST_INFO_VALUE
+    gtint_t info = bli_info_get_info_value();
+    computediff<gtint_t>( "info", info, 2 );
+#endif
 }
 
 // When info == 3
@@ -104,6 +114,11 @@ TYPED_TEST(GEMM_Compute_IIT_ERS_Test, m_lt_zero)
   gemm_compute<T>( STORAGE, TRANS, TRANS, 'U', 'U', -1, N, K, nullptr, nullptr, LDA, nullptr, LDB, nullptr, nullptr, LDC );
   // Use bitwise comparison (no threshold).
   computediff<T>( "C", STORAGE, N, N, c.data(), c_ref.data(), LDC);
+
+#ifdef CAN_TEST_INFO_VALUE
+    gtint_t info = bli_info_get_info_value();
+    computediff<gtint_t>( "info", info, 3 );
+#endif
 }
 
 // When info == 4
@@ -119,6 +134,11 @@ TYPED_TEST(GEMM_Compute_IIT_ERS_Test, n_lt_zero)
   gemm_compute<T>( STORAGE, TRANS, TRANS, 'U', 'U', M, -1, K, nullptr, nullptr, LDA, nullptr, LDB, nullptr, nullptr, LDC );
   // Use bitwise comparison (no threshold).
   computediff<T>( "C", STORAGE, N, N, c.data(), c_ref.data(), LDC);
+
+#ifdef CAN_TEST_INFO_VALUE
+    gtint_t info = bli_info_get_info_value();
+    computediff<gtint_t>( "info", info, 4 );
+#endif
 }
 
 // When info == 5
@@ -134,6 +154,11 @@ TYPED_TEST(GEMM_Compute_IIT_ERS_Test, k_lt_zero)
   gemm_compute<T>( STORAGE, TRANS, TRANS, 'U', 'U', M, N, -1, nullptr, nullptr, LDA, nullptr, LDB, nullptr, nullptr, LDC );
   // Use bitwise comparison (no threshold).
   computediff<T>( "C", STORAGE, N, N, c.data(), c_ref.data(), LDC);
+
+#ifdef CAN_TEST_INFO_VALUE
+    gtint_t info = bli_info_get_info_value();
+    computediff<gtint_t>( "info", info, 5 );
+#endif
 }
 
 // When info == 7
@@ -149,6 +174,11 @@ TYPED_TEST(GEMM_Compute_IIT_ERS_Test, invalid_lda)
   gemm_compute<T>( STORAGE, TRANS, TRANS, 'U', 'U', M, N, K, nullptr, nullptr, LDA - 1, nullptr, LDB, nullptr, nullptr, LDC );
   // Use bitwise comparison (no threshold).
   computediff<T>( "C", STORAGE, N, N, c.data(), c_ref.data(), LDC);
+
+#ifdef CAN_TEST_INFO_VALUE
+    gtint_t info = bli_info_get_info_value();
+    computediff<gtint_t>( "info", info, 7 );
+#endif
 }
 
 // When info == 9
@@ -164,6 +194,11 @@ TYPED_TEST(GEMM_Compute_IIT_ERS_Test, invalid_ldb)
   gemm_compute<T>( STORAGE, TRANS, TRANS, 'U', 'U', M, N, K, nullptr, nullptr, LDA, nullptr, LDB - 1, nullptr, nullptr, LDC );
   // Use bitwise comparison (no threshold).
   computediff<T>( "C", STORAGE, N, N, c.data(), c_ref.data(), LDC);
+
+#ifdef CAN_TEST_INFO_VALUE
+    gtint_t info = bli_info_get_info_value();
+    computediff<gtint_t>( "info", info, 9 );
+#endif
 }
 
 // When info == 12
@@ -179,6 +214,11 @@ TYPED_TEST(GEMM_Compute_IIT_ERS_Test, invalid_ldc_lt_zero)
   gemm_compute<T>( STORAGE, TRANS, TRANS, 'U', 'U', M, N, K, nullptr, nullptr, LDA, nullptr, LDB, nullptr, nullptr, -1 );
   // Use bitwise comparison (no threshold).
   computediff<T>( "C", STORAGE, N, N, c.data(), c_ref.data(), LDC);
+
+#ifdef CAN_TEST_INFO_VALUE
+    gtint_t info = bli_info_get_info_value();
+    computediff<gtint_t>( "info", info, 12 );
+#endif
 }
 
 // When info == 12
@@ -194,6 +234,11 @@ TYPED_TEST(GEMM_Compute_IIT_ERS_Test, invalid_ldc)
   gemm_compute<T>( STORAGE, TRANS, TRANS, 'U', 'U', M, N, K, nullptr, nullptr, LDA, nullptr, LDB, nullptr, nullptr, LDC - 1 );
   // Use bitwise comparison (no threshold).
   computediff<T>( "C", STORAGE, N, N, c.data(), c_ref.data(), LDC);
+
+#ifdef CAN_TEST_INFO_VALUE
+    gtint_t info = bli_info_get_info_value();
+    computediff<gtint_t>( "info", info, 12 );
+#endif
 }
 
 /*
@@ -218,6 +263,11 @@ TYPED_TEST(GEMM_Compute_IIT_ERS_Test, m_eq_zero)
   gemm_compute<T>( STORAGE, TRANS, TRANS, 'U', 'U', 0, N, K, nullptr, nullptr, LDA, nullptr, LDB, nullptr, nullptr, LDC );
   // Use bitwise comparison (no threshold).
   computediff<T>( "C", STORAGE, N, N, c.data(), c_ref.data(), LDC);
+
+#ifdef CAN_TEST_INFO_VALUE
+    gtint_t info = bli_info_get_info_value();
+    computediff<gtint_t>( "info", info, 0 );
+#endif
 }
 
 // When n = 0
@@ -233,5 +283,10 @@ TYPED_TEST(GEMM_Compute_IIT_ERS_Test, n_eq_zero)
   gemm_compute<T>( STORAGE, TRANS, TRANS, 'U', 'U', M, 0, K, nullptr, nullptr, LDA, nullptr, LDB, nullptr, nullptr, LDC );
   // Use bitwise comparison (no threshold).
   computediff<T>( "C", STORAGE, N, N, c.data(), c_ref.data(), LDC);
+
+#ifdef CAN_TEST_INFO_VALUE
+    gtint_t info = bli_info_get_info_value();
+    computediff<gtint_t>( "info", info, 0 );
+#endif
 }
 #endif

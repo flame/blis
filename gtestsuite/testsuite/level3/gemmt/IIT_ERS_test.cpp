@@ -81,6 +81,11 @@ TYPED_TEST(GEMMT_IIT_ERS, invalid_uploa)
 
     gemmt<T>( STORAGE, 'A', TRANS, TRANS, N, K, &alpha, a.data(), LDA, b.data(), LDB, &beta, c.data(), LDC );
     computediff<T>( "C", STORAGE, N, N, c.data(), c_ref.data(), LDC );
+
+#ifdef CAN_TEST_INFO_VALUE
+    gtint_t info = bli_info_get_info_value();
+    computediff<gtint_t>( "info", info, 1 );
+#endif
 }
 
 // When info == 2
@@ -101,6 +106,11 @@ TYPED_TEST(GEMMT_IIT_ERS, invalid_transa)
 
     gemmt<T>( STORAGE, UPLO, 'A', TRANS, N, K, &alpha, a.data(), LDA, b.data(), LDB, &beta, c.data(), LDC );
     computediff<T>( "C", STORAGE, N, N, c.data(), c_ref.data(), LDC );
+
+#ifdef CAN_TEST_INFO_VALUE
+    gtint_t info = bli_info_get_info_value();
+    computediff<gtint_t>( "info", info, 2 );
+#endif
 }
 
 // When info == 3
@@ -121,6 +131,11 @@ TYPED_TEST(GEMMT_IIT_ERS, invalid_transb)
 
     gemmt<T>( STORAGE, UPLO, TRANS, 'A', N, K, &alpha, a.data(), LDA, b.data(), LDB, &beta, c.data(), LDC );
     computediff<T>( "C", STORAGE, N, N, c.data(), c_ref.data(), LDC );
+
+#ifdef CAN_TEST_INFO_VALUE
+    gtint_t info = bli_info_get_info_value();
+    computediff<gtint_t>( "info", info, 3 );
+#endif
 }
 
 // When info == 4
@@ -141,6 +156,11 @@ TYPED_TEST(GEMMT_IIT_ERS, n_lt_zero)
 
     gemmt<T>( STORAGE, UPLO, TRANS, TRANS, -1, K, &alpha, a.data(), LDA, b.data(), LDB, &beta, c.data(), LDC );
     computediff<T>( "C", STORAGE, N, N, c.data(), c_ref.data(), LDC );
+
+#ifdef CAN_TEST_INFO_VALUE
+    gtint_t info = bli_info_get_info_value();
+    computediff<gtint_t>( "info", info, 4 );
+#endif
 }
 
 // When info == 5
@@ -161,6 +181,11 @@ TYPED_TEST(GEMMT_IIT_ERS, k_lt_zero)
 
     gemmt<T>( STORAGE, UPLO, TRANS, TRANS, N, -1, &alpha, a.data(), LDA, b.data(), LDB, &beta, c.data(), LDC );
     computediff<T>( "C", STORAGE, N, N, c.data(), c_ref.data(), LDC );
+
+#ifdef CAN_TEST_INFO_VALUE
+    gtint_t info = bli_info_get_info_value();
+    computediff<gtint_t>( "info", info, 5 );
+#endif
 }
 
 // When info == 8
@@ -181,6 +206,11 @@ TYPED_TEST(GEMMT_IIT_ERS, invalid_lda)
 
     gemmt<T>( STORAGE, UPLO, TRANS, TRANS, N, K, &alpha, a.data(), LDA-1, b.data(), LDB, &beta, c.data(), LDC );
     computediff<T>( "C", STORAGE, N, N, c.data(), c_ref.data(), LDC );
+
+#ifdef CAN_TEST_INFO_VALUE
+    gtint_t info = bli_info_get_info_value();
+    computediff<gtint_t>( "info", info, 8 );
+#endif
 }
 
 // When info == 10
@@ -201,6 +231,11 @@ TYPED_TEST(GEMMT_IIT_ERS, invalid_ldb)
 
     gemmt<T>( STORAGE, UPLO, TRANS, TRANS, N, K, &alpha, a.data(), LDA, b.data(), LDB-1, &beta, c.data(), LDC );
     computediff<T>( "C", STORAGE, N, N, c.data(), c_ref.data(), LDC );
+
+#ifdef CAN_TEST_INFO_VALUE
+    gtint_t info = bli_info_get_info_value();
+    computediff<gtint_t>( "info", info, 10 );
+#endif
 }
 
 // When info == 13
@@ -221,6 +256,11 @@ TYPED_TEST(GEMMT_IIT_ERS, invalid_ldc)
 
     gemmt<T>( STORAGE, UPLO, TRANS, TRANS, N, K, &alpha, a.data(), LDA, b.data(), LDB, &beta, c.data(), LDC-1 );
     computediff<T>( "C", STORAGE, N, N, c.data(), c_ref.data(), LDC );
+
+#ifdef CAN_TEST_INFO_VALUE
+    gtint_t info = bli_info_get_info_value();
+    computediff<gtint_t>( "info", info, 13 );
+#endif
 }
 
 /*
@@ -251,6 +291,11 @@ TYPED_TEST(GEMMT_IIT_ERS, n_eq_zero)
 
     gemmt<T>( STORAGE, UPLO, TRANS, TRANS, 0, K, &alpha, a.data(), LDA, b.data(), LDB, &beta, c.data(), LDC );
     computediff<T>( "C", STORAGE, N, N, c.data(), c_ref.data(), LDC );
+
+#ifdef CAN_TEST_INFO_VALUE
+    gtint_t info = bli_info_get_info_value();
+    computediff<gtint_t>( "info", info, 0 );
+#endif
 }
 
 // When alpha is 0 and beta is 1
@@ -271,6 +316,11 @@ TYPED_TEST(GEMMT_IIT_ERS, alpha_zero_beta_one)
 
     gemmt<T>( STORAGE, UPLO, TRANS, TRANS, N, K, &alpha, a.data(), LDA, b.data(), LDB, &beta, c.data(), LDC );
     computediff<T>( "C", STORAGE, N, N, c.data(), c_ref.data(), LDC );
+
+#ifdef CAN_TEST_INFO_VALUE
+    gtint_t info = bli_info_get_info_value();
+    computediff<gtint_t>( "info", info, 0 );
+#endif
 }
 
 // When k is 0 and beta is 1
@@ -291,6 +341,11 @@ TYPED_TEST(GEMMT_IIT_ERS, k_zero_beta_one)
 
     gemmt<T>( STORAGE, UPLO, TRANS, TRANS, N, 0, &alpha, a.data(), LDA, b.data(), LDB, &beta, c.data(), LDC );
     computediff<T>( "C", STORAGE, N, N, c.data(), c_ref.data(), LDC );
+
+#ifdef CAN_TEST_INFO_VALUE
+    gtint_t info = bli_info_get_info_value();
+    computediff<gtint_t>( "info", info, 0 );
+#endif
 }
 
 #endif

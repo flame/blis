@@ -79,6 +79,11 @@ TYPED_TEST(ger_IIT_ERS_Test, m_eq_zero_unitStride)
 
     // Computing bitwise difference.
     computediff<T>( "A", STORAGE, M, N, a.data(), a_ref.data(), LDA );
+
+#ifdef CAN_TEST_INFO_VALUE
+    gtint_t info = bli_info_get_info_value();
+    computediff<gtint_t>( "info", info, 0 );
+#endif
 }
 
 // m == 0, with non-unit stride
@@ -104,6 +109,11 @@ TYPED_TEST(ger_IIT_ERS_Test, m_eq_zero_nonUnitStride)
 
     // Computing bitwise difference.
     computediff<T>( "A", STORAGE, M, N, a.data(), a_ref.data(), LDA );
+
+#ifdef CAN_TEST_INFO_VALUE
+    gtint_t info = bli_info_get_info_value();
+    computediff<gtint_t>( "info", info, 0 );
+#endif
 }
 
 // n == 0, with unit stride
@@ -129,6 +139,11 @@ TYPED_TEST(ger_IIT_ERS_Test, n_eq_zero_unitStride)
 
     // Computing bitwise difference.
     computediff<T>( "A", STORAGE, M, N, a.data(), a_ref.data(), LDA );
+
+#ifdef CAN_TEST_INFO_VALUE
+    gtint_t info = bli_info_get_info_value();
+    computediff<gtint_t>( "info", info, 0 );
+#endif
 }
 
 // n == 0, with non-unit stride
@@ -154,6 +169,11 @@ TYPED_TEST(ger_IIT_ERS_Test, n_eq_zero_nonUnitStride)
 
     // Computing bitwise difference.
     computediff<T>( "A", STORAGE, M, N, a.data(), a_ref.data(), LDA );
+
+#ifdef CAN_TEST_INFO_VALUE
+    gtint_t info = bli_info_get_info_value();
+    computediff<gtint_t>( "info", info, 0 );
+#endif
 }
 
 // alpha == 0, with unit stride
@@ -177,6 +197,11 @@ TYPED_TEST(ger_IIT_ERS_Test, alpha_eq_zero_unitStride)
 
     // Computing bitwise difference.
     computediff<T>( "A", STORAGE, M, N, a.data(), a_ref.data(), LDA );
+
+#ifdef CAN_TEST_INFO_VALUE
+    gtint_t info = bli_info_get_info_value();
+    computediff<gtint_t>( "info", info, 0 );
+#endif
 }
 
 // alpha == 0, with non-unit stride
@@ -200,6 +225,11 @@ TYPED_TEST(ger_IIT_ERS_Test, alpha_eq_zero_nonUnitStride)
 
     // Computing bitwise difference.
     computediff<T>( "A", STORAGE, M, N, a.data(), a_ref.data(), LDA );
+
+#ifdef CAN_TEST_INFO_VALUE
+    gtint_t info = bli_info_get_info_value();
+    computediff<gtint_t>( "info", info, 0 );
+#endif
 }
 
 
@@ -236,6 +266,11 @@ TYPED_TEST(ger_IIT_ERS_Test, m_lt_zero_unitStride)
 
     // Computing bitwise difference.
     computediff<T>( "A", STORAGE, M, N, a.data(), a_ref.data(), LDA );
+
+#ifdef CAN_TEST_INFO_VALUE
+    gtint_t info = bli_info_get_info_value();
+    computediff<gtint_t>( "info", info, 1 );
+#endif
 }
 
 // m < 0, with non-unit stride
@@ -261,6 +296,11 @@ TYPED_TEST(ger_IIT_ERS_Test, m_lt_zero_nonUnitStride)
 
     // Computing bitwise difference.
     computediff<T>( "A", STORAGE, M, N, a.data(), a_ref.data(), LDA );
+
+#ifdef CAN_TEST_INFO_VALUE
+    gtint_t info = bli_info_get_info_value();
+    computediff<gtint_t>( "info", info, 1 );
+#endif
 }
 
 // n < 0, with unit stride
@@ -286,6 +326,11 @@ TYPED_TEST(ger_IIT_ERS_Test, n_lt_zero_unitStride)
 
     // Computing bitwise difference.
     computediff<T>( "A", STORAGE, M, N, a.data(), a_ref.data(), LDA );
+
+#ifdef CAN_TEST_INFO_VALUE
+    gtint_t info = bli_info_get_info_value();
+    computediff<gtint_t>( "info", info, 2 );
+#endif
 }
 
 // n < 0, with non-unit stride
@@ -311,6 +356,11 @@ TYPED_TEST(ger_IIT_ERS_Test, n_lt_zero_nonUnitStride)
 
     // Computing bitwise difference.
     computediff<T>( "A", STORAGE, M, N, a.data(), a_ref.data(), LDA );
+
+#ifdef CAN_TEST_INFO_VALUE
+    gtint_t info = bli_info_get_info_value();
+    computediff<gtint_t>( "info", info, 2 );
+#endif
 }
 
 // incx = 0, with unit incy
@@ -336,6 +386,11 @@ TYPED_TEST(ger_IIT_ERS_Test, incx_eq_zero_unitStride)
 
     // Computing bitwise difference.
     computediff<T>( "A", STORAGE, M, N, a.data(), a_ref.data(), LDA );
+
+#ifdef CAN_TEST_INFO_VALUE
+    gtint_t info = bli_info_get_info_value();
+    computediff<gtint_t>( "info", info, 5 );
+#endif
 }
 
 // incx = 0, with non-unit incy
@@ -361,6 +416,11 @@ TYPED_TEST(ger_IIT_ERS_Test, incx_eq_zero_nonUnitStride)
 
     // Computing bitwise difference.
     computediff<T>( "A", STORAGE, M, N, a.data(), a_ref.data(), LDA );
+
+#ifdef CAN_TEST_INFO_VALUE
+    gtint_t info = bli_info_get_info_value();
+    computediff<gtint_t>( "info", info, 5 );
+#endif
 }
 
 // incy = 0, with unit incy
@@ -386,6 +446,11 @@ TYPED_TEST(ger_IIT_ERS_Test, incy_eq_zero_unitStride)
 
     // Computing bitwise difference.
     computediff<T>( "A", STORAGE, M, N, a.data(), a_ref.data(), LDA );
+
+#ifdef CAN_TEST_INFO_VALUE
+    gtint_t info = bli_info_get_info_value();
+    computediff<gtint_t>( "info", info, 7 );
+#endif
 }
 
 // incy = 0, with non-unit incy
@@ -411,6 +476,11 @@ TYPED_TEST(ger_IIT_ERS_Test, incy_eq_zero_nonUnitStride)
 
     // Computing bitwise difference.
     computediff<T>( "A", STORAGE, M, N, a.data(), a_ref.data(), LDA );
+
+#ifdef CAN_TEST_INFO_VALUE
+    gtint_t info = bli_info_get_info_value();
+    computediff<gtint_t>( "info", info, 7 );
+#endif
 }
 
 // lda < max(1, M), with unit stride
@@ -436,6 +506,11 @@ TYPED_TEST(ger_IIT_ERS_Test, lda_lt_max_1_m_unitStride)
 
     // Computing bitwise difference.
     computediff<T>( "A", STORAGE, M, N, a.data(), a_ref.data(), LDA );
+
+#ifdef CAN_TEST_INFO_VALUE
+    gtint_t info = bli_info_get_info_value();
+    computediff<gtint_t>( "info", info, 9 );
+#endif
 }
 
 // lda < max(1, M), with non-unit stride
@@ -461,5 +536,10 @@ TYPED_TEST(ger_IIT_ERS_Test, lda_lt_max_1_m_nonUnitStride)
 
     // Computing bitwise difference.
     computediff<T>( "A", STORAGE, M, N, a.data(), a_ref.data(), LDA );
+
+#ifdef CAN_TEST_INFO_VALUE
+    gtint_t info = bli_info_get_info_value();
+    computediff<gtint_t>( "info", info, 9 );
+#endif
 }
 #endif

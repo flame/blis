@@ -77,6 +77,11 @@ void test_gemm( char storage, char trnsa, char trnsb, gtint_t m, gtint_t n,
     //              check component-wise error.
     //----------------------------------------------------------
     computediff<T>( "c", storage, m, n, c.data(), c_ref.data(), ldc, thresh );
+
+#ifdef CAN_TEST_INFO_VALUE
+    gtint_t info = bli_info_get_info_value();
+    computediff<gtint_t>( "info", info, 0 );
+#endif
 }
 
 // Test body used for exception value testing, by inducing an exception value
@@ -136,6 +141,11 @@ void test_gemm( char storage, char trnsa, char trnsb, gtint_t m, gtint_t n,
     //              check component-wise error.
     //----------------------------------------------------------
     computediff<T>( "c", storage, m, n, c.data(), c_ref.data(), ldc, thresh, true );
+
+#ifdef CAN_TEST_INFO_VALUE
+    gtint_t info = bli_info_get_info_value();
+    computediff<gtint_t>( "info", info, 0 );
+#endif
 }
 
 // Test body used for overflow and underflow checks
@@ -243,6 +253,11 @@ void test_gemm( char storage, char trnsa, char trnsb, gtint_t over_under, gtint_
     //              check component-wise error.
     //----------------------------------------------------------
     computediff<T>( "C", storage, m, n, c.data(), c_ref.data(), ldc, thresh, true );
+
+#ifdef CAN_TEST_INFO_VALUE
+    gtint_t info = bli_info_get_info_value();
+    computediff<gtint_t>( "info", info, 0 );
+#endif
 }
 
 // Test-case logger : Used to print the test-case details based on parameters

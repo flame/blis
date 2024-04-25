@@ -130,6 +130,8 @@ std::vector<double> x = testinghelpers::get_random_vector<double>( -10, 10, n, i
 ```cpp
 std::vector<double> x = testinghelpers::get_random_vector<double>( -10, 10, n, incx, testinghelpers::datagenerators::ElementType::INT );
 ```
+## Testing value of INFO set within BLIS. This is not returned by BLAS or CBLAS APIs, but AMD BLAS 4.2 and later includes a function bli_info_get_info_value to return this value.
+* If using an older version of BLIS, configure using `-DCAN_TEST_INFO_VALUE=OFF`. [**ON by default**]
 
 # Building the Tests
 After the successful configuration of CMake, we can build the tests. The following steps are taken by the building process:

@@ -151,6 +151,10 @@ option(TEST_UPPERCASE_ARGS "Test upper case character arguments" OFF)
 # Option to enable testing with thresholds set to zero.
 option(THRESHOLD_ZERO "Set thresholds to zero" OFF)
 
+# Can we test the value of info stored within BLIS and returned by a call to
+# bli_info_get_info_value (introduced at AMD BLAS 4.2).
+option(CAN_TEST_INFO_VALUE "Can test value of info" ON)
+
 if(REF_LIB)
     get_filename_component(REFLIB_PATH ${REF_LIB}/.. ABSOLUTE)
     get_filename_component(library ${REF_LIB} NAME)

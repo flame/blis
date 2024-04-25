@@ -76,6 +76,11 @@ void test_gemm_compute( char storage, char trnsa, char trnsb, char pcka, char pc
     //              check component-wise error.
     //----------------------------------------------------------
     computediff<T>( "C", storage, m, n, c.data(), c_ref.data(), ldc, thresh );
+
+#ifdef CAN_TEST_INFO_VALUE
+    gtint_t info = bli_info_get_info_value();
+    computediff<gtint_t>( "info", info, 0 );
+#endif
 }
 
 // Test-case logger : Used to print the test-case details based on parameters

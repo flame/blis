@@ -71,6 +71,11 @@ void test_trmv( char storage, char uploa, char transa, char diaga, gtint_t n,
     //              check component-wise error.
     //----------------------------------------------------------
     computediff<T>( "x", n, x.data(), x_ref.data(), incx, thresh );
+
+#ifdef CAN_TEST_INFO_VALUE
+    gtint_t info = bli_info_get_info_value();
+    computediff<gtint_t>( "info", info, 0 );
+#endif
 }
 
 // Test-case logger : Used to print the test-case details based on parameters

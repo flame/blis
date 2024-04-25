@@ -64,6 +64,11 @@ TYPED_TEST(TRSM_IIT_ERS_Test, invalid_side)
 
     trsm<T>( STORAGE, 'a', UPLO, TRANS, DIAG, M, N, nullptr, nullptr, LDA, b.data(), LDB);
     computediff<T>( "B", STORAGE, M, N, b.data(), b_ref.data(), LDB );
+
+#ifdef CAN_TEST_INFO_VALUE
+    gtint_t info = bli_info_get_info_value();
+    computediff<gtint_t>( "info", info, 1 );
+#endif
 }
 
 /**
@@ -80,6 +85,11 @@ TYPED_TEST(TRSM_IIT_ERS_Test, invalid_UPLO)
 
     trsm<T>( STORAGE, SIDE, 'a', TRANS, DIAG, M, N, nullptr, nullptr, LDA, b.data(), LDB);
     computediff<T>( "B", STORAGE, M, N, b.data(), b_ref.data(), LDB );
+
+#ifdef CAN_TEST_INFO_VALUE
+    gtint_t info = bli_info_get_info_value();
+    computediff<gtint_t>( "info", info, 2 );
+#endif
 }
 
 /**
@@ -96,6 +106,11 @@ TYPED_TEST(TRSM_IIT_ERS_Test, invalid_TRANS)
 
     trsm<T>( STORAGE, SIDE, UPLO, 'a', DIAG, M, N, nullptr, nullptr, LDA, b.data(), LDB);
     computediff<T>( "B", STORAGE, M, N, b.data(), b_ref.data(), LDB );
+
+#ifdef CAN_TEST_INFO_VALUE
+    gtint_t info = bli_info_get_info_value();
+    computediff<gtint_t>( "info", info, 3 );
+#endif
 }
 
 /**
@@ -111,6 +126,11 @@ TYPED_TEST(TRSM_IIT_ERS_Test, invalid_DIAG)
 
     trsm<T>( STORAGE, SIDE, UPLO, TRANS, 'a', M, N, nullptr, nullptr, LDA, b.data(), LDB);
     computediff<T>( "B", STORAGE, M, N, b.data(), b_ref.data(), LDB );
+
+#ifdef CAN_TEST_INFO_VALUE
+    gtint_t info = bli_info_get_info_value();
+    computediff<gtint_t>( "info", info, 4 );
+#endif
 }
 
 /**
@@ -126,6 +146,11 @@ TYPED_TEST(TRSM_IIT_ERS_Test, invalid_m)
 
     trsm<T>( STORAGE, SIDE, UPLO, TRANS, DIAG, -2, N, nullptr, nullptr, LDA, b.data(), LDB);
     computediff<T>( "B", STORAGE, M, N, b.data(), b_ref.data(), LDB );
+
+#ifdef CAN_TEST_INFO_VALUE
+    gtint_t info = bli_info_get_info_value();
+    computediff<gtint_t>( "info", info, 5 );
+#endif
 }
 
 /**
@@ -141,6 +166,11 @@ TYPED_TEST(TRSM_IIT_ERS_Test, invalid_n)
 
     trsm<T>( STORAGE, SIDE, UPLO, TRANS, DIAG, M, -2, nullptr, nullptr, LDA, b.data(), LDB);
     computediff<T>( "B", STORAGE, M, N, b.data(), b_ref.data(), LDB );
+
+#ifdef CAN_TEST_INFO_VALUE
+    gtint_t info = bli_info_get_info_value();
+    computediff<gtint_t>( "info", info, 6 );
+#endif
 }
 
 /**
@@ -156,6 +186,11 @@ TYPED_TEST(TRSM_IIT_ERS_Test, invalid_lda)
 
     trsm<T>( STORAGE, SIDE, UPLO, TRANS, DIAG, M, N, nullptr, nullptr, LDA - 1, b.data(), LDB);
     computediff<T>( "B", STORAGE, M, N, b.data(), b_ref.data(), LDB );
+
+#ifdef CAN_TEST_INFO_VALUE
+    gtint_t info = bli_info_get_info_value();
+    computediff<gtint_t>( "info", info, 9 );
+#endif
 }
 
 /**
@@ -171,6 +206,11 @@ TYPED_TEST(TRSM_IIT_ERS_Test, invalid_ldb)
 
     trsm<T>( STORAGE, SIDE, UPLO, TRANS, DIAG, M, N, nullptr, nullptr, LDA, b.data(), LDB - 1);
     computediff<T>( "B", STORAGE, M, N, b.data(), b_ref.data(), LDB );
+
+#ifdef CAN_TEST_INFO_VALUE
+    gtint_t info = bli_info_get_info_value();
+    computediff<gtint_t>( "info", info, 11 );
+#endif
 }
 
 
@@ -196,6 +236,11 @@ TYPED_TEST(TRSM_IIT_ERS_Test, m_eq_zero)
 
     trsm<T>( STORAGE, SIDE, UPLO, TRANS, DIAG, 0, N, nullptr, nullptr, LDA, b.data(), LDB );
     computediff<T>( "B", STORAGE, M, N, b.data(), b_ref.data(), LDB );
+
+#ifdef CAN_TEST_INFO_VALUE
+    gtint_t info = bli_info_get_info_value();
+    computediff<gtint_t>( "info", info, 0 );
+#endif
 }
 
 /**
@@ -210,6 +255,11 @@ TYPED_TEST(TRSM_IIT_ERS_Test, n_eq_zero)
 
     trsm<T>( STORAGE, SIDE, UPLO, TRANS, DIAG, M, 0, nullptr, nullptr, LDA, b.data(), LDB );
     computediff<T>( "B", STORAGE, M, N, b.data(), b_ref.data(), LDB );
+
+#ifdef CAN_TEST_INFO_VALUE
+    gtint_t info = bli_info_get_info_value();
+    computediff<gtint_t>( "info", info, 0 );
+#endif
 }
 
 #endif

@@ -88,6 +88,11 @@ TYPED_TEST(gemv_IIT_ERS_Test, n_eq_zero_Unitalphabeta)
     //              check component-wise error.
     //----------------------------------------------------------
     computediff<T>( "y", N, y.data(), y_ref.data(), incy);
+
+#ifdef CAN_TEST_INFO_VALUE
+    gtint_t info = bli_info_get_info_value();
+    computediff<gtint_t>( "info", info, 0 );
+#endif
 }
 
 TYPED_TEST(gemv_IIT_ERS_Test, ZeroBeta_Unitalpha)
@@ -122,6 +127,11 @@ TYPED_TEST(gemv_IIT_ERS_Test, ZeroBeta_Unitalpha)
     //              check component-wise error.
     //----------------------------------------------------------
     computediff<T>( "y", N, y.data(), y_ref.data(), incy);
+
+#ifdef CAN_TEST_INFO_VALUE
+    gtint_t info = bli_info_get_info_value();
+    computediff<gtint_t>( "info", info, 0 );
+#endif
 }
 
 TYPED_TEST(gemv_IIT_ERS_Test, m_eq_zero_Unitbeta)
@@ -158,6 +168,11 @@ TYPED_TEST(gemv_IIT_ERS_Test, m_eq_zero_Unitbeta)
     //              check component-wise error.
     //----------------------------------------------------------
     computediff<T>( "y", N, y.data(), y_ref.data(), incy);
+
+#ifdef CAN_TEST_INFO_VALUE
+    gtint_t info = bli_info_get_info_value();
+    computediff<gtint_t>( "info", info, 0 );
+#endif
 }
 
 TYPED_TEST(gemv_IIT_ERS_Test, m_lt_zero_Unitscalar)
@@ -194,6 +209,11 @@ TYPED_TEST(gemv_IIT_ERS_Test, m_lt_zero_Unitscalar)
     //              check component-wise error.
     //----------------------------------------------------------
     computediff<T>( "y", N, y.data(), y_ref.data(), incy);
+
+#ifdef CAN_TEST_INFO_VALUE
+    gtint_t info = bli_info_get_info_value();
+    computediff<gtint_t>( "info", info, 2 );
+#endif
 }
 
 TYPED_TEST(gemv_IIT_ERS_Test, n_lt_zero_Unitscalar)
@@ -230,6 +250,11 @@ TYPED_TEST(gemv_IIT_ERS_Test, n_lt_zero_Unitscalar)
     //              check component-wise error.
     //----------------------------------------------------------
     computediff<T>( "y", N, y.data(), y_ref.data(), incy);
+
+#ifdef CAN_TEST_INFO_VALUE
+    gtint_t info = bli_info_get_info_value();
+    computediff<gtint_t>( "info", info, 3 );
+#endif
 }
 
 TYPED_TEST(gemv_IIT_ERS_Test, Zero_scalar)
@@ -267,6 +292,11 @@ TYPED_TEST(gemv_IIT_ERS_Test, Zero_scalar)
     //              check component-wise error.
     //----------------------------------------------------------
     computediff<T>( "y", N, y.data(), zero_vec.data(), incy);
+
+#ifdef CAN_TEST_INFO_VALUE
+    gtint_t info = bli_info_get_info_value();
+    computediff<gtint_t>( "info", info, 0 );
+#endif
 }
 
 #endif

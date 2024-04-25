@@ -78,6 +78,11 @@ TYPED_TEST(TRSV_IIT_ERS_Test, invalid_UPLO)
 
     trsv<T>( STORAGE, 'A', TRANS, DIAG, N, &alpha, nullptr, LDA, x.data(), INC);
     computediff<T>( "x", N, x.data(), x_ref.data(), INC );
+
+#ifdef CAN_TEST_INFO_VALUE
+    gtint_t info = bli_info_get_info_value();
+    computediff<gtint_t>( "info", info, 1 );
+#endif
 }
 
 /**
@@ -95,6 +100,11 @@ TYPED_TEST(TRSV_IIT_ERS_Test, invalid_TRANS)
 
     trsv<T>( STORAGE, UPLO, 'A', DIAG, N, &alpha, nullptr, LDA, x.data(), INC);
     computediff<T>( "x", N, x.data(), x_ref.data(), INC );
+
+#ifdef CAN_TEST_INFO_VALUE
+    gtint_t info = bli_info_get_info_value();
+    computediff<gtint_t>( "info", info, 2 );
+#endif
 }
 
 /**
@@ -111,6 +121,11 @@ TYPED_TEST(TRSV_IIT_ERS_Test, invalid_DIAG)
 
     trsv<T>( STORAGE, UPLO, TRANS, 'A', N, &alpha, nullptr, LDA, x.data(), INC);
     computediff<T>( "x", N, x.data(), x_ref.data(), INC );
+
+#ifdef CAN_TEST_INFO_VALUE
+    gtint_t info = bli_info_get_info_value();
+    computediff<gtint_t>( "info", info, 3 );
+#endif
 }
 
 /**
@@ -127,6 +142,11 @@ TYPED_TEST(TRSV_IIT_ERS_Test, invalid_n)
 
     trsv<T>( STORAGE, UPLO, TRANS, DIAG, -1, &alpha, nullptr, LDA, x.data(), INC);
     computediff<T>( "x", N, x.data(), x_ref.data(), INC );
+
+#ifdef CAN_TEST_INFO_VALUE
+    gtint_t info = bli_info_get_info_value();
+    computediff<gtint_t>( "info", info, 4 );
+#endif
 }
 
 
@@ -144,6 +164,11 @@ TYPED_TEST(TRSV_IIT_ERS_Test, invalid_lda)
 
     trsv<T>( STORAGE, UPLO, TRANS, DIAG, N, &alpha, nullptr, LDA - 1, x.data(), INC);
     computediff<T>( "x", N, x.data(), x_ref.data(), INC );
+
+#ifdef CAN_TEST_INFO_VALUE
+    gtint_t info = bli_info_get_info_value();
+    computediff<gtint_t>( "info", info, 6 );
+#endif
 }
 
 /**
@@ -160,6 +185,11 @@ TYPED_TEST(TRSV_IIT_ERS_Test, invalid_incx)
 
     trsv<T>( STORAGE, UPLO, TRANS, DIAG, N, &alpha, nullptr, LDA, x.data(), 0);
     computediff<T>( "x", N, x.data(), x_ref.data(), INC );
+
+#ifdef CAN_TEST_INFO_VALUE
+    gtint_t info = bli_info_get_info_value();
+    computediff<gtint_t>( "info", info, 8 );
+#endif
 }
 
 
@@ -185,6 +215,11 @@ TYPED_TEST(TRSV_IIT_ERS_Test, n_eq_zero)
 
     trsv<T>( STORAGE, UPLO, TRANS, DIAG, 0, &alpha, nullptr, LDA, x.data(), INC);
     computediff<T>( "x", N, x.data(), x_ref.data(), INC );
+
+#ifdef CAN_TEST_INFO_VALUE
+    gtint_t info = bli_info_get_info_value();
+    computediff<gtint_t>( "info", info, 0 );
+#endif
 }
 
 #endif

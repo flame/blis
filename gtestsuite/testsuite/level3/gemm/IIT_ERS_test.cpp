@@ -82,6 +82,11 @@ TYPED_TEST(Gemm_IIT_ERS_Test, invalid_transa)
   gemm<T>( STORAGE, 'p', TRANS, M, N, K, &alpha, a.data(), LDA, b.data(), LDB, &beta, c.data(), LDC );
   // Use bitwise comparison (no threshold).
   computediff<T>( "C", STORAGE, N, N, c.data(), c_ref.data(), LDC);
+
+#ifdef CAN_TEST_INFO_VALUE
+    gtint_t info = bli_info_get_info_value();
+    computediff<gtint_t>( "info", info, 1 );
+#endif
 }
 
 // When info == 2
@@ -103,6 +108,11 @@ TYPED_TEST(Gemm_IIT_ERS_Test, invalid_transb)
   gemm<T>( STORAGE, TRANS, 'p', M, N, K, &alpha, a.data(), LDA, b.data(), LDB, &beta, c.data(), LDC );
   // Use bitwise comparison (no threshold).
   computediff<T>( "C", STORAGE, N, N, c.data(), c_ref.data(), LDC);
+
+#ifdef CAN_TEST_INFO_VALUE
+    gtint_t info = bli_info_get_info_value();
+    computediff<gtint_t>( "info", info, 2 );
+#endif
 }
 
 // When info == 3
@@ -123,6 +133,11 @@ TYPED_TEST(Gemm_IIT_ERS_Test, m_lt_zero)
   gemm<T>( STORAGE, TRANS, TRANS, -1, N, K, &alpha, a.data(), LDA, b.data(), LDB, &beta, c.data(), LDC );
   // Use bitwise comparison (no threshold).
   computediff<T>( "C", STORAGE, N, N, c.data(), c_ref.data(), LDC);
+
+#ifdef CAN_TEST_INFO_VALUE
+    gtint_t info = bli_info_get_info_value();
+    computediff<gtint_t>( "info", info, 3 );
+#endif
 }
 
 // When info == 4
@@ -143,6 +158,11 @@ TYPED_TEST(Gemm_IIT_ERS_Test, n_lt_zero)
   gemm<T>( STORAGE, TRANS, TRANS, M, -1, K, &alpha, a.data(), LDA, b.data(), LDB, &beta, c.data(), LDC );
   // Use bitwise comparison (no threshold).
   computediff<T>( "C", STORAGE, N, N, c.data(), c_ref.data(), LDC);
+
+#ifdef CAN_TEST_INFO_VALUE
+    gtint_t info = bli_info_get_info_value();
+    computediff<gtint_t>( "info", info, 4 );
+#endif
 }
 
 // When info == 5
@@ -163,6 +183,11 @@ TYPED_TEST(Gemm_IIT_ERS_Test, k_lt_zero)
   gemm<T>( STORAGE, TRANS, TRANS, M, N, -1, &alpha, a.data(), LDA, b.data(), LDB, &beta, c.data(), LDC );
   // Use bitwise comparison (no threshold).
   computediff<T>( "C", STORAGE, N, N, c.data(), c_ref.data(), LDC);
+
+#ifdef CAN_TEST_INFO_VALUE
+    gtint_t info = bli_info_get_info_value();
+    computediff<gtint_t>( "info", info, 5 );
+#endif
 }
 
 // When info == 8
@@ -183,6 +208,11 @@ TYPED_TEST(Gemm_IIT_ERS_Test, invalid_lda)
   gemm<T>( STORAGE, TRANS, TRANS, M, N, K, &alpha, a.data(), LDA - 1, b.data(), LDB, &beta, c.data(), LDC );
   // Use bitwise comparison (no threshold).
   computediff<T>( "C", STORAGE, N, N, c.data(), c_ref.data(), LDC);
+
+#ifdef CAN_TEST_INFO_VALUE
+    gtint_t info = bli_info_get_info_value();
+    computediff<gtint_t>( "info", info, 8 );
+#endif
 }
 
 // When info == 10
@@ -203,6 +233,11 @@ TYPED_TEST(Gemm_IIT_ERS_Test, invalid_ldb)
   gemm<T>( STORAGE, TRANS, TRANS, M, N, K, &alpha, a.data(), LDA, b.data(), LDB - 1, &beta, c.data(), LDC );
   // Use bitwise comparison (no threshold).
   computediff<T>( "C", STORAGE, N, N, c.data(), c_ref.data(), LDC);
+
+#ifdef CAN_TEST_INFO_VALUE
+    gtint_t info = bli_info_get_info_value();
+    computediff<gtint_t>( "info", info, 10 );
+#endif
 }
 
 // When info == 13
@@ -223,6 +258,11 @@ TYPED_TEST(Gemm_IIT_ERS_Test, invalid_ldc)
   gemm<T>( STORAGE, TRANS, TRANS, M, N, K, &alpha, a.data(), LDA, b.data(), LDB, &beta, c.data(), LDC - 1 );
   // Use bitwise comparison (no threshold).
   computediff<T>( "C", STORAGE, N, N, c.data(), c_ref.data(), LDC);
+
+#ifdef CAN_TEST_INFO_VALUE
+    gtint_t info = bli_info_get_info_value();
+    computediff<gtint_t>( "info", info, 13 );
+#endif
 }
 
 /*
@@ -253,6 +293,11 @@ TYPED_TEST(Gemm_IIT_ERS_Test, m_eq_zero)
   gemm<T>( STORAGE, TRANS, TRANS, 0, N, K, &alpha, a.data(), LDA, b.data(), LDB, &beta, c.data(), LDC );
   // Use bitwise comparison (no threshold).
   computediff<T>( "C", STORAGE, N, N, c.data(), c_ref.data(), LDC);
+
+#ifdef CAN_TEST_INFO_VALUE
+    gtint_t info = bli_info_get_info_value();
+    computediff<gtint_t>( "info", info, 0 );
+#endif
 }
 
 // When n is 0
@@ -272,6 +317,11 @@ TYPED_TEST(Gemm_IIT_ERS_Test, n_eq_zero)
   gemm<T>( STORAGE, TRANS, TRANS, M, 0, K, &alpha, a.data(), LDA, b.data(), LDB, &beta, c.data(), LDC );
   // Use bitwise comparison (no threshold).
   computediff<T>( "C", STORAGE, N, N, c.data(), c_ref.data(), LDC);
+
+#ifdef CAN_TEST_INFO_VALUE
+    gtint_t info = bli_info_get_info_value();
+    computediff<gtint_t>( "info", info, 0 );
+#endif
 }
 
 // When alpha is 0 and beta is 1
@@ -293,6 +343,11 @@ TYPED_TEST(Gemm_IIT_ERS_Test, alpha_zero_beta_one)
   gemm<T>( STORAGE, TRANS, TRANS, M, N, K, &alpha, a.data(), LDA, b.data(), LDB, &beta, c.data(), LDC );
   // Use bitwise comparison (no threshold).
   computediff<T>( "C", STORAGE, N, N, c.data(), c_ref.data(), LDC);
+
+#ifdef CAN_TEST_INFO_VALUE
+    gtint_t info = bli_info_get_info_value();
+    computediff<gtint_t>( "info", info, 0 );
+#endif
 }
 
 // When k is 0 and beta is 1
@@ -314,6 +369,11 @@ TYPED_TEST(Gemm_IIT_ERS_Test, k_zero_beta_one)
   gemm<T>( STORAGE, TRANS, TRANS, M, N, 0, &alpha, a.data(), LDA, b.data(), LDB, &beta, c.data(), LDC );
   // Use bitwise comparison (no threshold).
   computediff<T>( "C", STORAGE, N, N, c.data(), c_ref.data(), LDC);
+
+#ifdef CAN_TEST_INFO_VALUE
+    gtint_t info = bli_info_get_info_value();
+    computediff<gtint_t>( "info", info, 0 );
+#endif
 }
 
 #if 0
@@ -339,6 +399,11 @@ TYPED_TEST(Gemm_IIT_ERS_Test, null_a_matrix)
   gemm<T>( STORAGE, TRANS, TRANS, M, N, K, &alpha, nullptr, LDA, b.data(), LDB, &beta, c.data(), LDC );
   // Use bitwise comparison (no threshold).
   computediff<T>( "C", STORAGE, N, N, c.data(), c_ref.data(), LDC);
+
+#ifdef CAN_TEST_INFO_VALUE
+    gtint_t info = bli_info_get_info_value();
+    computediff<gtint_t>( "info", info, 0 );
+#endif
 }
 
 // When b matrix is null
@@ -358,6 +423,11 @@ TYPED_TEST(Gemm_IIT_ERS_Test, null_b_matrix)
   gemm<T>( STORAGE, TRANS, TRANS, M, N, K, &alpha, a.data(), LDA, nullptr, LDB, &beta, c.data(), LDC );
   // Use bitwise comparison (no threshold).
   computediff<T>( "C", STORAGE, N, N, c.data(), c_ref.data(), LDC);
+
+#ifdef CAN_TEST_INFO_VALUE
+    gtint_t info = bli_info_get_info_value();
+    computediff<gtint_t>( "info", info, 0 );
+#endif
 }
 #endif /* #IF 0 ENDS HERE */
 #endif
