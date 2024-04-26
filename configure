@@ -4608,7 +4608,7 @@ print_usage_plugin()
 
    --disable-examples, --enable-examples
 
-                 Do not include (created by default) example code for plugin
+                 Do not include (included by default) example code for plugin
                  registration, kernels, etc.
 
    --disable-templates, --enable-templates
