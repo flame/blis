@@ -116,6 +116,8 @@ void PASTEMAC(ch,opname,EX_SUF) \
 
 INSERT_GENTFUNC_BASIC( mkherm )
 INSERT_GENTFUNC_BASIC( mksymm )
+INSERT_GENTFUNC_BASIC( mkskewherm )
+INSERT_GENTFUNC_BASIC( mkskewsymm )
 INSERT_GENTFUNC_BASIC( mktrim )
 
 

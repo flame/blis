@@ -45,6 +45,8 @@ PASTEMAC(opname,BLIS_TAPI_EX_SUF,_qfp)( num_t dt );
 GENPROT( asumv )
 GENPROT( mkherm )
 GENPROT( mksymm )
+GENPROT( mkskewherm )
+GENPROT( mkskewsymm )
 GENPROT( mktrim )
 GENPROT( norm1v )
 GENPROT( normfv )

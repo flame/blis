@@ -66,6 +66,8 @@ void PASTEMAC(ch,varname) \
 
 INSERT_GENTPROT_BASIC( mkherm_unb_var1 )
 INSERT_GENTPROT_BASIC( mksymm_unb_var1 )
+INSERT_GENTPROT_BASIC( mkskewherm_unb_var1 )
+INSERT_GENTPROT_BASIC( mkskewsymm_unb_var1 )
 INSERT_GENTPROT_BASIC( mktrim_unb_var1 )
 
 
