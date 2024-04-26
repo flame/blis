@@ -39,10 +39,10 @@
 \
 void PASTEMAC(ch,varname) \
      ( \
+       struc_t struc, \
        uplo_t  uplo, \
        conj_t  conjx, \
        conj_t  conjy, \
-       conj_t  conjh, \
        dim_t   m, \
        ctype*  alpha, \
        ctype*  x, inc_t incx, \
@@ -64,51 +64,55 @@ void PASTEMAC(ch,varname) \
 	ctype   alpha1; \
 	ctype   alpha0_chi1; \
 	ctype   alpha1_chi1; \
-	ctype   alpha0_chi1_psi1; \
 	ctype   conjx0_chi1; \
 	ctype   conjx1_chi1; \
 	ctype   conjy0_psi1; \
+	ctype   conjy1_psi1; \
 	dim_t   i; \
 	dim_t   n_behind; \
 	dim_t   n_ahead; \
 	inc_t   rs_ct, cs_ct; \
-	conj_t  conj0, conj1; \
-	conj_t  conjh_conjx; \
+	conj_t  conjh, conjx0, conjy0, conjx1, conjy1; \
 \
-	/* Eliminate unused variable warnings. */ \
-	( void )conjh_conjx; \
+	rs_ct = rs_c; \
+	cs_ct = cs_c; \
+\
+	conjh = ( bli_is_hermitian( struc ) || bli_is_skew_hermitian( struc ) ) ? BLIS_CONJUGATE : BLIS_NO_CONJUGATE; \
+	conjx0 = conjx; \
+	conjy1 = conjy; \
 \
 	/* The algorithm will be expressed in terms of the lower triangular case;
 	   the upper triangular case is supported by swapping the row and column
 	   strides of A and toggling some conj parameters. */ \
 	if      ( bli_is_lower( uplo ) ) \
 	{ \
-		rs_ct = rs_c; \
-		cs_ct = cs_c; \
-\
 		PASTEMAC(ch,copys)( *alpha, alpha0 ); \
 		PASTEMAC(ch,copycjs)( conjh, *alpha, alpha1 ); \
+\
+		if ( bli_is_skew_symmetric( struc ) || bli_is_skew_hermitian( struc ) ) \
+			PASTEMAC(ch,negs)( alpha1 ); \
 	} \
 	else /* if ( bli_is_upper( uplo ) ) */ \
 	{ \
-		rs_ct = cs_c; \
-		cs_ct = rs_c; \
+		bli_swap_incs( &rs_ct, &cs_ct ); \
 \
 		/* Toggle conjugation of conjx/conjy, but only if we are being invoked
 		   as her2; for syr2, conjx/conjy are unchanged. */ \
-		conjx = bli_apply_conj( conjh, conjx ); \
-		conjy = bli_apply_conj( conjh, conjy ); \
+		conjx0 = bli_apply_conj( conjh, conjx0 ); \
+		conjy1 = bli_apply_conj( conjh, conjy1 ); \
 \
 		PASTEMAC(ch,copycjs)( conjh, *alpha, alpha0 ); \
 		PASTEMAC(ch,copys)( *alpha, alpha1 ); \
+\
+		if ( bli_is_skew_symmetric( struc ) || bli_is_skew_hermitian( struc ) ) \
+			PASTEMAC(ch,negs)( alpha0 ); \
 	} \
 \
 	/* Apply conjh (which carries the conjugation component of the Hermitian
 	   transpose, if applicable) to conjx and/or conjy as needed to arrive at
 	   the effective conjugation for the vector subproblems. */ \
-	conj0       = bli_apply_conj( conjh, conjy ); \
-	conj1       = conjy; \
-	conjh_conjx = bli_apply_conj( conjh, conjx ); \
+	conjx1 = bli_apply_conj( conjh, conjx0 ); \
+	conjy0 = bli_apply_conj( conjh, conjy1 ); \
 \
 	/* Query the context for the kernel function pointer. */ \
 	axpyv_ker_ft kfp_av = bli_cntx_get_ukr_dt( dt, BLIS_AXPYV_KER, cntx ); \
@@ -126,22 +130,19 @@ void PASTEMAC(ch,varname) \
 		c21      = c + (i+1)*rs_ct + (i  )*cs_ct; \
 \
 		/* Apply conjx and/or conjy to chi1 and/or psi1. */ \
-		PASTEMAC(ch,copycjs)( conjx,       *chi1, conjx0_chi1 ); \
-		PASTEMAC(ch,copycjs)( conjh_conjx, *chi1, conjx1_chi1 ); \
-		PASTEMAC(ch,copycjs)( conj0,       *psi1, conjy0_psi1 ); \
+		PASTEMAC(ch,copycjs)( conjx0, *chi1, conjx0_chi1 ); \
+		PASTEMAC(ch,copycjs)( conjx1, *chi1, conjx1_chi1 ); \
+		PASTEMAC(ch,copycjs)( conjy0, *psi1, conjy0_psi1 ); \
+		PASTEMAC(ch,copycjs)( conjy1, *psi1, conjy1_psi1 ); \
 \
 		/* Compute scalars for vector subproblems. */ \
 		PASTEMAC(ch,scal2s)( alpha0, conjx0_chi1, alpha0_chi1 ); \
 		PASTEMAC(ch,scal2s)( alpha1, conjx1_chi1, alpha1_chi1 ); \
 \
-		/* Compute alpha * chi1 * conj(psi1) after both chi1 and psi1 have
-		   already been conjugated, if needed, by conjx and conjy. */ \
-		PASTEMAC(ch,scal2s)( alpha0_chi1, conjy0_psi1, alpha0_chi1_psi1 ); \
-\
 		/* c10t = c10t + alpha * chi1 * y0'; */ \
 		kfp_av \
 		( \
-		  conj0, \
+		  conjy0, \
 		  n_behind, \
 		  &alpha0_chi1, \
 		  y0,   incy, \
@@ -152,7 +153,7 @@ void PASTEMAC(ch,varname) \
 		/* c21 = c21 + conj(alpha) * y2 * conj(chi1); */ \
 		kfp_av \
 		( \
-		  conj1, \
+		  conjy1, \
 		  n_ahead, \
 		  &alpha1_chi1, \
 		  y2,  incy, \
@@ -160,15 +161,17 @@ void PASTEMAC(ch,varname) \
 		  cntx  \
 		); \
 \
-		/* gamma11 = gamma11 +      alpha  * chi1 * conj(psi1) \
-		                     + conj(alpha) * psi1 * conj(chi1); */ \
-		PASTEMAC(ch,adds)( alpha0_chi1_psi1, *gamma11 ); \
-		PASTEMAC(ch,adds)( alpha0_chi1_psi1, *gamma11 ); \
+		/* gamma11 = gamma11 +        alpha  * chi1 * conj(psi1) \
+		                     +/- conj(alpha) * psi1 * conj(chi1); */ \
+		PASTEMAC(ch,axpys)( alpha0_chi1, conjy0_psi1, *gamma11 ); \
+		PASTEMAC(ch,axpys)( alpha1_chi1, conjy1_psi1, *gamma11 ); \
 \
 		/* For her2, explicitly set the imaginary component of gamma11 to
            zero. */ \
-		if ( bli_is_conj( conjh ) ) \
+		if ( bli_is_hermitian( struc ) ) \
 			PASTEMAC(ch,seti0s)( *gamma11 ); \
+		if ( bli_is_skew_hermitian( struc ) ) \
+			PASTEMAC(ch,setr0s)( *gamma11 ); \
 	} \
 }
 

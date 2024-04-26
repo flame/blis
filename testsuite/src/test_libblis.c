@@ -331,11 +331,15 @@ void libblis_test_level2_ops( thread_data_t* tdata, test_params_t* params, test_
 	libblis_test_gemv( tdata, params, &(ops->gemv) );
 	libblis_test_ger( tdata, params, &(ops->ger) );
 	libblis_test_hemv( tdata, params, &(ops->hemv) );
+	libblis_test_shmv( tdata, params, &(ops->shmv) );
 	libblis_test_her( tdata, params, &(ops->her) );
 	libblis_test_her2( tdata, params, &(ops->her2) );
+	libblis_test_shr2( tdata, params, &(ops->shr2) );
 	libblis_test_symv( tdata, params, &(ops->symv) );
+	libblis_test_skmv( tdata, params, &(ops->skmv) );
 	libblis_test_syr( tdata, params, &(ops->syr) );
 	libblis_test_syr2( tdata, params, &(ops->syr2) );
+	libblis_test_skr2( tdata, params, &(ops->skr2) );
 	libblis_test_trmv( tdata, params, &(ops->trmv) );
 	libblis_test_trsv( tdata, params, &(ops->trsv) );
 }
@@ -436,11 +440,15 @@ void libblis_test_read_ops_file( char* input_filename, test_ops_t* ops )
 	libblis_test_read_op_info( ops, input_stream, BLIS_NOID, BLIS_TEST_DIMS_MN,  2, &(ops->gemv) );
 	libblis_test_read_op_info( ops, input_stream, BLIS_NOID, BLIS_TEST_DIMS_MN,  2, &(ops->ger) );
 	libblis_test_read_op_info( ops, input_stream, BLIS_NOID, BLIS_TEST_DIMS_M,   3, &(ops->hemv) );
+	libblis_test_read_op_info( ops, input_stream, BLIS_NOID, BLIS_TEST_DIMS_M,   3, &(ops->shmv) );
 	libblis_test_read_op_info( ops, input_stream, BLIS_NOID, BLIS_TEST_DIMS_M,   2, &(ops->her) );
 	libblis_test_read_op_info( ops, input_stream, BLIS_NOID, BLIS_TEST_DIMS_M,   3, &(ops->her2) );
+	libblis_test_read_op_info( ops, input_stream, BLIS_NOID, BLIS_TEST_DIMS_M,   3, &(ops->shr2) );
 	libblis_test_read_op_info( ops, input_stream, BLIS_NOID, BLIS_TEST_DIMS_M,   3, &(ops->symv) );
+	libblis_test_read_op_info( ops, input_stream, BLIS_NOID, BLIS_TEST_DIMS_M,   3, &(ops->skmv) );
 	libblis_test_read_op_info( ops, input_stream, BLIS_NOID, BLIS_TEST_DIMS_M,   2, &(ops->syr) );
 	libblis_test_read_op_info( ops, input_stream, BLIS_NOID, BLIS_TEST_DIMS_M,   3, &(ops->syr2) );
+	libblis_test_read_op_info( ops, input_stream, BLIS_NOID, BLIS_TEST_DIMS_M,   3, &(ops->skr2) );
 	libblis_test_read_op_info( ops, input_stream, BLIS_NOID, BLIS_TEST_DIMS_M,   3, &(ops->trmv) );
 	libblis_test_read_op_info( ops, input_stream, BLIS_NOID, BLIS_TEST_DIMS_M,   3, &(ops->trsv) );
 

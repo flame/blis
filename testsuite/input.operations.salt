@@ -240,6 +240,10 @@
 -1       #   dimensions: m
 ???      #   parameters: uploa conja conjx
 
+1        # shmv
+-1       #   dimensions: m
+???      #   parameters: uploa conja conjx
+
 1        # her
 -1       #   dimensions: m
 ??       #   parameters: uploc conjx
@@ -248,7 +252,15 @@
 -1       #   dimensions: m
 ???      #   parameters: uploc conjx conjy
 
+1        # shr2
+-1       #   dimensions: m
+???      #   parameters: uploc conjx conjy
+
 1        # symv
+-1       #   dimensions: m
+???      #   parameters: uploa conja conjx
+
+1        # skmv
 -1       #   dimensions: m
 ???      #   parameters: uploa conja conjx
 
@@ -257,6 +269,10 @@
 ??       #   parameters: uploc conjx
 
 1        # syr2
+-1       #   dimensions: m
+???      #   parameters: uploc conjx conjy
+
+1        # skr2
 -1       #   dimensions: m
 ???      #   parameters: uploc conjx conjy
 

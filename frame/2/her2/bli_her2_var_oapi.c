@@ -39,9 +39,7 @@
 \
 void PASTEMAC(varname) \
      ( \
-       conj_t  conjh, \
        obj_t*  alpha, \
-       obj_t*  alpha_conj, \
        obj_t*  x, \
        obj_t*  y, \
        obj_t*  c, \
@@ -53,6 +51,7 @@ void PASTEMAC(varname) \
 \
 	num_t     dt        = bli_obj_dt( c ); \
 \
+	struc_t   struc     = bli_obj_struc( c ); \
 	uplo_t    uplo      = bli_obj_uplo( c ); \
 	conj_t    conjx     = bli_obj_conj_status( x ); \
 	conj_t    conjy     = bli_obj_conj_status( y ); \
@@ -78,10 +77,10 @@ void PASTEMAC(varname) \
 \
 	f \
 	( \
+	  struc, \
 	  uplo, \
 	  conjx, \
 	  conjy, \
-	  conjh, \
 	  m, \
 	  buf_alpha, \
 	  buf_x, incx, \

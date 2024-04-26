@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2018 - 2019, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -32,76 +33,10 @@
 
 */
 
-
-//
-// Prototype object-based interfaces.
-//
-
-#undef  GENPROT
-#define GENPROT( opname ) \
-\
-BLIS_EXPORT_BLIS void PASTEMAC(opname,EX_SUF) \
-     ( \
-       const obj_t* alpha, \
-       const obj_t* a, \
-       const obj_t* x, \
-       const obj_t* beta, \
-       const obj_t* y  \
-       BLIS_OAPI_EX_PARAMS  \
+void libblis_test_skmv
+     (
+       thread_data_t* tdata,
+       test_params_t* params,
+       test_op_t*     op
      );
-
-GENPROT( gemv )
-GENPROT( hemv )
-GENPROT( symv )
-GENPROT( shmv )
-GENPROT( skmv )
-
-
-#undef  GENPROT
-#define GENPROT( opname ) \
-\
-BLIS_EXPORT_BLIS void PASTEMAC(opname,EX_SUF) \
-     ( \
-       const obj_t* alpha, \
-       const obj_t* x, \
-       const obj_t* y, \
-       const obj_t* a  \
-       BLIS_OAPI_EX_PARAMS  \
-     );
-
-GENPROT( ger )
-GENPROT( her2 )
-GENPROT( syr2 )
-GENPROT( shr2 )
-GENPROT( skr2 )
-
-
-#undef  GENPROT
-#define GENPROT( opname ) \
-\
-BLIS_EXPORT_BLIS void PASTEMAC(opname,EX_SUF) \
-     ( \
-       const obj_t* alpha, \
-       const obj_t* x, \
-       const obj_t* a  \
-       BLIS_OAPI_EX_PARAMS  \
-     );
-
-GENPROT( her )
-GENPROT( syr )
-
-
-#undef  GENPROT
-#define GENPROT( opname ) \
-\
-BLIS_EXPORT_BLIS void PASTEMAC(opname,EX_SUF) \
-     ( \
-       const obj_t* alpha, \
-       const obj_t* a, \
-       const obj_t* x  \
-       BLIS_OAPI_EX_PARAMS  \
-     );
-
-GENPROT( trmv )
-GENPROT( trsv )
 

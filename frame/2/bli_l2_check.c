@@ -134,6 +134,76 @@ void bli_symv_check
 }
 
 
+void bli_shmv_check
+     (
+       const obj_t* alpha,
+       const obj_t* a,
+       const obj_t* x,
+       const obj_t* beta,
+       const obj_t* y
+     )
+{
+	err_t e_val;
+
+	// Perform checks common to gemv/hemv/symv/trmv/trsv.
+
+	bli_xxmv_check( alpha, a, x, beta, y );
+
+	// Check squareness.
+
+	e_val = bli_check_square_object( a );
+	bli_check_error_code( e_val );
+
+	// Check object structure.
+
+	e_val = bli_check_skew_hermitian_object( a );
+	bli_check_error_code( e_val );
+
+	// Check for consistent datatypes.
+
+	e_val = bli_check_consistent_object_datatypes( a, x );
+	bli_check_error_code( e_val );
+
+	e_val = bli_check_consistent_object_datatypes( a, y );
+	bli_check_error_code( e_val );
+}
+
+
+void bli_skmv_check
+     (
+       const obj_t* alpha,
+       const obj_t* a,
+       const obj_t* x,
+       const obj_t* beta,
+       const obj_t* y
+     )
+{
+	err_t e_val;
+
+	// Perform checks common to gemv/hemv/symv/trmv/trsv.
+
+	bli_xxmv_check( alpha, a, x, beta, y );
+
+	// Check squareness.
+
+	e_val = bli_check_square_object( a );
+	bli_check_error_code( e_val );
+
+	// Check object structure.
+
+	e_val = bli_check_skew_symmetric_object( a );
+	bli_check_error_code( e_val );
+
+	// Check for consistent datatypes.
+
+	e_val = bli_check_consistent_object_datatypes( a, x );
+	bli_check_error_code( e_val );
+
+	e_val = bli_check_consistent_object_datatypes( a, y );
+	bli_check_error_code( e_val );
+}
+
+
 void bli_trmv_check
      (
        const obj_t* alpha,
@@ -287,6 +357,40 @@ void bli_her2_check
 }
 
 
+void bli_shr2_check
+     (
+       const obj_t* alpha,
+       const obj_t* x,
+       const obj_t* y,
+       const obj_t* a
+     )
+{
+	err_t e_val;
+
+	// Perform checks common to ger/her/her2/syr/syr2.
+
+	bli_xxr_check( alpha, x, y, a );
+
+	// Check squareness.
+
+	e_val = bli_check_square_object( a );
+	bli_check_error_code( e_val );
+
+	// Check object structure.
+
+	e_val = bli_check_skew_hermitian_object( a );
+	bli_check_error_code( e_val );
+
+	// Check for consistent datatypes.
+
+	e_val = bli_check_consistent_object_datatypes( a, x );
+	bli_check_error_code( e_val );
+
+	e_val = bli_check_consistent_object_datatypes( a, y );
+	bli_check_error_code( e_val );
+}
+
+
 void bli_syr_check
      (
        const obj_t* alpha,
@@ -339,6 +443,40 @@ void bli_syr2_check
 	// Check object structure.
 
 	e_val = bli_check_symmetric_object( a );
+	bli_check_error_code( e_val );
+
+	// Check for consistent datatypes.
+
+	e_val = bli_check_consistent_object_datatypes( a, x );
+	bli_check_error_code( e_val );
+
+	e_val = bli_check_consistent_object_datatypes( a, y );
+	bli_check_error_code( e_val );
+}
+
+
+void bli_skr2_check
+     (
+       const obj_t* alpha,
+       const obj_t* x,
+       const obj_t* y,
+       const obj_t* a
+     )
+{
+	err_t e_val;
+
+	// Perform checks common to ger/her/her2/syr/syr2.
+
+	bli_xxr_check( alpha, x, y, a );
+
+	// Check squareness.
+
+	e_val = bli_check_square_object( a );
+	bli_check_error_code( e_val );
+
+	// Check object structure.
+
+	e_val = bli_check_skew_symmetric_object( a );
 	bli_check_error_code( e_val );
 
 	// Check for consistent datatypes.

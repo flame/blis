@@ -39,7 +39,6 @@
 \
 void PASTEMAC(varname) \
      ( \
-       conj_t  conjh, \
        obj_t*  alpha, \
        obj_t*  a, \
        obj_t*  x, \
@@ -51,26 +50,27 @@ void PASTEMAC(varname) \
 { \
 	bli_init_once(); \
 \
-	num_t     dt        = bli_obj_dt( a ); \
+	num_t     dt         = bli_obj_dt( a ); \
 \
-	uplo_t    uplo      = bli_obj_uplo( a ); \
-	conj_t    conja     = bli_obj_conj_status( a ); \
-	conj_t    conjx     = bli_obj_conj_status( x ); \
+	struc_t   struc      = bli_obj_struc( a ); \
+	uplo_t    uplo       = bli_obj_uplo( a ); \
+	conj_t    conja      = bli_obj_conj_status( a ); \
+	conj_t    conjx      = bli_obj_conj_status( x ); \
 \
-	dim_t     m         = bli_obj_length( a ); \
+	dim_t     m          = bli_obj_length( a ); \
 \
-	void*     buf_a     = bli_obj_buffer_at_off( a ); \
-	inc_t     rs_a      = bli_obj_row_stride( a ); \
-	inc_t     cs_a      = bli_obj_col_stride( a ); \
+	void*     buf_a      = bli_obj_buffer_at_off( a ); \
+	inc_t     rs_a       = bli_obj_row_stride( a ); \
+	inc_t     cs_a       = bli_obj_col_stride( a ); \
 \
-	void*     buf_x     = bli_obj_buffer_at_off( x ); \
-	inc_t     incx      = bli_obj_vector_inc( x ); \
+	void*     buf_x      = bli_obj_buffer_at_off( x ); \
+	inc_t     incx       = bli_obj_vector_inc( x ); \
 \
-	void*     buf_y     = bli_obj_buffer_at_off( y ); \
-	inc_t     incy      = bli_obj_vector_inc( y ); \
+	void*     buf_y      = bli_obj_buffer_at_off( y ); \
+	inc_t     incy       = bli_obj_vector_inc( y ); \
 \
-	void*     buf_alpha = bli_obj_buffer_for_1x1( dt, alpha ); \
-	void*     buf_beta  = bli_obj_buffer_for_1x1( dt, beta ); \
+	void*     buf_alpha  = bli_obj_buffer_for_1x1( dt, alpha ); \
+	void*     buf_beta   = bli_obj_buffer_for_1x1( dt, beta ); \
 \
 	/* Query a type-specific function pointer, except one that uses
 	   void* for function arguments instead of typed pointers. */ \
@@ -79,10 +79,10 @@ void PASTEMAC(varname) \
 \
 	f \
 	( \
+	  struc, \
 	  uplo, \
 	  conja, \
 	  conjx, \
-	  conjh, \
 	  m, \
 	  buf_alpha, \
 	  buf_a, rs_a, cs_a, \
