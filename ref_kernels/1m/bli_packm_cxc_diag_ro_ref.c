@@ -45,8 +45,8 @@ do { \
 do { \
 	ctypep_r alpha_r, alpha_i, ka_r, ka_i; (void)ka_i; \
 	PASTEMAC(cha,chp,copyris)( *(alpha1 +  mn       *inca2       + 0 + k*lda2), \
-	                            *(alpha1 +  mn       *inca2       + 1 + k*lda2), \
-	                            alpha_r, alpha_i ); \
+	                           *(alpha1 +  mn       *inca2       + 1 + k*lda2), \
+	                           alpha_r, alpha_i ); \
 	PASTEMAC(chp,op)( kappa_r, kappa_i, alpha_r, alpha_i, ka_r, ka_i ); \
 	PASTEMAC(chp_r,copys)( ka_r, *(pi1_r  + mn*cdim_bcast  + d + k*ldp) ); \
 } while (0)
@@ -98,8 +98,6 @@ void PASTEMAC(cha,chp,opname,arch,suf) \
 	const inc_t inca2 = 2 * inca; \
 	const inc_t lda2  = 2 * lda; \
 \
-	      ctypep_r           kappa_r = ( ( ctypep_r* )kappa )[0]; \
-	      ctypep_r           kappa_i = ( ( ctypep_r* )kappa )[1]; \
 	      ctypep_r           one     = *PASTEMAC(chp_r,1); \
 	const ctypea_r* restrict alpha1  = ( const ctypea_r* )a; \
 \
@@ -114,17 +112,23 @@ void PASTEMAC(cha,chp,opname,arch,suf) \
 	ctypep_r* restrict pi1_r = ( ctypep_r* )p; \
 \
 	/* write the strictly lower part if it exists */ \
-	if ( bli_is_lower( uploa ) || bli_is_herm_or_symm( struca ) ) \
+	if ( bli_is_lower( uploa ) || bli_is_herm_or_symm( struca ) || bli_is_skew_herm_or_symm( struca ) ) \
 	{ \
-		dim_t  inca_l2 = inca2; \
-		dim_t  lda_l2  = lda2; \
-		conj_t conja_l = conja; \
+		dim_t    inca_l2 = inca2; \
+		dim_t    lda_l2  = lda2; \
+		conj_t   conja_l = conja; \
+		ctypep_r kappa_r = ( ( ctypep_r* )kappa )[0]; \
+		ctypep_r kappa_i = ( ( ctypep_r* )kappa )[1]; \
 \
 		if ( bli_is_upper( uploa ) ) \
 		{ \
 			bli_swap_incs( &inca_l2, &lda_l2 ); \
-			if ( bli_is_hermitian( struca ) ) \
+\
+			if ( bli_is_hermitian( struca ) || bli_is_skew_hermitian( struca ) ) \
 			    bli_toggle_conj( &conja_l ); \
+\
+			if ( bli_is_skew_symmetric( struca ) || bli_is_skew_hermitian( struca ) ) \
+			    PASTEMAC(chp,negris)( kappa_r, kappa_i ); \
 		} \
 \
 		if ( bli_is_conj( conja_l ) ) PACKM_DIAG_BODY_RO_L( ctypep_r, cha, chp, chp_r, scal2jris ); \
@@ -133,22 +137,31 @@ void PASTEMAC(cha,chp,opname,arch,suf) \
 \
 	/* write the strictly upper part if it exists */ \
 	/* assume either symmetric, hermitian, or triangular */ \
-	if ( bli_is_upper( uploa ) || bli_is_herm_or_symm( struca ) ) \
+	if ( bli_is_upper( uploa ) || bli_is_herm_or_symm( struca ) || bli_is_skew_herm_or_symm( struca ) ) \
 	{ \
-		dim_t  inca_u2 = inca2; \
-		dim_t  lda_u2  = lda2; \
-		conj_t conja_u = conja; \
+		dim_t    inca_u2 = inca2; \
+		dim_t    lda_u2  = lda2; \
+		conj_t   conja_u = conja; \
+		ctypep_r kappa_r = ( ( ctypep_r* )kappa )[0]; \
+		ctypep_r kappa_i = ( ( ctypep_r* )kappa )[1]; \
 \
 		if ( bli_is_lower( uploa ) ) \
 		{ \
 			bli_swap_incs( &inca_u2, &lda_u2 ); \
-			if ( bli_is_hermitian( struca ) ) \
+\
+			if ( bli_is_hermitian( struca ) || bli_is_skew_hermitian( struca ) ) \
 			    bli_toggle_conj( &conja_u ); \
+\
+			if ( bli_is_skew_symmetric( struca ) || bli_is_skew_hermitian( struca ) ) \
+			    PASTEMAC(chp,negris)( kappa_r, kappa_i ); \
 		} \
 \
 		if ( bli_is_conj( conja_u ) ) PACKM_DIAG_BODY_RO_U( ctypep_r, cha, chp, chp_r, scal2jris ); \
 		else                          PACKM_DIAG_BODY_RO_U( ctypep_r, cha, chp, chp_r, scal2ris ); \
 	} \
+\
+	ctypep_r kappa_r = ( ( ctypep_r* )kappa )[0]; \
+	ctypep_r kappa_i = ( ( ctypep_r* )kappa )[1]; \
 \
 	/* write the diagonal */ \
 	if ( bli_is_unit_diag( diaga ) ) \
@@ -166,6 +179,22 @@ void PASTEMAC(cha,chp,opname,arch,suf) \
 			PASTEMAC(cha_r,chp_r,copys)( *(alpha1 + mnk*(inca2 + lda2)), alpha_r ); \
 			PASTEMAC(chp_r,scal2s)( kappa_r, alpha_r, *(pi1_r + mnk*(cdim_bcast + ldp) + d) ); \
 		} \
+	} \
+	else if ( bli_is_skew_hermitian( struca ) ) \
+	{ \
+		for ( dim_t mnk = 0; mnk < cdim; ++mnk ) \
+		for ( dim_t d = 0; d < cdim_bcast; ++d ) \
+		{ \
+			ctypep_r alpha_i; \
+			PASTEMAC(cha_r,chp_r,copys)( *(alpha1 + mnk*(inca2 + lda2 + 1)), alpha_i ); \
+			PASTEMAC(chp_r,scal2s)( -kappa_i, alpha_i, *(pi1_r + mnk*(cdim_bcast + ldp) + d) ); \
+		} \
+	} \
+	else if ( bli_is_skew_symmetric( struca ) ) \
+	{ \
+		for ( dim_t mnk = 0; mnk < cdim; ++mnk ) \
+		for ( dim_t d = 0; d < cdim_bcast; ++d ) \
+			PASTEMAC(chp_r,set0s)( *(pi1_r + mnk*(cdim_bcast + ldp) + d) ); \
 	} \
 	else if ( bli_is_conj( conja ) ) \
 	{ \
