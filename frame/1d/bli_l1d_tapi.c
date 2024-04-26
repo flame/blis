@@ -342,6 +342,79 @@ void PASTEMAC(ch,opname,EX_SUF) \
 	dim_t       offx; \
 	inc_t       incx; \
 \
+	if ( bli_zero_dim2( m, n ) ) return; \
+\
+	if ( bli_is_outside_diag( diagoffx, BLIS_NO_TRANSPOSE, m, n ) ) return; \
+\
+	/* Determine the distance to the diagonals, the number of diagonal
+	   elements, and the diagonal increments. */ \
+	bli_set_dims_incs_1d \
+	( \
+	  diagoffx, \
+	  m, n, rs_x, cs_x, \
+	  &offx, &n_elem, &incx \
+	); \
+\
+	/* Alternate implementation. (Substitute for remainder of function). */ \
+	/* for ( i = 0; i < n_elem; ++i ) \
+	{ \
+		ctype* chi11 = x1 + (i  )*incx; \
+\
+		PASTEMAC(ch,setrs)( *alpha, *chi11 ); \
+	} */ \
+\
+	/* Acquire the address of the real component of the first element,
+	   and scale the increment for use in the real domain if the data type is complex. */ \
+	x1   = ( ctype_r* )( x + offx ); \
+	if ( bli_is_complex( dt ) ) \
+		incx = 2*incx; \
+\
+	/* Obtain a valid context from the gks if necessary. */ \
+	if ( cntx == NULL ) cntx = bli_gks_query_cntx(); \
+\
+	/* Query the context for the operation's kernel address. */ \
+	PASTECH(kername,_ker_ft) f = bli_cntx_get_ukr_dt( dt_r, kerid, cntx ); \
+\
+	/* Invoke the kernel with the appropriate parameters. */ \
+	f \
+	( \
+	  BLIS_NO_CONJUGATE, \
+	  n_elem, \
+	  ( ctype_r* )alpha, \
+	              x1, incx, \
+	  ( cntx_t* )cntx  \
+	); \
+}
+
+INSERT_GENTFUNCR_BASIC( setrd, setv, BLIS_SETV_KER )
+
+
+#undef  GENTFUNCR
+#define GENTFUNCR( ctype, ctype_r, ch, chr, opname, kername, kerid ) \
+\
+void PASTEMAC(ch,opname,EX_SUF) \
+     ( \
+             doff_t   diagoffx, \
+             dim_t    m, \
+             dim_t    n, \
+       const ctype_r* alpha, \
+             ctype*   x, inc_t rs_x, inc_t cs_x  \
+       BLIS_TAPI_EX_PARAMS  \
+     ) \
+{ \
+\
+	bli_init_once(); \
+\
+	BLIS_TAPI_EX_DECLS \
+\
+	const num_t dt   = PASTEMAC(ch,type); \
+	const num_t dt_r = PASTEMAC(chr,type); \
+\
+	ctype_r*    x1; \
+	dim_t       n_elem; \
+	dim_t       offx; \
+	inc_t       incx; \
+\
 	/* If the datatype is real, the entire operation is a no-op. */ \
 	if ( bli_is_real( dt ) ) return; \
 \

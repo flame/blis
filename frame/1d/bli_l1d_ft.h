@@ -115,7 +115,7 @@ INSERT_GENTDEF( invscald )
 INSERT_GENTDEF( scald )
 INSERT_GENTDEF( setd )
 
-// setid
+// setrd, setid
 
 #undef  GENTDEFR
 #define GENTDEFR( ctype, ctype_r, ch, chr, opname, tsuf ) \
@@ -130,6 +130,7 @@ typedef void (*PASTECH(ch,opname,EX_SUF,tsuf)) \
        BLIS_TAPI_EX_PARAMS  \
      );
 
+INSERT_GENTDEFR( setrd )
 INSERT_GENTDEFR( setid )
 
 // shiftd
