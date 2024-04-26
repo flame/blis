@@ -36,6 +36,7 @@
 #define LPGEMM_S32_KERN_MACROS_H
 
 #include "../gelu_avx512.h"
+#include "../silu_avx512.h"
 #include "../math_utils_avx512.h"
 
 #define S32_BETA_FMA(reg,scratch1,scratch2) \
@@ -310,5 +311,11 @@
 	S32_S32_MATRIX_ADD_LOAD(_cvtu32_mask16( 0xFFFF ),scr2,m_ind,2); \
 	S32_S32_MATRIX_ADD_LOAD(_cvtu32_mask16( 0xFFFF ),scr3,m_ind,3); \
 	S32_MATRIX_ADD_4COL(scr0,scr1,scr2,scr3,m_ind); \
+
+// SiLU utility macros. al register expected to contains floats.
+#define SWISH_S32_AVX512(in_reg, fl_reg, al, al_in, r, r2, z, dn, ex_out) \
+	fl_reg = _mm512_cvtepi32_ps( in_reg ); \
+	SWISH_F32_AVX512_DEF( fl_reg, al, al_in, r, r2, z, dn, ex_out); \
+	in_reg = _mm512_cvtps_epi32( fl_reg ); \
 
 #endif // LPGEMM_S32_KERN_MACROS_H

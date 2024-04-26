@@ -36,6 +36,7 @@
 #define LPGEMM_S16_KERN_MACROS_H
 
 #include "../gelu_avx2.h"
+#include "../silu_avx2.h"
 #include "../math_utils_avx2.h"
 
 #define S8_MIN  (-128)
@@ -453,5 +454,20 @@
 	S16_S16_MATRIX_ADD_LOAD(scr0,m_ind,0); \
 	S16_S16_MATRIX_ADD_LOAD(scr1,m_ind,1); \
 	S16_MATRIX_ADD_2COL(scr0,scr1,m_ind); \
+
+// SiLU utility macros. al1, al2 register expected to contain floats.
+#define SWISH_S16_AVX2(in_reg, al, al_in, tmp_reg1, tmp_reg2, r, r2, z, dn, ex_out) \
+\
+	tmp_reg1 = _mm256_cvtepi32_ps( _mm256_cvtepi16_epi32( \
+							_mm256_extractf128_si256( in_reg, 0 ) ) ); \
+	tmp_reg2 = _mm256_cvtepi32_ps( _mm256_cvtepi16_epi32( \
+							_mm256_extractf128_si256( in_reg, 1 ) ) ); \
+\
+	SWISH_F32_AVX2_DEF(tmp_reg1, al, al_in, r, r2, z, dn, ex_out); \
+\
+	SWISH_F32_AVX2_DEF(tmp_reg2, al, al_in, r, r2, z, dn, ex_out); \
+\
+	in_reg = _mm256_packs_epi32(_mm256_cvtps_epi32(tmp_reg1), _mm256_cvtps_epi32(tmp_reg2));\
+	in_reg = _mm256_permute4x64_epi64(in_reg, 0XD8);\
 
 #endif //LPGEMM_S16_KERN_MACROS_H

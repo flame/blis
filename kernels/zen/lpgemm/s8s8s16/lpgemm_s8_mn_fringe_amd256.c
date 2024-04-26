@@ -54,7 +54,8 @@ LPGEMM_MN_FRINGE_KERN(int8_t,int8_t,int16_t,s8s8s16o16_4x16)
 			&&POST_OPS_GELU_ERF_4x16,
 			&&POST_OPS_CLIP_4x16,
 			&&POST_OPS_DOWNSCALE_4x16,
-			&&POST_OPS_MATRIX_ADD_4x16
+			&&POST_OPS_MATRIX_ADD_4x16,
+			&&POST_OPS_SWISH_4x16
 		};
 
 	// The division is done by considering the vpmaddubsw instruction
@@ -441,7 +442,6 @@ POST_OPS_DOWNSCALE_4x16:
 	}
 POST_OPS_MATRIX_ADD_4x16:
 	{
-		__m256i selector1;
 		dim_t ldm = *( dim_t* )post_ops_list_temp->op_args3;
 
 		if ( post_ops_attr.c_stor_type == S8 )
@@ -492,6 +492,30 @@ POST_OPS_MATRIX_ADD_4x16:
 			// c[3:0-15]
 			S16_S16_MATRIX_ADD_1COL(selector1,3);
 		}
+
+		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+	}
+POST_OPS_SWISH_4x16:
+	{
+		selector1 =
+			_mm256_set1_epi16( *( ( int16_t* )post_ops_list_temp->op_args2 ) );
+		__m256 al = _mm256_cvtepi32_ps( _mm256_cvtepi16_epi32( \
+						_mm256_extractf128_si256( selector1, 0 ) ) );
+
+		__m256 al_in, tmp_reg1, tmp_reg2, r, r2, z, dn;
+		__m256i ex_out;
+
+		// c[0,0-15]
+		SWISH_S16_AVX2(c_int16_0p0, al, al_in, tmp_reg1, tmp_reg2, r, r2, z, dn, ex_out);
+
+		// c[1,0-15]
+		SWISH_S16_AVX2(c_int16_1p0, al, al_in, tmp_reg1, tmp_reg2, r, r2, z, dn, ex_out);
+
+		// c[2,0-15]
+		SWISH_S16_AVX2(c_int16_2p0, al, al_in, tmp_reg1, tmp_reg2, r, r2, z, dn, ex_out);
+
+		// c[3,0-15]
+		SWISH_S16_AVX2(c_int16_3p0, al, al_in, tmp_reg1, tmp_reg2, r, r2, z, dn, ex_out);
 
 		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 	}
@@ -546,7 +570,8 @@ LPGEMM_MN_LT_NR0_FRINGE_KERN(int8_t,int8_t,int16_t,s8s8s16o16_4xlt16)
 			&&POST_OPS_GELU_ERF_4xlt16,
 			&&POST_OPS_CLIP_4xlt16,
 			&&POST_OPS_DOWNSCALE_4xlt16,
-			&&POST_OPS_MATRIX_ADD_4xlt16
+			&&POST_OPS_MATRIX_ADD_4xlt16,
+			&&POST_OPS_SWISH_4xlt16
 		};
 
 	// The division is done by considering the vpmaddubsw instruction
@@ -971,7 +996,6 @@ POST_OPS_DOWNSCALE_4xlt16:
 	}
 POST_OPS_MATRIX_ADD_4xlt16:
 	{
-		__m256i selector1;
 		dim_t ldm = *( dim_t* )post_ops_list_temp->op_args3;
 
 		if ( post_ops_attr.c_stor_type == S8 )
@@ -1022,6 +1046,30 @@ POST_OPS_MATRIX_ADD_4xlt16:
 			// c[3:0-15]
 			S16_S16_MATRIX_ADD_1COL_PAR(buf0,selector1,3,n0_rem,int16_t);
 		}
+
+		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+	}
+POST_OPS_SWISH_4xlt16:
+	{
+		selector1 =
+			_mm256_set1_epi16( *( ( int16_t* )post_ops_list_temp->op_args2 ) );
+		__m256 al = _mm256_cvtepi32_ps( _mm256_cvtepi16_epi32( \
+						_mm256_extractf128_si256( selector1, 0 ) ) );
+
+		__m256 al_in, tmp_reg1, tmp_reg2, r, r2, z, dn;
+		__m256i ex_out;
+
+		// c[0,0-15]
+		SWISH_S16_AVX2(c_int16_0p0, al, al_in, tmp_reg1, tmp_reg2, r, r2, z, dn, ex_out);
+
+		// c[1,0-15]
+		SWISH_S16_AVX2(c_int16_1p0, al, al_in, tmp_reg1, tmp_reg2, r, r2, z, dn, ex_out);
+
+		// c[2,0-15]
+		SWISH_S16_AVX2(c_int16_2p0, al, al_in, tmp_reg1, tmp_reg2, r, r2, z, dn, ex_out);
+
+		// c[3,0-15]
+		SWISH_S16_AVX2(c_int16_3p0, al, al_in, tmp_reg1, tmp_reg2, r, r2, z, dn, ex_out);
 
 		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 	}
@@ -1096,7 +1144,8 @@ LPGEMM_MN_FRINGE_KERN(int8_t,int8_t,int16_t,s8s8s16o16_2x16)
 			&&POST_OPS_GELU_ERF_2x16,
 			&&POST_OPS_CLIP_2x16,	
 			&&POST_OPS_DOWNSCALE_2x16,
-			&&POST_OPS_MATRIX_ADD_2x16
+			&&POST_OPS_MATRIX_ADD_2x16,
+			&&POST_OPS_SWISH_2x16
 		};
 
 	// The division is done by considering the vpmaddubsw instruction
@@ -1373,7 +1422,6 @@ POST_OPS_DOWNSCALE_2x16:
 	}
 POST_OPS_MATRIX_ADD_2x16:
 	{
-		__m256i selector1;
 		dim_t ldm = *( dim_t* )post_ops_list_temp->op_args3;
 
 		if ( post_ops_attr.c_stor_type == S8 )
@@ -1406,6 +1454,24 @@ POST_OPS_MATRIX_ADD_2x16:
 			// c[1:0-15]
 			S16_S16_MATRIX_ADD_1COL(selector1,1);
 		}
+
+		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+	}
+POST_OPS_SWISH_2x16:
+	{
+		selector1 =
+			_mm256_set1_epi16( *( ( int16_t* )post_ops_list_temp->op_args2 ) );
+		__m256 al = _mm256_cvtepi32_ps( _mm256_cvtepi16_epi32( \
+						_mm256_extractf128_si256( selector1, 0 ) ) );
+
+		__m256 al_in, tmp_reg1, tmp_reg2, r, r2, z, dn;
+		__m256i ex_out;
+
+		// c[0,0-15]
+		SWISH_S16_AVX2(c_int16_0p0, al, al_in, tmp_reg1, tmp_reg2, r, r2, z, dn, ex_out);
+
+		// c[1,0-15]
+		SWISH_S16_AVX2(c_int16_1p0, al, al_in, tmp_reg1, tmp_reg2, r, r2, z, dn, ex_out);
 
 		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 	}
@@ -1451,7 +1517,8 @@ LPGEMM_MN_LT_NR0_FRINGE_KERN(int8_t,int8_t,int16_t,s8s8s16o16_2xlt16)
 			&&POST_OPS_GELU_ERF_2xlt16,
 			&&POST_OPS_CLIP_2xlt16,
 			&&POST_OPS_DOWNSCALE_2xlt16,
-			&&POST_OPS_MATRIX_ADD_2xlt16
+			&&POST_OPS_MATRIX_ADD_2xlt16,
+			&&POST_OPS_SWISH_2xlt16
 		};
 
 	// The division is done by considering the vpmaddubsw instruction
@@ -1757,7 +1824,6 @@ POST_OPS_DOWNSCALE_2xlt16:
 	}
 POST_OPS_MATRIX_ADD_2xlt16:
 	{
-		__m256i selector1;
 		dim_t ldm = *( dim_t* )post_ops_list_temp->op_args3;
 
 		if ( post_ops_attr.c_stor_type == S8 )
@@ -1790,6 +1856,24 @@ POST_OPS_MATRIX_ADD_2xlt16:
 			// c[1:0-15]
 			S16_S16_MATRIX_ADD_1COL_PAR(buf0,selector1,1,n0_rem,int16_t);
 		}
+
+		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+	}
+POST_OPS_SWISH_2xlt16:
+	{
+		selector1 =
+			_mm256_set1_epi16( *( ( int16_t* )post_ops_list_temp->op_args2 ) );
+		__m256 al = _mm256_cvtepi32_ps( _mm256_cvtepi16_epi32( \
+						_mm256_extractf128_si256( selector1, 0 ) ) );
+
+		__m256 al_in, tmp_reg1, tmp_reg2, r, r2, z, dn;
+		__m256i ex_out;
+
+		// c[0,0-15]
+		SWISH_S16_AVX2(c_int16_0p0, al, al_in, tmp_reg1, tmp_reg2, r, r2, z, dn, ex_out);
+
+		// c[1,0-15]
+		SWISH_S16_AVX2(c_int16_1p0, al, al_in, tmp_reg1, tmp_reg2, r, r2, z, dn, ex_out);
 
 		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 	}
@@ -1847,7 +1931,8 @@ LPGEMM_MN_FRINGE_KERN(int8_t,int8_t,int16_t,s8s8s16o16_1x16)
 			&&POST_OPS_GELU_ERF_1x16,
 			&&POST_OPS_CLIP_1x16,
 			&&POST_OPS_DOWNSCALE_1x16,
-			&&POST_OPS_MATRIX_ADD_1x16
+			&&POST_OPS_MATRIX_ADD_1x16,
+			&&POST_OPS_SWISH_1x16
 		};
 
 	// The division is done by considering the vpmaddubsw instruction
@@ -2068,7 +2153,6 @@ POST_OPS_DOWNSCALE_1x16:
 	}
 POST_OPS_MATRIX_ADD_1x16:
 	{
-		__m256i selector1;
 		dim_t ldm = *( dim_t* )post_ops_list_temp->op_args3;
 
 		if ( post_ops_attr.c_stor_type == S8 )
@@ -2092,6 +2176,21 @@ POST_OPS_MATRIX_ADD_1x16:
 			// c[0:0-15]
 			S16_S16_MATRIX_ADD_1COL(selector1,0);
 		}
+
+		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+	}
+POST_OPS_SWISH_1x16:
+	{
+		selector1 =
+			_mm256_set1_epi16( *( ( int16_t* )post_ops_list_temp->op_args2 ) );
+		__m256 al = _mm256_cvtepi32_ps( _mm256_cvtepi16_epi32( \
+						_mm256_extractf128_si256( selector1, 0 ) ) );
+
+		__m256 al_in, tmp_reg1, tmp_reg2, r, r2, z, dn;
+		__m256i ex_out;
+
+		// c[0,0-15]
+		SWISH_S16_AVX2(c_int16_0p0, al, al_in, tmp_reg1, tmp_reg2, r, r2, z, dn, ex_out);
 
 		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 	}
@@ -2135,7 +2234,8 @@ LPGEMM_MN_LT_NR0_FRINGE_KERN(int8_t,int8_t,int16_t,s8s8s16o16_1xlt16)
 			&&POST_OPS_GELU_ERF_1xlt16,
 			&&POST_OPS_CLIP_1xlt16,
 			&&POST_OPS_DOWNSCALE_1xlt16,
-			&&POST_OPS_MATRIX_ADD_1xlt16
+			&&POST_OPS_MATRIX_ADD_1xlt16,
+			&&POST_OPS_SWISH_1xlt16
 		};
 
 	// The division is done by considering the vpmaddubsw instruction
@@ -2382,7 +2482,6 @@ POST_OPS_DOWNSCALE_1xlt16:
 	}
 POST_OPS_MATRIX_ADD_1xlt16:
 	{
-		__m256i selector1;
 		dim_t ldm = *( dim_t* )post_ops_list_temp->op_args3;
 
 		if ( post_ops_attr.c_stor_type == S8 )
@@ -2406,6 +2505,21 @@ POST_OPS_MATRIX_ADD_1xlt16:
 			// c[0:0-15]
 			S16_S16_MATRIX_ADD_1COL_PAR(buf0,selector1,0,n0_rem,int16_t);
 		}
+
+		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+	}
+POST_OPS_SWISH_1xlt16:
+	{
+		selector1 =
+			_mm256_set1_epi16( *( ( int16_t* )post_ops_list_temp->op_args2 ) );
+		__m256 al = _mm256_cvtepi32_ps( _mm256_cvtepi16_epi32( \
+						_mm256_extractf128_si256( selector1, 0 ) ) );
+
+		__m256 al_in, tmp_reg1, tmp_reg2, r, r2, z, dn;
+		__m256i ex_out;
+
+		// c[0,0-15]
+		SWISH_S16_AVX2(c_int16_0p0, al, al_in, tmp_reg1, tmp_reg2, r, r2, z, dn, ex_out);
 
 		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 	}

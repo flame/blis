@@ -12,3 +12,4 @@ r n n n r 144 1024 512 512 1024 1024 *:zp=vector,scale=scalar,relu,clip
 r n n n r 128 128 128 128 128 128 *:bias,relu,clip
 r n n n r 100 200 300 300 200 200 u8s8s16ou8:none
 c t n n n 16 256 512 512 512 256 bf16bf16f32of32:none
+r n n n r 144 6424 2048 2048 6424 6424 *:bias,swish

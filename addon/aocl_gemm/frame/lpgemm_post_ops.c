@@ -140,6 +140,14 @@ err_t lpgemm_translate_to_post_ops_list
 									}
 									tmp_code = POST_OPS_CLIP;
 									break;
+							case SWISH:
+									if( ( post_op_unparsed->eltwise + e_i )->algo.alpha == NULL )
+									{
+										bli_print_msg(" Post_op.alpha is NULL. Exiting..", __FILE__, __LINE__ );
+										return BLIS_NULL_POINTER;
+									}
+									tmp_code = POST_OPS_SWISH;
+									break;
 							default:
 									break;
 						}

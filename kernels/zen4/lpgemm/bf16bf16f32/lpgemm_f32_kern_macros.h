@@ -36,6 +36,7 @@
 #define LPGEMM_F32_KERN_MACROS_H
 
 #include "../gelu_avx512.h"
+#include "../silu_avx512.h"
 #include "../math_utils_avx512.h"
 
 /* ReLU scale (Parametric ReLU):  f(x) = x, when x > 0 and f(x) = a*x when x <= 0 */

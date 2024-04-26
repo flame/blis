@@ -55,7 +55,8 @@ LPGEMM_N_FRINGE_KERN(uint8_t,int8_t,int16_t,u8s8s16o16_6x16)
 			&&POST_OPS_GELU_ERF_6x16,
 			&&POST_OPS_CLIP_6x16,
 			&&POST_OPS_DOWNSCALE_6x16,
-			&&POST_OPS_MATRIX_ADD_6x16
+			&&POST_OPS_MATRIX_ADD_6x16,
+			&&POST_OPS_SWISH_6x16
 		};
 
 	dim_t m_full_pieces = m0 / MR;
@@ -531,7 +532,6 @@ POST_OPS_DOWNSCALE_6x16:
 		}
 POST_OPS_MATRIX_ADD_6x16:
 		{
-			__m256i selector1;
 			dim_t ldm = *( dim_t* )post_ops_list_temp->op_args3;
 
 			if ( post_ops_attr.c_stor_type == S8 )
@@ -600,6 +600,36 @@ POST_OPS_MATRIX_ADD_6x16:
 				// c[5:0-15]
 				S16_S16_MATRIX_ADD_1COL(selector1,5);
 			}
+
+			POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+		}
+POST_OPS_SWISH_6x16:
+		{
+			selector1 =
+				_mm256_set1_epi16( *( ( int16_t* )post_ops_list_temp->op_args2 ) );
+			__m256 al = _mm256_cvtepi32_ps( _mm256_cvtepi16_epi32( \
+							_mm256_extractf128_si256( selector1, 0 ) ) );
+
+			__m256 al_in, tmp_reg1, tmp_reg2, r, r2, z, dn;
+			__m256i ex_out;
+
+			// c[0,0-15]
+			SWISH_S16_AVX2(c_int16_0p0, al, al_in, tmp_reg1, tmp_reg2, r, r2, z, dn, ex_out);
+
+			// c[1,0-15]
+			SWISH_S16_AVX2(c_int16_1p0, al, al_in, tmp_reg1, tmp_reg2, r, r2, z, dn, ex_out);
+
+			// c[2,0-15]
+			SWISH_S16_AVX2(c_int16_2p0, al, al_in, tmp_reg1, tmp_reg2, r, r2, z, dn, ex_out);
+
+			// c[3,0-15]
+			SWISH_S16_AVX2(c_int16_3p0, al, al_in, tmp_reg1, tmp_reg2, r, r2, z, dn, ex_out);
+
+			// c[4,0-15]
+			SWISH_S16_AVX2(c_int16_4p0, al, al_in, tmp_reg1, tmp_reg2, r, r2, z, dn, ex_out);
+
+			// c[5,0-15]
+			SWISH_S16_AVX2(c_int16_5p0, al, al_in, tmp_reg1, tmp_reg2, r, r2, z, dn, ex_out);
 
 			POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 		}
@@ -737,7 +767,8 @@ LPGEMM_N_LT_NR0_FRINGE_KERN(uint8_t,int8_t,int16_t,u8s8s16o16_6xlt16)
 			&&POST_OPS_GELU_ERF_6xlt16,
 			&&POST_OPS_CLIP_6xlt16,
 			&&POST_OPS_DOWNSCALE_6xlt16,
-			&&POST_OPS_MATRIX_ADD_6xlt16
+			&&POST_OPS_MATRIX_ADD_6xlt16,
+			&&POST_OPS_SWISH_6xlt16
 		};
 
 	dim_t m_full_pieces = m0 / MR;
@@ -1262,7 +1293,6 @@ POST_OPS_DOWNSCALE_6xlt16:
 		}
 POST_OPS_MATRIX_ADD_6xlt16:
 		{
-			__m256i selector1;
 			dim_t ldm = *( dim_t* )post_ops_list_temp->op_args3;
 
 			if ( post_ops_attr.c_stor_type == S8 )
@@ -1331,6 +1361,36 @@ POST_OPS_MATRIX_ADD_6xlt16:
 				// c[5:0-15]
 				S16_S16_MATRIX_ADD_1COL_PAR(buf0,selector1,5,n0_rem,int16_t);
 			}
+
+			POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+		}
+POST_OPS_SWISH_6xlt16:
+		{
+			selector1 =
+				_mm256_set1_epi16( *( ( int16_t* )post_ops_list_temp->op_args2 ) );
+			__m256 al = _mm256_cvtepi32_ps( _mm256_cvtepi16_epi32( \
+							_mm256_extractf128_si256( selector1, 0 ) ) );
+
+			__m256 al_in, tmp_reg1, tmp_reg2, r, r2, z, dn;
+			__m256i ex_out;
+
+			// c[0,0-15]
+			SWISH_S16_AVX2(c_int16_0p0, al, al_in, tmp_reg1, tmp_reg2, r, r2, z, dn, ex_out);
+
+			// c[1,0-15]
+			SWISH_S16_AVX2(c_int16_1p0, al, al_in, tmp_reg1, tmp_reg2, r, r2, z, dn, ex_out);
+
+			// c[2,0-15]
+			SWISH_S16_AVX2(c_int16_2p0, al, al_in, tmp_reg1, tmp_reg2, r, r2, z, dn, ex_out);
+
+			// c[3,0-15]
+			SWISH_S16_AVX2(c_int16_3p0, al, al_in, tmp_reg1, tmp_reg2, r, r2, z, dn, ex_out);
+
+			// c[4,0-15]
+			SWISH_S16_AVX2(c_int16_4p0, al, al_in, tmp_reg1, tmp_reg2, r, r2, z, dn, ex_out);
+
+			// c[5,0-15]
+			SWISH_S16_AVX2(c_int16_5p0, al, al_in, tmp_reg1, tmp_reg2, r, r2, z, dn, ex_out);
 
 			POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 		}

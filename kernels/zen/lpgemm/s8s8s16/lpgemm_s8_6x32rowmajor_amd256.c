@@ -51,7 +51,8 @@ LPGEMM_MAIN_KERN(int8_t,int8_t,int16_t,s8s8s16o16_6x32)
 			&&POST_OPS_GELU_ERF_6x32,
 			&&POST_OPS_CLIP_6x32,
 			&&POST_OPS_DOWNSCALE_6x32,
-			&&POST_OPS_MATRIX_ADD_6x32
+			&&POST_OPS_MATRIX_ADD_6x32,
+			&&POST_OPS_SWISH_6x32
 		};
 
 	dim_t MR = 6;
@@ -940,6 +941,54 @@ POST_OPS_MATRIX_ADD_6x32:
 				// c[5:0-15,16-31]
 				S16_S16_MATRIX_ADD_2COL(selector1,selector2,5);
 			}
+
+			POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+		}
+POST_OPS_SWISH_6x32:
+		{
+			alphav =
+				_mm256_set1_epi16( *( ( int16_t* )post_ops_list_temp->op_args2 ) );
+			__m256 al = _mm256_cvtepi32_ps( _mm256_cvtepi16_epi32( \
+							_mm256_extractf128_si256( alphav, 0 ) ) );
+
+			__m256 al_in, tmp_reg1, tmp_reg2, r, r2, z, dn;
+			__m256i ex_out;
+
+			// c[0,0-15]
+			SWISH_S16_AVX2(c_int16_0p0, al, al_in, tmp_reg1, tmp_reg2, r, r2, z, dn, ex_out);
+
+			// c[0,16-31]
+			SWISH_S16_AVX2(c_int16_0p1, al, al_in, tmp_reg1, tmp_reg2, r, r2, z, dn, ex_out);
+
+			// c[1,0-15]
+			SWISH_S16_AVX2(c_int16_1p0, al, al_in, tmp_reg1, tmp_reg2, r, r2, z, dn, ex_out);
+
+			// c[1,16-31]
+			SWISH_S16_AVX2(c_int16_1p1, al, al_in, tmp_reg1, tmp_reg2, r, r2, z, dn, ex_out);
+
+			// c[2,0-15]
+			SWISH_S16_AVX2(c_int16_2p0, al, al_in, tmp_reg1, tmp_reg2, r, r2, z, dn, ex_out);
+
+			// c[2,16-31]
+			SWISH_S16_AVX2(c_int16_2p1, al, al_in, tmp_reg1, tmp_reg2, r, r2, z, dn, ex_out);
+
+			// c[3,0-15]
+			SWISH_S16_AVX2(c_int16_3p0, al, al_in, tmp_reg1, tmp_reg2, r, r2, z, dn, ex_out);
+
+			// c[3,16-31]
+			SWISH_S16_AVX2(c_int16_3p1, al, al_in, tmp_reg1, tmp_reg2, r, r2, z, dn, ex_out);
+
+			// c[4,0-15]
+			SWISH_S16_AVX2(c_int16_4p0, al, al_in, tmp_reg1, tmp_reg2, r, r2, z, dn, ex_out);
+
+			// c[4,16-31]
+			SWISH_S16_AVX2(c_int16_4p1, al, al_in, tmp_reg1, tmp_reg2, r, r2, z, dn, ex_out);
+
+			// c[5,0-15]
+			SWISH_S16_AVX2(c_int16_5p0, al, al_in, tmp_reg1, tmp_reg2, r, r2, z, dn, ex_out);
+
+			// c[5,16-31]
+			SWISH_S16_AVX2(c_int16_5p1, al, al_in, tmp_reg1, tmp_reg2, r, r2, z, dn, ex_out);
 
 			POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 		}

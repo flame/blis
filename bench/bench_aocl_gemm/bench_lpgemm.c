@@ -673,6 +673,45 @@ GEN_GELU_ERF_POSTOP_FLOAT(f32f32f32of32)
 GEN_GELU_ERF_POSTOP_FLOAT(bf16bf16f32of32)
 GEN_GELU_ERF_POSTOP_FLOAT(bf16bf16f32obf16)
 
+#define GEN_SWISH_POSTOP_INT(ACCUM_type,BLAS_SFX) \
+static inline ACCUM_type SWISH_post_op_ ## BLAS_SFX \
+     ( \
+       ACCUM_type temp_accum, \
+       ACCUM_type alpha \
+     ) \
+{ \
+    float swish_reference = ( temp_accum / ( 1 + \
+                            expf( ( double )alpha * temp_accum * -1 ) ) ); \
+    temp_accum = round (swish_reference); \
+    return temp_accum; \
+} \
+
+GEN_SWISH_POSTOP_INT(int16_t,u8s8s16os8)
+GEN_SWISH_POSTOP_INT(int16_t,u8s8s16ou8)
+GEN_SWISH_POSTOP_INT(int16_t,u8s8s16os16)
+GEN_SWISH_POSTOP_INT(int32_t,u8s8s32os8)
+GEN_SWISH_POSTOP_INT(int32_t,u8s8s32os32)
+GEN_SWISH_POSTOP_INT(int32_t,s8s8s32os8)
+GEN_SWISH_POSTOP_INT(int32_t,s8s8s32os32)
+GEN_SWISH_POSTOP_INT(int16_t,s8s8s16os8)
+GEN_SWISH_POSTOP_INT(int16_t,s8s8s16os16)
+
+#define GEN_SWISH_POSTOP_FLOAT(BLAS_SFX) \
+static inline float SWISH_post_op_ ## BLAS_SFX \
+     ( \
+       float temp_accum, \
+       float alpha \
+     ) \
+{ \
+    temp_accum = ( temp_accum / ( 1 + \
+                  expf( ( double )alpha * temp_accum * -1 ) ) ); \
+    return temp_accum; \
+} \
+
+GEN_SWISH_POSTOP_FLOAT(f32f32f32of32)
+GEN_SWISH_POSTOP_FLOAT(bf16bf16f32of32)
+GEN_SWISH_POSTOP_FLOAT(bf16bf16f32obf16)
+
 static inline float get_matrix_add_post_op_val_bf16bf16f32obf16
      (
        bfloat16 val
@@ -851,6 +890,15 @@ void mat_mul_accuracy_check_driver_ ## BLAS_SFX \
                             ele_i += 1; \
                         } \
                         else if ( ( post_op->eltwise + ele_i )->algo.algo_type == \
+                                SWISH ) /* SiLU*/ \
+                        { \
+                            temp_accum = GEN_FUNC_NAME(SWISH_post_op_,BLAS_SFX) \
+                                (temp_accum, \
+                                 *( ( ACCUM_type* ) \
+                                    ( post_op->eltwise + ele_i )->algo.alpha ) );\
+                            ele_i += 1; \
+                        } \
+                        else if ( ( post_op->eltwise + ele_i )->algo.algo_type == \
                                 RELU ) /* ReLU*/ \
                         { \
                             temp_accum = ( temp_accum > 0 ) ? temp_accum : 0 ; \
@@ -1021,6 +1069,7 @@ aocl_post_op* lpgemm_create_post_ops_struct_ ## BLAS_SFX \
     bool is_param_relu = FALSE; \
     bool is_gelu_tanh = FALSE; \
     bool is_gelu_erf = FALSE; \
+    bool is_swish = FALSE; \
     bool is_clip = FALSE; \
     bool is_scalar_scale = FALSE; \
     bool is_scalar_zp = FALSE; \
@@ -1060,6 +1109,16 @@ aocl_post_op* lpgemm_create_post_ops_struct_ ## BLAS_SFX \
             { \
                 post_ops->seq_vector[cur_op_index] = ELTWISE; \
                 is_param_relu = TRUE; \
+                is_activator_set = TRUE; \
+                num_eltwise += 1; \
+                activator_idx = cur_op_index; \
+                cur_op_index++; \
+            } \
+            else if ( ( strcmp( ops_tok, "swish" ) == 0 ) && \
+                      ( is_activator_set == FALSE ) ) \
+            { \
+                post_ops->seq_vector[cur_op_index] = ELTWISE; \
+                is_swish = TRUE; \
                 is_activator_set = TRUE; \
                 num_eltwise += 1; \
                 activator_idx = cur_op_index; \
@@ -1162,7 +1221,8 @@ aocl_post_op* lpgemm_create_post_ops_struct_ ## BLAS_SFX \
             goto err_handler; \
         } \
  \
-        /* Only one of relu,prelu,gelu_tanh,gelu_erf allowed as an activator.*/ \
+        /* Only one of relu, prelu, swish, gelu_tanh, gelu_erf allowed as
+         * an activator. */ \
         if ( is_relu == TRUE ) \
         { \
             ( post_ops->eltwise + activator_idx )->is_power_of_2 = FALSE; \
@@ -1175,14 +1235,29 @@ aocl_post_op* lpgemm_create_post_ops_struct_ ## BLAS_SFX \
         { \
             ( post_ops->eltwise + activator_idx )->is_power_of_2 = FALSE; \
             ( post_ops->eltwise + activator_idx )->scale_factor = NULL; \
-            ( post_ops->eltwise + activator_idx )->algo.beta = NULL; \
+            ( post_ops->eltwise + activator_idx )->algo.alpha = NULL; \
             ( post_ops->eltwise + activator_idx )->algo.alpha = malloc( sizeof( C_type ) ); \
             if ( ( post_ops->eltwise + activator_idx )->algo.alpha == NULL ) \
             { \
                 goto err_handler; \
             } \
             *( ( C_type* ) ( post_ops->eltwise + activator_idx )->algo.alpha ) = ( C_type )6; \
+            ( post_ops->eltwise + activator_idx )->algo.beta = NULL; \
             ( post_ops->eltwise + activator_idx )->algo.algo_type = PRELU; \
+        } \
+        if ( is_swish == TRUE ) \
+        { \
+            ( post_ops->eltwise + activator_idx )->is_power_of_2 = FALSE; \
+            ( post_ops->eltwise + activator_idx )->scale_factor = NULL; \
+            ( post_ops->eltwise + activator_idx )->algo.alpha = NULL; \
+            ( post_ops->eltwise + activator_idx )->algo.alpha = malloc( sizeof( C_type ) ); \
+            if ( ( post_ops->eltwise + activator_idx )->algo.alpha == NULL ) \
+            { \
+                goto err_handler; \
+            } \
+            *( ( C_type* ) ( post_ops->eltwise + activator_idx )->algo.alpha ) = ( C_type )2; \
+            ( post_ops->eltwise + activator_idx )->algo.beta = NULL; \
+            ( post_ops->eltwise + activator_idx )->algo.algo_type = SWISH; \
         } \
         else if ( is_gelu_tanh == TRUE ) \
         { \

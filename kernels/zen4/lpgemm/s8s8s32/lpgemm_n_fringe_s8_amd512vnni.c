@@ -54,7 +54,8 @@ LPGEMM_N_LT_NR0_FRINGE_KERN(int8_t,int8_t,int32_t,s8s8s32os32_6xlt16)
 						  &&POST_OPS_GELU_ERF_6xLT16,
 						  &&POST_OPS_CLIP_6xLT16,
 						  &&POST_OPS_DOWNSCALE_6xLT16,
-						  &&POST_OPS_MATRIX_ADD_6xLT16
+						  &&POST_OPS_MATRIX_ADD_6xLT16,
+						  &&POST_OPS_SWISH_6xLT16
 						};
 	dim_t MR = 6;
 	dim_t m_full_pieces = m0 / MR;
@@ -621,6 +622,34 @@ POST_OPS_MATRIX_ADD_6xLT16:
 
 			POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 		}
+POST_OPS_SWISH_6xLT16:
+		{
+			selector1 =
+				_mm512_set1_epi32( *( ( int32_t* )post_ops_list_temp->op_args2 ) );
+			__m512 al = _mm512_cvtepi32_ps( selector1 );
+
+			__m512 fl_reg, al_in, r, r2, z, dn;
+
+			// c[0, 0-15]
+			SWISH_S32_AVX512(c_int32_0p0, fl_reg, al, al_in, r, r2, z, dn, selector2);
+
+			// c[1, 0-15]
+			SWISH_S32_AVX512(c_int32_1p0, fl_reg, al, al_in, r, r2, z, dn, selector2);
+
+			// c[2, 0-15]
+			SWISH_S32_AVX512(c_int32_2p0, fl_reg, al, al_in, r, r2, z, dn, selector2);
+
+			// c[3, 0-15]
+			SWISH_S32_AVX512(c_int32_3p0, fl_reg, al, al_in, r, r2, z, dn, selector2);
+
+			// c[4, 0-15]
+			SWISH_S32_AVX512(c_int32_4p0, fl_reg, al, al_in, r, r2, z, dn, selector2);
+
+			// c[5, 0-15]
+			SWISH_S32_AVX512(c_int32_5p0, fl_reg, al, al_in, r, r2, z, dn, selector2);
+
+			POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+		}
 POST_OPS_6xLT16_DISABLE:
 		;
 
@@ -760,7 +789,8 @@ LPGEMM_N_FRINGE_KERN(int8_t,int8_t,int32_t,s8s8s32os32_6x16)
 						  &&POST_OPS_GELU_ERF_6x16,
 						  &&POST_OPS_CLIP_6x16,
 						  &&POST_OPS_DOWNSCALE_6x16,
-						  &&POST_OPS_MATRIX_ADD_6x16
+						  &&POST_OPS_MATRIX_ADD_6x16,
+						  &&POST_OPS_SWISH_6x16
 						};
 	dim_t MR = 6;
 	dim_t m_full_pieces = m0 / MR;
@@ -1298,6 +1328,34 @@ POST_OPS_MATRIX_ADD_6x16:
 
 			POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 		}
+POST_OPS_SWISH_6x16:
+		{
+			selector1 =
+				_mm512_set1_epi32( *( ( int32_t* )post_ops_list_temp->op_args2 ) );
+			__m512 al = _mm512_cvtepi32_ps( selector1 );
+
+			__m512 fl_reg, al_in, r, r2, z, dn;
+
+			// c[0, 0-15]
+			SWISH_S32_AVX512(c_int32_0p0, fl_reg, al, al_in, r, r2, z, dn, selector2);
+
+			// c[1, 0-15]
+			SWISH_S32_AVX512(c_int32_1p0, fl_reg, al, al_in, r, r2, z, dn, selector2);
+
+			// c[2, 0-15]
+			SWISH_S32_AVX512(c_int32_2p0, fl_reg, al, al_in, r, r2, z, dn, selector2);
+
+			// c[3, 0-15]
+			SWISH_S32_AVX512(c_int32_3p0, fl_reg, al, al_in, r, r2, z, dn, selector2);
+
+			// c[4, 0-15]
+			SWISH_S32_AVX512(c_int32_4p0, fl_reg, al, al_in, r, r2, z, dn, selector2);
+
+			// c[5, 0-15]
+			SWISH_S32_AVX512(c_int32_5p0, fl_reg, al, al_in, r, r2, z, dn, selector2);
+
+			POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+		}
 POST_OPS_6x16_DISABLE:
 		;
 
@@ -1437,7 +1495,8 @@ LPGEMM_N_FRINGE_KERN(int8_t,int8_t,int32_t,s8s8s32os32_6x32)
 						  &&POST_OPS_GELU_ERF_6x32,
 						  &&POST_OPS_CLIP_6x32,
 						  &&POST_OPS_DOWNSCALE_6x32,
-						  &&POST_OPS_MATRIX_ADD_6x32
+						  &&POST_OPS_MATRIX_ADD_6x32,
+						  &&POST_OPS_SWISH_6x32
 						};
 	dim_t MR = 6;
 	dim_t m_full_pieces = m0 / MR;
@@ -2151,6 +2210,52 @@ POST_OPS_MATRIX_ADD_6x32:
 
 			POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 		}
+POST_OPS_SWISH_6x32:
+		{
+			selector1 =
+				_mm512_set1_epi32( *( ( int32_t* )post_ops_list_temp->op_args2 ) );
+			__m512 al = _mm512_cvtepi32_ps( selector1 );
+
+			__m512 fl_reg, al_in, r, r2, z, dn;
+
+			// c[0, 0-15]
+			SWISH_S32_AVX512(c_int32_0p0, fl_reg, al, al_in, r, r2, z, dn, selector2);
+
+			// c[0, 16-31]
+			SWISH_S32_AVX512(c_int32_0p1, fl_reg, al, al_in, r, r2, z, dn, selector2);
+
+			// c[1, 0-15]
+			SWISH_S32_AVX512(c_int32_1p0, fl_reg, al, al_in, r, r2, z, dn, selector2);
+
+			// c[1, 16-31]
+			SWISH_S32_AVX512(c_int32_1p1, fl_reg, al, al_in, r, r2, z, dn, selector2);
+
+			// c[2, 0-15]
+			SWISH_S32_AVX512(c_int32_2p0, fl_reg, al, al_in, r, r2, z, dn, selector2);
+
+			// c[2, 16-31]
+			SWISH_S32_AVX512(c_int32_2p1, fl_reg, al, al_in, r, r2, z, dn, selector2);
+
+			// c[3, 0-15]
+			SWISH_S32_AVX512(c_int32_3p0, fl_reg, al, al_in, r, r2, z, dn, selector2);
+
+			// c[3, 16-31]
+			SWISH_S32_AVX512(c_int32_3p1, fl_reg, al, al_in, r, r2, z, dn, selector2);
+
+			// c[4, 0-15]
+			SWISH_S32_AVX512(c_int32_4p0, fl_reg, al, al_in, r, r2, z, dn, selector2);
+
+			// c[4, 16-31]
+			SWISH_S32_AVX512(c_int32_4p1, fl_reg, al, al_in, r, r2, z, dn, selector2);
+
+			// c[5, 0-15]
+			SWISH_S32_AVX512(c_int32_5p0, fl_reg, al, al_in, r, r2, z, dn, selector2);
+
+			// c[5, 16-31]
+			SWISH_S32_AVX512(c_int32_5p1, fl_reg, al, al_in, r, r2, z, dn, selector2);
+
+			POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+		}
 POST_OPS_6x32_DISABLE:
 		;
 
@@ -2325,7 +2430,8 @@ LPGEMM_N_FRINGE_KERN(int8_t,int8_t,int32_t,s8s8s32os32_6x48)
 						  &&POST_OPS_GELU_ERF_6x48,
 						  &&POST_OPS_CLIP_6x48,
 						  &&POST_OPS_DOWNSCALE_6x48,
-						  &&POST_OPS_MATRIX_ADD_6x48
+						  &&POST_OPS_MATRIX_ADD_6x48,
+						  &&POST_OPS_SWISH_6x48
 						};
 	dim_t MR = 6;
 	dim_t m_full_pieces = m0 / MR;
@@ -3213,6 +3319,70 @@ POST_OPS_MATRIX_ADD_6x48:
 				// c[5:0-15,16-31,32-47]
 				S32_S32_MATRIX_ADD_3COL(selector1,selector2,a_int32_0,5);
 			}
+
+			POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+		}
+POST_OPS_SWISH_6x48:
+		{
+			selector1 =
+				_mm512_set1_epi32( *( ( int32_t* )post_ops_list_temp->op_args2 ) );
+			__m512 al = _mm512_cvtepi32_ps( selector1 );
+
+			__m512 fl_reg, al_in, r, r2, z, dn;
+
+			// c[0, 0-15]
+			SWISH_S32_AVX512(c_int32_0p0, fl_reg, al, al_in, r, r2, z, dn, selector2);
+
+			// c[0, 16-31]
+			SWISH_S32_AVX512(c_int32_0p1, fl_reg, al, al_in, r, r2, z, dn, selector2);
+
+			// c[0, 32-47]
+			SWISH_S32_AVX512(c_int32_0p2, fl_reg, al, al_in, r, r2, z, dn, selector2);
+
+			// c[1, 0-15]
+			SWISH_S32_AVX512(c_int32_1p0, fl_reg, al, al_in, r, r2, z, dn, selector2);
+
+			// c[1, 16-31]
+			SWISH_S32_AVX512(c_int32_1p1, fl_reg, al, al_in, r, r2, z, dn, selector2);
+
+			// c[1, 32-47]
+			SWISH_S32_AVX512(c_int32_1p2, fl_reg, al, al_in, r, r2, z, dn, selector2);
+
+			// c[2, 0-15]
+			SWISH_S32_AVX512(c_int32_2p0, fl_reg, al, al_in, r, r2, z, dn, selector2);
+
+			// c[2, 16-31]
+			SWISH_S32_AVX512(c_int32_2p1, fl_reg, al, al_in, r, r2, z, dn, selector2);
+
+			// c[2, 32-47]
+			SWISH_S32_AVX512(c_int32_2p2, fl_reg, al, al_in, r, r2, z, dn, selector2);
+
+			// c[3, 0-15]
+			SWISH_S32_AVX512(c_int32_3p0, fl_reg, al, al_in, r, r2, z, dn, selector2);
+
+			// c[3, 16-31]
+			SWISH_S32_AVX512(c_int32_3p1, fl_reg, al, al_in, r, r2, z, dn, selector2);
+
+			// c[3, 32-47]
+			SWISH_S32_AVX512(c_int32_3p2, fl_reg, al, al_in, r, r2, z, dn, selector2);
+
+			// c[4, 0-15]
+			SWISH_S32_AVX512(c_int32_4p0, fl_reg, al, al_in, r, r2, z, dn, selector2);
+
+			// c[4, 16-31]
+			SWISH_S32_AVX512(c_int32_4p1, fl_reg, al, al_in, r, r2, z, dn, selector2);
+
+			// c[4, 32-47]
+			SWISH_S32_AVX512(c_int32_4p2, fl_reg, al, al_in, r, r2, z, dn, selector2);
+
+			// c[5, 0-15]
+			SWISH_S32_AVX512(c_int32_5p0, fl_reg, al, al_in, r, r2, z, dn, selector2);
+
+			// c[5, 16-31]
+			SWISH_S32_AVX512(c_int32_5p1, fl_reg, al, al_in, r, r2, z, dn, selector2);
+
+			// c[5, 32-47]
+			SWISH_S32_AVX512(c_int32_5p2, fl_reg, al, al_in, r, r2, z, dn, selector2);
 
 			POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
 		}

@@ -76,6 +76,7 @@
     r2 = _mm512_mul_ps (r2, r2); \
     r = _mm512_fmadd_ps (r2, _mm512_fmadd_ps (r, _mm512_set1_ps(lpgemm_exp_c5), _mm512_set1_ps(lpgemm_exp_c4)), z); \
 
+// Require in and out registers to be different. x : in, q : out.
 #define EXPF_AVX512(x, r, r2, z, dn, q) \
     z = _mm512_mul_ps (x, _mm512_set1_ps(TBL_LN2));	\
 	dn = _mm512_add_ps (z , _mm512_set1_ps(EXPF_HUGE));  \

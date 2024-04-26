@@ -54,7 +54,8 @@ LPGEMM_MAIN_KERN(float,float,float,f32f32f32of32_avx512_6x64m)
               &&POST_OPS_GELU_ERF_6x64F,
               &&POST_OPS_CLIP_6x64F,
               NULL, // Virtual node for downscale, else segfault
-              &&POST_OPS_MATRIX_ADD_6x64F
+              &&POST_OPS_MATRIX_ADD_6x64F,
+              &&POST_OPS_SWISH_6x64F
             };
     uint64_t n_left = n0 % 64;  //n0 is expected to be n0<=NR
 
@@ -975,6 +976,86 @@ POST_OPS_MATRIX_ADD_6x64F:
 
           POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
       }
+POST_OPS_SWISH_6x64F:
+      {
+          zmm7 =
+              _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args2 ) );
+          __m512i ex_out;
+
+          // c[0, 0-15]
+          SWISH_F32_AVX512_DEF(zmm8, zmm7, zmm0, zmm1, zmm2, zmm3, zmm4, ex_out);
+
+          // c[0, 16-31]
+          SWISH_F32_AVX512_DEF(zmm9, zmm7, zmm0, zmm1, zmm2, zmm3, zmm4, ex_out);
+
+          // c[0, 32-47]
+          SWISH_F32_AVX512_DEF(zmm10, zmm7, zmm0, zmm1, zmm2, zmm3, zmm4, ex_out);
+
+          // c[0, 48-63]
+          SWISH_F32_AVX512_DEF(zmm11, zmm7, zmm0, zmm1, zmm2, zmm3, zmm4, ex_out);
+
+          // c[1, 0-15]
+          SWISH_F32_AVX512_DEF(zmm12, zmm7, zmm0, zmm1, zmm2, zmm3, zmm4, ex_out);
+
+          // c[1, 16-31]
+          SWISH_F32_AVX512_DEF(zmm13, zmm7, zmm0, zmm1, zmm2, zmm3, zmm4, ex_out);
+
+          // c[1, 32-47]
+          SWISH_F32_AVX512_DEF(zmm14, zmm7, zmm0, zmm1, zmm2, zmm3, zmm4, ex_out);
+
+          // c[1, 48-63]
+          SWISH_F32_AVX512_DEF(zmm15, zmm7, zmm0, zmm1, zmm2, zmm3, zmm4, ex_out);
+
+          // c[2, 0-15]
+          SWISH_F32_AVX512_DEF(zmm16, zmm7, zmm0, zmm1, zmm2, zmm3, zmm4, ex_out);
+
+          // c[2, 16-31]
+          SWISH_F32_AVX512_DEF(zmm17, zmm7, zmm0, zmm1, zmm2, zmm3, zmm4, ex_out);
+
+          // c[2, 32-47]
+          SWISH_F32_AVX512_DEF(zmm18, zmm7, zmm0, zmm1, zmm2, zmm3, zmm4, ex_out);
+
+          // c[2, 48-63]
+          SWISH_F32_AVX512_DEF(zmm19, zmm7, zmm0, zmm1, zmm2, zmm3, zmm4, ex_out);
+
+          // c[3, 0-15]
+          SWISH_F32_AVX512_DEF(zmm20, zmm7, zmm0, zmm1, zmm2, zmm3, zmm4, ex_out);
+
+          // c[3, 16-31]
+          SWISH_F32_AVX512_DEF(zmm21, zmm7, zmm0, zmm1, zmm2, zmm3, zmm4, ex_out);
+
+          // c[3, 32-47]
+          SWISH_F32_AVX512_DEF(zmm22, zmm7, zmm0, zmm1, zmm2, zmm3, zmm4, ex_out);
+
+          // c[3, 48-63]
+          SWISH_F32_AVX512_DEF(zmm23, zmm7, zmm0, zmm1, zmm2, zmm3, zmm4, ex_out);
+
+          // c[4, 0-15]
+          SWISH_F32_AVX512_DEF(zmm24, zmm7, zmm0, zmm1, zmm2, zmm3, zmm4, ex_out);
+
+          // c[4, 16-31]
+          SWISH_F32_AVX512_DEF(zmm25, zmm7, zmm0, zmm1, zmm2, zmm3, zmm4, ex_out);
+
+          // c[4, 32-47]
+          SWISH_F32_AVX512_DEF(zmm26, zmm7, zmm0, zmm1, zmm2, zmm3, zmm4, ex_out);
+
+          // c[4, 48-63]
+          SWISH_F32_AVX512_DEF(zmm27, zmm7, zmm0, zmm1, zmm2, zmm3, zmm4, ex_out);
+
+          // c[5, 0-15]
+          SWISH_F32_AVX512_DEF(zmm28, zmm7, zmm0, zmm1, zmm2, zmm3, zmm4, ex_out);
+
+          // c[5, 16-31]
+          SWISH_F32_AVX512_DEF(zmm29, zmm7, zmm0, zmm1, zmm2, zmm3, zmm4, ex_out);
+
+          // c[5, 32-47]
+          SWISH_F32_AVX512_DEF(zmm30, zmm7, zmm0, zmm1, zmm2, zmm3, zmm4, ex_out);
+
+          // c[5, 48-63]
+          SWISH_F32_AVX512_DEF(zmm31, zmm7, zmm0, zmm1, zmm2, zmm3, zmm4, ex_out);
+
+          POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+      }
 POST_OPS_6x64F_DISABLE:
       ;
 
@@ -1059,7 +1140,8 @@ LPGEMM_N_FRINGE_KERN(float,float,float,f32f32f32of32_avx512_6x48m)
               &&POST_OPS_GELU_ERF_6x48F,
               &&POST_OPS_CLIP_6x48F,
               NULL, // Virtual node for downscale, else segfault
-              &&POST_OPS_MATRIX_ADD_6x48F
+              &&POST_OPS_MATRIX_ADD_6x48F,
+              &&POST_OPS_SWISH_6x48F
             };
     // Typecast local copies of integers in case dim_t and inc_t are a
     // different size than is expected by load instructions.
@@ -1700,6 +1782,68 @@ POST_OPS_MATRIX_ADD_6x48F:
 
           POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
       }
+POST_OPS_SWISH_6x48F:
+      {
+          __m512 zmm7 =
+              _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args2 ) );
+          __m512i ex_out;
+
+          // c[0, 0-15]
+          SWISH_F32_AVX512_DEF(zmm8, zmm7, zmm0, zmm1, zmm2, zmm3, zmm4, ex_out);
+
+          // c[0, 16-31]
+          SWISH_F32_AVX512_DEF(zmm9, zmm7, zmm0, zmm1, zmm2, zmm3, zmm4, ex_out);
+
+          // c[0, 32-47]
+          SWISH_F32_AVX512_DEF(zmm10, zmm7, zmm0, zmm1, zmm2, zmm3, zmm4, ex_out);
+
+          // c[1, 0-15]
+          SWISH_F32_AVX512_DEF(zmm12, zmm7, zmm0, zmm1, zmm2, zmm3, zmm4, ex_out);
+
+          // c[1, 16-31]
+          SWISH_F32_AVX512_DEF(zmm13, zmm7, zmm0, zmm1, zmm2, zmm3, zmm4, ex_out);
+
+          // c[1, 32-47]
+          SWISH_F32_AVX512_DEF(zmm14, zmm7, zmm0, zmm1, zmm2, zmm3, zmm4, ex_out);
+
+          // c[2, 0-15]
+          SWISH_F32_AVX512_DEF(zmm16, zmm7, zmm0, zmm1, zmm2, zmm3, zmm4, ex_out);
+
+          // c[2, 16-31]
+          SWISH_F32_AVX512_DEF(zmm17, zmm7, zmm0, zmm1, zmm2, zmm3, zmm4, ex_out);
+
+          // c[2, 32-47]
+          SWISH_F32_AVX512_DEF(zmm18, zmm7, zmm0, zmm1, zmm2, zmm3, zmm4, ex_out);
+
+          // c[3, 0-15]
+          SWISH_F32_AVX512_DEF(zmm20, zmm7, zmm0, zmm1, zmm2, zmm3, zmm4, ex_out);
+
+          // c[3, 16-31]
+          SWISH_F32_AVX512_DEF(zmm21, zmm7, zmm0, zmm1, zmm2, zmm3, zmm4, ex_out);
+
+          // c[3, 32-47]
+          SWISH_F32_AVX512_DEF(zmm22, zmm7, zmm0, zmm1, zmm2, zmm3, zmm4, ex_out);
+
+          // c[4, 0-15]
+          SWISH_F32_AVX512_DEF(zmm24, zmm7, zmm0, zmm1, zmm2, zmm3, zmm4, ex_out);
+
+          // c[4, 16-31]
+          SWISH_F32_AVX512_DEF(zmm25, zmm7, zmm0, zmm1, zmm2, zmm3, zmm4, ex_out);
+
+          // c[4, 32-47]
+          SWISH_F32_AVX512_DEF(zmm26, zmm7, zmm0, zmm1, zmm2, zmm3, zmm4, ex_out);
+
+          // c[5, 0-15]
+          SWISH_F32_AVX512_DEF(zmm28, zmm7, zmm0, zmm1, zmm2, zmm3, zmm4, ex_out);
+
+          // c[5, 16-31]
+          SWISH_F32_AVX512_DEF(zmm29, zmm7, zmm0, zmm1, zmm2, zmm3, zmm4, ex_out);
+
+          // c[5, 32-47]
+          SWISH_F32_AVX512_DEF(zmm30, zmm7, zmm0, zmm1, zmm2, zmm3, zmm4, ex_out);
+
+          POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+      }
 POST_OPS_6x48F_DISABLE:
       ;
  
@@ -1778,7 +1922,8 @@ LPGEMM_N_FRINGE_KERN(float,float,float,f32f32f32of32_avx512_6x32m)
               &&POST_OPS_GELU_ERF_6x32F,
               &&POST_OPS_CLIP_6x32F,
               NULL, // Virtual node for downscale, else segfault
-              &&POST_OPS_MATRIX_ADD_6x32F
+              &&POST_OPS_MATRIX_ADD_6x32F,
+              &&POST_OPS_SWISH_6x32F
             };
     // Typecast local copies of integers in case dim_t and inc_t are a
     // different size than is expected by load instructions.
@@ -2249,6 +2394,50 @@ POST_OPS_MATRIX_ADD_6x32F:
 
           // c[5:0-15,16-31]
           F32_F32_MATRIX_ADD_2COL(zmm1,zmm2,5,28,29);
+
+          POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+      }
+POST_OPS_SWISH_6x32F:
+      {
+          __m512 zmm7 =
+              _mm512_set1_ps( *( ( float* )post_ops_list_temp->op_args2 ) );
+          __m512i ex_out;
+
+          // c[0, 0-15]
+          SWISH_F32_AVX512_DEF(zmm8, zmm7, zmm0, zmm1, zmm2, zmm3, zmm4, ex_out);
+
+          // c[0, 16-31]
+          SWISH_F32_AVX512_DEF(zmm9, zmm7, zmm0, zmm1, zmm2, zmm3, zmm4, ex_out);
+
+          // c[1, 0-15]
+          SWISH_F32_AVX512_DEF(zmm12, zmm7, zmm0, zmm1, zmm2, zmm3, zmm4, ex_out);
+
+          // c[1, 16-31]
+          SWISH_F32_AVX512_DEF(zmm13, zmm7, zmm0, zmm1, zmm2, zmm3, zmm4, ex_out);
+
+          // c[2, 0-15]
+          SWISH_F32_AVX512_DEF(zmm16, zmm7, zmm0, zmm1, zmm2, zmm3, zmm4, ex_out);
+
+          // c[2, 16-31]
+          SWISH_F32_AVX512_DEF(zmm17, zmm7, zmm0, zmm1, zmm2, zmm3, zmm4, ex_out);
+
+          // c[3, 0-15]
+          SWISH_F32_AVX512_DEF(zmm20, zmm7, zmm0, zmm1, zmm2, zmm3, zmm4, ex_out);
+
+          // c[3, 16-31]
+          SWISH_F32_AVX512_DEF(zmm21, zmm7, zmm0, zmm1, zmm2, zmm3, zmm4, ex_out);
+
+          // c[4, 0-15]
+          SWISH_F32_AVX512_DEF(zmm24, zmm7, zmm0, zmm1, zmm2, zmm3, zmm4, ex_out);
+
+          // c[4, 16-31]
+          SWISH_F32_AVX512_DEF(zmm25, zmm7, zmm0, zmm1, zmm2, zmm3, zmm4, ex_out);
+
+          // c[5, 0-15]
+          SWISH_F32_AVX512_DEF(zmm28, zmm7, zmm0, zmm1, zmm2, zmm3, zmm4, ex_out);
+
+          // c[5, 16-31]
+          SWISH_F32_AVX512_DEF(zmm29, zmm7, zmm0, zmm1, zmm2, zmm3, zmm4, ex_out);
 
           POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
       }
