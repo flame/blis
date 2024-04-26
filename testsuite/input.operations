@@ -312,6 +312,10 @@
 -1 -1    #   dimensions: m n
 ????     #   parameters: side uploa conja transb
 
+1        # shmm
+-1 -1    #   dimensions: m n
+????     #   parameters: side uploa conja transb
+
 1        # herk
 -1 -1    #   dimensions: m k
 ??       #   parameters: uploc transa
@@ -320,7 +324,15 @@
 -1 -1    #   dimensions: m k
 ???      #   parameters: uploc transa transb
 
+1        # shr2k
+-1 -1    #   dimensions: m k
+???      #   parameters: uploc transa transb
+
 1        # symm
+-1 -1    #   dimensions: m n
+????     #   parameters: side uploa conja transb
+
+1        # skmm
 -1 -1    #   dimensions: m n
 ????     #   parameters: side uploa conja transb
 
@@ -329,6 +341,10 @@
 ??       #   parameters: uploc transa
 
 1        # syr2k
+-1 -1    #   dimensions: m k
+???      #   parameters: uploc transa transb
+
+1        # skr2k
 -1 -1    #   dimensions: m k
 ???      #   parameters: uploc transa transb
 

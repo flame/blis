@@ -4,8 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2020, Advanced Micro Devices, Inc.
+   Copyright (C) 2023, Southern Methodist University
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -33,77 +32,10 @@
 
 */
 
-
-//
-// Prototype object-based interfaces (basic).
-//
-
-#undef  GENPROT
-#define GENPROT( opname ) \
-\
-BLIS_EXPORT_BLIS void PASTEMAC(opname) \
-     ( \
-       const obj_t* alpha, \
-       const obj_t* a, \
-       const obj_t* b, \
-       const obj_t* beta, \
-       const obj_t* c  \
+void libblis_test_skmm
+     (
+       thread_data_t* tdata,
+       test_params_t* params,
+       test_op_t*     op
      );
-
-GENPROT( gemm )
-GENPROT( gemmt )
-GENPROT( her2k )
-GENPROT( syr2k )
-GENPROT( shr2k )
-GENPROT( skr2k )
-
-
-#undef  GENPROT
-#define GENPROT( opname ) \
-\
-BLIS_EXPORT_BLIS void PASTEMAC(opname) \
-     ( \
-             side_t side, \
-       const obj_t* alpha, \
-       const obj_t* a, \
-       const obj_t* b, \
-       const obj_t* beta, \
-       const obj_t* c  \
-     );
-
-GENPROT( hemm )
-GENPROT( symm )
-GENPROT( shmm )
-GENPROT( skmm )
-GENPROT( trmm3 )
-
-
-#undef  GENPROT
-#define GENPROT( opname ) \
-\
-BLIS_EXPORT_BLIS void PASTEMAC(opname) \
-     ( \
-       const obj_t* alpha, \
-       const obj_t* a, \
-       const obj_t* beta, \
-       const obj_t* c  \
-     );
-
-GENPROT( herk )
-GENPROT( syrk )
-
-
-#undef  GENPROT
-#define GENPROT( opname ) \
-\
-BLIS_EXPORT_BLIS void PASTEMAC(opname) \
-     ( \
-             side_t side, \
-       const obj_t* alpha, \
-       const obj_t* a, \
-       const obj_t* b  \
-     );
-
-GENPROT( trmm )
-GENPROT( trsm )
 

@@ -281,11 +281,15 @@ typedef struct test_ops_s
 	test_op_t gemm;
 	test_op_t gemmt;
 	test_op_t hemm;
+	test_op_t shmm;
 	test_op_t herk;
 	test_op_t her2k;
+	test_op_t shr2k;
 	test_op_t symm;
+	test_op_t skmm;
 	test_op_t syrk;
 	test_op_t syr2k;
+	test_op_t skr2k;
 	test_op_t trmm;
 	test_op_t trmm3;
 	test_op_t trsm;
@@ -563,11 +567,15 @@ char libblis_test_proj_dtchar_to_precchar( char dt_char );
 #include "test_gemm.h"
 #include "test_gemmt.h"
 #include "test_hemm.h"
+#include "test_shmm.h"
 #include "test_herk.h"
 #include "test_her2k.h"
+#include "test_shr2k.h"
 #include "test_symm.h"
+#include "test_skmm.h"
 #include "test_syrk.h"
 #include "test_syr2k.h"
+#include "test_skr2k.h"
 #include "test_trmm.h"
 #include "test_trmm3.h"
 #include "test_trsm.h"

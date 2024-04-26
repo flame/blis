@@ -360,11 +360,15 @@ void libblis_test_level3_ops( thread_data_t* tdata, test_params_t* params, test_
 	libblis_test_gemm( tdata, params, &(ops->gemm) );
 	libblis_test_gemmt( tdata, params, &(ops->gemmt) );
 	libblis_test_hemm( tdata, params, &(ops->hemm) );
+	libblis_test_shmm( tdata, params, &(ops->shmm) );
 	libblis_test_herk( tdata, params, &(ops->herk) );
 	libblis_test_her2k( tdata, params, &(ops->her2k) );
+	libblis_test_shr2k( tdata, params, &(ops->shr2k) );
 	libblis_test_symm( tdata, params, &(ops->symm) );
+	libblis_test_skmm( tdata, params, &(ops->skmm) );
 	libblis_test_syrk( tdata, params, &(ops->syrk) );
 	libblis_test_syr2k( tdata, params, &(ops->syr2k) );
+	libblis_test_skr2k( tdata, params, &(ops->skr2k) );
 	libblis_test_trmm( tdata, params, &(ops->trmm) );
 	libblis_test_trmm3( tdata, params, &(ops->trmm3) );
 	libblis_test_trsm( tdata, params, &(ops->trsm) );
@@ -461,11 +465,15 @@ void libblis_test_read_ops_file( char* input_filename, test_ops_t* ops )
 	libblis_test_read_op_info( ops, input_stream, BLIS_GEMM,  BLIS_TEST_DIMS_MNK, 2, &(ops->gemm) );
 	libblis_test_read_op_info( ops, input_stream, BLIS_GEMMT, BLIS_TEST_DIMS_MK,  3, &(ops->gemmt) );
 	libblis_test_read_op_info( ops, input_stream, BLIS_HEMM,  BLIS_TEST_DIMS_MN,  4, &(ops->hemm) );
+	libblis_test_read_op_info( ops, input_stream, BLIS_SHMM,  BLIS_TEST_DIMS_MN,  4, &(ops->shmm) );
 	libblis_test_read_op_info( ops, input_stream, BLIS_HERK,  BLIS_TEST_DIMS_MK,  2, &(ops->herk) );
 	libblis_test_read_op_info( ops, input_stream, BLIS_HER2K, BLIS_TEST_DIMS_MK,  3, &(ops->her2k) );
+	libblis_test_read_op_info( ops, input_stream, BLIS_SHR2K, BLIS_TEST_DIMS_MK,  3, &(ops->shr2k) );
 	libblis_test_read_op_info( ops, input_stream, BLIS_SYMM,  BLIS_TEST_DIMS_MN,  4, &(ops->symm) );
+	libblis_test_read_op_info( ops, input_stream, BLIS_SKMM,  BLIS_TEST_DIMS_MN,  4, &(ops->skmm) );
 	libblis_test_read_op_info( ops, input_stream, BLIS_SYRK,  BLIS_TEST_DIMS_MK,  2, &(ops->syrk) );
 	libblis_test_read_op_info( ops, input_stream, BLIS_SYR2K, BLIS_TEST_DIMS_MK,  3, &(ops->syr2k) );
+	libblis_test_read_op_info( ops, input_stream, BLIS_SKR2K, BLIS_TEST_DIMS_MK,  3, &(ops->skr2k) );
 	libblis_test_read_op_info( ops, input_stream, BLIS_TRMM,  BLIS_TEST_DIMS_MN,  4, &(ops->trmm) );
 	libblis_test_read_op_info( ops, input_stream, BLIS_TRMM3, BLIS_TEST_DIMS_MN,  5, &(ops->trmm3) );
 	libblis_test_read_op_info( ops, input_stream, BLIS_TRSM,  BLIS_TEST_DIMS_MN,  4, &(ops->trsm) );
@@ -1040,6 +1048,26 @@ void libblis_test_output_params_struct( FILE* os, test_params_t* params )
 	                        bli_info_get_syr2k_impl_string( BLIS_DOUBLE ),
 	                        bli_info_get_syr2k_impl_string( BLIS_SCOMPLEX ),
 	                        bli_info_get_syr2k_impl_string( BLIS_DCOMPLEX ) );
+	libblis_test_fprintf_c( os, "  shmm                   %7s %7s %7s %7s\n",
+	                        bli_info_get_shmm_impl_string( BLIS_FLOAT ),
+	                        bli_info_get_shmm_impl_string( BLIS_DOUBLE ),
+	                        bli_info_get_shmm_impl_string( BLIS_SCOMPLEX ),
+	                        bli_info_get_shmm_impl_string( BLIS_DCOMPLEX ) );
+	libblis_test_fprintf_c( os, "  shr2k                  %7s %7s %7s %7s\n",
+	                        bli_info_get_shr2k_impl_string( BLIS_FLOAT ),
+	                        bli_info_get_shr2k_impl_string( BLIS_DOUBLE ),
+	                        bli_info_get_shr2k_impl_string( BLIS_SCOMPLEX ),
+	                        bli_info_get_shr2k_impl_string( BLIS_DCOMPLEX ) );
+	libblis_test_fprintf_c( os, "  skmm                   %7s %7s %7s %7s\n",
+	                        bli_info_get_skmm_impl_string( BLIS_FLOAT ),
+	                        bli_info_get_skmm_impl_string( BLIS_DOUBLE ),
+	                        bli_info_get_skmm_impl_string( BLIS_SCOMPLEX ),
+	                        bli_info_get_skmm_impl_string( BLIS_DCOMPLEX ) );
+	libblis_test_fprintf_c( os, "  skr2k                  %7s %7s %7s %7s\n",
+	                        bli_info_get_skr2k_impl_string( BLIS_FLOAT ),
+	                        bli_info_get_skr2k_impl_string( BLIS_DOUBLE ),
+	                        bli_info_get_skr2k_impl_string( BLIS_SCOMPLEX ),
+	                        bli_info_get_skr2k_impl_string( BLIS_DCOMPLEX ) );
 	libblis_test_fprintf_c( os, "  trmm                   %7s %7s %7s %7s\n",
 	                        bli_info_get_trmm_impl_string( BLIS_FLOAT ),
 	                        bli_info_get_trmm_impl_string( BLIS_DOUBLE ),
