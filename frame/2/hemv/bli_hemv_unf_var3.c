@@ -202,6 +202,7 @@ void PASTEMAC(ch,varname) \
 		  n_ahead, \
 		  f, \
 		  alpha, \
+		  alpha, \
 		  A21, rs_at, cs_at, \
 		  x2,  incx, \
 		  x1,  incx, \

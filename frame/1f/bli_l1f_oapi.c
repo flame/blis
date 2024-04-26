@@ -253,7 +253,8 @@ GENFRONT( dotaxpyv )
 \
 void PASTEMAC(opname,EX_SUF) \
      ( \
-       const obj_t* alpha, \
+       const obj_t* alphaw, \
+       const obj_t* alphax, \
        const obj_t* at, \
        const obj_t* a, \
        const obj_t* w, \
@@ -288,23 +289,28 @@ void PASTEMAC(opname,EX_SUF) \
 	void*     buf_z     = bli_obj_buffer_at_off( z ); \
 	inc_t     inc_z     = bli_obj_vector_inc( z ); \
 \
-	void*     buf_alpha; \
+	void*     buf_alphaw; \
+	void*     buf_alphax; \
 	void*     buf_beta; \
 \
-	obj_t     alpha_local; \
+	obj_t     alphaw_local; \
+	obj_t     alphax_local; \
 	obj_t     beta_local; \
 \
 	if ( bli_error_checking_is_enabled() ) \
-		PASTEMAC(opname,_check)( alpha, at, a, w, x, beta, y, z ); \
+		PASTEMAC(opname,_check)( alphaw, alphax, at, a, w, x, beta, y, z ); \
 \
 	/* Create local copy-casts of scalars (and apply internal conjugation
 	   as needed). */ \
 	bli_obj_scalar_init_detached_copy_of( dt, BLIS_NO_CONJUGATE, \
-	                                      alpha, &alpha_local ); \
+	                                      alphaw, &alphaw_local ); \
+	bli_obj_scalar_init_detached_copy_of( dt, BLIS_NO_CONJUGATE, \
+	                                      alphax, &alphax_local ); \
 	bli_obj_scalar_init_detached_copy_of( dt, BLIS_NO_CONJUGATE, \
 	                                      beta, &beta_local ); \
-	buf_alpha = bli_obj_buffer_for_1x1( dt, &alpha_local ); \
-	buf_beta  = bli_obj_buffer_for_1x1( dt, &beta_local ); \
+	buf_alphaw = bli_obj_buffer_for_1x1( dt, &alphaw_local ); \
+	buf_alphax = bli_obj_buffer_for_1x1( dt, &alphax_local ); \
+	buf_beta   = bli_obj_buffer_for_1x1( dt, &beta_local ); \
 \
 	/* Support cases where matrix A requires a transposition. */ \
     if ( bli_obj_has_trans( a ) ) { bli_swap_incs( &rs_a, &cs_a ); } \
@@ -322,7 +328,8 @@ void PASTEMAC(opname,EX_SUF) \
 	   conjx, \
 	   m, \
 	   b_n, \
-	   buf_alpha, \
+	   buf_alphaw, \
+	   buf_alphax, \
 	   buf_a, rs_a, cs_a, \
 	   buf_w, inc_w, \
 	   buf_x, inc_x, \

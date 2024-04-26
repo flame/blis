@@ -153,6 +153,7 @@ void PASTEMAC(ch,varname) \
 		  n_behind, \
 		  f, \
 		  alpha, \
+		  alpha, \
 		  A10, cs_at, rs_at, \
 		  x0,  incx, \
 		  x1,  incx, \
