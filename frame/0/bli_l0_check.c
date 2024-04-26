@@ -58,6 +58,7 @@ GENFRONT( sqrtsc )
 GENFRONT( sqrtrsc )
 GENFRONT( subsc )
 GENFRONT( invertsc )
+GENFRONT( negsc )
 
 
 #undef  GENFRONT
