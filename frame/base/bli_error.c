@@ -82,6 +82,8 @@ static const char *bli_error_string[-BLIS_ERROR_CODE_MAX] =
 	[-BLIS_EXPECTED_HERMITIAN_OBJECT]            = "Expected Hermitian object.",
 	[-BLIS_EXPECTED_SYMMETRIC_OBJECT]            = "Expected symmetric object.",
 	[-BLIS_EXPECTED_TRIANGULAR_OBJECT]           = "Expected triangular object.",
+	[-BLIS_EXPECTED_SKEW_HERMITIAN_OBJECT]       = "Expected skew-Hermitian object.",
+	[-BLIS_EXPECTED_SKEW_SYMMETRIC_OBJECT]       = "Expected skew-symmetric object.",
 
 	[-BLIS_EXPECTED_UPPER_OR_LOWER_OBJECT]       = "Expected upper or lower triangular object.",
 

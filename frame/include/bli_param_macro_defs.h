@@ -366,6 +366,18 @@ BLIS_INLINE bool bli_is_symmetric( struc_t struc )
 	       ( struc == BLIS_SYMMETRIC );
 }
 
+BLIS_INLINE bool bli_is_skew_hermitian( struc_t struc )
+{
+	return ( bool )
+	       ( struc == BLIS_SKEW_HERMITIAN );
+}
+
+BLIS_INLINE bool bli_is_skew_symmetric( struc_t struc )
+{
+	return ( bool )
+	       ( struc == BLIS_SKEW_SYMMETRIC );
+}
+
 BLIS_INLINE bool bli_is_triangular( struc_t struc )
 {
 	return ( bool )
@@ -377,6 +389,13 @@ BLIS_INLINE bool bli_is_herm_or_symm( struc_t struc )
 	return ( bool )
 	       ( bli_is_hermitian( struc ) ||
 	         bli_is_symmetric( struc ) );
+}
+
+BLIS_INLINE bool bli_is_skew_herm_or_symm( struc_t struc )
+{
+	return ( bool )
+	       ( bli_is_skew_hermitian( struc ) ||
+	         bli_is_skew_symmetric( struc ) );
 }
 
 
