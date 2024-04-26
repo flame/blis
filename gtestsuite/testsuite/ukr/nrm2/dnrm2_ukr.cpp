@@ -69,22 +69,6 @@ TEST_P( dnrm2Ukr, AccuracyCheck )
     test_nrm2_ukr<T, RT>( ukr_fp, n, incx, thresh, is_memory_test );
 }
 
-// Prints the test case combination
-class dnrm2UkrPrint {
-public:
-    std::string operator()(
-        testing::TestParamInfo<std::tuple<nrm2_ker_ft<T, RT>, gtint_t, gtint_t, bool>> str) const {
-        gtint_t n     = std::get<1>(str.param);
-        gtint_t incx  = std::get<2>(str.param);
-        bool is_memory_test = std::get<3>(str.param);
-
-        std::string str_name = "_n_" + std::to_string(n);
-        str_name += "_incx_" + testinghelpers::get_value_string(incx);
-        str_name += ( is_memory_test ) ? "_mem_test_enabled" : "_mem_test_disabled";
-        return str_name;
-    }
-};
-
 #if defined(BLIS_KERNELS_ZEN) && defined(GTEST_AVX2FMA3)
 /*
     Unit testing for functionality of bli_dnorm2fv_unb_var1_avx2 kernel.
@@ -114,7 +98,7 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(gtint_t(1)),                 // stride size for x
             ::testing::Values(true, false)                 // is_memory_test
         ),
-        ::dnrm2UkrPrint()
+        ::nrm2UKRPrint<double>()
     );
 
 // Unit testing with non-unit strides.
@@ -132,6 +116,6 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(gtint_t(3), gtint_t(5)),     // stride size for x
             ::testing::Values(true, false)                 // is_memory_test
         ),
-        ::dnrm2UkrPrint()
+        ::nrm2UKRPrint<double>()
     );
 #endif

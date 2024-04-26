@@ -61,22 +61,6 @@ TEST_P( dsetvGenericTest, RandomData )
     test_setv<T>( conjalpha, n, alpha, incx );
 }
 
-// Prints the test case combination
-class dsetvGenericTestPrint {
-public:
-    std::string operator()(
-        testing::TestParamInfo<std::tuple<char,gtint_t,gtint_t>> str) const {
-        char conj      = std::get<0>(str.param);
-        gtint_t n      = std::get<1>(str.param);
-        gtint_t incx   = std::get<2>(str.param);
-        std::string str_name = "bli_dsetv";
-        str_name += "_n_" + std::to_string(n);
-        str_name += "_" + std::string(&conj, 1);
-        str_name += "_incx_" + testinghelpers::get_value_string(incx);
-        return str_name;
-    }
-};
-
 #ifdef TEST_BLIS_TYPED
 // Black box testing.
 INSTANTIATE_TEST_SUITE_P(
@@ -87,6 +71,6 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Range(gtint_t(10), gtint_t(101), 10),                 // m size of vector takes values from 10 to 100 with step size of 10.
             ::testing::Values(gtint_t(1))                                    // stride size for x
         ),
-        ::dsetvGenericTestPrint()
+        ::setvGenericPrint()
     );
 #endif

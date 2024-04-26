@@ -83,46 +83,6 @@ TEST_P( zomatcopyAPI, FunctionalTest )
     test_omatcopy<T>( storage, trans, m, n, alpha, lda_inc, ldb_inc, thresh, is_memory_test );
 }
 
-// Test-case logger : Used to print the test-case details based on parameters
-// The string format is as follows :
-// {blas_/cblas_/bli_}_storage_trans_m_n_alpha_lda_ldb_{mem_test_enabled/mem_test_disabled}
-class zomatcopyAPIPrint {
-public:
-    std::string operator()(
-        testing::TestParamInfo<std::tuple<char,char,gtint_t,gtint_t,dcomplex,gtint_t,gtint_t,bool>> str) const {
-        char storage   = std::get<0>(str.param);
-        char trans     = std::get<1>(str.param);
-        gtint_t m      = std::get<2>(str.param);
-        gtint_t n      = std::get<3>(str.param);
-        dcomplex alpha    = std::get<4>(str.param);
-        gtint_t lda_inc = std::get<5>(str.param);
-        gtint_t ldb_inc = std::get<6>(str.param);
-        bool is_memory_test = std::get<7>(str.param);
-// Currently, BLIS only has the BLAS standard wrapper for this API.
-// The CBLAS and BLIS strings are also added here(with macro guards),
-// in case we add the CBLAS and BLIS wrappers to the library in future.
-#ifdef TEST_BLAS
-        std::string str_name = "blas_";
-#elif TEST_CBLAS
-        std::string str_name = "cblas_";
-#else  //#elif TEST_BLIS_TYPED
-        std::string str_name = "bli_";
-#endif
-        str_name += std::string(&storage, 1);
-        str_name += "_" + std::string(&trans, 1);
-        str_name += "_m_" + std::to_string(m);
-        str_name += "_n_" + std::to_string(n);
-        str_name += "_alpha_" + testinghelpers::get_value_string(alpha);
-        gtint_t lda = testinghelpers::get_leading_dimension( storage, 'n', m, n, lda_inc );
-        gtint_t ldb = testinghelpers::get_leading_dimension( storage, trans, m, n, ldb_inc );
-        str_name += "_lda" + std::to_string(lda);
-        str_name += "_ldb" + std::to_string(ldb);
-        str_name += ( is_memory_test )? "_mem_test_enabled" : "_mem_test_disabled";
-
-        return str_name;
-    }
-};
-
 #if defined(TEST_BLAS) && (defined(REF_IS_MKL) || defined(REF_IS_OPENBLAS))
 // Black box testing for generic and main use of zomatcopy.
 INSTANTIATE_TEST_SUITE_P(
@@ -141,6 +101,6 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(gtint_t(0), gtint_t(17)),                      // increment of ldb
             ::testing::Values(false, true)                                   // is_memory_test
         ),
-        ::zomatcopyAPIPrint()
+        ::omatcopyGenericPrint<dcomplex>()
     );
 #endif

@@ -115,3 +115,26 @@ static void test_scalv_ukr( FT ukr, char conja_alpha, gtint_t n, gtint_t incx,
     // Compute component-wise error.
     computediff<T>( "x", n, x, x_ref, incx, thresh );
 }
+
+
+// Test-case logger : Used to print the test-case details based on parameters
+template <typename T1, typename T2>
+class scalvUKRPrint {
+public:
+    std::string operator()(
+        testing::TestParamInfo<std::tuple<T2, char, gtint_t, gtint_t, T1, bool>> str) const {
+        char conjx = std::get<1>(str.param);
+        gtint_t n = std::get<2>(str.param);
+        gtint_t incx = std::get<3>(str.param);
+        T1 alpha = std::get<4>(str.param);
+        bool is_memory_test = std::get<5>(str.param);
+
+        std::string str_name = "_n_" + std::to_string(n);
+        str_name += (conjx == 'n') ? "_noconjalpha" : "_conjalpha";
+        str_name += "_incx_" + testinghelpers::get_value_string(incx);
+        str_name += "_alpha_" + testinghelpers::get_value_string(alpha);
+        str_name += ( is_memory_test ) ? "_mem_test_enabled" : "_mem_test_disabled";
+
+        return str_name;
+    }
+};

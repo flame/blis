@@ -93,39 +93,6 @@ TEST_P(zherkTest, RandomData)
     test_herk<T>( storage, uplo, transa, n, k, lda_inc, ldc_inc, alpha, beta, thresh );
 }
 
-class zherkTestPrint {
-public:
-    std::string operator()(
-        testing::TestParamInfo<std::tuple<char, char, char, gtint_t, gtint_t, double, double, gtint_t, gtint_t>> str) const {
-        char sfm        = std::get<0>(str.param);
-        char uplo       = std::get<1>(str.param);
-        char tsa        = std::get<2>(str.param);
-        gtint_t n       = std::get<3>(str.param);
-        gtint_t k       = std::get<4>(str.param);
-        double alpha    = std::get<5>(str.param);
-        double beta     = std::get<6>(str.param);
-        gtint_t lda_inc = std::get<7>(str.param);
-        gtint_t ldc_inc = std::get<8>(str.param);
-#ifdef TEST_BLAS
-        std::string str_name = "zherk_";
-#elif TEST_CBLAS
-        std::string str_name = "cblas_zherk";
-#else  //#elif TEST_BLIS_TYPED
-        std::string str_name = "bli_zherk";
-#endif
-        str_name = str_name + "_" + sfm+sfm+sfm;
-        str_name = str_name + "_" + uplo;
-        str_name = str_name + "_" + tsa;
-        str_name += "_n_" + std::to_string(n);
-        str_name += "_k_" + std::to_string(k);
-        str_name += "_alpha_" + testinghelpers::get_value_string(alpha);
-        str_name += "_beta_" + testinghelpers::get_value_string(beta);
-        str_name = str_name + "_" + std::to_string(lda_inc);
-        str_name = str_name + "_" + std::to_string(ldc_inc);
-        return str_name;
-    }
-};
-
 // Black box testing.
 INSTANTIATE_TEST_SUITE_P(
         Blackbox,
@@ -145,5 +112,5 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(gtint_t(0), gtint_t(4)),                       // increment to the leading dim of a
             ::testing::Values(gtint_t(0), gtint_t(2))                        // increment to the leading dim of c
         ),
-        ::zherkTestPrint()
+        ::herkGenericPrint<dcomplex>()
     );

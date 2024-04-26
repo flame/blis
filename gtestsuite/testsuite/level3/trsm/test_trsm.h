@@ -245,3 +245,78 @@ void test_trsm( char storage, char side, char uploa, char transa, char diaga,
     //----------------------------------------------------------
     computediff<T>( "B", storage, m, n, b.data(), b_ref.data(), ldb, thresh, nan_inf_check );
 }
+
+// Test-case logger : Used to print the test-case details based on parameters
+template <typename T>
+class trsmGenericPrint {
+public:
+    std::string operator()(
+        testing::TestParamInfo<std::tuple<char, char, char, char, char, gtint_t, gtint_t, T, gtint_t, gtint_t>> str) const {
+        char sfm        = std::get<0>(str.param);
+        char side       = std::get<1>(str.param);
+        char uploa      = std::get<2>(str.param);
+        char transa     = std::get<3>(str.param);
+        char diaga      = std::get<4>(str.param);
+        gtint_t m       = std::get<5>(str.param);
+        gtint_t n       = std::get<6>(str.param);
+        T alpha  = std::get<7>(str.param);
+        gtint_t lda_inc = std::get<8>(str.param);
+        gtint_t ldb_inc = std::get<9>(str.param);
+
+        std::string str_name = API_PRINT;
+        str_name = str_name + "_stor_" + sfm;
+        str_name = str_name + "_side_" + side;
+        str_name = str_name + "_uploa_" + uploa;
+        str_name = str_name + "_transa_" + transa;
+        str_name = str_name + "_diag_" + diaga;
+        str_name += "_m_" + std::to_string(m);
+        str_name += "_n_" + std::to_string(n);
+        str_name += "_alpha_" + testinghelpers::get_value_string(alpha);
+        gtint_t mn;
+        testinghelpers::set_dim_with_side( side, m, n, &mn );
+        str_name = str_name + "_lda_" +
+                   std::to_string(testinghelpers::get_leading_dimension( sfm, transa, mn, mn, lda_inc ));
+        str_name = str_name + "_ldb_" +
+                   std::to_string(testinghelpers::get_leading_dimension( sfm, 'n', m, n, ldb_inc ));
+        return str_name;
+    }
+};
+
+template <typename T>
+class trsmEVTPrint {
+public:
+    std::string operator()(
+        testing::TestParamInfo<std::tuple<char, char, char, char, char, gtint_t, gtint_t, T, gtint_t, gtint_t, EVT_TYPE, EVT_TYPE>> str) const {
+        char sfm         = std::get<0>(str.param);
+        char side        = std::get<1>(str.param);
+        char uploa       = std::get<2>(str.param);
+        char transa      = std::get<3>(str.param);
+        char diaga       = std::get<4>(str.param);
+        gtint_t m        = std::get<5>(str.param);
+        gtint_t n        = std::get<6>(str.param);
+        T alpha   = std::get<7>(str.param);
+        gtint_t lda_inc  = std::get<8>(str.param);
+        gtint_t ldb_inc  = std::get<9>(str.param);
+        EVT_TYPE a_encode = std::get<10>(str.param);
+        EVT_TYPE b_encode = std::get<11>(str.param);
+        
+        std::string str_name = API_PRINT;
+        str_name = str_name + "_stor_" + sfm;
+        str_name = str_name + "_side_" + side;
+        str_name = str_name + "_uploa_" + uploa;
+        str_name = str_name + "_transa_" + transa;
+        str_name = str_name + "_diag_" + diaga;
+        str_name += "_m_" + std::to_string(m);
+        str_name += "_n_" + std::to_string(n);
+        str_name += "_alpha_" + testinghelpers::get_value_string(alpha);
+        gtint_t mn;
+        testinghelpers::set_dim_with_side( side, m, n, &mn );
+        str_name = str_name + "_lda_" +
+                   std::to_string(testinghelpers::get_leading_dimension( sfm, transa, mn, mn, lda_inc ));
+        str_name = str_name + "_ldb_" +
+                   std::to_string(testinghelpers::get_leading_dimension( sfm, 'n', m, n, ldb_inc ));
+        str_name = str_name + "_a_evt_" + std::to_string(a_encode);
+        str_name = str_name + "_b_evt_" + std::to_string(b_encode);
+        return str_name;
+    }
+};

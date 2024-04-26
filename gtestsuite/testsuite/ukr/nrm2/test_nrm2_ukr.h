@@ -118,3 +118,20 @@ static void test_nrm2_ukr( nrm2_ker_ft<T, RT> ukr_fp, gtint_t n, gtint_t incx, d
     computediff<RT>( "norm", norm, norm_ref, thresh );
 
 }
+
+// Test-case logger : Used to print the test-case details based on parameters
+template <typename T, typename RT = typename testinghelpers::type_info<T>::real_type>
+class nrm2UKRPrint {
+public:
+    std::string operator()(
+        testing::TestParamInfo<std::tuple<nrm2_ker_ft<T,RT>, gtint_t, gtint_t, bool>> str) const {
+        gtint_t n     = std::get<1>(str.param);
+        gtint_t incx  = std::get<2>(str.param);
+        bool is_memory_test = std::get<3>(str.param);
+
+        std::string str_name = "_n_" + std::to_string(n);
+        str_name += "_incx_" + testinghelpers::get_value_string(incx);
+        str_name += ( is_memory_test ) ? "_mem_test_enabled" : "_mem_test_disabled";
+        return str_name;
+    }
+};

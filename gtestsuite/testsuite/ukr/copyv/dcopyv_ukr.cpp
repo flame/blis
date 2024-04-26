@@ -71,30 +71,6 @@ TEST_P( dcopyvUkrTest, AccuracyCheck )
     test_copyv_ukr<T, dcopyv_ker_ft>( ukr_fp, conjx, n, incx, incy, is_memory_test );
 }
 
-// Used to generate a test case with a sensible name.
-// Beware that we cannot use fp numbers (e.g., 2.3) in the names,
-// so we are only printing int(2.3). This should be enough for debugging purposes.
-// If this poses an issue, please reach out.
-class dcopyvUkrTestPrint {
-public:
-    std::string operator()(
-        testing::TestParamInfo<std::tuple<dcopyv_ker_ft,char,gtint_t,gtint_t,gtint_t,bool>> str) const {
-        char conjx    = std::get<1>(str.param);
-        gtint_t n     = std::get<2>(str.param);
-        gtint_t incx  = std::get<3>(str.param);
-        gtint_t incy  = std::get<4>(str.param);
-        bool is_memory_test = std::get<5>(str.param);
-
-        std::string str_name = "dcopyv_ukr";
-        str_name += "_n_" + std::to_string(n);
-        str_name += "_conjx" + std::string(&conjx, 1);
-        str_name += "_incx_" + testinghelpers::get_value_string(incx);
-        str_name += "_incy_" + testinghelpers::get_value_string(incy);
-        str_name += ( is_memory_test ) ? "_mem_test_enabled" : "_mem_test_disabled";
-        return str_name;
-    }
-};
-
 #if defined(BLIS_KERNELS_ZEN) && defined(GTEST_AVX2FMA3)
 /*
     Unit testing for functionality of bli_dcopyv_zen_int kernel.
@@ -134,7 +110,7 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(gtint_t(1)),            // stride size for y
             ::testing::Values(false, true)            // is_memory_test
         ),
-        ::dcopyvUkrTestPrint()
+        ::copyvUKRPrint<dcopyv_ker_ft>()
     );
 
 // Unit testing with Non-Unit Strides(US), across all loops.
@@ -149,6 +125,6 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(gtint_t(3)),               // stride size for y
             ::testing::Values(false, true)               // is_memory_test
         ),
-        ::dcopyvUkrTestPrint()
+        ::copyvUKRPrint<dcopyv_ker_ft>()
     );
 #endif

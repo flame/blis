@@ -72,7 +72,7 @@ void test_asumv( gtint_t n, gtint_t incx, double thresh )
  * @brief Used to insert Exception Values in x vector.
  */
 template<typename T>
-void test_asumv( gtint_t n, gtint_t incx, gtint_t xi, double ix_exval,
+void test_asumv( gtint_t n, gtint_t incx, gtint_t xi, T ix_exval,
                  gtint_t xj, T jx_exval, double thresh )
 {
     // Get real type from T.
@@ -105,3 +105,42 @@ void test_asumv( gtint_t n, gtint_t incx, gtint_t xi, double ix_exval,
     //----------------------------------------------------------
     computediff<RT>( "asum", asum, asum_ref, thresh, true );
 }
+
+
+// Test-case logger : Used to print the test-case details based on parameters
+class asumvGenericPrint {
+public:
+    std::string operator()(
+        testing::TestParamInfo<std::tuple<gtint_t, gtint_t>> str) const {
+        gtint_t n     = std::get<0>(str.param);
+        gtint_t incx  = std::get<1>(str.param);
+
+        std::string str_name = API_PRINT;
+        str_name += "_n_" + std::to_string(n);
+        str_name += "_incx_" + testinghelpers::get_value_string(incx);
+        return str_name;
+    }
+};
+
+template <typename T>
+class asumvEVTPrint {
+public:
+    std::string operator()(
+        testing::TestParamInfo<std::tuple<gtint_t, gtint_t, gtint_t, T, gtint_t, T>> str) const {
+        gtint_t n        = std::get<0>(str.param);
+        gtint_t incx     = std::get<1>(str.param);
+        gtint_t xi       = std::get<2>(str.param);
+        T  ix_exval = std::get<3>(str.param);
+        gtint_t xj       = std::get<4>(str.param);
+        T  jx_exval = std::get<5>(str.param);
+
+        std::string str_name = API_PRINT;
+        str_name += "_n_" + std::to_string(n);
+        str_name += "_incx_" + testinghelpers::get_value_string(incx);
+        str_name = str_name + "_X_" + std::to_string(xi);
+        str_name = str_name + "_" + testinghelpers::get_value_string(ix_exval);
+        str_name = str_name + "_X_" + std::to_string(xj);
+        str_name = str_name + "_" + testinghelpers::get_value_string(jx_exval);
+        return str_name;
+    }
+};

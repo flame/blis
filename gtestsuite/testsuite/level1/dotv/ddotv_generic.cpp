@@ -77,35 +77,6 @@ TEST_P( ddotvGenericTest, RandomData )
     test_dotv<T>( conjx, conjy, n, incx, incy, thresh );
 }
 
-// Used to generate a test case with a sensible name.
-// Beware that we cannot use fp numbers (e.g., 2.3) in the names,
-// so we are only printing int(2.3). This should be enough for debugging purposes.
-// If this poses an issue, please reach out.
-class ddotvGenericTestPrint {
-public:
-    std::string operator()(
-        testing::TestParamInfo<std::tuple<char,char,gtint_t,gtint_t,gtint_t>> str) const {
-        char conjx    = std::get<0>(str.param);
-        char conjy    = std::get<1>(str.param);
-        gtint_t n     = std::get<2>(str.param);
-        gtint_t incx  = std::get<3>(str.param);
-        gtint_t incy  = std::get<4>(str.param);
-#ifdef TEST_BLAS
-        std::string str_name = "ddot_";
-#elif TEST_CBLAS
-        std::string str_name = "cblas_ddot";
-#else  //#elif TEST_BLIS_TYPED
-        std::string str_name = "bli_ddotv";
-#endif
-        str_name += "_n_" + std::to_string(n);
-        str_name += (conjx == 'n') ? "_noconjx" : "_conjx";
-        str_name += (conjy == 'n') ? "_noconjy" : "_conjy";
-        str_name += "_incx_" + testinghelpers::get_value_string(incx);
-        str_name += "_incy_" + testinghelpers::get_value_string(incy);
-        return str_name;
-    }
-};
-
 // Black box testing for generic use of ddot.
 INSTANTIATE_TEST_SUITE_P(
         unitPositiveStride,
@@ -122,7 +93,7 @@ INSTANTIATE_TEST_SUITE_P(
             // incy: stride of y vector.
             ::testing::Values(gtint_t(1))           // unit stride
         ),
-        ::ddotvGenericTestPrint()
+        ::dotvGenericPrint()
     );
 
 #ifdef TEST_BLIS_TYPED // BLIS-api specific
@@ -139,7 +110,7 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(gtint_t(1)),                                   // stride size for x
             ::testing::Values(gtint_t(1))                                    // stride size for y
         ),
-        ::ddotvGenericTestPrint()
+        ::dotvGenericPrint()
     );
 #endif
 
@@ -165,7 +136,7 @@ INSTANTIATE_TEST_SUITE_P(
                                gtint_t(3), gtint_t(7)   // few non-unit positive strides for sanity check
             )
         ),
-        ::ddotvGenericTestPrint()
+        ::dotvGenericPrint()
     );
 
 #ifndef TEST_BLIS_TYPED
@@ -191,7 +162,7 @@ INSTANTIATE_TEST_SUITE_P(
                                gtint_t(-1), gtint_t(-3), gtint_t(-7)   // few non-unit negative strides for sanity check
             )
         ),
-        ::ddotvGenericTestPrint()
+        ::dotvGenericPrint()
     );
 #endif
 
@@ -222,6 +193,6 @@ INSTANTIATE_TEST_SUITE_P(
                                gtint_t(1)           // unit stride
             )
         ),
-        ::ddotvGenericTestPrint()
+        ::dotvGenericPrint()
     );
 #endif

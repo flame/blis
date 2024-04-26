@@ -92,76 +92,6 @@ TEST_P( saxpyvEVT, NaNInfCheck )
                    yj, yexval, thresh);
 }
 
-// Test-case logger : Used to print the test-case details when vectors have exception value.
-// The string format is as follows :
-// {blas/cblas/blis}_n(vec_size)_(conjx/noconjx)_incx(m)(abs_incx)_incy(m)(abs_incy)_X_(xi)_(xexval)_(yi)_(yexval)_alpha(alpha_val)
-class saxpyvEVTVecPrint
-{
-public:
-    std::string operator()(
-        testing::TestParamInfo<std::tuple<char, gtint_t, gtint_t, gtint_t, gtint_t, float, gtint_t, float, float>> str) const
-    {
-        char conjx = std::get<0>(str.param);
-        gtint_t n = std::get<1>(str.param);
-        gtint_t incx = std::get<2>(str.param);
-        gtint_t incy = std::get<3>(str.param);
-        gtint_t xi = std::get<4>(str.param);
-        float xexval = std::get<5>(str.param);
-        gtint_t yj = std::get<6>(str.param);
-        float yexval = std::get<7>(str.param);
-        float alpha = std::get<8>(str.param);
-#ifdef TEST_BLAS
-        std::string str_name = "blas_";
-#elif TEST_CBLAS
-        std::string str_name = "cblas_";
-#else  //#elif TEST_BLIS_TYPED
-        std::string str_name = "blis_";
-#endif
-        str_name += "_n_" + std::to_string(n);
-        str_name += ( conjx == 'n' )? "_noconjx" : "_conjx";
-        str_name += "_incx_" + testinghelpers::get_value_string(incx);
-        str_name += "_incy_" + testinghelpers::get_value_string(incy);
-        std::string xexval_str = testinghelpers::get_value_string(xexval);
-        std::string yexval_str = testinghelpers::get_value_string(yexval);
-        str_name = str_name + "_X_" + std::to_string(xi);
-        str_name = str_name + "_" + xexval_str;
-        str_name = str_name + "_Y_" + std::to_string(yj);
-        str_name = str_name + "_" + yexval_str;
-        str_name += "_alpha_" + testinghelpers::get_value_string(alpha);
-        return str_name;
-    }
-};
-
-// Test-case logger : Used to print the test-case details when alpha/beta have exception value.
-// The string format is as follows :
-// {blas/cblas/blis}_n(vec_size)_(conjx/noconjx)_incx(m)(abs_incx)_incy(m)(abs_incy)_alpha(alpha_val)
-class saxpyvAlphaBetaPrint
-{
-public:
-    std::string operator()(
-        testing::TestParamInfo<std::tuple<char, gtint_t, gtint_t, gtint_t, gtint_t, float, gtint_t, float, float>> str) const
-    {
-        char conjx = std::get<0>(str.param);
-        gtint_t n = std::get<1>(str.param);
-        gtint_t incx = std::get<2>(str.param);
-        gtint_t incy = std::get<3>(str.param);
-        float alpha = std::get<8>(str.param);
-#ifdef TEST_BLAS
-        std::string str_name = "blas_";
-#elif TEST_CBLAS
-        std::string str_name = "cblas_";
-#else  //#elif TEST_BLIS_TYPED
-        std::string str_name = "blis_";
-#endif
-        str_name += "_n_" + std::to_string(n);
-        str_name += ( conjx == 'n' )? "_noconjx" : "_conjx";
-        str_name += "_incx_" + testinghelpers::get_value_string(incx);
-        str_name += "_incy_" + testinghelpers::get_value_string(incy);
-        str_name += "_alpha_" + testinghelpers::get_value_string(alpha);
-        return str_name;
-    }
-};
-
 static float NaN = std::numeric_limits<float>::quiet_NaN();
 static float Inf = std::numeric_limits<float>::infinity();
 
@@ -222,7 +152,7 @@ INSTANTIATE_TEST_SUITE_P(
         ::testing::Values(float(0.0)),                                          // dummy value on y
         ::testing::Values(float(0.0), float(1.0), float(-1.0), float(-3.3))     // alpha
         ),
-    ::saxpyvEVTVecPrint());
+    ::axpyvEVTPrint<float>());
 
 // Exception value testing(on Y vector alone) with unit strides
 INSTANTIATE_TEST_SUITE_P(
@@ -246,7 +176,7 @@ INSTANTIATE_TEST_SUITE_P(
         ::testing::Values(NaN, -Inf, Inf),                                      // exception values to set on y
         ::testing::Values(float(0.0), float(1.0), float(-1.0), float(-3.3))     // alpha
         ),
-    ::saxpyvEVTVecPrint());
+    ::axpyvEVTPrint<float>());
 
 // Exception value testing(on X and Y vectors) with unit strides
 INSTANTIATE_TEST_SUITE_P(
@@ -272,7 +202,7 @@ INSTANTIATE_TEST_SUITE_P(
         ::testing::Values(NaN, -Inf, Inf),                                      // exception values to set on y
         ::testing::Values(float(0.0), float(1.0), float(-1.0), float(-3.3))     // alpha
         ),
-    ::saxpyvEVTVecPrint());
+    ::axpyvEVTPrint<float>());
 
 /*
     Exception value testing on vectors(Zen4) :
@@ -325,7 +255,7 @@ INSTANTIATE_TEST_SUITE_P(
         ::testing::Values(float(0.0)),                                          // dummy value on y
         ::testing::Values(float(0.0), float(1.0), float(-1.0), float(-3.3))     // alpha
         ),
-    ::saxpyvEVTVecPrint());
+    ::axpyvEVTPrint<float>());
 
 // Exception value testing(on Y vector alone) with unit strides
 INSTANTIATE_TEST_SUITE_P(
@@ -349,7 +279,7 @@ INSTANTIATE_TEST_SUITE_P(
         ::testing::Values(NaN, -Inf, Inf),                                      // exception values to set on y
         ::testing::Values(float(0.0), float(1.0), float(-1.0), float(-3.3))     // alpha
         ),
-    ::saxpyvEVTVecPrint());
+    ::axpyvEVTPrint<float>());
 
 // Exception value testing(on X and Y vectors) with unit strides
 INSTANTIATE_TEST_SUITE_P(
@@ -375,7 +305,7 @@ INSTANTIATE_TEST_SUITE_P(
         ::testing::Values(NaN, -Inf, Inf),                                      // exception values to set on y
         ::testing::Values(float(0.0), float(1.0), float(-1.0), float(-3.3)) // alpha
         ),
-    ::saxpyvEVTVecPrint());
+    ::axpyvEVTPrint<float>());
 
 // Exception value testing(on vectors) with non-unit strides
 // We have to test a single scalar loop. The indices are such
@@ -399,7 +329,7 @@ INSTANTIATE_TEST_SUITE_P(
         ::testing::Values(NaN, -Inf, Inf, -1.5),                                // exception values to set on y
         ::testing::Values(float(0.0), float(1.0), float(-1.0), float(-3.3)) // alpha
         ),
-    ::saxpyvEVTVecPrint());
+    ::axpyvEVTPrint<float>());
 
 /*
     Exception value testing on alpha :
@@ -429,7 +359,7 @@ INSTANTIATE_TEST_SUITE_P(
         ::testing::Values(float(0.0)),
         ::testing::Values(NaN, -Inf, Inf)                                       // alpha
         ),
-    ::saxpyvEVTVecPrint());
+    ::axpyvEVTPrint<float>());
 
 // Exception value testing(on alpha) with unit strided vectors
 INSTANTIATE_TEST_SUITE_P(
@@ -451,7 +381,7 @@ INSTANTIATE_TEST_SUITE_P(
         ::testing::Values(float(0.0)),
         ::testing::Values(NaN, -Inf, Inf)                                       // alpha
         ),
-    ::saxpyvEVTVecPrint());
+    ::axpyvEVTPrint<float>());
 
 // Exception value testing(on alpha) with non-unit strided vectors
 INSTANTIATE_TEST_SUITE_P(
@@ -473,4 +403,4 @@ INSTANTIATE_TEST_SUITE_P(
         ::testing::Values(float(0.0)),
         ::testing::Values(NaN, -Inf, Inf)               // alpha
         ),
-    ::saxpyvEVTVecPrint());
+    ::axpyvEVTPrint<float>());

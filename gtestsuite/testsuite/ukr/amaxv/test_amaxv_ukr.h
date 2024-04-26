@@ -113,3 +113,22 @@ void test_amaxv_ukr( FT ukr_fp, gtint_t n, gtint_t incx, double thresh, bool is_
     //----------------------------------------------------------
     computediff<gtint_t>( "idx", idx, idx_ref );
 }
+
+// Test-case logger : Used to print the test-case details for unit testing the kernels.
+// NOTE : The kernel name is the prefix in instantiator name, and thus is not printed
+// with this logger.
+template <typename T>
+class amaxvUKRPrint {
+public:
+    std::string operator()(
+        testing::TestParamInfo<std::tuple<T,gtint_t,gtint_t,bool>> str) const {
+        gtint_t n     = std::get<1>(str.param);
+        gtint_t incx  = std::get<2>(str.param);
+        bool is_memory_test = std::get<3>(str.param);
+
+        std::string str_name = "_n_" + std::to_string(n);
+        str_name += "_incx_" + testinghelpers::get_value_string(incx);
+        str_name += ( is_memory_test ) ? "_mem_test_enabled" : "_mem_test_disabled";
+        return str_name;
+    }
+};

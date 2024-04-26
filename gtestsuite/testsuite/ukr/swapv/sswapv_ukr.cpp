@@ -72,31 +72,6 @@ TEST_P( sswapvUkr, FunctionalTest )
     test_swapv_ukr<T, sswapv_ker_ft>( ukr, n, incx, incy, is_memory_test );
 }
 
-// Prints the test case combination
-class sswapvUkrPrint {
-public:
-    std::string operator()(
-        testing::TestParamInfo<std::tuple<sswapv_ker_ft, gtint_t,gtint_t,gtint_t,bool>> str) const {
-        gtint_t n      = std::get<1>(str.param);
-        gtint_t incx   = std::get<2>(str.param);
-        gtint_t incy   = std::get<3>(str.param);
-        bool is_memory_test = std::get<4>(str.param);
-
-#ifdef TEST_BLAS
-        std::string str_name = "blas";
-#elif TEST_CBLAS
-        std::string str_name = "cblas";
-#else  //#elif TEST_BLIS_TYPED
-        std::string str_name = "blis";
-#endif
-        str_name += "_n_" + std::to_string(n);
-        str_name += "_incx_" + testinghelpers::get_value_string(incx);
-        str_name += "_incy_" + testinghelpers::get_value_string(incy);
-        str_name += ( is_memory_test ) ? "_mem_test_enabled" : "_mem_test_disabled";
-        return str_name;
-    }
-};
-
 // ----------------------------------------------
 // ----- Begin ZEN1/2/3 (AVX2) Kernel Tests -----
 // ----------------------------------------------
@@ -130,7 +105,7 @@ INSTANTIATE_TEST_SUITE_P(
             // is_memory_test
             ::testing::Values(false, true)
         ),
-        ::sswapvUkrPrint()
+        ::swapvUKRPrint<sswapv_ker_ft>()
     );
 
 INSTANTIATE_TEST_SUITE_P(
@@ -155,6 +130,6 @@ INSTANTIATE_TEST_SUITE_P(
             // is_memory_test
             ::testing::Values(false, true)
         ),
-        ::sswapvUkrPrint()
+        ::swapvUKRPrint<sswapv_ker_ft>()
     );
 #endif

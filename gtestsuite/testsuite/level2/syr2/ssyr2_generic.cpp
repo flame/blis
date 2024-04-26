@@ -90,37 +90,6 @@ TEST_P(ssyr2Test, RandomData)
     test_syr2<T>( storage, uploa, conjx, conjy, n, alpha, incx, incy, lda_inc, thresh );
 }
 
-class ssyr2TestPrint {
-public:
-    std::string operator()(
-        testing::TestParamInfo<std::tuple<char,char,char,char,gtint_t,float,gtint_t,gtint_t,gtint_t>> str) const {
-        char sfm       = std::get<0>(str.param);
-        char uploa     = std::get<1>(str.param);
-        char conjx     = std::get<2>(str.param);
-        char conjy     = std::get<3>(str.param);
-        gtint_t n      = std::get<4>(str.param);
-        float alpha    = std::get<5>(str.param);
-        gtint_t incx   = std::get<6>(str.param);
-        gtint_t incy   = std::get<7>(str.param);
-        gtint_t ld_inc = std::get<8>(str.param);
-#ifdef TEST_BLAS
-        std::string str_name = "ssyr2_";
-#elif TEST_CBLAS
-        std::string str_name = "cblas_ssyr2";
-#else  //#elif TEST_BLIS_TYPED
-        std::string str_name = "bli_ssyr2";
-#endif
-        str_name    = str_name + "_" + sfm;
-        str_name    = str_name + "_" + uploa+conjx+conjy;
-        str_name += "_n_" + std::to_string(n);
-        str_name += "_alpha_" + testinghelpers::get_value_string(alpha);
-        str_name += "_incx_" + testinghelpers::get_value_string(incx);
-        str_name += "_incy_" + testinghelpers::get_value_string(incy);
-        str_name    = str_name + "_" + std::to_string(ld_inc);
-        return str_name;
-    }
-};
-
 // Black box testing.
 INSTANTIATE_TEST_SUITE_P(
         Blackbox,
@@ -140,5 +109,5 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(gtint_t(1)),                                   // stride size for y
             ::testing::Values(gtint_t(0), gtint_t(5))                       // increment to the leading dim of a
         ),
-        ::ssyr2TestPrint()
+        ::syr2GenericPrint<float>()
     );

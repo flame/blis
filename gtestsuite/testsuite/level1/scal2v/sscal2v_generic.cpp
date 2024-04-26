@@ -81,29 +81,6 @@ TEST_P( sscal2vGenericTest, RandomData )
     test_scal2v<T>( conj_alpha, n, incx, incy, alpha, thresh );
 }
 
-// Used to generate a test case with a sensible name.
-// Beware that we cannot use fp numbers (e.g., 2.3) in the names,
-// so we are only printing int(2.3). This should be enough for debugging purposes.
-// If this poses an issue, please reach out.
-class sscal2vGenericTestPrint {
-public:
-    std::string operator()(
-        testing::TestParamInfo<std::tuple<char, gtint_t, gtint_t, gtint_t, float>> str) const {
-        char conj = std::get<0>(str.param);
-        gtint_t n = std::get<1>(str.param);
-        gtint_t incx = std::get<2>(str.param);
-        gtint_t incy = std::get<3>(str.param);
-        float alpha = std::get<4>(str.param);
-        std::string str_name = "bli_sscal2v";
-        str_name += "_n_" + std::to_string(n);
-        str_name += "_" + std::string(&conj, 1);
-        str_name += "_incx_" + testinghelpers::get_value_string(incx);
-        str_name += "_incy_" + testinghelpers::get_value_string(incy);
-        str_name += "_alpha_" + testinghelpers::get_value_string(alpha);
-        return str_name;
-    }
-};
-
 #ifdef TEST_BLIS_TYPED
 // Black box testing for generic and main use of sscal2.
 INSTANTIATE_TEST_SUITE_P(
@@ -116,7 +93,7 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(gtint_t(1)),                                   // stride size for y
             ::testing::Values(float(3.0), float(-5.0))                       // alpha
         ),
-        ::sscal2vGenericTestPrint()
+        ::scal2vGenericPrint<float>()
     );
 
 // Test when conjugate of x is used as an argument. This option is BLIS-api specific.
@@ -132,7 +109,7 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(gtint_t(1)),                                   // stride size for y
             ::testing::Values(float(9.0))                                    // alpha
         ),
-        ::sscal2vGenericTestPrint()
+        ::scal2vGenericPrint<float>()
     );
 
 // Test for non-unit increments.
@@ -148,6 +125,6 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(gtint_t(7)),                                  // stride size for y
             ::testing::Values(float(2.0))                               // alpha
         ),
-        ::sscal2vGenericTestPrint()
+        ::scal2vGenericPrint<float>()
     );
 #endif

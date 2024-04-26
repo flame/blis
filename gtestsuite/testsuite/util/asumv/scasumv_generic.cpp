@@ -67,26 +67,6 @@ TEST_P( scasumvGenericTest, RandomData )
     test_asumv<T>( n, incx, thresh );
 }
 
-// Prints the test case combination
-class scasumvGenericTestPrint {
-public:
-    std::string operator()(
-        testing::TestParamInfo<std::tuple<gtint_t, gtint_t>> str) const {
-        gtint_t n     = std::get<0>(str.param);
-        gtint_t incx  = std::get<1>(str.param);
-#ifdef TEST_BLAS
-        std::string str_name = "scasumv_";
-#elif TEST_CBLAS
-        std::string str_name = "cblas_scasumv";
-#else  //#elif TEST_BLIS_TYPED
-        std::string str_name = "bli_scasumv";
-#endif
-        str_name += "_n_" + std::to_string(n);
-        str_name += "_incx_" + testinghelpers::get_value_string(incx);
-        return str_name;
-    }
-};
-
 INSTANTIATE_TEST_SUITE_P(
         unitPositiveIncrement,
         scasumvGenericTest,
@@ -110,7 +90,7 @@ INSTANTIATE_TEST_SUITE_P(
                 gtint_t(1)
             )
         ),
-        ::scasumvGenericTestPrint()
+        ::asumvGenericPrint()
     );
 
 INSTANTIATE_TEST_SUITE_P(
@@ -137,7 +117,7 @@ INSTANTIATE_TEST_SUITE_P(
                 gtint_t(3)
             )
         ),
-        ::scasumvGenericTestPrint()
+        ::asumvGenericPrint()
     );
 
 // @note: ASUMV is supposed to set sum as 0 and return early in case incx <= 0,
@@ -168,6 +148,6 @@ INSTANTIATE_TEST_SUITE_P(
                 gtint_t(-3)
             )
         ),
-        ::scasumvGenericTestPrint()
+        ::asumvGenericPrint()
     );
 #endif

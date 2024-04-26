@@ -91,3 +91,38 @@ static void test_axpyf(
     //----------------------------------------------------------
     computediff<T>( "y", m, y.data(), y_ref.data(), incy, thresh, true );
 }
+
+
+// Test-case logger : Used to print the test-case details
+template <typename T>
+class axpyfGenericPrint {
+public:
+    std::string operator()(
+        testing::TestParamInfo<std::tuple<char,
+                                          char,
+                                          gtint_t,
+                                          gtint_t,
+                                          T,
+                                          gtint_t,
+                                          gtint_t,
+                                          gtint_t,
+                                          gtint_t>> str) const {
+        char conja    = std::get<0>(str.param);
+        char conjx    = std::get<1>(str.param);
+        gtint_t m     = std::get<2>(str.param);
+        gtint_t b  = std::get<3>(str.param);
+        T alpha  = std::get<4>(str.param);
+        gtint_t incx     = std::get<7>(str.param);
+        gtint_t incy  = std::get<8>(str.param);
+
+        std::string str_name = "bli_";
+        str_name += ( conja == 'n' )? "_conja_n" : "_conja_t";
+        str_name += ( conjx == 'n' )? "_conjx_n" : "_conjx_t";
+        str_name += "_m_" + std::to_string(m);
+        str_name += "_b_" + std::to_string(b);
+        str_name += "_alpha_" + testinghelpers::get_value_string(alpha);
+        str_name += "_incx_" + testinghelpers::get_value_string(incx);
+        str_name += "_incy_" + testinghelpers::get_value_string(incy);
+        return str_name;
+    }
+};

@@ -161,5 +161,5 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(gtint_t(0), gtint_t(10), gtint_t(358)),        // increment to the leading dim of a
             ::testing::Values(false, true)                                   // is memory test
         ),
-        ::ztrsvPrint()
+        ::trsvMemGenericPrint<dcomplex>()
     );

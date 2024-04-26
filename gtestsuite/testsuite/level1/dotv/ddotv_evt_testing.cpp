@@ -86,44 +86,6 @@ TEST_P( ddotv_EVT, ExceptionData )
     test_dotv<T>( conjx, conjy, n, incx, xi, x_exval, incy, yi, y_exval, thresh );
 }
 
-// Used to generate a test case with a sensible name.
-// Beware that we cannot use fp numbers (e.g., 2.3) in the names,
-// so we are only printing int(2.3). This should be enough for debugging purposes.
-// If this poses an issue, please reach out.
-class ddotv_EVTPrint {
-public:
-    std::string operator()(
-        testing::TestParamInfo<std::tuple<char,char,gtint_t,gtint_t,gtint_t, double, gtint_t, gtint_t, double>> str) const {
-        char    conjx   = std::get<0>(str.param);
-        char    conjy   = std::get<1>(str.param);
-        gtint_t n       = std::get<2>(str.param);
-        gtint_t incx    = std::get<3>(str.param);
-        gtint_t xi      = std::get<4>(str.param);
-        double  x_exval = std::get<5>(str.param);
-        gtint_t incy    = std::get<6>(str.param);
-        gtint_t yi      = std::get<7>(str.param);
-        double  y_exval = std::get<8>(str.param);
-
-#ifdef TEST_BLAS
-        std::string str_name = "ddot_";
-#elif TEST_CBLAS
-        std::string str_name = "cblas_ddot";
-#else  //#elif TEST_BLIS_TYPED
-        std::string str_name = "bli_ddotv";
-#endif
-        str_name += "_n_" + std::to_string(n);
-        str_name += (conjx == 'n') ? "_noconjx" : "_conjx";
-        str_name += (conjy == 'n') ? "_noconjy" : "_conjy";
-        str_name += "_incx_" + testinghelpers::get_value_string(incx);
-        str_name = str_name + "_X_" + std::to_string(xi);
-        str_name = str_name + "_" + testinghelpers::get_value_string(x_exval);
-        str_name += "_incy_" + testinghelpers::get_value_string(incy);
-        str_name = str_name + "_Y_" + std::to_string(yi);
-        str_name = str_name + "_" + testinghelpers::get_value_string(y_exval);
-
-        return str_name;
-    }
-};
 
 static double NaN = std::numeric_limits<double>::quiet_NaN();
 static double Inf = std::numeric_limits<double>::infinity();
@@ -184,7 +146,7 @@ INSTANTIATE_TEST_SUITE_P(
             // y_exval: extreme value for y.
             ::testing::Values( double(0.0) )        // dummy value since testing only for x
         ),
-        ::ddotv_EVTPrint()
+        ::dotvEVTPrint<double>()
     );
 
 
@@ -226,7 +188,7 @@ INSTANTIATE_TEST_SUITE_P(
             // y_exval: extreme value for y.
             ::testing::Values( NaN, Inf, -Inf )
         ),
-        ::ddotv_EVTPrint()
+        ::dotvEVTPrint<double>()
     );
 
 // EVT with unit stride vectors X and Y contatining Infs/NaNs.
@@ -271,7 +233,7 @@ INSTANTIATE_TEST_SUITE_P(
             // y_exval: extreme value for y.
             ::testing::Values( NaN, Inf, -Inf )
         ),
-        ::ddotv_EVTPrint()
+        ::dotvEVTPrint<double>()
     );
 
 // Tests for Zen3 Architecture.
@@ -343,7 +305,7 @@ INSTANTIATE_TEST_SUITE_P(
             // y_exval: extreme value for y.
             ::testing::Values( double(0.0) )        // dummy value since testing only for x
         ),
-        ::ddotv_EVTPrint()
+        ::dotvEVTPrint<double>()
     );
 
 // EVT with unit stride Y vector containing Infs/NaNs.
@@ -387,7 +349,7 @@ INSTANTIATE_TEST_SUITE_P(
             // y_exval: extreme value for y.
             ::testing::Values( NaN, Inf, -Inf )
         ),
-        ::ddotv_EVTPrint()
+        ::dotvEVTPrint<double>()
     );
 
 // EVT with unit stride vectors X and Y contatining Infs/NaNs.
@@ -433,7 +395,7 @@ INSTANTIATE_TEST_SUITE_P(
             // y_exval: extreme value for y.
             ::testing::Values( NaN, Inf, -Inf )
         ),
-        ::ddotv_EVTPrint()
+        ::dotvEVTPrint<double>()
     );
 
 // EVT with non-unit stride vectors X and Y containing Infs/NaNs.
@@ -470,7 +432,7 @@ INSTANTIATE_TEST_SUITE_P(
             // y_exval: extreme value for y.
             ::testing::Values( NaN, Inf, -Inf )
         ),
-        ::ddotv_EVTPrint()
+        ::dotvEVTPrint<double>()
     );
 
 // EVT with negative stride vectors X and Y containing Infs/NaNs.
@@ -507,5 +469,5 @@ INSTANTIATE_TEST_SUITE_P(
             // y_exval: extreme value for y.
             ::testing::Values( NaN, Inf, -Inf )
         ),
-        ::ddotv_EVTPrint()
+        ::dotvEVTPrint<double>()
     );

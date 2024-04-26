@@ -142,3 +142,72 @@ static void test_omatcopy2( char storage, char trans, gtint_t m, gtint_t n, T al
 
 }
 
+
+// Test-case logger : Used to print the test-case details based on parameters
+template <typename T>
+class omatcopy2GenericPrint {
+public:
+    std::string operator()(
+        testing::TestParamInfo<std::tuple<char,char,gtint_t,gtint_t,T,gtint_t,gtint_t,gtint_t,gtint_t,bool>> str) const {
+        char storage   = std::get<0>(str.param);
+        char trans     = std::get<1>(str.param);
+        gtint_t m      = std::get<2>(str.param);
+        gtint_t n      = std::get<3>(str.param);
+        T alpha    = std::get<4>(str.param);
+        gtint_t lda_inc = std::get<5>(str.param);
+        gtint_t stridea = std::get<6>(str.param);
+        gtint_t ldb_inc = std::get<7>(str.param);
+        gtint_t strideb = std::get<8>(str.param);
+        bool is_memory_test = std::get<9>(str.param);
+        
+        std::string str_name = API_PRINT;
+        str_name += std::string(&storage, 1);
+        str_name += "_" + std::string(&trans, 1);
+        str_name += "_m_" + std::to_string(m);
+        str_name += "_n_" + std::to_string(n);
+        str_name += "_alpha_" + testinghelpers::get_value_string(alpha);
+        gtint_t lda = testinghelpers::get_leading_dimension( storage, 'n', m, n, lda_inc );
+        gtint_t ldb = testinghelpers::get_leading_dimension( storage, trans, m, n, ldb_inc );
+        str_name += "_lda" + std::to_string(lda);
+        str_name += "_stridea" + std::to_string(stridea);
+        str_name += "_ldb" + std::to_string(ldb);
+        str_name += "_strideb" + std::to_string(strideb);
+        str_name += ( is_memory_test )? "_mem_test_enabled" : "_mem_test_disabled";
+
+        return str_name;
+    }
+};
+
+template <typename T>
+class comatcopy2EVTPrint {
+public:
+    std::string operator()(
+        testing::TestParamInfo<std::tuple<char,char,gtint_t,gtint_t,T,gtint_t,gtint_t,gtint_t,gtint_t,T,bool>> str) const {
+        char storage    = std::get<0>(str.param);
+        char trans      = std::get<1>(str.param);
+        gtint_t m       = std::get<2>(str.param);
+        gtint_t n       = std::get<3>(str.param);
+        T alpha  = std::get<4>(str.param);
+        gtint_t lda_inc = std::get<5>(str.param);
+        gtint_t stridea = std::get<6>(str.param);
+        gtint_t ldb_inc = std::get<7>(str.param);
+        gtint_t strideb = std::get<8>(str.param);
+        T exval  = std::get<9>(str.param);
+
+        std::string str_name = API_PRINT;
+        str_name += std::string(&storage, 1);
+        str_name += "_" + std::string(&trans, 1);
+        str_name += "_m_" + std::to_string(m);
+        str_name += "_n_" + std::to_string(n);
+        str_name += "_alpha_" + testinghelpers::get_value_string(alpha);
+        str_name = str_name + "_A_exval" + testinghelpers::get_value_string(exval);
+        gtint_t lda = testinghelpers::get_leading_dimension( storage, 'n', m, n, lda_inc );
+        gtint_t ldb = testinghelpers::get_leading_dimension( storage, trans, m, n, ldb_inc );
+        str_name += "_lda" + std::to_string(lda);
+        str_name += "_stridea" + std::to_string(stridea);
+        str_name += "_ldb" + std::to_string(ldb);
+        str_name += "_stridea" + std::to_string(strideb);
+
+        return str_name;
+    }
+};

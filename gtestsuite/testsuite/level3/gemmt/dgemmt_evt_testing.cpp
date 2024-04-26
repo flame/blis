@@ -104,53 +104,6 @@ TEST_P( dgemmtEVT, NaNInfCheck )
                   alpha, beta, thresh, false, true, aexval, bexval, cexval );
 }
 
-class dgemmtEVTPrint
-{
-public:
-    std::string operator()(
-        testing::TestParamInfo<std::tuple<char,char,char,char,gtint_t,gtint_t,double,double,gtint_t,gtint_t,gtint_t,double,double,double>> str) const {
-        char sfm        = std::get<0>(str.param);
-        char uplo       = std::get<1>(str.param);
-        char tsa        = std::get<2>(str.param);
-        char tsb        = std::get<3>(str.param);
-        gtint_t n       = std::get<4>(str.param);
-        gtint_t k       = std::get<5>(str.param);
-        double alpha    = std::get<6>(str.param);
-        double beta     = std::get<7>(str.param);
-        gtint_t lda_inc = std::get<8>(str.param);
-        gtint_t ldb_inc = std::get<9>(str.param);
-        gtint_t ldc_inc = std::get<10>(str.param);
-        double aexval   = std::get<11>(str.param);
-        double bexval   = std::get<12>(str.param);
-        double cexval   = std::get<13>(str.param);
-#ifdef TEST_BLAS
-        std::string str_name = "blas_";
-#elif TEST_CBLAS
-        std::string str_name = "cblas_";
-#else  //#elif TEST_BLIS_TYPED
-        std::string str_name = "bli_";
-#endif
-        str_name = str_name + "_storage_" + sfm;
-        str_name = str_name + "_transa_" + tsa;
-        str_name = str_name + "_transb_" + tsb;
-        str_name = str_name + "_uploa_" + uplo;
-        str_name += "_n_" + std::to_string(n);
-        str_name += "_k_" + std::to_string(k);
-        str_name += "_alpha_" + testinghelpers::get_value_string(alpha);
-        str_name += "_beta_" + testinghelpers::get_value_string(beta);
-        gtint_t lda = testinghelpers::get_leading_dimension( sfm, tsa, n, k, lda_inc );
-        gtint_t ldb = testinghelpers::get_leading_dimension( sfm, tsb, k, n, ldb_inc );
-        gtint_t ldc = testinghelpers::get_leading_dimension( sfm, 'n', n, n, ldc_inc );
-        str_name = str_name + "_ex_a_" + testinghelpers::get_value_string(aexval);
-        str_name = str_name + "_ex_b_" + testinghelpers::get_value_string(bexval);
-        str_name = str_name + "_ex_c_" + testinghelpers::get_value_string(cexval);
-        str_name = str_name + "_ldb_" + std::to_string(lda);
-        str_name = str_name + "_ldb_" + std::to_string(ldb);
-        str_name = str_name + "_ldc_" + std::to_string(ldc);
-        return str_name;
-    }
-};
-
 static double AOCL_NAN = std::numeric_limits<double>::quiet_NaN();
 static double AOCL_INF = std::numeric_limits<double>::infinity();
 
@@ -178,6 +131,6 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(0.0, AOCL_NAN, AOCL_INF, -AOCL_INF),           // extreme value for B matrix
             ::testing::Values(0.0, AOCL_NAN, AOCL_INF, -AOCL_INF)            // extreme value for B matrix
         ),
-        ::dgemmtEVTPrint()
+        ::gemmtEVTPrint<double>()
     );
 #endif

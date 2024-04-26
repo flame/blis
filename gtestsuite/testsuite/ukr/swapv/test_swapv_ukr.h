@@ -114,3 +114,23 @@ static void test_swapv_ukr( FT ukr, gtint_t n, gtint_t incx, gtint_t incy,
     computediff<T>( n, x, x_ref, y, y_ref, incx, incy, false );
 
 }
+
+
+// Test-case logger : Used to print the test-case details based on parameters
+template <typename T>
+class swapvUKRPrint {
+public:
+    std::string operator()(
+        testing::TestParamInfo<std::tuple<T, gtint_t,gtint_t,gtint_t,bool>> str) const {
+        gtint_t n      = std::get<1>(str.param);
+        gtint_t incx   = std::get<2>(str.param);
+        gtint_t incy   = std::get<3>(str.param);
+        bool is_memory_test = std::get<4>(str.param);
+
+        std::string str_name = "_n_" + std::to_string(n);
+        str_name += "_incx_" + testinghelpers::get_value_string(incx);
+        str_name += "_incy_" + testinghelpers::get_value_string(incy);
+        str_name += ( is_memory_test ) ? "_mem_test_enabled" : "_mem_test_disabled";
+        return str_name;
+    }
+};

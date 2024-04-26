@@ -91,30 +91,6 @@ TEST_P( zaxpyvUkr, AccuracyCheck )
     test_axpyv_ukr<T, zaxpyv_ker_ft>( ukr_fp, conj_x, n, incx, incy, alpha, thresh, is_memory_test );
 }
 
-// Test-case logger : Used to print the test-case details for unit testing the kernels.
-// NOTE : The kernel name is the prefix in instantiator name, and thus is not printed
-// with this logger.
-class zaxpyvUkrPrint {
-public:
-    std::string operator()(
-        testing::TestParamInfo<std::tuple<zaxpyv_ker_ft,char,gtint_t,gtint_t,gtint_t,dcomplex,bool>> str) const {
-        char conjx    = std::get<1>(str.param);
-        gtint_t n     = std::get<2>(str.param);
-        gtint_t incx  = std::get<3>(str.param);
-        gtint_t incy  = std::get<4>(str.param);
-        dcomplex alpha  = std::get<5>(str.param);
-        bool is_memory_test = std::get<6>(str.param);
-
-        std::string str_name = "_n_" + std::to_string(n);
-        str_name += ( conjx == 'n' )? "_noconjx" : "_conjx";
-        str_name += "_incx_" + testinghelpers::get_value_string(incx);
-        str_name += "_incy_" + testinghelpers::get_value_string(incy);
-        str_name += "_alpha_" + testinghelpers::get_value_string(alpha);
-        str_name += ( is_memory_test ) ? "_mem_test_enabled" : "_mem_test_disabled";
-        return str_name;
-    }
-};
-
 #if defined(BLIS_KERNELS_ZEN) && defined(GTEST_AVX2FMA3)
 /*
     Unit testing for functionality of bli_zaxpyv_zen_int5 kernel.
@@ -161,7 +137,7 @@ INSTANTIATE_TEST_SUITE_P(
                               dcomplex{0.0, 0.0}),                      // alpha
             ::testing::Values(false, true)                              // is_memory_test
         ),
-        ::zaxpyvUkrPrint()
+        (::axpyvUKRPrint<dcomplex, zaxpyv_ker_ft>())
     );
 
 // Unit testing for non unit strides
@@ -184,7 +160,7 @@ INSTANTIATE_TEST_SUITE_P(
                               dcomplex{0.0, 0.0}),                      // alpha
             ::testing::Values(false, true)                              // is_memory_test
         ),
-        ::zaxpyvUkrPrint()
+        (::axpyvUKRPrint<dcomplex, zaxpyv_ker_ft>())
     );
 
 #endif

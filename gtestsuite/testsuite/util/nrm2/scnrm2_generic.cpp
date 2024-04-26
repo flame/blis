@@ -67,26 +67,6 @@ TEST_P( scnrm2Test, RandomData )
     test_nrm2<T>(n, incx, thresh);
 }
 
-// Prints the test case combination
-class scnrm2TestPrint {
-public:
-    std::string operator()(
-        testing::TestParamInfo<std::tuple<gtint_t, gtint_t>> str) const {
-        gtint_t n     = std::get<0>(str.param);
-        gtint_t incx  = std::get<1>(str.param);
-#ifdef TEST_BLAS
-        std::string str_name = "scnrm2_";
-#elif TEST_CBLAS
-        std::string str_name = "cblas_scnrm2";
-#else  //#elif TEST_BLIS_TYPED
-        std::string str_name = "bli_cnormfv";
-#endif
-        str_name += "_n_" + std::to_string(n);
-        str_name += "_incx_" + testinghelpers::get_value_string(incx);
-        return str_name;
-    }
-};
-
 /**
  * scnrm2 implementation is composed by two parts:
  * - vectorized path for n>=64
@@ -119,5 +99,5 @@ INSTANTIATE_TEST_SUITE_P(
 #endif
         )
         ),
-        ::scnrm2TestPrint()
+        ::nrm2GenericPrint()
     );

@@ -87,46 +87,6 @@ TEST_P( somatcopyEVT, NanInfCheck )
     test_omatcopy<T>( storage, trans, m, n, alpha, lda_inc, ldb_inc, thresh, false, is_nan_inf_test, exval );
 }
 
-// Test-case logger : Used to print the test-case details based on parameters
-// The string format is as follows :
-// {blas_/cblas_/bli_}_storage_trans_m_n_alpha_lda_ldb_{mem_test_enabled/mem_test_disabled}
-class somatcopyEVTPrint {
-public:
-    std::string operator()(
-        testing::TestParamInfo<std::tuple<char,char,gtint_t,gtint_t,float,gtint_t,gtint_t,float,bool>> str) const {
-        char storage    = std::get<0>(str.param);
-        char trans      = std::get<1>(str.param);
-        gtint_t m       = std::get<2>(str.param);
-        gtint_t n       = std::get<3>(str.param);
-        float alpha  = std::get<4>(str.param);
-        gtint_t lda_inc = std::get<5>(str.param);
-        gtint_t ldb_inc = std::get<6>(str.param);
-        float exval  = std::get<7>(str.param);
-// Currently, BLIS only has the BLAS standard wrapper for this API.
-// The CBLAS and BLIS strings are also added here(with macro guards),
-// in case we add the CBLAS and BLIS wrappers to the library in future.
-#ifdef TEST_BLAS
-        std::string str_name = "blas_";
-#elif TEST_CBLAS
-        std::string str_name = "cblas_";
-#else  //#elif TEST_BLIS_TYPED
-        std::string str_name = "bli_";
-#endif
-        str_name += std::string(&storage, 1);
-        str_name += "_" + std::string(&trans, 1);
-        str_name += "_m_" + std::to_string(m);
-        str_name += "_n_" + std::to_string(n);
-        str_name += "_alpha_" + testinghelpers::get_value_string(alpha);
-        str_name = str_name + "_A_exval" + testinghelpers::get_value_string(exval);
-        gtint_t lda = testinghelpers::get_leading_dimension( storage, 'n', m, n, lda_inc );
-        gtint_t ldb = testinghelpers::get_leading_dimension( storage, trans, m, n, ldb_inc );
-        str_name += "_lda" + std::to_string(lda);
-        str_name += "_ldb" + std::to_string(ldb);
-
-        return str_name;
-    }
-};
-
 #if defined(TEST_BLAS) && (defined(REF_IS_MKL) || defined(REF_IS_OPENBLAS))
 
 static float AOCL_NAN = std::numeric_limits<float>::quiet_NaN();
@@ -149,7 +109,7 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(AOCL_NAN, AOCL_INF, -AOCL_INF),                         // exval
             ::testing::Values(true)                                                   // is_nan_inf_test
         ),
-        ::somatcopyEVTPrint()
+        ::omatcopyEVTPrint<float>()
     );
 
 // EVT testing for somatcopy, with exception values in alpha
@@ -169,6 +129,6 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(0.0f),                                                  // exval
             ::testing::Values(true)                                                   // is_nan_inf_test
         ),
-        ::somatcopyEVTPrint()
+        ::omatcopyEVTPrint<float>()
     );
 #endif

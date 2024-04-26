@@ -106,37 +106,6 @@ TEST_P( caxpbyvGenericTest, RandomData )
     test_axpbyv<T>( conj_x, n, incx, incy, alpha, beta, thresh );
 }
 
-// Used to generate a test case with a sensible name.
-// Beware that we cannot use fp numbers (e.g., 2.3) in the names,
-// so we are only printing int(2.3). This should be enough for debugging purposes.
-// If this poses an issue, please reach out.
-class caxpbyvGenericTestPrint {
-public:
-    std::string operator()(
-        testing::TestParamInfo<std::tuple<char,gtint_t,gtint_t,gtint_t,scomplex,scomplex>> str) const {
-        char conj      = std::get<0>(str.param);
-        gtint_t n      = std::get<1>(str.param);
-        gtint_t incx   = std::get<2>(str.param);
-        gtint_t incy   = std::get<3>(str.param);
-        scomplex alpha = std::get<4>(str.param);
-        scomplex beta  = std::get<5>(str.param);
-#ifdef TEST_BLAS
-        std::string str_name = "caxpby_";
-#elif TEST_CBLAS
-        std::string str_name = "cblas_caxpby";
-#else  //#elif TEST_BLIS_TYPED
-        std::string str_name = "bli_caxpbyv";
-#endif
-        str_name += "_n_" + std::to_string(n);
-        str_name += "_" + std::string(&conj, 1);
-        str_name += "_incx_" + testinghelpers::get_value_string(incx);
-        str_name += "_incy_" + testinghelpers::get_value_string(incy);
-        str_name += "_alpha_" + testinghelpers::get_value_string(alpha);
-        str_name += "_beta_" + testinghelpers::get_value_string(beta);
-        return str_name;
-    }
-};
-
 // Black box testing for generic and main use of caxpby.
 INSTANTIATE_TEST_SUITE_P(
         Blackbox,
@@ -153,7 +122,7 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(scomplex{2.0, -1.0}, scomplex{-2.0, 3.0}),     // alpha
             ::testing::Values(scomplex{1.0, 2.0})                            // beta
         ),
-        ::caxpbyvGenericTestPrint()
+        ::axpbyvGenericPrint<scomplex>()
     );
 
 // Test for non-unit increments.
@@ -174,7 +143,7 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(scomplex{4.0, 3.1}),                           // alpha
             ::testing::Values(scomplex{1.0, -2.0})                           // beta
         ),
-        ::caxpbyvGenericTestPrint()
+        ::axpbyvGenericPrint<scomplex>()
     );
 
 #ifndef TEST_BLIS_TYPED
@@ -192,6 +161,6 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(scomplex{4.0, 3.1}),                           // alpha
             ::testing::Values(scomplex{1.0, -2.0})                           // beta
         ),
-        ::caxpbyvGenericTestPrint()
+        ::axpbyvGenericPrint<scomplex>()
     );
 #endif

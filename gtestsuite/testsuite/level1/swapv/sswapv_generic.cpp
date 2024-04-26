@@ -60,22 +60,6 @@ TEST_P( sswapvAPI, FunctionalTest )
     test_swapv<T>( n, incx, incy );
 }
 
-// Prints the test case combination
-class sswapvAPIPrint {
-public:
-    std::string operator()(
-        testing::TestParamInfo<std::tuple<gtint_t,gtint_t,gtint_t>> str) const {
-        gtint_t n      = std::get<0>(str.param);
-        gtint_t incx   = std::get<1>(str.param);
-        gtint_t incy   = std::get<2>(str.param);
-        std::string str_name = "bli";
-        str_name += "_n_" + std::to_string(n);
-        str_name += "_incx_" + testinghelpers::get_value_string(incx);
-        str_name += "_incy_" + testinghelpers::get_value_string(incy);
-        return str_name;
-    }
-};
-
 /*****************************************************************/
 /* When n values are 64, 32, 16, 8 it is avx2 optimised          */
 /* Values to be tested to cover all loops                        */
@@ -107,7 +91,7 @@ INSTANTIATE_TEST_SUITE_P(
                 gtint_t(1)
             )
         ),
-        ::sswapvAPIPrint()
+        ::swapvGenericPrint()
     );
 
 INSTANTIATE_TEST_SUITE_P(
@@ -129,5 +113,5 @@ INSTANTIATE_TEST_SUITE_P(
                 gtint_t(500), gtint_t(-200)
             )
         ),
-        ::sswapvAPIPrint()
+        ::swapvGenericPrint()
     );

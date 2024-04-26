@@ -76,3 +76,33 @@ void test_hemv( char storage, char uploa, char conja, char conjx, gtint_t n,
     //----------------------------------------------------------
     computediff<T>( "y", n, y.data(), y_ref.data(), incy, thresh );
 }
+
+// Test-case logger : Used to print the test-case details based on parameters
+template <typename T>
+class hemvGenericPrint {
+public:
+    std::string operator()(
+        testing::TestParamInfo<std::tuple<char,char,char,char,gtint_t,T,T,gtint_t,gtint_t,gtint_t>> str) const {
+        char sfm       = std::get<0>(str.param);
+        char uploa     = std::get<1>(str.param);
+        char conja     = std::get<2>(str.param);
+        char conjx     = std::get<3>(str.param);
+        gtint_t n      = std::get<4>(str.param);
+        T alpha = std::get<5>(str.param);
+        T beta  = std::get<6>(str.param);
+        gtint_t incx   = std::get<7>(str.param);
+        gtint_t incy   = std::get<8>(str.param);
+        gtint_t ld_inc = std::get<9>(str.param);
+
+        std::string str_name = API_PRINT;
+        str_name    = str_name + "_" + sfm;
+        str_name    = str_name + "_" + uploa+conja+conjx;
+        str_name += "_n_" + std::to_string(n);
+        str_name += "_alpha_" + testinghelpers::get_value_string(alpha);
+        str_name += "_beta_" + testinghelpers::get_value_string(beta);
+        str_name += "_incx_" + testinghelpers::get_value_string(incx);
+        str_name += "_incy_" + testinghelpers::get_value_string(incy);
+        str_name    = str_name + "_" + std::to_string(ld_inc);
+        return str_name;
+    }
+};

@@ -62,40 +62,6 @@ TEST_P( dnrm2_EVT, EVT )
     test_nrm2<T>(n, incx, i, iexval, j, jexval);
 }
 
-// Prints the test case combination
-class dnrm2_TestPrint {
-public:
-    std::string operator()(
-        testing::TestParamInfo<std::tuple<gtint_t, gtint_t, gtint_t, double, gtint_t, double>> str) const {
-        // vector length:
-        gtint_t n = std::get<0>(str.param);
-        // stride size for x:
-        gtint_t incx = std::get<1>(str.param);
-        // index with extreme value iexval.
-        gtint_t i = std::get<2>(str.param);
-        double iexval = std::get<3>(str.param);
-        // index with extreme value jexval.
-        gtint_t j = std::get<4>(str.param);
-        double jexval = std::get<5>(str.param);
-#ifdef TEST_BLAS
-        std::string str_name = "dnrm2_";
-#elif TEST_CBLAS
-        std::string str_name = "cblas_dnrm2";
-#else  //#elif TEST_BLIS_TYPED
-        std::string str_name = "bli_dnormfv";
-#endif
-        str_name += "_n_" + std::to_string(n);
-        str_name += "_incx_" + testinghelpers::get_value_string(incx);
-        str_name    = str_name + "_i" + std::to_string(i);
-        std::string iexval_str = testinghelpers::get_value_string(iexval);
-        str_name    = str_name + "_" + iexval_str;
-        str_name    = str_name + "_j" + std::to_string(j);
-        std::string jexval_str = testinghelpers::get_value_string(jexval);
-        str_name    = str_name + "_" + jexval_str;
-        return str_name;
-    }
-};
-
 static double NaN = std::numeric_limits<double>::quiet_NaN();
 static double Inf = std::numeric_limits<double>::infinity();
 
@@ -126,7 +92,7 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(2),
             ::testing::Values(1.0, NaN, Inf, -Inf)
         ),
-        ::dnrm2_TestPrint()
+        ::nrm2EVTPrint<double>()
     );
 
 INSTANTIATE_TEST_SUITE_P(
@@ -144,7 +110,7 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(6),
             ::testing::Values(1.0, NaN, Inf, -Inf)
         ),
-        ::dnrm2_TestPrint()
+        ::nrm2EVTPrint<double>()
     );
 
 // To test the second for-loop (F4), we use n = 12
@@ -164,7 +130,7 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(11),
             ::testing::Values(1.0, NaN, Inf, -Inf)
         ),
-        ::dnrm2_TestPrint()
+        ::nrm2EVTPrint<double>()
     );
 
 // Now let's check the combination of a vectorized path and
@@ -185,7 +151,7 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(8),
             ::testing::Values(1.0, NaN, Inf, -Inf)
         ),
-        ::dnrm2_TestPrint()
+        ::nrm2EVTPrint<double>()
     );
 
 // Multithreading unit tester
@@ -233,7 +199,7 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(4, 17, 125, 201),
             ::testing::Values(1.0, NaN, Inf, -Inf)
         ),
-        ::dnrm2_TestPrint()
+        ::nrm2EVTPrint<double>()
     );
 
 // Instantiator if AOCL_DYNAMIC is enabled
@@ -261,5 +227,5 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(1500000, 2500000),
             ::testing::Values(-Inf, NaN)
         ),
-        ::dnrm2_TestPrint()
+        ::nrm2EVTPrint<double>()
     );

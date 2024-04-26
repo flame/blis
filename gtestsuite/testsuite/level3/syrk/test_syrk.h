@@ -77,3 +77,33 @@ void test_syrk( char storage, char uplo, char transa, gtint_t n, gtint_t k,
     //----------------------------------------------------------
     computediff<T>( "C", storage, n, n, c.data(), c_ref.data(), ldc, thresh );
 }
+
+// Test-case logger : Used to print the test-case details based on parameters
+template <typename T>
+class syrkGenericPrint {
+public:
+    std::string operator()(
+        testing::TestParamInfo<std::tuple<char, char, char, gtint_t, gtint_t, T, T, gtint_t, gtint_t>> str) const {
+        char sfm        = std::get<0>(str.param);
+        char uplo       = std::get<1>(str.param);
+        char tsa        = std::get<2>(str.param);
+        gtint_t n       = std::get<3>(str.param);
+        gtint_t k       = std::get<4>(str.param);
+        T alpha  = std::get<5>(str.param);
+        T beta   = std::get<6>(str.param);
+        gtint_t lda_inc = std::get<7>(str.param);
+        gtint_t ldc_inc = std::get<8>(str.param);
+
+        std::string str_name = API_PRINT;
+        str_name = str_name + "_" + sfm+sfm+sfm;
+        str_name = str_name + "_" + uplo;
+        str_name = str_name + "_" + tsa;
+        str_name += "_n_" + std::to_string(n);
+        str_name += "_k_" + std::to_string(k);
+        str_name += "_alpha_" + testinghelpers::get_value_string(alpha);
+        str_name += "_beta_" + testinghelpers::get_value_string(beta);
+        str_name = str_name + "_" + std::to_string(lda_inc);
+        str_name = str_name + "_" + std::to_string(ldc_inc);
+        return str_name;
+    }
+};

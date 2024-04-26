@@ -79,34 +79,6 @@ TEST_P( dasumv_EVT, ExceptionData )
     test_asumv<T>( n, incx, xi, ix_exval, xj, jx_exval, thresh );
 }
 
-// Prints the test case combination
-class dasumv_EVTPrint {
-public:
-    std::string operator()(
-        testing::TestParamInfo<std::tuple<gtint_t, gtint_t, gtint_t, double, gtint_t, double>> str) const {
-        gtint_t n        = std::get<0>(str.param);
-        gtint_t incx     = std::get<1>(str.param);
-        gtint_t xi       = std::get<2>(str.param);
-        double  ix_exval = std::get<3>(str.param);
-        gtint_t xj       = std::get<4>(str.param);
-        double  jx_exval = std::get<5>(str.param);
-#ifdef TEST_BLAS
-        std::string str_name = "dasumv_";
-#elif TEST_CBLAS
-        std::string str_name = "cblas_dasumv";
-#else  //#elif TEST_BLIS_TYPED
-        std::string str_name = "bli_dasumv";
-#endif
-        str_name += "_n_" + std::to_string(n);
-        str_name += "_incx_" + testinghelpers::get_value_string(incx);
-        str_name = str_name + "_X_" + std::to_string(xi);
-        str_name = str_name + "_" + testinghelpers::get_value_string(ix_exval);
-        str_name = str_name + "_X_" + std::to_string(xj);
-        str_name = str_name + "_" + testinghelpers::get_value_string(jx_exval);
-        return str_name;
-    }
-};
-
 static double NaN = std::numeric_limits<double>::quiet_NaN();
 static double Inf = std::numeric_limits<double>::infinity();
 
@@ -129,7 +101,7 @@ INSTANTIATE_TEST_SUITE_P(
             // jx_exval = 1.0 tests for the vector with only one extreme value.
             ::testing::Values( 1.0, NaN, Inf, -Inf )
         ),
-        ::dasumv_EVTPrint()
+        ::asumvEVTPrint<double>()
     );
 
 // EVT with non-unit stride vector containing Infs/NaNs.
@@ -151,5 +123,5 @@ INSTANTIATE_TEST_SUITE_P(
             // jx_exval = 1.0 tests for the vector with only one extreme value.
             ::testing::Values( 1.0, NaN, Inf, -Inf )
         ),
-        ::dasumv_EVTPrint()
+        ::asumvEVTPrint<double>()
     );

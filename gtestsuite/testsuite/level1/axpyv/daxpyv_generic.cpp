@@ -80,34 +80,6 @@ TEST_P( daxpyvGenericTest, RandomData )
     test_axpyv<T>( conj_x, n, incx, incy, alpha, thresh );
 }
 
-// Test-case logger : Used to print the test-case details when alpha/beta have exception value.
-// The string format is as follows :
-// n(vec_size)_(conjx/noconjx)_incx(m)(abs_incx)_incy(m)(abs_incy)_alpha(alpha_val)
-class daxpyvGenericTestPrint {
-public:
-    std::string operator()(
-        testing::TestParamInfo<std::tuple<char,gtint_t,gtint_t,gtint_t,double>> str) const {
-        char conjx    = std::get<0>(str.param);
-        gtint_t n     = std::get<1>(str.param);
-        gtint_t incx  = std::get<2>(str.param);
-        gtint_t incy  = std::get<3>(str.param);
-        double alpha  = std::get<4>(str.param);
-#ifdef TEST_BLAS
-        std::string str_name = "blas_";
-#elif TEST_CBLAS
-        std::string str_name = "cblas_";
-#else  //#elif TEST_BLIS_TYPED
-        std::string str_name = "bli_";
-#endif
-        str_name += "_n_" + std::to_string(n);
-        str_name += ( conjx == 'n' )? "_noconjx" : "_conjx";
-        str_name += "_incx_" + testinghelpers::get_value_string(incx);
-        str_name += "_incy_" + testinghelpers::get_value_string(incy);
-        str_name += "_alpha_" + testinghelpers::get_value_string(alpha);
-        return str_name;
-    }
-};
-
 // Black box testing for generic and main use of daxpy.
 INSTANTIATE_TEST_SUITE_P(
         Blackbox,
@@ -120,7 +92,7 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(double(0.0), double(1.0),
                               double(-1.0), double(4.1))                     // alpha
         ),
-        ::daxpyvGenericTestPrint()
+        ::axpyvGenericPrint<double>()
     );
 
 #ifdef TEST_BLIS_TYPED
@@ -138,7 +110,7 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(double(0.0), double(1.0),
                               double(-1.0), double(4.1))                     // alpha
         ),
-        ::daxpyvGenericTestPrint()
+        ::axpyvGenericPrint<double>()
     );
 #endif
 
@@ -156,7 +128,7 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(double(0.0), double(1.0),
                               double(-1.0), double(4.1))                     // alpha
         ),
-        ::daxpyvGenericTestPrint()
+        ::axpyvGenericPrint<double>()
     );
 
 #ifndef TEST_BLIS_TYPED
@@ -174,7 +146,7 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(double(0.0), double(1.0),
                               double(-1.0), double(4.1))                     // alpha
         ),
-        ::daxpyvGenericTestPrint()
+        ::axpyvGenericPrint<double>()
     );
 #endif
 
@@ -200,7 +172,7 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(double(0.0), double(1.0),
                               double(-1.0), double(4.1))    // alpha
         ),
-        ::daxpyvGenericTestPrint()
+        ::axpyvGenericPrint<double>()
     );
 
 // Checking for the thresholds with non-unit strides
@@ -222,6 +194,6 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(double(0.0), double(1.0),
                               double(-1.0), double(4.1))    // alpha
         ),
-        ::daxpyvGenericTestPrint()
+        ::axpyvGenericPrint<double>()
     );
 #endif

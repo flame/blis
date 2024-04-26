@@ -98,42 +98,6 @@ TEST_P(zsyr2kTest, RandomData)
     test_syr2k<T>( storage, uplo, transa, transb, n, k, lda_inc, ldb_inc, ldc_inc, alpha, beta, thresh );
 }
 
-class zsyr2kTestPrint {
-public:
-    std::string operator()(
-        testing::TestParamInfo<std::tuple<char, char, char, char, gtint_t, gtint_t, dcomplex, dcomplex, gtint_t, gtint_t, gtint_t>> str) const {
-        char sfm        = std::get<0>(str.param);
-        char uplo       = std::get<1>(str.param);
-        char tsa        = std::get<2>(str.param);
-        char tsb        = std::get<3>(str.param);
-        gtint_t n       = std::get<4>(str.param);
-        gtint_t k       = std::get<5>(str.param);
-        dcomplex alpha  = std::get<6>(str.param);
-        dcomplex beta   = std::get<7>(str.param);
-        gtint_t lda_inc = std::get<8>(str.param);
-        gtint_t ldb_inc = std::get<9>(str.param);
-        gtint_t ldc_inc = std::get<10>(str.param);
-#ifdef TEST_BLAS
-        std::string str_name = "zsyr2k_";
-#elif TEST_CBLAS
-        std::string str_name = "cblas_zsyr2k";
-#else  //#elif TEST_BLIS_TYPED
-        std::string str_name = "bli_zsyr2k";
-#endif
-        str_name = str_name + "_" + sfm+sfm+sfm;
-        str_name = str_name + "_" + uplo;
-        str_name = str_name + "_" + tsa + tsb;
-        str_name += "_n_" + std::to_string(n);
-        str_name += "_k_" + std::to_string(k);
-        str_name += "_alpha_" + testinghelpers::get_value_string(alpha);
-        str_name += "_beta_" + testinghelpers::get_value_string(beta);
-        str_name = str_name + "_" + std::to_string(lda_inc);
-        str_name = str_name + "_" + std::to_string(ldb_inc);
-        str_name = str_name + "_" + std::to_string(ldc_inc);
-        return str_name;
-    }
-};
-
 // Black box testing.
 INSTANTIATE_TEST_SUITE_P(
         Blackbox,
@@ -155,5 +119,5 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(gtint_t(0), gtint_t(5)),                       // increment to the leading dim of b
             ::testing::Values(gtint_t(0), gtint_t(6))                        // increment to the leading dim of c
         ),
-        ::zsyr2kTestPrint()
+        ::syr2kGenericPrint<dcomplex>()
     );

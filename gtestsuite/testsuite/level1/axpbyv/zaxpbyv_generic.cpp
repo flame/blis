@@ -106,39 +106,6 @@ TEST_P(zaxpbyvAccTest, RandomData)
     test_axpbyv<T>(conj_x, n, incx, incy, alpha, beta, thresh);
 }
 
-// Used to generate a test case with a sensible name.
-// Beware that we cannot use fp numbers (e.g., 2.3) in the names,
-// so we are only printing int(2.3). This should be enough for debugging purposes.
-// If this poses an issue, please reach out.
-class zaxpbyvAccTestPrint
-{
-public:
-    std::string operator()(
-        testing::TestParamInfo<std::tuple<char, gtint_t, gtint_t, gtint_t, dcomplex, dcomplex>> str) const
-    {
-        char conj = std::get<0>(str.param);
-        gtint_t n = std::get<1>(str.param);
-        gtint_t incx = std::get<2>(str.param);
-        gtint_t incy = std::get<3>(str.param);
-        dcomplex alpha = std::get<4>(str.param);
-        dcomplex beta = std::get<5>(str.param);
-#ifdef TEST_BLAS
-        std::string str_name = "zaxpby_";
-#elif TEST_CBLAS
-        std::string str_name = "cblas_zaxpby";
-#else // #elif TEST_BLIS_TYPED
-        std::string str_name = "bli_zaxpbyv";
-#endif
-        str_name += "_n_" + std::to_string(n);
-        str_name += "_" + std::string(&conj, 1);
-        str_name += "_incx_" + testinghelpers::get_value_string(incx);
-        str_name += "_incy_" + testinghelpers::get_value_string(incy);
-        str_name += "_alpha_" + testinghelpers::get_value_string(alpha);
-        str_name += "_beta_" + testinghelpers::get_value_string(beta);
-        return str_name;
-    }
-};
-
 /*
     The code structure for bli_zaxpbyv_zen_int( ... ) is as follows :
     For unit strides :
@@ -169,7 +136,7 @@ INSTANTIATE_TEST_SUITE_P(
         ::testing::Values(dcomplex{0.0, 0.0}, dcomplex{1.0, 0.0}, dcomplex{2.2, -3.3}), // alpha
         ::testing::Values(dcomplex{0.0, 0.0}, dcomplex{1.0, 0.0}, dcomplex{1.0, 2.0}) // beta
         ),
-    ::zaxpbyvAccTestPrint());
+    ::axpbyvGenericPrint<dcomplex>());
 
 // Accuracy testing of different combinations of fringe loops(L6, L4, L2, 1)
 INSTANTIATE_TEST_SUITE_P(
@@ -188,7 +155,7 @@ INSTANTIATE_TEST_SUITE_P(
         ::testing::Values(dcomplex{0.0, 0.0}, dcomplex{1.0, 0.0}, dcomplex{2.2, -3.3}), // alpha
         ::testing::Values(dcomplex{0.0, 0.0}, dcomplex{1.0, 0.0}, dcomplex{1.0, 2.0}) // beta
         ),
-    ::zaxpbyvAccTestPrint());
+    ::axpbyvGenericPrint<dcomplex>());
 
 // Accuracy testing of 3*L8 + L6 + L4 + L2 + 1, a case of main + all fringe cases taken
 INSTANTIATE_TEST_SUITE_P(
@@ -207,7 +174,7 @@ INSTANTIATE_TEST_SUITE_P(
         ::testing::Values(dcomplex{0.0, 0.0}, dcomplex{1.0, 0.0}, dcomplex{2.2, -3.3}), // alpha
         ::testing::Values(dcomplex{0.0, 0.0}, dcomplex{1.0, 0.0}, dcomplex{1.0, 2.0}) // beta
         ),
-    ::zaxpbyvAccTestPrint());
+    ::axpbyvGenericPrint<dcomplex>());
 
 // Accuracy testing with non-unit strides
 INSTANTIATE_TEST_SUITE_P(
@@ -234,4 +201,4 @@ INSTANTIATE_TEST_SUITE_P(
         ::testing::Values(dcomplex{0.0, 0.0}, dcomplex{1.0, 0.0}, dcomplex{2.2, -3.3}), // alpha
         ::testing::Values(dcomplex{0.0, 0.0}, dcomplex{1.0, 0.0}, dcomplex{1.0, 2.0}) // beta
         ),
-    ::zaxpbyvAccTestPrint());
+    ::axpbyvGenericPrint<dcomplex>());

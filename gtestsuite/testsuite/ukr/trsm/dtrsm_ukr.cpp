@@ -122,59 +122,6 @@ TEST_P(DTRSMSmallUkrTest, small_kernel)
     test_trsm_small_ukr<T, trsm_small_ker_ft>( ukr_fp, side, uploa, diaga, transa, m, n, alpha, lda, ldb, thresh, is_memory_test, BLIS_DOUBLE);
 }
 
-class DTRSMUkrTestPrint {
-public:
-    std::string operator()(
-        testing::TestParamInfo<std::tuple<dgemmtrsm_ukr_ft, char, char, char, gtint_t,
-                                            gtint_t, gtint_t, double, gtint_t, bool>> str) const{
-        char storage            = std::get<1>(str.param);
-        char uploa              = std::get<2>(str.param);
-        char diaga              = std::get<3>(str.param);
-        gtint_t k               = std::get<6>(str.param);
-        double  alpha           = std::get<7>(str.param);
-        gtint_t ldc             = std::get<8>(str.param);
-        bool is_memory_test     = std::get<9>(str.param);
-        std::string res = std::string("dgemmtrsm_ukr")
-        + "_stor_" + storage
-        + "_diag_" +  diaga
-        + "_uplo_" + uploa
-        + "_k_" + std::to_string(k)
-        + "_alpha_" + testinghelpers::get_value_string(alpha)
-        + "_ldc_" + std::to_string(ldc);
-        res += is_memory_test ? "_mem_test_enabled" : "_mem_test_disabled";
-        return res;
-    }
-};
-
-class DTRSMSmallUkrTestPrint {
-public:
-    std::string operator()(
-        testing::TestParamInfo<std::tuple<trsm_small_ker_ft, char, char, char, char, gtint_t,
-                                            gtint_t, double, gtint_t, gtint_t, bool>> str) const{
-        char side               = std::get<1>(str.param);
-        char uploa              = std::get<2>(str.param);
-        char diaga              = std::get<3>(str.param);
-        char transa             = std::get<4>(str.param);
-        gtint_t m               = std::get<5>(str.param);
-        gtint_t n               = std::get<6>(str.param);
-        double  alpha           = std::get<7>(str.param);
-        gtint_t lda             = std::get<8>(str.param);
-        gtint_t ldb             = std::get<9>(str.param);
-        bool is_memory_test     = std::get<10>(str.param);
-        std::string res = std::string("trsm_small_")
-        + "_stor_" + side
-        + "_diag_" +  diaga
-        + "_uplo_" + uploa
-        + "_trana_" + transa
-        + "_alpha_" + testinghelpers::get_value_string(alpha)
-        + "_lda_" + std::to_string(lda)
-        + "_ldb_" + std::to_string(ldb)
-        + "_m_" + std::to_string(m)
-        + "_n_" + std::to_string(n);
-        return is_memory_test ? res + "_memory_test" : res;
-    }
-};
-
 #if defined(BLIS_KERNELS_ZEN4) && defined(GTEST_AVX512)
 INSTANTIATE_TEST_SUITE_P (
     bli_dgemmtrsm_l_zen4_asm_8x24,
@@ -191,7 +138,7 @@ INSTANTIATE_TEST_SUITE_P (
         ::testing::Values(0, 9, 53),                       // ldc
         ::testing::Values(false, true)                     // is_memory_test
     ),
-    ::DTRSMUkrTestPrint()
+    (::trsmNatUKRPrint<double,dgemmtrsm_ukr_ft>())
 );
 
 INSTANTIATE_TEST_SUITE_P (
@@ -209,7 +156,7 @@ INSTANTIATE_TEST_SUITE_P (
         ::testing::Values(0, 9, 53),                       // ldc
         ::testing::Values(false, true)                     // is_memory_test
    ),
-    ::DTRSMUkrTestPrint()
+    (::trsmNatUKRPrint<double,dgemmtrsm_ukr_ft>())
 );
 
 INSTANTIATE_TEST_SUITE_P (
@@ -228,7 +175,7 @@ INSTANTIATE_TEST_SUITE_P (
         ::testing::Values(0, 10),                     // ldb_inc
         ::testing::Values(false, true)                // is_memory_test
     ),
-    ::DTRSMSmallUkrTestPrint()
+    (::trsmSmallUKRPrint<double,trsm_small_ker_ft>())
 );
 #endif
 
@@ -249,7 +196,7 @@ INSTANTIATE_TEST_SUITE_P (
         ::testing::Values(0, 9, 53),                        // ldc
         ::testing::Values(false, true)                      // is_memory_test
     ),
-    ::DTRSMUkrTestPrint()
+    (::trsmNatUKRPrint<double,dgemmtrsm_ukr_ft>())
 );
 
 INSTANTIATE_TEST_SUITE_P (
@@ -267,7 +214,7 @@ INSTANTIATE_TEST_SUITE_P (
         ::testing::Values(0, 9, 53),                        // ldc
         ::testing::Values(false, true)                      // is_memory_test
     ),
-    ::DTRSMUkrTestPrint()
+    (::trsmNatUKRPrint<double,dgemmtrsm_ukr_ft>())
 );
 #endif
 
@@ -288,6 +235,6 @@ INSTANTIATE_TEST_SUITE_P (
         ::testing::Values(0, 10),                     // ldb_inc
         ::testing::Values(false, true)                // is_memory_test
     ),
-    ::DTRSMSmallUkrTestPrint()
+    (::trsmSmallUKRPrint<double,trsm_small_ker_ft>())
 );
 #endif

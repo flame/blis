@@ -107,31 +107,6 @@ TEST_P( saxpbyvUkrTest, AccuracyCheck )
     test_axpbyv_ukr<T, saxpbyv_ker_ft>( ukr_fp, conj_x, n, incx, incy, alpha, beta, thresh );
 }
 
-// Test-case logger : Used to print the test-case details for unit testing the kernels.
-// NOTE : The kernel name is the prefix in instantiator name, and thus is not printed
-// with this logger.
-class saxpbyvUkrTestPrint {
-public:
-    std::string operator()(
-        testing::TestParamInfo<std::tuple<saxpbyv_ker_ft,char,gtint_t,gtint_t,gtint_t,float,float>> str) const {
-        char conjx     = std::get<1>(str.param);
-        gtint_t n     = std::get<2>(str.param);
-        gtint_t incx  = std::get<3>(str.param);
-        gtint_t incy  = std::get<4>(str.param);
-        float alpha  = std::get<5>(str.param);
-        float beta   = std::get<6>(str.param);
-
-        std::string str_name = "saxpbyv_ukr";
-        str_name += "_n_" + std::to_string(n);
-        str_name += ( conjx == 'n' )? "_noconjx" : "_conjx";
-        str_name += "_incx_" + testinghelpers::get_value_string(incx);
-        str_name += "_incy_" + testinghelpers::get_value_string(incy);
-        str_name += "_alpha_" + testinghelpers::get_value_string(alpha);
-        str_name += "_beta_" + testinghelpers::get_value_string(beta);
-        return str_name;
-    }
-};
-
 #if defined(BLIS_KERNELS_ZEN) && defined(GTEST_AVX2FMA3)
 // Unit testing with unit stride
 INSTANTIATE_TEST_SUITE_P(
@@ -146,7 +121,7 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(float(2.2)), // alpha
             ::testing::Values(float(-1.8))  // beta
         ),
-        ::saxpbyvUkrTestPrint()
+        (::axpbyvUKRPrint<float, saxpbyv_ker_ft>())
     );
 
 // Unit testing with unit stride
@@ -162,6 +137,6 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(float(2.2)), // alpha
             ::testing::Values(float(-1.8))  // beta
         ),
-        ::saxpbyvUkrTestPrint()
+        (::axpbyvUKRPrint<float, saxpbyv_ker_ft>())
     );
 #endif

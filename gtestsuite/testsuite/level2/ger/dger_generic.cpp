@@ -90,39 +90,6 @@ TEST_P(dgerGenericTest, RandomData)
     test_ger<T>( storage, conjx, conjy, m, n, alpha, incx, incy, lda_inc, thresh );
 }
 
-class dgerGenericTestPrint {
-public:
-    std::string operator()(
-        testing::TestParamInfo<std::tuple<char,char,char,gtint_t,gtint_t,double,gtint_t,gtint_t,gtint_t>> str) const {
-        char sfm       = std::get<0>(str.param);
-        char conjx     = std::get<1>(str.param);
-        char conjy     = std::get<2>(str.param);
-        gtint_t m      = std::get<3>(str.param);
-        gtint_t n      = std::get<4>(str.param);
-        double alpha   = std::get<5>(str.param);
-        gtint_t incx   = std::get<6>(str.param);
-        gtint_t incy   = std::get<7>(str.param);
-        gtint_t ld_inc = std::get<8>(str.param);
-#ifdef TEST_BLAS
-        std::string str_name = "blas_";
-#elif TEST_CBLAS
-        std::string str_name = "cblas_";
-#else  //#elif TEST_BLIS_TYPED
-        std::string str_name = "bli_";
-#endif
-        str_name    = str_name + "_" + sfm;
-        str_name    = str_name + "_" + conjx+conjy;
-        str_name += "_m_" + std::to_string(m);
-        str_name += "_n_" + std::to_string(n);
-        str_name += "_incx_" + testinghelpers::get_value_string(incx);
-        str_name += "_incy_" + testinghelpers::get_value_string(incy);
-        str_name    = str_name + "_alpha_" + testinghelpers::get_value_string(alpha);
-        std::string ld_inc_str = ( ld_inc >= 0) ? std::to_string(ld_inc) : "m" + std::to_string(std::abs(ld_inc));
-        str_name    = str_name + "_lda_inc" + ld_inc_str;
-        return str_name;
-    }
-};
-
 INSTANTIATE_TEST_SUITE_P(
         unitPositiveIncrement,
         dgerGenericTest,
@@ -151,7 +118,7 @@ INSTANTIATE_TEST_SUITE_P(
             // inc_lda: increment to the leading dim of a
             ::testing::Values( gtint_t(0) )
         ),
-        ::dgerGenericTestPrint()
+        ::gerGenericPrint<double>()
     );
 
 #ifdef TEST_BLIS_TYPED
@@ -181,7 +148,7 @@ INSTANTIATE_TEST_SUITE_P(
             // inc_lda: increment to the leading dim of a
             ::testing::Values( gtint_t(1) )
         ),
-        ::dgerGenericTestPrint()
+        ::gerGenericPrint<double>()
     );
 #endif
 
@@ -213,7 +180,7 @@ INSTANTIATE_TEST_SUITE_P(
             // inc_lda: increment to the leading dim of a
             ::testing::Values( gtint_t(5) )
         ),
-        ::dgerGenericTestPrint()
+        ::gerGenericPrint<double>()
     );
 
 // @note negativeIncrement tests are resulting in Segmentation Faults when
@@ -247,7 +214,7 @@ INSTANTIATE_TEST_SUITE_P(
             // inc_lda: increment to the leading dim of a
             ::testing::Values( gtint_t(0) )
         ),
-        ::dgerGenericTestPrint()
+        ::gerGenericPrint<double>()
     );
 #endif
 
@@ -279,7 +246,7 @@ INSTANTIATE_TEST_SUITE_P(
             // inc_lda: increment to the leading dim of a
             ::testing::Values( gtint_t(2) )
         ),
-        ::dgerGenericTestPrint()
+        ::gerGenericPrint<double>()
     );
 //large size for m and n   
 INSTANTIATE_TEST_SUITE_P(
@@ -310,7 +277,7 @@ INSTANTIATE_TEST_SUITE_P(
             // inc_lda: increment to the leading dim of a
             ::testing::Values( gtint_t(2) )
         ),
-        ::dgerGenericTestPrint()
+        ::gerGenericPrint<double>()
     );
 //incx and incy are greater than m and n.
 INSTANTIATE_TEST_SUITE_P(
@@ -341,5 +308,5 @@ INSTANTIATE_TEST_SUITE_P(
             // inc_lda: increment to the leading dim of a
             ::testing::Values( gtint_t(7) )
         ),
-        ::dgerGenericTestPrint()
+        ::gerGenericPrint<double>()
     );

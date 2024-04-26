@@ -83,29 +83,6 @@ TEST_P( sxpbyvGenericTest, RandomData )
     test_xpbyv<T>( conj_x, n, incx, incy, beta, thresh );
 }
 
-// Used to generate a test case with a sensible name.
-// Beware that we cannot use fp numbers (e.g., 2.3) in the names,
-// so we are only printing int(2.3). This should be enough for debugging purposes.
-// If this poses an issue, please reach out.
-class sxpbyvGenericTestPrint {
-public:
-    std::string operator()(
-        testing::TestParamInfo<std::tuple<char,gtint_t,gtint_t,gtint_t,float>> str) const {
-        char conj     = std::get<0>(str.param);
-        gtint_t n     = std::get<1>(str.param);
-        gtint_t incx  = std::get<2>(str.param);
-        gtint_t incy  = std::get<3>(str.param);
-        float beta    = std::get<4>(str.param);
-        std::string str_name = "bli_sxpbyv";
-        str_name += "_n_" + std::to_string(n);
-        str_name += "_" + std::string(&conj, 1);
-        str_name += "_incx_" + testinghelpers::get_value_string(incx);
-        str_name += "_incy_" + testinghelpers::get_value_string(incy);
-        str_name += "_beta_" + testinghelpers::get_value_string(beta);
-        return str_name;
-    }
-};
-
 #ifdef TEST_BLIS_TYPED
 // Black box testing for generic and main use of caxpy.
 INSTANTIATE_TEST_SUITE_P(
@@ -118,7 +95,7 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(gtint_t(1)),                                   // stride size for y
             ::testing::Values(float(2.0), float(-2.0))                       // beta
         ),
-        ::sxpbyvGenericTestPrint()
+        ::xpbyvGenericPrint<float>()
     );
 
 // Test when conjugate of x is used as an argument. This option is BLIS-api specific.
@@ -134,7 +111,7 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(gtint_t(1)),                                   // stride size for y
             ::testing::Values(float(2.0))                                    // beta
         ),
-        ::sxpbyvGenericTestPrint()
+        ::xpbyvGenericPrint<float>()
     );
 
 
@@ -151,6 +128,6 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(gtint_t(3), gtint_t(33)),                      /*(gtint_t(-12), gtint_t(-4))*/// stride size for y
             ::testing::Values(float(4.0))                                    // beta
         ),
-        ::sxpbyvGenericTestPrint()
+        ::xpbyvGenericPrint<float>()
     );
 #endif

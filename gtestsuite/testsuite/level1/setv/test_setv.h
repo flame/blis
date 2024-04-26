@@ -73,3 +73,21 @@ void test_setv( char conjalpha, gtint_t n, T alpha, gtint_t incx )
         EXPECT_EQ(x[i], alpha_ref) << "blis_sol[" << i << "]="<< x[i] <<"   ref = "  << alpha_ref;
     }
 }
+
+
+// Test-case logger : Used to print the test-case details based on parameters
+class setvGenericPrint {
+public:
+    std::string operator()(
+        testing::TestParamInfo<std::tuple<char,gtint_t,gtint_t>> str) const {
+        char conj      = std::get<0>(str.param);
+        gtint_t n      = std::get<1>(str.param);
+        gtint_t incx   = std::get<2>(str.param);
+
+        std::string str_name = API_PRINT;
+        str_name += "_n_" + std::to_string(n);
+        str_name += "_" + std::string(&conj, 1);
+        str_name += "_incx_" + testinghelpers::get_value_string(incx);
+        return str_name;
+    }
+};

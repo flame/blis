@@ -66,26 +66,6 @@ TEST_P( snrm2Test, RandomData )
     test_nrm2<T>( n, incx, thresh );
 }
 
-// Prints the test case combination
-class snrm2TestPrint {
-public:
-    std::string operator()(
-        testing::TestParamInfo<std::tuple<gtint_t, gtint_t>> str) const {
-        gtint_t n     = std::get<0>(str.param);
-        gtint_t incx  = std::get<1>(str.param);
-#ifdef TEST_BLAS
-        std::string str_name = "snrm2_";
-#elif TEST_CBLAS
-        std::string str_name = "cblas_snrm2";
-#else  //#elif TEST_BLIS_TYPED
-        std::string str_name = "bli_snormfv";
-#endif
-        str_name += "_n_" + std::to_string(n);
-        str_name += "_incx_" + testinghelpers::get_value_string(incx);
-        return str_name;
-    }
-};
-
 /**
  * Note: snrm2 scalar ONLY implementation is used, but we write the test 
  * using values that worked for the vectorized path for the future.
@@ -121,5 +101,5 @@ INSTANTIATE_TEST_SUITE_P(
 #endif
         )                                                                    // stride size for x
         ),
-        ::snrm2TestPrint()
+        ::nrm2GenericPrint()
     );

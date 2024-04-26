@@ -64,33 +64,6 @@ TEST_P( scopyvGenericTest, RandomData )
     test_copyv<T>( conjx, n, incx, incy );
 }
 
-// Used to generate a test case with a sensible name.
-// Beware that we cannot use fp numbers (e.g., 2.3) in the names,
-// so we are only printing int(2.3). This should be enough for debugging purposes.
-// If this poses an issue, please reach out.
-class scopyvGenericTestPrint {
-public:
-    std::string operator()(
-        testing::TestParamInfo<std::tuple<char,gtint_t,gtint_t,gtint_t>> str) const {
-        char conjx    = std::get<0>(str.param);
-        gtint_t n     = std::get<1>(str.param);
-        gtint_t incx  = std::get<2>(str.param);
-        gtint_t incy  = std::get<3>(str.param);
-#ifdef TEST_BLAS
-        std::string str_name = "scopy_";
-#elif TEST_CBLAS
-        std::string str_name = "cblas_scopy";
-#else  //#elif TEST_BLIS_TYPED
-        std::string str_name = "bli_scopyv";
-#endif
-        str_name += "_n_" + std::to_string(n);
-        str_name += "_" + std::string(&conjx, 1);
-        str_name += "_incx_" + testinghelpers::get_value_string(incx);
-        str_name += "_incy_" + testinghelpers::get_value_string(incy);
-        return str_name;
-    }
-};
-
 // Black box testing for generic and main use of scopyv.
 INSTANTIATE_TEST_SUITE_P(
         Blackbox,
@@ -101,7 +74,7 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(gtint_t(1)),                                   // stride size for x
             ::testing::Values(gtint_t(1))                                    // stride size for y
         ),
-        ::scopyvGenericTestPrint()
+        ::copyvGenericPrint()
     );
 
 #ifdef TEST_BLIS_TYPED // BLIS-api specific
@@ -117,7 +90,7 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(gtint_t(1)),                                   // stride size for x
             ::testing::Values(gtint_t(1))                                    // stride size for y
         ),
-        ::scopyvGenericTestPrint()
+        ::copyvGenericPrint()
     );
 #endif
 
@@ -133,7 +106,7 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(gtint_t(2), gtint_t(11)),                      // stride size for x
             ::testing::Values(gtint_t(3), gtint_t(33))                       // stride size for y
         ),
-        ::scopyvGenericTestPrint()
+        ::copyvGenericPrint()
     );
 
 #ifndef TEST_BLIS_TYPED
@@ -149,6 +122,6 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(gtint_t(-5), gtint_t(7)),                      // stride size for x
             ::testing::Values(gtint_t(13), gtint_t(-9))                       // stride size for y
         ),
-        ::scopyvGenericTestPrint()
+        ::copyvGenericPrint()
     );
 #endif

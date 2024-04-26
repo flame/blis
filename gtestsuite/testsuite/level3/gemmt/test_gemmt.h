@@ -138,3 +138,118 @@ void test_gemmt( char storage, char uplo, char trnsa, char trnsb, gtint_t n,
     //----------------------------------------------------------
     computediff<T>( "C", storage, n, n, c_ptr, c_ref.data(), ldc, thresh, is_evt_test );
 }
+
+// Test-case logger : Used to print the test-case details based on parameters
+template <typename T>
+class gemmtGenericPrint {
+public:
+    std::string operator()(
+        testing::TestParamInfo<std::tuple<char,char,char,char,gtint_t,gtint_t,T,T,gtint_t,gtint_t,gtint_t>> str) const {
+        char sfm        = std::get<0>(str.param);
+        char uplo       = std::get<1>(str.param);
+        char tsa        = std::get<2>(str.param);
+        char tsb        = std::get<3>(str.param);
+        gtint_t n       = std::get<4>(str.param);
+        gtint_t k       = std::get<5>(str.param);
+        T alpha  = std::get<6>(str.param);
+        T beta   = std::get<7>(str.param);
+        gtint_t lda_inc = std::get<8>(str.param);
+        gtint_t ldb_inc = std::get<9>(str.param);
+        gtint_t ldc_inc = std::get<10>(str.param);
+
+        std::string str_name = API_PRINT;
+        str_name = str_name + "_" + sfm+sfm+sfm;
+        str_name = str_name + "_" + uplo;
+        str_name = str_name + "_" + tsa + tsb;
+        str_name += "_n_" + std::to_string(n);
+        str_name += "_k_" + std::to_string(k);
+        str_name += "_alpha_" + testinghelpers::get_value_string(alpha);
+        str_name += "_beta_" + testinghelpers::get_value_string(beta);
+        str_name = str_name + "_" + std::to_string(lda_inc);
+        str_name = str_name + "_" + std::to_string(ldb_inc);
+        str_name = str_name + "_" + std::to_string(ldc_inc);
+        return str_name;
+    }
+};
+
+template <typename T>
+class gemmtMemGenericPrint {
+public:
+    std::string operator()(
+        testing::TestParamInfo<std::tuple<char,char,char,char,gtint_t,gtint_t,T,T,gtint_t,gtint_t,gtint_t,bool>> str) const {
+        char sfm        = std::get<0>(str.param);
+        char uplo       = std::get<1>(str.param);
+        char tsa        = std::get<2>(str.param);
+        char tsb        = std::get<3>(str.param);
+        gtint_t n       = std::get<4>(str.param);
+        gtint_t k       = std::get<5>(str.param);
+        T alpha    = std::get<6>(str.param);
+        T beta     = std::get<7>(str.param);
+        gtint_t lda_inc = std::get<8>(str.param);
+        gtint_t ldb_inc = std::get<9>(str.param);
+        gtint_t ldc_inc = std::get<10>(str.param);
+        bool is_mem_test = std::get<11>(str.param);
+
+        std::string str_name = API_PRINT;
+        str_name = str_name + "_storage_" + sfm;
+        str_name = str_name + "_transa_" + tsa;
+        str_name = str_name + "_transb_" + tsb;
+        str_name = str_name + "_uploa_" + uplo;
+        str_name += "_n_" + std::to_string(n);
+        str_name += "_k_" + std::to_string(k);
+        str_name += "_alpha_" + testinghelpers::get_value_string(alpha);
+        str_name += "_beta_" + testinghelpers::get_value_string(beta);
+        gtint_t lda = testinghelpers::get_leading_dimension( sfm, tsa, n, k, lda_inc );
+        gtint_t ldb = testinghelpers::get_leading_dimension( sfm, tsb, k, n, ldb_inc );
+        gtint_t ldc = testinghelpers::get_leading_dimension( sfm, 'n', n, n, ldc_inc );
+        str_name = str_name + "_lda_" + std::to_string(lda);
+        str_name = str_name + "_ldb_" + std::to_string(ldb);
+        str_name = str_name + "_ldc_" + std::to_string(ldc);
+        str_name = str_name + (is_mem_test ? "_mem_test_enabled" : "_mem_test_disabled");
+        return str_name;
+    }
+};
+
+// Test-case logger : Used to print the test-case details based on parameters
+template <typename T>
+class gemmtEVTPrint
+{
+public:
+    std::string operator()(
+        testing::TestParamInfo<std::tuple<char,char,char,char,gtint_t,gtint_t,T,T,gtint_t,gtint_t,gtint_t,T,T,T>> str) const {
+        char sfm        = std::get<0>(str.param);
+        char uplo       = std::get<1>(str.param);
+        char tsa        = std::get<2>(str.param);
+        char tsb        = std::get<3>(str.param);
+        gtint_t n       = std::get<4>(str.param);
+        gtint_t k       = std::get<5>(str.param);
+        T alpha    = std::get<6>(str.param);
+        T beta     = std::get<7>(str.param);
+        gtint_t lda_inc = std::get<8>(str.param);
+        gtint_t ldb_inc = std::get<9>(str.param);
+        gtint_t ldc_inc = std::get<10>(str.param);
+        T aexval   = std::get<11>(str.param);
+        T bexval   = std::get<12>(str.param);
+        T cexval   = std::get<13>(str.param);
+
+        std::string str_name = API_PRINT;
+        str_name = str_name + "_storage_" + sfm;
+        str_name = str_name + "_transa_" + tsa;
+        str_name = str_name + "_transb_" + tsb;
+        str_name = str_name + "_uploa_" + uplo;
+        str_name += "_n_" + std::to_string(n);
+        str_name += "_k_" + std::to_string(k);
+        str_name += "_alpha_" + testinghelpers::get_value_string(alpha);
+        str_name += "_beta_" + testinghelpers::get_value_string(beta);
+        gtint_t lda = testinghelpers::get_leading_dimension( sfm, tsa, n, k, lda_inc );
+        gtint_t ldb = testinghelpers::get_leading_dimension( sfm, tsb, k, n, ldb_inc );
+        gtint_t ldc = testinghelpers::get_leading_dimension( sfm, 'n', n, n, ldc_inc );
+        str_name = str_name + "_ex_a_" + testinghelpers::get_value_string(aexval);
+        str_name = str_name + "_ex_b_" + testinghelpers::get_value_string(bexval);
+        str_name = str_name + "_ex_c_" + testinghelpers::get_value_string(cexval);
+        str_name = str_name + "_ldb_" + std::to_string(lda);
+        str_name = str_name + "_ldb_" + std::to_string(ldb);
+        str_name = str_name + "_ldc_" + std::to_string(ldc);
+        return str_name;
+    }
+};

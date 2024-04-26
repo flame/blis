@@ -83,28 +83,6 @@ TEST_P( zscal2vGenericTest, RandomData )
     test_scal2v<T>( conj_alpha, n, incx, incy, alpha, thresh );
 }
 
-// Used to generate a test case with a sensible name.
-// Beware that we cannot use fp numbers (e.g., 2.3) in the names,
-// so we are only printing int(2.3). This should be enough for debugging purposes.
-// If this poses an issue, please reach out.
-class zscal2vGenericTestPrint {
-public:
-    std::string operator()(
-        testing::TestParamInfo<std::tuple<char, gtint_t, gtint_t, gtint_t, dcomplex>> str) const {
-        char conj = std::get<0>(str.param);
-        gtint_t n = std::get<1>(str.param);
-        gtint_t incx = std::get<2>(str.param);
-        gtint_t incy = std::get<3>(str.param);
-        dcomplex alpha = std::get<4>(str.param);
-        std::string str_name = "bli_zscal2v";
-        str_name += "_n_" + std::to_string(n);
-        str_name += "_" + std::string(&conj, 1);
-        str_name += "_incx_" + testinghelpers::get_value_string(incx);
-        str_name += "_incy_" + testinghelpers::get_value_string(incy);
-        str_name += "_alpha_" + testinghelpers::get_value_string(alpha);
-        return str_name;
-    }
-};
 #ifdef TEST_BLIS_TYPED
 // Black box testing for generic and main use of cscal2.
 INSTANTIATE_TEST_SUITE_P(
@@ -117,7 +95,7 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(gtint_t(1)),                                   // stride size for y
             ::testing::Values(dcomplex{3.0, -2.0}, dcomplex{-1.0, 4.0})      // alpha
         ),
-        ::zscal2vGenericTestPrint()
+        ::scal2vGenericPrint<dcomplex>()
     );
 
 
@@ -134,6 +112,6 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(gtint_t(3)),                                   // stride size for y
             ::testing::Values(dcomplex{1.0, 2.1})                            // alpha
         ),
-        ::zscal2vGenericTestPrint()
+        ::scal2vGenericPrint<dcomplex>()
     );
 #endif

@@ -73,24 +73,6 @@ TEST_P( caddvGenericTest, RandomData )
     test_addv<T>( conj_x, n, incx, incy, thresh );
 }
 
-// Prints the test case combination
-class caddvGenericTestPrint {
-public:
-    std::string operator()(
-        testing::TestParamInfo<std::tuple<char,gtint_t,gtint_t,gtint_t>> str) const {
-        char conj      = std::get<0>(str.param);
-        gtint_t n      = std::get<1>(str.param);
-        gtint_t incx   = std::get<2>(str.param);
-        gtint_t incy   = std::get<3>(str.param);
-        std::string str_name = "bli_caddv";
-        str_name += "_n_" + std::to_string(n);
-        str_name += "_" + std::string(&conj, 1);
-        str_name += "_incx_" + testinghelpers::get_value_string(incx);
-        str_name += "_incy_" + testinghelpers::get_value_string(incy);
-        return str_name;
-    }
-};
-
 #ifdef TEST_BLIS_TYPED
 // Black box testing.
 INSTANTIATE_TEST_SUITE_P(
@@ -102,6 +84,6 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(gtint_t(1)),                                   // stride size for x
             ::testing::Values(gtint_t(1))                                    // stride size for y
         ),
-        ::caddvGenericTestPrint()
+        ::addvGenericPrint()
     );
 #endif

@@ -85,34 +85,6 @@ TEST_P(cherTest, RandomData)
     test_her<T, float>( storage, uploa, conjx, n, alpha, incx, lda_inc, thresh );
 }
 
-class cherTestPrint {
-public:
-    std::string operator()(
-        testing::TestParamInfo<std::tuple<char,char,char,gtint_t,float,gtint_t,gtint_t>> str) const {
-        char sfm       = std::get<0>(str.param);
-        char uploa     = std::get<1>(str.param);
-        char conjx     = std::get<2>(str.param);
-        gtint_t n      = std::get<3>(str.param);
-        float alpha    = std::get<4>(str.param);
-        gtint_t incx   = std::get<5>(str.param);
-        gtint_t ld_inc = std::get<6>(str.param);
-#ifdef TEST_BLAS
-        std::string str_name = "cher_";
-#elif TEST_CBLAS
-        std::string str_name = "cblas_cher";
-#else  //#elif TEST_BLIS_TYPED
-        std::string str_name = "bli_cher";
-#endif
-        str_name    = str_name + "_" + sfm;
-        str_name    = str_name + "_" + uploa+conjx;
-        str_name += "_n_" + std::to_string(n);
-        str_name += "_incx_" + testinghelpers::get_value_string(incx);
-        str_name += "_alpha_" + testinghelpers::get_value_string(alpha);
-        str_name    = str_name + "_" + std::to_string(ld_inc);
-        return str_name;
-    }
-};
-
 // Black box testing.
 INSTANTIATE_TEST_SUITE_P(
         Blackbox,
@@ -130,5 +102,5 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(gtint_t(1)),                                   // stride size for x
             ::testing::Values(gtint_t(0), gtint_t(3))                        // increment to the leading dim of a
         ),
-        ::cherTestPrint()
+        ::herGenericPrint<float>()
     );

@@ -62,40 +62,6 @@ TEST_P( snrm2_EVT, EVT )
     test_nrm2<T>(n, incx, i, iexval, j, jexval);
 }
 
-// Prints the test case combination
-class snrm2_TestPrint {
-public:
-    std::string operator()(
-        testing::TestParamInfo<std::tuple<gtint_t, gtint_t, gtint_t, float, gtint_t, float>> str) const {
-        // vector length:
-        gtint_t n = std::get<0>(str.param);
-        // stride size for x:
-        gtint_t incx = std::get<1>(str.param);
-        // index with extreme value iexval.
-        gtint_t i = std::get<2>(str.param);
-        float iexval = std::get<3>(str.param);
-        // index with extreme value jexval.
-        gtint_t j = std::get<4>(str.param);
-        float jexval = std::get<5>(str.param);
-#ifdef TEST_BLAS
-        std::string str_name = "snrm2_";
-#elif TEST_CBLAS
-        std::string str_name = "cblas_snrm2";
-#else  //#elif TEST_BLIS_TYPED
-        std::string str_name = "bli_snormfv";
-#endif
-        str_name += "_n_" + std::to_string(n);
-        str_name += "_incx_" + testinghelpers::get_value_string(incx);
-        str_name    = str_name + "_i" + std::to_string(i);
-        std::string iexval_str = testinghelpers::get_value_string(iexval);
-        str_name    = str_name + "_" + iexval_str;
-        str_name    = str_name + "_j" + std::to_string(j);
-        std::string jexval_str = testinghelpers::get_value_string(jexval);
-        str_name    = str_name + "_" + jexval_str;
-        return str_name;
-    }
-};
-
 static float NaN = std::numeric_limits<float>::quiet_NaN();
 static float Inf = std::numeric_limits<float>::infinity();
 
@@ -130,7 +96,7 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(2),
             ::testing::Values(1.0, NaN, Inf, -Inf)
         ),
-        ::snrm2_TestPrint()
+        ::nrm2EVTPrint<float>()
     );
 
 INSTANTIATE_TEST_SUITE_P(
@@ -148,7 +114,7 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(26),
             ::testing::Values(1.0, NaN, Inf, -Inf)
         ),
-        ::snrm2_TestPrint()
+        ::nrm2EVTPrint<float>()
     );
 
 // To test the second for-loop (F24), we use n = 88 = 2*32+24
@@ -168,7 +134,7 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(80),
             ::testing::Values(1.0, NaN, Inf, -Inf)
         ),
-        ::snrm2_TestPrint()
+        ::nrm2EVTPrint<float>()
     );
 
 // To test the second for-loop (F16), we use n = 80 = 2*32+16
@@ -188,7 +154,7 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(75),
             ::testing::Values(1.0, NaN, Inf, -Inf)
         ),
-        ::snrm2_TestPrint()
+        ::nrm2EVTPrint<float>()
     );
 
 // Now let's check the combination of a vectorized path and 
@@ -209,6 +175,6 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(65),
             ::testing::Values(NaN, Inf, -Inf)
         ),
-        ::snrm2_TestPrint()
+        ::nrm2EVTPrint<float>()
     );
 

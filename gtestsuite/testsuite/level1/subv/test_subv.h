@@ -100,3 +100,52 @@ static void test_subv( char conjx, gtint_t n, gtint_t incx, gtint_t incy,
     //----------------------------------------------------------
     computediff<T>( "y", n, y.data(), y_ref.data(), incy, thresh, true );
 }
+
+
+// Test-case logger : Used to print the test-case details based on parameters
+class subvGenericPrint {
+public:
+    std::string operator()(
+        testing::TestParamInfo<std::tuple<char,gtint_t,gtint_t,gtint_t>> str) const {
+        char conj      = std::get<0>(str.param);
+        gtint_t n      = std::get<1>(str.param);
+        gtint_t incx   = std::get<2>(str.param);
+        gtint_t incy   = std::get<3>(str.param);
+       
+        std::string str_name = API_PRINT;
+        str_name += "_n_" + std::to_string(n);
+        str_name += "_conj_" + std::string(&conj, 1);
+        str_name += "_incx_" + testinghelpers::get_value_string(incx);
+        str_name += "_incy_" + testinghelpers::get_value_string(incy);
+        return str_name;
+    }
+};
+
+template <typename T>
+class subvEVTPrint {
+public:
+    std::string operator()(
+        testing::TestParamInfo<std::tuple<char, gtint_t, gtint_t, gtint_t, gtint_t, T, gtint_t, T>> str) const {
+        char conjx      = std::get<0>(str.param);
+        gtint_t n      = std::get<1>(str.param);
+        gtint_t incx   = std::get<2>(str.param);
+        gtint_t incy   = std::get<3>(str.param);
+        gtint_t xi = std::get<4>(str.param);
+        T xexval = std::get<5>(str.param);
+        gtint_t yj = std::get<6>(str.param);
+        T yexval = std::get<7>(str.param);
+        
+        std::string str_name = API_PRINT;
+        str_name += "_n_" + std::to_string(n);
+        str_name += ( conjx == 'n' )? "_noconjx" : "_conjx";
+        str_name += "_incx_" + testinghelpers::get_value_string(incx);
+        str_name += "_incy_" + testinghelpers::get_value_string(incy);
+        std::string xexval_str = testinghelpers::get_value_string(xexval);
+        std::string yexval_str = testinghelpers::get_value_string(yexval);
+        str_name = str_name + "_X_" + std::to_string(xi);
+        str_name = str_name + "_" + xexval_str;
+        str_name = str_name + "_Y_" + std::to_string(yj);
+        str_name = str_name + "_" + yexval_str;
+        return str_name;
+    }
+};

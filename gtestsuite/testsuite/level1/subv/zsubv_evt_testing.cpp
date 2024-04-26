@@ -89,36 +89,6 @@ TEST_P( zsubvEVT, NaNInfCheck )
                    yj, yexval, thresh );
 }
 
-// Test-case logger : Used to print the test-case details when vectors have exception value.
-// The string format is as follows :
-// n(vec_size)_(conjx/noconjx)_incx(m)(abs_incx)_incy(m)(abs_incy)_X_(xi)_(xexval)_(yi)_(yexval)
-class zsubvEVTPrint {
-public:
-    std::string operator()(
-        testing::TestParamInfo<std::tuple<char, gtint_t, gtint_t, gtint_t, gtint_t, dcomplex, gtint_t, dcomplex>> str) const {
-        char conjx      = std::get<0>(str.param);
-        gtint_t n      = std::get<1>(str.param);
-        gtint_t incx   = std::get<2>(str.param);
-        gtint_t incy   = std::get<3>(str.param);
-        gtint_t xi = std::get<4>(str.param);
-        dcomplex xexval = std::get<5>(str.param);
-        gtint_t yj = std::get<6>(str.param);
-        dcomplex yexval = std::get<7>(str.param);
-        std::string str_name = "bli_";
-        str_name += "_n_" + std::to_string(n);
-        str_name += ( conjx == 'n' )? "_noconjx" : "_conjx";
-        str_name += "_incx_" + testinghelpers::get_value_string(incx);
-        str_name += "_incy_" + testinghelpers::get_value_string(incy);
-        std::string xexval_str = testinghelpers::get_value_string(xexval);
-        std::string yexval_str = testinghelpers::get_value_string(yexval);
-        str_name = str_name + "_X_" + std::to_string(xi);
-        str_name = str_name + "_" + xexval_str;
-        str_name = str_name + "_Y_" + std::to_string(yj);
-        str_name = str_name + "_" + yexval_str;
-        return str_name;
-    }
-};
-
 #ifdef TEST_BLIS_TYPED
 
 static double NaN = std::numeric_limits<double>::quiet_NaN();
@@ -157,7 +127,7 @@ INSTANTIATE_TEST_SUITE_P(
             // value on y
             ::testing::Values(dcomplex{0.0, 0.0})
         ),
-        ::zsubvEVTPrint()
+        ::subvEVTPrint<dcomplex>()
     );
 
 // Exception value testing(on Y vector alone) with unit strides on zen3
@@ -193,7 +163,7 @@ INSTANTIATE_TEST_SUITE_P(
                           dcomplex{4.5, -Inf}, dcomplex{NaN, Inf},
                           dcomplex{NaN, -Inf})
         ),
-        ::zsubvEVTPrint()
+        ::subvEVTPrint<dcomplex>()
     );
 
 // Exception value testing(on X and Y vectors) with unit strides on zen3
@@ -234,7 +204,7 @@ INSTANTIATE_TEST_SUITE_P(
                           dcomplex{4.5, -Inf}, dcomplex{NaN, Inf},
                           dcomplex{NaN, -Inf})
         ),
-        ::zsubvEVTPrint()
+        ::subvEVTPrint<dcomplex>()
     );
 
 // Exception value testing(on X & Y vectors) with non-unit strides.
@@ -272,6 +242,6 @@ INSTANTIATE_TEST_SUITE_P(
                           dcomplex{4.5, -Inf}, dcomplex{NaN, Inf},
                           dcomplex{0.0, 0.0}, dcomplex{NaN, -Inf})
         ),
-        ::zsubvEVTPrint()
+        ::subvEVTPrint<dcomplex>()
     );
 #endif

@@ -71,24 +71,6 @@ TEST_P( damaxvUkr, AccuracyCheck )
     test_amaxv_ukr<T, damaxv_ker_ft>( ukr_fp, n, incx, thresh, is_memory_test );
 }
 
-// Test-case logger : Used to print the test-case details for unit testing the kernels.
-// NOTE : The kernel name is the prefix in instantiator name, and thus is not printed
-// with this logger.
-class damaxvUkrPrint {
-public:
-    std::string operator()(
-        testing::TestParamInfo<std::tuple<damaxv_ker_ft,gtint_t,gtint_t,bool>> str) const {
-        gtint_t n     = std::get<1>(str.param);
-        gtint_t incx  = std::get<2>(str.param);
-        bool is_memory_test = std::get<3>(str.param);
-
-        std::string str_name = "_n_" + std::to_string(n);
-        str_name += "_incx_" + testinghelpers::get_value_string(incx);
-        str_name += ( is_memory_test ) ? "_mem_test_enabled" : "_mem_test_disabled";
-        return str_name;
-    }
-};
-
 #if defined(BLIS_KERNELS_ZEN) && defined(GTEST_AVX2FMA3)
 /*
     Unit testing for functionality of bli_damaxv_zen_int kernel.
@@ -134,7 +116,7 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(gtint_t(1)),           // incx
             ::testing::Values(false, true)           // is_memory_test
         ),
-        ::damaxvUkrPrint()
+        ::amaxvUKRPrint<damaxv_ker_ft>()
     );
 
 // Unit testing with non-unit strides.
@@ -148,7 +130,7 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(gtint_t(5)),           // incx
             ::testing::Values(false, true)           // is_memory_test
         ),
-        ::damaxvUkrPrint()
+        ::amaxvUKRPrint<damaxv_ker_ft>()
     );
 #endif
 
@@ -181,7 +163,7 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(gtint_t(1)),                  // incx
             ::testing::Values(false, true)                  // is_memory_test
         ),
-        ::damaxvUkrPrint()
+        ::amaxvUKRPrint<damaxv_ker_ft>()
     );
 
 // Unit testing with non-unit strides.
@@ -195,6 +177,6 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(gtint_t(5)),                  // incx
             ::testing::Values(false, true)                  // is_memory_test
         ),
-        ::damaxvUkrPrint()
+        ::amaxvUKRPrint<damaxv_ker_ft>()
     );
 #endif

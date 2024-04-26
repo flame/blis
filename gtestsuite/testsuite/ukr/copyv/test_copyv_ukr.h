@@ -123,3 +123,24 @@ static void test_copyv_ukr( FT ukr_fp, char conjx, gtint_t n, gtint_t incx, gtin
     //----------------------------------------------------------
     computediff<T>( "y", n, y, y_ref, incy );
 }
+
+// Test-case logger : Used to print the test-case details based on parameters
+template <typename T>
+class copyvUKRPrint {
+public:
+    std::string operator()(
+        testing::TestParamInfo<std::tuple<T,char,gtint_t,gtint_t,gtint_t,bool>> str) const {
+        char conjx    = std::get<1>(str.param);
+        gtint_t n     = std::get<2>(str.param);
+        gtint_t incx  = std::get<3>(str.param);
+        gtint_t incy  = std::get<4>(str.param);
+        bool is_memory_test = std::get<5>(str.param);
+
+        std::string str_name = "_n_" + std::to_string(n);
+        str_name += "_conjx" + std::string(&conjx, 1);
+        str_name += "_incx_" + testinghelpers::get_value_string(incx);
+        str_name += "_incy_" + testinghelpers::get_value_string(incy);
+        str_name += ( is_memory_test ) ? "_mem_test_enabled" : "_mem_test_disabled";
+        return str_name;
+    }
+};

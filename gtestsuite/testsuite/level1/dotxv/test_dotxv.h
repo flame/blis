@@ -73,3 +73,29 @@ static void test_dotxv( gtint_t n, char conjx, char conjy, T alpha,
     //----------------------------------------------------------
     computediff<T>( "rho", rho, rho_ref, thresh );
 }
+
+// Test-case logger : Used to print the test-case details based on parameters
+template <typename T>
+class dotxvGenericPrint {
+public:
+    std::string operator()(
+        testing::TestParamInfo<std::tuple<gtint_t,char,char,gtint_t,gtint_t,T,T>> str) const {
+        gtint_t n      = std::get<0>(str.param);
+        char conjx     = std::get<1>(str.param);
+        char conjy     = std::get<2>(str.param);
+        gtint_t incx   = std::get<3>(str.param);
+        gtint_t incy   = std::get<4>(str.param);
+        T alpha = std::get<5>(str.param);
+        T beta  = std::get<6>(str.param);
+
+        std::string str_name = API_PRINT;
+        str_name += "_n_" + std::to_string(n);
+        str_name += "_" + std::string(&conjx, 1);
+        str_name += "_" + std::string(&conjy, 1);
+        str_name += "_incx_" + testinghelpers::get_value_string(incx);
+        str_name += "_incy_" + testinghelpers::get_value_string(incy);
+        str_name += "_alpha_" + testinghelpers::get_value_string(alpha);
+        str_name += "_beta_" + testinghelpers::get_value_string(beta);
+        return str_name;
+    }
+};

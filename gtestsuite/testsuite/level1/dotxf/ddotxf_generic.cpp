@@ -106,43 +106,6 @@ TEST_P( ddotxffGenericTest, FunctionalTest )
     test_dotxf<T>( conjx, conja, m, b, &alpha, inca, lda, incx, &beta, incy, thresh );
 }
 
-// Test-case logger : Used to print the test-case details
-class ddotxfGenericTestPrint {
-public:
-    std::string operator()(
-        testing::TestParamInfo<std::tuple<char,
-                                                   char,
-                                                   gtint_t,
-                                                   gtint_t,
-                                                   double,
-                                                   gtint_t,
-                                                   gtint_t,
-                                                   gtint_t,
-                                                   double,
-                                                   gtint_t>> str) const {
-        char conja    = std::get<0>(str.param);
-        char conjx    = std::get<1>(str.param);
-        gtint_t m     = std::get<2>(str.param);
-        gtint_t b  = std::get<3>(str.param);
-        double alpha  = std::get<4>(str.param);
-        gtint_t incx     = std::get<7>(str.param);
-        double beta  = std::get<8>(str.param);
-        gtint_t incy  = std::get<9>(str.param);
-
-        std::string str_name = "bli_";
-
-        str_name += ( conja == 'n' )? "_conja_n" : "_conja_t";
-        str_name += ( conjx == 'n' )? "_conjx_n" : "_conjx_t";
-        str_name += "_m_" + std::to_string(m);
-        str_name += "_b_" + std::to_string(b);
-        str_name += "_alpha_" + testinghelpers::get_value_string(alpha);
-        str_name += "_beta_" + testinghelpers::get_value_string(beta);
-        str_name += "_incx_" + testinghelpers::get_value_string(incx);
-        str_name += "_incy_" + testinghelpers::get_value_string(incy);
-        return str_name;
-    }
-};
-
 // Black box testing for generic and main use of ddotxf.
 INSTANTIATE_TEST_SUITE_P(
         FunctionalTest,
@@ -159,6 +122,6 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(double(1.0)),                     // beta
             ::testing::Values(gtint_t(1))                                    // stride size for y
         ),
-        ::ddotxfGenericTestPrint()
+        ::dotxfGenericPrint<double>()
     );
 

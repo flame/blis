@@ -100,45 +100,6 @@ TEST_P(SGemm, FunctionalTest)
     test_gemm<T>( storage, transa, transb, m, n, k, lda_inc, ldb_inc, ldc_inc, alpha, beta, thresh );
 }
 
-class SGemmPrint {
-public:
-    std::string operator()(
-        testing::TestParamInfo<std::tuple<char, char, char, gtint_t, gtint_t, gtint_t, float, float, gtint_t, gtint_t, gtint_t>> str) const {
-        char sfm        = std::get<0>(str.param);
-        char tsa        = std::get<1>(str.param);
-        char tsb        = std::get<2>(str.param);
-        gtint_t m       = std::get<3>(str.param);
-        gtint_t n       = std::get<4>(str.param);
-        gtint_t k       = std::get<5>(str.param);
-        float alpha     = std::get<6>(str.param);
-        float beta      = std::get<7>(str.param);
-        gtint_t lda_inc = std::get<8>(str.param);
-        gtint_t ldb_inc = std::get<9>(str.param);
-        gtint_t ldc_inc = std::get<10>(str.param);
-#ifdef TEST_BLAS
-        std::string str_name = "sgemm_";
-#elif TEST_CBLAS
-        std::string str_name = "cblas_sgemm";
-#else  //#elif TEST_BLIS_TYPED
-        std::string str_name = "bli_sgemm";
-#endif
-        str_name = str_name + "storageC_" + sfm;
-        str_name = str_name + "_transA_" + tsa + tsb;
-        str_name += "_m_" + std::to_string(m);
-        str_name += "_n_" + std::to_string(n);
-        str_name += "_k_" + std::to_string(k);
-        str_name += "_alpha_" + testinghelpers::get_value_string(alpha);
-        str_name += "_beta_" + testinghelpers::get_value_string(beta);
-        gtint_t lda = testinghelpers::get_leading_dimension( sfm, tsa, m, k, lda_inc );
-        gtint_t ldb = testinghelpers::get_leading_dimension( sfm, tsb, k, n, ldb_inc );
-        gtint_t ldc = testinghelpers::get_leading_dimension( sfm, 'n', m, n, ldc_inc );
-        str_name = str_name + "_lda_" + std::to_string(lda);
-        str_name = str_name + "_ldb_" + std::to_string(ldb);
-        str_name = str_name + "_ldc_" + std::to_string(ldc);
-        return str_name;
-    }
-};
-
 INSTANTIATE_TEST_SUITE_P(
         expect_sgemv_path,
         SGemm,
@@ -159,7 +120,7 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(0, 15),                           // increment to the leading dim of b
             ::testing::Values(0, 17)                            // increment to the leading dim of c
         ),
-        ::SGemmPrint()
+        ::gemmGenericPrint<float>()
     );
 
 //----------------------------- sgemm_small kernel ------------------------------------
@@ -184,7 +145,7 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(0, 15),                                      // increment to the leading dim of b
             ::testing::Values(0, 17)                                       // increment to the leading dim of c
         ),
-        ::SGemmPrint()
+        ::gemmGenericPrint<float>()
     );
 
 // ----------------------------- SUP implementation --------------------------------------
@@ -207,7 +168,7 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(0, 15),                                                       // increment to the leading dim of b
             ::testing::Values(0, 17)                                                        // increment to the leading dim of c
         ),
-        ::SGemmPrint()
+        ::gemmGenericPrint<float>()
     );
 
 // ----------------------------- Native implementation --------------------------------------
@@ -230,5 +191,5 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(0, 15),                          // increment to the leading dim of b
             ::testing::Values(0, 17)                           // increment to the leading dim of c
         ),
-        ::SGemmPrint()
+        ::gemmGenericPrint<float>()
     );

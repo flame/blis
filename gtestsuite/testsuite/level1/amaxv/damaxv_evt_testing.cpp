@@ -70,34 +70,6 @@ TEST_P( damaxvEVT, NaNInfCheck )
     test_amaxv<T>( n, incx, xi, xi_exval, xj, xj_exval );
 }
 
-// Test-case logger : Used to print the test-case details when vectors have exception value.
-// The string format is as follows :
-// {blas/cblas/blis}_n(vec_size)_incx(m)(abs_incx)_X_(xi)_(xexval)
-class damaxvEVTPrint {
-public:
-    std::string operator()(
-        testing::TestParamInfo<std::tuple<gtint_t,gtint_t,gtint_t,double,gtint_t,double>> str) const {
-        gtint_t n     = std::get<0>(str.param);
-        gtint_t incx  = std::get<1>(str.param);
-        gtint_t xi    = std::get<2>(str.param);
-        double xi_exval = std::get<3>(str.param);
-        gtint_t xj    = std::get<4>(str.param);
-        double xj_exval = std::get<5>(str.param);
-#ifdef TEST_BLAS
-        std::string str_name = "blas_";
-#elif TEST_CBLAS
-        std::string str_name = "cblas_";
-#else  //#elif TEST_BLIS_TYPED
-        std::string str_name = "bli_";
-#endif
-        str_name += "_n_" + std::to_string(n);
-        str_name += "_incx_" + testinghelpers::get_value_string(incx);
-        str_name = str_name + "_X_" + std::to_string(xi) + "_" + testinghelpers::get_value_string(xi_exval);
-        str_name = str_name + "_" + std::to_string(xj) + "_" + testinghelpers::get_value_string(xj_exval);
-        return str_name;
-    }
-};
-
 static double NaN = std::numeric_limits<double>::quiet_NaN();
 static double Inf = std::numeric_limits<double>::infinity();
 
@@ -161,7 +133,7 @@ INSTANTIATE_TEST_SUITE_P(
                           gtint_t(163), gtint_t(170), gtint_t(172)),            // xj, index for exval in xj_exval
         ::testing::Values(NaN, -Inf, Inf, double(2.3))                          // xj_exval
         ),
-        ::damaxvEVTPrint()
+        ::amaxvEVTPrint<double>()
     );
 
 /*
@@ -204,7 +176,7 @@ INSTANTIATE_TEST_SUITE_P(
                           gtint_t(327), gtint_t(366)),                          // xj, index for exval in xj_exval
         ::testing::Values(NaN, -Inf, Inf, double(2.3))                          // xj_exval
         ),
-        ::damaxvEVTPrint()
+        ::amaxvEVTPrint<double>()
     );
 
 
@@ -220,5 +192,5 @@ INSTANTIATE_TEST_SUITE_P(
         ::testing::Values(gtint_t(5), gtint_t(9)),                              // xj, index for exval in xj_exval
         ::testing::Values(NaN, -Inf, Inf, double(2.3))                          // xj_exval
         ),
-        ::damaxvEVTPrint()
+        ::amaxvEVTPrint<double>()
     );

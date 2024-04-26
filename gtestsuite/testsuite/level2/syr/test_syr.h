@@ -73,3 +73,28 @@ void test_syr( char storage, char uploa, char conjx, gtint_t n, T alpha,
     //----------------------------------------------------------
     computediff<T>( "A", storage, n, n, a.data(), a_ref.data(), lda, thresh );
 }
+
+// Test-case logger : Used to print the test-case details based on parameters
+template <typename T>
+class syrGenericPrint {
+public:
+    std::string operator()(
+        testing::TestParamInfo<std::tuple<char,char,char,gtint_t,T,gtint_t,gtint_t>> str) const {
+        char sfm       = std::get<0>(str.param);
+        char uploa     = std::get<1>(str.param);
+        char conjx     = std::get<2>(str.param);
+        gtint_t n      = std::get<3>(str.param);
+        T alpha   = std::get<4>(str.param);
+        gtint_t incx   = std::get<5>(str.param);
+        gtint_t ld_inc = std::get<6>(str.param);
+
+        std::string str_name = API_PRINT;
+        str_name    = str_name + "_" + sfm;
+        str_name    = str_name + "_" + uploa+conjx;
+        str_name += "_n_" + std::to_string(n);
+        str_name += "_incx_" + testinghelpers::get_value_string(incx);
+        str_name += "_alpha_" + testinghelpers::get_value_string(alpha);
+        str_name    = str_name + "_" + std::to_string(ld_inc);
+        return str_name;
+    }
+};

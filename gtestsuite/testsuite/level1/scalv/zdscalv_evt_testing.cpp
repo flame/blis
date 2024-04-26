@@ -85,38 +85,6 @@ TEST_P( zdscalvEVT, NaNInfCheck )
     test_scalv<T, RT>( conj_alpha, n, incx, xi, x_exval, alpha, thresh );
 }
 
-// Used to generate a test case with a sensible name.
-// Beware that we cannot use fp numbers (e.g., 2.3) in the names,
-// so we are only printing int(2.3). This should be enough for debugging purposes.
-// If this poses an issue, please reach out.
-class zdscalvEVTPrint {
-public:
-    std::string operator()(
-        testing::TestParamInfo<std::tuple<char, gtint_t, gtint_t, gtint_t, dcomplex, double  >> str) const {
-        char     conj    = std::get<0>(str.param);
-        gtint_t  n       = std::get<1>(str.param);
-        gtint_t  incx    = std::get<2>(str.param);
-        gtint_t  xi      = std::get<3>(str.param);
-        dcomplex x_exval = std::get<4>(str.param);
-        double   alpha   = std::get<5>(str.param);
-#ifdef TEST_BLAS
-        std::string str_name = "blas_";
-#elif TEST_CBLAS
-        std::string str_name = "cblas_";
-#else  //#elif TEST_BLIS_TYPED
-        std::string str_name = "blis_";
-#endif
-        str_name += "_n_" + std::to_string(n);
-        str_name += (conj  == 'n') ? "_noconj" : "_conj";
-        str_name += "_incx_" + testinghelpers::get_value_string(incx);
-        str_name = str_name + "_X_" + std::to_string(xi);
-        str_name = str_name + "_" + testinghelpers::get_value_string(x_exval);
-        str_name += "_alpha_" + testinghelpers::get_value_string(alpha);
-
-        return str_name;
-    }
-};
-
 static double NaN = std::numeric_limits<double>::quiet_NaN();
 static double Inf = std::numeric_limits<double>::infinity();
 
@@ -210,7 +178,7 @@ INSTANTIATE_TEST_SUITE_P(
                            double( 7.3)
         )
     ),
-    ::zdscalvEVTPrint()
+    (::scalvEVTPrint<dcomplex, double>())
 );
 
 // Tests for Zen4 Architecture.
@@ -275,7 +243,7 @@ INSTANTIATE_TEST_SUITE_P(
                            double( 7.3)
         )
     ),
-    ::zdscalvEVTPrint()
+    (::scalvEVTPrint<dcomplex, double>())
 );
 
 // EVT with non-unit stride vector containing Infs/NaNs.
@@ -315,7 +283,7 @@ INSTANTIATE_TEST_SUITE_P(
                            double( 7.3)
         )
     ),
-    ::zdscalvEVTPrint()
+    (::scalvEVTPrint<dcomplex, double>())
 );
 
 // EVT with alpha containing Infs/NaNs on a unit stride vector.
@@ -342,7 +310,7 @@ INSTANTIATE_TEST_SUITE_P(
         // alpha: value of scalar.
         ::testing::Values( NaN, Inf, -Inf )
     ),
-    ::zdscalvEVTPrint()
+    (::scalvEVTPrint<dcomplex, double>())
 );
 
 // EVT with alpha containing Infs/NaNs on a unit stride vector.
@@ -367,7 +335,7 @@ INSTANTIATE_TEST_SUITE_P(
         // alpha: value of scalar.
         ::testing::Values( NaN, Inf, -Inf )
     ),
-    ::zdscalvEVTPrint()
+    (::scalvEVTPrint<dcomplex, double>())
 );
 
 // EVT with alpha containing Infs/NaNs on a unit stride vector.
@@ -392,5 +360,5 @@ INSTANTIATE_TEST_SUITE_P(
         // alpha: value of scalar.
         ::testing::Values( NaN, Inf, -Inf )
     ),
-    ::zdscalvEVTPrint()
+    (::scalvEVTPrint<dcomplex, double>())
 );

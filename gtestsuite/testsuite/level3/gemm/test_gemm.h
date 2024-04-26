@@ -244,3 +244,144 @@ void test_gemm( char storage, char trnsa, char trnsb, gtint_t over_under, gtint_
     //----------------------------------------------------------
     computediff<T>( "C", storage, m, n, c.data(), c_ref.data(), ldc, thresh, true );
 }
+
+// Test-case logger : Used to print the test-case details based on parameters
+template <typename T>
+class gemmGenericPrint {
+public:
+    std::string operator()(
+        testing::TestParamInfo<std::tuple<char, char, char, gtint_t, gtint_t, gtint_t, T, T, gtint_t, gtint_t, gtint_t>> str) const {
+        char sfm        = std::get<0>(str.param);
+        char tsa        = std::get<1>(str.param);
+        char tsb        = std::get<2>(str.param);
+        gtint_t m       = std::get<3>(str.param);
+        gtint_t n       = std::get<4>(str.param);
+        gtint_t k       = std::get<5>(str.param);
+        T alpha  = std::get<6>(str.param);
+        T beta   = std::get<7>(str.param);
+        gtint_t lda_inc = std::get<8>(str.param);
+        gtint_t ldb_inc = std::get<9>(str.param);
+        gtint_t ldc_inc = std::get<10>(str.param);
+
+        std::string str_name = API_PRINT;
+        str_name = str_name + "storageOfMatrix_" + sfm;
+        str_name = str_name + "_transA_" + tsa + "_transB_" + tsb;
+        str_name += "_m_" + std::to_string(m);
+        str_name += "_n_" + std::to_string(n);
+        str_name += "_k_" + std::to_string(k);
+        str_name += "_alpha_" + testinghelpers::get_value_string(alpha);
+        str_name += "_beta_" + testinghelpers::get_value_string(beta);
+        gtint_t lda = testinghelpers::get_leading_dimension( sfm, tsa, m, k, lda_inc );
+        gtint_t ldb = testinghelpers::get_leading_dimension( sfm, tsb, k, n, ldb_inc );
+        gtint_t ldc = testinghelpers::get_leading_dimension( sfm, 'n', m, n, ldc_inc );
+        str_name = str_name + "_lda_" + std::to_string(lda);
+        str_name = str_name + "_ldb_" + std::to_string(ldb);
+        str_name = str_name + "_ldc_" + std::to_string(ldc);
+        return str_name;
+    }
+};
+
+template <typename T>
+class gemmEVTPrint {
+public:
+    std::string operator()(
+        testing::TestParamInfo<std::tuple<char, char, char, gtint_t, gtint_t, gtint_t, gtint_t,
+                                          gtint_t, T, gtint_t, gtint_t, T, gtint_t, gtint_t, T,
+                                          T, T, gtint_t, gtint_t, gtint_t>> str) const {
+        char sfm        = std::get<0>(str.param);
+        char tsa        = std::get<1>(str.param);
+        char tsb        = std::get<2>(str.param);
+        gtint_t m       = std::get<3>(str.param);
+        gtint_t n       = std::get<4>(str.param);
+        gtint_t k       = std::get<5>(str.param);
+        gtint_t ai, aj, bi, bj, ci, cj;
+        T aex, bex, cex;
+        ai  = std::get<6>(str.param);
+        aj  = std::get<7>(str.param);
+        aex = std::get<8>(str.param);
+
+        bi  = std::get<9>(str.param);
+        bj  = std::get<10>(str.param);
+        bex = std::get<11>(str.param);
+
+        ci  = std::get<12>(str.param);
+        cj  = std::get<13>(str.param);
+        cex = std::get<14>(str.param);
+
+        T alpha  = std::get<15>(str.param);
+        T beta   = std::get<16>(str.param);
+        gtint_t lda_inc = std::get<17>(str.param);
+        gtint_t ldb_inc = std::get<18>(str.param);
+        gtint_t ldc_inc = std::get<19>(str.param);
+
+        std::string str_name = API_PRINT;
+        str_name = str_name + "storageOfMatrix_" + sfm;
+        str_name = str_name + "_transA_" + tsa + "_transB_" + tsb;
+        str_name += "_m_" + std::to_string(m);
+        str_name += "_n_" + std::to_string(n);
+        str_name += "_k_" + std::to_string(k);
+        str_name = str_name + "_A" + std::to_string(ai) + std::to_string(aj);
+        str_name = str_name + "_" + testinghelpers::get_value_string(aex);
+        str_name = str_name + "_B" + std::to_string(bi) + std::to_string(bj);
+        str_name = str_name + "_" + testinghelpers::get_value_string(bex);
+        str_name = str_name + "_C" + std::to_string(ci) + std::to_string(cj);
+        str_name = str_name + "_" + testinghelpers::get_value_string(cex);
+        str_name += "_alpha_" + testinghelpers::get_value_string(alpha);
+        str_name += "_beta_" + testinghelpers::get_value_string(beta);
+        gtint_t lda = testinghelpers::get_leading_dimension( sfm, tsa, m, k, lda_inc );
+        gtint_t ldb = testinghelpers::get_leading_dimension( sfm, tsb, k, n, ldb_inc );
+        gtint_t ldc = testinghelpers::get_leading_dimension( sfm, 'n', m, n, ldc_inc );
+        str_name = str_name + "_lda_" + std::to_string(lda);
+        str_name = str_name + "_ldb_" + std::to_string(ldb);
+        str_name = str_name + "_ldc_" + std::to_string(ldc);
+        return str_name;
+    }
+};
+
+template <typename T>
+class gemmOUTPrint {
+    public:
+    std::string operator()(
+        testing::TestParamInfo<std::tuple<char, char, char, gtint_t, gtint_t, gtint_t, gtint_t, gtint_t, T, T, gtint_t, gtint_t, gtint_t, gtint_t, gtint_t, gtint_t, gtint_t>> str) const {
+        char sfm              = std::get<0>(str.param);
+        char tsa              = std::get<1>(str.param);
+        char tsb              = std::get<2>(str.param);
+        gtint_t over_under    = std::get<3>(str.param);
+        gtint_t input_range   = std::get<4>(str.param);
+        gtint_t m             = std::get<5>(str.param);
+        gtint_t n             = std::get<6>(str.param);
+        gtint_t k             = std::get<7>(str.param);
+        T alpha          = std::get<8>(str.param);
+        T beta           = std::get<9>(str.param);
+        gtint_t lda_inc       = std::get<10>(str.param);
+        gtint_t ldb_inc       = std::get<11>(str.param);
+        gtint_t ldc_inc       = std::get<12>(str.param);
+        gtint_t ai            = std::get<13>(str.param);
+        gtint_t aj            = std::get<14>(str.param);
+        gtint_t bi            = std::get<15>(str.param);
+        gtint_t bj            = std::get<16>(str.param);
+
+        gtint_t lda = testinghelpers::get_leading_dimension( sfm, tsa, m, k, lda_inc );
+        gtint_t ldb = testinghelpers::get_leading_dimension( sfm, tsb, k, n, ldb_inc );
+        gtint_t ldc = testinghelpers::get_leading_dimension( sfm, 'n', m, n, ldc_inc );
+
+        std::string str_name = API_PRINT;
+        str_name = str_name + "StorageOfCMatrix_" + sfm;
+        str_name = str_name + "_transa_" + tsa + "_transb_"+ tsb;
+        std::string over_under_str = ( over_under > 0) ? "underflow": "overflow";
+        str_name = str_name + "_" + over_under_str;
+        std::string input_range_str = (input_range < 0) ? "within_limit": (input_range > 0) ? "beyond_limit" : "close_to_limit";
+        str_name = str_name + "_" + input_range_str;
+        str_name += "_m_" + std::to_string(m);
+        str_name += "_n_" + std::to_string(n);
+        str_name += "_k_" + std::to_string(k);
+        str_name = str_name + "_A_" + std::to_string(ai) + "_" + std::to_string(aj);
+        str_name = str_name + "_B_" + std::to_string(bi) + "_" + std::to_string(bj);
+        str_name += "_alpha_" + testinghelpers::get_value_string(alpha);
+        str_name += "_beta_" + testinghelpers::get_value_string(beta);
+        str_name = str_name + "_lda_" + std::to_string(lda);
+        str_name = str_name + "_ldb_" + std::to_string(ldb);
+        str_name = str_name + "_ldc_" + std::to_string(ldc);
+        return str_name;
+    }
+};

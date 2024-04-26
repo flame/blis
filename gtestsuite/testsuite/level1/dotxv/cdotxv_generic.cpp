@@ -105,33 +105,6 @@ TEST_P( cdotxvGenericTest, RandomData )
     test_dotxv<T>( n, conj_x, conj_y, alpha, incx, incy, beta, thresh );
 }
 
-// Used to generate a test case with a sensible name.
-// Beware that we cannot use fp numbers (e.g., 2.3) in the names,
-// so we are only printing int(2.3). This should be enough for debugging purposes.
-// If this poses an issue, please reach out.
-class cdotxvGenericTestPrint {
-public:
-    std::string operator()(
-        testing::TestParamInfo<std::tuple<gtint_t,char,char,gtint_t,gtint_t,scomplex,scomplex>> str) const {
-        gtint_t n      = std::get<0>(str.param);
-        char conjx     = std::get<1>(str.param);
-        char conjy     = std::get<2>(str.param);
-        gtint_t incx   = std::get<3>(str.param);
-        gtint_t incy   = std::get<4>(str.param);
-        scomplex alpha = std::get<5>(str.param);
-        scomplex beta  = std::get<6>(str.param);
-        std::string str_name = "bli_cdotxv";
-        str_name += "_n_" + std::to_string(n);
-        str_name += "_" + std::string(&conjx, 1);
-        str_name += "_" + std::string(&conjy, 1);
-        str_name += "_incx_" + testinghelpers::get_value_string(incx);
-        str_name += "_incy_" + testinghelpers::get_value_string(incy);
-        str_name += "_alpha_" + testinghelpers::get_value_string(alpha);
-        str_name += "_beta_" + testinghelpers::get_value_string(beta);
-        return str_name;
-    }
-};
-
 #ifdef TEST_BLIS_TYPED
 // Black box testing for generic and main use of cdotxv.
 INSTANTIATE_TEST_SUITE_P(
@@ -146,7 +119,7 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(scomplex{1.0, -1.0}),                          // alpha
             ::testing::Values(scomplex{-1.0, 1.0})                           // beta
         ),
-        ::cdotxvGenericTestPrint()
+        ::dotxvGenericPrint<scomplex>()
     );
 
 // Black box testing for generic and main use of cdotxv.
@@ -162,7 +135,7 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(scomplex{1.0, -1.0}),                          // alpha
             ::testing::Values(scomplex{-1.0, 1.0})                           // beta
         ),
-        ::cdotxvGenericTestPrint()
+        ::dotxvGenericPrint<scomplex>()
     );
 
 // Test for non-unit increments.
@@ -180,6 +153,6 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(scomplex{1.0, -1.0}),                          // alpha
             ::testing::Values(scomplex{-1.0, 1.0})                           // beta
         ),
-        ::cdotxvGenericTestPrint()
+        ::dotxvGenericPrint<scomplex>()
     );
 #endif

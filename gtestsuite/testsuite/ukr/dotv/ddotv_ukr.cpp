@@ -85,34 +85,6 @@ TEST_P( ddotvUkrTest, FunctionalTest )
     test_dotv_ukr<T>( ukr, conjx, conjy, n, incx, incy, thresh, is_memory_test );
 }
 
-// Used to generate a test case with a sensible name.
-// Beware that we cannot use fp numbers (e.g., 2.3) in the names,
-// so we are only printing int(2.3). This should be enough for debugging purposes.
-// If this poses an issue, please reach out.
-class ddotvUkrTestPrint {
-public:
-    std::string operator()(
-        testing::TestParamInfo<std::tuple<ddotv_ker_ft,char,char,gtint_t,gtint_t,gtint_t, bool>> str) const {
-        char conjx    = std::get<1>(str.param);
-        char conjy    = std::get<2>(str.param);
-        gtint_t n     = std::get<3>(str.param);
-        gtint_t incx  = std::get<4>(str.param);
-        gtint_t incy  = std::get<5>(str.param);
-        bool is_memory_test = std::get<6>(str.param);
-
-        std::string str_name = "ddotvUkr_";
-        str_name += "_n_" + std::to_string(n);
-        str_name += "conjx_" + std::string(&conjx, 1);
-        str_name += "conjy_" + std::string(&conjy, 1);
-        str_name += "_incx_" + testinghelpers::get_value_string(incx);
-        str_name += "_incy_" + testinghelpers::get_value_string(incy);
-        str_name += ( is_memory_test ) ? "_mem_test_enabled" : "_mem_test_disabled";
-
-        return str_name;
-    }
-};
-
-
 // ----------------------------------------------
 // ----- Begin ZEN1/2/3 (AVX2) Kernel Tests -----
 // ----------------------------------------------
@@ -156,7 +128,7 @@ INSTANTIATE_TEST_SUITE_P(
             // is_memory_test: enable/disable memory tests
             ::testing::Values( false, true )
         ),
-        ::ddotvUkrTestPrint()
+        ::dotvUKRPrint<ddotv_ker_ft>()
     );
 
 INSTANTIATE_TEST_SUITE_P(
@@ -183,7 +155,7 @@ INSTANTIATE_TEST_SUITE_P(
             // is_memory_test: enable/disable memory tests
             ::testing::Values( false, true )
         ),
-        ::ddotvUkrTestPrint()
+        ::dotvUKRPrint<ddotv_ker_ft>()
     );
 
 // Tests for bli_ddotv_zen_int10 (AVX2) kernel.
@@ -242,7 +214,7 @@ INSTANTIATE_TEST_SUITE_P(
             // is_memory_test: enable/disable memory tests
             ::testing::Values( false, true )
         ),
-        ::ddotvUkrTestPrint()
+        ::dotvUKRPrint<ddotv_ker_ft>()
     );
 
 INSTANTIATE_TEST_SUITE_P(
@@ -269,7 +241,7 @@ INSTANTIATE_TEST_SUITE_P(
             // is_memory_test: enable/disable memory tests
             ::testing::Values( false, true )
         ),
-        ::ddotvUkrTestPrint()
+        ::dotvUKRPrint<ddotv_ker_ft>()
     );
 #endif
 // ----------------------------------------------
@@ -331,7 +303,7 @@ INSTANTIATE_TEST_SUITE_P(
             // is_memory_test: enable/disable memory tests
             ::testing::Values( false, true )
         ),
-        ::ddotvUkrTestPrint()
+        ::dotvUKRPrint<ddotv_ker_ft>()
     );
 
 INSTANTIATE_TEST_SUITE_P(
@@ -358,7 +330,7 @@ INSTANTIATE_TEST_SUITE_P(
             // is_memory_test: enable/disable memory tests
             ::testing::Values( false, true )
         ),
-        ::ddotvUkrTestPrint()
+        ::dotvUKRPrint<ddotv_ker_ft>()
     );
 #endif
 // ----------------------------------------------

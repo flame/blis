@@ -116,57 +116,6 @@ TEST_P(dger_EVT, ExceptionValues)
                  ai, aj, a_exval, xi, x_exval, yi, y_exval, thresh );
 }
 
-class dger_EVTPrint {
-public:
-    std::string operator()(
-        testing::TestParamInfo<std::tuple<char,char,char,gtint_t,gtint_t,T,gtint_t,gtint_t,gtint_t,gtint_t,gtint_t,T,gtint_t,T,gtint_t,T>> str) const {
-        char sfm       = std::get<0>(str.param);
-        char conjx     = std::get<1>(str.param);
-        char conjy     = std::get<2>(str.param);
-        gtint_t m      = std::get<3>(str.param);
-        gtint_t n      = std::get<4>(str.param);
-        T alpha        = std::get<5>(str.param);
-        gtint_t incx   = std::get<6>(str.param);
-        gtint_t incy   = std::get<7>(str.param);
-        gtint_t ld_inc = std::get<8>(str.param);
-        gtint_t ai     = std::get<9>(str.param);
-        gtint_t aj     = std::get<10>(str.param);
-        T a_exval      = std::get<11>(str.param);
-        gtint_t xi     = std::get<12>(str.param);
-        T x_exval      = std::get<13>(str.param);
-        gtint_t yi     = std::get<14>(str.param);
-        T y_exval      = std::get<15>(str.param);
-
-        gtint_t lda = testinghelpers::get_leading_dimension( sfm, 'n', m, n, ld_inc );
-
-#ifdef TEST_BLAS
-        std::string str_name = "blas_";
-#elif TEST_CBLAS
-        std::string str_name = "cblas_";
-#else  //#elif TEST_BLIS_TYPED
-        std::string str_name = "blis_";
-#endif
-
-        str_name    = str_name + "_" + sfm;
-        str_name    = str_name + "_" + conjx+conjy;
-        str_name += "_m_" + std::to_string(m);
-        str_name += "_n_" + std::to_string(n);
-        str_name += "_incx_" + testinghelpers::get_value_string(incx);
-        str_name += "_incy_" + testinghelpers::get_value_string(incy);
-        str_name    = str_name + "_alpha_" + testinghelpers::get_value_string(alpha);
-        str_name    = str_name + "_lda" + std::to_string(lda);
-        str_name    = str_name + "_ai" + std::to_string(ai);
-        str_name    = str_name + "_aj" + std::to_string(aj);
-        str_name    = str_name + "_a_exval_" + testinghelpers::get_value_string(a_exval);
-        str_name    = str_name + "_xi" + std::to_string(xi);
-        str_name    = str_name + "_x_exval_" + testinghelpers::get_value_string(x_exval);
-        str_name    = str_name + "_yi" + std::to_string(yi);
-        str_name    = str_name + "_y_exval_" + testinghelpers::get_value_string(y_exval);
-
-        return str_name;
-    }
-};
-
 INSTANTIATE_TEST_SUITE_P(
         unitStride,
         dger_EVT,
@@ -209,7 +158,7 @@ INSTANTIATE_TEST_SUITE_P(
             // y_exval: extreme value for y.
             ::testing::Values( T{0.0}, NaN, Inf, -Inf )
         ),
-        ::dger_EVTPrint()
+        ::gerEVTPrint<double>()
     );
 
 INSTANTIATE_TEST_SUITE_P(
@@ -254,5 +203,5 @@ INSTANTIATE_TEST_SUITE_P(
             // y_exval: extreme value for y.
             ::testing::Values( T{0.0}, NaN, Inf, -Inf )
         ),
-        ::dger_EVTPrint()
+        ::gerEVTPrint<double>()
     );

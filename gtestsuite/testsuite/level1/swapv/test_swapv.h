@@ -67,3 +67,20 @@ static void test_swapv( gtint_t n, gtint_t incx, gtint_t incy )
     computediff<T>( n, x.data(), x_ref.data(), y.data(), y_ref.data(), incx, incy, false );
 
 }
+
+// Test-case logger : Used to print the test-case details based on parameters
+class swapvGenericPrint {
+public:
+    std::string operator()(
+        testing::TestParamInfo<std::tuple<gtint_t,gtint_t,gtint_t>> str) const {
+        gtint_t n      = std::get<0>(str.param);
+        gtint_t incx   = std::get<1>(str.param);
+        gtint_t incy   = std::get<2>(str.param);
+
+        std::string str_name = API_PRINT;
+        str_name += "_n_" + std::to_string(n);
+        str_name += "_incx_" + testinghelpers::get_value_string(incx);
+        str_name += "_incy_" + testinghelpers::get_value_string(incy);
+        return str_name;
+    }
+};

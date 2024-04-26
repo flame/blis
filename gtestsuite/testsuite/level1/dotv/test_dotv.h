@@ -121,3 +121,55 @@ static void test_dotv( char conjx, char conjy, gtint_t n,
     //----------------------------------------------------------
     computediff<T>( "rho", rho, rho_ref, thresh, true);
 }
+
+
+// Test-case logger : Used to print the test-case details based on parameters
+class dotvGenericPrint {
+public:
+    std::string operator()(
+        testing::TestParamInfo<std::tuple<char,char,gtint_t,gtint_t,gtint_t>> str) const {
+        char conjx    = std::get<0>(str.param);
+        char conjy    = std::get<1>(str.param);
+        gtint_t n     = std::get<2>(str.param);
+        gtint_t incx  = std::get<3>(str.param);
+        gtint_t incy  = std::get<4>(str.param);
+        
+        std::string str_name = API_PRINT;
+        str_name += "_n_" + std::to_string(n);
+        str_name += "_" + std::string(&conjx, 1);
+        str_name += "_" + std::string(&conjy, 1);
+        str_name += "_incx_" + testinghelpers::get_value_string(incx);
+        str_name += "_incy_" + testinghelpers::get_value_string(incy);
+        return str_name;
+    }
+};
+
+template <typename T>
+class dotvEVTPrint {
+public:
+    std::string operator()(
+        testing::TestParamInfo<std::tuple<char,char,gtint_t,gtint_t,gtint_t, T, gtint_t, gtint_t, T>> str) const {
+        char    conjx   = std::get<0>(str.param);
+        char    conjy   = std::get<1>(str.param);
+        gtint_t n       = std::get<2>(str.param);
+        gtint_t incx    = std::get<3>(str.param);
+        gtint_t xi      = std::get<4>(str.param);
+        T  x_exval = std::get<5>(str.param);
+        gtint_t incy    = std::get<6>(str.param);
+        gtint_t yi      = std::get<7>(str.param);
+        T  y_exval = std::get<8>(str.param);
+
+        std::string str_name = API_PRINT;
+        str_name += "_n_" + std::to_string(n);
+        str_name += (conjx == 'n') ? "_noconjx" : "_conjx";
+        str_name += (conjy == 'n') ? "_noconjy" : "_conjy";
+        str_name += "_incx_" + testinghelpers::get_value_string(incx);
+        str_name = str_name + "_X_" + std::to_string(xi);
+        str_name = str_name + "_" + testinghelpers::get_value_string(x_exval);
+        str_name += "_incy_" + testinghelpers::get_value_string(incy);
+        str_name = str_name + "_Y_" + std::to_string(yi);
+        str_name = str_name + "_" + testinghelpers::get_value_string(y_exval);
+
+        return str_name;
+    }
+};

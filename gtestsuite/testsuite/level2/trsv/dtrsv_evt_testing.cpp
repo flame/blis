@@ -93,44 +93,6 @@ TEST_P( dtrsvEVT, NaNInfCheck )
     test_trsv<T>( storage, uploa, transa, diaga, n, alpha, lda_inc, incx, thresh, false, true, xexval, aexval);
 }
 
-class dtrsvEVTPrint
-{
-public:
-    std::string operator()(
-        testing::TestParamInfo<std::tuple<char,char,char,char,gtint_t,double,gtint_t,double,double,gtint_t>> str) const {
-        char sfm       = std::get<0>(str.param);
-        char uploa     = std::get<1>(str.param);
-        char transa    = std::get<2>(str.param);
-        char diaga     = std::get<3>(str.param);
-        gtint_t n      = std::get<4>(str.param);
-        double alpha   = std::get<5>(str.param);
-        gtint_t incx   = std::get<6>(str.param);
-        double xexval  = std::get<7>(str.param);
-        double aexval  = std::get<8>(str.param);
-        gtint_t ld_inc = std::get<9>(str.param);
-#ifdef TEST_BLAS
-        std::string str_name = "blas_";
-#elif TEST_CBLAS
-        std::string str_name = "cblas_";
-#else  //#elif TEST_BLIS_TYPED
-        std::string str_name = "bli_";
-#endif
-        str_name    = str_name + "stor_" + sfm;
-        str_name    = str_name + "_uplo_" + uploa;
-        str_name    = str_name + "_transa_" + transa;
-        str_name    = str_name + "_diaga_" + diaga;
-        str_name += "_n_" + std::to_string(n);
-        str_name += "_alpha_" + testinghelpers::get_value_string(alpha);
-        str_name += "_incx_" + testinghelpers::get_value_string(incx);
-        str_name    = str_name + "_ex_x_" + testinghelpers::get_value_string(xexval);
-        str_name    = str_name + "_ex_a_" + testinghelpers::get_value_string(aexval);
-        str_name    = str_name + "_lda_" + std::to_string(
-                    testinghelpers::get_leading_dimension( sfm, transa, n, n, ld_inc )
-                );
-        return str_name;
-    }
-};
-
 static double AOCL_NAN = std::numeric_limits<double>::quiet_NaN();
 static double AOCL_INF = std::numeric_limits<double>::infinity();
 
@@ -165,5 +127,5 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(AOCL_NAN, -AOCL_INF, AOCL_INF, 0),               // exception value for A
             ::testing::Values(gtint_t(0), gtint_t(10))                         // increment to the leading dim of a
         ),
-        ::dtrsvEVTPrint()
+        ::trsvEVTPrint<double>()
     );

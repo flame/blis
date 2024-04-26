@@ -78,33 +78,6 @@ TEST_P( zscalvGenericTest, RandomData )
     test_scalv<T>( conj_alpha, n, incx, alpha, thresh );
 }
 
-// Used to generate a test case with a sensible name.
-// Beware that we cannot use fp numbers (e.g., 2.3) in the names,
-// so we are only printing int(2.3). This should be enough for debugging purposes.
-// If this poses an issue, please reach out.
-class zscalvGenericTestPrint {
-public:
-    std::string operator()(
-        testing::TestParamInfo<std::tuple<char, gtint_t, gtint_t, dcomplex>> str) const {
-        char conj_alpha = std::get<0>(str.param);
-        gtint_t n = std::get<1>(str.param);
-        gtint_t incx = std::get<2>(str.param);
-        dcomplex alpha = std::get<3>(str.param);
-#ifdef TEST_BLAS
-        std::string str_name = "blas_";
-#elif TEST_CBLAS
-        std::string str_name = "cblas_";
-#else  //#elif TEST_BLIS_TYPED
-        std::string str_name = "bli_";
-#endif
-        str_name += "_n_" + std::to_string(n);
-        str_name += (conj_alpha == 'n') ? "_noconjalpha" : "_conjalpha";
-        str_name += "_incx_" + testinghelpers::get_value_string(incx);
-        str_name += "_alpha_" + testinghelpers::get_value_string(alpha);
-        return str_name;
-    }
-};
-
 // Black box testing for zscal.
 // Tests with unit-positive increment.
 INSTANTIATE_TEST_SUITE_P(
@@ -129,7 +102,7 @@ INSTANTIATE_TEST_SUITE_P(
                                 dcomplex{ 7.3,  5.1}
             )
         ),
-        ::zscalvGenericTestPrint()
+        ::scalvGenericPrint<dcomplex>()
     );
 
 
@@ -159,5 +132,5 @@ INSTANTIATE_TEST_SUITE_P(
                                 dcomplex{ 7.3,  5.1}
             )
         ),
-        ::zscalvGenericTestPrint()
+        ::scalvGenericPrint<dcomplex>()
     );

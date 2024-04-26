@@ -87,32 +87,6 @@ TEST_P( zdscalvUkrTest, FunctionalTest )
     test_scalv_ukr<T, U, zscalv_ker_ft>( ukr, conj_alpha, n, incx, alpha, thresh, is_memory_test );
 }
 
-// Used to generate a test case with a sensible name.
-// Beware that we cannot use fp numbers (e.g., 2.3) in the names,
-// so we are only printing int(2.3). This should be enough for debugging purposes.
-// If this poses an issue, please reach out.
-class zdscalvUkrTestPrint {
-public:
-    std::string operator()(
-        testing::TestParamInfo<std::tuple<zscalv_ker_ft, char, gtint_t, gtint_t, dcomplex, bool>> str) const {
-        char conjx = std::get<1>(str.param);
-        gtint_t n = std::get<2>(str.param);
-        gtint_t incx = std::get<3>(str.param);
-        dcomplex alpha = std::get<4>(str.param);
-        bool is_memory_test = std::get<5>(str.param);
-
-        std::string str_name = "zd";
-        str_name += "_n_" + std::to_string(n);
-        str_name += (conjx == 'n') ? "_noconjalpha" : "_conjalpha";
-        str_name += "_incx_" + testinghelpers::get_value_string(incx);
-        str_name += "_alpha_" + testinghelpers::get_value_string(alpha);
-        str_name += ( is_memory_test ) ? "_mem_test_enabled" : "_mem_test_disabled";
-
-        return str_name;
-    }
-};
-
-
 // ----------------------------------------------
 // ----- Begin ZEN1/2/3 (AVX2) Kernel Tests -----
 // ----------------------------------------------
@@ -166,7 +140,7 @@ INSTANTIATE_TEST_SUITE_P(
             ),
             ::testing::Values(false, true)                 // is_memory_test
         ),
-        ::zdscalvUkrTestPrint()
+        (::scalvUKRPrint<dcomplex,zscalv_ker_ft>())
     );
 
 INSTANTIATE_TEST_SUITE_P(
@@ -197,7 +171,7 @@ INSTANTIATE_TEST_SUITE_P(
             ),
             ::testing::Values(false, true)                 // is_memory_test
         ),
-        ::zdscalvUkrTestPrint()
+        (::scalvUKRPrint<dcomplex,zscalv_ker_ft>())
     );
 #endif
 // ----------------------------------------------
@@ -251,7 +225,7 @@ INSTANTIATE_TEST_SUITE_P(
             ),
             ::testing::Values(false, true)                 // is_memory_test
         ),
-        ::zdscalvUkrTestPrint()
+        (::scalvUKRPrint<dcomplex,zscalv_ker_ft>())
     );
 
 INSTANTIATE_TEST_SUITE_P(
@@ -282,7 +256,7 @@ INSTANTIATE_TEST_SUITE_P(
             ),
             ::testing::Values(false, true)                 // is_memory_test
         ),
-        ::zdscalvUkrTestPrint()
+        (::scalvUKRPrint<dcomplex,zscalv_ker_ft>())
     );
 #endif
 // ----------------------------------------------

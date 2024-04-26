@@ -119,80 +119,6 @@ TEST_P(daxpbyvEVT, ExceptionData)
                    yj, yexval, thresh);
 }
 
-// Test-case logger : Used to print the test-case details when vectors have exception value.
-// The string format is as follows :
-// n(vec_size)_(conjx/noconjx)_incx(m)(abs_incx)_incy(m)(abs_incy)_X_(xi)_(xexval)_(yi)_(yexval)_alpha(alpha_val)_beta(beta_val)
-class daxpbyvEVTVecPrint
-{
-public:
-    std::string operator()(
-        testing::TestParamInfo<std::tuple<char, gtint_t, gtint_t, gtint_t, gtint_t, double, gtint_t, double, double, double>> str) const
-    {
-        char conjx = std::get<0>(str.param);
-        gtint_t n = std::get<1>(str.param);
-        gtint_t incx = std::get<2>(str.param);
-        gtint_t incy = std::get<3>(str.param);
-        gtint_t xi = std::get<4>(str.param);
-        double xexval = std::get<5>(str.param);
-        gtint_t yj = std::get<6>(str.param);
-        double yexval = std::get<7>(str.param);
-        double alpha = std::get<8>(str.param);
-        double beta = std::get<9>(str.param);
-#ifdef TEST_BLAS
-        std::string str_name = "blas_";
-#elif TEST_CBLAS
-        std::string str_name = "cblas_";
-#else  //#elif TEST_BLIS_TYPED
-        std::string str_name = "bli_";
-#endif
-        str_name += "_n_" + std::to_string(n);
-        str_name += ( conjx == 'n' )? "_noconjx" : "_conjx";
-        str_name += "_incx_" + testinghelpers::get_value_string(incx);
-        str_name += "_incy_" + testinghelpers::get_value_string(incy);
-        std::string xexval_str = testinghelpers::get_value_string(xexval);
-        std::string yexval_str = testinghelpers::get_value_string(yexval);
-        str_name = str_name + "_X_" + std::to_string(xi);
-        str_name = str_name + "_" + xexval_str;
-        str_name = str_name + "_Y_" + std::to_string(yj);
-        str_name = str_name + "_" + yexval_str;
-        str_name += "_alpha_" + testinghelpers::get_value_string(alpha);
-        str_name += "_beta_" + testinghelpers::get_value_string(beta);
-        return str_name;
-    }
-};
-
-// Test-case logger : Used to print the test-case details when alpha/beta have exception value.
-// The string format is as follows :
-// n(vec_size)_(conjx/noconjx)_incx(m)(abs_incx)_incy(m)(abs_incy)_alpha(alpha_val)_beta(beta_val)
-class daxpbyvAlphaBetaPrint
-{
-public:
-    std::string operator()(
-        testing::TestParamInfo<std::tuple<char, gtint_t, gtint_t, gtint_t, gtint_t, double, gtint_t, double, double, double>> str) const
-    {
-        char conjx = std::get<0>(str.param);
-        gtint_t n = std::get<1>(str.param);
-        gtint_t incx = std::get<2>(str.param);
-        gtint_t incy = std::get<3>(str.param);
-        double alpha = std::get<8>(str.param);
-        double beta = std::get<9>(str.param);
-#ifdef TEST_BLAS
-        std::string str_name = "daxpby_";
-#elif TEST_CBLAS
-        std::string str_name = "cblas_daxpby";
-#else // #elif TEST_BLIS_TYPED
-        std::string str_name = "bli_daxpbyv";
-#endif
-        str_name += "_n_" + std::to_string(n);
-        str_name += ( conjx == 'n' )? "_noconjx" : "_conjx";
-        str_name += "_incx_" + testinghelpers::get_value_string(incx);
-        str_name += "_incy_" + testinghelpers::get_value_string(incy);
-        str_name += "_alpha_" + testinghelpers::get_value_string(alpha);
-        str_name += "_beta_" + testinghelpers::get_value_string(beta);
-        return str_name;
-    }
-};
-
 static double NaN = std::numeric_limits<double>::quiet_NaN();
 static double Inf = std::numeric_limits<double>::infinity();
 
@@ -244,7 +170,7 @@ INSTANTIATE_TEST_SUITE_P(
         ::testing::Values(double(0.0), double(1.0), double(-1.0), double(-3.3)),    // alpha
         ::testing::Values(double(0.0), double(1.0), double(-1.0), double(4.5))      // beta
         ),
-    ::daxpbyvEVTVecPrint());
+    ::axpbyvEVTPrint<double>());
 
 // Exception value testing(on Y vector alone) with unit strides
 INSTANTIATE_TEST_SUITE_P(
@@ -268,7 +194,7 @@ INSTANTIATE_TEST_SUITE_P(
         ::testing::Values(double(0.0), double(1.0), double(-1.0), double(-3.3)),    // alpha
         ::testing::Values(double(0.0), double(1.0), double(-1.0), double(4.5))      // beta
         ),
-    ::daxpbyvEVTVecPrint());
+    ::axpbyvEVTPrint<double>());
 
 // Exception value testing(on X and Y vectors) with unit strides
 INSTANTIATE_TEST_SUITE_P(
@@ -293,7 +219,7 @@ INSTANTIATE_TEST_SUITE_P(
         ::testing::Values(double(0.0), double(1.0), double(-1.0), double(-3.3)),    // alpha
         ::testing::Values(double(0.0), double(1.0), double(-1.0), double(4.5))      // beta
         ),
-    ::daxpbyvEVTVecPrint());
+    ::axpbyvEVTPrint<double>());
 
 // Exception value testing(on vectors) with non-unit strides
 // We have to test a single scalar loop. The indices are such
@@ -318,7 +244,7 @@ INSTANTIATE_TEST_SUITE_P(
         ::testing::Values(double(0.0), double(1.0), double(-1.0), double(-3.3)),    // alpha
         ::testing::Values(double(0.0), double(1.0), double(-1.0), double(4.5))      // beta
         ),
-    ::daxpbyvEVTVecPrint());
+    ::axpbyvEVTPrint<double>());
 
 /*
     Exception value testing on alpha and/or beta :
@@ -352,7 +278,7 @@ INSTANTIATE_TEST_SUITE_P(
         ::testing::Values(NaN, -Inf, Inf, 2.3),         // alpha
         ::testing::Values(NaN, -Inf, Inf, -1.9)         // beta
         ),
-    ::daxpbyvEVTVecPrint());
+    ::axpbyvEVTPrint<double>());
 
 // Exception value testing(on alpha/beta) with non-unit strided vectors
 INSTANTIATE_TEST_SUITE_P(
@@ -375,4 +301,4 @@ INSTANTIATE_TEST_SUITE_P(
         ::testing::Values(NaN, -Inf, Inf, 2.3),         // alpha
         ::testing::Values(NaN, -Inf, Inf, -1.9)         // beta
         ),
-    ::daxpbyvEVTVecPrint());
+    ::axpbyvEVTPrint<double>());

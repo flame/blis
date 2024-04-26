@@ -115,59 +115,6 @@ TEST_P(DGEMMOvrUndr, OverflowUnderflow)
 
 }
 
-class DGEMMOUTestPrint {
-    public:
-    std::string operator()(
-        testing::TestParamInfo<std::tuple<char, char, char, gtint_t, gtint_t, gtint_t, gtint_t, gtint_t, double, double, gtint_t, gtint_t, gtint_t, gtint_t, gtint_t, gtint_t, gtint_t>> str) const {
-        char sfm              = std::get<0>(str.param);
-        char tsa              = std::get<1>(str.param);
-        char tsb              = std::get<2>(str.param);
-        gtint_t over_under    = std::get<3>(str.param);
-        gtint_t input_range   = std::get<4>(str.param);
-        gtint_t m             = std::get<5>(str.param);
-        gtint_t n             = std::get<6>(str.param);
-        gtint_t k             = std::get<7>(str.param);
-        double alpha          = std::get<8>(str.param);
-        double beta           = std::get<9>(str.param);
-        gtint_t lda_inc       = std::get<10>(str.param);
-        gtint_t ldb_inc       = std::get<11>(str.param);
-        gtint_t ldc_inc       = std::get<12>(str.param);
-        gtint_t ai            = std::get<13>(str.param);
-        gtint_t aj            = std::get<14>(str.param);
-        gtint_t bi            = std::get<15>(str.param);
-        gtint_t bj            = std::get<16>(str.param);
-
-        gtint_t lda = testinghelpers::get_leading_dimension( sfm, tsa, m, k, lda_inc );
-        gtint_t ldb = testinghelpers::get_leading_dimension( sfm, tsb, k, n, ldb_inc );
-        gtint_t ldc = testinghelpers::get_leading_dimension( sfm, 'n', m, n, ldc_inc );
-
-        #ifdef TEST_BLAS
-        std::string str_name = "blas_";
-#elif TEST_CBLAS
-        std::string str_name = "cblas_";
-#else  //#elif TEST_BLIS_TYPED
-        std::string str_name = "bli_";
-#endif
-        str_name = str_name + "StorageOfCMatrix_" + sfm;
-        str_name = str_name + "_transa_" + tsa + "_transb_"+ tsb;
-        std::string over_under_str = ( over_under > 0) ? "underflow": "overflow";
-        str_name = str_name + "_" + over_under_str;
-        std::string input_range_str = (input_range < 0) ? "within_limit": (input_range > 0) ? "beyond_limit" : "close_to_limit";
-        str_name = str_name + "_" + input_range_str;
-        str_name += "_m_" + std::to_string(m);
-        str_name += "_n_" + std::to_string(n);
-        str_name += "_k_" + std::to_string(k);
-        str_name = str_name + "_A_" + std::to_string(ai) + "_" + std::to_string(aj);
-        str_name = str_name + "_B_" + std::to_string(bi) + "_" + std::to_string(bj);
-        str_name += "_alpha_" + testinghelpers::get_value_string(alpha);
-        str_name += "_beta_" + testinghelpers::get_value_string(beta);
-        str_name = str_name + "_lda_" + std::to_string(lda);
-        str_name = str_name + "_ldb_" + std::to_string(ldb);
-        str_name = str_name + "_ldc_" + std::to_string(ldc);
-        return str_name;
-    }
-};
-
 /*
     Tests for Overflow
 
@@ -219,7 +166,7 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(140),                                       // bi
             ::testing::Values(110)                                        // bj
         ),
-        ::DGEMMOUTestPrint()
+        ::gemmOUTPrint<double>()
     );
 
 /* Overflow test for values close to DBL_MAX */
@@ -253,7 +200,7 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(140),                                       // bi
             ::testing::Values(120)                                        // bj
         ),
-        ::DGEMMOUTestPrint()
+        ::gemmOUTPrint<double>()
     );
 
 
@@ -288,7 +235,7 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(145),                                       // bi
             ::testing::Values(108)                                        // bj
         ),
-        ::DGEMMOUTestPrint()
+        ::gemmOUTPrint<double>()
     );
 
 /* Overflow test for values larger than DBL_MAX */
@@ -322,7 +269,7 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(130),                                       // bi
             ::testing::Values(100)                                        // bj
         ),
-        ::DGEMMOUTestPrint()
+        ::gemmOUTPrint<double>()
     );
 
 
@@ -378,7 +325,7 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(140),                                       // bi
             ::testing::Values(110)                                        // bj
         ),
-        ::DGEMMOUTestPrint()
+        ::gemmOUTPrint<double>()
     );
 
 /* Underflow test for values close to DBL_MIN */
@@ -412,7 +359,7 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(132),                                       // bi
             ::testing::Values(110)                                        // bj
         ),
-        ::DGEMMOUTestPrint()
+        ::gemmOUTPrint<double>()
     );
 
 /* Underflow test for values close to DBL_MIN and alpha = 0 */
@@ -446,7 +393,7 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(88),                                        // bi
             ::testing::Values(42)                                         // bj
         ),
-        ::DGEMMOUTestPrint()
+        ::gemmOUTPrint<double>()
     );
 
 
@@ -482,5 +429,5 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(100),                                       // bi
             ::testing::Values(105)                                        // bj
         ),
-        ::DGEMMOUTestPrint()
+        ::gemmOUTPrint<double>()
     );

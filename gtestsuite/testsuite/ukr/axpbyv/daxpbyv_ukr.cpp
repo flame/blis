@@ -110,33 +110,6 @@ TEST_P( daxpbyvUkrTest, AccuracyCheck )
     test_axpbyv_ukr<T, daxpbyv_ker_ft>( ukr_fp, conj_x, n, incx, incy, alpha, beta, thresh, is_memory_test );
 }
 
-// Test-case logger : Used to print the test-case details for unit testing the kernels.
-// NOTE : The kernel name is the prefix in instantiator name, and thus is not printed
-// with this logger.
-class daxpbyvUkrTestPrint {
-public:
-    std::string operator()(
-        testing::TestParamInfo<std::tuple<daxpbyv_ker_ft,char,gtint_t,gtint_t,gtint_t,double,double,bool>> str) const {
-        char conjx     = std::get<1>(str.param);
-        gtint_t n     = std::get<2>(str.param);
-        gtint_t incx  = std::get<3>(str.param);
-        gtint_t incy  = std::get<4>(str.param);
-        double alpha  = std::get<5>(str.param);
-        double beta   = std::get<6>(str.param);
-        bool is_memory_test = std::get<7>(str.param);
-
-        std::string str_name = "daxpbyv_ukr";
-        str_name += "_n_" + std::to_string(n);
-        str_name += ( conjx == 'n' )? "_noconjx" : "_conjx";
-        str_name += "_incx_" + testinghelpers::get_value_string(incx);
-        str_name += "_incy_" + testinghelpers::get_value_string(incy);
-        str_name += "_alpha_" + testinghelpers::get_value_string(alpha);
-        str_name += "_beta_" + testinghelpers::get_value_string(beta);
-        str_name += ( is_memory_test ) ? "_mem_test_enabled" : "_mem_test_disabled";
-        return str_name;
-    }
-};
-
 #if defined(BLIS_KERNELS_ZEN) && defined(GTEST_AVX2FMA3)
 /*
     Unit testing for functionality of bli_daxpbyv_zen_int10 kernel.
@@ -180,7 +153,7 @@ INSTANTIATE_TEST_SUITE_P(
                               double(0.0)),                // beta
             ::testing::Values(false, true)                 // is_memory_test
         ),
-        ::daxpbyvUkrTestPrint()
+        ((::axpbyvMemUKRPrint<double, daxpbyv_ker_ft>()))
     );
 
 // Unit testing for non unit strides
@@ -202,7 +175,7 @@ INSTANTIATE_TEST_SUITE_P(
                               double(0.0)),                // beta
             ::testing::Values(false, true)                 // is_memory_test
         ),
-        ::daxpbyvUkrTestPrint()
+        (::axpbyvMemUKRPrint<double, daxpbyv_ker_ft>())
     );
 
 /*
@@ -234,7 +207,7 @@ INSTANTIATE_TEST_SUITE_P(
                               double(0.0)),                // beta
             ::testing::Values(false, true)                 // is_memory_test
         ),
-        ::daxpbyvUkrTestPrint()
+        (::axpbyvMemUKRPrint<double, daxpbyv_ker_ft>())
     );
 
 // Unit testing for Non-Unit Stride
@@ -256,6 +229,6 @@ INSTANTIATE_TEST_SUITE_P(
                               double(0.0)),                // beta
             ::testing::Values(false, true)                 // is_memory_test
         ),
-        ::daxpbyvUkrTestPrint()
+        (::axpbyvMemUKRPrint<double, daxpbyv_ker_ft>())
     );
 #endif

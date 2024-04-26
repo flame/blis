@@ -58,28 +58,6 @@ TEST_P( zamaxvGeneric, FunctionalTest )
     test_amaxv<T>( n, incx );
 }
 
-// Test-case logger : Used to print the test-case details when vectors have exception value.
-// The string format is as follows :
-// {blas/cblas/blis}_n(vec_size)_incx(m)(abs_incx)
-class zamaxvGenericPrint {
-public:
-    std::string operator()(
-        testing::TestParamInfo<std::tuple<gtint_t,gtint_t>> str) const {
-        gtint_t n     = std::get<0>(str.param);
-        gtint_t incx  = std::get<1>(str.param);
-#ifdef TEST_BLAS
-        std::string str_name = "blas_";
-#elif TEST_CBLAS
-        std::string str_name = "cblas_";
-#else  //#elif TEST_BLIS_TYPED
-        std::string str_name = "bli_";
-#endif
-	str_name += "_n_" + std::to_string(n);
-        str_name += "_incx_" + testinghelpers::get_value_string(incx);
-        return str_name;
-    }
-};
-
 //Black box testing extended for different range of values
 INSTANTIATE_TEST_SUITE_P(
         Blackbox_Small_Sizes,
@@ -88,7 +66,7 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Range(gtint_t(1), gtint_t(11), 1),                    // n size of vector takes values from 1 to 11 with step size of 1.
             ::testing::Values(gtint_t(1))                                    // stride size for x
         ),
-        ::zamaxvGenericPrint()
+        ::amaxvGenericPrint()
     );
 
 INSTANTIATE_TEST_SUITE_P(
@@ -98,7 +76,7 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Range(gtint_t(100), gtint_t(502), 50),                 // n size of vector takes values from 100 to 500 with step size of 50.
             ::testing::Values(gtint_t(1))                                     // stride size for x
         ),
-        ::zamaxvGenericPrint()
+        ::amaxvGenericPrint()
     );
 
 INSTANTIATE_TEST_SUITE_P(
@@ -108,7 +86,7 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Range(gtint_t(1024), gtint_t(65535), 1023),           // n size of vector takes values from 2pow10 to 2pow16-1 with step size of 1023.
             ::testing::Values(gtint_t(1))                                    // stride size for x
         ),
-        ::zamaxvGenericPrint()
+        ::amaxvGenericPrint()
     );
 
 //Non unit testing extended for different stride values
@@ -119,7 +97,7 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(gtint_t(123), gtint_t(111), gtint_t(20)),     // m size of vector
             ::testing::Values(gtint_t(4), gtint_t(8))                       // stride size for x
         ),
-        ::zamaxvGenericPrint()
+        ::amaxvGenericPrint()
     );
 
 INSTANTIATE_TEST_SUITE_P(
@@ -129,5 +107,5 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Range(gtint_t(1), gtint_t(10), 1),                    // n size of vector takes values from 1 to 10 with step size 1
             ::testing::Values(gtint_t(11))                                   // stride size for x
         ),
-        ::zamaxvGenericPrint()
+        ::amaxvGenericPrint()
     );

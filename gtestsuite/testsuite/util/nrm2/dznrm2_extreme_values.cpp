@@ -62,40 +62,6 @@ TEST_P( dznrm2_EVT, EVT )
     test_nrm2<T>(n, incx, i, iexval, j, jexval);
 }
 
-// Prints the test case combination
-class dznrm2_TestPrint{
-public:
-    std::string operator()(
-        testing::TestParamInfo<std::tuple<gtint_t, gtint_t, gtint_t, dcomplex, gtint_t, dcomplex>> str) const {
-        // vector length:
-        gtint_t n = std::get<0>(str.param);
-        // stride size for x:
-        gtint_t incx = std::get<1>(str.param);
-        // index with extreme value iexval.
-        gtint_t i = std::get<2>(str.param);
-        dcomplex iexval = std::get<3>(str.param);
-        // index with extreme value jexval.
-        gtint_t j = std::get<4>(str.param);
-        dcomplex jexval = std::get<5>(str.param);
-#ifdef TEST_BLAS
-        std::string str_name = "dznrm2_";
-#elif TEST_CBLAS
-        std::string str_name = "cblas_dznrm2";
-#else  //#elif TEST_BLIS_TYPED
-        std::string str_name = "bli_znormfv";
-#endif
-        str_name += "_n_" + std::to_string(n);
-        str_name += "_incx_" + testinghelpers::get_value_string(incx);
-        str_name    = str_name + "_i" + std::to_string(i);
-        std::string iexval_str = "_Re_" + testinghelpers::get_value_string(iexval.real) + "_Im_" + testinghelpers::get_value_string(iexval.imag);
-        str_name    = str_name + iexval_str;
-        str_name    = str_name + "_j" + std::to_string(j);
-        std::string jexval_str = "_Re_" + testinghelpers::get_value_string(jexval.real) + "_Im_" + testinghelpers::get_value_string(jexval.imag);
-        str_name    = str_name + jexval_str;
-        return str_name;
-    }
-};
-
 static double NaN = std::numeric_limits<double>::quiet_NaN();
 static double Inf = std::numeric_limits<double>::infinity();
 /**
@@ -125,7 +91,7 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(1),
             ::testing::Values(dcomplex{1.0, 2.0}, dcomplex{NaN, 1.0}, dcomplex{Inf, 9.0}, dcomplex{-1.0, -Inf}, dcomplex{2.0, NaN})
         ),
-        ::dznrm2_TestPrint()
+        ::nrm2EVTPrint<dcomplex>()
     );
 
 INSTANTIATE_TEST_SUITE_P(
@@ -143,7 +109,7 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(3),
             ::testing::Values(dcomplex{1.0, 2.0}, dcomplex{NaN, 1.0}, dcomplex{Inf, 9.0}, dcomplex{-1.0, -Inf}, dcomplex{2.0, NaN})
         ),
-        ::dznrm2_TestPrint()
+        ::nrm2EVTPrint<dcomplex>()
     );
 
 // To test the second for-loop (F2), we use n = 6
@@ -163,7 +129,7 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(5),
             ::testing::Values(dcomplex{1.0, 2.0}, dcomplex{NaN, 1.0}, dcomplex{Inf, 9.0}, dcomplex{-1.0, -Inf}, dcomplex{2.0, NaN})
         ),
-        ::dznrm2_TestPrint()
+        ::nrm2EVTPrint<dcomplex>()
     );
 
 // Now let's check the combination of a vectorized path and
@@ -184,7 +150,7 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(6),
             ::testing::Values(dcomplex{NaN, 1.0}, dcomplex{Inf, 9.0}, dcomplex{-1.0, -Inf}, dcomplex{2.0, NaN})
         ),
-        ::dznrm2_TestPrint()
+        ::nrm2EVTPrint<dcomplex>()
     );
 
 // Mutlthreading Unit Tester
@@ -233,7 +199,7 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(6, 25, 64, 127),
             ::testing::Values(dcomplex{NaN, 1.0}, dcomplex{Inf, 9.0}, dcomplex{-1.0, -Inf}, dcomplex{2.0, NaN})
         ),
-        ::dznrm2_TestPrint()
+        ::nrm2EVTPrint<dcomplex>()
     );
 
 // Instantiator if AOCL_DYNAMIC is enabled
@@ -259,5 +225,5 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(1100000, 1500000),
             ::testing::Values(dcomplex{NaN, Inf}, dcomplex{-Inf, NaN}, dcomplex{Inf, 0.0})
         ),
-        ::dznrm2_TestPrint()
+        ::nrm2EVTPrint<dcomplex>()
     );

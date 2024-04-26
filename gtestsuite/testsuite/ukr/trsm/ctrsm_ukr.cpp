@@ -83,39 +83,6 @@ TEST_P(ctrsmUkrSmall, AccuracyCheck)
     test_trsm_small_ukr<T, trsm_small_ker_ft>( ukr_fp, side, uploa, diaga, transa, m, n, alpha, lda, ldb, thresh, is_memory_test, BLIS_SCOMPLEX);
 }
 
-class ctrsmSmallUKRPrint {
-public:
-    std::string operator()(
-        testing::TestParamInfo<std::tuple<trsm_small_ker_ft, char, char, char, char, gtint_t,
-                                            gtint_t, scomplex, gtint_t, gtint_t, bool>> str) const{
-        char side               = std::get<1>(str.param);
-        char uploa              = std::get<2>(str.param);
-        char diaga              = std::get<3>(str.param);
-        char transa             = std::get<4>(str.param);
-        gtint_t m               = std::get<5>(str.param);
-        gtint_t n               = std::get<6>(str.param);
-        scomplex  alpha         = std::get<7>(str.param);
-        gtint_t lda_inc         = std::get<8>(str.param);
-        gtint_t ldb_inc         = std::get<9>(str.param);
-        bool is_memory_test     = std::get<10>(str.param);
-        std::string res =
-        std::string("_side_") + side
-        + "_diag_" +  diaga
-        + "_uplo_" + uploa
-        + "_trana_" + transa
-        + "_alpha_" + testinghelpers::get_value_string(alpha);
-        gtint_t mn;
-        testinghelpers::set_dim_with_side( side, m, n, &mn );
-        res += "_lda_" + std::to_string( lda_inc + mn);
-        res += "_ldb_" + std::to_string( ldb_inc + m)
-        + "_m_" + std::to_string(m)
-        + "_n_" + std::to_string(n);
-        res += is_memory_test ? "_mem_test_enabled" : "_mem_test_disabled";
-        return res;
-    }
-};
-
-
 #if defined(BLIS_KERNELS_ZEN) && defined(GTEST_AVX2FMA3)
 INSTANTIATE_TEST_SUITE_P (
     bli_trsm_small,
@@ -136,6 +103,6 @@ INSTANTIATE_TEST_SUITE_P (
         ::testing::Values(0, 10, 194),                // ldb_inc
         ::testing::Values(false, true)                // is_memory_test
     ),
-    ::ctrsmSmallUKRPrint()
+    (::trsmSmallUKRPrint<scomplex, trsm_small_ker_ft>())
 );
 #endif

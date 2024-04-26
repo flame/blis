@@ -104,44 +104,6 @@ TEST_P(dgemvGeneric, FunctionalTest)
     test_gemv<T>( storage, transa, conjx, m, n, alpha, lda_inc, incx, beta, incy, thresh, is_memory_test );
 }
 
-class dgemvGenericPrint {
-public:
-    std::string operator()(
-        testing::TestParamInfo<std::tuple<char,char,char,gtint_t,gtint_t,T,T,gtint_t,gtint_t,gtint_t, bool>> str) const {
-        char sfm            = std::get<0>(str.param);
-        char transa         = std::get<1>(str.param);
-        char conjx          = std::get<2>(str.param);
-        gtint_t m           = std::get<3>(str.param);
-        gtint_t n           = std::get<4>(str.param);
-        T alpha             = std::get<5>(str.param);
-        T beta              = std::get<6>(str.param);
-        gtint_t incx        = std::get<7>(str.param);
-        gtint_t incy        = std::get<8>(str.param);
-        gtint_t ld_inc      = std::get<9>(str.param);
-        bool is_memory_test = std::get<10>(str.param);
-
-#ifdef TEST_BLAS
-        std::string str_name = "blas_";
-#elif TEST_CBLAS
-        std::string str_name = "cblas_";
-#else  //#elif TEST_BLIS_TYPED
-        std::string str_name = "bli_";
-#endif
-        str_name = str_name + "stor_" + sfm;
-        str_name = str_name + "_transa_" + transa;
-        str_name = str_name + "_conjx_" + conjx;
-        str_name += "_m_" + std::to_string(m);
-        str_name += "_n_" + std::to_string(n);
-        str_name += "_incx_" + testinghelpers::get_value_string(incx);
-        str_name += "_incy_" + testinghelpers::get_value_string(incy);
-        str_name += "_alpha_" + testinghelpers::get_value_string(alpha);
-        str_name += "_beta_" + testinghelpers::get_value_string(beta);
-        str_name = str_name + "_lda_" + std::to_string(testinghelpers::get_leading_dimension( sfm, 'n', m, n, ld_inc ));
-        str_name = str_name + (( is_memory_test ) ? "_mem_test_enabled" : "_mem_test_disabled");
-        return str_name;
-    }
-};
-
 // Black box testing.
 INSTANTIATE_TEST_SUITE_P(
         Blackbox,
@@ -163,7 +125,7 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(gtint_t(0)),                      // increment to the leading dim of a
             ::testing::Values(false, true)                      // is_memory_test
         ),
-        ::dgemvGenericPrint()
+        ::gemvGenericPrint<T>()
     );
 
 INSTANTIATE_TEST_SUITE_P(
@@ -186,7 +148,7 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(gtint_t(7), gtint_t(3)),                       // increment to the leading dim of a
             ::testing::Values(false, true)                                   // is_memory_test
         ),
-        ::dgemvGenericPrint()
+        ::gemvGenericPrint<T>()
     );
 
 INSTANTIATE_TEST_SUITE_P(
@@ -209,7 +171,7 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(gtint_t(2)),                                   // increment to the leading dim of a
             ::testing::Values(false, true)                                   // is_memory_test
         ),
-        ::dgemvGenericPrint()
+        ::gemvGenericPrint<T>()
    );
 
 INSTANTIATE_TEST_SUITE_P(
@@ -233,7 +195,7 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(false, true)                                   // is_memory_test
         ),
 
-      ::dgemvGenericPrint()
+      ::gemvGenericPrint<T>()
     );
 
 INSTANTIATE_TEST_SUITE_P(
@@ -256,5 +218,5 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(gtint_t(1)),                                   // increment to the leading dim of a
             ::testing::Values(false, true)                                   // is_memory_test
         ),
-        ::dgemvGenericPrint()
+        ::gemvGenericPrint<T>()
     );

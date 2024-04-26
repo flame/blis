@@ -96,39 +96,6 @@ TEST_P(dtrsmTest, Accuracy_test)
     test_trsm<T>( storage, side, uploa, transa, diaga, m, n, alpha, lda_inc, ldb_inc, thresh );
 }
 
-class dtrsmTestPrint {
-public:
-    std::string operator()(
-        testing::TestParamInfo<std::tuple<char, char, char, char, char, gtint_t, gtint_t, double, gtint_t, gtint_t>> str) const {
-        char sfm        = std::get<0>(str.param);
-        char side       = std::get<1>(str.param);
-        char uploa      = std::get<2>(str.param);
-        char transa     = std::get<3>(str.param);
-        char diaga      = std::get<4>(str.param);
-        gtint_t m       = std::get<5>(str.param);
-        gtint_t n       = std::get<6>(str.param);
-        double alpha    = std::get<7>(str.param);
-        gtint_t lda_inc = std::get<8>(str.param);
-        gtint_t ldb_inc = std::get<9>(str.param);
-#ifdef TEST_BLAS
-        std::string str_name = "dtrsm_";
-#elif TEST_CBLAS
-        std::string str_name = "cblas_dtrsm";
-#else  //#elif TEST_BLIS_TYPED
-        std::string str_name = "blis_dtrsm";
-#endif
-        str_name = str_name + "_" + sfm+sfm+sfm;
-        str_name = str_name + "_" + side + uploa + transa;
-        str_name = str_name + "_d" + diaga;
-        str_name += "_m_" + std::to_string(m);
-        str_name += "_n_" + std::to_string(n);
-        str_name += "_alpha_" + testinghelpers::get_value_string(alpha);
-        str_name = str_name + "_" + std::to_string(lda_inc);
-        str_name = str_name + "_" + std::to_string(ldb_inc);
-        return str_name;
-    }
-};
-
 /**
  * @brief Test DTRSM native path, which starts from size 1500 for BLAS api
  *        and starts from size 0 for BLIS api.
@@ -152,7 +119,7 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(gtint_t(5)),                                   // increment to the leading dim of a
             ::testing::Values(gtint_t(3))                                    // increment to the leading dim of b
         ),
-        ::dtrsmTestPrint()
+        ::trsmGenericPrint<double>()
     );
 
 /**
@@ -175,7 +142,7 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(gtint_t(5)),                                   // increment to the leading dim of a
             ::testing::Values(gtint_t(3))                                    // increment to the leading dim of b
         ),
-        ::dtrsmTestPrint()
+        ::trsmGenericPrint<double>()
     );
 
 /**
@@ -197,7 +164,7 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(gtint_t(5)),                                   // increment to the leading dim of a
             ::testing::Values(gtint_t(3))                                    // increment to the leading dim of b
         ),
-        ::dtrsmTestPrint()
+        ::trsmGenericPrint<double>()
     );
 
 /**
@@ -221,7 +188,7 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(gtint_t(5)),                                   // increment to the leading dim of a
             ::testing::Values(gtint_t(3))                                    // increment to the leading dim of b
         ),
-        ::dtrsmTestPrint()
+        ::trsmGenericPrint<double>()
     );
 
 /**
@@ -243,7 +210,7 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(gtint_t(5)),                                   // increment to the leading dim of a
             ::testing::Values(gtint_t(3))                                    // increment to the leading dim of b
         ),
-        ::dtrsmTestPrint()
+        ::trsmGenericPrint<double>()
     );
 
 /**
@@ -269,5 +236,5 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(gtint_t(0), gtint_t(5)),                       // increment to the leading dim of a
             ::testing::Values(gtint_t(0), gtint_t(3))                        // increment to the leading dim of b
         ),
-        ::dtrsmTestPrint()
+        ::trsmGenericPrint<double>()
     );

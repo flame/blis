@@ -89,41 +89,6 @@ TEST_P(dtrsvAPI, FunctionalTest)
     test_trsv<T>( storage, uploa, transa, diaga, n, alpha, lda_inc, incx, thresh, is_mem_test);
 }
 
-class dtrsvPrint {
-public:
-    std::string operator()(
-        testing::TestParamInfo<std::tuple<char,char,char,char,gtint_t,double,gtint_t,gtint_t,bool>> str) const {
-        char sfm         = std::get<0>(str.param);
-        char uploa       = std::get<1>(str.param);
-        char transa      = std::get<2>(str.param);
-        char diaga       = std::get<3>(str.param);
-        gtint_t n        = std::get<4>(str.param);
-        double alpha     = std::get<5>(str.param);
-        gtint_t incx     = std::get<6>(str.param);
-        gtint_t ld_inc   = std::get<7>(str.param);
-        bool is_mem_test = std::get<8>(str.param);
-#ifdef TEST_BLAS
-        std::string str_name = "blas_";
-#elif TEST_CBLAS
-        std::string str_name = "cblas_";
-#else  //#elif TEST_BLIS_TYPED
-        std::string str_name = "bli_";
-#endif
-        str_name    = str_name + "stor_" + sfm;
-        str_name    = str_name + "_uplo_" + uploa;
-        str_name    = str_name + "_transa_" + transa;
-        str_name    = str_name + "_diaga_" + diaga;
-        str_name += "_n_" + std::to_string(n);
-        str_name += "_alpha_" + testinghelpers::get_value_string(alpha);
-        str_name += "_incx_" + testinghelpers::get_value_string(incx);
-        str_name    = str_name + "_lda_" + std::to_string(
-                    testinghelpers::get_leading_dimension( sfm, transa, n, n, ld_inc )
-                );
-        str_name    = str_name + (is_mem_test ? "_mem_test_enabled" : "_mem_test_disabled");
-        return str_name;
-    }
-};
-
 INSTANTIATE_TEST_SUITE_P(
         Native,
         dtrsvAPI,
@@ -159,5 +124,5 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(gtint_t(0), gtint_t(10), gtint_t(358)),        // increment to the leading dim of a
             ::testing::Values(false, true)                                   // is memory test
         ),
-        ::dtrsvPrint()
+        ::trsvMemGenericPrint<double>()
     );

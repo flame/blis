@@ -121,73 +121,6 @@ TEST_P(DGEMMEVT, ExceptionValueTest)
                   alpha, beta, ai, aj, aex, bi, bj, bex, ci, cj, cex, thresh );
 }
 
-// Helper classes for printing the test case parameters based on the instantiator
-// These are mainly used to help with debugging, in case of failures
-
-// Utility to print the test-case in case of exception value on matrices
-class DGEMMEVMatPrint {
-public:
-    std::string operator()(
-        testing::TestParamInfo<std::tuple<char, char, char, gtint_t, gtint_t, gtint_t, gtint_t,
-                                          gtint_t, double, gtint_t, gtint_t, double, gtint_t,
-                                          gtint_t, double, double, double,
-                                          gtint_t, gtint_t, gtint_t>> str) const{
-        char sfm        = std::get<0>(str.param);
-        char tsa        = std::get<1>(str.param);
-        char tsb        = std::get<2>(str.param);
-        gtint_t m       = std::get<3>(str.param);
-        gtint_t n       = std::get<4>(str.param);
-        gtint_t k       = std::get<5>(str.param);
-
-        gtint_t ai      = std::get<6>(str.param);
-        gtint_t aj      = std::get<7>(str.param);
-        double  aex     = std::get<8>(str.param);
-
-        gtint_t bi      = std::get<9>(str.param);
-        gtint_t bj      = std::get<10>(str.param);
-        double  bex     = std::get<11>(str.param);
-
-        gtint_t ci      = std::get<12>(str.param);
-        gtint_t cj      = std::get<13>(str.param);
-        double  cex     = std::get<14>(str.param);
-
-        double alpha    = std::get<15>(str.param);
-        double beta     = std::get<16>(str.param);
-
-        gtint_t lda_inc = std::get<17>(str.param);
-        gtint_t ldb_inc = std::get<18>(str.param);
-        gtint_t ldc_inc = std::get<19>(str.param);
-
-#ifdef TEST_BLAS
-        std::string str_name = "blas_";
-#elif TEST_CBLAS
-        std::string str_name = "cblas_";
-#else  //#elif TEST_BLIS_TYPED
-        std::string str_name = "bli_";
-#endif
-        str_name = str_name + "C_matrix_storage_" + sfm;
-        str_name = str_name + "_transA_" + tsa + "_transB_" + tsb;
-        str_name += "_m_" + std::to_string(m);
-        str_name += "_n_" + std::to_string(n);
-        str_name += "_k_" + std::to_string(k);
-        str_name = str_name + "_A" + std::to_string(ai) + std::to_string(aj);
-        str_name = str_name + "_" + testinghelpers::get_value_string(aex);
-        str_name = str_name + "_B" + std::to_string(bi) + std::to_string(bj);
-        str_name = str_name + "_" + testinghelpers::get_value_string(bex);
-        str_name = str_name + "_C" + std::to_string(ci) + std::to_string(cj);
-        str_name = str_name + "_" + testinghelpers::get_value_string(cex);
-        str_name += "_alpha_" + testinghelpers::get_value_string(alpha);
-        str_name += "_beta_" + testinghelpers::get_value_string(beta);
-        gtint_t lda = testinghelpers::get_leading_dimension( sfm, tsa, m, k, lda_inc );
-        gtint_t ldb = testinghelpers::get_leading_dimension( sfm, tsb, k, n, ldb_inc );
-        gtint_t ldc = testinghelpers::get_leading_dimension( sfm, 'n', m, n, ldc_inc );
-        str_name = str_name + "_lda_" + std::to_string(lda);
-        str_name = str_name + "_ldb_" + std::to_string(ldb);
-        str_name = str_name + "_ldc_" + std::to_string(ldc);
-        return str_name;
-    }
-};
-
 /*
     It contains both the exception value testing(EVT) and the
     positive accuracy testing of the bli_DGEMM_4x4_avx2_k1_nn( ... ) computational
@@ -243,7 +176,7 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(gtint_t(0)),                                  // increment to the leading dim of b
             ::testing::Values(gtint_t(0))                                   // increment to the leading dim of c
         ),
-        ::DGEMMEVMatPrint()
+        ::gemmEVTPrint<double>()
     );
 
 // Testing the fringe cases
@@ -277,7 +210,7 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(gtint_t(0)),                                  // increment to the leading dim of b
             ::testing::Values(gtint_t(0))                                   // increment to the leading dim of c
         ),
-        ::DGEMMEVMatPrint()
+        ::gemmEVTPrint<double>()
     );
 
 // Exception value testing(on alpha and beta)
@@ -311,7 +244,7 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(gtint_t(0)),                                   // increment to the leading dim of b
             ::testing::Values(gtint_t(0))                                    // increment to the leading dim of c
         ),
-        ::DGEMMEVMatPrint()
+        ::gemmEVTPrint<double>()
     );
 
 /********************************************************/
@@ -348,7 +281,7 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(gtint_t(0)),                                  // increment to the leading dim of b
             ::testing::Values(gtint_t(0))                                   // increment to the leading dim of c
         ),
-        ::DGEMMEVMatPrint()
+        ::gemmEVTPrint<double>()
     );
 
 /******************************************************/
@@ -385,7 +318,7 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(gtint_t(0)),                                  // increment to the leading dim of b
             ::testing::Values(gtint_t(0))                                   // increment to the leading dim of c
         ),
-        ::DGEMMEVMatPrint()
+        ::gemmEVTPrint<double>()
     );
 
 /*********************************************************/
@@ -422,7 +355,7 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(gtint_t(0)),                                  // increment to the leading dim of b
             ::testing::Values(gtint_t(0))                                   // increment to the leading dim of c
         ),
-        ::DGEMMEVMatPrint()
+        ::gemmEVTPrint<double>()
     );
 
 /********************************************************/
@@ -461,7 +394,7 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(gtint_t(0)),                                  // increment to the leading dim of b
             ::testing::Values(gtint_t(0))                                   // increment to the leading dim of c
         ),
-        ::DGEMMEVMatPrint()
+        ::gemmEVTPrint<double>()
     );
 
 /********************************************************/
@@ -499,5 +432,5 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(gtint_t(0)),                                  // increment to the leading dim of b
             ::testing::Values(gtint_t(0))                                   // increment to the leading dim of c
         ),
-        ::DGEMMEVMatPrint()
+        ::gemmEVTPrint<double>()
     );
