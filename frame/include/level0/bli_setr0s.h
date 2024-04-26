@@ -32,41 +32,13 @@
 
 */
 
-#ifndef BLIS_COPYCJRIS_H
-#define BLIS_COPYCJRIS_H
+#ifndef BLIS_SETR0S_H
+#define BLIS_SETR0S_H
 
-// copycjris
-
-#define bli_scopycjris( conj, xr, xi, yr, yi ) \
-{ \
-	(void)conj; \
-	bli_scopyris( (xr), (xi), (yr), (yi) ); \
-}
-
-#define bli_dcopycjris( conj, xr, xi, yr, yi ) \
-{ \
-	(void)conj; \
-	bli_dcopyris( (xr), (xi), (yr), (yi) ); \
-}
-
-#define bli_ccopycjris( conj, xr, xi, yr, yi ) \
-{ \
-	(yr) =                          (xr); \
-	(yi) = ( bli_is_conj( conj ) ? -(xi) \
-	                             :  (xi) ); \
-}
-
-#define bli_zcopycjris( conj, xr, xi, yr, yi ) \
-{ \
-	(yr) =                          (xr); \
-	(yi) = ( bli_is_conj( conj ) ? -(xi) \
-	                             :  (xi) ); \
-}
-
-#define bli_icopycjris( conj, xr, xi, yr, yi ) \
-{ \
-	(void)conj; \
-	bli_icopyris( (xr), (xi), (yr), (yi) ); \
-}
+#define bli_ssetr0s( a )  bli_ssetrs( 0.0F, (a) )
+#define bli_dsetr0s( a )  bli_dsetrs( 0.0 , (a) )
+#define bli_csetr0s( a )  bli_csetrs( 0.0F, (a) )
+#define bli_zsetr0s( a )  bli_zsetrs( 0.0 , (a) )
 
 #endif
+

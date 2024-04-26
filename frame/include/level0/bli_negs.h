@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2023, Southern Methodist University
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -32,41 +32,29 @@
 
 */
 
-#ifndef BLIS_COPYCJRIS_H
-#define BLIS_COPYCJRIS_H
+#ifndef BLIS_NEGS_H
+#define BLIS_NEGS_H
 
-// copycjris
+// negs
 
-#define bli_scopycjris( conj, xr, xi, yr, yi ) \
-{ \
-	(void)conj; \
-	bli_scopyris( (xr), (xi), (yr), (yi) ); \
-}
+// Notes:
+// - The first char encodes the type of x.
 
-#define bli_dcopycjris( conj, xr, xi, yr, yi ) \
-{ \
-	(void)conj; \
-	bli_dcopyris( (xr), (xi), (yr), (yi) ); \
-}
+#define bli_snegs( x )  bli_snegris( bli_sreal(x), bli_simag(x) )
+#define bli_dnegs( x )  bli_dnegris( bli_dreal(x), bli_dimag(x) )
 
-#define bli_ccopycjris( conj, xr, xi, yr, yi ) \
-{ \
-	(yr) =                          (xr); \
-	(yi) = ( bli_is_conj( conj ) ? -(xi) \
-	                             :  (xi) ); \
-}
+#ifndef BLIS_ENABLE_C99_COMPLEX
 
-#define bli_zcopycjris( conj, xr, xi, yr, yi ) \
-{ \
-	(yr) =                          (xr); \
-	(yi) = ( bli_is_conj( conj ) ? -(xi) \
-	                             :  (xi) ); \
-}
+#define bli_cnegs( x )  bli_cnegris( bli_creal(x), bli_cimag(x) )
+#define bli_znegs( x )  bli_znegris( bli_zreal(x), bli_zimag(x) )
 
-#define bli_icopycjris( conj, xr, xi, yr, yi ) \
-{ \
-	(void)conj; \
-	bli_icopyris( (xr), (xi), (yr), (yi) ); \
-}
+#else // ifdef BLIS_ENABLE_C99_COMPLEX
+
+#define bli_cnegs( x )  { (x) = -(x); }
+#define bli_znegs( x )  { (x) = -(x); }
+
+#endif // BLIS_ENABLE_C99_COMPLEX
+
 
 #endif
+

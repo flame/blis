@@ -32,41 +32,32 @@
 
 */
 
-#ifndef BLIS_COPYCJRIS_H
-#define BLIS_COPYCJRIS_H
+#ifndef BLIS_NEGRIS_H
+#define BLIS_NEGRIS_H
 
-// copycjris
+// negris
 
-#define bli_scopycjris( conj, xr, xi, yr, yi ) \
+#define bli_snegris( ar, ai ) \
 { \
-	(void)conj; \
-	bli_scopyris( (xr), (xi), (yr), (yi) ); \
+	(ar) = -(ar); \
 }
 
-#define bli_dcopycjris( conj, xr, xi, yr, yi ) \
+#define bli_dnegris( ar, ai ) \
 { \
-	(void)conj; \
-	bli_dcopyris( (xr), (xi), (yr), (yi) ); \
+	(ar) = -(ar); \
 }
 
-#define bli_ccopycjris( conj, xr, xi, yr, yi ) \
+#define bli_cnegris( ar, ai ) \
 { \
-	(yr) =                          (xr); \
-	(yi) = ( bli_is_conj( conj ) ? -(xi) \
-	                             :  (xi) ); \
+	(ar) = -(ar); \
+	(ai) = -(ai); \
 }
 
-#define bli_zcopycjris( conj, xr, xi, yr, yi ) \
+#define bli_znegris( ar, ai ) \
 { \
-	(yr) =                          (xr); \
-	(yi) = ( bli_is_conj( conj ) ? -(xi) \
-	                             :  (xi) ); \
-}
-
-#define bli_icopycjris( conj, xr, xi, yr, yi ) \
-{ \
-	(void)conj; \
-	bli_icopyris( (xr), (xi), (yr), (yi) ); \
+	(ar) = -(ar); \
+	(ai) = -(ai); \
 }
 
 #endif
+
