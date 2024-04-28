@@ -73,10 +73,7 @@ AOCL_GEMM_GET_REORDER_BUF_SIZE(bf16bf16f32of32)
 	// loaded; and since k_dim needs to be at least 2, having n_dim at least 16
 	// should give 2x16=32 elements, enough for 1 zmm register.The padding is
 	// not rounded to NR (=64), since that would result in memory wastage.
-#ifdef LPGEMM_BF16_JIT
-	dim_t n_reorder = make_multiple_of_n( n, 16 );;
-	dim_t k_reorder = make_multiple_of_n( k, 2 );
-#else
+#if (defined(BLIS_KERNELS_ZEN4) && (!defined(LPGEMM_BF16_JIT)))
 	dim_t n_reorder;
 
 	if( n == 1 )
@@ -98,6 +95,9 @@ AOCL_GEMM_GET_REORDER_BUF_SIZE(bf16bf16f32of32)
 	{
 		k_reorder = make_multiple_of_n( k, 2 );
 	}
+#else
+	dim_t n_reorder = make_multiple_of_n( n, 16 );;
+	dim_t k_reorder = make_multiple_of_n( k, 2 );
 #endif
 	siz_t size_req = sizeof( int16_t ) * k_reorder * n_reorder;
 
@@ -155,7 +155,7 @@ AOCL_GEMM_REORDER(bfloat16, bf16bf16f32of32)
 	{
 		return; // A reorder not supported.
 	}
-#ifndef LPGEMM_BF16_JIT
+#if (defined(BLIS_KERNELS_ZEN4) && (!defined(LPGEMM_BF16_JIT)))
 	if( n == 1 )
 	{
 		if( rs_b == 1 )

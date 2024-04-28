@@ -73,7 +73,7 @@
 	F32_BETA_FMA(reg,scratch1,scratch2) \
 
 // Default n < 16 mask load beta macro
-#define F32_F32_BETA_OP_NLT16F_MASK(lmask,reg,m_ir,m_ind,n_ind,scratch1,scratch2) \
+#define F32_F32_BETA_OP_NLT16F_MASK(c,lmask,reg,m_ir,m_ind,n_ind,scratch1,scratch2) \
 	scratch1 = _mm512_maskz_loadu_ps( lmask, c + ( rs_c * ( m_ir + m_ind ) ) + ( n_ind * 16 ) ); \
 	F32_BETA_FMA(reg,scratch1,scratch2) \
 

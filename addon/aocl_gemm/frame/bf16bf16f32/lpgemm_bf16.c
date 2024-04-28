@@ -74,8 +74,13 @@ LPGEMV(bfloat16, bfloat16, float, bf16bf16f32of32)
 
 	// Strides are updated based on matrix packing/reordering.
 	bfloat16* a_use = ( bfloat16* )a;
-	dim_t rs_a_use = rs_a;
-	dim_t cs_a_use = cs_a;
+	inc_t rs_a_use = rs_a;
+	inc_t cs_a_use = cs_a;
+
+	bfloat16* b_use = ( bfloat16* )b;
+	inc_t rs_b_use = rs_b;
+	inc_t cs_b_use = cs_b;
+
 
 	float *c_use = NULL;
 	bfloat16* pack_a_buffer_bf16;
@@ -103,6 +108,29 @@ LPGEMV(bfloat16, bfloat16, float, bf16bf16f32of32)
 	{
 		// Increased MR from 6 to 16 to make use of 32 ZMM registers
 		dim_t MR = 16;
+
+		// pack B matrix if rs_b > 1
+		if( ( mtag_b == PACK ) && ( rs_b != 1 ) )
+		{
+			mem_b_size_req = sizeof( bfloat16 ) * k;
+
+			lpgemm_alloc_mem_panel
+			(
+			  mem_b_size_req, BLIS_BUFFER_FOR_GEN_USE,
+			  &mem_b, rntm
+			);
+
+			pack_b_buffer_bf16 = ( bfloat16* ) bli_mem_buffer( &mem_b );
+
+			for( dim_t k0 = 0; k0 < k; k0++ )
+			{
+				pack_b_buffer_bf16[k0] = b[ k0*rs_b ];
+			}
+
+			b_use = pack_b_buffer_bf16;
+			rs_b_use = 1;
+			cs_b_use = 1;
+		}
 
 		// Compute the IC loop thread range for the current thread.
 		dim_t ic_start, ic_end;
@@ -143,7 +171,7 @@ LPGEMV(bfloat16, bfloat16, float, bf16bf16f32of32)
 			(
 			  mc0, k,
 			  a_use, rs_a_use, cs_a_use, mtag_a,
-			  b, rs_b, cs_b, mtag_b,
+			  b_use, rs_b_use, cs_b_use, mtag_b,
 			  c_use, rs_c, cs_c,
 			  alpha, beta,
 			  MR, KC,
@@ -157,6 +185,10 @@ LPGEMV(bfloat16, bfloat16, float, bf16bf16f32of32)
 		{
 			bli_pba_release(rntm, &mem_a);
 		}
+		if( mtag_b == PACK && bli_mem_is_alloc( &mem_b ) )
+		{
+			bli_pba_release(rntm, &mem_b);
+		}
 	}
 	else
 	{
@@ -167,8 +199,6 @@ LPGEMV(bfloat16, bfloat16, float, bf16bf16f32of32)
 
 		dim_t packb_min_NR = 16;
 
-		dim_t rs_b_use = 0, cs_b_use = 0;
-
 		dim_t k_updated = k;
 		k_updated += ( k_updated & 0x1 );
 
@@ -176,8 +206,8 @@ LPGEMV(bfloat16, bfloat16, float, bf16bf16f32of32)
 
 		kc0 +=  ( kc0 & 0x1 );
 
-		inc_t rs_a_use = rs_a;
-		inc_t cs_a_use = 2;
+		rs_a_use = rs_a;
+		cs_a_use = 2;
 
 		if ( mtag_a == PACK )
 		{
@@ -211,7 +241,6 @@ LPGEMV(bfloat16, bfloat16, float, bf16bf16f32of32)
 			dim_t jc_cur_loop = jc;
 			dim_t jc_cur_loop_rem = 0;
 			dim_t n_sub_updated = 0;
-			bfloat16 *b_use = NULL;
 
 			if (mtag_b == REORDERED)
 			{
@@ -304,8 +333,7 @@ LPGEMV(bfloat16, bfloat16, float, bf16bf16f32of32)
 LPGEMM_5LOOP(bfloat16,bfloat16,float,bf16bf16f32of32)
 {
 
-#ifdef BLIS_KERNELS_ZEN4
-#ifndef LPGEMM_BF16_JIT
+#if (defined(BLIS_KERNELS_ZEN4) && (!defined(LPGEMM_BF16_JIT)))
 	// Handle using LPGEMV when m or/and n equal to 1
 	// The avx512 check will be removed when avx2 kernels added in future
 	if ( (n == 1) || ( m == 1 ) )
@@ -323,7 +351,6 @@ LPGEMM_5LOOP(bfloat16,bfloat16,float,bf16bf16f32of32)
 		                               c_downscale);
 		return;
 	}
-#endif
 #endif
 
 	dim_t NC = lcntx->blksz.NC;

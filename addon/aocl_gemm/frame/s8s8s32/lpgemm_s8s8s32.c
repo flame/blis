@@ -64,6 +64,282 @@ typedef void (*lpgemm_rowvar_s32_s8)
        lpgemm_post_op_attr
      );
 
+#ifdef BLIS_KERNELS_ZEN4
+
+LPGEMV(int8_t,int8_t,int32_t,s8s8s32o32)
+{
+	dim_t NC = lcntx->blksz.NC;
+	dim_t KC = lcntx->blksz.KC;
+	dim_t MC = lcntx->blksz.MC;
+	dim_t NR = lcntx->blksz.NR;
+
+	// Strides are updated based on matrix packing/reordering.
+	int8_t* a_use = ( int8_t* )a;
+	inc_t rs_a_use = rs_a;
+	inc_t cs_a_use = cs_a;
+
+	int8_t* b_use = ( int8_t* )b;
+	dim_t rs_b_use = rs_b;
+	inc_t cs_b_use = cs_b;
+
+	int32_t *c_use = NULL;
+
+	int32_t* pack_b_column_sum = NULL;
+
+	lpgemm_post_op_attr post_ops_attr;
+	post_ops_attr.c_stor_type = c_downscale;
+	if (c_downscale < S32) post_ops_attr.buf_downscale = c;
+	else  post_ops_attr.buf_downscale = NULL;
+
+	siz_t mem_a_size_req = 0;
+	siz_t mem_b_size_req = 0;
+
+	mem_t mem_a = BLIS_MEM_INITIALIZER;
+	mem_t mem_b = BLIS_MEM_INITIALIZER;
+
+	int8_t* pack_b_buffer_s8s8s32os32;
+	int8_t* pack_a_buffer_s8s8s32os32;
+
+	// Generate thrinfo objects for jc and ic loops from lpgemm_thrinfo_t.
+	thrinfo_t thread_jc;
+	thrinfo_t thread_ic;
+
+	lpgemm_gen_thrinfo( thread, &thread_jc, &thread_ic );
+
+	if( n == 1 )
+	{
+		// Increased MR from 6 to 16 to make use of 32 ZMM registers
+		dim_t MR = 16;
+
+		// pack B matrix if rs_b > 1
+		if( ( mtag_b == PACK ) && ( rs_b != 1 ) )
+		{
+			mem_b_size_req = sizeof( int8_t ) * k;
+
+			lpgemm_alloc_mem_panel
+			(
+			  mem_b_size_req, BLIS_BUFFER_FOR_GEN_USE,
+			  &mem_b, rntm
+			);
+
+			pack_b_buffer_s8s8s32os32 = ( int8_t* ) bli_mem_buffer( &mem_b );
+
+			for( dim_t k0 = 0; k0 < k; k0++ )
+			{
+				pack_b_buffer_s8s8s32os32[k0] = b[ k0*rs_b ];
+			}
+
+			b_use = pack_b_buffer_s8s8s32os32;
+			rs_b_use = 1;
+			cs_b_use = 1;
+		}
+
+		// Compute the IC loop thread range for the current thread.
+		dim_t ic_start, ic_end;
+		bli_thread_range_sub(&thread_ic, m, MR, FALSE, &ic_start, &ic_end);
+
+		for (dim_t ic = ic_start; ic < ic_end; ic += MC)
+		{
+			dim_t mc0 = bli_min((ic_end - ic), MC);
+
+			const int8_t *a_use = a + ic * rs_a;
+			c_use = c + ic * rs_c;
+
+			post_ops_attr.post_op_c_i = ic;
+			post_ops_attr.post_op_c_j = 0;
+			post_ops_attr.rs_c_downscale = rs_c;
+
+			if( mtag_a == PACK )
+			{
+				mem_a_size_req = sizeof( int8_t ) * mc0 * k;
+
+				lpgemm_alloc_mem_panel
+				(
+				  mem_a_size_req, BLIS_BUFFER_FOR_GEN_USE,
+				  &mem_a, rntm
+				);
+
+				pack_a_buffer_s8s8s32os32 = (int8_t*)bli_mem_buffer( &mem_a );
+
+				( ( packa_s32 ) lcntx->packa_fun_ptr )
+				(
+				  ( uint8_t* ) pack_a_buffer_s8s8s32os32,
+				  ( uint8_t* )( a + ( rs_a * ic )), rs_a, cs_a,
+				  mc0, k,
+				  &rs_a_use, &cs_a_use
+				);
+				a_use = pack_a_buffer_s8s8s32os32;
+			}
+			// Call lpgemv_n_one kernel
+			lpgemv_n_one_u8s8s32os32
+			(
+			  mc0, k,
+			  (uint8_t*)a_use, rs_a_use, cs_a_use, mtag_a,
+			  b_use, rs_b_use, cs_b_use, mtag_b,
+			  c_use, rs_c, cs_c,
+			  alpha, beta,
+			  MR, KC,
+			  post_op_list,
+			  &post_ops_attr
+			);
+		}
+
+		// Release pack buffers
+		if( mtag_a == PACK && bli_mem_is_alloc( &mem_a ) )
+		{
+			bli_pba_release(rntm, &mem_a);
+		}
+		if( mtag_b == PACK && bli_mem_is_alloc( &mem_b ) )
+		{
+			bli_pba_release(rntm, &mem_b);
+		}
+	}
+	else
+	{
+		dim_t jc_start, jc_end;
+		bli_thread_range_sub(&thread_jc, n, NR, FALSE, &jc_start, &jc_end);
+
+		dim_t packb_min_NR = get_packb_s8s8s32o32_min_NR();
+
+		dim_t k_updated = make_multiple_of_n( k, 4 );
+		dim_t n_updated = make_multiple_of_n( n, 16 );
+
+		rs_a_use = rs_a;
+		cs_a_use = 4;
+
+
+		if ( mtag_a == PACK )
+		{
+			mem_a_size_req = sizeof( uint8_t ) * k;
+
+			lpgemm_alloc_mem_panel
+			(
+			  mem_a_size_req, BLIS_BUFFER_FOR_GEN_USE,
+			  &mem_a, rntm
+			);
+
+			pack_a_buffer_s8s8s32os32 =
+				( int8_t* ) bli_mem_buffer( &mem_a );
+
+			( ( packa_s32 )lcntx->packa_fun_ptr )
+			(
+			  ( uint8_t* )pack_a_buffer_s8s8s32os32,
+			  ( uint8_t* )a, rs_a, cs_a,
+			  1, k,
+			  &rs_a_use, &cs_a_use
+			);
+
+			a_use = pack_a_buffer_s8s8s32os32;
+		}
+
+		for (dim_t jc = jc_start; jc < jc_end; jc += NC)
+		{
+			dim_t nc0 = bli_min((jc_end - jc), NC);
+			c_use = c + jc;
+
+			dim_t jc_cur_loop = jc;
+			dim_t jc_cur_loop_rem = 0;
+			dim_t n_sub_updated = 0;
+
+			if (mtag_b == REORDERED)
+			{
+				get_B_panel_reordered_start_offset_width(
+				  jc, n, NC, packb_min_NR,
+				  &jc_cur_loop, &jc_cur_loop_rem,
+				  &nc0, &n_sub_updated );
+
+				b_use = (int8_t*) ( b + (jc_cur_loop * k_updated ) );
+
+				lpgemm_get_packb_strides( lcntx, &rs_b_use, &cs_b_use );
+
+				post_ops_attr.b_col_sum_vec = ( (int32_t*)( b +
+				                              ( k_updated * n_updated ) ) )
+				                                + jc;
+			}
+			else if( mtag_b == PACK )
+			{
+				dim_t nc0_updated = make_multiple_of_n( nc0, packb_min_NR );
+
+				mem_b_size_req = sizeof( int8_t ) * nc0_updated * k_updated
+				                 + ( nc0_updated * sizeof( int32_t ) );
+
+				n_sub_updated = nc0_updated;
+
+				lpgemm_alloc_mem_panel
+				(
+				  mem_b_size_req, BLIS_BUFFER_FOR_B_PANEL,
+				  &mem_b, rntm
+				);
+
+				pack_b_buffer_s8s8s32os32 =
+						( int8_t* ) bli_mem_buffer( &mem_b );
+
+
+				pack_b_column_sum = ( int32_t* )( pack_b_buffer_s8s8s32os32
+				                    + ( sizeof( int8_t ) * nc0_updated
+				                                         * k_updated ) );
+
+				for (dim_t idx = 0; idx < nc0; idx++ )
+				{
+					*( pack_b_column_sum + idx ) =  0;
+				}
+
+				for ( dim_t pc = 0; pc < k; pc += KC )
+				{
+					dim_t kc0 = bli_min( ( k - pc ), KC );
+
+					( ( packb_s32_s8 )lcntx->packb_fun_ptr )
+					(
+					  ( pack_b_buffer_s8s8s32os32 ) +
+					  ( n_sub_updated * pc ),
+					  pack_b_column_sum,
+					  ( b + ( rs_b * pc ) + (jc * cs_b)),
+					  rs_b, nc0, kc0, &rs_b_use, &cs_b_use
+					);
+				}
+
+				b_use = pack_b_buffer_s8s8s32os32;
+				post_ops_attr.b_col_sum_vec = pack_b_column_sum;
+			}
+
+			post_ops_attr.post_op_c_i = 0;
+			post_ops_attr.post_op_c_j = jc;
+			post_ops_attr.rs_c_downscale = rs_c;
+			post_ops_attr.b_sum_offset = 0;
+
+			lpgemv_m_one_s8s8s32os32
+			(
+			  nc0, k,
+			  a_use, rs_a_use, cs_a_use, mtag_a,
+			  b_use, rs_b_use, cs_b_use, mtag_b,
+			  c_use, rs_c, cs_c,
+			  alpha, beta,
+			  NR, KC,
+			  n_sub_updated,
+			  jc_cur_loop_rem,
+			  post_op_list,
+			  &post_ops_attr
+			);
+
+			if (mtag_b == REORDERED)
+			{
+				adjust_B_panel_reordered_jc(&jc, jc_cur_loop);
+			}
+		} // jc loop
+
+		// Release pack buffers.
+		if ( mtag_b == PACK && bli_mem_is_alloc( &mem_b ) )
+		{
+			bli_pba_release( rntm, &mem_b );
+		}
+		if( mtag_a == PACK && bli_mem_is_alloc( &mem_a ) )
+		{
+			bli_pba_release(rntm, &mem_a);
+		}
+	}
+}
+
+#endif
 // B should always be packed.
 LPGEMM_5LOOP(int8_t,int8_t,int32_t,s8s8s32o32)
 {
@@ -78,6 +354,26 @@ LPGEMM_5LOOP(int8_t,int8_t,int32_t,s8s8s32o32)
 		//Error: can only work with packed B now.
 		return;
 	}
+
+#ifdef BLIS_KERNELS_ZEN4
+
+	if( ( m == 1 ) || ( n == 1 ) )
+	{
+		lpgemv_rowvar_s8s8s32o32( m, n, k,
+		                          a, rs_a, cs_a, mtag_a,
+		                          b, rs_b, cs_b, mtag_b,
+		                          c, rs_c, cs_c,
+		                          alpha,
+		                          beta,
+		                          rntm,
+		                          thread,
+		                          lcntx,
+		                          post_op_list,
+		                          c_downscale );
+		return;
+	}
+
+#endif
 
 	// Strides are updated based on matrix packing/reordering.
 	const int8_t* a_use = NULL;
@@ -233,7 +529,8 @@ LPGEMM_5LOOP(int8_t,int8_t,int32_t,s8s8s32o32)
 					// which is a multiple of 16. Subsequently the nc0 offsets used
 					// for packed/reordered buffers needs to be updated.pack
 
-					mem_b_size_req = sizeof( int8_t ) * nc0_updated * kc0_updated + ( nc0_updated * sizeof( int32_t ) );
+					mem_b_size_req = sizeof( int8_t ) * nc0_updated * kc0_updated
+					                 + ( nc0_updated * sizeof( int32_t ) );
 
 					lpgemm_alloc_mem_panel
 					(
@@ -268,7 +565,9 @@ LPGEMM_5LOOP(int8_t,int8_t,int32_t,s8s8s32o32)
 
 				if ( pc == 0)
 				{
-					pack_b_column_sum = ( int32_t* )( pack_b_buffer_s8s8s32o32 + ( sizeof( int8_t ) * nc0_updated * kc0_updated ) );
+					pack_b_column_sum = ( int32_t* )( pack_b_buffer_s8s8s32o32
+					                    + ( sizeof( int8_t ) * nc0_updated
+					                                         * kc0_updated ) );
 				}
 
 				// Ensure thread ranges are valid, especially cases where no:
@@ -368,7 +667,7 @@ LPGEMM_5LOOP(int8_t,int8_t,int32_t,s8s8s32o32)
 					);
 					a_use = pack_a_buffer_s8s8s32o32;
 
-					if( cs_a == 1 ) 
+					if( cs_a == 1 )
 					{
 						a_block_stride = kc0_updated;
 					}

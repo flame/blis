@@ -71,8 +71,8 @@ typedef struct lpgemm_post_op_attr_t
 	uint64_t rs_c_downscale;
 	uint64_t cs_c_downscale;
 	void* buf_downscale;
-	bool is_first_k;
-	bool is_last_k;
+	uint64_t is_first_k;
+	uint64_t is_last_k;
 	uint64_t c_stor_type;
 	uint64_t b_sum_offset;
 	int32_t* b_col_sum_vec;

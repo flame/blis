@@ -100,5 +100,7 @@ void lpgemv_rowvar_ ## LP_SFX \
 
 LPGEMV(float, float, float, f32f32f32of32);
 LPGEMV(bfloat16,bfloat16,float,bf16bf16f32of32);
+LPGEMV(uint8_t,int8_t,int32_t,u8s8s32os32);
+LPGEMV(int8_t,int8_t,int32_t,s8s8s32os32);
 
 #endif // LPGEMM_5LOOP_INTF_H

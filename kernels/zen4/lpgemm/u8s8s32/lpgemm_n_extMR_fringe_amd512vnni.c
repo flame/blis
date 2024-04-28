@@ -458,51 +458,51 @@ LPGEMM_N_LT_NR0_FRINGE_KERN(uint8_t,int8_t,int32_t,u8s8s32o32_12xlt16)
 				__mmask16 load_mask = _cvtu32_mask16( 0xFFFF >> ( 16 - n0_rem ) );
 
 				// c[0,0-15]
-				S32_S32_BETA_OP_NLT16F_MASK(load_mask, c_int32_0p0, ir, 0, 0, \
+				S32_S32_BETA_OP_NLT16F_MASK(c, load_mask, c_int32_0p0, ir, 0, 0, \
 								selector1, selector2);
 
 				// c[1,0-15]
-				S32_S32_BETA_OP_NLT16F_MASK(load_mask, c_int32_1p0, ir, 1, 0, \
+				S32_S32_BETA_OP_NLT16F_MASK(c, load_mask, c_int32_1p0, ir, 1, 0, \
 								selector1, selector2);
 
 				// c[2,0-15]
-				S32_S32_BETA_OP_NLT16F_MASK(load_mask, c_int32_2p0, ir, 2, 0, \
+				S32_S32_BETA_OP_NLT16F_MASK(c, load_mask, c_int32_2p0, ir, 2, 0, \
 								selector1, selector2);
 
 				// c[3,0-15]
-				S32_S32_BETA_OP_NLT16F_MASK(load_mask, c_int32_3p0, ir, 3, 0, \
+				S32_S32_BETA_OP_NLT16F_MASK(c, load_mask, c_int32_3p0, ir, 3, 0, \
 								selector1, selector2);
 
 				// c[4,0-15]
-				S32_S32_BETA_OP_NLT16F_MASK(load_mask, c_int32_4p0, ir, 4, 0, \
+				S32_S32_BETA_OP_NLT16F_MASK(c, load_mask, c_int32_4p0, ir, 4, 0, \
 								selector1, selector2);
 
 				// c[5,0-15]
-				S32_S32_BETA_OP_NLT16F_MASK(load_mask, c_int32_5p0, ir, 5, 0, \
+				S32_S32_BETA_OP_NLT16F_MASK(c, load_mask, c_int32_5p0, ir, 5, 0, \
 								selector1, selector2);
 
 				// c[6,0-15]
-				S32_S32_BETA_OP_NLT16F_MASK(load_mask, c_int32_6p0, ir, 6, 0, \
+				S32_S32_BETA_OP_NLT16F_MASK(c, load_mask, c_int32_6p0, ir, 6, 0, \
 								selector1, selector2);
 
 				// c[7,0-15]
-				S32_S32_BETA_OP_NLT16F_MASK(load_mask, c_int32_7p0, ir, 7, 0, \
+				S32_S32_BETA_OP_NLT16F_MASK(c, load_mask, c_int32_7p0, ir, 7, 0, \
 								selector1, selector2);
 
 				// c[8,0-15]
-				S32_S32_BETA_OP_NLT16F_MASK(load_mask, c_int32_8p0, ir, 8, 0, \
+				S32_S32_BETA_OP_NLT16F_MASK(c, load_mask, c_int32_8p0, ir, 8, 0, \
 								selector1, selector2);
 
 				// c[9,0-15]
-				S32_S32_BETA_OP_NLT16F_MASK(load_mask, c_int32_9p0, ir, 9, 0, \
+				S32_S32_BETA_OP_NLT16F_MASK(c, load_mask, c_int32_9p0, ir, 9, 0, \
 								selector1, selector2);
 
 				// c[10,0-15]
-				S32_S32_BETA_OP_NLT16F_MASK(load_mask, c_int32_10p0, ir, 10, 0, \
+				S32_S32_BETA_OP_NLT16F_MASK(c, load_mask, c_int32_10p0, ir, 10, 0, \
 								selector1, selector2);
 
 				// c[11,0-15]
-				S32_S32_BETA_OP_NLT16F_MASK(load_mask, c_int32_11p0, ir, 11, 0, \
+				S32_S32_BETA_OP_NLT16F_MASK(c, load_mask, c_int32_11p0, ir, 11, 0, \
 								selector1, selector2);
 			}
 		}

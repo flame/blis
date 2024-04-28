@@ -93,6 +93,11 @@ LPGEMV(float, float, float, f32f32f32of32)
   cntx_t *cntx = bli_gks_query_cntx();
   num_t dt = BLIS_FLOAT;
 
+  float* b_use = (float*)b;
+  inc_t rs_b_use = rs_b;
+  inc_t cs_b_use = cs_b;
+
+
   // Query the context for various blocksizes.
   const dim_t NR = bli_cntx_get_l3_sup_blksz_def_dt(dt, BLIS_NR, cntx);
   const dim_t NC = bli_cntx_get_l3_sup_blksz_def_dt(dt, BLIS_NC, cntx);
@@ -114,9 +119,36 @@ LPGEMV(float, float, float, f32f32f32of32)
 
   if(n == 1)
   {
+    mem_t mem_b = BLIS_MEM_INITIALIZER;
+    float* pack_b_buffer_f32f32f32of32;
+
     //TODO: AVX2 support need to be added
     // Increased MR from 6 to 16 to make use of 32 ZMM registers
     dim_t MR = 16;
+
+    // Pack B matrix if rs_b > 1
+    if( ( mtag_b == PACK ) && ( rs_b != 1 ) )
+    {
+      siz_t mem_b_size_req = sizeof( float ) * k;
+
+      lpgemm_alloc_mem_panel
+      (
+        mem_b_size_req, BLIS_BUFFER_FOR_GEN_USE,
+        &mem_b, rntm
+      );
+
+      pack_b_buffer_f32f32f32of32 = ( float* ) bli_mem_buffer( &mem_b );
+
+      for( dim_t k0 = 0; k0 < k; k0++ )
+      {
+        pack_b_buffer_f32f32f32of32[k0] = b[ k0*rs_b ];
+      }
+
+      b_use = pack_b_buffer_f32f32f32of32;
+      rs_b_use = 1;
+      cs_b_use = 1;
+
+    }
 
     // Compute the IC loop thread range for the current thread.
     dim_t ic_start, ic_end;
@@ -134,7 +166,7 @@ LPGEMV(float, float, float, f32f32f32of32)
       (
           mc0, k,
           a_use, rs_a, cs_a, mtag_a,
-          b, rs_b, cs_b, mtag_b,
+          b_use, rs_b_use, cs_b_use, mtag_b,
           c_use, rs_c, cs_c,
           alpha, beta,
           MR, KC,
@@ -157,7 +189,6 @@ LPGEMV(float, float, float, f32f32f32of32)
       dim_t jc_cur_loop = jc;
       dim_t jc_cur_loop_rem = 0;
       dim_t n_sub_updated = 0;
-      const float *b_use = NULL;
 
       if (mtag_b == REORDERED)
       {
@@ -166,10 +197,10 @@ LPGEMV(float, float, float, f32f32f32of32)
             &jc_cur_loop, &jc_cur_loop_rem,
             &nc0, &n_sub_updated);
 
-        b_use = b + (jc_cur_loop * k);
+        b_use = (float*) b + (jc_cur_loop * k);
       }else
       {
-        b_use = b + jc;
+        b_use = (float*) b + jc;
       }
 
       //update post-op pointer

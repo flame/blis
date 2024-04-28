@@ -347,11 +347,11 @@ void bli_lpgemm_jit:: bf16_f32_matrix_add( dim_t m_dim, dim_t n_dim )
     mov( rcx, ptr[ rdx + offsetof( lpgemm_post_op, op_args1 ) ] );
 
     // rax = ldm
-    mov( rdi, ptr[ rdx + offsetof( lpgemm_post_op, op_args3 ) ] );
-    mov( rdi, ptr[ rdi ] );
+    mov( rax, ptr[ rdx + offsetof( lpgemm_post_op, op_args3 ) ] );
+    mov( rax, ptr[ rax ] );
 
     // ldm *= sizeof(bfloat16)
-    lea( rdi, ptr[ rdi * 2 ] );
+    lea( rax, ptr[ rax * 2 ] );
 
     mov( rsi, ptr[ rsp + stack_off_postop +
                    offsetof( lpgemm_post_op_attr, post_op_c_i ) ] );
@@ -359,7 +359,7 @@ void bli_lpgemm_jit:: bf16_f32_matrix_add( dim_t m_dim, dim_t n_dim )
                    offsetof( lpgemm_post_op_attr, post_op_c_j ) ] );
 
     // rsi = post_op_c_i * ( rs_c_downscale * sizeof(bfloat16) )
-    imul( rsi, rdi );
+    imul( rsi, rax );
 
     // rsi = post_op_c_i * ( rs_c_downscale * sizeof(bfloat16) )
     //       + post_op_c_j * sizeof(bfloat16)
@@ -405,7 +405,7 @@ void bli_lpgemm_jit:: bf16_f32_matrix_add( dim_t m_dim, dim_t n_dim )
         }
 
         // move to next row
-        add( rcx, rdi );
+        add( rcx, rax );
     }
 }
 
@@ -417,11 +417,11 @@ void bli_lpgemm_jit:: f32_f32_matrix_add( dim_t m_dim, dim_t n_dim )
     // rcx =  matrix ptr
     mov( rcx, ptr[ rdx + offsetof( lpgemm_post_op, op_args1 ) ] );
     // rax = ldm
-    mov( rdi, ptr[ rdx + offsetof( lpgemm_post_op, op_args3 ) ] );
-    mov( rdi, ptr[ rdi ] );
+    mov( rax, ptr[ rdx + offsetof( lpgemm_post_op, op_args3 ) ] );
+    mov( rax, ptr[ rax ] );
 
     // ldm *= sizeof(float)
-    lea( rdi, ptr[ rdi * 4 ] );
+    lea( rax, ptr[ rax * 4 ] );
 
     mov( rsi, ptr[ rsp + stack_off_postop +
                    offsetof( lpgemm_post_op_attr, post_op_c_i ) ] );
@@ -429,7 +429,7 @@ void bli_lpgemm_jit:: f32_f32_matrix_add( dim_t m_dim, dim_t n_dim )
                    offsetof( lpgemm_post_op_attr, post_op_c_j ) ] );
 
     // rsi = post_op_c_i * ( rs_c_downscale * sizeof(float) )
-    imul( rsi, rdi );
+    imul( rsi, rax );
 
     // rsi = post_op_c_i * ( rs_c_downscale * sizeof(float) )
     //       + post_op_c_j * sizeof(float)
@@ -456,7 +456,7 @@ void bli_lpgemm_jit:: f32_f32_matrix_add( dim_t m_dim, dim_t n_dim )
         }
 
         // move to next row
-        add( rcx, rdi );
+        add( rcx, rax );
     }
 }
 void bli_lpgemm_jit:: bias_row_major( dim_t m_dim, dim_t n_dim )

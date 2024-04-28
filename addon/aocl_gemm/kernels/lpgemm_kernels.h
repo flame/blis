@@ -401,6 +401,8 @@ void lpgemv_m_one_ ## LP_SFX \
 
 LPGEMV_M_EQ1_KERN(float, float, float,f32f32f32of32);
 LPGEMV_M_EQ1_KERN(bfloat16,bfloat16,float,bf16bf16f32of32);
+LPGEMV_M_EQ1_KERN(uint8_t,int8_t,int32_t,u8s8s32os32);
+LPGEMV_M_EQ1_KERN(int8_t,int8_t,int32_t,s8s8s32os32);
 
 #define LPGEMV_N_EQ1_KERN(A_type,B_type,C_type,LP_SFX) \
 void lpgemv_n_one_ ## LP_SFX \
@@ -428,5 +430,6 @@ void lpgemv_n_one_ ## LP_SFX \
 
 LPGEMV_N_EQ1_KERN(float, float, float,f32f32f32of32);
 LPGEMV_N_EQ1_KERN(bfloat16, bfloat16, float,bf16bf16f32of32);
+LPGEMV_N_EQ1_KERN(uint8_t,int8_t,int32_t,u8s8s32os32);
 
 #endif //BLIS_LPGEMM_KERN_H

@@ -261,23 +261,23 @@ LPGEMM_MN_LT_NR0_FRINGE_KERN(int8_t,int8_t,int32_t,s8s8s32os32_5xlt16)
 				__mmask16 load_mask = _cvtu32_mask16( 0xFFFF >> ( 16 - n0_rem ) );
 
 				// c[0,0-15]
-				S32_S32_BETA_OP_NLT16F_MASK(load_mask, c_int32_0p0, 0, 0, 0, \
+				S32_S32_BETA_OP_NLT16F_MASK(c, load_mask, c_int32_0p0, 0, 0, 0, \
 								selector1, selector2);
 
 				// c[1,0-15]
-				S32_S32_BETA_OP_NLT16F_MASK(load_mask, c_int32_1p0, 0, 1, 0, \
+				S32_S32_BETA_OP_NLT16F_MASK(c, load_mask, c_int32_1p0, 0, 1, 0, \
 								selector1, selector2);
 
 				// c[2,0-15]
-				S32_S32_BETA_OP_NLT16F_MASK(load_mask, c_int32_2p0, 0, 2, 0, \
+				S32_S32_BETA_OP_NLT16F_MASK(c, load_mask, c_int32_2p0, 0, 2, 0, \
 								selector1, selector2);
 
 				// c[3,0-15]
-				S32_S32_BETA_OP_NLT16F_MASK(load_mask, c_int32_3p0, 0, 3, 0, \
+				S32_S32_BETA_OP_NLT16F_MASK(c, load_mask, c_int32_3p0, 0, 3, 0, \
 								selector1, selector2);
 
 				// c[4,0-15]
-				S32_S32_BETA_OP_NLT16F_MASK(load_mask, c_int32_4p0, 0, 4, 0, \
+				S32_S32_BETA_OP_NLT16F_MASK(c, load_mask, c_int32_4p0, 0, 4, 0, \
 								selector1, selector2);
 			}
 		}
@@ -782,19 +782,19 @@ LPGEMM_MN_LT_NR0_FRINGE_KERN(int8_t,int8_t,int32_t,s8s8s32os32_4xlt16)
 				__mmask16 load_mask = _cvtu32_mask16( 0xFFFF >> ( 16 - n0_rem ) );
 
 				// c[0,0-15]
-				S32_S32_BETA_OP_NLT16F_MASK(load_mask, c_int32_0p0, 0, 0, 0, \
+				S32_S32_BETA_OP_NLT16F_MASK(c, load_mask, c_int32_0p0, 0, 0, 0, \
 								selector1, selector2);
 
 				// c[1,0-15]
-				S32_S32_BETA_OP_NLT16F_MASK(load_mask, c_int32_1p0, 0, 1, 0, \
+				S32_S32_BETA_OP_NLT16F_MASK(c, load_mask, c_int32_1p0, 0, 1, 0, \
 								selector1, selector2);
 
 				// c[2,0-15]
-				S32_S32_BETA_OP_NLT16F_MASK(load_mask, c_int32_2p0, 0, 2, 0, \
+				S32_S32_BETA_OP_NLT16F_MASK(c, load_mask, c_int32_2p0, 0, 2, 0, \
 								selector1, selector2);
 
 				// c[3,0-15]
-				S32_S32_BETA_OP_NLT16F_MASK(load_mask, c_int32_3p0, 0, 3, 0, \
+				S32_S32_BETA_OP_NLT16F_MASK(c, load_mask, c_int32_3p0, 0, 3, 0, \
 								selector1, selector2);
 			}
 		}
@@ -1233,15 +1233,15 @@ LPGEMM_MN_LT_NR0_FRINGE_KERN(int8_t,int8_t,int32_t,s8s8s32os32_3xlt16)
 				__mmask16 load_mask = _cvtu32_mask16( 0xFFFF >> ( 16 - n0_rem ) );
 
 				// c[0,0-15]
-				S32_S32_BETA_OP_NLT16F_MASK(load_mask, c_int32_0p0, 0, 0, 0, \
+				S32_S32_BETA_OP_NLT16F_MASK(c, load_mask, c_int32_0p0, 0, 0, 0, \
 								selector1, selector2);
 
 				// c[1,0-15]
-				S32_S32_BETA_OP_NLT16F_MASK(load_mask, c_int32_1p0, 0, 1, 0, \
+				S32_S32_BETA_OP_NLT16F_MASK(c, load_mask, c_int32_1p0, 0, 1, 0, \
 								selector1, selector2);
 
 				// c[2,0-15]
-				S32_S32_BETA_OP_NLT16F_MASK(load_mask, c_int32_2p0, 0, 2, 0, \
+				S32_S32_BETA_OP_NLT16F_MASK(c, load_mask, c_int32_2p0, 0, 2, 0, \
 								selector1, selector2);
 			}
 		}
@@ -1614,11 +1614,11 @@ LPGEMM_MN_LT_NR0_FRINGE_KERN(int8_t,int8_t,int32_t,s8s8s32os32_2xlt16)
 				__mmask16 load_mask = _cvtu32_mask16( 0xFFFF >> ( 16 - n0_rem ) );
 
 				// c[0,0-15]
-				S32_S32_BETA_OP_NLT16F_MASK(load_mask, c_int32_0p0, 0, 0, 0, \
+				S32_S32_BETA_OP_NLT16F_MASK(c, load_mask, c_int32_0p0, 0, 0, 0, \
 								selector1, selector2);
 
 				// c[1,0-15]
-				S32_S32_BETA_OP_NLT16F_MASK(load_mask, c_int32_1p0, 0, 1, 0, \
+				S32_S32_BETA_OP_NLT16F_MASK(c, load_mask, c_int32_1p0, 0, 1, 0, \
 								selector1, selector2);
 			}
 		}
@@ -1925,7 +1925,7 @@ LPGEMM_MN_LT_NR0_FRINGE_KERN(int8_t,int8_t,int32_t,s8s8s32os32_1xlt16)
 				__mmask16 load_mask = _cvtu32_mask16( 0xFFFF >> ( 16 - n0_rem ) );
 
 				// c[0,0-15]
-				S32_S32_BETA_OP_NLT16F_MASK(load_mask, c_int32_0p0, 0, 0, 0, \
+				S32_S32_BETA_OP_NLT16F_MASK(c, load_mask, c_int32_0p0, 0, 0, 0, \
 								selector1, selector2);
 			}
 		}

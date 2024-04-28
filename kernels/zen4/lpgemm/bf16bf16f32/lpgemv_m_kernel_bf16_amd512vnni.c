@@ -45,13 +45,6 @@ LPGEMV_M_EQ1_KERN(bfloat16, bfloat16, float, bf16bf16f32of32)
 {}
 #else
 
-#define F32_F32_BETA_OP_C(c,reg,m_ir,m_ind,n_ind,scratch1,scratch2) \
-	scratch1 = \
-	_mm512_loadu_ps \
-	( \
-	  ( c + ( rs_c * ( m_ir + m_ind ) ) + ( n_ind * 16 ) ) \
-	); \
-	F32_BETA_FMA(reg,scratch1,scratch2) \
 
 LPGEMV_M_EQ1_KERN(bfloat16, bfloat16, float, bf16bf16f32of32)
 {
@@ -306,17 +299,17 @@ LPGEMV_M_EQ1_KERN(bfloat16, bfloat16, float, bf16bf16f32of32)
 			// needs to be upscaled to float to be used for beta scale.
 			if ( post_ops_attr.buf_downscale != NULL )
 			{
-				BF16_F32_BETA_OP( zmm8,  0, 0, 0, selector1, selector2 )
-				BF16_F32_BETA_OP( zmm12, 0, 0, 1, selector1, selector2 )
-				BF16_F32_BETA_OP( zmm16, 0, 0, 2, selector1, selector2 )
-				BF16_F32_BETA_OP( zmm20, 0, 0, 3, selector1, selector2 )
+				BF16_F32_BETA_OP_NLT16F_MASK( k1, zmm8,  0, 0, selector1, selector2 )
+				BF16_F32_BETA_OP_NLT16F_MASK( k2, zmm12, 0, 1, selector1, selector2 )
+				BF16_F32_BETA_OP_NLT16F_MASK( k3, zmm16, 0, 2, selector1, selector2 )
+				BF16_F32_BETA_OP_NLT16F_MASK( k4, zmm20, 0, 3, selector1, selector2 )
 			}
 			else
 			{
-				F32_F32_BETA_OP_C( c_use, zmm8,  0, 0, 0, selector1, selector2 )
-				F32_F32_BETA_OP_C( c_use, zmm12, 0, 0, 1, selector1, selector2 )
-				F32_F32_BETA_OP_C( c_use, zmm16, 0, 0, 2, selector1, selector2 )
-				F32_F32_BETA_OP_C( c_use, zmm20, 0, 0, 3, selector1, selector2 )
+				F32_F32_BETA_OP_NLT16F_MASK( c_use, k1, zmm8,  0, 0, 0, selector1, selector2 )
+				F32_F32_BETA_OP_NLT16F_MASK( c_use, k2, zmm12, 0, 0, 1, selector1, selector2 )
+				F32_F32_BETA_OP_NLT16F_MASK( c_use, k3, zmm16, 0, 0, 2, selector1, selector2 )
+				F32_F32_BETA_OP_NLT16F_MASK( c_use, k4, zmm20, 0, 0, 3, selector1, selector2 )
 			}
 		}
 
