@@ -185,7 +185,7 @@ void bli_cntx_init_zen4( cntx_t* cntx )
 	  // scalv
 	  BLIS_SCALV_KER,  BLIS_FLOAT,    bli_sscalv_zen_int_avx512,
 	  BLIS_SCALV_KER,  BLIS_DOUBLE,   bli_dscalv_zen_int_avx512,
-	  BLIS_SCALV_KER,  BLIS_DCOMPLEX, bli_zscalv_zen_int,
+	  BLIS_SCALV_KER,  BLIS_DCOMPLEX, bli_zscalv_zen_int_avx512,
 
 	  // swapv
 	  BLIS_SWAPV_KER,  BLIS_FLOAT,    bli_sswapv_zen_int8,

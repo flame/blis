@@ -598,6 +598,11 @@ void zscal_blis_impl
     {
         case BLIS_ARCH_ZEN5:
         case BLIS_ARCH_ZEN4:
+#if defined(BLIS_KERNELS_ZEN4)
+          // AVX512 Kernel
+          scalv_fun_ptr = bli_zscalv_zen_int_avx512;
+          break;
+#endif
         case BLIS_ARCH_ZEN:
         case BLIS_ARCH_ZEN2:
         case BLIS_ARCH_ZEN3:
