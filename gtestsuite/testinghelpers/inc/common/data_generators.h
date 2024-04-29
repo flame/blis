@@ -128,65 +128,91 @@ void getfp(T2 from, T3 to, char storage, gtint_t m, gtint_t n, T1* a, gtint_t ld
 
     if((storage == 'c') || (storage == 'C'))
     {
-        for(gtint_t j=0; j<n; j++)
+        if (m > 0)
         {
-            if constexpr (testinghelpers::type_info<T1>::is_real)
+            for(gtint_t j=0; j<n; j++)
             {
-                for(gtint_t i=0; i<m-1; i++)
+                if constexpr (testinghelpers::type_info<T1>::is_real)
                 {
-                    for(gtint_t p=1; p<stridea; p++)
-                        a[i*stridea+p+j*lda] = T1{-1.2345e38};
+                    for(gtint_t i=0; i<m-1; i++)
+                    {
+                        for(gtint_t p=1; p<stridea; p++)
+                            a[i*stridea+p+j*lda] = T1{-1.2345e38};
 
-                    a[i*stridea+j*lda] = real_T(distr(generator));
+                        a[i*stridea+j*lda] = real_T(distr(generator));
+                    }
+                    a[(m-1)*stridea+j*lda] = real_T(distr(generator));
                 }
-                a[(m-1)*stridea+j*lda] = real_T(distr(generator));
-            }
-            else
-            {
-                for(gtint_t i=0; i<m-1; i++)
+                else
                 {
-                    for(gtint_t p=1; p<stridea; p++)
-                        a[i*stridea+p+j*lda] = T1{-1.2345e38};
+                    for(gtint_t i=0; i<m-1; i++)
+                    {
+                        for(gtint_t p=1; p<stridea; p++)
+                            a[i*stridea+p+j*lda] = T1{-1.2345e38};
 
-                    a[i*stridea+j*lda] = {real_T(distr(generator)), real_T(distr(generator))};
+                        a[i*stridea+j*lda] = {real_T(distr(generator)), real_T(distr(generator))};
+                    }
+                    a[(m-1)*stridea+j*lda] = {real_T(distr(generator)), real_T(distr(generator))};
                 }
-                a[(m-1)*stridea+j*lda] = {real_T(distr(generator)), real_T(distr(generator))};
+                for(gtint_t i=(m-1)*stridea+1; i<lda; i++)
+                {
+                    a[i+j*lda] = T1{-1.2345e38};
+                }
             }
-            for(gtint_t i=(m-1)*stridea+1; i<lda; i++)
+        }
+        else
+        {
+            for(gtint_t j=0; j<n; j++)
             {
-                a[i+j*lda] = T1{-1.2345e38};
+                for(gtint_t i=0; i<lda; i++)
+                {
+                    a[i+j*lda] = T1{-1.2345e38};
+                }
             }
         }
     }
     else if( (storage == 'r') || (storage == 'R') )
     {
-        for(gtint_t i=0; i<m; i++)
+        if (n > 0)
         {
-            if constexpr (testinghelpers::type_info<T1>::is_real)
+            for(gtint_t i=0; i<m; i++)
             {
-                for(gtint_t j=0; j<n-1; j++)
+                if constexpr (testinghelpers::type_info<T1>::is_real)
                 {
-                    for(gtint_t p=1; p<stridea; p++)
-                        a[j*stridea+p+i*lda] = T1{-1.2345e38};
+                    for(gtint_t j=0; j<n-1; j++)
+                    {
+                        for(gtint_t p=1; p<stridea; p++)
+                            a[j*stridea+p+i*lda] = T1{-1.2345e38};
 
-                    a[j*stridea+i*lda] = real_T(distr(generator));
+                        a[j*stridea+i*lda] = real_T(distr(generator));
+                    }
+                    a[(n-1)*stridea+i*lda] = real_T(distr(generator));
                 }
-                a[(n-1)*stridea+i*lda] = real_T(distr(generator));
-            }
-            else
-            {
-                for(gtint_t j=0; j<n-1; j++)
+                else
                 {
-                    for(gtint_t p=1; p<stridea; p++)
-                        a[j*stridea+p+i*lda] = T1{-1.2345e38};
+                    for(gtint_t j=0; j<n-1; j++)
+                    {
+                        for(gtint_t p=1; p<stridea; p++)
+                            a[j*stridea+p+i*lda] = T1{-1.2345e38};
 
-                    a[j*stridea+i*lda] = {real_T(distr(generator)), real_T(distr(generator))};
+                        a[j*stridea+i*lda] = {real_T(distr(generator)), real_T(distr(generator))};
+                    }
+                    a[(n-1)*stridea+i*lda] = {real_T(distr(generator)), real_T(distr(generator))};
                 }
-                a[(n-1)*stridea+i*lda] = {real_T(distr(generator)), real_T(distr(generator))};
+                for(gtint_t j=(n-1)*stridea+1; j<lda; j++)
+                {
+                    a[j+i*lda] = T1{-1.2345e38};
+                }
             }
-            for(gtint_t j=(n-1)*stridea+1; j<lda; j++)
+        }
+        else
+        {
+            for(gtint_t i=0; i<m; i++)
             {
-                a[j+i*lda] = T1{-1.2345e38};
+                for(gtint_t j=0; j<lda; j++)
+                {
+                    a[j+i*lda] = T1{-1.2345e38};
+                }
             }
         }
     }
@@ -286,65 +312,91 @@ void getint(int from, int to, char storage, gtint_t m, gtint_t n, T* a, gtint_t 
 
     if((storage == 'c') || (storage == 'C'))
     {
-        for(gtint_t j=0; j<n; j++)
+        if (m > 0)
         {
-            if constexpr (testinghelpers::type_info<T>::is_real)
+            for(gtint_t j=0; j<n; j++)
             {
-                for(gtint_t i=0; i<m-1; i++)
+                if constexpr (testinghelpers::type_info<T>::is_real)
                 {
-                    for(gtint_t p=1; p<stridea; p++)
-                        a[i*stridea+p+j*lda] = T{-1.2345e38};
+                    for(gtint_t i=0; i<m-1; i++)
+                    {
+                        for(gtint_t p=1; p<stridea; p++)
+                            a[i*stridea+p+j*lda] = T{-1.2345e38};
 
-                    a[i*stridea+j*lda] = real_T(distr(generator));
+                        a[i*stridea+j*lda] = real_T(distr(generator));
+                    }
+                    a[(m-1)*stridea+j*lda] = real_T(distr(generator));
                 }
-                a[(m-1)*stridea+j*lda] = real_T(distr(generator));
-            }
-            else
-            {
-                for(gtint_t i=0; i<m-1; i++)
+                else
                 {
-                    for(gtint_t p=1; p<stridea; p++)
-                        a[i*stridea+p+j*lda] = T{-1.2345e38};
+                    for(gtint_t i=0; i<m-1; i++)
+                    {
+                        for(gtint_t p=1; p<stridea; p++)
+                            a[i*stridea+p+j*lda] = T{-1.2345e38};
 
-                    a[i*stridea+j*lda] = {real_T(distr(generator)), real_T(distr(generator))};
+                        a[i*stridea+j*lda] = {real_T(distr(generator)), real_T(distr(generator))};
+                    }
+                    a[(m-1)*stridea+j*lda] = {real_T(distr(generator)), real_T(distr(generator))};
                 }
-                a[(m-1)*stridea+j*lda] = {real_T(distr(generator)), real_T(distr(generator))};
+                for(gtint_t i=(m-1)*stridea+1; i<lda; i++)
+                {
+                    a[i+j*lda] = T{-1.2345e38};
+                }
             }
-            for(gtint_t i=(m-1)*stridea+1; i<lda; i++)
+        }
+        else
+        {
+            for(gtint_t j=0; j<n; j++)
             {
-                a[i+j*lda] = T{-1.2345e38};
+                for(gtint_t i=0; i<lda; i++)
+                {
+                    a[i+j*lda] = T{-1.2345e38};
+                }
             }
         }
     }
     else if( (storage == 'r') || (storage == 'R') )
     {
-        for(gtint_t i=0; i<m; i++)
+        if (n > 0)
         {
-            if constexpr (testinghelpers::type_info<T>::is_real)
+            for(gtint_t i=0; i<m; i++)
             {
-                for(gtint_t j=0; j<n-1; j++)
+                if constexpr (testinghelpers::type_info<T>::is_real)
                 {
-                    for(gtint_t p=1; p<stridea; p++)
-                        a[j*stridea+p+i*lda] = T{-1.2345e38};
+                    for(gtint_t j=0; j<n-1; j++)
+                    {
+                        for(gtint_t p=1; p<stridea; p++)
+                            a[j*stridea+p+i*lda] = T{-1.2345e38};
 
-                    a[j*stridea+i*lda] = real_T(distr(generator));
+                        a[j*stridea+i*lda] = real_T(distr(generator));
+                    }
+                    a[(n-1)*stridea+i*lda] = real_T(distr(generator));
                 }
-                a[(n-1)*stridea+i*lda] = real_T(distr(generator));
-            }
-            else
-            {
-                for(gtint_t j=0; j<n-1; j++)
+                else
                 {
-                    for(gtint_t p=1; p<stridea; p++)
-                        a[j*stridea+p+i*lda] = T{-1.2345e38};
+                    for(gtint_t j=0; j<n-1; j++)
+                    {
+                        for(gtint_t p=1; p<stridea; p++)
+                            a[j*stridea+p+i*lda] = T{-1.2345e38};
 
-                    a[j*stridea+i*lda] = {real_T(distr(generator)), real_T(distr(generator))};
+                        a[j*stridea+i*lda] = {real_T(distr(generator)), real_T(distr(generator))};
+                    }
+                    a[(n-1)*stridea+i*lda] = {real_T(distr(generator)), real_T(distr(generator))};
                 }
-                a[(n-1)*stridea+i*lda] = {real_T(distr(generator)), real_T(distr(generator))};
+                for(gtint_t j=(n-1)*stridea+1; j<lda; j++)
+                {
+                    a[j+i*lda] = T{-1.2345e38};
+                }
             }
-            for(gtint_t j=(n-1)*stridea+1; j<lda; j++)
+        }
+        else
+        {
+            for(gtint_t i=0; i<m; i++)
             {
-                a[j+i*lda] = T{-1.2345e38};
+                for(gtint_t j=0; j<lda; j++)
+                {
+                    a[j+i*lda] = T{-1.2345e38};
+                }
             }
         }
     }
