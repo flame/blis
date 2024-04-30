@@ -95,11 +95,11 @@ fi
 
 # Datatypes to test.
 test_dts="s d c z"
-test_dts="d"
+#test_dts="d"
 
 # Operations to test.
 test_ops="gemm_nn hemm_ll herk_ln trmm_llnn trsm_runn"
-#test_ops="herk"
+#test_ops="gemm_nn"
 
 # Implementations to test.
 test_impls="blis"
@@ -115,8 +115,9 @@ fi
 # Number of repeats per problem size.
 nrepeats=3
 
-# The induced method to use ('native' or '1m').
-ind="native"
+# The induced method to use ('auto', 'native', or '1m') for executing
+# complex-domain level-3 operations.
+ind="auto"
 
 # Quiet mode?
 #quiet="yes"
