@@ -115,7 +115,8 @@ void bli_pool_init
 
 void bli_pool_finalize
      (
-       pool_t* pool
+       pool_t* pool,
+       bool    reinit
      )
 {
 	// NOTE: This implementation assumes that either:
@@ -129,24 +130,22 @@ void bli_pool_finalize
 	// Query the total number of blocks currently allocated.
 	const siz_t num_blocks = bli_pool_num_blocks( pool );
 
-	// NOTE: This sanity check has been disabled because bli_pool_reinit()
-	// is currently implemented in terms of bli_pool_finalize() followed by
-	// bli_pool_init(). If that _reinit() takes place when some blocks are
-	// checked out, then we would expect top_index != 0, and therefore this
-	// check is not universally appropriate.
-#if 0
 	// Query the top_index of the pool.
 	const siz_t top_index = bli_pool_top_index( pool );
 
 	// Sanity check: The top_index should be zero.
-	if ( top_index != 0 )
+	// NOTE: This sanity check is disabled when called from bli_pool_reinit()
+	// because it is currently implemented in terms of bli_pool_finalize() followed by
+	// bli_pool_init(). If that _reinit() takes place when some blocks are
+	// checked out, then we would expect top_index != 0, and therefore this
+	// check is not universally appropriate.
+	if ( top_index != 0 && !reinit )
 	{
 		printf( "bli_pool_finalize(): final top_index == %d (expected 0); block_size: %d.\n",
 		        ( int )top_index, ( int )bli_pool_block_size( pool ) );
 		printf( "bli_pool_finalize(): Implication: not all blocks were checked back in!\n" );
 		bli_abort();
 	}
-#endif
 
 	// Query the free() function pointer for the pool.
 	free_ft free_fp = bli_pool_free_fp( pool );
@@ -215,7 +214,7 @@ void bli_pool_reinit
 	// those blocks back into the pool. (This condition can be detected
 	// since the block size is encoded into each pblk, which is copied
 	// upon checkout.)
-	bli_pool_finalize( pool );
+	bli_pool_finalize( pool, TRUE );
 
 	// Reinitialize the pool with the new parameters, in particular,
 	// the new block size.
@@ -335,6 +334,10 @@ void bli_pool_checkin_block
 	// Query the top_index of the pool.
 	const siz_t top_index = bli_pool_top_index( pool );
 
+	// Check for double-free and other conditions which may prematurely
+	// exhaust the memory pool.
+	if ( top_index == 0 ) bli_abort();
+
 	#ifdef BLIS_ENABLE_MEM_TRACING
 	printf( "bli_pool_checkin_block(): checking in block %d of size %d "
 	        "(align %d, offset %d).\n",
@@ -403,14 +406,12 @@ void bli_pool_grow
 		=
 		bli_malloc_intl( block_ptrs_len_new * sizeof( pblk_t ), &r_val );
 
-		// Query the top_index of the pool.
-		const siz_t top_index = bli_pool_top_index( pool );
-
 		// Copy the contents of the old block_ptrs array to the new/resized
-		// array. Notice that we can begin with top_index since all entries
-		// from 0 to top_index-1 have been (and are currently) checked out
-		// to threads.
-		for ( dim_t i = top_index; i < num_blocks_cur; ++i )
+		// array. Notice that we copy the entire array, including elements
+		// corresponding to blocks that have been checked out. Those elements
+		// were set to NULL upon checkout, and so it's important to copy them
+		// into the new block_ptrs array.
+		for ( dim_t i = 0; i < num_blocks_cur; ++i )
 		{
 			block_ptrs_new[i] = block_ptrs_cur[i];
 		}

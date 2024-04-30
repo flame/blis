@@ -389,9 +389,9 @@ void bli_pba_finalize_pools
 	pool_t* pool_c  = bli_pba_pool( index_c, pba );
 
 	// Finalize the memory pools for A, B, and C.
-	bli_pool_finalize( pool_a );
-	bli_pool_finalize( pool_b );
-	bli_pool_finalize( pool_c );
+	bli_pool_finalize( pool_a, FALSE );
+	bli_pool_finalize( pool_b, FALSE );
+	bli_pool_finalize( pool_c, FALSE );
 }
 
 // -----------------------------------------------------------------------------
