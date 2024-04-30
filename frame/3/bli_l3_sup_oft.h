@@ -53,7 +53,7 @@ typedef err_t (*PASTECH(opname,_oft)) \
   const obj_t*  beta, \
   const obj_t*  c, \
   const cntx_t* cntx, \
-        rntm_t* rntm  \
+  const rntm_t* rntm  \
 );
 
 GENTDEF( gemmsup )

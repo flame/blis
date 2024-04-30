@@ -42,16 +42,12 @@ void bli_packm_sup_init_mem
        dim_t      m,
        dim_t      k,
        dim_t      mr,
-       rntm_t*    rntm,
-       mem_t*     mem,
        thrinfo_t* thread
      );
 
 void bli_packm_sup_finalize_mem
      (
        bool       did_pack,
-       rntm_t*    rntm,
-       mem_t*     mem,
        thrinfo_t* thread
      );
 
@@ -68,7 +64,7 @@ void bli_packm_sup_init
        const void*      x, inc_t  rs_x, inc_t  cs_x,
              void**     p, inc_t* rs_p, inc_t* cs_p,
                            dim_t* pd_p, inc_t* ps_p,
-             mem_t*     mem
+             thrinfo_t* thread
      );
 
 void bli_packm_sup
@@ -88,8 +84,6 @@ void bli_packm_sup
              void**     p, inc_t* rs_p, inc_t* cs_p,
                            inc_t* ps_p,
        const cntx_t*    cntx,
-             rntm_t*    rntm,
-             mem_t*     mem,
              thrinfo_t* thread
      );
 

@@ -42,7 +42,7 @@ err_t bli_gemmsup
        const obj_t*  beta,
        const obj_t*  c,
        const cntx_t* cntx,
-             rntm_t* rntm
+       const rntm_t* rntm
      )
 {
 	// Return early if small matrix handling is disabled at configure-time.
@@ -89,8 +89,8 @@ err_t bli_gemmsup
 	// Initialize a local runtime with global settings if necessary. Note
 	// that in the case that a runtime is passed in, we make a local copy.
 	rntm_t rntm_l;
-	if ( rntm == NULL ) { bli_rntm_init_from_global( &rntm_l ); rntm = &rntm_l; }
-	else                { rntm_l = *rntm;                       rntm = &rntm_l; }
+	if ( rntm == NULL ) { bli_rntm_init_from_global( &rntm_l ); }
+	else                { rntm_l = *rntm;                       }
 
 #if 0
 const num_t dt = bli_obj_dt( c );
@@ -127,7 +127,7 @@ printf( "dims: %d %d %d (threshs: %d %d %d)\n",
 	  beta,
 	  c,
 	  cntx,
-	  rntm
+	  &rntm_l
 	);
 }
 
@@ -140,7 +140,7 @@ err_t bli_gemmtsup
        const obj_t*  beta,
        const obj_t*  c,
        const cntx_t* cntx,
-             rntm_t* rntm
+       const rntm_t* rntm
      )
 {
 	// Return early if small matrix handling is disabled at configure-time.
@@ -174,8 +174,8 @@ err_t bli_gemmtsup
 	// Initialize a local runtime with global settings if necessary. Note
 	// that in the case that a runtime is passed in, we make a local copy.
 	rntm_t rntm_l;
-	if ( rntm == NULL ) { bli_rntm_init_from_global( &rntm_l ); rntm = &rntm_l; }
-	else                { rntm_l = *rntm;                       rntm = &rntm_l; }
+	if ( rntm == NULL ) { bli_rntm_init_from_global( &rntm_l ); }
+	else                { rntm_l = *rntm;                       }
 
 	// We've now ruled out the possibility that the sup thresholds are
 	// unsatisfied.
@@ -196,7 +196,7 @@ err_t bli_gemmtsup
 	  beta,
 	  c,
 	  cntx,
-	  rntm
+	  &rntm_l
 	);
 }
 

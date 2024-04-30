@@ -42,8 +42,7 @@ void bli_trmm_front
        const obj_t*  a,
        const obj_t*  b,
        const cntx_t* cntx,
-             rntm_t* rntm,
-             cntl_t* cntl
+             rntm_t* rntm
      )
 {
 	bli_init_once();
@@ -249,8 +248,7 @@ void bli_trmm_front
 	  &BLIS_ZERO,
 	  &c_local,
 	  cntx,
-	  rntm,
-	  cntl
+	  rntm
 	);
 }
 

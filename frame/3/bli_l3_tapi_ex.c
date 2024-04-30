@@ -55,7 +55,7 @@ void PASTEMAC2(ch,opname,BLIS_OAPI_EX_SUF) \
        const ctype*  beta, \
              ctype*  c, inc_t rs_c, inc_t cs_c, \
        const cntx_t* cntx, \
-             rntm_t* rntm  \
+       const rntm_t* rntm  \
      ) \
 { \
 	bli_init_once(); \
@@ -115,7 +115,7 @@ void PASTEMAC2(ch,opname,BLIS_OAPI_EX_SUF) \
        const ctype*  beta, \
              ctype*  c, inc_t rs_c, inc_t cs_c, \
        const cntx_t* cntx, \
-             rntm_t* rntm  \
+       const rntm_t* rntm  \
      ) \
 { \
 	bli_init_once(); \
@@ -178,7 +178,7 @@ void PASTEMAC2(ch,opname,BLIS_OAPI_EX_SUF) \
        const ctype_r* beta, \
              ctype*   c, inc_t rs_c, inc_t cs_c, \
        const cntx_t*  cntx, \
-             rntm_t*  rntm  \
+       const rntm_t*  rntm  \
      ) \
 { \
 	bli_init_once(); \
@@ -236,7 +236,7 @@ void PASTEMAC2(ch,opname,BLIS_OAPI_EX_SUF) \
        const ctype_r* beta, \
              ctype*   c, inc_t rs_c, inc_t cs_c, \
        const cntx_t*  cntx, \
-             rntm_t*  rntm  \
+       const rntm_t*  rntm  \
      ) \
 { \
 	bli_init_once(); \
@@ -298,7 +298,7 @@ void PASTEMAC2(ch,opname,BLIS_OAPI_EX_SUF) \
        const ctype*  beta, \
              ctype*  c, inc_t rs_c, inc_t cs_c, \
        const cntx_t* cntx, \
-             rntm_t* rntm  \
+       const rntm_t* rntm  \
      ) \
 { \
 	bli_init_once(); \
@@ -355,7 +355,7 @@ void PASTEMAC2(ch,opname,BLIS_OAPI_EX_SUF) \
        const ctype*  beta, \
              ctype*  c, inc_t rs_c, inc_t cs_c, \
        const cntx_t* cntx, \
-             rntm_t* rntm  \
+       const rntm_t* rntm  \
      ) \
 { \
 	bli_init_once(); \
@@ -418,7 +418,7 @@ void PASTEMAC2(ch,opname,BLIS_OAPI_EX_SUF) \
        const ctype*  beta, \
              ctype*  c, inc_t rs_c, inc_t cs_c, \
        const cntx_t* cntx, \
-             rntm_t* rntm  \
+       const rntm_t* rntm  \
      ) \
 { \
 	bli_init_once(); \
@@ -481,7 +481,7 @@ void PASTEMAC2(ch,opname,BLIS_OAPI_EX_SUF) \
        const ctype*  beta, \
              ctype*  c, inc_t rs_c, inc_t cs_c, \
        const cntx_t* cntx, \
-             rntm_t* rntm  \
+       const rntm_t* rntm  \
      ) \
 { \
 	bli_init_once(); \
@@ -545,7 +545,7 @@ void PASTEMAC2(ch,opname,BLIS_OAPI_EX_SUF) \
        const ctype*  a, inc_t rs_a, inc_t cs_a, \
              ctype*  b, inc_t rs_b, inc_t cs_b, \
        const cntx_t* cntx, \
-             rntm_t* rntm  \
+       const rntm_t* rntm  \
      ) \
 { \
 	bli_init_once(); \

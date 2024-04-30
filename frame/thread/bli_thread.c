@@ -35,9 +35,7 @@
 
 #include "blis.h"
 
-thrinfo_t BLIS_PACKM_SINGLE_THREADED = {};
-thrinfo_t BLIS_GEMM_SINGLE_THREADED  = {};
-thrcomm_t BLIS_SINGLE_COMM           = {};
+thrcomm_t BLIS_SINGLE_COMM = {};
 
 // The global rntm_t structure. (The definition resides in bli_rntm.c.)
 extern rntm_t global_rntm;
@@ -46,13 +44,39 @@ extern rntm_t global_rntm;
 // resides in bli_rntm.c.)
 extern bli_pthread_mutex_t global_rntm_mutex;
 
+typedef void (*thread_launch_t)
+     (
+             dim_t         nt,
+             thread_func_t func,
+       const void*         params
+     );
+
+static thread_launch_t thread_launch_fpa[ BLIS_NUM_THREAD_IMPLS ] =
+{
+	[BLIS_SINGLE] = bli_thread_launch_single,
+	[BLIS_OPENMP] =
+#if   defined(BLIS_ENABLE_OPENMP)
+	                bli_thread_launch_openmp,
+#elif defined(BLIS_ENABLE_PTHREADS)
+	                NULL,
+#else
+	                NULL,
+#endif
+	[BLIS_POSIX]  =
+#if   defined(BLIS_ENABLE_PTHREADS)
+	                bli_thread_launch_pthreads,
+#elif defined(BLIS_ENABLE_OPENMP)
+	                NULL,
+#else
+	                NULL,
+#endif
+};
+
 // -----------------------------------------------------------------------------
 
 void bli_thread_init( void )
 {
 	bli_thrcomm_init( BLIS_SINGLE, 1, &BLIS_SINGLE_COMM );
-	bli_packm_thrinfo_init_single( &BLIS_PACKM_SINGLE_THREADED );
-	bli_l3_thrinfo_init_single( &BLIS_GEMM_SINGLE_THREADED );
 
 	// Read the environment variables and use them to initialize the
 	// global runtime object.
@@ -61,6 +85,19 @@ void bli_thread_init( void )
 
 void bli_thread_finalize( void )
 {
+}
+
+// -----------------------------------------------------------------------------
+
+void bli_thread_launch
+     (
+             timpl_t       ti,
+             dim_t         nt,
+             thread_func_t func,
+       const void*         params
+     )
+{
+	thread_launch_fpa[ti]( nt, func, params );
 }
 
 // -----------------------------------------------------------------------------
@@ -75,11 +112,11 @@ void bli_thread_range_sub
              dim_t*     end
      )
 {
-	dim_t      n_way      = bli_thread_n_way( thread );
+	dim_t      n_way      = bli_thrinfo_n_way( thread );
 
 	if ( n_way == 1 ) { *start = 0; *end = n; return; }
 
-	dim_t      work_id    = bli_thread_work_id( thread );
+	dim_t      work_id    = bli_thrinfo_work_id( thread );
 
 	dim_t      all_start  = 0;
 	dim_t      all_end    = n;
@@ -515,8 +552,8 @@ siz_t bli_thread_range_weighted_sub
              dim_t*     j_end_thr
      )
 {
-	dim_t      n_way   = bli_thread_n_way( thread );
-	dim_t      my_id   = bli_thread_work_id( thread );
+	dim_t      n_way   = bli_thrinfo_n_way( thread );
+	dim_t      my_id   = bli_thrinfo_work_id( thread );
 
 	dim_t      bf_left = n % bf;
 

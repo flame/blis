@@ -46,15 +46,14 @@ void bli_l3_cntl_create_if
        const obj_t*   a,
        const obj_t*   b,
        const obj_t*   c,
-             rntm_t*  rntm,
-             cntl_t*  cntl_orig,
+             pool_t*  pool,
+       const cntl_t*  cntl_orig,
              cntl_t** cntl_use
      );
 
-void bli_l3_cntl_free
+BLIS_EXPORT_BLIS void bli_l3_cntl_free
      (
-       rntm_t*    rntm,
-       cntl_t*    cntl_use,
-       thrinfo_t* thread
+       pool_t* pool,
+       cntl_t* cntl_use
      );
 

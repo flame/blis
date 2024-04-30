@@ -49,7 +49,7 @@ BLIS_EXPORT_BLIS void PASTEMAC(opname,BLIS_OAPI_EX_SUF) \
        const obj_t*  beta, \
        const obj_t*  c, \
        const cntx_t* cntx, \
-             rntm_t* rntm  \
+       const rntm_t* rntm  \
      );
 
 GENPROT( gemm )
@@ -70,7 +70,7 @@ BLIS_EXPORT_BLIS void PASTEMAC(opname,BLIS_OAPI_EX_SUF) \
        const obj_t*  beta, \
        const obj_t*  c, \
        const cntx_t* cntx, \
-             rntm_t* rntm  \
+       const rntm_t* rntm  \
      );
 
 GENPROT( hemm )
@@ -88,7 +88,7 @@ BLIS_EXPORT_BLIS void PASTEMAC(opname,BLIS_OAPI_EX_SUF) \
        const obj_t*  beta, \
        const obj_t*  c, \
        const cntx_t* cntx, \
-             rntm_t* rntm  \
+       const rntm_t* rntm  \
      );
 
 GENPROT( herk )
@@ -105,7 +105,7 @@ BLIS_EXPORT_BLIS void PASTEMAC(opname,BLIS_OAPI_EX_SUF) \
        const obj_t*  a, \
        const obj_t*  b, \
        const cntx_t* cntx, \
-             rntm_t* rntm  \
+       const rntm_t* rntm  \
      );
 
 GENPROT( trmm )

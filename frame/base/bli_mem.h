@@ -136,13 +136,26 @@ BLIS_INLINE void bli_mem_set_size( siz_t size, mem_t* mem )
 // removed from the mem_t type definition. An alternative to the initializer is
 // calling bli_mem_clear() at runtime.
 
+#ifdef __cplusplus
+#define BLIS_MEM_INITIALIZER \
+        { \
+          .pblk        = BLIS_PBLK_INITIALIZER, \
+          /* When using C++, which is strongly typed, we avoid use of -1 as a
+             packbuf_t value since it will result in a compile-time error. */ \
+          .buf_type    = BLIS_BUFFER_FOR_GEN_USE, \
+          .pool        = NULL, \
+          .size        = 0, \
+        }
+#else // C99
 #define BLIS_MEM_INITIALIZER \
         { \
           .pblk        = BLIS_PBLK_INITIALIZER, \
           .buf_type    = -1, \
           .pool        = NULL, \
           .size        = 0, \
-        }  \
+        }
+#endif
+
 
 BLIS_INLINE void bli_mem_clear( mem_t* mem )
 {

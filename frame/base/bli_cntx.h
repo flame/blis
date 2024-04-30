@@ -357,8 +357,6 @@ BLIS_EXPORT_BLIS void bli_cntx_print( const cntx_t* cntx );
 
 BLIS_EXPORT_BLIS void bli_cntx_set_l3_sup_handlers( cntx_t* cntx, ... );
 
-BLIS_EXPORT_BLIS void bli_cntx_set_l3_sup_handlers( cntx_t* cntx, ... );
-
 
 #endif
 

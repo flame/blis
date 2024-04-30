@@ -148,10 +148,15 @@ BLIS_INLINE dim_t bli_thrcomm_num_threads( thrcomm_t* comm )
 	return comm->n_threads;
 }
 
+BLIS_INLINE timpl_t bli_thrcomm_thread_impl( thrcomm_t* comm )
+{
+	return comm->ti;
+}
+
 
 // Threading method-agnostic function prototypes.
-thrcomm_t* bli_thrcomm_create( rntm_t* rntm, dim_t n_threads );
-void       bli_thrcomm_free( rntm_t* rntm, thrcomm_t* comm );
+thrcomm_t* bli_thrcomm_create( timpl_t ti, pool_t* sba_pool, dim_t n_threads );
+void       bli_thrcomm_free( pool_t* sba_pool, thrcomm_t* comm );
 
 // Threading method-specific function prototypes.
 // NOTE: These are the prototypes to the dispatcher functions and thus they
@@ -159,11 +164,11 @@ void       bli_thrcomm_free( rntm_t* rntm, thrcomm_t* comm );
 // (and do) omit the timpl_t from their function signatures since their
 // threading implementation is intrinsically known.
 void                   bli_thrcomm_init( timpl_t ti, dim_t n_threads, thrcomm_t* comm );
-void                   bli_thrcomm_cleanup( timpl_t ti, thrcomm_t* comm );
-BLIS_EXPORT_BLIS void  bli_thrcomm_barrier( timpl_t ti, dim_t thread_id, thrcomm_t* comm );
+void                   bli_thrcomm_cleanup( thrcomm_t* comm );
+BLIS_EXPORT_BLIS void  bli_thrcomm_barrier( dim_t thread_id, thrcomm_t* comm );
 
 // Other function prototypes.
-BLIS_EXPORT_BLIS void* bli_thrcomm_bcast( timpl_t ti, dim_t inside_id, void* to_send, thrcomm_t* comm );
+BLIS_EXPORT_BLIS void* bli_thrcomm_bcast( dim_t inside_id, void* to_send, thrcomm_t* comm );
 void                   bli_thrcomm_barrier_atomic( dim_t thread_id, thrcomm_t* comm );
 
 #endif

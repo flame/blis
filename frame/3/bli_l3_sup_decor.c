@@ -34,36 +34,68 @@
 
 #include "blis.h"
 
-// Initialize a function pointer array containing function addresses for
-// each of the threading-specific level-3 thread decorators.
-
-static l3_decor_ft l3_decor_fpa[ BLIS_NUM_THREAD_IMPLS ] =
+struct l3_sup_decor_params_s
 {
-	[BLIS_SINGLE] = bli_l3_thread_decorator_single,
-	[BLIS_OPENMP] =
-#if   defined(BLIS_ENABLE_OPENMP)
-	                bli_l3_thread_decorator_openmp,
-#elif defined(BLIS_ENABLE_PTHREADS)
-	                NULL,
-#else
-	                NULL,
-#endif
-	[BLIS_POSIX]  =
-#if   defined(BLIS_ENABLE_PTHREADS)
-	                bli_l3_thread_decorator_pthreads,
-#elif defined(BLIS_ENABLE_OPENMP)
-	                NULL,
-#else
-	                NULL,
-#endif
+	      l3supint_ft func;
+	      opid_t      family;
+	const obj_t*      alpha;
+	const obj_t*      a;
+	const obj_t*      b;
+	const obj_t*      beta;
+	const obj_t*      c;
+	const cntx_t*     cntx;
+	      rntm_t*     rntm;
+	      array_t*    array;
 };
+typedef struct l3_sup_decor_params_s l3_sup_decor_params_t;
 
-// Define a dispatcher that chooses a threading-specific function from the
-// above function pointer array.
+static void bli_l3_sup_thread_decorator_entry( thrcomm_t* gl_comm, dim_t tid, const void* data_void )
+{
+	const l3_sup_decor_params_t* data    = data_void;
 
-void bli_l3_thread_decorator
+	const l3supint_ft            func    = data->func;
+	const opid_t                 family  = data->family;
+	const obj_t*                 alpha   = data->alpha;
+	const obj_t*                 a       = data->a;
+	const obj_t*                 b       = data->b;
+	const obj_t*                 beta    = data->beta;
+	const obj_t*                 c       = data->c;
+	const cntx_t*                cntx    = data->cntx;
+	      rntm_t*                rntm    = data->rntm;
+	      array_t*               array   = data->array;
+
+	( void )family;
+
+	bli_l3_thread_decorator_thread_check( gl_comm, rntm );
+
+	// Create the root node of the thread's thrinfo_t structure.
+	pool_t*    pool   = bli_apool_array_elem( tid, array );
+	thrinfo_t* thread = bli_l3_sup_thrinfo_create( tid, gl_comm, pool, rntm );
+
+	func
+	(
+	  alpha,
+	  a,
+	  b,
+	  beta,
+	  c,
+	  cntx,
+	  rntm,
+	  thread
+	);
+
+	// Free the current thread's thrinfo_t structure.
+	// NOTE: The barrier here is very important as it prevents memory being
+	// released by the chief of some thread sub-group before its peers are done
+	// using it. See PR #702 for more info [1].
+	// [1] https://github.com/flame/blis/pull/702
+	bli_thrinfo_barrier( thread );
+	bli_thrinfo_free( thread );
+}
+
+err_t bli_l3_sup_thread_decorator
      (
-             l3int_ft func,
+             l3supint_ft func,
              opid_t   family,
        const obj_t*   alpha,
        const obj_t*   a,
@@ -71,15 +103,14 @@ void bli_l3_thread_decorator
        const obj_t*   beta,
        const obj_t*   c,
        const cntx_t*  cntx,
-             rntm_t*  rntm,
-             cntl_t*  cntl
+       const rntm_t*  rntm
      )
 {
-	rntm_t rntm_l;
+	rntm_t rntm_l = *rntm;
 
 	// Query the threading implementation and the number of threads requested.
-	timpl_t ti = bli_rntm_thread_impl( rntm );
-	dim_t   nt = bli_rntm_num_threads( rntm );
+	timpl_t ti = bli_rntm_thread_impl( &rntm_l );
+	dim_t   nt = bli_rntm_num_threads( &rntm_l );
 
 #if 0
 	printf( "(pre-opt) application requested rntm.thread_impl = %s\n",
@@ -88,7 +119,7 @@ void bli_l3_thread_decorator
 #endif
 
 	if ( bli_error_checking_is_enabled() )
-		bli_l3_thread_decorator_check( rntm );
+		bli_l3_thread_decorator_check( &rntm_l );
 
 #ifdef BLIS_ENABLE_NT1_VIA_SINGLE
 	if ( nt == 1 )
@@ -111,11 +142,9 @@ void bli_l3_thread_decorator
 		// than one thread. Here, we choose to favor the requested threading
 		// implementation over the number of threads, and so reset all
 		// parallelism parameters to 1.
-		rntm_l = *rntm;
 		nt = 1;
 		bli_rntm_set_ways_only( 1, 1, 1, 1, 1, &rntm_l );
 		bli_rntm_set_num_threads_only( 1, &rntm_l );
-		rntm = &rntm_l;
 	}
 
 #if 0
@@ -124,53 +153,28 @@ void bli_l3_thread_decorator
 	        ( ti == BLIS_OPENMP ? "openmp" : "pthreads" ) ) );
 #endif
 
-	// Use the timpl_t value to index into the corresponding function address
-	// from the function pointer array.
-	const l3_decor_ft fp = l3_decor_fpa[ ti ];
+	// Check out an array_t from the small block allocator. This is done
+	// with an internal lock to ensure only one application thread accesses
+	// the sba at a time. bli_sba_checkout_array() will also automatically
+	// resize the array_t, if necessary.
+	array_t* array = bli_sba_checkout_array( nt );
 
-	// Call the threading-specific decorator function.
-	fp
-	(
-	  func,
-	  family,
-	  alpha,
-	  a,
-	  b,
-	  beta,
-	  c,
-	  cntx,
-	  rntm,
-	  cntl
-	);
-}
+	l3_sup_decor_params_t params;
+	params.func   = func;
+	params.family = family;
+	params.alpha  = alpha;
+	params.a      = a;
+	params.b      = b;
+	params.beta   = beta;
+	params.c      = c;
+	params.cntx   = cntx;
+	params.rntm   = &rntm_l;
+	params.array  = array;
 
-void bli_l3_thread_decorator_check
-     (
-       rntm_t* rntm
-     )
-{
-	//err_t e_val;
+	bli_thread_launch( ti, nt, bli_l3_sup_thread_decorator_entry, &params );
 
-	//e_val = bli_check_valid_thread_impl( bli_rntm_thread_impl( rntm ) );
-	//bli_check_error_code( e_val );
+	bli_sba_checkin_array( array );
 
-	const timpl_t ti = bli_rntm_thread_impl( rntm );
-
-	if (
-#ifndef BLIS_ENABLE_OPENMP
-	    ti == BLIS_OPENMP ||
-#endif
-#ifndef BLIS_ENABLE_PTHREADS
-	    ti == BLIS_POSIX ||
-#endif
-	    FALSE
-	   )
-	{
-		fprintf( stderr, "\n" );
-		fprintf( stderr, "libblis: User requested threading implementation \"%s\", but that method is\n", ( ti == BLIS_OPENMP ? "openmp" : "pthreads" ) );
-		fprintf( stderr, "libblis: unavailable. Try reconfiguring BLIS with \"-t %s\" and recompiling.\n", ( ti == BLIS_OPENMP ? "openmp" : "pthreads" ) );
-		fprintf( stderr, "libblis: %s: line %d\n", __FILE__, ( int )__LINE__ );
-		bli_abort();
-	}
+	return BLIS_SUCCESS;
 }
 

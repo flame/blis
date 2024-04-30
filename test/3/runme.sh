@@ -85,7 +85,7 @@ elif [ ${sys} = "ul264" ]; then
 elif [ ${sys} = "ul2128" ]; then
 
 	export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/home/field/intel/mkl/lib/intel64"
-	export GOMP_CPU_AFFINITY="0-1s"
+	export GOMP_CPU_AFFINITY="0-127"
 
 	numactl="numactl --interleave=all"
 	threads="jc1ic1jr1_st

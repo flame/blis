@@ -411,7 +411,7 @@ void PASTEMAC(ch,varname) \
 					a2 = a_cast; \
 					b2 = b1; \
 					/*if ( bli_is_last_iter( j, n_iter, 0, 1 ) ) */\
-					if ( j + bli_thread_num_threads(thread) >= n_iter ) \
+					if ( j + bli_thrinfo_num_threads(thread) >= n_iter ) \
 						b2 = b_cast; \
 				} \
 \
@@ -476,7 +476,7 @@ void PASTEMAC(ch,varname) \
 					a2 = a_cast; \
 					b2 = b1; \
 					/*if ( bli_is_last_iter( j, n_iter, 0, 1 ) ) */\
-					if ( j + bli_thread_num_threads(thread) >= n_iter ) \
+					if ( j + bli_thrinfo_num_threads(thread) >= n_iter ) \
 						b2 = b_cast; \
 				} \
 \

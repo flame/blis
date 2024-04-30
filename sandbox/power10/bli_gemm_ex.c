@@ -52,7 +52,7 @@ void bli_gemm_ex
        obj_t*  beta,
        obj_t*  c,
        cntx_t* cntx,
-       rntm_t* rntm 
+       rntm_t* rntm
      )
 {
 	bli_init_once();
@@ -73,7 +73,7 @@ void bli_gemm_ex
 	// Invoke the operation's front end.
 	bli_gemm_front
 	(
-	  alpha, a, b, beta, c, cntx, rntm, NULL
+	  alpha, a, b, beta, c, cntx, rntm
 	);
 }
 

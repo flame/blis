@@ -5,7 +5,6 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2018, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -33,63 +32,12 @@
 
 */
 
-#ifndef BLIS_L3_DECOR_H
-#define BLIS_L3_DECOR_H
+#include "blis.h"
 
-// Level-3 internal function type.
-typedef void (*l3int_ft)
-     (
-       const obj_t*     alpha,
-       const obj_t*     a,
-       const obj_t*     b,
-       const obj_t*     beta,
-       const obj_t*     c,
-       const cntx_t*    cntx,
-             rntm_t*    rntm,
-             cntl_t*    cntl,
-             thrinfo_t* thread
-     );
-
-// Level-3 thread decorator function type.
-typedef void (*l3_decor_ft)
-     (
-             l3int_ft func,
-             opid_t   family,
-       const obj_t*   alpha,
-       const obj_t*   a,
-       const obj_t*   b,
-       const obj_t*   beta,
-       const obj_t*   c,
-       const cntx_t*  cntx,
-             rntm_t*  rntm,
-             cntl_t*  cntl
-     );
-
-// Level-3 thread decorator prototype.
-void bli_l3_thread_decorator
-     (
-             l3int_ft func,
-             opid_t   family,
-       const obj_t*   alpha,
-       const obj_t*   a,
-       const obj_t*   b,
-       const obj_t*   beta,
-       const obj_t*   c,
-       const cntx_t*  cntx,
-             rntm_t*  rntm,
-             cntl_t*  cntl
-     );
-
-void bli_l3_thread_decorator_check
-     (
-       rntm_t* rntm
-     );
-
-// Include definitions specific to the method of multithreading for the
-// conventional code path.
-#include "bli_l3_decor_single.h"
-#include "bli_l3_decor_openmp.h"
-#include "bli_l3_decor_pthreads.h"
-
-#endif
+void bli_thread_launch_single( dim_t nt, thread_func_t func, const void* params )
+{
+	// Call the thread entry point, passing the global single-threaded
+	// communicator, thread id of 0, and the params struct as arguments.
+    func( &BLIS_SINGLE_COMM, 0, params );
+}
 

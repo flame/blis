@@ -44,52 +44,52 @@
 
 // -- (axy) = (??s) ------------------------------------------------------------
 
-#define bli_sssscal2j1es( a, x, yri, yir ) {}
-#define bli_sdsscal2j1es( a, x, yri, yir ) {}
-#define bli_scsscal2j1es( a, x, yri, yir ) {}
-#define bli_szsscal2j1es( a, x, yri, yir ) {}
+#define bli_sssscal2j1es( a, x, yri, yir ) { ( void )a; ( void )x; ( void )yri; ( void )yir; }
+#define bli_sdsscal2j1es( a, x, yri, yir ) { ( void )a; ( void )x; ( void )yri; ( void )yir; }
+#define bli_scsscal2j1es( a, x, yri, yir ) { ( void )a; ( void )x; ( void )yri; ( void )yir; }
+#define bli_szsscal2j1es( a, x, yri, yir ) { ( void )a; ( void )x; ( void )yri; ( void )yir; }
 
-#define bli_dssscal2j1es( a, x, yri, yir ) {}
-#define bli_ddsscal2j1es( a, x, yri, yir ) {}
-#define bli_dcsscal2j1es( a, x, yri, yir ) {}
-#define bli_dzsscal2j1es( a, x, yri, yir ) {}
+#define bli_dssscal2j1es( a, x, yri, yir ) { ( void )a; ( void )x; ( void )yri; ( void )yir; }
+#define bli_ddsscal2j1es( a, x, yri, yir ) { ( void )a; ( void )x; ( void )yri; ( void )yir; }
+#define bli_dcsscal2j1es( a, x, yri, yir ) { ( void )a; ( void )x; ( void )yri; ( void )yir; }
+#define bli_dzsscal2j1es( a, x, yri, yir ) { ( void )a; ( void )x; ( void )yri; ( void )yir; }
 
-#define bli_cssscal2j1es( a, x, yri, yir ) {}
-#define bli_cdsscal2j1es( a, x, yri, yir ) {}
-#define bli_ccsscal2j1es( a, x, yri, yir ) {}
-#define bli_czsscal2j1es( a, x, yri, yir ) {}
+#define bli_cssscal2j1es( a, x, yri, yir ) { ( void )a; ( void )x; ( void )yri; ( void )yir; }
+#define bli_cdsscal2j1es( a, x, yri, yir ) { ( void )a; ( void )x; ( void )yri; ( void )yir; }
+#define bli_ccsscal2j1es( a, x, yri, yir ) { ( void )a; ( void )x; ( void )yri; ( void )yir; }
+#define bli_czsscal2j1es( a, x, yri, yir ) { ( void )a; ( void )x; ( void )yri; ( void )yir; }
 
-#define bli_zssscal2j1es( a, x, yri, yir ) {}
-#define bli_zdsscal2j1es( a, x, yri, yir ) {}
-#define bli_zcsscal2j1es( a, x, yri, yir ) {}
-#define bli_zzsscal2j1es( a, x, yri, yir ) {}
+#define bli_zssscal2j1es( a, x, yri, yir ) { ( void )a; ( void )x; ( void )yri; ( void )yir; }
+#define bli_zdsscal2j1es( a, x, yri, yir ) { ( void )a; ( void )x; ( void )yri; ( void )yir; }
+#define bli_zcsscal2j1es( a, x, yri, yir ) { ( void )a; ( void )x; ( void )yri; ( void )yir; }
+#define bli_zzsscal2j1es( a, x, yri, yir ) { ( void )a; ( void )x; ( void )yri; ( void )yir; }
 
 // -- (axy) = (??d) ------------------------------------------------------------
 
-#define bli_ssdscal2j1es( a, x, yri, yir ) {}
-#define bli_sddscal2j1es( a, x, yri, yir ) {}
-#define bli_scdscal2j1es( a, x, yri, yir ) {}
-#define bli_szdscal2j1es( a, x, yri, yir ) {}
+#define bli_ssdscal2j1es( a, x, yri, yir ) { ( void )a; ( void )x; ( void )yri; ( void )yir; }
+#define bli_sddscal2j1es( a, x, yri, yir ) { ( void )a; ( void )x; ( void )yri; ( void )yir; }
+#define bli_scdscal2j1es( a, x, yri, yir ) { ( void )a; ( void )x; ( void )yri; ( void )yir; }
+#define bli_szdscal2j1es( a, x, yri, yir ) { ( void )a; ( void )x; ( void )yri; ( void )yir; }
 
-#define bli_dsdscal2j1es( a, x, yri, yir ) {}
-#define bli_dddscal2j1es( a, x, yri, yir ) {}
-#define bli_dcdscal2j1es( a, x, yri, yir ) {}
-#define bli_dzdscal2j1es( a, x, yri, yir ) {}
+#define bli_dsdscal2j1es( a, x, yri, yir ) { ( void )a; ( void )x; ( void )yri; ( void )yir; }
+#define bli_dddscal2j1es( a, x, yri, yir ) { ( void )a; ( void )x; ( void )yri; ( void )yir; }
+#define bli_dcdscal2j1es( a, x, yri, yir ) { ( void )a; ( void )x; ( void )yri; ( void )yir; }
+#define bli_dzdscal2j1es( a, x, yri, yir ) { ( void )a; ( void )x; ( void )yri; ( void )yir; }
 
-#define bli_csdscal2j1es( a, x, yri, yir ) {}
-#define bli_cddscal2j1es( a, x, yri, yir ) {}
-#define bli_ccdscal2j1es( a, x, yri, yir ) {}
-#define bli_czdscal2j1es( a, x, yri, yir ) {}
+#define bli_csdscal2j1es( a, x, yri, yir ) { ( void )a; ( void )x; ( void )yri; ( void )yir; }
+#define bli_cddscal2j1es( a, x, yri, yir ) { ( void )a; ( void )x; ( void )yri; ( void )yir; }
+#define bli_ccdscal2j1es( a, x, yri, yir ) { ( void )a; ( void )x; ( void )yri; ( void )yir; }
+#define bli_czdscal2j1es( a, x, yri, yir ) { ( void )a; ( void )x; ( void )yri; ( void )yir; }
 
-#define bli_zsdscal2j1es( a, x, yri, yir ) {}
-#define bli_zddscal2j1es( a, x, yri, yir ) {}
-#define bli_zcdscal2j1es( a, x, yri, yir ) {}
-#define bli_zzdscal2j1es( a, x, yri, yir ) {}
+#define bli_zsdscal2j1es( a, x, yri, yir ) { ( void )a; ( void )x; ( void )yri; ( void )yir; }
+#define bli_zddscal2j1es( a, x, yri, yir ) { ( void )a; ( void )x; ( void )yri; ( void )yir; }
+#define bli_zcdscal2j1es( a, x, yri, yir ) { ( void )a; ( void )x; ( void )yri; ( void )yir; }
+#define bli_zzdscal2j1es( a, x, yri, yir ) { ( void )a; ( void )x; ( void )yri; ( void )yir; }
 
 // -- (axy) = (??c) ------------------------------------------------------------
 
-#define bli_sscscal2j1es( a, x, yri, yir ) {}
-#define bli_sdcscal2j1es( a, x, yri, yir ) {}
+#define bli_sscscal2j1es( a, x, yri, yir ) { ( void )a; ( void )x; ( void )yri; ( void )yir; }
+#define bli_sdcscal2j1es( a, x, yri, yir ) { ( void )a; ( void )x; ( void )yri; ( void )yir; }
 #define bli_sccscal2j1es( a, x, yri, yir ) \
 { \
 	bli_cxscal2ris( bli_sreal(a), bli_simag(a), bli_creal(x), -bli_cimag(x), bli_zreal(yri), bli_zimag(yri) ); \
@@ -101,8 +101,8 @@
 	bli_cxscal2ris( bli_sreal(a), bli_simag(a), bli_zimag(x),  bli_zreal(x), bli_zreal(yir), bli_zimag(yir) ); \
 }
 
-#define bli_dscscal2j1es( a, x, yri, yir ) {}
-#define bli_ddcscal2j1es( a, x, yri, yir ) {}
+#define bli_dscscal2j1es( a, x, yri, yir ) { ( void )a; ( void )x; ( void )yri; ( void )yir; }
+#define bli_ddcscal2j1es( a, x, yri, yir ) { ( void )a; ( void )x; ( void )yri; ( void )yir; }
 #define bli_dccscal2j1es( a, x, yri, yir ) \
 { \
 	bli_cxscal2ris( bli_dreal(a), bli_dimag(a), bli_creal(x), -bli_cimag(x), bli_zreal(yri), bli_zimag(yri) ); \
@@ -158,8 +158,8 @@
 
 // -- (axy) = (??z) ------------------------------------------------------------
 
-#define bli_sszscal2j1es( a, x, yri, yir ) {}
-#define bli_sdzscal2j1es( a, x, yri, yir ) {}
+#define bli_sszscal2j1es( a, x, yri, yir ) { ( void )a; ( void )x; ( void )yri; ( void )yir; }
+#define bli_sdzscal2j1es( a, x, yri, yir ) { ( void )a; ( void )x; ( void )yri; ( void )yir; }
 #define bli_sczscal2j1es( a, x, yri, yir ) \
 { \
 	bli_cxscal2ris( bli_sreal(a), bli_simag(a), bli_creal(x), -bli_cimag(x), bli_zreal(yri), bli_zimag(yri) ); \
@@ -171,8 +171,8 @@
 	bli_cxscal2ris( bli_sreal(a), bli_simag(a), bli_zimag(x),  bli_zreal(x), bli_zreal(yir), bli_zimag(yir) ); \
 }
 
-#define bli_dszscal2j1es( a, x, yri, yir ) {}
-#define bli_ddzscal2j1es( a, x, yri, yir ) {}
+#define bli_dszscal2j1es( a, x, yri, yir ) { ( void )a; ( void )x; ( void )yri; ( void )yir; }
+#define bli_ddzscal2j1es( a, x, yri, yir ) { ( void )a; ( void )x; ( void )yri; ( void )yir; }
 #define bli_dczscal2j1es( a, x, yri, yir ) \
 { \
 	bli_cxscal2ris( bli_dreal(a), bli_dimag(a), bli_creal(x), -bli_cimag(x), bli_zreal(yri), bli_zimag(yri) ); \

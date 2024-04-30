@@ -307,8 +307,6 @@ void PASTEMAC2(cha,chp,opname) \
 	PASTEMAC(chp,ctyper)* restrict pi1_r    = ( PASTEMAC(chp,ctyper)* )p; \
 	PASTEMAC(chp,ctyper)* restrict pi1_i    = ( PASTEMAC(chp,ctyper)* )p + ldp; \
 \
-	( void )kappa_i; \
-\
 	if ( PASTEMAC(chp,eq1)( *kappa ) ) \
 	{ \
 		if ( bli_is_conj( conja ) ) \

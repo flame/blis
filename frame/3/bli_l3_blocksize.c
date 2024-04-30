@@ -35,6 +35,40 @@
 #include "blis.h"
 
 
+void bli_l3_adjust_kc
+      (
+        const obj_t*  a,
+        const obj_t*  b,
+              dim_t*  b_alg,
+              dim_t*  b_max,
+        const cntx_t* cntx,
+        const cntl_t* cntl
+      )
+{
+	const opid_t family = bli_cntl_family( cntl );
+	const num_t  dt     = bli_obj_exec_dt( a );
+	      dim_t  mnr    = 1;
+
+	// Nudge the default and maximum kc blocksizes up to the nearest
+	// multiple of MR if A is Hermitian, symmetric, or triangular or
+	// NR if B is Hermitian, symmetric, or triangular. If neither case
+	// applies, then we leave the blocksizes unchanged. For trsm we
+	// always use MR (rather than sometimes using NR) because even
+	// when the triangle is on the right, packing of that matrix uses
+	// MR, since only left-side trsm micro-kernels are supported.
+	if ( !bli_obj_root_is_general( a ) || family == BLIS_TRSM )
+	{
+		mnr = bli_cntx_get_blksz_def_dt( dt, BLIS_MR, cntx );
+	}
+	else if ( !bli_obj_root_is_general( b ) )
+	{
+		mnr = bli_cntx_get_blksz_def_dt( dt, BLIS_NR, cntx );
+	}
+
+	*b_alg = bli_align_dim_to_mult( *b_alg, mnr );
+	*b_max = bli_align_dim_to_mult( *b_max, mnr );
+}
+
 dim_t bli_l3_determine_kc
       (
               dir_t   direct,
@@ -47,261 +81,16 @@ dim_t bli_l3_determine_kc
         const cntl_t* cntl
       )
 {
-	opid_t family = bli_cntl_family( cntl );
+	const num_t    dt    = bli_obj_exec_dt( a );
+	const blksz_t* bsize = bli_cntx_get_blksz( bszid, cntx );
+	      dim_t    b_alg = bli_blksz_get_def( dt, bsize );
+	      dim_t    b_max = bli_blksz_get_max( dt, bsize );
 
-	if      ( family == BLIS_GEMM )
-		return bli_gemm_determine_kc( direct, i, dim, a, b, bszid, cntx );
-	else if ( family == BLIS_GEMMT )
-		return bli_gemmt_determine_kc( direct, i, dim, a, b, bszid, cntx );
-	else if ( family == BLIS_TRMM )
-		return bli_trmm_determine_kc( direct, i, dim, a, b, bszid, cntx );
-	else if ( family == BLIS_TRSM )
-		return bli_trsm_determine_kc( direct, i, dim, a, b, bszid, cntx );
+	bli_l3_adjust_kc( a, b, &b_alg, &b_max, cntx, cntl );
 
-	// This should never execute.
-	return bli_gemm_determine_kc( direct, i, dim, a, b, bszid, cntx );
+	if ( direct == BLIS_FWD )
+		return bli_determine_blocksize_f_sub( i, dim, b_alg, b_max );
+	else
+		return bli_determine_blocksize_b_sub( i, dim, b_alg, b_max );
 }
-
-// -----------------------------------------------------------------------------
-
-//
-// NOTE: We call a gemm/hemm/symm, trmm, or trsm-specific blocksize
-// function to determine the kc blocksize so that we can implement the
-// "nudging" of kc to be a multiple of mr or nr, as needed.
-//
-
-#undef  GENFRONT
-#define GENFRONT( opname, l3op ) \
-\
-dim_t PASTEMAC0(opname) \
-      ( \
-              dir_t   direct, \
-              dim_t   i, \
-              dim_t   dim, \
-        const obj_t*  a, \
-        const obj_t*  b, \
-              bszid_t bszid, \
-        const cntx_t* cntx  \
-      ) \
-{ \
-	if ( direct == BLIS_FWD ) \
-		return PASTEMAC(l3op,_determine_kc_f)( i, dim, a, b, bszid, cntx ); \
-	else \
-		return PASTEMAC(l3op,_determine_kc_b)( i, dim, a, b, bszid, cntx ); \
-}
-
-GENFRONT( gemm_determine_kc, gemm )
-GENFRONT( gemmt_determine_kc, gemmt )
-GENFRONT( trmm_determine_kc, trmm )
-GENFRONT( trsm_determine_kc, trsm )
-
-// -----------------------------------------------------------------------------
-
-#undef  GENFRONT
-#define GENFRONT( opname, chdir ) \
-\
-dim_t PASTEMAC0(opname) \
-      ( \
-              dim_t   i, \
-              dim_t   dim, \
-        const obj_t*  a, \
-        const obj_t*  b, \
-              bszid_t bszid, \
-        const cntx_t* cntx  \
-      ) \
-{ \
-	/* bli_*_determine_kc_f():
-
-	   We assume that this function is being called from an algorithm that
-	   is moving "forward" (ie: top to bottom, left to right, top-left
-	   to bottom-right). */ \
-\
-	/* bli_*_determine_kc_b():
-
-	   We assume that this function is being called from an algorithm that
-	   is moving "backward" (ie: bottom to top, right to left, bottom-right
-	   to top-left). */ \
-\
-	/* Extract the execution datatype and use it to query the corresponding
-	   blocksize and blocksize maximum values from the blksz_t object. */ \
-	const num_t    dt    = bli_obj_exec_dt( a ); \
-	const blksz_t* bsize = bli_cntx_get_blksz( bszid, cntx ); \
-	      dim_t    b_alg = bli_blksz_get_def( dt, bsize ); \
-	      dim_t    b_max = bli_blksz_get_max( dt, bsize ); \
-\
-	/* Nudge the default and maximum kc blocksizes up to the nearest
-	   multiple of MR if A is Hermitian or symmetric, or NR if B is
-	   Hermitian or symmetric. If neither case applies, then we leave
-	   the blocksizes unchanged. */ \
-	dim_t    mnr; \
-	if      ( bli_obj_root_is_herm_or_symm( a ) ) \
-	{ \
-		mnr   = bli_cntx_get_blksz_def_dt( dt, BLIS_MR, cntx ); \
-		b_alg = bli_align_dim_to_mult( b_alg, mnr ); \
-		b_max = bli_align_dim_to_mult( b_max, mnr ); \
-	} \
-	else if ( bli_obj_root_is_herm_or_symm( b ) ) \
-	{ \
-		mnr   = bli_cntx_get_blksz_def_dt( dt, BLIS_NR, cntx ); \
-		b_alg = bli_align_dim_to_mult( b_alg, mnr ); \
-		b_max = bli_align_dim_to_mult( b_max, mnr ); \
-	} \
-\
-	/* Call the bli_determine_blocksize_[fb]_sub() helper routine defined
-	   in bli_blksz.c */ \
-	return PASTEMAC2(determine_blocksize_,chdir,_sub)( i, dim, b_alg, b_max ); \
-}
-
-GENFRONT( gemm_determine_kc_f, f )
-GENFRONT( gemm_determine_kc_b, b )
-
-// -----------------------------------------------------------------------------
-
-#undef  GENFRONT
-#define GENFRONT( opname, chdir ) \
-\
-dim_t PASTEMAC0(opname) \
-      ( \
-              dim_t   i, \
-              dim_t   dim, \
-        const obj_t*  a, \
-        const obj_t*  b, \
-              bszid_t bszid, \
-        const cntx_t* cntx  \
-      ) \
-{ \
-	/* bli_*_determine_kc_f():
-
-	   We assume that this function is being called from an algorithm that
-	   is moving "forward" (ie: top to bottom, left to right, top-left
-	   to bottom-right). */ \
-\
-	/* bli_*_determine_kc_b():
-
-	   We assume that this function is being called from an algorithm that
-	   is moving "backward" (ie: bottom to top, right to left, bottom-right
-	   to top-left). */ \
-\
-	/* Extract the execution datatype and use it to query the corresponding
-	   blocksize and blocksize maximum values from the blksz_t object. */ \
-	const num_t    dt    = bli_obj_exec_dt( a ); \
-	const blksz_t* bsize = bli_cntx_get_blksz( bszid, cntx ); \
-	const dim_t    b_alg = bli_blksz_get_def( dt, bsize ); \
-	const dim_t    b_max = bli_blksz_get_max( dt, bsize ); \
-\
-	/* Notice that for gemmt, we do not need to perform any special handling
-	   for the default and maximum kc blocksizes vis-a-vis MR or NR. */ \
-\
-	/* Call the bli_determine_blocksize_[fb]_sub() helper routine defined
-	   in bli_blksz.c */ \
-	return PASTEMAC2(determine_blocksize_,chdir,_sub)( i, dim, b_alg, b_max ); \
-}
-
-GENFRONT( gemmt_determine_kc_f, f )
-GENFRONT( gemmt_determine_kc_b, b )
-
-// -----------------------------------------------------------------------------
-
-#undef  GENFRONT
-#define GENFRONT( opname, chdir ) \
-\
-dim_t PASTEMAC0(opname) \
-      ( \
-              dim_t   i, \
-              dim_t   dim, \
-        const obj_t*  a, \
-        const obj_t*  b, \
-              bszid_t bszid, \
-        const cntx_t* cntx  \
-      ) \
-{ \
-	/* bli_*_determine_kc_f():
-
-	   We assume that this function is being called from an algorithm that
-	   is moving "forward" (ie: top to bottom, left to right, top-left
-	   to bottom-right). */ \
-\
-	/* bli_*_determine_kc_b():
-
-	   We assume that this function is being called from an algorithm that
-	   is moving "backward" (ie: bottom to top, right to left, bottom-right
-	   to top-left). */ \
-\
-	/* Extract the execution datatype and use it to query the corresponding
-	   blocksize and blocksize maximum values from the blksz_t object. */ \
-	const num_t    dt    = bli_obj_exec_dt( a ); \
-	const blksz_t* bsize = bli_cntx_get_blksz( bszid, cntx ); \
-	      dim_t    b_alg = bli_blksz_get_def( dt, bsize ); \
-	      dim_t    b_max = bli_blksz_get_max( dt, bsize ); \
-\
-	/* Nudge the default and maximum kc blocksizes up to the nearest
-	   multiple of MR if the triangular matrix is on the left, or NR
-	   if the triangular matrix is one the right. */ \
-	dim_t mnr; \
-	if ( bli_obj_root_is_triangular( a ) ) \
-		mnr = bli_cntx_get_blksz_def_dt( dt, BLIS_MR, cntx ); \
-	else \
-		mnr = bli_cntx_get_blksz_def_dt( dt, BLIS_NR, cntx ); \
-\
-	b_alg = bli_align_dim_to_mult( b_alg, mnr ); \
-	b_max = bli_align_dim_to_mult( b_max, mnr ); \
-\
-	/* Call the bli_determine_blocksize_[fb]_sub() helper routine defined
-	   in bli_blksz.c */ \
-	return PASTEMAC2(determine_blocksize_,chdir,_sub)( i, dim, b_alg, b_max ); \
-}
-
-GENFRONT( trmm_determine_kc_f, f )
-GENFRONT( trmm_determine_kc_b, b )
-
-// -----------------------------------------------------------------------------
-
-#undef  GENFRONT
-#define GENFRONT( opname, chdir ) \
-\
-dim_t PASTEMAC0(opname) \
-      ( \
-              dim_t   i, \
-              dim_t   dim, \
-        const obj_t*  a, \
-        const obj_t*  b, \
-              bszid_t bszid, \
-        const cntx_t* cntx  \
-      ) \
-{ \
-	/* bli_*_determine_kc_f():
-
-	   We assume that this function is being called from an algorithm that
-	   is moving "forward" (ie: top to bottom, left to right, top-left
-	   to bottom-right). */ \
-\
-	/* bli_*_determine_kc_b():
-
-	   We assume that this function is being called from an algorithm that
-	   is moving "backward" (ie: bottom to top, right to left, bottom-right
-	   to top-left). */ \
-\
-	/* Extract the execution datatype and use it to query the corresponding
-	   blocksize and blocksize maximum values from the blksz_t object. */ \
-	const num_t    dt    = bli_obj_exec_dt( a ); \
-	const blksz_t* bsize = bli_cntx_get_blksz( bszid, cntx ); \
-	      dim_t    b_alg = bli_blksz_get_def( dt, bsize ); \
-	      dim_t    b_max = bli_blksz_get_max( dt, bsize ); \
-\
-	/* Nudge the default and maximum kc blocksizes up to the nearest
-	   multiple of MR. We always use MR (rather than sometimes using NR)
-	   because even when the triangle is on the right, packing of that
-	   matrix uses MR, since only left-side trsm micro-kernels are
-	   supported. */ \
-	const dim_t mnr   = bli_cntx_get_blksz_def_dt( dt, BLIS_MR, cntx ); \
-	            b_alg = bli_align_dim_to_mult( b_alg, mnr ); \
-	            b_max = bli_align_dim_to_mult( b_max, mnr ); \
-\
-	/* Call the bli_determine_blocksize_[fb]_sub() helper routine defined
-	   in bli_blksz.c */ \
-	return PASTEMAC2(determine_blocksize_,chdir,_sub)( i, dim, b_alg, b_max ); \
-}
-
-GENFRONT( trsm_determine_kc_f, f )
-GENFRONT( trsm_determine_kc_b, b )
 

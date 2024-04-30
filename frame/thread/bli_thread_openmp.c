@@ -32,29 +32,32 @@
 
 */
 
-#ifndef BLIS_L3_SUP_DECOR_PTHREADS_H
-#define BLIS_L3_SUP_DECOR_PTHREADS_H
+#include "blis.h"
 
-// Definitions specific to situations when POSIX multithreading is enabled.
-#ifdef BLIS_ENABLE_PTHREADS
+#ifdef BLIS_ENABLE_OPENMP
 
-// Thread entry point prototype.
-void* bli_l3_sup_thread_entry( void* data_void );
+void bli_thread_launch_openmp( dim_t n_threads, thread_func_t func, const void* params )
+{
+	const timpl_t ti = BLIS_OPENMP;
 
-err_t bli_l3_sup_thread_decorator_pthreads
-     (
-             l3supint_ft func,
-             opid_t      family,
-       const obj_t*      alpha,
-       const obj_t*      a,
-       const obj_t*      b,
-       const obj_t*      beta,
-       const obj_t*      c,
-       const cntx_t*     cntx,
-             rntm_t*     rntm
-     );
+	// Allocate a global communicator for the root thrinfo_t structures.
+	pool_t*    gl_comm_pool = NULL;
+	thrcomm_t* gl_comm      = bli_thrcomm_create( ti, gl_comm_pool, n_threads );
 
-#endif
+	_Pragma( "omp parallel num_threads(n_threads)" )
+	{
+		// Query the thread's id from OpenMP.
+		const dim_t tid = omp_get_thread_num();
+
+		// Call the thread entry point, passing the global communicator, the
+		// thread id, and the params struct as arguments.
+		func( gl_comm, tid, params );
+	}
+
+	// Free the global communicator, because the root thrinfo_t node
+	// never frees its communicator.
+	bli_thrcomm_free( gl_comm_pool, gl_comm );
+}
 
 #endif
 

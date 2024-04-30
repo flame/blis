@@ -431,12 +431,12 @@ void packm_tensor
     }
 
     /* Wait for the scatter vectors to be done. */
-    bli_thread_barrier( thread );
+    bli_thrinfo_barrier( thread );
 
 	/* Query the number of threads and thread ids from the current thread's
 	   packm thrinfo_t node. */
-	auto nt  = bli_thread_n_way( thread );
-	auto tid = bli_thread_work_id( thread );
+	auto nt  = bli_thrinfo_n_way( thread );
+	auto tid = bli_thrinfo_work_id( thread );
 
 	/* Determine the thread range and increment using the current thread's
 	   packm thrinfo_t node. NOTE: The definition of bli_thread_range_jrir()
@@ -656,7 +656,7 @@ void gemm_tensor
     }
 
     /* Wait for the scatter vectors to be done. */
-    bli_thread_barrier( thread );
+    bli_thrinfo_barrier( thread );
 
 	/* Compute number of primary and leftover components of the m and n
 	   dimensions. */
@@ -684,10 +684,10 @@ void gemm_tensor
 	auto caucus = bli_thrinfo_sub_node( thread );
 
 	/* Query the number of threads and thread ids for each loop. */
-	auto jr_nt  = bli_thread_n_way( thread );
-	auto jr_tid = bli_thread_work_id( thread );
-	auto ir_nt  = bli_thread_n_way( caucus );
-	auto ir_tid = bli_thread_work_id( caucus );
+	auto jr_nt  = bli_thrinfo_n_way( thread );
+	auto jr_tid = bli_thrinfo_work_id( thread );
+	auto ir_nt  = bli_thrinfo_n_way( caucus );
+	auto ir_tid = bli_thrinfo_work_id( caucus );
 
 	/* Determine the thread range and increment for the 2nd and 1st loops.
 	   NOTE: The definition of bli_thread_range_jrir() will depend on whether

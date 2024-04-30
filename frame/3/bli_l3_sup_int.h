@@ -40,7 +40,7 @@ err_t bli_gemmsup_int
        const obj_t*  beta,
        const obj_t*  c,
        const cntx_t* cntx,
-             rntm_t* rntm,
+       const rntm_t* rntm,
              thrinfo_t* thread
      );
 
@@ -52,6 +52,6 @@ err_t bli_gemmtsup_int
        const obj_t*  beta,
        const obj_t*  c,
        const cntx_t* cntx,
-             rntm_t* rntm,
+       const rntm_t* rntm,
              thrinfo_t* thread
      );
