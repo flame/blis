@@ -168,7 +168,7 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(double(2.3), double(1.0),
                               double(-1.0), double(0.0)),                    // alpha
             ::testing::Values(double(-4.9), double(1.0),
-                              double(-1.0), double(0.0)),                    // beta
+                              double(-1.0), double(0.0))                     // beta
         ),
         ::daxpbyvGenericTestPrint()
     );
