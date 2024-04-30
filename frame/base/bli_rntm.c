@@ -1857,6 +1857,138 @@ static void aocl_ddotv_dynamic
 	}
 }
 
+/*
+	Functionality:
+	--------------
+	This function decides the AOCL dynamic logic for L1 dcopyv API based on the
+	architecture ID, input type and size of the input variable.
+
+	Function signature
+	-------------------
+
+	This function takes the following input:
+
+	* 'arch_id' - Architecture ID of the system (copy of BLIS global arch id)
+	* 'n_elem' - Number of elements in the vector
+	* 'nt_ideal' - Ideal number of threads
+
+	The function has been made static to restrict its scope.
+
+	Exception
+	----------
+
+	1. For non-Zen architectures, return -1. The expectation is that this is handled
+	   in the higher layer
+*/
+
+static void aocl_dcopyv_dynamic
+     (
+       arch_t arch_id,
+       dim_t  n_elem,
+       dim_t* nt_ideal
+     )
+{
+	// Pick the AOCL dynamic logic based on the
+	// architecture ID
+
+	switch (arch_id)
+	{
+		case BLIS_ARCH_ZEN5:
+		case BLIS_ARCH_ZEN4:
+		case BLIS_ARCH_ZEN:
+		case BLIS_ARCH_ZEN2:
+		case BLIS_ARCH_ZEN3:
+
+			if ( n_elem <= 17000 )
+				*nt_ideal = 1;
+			else if (n_elem <= 62000)
+				*nt_ideal = 2;
+			else if (n_elem <= 96000)
+				*nt_ideal = 4;
+			else
+				*nt_ideal = 8;
+				// dcopy does not scale with more than 8 threads
+			break;
+
+		default:
+			// Without this default condition, compiler will throw
+			// a warning saying other conditions are not handled
+			// For other architectures, AOCL dynamic does not make any change
+			*nt_ideal = -1;
+	}
+}
+
+/*
+	Functionality:
+	--------------
+	This function decides the AOCL dynamic logic for L1 zcopyv API based on the
+	architecture ID, input type and size of the input variable.
+
+	Function signature
+	-------------------
+
+	This function takes the following input:
+
+	* 'arch_id' - Architecture ID of the system (copy of BLIS global arch id)
+	* 'n_elem' - Number of elements in the vector
+	* 'nt_ideal' - Ideal number of threads
+
+	The function has been made static to restrict its scope.
+
+	Exception
+	----------
+
+	1. For non-Zen architectures, return -1. The expectation is that this is handled
+	   in the higher layer
+*/
+
+static void aocl_zcopyv_dynamic
+     (
+       arch_t arch_id,
+       dim_t  n_elem,
+       dim_t* nt_ideal
+     )
+{
+	// Pick the AOCL dynamic logic based on the
+	// architecture ID
+
+	switch (arch_id)
+	{
+		case BLIS_ARCH_ZEN5:
+		case BLIS_ARCH_ZEN4:
+		case BLIS_ARCH_ZEN:
+		case BLIS_ARCH_ZEN2:
+		case BLIS_ARCH_ZEN3:
+
+			if ( n_elem <= 4600 )
+				*nt_ideal = 1;
+			else if (n_elem <= 5100)
+				*nt_ideal = 2;
+			else if (n_elem <= 22000)
+				*nt_ideal = 4;
+			else if (n_elem <= 240000)
+				*nt_ideal = 8;
+			else if (n_elem <=380000)
+				*nt_ideal = 16;
+			else if (n_elem <= 1700000)
+				*nt_ideal = 32;
+			else if (n_elem <= 3700000)
+				*nt_ideal = 64;
+			else
+				// For sizes in this range, AOCL dynamic does not make any change
+				*nt_ideal = -1;
+
+			break;
+
+		default:
+			// Without this default condition, compiler will throw
+			// a warning saying other conditions are not handled
+
+			// For other architectures, AOCL dynamic does not make any change
+			*nt_ideal = -1;
+	}
+}
+
 #endif // AOCL_DYNAMIC
 
 /*
@@ -1937,6 +2069,20 @@ void bli_nthreads_l1
 			aocl_dynamic_func_l1 = aocl_ddotv_dynamic;
 
 			break;
+
+		case BLIS_COPYV_KER:
+
+			if ( data_type_a == BLIS_DOUBLE)
+			{
+				// Function for DCOPYV
+				aocl_dynamic_func_l1 = aocl_dcopyv_dynamic;
+			}
+			else if ( data_type_a == BLIS_DCOMPLEX )
+			{
+				// Function for ZCOPYV
+				aocl_dynamic_func_l1 = aocl_zcopyv_dynamic;
+			}
+					break;
 
 		default:
 			/*
