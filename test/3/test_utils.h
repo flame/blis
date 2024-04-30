@@ -90,6 +90,7 @@ typedef struct params_s
 
 	const char* im_str;
 	ind_t im;
+	bool  im_is_auto;
 
 	// Problem size range and dimension specifiers.
 	const char* ps_str;
