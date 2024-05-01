@@ -47,18 +47,18 @@
 namespace testinghelpers {
 
 template<typename T>
-void ref_axpyf( conj_t conja,
-                conj_t conjx,
-                gint_t m,
-                gint_t b_n,
+void ref_axpyf( char conja,
+                char conjx,
+                gtint_t m,
+                gtint_t b_n,
                 T *alpha,
                 T* a,
-                gint_t inca,
-                gint_t lda,
+                gtint_t inca,
+                gtint_t lda,
                 T* x,
-                gint_t incx,
+                gtint_t incx,
                 T* y,
-                gint_t incy
+                gtint_t incy
               );
 
 } //end of namespace testinghelpers

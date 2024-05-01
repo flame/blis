@@ -72,91 +72,91 @@ dcomplex bli_cpyscal(conj_t conjx, dcomplex *chi1, dcomplex *alpha )
 }
 
 template<typename T>
-void ref_axpyf( conj_t conja,
-                conj_t conjx,
-                gint_t m,
-                gint_t b,
+void ref_axpyf( char conja,
+                char conjx,
+                gtint_t m,
+                gtint_t b,
                 T *alpha,
                 T* A,
-                gint_t inca,
-                gint_t lda,
+                gtint_t inca,
+                gtint_t lda,
                 T* x,
-                gint_t incx,
+                gtint_t incx,
                 T* y,
-                gint_t incy
+                gtint_t incy
               )
             {
-                for (gint_t i = 0; i < b; ++i )
+                conj_t blis_conjx;
+                testinghelpers::char_to_blis_conj( conjx, &blis_conjx );
+                for (gtint_t i = 0; i < b; ++i )
                 {
                     T* a1   = A + (0  )*inca + (i  )*lda;
                     T* chi1 = x + (i  )*incx;
                     T* y1   = y + (0  )*incy;
 
-                    T alpha_chi1 = bli_cpyscal( conjx, chi1, alpha );
+                    T alpha_chi1 = bli_cpyscal( blis_conjx, chi1, alpha );
 
                     testinghelpers::ref_axpyv<T>( conja, m, alpha_chi1, a1, inca, y1, incy );
                 }
             }
 
 template void ref_axpyf<float>(
-                conj_t conja,
-                conj_t conjx,
-                gint_t m,
-                gint_t b,
+                char conja,
+                char conjx,
+                gtint_t m,
+                gtint_t b,
                 float *alpha,
                 float* A,
-                gint_t inca,
-                gint_t lda,
+                gtint_t inca,
+                gtint_t lda,
                 float* x,
-                gint_t incx,
+                gtint_t incx,
                 float* y,
-                gint_t incy
+                gtint_t incy
               );
 
 template void ref_axpyf<double>(
-                conj_t conja,
-                conj_t conjx,
-                gint_t m,
-                gint_t b,
+                char conja,
+                char conjx,
+                gtint_t m,
+                gtint_t b,
                 double *alpha,
                 double* A,
-                gint_t inca,
-                gint_t lda,
+                gtint_t inca,
+                gtint_t lda,
                 double* x,
-                gint_t incx,
+                gtint_t incx,
                 double* y,
-                gint_t incy
+                gtint_t incy
               );
 
 template void ref_axpyf<scomplex>(
-                conj_t conja,
-                conj_t conjx,
-                gint_t m,
-                gint_t b,
+                char conja,
+                char conjx,
+                gtint_t m,
+                gtint_t b,
                 scomplex *alpha,
                 scomplex* A,
-                gint_t inca,
-                gint_t lda,
+                gtint_t inca,
+                gtint_t lda,
                 scomplex* x,
-                gint_t incx,
+                gtint_t incx,
                 scomplex* y,
-                gint_t incy
+                gtint_t incy
               );
 
 template void ref_axpyf<dcomplex>(
-                conj_t conja,
-                conj_t conjx,
-                gint_t m,
-                gint_t b,
+                char conja,
+                char conjx,
+                gtint_t m,
+                gtint_t b,
                 dcomplex *alpha,
                 dcomplex* A,
-                gint_t inca,
-                gint_t lda,
+                gtint_t inca,
+                gtint_t lda,
                 dcomplex* x,
-                gint_t incx,
+                gtint_t incx,
                 dcomplex* y,
-                gint_t incy
+                gtint_t incy
               );
 }
-
-

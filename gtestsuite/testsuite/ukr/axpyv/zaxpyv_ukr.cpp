@@ -164,3 +164,75 @@ INSTANTIATE_TEST_SUITE_P(
     );
 
 #endif
+
+#if defined(BLIS_KERNELS_ZEN4) && defined(GTEST_AVX512)
+/*
+    Unit testing for functionality of bli_zaxpyv_zen_int_avx512 kernel.
+    The code structure for bli_zaxpyv_zen_int_avx512( ... ) is as follows :
+    For unit strides :
+        Main loop    :  In blocks of 32 --> L32
+        Fringe loops :  In blocks of 16 --> L16
+                        In blocks of 8  --> L8
+                        In blocks of 4  --> L4
+                        Masked loop     ---> LScalar
+
+    For non-unit strides : A single loop, to process element wise.
+*/
+// Unit testing with unit strides, across all loops.
+INSTANTIATE_TEST_SUITE_P(
+        bli_zaxpyv_zen_int_avx512_unitStrides,
+        zaxpyvUkr,
+        ::testing::Combine(
+            ::testing::Values(bli_zaxpyv_zen_int_avx512),               // kernel address
+            ::testing::Values('n'
+#ifdef TEST_BLIS_TYPED
+                            , 'c'                                       // conjx
+#endif
+            ),
+            ::testing::Values(// Testing the loops standalone
+                              gtint_t(32),                              // size n, for L32
+                              gtint_t(16),                              // L16
+                              gtint_t(8),                               // L8
+                              gtint_t(4),                               // L4
+                              gtint_t(3),                               // LScalar
+                              // Testing the loops with combination
+                              gtint_t(96),                              // 3*L32
+                              gtint_t(112),                             // 3*L32 + L116
+                              gtint_t(120),                             // 3*L32 + L16 + L8
+                              gtint_t(124),                             // 3*L32 + L16 + L8 + L4
+                              gtint_t(127)),                            // 3*L32 + L16 + L8 + L4 + LScalar
+            ::testing::Values(gtint_t(1)),                              // stride size for x
+            ::testing::Values(gtint_t(1)),                              // stride size for y
+            ::testing::Values(dcomplex{1.0, 0.0}, dcomplex{-1.0, 0.0},
+                              dcomplex{0.0, 1.0}, dcomplex{0.0, -1.0},
+                              dcomplex{0.0, -3.3}, dcomplex{4.3,-2.1},
+                              dcomplex{0.0, 0.0}),                      // alpha
+            ::testing::Values(false, true)                              // is_memory_test
+        ),
+        (::axpyvUKRPrint<dcomplex, zaxpyv_ker_ft>())
+    );
+
+// Unit testing for non unit strides
+INSTANTIATE_TEST_SUITE_P(
+        bli_zaxpyv_zen_int_avx512_nonUnitStrides,
+        zaxpyvUkr,
+        ::testing::Combine(
+            ::testing::Values(bli_zaxpyv_zen_int_avx512),               // kernel address
+            ::testing::Values('n'
+#ifdef TEST_BLIS_TYPED
+                            , 'c'                                       // conjx
+#endif
+            ),
+            ::testing::Values(gtint_t(13)),                             // n, size of the vector
+            ::testing::Values(gtint_t(5)),                              // stride size for x
+            ::testing::Values(gtint_t(3)),                              // stride size for y
+            ::testing::Values(dcomplex{1.0, 0.0}, dcomplex{-1.0, 0.0},
+                              dcomplex{0.0, 1.0}, dcomplex{0.0, -1.0},
+                              dcomplex{0.0, -3.3}, dcomplex{4.3,-2.1},
+                              dcomplex{0.0, 0.0}),                      // alpha
+            ::testing::Values(false, true)                              // is_memory_test
+        ),
+        (::axpyvUKRPrint<dcomplex, zaxpyv_ker_ft>())
+    );
+
+#endif

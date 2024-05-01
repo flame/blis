@@ -46,8 +46,8 @@
 */
 template<typename T>
 static void test_axpyf(
-                conj_t conja,
-                conj_t conjx,
+                char conj_a,
+                char conj_x,
                 gint_t m,
                 gint_t b,
                 T *alpha,
@@ -73,13 +73,19 @@ static void test_axpyf(
     std::vector<T> x = testinghelpers::get_random_vector<T>( -10, 10, m, incx );
     std::vector<T> y = testinghelpers::get_random_vector<T>( -10, 10, m, incy );
 
+    // Convert conjugate to BLIS conjugate
+    conj_t conjx;
+    testinghelpers::char_to_blis_conj( conj_x, &conjx );
+    conj_t conja;
+    testinghelpers::char_to_blis_conj( conj_a, &conja );
+
     //----------------------------------------------------------
     //    Call reference implementation to get ref results.
     //----------------------------------------------------------
     // Create a copy of y so that we can check reference results.
     std::vector<T> y_ref(y);
-    // conj_t, conj_t, long, long, double, double*, long, long, double*, long, double*, long)
-    testinghelpers::ref_axpyf<T>( conja, conjx, m, b, alpha, A.data(), inca, lda, x.data(), incx, y_ref.data(), incy );
+    // char, char, long, long, double, double*, long, long, double*, long, double*, long)
+    testinghelpers::ref_axpyf<T>( conj_a, conj_x, m, b, alpha, A.data(), inca, lda, x.data(), incx, y_ref.data(), incy );
 
     //----------------------------------------------------------
     //                  Call BLIS function.

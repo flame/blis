@@ -56,11 +56,7 @@ TEST_P( daxpyfGenericTest, FunctionalTest )
     //----------------------------------------------------------
     // denotes whether x or conj(x) will be added to y:
     char conj_x = std::get<0>(GetParam());
-    conj_t conjx;
-    testinghelpers::char_to_blis_conj( conj_x, &conjx );
     char conj_a = std::get<1>(GetParam());
-    conj_t conja;
-    testinghelpers::char_to_blis_conj( conj_a, &conja );
     gtint_t m = std::get<2>(GetParam());
     gtint_t b = std::get<3>(GetParam());
     T alpha = std::get<4>(GetParam());
@@ -89,7 +85,7 @@ TEST_P( daxpyfGenericTest, FunctionalTest )
     //----------------------------------------------------------
     //     Call generic test body using those parameters
     //----------------------------------------------------------
-    test_axpyf<T>( conjx, conja, m, b, &alpha, inca, lda, incx, incy, thresh );
+    test_axpyf<T>( conj_x, conj_a, m, b, &alpha, inca, lda, incx, incy, thresh );
 }
 
 // Black box testing for generic and main use of daxpy.
