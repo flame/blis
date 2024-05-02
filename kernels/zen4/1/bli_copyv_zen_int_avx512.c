@@ -1551,7 +1551,7 @@ void bli_zcopyv_zen_int_avx512
                 xv[0] = _mm_loadu_pd((double *)(x0 + 0 * incx));
                 xv[1] = _mm_loadu_pd((double *)(x0 + 1 * incx));
 
-                // Storing the values to destination
+                // Storing the values to desti-nation
                 _mm_storeu_pd((double *)(y0 + incy * 0), xv[0]);
                 _mm_storeu_pd((double *)(y0 + incy * 1), xv[1]);
 
