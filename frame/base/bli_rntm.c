@@ -1989,6 +1989,54 @@ static void aocl_zcopyv_dynamic
 	}
 }
 
+static void aocl_daxpyf_dynamic
+     (
+       arch_t arch_id,
+       dim_t  n_elem,
+       dim_t* nt_ideal
+     )
+{
+
+	// Pick the AOCL dynamic logic based on the
+	// architecture ID
+
+	switch (arch_id)
+	{
+		case BLIS_ARCH_ZEN5:
+		case BLIS_ARCH_ZEN4:
+		case BLIS_ARCH_ZEN3:
+		case BLIS_ARCH_ZEN2:
+		case BLIS_ARCH_ZEN:
+
+			if ( n_elem <= 128 )
+				*nt_ideal = 1;
+			// these nt_ideal sizes are tuned for trsv only,
+			// when axpyf kernels are enabled for gemv, these might need
+			// to be re tuned
+			
+			// else if ( n_elem <= 224)
+			// 	*nt_ideal = 2;
+			// else if ( n_elem <= 860)
+			// 	*nt_ideal = 4;
+			else
+				*nt_ideal = 8;
+				// axpyf does not scale with more than 8 threads
+
+			break;
+
+		default:
+			/*
+				Without this default condition, compiler will throw
+				a warning saying other conditions are not handled
+			*/
+
+			/*
+				For other architectures, AOCL dynamic does not make any change
+			*/
+			*nt_ideal = -1;
+	}
+}
+
 #endif // AOCL_DYNAMIC
 
 /*
@@ -2067,6 +2115,13 @@ void bli_nthreads_l1
 
 			// Function for DDOTV
 			aocl_dynamic_func_l1 = aocl_ddotv_dynamic;
+
+			break;
+
+		case BLIS_AXPYF_KER:
+
+			// Function for DAXPYF
+			aocl_dynamic_func_l1 = aocl_daxpyf_dynamic;
 
 			break;
 

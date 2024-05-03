@@ -300,8 +300,36 @@ void bli_dtrsv_unf_var2
     // This function is invoked on all architectures including 'generic'.
     // Non-AVX2+FMA3 platforms will use the kernels derived from the context.
     if (bli_cpuid_is_avx2fma3_supported() == TRUE) {
-	    kfp_af = bli_daxpyf_zen_int_16x4;
-	    b_fuse = 4;
+        arch_t id = bli_arch_query_id();
+        switch (id)
+        {
+#if defined(BLIS_KERNELS_ZEN4)
+            case BLIS_ARCH_ZEN5:
+            case BLIS_ARCH_ZEN4:
+#ifdef BLIS_ENABLE_OPENMP
+                rntm_t rntm;
+                bli_rntm_init_from_global(&rntm);
+                dim_t n_threads = bli_rntm_num_threads(&rntm);
+                // For small sizes and single thred, kernel with
+                // fuse_factor 8 is performing better
+                if ( m > 800 && n_threads > 1 )
+                {
+                    kfp_af = bli_daxpyf_zen_int32_avx512_mt;
+                    b_fuse = 32;
+                }
+                else
+#endif
+                {
+                    kfp_af = bli_daxpyf_zen_int8_avx512;
+                    b_fuse = 8;
+                }
+                break;
+#endif
+            default:
+                kfp_af = bli_daxpyf_zen_int_16x4;
+                b_fuse = 4;
+                break;
+        }
     }
     else
     {
