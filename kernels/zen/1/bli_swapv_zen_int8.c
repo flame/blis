@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2020 - 2023, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2020 - 2024, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -202,7 +202,7 @@ void bli_sswapv_zen_int8
 
 //--------------------------------------------------------------------------------
 
-void bli_dswapv_zen_int8
+BLIS_EXPORT_BLIS void bli_dswapv_zen_int8
      (
        dim_t            n,
        double* restrict x, inc_t incx,

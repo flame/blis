@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2024, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -35,8 +36,8 @@
 BLIS_EXPORT_BLIS void bli_init( void );
 BLIS_EXPORT_BLIS void bli_finalize( void );
 
-void bli_init_auto( void );
-void bli_finalize_auto( void );
+BLIS_EXPORT_BLIS void bli_init_auto( void );
+BLIS_EXPORT_BLIS void bli_finalize_auto( void );
 
 void bli_init_apis( void );
 void bli_finalize_apis( void );
