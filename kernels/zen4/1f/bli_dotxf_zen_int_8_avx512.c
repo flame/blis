@@ -185,7 +185,7 @@ void bli_zdotxf_zen_int_2_avx512
       // Load remaining elements from X
       // Maskz_load is used to ensure the unloaded elements are 0
       // Else, it affects the accumulation and final reduction
-      xv[0].v = _mm512_mask_loadu_pd(xv[0].v, m_mask, x_temp);
+      xv[0].v = _mm512_maskz_loadu_pd(m_mask, x_temp);
 
       // Permute to duplicate the imag part for every element
       // xv[1].v = I0 I0 I1 I1 ...
@@ -618,7 +618,7 @@ void bli_zdotxf_zen_int_4_avx512
       // Load remaining elements from X
       // Maskz_load is used to ensure the unloaded elements are 0
       // Else, it affects the accumulation and final reduction
-      xv[0].v = _mm512_mask_loadu_pd(xv[0].v, m_mask, x_temp);
+      xv[0].v = _mm512_maskz_loadu_pd(m_mask, x_temp);
 
       // Permute to duplicate the imag part for every element
       // xv[1].v = I0 I0 I1 I1 ...
@@ -1175,7 +1175,7 @@ void bli_zdotxf_zen_int_8_avx512
       // Load remaining elements from X
       // Maskz_load is used to ensure the unloaded elements are 0
       // Else, it affects the accumulation and final reduction
-      xv[0].v = _mm512_mask_loadu_pd(xv[0].v, m_mask, x_temp);
+      xv[0].v = _mm512_maskz_loadu_pd(m_mask, x_temp);
 
       // Permute to duplicate the imag part for every element
       // xv[1].v = I0 I0 I1 I1 ...
