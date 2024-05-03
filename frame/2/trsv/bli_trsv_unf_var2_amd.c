@@ -306,6 +306,7 @@ void bli_dtrsv_unf_var2
 #if defined(BLIS_KERNELS_ZEN4)
             case BLIS_ARCH_ZEN5:
             case BLIS_ARCH_ZEN4:
+            {
 #ifdef BLIS_ENABLE_OPENMP
                 rntm_t rntm;
                 bli_rntm_init_from_global(&rntm);
@@ -324,6 +325,7 @@ void bli_dtrsv_unf_var2
                     b_fuse = 8;
                 }
                 break;
+            }
 #endif
             default:
                 kfp_af = bli_daxpyf_zen_int_16x4;
