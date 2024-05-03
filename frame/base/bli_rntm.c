@@ -1286,11 +1286,19 @@ void bli_nthreads_optimum(
 	{
 		dim_t m = bli_obj_length(c);
 		dim_t n = bli_obj_width(c);
-
+#ifdef BLIS_ENABLE_SMALL_MATRIX_TRSM
+		if ( (m <= 300) && (n <= 300) )
+			n_threads_ideal = 8;
+		else if ( (m <= 400) && (n <= 400) )
+			n_threads_ideal = 16;
+		else if ( (m <= 900) && (n <= 900) )
+			n_threads_ideal = 32;
+#else
 		if((m>=64) && (m<=256) && (n>=64) && (n<=256))
 		{
 			n_threads_ideal = 8;
 		}
+#endif
 	}
 	else if( family == BLIS_GEMMT && bli_obj_is_double(c)  )
 	{

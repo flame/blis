@@ -1,4 +1,4 @@
-##Copyright (C) 2022-23, Advanced Micro Devices, Inc. All rights reserved.##
+##Copyright (C) 2022-24, Advanced Micro Devices, Inc. All rights reserved.##
 
 add_library(zen4_3
      OBJECT
@@ -9,6 +9,7 @@ add_library(zen4_3
     ${CMAKE_CURRENT_SOURCE_DIR}/bli_dgemm_zen4_asm_32x6.c
     ${CMAKE_CURRENT_SOURCE_DIR}/bli_dgemm_zen4_asm_8x24.c
     ${CMAKE_CURRENT_SOURCE_DIR}/bli_trsm_small_AVX512.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/bli_ztrsm_small_AVX512.c
     ${CMAKE_CURRENT_SOURCE_DIR}/bli_zgemm_zen4_asm_12x4.c
     ${CMAKE_CURRENT_SOURCE_DIR}/bli_zero_zmm.c
     ${CMAKE_CURRENT_SOURCE_DIR}/bli_zgemm_zen4_asm_4x12.c

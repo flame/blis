@@ -5123,7 +5123,10 @@ err_t bli_trsm_small
    switch(dt)
    {
         case BLIS_DOUBLE:
+        case BLIS_DCOMPLEX:
         {
+            // threshold checks for these datatypes is
+            // done at bla layer
             break;
         }
         case BLIS_FLOAT:
@@ -5131,13 +5134,6 @@ err_t bli_trsm_small
         {
             if((!is_parallel) && (m > 1000 || n > 1000)) {
                return BLIS_NOT_YET_IMPLEMENTED;
-            }
-            break;
-        }
-        case BLIS_DCOMPLEX:
-        {
-            if((!is_parallel) && (m > 500 || n > 500)) {
-                return BLIS_NOT_YET_IMPLEMENTED;
             }
             break;
         }

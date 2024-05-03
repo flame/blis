@@ -152,7 +152,7 @@ typedef err_t (*trsmsmall_ker_ft)
   Pack a block of 8xk from input buffer into packed buffer
   directly or after transpose based on input params
 */
-BLIS_INLINE void bli_dtrsm_small_pack_avx512
+void bli_dtrsm_small_pack_avx512
      (
        char     side,
        dim_t    size,
@@ -406,7 +406,7 @@ BLIS_INLINE void bli_dtrsm_small_pack_avx512
   a. This helps in utilze cache line efficiently in TRSM operation
   b. store ones when input is unit diagonal
 */
-BLIS_INLINE void dtrsm_small_pack_diag_element_avx512
+void dtrsm_small_pack_diag_element_avx512
      (
        bool     is_unitdiag,
        double*  a11,
@@ -486,14 +486,14 @@ trsmsmall_ker_ft ker_fps_AVX512[4][8] =
      bli_dtrsm_small_XAltB_XAuB_AVX512,
      bli_dtrsm_small_XAltB_XAuB_AVX512,
      bli_dtrsm_small_XAutB_XAlB_AVX512},
-    {NULL,
-     NULL,
-     NULL,
-     NULL,
-     NULL,
-     NULL,
-     NULL,
-     NULL},
+    {bli_ztrsm_small_AutXB_AlXB_AVX512,
+     bli_ztrsm_small_AltXB_AuXB_AVX512,
+     bli_ztrsm_small_AltXB_AuXB_AVX512,
+     bli_ztrsm_small_AutXB_AlXB_AVX512,
+     bli_ztrsm_small_XAutB_XAlB_AVX512,
+     bli_ztrsm_small_XAltB_XAuB_AVX512,
+     bli_ztrsm_small_XAltB_XAuB_AVX512,
+     bli_ztrsm_small_XAutB_XAlB_AVX512},
 };
 /*
 * The bli_trsm_small implements a version of TRSM where A is packed and reused
@@ -526,12 +526,12 @@ err_t bli_trsm_small_AVX512
   switch (dt)
   {
   case BLIS_DOUBLE:
+  case BLIS_DCOMPLEX:
   {
     break;
   }
   case BLIS_FLOAT:
   case BLIS_SCOMPLEX:
-  case BLIS_DCOMPLEX:
   default:
   {
     return BLIS_NOT_YET_IMPLEMENTED;
@@ -602,6 +602,11 @@ err_t bli_trsm_small_mt_AVX512
       d_mr = 8, d_nr = 8;
       break;
     }
+    case BLIS_DCOMPLEX:
+    {
+      d_mr = 4, d_nr = 4;
+      break;
+    }
     default:
     {
       return BLIS_NOT_YET_IMPLEMENTED;
@@ -616,7 +621,7 @@ err_t bli_trsm_small_mt_AVX512
   // If dynamic-threading is enabled, calculate optimum number
   //  of threads.
   //  rntm will be updated with optimum number of threads.
-  if (bli_obj_is_double(b))
+  if (bli_obj_is_double(b) || bli_obj_is_dcomplex(b) )
   {
     bli_nthreads_optimum(a, b, b, BLIS_TRSM, &rntm);
   }
@@ -1984,7 +1989,7 @@ err_t bli_trsm_small_mt_AVX512
 // endregion - pre/post DTRSM macros for right variants
 
 // RUNN - RLTN
-BLIS_INLINE err_t bli_dtrsm_small_XAltB_XAuB_AVX512
+err_t bli_dtrsm_small_XAltB_XAuB_AVX512
      (
        obj_t*   AlphaObj,
        obj_t*   a,
@@ -4314,7 +4319,7 @@ BLIS_INLINE err_t bli_dtrsm_small_XAltB_XAuB_AVX512
 
 
 // RLNN - RUTN
-BLIS_INLINE err_t bli_dtrsm_small_XAutB_XAlB_AVX512
+err_t bli_dtrsm_small_XAutB_XAlB_AVX512
      (
        obj_t*   AlphaObj,
        obj_t*   a,
@@ -7232,7 +7237,7 @@ zmm7 = zmm16[0] zmm15[0] zmm14[0] zmm13[0] zmm12[0] zmm11[0] zmm10[0] zmm9 [0]
   _mm_storel_pd((double *)(b11), _mm256_extractf128_pd(ymm8, 0));
 
 // LLNN - LUTN
-BLIS_INLINE err_t bli_dtrsm_small_AutXB_AlXB_AVX512
+err_t bli_dtrsm_small_AutXB_AlXB_AVX512
      (
        obj_t*   AlphaObj,
        obj_t*   a,
@@ -9203,7 +9208,7 @@ BLIS_INLINE err_t bli_dtrsm_small_AutXB_AlXB_AVX512
 
 
 // LUNN LUTN
-BLIS_INLINE err_t bli_dtrsm_small_AltXB_AuXB_AVX512
+err_t bli_dtrsm_small_AltXB_AuXB_AVX512
      (
        obj_t*   AlphaObj,
        obj_t*   a,

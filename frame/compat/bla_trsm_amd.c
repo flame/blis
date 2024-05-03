@@ -1535,12 +1535,27 @@ void ztrsm_blis_impl
 #ifdef BLIS_ENABLE_SMALL_MATRIX_TRSM
     // This function is invoked on all architectures including 'generic'.
     // Non-AVX2+FMA3 platforms will use the kernels derived from the context.
-    if (bli_cpuid_is_avx2fma3_supported() == TRUE)
+    if ( bli_cpuid_is_avx2fma3_supported() == TRUE )
     {
         /* bli_ztrsm_small is performing better existing native
         * implementations for [m,n]<=1000 for single thread.
         * In case of multithread when [m,n]<=128 single thread implementation
         * is doing better than native multithread */
+        typedef err_t (*ztrsm_small_ker_ft)
+        (
+            side_t   side,
+            obj_t*   alpha,
+            obj_t*   a,
+            obj_t*   b,
+            cntx_t*  cntx,
+            cntl_t*  cntl,
+            bool     is_parallel
+        );
+        err_t status = BLIS_NOT_YET_IMPLEMENTED;
+
+        // trsm small kernel function pointer definition
+        ztrsm_small_ker_ft ker_ft = NULL;
+        arch_t id = bli_arch_query_id();
         bool is_parallel = bli_thread_get_is_parallel();
         dim_t dim_a = n0;
         if (blis_side == BLIS_LEFT)
@@ -1548,29 +1563,58 @@ void ztrsm_blis_impl
 
         // size of output matrix(B)
         dim_t size_b = m0*n0;
-        if((!is_parallel && m0<=500 && n0<=500) ||
-           (is_parallel && (m0+n0)<128) || 
-           (dim_a<35 && size_b<3500))
+#if defined(BLIS_ENABLE_OPENMP) && defined(BLIS_KERNELS_ZEN4)
+        if (( is_parallel ) &&
+            ( (dim_a > 10) && (dim_a < 2500) && (size_b > 500) && (size_b < 5e5) ) &&
+            ( id == BLIS_ARCH_ZEN4 ))
         {
-            err_t status;
-            status = bli_trsm_small
-                    (
-                        blis_side,
-                        &alphao,
-                        &ao,
-                        &bo,
-                        NULL,
-                        NULL,
-                        is_parallel
-                    );
-            if (status == BLIS_SUCCESS)
+            ker_ft = bli_trsm_small_mt_AVX512;
+        }
+#endif
+        if( ( ker_ft == NULL ) &&
+            ( ( ( !is_parallel ) && 
+                ( (( m0 <= 500 ) && ( n0 <= 500 )) || ( (dim_a < 75) && (size_b < 3.2e5)))) ||
+              ( ( is_parallel ) && 
+                ( (m0 + n0 < 180) || (size_b < 5000) ) )
+            )
+          )
+        {
+            switch (id)
             {
-                AOCL_DTL_LOG_TRSM_STATS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(z), *side, *m, *n);
-                AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO);
-                /* Finalize BLIS. */
-                bli_finalize_auto();
-                return;
+                case BLIS_ARCH_ZEN5:
+                case BLIS_ARCH_ZEN4:
+#if defined(BLIS_KERNELS_ZEN4)
+                    // ZTRSM AVX512 code path do not support
+                    // conjugate
+                    if (!bli_obj_has_conj(&ao))
+                    {
+                        ker_ft = bli_trsm_small_AVX512;
+                    }
+                    else
+                    {
+                        ker_ft = bli_trsm_small;
+                    }
+                    break;
+#endif // BLIS_KERNELS_ZEN4
+                case BLIS_ARCH_ZEN:
+                case BLIS_ARCH_ZEN2:
+                case BLIS_ARCH_ZEN3:
+                default:
+                    ker_ft = bli_trsm_small;
+                    break;
             }
+        }
+        if(ker_ft)
+        {
+            status = ker_ft(blis_side, &alphao, &ao, &bo, NULL, NULL, is_parallel);
+        }
+        if (status == BLIS_SUCCESS)
+        {
+            AOCL_DTL_LOG_TRSM_STATS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(z), *side, *m, *n);
+            AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO);
+            /* Finalize BLIS. */
+            bli_finalize_auto();
+            return;
         }
     } // bli_cpuid_is_avx2fma3_supported
 #endif// END of BLIS_ENABLE_SMALL_MATRIX_TRSM

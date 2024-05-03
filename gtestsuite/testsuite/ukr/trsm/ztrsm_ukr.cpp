@@ -167,6 +167,29 @@ INSTANTIATE_TEST_SUITE_P (
     (::trsmNatUKRPrint<dcomplex,zgemmtrsm_ukr_ft>())
 );
 
+INSTANTIATE_TEST_SUITE_P (
+    bli_trsm_small_AVX512,
+    ztrsmUkrSmall,
+    ::testing::Combine(
+        ::testing::Values(bli_trsm_small_AVX512),     // ker_ptr
+        ::testing::Values('l', 'r'),                  // side
+        ::testing::Values('l', 'u'),                  // uplo
+        ::testing::Values('n', 'u'),                  // diaga
+        ::testing::Values('n', 't'),                  // transa
+        ::testing::Range(gtint_t(1), gtint_t(5), 1),  // m
+        ::testing::Range(gtint_t(1), gtint_t(5), 1),  // n
+        ::testing::Values(dcomplex{-1.4,  3.2},
+                          dcomplex{ 2.8, -0.5},
+                          dcomplex{-1.4,  0.0},
+                          dcomplex{ 0.0, -1.9}),      // alpha
+        ::testing::Values(0, 10, 194),                // lda_inc
+        ::testing::Values(0, 10, 194),                // ldb_inc
+        ::testing::Values(false, true)                // is_memory_test
+    ),
+    (::trsmSmallUKRPrint<dcomplex, trsm_small_ker_ft>())
+);
+
+
 #endif
 
 
