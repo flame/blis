@@ -61,7 +61,7 @@ Framework:
 - Relocated the pba, sba pool (from the `rntm_t`), and `mem_t` (from the `cntl_t`) to the `thrinfo_t` object.
 - Modified which communicator is associated with a given node of the `thrinfo_t` tree. (Devin Matthews)
 - Refactored level-3 thread decorator into two parts: a thread launcher and a function to pass operands. (Devin Matthews)
-- Refactored strucure awareness in `bli_packm_blk_var1.c`. (Devin Matthews)
+- Refactored structure awareness in `bli_packm_blk_var1.c`. (Devin Matthews)
 - Reimplemented `bli_l3_determine_kc()`. (Devin Matthews)
 - Implemented `cntx_t` pointer caching in gks. (Field Van Zee, Harihara Sudhan S)
 - Added `const` keyword to pointers in kernel APIs. (Field Van Zee, Nisanth M P)
@@ -80,7 +80,7 @@ Framework:
 - Fixed type bug in `bli_cntx_set_ukr_prefs()`. (Field Van Zee, Leick Robinson, Devin Matthews, Jeff Diamond)
 - Fixed incorrect `sizeof(type)` in edge case macros. (@moon-chilled)
 - Fixed bugs and added sanity check in `bli_pool.c`. (Devin Matthews)
-- Fixed a typo in the macro defintion for `VEXTRACTF64X2` in `bli_x86_asm_macros.h`. (Harsh Dave)
+- Fixed a typo in the macro definition for `VEXTRACTF64X2` in `bli_x86_asm_macros.h`. (Harsh Dave)
 - Fixed a typo in `bli_type_defs.h` where `BLIS_BLAS_INT_TYPE_SIZE` was misspelled. (Devin Matthews)
 - Typecast `printf()` args in `bli_thread_range_tlb.c` to avoid compiler warnings. (Lee Killough)
 - Minor tweaks to `bli_l3_check.c`.
@@ -134,7 +134,7 @@ Build system:
 - Added `--nosup` and `--sup` shorthand options to `configure`.
 - Use here-document syntax for `configure --help` output. (Lee Killough)
 - Updated `configure` to pass all `shellcheck` checks. (Lee Killough)
-- Tweaks to `.dir-locals.el` to enchance emacs formatting of C files. (Lee Killough)
+- Tweaks to `.dir-locals.el` to enhance emacs formatting of C files. (Lee Killough)
 - Removed buggy cruft from `power10` subconfig. (Field Van Zee, Nicholai Tukanov)
 - Added missing `#include <io.h>` for Windows. (@h-vetinari)
 - Fixed hardware auto-detection for `firestorm` (Apple M1) subconfig. (Devin Matthews)
