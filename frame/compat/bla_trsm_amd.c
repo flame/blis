@@ -1568,7 +1568,14 @@ void ztrsm_blis_impl
             ( (dim_a > 10) && (dim_a < 2500) && (size_b > 500) && (size_b < 5e5) ) &&
             ( id == BLIS_ARCH_ZEN4 ))
         {
-            ker_ft = bli_trsm_small_mt_AVX512;
+            if (!bli_obj_has_conj(&ao))
+            {
+                ker_ft = bli_trsm_small_mt_AVX512;
+            }
+            else
+            {
+                ker_ft = bli_trsm_small_mt;
+            }
         }
 #endif
         if( ( ker_ft == NULL ) &&

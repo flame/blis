@@ -86,28 +86,33 @@
 * here reg_a = [a1, b1, a2, b2, a3, b3, a4, b4]
 */
 #define DIVIDE_COMPLEX( reg_a, addr )               \
-    g_double[0] = addr->real;                       \
-    t_reg[0]    = _mm512_set1_pd(g_double[0]);      \
-    /*t_reg[0]  = [c, c, c, c, c, c, c, c ]*/       \
-    g_double[1] = addr->imag;                       \
-    t_reg[1]    = _mm512_set1_pd(g_double[1]);      \
-    /*t_reg[1]  = [d, d, d, d, d, d, d, d ]*/       \
-    g_double[1] = (g_double[0] * g_double[0]) +     \
-                  (g_double[1] * g_double[1]);      \
-    /*g_double[1] = (c^2 + d^2)*/                   \
-    t_reg[3]   = _mm512_permute_pd(reg_a, 0x55);    \
-    /*t_reg[3] = [b1,a1,b2,a2,b3,a3,b4,a4] */       \
-    reg_a      = _mm512_mul_pd(reg_a, t_reg[0]);    \
-    /* reg_a   = c * [a1,b1,a2,b2,a3,b3,a4,b4]*/    \
-    t_reg[3]   = _mm512_mul_pd(t_reg[3], t_reg[1]); \
-    /*t_reg[3] = d * [b1,a1,b2,a2,b3,a3,b4,a4] */   \
-    t_reg[3]   = _mm512_mul_pd(t_reg[4], t_reg[3]); \
-    /*t_reg[3] = -d * [b1,a1,b2,a2,b3,a3,b4,a4] */  \
-    t_reg[1]   = _mm512_set1_pd(g_double[1]);       \
-    /*t_reg[1] = [(c^2 + d^2), (c^2 + d^2), ...] */ \
-    reg_a      = _mm512_fmaddsub_pd(t_reg[5], reg_a, t_reg[3]);\
-    /*reg_a    = [a1c+b1d, b1c-a1d, a2c+b2d, b2c-a2d, ....]*/  \
-    reg_a      = _mm512_div_pd(reg_a, t_reg[1]); \
+    for(int iii=0; iii<4;++iii) \
+    {\
+        bli_zinvscalris((addr->real), (addr->imag), (reg_a[iii*2]), (reg_a[iii*2+1])); \
+    } \
+
+    // WIP
+    // g_double[2] = bli_fmaxabs(addr->real, addr->imag);/*s*/    \
+    // g_double[0] = addr->real / g_double[2];/*ar/s*/            \
+    // g_double[1] = addr->imag / g_double[2];/*ai/s*/            \
+    // t_reg[0]    = _mm512_set1_pd(g_double[0]);/*ar/s*/         \
+    // t_reg[1]    = _mm512_set1_pd(g_double[1]);/*ar/s*/         \
+    // g_double[2] = (g_double[0] * addr->real) +                 \
+    //               (g_double[1] * addr->imag);                  \
+    //                /*(ar/s * ar) +(ai/s * ai)*/                \
+    // t_reg[3]   = _mm512_permute_pd(reg_a, 0x55);               \
+    // /*t_reg[3] = [xi,xr,xi,xr....] */                          \
+    // reg_a      = _mm512_mul_pd(reg_a, t_reg[0]);               \
+    // /* reg_a   = ar/s * [xr, xi, xr, xi ....]*/                \
+    // t_reg[3]   = _mm512_mul_pd(t_reg[3], t_reg[1]);            \
+    // /*t_reg[3] = ai/s * [xi,xr,xi,xr........] */               \
+    // t_reg[3]   = _mm512_mul_pd(t_reg[4], t_reg[3]);            \
+    // /*t_reg[3] = -ai/s * [xi,xr,xi,xr........] */              \
+    // t_reg[1]   = _mm512_set1_pd(g_double[2]);                  \
+    // /*t_reg[1] = [(c^2 + d^2), (c^2 + d^2), ...] */            \
+    // reg_a      = _mm512_fmaddsub_pd(t_reg[5], reg_a, t_reg[3]);\
+    // /*reg_a    = [a1c+b1d, b1c-a1d, a2c+b2d, b2c-a2d, ....]*/  \
+    // reg_a      = _mm512_div_pd(reg_a, t_reg[1]);               \
 
 // Zero the registors used for gemm accumulation
 #define ZERO_REGISTERS() \
