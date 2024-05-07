@@ -50,7 +50,7 @@ ftype PASTEF772S(ch,blasname,chc) \
      ) \
 { \
     AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1); \
-    AOCL_DTL_LOG_DOTV_INPUTS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(ch), *n, *incx, *incy); \
+    AOCL_DTL_LOG_DOTV_INPUTS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(ch), *MKSTR(blis_conjx), *n, *incx, *incy); \
     dim_t  n0; \
     ftype* x0; \
     ftype* y0; \
@@ -119,7 +119,7 @@ void PASTEF772S(ch,blasname,chc) \
      ) \
 { \
   AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1); \
-  AOCL_DTL_LOG_DOTV_INPUTS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(ch), *n, *incx, *incy); \
+  AOCL_DTL_LOG_DOTV_INPUTS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(ch), *MKSTR(blis_conjx), *n, *incx, *incy); \
         dim_t  n0; \
         ftype* x0; \
         ftype* y0; \
@@ -229,7 +229,7 @@ double PASTEF77S(d,sdot)
     dim_t   i;
 
     AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1);
-    AOCL_DTL_LOG_DOTV_INPUTS(AOCL_DTL_LEVEL_TRACE_1, 'D', *n, *incx, *incy);
+    AOCL_DTL_LOG_DOTV_INPUTS(AOCL_DTL_LEVEL_TRACE_1, 'D', 'N', *n, *incx, *incy);
     /* Initialization of BLIS is not required. */
 
     /* Convert/typecast negative values of n to zero. */
