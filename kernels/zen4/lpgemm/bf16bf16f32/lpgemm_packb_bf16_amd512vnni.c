@@ -359,6 +359,7 @@ void packb_nr48_bf16bf16f32of32_row_major
 
 		kr_new += 3;
 	}
+
 	// Handle k remainder.
 	if ( k_partial_pieces > 0 )
 	{
@@ -440,6 +441,7 @@ void packb_nr32_bf16bf16f32of32_row_major
 
 		kr_new += 2;
 	}
+
 	// Handle k remainder.
 	if ( k_partial_pieces > 0 )
 	{
@@ -503,6 +505,7 @@ void packb_nr16_bf16bf16f32of32_row_major
 
 		kr_new += 2;
 	}
+
 	// Handle k remainder.
 	if ( k_partial_pieces > 0 )
 	{
@@ -580,6 +583,7 @@ void packb_nrlt16_bf16bf16f32of32_row_major
 
 		kr_new += 2;
 	}
+
 	// Handle k remainder.
 	if ( k_partial_pieces > 0 )
 	{
@@ -816,7 +820,6 @@ void packb_nr_mult_16_bf16bf16f32of32_col_major
       const dim_t     KC
     )
 {
-
 	// Used for permuting the mm512i elements for use in dpbf16_ps instruction.
 	__m512i selector1 = _mm512_setr_epi64( 0x0, 0x1, 0x8, 0x9, 0x4, 0x5, 0xC, 0xD );
 	__m512i selector2 = _mm512_setr_epi64( 0x2, 0x3, 0xA, 0xB, 0x6, 0x7, 0xE, 0xF );
@@ -830,7 +833,6 @@ void packb_nr_mult_16_bf16bf16f32of32_col_major
 		for( dim_t jr = 0; jr < NR; jr += 16 )
 		{
 			// Rearrange for dpbf16_ps, read 2 rows from B with 64 elements in each row.
-
 			LOAD_16_COLS_AVX512
 			UNPACKHILO32_AVX512
 			UNPACKHILO64_AVX512
@@ -854,9 +856,9 @@ void packb_nr_mult_16_bf16bf16f32of32_col_major
 			_mm512_storeu_si512( pack_b_buffer + ( jr * 2 ) + ( ( kr + 26 ) * NR ), a_reg[13] );
 			_mm512_storeu_si512( pack_b_buffer + ( jr * 2 ) + ( ( kr + 28 ) * NR ), a_reg[14] );
 			_mm512_storeu_si512( pack_b_buffer + ( jr * 2 ) + ( ( kr + 30 ) * NR ), a_reg[15] );
-
 		}
 	}
+
 	for ( ; ( kr + 15 ) < KC; kr += 16 )
 	{
 		for( dim_t jr = 0; jr < NR; jr += 16 )
@@ -900,6 +902,7 @@ void packb_nr_mult_16_bf16bf16f32of32_col_major
 			_mm512_storeu_si512( pack_b_buffer + ( jr * 2 ) + ( ( kr + 6 ) * NR ), a_reg[3] );
 		}
 	}
+
 	for( ; ( kr +3 ) < KC; kr += 4 )
 	{
 		for( dim_t jr = 0; jr < NR; jr += 16 )
@@ -916,6 +919,7 @@ void packb_nr_mult_16_bf16bf16f32of32_col_major
 			_mm512_storeu_si512( pack_b_buffer + ( jr * 2 ) + ( ( kr + 2 ) * NR ), a_reg[1] );
 		}
 	}
+
 	for( ; ( kr +1 ) < KC; kr += 2 )
 	{
 		for( dim_t jr = 0; jr < NR; jr += 16 )
@@ -931,6 +935,7 @@ void packb_nr_mult_16_bf16bf16f32of32_col_major
 			_mm512_storeu_si512( pack_b_buffer + ( jr * 2 ) + ( ( kr ) * NR ), a_reg[0] );
 		}
 	}
+
 	for( ; kr < KC; kr += 1 )
 	{
 		for( dim_t jr = 0; jr < NR; jr += 16 )
@@ -1004,6 +1009,7 @@ void packb_nrlt16_bf16bf16f32of32_col_major
 		_mm512_storeu_si512( pack_b_buffer + ( ( kr + 30 ) * NR ), a_reg[15] );
 
 	}
+
 	for ( ; ( kr + 15 ) < KC; kr += 16 )
 	{
 		for( jr = 0; jr  < n0_partial_rem; jr += 1 )
@@ -1055,6 +1061,7 @@ void packb_nrlt16_bf16bf16f32of32_col_major
 		_mm512_storeu_si512( pack_b_buffer + ( ( kr + 4 ) * NR ), a_reg[2] );
 		_mm512_storeu_si512( pack_b_buffer + ( ( kr + 6 ) * NR ), a_reg[3] );
 	}
+
 	for ( ; (kr+3) < KC; kr += 4 )
 	{
 		for( jr = 0; jr  < n0_partial_rem; jr += 1 )
@@ -1076,6 +1083,7 @@ void packb_nrlt16_bf16bf16f32of32_col_major
 		_mm512_storeu_si512( pack_b_buffer + ( ( kr + 0 ) * NR ), a_reg[0] );
 		_mm512_storeu_si512( pack_b_buffer + ( ( kr + 2 ) * NR ), a_reg[1] );
 	}
+
 	for ( ; ( kr + 1 ) < KC; kr += 2 )
 	{
 		for( jr = 0; jr  < n0_partial_rem; jr += 1 )
@@ -1095,6 +1103,7 @@ void packb_nrlt16_bf16bf16f32of32_col_major
 		// store to pack_b buffer
 		_mm512_storeu_si512( pack_b_buffer + ( kr * NR ), a_reg[0] );
 	}
+
 	for ( ; kr < KC; kr += 1 )
 	{
 		for( jr = 0; jr  < n0_partial_rem; jr += 1 )

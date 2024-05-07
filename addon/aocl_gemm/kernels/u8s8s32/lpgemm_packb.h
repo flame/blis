@@ -52,6 +52,7 @@ typedef void (*packb_s32)
        const dim_t,
        const dim_t,
        const dim_t,
+       const dim_t,
        dim_t*,
        dim_t*
      );
@@ -60,11 +61,12 @@ void packb_nr64_u8s8s32o32
      (
        int8_t*       pack_b_buffer_u8s8s32o32,
        const int8_t* b,
-       const dim_t   ldb,
+       const dim_t   rs_b,
+       const dim_t   cs_b,
        const dim_t   NC,
        const dim_t   KC,
-       dim_t*        rs_b,
-       dim_t*        cs_b
+       dim_t*        rs_p,
+       dim_t*        cs_p
      );
 
 #endif //BLIS_GEMM_INT8_PACKB

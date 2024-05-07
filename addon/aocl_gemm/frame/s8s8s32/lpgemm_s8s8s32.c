@@ -294,7 +294,7 @@ LPGEMV(int8_t,int8_t,int32_t,s8s8s32o32)
 					  ( n_sub_updated * pc ),
 					  pack_b_column_sum,
 					  ( b + ( rs_b * pc ) + (jc * cs_b)),
-					  rs_b, nc0, kc0, &rs_b_use, &cs_b_use
+					  rs_b, cs_b, nc0, kc0, &rs_b_use, &cs_b_use
 					);
 				}
 
@@ -589,7 +589,7 @@ LPGEMM_5LOOP(int8_t,int8_t,int32_t,s8s8s32o32)
 					  pack_b_buffer_s8s8s32o32 + ( jc_packb_start * kc0_updated ),
 					  pack_b_column_sum + ( cs_b * jc_packb_start ),
 					  ( b + ( rs_b * pc ) + ( cs_b * jc ) +
-					    ( cs_b * jc_packb_start ) ), rs_b,
+					    ( cs_b * jc_packb_start ) ), rs_b, cs_b,
 					  ( jc_packb_end - jc_packb_start ), kc0,
 					  &rs_b_use, &cs_b_use
 					);
@@ -677,7 +677,6 @@ LPGEMM_5LOOP(int8_t,int8_t,int32_t,s8s8s32o32)
 						a_block_stride = rs_a_use;
 					}
 				}
-
 				else
 				{
 					a_use = a + ( rs_a * ic ) + ( cs_a * pc );

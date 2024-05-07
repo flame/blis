@@ -271,61 +271,6 @@ void mat_mul_ ## BLAS_SFX \
                     b, ldb, op_b, \
                     beta, \
                     c, ldc, post_op ); \
- \
-    /*dim_t MR = 6; \
-    dim_t NR = 16; \
- \
-    __m512i selector1; \
-    __m512i all_zero = _mm512_setzero_epi32(); \
-    __m512i c0; \
-    __m512i c1; \
-    __m512i c2; \
-    __m512i c3; \
-    __m512i c4; \
-    __m512i c5; \
- \
-    for ( dim_t i = 0; i < m; i += MR ) \
-    { \
-        if ( ( i + MR ) > m ) \
-        { \
-            break; \
-        } \
-        for ( dim_t j = 0; j < n; j += NR ) \
-        { \
-            if ( ( j + NR ) > n ) \
-            { \
-                break; \
-            } \
-            selector1 = _mm512_loadu_epi32( (int32_t*)post_op->bias.bias + j ); \
-            c0 = _mm512_loadu_epi32( c + ( ( i + 0 ) * ldc ) + j ); \
-            c1 = _mm512_loadu_epi32( c + ( ( i + 1 ) * ldc ) + j ); \
-            c2 = _mm512_loadu_epi32( c + ( ( i + 2 ) * ldc ) + j ); \
-            c3 = _mm512_loadu_epi32( c + ( ( i + 3 ) * ldc ) + j ); \
-            c4 = _mm512_loadu_epi32( c + ( ( i + 4 ) * ldc ) + j ); \
-            c5 = _mm512_loadu_epi32( c + ( ( i + 5 ) * ldc ) + j ); \
- \
-            c0 = _mm512_add_epi32( selector1, c0 ); \
-            c1 = _mm512_add_epi32( selector1, c1 ); \
-            c2 = _mm512_add_epi32( selector1, c2 ); \
-            c3 = _mm512_add_epi32( selector1, c3 ); \
-            c4 = _mm512_add_epi32( selector1, c4 ); \
-            c5 = _mm512_add_epi32( selector1, c5 ); \
- \
-            c0 = _mm512_max_epi32( all_zero, c0 ); \
-            c1 = _mm512_max_epi32( all_zero, c1 ); \
-            c2 = _mm512_max_epi32( all_zero, c2 ); \
-            c3 = _mm512_max_epi32( all_zero, c3 ); \
-            c4 = _mm512_max_epi32( all_zero, c4 ); \
-            c5 = _mm512_max_epi32( all_zero, c5 ); \
- \
-            _mm512_storeu_epi32( c + ( ( i + 0 ) * ldc ) + j, c0 ); \
-            _mm512_storeu_epi32( c + ( ( i + 1 ) * ldc ) + j, c1 ); \
-            _mm512_storeu_epi32( c + ( ( i + 2 ) * ldc ) + j, c2 ); \
-            _mm512_storeu_epi32( c + ( ( i + 3 ) * ldc ) + j, c3 ); \
-            _mm512_storeu_epi32( c + ( ( i + 4 ) * ldc ) + j, c4 ); \
-            _mm512_storeu_epi32( c + ( ( i + 5 ) * ldc ) + j, c5 ); \
-        } \
-    } */\
 } \
 
 GEN_BLIS_MAT_MUL_FUNC(uint8_t,int8_t,int16_t,int16_t,u8s8s16os16)
@@ -1556,6 +1501,7 @@ GEN_MAT_MUL_BENCH_MAIN_FUNC(int8_t,int8_t,int32_t,int32_t,s8s8s32os32,s8s8s32os3
 GEN_MAT_MUL_BENCH_MAIN_FUNC(int8_t,int8_t,int8_t,int32_t,s8s8s32os8,s8s8s32os32)
 GEN_MAT_MUL_BENCH_MAIN_FUNC(int8_t,int8_t,int16_t,int16_t,s8s8s16os16,s8s8s16os16)
 GEN_MAT_MUL_BENCH_MAIN_FUNC(int8_t,int8_t,int8_t,int16_t,s8s8s16os8,s8s8s16os16)
+
 int main( int argc, char** argv )
 {
     FILE* fin  = NULL;
@@ -1669,7 +1615,7 @@ int main( int argc, char** argv )
     int32_t stride_a, stride_b, stride_c;
 
     const dim_t len_list_omp_cores_for_testing = 2;
-    const dim_t list_omp_cores_for_testing[2] = { 64, 1 };
+    const dim_t list_omp_cores_for_testing[2] = { 1, 64 };
 
     dim_t core_index = 0;
     bool can_run = TRUE;

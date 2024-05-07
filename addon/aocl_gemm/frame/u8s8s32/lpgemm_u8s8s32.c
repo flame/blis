@@ -94,8 +94,8 @@ LPGEMV(uint8_t,int8_t,int32_t,u8s8s32o32)
 	mem_t mem_a = BLIS_MEM_INITIALIZER;
 	mem_t mem_b = BLIS_MEM_INITIALIZER;
 
-	uint8_t* pack_a_buffer_u8s8s32os32;
-	int8_t* pack_b_buffer_u8s8s32os32;
+	uint8_t* pack_a_buffer;
+	int8_t* pack_b_buffer;
 
 	// Generate thrinfo objects for jc and ic loops from lpgemm_thrinfo_t.
 	thrinfo_t thread_jc;
@@ -119,14 +119,14 @@ LPGEMV(uint8_t,int8_t,int32_t,u8s8s32o32)
 			  &mem_b, rntm
 			);
 
-			pack_b_buffer_u8s8s32os32 = ( int8_t* ) bli_mem_buffer( &mem_b );
+			pack_b_buffer = ( int8_t* ) bli_mem_buffer( &mem_b );
 
 			for( dim_t k0 = 0; k0 < k; k0++ )
 			{
-				pack_b_buffer_u8s8s32os32[k0] = b[ k0*rs_b ];
+				pack_b_buffer[k0] = b[ k0*rs_b ];
 			}
 
-			b_use = pack_b_buffer_u8s8s32os32;
+			b_use = pack_b_buffer;
 			rs_b_use = 1;
 			cs_b_use = 1;
 
@@ -154,16 +154,16 @@ LPGEMV(uint8_t,int8_t,int32_t,u8s8s32o32)
 				  &mem_a, rntm
 				);
 
-				pack_a_buffer_u8s8s32os32 = ( uint8_t* ) bli_mem_buffer( &mem_a );
+				pack_a_buffer = ( uint8_t* ) bli_mem_buffer( &mem_a );
 
 				( ( packa_s32 ) lcntx->packa_fun_ptr )
 				(
-				  pack_a_buffer_u8s8s32os32,
+				  pack_a_buffer,
 				  ( a + ( rs_a * ic )), rs_a, cs_a,
 				  mc0, k,
 				  &rs_a_use, &cs_a_use
 				);
-				a_use = pack_a_buffer_u8s8s32os32;
+				a_use = pack_a_buffer;
 			}
 			// Call lpgemv_n_one kernel
 			lpgemv_n_one_u8s8s32os32
@@ -212,18 +212,17 @@ LPGEMV(uint8_t,int8_t,int32_t,u8s8s32o32)
 			  &mem_a, rntm
 			);
 
-			pack_a_buffer_u8s8s32os32 =
-				( uint8_t* ) bli_mem_buffer( &mem_a );
+			pack_a_buffer =	( uint8_t* ) bli_mem_buffer( &mem_a );
 
 			( ( packa_s32 )lcntx->packa_fun_ptr )
 			(
-			  pack_a_buffer_u8s8s32os32,
+			  pack_a_buffer,
 			  a, rs_a, cs_a,
 			  1, k,
 			  &rs_a_use, &cs_a_use
 			);
 
-			a_use = pack_a_buffer_u8s8s32os32;
+			a_use = pack_a_buffer;
 		}
 
 		for (dim_t jc = jc_start; jc < jc_end; jc += NC)
@@ -237,7 +236,6 @@ LPGEMV(uint8_t,int8_t,int32_t,u8s8s32o32)
 
 			if (mtag_b == REORDERED)
 			{
-
 				get_B_panel_reordered_start_offset_width(
 				  jc, n, NC, packb_min_NR,
 				  &jc_cur_loop, &jc_cur_loop_rem,
@@ -259,8 +257,7 @@ LPGEMV(uint8_t,int8_t,int32_t,u8s8s32o32)
 				  &mem_b, rntm
 				);
 
-				pack_b_buffer_u8s8s32os32 =
-						( int8_t* ) bli_mem_buffer( &mem_b );
+				pack_b_buffer =	( int8_t* ) bli_mem_buffer( &mem_b );
 
 				for ( dim_t pc = 0; pc < k; pc += KC )
 				{
@@ -268,15 +265,13 @@ LPGEMV(uint8_t,int8_t,int32_t,u8s8s32o32)
 
 					( ( packb_s32 )lcntx->packb_fun_ptr )
 					(
-					  ( ( int8_t* )pack_b_buffer_u8s8s32os32 ) +
-					  ( n_sub_updated * pc ),
-					  ( ( ( int8_t* )b ) +
-					  ( rs_b * pc ) + (jc * cs_b)),
-					  rs_b, nc0, kc0, &rs_b_use, &cs_b_use
+					  ( ( int8_t* )pack_b_buffer  + ( n_sub_updated * pc )),
+					  ( ( ( int8_t* )b ) + ( rs_b * pc ) + (jc * cs_b)),
+					  rs_b, cs_b, nc0, kc0, &rs_b_use, &cs_b_use
 					);
 				}
 
-				b_use = pack_b_buffer_u8s8s32os32;
+				b_use = pack_b_buffer;
 			}
 
 			post_ops_attr.post_op_c_i = 0;
@@ -372,7 +367,7 @@ LPGEMM_5LOOP(uint8_t,int8_t,int32_t,u8s8s32o32)
 	siz_t mem_a_size_req = 0;
 
 	// Pack buffer for B.
-	int8_t* pack_b_buffer_u8s8s32o32;
+	int8_t* pack_b_buffer;
 	mem_t mem_b = BLIS_MEM_INITIALIZER;
 	siz_t mem_b_size_req = 0;
 	dim_t packb_min_NR = get_packb_u8s8s32o32_min_NR();
@@ -508,8 +503,8 @@ LPGEMM_5LOOP(uint8_t,int8_t,int32_t,u8s8s32o32)
 					  &mem_b, rntm
 					);
 
-					thread->comm[jc_work_id].sent_object =
-													bli_mem_buffer( &mem_b );
+					thread->comm[jc_work_id].sent_object = 
+								bli_mem_buffer( &mem_b );
 				}
 
 				// All threads in work group should wait till chief thread has
@@ -520,8 +515,7 @@ LPGEMM_5LOOP(uint8_t,int8_t,int32_t,u8s8s32o32)
 				  &thread->comm[jc_work_id]
 				);
 
-				pack_b_buffer_u8s8s32o32 =
-						( int8_t* ) thread->comm[jc_work_id].sent_object;
+				pack_b_buffer =	( int8_t* ) thread->comm[jc_work_id].sent_object;
 
 				// Compute the B panel per thread loop range for parallel
 				// packing using ic_ways number of threads. Since atmost only
@@ -542,9 +536,9 @@ LPGEMM_5LOOP(uint8_t,int8_t,int32_t,u8s8s32o32)
 				{
 					( ( packb_s32 )lcntx->packb_fun_ptr )
 					(
-					  pack_b_buffer_u8s8s32o32 + ( jc_packb_start * kc0_updated ),
+					  pack_b_buffer + ( jc_packb_start * kc0_updated ),
 					  ( b + ( rs_b * pc ) + ( cs_b * jc ) +
-					    ( cs_b * jc_packb_start ) ), rs_b,
+					    ( cs_b * jc_packb_start ) ), rs_b, cs_b,
 					  ( jc_packb_end - jc_packb_start ), kc0,
 					  &rs_b_use, &cs_b_use
 					);
@@ -561,7 +555,7 @@ LPGEMM_5LOOP(uint8_t,int8_t,int32_t,u8s8s32o32)
 				  bli_thread_ocomm_id( &thread_ic ),
 				  &thread->comm[jc_work_id]
 				);
-				b_use = pack_b_buffer_u8s8s32o32;
+				b_use = pack_b_buffer;
 			}
 			else if ( mtag_b == REORDERED )
 			{
@@ -649,7 +643,7 @@ LPGEMM_5LOOP(uint8_t,int8_t,int32_t,u8s8s32o32)
 
 				for ( dim_t jr = 0; jr < nc0; jr += NR )
 				{
-					dim_t nr0 = bli_min( ( nc0 - jr ), NR );
+					dim_t nr0 = bli_min((nc0 - jr), NR);
 
 					// Post ops meta attributes.
 					post_ops_attr.post_op_c_i = ic;
@@ -665,7 +659,7 @@ LPGEMM_5LOOP(uint8_t,int8_t,int32_t,u8s8s32o32)
 					  ( c_use_ic + jr ), rs_c_use, 1,
 					  alpha, beta0,
 					  post_op_list, post_ops_attr
-					);
+					);					
 				}
 			}
 		}

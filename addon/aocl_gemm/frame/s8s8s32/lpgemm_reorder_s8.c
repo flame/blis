@@ -50,8 +50,9 @@ void reorderb_nr64_s8s8s32o32
 	dim_t NC = lcntx->blksz.NC;
 	dim_t KC = lcntx->blksz.KC;
 	dim_t NR = lcntx->blksz.NR;
-
+	
 	dim_t rs_b = b->rs;
+	dim_t cs_b = b->cs;
 	dim_t rs_b_reorder;
 	dim_t cs_b_reorder;
 
@@ -68,7 +69,10 @@ void reorderb_nr64_s8s8s32o32
 	dim_t n_threads = bli_rntm_num_threads( rntm );
 	n_threads = ( n_threads > 0 ) ? n_threads : 1;
 
-	int32_t* pack_b_column_sum = ( int32_t* ) ( b_reorder->storage.aligned_buffer + ( sizeof( int8_t ) * n_updated * k_updated ));
+	int32_t* pack_b_column_sum = 
+	( int32_t* ) ( b_reorder->storage.aligned_buffer + 
+	( sizeof( int8_t ) * n_updated * k_updated ));
+
 	for ( dim_t idx = 0; idx < n_updated; idx++ )
 	{
 		*( pack_b_column_sum + idx ) =  0;
@@ -159,8 +163,8 @@ void reorderb_nr64_s8s8s32o32
 					( jc_cur_loop_rem * kc0_updated ) ),
 					pack_b_column_sum + jc,
 				  ( ( ( int8_t* )b->storage.aligned_buffer ) +
-					( rs_b * pc ) + jc ),
-				  rs_b, nc0, kc0, &rs_b_reorder, &cs_b_reorder
+					( rs_b * pc ) + jc * cs_b),
+				  rs_b, cs_b, nc0, kc0, &rs_b_reorder, &cs_b_reorder
 				);
 			}
 			adjust_B_panel_reordered_jc( &jc, jc_cur_loop );

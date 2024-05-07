@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2023, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2023 - 2024, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -71,7 +71,7 @@ void aocl_reorderb_nr32_s8s8s16o16
 
     // To access the last row of B matrix - Column sum of B matrix
     int16_t* pack_b_column_sum = ( int16_t* ) ( b_reorder->storage.aligned_buffer + ( sizeof( int8_t ) * n_updated * k_updated ));
-	for (int idx = 0; idx < n_updated; idx++ )
+	for (dim_t idx = 0; idx < n_updated; idx++ )
 	{
 		*( pack_b_column_sum + idx ) =  0;
 	}
@@ -169,16 +169,6 @@ void aocl_reorderb_nr32_s8s8s16o16
 			adjust_B_panel_reordered_jc( &jc, jc_cur_loop );
 		}
 	}
-	// for (int i =0; i< k_updated; i++)
-	// {
-	// 	for (int j=0; j< n_updated; j++)
-	// 	{
-	// 		printf(" %d ", *( int8_t* )(b->storage.aligned_buffer + i*n_updated + j ));
-	// 	}
-	// 	printf(" \n ");
-	// }
-	// for (int i =0; i< n_updated; i++)
-	// printf(" %d ", *(pack_b_column_sum + i));
 
 	// Changing the packed matrix properties in the packed matrix object
 	b_reorder->rs = rs_b_reorder;

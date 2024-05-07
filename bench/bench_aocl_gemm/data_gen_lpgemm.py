@@ -34,19 +34,19 @@
 # Initializing global mnk_array.This array will be used to store all mnk values
 mnk_array = []
 
-max_elem = 2500;
+max_elem = 2600;
 out_file_name = "accuracy_test_data_lpgemm.txt"
 # Important mnk generator function.This will generate all possible combinations
 # of m,n,k values using formula m(t+1)=ROUND(m(t)*Base,0)+offset
 def mnk_generator():
     k_1 = 1
-    incr_k = 20
+    incr_k = 500
     while (k_1 <= max_elem):
         n_1 = 1
-        incr_n = 20
+        incr_n = 200
         while (n_1 <= max_elem):
             m_1 = 1
-            incr_m = 20
+            incr_m = 100
             while (m_1 <= max_elem):
                 mnk_array.append([m_1, n_1, k_1])
                 if (m_1 == 1):
@@ -68,8 +68,8 @@ def data_gen():
     fout = open(out_file_name, "w")
 
     for ele in mnk_array:
-        fout.write("i r " + str(ele[0]) + " " + str(ele[1]) + " " + str(ele[2]) + " " +\
-                str(ele[2]) + " " + str(ele[1]) + " " + str(ele[1]) + "\n")
+        fout.write("r n n n r " + str(ele[0]) + " " + str(ele[1]) + " " + str(ele[2]) + " " +\
+                str(ele[2]) + " " + str(ele[1]) + " " + str(ele[1]) + " u8s8s32os32:none" + "\n")
 
     fout.truncate(fout.tell() - 1)
     fout.close()

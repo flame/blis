@@ -107,10 +107,31 @@ AOCL_GEMM_GET_REORDER_BUF_SIZE(s8s8s32os32)
 
 AOCL_GEMM_REORDER(int8_t,s8s8s32os32)
 {
-	if ( ( input_buf_addr == NULL ) || ( reorder_buf_addr == NULL ) ||
-	     ( k <= 0 ) || ( n <= 0 ) || ( ldb < n ) )
+	trans_t blis_trans;
+	/* Map BLAS chars to their corresponding BLIS enumerated type value. */
+	bli_param_map_netlib_to_blis_trans(trans, &blis_trans);
+
+	if ((input_buf_addr == NULL) || (reorder_buf_addr == NULL) ||
+		(k <= 0) || (n <= 0) || (bli_is_notrans(blis_trans) && (ldb < n)) ||
+		(bli_is_trans(blis_trans) && (ldb < k)) )
 	{
 		return; // Error.
+	}
+
+	inc_t rs_b, cs_b;
+	if ((order == 'r') || (order == 'R'))
+	{
+		rs_b = bli_is_notrans(blis_trans) ? ldb : 1;
+		cs_b = bli_is_notrans(blis_trans) ? 1 : ldb;
+	}
+	else if ((order == 'c') || (order == 'C'))
+	{
+		rs_b = bli_is_notrans(blis_trans) ? 1 : ldb;
+		cs_b = bli_is_notrans(blis_trans) ? ldb : 1;
+	}
+	else
+	{
+		return; // Error
 	}
 
 	// Check if avx512_vnni ISA is supported, lpgemm matmul only works with it.
@@ -137,7 +158,7 @@ AOCL_GEMM_REORDER(int8_t,s8s8s32os32)
 #ifdef BLIS_KERNELS_ZEN4
 	if( n == 1 )
 	{
-		if ( ldb == 1 )
+		if ( rs_b == 1 )
 		{
 			memcpy( reorder_buf_addr, input_buf_addr, ( k * sizeof( int8_t ) ) );
 		}
@@ -145,7 +166,7 @@ AOCL_GEMM_REORDER(int8_t,s8s8s32os32)
 		{
 			for( dim_t k0 = 0; k0 < k; k0++ )
 			{
-				reorder_buf_addr[k0] = input_buf_addr[ k0*ldb ];
+				reorder_buf_addr[k0] = input_buf_addr[ k0 * rs_b ];
 			}
 		}
 		return;
@@ -166,7 +187,8 @@ AOCL_GEMM_REORDER(int8_t,s8s8s32os32)
 	// Create dummy original b obj;
 	lpgemm_obj_t b;
 	b.storage.aligned_buffer = ( void* )input_buf_addr;
-	b.rs = ldb;
+	b.rs = rs_b;
+	b.cs = cs_b;
 	b.width = n;
 	b.length = k;
 
