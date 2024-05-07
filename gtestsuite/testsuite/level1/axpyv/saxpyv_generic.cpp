@@ -148,3 +148,81 @@ INSTANTIATE_TEST_SUITE_P(
         ::axpyvGenericPrint<float>()
     );
 #endif
+// To cover small, medium and large sizes of M with unit increment.
+INSTANTIATE_TEST_SUITE_P(
+        differentSizesOfM,
+        saxpyvGeneric,
+        ::testing::Combine(
+            ::testing::Values('n'),                                          // n: use x, c: use conj(x)
+            ::testing::Values(gtint_t(264),                                  // M size of the vector
+                            gtint_t(1600),
+                            gtint_t(1992),
+                            gtint_t(744),
+                            gtint_t(3264),
+                            gtint_t(2599),
+                            gtint_t(4800),
+                            gtint_t(2232),
+                            gtint_t(2080),
+                            gtint_t(1764),
+                            gtint_t(622),
+                            gtint_t(128),
+                            gtint_t(64),
+                            gtint_t(32),
+                            gtint_t(16)),
+            ::testing::Values(gtint_t(1)),                                   // stride size for x
+            ::testing::Values(gtint_t(1)),                                   // stride size for y
+            ::testing::Values(float(2.0),
+                              float(0.0),
+                              float(1.0),
+                              float(-1.0))                                    // alpha
+        ),
+        ::axpyvGenericPrint<float>()
+    );
+//increment values of x and y are zero
+INSTANTIATE_TEST_SUITE_P(
+        zeroIncrements,
+        saxpyvGeneric,
+        ::testing::Combine(
+            ::testing::Values('n'),                                          // n: use x, c: use conj(x)
+            ::testing::Values(gtint_t(113)),                                 // m size of vector
+            ::testing::Values(gtint_t(0),gtint_t(2)),                        // stride size for x
+            ::testing::Values(gtint_t(2),gtint_t(0)),                        // stride size for y
+            ::testing::Values(float(2.0),
+                              float(0.0),
+                              float(1.0),
+                              float(-1.0))                                    // alpha
+        ),
+        ::axpyvGenericPrint<float>()
+    );
+//To cover large sizes with non unit increments.
+INSTANTIATE_TEST_SUITE_P(
+        largeSize,
+        saxpyvGeneric,
+        ::testing::Combine(
+            ::testing::Values('n'),                                          // n: use x, c: use conj(x)
+            ::testing::Values(gtint_t(1000)),                                // m size of vector
+            ::testing::Values(gtint_t(2)),                                   // stride size for x
+            ::testing::Values(gtint_t(2)),                                   // stride size for y
+            ::testing::Values(float(2.0),
+                              float(0.0),
+                              float(1.0),
+                              float(-1.0))                                   // alpha
+        ),
+        ::axpyvGenericPrint<float>()
+    );
+//incx and incy is greater than size of a vector m.
+INSTANTIATE_TEST_SUITE_P(
+        strideGreaterThanSize,
+        saxpyvGeneric,
+        ::testing::Combine(
+            ::testing::Values('n'),                                          // n: use x, c: use conj(x)
+            ::testing::Values(gtint_t(10)),                                  // m size of vector
+            ::testing::Values(gtint_t(20)),                                  // stride size for x
+            ::testing::Values(gtint_t(33)),                                  // stride size for y
+            ::testing::Values(float(2.0),
+                              float(0.0),
+                              float(1.0),
+                              float(-1.0))                                    // alpha
+        ),
+        ::axpyvGenericPrint<float>()
+    );

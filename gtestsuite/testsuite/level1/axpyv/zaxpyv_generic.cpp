@@ -35,14 +35,14 @@
 #include <gtest/gtest.h>
 #include "test_axpyv.h"
 
-class zaxpyvGenericTest :
+class zaxpyvGeneric :
         public ::testing::TestWithParam<std::tuple<char,            // conjx
                                                    gtint_t,         // n
                                                    gtint_t,         // incx
                                                    gtint_t,         // incy
                                                    dcomplex>> {};   // alpha
 // Tests using random integers as vector elements.
-TEST_P( zaxpyvGenericTest, FunctionalTest )
+TEST_P( zaxpyvGeneric, FunctionalTest )
 {
     using T = dcomplex;
     //----------------------------------------------------------
@@ -84,7 +84,7 @@ TEST_P( zaxpyvGenericTest, FunctionalTest )
 // Black box testing for generic and main use of zaxpy.
 INSTANTIATE_TEST_SUITE_P(
         unitStrides,
-        zaxpyvGenericTest,
+        zaxpyvGeneric,
         ::testing::Combine(
             ::testing::Values('n'
 #ifdef TEST_BLIS_TYPED
@@ -106,7 +106,7 @@ INSTANTIATE_TEST_SUITE_P(
 // We can modify the values using implementantion details.
 INSTANTIATE_TEST_SUITE_P(
         nonUnitPositiveStrides,
-        zaxpyvGenericTest,
+        zaxpyvGeneric,
         ::testing::Combine(
             ::testing::Values('n'
 #ifdef TEST_BLIS_TYPED
@@ -129,7 +129,7 @@ INSTANTIATE_TEST_SUITE_P(
 // We can modify the values using implementantion details.
 INSTANTIATE_TEST_SUITE_P(
         negativeStrides,
-        zaxpyvGenericTest,
+        zaxpyvGeneric,
         ::testing::Combine(
             ::testing::Values('n'),                                          // n: use x, c: use conj(x)
             ::testing::Range(gtint_t(10), gtint_t(101), 10),                 // m size of vector takes values from 10 to 100 with step size of 10.
@@ -142,3 +142,71 @@ INSTANTIATE_TEST_SUITE_P(
         ::axpyvGenericPrint<dcomplex>()
     );
 #endif
+// To cover small, medium and large sizes of M with unit increment.
+INSTANTIATE_TEST_SUITE_P(
+        DifferentSizesOfM,
+        zaxpyvGeneric,
+        ::testing::Combine(
+            ::testing::Values('n'),                                          // n: use x, c: use conj(x)
+            ::testing::Values(gtint_t(36),                                   //m size of vector
+                              gtint_t(1000),
+                              gtint_t(2999),
+                              gtint_t(3666),
+                              gtint_t(777)),
+            ::testing::Values(gtint_t(1)),                                   // stride size for x
+            ::testing::Values(gtint_t(1)),                                   // stride size for y
+            ::testing::Values(dcomplex{2.0, 1.1},
+                              dcomplex{0.0, 0.0},
+                              dcomplex{1.0, 0.0},
+                              dcomplex{-1.0, 0.0})                            // alpha
+        ),
+        ::axpyvGenericPrint<dcomplex>()
+    );
+//incx and incy are zero.
+INSTANTIATE_TEST_SUITE_P(
+        ZeroIncrements,
+        zaxpyvGeneric,
+        ::testing::Combine(
+            ::testing::Values('n'),                                          // n: use x, c: use conj(x)
+            ::testing::Values(gtint_t(10)),                                  // m size of vector
+            ::testing::Values(gtint_t(0),gtint_t(2)),                        // stride size for x
+            ::testing::Values(gtint_t(3),gtint_t(0)),                        // stride size for y
+            ::testing::Values(dcomplex{4.0, 3.1},
+                              dcomplex{0.0, 0.0},
+                              dcomplex{1.0, 0.0},
+                              dcomplex{-1.0, 0.0})                            // alpha
+        ),
+        ::axpyvGenericPrint<dcomplex>()
+    );
+//To cover large sizes with non unit increments.
+INSTANTIATE_TEST_SUITE_P(
+        largeSize,
+        zaxpyvGeneric,
+        ::testing::Combine(
+            ::testing::Values('n'),                                          // n: use x, c: use conj(x)
+            ::testing::Values(gtint_t(1000)),                                // m size of vector
+            ::testing::Values(gtint_t(2)),                                   // stride size for x
+            ::testing::Values(gtint_t(3)),                                   // stride size for y
+            ::testing::Values(dcomplex{4.0, 3.1},
+                              dcomplex{0.0, 0.0},
+                              dcomplex{1.0, 0.0},
+                              dcomplex{-1.0, 0.0})                          // alpha
+        ),
+        ::axpyvGenericPrint<dcomplex>()
+    );
+//incx and incy is greater than size of a vector m.
+INSTANTIATE_TEST_SUITE_P(
+        strideGreaterThanSize,
+        zaxpyvGeneric,
+        ::testing::Combine(
+            ::testing::Values('n'),                                          // n: use x, c: use conj(x)
+            ::testing::Values(gtint_t(6)),                                   // m size of vector
+            ::testing::Values(gtint_t(10)),                                  // stride size for x
+            ::testing::Values(gtint_t(14)),                                  // stride size for y
+            ::testing::Values(dcomplex{4.0, 3.1},
+                              dcomplex{0.0, 0.0},
+                              dcomplex{1.0, 0.0},
+                              dcomplex{-1.0, 0.0})                            // alpha
+        ),
+        ::axpyvGenericPrint<dcomplex>()
+    );
