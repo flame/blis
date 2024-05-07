@@ -35,14 +35,14 @@
 #include <gtest/gtest.h>
 #include "test_copyv.h"
 
-class zcopyvGenericTest :
-        public ::testing::TestWithParam<std::tuple<char,
-                                                   gtint_t,
-                                                   gtint_t,
-                                                   gtint_t>> {};
+class zcopyvGeneric :
+        public ::testing::TestWithParam<std::tuple<char,                     // n: use x, c: use conj(x)
+                                                   gtint_t,                  // m size of vector
+                                                   gtint_t,                  // stride size for x
+                                                   gtint_t>> {};             // stride size for y
 
-// Tests using random integers as vector elements.
-TEST_P( zcopyvGenericTest, RandomData )
+// Tests using random values as vector elements.
+TEST_P( zcopyvGeneric, FunctionalTest )
 {
     using T = dcomplex;
     //----------------------------------------------------------
@@ -66,8 +66,8 @@ TEST_P( zcopyvGenericTest, RandomData )
 
 // Black box testing for generic and main use of zcopy.
 INSTANTIATE_TEST_SUITE_P(
-        Blackbox,
-        zcopyvGenericTest,
+        smallSize,
+        zcopyvGeneric,
         ::testing::Combine(
             ::testing::Values('n'                                            // n: use x, c: use conj(x)
 #ifdef TEST_BLIS_TYPED
@@ -86,7 +86,7 @@ INSTANTIATE_TEST_SUITE_P(
 // We can modify the values using implementantion details.
 INSTANTIATE_TEST_SUITE_P(
         NonUnitPositiveIncrements,
-        zcopyvGenericTest,
+        zcopyvGeneric,
         ::testing::Combine(
             ::testing::Values('n'                                            // n: use x, c: use conj(x)
 #ifdef TEST_BLIS_TYPED
@@ -106,7 +106,7 @@ INSTANTIATE_TEST_SUITE_P(
 // We can modify the values using implementantion details.
 INSTANTIATE_TEST_SUITE_P(
         NegativeIncrements,
-        zcopyvGenericTest,
+        zcopyvGeneric,
         ::testing::Combine(
             ::testing::Values('n'),                                          // n: use x, c: use conj(x)
             ::testing::Values(gtint_t(3), gtint_t(30), gtint_t(112)),        // m size of vector
@@ -116,3 +116,48 @@ INSTANTIATE_TEST_SUITE_P(
         ::copyvGenericPrint()
     );
 #endif
+//To cover large sizes with non unit increments.
+INSTANTIATE_TEST_SUITE_P(
+        largeSize,
+        zcopyvGeneric,
+        ::testing::Combine(
+            ::testing::Values('n'),                                          // n: use x, c: use conj(x)
+            ::testing::Values(gtint_t(4444)),                                // m size of vector
+            ::testing::Values(gtint_t(4)),                                   // stride size for x
+            ::testing::Values(gtint_t(3))                                    // stride size for y
+        ),
+        ::copyvGenericPrint()
+    );
+// To cover small, medium and large sizes of M with unit increment.
+INSTANTIATE_TEST_SUITE_P(
+        DiffSizeOfM,
+        zcopyvGeneric,
+        ::testing::Combine(
+            ::testing::Values('n'),                                          // n: use x, c: use conj(x)
+            ::testing::Values(gtint_t(1250),
+                              gtint_t(4200),
+                              gtint_t(3344),
+                              gtint_t(2244),
+                              gtint_t(32),
+                              gtint_t(64),
+                              gtint_t(128),
+                              gtint_t(264),
+                              gtint_t(987),
+                              gtint_t(1876)),                                // m size of vector
+            ::testing::Values(gtint_t(1)),                                   // stride size for x
+            ::testing::Values(gtint_t(1))                                    // stride size for y
+        ),
+        ::copyvGenericPrint()
+    );
+//incx and incy is greater than size of a vector m.
+INSTANTIATE_TEST_SUITE_P(
+        strideGreaterThanSize,
+        zcopyvGeneric,
+        ::testing::Combine(
+            ::testing::Values('n'),                                           // n: use x, c: use conj(x)
+            ::testing::Values(gtint_t(4)),                                    // m size of vector
+            ::testing::Values(gtint_t(88)),                                   // stride size for x
+            ::testing::Values(gtint_t(99))                                    // stride size for y
+        ),
+        ::copyvGenericPrint()
+    );
