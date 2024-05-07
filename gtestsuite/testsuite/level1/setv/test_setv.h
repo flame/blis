@@ -80,13 +80,13 @@ class setvGenericPrint {
 public:
     std::string operator()(
         testing::TestParamInfo<std::tuple<char,gtint_t,gtint_t>> str) const {
-        char conj      = std::get<0>(str.param);
+        char conjalpha = std::get<0>(str.param);
         gtint_t n      = std::get<1>(str.param);
         gtint_t incx   = std::get<2>(str.param);
 
         std::string str_name = API_PRINT;
         str_name += "_n_" + std::to_string(n);
-        str_name += "_" + std::string(&conj, 1);
+        str_name += "_conjalpha_" + conjalpha;
         str_name += "_incx_" + testinghelpers::get_value_string(incx);
         return str_name;
     }

@@ -96,9 +96,9 @@ class gemm_computeGeneticPrint {
 public:
     std::string operator()(
         testing::TestParamInfo<std::tuple<char, char, char, char, char, gtint_t, gtint_t, gtint_t, T, T, gtint_t, gtint_t, gtint_t>> str) const {
-        char sfm        = std::get<0>(str.param);
-        char tsa        = std::get<1>(str.param);
-        char tsb        = std::get<2>(str.param);
+        char storage    = std::get<0>(str.param);
+        char transa     = std::get<1>(str.param);
+        char transb     = std::get<2>(str.param);
         char pka        = std::get<3>(str.param);
         char pkb        = std::get<4>(str.param);
         gtint_t m       = std::get<5>(str.param);
@@ -111,9 +111,11 @@ public:
         gtint_t ldc_inc = std::get<12>(str.param);
         
         std::string str_name = API_PRINT;
-        str_name = str_name + "_" + sfm+sfm+sfm;
-        str_name = str_name + "_" + tsa + tsb;
-        str_name = str_name + "_" + pka + pkb;
+        str_name += "_stor_" + storage;
+        str_name += "_transa_" + transa;
+        str_name += "_transb_" + transb;
+        str_name += "_pka_" + pka;
+        str_name += "_pkb_" + pkb;
         str_name += "_m_" + std::to_string(m);
         str_name += "_n_" + std::to_string(n);
         str_name += "_k_" + std::to_string(k);

@@ -101,11 +101,11 @@ class hemmGenericPrint {
 public:
     std::string operator()(
         testing::TestParamInfo<std::tuple<char, char, char, char, char, gtint_t, gtint_t, T, T, gtint_t, gtint_t, gtint_t>> str) const {
-        char sfm        = std::get<0>(str.param);
+        char storage    = std::get<0>(str.param);
         char side       = std::get<1>(str.param);
         char uplo       = std::get<2>(str.param);
         char conja      = std::get<3>(str.param);
-        char tsb        = std::get<4>(str.param);
+        char transb     = std::get<4>(str.param);
         gtint_t m       = std::get<5>(str.param);
         gtint_t n       = std::get<6>(str.param);
         T alpha  = std::get<7>(str.param);
@@ -115,9 +115,11 @@ public:
         gtint_t ldc_inc = std::get<11>(str.param);
 
         std::string str_name = API_PRINT;
-        str_name = str_name + "_" + sfm+sfm+sfm;
-        str_name = str_name + "_" + side + uplo;
-        str_name = str_name + "_" + conja + tsb;
+        str_name += "_stor_" + storage;
+        str_name += "_side_" + side;
+        str_name += "_uplo_" + uplo;
+        str_name += "_conja" + conja;
+        str_name += "_transb_" + transb;
         str_name += "_m_" + std::to_string(m);
         str_name += "_n_" + std::to_string(n);
         str_name += "_alpha_" + testinghelpers::get_value_string(alpha);

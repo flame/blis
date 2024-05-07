@@ -135,7 +135,7 @@ class gerGenericPrint {
 public:
     std::string operator()(
         testing::TestParamInfo<std::tuple<char,char,char,gtint_t,gtint_t,T,gtint_t,gtint_t,gtint_t>> str) const {
-        char sfm       = std::get<0>(str.param);
+        char storage   = std::get<0>(str.param);
         char conjx     = std::get<1>(str.param);
         char conjy     = std::get<2>(str.param);
         gtint_t m      = std::get<3>(str.param);
@@ -146,8 +146,9 @@ public:
         gtint_t ld_inc = std::get<8>(str.param);
 
         std::string str_name = API_PRINT;
-        str_name    = str_name + "_" + sfm;
-        str_name    = str_name + "_" + conjx+conjy;
+        str_name += "_stor_" + storage;
+        str_name += "_conjx_" + conjx;
+        str_name += "_conjy_" + conjy;
         str_name += "_m_" + std::to_string(m);
         str_name += "_n_" + std::to_string(n);
         str_name += "_incx_" + testinghelpers::get_value_string(incx);
@@ -164,7 +165,7 @@ class gerEVTPrint {
 public:
     std::string operator()(
         testing::TestParamInfo<std::tuple<char,char,char,gtint_t,gtint_t,T,gtint_t,gtint_t,gtint_t,gtint_t,gtint_t,T,gtint_t,T,gtint_t,T>> str) const {
-        char sfm       = std::get<0>(str.param);
+        char storage   = std::get<0>(str.param);
         char conjx     = std::get<1>(str.param);
         char conjy     = std::get<2>(str.param);
         gtint_t m      = std::get<3>(str.param);
@@ -181,7 +182,7 @@ public:
         gtint_t yi     = std::get<14>(str.param);
         T y_exval      = std::get<15>(str.param);
 
-        gtint_t lda = testinghelpers::get_leading_dimension( sfm, 'n', m, n, ld_inc );
+        gtint_t lda = testinghelpers::get_leading_dimension( storage, 'n', m, n, ld_inc );
 
 #ifdef TEST_BLAS
         std::string str_name = "blas_";
@@ -191,8 +192,9 @@ public:
         std::string str_name = "blis_";
 #endif
 
-        str_name    = str_name + "_" + sfm;
-        str_name    = str_name + "_" + conjx+conjy;
+        str_name += "_stor_" + storage;
+        str_name += "_conjx" + conjx;
+        str_name += "_conjy" + conjy;
         str_name += "_m_" + std::to_string(m);
         str_name += "_n_" + std::to_string(n);
         str_name += "_incx_" + testinghelpers::get_value_string(incx);

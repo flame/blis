@@ -42,24 +42,24 @@
 #include "common/testing_helpers.h"
 
 template<typename T>
-void test_gemmt( char storage, char uplo, char trnsa, char trnsb, gtint_t n,
+void test_gemmt( char storage, char uploc, char transa, char transb, gtint_t n,
     gtint_t k, gtint_t lda_inc, gtint_t ldb_inc, gtint_t ldc_inc, T alpha,
     T beta, double thresh, bool is_mem_test=false, bool is_evt_test=false,
     T evt_a=T{0.0}, T evt_b=T{0.0}, T evt_c=T{0.0} )
 {
     // Compute the leading dimensions of a, b, and c.
-    gtint_t lda = testinghelpers::get_leading_dimension( storage, trnsa, n, k, lda_inc );
-    gtint_t ldb = testinghelpers::get_leading_dimension( storage, trnsb, k, n, ldb_inc );
+    gtint_t lda = testinghelpers::get_leading_dimension( storage, transa, n, k, lda_inc );
+    gtint_t ldb = testinghelpers::get_leading_dimension( storage, transb, k, n, ldb_inc );
     gtint_t ldc = testinghelpers::get_leading_dimension( storage, 'n', n, n, ldc_inc );
 
     //----------------------------------------------------------
     //         Initialize matrics with random numbers
     //----------------------------------------------------------
     T *a_ptr, *b_ptr, *c_ptr;
-    dim_t size_a = testinghelpers::matsize(storage, trnsa, n, k, lda) * sizeof(T);
+    dim_t size_a = testinghelpers::matsize(storage, transa, n, k, lda) * sizeof(T);
     testinghelpers::ProtectedBuffer a(size_a, false, is_mem_test );
     a_ptr = (T*)a.greenzone_1;
-    testinghelpers::datagenerators::randomgenerators<T>( -2, 8, storage, n, k, a_ptr, trnsa, lda);
+    testinghelpers::datagenerators::randomgenerators<T>( -2, 8, storage, n, k, a_ptr, transa, lda);
 
     if ( is_evt_test )
     {
@@ -68,10 +68,10 @@ void test_gemmt( char storage, char uplo, char trnsa, char trnsb, gtint_t n,
         a_ptr[n_rand + k_rand * lda] = evt_a;
     }
 
-    dim_t size_b = testinghelpers::matsize(storage, trnsb, k, n, ldb) * sizeof(T);
+    dim_t size_b = testinghelpers::matsize(storage, transb, k, n, ldb) * sizeof(T);
     testinghelpers::ProtectedBuffer b(size_b, false, is_mem_test );
     b_ptr = (T*)b.greenzone_1;
-    testinghelpers::datagenerators::randomgenerators<T>( -5, 2, storage, k, n, b_ptr, trnsb, ldb);
+    testinghelpers::datagenerators::randomgenerators<T>( -5, 2, storage, k, n, b_ptr, transb, ldb);
 
     if ( is_evt_test )
     {
@@ -110,7 +110,7 @@ void test_gemmt( char storage, char uplo, char trnsa, char trnsb, gtint_t n,
         //----------------------------------------------------------
         //                  Call BLIS function
         //----------------------------------------------------------
-        gemmt<T>( storage, uplo, trnsa, trnsb, n, k, &alpha, a_ptr, lda,
+        gemmt<T>( storage, uploc, transa, transb, n, k, &alpha, a_ptr, lda,
                   b_ptr, ldb, &beta, c_ptr, ldc );
         if (is_mem_test)
         {
@@ -118,7 +118,7 @@ void test_gemmt( char storage, char uplo, char trnsa, char trnsb, gtint_t n,
             memcpy(b.greenzone_2, b.greenzone_1, size_b);
             memcpy(c.greenzone_2, c_ref.data(), size_c);
 
-            gemmt<T>( storage, uplo, trnsa, trnsb, n, k, &alpha, (T*)a.greenzone_2, lda,
+            gemmt<T>( storage, uploc, transa, transb, n, k, &alpha, (T*)a.greenzone_2, lda,
                       (T*)b.greenzone_2, ldb, &beta, (T*)c.greenzone_2, ldc );
         }
 
@@ -137,7 +137,7 @@ void test_gemmt( char storage, char uplo, char trnsa, char trnsb, gtint_t n,
     //----------------------------------------------------------
     //                  Call reference implementation.
     //----------------------------------------------------------
-    testinghelpers::ref_gemmt<T>( storage, uplo, trnsa, trnsb, n, k, alpha,
+    testinghelpers::ref_gemmt<T>( storage, uploc, transa, transb, n, k, alpha,
                a_ptr, lda, b_ptr, ldb, beta, c_ref.data(), ldc );
 
     //----------------------------------------------------------
@@ -157,10 +157,10 @@ class gemmtGenericPrint {
 public:
     std::string operator()(
         testing::TestParamInfo<std::tuple<char,char,char,char,gtint_t,gtint_t,T,T,gtint_t,gtint_t,gtint_t>> str) const {
-        char sfm        = std::get<0>(str.param);
-        char uplo       = std::get<1>(str.param);
-        char tsa        = std::get<2>(str.param);
-        char tsb        = std::get<3>(str.param);
+        char storage    = std::get<0>(str.param);
+        char uploc      = std::get<1>(str.param);
+        char transa     = std::get<2>(str.param);
+        char transb     = std::get<3>(str.param);
         gtint_t n       = std::get<4>(str.param);
         gtint_t k       = std::get<5>(str.param);
         T alpha  = std::get<6>(str.param);
@@ -170,9 +170,10 @@ public:
         gtint_t ldc_inc = std::get<10>(str.param);
 
         std::string str_name = API_PRINT;
-        str_name = str_name + "_" + sfm+sfm+sfm;
-        str_name = str_name + "_" + uplo;
-        str_name = str_name + "_" + tsa + tsb;
+        str_name += "_stor_" + storage;
+        str_name += "_uploc_" + uploc;
+        str_name += "_transa_" + transa;
+        str_name += "_transb_" + transb;
         str_name += "_n_" + std::to_string(n);
         str_name += "_k_" + std::to_string(k);
         str_name += "_alpha_" + testinghelpers::get_value_string(alpha);
@@ -189,10 +190,10 @@ class gemmtMemGenericPrint {
 public:
     std::string operator()(
         testing::TestParamInfo<std::tuple<char,char,char,char,gtint_t,gtint_t,T,T,gtint_t,gtint_t,gtint_t,bool>> str) const {
-        char sfm        = std::get<0>(str.param);
-        char uplo       = std::get<1>(str.param);
-        char tsa        = std::get<2>(str.param);
-        char tsb        = std::get<3>(str.param);
+        char storage    = std::get<0>(str.param);
+        char uploc      = std::get<1>(str.param);
+        char transa     = std::get<2>(str.param);
+        char transb     = std::get<3>(str.param);
         gtint_t n       = std::get<4>(str.param);
         gtint_t k       = std::get<5>(str.param);
         T alpha    = std::get<6>(str.param);
@@ -203,17 +204,17 @@ public:
         bool is_mem_test = std::get<11>(str.param);
 
         std::string str_name = API_PRINT;
-        str_name = str_name + "_storage_" + sfm;
-        str_name = str_name + "_transa_" + tsa;
-        str_name = str_name + "_transb_" + tsb;
-        str_name = str_name + "_uploa_" + uplo;
+        str_name += "_stor_" + storage;
+        str_name += "_uploc_" + uploc;
+        str_name += "_transa_" + transa;
+        str_name += "_transb_" + transb;
         str_name += "_n_" + std::to_string(n);
         str_name += "_k_" + std::to_string(k);
         str_name += "_alpha_" + testinghelpers::get_value_string(alpha);
         str_name += "_beta_" + testinghelpers::get_value_string(beta);
-        gtint_t lda = testinghelpers::get_leading_dimension( sfm, tsa, n, k, lda_inc );
-        gtint_t ldb = testinghelpers::get_leading_dimension( sfm, tsb, k, n, ldb_inc );
-        gtint_t ldc = testinghelpers::get_leading_dimension( sfm, 'n', n, n, ldc_inc );
+        gtint_t lda = testinghelpers::get_leading_dimension( storage, transa, n, k, lda_inc );
+        gtint_t ldb = testinghelpers::get_leading_dimension( storage, transb, k, n, ldb_inc );
+        gtint_t ldc = testinghelpers::get_leading_dimension( storage, 'n', n, n, ldc_inc );
         str_name = str_name + "_lda_" + std::to_string(lda);
         str_name = str_name + "_ldb_" + std::to_string(ldb);
         str_name = str_name + "_ldc_" + std::to_string(ldc);
@@ -229,10 +230,10 @@ class gemmtEVTPrint
 public:
     std::string operator()(
         testing::TestParamInfo<std::tuple<char,char,char,char,gtint_t,gtint_t,T,T,gtint_t,gtint_t,gtint_t,T,T,T>> str) const {
-        char sfm        = std::get<0>(str.param);
-        char uplo       = std::get<1>(str.param);
-        char tsa        = std::get<2>(str.param);
-        char tsb        = std::get<3>(str.param);
+        char storage    = std::get<0>(str.param);
+        char uploc      = std::get<1>(str.param);
+        char transa     = std::get<2>(str.param);
+        char transb     = std::get<3>(str.param);
         gtint_t n       = std::get<4>(str.param);
         gtint_t k       = std::get<5>(str.param);
         T alpha    = std::get<6>(str.param);
@@ -245,17 +246,17 @@ public:
         T cexval   = std::get<13>(str.param);
 
         std::string str_name = API_PRINT;
-        str_name = str_name + "_storage_" + sfm;
-        str_name = str_name + "_transa_" + tsa;
-        str_name = str_name + "_transb_" + tsb;
-        str_name = str_name + "_uploa_" + uplo;
+        str_name += "_stor_" + storage;
+        str_name += "_uploc_" + uploc;
+        str_name += "_transa_" + transa;
+        str_name += "_transb_" + transb;
         str_name += "_n_" + std::to_string(n);
         str_name += "_k_" + std::to_string(k);
         str_name += "_alpha_" + testinghelpers::get_value_string(alpha);
         str_name += "_beta_" + testinghelpers::get_value_string(beta);
-        gtint_t lda = testinghelpers::get_leading_dimension( sfm, tsa, n, k, lda_inc );
-        gtint_t ldb = testinghelpers::get_leading_dimension( sfm, tsb, k, n, ldb_inc );
-        gtint_t ldc = testinghelpers::get_leading_dimension( sfm, 'n', n, n, ldc_inc );
+        gtint_t lda = testinghelpers::get_leading_dimension( storage, transa, n, k, lda_inc );
+        gtint_t ldb = testinghelpers::get_leading_dimension( storage, transb, k, n, ldb_inc );
+        gtint_t ldc = testinghelpers::get_leading_dimension( storage, 'n', n, n, ldc_inc );
         str_name = str_name + "_ex_a_" + testinghelpers::get_value_string(aexval);
         str_name = str_name + "_ex_b_" + testinghelpers::get_value_string(bexval);
         str_name = str_name + "_ex_c_" + testinghelpers::get_value_string(cexval);

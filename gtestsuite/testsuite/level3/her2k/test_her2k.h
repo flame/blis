@@ -99,22 +99,23 @@ class her2kGenericPrint {
 public:
     std::string operator()(
         testing::TestParamInfo<std::tuple<char, char, char, char, gtint_t, gtint_t, T, RT, gtint_t, gtint_t, gtint_t>> str) const {
-        char sfm        = std::get<0>(str.param);
+        char storage    = std::get<0>(str.param);
         char uplo       = std::get<1>(str.param);
-        char tsa        = std::get<2>(str.param);
-        char tsb        = std::get<3>(str.param);
+        char transa     = std::get<2>(str.param);
+        char transb     = std::get<3>(str.param);
         gtint_t n       = std::get<4>(str.param);
         gtint_t k       = std::get<5>(str.param);
         T alpha  = std::get<6>(str.param);
-        RT beta      = std::get<7>(str.param);
+        RT beta  = std::get<7>(str.param);
         gtint_t lda_inc = std::get<8>(str.param);
         gtint_t ldb_inc = std::get<9>(str.param);
         gtint_t ldc_inc = std::get<10>(str.param);
 
         std::string str_name = API_PRINT; 
-        str_name = str_name + "_" + sfm+sfm+sfm;
-        str_name = str_name + "_" + uplo;
-        str_name = str_name + "_" + tsa + tsb;
+        str_name += "_stor_" + storage;
+        str_name += "_uplo_" + uplo;
+        str_name += "_transa_" + transa;
+        str_name += "_transb_" + transb;
         str_name += "_n_" + std::to_string(n);
         str_name += "_k_" + std::to_string(k);
         str_name += "_alpha_" + testinghelpers::get_value_string(alpha);

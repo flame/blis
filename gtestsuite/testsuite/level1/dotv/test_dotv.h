@@ -136,8 +136,8 @@ public:
         
         std::string str_name = API_PRINT;
         str_name += "_n_" + std::to_string(n);
-        str_name += "_" + std::string(&conjx, 1);
-        str_name += "_" + std::string(&conjy, 1);
+        str_name += "_conjx_" + conjx;
+        str_name += "_conjy_" + conjy;
         str_name += "_incx_" + testinghelpers::get_value_string(incx);
         str_name += "_incy_" + testinghelpers::get_value_string(incy);
         return str_name;
@@ -161,8 +161,8 @@ public:
 
         std::string str_name = API_PRINT;
         str_name += "_n_" + std::to_string(n);
-        str_name += (conjx == 'n') ? "_noconjx" : "_conjx";
-        str_name += (conjy == 'n') ? "_noconjy" : "_conjy";
+        str_name += "_conjx_" + conjx;
+        str_name += "_conjy_" + conjy;
         str_name += "_incx_" + testinghelpers::get_value_string(incx);
         str_name = str_name + "_X_" + std::to_string(xi);
         str_name = str_name + "_" + testinghelpers::get_value_string(x_exval);

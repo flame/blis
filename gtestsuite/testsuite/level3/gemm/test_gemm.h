@@ -273,9 +273,9 @@ class gemmGenericPrint {
 public:
     std::string operator()(
         testing::TestParamInfo<std::tuple<char, char, char, gtint_t, gtint_t, gtint_t, T, T, gtint_t, gtint_t, gtint_t>> str) const {
-        char sfm        = std::get<0>(str.param);
-        char tsa        = std::get<1>(str.param);
-        char tsb        = std::get<2>(str.param);
+        char storage    = std::get<0>(str.param);
+        char transa     = std::get<1>(str.param);
+        char transb     = std::get<2>(str.param);
         gtint_t m       = std::get<3>(str.param);
         gtint_t n       = std::get<4>(str.param);
         gtint_t k       = std::get<5>(str.param);
@@ -286,16 +286,17 @@ public:
         gtint_t ldc_inc = std::get<10>(str.param);
 
         std::string str_name = API_PRINT;
-        str_name = str_name + "storageOfMatrix_" + sfm;
-        str_name = str_name + "_transA_" + tsa + "_transB_" + tsb;
+        str_name += "_stor_" + storage;
+        str_name += "_transa_" + transa;
+        str_name += "_transb_" + transb;
         str_name += "_m_" + std::to_string(m);
         str_name += "_n_" + std::to_string(n);
         str_name += "_k_" + std::to_string(k);
         str_name += "_alpha_" + testinghelpers::get_value_string(alpha);
         str_name += "_beta_" + testinghelpers::get_value_string(beta);
-        gtint_t lda = testinghelpers::get_leading_dimension( sfm, tsa, m, k, lda_inc );
-        gtint_t ldb = testinghelpers::get_leading_dimension( sfm, tsb, k, n, ldb_inc );
-        gtint_t ldc = testinghelpers::get_leading_dimension( sfm, 'n', m, n, ldc_inc );
+        gtint_t lda = testinghelpers::get_leading_dimension( storage, transa, m, k, lda_inc );
+        gtint_t ldb = testinghelpers::get_leading_dimension( storage, transb, k, n, ldb_inc );
+        gtint_t ldc = testinghelpers::get_leading_dimension( storage, 'n', m, n, ldc_inc );
         str_name = str_name + "_lda_" + std::to_string(lda);
         str_name = str_name + "_ldb_" + std::to_string(ldb);
         str_name = str_name + "_ldc_" + std::to_string(ldc);
@@ -310,9 +311,9 @@ public:
         testing::TestParamInfo<std::tuple<char, char, char, gtint_t, gtint_t, gtint_t, gtint_t,
                                           gtint_t, T, gtint_t, gtint_t, T, gtint_t, gtint_t, T,
                                           T, T, gtint_t, gtint_t, gtint_t>> str) const {
-        char sfm        = std::get<0>(str.param);
-        char tsa        = std::get<1>(str.param);
-        char tsb        = std::get<2>(str.param);
+        char storage    = std::get<0>(str.param);
+        char transa     = std::get<1>(str.param);
+        char transb     = std::get<2>(str.param);
         gtint_t m       = std::get<3>(str.param);
         gtint_t n       = std::get<4>(str.param);
         gtint_t k       = std::get<5>(str.param);
@@ -337,8 +338,9 @@ public:
         gtint_t ldc_inc = std::get<19>(str.param);
 
         std::string str_name = API_PRINT;
-        str_name = str_name + "storageOfMatrix_" + sfm;
-        str_name = str_name + "_transA_" + tsa + "_transB_" + tsb;
+        str_name += "_stor_" + storage;
+        str_name += "_transa_" + transa;
+        str_name += "_transb_" + transb;
         str_name += "_m_" + std::to_string(m);
         str_name += "_n_" + std::to_string(n);
         str_name += "_k_" + std::to_string(k);
@@ -350,9 +352,9 @@ public:
         str_name = str_name + "_" + testinghelpers::get_value_string(cex);
         str_name += "_alpha_" + testinghelpers::get_value_string(alpha);
         str_name += "_beta_" + testinghelpers::get_value_string(beta);
-        gtint_t lda = testinghelpers::get_leading_dimension( sfm, tsa, m, k, lda_inc );
-        gtint_t ldb = testinghelpers::get_leading_dimension( sfm, tsb, k, n, ldb_inc );
-        gtint_t ldc = testinghelpers::get_leading_dimension( sfm, 'n', m, n, ldc_inc );
+        gtint_t lda = testinghelpers::get_leading_dimension( storage, transa, m, k, lda_inc );
+        gtint_t ldb = testinghelpers::get_leading_dimension( storage, transb, k, n, ldb_inc );
+        gtint_t ldc = testinghelpers::get_leading_dimension( storage, 'n', m, n, ldc_inc );
         str_name = str_name + "_lda_" + std::to_string(lda);
         str_name = str_name + "_ldb_" + std::to_string(ldb);
         str_name = str_name + "_ldc_" + std::to_string(ldc);
@@ -365,9 +367,9 @@ class gemmOUTPrint {
     public:
     std::string operator()(
         testing::TestParamInfo<std::tuple<char, char, char, gtint_t, gtint_t, gtint_t, gtint_t, gtint_t, T, T, gtint_t, gtint_t, gtint_t, gtint_t, gtint_t, gtint_t, gtint_t>> str) const {
-        char sfm              = std::get<0>(str.param);
-        char tsa              = std::get<1>(str.param);
-        char tsb              = std::get<2>(str.param);
+        char storage          = std::get<0>(str.param);
+        char transa           = std::get<1>(str.param);
+        char transb           = std::get<2>(str.param);
         gtint_t over_under    = std::get<3>(str.param);
         gtint_t input_range   = std::get<4>(str.param);
         gtint_t m             = std::get<5>(str.param);
@@ -383,13 +385,14 @@ class gemmOUTPrint {
         gtint_t bi            = std::get<15>(str.param);
         gtint_t bj            = std::get<16>(str.param);
 
-        gtint_t lda = testinghelpers::get_leading_dimension( sfm, tsa, m, k, lda_inc );
-        gtint_t ldb = testinghelpers::get_leading_dimension( sfm, tsb, k, n, ldb_inc );
-        gtint_t ldc = testinghelpers::get_leading_dimension( sfm, 'n', m, n, ldc_inc );
+        gtint_t lda = testinghelpers::get_leading_dimension( storage, transa, m, k, lda_inc );
+        gtint_t ldb = testinghelpers::get_leading_dimension( storage, transb, k, n, ldb_inc );
+        gtint_t ldc = testinghelpers::get_leading_dimension( storage, 'n', m, n, ldc_inc );
 
         std::string str_name = API_PRINT;
-        str_name = str_name + "StorageOfCMatrix_" + sfm;
-        str_name = str_name + "_transa_" + tsa + "_transb_"+ tsb;
+        str_name += "_stor_" + storage;
+        str_name += "_transa_" + transa;
+        str_name += "_transb_" + transb;
         std::string over_under_str = ( over_under > 0) ? "underflow": "overflow";
         str_name = str_name + "_" + over_under_str;
         std::string input_range_str = (input_range < 0) ? "within_limit": (input_range > 0) ? "beyond_limit" : "close_to_limit";

@@ -84,7 +84,7 @@ class trmvGenericPrint {
 public:
     std::string operator()(
         testing::TestParamInfo<std::tuple<char,char,char,char,gtint_t,T,gtint_t,gtint_t>> str) const {
-        char sfm       = std::get<0>(str.param);
+        char storage   = std::get<0>(str.param);
         char uploa     = std::get<1>(str.param);
         char transa    = std::get<2>(str.param);
         char diaga     = std::get<3>(str.param);
@@ -94,9 +94,10 @@ public:
         gtint_t ld_inc = std::get<7>(str.param);
         
         std::string str_name = API_PRINT;
-        str_name    = str_name + "_" + sfm;
-        str_name    = str_name + "_" + uploa+transa;
-        str_name    = str_name + "_d" + diaga;
+        str_name += "_stor_" + storage;
+        str_name += "_uploa_" + uploa;
+        str_name += "_transa_" + transa;
+        str_name += "_diaga_" + diaga;
         str_name += "_n_" + std::to_string(n);
         str_name += "_alpha_" + testinghelpers::get_value_string(alpha);
         str_name += "_incx_" + testinghelpers::get_value_string(incx);

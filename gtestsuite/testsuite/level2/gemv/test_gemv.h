@@ -155,7 +155,7 @@ class gemvGenericPrint {
 public:
     std::string operator()(
         testing::TestParamInfo<std::tuple<char,char,char,gtint_t,gtint_t,T,T,gtint_t,gtint_t,gtint_t,bool>> str) const {
-        char sfm            = std::get<0>(str.param);
+        char storage        = std::get<0>(str.param);
         char transa         = std::get<1>(str.param);
         char conjx          = std::get<2>(str.param);
         gtint_t m           = std::get<3>(str.param);
@@ -168,16 +168,16 @@ public:
         bool is_memory_test = std::get<10>(str.param);
 
         std::string str_name = API_PRINT;
-        str_name = str_name + "stor_" + sfm;
-        str_name = str_name + "_transa_" + transa;
-        str_name = str_name + "_conjx_" + conjx;
+        str_name += "_stor_" + storage;
+        str_name += "_transa_" + transa;
+        str_name += "_conjx_" + conjx;
         str_name += "_m_" + std::to_string(m);
         str_name += "_n_" + std::to_string(n);
         str_name += "_incx_" + testinghelpers::get_value_string(incx);
         str_name += "_incy_" + testinghelpers::get_value_string(incy);
         str_name += "_alpha_" + testinghelpers::get_value_string(alpha);
         str_name += "_beta_" + testinghelpers::get_value_string(beta);
-        str_name = str_name + "_lda_" + std::to_string(testinghelpers::get_leading_dimension( sfm, 'n', m, n, ld_inc ));
+        str_name = str_name + "_lda_" + std::to_string(testinghelpers::get_leading_dimension( storage, 'n', m, n, ld_inc ));
         str_name = str_name + (( is_memory_test ) ? "_mem_test_enabled" : "_mem_test_disabled");
         return str_name;
     }
@@ -188,7 +188,7 @@ class gemvEVTPrint {
 public:
     std::string operator()(
         testing::TestParamInfo<std::tuple<char,char,char,gtint_t,gtint_t,T,T,gtint_t,gtint_t,T,T,T,gtint_t>> str) const {
-        char sfm            = std::get<0>(str.param);
+        char storage        = std::get<0>(str.param);
         char transa         = std::get<1>(str.param);
         char conjx          = std::get<2>(str.param);
         gtint_t m           = std::get<3>(str.param);
@@ -203,16 +203,16 @@ public:
         gtint_t ld_inc      = std::get<12>(str.param);
 
         std::string str_name = API_PRINT;
-        str_name = str_name + "stor_" + sfm;
-        str_name = str_name + "_transa_" + transa;
-        str_name = str_name + "_conjx_" + conjx;
+        str_name += "_stor_" + storage;
+        str_name += "_transa_" + transa;
+        str_name += "_conjx_" + conjx;
         str_name += "_m_" + std::to_string(m);
         str_name += "_n_" + std::to_string(n);
         str_name += "_incx_" + testinghelpers::get_value_string(incx);
         str_name += "_incy_" + testinghelpers::get_value_string(incy);
         str_name += "_alpha_" + testinghelpers::get_value_string(alpha);
         str_name += "_beta_" + testinghelpers::get_value_string(beta);
-        str_name = str_name + "_lda_" + std::to_string(testinghelpers::get_leading_dimension( sfm, 'n', m, n, ld_inc ));
+        str_name = str_name + "_lda_" + std::to_string(testinghelpers::get_leading_dimension( storage, 'n', m, n, ld_inc ));
         str_name = str_name + "_a_exval_" + testinghelpers::get_value_string(a_exval);
         str_name = str_name + "_x_exval_" + testinghelpers::get_value_string(x_exval);
         str_name = str_name + "_y_exval_" + testinghelpers::get_value_string(y_exval);

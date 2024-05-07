@@ -140,8 +140,8 @@ public:
         bool is_memory_test = std::get<6>(str.param);
 
         std::string str_name = "_n_" + std::to_string(n);
-        str_name += "conjx_" + std::string(&conjx, 1);
-        str_name += "conjy_" + std::string(&conjy, 1);
+        str_name += "_conjx_" + conjx;
+        str_name += "_conjy_" + conjy;
         str_name += "_incx_" + testinghelpers::get_value_string(incx);
         str_name += "_incy_" + testinghelpers::get_value_string(incy);
         str_name += ( is_memory_test ) ? "_mem_test_enabled" : "_mem_test_disabled";

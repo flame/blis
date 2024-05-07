@@ -161,8 +161,8 @@ public:
         bool is_memory_test = std::get<9>(str.param);
         
         std::string str_name = API_PRINT;
-        str_name += std::string(&storage, 1);
-        str_name += "_" + std::string(&trans, 1);
+        str_name += "_stor_" + storage;
+        str_name += "_trans_" + trans;
         str_name += "_m_" + std::to_string(m);
         str_name += "_n_" + std::to_string(n);
         str_name += "_alpha_" + testinghelpers::get_value_string(alpha);
@@ -195,8 +195,8 @@ public:
         T exval  = std::get<9>(str.param);
 
         std::string str_name = API_PRINT;
-        str_name += std::string(&storage, 1);
-        str_name += "_" + std::string(&trans, 1);
+        str_name += "_stor_" + storage;
+        str_name += "_trans_" + trans;
         str_name += "_m_" + std::to_string(m);
         str_name += "_n_" + std::to_string(n);
         str_name += "_alpha_" + testinghelpers::get_value_string(alpha);

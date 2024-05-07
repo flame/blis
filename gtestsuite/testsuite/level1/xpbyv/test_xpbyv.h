@@ -76,14 +76,14 @@ class xpbyvGenericPrint {
 public:
     std::string operator()(
         testing::TestParamInfo<std::tuple<char,gtint_t,gtint_t,gtint_t,T>> str) const {
-        char conj     = std::get<0>(str.param);
+        char conjx    = std::get<0>(str.param);
         gtint_t n     = std::get<1>(str.param);
         gtint_t incx  = std::get<2>(str.param);
         gtint_t incy  = std::get<3>(str.param);
         T beta = std::get<4>(str.param);
         std::string str_name = "bli_cxpbyv";
         str_name += "_n_" + std::to_string(n);
-        str_name += "_" + std::string(&conj, 1);
+        str_name += "_conjx_" + conjx;
         str_name += "_incx_" + testinghelpers::get_value_string(incx);
         str_name += "_incy_" + testinghelpers::get_value_string(incy);
         str_name += "_beta_" + testinghelpers::get_value_string(beta);
