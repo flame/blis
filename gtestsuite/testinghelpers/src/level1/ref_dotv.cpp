@@ -69,7 +69,6 @@ void ref_dotv(gtint_t len, const T* xp,
 template<typename T>
 void ref_dotv( char conj_x, char conj_y, gtint_t len, const T* xp, gtint_t incx,
                                              const T* yp, gtint_t incy, T* rho ) {
-
     typedef void (*Fptr_ref_cblas_dot)(f77_int, const T*, f77_int, const T*, f77_int, T* );
     Fptr_ref_cblas_dot ref_cblas_dot;
 
@@ -85,11 +84,11 @@ void ref_dotv( char conj_x, char conj_y, gtint_t len, const T* xp, gtint_t incx,
     memcpy(Y.data(), yp, svy*sizeof(T));
 
     if( cfx ) {
-        conj<T>( X.data(), len, incx );
+        conj<T>( X.data(), len, abs(incx) );
     }
 
     if( cfy ) {
-        conj<T>( Y.data(), len, incy );
+        conj<T>( Y.data(), len, abs(incy) );
     }
 
     // Call C function

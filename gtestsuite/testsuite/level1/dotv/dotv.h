@@ -53,7 +53,6 @@
 
 template<typename T>
 static void dotv_(gtint_t n, T* x, gtint_t incx, T* y, gtint_t incy, T* rho) {
-
     if constexpr (std::is_same<T, float>::value)
         *rho = sdot_(&n, x, &incx, y, &incy);
     else if constexpr (std::is_same<T, double>::value)
@@ -75,18 +74,69 @@ static void dotv_(gtint_t n, T* x, gtint_t incx, T* y, gtint_t incy, T* rho) {
 }
 
 template<typename T>
-static void cblas_dotv(gtint_t n, T* x, gtint_t incx, T* y, gtint_t incy, T* rho) {
+static void dotu_(gtint_t n, T* x, gtint_t incx, T* y, gtint_t incy, T* rho) {
+    if constexpr (std::is_same<T, scomplex>::value)
+    #ifdef BLIS_DISABLE_COMPLEX_RETURN_INTEL
+        *rho = cdotu_(&n, x, &incx, y, &incy);
+    #else
+        cdotu_(rho, &n, x, &incx, y, &incy);
+    #endif
+    else if constexpr (std::is_same<T, dcomplex>::value)
+    #ifdef BLIS_DISABLE_COMPLEX_RETURN_INTEL
+        *rho = zdotu_(&n, x, &incx, y, &incy);
+    #else
+        zdotu_(rho, &n, x, &incx, y, &incy);
+    #endif
+    else
+        throw std::runtime_error("Error in testsuite/level1/dotv.h: Invalid typename in dotu_().");
+}
 
-  if constexpr (std::is_same<T, float>::value)
-    *rho = cblas_sdot( n, x, incx, y, incy );
-  else if constexpr (std::is_same<T, double>::value)
-    *rho = cblas_ddot( n, x, incx, y, incy );
-  else if constexpr (std::is_same<T, scomplex>::value)
-    cblas_cdotu_sub( n, x, incx, y, incy, rho );
-  else if constexpr (std::is_same<T, dcomplex>::value)
-    cblas_zdotu_sub( n, x, incx, y, incy, rho );
-  else
-    throw std::runtime_error("Error in testsuite/level1/dotv.h: Invalid typename in cblas_dotv().");
+template<typename T>
+static void dotc_(gtint_t n, T* x, gtint_t incx, T* y, gtint_t incy, T* rho) {
+    if constexpr (std::is_same<T, scomplex>::value)
+    #ifdef BLIS_DISABLE_COMPLEX_RETURN_INTEL
+        *rho = cdotc_(&n, x, &incx, y, &incy);
+    #else
+        cdotc_(rho, &n, x, &incx, y, &incy);
+    #endif
+    else if constexpr (std::is_same<T, dcomplex>::value)
+    #ifdef BLIS_DISABLE_COMPLEX_RETURN_INTEL
+        *rho = zdotc_(&n, x, &incx, y, &incy);
+    #else
+        zdotc_(rho, &n, x, &incx, y, &incy);
+    #endif
+    else
+        throw std::runtime_error("Error in testsuite/level1/dotv.h: Invalid typename in dotc_().");
+}
+
+template<typename T>
+static void cblas_dotv(gtint_t n, T* x, gtint_t incx, T* y, gtint_t incy, T* rho) {
+    if constexpr (std::is_same<T, float>::value)
+        *rho = cblas_sdot( n, x, incx, y, incy );
+    else if constexpr (std::is_same<T, double>::value)
+        *rho = cblas_ddot( n, x, incx, y, incy );
+    else
+        throw std::runtime_error("Error in testsuite/level1/dotv.h: Invalid typename in cblas_dotv().");
+}
+
+template<typename T>
+static void cblas_dotu(gtint_t n, T* x, gtint_t incx, T* y, gtint_t incy, T* rho) {
+    if constexpr (std::is_same<T, scomplex>::value)
+        cblas_cdotu_sub( n, x, incx, y, incy, rho );
+    else if constexpr (std::is_same<T, dcomplex>::value)
+        cblas_zdotu_sub( n, x, incx, y, incy, rho );
+    else
+        throw std::runtime_error("Error in testsuite/level1/dotv.h: Invalid typename in cblas_dotu().");
+}
+
+template<typename T>
+static void cblas_dotc(gtint_t n, T* x, gtint_t incx, T* y, gtint_t incy, T* rho) {
+    if constexpr (std::is_same<T, scomplex>::value)
+        cblas_cdotc_sub( n, x, incx, y, incy, rho );
+    else if constexpr (std::is_same<T, dcomplex>::value)
+        cblas_zdotc_sub( n, x, incx, y, incy, rho );
+    else
+        throw std::runtime_error("Error in testsuite/level1/dotv.h: Invalid typename in cblas_dotc().");
 }
 
 template<typename T>
@@ -120,9 +170,25 @@ static void dotv(char conjx, char conjy, gtint_t n,
 #endif
 
 #ifdef TEST_BLAS
-    dotv_<T>(n, x, incx, y, incy, rho);
+    if constexpr ( testinghelpers::type_info<T>::is_real )
+        dotv_<T>(n, x, incx, y, incy, rho);
+    else if constexpr ( testinghelpers::type_info<T>::is_complex )
+    {
+        if ( testinghelpers::chkconj(conjx) )
+            dotc_<T>(n, x, incx, y, incy, rho);
+        else
+            dotu_<T>(n, x, incx, y, incy, rho);
+    }
 #elif TEST_CBLAS
-    cblas_dotv<T>(n, x, incx, y, incy, rho);
+    if constexpr ( testinghelpers::type_info<T>::is_real )
+        cblas_dotv<T>(n, x, incx, y, incy, rho);
+    else if constexpr ( testinghelpers::type_info<T>::is_complex )
+    {
+        if ( testinghelpers::chkconj(conjx) )
+            cblas_dotc<T>(n, x, incx, y, incy, rho);
+        else
+            cblas_dotu<T>(n, x, incx, y, incy, rho);
+    }
 #elif TEST_BLIS_TYPED
     typed_dotv<T>(conjx, conjy, n, x, incx, y, incy, rho);
 #else

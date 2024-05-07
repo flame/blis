@@ -83,19 +83,15 @@ INSTANTIATE_TEST_SUITE_P(
         Blackbox,
         zdotvGenericTest,
         ::testing::Combine(
+            ::testing::Values('n', 'c'),                                    // 'n': tests zdotu_, 'c': tests zdotc_
             ::testing::Values('n'
 #ifdef TEST_BLIS_TYPED
-            , 'c'                                                            // this option is BLIS-api specific.
+            , 'c'                                                           // this option is BLIS-api specific.
 #endif
-            ),                                                               // n: use x, c: use conj(x)
-            ::testing::Values('n'
-#ifdef TEST_BLIS_TYPED
-            , 'c'                                                            // this option is BLIS-api specific.
-#endif
-             ),                                                              // n: use y, c: use conj(y)
-            ::testing::Range(gtint_t(10), gtint_t(101), 10),                 // m size of vector takes values from 10 to 100 with step size of 10.
-            ::testing::Values(gtint_t(1)),                                   // stride size for x
-            ::testing::Values(gtint_t(1))                                    // stride size for y
+             ),                                                             // n: use y, c: use conj(y)
+            ::testing::Range(gtint_t(10), gtint_t(101), 10),                // m size of vector takes values from 10 to 100 with step size of 10.
+            ::testing::Values(gtint_t(1)),                                  // stride size for x
+            ::testing::Values(gtint_t(1))                                   // stride size for y
         ),
         ::dotvGenericPrint()
     );
@@ -107,19 +103,15 @@ INSTANTIATE_TEST_SUITE_P(
         NonUnitPositiveIncrements,
         zdotvGenericTest,
         ::testing::Combine(
+            ::testing::Values('n', 'c'),                                    // 'n': tests zdotu_, 'c': tests zdotc_
             ::testing::Values('n'
 #ifdef TEST_BLIS_TYPED
-            , 'c'                                                            // this option is BLIS-api specific.
+            , 'c'                                                           // this option is BLIS-api specific.
 #endif
-            ),                                                               // n: use x, c: use conj(x)
-            ::testing::Values('n'
-#ifdef TEST_BLIS_TYPED
-            , 'c'                                                            // this option is BLIS-api specific.
-#endif
-            ),                                                               // n: use y, c: use conj(y)
-            ::testing::Values(gtint_t(3), gtint_t(30), gtint_t(112)),        // m size of vector
-            ::testing::Values(gtint_t(2), gtint_t(11)),                      // stride size for x
-            ::testing::Values(gtint_t(3), gtint_t(33))                       // stride size for y
+            ),                                                              // n: use y, c: use conj(y)
+            ::testing::Values(gtint_t(3), gtint_t(30), gtint_t(112)),       // m size of vector
+            ::testing::Values(gtint_t(2), gtint_t(11)),                     // stride size for x
+            ::testing::Values(gtint_t(3), gtint_t(33))                      // stride size for y
         ),
         ::dotvGenericPrint()
     );
@@ -132,11 +124,42 @@ INSTANTIATE_TEST_SUITE_P(
         NegativeIncrements,
         zdotvGenericTest,
         ::testing::Combine(
-            ::testing::Values('n'),                                          // n: use x, c: use conj(x)
-            ::testing::Values('n'),                                          // n: use y, c: use conj(y)
-            ::testing::Values(gtint_t(3), gtint_t(30), gtint_t(112)),        // m size of vector
-            ::testing::Values(gtint_t(-2)),                                  // stride size for x
-            ::testing::Values(gtint_t(-3))                                   // stride size for y
+            ::testing::Values('n', 'c'),                                    // 'n': tests zdotu_, 'c': tests zdotc_
+            ::testing::Values('n'),                                         // n: use y, c: use conj(y)
+            ::testing::Values(gtint_t(3), gtint_t(30), gtint_t(112)),       // m size of vector
+            ::testing::Values(gtint_t(-2)),                                 // stride size for x
+            ::testing::Values(gtint_t(-3))                                  // stride size for y
+        ),
+        ::dotvGenericPrint()
+    );
+#endif
+
+#if defined(BLIS_ENABLE_OPENMP) && defined(AOCL_DYNAMIC)
+INSTANTIATE_TEST_SUITE_P(
+        AOCLDynamicThresholds,
+        zdotvGenericTest,
+        ::testing::Combine(
+            // conj(x): user n (no_conjugate) since it is real.
+            ::testing::Values('n', 'c'),
+            // conj(y): user n (no_conjugate) since it is real.
+            ::testing::Values('n'),
+            // m: size of vector.
+            ::testing::Values(
+                               gtint_t(  2080),     // nt_ideal = 1
+                               gtint_t(  3328),     // nt_ideal = 4
+                               gtint_t( 98304),     // nt_ideal = 8
+                               gtint_t(262144),     // nt_ideal = 32
+                               gtint_t(524288),     // nt_ideal = 64
+                               gtint_t(550000)      // nt_ideal = max_available
+            ),
+            // incx: stride of x vector.
+            ::testing::Values(
+                               gtint_t(1)           // unit stride
+            ),
+            // incy: stride of y vector.
+            ::testing::Values(
+                               gtint_t(1)           // unit stride
+            )
         ),
         ::dotvGenericPrint()
     );

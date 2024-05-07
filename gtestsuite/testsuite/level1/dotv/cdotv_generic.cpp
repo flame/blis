@@ -83,11 +83,7 @@ INSTANTIATE_TEST_SUITE_P(
         Blackbox,
         cdotvGenericTest,
         ::testing::Combine(
-            ::testing::Values('n'
-#ifdef TEST_BLIS_TYPED
-            , 'c'                                                            // this option is BLIS-api specific.
-#endif
-            ),                                                               // n: use x, c: use conj(x)
+            ::testing::Values('n', 'c'),                                    // 'n': tests cdotu_, 'c': tests cdotc_
             ::testing::Values('n'
 #ifdef TEST_BLIS_TYPED
             , 'c'                                                            // this option is BLIS-api specific.
@@ -107,11 +103,7 @@ INSTANTIATE_TEST_SUITE_P(
         NonUnitPositiveIncrements,
         cdotvGenericTest,
         ::testing::Combine(
-            ::testing::Values('n'
-#ifdef TEST_BLIS_TYPED
-            , 'c'                                                            // this option is BLIS-api specific.
-#endif
-            ),                                                               // n: use x, c: use conj(x)
+            ::testing::Values('n', 'c'),                                    // 'n': tests cdotu_, 'c': tests cdotc_
             ::testing::Values('n'
 #ifdef TEST_BLIS_TYPED
             , 'c'                                                            // this option is BLIS-api specific.
@@ -132,7 +124,7 @@ INSTANTIATE_TEST_SUITE_P(
         NegativeIncrements,
         cdotvGenericTest,
         ::testing::Combine(
-            ::testing::Values('n'),                                          // n: use x, c: use conj(x)
+            ::testing::Values('n', 'c'),                                    // 'n': tests cdotu_, 'c': tests cdotc_
             ::testing::Values('n'),                                          // n: use y, c: use conj(y)
             ::testing::Values(gtint_t(3), gtint_t(30), gtint_t(112)),        // m size of vector
             ::testing::Values(gtint_t(-2)),                                  // stride size for x
