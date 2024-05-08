@@ -139,6 +139,7 @@ void bli_scopyv_zen4_asm_avx512
     cmp(imm(16*32), rsi)               // check if the number of remaining elements greater than or equal to 512  -> (NUMBER OF ELEMENTS PER REGISTER) * (NUMBER OF REGISTERS USED IN THE BLOCK)
     jl(.BLOCK256)                      // else, goto block of size 256
 
+    label(.MAINLOOP)
     // Interleaved SIMD load and store operations to copy data from source to the destination
     // Each vector register can hold 16 elements and is used twice before next jump operation (1 for loading the element from source and 1 for store it into the destination)
 
@@ -219,7 +220,8 @@ void bli_scopyv_zen4_asm_avx512
     add(imm(16*4*32),  r8)
     sub(imm(16*32),   rsi)             // reduce the number of remaining elements by 512  ->  ( Number of elements per register ) * ( Number of zmm registers used in the section of code )
 
-    jmp(.BLOCK512)
+    cmp(imm(16*32), rsi)
+    jge(.MAINLOOP)
 
     // -----------------------------------------------------------
 
@@ -272,8 +274,6 @@ void bli_scopyv_zen4_asm_avx512
     add(imm(16*4*16),  r8)
     sub(imm(16*16),   rsi)             // reduce the number of remaining elements by 256
 
-    jmp(.BLOCK256)
-
     // -----------------------------------------------------------
 
     // Section of code to move the data as blocks of 128 elements
@@ -307,8 +307,6 @@ void bli_scopyv_zen4_asm_avx512
     add(imm(16*4*8),  r8)
     sub(imm(16*8),   rsi)              // reduce the number of remaining elements by 128
 
-    jmp(.BLOCK128)
-
     // -----------------------------------------------------------
 
     // Section of code to move the data as blocks of 64 elements
@@ -333,8 +331,6 @@ void bli_scopyv_zen4_asm_avx512
     add(imm(16*4*4),  r8)
     sub(imm(16*4),   rsi)              // reduce the number of remaining elements by 64
 
-    jmp(.BLOCK64)
-
     // -----------------------------------------------------------
 
     // Section of code to move the data as blocks of 32 elements
@@ -354,8 +350,6 @@ void bli_scopyv_zen4_asm_avx512
     add(imm(16*4*2),  r8)
     sub(imm(16*2),   rsi)              // reduce the number of remaining elements by 32
 
-    jmp(.BLOCK32)
-
     // -----------------------------------------------------------
 
     // Section of code to move the data as blocks of 16 elements
@@ -373,8 +367,6 @@ void bli_scopyv_zen4_asm_avx512
     add(imm(16*4), rdx)
     add(imm(16*4),  r8)
     sub(imm(16),   rsi)                // reduce the number of remaining elements by 16
-
-    jmp(.BLOCK16)
 
     // -----------------------------------------------------------
 
@@ -561,6 +553,7 @@ void bli_dcopyv_zen4_asm_avx512
     cmp(imm(8*32), rsi)                // check if the number of remaining elements greater than or equal to 256  -> (NUMBER OF ELEMENTS PER REGISTER) * (NUMBER OF REGISTERS USED IN THE BLOCK)
     jl(.BLOCK128)                      // else, goto block of size 128
 
+    label(.MAINLOOP)
     // Interleaved SIMD load and store operations to copy data from source to the destination
     // Each vector register can hold 8 elements and is used twice before next jump operation (1 for loading the element from source and 1 for store it into the destination)
 
@@ -642,7 +635,8 @@ void bli_dcopyv_zen4_asm_avx512
 
     sub(imm(8*32), rsi)                // reduce the number of remaining elements by 256  ->  ( Number of elements per register ) * ( Number of zmm registers used in the section of code )
 
-    jmp(.BLOCK256)
+    cmp(imm(8*32), rsi)
+    jge(.MAINLOOP)
 
     // -----------------------------------------------------------
 
@@ -695,8 +689,6 @@ void bli_dcopyv_zen4_asm_avx512
     add(imm(8*8*16),  r8)
     sub(imm(8*16),   rsi)              // reduce the number of remaining elements by 128
 
-    jmp(.BLOCK128)
-
     // -----------------------------------------------------------
 
     // Section of code to move the data as blocks of 64 elements
@@ -730,8 +722,6 @@ void bli_dcopyv_zen4_asm_avx512
     add(imm(8*8*8),  r8)
     sub(imm(8*8),   rsi)               // reduce the number of remaining elements by 64
 
-    jmp(.BLOCK64)
-
     // -----------------------------------------------------------
 
     // Section of code to move the data as blocks of 32 elements
@@ -756,8 +746,6 @@ void bli_dcopyv_zen4_asm_avx512
     add(imm(8*8*4),  r8)
     sub(imm(8*4),   rsi)               // reduce the number of remaining elements by 32
 
-    jmp(.BLOCK32)
-
     // -----------------------------------------------------------
 
     // Section of code to move the data as blocks of 16 elements
@@ -778,8 +766,6 @@ void bli_dcopyv_zen4_asm_avx512
     add(imm(8*8*2),  r8)
     sub(imm(8*2),   rsi)               // reduce the number of remaining elements by 16
 
-    jmp(.BLOCK16)
-
     // -----------------------------------------------------------
 
     // Section of code to move the data as blocks of 8 elements
@@ -797,8 +783,6 @@ void bli_dcopyv_zen4_asm_avx512
     add(imm(8*8), rdx)
     add(imm(8*8),  r8)
     sub(imm(8),   rsi)                 // reduce the number of remaining elements by 8
-
-    jmp(.BLOCK8)
 
     // -----------------------------------------------------------
 
@@ -835,7 +819,7 @@ void bli_dcopyv_zen4_asm_avx512
     // Code section used to deal with situations where incx or incy is not 1
     label(.SCALAR)
 
-    // incx and incy are multipled by 8 (shift left by 2 bits) and stored back into their respective registers
+    // incx and incy are multipled by 8 (shift left by 3 bits) and stored back into their respective registers
     mov(imm(3), r11)
     shlx(r11, rcx, rcx)
     shlx(r11, r9, r9)
@@ -980,6 +964,7 @@ void bli_zcopyv_zen4_asm_avx512
             cmp(imm(4*16), rsi)        // check if the number of remaining elements greater than or equal to 64
             jl(.BLOCK32)               // else, goto to the section of code for block of size 32
 
+            label(.MAINLOOP)
             // Interleaved SIMD load, conjugate and store operations to copy data from source to the destination
 
             vmovupd(mem(rdx, 0*64), zmm0)       // zmm0 = x[i+0] - x[i+3]
@@ -1039,7 +1024,8 @@ void bli_zcopyv_zen4_asm_avx512
             add(imm(16*4*16),  r8)
             sub(imm(4*16),    rsi)     // reduce the number of remaining elements by 64  ->  ( Number of elements per register ) * ( Number of zmm registers used in the section of code )
 
-            jmp(.BLOCK64)
+            cmp(imm(4*16), rsi)
+            jge(.MAINLOOP)
 
             // -----------------------------------------------------------
 
@@ -1082,8 +1068,6 @@ void bli_zcopyv_zen4_asm_avx512
             add(imm(16*4*8),  r8)
             sub(imm(4*8),    rsi)      // reduce the number of remaining elements by 32
 
-            jmp(.BLOCK32)
-
             // -----------------------------------------------------------
 
             // Section of code to move the data as blocks of 16 elements
@@ -1112,8 +1096,6 @@ void bli_zcopyv_zen4_asm_avx512
             add(imm(16*4*4),  r8)
             sub(imm(4*4),    rsi)      // reduce the number of remaining elements by 16
 
-            jmp(.BLOCK16)
-
             // -----------------------------------------------------------
 
             // Section of code to move the data as blocks of 8 elements
@@ -1136,8 +1118,6 @@ void bli_zcopyv_zen4_asm_avx512
             add(imm(16*4*2),  r8)
             sub(imm(4*2),    rsi)      // reduce the number of remaining elements by 8
 
-            jmp(.BLOCK8)
-
             // -----------------------------------------------------------
 
             // Section of code to move the data as blocks of 4 elements
@@ -1156,8 +1136,6 @@ void bli_zcopyv_zen4_asm_avx512
             add(imm(16*4), rdx)
             add(imm(16*4),  r8)
             sub(imm(4),    rsi)        // reduce the number of remaining elements by 4
-
-            jmp(.BLOCK4)
 
             // -----------------------------------------------------------
 
@@ -1424,6 +1402,7 @@ void bli_zcopyv_zen4_asm_avx512
             cmp(imm(4*32), rsi)        // check if the number of remaining elements greater than or equal to 128 -> (NUMBER OF ELEMENTS PER REGISTER) * (NUMBER OF REGISTERS USED IN THE BLOCK)
             jl(.BLOCK64)               // else, goto block of size 64
 
+            label(.MAINLOOP)
             // Interleaved SIMD load and store operations to copy data from source to the destination
             // Each vector register can hold 4 elements and is used twice before next jump operation (1 for loading the element from source and 1 for store it into the destination)
 
@@ -1506,7 +1485,8 @@ void bli_zcopyv_zen4_asm_avx512
             // reduce the number of remaining elements by 128
             sub(imm(4*32), rsi)        // ( Number of elements per register ) * ( Number of zmm registers used in the section of code )
 
-            jmp(.BLOCK128)
+            cmp(imm(4*32), rsi)
+            jge(.MAINLOOP)
 
             // -----------------------------------------------------------
 
@@ -1561,8 +1541,6 @@ void bli_zcopyv_zen4_asm_avx512
             // reduce the number of remaining elements by 64
             sub(imm(4*16), rsi)
 
-            jmp(.BLOCK64)
-
             // -----------------------------------------------------------
 
             // Section of code to move the data as blocks of 32 elements
@@ -1598,8 +1576,6 @@ void bli_zcopyv_zen4_asm_avx512
             // reduce the number of remaining elements by 32
             sub(imm(4*8), rsi)
 
-            jmp(.BLOCK32)
-
             // -----------------------------------------------------------
 
             // Section of code to move the data as blocks of 16 elements
@@ -1626,8 +1602,6 @@ void bli_zcopyv_zen4_asm_avx512
             // reduce the number of remaining elements by 16
             sub(imm(4*4), rsi)
 
-            jmp(.BLOCK16)
-
             // -----------------------------------------------------------
 
             // Section of code to move the data as blocks of 8 elements
@@ -1650,8 +1624,6 @@ void bli_zcopyv_zen4_asm_avx512
             // reduce the number of remaining elements by 8
             sub(imm(4*2), rsi)
 
-            jmp(.BLOCK8)
-
             // -----------------------------------------------------------
 
             // Section of code to move the data as blocks of 4 elements
@@ -1671,8 +1643,6 @@ void bli_zcopyv_zen4_asm_avx512
 
             // reduce the number of remaining elements by 4
             sub(imm(4), rsi)
-
-            jmp(.BLOCK4)
 
             // -----------------------------------------------------------
 

@@ -1117,10 +1117,10 @@ void bli_zcopyv_zen_int_avx512
             const dim_t num_elem_per_reg = 8;
             __m512d  xv[32];
 
-            // n & (~0x7F) = n & 0xFFFFFF80 -> this masks the numbers less than 128,
-            // if value of n < 128, then (n & (~0x7F)) = 0
-            // the copy operation will be done for the multiples of 128
-             for (i = 0; i < (n & (~0x7F)); i += 128)
+            // n & (~0xFF) = n & 0xFFFFFF00 -> this masks the numbers less than 256,
+            // if value of n < 256, then (n & (~0xFF)) = 0
+            // the copy operation will be done for the multiples of 256
+             for (i = 0; i < (n & (~0xFF)); i += 256)
             {
                 // Loading the input values
                 xv[0] = _mm512_loadu_pd((double *)(x0+ num_elem_per_reg * 0));
@@ -1209,7 +1209,7 @@ void bli_zcopyv_zen_int_avx512
                 y0 += 32 * num_elem_per_reg;
             }
 
-            for (; i < (n & (~0x3F)); i += 64)
+            for (; i < (n & (~0x7F)); i += 128)
             {
                 // Loading the input values
                 xv[0] = _mm512_loadu_pd((double *)(x0+ num_elem_per_reg * 0));
@@ -1258,7 +1258,7 @@ void bli_zcopyv_zen_int_avx512
                 y0 += 16 * num_elem_per_reg;
             }
 
-            for (; i < (n & (~0x1F)); i += 32)
+            for (; i < (n & (~0x3F)); i += 64)
             {
                 // Loading the input values
                 xv[0] = _mm512_loadu_pd((double *)(x0+ num_elem_per_reg * 0));
@@ -1287,7 +1287,7 @@ void bli_zcopyv_zen_int_avx512
                 y0 += 8 * num_elem_per_reg;
             }
 
-            for (; i < (n & (~0x0F)); i += 16)
+            for (; i < (n & (~0x1F)); i += 32)
             {
                 // Loading the input values
                 xv[0] = _mm512_loadu_pd((double *)(x0+ num_elem_per_reg * 0));
@@ -1306,7 +1306,7 @@ void bli_zcopyv_zen_int_avx512
                 y0 += 4 * num_elem_per_reg;
             }
 
-            for (; i < (n & (~0x07)); i += 8)
+            for (; i < (n & (~0x0F)); i += 16)
             {
                 // Loading the input values
                 xv[0] = _mm512_loadu_pd((double *)(x0+ num_elem_per_reg * 0));
@@ -1321,7 +1321,7 @@ void bli_zcopyv_zen_int_avx512
                 y0 += 2 * num_elem_per_reg;
             }
 
-            for (; i < (n & (~0x03)); i += 4)
+            for (; i < (n & (~0x07)); i += 8)
             {
                 // Loading the input values
                 xv[0] = _mm512_loadu_pd((double *)(x0+ num_elem_per_reg * 0));
