@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2022 - 2023, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2022 - 2024, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -90,16 +90,16 @@
     with k == 1. It expects the inputs and output to support the column-major storage
     scheme, without any requirement to conjugate/transpose any of the operands.  */
 
-void bli_zgemm_4x4_avx2_k1_nn
-(
-    dim_t  m,
-    dim_t  n,
-    dim_t  k,
-    dcomplex*    alpha,
-    dcomplex*    a, const inc_t lda,
-    dcomplex*    b, const inc_t ldb,
-    dcomplex*    beta,
-    dcomplex*    c, const inc_t ldc
+err_t bli_zgemm_4x4_avx2_k1_nn
+    (
+      dim_t  m,
+      dim_t  n,
+      dim_t  k,
+      dcomplex*    alpha,
+      dcomplex*    a, const inc_t lda,
+      dcomplex*    b, const inc_t ldb,
+      dcomplex*    beta,
+      dcomplex*    c, const inc_t ldc
     )
 {
     // Setting the required variables for choosing the right path
@@ -1123,7 +1123,7 @@ void bli_zgemm_4x4_avx2_k1_nn
             temp_cij += Z_MR;
             temp_ai += Z_MR;
         }
-
     }
 
+    return BLIS_SUCCESS;
 }

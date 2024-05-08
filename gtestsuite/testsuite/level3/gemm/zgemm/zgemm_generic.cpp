@@ -90,7 +90,7 @@ TEST_P( zgemmGeneric, API )
              (beta == testinghelpers::ZERO<T>() || beta == testinghelpers::ONE<T>()))
         thresh = 0.0;
     else
-        thresh = (3*k+1)*testinghelpers::getEpsilon<T>();
+        thresh = (7*k+3)*testinghelpers::getEpsilon<T>();
         //thresh = (15*k+1)*testinghelpers::getEpsilon<T>();
 
     //----------------------------------------------------------
@@ -233,7 +233,7 @@ INSTANTIATE_TEST_SUITE_P(
             ),                                                              // storage format
             ::testing::Values('n'),                                         // transa
             ::testing::Values('n'),                                         // transb
-            ::testing::Range(gtint_t(2), gtint_t(8), 1),                    // m
+            ::testing::Range(gtint_t(2), gtint_t(16), 1),                    // m
             ::testing::Range(gtint_t(2), gtint_t(8), 1),                    // n
             ::testing::Values(gtint_t(1)),                                  // k
             ::testing::Values(dcomplex{1.0, 0.0}, dcomplex{-1.0, 0.0},

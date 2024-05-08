@@ -1128,23 +1128,94 @@ void zgemm_blis_impl
     - The input constraints are that k should be 1, and transa and transb
       should be N and N respectively.
     */
-    if( ( k0 == 1 ) && bli_is_notrans( blis_transa ) && bli_is_notrans( blis_transb ) )
+    if( ( k0 == 1 ) && bli_is_notrans( blis_transa ) &&
+        bli_is_notrans( blis_transb ) )
     {
-        bli_zgemm_4x4_avx2_k1_nn
-        ( 
-            m0, n0, k0,
-            (dcomplex*)alpha,
-            (dcomplex*)a, *lda,
-            (dcomplex*)b, *ldb,
-            (dcomplex*)beta,
-            c, *ldc
-        );
+        err_t ret = BLIS_FAILURE;
+        arch_t arch_id = bli_arch_query_id();
 
-        AOCL_DTL_LOG_GEMM_STATS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(z), *m, *n, *k);
-        AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
-        /* Finalize BLIS */
-        bli_finalize_auto();
-        return;
+        if( arch_id == BLIS_ARCH_ZEN || arch_id == BLIS_ARCH_ZEN2 ||
+            arch_id == BLIS_ARCH_ZEN3 )
+        {
+            ret = bli_zgemm_4x4_avx2_k1_nn
+                  (
+                    m0, n0, k0,
+                    (dcomplex*)alpha,
+                    (dcomplex*)a, *lda,
+                    (dcomplex*)b, *ldb,
+                    (dcomplex*)beta,
+                    c, *ldc
+                  );
+        }
+
+#if defined(BLIS_KERNELS_ZEN4)
+        else if ( arch_id == BLIS_ARCH_ZEN4 )
+        {
+            // Redirecting to AVX-2 kernel if load direction( m0 ) is < 30.
+            // This holds true irrespective of the broadcast direction( n0 )
+            if( m0 < 30 )
+            {
+                ret = bli_zgemm_4x4_avx2_k1_nn
+                      (
+                        m0, n0, k0,
+                        (dcomplex*)alpha,
+                        (dcomplex*)a, *lda,
+                        (dcomplex*)b, *ldb,
+                        (dcomplex*)beta,
+                        c, *ldc
+                      );
+            }
+            else
+            {
+                ret = bli_zgemm_16x4_avx512_k1_nn
+                      (
+                        m0, n0, k0,
+                        (dcomplex*)alpha,
+                        (dcomplex*)a, *lda,
+                        (dcomplex*)b, *ldb,
+                        (dcomplex*)beta,
+                        c, *ldc
+                      );
+            }
+        }
+        else if ( arch_id == BLIS_ARCH_ZEN5 )
+        {
+            // Redirecting to AVX-2 kernel if the dimensions are < 30
+            // ( i.e, small or tiny sizes ), or if the load directon( m0 ) < 10
+            if( ( m0 < 30 && n0 < 30 ) || m0 < 10 )
+            {
+                ret = bli_zgemm_4x4_avx2_k1_nn
+                      (
+                        m0, n0, k0,
+                        (dcomplex*)alpha,
+                        (dcomplex*)a, *lda,
+                        (dcomplex*)b, *ldb,
+                        (dcomplex*)beta,
+                        c, *ldc
+                      );
+            }
+            else
+            {
+                ret = bli_zgemm_16x4_avx512_k1_nn
+                      (
+                        m0, n0, k0,
+                        (dcomplex*)alpha,
+                        (dcomplex*)a, *lda,
+                        (dcomplex*)b, *ldb,
+                        (dcomplex*)beta,
+                        c, *ldc
+                      );
+            }
+        }
+#endif
+        if( ret == BLIS_SUCCESS )
+        {
+            AOCL_DTL_LOG_GEMM_STATS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(z), *m, *n, *k);
+            AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
+            /* Finalize BLIS */
+            bli_finalize_auto();
+            return;
+        }
     }
 
     const num_t dt     = BLIS_DCOMPLEX;

@@ -1189,3 +1189,111 @@ INSTANTIATE_TEST_SUITE_P (
     ::zgemmGenericNatPrint()
 );
 #endif
+
+// Function pointer specific to zgemm kernel that handles
+// special case where k=1.
+typedef err_t (*zgemm_k1_kernel)
+     (
+        dim_t  m,
+        dim_t  n,
+        dim_t  k,
+        dcomplex*    alpha,
+        dcomplex*    a, const inc_t lda,
+        dcomplex*    b, const inc_t ldb,
+        dcomplex*    beta,
+        dcomplex*    c, const inc_t ldc
+    );
+
+// AOCL-BLAS has a set of kernels(AVX2 and AVX512) that separately handle
+// k=1 cases for ZGEMM. Thus, we need to define a test-fixture class for testing
+// these kernels
+class zgemmUkrk1 :
+        public ::testing::TestWithParam<std::tuple<dcomplex,        // alpha
+                                                   dcomplex,        // beta
+                                                   char,            // storage
+                                                   gtint_t,         // m
+                                                   gtint_t,         // n
+                                                   zgemm_k1_kernel, // kernel-pointer type
+                                                   bool>> {};       // is_mem_test
+
+GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(zgemmUkrk1);
+
+TEST_P(zgemmUkrk1, FunctionalTest)
+{
+    using T = dcomplex;
+    gtint_t k      = 1;
+    T alpha        = std::get<0>(GetParam());           // alpha
+    T beta         = std::get<1>(GetParam());           // beta
+    char storage   = std::get<2>(GetParam());           // indicates storage of all matrix operands
+    gtint_t m = std::get<3>(GetParam());                // m
+    gtint_t n = std::get<4>(GetParam());                // n
+    zgemm_k1_kernel kern_ptr = std::get<5>(GetParam()); // kernel address
+    bool memory_test = std::get<6>(GetParam());         // is_mem_test
+
+    // Call to the testing interface(specific to k=1 cases)
+    test_gemmk1_ukr(kern_ptr, m, n, k, storage, alpha, beta, memory_test);
+}
+
+class zgemmUkrk1Print {
+public:
+    std::string operator()(
+        testing::TestParamInfo<std::tuple<dcomplex, dcomplex, char, gtint_t, gtint_t, zgemm_k1_kernel, bool>>  str) const {
+        gtint_t k       = 1;
+        dcomplex alpha    = std::get<0>(str.param);
+        dcomplex beta     = std::get<1>(str.param);
+        char storage    = std::get<2>(str.param);
+        gtint_t m       = std::get<3>(str.param);
+        gtint_t n       = std::get<4>(str.param);
+        bool memory_test = std::get<6>(str.param);
+
+        std::string str_name;
+        str_name += "_k_" + std::to_string(k);
+        str_name += "_alpha_" + testinghelpers::get_value_string(alpha);
+        str_name += "_beta_" + testinghelpers::get_value_string(beta);
+        str_name += "_m_" + std::to_string(m);
+        str_name += "_n_" + std::to_string(n);
+        str_name = str_name + "_" + storage;
+        str_name += ( memory_test ) ? "_mem_test_enabled" : "_mem_test_disabled";
+
+        return str_name;
+    }
+};
+
+#if defined(BLIS_KERNELS_ZEN4) && defined(GTEST_AVX512)
+INSTANTIATE_TEST_SUITE_P (
+    bli_zgemm_16x4_avx512_k1_nn,
+    zgemmUkrk1,
+    ::testing::Combine(
+
+        ::testing::Values(dcomplex{1.0, 0.0}, dcomplex{-1.0, 0.0},
+                          dcomplex{0.0, 0.0}, dcomplex{1.2, 2.3}),      // alpha value
+        ::testing::Values(dcomplex{1.0, 0.0}, dcomplex{-1.0, 0.0},
+                          dcomplex{0.0, 0.0}, dcomplex{1.2, 2.3}),      // beta value
+        ::testing::Values('c'),                                         // storage
+        ::testing::Range(gtint_t(1), gtint_t(33), 1),                   // values of m
+        ::testing::Range(gtint_t(1), gtint_t(9), 1),                    // values of n
+        ::testing::Values(bli_zgemm_16x4_avx512_k1_nn),
+        ::testing::Values(true, false)                                  // memory test
+    ),
+    ::zgemmUkrk1Print()
+);
+#endif
+
+#if defined(BLIS_KERNELS_ZEN) && defined(GTEST_AVX2FMA3)
+INSTANTIATE_TEST_SUITE_P (
+    bli_zgemm_4x4_avx2_k1_nn,
+    zgemmUkrk1,
+    ::testing::Combine(
+        ::testing::Values(dcomplex{1.0, 0.0}, dcomplex{-1.0, 0.0},
+                          dcomplex{0.0, 0.0}, dcomplex{1.2, 2.3}),      // alpha value
+        ::testing::Values(dcomplex{1.0, 0.0}, dcomplex{-1.0, 0.0},
+                          dcomplex{0.0, 0.0}, dcomplex{1.2, 2.3}),      // beta value
+        ::testing::Values('c'),                                         // storage
+        ::testing::Range(gtint_t(1), gtint_t(9), 1),                   // values of m
+        ::testing::Range(gtint_t(1), gtint_t(9), 1),                    // values of n
+        ::testing::Values(bli_zgemm_4x4_avx2_k1_nn),
+        ::testing::Values(true, false)                                  // memory test
+    ),
+    ::zgemmUkrk1Print()
+);
+#endif

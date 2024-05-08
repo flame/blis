@@ -411,3 +411,130 @@ static void test_gemmnat_ukr( char storage, gtint_t m, gtint_t n, gtint_t k, T a
     computediff<T>( "C", storage, m, n, (T*)buf_c, (T*)buf_cref, ldc, thresh );
 
 }
+
+// The function is templatized based on the datatype and function-pointer type to the kernel.
+template<typename T, typename FT>
+static void test_gemmk1_ukr( FT ukr_fp, gtint_t m, gtint_t n, gtint_t k, char storage, T alpha, T beta, bool memory_test  = false )
+{
+    // Compute the leading dimensions of a, b, and c.
+    //char storage = storageC;
+    gtint_t lda = testinghelpers::get_leading_dimension( storage, 'n', m, k, 0 );
+    gtint_t ldb = testinghelpers::get_leading_dimension( storage, 'n', k, n, 0 );
+    gtint_t ldc = testinghelpers::get_leading_dimension( storage, 'n', m, n, 0 );
+
+     //----------------------------------------------------------
+    //         Initialize matrices with random numbers
+    //----------------------------------------------------------
+    gtint_t sizea =  testinghelpers::matsize( storage, 'n', m, k, lda ) * sizeof(T);
+    gtint_t sizeb =  testinghelpers::matsize( storage, 'n', k, n, ldb ) * sizeof(T);
+    gtint_t sizec =  testinghelpers::matsize( storage, 'n', m, n, ldc ) * sizeof(T);
+
+    testinghelpers::ProtectedBuffer mat_a(sizea, false, memory_test);
+    testinghelpers::ProtectedBuffer mat_b(sizeb, false, memory_test);
+    testinghelpers::ProtectedBuffer mat_c(sizec, false, memory_test);
+    testinghelpers::ProtectedBuffer mat_cref(sizec, false, false);
+
+    T *buf_a = (T*)mat_a.greenzone_1;
+    T *buf_b = (T*)mat_b.greenzone_1;
+    T *buf_c = (T*)mat_c.greenzone_1;
+    T* buf_cref = (T*)mat_cref.greenzone_1;
+
+    // Check if the memory has been successfully allocated
+    if ((buf_a == NULL) ||(buf_b == NULL) ||(buf_c == NULL) ||(buf_cref == NULL)) {
+        printf("Memory not allocated for input and output Matrix.\n");
+        return ;
+    }
+    testinghelpers::datagenerators::randomgenerators<T>( -2, 8, storage, m, k, (T*)(buf_a), 'n', lda);
+    testinghelpers::datagenerators::randomgenerators<T>( -5, 2, storage, k, n, (T*)(buf_b), 'n', ldb);
+    testinghelpers::datagenerators::randomgenerators<T>( -3, 5, storage, m, n, (T*)(buf_c), 'n', ldc);
+
+    // Create a copy of c so that we can check reference results.
+    memcpy(buf_cref, buf_c, sizec);
+
+    // add signal handler for segmentation fault
+    testinghelpers::ProtectedBuffer::start_signal_handler();
+    try
+    {
+        // call micro-kernel
+        ukr_fp (
+            m,
+            n,
+            k,
+            &alpha,
+            buf_a,
+            lda,
+            buf_b,
+            ldb,
+            &beta,
+            buf_c,
+            ldc
+            );
+
+        if(memory_test == true)
+        {
+            // set pointers to second buffer
+            buf_a    = (T*)mat_a.greenzone_2;
+            buf_b    = (T*)mat_b.greenzone_2;
+            buf_c    = (T*)mat_c.greenzone_2;
+
+            // Check if the memory has been successfully allocated
+            if ((buf_a == NULL) || (buf_b == NULL) || (buf_c == NULL)) {
+                printf("Memory not allocated for input or output Matrix for memory test.\n");
+                return ;
+            }
+
+            // copy data from 1st buffer of A and B to second buffer
+            memcpy(buf_a, mat_a.greenzone_1, sizea);
+            memcpy(buf_b, mat_b.greenzone_1, sizeb);
+
+            //buf_c_ptrs.greenzone_1 has been updated with output from previous
+            // gemm call, hence use buf_cref
+            memcpy(buf_c, buf_cref, sizec);
+
+            // call micro-kernel
+            ukr_fp (
+                m,
+                n,
+                k,
+                &alpha,
+                buf_a,
+                lda,
+                buf_b,
+                ldb,
+                &beta,
+                buf_c,
+                ldc
+                );
+        }
+    }
+    catch(const std::exception& e)
+    {
+        // reset to default signal handler
+        testinghelpers::ProtectedBuffer::stop_signal_handler();
+
+        // show failure in case seg fault was detected
+        FAIL() << "Memory Test Failed";
+    }
+    // reset to default signal handler
+    testinghelpers::ProtectedBuffer::stop_signal_handler();
+
+    // Set the threshold for the errors:
+    // Check gtestsuite gemm.h or netlib source code for reminder of the
+    // functionality from which we estimate operation count per element
+    // of output, and hence the multipler for epsilon.
+    double thresh;
+    if (m == 0 || n == 0)
+        thresh = 0.0;
+    else if ((alpha == testinghelpers::ZERO<T>() || k == 0) && (beta == testinghelpers::ZERO<T>() ||
+              beta == testinghelpers::ONE<T>()))
+        thresh = 0.0;
+    else
+        thresh = (7*k+3)*testinghelpers::getEpsilon<T>();
+
+    // call reference implementation
+    testinghelpers::ref_gemm<T>( storage, 'n', 'n', m, n, k, alpha,
+                                 buf_a, lda, buf_b, ldb, beta, buf_cref, ldc);
+
+    // Check component-wise error
+    computediff<T>( "C", storage, m, n, buf_c, buf_cref, ldc, thresh );
+}
