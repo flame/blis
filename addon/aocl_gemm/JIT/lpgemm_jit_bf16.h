@@ -35,16 +35,15 @@
 #ifndef JIT_BF16_H
 #define JIT_BF16_H
 
-
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
 #include <cstring>
+#include <functional>
 #include "blis.h"
 #include <xbyak/xbyak.h>
-using namespace Xbyak;
 
+using namespace Xbyak;
 
 class bli_lpgemm_jit: public Xbyak::CodeGenerator
 {
@@ -78,6 +77,14 @@ private :
     void ERF_AVX512();
     void GELU_ERF_F32_AVX512_DEF( dim_t reg );
     void gelu_erf( dim_t m_dim, dim_t n_dim );
+    void SWISH_F32_AVX512_DEF( dim_t reg );
+    void swish( dim_t m, dim_t n );
+
+    void apply_post_ops_in_high_reg_pressure
+    (
+      const dim_t num_post_op_regs,
+      std::function< void( dim_t ) > op_fn
+    );
     // C store functions
     void cvt_store_f32_bf16_mask( dim_t m_dim, dim_t n_dim );
     void store_f32( dim_t m_dim, dim_t n_dim );
@@ -112,6 +119,9 @@ private :
         // registers for gelu_erf
     const dim_t num_erf_regs = 5;
     const dim_t x_erf = load_start_idx+4;
+
+    // registers used for swish. Reusing the gelu_tanh registers.
+    const dim_t num_swish_regs = 9;
 
     const dim_t stack_off_ps_a = 8;
     const dim_t stack_off_k_iter_before_prefetch = 16;

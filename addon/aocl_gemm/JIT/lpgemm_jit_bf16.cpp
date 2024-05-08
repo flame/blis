@@ -34,7 +34,6 @@
 
 #include "lpgemm_jit_bf16.h"
 
-
 // push callee-save registers to stack
 void bli_lpgemm_jit:: preamble()
 {
@@ -542,171 +541,38 @@ void bli_lpgemm_jit:: relu_scale( dim_t m_dim, dim_t n_dim )
     }
 }
 
-//r2 and z, q are scratch regs
-//r will be passed in and out of parent function.
-void bli_lpgemm_jit:: POLY_EVAL_6_AVX512( )
+void bli_lpgemm_jit::apply_post_ops_in_high_reg_pressure
+     (
+       const dim_t num_post_op_regs,
+       std::function< void( dim_t ) > op_fn
+     )
 {
-        vmulps( Zmm( r2 ), Zmm( r ), Zmm( r ) );
+    dim_t num_push_regs = num_post_op_regs - fma_start_idx ;
 
-        vbroadcastss( Zmm( const1 ), ptr[ &( this->lpgemm_exp[3] ) ] );
-
-        vbroadcastss( Zmm( const2 ), ptr[ &( this->lpgemm_exp[2] ) ] );
-
-        vmovups( Zmm( q ), Zmm( const2 ) );
-        vfmadd231ps( Zmm( q ), Zmm( const1 ), Zmm( r ) );
-
-        vbroadcastss( Zmm( const1 ), ptr[ &( this->lpgemm_exp[1] ) ] );
-
-        vbroadcastss( Zmm( const2 ), ptr[ &( this->lpgemm_exp[0] ) ] );
-
-        vmovups( Zmm( z ), Zmm( const2 ) );
-        vfmadd231ps( Zmm( z ), Zmm( const1 ), Zmm( r ) );
-
-        vfmadd231ps( Zmm( z ), Zmm( r2 ), Zmm( q ) );
-
-        vmulps(Zmm( r2 ), Zmm( r2 ), Zmm( r2 ) );
-
-        vbroadcastss( Zmm( const1 ), ptr[ &( this->lpgemm_exp[5] ) ] );
-
-        vbroadcastss( Zmm( const2 ), ptr[ &( this->lpgemm_exp[4] ) ] );
-
-        vfmadd231ps( Zmm( const2 ), Zmm( const1 ), Zmm( r ) );
-
-        vfmadd231ps( Zmm( z ), Zmm( const2 ), Zmm( r2 ) );
-        vmovups(Zmm( r ), Zmm( z ) );
-
-}
-
-// z, r, dn is a scratch register
-// takes 'x' as input and returns 'q' to the parent
-void bli_lpgemm_jit:: EXPF_AVX512()
-{
-
-        vbroadcastss( Zmm( const1 ), ptr[ &( this->gelu_macros[0] ) ] );
-
-        vmulps( Zmm( z ), Zmm( x ), Zmm(const1 ) );
-
-        vbroadcastss( Zmm( const2 ), ptr[ &( this->gelu_macros[1] ) ] );
-
-        vaddps( Zmm( dn ), Zmm( z ), Zmm( const2 ) );
-
-        vsubps( Zmm( r ), Zmm( dn ), Zmm( const2 ) );
-        vsubps( Zmm( r ), Zmm( z ), Zmm( r ) );
-
-        POLY_EVAL_6_AVX512();
-
-        vpslld( Zmm( dn ), Zmm( dn ), 0x17 );
-
-        vpaddd( Zmm( q ), Zmm( r ), Zmm( dn ) );
-
-        vpxorq( Zmm( const2 ), Zmm( const2 ), Zmm( const2 ) );
-
-        vpbroadcastd( Zmm( const1 ), ptr[ &( this->gelu_macros[2] ) ] );
-
-        vcmpps( k5, Zmm( const1 ), Zmm( x ), 0x06 );
-
-        vpandd( Zmm( q ) | k5, Zmm( q ), Zmm( const2 ) );
-
-        vbroadcastss( Zmm( const1 ), ptr[ &( this->gelu_macros[3] ) ] );
-
-        vcmpps( k5, Zmm( const1 ), Zmm( x ), 0x06 );
-
-        vbroadcastss( Zmm( x ), ptr[ &( this->gelu_macros[4] ) ] );
-
-        vpxord( Zmm( x ) | k5, Zmm( q ), Zmm( const2 ) );
-}
-
-// uses z, dn, r as scratch regs
-// passes r to child macro and gets q
-// takes x_tanh as input and gives back x_tanh
-void bli_lpgemm_jit:: TANHF_AVX512()
-{
-        vbroadcastss( Zmm( const1 ), ptr[ &( this->gelu_consts[2] ) ] );
-
-        mov( ebx, 0x7FFFFFFF );
-        vpbroadcastd( Zmm( const2 ), ebx );
-        vpandd( Zmm( x ), Zmm( x_tanh ), Zmm( const2 ) );
-
-        vmulps( Zmm( x ), Zmm( x ), Zmm( const1 ) );
-
-        EXPF_AVX512();
-
-        mov( eax, -1 );
-        vbroadcastss( Zmm( const1 ), ptr[ &( this->gelu_consts[4] ) ] );
-
-        vaddps( Zmm( z ), Zmm( q ), Zmm( const1 ) );
-
-        vbroadcastss( Zmm( const2 ), ptr[ &( this->gelu_consts[5] ) ] );
-
-        vaddps( Zmm( r ), Zmm( z ), Zmm( const2 ) );
-
-        vdivps( Zmm( z ), Zmm( z ), Zmm( r ) );
-
-        vmulps( Zmm( z ), Zmm( z ), Zmm( const1 ) );
-
-        mov( eax, -2147483648 );
-        vpbroadcastd( Zmm( const1 ), eax );
-
-        vpandd(Zmm( q ), Zmm( x_tanh ), Zmm( const1 ) );
-
-        vpxord( Zmm( x_tanh ), Zmm( q ), Zmm( z ) );
-
-}
-
-void bli_lpgemm_jit:: GELU_TANH_F32_AVX512_DEF(dim_t reg )
-{
-        vmulps( Zmm( r2 ), Zmm( reg ), Zmm( reg ) );
-        vmulps( Zmm( r2 ), Zmm( r2 ), Zmm( reg ) );
-
-        vbroadcastss( Zmm( const1 ), ptr[ &( this->gelu_consts[0] ) ] );
-        vmovups( Zmm( r ), Zmm( reg ) );
-        vfmadd231ps( Zmm( r ), Zmm( r2 ), Zmm( const1 ) );
-
-        vbroadcastss( Zmm( const2 ), ptr[ &( this->gelu_consts[1] ) ] );
-        vmulps( Zmm( x_tanh ), Zmm( r ), Zmm( const2 ) );
-
-        TANHF_AVX512();
-
-        vbroadcastss( Zmm( const2 ), ptr[ &( this->gelu_consts[6] ) ] );
-        vaddps( Zmm( x_tanh ), Zmm( x_tanh ), Zmm( const2 ) );
-        vmulps( Zmm( x_tanh ), Zmm( x_tanh ), Zmm( reg ) );
-
-        vbroadcastss( Zmm( const1 ), ptr[ &( this->gelu_consts[3] ) ] );
-        vmulps( Zmm( reg ), Zmm( x_tanh ), Zmm( const1 ) );
-
-}
-
-void bli_lpgemm_jit:: gelu_tanh( dim_t m_dim, dim_t n_dim )
-{
-    dim_t num_push_regs = num_gelu_regs - fma_start_idx ;
-
-    /* if number of registers required to compute gelu is more than
-       registers available, then push some accum registers to stack
-       and use them to compute gelu.
-    */
+    // If number of registers required to compute pots op is more than
+    // registers available, then push some accum registers to stack
+    // and use them to compute gelu.
     store_zmms_in_stack( fma_start_idx, num_push_regs, 0 );
 
-    dim_t gelu_start = num_push_regs > 0 ? fma_start_idx + num_push_regs
+    dim_t post_op_start = num_push_regs > 0 ? fma_start_idx + num_push_regs
                                          : fma_start_idx;
 
     // operate on non-pushed regs
-    for( dim_t reg=gelu_start; reg < 32; reg++ )
+    for( dim_t reg = post_op_start; reg < 32; reg++ )
     {
-        GELU_TANH_F32_AVX512_DEF( reg );
-
+        op_fn( reg );
     }
 
-    // push num_push_regs number of registers from last to stack and
-    // replace themwith the items that were pushed earlier
+    // Push num_push_regs number of registers from last to stack and
+    // replace them with the items that were pushed earlier
     // and compute on them.
-
     store_zmms_in_stack( 32 - num_push_regs, num_push_regs,
                          num_push_regs * 64 );
     get_zmms_from_stack( 32 - num_push_regs, num_push_regs, 0);
 
     for( dim_t reg = 0; reg < num_push_regs; reg++ )
     {
-        GELU_TANH_F32_AVX512_DEF( 32 - num_push_regs + reg );
+        op_fn( 32 - num_push_regs + reg );
     }
 
     for( dim_t reg = 0; reg < num_push_regs; reg++ )
@@ -715,7 +581,151 @@ void bli_lpgemm_jit:: gelu_tanh( dim_t m_dim, dim_t n_dim )
 
     get_zmms_from_stack( 32 - num_push_regs, num_push_regs,
                          num_push_regs * 64 );
+}
 
+//r2 and z, q are scratch regs
+//r will be passed in and out of parent function.
+void bli_lpgemm_jit:: POLY_EVAL_6_AVX512( )
+{
+    vmulps( Zmm( r2 ), Zmm( r ), Zmm( r ) );
+
+    vbroadcastss( Zmm( const1 ), ptr[ &( this->lpgemm_exp[3] ) ] );
+
+    vbroadcastss( Zmm( const2 ), ptr[ &( this->lpgemm_exp[2] ) ] );
+
+    vmovups( Zmm( q ), Zmm( const2 ) );
+    vfmadd231ps( Zmm( q ), Zmm( const1 ), Zmm( r ) );
+
+    vbroadcastss( Zmm( const1 ), ptr[ &( this->lpgemm_exp[1] ) ] );
+
+    vbroadcastss( Zmm( const2 ), ptr[ &( this->lpgemm_exp[0] ) ] );
+
+    vmovups( Zmm( z ), Zmm( const2 ) );
+    vfmadd231ps( Zmm( z ), Zmm( const1 ), Zmm( r ) );
+
+    vfmadd231ps( Zmm( z ), Zmm( r2 ), Zmm( q ) );
+
+    vmulps(Zmm( r2 ), Zmm( r2 ), Zmm( r2 ) );
+
+    vbroadcastss( Zmm( const1 ), ptr[ &( this->lpgemm_exp[5] ) ] );
+
+    vbroadcastss( Zmm( const2 ), ptr[ &( this->lpgemm_exp[4] ) ] );
+
+    vfmadd231ps( Zmm( const2 ), Zmm( const1 ), Zmm( r ) );
+
+    vfmadd231ps( Zmm( z ), Zmm( const2 ), Zmm( r2 ) );
+    vmovups(Zmm( r ), Zmm( z ) );
+}
+
+// z, r, dn is a scratch register
+// takes 'x' as input and returns 'q' to the parent
+void bli_lpgemm_jit:: EXPF_AVX512()
+{
+    vbroadcastss( Zmm( const1 ), ptr[ &( this->gelu_macros[0] ) ] );
+
+    vmulps( Zmm( z ), Zmm( x ), Zmm(const1 ) );
+
+    vbroadcastss( Zmm( const2 ), ptr[ &( this->gelu_macros[1] ) ] );
+
+    vaddps( Zmm( dn ), Zmm( z ), Zmm( const2 ) );
+
+    vsubps( Zmm( r ), Zmm( dn ), Zmm( const2 ) );
+    vsubps( Zmm( r ), Zmm( z ), Zmm( r ) );
+
+    POLY_EVAL_6_AVX512();
+
+    vpslld( Zmm( dn ), Zmm( dn ), 0x17 );
+
+    vpaddd( Zmm( q ), Zmm( r ), Zmm( dn ) );
+
+    vpxorq( Zmm( const2 ), Zmm( const2 ), Zmm( const2 ) );
+
+    vpbroadcastd( Zmm( const1 ), ptr[ &( this->gelu_macros[2] ) ] );
+
+    vcmpps( k5, Zmm( const1 ), Zmm( x ), 0x06 );
+
+    vpandd( Zmm( q ) | k5, Zmm( q ), Zmm( const2 ) );
+
+    vbroadcastss( Zmm( const1 ), ptr[ &( this->gelu_macros[3] ) ] );
+
+    vcmpps( k5, Zmm( const1 ), Zmm( x ), 0x06 );
+
+    vbroadcastss( Zmm( x ), ptr[ &( this->gelu_macros[4] ) ] );
+
+    vpxord( Zmm( x ) | k5, Zmm( q ), Zmm( const2 ) );
+    vmovups(Zmm( q ), Zmm( x ) );
+}
+
+// uses z, dn, r as scratch regs
+// passes r to child macro and gets q
+// takes x_tanh as input and gives back x_tanh
+void bli_lpgemm_jit:: TANHF_AVX512()
+{
+    vbroadcastss( Zmm( const1 ), ptr[ &( this->gelu_consts[2] ) ] );
+
+    mov( ebx, 0x7FFFFFFF );
+    vpbroadcastd( Zmm( const2 ), ebx );
+    vpandd( Zmm( x ), Zmm( x_tanh ), Zmm( const2 ) );
+
+    vmulps( Zmm( x ), Zmm( x ), Zmm( const1 ) );
+
+    EXPF_AVX512();
+
+    mov( eax, -1 );
+    vbroadcastss( Zmm( const1 ), ptr[ &( this->gelu_consts[4] ) ] );
+
+    vaddps( Zmm( z ), Zmm( q ), Zmm( const1 ) );
+
+    vbroadcastss( Zmm( const2 ), ptr[ &( this->gelu_consts[5] ) ] );
+
+    vaddps( Zmm( r ), Zmm( z ), Zmm( const2 ) );
+
+    vdivps( Zmm( z ), Zmm( z ), Zmm( r ) );
+
+    vmulps( Zmm( z ), Zmm( z ), Zmm( const1 ) );
+
+    mov( eax, -2147483648 );
+    vpbroadcastd( Zmm( const1 ), eax );
+
+    vpandd(Zmm( q ), Zmm( x_tanh ), Zmm( const1 ) );
+
+    vpxord( Zmm( x_tanh ), Zmm( q ), Zmm( z ) );
+}
+
+void bli_lpgemm_jit:: GELU_TANH_F32_AVX512_DEF(dim_t reg )
+{
+    vmulps( Zmm( r2 ), Zmm( reg ), Zmm( reg ) );
+    vmulps( Zmm( r2 ), Zmm( r2 ), Zmm( reg ) );
+
+    vbroadcastss( Zmm( const1 ), ptr[ &( this->gelu_consts[0] ) ] );
+    vmovups( Zmm( r ), Zmm( reg ) );
+    vfmadd231ps( Zmm( r ), Zmm( r2 ), Zmm( const1 ) );
+
+    vbroadcastss( Zmm( const2 ), ptr[ &( this->gelu_consts[1] ) ] );
+    vmulps( Zmm( x_tanh ), Zmm( r ), Zmm( const2 ) );
+
+    TANHF_AVX512();
+
+    vbroadcastss( Zmm( const2 ), ptr[ &( this->gelu_consts[6] ) ] );
+    vaddps( Zmm( x_tanh ), Zmm( x_tanh ), Zmm( const2 ) );
+    vmulps( Zmm( x_tanh ), Zmm( x_tanh ), Zmm( reg ) );
+
+    vbroadcastss( Zmm( const1 ), ptr[ &( this->gelu_consts[3] ) ] );
+    vmulps( Zmm( reg ), Zmm( x_tanh ), Zmm( const1 ) );
+}
+
+void bli_lpgemm_jit:: gelu_tanh( dim_t m_dim, dim_t n_dim )
+{
+    apply_post_ops_in_high_reg_pressure
+    (
+      num_gelu_regs,
+      std::bind
+      (
+        &bli_lpgemm_jit::GELU_TANH_F32_AVX512_DEF,
+        this,
+        std::placeholders::_1
+      )
+    );
 }
 
 void bli_lpgemm_jit:: POLY_EVAL_HORNER_16_0_AVX512()
@@ -802,8 +812,8 @@ void bli_lpgemm_jit:: ERF_AVX512()
     vpandd( Zmm( x_erf ), Zmm( x_erf ), Zmm( const2 ) );
 
     vpord( Zmm( x_erf ), Zmm( x_erf ), Zmm( const1 ) );
-
 }
+
 void bli_lpgemm_jit:: GELU_ERF_F32_AVX512_DEF( dim_t reg )
 {
     vbroadcastss( Zmm( const1 ), ptr[ &( this->erf_consts[0] ) ] );
@@ -819,45 +829,49 @@ void bli_lpgemm_jit:: GELU_ERF_F32_AVX512_DEF( dim_t reg )
     vmulps( Zmm( reg ), Zmm( x_erf ), Zmm( const2 ) );
 
 }
+
 void bli_lpgemm_jit:: gelu_erf( dim_t m_dim, dim_t n_dim )
 {
-    dim_t num_push_regs = num_erf_regs - fma_start_idx;
+    apply_post_ops_in_high_reg_pressure
+    (
+      num_gelu_regs,
+      std::bind
+      (
+        &bli_lpgemm_jit::GELU_ERF_F32_AVX512_DEF,
+        this,
+        std::placeholders::_1
+      )
+    );
+}
 
-    /* if number of registers required to compute gelu_erf is more than
-       registers available, then push some accum registers to stack
-       and use them to compute gelu_erf.
-    */
-    store_zmms_in_stack( fma_start_idx, num_push_regs, 0);
+void bli_lpgemm_jit::SWISH_F32_AVX512_DEF( dim_t reg )
+{
+    vpxorq( Zmm( x ), Zmm( x ), Zmm( x ) );
+    vfnmadd231ps( Zmm( x ), Zmm( reg ), Zmm( x_tanh ) );
 
-    dim_t erf_start = num_push_regs > 0 ? fma_start_idx + num_push_regs
-                                        : fma_start_idx;
+    // Input reg x and output reg q.
+    EXPF_AVX512();
 
-    // operate on non-pushed regs
-    for(dim_t reg = erf_start; reg < 32; reg++ )
-    {
-        GELU_ERF_F32_AVX512_DEF( reg );
-    }
+    vbroadcastss( Zmm( const1 ), ptr[ &( this->gelu_consts[6] ) ] );
+    vaddps( Zmm( q ), Zmm( q ), Zmm( const1 ) );
+    vdivps( Zmm( reg ), Zmm( reg ), Zmm( q ) );
+}
 
-    // push num_push_regs number of registers from last to stack
-    // and replace them with the items that were pushed earlier
-    // and compute on them.
+void bli_lpgemm_jit::swish( dim_t m_dim, dim_t n_dim )
+{
+    mov( rax, ptr[ rdx + offsetof( lpgemm_post_op, op_args2 ) ] );
+    vbroadcastss( Zmm( x_tanh ), ptr[ rax ] );
 
-    store_zmms_in_stack( 32 - num_push_regs, num_push_regs,
-                         num_push_regs * 64 );
-    get_zmms_from_stack( 32 - num_push_regs, num_push_regs, 0);
-
-    for( dim_t reg = 0; reg < num_push_regs; reg++ )
-    {
-        GELU_ERF_F32_AVX512_DEF( 32 - num_push_regs + reg );
-    }
-
-    for( dim_t reg = 0; reg < num_push_regs; reg++ )
-        vmovups( Zmm( fma_start_idx + reg ),
-                 Zmm( 32 - num_push_regs + reg ) );
-
-    get_zmms_from_stack( 32 - num_push_regs, num_push_regs,
-                         num_push_regs * 64 );
-
+    apply_post_ops_in_high_reg_pressure
+    (
+      num_gelu_regs,
+      std::bind
+      (
+        &bli_lpgemm_jit::SWISH_F32_AVX512_DEF,
+        this,
+        std::placeholders::_1
+      )
+    );
 }
 
 void bli_lpgemm_jit:: store_f32( dim_t m_dim, dim_t n_dim )
@@ -1087,7 +1101,8 @@ void bli_lpgemm_jit:: post_op_label_lastk_safe_jump()
     je( "POST_OPS_DOWNSCALE_6x64", T_NEAR );
     cmp( rax, POST_OPS_MATRIX_ADD );
     je( "POST_OPS_MATRIX_ADD_6x64", T_NEAR );
-
+    cmp( rax, POST_OPS_SWISH );
+    je( "POST_OPS_SWISH_6x64", T_NEAR );
 }
 
 // Constructor
@@ -1345,8 +1360,11 @@ void bli_lpgemm_jit::generate_kernel( lpgemm_jit_inputs_t* params )
 
     post_op_label_lastk_safe_jump_with_next_ptr();
 
-    L( "POST_OPS_6x64_DISABLE" );
+    L( "POST_OPS_SWISH_6x64" );
+    swish( m_dim, n_dim );
+    post_op_label_lastk_safe_jump_with_next_ptr();
 
+    L( "POST_OPS_6x64_DISABLE" );
 
     // check if buf_downscale is NULL
     mov( rax, ptr[ rsp + stack_off_buf_downscale ] );

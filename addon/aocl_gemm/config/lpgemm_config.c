@@ -59,7 +59,7 @@ static void* global_jit_kernels[ LPGEMM_BF16_MR ]
 // Buffer size is chosen in order to accommodate the
 // worst-case scenario for MR=6 and NR=64.
 // The buffersize is chosen using bruteforce method.
-#define JIT_KERNEL_SIZE ( 7 * BLIS_PAGE_SIZE )
+#define JIT_KERNEL_SIZE ( 10 * BLIS_PAGE_SIZE )
 
 static bli_pthread_once_t once_check_lpgemm_func_map_init = BLIS_PTHREAD_ONCE_INIT;
 static void _lpgemm_util_cntx_init_func_map()
