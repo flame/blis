@@ -80,39 +80,39 @@
 * t_teg[4] contains [-1, -1, -1, -1, -1, -1, -1, -1]
 * t_reg[5] contains [ 1,  1,  1,  1,  1,  1,  1,  1]
 *
-* (a + ib)/(c + id) = (ac + bd)/(c^2 + d^2) +
-*                    i(bc - ad)/(c^2 + d^2)
+* (xr + i xi)/(ar + i ai) = 
+*          (xrar + xiai)/(ar^2 + ai^2) +
+*         i(xiar - xrai)/(ar^2 + ai^2)
 *
+* instead if dividing by ar^2 + ai^2, we divide
+* by ar/maxabs(ar, ai) * ar + ai / maxabs(ar, ai) * ai
+* in order to reduce the possibility of underflow
+* when c or d are very small
+* 
 * here reg_a = [a1, b1, a2, b2, a3, b3, a4, b4]
 */
 #define DIVIDE_COMPLEX( reg_a, addr )               \
-    for(int iii=0; iii<4;++iii) \
-    {\
-        bli_zinvscalris((addr->real), (addr->imag), (reg_a[iii*2]), (reg_a[iii*2+1])); \
-    } \
-
-    // WIP
-    // g_double[2] = bli_fmaxabs(addr->real, addr->imag);/*s*/    \
-    // g_double[0] = addr->real / g_double[2];/*ar/s*/            \
-    // g_double[1] = addr->imag / g_double[2];/*ai/s*/            \
-    // t_reg[0]    = _mm512_set1_pd(g_double[0]);/*ar/s*/         \
-    // t_reg[1]    = _mm512_set1_pd(g_double[1]);/*ar/s*/         \
-    // g_double[2] = (g_double[0] * addr->real) +                 \
-    //               (g_double[1] * addr->imag);                  \
-    //                /*(ar/s * ar) +(ai/s * ai)*/                \
-    // t_reg[3]   = _mm512_permute_pd(reg_a, 0x55);               \
-    // /*t_reg[3] = [xi,xr,xi,xr....] */                          \
-    // reg_a      = _mm512_mul_pd(reg_a, t_reg[0]);               \
-    // /* reg_a   = ar/s * [xr, xi, xr, xi ....]*/                \
-    // t_reg[3]   = _mm512_mul_pd(t_reg[3], t_reg[1]);            \
-    // /*t_reg[3] = ai/s * [xi,xr,xi,xr........] */               \
-    // t_reg[3]   = _mm512_mul_pd(t_reg[4], t_reg[3]);            \
-    // /*t_reg[3] = -ai/s * [xi,xr,xi,xr........] */              \
-    // t_reg[1]   = _mm512_set1_pd(g_double[2]);                  \
-    // /*t_reg[1] = [(c^2 + d^2), (c^2 + d^2), ...] */            \
-    // reg_a      = _mm512_fmaddsub_pd(t_reg[5], reg_a, t_reg[3]);\
-    // /*reg_a    = [a1c+b1d, b1c-a1d, a2c+b2d, b2c-a2d, ....]*/  \
-    // reg_a      = _mm512_div_pd(reg_a, t_reg[1]);               \
+    g_double[2] = bli_fmaxabs(addr->real, addr->imag);/*s*/    \
+    g_double[0] = addr->real / g_double[2];/*ar/s*/            \
+    g_double[1] = addr->imag / g_double[2];/*ai/s*/            \
+    t_reg[0]    = _mm512_set1_pd(g_double[0]);/*ar/s*/         \
+    t_reg[1]    = _mm512_set1_pd(g_double[1]);/*ai/s*/         \
+    g_double[2] = (g_double[0] * addr->real) +                 \
+                  (g_double[1] * addr->imag);                  \
+                   /*(ar/s * ar) +(ai/s * ai)*/                \
+    t_reg[3]   = _mm512_permute_pd(reg_a, 0x55);               \
+    /*t_reg[3] = [xi,xr,xi,xr....] */                          \
+    reg_a      = _mm512_mul_pd(reg_a, t_reg[0]);               \
+    /* reg_a   = ar/s * [xr, xi, xr, xi ....]*/                \
+    t_reg[3]   = _mm512_mul_pd(t_reg[3], t_reg[1]);            \
+    /*t_reg[3] = ai/s * [xi,xr,xi,xr........] */               \
+    t_reg[3]   = _mm512_mul_pd(t_reg[4], t_reg[3]);            \
+    /*t_reg[3] = -ai/s * [xi,xr,xi,xr........] */              \
+    t_reg[1]   = _mm512_set1_pd(g_double[2]);                  \
+    /*t_reg[1] = [(ar/s * ar) +(ai/s * ai), ...] */            \
+    reg_a      = _mm512_fmaddsub_pd(t_reg[5], reg_a, t_reg[3]);\
+    /*reg_a    = [a1c+b1d, b1c-a1d, a2c+b2d, b2c-a2d, ....]*/  \
+    reg_a      = _mm512_div_pd(reg_a, t_reg[1]);               \
 
 // Zero the registors used for gemm accumulation
 #define ZERO_REGISTERS() \
@@ -139,7 +139,7 @@
     __m512d b_reg[4]; /*registors to hold B matrix*/         \
     t_reg[5] = _mm512_set1_pd( 1.0 ); /*(constant) used for fmaddsub*/\
     \
-    double g_double[2]; \
+    double g_double[3]; \
     __mmask8 mask_m; /*registor to hold mask for laod/store*/\
     \
     dim_t m = bli_obj_length( b );        \
@@ -359,7 +359,7 @@ BLIS_INLINE void runn_n_rem
     __m512d c_reg[8];
     __m512d b_reg[4];
 
-    double g_double[2];
+    double g_double[3];
     __mmask8 mask_m;
 
     t_reg[5] = _mm512_set1_pd(1.0);
@@ -498,7 +498,7 @@ BLIS_INLINE void rlnn_n_rem
     __m512d c_reg[8];
     __m512d b_reg[4];
 
-    double g_double[2];
+    double g_double[3];
     __mmask8 mask_m;
 
     t_reg[5] = _mm512_set1_pd(1.0);
@@ -772,7 +772,7 @@ BLIS_INLINE void llnn_m_rem
     __m512d t_reg[6];
     __m512d c_reg[8];
     __m512d b_reg[4];
-    double g_double[2];
+    double g_double[3];
 
     __mmask8 mask_m;
     t_reg[5] = _mm512_set1_pd(1.0);
@@ -923,7 +923,7 @@ BLIS_INLINE void lunn_m_rem
     __m512d c_reg[8];
     __m512d b_reg[4];
 
-    double g_double[2];
+    double g_double[3];
     __mmask8 mask_m;
 
     t_reg[5] = _mm512_set1_pd(1.0);
