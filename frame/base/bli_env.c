@@ -188,41 +188,84 @@ gint_t bli_env_get_var_arch_type( const char* env, gint_t fallback )
 				r_val = BLIS_ARCH_BULLDOZER;
 			}
 			// Some aliases for mapping AMD and Intel ISA
-			// names to a suitable sub-configuration.
-#if defined(BLIS_FAMILY_AMDZEN) || defined(BLIS_FAMILY_X86_64) || defined(BLIS_FAMILY_ZEN5) || defined(BLIS_FAMILY_ZEN4) || defined(BLIS_FAMILY_ZEN3) || defined(BLIS_FAMILY_ZEN2) || defined(BLIS_FAMILY_ZEN)
+			// names to a suitable sub-configuration for each
+			// x86-64 processor family.
+#if defined(BLIS_FAMILY_AMDZEN)
 			else if (strcmp(str, "avx512") == 0)
 			{
 				r_val = BLIS_ARCH_ZEN4;
 			}
-#endif
-#if defined(BLIS_FAMILY_INTEL64) || defined(BLIS_FAMILY_SKX) || defined(BLIS_FAMILY_HASWELL)
-			else if (strcmp(str, "avx512") == 0)
-			{
-				r_val = BLIS_ARCH_SKX;
-			}
-#endif
-#if defined(BLIS_FAMILY_AMDZEN) || defined(BLIS_FAMILY_X86_64) || defined(BLIS_FAMILY_ZEN5) || defined(BLIS_FAMILY_ZEN4) ||defined(BLIS_FAMILY_ZEN3)
 			else if (strcmp(str, "avx2") == 0)
 			{
 				r_val = BLIS_ARCH_ZEN3;
 			}
-#endif
-#if defined(BLIS_FAMILY_ZEN2)
-			else if (strcmp(str, "avx2") == 0)
+			else if (strcmp(str, "avx") == 0)
 			{
-				r_val = BLIS_ARCH_ZEN2;
+				r_val = BLIS_ARCH_GENERIC;
+			}
+			else if ((strcmp(str, "sse4_2") == 0) ||
+			         (strcmp(str, "sse4.2") == 0) ||
+			         (strcmp(str, "sse4_1") == 0) ||
+			         (strcmp(str, "sse4.1") == 0) ||
+			         (strcmp(str, "sse4a") == 0)  ||
+			         (strcmp(str, "sse4") == 0)   ||
+			         (strcmp(str, "ssse3") == 0)  ||
+			         (strcmp(str, "sse3") == 0)   ||
+			         (strcmp(str, "sse2") == 0))
+			{
+				r_val = BLIS_ARCH_GENERIC;
 			}
 #endif
-#if defined(BLIS_FAMILY_ZEN)
+#if defined(BLIS_FAMILY_X86_64)
+			else if (strcmp(str, "avx512") == 0)
+			{
+				r_val = BLIS_ARCH_ZEN4;
+			}
 			else if (strcmp(str, "avx2") == 0)
 			{
-				r_val = BLIS_ARCH_ZEN;
+				r_val = BLIS_ARCH_ZEN3;
+			}
+			else if (strcmp(str, "avx") == 0)
+			{
+				r_val = BLIS_ARCH_SANDYBRIDGE;
+			}
+			else if ((strcmp(str, "sse4_2") == 0) ||
+			         (strcmp(str, "sse4.2") == 0) ||
+			         (strcmp(str, "sse4_1") == 0) ||
+			         (strcmp(str, "sse4.1") == 0) ||
+			         (strcmp(str, "sse4a") == 0)  ||
+			         (strcmp(str, "sse4") == 0)   ||
+			         (strcmp(str, "ssse3") == 0)  ||
+			         (strcmp(str, "sse3") == 0)   ||
+			         (strcmp(str, "sse2") == 0))
+			{
+				r_val = BLIS_ARCH_GENERIC;
 			}
 #endif
-#if defined(BLIS_FAMILY_INTEL64) || defined(BLIS_FAMILY_SKX) || defined(BLIS_FAMILY_HASWELL)
+#if defined(BLIS_FAMILY_INTEL64)
+			else if (strcmp(str, "avx512") == 0)
+			{
+				r_val = BLIS_ARCH_SKX;
+			}
 			else if (strcmp(str, "avx2") == 0)
 			{
 				r_val = BLIS_ARCH_HASWELL;
+			}
+			else if (strcmp(str, "avx") == 0)
+			{
+				r_val = BLIS_ARCH_SANDYBRIDGE;
+			}
+			else if ((strcmp(str, "sse4_2") == 0) ||
+			         (strcmp(str, "sse4.2") == 0) ||
+			         (strcmp(str, "sse4_1") == 0) ||
+			         (strcmp(str, "sse4.1") == 0) ||
+			         (strcmp(str, "sse4a") == 0)  ||
+			         (strcmp(str, "sse4") == 0)   ||
+			         (strcmp(str, "ssse3") == 0)  ||
+			         (strcmp(str, "sse3") == 0)   ||
+			         (strcmp(str, "sse2") == 0))
+			{
+				r_val = BLIS_ARCH_GENERIC;
 			}
 #endif
 			// ARM
