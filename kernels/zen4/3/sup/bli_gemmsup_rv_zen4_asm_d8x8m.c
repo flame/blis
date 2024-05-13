@@ -149,9 +149,9 @@
         for(dim_t ii = 0; ii < N; ++ii) \
         { \
             c_reg[ii] = _mm512_mul_pd(c_reg[ii], b_reg[0]); \
-            a_reg[ii] = _mm512_mask_loadu_pd(c_reg[ii], (1 << (M)) - 1, c + cs_c * ii); \
-            c_reg[ii] = _mm512_mask_fmadd_pd(b_reg[1], (1 << (M)) - 1, a_reg[ii], c_reg[ii]); \
-            _mm512_mask_storeu_pd(c + cs_c * ii, ~((1 << (ii)) - 1), c_reg[ii]); \
+            a_reg[ii] = _mm512_mask_loadu_pd(c_reg[ii], ((1 << (n_rem - ii)) -1) << ii, c + cs_c * ii); \
+            c_reg[ii] = _mm512_fmadd_pd(b_reg[1], a_reg[ii], c_reg[ii]); \
+            _mm512_mask_storeu_pd(c + cs_c * ii, ((1 << (n_rem - ii)) -1) << ii, c_reg[ii]); \
         } \
     } \
 
@@ -162,7 +162,7 @@
     for(dim_t ii = 0; ii < N; ++ii) \
     { \
         c_reg[ii] = _mm512_mul_pd(c_reg[ii], b_reg[0]); \
-        _mm512_mask_storeu_pd(c + cs_c * ii, ~((1 << (ii)) - 1), c_reg[ii]); \
+        _mm512_mask_storeu_pd(c + cs_c * ii, ((1 << (n_rem - ii)) -1) << ii, c_reg[ii]); \
     } \
 
 #define STORE_COL_UPPER(M, N) \
@@ -176,8 +176,8 @@
         for(dim_t ii = 0; ii < N; ++ii) \
         { \
             c_reg[ii] = _mm512_mul_pd(c_reg[ii], b_reg[0]); \
-            a_reg[ii] = _mm512_mask_loadu_pd(c_reg[ii], (1 << (M)) - 1, c + cs_c * ii); \
-            c_reg[ii] = _mm512_mask_fmadd_pd(b_reg[1], (1 << (M)) - 1, a_reg[ii], c_reg[ii]); \
+            a_reg[ii] = _mm512_mask_loadu_pd(c_reg[ii], (1 << (ii+1)) - 1, c + cs_c * ii); \
+            c_reg[ii] = _mm512_fmadd_pd(b_reg[1], a_reg[ii], c_reg[ii]); \
             _mm512_mask_storeu_pd(c + cs_c * ii, (1 << (ii+1)) - 1, c_reg[ii]); \
         } \
     } \
@@ -204,7 +204,7 @@
         { \
             c_reg[ii] = _mm512_mul_pd(c_reg[ii], b_reg[0]); \
             a_reg[ii] = _mm512_mask_loadu_pd(c_reg[ii], mask_n, c + (rs_c * ii)); \
-            c_reg[ii] = _mm512_mask_fmadd_pd(b_reg[1], mask_n, a_reg[ii], c_reg[ii]); \
+            c_reg[ii] = _mm512_fmadd_pd(b_reg[1], a_reg[ii], c_reg[ii]); \
             _mm512_mask_storeu_pd(c + (rs_c * ii), mask_n, c_reg[ii]); \
         } \
     } \
@@ -228,8 +228,8 @@
         for(dim_t ii = 0; ii < M; ++ii) \
         { \
             c_reg[ii] = _mm512_mul_pd(c_reg[ii], b_reg[0]); \
-            a_reg[ii] = _mm512_mask_loadu_pd(c_reg[ii], (1 << (M)) - 1, c + (rs_c * ii)); \
-            c_reg[ii] = _mm512_mask_fmadd_pd(b_reg[1], (1 << (M)) - 1, a_reg[ii], c_reg[ii]); \
+            a_reg[ii] = _mm512_mask_loadu_pd(c_reg[ii], (1 << (ii+1)) - 1, c + (rs_c * ii)); \
+            c_reg[ii] = _mm512_fmadd_pd(b_reg[1], a_reg[ii], c_reg[ii]); \
             _mm512_mask_storeu_pd(c + (rs_c * ii), (1 << (ii+1)) - 1, c_reg[ii]); \
         } \
     } \
@@ -253,9 +253,9 @@
         for(dim_t ii = 0; ii < M; ++ii) \
         { \
             c_reg[ii] = _mm512_mul_pd(c_reg[ii], b_reg[0]); \
-            a_reg[ii] = _mm512_mask_loadu_pd(c_reg[ii], (1 << (M)) - 1, c + (rs_c * ii)); \
-            c_reg[ii] = _mm512_mask_fmadd_pd(b_reg[1], (1 << (M)) - 1, a_reg[ii], c_reg[ii]); \
-            _mm512_mask_storeu_pd(c + (rs_c * ii), ~((1 << (ii)) - 1), c_reg[ii]); \
+            a_reg[ii] = _mm512_mask_loadu_pd(c_reg[ii], ((1 << (n_rem - ii)) - 1) << ii, c + (rs_c * ii)); \
+            c_reg[ii] = _mm512_fmadd_pd(b_reg[1], a_reg[ii], c_reg[ii]); \
+            _mm512_mask_storeu_pd(c + (rs_c * ii), ((1 << (n_rem - ii)) - 1) << ii, c_reg[ii]); \
         } \
     } \
 
@@ -265,7 +265,7 @@
     for(dim_t ii = 0; ii < M; ++ii) \
     { \
         c_reg[ii] = _mm512_mul_pd(c_reg[ii], b_reg[0]); \
-        _mm512_mask_storeu_pd(c + (rs_c * ii), ~((1 << (ii)) - 1), c_reg[ii]); \
+        _mm512_mask_storeu_pd(c + (rs_c * ii), ((1 << (n_rem - ii)) - 1) << ii, c_reg[ii]); \
     } \
 
 #define MAIN_LOOP(M) \

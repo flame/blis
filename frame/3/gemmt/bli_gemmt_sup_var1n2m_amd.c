@@ -306,9 +306,28 @@ void bli_gemmtsup_ref_var1n
 
 #if defined BLIS_KERNELS_ZEN4
 	#define UPPER_TRIANGLE_OPTIMIZATION() \
+		if (MR == 8 && NR == 8 && (stor_id != BLIS_CRC && stor_id != BLIS_RRC)) \
+		{ \
+			bli_dgemmsup_rv_zen4_asm_8x8m_upper\
+			( \
+				conja, \
+				conjb, \
+				mr_cur, \
+				nr_cur, \
+				kc_cur, \
+				(double*) alpha_cast, \
+				(double*) a_ir, rs_a_use, cs_a_use, \
+				(double*) b_jr,     rs_b_use, cs_b_use, \
+				(double*) beta_use, \
+				(double*) c_ir,     rs_c,     cs_c, \
+				&aux, \
+				cntx  \
+			); \
+		} \
+		else \
 
 	#define LOWER_TRIANGLE_OPTIMIZATION() \
-		if (MR == 8 && NR == 8 && stor_id == BLIS_RRR) \
+		if (MR == 8 && NR == 8 && (stor_id != BLIS_CRC && stor_id != BLIS_RRC)) \
 		{ \
 			bli_dgemmsup_rv_zen4_asm_8x8m_lower\
 			( \
