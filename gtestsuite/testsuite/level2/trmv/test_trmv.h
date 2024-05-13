@@ -94,10 +94,10 @@ public:
         gtint_t ld_inc = std::get<7>(str.param);
         
         std::string str_name = API_PRINT;
-        str_name += "_stor_" + storage;
-        str_name += "_uploa_" + uploa;
-        str_name += "_transa_" + transa;
-        str_name += "_diaga_" + diaga;
+        str_name += "_stor_" + std::string(&storage, 1);
+        str_name += "_uploa_" + std::string(&uploa, 1);
+        str_name += "_transa_" + std::string(&transa, 1);
+        str_name += "_diaga_" + std::string(&diaga, 1);
         str_name += "_n_" + std::to_string(n);
         str_name += "_alpha_" + testinghelpers::get_value_string(alpha);
         str_name += "_incx_" + testinghelpers::get_value_string(incx);

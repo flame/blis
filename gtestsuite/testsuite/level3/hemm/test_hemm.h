@@ -115,11 +115,11 @@ public:
         gtint_t ldc_inc = std::get<11>(str.param);
 
         std::string str_name = API_PRINT;
-        str_name += "_stor_" + storage;
-        str_name += "_side_" + side;
-        str_name += "_uplo_" + uplo;
-        str_name += "_conja" + conja;
-        str_name += "_transb_" + transb;
+        str_name += "_stor_" + std::string(&storage, 1);
+        str_name += "_side_" + std::string(&side, 1);
+        str_name += "_uplo_" + std::string(&uplo, 1);
+        str_name += "_conja_" + std::string(&conja, 1);
+        str_name += "_transb_" + std::string(&transb, 1);
         str_name += "_m_" + std::to_string(m);
         str_name += "_n_" + std::to_string(n);
         str_name += "_alpha_" + testinghelpers::get_value_string(alpha);

@@ -107,10 +107,10 @@ public:
         gtint_t ld_inc = std::get<9>(str.param);
 
         std::string str_name = API_PRINT;
-        str_name += "_stor_" + storage;
-        str_name += "_uploa_" + uploa;
-        str_name += "_conja_" + conja;
-        str_name += "_conjx_" + conjx;
+        str_name += "_stor_" + std::string(&storage, 1);
+        str_name += "_uploa_" + std::string(&uploa, 1);
+        str_name += "_conja_" + std::string(&conja, 1);
+        str_name += "_conjx_" + std::string(&conjx, 1);
         str_name += "_n_" + std::to_string(n);
         str_name += "_alpha_" + testinghelpers::get_value_string(alpha);
         str_name += "_beta_" + testinghelpers::get_value_string(beta);

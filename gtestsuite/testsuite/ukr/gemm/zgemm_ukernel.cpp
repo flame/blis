@@ -91,19 +91,19 @@ public:
         dcomplex alpha      = std::get<3>(str.param);
         dcomplex beta       = std::get<4>(str.param);
         char storageC       = std::get<5>(str.param);
-        char trnsa          = std::get<7>(str.param);
-        char trnsb          = std::get<8>(str.param);
+        char transa         = std::get<7>(str.param);
+        char transb         = std::get<8>(str.param);
         bool is_memory_test = std::get<9>(str.param);
         std::string str_name ;
-        str_name = str_name + "StorageOfCMatrix_" + storageC;
-        str_name = str_name + "_transA_" + trnsa;
-        str_name = str_name + "_transB_" + trnsb;
+        str_name += "_storC_" + std::string(&storageC, 1);
+        str_name += "_transa_" + std::string(&transa, 1);
+        str_name += "_transb_" + std::string(&transb, 1);
         str_name += "_m_" + std::to_string(m);
         str_name += "_n_" + std::to_string(n);
         str_name += "_k_" + std::to_string(k);
         str_name += "_alpha_" + testinghelpers::get_value_string(alpha);
         str_name += "_beta_" + testinghelpers::get_value_string(beta);
-         str_name = str_name + (is_memory_test ? "_mem_test_enabled" : "_mem_test_disabled");
+        str_name = str_name + (is_memory_test ? "_mem_test_enabled" : "_mem_test_disabled");
         return str_name;
     }
 };
@@ -998,7 +998,7 @@ TEST_P(zgemmUkrNat, MicroKernelTest)
     gtint_t k      = std::get<0>(GetParam());                               // dimension k
     T alpha        = std::get<1>(GetParam());                               // alpha
     T beta         = std::get<2>(GetParam());                               // beta
-    char storage   = std::get<3>(GetParam());                               // indicates storage of all matrix operands
+    char storageC  = std::get<3>(GetParam());                               // indicates storage of all matrix operands
     // Fix m and n to MR and NR respectively.
     gtint_t m = std::get<4>(GetParam());                                    // m
     gtint_t n = std::get<5>(GetParam());                                    // n
@@ -1020,7 +1020,7 @@ TEST_P(zgemmUkrNat, MicroKernelTest)
         thresh = (3*k+1)*testinghelpers::getEpsilon<T>();
         //thresh = (4*k+1)*testinghelpers::getEpsilon<T>();
 
-    test_gemmnat_ukr(storage, m, n, k, alpha, beta, thresh, kern_ptr, is_memory_test);
+    test_gemmnat_ukr(storageC, m, n, k, alpha, beta, thresh, kern_ptr, is_memory_test);
 }// end of function
 
 class zgemmUkrNativePrint {
@@ -1030,11 +1030,11 @@ public:
         gtint_t k       = std::get<0>(str.param);
         dcomplex alpha  = std::get<1>(str.param);
         dcomplex beta   = std::get<2>(str.param);
-        char storage    = std::get<3>(str.param);
+        char storageC   = std::get<3>(str.param);
         bool is_memory_test  = std::get<7>(str.param);
         std::string str_name ;
 
-        str_name = str_name + "StorageOfCMatrix_" + storage;
+        str_name += "_storC_" + std::string(&storageC, 1);
         str_name += "_k_" + std::to_string(k);
         str_name += "_alpha_" + testinghelpers::get_value_string(alpha);
         str_name += "_beta_" + testinghelpers::get_value_string(beta);

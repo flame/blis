@@ -75,19 +75,19 @@ public:
         double alpha    = std::get<3>(str.param);
         double beta     = std::get<4>(str.param);
         char storageC    = std::get<5>(str.param);
-        char trnsa       = std::get<8>(str.param);
-        char trnsb       = std::get<9>(str.param);
+        char transa      = std::get<8>(str.param);
+        char transb      = std::get<9>(str.param);
         bool memory_test       = std::get<11>(str.param);
 
         std::string str_name;
-        str_name = str_name + "_" + trnsa;
-        str_name = str_name + "_" + trnsb;
+        str_name += "_storC_" + std::string(&storageC, 1);
+        str_name += "_transa_" + std::string(&transa, 1);
+        str_name += "_transb_" + std::string(&transb, 1);
         str_name += "_m_" + std::to_string(m);
         str_name += "_n_" + std::to_string(n);
         str_name += "_k_" + std::to_string(k);
         str_name += "_alpha_" + testinghelpers::get_value_string(alpha);
         str_name += "_beta_" + testinghelpers::get_value_string(beta);
-        str_name = str_name + "_" + storageC;
         str_name += ( memory_test ) ? "_mem_test_enabled" : "_mem_test_disabled";
 
         return str_name;
@@ -273,13 +273,13 @@ TEST_P(dgemmUkrNat, native_kernel_testing)
     gtint_t k      = std::get<0>(GetParam());  // dimension k
     T alpha        = std::get<1>(GetParam());  // alpha
     T beta         = std::get<2>(GetParam());  // beta
-    char storage   = std::get<3>(GetParam());  // indicates storage of all matrix operands
+    char storageC  = std::get<3>(GetParam());  // indicates storage of all matrix operands
     // Fix m and n to MR and NR respectively.
     gtint_t m = std::get<4>(GetParam());
     gtint_t n = std::get<5>(GetParam());
     dgemm_ukr_ft kern_ptr = std::get<6>(GetParam());
     bool memory_test = std::get<7>(GetParam());
-    test_gemmnat_ukr(storage, m, n, k, alpha, beta, kern_ptr, memory_test);
+    test_gemmnat_ukr(storageC, m, n, k, alpha, beta, kern_ptr, memory_test);
 }// end of function
 
 
@@ -291,14 +291,14 @@ public:
         gtint_t k       = std::get<0>(str.param);
         double alpha    = std::get<1>(str.param);
         double beta     = std::get<2>(str.param);
-        char storage    = std::get<3>(str.param);
+        char storageC   = std::get<3>(str.param);
         bool memory_test = std::get<7>(str.param);
 
         std::string str_name;
+        str_name += "_storC_" + std::string(&storageC, 1);
         str_name += "_k_" + std::to_string(k);
-               str_name += "_alpha_" + testinghelpers::get_value_string(alpha);;
+        str_name += "_alpha_" + testinghelpers::get_value_string(alpha);;
         str_name += "_beta_" + testinghelpers::get_value_string(beta);;
-        str_name = str_name + "_storage_" + storage;
         str_name += ( memory_test ) ? "_mem_test_enabled" : "_mem_test_disabled";
 
         return str_name;
@@ -387,13 +387,13 @@ TEST_P(dgemmUkrk1, k1_kernel_testing)
     gtint_t k      = 1;
     T alpha        = std::get<0>(GetParam());  // alpha
     T beta         = std::get<1>(GetParam());  // beta
-    char storage   = std::get<2>(GetParam());  // indicates storage of all matrix operands
+    char storageC  = std::get<2>(GetParam());  // indicates storage of all matrix operands
     // Fix m and n to MR and NR respectively.
     gtint_t m = std::get<3>(GetParam());
     gtint_t n = std::get<4>(GetParam());
     gemm_k1_kernel kern_ptr = std::get<5>(GetParam());
     bool memory_test = std::get<6>(GetParam());
-    test_gemmk1_ukr(kern_ptr, m, n, k, storage, alpha, beta, memory_test);
+    test_gemmk1_ukr(kern_ptr, m, n, k, storageC, alpha, beta, memory_test);
 }// end of function
 
 
@@ -405,18 +405,18 @@ public:
         gtint_t k       = 1;
         double alpha    = std::get<0>(str.param);
         double beta     = std::get<1>(str.param);
-        char storage    = std::get<2>(str.param);
+        char storageC   = std::get<2>(str.param);
         gtint_t m       = std::get<3>(str.param);
         gtint_t n       = std::get<4>(str.param);
         bool memory_test = std::get<6>(str.param);
 
         std::string str_name;
+        str_name += "_storC_" + std::string(&storageC, 1);
+        str_name += "_m_" + std::to_string(m);
+        str_name += "_n_" + std::to_string(n);
         str_name += "_k_" + std::to_string(k);
         str_name += "_alpha_" + testinghelpers::get_value_string(alpha);
         str_name += "_beta_" + testinghelpers::get_value_string(beta);
-        str_name += "_m_" + std::to_string(m);
-        str_name += "_n_" + std::to_string(n);
-        str_name = str_name + "_" + storage;
         str_name += ( memory_test ) ? "_mem_test_enabled" : "_mem_test_disabled";
 
         return str_name;
@@ -477,13 +477,13 @@ TEST_P(dgemmSmallUkernel, gemm_small)
     gtint_t k      = std::get<2>(GetParam());      // dimension k
     T alpha        = std::get<3>(GetParam());      // alpha
     T beta         = std::get<4>(GetParam());      // beta
-    char storage   = std::get<5>(GetParam());      // indicates storage of all matrix operands
+    char storageC  = std::get<5>(GetParam());      // indicates storage of all matrix operands
     bool memory_test   = std::get<6>(GetParam());  // memory test enable or disable
 
 
-    gtint_t lda = testinghelpers::get_leading_dimension( storage, 'n', m, k, 0 );
-    gtint_t ldb = testinghelpers::get_leading_dimension( storage, 'n', k, n, 0 );
-    gtint_t ldc = testinghelpers::get_leading_dimension( storage, 'n', m, n, 0 );
+    gtint_t lda = testinghelpers::get_leading_dimension( storageC, 'n', m, k, 0 );
+    gtint_t ldb = testinghelpers::get_leading_dimension( storageC, 'n', k, n, 0 );
+    gtint_t ldc = testinghelpers::get_leading_dimension( storageC, 'n', m, n, 0 );
 
     const num_t dt = BLIS_DOUBLE;
 
@@ -589,10 +589,10 @@ TEST_P(dgemmSmallUkernel, gemm_small)
             //thresh = (4*k+1)*testinghelpers::getEpsilon<T>();
 
         // call reference implementation
-        testinghelpers::ref_gemm<T>( storage, 'n', 'n', m, n, k, alpha,
+        testinghelpers::ref_gemm<T>( storageC, 'n', 'n', m, n, k, alpha,
                                     a, lda, b, ldb, beta, cref, ldc);
         // Check component-wise error
-        computediff<T>( "C", storage, m, n, c, cref, ldc, thresh );
+        computediff<T>( "C", storageC, m, n, c, cref, ldc, thresh );
 
         free(cref);
     }
@@ -601,9 +601,9 @@ TEST_P(dgemmSmallUkernel, gemm_small)
         //----------------------------------------------------------
         //         Initialize matrics with random numbers
         //----------------------------------------------------------
-        std::vector<T> a = testinghelpers::get_random_matrix<T>( -2, 8, storage, 'n', m, k, lda );
-        std::vector<T> b = testinghelpers::get_random_matrix<T>( -5, 2, storage, 'n', k, n, ldb );
-        std::vector<T> c = testinghelpers::get_random_matrix<T>( -3, 5, storage, 'n', m, n, ldc );
+        std::vector<T> a = testinghelpers::get_random_matrix<T>( -2, 8, storageC, 'n', m, k, lda );
+        std::vector<T> b = testinghelpers::get_random_matrix<T>( -5, 2, storageC, 'n', k, n, ldb );
+        std::vector<T> c = testinghelpers::get_random_matrix<T>( -3, 5, storageC, 'n', m, n, ldc );
 
         std::vector<T> c_ref(c);
 
@@ -638,10 +638,10 @@ TEST_P(dgemmSmallUkernel, gemm_small)
             //thresh = (4*k+1)*testinghelpers::getEpsilon<T>();
 
         // call reference implementation
-        testinghelpers::ref_gemm<T>( storage, 'n', 'n', m, n, k, alpha,
+        testinghelpers::ref_gemm<T>( storageC, 'n', 'n', m, n, k, alpha,
                                     a.data(), lda, b.data(), ldb, beta, c_ref.data(), ldc);
         // Check component-wise error
-        computediff<T>( "C", storage, m, n, c.data(), c_ref.data(), ldc, thresh );
+        computediff<T>( "C", storageC, m, n, c.data(), c_ref.data(), ldc, thresh );
     }
 
 }// end of function
@@ -657,16 +657,16 @@ public:
         gtint_t k       = std::get<2>(str.param);
         double alpha    = std::get<3>(str.param);
         double beta     = std::get<4>(str.param);
-        char storage    = std::get<5>(str.param);
+        char storageC   = std::get<5>(str.param);
         bool memory_test    = std::get<6>(str.param);
 
         std::string str_name;
+        str_name += "_storC_" + std::string(&storageC, 1);
         str_name += "_m_" + std::to_string(m);
         str_name += "_n_" + std::to_string(n);
         str_name += "_k_" + std::to_string(k);
         str_name += "_alpha_" + testinghelpers::get_value_string(alpha);
         str_name += "_beta_" + testinghelpers::get_value_string(beta);
-        str_name = str_name + "_" + storage;
         str_name += ( memory_test ) ? "_mem_test_enabled" : "_mem_test_disabled";
 
         return str_name;

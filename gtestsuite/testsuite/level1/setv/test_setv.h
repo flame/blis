@@ -86,7 +86,7 @@ public:
 
         std::string str_name = API_PRINT;
         str_name += "_n_" + std::to_string(n);
-        str_name += "_conjalpha_" + conjalpha;
+        str_name += "_conjalpha_" + std::string(&conjalpha, 1);
         str_name += "_incx_" + testinghelpers::get_value_string(incx);
         return str_name;
     }

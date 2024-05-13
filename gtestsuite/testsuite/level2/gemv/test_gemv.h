@@ -168,9 +168,9 @@ public:
         bool is_memory_test = std::get<10>(str.param);
 
         std::string str_name = API_PRINT;
-        str_name += "_stor_" + storage;
-        str_name += "_transa_" + transa;
-        str_name += "_conjx_" + conjx;
+        str_name += "_stor_" + std::string(&storage, 1);
+        str_name += "_transa_" + std::string(&transa, 1);
+        str_name += "_conjx_" + std::string(&conjx, 1);
         str_name += "_m_" + std::to_string(m);
         str_name += "_n_" + std::to_string(n);
         str_name += "_incx_" + testinghelpers::get_value_string(incx);
@@ -203,9 +203,9 @@ public:
         gtint_t ld_inc      = std::get<12>(str.param);
 
         std::string str_name = API_PRINT;
-        str_name += "_stor_" + storage;
-        str_name += "_transa_" + transa;
-        str_name += "_conjx_" + conjx;
+        str_name += "_stor_" + std::string(&storage, 1);
+        str_name += "_transa_" + std::string(&transa, 1);
+        str_name += "_conjx_" + std::string(&conjx, 1);
         str_name += "_m_" + std::to_string(m);
         str_name += "_n_" + std::to_string(n);
         str_name += "_incx_" + testinghelpers::get_value_string(incx);

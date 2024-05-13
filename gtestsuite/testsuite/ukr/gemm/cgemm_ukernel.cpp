@@ -61,13 +61,13 @@ TEST_P(cgemmUkrSUP, FunctionalTest)
     gtint_t k      = std::get<2>(GetParam());                               // dimension k
     T alpha        = std::get<3>(GetParam());                               // alpha
     T beta         = std::get<4>(GetParam());                               // beta
-    char storage   = std::get<5>(GetParam());                               // storage scheme for C matrix
+    char storageC  = std::get<5>(GetParam());                               // storage scheme for C matrix
     cgemmsup_ker_ft kern_ptr = std::get<6>(GetParam());                     // pointer to the gemm kernel
     char transa    = std::get<7>(GetParam());                               // transa
-    char transb    = (storage == 'r')? 'n' : 't';                           // transb
+    char transb    = (storageC == 'r')? 'n' : 't';                          // transb
     bool is_memory_test = std::get<8>(GetParam());                          // is_memory_test
     double thresh = 40 * ((std::max)(k,gtint_t(1))) * testinghelpers::getEpsilon<T>(); // Set the threshold for the errors
-    test_complex_gemmsup_ukr<scomplex, cgemmsup_ker_ft> (storage, transa, transb, m, n, k, alpha, beta, thresh, kern_ptr, is_memory_test);
+    test_complex_gemmsup_ukr<scomplex, cgemmsup_ker_ft> (storageC, transa, transb, m, n, k, alpha, beta, thresh, kern_ptr, is_memory_test);
 }// end of function
 
 class cgemmUkrSUPPrint {
@@ -80,20 +80,20 @@ public:
         gtint_t k           = std::get<2>(str.param);
         scomplex alpha      = std::get<3>(str.param);
         scomplex beta       = std::get<4>(str.param);
-        char storage        = std::get<5>(str.param);
-        char trnsa          = std::get<7>(str.param);
-        char trnsb          = (storage == 'r')? 'n' : 't';
+        char storageC       = std::get<5>(str.param);
+        char transa         = std::get<7>(str.param);
+        char transb         = (storageC == 'r')? 'n' : 't';
         bool is_memory_test = std::get<8>(str.param);
         std::string str_name ;
-        str_name = str_name + "StorageOfMatrix_" + storage;
-        str_name = str_name + "_transA_" + trnsa;
-        str_name = str_name + "_transB_" + trnsb;
+        str_name += "_storC_" + std::string(&storageC, 1);
+        str_name += "_transa_" + std::string(&transa, 1);
+        str_name += "_transb_" + std::string(&transb, 1);
         str_name += "_m_" + std::to_string(m);
         str_name += "_n_" + std::to_string(n);
         str_name += "_k_" + std::to_string(k);
         str_name += "_alpha_" + testinghelpers::get_value_string(alpha);
         str_name += "_beta_" + testinghelpers::get_value_string(beta);
-         str_name = str_name + (is_memory_test ? "_mem_test_enabled" : "_mem_test_disabled");
+        str_name = str_name + (is_memory_test ? "_mem_test_enabled" : "_mem_test_disabled");
         return str_name;
     }
 };
@@ -636,7 +636,7 @@ TEST_P(cgemmUkrNat, FunctionalTest)
     gtint_t k      = std::get<0>(GetParam());                               // dimension k
     T alpha        = std::get<1>(GetParam());                               // alpha
     T beta         = std::get<2>(GetParam());                               // beta
-    char storage   = std::get<3>(GetParam());                               // indicates storage of all matrix operands
+    char storageC  = std::get<3>(GetParam());                               // indicates storage of all matrix operands
     // Fix m and n to MR and NR respectively.
     gtint_t m = std::get<4>(GetParam());                                    // m
     gtint_t n = std::get<5>(GetParam());                                    // n
@@ -644,7 +644,7 @@ TEST_P(cgemmUkrNat, FunctionalTest)
     bool is_memory_test   = std::get<7>(GetParam());                        // is_memory_test
     double thresh = 20 * ((std::max)(k,gtint_t(1))) * testinghelpers::getEpsilon<T>(); // Set the threshold for the errors
 
-    test_gemmnat_ukr(storage, m, n, k, alpha, beta, thresh, kern_ptr, is_memory_test);
+    test_gemmnat_ukr(storageC, m, n, k, alpha, beta, thresh, kern_ptr, is_memory_test);
 }// end of function
 
 class cgemmukrnatTestPrint {
@@ -654,11 +654,10 @@ public:
         gtint_t k       = std::get<0>(str.param);
         scomplex alpha  = std::get<1>(str.param);
         scomplex beta   = std::get<2>(str.param);
-        char storage    = std::get<3>(str.param);
+        char storageC   = std::get<3>(str.param);
         bool is_memory_test  = std::get<7>(str.param);
         std::string str_name ;
-
-        str_name = str_name + "StorageOfCMatrix_" + storage;
+        str_name += "_storC_" + std::string(&storageC, 1);
         str_name += "_k_" + std::to_string(k);
         str_name += "_alpha_" + testinghelpers::get_value_string(alpha);
         str_name += "_beta_" + testinghelpers::get_value_string(beta);

@@ -102,7 +102,7 @@ INSTANTIATE_TEST_SUITE_P(
                                 dcomplex{ 7.3,  5.1}
             )
         ),
-        ::scalvGenericPrint<dcomplex>()
+        (::scalvGenericPrint<dcomplex, dcomplex>())
     );
 
 
@@ -132,5 +132,5 @@ INSTANTIATE_TEST_SUITE_P(
                                 dcomplex{ 7.3,  5.1}
             )
         ),
-        ::scalvGenericPrint<dcomplex>()
+        (::scalvGenericPrint<dcomplex, dcomplex>())
     );

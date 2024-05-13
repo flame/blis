@@ -146,9 +146,9 @@ public:
         gtint_t ld_inc = std::get<8>(str.param);
 
         std::string str_name = API_PRINT;
-        str_name += "_stor_" + storage;
-        str_name += "_conjx_" + conjx;
-        str_name += "_conjy_" + conjy;
+        str_name += "_stor_" + std::string(&storage, 1);
+        str_name += "_conjx_" + std::string(&conjx, 1);
+        str_name += "_conjy_" + std::string(&conjy, 1);
         str_name += "_m_" + std::to_string(m);
         str_name += "_n_" + std::to_string(n);
         str_name += "_incx_" + testinghelpers::get_value_string(incx);
@@ -184,17 +184,10 @@ public:
 
         gtint_t lda = testinghelpers::get_leading_dimension( storage, 'n', m, n, ld_inc );
 
-#ifdef TEST_BLAS
-        std::string str_name = "blas_";
-#elif TEST_CBLAS
-        std::string str_name = "cblas_";
-#else  //#elif TEST_BLIS_TYPED
-        std::string str_name = "blis_";
-#endif
-
-        str_name += "_stor_" + storage;
-        str_name += "_conjx" + conjx;
-        str_name += "_conjy" + conjy;
+        std::string str_name = API_PRINT;
+        str_name += "_stor_" + std::string(&storage, 1);
+        str_name += "_conjx_" + std::string(&conjx, 1);
+        str_name += "_conjy_" + std::string(&conjy, 1);
         str_name += "_m_" + std::to_string(m);
         str_name += "_n_" + std::to_string(n);
         str_name += "_incx_" + testinghelpers::get_value_string(incx);

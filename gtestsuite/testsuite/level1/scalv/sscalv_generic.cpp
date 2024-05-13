@@ -87,7 +87,7 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(gtint_t(1)),                                   // stride size for x
             ::testing::Values(float(3.0), float(-5.0))                       // alpha
         ),
-        ::scalvGenericPrint<float>()
+        (::scalvGenericPrint<float, float>())
     );
 
 #ifdef TEST_BLIS_TYPED
@@ -103,7 +103,7 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(gtint_t(1)),                                   // stride size for x
             ::testing::Values(float(9.0))                                    // alpha
         ),
-        ::scalvGenericPrint<float>()
+        (::scalvGenericPrint<float, float>())
     );
 #endif
 
@@ -119,7 +119,7 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(gtint_t(2), gtint_t(11)),                      //(gtint_t(-5), gtint_t(-17)) // stride size for x
             ::testing::Values(float(2.0))                                    // alpha
         ),
-        ::scalvGenericPrint<float>()
+        (::scalvGenericPrint<float, float>())
     );
 
 
@@ -136,6 +136,6 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(gtint_t(-2), gtint_t(-1)),                     // stride size for x
             ::testing::Values(3)                                             // alpha
         ),
-        ::scalvGenericPrint<float>()
+        (::scalvGenericPrint<float, float>())
     );
 #endif

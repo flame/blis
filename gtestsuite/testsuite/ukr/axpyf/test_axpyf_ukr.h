@@ -175,28 +175,15 @@ public:
         bool is_memory_test = std::get<10>(str.param);
 
         std::string str_name = "";
-        if constexpr (std::is_same<T, float>::value)
-            str_name += "saxpyf_ukr";
-        
-        else if constexpr (std::is_same<T, double>::value)
-            str_name += "daxpyf_ukr";
-        
-        else if constexpr (std::is_same<T, scomplex>::value)
-            str_name += "caxpyf_ukr";
-        
-        else if constexpr (std::is_same<T, dcomplex>::value)
-            str_name += "zaxpyf_ukr";
-
-
-        str_name += "m" + std::to_string(m);
-        str_name += "_bf" + std::to_string(b_fuse);
-        str_name += ( conjA == 'n' )? "_noconjA" : "_conjA";
-        str_name += ( conjx == 'n' )? "_noconjx" : "_conjx";
+        str_name += "_m_" + std::to_string(m);
+        str_name += "_bf_" + std::to_string(b_fuse);
+        str_name += "_conja_" + std::string(&conjA, 1);
+        str_name += "_conjx_" + std::string(&conjx, 1);
         str_name += "_alpha_" + testinghelpers::get_value_string(alpha);
-        str_name += "_inca" + (( inca >= 0) ? std::to_string(inca) : "m" + std::to_string(std::abs(inca)));
-        str_name += "_ldainc" + (( lda >= 0) ? std::to_string(lda) : "m" + std::to_string(std::abs(lda)));
-        str_name += "_incx" + (( incx >= 0) ? std::to_string(incx) : "m" + std::to_string(std::abs(incx)));
-        str_name += "_incy" + (( incy >= 0) ? std::to_string(incy) : "m" + std::to_string(std::abs(incy)));
+        str_name += "_inca_" + testinghelpers::get_value_string(inca);
+        str_name += "_ldainc_" + testinghelpers::get_value_string(lda);
+        str_name += "_incx_" + testinghelpers::get_value_string(incx);
+        str_name += "_incy_" + testinghelpers::get_value_string(incy);
         str_name += ( is_memory_test ) ? "_mem_test_enabled" : "_mem_test_disabled";
         return str_name;
     }

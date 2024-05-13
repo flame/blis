@@ -82,7 +82,7 @@ public:
 
         std::string str_name = API_PRINT;
         str_name += "_n_" + std::to_string(n);
-        str_name += "_conjx_" + conjx;
+        str_name += "_conjx_" + std::string(&conjx, 1);
         str_name += "_incx_" + testinghelpers::get_value_string(incx);
         str_name += "_incy_" + testinghelpers::get_value_string(incy);
         return str_name;

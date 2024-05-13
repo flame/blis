@@ -92,7 +92,7 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(gtint_t(1)),                                   // stride size for x
             ::testing::Values(scomplex{2.0, -1.0}, scomplex{-2.0, 3.0})      // alpha
         ),
-        ::scalvGenericPrint<scomplex>()
+        (::scalvGenericPrint<scomplex, scomplex>())
     );
 
 
@@ -112,7 +112,7 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(gtint_t(2), gtint_t(11)),                      //(gtint_t(-5), gtint_t(-17)) // stride size for x
             ::testing::Values(scomplex{4.0, 3.1})                            // alpha
         ),
-        ::scalvGenericPrint<scomplex>()
+        (::scalvGenericPrint<scomplex, scomplex>())
     );
 
 #ifndef TEST_BLIS_TYPED
@@ -128,6 +128,6 @@ INSTANTIATE_TEST_SUITE_P(
             ::testing::Values(gtint_t(-2), gtint_t(-1)),                     // stride size for x
             ::testing::Values(scomplex{4.0, 3.1})                            // alpha
         ),
-        ::scalvGenericPrint<scomplex>()
+        (::scalvGenericPrint<scomplex, scomplex>())
     );
 #endif

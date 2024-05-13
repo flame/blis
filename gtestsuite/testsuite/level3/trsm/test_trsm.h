@@ -277,11 +277,11 @@ public:
         gtint_t ldb_inc = std::get<9>(str.param);
 
         std::string str_name = API_PRINT;
-        str_name += "_stor_" + storage;
-        str_name += "_side_" + side;
-        str_name += "_uploa_" + uploa;
-        str_name += "_transa_" + transa;
-        str_name += "_diag_" + diaga;
+        str_name += "_stor_" + std::string(&storage, 1);
+        str_name += "_side_" + std::string(&side, 1);
+        str_name += "_uploa_" + std::string(&uploa, 1);
+        str_name += "_transa_" + std::string(&transa, 1);
+        str_name += "_diag_" + std::string(&diaga, 1);
         str_name += "_m_" + std::to_string(m);
         str_name += "_n_" + std::to_string(n);
         str_name += "_alpha_" + testinghelpers::get_value_string(alpha);
@@ -314,11 +314,11 @@ public:
         EVT_TYPE b_encode = std::get<11>(str.param);
         
         std::string str_name = API_PRINT;
-        str_name += "_stor_" + storage;
-        str_name += "_side_" + side;
-        str_name += "_uploa_" + uploa;
-        str_name += "_transa_" + transa;
-        str_name += "_diag_" + diaga;
+        str_name += "_stor_" + std::string(&storage, 1);
+        str_name += "_side_" + std::string(&side, 1);
+        str_name += "_uploa_" + std::string(&uploa, 1);
+        str_name += "_transa_" + std::string(&transa, 1);
+        str_name += "_diag_" + std::string(&diaga, 1);
         str_name += "_m_" + std::to_string(m);
         str_name += "_n_" + std::to_string(n);
         str_name += "_alpha_" + testinghelpers::get_value_string(alpha);

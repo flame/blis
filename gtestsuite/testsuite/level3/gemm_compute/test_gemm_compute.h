@@ -111,11 +111,11 @@ public:
         gtint_t ldc_inc = std::get<12>(str.param);
         
         std::string str_name = API_PRINT;
-        str_name += "_stor_" + storage;
-        str_name += "_transa_" + transa;
-        str_name += "_transb_" + transb;
-        str_name += "_pka_" + pka;
-        str_name += "_pkb_" + pkb;
+        str_name += "_stor_" + std::string(&storage, 1);
+        str_name += "_transa_" + std::string(&transa, 1);
+        str_name += "_transb_" + std::string(&transb, 1);
+        str_name += "_pka_" + std::string(&pka, 1);
+        str_name += "_pkb_" + std::string(&pkb, 1);
         str_name += "_m_" + std::to_string(m);
         str_name += "_n_" + std::to_string(n);
         str_name += "_k_" + std::to_string(k);

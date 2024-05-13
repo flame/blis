@@ -146,22 +146,9 @@ public:
         bool is_memory_test = std::get<5>(str.param);
 
         std::string str_name = "";
-        if constexpr (std::is_same<T, float>::value)
-            str_name += "ssetv_ukr";
-
-        else if constexpr (std::is_same<T, double>::value)
-            str_name += "dsetv_ukr";
-
-        else if constexpr (std::is_same<T, scomplex>::value)
-            str_name += "csetv_ukr";
-
-        else if constexpr (std::is_same<T, dcomplex>::value)
-            str_name += "zsetv_ukr";
-
-        str_name += "_n" + std::to_string(n);
-        str_name += "_conjalpha" + std::string(&conjalpha, 1);
-        std::string incx_str = ( incx >= 0) ? std::to_string(incx) : "m" + std::to_string(std::abs(incx));
-        str_name += "_incx" + incx_str;
+        str_name += "_n_" + std::to_string(n);
+        str_name += "_conjalpha_" + std::string(&conjalpha, 1);
+        str_name += "_incx_" + testinghelpers::get_value_string(incx);
         str_name += "_alpha_" + testinghelpers::get_value_string(alpha);
         str_name += ( is_memory_test ) ? "_mem_test_enabled" : "_mem_test_disabled";
         return str_name;

@@ -286,9 +286,9 @@ public:
         gtint_t ldc_inc = std::get<10>(str.param);
 
         std::string str_name = API_PRINT;
-        str_name += "_stor_" + storage;
-        str_name += "_transa_" + transa;
-        str_name += "_transb_" + transb;
+        str_name += "_stor_" + std::string(&storage, 1);
+        str_name += "_transa_" + std::string(&transa, 1);
+        str_name += "_transb_" + std::string(&transb, 1);
         str_name += "_m_" + std::to_string(m);
         str_name += "_n_" + std::to_string(n);
         str_name += "_k_" + std::to_string(k);
@@ -338,9 +338,9 @@ public:
         gtint_t ldc_inc = std::get<19>(str.param);
 
         std::string str_name = API_PRINT;
-        str_name += "_stor_" + storage;
-        str_name += "_transa_" + transa;
-        str_name += "_transb_" + transb;
+        str_name += "_stor_" + std::string(&storage, 1);
+        str_name += "_transa_" + std::string(&transa, 1);
+        str_name += "_transb_" + std::string(&transb, 1);
         str_name += "_m_" + std::to_string(m);
         str_name += "_n_" + std::to_string(n);
         str_name += "_k_" + std::to_string(k);
@@ -390,9 +390,9 @@ class gemmOUTPrint {
         gtint_t ldc = testinghelpers::get_leading_dimension( storage, 'n', m, n, ldc_inc );
 
         std::string str_name = API_PRINT;
-        str_name += "_stor_" + storage;
-        str_name += "_transa_" + transa;
-        str_name += "_transb_" + transb;
+        str_name += "_stor_" + std::string(&storage, 1);
+        str_name += "_transa_" + std::string(&transa, 1);
+        str_name += "_transb_" + std::string(&transb, 1);
         std::string over_under_str = ( over_under > 0) ? "underflow": "overflow";
         str_name = str_name + "_" + over_under_str;
         std::string input_range_str = (input_range < 0) ? "within_limit": (input_range > 0) ? "beyond_limit" : "close_to_limit";

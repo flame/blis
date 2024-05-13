@@ -443,20 +443,20 @@ public:
         gtint_t ldb_inc         = std::get<9>(str.param);
         bool is_memory_test     = std::get<10>(str.param);
 
-        std::string res =
-        std::string("_side_") + side
-        + "_diag_" +  diaga
-        + "_uplo_" + uploa
-        + "_trana_" + transa
-        + "_alpha_" + testinghelpers::get_value_string(alpha);
+        std::string str_name = "";
+        str_name += "_side_" + std::string(&side, 1);
+        str_name += "_uplo_" + std::string(&uploa, 1);
+        str_name += "_transa_" + std::string(&transa, 1);
+        str_name += "_diag_" + std::string(&diaga, 1);
+        str_name += "_alpha_" + testinghelpers::get_value_string(alpha);
+        str_name += "_m_" + std::to_string(m);
+        str_name += "_n_" + std::to_string(n);
         gtint_t mn;
         testinghelpers::set_dim_with_side( side, m, n, &mn );
-        res += "_lda_" + std::to_string( lda_inc + mn);
-        res += "_ldb_" + std::to_string( ldb_inc + m)
-        + "_m_" + std::to_string(m)
-        + "_n_" + std::to_string(n);
-        res += is_memory_test ? "_mem_test_enabled" : "_mem_test_disabled";
-        return res;
+        str_name += "_lda_" + std::to_string( lda_inc + mn);
+        str_name += "_ldb_" + std::to_string( ldb_inc + m);
+        str_name += is_memory_test ? "_mem_test_enabled" : "_mem_test_disabled";
+        return str_name;
     }
 };
 
@@ -472,18 +472,21 @@ public:
         gtint_t m               = std::get<4>(str.param);
         gtint_t n               = std::get<5>(str.param);
         gtint_t k               = std::get<6>(str.param);
-        T1  alpha         = std::get<7>(str.param);
+        T1  alpha               = std::get<7>(str.param);
         gtint_t ldc             = std::get<8>(str.param);
         bool is_memory_test     = std::get<9>(str.param);
-        std::string res =
-        std::string("stor_") + storage
-        + "_diag_" +  diaga
-        + "_uplo_" + uploa
-        + "_k_" + std::to_string(k)
-        + "_alpha_" + testinghelpers::get_value_string(alpha);
+
+        std::string str_name = "";
+        str_name += "_stor_" + std::string(&storage, 1);
+        str_name += "_uplo_" + std::string(&uploa, 1);
+        str_name += "_diag_" + std::string(&diaga, 1);
+        str_name += "_alpha_" + testinghelpers::get_value_string(alpha);
+        str_name += "_m_" + std::to_string(m);
+        str_name += "_n_" + std::to_string(n);
+        str_name += "_k_" + std::to_string(k);
         ldc += (storage == 'r' || storage == 'R') ? n : m;
-        res += "_ldc_" + std::to_string(ldc);
-        res += is_memory_test ? "_mem_test_enabled" : "_mem_test_disabled";
-        return res;
+        str_name += "_ldc_" + std::to_string(ldc);
+        str_name += is_memory_test ? "_mem_test_enabled" : "_mem_test_disabled";
+        return str_name;
     }
 };

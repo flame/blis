@@ -115,8 +115,8 @@ public:
 
         std::string str_name = "bli_";
 
-        str_name += "_conja_" + conja;
-        str_name += "_conjx_" + conjx;
+        str_name += "_conja_" + std::string(&conja, 1);
+        str_name += "_conjx_" + std::string(&conjx, 1);
         str_name += "_m_" + std::to_string(m);
         str_name += "_b_" + std::to_string(b);
         str_name += "_alpha_" + testinghelpers::get_value_string(alpha);
