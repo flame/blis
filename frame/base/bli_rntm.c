@@ -2182,13 +2182,6 @@ void bli_nthreads_l1
 
 			break;
 
-		case BLIS_AXPYF_KER:
-
-			// Function for DAXPYF
-			aocl_dynamic_func_l1 = aocl_daxpyf_dynamic;
-
-			break;
-
 		case BLIS_COPYV_KER:
 
 			if ( data_type_a == BLIS_DOUBLE)
@@ -2219,6 +2212,141 @@ void bli_nthreads_l1
 	{
 		// Call the AOCL dynamic logic kernel
 		aocl_dynamic_func_l1
+		(
+			arch_id,
+			n_elem,
+			nt_ideal
+		);
+
+		if (*nt_ideal == 1)
+		{
+			// Return early when the number of threads is 1
+			return;
+		}
+	}
+
+#endif
+	// Initialized to avoid compiler warning
+	rntm_t rntm_local;
+
+	// Initialize a local runtime with global settings.
+	bli_rntm_init_from_global(&rntm_local);
+
+	// Query the total number of threads from the rntm_t object.
+	dim_t nt_rntm = bli_rntm_num_threads(&rntm_local);
+
+	if (nt_rntm <= 0)
+	{
+		// nt is less than one if BLIS manual setting of parallelism
+		// has been used. Parallelism here will be product of values.
+		nt_rntm = bli_rntm_calc_num_threads(&rntm_local);
+	}
+
+#ifdef AOCL_DYNAMIC
+
+	// Calculate the actual number of threads that will be spawned
+	if (*nt_ideal != -1)
+	{
+		// The if block is executed for all Zen architectures
+		*nt_ideal = bli_min(nt_rntm, *nt_ideal);
+	}
+	else
+	{
+		/*
+			For non-Zen architectures and very large sizes,
+			spawn the actual number of threads requested
+		*/
+		*nt_ideal = nt_rntm;
+	}
+
+	/*
+	  When the number of element to be processed is less
+	  than the number of threads spawn n_elem number of threads.
+	*/
+	if (n_elem < *nt_ideal)
+	{
+		*nt_ideal = n_elem;
+	}
+#else
+
+	// Calculate the actual number of threads that will be spawned
+	*nt_ideal = nt_rntm;
+
+#endif
+}
+
+/*
+	Functionality:
+	--------------
+
+	This function does the following:
+	1. Reads the number of threads requested by the user from the rntm variable
+	2. Acts as the gateway to the AOCL dynamic logic if AOCL dynamic is enabled
+	   and alters the count of the number of threads accordingly
+
+	Function signature
+	-------------------
+
+	This function takes the following input:
+
+	* 'ker_id' - ID of kernel invoking this function
+	* 'datatype_a' - Datatype 1 of kernel
+	* 'datatype_b' - Datatype 2 of kernel
+	* 'arch_id' - Architecture ID of the system (copy of BLIS global arch id)
+	* 'n_elem' - Number of elements in the vector
+	* 'nt_ideal' - Ideal number of threads
+
+	Exception
+	----------
+
+	None
+*/
+void bli_nthreads_l1f
+	 (
+       l1fkr_t  ker_id,
+       num_t    data_type_a,
+       num_t    data_type_b,
+       arch_t   arch_id,
+       dim_t    n_elem,
+       dim_t*   nt_ideal
+	 )
+{
+#ifdef AOCL_DYNAMIC
+	/*
+		This code sections dispatches the AOCL dynamic logic kernel for
+		L1 APIs based on the kernel ID and the data type.
+	*/
+	// Function pointer to AOCL Dynamic logic kernel
+	void (*aocl_dynamic_func_l1f)(arch_t, dim_t, dim_t* ) = NULL;
+
+	// Pick the aocl dynamic thread decision kernel based on the kernel ID
+	switch (ker_id)
+	{
+		case BLIS_AXPYF_KER:
+
+			if ( data_type_a == BLIS_DOUBLE )
+			{
+				// Function for DAXPYF
+				aocl_dynamic_func_l1f = aocl_daxpyf_dynamic;
+			}
+			break;
+
+		default:
+			/*
+				For kernels that do no have AOCL dynamic logic,
+				use the number of threads requested by the user.
+			*/
+			*nt_ideal = -1;
+	}
+
+	/*
+		For APIs that do not have AOCL dynamic
+		logic, aocl_dynamic_func_l1f will be NULL.
+	*/
+	if( aocl_dynamic_func_l1f != NULL)
+	{
+		// Call the AOCL dynamic logic kernel
+		aocl_dynamic_func_l1f
 		(
 			arch_id,
 			n_elem,

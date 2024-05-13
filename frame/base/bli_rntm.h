@@ -113,6 +113,16 @@ void bli_nthreads_l1
        dim_t*  nt_ideal
      );
 
+void bli_nthreads_l1f
+     (
+       l1fkr_t ker_id,
+       num_t   data_type_a,
+       num_t   data_type_b,
+       arch_t  arch_id,
+       dim_t   n_elem,
+       dim_t*  nt_ideal
+     );
+
 // Runtime object type (defined in bli_type_defs.h)
 
 /*
