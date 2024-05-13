@@ -93,8 +93,20 @@ extern BLIS_THREAD_LOCAL rntm_t tl_rntm;
     bool print_on_error = bli_rntm_print_on_error( &global_rntm );
     if (print_on_error)
     {
-        printf("** On entry to %6s, parameter number %2i had an illegal value\n",
-            srname, (int)*info);
+        // The check for -10 is specific to xerbla_()'s use-case in ?imatcopy_() APIs.
+        // The definition of an info value for memory failure could be abstracted
+        // to a higher layer, if needed. This would enable us to reuse xerbla_()
+        // with this specific info value, in case of encountering a memory allocation
+        // failure.
+        if( *info == -10 )
+        {
+          printf("** On entry to %6s, memory allocation failed\n", srname);
+        }
+        else
+        {
+          printf("** On entry to %6s, parameter number %2i had an illegal value\n",
+              srname, (int)*info);
+        }
     }
 
     bool stop_on_error = bli_rntm_stop_on_error( &global_rntm );
