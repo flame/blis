@@ -411,7 +411,7 @@ void bli_cntx_init_zen4( cntx_t* cntx )
 	  BLIS_RRC, BLIS_DCOMPLEX, bli_zgemmsup_rd_zen_asm_3x4m, TRUE,
 	  BLIS_RCR, BLIS_DCOMPLEX, bli_zgemmsup_rv_zen4_asm_4x4m, TRUE,
 	  BLIS_RCC, BLIS_DCOMPLEX, bli_zgemmsup_rv_zen4_asm_4x4m, TRUE,
-	  BLIS_CRR, BLIS_DCOMPLEX, bli_zgemmsup_rv_zen_asm_3x4m, TRUE,
+	  BLIS_CRR, BLIS_DCOMPLEX, bli_zgemmsup_rv_zen4_asm_4x4m, TRUE,
 	  BLIS_CRC, BLIS_DCOMPLEX, bli_zgemmsup_rd_zen_asm_3x4n, TRUE,
 	  BLIS_CCR, BLIS_DCOMPLEX, bli_zgemmsup_rv_zen4_asm_4x4m, TRUE,
 	  BLIS_CCC, BLIS_DCOMPLEX, bli_zgemmsup_rv_zen4_asm_4x4m, TRUE,

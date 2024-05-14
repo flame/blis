@@ -2856,17 +2856,14 @@ INSERT_GENTFUNC_U_SDC( gemmtsup, ref_var2m )
 /* AVX512 Kernel - gemmsup_rv_zen4_asm_4x4m                    */
 /* Check if AVX512 kernel can be called for certain conditions */
 /* 1. Architecture: ZEN4 or ZEN5                               */
-/* 2. Storage: If it is CRC, CRC and RRC format(AVX2 kernel)   */ 
+/* 2. Storage: If it is CRC, RRC AVX2 code path is invoked     */
 /*              for other storage formats AVX512 will be called*/
+/* 3. BlockSize: Kernel is optimised for MR=NR=4               */
 /***************************************************************/
 #if defined (BLIS_KERNELS_ZEN4)
 
 #define LOWER_TRIANGLE_OPTIMIZATION_DCOMPLEX() \
-	if(( \
-		(stor_id == BLIS_RRR) || (stor_id == BLIS_RCR) \
-	    || (stor_id == BLIS_RCC) || (stor_id == BLIS_CCR) \
-		|| (stor_id == BLIS_CCC)) && \
-		((MR == 4) && (NR == 4)) ) \
+	if ((MR == 4) && (NR == 4) && (stor_id != BLIS_CRC) && (stor_id != BLIS_RRC)) \
 	{ \
 		bli_zgemmsup_rv_zen4_asm_4x4m_lower \
 			( \
@@ -2887,7 +2884,27 @@ INSERT_GENTFUNC_U_SDC( gemmtsup, ref_var2m )
 	/* call the regular kernel for non applicable cases */ \
 	else
 
-#define UPPER_TRIANGLE_OPTIMIZATION_DCOMPLEX()
+#define UPPER_TRIANGLE_OPTIMIZATION_DCOMPLEX() \
+	if ((MR == 4) && (NR == 4) && (stor_id != BLIS_CRC) && (stor_id != BLIS_RRC)) \
+		{ \
+			bli_zgemmsup_rv_zen4_asm_4x4m_upper \
+				( \
+					conja, \
+					conjb, \
+					mr_cur, \
+					nr_cur, \
+					kc_cur, \
+					(dcomplex*) alpha_cast, \
+					(dcomplex*) a_ir, rs_a_use, cs_a_use, \
+					(dcomplex*) b_jr,     rs_b_use, cs_b_use, \
+					(dcomplex*) beta_use, \
+					(dcomplex*) c_ir,     rs_c,     cs_c, \
+					&aux, \
+					cntx \
+				); \
+		} \
+		/* call the regular kernel for non applicable cases */ \
+		else
 
 #else
 	#define LOWER_TRIANGLE_OPTIMIZATION_DCOMPLEX()

@@ -149,8 +149,8 @@
         for(dim_t ii = 0; ii < N; ++ii) \
         { \
             SCALE_ALPHA_COL(M) \
-            SCALE_BETA_M_MASK_COL(M) \
-            _mm512_mask_storeu_pd(c + cs_c * ii, (1 << (M*2)) - 1, c_reg[ii]); \
+            SCALE_BETA(mask_n, cs_c) \
+            _mm512_mask_storeu_pd(c + cs_c * ii, mask_n, c_reg[ii]); \
         } \
     } \
 
@@ -172,7 +172,7 @@
     for(dim_t ii = 0; ii < N; ++ii) \
     { \
         SCALE_ALPHA_COL(M) \
-        _mm512_mask_storeu_pd(c + cs_c * ii, (1 << (M*2)) - 1, c_reg[ii]); \
+        _mm512_mask_storeu_pd(c + cs_c * ii, mask_n, c_reg[ii]); \
     } \
 
 /****************************************/
@@ -213,8 +213,9 @@
         for(dim_t ii = 0; ii < N; ++ii) \
         { \
             SCALE_ALPHA_COL(M) \
-            SCALE_BETA_M_MASK_COL(M) \
-            _mm512_mask_storeu_pd(c + cs_c * ii, ~((1 << (ii*2)) - 1), c_reg[ii]); \
+            mask_n = ((1 << ((n_rem*2) - (ii*2))) -1) << (ii*2); \
+            SCALE_BETA(mask_n, cs_c) \
+            _mm512_mask_storeu_pd(c + cs_c * ii, mask_n, c_reg[ii]); \
         } \
     } \
 
@@ -238,7 +239,8 @@
     for(dim_t ii = 0; ii < N; ++ii) \
     { \
         SCALE_ALPHA_COL(M) \
-        _mm512_mask_storeu_pd(c + cs_c * ii, ~((1 << (ii*2)) - 1), c_reg[ii]); \
+        mask_n = ((1 << ((n_rem*2) - (ii*2))) - 1) << (ii*2); \
+        _mm512_mask_storeu_pd(c + cs_c * ii, mask_n, c_reg[ii]); \
     } \
 
 /****************************************/
@@ -279,8 +281,9 @@
         for(dim_t ii = 0; ii < N; ++ii) \
         { \
             SCALE_ALPHA_COL(M) \
-            SCALE_BETA_M_MASK_COL(M) \
-            _mm512_mask_storeu_pd(c + cs_c * ii, (1 << (ii+1)*2) - 1, c_reg[ii]); \
+            mask_n = (1 << ((ii+1)*2)) - 1; \
+            SCALE_BETA(mask_n, cs_c) \
+            _mm512_mask_storeu_pd(c + cs_c * ii, mask_n, c_reg[ii]); \
         } \
     } \
 
@@ -304,7 +307,29 @@
     for(dim_t ii = 0; ii < N; ++ii) \
     { \
         SCALE_ALPHA_COL(M) \
-        _mm512_mask_storeu_pd(c + cs_c * ii, (1 << ((ii+1)*2)) - 1, c_reg[ii]); \
+        mask_n = (1 << (((ii+1)*2))) - 1; \
+        _mm512_mask_storeu_pd(c + cs_c * ii, mask_n, c_reg[ii]); \
+    } \
+
+/****************************************/
+/* Operation:                           */
+/* Scale reg with alpha value and       */
+/* store elements in row major order    */
+/* where Beta = 0                       */
+/* Elements:                            */
+/* Mx4 elements at a time               */
+/* Input:                               */
+/* c_reg = A(real, imag) * B(real, img) */
+/* Output:                              */
+/* c_reg = Alpha * A(real, imag) *      */
+/*         B(real, img)                 */
+/****************************************/
+#define STORE_ROW_BZ(M, N) \
+    UNROLL_LOOP_FULL() \
+    for(dim_t ii = 0; ii < M; ++ii) \
+    { \
+        SCALE_ALPHA(M) \
+        _mm512_mask_storeu_pd(c + (rs_c * ii), mask_n, c_reg[ii]); \
     } \
 
 /****************************************/
@@ -328,7 +353,7 @@
         for(dim_t ii = 0; ii < M; ++ii) \
         { \
             SCALE_ALPHA(M) \
-            SCALE_BETA_N_MASK(M) \
+            SCALE_BETA(mask_n, rs_c) \
             _mm512_mask_storeu_pd(c + (rs_c * ii), mask_n, c_reg[ii]); \
         } \
     } \
@@ -372,61 +397,17 @@
 /* Scale C matrix with beta value       */
 /* Elements:                            */
 /* 4 elements at a time                 */
-/* Mask is set based on N elements      */
-/* Output :                             */
-/* c_reg = Beta * C                     */
-/****************************************/
-#define SCALE_BETA_N_MASK(M)\
-    a_reg[ii] = _mm512_maskz_loadu_pd(mask_n, c + (rs_c * ii)); \
-    c_imag_reg[ii] = _mm512_permute_pd(a_reg[ii], 0b01010101); \
-    a_reg[ii] = _mm512_mul_pd(a_reg[ii], beta_reg); \
-    c_imag_reg[ii] = _mm512_mul_pd(c_imag_reg[ii], beta_imag_reg); \
-    a_reg[ii] = _mm512_fmaddsub_pd(a_reg[ii], one_reg, c_imag_reg[ii]);  \
-    c_reg[ii] = _mm512_add_pd(a_reg[ii], c_reg[ii]);  \
-
-/****************************************/
-/* Scale C matrix with beta value       */
-/* Elements:                            */
-/* 4 elements at a time                 */
 /* Mask is set based on M elements      */
 /* Output :                             */
 /* c_reg = Beta * C                     */
 /****************************************/
-#define SCALE_BETA_M_MASK_COL(M)\
-    a_reg[ii] = _mm512_maskz_loadu_pd((1 << (M*2)) - 1, c + (cs_c * ii)); \
+#define SCALE_BETA(mask_n, stride) \
+    a_reg[ii] = _mm512_maskz_loadu_pd(mask_n, c + (stride * ii)); \
     c_imag_reg[ii] = _mm512_permute_pd(a_reg[ii], 0b01010101); \
     a_reg[ii] = _mm512_mul_pd(a_reg[ii], beta_reg); \
     c_imag_reg[ii] = _mm512_mul_pd(c_imag_reg[ii], beta_imag_reg); \
     a_reg[ii] = _mm512_fmaddsub_pd(a_reg[ii], one_reg, c_imag_reg[ii]);  \
     c_reg[ii] = _mm512_add_pd(a_reg[ii], c_reg[ii]);  \
-
-#define SCALE_BETA_M_MASK_ROW(M)\
-    a_reg[ii] = _mm512_maskz_loadu_pd((1 << (M*2)) - 1, c + (rs_c * ii)); \
-    c_imag_reg[ii] = _mm512_permute_pd(a_reg[ii], 0b01010101); \
-    a_reg[ii] = _mm512_mul_pd(a_reg[ii], beta_reg); \
-    c_imag_reg[ii] = _mm512_mul_pd(c_imag_reg[ii], beta_imag_reg); \
-    a_reg[ii] = _mm512_fmaddsub_pd(a_reg[ii], one_reg, c_imag_reg[ii]);  \
-    c_reg[ii] = _mm512_add_pd(a_reg[ii], c_reg[ii]);  \
-/****************************************/
-/* Operation:                           */
-/* Scale reg with alpha value and       */
-/* store elements in row major order    */
-/* where Beta = 0                       */
-/* Elements:                            */
-/* Mx4 elements at a time               */
-/* Input:                               */
-/* c_reg = A(real, imag) * B(real, img) */
-/* Output:                              */
-/* c_reg = Alpha * A(real, imag) *      */
-/*         B(real, img)                 */
-/****************************************/
-#define STORE_ROW_BZ(M, N) \
-    UNROLL_LOOP_FULL() \
-    for(dim_t ii = 0; ii < M; ++ii) \
-    { \
-        SCALE_ALPHA(M) \
-        _mm512_mask_storeu_pd(c + (rs_c * ii), mask_n, c_reg[ii]); \
-    } \
 
 /****************************************/
 /* Operation:                           */
@@ -460,8 +441,9 @@
         for(dim_t ii = 0; ii < M; ++ii) \
         { \
             SCALE_ALPHA(M) \
-            SCALE_BETA_M_MASK_ROW(M) \
-            _mm512_mask_storeu_pd(c + (rs_c * ii), (1 << ((ii+1)*2)) - 1, c_reg[ii]); \
+            mask_n = (1 << ((ii+1)*2)) - 1; \
+            SCALE_BETA(mask_n, rs_c) \
+            _mm512_mask_storeu_pd(c + (rs_c * ii), mask_n, c_reg[ii]); \
         } \
     } \
 
@@ -485,7 +467,8 @@
     for(dim_t ii = 0; ii < M; ++ii) \
     { \
         SCALE_ALPHA(M) \
-        _mm512_mask_storeu_pd(c + (rs_c * ii), (1 << ((ii+1)*2)) - 1, c_reg[ii]); \
+        mask_n = (1 << ((ii+1)*2)) - 1; \
+        _mm512_mask_storeu_pd(c + (rs_c * ii), mask_n, c_reg[ii]); \
     } \
 
 /****************************************/
@@ -511,8 +494,9 @@
         for(dim_t ii = 0; ii < M; ++ii) \
         { \
             SCALE_ALPHA(M) \
-            SCALE_BETA_M_MASK_ROW(M) \
-            _mm512_mask_storeu_pd(c + (rs_c * ii), ~((1 << (ii*2)) - 1), c_reg[ii]); \
+            mask_n = ((1 << ((n_rem*2) - (ii*2))) - 1) << (ii*2); \
+            SCALE_BETA(mask_n, rs_c) \
+            _mm512_mask_storeu_pd(c + (rs_c * ii), mask_n, c_reg[ii]); \
         } \
     } \
 
@@ -536,7 +520,8 @@
     for(dim_t ii = 0; ii < M; ++ii) \
     { \
         SCALE_ALPHA(M) \
-        _mm512_mask_storeu_pd(c + (rs_c * ii), ~((1 << (ii*2)) - 1), c_reg[ii]); \
+        mask_n = (((1 << ((n_rem*2) - (ii*2)))) - 1) << (ii*2); \
+        _mm512_mask_storeu_pd(c + (rs_c * ii), mask_n, c_reg[ii]); \
     } \
 
 /****************************************/
@@ -564,7 +549,7 @@
     ZERO_REGISTERS() \
     b_curr = b; \
     a_curr = a + i * ps_a; \
-     mask_n = (1 << (n_rem*2)) - 1; \
+    mask_n = (1 << (n_rem*2)) - 1; \
     GEMM_MxN(M, n_rem) \
     STORE_ROW(M, n_rem) \
     c += 4 * rs_c; \
@@ -577,6 +562,7 @@
     a_curr = a + i * ps_a; \
     mask_n = (1 << (n_rem*2)) - 1; \
     GEMM_MxN(M, n_rem) \
+    mask_n = (1 << (M*2)) - 1; \
     STORE_COL(M, n_rem) \
     c += 4 * rs_c; \
 
