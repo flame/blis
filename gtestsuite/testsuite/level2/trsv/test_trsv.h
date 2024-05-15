@@ -158,14 +158,14 @@ class trsvGenericPrint {
 public:
     std::string operator()(
         testing::TestParamInfo<std::tuple<char,char,char,char,gtint_t,T,gtint_t,gtint_t>> str) const {
-        char storage   = std::get<0>(str.param);
-        char uploa     = std::get<1>(str.param);
-        char transa    = std::get<2>(str.param);
-        char diaga     = std::get<3>(str.param);
-        gtint_t n      = std::get<4>(str.param);
-        T alpha = std::get<5>(str.param);
-        gtint_t incx   = std::get<6>(str.param);
-        gtint_t ld_inc = std::get<7>(str.param);
+        char storage    = std::get<0>(str.param);
+        char uploa      = std::get<1>(str.param);
+        char transa     = std::get<2>(str.param);
+        char diaga      = std::get<3>(str.param);
+        gtint_t n       = std::get<4>(str.param);
+        T alpha         = std::get<5>(str.param);
+        gtint_t incx    = std::get<6>(str.param);
+        gtint_t lda_inc = std::get<7>(str.param);
 
         std::string str_name = API_PRINT;
         str_name += "_stor_" + std::string(&storage, 1);
@@ -175,7 +175,8 @@ public:
         str_name += "_n_" + std::to_string(n);
         str_name += "_alpha_" + testinghelpers::get_value_string(alpha);
         str_name += "_incx_" + testinghelpers::get_value_string(incx);
-        str_name    = str_name + "_" + std::to_string(ld_inc);
+        gtint_t lda = testinghelpers::get_leading_dimension( storage, transa, n, n, lda_inc );
+        str_name += "_lda_i" + std::to_string(lda_inc) + "_" + std::to_string(lda);
         return str_name;
     }
 };
@@ -191,9 +192,9 @@ public:
         char transa      = std::get<2>(str.param);
         char diaga       = std::get<3>(str.param);
         gtint_t n        = std::get<4>(str.param);
-        T alpha     = std::get<5>(str.param);
+        T alpha          = std::get<5>(str.param);
         gtint_t incx     = std::get<6>(str.param);
-        gtint_t ld_inc   = std::get<7>(str.param);
+        gtint_t lda_inc  = std::get<7>(str.param);
         bool is_mem_test = std::get<8>(str.param);
 
         std::string str_name = API_PRINT;
@@ -204,9 +205,8 @@ public:
         str_name += "_n_" + std::to_string(n);
         str_name += "_alpha_" + testinghelpers::get_value_string(alpha);
         str_name += "_incx_" + testinghelpers::get_value_string(incx);
-        str_name    = str_name + "_lda_" + std::to_string(
-                    testinghelpers::get_leading_dimension( storage, transa, n, n, ld_inc )
-                );
+        gtint_t lda = testinghelpers::get_leading_dimension( storage, transa, n, n, lda_inc );
+        str_name += "_lda_i" + std::to_string(lda_inc) + "_" + std::to_string(lda);
         str_name    = str_name + (is_mem_test ? "_mem_test_enabled" : "_mem_test_disabled");
         return str_name;
     }
@@ -223,11 +223,11 @@ public:
         char transa     = std::get<2>(str.param);
         char diaga      = std::get<3>(str.param);
         gtint_t n       = std::get<4>(str.param);
-        T alpha  = std::get<5>(str.param);
+        T alpha         = std::get<5>(str.param);
         gtint_t incx    = std::get<6>(str.param);
-        T xexval = std::get<7>(str.param);
-        T aexval = std::get<8>(str.param);
-        gtint_t ld_inc  = std::get<9>(str.param);
+        T xexval        = std::get<7>(str.param);
+        T aexval        = std::get<8>(str.param);
+        gtint_t lda_inc = std::get<9>(str.param);
 
         std::string str_name = API_PRINT;
         str_name += "_stor_" + std::string(&storage, 1);
@@ -239,9 +239,8 @@ public:
         str_name += "_incx_" + testinghelpers::get_value_string(incx);
         str_name    = str_name + "_ex_x_" + testinghelpers::get_value_string(xexval);
         str_name    = str_name + "_ex_a_" + testinghelpers::get_value_string(aexval);
-        str_name    = str_name + "_lda_" + std::to_string(
-                    testinghelpers::get_leading_dimension( storage, transa, n, n, ld_inc )
-                );
+        gtint_t lda = testinghelpers::get_leading_dimension( storage, transa, n, n, lda_inc );
+        str_name += "_lda_i" + std::to_string(lda_inc) + "_" + std::to_string(lda);
         return str_name;
     }
 };

@@ -164,7 +164,7 @@ public:
         T beta              = std::get<6>(str.param);
         gtint_t incx        = std::get<7>(str.param);
         gtint_t incy        = std::get<8>(str.param);
-        gtint_t ld_inc      = std::get<9>(str.param);
+        gtint_t lda_inc     = std::get<9>(str.param);
         bool is_memory_test = std::get<10>(str.param);
 
         std::string str_name = API_PRINT;
@@ -177,7 +177,8 @@ public:
         str_name += "_incy_" + testinghelpers::get_value_string(incy);
         str_name += "_alpha_" + testinghelpers::get_value_string(alpha);
         str_name += "_beta_" + testinghelpers::get_value_string(beta);
-        str_name = str_name + "_lda_" + std::to_string(testinghelpers::get_leading_dimension( storage, 'n', m, n, ld_inc ));
+        gtint_t lda = testinghelpers::get_leading_dimension( storage, 'n', m, n, lda_inc );
+        str_name += "_lda_i" + std::to_string(lda_inc) + "_" + std::to_string(lda);
         str_name = str_name + (( is_memory_test ) ? "_mem_test_enabled" : "_mem_test_disabled");
         return str_name;
     }
@@ -200,7 +201,7 @@ public:
         T a_exval           = std::get<9>(str.param);
         T x_exval           = std::get<10>(str.param);
         T y_exval           = std::get<11>(str.param);
-        gtint_t ld_inc      = std::get<12>(str.param);
+        gtint_t lda_inc     = std::get<12>(str.param);
 
         std::string str_name = API_PRINT;
         str_name += "_stor_" + std::string(&storage, 1);
@@ -212,7 +213,8 @@ public:
         str_name += "_incy_" + testinghelpers::get_value_string(incy);
         str_name += "_alpha_" + testinghelpers::get_value_string(alpha);
         str_name += "_beta_" + testinghelpers::get_value_string(beta);
-        str_name = str_name + "_lda_" + std::to_string(testinghelpers::get_leading_dimension( storage, 'n', m, n, ld_inc ));
+        gtint_t lda = testinghelpers::get_leading_dimension( storage, 'n', m, n, lda_inc );
+        str_name += "_lda_i" + std::to_string(lda_inc) + "_" + std::to_string(lda);
         str_name = str_name + "_a_exval_" + testinghelpers::get_value_string(a_exval);
         str_name = str_name + "_x_exval_" + testinghelpers::get_value_string(x_exval);
         str_name = str_name + "_y_exval_" + testinghelpers::get_value_string(y_exval);

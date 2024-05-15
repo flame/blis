@@ -297,9 +297,9 @@ public:
         gtint_t lda = testinghelpers::get_leading_dimension( storage, transa, m, k, lda_inc );
         gtint_t ldb = testinghelpers::get_leading_dimension( storage, transb, k, n, ldb_inc );
         gtint_t ldc = testinghelpers::get_leading_dimension( storage, 'n', m, n, ldc_inc );
-        str_name = str_name + "_lda_" + std::to_string(lda);
-        str_name = str_name + "_ldb_" + std::to_string(ldb);
-        str_name = str_name + "_ldc_" + std::to_string(ldc);
+        str_name += "_lda_i" + std::to_string(lda_inc) + "_" + std::to_string(lda);
+        str_name += "_ldb_i" + std::to_string(ldb_inc) + "_" + std::to_string(ldb);
+        str_name += "_ldc_i" + std::to_string(ldc_inc) + "_" + std::to_string(ldc);
         return str_name;
     }
 };
@@ -355,9 +355,9 @@ public:
         gtint_t lda = testinghelpers::get_leading_dimension( storage, transa, m, k, lda_inc );
         gtint_t ldb = testinghelpers::get_leading_dimension( storage, transb, k, n, ldb_inc );
         gtint_t ldc = testinghelpers::get_leading_dimension( storage, 'n', m, n, ldc_inc );
-        str_name = str_name + "_lda_" + std::to_string(lda);
-        str_name = str_name + "_ldb_" + std::to_string(ldb);
-        str_name = str_name + "_ldc_" + std::to_string(ldc);
+        str_name += "_lda_i" + std::to_string(lda_inc) + "_" + std::to_string(lda);
+        str_name += "_ldb_i" + std::to_string(ldb_inc) + "_" + std::to_string(ldb);
+        str_name += "_ldc_i" + std::to_string(ldc_inc) + "_" + std::to_string(ldc);
         return str_name;
     }
 };
@@ -375,8 +375,8 @@ class gemmOUTPrint {
         gtint_t m             = std::get<5>(str.param);
         gtint_t n             = std::get<6>(str.param);
         gtint_t k             = std::get<7>(str.param);
-        T alpha          = std::get<8>(str.param);
-        T beta           = std::get<9>(str.param);
+        T alpha               = std::get<8>(str.param);
+        T beta                = std::get<9>(str.param);
         gtint_t lda_inc       = std::get<10>(str.param);
         gtint_t ldb_inc       = std::get<11>(str.param);
         gtint_t ldc_inc       = std::get<12>(str.param);
@@ -384,10 +384,6 @@ class gemmOUTPrint {
         gtint_t aj            = std::get<14>(str.param);
         gtint_t bi            = std::get<15>(str.param);
         gtint_t bj            = std::get<16>(str.param);
-
-        gtint_t lda = testinghelpers::get_leading_dimension( storage, transa, m, k, lda_inc );
-        gtint_t ldb = testinghelpers::get_leading_dimension( storage, transb, k, n, ldb_inc );
-        gtint_t ldc = testinghelpers::get_leading_dimension( storage, 'n', m, n, ldc_inc );
 
         std::string str_name = API_PRINT;
         str_name += "_stor_" + std::string(&storage, 1);
@@ -404,9 +400,12 @@ class gemmOUTPrint {
         str_name = str_name + "_B_" + std::to_string(bi) + "_" + std::to_string(bj);
         str_name += "_alpha_" + testinghelpers::get_value_string(alpha);
         str_name += "_beta_" + testinghelpers::get_value_string(beta);
-        str_name = str_name + "_lda_" + std::to_string(lda);
-        str_name = str_name + "_ldb_" + std::to_string(ldb);
-        str_name = str_name + "_ldc_" + std::to_string(ldc);
+        gtint_t lda = testinghelpers::get_leading_dimension( storage, transa, m, k, lda_inc );
+        gtint_t ldb = testinghelpers::get_leading_dimension( storage, transb, k, n, ldb_inc );
+        gtint_t ldc = testinghelpers::get_leading_dimension( storage, 'n', m, n, ldc_inc );
+        str_name += "_lda_i" + std::to_string(lda_inc) + "_" + std::to_string(lda);
+        str_name += "_ldb_i" + std::to_string(ldb_inc) + "_" + std::to_string(ldb);
+        str_name += "_ldc_i" + std::to_string(ldc_inc) + "_" + std::to_string(ldc);
         return str_name;
     }
 };

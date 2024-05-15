@@ -124,9 +124,13 @@ public:
         str_name += "_n_" + std::to_string(n);
         str_name += "_alpha_" + testinghelpers::get_value_string(alpha);
         str_name += "_beta_" + testinghelpers::get_value_string(beta);
-        str_name = str_name + "_" + std::to_string(lda_inc);
-        str_name = str_name + "_" + std::to_string(ldb_inc);
-        str_name = str_name + "_" + std::to_string(ldc_inc);
+        gtint_t k = ((side == 'l')||(side == 'L'))? m : n;
+        gtint_t lda = testinghelpers::get_leading_dimension( storage, 'n', k, k, lda_inc );
+        gtint_t ldb = testinghelpers::get_leading_dimension( storage, 'n', m, n, ldb_inc );
+        gtint_t ldc = testinghelpers::get_leading_dimension( storage, 'n', m, n, ldc_inc );
+        str_name += "_lda_i" + std::to_string(lda_inc) + "_" + std::to_string(lda);
+        str_name += "_ldb_i" + std::to_string(ldb_inc) + "_" + std::to_string(ldb);
+        str_name += "_ldc_i" + std::to_string(ldc_inc) + "_" + std::to_string(ldc);
         return str_name;
     }
 };

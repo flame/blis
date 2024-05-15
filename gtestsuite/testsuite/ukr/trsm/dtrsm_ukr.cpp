@@ -48,7 +48,7 @@ class DTRSMUkrTest :
                                                 gtint_t,           // n
                                                 gtint_t,           // k
                                                 double,            // alpha
-                                                gtint_t,           // ldc_inc
+                                                gtint_t,           // ldc_inc_inc
                                                 bool      >> {};   // is_memory_test
 
 class DTRSMSmallUkrTest :
@@ -135,7 +135,7 @@ INSTANTIATE_TEST_SUITE_P (
         ::testing::Values(24),                             // n
         ::testing::Values(0, 1, 2, 8, 9, 10, 500, 1000),   // k
         ::testing::Values(-1, -5.2, 1, 8.9),               // alpha
-        ::testing::Values(0, 9, 53),                       // ldc
+        ::testing::Values(0, 9, 53),                       // ldc_inc
         ::testing::Values(false, true)                     // is_memory_test
     ),
     (::trsmNatUKRPrint<double,dgemmtrsm_ukr_ft>())
@@ -153,7 +153,7 @@ INSTANTIATE_TEST_SUITE_P (
         ::testing::Values(24),                             // n
         ::testing::Values(0, 1, 2, 8, 9, 10, 500, 1000),   // k
         ::testing::Values(-1, -5.2, 1, 8.9),               // alpha
-        ::testing::Values(0, 9, 53),                       // ldc
+        ::testing::Values(0, 9, 53),                       // ldc_inc
         ::testing::Values(false, true)                     // is_memory_test
    ),
     (::trsmNatUKRPrint<double,dgemmtrsm_ukr_ft>())
@@ -193,7 +193,7 @@ INSTANTIATE_TEST_SUITE_P (
         ::testing::Values(8),                               // n
         ::testing::Values(0, 1, 2, 8, 9, 10, 500, 1000),    // k
         ::testing::Values(-1, -5.2, 1, 8.9),                // alpha
-        ::testing::Values(0, 9, 53),                        // ldc
+        ::testing::Values(0, 9, 53),                        // ldc_inc
         ::testing::Values(false, true)                      // is_memory_test
     ),
     (::trsmNatUKRPrint<double,dgemmtrsm_ukr_ft>())
@@ -211,7 +211,7 @@ INSTANTIATE_TEST_SUITE_P (
         ::testing::Values(8),                               // n
         ::testing::Values(0, 1, 2, 8, 9, 10, 500, 1000),    // k
         ::testing::Values(-1, -5.2, 1, 8.9),                // alpha
-        ::testing::Values(0, 9, 53),                        // ldc
+        ::testing::Values(0, 9, 53),                        // ldc_inc
         ::testing::Values(false, true)                      // is_memory_test
     ),
     (::trsmNatUKRPrint<double,dgemmtrsm_ukr_ft>())

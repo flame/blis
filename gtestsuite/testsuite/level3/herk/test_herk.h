@@ -115,8 +115,10 @@ public:
         str_name += "_k_" + std::to_string(k);
         str_name += "_alpha_" + testinghelpers::get_value_string(alpha);
         str_name += "_beta_" + testinghelpers::get_value_string(beta);
-        str_name = str_name + "_" + std::to_string(lda_inc);
-        str_name = str_name + "_" + std::to_string(ldc_inc);
+        gtint_t lda = testinghelpers::get_leading_dimension( storage, transa, n, k, lda_inc );
+        gtint_t ldc = testinghelpers::get_leading_dimension( storage, 'n', n, n, ldc_inc );
+        str_name += "_lda_i" + std::to_string(lda_inc) + "_" + std::to_string(lda);
+        str_name += "_ldc_i" + std::to_string(ldc_inc) + "_" + std::to_string(ldc);
         return str_name;
     }
 };

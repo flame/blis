@@ -287,10 +287,10 @@ public:
         str_name += "_alpha_" + testinghelpers::get_value_string(alpha);
         gtint_t mn;
         testinghelpers::set_dim_with_side( side, m, n, &mn );
-        str_name = str_name + "_lda_" +
-                   std::to_string(testinghelpers::get_leading_dimension( storage, transa, mn, mn, lda_inc ));
-        str_name = str_name + "_ldb_" +
-                   std::to_string(testinghelpers::get_leading_dimension( storage, 'n', m, n, ldb_inc ));
+        gtint_t lda = testinghelpers::get_leading_dimension( storage, transa, mn, mn, lda_inc );
+        gtint_t ldb = testinghelpers::get_leading_dimension( storage, 'n', m, n, ldb_inc );
+        str_name += "_lda_i" + std::to_string(lda_inc) + "_" + std::to_string(lda);
+        str_name += "_ldb_i" + std::to_string(ldb_inc) + "_" + std::to_string(ldb);
         return str_name;
     }
 };
@@ -324,10 +324,10 @@ public:
         str_name += "_alpha_" + testinghelpers::get_value_string(alpha);
         gtint_t mn;
         testinghelpers::set_dim_with_side( side, m, n, &mn );
-        str_name = str_name + "_lda_" +
-                   std::to_string(testinghelpers::get_leading_dimension( storage, transa, mn, mn, lda_inc ));
-        str_name = str_name + "_ldb_" +
-                   std::to_string(testinghelpers::get_leading_dimension( storage, 'n', m, n, ldb_inc ));
+        gtint_t lda = testinghelpers::get_leading_dimension( storage, transa, mn, mn, lda_inc );
+        gtint_t ldb = testinghelpers::get_leading_dimension( storage, 'n', m, n, ldb_inc );
+        str_name += "_lda_i" + std::to_string(lda_inc) + "_" + std::to_string(lda);
+        str_name += "_ldb_i" + std::to_string(ldb_inc) + "_" + std::to_string(ldb);
         str_name = str_name + "_a_evt_" + std::to_string(a_encode);
         str_name = str_name + "_b_evt_" + std::to_string(b_encode);
         return str_name;

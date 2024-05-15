@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2023, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2023 - 2024, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -135,15 +135,15 @@ class gerGenericPrint {
 public:
     std::string operator()(
         testing::TestParamInfo<std::tuple<char,char,char,gtint_t,gtint_t,T,gtint_t,gtint_t,gtint_t>> str) const {
-        char storage   = std::get<0>(str.param);
-        char conjx     = std::get<1>(str.param);
-        char conjy     = std::get<2>(str.param);
-        gtint_t m      = std::get<3>(str.param);
-        gtint_t n      = std::get<4>(str.param);
-        T alpha = std::get<5>(str.param);
-        gtint_t incx   = std::get<6>(str.param);
-        gtint_t incy   = std::get<7>(str.param);
-        gtint_t ld_inc = std::get<8>(str.param);
+        char storage    = std::get<0>(str.param);
+        char conjx      = std::get<1>(str.param);
+        char conjy      = std::get<2>(str.param);
+        gtint_t m       = std::get<3>(str.param);
+        gtint_t n       = std::get<4>(str.param);
+        T alpha         = std::get<5>(str.param);
+        gtint_t incx    = std::get<6>(str.param);
+        gtint_t incy    = std::get<7>(str.param);
+        gtint_t lda_inc = std::get<8>(str.param);
 
         std::string str_name = API_PRINT;
         str_name += "_stor_" + std::string(&storage, 1);
@@ -153,9 +153,9 @@ public:
         str_name += "_n_" + std::to_string(n);
         str_name += "_incx_" + testinghelpers::get_value_string(incx);
         str_name += "_incy_" + testinghelpers::get_value_string(incy);
-        str_name    = str_name + "_alpha_" + testinghelpers::get_value_string(alpha);
-        std::string ld_inc_str = ( ld_inc >= 0) ? std::to_string(ld_inc) : "m" + std::to_string(std::abs(ld_inc));
-        str_name    = str_name + "_lda_inc" + ld_inc_str;
+        str_name += "_alpha_" + testinghelpers::get_value_string(alpha);
+        gtint_t lda = testinghelpers::get_leading_dimension( storage, 'n', m, n, lda_inc );
+        str_name += "_lda_i" + std::to_string(lda_inc) + "_" + std::to_string(lda);
         return str_name;
     }
 };
@@ -165,24 +165,22 @@ class gerEVTPrint {
 public:
     std::string operator()(
         testing::TestParamInfo<std::tuple<char,char,char,gtint_t,gtint_t,T,gtint_t,gtint_t,gtint_t,gtint_t,gtint_t,T,gtint_t,T,gtint_t,T>> str) const {
-        char storage   = std::get<0>(str.param);
-        char conjx     = std::get<1>(str.param);
-        char conjy     = std::get<2>(str.param);
-        gtint_t m      = std::get<3>(str.param);
-        gtint_t n      = std::get<4>(str.param);
-        T alpha        = std::get<5>(str.param);
-        gtint_t incx   = std::get<6>(str.param);
-        gtint_t incy   = std::get<7>(str.param);
-        gtint_t ld_inc = std::get<8>(str.param);
-        gtint_t ai     = std::get<9>(str.param);
-        gtint_t aj     = std::get<10>(str.param);
-        T a_exval      = std::get<11>(str.param);
-        gtint_t xi     = std::get<12>(str.param);
-        T x_exval      = std::get<13>(str.param);
-        gtint_t yi     = std::get<14>(str.param);
-        T y_exval      = std::get<15>(str.param);
-
-        gtint_t lda = testinghelpers::get_leading_dimension( storage, 'n', m, n, ld_inc );
+        char storage    = std::get<0>(str.param);
+        char conjx      = std::get<1>(str.param);
+        char conjy      = std::get<2>(str.param);
+        gtint_t m       = std::get<3>(str.param);
+        gtint_t n       = std::get<4>(str.param);
+        T alpha         = std::get<5>(str.param);
+        gtint_t incx    = std::get<6>(str.param);
+        gtint_t incy    = std::get<7>(str.param);
+        gtint_t lda_inc = std::get<8>(str.param);
+        gtint_t ai      = std::get<9>(str.param);
+        gtint_t aj      = std::get<10>(str.param);
+        T a_exval       = std::get<11>(str.param);
+        gtint_t xi      = std::get<12>(str.param);
+        T x_exval       = std::get<13>(str.param);
+        gtint_t yi      = std::get<14>(str.param);
+        T y_exval       = std::get<15>(str.param);
 
         std::string str_name = API_PRINT;
         str_name += "_stor_" + std::string(&storage, 1);
@@ -192,8 +190,9 @@ public:
         str_name += "_n_" + std::to_string(n);
         str_name += "_incx_" + testinghelpers::get_value_string(incx);
         str_name += "_incy_" + testinghelpers::get_value_string(incy);
-        str_name    = str_name + "_alpha_" + testinghelpers::get_value_string(alpha);
-        str_name    = str_name + "_lda" + std::to_string(lda);
+        str_name += "_alpha_" + testinghelpers::get_value_string(alpha);
+        gtint_t lda = testinghelpers::get_leading_dimension( storage, 'n', m, n, lda_inc );
+        str_name += "_lda_i" + std::to_string(lda_inc) + "_" + std::to_string(lda);
         str_name    = str_name + "_ai" + std::to_string(ai);
         str_name    = str_name + "_aj" + std::to_string(aj);
         str_name    = str_name + "_a_exval_" + testinghelpers::get_value_string(a_exval);

@@ -9,14 +9,14 @@
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
    met:
-    - Redistributions of source code must retain the above copyright
-      notice, this list of conditions and the following disclaimer.
-    - Redistributions in binary form must reproduce the above copyright
-      notice, this list of conditions and the following disclaimer in the
-      documentation and/or other materials provided with the distribution.
-    - Neither the name(s) of the copyright holder(s) nor the names of its
-      contributors may be used to endorse or promote products derived
-      from this software without specific prior written permission.
+	- Redistributions of source code must retain the above copyright
+	  notice, this list of conditions and the following disclaimer.
+	- Redistributions in binary form must reproduce the above copyright
+	  notice, this list of conditions and the following disclaimer in the
+	  documentation and/or other materials provided with the distribution.
+	- Neither the name(s) of the copyright holder(s) nor the names of its
+	  contributors may be used to endorse or promote products derived
+	  from this software without specific prior written permission.
 
    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
    "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -163,15 +163,15 @@ class axpyfUkrPrint {
 public:
     std::string operator()(
         testing::TestParamInfo<std::tuple<FT,char,char,gtint_t,gtint_t,T,gtint_t,gtint_t,gtint_t,gtint_t,bool>> str) const {
-        char conjA     = std::get<1>(str.param);
-        char conjx     = std::get<2>(str.param);
-        gtint_t m      = std::get<3>(str.param);
-        gtint_t b_fuse = std::get<4>(str.param);
-        T alpha        = std::get<5>(str.param);
-        gtint_t inca   = std::get<6>(str.param);
-        gtint_t lda    = std::get<7>(str.param);
-        gtint_t incx   = std::get<8>(str.param);
-        gtint_t incy   = std::get<9>(str.param);
+        char conjA      = std::get<1>(str.param);
+        char conjx      = std::get<2>(str.param);
+        gtint_t m       = std::get<3>(str.param);
+        gtint_t b_fuse  = std::get<4>(str.param);
+        T alpha         = std::get<5>(str.param);
+        gtint_t inca    = std::get<6>(str.param);
+        gtint_t lda_inc = std::get<7>(str.param);
+        gtint_t incx    = std::get<8>(str.param);
+        gtint_t incy    = std::get<9>(str.param);
         bool is_memory_test = std::get<10>(str.param);
 
         std::string str_name = "";
@@ -181,7 +181,8 @@ public:
         str_name += "_conjx_" + std::string(&conjx, 1);
         str_name += "_alpha_" + testinghelpers::get_value_string(alpha);
         str_name += "_inca_" + testinghelpers::get_value_string(inca);
-        str_name += "_ldainc_" + testinghelpers::get_value_string(lda);
+        gtint_t lda = testinghelpers::get_leading_dimension( 'c', 'n', m, b_fuse, lda_inc, inca );
+        str_name += "_lda_i" + testinghelpers::get_value_string(lda_inc) + "_" + std::to_string(lda);;
         str_name += "_incx_" + testinghelpers::get_value_string(incx);
         str_name += "_incy_" + testinghelpers::get_value_string(incy);
         str_name += ( is_memory_test ) ? "_mem_test_enabled" : "_mem_test_disabled";
