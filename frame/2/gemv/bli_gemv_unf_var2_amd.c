@@ -320,8 +320,8 @@ void bli_dgemv_unf_var2
           factor of DAXPYF kernel
         */
 
-        axpyf_kr_ptr = bli_daxpyf_zen_int_8;
-        b_fuse = 8;
+        axpyf_kr_ptr = bli_daxpyf_zen_int_avx512;
+        b_fuse = 32;
 
         scalv_kr_ptr = bli_dscalv_zen_int_avx512;
 
