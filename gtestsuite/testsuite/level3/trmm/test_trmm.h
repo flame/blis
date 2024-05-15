@@ -53,9 +53,9 @@ void test_trmm( char storage, char side, char uploa, char transa, char diaga,
     //        Initialize matrics with random values.
     //----------------------------------------------------------
     std::vector<T> a = testinghelpers::get_random_matrix<T>( -2, 8, storage, transa, mn, mn, lda );
-    std::vector<T> b;
+    std::vector<T> b( testinghelpers::matsize( storage, 'n', m, n, ldb ) );
     if (alpha != testinghelpers::ZERO<T>())
-        b = testinghelpers::get_random_matrix<T>( -5, 2, storage, 'n', m, n, ldb );
+        testinghelpers::datagenerators::randomgenerators<T>( -5, 2, storage, m, n, b.data(), 'n', ldb );
     else
     {
         // Matrix B should not be read, only set.

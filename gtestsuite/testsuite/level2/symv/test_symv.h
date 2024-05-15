@@ -55,9 +55,9 @@ void test_symv( char storage, char uploa, char conja, char conjx, gtint_t n,
     testinghelpers::make_triangular<T>( storage, uploa, n, a.data(), lda );
 
     std::vector<T> x = testinghelpers::get_random_vector<T>( -3, 3, n, incx );
-    std::vector<T> y;
+    std::vector<T> y( testinghelpers::buff_dim(n, incy) );
     if (beta != testinghelpers::ZERO<T>())
-        y = testinghelpers::get_random_vector<T>( -2, 5, n, incy );
+        testinghelpers::datagenerators::randomgenerators<T>( -2, 5, n, incy, y.data() );
     else
     {
         // Vector Y should not be read, only set.

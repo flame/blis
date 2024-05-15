@@ -56,9 +56,9 @@ void test_trmm3( char storage, char side, char uploa, char transa, char diaga,
     //----------------------------------------------------------
     std::vector<T> a = testinghelpers::get_random_matrix<T>( -2, 8, storage, transa, mn, mn, lda );
     std::vector<T> b = testinghelpers::get_random_matrix<T>( -5, 2, storage, transb, m, n, ldb );
-    std::vector<T> c;
+    std::vector<T> c( testinghelpers::matsize( storage, 'n', m, n, ldc ) );
     if (beta != testinghelpers::ZERO<T>())
-        c = testinghelpers::get_random_matrix<T>( -3, 5, storage, 'n', m, n, ldc );
+        testinghelpers::datagenerators::randomgenerators<T>( -3, 5, storage, m, n, c.data(), 'n', ldc );
     else
     {
         // Matrix C should not be read, only set.

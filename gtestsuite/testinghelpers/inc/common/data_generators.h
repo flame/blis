@@ -584,6 +584,50 @@ void set_matrix( char storage, gtint_t m, gtint_t n, T* a, char transa, gtint_t 
 }
 
 template<typename T>
+void set_matrix( char storage, gtint_t n, T* a, char uplo, gtint_t lda, T value )
+{
+    testinghelpers::set_matrix<T>(storage, n, n, a, 'n', lda, value );
+    if( (storage=='c')||(storage=='C') )
+    {
+        for(gtint_t j=0; j<n; j++)
+        {
+            for(gtint_t i=0; i<n; i++)
+            {
+                if( (uplo=='u')||(uplo=='U') )
+                {
+                    if(i>j) a[i+j*lda] = T{2.987e38};
+                }
+                else if ( (uplo=='l')||(uplo=='L') )
+                {
+                    if (i<j) a[i+j*lda] = T{2.987e38};
+                }
+                else
+                    throw std::runtime_error("Error in common/data_generators.cpp: side must be 'u' or 'l'.");
+            }
+        }
+    }
+    else
+    {
+        for(gtint_t i=0; i<n; i++)
+        {
+            for(gtint_t j=0; j<n; j++)
+            {
+                if( (uplo=='u')||(uplo=='U') )
+                {
+                    if(i>j) a[j+i*lda] = T{2.987e38};
+                }
+                else if ( (uplo=='l')||(uplo=='L') )
+                {
+                    if (i<j) a[j+i*lda] = T{2.987e38};
+                }
+                else
+                    throw std::runtime_error("Error in common/data_generators.cpp: side must be 'u' or 'l'.");
+            }
+        }
+    }
+}
+
+template<typename T>
 std::vector<T> get_vector( gtint_t n, gtint_t incx, T value )
 {
     // Create vector for the given sizes.

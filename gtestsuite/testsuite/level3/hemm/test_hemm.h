@@ -60,9 +60,9 @@ void test_hemm( char storage, char side, char uplo, char conja, char transb,
     // that code operates as expected.
     std::vector<T> a = testinghelpers::get_random_matrix<T>( -5, 2, storage, uplo, k, lda );
     std::vector<T> b = testinghelpers::get_random_matrix<T>( -5, 2, storage, transb, m, n, ldb );
-    std::vector<T> c;
+    std::vector<T> c( testinghelpers::matsize( storage, 'n', m, n, ldc ) );
     if (beta != testinghelpers::ZERO<T>())
-        c = testinghelpers::get_random_matrix<T>( -3, 5, storage, 'n', m, n, ldc );
+        testinghelpers::datagenerators::randomgenerators<T>( -3, 5, storage, m, n, c.data(), 'n', ldc );
     else
     {
         // Matrix C should not be read, only set.
