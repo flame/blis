@@ -282,7 +282,7 @@ void bli_saxpyv_zen_int_avx512
        The expectation is that these are standard BLAS exceptions and should be handled in
        a higher layer
 */
-void bli_daxpyv_zen_int_avx512
+BLIS_EXPORT_BLIS void bli_daxpyv_zen_int_avx512
      (
        conj_t           conjx,
        dim_t            n,

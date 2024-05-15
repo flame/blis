@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2016 - 2023, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2016 - 2024, Advanced Micro Devices, Inc. All rights reserved.
    Copyright (C) 2018, The University of Texas at Austin	
 
    Redistribution and use in source and binary forms, with or without
@@ -838,7 +838,7 @@ static void bli_vec_search_double
 	1. The function results in undefined behaviour when NaN elements are present in the
 	   array. This behaviour is BLAS complaint.
 */
-void bli_damaxv_zen_int
+BLIS_EXPORT_BLIS void bli_damaxv_zen_int
      (
        dim_t            n,
        double* restrict x, inc_t incx,

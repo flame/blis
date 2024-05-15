@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2016 - 2023, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2016 - 2024, Advanced Micro Devices, Inc. All rights reserved.
    Copyright (C) 2018 - 2020, The University of Texas at Austin. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
@@ -340,7 +340,7 @@ void bli_saxpyv_zen_int10
 
 // -----------------------------------------------------------------------------
 
-void bli_daxpyv_zen_int10
+BLIS_EXPORT_BLIS void bli_daxpyv_zen_int10
      (
        conj_t           conjx,
        dim_t            n,

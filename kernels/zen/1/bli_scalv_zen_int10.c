@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2017 - 2023, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2017 - 2024, Advanced Micro Devices, Inc. All rights reserved.
    Copyright (C) 2018, The University of Texas at Austin
 
    Redistribution and use in source and binary forms, with or without
@@ -307,7 +307,7 @@ void bli_sscalv_zen_int10
 
 // -----------------------------------------------------------------------------
 
-void bli_dscalv_zen_int10
+BLIS_EXPORT_BLIS void bli_dscalv_zen_int10
      (
        conj_t           conjalpha,
        dim_t            n,
