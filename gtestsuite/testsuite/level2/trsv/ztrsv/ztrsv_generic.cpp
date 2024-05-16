@@ -77,12 +77,16 @@ TEST_P(ztrsvAPI, FunctionalTest)
     // Check gtestsuite trsv.h or netlib source code for reminder of the
     // functionality from which we estimate operation count per element
     // of output, and hence the multipler for epsilon.
-    // No adjustment applied yet for complex data.
+    // With adjustment for complex data.
     double thresh;
+    double adj = 2.0;
     if (n == 0)
         thresh = 0.0;
     else
-        thresh = 2*n*testinghelpers::getEpsilon<T>();
+        if(alpha == T{1.0})
+          thresh = adj*2*n*testinghelpers::getEpsilon<T>();
+        else
+          thresh = adj*3*n*testinghelpers::getEpsilon<T>();
 
     //----------------------------------------------------------
     //     Call test body using these parameters

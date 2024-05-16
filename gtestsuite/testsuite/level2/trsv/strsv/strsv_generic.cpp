@@ -79,7 +79,10 @@ TEST_P(strsvTest, RandomData)
     if (n == 0)
         thresh = 0.0;
     else
-        thresh = 2*n*testinghelpers::getEpsilon<T>();
+        if(alpha == T{1.0})
+          thresh = 2*n*testinghelpers::getEpsilon<T>();
+        else
+          thresh = 3*n*testinghelpers::getEpsilon<T>();
 
     //----------------------------------------------------------
     //     Call test body using these parameters

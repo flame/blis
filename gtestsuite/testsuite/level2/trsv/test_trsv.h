@@ -69,7 +69,7 @@ void test_trsv(
 
     // Buffers for A matrix and X vector are always unaligned
     testinghelpers::ProtectedBuffer a(size_a, false, is_memory_test );
-    testinghelpers::datagenerators::randomgenerators<T>( 1, 5, storage, n, n, (T*)(a.greenzone_1), transa, lda );
+    testinghelpers::datagenerators::randomgenerators<T>( 0, 1, storage, n, n, (T*)(a.greenzone_1), transa, lda );
 
     dim_t size_x = testinghelpers::buff_dim(n, incx) * sizeof(T);
     testinghelpers::ProtectedBuffer x(size_x, false, is_memory_test );

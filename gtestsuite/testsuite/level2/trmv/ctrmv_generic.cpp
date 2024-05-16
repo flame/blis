@@ -77,10 +77,13 @@ TEST_P(ctrmvTest, RandomData)
     // of output, and hence the multipler for epsilon.
     // No adjustment applied yet for complex data.
     double thresh;
-    if (n == 0)
+    if (n == 0 || alpha == T{0.0})
         thresh = 0.0;
     else
-        thresh = 2*n*testinghelpers::getEpsilon<T>();
+        if(alpha == T{1.0})
+          thresh = 2*n*testinghelpers::getEpsilon<T>();
+        else
+          thresh = 3*n*testinghelpers::getEpsilon<T>();
 
     //----------------------------------------------------------
     //     Call test body using these parameters

@@ -78,8 +78,9 @@ TEST_P( zaxpyvEVT, NaNInfCheck )
     // Check gtestsuite subv.h (no netlib version) for reminder of the
     // functionality from which we estimate operation count per element
     // of output, and hence the multipler for epsilon.
+    double thresh;    
     // Small adjustment has been applied for complex data.
-    double thresh;
+    double adj = 1.5;
     if (n == 0)
         thresh = 0.0;
     else if (alpha == testinghelpers::ZERO<T>())
@@ -87,8 +88,7 @@ TEST_P( zaxpyvEVT, NaNInfCheck )
     else if (alpha == testinghelpers::ONE<T>())
         thresh = testinghelpers::getEpsilon<T>();
     else
-        //thresh = 2*testinghelpers::getEpsilon<T>();
-        thresh = 3*testinghelpers::getEpsilon<T>();
+        thresh = adj*2*testinghelpers::getEpsilon<T>();
 
     //----------------------------------------------------------
     //     Call generic test body using those parameters

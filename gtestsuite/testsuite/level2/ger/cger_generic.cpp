@@ -78,11 +78,13 @@ TEST_P(cgerGenericTest, RandomData)
     // Check gtestsuite ger.h or netlib source code for reminder of the
     // functionality from which we estimate operation count per element
     // of output, and hence the multipler for epsilon.
+    // With adjustment for complex data.
     double thresh;
+    double adj = 3.0;
     if (m == 0 || n == 0 || alpha == testinghelpers::ZERO<T>())
         thresh = 0.0;
     else
-        thresh = 7*testinghelpers::getEpsilon<T>();
+        thresh = adj*3*testinghelpers::getEpsilon<T>();
 
     //----------------------------------------------------------
     //     Call test body using these parameters

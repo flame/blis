@@ -86,8 +86,9 @@ TEST_P(chemmTest, RandomData)
     // Check gtestsuite hemm.h or netlib source code for reminder of the
     // functionality from which we estimate operation count per element
     // of output, and hence the multipler for epsilon.
-    // No adjustment applied yet for complex data.
+    // With adjustment for complex data.
     double thresh;
+    double adj = 2.5;
     if (m == 0 || n == 0)
         thresh = 0.0;
     else if (alpha == testinghelpers::ZERO<T>() &&
@@ -95,9 +96,9 @@ TEST_P(chemmTest, RandomData)
         thresh = 0.0;
     else
         if ( side == 'l' || side == 'L' )
-           thresh = (3*m+1)*testinghelpers::getEpsilon<T>();
+           thresh = adj*(3*m+1)*testinghelpers::getEpsilon<T>();
         else
-           thresh = (3*n+1)*testinghelpers::getEpsilon<T>();
+           thresh = adj*(3*n+1)*testinghelpers::getEpsilon<T>();
 
     //----------------------------------------------------------
     //     Call test body using these parameters

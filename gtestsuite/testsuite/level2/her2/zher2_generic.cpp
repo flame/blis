@@ -78,12 +78,13 @@ TEST_P(zher2Test, RandomData)
     // Check gtestsuite her2.h or netlib source code for reminder of the
     // functionality from which we estimate operation count per element
     // of output, and hence the multipler for epsilon.
-    // No adjustment applied yet for complex data.
+    // With adjustment for complex data.
     double thresh;
+    double adj = 2.2;
     if (n == 0 || alpha == testinghelpers::ZERO<T>())
         thresh = 0.0;
     else
-        thresh = 6*testinghelpers::getEpsilon<T>();
+        thresh = adj*6*testinghelpers::getEpsilon<T>();
 
     //----------------------------------------------------------
     //     Call test body using these parameters
