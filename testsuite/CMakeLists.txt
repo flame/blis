@@ -70,7 +70,11 @@ target_include_directories(test_libblis.x
                     )
 target_link_libraries(test_libblis.x PRIVATE ${libblis_link} ${LDFLAGS})
 if(THREADING_MODEL STREQUAL "openmp")
-    target_link_libraries(test_libblis.x PRIVATE OpenMP::OpenMP_C)
+    if((NOT ${OpenMP_libomp_LIBRARY} STREQUAL "") AND (NOT WIN32))
+        target_link_libraries(test_libblis.x PRIVATE ${OpenMP_libomp_LIBRARY})
+    else()
+        target_link_libraries(test_libblis.x PRIVATE OpenMP::OpenMP_C)
+    endif()
 endif()
 
 # -- Test run/check rules --
