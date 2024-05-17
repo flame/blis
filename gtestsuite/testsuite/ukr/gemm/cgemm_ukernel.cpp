@@ -103,7 +103,7 @@ public:
 /* A Matrix: Broadcast instruction is applied on Matrix  */
 /*           hence it can be row or col stored           */
 /*           trana = 'n' or 't'                          */
-/* B Matrix: Load instruction is appiled on Matrix       */
+/* B Matrix: Load instruction is applied on Matrix       */
 /*           hence it has to be row stored               */
 /*           When storage = r, transb = 'n'              */
 /*           When storage = c, transb = 't'              */

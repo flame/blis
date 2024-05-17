@@ -67,6 +67,10 @@ static void imatcopy_( char trans, gtint_t m, gtint_t n, T alpha, T* A, gtint_t 
 template<typename T>
 static void imatcopy( char trans, gtint_t m, gtint_t n, T alpha, T* A, gtint_t lda_in, gtint_t lda_out )
 {
+#ifdef TEST_UPPERCASE_ARGS
+    trans = static_cast<char>(std::toupper(static_cast<unsigned char>(trans)));
+#endif
+
 #ifdef TEST_BLAS
     imatcopy_<T>( trans, m, n, alpha, A, lda_in, lda_out );
 #else

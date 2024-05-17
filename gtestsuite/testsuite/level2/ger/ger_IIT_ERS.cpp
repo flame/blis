@@ -217,7 +217,7 @@ TYPED_TEST(ger_IIT_ERS_Test, alpha_eq_zero_nonUnitStride)
     // Create a copy of a matrix so that we can check reference results.
     std::vector<T> a_ref(a);
 
-    T zero_alpha = T{3};
+    T zero_alpha = T{0};
 
     // Invoking GER with an invalid value of n.
     ger<T>( STORAGE, CONJ, CONJ, M, N, &zero_alpha, x.data(), inc,

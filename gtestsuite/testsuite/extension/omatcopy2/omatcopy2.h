@@ -70,6 +70,10 @@ static void omatcopy2_( char trans, gtint_t m, gtint_t n, T alpha, T* A, gtint_t
 template<typename T>
 static void omatcopy2( char trans, gtint_t m, gtint_t n, T alpha, T* A, gtint_t lda, gtint_t stridea, T* B, gtint_t ldb, gtint_t strideb )
 {
+#ifdef TEST_UPPERCASE_ARGS
+    trans = static_cast<char>(std::toupper(static_cast<unsigned char>(trans)));
+#endif
+
 #ifdef TEST_BLAS
     omatcopy2_<T>( trans, m, n, alpha, A, lda, stridea, B, ldb, strideb );
 #else

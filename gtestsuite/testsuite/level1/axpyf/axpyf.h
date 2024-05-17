@@ -41,16 +41,16 @@ template<typename T>
 static void typed_axpyf(
                 conj_t conja,
                 conj_t conjx,
-                gint_t m,
-                gint_t b,
+                gtint_t m,
+                gtint_t b,
                 T *alpha,
                 T* A,
-                gint_t inca,
-                gint_t lda,
+                gtint_t inca,
+                gtint_t lda,
                 T* x,
-                gint_t incx,
+                gtint_t incx,
                 T* y,
-                gint_t incy)
+                gtint_t incy)
 {
     conj_t conj_a;
     conj_t conj_x;
@@ -73,16 +73,16 @@ template<typename T>
 static void axpyf(
                 conj_t conja,
                 conj_t conjx,
-                gint_t m,
-                gint_t b,
+                gtint_t m,
+                gtint_t b,
                 T *alpha,
                 T* A,
-                gint_t inca,
-                gint_t lda,
+                gtint_t inca,
+                gtint_t lda,
                 T* x,
-                gint_t incx,
+                gtint_t incx,
                 T* y,
-                gint_t incy
+                gtint_t incy
 )
 {
 

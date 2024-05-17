@@ -48,13 +48,13 @@ template<typename T>
 static void test_axpyf(
                 char conj_a,
                 char conj_x,
-                gint_t m,
-                gint_t b,
+                gtint_t m,
+                gtint_t b,
                 T *alpha,
-                gint_t inca,
-                gint_t lda_inc,
-                gint_t incx,
-                gint_t incy,
+                gtint_t inca,
+                gtint_t lda_inc,
+                gtint_t incx,
+                gtint_t incy,
                 double thresh
                 )
 {

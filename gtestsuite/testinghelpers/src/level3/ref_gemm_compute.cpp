@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2023, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2023 - 2024, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -82,7 +82,7 @@ void ref_gemm_compute(char storage, char trnsa, char trnsb, char pcka, char pckb
 
     using scalar_t = std::conditional_t<testinghelpers::type_info<T>::is_complex, T&, T>;
 
-    typedef gint_t (*Fptr_ref_cblas_gemm_pack_get_size)( const CBLAS_IDENTIFIER,
+    typedef gtint_t (*Fptr_ref_cblas_gemm_pack_get_size)( const CBLAS_IDENTIFIER,
                     const f77_int, const f77_int, const f77_int );
     Fptr_ref_cblas_gemm_pack_get_size ref_cblas_gemm_pack_get_size;
 
