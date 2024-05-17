@@ -43,20 +43,20 @@
  */
 namespace testinghelpers {
 template<typename T>
-void ref_dotxf( conj_t conja,
-                conj_t conjx,
-                gint_t m,
-                gint_t b,
+void ref_dotxf( char conj_a,
+                char conj_x,
+                gtint_t m,
+                gtint_t b,
                 T *alpha,
                 T* A,
-                gint_t inca,
-                gint_t lda,
+                gtint_t inca,
+                gtint_t lda,
                 T* x,
-                gint_t incx,
+                gtint_t incx,
                 T * beta,
                 T* y,
-                gint_t incy
-              ) 
+                gtint_t incy
+              )
             {
                 for ( dim_t i = 0; i < b; ++i )
                 {
@@ -66,8 +66,8 @@ void ref_dotxf( conj_t conja,
 
                   testinghelpers::ref_dotxv<T>
                   (
-                    conja,
-                    conjx,
+                    conj_a,
+                    conj_x,
                     m,
                     *alpha,
                     a1, inca,
@@ -78,69 +78,67 @@ void ref_dotxf( conj_t conja,
                 }
             }
 
-template void ref_dotxf<double>( 
-                conj_t conja,
-                conj_t conjx,
-                gint_t m,
-                gint_t b,
+template void ref_dotxf<double>(
+                char conj_a,
+                char conj_x,
+                gtint_t m,
+                gtint_t b,
                 double *alpha,
                 double* A,
-                gint_t inca,
-                gint_t lda,
+                gtint_t inca,
+                gtint_t lda,
                 double* x,
-                gint_t incx,
+                gtint_t incx,
                 double *beta,
                 double* y,
-                gint_t incy
+                gtint_t incy
               );
 
-template void ref_dotxf<float>( 
-                conj_t conja,
-                conj_t conjx,
-                gint_t m,
-                gint_t b,
+template void ref_dotxf<float>(
+                char conj_a,
+                char conj_x,
+                gtint_t m,
+                gtint_t b,
                 float *alpha,
                 float* A,
-                gint_t inca,
-                gint_t lda,
+                gtint_t inca,
+                gtint_t lda,
                 float* x,
-                gint_t incx,
+                gtint_t incx,
                 float *beta,
                 float* y,
-                gint_t incy
+                gtint_t incy
               );
 
-template void ref_dotxf<scomplex>( 
-                conj_t conja,
-                conj_t conjx,
-                gint_t m,
-                gint_t b,
+template void ref_dotxf<scomplex>(
+                char conj_a,
+                char conj_x,
+                gtint_t m,
+                gtint_t b,
                 scomplex *alpha,
                 scomplex* A,
-                gint_t inca,
-                gint_t lda,
+                gtint_t inca,
+                gtint_t lda,
                 scomplex* x,
-                gint_t incx,
+                gtint_t incx,
                 scomplex *beta,
                 scomplex* y,
-                gint_t incy
+                gtint_t incy
               );
 
-template void ref_dotxf<dcomplex>( 
-                conj_t conja,
-                conj_t conjx,
-                gint_t m,
-                gint_t b,
+template void ref_dotxf<dcomplex>(
+                char conj_a,
+                char conj_x,
+                gtint_t m,
+                gtint_t b,
                 dcomplex *alpha,
                 dcomplex* A,
-                gint_t inca,
-                gint_t lda,
+                gtint_t inca,
+                gtint_t lda,
                 dcomplex* x,
-                gint_t incx,
+                gtint_t incx,
                 dcomplex *beta,
                 dcomplex* y,
-                gint_t incy
+                gtint_t incy
               );
 }
-      
-

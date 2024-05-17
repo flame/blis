@@ -55,22 +55,25 @@ TEST_P( ddotxffGeneric, API )
     // Initialize values from the parameters passed through
     // test suite instantiation (INSTANTIATE_TEST_SUITE_P).
     //----------------------------------------------------------
+    // denotes whether x or conj(x) will be used
     char conj_x = std::get<0>(GetParam());
-    conj_t conjx;
-    testinghelpers::char_to_blis_conj( conj_x, &conjx );
+    // denotes whether A or conj(A) will be used
     char conj_a = std::get<1>(GetParam());
-    conj_t conja;
-    testinghelpers::char_to_blis_conj( conj_a, &conja );
+    // matrix size m
     gtint_t m = std::get<2>(GetParam());
+    // matrix size n
     gtint_t b = std::get<3>(GetParam());
+    // alpha
     T alpha = std::get<4>(GetParam());
-
-    // stride size for x:
-    gtint_t inca = std::get<5>(GetParam());
-    // stride size for y:
-    gtint_t lda = std::get<6>(GetParam());
+    // lda increment for A
+    gtint_t lda_inc = std::get<5>(GetParam());
+    // stride size for A
+    gtint_t inca = std::get<6>(GetParam());
+    // stride size for x
     gtint_t incx = std::get<7>(GetParam());
+    // beta
     T beta = std::get<8>(GetParam());
+    // stride size for y
     gtint_t incy = std::get<9>(GetParam());
 
     // Set the threshold for the errors:
@@ -103,7 +106,7 @@ TEST_P( ddotxffGeneric, API )
     //----------------------------------------------------------
     //     Call generic test body using those parameters
     //----------------------------------------------------------
-    test_dotxf<T>( conjx, conja, m, b, &alpha, inca, lda, incx, &beta, incy, thresh );
+    test_dotxf<T>( conj_x, conj_a, m, b, &alpha, inca, lda_inc, incx, &beta, incy, thresh );
 }
 
 // Black box testing for generic and main use of ddotxf.
@@ -111,16 +114,16 @@ INSTANTIATE_TEST_SUITE_P(
         FunctionalTest,
         ddotxffGeneric,
         ::testing::Combine(
-            ::testing::Values('n'),                                          // n: use x, not conj(x) (since it is real)
-            ::testing::Values('n'),                                          // n: use x, not conj(x) (since it is real)
-            ::testing::Range(gtint_t(10), gtint_t(101), 10),                 // m size of matrix
-            ::testing::Range(gtint_t(6), gtint_t(10), 1),                    // b size of matrix
-            ::testing::Values(double(0.0), double(1.0), double(2.3)),        // alpha
-            ::testing::Values(gtint_t(0)),                                   // lda increment
-            ::testing::Values(gtint_t(1)),                                   // stride size for a
-            ::testing::Values(gtint_t(1)),                                   // stride size for x
-            ::testing::Values(double(1.0)),                     // beta
-            ::testing::Values(gtint_t(1))                                    // stride size for y
+            ::testing::Values('n'),                                         // n: use x, not conj(x) (since it is real)
+            ::testing::Values('n'),                                         // n: use x, not conj(x) (since it is real)
+            ::testing::Range(gtint_t(10), gtint_t(101), 10),                // m size of matrix
+            ::testing::Range(gtint_t(6), gtint_t(10), 1),                   // b size of matrix
+            ::testing::Values(double(0.0), double(1.0), double(2.3)),       // alpha
+            ::testing::Values(gtint_t(0)),                                  // lda increment
+            ::testing::Values(gtint_t(1)),                                  // stride size for a
+            ::testing::Values(gtint_t(1)),                                  // stride size for x
+            ::testing::Values(double(1.0)),                                 // beta
+            ::testing::Values(gtint_t(1))                                   // stride size for y
         ),
         ::dotxfGenericPrint<double>()
     );

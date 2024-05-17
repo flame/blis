@@ -39,58 +39,58 @@
 
 template<typename T>
 static void typed_dotxf(
-                conj_t conja,
-                conj_t conjx,
-                gint_t m,
-                gint_t b,
+                char conj_a,
+                char conj_x,
+                gtint_t m,
+                gtint_t b,
                 T *alpha,
                 T* A,
-                gint_t inca,
-                gint_t lda,
+                gtint_t inca,
+                gtint_t lda,
                 T* x,
-                gint_t incx,
+                gtint_t incx,
                 T *beta,
                 T* y,
-                gint_t incy)
+                gtint_t incy)
 {
-    conj_t conj_a;
-    conj_t conj_x;
+    conj_t conja;
+    conj_t conjx;
     // Map parameter characters to BLIS constants.
-    testinghelpers::char_to_blis_conj( conja, &conj_a );
-    testinghelpers::char_to_blis_conj( conjx, &conj_x );
+    testinghelpers::char_to_blis_conj( conj_a, &conja );
+    testinghelpers::char_to_blis_conj( conj_x, &conjx );
     if constexpr (std::is_same<T, float>::value)
-        bli_sdotxf(conj_a, conj_x, m, b, alpha, A, inca, lda, x, incx, beta, y, incy);
+        bli_sdotxf(conja, conjx, m, b, alpha, A, inca, lda, x, incx, beta, y, incy);
     else if constexpr (std::is_same<T, double>::value)
-        bli_ddotxf( conj_a, conj_x, m, b, alpha, A, inca, lda, x, incx, beta, y, incy );
+        bli_ddotxf( conja, conjx, m, b, alpha, A, inca, lda, x, incx, beta, y, incy );
     else if constexpr (std::is_same<T, scomplex>::value)
-        bli_cdotxf( conj_a, conj_x, m, b, alpha, A, inca, lda, x, incx, beta, y, incy );
+        bli_cdotxf( conja, conjx, m, b, alpha, A, inca, lda, x, incx, beta, y, incy );
     else if constexpr (std::is_same<T, dcomplex>::value)
-        bli_zdotxf( conj_a, conj_x, m, b, alpha, A, inca, lda, x, incx, beta, y, incy );
+        bli_zdotxf( conja, conjx, m, b, alpha, A, inca, lda, x, incx, beta, y, incy );
     else
         throw std::runtime_error("Error in testsuite/level1/dotv.h: Invalid typename in typed_dotv().");
 }
 
 template<typename T>
 static void dotxf(
-                conj_t conja,
-                conj_t conjx,
-                gint_t m,
-                gint_t b,
+                char conj_a,
+                char conj_x,
+                gtint_t m,
+                gtint_t b,
                 T *alpha,
                 T* A,
-                gint_t inca,
-                gint_t lda,
+                gtint_t inca,
+                gtint_t lda,
                 T* x,
-                gint_t incx,
+                gtint_t incx,
                 T *beta,
                 T* y,
-                gint_t incy
+                gtint_t incy
 )
 {
 
 #ifdef TEST_UPPERCASE_ARGS
-    conja = static_cast<char>(std::toupper(static_cast<unsigned char>(conja)));
-    conjx = static_cast<char>(std::toupper(static_cast<unsigned char>(conjx)));
+    conj_a = static_cast<char>(std::toupper(static_cast<unsigned char>(conj_a)));
+    conj_x = static_cast<char>(std::toupper(static_cast<unsigned char>(conj_x)));
 #endif
 
 /**
@@ -98,9 +98,9 @@ static void dotxf(
  * y := beta * y + alpha * conja(A) * conjx(x)
  * where A is an m x b matrix, and y and x are vectors.
  */
-    typed_dotxf<T>(       
-               conja,
-               conjx,
+    typed_dotxf<T>(
+               conj_a,
+               conj_x,
                m,
                b,
                alpha,

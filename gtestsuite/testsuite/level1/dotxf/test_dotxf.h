@@ -41,16 +41,16 @@
 
 template<typename T>
 static void test_dotxf(
-                conj_t conja,
-                conj_t conjx,
-                gint_t m,
-                gint_t b,
+                char conj_a,
+                char conj_x,
+                gtint_t m,
+                gtint_t b,
                 T *alpha,
-                gint_t inca,
-                gint_t lda_inc,
-                gint_t incx,
+                gtint_t inca,
+                gtint_t lda_inc,
+                gtint_t incx,
                 T *beta,
-                gint_t incy,
+                gtint_t incy,
                 double thresh
                 )
 {
@@ -67,7 +67,7 @@ static void test_dotxf(
     std::vector<T> A = testinghelpers::get_random_matrix<T>( -2, 8, 'c', 'n', m, b, lda );
 
     std::vector<T> x = testinghelpers::get_random_vector<T>( -10, 10, m, incx );
-    std::vector<T> y = testinghelpers::get_random_vector<T>( -10, 10, m, incy );
+    std::vector<T> y = testinghelpers::get_random_vector<T>( -10, 10, b, incy );
 
     //----------------------------------------------------------
     //    Call reference implementation to get ref results.
@@ -75,17 +75,17 @@ static void test_dotxf(
     // Create a copy of y so that we can check reference results.
     std::vector<T> y_ref(y);
 
-    testinghelpers::ref_dotxf<T>( conja, conjx, m, b, alpha, A.data(), inca, lda, x.data(), incx, beta, y_ref.data(), incy );
+    testinghelpers::ref_dotxf<T>( conj_a, conj_x, m, b, alpha, A.data(), inca, lda, x.data(), incx, beta, y_ref.data(), incy );
 
     //----------------------------------------------------------
     //                  Call BLIS function.
     //----------------------------------------------------------
-    dotxf<T>( conja, conjx, m, b, alpha, A.data(), inca, lda, x.data(), incx, beta, y.data(), incy );
+    dotxf<T>( conj_a, conj_x, m, b, alpha, A.data(), inca, lda, x.data(), incx, beta, y.data(), incy );
 
     //---------------------------------------------------------
     //              Compute component-wise error.
     //----------------------------------------------------------
-    computediff<T>( "y", m, y.data(), y_ref.data(), incy, thresh, true );
+    computediff<T>( "y", b, y.data(), y_ref.data(), incy, thresh, true );
 }
 
 
@@ -95,15 +95,15 @@ class dotxfGenericPrint {
 public:
     std::string operator()(
         testing::TestParamInfo<std::tuple<char,
-                                                   char,
-                                                   gtint_t,
-                                                   gtint_t,
-                                                   T,
-                                                   gtint_t,
-                                                   gtint_t,
-                                                   gtint_t,
-                                                   T,
-                                                   gtint_t>> str) const {
+                                          char,
+                                          gtint_t,
+                                          gtint_t,
+                                          T,
+                                          gtint_t,
+                                          gtint_t,
+                                          gtint_t,
+                                          T,
+                                          gtint_t>> str) const {
         char conja    = std::get<0>(str.param);
         char conjx    = std::get<1>(str.param);
         gtint_t m     = std::get<2>(str.param);

@@ -39,8 +39,8 @@
 
 template<typename T>
 static void typed_axpyf(
-                conj_t conja,
-                conj_t conjx,
+                char conj_a,
+                char conj_x,
                 gtint_t m,
                 gtint_t b,
                 T *alpha,
@@ -52,27 +52,27 @@ static void typed_axpyf(
                 T* y,
                 gtint_t incy)
 {
-    conj_t conj_a;
-    conj_t conj_x;
+    conj_t conja;
+    conj_t conjx;
     // Map parameter characters to BLIS constants.
-    testinghelpers::char_to_blis_conj( conja, &conj_a );
-    testinghelpers::char_to_blis_conj( conjx, &conj_x );
+    testinghelpers::char_to_blis_conj( conj_a, &conja );
+    testinghelpers::char_to_blis_conj( conj_x, &conjx );
     if constexpr (std::is_same<T, float>::value)
-        bli_saxpyf(conj_a, conj_x, m, b, alpha, A, inca, lda, x, incx, y, incy);
+        bli_saxpyf( conja, conjx, m, b, alpha, A, inca, lda, x, incx, y, incy );
     else if constexpr (std::is_same<T, double>::value)
-        bli_daxpyf( conj_a, conj_x, m, b, alpha, A, inca, lda, x, incx, y, incy );
+        bli_daxpyf( conja, conjx, m, b, alpha, A, inca, lda, x, incx, y, incy );
     else if constexpr (std::is_same<T, scomplex>::value)
-        bli_caxpyf( conj_a, conj_x, m, b, alpha, A, inca, lda, x, incx, y, incy );
+        bli_caxpyf( conja, conjx, m, b, alpha, A, inca, lda, x, incx, y, incy );
     else if constexpr (std::is_same<T, dcomplex>::value)
-        bli_zaxpyf( conj_a, conj_x, m, b, alpha, A, inca, lda, x, incx, y, incy );
+        bli_zaxpyf( conja, conjx, m, b, alpha, A, inca, lda, x, incx, y, incy );
     else
         throw std::runtime_error("Error in testsuite/level1/axpyv.h: Invalid typename in typed_axpyv().");
 }
 
 template<typename T>
 static void axpyf(
-                conj_t conja,
-                conj_t conjx,
+                char conj_a,
+                char conj_x,
                 gtint_t m,
                 gtint_t b,
                 T *alpha,
@@ -87,19 +87,19 @@ static void axpyf(
 {
 
 #ifdef TEST_UPPERCASE_ARGS
-    conja = static_cast<char>(std::toupper(static_cast<unsigned char>(conja)));
-    conjx = static_cast<char>(std::toupper(static_cast<unsigned char>(conjx)));
+    conj_a = static_cast<char>(std::toupper(static_cast<unsigned char>(conj_a)));
+    conj_x = static_cast<char>(std::toupper(static_cast<unsigned char>(conj_x)));
 #endif
 
 /**
  * axpyf operation is defined as :
  * y := y + alpha * conja(A) * conjx(x)
- * where A is an m x b matrix, and y and x are vectors. 
+ * where A is an m x b matrix, and y and x are vectors.
  * Matrix should be represented as "A" instead of "a" to distinguish it from vector.
 */
     typed_axpyf<T>(
-               conja,
-               conjx,
+               conj_a,
+               conj_x,
                m,
                b,
                alpha,

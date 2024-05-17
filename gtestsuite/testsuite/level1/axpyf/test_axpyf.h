@@ -41,7 +41,7 @@
 /**
  * axpyf operation is defined as :
  * y := y + alpha * conja(A) * conjx(x)
- * where A is an m x b matrix, and y and x are vectors. 
+ * where A is an m x b matrix, and y and x are vectors.
  * Matrix should be represented as "A" instead of "a" to distinguish it from vector.
 */
 template<typename T>
@@ -73,12 +73,6 @@ static void test_axpyf(
     std::vector<T> x = testinghelpers::get_random_vector<T>( -10, 10, m, incx );
     std::vector<T> y = testinghelpers::get_random_vector<T>( -10, 10, m, incy );
 
-    // Convert conjugate to BLIS conjugate
-    conj_t conjx;
-    testinghelpers::char_to_blis_conj( conj_x, &conjx );
-    conj_t conja;
-    testinghelpers::char_to_blis_conj( conj_a, &conja );
-
     //----------------------------------------------------------
     //    Call reference implementation to get ref results.
     //----------------------------------------------------------
@@ -90,7 +84,7 @@ static void test_axpyf(
     //----------------------------------------------------------
     //                  Call BLIS function.
     //----------------------------------------------------------
-    axpyf<T>( conja, conjx, m, b, alpha, A.data(), inca, lda, x.data(), incx, y.data(), incy );
+    axpyf<T>( conj_a, conj_x, m, b, alpha, A.data(), inca, lda, x.data(), incx, y.data(), incy );
 
     //---------------------------------------------------------
     //              Compute component-wise error.
