@@ -60,16 +60,16 @@ void bls_gemm_ex
 // -- Prototype the gemm-like operation's thread entry point -------------------
 //
 
-void bls_gemm_int
+err_t bls_gemm_int
      (
-       obj_t*  alpha,
-       obj_t*  a,
-       obj_t*  b,
-       obj_t*  beta,
-       obj_t*  c,
-       cntx_t* cntx,
-       rntm_t* rntm,
-       thrinfo_t* thread
+       const obj_t*     alpha,
+       const obj_t*     a,
+       const obj_t*     b,
+       const obj_t*     beta,
+       const obj_t*     c,
+       const cntx_t*    cntx,
+       const rntm_t*    rntm,
+             thrinfo_t* thread
      );
 
 //
