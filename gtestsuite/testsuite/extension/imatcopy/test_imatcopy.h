@@ -60,7 +60,7 @@ static void test_imatcopy( char storage, char trans, gtint_t m, gtint_t n, T alp
     gtint_t size_a_out = testinghelpers::matsize( storage, A_out_trans, m, n, lda_out ) * sizeof( T );
 
     // A has to allocated the maximum of input and output sizes, for API compatibility
-    gtint_t size_a = std::max( size_a_in, size_a_out );
+    gtint_t size_a = (std::max)( size_a_in, size_a_out );
 
     // Create the objects for the input and output operands
     // The API does not expect the memory to be aligned
