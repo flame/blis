@@ -68,6 +68,11 @@ static doublereal c_b52 = 0.;
 /*  ===================================================================== */
 /* Main program */ int main(void)
 {
+#ifdef BLIS_ENABLE_HPX
+    char* program = "zblat1";
+    bli_thread_initialize_hpx( 1, &program );
+#endif
+
     /* Initialized data */
 
     static doublereal sfac = 9.765625e-4;
@@ -84,7 +89,7 @@ static doublereal c_b52 = 0.;
 
     /* Local variables */
     integer ic;
-    extern /* Subroutine */ int check1_(doublereal *), check2_(doublereal *), 
+    extern /* Subroutine */ int check1_(doublereal *), check2_(doublereal *),
 	    header_(void);
 
     /* Fortran I/O blocks */
@@ -136,7 +141,12 @@ static doublereal c_b52 = 0.;
     }
     s_stop("", (ftnlen)0);
 
-    return 0;
+#ifdef BLIS_ENABLE_HPX
+    return bli_thread_finalize_hpx();
+#else
+	// Return peacefully.
+	return 0;
+#endif
 } /* main */
 
 /* Subroutine */ int header_(void)
@@ -222,7 +232,7 @@ static doublereal c_b52 = 0.;
     doublecomplex z__1;
 
     /* Builtin functions */
-    integer s_wsle(cilist *), do_lio(integer *, integer *, char *, ftnlen), 
+    integer s_wsle(cilist *), do_lio(integer *, integer *, char *, ftnlen),
 	    e_wsle(void);
     /* Subroutine */ int s_stop(char *, ftnlen);
 
@@ -230,14 +240,14 @@ static doublereal c_b52 = 0.;
     integer i__;
     doublecomplex cx[8];
     integer np1, len;
-    extern /* Subroutine */ int zscal_(integer *, doublecomplex *, 
-	    doublecomplex *, integer *), ctest_(integer *, doublecomplex *, 
+    extern /* Subroutine */ int zscal_(integer *, doublecomplex *,
+	    doublecomplex *, integer *), ctest_(integer *, doublecomplex *,
 	    doublecomplex *, doublecomplex *, doublereal *);
     doublecomplex mwpcs[5], mwpct[5];
     extern /* Subroutine */ int itest1_(integer *, integer *);
     extern doublereal dznrm2_(integer *, doublecomplex *, integer *);
-    extern /* Subroutine */ int stest1_(doublereal *, doublereal *, 
-	    doublereal *, doublereal *), zdscal_(integer *, doublereal *, 
+    extern /* Subroutine */ int stest1_(doublereal *, doublereal *,
+	    doublereal *, doublereal *), zdscal_(integer *, doublereal *,
 	    doublecomplex *, integer *);
     extern integer izamax_(integer *, doublecomplex *, integer *);
     extern doublereal dzasum_(integer *, doublecomplex *, integer *);
@@ -433,7 +443,7 @@ static doublereal c_b52 = 0.;
 	    0.,0.},{0.,0.},{0.,0.},{0.,0.},{.7,-.8},{-.9,.5},{-.4,-.7},{0.,0.}
 	    ,{0.,0.},{0.,0.},{0.,0.},{.7,-.8},{-.9,.5},{-.4,-.7},{.1,-.5},{
 	    -.1,-.9},{-.5,-.3},{.2,-.8} };
-    static doublecomplex csize1[4] = { {0.,0.},{.9,.9},{1.63,1.73},{2.9,2.78} 
+    static doublecomplex csize1[4] = { {0.,0.},{.9,.9},{1.63,1.73},{2.9,2.78}
 	    };
     static doublecomplex csize3[14] = { {0.,0.},{0.,0.},{0.,0.},{0.,0.},{0.,
 	    0.},{0.,0.},{0.,0.},{1.17,1.17},{1.17,1.17},{1.17,1.17},{1.17,
@@ -447,7 +457,7 @@ static doublereal c_b52 = 0.;
     doublecomplex z__1;
 
     /* Builtin functions */
-    integer s_wsle(cilist *), do_lio(integer *, integer *, char *, ftnlen), 
+    integer s_wsle(cilist *), do_lio(integer *, integer *, char *, ftnlen),
 	    e_wsle(void);
     /* Subroutine */ int s_stop(char *, ftnlen);
 
@@ -457,7 +467,7 @@ static doublereal c_b52 = 0.;
     integer mx, my;
     doublecomplex cdot[1];
     integer lenx, leny;
-    extern /* Subroutine */ int ctest_(integer *, doublecomplex *, 
+    extern /* Subroutine */ int ctest_(integer *, doublecomplex *,
 	    doublecomplex *, doublecomplex *, doublereal *);
     extern /* Double Complex */
 #ifdef BLIS_ENABLE_COMPLEX_RETURN_INTEL
@@ -465,10 +475,10 @@ static doublereal c_b52 = 0.;
 #else
 doublecomplex zdotc_(
 #endif
- integer *, 
+ integer *,
 	    doublecomplex *, integer *, doublecomplex *, integer *);
     integer ksize;
-    extern /* Subroutine */ int zcopy_(integer *, doublecomplex *, integer *, 
+    extern /* Subroutine */ int zcopy_(integer *, doublecomplex *, integer *,
 	    doublecomplex *, integer *);
     extern /* Double Complex */
 #ifdef BLIS_ENABLE_COMPLEX_RETURN_INTEL
@@ -476,10 +486,10 @@ doublecomplex zdotc_(
 #else
 doublecomplex zdotu_(
 #endif
- integer *, 
+ integer *,
 	    doublecomplex *, integer *, doublecomplex *, integer *);
-    extern /* Subroutine */ int zswap_(integer *, doublecomplex *, integer *, 
-	    doublecomplex *, integer *), zaxpy_(integer *, doublecomplex *, 
+    extern /* Subroutine */ int zswap_(integer *, doublecomplex *, integer *,
+	    doublecomplex *, integer *), zaxpy_(integer *, doublecomplex *,
 	    doublecomplex *, integer *, doublecomplex *, integer *);
 
     /* Fortran I/O blocks */
@@ -669,11 +679,11 @@ L40:
 
 } /* stest_ */
 
-/* Subroutine */ int stest1_(doublereal *scomp1, doublereal *strue1, 
+/* Subroutine */ int stest1_(doublereal *scomp1, doublereal *strue1,
 	doublereal *ssize, doublereal *sfac)
 {
     doublereal scomp[1], strue[1];
-    extern /* Subroutine */ int stest_(integer *, doublereal *, doublereal *, 
+    extern /* Subroutine */ int stest_(integer *, doublereal *, doublereal *,
 	    doublereal *, doublereal *);
 
 /*     ************************* STEST1 ***************************** */
@@ -715,7 +725,7 @@ doublereal sdiff_(doublereal *sa, doublereal *sb)
     return ret_val;
 } /* sdiff_ */
 
-/* Subroutine */ int ctest_(integer *len, doublecomplex *ccomp, doublecomplex 
+/* Subroutine */ int ctest_(integer *len, doublecomplex *ccomp, doublecomplex
 	*ctrue, doublecomplex *csize, doublereal *sfac)
 {
     /* System generated locals */
@@ -727,7 +737,7 @@ doublereal sdiff_(doublereal *sa, doublereal *sb)
     /* Local variables */
     integer i__;
     doublereal scomp[20], ssize[20], strue[20];
-    extern /* Subroutine */ int stest_(integer *, doublereal *, doublereal *, 
+    extern /* Subroutine */ int stest_(integer *, doublereal *, doublereal *,
 	    doublereal *, doublereal *);
 
 /*     **************************** CTEST ***************************** */

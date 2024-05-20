@@ -17,11 +17,14 @@ viewing the file over GitHub via a web browser:
 This document will always contain the most up-to-date information related
 to instantiating a BLIS library from the framework source code. If you have
 any further questions or wish to provide feedback, please contact the BLIS
-community by posting your message to the BLIS developer's mailing list:
+community by either by joining our Discord community! Instructions for
+joining may be found in:
 
-  https://groups.google.com/d/forum/blis-devel
+  docs/Discord.md
+
+or in rendered form at:
+
+  https://github.com/flame/blis/blob/master/docs/Discord.md
 
 Thanks for your interest in the BLIS framework!
-
-Field Van Zee
 

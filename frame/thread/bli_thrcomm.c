@@ -74,16 +74,18 @@ static thrcomm_init_ft init_fpa[ BLIS_NUM_THREAD_IMPLS ] =
 	[BLIS_OPENMP] =
 #if   defined(BLIS_ENABLE_OPENMP)
 	                bli_thrcomm_init_openmp,
-#elif defined(BLIS_ENABLE_PTHREADS)
-	                NULL,
 #else
 	                NULL,
 #endif
 	[BLIS_POSIX]  =
 #if   defined(BLIS_ENABLE_PTHREADS)
 	                bli_thrcomm_init_pthreads,
-#elif defined(BLIS_ENABLE_OPENMP)
+#else
 	                NULL,
+#endif
+	[BLIS_HPX]  =
+#if   defined(BLIS_ENABLE_HPX)
+	                bli_thrcomm_init_hpx,
 #else
 	                NULL,
 #endif
@@ -94,16 +96,18 @@ static thrcomm_cleanup_ft cleanup_fpa[ BLIS_NUM_THREAD_IMPLS ] =
 	[BLIS_OPENMP] =
 #if   defined(BLIS_ENABLE_OPENMP)
 	                bli_thrcomm_cleanup_openmp,
-#elif defined(BLIS_ENABLE_PTHREADS)
-	                NULL,
 #else
 	                NULL,
 #endif
 	[BLIS_POSIX]  =
 #if   defined(BLIS_ENABLE_PTHREADS)
 	                bli_thrcomm_cleanup_pthreads,
-#elif defined(BLIS_ENABLE_OPENMP)
+#else
 	                NULL,
+#endif
+	[BLIS_HPX]  =
+#if   defined(BLIS_ENABLE_HPX)
+	                bli_thrcomm_cleanup_hpx,
 #else
 	                NULL,
 #endif
@@ -114,18 +118,20 @@ static thrcomm_barrier_ft barrier_fpa[ BLIS_NUM_THREAD_IMPLS ] =
 	[BLIS_OPENMP] =
 #if   defined(BLIS_ENABLE_OPENMP)
 	                bli_thrcomm_barrier_openmp,
-#elif defined(BLIS_ENABLE_PTHREADS)
-	                bli_thrcomm_barrier_pthreads,
 #else
-	                bli_thrcomm_barrier_single,
+	                NULL,
 #endif
 	[BLIS_POSIX]  =
 #if   defined(BLIS_ENABLE_PTHREADS)
 	                bli_thrcomm_barrier_pthreads,
-#elif defined(BLIS_ENABLE_OPENMP)
-	                bli_thrcomm_barrier_openmp,
 #else
-	                bli_thrcomm_barrier_single,
+	                NULL,
+#endif
+	[BLIS_HPX]  =
+#if   defined(BLIS_ENABLE_HPX)
+	                bli_thrcomm_barrier_hpx,
+#else
+	                NULL,
 #endif
 };
 

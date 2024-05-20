@@ -1,3 +1,8 @@
+_Recipient of the **[2023 James H. Wilkinson Prize for Numerical Software](https://www.siam.org/prizes-recognition/major-prizes-lectures/detail/james-h-wilkinson-prize-for-numerical-software)**_
+
+_Recipient of the **[2020 SIAM Activity Group on Supercomputing Best Paper Prize](https://www.siam.org/prizes-recognition/activity-group-prizes/detail/siag-sc-best-paper-prize)**_
+
+
 ![The BLIS cat is sleeping.](http://www.cs.utexas.edu/users/field/blis_cat.png)
 
 [![Build Status](https://api.travis-ci.com/flame/blis.svg?branch=master)](https://app.travis-ci.com/github/flame/blis)
@@ -22,12 +27,14 @@ Contents
 * **[Discussion](#discussion)**
 * **[Contributing](#contributing)**
 * **[Citations](#citations)**
+* **[Awards](#awards)**
 * **[Funding](#funding)**
 
 Introduction
 ------------
 
-BLIS is a portable software framework for instantiating high-performance
+BLIS is an [award-winning](#awards)
+portable software framework for instantiating high-performance
 BLAS-like dense linear algebra libraries. The framework was designed to isolate
 essential kernels of computation that, when optimized, immediately enable
 optimized implementations of most of its commonly used and computationally
@@ -99,16 +106,30 @@ all of which are available for free via the [edX platform](http://www.edx.org/).
 What's New
 ----------
 
+ * **BLIS selected for the 2023 James H. Wilkinson Prize for Numerical Software!** We
+are thrilled to announce that Field Van Zee and Devin Matthews were chosen to receive
+the [2023 James H. Wilkinson Prize for Numerical Software](https://www.siam.org/prizes-recognition/major-prizes-lectures/detail/james-h-wilkinson-prize-for-numerical-software).
+The selection committee sought to recognize the recipients "for the development of
+BLIS, a portable open-source software framework that facilitates rapid instantiation
+of high-performance BLAS and BLAS-like operations targeting modern CPUs." This prize
+is awarded once every four years to the authors of an outstanding piece of numerical
+software, or to individuals who have made an outstanding contribution to an existing
+piece of numerical software. It is awarded to an entry that best addresses all phases
+of the preparation of high-quality numerical software, and is intended to recognize
+innovative software in scientific computing and to encourage researchers in the
+earlier stages of their career. The prize will be awarded at the
+[2023 SIAM Conference on Computational Science and Engineering](https://www.siam.org/conferences/cm/conference/cse23) in Amsterdam.
+
  * **Join us on Discord!** In 2021, we soft-launched our [Discord](https://discord.com/)
 server by privately inviting current and former collaborators, attendees of our BLIS
-Retreat, as well as other participants within the BLIS ecosystem. We've been thrilled by
-the results thus far, and are happy to announce that our new community is now open to
-the broader public! If you'd like to hang out with other BLIS users and developers,
-ask a question, discuss future features, or just say hello, please feel free to join us!
-We've put together a [step-by-step guide](docs/Discord.md) for creating an account and
-joining our cozy enclave. We even have a monthly "BLIS happy hour" event where people
-can casually come together for a video chat, Q&A, brainstorm session, or whatever it
-happens to unfold into!
+Retreat, as well as other participants within the BLIS ecosystem. We've been thrilled
+by the results thus far, and are happy to announce that our new community is now open
+to the broader public! If you'd like to hang out with other BLIS users and developers,
+ask a question, discuss future features, or just say hello, please feel free to join
+us! We've put together a [step-by-step guide](docs/Discord.md) for creating an account
+and joining our cozy enclave. We even have a monthly "BLIS happy hour" event where
+people can casually come together for a video chat, Q&A, brainstorm session, or
+whatever it happens to unfold into!
 
  * **Addons feature now available!** Have you ever wanted to quickly extend BLIS's
 operation support or define new custom BLIS APIs for your application, but were
@@ -265,7 +286,7 @@ writing complex kernels.
 
  * **Advanced multithreading support.** BLIS allows multiple levels of
 symmetric multithreading for nearly all level-3 operations. (Currently, users
-may choose to obtain parallelism via either OpenMP or POSIX threads). This
+may choose to obtain parallelism via OpenMP, POSIX threads, or HPX). This
 means that matrices may be partitioned in multiple dimensions simultaneously to
 attain scalable, high-performance parallelism on multicore and many-core
 architectures. The key to this innovation is a thread-specific control tree
@@ -622,10 +643,10 @@ releases. The source packages may build on other rpm-based distributions.
 the source rpms may build for others.
 
  * **GNU Guix**. Guix has BLIS packages, provides builds only for the generic
-target and some specific x86_64 micro-architectures.
+target and some specific `x86_64` micro-architectures.
 
  * **Conda**. conda channel [conda-forge](https://github.com/conda-forge/blis-feedstock)
-has Linux, OSX and Windows binary packages for x86_64.
+has Linux, OSX and Windows binary packages for `x86_64`.
 
 Discussion
 ----------
@@ -794,6 +815,29 @@ within the BLIS Framework},
    url         = {https://doi.org/10.1145/3402225},
 }
 ```
+
+Awards
+------
+
+ * **[2023 James H. Wilkinson Prize for Numerical Software.](https://www.siam.org/prizes-recognition/major-prizes-lectures/detail/james-h-wilkinson-prize-for-numerical-software)**
+This prize is awarded once every four years to the authors of an outstanding piece of
+numerical software, or to individuals who have made an outstanding contribution to an
+existing piece of numerical software. The selection committee sought to recognize the
+recipients "for the development of [BLIS](https://github.com/flame/blis), a portable
+open-source software framework that facilitates rapid instantiation of
+high-performance BLAS and BLAS-like operations targeting modern CPUs." The prize will
+be awarded at the
+[2023 SIAM Conference on Computational Science and Engineering](https://www.siam.org/conferences/cm/conference/cse23) in Amsterdam.
+
+ * **[2020 SIAM Activity Group on Supercomputing Best Paper Prize.](https://www.siam.org/prizes-recognition/activity-group-prizes/detail/siag-sc-best-paper-prize)**
+This prize is awarded once every two years to the authors of the most outstanding
+paper, as determined by the selection committee, in the field of parallel scientific
+and engineering computing published within the four calendar years preceding the
+award year. The prize was chosen for the paper ["The BLIS Framework: Experiments in
+Portability."](#citations) and awarded at the [2020 SIAM Conference on Parallel Processing for Scientific Computing](https://www.siam.org/conferences/cm/conference/pp20) in Seattle where Robert van de Geijn delivered [a talk on BLIS](https://meetings.siam.org/sess/dsp_programsess.cfm?SESSIONCODE=68266) and accepted the prize alongside other coauthors.
+See also:
+   * [SIAM News | January 2020 Prize Spotlight](https://sinews.siam.org/Details-Page/january-2020-prize-spotlight#Field&Robert)
+   * [Oden Institute's SHPC Group Win SIAM Best Paper Prize](https://www.oden.utexas.edu/about/news/ScienceHighPerfomanceComputingSIAMBestPaperPrize/)
 
 Funding
 -------

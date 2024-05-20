@@ -230,12 +230,15 @@ void bli_l3_thread_decorator_check
 #ifndef BLIS_ENABLE_PTHREADS
 	     ti == BLIS_POSIX ||
 #endif
+#ifndef BLIS_ENABLE_HPX
+	     ti == BLIS_HPX ||
+#endif
 	     FALSE
 	   )
 	{
 		fprintf( stderr, "\n" );
-		fprintf( stderr, "libblis: User requested threading implementation \"%s\", but that method is\n", ( ti == BLIS_OPENMP ? "openmp" : "pthreads" ) );
-		fprintf( stderr, "libblis: unavailable. Try reconfiguring BLIS with \"-t %s\" and recompiling.\n", ( ti == BLIS_OPENMP ? "openmp" : "pthreads" ) );
+		fprintf( stderr, "libblis: User requested threading implementation \"%s\", but that method is\n", bli_thread_get_thread_impl_str( ti ) );
+		fprintf( stderr, "libblis: unavailable. Try reconfiguring BLIS with \"-t %s\" and recompiling.\n", bli_thread_get_thread_impl_str( ti ) );
 		fprintf( stderr, "libblis: %s: line %d\n", __FILE__, ( int )__LINE__ );
 		bli_abort();
 	}

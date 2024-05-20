@@ -155,10 +155,15 @@ static logical c_false = FALSE_;
 /*  ===================================================================== */
 /* Main program */ int main(void)
 {
+#ifdef BLIS_ENABLE_HPX
+    char* program = "dblat2";
+    bli_thread_initialize_hpx( 1, &program );
+#endif
+
     /* Initialized data */
 
-    static char snames[6*16] = "DGEMV " "DGBMV " "DSYMV " "DSBMV " "DSPMV " 
-	    "DTRMV " "DTBMV " "DTPMV " "DTRSV " "DTBSV " "DTPSV " "DGER  " 
+    static char snames[6*16] = "DGEMV " "DGBMV " "DSYMV " "DSBMV " "DSPMV "
+	    "DTRMV " "DTBMV " "DTPMV " "DTRSV " "DTBSV " "DTPSV " "DGER  "
 	    "DSYR  " "DSPR  " "DSYR2 " "DSPR2 ";
 
     /* Format strings */
@@ -204,10 +209,10 @@ static logical c_false = FALSE_;
     cllist cl__1;
 
     /* Builtin functions */
-    integer s_rsle(cilist *), do_lio(integer *, integer *, char *, ftnlen), 
+    integer s_rsle(cilist *), do_lio(integer *, integer *, char *, ftnlen),
 	    e_rsle(void), f_open(olist *), s_wsfe(cilist *), do_fio(integer *,
-	     char *, ftnlen), e_wsfe(void), s_wsle(cilist *), e_wsle(void), 
-	    s_rsfe(cilist *), e_rsfe(void), s_cmp(const char *, const char *, ftnlen, 
+	     char *, ftnlen), e_wsfe(void), s_wsle(cilist *), e_wsle(void),
+	    s_rsfe(cilist *), e_rsfe(void), s_cmp(const char *, const char *, ftnlen,
 	    ftnlen);
     /* Subroutine */ int s_stop(char *, ftnlen);
     integer f_clos(cllist *);
@@ -227,50 +232,50 @@ static logical c_false = FALSE_;
     integer ninc, nbet, ntra;
     logical rewi;
     integer nout;
-    extern /* Subroutine */ int dchk1_(char *, doublereal *, doublereal *, 
-	    integer *, integer *, logical *, logical *, logical *, integer *, 
-	    integer *, integer *, integer *, integer *, doublereal *, integer 
-	    *, doublereal *, integer *, integer *, integer *, integer *, 
-	    doublereal *, doublereal *, doublereal *, doublereal *, 
-	    doublereal *, doublereal *, doublereal *, doublereal *, 
-	    doublereal *, doublereal *, doublereal *, ftnlen), dchk2_(char *, 
-	    doublereal *, doublereal *, integer *, integer *, logical *, 
-	    logical *, logical *, integer *, integer *, integer *, integer *, 
-	    integer *, doublereal *, integer *, doublereal *, integer *, 
-	    integer *, integer *, integer *, doublereal *, doublereal *, 
-	    doublereal *, doublereal *, doublereal *, doublereal *, 
-	    doublereal *, doublereal *, doublereal *, doublereal *, 
-	    doublereal *, ftnlen), dchk3_(char *, doublereal *, doublereal *, 
-	    integer *, integer *, logical *, logical *, logical *, integer *, 
-	    integer *, integer *, integer *, integer *, integer *, integer *, 
+    extern /* Subroutine */ int dchk1_(char *, doublereal *, doublereal *,
+	    integer *, integer *, logical *, logical *, logical *, integer *,
+	    integer *, integer *, integer *, integer *, doublereal *, integer
+	    *, doublereal *, integer *, integer *, integer *, integer *,
+	    doublereal *, doublereal *, doublereal *, doublereal *,
+	    doublereal *, doublereal *, doublereal *, doublereal *,
+	    doublereal *, doublereal *, doublereal *, ftnlen), dchk2_(char *,
+	    doublereal *, doublereal *, integer *, integer *, logical *,
+	    logical *, logical *, integer *, integer *, integer *, integer *,
+	    integer *, doublereal *, integer *, doublereal *, integer *,
+	    integer *, integer *, integer *, doublereal *, doublereal *,
+	    doublereal *, doublereal *, doublereal *, doublereal *,
+	    doublereal *, doublereal *, doublereal *, doublereal *,
+	    doublereal *, ftnlen), dchk3_(char *, doublereal *, doublereal *,
+	    integer *, integer *, logical *, logical *, logical *, integer *,
+	    integer *, integer *, integer *, integer *, integer *, integer *,
 	    integer *, doublereal *, doublereal *, doublereal *, doublereal *,
-	     doublereal *, doublereal *, doublereal *, doublereal *, 
-	    doublereal *, ftnlen), dchk4_(char *, doublereal *, doublereal *, 
-	    integer *, integer *, logical *, logical *, logical *, integer *, 
-	    integer *, integer *, doublereal *, integer *, integer *, integer 
-	    *, integer *, doublereal *, doublereal *, doublereal *, 
-	    doublereal *, doublereal *, doublereal *, doublereal *, 
-	    doublereal *, doublereal *, doublereal *, doublereal *, 
-	    doublereal *, ftnlen), dchk5_(char *, doublereal *, doublereal *, 
-	    integer *, integer *, logical *, logical *, logical *, integer *, 
-	    integer *, integer *, doublereal *, integer *, integer *, integer 
-	    *, integer *, doublereal *, doublereal *, doublereal *, 
-	    doublereal *, doublereal *, doublereal *, doublereal *, 
-	    doublereal *, doublereal *, doublereal *, doublereal *, 
-	    doublereal *, ftnlen), dchk6_(char *, doublereal *, doublereal *, 
-	    integer *, integer *, logical *, logical *, logical *, integer *, 
-	    integer *, integer *, doublereal *, integer *, integer *, integer 
-	    *, integer *, doublereal *, doublereal *, doublereal *, 
-	    doublereal *, doublereal *, doublereal *, doublereal *, 
-	    doublereal *, doublereal *, doublereal *, doublereal *, 
-	    doublereal *, ftnlen), dchke_(integer *, char *, integer *, 
+	     doublereal *, doublereal *, doublereal *, doublereal *,
+	    doublereal *, ftnlen), dchk4_(char *, doublereal *, doublereal *,
+	    integer *, integer *, logical *, logical *, logical *, integer *,
+	    integer *, integer *, doublereal *, integer *, integer *, integer
+	    *, integer *, doublereal *, doublereal *, doublereal *,
+	    doublereal *, doublereal *, doublereal *, doublereal *,
+	    doublereal *, doublereal *, doublereal *, doublereal *,
+	    doublereal *, ftnlen), dchk5_(char *, doublereal *, doublereal *,
+	    integer *, integer *, logical *, logical *, logical *, integer *,
+	    integer *, integer *, doublereal *, integer *, integer *, integer
+	    *, integer *, doublereal *, doublereal *, doublereal *,
+	    doublereal *, doublereal *, doublereal *, doublereal *,
+	    doublereal *, doublereal *, doublereal *, doublereal *,
+	    doublereal *, ftnlen), dchk6_(char *, doublereal *, doublereal *,
+	    integer *, integer *, logical *, logical *, logical *, integer *,
+	    integer *, integer *, doublereal *, integer *, integer *, integer
+	    *, integer *, doublereal *, doublereal *, doublereal *,
+	    doublereal *, doublereal *, doublereal *, doublereal *,
+	    doublereal *, doublereal *, doublereal *, doublereal *,
+	    doublereal *, ftnlen), dchke_(integer *, char *, integer *,
 	    ftnlen);
     logical fatal, trace;
     integer nidim;
-    extern /* Subroutine */ int dmvch_(char *, integer *, integer *, 
-	    doublereal *, doublereal *, integer *, doublereal *, integer *, 
+    extern /* Subroutine */ int dmvch_(char *, integer *, integer *,
+	    doublereal *, doublereal *, integer *, doublereal *, integer *,
 	    doublereal *, doublereal *, integer *, doublereal *, doublereal *,
-	     doublereal *, doublereal *, doublereal *, logical *, integer *, 
+	     doublereal *, doublereal *, doublereal *, logical *, integer *,
 	    logical *, ftnlen);
     char snaps[32], trans[1];
     integer isnum;
@@ -621,7 +626,7 @@ L50:
 	goto L80;
     }
     for (i__ = 1; i__ <= 16; ++i__) {
-	if (s_cmp(snamet, snames + (i__ - 1) * 6, (ftnlen)6, (ftnlen)6) == 0) 
+	if (s_cmp(snamet, snames + (i__ - 1) * 6, (ftnlen)6, (ftnlen)6) == 0)
 		{
 	    goto L70;
 	}
@@ -668,7 +673,7 @@ L80:
     }
     i__1 = n;
     for (j = 1; j <= i__1; ++j) {
-	yy[j - 1] = (doublereal) (j * ((j + 1) * j) / 2 - (j + 1) * j * (j - 
+	yy[j - 1] = (doublereal) (j * ((j + 1) * j) / 2 - (j + 1) * j * (j -
 		1) / 3);
 /* L130: */
     }
@@ -748,44 +753,44 @@ L80:
 /*           Test DGEMV, 01, and DGBMV, 02. */
 L140:
 	    dchk1_(snames + (isnum - 1) * 6, &eps, &thresh, &nout, &ntra, &
-		    trace, &rewi, &fatal, &nidim, idim, &nkb, kb, &nalf, alf, 
-		    &nbet, bet, &ninc, inc, &c__65, &c__2, a, aa, as, x, xx, 
+		    trace, &rewi, &fatal, &nidim, idim, &nkb, kb, &nalf, alf,
+		    &nbet, bet, &ninc, inc, &c__65, &c__2, a, aa, as, x, xx,
 		    xs, y, yy, ys, yt, g, (ftnlen)6);
 	    goto L200;
 /*           Test DSYMV, 03, DSBMV, 04, and DSPMV, 05. */
 L150:
 	    dchk2_(snames + (isnum - 1) * 6, &eps, &thresh, &nout, &ntra, &
-		    trace, &rewi, &fatal, &nidim, idim, &nkb, kb, &nalf, alf, 
-		    &nbet, bet, &ninc, inc, &c__65, &c__2, a, aa, as, x, xx, 
+		    trace, &rewi, &fatal, &nidim, idim, &nkb, kb, &nalf, alf,
+		    &nbet, bet, &ninc, inc, &c__65, &c__2, a, aa, as, x, xx,
 		    xs, y, yy, ys, yt, g, (ftnlen)6);
 	    goto L200;
 /*           Test DTRMV, 06, DTBMV, 07, DTPMV, 08, */
 /*           DTRSV, 09, DTBSV, 10, and DTPSV, 11. */
 L160:
 	    dchk3_(snames + (isnum - 1) * 6, &eps, &thresh, &nout, &ntra, &
-		    trace, &rewi, &fatal, &nidim, idim, &nkb, kb, &ninc, inc, 
+		    trace, &rewi, &fatal, &nidim, idim, &nkb, kb, &ninc, inc,
 		    &c__65, &c__2, a, aa, as, y, yy, ys, yt, g, z__, (ftnlen)
 		    6);
 	    goto L200;
 /*           Test DGER, 12. */
 L170:
 	    dchk4_(snames + (isnum - 1) * 6, &eps, &thresh, &nout, &ntra, &
-		    trace, &rewi, &fatal, &nidim, idim, &nalf, alf, &ninc, 
-		    inc, &c__65, &c__2, a, aa, as, x, xx, xs, y, yy, ys, yt, 
+		    trace, &rewi, &fatal, &nidim, idim, &nalf, alf, &ninc,
+		    inc, &c__65, &c__2, a, aa, as, x, xx, xs, y, yy, ys, yt,
 		    g, z__, (ftnlen)6);
 	    goto L200;
 /*           Test DSYR, 13, and DSPR, 14. */
 L180:
 	    dchk5_(snames + (isnum - 1) * 6, &eps, &thresh, &nout, &ntra, &
-		    trace, &rewi, &fatal, &nidim, idim, &nalf, alf, &ninc, 
-		    inc, &c__65, &c__2, a, aa, as, x, xx, xs, y, yy, ys, yt, 
+		    trace, &rewi, &fatal, &nidim, idim, &nalf, alf, &ninc,
+		    inc, &c__65, &c__2, a, aa, as, x, xx, xs, y, yy, ys, yt,
 		    g, z__, (ftnlen)6);
 	    goto L200;
 /*           Test DSYR2, 15, and DSPR2, 16. */
 L190:
 	    dchk6_(snames + (isnum - 1) * 6, &eps, &thresh, &nout, &ntra, &
-		    trace, &rewi, &fatal, &nidim, idim, &nalf, alf, &ninc, 
-		    inc, &c__65, &c__2, a, aa, as, x, xx, xs, y, yy, ys, yt, 
+		    trace, &rewi, &fatal, &nidim, idim, &nalf, alf, &ninc,
+		    inc, &c__65, &c__2, a, aa, as, x, xx, xs, y, yy, ys, yt,
 		    g, z__, (ftnlen)6);
 
 L200:
@@ -827,16 +832,21 @@ L240:
 
 /*     End of DBLAT2. */
 
-    return 0;
+#ifdef BLIS_ENABLE_HPX
+    return bli_thread_finalize_hpx();
+#else
+	// Return peacefully.
+	return 0;
+#endif
 } /* main */
 
-/* Subroutine */ int dchk1_(char *sname, doublereal *eps, doublereal *thresh, 
+/* Subroutine */ int dchk1_(char *sname, doublereal *eps, doublereal *thresh,
 	integer *nout, integer *ntra, logical *trace, logical *rewi, logical *
-	fatal, integer *nidim, integer *idim, integer *nkb, integer *kb, 
-	integer *nalf, doublereal *alf, integer *nbet, doublereal *bet, 
-	integer *ninc, integer *inc, integer *nmax, integer *incmax, 
-	doublereal *a, doublereal *aa, doublereal *as, doublereal *x, 
-	doublereal *xx, doublereal *xs, doublereal *y, doublereal *yy, 
+	fatal, integer *nidim, integer *idim, integer *nkb, integer *kb,
+	integer *nalf, doublereal *alf, integer *nbet, doublereal *bet,
+	integer *ninc, integer *inc, integer *nmax, integer *incmax,
+	doublereal *a, doublereal *aa, doublereal *as, doublereal *x,
+	doublereal *xx, doublereal *xs, doublereal *y, doublereal *yy,
 	doublereal *ys, doublereal *yt, doublereal *g, ftnlen sname_len)
 {
     /* Initialized data */
@@ -881,21 +891,21 @@ L240:
     logical same;
     integer incx, incy;
     logical full, tran, null;
-    extern /* Subroutine */ int dmake_(char *, char *, char *, integer *, 
-	    integer *, doublereal *, integer *, doublereal *, integer *, 
-	    integer *, integer *, logical *, doublereal *, ftnlen, ftnlen, 
+    extern /* Subroutine */ int dmake_(char *, char *, char *, integer *,
+	    integer *, doublereal *, integer *, doublereal *, integer *,
+	    integer *, integer *, logical *, doublereal *, ftnlen, ftnlen,
 	    ftnlen);
     doublereal alpha;
     logical isame[13];
     extern /* Subroutine */ int dgbmv_(char *, integer *, integer *, integer *
-	    , integer *, doublereal *, doublereal *, integer *, doublereal *, 
+	    , integer *, doublereal *, doublereal *, integer *, doublereal *,
 	    integer *, doublereal *, doublereal *, integer *, ftnlen), dgemv_(
-	    char *, integer *, integer *, doublereal *, doublereal *, integer 
+	    char *, integer *, integer *, doublereal *, doublereal *, integer
 	    *, doublereal *, integer *, doublereal *, doublereal *, integer *,
-	     ftnlen), dmvch_(char *, integer *, integer *, doublereal *, 
-	    doublereal *, integer *, doublereal *, integer *, doublereal *, 
+	     ftnlen), dmvch_(char *, integer *, integer *, doublereal *,
+	    doublereal *, integer *, doublereal *, integer *, doublereal *,
 	    doublereal *, integer *, doublereal *, doublereal *, doublereal *,
-	     doublereal *, doublereal *, logical *, integer *, logical *, 
+	     doublereal *, doublereal *, logical *, integer *, logical *,
 	    ftnlen);
     integer nargs;
     logical reset;
@@ -1079,9 +1089,9 @@ L240:
 				    transl = 0.;
 				    i__7 = abs(incy);
 				    i__8 = ml - 1;
-				    dmake_("GE", " ", " ", &c__1, &ml, &y[1], 
+				    dmake_("GE", " ", " ", &c__1, &ml, &y[1],
 					    &c__1, &yy[1], &i__7, &c__0, &
-					    i__8, &reset, &transl, (ftnlen)2, 
+					    i__8, &reset, &transl, (ftnlen)2,
 					    (ftnlen)1, (ftnlen)1);
 
 				    ++nc;
@@ -1089,7 +1099,7 @@ L240:
 /*                             Save every datum before calling the */
 /*                             subroutine. */
 
-				    *(unsigned char *)transs = *(unsigned 
+				    *(unsigned char *)transs = *(unsigned
 					    char *)trans;
 				    ms = m;
 				    ns = n;
@@ -1149,7 +1159,7 @@ L240:
 					    al__1.aunit = *ntra;
 					    f_rew(&al__1);
 					}
-					dgemv_(trans, &m, &n, &alpha, &aa[1], 
+					dgemv_(trans, &m, &n, &alpha, &aa[1],
 						&lda, &xx[1], &incx, &beta, &
 						yy[1], &incy, (ftnlen)1);
 				    } else if (banded) {
@@ -1276,8 +1286,8 @@ L240:
 
 					dmvch_(trans, &m, &n, &alpha, &a[
 						a_offset], nmax, &x[1], &incx,
-						 &beta, &y[1], &incy, &yt[1], 
-						&g[1], &yy[1], eps, &err, 
+						 &beta, &y[1], &incy, &yt[1],
+						&g[1], &yy[1], eps, &err,
 						fatal, nout, &c_true, (ftnlen)
 						1);
 					errmax = max(errmax,err);
@@ -1381,13 +1391,13 @@ L140:
 
 } /* dchk1_ */
 
-/* Subroutine */ int dchk2_(char *sname, doublereal *eps, doublereal *thresh, 
+/* Subroutine */ int dchk2_(char *sname, doublereal *eps, doublereal *thresh,
 	integer *nout, integer *ntra, logical *trace, logical *rewi, logical *
-	fatal, integer *nidim, integer *idim, integer *nkb, integer *kb, 
-	integer *nalf, doublereal *alf, integer *nbet, doublereal *bet, 
-	integer *ninc, integer *inc, integer *nmax, integer *incmax, 
-	doublereal *a, doublereal *aa, doublereal *as, doublereal *x, 
-	doublereal *xx, doublereal *xs, doublereal *y, doublereal *yy, 
+	fatal, integer *nidim, integer *idim, integer *nkb, integer *kb,
+	integer *nalf, doublereal *alf, integer *nbet, doublereal *bet,
+	integer *ninc, integer *inc, integer *nmax, integer *incmax,
+	doublereal *a, doublereal *aa, doublereal *as, doublereal *x,
+	doublereal *xx, doublereal *xs, doublereal *y, doublereal *yy,
 	doublereal *ys, doublereal *yt, doublereal *g, ftnlen sname_len)
 {
     /* Initialized data */
@@ -1425,7 +1435,7 @@ L140:
 	     f_rew(alist *);
 
     /* Local variables */
-    integer i__, k, n, ia, ib, ic, nc, ik, in, nk, ks, ix, iy, ns, lx, ly, 
+    integer i__, k, n, ia, ib, ic, nc, ik, in, nk, ks, ix, iy, ns, lx, ly,
 	    laa, lda;
     extern logical lde_(doublereal *, doublereal *, integer *);
     doublereal als, bls, err, beta;
@@ -1434,29 +1444,29 @@ L140:
     integer incx, incy;
     logical full, null;
     char uplo[1];
-    extern /* Subroutine */ int dmake_(char *, char *, char *, integer *, 
-	    integer *, doublereal *, integer *, doublereal *, integer *, 
-	    integer *, integer *, logical *, doublereal *, ftnlen, ftnlen, 
+    extern /* Subroutine */ int dmake_(char *, char *, char *, integer *,
+	    integer *, doublereal *, integer *, doublereal *, integer *,
+	    integer *, integer *, logical *, doublereal *, ftnlen, ftnlen,
 	    ftnlen);
     doublereal alpha;
     logical isame[13];
-    extern /* Subroutine */ int dmvch_(char *, integer *, integer *, 
-	    doublereal *, doublereal *, integer *, doublereal *, integer *, 
+    extern /* Subroutine */ int dmvch_(char *, integer *, integer *,
+	    doublereal *, doublereal *, integer *, doublereal *, integer *,
 	    doublereal *, doublereal *, integer *, doublereal *, doublereal *,
-	     doublereal *, doublereal *, doublereal *, logical *, integer *, 
+	     doublereal *, doublereal *, doublereal *, logical *, integer *,
 	    logical *, ftnlen);
     integer nargs;
-    extern /* Subroutine */ int dsbmv_(char *, integer *, integer *, 
-	    doublereal *, doublereal *, integer *, doublereal *, integer *, 
+    extern /* Subroutine */ int dsbmv_(char *, integer *, integer *,
+	    doublereal *, doublereal *, integer *, doublereal *, integer *,
 	    doublereal *, doublereal *, integer *, ftnlen);
     logical reset;
     integer incxs, incys;
-    extern /* Subroutine */ int dspmv_(char *, integer *, doublereal *, 
+    extern /* Subroutine */ int dspmv_(char *, integer *, doublereal *,
 	    doublereal *, doublereal *, integer *, doublereal *, doublereal *,
 	     integer *, ftnlen);
     char uplos[1];
-    extern /* Subroutine */ int dsymv_(char *, integer *, doublereal *, 
-	    doublereal *, integer *, doublereal *, integer *, doublereal *, 
+    extern /* Subroutine */ int dsymv_(char *, integer *, doublereal *,
+	    doublereal *, integer *, doublereal *, integer *, doublereal *,
 	    doublereal *, integer *, ftnlen);
     logical banded, packed;
     extern logical lderes_(char *, char *, integer *, integer *, doublereal *,
@@ -1619,7 +1629,7 @@ L140:
 				i__8 = n - 1;
 				dmake_("GE", " ", " ", &c__1, &n, &y[1], &
 					c__1, &yy[1], &i__7, &c__0, &i__8, &
-					reset, &transl, (ftnlen)2, (ftnlen)1, 
+					reset, &transl, (ftnlen)2, (ftnlen)1,
 					(ftnlen)1);
 
 				++nc;
@@ -1836,8 +1846,8 @@ L140:
 
 /*                             Check the result. */
 
-				    dmvch_("N", &n, &n, &alpha, &a[a_offset], 
-					    nmax, &x[1], &incx, &beta, &y[1], 
+				    dmvch_("N", &n, &n, &alpha, &a[a_offset],
+					    nmax, &x[1], &incx, &beta, &y[1],
 					    &incy, &yt[1], &g[1], &yy[1], eps,
 					     &err, fatal, nout, &c_true, (
 					    ftnlen)1);
@@ -1947,12 +1957,12 @@ L130:
 
 } /* dchk2_ */
 
-/* Subroutine */ int dchk3_(char *sname, doublereal *eps, doublereal *thresh, 
+/* Subroutine */ int dchk3_(char *sname, doublereal *eps, doublereal *thresh,
 	integer *nout, integer *ntra, logical *trace, logical *rewi, logical *
-	fatal, integer *nidim, integer *idim, integer *nkb, integer *kb, 
-	integer *ninc, integer *inc, integer *nmax, integer *incmax, 
-	doublereal *a, doublereal *aa, doublereal *as, doublereal *x, 
-	doublereal *xx, doublereal *xs, doublereal *xt, doublereal *g, 
+	fatal, integer *nidim, integer *idim, integer *nkb, integer *kb,
+	integer *ninc, integer *inc, integer *nmax, integer *incmax,
+	doublereal *a, doublereal *aa, doublereal *as, doublereal *x,
+	doublereal *xx, doublereal *xs, doublereal *xt, doublereal *g,
 	doublereal *z__, ftnlen sname_len)
 {
     /* Initialized data */
@@ -2002,36 +2012,36 @@ L130:
     integer incx;
     logical full, null;
     char uplo[1];
-    extern /* Subroutine */ int dmake_(char *, char *, char *, integer *, 
-	    integer *, doublereal *, integer *, doublereal *, integer *, 
-	    integer *, integer *, logical *, doublereal *, ftnlen, ftnlen, 
+    extern /* Subroutine */ int dmake_(char *, char *, char *, integer *,
+	    integer *, doublereal *, integer *, doublereal *, integer *,
+	    integer *, integer *, logical *, doublereal *, ftnlen, ftnlen,
 	    ftnlen);
     char diags[1];
     logical isame[13];
-    extern /* Subroutine */ int dmvch_(char *, integer *, integer *, 
-	    doublereal *, doublereal *, integer *, doublereal *, integer *, 
+    extern /* Subroutine */ int dmvch_(char *, integer *, integer *,
+	    doublereal *, doublereal *, integer *, doublereal *, integer *,
 	    doublereal *, doublereal *, integer *, doublereal *, doublereal *,
-	     doublereal *, doublereal *, doublereal *, logical *, integer *, 
+	     doublereal *, doublereal *, doublereal *, logical *, integer *,
 	    logical *, ftnlen);
     integer nargs;
-    extern /* Subroutine */ int dtbmv_(char *, char *, char *, integer *, 
-	    integer *, doublereal *, integer *, doublereal *, integer *, 
+    extern /* Subroutine */ int dtbmv_(char *, char *, char *, integer *,
+	    integer *, doublereal *, integer *, doublereal *, integer *,
 	    ftnlen, ftnlen, ftnlen);
     logical reset;
-    extern /* Subroutine */ int dtbsv_(char *, char *, char *, integer *, 
-	    integer *, doublereal *, integer *, doublereal *, integer *, 
+    extern /* Subroutine */ int dtbsv_(char *, char *, char *, integer *,
+	    integer *, doublereal *, integer *, doublereal *, integer *,
 	    ftnlen, ftnlen, ftnlen);
     integer incxs;
     char trans[1];
-    extern /* Subroutine */ int dtpmv_(char *, char *, char *, integer *, 
-	    doublereal *, doublereal *, integer *, ftnlen, ftnlen, ftnlen), 
+    extern /* Subroutine */ int dtpmv_(char *, char *, char *, integer *,
+	    doublereal *, doublereal *, integer *, ftnlen, ftnlen, ftnlen),
 	    dtrmv_(char *, char *, char *, integer *, doublereal *, integer *,
-	     doublereal *, integer *, ftnlen, ftnlen, ftnlen), dtpsv_(char *, 
-	    char *, char *, integer *, doublereal *, doublereal *, integer *, 
+	     doublereal *, integer *, ftnlen, ftnlen, ftnlen), dtpsv_(char *,
+	    char *, char *, integer *, doublereal *, doublereal *, integer *,
 	    ftnlen, ftnlen, ftnlen);
     char uplos[1];
-    extern /* Subroutine */ int dtrsv_(char *, char *, char *, integer *, 
-	    doublereal *, integer *, doublereal *, integer *, ftnlen, ftnlen, 
+    extern /* Subroutine */ int dtrsv_(char *, char *, char *, integer *,
+	    doublereal *, integer *, doublereal *, integer *, ftnlen, ftnlen,
 	    ftnlen);
     logical banded, packed;
     extern logical lderes_(char *, char *, integer *, integer *, doublereal *,
@@ -2160,13 +2170,13 @@ L130:
 			    ;
 
 		    for (icd = 1; icd <= 2; ++icd) {
-			*(unsigned char *)diag = *(unsigned char *)&ichd[icd 
+			*(unsigned char *)diag = *(unsigned char *)&ichd[icd
 				- 1];
 
 /*                    Generate the matrix A. */
 
 			transl = 0.;
-			dmake_(sname + 1, uplo, diag, &n, &n, &a[a_offset], 
+			dmake_(sname + 1, uplo, diag, &n, &n, &a[a_offset],
 				nmax, &aa[1], &lda, &k, &k, &reset, &transl, (
 				ftnlen)2, (ftnlen)1, (ftnlen)1);
 
@@ -2213,7 +2223,7 @@ L130:
 
 /*                       Call the subroutine. */
 
-			    if (s_cmp(sname + 3, "MV", (ftnlen)2, (ftnlen)2) 
+			    if (s_cmp(sname + 3, "MV", (ftnlen)2, (ftnlen)2)
 				    == 0) {
 				if (full) {
 				    if (*trace) {
@@ -2266,7 +2276,7 @@ L130:
 					al__1.aunit = *ntra;
 					f_rew(&al__1);
 				    }
-				    dtbmv_(uplo, trans, diag, &n, &k, &aa[1], 
+				    dtbmv_(uplo, trans, diag, &n, &k, &aa[1],
 					    &lda, &xx[1], &incx, (ftnlen)1, (
 					    ftnlen)1, (ftnlen)1);
 				} else if (packed) {
@@ -2347,7 +2357,7 @@ L130:
 					al__1.aunit = *ntra;
 					f_rew(&al__1);
 				    }
-				    dtbsv_(uplo, trans, diag, &n, &k, &aa[1], 
+				    dtbsv_(uplo, trans, diag, &n, &k, &aa[1],
 					    &lda, &xx[1], &incx, (ftnlen)1, (
 					    ftnlen)1, (ftnlen)1);
 				} else if (packed) {
@@ -2389,11 +2399,11 @@ L130:
 
 /*                       See what data changed inside subroutines. */
 
-			    isame[0] = *(unsigned char *)uplo == *(unsigned 
+			    isame[0] = *(unsigned char *)uplo == *(unsigned
 				    char *)uplos;
-			    isame[1] = *(unsigned char *)trans == *(unsigned 
+			    isame[1] = *(unsigned char *)trans == *(unsigned
 				    char *)transs;
-			    isame[2] = *(unsigned char *)diag == *(unsigned 
+			    isame[2] = *(unsigned char *)diag == *(unsigned
 				    char *)diags;
 			    isame[3] = ns == n;
 			    if (full) {
@@ -2464,7 +2474,7 @@ L130:
 				    dmvch_(trans, &n, &n, &c_b128, &a[
 					    a_offset], nmax, &x[1], &incx, &
 					    c_b120, &z__[1], &incx, &xt[1], &
-					    g[1], &xx[1], eps, &err, fatal, 
+					    g[1], &xx[1], eps, &err, fatal,
 					    nout, &c_true, (ftnlen)1);
 				} else if (s_cmp(sname + 3, "SV", (ftnlen)2, (
 					ftnlen)2) == 0) {
@@ -2473,7 +2483,7 @@ L130:
 
 				    i__4 = n;
 				    for (i__ = 1; i__ <= i__4; ++i__) {
-					z__[i__] = xx[(i__ - 1) * abs(incx) + 
+					z__[i__] = xx[(i__ - 1) * abs(incx) +
 						1];
 					xx[(i__ - 1) * abs(incx) + 1] = x[i__]
 						;
@@ -2482,7 +2492,7 @@ L130:
 				    dmvch_(trans, &n, &n, &c_b128, &a[
 					    a_offset], nmax, &z__[1], &incx, &
 					    c_b120, &x[1], &incx, &xt[1], &g[
-					    1], &xx[1], eps, &err, fatal, 
+					    1], &xx[1], eps, &err, fatal,
 					    nout, &c_false, (ftnlen)1);
 				}
 				errmax = max(errmax,err);
@@ -2584,13 +2594,13 @@ L130:
 
 } /* dchk3_ */
 
-/* Subroutine */ int dchk4_(char *sname, doublereal *eps, doublereal *thresh, 
+/* Subroutine */ int dchk4_(char *sname, doublereal *eps, doublereal *thresh,
 	integer *nout, integer *ntra, logical *trace, logical *rewi, logical *
-	fatal, integer *nidim, integer *idim, integer *nalf, doublereal *alf, 
-	integer *ninc, integer *inc, integer *nmax, integer *incmax, 
-	doublereal *a, doublereal *aa, doublereal *as, doublereal *x, 
-	doublereal *xx, doublereal *xs, doublereal *y, doublereal *yy, 
-	doublereal *ys, doublereal *yt, doublereal *g, doublereal *z__, 
+	fatal, integer *nidim, integer *idim, integer *nalf, doublereal *alf,
+	integer *ninc, integer *inc, integer *nmax, integer *incmax,
+	doublereal *a, doublereal *aa, doublereal *as, doublereal *x,
+	doublereal *xx, doublereal *xs, doublereal *y, doublereal *yy,
+	doublereal *ys, doublereal *yt, doublereal *g, doublereal *z__,
 	ftnlen sname_len)
 {
     /* Format strings */
@@ -2625,23 +2635,23 @@ L130:
     integer ia, nc, nd, im, in, ms, ix, iy, ns, lx, ly, laa, lda;
     extern logical lde_(doublereal *, doublereal *, integer *);
     doublereal als, err;
-    extern /* Subroutine */ int dger_(integer *, integer *, doublereal *, 
-	    doublereal *, integer *, doublereal *, integer *, doublereal *, 
+    extern /* Subroutine */ int dger_(integer *, integer *, doublereal *,
+	    doublereal *, integer *, doublereal *, integer *, doublereal *,
 	    integer *);
     integer ldas;
     logical same;
     integer incx, incy;
     logical null;
-    extern /* Subroutine */ int dmake_(char *, char *, char *, integer *, 
-	    integer *, doublereal *, integer *, doublereal *, integer *, 
-	    integer *, integer *, logical *, doublereal *, ftnlen, ftnlen, 
+    extern /* Subroutine */ int dmake_(char *, char *, char *, integer *,
+	    integer *, doublereal *, integer *, doublereal *, integer *,
+	    integer *, integer *, logical *, doublereal *, ftnlen, ftnlen,
 	    ftnlen);
     doublereal alpha;
     logical isame[13];
-    extern /* Subroutine */ int dmvch_(char *, integer *, integer *, 
-	    doublereal *, doublereal *, integer *, doublereal *, integer *, 
+    extern /* Subroutine */ int dmvch_(char *, integer *, integer *,
+	    doublereal *, doublereal *, integer *, doublereal *, integer *,
 	    doublereal *, doublereal *, integer *, doublereal *, doublereal *,
-	     doublereal *, doublereal *, doublereal *, logical *, integer *, 
+	     doublereal *, doublereal *, doublereal *, logical *, integer *,
 	    logical *, ftnlen);
     integer nargs;
     logical reset;
@@ -2748,7 +2758,7 @@ L130:
 		i__3 = abs(incx);
 		i__4 = m - 1;
 		dmake_("GE", " ", " ", &c__1, &m, &x[1], &c__1, &xx[1], &i__3,
-			 &c__0, &i__4, &reset, &transl, (ftnlen)2, (ftnlen)1, 
+			 &c__0, &i__4, &reset, &transl, (ftnlen)2, (ftnlen)1,
 			(ftnlen)1);
 		if (m > 1) {
 		    x[m / 2] = 0.;
@@ -2782,7 +2792,7 @@ L130:
 			transl = 0.;
 			i__5 = m - 1;
 			i__6 = n - 1;
-			dmake_(sname + 1, " ", " ", &m, &n, &a[a_offset], 
+			dmake_(sname + 1, " ", " ", &m, &n, &a[a_offset],
 				nmax, &aa[1], &lda, &i__5, &i__6, &reset, &
 				transl, (ftnlen)2, (ftnlen)1, (ftnlen)1);
 
@@ -2913,9 +2923,9 @@ L130:
 				} else {
 				    w[0] = y[n - j + 1];
 				}
-				dmvch_("N", &m, &c__1, &alpha, &z__[1], nmax, 
+				dmvch_("N", &m, &c__1, &alpha, &z__[1], nmax,
 					w, &c__1, &c_b128, &a[j * a_dim1 + 1],
-					 &c__1, &yt[1], &g[1], &aa[(j - 1) * 
+					 &c__1, &yt[1], &g[1], &aa[(j - 1) *
 					lda + 1], eps, &err, fatal, nout, &
 					c_true, (ftnlen)1);
 				errmax = max(errmax,err);
@@ -2995,13 +3005,13 @@ L150:
 
 } /* dchk4_ */
 
-/* Subroutine */ int dchk5_(char *sname, doublereal *eps, doublereal *thresh, 
+/* Subroutine */ int dchk5_(char *sname, doublereal *eps, doublereal *thresh,
 	integer *nout, integer *ntra, logical *trace, logical *rewi, logical *
-	fatal, integer *nidim, integer *idim, integer *nalf, doublereal *alf, 
-	integer *ninc, integer *inc, integer *nmax, integer *incmax, 
-	doublereal *a, doublereal *aa, doublereal *as, doublereal *x, 
-	doublereal *xx, doublereal *xs, doublereal *y, doublereal *yy, 
-	doublereal *ys, doublereal *yt, doublereal *g, doublereal *z__, 
+	fatal, integer *nidim, integer *idim, integer *nalf, doublereal *alf,
+	integer *ninc, integer *inc, integer *nmax, integer *incmax,
+	doublereal *a, doublereal *aa, doublereal *as, doublereal *x,
+	doublereal *xx, doublereal *xs, doublereal *y, doublereal *yy,
+	doublereal *ys, doublereal *yt, doublereal *g, doublereal *z__,
 	ftnlen sname_len)
 {
     /* Initialized data */
@@ -3047,21 +3057,21 @@ L150:
     logical same;
     integer incx;
     logical full;
-    extern /* Subroutine */ int dspr_(char *, integer *, doublereal *, 
+    extern /* Subroutine */ int dspr_(char *, integer *, doublereal *,
 	    doublereal *, integer *, doublereal *, ftnlen);
     logical null;
     char uplo[1];
-    extern /* Subroutine */ int dsyr_(char *, integer *, doublereal *, 
+    extern /* Subroutine */ int dsyr_(char *, integer *, doublereal *,
 	    doublereal *, integer *, doublereal *, integer *, ftnlen), dmake_(
-	    char *, char *, char *, integer *, integer *, doublereal *, 
-	    integer *, doublereal *, integer *, integer *, integer *, logical 
+	    char *, char *, char *, integer *, integer *, doublereal *,
+	    integer *, doublereal *, integer *, integer *, integer *, logical
 	    *, doublereal *, ftnlen, ftnlen, ftnlen);
     doublereal alpha;
     logical isame[13];
-    extern /* Subroutine */ int dmvch_(char *, integer *, integer *, 
-	    doublereal *, doublereal *, integer *, doublereal *, integer *, 
+    extern /* Subroutine */ int dmvch_(char *, integer *, integer *,
+	    doublereal *, doublereal *, integer *, doublereal *, integer *,
 	    doublereal *, doublereal *, integer *, doublereal *, doublereal *,
-	     doublereal *, doublereal *, doublereal *, logical *, integer *, 
+	     doublereal *, doublereal *, doublereal *, logical *, integer *,
 	    logical *, ftnlen);
     integer nargs;
     logical reset;
@@ -3173,7 +3183,7 @@ L150:
 		i__3 = abs(incx);
 		i__4 = n - 1;
 		dmake_("GE", " ", " ", &c__1, &n, &x[1], &c__1, &xx[1], &i__3,
-			 &c__0, &i__4, &reset, &transl, (ftnlen)2, (ftnlen)1, 
+			 &c__0, &i__4, &reset, &transl, (ftnlen)2, (ftnlen)1,
 			(ftnlen)1);
 		if (n > 1) {
 		    x[n / 2] = 0.;
@@ -3342,9 +3352,9 @@ L150:
 				jj = j;
 				lj = n - j + 1;
 			    }
-			    dmvch_("N", &lj, &c__1, &alpha, &z__[jj], &lj, w, 
+			    dmvch_("N", &lj, &c__1, &alpha, &z__[jj], &lj, w,
 				    &c__1, &c_b128, &a[jj + j * a_dim1], &
-				    c__1, &yt[1], &g[1], &aa[ja], eps, &err, 
+				    c__1, &yt[1], &g[1], &aa[ja], eps, &err,
 				    fatal, nout, &c_true, (ftnlen)1);
 			    if (full) {
 				if (upper) {
@@ -3442,13 +3452,13 @@ L130:
 
 } /* dchk5_ */
 
-/* Subroutine */ int dchk6_(char *sname, doublereal *eps, doublereal *thresh, 
+/* Subroutine */ int dchk6_(char *sname, doublereal *eps, doublereal *thresh,
 	integer *nout, integer *ntra, logical *trace, logical *rewi, logical *
-	fatal, integer *nidim, integer *idim, integer *nalf, doublereal *alf, 
-	integer *ninc, integer *inc, integer *nmax, integer *incmax, 
-	doublereal *a, doublereal *aa, doublereal *as, doublereal *x, 
-	doublereal *xx, doublereal *xs, doublereal *y, doublereal *yy, 
-	doublereal *ys, doublereal *yt, doublereal *g, doublereal *z__, 
+	fatal, integer *nidim, integer *idim, integer *nalf, doublereal *alf,
+	integer *ninc, integer *inc, integer *nmax, integer *incmax,
+	doublereal *a, doublereal *aa, doublereal *as, doublereal *x,
+	doublereal *xx, doublereal *xs, doublereal *y, doublereal *yy,
+	doublereal *ys, doublereal *yt, doublereal *g, doublereal *z__,
 	ftnlen sname_len)
 {
     /* Initialized data */
@@ -3477,7 +3487,7 @@ L130:
 	    "ER:\002)";
 
     /* System generated locals */
-    integer a_dim1, a_offset, z_dim1, z_offset, i__1, i__2, i__3, i__4, i__5, 
+    integer a_dim1, a_offset, z_dim1, z_offset, i__1, i__2, i__3, i__4, i__5,
 	    i__6;
     alist al__1;
 
@@ -3496,19 +3506,19 @@ L130:
     integer incx, incy;
     logical full, null;
     char uplo[1];
-    extern /* Subroutine */ int dspr2_(char *, integer *, doublereal *, 
-	    doublereal *, integer *, doublereal *, integer *, doublereal *, 
-	    ftnlen), dsyr2_(char *, integer *, doublereal *, doublereal *, 
-	    integer *, doublereal *, integer *, doublereal *, integer *, 
-	    ftnlen), dmake_(char *, char *, char *, integer *, integer *, 
-	    doublereal *, integer *, doublereal *, integer *, integer *, 
+    extern /* Subroutine */ int dspr2_(char *, integer *, doublereal *,
+	    doublereal *, integer *, doublereal *, integer *, doublereal *,
+	    ftnlen), dsyr2_(char *, integer *, doublereal *, doublereal *,
+	    integer *, doublereal *, integer *, doublereal *, integer *,
+	    ftnlen), dmake_(char *, char *, char *, integer *, integer *,
+	    doublereal *, integer *, doublereal *, integer *, integer *,
 	    integer *, logical *, doublereal *, ftnlen, ftnlen, ftnlen);
     doublereal alpha;
     logical isame[13];
-    extern /* Subroutine */ int dmvch_(char *, integer *, integer *, 
-	    doublereal *, doublereal *, integer *, doublereal *, integer *, 
+    extern /* Subroutine */ int dmvch_(char *, integer *, integer *,
+	    doublereal *, doublereal *, integer *, doublereal *, integer *,
 	    doublereal *, doublereal *, integer *, doublereal *, doublereal *,
-	     doublereal *, doublereal *, doublereal *, logical *, integer *, 
+	     doublereal *, doublereal *, doublereal *, logical *, integer *,
 	    logical *, ftnlen);
     integer nargs;
     logical reset;
@@ -3622,7 +3632,7 @@ L130:
 		i__3 = abs(incx);
 		i__4 = n - 1;
 		dmake_("GE", " ", " ", &c__1, &n, &x[1], &c__1, &xx[1], &i__3,
-			 &c__0, &i__4, &reset, &transl, (ftnlen)2, (ftnlen)1, 
+			 &c__0, &i__4, &reset, &transl, (ftnlen)2, (ftnlen)1,
 			(ftnlen)1);
 		if (n > 1) {
 		    x[n / 2] = 0.;
@@ -3657,7 +3667,7 @@ L130:
 			transl = 0.;
 			i__5 = n - 1;
 			i__6 = n - 1;
-			dmake_(sname + 1, uplo, " ", &n, &n, &a[a_offset], 
+			dmake_(sname + 1, uplo, " ", &n, &n, &a[a_offset],
 				nmax, &aa[1], &lda, &i__5, &i__6, &reset, &
 				transl, (ftnlen)2, (ftnlen)1, (ftnlen)1);
 
@@ -3835,7 +3845,7 @@ L130:
 				    jj = j;
 				    lj = n - j + 1;
 				}
-				dmvch_("N", &lj, &c__2, &alpha, &z__[jj + 
+				dmvch_("N", &lj, &c__2, &alpha, &z__[jj +
 					z_dim1], nmax, w, &c__1, &c_b128, &a[
 					jj + j * a_dim1], &c__1, &yt[1], &g[1]
 					, &aa[ja], eps, &err, fatal, nout, &
@@ -3941,7 +3951,7 @@ L170:
 
 } /* dchk6_ */
 
-/* Subroutine */ int dchke_(integer *isnum, char *srnamt, integer *nout, 
+/* Subroutine */ int dchke_(integer *isnum, char *srnamt, integer *nout,
 	ftnlen srnamt_len)
 {
     /* Format strings */
@@ -3955,39 +3965,39 @@ L170:
 
     /* Local variables */
     doublereal a[1]	/* was [1][1] */, x[1], y[1], beta;
-    extern /* Subroutine */ int dger_(integer *, integer *, doublereal *, 
-	    doublereal *, integer *, doublereal *, integer *, doublereal *, 
-	    integer *), dspr_(char *, integer *, doublereal *, doublereal *, 
-	    integer *, doublereal *, ftnlen), dsyr_(char *, integer *, 
-	    doublereal *, doublereal *, integer *, doublereal *, integer *, 
-	    ftnlen), dspr2_(char *, integer *, doublereal *, doublereal *, 
+    extern /* Subroutine */ int dger_(integer *, integer *, doublereal *,
+	    doublereal *, integer *, doublereal *, integer *, doublereal *,
+	    integer *), dspr_(char *, integer *, doublereal *, doublereal *,
+	    integer *, doublereal *, ftnlen), dsyr_(char *, integer *,
+	    doublereal *, doublereal *, integer *, doublereal *, integer *,
+	    ftnlen), dspr2_(char *, integer *, doublereal *, doublereal *,
 	    integer *, doublereal *, integer *, doublereal *, ftnlen), dsyr2_(
-	    char *, integer *, doublereal *, doublereal *, integer *, 
+	    char *, integer *, doublereal *, doublereal *, integer *,
 	    doublereal *, integer *, doublereal *, integer *, ftnlen);
     doublereal alpha;
     extern /* Subroutine */ int dgbmv_(char *, integer *, integer *, integer *
-	    , integer *, doublereal *, doublereal *, integer *, doublereal *, 
+	    , integer *, doublereal *, doublereal *, integer *, doublereal *,
 	    integer *, doublereal *, doublereal *, integer *, ftnlen), dgemv_(
-	    char *, integer *, integer *, doublereal *, doublereal *, integer 
+	    char *, integer *, integer *, doublereal *, doublereal *, integer
 	    *, doublereal *, integer *, doublereal *, doublereal *, integer *,
-	     ftnlen), dsbmv_(char *, integer *, integer *, doublereal *, 
-	    doublereal *, integer *, doublereal *, integer *, doublereal *, 
-	    doublereal *, integer *, ftnlen), dtbmv_(char *, char *, char *, 
-	    integer *, integer *, doublereal *, integer *, doublereal *, 
+	     ftnlen), dsbmv_(char *, integer *, integer *, doublereal *,
+	    doublereal *, integer *, doublereal *, integer *, doublereal *,
+	    doublereal *, integer *, ftnlen), dtbmv_(char *, char *, char *,
+	    integer *, integer *, doublereal *, integer *, doublereal *,
 	    integer *, ftnlen, ftnlen, ftnlen), dtbsv_(char *, char *, char *,
-	     integer *, integer *, doublereal *, integer *, doublereal *, 
-	    integer *, ftnlen, ftnlen, ftnlen), dspmv_(char *, integer *, 
+	     integer *, integer *, doublereal *, integer *, doublereal *,
+	    integer *, ftnlen, ftnlen, ftnlen), dspmv_(char *, integer *,
 	    doublereal *, doublereal *, doublereal *, integer *, doublereal *,
-	     doublereal *, integer *, ftnlen), dtpmv_(char *, char *, char *, 
-	    integer *, doublereal *, doublereal *, integer *, ftnlen, ftnlen, 
-	    ftnlen), dtrmv_(char *, char *, char *, integer *, doublereal *, 
-	    integer *, doublereal *, integer *, ftnlen, ftnlen, ftnlen), 
-	    dtpsv_(char *, char *, char *, integer *, doublereal *, 
-	    doublereal *, integer *, ftnlen, ftnlen, ftnlen), dsymv_(char *, 
-	    integer *, doublereal *, doublereal *, integer *, doublereal *, 
+	     doublereal *, integer *, ftnlen), dtpmv_(char *, char *, char *,
+	    integer *, doublereal *, doublereal *, integer *, ftnlen, ftnlen,
+	    ftnlen), dtrmv_(char *, char *, char *, integer *, doublereal *,
+	    integer *, doublereal *, integer *, ftnlen, ftnlen, ftnlen),
+	    dtpsv_(char *, char *, char *, integer *, doublereal *,
+	    doublereal *, integer *, ftnlen, ftnlen, ftnlen), dsymv_(char *,
+	    integer *, doublereal *, doublereal *, integer *, doublereal *,
 	    integer *, doublereal *, doublereal *, integer *, ftnlen), dtrsv_(
-	    char *, char *, char *, integer *, doublereal *, integer *, 
-	    doublereal *, integer *, ftnlen, ftnlen, ftnlen), chkxer_(char *, 
+	    char *, char *, char *, integer *, doublereal *, integer *,
+	    doublereal *, integer *, ftnlen, ftnlen, ftnlen), chkxer_(char *,
 	    integer *, integer *, logical *, logical *, ftnlen);
 
     /* Fortran I/O blocks */
@@ -4493,9 +4503,9 @@ L170:
 
 } /* dchke_ */
 
-/* Subroutine */ int dmake_(char *type__, char *uplo, char *diag, integer *m, 
+/* Subroutine */ int dmake_(char *type__, char *uplo, char *diag, integer *m,
 	integer *n, doublereal *a, integer *nmax, doublereal *aa, integer *
-	lda, integer *kl, integer *ku, logical *reset, doublereal *transl, 
+	lda, integer *kl, integer *ku, logical *reset, doublereal *transl,
 	ftnlen type_len, ftnlen uplo_len, ftnlen diag_len)
 {
     /* System generated locals */
@@ -4553,7 +4563,7 @@ L170:
 	i__2 = *m;
 	for (i__ = 1; i__ <= i__2; ++i__) {
 	    if (gen || upper && i__ <= j || lower && i__ >= j) {
-		if (i__ <= j && j - i__ <= *ku || i__ >= j && i__ - j <= *kl) 
+		if (i__ <= j && j - i__ <= *ku || i__ >= j && i__ - j <= *kl)
 			{
 		    a[i__ + j * a_dim1] = dbeg_(reset) + *transl;
 		} else {
@@ -4728,9 +4738,9 @@ L170:
 } /* dmake_ */
 
 /* Subroutine */ int dmvch_(char *trans, integer *m, integer *n, doublereal *
-	alpha, doublereal *a, integer *nmax, doublereal *x, integer *incx, 
-	doublereal *beta, doublereal *y, integer *incy, doublereal *yt, 
-	doublereal *g, doublereal *yy, doublereal *eps, doublereal *err, 
+	alpha, doublereal *a, integer *nmax, doublereal *x, integer *incx,
+	doublereal *beta, doublereal *y, integer *incy, doublereal *yt,
+	doublereal *g, doublereal *yy, doublereal *eps, doublereal *err,
 	logical *fatal, integer *nout, logical *mv, ftnlen trans_len)
 {
     /* Format strings */
@@ -4845,7 +4855,7 @@ L170:
     *err = 0.;
     i__1 = ml;
     for (i__ = 1; i__ <= i__1; ++i__) {
-	erri = (d__1 = yt[i__] - yy[(i__ - 1) * abs(*incy) + 1], abs(d__1)) / 
+	erri = (d__1 = yt[i__] - yy[(i__ - 1) * abs(*incy) + 1], abs(d__1)) /
 		*eps;
 	if (g[i__] != 0.) {
 	    erri /= g[i__];
@@ -5102,7 +5112,7 @@ doublereal ddiff_(doublereal *x, doublereal *y)
 
 } /* ddiff_ */
 
-/* Subroutine */ int chkxer_(char *srnamt, integer *infot, integer *nout, 
+/* Subroutine */ int chkxer_(char *srnamt, integer *infot, integer *nout,
 	logical *lerr, logical *ok, ftnlen srnamt_len)
 {
     /* Format strings */

@@ -147,8 +147,8 @@ print_usage()
 	echo "   --enable-rpath, --disable-rpath"
 	echo " "
 	echo "                 Enable (disabled by default) setting an install_name for"
-    echo "                 dynamic libraries on macOS which starts with @rpath rather"
-    echo "                 than the absolute install path."
+	echo "                 dynamic libraries on macOS which starts with @rpath rather"
+	echo "                 than the absolute install path."
 	echo " "
 	echo "   -e SYMBOLS, --export-shared[=SYMBOLS]"
 	echo " "
@@ -170,22 +170,22 @@ print_usage()
 	echo "   -t MODEL, --enable-threading[=MODEL], --disable-threading"
 	echo " "
 	echo "                 Enable threading in the library, using threading model(s)"
-	echo "                 MODEL={single,openmp,pthreads,auto}. If multiple values"
+	echo "                 MODEL={single,openmp,pthreads,hpx,auto}. If multiple values"
 	echo "                 are specified within MODEL, they will all be compiled into"
 	echo "                 BLIS, and the choice of which to use will be determined at"
 	echo "                 runtime. If the user does not express a preference (by"
 	echo "                 setting the BLIS_THREAD_IMPL environment variable to"
-	echo "                 'single', 'openmp', or 'pthreads'; by calling the global"
-	echo "                 runtime API bli_thread_set_thread_impl(); or by encoding a"
-	echo "                 choice on a per-call basis within a rntm_t passed into the"
-	echo "                 expert API), then the first model listed in MODEL will be"
-	echo "                 used by default. Note that 'single' is silently appended"
-	echo "                 to whatever the user specifies in MODEL, meaning that"
-	echo "                 single-threaded functionality will always be available,"
-	echo "                 even if it is not requested and even if it is not enabled"
-	echo "                 by default. Even --disable-threading is actually shorthand"
-	echo "                 for --enable-threading=single (which is the default when"
-	echo "                 the option is not specified)."
+	echo "                 'single', 'openmp', 'pthreads', or 'hpx'; by calling the"
+	echo "                 global runtime API bli_thread_set_thread_impl(); or by"
+	echo "                 encoding a choice on a per-call basis within a rntm_t"
+	echo "                 passed into the expert API), then the first model listed"
+	echo "                 in MODEL will be used by default. Note that 'single' is"
+	echo "                 silently appended to whatever the user specifies in MODEL,"
+	echo "                 meaning that single-threaded functionality will always be"
+	echo "                 available, even if it is not requested and even if it is"
+	echo "                 not enabled by default. Even --disable-threading is"
+	echo "                 actually shorthand for --enable-threading=single (which is"
+	echo "                 the default when the option is not specified)."
 	echo " "
 	echo "   --enable-system, --disable-system"
 	echo " "
@@ -244,7 +244,7 @@ print_usage()
 	echo " "
 	echo "                 Set the size (in bits) of internal BLIS integers and"
 	echo "                 integer types used in native BLIS interfaces. The"
-	echo "                 default inteter type size is architecture dependent."
+	echo "                 default integer type size is architecture dependent."
 	echo "                 (Hint: You can always find this value printed at the"
 	echo "                 beginning of the testsuite output.)"
 	echo " "
@@ -1262,9 +1262,9 @@ has_libmemkind()
 	# Depending on the return code from the compile step above, we set
 	# enable_memkind accordingly.
 	if [ "$?" == 0 ]; then
-	    rval='yes'
+		rval='yes'
 	else
-	    rval='no'
+		rval='no'
 	fi
 
 	# Remove the executable generated above.
@@ -1292,9 +1292,9 @@ has_pragma_omp_simd()
 	# Depending on the return code from the compile step above, we set
 	# enable_memkind accordingly.
 	if [ "$?" == 0 ]; then
-	    rval='yes'
+		rval='yes'
 	else
-	    rval='no'
+		rval='no'
 	fi
 
 	# Remove the executable generated above.
@@ -1514,11 +1514,11 @@ get_compiler_version()
 	# Begin parsing cc_vendor for the version string.
 
 	if [ "${cc_vendor}" = "GCC" ]; then
-	     # Conda gcc sometimes has GCC (all caps) in the version string
+		# Conda gcc sometimes has GCC (all caps) in the version string
 		cc_vendor="gcc"
 	fi
 	if [ "${cc_vendor}" = "crosstool-NG" ]; then
-	     # Treat compilers built by crosstool-NG (for eg: conda) as gcc.
+		# Treat compilers built by crosstool-NG (for eg: conda) as gcc.
 		cc_vendor="gcc"
 	fi
 	if [ "${cc_vendor}" = "icc" -o \
@@ -1561,7 +1561,7 @@ get_compiler_version()
 			cc_version=$(echo "${vendor_string}" \
 			             | egrep -o 'AOCC.LLVM.[0-9]+\.[0-9]+\.?[0-9]*' \
 			             | egrep -o           '[0-9]+\.[0-9]+\.?[0-9]*' \
-		                 | { read first rest ; echo $first ; })
+			             | { read first rest ; echo $first ; })
 		else
 
 			# Grep for the AOCC_x.y.z substring first, and then isolate the
@@ -1572,7 +1572,7 @@ get_compiler_version()
 			cc_version=$(echo "${vendor_string}" \
 			             | egrep -o 'AOCC_[0-9]+\.[0-9]+\.?[0-9]*' \
 			             | egrep -o      '[0-9]+\.[0-9]+\.?[0-9]*' \
-		                 | { read first rest ; echo $first ; })
+			             | { read first rest ; echo $first ; })
 		fi
 
 	elif [ "${cc_vendor}" = "oneAPI" ]; then
@@ -2025,9 +2025,9 @@ try_assemble()
 	${cc} ${cflags} -c ${asm_src} -o ${asm_bin} > /dev/null 2>&1
 
 	if [ "$?" == 0 ]; then
-	    rval='yes'
+		rval='yes'
 	else
-	    rval='no'
+		rval='no'
 	fi
 
 	# Remove the object file.
@@ -2346,10 +2346,6 @@ main()
 	# of the distribution and the directory in which we are building.
 	cur_dirpath="."
 
-	# The file in which the version string is kept.
-	version_file="version"
-	version_filepath="${dist_path}/${version_file}"
-
 	# The name of and path to the directory named "build" in the top-level
 	# directory of the source distribution.
 	build_dir='build'
@@ -2431,9 +2427,13 @@ main()
 
 	# -- Version-related --
 
+	# The file in which the version string is kept.
+	version_file="version"
+	version_filepath="${build_dirpath}/${version_file}"
+
 	# The shared library (.so) version file.
 	so_version_file='so_version'
-	so_version_filepath="${dist_path}/${so_version_file}"
+	so_version_filepath="${build_dirpath}/${so_version_file}"
 
 	# The major and minor/build .so version numbers.
 	so_version_major=''
@@ -2478,6 +2478,7 @@ main()
 	# The user-given debug type and a flag indicating it was given.
 	debug_type=''
 	debug_flag=''
+	enable_debug='no'
 
 	# A flag indicating whether AddressSanitizer should be used.
 	enable_asan='no'
@@ -2500,7 +2501,7 @@ main()
 	enable_arg_max_hack='no'
 	enable_static='yes'
 	enable_shared='yes'
-    enable_rpath='no'
+	enable_rpath='no'
 	export_shared='public'
 	enable_pba_pools='yes'
 	enable_sba_pools='yes'
@@ -2570,12 +2571,15 @@ main()
 			case $opt in
 				-)
 					case "$OPTARG" in
+
 						help)
 							print_usage
 							;;
+
 						quiet)
 							quiet_flag=1
 							;;
+
 						prefix=*)
 							prefix_flag=1
 							prefix=${OPTARG#*=}
@@ -2596,6 +2600,7 @@ main()
 							sharedir_flag=1
 							sharedir=${OPTARG#*=}
 							;;
+
 						enable-debug)
 							debug_flag=1
 							debug_type=noopt
@@ -2607,78 +2612,92 @@ main()
 						disable-debug)
 							debug_flag=0
 							;;
+
 						enable-asan)
 							enable_asan='yes'
 							;;
 						disable-asan)
 							enable_asan='no'
 							;;
+
 						enable-verbose-make)
 							enable_verbose='yes'
 							;;
 						disable-verbose-make)
 							enable_verbose='no'
 							;;
+
 						enable-arg-max-hack)
 							enable_arg_max_hack='yes'
 							;;
 						disable-arg-max-hack)
 							enable_arg_max_hack='no'
 							;;
+
 						enable-static)
 							enable_static='yes'
 							;;
 						disable-static)
 							enable_static='no'
 							;;
+
 						enable-shared)
 							enable_shared='yes'
 							;;
 						disable-shared)
 							enable_shared='no'
 							;;
+
 						enable-rpath)
 							enable_rpath='yes'
 							;;
 						disable-rpath)
 							enable_rpath='no'
 							;;
+
 						export-shared=*)
 							export_shared=${OPTARG#*=}
 							;;
+
 						enable-system)
 							enable_system='yes'
 							;;
 						disable-system)
 							enable_system='no'
 							;;
+
 						enable-threading=*)
 							threading_model=${OPTARG#*=}
 							;;
 						disable-threading)
 							threading_model='single'
 							;;
+
 						thread-part-jrir=*)
 							thread_part_jrir=${OPTARG#*=}
 							;;
+
 						enable-pba-pools)
 							enable_pba_pools='yes'
 							;;
 						disable-pba-pools)
 							enable_pba_pools='no'
 							;;
+
 						enable-sba-pools)
 							enable_sba_pools='yes'
 							;;
 						disable-sba-pools)
 							enable_sba_pools='no'
 							;;
+
 						enable-mem-tracing)
 							enable_mem_tracing='yes'
 							;;
 						disable-mem-tracing)
 							enable_mem_tracing='no'
 							;;
+
 						enable-addon=*)
 							addon_flag=1
 							addon_name=${OPTARG#*=}
@@ -2688,6 +2707,7 @@ main()
 						disable-addon)
 							addon_flag=''
 							;;
+
 						enable-sandbox=*)
 							sandbox_flag=1
 							sandbox=${OPTARG#*=}
@@ -2695,69 +2715,89 @@ main()
 						disable-sandbox)
 							sandbox_flag=''
 							;;
+
 						int-size=*)
 							int_type_size=${OPTARG#*=}
 							;;
+
 						blas-int-size=*)
 							blas_int_type_size=${OPTARG#*=}
 							;;
+
 						enable-blas)
 							enable_blas='yes'
 							;;
 						disable-blas)
 							enable_blas='no'
 							;;
+
 						enable-cblas)
 							enable_cblas='yes'
 							;;
 						disable-cblas)
 							enable_cblas='no'
 							;;
+
 						enable-mixed-dt)
 							enable_mixed_dt='yes'
 							;;
 						disable-mixed-dt)
 							enable_mixed_dt='no'
 							;;
+
 						enable-mixed-dt-extra-mem)
 							enable_mixed_dt_extra_mem='yes'
 							;;
 						disable-mixed-dt-extra-mem)
 							enable_mixed_dt_extra_mem='no'
 							;;
+
+						sup)
+							enable_sup_handling='yes'
+							;;
 						enable-sup-handling)
 							enable_sup_handling='yes'
+							;;
+						nosup)
+							enable_sup_handling='no'
 							;;
 						disable-sup-handling)
 							enable_sup_handling='no'
 							;;
+
 						enable-amd-frame-tweaks)
 							enable_amd_frame_tweaks='yes'
 							;;
 						disable-amd-frame-tweaks)
 							enable_amd_frame_tweaks='no'
 							;;
+
 						with-memkind)
 							enable_memkind='yes'
 							;;
 						without-memkind)
 							enable_memkind='no'
 							;;
+
 						enable-trsm-preinversion)
 							enable_trsm_preinversion='yes'
 							;;
 						disable-trsm-preinversion)
 							enable_trsm_preinversion='no'
 							;;
+
 						force-version=*)
 							force_version=${OPTARG#*=}
 							;;
+
 						show-config-list)
 							show_config_list=1
 							;;
+
 						complex-return=*)
 							complex_return=${OPTARG#*=}
 							;;
+
 						*)
 							print_usage
 							;;
@@ -2904,7 +2944,7 @@ main()
 	get_binutils_version
 	check_assembler
 
-    # Check if there is any incompatibility due to the operating system.
+	# Check if there is any incompatibility due to the operating system.
 	check_os
 
 	# Remove duplicates and whitespace from the blacklist.
@@ -3422,8 +3462,10 @@ main()
 			debug_type='noopt'
 			echo "${script_name}: enabling debug symbols; optimizations disabled."
 		fi
+		enable_debug='yes'
 	else
 		debug_type='off'
+		enable_debug='no'
 		echo "${script_name}: debug symbols disabled."
 	fi
 
@@ -3431,7 +3473,7 @@ main()
 	if [ "x${enable_asan}" = "xyes" ]; then
 		echo "${script_name}: enabling AddressSanitizer support (except for optimized kernels)."
 	else
-        enable_asan='no'
+		enable_asan='no'
 		echo "${script_name}: AddressSanitizer support disabled."
 	fi
 
@@ -3487,14 +3529,17 @@ main()
 	enable_single='yes'
 	enable_openmp='no'
 	enable_pthreads='no'
+	enable_hpx='no'
 	enable_single_01=1
 	enable_openmp_01=0
 	enable_pthreads_01=0
+	enable_hpx_01=0
 	parsed_tm=''
 	first_tm=''
 	enable_single_as_def_01=0
 	enable_openmp_as_def_01=0
 	enable_pthreads_as_def_01=0
+	enable_hpx_as_def_01=0
 
 	# Convert whatever reasonable separator the user may have used into a space.
 	threading_model_list=$(echo "${threading_model}" | sed -e "s/[,+]/ /g")
@@ -3521,6 +3566,10 @@ main()
 			 [ "x${word}" = "xposix"    ]; then
 
 			parsed_tm="${parsed_tm} pthreads"
+
+		elif [ "x${word}" = "xhpx" ]; then
+
+			parsed_tm="${parsed_tm} hpx"
 
 		elif [ "x${word}" = "xauto" ]; then
 
@@ -3613,7 +3662,15 @@ main()
 			echo "${script_name}: enabling support for threading via pthreads."
 			enable_pthreads='yes'
 			enable_pthreads_01=1
+
+		elif [ "x${word}" = "xhpx" ]; then
+
+			echo "${script_name}: enabling support for threading via HPX."
+			enable_hpx='yes'
+			enable_hpx_01=1
+
 		fi
+
 	done
 
 	# Define boolean variables that can easily be interpreted with #ifdef
@@ -3623,25 +3680,37 @@ main()
 		enable_single_as_def_01=1
 		enable_openmp_as_def_01=0
 		enable_pthreads_as_def_01=0
+		enable_hpx_as_def_01=0
 
 	elif [ "x${first_tm}" = "xopenmp" ]; then
 
 		enable_single_as_def_01=0
 		enable_openmp_as_def_01=1
 		enable_pthreads_as_def_01=0
+		enable_hpx_as_def_01=0
 
 	elif [ "x${first_tm}" = "xpthreads" ]; then
 
 		enable_single_as_def_01=0
 		enable_openmp_as_def_01=0
 		enable_pthreads_as_def_01=1
+		enable_hpx_as_def_01=0
+
+	elif [ "x${first_tm}" = "xhpx" ]; then
+
+		enable_single_as_def_01=0
+		enable_openmp_as_def_01=0
+		enable_pthreads_as_def_01=0
+		enable_hpx_as_def_01=1
+
 	fi
 
-	# If either OpenMP or pthreads was enabled, given that single-threaded mode is
+	# If OpenMP, pthreads, or HPX was enabled, given that single-threaded mode is
 	# also always enabled, remind the user which one will serve as the default
 	# (that is, absent any explicit choice at runtime).
 	if [ "x${enable_openmp}"   = "xyes" ] ||
-	   [ "x${enable_pthreads}" = "xyes" ]; then
+	   [ "x${enable_pthreads}" = "xyes" ] ||
+	   [ "x${enable_hpx}"      = "xyes" ]; then
 
 		if   [ "x${first_tm}"   = "xsingle" ]; then
 			echo "${script_name}: threading will default to single-threaded."
@@ -3649,6 +3718,8 @@ main()
 			echo "${script_name}: threading will default to OpenMP."
 		elif [ "x${first_tm}"   = "xpthreads" ]; then
 			echo "${script_name}: threading will default to pthreads."
+		elif [ "x${first_tm}"   = "xhpx" ]; then
+			echo "${script_name}: threading will default to HPX."
 		fi
 	fi
 
@@ -3764,10 +3835,10 @@ main()
 		enable_mixed_dt_01=0
 	fi
 	if [ "x${enable_sup_handling}" = "xyes" ]; then
-		echo "${script_name}: small matrix handling is enabled."
+		echo "${script_name}: sup (skinny/unpacked) matrix handling is enabled."
 		enable_sup_handling_01=1
 	else
-		echo "${script_name}: small matrix handling is disabled."
+		echo "${script_name}: sup (skinny/unpacked) matrix handling is disabled."
 		enable_sup_handling_01=0
 	fi
 	if [ "x${enable_trsm_preinversion}" = "xyes" ]; then
@@ -4063,6 +4134,7 @@ main()
 		| sed -e "s/@ldflags_preset@/${ldflags_preset_esc}/g" \
 		| sed -e "s/@enable_asan@/${enable_asan}/g" \
 		| sed -e "s/@debug_type@/${debug_type}/g" \
+		| sed -e "s/@enable_debug@/${enable_debug}/g" \
 		| sed -e "s/@enable_system@/${enable_system}/g" \
 		| sed -e "s/@threading_model@/${threading_model}/g" \
 		| sed -e "s/@prefix@/${prefix_esc}/g" \
@@ -4103,6 +4175,8 @@ main()
 		| sed   -e "s/@enable_openmp_as_def@/${enable_openmp_as_def_01}/g" \
 		| sed   -e "s/@enable_pthreads@/${enable_pthreads_01}/g" \
 		| sed   -e "s/@enable_pthreads_as_def@/${enable_pthreads_as_def_01}/g" \
+		| sed   -e "s/@enable_hpx@/${enable_hpx_01}/g" \
+		| sed   -e "s/@enable_hpx_as_def@/${enable_hpx_as_def_01}/g" \
 		| sed   -e "s/@enable_jrir_slab@/${enable_jrir_slab_01}/g" \
 		| sed   -e "s/@enable_jrir_rr@/${enable_jrir_rr_01}/g" \
 		| sed   -e "s/@enable_pba_pools@/${enable_pba_pools_01}/g" \

@@ -98,10 +98,10 @@ main()
 	# The name of the CHANGELOG file.
 	changelog_file='CHANGELOG'
 
-	# The name of the default version file.
-	version_file_def='version'
+	# The name and location of the default version file.
+	version_file_def='build/version'
 
-	# The name of the specified version file.
+	# The name and location of the specified version file.
 	version_file=''
 
 	# Strings used during version query.

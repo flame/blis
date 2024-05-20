@@ -115,7 +115,7 @@ For more information on macrokernels, please read our [ACM TOMS papers](https://
 
 As of 0.2.0, BLIS contains a new infrastructure for communicating runtime information (such as kernel addresses and blocksizes) from the highest levels of code all the way down the function stack, even into the kernels themselves. This new data structure is called a *context* (defined in code as a `cntx_t` type), and together with its API it helped us clean up some hacks and other awkwardness that existed in BLIS prior to 0.2.0. Contexts also lay the groundwork for managing kernels and related kernel information at runtime.
 
-If you are a kernel developer, you can usually ignore the `cntx_t*` argument that is passed into each kernel, since the kernels already inherently "know" this information (such as register blocksizes). And if you are a user, and the function you want to call takes a `cntx_t*` argument, you can safely pass in `NULL` and BLIS will automatically build a suitable context for you at runtime. 
+If you are a kernel developer, you can usually ignore the `cntx_t*` argument that is passed into each kernel, since the kernels already inherently "know" this information (such as register blocksizes). And if you are a user, and the function you want to call takes a `cntx_t*` argument, you can safely pass in `NULL` and BLIS will automatically build a suitable context for you at runtime.
 
 ### I'm used to thinking in terms of column-major/row-major storage and leading dimensions. What is a "row stride" / "column stride"?
 
@@ -171,7 +171,7 @@ Originally, BLIS did indeed require the application to explicitly setup (initial
 
 ### Does BLIS support multithreading?
 
-Yes! BLIS supports multithreading (via OpenMP or POSIX threads) for all of its level-3 operations. For more information on enabling and controlling multithreading, please see the [Multithreading](Multithreading.md) guide.
+Yes! BLIS supports multithreading (via OpenMP, POSIX threads, or HPX) for all of its level-3 operations. For more information on enabling and controlling multithreading, please see the [Multithreading](Multithreading.md) guide.
 
 BLIS is also thread-safe so that you can call BLIS from threads within a multithreaded library or application. BLIS derives its thread-safety via unconditional use of features present in POSIX threads (pthreads). These pthreads features are employed for thread-safety regardless of whether BLIS is configured for OpenMP multithreading, pthreads multithreading, or single-threaded execution.
 

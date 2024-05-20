@@ -91,12 +91,20 @@
   // Default behavior is disabled.
 #endif
 
+// Enable multithreading via HPX.
+#ifdef BLIS_ENABLE_HPX
+  // No additional definitions needed.
+#else
+  // Default behavior is disabled.
+#endif
+
 // Here, we define BLIS_ENABLE_MULTITHREADING if either OpenMP
 // or pthreads are enabled. This macro is useful in situations when
 // we want to detect use of either OpenMP or pthreads, or both (as
 // opposed to neither being used).
-#if defined ( BLIS_ENABLE_OPENMP ) || \
-    defined ( BLIS_ENABLE_PTHREADS )
+#if defined ( BLIS_ENABLE_OPENMP )   || \
+    defined ( BLIS_ENABLE_PTHREADS ) || \
+    defined ( BLIS_ENABLE_HPX )
   #define BLIS_ENABLE_MULTITHREADING
 #endif
 

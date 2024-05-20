@@ -552,6 +552,16 @@ else
 	@echo "Compiling $$@" $(call get-frame-text-for,$(1))
 	@$(CC) $(call get-frame-cflags-for,$(1)) -c $$< -o $$@
 endif
+
+ifneq ($(findstring hpx,$(THREADING_MODEL)),)
+$(BASE_OBJ_FRAME_PATH)/%.o: $(FRAME_PATH)/%.cpp $(BLIS_H_FLAT) $(MAKE_DEFS_MK_PATHS)
+ifeq ($(ENABLE_VERBOSE),yes)
+	$(CXX) $(call get-frame-cxxflags-for,$(1)) -c $$< -o $$@
+else
+	@echo "Compiling $$@" $(call get-frame-cxxtext-for,$(1))
+	@$(CXX) $(call get-frame-cxxflags-for,$(1)) -c $$< -o $$@
+endif
+endif
 endef
 
 # first argument: a kernel set (name) being targeted (e.g. haswell).

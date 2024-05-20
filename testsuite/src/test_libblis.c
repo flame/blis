@@ -66,6 +66,10 @@ int main( int argc, char** argv )
 	test_params_t params;
 	test_ops_t    ops;
 
+#ifdef BLIS_ENABLE_HPX
+	bli_thread_initialize_hpx( 1, argv );
+#endif
+
 	// Initialize libblis.
 	//bli_init();
 
@@ -88,8 +92,12 @@ int main( int argc, char** argv )
 	// Finalize libblis.
 	bli_finalize();
 
+#ifdef BLIS_ENABLE_HPX
+	return bli_thread_finalize_hpx();
+#else
 	// Return peacefully.
 	return 0;
+#endif
 }
 
 
@@ -805,26 +813,34 @@ void libblis_test_output_params_struct( FILE* os, test_params_t* params )
 
 	const bool    has_openmp      = bli_info_get_enable_openmp();
 	const bool    has_pthreads    = bli_info_get_enable_pthreads();
+	const bool    has_hpx         = bli_info_get_enable_hpx();
 	const bool    openmp_is_def   = bli_info_get_enable_openmp_as_default();
 	const bool    pthreads_is_def = bli_info_get_enable_pthreads_as_default();
+	const bool    hpx_is_def      = bli_info_get_enable_hpx_as_default();
 	const timpl_t ti              = bli_thread_get_thread_impl();
 
 	// List the available threading implementation(s).
-	if      ( has_openmp && has_pthreads   ) sprintf( impl_str, "openmp,pthreads,single" );
-	else if ( has_openmp                   ) sprintf( impl_str, "openmp,single" );
-	else if (               has_pthreads   ) sprintf( impl_str, "pthreads,single" );
-	else                                     sprintf( impl_str, "single only" );
+	if      ( has_hpx && has_openmp && has_pthreads   ) sprintf( impl_str, "openmp,pthreads,hpx,single" );
+	else if ( has_hpx && has_openmp                   ) sprintf( impl_str, "openmp,hpx,single" );
+	else if ( has_hpx &&               has_pthreads   ) sprintf( impl_str, "pthreads,hpx,single" );
+	else if ( has_hpx                                 ) sprintf( impl_str, "hpx,single" );
+	else if (            has_openmp && has_pthreads   ) sprintf( impl_str, "openmp,pthreads,single" );
+	else if (            has_openmp                   ) sprintf( impl_str, "openmp,single" );
+	else if (                          has_pthreads   ) sprintf( impl_str, "pthreads,single" );
+	else                                                sprintf( impl_str, "single only" );
 
 	// Describe the default threading implementation that would be active if
 	// or when BLIS_THREAD_IMPL is unset.
 	if      ( openmp_is_def   ) sprintf( def_impl_unset_str, "openmp" );
 	else if ( pthreads_is_def ) sprintf( def_impl_unset_str, "pthreads" );
+	else if ( hpx_is_def      ) sprintf( def_impl_unset_str, "hpx" );
 	else                        sprintf( def_impl_unset_str, "single" );
 
 	// Describe the default threading implementation as the testsuite was
 	// currently run.
 	if      ( ti == BLIS_OPENMP ) sprintf( def_impl_set_str, "openmp" );
 	else if ( ti == BLIS_POSIX  ) sprintf( def_impl_set_str, "pthreads" );
+	else if ( ti == BLIS_HPX    ) sprintf( def_impl_set_str, "hpx" );
 	else                          sprintf( def_impl_set_str, "single" );
 
 	// Describe the status of jrir thread partitioning.

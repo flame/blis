@@ -35,6 +35,10 @@
 
 #include "blis.h"
 
+#ifdef BLIS_ENABLE_HPX
+#include "bli_thread_hpx.h"
+#endif
+
 thrcomm_t BLIS_SINGLE_COMM = {};
 
 // The global rntm_t structure. (The definition resides in bli_rntm.c.)
@@ -57,16 +61,18 @@ static thread_launch_t thread_launch_fpa[ BLIS_NUM_THREAD_IMPLS ] =
 	[BLIS_OPENMP] =
 #if   defined(BLIS_ENABLE_OPENMP)
 	                bli_thread_launch_openmp,
-#elif defined(BLIS_ENABLE_PTHREADS)
-	                NULL,
 #else
 	                NULL,
 #endif
 	[BLIS_POSIX]  =
 #if   defined(BLIS_ENABLE_PTHREADS)
 	                bli_thread_launch_pthreads,
-#elif defined(BLIS_ENABLE_OPENMP)
+#else
 	                NULL,
+#endif
+	[BLIS_HPX] =
+#if   defined(BLIS_ENABLE_HPX)
+	                bli_thread_launch_hpx,
 #else
 	                NULL,
 #endif
@@ -1604,6 +1610,7 @@ static const char* bli_timpl_string[BLIS_NUM_THREAD_IMPLS] =
 	[BLIS_SINGLE] = "single",
 	[BLIS_OPENMP] = "openmp",
 	[BLIS_POSIX]  = "pthreads",
+	[BLIS_HPX]    = "hpx",
 };
 
 const char* bli_thread_get_thread_impl_str( timpl_t ti )
@@ -1713,6 +1720,7 @@ void bli_thread_init_rntm_from_env
 		else if ( !strncmp( ti_env, "pthreads", 8 ) ) ti = BLIS_POSIX;
 		else if ( !strncmp( ti_env, "pthread",  7 ) ) ti = BLIS_POSIX;
 		else if ( !strncmp( ti_env, "posix",    5 ) ) ti = BLIS_POSIX;
+		else if ( !strncmp( ti_env, "hpx",      3 ) ) ti = BLIS_HPX;
 		else                                          ti = BLIS_SINGLE;
 
 		#ifdef PRINT_IMPL
@@ -1731,6 +1739,9 @@ void bli_thread_init_rntm_from_env
 		#endif
 		#ifdef BLIS_ENABLE_PTHREADS_AS_DEFAULT
 		ti = BLIS_POSIX;
+		#endif
+		#ifdef BLIS_ENABLE_HPX_AS_DEFAULT
+		ti = BLIS_HPX;
 		#endif
 
 		#ifdef PRINT_IMPL

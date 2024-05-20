@@ -70,7 +70,7 @@ typedef struct barrier_s barrier_t;
 // Define the thrcomm_t structure, which will be common to all threading
 // implementations.
 
-struct thrcomm_s
+typedef struct thrcomm_s
 {
 	// -- Fields common to all threading implementations --
 
@@ -121,8 +121,15 @@ struct thrcomm_s
 	#endif
 	#endif
 
-};
-typedef struct thrcomm_s thrcomm_t;
+	// -- Fields specific to HPX --
+
+	#ifdef BLIS_ENABLE_HPX
+	#ifdef BLIS_USE_HPX_BARRIER
+	hpx::barrier<> * barrier;
+	#endif
+	#endif
+
+} thrcomm_t;
 
 
 
@@ -133,6 +140,7 @@ typedef struct thrcomm_s thrcomm_t;
 #include "bli_thrcomm_single.h"
 #include "bli_thrcomm_openmp.h"
 #include "bli_thrcomm_pthreads.h"
+#include "bli_thrcomm_hpx.h"
 
 // Define a function pointer type for each of the functions that are
 // "overloaded" by each method of multithreading.

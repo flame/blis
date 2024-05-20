@@ -44,9 +44,10 @@
 
 #ifdef __cplusplus
   // For C++, include stdint.h.
-  #include <stdint.h>
+  #include <cstdint>
 #elif __STDC_VERSION__ >= 199901L
   // For C99 (or later), include stdint.h.
+  #include <stddef.h>
   #include <stdint.h>
   #include <stdbool.h>
 #else
@@ -629,6 +630,7 @@ typedef enum
 	BLIS_SINGLE = 0,
 	BLIS_OPENMP,
 	BLIS_POSIX,
+	BLIS_HPX,
 
 	// BLIS_NUM_THREAD_IMPLS must be last!
 	BLIS_NUM_THREAD_IMPLS

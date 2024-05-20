@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2022 Tactical Computing Laboratories, LLC
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -32,27 +32,23 @@
 
 */
 
-void bli_gemm_front
+#ifndef BLIS_THREAD_HPX_H
+#define BLIS_THREAD_HPX_H
+
+// Definitions specific to situations when HPX multithreading is enabled.
+#ifdef BLIS_ENABLE_HPX
+
+void bli_thread_launch_hpx
      (
-       const obj_t*  alpha,
-       const obj_t*  a,
-       const obj_t*  b,
-       const obj_t*  beta,
-       const obj_t*  c,
-       const cntx_t* cntx,
-             rntm_t* rntm
+             dim_t         nt,
+             thread_func_t func,
+       const void*         params
      );
 
-#ifdef BLIS_ENABLE_SMALL_MATRIX
-err_t bli_gemm_small
-     (
-       const obj_t*  alpha,
-       const obj_t*  a,
-       const obj_t*  b,
-       const obj_t*  beta,
-       const obj_t*  c,
-       const cntx_t* cntx,
-             cntl_t* cntl
-     );
+void bli_thread_initialize_hpx( int argc, char** argv );
+
+int bli_thread_finalize_hpx();
+
 #endif
 
+#endif

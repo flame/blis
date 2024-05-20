@@ -112,6 +112,7 @@ get-noopt-cxxflags-for   = $(strip $(CFLAGS_PRESET) \
                                    $(call load-var-for,CXXLANGFLAGS,$(1)) \
                                    $(call load-var-for,CPPROCFLAGS,$(1)) \
                                    $(CTHREADFLAGS) \
+                                   $(CXXTHREADFLAGS) \
                                    $(CINCFLAGS) $(VERS_DEF) \
                             )
 
@@ -146,6 +147,13 @@ get-config-cflags-for    = $(strip $(call load-var-for,COPTFLAGS,$(1)) \
 
 get-frame-cflags-for     = $(strip $(call load-var-for,COPTFLAGS,$(1)) \
                                    $(call get-noopt-cflags-for,$(1)) \
+                                   $(BUILD_ASANFLAGS) \
+                                   $(BUILD_CPPFLAGS) \
+                                   $(BUILD_SYMFLAGS) \
+                            )
+
+get-frame-cxxflags-for   = $(strip $(call load-var-for,COPTFLAGS,$(1)) \
+                                   $(call get-noopt-cxxflags-for,$(1)) \
                                    $(BUILD_ASANFLAGS) \
                                    $(BUILD_CPPFLAGS) \
                                    $(BUILD_SYMFLAGS) \
@@ -224,6 +232,7 @@ get-refinit-text-for      = "('$(1)' CFLAGS for ref. kernel init)"
 get-refkern-text-for      = "('$(1)' CFLAGS for ref. kernels)"
 get-config-text-for       = "('$(1)' CFLAGS for config code)"
 get-frame-text-for        = "('$(1)' CFLAGS for framework code)"
+get-frame-cxxtext-for     = "('$(1)' CXXFLAGS for framework code)"
 get-kernel-text-for       = "('$(1)' CFLAGS for kernels)"
 get-addon-c99text-for     = "('$(1)' CFLAGS for addons)"
 get-addon-cxxtext-for     = "('$(1)' CXXFLAGS for addons)"
@@ -245,6 +254,7 @@ files-that-dont-contain = $(strip $(foreach f, $(1), $(if $(findstring $(2),$(f)
 # Define a function that removes duplicate strings *without* using the sort
 # function.
 rm-dups = $(if $1,$(firstword $1) $(call rm-dups,$(filter-out $(firstword $1),$1)))
+
 
 
 #
@@ -348,7 +358,11 @@ REFNM              := ref
 # Source suffixes.
 CONFIG_SRC_SUFS    := c
 KERNELS_SRC_SUFS   := c s S
+ifneq ($(findstring hpx,$(THREADING_MODEL)),)
+FRAME_SRC_SUFS     := c cpp
+else
 FRAME_SRC_SUFS     := c
+endif
 
 ADDON_C99_SUFS     := c
 ADDON_CXX_SUFS     := cc cpp cxx
@@ -503,6 +517,8 @@ else
 LIBBLIS_SO_OUTPUT_NAME := $(LIBBLIS_SO_PATH)
 endif
 
+
+
 #
 # --- Utility program definitions ----------------------------------------------
 #
@@ -632,6 +648,7 @@ endif
 endif
 
 
+
 #
 # --- Include makefile definitions file ----------------------------------------
 #
@@ -687,8 +704,12 @@ endif
 
 # --- Linker program ---
 
-# Use whatever compiler was chosen.
+# Use whatever compiler was chosen. A C++ compiler must be used if HPX is enabled.
+ifneq ($(findstring hpx,$(THREADING_MODEL)),)
+LINKER     := $(CXX)
+else
 LINKER     := $(CC)
+endif
 
 # --- Warning flags ---
 
@@ -810,14 +831,22 @@ endif
 CLANGFLAGS := -std=c99
 $(foreach c, $(CONFIG_LIST_FAM), $(eval $(call append-var-for,CLANGFLAGS,$(c))))
 
-# Enable C++11.
+# Enable C++11, or C++17 if HPX threading is enabled.
+ifneq ($(findstring hpx,$(THREADING_MODEL)),)
+CXXLANGFLAGS := -std=c++17
+else
 CXXLANGFLAGS := -std=c++11
+endif
 $(foreach c, $(CONFIG_LIST_FAM), $(eval $(call append-var-for,CXXLANGFLAGS,$(c))))
 
 # --- C Preprocessor flags ---
 
 # Enable clock_gettime() in time.h.
 CPPROCFLAGS := -D_POSIX_C_SOURCE=200112L
+# Enable ip_mreq on macOS which is needed for ASIO which is needed for HPX.
+ifeq ($(OS_NAME),Darwin)
+CPPROCFLAGS += -D_DARWIN_C_SOURCE
+endif
 $(foreach c, $(CONFIG_LIST_FAM), $(eval $(call append-var-for,CPPROCFLAGS,$(c))))
 
 # --- AddressSanitizer flags ---
@@ -835,6 +864,7 @@ endif
 # gets added to begin with.
 
 CTHREADFLAGS :=
+CXXTHREADFLAGS :=
 
 ifeq ($(CC_VENDOR),gcc)
 #ifneq ($(findstring auto,$(THREADING_MODEL)),)
@@ -875,6 +905,18 @@ endif
 ifneq ($(findstring pthreads,$(THREADING_MODEL)),)
 CTHREADFLAGS += -pthread
 LDFLAGS      += $(LIBPTHREAD)
+endif
+endif
+
+# Threading flags for HPX.
+ifneq ($(findstring hpx,$(THREADING_MODEL)),)
+HPX_CXXFLAGS := $(shell pkg-config --cflags hpx_component)
+HPX_LDFLAGS  := $(filter-out -shared,$(shell pkg-config --libs hpx_component))
+CTHREADFLAGS += $(filter-out -std=%,$(HPX_CXXFLAGS))
+LDFLAGS      += $(HPX_LDFLAGS)
+ifeq ($(OS_NAME),Darwin)
+RPATH_PREFIX := -Wl,-rpath,
+LDFLAGS      += $(patsubst -L%,$(RPATH_PREFIX)%,$(filter -L%,$(HPX_LDFLAGS)))
 endif
 endif
 

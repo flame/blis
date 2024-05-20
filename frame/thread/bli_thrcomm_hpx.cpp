@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2022 Tactical Computing Laboratories, LLC
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -32,27 +32,61 @@
 
 */
 
-void bli_gemm_front
-     (
-       const obj_t*  alpha,
-       const obj_t*  a,
-       const obj_t*  b,
-       const obj_t*  beta,
-       const obj_t*  c,
-       const cntx_t* cntx,
-             rntm_t* rntm
-     );
+#include "blis.h"
 
-#ifdef BLIS_ENABLE_SMALL_MATRIX
-err_t bli_gemm_small
-     (
-       const obj_t*  alpha,
-       const obj_t*  a,
-       const obj_t*  b,
-       const obj_t*  beta,
-       const obj_t*  c,
-       const cntx_t* cntx,
-             cntl_t* cntl
-     );
+#ifdef BLIS_ENABLE_HPX
+
+extern "C" {
+
+#ifdef BLIS_USE_HPX_BARRIER
+
+// Define the pthread_barrier_t implementations of the init, cleanup, and
+// barrier functions.
+
+void bli_thrcomm_init_hpx( dim_t n_threads, thrcomm_t* comm )
+{
+	if ( comm == nullptr ) return;
+	comm->barrier = new hpx:barrier<>();
+}
+
+void bli_thrcomm_cleanup_hpx( thrcomm_t* comm )
+{
+	if ( comm == nullptr ) return;
+	delete comm->barrier;
+}
+
+void bli_thrcomm_barrier( dim_t t_id, thrcomm_t* comm )
+{
+	comm->barrier->arrive_and_wait();
+}
+
+#else
+
+// Define the non-hpx::barrier implementations of the init, cleanup,
+// and barrier functions. These are the default unless the hpx::barrier
+// versions are requested at compile-time.
+
+void bli_thrcomm_init_hpx( dim_t n_threads, thrcomm_t* comm )
+{
+	if ( comm == nullptr ) return;
+	comm->sent_object = nullptr;
+	comm->n_threads = n_threads;
+	comm->barrier_sense = 0;
+	comm->barrier_threads_arrived = 0;
+}
+
+void bli_thrcomm_cleanup_hpx( thrcomm_t* comm )
+{
+}
+
+void bli_thrcomm_barrier_hpx( dim_t t_id, thrcomm_t* comm )
+{
+	bli_thrcomm_barrier_atomic( t_id, comm );
+}
+
+} // extern "C"
+
+#endif
+
 #endif
 

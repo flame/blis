@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2022 Tactical Computing Laboratories, LLC
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -32,27 +32,54 @@
 
 */
 
-void bli_gemm_front
-     (
-       const obj_t*  alpha,
-       const obj_t*  a,
-       const obj_t*  b,
-       const obj_t*  beta,
-       const obj_t*  c,
-       const cntx_t* cntx,
-             rntm_t* rntm
-     );
+#include "blis.h"
 
-#ifdef BLIS_ENABLE_SMALL_MATRIX
-err_t bli_gemm_small
+#ifdef BLIS_ENABLE_HPX
+
+#include <hpx/local/execution.hpp>
+#include <hpx/parallel/algorithms/for_each.hpp>
+#include <hpx/hpx_start.hpp>
+
+extern "C"
+{
+
+void bli_thread_launch_hpx
      (
-       const obj_t*  alpha,
-       const obj_t*  a,
-       const obj_t*  b,
-       const obj_t*  beta,
-       const obj_t*  c,
-       const cntx_t* cntx,
-             cntl_t* cntl
-     );
+             dim_t         n_threads,
+             thread_func_t func,
+       const void*         params
+     )
+{
+	const timpl_t ti = BLIS_HPX;
+
+	// Allocate a global communicator for the root thrinfo_t structures.
+	pool_t*    gl_comm_pool = nullptr;
+	thrcomm_t* gl_comm      = bli_thrcomm_create( ti, gl_comm_pool, n_threads );
+
+	auto irange = hpx::util::detail::make_counting_shape(n_threads);
+
+	hpx::for_each(hpx::execution::par, hpx::util::begin(irange), hpx::util::end(irange),
+	[&gl_comm, &func, &params](const dim_t tid)
+	{
+		func( gl_comm, tid, params );
+	});
+
+	// Free the global communicator, because the root thrinfo_t node
+	// never frees its communicator.
+	bli_thrcomm_free( gl_comm_pool, gl_comm );
+}
+
+void bli_thread_initialize_hpx( int argc, char** argv )
+{
+	hpx::start( nullptr, argc, argv );
+}
+
+int bli_thread_finalize_hpx()
+{
+	hpx::apply([]() { hpx::finalize(); });
+	return hpx::stop();
+}
+
+} // extern "C"
+
 #endif
-
