@@ -48,7 +48,7 @@ void PASTEMAC0(opname) \
        const obj_t*     c, \
        const cntx_t*    cntx, \
        const cntl_t*    cntl, \
-             thrinfo_t* thread  \
+             thrinfo_t* thread_par  \
      );
 
 GENPROT( trsm_blk_var1 )

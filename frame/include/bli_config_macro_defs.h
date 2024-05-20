@@ -36,6 +36,16 @@
 #ifndef BLIS_CONFIG_MACRO_DEFS_H
 #define BLIS_CONFIG_MACRO_DEFS_H
 
+// NOTE: This file should ONLY contain processing of macros that are set by
+// configure and output into bli_config.h. Any other macro processing --
+// especially such as for those macros that are expected to be optionally
+// set within a configuration's bli_family_<conf>.h header -- MUST be placed
+// in bli_kernel_macro_defs.h instead. The reason: bli_arch_config.h (which
+// #includes the configuration's bli_family_<conf>.h header) is #included
+// much later in blis.h than this file (bli_config_macro_defs.h), and so any
+// macros set in bli_family_<conf>.h would have no effect on the processing
+// that happens below.
+
 
 // -- INTEGER PROPERTIES -------------------------------------------------------
 

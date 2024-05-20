@@ -155,10 +155,10 @@ void PASTEMAC(ch,varname) \
 	dim_t it_start, it_end, it_inc; \
 \
 	/* Determine the thread range and increment using the current thread's
-	   packm thrinfo_t node. NOTE: The definition of bli_thread_range_jrir()
+	   packm thrinfo_t node. NOTE: The definition of bli_thread_range_slrr()
 	   will depend on whether slab or round-robin partitioning was requested
 	   at configure-time. */ \
-	bli_thread_range_jrir( thread, n_iter, 1, FALSE, &it_start, &it_end, &it_inc ); \
+	bli_thread_range_slrr( thread, n_iter, 1, FALSE, &it_start, &it_end, &it_inc ); \
 \
 	/* Iterate over every logical micropanel in the source matrix. */ \
 	for ( ic  = ic0,    it  = 0; it < n_iter; \
@@ -175,9 +175,9 @@ void PASTEMAC(ch,varname) \
 			panel_len_i     = panel_len_full; \
 			panel_len_max_i = panel_len_max; \
 \
-			/* The definition of bli_packm_my_iter() will depend on whether slab
+			/* The definition of bli_is_my_iter() will depend on whether slab
 			   or round-robin partitioning was requested at configure-time. */ \
-			if ( bli_packm_my_iter( it, it_start, it_end, tid, nt ) ) \
+			if ( bli_is_my_iter( it, it_start, it_end, tid, nt ) ) \
 			{ \
 				f \
 				( \
@@ -398,10 +398,10 @@ void PASTEMAC(ch,varname) \
 	dim_t it_start, it_end, it_inc; \
 \
 	/* Determine the thread range and increment using the current thread's
-	   packm thrinfo_t node. NOTE: The definition of bli_thread_range_jrir()
+	   packm thrinfo_t node. NOTE: The definition of bli_thread_range_slrr()
 	   will depend on whether slab or round-robin partitioning was requested
 	   at configure-time. */ \
-	bli_thread_range_jrir( thread, n_iter, 1, FALSE, &it_start, &it_end, &it_inc ); \
+	bli_thread_range_slrr( thread, n_iter, 1, FALSE, &it_start, &it_end, &it_inc ); \
 \
 	/* Iterate over every logical micropanel in the source matrix. */ \
 	for ( it = 0; it < n_iter; it += 1 ) \
@@ -412,9 +412,9 @@ void PASTEMAC(ch,varname) \
 		ctype* p_use = p_begin; \
 \
 		{ \
-			/* The definition of bli_packm_my_iter() will depend on whether slab
+			/* The definition of bli_is_my_iter() will depend on whether slab
 			   or round-robin partitioning was requested at configure-time. */ \
-			if ( bli_packm_my_iter( it, it_start, it_end, tid, nt ) ) \
+			if ( bli_is_my_iter( it, it_start, it_end, tid, nt ) ) \
 			{ \
 				PASTEMAC2(ch,scal2v,BLIS_TAPI_EX_SUF) \
 				( \

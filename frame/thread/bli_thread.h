@@ -56,97 +56,14 @@ typedef void (*thread_func_t)( thrcomm_t* gl_comm, dim_t tid, const void* params
 void bli_thread_init( void );
 void bli_thread_finalize( void );
 
+// -----------------------------------------------------------------------------
+
 BLIS_EXPORT_BLIS void bli_thread_launch
      (
              timpl_t       ti,
              dim_t         nt,
              thread_func_t func,
        const void*         params
-     );
-
-// Thread range-related prototypes.
-
-BLIS_EXPORT_BLIS void bli_thread_range_sub
-     (
-       const thrinfo_t* thread,
-             dim_t      n,
-             dim_t      bf,
-             bool       handle_edge_low,
-             dim_t*     start,
-             dim_t*     end
-     );
-
-#undef  GENPROT
-#define GENPROT( opname ) \
-\
-siz_t PASTEMAC0( opname ) \
-     ( \
-             dir_t      direct, \
-       const thrinfo_t* thr, \
-       const obj_t*     a, \
-       const obj_t*     b, \
-       const obj_t*     c, \
-       const cntl_t*    cntl, \
-       const cntx_t*    cntx, \
-             dim_t*     start, \
-             dim_t*     end  \
-     );
-
-GENPROT( thread_range_mdim )
-GENPROT( thread_range_ndim )
-
-#undef  GENPROT
-#define GENPROT( opname ) \
-\
-siz_t PASTEMAC0( opname ) \
-     ( \
-       const thrinfo_t* thr, \
-       const obj_t*     a, \
-       const blksz_t*   bmult, \
-             dim_t*     start, \
-             dim_t*     end  \
-     );
-
-GENPROT( thread_range_l2r )
-GENPROT( thread_range_r2l )
-GENPROT( thread_range_t2b )
-GENPROT( thread_range_b2t )
-
-GENPROT( thread_range_weighted_l2r )
-GENPROT( thread_range_weighted_r2l )
-GENPROT( thread_range_weighted_t2b )
-GENPROT( thread_range_weighted_b2t )
-
-
-dim_t bli_thread_range_width_l
-     (
-       doff_t diagoff_j,
-       dim_t  m,
-       dim_t  n_j,
-       dim_t  j,
-       dim_t  n_way,
-       dim_t  bf,
-       dim_t  bf_left,
-       double area_per_thr,
-       bool   handle_edge_low
-     );
-siz_t bli_find_area_trap_l
-     (
-       dim_t  m,
-       dim_t  n,
-       doff_t diagoff
-     );
-siz_t bli_thread_range_weighted_sub
-     (
-       const thrinfo_t* thread,
-             doff_t     diagoff,
-             uplo_t     uplo,
-             dim_t      m,
-             dim_t      n,
-             dim_t      bf,
-             bool       handle_edge_low,
-             dim_t*     j_start_thr,
-             dim_t*     j_end_thr
      );
 
 // -----------------------------------------------------------------------------
@@ -212,98 +129,5 @@ BLIS_EXPORT_BLIS void    bli_thread_set_thread_impl( timpl_t ti );
 
 void                     bli_thread_init_rntm_from_env( rntm_t* rntm );
 
-// -----------------------------------------------------------------------------
-
-BLIS_INLINE void bli_thread_range_jrir_rr
-     (
-       const thrinfo_t* thread,
-             dim_t      n,
-             dim_t      bf,
-             bool       handle_edge_low,
-             dim_t*     start,
-             dim_t*     end,
-             dim_t*     inc
-     )
-{
-	// Use interleaved partitioning of jr/ir loops.
-	*start = bli_thrinfo_work_id( thread );
-	*inc   = bli_thrinfo_n_way( thread );
-	*end   = n;
-}
-
-BLIS_INLINE void bli_thread_range_jrir_sl
-     (
-       const thrinfo_t* thread,
-             dim_t      n,
-             dim_t      bf,
-             bool       handle_edge_low,
-             dim_t*     start,
-             dim_t*     end,
-             dim_t*     inc
-     )
-{
-	// Use contiguous slab partitioning of jr/ir loops.
-	bli_thread_range_sub( thread, n, bf, handle_edge_low, start, end );
-	*inc = 1;
-}
-
-BLIS_INLINE void bli_thread_range_jrir
-     (
-       const thrinfo_t* thread,
-             dim_t      n,
-             dim_t      bf,
-             bool       handle_edge_low,
-             dim_t*     start,
-             dim_t*     end,
-             dim_t*     inc
-     )
-{
-	// Define a general-purpose version of bli_thread_range_jrir() whose
-	// definition depends on whether slab or round-robin partitioning was
-	// requested at configure-time.
-#ifdef BLIS_ENABLE_JRIR_SLAB
-	bli_thread_range_jrir_sl( thread, n, bf, handle_edge_low, start, end, inc );
-#else
-	bli_thread_range_jrir_rr( thread, n, bf, handle_edge_low, start, end, inc );
-#endif
-}
-
-#if 0
-BLIS_INLINE void bli_thread_range_weighted_jrir
-     (
-       thrinfo_t* thread,
-       doff_t     diagoff,
-       uplo_t     uplo,
-       dim_t      m,
-       dim_t      n,
-       dim_t      bf,
-       bool       handle_edge_low,
-       dim_t*     start,
-       dim_t*     end,
-       dim_t*     inc
-     )
-{
-#ifdef BLIS_ENABLE_JRIR_SLAB
-
-	// Use contiguous slab partitioning for jr/ir loops.
-	bli_thread_range_weighted_sub( thread, diagoff, uplo, m, n, bf,
-	                               handle_edge_low, start, end );
-
-	*start = *start / bf; *inc = 1;
-
-	if ( *end % bf ) *end = *end / bf + 1;
-	else             *end = *end / bf;
-
-#else
-
-	// Use interleaved partitioning of jr/ir loops.
-	*start = bli_thrinfo_work_id( thread );
-	*inc   = bli_thrinfo_n_way( thread );
-	*end   = n;
 
 #endif
-}
-#endif
-
-#endif
-

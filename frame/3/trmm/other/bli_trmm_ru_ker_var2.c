@@ -356,7 +356,7 @@ void PASTEMAC(ch,varname) \
 		b2 = b1; \
 \
 		/* If the current panel of B intersects the diagonal, scale C
-		   by beta. If it is strictly below the diagonal, scale by one.
+		   by beta. If it is strictly above the diagonal, scale by one.
 		   This allows the current macro-kernel to work for both trmm
 		   and trmm3. */ \
 		if ( bli_intersects_diag_n( diagoffb_j, k, NR ) ) \
